@@ -1,0 +1,61 @@
+In addition to those listed in the AUTHORS file, the following people
+are among those who offered financial support, design insights and
+ideas, encouragement, feedback, bug reports and much more during
+Ardour's pre-release development. They generally suffered from days of
+frustration, and withstood hundreds of CVS revisions without
+complaint. 
+
+No thanks or praise is sufficient for their contributions to Ardour.
+
+(in no particular order)
+
+Joe Hartley
+Marek Peteraj
+Ryan Gallagher
+Rob Holland
+Jan Depner
+Bryan Koschmann
+Patrick Shirkey
+Rob Fell
+Ant <avan@uwm.edu>
+Chris Ross
+Joshua Pritikin
+Rohan Drape
+Johan De Groote
+Bob Ham
+
+I would particularly like to recognize:
+
+Frank Carmickle
+       - first financial supporter of Ardour, 
+         instigator of ardour/ksi.
+
+Ron Parker (Minneapolis, MN)
+       - first user of Ardour in a commercial studio,
+         financial contributor, major initiator of
+         MTC and MMC functionality.
+
+DuWayne Holsbeck
+       - an early financial and infrastructure sponsor
+
+Havoc Pennington & Owen Taylor 
+       - provided much assistance in understanding, diagnosing and
+         cajoling GTK+.
+
+Tom Pincince (Shasta, CA)
+       - provided continuous, excellent design insights and
+         rationalizations, as well as info on the operation of some
+         existing DAW's.
+
+I would also like to thank Jim Hamilton of Rittenhouse Recording,
+Philadelphia, for the partnership, friendship and foresight he showed
+in allowing me to use the studio as the development basis for
+Ardour. I met Jim playing a jazz drumkit at a fundraiser to celebrate
+the 30th anniversary of our children's nursery school. Since then, he
+has continued to open my eyes to both music itself, the process of
+making music, and the life of a working musician. Jim's the best and
+most inventive percussionist I have ever seen, and one of the best
+I've ever heard. He has always believed in the social and philosphical
+implications of Ardour, and his support and interest have been vital
+in Ardour's development. Although as of this writing, Rittenhouse
+Recording is not running Ardour, its only a matter of time!

@@ -1,0 +1,10 @@
+import glob
+
+gnomecanvasmm_files = glob.glob('libgnomecanvasmm/*.cc')
+
+Import('env libraries')
+gnomecanvasmm = env.Copy()
+gnomecanvasmm.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'], libraries['pangomm'], libraries['atkmm'], libraries['gdkmm2'], libraries['gtkmm2'], libraries['libgnomecanvas2'] ])
+
+libgnomecanvasmm = gnomecanvasmm.StaticLibrary('libgnomecanvasmm', gnomecanvasmm_files)
+Default(libgnomecanvasmm)

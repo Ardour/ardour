@@ -1,0 +1,74 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env final_prefix install_prefix libraries i18n')
+
+gtkmm2ext = env.Copy()
+gtkmm2ext.Merge ([ 
+    libraries['sigc2'], 
+    libraries['pbd3'],
+    libraries['midi++2'],
+    libraries['gtk2'],
+    libraries['glibmm2'],
+    libraries['pangomm'],
+    libraries['atkmm'],
+    libraries['gdkmm2'],
+    libraries['gtkmm2']
+    ])
+
+#
+# this defines the version number of libgtkmm2ext
+# 
+
+domain = 'libgtkmm2ext'
+
+gtkmm2ext.Append(DOMAIN=domain,MAJOR=0,MINOR=8,MICRO=0)
+gtkmm2ext.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
+gtkmm2ext.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+gtkmm2ext.Append(PACKAGE=domain)
+gtkmm2ext.Append(POTFILE=domain + '.pot')
+
+gtkmm2ext_files = Split("""
+auto_spin.cc
+barcontroller.cc
+bindable_button.cc
+choice.cc
+click_box.cc
+controller.cc
+fastmeter.cc
+gtk_ui.cc
+gtkutils.cc
+hexentry.cc
+idle_adjustment.cc
+pix.cc
+pixscroller.cc
+popup.cc
+prompter.cc
+selector.cc
+slider_controller.cc
+tearoff.cc
+textviewer.cc
+utils.cc
+version.cc
+""")
+
+gtkmm2ext.VersionBuild(['version.cc','gtkmm2ext/version.h'], 'SConscript')
+
+gtkmm2ext.Append(CCFLAGS="-D_REENTRANT")
+gtkmm2ext.Append(CCFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+
+libgtkmm2ext = gtkmm2ext.StaticLibrary('gtkmm2ext', gtkmm2ext_files)
+
+Default(libgtkmm2ext)
+
+if env['NLS']:
+    i18n (gtkmm2ext, gtkmm2ext_files, env)
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'i18n.h', 'gettext.h'] +
+                                     gtkmm2ext_files +
+                                     glob.glob('po/*.po') +
+                                     glob.glob('gtkmm2ext/*.h')))

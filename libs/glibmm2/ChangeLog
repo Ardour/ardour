@@ -1,0 +1,998 @@
+2.6.1:
+
+2005-03-07  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/interface.cc: Disable the new check for pre-existing 
+	interface implementations, because it checks all base gtypes and 
+	not just the current gtype. Bug #169442 by Bryan Forbes.
+
+2.6.0:
+
+2.5.6:
+
+2005-02-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/interface.cc: Interface_Class:add_interface(), used by 
+	add_interface() methods of Interfaces: Do not add interfaces that 
+	have been added before, to avoid the warning from glib. This 
+	allows application code to be simpler.
+
+2005-02-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/pm/Output.pm: Add the documentation to the const property() 
+	accessor as well as the non-const one.
+
+2005-02-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/extra_defs_gen/generate_extra_defs.cc: Use 
+	g_param_spec_get_blurb() to output the documentation for the 
+	properties in the .defs file.
+	* tools/m4/property.m4: Take an extra docs argument, and put it in the 
+	doxygen docs.
+	* tools/pm/Output.pm: Add the extra docs argument when calling the 
+	property m4 macro.
+	* tools/pm/Property.pm: Read in the new docs part of the .defs, and 
+	add a period at the end if neccessary.
+
+2005-02-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/threadpool.cc, dispatcher.cc, dispatcher2.cc: Removed the 
+	#ifdef for AIX, because sigc::bind now works on AIX.
+
+2005-01-27  Cedric Gustin <cedric.gustin@swing.be>
+
+	* MSVC_Net2003/glibmm/glibmm.rc.in: Reverted to 2.4 for the
+	library version number.
+
+2.5.5:
+
+2005-01-26  Cedric Gustin <cedric.gustin@swing.be>
+
+	* MSVC_Net2003/glibmm/glibmm.vcproj: Reverted to 2.4 for the
+	library version number.
+
+2005-01-24  Cedric Gustin <cedric.gustin@swing.be>
+
+	* Makefile.am, configure.in: Added MSVC_Net2003 directory.
+	* config.h.in: Added mkfifo #define (for mingw32).
+	* glib/glibmmconfig.h.in: Added new #define's to MSVC section.
+	* examples/iochannel_stream/Makefile.am: Do not build on win32
+	with mingw32 (mkfifo not available).
+	* scripts/cxx_std.m4: Fixed typo in AC_DEFINE macros.
+	* build_shared/Makefile_build.am_fragment: Removed
+	$(sublib_name)_COMPILATION variable (is useless now on
+	cygwin/mingw as all symbols are dll exported).
+	* MSVC_Net2003/*: Initial commit imported from glibmm-2-4 branch.
+	* MSVC_Net2003/glibmm/Makefile.am: Rewrote rule for local copy of
+	glibmmconfig.h (required for 'make distcheck').
+
+2005-01-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in, scripts/cxx.m4, glibmm/glibmmconfig.h.in: Added new 
+	compiler tests to see whether extern "C" functions are put in the 
+	global namespace, even when we use extern "C" inside a namespace 
+	declaration. The AIX xlC compiler does this, but allows us to 
+	redeclare the namespace inside the extern "C" block.
+	* glib/glibmm/property.h: Use the new 
+	#ifdef GLIBMM_MUST_REDECLARE_NAMESPACES_INSIDE_EXTERNC and redeclare 
+	the namespace when necessary.
+	* examples/thread/dispatcher.cc, dispatcher2.cc: Use sigc::bind<1> 
+	instead of just sigc::bind<> because the AIX xlC compiler needs the 
+	extra hint. However, the linker then fails, so the use of sigc::bind 
+	is ifdefed out for _AIX. See the comments in the code.
+	
+2005-01-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in, scripts/cxx.m4, glibmm/glibmmconfig.h.in: Added new 
+	compiler tests.
+	1. To see whether it allows use of non extern C functions 
+	as extern C callbacks, because the Tru64 compiler does not 
+	allow this, when using strict_ansi. We do not actually use this yet.
+	2. To see whether it allows us to define a template that uses an 
+	undefined type, even if we do not use it before defining the type. 
+	Tru64 does not allow this. That's probably correct. 
+	* glib/glibmm/container.h: #ifdef out a dynamic_cast that Tru64
+	does not allow, and which I can not think of a better place to put.
+	See the comment in the code.
+	* glib/glibmm/containerhandler_helpers.h: When the compiler does not 
+	alllow the GObject and GtkObject (dynamic_cast of) specializations 
+	here, then put them in glib/glibmm/object.h and 
+	gtkmm/gtk/src/object.hg instead.- needed by Tru64 compiler.
+	* glib/glibmm/value.h, value_custom.[h|cc]: Conditionally moved 
+	the RefPtr Value specialization into object.h, as above.
+	* glib/src/ optiongroup.ccg, spawn.ccg, thread.ccg: Make C callacks 
+	separate extern "C".
+	* glib/src/optiongroup.ccg: Do not use the StringArrayHandle, 
+	because the Tru64 compiler has problems with it - see comments 
+	in code.
+	* glib/src/optionentry.hg: Remove the include of value.h, because 
+	it is not used and it causes a Tru64 compile error in 
+	optioncontext.cc because its templates are included before the 
+	types that the template uses.
+
+2005-01-19  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in, scripts/cxx.m4, glibmm/glibmmconfig.h.in: Added a 
+	compiler test, because the IRIX MipsPro compiler does not allow the 
+	inline initialization of ustring::npos.
+	* glib/glibmm/ustring.[h|cc]: When the compiler does not support the 
+	inline initialization of npos, initialize it in the .cc file.
+	Declare partial specializations of the SequenceString inner class 
+	inside the class - needed by IRIX MipsPro compiler. 
+
+2005-01-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* glibmm/src/optiongroup.[hg|ccg]: CppOptionEntry::convert_c_to_cpp(): 
+	Copy the strings to the vector in a loop, instead of using the 
+	ArrayHandle constructor, because that does not seem to work with the 
+	SUN Forte compiler.
+
+2.5.4:
+
+2005-01-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* glibmm/src/optiongroup.[hg|ccg]: Added a castitem constructor 
+	that always takes ownership, needed by Gtk::Main. Added the new 
+	FLAG_REVERSE flag value. Added reference documentation.
+
+2.5.3:
+
+2005-01-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/misc_utils.[h|cc]: Added setenv() and unsetenv(), 
+	wrapping new functions added in glib 2.4.
+	* glib/src/convert.[hg|ccg]: Added filename_display_name() and 
+	filename_display_basename().
+
+2005-01-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/optionentry.ccg: Copy constructor: Copy the short name 
+	form the src, not from itself. Bug #16331 from Daniel Holbach.
+
+2005-01-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/optionentry.[hg|cc]: Add add_entry(entry, bool&), to wrap 
+	use of G_OPTION_ARG_NONE. Bug #163325 from Daniel Holbach.
+	* examples/options/main.cc: Use the new add_entry() overload.
+
+2005-01-06  Benoît Dejean  <TazForEver@dlfp.org>
+
+	* glib/glibmm/dispatcher.cc:
+	* glib/glibmm/error.cc:
+	* glib/glibmm/exceptionhandler.cc:
+	* glib/glibmm/main.cc:
+	* glib/glibmm/threadpool.cc:
+	* glib/glibmm/ustring.cc:
+	* glib/glibmm/wrap.cc: Don't export private API.
+	Closes #163031.
+
+2005-01-04  Chris Vine <chris@cvine.freeserve.co.uk>
+	
+	* examples/iochannel_stream/: Provide a means of obtaining
+	Glib::IOChannel error information from the streambuffer.  Remove
+	the code conversion option from the fdstream/fdstreambuf
+	constructors and add comments in fdstream.h about code conversion
+	and other matters.  Add a detach() function and a destructor to
+	fdstreambuf.  Correct an error in fdstreambuf::xsgetn().  Include
+	missing <string> header file in main.cc.
+
+2.5.2:
+
+2004-12-19  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/: Adapted and added iochannel_stream example from 
+	Chris Vine in bug #138259.
+
+2004-12-19  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/: Added glib_docs.xml, generated with docsextract_to_xml.py 
+	and glib_docs_override.xml, to generate some API reference from 
+	the C docs.
+	* glib/src/Makefile.am: Mention the new files.
+
+2004-12-19  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/reference/: Added a copy of the libstdc++ doxygen tags file, 
+	but it still does not seem to work, for example with std::vector<> 
+	and std::string.
+
+2004-12-19  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/reference/Doxyfile.in: Use the libstdc++ TAG files, so that 
+	references to std:: classes take people to their docs.
+	* glib/src/: Added glib_docs.xml and glib_docs_override.xml, and 
+	mentioned them in Makefile.am.
+
+2004-12-19  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/date.hg, glib/glibmm/main.h, 
+	glib/glibmm/signalproxy_connectionnode.h: Deal with some doxygen 
+	warnings about undocumented parameters.
+	* glib/glibmm/ustring.h: Added documentation for the size() and 
+	bytes() methods. 
+
+2004-11-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/optionentry.[hg|ccg]: Removed OptionEntry enum and 
+	set_arg_data(), because they are not needed any more.
+
+2.5.1:
+
+2004-11-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/optiongroup.[hg|ccg]: Added add_entry() for vector<ustring> 
+	and add_entry_filename() for std::string and vector<std::string>.
+	* examples/options/main.cc: Test these new methods.
+
+2004-10-30  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/optiongroup.[hg|ccg]: Added gobj_give_ownership().
+	* glib/src/optioncontext.[hg|ccg]: add_group(), set_main_group(): Use 
+	gobj_give_ownership() because GOptionContext deletes the GOptionGroups 
+	that we give it.
+
+2004-10-26  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/optionentry.hg: Remove accessors for arg and arg_data.
+	* glib/src/optiongroup.[hg|ccg]: add_entry(): Remove arg_type parameter
+	and instead add overrides which take specific C++ value types. 
+	Add CppOptionEntry inner class to hold information about each entry 
+	and its dynamically allocated C value.
+	Add map_entries_ map to store them, so we can iterate over them during 
+	post_parse.
+
+2004-10-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* build_shared/Makefile_build.am_fragment: Patch from Roger Leigh in 
+	bug # 15589 to use PLATFORM_WIN32 rather than OS_WIN32 to enable 
+	-no-undefined. This allows glibmm to build in a cgwin environment, 
+	apparently.
+
+2.5.0:
+
+2004-10-17  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/optioncontext.[hg|ccg]: add_entry(): Fixed crash by 
+	creating a temporary array, with a nulled last item, which is what the 
+	C function wants. In callbacks, ignore the group parameter because our 
+	option group in the data parameter is the same, and does not require 
+	construction of a second C++ wrapper instance for the same C instance.
+	* glib/src/optiongroup.[hg|ccg]: Removed the cast constructor, because 
+	it is not needed anymore, and there is no clear way to implement it.
+
+2004-10-14  Murray Cumming  <murrayc@murrayc.com>
+ 
+ 	* tools/pm/WrapParser.pm: on_wrap_property(): Convert property name to 
+ 	canonical form, so that we can recognise notifications of property 
+ 	value changes. Bug #152764.
+
+2004-10-07  Philip Langdale  <plangdale@vmware.com>
+
+	* glib/glibmm/signalproxy_connectionnode.cc: Remove unnecessary warning
+	when notify() is called after destroy_notify_handler(). (bug #154498)
+
+2004-10-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/option*.[hg|ccg], examples/options/main.cc: Rethought the 
+	structure now that I see how the parts work together. Rearranged the 
+	example to show how the parsing can fill values in member variables 
+	of a derived OptionGroup class. However, 1. it crashes now, 2. we need 
+	extra code to map the GOption C types to suitable C++ types, probably 
+	by doing pre and post parsing to create temporary C types for the C++ 
+	types.
+
+2004-09-27  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/option*.[hg|ccg]: Wrapped more methods, but I have still not
+	finished.
+	* examples/options/: Started an example.
+
+2004-09-26  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/glib_functions.defs: Regenerated with h2defs.py
+	* glib/src/: Added optionentry.[hg|ccg], optiongroup.[hg|ccg], 
+	optioncontext.[hg|ccg].
+
+2004-09-19  Murray Cumming  <murrayc@murrayc.com>
+
+	* This is the HEAD branch.
+
+2004-09-13  Cedric Gustin <cedric.gustin@swing.be>
+
+	* examples/thread/dispatcher.cc: Fixed a race condition on win32
+	that involved the combined use of auto_ptr and multithreading (bug
+	#109966). 
+
+2.4.4:
+
+2004-07-23  Martin Schulze  <mschulze@cvs.gnome.org>
+
+	* glib/glibmm/main.cc: Move deletion of SourceConnectionNode object
+	into destroy_notify_callback() exclusively; do not delete from 
+	notify().
+	(bug #144420)
+
+2004-07-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/signalproxy_connectionnode.cc: notify(): Do not delete 
+	the connection after disconnecting it, because disconnecting it 
+	always causes disconnect_notify to be called, so just delete it there.
+	This prevents double deletes and reading of deleting memory, found in 
+	bug #145571.
+
+2004-07-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/signalproxy.h.m4: Added some documentation.
+
+2004-06-20  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/objectbase.cc: Spring cleaning.
+	* glib/glibmm/object.cc: ditto.
+
+2.4.3:
+
+2004-06-18  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* scripts/macros.m4 (GTKMM_ARG_ENABLE_WARNINGS): Add
+	-Wno-long-long to the list of tried warning flags.
+
+2004-06-16  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/dispatcher.cc (DispatchNotifier::create_pipe): There
+	is no point in calling g_file_error_from_errno() on win32 since we
+	have no real errno.  Also fix the error text to say "event" rather
+	than "pipe".
+
+2004-06-14  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* scripts/cxx.m4: Add a couple of casts to void in order to suppress
+	warnings about unused variables.  I still have no idea as to why the
+	hardcore warning flags are remembered when running make distcheck...
+
+2004-06-14  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* examples/thread/dispatcher.cc: Explicitely join all threads.
+	Hopefully that'll fix the crash on win32 (see bug #109966).
+
+2004-06-13  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* examples/thread/dispatcher*.cc (main): Remove unused parameter
+	names to fix building with -Werror.
+
+2004-06-13  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* configure.in (GTKMM_ENABLE_DEBUG_REFCOUNTING): s/^GTK/GLIB/
+
+2004-06-08  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* build_shared/Makefile_build.am_fragment (all_includes): Remove
+	left-over include paths for pango, atk, gdk and gtk.
+
+2004-06-07  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/stringutils.h: Replace a couple of double quotes with
+	&quot; to prevent doxygen from escaping the enclosed HTML entities.
+
+2004-06-04  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/ustring.h: Use /*! instead of /** to introduce
+	doxygen comments in order to avoid cluttering the long method list
+	of class Glib::ustring.  Replace a few double quotes with &quot;
+	to prevent doxygen from escaping the enclosed HTML entities.
+
+2.4.2:
+
+2004-06-03  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* scripts/Makefile.am (EXTRA_DIST): Remove mkinstalldirs, because
+	automake-1.8 doesn't use it anymore and prior versions should pick
+	it up automatically anyway.
+
+2004-06-03  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/dispatcher.cc: Complete overhaul of the Win32
+	implementation of Glib::Dispatcher.  That is, mutex locking is
+	done correctly now and dynamic memory allocation is no longer
+	used, plus a few other cleanups.  See reopened bug #109966.
+
+2004-06-03  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/signalproxy_connectionnode.cc
+	(SignalProxyConnectionNode::SignalProxyConnectionNode):
+	Reorder the initializer list to match the declaration order.
+
+	(SignalProxyConnectionNode::notify): Add missing return 0.
+
+2004-05-26  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/ustring.{cc,h}: Globally apply some minor code
+	cleanup and optimization tweaks.
+
+	(get_unichar_from_std_iterator): Replace implementation with a
+	hand-optimized and profiled variant that has been lurking in my
+	local tree for quite some time, thus should be well tested.
+	Also add the G_GNUC_PURE() attribute.
+
+	(operator+): Explicitely instantiate and return a temporary string,
+	instead of accessing the reference ustring::operator+=() returns.
+	This quite often allows the compiler to eliminate the additional
+	copy constructor invocation.
+
+2004-05-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in, Makefile.am: Removed the glibmm.spec files, because
+	it is broken and nobody has volunteered to fix it.
+
+2004-05-20  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* examples/thread/dispatcher.cc: Revert last commit because it's
+	silly.  To make the code truly exception-safe it would be necessary
+	to either join all threads or to notify them, which is way beyond
+	the scope of this example.
+
+2004-05-20  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* examples/thread/dispatcher.cc: Set a good example and
+	be paranoid about possible memory leaks due to exeptions.
+
+2004-05-20  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* examples/thread/dispatcher.cc: Code cleanup.  Most importantly,
+	get rid of the locking around std::cout since it obfuscates the
+	purpose of using Glib::Dispatcher.
+
+2004-05-13  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/object.{cc,h} (ConstructParams::ConstructParams):
+	Implement the copy constructor in a way that actually works if used.
+	Relying on the compiler to optimize it away is a bad idea. (#132300)
+
+2004-05-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/ustring.h: Documented the constructors, based on
+	the libstdc++ documentation, to make it clear that sizes are in 
+	characters rather than bytes.
+
+2004-05-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in: Increase glib dependency to 2.4.0.
+
+2004-04-30  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/gobject.m4: Allow use of _CUSTOM_DTOR(), needed by
+	Gnome::Gda::Connection.
+
+2.4.1:
+
+2004-04-17  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/reference/Makefile.am: Make the generated html depend on the
+	beautify_docs.pl.in source instead of the generated beautify_docs.pl,
+	so that the html is not rebuilt from tarballs.
+
+2004-04-17  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/container_handle.h: Reimplemented more of the 
+	to_cpp_type() methods without using dependent methods, so that they 
+	work with g++ 3.4 (cvs versions).
+
+2.4.0:
+
+2004-04-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/pm/WrapParser.pm, Output.pm, m4/signal.m4: Allow _WRAP_SIGNAL()
+	to take an refreturn argument, so that Gtk::Widget::on_get_accessible()
+	can do an extra ref before returning the Atk::Object. 
+
+2004-04-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/pm/Output.pm: output_wrap_property(): Provide the actual
+	property name as well as one with - replace with _, so we can 
+	test for the correct value in notification signal handler.
+	* tools/m4/property.m4: Use the actual property name when calling
+	C functions.
+
+2.3.8:
+
+2004-03-24  Murray Cumming  <murrayc@murrayc.com>
+
+	* scripts/cxx.m4: Corrected parentheses, which cause the docs to be 
+	written into config.h. Thanks to Alexander Nedotsukov.
+
+2004-03-23  Murray Cumming  <murrayc@murrayc.com>
+
+	* scripts/cxx.m4: Corrected the ambiguous const template test, which
+	failed on all platforms because it generated bad code.
+
+2004-03-20  Martin Schulze  <mschulze@cvs.gnome.org>
+
+	* glibmm/main.cc: Bug fix in SourceConnectionNode::notify() (#137030).
+
+2004-03-18  Murray Cumming  <murrayc@murrayc.com>
+ 
+ 	* tools/generate_wrap_init.pl: Change a regex so that files are
+ 	included without full path. Apparently this helps when building outside
+ 	of the source directory, though I'm sceptical. By Victor Zverovich in 
+ 	bug #137530.
+
+2.3.7:
+
+2004-03-14  Murray Cumming  <murrayc@murrayc.com>
+                                                                         
+        * scripts/sun.m4: Set the correct variable, so it is actually set in 
+	glibmmconfig.
+
+2004-03-14  Murray Cumming  <murrayc@murrayc.com>                                                                                       
+        * glib/glibmm/containerhandle_shared.h value.h: Used ifdef 
+        GLIBMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS to avoid 
+	problems with the SUN Forte compiler.
+
+2004-03-14  Murray Cumming  <murrayc@murrayc.com>
+
+	* scripts/cxx.m4: Added CAN_DISAMBIGUATE_CONST_TEMPLATE_SPECIALIZATIONS
+	m4 macro to use in configure.in, to check for the SUN Forte problem -
+	see the comments in cxx.m4.
+	* scripts/sun.m4: Moved some brackets around to make the define
+	actually work.
+
+2004-03-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/containerhandle_shared.h: TypeTraits to_cpp_type() 
+	specializations: Use wrap_auto() directly instead of a specific
+	wrap() overload that would be dependent. Needed for g++ 3.4.
+	* glib/glibmm/containers.h: Same again.
+
+2004-03-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/class_shared.m4: Remove the parent get_type() call from
+	the Class::init() function, because it is optimised away, and g++ 3.4
+	actually complains that it does nothing.
+	* glib/glibmm/object.[h|cc]: Add a public ConstructParams copy 
+	constructor, needed by g++ 3.4. See comments in the code.
+	* tests/glibmm_value/glibmm_value.cc: Instantiate instances of 
+	value types, to fix the g++ 3.4 build. I don't know what the code
+	was meant to do before anyway.
+
+2004-03-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* scripts/: Added sun.m4, copied from libsigc++-1.2/scripts and 
+	modified, so we can detect the SUN Forte compiler.
+	* configure.in: Used the m4 macro.
+	* glibmm/glibmm-config.h: Undef the GLIBMM_COMPILER_SUN_FORTE macro
+	so that it will be defined if configure sets it.
+
+2004-03-09  Murray Cumming  <murrayc@murrayc.com>
+ 
+ 	* Some, but not all, SUN Forte build fixes: 
+ 	* tools/m4/convert_gdk.m4, convert_glib.m4: Use existing
+ 	sun-specific conversion when converting from any 
+ 	RefPtr<const Something> to *Something.
+
+2004-04-08  Hagen Moebius  <hagen.moebius@starschiffchen.de>
+
+        * tools/pm/DocsParser.pm: Another change to give better warnings and
+        errors at gmmproc-runtime. Further improvment of parsing parameter names
+        to strip traling underscres. This not only for reference text, but for
+        the parameter list also.
+
+2004-04-07  Hagen Moebius  <hagen.moebius@starschiffchen.de>
+
+	* tools/pm/DocsParser.pm: Allow overrides to only override
+	part of the docs. Add a <mapping> tag to associate non-prefixed
+	functions with classes. Improve parsing of parameter names so they
+	can now have numbers in the names.
+
+2.3.6:
+
+2004-03-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* Added glib/glibmm/i18n.h and i18n-lib.h which defines _() and friends
+	for internationalization. See the comments in the header - you must
+	include things in the right order.
+	* glib/src/spawn.[hg|ccg]: Added spawn_close_id() as wrapper for
+	g_spawn_close_id().
+	* glib/glibmm/main.[h|cc]: Added MainLoop::depth() as wrapper for
+	g_main_depth().
+
+ 2004-03-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/pm/Function.pm: parse_param(): Only parse const as an 
+	individual part of the type name if it is followed by a space, so 
+	that we can have const const_iterator& types.
+
+2004-02-27  Martin Schulze  <teebaum@cvs.gnome.org>
+
+  * CHANGES: Fix typo reported by Chris Vine.
+
+2004-02-13  Martin Schulze  <teebaum@cvs.gnome.org>
+
+	* documentation fixes and corrections in the comments reflecting
+	the shift to libsigc++ 2.
+	* make all source files in example thread use libsigc++ 2 instead
+	of libsigc++ 1.2.
+
+2.3.5:
+
+2004-02-10  Murray Cumming  <murrayc@usa.net>
+
+	* glibmm now uses libsigc++ 2 instead of libsigc++ 1.2. See bug
+	#125061 for more details. We must update CHANGES later.
+
+2.3.4:
+
+2004-02-02  Murray Cumming  <murrayc@usa.net>
+
+	* glib/glibmm/containerhandle_shared.h: Traits<const T*>: Added
+	const_cast, needed by TreeView::get_columns() const: bug #126721.
+
+2004-01-29  Murray Cumming  <murrayc@usa.net>
+
+	* tools/pm/Parser.pm, Output.pm, tools/m4/signal.m4: Add an optional
+	custom_c_callback parameter to _WRAP_SIGNAL to allow special code
+	for the SelectionData& output parameter in Gtk::Widget signals.
+	Hopefully we won't need too many more of these hacks - the m4 is 
+	becoming very hard to read, with all these nested ifelse() statements.
+
+2004-01-27  Cedric Gustin  <cedric.gustin@swing.be>
+
+	* build_shared/Makefile_build.am_fragment: Added win32-specific
+	--export-all-symbols to linker flags. This is backported from 
+	gtkmm-2.2.
+	* README.win32: Updated text for glibmm-2.4. 
+	* tools/generate_wrap_init.pl.in: Replaced GTKMM_WIN32 by the 
+	standard G_OS_WIN32.
+
+2.3.3:
+
+2004-01-22  Murray Cumming  <murrayc@usa.net>
+
+	* glib/date.[hg|ccg]: Added clamp_min() and clamp_max() to wrap the
+	case where g_date_clamp() takes null values.
+
+2004-01-18  Alberto Paro  <alberto@paro.homeunxi.org>
+
+	* glib/src/date.hg: documentated Glib::Date functions.
+	* glib/glibmm/main.h: documentated Glib::MainLoop,Glib::MainContext
+	and Glib::Source  functions.
+
+2004-01-18  Murray Cumming  <murrayc@usa.net>
+
+	* tools/pm/Output.pm, tools/m4/property.m4: When the property is not
+	read-only, add a second read-only propertyproxy for the same property,
+	with a const accessor. This allows setting of properties in const
+	methods. Make all read-only propertyproxies have const accessors.
+	* glib/glibmm/propertyproxy.h: Added class documentation.
+	* tools/pm/Output.pm: Declare _vfuncs as virtual methods - fixing
+	an error in my last change.
+
+2004-01-16  Murray Cumming  <murrayc@usa.net>
+
+	* tools/pm/Output.pm, tools/m4/vfunc.m4:
+	- Generate const vfuncs when requested with _WRAP_VFUNC().
+	- Put the *_vfunc() decleraration directly into the header, where 
+	the _WRAP_VFUNC() macro appears, instead of in a separate section.
+	This allows us to add doxygen documentation before the _WRAP_VFUNC()
+	in the .hg file. However, we must check that all of our _WRAP_VFUNC()
+	macros are in protected: sections.
+
+2004-01-12  Murray Cumming  <murrayc@usa.net>
+
+	* glib/glibmm/object.cc: Object::Object() default constructor. 
+	Remove the warning because we really need this to implement a custom
+	TreeModel. Derive a new GType, as in the 
+	Object::Object(ConstructParams) constructor. Like that constructor, 
+	the default one also assumes that you have called a suitable 
+	ObjectBase constructor, such as ObejctBase(typeid(MyCustomClass)).
+
+2004-01-09  Murray Cumming  <murrayc@usa.net>
+
+	* tools/pm/Output.pm: output_wrap_property(): Allow construct-only
+	properties to be wrapped, as read-only properties.
+
+2004-01-03  Murray Cumming  <murrayc@usa.net>
+
+	* tools/gmmproc.in, pm/WrapParser.pm, DocsParser.pm: Removed the 
+	mergecdocs option - because we always want to merge C docs, to avoid
+	accidental upload of half-complete docs.
+
+2003-12-29  Murray Cumming  <murrayc@usa.net>
+
+	* Makefile.am: Add scripts and tests directories to SUBDIRS instead of 
+	DIST_SUBDIRS, so that their Makefile.am files are actually used.
+	* scripts/macros.m4: renamed GTKMM_CHECK_PERL() to GLIBMM_CHECK_PERL()
+	and install it as glibmm_check_perl.m4, so that other *mm projects
+	can use it. They need the PERL_PATH for Doxygen.
+
+2003-12-22  Murray Cumming  <murrayc@usa.net>
+
+	* docs/reference: generate beautify_docs.pl from beautify_docs.pl.in,
+	so it can have the perl path in it. Install it, so other *mm 
+	modules can use it.
+
+2003-12-13  Murray Cumming  <murrayc@usa.net>
+
+	* tools/m4/*.m4: Added fuller Doxygen documentation to all gobj() and 
+	wrap() methods. Doxygen should not emit warnings about these now.
+
+2.3.2:
+
+2003-11-29  Murray Cumming  <murrayc@usa.net>
+
+	* tools/m4/signal.m4: Add spaces inside signal_proxy template types,
+	to avoid << and >> when using templated types.
+
+2003-11-27  Murray Cumming  <murrayc@usa.net>
+
+	* tools/pm/WrapParser.pm, Output.pm: Added WRAP_METHOD_DOCS_ONLY()
+	macro.
+	* docs/internal/using_gmmproc.txt: Explained the new macro.
+	
+2003-11-02  Murray Cumming  <murrayc@usa.net>
+
+	* glib/glibmm/: Added init.[h|cc] with Glib::init() so that the 
+	gnomemm init() methods do not need to initialize gtkmm.
+	* tools/m4/class_gobject.m4, class_gtkobject.m4: Added 
+	_GMMPROC_PROTECTED_GCLASS macro, needed by libgnomecanvasmm. This
+	was not previously properly merged from gtkmm2.
+	* tools/m4/property.m4: Re-added PropertyProxy reference documentation
+	that did not survive a previous merge from gtkmm2.
+
+2003-11-01  Murray Cumming  <murrayc@usa.net>
+
+	* glib/glibmm/propertyproxy.h, propertyproxy_base.[h|cc]: Now uses
+	ObjectBase instead of Object, because glib can now have properties
+	on interfaces. This is needed, for instance, by the GtkFileChooser
+	interface wrapper in gtkmm.
+	* glib/glibmm/object.h: Moved get/set_property() methods into 
+	ObjectBase, for the same reason.
+	* tools/pm/WrapParser.pm, Output.pm: Added optional no_default_handler
+	parameter to gmmproc _WRAP_SIGNAL() macro, for signals whose 
+	default signal handler is not in the klass struct and therefore
+	can not be overridden.
+
+2003-10-31  Murray Cumming  <murrayc@usa.net>
+
+	* docs/Makefile_web.am_fragment: Corrected install location,
+	so that links from the gtkmm docs work when they are installed.
+
+2003-10-30  Murray Cumming  <murrayc@usa.net>
+
+	* docs: Added images directory, copied from gtkmm, for the reference
+	html docs.
+	* configure.in: Mention docs/images/Makefile.
+	* docs/reference/Doxyfile.in: Genereate glibmm_doxygen_tags instead
+	of gtkmm_doxygen_tags.
+	* docs/reference/Makefile.am: dist glibmm_doxygen_tags.
+	* docs/reference: gtkmm*.html_fragment are now glibmm*.html_fragment.
+
+2.3.1:
+	
+2003-10-23  Murray Cumming  <murrayc@usa.net>
+
+	* tools/pm/Output.pm: output_wrap_create(): Used
+	args_types_and_names_with_default_values() intead of 
+	args_types_and_names(), so that create() functions .in .h files have 
+	the default values as specified in _WRAP_CREATE() in .hg files.
+	* tools/pm/WrapParser.pm: on_ignore_signals(): Strip the quotes, to
+  make _IGNORE_SIGNAL() really work in .hg files.
+
+2003-10-02  J. Abelardo Gutierrez <jabelardo@cantv.net>
+
+	* examples/threads/dispatcher.cc
+	  examples/threads/dispatcher2.cc: fixed to cast out all gktmm code,
+	now they only need glimm.
+	* configure.in: Added examples/threads because they don't use gtkmm
+	anymore.  Now all examples/threads compiles and run just fine.
+
+2.3.0:
+
+2003-09-30  Murray Cumming  <murrayc@usa.net>
+
+	* configure.in: Removed examples/threads because we don't build or
+	distribute it, because it doesn't build, because it uses gtkmm.
+
+2003-09-30  Murray Cumming  <murrayc@usa.net>
+
+	* glib/glibmm/object_base.h: ObjectBase inherits virtually from
+	Sigc::Object. See bug #116280.
+
+2003-09-27  Cedric Gustin  <cedric.gustin@swing.be>
+ 
+ 	* glib/glibmm/threadpool.cc: Removed
+ 	_GTKMMPROC_SIGNAL_H_AND_CC(#ifndef G_OS_WIN32) restrictions. These
+ 	functions are now implemented in the latest (2.2.4) GTK+ on win32.
+ 	* README.win32 : Updated list of unsupported functions. 
+ 
+2003-08-20  Frank Naumann  <fnaumann@freemint.de>
+  
+  	* glib/src/thread.hg,
+  	  glib/src/unicode.hg: Warning bugfix for VisualStudio .NET 2003;
+  	made wrapper functions returning bool from glib functions
+  	returning int (C lacks builtin type bool) explicit by adding 
+  	an != 0 check. Otherwise VisualStudio .NET warn about implicit
+  	int -> bool cast. 
+
+2003-07-26  Murray Cumming  <murrayc@usa.net>
+ 
+ 	* glib/glibmm/dispatcher.cc: Added #include <algorithm>, needed
+ 	by MSVC++, as suggested by Frank Naumann in bug #118215.
+
+2003-05-31  Murray Cumming  <murrayc@usa.net>
+
+	* tools/gmmproc.in: Corrected location of installed .pm files. They
+	are now in a glibmm-2.3 folder instead of a glibmm-2.4 folder.
+
+2003-05-14  Murray Cumming  <murrayc@usa.net>
+
+	* Applied some of MSVC++ .NET 2003 changes from jburris. For instance,
+	use of Gtk:: prefix with manage, because MSVC++ can not guess it. Also
+	corrected the out-of-sync protected/private modifiers in the private
+	gtype classes and their prototypes.
+
+2003-05-09  Cedric Gustin  <cedric.gustin@swing.be>
+
+        * glib/glibmm/dispatcher.cc: small typo in G_OS_WIN32 condition.
+	
+2003-05-07  Murray Cumming  <murrayc@usa.net>
+
+	* scripts/macros.m4: Made the --enable-debug-refcounting configure
+	option set GLIBMM_* instead of GTKMM_*.
+
+2003-05-02  Murray Cumming  <murrayc@usa.net>
+ 
+ 	* tools/m4/*.m4: Added doxygen comments to gobj() methods.
+ 	* examples/markup/parser.cc: Commented-out a std::right that gcc 2.93
+ 	does not like.
+
+2003-04-23  Andrew Makeev
+ 
+	* glib/glibmm/dispatcher.cc: Added some #ifdefed code to implement
+ 	Glib::Dispatcher on WIN32. See comments with the code.
+
+2003-04-22  Murray Cumming  <murrayc@usa.net>
+
+	* Install headers in a glibmm-2.3 directory instead of glibmm-2.4,
+	to be consistent with gtkmm 2.4.
+
+2003-04-21  Murray Cumming  <murrayc@usa.net>
+
+	* arrayhandle.h, listhandle, slisthandle.h:
+	Glib::ListHandle, Glib::ListHandle, Glib::SListHandle: Added 
+	reference docs explaining that people can use STL containers.
+	
+2003-04-21  Murray Cumming  <murrayc@usa.net>
+
+	* Removed examples/idle: It's now updated and in gtkmm/examples/book.
+
+2003-04-19  Murray Cumming  <murrayc@usa.net>
+
+	* tools/pm/GtkDefs.pm: get_unwrapped(): Changed some & to && to 
+	avoid warnings and because that is probably what they should be.
+
+	* tools/m4/extra_defs_gen/generate_defs_glib.cc: Removed parameter
+	names from main(), because they are not used. Avoid warning.
+
+2003-03-26  Ross Burton  <ross@burtonini.com>
+
+	* glib/src/module.hg: Added API documentation.
+
+2003-03-18  Enrico Scholz  <enrico.scholz@informatik.tu-chemnitz.de>
+	
+	* scripts/*.m4, configure.in:
+          Added description to several AC_DEFINE statements to make 'autoheader'
+          happy
+        * Makefile.am:
+          Added ACLOCAL_AMFLAGS to make 'autoreconf' work
+	
+2003-03-18  Cedric Gustin  <cgustin@ibelgique.com>
+ 
+  	* Makefile.am : removed examples from DIST_SUBDIRS
+
+2003-03-18  Enrico Scholz  <enrico.scholz@informatik.tu-chemnitz.de>
+
+	* examples/Makefile.am_fragment:  Added DESTDIR-support.
+	
+2003-03-14  Cedric Gustin  <cgustin@ibelgique.com>
+
+	* Install examples. The are built by default too. Patch adapted for
+	glibmm 2.4 by Murray Cumming.
+
+2003-03-04  Cedric Gustin  <cgustin@ibelgique.com>
+
+ 	* configure.in : Removed libstdc++ in LDFLAGS on win32. Latest
+ 	libtool is taking care of it.
+	* build_shared/Makefile_build.am_fragment,
+	tools/extra_defs_gen/Makefile.am : Added
+	--export-all-symbols linker flag on win32 (required by latest
+ 	libtool to build DLLs).
+ 	* build_shared/Makefile_gensrc.am_fragment : Modifiy rule that
+ 	builds wrap_init.cc. wrap_init.cc now contains reference to all
+ 	objects, event on win32. #ifdefs are included when needed.
+	* README.win32 : updated for version 2.2. Added list of missing
+ 	methods and signals on win32
+	* tools/m4/base.m4 : Added _GTKMMPROC_SIGNAL_H_AND_CC macro.
+	
+
+2003-03-14  Martin Schulze  <MHL.Schulze@t-online.de>
+
+	* docs/internal/using_gtkmmproc.txt: Correct name of
+	[...]signals.defs generation utiliy.
+
+2003-01-30  Rick L Vinyard Jr <rvinyard@cs.nmsu.edu>
+
+	* glib/src/thread.hg Cond: Add documentation
+
+2003-01-27  Murray Cumming  <murrayc@usa.net>
+
+	* glib/glibmm/refptr.h: Removed RefPtr<>::is_null() to encourage use
+	of more pointer-like operator bool() instead. Wanted to remove clear()
+	too, but there is no =0 equivalent yet.
+	* tools/gmmproc.in: Change harcoded gtkmm-2.0/m4 path to glibmm-2.4/m4.
+
+2003-01-22  Murray Cumming  <murrayc@usa.net>
+
+	* GTKMM_ m4 tests and #defines are now prefixed with GLIBMM_
+
+2003-01-21  Murray Cumming  <murrayc@usa.net>
+
+	* tests/Makefile.am_fragment, examples/Makefile.am_fragment: 
+	Corrected LIBS and CFLAGS. Not all of these build because they
+	use gtkmm stuff too. They need to be reduced to glibmm-only code.
+
+2003-01-21  Murray Cumming <murrayc@usa.net>
+
+	* glib/Makefile.am, glib/glibmm/Makefile.am: Install headers in
+	glibmm-2.4 directory rather than gtkmm-2.4
+
+2003-01-21  Murray Cumming  <murrayc@usa.net>
+
+	* configure.in: Use GLIBMM_* instead of GTKMM_* to avoid config.h 
+	clashes with gtkmm 2.4.
+	* glib/glibmm-2.4.pc.in: Correct cflags - report 2.4 instead of 2.0.
+
+2003-01-21  Murray Cumming  <murrayc@usa.net>
+
+	* tools/extra_defs_gen/Makefile.am: Changed extra_defs library name
+	from 2.4 to 2.3, so it can be unstable.
+
+2003-01-09  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/utility.h (GLIBMM_INITIALIZE_STRUCT): Replace
+	__builtin_bzero() with __builtin_memset() because the former is
+	deprecated.  Also, it looks like GCC is able to optimize the 0 case
+	so we don't lose anything here.
+
+2003-01-09  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/miscutils.cc (Glib::build_path): Reserve 256 bytes
+	in advance to improve performance.
+
+2003-01-09  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* glib/glibmm/miscutils.{cc,h} (Glib::build_path): Fix to make it
+	behave exactly like g_build_path().  (#102885, Jarek Dukat)
+
+	(Glib::build_filename(const std::string&, const std::string&)):
+	Implement in terms of Glib::build_path().
+	
+2003-01-21  Murray Cumming  <murrayc@usa.net>
+
+	* Renamed gtkmmproc to gmmproc.
+
+2003-01-08  Murray Cumming  <murrayc@usa.net>
+
+	* glib/glibmm/refptr.h: Removed the operator=(CppObject*), as
+	suggested in the TODO comment.
+
+2003-01-08  Murray Cumming  <murrayc@usa.net>
+
+	* make distcheck works.
+
+2003-01-08  Murray Cumming  <murrayc@usa.net>
+
+	* It now builds, though I haven' tried installing it. The
+	library names and header directories should now all have 2.4
+	instead of 2.0 in their name.
+
+glibmm was previously part of gtkmm2.
+

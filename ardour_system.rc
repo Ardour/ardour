@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<Ardour>
+  <Config>
+    <Option name="minimum-disk-io-bytes" value="262144"/>
+    <Option name="track-buffer-seconds" value="5.000000"/>
+    <Option name="mute-affects-pre-fader" value="yes"/>
+    <Option name="mute-affects-post-fader" value="yes"/>
+    <Option name="mute-affects-control-outs" value="yes"/>
+    <Option name="mute-affects-main-outs" value="yes"/>
+    <Option name="solo-latch" value="yes"/>
+    <Option name="pixmap-path" value="/usr/share/ardour/pixmaps:/usr/local/share/ardour/pixmaps"/>
+    <Option name="disk-choice-space-threshold" value="57600000"/>
+    <Option name="mtc-port" value="trident"/>
+    <Option name="mmc-port" value="trident"/>
+    <Option name="monitor-inputs" value="no"/>
+  </Config>
+  <Keys>
+    <context name="default">
+      <binding keys="Ctrl-w" action="close-dialog"/>
+      <binding keys="Ctrl-u" action="start-prefix"/>
+      <binding keys="Alt-e" action="toggle-editor-window"/>
+      <binding keys="Alt-m" action="toggle-mixer-window"/>
+      <binding keys="Alt-r" action="toggle-recorder-window"/>
+      <binding keys="Alt-l" action="toggle-locations-window"/>
+      <binding keys="Alt-c" action="toggle-big-clock-window"/>
+      <binding keys="Alt-o" action="toggle-options-window"/>
+      <binding keys=" " action="toggle-playback"/>
+      <binding keys="Ctrl-Shift- " action="toggle-playback-forget-capture"/>
+      <binding keys="Ctrl-n" action="new-session"/>
+      <binding keys="Ctrl-t" action="add-audio-track"/>
+      <binding keys="Ctrl-s" action="save-state"/>
+      <binding keys="Ctrl-q" action="quit"/>
+      <binding keys="Left" action="transport-rewind"/>
+      <binding keys="Right" action="transport-forward"/>
+      <binding keys="r" action="transport-record"/>
+      <binding keys="Home" action="transport-goto-start"/>
+      <binding keys="Ctrl-a" action="transport-goto-start"/>
+      <binding keys="End" action="transport-goto-end"/>
+      <binding keys="Ctrl-e" action="transport-goto-end"/>
+    </context>
+    <context name="editor">
+      <binding keys="Tab" action="playhead-to-next-region-start"/>
+      <binding keys="Ctrl-Tab" action="playhead-to-next-region-end"/>
+      <binding keys="`" action="playhead-to-previous-region-start"/>
+      <binding keys="Ctrl-`" action="playhead-to-previous-region-end"/>
+      <binding keys="[" action="edit-cursor-to-previous-region-start"/>
+      <binding keys="Ctrl-[" action="edit-cursor-to-previous-region-end"/>
+      <binding keys="]" action="edit-cursor-to-next-region-start"/>
+      <binding keys="Ctrl-]" action="edit-cursor-to-next-region-end"/>
+      <binding keys="'" action="edit-cursor-to-next-region-sync"/>
+      <binding keys=";" action="edit-cursor-to-previous-region-sync"/>
+      <binding keys="Left" action="scroll-backward"/>
+      <binding keys="Right" action="scroll-forward"/>
+      <binding keys="KP_6" action="jump-forward-to-mark"/>
+      <binding keys="KP_Right" action="jump-forward-to-mark"/>
+      <binding keys="KP_4" action="jump-backward-to-mark"/>
+      <binding keys="KP_Left" action="jump-backward-to-mark"/>
+      <binding keys="KP_Enter" action="add-location-from-playhead"/>
+      <binding keys="KP_Add" action="nudge-forward"/>
+      <binding keys="Ctrl-KP_Add" action="nudge-next-forward"/>
+      <binding keys="KP_Subtract" action="nudge-backward"/>
+      <binding keys="Ctrl-KP_Subtract" action="nudge-next-backward"/>
+      <binding keys="=" action="temporal-zoom-out"/>
+      <binding keys="-" action="temporal-zoom-in"/>
+      <binding keys="Page_Up" action="scroll-tracks-up"/>
+      <binding keys="Page_Down" action="scroll-tracks-down"/>
+      <binding keys="o" action="set-mouse-mode-object"/>
+      <binding keys="g" action="set-mouse-mode-range"/>
+      <binding keys="G" action="set-mouse-mode-gain"/>
+      <binding keys="t" action="set-mouse-mode-timefx"/>
+      <binding keys="f" action="toggle-follow-playhead"/>
+      <binding keys="z" action="set-mouse-mode-zoom"/>
+      <binding keys="Z" action="zoom-focus-playhead"/>
+      <binding keys="Ctrl-z" action="set-undo"/>
+      <binding keys="Ctrl-r" action="set-redo"/>
+      <binding keys="Ctrl-x" action="editor-cut"/>
+      <binding keys="Ctrl-c" action="editor-copy"/>
+      <binding keys="Ctrl-v" action="editor-paste"/>
+      <binding keys="Insert" action="insert-region"/>
+      <binding keys="Delete" action="editor-cut"/>
+      <binding keys="Meta-d" action="duplicate-region"/>
+      <binding keys="Alt-r" action="reverse-region"/>
+      <binding keys="Alt-n" action="normalize-region"/>
+      <binding keys="Ctrl-l" action="center-playhead"/>
+      <binding keys="Ctrl-g" action="goto"/>
+      <binding keys="Ctrl-f" action="scroll-forward"/>
+      <binding keys="Ctrl-b" action="scroll-backward"/>
+      <binding keys="Alt-f" action="playhead-forward"/>
+      <binding keys="Alt-b" action="playhead-backward"/>
+      <binding keys="Return" action="playhead-to-edit"/>
+      <binding keys="Alt-Return" action="edit-to-playhead"/>
+    </context>
+  </Keys>
+</Ardour>

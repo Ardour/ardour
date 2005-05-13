@@ -1,0 +1,9 @@
+2005-05-08 Taybin Rutkin <taybin@earthlink.net>
+	* Brought up Jesse's CoreMIDI threading fix.
+
+2005-04-14 Taybin Rutkin <taybin@earthlink.net>
+	* Brought up Paul's parser fix from midi++ 1.16.
+
+2005-04-01 Taybin Rutkin <taybin@earthlink.net>
+	* Updated for sigc++-2.0.
+	* Incremented version number to 2.0.0.

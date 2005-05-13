@@ -1,0 +1,242 @@
+2.6.1:
+
+* Interface::add_interface(): Disabled the check for a second call, 
+  introduced in 2.6.0, for now, because it stops some valid uses.
+  (Bryan Forbes)
+
+2.6.0:
+
+New stable version. Changes compare to glibmm 2.4.x:
+
+* Added Option, OptionContext, OptionGroup for parsing of command-line arguments.
+* Added filename_display_basename() and filename_display_name().
+* Added setenv() and unsetenv().
+* add_interface() methods will no longer give warnings if you 
+  call them twice.
+* gmmproc:
+  - Now reuses C properties documentation.
+
+2.5.6:
+
+* add_interface() methods will no longer give warnings if you 
+call them twice.
+* gmmproc: Output properties documentation taken from the .defs.
+* examples now build on AIX.
+  (Murray Cumming)
+* MSVC++ .Net 2003 build fix. (Cedric Gustin)
+
+2.5.5:
+
+* Now builds with the following compilers, in addition to 
+the existing GNU g++, and Intel compilers:
+- SUN Forte CC 5.5
+- IBM AIX xlC v7
+- Tru64 C++ V6.5-042
+- IRIX MIPSpro 7.4.2m
+  (Older versions of all these compilers might also work.)
+  (Murray Cumming, www.thewrittenword.com)
+* Now builds with MSVC++ .Net 2003 (gtkmm 2.4 already did).
+  (Cedric Gustin)
+  
+2.5.4:
+
+Options:
+* Added Option(GOptionGroup* cast_item) constructor,
+  needed by Gtk::Main.
+* Added reference documentation.
+(Murray Cumming)
+
+2.5.3:
+
+* Options:
+  - Allow parsing of boolean arguments (arguments with no value).
+  - Really use the short names.  
+  (Daniel Holbach, Murray Cumming)
+* Added filename_display_basename() and filename_display_name().
+  (Murray Cumming)
+* Added setenv() and unsetenv(). (Murray Cumming)
+* Use static keyword to prevent exporting private API.
+  (Benoît Dejean)
+* input example: Improvements and simplification. (Chris Vine) 
+
+2.5.2:
+
+* OptionEntry: Remove useless enum. (Murray Cumming)
+* Documentation:
+  - examples: Added iochannel_stream example. (Chris Vine)
+  - reference: Generate more reference API from the C documentation, and
+    try to use the libstdc++ doxygen tags file to link to their 
+    documentation. (Murray Cumming)
+
+2.5.1:
+
+* OptionContext, OptionGroup, OptionEntry: Made the add_entry() methods 
+  type-safe and fixed several problems memory-management problems. This 
+  API is now worth looking at.
+
+2.5.0:
+
+* Added OptionContext, OptionGroup, and OptionEntry classes, for
+  parsing of command-line options. See examples/options/
+
+2.4.4:
+
+* Signals: Avoid crashes when disconnecting a signal when handling that signal.
+  (Murray Cumming, Martin Schulze)
+* 
+2.4.3:
+
+* Minor improvements to reference documentation. (Daniel Elstner)
+* Minor Glib::Dispatcher improvements (Daniel Elstner)
+
+2.4.2:
+
+* Glib::Dispatcher: win32 implementation rewritten, and hopefully, improved.
+  (Daniel Elstner)
+* Glib::ustring:
+  - Optimization and code-cleanup. (Daniel Elstner)
+  - Added reference documentation for constuctors. (Murray Cumming)
+* Fixed some compiler warnings.
+  (Daniel Elstner)
+* gmmproc: Some improvements for libgdamm. (Murray Cumming)
+
+
+2.4.1:
+
+* Build fixes for gcc 3.4.0.
+* Doxygen not required when building from tarballs.
+  (Murray Cumming)
+
+
+2.4.0:
+
+Changes since 2.2.0:
+
+* Now separate from gtkmm, so you can use things like Glib::ustring without depending on gtkmm. This glibmm 2.4 API installs in parallel with gtkmm 2.0/2.2, so you can install applications which use either.
+* When using pkg-config, you should check for "glibmm-2.4".
+* Glib::ObjectBase inherits virtually from SigC::Object, allowing multiple inheritance with other classes that inherit from SigC::Object.
+* RefPtr:
+  - is_null() was removed, to encourage you to use "== 0" instead.
+  - operator=(CppObject*) was removed.
+* The gtkmmproc code-generator is now gmmproc, and has several improvements to support gtkmm 2.4.
+* Now uses improved libsigc++ 2.0 API.
+* Added i18n.h and i18n-lib.h, which include the relevant
+  glib headers, which declare internationalization 
+  macros such as _().
+* New methods:
+  Glib::spawn_close_id(), Glib::MainLoop::depth(),
+  Glib::Date::clamp_min(),  Glib::Date::clamp_max(). 
+* Improved documentation.
+
+ 
+2.3.8:
+
+* Fix crash when using Glib::Main signals.
+  (Martin Schulze)
+* Corrected the configure-time SUN compiler check.
+  (Murray Cumming, Alexander Nedotsukov)
+
+2.3.7:
+
+* Added configure macros to detect SUN compiler oddities.
+* Various SUN Forte C+ and g++ 3.4 (cvs) build fixes.
+  (Murray Cumming)
+* gmmproc: Improved parsing of C docs.
+  (Hagen Moebius)
+
+2.3.6:
+
+* Added i18n.h and i18n-lib.h, which include the relevant
+  glib headers, which declare internationalization 
+  macros such as _(). (Murray Cumming)
+* Added Glib::spawn_close_id(). (Murray Cumming)
+* Added Glib::MainLoop::depth(). (Murray Cumming)
+* Documentation: corrections to CHANGES (Martin Schulze).
+* gmmproc: Can now handle "const const_iterator& iter"
+  parameter names without getting confused by 2 consts.
+  (Murray Cumming)
+
+2.3.5:
+
+* glibmm now uses libsigc++ 2 rather than libsigc++ 1.2.
+ 
+2.3.4:
+
+* ListHandle/SListHandle (intermediate container types):
+  - Added a const_cast<> to allow lists of const elements.
+* gmmproc: _WRAP_SIGNAL(): Added optional custom_c_callback 
+  parameter.
+  (Murray Cumming)
+* WIN32: Build fixes, mostly merged from the 2.2 branch.
+  (Cedric Gustin) 
+ 
+2.3.3:
+
+* gmmproc (code generator)
+  - properties: Make read-only properties have const accessors,
+    and add a second read-only const accessor for normal
+    properties. Wrap construct-only properties as read-only,
+    instead of ignoring them.
+  - vfuncs: Really generate const vfuncs when requested. Put
+    the method declaration directly into the .h file, so that
+    the doxygen documentation can be next to it.
+  - documentation:
+    - Remove mergecdocs configure option - always
+    merge the C docs, to avoid any risk of uploading or
+    releasing empty documentation. Just delete the *_docs.xml
+    files to make building from cvs faster.
+    - Install a GLIBMM_CHECK_PERL() macro, for use by gtkmm
+    and other *mm projects, to get the perl path needed by
+    doxygen.
+    - Install beautify_docs.pl so it can be reused in gtkmm
+    and other *mm projects, instead of having lots of copies.
+* Glib::ObjectBase: The default constructor, never before used,
+  now generates a custom GType, for use when creating new
+  implementations of Glib::Interfaces - for instance, see the
+  new custom tree model example in gtkmm.
+* Glib::Date: Added clamp_min() and clamp_max().
+  (Murray Cumming)
+
+* Documentation:
+  - Added reference documentation for MainLoop, MainContext, 
+    Source, and Date. (Alberto Paro)
+  
+2.3.2:
+
+* gmmproc (code generator):
+  - signal proxies have extra space to avoid << with templates.
+  - Added WRAP_METHOD_DOCS_ONLY() for reusing documentation even
+    when the method is hand-coded.
+  - _WRAP_SIGNAL(): Added optional no_default_handler parameter,
+    because some of the new GTK+ signals have no public default 
+    handler vfunc.
+* Added Glib::init(), for use by non-GUI apps which need to 
+  use Glib::wrap().
+* PropertyProxy: Can now be used with Interfaces.
+* Documentation improvements, so that gtkmm docs link to glibmm
+  docs.
+  (Murray Cumming)
+
+2.3.1:
+
+* gmmproc changes needed by gtkmm 2.3.0
+  (Murray Cumming)
+* examples updated and buildable and working,
+  without gtkmm code.
+  (J. Abelardo Gutierrez)
+
+Changes in glibmm 2.3.0:
+
+* Now separate from gtkmm, so you can use things like Glib::ustring without depending on gtkmm.
+  This glibmm 2.4 API installs in parallel with gtkmm 2.0/2.2, so you can install this unstable library 
+  without the risk of breaking existing application.
+* This does not yet require glib 2.3 because there has been no tarball release of that yet. For now, you
+  can use glibmm 2.3.0 with glib 2.2.x.
+* When using pkg-config, you should check for "glibmm-2.4".
+* Glib::ObjectBase inherits virtually from SigC::Object, allowing multiple inheritance with other
+  classes that inherit from SigC::Object.
+* RefPtr:
+  - is_null() was removed, to encourage you to use "== 0" instead.
+  - operator=(CppObject*) was removed.
+* gtkmmproc is now gmmproc.
+* All the glibmm bugfixes in gtkmm 2.2.x.

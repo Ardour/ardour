@@ -1,0 +1,349 @@
+#! /usr/bin/python
+
+# By Taybin Rutkin
+#
+# TODO
+# look along $PATH to find binary.
+# Use ardour binary to get version info
+# hide file information from reporters
+
+# standard
+import os
+import Queue
+import re
+import shutil
+import string
+import sys
+import tempfile
+import threading
+import warnings
+
+# probably installed
+import pygtk
+pygtk.require("2.0")
+import gtk, gnome.ui
+
+# we provide ClientForm and ClientCookie in $prefix/share/ardour/
+sys.path.append('/usr/local/share/ardour/')
+sys.path.append('/opt/local/share/ardour/')
+sys.path.append('/opt/share/ardour/')
+sys.path.append('/usr/share/ardour/')
+
+# probably not installed
+import ClientForm
+import ClientCookie
+
+warnings.filterwarnings('ignore', message="tempnam is a potential security risk to your program")
+g_name = os.tempnam('/tmp', 'bugrp')
+os.mkdir(g_name)
+
+class NoBlock(threading.Thread):
+	def __init__(self, data, queue):
+		threading.Thread.__init__(self)
+		self.data = data
+		self.queue = queue
+
+	def zip(self):
+		self.queue.put('zipping')
+		os.system('tar cvfz ' + g_name + '.tar.gz ' + g_name + ' > /dev/null')
+	
+	def login(self):
+		self.queue.put('logging in')
+		response = ClientCookie.urlopen('http://ardour.org/mantis/login.php?username=bug_tool&password=bug_tool')
+		print response
+		response.close()
+
+	def get_form(self):
+		self.queue.put('forming data')
+		response = ClientCookie.urlopen('http://ardour.org/mantis/bug_report_page.php')
+		print response
+		forms = ClientForm.ParseResponse(response)
+		self.form = forms[2]
+		
+	def upload(self):
+		self.queue.put('uploading')
+		self.form.add_file(open(g_name+'.tar.gz'), 'application/x-gzip', 'system-info.tar.gz')
+		self.form['description'] = self.data['long']
+		self.form['summary'] = self.data['short']
+		self.form['custom_field_3'] = self.data['email']
+		self.form['custom_field_4'] = self.data['name']
+		request = self.form.click()
+		response2 = ClientCookie.urlopen(request)
+		response2.close()
+
+	def run(self):
+		print "1"
+		self.zip()
+		print "2"
+		self.login()
+		print "3"
+		self.get_form()
+		print "4"
+		self.upload()
+		print "5"
+		self.queue.put('done')
+
+class ProgressWin(object):
+	def __init__(self, parent_window, no_block, queue):
+		self.no_block = no_block
+		self.queue = queue
+
+		self.win = gtk.Window()
+		self.win.set_type_hint('dialog')
+		self.win.set_title('Progress')
+		self.win.set_resizable(False)
+		self.win.set_transient_for(parent_window)
+		
+		vbox = gtk.VBox()
+		self.text = gtk.Label('')
+		self.progress = gtk.ProgressBar()
+		self.progress.set_pulse_step(0.25)
+		
+		vbox.pack_start(self.text)
+		vbox.pack_start(self.progress)
+		self.win.add(vbox)
+		
+		self.win.show_all()
+
+		gtk.timeout_add(100, self.check)
+
+	def check(self):
+		try:
+			text = self.queue.get_nowait()
+			print text
+			if text == 'done':
+				gtk.main_quit()
+			self.text.set_text(text)
+		except Queue.Empty:
+			pass
+		
+		self.progress.pulse()
+		return True
+		
+class ReportWin(object):
+	def start_page(self):
+		start = gnome.ui.DruidPageEdge(gnome.ui.EDGE_START)
+		start.set_text(
+"""So, you want to report a bug in ardour.  Excellent.
+
+This program will help you to submit a bug report that will be useful to the programmers.
+
+We are collecting this information so that we don't have to ask you to research very detailed aspects of your system configuration. The information this tool collects is stored in the Ardour bug tracking system, and is not used for any other purpose. We will not intentionally sell or disclose the information to any parties besides those authorized to view it on the Ardour bug tracking system.
+""")
+		start.connect('cancel', lambda w, d: gtk.main_quit())
+		self.druid.append_page(start)
+
+	def end_page_finish(self, page, data):
+		print "page_finish"
+		if self.first_time:
+			self.first_time = False
+			self.druid.set_buttons_sensitive(False, False, False, False)
+			print "build queue"
+			self.queue = Queue.Queue(0)
+			print "build no_block"
+			self.no_block = NoBlock(self.data, self.queue)
+			print "build progress window"
+			self.progress = ProgressWin(self.win, self.no_block, self.queue)
+			print "start no block"
+			self.no_block.start()
+			print "exit end_page_finish"
+	
+	def end_page(self):
+		end   = gnome.ui.DruidPageEdge(gnome.ui.EDGE_FINISH)
+		end.set_text(
+"""Thank you for helping Ardour.
+
+When you click the "Apply" button, we will connect to the web and upload the information.
+
+Please let the Bug Tool finish.  It will exit on its own.""")
+		end.connect('cancel', lambda w, d: gtk.main_quit())
+		end.connect('finish', self.end_page_finish)
+		self.druid.append_page(end)
+	
+	def build_tools_page_next(self, page, data):
+		if self.tools_radio.get_active():
+			os.system("g++ --version >> " +g_name+"/build-tools")
+			os.system("pkg-config --version >> " +g_name+"/build-tools")
+			os.system("autoconf --version >> " +g_name+"/build-tools")
+			os.system("automake --version >> " +g_name+"/build-tools")
+			os.system("aclocal --version >> " +g_name+"/build-tools")
+			os.system("libtool --version >> " +g_name+"/build-tools")
+			os.system("gettext --version >> " +g_name+"/build-tools")
+			os.system("autopoint --version >> " +g_name+"/build-tools")
+	
+	def build_tools_page(self):
+		tools = gnome.ui.DruidPageStandard()
+		self.tools_radio = gtk.RadioButton(None, "Yes")
+		radio_btn2 = gtk.RadioButton(self.tools_radio, "No")
+		radio_btn2.set_active(True)
+		tools.append_item("Are you using a version of Ardour that you compiled yourself?", self.tools_radio, "")
+		tools.append_item("", radio_btn2, "")
+		tools.connect('cancel', lambda w, d: gtk.main_quit())
+		tools.connect('next', self.build_tools_page_next)
+		self.druid.append_page(tools)
+	
+	def binary_page_next(self, page, data):
+		path = self.binary_path.get_text()
+		if len(path) > 0 and os.path.exists(path):
+			os.system("ldd "+path+" > "+g_name+"/linker-info")
+	
+	def binary_page(self):
+		binary = gnome.ui.DruidPageStandard()
+		self.binary_path = gtk.Entry()
+		binary.append_item("Where is Ardour's binary located?", self.binary_path, "")
+		binary.connect('cancel', lambda w, d: gtk.main_quit())
+		binary.connect('next', self.binary_page_next)
+		self.druid.append_page(binary)
+	
+	def versions_page_next(self, page, data):
+		os.system('echo "gtk-ardour version: '+self.gtkardour_version.get_text()+'" >>'+g_name+'/ardour-version')
+		os.system('echo "libardour version: '+self.libardour_version.get_text()+'" >>'+g_name+'/ardour-version')
+	
+	def versions_page(self):
+		versions = gnome.ui.DruidPageStandard()
+		self.gtkardour_version = gtk.Entry()
+		self.libardour_version = gtk.Entry()
+		versions.append_item("What is gtk-ardour's version?", self.gtkardour_version, "")
+		versions.append_item("What is libardour's version?", self.libardour_version, "")
+		versions.connect('cancel', lambda w, d: gtk.main_quit())
+		versions.connect('next', self.versions_page_next)
+		self.druid.append_page(versions)
+	
+	def session_check_toggled(self, data):
+		self.session_path.set_sensitive(self.session_check.get_active())
+	
+	def sessions_page_next(self, page, data):
+		session = self.session_path.get_text()
+		if self.session_check.get_active() and session > 0:
+			if os.path.exists(session) and os.path.isfile(session):
+				shutil.copy(session, g_name)
+	
+	def sessions_page(self):
+		sessions = gnome.ui.DruidPageStandard()
+		self.session_check = gtk.CheckButton("Yes")
+		self.session_check.set_active(True)
+		self.session_path = gtk.Entry()
+		sessions.append_item("Is the problem one you've noticed while trying to run Ardour?", self.session_check, "")
+		sessions.append_item("What is the session file you've been using?", self.session_path, "")
+		self.session_check.connect('toggled', self.session_check_toggled)
+		sessions.connect('cancel', lambda w, d:gtk.main_quit())
+		sessions.connect('next', self.sessions_page_next)
+		self.druid.append_page(sessions)
+	
+	def description_page_next(self, page, data):
+		self.data['short'] = self.short_description.get_text()
+		buffer  = self.long_description.get_buffer()
+		self.data['long'] = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter())
+	
+	def description_page(self):
+		description = gnome.ui.DruidPageStandard()
+		self.long_description = gtk.TextView()
+		self.short_description = gtk.Entry()
+		self.long_description.set_size_request(-1, 70)
+		description.append_item(
+"""OK, we've collected the system information. Now its time for you
+to explain the problem.
+
+Please note: you do not need to include any information about versions
+of any software - that has been taken care of.
+
+If you are reporting an operational problem, please carefully describe
+the actions you took, any messages that you noticed, and in as much
+detail as possible describe what went wrong.""", self.long_description, "")
+		description.append_item("Please give a one line summary of your problem", self.short_description, "")
+		description.connect('cancel', lambda w, d:gtk.main_quit())
+		description.connect('next', self.description_page_next)
+		self.druid.append_page(description)
+	
+	def info_page_next(self, page, data):
+		self.data['name'] = self.name.get_text()
+		self.data['email'] = self.email.get_text()
+	
+	def info_page(self):
+		info = gnome.ui.DruidPageStandard()
+		self.name = gtk.Entry()
+		self.email = gtk.Entry()
+		info.append_item("Name", self.name, "Optional")
+		info.append_item("Email", self.email, "")
+		info.connect('cancel', lambda w, d:gtk.main_quit())
+		info.connect('next', self.info_page_next)
+		self.druid.append_page(info)
+	
+	def __init__(self):
+		self.first_time = True
+		
+		self.win = gtk.Window()
+		self.win.set_title("Ardour Bug Tool")
+		self.win.connect('destroy', lambda w: gtk.main_quit())
+		
+		self.druid = gnome.ui.Druid()
+		
+		self.start_page()
+		self.build_tools_page()
+		self.binary_page()
+		self.versions_page()
+		self.sessions_page()
+		self.description_page()
+		self.info_page()
+		self.end_page()
+		
+		self.win.add(self.druid)
+		self.win.show_all()
+
+		self.data = {}
+
+def main(*args):
+	os.mkdir(g_name+"/proc/")
+	proclist = ['asound', 'cpuinfo', 'devices', 'dma', 'filesystems', 'irq', 'isapnp', 'meminfo', 'modules', 'mounts', 'partition', 'pci', 'slabinfo', 'sysvipc/shm', 'version']
+	for item in proclist:
+		if os.path.exists('/proc/'+item):
+			try:
+				if os.path.isdir('/proc/'+item):
+					shutil.copytree('/proc/'+item, g_name+'/proc/'+item)
+				else:
+					shutil.copy('/proc/'+item, g_name+'/proc/')
+			except shutil.Error:
+				pass #should this be reported?
+		else:
+			f = open(g_name+'/proc/'+item, 'w')
+			f.write(item+' missing in /proc')
+			f.close
+	
+	liblist = ['asound', 'c', 'gdbm', 'gdk', 'gmodule', 'gtk', 'intl', 'jack', 'm', 'pthreads', 'sndfile', 'X11', 'Xext']
+	for lib in liblist:
+		for libdir in ['/lib/', '/usr/lib/', '/usr/X11R6/lib/', '/usr/local/lib/', '/opt/lib/']:
+			if os.path.exists(libdir+"lib"+lib+".so"):
+				os.system('echo "'+lib+ ' is `ls -l '+libdir+'lib'+lib+'.so`" >> '+g_name+'/libraries')
+	
+	if os.path.exists('/proc/sys/kernel/lowlatency'):
+		shutil.copy('/proc/sys/kernel/lowlatency', g_name+'/lowlatency-status')
+	else:
+		f = open(g_name+'/lowlatency-status', 'w')
+		f.write('-1')
+		f.close()
+
+	scsi = re.compile(r'sd[a-z][0-9]')
+	if scsi.search(open('/proc/mounts').read()):
+		shutil.copytree('/proc/scsi', g_name+'/scsi')
+
+	ide = re.compile(r'hd[a-z][0-9]')
+	if ide.search(open('/proc/mounts').read()):
+		pass
+
+	os.system("xmodmap >" +g_name+"/xmodmap")
+	os.system("/sbin/lspci -vv >" +g_name+"/lspci.out")
+	
+	if os.path.exists(os.path.expandvars('$HOME')+'/.ardour/ardour.rc'):
+		shutil.copy(os.path.expandvars('$HOME')+'/.ardour/ardour.rc', g_name+'/ardour.rc')
+
+	bug_win = ReportWin()
+
+	gtk.main()
+
+if __name__ == '__main__':
+	main()
+	
+shutil.rmtree(g_name)
+if os.path.exists(g_name+'.tar.gz'):
+	os.remove(g_name+'.tar.gz')
+

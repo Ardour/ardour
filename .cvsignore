@@ -1,0 +1,5 @@
+.sconf_temp
+.sconsign.dblite
+ardour.rc
+config.log
+scache.conf

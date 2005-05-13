@@ -1,0 +1,11 @@
+import glob
+import os
+
+pangomm_files = glob.glob('pangomm/*.cc')
+
+Import('env libraries')
+pangomm = env.Copy()
+pangomm.Merge([libraries['glibmm2'], libraries['pango'], libraries['sigc2']])
+
+libpangomm = pangomm.StaticLibrary('pangomm', pangomm_files)
+Default(libpangomm)

@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<Ardour>
+  <MIDI-port tag="%MIDITAG%" device="ardour" type="%MIDITYPE%" mode="duplex"/>
+  <Config>
+    <Option name="minimum-disk-io-bytes" value="262144"/>
+    <Option name="track-buffer-seconds" value="5.000000"/>
+    <Option name="mute-affects-pre-fader" value="yes"/>
+    <Option name="mute-affects-post-fader" value="yes"/>
+    <Option name="mute-affects-control-outs" value="yes"/>
+    <Option name="mute-affects-main-outs" value="yes"/>
+    <Option name="solo-latch" value="yes"/>
+    <Option name="mtc-port" value="%MIDITAG%"/>
+    <Option name="mmc-port" value="%MIDITAG%"/>
+    <Option name="midi-port" value="%MIDITAG%"/>
+    <Option name="jack-time-master" value="yes"/>
+    <Option name="trace-midi-input" value="no"/>
+    <Option name="trace-midi-output" value="no"/>
+    <Option name="plugins-stop-with-transport" value="no"/>
+    <Option name="no-sw-monitoring" value="no"/>
+    <Option name="stop-recording-on-xrun" value="no"/>
+    <Option name="stop-at-session-end" value="no"/>
+    <Option name="auto-xfade" value="yes"/>
+    <Option name="no-new-session-dialog" value="yes"/>
+    <Option name="timecode-source-is-synced" value="yes"/>
+    <Option name="auditioner-left-out" value="%JACK_BACKEND%1"/>
+    <Option name="auditioner-right-out" value="%JACK_BACKEND%2"/>
+    <Option name="quieten-at-speed" value="1.000000"/>
+    <Option name="use-vst" value="yes"/>
+  </Config>
+  <Keys>
+    <context name="default">
+      <binding keys="Ctrl-w" action="close-dialog"/>
+      <binding keys="Ctrl-u" action="start-prefix"/>
+      <binding keys="Alt-e" action="toggle-editor-window"/>
+      <binding keys="Alt-m" action="toggle-mixer-window"/>
+      <binding keys="Alt-r" action="toggle-recorder-window"/>
+      <binding keys="Alt-l" action="toggle-locations-window"/>
+      <binding keys="Alt-c" action="toggle-big-clock-window"/>
+      <binding keys="Alt-o" action="toggle-options-window"/>
+      <binding keys=" " action="toggle-playback"/>
+      <binding keys="Ctrl-Shift- " action="toggle-playback-forget-capture"/>
+      <binding keys="Ctrl-n" action="new-session"/>
+      <binding keys="Ctrl-t" action="add-audio-track"/>
+      <binding keys="Ctrl-s" action="save-state"/>
+      <binding keys="Ctrl-q" action="quit"/>
+      <binding keys="Left" action="transport-rewind"/>
+      <binding keys="Shift-Left" action="transport-rewind-fast"/>
+      <binding keys="Ctrl-Left" action="transport-rewind-slow"/>
+      <binding keys="Right" action="transport-forward"/>
+      <binding keys="Shift-Right" action="transport-forward-fast"/>
+      <binding keys="Ctrl-Right" action="transport-forward-slow"/>
+      <binding keys="R" action="transport-record"/>
+      <binding keys="i" action="toggle-punch-in"/>
+      <binding keys="Home" action="transport-goto-start"/>
+      <binding keys="Ctrl-a" action="transport-goto-start"/>
+      <binding keys="End" action="transport-goto-end"/>
+      <binding keys="Ctrl-e" action="transport-goto-end"/>
+      <binding keys="Ctrl-m" action="send-all-midi-feedback"/>
+    </context>
+    <context name="editor">
+      <binding keys="Tab" action="playhead-to-next-region-start"/>
+      <binding keys="Ctrl-Tab" action="playhead-to-next-region-end"/>
+      <binding keys="`" action="playhead-to-previous-region-start"/>
+      <binding keys="Ctrl-`" action="playhead-to-previous-region-end"/>
+      <binding keys="[" action="edit-cursor-to-previous-region-start"/>
+      <binding keys="Ctrl-[" action="edit-cursor-to-previous-region-end"/>
+      <binding keys="]" action="edit-cursor-to-next-region-start"/>
+      <binding keys="Ctrl-]" action="edit-cursor-to-next-region-end"/>
+      <binding keys="'" action="edit-cursor-to-next-region-sync"/>
+      <binding keys=";" action="edit-cursor-to-previous-region-sync"/>
+      <binding keys="Left" action="scroll-backward"/>
+      <binding keys="Right" action="scroll-forward"/>
+      <binding keys="KP_2" action="start-range"/>
+      <binding keys="KP_8" action="finish-range"/>
+      <binding keys="KP_6" action="jump-forward-to-mark"/>
+      <binding keys="KP_Right" action="jump-forward-to-mark"/>
+      <binding keys="KP_4" action="jump-backward-to-mark"/>
+      <binding keys="KP_Left" action="jump-backward-to-mark"/>
+      <binding keys="KP_Enter" action="add-location-from-playhead"/>
+      <binding keys="KP_Add" action="nudge-forward"/>
+      <binding keys="Ctrl-KP_Add" action="nudge-next-forward"/>
+      <binding keys="KP_Subtract" action="nudge-backward"/>
+      <binding keys="Ctrl-KP_Subtract" action="nudge-next-backward"/>
+      <binding keys="=" action="temporal-zoom-out"/>
+      <binding keys="-" action="temporal-zoom-in"/>
+      <binding keys="Page_Up" action="scroll-tracks-up"/>
+      <binding keys="Page_Down" action="scroll-tracks-down"/>
+      <binding keys="a" action="align-regions-sync-relative"/>
+      <binding keys="Meta-a" action="align-regions-sync"/>
+      <binding keys="Meta-Ctrl-a" action="align-regions-end"/>
+      <binding keys="Ctrl-A" action="align-regions-start-relative"/>
+      <binding keys="Ctrl-b" action="brush-at-mouse"/>
+      <binding keys="e" action="set-edit-cursor"/>
+      <binding keys="f" action="toggle-follow-playhead"/>
+      <binding keys="r" action="set-mouse-mode-range"/>
+      <binding keys="g" action="set-mouse-mode-gain"/>
+      <binding keys="l" action="toggle-auto-loop"/>
+      <binding keys="o" action="set-mouse-mode-object"/>
+      <binding keys="p" action="set-playhead"/>
+      <binding keys="t" action="set-mouse-mode-timefx"/>
+      <binding keys="s" action="split-at-mouse"/>
+      <binding keys="Alt-s" action="split-at-edit-cursor"/>
+      <binding keys="z" action="set-mouse-mode-zoom"/>
+      <binding keys="Z" action="zoom-focus-playhead"/>
+      <binding keys="Ctrl-z" action="set-undo"/>
+      <binding keys="Ctrl-r" action="set-redo"/>
+      <binding keys="Ctrl-x" action="editor-cut"/>
+      <binding keys="Ctrl-c" action="editor-copy"/>
+      <binding keys="Ctrl-v" action="editor-paste"/>
+      <binding keys="Up" action="step-tracks-up"/>
+      <binding keys="Down" action="step-tracks-down"/>
+      <binding keys="Shift-Tab" action="extend-range-to-end-of-region"/>
+      <binding keys="Ctrl-Shift-Tab" action="extend-range-to-start-of-region"/>
+      <binding keys="Insert" action="insert-region"/>
+      <binding keys="Delete" action="editor-cut"/>
+      <binding keys="Meta-d" action="duplicate-region"/>
+      <binding keys="Meta-s" action="duplicate-range"/>
+      <binding keys="Alt-r" action="reverse-region"/>
+      <binding keys="Alt-n" action="normalize-region"/>
+      <binding keys="Ctrl-l" action="center-playhead"/>
+      <binding keys="Ctrl-g" action="goto"/>
+      <binding keys="Alt-f" action="playhead-forward"/>
+      <binding keys="Alt-b" action="playhead-backward"/>
+      <binding keys="Return" action="playhead-to-edit"/>
+      <binding keys="Alt-Return" action="edit-to-playhead"/>
+      <binding keys="F1" action="edit-cursor-to-range-start"/>
+      <binding keys="F2" action="edit-cursor-to-range-end"/>
+      <binding keys="F9" action="snap-to-beat"/>
+      <binding keys="F10" action="snap-to-bar"/>
+      <binding keys="." action="audition-at-mouse"/>
+    </context>
+  </Keys>
+  <extra>
+    <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>
+  </extra>
+</Ardour>

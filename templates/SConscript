@@ -1,0 +1,9 @@
+# -*- python -*-
+
+import os
+import glob
+template_files = glob.glob('*.template')
+
+Import('env install_prefix')
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/templates'), template_files))
+env.Alias('tarball', env.Distribute (env['DISTTREE'], [ 'SConscript' ] + template_files))

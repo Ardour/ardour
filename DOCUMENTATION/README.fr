@@ -1,0 +1,113 @@
+			    ARDOUR -- LISEZ-MOI
+
+	  Paul Davis <paul@linuxaudiosystems.com> Juin 2003
+
+Bienvenue sur Ardour.  Ce programme est encore en cours de développement,
+mais a atteint un état où il peut être utile et productif afin que 
+d'autres personnes puissent le tester et peut-être (je l'espère !) corriger
+les bogues et ajouter des fonctionnalités.
+
+**** SÉCURITÉ *******************************************************
+
+Afin d'utiliser Ardour avec un temps de latence le plus bas possible,
+il est nécessaire d'utiliser l'ordonnancement temps réel POSIX ainsi 
+que de verrouiller toute la mémoire qu'il utilise en mémoire vive physique.
+Ces pré requis ne peuvent être atteint que lorsque Ardour est lancé 
+avec les privilèges du super-utilisateur (root).
+
+D'un autre côté, ce n'est pas si grave que ça. Si vous n'essayez pas
+de l'installer en setuid root (ce qui ne marchera pas de toute façon),
+alors les utilisateurs devront avoir obtenu l'accès root pour pouvoir le 
+lancer comme cela. S'ils ont déjà l'accès root, Ardour est bien le dernier 
+de vos problèmes. Donc tranquillisez-vous. Nous utiliserons les "capacités" 
+(capabilities en anglais, NdT) quand les noyaux Linux arriverons avec 
+leur support activé, bien que les capacités en question autoriserons 
+toujours un cracker mal intentionné à faire à peu près n'importe quoi.
+
+L'alternative est de lancer Ardour sans ordonnancement temps-réel, dans 
+ce cas, il n'y a plus de souci. Ardour ne sera juste plus très utile 
+dans des conditions de faible latence, ce qui est désirable dans la 
+plupart des environnements de studio. Notez que cela n'est pas si important
+lorsque vous avez du matériel audio qui est capable de faire du 
+"monitoring matériel" -- dans ce cas, un temps de latence trop important 
+provoquera juste des temps de réponse un peu longs pour l'interface 
+utilisateur d'Ardour, mais le monitoring pendant l'enregistrement 
+sera excellent.
+
+
+**** COMPATIBILITÉ MATÉRIELLE *****************************************
+
+Ardour utilise JACK pour toutes ses entrés/sorties audio, fournissant
+ainsi des connexions transparentes au matériel audio ainsi qu'à d'autres 
+applications. Cela n'est pas du tout l'endroit pour parler de JACK, 
+mais dans le cas où vous vous poseriez la question :
+
+Bien que JACK utilise l'API (Application Programming Interface, NdT) ALSA 
+0.9.0, il utilise cette API d'une manière que nulle autre application 
+ne l'a jamais fait jusqu'à présent, et essaie aussi d'utiliser certaines 
+possibilités matérielles qui également n'ont jamais été employées par 
+d'autres applications. En conséquence, bien que la portabilité complète de 
+tout matériel supporté par ALSA est un objectif très atteignable, il peut 
+y avoir des problèmes concernant la compatibilité matérielle. Veuillez 
+garder en mémoire que le but principal avec JACK est d'obtenir 
+un système audio professionnel, et avec Ardour, d'obtenir une station 
+de travail audio-numérique professionnelle. S'ils parviennent à être 
+utilisés par des gens avec des cartes audio ayant 2/4 canaux, génial, 
+mais ce n'est pas ma priorité.
+
+Un autre problème important est que votre interface audio doit supporter 
+l'entrée/sortie en mode full duplex avec le même format d'échantillonage 
+pour l'enregistrement que pour la restitution. Cela veut dire, par exemple, 
+que la SoundBlaster AWE ne peut être utilisée par JACK en mode full duplex 
+-- elle supporte seulement l'entrée/sortie en full duplex si l'une des 
+deux directions (enregistrement ou restitution) est en 8 bits et
+ que l'autre est en 16 bits. Très peu de cartes ont cette limitation, 
+ et si c'est le cas, elles ne sont de toute façon pas adéquates pour des 
+utilisations avec des applications telles que JACK ou Ardour pour d'autres 
+raisons.
+
+À ce jour, JACK a été utilisé avec :
+
+   RME Hammerfall (Digi9652)              (26 canaux en entrée, 26 canaux en sortie)
+   RME Hammerfall DSP (hdsp)              (26 canaux en entrée, 26 canaux en sortie)
+   RME Hammerfall Light (Digi9636)        (18 canaux en entrée, 18 canaux en sortie)
+   Midiman Delta series (ice1712 chipset) (12 canaux en entrée, 10 canaux en sortie)
+  
+Diverses interface audio grand public, généralement avec deux canaux d'entrée, deux 
+canaux de sortie, incluant :
+   
+   Hoontech 4Dwave-NX (Trident chipset)
+   Ensoniq 5880
+   Soundblaster 32
+   Soundblaster 64
+   Creative SBLive64
+
+et bien d'autres.
+
+Donc, pour résumer, il semble fonctionner pour toute carte supporté par ALSA, ce qui 
+est le but.
+  
+**********************************************************************
+
+RAPPORT DE BOGUES
+-----------------
+
+Les bogues doivent être rapportés sur http://ardour.org/mantis/. Ils seront 
+certainement plus à même d'être conservés et traités à cet endroit. Veuillez 
+consulter les bogues existant afin d'être sûr que le votre n'a pas déjà été 
+rapporté et/ou corrigé dans le CVS.
+
+
+COMPILER ARDOUR
+---------------
+Veuillez consulter le fichier "BUILD".
+
+
+LANCER ARDOUR
+-------------
+
+NOTE : Vous devez avoir un serveur JACK lancé avant de lancer Ardour.
+       --------------------------------------------------------------
+
+Taper "ardour" devrait sans doute avoir quelque effet. "ardour --help" liste 
+les options disponibles.

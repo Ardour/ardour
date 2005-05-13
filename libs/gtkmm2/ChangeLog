@@ -1,0 +1,2390 @@
+2.6.1:
+
+2005-03-12  Claudio Saavedra <csaavedra@alumnos.utalca.cl>
+ 
+ 	* docs/tutorial/gtkmm-tut.xml: Fixing inconsistences in documentation.
+ 	Bug #170131.
+
+2005-03-13  Murray Cumming <murrayc@murrayc.com>
+
+	* gtk/src/cellrenderercombo.hg:
+	* gtk/src/combo.hg:
+	* gtk/src/fileselection.hg:
+	* gtk/src/optionmenu.hg:
+	* gtk/src/treemodel.hg:
+ 	Doxygen comments: Remove deprecated widgets from 
+	the Widgets and Dialogs groups, so they don't 
+	show up in the lists. 
+
+2005-03-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/cellrenderer.ccg: property_renderable_(): Call the base 
+	class method, not the method itself, to avoid an infinite loop.
+
+2005-03-10  Cedric Gustin <cedric.gustin@swing.be>
+
+	* MSVC_Net2003/Makefile.am: Add blank.cpp to EXTRA_DIST.
+	* MSVC_Net2003/atkmm/atkmm.rc.in,
+	MSVC_Net2003/pangomm/pangomm.rc.in: Use gtkmm @VERSION@ as version
+	string.
+
+2.6.0:
+
+2005-03-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/menus_and_toolbars/main_menu/examplewindow.[h|cc]: 
+	Demonstrate radio action items.
+
+2005-03-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/tutorial/gtkmm-tut.xml: Fixed a duplication section id.
+	* docs/tutorial/Makefile: Make the phpwebnotes version build in a 
+	separate directory, to make things simpler.
+
+2005-03-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/scale.hg: format_value signal: Modify the custom conversion 
+	so that this never sends an empty string to GTK+, so we do not stop 
+	C callbacks from using the special meaning that format_value gives to 
+	a null string. This needs an extra signal parameter in C++ in future -
+	see the comment. Bug #154004 from Lars Luthman, who did the 
+	detective work.
+
+2005-03-03 <meissner@suse.de>
+
+	* gtk/src/treeview.ccg: insert_column(): Used (void*)0 instead of 0 
+	for the terminating vararg, to avoid g++ 4.0 warning about  missing 
+	sentinel in function call.
+
+2005-03-03  Albert Chin <thewrittenword.com>
+
+	* configure.in: Check whether funlockfile(), flockfile(), and 
+	getc_unlocked() are really available to the compiler, rather than 
+	just present in a library.
+	* demos/gtk-demo/demo-window.c: Use the new tests.
+
+2005-02-28   Roel Vanhout  <roel.vanhout@gmail.com>
+
+	* docs/tutorial/gtkmm-tut.xml: Add more section ids so that 
+	phpwebnotes would have permanent ids to use.
+
+2.5.7:
+
+2005-02-23  Roel Vanhout  <roel.vanhout@gmail.com>
+
+	* docs/tutorial/: Experimental generation of the html with 
+	phpWebNotes code, to allow online comments. Not used yet.
+
+2005-02-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_signals.defs: Removed some more quotes from inside 
+	the properties docs strings, because gmmproc can not handle those yet.
+
+2005-02-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/cellrenderer.hg: start_editing(): Add a default value of 0 
+	for the last flags parameter, because this is a valid value.
+	* examples/book/treeview/editable_cells: Added a number_validated 
+	column, which shows how to handle edited cells without the 
+	convenience functions, and how to validate date.
+
+2005-02-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/messagedialog.hg: Deprecate set_markup in favour of 
+	set_message(string, false), which now uses the new 
+	gtk_message_dialog_set_markup() function. We should not have added 
+	this, but we are past API freeze now. Added documentation for 
+	set_message() and set_secondary_text().
+	* examples/book/dialogs/messagedialog/examplewindow.cc: Used 
+	set_secondary_text().
+
+2005-02-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/cellview.hg, comboboxentry.hg, image.hg, main.hg,
+	gkd/src/pixbuf.hg: Corrected some minor doxygen documenation errors.
+
+2005-02-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* atk/src/atk_signals.defs, gdk/src/gdk_signals.defs, 
+	gtk/gtk_signals.defs: Regenerate with latest extra_defs_gen, to get 
+	the property documentation.
+	* docs/reference: Added widget_hierarchy html image map and .dia 
+	original from Marco Scholten in bug 88610.
+	* docs/index.html: Added link to hierarchy.
+	* docs/reference/Makefile.am: Add extra commands to install and 
+	upload the widget_hierarchy files.
+
+2005-02-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/cellrenderertext.hg: Added documentation for the edited() 
+	method. Bug found by Antonio Coralles.
+
+2005-02-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* gdk/src/dragtarget.ccg: get_targets(): Fixed typo to fix the build.
+
+2005-02-07  Ronald Lembcke <es186@fen-net.de>
+
+	* gdk/src/dragcontext.ccg: get_targets(): Actually step through the 
+	list, instead of looping infinitely. Bug #166412.
+
+2005-02-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/targetlist.ccg: Add TargetList:: prefix to the create 
+	method, so that it is actually defined. Bug found by Ronald Lembcke.
+
+2005-02-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/cellrenderercustom/cellrenderertoggle.cc: AppWindow:
+	Move the inner ModelColumns class outside of the AppWindow class, 
+	because the IRIX MipsPro compiler (wrongly) says that its 
+	destructor it was referenced but not defined.
+	* examples/gdk/radar.cc: Added #include of math.h, needed by 
+	IRIX MipsPro compiler.
+
+2005-02-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeview.hg: append_column_numeric(), 
+	_connect_auto_store_editable_signal(): Use an intermediate 
+	function pointer, because the IRIX MipsPro compiler needs that. 
+
+2005-02-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/clipboard/ideal/examplewindow.cc: 
+	on_clipboard_received_targets(). Use targets = targets_array instead 
+	of targets(targets_array). The IRIX MipsPro compiler needs this, 
+	maybe because of the ustring-std::string conversion. We should 
+	maybe use ustring anyway.
+
+2005-02-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/gtkmm/comboboxtext.h: Class documentation: Warn about using this 
+	with Glade. Bug #165411,
+
+2005-02-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in: Check for atk version 1.9 at configure time, 
+	because that is what we use, because it follows the same schedule as 
+	gtkmm.
+
+2005-02-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeview.hg, colorselection.ccg: Remove the #ifdefs for AIX, 
+	because sigc::bind now works on AIX.
+
+2.5.6:
+
+2005-01-26  Cedric Gustin <cedric.gustin@swing.be>
+
+	* Makefile.am: Added MSVC_Net2003 directory.
+	* configure.in: Added MSVC_Net2003 entries. AC_SUBST
+	GTKMM_*_VERSION macros (for the MSVC resource files)
+	* gtk/gtkmmconfig.h.in: Added dllimport/dllexport rules. Moved
+	HAVE_FLOCKFILE and HAVE_FUNLOCKFILE #undef's to GLIBMM_CONFIGURE
+	section, as it is not relevant to platforms that do not run
+	configure (MSVC for example). 
+	* examples/stock/stock.cc, examples/tictactoe/tictactoe.cc: Added
+	Gtk namespace to "manage" calls (Gtk::manage) as required by MSVC.
+	* demos/gtk-demo/demo-common.cc: Fixed typo in #ifdef/#endif
+	structure. Uncommented get_democodedir function.
+	* demos/gtk-demo/textwidget.cc: Use default system font on win32.
+	* MSVC_Net2003/*: Initial commit, imported from gtkmm-2-4 branch.
+	* MSVC_Net2003/gtkmm/Makefile.am, MSVC_Net2003/gdkmm/Makefile.am:
+	Rewrote rule for local copy of g[d|t]kmmconfig.h (required for
+	'make distcheck').
+
+2005-01-25  Bryan Forbes  <bryan@reigndropsfall.net>
+
+	* gtk/src/plug.[hg|ccg]: Add a default constructor.
+
+2005-01-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/colorselection.hg: set_change_pallete_hook(): On AIX, #ifdef 
+	out the part that uses sigc::bind, which does not work with the AIX 
+	xlC compiler. This method will be broken of that platform, but it is 
+	rarely used anyway.
+	* demos/gtk-demo/demowindow.cc: SUN Forte, AIX, and Tru64 have the 
+	problem with flockfile and funlockfile - configure finds it but the 
+	compiler can not find it while compiling demowindow.cc. #undef 
+	HAVE_FLOCKFILE and HAVE_FUNLOCKFILE for now, so that it builds on 
+	those platforms.
+
+2005-01-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in, Makefile.am: Add --disable-demos configure option, 
+	by plors in bug #160756. This is needed because AIX does not support 
+	sigc::bind at all and the demos would be quite unreadable if we 
+	worked around that. This way, at least gtkmm can be installed on AIX.
+
+2005-01-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/input/main.cc: Do not use O_NONBLOCK, because the 
+	example is meant to be blocking. As advised by Chris Vine.
+
+2005-01-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeview.hg: Use nested sigc::bind<-1>s instead of 
+	sigc::bind(), because the Tru64 compiler needs the extra hint.
+	Added #ifdef GTKMM_HAVE_SIGC_BIND() around some templated convenience 
+	methods, so we can disable these on AIX.
+	* gtk/src/treemodel.[hg|ccg]: Use Gtk::TreeModel::iterator instead of just 
+	iterator, because the Tru64 compiler finds it ambiguous.
+	* demos/example_treeview_editable_cells.cc: Replace use of 
+	TreeView::append_column_editable() with the long-winded workaround,
+	so that the IRIX MipsPro and Tru64 compilers can build this
+
+2005-01-18  Marco Scholten  <mscholtn@xs4all.nl>
+
+	* examples/book/custom/custom_widget/examplewindow.cc:
+	Removed #include <iostream> because it is not used.
+	* examples/book/custom/custom_widget/mywidget.cc:
+	Removed #include <iostream> because it is not used.
+	In on_realize() removed:
+	-set_flags(Gtk::REALIZED); 
+	-set_window( get_parent_window() );
+	-GtkWidget* cWidget = (GtkWidget*)gobj();
+	-cWidget->style = gtk_style_attach(cWidget->style, get_window()->gobj());
+	Added attributes.event_mask = get_events () | Gdk::EXPOSURE_MASK;
+	to make the widget receive expose events.
+	Create GdkWindow and set this as the widgets window
+	Set colors in on_realize() instead of on_expose_event() because this
+	needs to be done only once.
+	Removed colormap in on_expose_event() because of problem with 
+	get_default_colormap() (see Bug 163992). I decided not to wait for a fix
+	on that bug because how we set the color is not essential to this example.
+	Made it draw something nice.
+
+2005-01-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* demos/gtk-demo/demos.h: Use sigc::ptr_fun() instead of the bare 
+	function pointer, because that does not work with the SUN Forte 
+	compiler. on_treeview_row_activated(): Use a const reference of the 
+	slot with operator[] to avoid ambiguity with the SUN Forte compiler - 
+	see the comment in the code.
+
+2005-01-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/input/main.cc: Add extra #includes, needed by 
+	the SUN Forte compiler.
+
+2005-01-18  Murray Cumming  <murrayc@murrayc.com>
+ 
+	* demos/demowindow.cc: #ifdef on __SUNPRO_CC instead of 
+	GLIBMM_COMPILER_SUN_FORTE, though we should really find out why 
+	GLIBMM_COMPILER_SUN_FORTE is not defined with the SUN compiler.
+	* demos/example_stockbrowser.cc: Remove some consts that the 
+	SUN compiler does not allow.
+	* gtk/src/radiobutton.hg: Remove duplicate Group typedef, which 
+        SUN Forte complains about.
+        * This should fix the remaining issues in bug #154973.
+	Joel Fredrikson helped with these fixes.
+
+2005-01-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/custom/custom_widget/mywidget.cc: Fix from Marco 
+	(mshcoltn) to make this widget actually draw something: on_realize():
+	Use get_window() instead of creating our own Gdk::Window. I am not 
+	sure why this works, but it is simpler.
+
+2.5.5:
+
+2005-01-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/main.[hg|ccg]: Added Main constructor that takes a 
+	Glib::OptionContext(), and added 
+	Main::add_gtk_option_group(option_context) to wrap functionality in 
+	gtk_init_with_args() and gtk_get_option_group(), hopefully.
+	* tests/: Added main_with_option_group to show that it works.
+
+2005-01-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/combobox.hg, comboboxentry.hg, clipboard.hg, cellview.hg, 
+	celllayout.hg, celleditable.hg, cellrenderer*.hg: Added class 
+	documentation, based on the C documentation.
+	* gtk/src/clipboard.hg: Added set_can_store() overload that takes no 
+	arguments.
+	* gtk/src/combobox.hg: Added unset_row_separator_func().
+
+2005-01-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/filechooserbutton.[hg|ccg]: Inherit from the FileChooser 
+	interface. Add constructor which takes no title. Add documentation, 
+	based on the C documentation.
+
+2005-01-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/examples/book/buttons/: Added filechooserbutton example, 
+	though I see g_warnings.
+
+2005-01-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/examples/book/treeview/list/examplewindow.[h|cc]: Add an extra 
+	model column, rendered with a CellRendererProgress, to show that it 
+	works.
+
+2005-01-08  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/aboutdialog.hg: Add logo_icon_name proeprty.
+	* gtk/src/iconview.hg: Wrap the properties.
+
+2005-01-07  Murray Cumming  <murrayc@murrayc.com>
+
+	* Makefile.am: Offline documentation tarball: Do not try to tar up non 
+	existant docs/internals directory. Put 2-4 in the tarball name to 
+	avoid confusion.
+	* docs/index.html: Correct the offline documentation link, so that 
+	people do not download the tarball for the 2.0 documentation instead.
+	Bug #163122.
+
+2005-01-07  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/modelfilter.hg: Added documentation for set_modify_func().
+	* pango/src/renderer.hg: Added get_color(),
+	* pango/src/color.hg: Added operator bool() so that people can check 
+	for a null Color returned by Renderer::get_color().
+
+2005-01-07  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/entrycompletion.hg, toolitem.hg: Added //TODO comments 
+	to tell us to add default signal handlers when we can break ABI. Also 
+	remove an extra ; to avoid a warning and fix the build.
+
+2005-01-06  Bryan Forbes  <bryan@reigndropsfall.net>
+
+	* updated .cvsignore files.
+	* gtk/gtkmm/stock.[h|cc]: Added new stock items.
+	* gtk/src/entrycompletion.hg: Changed to use no_default_handler on
+	insert_prefix signal.
+	* gtk/src/filechooserdialog.[hg|ccg]:
+	* gtk/src/filechooserwidget.[hg|ccg]: Added constructors to choose the
+	backend used.
+	* gtk/src/main.[hg|ccg]: Added commented constructors for gtk_init_with_args
+	so we can take a look at it.
+	* gtk/src/toolitem.hg: Changed to use no_default_handler on set_tooltip
+	signal.
+
+2005-01-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* gdk/src/pixbufloader.hg, gtk/src/cellrenderer.hg, gtk/src/range.hg:
+	For the signals that are new in gtkmm 2.5, use the extra 
+	no_default_handler argument with _WRAP_SIGNAL(), to avoid adding new 
+	virtual functions which would break the ABI by increasing the size 
+	of base class objects.
+
+2005-01-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeiter.[hg|ccg]: Add forward_search() and 
+	backward_search() overloads without the limit argument.
+	* gtk/src/gtk_docs_override.xml: Correct the documentation for 
+	the full forward_search() and backward_search() methods, so that it 
+	does not suggest 0 for references. Bug found by Rob Page.
+
+2005-01-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/dialog/: Added aboutdialog example.
+
+2.5.4:
+
+2005-01-05  Murray Cumming  <murrayc@murrayc.com>
+
+	* atk/src/atk_enums.defs: Regenerated.
+	* atk/src/relation.hg: Added add_target().
+	* atk/src/relationset.hg: Added add_relation_by_type().
+	* atk/src/text.hg: Added get_range_extents(), get_bounded_ranges().
+
+2005-01-05  Murray Cumming  <murrayc@murrayc.com>
+
+	* gdk/src/gdk_pixbuf.defs: Updated with h2defs.py
+	* gdk/src/display.[hg|ccg]: Added supports_selection_notification(), 
+	request_selection_notification(), supports_clipboard_persistance(), 
+	store_clipboard().
+	* gdk/src/pixbuf.[hg|ccg]: Added rotate_simple(), flip(), 
+	save_to_buffer().
+	* gdk/src/pixbuf_format.hg: Added is_scalable(), is_disabled(), 
+	set_disabled(), get_license().
+	* gdk/src/window.hg: Added enable_synchronized_configure(), 
+	configure_finished(), set_focus_on_map().
+
+2005-01-05  Murray Cumming  <murrayc@murrayc.com>
+
+	* gdk/src/gdk_methods.defs: Updated with h2defs.py.
+
+2005-01-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* gdk/src/gdk_enums.defs, gtk/src/gtk_enums.defs, 
+	gtk/src/gtk_signals.defs: Regenerated.
+	* gtk/src/gtk_others.defs: Added get_authors, get_documentors and 
+	get_artists because h2defs.py does not add them to gtk_methods.defs, 
+	for some reason.
+	* gtk/src/action.hg: Added get_accel_path().
+
+2005-01-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeview.hg: Added hover_expand and hover_selection 
+	properties.
+
+2005-01-03  Bryan Forbes  <bryan@reigndropsfall.net>
+
+	* gtk/src/cellrenderertext.hg: added properties "language", 
+	"ellipsize", and "ellipsize-set".
+
+2.5.3:
+
+2004-12-19  Murray Cumming  <murraycmurrayc.com>
+
+	* gdk/pixbuf.hg: Added create_from_file() overload that takes 
+	height and width, wrapping gdk_pixbuf_create_from_file_at_scale().
+	Bug #157894.
+
+2004-12-19 Claudio Saavedra <csaavedra@alumnos.utalca.cl>
+ 	
+ 	* example/book/input/main.cc: Improved example to use a 
+ 	Glib::IOChannel. References bug #138259.
+
+2004-12-19  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/cellrenderer.hg: Added stop_editing() which replaces the 
+	now-deprecated editing_cancelled().
+	* gtk/src/iconview.hg: Added get/set_columns(), get/set_item_width(),
+	get/set_spacing(), get/set_row_spacing(), get/set_column_spacing(), 
+	get/set_margin().
+	* gtk/src/label.hg: Added get/set_max_chars_width(), and property.
+	* gtk/src/textview.hg: Added get_iter_at_position().
+	* gdk/src/gdk_docs.xml, pango/src/pango_docs.xml, 
+	gtk/src/gtk_docs.xml: Regenerated with docextract_to_xm.py, to get 
+	new GTK+ documentation.
+
+2004-12-19  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/filechooserbutton.hg: Constructors: Added action parameters, 
+	because they have been added to the GTK+ API.
+	* gtk/src/gtk_methods.defs: Regenerated with h2defs.py
+
+2004-12-16  Murray Cumming  <murrayc@murrayc.com>
+ 
+ 	* examples/book/dialogs/messagedialog/examplewindow.cc: The 
+ 	ButtonsType enum is not an ORable flag.
+ 	* docs/tutorial/gtkmm-tut.xml: Fix the text where it says that it is.
+
+2004-12-16  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/cellview.hg: Remove set_value(), because it has been 
+	removed from GTK+. This fixes the build. Now inherits from the 
+	CellLayout interface. Added text and pixbuf constructors, to match 
+	the C _new conveience functions.
+
+2.5.2:
+	
+2004-12-04  Roger Leigh  <roger@whinlatter.uklinux.net>
+
+	* configure.in: Bug #160244: Ask automake to use the utar format, to 
+	fix the problems with the long filenames of our documentation in the 
+	tarballs.
+
+2004-12-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeview.hg: Added append_column_numeric() which allows you 
+	to specify a printf-style format string for the View column, and 
+	append_column_numeric_editable() which does the same, and auto-stores 
+	decimal input. Updated the append_column() documentation to improve 
+	the explanation of supported types, and to suggest use of 
+	append_column_numeric().
+	* examples/book/treeview/list/, editable_cells/: Demonstrate these 
+	new convenience methods.
+
+2004-12-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/label.hg: Added get/set_angle().
+
+2004-12-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/filechooserbutton.hg: GtkFileChooser inherits from HBox, not 
+	Button.
+
+2004-12-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/filechooserbutton.hg: Removed get/set_active(), because they 
+	have been removed from GTK+.
+
+2004-12-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/cellview.hg: Removed set_cell_data() because it has been 
+	removed from GTK+.
+
+2004-12-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* pango/pangomm/: Added types.h, for typedefs of simple structs.
+	* pango/src/: Added renderer.[hg|ccg].
+	* pango/src/context.hg: Add get/set_matrix().
+	* pango/src/fontmetrics.hg: Added get_underline_position(), 
+	get_underline_thickness(), get_strikethrough_position(), 
+	get_strikethrough_thickness().
+	* pango/src/pango_enums.defs: Regenerated.
+	* tools/m4/convert_pango.m4: Added Matrix and Layout conversions.
+
+2004-11-30  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/convert_gtk.m4: Use _CONVERT_CONST_REFPTR_TO_P_SUN() instead 
+	of _CONVERT_CONST_REFPTR_TO_P(), to hopefully fix the SUN Forte build 
+	problems in bug #154973.
+
+2004-11-30  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/menus_and_toolbars: Applied Fredrik Arnerup's patch 
+	to add a non-stock icon, with some changes.
+
+2004-11-30  Murray Cumming  <murrayc@murrayc.com>
+ 
+ 	* atk/src/hyperlink.hg: get_object(),
+ 	* atk/src/object.hg: get_relation_set(),
+ 	* gdk/src/cursor.hg: get_display(),
+ 	* gdk/src/display.hg: get_default_group(),
+ 	* gdk/src/displaymanager.hg: get_default_display(),
+ 	* gdk/src/drawable.hg: get_screen(), get_display(),
+ 	* gdk/src/event.hg: get_screen(),
+ 	* gdk/src/visual.hg: get_system(), get_best(), get_screen(),
+ 	* gtk/src/widget.hg: get_default_style()
+
+2004-11-25  Chris Vine  <cvine@freeserve.co.uk>
+
+	* example/book/input/: This now works.
+
+2004-11-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/tut/gtkmm-tut.xml: TreeView selection: Use 
+	selected_foreach_iter() instead of selected_foreach(). Error 
+	found by Teus Benschop.
+
+2004-11-24  Murray Cumming  <murrayc@murrayc.com>
+
+	* demos/gtk-demo/: Added missing demo-common.[h|cc] files.
+	* gtk/src/treeview.hg, gdk/src/pixbuf.hg, : Removed extra ; and 
+	unused parameter to fix build for g++ 3.4.
+
+2004-11-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/dialog.[hg|ccg]: Added set_alternative_button_order().
+	* gtk/src/button.[hg|ccg]: Added set/get_image() and property.
+
+2004-11-17  Murray Cumming  <murrayc@murayc.com>
+
+	* gtk/src/iconinfo.[hg|ccg]: Added operator bool(), needed to check 
+	the result of IconTheme::lookup_icon(). Bug #143018.
+
+2004-11-16  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/tutorial/gtkmm-tut.xml: Mention Gtk::manage() in the Basics/
+	Widgets section, with a link to the Memory Management chapter, so that 
+	people have an explanation of manage() before it is used in examples. 
+	Bug #138248.
+
+2004-11-16 Claudio Saavedra <csaavedra@alumnos.utalca.cl>
+
+	* docs/tutorial/gtkmm-tut.xml: Fixed two typos in Chapter 19 and
+	Appendix A.
+	* examples/book/helloworld/helloworld.cc: Fixed wrong reference
+	to a inexistent method in a comment.
+
+2.5.1:
+
+2004-11-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/filechooser.hg: Wrap GTK_FILE_CHOOSER_ERROR as exception. 
+	Still need to investigate whether GTK_FILE_SYSTEM_ERROR is public API.
+	* gtk/src/icontheme.hg: Wrap GTK_ICON_THEME_ERROR as exception 
+	instead of enum. Luckily, the enum was not used in the API anywhere 
+	so nobody can be using it.
+	* examples/book/: Added input example, based on code that was in the 
+	tutorial inline. This needs to be updated properly - see TODO in the 
+	code.
+	* docs/tutorial/gtkmm-tut.xml: Some minor corrections to the 
+	Idle/Timeout chapter, but it needs to be reviewed properly after we 
+	have finished the example. Get the example from the source, instead of 
+	pasting it inline.
+	* gdk/src/pixbufloader.hg: Wrap size_prepared signal. I am not sure 
+	why this was not wrapped in 2.4.
+	* gtk/src/filefilter.hg: Add add_pixbuf_formats().
+
+2004-11-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/textbuffer.hg: Added ; to fix build.
+
+2004-11-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_methods.defs: Regenerated with h2defs.py.
+	* gtk/src/selectiondata.hg: Added targets_include_image().
+	* gtk/src/progressbar.hg: Added set/get_ellipsize() and property.
+	* gtk/src/label.hg: Added set/get_single_line_mode() and property.
+	* gtk/src/clipboard.hg: Added set_image(), wait_is_image_available(),
+	wait_for_image(), request_image().
+	* gtk/src/toolitem: Added rebuild_menu().
+
+2004-11-08  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/treeview/combo_renderer/examplewindow.[h|cc]: Use a 
+	combo model from the treeview model, now that it works in GTK+.
+
+2004-11-07  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/combocellrenderer.hg: The model is a TreeModel, not a 
+	Pixbuf.
+	* gtk/gtkmm/cellrenderer_generation.[h|cc]: Remove the TreeModel/Combo 
+	specialization, because the Combo is not for representing or editing 
+	a TreeModel - it's just to use a TreeModel to present choices for 
+	a text column.
+	* examples/book/treeview/combo_renderer/examplewindow.[h|cc]: This 
+	now works.
+
+2004-11-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/messagedialog.hg: Reverted set_message() implementation 
+	change and added set_secondary_text().
+	* gtk/src/dialog.hg: Added alternative_button_order().
+	* gtk/src/: Added cellrenderercombo.[hg|ccg] and cellrendererprogress.[hg|ccg].
+	* gtk/gtkmm/cellrenderer_generation.[h|cc]: Add template 
+	specializations to create a CellRendererCombo when the model is of 
+	type TreeModel.
+	* pango/src/context.hg: Added get_font_map().
+	* examples/book/treeview/: Added combo_renderer example - does not 
+	actually work yet.
+
+2004-11-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/menus/popup/examplewindow.[h|cc]: Use the popup 
+	UIManager node type, so that this example works.
+	* docs/tutorial/gtkmm-tut.xml: Update the popup menu section.
+
+2004-11-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* Removed gtkmm.spec.in and mention of it in configure.in and 
+	Makefile.am, yet again. There is no point in having a broken spec 
+	file that nobody is maintaining. spec files are distro-specific and 
+	belong with distros.
+
+2004-10-31  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treemodelfilter.ccg: SignalProxy_Modify::gtk_callback():
+	Do not return before actually copying the value.
+	* examples/book/treeview/: Added filter_modify example, to show the 
+	use of set_modify_func().
+
+2004-10-30  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_methods.hg: Regenerated with h2defs.py.
+	* gtk/src/window.hg: Added drag_dest_add_text_targets(), 
+	drag_dest_add_uri_targets(), drag_dest_add_image_targets(), 
+	drag_source_add_text_targets(), drag_source_add_uri_targets(),
+	drag_source_add_image_targets().
+	* gtk/src/aboutdialog: Added get_logo_icon_name(), and 
+	set_logo_icon_name().
+	* gtk/src/clipboard.hg: Added wait_is_target_available(), 
+	set_can_store(), store()
+	* gtk/src/filechooserbutton: Added get/set_width_chars()
+	* gtk/src/image.hg: Added set_from_icon_name(), get/set_pixel_size(), 
+	get_icon_name()
+	* gtk/src/label.hg: Added get/set_width_chars().
+	* gtk/src/messagedialog.[hg|ccg]: Made set_message() public and 
+	reimplemented it with gtk_message_dialog_format_secondary_text() and 
+	gtk_message_dialog_format_secondary_markup() instead of the private 
+	label field.
+	* gtk/src/selectiondata.hg: Added get/set_pixbuf(), get/set_uris().
+
+2004-10-30  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treemodelfilter.[hg|ccg]: Added implementations of 
+	set_value_impl() to ouput a warning when it is used instead of 
+	the child model. Added const versions of patch convert methods.
+	* gtk/src/treeview.[hg|ccg]: Added _get_base_model() non-public API 
+	member method to get the child model, if necessary. Used it in the 
+	cell renderer signal handlers instead of get_model().
+	* Added examples/book/treeview/filter, from the gtkmm-2-4 branch.
+
+2004-10-16  Gene Ruebsamen  <gene@erachampion.com>
+ 
+ 	* docs/tutorial/gtkmm-tut.xml: Added a chapter for the new gtk-2.4 
+ 	FileChooserDialog.
+ 	* docs/tutorial/figures/dialogs_filechooser.png: Added a PNG image
+ 	of the new FileChooserDialog.
+
+2004-10-25  Roger Leigh <rleigh@debian.org>
+ 
+ 	* build_shared/Makefile_build.am_fragment: Use PLATFORM_WIN32
+ 	rather than OS_WIN32 so that -no-undefined is used on Cygwin
+ 	as well as MinGW toolchains.
+
+2004-10-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/gtkmm.h: #include filechooserwidget.h, as suggested in bug 
+	#156170 from Arjan Timmerman.
+
+2004-10-24  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/tutorial/gtkmm-tut.xml: Updated the menus and toolbars section 
+	about UIManager, though the popup example does not work yet, and I 
+	should mention ui merging and toggle items.
+
+2004-10-22  Murray Cumming  <murrayc@murrayc.com>
+ 
+ 	* gtk/src/treemodelfilter.hg: _WRAP_CTOR: Rename root parameter to 
+ 	virual_root so that it sets the correct property.
+ 
+2004-10-22  Murray Cumming  <murrayc@murrayc.com>
+ 
+ 	* gtk/src/treeiter.hg: In ifdef, use SUN-Forte-style reverse_iterator. 
+ 	Patch from TODO in bug #154973. 
+
+2004-10-22  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/aboutdialog.hg: Wrap the get and set methods that deal with 
+	char** arrays, using Glib::SArrayHandle. Wrap the callback set 
+	methods with a SignalProxy.
+	* gtk/src/gtk_signals.defs: Add signals and properties for 
+	AboutDialog and MenuToolButton.
+	* tools/extra_defs_gen/generate_defs_gtk.cc: Get defs for 
+	GtkAboutDialog and GtkMenuToolButton.
+	* gtk/src/action_group.hg: Add translate_string(). We probably need to 
+	use iit in the .ccg file.
+	* gtk/src/icontheme.hg: Added get_icon_sizes().
+	* gtk/src/iconview.hg: Added get_selected_items().
+	* tools/m4/convert_gtk.m4: Added conversion for SArrayHandle to char**,
+	and GList* to SListHandle<TreePath>
+
+2004-10-17  Gene Ruebsamen  <gene@erachampion.com>
+
+ 	* docs/tutorial/gtkmm-tut.xml: Updated the Windows installation
+ 	appendix by providing a link to the latest Gtk+ Win32 installer, 
+ 	and updating the installation instructions.
+
+2004-10-12  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/custom/custom_container.cc: Use only C++ methods 
+	instead of the C functions, now that they are public.
+	* docs/tutorial/figures/: Added custom_container.png.
+
+2004-10-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/tutorial/gtkmm-tut.xml: Added Custom Widgets chapter, so far 
+ 	with a Custom Container section and example.
+
+2004-10-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/widget.hg: Made set_parent(), and unparent() public instead 
+	of protected, because they are need by custom Containers. Added 
+	size_request() which is const and actually returns a value, also 
+	needed by custom Containers.
+	* gtk/src/accelgroup,hg: Wrap the new gtk_accelerator_get_label() 
+	function.
+	* gtk/src/comboboxentry.[hg|ccg]: Hand-code get_entry() to fix the 
+	build.
+	* gtk/src/: Added menutoolbutton.[hg|ccg].
+	* gtk/gtkmm/comboboxtext.[h|cc], comboboxentrytext.[h||cc]: Added 
+	set_active_text(), clear(). Reimplemented append() and prepend() 
+	without using the C functions, because they might not work with our 
+	model.
+
+2004-10-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/index.html: Changed cvs links to viewcvs, because lxr and 
+	bonsai are still broken.
+
+2004-10-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/style.hg: Add create() method, as per bug #148012.
+
+2004-10-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/comboboxentry.hg: Added get_entry(), as per bug #142758.
+
+2004-09-04 Jonathan Brandmeyer <jbrandmeyer@earthlink.net>
+ 
+ 	* gdk/src/screen.hg: get_default(): Take an extra reference so that
+ 	the Screen is not deleted too early.
+
+2004-09-17  Murray Cumming  <murrayc@murrayc.com>
+
+	* iconview.hg: Added overrides of set_text_column(), and 
+	set_pixbuf_column() that take ModelColumns instead of ints.
+	Wrapped signals. Added foreach()
+	* cellview.hg: Make get_size_of_row() const.
+	* tools/extra_defs_gen/gtk_extra_defs_gen: Added new types.
+	* gtk/src/gtk_signals.defs: Regenerated (making the usual corrections 
+	for Event* and gpointer parameters.
+	* combobox.[hg|ccg], treeview.[hg|ccg]: Add set_row_separator_func(), 
+	with common implementation in treeview-private.[h|cc].
+	* range.hg: Wrapped change_value signal.
+	* demos/gtk-demo/: Added example_iconview.cc, which demonstrates  the 
+	IconView and is a C++ version of the C original..
+
+2.5.0:
+	
+2004-09-12  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/: Added cellview.[hg|ccg].
+
+2004-09-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* pango/src/layout: Added set_ellipsize(), get_ellipsize(), and 
+	EllipsizeMode enum.
+	* pango/src/pango_enums.defs: Regenerated.
+	* pango/src/pango_methods.defs: Regenerated.
+	* gtk/src/: Added iconview.[hg|ccg|, filechooserbutton.[hg|ccg].
+	* gtk/src/entry.hg: Added layout_index_to_text_index() and 
+	text_index_to_layout_index()
+	* gtk/src/entrycompletion.hg: Added insert_prefix(), 
+	set_inline_completion(), get_inline_completion(), 
+	set_popup_completion(), get_popup_completion(), get_text_column()
+	* gtk/src/combobox.hg: Added get_wrap_width(), get_row_span_column(),
+	get_column_span_column(), get_add_tearoffs(), set_add_tearoffs(), 
+	get_focus_on_click(), set_focus_on_click(), get_popup_accessible().
+	Wrapped new properties.
+	* gtk/src/action.hg: Wrap new gtk_action_set_sensitive() 
+	instead of writing our own method. Add set_visible() too.
+	* gtk/src/label.hg: Added set_ellipsize(), get_ellipsize().
+	* gtk/src/cellrenderer.hg: Added editing_started signal.
+	* gtk/src/filechooser.hg: Added set_show_hidden(), get_show_hidden().
+	* gtk/src/gtk_methods.defs: Regenerated.
+	* gtk/src/treesortable.hg: Added DEFAULT_UNSORTED_COLUMN_ID constant.
+	* gtk/src/treeview.hg: Added set_fixed_height_mode(), 
+	get_fixed_height_mode(), set_hover_selection(), get_hover_selection(),
+	set_hover_expand(), get_hover_expand()
+
+2004-09-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* This is the HEAD branch, which should wrap new API in GTK+ 2.5/2.6.
+
+2004-08-30  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/dialogs/fileselection/examplewindow.cc: Removed a 
+	misleading include.
+
+2.4.5:
+
+2004-08-07  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/toolbar.hg: Class documentation: remove mention of 
+	tools() which no longer exists.
+	* examples/book/treeview/drag_and_drop: Correct the implementation 
+	of the vfuncs so that they actually work. In particular they are const 
+	in gtkmm 2.4. 
+
+2004-07-16  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/settings.ccg: get_default(): Use reference() instead of an 
+	extra parameter, to fix the build.
+
+2004-07-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/settings.ccg: get_default(): Take an extra reference so that 
+	the Settings is not deleted too early. Bug #147592.
+
+2004-07-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/treeview/: Added popup example, which was already in 
+	gtkmm 2.0/2.2.
+
+2004-07-08  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/tutorial/gtk_tut.xml: libglademm chapter: Mention memory 
+	management.
+
+2004-07-08  Murray Cumming  <murrayc@murrayc.com>
+
+	* Patch from Christopher Palm in bug #145594, to change ActionGroup and 
+	EntryCompletion constructors from private to protected. Lets hope 
+	there are no more of these, because this is technically API change in 
+	the stable branch. However, the methods already exist and are  tested 
+	by the create() methods, and are simple and generated, and therefore 
+	unlikely to have errors. Also, this change will only be useful to a 
+	very small number of people, so it does not confuse the API versions.
+
+2004-07-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/tutorial/gtkmm_tut.xml: Tell people to pkg-config for 2.4 
+	instead of 2.0.
+
+2004-07-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/uimanager.hg: Made constructor protected, like in the 
+	previous change.
+	* gtk/src/treesortable.hg: Added docs explaining the return values 
+	for the sort func.
+
+2.4.4:
+
+2004-07-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/action.hg, toggleaction.hg, radioaction.hg, icontheme.hg:
+	Added protected keyword at start of class so that 
+	the constructors can be used by derived classes. This is addition of 
+	API in the stable branch, but it should not affect many people and it 
+	is a little too embarassing to leave as it is.
+
+2004-06-30  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/container.hg: Add code to the GClass init() function to null 
+	the remove callback if the type is actually GtkContainer rather than 
+	a derived class. The default implementation in GtkContainer complains 
+	about it not being implemented, but that is useless and annoying to us 
+	when deriving directly from Gtk::Container.
+
+2004-06-20  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* gtk/src/stockitem.ccg (StockItem::StockItem): Pass a 0 pointer
+	to GTK+ if translation_domain is the empty string, so that the
+	application's global translation domain will be used by default.
+
+2004-06-20  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* gtk/src/widget.ccg (Widget::unset_fg): First cast Gtk::StateType
+	to int and then to GtkStateType, because direct static_cast<> from
+	one enum type to another is invalid C++.  Why g++ 3.3 accepts this
+	is a mystery to me though...
+	(Widget::unset_bg): ditto
+	(Widget::unset_text): ditto
+	(Widget::unset_base): ditto.
+
+2.4.3:
+
+2004-06-16  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* gtk/src/treeiter.ccg (TreeIter::operator--): Correctly decrement
+	the end iterator.  Also assert that the iterator is not already at
+	the begin of the sequence.
+
+	* gtk/src/treeiter.hg (TreeIter::operator--): s/slow/very slow/
+
+2004-06-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/gtkmm/comboboxentrytext.h: Correct the header guard so that it 
+	can be used at the same time as comboboxentry.h.
+	* gtk/gtkmm/comboboxentrytext.cc, comboboxtext.cc: Implement the 
+	GObject* castitem constructors.
+
+2004-06-08  Cedric Gustin  <cedric.gustin@swing.be>
+  
+	* gdk/gdkmm/Makefile.am: link against libpangomm-1.4 instead of
+	1.6 on win32 (sublib_win32_dlls_libs variable).
+
+2.4.2:
+
+2004-06-04  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* gtk/src/filechooser.hg (FileChooser): Copy the class docs from
+	GTK+.  Also explain the fact that the API is broken and how to use
+	it correctly despite this problem (bug #142138).
+
+2004-06-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeview.ccg: get_path_at_pos(): Correct memory management
+	of the path. Bug #142970 from david@thepriorities.com.
+
+2004-05-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/FAQ/gtkmm_faq.xml: Mentioned gtkmm 2.4.
+
+2004-05-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/combobox.ccg: get_active(): Instantiate a 
+	Gtk::TreeModel::iterator instead of the GtkTreeIter, so that the 
+	underlying GtkTreeIter is properly initialized.
+
+2004-05-25  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* demos/pixbuf-demo.cc: More micro tweaking.
+
+2004-05-25  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* demos/pixbuf-demo.cc: Minor cleanups: use const double rather
+	than a macro for pi, no need to explicitly maintain the timeout
+	signal connection, and some other stuff.
+
+2004-05-23  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/gtkmm/comboboxentrytext.cc: Patch from Teemu Tervo to prevent 
+	the text column from being added twice, in bug #142956.
+
+2004-05-22  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* configure.in: Check for gthread-2.0 and if it exists, substitute
+	the required compiler flags into GTHREAD_CFLAGS.  This is necessary
+	to make the library code work correctly in a threaded application.
+	For instance, on glibc systems errno is replaced by a macro which
+	expands into a function call.  Actually this stuff was already in
+	place, but apparently got lost when glibmm was split off.
+
+	* build_shared/Makefile_build.am_fragment (all_includes): Append
+	$(GTHREAD_CFLAGS).
+
+2004-05-19  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* gtk/gtkmm.h: Remove duplicated combobox.h include.  Add missing
+	includes of comboboxentry.h and comboboxentrytext.h.
+
+2004-05-18  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* gtk/src/treeiter.ccg (TreeIter::operator bool): Put the original
+	test for gobject_.stamp != 0 back in place.  The iter_is_valid()
+	method provided by model implementations is intended for debugging
+	purposes only, and thus should not be used here (bug #142599).
+
+	* gtk/src/treemodel.hg (TreeModel::iter_is_valid): Document that
+	the usage of this method as abstract interface is deprecated, and
+	that the implementation's iter_is_valid() should be used directly.
+
+2004-05-14  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/gtkmm/comboboxtext.cc, comboboxentrytext.cc: get_active_text():
+	The iterator was being used in ways that probably should not compile.
+	This leads to strange results in other situations, so it is best to fix
+	it.
+
+2.4.1:
+
+2004-04-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* gdk/Makefile.am: install gdkmmconfig.h in a gdkmm-2.6 directory,
+	instead of a gtkmm-2.6 directory. Bug #141045.
+
+2004-04-23  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/uimanager.[hg|ccg]: add_ui_from_string now returns a 
+	ui_merge_id instead of a guint, to make the API clearer. This is 
+	technically an API change, but it's not a breaking one, and it's not
+	an ABI change.
+
+2004-04-22  Alexander Nedotsukov <bland@FreeBSD.org>
+
+ 	* atk/atkmm: Fixed private/ includes installation directory.
+
+2004-04-17  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/optionmenu.hg, fileselection.hg, combo.hg: Mark them as 
+	deprecated in the docs, by using the Doxygen @deprecated command.
+
+2004-04-17  Murray Cumming  <murrayc@murrayc.com>
+
+	* Removed some extra semi-colons detected by gcc 3.4 from cvs.
+
+2.4.0:
+
+2004-04-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* atk/src/: Added implementor.[hg|ccg] to wrap the AtkImplementorIface.
+	* gtk/src/widget.hg: Widget inherits from the Implementor interface
+	as well as Gtk::Object.
+
+2004-04-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/gtkmm.h: #include treemodelsort.h and treemodelfilter.h
+	* gtk/src/menu.hg: popup(): Wrap the C callback as a Slot, so we do
+	not need to include gtkmenu.h.
+	* gtk/src/iconinfo.hg: Do not include gtkiconinfo.h.
+	* gtk/src/notebook.hg: Do not include gtknotebook.h
+	* gtk/src/stockitem.hg: Do not include gtkstockitem.h
+	* gtk/src/texttag.hg: Do not include gtktexttag.h
+
+2004-04-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* toolbar.hg: Added get_tooltips_object() accessor, which should let
+	us set tooltips on toolbar objects.
+
+2004-04-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* filefilter.hg: Create a FileFilter::Info class to use in place of
+	GtkFileFilterInfo, in the add_custom() callbak . Removed filter(), 
+	because it is not needed and because it is difficult to wrap.
+
+2004-04-08  Bryan Forbes  <bryan@reigndropsfall.net>
+
+	* gtk/gtkmm.h: include gtkmm/settings.h.
+
+2.3.8
+
+2004-04-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/action.hg: Added set_tooltip().
+
+2004-04-07  Bryan Forbes  <bryan@reigndropsfall.net>
+
+	* gtk/src/icontheme.hg: added refreturns for get_default and get_for_screen.
+	* gtk/src/settings.hg: added unwrapped properties.
+	* gtk/src/targetlist.[hg|ccg]: added a create method that wraps
+	gtk_target_list_new.
+
+2004-04-07  Murray Cumming  <murrayc@murrayc.com>
+
+	* Removed some TODO comments that are no longer relevant.
+
+2004-04-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treemodel.[hg|ccg]: Rename 2 of the 3 foreach() overloads
+	to foreach_iter() and foreach_path(), because they are ambiguous with
+	libsigc++ 2.
+
+2004-04-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/liststore.[hg|ccg], treestore.[hg|ccg]: Added insert_after(),
+	because it is apparently faster with many rows. Bug #131019.
+
+2004-04-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/action.[hg|ccg]: Added set_sensitive(), even though
+	it does not exist in GTK+ itself yet. Spotted by Matthew Walton.
+
+2.3.7:
+
+2004-03-28  Bryan Forbes  <bryan@reigndropsfall.net>
+
+	* gtk/src/action.[hg|ccg]:
+	* tools/m4/convert_gtk.m4: changed Action::create_menu_item(), 
+	create_tool_item(), and create_icon() to return Gtk::MenuItem*, 
+	Gtk::ToolItem*, and Gtk::Image respectively, rather than Gtk::Widget*.
+
+2004-03-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/uimanager.ccg: Fix typo to fix the build.
+	* */src/*_methods.defs: Regenerated with h2defs.py.
+
+2004-03-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* *_docs_override.xml: Added several overrides to remove references to
+	0 parameters and freeing of strings.
+	* atk/src/table.hg: Added const versions of some get_*() methods.
+
+2004-03-25  Andrew E. Makeev  <andrew@solvo.ru>
+
+	* gtk/src/treeview.hg, gtk/src/treeview.ccg: Added 
+	move_column_to_start(), which uses gtk_tree_view_move_column_after() 
+	with a 0 parameter.
+
+2004-03-26  Elijah Newren  <newren@math.utah.edu>
+ 
+ 	* docs/tutorial/gtkmm-tut.xml: Several simple fixes. 
+
+2004-03-27  Murray Cumming  <murrayc@murrayc.com>
+
+	* example/book/: Added menus_and_toolbars example that uses UIManager.
+	The book should probably stop using the other menu and toolbar examples
+	and they should be moved away.
+
+2004-03-27  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/action.ccg, toggleaction.ccg, radioaction.ccg: 
+	Constructor: Give GTK+ 0 instead of "" for default labels and tooltips,
+	so that the stock ones are used.
+
+2004-03-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/filefilter.[hg|ccg]: Wrapped filefilter as a GtkObject 
+	instead of a GObject, because it is a GtkObject.
+	* examples/book/dialogs/filechooserdialog/: Used filefilter.
+
+2004-03-25  Bryan Forbes  <bryan@reigndropsfall.net>
+
+	* gtk/src/messagedialog.[hg|ccg]: removed use_separator parameter from
+	constructor as GtkMessageDialog gets its separator setting from the style
+	now.
+
+2004-03-24  Bryan Forbes  <bryan@reigndropsfall.net>
+
+	* gtk/src/uimanager.hg: fixed typo in disconnect_proxy signal.
+
+2004-03-21 Elijah Newren  <newren@math.utah.edu>
+
+	* doc/FAQ/gtkmm-faq.xml: Updated to mention gtkmm2 more than gtkmm 1.2.
+
+2004-03-20  Murray Cumming  <murrayc@murrayc.com>
+
+	* demos/gtk-demo/demowindow.cc: Use sigc::ptr_fun() instead of giving
+	the set_select_function function pointer directly to connect.
+
+2004-03-20  Murray Cumming  <murrayc@murrayc.com>
+
+	* ActionGroup::get_action(), Clipboard::get_owner(), 
+	ComboBox::get_model(), Entry::get_layout(), get_completion(),
+	EntryCompletion::get_model(), FileChooser::get_filter(), 
+	IconInfo::get_builtin_pixbuf(), IconSource::get_pixbuf(), 
+	Image::get_pixbuf(), get_animation(), Menu::get_accel_group(), 
+	Scale::get_layout(), TreeModelFilter::get_model(),
+	UIManager::get_accel_group(), get_action(), 
+	Widget::drag_begin(): Use refreturn.
+	* Entry::get_layout(), IconInfo::get_builtin_pixbuf(): 
+	IconSource::get_pixbuf(), Image::get_pixbuf(), 
+	Menu::get_accel_group(): Added const versions.
+        (Thanks to Bryan Forbes for finding the missing refreturns.)
+
+2004-03-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/icontheme.hg: Wrapped changed signal.
+
+2004-03-14  Murray Cumming  <murrayc@murrayc.com>
+      
+	* gtk/src/bin.ccg remove(),
+	  gtk/src/container.[hg|ccg]: If the child widget is managed, do 
+	a reference on the child widget before removing it, so that it 
+	is not destroyed, and is ready for a new container, just like 
+	when it was first instantiated.
+
+2.3.6:
+
+2004-03-14  Murray Cumming  <murrayc@murrayc.com>
+      
+	* demos/demowindow.cc: Do not use flockfile if we are using the SUN
+ 	compiler, even though it passes the configure test, because it does
+ 	not seem to work here.
+
+2004-03-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/toolbar, treestore: Removed extra semicolon to remove
+	g++ 3.4 warning.
+
+2004-03-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* atk/src/hypertext.hg, 
+	Removed extra semicolon to remove g++ 3.4 warning.	
+
+2004-03-12  Cedric Gustin  <cedric.gustin@swing.be>
+  
+ 	* README.win32: Updated file for upcoming gtkmm-2.4.  
+ 	* atk/src/action.hg, atk/src/component.hg, atk/src/object.hg,
+ 	gtk/gtkmm/accelmap.cc, gtk/gtkmm/accelmap.h,
+ 	gtk/gtkmm/comboboxtext.cc, gtk/gtkmm/comboboxtext.h,
+ 	gtk/src/main.ccg : Removed many #ifndef WIN32 as all methods are
+ 	now available/dllexported on win32, with the exceptions og Plug
+ 	and Socket.
+ 	* atk/atkmm/Makefile.am, atk/atkmm/private/Makefile.am,
+ 	atk/src/Makefile_list_of_hg.am_fragment,
+ 	build_shared/Makefile_build.am_fragment,
+ 	build_shared/Makefile_build_gensrc.am_fragment,
+ 	build_shared/Makefile_conditional.am_fragment,
+ 	build_shared/Makefile_gensrc.am_fragment, gdk/gdkmm/Makefile.am,
+ 	gdk/gdkmm/private/Makefile.am,
+ 	gdk/src/Makefile_list_of_hg.am_fragment, gtk/gtkmm/Makefile.am,
+ 	gtk/gtkmm/private/Makefile.am,
+ 	gtk/src/Makefile_list_of_hg.am_fragment,
+ 	pango/pangomm/Makefile.am, pango/pangomm/private/Makefile.am,
+ 	pango/src/Makefile_list_of_hg.am_fragment: Revamped the
+ 	Makefile.am helpers to accomodate multiple platforms (general,
+ 	posix, win32) and files sections (regular and deprecated files). 
+
+2004-03-12  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/reference/Makefile.am: remove the make dependency of 
+	html/index.html on the generated installed beautify_docs.pl script, so
+	that docs are not rebuilt when building from a tarball.
+	Bug #136597 from dalgoda.
+
+2004-03-12  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/cellrenderercustom/cellrendererpopup.cc: Removed some 
+	accidentally pasted text that breaks the build.
+
+2004-03-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* demos/gtk-demo/demowindow.cc: Added #ifdef GLIBMM_COMPILER_SUN_FORTE
+	around the strange flockfile and funlockfile function prototypes, to 
+	avoid problems on platforms which declare them differently.
+
+2004-03-09  Murray Cumming  <murrayc@murrayc.com>
+ 
+ 	* Some, but not all, SUN Forte build fixes:
+ 	* demos/gtk-demo/demowindow.cc: Added prototypes for flockfile()
+ 	and funlockfile() because it does not seem to get them from
+	stdio.h - very strange. Commented-out the g_assert() lines that it
+ 	says as badly formed.
+ 	* demos/gtk-demo/textwidget.cc: Made the next_token char* const.
+	* examples/book/clipboard/ideal/examplewindow.cc: 
+ 	on_clipboard_received_targets: Remove the useless const from the
+ 	std::list variable because it confused the compiler.
+ 	* examples/cellrenderercustom/cellrendererpopup.cc:
+ 	on_show_popup(): Use namespaced class name when specifying a
+ 	particular version of gobj().
+ 	* gdk/src/display.hg: Removed lots of extra ;s that caused
+ 	warnings.
+ 	* gdk/src/pixmap.ccg: Use unwrap<Drawable> instead of 
+ 	unwrap<const Drawable> - this is the same as the sun-specific
+ 	stuff in tools/m4/convert_*.m4.
+ 	* gdk/src/pixmap.hg: Removed extra ;s that cause warnings.
+ 	* gtk/src/textbuffer.ccg: insert_(): Some const changes - see the 
+ 	comments. 
+ 	* tools/m4/convert_gdk.m4, convert_glib.m4: Use existing
+ 	sun-specific conversion when converting from any 
+ 	RefPtr<const Something> to *Something.
+
+2004-03-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* Regenerated gtk/src/gtk_docs.xml, and gdk/src/gdk_docs.xml with
+	docextract_to_xml.py.
+	* docs/reference/Makefile.am: Upload doxygen-warnings.txt and 
+	doxygen-output.txt every time, so everybody sees them.
+
+2004-03-09  Hagen Moebius  <hagen.moebius@starschiffchen.de>
+
+        * Recent efforts cumulated in a massive documentation patch, which
+        eliminates almost all doxygen warnings/errors.
+        Files: atk/atkmm/init.h, gdk/src/display.hg, drawable.hg,
+        gdk_docs_override.xml, pixbuf.hg, window.ccg, window.hg,
+        gtk/gtkmm/accelkey.h, gtk/src/accellabel.hg, alignment.hg, box.hg
+        button.hg, cellrenderer.hg, filechooser.hg, gtk_docs_override.xml,
+        image.hg, layout.hg, main.hg, notebook.hg, rc.hg, textbuffer.hg,
+        treedragdest.hg, treemodelfilter.hg, treemodel.hg, treepath.hg,
+        treeview.hg, widget.hg, window.hg, pango/src/attributes.hg,
+        pango_docs_override.xml
+
+2004-03-07  Murray Cumming  <murrayc@murrayc.com>
+
+	* Regenerated *_docs.xml files for atk, gdk, pango, and gtkmm, 
+	because Hagen Moebius improved the docextract_to_xml.py script.
+
+2004-04-07  Hagen Moebius  <hagen.moebius@starschiffchen.de>
+
+	* added documentation to gtk/src/viewport.hg, gtk/src/toolbutton.hg,
+        gtk/src/toggletoolbutton.hg, gtk/src/separatortoolitem.hg and
+        gtk/src/range.hg. Fixed a spelling error in gtk/src/radiotoolbutton.hg.
+        All documentation copy/pasted from Gtk+, so still room for imrovement.
+
+2004-04-06  Hagen Moebius  <hagen.moebius@starschiffchen.de>
+
+	* modified docs/reference/Makefile.am to support a more general output
+	of doxygen warnings/errors.
+
+2004-03-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_signals.defs: Added the new RadioMenuItem::group_changed
+	signal.
+
+2004-03-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/filechooser.hg: set_current_folder(), 
+	set_current_folder_uri(), select_filename(), select_uri(), 
+	set_filename(), and set_uri() now return bools, because GTK+ now
+	does this.
+
+2004-03-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_methods.defs: regenerated.
+	* gtk/src/gtk_docs.xml: regenerated.
+
+2004-03-05  Hagen Moebius  <hagen.moebius@starschiffchen.de>
+ 
+ 	* added missing documentation to gtk/src/expander.hg,
+ 	gtk/src/filechooserwidget.hg, gtk/src/fontbutton.hg,
+ 	gtk/src/imagemenuitem.hg, gtk/src/radiotoolbutton.hg. Mainly
+ 	class documentation, some non-Gtk+ function and some constructors.
+ 
+2004-03-05  Hagen Moebius  <hagen.moebius@starschiffchen.de>
+ 
+ 	* gtk/src/colorbutton.hg: added missing documentation to some functions.
+
+2004-03-05  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/radiobutton.hg, radiomenuitem.hg: Wrap the group_changed
+	signals now that they are corrected in GTK+.
+	* gtk/src/filechooser.hg: Correct the set_local_only() parameter name
+	to match the one in GTK+, as spotted by Matthew Walton.
+
+2.3.5:
+
+2004-03-03  Bryan Forbes  <mxpxfifws@yahoo.com>
+
+	* gtk/src/toolbar.[hg|ccg]: added methods to append, prepend, and 
+	insert with a sigc::slot.
+	* examples/stock/stock.cc: use new append method to append with a slot;
+	added a toggle button to prove that there are no ambiguity problems 
+	with the new methods.
+
+2004-03-02  Bryan Forbes  <mxpxfifws@yahoo.com>
+
+	* gtk/src/toolbar.[hg|ccg]: removed old STL-stlye API (deprecated and 
+	can't co-exist with new API).
+	* gtk/gtkmm/toolbar_elements.[h|cc]: removed these files to get rid of 
+	all old API for Gtk::Toolbar.
+	* gtk/gtkmm/Makefile.am: removed toolbar_elements.[h|cc] from list of 
+	files to build, because it is only needed by the old STL-style Toolbar
+	API.
+
+2004-03-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/radiobutton.hg, radiomenuitem.hg: Commented-out
+	the new group_changed signals until their declarations
+	are fixed in GTK+ - patch submitted.
+
+2004-03-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* pango/src/pango_methods.defs: Updated with h2defs.py.
+	* pango/fontface.[hg|ccg]: Added list_sizes().
+	* pango/attriter.[hg|ccg]: Added get_attrs().
+	* pango/fontfamily.hg: Added is_monospace().
+	* pango/fontset.[hg|ccg]: Added foreach().
+	* pango/language.hg: Added includes_script().
+	* pango/layout: Added set/get_auto_dir().
+
+2004-03-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* Updated gtk/src/gtk_signals.defs with tools/extra_defs_gen.
+	* gtk/src/cellrendererpixbuf.hg: Wrapped several new properties.
+
+2004-03-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* New GTK+ API wrapped:
+	* FileChooser: Added set/get_use_preview_label() and use_preview_label
+	property.
+	* Entry: Added set/get_alignment().
+	* ComboBox: Added popup() and popdown().
+	* Scale: Added get_layout() and get_layout_offsets().
+	* Widget: Added add_mnemonic_labels(), remove_mnemonic_label(), and
+	list_mnemonic_labels().
+	* ComboBoxEntry: Added a set_text_column() overload that takes a
+	ModelColumnBase instead of an int.
+	* Added ComboBoxEntryText, like ComboBoxText, as an equivalent for
+	gtk_combo_box_entry_new_text().
+	* RadioButton, RadioMenuItem: Added group_changed signals.
+	* Widget: Added draw_insertion_cursor() as wrapper for 
+	gtk_draw_insertion_cursor, which has a GtkWidget as the first 
+	parameter.
+	* Updated gtk/src/gtk_methods.defs with h2defs.py
+
+2004-03-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeview.ccg: Corrected the implementation of 
+	unset_expander_column() to reset_expander_column(), to fix the build.
+
+2004-02-29  Billy O'Connor  <billyoc@gnuyork.org>
+ 
+ 	* gtk/src/treeview.hg: Added documentation for Gtk::TreeView.
+
+2004-02-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeiter.[hg|ccg]: begins_tag(), ends_tag(), toggles_tag(), 
+	has_tag(): Use a const parameter, and added method overloads with no 
+	parameter, because the C functions can take a NULL.
+	* gtk/src/treemodel.[hg|ccg]: rows_reordered() now takes a
+	Glib::ArrayHandle<int> instead of a int* array of unknown size.
+	* gtk/src/entrycompletion.hg: Added prepend_*() methods instead of 
+	using a default arg for insert().
+	* examples/book/entry: Moved the existing example into a simple
+	sub-directory, and added a completion sub-directory, demonstrating
+	Gtk::EntryCompletion.
+
+2004-02-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeselection.[hg|ccg]: Made selected_foreach() methods 
+	const, because the slots are not allowed to change the model. But we
+	really need a TreeModel::const_iterator for this, and other things.
+
+2004-02-27  Bryan Forbes  <mxpxfifws@yahoo.com>
+
+	* gtk/src/filechooser.hg: removed the inclusion of gtk/gtkfilechooser.h
+	since it's included in the ccg.
+
+2004-02-27  Bryan Forbes  <mxpxfifws@yahoo.com>
+
+	* gtk/src/gtk_methods.defs: removed the set_folder_mode and get_folder_mode
+	methods as they are no longer in gtk+.
+
+2004-02-27  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_enums.defs: Added new FileChooser enum values, so that
+	set_action() is now a real replacement for set_folder_mode().
+	* examples/book/dialogs/filechooser/: Updated to use set_action()
+	instead of set_folder_mode(), really fixin build.
+
+2004-02-27  Murray Cumming  <murrayc@murray.com>
+
+	* gtk/src/filechooser.hg: Removed set_folder_mode() and 
+	get_folder_mode() because they have been removed from GTK+. This fixes
+	the cvs build.
+
+2004-02-27  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treepath.hg: append<>(): Corrected a typo that is detected by
+	gtk++ 3.4 prereleases and would have been detected before if this 
+	template method had been used. Bug #131928 by Matthew Tuck.  
+
+2004-02-26  Martin Schulze <martin-ml@hippogriff.de>
+
+	* More libsigc++ 2 changes: Some documentation fixes, updates in the 
+	tutorial and tries to solve some issues in GtkMainConnectionNode. With 
+	fixes from Bryan Forbes.
+
+2004-02-26  Bryan Forbes  <mxpxfifws@yahoo.com>
+
+	* configure.in:
+	* Makefile.am: added --enable-examples to configure to enable/disable the
+	building of the examples.
+
+2004-02-26  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/treeview/tree/examplewindow.[h|cc]: Handle the TreeView
+	row_activated signal.
+	* gdk/src/display.hg: Add const overloads get_screen(), 
+	get_default_screen(), list_devices(), get_event(), and peek_event().
+	* gdk/src/iconinfo.ccg: Actually implement get_attach_points(), though 
+	the implementation is incomplete - see the TODO in the code.
+	* gdk/src/iconinfo.hg: Add default parameter values for 
+	set_raw_coordinates(). Make get_embedded_rect() and get_attach_points()
+	const.
+	* gdk/src/icontheme.hg: Add parameter names in get_for_screen() and
+	set_screen(). Made load_icon() and list_icons() const.
+	* gtk/src/widget.[hg|ccg]: Made drag_dest_find_target() const.
+	* gdk/src/treeiter: Added reverse_iterator and const_reverse_iterator, 
+	though const_iterator and const_reverse_iterator are not really const 
+	yet. Added suitable overloads of begin() and end(), and added rbegin()
+	and rend().
+	* tools/m4/convert_gtk.m4: Added conversion needed by the above.
+
+2004-02-26  Bryan Forbes  <mxpxfifws@yahoo.com>
+
+	* examples/stock/stock.cc: fixed to use the new Toolbar API.
+
+2.5.4:
+
+2004-02-14  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_methods.defs: Updated with h2defs.py
+	* gtk/src/gtk_signals.defs: Updated with generate_extra_defs, keeping
+	hand-coded changes for the Widget _event signals.
+	* gtk/src/gtk_enums.defs: Updated with glibmm/tools/enums.pl.
+	* gdk/src/pixbufloader.hg: Added set_size() as wrapper for 
+	gdk_pixbuf_loader_set_size().
+	* gtk/src/cellrenderer.hg: Wrapped editing_cancelled() and the
+	editing_cancelled signal, for use by CellRenderer implementations.
+	* gtk/src/action.hg: Added get_visible(), get_sensitive(), 
+	is_visible(), is_sensitive().
+	* gtk/src/actiongroup.hg: Added set_sensitive(), set_visible(), 
+	get_visible(), get_sensitive().
+	* gtk/src/uimanager.hg: Wrapped the proxy_connected, 
+	proxy_disconnected, pre_activate, and post_activate signals.
+	* gtk/src/widget.hg: Wrapped event_after signal.
+
+2004-02-11  Bryan Forbes  <mxpxfifws@yahoo.com>
+
+	* examples/cellrenderercustom/popupentry.cc: change to use Gtk::Requisition.
+	* examples/dnd/dndwindow.cc: change to use Gtk::AtomString::to_cpp_type.
+	* gdk/src/drawable.hg: changed the PangoGlyphString* arg to
+	Pango::GlyphString& since that argument is not an array. closes bug #97036
+	* gdk/src/window.[ccg|hg]: changed methods that use GList* to a
+	Glib::ListHandle<>; wrote get_internal_paint_info by hand because we need a
+	temporary variable.
+	* gtk/gtkmm/stock.[cc|h]: added the new Authentication dialog stock icon.
+	* gtk/src/Makefile_list_of_hg.am_fragment: added new iconinfo.hg.
+	* gtk/src/filechooser.hg: changed the GSList* returned by get_uris() to a
+	Glib::SListHandle<Glib::ustring>.
+	* gtk/src/iconinfo.[ccg|hg]: added new class to deal with GtkIconInfo.
+	* gtk/src/icontheme.[ccg|hg]: changed to use new IconInfo class; hand coded
+	get|set_search_path.
+	* gtk/src/window.hg: added property "role".
+	* tools/m4/convert_gtk.m4: added conversion for GtkIconInfo*->IconInfo.
+
+2.3.4:
+
+2004-02-13  Murray Cumming  <murrayc@usa.net>
+
+	* examples/cellrendercustom/popup.cc: Get and use a string for the
+	target, to fix the build.
+	* gdk/src/dragcontext.hg: get_selection() is now const.
+
+2004-02-11  Matthew Walton  <matthew@alledora.co.uk>
+
+	* examples/book/dialogs/filechooserdialog/examplewindow.cc:
+	Add buttons, as you would need in a real example.
+
+2004-02-10  Bryan Forbes  <mxpxfifws@yahoo.com>
+
+	* tools/m4/convert_gtk.m4: added TargetFlags<->GtkTargetFlags,
+	IconLookupFlags<->GtkIconLookupFlags, and
+	IconThemeError<->GtkIconThemeError; added conversions for
+	IconTheme<->GtkIconTheme and TargetList<->GtkTargetList.
+	* gtk/gtkmm/targetentry.[cc|h]: use the TargetFlags enum.
+	* gtk/src/Makefile_list_of_hg.am_fragment: added icontheme.hg and
+	targetlist.hg.
+	* gtk/src/enums.hg: added TargetFlags enum.
+	* gtk/src/frame.hg: use Allocation instead of GtkAllocation.
+	* gtk/src/icontheme.[ccg|hg]: added IconTheme class.
+	* gtk/src/socket.hg: use Gdk::NativeWindow instead of GdkNativeWindow.
+	* gtk/src/targetlist.[ccg|hg]: added TargetList class.
+	* gtk/src/widget.[ccg|hg]: use the new TargetList class; typedef Requisition
+	and Allocation and convert methods to use them; use Glib::ustring instead of
+	GdkAtom where necessary;
+	* demos/gtk-demo/example_drawingarea.cc:
+	* examples/cellrenderercustom/cellrendererpopup.cc: changed to use new
+	Allocation API.
+	* examples/dnd/dndwindow.c: changed to use the new TargetFlag enum.
+	* fixed up as per murrayc's requests; closes bug #133936.
+
+2004-02-10  Bryan Forbes  <mxpxfifws@yahoo.com>
+
+	* tools/m4/convert_gdk.m4: added InputSource<->GdkInputSource,
+	Glib::ustring<->GdkAtom, and NativeWindow<->GdkNativeWindow.
+	* gdk/src/colormap.hg: Used Gdk::Color instead of GdkColor.
+	* gdk/src/device.hg: Wrapped GdkInputSource and used the new enum in
+	corresponding methods.
+	* gdk/src/display.[hg|ccg]: Used Glib::ustring instead of GdkAtom and
+	NativeWindow instead of GdkNativeWindow.
+	* gdk/src/dragcontext.[ccg|hg]: Used DragProtocol instead of
+	GdkDragProtocol; GdkAtom->Glib::ustring.
+	* gdk/src/event.[ccg|hg]: 
+	* gdk/src/pixmap.[ccg|hg]: GdkNativeWindow->NativeWindow.
+	* gdk/src/types.[ccg|hg]: Added Gdk::AtomStringTraits struct back and
+	typedef'd it as AtomString; typedef'd	GdkNativeWindow as Gdk::NativeWindow.
+	* gdk/src/window.hg: GdkGeometry->Geometry.
+	* fixed up as per murrayc's requests; closes bug #133933.
+
+2004-02-10  Murray Cumming  <murrayc@usa.net>
+
+	* gtkmm now uses libsigc++ 2 as like glibmm, with slightly different
+	API. See bug #125061. We need to update CHANGES later.
+
+2.3.3:
+
+2004-01-31  Murray Cumming  <murrayc@usa.net>
+
+	* gdk/src/window.hg, gtk/src/widget.hg: Used C++ Region type instead of
+	GdkRegion. Make Region& args const where appropriate.
+	* gtk/src/treedragsource.[hg|ccg]: Hand-coded the drag_get_data vfunc
+	so that it can use a C++ SelectionData& output parameter.
+	* gtk/src/selectiondata.[hg|ccg]: Added set() method with fewer 
+	parameters, that calls get_target() to get the type(), like the 
+	examples do. Hopefully that is sensible.
+	* gtk/src/celllayout.hg: Use C++ CellRenderer* instead of C 
+	GtkCellRenderer for vfunc paramters.
+	* gtk/src/treeiter.[hg|ccg]: Added TreeIter::operator--(), which is 
+	slow and which has no direct equivalent in GTK+ itself yet.
+	* Added lots of const ListHandle and SListHandle get methods, with 
+	const elements. Fixes bug 126721.
+	
+
+2004-01-29  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/widget: The drag_data_get and selection_get signals now have 
+	Gtk::SelectionData& return parameters instead of GtkSelectionData*. 
+	This requires the latest glibmm, which has added the optional 
+	custom_c_callback parameter for _WRAP_SIGNAL(). This required some 
+	copy/paste/changed code in the .ccg files.
+
+2.3.2:
+
+2004-01-21  Murray Cumming  <murrayc@usa.net>
+
+	* examples/book/treemodelcustom/exampletreemodel.[h|cc]: Wrote and
+	used some GlueItem and GlueList classes to better manage the 
+	GtkTreeIter data. But at the moment, the old iters are never 
+	invalidatated so this concept is not fully tested.
+	* gtk/src/treemodelfilter: Wrapped set_modify_func() after talking
+	to Kris about what it does.
+
+2004-01-19  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/liststore.[hg|ccg], gtk/src/treestore.[hg|ccg]: Added
+	set_model_columns() methods, as wrappers for 
+	gtk_list_store_set_model_columns() and 
+	gtk_tree_store_set_model_columns().
+	* examples/book/treeview/drag_and_drop/dnd_treemodel.[h|cc]: Used
+	these methods with a non-static member ModelColumnRecord, so that
+	the ModelColumnRecord can be instantiated after the gtkmm type system.
+	Thanks to Bryan Forbes for pointing this out.
+
+2004-01-19  Takashi Takekawa <takekawa@users.sourceforge.jp>
+ 
+ 	* atk/src/text.hg, gtk/src/enums.hg: deleted unnecessary namespace
+	qualification, for the Intel compiler. Bug #131172.
+
+2004-01-19  Murray Cumming  <murrayc@usa.net>
+
+	* gdk/src/drawable.[hg|ccg]: Added copy_to_image() as wrapper for
+	gdk_drawable_copy_to_image().
+	* gtk/src/cellrenderertext.hg: Add a custom m4 conversion for the
+	Gdk::Drawable paramter of the render() vfunc, so that it takes
+	an extra reference.
+
+2004-01-16  Murray Cumming  <murrayc@usa.net>
+
+	* */*.hg: All _WRAP_VFUNCS are now in protected sections, because
+	gmmproc no longer puts them in a separated protected section 
+	automatically. Note also, that gmmproc now generates correct const
+	_vfuncs, so some of your overrides might no longer be overrides. Also,
+	you can add doxygen documentation before the _WRAP_VFUNC() macro now,
+	and it will be read by doxygen.
+
+2004-01-14  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/treeiter.[hg}ccg]: Added TreeIter::set_stamp() and 
+	get_stamp(), with documentation, for use when implementing a 
+	custom TreeModel.
+	* gtk/src/treemodel.[hg|ccg]: 
+	- Hand-coded several vfuncs and their C callbacks, so that we can have 
+	C++ iterators instead of GtkTreeIter*s in the API, and to reorder some 
+	parameters.
+	- Added 2 extra vfuncs for information about root nodes. The C 
+	versions of these vfuncs provide root node information when the iter 
+	is NULL, but it is nicer in C++ to just have an extra vfunc without 
+	that parameter. This requires an extra if() in the _vfunc_callback() 
+	implementation.
+	- Added documentation for the vfuncs but gmmproc does not yet put the
+	documentation in the right place for the generated vfuncs. 
+	* gtk/src/cellrenderer.hg: Added docuemntation for the vfuncs, but
+	gmmproc does not put this documentation in the right place yet.
+	* examples/: Added treemodelcustom to show a derived TreeModel, which
+	overrides those vfuncs, based on the example by Christof Pettig.
+
+2004-01-12  Murray Cumming  <murrayc@usa.net>
+
+	* demos/gtk-demo/example_uimanager.cc: Removed extra comma to fix 
+	build - patch by Billy O'Connor.
+
+2004-01-09  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/main.[hg|ccg]: Added docs, based on the C docs. Added bool
+	return value to iteration().
+	* gtk/src/uimanager.hg: Added wrapper for get_toplevels(), as wrapper
+	for gtk_ui_manager_get_toplevels().
+	* gtk/src/action.hg: add(): Use the new 
+	gtk_action_group_add_action_with_accels() instead of
+	gtk_action_group_add_action() so that it tries to use the stock 
+	accelerator if the action has a stock_id.
+
+2004-01-05  Murray Cumming  <murrayc@usa.net>
+
+	* gdk/src/image.hg: Added accessors for public struct fields.
+
+2003-01-05  Eric Bourque <ericb@computer.org>
+
+ 	* gtkmm.spec.in: added an unpackaged file (.devhelp) to the %files 
+	section. 
+
+2004-01-03  Murray Cumming  <murrayc@usa.net>
+
+	* gdk/src/*.[hg|ccg]: Added class documentation, by copying it from the
+	C documentation.
+	* gdk/gdkmm/: Added rgb.[h|cc] with some global functions, wrapping
+	gdk_rgb_get_colormap(), gdk_rgb_get_visual() and gdk_rgb_ditherable().
+	* gdk/src/color.hg: Documented all methods, apart from the hsv and hsl 
+	stuff that is a mystery to me.
+	* gdk/src/colormap.hg: Added get_system() as a wrapper for 
+	gdk_colormap_get_system().
+	* gdk/src/device.hg: Added get_name(), get_source(), get_mode() and
+	get_has_cursor() as accessors for read-only struct fields.
+	* gdk/src/dragcontext.[hg|ccg]: Added get_targets() and documented it
+	and other accessors.
+	* gtk/src/liststore.hg, treestore.hg: Documented all methods.
+	* gtk/src/tree*.hg: Added lots of class and method documentation.
+
+2003-12-31  Murray Cumming  <murrayc@usa.net>
+
+	* docs/reference/Makefile.am: Corrected generated .devhelp filename
+	so that it matches the pattern that devhelp looks for.
+	* docs/reference/doxygen_to_devhelp.xsl: Correct link prefix, so that
+	it links to the installed html documentation.
+	* gtk/gtkmm/accelmap.[h|cc]: Added lock_path() and unlock_path() as 
+	wrappers for new GTK+ functions. Added documentation for all AccelMap
+	methods, based on the GTK+ docs.
+	* gtk/src/clipboard.[hg|ccg]: Added documentation, based on the C docs.
+	Added wait_for_targets(), as a wrapper for 
+	gtk_clipboard_wait_for_targets(). Added a version of request_targets()
+	with a callback that takes a list of strings, as a wrapper for 
+	gtk_clipboard_request_targets(), and deprecated the hacky one
+	with a callback that takes a SelectionData.
+	* atk/src/: Added Hyperlink, Hypertext, Document, and StreamableContent
+	* atk/src/atkobject.hg: Now inherits from the Hypertext interfaces as
+	well as the others.
+	* gtk/src/gtk_methods.defs: Updated from gtk+ with h2defs.py
+
+2003-12-30  Murray Cumming  <murrayc@usa.net>
+
+	* docs/reference/Makefile.am: Use installed beautify_docs, instead
+	of a copy.
+	* configure.in: Use installed glibmm_check_perl() instead of a copy.
+
+2003-12-21  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/menushell.hg: Added cancel() as wrapper for 
+	gtk_menu_shell_cancel().
+
+2003-12-20  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/celllayout.hg: Wrapped reorder() method and vfunc.
+	* gtk/src/gtk_methods.defs and gdk/src/gdk_methods.defs: regenerated
+	with h2defs.pyt.
+
+2003-12-18  Murray Cumming  <murrayc@usa.net>
+
+	* gdk/src/display.hg: Added set_double_click_distance() as wrapper
+	for gdk_display_set_double_click_distance(), though the .defs for
+	it are not there yet.
+	* gtk/src/settings.hg: Added double-click-distance property.
+	* gtk/src/button.hg: Added get/set_alignment() as wrapper for
+	gtk_button_get/set_alignment(), though the .defs are not there yet.
+	* pango/src/pangoline.hg: Added get_length(), get_start_index(), and
+	get_layout() as accessors for the public struct fields.
+	* gtk/src/cellrenderertext.hg: Wrapped the new single-paragraph-mode
+	property.
+
+2003-12-13  Murray Cumming  <murrayc@usa.net>
+
+	* docs/reference/Makefile.am: Make sure that gtkmm2.devhelp is
+	generated before trying to install it. Added a doxygen-warnings
+	target that outputs the doxygen log to doyxgen_warnings.txt.
+	* gdk/src/window.hg: Added get_group(), as a wrapper for 
+	gdk_window_get_group(), and set_accept_focus() as wrapper for
+	gdk_window_set_accept_focus().
+	* gdk/src/display.hg: Added get_default_group(), as wrapper for 
+	gdk_display_get_default_group().
+
+2.3.1:
+
+2003-12-08  Murray Cumming  <murrayc@usa.net>
+	
+	* gtk/src/gtk_methods.defs: Regenerated with h2defs.py.
+	* gtk/src/combobox.hg: Corrected C function name in _WRAP_CONSTRUCT,
+	so that the constructor is actually generated.
+	* gtk/src/comboboxentry.hg: Added set_text_column() as wrapper
+	for gtk_combo_box_entry_set_text_column().
+	* gtk/src/entrycompletion.[hg|ccg]: Wrapped match_selected signal,
+	unpleasantly, by hand-coding everything.
+	* gtk/src/filefilter.[hg|ccg]: Added add_custom() as wrapper for
+	gtk_file_filter_add_custom(), using a SignalProxy.
+	* gtk/src/menu: Added set_monitor() as wrapper for 
+	gtk_menu_set_monitor().
+	* gtk/src/treeviewcolumn.hg: Added get_cell_position() as a 
+	wrapper for gtk_tree_view_column_cell_get_position().
+
+2003-12-08  Murray Cumming  <murrayc@usa.net>
+
+	* atk/atkmm/, pango/pangomm: Added init.[h|cc] so you can use
+	these libraries without using all of gtkmm.
+
+2003-12-06  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/radiotoolbutton.[hg|ccg]: Removed the constructor that
+	takes a RadioToolButton& group, because it looks like a copy
+	constructor. Added a constructor that takes a Widget& icon_group,
+	for consistency with the other ToolButton classes.
+	Bug 128484 (Billy O'Connor).
+
+2003-12-03  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/widget.hg: Wrapped get_accessible, screen_changed, and 
+	can_activate_accel signals, though the .defs are not there for them 
+	yet.
+
+2003-11-27  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/treemodel.hg: Added iter_is_valid(). Use the old TreeIter::
+	operator bool() as a default implementation, but this is already 
+	reimplemented in ListStore and TreeStore, using GTK+ functions.
+	* gtk/src/treeiter.hg: operator bool(): Use iter_is_valid() instead
+	of our hack.
+
+2003-11-23  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/radiotoolbutton.[hg|ccg]: Manually-implement constructors,
+	because the group is not a property.
+	* examples/book/toolbar: Use the new Toolbar API, to test it, though
+	this example should probably use the UIManager in future.
+	* gtk/gtkmm.h: Added the toolitem headers.
+
+2003-11-22  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/toolbar.[hg|ccg]: Deprecated ToolList.
+	* examples/Makefile.am_fragment: Added GTKMM_DISABLE_DEPRECATED to
+	examples build.
+	* gdk/src/pixbuf.[hg|ccg]: Wrapped get_formats().
+
+2003-11-19  Murray Cumming  <murrayc@usa.net>
+
+	* docs/reference/Makefile.am: Fix the distcheck for the .devhelp file.
+	* gtk/src/expander.hg: Add the get/set_markup methods, though there
+	are no .defs for them yet.
+
+2003-11-17  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/combobox.hg: Changed constructors, and added set_model(),
+	because the model is now a non-construct-only property in GTK+.
+	* gtk/gtkmm/comboboxtext.[h|cc]: Used changed API to implement this.
+	examples/book/combobox/text now works.
+
+2003-11-16  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/toolbar.[hg|cc]: Wrapped new functions, including the 
+	ToolItem-based insert, append, and prepend, and deprecated our
+	equivalents of the deprecated C functions.
+	Moved deprecated Elements API into toolbar_elements.[h|cc].
+	* gtk/src/gtk_docs.xml: Replaced with freshly generated output
+	from docextract_to_xml.py from pygtk.
+	* Added gdk/src/pixbufformat.[hg|ccg] as wrapper for GdkPixbufFormat.
+
+2003-11-14  Murray Cumming  <murrayc@usa.net>
+ 
+ 	* gdk/src/gdk_docs_override.xml, gtk/src/gtk_docs_override.xm,
+ 	pango/src/pango_docs_override.xml. Added overrides for 4 or 5 methods
+ 	that mention Glib::Free, though I feel sure that I did this once
+ 	before. Bug #126870.
+
+2003-11-05  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/widget.hg, gdk/src/window.hg: Fixed typos to fix build.
+
+2003-11-03  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/action.[hg|ccg]: Renamed add_action() to add(), to reduce
+	the amount of client code slightly.
+	* gtk/src/celllayout.[hg|ccg]: Added set_cell_data_func(), using
+	SignalProxy.
+	* gtk/src/treemodelfilter.[hg|ccg]: 
+	Added set_visible_func(), using SignalProxy.
+	Added convert methods.
+
+
+2003-11-02  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/*action.[hg|ccg]: renamed create_from_stock() to
+	create() because I think we can overload the methods, because the
+	parameters are distinguishable.
+	* examples/book/dialogs/: Added filechooserdialog, by copying and
+	modifying the fileselectiondialog example.
+	* gtk/src/entrycompletion.[hg|ccg]: wrap set_match_func() using
+	SignalProxy.
+
+2003-11-01  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/: Added wrappers for FileChooser, FileChooserWidget,
+	FileChooserDialog and FileFilter. FileChooser is an interface
+	but I see no way to override it.
+	* Wrapped some more signals and vfuncs.
+
+2003-10-31  Murray Cumming  <murrayc@usa.net>
+
+	* docs/index.html: Corrected links to glibmm docs, using relative 
+	links.
+
+2003-10-30  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/toolitem.hg: Removed get/set_pack_end() now that they are
+	removed from GTK+, to fix the CVS build.
+	* docs/Makefile.am_fragment: Install docs to gtkmm-2.4 directory
+	instead of gtkmm-2.3.
+	* docs/reference/Makefile.am: Add installdox rule to make the 
+	reference html link to the glibmm docs when they are installed.
+
+2003-10-26  Murray Cumming  <murrayc@usa.net>
+
+	* Dealt with several //TODO comments, adding several unset_*() methods
+	* *Action: Changed create() to create_from_stock() and create.
+	* ToggleAction: create() methods: Added bool is_active parameter.
+	* RadioAction: create() methods: Added group parameter.
+	* Added gtk/gtkmm/radiobuttongroup.[h|cc] containing 
+	Gtk::RadioButtonGroup. This was previously in the Gtk::Menu_Helpers
+	namespace. It now works with RadioActions as well as the 3 other
+	Radio item classes.
+	* Added examples/combobox/complex, showing a custom tree model,
+
+2.3.0:
+
+2003-10-24  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/gtk_signals.defs: regenerated, keeping hand-coded changes,
+	after adding some extra GTypes to tools/extra_defs_gen.
+	* gkt/gtkmm: Added cellrenderer_generation.[h|cc], with some of the 
+	templates and template specialisations previously in 
+	treeviewcolumn.[hg|ccg]. This allowed them to be reused in
+	gtk/src/celllayout.hg for a pack_start(model column) template.
+	* demos/gtk-demo/: Added example_ui_manager.cc - a C++ version of
+	the C one.  
+
+2003-10-22  Murray Cumming  <murrayc@usa.net>
+
+	* Added wrappers for GtkToolItem, ToolButton, ToggleButton,
+	RadioToolButton.
+
+2003-10-17  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/combobox.hg: Updated for latest API.
+	* Added gtk/gtkmm/comboboxtext.[h|cc], putting text-based stuff
+	in a sub class.
+	* gtk/src/treemodel.[hg|ccg]: Added const overload of children(),
+	but it's a bad hack that needs more attention.
+	* Added examples/book/combobox, which uses ComboBoxText and should use
+	ComboBox also in future. It segfaults at the moment.
+	* Added gtk/src/toggleaction.[hg|ccg] and gtk/src/radioaction.hg.
+	* Wrapped GList* and GSList*-using methods.
+	* UIManager: Wrapped Error-using methods, with optional errthrow
+	  parameter of _WRAP_METHOD().
+	* gtk/src/gtk_signals.defs: Updated with newly-generated defs from
+	extra_defs_gen, redoing the by-hand corrections.
+	* examples/book/dialogs/colorselection, fontselection: Used
+	the buttons instead. This will be moved into the buttons folder
+	later.
+	* examples/book/dialogs/messagedialog: Updated for new constructor
+	API.
+
+2003-10-12  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/treemodel.hg: Comment-out wrapper for row-inserted
+	signal, until gtk+ bug 123923 has been dealt with, to prevent
+	treeview crash with GTK+ 2.3
+
+2003-10-12  Murray Cumming  <murrayc@usa.net>
+
+	* Added wrappers for new GTK+  classes: Action, ActionGroup, 
+        CellLayout, ComboBox, ComboBoxEntry, ColorButton, EntryCompletion,
+        Expander, FontButton, UIManager, and a few extra methods and
+        properties. More API details in NEWS.
+
+2003-10-01  Murray Cumming  <murrayc@usa.net>
+
+	* tools/m4/convert_gdk.m4: Correct the GdkDrawable conversion to
+	fix the build.
+
+2003-09-30  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/cellrenderer.hg, gtk/src/gtk_vfuncs.defs, 
+	tools/m4/convert_gdk.m4: The CellRenderer render vfunc now takes a 
+	Gdk::Drawable instead of a Gdk::Window, as per my recent change 
+	in GTK+ in CVS. See bug #102405.
+
+2003-09-30  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/gtk_methods.defs: Updated with h2defs.py from GTK+ in cvs.
+
+2003-09-30  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/cellrenderer.hg, gtk/src/gtk_signals.defs:
+	Wrapped the CellRenderer::background-cell-* properties that seem
+	to have been added in GTK+ 2.2, but that we had not wrapped yet.
+	Bug #116803.
+
+2003-09-30  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/textbuffer.hg: get_selection_bounds() returns a bool
+	to say whether anything is selected. Bug #118459
+	* gtk/src/widget.hg: get_style_property(): Parameter renamed to
+	avoid rare warning. Part of bug #117740.
+
+2003-09-28  Bradley Bell  <btb@debian.org>
+ 
+ 	* gtk/src/notebook.hg, gtk/src/treeiter.ccg, gtk/src/treeiter.hg:
+ 	workarounds for inaccessible base bugs with latest gcc.
+
+2003-09-11  Cedric Gustin  <cedric.gustin@swing.be>
+
+	* atk/src/text.hg, gdk/src/display.hg, gdk/src/displaymanager.hg,
+	gdk/src/screen.hg, glib/glibmm/threadpool.cc,
+	gtk/src/clipboard.hg, gtk/src/treerowreference.hg,
+	gtk/src/widget.hg, gtk/src/window.hg : Removed a bunch of
+	_GTKMMPROC_SIGNAL_H_AND_CC(#ifndef G_OS_WIN32) restrictions. These
+	functions are now implemented in the latest (2.2.4) GTK+ on win32.
+	* gdk/src/Makefile_list_of_hg.am_fragment,
+	gtk/src/Makefile_list_of_hg.am_fragment : Adapted Makefile.am's
+	accordingly. In particular, Gtk::Clipboard is now supported on
+	win32.
+	* README.win32 : Updated list of unsupported functions. 
+
+2003-09-04  Bradley Bell  <btb@debian.org>
+ 
+ 	* docs/reference/Makefile.am: Distribute doxygen tags 
+
+2003-08-20  Murray Cumming  <murrayc@usa.net>
+  
+ 	* gdk/src/display.hg: Add refreturn WRAP_METHOD() parameter to
+ 	open() and open_default_libgtk_only(), because these seem to return
+ 	an existing instance rather than a new one. Should fix bug #119049.
+
+2003-08-20  Frank Naumann  <fnaumann@freemint.de>
+ 
+ 	* demos/gtk-demo/example_treeview_editable_cells.cc,
+  	  examples/book/treeview/editable_cells/examplewindow.cc,
+  	  gtk/src/treeview.hg: Added workaround for MSVC++.
+  	The MSVC++ now compile Gtk::TreeView::append_column_editable
+  	and the result work as expected. An exact description
+  	can be found in the treeview.h as comment. Removed
+  	the no longer required MSVC++ workarounds from the
+  	examples too.
+
+2003-08-11  Martin Schulze  <teebaum@cvs.gnome.org>
+
+	* gtk/src/treeview.hg, docs/tutorial/gtkmm-tut.xml:
+	Add information about what to do when the column type is not
+	supported and TreeView::append_column() sets up the CellRenderer
+	incompletely (bug #118922).
+
+2003-07-21  Murray Cumming  <murrayc@usa.net>
+ 
+ 	* src/gtk/buttonbox.hg: Documentation: Corrected the switched 
+ 	vertical/horizonal descriptions of VButtonBox and HButtonBox.
+ 	Bug #117883.
+
+2003-07-05  Murray Cumming  <murrayc@usa.net>
+ 
+ 	* gtk/src/object.ccg Object::_init_unmanage(): 
+ 	Don't g_object_ref() objects that are already not managed, such as 
+ 	stuff used with Glib::Wrap() which is already in a container 
+ 	(Containers sink (unfloat) child widgets after they are added). Also, 
+ 	don't mark it as not manage()d, (!referenced_) of course. This was 
+ 	doing one-too-many refs, so sometimes the objects would not be 
+ 	finalized even if they were destroyed. Daniel Elstner found this 
+ 	potential problem months ago and I should have listened to him.
+ 	This seems to fix the lifetime bug shown in tests/wrap_existing. I think this
+   fixes the get_toplevel_windows() leak shown in tests/refcount_dialog also.
+   Thanks to Harold Hopfes for doing _lots_ of investigation work on this bug.
+ 	* gtk/src/window.ccg: Window::_destroy_c_instance():
+ 	Remove the g_object_unref() that was a window-specific fix for the
+ 	extra g_object_ref() in gtk/src/object.ccg above.
+
+2003-07-12  Murray Cumming  <murrayc@usa.net>
+
+	* pango/src/pango_docs_override.xml,
+	  gdk/src/gdk_docs_override.xml,
+	  gtk/src/gtk_docs_override.xml: Added overrides for documentation 
+	that talks about null pointer values where we use references. Added 
+	TODOs in the .hg files to add unset() methods in 2.4 to support this
+	functionality.
+
+2003-07-03  Murray Cumming  <murrayc@usa.net>
+
+	* Used %p and (void*) cast to various g_warning()s used when
+	--enable-debug-refcounting is used, avoiding compiler warnings.
+	* Added tests/wrap_existing, which shows a memory leak that we are
+	currently working on.
+
+2003-06-17  Murray Cumming  <murrayc@usa.net>
+ 
+ 	* docs/FAQ/gtkmm_faq.xml: Applied patch from Andreas Rottman 
+ 	mentioning libsigcx extension library.
+
+2003-06-13  Cedric Gustin  <cedric.gustin@swing.be>
+ 
+         * gtk/src/treeviewcolumn.hg: Added declaration of
+ 	generate_cellrenderer full class specialization for types bool and
+ 	Gdk::Pixbuf. This solves a long-standing bug with treeviews on
+ 	win32. Hopefully, it will also solve bug #113688 on Debian.
+ 	* demos/gtk-demo/example_stockbrowser.cc: Removed GTKMM_WIN32
+ 	compiler directive. On win32, stock icons are not displayed as
+ 	expected in the first column of the treeview.
+	
+2003-05-31  Murray Cumming  <murrayc@usa.net>
+
+	* configure.in: Depends on GTK+ 2.3.0 now that GTK+ has branched, with
+	GTK+ 2.4 in HEAD.
+	* configure.in: gmmproc is now installed in a glibmm-2.3 folder
+	rather than a glibmm-2.4 folder.
+	* gtk/src/alignment.hg: Wrapped new padding functions and properties. 
+	Wrote New in GTK+ 2.4 next to them. They need regenerated .defs files,
+	but we can do that later.
+
+2003-05-18  Murray Cumming  <murrayc@usa.net>
+ 
+ 	* docs/tutorial/gtkmm-tut.xml: TreeView chapter: Replaced some TODOs
+ 	with short paragraphs. Added copies of the example screenshots to
+ 	show the list and tree models.
+
+2003-05-14  Murray Cumming  <murrayc@usa.net>
+
+	* Applied some of MSVC++ .NET 2003 changes from jburris. For instance,
+	use of Gtk:: prefix with manage, because MSVC++ can not guess it. Also
+	corrected the out-of-sync protected/private modifiers in the private
+	gtype classes and their prototypes.
+
+2003-05-09  Murray Cumming  <murrayc@usa.net>
+ 
+ 	* gtk/src/menushell.[hg|ccg] replace GP_LIST_CONTAINER_REMOVE() with
+ 	custom-written remove() and erase() MenuList methods, to ensure that
+ 	we unset the accel widget that we might have set in the MenuItem() 
+ 	constructor. This avoids a memory leak due to the extra reference.
+	* gtk/src/accel_label.[hg|ccg]: Added unset_accel_widget().
+
+2003-05-06  Enrico Costanza  <ec142@york.ac.uk>
+ 
+ 	* gtk/src/image.hg: Added "refreturn" to _METHOD_WRAP for get_pixbuf
+ 	This fixes a bug that caused "(g_object_unref): assertion `G_IS_OBJECT
+ 	(object)' failed"
+
+2003-05-06  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/optionmenu.[hg|ccg]: Implemented a custom destructor which
+	calls remove_menu(), to prevent the menu (set with set_menu()), from
+	remembering a dead OptionMenu. See the comment in the destructor for
+	more details.
+	
+2003-05-02  Murray Cumming  <murrayc@usa.net>
+
+	* *.hg: Added namespace prefix to all StateType parameter types, 
+	because there is one in Atk and in Gtk and that confuses Doxygen.
+	* demos/gtk-demo/example_change_display.cc: Commented-out some unused
+	method parameters, to avoid warnings.
+
+2003-04-26  Gene Ruebsamen <gene@erachampion.com>
+	
+ 	* docs/tutorial/gtkmm-tut.xml: Added a new appendix for win32
+ 	with the cygwin/command-line portion contributed by Cedric Gustin.
+ 	Created a new link from the Installation section to point to the new appendix.
+ 	Also fixed the filename of the tutorial in the "Contributing" section.
+ 	* docs/tutorial/figures/devcpp_project_options.png: Added new image for the new win32 appendix described above.
+	
+2003-04-22  Murray Cumming  <murrayc@usa.net>
+
+	* Install headers in x.3 directories instead of .4 because I noticed
+	that some are already there so it needed to be fixed, and, given the
+	current build files, it was easier to choose .3 than .4 (it is based
+	on the library names), and because it does not seem like such a bad
+	idea.
+
+2003-04-21  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/src/menushell.ccg: Added 
+	GP_LIST_ITER(Glib::List_Cpp_Iterator<GtkListItem, ComboDropDownItem> 
+	because the standard GP_LIST iterator seems to be useless. See bug
+	#110206.
+	
+2003-04-21  Murray Cumming  <murrayc@usa.net>
+
+	* examples/book/Makefile.am: Added idle directory.
+	* configure.in: Added examples/book/idle/Makefile.
+
+2003-03-30  Gene Ruebsamen <gene@erachampion.com>
+
+	* examples/book/timeout/timerexample.[cc,h]: update examples to
+	work with Gtkmm2.
+	* examples/book/idle/idleexample.[cc,h]: create new idle directory and
+	examples for Gtkmm2.
+	* docs/tutorial/gtkmm-tut.xml: update the idle/timeout chapter for
+	Gtkmm2 and modify to use the program listings in the examples/book/
+	directories.
+	
+2003-04-21 Oli Kessler <ok@tor.ch>
+       
+         * gtk/gtk_docs_override.xml, fixed docu bug in the function
+         gtk_window_set_default
+	
+2003-04-15  Ole Laursen  <olau@hardworking.dk>
+
+	* gtk/src/widget.{cc,h}g: Added unset_fg/bg/font/text/base to
+	support unwrapped null pointer parameter to modify_fg/bg/....
+
+2003-04-13  Ole Laursen  <olau@hardworking.dk>
+
+	* examples/cellrenderercustom/cellrendererpopup.cc: Switched to
+	using wrappers of grab_add and friends instead of using the C
+	functions.
+
+	* gtk/src/main.ccg, gtk/src/main.hg: Removed commented wrapper of
+	grab_add and friends.
+
+	* gtk/src/widget.ccg, gtk/src/widget.hg: Wrapped
+	gtk_grab_add()/remove()/get_current().
+
+2003-03-30  Murray Cumming  <murrayc@usa.net>
+
+        * gtk/gtk_docs_override.xml, likewise atk, pango: Added overrides for
+ 	docs that mention *_free() functions.
+	
+2003-03-26  Martin Schulze  <MHL.Schulze@t-online.de>
+
+	* pango/src/attrlist.{ccg,hg}: AttrList::insert,
+	AttrList::insert_before, AttrList::change must pass a copy of
+	the attribute parameter into the c functions (should fix #109334).
+
+2003-03-22  Enrico Scholz  <enrico.scholz@informatik.tu-chemnitz.de>
+ 
+	* examples/Makefile.am_fragment:  Added DESTDIR-support. 
+
+2003-03-20  Ole Laursen  <olau@hardworking.dk>
+
+	* gtk/src/widget.hg: Applied patch from Detlef Reichl to add
+	protected set_window and set_allocation (#108484).	
+
+2003-03-18  Cedric Gustin  <cgustin@ibelgique.com>
+
+	* Makefile.am : removed examples from DIST_SUBDIRS.
+
+2003-03-13  Sebastian Rittau  <srittau@jroger.in-berlin.de>
+
+	* gdk/src/gc.hg: Added refreturn flag to both GC::get_screen() flavors.
+	Closes bug #108233. (With help by Sven Grottke.)
+
+2003-02-14  Bryan Forbes  <mxpxfifws@yahoo.com>
+
+	* gtk/src/accelgroup.hg:
+	* gtk/src/accellabel.hg:
+	* gtk/src/adjustment.hg:
+	* gtk/src/alignment.hg:
+	* gtk/src/arrow.hg:
+	* gtk/src/aspectframe.hg:
+	* gtk/src/bin.hg: Added documentation for constructors and
+	_MEMBER_GET() wrappers.
+	* gtk/src/box.hg: Added the PackOptions enum into the gtkmmEnums
+	group so it is now on the correct documentation page.
+	* gtk/src/enums.hg: Allow Doxygen to grab Gtk::AlignmentEnum (used in
+	alignment.hg and others) and added it to the gtkmmEnums group.
+	* gtk/src/gtk_docs_override.xml: Added documentation for methods
+	in accelgroup.hg, accellabel.hg, adjusment.hg, and arrow.hg.
+	
+2003-01-27  Murray Cumming  <murrayc@usa.net>
+ 
+ 	* gdk/src/display.hg: Used refreturn on  get_default() and
+ 	get_core_pointer(), preventing segfaults.
+	
+2003-01-27  Murray Cumming  <murrayc@usa.net>
+
+	* Replaced use of RefPtr::is_null() with use of operator bool().
+
+2003-01-24  Murray Cumming  <murrayc@usa.net>
+
+	* gtk/gtkmm/menu_elems.cc: Element::Element(MenuItem): Use the
+	Glib::RefPtr<> constructor explicitly, for clarity, and do the
+	necessary extra ref - fixes lifetime bug 104194
+
+2003-01-23  Murray Cumming  <murrayc@usa.net>
+
+	* More TODOs:
+	  - Gtk::Container: Removed const set_focus_chain(), added const 
+	    get_focus_chain().
+          - Gtk::TreeDragSource::drag_data_get() and 
+	    Gtk::TreeDragDest::row_drag_possible() now use SelectionData 
+	    instead of GtkSelectionData.
+
+2003-01-23  Murray Cumming  <murrayc@usa.net>
+
+	* Updated dnd examples for new signal signatures.
+
+2003-01-23  Murray Cumming  <murrayc@usa.net>
+
+	* More use of Gdk::Device and Gtk::SelectionData.
+
+2003-01-22  Murray Cumming  <murrayc@usa.net>
+
+	* Used _IGNORE_SIGNAL() on keybinding signals, though gmmproc still
+	complains about them. I founds these signals by grepping for
+	binding_entry_add_signal in the gtk+ source code.
+	* Dealt with various minor TODOs, adding const and using C++ types.
+
+2003-01-22  Murray Cumming  <murrayc@usa.net>
+
+	* Rename GTKMM_ macros to GLIBMM_.
+
+2003-01-22  Murray Cumming  <murrayc@usa.net>
+
+	* build_shared: Used the general/win32/posix variables used in
+	the gtkmm Makefile.ams, so that the libraries actually build.
+	* gtk/src/treepath.[hg|ccg]: Removed the TreePath(bool) override, as 
+	suggested, because it broke the build, because we don't seem to set 
+	gtkmm_COMPILATION.
+	* gtk/gtkmm/menu_elem.[h|cc]: It used the RefPtr::operator=() that we
+	removed because that operator=() shouldn't be used. Faked the behaviour
+	with an explict use of the constructor and a reference() for now, with 
+	a TODO.
+
+2003-01-21  Murray Cumming  <murrayc@usa.net>
+
+	* Changed library names: 1.4 -> 1.3 and 2.4 -> 2.3 so that they
+	can be unstable.
+
+2003-01-21  Murray Cumming  <murrayc@usa.net>
+
+	* Copied and modified slightly the build_shared files from libgdamm,
+	to use the gmmproc from glibmm-2.4.
+
+2003-01-21  Murray Cumming  <murrayc@usa.net>
+
+	* Changed library names: 1.0 -> 1.4 and 2.0 -> 2.4
+
+See gtkmm 2.2 for previous ChangeLog entries.

@@ -1,0 +1,15 @@
+(1) VST SUPPORT
+
+You may not distribute binaries of Ardour with VST support. Doing so
+is a violation of the license agreement for the Steinberg VST SDK. If
+you are found to be distributing such binaries, you risk both
+prosecution by Steinberg and public humiliation by me.
+
+This is not my choice, and as soon as Steinberg change their
+licensing, which they have indicated they will do, this policy (and
+file) will be removed.
+
+(2) STANDARD TEMPLATES
+
+The templates in ./templates are intended for installation in
+$prefix/share/ardour/templates.

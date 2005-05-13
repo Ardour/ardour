@@ -1,0 +1,6 @@
+2005-4-1 Taybin Rutkin <taybin@earthlink.net>
+	* Updated to support sigc++-2.0.
+	* Incremented version to 3.0.0.
+
+2004-8-4 Taybin Rutkin <taybin@earthlink.net>
+	* Added support for gcc-3.4

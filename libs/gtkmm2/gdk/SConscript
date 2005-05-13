@@ -1,0 +1,10 @@
+import glob
+
+gdkmm2_files = glob.glob('gdkmm/*.cc')
+
+Import('env libraries')
+gdkmm2 = env.Copy()
+gdkmm2.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'], libraries['pangomm'], libraries['gtkmm2']])
+
+libgdkmm2 = gdkmm2.StaticLibrary('gdkmm2', gdkmm2_files)
+Default(libgdkmm2)

@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@/gtkmm2ext
+
+Name: libgtkmm2ext
+Version: @VERSION@
+Description: libgtkmm2ext, a library of useful new C++ and C widgets for gtkmm users
+Requires: libpbd, libmidi++
+Libs: -L${libdir} -lgtkmm2ext @NON_PKG_LIBS@
+Cflags: -I${includedir} @NON_PKG_CFLAGS@

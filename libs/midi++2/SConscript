@@ -1,0 +1,48 @@
+# -*- python -*-
+
+import glob
+
+Import('env libraries')
+
+midi2 = env.Copy()
+midi2.Merge([ libraries['sigc2'], libraries['xml'], libraries['pbd3'] ])
+
+domain = 'midipp'
+
+midi2.Append(DOMAIN=domain,MAJOR=2,MINOR=1,MICRO=1)
+
+sources = Split("""
+fd_midiport.cc
+fifomidi.cc
+midi.cc
+midichannel.cc
+midicontrollable.cc
+midifactory.cc
+midimanager.cc
+midiparser.cc
+midiport.cc
+mmc.cc
+mtc.cc
+port_request.cc
+version.cc
+""")
+
+sysdep_sources = Split ("""
+alsa_sequencer_midiport.cc
+coremidi_midiport.cc
+""")
+
+if env['SYSMIDI'] == 'CoreMIDI':
+   sysdep_src = [ 'coremidi_midiport.cc' ]
+   midi2.Append (CCFLAGS="-DWITH_COREMIDI")
+else:
+   sysdep_src = [ 'alsa_sequencer_midiport.cc' ]
+   midi2.Append (CCFLAGS="-DWITH_ALSA")
+
+midi2.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+midi2.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+
+midi2.VersionBuild(['version.cc','midi++/version.h'], 'SConscript')
+
+libmidi2 = midi2.StaticLibrary('midi++', [ sources, sysdep_src ])
+Default(libmidi2)

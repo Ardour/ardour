@@ -1,0 +1,497 @@
+/*
+    Copyright (C) 2004 Paul Davis
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+    $Id$
+*/
+
+#include <string>
+#include <climits>
+#include <cstdio>
+#include <cmath>
+#include <algorithm>
+
+#include <midi++/controllable.h>
+
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/barcontroller.h>
+
+#include "i18n.h"
+
+using namespace std;
+using namespace Gtk;
+using namespace Gtkmm2ext;
+
+BarController::BarController (Gtk::Adjustment& adj,
+			      MIDI::Controllable *mc,
+			      sigc::slot<void,char*,unsigned int> lc) 
+
+	: adjustment (adj),
+	  prompter (Gtk::WIN_POS_MOUSE, 30000, false),
+	  midi_control (mc),
+	  label_callback (lc),
+	  spinner (adjustment),
+	  bind_button (2),
+	  bind_statemask (Gdk::CONTROL_MASK)
+
+{			  
+	_style = LeftToRight;
+	grabbed = false;
+	switching = false;
+	switch_on_release = false;
+	with_text = true;
+	use_parent = false;
+
+	set_shadow_type (SHADOW_NONE);
+
+	initial_value = adjustment.get_value ();
+
+	adjustment.signal_value_changed().connect (mem_fun (*this, &Gtk::Widget::queue_draw));
+	adjustment.signal_changed().connect (mem_fun (*this, &Gtk::Widget::queue_draw));
+
+	darea.add_events (Gdk::BUTTON_RELEASE_MASK|
+			  Gdk::BUTTON_PRESS_MASK|
+			  Gdk::POINTER_MOTION_MASK|
+			  Gdk::ENTER_NOTIFY_MASK|
+			  Gdk::LEAVE_NOTIFY_MASK);
+
+	darea.signal_expose_event().connect (mem_fun (*this, &BarController::expose));
+	darea.signal_motion_notify_event().connect (mem_fun (*this, &BarController::motion));
+	darea.signal_button_press_event().connect (mem_fun (*this, &BarController::button_press));
+	darea.signal_button_release_event().connect (mem_fun (*this, &BarController::button_release));
+
+	prompter.signal_unmap_event().connect (mem_fun (*this, &BarController::prompter_hiding));
+	
+	prompting = false;
+	unprompting = false;
+	
+	if (mc) {
+		mc->learning_started.connect (mem_fun (*this, &BarController::midicontrol_prompt));
+		mc->learning_stopped.connect (mem_fun (*this, &BarController::midicontrol_unprompt));
+	}
+
+	spinner.signal_activate().connect (mem_fun (*this, &BarController::entry_activated));
+	spinner.signal_focus_out_event().connect (mem_fun (*this, &BarController::entry_focus_out));
+	spinner.set_digits (3);
+
+	add (darea);
+	show_all ();
+}
+
+void
+BarController::set_bind_button_state (guint button, guint statemask)
+{
+	bind_button = button;
+	bind_statemask = statemask;
+}
+
+void
+BarController::get_bind_button_state (guint &button, guint &statemask)
+{
+	button = bind_button;
+	statemask = bind_statemask;
+}
+
+
+gint
+BarController::button_press (GdkEventButton* ev)
+{
+	switch (ev->button) {
+	case 1:
+		if (ev->type == GDK_2BUTTON_PRESS) {
+			switch_on_release = true;
+		} else {
+			switch_on_release = false;
+			darea.add_modal_grab();
+			grabbed = true;
+			grab_x = ev->x;
+			grab_window = ev->window;
+			StartGesture ();
+		}
+		return TRUE;
+		break;
+
+	case 2:
+	case 3:
+		break;
+
+	case 4:
+	case 5:
+		break;
+	}
+
+	return FALSE;
+}
+
+gint
+BarController::button_release (GdkEventButton* ev)
+{
+	switch (ev->button) {
+	case 1:
+		if (switch_on_release) {
+			Glib::signal_idle().connect (mem_fun (*this, &BarController::switch_to_spinner));
+			return TRUE;
+		}
+
+		if ((ev->state & (GDK_SHIFT_MASK|GDK_CONTROL_MASK)) == GDK_SHIFT_MASK) {
+			adjustment.set_value (initial_value);
+		} else {
+			double scale;
+
+			if (ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
+				scale = 0.01;
+			} else if (ev->state & GDK_CONTROL_MASK) {
+				scale = 0.1;
+			} else {
+				scale = 1.0;
+			}
+
+			mouse_control (ev->x, ev->window, scale);
+		}
+		grabbed = false;
+		darea.remove_modal_grab();
+		StopGesture ();
+		break;
+
+	case 2:
+		if ((ev->state & bind_statemask) && bind_button == 2) {
+			midi_learn ();
+		} else {
+			double fract;
+			fract = ev->x / (darea.get_width() - 2.0);
+			adjustment.set_value (adjustment.get_lower() + 
+					      fract * (adjustment.get_upper() - adjustment.get_lower()));
+		}
+		return TRUE;
+
+	case 3:
+		if ((ev->state & bind_statemask) && bind_button == 3) {
+			midi_learn ();
+			return TRUE;
+		}
+		return FALSE;
+		
+	case 4:
+		adjustment.set_value (adjustment.get_value() +
+				      adjustment.get_step_increment());
+		break;
+	case 5:
+		adjustment.set_value (adjustment.get_value() -
+				      adjustment.get_step_increment());
+		break;
+	}
+
+	return TRUE;
+}
+
+gint
+BarController::motion (GdkEventMotion* ev)
+{
+	double scale;
+	
+	if (!grabbed) {
+		return TRUE;
+	}
+
+	if ((ev->state & (GDK_SHIFT_MASK|GDK_CONTROL_MASK)) == GDK_SHIFT_MASK) {
+		return TRUE;
+	}
+
+	if (ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
+		scale = 0.01;
+	} else if (ev->state & GDK_CONTROL_MASK) {
+		scale = 0.1;
+	} else {
+		scale = 1.0;
+	}
+
+	return mouse_control (ev->x, ev->window, scale);
+}
+
+gint
+BarController::mouse_control (double x, GdkWindow* window, double scaling)
+{
+	double fract;
+	double delta;
+
+	if (window != grab_window) {
+		grab_x = x;
+		grab_window = window;
+		return TRUE;
+	}
+
+	delta = x - grab_x;
+	grab_x = x;
+
+	switch (_style) {
+	case Line:
+	case LeftToRight:
+		fract = scaling * (delta / (darea.get_width() - 2));
+		fract = min (1.0, fract);
+		fract = max (-1.0, fract);
+		adjustment.set_value (adjustment.get_value() + fract * (adjustment.get_upper() - adjustment.get_lower()));
+		break;
+
+	default:
+		fract = 0.0;
+	}
+	
+	
+	return TRUE;
+}
+
+gint
+BarController::expose (GdkEventExpose* event)
+{
+	Glib::RefPtr<Gdk::Window> win (darea.get_window());
+	Widget* parent;
+	gint x1, x2, y1, y2;
+	gint w, h;
+	double fract;
+
+	w = darea.get_width() - 2;
+	h = darea.get_height() - 2;
+
+	fract = ((adjustment.get_value() - adjustment.get_lower()) /
+		 (adjustment.get_upper() - adjustment.get_lower()));
+	
+	switch (_style) {
+	case Line:
+		x1 = (gint) floor (w * fract);
+		x2 = x1;
+		y1 = 0;
+		y2 = h - 1;
+
+		if (use_parent) {
+			parent = get_parent();
+			
+			if (parent) {
+				win->draw_rectangle (parent->get_style()->get_fg_gc (parent->get_state()),
+						    true,
+						    0, 0, darea.get_width(), darea.get_height());
+			}
+		} else {
+			win->draw_rectangle (get_style()->get_bg_gc (get_state()),
+					    true,
+					    0, 0, darea.get_width(), darea.get_height());
+		}
+
+		if (fract == 0.0) {
+			win->draw_rectangle (get_style()->get_fg_gc (get_state()),
+					    true, x1, 1, 2, darea.get_height() - 2);
+		} else {
+			win->draw_rectangle (get_style()->get_fg_gc (get_state()),
+					    true, x1 - 1, 1, 3, darea.get_height() - 2);
+		}
+		break;
+
+	case CenterOut:
+		break;
+
+	case LeftToRight:
+		x1 = 0;
+		x2 = (gint) floor (w * fract);
+		y1 = 0;
+		y2 = h - 1;
+
+		win->draw_rectangle (get_style()->get_bg_gc (get_state()),
+				    false,
+				    0, 0, darea.get_width(), darea.get_height());
+
+		/* draw active box */
+		
+		win->draw_rectangle (get_style()->get_fg_gc (get_state()),
+				    true,
+				    1 + x1,
+				    1 + y1,
+				    x2,
+				    1 + y2);
+		
+		/* draw inactive box */
+
+		win->draw_rectangle (get_style()->get_fg_gc (STATE_INSENSITIVE),
+				    true,
+				    1 + x2,
+				    1 + y1,
+				    w - x2,
+				    1 + y2);
+
+		break;
+
+	case RightToLeft:
+		break;
+	case TopToBottom:
+		break;
+	case BottomToTop:
+		break;
+	}
+
+	if (with_text) {
+		/* draw label */
+		
+		char buf[64];
+		buf[0] = '\0';
+
+		label_callback (buf, 64);
+
+		if (buf[0] != '\0') {
+    			int width = 0, height;
+			darea.create_pango_layout(buf)->get_pixel_size(width, height);
+			darea.set_size_request(width + 2, -1);
+		}
+	}
+	return TRUE;
+}
+
+void
+BarController::set_with_text (bool yn)
+{
+	if (with_text != yn) {
+		with_text = yn;
+		queue_draw ();
+	}
+}
+
+void
+BarController::midicontrol_set_tip ()
+{
+	if (midi_control) {
+		// Gtkmm2ext::UI::instance()->set_tip (&darea, midi_control->control_description());
+	}
+}
+
+void
+BarController::midi_learn()
+{
+	if (midi_control) {
+		prompting = true;
+		midi_control->learn_about_external_control ();
+	}
+}
+
+
+void
+BarController::midicontrol_prompt ()
+{
+	if (prompting) {
+		string prompt = _("operate MIDI controller now");
+		prompter.set_text (prompt);
+		Gtkmm2ext::UI::instance()->touch_display (&prompter);
+
+		unprompting = true;
+		prompting = false;
+	}
+}
+
+void
+BarController::midicontrol_unprompt ()
+{
+	if (unprompting) {
+		Gtkmm2ext::UI::instance()->touch_display (&prompter);
+		
+		unprompting = false;
+	}
+}
+
+gint
+BarController::prompter_hiding (GdkEventAny *ev)
+{
+	if (unprompting) {
+		if (midi_control) {
+			midi_control->stop_learning();
+		}
+		unprompting = false;
+	}
+	
+	return FALSE;
+}
+
+
+void
+BarController::set_style (Style s)
+{
+	_style = s;
+	darea.queue_draw ();
+}
+
+gint
+BarController::switch_to_bar ()
+{
+	if (switching) {
+		return FALSE;
+	}
+
+	switching = true;
+
+	if (get_child() == &darea) {
+		return FALSE;
+	}
+
+	remove ();
+	add (darea);
+	darea.show ();
+
+	switching = false;
+	return FALSE;
+}
+
+gint
+BarController::switch_to_spinner ()
+{
+	if (switching) {
+		return FALSE;
+	}
+
+	switching = true;
+
+	if (get_child() == &spinner) {
+		return FALSE;
+	}
+
+	remove ();
+	add (spinner);
+	spinner.show ();
+	spinner.grab_focus ();
+
+	switching = false;
+	return FALSE;
+}
+
+void
+BarController::entry_activated ()
+{
+	string text = spinner.get_text ();
+	float val;
+
+	if (sscanf (text.c_str(), "%f", &val) == 1) {
+		adjustment.set_value (val);
+	}
+	
+	switch_to_bar ();
+}
+
+gint
+BarController::entry_focus_out (GdkEventFocus* ev)
+{
+	entry_activated ();
+	return TRUE;
+}
+
+void
+BarController::set_use_parent (bool yn)
+{
+	use_parent = yn;
+	queue_draw ();
+}

@@ -1,0 +1,101 @@
+			    ARDOUR README
+
+	  Paul Davis <paul@linuxaudiosystems.com> June 2003
+
+Welcome to Ardour.  This program is still very much under development,
+but has now reached the stage where it will be productive and useful
+to have other people testing it out and perhaps (hopefully!) fixing
+bugs and adding features.
+
+**** SECURITY *******************************************************
+
+To run Ardour with the lowest latencies, it's necessary to use POSIX
+Real-Time Scheduling as well as locking all the memory it uses into
+physical RAM.  These requirements can only be met if Ardour is run with
+root priviledges. 
+
+On the other hand, things are not so bad.  If you don't attempt to
+install it setuid root (which actually won't work anyway), then
+someone needs to have gained root access in order to run it like this.
+If they already have root access, Ardour is the least of your
+problems.  So relax.  We'll use capabilities once Linux kernels start
+arriving with them enabled, though this won't help too much with
+security, since the relevant capabilities would still allow a wiley
+cracker to do anything at all.
+
+Alternatively, you can choose to run Ardour without RT scheduling, and
+then there's no concern at all.  It just won't be useful in low latency
+situations, which are desirable in most studio environments. Note that
+this is not so important if you have audio hardware that is capable of 
+doing "hardware monitoring" - in this case, a lack of low latency will
+simply make response to Ardour's UI controls a little sluggish, but
+monitoring during capture will be excellent.
+
+**** HARDWARE COMPATIBILITY *****************************************
+
+Ardour uses JACK for all its audio I/O, thus providing seamless
+connections to both audio hardware and other applications. Its really
+not the right place to discuss JACK, but in case you are wondering:
+
+Although JACK uses the ALSA 0.9.0 API, it exercises this API in a way
+that no other application to date has done, and it also tries to use
+certain hardware features that again, no other existing applications
+use.  As a result, although complete portability to all ALSA supported
+h/w is an eventual and very achievable goal, there may be issues
+surrounding h/w compatibility.  Please remember that my primary goal
+with JACK is to build a professional audio system, and with Ardour, a
+professional digital audio workstation. If they happen to be useful
+for people with 2/4 channel cards, then great, but it's not my own
+primary focus.
+
+One other important issue is that your audio interface must support
+full duplex i/o with the same sample format for both capture and
+playback.  This means, for example, that the SoundBlaster AWE cannot
+be used with JACK in full duplex mode - it only supports full duplex
+i/o if one of the two directions (capture or playback) is 8 bit and
+the other is 16.  Very few cards have this kind of limitation, and if
+they do, they typically are not suitable for use with applications
+like JACK or Ardour for other reasons.
+
+To date, JACK has been run with:
+
+   RME Hammerfall (Digi9652)              (26 channels in, 26 channels out)
+   RME Hammerfall DSP (hdsp)              (26 channels in, 26 channels out)
+   RME Hammerfall Light (Digi9636)        (18 channels in, 18 channels out)
+   Midiman Delta series (ice1712 chipset) (12 channels in, 10 channels out)
+  
+   Various consumer grade audio interfaces, typically with 2 channels
+   in, 2/4 channels out, including:
+   
+   Hoontech 4Dwave-NX (Trident chipset)
+   Ensoniq 5880
+   Soundblaster 32
+   Soundblaster 64
+   Creative SBLive64
+
+and many more.
+
+So, basically, it appears to work for just about all ALSA supported
+cards, which is the goal.
+  
+**********************************************************************
+
+BUG REPORTING
+-------------
+
+Bugs should be reported to http://ardour.org/mantis/ .  They are more
+likely to be remembered and dealt with there.  Please check the existing bugs
+to make sure it has not already been reported and/or fixed in CVS.
+
+COMPILING ARDOUR
+----------------
+Please see the file "BUILD".
+
+RUNNING ARDOUR
+--------------
+
+NOTE: You must have a running JACK server before starting Ardour.
+      ----------------------------------------------------------- 
+
+Typing "ardour" will hopefully have some effect. "ardour --help" lists
+available options.

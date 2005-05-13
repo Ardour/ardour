@@ -1,0 +1,5 @@
+libgtkmmext.pc
+libgtkmmext.spec
+version.cc
+*.mo
+*.pot

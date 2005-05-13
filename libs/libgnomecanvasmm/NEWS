@@ -1,0 +1,54 @@
+2.10.0:
+
+* Increased version for GNOME 2.10 release version.
+* WIN32 build fixes. (Cedric Gustin, Michael Hofmann)
+* Alpha build fix (Bradley Bell)
+
+2.8.0:
+
+* Increased version for GNOME 2.8 release version.
+
+2.6.1:
+
+* Build fixes for gcc 3.4 and for the Intel compiler.
+  (Takashi Takekawa)
+
+2.6.0:
+
+Increased version.
+
+2.5.2:
+
+* Canvas: set_dither(), get_dither(): Use C++ enum instead of C enum.
+* Item: draw(): Use C++ Gdk::Drawable instead of C type.  
+* Text: Changed all C Pango properties to their C++
+  counterparts.
+(Bryan Forbes)
+
+
+2.5.1:
+
+* Use new libsigc++ 2 syntax.
+* Canvas::Widget: Use a Gtk::Widget* for the "widget" property,
+  instead of Gtk::Widget, so that it is usable.
+(Murray Cumming)
+* Spec file dependency fix. (Eric Bourque)
+
+2.5.0:
+ 
+This is the new unstable branch of the parallel-installable 
+libgnomevanvasmm 2.6, for use with gtkmm 2.4.
+
+2.0.1:
+
+* Corrected segfault in CanvasAA destructor.
+  The AA Canvas was probably useless before this.
+  (Murray Cumming)
+
+2.0.0:
+
+Documentation:
+* Reuses C documentation.
+* examples separated into individual directories.
+
+1.3.11:

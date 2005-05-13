@@ -1,0 +1,38 @@
+/* Copyright unknown. Code by Laurent de Soras <laurent@ohmforce.com>.
+ */
+
+#ifndef __pbd_fastlog_h__
+#define __pbd_fastlog_h__
+
+#include <math.h> /* for HUGE_VAL */
+
+static inline float fast_log2 (float val)
+{
+	/* don't use reinterpret_cast<> because that prevents this
+	   from being used by pure C code (for example, GnomeCanvasItems)
+	*/
+	int * const    exp_ptr = (int *)(&val);
+	int            x = *exp_ptr;
+	const int      log_2 = ((x >> 23) & 255) - 128;
+	x &= ~(255 << 23);
+	x += 127 << 23;
+	*exp_ptr = x;
+	
+	val = ((-1.0f/3) * val + 2) * val - 2.0f/3;   // (1)
+	
+	return (val + log_2);
+}
+
+static inline float fast_log (const float val)
+{
+	return (fast_log2 (val) * 0.69314718f);
+}
+
+static inline float fast_log10 (const float val)
+{
+	return fast_log2(val) / 3.312500f;
+}
+
+static inline float minus_infinity() { return -HUGE_VAL; }
+
+#endif /* __pbd_fastlog_h__ */
