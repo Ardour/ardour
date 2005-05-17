@@ -1,3 +1,6 @@
+Tue May 17 16:24:00 2005  Taybin Rutkin <taybin@earthlink.net>
+	* Moved cassowary from autotools to scons.
+
 Fri Mar 18 15:41:00 2005  Taybin Rutkin <taybin@earthlink.net>
 	* Removed ClSet.h, ClMap.h.
 	* ClReader.l includes ClReader.cc.h instead of ClReader.hh.  The
