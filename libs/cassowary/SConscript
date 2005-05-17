@@ -1,7 +1,7 @@
 # -*- python -*-
 Import('env libraries')
 
-cassowary = env.Copy()
+cassowary = env.Copy(YACCFLAGS="-d")
 
 domain = 'libcassowary'
 cassowary.Append(DOMAIN=domain,MAJOR=0,MINOR=60,MICRO=3)
@@ -23,7 +23,9 @@ ClReader.cc
 ClReader-lex.cc
 """)
 
-cassowary.Command('ClReader.cc', 'ClReader.yy', 'bison -y -d -pcl --output-file $TARGET $SOURCES')
+cassowary.Append(CCFLAGS="-D_REENTRANT")
+
+cassowary.CXXFile(target = ['ClReader.cc', 'ClReader.cc.h'], source = 'ClReader.yy')
 cassowary.CXXFile(target = 'ClReader-lex.cc', source = 'ClReader.ll')
 
 libcassowary = cassowary.StaticLibrary('cassowary', cassowary_files)
