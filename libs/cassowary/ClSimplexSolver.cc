@@ -31,8 +31,6 @@ using namespace std;
 #define CONFIG_H_INCLUDED
 #endif
 
-const char *szCassowaryVersion = VERSION;
-
 // Need to delete all expressions
 // and all slack and dummy variables
 // See NewExpression -- all allocation is done in there
