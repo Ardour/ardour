@@ -378,6 +378,7 @@ libraries['ardour2'] = LibraryInfo (LIBS='ardour2', LIBPATH='#libs/ardour2', CPP
 libraries['midi++2'] = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++2', CPPPATH='#libs/midi++2')
 libraries['pbd3']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd3', CPPPATH='#libs/pbd3')
 libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext', CPPPATH='#libs/gtkmm2ext')
+libraries['cassowary'] = LibraryInfo (LIBS='cassowary', LIBPATH='#libs/cassowary', CPPPATH='#libs/cassowary')
 
 libraries['fst'] = LibraryInfo()
 if env['VST']:
@@ -412,12 +413,13 @@ if env['DEBIAN']:
     ]
 
     subdirs2 = [
+	'libs/cassowary',
         'libs/pbd3',
-        'libs/midi++2',
+        'libs/midi++2'
         ]
 
     gtk2_subdirs = [
-        'libs/gtkmm2ext',
+        'libs/gtkmm2ext'
          ]
  
 else:
@@ -445,7 +447,7 @@ else:
                                                 CPPPATH='#libs/libgnomecanvasmm')
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
-                                          CPPPATH='#libs/soundtouch')
+                                          CPPPATH='#libs')
 
     coredirs = [
         'libs/soundtouch',
@@ -453,9 +455,10 @@ else:
     ]
 
     subdirs2 = [
+	'libs/cassowary',
         'libs/sigc++2',
         'libs/pbd3',
-        'libs/midi++2',
+        'libs/midi++2'
         ]
 
     gtk2_subdirs = [
@@ -465,7 +468,7 @@ else:
         'libs/gtkmm2/gdk', 
         'libs/gtkmm2/gtk',
 	'libs/libgnomecanvasmm',
-        'libs/gtkmm2ext',
+        'libs/gtkmm2ext'
         ]
     
 opts.Save('scache.conf', env)
