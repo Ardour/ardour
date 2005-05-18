@@ -1,0 +1,23 @@
+# -*- python -*-
+
+import glob
+
+soundtouch_files = Split("""
+AAFilter.cpp
+FIFOSampleBuffer.cpp
+FIRFilter.cpp
+RateTransposer.cpp
+SoundTouch.cpp
+TDStretch.cpp
+mmx_gcc.cpp
+cpu_detect_x86_gcc.cpp
+""")
+
+Import('env')
+st = env.Copy()
+st.Append(CCFLAGS="-DHAVE_CONFIG_H -D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+libst = st.StaticLibrary('soundtouch', soundtouch_files)
+Default(libst)
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'], 
+		     [ 'SConscript'] + soundtouch_files + glob.glob('*.h')))
