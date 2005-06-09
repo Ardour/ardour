@@ -59,6 +59,7 @@ namespace soundtouch
 class FIFOSamplePipe
 {
 public:
+    virtual ~FIFOSamplePipe () {};
     /// Returns a pointer to the beginning of the output samples. 
     /// This function is provided for accessing the output samples directly. 
     /// Please be careful for not to corrupt the book-keeping!

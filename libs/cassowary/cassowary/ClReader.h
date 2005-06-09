@@ -35,6 +35,7 @@ class ClConstraint;
 
 class ClVarLookupFunction : public std::unary_function<const string &,ClVariable *> {
 public:
+  virtual ~ClVarLookupFunction () {};
   virtual ClVariable *operator()(const string &) const { return &clvNil; }
 };
 
@@ -49,6 +50,8 @@ class ClVarLookupInMap : public ClVarLookupFunction {
 public:
   ClVarLookupInMap(StringToVarMap *pmapVars, bool fAutoCreate) 
       : _pmapVars(pmapVars), _fAutoCreate(fAutoCreate) { }
+
+  virtual ~ClVarLookupInMap () {};
 
   ClVariable *operator()(const string &str) const
     { 

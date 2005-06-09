@@ -56,6 +56,9 @@ public:
       : pclv(pcfv) 
     { if (pmapStrPclv) { (*pmapStrPclv)[pcfv->Name()] = *this; } }
 
+  // Destructor
+  virtual ~ClVariable() {};
+
   /// permit ClVariables to be used as pointers to pclvs
   ClAbstractVariable *operator->() { return pclv; }
   const ClAbstractVariable *operator->() const { return pclv; }
