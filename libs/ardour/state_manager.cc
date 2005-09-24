@@ -52,9 +52,6 @@ StateManager::use_state (state_id_t id)
 void
 StateManager::save_state (std::string why)
 {
-	if (!should_save_state()) 
-		return;
-
 	states.push_back (state_factory (why));
 	_current_state_id = states.size() - 1;
 }
