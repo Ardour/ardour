@@ -53,6 +53,12 @@ automation curves. Gerard also helped out with a workshop on Ardour
 held at the Dutch Electronic Arts Festival, Rotterdam, in November
 2004.
 
+Sampo Savolainen became a major contributor of minor patches as Paul
+began working full time for a while. He fixed numerous bugs, some on
+mantis and some not, fairly continuously for several months. He then
+moved on to write SSE assembler routines to handle the CPU-hungry
+metering and mixing routines.
+
 Smaller (but not necessarily minor) patches were received from the
 following people:
 
@@ -66,6 +72,4 @@ following people:
   Christopher George
   Rob Holland
   Joshua Leachman
-  Sampo Savolainen
   Per Sigmond
-  
