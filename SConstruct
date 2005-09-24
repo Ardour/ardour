@@ -1,3 +1,5 @@
+# -*- python -*-
+
 import os
 import sys
 import re
@@ -22,15 +24,18 @@ opts = Options('scache.conf')
 opts.AddOptions(
     BoolOption('ALTIVEC', 'Compile using Altivec instructions', 0),
   ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
-    BoolOption('DEBIAN', 'Debian build options (no internal versions of 3rd party libraries)', 0),
+    BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     BoolOption('DEVBUILD', 'Use shared libardour (developers only)', 0),
+    BoolOption('SIGCCVSBUILD', 'Use if building sigc++ with a new configure.ac (developers only)', 0),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     BoolOption('NOARCH', 'Do not use architecture-specific compilation flags', 0),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('VST', 'Compile with support for VST', 0),
-    BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0)
+    BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
+    BoolOption('USE_SSE_EVERYWHERE', 'Ask the compiler to use x86/SSE instructions and also our hand-written x86/SSE optimizations when possible (off by default)', 0),
+    BoolOption('BUILD_SSE_OPTIMIZATIONS', 'Use our hand-written x86/SSE optimizations when possible (off by default)', 0)
   )
 
 
@@ -374,11 +379,11 @@ libraries['pango'].ParseConfig ('pkg-config --cflags --libs pango')
 libraries['libgnomecanvas2'] = LibraryInfo()
 libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomecanvas-2.0')
 
-libraries['ardour2'] = LibraryInfo (LIBS='ardour2', LIBPATH='#libs/ardour2', CPPPATH='#libs/ardour2')
+libraries['ardour'] = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')
 libraries['midi++2'] = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++2', CPPPATH='#libs/midi++2')
 libraries['pbd3']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd3', CPPPATH='#libs/pbd3')
 libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext', CPPPATH='#libs/gtkmm2ext')
-libraries['cassowary'] = LibraryInfo (LIBS='cassowary', LIBPATH='#libs/cassowary', CPPPATH='#libs/cassowary')
+#libraries['cassowary'] = LibraryInfo(LIBS='cassowary', LIBPATH='#libs/cassowary', CPPPATH='#libs/cassowary')
 
 libraries['fst'] = LibraryInfo()
 if env['VST']:
@@ -397,14 +402,20 @@ if conf.CheckCHeader('alsa/asoundlib.h'):
     subst_dict['%MIDITYPE%'] = "alsa/sequencer"
 elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
     # this line is needed because scons can't handle -framework in ParseConfig() yet.
-    libraries['sysmidi'] = LibraryInfo (LINKFLAGS= '-framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit')
+    libraries['sysmidi'] = LibraryInfo (LINKFLAGS= '-framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -bind_at_load')
     env['SYSMIDI'] = 'CoreMIDI'
-    subst_dict['%MIDITAG%'] = "coremidi"
+    subst_dict['%MIDITAG%'] = "ardour"
     subst_dict['%MIDITYPE%'] = "coremidi"
 
 env = conf.Finish()
 
-if env['DEBIAN']:
+if env['SYSLIBS']:
+
+    libraries['sigc2'] = LibraryInfo()
+    libraries['sigc2'].ParseConfig('pkg-config --cflags --libs sigc++-2.0')
+
+    libraries['gtkmm2'] = LibraryInfo()
+    libraries['gtkmm2'].ParseConfig ('pkg-config --cflags --libs gtkmm-2.0')
 
     libraries['soundtouch'] = LibraryInfo(LIBS='SoundTouch')
 
@@ -412,18 +423,20 @@ if env['DEBIAN']:
         'templates'
     ]
 
-    subdirs2 = [
-	'libs/cassowary',
+    subdirs = [
+#	'libs/cassowary',
         'libs/pbd3',
-        'libs/midi++2'
+        'libs/midi++2',
+        'libs/ardour',
+        'templates'
         ]
 
-    gtk2_subdirs = [
-        'libs/gtkmm2ext'
-         ]
- 
-else:
+    gtk_subdirs = [
+        'libs/gtkmm2ext',
+        'gtk2_ardour',
+        ]
 
+else:
     libraries['sigc2'] = LibraryInfo(LIBS='sigc++2',
                                     LIBPATH='#libs/sigc++2',
                                     CPPPATH='#libs/sigc++2')
@@ -440,45 +453,59 @@ else:
                                       LIBPATH='#libs/gtkmm2/gdk',
                                       CPPPATH='#libs/gtkmm2/gdk')
     libraries['gtkmm2'] = LibraryInfo(LIBS='gtkmm2',
-                                      LIBPATH='#libs/gtkmm2/gtk',
-                                      CPPPATH='#libs/gtkmm2/gtk')
+                                     LIBPATH="#libs/gtkmm2/gtk",
+                                     CPPPATH='#libs/gtkmm2/gtk/')
     libraries['libgnomecanvasmm'] = LibraryInfo(LIBS='libgnomecanvasmm',
                                                 LIBPATH='#libs/libgnomecanvasmm',
                                                 CPPPATH='#libs/libgnomecanvasmm')
+
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
-                                          CPPPATH='#libs')
+                                          CPPPATH=['#libs', '#libs/soundtouch'])
 
     coredirs = [
         'libs/soundtouch',
         'templates'
     ]
 
-    subdirs2 = [
-	'libs/cassowary',
+    subdirs = [
+#	'libs/cassowary',
         'libs/sigc++2',
         'libs/pbd3',
-        'libs/midi++2'
+        'libs/midi++2',
+        'libs/ardour'
         ]
 
-    gtk2_subdirs = [
-        'libs/glibmm2', 
-        'libs/gtkmm2/pango', 
-        'libs/gtkmm2/atk', 
-        'libs/gtkmm2/gdk', 
-        'libs/gtkmm2/gtk',
+    gtk_subdirs = [
+	'libs/glibmm2',
+	'libs/gtkmm2/pango',
+	'libs/gtkmm2/atk',
+	'libs/gtkmm2/gdk',
+	'libs/gtkmm2/gtk',
 	'libs/libgnomecanvasmm',
-        'libs/gtkmm2ext'
+        'libs/gtkmm2ext',
+        'gtk2_ardour',
         ]
-    
+
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
 
 if os.environ.has_key('PATH'):
     env.Append(PATH = os.environ['PATH'])
+
 if os.environ.has_key('PKG_CONFIG_PATH'):
     env.Append(PKG_CONFIG_PATH = os.environ['PKG_CONFIG_PATH'])
 
+if os.environ.has_key('CC'):
+    env['CC'] = os.environ['CC']
+
+if os.environ.has_key('CXX'):
+    env['CXX'] = os.environ['CXX']
+
+if os.environ.has_key('DISTCC_HOSTS'):
+    env['ENV']['DISTCC_HOSTS'] = os.environ['DISTCC_HOSTS']
+    env['ENV']['HOME'] = os.environ['HOME']
+    
 final_prefix = '$PREFIX'
 install_prefix = '$DESTDIR/$PREFIX'
 
@@ -494,6 +521,7 @@ config_prefix = '$DESTDIR' + final_config_prefix
 #
 
 opt_flags = []
+debug_flags = [ '-g' ]
 
 # guess at the platform, used to define compiler flags
 
@@ -509,9 +537,10 @@ config = config_guess.split ("-")
 # on OS X darwinports puts things in /opt/local by default
 #
 if config[config_arch] == 'apple':
-    libraries['core'].Append (LIBPATH = [ '/opt/local/lib' ],
-                              CPPPATH = [ '/opt/local/include' ])
-
+    if os.path.isdir('/opt/local/lib'):
+        libraries['core'].Append (LIBPATH = [ '/opt/local/lib' ])
+    if os.path.isdir('/opt/local/include'):
+        libraries['core'].Append (CPPPATH = [ '/opt/local/include' ])
 if config[config_cpu] == 'powerpc':
     #
     # Apple/PowerPC optimization options
@@ -520,14 +549,22 @@ if config[config_cpu] == 'powerpc':
     #
     if env['NOARCH'] == 0:
         if env['ALTIVEC'] == 1:
-            opt_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec" ])
-        else:
+	    if config[config_arch] == 'apple':
+                opt_flags.extend ([ "-mcpu=7450", "-faltivec"])
+            else:
+	        opt_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"]) 
+	else:
             opt_flags.extend([ "-mcpu=750", "-mmultiple" ])
         opt_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
 
-elif re.search ("i[0-9]86", config[config_cpu]) != None :
+elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_64", config[config_cpu]) != None)):
 
+    build_host_supports_sse = 0
+    
     if env['NOARCH'] == 0:
+
+        debug_flags.append ("-DARCH_X86")
+        opt_flags.append ("-DARCH_X86")
 
         if config[config_kernel] == 'linux' :
 
@@ -537,7 +574,7 @@ elif re.search ("i[0-9]86", config[config_cpu]) != None :
             if "mmx" in x86_flags:
                 opt_flags.append ("-mmmx")
             if "sse" in x86_flags:
-                opt_flags.extend (["-msse", "-mfpmath=sse"])
+	        build_host_supports_sse = 1
             if "3dnow" in x86_flags:
                 opt_flags.append ("-m3dnow")
 
@@ -545,7 +582,21 @@ elif re.search ("i[0-9]86", config[config_cpu]) != None :
                 opt_flags.append ("-march=i586")
             elif config[config_cpu] == "i686":
                 opt_flags.append ("-march=i686")
-        
+
+        if env['USE_SSE_EVERYWHERE'] == 1:
+                opt_flags.extend (["-msse", "-mfpmath=sse"])
+                debug_flags.extend (["-msse", "-mfpmath=sse"])
+                if build_host_supports_sse != 1:
+                    print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
+
+        if env['BUILD_SSE_OPTIMIZATIONS'] == 1:
+                opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+                debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+                if build_host_supports_sse != 1:
+                    print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
+                    
+# end of processor-specific section
+
 #
 # ARCH="..." overrides all 
 #
@@ -565,7 +616,7 @@ opt_flags[:0] = [
     ]
 
 if env['DEBUG'] == 1:
-    env.Append(CCFLAGS="-g")
+    env.Append(CCFLAGS=" ".join (debug_flags))
 else:
     env.Append(CCFLAGS=" ".join (opt_flags))
 
@@ -573,6 +624,7 @@ env.Append(CCFLAGS="-Wall")
 
 if env['VST']:
     env.Append(CCFLAGS="-DVST_SUPPORT")
+
 
 #
 # everybody needs this
@@ -587,14 +639,22 @@ env.Merge ([ libraries['core'] ])
 conf = Configure (env)
 
 if env['NLS']:
-    if conf.CheckCHeader('libintl.h') == None:
-        print 'This system is not configured for internationalized applications. An english-only version will be built\n'
+    print 'Checking for internationalization support ...'
+    have_gettext = conf.TryAction(Action('xgettext --version'))
+    if have_gettext[0] != 1:
+        print 'This system is not configured for internationalized applications (no xgettext command). An english-only version will be built\n'
         env['NLS'] = 0
+        
+    if conf.CheckCHeader('libintl.h') == None:
+        print 'This system is not configured for internationalized applications (no libintl.h). An english-only version will be built\n'
+        env['NLS'] = 0
+
 
 env = conf.Finish()
 
 if env['NLS'] == 1:
     env.Append(CCFLAGS="-DENABLE_NLS")
+
 
 Export('env install_prefix final_prefix config_prefix final_config_prefix libraries i18n version')
 
@@ -608,6 +668,12 @@ if conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Versions/A/
     subst_dict['%JACK_BACKEND%'] = "coreaudio:Built-in Audio:in"
 else:
     subst_dict['%JACK_BACKEND%'] = "alsa_pcm:playback_"
+
+# posix_memalign available
+if not conf.CheckFunc('posix_memalign'):
+    print 'Did not find posix_memalign(), using malloc'
+    env.Append(CCFLAGS='-DNO_POSIX_MEMALIGN')
+
 
 env = conf.Finish()
 
@@ -657,9 +723,9 @@ env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 for subdir in coredirs:
     SConscript (subdir + '/SConscript')
 
-for sublistdir in [subdirs2, gtk2_subdirs]:
-    for subdir in sublistdir:
-        SConscript (subdir + '/SConscript')
+for sublistdir in [subdirs, gtk_subdirs]:
+	for subdir in sublistdir:
+	        SConscript (subdir + '/SConscript')
 
 # cleanup
 env.Clean ('scrub', [ 'scache.conf', '.sconf_temp', '.sconsign.dblite', 'config.log'])
