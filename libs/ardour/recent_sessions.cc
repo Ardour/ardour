@@ -76,8 +76,6 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 	 * natural order will be broken
 	 */
 
-	sort(rs.begin(), rs.end(), cmp);
-	
 	return 0;
 }
 
