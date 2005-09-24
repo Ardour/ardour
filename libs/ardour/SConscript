@@ -1,0 +1,206 @@
+# -*- python -*-
+
+import os
+import glob
+
+Import('env final_prefix install_prefix final_config_prefix libraries i18n')
+
+ardour = env.Copy()
+
+#
+# this defines the version number of libardour
+# 
+
+domain = 'libardour'
+
+ardour.Append(DOMAIN = domain, MAJOR = 1, MINOR = 0, MICRO = 0)
+ardour.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
+ardour.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+ardour.Append(PACKAGE = domain)
+ardour.Append(POTFILE = domain + '.pot')
+
+ardour_files=Split("""
+audio_library.cc
+audio_playlist.cc
+audio_track.cc
+audioengine.cc
+audiofilter.cc
+audioregion.cc
+auditioner.cc
+automation.cc
+automation_event.cc
+configuration.cc
+connection.cc
+crossfade.cc
+curve.cc
+cycle_timer.cc
+default_click.cc
+diskstream.cc
+filesource.cc
+gain.cc
+gdither.cc
+globals.cc
+import.cc
+insert.cc
+io.cc
+jack_slave.cc
+ladspa_plugin.cc
+location.cc
+mtc_slave.cc
+named_selection.cc
+panner.cc
+playlist.cc
+playlist_factory.cc
+plugin.cc
+plugin_manager.cc
+port.cc
+recent_sessions.cc
+redirect.cc
+region.cc
+reverse.cc
+route.cc
+route_group.cc
+send.cc
+session.cc
+session_butler.cc
+session_click.cc
+session_events.cc
+session_export.cc
+session_feedback.cc
+session_midi.cc
+session_process.cc
+session_state.cc
+session_time.cc
+session_timefx.cc
+session_transport.cc
+sndfile_helpers.cc
+sndfilesource.cc
+source.cc
+state_manager.cc
+stateful.cc
+tempo.cc
+utils.cc
+version.cc
+mix.cc
+""")
+
+arch_specific_objects = [ ]
+
+vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
+extra_sources = [ ]
+
+if ardour['VST']:
+	extra_sources += vst_files
+
+ardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+ardour.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
+ardour.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
+ardour.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+
+ardour.Merge ([ libraries['jack'] ])
+
+#
+# See if JACK supports jack_client_open()
+#
+
+jack_test_source_file = """
+#include <jack/jack.h>
+int main(int argc, char **argv)
+{
+    jack_client_open ("foo", 0, 0);
+    return 0;
+}
+"""
+def CheckJackClientOpen(context):
+        context.Message('Checking for jack_client_open()...')
+        result = context.TryLink(jack_test_source_file, '.c')
+        context.Result(result)
+        return result
+
+#
+# See if JACK supports jack_recompute_total_latencies()
+#
+
+jack_test_source_file = """
+#include <jack/jack.h>
+int main(int argc, char **argv)
+{
+    jack_recompute_total_latencies ((jack_client_t*) 0);
+    return 0;
+}
+"""
+def CheckJackRecomputeLatencies(context):
+        context.Message('Checking for jack_recompute_total_latencies()...')
+        result = context.TryLink(jack_test_source_file, '.c')
+        context.Result(result)
+        return result
+
+conf = Configure(ardour, custom_tests = {
+	'CheckJackClientOpen' : CheckJackClientOpen,
+	'CheckJackRecomputeLatencies' : CheckJackRecomputeLatencies
+})
+
+if conf.CheckJackClientOpen():
+    ardour.Append(CXXFLAGS="-DHAVE_JACK_CLIENT_OPEN")
+
+if conf.CheckJackRecomputeLatencies():
+    ardour.Append(CXXFLAGS="-DHAVE_JACK_RECOMPUTE_LATENCIES")
+
+#
+# Optional header files
+#
+
+if conf.CheckCHeader('wordexp.h'):
+    ardour.Append(CXXFLAGS="-DHAVE_WORDEXP")
+
+if conf.CheckCHeader('sys/vfs.h'):
+    ardour.Append(CXXFLAGS="-DHAVE_SYS_VFS_H")
+
+ardour = conf.Finish ()
+
+ardour.Merge ([
+	     libraries['core'],
+	     libraries['xml'],
+	     libraries['sndfile'],
+	     libraries['lrdf'],
+	     libraries['samplerate'],
+	     libraries['sigc2'],
+	     libraries['pbd3'],
+	     libraries['soundtouch'],
+	     libraries['midi++2']
+	     ])
+
+
+ardour.VersionBuild(['version.cc', 'ardour/version.h'], 'SConscript')
+
+def SharedAsmObjectEmitter(target, source, env):
+    for tgt in target:
+        tgt.attributes.shared = 1
+    return (target, source)
+
+
+env['BUILDERS']['SharedAsmObject'] = Builder (action = '$CXX -c -fPIC $SOURCE -o $TARGET',
+					      emitter = SharedAsmObjectEmitter,
+					      suffix = '$SHOBJSUFFIX',
+					      src_suffix = '.s',
+					      single_source = 1)
+
+if env['DEVBUILD'] == 1:
+	if env['BUILD_SSE_OPTIMIZATIONS'] == 1:
+		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+	libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
+else:
+	if env['BUILD_SSE_OPTIMIZATIONS'] == 1:
+		arch_specific_objects = env.StaticObject(target='sse_functions',source='sse_functions.s')
+
+	libardour = ardour.StaticLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
+
+Default(libardour)
+
+if env['NLS']:
+	i18n (ardour, ardour_files + vst_files, env)
+	      
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions.s' ] +
+				     ardour_files + vst_files + 
+				     glob.glob('po/*.po') + glob.glob('ardour/*.h')))
