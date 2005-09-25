@@ -19,7 +19,7 @@ gtkardour.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkardour.Append(PACKAGE=domain)
 gtkardour.Append(POTFILE=domain + '.pot')
 
-gtkardour.Merge ( [libraries['ardour2'],
+gtkardour.Merge ( [libraries['ardour'],
                    libraries['gtkmm2ext'],
                    libraries['midi++2'],
                    libraries['pbd3'],
