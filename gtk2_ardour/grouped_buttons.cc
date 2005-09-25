@@ -18,7 +18,7 @@
     $Id$
 */
 
-#include <gtk--.h>
+#include <gtkmm.h>
 
 #include "grouped_buttons.h"
 
@@ -34,7 +34,7 @@ GroupedButtons::GroupedButtons (vector<Gtk::ToggleButton *>& buttonset)
 		if ((*i)->get_active()) {
 			current_active = n;
 		}
-		(*i)->clicked.connect (bind (slot (*this, &GroupedButtons::one_clicked), n));
+		(*i)->signal_clicked().connect (sigc::bind (mem_fun (*this, &GroupedButtons::one_clicked), n));
 	}
 }
 
@@ -53,7 +53,7 @@ GroupedButtons::GroupedButtons (uint32_t nbuttons, uint32_t first_active)
 			button->set_active (true);
 		} 
 
-		button->clicked.connect (bind (slot (*this, &GroupedButtons::one_clicked), n));
+		button->signal_clicked().connect (sigc::bind (mem_fun (*this, &GroupedButtons::one_clicked), n));
 		buttons.push_back (button);
 	}
 }

@@ -85,8 +85,8 @@ gtk_custom_hruler_init (GtkCustomHRuler * custom_hruler)
 	GtkWidget *widget;
 
 	widget = GTK_WIDGET (custom_hruler);
-	widget->requisition.width = widget->style->klass->xthickness * 2 + 1;
-	widget->requisition.height = widget->style->klass->ythickness * 2 + RULER_HEIGHT;
+	widget->requisition.width = widget->style->xthickness * 2 + 1;
+	widget->requisition.height = widget->style->ythickness * 2 + RULER_HEIGHT;
 }
 
 
@@ -143,7 +143,7 @@ gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 
 	gc = widget->style->fg_gc[GTK_STATE_NORMAL];
 	bg_gc = widget->style->bg_gc[GTK_STATE_NORMAL];
-	font = widget->style->font;
+	font = gtk_style_get_font(widget->style);
 
 	gtk_paint_box (widget->style, ruler->backing_store,
 		       GTK_STATE_NORMAL, GTK_SHADOW_NONE,
@@ -208,8 +208,8 @@ gtk_custom_hruler_draw_pos (GtkCustomRuler * ruler)
 	if (GTK_WIDGET_DRAWABLE (ruler) && (ruler->upper - ruler->lower) > 0) {
 		widget = GTK_WIDGET (ruler);
 		gc = widget->style->fg_gc[GTK_STATE_NORMAL];
-		xthickness = widget->style->klass->xthickness;
-		ythickness = widget->style->klass->ythickness;
+		xthickness = widget->style->xthickness;
+		ythickness = widget->style->ythickness;
 		width = widget->allocation.width;
 		height = widget->allocation.height - ythickness * 2;
 

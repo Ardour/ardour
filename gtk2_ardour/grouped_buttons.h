@@ -18,19 +18,19 @@
     $Id$
 */
 
-#ifndef __gtkmmext_grouped_buttons_h__
-#define __gtkmmext_grouped_buttons_h__
+#ifndef __gtkmm2ext_grouped_buttons_h__
+#define __gtkmm2ext_grouped_buttons_h__
 
 #include <stdint.h>
 
 #include <vector>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 
 namespace Gtk {
 	class ToggleButton;
 };
 
-class GroupedButtons : public SigC::Object
+class GroupedButtons : public sigc::trackable
 {
   public:
 	GroupedButtons (uint32_t nbuttons, uint32_t first_active);
@@ -46,4 +46,4 @@ class GroupedButtons : public SigC::Object
 	void one_clicked (uint32_t which);
 };
 
-#endif /* __gtkmmext_grouped_buttons_h__ */
+#endif /* __gtkmm2ext_grouped_buttons_h__ */

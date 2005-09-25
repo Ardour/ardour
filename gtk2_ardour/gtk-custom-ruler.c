@@ -216,7 +216,7 @@ gtk_custom_ruler_draw_ticks (GtkCustomRuler * ruler)
 	g_return_if_fail (ruler != NULL);
 	g_return_if_fail (GTK_IS_CUSTOM_RULER (ruler));
 
-    klass = GTK_CUSTOM_RULER_CLASS (GTK_OBJECT (ruler)->klass);
+	klass = GTK_CUSTOM_RULER_CLASS (GTK_OBJECT (ruler));
 	if (klass->draw_ticks)
 		klass->draw_ticks (ruler);
 }
@@ -228,7 +228,7 @@ gtk_custom_ruler_draw_pos (GtkCustomRuler * ruler)
     g_return_if_fail (ruler != NULL);
     g_return_if_fail (GTK_IS_CUSTOM_RULER (ruler));
     
-    klass = GTK_CUSTOM_RULER_CLASS (GTK_OBJECT (ruler)->klass);
+    klass = GTK_CUSTOM_RULER_CLASS (GTK_OBJECT (ruler));
     if (klass->draw_pos && ruler->show_position)
 	    klass->draw_pos (ruler);
 }
