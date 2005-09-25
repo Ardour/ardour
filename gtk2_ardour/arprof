@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ gprofhelper.c -nt gprofhelper.so ] ; then 
+    echo "Recompiling gprof helper ..."
+    gcc -shared -nostdlib -fPIC gprofhelper.c -o gprofhelper.so -lpthread -ldl || exit 1
+fi
+
+export LD_LIBRARY_PATH=../libs/ardour/.libs
+LDPRELOAD=./gprofhelper.so ./ardour $*

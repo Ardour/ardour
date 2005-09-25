@@ -1,0 +1,147 @@
+/*
+    Copyright (C) 2002 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+    $Id$
+*/
+
+#ifndef __ardour_gtk_connection_editor_h__
+#define __ardour_gtk_connection_editor_h__
+
+#if __GNUC__ >= 3
+#include <ext/slist>
+using __gnu_cxx::slist;
+#else
+#include <slist.h>
+#endif
+
+#include <gtk--/box.h>
+#include <gtk--/window.h>
+#include <gtk--/scrolledwindow.h>
+#include <gtk--/button.h>
+#include <gtk--/frame.h>
+#include <gtk--/notebook.h>
+#include <gtk--/clist.h>
+
+#include "ardour_dialog.h"
+
+#include <pbd/lockmonitor.h>
+
+namespace ARDOUR {
+	class Session;
+	class Connection;
+}
+
+class ConnectionEditor : public ArdourDialog {
+  public:
+	ConnectionEditor ();
+	~ConnectionEditor ();
+
+	void set_session (ARDOUR::Session *);
+
+  protected:
+	gint map_event_impl (GdkEventAny *);
+
+  private:
+	ARDOUR::Connection *current_connection;
+	int                 selected_port;
+	bool                push_at_front;
+
+	Gtk::CList input_connection_display;
+	Gtk::CList output_connection_display;
+	Gtk::ScrolledWindow input_scroller;
+	Gtk::ScrolledWindow output_scroller;
+
+	Gtk::Frame input_frame;
+	Gtk::Frame output_frame;
+	Gtk::VBox input_box;
+	Gtk::VBox output_box;
+	Gtk::VBox connection_box;
+
+	Gtk::HBox main_hbox;
+	Gtk::VBox main_vbox;
+
+	Gtk::VBox left_vbox;
+	Gtk::VBox right_vbox;
+	Gtk::VBox port_and_selector_box;
+	
+
+	Gtk::Button new_input_connection_button;
+	Gtk::Button new_output_connection_button;
+	Gtk::Button delete_connection_button;
+
+	/* client/port selection */
+
+	Gtk::Notebook notebook;
+	Gtk::Button clear_client_button;
+	Gtk::Frame selector_frame;
+	Gtk::VBox selector_box;
+	Gtk::HBox selector_button_box;
+
+	/* connection displays */
+
+	Gtk::HBox port_box;
+	Gtk::HBox port_button_box;
+	Gtk::VBox port_and_button_box;
+	Gtk::Frame port_frame;
+	Gtk::Button clear_button;
+	Gtk::Button add_port_button;
+
+	PBD::Lock port_display_lock;
+	slist<Gtk::ScrolledWindow *> port_displays;
+
+	Gtk::Button ok_button;
+	Gtk::Button cancel_button;
+	Gtk::Button rescan_button;
+
+	Gtk::Frame button_frame;
+	Gtk::HBox  button_box;
+
+	void new_connection (bool for_input);
+	void delete_connection ();
+
+	void display_ports ();
+	void display_connection_state (bool for_input);
+
+	void add_connection (ARDOUR::Connection *);
+	void add_connection_and_select (ARDOUR::Connection *);
+	void proxy_add_connection_and_select (ARDOUR::Connection *);
+	void proxy_remove_connection (ARDOUR::Connection *);
+	void remove_connection (ARDOUR::Connection *);
+	void refill_connection_display ();
+
+	void rescan ();
+	void clear ();
+	void cancel ();
+	void accept ();
+
+	void port_selection_handler (gint row, gint col, GdkEvent *ev, Gtk::CList *);
+
+	void add_port ();
+	void remove_port (int which_port);
+
+	void port_column_click (gint col, Gtk::CList *clist);
+	gint port_button_event (GdkEventButton *, Gtk::CList *clist);
+	gint connection_click (GdkEventButton *ev, Gtk::CList *clist);
+	void connection_selected (gint, gint, GdkEvent *, bool);
+
+	SigC::Connection config_connection;
+	SigC::Connection connect_connection;
+	void configuration_changed (bool);
+	void connections_changed (int, bool);
+};
+
+#endif /* __ardour_gtk_connection_editor_h__ */

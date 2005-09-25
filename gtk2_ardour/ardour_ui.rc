@@ -1,0 +1,1976 @@
+#
+# This is the GTK style file for Ardour
+#
+#
+
+style "very_small_text"
+{
+ 	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
+	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+}
+
+style "small_text"
+{
+ 	fontset="-*-helvetica-medium-r-normal-*-10-*-*-*-p-*-*-*"
+	font ="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*"
+}
+
+style "small_bold_text"
+{
+ 	fontset="-*-helvetica-bold-r-normal-*-10-*-*-*-p-*-*-*"
+	font ="-*-helvetica-bold-r-normal-*-*-100-*-*-p-*-*"
+}
+
+style "medium_bold_text"
+{
+ 	fontset="-*-helvetica-bold-r-normal-*-12-*-*-*-p-*-*-*"
+	font ="-*-helvetica-bold-r-normal-*-*-120-*-*-p-*-*"
+}
+
+style "medium_text"
+{
+ 	fontset="-*-helvetica-medium-r-normal-*-12-*-*-*-p-*-*-*"
+	font ="-*-helvetica-medium-r-normal-*-*-120-*-*-p-*-*"
+}
+
+style "red_medium_text" = "medium_text"
+{	
+	fg[NORMAL] = { 1.0, 0, 0 }
+	fg[ACTIVE] = { 1.0, 0, 0 }
+	fg[SELECTED] = { 1.0, 0, 0 }
+}
+
+
+style "large_text"
+{
+ 	fontset="-*-helvetica-bold-r-normal-*-18-*-*-*-p-*-*-*"
+	font ="-*-helvetica-bold-r-normal-*-*-180-*-*-p-*-*"
+}
+
+style "larger_bold_text"
+{
+ 	fontset="-*-helvetica-bold-r-normal-*-14-*-*-*-p-*-*-*"
+	font ="-*-helvetica-bold-r-normal-*-*-140-*-*-p-*-*"
+}
+
+style "plugin_name_text"
+{
+	fontset="-*-helvetica-bold-o-*-*-25-*-*-*-p-*-*-*"
+	font="-*-helvetica-bold-o-*-*-25-*-*-*-p-*-*-*"
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+}
+
+style "plugin_maker_text"
+{
+	fontset="-*-helvetica-bold-o-*-*-14-*-*-*-p-*-*-*"
+	font="-*-helvetica-bold-o-*-*-14-*-*-*-p-*-*-*"
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+}
+
+style "first_action_message" 
+{
+	font="-*-helvetica-medium-r-*-*-34-350-*-*-*-*-*-*"
+	fontset="-*-helvetica-medium-r-*-*-34-350-*-*-*-*-*-*"
+}
+
+style "verbose_canvas_cursor"
+{
+	font="-*-helvetica-medium-r-*-*-*-240-*-*-*-*-*-*"
+	fontset="-*-helvetica-medium-r-*-*-*-240-*-*-*-*-*-*"
+}
+
+style "marker_text" 
+{
+	font="-*-helvetica-medium-r-*-*-10-*-*-*-*-*-*-*"
+	fontset="-*-helvetica-medium-r-*-*-10-*-*-*-*-*-*-*"
+}
+
+style "time_axis_view_item_name"
+{
+	font="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*-1"
+	fontset="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*-1"
+}
+
+style "default_base" = "medium_text"
+{
+  fg[NORMAL] = { 0.80, 0.80, 0.70 }	
+  fg[ACTIVE] = { 0.80, 0.80, 0.70 }	
+  fg[PRELIGHT] = { 0.98, 0.76, 0.14 }
+  fg[INSENSITIVE] = { 0.80, 0.80, 0.70 }	
+  fg[SELECTED] = {0.20, 0.90,.20 }
+  
+  bg[NORMAL] = { 0.20, 0.20, 0.20 }
+  bg[ACTIVE] = { 0.20, 0.20, 0.20 }
+  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
+  bg[INSENSITIVE] = { 0.10, 0.10, 0.10 }
+  bg[SELECTED] = { 0, 0.40, 0.60 }
+  
+  text[NORMAL] = { 0.80, 0.80, 0.70 }	
+  text[ACTIVE] = { 0.80, 0.80, 0.70 }	
+  text[PRELIGHT] = { 0, 0.80, 0 }	
+  text[INSENSITIVE] = { 0.80, 0.80, 0.70 }	
+  text[SELECTED] = { 0, 1.0, 0 }
+  
+  base[NORMAL] = { 0.0, 0.0, 0.0 }
+  base[ACTIVE] = { 0.0, 0.0, 0.0 }
+  base[PRELIGHT] = { 0.0, 0.0, 0.0 }
+  base[INSENSITIVE] = { 0.0, 0.0, 0.0 }
+  base[SELECTED] = { 0.0, 0.0, 0.0 }
+}
+
+style "ardour_frames" = "medium_text"
+{
+  fg[NORMAL] = { 0.80, 0.80, 0.70 }	
+  fg[ACTIVE] = { 0.80, 0.80, 0.70 }	
+  fg[PRELIGHT] = { 0.98, 0.76, 0.14 }
+  fg[INSENSITIVE] = { 0.80, 0.80, 0.70 }	
+  fg[SELECTED] = { 0.80, 0.80, 0.70 }	
+  
+  bg[NORMAL] = { 0.80, 0.80, 0.70 }	
+  bg[ACTIVE] = { 0.80, 0.80, 0.70 }	
+  bg[PRELIGHT] = { 0.98, 0.76, 0.14 }
+  bg[INSENSITIVE] = { 0.80, 0.80, 0.70 }	
+  bg[SELECTED] = { 0.80, 0.80, 0.70 }
+  
+  text[NORMAL] = { 0.80, 0.80, 0.70 }	
+  text[ACTIVE] = { 0.80, 0.80, 0.70 }	
+  text[PRELIGHT] = { 0.80, 0.80, 0.70 }	
+  text[INSENSITIVE] = { 0.80, 0.80, 0.70 }	
+  text[SELECTED] = { 0, 0, 0 }
+  
+  base[NORMAL] = { 0.00, 0.00, 0.00 }
+  base[ACTIVE] = { 0.00, 0.00, 0.00 }
+  base[PRELIGHT] = { 0.00, 0.00, 0.00 }
+  base[INSENSITIVE] = { 0.00, 0.00, 0.00 }
+  base[SELECTED] = { 0.00, 0.00, 0.00 }
+}
+
+style "base_frame"
+{
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+}
+
+style "transport_base" = "medium_bold_text"
+{
+  bg[NORMAL] = { 0.10, 0.10, 0.10 }
+  bg[ACTIVE] = { 0, 0, 0 }
+  bg[PRELIGHT] = { 0, 0, 0 }
+  bg[INSENSITIVE] = { 0, 0, 0 }
+  bg[SELECTED] = { 0, 0, 0 }
+}
+
+style "black_mackie_menu_bar" = "medium_bold_text"
+{
+      fg[NORMAL] = { 1.0, 1.0, 1.0 }
+      bg[NORMAL] = { 0, 0, 0 }
+}
+
+style "default_buttons_menus" = "default_base"
+{
+  fontset="-*-helvetica-medium-r-normal-*-12-*-*-*-p-*-*-*"
+  font ="-*-helvetica-medium-r-normal-*-*-120-*-*-p-*-*"
+  	
+  fg[ACTIVE] = { 0, 0, 0 }
+  
+  bg[NORMAL] = { 0.35, 0.35, 0.35 }
+  bg[ACTIVE] = { 0.98, 0.76, 0.14 }
+  bg[PRELIGHT] = { 0.25, 0.25, 0.25 }
+  bg[INSENSITIVE] = { 0.10, 0.10, 0.10 }
+  bg[SELECTED] = { 0.06, 0.06, 0.06 }	
+}
+
+style "very_small_button" = "default_buttons_menus"
+{
+	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
+	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+}
+
+style "small_button" = "default_buttons_menus"
+{
+	fontset="-*-helvetica-medium-r-normal-*-10-*-*-*-p-*-*-*"
+	font ="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*"
+}
+
+style "very_small_red_active_and_selected_button" = "very_small_button"
+{
+	bg[ACTIVE] = { 1.0, 0, 0}
+	bg[SELECTED] = { 1.0, 0, 0}
+}
+
+style "small_red_active_and_selected_button" = "small_button"
+{
+	fg[ACTIVE] = { 0, 0, 0 }
+	bg[ACTIVE] = { 1.0, 0, 0}
+	bg[SELECTED] = { 1.0, 0, 0}
+}
+
+style "track_rec_enable_button" = "small_button"
+{
+	fg[SELECTED] = { 0.0, 0.0, 0.0 }
+	fg[ACTIVE] =   { 0.0, 0.0, 0.0 }
+	fg[PRELIGHT] = { 0.0, 0.0, 0.0 }
+
+	bg[SELECTED] =   { 1.0, 0.0, 0.0 }
+	bg[ACTIVE] =   { 0.91, 0.68, 0.68}
+	bg[PRELIGHT] =   { 1.0, 0.0, 0.0 }
+}
+
+style "mixer_rec_enable_button" = "track_rec_enable_button"
+{
+	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
+	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+}
+
+style "solo_button" = "small_button"
+{
+	bg[PRELIGHT] = { 0, 1.0, 0 }
+	bg[ACTIVE] = { 0.66, 0.97, 0.19 }
+
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
+style "mixer_solo_button" = "solo_button"
+{
+	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
+	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+}
+
+
+style "mute_button" = "small_button"
+{
+	bg[PRELIGHT] = { 1.0, 0.65, 0.13 }
+	bg[ACTIVE] = { 1.0, 0.98, 0.53 }
+	
+	fg[PRELIGHT] = { 0, 0, 0 }
+}
+
+style "mixer_mute_button" = "mute_button"
+{
+	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
+	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+}
+
+style "track_loop_button" = "small_button"
+{
+	bg[ACTIVE] = { 1.0, 0.98, 0.53 }
+	bg[PRELIGHT] = { 1.0, 0.98, 0.53 }
+
+}
+
+style "mixer_red_active_button" = "very_small_button"
+{
+	fg[ACTIVE] = { 0, 1.0, 1.0 }
+	bg[ACTIVE] = { 0.7, 0, 0 }
+
+ 	base[INSENSITIVE] = { 0.21, 0.21, 0.21 }
+ 	bg[INSENSITIVE] = { 0.21, 0.21, 0.21 }
+}
+
+style "time_button" = "default_buttons_menus"
+{
+	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
+ 	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+}
+
+style "transport_button" = "very_small_button"
+{
+	bg[ACTIVE] = { 0.66, 0.97, 0.18 }
+	bg[SELECTED] = { 1.0, 0.04, 0.04 }
+}
+
+style "transport_rec_button" = "very_small_button"
+{
+	bg[ACTIVE] = { 0.82, 0.02, 0.02 }
+	bg[SELECTED] = { 1.0, 0.04, 0.04 }
+}
+
+style "shuttle_control" = "very_small_text"
+{
+	fg[NORMAL] = { 0.85, 0.92, 0.98 }
+	fg[ACTIVE] = { 0.85, 0.92, 0.98 }
+	fg[PRELIGHT] = { 0.85, 0.92, 0.98 }
+	fg[SELECTED] = { 0.85, 0.92, 0.98 }
+	fg[INSENSITIVE] = { 0.85, 0.92, 0.98 }
+
+	bg[NORMAL] = { 0.31, 0.31, 0.31 }
+	bg[PRELIGHT] = { 0.31, 0.31, 0.31 }
+	bg[INSENSITIVE] = { 0.31, 0.31, 0.31 }
+	bg[ACTIVE] = { 0.66, 0.97, 0.18 }
+	bg[SELECTED] = { 1.0, 0.04, 0.04 }
+}
+
+style "ardour_adjusters" = "default_buttons_menus"
+{
+	bg[NORMAL] = { 0.60, 0.60, 0.60 }
+	bg[PRELIGHT] = { 0.80, 0.80, 0.70 }
+	bg[ACTIVE] = { 0.18, 0.18, 0.22 }
+}
+
+style "ardour_progressbars" = "default_buttons_menus"
+{ 
+  bg[NORMAL] = { 0, 0, 0 }
+  bg[PRELIGHT] = { 0.00, 0.36, 0.40 }
+}
+
+style "options_window"  = "default_base"
+{
+	fontset="-*-helvetica-bold-r-normal-*-12-*-*-*-p-*-*-*"
+	font ="-*-helvetica-bold-r-normal-*-*-120-*-*-p-*-*"
+	fg[PRELIGHT] = { 0.80, 0.80, 0.70 }
+}
+
+style "option_entry"  = "default_base"
+{
+	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
+	fg[INSENSITIVE] = { 0.80, 0.80, 0.70 }
+	
+	base[INSENSITIVE] = { 0.12, 0.12, 0.12 }
+	
+	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+	bg[ACTIVE] = { 0.40, 0.40, 0.40 }
+}
+
+style "red_when_active" = "medium_text"
+{
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	bg[NORMAL] = { 0.31, 0.31, 0.31 }
+
+	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
+	bg[ACTIVE] = { 1.0, 0, 0}
+}
+
+style "xrun_warn"  
+{
+	font ="-*-helvetica-bold-r-normal-*-*-180-*-*-p-*-*"
+ 	fontset="-*-helvetica-bold-r-normal-*-18-*-*-*-p-*-*-*"
+
+	fg[NORMAL] = { 1.0, 1.0, 1.0 }
+	fg[ACTIVE] = { 1.0, 1.0, 1.0 }
+	text[NORMAL] = { 1.0, 1.0, 1.0 }
+	text[ACTIVE] = { 1.0, 1.0, 1.0 }
+	base[NORMAL] = { 0.09, 0.48, 0.46 }
+	base[ACTIVE] = { 0.09, 0.48, 0.46 }
+	bg[NORMAL] = { 1.0, 0.48, 0.46 }
+	bg[ACTIVE] = { 0.09, 1.0, 0.46 }
+}
+
+style "menu_bar_base"
+{
+  bg[NORMAL] = { 0, 0, 0 }	
+  bg[ACTIVE] = { 0, 0, 0 }
+  bg[PRELIGHT] = { 0, 0, 0 }
+  bg[INSENSITIVE] = { 0, 0, 0 }
+  bg[SELECTED] = { 0, 0, 0 }
+}
+
+style "fatal_message" = "medium_text"
+{
+   fg[ACTIVE] = { 1.0, 0, 1.0 }
+   fg[NORMAL] = { 0.80, 0.80, 0.70 }
+   bg[ACTIVE] = { 0,0,0 }
+   bg[NORMAL] = { 0,0,0 }
+   base[ACTIVE] = { 0,0,0 }
+   base[NORMAL] = { 0,0,0 }
+}
+
+style "error_message" = "medium_text"
+{
+   fg[ACTIVE] = { 1.0, 0, 0 }
+   fg[NORMAL] = { 0.80, 0.80, 0.70 }
+   bg[ACTIVE] = { 0,0,0 }
+   bg[NORMAL] = { 0,0,0 }
+   base[ACTIVE] = { 0,0,0 }
+   base[NORMAL] = { 0,0,0 }
+}
+
+style "info_message" = "medium_text"
+{
+   fg[ACTIVE] = { 1.0, 0, 0 }
+   fg[NORMAL] = { 0.80, 0.80, 0.70 }
+   bg[ACTIVE] = { 0,0,0 }
+   bg[NORMAL] = { 0,0,0 }
+   base[ACTIVE] = { 0,0,0 }
+   base[NORMAL] = { 0,0,0 }
+}
+
+style "warning_message" = "medium_text"
+{
+   fg[ACTIVE] = { 0.30,0.30, 1.0 }
+   fg[NORMAL] = { 0.80, 0.80, 0.70 }
+   bg[ACTIVE] = { 0, 0, 0 }
+   bg[NORMAL] = { 0, 0, 0 }
+   base[ACTIVE] = { 0, 0, 0 }
+   base[NORMAL] = { 0, 0, 0 }
+}
+
+style "medium_entry" = "medium_text"
+{
+	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
+	fg[SELECTED] = { 0.66, 0.97, 0.18 }
+	
+	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+	
+	base[NORMAL] = { 0, 0, 0 }
+	base[ACTIVE] = { 0, 0, 0 }
+	base[SELECTED] = { 0, 0, 0 }
+}
+
+style "medium_entry_noselection_fg" = "medium_entry"
+{
+	fg[SELECTED] = { 0.98, 0.76, 0.14 }
+}
+
+style "medium_entry_noselection_bg" = "medium_entry"
+{
+	bg[SELECTED] = { 0, 0, 0 }
+}
+
+style "medium_bold_entry"  = "medium_bold_text"
+{
+	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
+	
+	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+	
+	base[NORMAL] = { 0, 0, 0 }
+	base[ACTIVE] = { 0, 0, 0 }
+	base[SELECTED] = { 0, 0, 0 }
+}
+
+
+style "small_entry" = "small_text"
+{
+	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
+	bg[NORMAL] = { 0.0, 0.0, 0.0 }
+	base[NORMAL] = { 0, 0, 0 }
+	base[ACTIVE] = { 0, 0, 0 }
+	base[SELECTED] = { 0, 0, 0 }
+}
+
+style "red_active_small_entry" = "small_entry"
+{
+	fg[ACTIVE] = { 1.0, 0.0, 0.0 }
+	fg[SELECTED] = { 1.0, 0, 0 }
+}
+
+style "small_bold_entry" = "small_bold_text"
+{
+	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
+	
+	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+	
+	base[NORMAL] = { 0, 0, 0 }
+	base[ACTIVE] = { 0, 0, 0 }
+	base[SELECTED] = { 0, 0, 0 }
+}
+
+style "small_red_on_black_entry"  = "small_bold_text"
+{
+       fg[NORMAL] = { 1.0, 0, 0 }
+       fg[ACTIVE] = { 1.0, 0, 0 }
+       base[NORMAL] = { 0.0, 0.0, 0.0 }
+       base[ACTIVE] = { 0.0, 0.0, 0.0 }
+       bg[NORMAL] = { 0.0, 0.0, 0.0 }
+       bg[ACTIVE] = { 0.0, 0.0, 0.0 }
+}
+
+style "big_clock_display" = "medium_entry"
+{
+	fontset = "-*-courier-bold-r-*-*-34-*-*-*-*-*-*-*"
+	font = "-*-courier-bold-r-*-*-34-*-*-*-*-*-*-*"
+}
+
+style "transport_clock_display"
+{
+	fontset = "-*-helvetica-bold-r-*-*-18-*-*-*-*-*-*-*"
+	font = "-*-helvetica-bold-r-*-*-18-*-*-*-*-*-*-*"
+	
+	fg[NORMAL] = { 0.66, 0.97, 0.18 }
+	fg[ACTIVE] = { 1.0, 0, 0.0 }
+	fg[SELECTED] = { 1.0, 0, 0 }
+	fg[PRELIGHT] = { 1.0, 0, 0.0 }
+	fg[INSENSITIVE] = { 1.0, 0, 0.0 }
+	
+	base[NORMAL] = { 0.0, 0.0, 0.0 }
+       base[ACTIVE] = { 0.0, 0.0, 0.0 }
+       bg[NORMAL] = { 0.0, 0.0, 0.0 }
+       bg[ACTIVE] = { 0.0, 0.0, 0.0 }
+}
+
+style "tempo_meter_clock_display"
+{
+	fontset = "-*-helvetica-bold-r-*-*-8-*-*-*-*-*-*-*"
+	font = "-*-helvetica-bold-r-*-*-8-*-*-*-*-*-*-*"
+	fg[NORMAL] = { 1.0, 1.0, 1.0 }
+	fg[ACTIVE] = { 1.0, 1.0, 0.0 }
+	fg[SELECTED] = { 1.0, 0, 0 }
+	base[NORMAL] = { 0.0, 0.48, 1.0 }
+	base[ACTIVE] = { 0.09, 0.98, 0.46 }
+	bg[NORMAL] = { 0.0, 0.48, 1.0 }
+	bg[ACTIVE] = { 0.09, 0.98, 0.46 }
+}
+
+style "default_clock_display" = "medium text"
+{
+	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+	fg[ACTIVE] = { 1.0, 0.0, 0.0 }
+	fg[SELECTED] = { 1.0, 0, 0 }
+	base[NORMAL] = { 0, 0, 0 }
+	base[ACTIVE] = { 0, 0, 0 }
+	bg[NORMAL] = { 0, 0, 0 }
+	bg[ACTIVE] = { 0, 0, 0 }
+}
+
+style "editor_time_ruler" = "small_text"
+{
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	bg[NORMAL] = { 0.09, 0.09, 0.09 }
+}
+
+style "audio_track_base" = "default_base"
+{
+  font = "-*-courier-medium-r-*-*-*-100-*-*-*-*-*-*"
+  fg[NORMAL] = { 0.80, 0.80, 0.70 }	
+  bg[NORMAL] = { 0.18, 0.18, 0.22 }
+  bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
+  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
+  bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
+  bg[SELECTED] = { 0.20, 0.20, 0.20 }
+}
+
+style "audio_bus_base"
+{
+  font = "-*-courier-medium-r-*-*-*-100-*-*-*-*-*-*"
+  fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+  bg[NORMAL] = {0, 0.36, 0.40 }	
+}
+
+style "track_name_display"
+{
+	font = "-*-helvetica-medium-r-*-*-*-100-*-*-*-*-*-*"
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
+
+	base[NORMAL] = { 0.06, 0.06, 0.06 }
+	base[ACTIVE] = { 0.26, 0.26, 0.26 }
+	bg[NORMAL] = { 0.26, 0.26, 0.26 }
+	bg[ACTIVE] = { 0.26, 0.26, 0.26 }
+}
+
+style "track_separator"
+{
+	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+}
+
+#
+# Track edit groups. These styles define
+# the colors that the "edit" button will
+# use as a track is moved from
+# track edit group to track edit group.
+# There are 8 edit groups. Edit group 0
+# is used for tracks that are not editable, 
+# so we leave its style to the default.
+#
+
+style "edit_group_0"
+
+{
+	bg[ACTIVE] = { 1.0, 0.65, 0.13 }
+	bg[NORMAL] = { 0.31, 0.31, 0.31 }
+	fg[NORMAL] = { 0.82, 0.91, 0.99 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
+style "edit_group_1" 
+{
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.93, 0.34, 0.08 }
+	bg[PRELIGHT] = { 0.93, 0.34, 0.08 }
+	bg[SELECTED] = { 0.93, 0.34, 0.08 }
+}
+
+style "edit_group_2" 
+{
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.93, 0.34, 0.08 }
+	bg[PRELIGHT] = { 0.93, 0.34, 0.08 }
+	bg[SELECTED] = { 0.93, 0.34, 0.08 }
+}
+
+style "edit_group_3" 
+{
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.93, 0.34, 0.08 }
+	bg[PRELIGHT] = { 0.93, 0.34, 0.08 }
+	bg[SELECTED] = { 0.93, 0.34, 0.08 }
+}
+
+style "region_list_display" = "small_bold_text"
+{
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
+	fg[SELECTED] = { 0.98, 0.76, 0.14 }
+	bg[NORMAL] = { 0, 0, 0 }
+	bg[ACTIVE] = { 0, 0, 0 }
+	bg[SELECTED] = { 0, 0, 0 }
+	base[NORMAL] = { 0, 0, 0 }
+ 	base[ACTIVE] = { 0, 1, 0 }
+ 	base[INSENSITIVE] = { 0, 0, 0 }
+ 	base[SELECTED] = { 0.80, 0.80, 0.70 }
+}
+
+style "main_canvas_area"
+{
+	bg[NORMAL] = { 0.38, 0.38, 0.38 }
+	bg[ACTIVE] = { 0.38, 0.38, 0.38 }
+	bg[INSENSITIVE] = { 0.38, 0.38, 0.38 }
+	bg[SELECTED] = { 0.38, 0.38, 0.38 }
+	bg[PRELIGHT] = { 0.38, 0.38, 0.38 }
+}
+
+style "track_controls_inactive"
+{
+	bg[NORMAL] =      { 0.60, 0.60, 0.66 }
+	bg[ACTIVE] =      { 0.60, 0.60, 0.66 }
+	bg[INSENSITIVE] = { 0.60, 0.60, 0.66 }
+	bg[SELECTED] =    { 0.60, 0.60, 0.66 }
+	bg[PRELIGHT] =    { 0.60, 0.60, 0.66 }
+
+	font = "-*-courier-medium-r-*-*-*-100-*-*-*-*-*-*"
+	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+}
+
+style "edit_controls_base_selected"
+{
+	bg[NORMAL] = { 0.56, 0.56, 0.56 }
+	bg[ACTIVE] = { 0.56, 0.56, 0.56 }
+	bg[INSENSITIVE] = { 0.56, 0.56, 0.56 }
+	bg[SELECTED] = { 0.56, 0.56, 0.56 }
+	bg[PRELIGHT] = { 0.56, 0.56, 0.56 }
+}
+
+style "automation_track_controls_base"
+{
+	bg[NORMAL] = { 0.22, 0.22, 0.29 }
+	bg[ACTIVE] = { 0.22, 0.22, 0.29 }
+	bg[INSENSITIVE] = { 0.22, 0.22, 0.29 }
+	bg[SELECTED] = { 0.22, 0.22, 0.29 }
+	bg[PRELIGHT] = { 0.22, 0.22, 0.29 }
+}
+
+# Plugin Editors
+style "plugin_slider" 
+{
+ 	fontset="-*-helvetica-medium-r-normal-*-10-*-*-*-p-*-*-*"
+	font ="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*"
+
+	fg[NORMAL] = { 0.45, 0.45, 0.45 }
+	fg[ACTIVE] = { 0.45, 0.45, 0.45 }
+	fg[INSENSITIVE] = {0.0, 0.0, 0.0 } # matches default_base
+	fg[SELECTED] = { 0.45, 0.45, 0.45 }
+	fg[PRELIGHT] = { 0.45, 0.45, 0.45 }
+
+	text[NORMAL] = { 0.80, 0.80, 0.70 }
+	text[ACTIVE] = { 0.80, 0.80, 0.70 }
+	text[INSENSITIVE] = { 0.80, 0.80, 0.70 }
+	text[SELECTED] = { 0.80, 0.80, 0.70 }
+	text[PRELIGHT] = { 0.80, 0.80, 0.70 }
+}
+
+style "track_list_display" = "small_bold_text"
+{
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
+	fg[SELECTED] = { 0.98, 0.76, 0.14 }
+	bg[NORMAL] = { 0, 0, 0 }
+	bg[ACTIVE] = { 0, 0, 0 }
+	bg[SELECTED] = { 0, 0, 0 }
+	base[NORMAL] = { 0, 0, 0 }
+ 	base[ACTIVE] = { 0, 0, 0 }
+ 	base[INSENSITIVE] = { 0, 0, 0 }
+ 	base[SELECTED] = { 0, 0, 0 }
+}
+
+style "region_list_display" = "small_bold_text"
+{
+	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
+	fg[SELECTED] = { 0.66, 0.97, 0.18 }
+	bg[NORMAL] = { 0, 0, 0 }
+	bg[ACTIVE] = { 0, 0, 0 }
+	bg[SELECTED] = { 0, 0, 0 }
+	base[NORMAL] = { 1, 0, 0 }
+ 	base[ACTIVE] = { 0, 0, 0 }
+ 	base[INSENSITIVE] = { 0, 0, 0 }
+ 	base[SELECTED] = { 0, 0, 0 }
+}
+
+# MixerPanZone:
+#
+# the NORMAL fg color is used for the pan puck
+# the ACTIVE fg color is used for the speaker boxes
+
+style "pan_zone" = "default_base"
+{
+	fg[NORMAL] = { 0.34, 0.95, 0.92 }
+	fg[ACTIVE] = { 0.95, 0.48, 0.11 }
+}
+
+style "wall_clock" = "medium_bold_text"
+{
+	fg[NORMAL] = { 1.0, 1.0, 1.0 }
+	bg[NORMAL] = { 0, 0, 0 }
+}
+
+style "paler_red_when_active" = "medium_text"
+{
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[PRELIGHT] = { 0.80, 0.80, 0.70 }
+	bg[NORMAL] = { 0.31, 0.31, 0.31 }
+	bg[PRELIGHT] = { 0.31, 0.31, 0.31 }
+
+	fg[ACTIVE] = { 0.36, 0.46, 0.28 }
+	bg[ACTIVE] = { 1.00, 0.59, 0.59}
+}
+
+style "peak_display_peaked_entry" = "small_text"
+{
+	fg[NORMAL] = { 1.0, 1.0, 1.0 }
+	fg[ACTIVE] = { 1.0, 1.0, 1.0 }
+	fg[SELECTED] = { 1.0, 1.0, 1.0 }
+
+	bg[NORMAL] = {0.9, 0.0, 0.0 }	
+	bg[ACTIVE] = { 0.9, 0.0, 0.0 }	
+  	bg[PRELIGHT] = { 0.9, 0.0, 0.0 }	
+  	bg[INSENSITIVE] = { 0.9, 0.0, 0.0 }	
+  	bg[SELECTED] = { 0.9, 0.0, 0.0 }	
+	base[NORMAL] = { 0.9, 0.0, 0.0 }	
+	base[ACTIVE] = { 0.9, 0.0, 0.0 }	
+  	base[PRELIGHT] = { 0.9, 0.0, 0.0 }	
+  	base[INSENSITIVE] = { 0.9, 0.0, 0.0 }	
+  	base[SELECTED] = { 0.9, 0.0, 0.0 }	
+}
+
+style "selected_strip_frame"
+{
+	fg[NORMAL] = { 0.74, 0.42, 0.47 }
+	bg[NORMAL] = { 0.79, 0.28, 0.18 }
+}
+
+style "flashing_alert" = "very_small_text"
+{
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	bg[NORMAL] = { 0.31, 0.31, 0.31 }
+
+	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
+	bg[ACTIVE] = { 1.0, 0, 0}
+}
+
+style "selected_io_selector_port_list" = "medium_text"
+{
+	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+	fg[SELECTED] = { 0.98, 0.76, 0.14 }
+	base[NORMAL] = { 0, 0, 0 }
+	base[SELECTED] = { 0, 0, 0 }
+}
+
+style "io_selector_port_list" = "medium_text"
+{
+	fg[NORMAL] = {0.80, 0.80, 0.70 }
+	fg[SELECTED] = {0.80, 0.80, 0.70 }
+	base[NORMAL] = { 0.26, 0.26, 0.26 }
+	base[SELECTED] = { 0.26, 0.26, 0.26 }
+}
+
+style "io_selector_notebook" = "default_base"
+{
+	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+        font ="-*-helvetica-bold-r-normal-*-*-140-*-*-p-*-*"
+}
+
+style "tearoff_arrow" = "medium_bold_entry"
+{
+	bg[NORMAL] = { 0.80, 0.80, 0.70 }
+	bg[PRELIGHT] = { 0.98, 0.76, 0.14 }
+}
+
+style "meter_metrics_strip" = "default_base"
+{
+	font = "-*-courier-medium-r-*-*-*-100-*-*-*-*-*-*"
+	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+}
+
+style "no_session_msg" 
+{
+	font = "-*-helvetica-medium-r-*-*-34-350-*-*-*-*-*-*"
+}
+
+style "location_row_button" = "default_buttons_menus"
+{
+	fontset="-*-helvetica-medium-r-normal-*-10-*-*-*-p-*-*-*"
+ 	font ="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*"
+}
+
+style "location_rows_clock" = "default_clock_display"
+{
+	fontset="-*-helvetica-medium-r-normal-*-12-*-*-*-p-*-*-*"
+ 	font ="-*-helvetica-medium-r-normal-*-*-120-*-*-p-*-*"
+}
+
+style "pan_slider" 
+{
+ 	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
+	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+
+	fg[NORMAL] = { 0.67, 0.23, 0.22 }
+	fg[ACTIVE] = { 0.67, 0.23, 0.22 }
+	fg[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
+	fg[SELECTED] = { 0.67, 0.23, 0.22 }
+	fg[PRELIGHT] = { 0.67, 0.23, 0.22 }
+
+	bg[NORMAL] = { 0, 0, 0 }
+	bg[ACTIVE] = { 0, 0, 0 }
+	bg[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
+	bg[SELECTED] = { 0, 0, 0 }
+	bg[PRELIGHT] = { 0, 0, 0 }
+
+	text[NORMAL] = { 0.85, 0.92, 0.98 }
+	text[ACTIVE] = { 0.85, 0.92, 0.98 }
+	text[INSENSITIVE] = { 0.85, 0.92, 0.98 }
+	text[SELECTED] = { 0.85, 0.92, 0.98 }
+	text[PRELIGHT] = { 0.85, 0.92, 0.98 }
+}
+
+#---------------------------------------------------------------
+widget "*FirstActionMessage" style "first_action_message"
+widget "*VerboseCanvasCursor" style "verbose_canvas_cursor"
+widget "*MarkerText" style "marker_text"
+widget "*TimeAxisViewItemName" style "time_axis_view_item_name"
+widget "EditorBase" style "default_base"
+widget "*TimebarLabelBase" style "default_base"
+widget "*WipeWindow" style "default_base"
+widget "*TakeWindow" style "default_base"
+widget "*TrackCanvasScroller" style "default_base"
+widget "*TimeCanvasScroller" style "default_base"
+widget "*SendUIWindow" style "default_base"
+widget "*SendUIFrame" style "default_base"
+widget "*MouseModeBase" style "default_base"
+widget "*SelectionModeBase" style "default_base"
+widget	"*MeterBridgeWindow"	style "default_base"
+widget	"*ControlWindow"	style "default_base"
+widget "*RegionWindow"		style "default_base"
+widget "*ClickWindow" style "default_base"
+widget "*RegionRenameWindow" style "default_base"
+widget "*BackupRecoveryWindow" style "default_base"
+widget "*PluginDisplayWindow" style "default_base"
+widget "*ExportWindow" style "default_base"
+#widget "*ExportProgress" style "default_buttons_menus"
+widget "*ExportFileLabel" style "small_bold_text"
+widget "*ExportFormatLabel" style "medium_bold_text"
+widget "*ExportHeader" style "small_bold_text"
+widget "*ExportFileDisplay" style "medium_entry"
+widget "*ExportFormatDisplay" style "medium_entry"
+widget "*ExportCheckbox" style "small_entry"
+widget "*ExportTrackSelector" style "medium_entry_noselection_bg"
+widget "*MeterScrollBase" style "default_base"
+widget "*MixerWindow" style "default_base"
+widget "*RegionEditorWindow" style "default_base"
+widget "*AudioEngineControl" style "default_base"
+widget "*PeakFileWaitWindow" style "default_base"
+widget "*OptionsWindow" style "default_base"
+widget "*TimeStretchDialog" style "default_base"
+widget "*ChoiceWindow" style "default_base"
+widget "*PluginManagerWindow" style "default_base"
+widget "*CrossfadeEditWindow" style "default_base"
+widget "*ErrorText" style "default_base"
+widget "*LocationWindow" style "default_base"
+widget "*EditControlsBase" style "default_base"
+widget "*ToolBar" style "default_base"
+widget "*EditModeSelector" style "medium_bold_entry"
+widget "*SnapTypeSelector" style "medium_bold_entry"
+widget "*SnapModeSelector" style "medium_bold_entry"
+widget "*ZoomFocusSelector" style "medium_bold_entry"
+widget "*BigClockBase" style "default_base"
+widget "*AboveMeterZone" style "default_base"
+widget "*BelowMeterZone" style "default_base"
+widget "*ButtonTable" style "default_base"
+widget "*AdjusterTable" style "default_base"
+widget "*PluginEditor" style "default_base"
+widget "*PluginNameBox" style "default_base"
+widget "*IOSelectorWindow" style "default_base"
+widget "*ConnectionEditorWindow" style "default_base"
+widget "*RouteParamsWindow" style "default_base"
+widget "*RouteParamsBaseFrame" style "default_base"
+widget "*MetricDialog" style "default_base"
+widget "AddRouteDialog" style "default_base"
+widget "*LocationLocRowsScroller*" style "default_base"
+widget "*LocationRangeRowsScroller*" style "default_base"
+widget "*LocationRangeRows" style "default_base"
+widget "*LocationLocRows" style "default_base"
+widget "*LocationFrameBox" style "default_base"
+widget "*PanScrollerBase" style "default_base"
+widget "*ArdourContextMenu*" style "default_buttons_menus"
+widget "*EditGroupTitleButton*" style "default_buttons_menus"
+widget "*MixerGroupTitleButton*" style "default_buttons_menus"
+widget "*ErrorLogCloseButton" style "default_buttons_menus"
+widget "*EditorGTKButton*" style "default_buttons_menus" 
+widget "*ToolbarButton" style "default_buttons_menus"
+widget "*ToolbarButton*" style "default_buttons_menus"
+widget "*CrossfadeEditButton" style "default_buttons_menus"
+widget "*CrossfadeEditButton*" style "default_buttons_menus"
+widget "*TrackHistoryButton*" style "default_buttons_menus"
+widget "*TrackSizeButton*" style "default_buttons_menus"
+widget "*TrackPlaylistButton*" style "default_buttons_menus"
+widget "*TrackAutomationButton*" style "default_buttons_menus"
+widget "*TrackGroupButton*" style "default_buttons_menus"
+widget "*TrackMixButton*" style "default_buttons_menus"
+widget "*TrackVisualButton*" style "default_buttons_menus"
+widget "*TrackRemoveButton*" style "default_buttons_menus"
+widget "*BaseButton" style "default_buttons_menus"
+widget "*TakeButtonLabel" style "default_buttons_menus"
+widget "*MixerWidthButton" style "default_buttons_menus"
+widget "*MixerHideButton" style "default_buttons_menus"
+widget "*MixerSendButton" style "default_buttons_menus"
+widget "*MixerSendButtonLabel" style "default_buttons_menus"
+widget "*MixerSendSwitch" style "default_buttons_menus"
+widget "*MixerInsertButton" style "default_buttons_menus"
+widget "*MixerInsertButtonLabel" style "default_buttons_menus"
+widget "*MixerInsertSwitch" style "default_buttons_menus"
+widget "*MixerMonitorInputButton*" style "very_small_button"
+widget "*MixerMonitorInputButton.*" style "very_small_button"
+widget "*MixerIOButton" style "very_small_button"
+widget "*MixerIOButtonLabel" style "very_small_button"
+widget "*AddRouteDialogSpinner" style "ardour_adjusters"
+widget "*AddRouteDialogRadioButton*" style "options_window"
+widget "*OptionsNotebook" style "options_window"
+widget "*OptionEditorToggleButton*" style "options_window"
+widget "*OptionsLabel" style "options_window"
+widget "*OptionEditorAuditionerLabel" style "options_window"
+widget "*OptionsEntry" style "option_entry"
+widget "*InspectorNotebook" style "options_window"
+widget "*NewSessionDialog" style "options_window"
+widget "*NewSessionDialogButton*" style "options_window"
+widget "*MixerSendSwitch*" style "very_small_red_active_and_selected_button"
+widget "*OptionEditorToggleButton" style "small_red_active_and_selected_button"
+widget "*NewSessionDialogButton" style "small_red_active_and_selected_button"
+widget "*MixerRecordEnableButton" style "mixer_rec_enable_button"
+widget "*MixerRecordEnableButton*" style "mixer_rec_enable_button"
+widget "*TrackRecordEnableButton" style "track_rec_enable_button"
+widget "*TrackRecordEnableButton*" style "track_rec_enable_button"
+widget "*TrackMuteButton*" style "mute_button"
+widget "*TrackLoopButton*" style "track_loop_button"
+widget "*EditorTimeButton*" style "time_button"
+widget "*EditorMixerButton*" style "default_buttons_menus"
+widget "*SoloButton*" style "solo_button"
+widget "*SoloButton.*" style "solo_button"
+widget "*SafeSoloButton*" style "solo_button"
+widget "*SafeSoloButton.*" style "solo_button"
+widget "*MixerPhaseInvertButton*" style "very_small_button"
+widget "*MixerPhaseInvertButton.*" style "very_small_button"
+widget "*MixerAutomationRecordingButton*" style "very_small_button"
+widget "*MixerAutomationRecordingButton.*" style "very_small_button"
+widget "*MixerAutomationModeButton*" style "very_small_button"
+widget "*MixerAutomationModeButton.*" style "very_small_button"
+widget "*MixerAutomationPlaybackButton*" style "very_small_button"
+widget "*MixerAutomationPlaybackButton.*" style "very_small_button"
+widget "*MixerMuteButton*" style "mixer_mute_button"
+widget "*MixerMuteButton.*" style "mixer_mute_button"
+widget "*MixerSoloButton*" style "mixer_solo_button"
+widget "*MixerSoloButton.*" style "mixer_solo_button"
+widget "*MixerNameButton" style "very_small_button"
+widget "*MixerNameButtonLabel" style "very_small_button"
+widget "*MixerGroupButton" style "very_small_button"
+widget "*MixerGroupButtonLabel" style "very_small_button"
+widget "*MixerCommentButton" style "very_small_button"
+widget "*MixerCommentButton*" style "very_small_button"
+widget "*EditGroupButton" style "very_small_button"
+widget "*EditGroupButtonLabel" style "very_small_button"
+widget "*TransportButton" style "transport_button"
+widget "*TransportButton*" style "transport_button"
+widget "*ShuttleButton" style "transport_button"
+widget "*ShuttleButton*" style "transport_button"
+widget "*ShuttleDisplay" style "transport_button"
+widget "*ShuttleDisplay*" style "transport_button"
+widget "*ShuttleControl" style "shuttle_control"
+widget "*TransportRecButton" style "transport_rec_button"
+widget "*TransportRecButton*" style "transport_rec_button"
+widget "*TransportBase" style "default_base"
+widget "*TransportWindow" style "default_base"
+widget "*RecordingXrunWarningWindow" style "xrun_warn"
+widget "*RecordingXrunWarningWindow*" style "xrun_warn"
+widget "*MainMenuBar" style "menu_bar_base"
+widget "*ErrorMessage" style "error_message"
+widget "*FatalMessage" style "fatal_message"
+widget "*InfoMessage" style "info_message"
+widget "*WarningMessage" style "warning_message"
+widget "*BigClockDisplay" style "big_clock_display"
+widget "*TransportClockDisplay" style "transport_clock_display"
+widget "*SecondaryClockDisplay" style "transport_clock_display"
+widget "*BBTTempoLabel" style "tempo_meter_clock_display"
+widget "*BBTMeterLabel" style "tempo_meter_clock_display"
+widget "*SelectionStartClock" style "default_clock_display"
+widget "*SelectionEndClock" style "default_clock_display"
+widget "*EditCursorClock" style "default_clock_display"
+widget "*PreRollClock" style "default_clock_display"
+widget "*PostRollClock" style "default_clock_display"
+widget "*NudgeClock" style "default_clock_display"
+widget "*ZoomRangeClock" style "default_clock_display"
+widget "*SMPTEOffsetClock" style "default_clock_display"
+widget "*TransportLabel" style "small_bold_text"
+widget "*TakeLabel" style "small_bold_text"
+widget "*LocationLabel" style "small_bold_text"
+widget "*WipeLabel" style "small_bold_text"
+widget "*TakeTagLabel" style "small_bold_text"
+widget "*ToolBarLabel" style "small_bold_text"
+widget "*EditorDisplayLabel" style "small_bold_text"
+widget "*NewSessionLabel" style "large_text"
+widget "*GlobalButtonLabel" style "default_buttons_menus"
+widget "*ClickButton" style "medium_entry"
+widget "*RegionNameDisplay" style "medium_entry"
+widget "*PluginDisplay" style "medium_entry"
+widget "*SelectionDisplay" style "medium_entry"
+widget "*HistorySelector" style "medium_entry"
+widget "*LocationSelector" style "medium_entry"
+widget "*TakeSelector" style "medium_entry"
+widget "*RegionSelector" style "medium_entry"
+widget "*SMPTERuler" style "editor_time_ruler"
+widget "*BBTRuler" style "editor_time_ruler"
+widget "*FramesRuler" style "editor_time_ruler"
+widget "*MinSecRuler" style "editor_time_ruler"
+widget "*BaseFrame" style "base_frame"
+widget "*AudioTrackStripBase" style "audio_track_base"
+widget "*TimeAxisViewControlsBaseUnselected" style "audio_track_base"
+widget "*AudioTrackControlsBaseUnselected" style "audio_track_base"
+widget "*AudioTrackFader" style "audio_track_base"
+widget "*AudioBusStripBase" style "audio_bus_base"
+widget "*BusControlsBaseUnselected" style "audio_bus_base"
+widget "*AudioBusFader" style "audio_bus_base"
+widget "*TrackSeparator" style "track_separator"
+widget "*TrackEditIndicator0*" style "edit_group_0"
+widget "*TrackEditIndicator1*" style "edit_group_1"
+widget "*TrackEditIndicator2*" style "edit_group_2"
+widget "*TrackEditIndicator3*" style "edit_group_3"
+widget "*TrackEditIndicator4*" style "edit_group_3"
+widget "*TrackEditIndicator5*" style "edit_group_3"
+widget "*TrackEditIndicator6*" style "edit_group_3"
+widget "*TrackEditIndicator7*" style "edit_group_3"
+widget "*EditorTrackNameDisplay" style "track_name_display"
+widget "*EditorTrackNameDisplay*" style "track_name_display"
+widget "*EditorRegionList" style "region_list_display"
+widget "*CrossfadeEditAuditionButton" style "red_when_active"
+widget "*CrossfadeEditAuditionButton*" style "red_when_active"
+widget "*CrossfadeEditCurveButton" style "red_when_active"
+widget "*CrossfadeEditCurveButton*" style "red_when_active"
+widget "*CrossfadeEditLabel" style "medium_text"
+widget "*CrossfadeEditFrame" style "base_frame"
+widget "*MouseModeButton" style "default_buttons_menus"
+widget "*MouseModeButton*" style "default_buttons_menus"
+widget "*EditorWindow" style "default_base"
+widget "*EditorMainCanvas" style "main_canvas_area"
+widget "*AudioTrackControlsBaseInactiveUnselected" style "track_controls_inactive"
+widget "*BusControlsBaseInactiveUnselected" style "track_controls_inactive"
+widget "*AutomationTrackControlsBaseInactiveUnselected" style "track_controls_inactive"
+widget "*AudioTrackControlsBaseInactiveSelected" style "track_controls_inactive"
+widget "*BusControlsBaseInactiveSelected" style "track_controls_inactive"
+widget "*AutomationTrackControlsBaseInactiveSelected" style "track_controls_inactive"
+widget "*AudioTrackStripBaseInactive" style "track_controls_inactive"
+widget "*AudioBusStripBaseInactive" style "track_controls_inactive"
+widget "*AudioTrackControlsBaseSelected" style "edit_controls_base_selected"
+widget "*BusControlsBaseSelected" style "edit_controls_base_selected"
+widget "*AutomationTrackControlsBase" style "automation_track_controls_base"
+widget "*AutomationTrackControlsBaseSelected" style "edit_controls_base_selected"
+widget "*EditorMenuBar*" style "black_mackie_menu_bar"
+widget "*MainMenuBar*" style "black_mackie_menu_bar"
+widget "*ZoomClickBox" style "medium_bold_entry"
+widget "*PluginParameterLabel" style "medium_text"
+widget "*PluginNameInfo" style "plugin_name_text"
+widget "*PluginMakerInfo" style "plugin_maker_text"
+widget "*PluginParameterInfo" style "medium_text"
+widget "*MotionControllerValue" style "medium_entry"
+widget "*ParameterValueDisplay" style "medium_bold_entry"
+widget "*PluginUIClickBox" style "medium_bold_entry"
+widget "*PluginUIClickBox*" style "medium_bold_entry"
+widget "*PluginSlider" style "plugin_slider"
+widget "*TrackListDisplay" style "track_list_display"
+widget "*TrackListDisplay.*" style "small_bold_text"
+widget "*RegionListDisplay" style "small_bold_entry"
+widget "*RegionListDisplay.*" style "small_bold_text"
+widget "*MixerRedirectSelector" style "small_bold_entry"
+widget "*MixerRedirectSelector.*" style "small_bold_text"
+widget "*MixerTrackNameArea" style "default_base"
+widget "*MixerTrackCommentArea" style "option_entry"
+widget "*MixerPanZone" style "pan_zone"
+widget "*MixerTrackDisplayList" style "track_list_display"
+widget "*MixerSnapshotDisplayList" style "track_list_display"
+widget "*MixerAuxDisplayList" style "track_list_display"
+widget "*MixerGroupList" style "track_list_display"
+widget "*WallClock" style "wall_clock"
+widget "*CPULoad" style "wall_clock"
+widget "*RegionEditorLabel" style "medium_text"
+widget "*RegionEditorSmallLabel" style "small_text"
+widget "*RegionEditorEntry" style "medium_entry"
+widget "*RegionEditorClock" style "default_clock_display"
+widget "*RegionEditorToggleButton" style "paler_red_when_active"
+widget "*RegionEditorToggleButton*" style "paler_red_when_active"
+widget "*MixerStripSpeedBase" style "small_entry"
+widget "*MixerStripSpeedBase*" style "small_entry"
+widget "*MixerStripSpeedBaseNotOne" style "small_red_on_black_entry"
+widget "*MixerStripSpeedBaseNotOne*" style "small_red_on_black_entry"
+widget "*MixerStripGainDisplay" style "small_entry"
+widget "*MixerStripGainUnitButton" style "very_small_button"
+widget "*MixerStripGainUnitButton*" style "very_small_button"
+widget "*MixerStripMeterPreButton" style "very_small_button"
+widget "*MixerStripMeterPreButton*" style "very_small_button"
+widget "*MixerStripPeakDisplay*" style "red_active_small_entry"
+widget "*MixerStripPeakDisplayPeak*" style "peak_display_peaked_entry"
+widget "*MixerStripSelectedFrame" style "selected_strip_frame"
+widget "*MixerStripFrame" style "base_frame"
+widget "*HWMonitorButton" style "red_when_active"
+widget "*HWMonitorButton*" style "red_when_active"
+widget "*BypassButton" style "red_when_active"
+widget "*BypassButton*" style "red_when_active"
+widget "*TransportSoloAlert" style "flashing_alert"
+widget "*TransportSoloAlert.*" style "flashing_alert"
+widget "*TransportAuditioningAlert" style "flashing_alert"
+widget "*TransportAuditioningAlert.*" style "flashing_alert"
+widget "*Prompter" style "default_base"
+widget "*PrompterLabel" style "default_base"
+widget "*CleanupDialog" style "default_base"
+widget "*CleanupDialog*" style "default_base"
+widget "*FadeCurve" style "medium_bold_entry"
+widget "*FadeCurve*" style "medium_bold_entry"
+widget "*IOSelectorButton" style "default_buttons_menus"
+widget "*IOSelectorButton*" style "default_buttons_menus"
+widget "*IOSelectorList" style "medium_entry_noselection_fg"
+widget "*IOSelectorPortList" style "io_selector_port_list"
+widget "*IOSelectorPortListSelected" style "selected_io_selector_port_list"
+widget "*IOSelectorNotebook" style "io_selector_notebook"
+widget "*IOSelectorNotebookTab" style "io_selector_notebook"
+widget "*IOSelectorFrame" style "base_frame"
+widget "*ConnectionEditorButton" style "default_buttons_menus"
+widget "*ConnectionEditorButton*" style "default_buttons_menus"
+widget "*ConnectionEditorList" style "medium_entry_noselection_fg"
+widget "*ConnectionEditorConnectionList" style "medium_entry"
+widget "*ConnectionEditorPortList" style "io_selector_port_list"
+widget "*ConnectionEditorPortListSelected" style "selected_io_selector_port_list"
+widget "*ConnectionEditorNotebook" style "io_selector_notebook"
+widget "*ConnectionEditorNotebookTab" style "io_selector_notebook"
+widget "*ConnectionEditorFrame" style "base_frame"
+widget "*RouteParamsListDisplay" style "track_list_display"
+widget "*RouteParamsPreListDisplay" style "track_list_display"
+widget "*RouteParamsPostListDisplay" style "track_list_display"
+widget "*TearOffArrow" style "tearoff_arrow"
+widget "*RouteParamsTitleButton" style "medium_text"
+widget "*RouteParamsTitleLabel" style "medium_text"
+widget "*PluginAutomateRecordButton" style "small_red_active_and_selected_button"
+widget "*PluginAutomateRecordButton*" style "small_red_active_and_selected_button"
+widget "*PluginAutomatePlayButton" style "small_red_active_and_selected_button"
+widget "*PluginAutomatePlayButton*" style "small_red_active_and_selected_button"
+widget "*PluginAutomateButton" style "small_button"
+widget "*PluginAutomateButton*" style "small_button"
+widget "*PluginSaveButton" style "small_button"
+widget "*PluginSaveButton*" style "small_button"
+widget "*PluginLoadButton" style "small_button"
+widget "*PluginLoadButton*" style "small_button"
+widget "*FaderMetricsStrip" style "meter_metrics_strip"
+widget "*MeterMetricsStrip" style "meter_metrics_strip"
+widget "*NoSessionMessage" style "no_session_msg"
+widget "*MetricDialogFrame" style "base_frame"
+widget "*MetricEntry" style "medium_bold_entry"
+widget "*MetricButton" style "default_buttons_menus"
+widget "*MetricButton.*" style "default_buttons_menus"
+widget "*MetricLabel" style "medium_text"
+widget "*TimeStretchButton" style "default_buttons_menus"
+widget "*TimeStretchButton.*" style "default_buttons_menus"
+widget "*TimeStretchProgress" style "default_buttons_menus"
+widget "*ChoiceWindow" style "default_buttons_menus"
+widget "*ChoicePrompt" style "default_buttons_menus"
+widget "*ChoiceButton" style "default_buttons_menus"
+widget "*ChoiceButton*" style "default_buttons_menus"
+widget "*SelectionModeButton" style "default_buttons_menus"
+widget "*SelectionModeButton*" style "default_buttons_menus"
+widget "*TrackLabel" style "medium_text"
+widget "*TrackPlugName" style "medium_text"
+widget "*TrackParameterName" style "small_text"
+widget "*AddRouteDialog*" style "medium_text"
+widget "*AddRouteDialog.GtkLabel" style "medium_text"
+widget "*AddRouteDialogChannelChoice" style "medium_bold_entry"
+widget "*AddRouteDialogSpinner" style "medium_bold_entry"
+widget "*AddRouteDialogSpinner*" style "medium_bold_entry"
+widget "*AddRouteDialogRadioButton" style "red_when_active"
+widget "*AddRouteDialogButton" style "default_buttons_menus"
+widget "*AddRouteDialogNameTemplateEntry" style "medium_bold_entry"
+widget "*NewSessionIOLabel" style "larger_bold_text"
+widget "*NewSessionSR1Label" style "red_medium_text"
+widget "*NewSessionSR2Label" style "medium_text"
+widget "*NewSessionChannelChoice" style "medium_bold_entry"
+widget "*NewSessionMainButton" style "larger_bold_text"
+widget "*NewSessionMainButton*" style "larger_bold_text"
+widget "*NewSessionMainLabel" style "larger_bold_text"
+widget "*LocationEditRowClock" style "location_rows_clock"
+widget "*LocationEditNameLabel" style "medium_text"
+widget "*LocationEditSetButton" style "location_row_button"
+widget "*LocationEditSetButton*" style "location_row_button"
+widget "*LocationEditGoButton" style "location_row_button"
+widget "*LocationEditGoButton*" style "location_row_button"
+widget "*LocationEditCdButton" style "small_red_active_and_selected_button"
+widget "*LocationEditCdButton*" style "small_red_active_and_selected_button"
+widget "*LocationEditHideButton" style "small_red_active_and_selected_button"
+widget "*LocationEditHideButton*" style "small_red_active_and_selected_button"
+widget "*LocationEditNumberLabel" style "small_text"
+widget "*LocationLocEditorFrame" style "base_frame"
+widget "*LocationRangeEditorFrame" style "base_frame"
+widget "*LocationEditNameEntry" style "option_entry"
+widget "*LocationAddLocationButton" style "default_buttons_menus"
+widget "*LocationAddLocationButton*" style "default_buttons_menus"
+widget "*LocationAddRangeButton" style "default_buttons_menus"
+widget "*LocationAddRangeButton*" style "default_buttons_menus"
+widget "*LocationEditRemoveButton" style "location_row_button"
+widget "*LocationEditRemoveButton*" style "location_row_button"
+widget "*PanSlider" style "pan_slider"
+widget "*PanningLinkButton" style "mixer_red_active_button"
+widget "*PanningLinkButton.*" style "mixer_red_active_button"
+widget "*PanningLinkDirectionButton" style "very_small_button"
+widget "*PanningLinkDirectionButton.*" style "very_small_button"
+widget "*ChannelCountSelector" style "medium_bold_entry"
+widget "*ChannelCountSelector.GtkArrow" style "default_buttons_menus"
+
+class "GtkWidget" style "default_base"
+class "GtkScrollbar" style "ardour_adjusters"
+class "GtkLabel" style "default_buttons_menus"
+class "GtkButton" style "default_buttons_menus"
+class "GtkArrow" style "tearoff_arrow"
+class "GtkProgressBar" style "ardour_progressbars"
+
+
+#
+#----------------------------------------------------------------------
+#
+# Below this point, all styles refer to colors used by canvas items
+# not actual widgets. The "red" value of the active state is used
+# to define the "alpha" value for the RGBA value. Other color values
+# for the active state are ignored.
+#
+
+style "cWaveForm" 
+{
+      fg[NORMAL] = { 0.0, 0.0, 0.0 }
+      fg[ACTIVE] = { 0.80, 0, 0 }
+}
+widget "*cWaveForm" style "cWaveForm"
+
+style "cMutedWaveForm" 
+{
+      fg[NORMAL] = { 0.35, 0.35, 0.35 }
+      #fg[NORMAL] = { 0.80, 0.80, 0.70 }
+      fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cMutedWaveForm" style "cMutedWaveForm"
+
+style "cSelectedFrameBase"
+{
+	fg[NORMAL] = { 0.71, 0.57, 0.66 }
+	#fg[NORMAL] = { 0.10, 0.10, 0.10 }
+        fg[ACTIVE] = { 1.0, 0, 0 } # Not used, opacity set by region editor
+}
+widget "*cSelectedFrameBase" style "cSelectedFrameBase"
+
+style "cFrameBase"
+{
+	fg[NORMAL] = { 0.75, 0.75, 0.76 }
+        fg[ACTIVE] = { 1.0, 0, 0 } # Not used, opacity set by region editor
+}
+widget "*cFrameBase" style "cFrameBase"
+
+style "cAudioTrackBase"
+{
+	fg[NORMAL] = { 0.79, 0.80, 0.85 }
+	#fg[NORMAL] = { 0, 0, 0 }
+        fg[ACTIVE] = { 0.41, 0, 0 }
+	#fg[ACTIVE] = { 0.70, 0, 0 }
+}
+widget "*cAudioTrackBase" style "cAudioTrackBase"
+
+style "cAudioTrackOutline"
+{
+	fg[NORMAL] = { 0.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cAudioTrackOutline" style "cAudioTrackOutline"
+
+style "cAudioBusBase"
+{
+	fg[NORMAL] = { 0.90, 0.82, 0.90 }
+        fg[ACTIVE] = { 0.41, 0, 0 }
+}
+widget "*cAudioBusBase" style "cAudioBusBase"
+
+style "cTempoBar"
+{
+	fg[NORMAL] = { 0.64, 0.64, 0.62 }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*TempoBar" style "cTempoBar"
+
+style "cMeterBar"
+{
+	fg[NORMAL] = { 0.75, 0.75, 0.73 }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cMeterBar" style "cMeterBar"
+
+style "cMarkerBar"
+{
+	fg[NORMAL] = { 0.54, 0.54, 0.52 }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cMarkerBar" style "cMarkerBar"
+
+style "cRangeMarkerBar"
+{
+	fg[NORMAL] = { 0.48, 0.48, 0.46 }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cRangeMarkerBar" style "cRangeMarkerBar"
+
+style "cTransportMarkerBar"
+{
+	fg[NORMAL] = { 0.40, 0.40, 0.38  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cTransportMarkerBar" style "cTransportMarkerBar"
+
+style "cTimeStretchFill"
+{
+	fg[NORMAL] = { 0.89, 0.71, 0.71  }
+        fg[ACTIVE] = { 0.59, 0, 0 }
+}
+widget "*cTimeStretchFill" style "cTimeStretchFill"
+
+style "cTimeStretchOutline"
+{
+	fg[NORMAL] = { 0.39, 0.39, 0.39  }
+        fg[ACTIVE] = { 0.59, 0, 0 }
+}
+widget "*cTimeStretchOutline" style "cTimeStretchOutline"
+
+style "cAutomationLine"
+{
+	fg[NORMAL] = { 0.27, 0.74, 0.35  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cAutomationLine" style "cAutomationLine"
+
+style "cLeftPanAutomationLine"
+{
+	fg[NORMAL] = { 0.77, 0.24, 0.01  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cLeftPanAutomationLine" style "cLeftPanAutomationLine"
+
+style "cRightPanAutomationLine"
+{
+	fg[NORMAL] = { 0.03, 0.26, 0.73 }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cRightPanAutomationLine" style "cRightPanAutomationLine"
+
+style "cRedirectAutomationLine"
+{
+	fg[NORMAL] = { 0.28, 0.34, 0.74  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cRedirectAutomationLine" style "cRedirectAutomationLine"
+
+style "cControlPointFill"
+{
+	fg[NORMAL] = { 0, 0, 0 }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cControlPointFill" style "cControlPointFill"
+
+style "cControlPointOutline"
+{
+	fg[NORMAL] = { 0, 0, 0 }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cControlPointOutline" style "cControlPointOutline"
+
+style "cEnteredControlPointOutline"
+{
+	fg[NORMAL] = { 1.0, 0.21, 0.21  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cEnteredControlPointOutline" style "cEnteredControlPointOutline"
+
+style "cEnteredControlPointSelected"
+{
+	fg[NORMAL] = { 0.00, 1.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cEnteredControlPointSelected" style "cEnteredControlPointSelected"
+
+style "cEnteredControlPoint"
+{
+	fg[NORMAL] = { 1.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cEnteredControlPoint" style "cEnteredControlPoint"
+
+style "cControlPointSelected"
+{
+	fg[NORMAL] = { 0.91, 0.04, 0.04 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cControlPointSelected" style "cControlPointSelected"
+
+style "cControlPoint"
+{
+	fg[NORMAL] = { 0.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cControlPoint" style "cControlPoint"
+
+style "cAutomationTrackFill"
+{
+	fg[NORMAL] = { 0.63, 0.63, 0.81  }
+        fg[ACTIVE] = { 0.41, 0, 0 }
+}
+widget "*cAutomationTrackFill" style "cAutomationTrackFill"
+
+style "cAutomationTrackOutline"
+{
+	fg[NORMAL] = { 0.16, 0.16, 0.16  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cAutomationTrackOutline" style "cAutomationTrackOutline"
+
+style "cCrossfadeEditorBase"
+{
+	fg[NORMAL] = { 0.16, 0.18, 0.29  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cCrossfadeEditorBase" style "cCrossfadeEditorBase"
+
+style "cCrossfadeEditorLine"
+{
+	fg[NORMAL] = { 1.0, 0.86, 0.86  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cCrossfadeEditorLine" style "cCrossfadeEditorLine"
+
+style "cSelectedCrossfadeEditorLine"
+{
+	fg[NORMAL] = { 0, 0.86, 0.86  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cSelectedCrossfadeEditorLine" style "cSelectedCrossfadeEditorLine"
+
+style "cCrossfadeEditorLineShading"
+{
+	fg[NORMAL] = { 0, 0.63, 0.82  }
+        fg[ACTIVE] = { 0.33, 0, 0 }
+}
+widget "*cCrossfadeEditorLineShading" style "cCrossfadeEditorLineShading"
+
+style "cCrossfadeEditorPointFill"
+{
+	fg[NORMAL] = { 0, 1.0, 0  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cCrossfadeEditorPointFill" style "cCrossfadeEditorPointFill"
+
+style "cCrossfadeEditorPointOutline"
+{
+	fg[NORMAL] = { 0, 0, 1.0  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cCrossfadeEditorPointOutline" style "cCrossfadeEditorPointOutline"
+
+style "cCrossfadeEditorWave"
+{
+	fg[NORMAL] = { 1.0, 1.0, 1.0 }
+        fg[ACTIVE] = { 0.36, 0, 0 }
+}
+widget "*cCrossfadeEditorWave" style "cCrossfadeEditorWave"
+
+style "cSelectedCrossfadeEditorWave"
+{
+	fg[NORMAL] = { 0.98, 0.92, 0.08  }
+        fg[ACTIVE] = { 0.63, 0, 0 }
+}
+widget "*cSelectedCrossfadeEditorWave" style "cSelectedCrossfadeEditorWave"
+
+style "cCrossfadeLine"
+{
+	fg[NORMAL] = { 0, 0, 0 }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cCrossfadeLine" style "cCrossfadeLine"
+
+style "cActiveCrossfade"
+{
+	fg[NORMAL] = { 0.91, 0.93, 0.24  }
+        fg[ACTIVE] = { 0.47, 0, 0 }
+}
+widget "*cActiveCrossfade" style "cActiveCrossfade"
+
+style "cInactiveCrossfade"
+{
+	fg[NORMAL] = { 1.0, 1.0, 1.0  }
+        fg[ACTIVE] = { 0.1, 0, 0 }
+}
+widget "*cInactiveCrossfade" style "cInactiveCrossfade"
+
+style "cLocationMarker"
+{
+	fg[NORMAL] = { 0.77, 0.96, 0.07  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cLocationMarker" style "cLocationMarker"
+
+style "cLocationRange"
+{
+	fg[NORMAL] = { 0.29, 0.48, 0.35  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cLocationRange" style "cLocationRange"
+
+style "cLocationCDMarker"
+{
+	fg[NORMAL] = { 0.12, 0.91, 0.77  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cLocationCDMarker" style "cLocationCDMarker"
+
+style "cLocationLoop"
+{
+	fg[NORMAL] = { 0.21, 0.59, 0.31  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cLocationLoop" style "cLocationLoop"
+
+style "cLocationPunch"
+{
+	fg[NORMAL] = { 0.49, 0.23, 0.23  }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cLocationPunch" style "cLocationPunch"
+
+style "cVerboseCanvasCursor"
+{
+	fg[NORMAL] = { 0, 0, 0  }
+        fg[ACTIVE] = {0.74, 0, 0 }
+}
+widget "*cVerboseCanvasCursor" style "cVerboseCanvasCursor"
+
+style "cRangeDragBarRect"
+{
+	fg[NORMAL] = { 0.59, 0.59, 0.59  }
+        fg[ACTIVE] = { 0.78, 0, 0 }
+}
+widget "*cRangeDragBarRect" style "cRangeDragBarRect"
+
+style "cRangeDragBarRectFill"
+{
+	fg[NORMAL] = { 0.78, 0.82, 0.70  }
+        fg[ACTIVE] = { 0.43, 0, 0 }
+}
+widget "*cRangeDragBarRectFill" style "cRangeDragBarRectFill"
+
+style "cRangeDragRect"
+{
+	fg[NORMAL] = { 0.59, 0.59, 0.59  }
+        fg[ACTIVE] = { 0.78, 0, 0 }
+}
+widget "*cRangeDragRect" style "cRangeDragRect"
+
+style "cRangeDragRectFill"
+{
+	fg[NORMAL] = { 0.51, 0.78, 0.59  }
+        fg[ACTIVE] = { 0.78, 0, 0 }
+}
+widget "*cRangeDragRectFill" style "cRangeDragRectFill"
+
+style "cTransportDragRect"
+{
+	fg[NORMAL] = { 0.59, 0.59, 0.59  }
+        fg[ACTIVE] = { 0.78, 0, 0 }
+}
+widget "*cTransportDragRect" style "cTransportDragRect"
+
+style "cTransportDragRectFill"
+{
+	fg[NORMAL] = { 0.78, 0.78, 0.78  }
+        fg[ACTIVE] = { 1.43, 0, 0 }
+}
+widget "*cTransportDragRectFill" style "cTransportDragRectFill"
+
+style "cMarkerDragLine"
+{
+	fg[NORMAL] = { 0, 0.31, 0  }
+        fg[ACTIVE] = { 0.98, 0, 0 }
+}
+widget "*cMarkerDragLine" style "cMarkerDragLine"
+
+style "cTransportLoopRect"
+{
+        fg[NORMAL] = { 0.12, 0.47, 0.16 }
+        fg[ACTIVE] = { 0.98, 0, 0 }
+}
+widget "*cTransportLoopRect" style "cTransportLoopRect"
+
+style "cTransportLoopRectFill"
+{
+	fg[NORMAL] = { 0.12, 0.47, 0.16 }
+        fg[ACTIVE] = { 0.98, 0, 0 }
+}
+widget "*cTransportLoopRectFill" style "cTransportLoopRectFill"
+
+style "cTransportPunchRect"
+{
+       fg[NORMAL] = { 0.43, 0.16, 0.16 }
+       fg[ACTIVE] = { 0.90, 0, 0 }
+}
+widget "*cTransportPunchRect" style "cTransportPunchRect"
+
+style "cTransportPunchRectFill"
+{
+       fg[NORMAL] = { 0.43, 0.16, 0.16 }
+       fg[ACTIVE] = { 0.90, 0, 0 }
+}
+widget "*cTransportPunchRectFill" style "cTransportPunchRectFill"
+
+style "cPunchInLine"
+{
+	fg[NORMAL] = { 0.66, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cPunchInLine" style "cPunchInLine"
+
+style "cPunchOutLine"
+{
+	fg[NORMAL] = { 0.66, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cPunchOutLine" style "cPunchOutLine"
+
+style "cZoomRect"
+{
+	fg[NORMAL] = { 0.59, 0.59, 0.59 }
+        fg[ACTIVE] = { 0.78, 0, 0 }
+}
+widget "*cZoomRect" style "cZoomRect"
+
+style "cZoomRectFill"
+{
+	fg[NORMAL] = { 0.78, 0.82, 0.70 }
+        fg[ACTIVE] = { 0.43, 0, 0 }
+}
+widget "*cZoomRectFill" style "cZoomRectFill"
+
+style "cRubberBandRect"
+{
+	fg[NORMAL] = { 0.08, 1.00, 0.52 }
+        fg[ACTIVE] = { 0.59, 0, 0 }
+}
+widget "*cRubberBandRect" style "cRubberBandRect"
+
+style "cRubberBandRectFill"
+{
+	fg[NORMAL] = { 0.78, 0.78, 0.78 }
+        fg[ACTIVE] = { 0.35, 0, 0 }
+}
+widget "*cRubberBandRectFill" style "cRubberBandRectFill"
+
+style "cFirstActionMessage"
+{
+	fg[NORMAL] = { 0.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cFirstActionMessage" style "cFirstActionMessage"
+
+style "cEnteredGainLine"
+{
+	fg[NORMAL] = { 0.87, 0.39, 0.39 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cEnteredGainLine" style "cEnteredGainLine"
+
+style "cEnteredAutomationLine"
+{
+	fg[NORMAL] = { 0.87, 0.39, 0.39 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cEnteredAutomationLine" style "cEnteredAutomationLine"
+
+style "cEnteredMarker"
+{
+	fg[NORMAL] = { 0.87, 0.39, 0.39 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cEnteredMarker" style "cEnteredMarker"
+
+style "cMeterMarker"
+{
+	fg[NORMAL] = { 0.95, 0.26, 0.36 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cMeterMarker" style "cMeterMarker"
+
+style "cTempoMarker"
+{
+	fg[NORMAL] = { 0.95, 0.26, 0.36 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cTempoMarker" style "cTempoMarker"
+
+style "cMeasureLineBeat"
+{
+	fg[NORMAL] = { 0.80, 0.59, 0.51 }
+        fg[ACTIVE] = { 0.98, 0, 0 }
+}
+widget "*cMeasureLineBeat" style "cMeasureLineBeat"
+
+style "cMeasureLineBar"
+{
+	fg[NORMAL] = { 0.68, 1.0, 0.59 }
+        fg[ACTIVE] = { 0.94, 0, 0 }
+}
+widget "*cMeasureLineBar" style "cMeasureLineBar"
+
+style "cGhostTrackBaseOutline"
+{
+	fg[NORMAL] = { 0.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cGhostTrackBaseOutline" style "cGhostTrackBaseOutline"
+
+style "cGhostTrackBaseFill"
+{
+	fg[NORMAL] = { 0.27, 0.00, 0.49 }
+        fg[ACTIVE] = { 0.50, 0, 0 }
+}
+widget "*cGhostTrackBaseFill" style "cGhostTrackBaseFill"
+
+style "cGhostTrackWave"
+{
+	fg[NORMAL] = { 1.0, 0.00, 0.00 }
+        fg[ACTIVE] = { 0.50, 0, 0 }
+}
+widget "*cGhostTrackWave" style "cGhostTrackWave"
+
+style "cImageTrackBase"
+{
+	fg[NORMAL] = { 0.87, 0.87, 0.85 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cImageTrackBase" style "cImageTrackBase"
+
+style "cImageTrackOutline"
+{
+	fg[NORMAL] = { 0.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cImageTrackOutline" style "cImageTrackOutline"
+
+style "cMarkerTrackBase"
+{
+	fg[NORMAL] = { 0.87, 0.87, 0.85 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cMarkerTrackBase" style "cMarkerTrackBase"
+
+style "cMarkerTrackOutline"
+{
+	fg[NORMAL] = { 0.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cMarkerTrackOutline" style "cMarkerTrackOutline"
+
+style "cZeroLine"
+{
+	fg[NORMAL] = { 0.71, 0.71, 0.71 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cZeroLine" style "cZeroLine"
+
+style "cGainLine"
+{
+	fg[NORMAL] = { 0.00, 1.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cGainLine" style "cGainLine"
+
+style "cGainLineInactive"
+{
+	fg[NORMAL] = { 0.06, 0.06, 0.06 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cGainLineInactive" style "cGainLineInactive"
+
+style "cRecordingRectFill"
+{
+	fg[NORMAL] = { 0.90, 0.78, 0.78 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cRecordingRectFill" style "cRecordingRectFill"
+
+style "cRecordingRectOutline"
+{
+	fg[NORMAL] = { 0.31, 0.16, 0.16 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cRecordingRectOutline" style "cRecordingRectOutline"
+
+style "cSelectionRectFill"
+{
+	fg[NORMAL] = { 0.91, 0.96, 0.83 }
+        fg[ACTIVE] = { 0.47, 0, 0 }
+}
+widget "*cSelectionRectFill" style "cSelectionRectFill"
+
+style "cSelectionRectOutline"
+{
+	fg[NORMAL] = { 0.39, 0.39, 0.39 }
+        fg[ACTIVE] = { 0.59, 0, 0 }
+}
+widget "*cSelectionRectOutline" style "cSelectionRectOutline"
+
+style "cSelectionEndFill"
+{
+	fg[NORMAL] = { 0.39, 0.39, 0.39 }
+        fg[ACTIVE] = { 0.70, 0, 0 }
+}
+widget "*cSelectionEndFill" style "cSelectionEndFill"
+
+style "cSelectionEndOutline"
+{
+	fg[NORMAL] = { 0.39, 0.39, 0.39 }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cSelectionEndOutline" style "cSelectionEndOutline"
+
+style "cSelectionStartFill"
+{
+	fg[NORMAL] = { 0.39, 0.39, 0.39 }
+        fg[ACTIVE] = { 0.70, 0, 0 }
+}
+widget "*cSelectionStartFill" style "cSelectionStartFill"
+
+style "cSelectionStartOutline"
+{
+	fg[NORMAL] = { 0.39, 0.39, 0.39 }
+        fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cSelectionStartOutline" style "cSelectionStartOutline"
+
+style "cVestigialFrameFill"
+{
+	fg[NORMAL] = { 0.27, 0.00, 0.49 }
+        fg[ACTIVE] = { 0.06, 0, 0 }
+}
+widget "*cVestigialFrameFill" style "cVestigialFrameFill"
+
+style "cVestigialFrameOutline"
+{
+	fg[NORMAL] = { 0.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cVestigialFrameOutline" style "cVestigialFrameOutline"
+
+style "cTimeAxisFrameFill"
+{
+	fg[NORMAL] = { 0.27, 0.00, 0.49 }
+        fg[ACTIVE] = { 0.06, 0, 0 }
+}
+widget "*cTimeAxisFrameFill" style "cTimeAxisFrameFill"
+
+style "cTimeAxisFrameOutline"
+{
+	fg[NORMAL] = { 0.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cTimeAxisFrameOutline" style "cTimeAxisFrameOutline"
+
+style "cNameHighlightFill"
+{
+	fg[NORMAL] = { 0.00, 0.00, 1.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cNameHighlightFill" style "cNameHighlightFill"
+
+style "cNameHighlightOutline"
+{
+	fg[NORMAL] = { 0.49, 0.00, 1.00 }
+        fg[ACTIVE] = { 0.59, 0, 0 }
+}
+widget "*cNameHighlightOutline" style "cNameHighlightOutline"
+
+style "cFrameHandleStartFill"
+{
+	fg[NORMAL] = { 0.49, 0.00, 1.00 }
+        fg[ACTIVE] = { 0.59, 0, 0 }
+}
+widget "*cFrameHandleStartFill" style "cFrameHandleStartFill"
+
+style "cFrameHandleStartOutline"
+{
+	fg[NORMAL] = { 0.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cFrameHandleStartOutline" style "cFrameHandleStartOutline"
+
+style "cFrameHandleEndFill"
+{
+	fg[NORMAL] = { 0.49, 0.00, 1.00 }
+        fg[ACTIVE] = { 0.59, 0, 0 }
+}
+widget "*cFrameHandleEndFill" style "cFrameHandleEndFill"
+
+style "cFrameHandleEndOutline"
+{
+	fg[NORMAL] = { 0.00, 0.00, 0.00 }
+        fg[ACTIVE] = { 1.00, 0, 0 }
+}
+widget "*cFrameHandleEndOutline" style "cFrameHandleEndOutline"
+
+style "cTrimHandleLockedStart"
+{
+	fg[NORMAL] = { 0.92, 0.06, 0.06 }
+        fg[ACTIVE] = { 0.16, 0, 0 }
+}
+widget "*cTrimHandleLockedStart" style "cTrimHandleLockedStart"
+
+style "cTrimHandleLockedEnd"
+{
+	fg[NORMAL] = { 0.92, 0.06, 0.06 }
+        fg[ACTIVE] = { 0.16, 0, 0 }
+}
+widget "*cTrimHandleLockedEnd" style "cTrimHandleLockedEnd"
+
+style "cTrimHandleStart"
+{
+	fg[NORMAL] = { 0.10, 0.00, 1.00 }
+        fg[ACTIVE] = { 0.27, 0, 0 }
+}
+widget "*cTrimHandleStart" style "cTrimHandleStart"
+
+style "cTrimHandleEnd"
+{
+	fg[NORMAL] = { 0.10, 0.00, 1.00 }
+        fg[ACTIVE] = { 0.27, 0, 0 }
+}
+widget "*cTrimHandleEnd" style "cTrimHandleEnd"

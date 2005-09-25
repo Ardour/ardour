@@ -1,0 +1,13 @@
+#!/bin/sh
+
+
+if [ -x ./ardour.bin ] ; then 
+    # scons executable
+    export LD_LIBRARY_PATH=../libs/ardour
+    exec ./ardour.bin --novst $*
+else 
+    # autofoo/make executable
+    export LD_LIBRARY_PATH=../libs/ardour
+    exec ./ardour --novst $*
+fi
+

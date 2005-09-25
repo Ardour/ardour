@@ -1,0 +1,4 @@
+#!/bin/sh
+
+export LD_LIBRARY_PATH=../libs/ardour
+exec valgrind --num-callers=12 --tool=memcheck ./ardour.bin --novst $*

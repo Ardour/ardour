@@ -1,0 +1,5195 @@
+# Σχολιαστικός Τίτλος.
+# Πνευματικά Δικαιώματα (C) YEAR Paul Davis
+# Το παρόν αρχείο διανέμεται υπό της ιδίας αδείας με του PACKAGE πακέτου.
+# ΠΡΩΤΟΣ ΔΗΜΙΟΥΡΓΟΣ <muadib@in.gr>, 2004.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.99beta23\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-09-19 18:09-0400\n"
+"PO-Revision-Date: 2005-01-11\n"
+"Last-Translator: Muadibas <EMAIL@ADDRESS>\n"
+"Language-Team: Hellenic(Greek) <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: gtk_ardour/about.cc:134
+msgid "Marcus Andersson"
+msgstr ""
+
+#: gtk_ardour/about.cc:135
+msgid "Jeremy Hall"
+msgstr ""
+
+#: gtk_ardour/about.cc:136
+msgid "Steve Harris"
+msgstr ""
+
+#: gtk_ardour/about.cc:137
+msgid "Tim Mayberry"
+msgstr ""
+
+#: gtk_ardour/about.cc:138
+msgid "Mark Stewart"
+msgstr ""
+
+#: gtk_ardour/about.cc:139
+msgid "Sam Chessman"
+msgstr ""
+
+#: gtk_ardour/about.cc:140
+msgid "Jack O'Quin"
+msgstr ""
+
+#: gtk_ardour/about.cc:141
+msgid "Matt Krai"
+msgstr ""
+
+#: gtk_ardour/about.cc:142
+msgid "Ben Bell"
+msgstr ""
+
+#: gtk_ardour/about.cc:143
+msgid "Gerard van Dongen"
+msgstr ""
+
+#: gtk_ardour/about.cc:144
+msgid "Thomas Charbonnel"
+msgstr ""
+
+#: gtk_ardour/about.cc:145
+msgid "Nick Mainsbridge"
+msgstr ""
+
+#: gtk_ardour/about.cc:146
+msgid "Colin Law"
+msgstr ""
+
+#: gtk_ardour/about.cc:147
+msgid "Sampo Savolainen"
+msgstr ""
+
+#: gtk_ardour/about.cc:148
+msgid "Joshua Leach"
+msgstr ""
+
+#: gtk_ardour/about.cc:149
+msgid "Rob Holland"
+msgstr ""
+
+#: gtk_ardour/about.cc:150
+msgid "Per Sigmond"
+msgstr ""
+
+#: gtk_ardour/about.cc:151
+msgid "Doug Mclain"
+msgstr ""
+
+#: gtk_ardour/about.cc:156
+msgid ""
+"French:\n"
+"\tAlain Fréhel <alain.frehel@free.fr>"
+msgstr ""
+
+#: gtk_ardour/about.cc:157
+msgid ""
+"German:\n"
+"\tKarsten Petersen <kapet@kapet.de>"
+msgstr ""
+
+#: gtk_ardour/about.cc:158
+msgid ""
+"Italian:\n"
+"\tFilippo Pappalardo <filippo@email.it>"
+msgstr ""
+
+#: gtk_ardour/about.cc:159
+msgid ""
+"Portuguese:\n"
+"\tRui Nuno Capela <rncbc@rncbc.org>"
+msgstr ""
+
+#: gtk_ardour/about.cc:160
+msgid ""
+"Brazilian Portuguese:\n"
+"\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
+"\tChris Ross <chris@tebibyte.org>"
+msgstr ""
+
+#: gtk_ardour/about.cc:162
+msgid ""
+"Spanish:\n"
+"\t Alex Krohn <alexkrohn@fastmail.fm>"
+msgstr ""
+
+#: gtk_ardour/about.cc:163
+msgid ""
+"Russian:\n"
+"\t Igor Blinov <pitstop@nm.ru>"
+msgstr ""
+
+#: gtk_ardour/about.cc:181
+#, fuzzy
+msgid ""
+"Copyright (C) 1999-2005 Paul Davis\n"
+"Ardour comes with ABSOLUTELY NO WARRANTY\n"
+"This is free software, and you are welcome to redistribute it\n"
+"under certain conditions; see the file COPYING for details.\n"
+msgstr ""
+"Πνευματικά Δικαιώματα (C) 1999-2004 Paul Davis\n"
+"Το πρόγραμμα Ardour διανέμεται δίχως ΑΠΟΛΥΤΩΣ ΚΑΜΙΑ ΕΓΓΥΗΣΗ\n"
+"Το παρόν ειναι δωρεάν λογισμικό, είστε ευπρόσδεκτοι να το επαναδιανείμετε \n"
+"υπό ειδικούς όρους; διαβάστε το αρχείο COPYING για λεπτομέρειες.\n"
+
+#: gtk_ardour/about.cc:188
+#, fuzzy
+msgid ""
+"Ardour: %1\n"
+"(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"
+msgstr ""
+"Ardour: %1\n"
+"(Κτισμένο με ardour/gtk %2 libardour: %3.%4.%5)"
+
+#: gtk_ardour/about.cc:206
+msgid ""
+"Primary author:\n"
+"\tPaul Davis\n"
+"\n"
+"Major developers:\n"
+"\tJesse Chappell\n"
+"\tTaybin Rutkin\n"
+"Contributors:\n"
+"\t"
+msgstr ""
+
+#: gtk_ardour/about.cc:243
+msgid "Authors"
+msgstr "Δημιουργοί"
+
+#: gtk_ardour/about.cc:244
+msgid "Translators"
+msgstr "Μεταφραστές"
+
+#: gtk_ardour/about.cc:361
+msgid "cannot open splash image file \"%1\""
+msgstr "Η εισαγωγική εικόνα δεν ανοίγει\"%1\""
+
+#: gtk_ardour/add_route_dialog.cc:40 gtk_ardour/ardour_message.cc:33
+#: gtk_ardour/ardour_ui.cc:2984 gtk_ardour/connection_editor.cc:81
+#: gtk_ardour/crossfade_edit.cc:73 gtk_ardour/editor.cc:3977
+#: gtk_ardour/editor_markers.cc:732 gtk_ardour/editor_ops.cc:1737
+#: gtk_ardour/io_selector.cc:54 gtk_ardour/io_selector.cc:784
+#: gtk_ardour/main.cc:291 gtk_ardour/plugin_selector.cc:85
+#: gtk_ardour/redirect_box.cc:480 gtk_ardour/redirect_box.cc:777
+#: gtk_ardour/redirect_box.cc:900
+msgid "OK"
+msgstr "OK"
+
+#: gtk_ardour/add_route_dialog.cc:41 gtk_ardour/add_route_dialog.cc:92
+#: gtk_ardour/add_route_dialog.cc:93 gtk_ardour/ardour_ui.cc:3046
+#: gtk_ardour/connection_editor.cc:55 gtk_ardour/crossfade_edit.cc:72
+#: gtk_ardour/editor.cc:3978 gtk_ardour/editor.cc:3982
+#: gtk_ardour/editor.cc:3983 gtk_ardour/editor_markers.cc:733
+#: gtk_ardour/editor_ops.cc:1738 gtk_ardour/editor_ops.cc:2000
+#: gtk_ardour/editor_timefx.cc:52 gtk_ardour/export_dialog.cc:1129
+#: gtk_ardour/io_selector.cc:55 gtk_ardour/io_selector.cc:785
+#: gtk_ardour/library_ui.cc:722 gtk_ardour/plugin_selector.cc:86
+#: gtk_ardour/redirect_box.cc:901 gtk_ardour/redirect_box.cc:1072
+#: gtk_ardour/tempo_dialog.cc:16 gtk_ardour/tempo_dialog.cc:33
+#: gtk_ardour/tempo_dialog.cc:143 gtk_ardour/tempo_dialog.cc:161
+msgid "Cancel"
+msgstr "Ακύρωση"
+
+#: gtk_ardour/add_route_dialog.cc:42 gtk_ardour/editor.cc:94
+msgid "Tracks"
+msgstr "Κανάλια"
+
+#: gtk_ardour/add_route_dialog.cc:43
+msgid "Busses"
+msgstr "Δίαυλοι"
+
+#: gtk_ardour/add_route_dialog.cc:48
+msgid "ardour: add track/bus"
+msgstr "ardour: Εισαγωγή καναλιού/διαύλου"
+
+#: gtk_ardour/add_route_dialog.cc:66 gtk_ardour/plugin_selector.cc:81
+msgid "Add"
+msgstr "Πρόσθεση"
+
+#: gtk_ardour/add_route_dialog.cc:86
+msgid "Name (template)"
+msgstr "Όνομα (προσχέδιο)"
+
+#: gtk_ardour/ardour_ui.cc:798
+msgid ""
+"pre\n"
+"roll"
+msgstr ""
+"pre\n"
+"roll"
+
+#: gtk_ardour/ardour_ui.cc:799
+msgid ""
+"post\n"
+"roll"
+msgstr ""
+"post\n"
+"roll"
+
+#: gtk_ardour/ardour_ui.cc:807
+msgid "% "
+msgstr "% "
+
+#: gtk_ardour/ardour_ui.cc:808
+msgid "spring"
+msgstr "έλασμα"
+
+#: gtk_ardour/ardour_ui.cc:810
+msgid ""
+"punch\n"
+"in"
+msgstr ""
+"punch\n"
+"in"
+
+#: gtk_ardour/ardour_ui.cc:811
+msgid ""
+"punch\n"
+"out"
+msgstr ""
+"punch\n"
+"out"
+
+#: gtk_ardour/ardour_ui.cc:812
+msgid ""
+"auto\n"
+"return"
+msgstr ""
+"αυτόματη\n"
+"επιστροφή"
+
+#: gtk_ardour/ardour_ui.cc:813
+msgid ""
+"auto\n"
+"play"
+msgstr ""
+"αυτόματη\n"
+"αναπαρ/γή"
+
+#: gtk_ardour/ardour_ui.cc:814
+msgid ""
+"auto\n"
+"input"
+msgstr ""
+"αυτόματο\n"
+"input"
+
+#: gtk_ardour/ardour_ui.cc:815
+msgid "click"
+msgstr "μετρονόμος"
+
+#: gtk_ardour/ardour_ui.cc:816
+msgid ""
+"follow\n"
+"PH"
+msgstr ""
+"ακολουθία\n"
+"Κερσ."
+
+#: gtk_ardour/ardour_ui.cc:817
+msgid "AUDITIONING"
+msgstr "ΑΚΡΟΑΣΗ"
+
+#: gtk_ardour/ardour_ui.cc:818
+msgid "SOLO"
+msgstr "ΣΟΛΟ"
+
+#: gtk_ardour/ardour_ui.cc:870
+msgid "Percentage"
+msgstr "Ποσοστό"
+
+#: gtk_ardour/ardour_ui.cc:872
+msgid "Semitones"
+msgstr "Ημιτόνια"
+
+#: gtk_ardour/ardour_ui.cc:875
+msgid "Sprung"
+msgstr "Έλασμα"
+
+#: gtk_ardour/ardour_ui.cc:877
+msgid "Wheel"
+msgstr "Τροχός"
+
+#: gtk_ardour/ardour_ui.cc:902
+msgid ""
+"You cannot record-enable\n"
+"track %1\n"
+"because it has no input connections.\n"
+"You would be wasting space recording silence."
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:1073
+msgid "quit"
+msgstr "Έξοδος"
+
+#: gtk_ardour/ardour_ui.cc:1082
+msgid ""
+"Ardour was unable to save your session.\n"
+"\n"
+"If you still wish to quit, please use the\n"
+"\n"
+"\"Just quit\" option."
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:1107
+msgid "Save and %1"
+msgstr "Αποθήκευση και %1"
+
+#: gtk_ardour/ardour_ui.cc:1112
+msgid "Just %1"
+msgstr "Απλά %1"
+
+#: gtk_ardour/ardour_ui.cc:1117
+msgid "Don't %1"
+msgstr "Μη %1"
+
+#: gtk_ardour/ardour_ui.cc:1126
+#, fuzzy
+msgid "session"
+msgstr "Συνεδρία"
+
+#: gtk_ardour/ardour_ui.cc:1128
+#, fuzzy
+msgid "snapshot"
+msgstr "Στιγμιότυπο"
+
+#: gtk_ardour/ardour_ui.cc:1130
+#, fuzzy
+msgid ""
+"The %1\n"
+"\"%2\"\n"
+"has not been saved.\n"
+"\n"
+"Any changes made this time\n"
+"will be lost unless you save it.\n"
+"\n"
+"What do you want to do?"
+msgstr ""
+"Το τραγούδι \"%1\"\n"
+"δεν έχει αποθηκευθεί.\n"
+"\n"
+"Εάν δεν το αποθήκευσετε\n"
+"οι αλλαγές που κάνατε θα χαθούν.\n"
+"\n"
+"τί θέλετε να κάνετε;"
+
+#: gtk_ardour/ardour_ui.cc:1151
+msgid "Prompter"
+msgstr "Υποβολέας"
+
+#: gtk_ardour/ardour_ui.cc:1152
+msgid "ardour: save session?"
+msgstr "ardour: αποθήκευση συνεδρίας;"
+
+#: gtk_ardour/ardour_ui.cc:1219
+#, fuzzy, c-format
+msgid "disconnected"
+msgstr "Αποσύνδεση"
+
+#: gtk_ardour/ardour_ui.cc:1226
+#, fuzzy, c-format
+msgid "SR: %.1f kHz / %4.1f msecs"
+msgstr "SR: %.1f kHz"
+
+#: gtk_ardour/ardour_ui.cc:1230
+#, c-format
+msgid "SR: %u kHz / %4.1f msecs"
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:1243
+#, c-format
+msgid "DSP Load: %.1f%%"
+msgstr "Φορτίο DSP: %.1f%%"
+
+#: gtk_ardour/ardour_ui.cc:1253
+#, c-format
+msgid "Disk r:%5.1f w:%5.1f MB/s"
+msgstr "Δίσκοι r:%5.1f w:%5.1f MB/s"
+
+#: gtk_ardour/ardour_ui.cc:1267
+#, fuzzy, c-format
+msgid "Buffers p:%<PRIu32>%% c:%<PRIu32>%%"
+msgstr "Buffers p:%5.0f%% c:%5.0f%%"
+
+#: gtk_ardour/ardour_ui.cc:1294
+msgid "space: 24hrs+"
+msgstr "χώρος : 24hrs+"
+
+#: gtk_ardour/ardour_ui.cc:1324
+#, c-format
+msgid "space: %02dh:%02dm:%02ds"
+msgstr "χώρος: %02dh:%02dm:%02ds"
+
+#: gtk_ardour/ardour_ui.cc:1575
+msgid "programming error: impossible control method"
+msgstr "Σφάλμα προγραμματισμού: Μη-πιθανή μέθοδος ελέγχου"
+
+#: gtk_ardour/ardour_ui.cc:1800
+msgid "cancel"
+msgstr "Ακύρωση"
+
+#: gtk_ardour/ardour_ui.cc:1801
+msgid "rescan"
+msgstr "Επανα-ανίχνευση"
+
+#: gtk_ardour/ardour_ui.cc:1842
+msgid "open session"
+msgstr "Άνοιγμα συνεδρίας"
+
+#: gtk_ardour/ardour_ui.cc:1897
+msgid "Patience is a virtue.\n"
+msgstr "Η Υπομονή ειναι Χρυσός.\n"
+
+#: gtk_ardour/ardour_ui.cc:1906
+msgid "You cannot add a track without a session already loaded."
+msgstr "Δεν γίνεται να προστεθεί κανάλι χωρίς ήδη φορτωμένη συνεδρία."
+
+#: gtk_ardour/ardour_ui.cc:1913
+msgid "could not create new audio track"
+msgstr "Δεν γίνεται να δημιουργηθεί νέο ηχητικό κανάλι"
+
+#: gtk_ardour/ardour_ui.cc:1917
+msgid "could not create new audio bus"
+msgstr "Δεν γίνεται να δημιουργηθεί νέος ηχητικός δίαυλος"
+
+#: gtk_ardour/ardour_ui.cc:1936
+msgid ""
+"There are insufficient JACK ports available\n"
+"to create a new track or bus.\n"
+"You should save Ardour, exit and\n"
+"restart JACK with more ports."
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:2071
+msgid ""
+"Please create 1 or more track\n"
+"before trying to record.\n"
+"Check the Session menu."
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:2312
+#, fuzzy
+msgid ""
+"JACK has either been shutdown or it\n"
+"disconnected Ardour because Ardour\n"
+"was not fast enough. You can save the\n"
+"session and/or try to reconnect to JACK ."
+msgstr ""
+"Ή ο JACK απενεργοποιήθηκε ή αυτός\n"
+"αποσύνδεσε το Ardour διότι το Ardour\n"
+"δεν ήταν αρκετά γρήγορο. Καλύτερα να αποθηκεύσετε τη\n"
+"συνεδρία και να επανακινήσετε και τον JACK και το Ardour."
+
+#: gtk_ardour/ardour_ui.cc:2328
+msgid "Unable to create all required ports"
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:2336
+#, fuzzy
+msgid "Unable to start the session running"
+msgstr "Αρχή της συνεδρίας"
+
+#: gtk_ardour/ardour_ui.cc:2472
+msgid "No Stream"
+msgstr "Δεν υπάρχει ροή(No stream)"
+
+#: gtk_ardour/ardour_ui.cc:2499 gtk_ardour/ardour_ui.cc:2518
+msgid "none"
+msgstr "Κανένα"
+
+#: gtk_ardour/ardour_ui.cc:2508 gtk_ardour/ardour_ui.cc:2527
+#: gtk_ardour/automation_time_axis.cc:189
+#: gtk_ardour/automation_time_axis.cc:218
+#: gtk_ardour/automation_time_axis.cc:458 gtk_ardour/mixer_strip.cc:211
+#: gtk_ardour/mixer_strip.cc:223 gtk_ardour/mixer_strip.cc:947
+#: gtk_ardour/plugin_ui.cc:416 gtk_ardour/plugin_ui.cc:659
+msgid "off"
+msgstr "εκτός"
+
+#: gtk_ardour/ardour_ui.cc:2548
+msgid "Name for snapshot"
+msgstr "Όνομα για στιγμιότυπο"
+
+#: gtk_ardour/ardour_ui.cc:2716 gtk_ardour/new_session_dialog.cc:294
+msgid "Name for mix template:"
+msgstr "Όνομα για προσχεδίο μίξεως:"
+
+#: gtk_ardour/ardour_ui.cc:2717
+msgid "-template"
+msgstr "-προσχέδιο"
+
+#: gtk_ardour/ardour_ui.cc:2760
+msgid "Session %1 already exists at %2"
+msgstr "Η Συνεδρία %1 υπάρχει ήδη στο %2"
+
+#: gtk_ardour/ardour_ui.cc:2832
+msgid ""
+"You do not have write access to this session.\n"
+"This prevents the session from being loaded."
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:2844 gtk_ardour/ardour_ui.cc:2897
+msgid "Session \"%1 (snapshot %2)\" did not load successfully"
+msgstr "Η Συνεδρία \"%1 (στιγμιότυπο %2)\" δεν φορτώθηκε επιτυχώς"
+
+#: gtk_ardour/ardour_ui.cc:2966
+msgid ""
+"No audio files were ready for cleanup\n"
+"\n"
+"If this seems suprising, check for any existing\n"
+"snapshots. These may still include regions that\n"
+"require some unused files to continue to exist."
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:2995 gtk_ardour/ardour_ui.cc:3001
+msgid "files"
+msgstr "αρχεία"
+
+#: gtk_ardour/ardour_ui.cc:2997 gtk_ardour/ardour_ui.cc:3003
+msgid "file"
+msgstr "αρχείο"
+
+#: gtk_ardour/ardour_ui.cc:3026
+msgid "ardour: cleanup"
+msgstr "ardour: εκκαθάριση"
+
+#: gtk_ardour/ardour_ui.cc:3040
+msgid ""
+"Cleanup is a destructive operation.\n"
+"ALL undo/redo information will be lost if you cleanup.\n"
+"Unused audio files will be moved to a \"dead sounds\" location."
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:3045
+msgid "Proceed with cleanup"
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:3061
+#, fuzzy
+msgid "CleanupDialog"
+msgstr "Εκκαθάριση"
+
+#: gtk_ardour/ardour_ui.cc:3062
+#, fuzzy
+msgid "ardour cleanup"
+msgstr "ardour: εκκαθάριση"
+
+#: gtk_ardour/ardour_ui.cc:3063
+#, fuzzy
+msgid "ardour_cleanup"
+msgstr "ardour: εκκαθάριση"
+
+#: gtk_ardour/ardour_ui.cc:3086
+msgid "cleaned files"
+msgstr "καθαρισμένα αρχεία"
+
+#: gtk_ardour/ardour_ui.cc:3087
+msgid ""
+"The following %1 %2 were not in use.\n"
+"The next time you flush the wastebasket\n"
+"it will release an additional %3 %4bytes\n"
+"of disk space"
+msgstr ""
+"Τα ακόλουθα %1 %2 δεν χρησιμοποιούνταν.\n"
+"Την επόμενη φορά που θα αδειάσετε τον κάδο\n"
+"θα ελευθερωθούν %3 %4bytes\n"
+"χώρου στο δίσκο"
+
+#: gtk_ardour/ardour_ui.cc:3110
+msgid "deleted file"
+msgstr "διαγραμμένα αρχεία"
+
+#: gtk_ardour/ardour_ui.cc:3111
+msgid ""
+"The following %1 file%2 were deleted, releasing %3 %4bytes of disk space"
+msgstr ""
+"Τα ακόλουθα %1 file%2 διεγράφησαν, ελευθερώνοντας %3 %4bytes χώρου στο δίσκο"
+
+#: gtk_ardour/ardour_ui.cc:3226
+msgid "Recording was stopped because your system could not keep up."
+msgstr "η Εγγραφή διεκόπη διότι το σύστημά δεν μπορούσε να ανταπεξέλθει."
+
+#: gtk_ardour/ardour_ui.cc:3248
+msgid ""
+"The disk system on your computer\n"
+"was not able to keep up with Ardour.\n"
+"\n"
+"Specifically, it failed to write data to disk\n"
+"quickly enough to keep up with recording.\n"
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:3266
+msgid ""
+"The disk system on your computer\n"
+"was not able to keep up with Ardour.\n"
+"\n"
+"Specifically, it failed to read data from disk\n"
+"quickly enough to keep up with playback.\n"
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:3291
+msgid "Recover from crash"
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:3292
+msgid "Ignore crash data"
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:3293
+msgid ""
+"This session appears to have been in\n"
+"middle of recording when ardour or\n"
+"the computer was shutdown.\n"
+"\n"
+"Ardour can recover any captured audio for\n"
+"you, or it can ignore it. Please decide\n"
+"what you would like to do.\n"
+msgstr ""
+
+#: gtk_ardour/ardour_ui.cc:3338
+#, fuzzy
+msgid "Could not disconnect from JACK"
+msgstr "Δεν γινόταν να συνδεθώ στον JACK server σαν  \"%1\""
+
+#: gtk_ardour/ardour_ui.cc:3351
+#, fuzzy
+msgid "Could not reconnect to JACK"
+msgstr "Δεν γινόταν να συνδεθώ στον JACK server σαν  \"%1\""
+
+#: gtk_ardour/ardour_ui2.cc:60
+msgid "UI: cannot setup editor"
+msgstr "UI: Ο 'editor' δεν μπορεί να εγερθεί"
+
+#: gtk_ardour/ardour_ui2.cc:65
+msgid "UI: cannot setup mixer"
+msgstr "UI: ο μίκτης δεν μπορεί να εγερθεί"
+
+#: gtk_ardour/ardour_ui2.cc:70
+msgid "UI: cannot setup meter_bridge"
+msgstr "UI: η γέφυρα μετρήσεων δεν μπορεί να εγερθεί"
+
+#: gtk_ardour/ardour_ui2.cc:98
+msgid "MMC + Local"
+msgstr "MMC + Τοπικό"
+
+#: gtk_ardour/ardour_ui2.cc:99
+msgid "MMC"
+msgstr "MMC"
+
+#: gtk_ardour/ardour_ui2.cc:100
+msgid "Local"
+msgstr "Τοπικό"
+
+#: gtk_ardour/ardour_ui2.cc:117
+msgid "MMC ID"
+msgstr "MMC ID"
+
+#: gtk_ardour/ardour_ui2.cc:215
+msgid "Play from playhead"
+msgstr "Αναπαρ/γή από τον Αναπαραγωγέα"
+
+#: gtk_ardour/ardour_ui2.cc:216
+msgid "Stop playback"
+msgstr "Διακοπή Αναπαρ/γής"
+
+#: gtk_ardour/ardour_ui2.cc:217
+msgid "Play range/selection"
+msgstr "Αναπαρ/γή διαστήματος/επιλογής"
+
+#: gtk_ardour/ardour_ui2.cc:218
+msgid "Go to start of session"
+msgstr "Αρχή της συνεδρίας"
+
+#: gtk_ardour/ardour_ui2.cc:219
+msgid "Go to end of session"
+msgstr "Τέλος του συνεδρίας"
+
+#: gtk_ardour/ardour_ui2.cc:220
+msgid "Play loop range"
+msgstr "Επαναληπτική αναπαρ/γή διαστήματος"
+
+#: gtk_ardour/ardour_ui2.cc:221
+msgid "Return to last playback start when stopped"
+msgstr "Επιστροφή στην τελευταία θεση μετα απο παύση"
+
+#: gtk_ardour/ardour_ui2.cc:222
+msgid "Start playback after any locate"
+msgstr "Αρχή αναπαρ/γής μετά από κάθε τοποθέτηση"
+
+#: gtk_ardour/ardour_ui2.cc:223
+msgid "Be sensible about input monitoring"
+msgstr "Προσοχή στο input monitoring"
+
+#: gtk_ardour/ardour_ui2.cc:224
+msgid "Start recording at auto-punch start"
+msgstr "Έναρξη εγγραφής στην αρχή αυτο-εναπόθεσης"
+
+#: gtk_ardour/ardour_ui2.cc:225
+msgid "Stop recording at auto-punch end"
+msgstr "Λήξη εγγραφής στο τέλος αυτο-εναπόθεσης"
+
+#: gtk_ardour/ardour_ui2.cc:226
+msgid "Enable/Disable audio click"
+msgstr "Άρση/Παύση μετρονόμου"
+
+#: gtk_ardour/ardour_ui2.cc:227
+msgid "Enable/Disable follow playhead"
+msgstr "Άρση/Παύση ακολουθίας αναπαραγωγέα"
+
+#: gtk_ardour/ardour_ui2.cc:228
+msgid "Shuttle speed control"
+msgstr "Έλεγχος ταχύτητας Shuttle"
+
+#: gtk_ardour/ardour_ui2.cc:229
+#, fuzzy, c-format
+msgid "Select semitones or %%-age for speed display"
+msgstr "Επιλογή ημιτονίων ή %- για απεικόνιση ταχύτητος"
+
+#: gtk_ardour/ardour_ui2.cc:230
+msgid "Select sprung or wheel behaviour"
+msgstr "Επιλογή συμπεριφοράς ελάσματος ή τροχού"
+
+#: gtk_ardour/ardour_ui2.cc:231
+msgid "Current transport speed"
+msgstr "Τρέχουσα ταχύτητα μεταφοράς"
+
+#: gtk_ardour/ardour_ui2.cc:312
+msgid "Primary clock"
+msgstr "Πρωτεύον ωρολόγιον"
+
+#: gtk_ardour/ardour_ui2.cc:313
+msgid "secondary clock"
+msgstr "Δευτερέυον ωρολόγιον"
+
+#: gtk_ardour/ardour_ui2.cc:365 gtk_ardour/ardour_ui2.cc:751
+#: gtk_ardour/ardour_ui2.cc:770
+msgid "stopped"
+msgstr "παύση"
+
+#: gtk_ardour/ardour_ui2.cc:431
+msgid "ardour: clock"
+msgstr "ardour: Ωρολόγιον"
+
+#: gtk_ardour/ardour_ui2.cc:721
+msgid "st"
+msgstr "st"
+
+#: gtk_ardour/ardour_ui2.cc:731
+msgid "sprung"
+msgstr "έλασμα"
+
+#: gtk_ardour/ardour_ui2.cc:742
+msgid "wheel"
+msgstr "τροχός"
+
+#: gtk_ardour/ardour_ui_dependents.cc:74
+msgid "keyboard_target: error setting binding state: invalid node"
+msgstr ""
+"keyboard_target: σφάλμα στη θέση καταστάσεως δεσμού πλήκτρων: ανύπαρκτος "
+"κόμβος"
+
+#: gtk_ardour/ardour_ui_dialogs.cc:158
+msgid "close session"
+msgstr "κλείσιμο συνεδρίας"
+
+#: gtk_ardour/ardour_ui_ed.cc:75 gtk_ardour/audio_time_axis.cc:1895
+msgid "New"
+msgstr "Νέο"
+
+#: gtk_ardour/ardour_ui_ed.cc:76
+msgid "Open"
+msgstr "Άνοιγμα"
+
+#: gtk_ardour/ardour_ui_ed.cc:77
+msgid "Recent"
+msgstr "Πρόσφατο"
+
+#: gtk_ardour/ardour_ui_ed.cc:78 gtk_ardour/connection_editor.cc:54
+#: gtk_ardour/io_selector.cc:54 gtk_ardour/io_selector.cc:784
+msgid "Close"
+msgstr "Κλείσιμο"
+
+#: gtk_ardour/ardour_ui_ed.cc:84 gtk_ardour/route_params_ui.cc:488
+msgid "Add Track/Bus"
+msgstr "Πρόσθεση καναλιού/διαύλου"
+
+#: gtk_ardour/ardour_ui_ed.cc:99
+msgid "Connect"
+msgstr "Σύνδεση"
+
+#: gtk_ardour/ardour_ui_ed.cc:100
+msgid "Image Compositor"
+msgstr "Σύνθεση εικόνων"
+
+#: gtk_ardour/ardour_ui_ed.cc:114
+msgid "Save"
+msgstr "Αποθήκευση"
+
+#: gtk_ardour/ardour_ui_ed.cc:118
+msgid "Snapshot"
+msgstr "Στιγμιότυπο"
+
+#: gtk_ardour/ardour_ui_ed.cc:126
+msgid "Save Template..."
+msgstr "Αποθήκευση προσχεδίου..."
+
+#: gtk_ardour/ardour_ui_ed.cc:133
+msgid "Export session to audiofile..."
+msgstr "Εξαγωγή συνεδρίας σε αρχείο..."
+
+#: gtk_ardour/ardour_ui_ed.cc:134
+msgid "Export range to audiofile..."
+msgstr "Εξαγωγή διαστήματος σε αρχείο..."
+
+#: gtk_ardour/ardour_ui_ed.cc:137 gtk_ardour/editor.cc:2312
+#: gtk_ardour/editor.cc:2430 gtk_ardour/export_dialog.cc:118
+#: gtk_ardour/export_dialog.cc:1223 gtk_ardour/export_dialog.cc:1227
+msgid "Export"
+msgstr "Εξαγωγή"
+
+#: gtk_ardour/ardour_ui_ed.cc:146
+msgid "Cleanup unused sources"
+msgstr "Εκκαθάριση αχρήστων πηγών"
+
+#: gtk_ardour/ardour_ui_ed.cc:147
+msgid "Flush wastebasket"
+msgstr "Άδειασμα κάδου"
+
+#: gtk_ardour/ardour_ui_ed.cc:149
+msgid "Cleanup"
+msgstr "Εκκαθάριση"
+
+#: gtk_ardour/ardour_ui_ed.cc:154
+msgid "Quit"
+msgstr "Έξοδος"
+
+#: gtk_ardour/ardour_ui_ed.cc:156
+msgid "Session"
+msgstr "Συνεδρία"
+
+#: gtk_ardour/ardour_ui_ed.cc:162 gtk_ardour/crossfade_edit.cc:287
+#: gtk_ardour/editor.cc:2242 gtk_ardour/editor.cc:2499
+#: gtk_ardour/editor_markers.cc:466 gtk_ardour/mixer_strip.cc:570
+#: gtk_ardour/mixer_strip.cc:629 gtk_ardour/redirect_box.cc:412
+msgid "Edit"
+msgstr "Επεξεργασία"
+
+#: gtk_ardour/ardour_ui_ed.cc:171 gtk_ardour/mixer_strip.cc:572
+#: gtk_ardour/mixer_strip.cc:631
+msgid "Disconnect"
+msgstr "Αποσύνδεση"
+
+#: gtk_ardour/ardour_ui_ed.cc:174
+#, fuzzy
+msgid "Reconnect"
+msgstr "Σύνδεση"
+
+#: gtk_ardour/ardour_ui_ed.cc:192
+msgid "Latency"
+msgstr ""
+
+#: gtk_ardour/ardour_ui_ed.cc:195
+msgid "JACK"
+msgstr ""
+
+#: gtk_ardour/ardour_ui_ed.cc:205
+msgid "Editor"
+msgstr "Επεξεργαστής"
+
+#: gtk_ardour/ardour_ui_ed.cc:206
+msgid "Mixer"
+msgstr "Μίκτης"
+
+#: gtk_ardour/ardour_ui_ed.cc:212
+msgid "Options Editor"
+msgstr "Επεξ/στης Ρυθμίσεων"
+
+#: gtk_ardour/ardour_ui_ed.cc:219
+msgid "Audio Library"
+msgstr "Ηχητική βιβλιοθήκη"
+
+#: gtk_ardour/ardour_ui_ed.cc:225
+#, fuzzy
+msgid "Track/Bus Inspector"
+msgstr "κανάλια/δίαυλοι"
+
+#: gtk_ardour/ardour_ui_ed.cc:232
+msgid "Connections"
+msgstr "Συνδέσεις"
+
+#: gtk_ardour/ardour_ui_ed.cc:240
+msgid "Meter Bridge"
+msgstr "Γέφυρα μετρητή"
+
+#: gtk_ardour/ardour_ui_ed.cc:248
+msgid "Locations"
+msgstr "Τοποθεσίες"
+
+#: gtk_ardour/ardour_ui_ed.cc:255
+msgid "Big Clock"
+msgstr "Μεγάλο ωρολόγιον"
+
+#: gtk_ardour/ardour_ui_ed.cc:261
+msgid "About"
+msgstr "Πληροφορίες"
+
+#: gtk_ardour/ardour_ui_ed.cc:264
+msgid "Windows"
+msgstr "Παράθυρα"
+
+#: gtk_ardour/audio_clock.cc:1640 gtk_ardour/editor.cc:203
+msgid "SMPTE"
+msgstr "SMPTE"
+
+#: gtk_ardour/audio_clock.cc:1641 gtk_ardour/editor.cc:202
+#: gtk_ardour/editor_rulers.cc:359
+msgid "Bars:Beats"
+msgstr "Μπάρες:Κτύποι"
+
+#: gtk_ardour/audio_clock.cc:1642
+msgid "Minutes:Seconds"
+msgstr "Λεπτά:Δεύτερα"
+
+#: gtk_ardour/audio_clock.cc:1643
+msgid "Audio Frames"
+msgstr "Ηχητικά frames"
+
+#: gtk_ardour/audio_clock.cc:1644 gtk_ardour/option_editor.cc:356
+#: gtk_ardour/option_editor.cc:373 gtk_ardour/option_editor.cc:713
+#: gtk_ardour/option_editor.cc:733 gtk_ardour/option_editor.cc:774
+#: gtk_ardour/option_editor.cc:794
+msgid "Off"
+msgstr "Εκτός"
+
+#: gtk_ardour/audio_clock.cc:1646
+msgid "Mode"
+msgstr "Λειτουργία"
+
+#: gtk_ardour/audio_time_axis.cc:104 gtk_ardour/mixer_strip.cc:523
+msgid "m"
+msgstr "m"
+
+#: gtk_ardour/audio_time_axis.cc:104 gtk_ardour/mixer_strip.cc:524
+msgid "s"
+msgstr "s"
+
+#: gtk_ardour/audio_time_axis.cc:104
+msgid "r"
+msgstr "r"
+
+#: gtk_ardour/audio_time_axis.cc:108
+msgid "g"
+msgstr "g"
+
+#: gtk_ardour/audio_time_axis.cc:109
+msgid "p"
+msgstr "p"
+
+#: gtk_ardour/audio_time_axis.cc:110 gtk_ardour/automation_time_axis.cc:44
+#: gtk_ardour/visual_time_axis.cc:90
+msgid "h"
+msgstr "h"
+
+#: gtk_ardour/audio_time_axis.cc:111
+msgid "a"
+msgstr "a"
+
+#: gtk_ardour/audio_time_axis.cc:112 gtk_ardour/visual_time_axis.cc:89
+msgid "v"
+msgstr "v"
+
+#: gtk_ardour/audio_time_axis.cc:185
+msgid "Record"
+msgstr "Εγγραφή"
+
+#: gtk_ardour/audio_time_axis.cc:186 gtk_ardour/option_editor.cc:191
+msgid "Solo"
+msgstr "Σόλο"
+
+#: gtk_ardour/audio_time_axis.cc:187 gtk_ardour/editor.cc:2236
+#: gtk_ardour/editor.cc:2330 gtk_ardour/panner_ui.cc:433
+msgid "Mute"
+msgstr "Σιγή"
+
+#: gtk_ardour/audio_time_axis.cc:188
+msgid "Edit Group"
+msgstr "Διαμόρφωση Ομάδας"
+
+#: gtk_ardour/audio_time_axis.cc:189 gtk_ardour/visual_time_axis.cc:110
+msgid "Display Height"
+msgstr "Απεικόνιση ύψους"
+
+#: gtk_ardour/audio_time_axis.cc:190
+msgid "Playlist"
+msgstr "Playlist"
+
+#: gtk_ardour/audio_time_axis.cc:191 gtk_ardour/audio_time_axis.cc:752
+msgid "Automation"
+msgstr "Αυτοματισμός"
+
+#: gtk_ardour/audio_time_axis.cc:192 gtk_ardour/visual_time_axis.cc:111
+msgid "Visual options"
+msgstr "Επιλογές Εμφανίσεως"
+
+#: gtk_ardour/audio_time_axis.cc:193 gtk_ardour/visual_time_axis.cc:112
+msgid "Hide this track"
+msgstr "Απόκρυψη παρόντος καναλιού"
+
+#: gtk_ardour/audio_time_axis.cc:349
+msgid "No group"
+msgstr "Χωρίς ομάδα"
+
+#: gtk_ardour/audio_time_axis.cc:715 gtk_ardour/automation_time_axis.cc:447
+#: gtk_ardour/imageframe_time_axis.cc:265 gtk_ardour/marker_time_axis.cc:229
+msgid "Height"
+msgstr "Ύψος"
+
+#: gtk_ardour/audio_time_axis.cc:716 gtk_ardour/imageframe_time_axis.cc:266
+#: gtk_ardour/marker_time_axis.cc:230
+msgid "Color"
+msgstr "Χρώμα"
+
+#: gtk_ardour/audio_time_axis.cc:720
+msgid "Hide all crossfades"
+msgstr ""
+
+#: gtk_ardour/audio_time_axis.cc:721
+msgid "Show all crossfades"
+msgstr ""
+
+#: gtk_ardour/audio_time_axis.cc:729
+msgid "show all automation"
+msgstr "Ανάδειξη όλων των αυτοματισμών"
+
+#: gtk_ardour/audio_time_axis.cc:732
+msgid "show existing automation"
+msgstr "Ανάδειξη υπαρχόντων αυτοματισμών"
+
+#: gtk_ardour/audio_time_axis.cc:735
+msgid "hide all automation"
+msgstr "Κρύψιμο όλων των αυτοματισμών"
+
+#: gtk_ardour/audio_time_axis.cc:740 gtk_ardour/audio_time_axis.cc:1204
+#: gtk_ardour/editor.cc:234
+msgid "gain"
+msgstr "gain"
+
+#: gtk_ardour/audio_time_axis.cc:745 gtk_ardour/audio_time_axis.cc:1244
+msgid "pan"
+msgstr "pan"
+
+#: gtk_ardour/audio_time_axis.cc:750 gtk_ardour/redirect_box.cc:388
+msgid "Plugins"
+msgstr "Plugins"
+
+#: gtk_ardour/audio_time_axis.cc:758 gtk_ardour/option_editor.cc:95
+msgid "Show waveforms"
+msgstr "Ανάδειξη κυματομορφών"
+
+#: gtk_ardour/audio_time_axis.cc:766
+msgid "Traditional"
+msgstr "Παραδοσιακή"
+
+#: gtk_ardour/audio_time_axis.cc:769
+msgid "Rectified"
+msgstr "Ανορθωμένή"
+
+#: gtk_ardour/audio_time_axis.cc:772
+msgid "Waveform"
+msgstr "Κυματομορφή"
+
+#: gtk_ardour/audio_time_axis.cc:782
+#, fuzzy
+msgid "align with existing material"
+msgstr "Υπάρχον υλικό"
+
+#: gtk_ardour/audio_time_axis.cc:787
+#, fuzzy
+msgid "align with capture time"
+msgstr "Χρόνος Λήψεως"
+
+#: gtk_ardour/audio_time_axis.cc:793
+#, fuzzy
+msgid "Alignment"
+msgstr "Ευθυγράμμιση"
+
+#: gtk_ardour/audio_time_axis.cc:799 gtk_ardour/mixer_strip.cc:1288
+msgid "Active"
+msgstr "Ενεργό"
+
+#: gtk_ardour/audio_time_axis.cc:804 gtk_ardour/editor.cc:2386
+#: gtk_ardour/editor_markers.cc:454 gtk_ardour/editor_markers.cc:467
+#: gtk_ardour/editor_region_list.cc:400 gtk_ardour/imageframe_time_axis.cc:269
+#: gtk_ardour/location_ui.cc:56 gtk_ardour/marker_time_axis.cc:233
+#: gtk_ardour/mixer_strip.cc:1293 gtk_ardour/plugin_selector.cc:83
+msgid "Remove"
+msgstr "Απαλοιφή"
+
+#: gtk_ardour/audio_time_axis.cc:843 gtk_ardour/audio_time_axis.cc:880
+#: gtk_ardour/audio_time_axis.cc:911
+msgid "Name for playlist"
+msgstr "Όνομα για playlist"
+
+#: gtk_ardour/audio_time_axis.cc:1168 gtk_ardour/visual_time_axis.cc:433
+msgid "a track already exists with that name"
+msgstr "Κανάλι με αυτό το όνομα ήδη υπάρχει"
+
+#: gtk_ardour/audio_time_axis.cc:1449 gtk_ardour/editor.cc:2001
+#: gtk_ardour/editor_ops.cc:2251 gtk_ardour/selection.cc:539
+msgid "programming error: "
+msgstr "σφάλμα προγραμματισμού: "
+
+#: gtk_ardour/audio_time_axis.cc:1889
+msgid "Current: %1"
+msgstr "Τρέχον: %1"
+
+#: gtk_ardour/audio_time_axis.cc:1892 gtk_ardour/editor_markers.cc:452
+#: gtk_ardour/imageframe_time_axis.cc:258 gtk_ardour/marker_time_axis.cc:226
+#: gtk_ardour/mixer_strip.cc:1286 gtk_ardour/redirect_box.cc:377
+msgid "Rename"
+msgstr "Μετονομασία"
+
+#: gtk_ardour/audio_time_axis.cc:1896
+msgid "New Copy"
+msgstr "Νέο αντίγραφο"
+
+#: gtk_ardour/audio_time_axis.cc:1898
+msgid "Clear Current"
+msgstr "Εκκαθάριση τρέχοντος"
+
+#: gtk_ardour/audio_time_axis.cc:1900 gtk_ardour/editor.cc:2472
+#: gtk_ardour/editor.cc:2557
+msgid "Select"
+msgstr "Επιλογή"
+
+#: gtk_ardour/automation_line.cc:904
+msgid "automation event move"
+msgstr "μετακίνηση συμβάντος αυτοματισμού"
+
+#: gtk_ardour/automation_line.cc:906
+msgid "automation range drag"
+msgstr "έλξη διαστήματος αυτοματισμού"
+
+#: gtk_ardour/automation_line.cc:1035 gtk_ardour/region_gain_line.cc:64
+msgid "remove control point"
+msgstr "απαλοιφή σημείου ελέγχου"
+
+#: gtk_ardour/automation_time_axis.cc:45 gtk_ardour/editor_ops.cc:3010
+msgid "clear"
+msgstr "εκκαθάριση"
+
+#: gtk_ardour/automation_time_axis.cc:80
+msgid "track height"
+msgstr ""
+
+#: gtk_ardour/automation_time_axis.cc:81
+#, fuzzy
+msgid "automation state"
+msgstr "Κατάσταση αυτοματισμού pan"
+
+#: gtk_ardour/automation_time_axis.cc:82
+#, fuzzy
+msgid "clear track"
+msgstr "διαγραφή διαστημάτων"
+
+#: gtk_ardour/automation_time_axis.cc:83
+#, fuzzy
+msgid "hide track"
+msgstr "νύξη καναλιού"
+
+#: gtk_ardour/automation_time_axis.cc:191
+#: gtk_ardour/automation_time_axis.cc:229
+#: gtk_ardour/automation_time_axis.cc:462 gtk_ardour/mixer_strip.cc:213
+#: gtk_ardour/mixer_strip.cc:225 gtk_ardour/plugin_ui.cc:419
+#: gtk_ardour/plugin_ui.cc:661 gtk_ardour/region_editor.cc:50
+msgid "play"
+msgstr "αναπαραγωγή"
+
+#: gtk_ardour/automation_time_axis.cc:193
+#: gtk_ardour/automation_time_axis.cc:240
+#: gtk_ardour/automation_time_axis.cc:466 gtk_ardour/mixer_strip.cc:215
+#: gtk_ardour/mixer_strip.cc:227 gtk_ardour/plugin_ui.cc:422
+#: gtk_ardour/plugin_ui.cc:663
+msgid "write"
+msgstr "εγγραφή"
+
+#: gtk_ardour/automation_time_axis.cc:195
+#: gtk_ardour/automation_time_axis.cc:251
+#: gtk_ardour/automation_time_axis.cc:470 gtk_ardour/mixer_strip.cc:217
+#: gtk_ardour/mixer_strip.cc:229 gtk_ardour/mixer_strip.cc:953
+#: gtk_ardour/plugin_ui.cc:425 gtk_ardour/plugin_ui.cc:665
+msgid "touch"
+msgstr "άγγιγμα"
+
+#: gtk_ardour/automation_time_axis.cc:262 gtk_ardour/option_editor.cc:274
+#: gtk_ardour/option_editor.cc:280 gtk_ardour/plugin_ui.cc:428
+msgid "???"
+msgstr "???"
+
+#: gtk_ardour/automation_time_axis.cc:276
+msgid "clear automation"
+msgstr "εκκαθάριση αυτοματισμού"
+
+#: gtk_ardour/automation_time_axis.cc:449 gtk_ardour/editor_markers.cc:453
+#: gtk_ardour/editor_markers.cc:499 gtk_ardour/editor_region_list.cc:398
+msgid "Hide"
+msgstr "Κρύψιμο"
+
+#: gtk_ardour/automation_time_axis.cc:451 gtk_ardour/connection_editor.cc:52
+#: gtk_ardour/crossfade_edit.cc:76 gtk_ardour/redirect_box.cc:364
+msgid "Clear"
+msgstr "Εκκαθάριση"
+
+#: gtk_ardour/automation_time_axis.cc:474
+#, fuzzy
+msgid "State"
+msgstr "Αρχή:"
+
+#: gtk_ardour/connection_editor.cc:47 gtk_ardour/new_session_dialog.cc:49
+msgid "Input Connections"
+msgstr "Συνδέσεις Εισόδου"
+
+#: gtk_ardour/connection_editor.cc:48 gtk_ardour/new_session_dialog.cc:48
+msgid "Output Connections"
+msgstr "Συνδέσεις Εξόδου"
+
+#: gtk_ardour/connection_editor.cc:49
+#, fuzzy
+msgid "New Input"
+msgstr "νέα είσοδος"
+
+#: gtk_ardour/connection_editor.cc:50
+#, fuzzy
+msgid "New Output"
+msgstr "νέα έξοδος"
+
+#: gtk_ardour/connection_editor.cc:51
+#, fuzzy
+msgid "Delete"
+msgstr "διαγραφή"
+
+#: gtk_ardour/connection_editor.cc:53 gtk_ardour/connection_editor.cc:96
+#, fuzzy
+msgid "Add Port"
+msgstr "πρόσθεση θύρας"
+
+#: gtk_ardour/connection_editor.cc:56 gtk_ardour/connection_editor.cc:105
+#: gtk_ardour/io_selector.cc:56 gtk_ardour/io_selector.cc:786
+#, fuzzy
+msgid "Rescan"
+msgstr "Επανα-ανίχνευση"
+
+#: gtk_ardour/connection_editor.cc:101
+msgid "Available Ports"
+msgstr "Διαθέσιμες Θύρες"
+
+#: gtk_ardour/connection_editor.cc:183
+msgid "ardour: connections"
+msgstr "ardour: συνδέσεις"
+
+#: gtk_ardour/connection_editor.cc:513
+#, c-format
+msgid "in %d"
+msgstr "σε %d"
+
+#: gtk_ardour/connection_editor.cc:644
+msgid "Name for new connection:"
+msgstr "Όνομα για νέα σύνδεση:"
+
+#: gtk_ardour/crossfade_edit.cc:71
+#, fuzzy
+msgid "crossfade editor"
+msgstr "επεξερ/σία fade in"
+
+#: gtk_ardour/crossfade_edit.cc:77 gtk_ardour/panner_ui.cc:449
+#, fuzzy
+msgid "Reset"
+msgstr "reset"
+
+#: gtk_ardour/crossfade_edit.cc:78
+#, fuzzy
+msgid "Fade"
+msgstr "Fades"
+
+#: gtk_ardour/crossfade_edit.cc:79
+#, fuzzy
+msgid "Out (dry)"
+msgstr "out (dry)"
+
+#: gtk_ardour/crossfade_edit.cc:80
+#, fuzzy
+msgid "Out"
+msgstr "Έξοδοι"
+
+#: gtk_ardour/crossfade_edit.cc:81
+#, fuzzy
+msgid "In (dry)"
+msgstr "in (dry)"
+
+#: gtk_ardour/crossfade_edit.cc:82
+msgid "In"
+msgstr ""
+
+#: gtk_ardour/crossfade_edit.cc:84
+#, fuzzy
+msgid "With Pre-roll"
+msgstr "με pre-roll"
+
+#: gtk_ardour/crossfade_edit.cc:85
+#, fuzzy
+msgid "With Post-roll"
+msgstr "με post-roll"
+
+#: gtk_ardour/crossfade_edit.cc:93
+msgid "Fade In"
+msgstr "Fade In"
+
+#: gtk_ardour/crossfade_edit.cc:94
+msgid "Fade Out"
+msgstr "Fade Out"
+
+#: gtk_ardour/crossfade_edit.cc:98
+msgid "ardour: x-fade edit"
+msgstr "ardour: επεξεργασία x-fade"
+
+#: gtk_ardour/crossfade_edit.cc:198 gtk_ardour/editor.cc:2311
+#: gtk_ardour/editor_region_list.cc:396 gtk_ardour/option_editor.cc:189
+msgid "Audition"
+msgstr "Ακρόαση"
+
+#: gtk_ardour/editor.cc:103 gtk_ardour/editor_region_list.cc:804
+msgid "Regions/name"
+msgstr "Περιοχες/όνομα"
+
+#: gtk_ardour/editor.cc:108
+msgid "Chunks"
+msgstr "Κομμάτια"
+
+#: gtk_ardour/editor.cc:116 gtk_ardour/editor.cc:4079
+msgid "Slide"
+msgstr "Ολίσθηση"
+
+#: gtk_ardour/editor.cc:117 gtk_ardour/editor.cc:4077
+msgid "Splice"
+msgstr "Splice"
+
+#: gtk_ardour/editor.cc:122 gtk_ardour/editor.cc:4136
+#: gtk_ardour/export_dialog.cc:82 gtk_ardour/export_dialog.cc:96
+#: gtk_ardour/export_dialog.cc:912 gtk_ardour/export_dialog.cc:977
+msgid "None"
+msgstr "Ουδέν"
+
+#: gtk_ardour/editor.cc:123 gtk_ardour/editor.cc:4124
+#, fuzzy
+msgid "CD Frames"
+msgstr "Frames"
+
+#: gtk_ardour/editor.cc:124 gtk_ardour/editor.cc:4126
+msgid "SMPTE Frames"
+msgstr "SMPTE Frames"
+
+#: gtk_ardour/editor.cc:125 gtk_ardour/editor.cc:4128
+msgid "SMPTE Seconds"
+msgstr "SMPTE Δευτερόλεπτα"
+
+#: gtk_ardour/editor.cc:126 gtk_ardour/editor.cc:4130
+msgid "SMPTE Minutes"
+msgstr "SMPTE Λεπτά"
+
+#: gtk_ardour/editor.cc:127 gtk_ardour/editor.cc:4132
+msgid "Seconds"
+msgstr "Δευτερόλεπτα"
+
+#: gtk_ardour/editor.cc:128 gtk_ardour/editor.cc:4134
+msgid "Minutes"
+msgstr "Λεπτά"
+
+#: gtk_ardour/editor.cc:129 gtk_ardour/editor.cc:4106
+msgid "Beats/32"
+msgstr "Κτύποι/32"
+
+#: gtk_ardour/editor.cc:130 gtk_ardour/editor.cc:4104
+msgid "Beats/16"
+msgstr "Κτύποι/16"
+
+#: gtk_ardour/editor.cc:131 gtk_ardour/editor.cc:4102
+msgid "Beats/8"
+msgstr "Κτύποι/8"
+
+#: gtk_ardour/editor.cc:132 gtk_ardour/editor.cc:4100
+msgid "Beats/4"
+msgstr "Κτύποι/4"
+
+#: gtk_ardour/editor.cc:133 gtk_ardour/editor.cc:4098
+msgid "Beats/3"
+msgstr "Κτύποι/3"
+
+#: gtk_ardour/editor.cc:134 gtk_ardour/editor.cc:4108
+msgid "Beats"
+msgstr "Κτύποι"
+
+#: gtk_ardour/editor.cc:135 gtk_ardour/editor.cc:4110
+msgid "Bars"
+msgstr "Μπάρες"
+
+#: gtk_ardour/editor.cc:136 gtk_ardour/editor.cc:4112
+msgid "Marks"
+msgstr "Στίγματα"
+
+#: gtk_ardour/editor.cc:137 gtk_ardour/editor.cc:156 gtk_ardour/editor.cc:4114
+#: gtk_ardour/editor.cc:4182
+msgid "Edit Cursor"
+msgstr "Κέρσορας επεξεργασίας"
+
+#: gtk_ardour/editor.cc:138 gtk_ardour/editor.cc:4116
+msgid "Region starts"
+msgstr "Αρχές Περιοχών"
+
+#: gtk_ardour/editor.cc:139 gtk_ardour/editor.cc:4118
+msgid "Region ends"
+msgstr "Τέλη Περιοχών"
+
+#: gtk_ardour/editor.cc:140 gtk_ardour/editor.cc:4122
+msgid "Region syncs"
+msgstr "Συγχρονισμός Περιοχών"
+
+#: gtk_ardour/editor.cc:141 gtk_ardour/editor.cc:4120
+msgid "Region bounds"
+msgstr "Όρια περιοχών"
+
+#: gtk_ardour/editor.cc:146 gtk_ardour/editor.cc:4153
+#: gtk_ardour/time_axis_view.cc:449
+msgid "Normal"
+msgstr "Κανονικό"
+
+#: gtk_ardour/editor.cc:147 gtk_ardour/editor.cc:4155
+msgid "Magnetic"
+msgstr "Μαγνητικό"
+
+#: gtk_ardour/editor.cc:152 gtk_ardour/editor.cc:4174
+#: gtk_ardour/export_dialog.cc:1232 gtk_ardour/export_dialog.cc:1237
+msgid "Left"
+msgstr "Αριστερό"
+
+#: gtk_ardour/editor.cc:153 gtk_ardour/editor.cc:4176
+#: gtk_ardour/export_dialog.cc:1233 gtk_ardour/export_dialog.cc:1238
+msgid "Right"
+msgstr "Δεξιό"
+
+#: gtk_ardour/editor.cc:154 gtk_ardour/editor.cc:4178
+msgid "Center"
+msgstr "Κέντρο"
+
+#: gtk_ardour/editor.cc:155 gtk_ardour/editor.cc:4180
+msgid "Playhead"
+msgstr "Αναπαραγωγέας"
+
+#: gtk_ardour/editor.cc:201
+msgid "Mins:Secs"
+msgstr "Λεπτά:Δέυτερα"
+
+#: gtk_ardour/editor.cc:204 gtk_ardour/editor_rulers.cc:353
+msgid "Frames"
+msgstr "Frames"
+
+#: gtk_ardour/editor.cc:205 gtk_ardour/editor_rulers.cc:373
+msgid "Tempo"
+msgstr "Χρόνος"
+
+#: gtk_ardour/editor.cc:206 gtk_ardour/editor_rulers.cc:367
+msgid "Meter"
+msgstr "Μετρητής"
+
+#: gtk_ardour/editor.cc:207 gtk_ardour/editor_rulers.cc:379
+msgid "Location Markers"
+msgstr "Στίγματα Τοποθεσίας"
+
+#: gtk_ardour/editor.cc:208 gtk_ardour/editor_rulers.cc:385
+msgid "Range Markers"
+msgstr "Στίγματα διαστημάτων"
+
+#: gtk_ardour/editor.cc:209 gtk_ardour/editor_rulers.cc:391
+msgid "Loop/Punch Ranges"
+msgstr "Διαστήματα Loop/Punch"
+
+#: gtk_ardour/editor.cc:221
+msgid ""
+"editor\n"
+"mixer"
+msgstr ""
+"Μίκτης\n"
+"Επεξεργαστή"
+
+#: gtk_ardour/editor.cc:232
+msgid "range"
+msgstr "διάστημα"
+
+#: gtk_ardour/editor.cc:233
+msgid "object"
+msgstr "αντικείμενο"
+
+#: gtk_ardour/editor.cc:235
+msgid "zoom"
+msgstr "zoom"
+
+#: gtk_ardour/editor.cc:236
+msgid "timefx"
+msgstr "timefx"
+
+#: gtk_ardour/editor.cc:237
+#, fuzzy
+msgid "listen"
+msgstr "link"
+
+#: gtk_ardour/editor.cc:239
+msgid "mode"
+msgstr "λειτουργία"
+
+#: gtk_ardour/editor.cc:240
+msgid "automation"
+msgstr "αυτοματισμός"
+
+#: gtk_ardour/editor.cc:242
+msgid "Edit Mode"
+msgstr "Λειτουργία Επεξ/σίας"
+
+#: gtk_ardour/editor.cc:243
+msgid "Snap To"
+msgstr "Έλξη σε"
+
+#: gtk_ardour/editor.cc:244
+msgid "Snap Mode"
+msgstr "Λειτουργία Έλξεως"
+
+#: gtk_ardour/editor.cc:245
+msgid "Zoom Focus"
+msgstr "Εστίαση Zoom"
+
+#: gtk_ardour/editor.cc:256 gtk_ardour/editor.cc:2364
+#: gtk_ardour/editor.cc:2524 gtk_ardour/editor.cc:2579
+msgid "Nudge"
+msgstr "Νύξη"
+
+#: gtk_ardour/editor.cc:511
+msgid "Zoom in"
+msgstr "Zoom in"
+
+#: gtk_ardour/editor.cc:512
+msgid "Zoom out"
+msgstr "Zoom out"
+
+#: gtk_ardour/editor.cc:517
+msgid "Zoom to session"
+msgstr "Zoom στη συνεδρία"
+
+#: gtk_ardour/editor.cc:536
+msgid "Zoom Span"
+msgstr "Εύρος Zoom"
+
+#: gtk_ardour/editor.cc:566
+msgid "Edit Groups"
+msgstr "Πρόσθεση Ομάδων"
+
+#: gtk_ardour/editor.cc:591 gtk_ardour/mixer_ui.cc:142
+msgid "-all-"
+msgstr "-όλα-"
+
+#: gtk_ardour/editor.cc:718
+msgid "Nudge region/selection forwards"
+msgstr "Νύξη περιοχής/επιλογής εμπρός"
+
+#: gtk_ardour/editor.cc:719
+msgid "Nudge region/selection backwards"
+msgstr "Νύξη περιοχής/επιλογής πίσω"
+
+#: gtk_ardour/editor.cc:728 gtk_ardour/editor_mixer.cc:308
+msgid "ardour: editor"
+msgstr "ardour: επεξεργαστής"
+
+#: gtk_ardour/editor.cc:729
+msgid "ardour_editor"
+msgstr "ardour_επεξεργαστής"
+
+#: gtk_ardour/editor.cc:846
+msgid "VerboseCanvasCursor"
+msgstr ""
+
+#: gtk_ardour/editor.cc:1405
+msgid "FirstActionMessage"
+msgstr ""
+
+#: gtk_ardour/editor.cc:1407
+msgid "Start a new session\n"
+msgstr "Αρχή καινούριας συνεδρίας\n"
+
+#: gtk_ardour/editor.cc:1408
+msgid "via Session menu"
+msgstr "μέσω του μενού Συνεδρίας"
+
+#: gtk_ardour/editor.cc:1703
+msgid "ardour: editor: "
+msgstr "ardour: επεξεργαστής: "
+
+#: gtk_ardour/editor.cc:1787 gtk_ardour/editor.cc:1796
+#: gtk_ardour/editor_markers.cc:797
+msgid "Loop"
+msgstr "Loop"
+
+#: gtk_ardour/editor.cc:1801 gtk_ardour/editor.cc:1810
+#: gtk_ardour/editor_markers.cc:823
+msgid "Punch"
+msgstr "Punch"
+
+#: gtk_ardour/editor.cc:1957 gtk_ardour/editor_mouse.cc:1688
+msgid "programming error: fade in canvas item has no regionview data pointer!"
+msgstr ""
+"Σφάλμα προγραμματισμού: το αντικείμενο 'fade in canvas' δεν διαθέτει δείκτη "
+"δεδομένων οπτικής περιοχών!"
+
+#: gtk_ardour/editor.cc:1969 gtk_ardour/editor.cc:1986
+#: gtk_ardour/redirect_box.cc:401
+msgid "Deactivate"
+msgstr "Απενεργοποίηση"
+
+#: gtk_ardour/editor.cc:1971 gtk_ardour/editor.cc:1988
+#: gtk_ardour/redirect_box.cc:398
+msgid "Activate"
+msgstr "Ενεργοποίηση"
+
+#: gtk_ardour/editor.cc:1976 gtk_ardour/editor.cc:1993
+msgid "Linear"
+msgstr "Γραμμικό"
+
+#: gtk_ardour/editor.cc:1977 gtk_ardour/editor.cc:1994
+#: gtk_ardour/option_editor.cc:358 gtk_ardour/option_editor.cc:734
+#: gtk_ardour/option_editor.cc:796
+msgid "Slowest"
+msgstr "Αργότατο"
+
+#: gtk_ardour/editor.cc:1978 gtk_ardour/editor.cc:1995
+#: gtk_ardour/option_editor.cc:360 gtk_ardour/option_editor.cc:735
+#: gtk_ardour/option_editor.cc:798
+msgid "Slow"
+msgstr "Αργό"
+
+#: gtk_ardour/editor.cc:1979 gtk_ardour/editor.cc:1996
+#: gtk_ardour/option_editor.cc:364 gtk_ardour/option_editor.cc:737
+#: gtk_ardour/option_editor.cc:802
+msgid "Fast"
+msgstr "Ταχύ"
+
+#: gtk_ardour/editor.cc:1980 gtk_ardour/editor.cc:1997
+#: gtk_ardour/option_editor.cc:368 gtk_ardour/option_editor.cc:739
+#: gtk_ardour/option_editor.cc:806
+msgid "Fastest"
+msgstr "Ταχύτατο"
+
+#: gtk_ardour/editor.cc:2105 gtk_ardour/editor.cc:2113
+msgid "Freeze"
+msgstr "Πάγωμα"
+
+#: gtk_ardour/editor.cc:2109
+msgid "Unfreeze"
+msgstr "Ξεπάγωμα"
+
+#: gtk_ardour/editor.cc:2238 gtk_ardour/editor.cc:2328
+#, fuzzy
+msgid "Unmute"
+msgstr "σιγή"
+
+#: gtk_ardour/editor.cc:2247
+msgid "Convert to short"
+msgstr ""
+
+#: gtk_ardour/editor.cc:2249
+msgid "Convert to full"
+msgstr ""
+
+#: gtk_ardour/editor.cc:2260
+#, fuzzy
+msgid "Crossfade"
+msgstr "Crossfade"
+
+#: gtk_ardour/editor.cc:2303
+msgid "Popup region editor"
+msgstr "Εμφάνιση του ρυθμιστή περιοχής"
+
+#: gtk_ardour/editor.cc:2304
+#, fuzzy
+msgid "Raise to top layer"
+msgstr "Ανόρθωση περιοχής στο ανώτατο στρώμα"
+
+#: gtk_ardour/editor.cc:2305
+#, fuzzy
+msgid "Lower to bottom layer"
+msgstr "Υποβίβαση περιοχής στο κατώτατο στρώμα"
+
+#: gtk_ardour/editor.cc:2307
+msgid "Define sync point"
+msgstr "Προσδιορισμός σημείου συγχρονισμού"
+
+#: gtk_ardour/editor.cc:2308
+msgid "Remove sync point"
+msgstr "Απαλοιφή σημείου συγχρονισμού"
+
+#: gtk_ardour/editor.cc:2313
+#, fuzzy
+msgid "Bounce"
+msgstr "Αναπήδηση διαστήματος"
+
+#: gtk_ardour/editor.cc:2323
+msgid "Lock"
+msgstr "Κλείδωμα"
+
+#: gtk_ardour/editor.cc:2324
+msgid "Unlock"
+msgstr "Ξεκλείδωμα"
+
+#: gtk_ardour/editor.cc:2334
+msgid "Original position"
+msgstr "Πρωταρχική θέση"
+
+#: gtk_ardour/editor.cc:2340
+msgid "Toggle envelope visibility"
+msgstr ""
+
+#: gtk_ardour/editor.cc:2341
+#, fuzzy
+msgid "Toggle envelope active"
+msgstr "Διακόπτης Ενεργού"
+
+#: gtk_ardour/editor.cc:2345
+#, fuzzy
+msgid "DeNormalize"
+msgstr "Εξομάλυνση"
+
+#: gtk_ardour/editor.cc:2347
+msgid "Normalize"
+msgstr "Εξομάλυνση"
+
+#: gtk_ardour/editor.cc:2350
+msgid "Reverse"
+msgstr "Αντιστροφή"
+
+#: gtk_ardour/editor.cc:2359
+#, fuzzy
+msgid "Nudge fwd"
+msgstr "νύξη εμπρός"
+
+#: gtk_ardour/editor.cc:2360
+#, fuzzy
+msgid "Nudge bwd"
+msgstr "Νύξη"
+
+#: gtk_ardour/editor.cc:2361
+msgid "Nudge fwd by capture offset"
+msgstr ""
+
+#: gtk_ardour/editor.cc:2362
+msgid "Nudge bwd by capture offset"
+msgstr ""
+
+#: gtk_ardour/editor.cc:2371
+msgid "Start to edit cursor"
+msgstr "Από αρχή μέχρι  κέρσορα επεξεργασίας"
+
+#: gtk_ardour/editor.cc:2372
+msgid "Edit cursor to end"
+msgstr "Από κέρσορα επεξεργασίας μέχρι τέλους"
+
+#: gtk_ardour/editor.cc:2374
+msgid "Trim"
+msgstr "Ισοστάθμιση"
+
+#: gtk_ardour/editor.cc:2377
+msgid "Split"
+msgstr "Διαχωρισμός"
+
+#: gtk_ardour/editor.cc:2380
+msgid "Make mono regions"
+msgstr "Δημιουργία mono περιοχών"
+
+#: gtk_ardour/editor.cc:2383 gtk_ardour/editor.cc:2428
+msgid "Duplicate"
+msgstr "Αντιγραφή"
+
+#: gtk_ardour/editor.cc:2384
+msgid "Fill Track"
+msgstr "Γόμωση καναλιού"
+
+#: gtk_ardour/editor.cc:2388
+msgid "Destroy"
+msgstr "Καταστροφή"
+
+#: gtk_ardour/editor.cc:2418
+msgid "Play range"
+msgstr "Αναπαρ/γή διαστήματος"
+
+#: gtk_ardour/editor.cc:2419 gtk_ardour/editor_markers.cc:446
+msgid "Loop range"
+msgstr "Loop διαστήματος"
+
+#: gtk_ardour/editor.cc:2421
+msgid "Create chunk from range"
+msgstr "Δημιουργία κομματιού από διάστημα"
+
+#: gtk_ardour/editor.cc:2423
+msgid "Create Region"
+msgstr "Δημιουργία περιοχής"
+
+#: gtk_ardour/editor.cc:2424
+msgid "Separate Region"
+msgstr "Διαχωρισμός περιοχής"
+
+#: gtk_ardour/editor.cc:2425
+msgid "Crop Region to range"
+msgstr "Κοπή Περιοχής στο διάστημα"
+
+#: gtk_ardour/editor.cc:2426
+msgid "Bounce range"
+msgstr "Αναπήδηση διαστήματος"
+
+#: gtk_ardour/editor.cc:2432
+msgid "Fill range w/Region"
+msgstr "Γέμισμα διαστήματος  μ/Περιοχή"
+
+#: gtk_ardour/editor.cc:2434
+msgid "Range"
+msgstr "Διάστημα"
+
+#: gtk_ardour/editor.cc:2449 gtk_ardour/editor.cc:2538
+msgid "Play from edit cursor"
+msgstr "Αναπαρ/γή από Κέρσορα Επεξεργασίας"
+
+#: gtk_ardour/editor.cc:2450 gtk_ardour/editor.cc:2539
+msgid "Play from start"
+msgstr "Αναπαρ/γή από αρχή"
+
+#: gtk_ardour/editor.cc:2451
+#, fuzzy
+msgid "Play region"
+msgstr "Αναπαρ/γή Περιοχής"
+
+#: gtk_ardour/editor.cc:2453
+msgid "Loop Region"
+msgstr "Loop Περιοχής"
+
+#: gtk_ardour/editor.cc:2455 gtk_ardour/editor.cc:2540
+#: gtk_ardour/library_ui.cc:972
+msgid "Play"
+msgstr "Αναπαρ/γή"
+
+#: gtk_ardour/editor.cc:2463 gtk_ardour/editor.cc:2548
+msgid "Select All in track"
+msgstr "Επιλογή όλων στο  κανάλι"
+
+#: gtk_ardour/editor.cc:2464 gtk_ardour/editor.cc:2549
+msgid "Select All"
+msgstr "Επιλογή όλων"
+
+#: gtk_ardour/editor.cc:2465 gtk_ardour/editor.cc:2550
+msgid "Invert in track"
+msgstr "Αντιστροφή στο κανάλι"
+
+#: gtk_ardour/editor.cc:2466 gtk_ardour/editor.cc:2551
+msgid "Invert"
+msgstr "Αντιστροφή"
+
+#: gtk_ardour/editor.cc:2468 gtk_ardour/editor.cc:2553
+msgid "Select loop range"
+msgstr "Επιλογή διαστήματος loop"
+
+#: gtk_ardour/editor.cc:2469 gtk_ardour/editor.cc:2554
+msgid "Select punch range"
+msgstr "Επιλογή διαστήματος punch"
+
+#: gtk_ardour/editor.cc:2480 gtk_ardour/editor.cc:2565
+#: gtk_ardour/editor.cc:3916 gtk_ardour/redirect_box.cc:369
+msgid "Cut"
+msgstr "Κοπή"
+
+#: gtk_ardour/editor.cc:2481 gtk_ardour/editor.cc:2566
+#: gtk_ardour/editor.cc:3918 gtk_ardour/redirect_box.cc:371
+msgid "Copy"
+msgstr "Αντιγραφή"
+
+#: gtk_ardour/editor.cc:2482
+#, fuzzy
+msgid "Paste at edit cursor"
+msgstr "Από αρχή μέχρι  κέρσορα επεξεργασίας"
+
+#: gtk_ardour/editor.cc:2483
+#, fuzzy
+msgid "Paste at mouse"
+msgstr "χρήση των master outs"
+
+#: gtk_ardour/editor.cc:2487 gtk_ardour/editor.cc:3923
+msgid "Align"
+msgstr "Ευθυγράμμιση"
+
+#: gtk_ardour/editor.cc:2488 gtk_ardour/editor.cc:3925
+msgid "Align Relative"
+msgstr "Ευθυγράμμιση σχετικών"
+
+#: gtk_ardour/editor.cc:2492
+msgid "Insert chunk"
+msgstr "Προσθήκη κομματιού"
+
+#: gtk_ardour/editor.cc:2496
+msgid "New Region from range"
+msgstr "Νέα περιοχή από διάστημα"
+
+#: gtk_ardour/editor.cc:2497
+msgid "Separate Range"
+msgstr "Ξεχωριστό διάστημα"
+
+#: gtk_ardour/editor.cc:2507
+msgid "Insert Region"
+msgstr "Προσθήκη περιοχής"
+
+#: gtk_ardour/editor.cc:2508
+msgid "Insert external sndfile"
+msgstr "Προσθήκη εξωτερικού αρχείου ήχου"
+
+#: gtk_ardour/editor.cc:2510 gtk_ardour/library_ui.cc:1438
+msgid "Import"
+msgstr "Εισαγωγή"
+
+#: gtk_ardour/editor.cc:2519 gtk_ardour/editor.cc:2574
+msgid "Nudge entire track fwd"
+msgstr "Νύξη ολόκληρου καναλιού εμπρός"
+
+#: gtk_ardour/editor.cc:2520 gtk_ardour/editor.cc:2575
+msgid "Nudge track after edit cursor fwd"
+msgstr "Νύξη καναλιού μετά του κέρσορα επεξεργασίας εμπρός"
+
+#: gtk_ardour/editor.cc:2521 gtk_ardour/editor.cc:2576
+msgid "Nudge entire track bwd"
+msgstr "Νύξη ολοκλήρου καναλιού πίσω"
+
+#: gtk_ardour/editor.cc:2522 gtk_ardour/editor.cc:2577
+msgid "Nudge track after edit cursor bwd"
+msgstr "Νύξη κανάλι μετά του κέρσορα επεξεργασίας  πίσω"
+
+#: gtk_ardour/editor.cc:2567 gtk_ardour/editor.cc:3920
+#: gtk_ardour/redirect_box.cc:373
+msgid "Paste"
+msgstr "Επικόλληση"
+
+#: gtk_ardour/editor.cc:2632 gtk_ardour/editor.cc:2645
+#: gtk_ardour/editor_markers.cc:287 gtk_ardour/location_ui.cc:799
+msgid "add marker"
+msgstr "πρόσθεση στίγματος"
+
+#: gtk_ardour/editor.cc:3084
+msgid "select/move objects"
+msgstr "επιλογή/μετακίνηση αντικειμένων"
+
+#: gtk_ardour/editor.cc:3085
+msgid "select/move ranges"
+msgstr "επιλογή/μετακίνηση διαστημάτων"
+
+#: gtk_ardour/editor.cc:3086
+msgid "draw gain automation"
+msgstr "σχεδιασμός αυτοματισμού του gain"
+
+#: gtk_ardour/editor.cc:3087
+msgid "select zoom range"
+msgstr "επιλογή διαστήματος zoom"
+
+#: gtk_ardour/editor.cc:3088
+msgid "stretch/shrink regions"
+msgstr "μεγέθυνση/σμίκρυνση περιοχών"
+
+#: gtk_ardour/editor.cc:3089
+#, fuzzy
+msgid "listen to specific regions"
+msgstr "θέση επιλεγμένης οπτικής περιοχής"
+
+#: gtk_ardour/editor.cc:3213
+msgid "Start:"
+msgstr "Αρχή:"
+
+#: gtk_ardour/editor.cc:3214
+msgid "End:"
+msgstr "Τέλος:"
+
+#: gtk_ardour/editor.cc:3215
+msgid "Edit:"
+msgstr "Σύνταξη:"
+
+#: gtk_ardour/editor.cc:3429
+msgid "incorrectly formatted URI list, ignored"
+msgstr "λανθασμένα φορμαρισμένη URI λίστα, αγνοήθηκε"
+
+#: gtk_ardour/editor.cc:3611
+msgid "set selected trackview"
+msgstr "θέση επιλεγμένης οπτικής καναλιού"
+
+#: gtk_ardour/editor.cc:3647
+#, fuzzy
+msgid "set selected control point"
+msgstr "απαλοιφή σημείου ελέγχου"
+
+#: gtk_ardour/editor.cc:3719
+msgid "set selected regionview"
+msgstr "θέση επιλεγμένης οπτικής περιοχής"
+
+#: gtk_ardour/editor.cc:3799 gtk_ardour/editor.cc:3835
+#, fuzzy
+msgid "set selected regions"
+msgstr "θέση επιλεγμένης οπτικής περιοχής"
+
+#: gtk_ardour/editor.cc:3891
+msgid "Undo"
+msgstr "Undo"
+
+#: gtk_ardour/editor.cc:3893
+msgid "Undo (%1)"
+msgstr "Undo (%1)"
+
+#: gtk_ardour/editor.cc:3903
+msgid "Redo"
+msgstr "Redo"
+
+#: gtk_ardour/editor.cc:3905
+msgid "Redo (%1)"
+msgstr "Redo (%1)"
+
+#: gtk_ardour/editor.cc:3939 gtk_ardour/editor.cc:3946
+msgid "... as new track"
+msgstr ""
+
+#: gtk_ardour/editor.cc:3940 gtk_ardour/editor.cc:3947
+#, fuzzy
+msgid "... as new region"
+msgstr "ευθυγράμμιση περιοχής"
+
+#: gtk_ardour/editor.cc:3949 gtk_ardour/editor_region_list.cc:452
+msgid "Import audio (copy)"
+msgstr "Εισαγωγή ήχου (αντίγραφο)"
+
+#: gtk_ardour/editor.cc:3950 gtk_ardour/editor_region_list.cc:457
+msgid "Embed audio (link)"
+msgstr "Εμφύτευση ήχου (link)"
+
+#: gtk_ardour/editor.cc:3953
+msgid "Remove last capture"
+msgstr "Απαλοιφή τελευταίας λήψης"
+
+#: gtk_ardour/editor.cc:3974
+msgid "Duplicate how many times?"
+msgstr "Αντιγραφή πόσες φορές?"
+
+#: gtk_ardour/editor.cc:4550
+msgid ""
+"Playlist %1 is currently unused.\n"
+"If left alone, no audio files used by it will be cleaned.\n"
+"If deleted, audio files used by it alone by will cleaned."
+msgstr ""
+"Η Λίστα Αναπαρ/γής %1 προς το παρόν δε χρησιμοποιείται.\n"
+"Εάν μείνει έτσι, κανένα ηχητικό αρχείο που χρησιμοποιείται απο αυτήν δεν θα "
+"διαγραφεί.\n"
+"Εάν διαγραφεί, τα ηχητικά αρχεία που χρησιμοποιούνται μόνο απ'αυτήν θα "
+"διαγραφούν."
+
+#: gtk_ardour/editor.cc:4555
+msgid "Delete playlist"
+msgstr "Διαγραφή λίστας αναπαρ/γής"
+
+#: gtk_ardour/editor.cc:4556
+msgid "Keep playlist"
+msgstr "Διατήρηση λίστας αναπαρ/γής"
+
+#: gtk_ardour/editor.cc:4557
+msgid "Cancel cleanup"
+msgstr "Ακύρωση εκκαθάρισης"
+
+#: gtk_ardour/editor_canvas_events.cc:691 gtk_ardour/editor_mouse.cc:2258
+#: gtk_ardour/editor_mouse.cc:2277 gtk_ardour/editor_mouse.cc:2290
+msgid ""
+"programming error: control point canvas item has no control point object "
+"pointer!"
+msgstr ""
+"Σφάλμα Προγραμματισμού: ο καμβάς του σημείου ελέγχου δεν έχει  δείκτη "
+"αναφοράς!"
+
+#: gtk_ardour/editor_canvas_events.cc:717
+msgid "programming error: line canvas item has no line object pointer!"
+msgstr ""
+"Σφάλμα Προγραμματισμού: ο καμβάς της γραμμής δεν έχει δείκτη αναφοράς της "
+"γραμμής!"
+
+#: gtk_ardour/editor_canvas_events.cc:744
+#: gtk_ardour/editor_canvas_events.cc:784
+#: gtk_ardour/editor_canvas_events.cc:823
+msgid "programming error: no \"rect\" pointer associated with selection item"
+msgstr ""
+"Σφάλμα προγραμματισμού: κανένας  \"rect\" δείκτης δεν σχετίζεται με το "
+"επιλεγμένο αντικείμενο"
+
+#: gtk_ardour/editor_edit_groups.cc:62 gtk_ardour/editor_route_list.cc:298
+#: gtk_ardour/mixer_ui.cc:670
+msgid "Show All"
+msgstr "Εμφάνιση Όλων"
+
+#: gtk_ardour/editor_edit_groups.cc:63 gtk_ardour/editor_route_list.cc:299
+#: gtk_ardour/mixer_ui.cc:671
+msgid "Hide All"
+msgstr "Απόκρυψη όλων"
+
+#: gtk_ardour/editor_edit_groups.cc:98
+msgid "Name for new edit group"
+msgstr "Όνομα για νέα ομάδα επεξεργασίας"
+
+#: gtk_ardour/editor_export_audio.cc:60
+msgid ""
+"There is no range to export.\n"
+"\n"
+"Select a range using the range mouse mode"
+msgstr ""
+
+#: gtk_ardour/editor_imageframe.cc:675 gtk_ardour/editor_imageframe.cc:707
+msgid "programming error: no ImageFrameView selected"
+msgstr "Σφάλμα προγραμματισμού: δεν επιλέχθηκε οπτική καρέ εικόνας"
+
+#: gtk_ardour/editor_imageframe.cc:906 gtk_ardour/editor_imageframe.cc:930
+msgid "programming error: no MarkerView selected"
+msgstr "Σφάλμα προγραμματισμού: δεν επιλέχθηκε οπτική στίγματος"
+
+#: gtk_ardour/editor_keys.cc:187
+#, fuzzy
+msgid "keyboard selection"
+msgstr "επέκταση επιλογής"
+
+#: gtk_ardour/editor_markers.cc:302 gtk_ardour/editor_markers.cc:376
+#: gtk_ardour/editor_markers.cc:508 gtk_ardour/editor_markers.cc:526
+#: gtk_ardour/editor_markers.cc:556 gtk_ardour/editor_markers.cc:584
+#: gtk_ardour/editor_markers.cc:612 gtk_ardour/editor_markers.cc:650
+#: gtk_ardour/editor_markers.cc:677 gtk_ardour/editor_markers.cc:700
+#: gtk_ardour/editor_markers.cc:719 gtk_ardour/editor_mouse.cc:1960
+#: gtk_ardour/editor_mouse.cc:4075
+msgid "programming error: marker canvas item has no marker object pointer!"
+msgstr ""
+"Σφάλμα προγραμματισμού: ο καμβάς στιγμάτων δεν έχει δείκτη αντικειμένου "
+"στιγμάτων!"
+
+#: gtk_ardour/editor_markers.cc:326 gtk_ardour/location_ui.cc:681
+msgid "remove marker"
+msgstr "απαλοιφή στίγματος"
+
+#: gtk_ardour/editor_markers.cc:444 gtk_ardour/editor_markers.cc:494
+msgid "Locate to"
+msgstr "Τοποθέτηση στο"
+
+#: gtk_ardour/editor_markers.cc:445 gtk_ardour/editor_markers.cc:495
+msgid "Play from"
+msgstr "Αναπαρ/γή από"
+
+#: gtk_ardour/editor_markers.cc:447 gtk_ardour/editor_markers.cc:496
+msgid "Set from playhead"
+msgstr "Θέση από αναπαραγωγέα"
+
+#: gtk_ardour/editor_markers.cc:448 gtk_ardour/editor_markers.cc:497
+msgid "Set from range"
+msgstr "Θέση από διάστημα"
+
+#: gtk_ardour/editor_markers.cc:479
+msgid "Set Loop Range"
+msgstr "Θέση Loop Διαστήματος"
+
+#: gtk_ardour/editor_markers.cc:480
+msgid "Set Punch Range"
+msgstr "Θέση Punch Διαστήματος"
+
+#: gtk_ardour/editor_markers.cc:736
+msgid "ardour: rename mark"
+msgstr "ardour: μετονομασία στίγματος"
+
+#: gtk_ardour/editor_markers.cc:738
+#, fuzzy
+msgid "ardour: rename range"
+msgstr "ardour: μετονομασία περιοχής"
+
+#: gtk_ardour/editor_markers.cc:792
+msgid "set loop range"
+msgstr "Θέση loop διαστήματος"
+
+#: gtk_ardour/editor_markers.cc:818
+msgid "set punch range"
+msgstr "θέση punch διαστήματος"
+
+#: gtk_ardour/editor_mouse.cc:99
+msgid "Editor::event_frame() used on unhandled event type %1"
+msgstr ""
+"Επαξεργαστής::event_frame() χρησιμοποιήθηκε στο αδιαχείριστο συμβάν τύπου %1"
+
+#: gtk_ardour/editor_mouse.cc:1555
+msgid "programming error: start_grab called without drag item"
+msgstr ""
+"σφάλμα προγραμματισμού: η ρουτίνα start_grab εκλήθη δίχως 'drag' αντικείμενο"
+
+#: gtk_ardour/editor_mouse.cc:1760
+msgid "change fade in length"
+msgstr "αλλαγή μήκους fade in"
+
+#: gtk_ardour/editor_mouse.cc:1778
+msgid "programming error: fade out canvas item has no regionview data pointer!"
+msgstr ""
+"σφάλμα προγραμματισμού: ο καμβάς fade out δεν έχει δείκτη δεδομένων της "
+"οπτικής περιοχών!"
+
+#: gtk_ardour/editor_mouse.cc:1852
+msgid "change fade out length"
+msgstr "αλλαγή μήκους fade out"
+
+#: gtk_ardour/editor_mouse.cc:1871
+msgid "programming error: cursor canvas item has no cursor data pointer!"
+msgstr ""
+"σφάλμα προγραμματισμού: ο καμβάς του κέρσορα δεν έχει δείκτη δεδομένων του "
+"κέρσορα!"
+
+#: gtk_ardour/editor_mouse.cc:2098 gtk_ardour/editor_tempodisplay.cc:470
+msgid ""
+"programming error: meter marker canvas item has no marker object pointer!"
+msgstr ""
+"σφάλμα προγραμματισμού: ο καμβάς του μετρητή στιγμάτων δεν έχει δείκτη "
+"αντικειμένου στιγμάτων!"
+
+#: gtk_ardour/editor_mouse.cc:2163
+msgid "move meter mark"
+msgstr "μετακίνηση στίγματος μετρητή"
+
+#: gtk_ardour/editor_mouse.cc:2177 gtk_ardour/editor_tempodisplay.cc:335
+#: gtk_ardour/editor_tempodisplay.cc:420 gtk_ardour/editor_tempodisplay.cc:439
+msgid ""
+"programming error: tempo marker canvas item has no marker object pointer!"
+msgstr ""
+"σφάλμα προγραμματισμού: ο καμβάς στίξης του tempo δεν έχει δείκτη "
+"αντικειμένου στιγμάτων!"
+
+#: gtk_ardour/editor_mouse.cc:2182 gtk_ardour/editor_tempodisplay.cc:340
+#: gtk_ardour/editor_tempodisplay.cc:425
+msgid "programming error: marker for tempo is not a tempo marker!"
+msgstr ""
+"σφάλμα προγραμματισμού: το στίγμα για το  tempo δεν είναι στιγμα για tempo!"
+
+#: gtk_ardour/editor_mouse.cc:2245
+msgid "move tempo mark"
+msgstr "μετακίνηση στίγματος tempo"
+
+#: gtk_ardour/editor_mouse.cc:2388
+msgid "programming error: line canvas item has no line pointer!"
+msgstr "σφάλμα προγραμματισμού: ο καμβάς γραμμών δεν έχει δείκτη γραμμών!"
+
+#: gtk_ardour/editor_mouse.cc:2497
+#, fuzzy
+msgid "move region(s)"
+msgstr "απαλοιφή περιοχής"
+
+#: gtk_ardour/editor_mouse.cc:2509
+msgid "Drag region copy"
+msgstr "Έλξη αντιγραφής περιοχής"
+
+#: gtk_ardour/editor_mouse.cc:2579
+#, fuzzy
+msgid "copy region(s)"
+msgstr "Έλξη περιοχής(ων)"
+
+#: gtk_ardour/editor_mouse.cc:2612
+#, fuzzy
+msgid "Drag region brush"
+msgstr "Έλξη περιοχής(ων)"
+
+#: gtk_ardour/editor_mouse.cc:3425
+msgid "selection grab"
+msgstr "αρπαγή επιλεγμένων"
+
+#: gtk_ardour/editor_mouse.cc:3571
+msgid "range selection"
+msgstr "επιλογή διαστήματος"
+
+#: gtk_ardour/editor_mouse.cc:3587
+msgid "trim selection start"
+msgstr "αρχή επιλογής προς ισοστάθμιση"
+
+#: gtk_ardour/editor_mouse.cc:3603
+msgid "trim selection end"
+msgstr "τέλος επιλογής προς ισοστάθμιση"
+
+#: gtk_ardour/editor_mouse.cc:3620
+msgid "move selection"
+msgstr "μετακίνηση επιλογής"
+
+#: gtk_ardour/editor_mouse.cc:3995
+msgid "Start point trim"
+msgstr "Αρχή σημείου ισοσταθμίσεως"
+
+#: gtk_ardour/editor_mouse.cc:4023
+msgid "End point trim"
+msgstr "Τέλος σημείου ισοσταθμίσεως"
+
+#: gtk_ardour/editor_mouse.cc:4062
+msgid "trimmed region"
+msgstr "ισοσταθμισμένη περιοχή"
+
+#: gtk_ardour/editor_mouse.cc:4203
+msgid "new range marker"
+msgstr "νέο στίγμα διαστήματος"
+
+#: gtk_ardour/editor_mouse.cc:4422
+msgid "select regions"
+msgstr "επιλογή περιοχών"
+
+#: gtk_ardour/editor_mouse.cc:4451
+msgid "Name for region:"
+msgstr "Όνομα για περιοχή:"
+
+#: gtk_ardour/editor_mouse.cc:4517
+msgid "timestretch"
+msgstr "κάμψη χρόνου"
+
+#: gtk_ardour/editor_ops.cc:117
+msgid "split"
+msgstr "διαχωρισμός"
+
+#: gtk_ardour/editor_ops.cc:153
+msgid "remove region"
+msgstr "απαλοιφή περιοχής"
+
+#: gtk_ardour/editor_ops.cc:172
+msgid ""
+" This is destructive, will possibly delete audio files\n"
+"It cannot be undone\n"
+"Do you really want to destroy %1 ?"
+msgstr ""
+
+#: gtk_ardour/editor_ops.cc:176
+#, fuzzy
+msgid "these regions"
+msgstr "αντιστροφή περιοχών"
+
+#: gtk_ardour/editor_ops.cc:176
+#, fuzzy
+msgid "this region"
+msgstr "σιγή παρούσας περιοχής"
+
+#: gtk_ardour/editor_ops.cc:179
+#, fuzzy
+msgid "Yes, destroy them."
+msgstr "Ναι, να καταστραφεί."
+
+#: gtk_ardour/editor_ops.cc:181 gtk_ardour/editor_ops.cc:3434
+msgid "Yes, destroy it."
+msgstr "Ναι, να καταστραφεί."
+
+#: gtk_ardour/editor_ops.cc:184 gtk_ardour/editor_ops.cc:3435
+#: gtk_ardour/route_ui.cc:658 gtk_ardour/visual_time_axis.cc:300
+msgid "No, do nothing."
+msgstr "Όχι, να μην γίνει τίποτα."
+
+#: gtk_ardour/editor_ops.cc:279 gtk_ardour/editor_ops.cc:307
+msgid "extend selection"
+msgstr "επέκταση επιλογής"
+
+#: gtk_ardour/editor_ops.cc:323 gtk_ardour/editor_ops.cc:357
+#: gtk_ardour/editor_ops.cc:401 gtk_ardour/editor_ops.cc:427
+msgid "nudge forward"
+msgstr "νύξη εμπρός"
+
+#: gtk_ardour/editor_ops.cc:491
+msgid "build_region_boundary_cache called with snap_type = %1"
+msgstr "build_region_boundary_cache εκλήθη με snap_type = %1"
+
+#: gtk_ardour/editor_ops.cc:1305
+msgid "set selection from range"
+msgstr "θέση επιλογής από διάστημα"
+
+#: gtk_ardour/editor_ops.cc:1421
+msgid "clear markers"
+msgstr "εκκαθάριση στιγμάτων"
+
+#: gtk_ardour/editor_ops.cc:1433
+msgid "clear ranges"
+msgstr "διαγραφή διαστημάτων"
+
+#: gtk_ardour/editor_ops.cc:1452
+msgid "clear locations"
+msgstr "διαγραφή τοποθεσιών"
+
+#: gtk_ardour/editor_ops.cc:1503
+msgid "insert dragged region"
+msgstr "προσθήκη ελκομένης περιοχής"
+
+#: gtk_ardour/editor_ops.cc:1538
+msgid "insert region"
+msgstr "προσθήκη περιοχής"
+
+#: gtk_ardour/editor_ops.cc:1744
+msgid "ardour: rename region"
+msgstr "ardour: μετονομασία περιοχής"
+
+#: gtk_ardour/editor_ops.cc:1891
+msgid "You can't import an audiofile until you have a session loaded."
+msgstr "Δεν γίνεται να εισαχθεί ήχος χωρίς να έχει φορτωθεί πρώτα Συνεδρία."
+
+#: gtk_ardour/editor_ops.cc:1901
+#, fuzzy
+msgid "Import selected as tracks"
+msgstr "Εισαγωγή επιλεγμένου(ων)"
+
+#: gtk_ardour/editor_ops.cc:1904
+#, fuzzy
+msgid "Import selected to region list"
+msgstr "θέση επιλεγμένης οπτικής περιοχής"
+
+#: gtk_ardour/editor_ops.cc:1933
+msgid "ardour: audio import in progress"
+msgstr "ardour: εισαγωγή ήχων εν εξελίξι"
+
+#: gtk_ardour/editor_ops.cc:1937
+msgid "Cancel Import"
+msgstr "Ακύρωση Εισαγωγής"
+
+#: gtk_ardour/editor_ops.cc:1944
+msgid "ardour: importing %1"
+msgstr "ardour: εισαγωγή εν εξελίξι %1"
+
+#: gtk_ardour/editor_ops.cc:1990
+msgid "%1 it anyway"
+msgstr "%1 το ούτως ή άλλως"
+
+#: gtk_ardour/editor_ops.cc:1996
+#, fuzzy
+msgid "Don't %1 it"
+msgstr "Μη %1"
+
+#: gtk_ardour/editor_ops.cc:1997
+msgid "%1 all without questions"
+msgstr ""
+
+#: gtk_ardour/editor_ops.cc:1998
+#, fuzzy
+msgid "Cancel entire import"
+msgstr "Ακύρωση Εισαγωγής"
+
+#: gtk_ardour/editor_ops.cc:2004
+msgid ""
+"%1\n"
+"This audiofile's sample rate doesn't match the session sample rate!"
+msgstr ""
+"%1\n"
+"Ο ρυθμός δειγματοληψίας αυτού του αρχείου δεν ταιριάζει με αυτόν της "
+"συνεδρίας!"
+
+#: gtk_ardour/editor_ops.cc:2032
+msgid "You can't embed an audiofile until you have a session loaded."
+msgstr ""
+"Δεν γίνεται να εμφυτεύσετε ηχο-αρχεία μέχρι να φορτώσετε κάποια συνεδρία."
+
+#: gtk_ardour/editor_ops.cc:2039
+msgid "Add to External Region list"
+msgstr "Πρόσθεση σε Λίστα Εξωτερικής Περιοχής"
+
+#: gtk_ardour/editor_ops.cc:2090 gtk_ardour/editor_ops.cc:2210
+#: gtk_ardour/editor_ops.cc:2286
+msgid "Editor: cannot open file \"%1\" (%2)"
+msgstr "Editor: δεν γίνεται να ανοίξει το αρχείο \"%1\" (%2)"
+
+#: gtk_ardour/editor_ops.cc:2128 gtk_ardour/editor_ops.cc:2312
+msgid "could not open %1"
+msgstr "δεν μπόρεσα να ανοίξω το %1"
+
+#: gtk_ardour/editor_ops.cc:2171
+#, fuzzy
+msgid "Insert selected as new tracks"
+msgstr "θέση επιλεγμένης οπτικής καναλιού"
+
+#: gtk_ardour/editor_ops.cc:2186
+msgid "Insert selected"
+msgstr "Προσθήκη επιλεγμένου(ων)"
+
+#: gtk_ardour/editor_ops.cc:2327
+msgid "insert sndfile"
+msgstr "προσθήκη ηχο-αρχείου"
+
+#: gtk_ardour/editor_ops.cc:2464
+msgid "separate"
+msgstr "διαχωρισμός"
+
+#: gtk_ardour/editor_ops.cc:2528
+msgid "trim to selection"
+msgstr "ισοστάθμιση προς τα επιλεγμένα"
+
+#: gtk_ardour/editor_ops.cc:2568
+msgid "region fill"
+msgstr "γόμωση περιοχής"
+
+#: gtk_ardour/editor_ops.cc:2626
+msgid "fill selection"
+msgstr "γόμωση επιλογής"
+
+#: gtk_ardour/editor_ops.cc:2650
+msgid "Place the edit cursor at the desired sync point"
+msgstr "Τοποθετήστε τον κερσορα επεξερ/σίας στο επιθύμητό σημείο συγχρονισμού"
+
+#: gtk_ardour/editor_ops.cc:2656
+msgid "set sync from edit cursor"
+msgstr "Θέση συγχρονισμού(sync) απο κέρσορα επεξερ/σίας"
+
+#: gtk_ardour/editor_ops.cc:2668
+msgid "remove sync"
+msgstr "απαλοιφή συγχρονισμού(sync)"
+
+#: gtk_ardour/editor_ops.cc:2682
+msgid "naturalize"
+msgstr "φυσικοποίηση"
+
+#: gtk_ardour/editor_ops.cc:2746
+msgid "align selection (relative)"
+msgstr "ευθυγράμμιση επιλογής (σχετική)"
+
+#: gtk_ardour/editor_ops.cc:2774
+msgid "align selection"
+msgstr "ευθυγράμμιση επιλογής"
+
+#: gtk_ardour/editor_ops.cc:2786
+msgid "align region"
+msgstr "ευθυγράμμιση περιοχής"
+
+#: gtk_ardour/editor_ops.cc:2833 gtk_ardour/editor_ops.cc:2858
+msgid "trim to edit"
+msgstr "ισοστάθμιση προς σύνταξη"
+
+#: gtk_ardour/editor_ops.cc:2909
+#, fuzzy
+msgid "ardour: freeze"
+msgstr "ardour: "
+
+#: gtk_ardour/editor_ops.cc:2914
+#, fuzzy
+msgid "Cancel Freeze"
+msgstr "Ακύρωση"
+
+#: gtk_ardour/editor_ops.cc:2951
+msgid "bounce range"
+msgstr "αναπήδηση διαστήματο"
+
+#: gtk_ardour/editor_ops.cc:3004
+msgid "cut"
+msgstr "κοπή"
+
+#: gtk_ardour/editor_ops.cc:3007
+msgid "copy"
+msgstr "αντιγραφή"
+
+#: gtk_ardour/editor_ops.cc:3020
+msgid " objects"
+msgstr " αντικειμένων"
+
+#: gtk_ardour/editor_ops.cc:3046
+msgid " range"
+msgstr " διαστήματος"
+
+#: gtk_ardour/editor_ops.cc:3201
+msgid "paste"
+msgstr "επικόλληση"
+
+#: gtk_ardour/editor_ops.cc:3236
+msgid "paste chunk"
+msgstr "επικόλληση κομματιού"
+
+#: gtk_ardour/editor_ops.cc:3276
+msgid "duplicate region"
+msgstr "αντιγραφή περιοχής"
+
+#: gtk_ardour/editor_ops.cc:3309
+msgid "duplicate selection"
+msgstr "αντιγραφή επιλογής"
+
+#: gtk_ardour/editor_ops.cc:3349
+msgid "clear playlist"
+msgstr "εκκαθάριση playlist"
+
+#: gtk_ardour/editor_ops.cc:3378
+msgid "nudge track"
+msgstr "νύξη καναλιού"
+
+#: gtk_ardour/editor_ops.cc:3431
+msgid ""
+"Do you really want to destroy the last capture?\n"
+"(This is destructive and cannot be undone)"
+msgstr ""
+"Στ'αλήθεια θέλετε να καταστρέψετε την τελευταία λήψη?\n"
+"(Η πράξη είνα‎ι καταστρεπτική και δεν γίνεται επαναφορά της)"
+
+#: gtk_ardour/editor_ops.cc:3463
+msgid "normalize"
+msgstr "εξομάλυνση"
+
+#: gtk_ardour/editor_ops.cc:3510
+msgid "reverse regions"
+msgstr "αντιστροφή περιοχών"
+
+#: gtk_ardour/editor_region_list.cc:223
+#, fuzzy
+msgid "hidden"
+msgstr "Κρυμμένο"
+
+#: gtk_ardour/editor_region_list.cc:408
+msgid "Show all"
+msgstr "Ανάδειξη όλων"
+
+#: gtk_ardour/editor_region_list.cc:417
+msgid "Ascending"
+msgstr "Αύξουσα"
+
+#: gtk_ardour/editor_region_list.cc:419
+msgid "Descending"
+msgstr "Φθίνουσα"
+
+#: gtk_ardour/editor_region_list.cc:423
+msgid "By Region Name"
+msgstr "Με Όνομα Περιοχής"
+
+#: gtk_ardour/editor_region_list.cc:425
+msgid "By Region Length"
+msgstr "Με Μέγεθος Περιοχής"
+
+#: gtk_ardour/editor_region_list.cc:427
+msgid "By Region Position"
+msgstr "Με Θέση Περιοχής"
+
+#: gtk_ardour/editor_region_list.cc:429
+msgid "By Region Timestamp"
+msgstr "Με Χρονο-στάμπα Περιοχής"
+
+#: gtk_ardour/editor_region_list.cc:431
+msgid "By Region Start in File"
+msgstr "Με Αρχή-στο-αρχείο της Περιοχής"
+
+#: gtk_ardour/editor_region_list.cc:433
+msgid "By Region End in File"
+msgstr "Με Τέλος-στο -αρχείο της Περιοχής"
+
+#: gtk_ardour/editor_region_list.cc:435
+msgid "By Source File Name"
+msgstr "Με Όνομα Αρχείου Πηγής"
+
+#: gtk_ardour/editor_region_list.cc:437
+msgid "By Source File Length"
+msgstr "Με Μέγεθος Αρχείου Πηγής"
+
+#: gtk_ardour/editor_region_list.cc:439
+msgid "By Source File Creation Date"
+msgstr "Με Ημ/νία Αρχείου Πηγής"
+
+#: gtk_ardour/editor_region_list.cc:441
+msgid "By Source Filesystem"
+msgstr "Με Filesystem Πηγής"
+
+#: gtk_ardour/editor_region_list.cc:444
+msgid "Sorting"
+msgstr "Ταξινόμηση"
+
+#: gtk_ardour/editor_region_list.cc:808
+msgid "Regions/length"
+msgstr "Περιοχές/διάρκεια"
+
+#: gtk_ardour/editor_region_list.cc:812
+msgid "Regions/position"
+msgstr "Περιοχές/θέση"
+
+#: gtk_ardour/editor_region_list.cc:816
+msgid "Regions/creation"
+msgstr "Περιοχές/δημιουργία"
+
+#: gtk_ardour/editor_region_list.cc:820
+msgid "Regions/start"
+msgstr "Περιοχές/αρχή"
+
+#: gtk_ardour/editor_region_list.cc:824
+msgid "Regions/end"
+msgstr "Περιοχές/τέλος"
+
+#: gtk_ardour/editor_region_list.cc:828
+msgid "Regions/file name"
+msgstr "Περιοχές/όνομα αρχείου"
+
+#: gtk_ardour/editor_region_list.cc:832
+msgid "Regions/file size"
+msgstr "Περιοχές/μέγεθος αρχείου"
+
+#: gtk_ardour/editor_region_list.cc:836
+msgid "Regions/file date"
+msgstr "Περιοχές/ημ/νία αρχείου"
+
+#: gtk_ardour/editor_region_list.cc:840
+msgid "Regions/file system"
+msgstr "Περιοχές/file system"
+
+#: gtk_ardour/editor_route_list.cc:72 gtk_ardour/editor_route_list.cc:73
+#: gtk_ardour/editor_route_list.cc:231
+msgid "editor"
+msgstr "επεξεργαστής"
+
+#: gtk_ardour/editor_route_list.cc:300
+msgid "Show All AbstractTracks"
+msgstr "Ανάδειξη όλων των Abstractκανάλιs"
+
+#: gtk_ardour/editor_route_list.cc:301
+msgid "Hide All AbstractTracks"
+msgstr "Απόκρυψη όλων των Abstractκαναλιών"
+
+#: gtk_ardour/editor_route_list.cc:302
+msgid "Show All AudioBus"
+msgstr "Ανάδειξη όλων των Ηχοδιαύλων"
+
+#: gtk_ardour/editor_route_list.cc:303
+msgid "Hide All AudioBus"
+msgstr "Απόκρυψη όλων των Ηχοδιαύλων"
+
+#: gtk_ardour/editor_rulers.cc:311
+msgid "New location marker"
+msgstr "Νέο στίγμα θέσεως"
+
+#: gtk_ardour/editor_rulers.cc:312
+msgid "Clear all locations"
+msgstr "Εκκαθάριση όλων των θέσεων"
+
+#: gtk_ardour/editor_rulers.cc:317
+msgid "Clear all ranges"
+msgstr "Εκκαθάριση όλων των διαστημάτων"
+
+#: gtk_ardour/editor_rulers.cc:326
+msgid "New Tempo"
+msgstr "Νέος Χρόνος"
+
+#: gtk_ardour/editor_rulers.cc:327
+msgid "Clear tempo"
+msgstr "Εκκαθάριση Χρόνου"
+
+#: gtk_ardour/editor_rulers.cc:332
+msgid "New Meter"
+msgstr "Νέο μέτρο"
+
+#: gtk_ardour/editor_rulers.cc:333
+msgid "Clear meter"
+msgstr "Εκκαθάριση μέτρου"
+
+#: gtk_ardour/editor_rulers.cc:341
+msgid "Min:Secs"
+msgstr "Λεπ:Δεύτ"
+
+#: gtk_ardour/editor_selection_list.cc:117
+msgid "name for chunk:"
+msgstr "όνομα για κομμάτι:"
+
+#: gtk_ardour/editor_selection_list.cc:119
+msgid "Create chunk"
+msgstr "Δημιουργία κομματιού"
+
+#: gtk_ardour/editor_selection_list.cc:119
+msgid "Forget it"
+msgstr "Ξέχασέ το"
+
+#: gtk_ardour/editor_tempodisplay.cc:252 gtk_ardour/editor_tempodisplay.cc:295
+msgid "add"
+msgstr "πρόσθεση"
+
+#: gtk_ardour/editor_tempodisplay.cc:276
+msgid "add tempo mark"
+msgstr "πρόσθεση στίγματος χρόνου"
+
+#: gtk_ardour/editor_tempodisplay.cc:318
+msgid "add meter mark"
+msgstr "πρόσθεση στίγματος μέτρου"
+
+#: gtk_ardour/editor_tempodisplay.cc:352 gtk_ardour/editor_tempodisplay.cc:383
+msgid "done"
+msgstr "έγινε"
+
+#: gtk_ardour/editor_tempodisplay.cc:372 gtk_ardour/editor_tempodisplay.cc:404
+msgid "replace tempo mark"
+msgstr "αντικατάσταση στίγματος χρόνου"
+
+#: gtk_ardour/editor_tempodisplay.cc:444 gtk_ardour/editor_tempodisplay.cc:475
+msgid "programming error: marker for meter is not a meter marker!"
+msgstr ""
+"Σφάλμα προγραμματισμού: το στίγμα για το μέτρο δεν είναι στίγμα μέτρου!"
+
+#: gtk_ardour/editor_tempodisplay.cc:454 gtk_ardour/editor_tempodisplay.cc:487
+msgid "remove tempo mark"
+msgstr "απαλοιφή στίγματος χρόνου"
+
+#: gtk_ardour/editor_timefx.cc:50
+msgid "Quick but Ugly"
+msgstr "Γρήγορο αλλά  Άσχημο"
+
+#: gtk_ardour/editor_timefx.cc:51
+msgid "Skip Anti-aliasing"
+msgstr "Παράκαμψη Anti-aliasing"
+
+#: gtk_ardour/editor_timefx.cc:53
+msgid "Stretch/Shrink it"
+msgstr "Μεγέθυνέ/Σμίκρυνέ το"
+
+#: gtk_ardour/editor_timefx.cc:57
+msgid "ardour: timestretch"
+msgstr "ardour: χρονοκάμψη"
+
+#: gtk_ardour/editor_timefx.cc:58
+msgid "TimeStretchDialog"
+msgstr "ΔιάλογοςΧρονοκάμψης"
+
+#: gtk_ardour/editor_timefx.cc:82 gtk_ardour/editor_timefx.cc:83
+#: gtk_ardour/editor_timefx.cc:84 gtk_ardour/editor_timefx.cc:85
+msgid "TimeStretchButton"
+msgstr "ΚουμπίΧρονοκάμψης"
+
+#: gtk_ardour/editor_timefx.cc:86
+msgid "TimeStretchProgress"
+msgstr "ΠρόοδοςΧρονοκάμψης"
+
+#: gtk_ardour/editor_timefx.cc:151
+msgid "timestretch cannot be started - thread creation error"
+msgstr ""
+
+#: gtk_ardour/export_dialog.cc:63 gtk_ardour/export_dialog.cc:410
+#: gtk_ardour/export_dialog.cc:947 gtk_ardour/export_dialog.cc:1189
+msgid "22.05kHz"
+msgstr "22.05kHz"
+
+#: gtk_ardour/export_dialog.cc:64 gtk_ardour/export_dialog.cc:413
+#: gtk_ardour/export_dialog.cc:428 gtk_ardour/export_dialog.cc:949
+#: gtk_ardour/export_dialog.cc:1191
+msgid "44.1kHz"
+msgstr "44.1kHz"
+
+#: gtk_ardour/export_dialog.cc:65 gtk_ardour/export_dialog.cc:416
+#: gtk_ardour/export_dialog.cc:951 gtk_ardour/export_dialog.cc:1193
+msgid "48kHz"
+msgstr "48kHz"
+
+#: gtk_ardour/export_dialog.cc:66 gtk_ardour/export_dialog.cc:419
+#: gtk_ardour/export_dialog.cc:953 gtk_ardour/export_dialog.cc:1195
+msgid "88.2kHz"
+msgstr "88.2kHz"
+
+#: gtk_ardour/export_dialog.cc:67 gtk_ardour/export_dialog.cc:422
+#: gtk_ardour/export_dialog.cc:955 gtk_ardour/export_dialog.cc:1197
+msgid "96kHz"
+msgstr "96kHz"
+
+#: gtk_ardour/export_dialog.cc:68 gtk_ardour/export_dialog.cc:425
+#: gtk_ardour/export_dialog.cc:957 gtk_ardour/export_dialog.cc:1199
+msgid "192kHz"
+msgstr "192kHz"
+
+#: gtk_ardour/export_dialog.cc:73
+msgid "best"
+msgstr "βέλτιστη"
+
+#: gtk_ardour/export_dialog.cc:74 gtk_ardour/export_dialog.cc:964
+msgid "fastest"
+msgstr "ταχύτατη"
+
+#: gtk_ardour/export_dialog.cc:75 gtk_ardour/export_dialog.cc:966
+msgid "linear"
+msgstr "γραμμική"
+
+#: gtk_ardour/export_dialog.cc:76 gtk_ardour/export_dialog.cc:968
+msgid "better"
+msgstr "καλύτερη"
+
+#: gtk_ardour/export_dialog.cc:77 gtk_ardour/export_dialog.cc:970
+msgid "intermediate"
+msgstr "ενδιάμεση"
+
+#: gtk_ardour/export_dialog.cc:83 gtk_ardour/export_dialog.cc:979
+msgid "Rectangular"
+msgstr "Τετράγωνη"
+
+#: gtk_ardour/export_dialog.cc:84
+msgid "Shaped Noise"
+msgstr "Μορφοποιημένος Θόρυβος"
+
+#: gtk_ardour/export_dialog.cc:85 gtk_ardour/export_dialog.cc:981
+msgid "Triangular"
+msgstr "Τρίγωνη"
+
+#: gtk_ardour/export_dialog.cc:90 gtk_ardour/utils.cc:336
+msgid "stereo"
+msgstr "stereo"
+
+#: gtk_ardour/export_dialog.cc:91 gtk_ardour/export_dialog.cc:497
+#: gtk_ardour/export_dialog.cc:929 gtk_ardour/export_dialog.cc:1219
+#: gtk_ardour/utils.cc:334
+msgid "mono"
+msgstr "mono"
+
+#: gtk_ardour/export_dialog.cc:97
+msgid "CUE"
+msgstr ""
+
+#: gtk_ardour/export_dialog.cc:98
+msgid "TOC"
+msgstr ""
+
+#: gtk_ardour/export_dialog.cc:106
+msgid "FORMAT"
+msgstr "FORMAT"
+
+#: gtk_ardour/export_dialog.cc:107
+msgid "SAMPLE RATE"
+msgstr "ΡΥΘΜΟΣ ΔΕΙΓΜΑΤ/ΨΙΑΣ"
+
+#: gtk_ardour/export_dialog.cc:108
+msgid "CONVERSION QUALITY"
+msgstr "ΠΟΙΟΤΗΤΑ ΜΕΤΑΤΡΟΠΗΣ"
+
+#: gtk_ardour/export_dialog.cc:109
+msgid "DITHER TYPE"
+msgstr "ΤΥΠΟΣ DITHER"
+
+#: gtk_ardour/export_dialog.cc:110
+#, fuzzy
+msgid "CD MARKER FILE TYPE"
+msgstr "ΤΥΠΟΣ ΑΡΧΕΙΟΥ"
+
+#: gtk_ardour/export_dialog.cc:111
+msgid "CHANNELS"
+msgstr "ΚΑΝΑΛΙΑ"
+
+#: gtk_ardour/export_dialog.cc:112
+msgid "FILE TYPE"
+msgstr "ΤΥΠΟΣ ΑΡΧΕΙΟΥ"
+
+#: gtk_ardour/export_dialog.cc:113
+msgid "SAMPLE FORMAT"
+msgstr "FORMAT ΔΕΙΓΜΑΤΟΣ"
+
+#: gtk_ardour/export_dialog.cc:114
+msgid "SAMPLE ENDIANNESS"
+msgstr "SAMPLE ENDIANNESS"
+
+#: gtk_ardour/export_dialog.cc:115
+#, fuzzy
+msgid "EXPORT CD MARKER FILE ONLY"
+msgstr "ΤΥΠΟΣ ΑΡΧΕΙΟΥ"
+
+#: gtk_ardour/export_dialog.cc:116
+msgid "EXPORT TO FILE"
+msgstr "ΕΞΑΓΩΓΗ ΣΕ ΑΡΧΕΙΟ"
+
+#: gtk_ardour/export_dialog.cc:117 gtk_ardour/option_editor.cc:118
+#: gtk_ardour/option_editor.cc:119
+msgid "Browse"
+msgstr "Αναζήτηση"
+
+#: gtk_ardour/export_dialog.cc:119
+msgid "Specific tracks ..."
+msgstr ""
+
+#: gtk_ardour/export_dialog.cc:131
+msgid "ardour: export"
+msgstr "ardour: εξαγωγή"
+
+#: gtk_ardour/export_dialog.cc:132
+msgid "ardour_export"
+msgstr "ardour_εξαγωγή"
+
+#: gtk_ardour/export_dialog.cc:156
+#, fuzzy
+msgid "Output"
+msgstr "Έξοδοι"
+
+#: gtk_ardour/export_dialog.cc:168 gtk_ardour/mixer_strip.cc:626
+msgid "Track"
+msgstr "Κανάλι"
+
+#: gtk_ardour/export_dialog.cc:287
+msgid "slereg"
+msgstr "slereg"
+
+#: gtk_ardour/export_dialog.cc:658
+#, fuzzy
+msgid "Editor: cannot open \"%1\" as export file for CD toc file"
+msgstr ""
+"Επεξεργαστής: δεν γίνεται να ανοιχτεί το \"%1\" ως αρχείο εξαγωγής για "
+"στίγματα καναλιού CD"
+
+#: gtk_ardour/export_dialog.cc:780
+#, fuzzy
+msgid "Editor: cannot open \"%1\" as export file for CD cue file"
+msgstr ""
+"Επεξεργαστής: δεν γίνεται να ανοιχτεί το \"%1\" ως αρχείο εξαγωγής για "
+"στίγματα καναλιού CD"
+
+#: gtk_ardour/export_dialog.cc:799
+msgid "WAV"
+msgstr ""
+
+#: gtk_ardour/export_dialog.cc:1051
+msgid "Stop Export"
+msgstr "Παύση Εξαγωγής"
+
+#: gtk_ardour/gain_automation_time_axis.cc:60
+#, fuzzy
+msgid "add gain automation event"
+msgstr "πρόσθεση συμβάντος αυτοματισμού σε "
+
+#: gtk_ardour/gain_meter.cc:68
+msgid "Cannot create slider pixmaps"
+msgstr ""
+
+#: gtk_ardour/gain_meter.cc:83
+msgid "dbFS"
+msgstr "dbFS"
+
+#: gtk_ardour/gain_meter.cc:84 gtk_ardour/gain_meter.cc:134
+#: gtk_ardour/gain_meter.cc:728
+msgid "pre"
+msgstr "προ"
+
+#: gtk_ardour/gain_meter.cc:130 gtk_ardour/gain_meter.cc:724
+#, fuzzy
+msgid "input"
+msgstr "%1 είσοδος"
+
+#: gtk_ardour/gain_meter.cc:138 gtk_ardour/gain_meter.cc:732
+#, fuzzy
+msgid "post"
+msgstr "θύρα"
+
+#: gtk_ardour/gain_meter.cc:146
+msgid "tupni"
+msgstr ""
+
+#: gtk_ardour/gain_meter.cc:167 gtk_ardour/gain_meter.cc:470
+#: gtk_ardour/gain_meter.cc:492 gtk_ardour/gain_meter.cc:537
+msgid "-inf"
+msgstr "-inf"
+
+#: gtk_ardour/imageframe_socket_handler.cc:127
+msgid "Image Compositor Socket has been shutdown/closed"
+msgstr "Η  Socket για τον Image Compositor έχει τερματιστεί/κλείσει"
+
+#: gtk_ardour/imageframe_time_axis.cc:295
+#, fuzzy
+msgid "0.5 seconds"
+msgstr "Δευτερόλεπτα"
+
+#: gtk_ardour/imageframe_time_axis.cc:296 gtk_ardour/marker_time_axis.cc:259
+#, fuzzy
+msgid "1 seconds"
+msgstr "Δευτερόλεπτα"
+
+#: gtk_ardour/imageframe_time_axis.cc:297 gtk_ardour/marker_time_axis.cc:260
+#, fuzzy
+msgid "1.5 seconds"
+msgstr "Δευτερόλεπτα"
+
+#: gtk_ardour/imageframe_time_axis.cc:298 gtk_ardour/marker_time_axis.cc:261
+#, fuzzy
+msgid "2 seconds"
+msgstr "Δευτερόλεπτα"
+
+#: gtk_ardour/imageframe_time_axis.cc:299 gtk_ardour/marker_time_axis.cc:262
+#, fuzzy
+msgid "2.5 seconds"
+msgstr "Δευτερόλεπτα"
+
+#: gtk_ardour/imageframe_time_axis.cc:300 gtk_ardour/marker_time_axis.cc:263
+#, fuzzy
+msgid "3 seconds"
+msgstr "Δευτερόλεπτα"
+
+#: gtk_ardour/imageframe_time_axis.cc:305 gtk_ardour/marker_time_axis.cc:268
+#, fuzzy
+msgid "Duration (sec)"
+msgstr "Έλξη περιοχής(ων)"
+
+#: gtk_ardour/imageframe_time_axis.cc:310
+#, fuzzy
+msgid "Remove Frame"
+msgstr "Απαλοιφή Πεδίου"
+
+#: gtk_ardour/imageframe_time_axis.cc:313
+#, fuzzy
+msgid "Image Frame"
+msgstr "Frames"
+
+#: gtk_ardour/imageframe_time_axis.cc:314 gtk_ardour/marker_time_axis.cc:274
+#, fuzzy
+msgid "Rename Track"
+msgstr "Μετονομασία"
+
+#: gtk_ardour/io_selector.cc:64
+msgid "%1 input"
+msgstr "%1 είσοδος"
+
+#: gtk_ardour/io_selector.cc:66
+msgid "%1 output"
+msgstr "%1 έξοδος"
+
+#: gtk_ardour/io_selector.cc:141 gtk_ardour/route_params_ui.cc:103
+msgid "Inputs"
+msgstr "Είσοδοι"
+
+#: gtk_ardour/io_selector.cc:141 gtk_ardour/route_params_ui.cc:104
+msgid "Outputs"
+msgstr "Έξοδοι"
+
+#: gtk_ardour/io_selector.cc:142
+#, fuzzy
+msgid "Add Input"
+msgstr "πρόσθεση εισόδου"
+
+#: gtk_ardour/io_selector.cc:142
+#, fuzzy
+msgid "Add Output"
+msgstr "πρόσθεση εξόδου"
+
+#: gtk_ardour/io_selector.cc:143
+#, fuzzy
+msgid "Remove Input"
+msgstr "Απαλοιφή σημείου συγχρονισμού"
+
+#: gtk_ardour/io_selector.cc:143
+#, fuzzy
+msgid "Remove Output"
+msgstr "# Έξοδοι"
+
+#: gtk_ardour/io_selector.cc:144
+#, fuzzy
+msgid "Disconnect All"
+msgstr "Αποσύνδεση"
+
+#: gtk_ardour/io_selector.cc:158
+msgid "Available connections"
+msgstr "Διαθέσιμες Συνδέσεις"
+
+#: gtk_ardour/io_selector.cc:424 gtk_ardour/io_selector.cc:636
+#: gtk_ardour/io_selector.cc:688 gtk_ardour/io_selector.cc:724
+msgid "port"
+msgstr "θύρα"
+
+#: gtk_ardour/io_selector.cc:568 gtk_ardour/io_selector.cc:587
+msgid "There are no more JACK ports available."
+msgstr ""
+
+#: gtk_ardour/io_selector.cc:790
+msgid "ardour: "
+msgstr "ardour: "
+
+#: gtk_ardour/keyboard.cc:419
+msgid "KeyboardTarget: keyname \"%1\" is unknown."
+msgstr "KeyboardTarget: το Όνομα Πλήκτρου \"%1\" είναι άγνωστο."
+
+#: gtk_ardour/keyboard.cc:645
+msgid ""
+"Your system is completely broken - NumLock uses \"%1\"as its modifier. This "
+"is madness - see the man page for xmodmap to find out how to fix this."
+msgstr ""
+"Το Σύστημά σας έχει χαλάσει τελείως - Το NumLock χρησιμοποιεί το \"%1\"σαν "
+"μεταβλητή του. Αυτό είναι τρέλα - ανατρέξτε στην man page του xmodmap για να "
+"βρείτε πώς θα το φτιάξετε."
+
+#: gtk_ardour/keyboard.cc:653
+msgid ""
+"Your system generates \"%1\" when the NumLock key is pressed. This can cause "
+"problems when editing so Ardour will use %2 to mean Meta rather than %1"
+msgstr ""
+"Το Σύστημά σας δημιουργεί \"%1\" όταν το  NumLock είναι εν ενεργεία. Αυτό "
+"μπορεί να δημιουργήσει προβλήματα στην επεξεργασία οπότε ο Ardour θα "
+"χρησιμοποιήσει %2 για Meta αντί του %1"
+
+#: gtk_ardour/keyboard.cc:714
+msgid "You have %1 keys bound to \"mod1\""
+msgstr "Υπάρχουν %1 πλήκτρα αναθεμένα στο \"mod1\""
+
+#: gtk_ardour/keyboard.cc:729
+msgid "You have %1 keys bound to \"mod2\""
+msgstr "Υπάρχουν %1 πλήκτρα αναθεμένα στο \"mod2\""
+
+#: gtk_ardour/keyboard.cc:744
+msgid "You have %1 keys bound to \"mod3\""
+msgstr "Υπάρχουν %1 πλήκτρα αναθεμένα στο \"mod3\""
+
+#: gtk_ardour/keyboard.cc:759
+msgid "You have %1 keys bound to \"mod4\""
+msgstr "Υπάρχουν %1 πλήκτρα αναθεμένα στο \"mod4\""
+
+#: gtk_ardour/keyboard.cc:774
+msgid "You have %1 keys bound to \"mod5\""
+msgstr "Υπάρχουν %1 πλήκτρα αναθεμένα στο \"mod5\""
+
+#: gtk_ardour/keyboard_target.cc:72
+msgid "KeyboardTarget: empty string passed to add_binding."
+msgstr "KeyboardTarget: κενή γραμμή  στην πρόσθεση_δεσμού."
+
+#: gtk_ardour/keyboard_target.cc:78
+msgid "KeyboardTarget: no translation found for \"%1\""
+msgstr "KeyboardTarget: δεν ευρέθη μετάφραση για \"%1\""
+
+#: gtk_ardour/keyboard_target.cc:83
+msgid "KeyboardTarget: unknown action \"%1\""
+msgstr "KeyboardTarget: άγνωστη ενέργεια \"%1\""
+
+#: gtk_ardour/keyboard_target.cc:248
+msgid "misformed binding node - ignored"
+msgstr "παραμορφωμένος πομπός δεσμού - αγνοήθηκε"
+
+#: gtk_ardour/library_ui.cc:62
+msgid "Soundfile Library"
+msgstr "Βιβλιοθήκη Soundfiles"
+
+#: gtk_ardour/library_ui.cc:63
+msgid "Filesystem"
+msgstr "Filesystem"
+
+#: gtk_ardour/library_ui.cc:66
+msgid "Split Channels"
+msgstr "Διαχωρισμός Καναλιών"
+
+#: gtk_ardour/library_ui.cc:69
+msgid "ardour: soundfile selector"
+msgstr "ardour: επιλογέας Soundfiles"
+
+#: gtk_ardour/library_ui.cc:430
+msgid "Add to Library..."
+msgstr "Πρόσθεση στη Βιβλιοθήκη..."
+
+#: gtk_ardour/library_ui.cc:431
+msgid "Remove..."
+msgstr "Απαλοιφή..."
+
+#: gtk_ardour/library_ui.cc:432
+msgid "Find..."
+msgstr "Εύρεση..."
+
+#: gtk_ardour/library_ui.cc:433
+msgid "Add Folder"
+msgstr "Πρόσθεση Φακέλου"
+
+#: gtk_ardour/library_ui.cc:434
+msgid "Add audio file or directory"
+msgstr "Πρόσθεση αρχείου ήχου ή φακέλου"
+
+#: gtk_ardour/library_ui.cc:713
+msgid "Importing"
+msgstr "Εισαγωγή εν εξελίξι"
+
+#: gtk_ardour/library_ui.cc:748
+msgid "%1 not added to database"
+msgstr "%1 δεν προστέθηκε στην database"
+
+#: gtk_ardour/library_ui.cc:767
+msgid "Folder name:"
+msgstr "Όνομα φακέλου:"
+
+#: gtk_ardour/library_ui.cc:838
+msgid "Should not be reached"
+msgstr "Δεν θα έπρεπε να αγγιχτεί"
+
+#: gtk_ardour/library_ui.cc:940 gtk_ardour/library_ui.cc:1096
+msgid "file \"%1\" could not be opened"
+msgstr "το αρχείο \"%1\" δεν γινόταν να ανοιχτεί"
+
+#: gtk_ardour/library_ui.cc:956
+msgid "Field"
+msgstr "Πεδίο"
+
+#: gtk_ardour/library_ui.cc:957
+msgid "Value"
+msgstr "Αξία"
+
+#: gtk_ardour/library_ui.cc:973
+msgid "Stop"
+msgstr "Παύση"
+
+#: gtk_ardour/library_ui.cc:974
+msgid "Add Field..."
+msgstr "Πρόσθεση Πεδίου..."
+
+#: gtk_ardour/library_ui.cc:975
+msgid "Remove Field"
+msgstr "Απαλοιφή Πεδίου"
+
+#: gtk_ardour/library_ui.cc:979
+msgid "Soundfile Info"
+msgstr "Πληροφορίες για το Soundfile"
+
+#: gtk_ardour/library_ui.cc:1106
+msgid "file \"%1\" appears not to be an audio file"
+msgstr ""
+
+#: gtk_ardour/library_ui.cc:1159
+msgid "Could not read file: %1 (%2)."
+msgstr "Δεν γινόταν να διαβαστεί το αρχείο: %1 (%2)."
+
+#: gtk_ardour/library_ui.cc:1177
+msgid "Could not access soundfile: "
+msgstr "Δεν γινόταν να διαβαστεί το soundfile: "
+
+#: gtk_ardour/library_ui.cc:1222
+msgid "Field name:"
+msgstr "Όνομα Πεδίου:"
+
+#: gtk_ardour/library_ui.cc:1275 gtk_ardour/library_ui.cc:1367
+msgid "Field value:"
+msgstr "Αξία Πεδίου:"
+
+#: gtk_ardour/library_ui.cc:1295
+msgid "Find"
+msgstr "Εύρεση"
+
+#: gtk_ardour/library_ui.cc:1296
+msgid "AND"
+msgstr "AND"
+
+#: gtk_ardour/library_ui.cc:1297
+msgid "OR"
+msgstr "OR"
+
+#: gtk_ardour/library_ui.cc:1300
+msgid "ardour: locate soundfiles"
+msgstr "ardour: εύρεση soundfiles"
+
+#: gtk_ardour/library_ui.cc:1426
+msgid "Results"
+msgstr "Αποτελέσματα"
+
+#: gtk_ardour/library_ui.cc:1427
+msgid "Uris"
+msgstr "Uris"
+
+#: gtk_ardour/library_ui.cc:1439
+msgid "Create multi-channel region"
+msgstr "Δημιουργία πολυκάναλης περιοχής"
+
+#: gtk_ardour/library_ui.cc:1442
+msgid "Ardour: Search Results"
+msgstr "Ardour: Αποτελέσματα Αναζητήσεως"
+
+#: gtk_ardour/location_ui.cc:47 gtk_ardour/location_ui.cc:50
+msgid "Set"
+msgstr "Θέση"
+
+#: gtk_ardour/location_ui.cc:48 gtk_ardour/location_ui.cc:51
+msgid "Go"
+msgstr "Πήγαινε"
+
+#: gtk_ardour/location_ui.cc:54
+msgid "CD"
+msgstr "CD"
+
+#: gtk_ardour/location_ui.cc:55
+msgid "Hidden"
+msgstr "Κρυμμένο"
+
+#: gtk_ardour/location_ui.cc:57
+msgid "SCMS"
+msgstr ""
+
+#: gtk_ardour/location_ui.cc:58
+msgid "Pre-Emphasis"
+msgstr ""
+
+#: gtk_ardour/location_ui.cc:592
+msgid "Add New Location"
+msgstr "Πρόσθεση νέας τοποθεσίας"
+
+#: gtk_ardour/location_ui.cc:593
+msgid "Add New Range"
+msgstr "Πρόσθεση νέου διαστήματος"
+
+#: gtk_ardour/location_ui.cc:597
+msgid "ardour: locations"
+msgstr "ardour: τοποθεσίες"
+
+#: gtk_ardour/location_ui.cc:598
+msgid "ardour_locations"
+msgstr "ardour_τοποθεσίες"
+
+#: gtk_ardour/location_ui.cc:629
+#, fuzzy
+msgid "Location (CD Index) Markers"
+msgstr "Στίγματα Τοποθεσίας"
+
+#: gtk_ardour/location_ui.cc:649
+#, fuzzy
+msgid "Range (CD Track) Markers"
+msgstr "Στίγματα διαστημάτων"
+
+#: gtk_ardour/location_ui.cc:814
+msgid "add range marker"
+msgstr "πρόσθεση στίγματος διαστήματος"
+
+#: gtk_ardour/main.cc:76
+msgid "ardour is killing itself for a clean exit\n"
+msgstr "Ο ardour σκοτώνει τον εαυτό του για καθαρή έξοδο\n"
+
+#: gtk_ardour/main.cc:85
+msgid "stopping user interface\n"
+msgstr "παύση του user interface\n"
+
+#: gtk_ardour/main.cc:104
+#, fuzzy, c-format
+msgid "%d(%d): received signal %d\n"
+msgstr "%d: εδέχθη σήμα %d\n"
+
+#: gtk_ardour/main.cc:190
+msgid "cannot become new process group leader (%1)"
+msgstr ""
+
+#: gtk_ardour/main.cc:217
+msgid "cannot setup signal handling for %1"
+msgstr "δεν γίνεται να διαμορφώθεί η διαχείρηση σημάτων για %1"
+
+#: gtk_ardour/main.cc:228
+msgid "cannot set default signal mask (%1)"
+msgstr "δεν γίνεται να διαμορφώθεί η προκαθορισμένη μάσκα σημάτων (%1)"
+
+#: gtk_ardour/main.cc:253
+#, fuzzy
+msgid ""
+"Without a UI style file, ardour will look strange.\n"
+" Please set ARDOUR_UI_RC to point to a valid UI style file"
+msgstr ""
+"Δίχως αρχείο εμφάνισεως UI, ο ardour θα φαίνεται παράξενα.\n"
+"Παρακαλώ θέστε το ARDOUR_UI_RC να δείχνει σε ενεργό αρχείο εμφανίσεως UI"
+
+#: gtk_ardour/main.cc:292
+msgid ""
+"Ardour could not connect to JACK.\n"
+"There are several possible reasons:\n"
+"\n"
+"1) JACK is not running.\n"
+"2) JACK is running as another user, perhaps root.\n"
+"3) There is already another client called \"ardour\".\n"
+"\n"
+"Please consider the possibilities, and perhaps (re)start JACK."
+msgstr ""
+"Ο Ardour δεν μπόρεσε να συνδεθεί στον  JACK.\n"
+"Υπάρχουν διάφοροι πιθανοί λόγοι:\n"
+"\n"
+"1) Ο JACK δεν τρέχει.\n"
+"2) JACK τρέχει σαν άλλος Χρήστης, ίσως σαν root.\n"
+"3) Υπάρχει ήδη άλλο πρόγραμμα με το όνομα \"ardour\".\n"
+"\n"
+"Παρακαλώ αναλογιστείτε τις πιθανότητες, και ίσως (ξανα)ξεκινήστε τον JACK."
+
+#: gtk_ardour/main.cc:305
+msgid "ardour: unplugged"
+msgstr "ardour: unplugged"
+
+#: gtk_ardour/main.cc:363
+msgid "Ardour/GTK "
+msgstr "Ardour/GTK "
+
+#: gtk_ardour/main.cc:365
+msgid ""
+"\n"
+"   (built using "
+msgstr ""
+
+#: gtk_ardour/main.cc:369
+#, fuzzy
+msgid " with libardour "
+msgstr " τρέχοντας με libardour "
+
+#: gtk_ardour/main.cc:374
+msgid " and GCC version "
+msgstr ""
+
+#: gtk_ardour/main.cc:384
+#, fuzzy
+msgid "Copyright (C) 1999-2005 Paul Davis"
+msgstr "Πνευματικα Δικαιώματα 1999-2004 Paul Davis"
+
+#: gtk_ardour/main.cc:385
+msgid ""
+"Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
+"Baker"
+msgstr ""
+
+#: gtk_ardour/main.cc:387
+msgid "Ardour comes with ABSOLUTELY NO WARRANTY"
+msgstr "Ο Ardour έρχεται με απολύτως ΚΑΜΙΑ ΕΓΓΥΗΣΗ"
+
+#: gtk_ardour/main.cc:388
+msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+msgstr ""
+
+#: gtk_ardour/main.cc:389
+msgid "This is free software, and you are welcome to redistribute it "
+msgstr ""
+"Το παρόν είναι ελεύθερο λογισμικό, είστε ελεύθεροι να το επαναδιανείμετε "
+
+#: gtk_ardour/main.cc:390
+#, fuzzy
+msgid "under certain conditions; see the source for copying conditions."
+msgstr "υπό ορισμένους όρους, ανατρέξτε στο αρχείο COPYING για λεπτομέρειες"
+
+#: gtk_ardour/main.cc:399
+msgid "could not create ARDOUR GUI"
+msgstr "δεν γινόταν να δημιουργηθεί ARDOUR GUI"
+
+#: gtk_ardour/main.cc:419
+msgid "Could not connect to JACK server as  \"%1\""
+msgstr "Δεν γινόταν να συνδεθώ στον JACK server σαν  \"%1\""
+
+#: gtk_ardour/main.cc:424
+msgid "could not initialize Ardour."
+msgstr "δεν γινόταν να εκκινηθεί ο  Ardour."
+
+#: gtk_ardour/main.cc:435
+msgid "could not load command line session \"%1\""
+msgstr "δεν γινόταν να φορτωθεί η συνεδρία γραμμής εντολών  \"%1\""
+
+#: gtk_ardour/main.cc:455
+msgid ""
+"\n"
+"\n"
+"A session named \"%1\" already exists.\n"
+"To avoid this message, start ardour as \"ardour %1"
+msgstr ""
+
+#: gtk_ardour/main.cc:466
+msgid ""
+"\n"
+"\n"
+"No session named \"%1\" exists.\n"
+"To create it from the command line, start ardour as \"ardour --new %1"
+msgstr ""
+
+#: gtk_ardour/marker.cc:354
+#, fuzzy
+msgid "MarkerText"
+msgstr "Στίγματα"
+
+#: gtk_ardour/marker_time_axis.cc:271
+#, fuzzy
+msgid "Remove Marker"
+msgstr "απαλοιφή στίγματος"
+
+#: gtk_ardour/marker_time_axis.cc:273
+#, fuzzy
+msgid "Marker"
+msgstr "Στίγματα"
+
+#: gtk_ardour/meter_bridge.cc:74
+msgid "ardour: meter bridge"
+msgstr "ardour: γέφυρα μετρήσεων"
+
+#: gtk_ardour/meter_bridge.cc:75
+msgid "ardour_meter_bridge"
+msgstr "ardour_γέφυρα_μετρήσεων"
+
+#: gtk_ardour/meter_bridge_strip.cc:79 gtk_ardour/meter_bridge_strip.cc:93
+#, c-format
+msgid "# of %u-sample overs"
+msgstr "# από %u-sample overs"
+
+#: gtk_ardour/meter_bridge_strip.cc:219
+msgid "New name for meter:"
+msgstr "Νέο όνομα για μετρητή:"
+
+#: gtk_ardour/mixer_strip.cc:117 gtk_ardour/mixer_strip.cc:507
+#: gtk_ardour/region_editor.cc:45
+msgid "mute"
+msgstr "σιγή"
+
+#: gtk_ardour/mixer_strip.cc:117 gtk_ardour/mixer_strip.cc:508
+msgid "solo"
+msgstr "σόλο"
+
+#: gtk_ardour/mixer_strip.cc:117 gtk_ardour/mixer_strip.cc:506
+msgid "RECORD"
+msgstr "ΕΓΓΡΑΦΗ"
+
+#: gtk_ardour/mixer_strip.cc:128 gtk_ardour/mixer_strip.cc:514
+msgid "polarity"
+msgstr "πολικότητα"
+
+#: gtk_ardour/mixer_strip.cc:129 gtk_ardour/mixer_strip.cc:509
+msgid "comments"
+msgstr ""
+
+#: gtk_ardour/mixer_strip.cc:152 gtk_ardour/mixer_strip.cc:810
+msgid "INPUT"
+msgstr "ΕΙΣΟΔΟΣ"
+
+#: gtk_ardour/mixer_strip.cc:157 gtk_ardour/mixer_strip.cc:831
+msgid "OUTPUT"
+msgstr "ΕΞΟΔΟΣ"
+
+#: gtk_ardour/mixer_strip.cc:173
+msgid "Pan automation mode"
+msgstr "Λειτουργία αυτοματισμού Pan"
+
+#: gtk_ardour/mixer_strip.cc:174
+msgid "Gain automation mode"
+msgstr "Λειτουργία αυτοματισμού Gain"
+
+#: gtk_ardour/mixer_strip.cc:176
+msgid "Pan automation type"
+msgstr "Τύπος αυτοματισμού Pan"
+
+#: gtk_ardour/mixer_strip.cc:177
+msgid "Gain automation type"
+msgstr "Τύπος αυτοματισμού Gain"
+
+#: gtk_ardour/mixer_strip.cc:220 gtk_ardour/mixer_strip.cc:232
+#: gtk_ardour/mixer_strip.cc:979
+msgid "trim"
+msgstr "ισοστάθμιση"
+
+#: gtk_ardour/mixer_strip.cc:221 gtk_ardour/mixer_strip.cc:233
+#: gtk_ardour/mixer_strip.cc:983
+msgid "abs"
+msgstr "abs"
+
+#: gtk_ardour/mixer_strip.cc:240
+msgid "gain automation mode"
+msgstr "Λειτουργία αυτοματισμού gain"
+
+#: gtk_ardour/mixer_strip.cc:241
+msgid "pan automation mode"
+msgstr "Λειτουργία αυτοματισμού pan"
+
+#: gtk_ardour/mixer_strip.cc:242
+msgid "gain automation state"
+msgstr "Κατάσταση αυτοματισμού gain"
+
+#: gtk_ardour/mixer_strip.cc:243
+msgid "pan automation state"
+msgstr "Κατάσταση αυτοματισμού pan"
+
+#: gtk_ardour/mixer_strip.cc:259
+msgid "varispeed"
+msgstr "μεταβλητή ταχύτητα"
+
+#: gtk_ardour/mixer_strip.cc:281 gtk_ardour/mixer_strip.cc:1174
+msgid "click to add/edit comments"
+msgstr ""
+
+#: gtk_ardour/mixer_strip.cc:463
+msgid "unknown strip width \"%1\" in XML GUI information"
+msgstr "άγνωστο εύρος διαδρόμου \"%1\" στις πληροφορίες του XML GUI"
+
+#: gtk_ardour/mixer_strip.cc:522
+msgid "REC"
+msgstr "REC"
+
+#: gtk_ardour/mixer_strip.cc:525
+#, fuzzy
+msgid "cmt"
+msgstr "κοπή"
+
+#: gtk_ardour/mixer_strip.cc:530
+msgid "pol"
+msgstr "πολ"
+
+#: gtk_ardour/mixer_strip.cc:562 gtk_ardour/mixer_strip.cc:620
+#: gtk_ardour/redirect_box.cc:1180
+msgid "Not connected to JACK - no I/O changes are possible"
+msgstr ""
+
+#: gtk_ardour/mixer_strip.cc:651 gtk_ardour/mixer_strip.cc:667
+msgid "could not register new ports required for that connection"
+msgstr ""
+
+#: gtk_ardour/mixer_strip.cc:813
+msgid "IN"
+msgstr "IN"
+
+#: gtk_ardour/mixer_strip.cc:834
+msgid "OUT"
+msgstr "OUT"
+
+#: gtk_ardour/mixer_strip.cc:950
+msgid "aplay"
+msgstr "aplay"
+
+#: gtk_ardour/mixer_strip.cc:956
+msgid "awrite"
+msgstr "awrite"
+
+#: gtk_ardour/mixer_strip.cc:1134
+#, fuzzy
+msgid ": comment editor"
+msgstr "UI: Ο 'editor' δεν μπορεί να εγερθεί"
+
+#: gtk_ardour/mixer_strip.cc:1205 gtk_ardour/mixer_strip.cc:1224
+msgid "no group"
+msgstr "καμία ομάδα"
+
+#: gtk_ardour/mixer_strip.cc:1227
+msgid "~G"
+msgstr "~G"
+
+#: gtk_ardour/mixer_ui.cc:52
+msgid "Strips"
+msgstr "Διάδρομοι"
+
+#: gtk_ardour/mixer_ui.cc:56
+msgid "Snapshots"
+msgstr ""
+
+#: gtk_ardour/mixer_ui.cc:61
+msgid "***"
+msgstr ""
+
+#: gtk_ardour/mixer_ui.cc:62 gtk_ardour/tempo_dialog.cc:17
+#: gtk_ardour/tempo_dialog.cc:34 gtk_ardour/tempo_dialog.cc:144
+#: gtk_ardour/tempo_dialog.cc:162
+msgid "Bar"
+msgstr "Μπάρα"
+
+#: gtk_ardour/mixer_ui.cc:121
+msgid "Mix Groups"
+msgstr "Ανάμειξη ομάδων"
+
+#: gtk_ardour/mixer_ui.cc:191 gtk_ardour/mixer_ui.cc:373
+msgid "ardour: mixer"
+msgstr "ardour: μίκτης"
+
+#: gtk_ardour/mixer_ui.cc:192
+msgid "ardour_mixer"
+msgstr "ardour_μίκτης"
+
+#: gtk_ardour/mixer_ui.cc:342
+msgid "ardour: mixer: "
+msgstr "ardour: μίκτης: "
+
+#: gtk_ardour/mixer_ui.cc:641
+msgid "signal"
+msgstr "σήμα"
+
+#: gtk_ardour/mixer_ui.cc:672
+msgid "Show All AudioTrack MixerStrips"
+msgstr "Ανάδειξη όλων των ΔιαδρόμωνΜίξεως των καναλιών"
+
+#: gtk_ardour/mixer_ui.cc:673
+msgid "Hide All AudioTrack MixerStrips"
+msgstr "Απόκρυψη όλων των ΔιαδρόμωνΜίξεως των καναλιών"
+
+#: gtk_ardour/mixer_ui.cc:674
+msgid "Show All AudioBus MixerStrips"
+msgstr "Ανάδειξη όλων των ΔιαδρόμωνΜίξεως των διαύλων"
+
+#: gtk_ardour/mixer_ui.cc:675
+msgid "Hide All AudioBus MixerStrips"
+msgstr "Απόκρυψη όλων των ΔιαδρόμωνΜίξεως των διαύλων"
+
+#: gtk_ardour/mixer_ui.cc:687
+msgid "track display list item for renamed strip not found!"
+msgstr "Λίστα αναδείξεως καναλιών για μετονομασμένο διάδρομο δεν ευρέθη!"
+
+#: gtk_ardour/mixer_ui.cc:700
+msgid "Name for new mix group"
+msgstr "Όνομα για νέα ομάδα μίξεως"
+
+#: gtk_ardour/new_session_dialog.cc:39
+msgid "Session name:"
+msgstr "Όνομα συνεδρίας:"
+
+#: gtk_ardour/new_session_dialog.cc:39
+msgid "Create"
+msgstr "Δημιουργία"
+
+#: gtk_ardour/new_session_dialog.cc:40
+msgid "use control outs"
+msgstr "χρήση των control outs"
+
+#: gtk_ardour/new_session_dialog.cc:41
+msgid "use master outs"
+msgstr "χρήση των master outs"
+
+#: gtk_ardour/new_session_dialog.cc:42
+msgid "automatically connect track inputs to physical ports"
+msgstr "αυτόματη σύνδεση inputs καναλιών σε φυσικές θύρες"
+
+#: gtk_ardour/new_session_dialog.cc:43
+msgid "automatically connect track outputs to master outs"
+msgstr "αυτόματη σύνδεση outputs καναλιών σε master outs"
+
+#: gtk_ardour/new_session_dialog.cc:44
+msgid "automatically connect track outputs to physical ports"
+msgstr "αυτόματη σύνδεση outputs καναλιών σε φυσικές θύρες"
+
+#: gtk_ardour/new_session_dialog.cc:45
+msgid "manually connect track outputs"
+msgstr "χειροκίνητη σύνδεση των outputs των καναλιών"
+
+#: gtk_ardour/new_session_dialog.cc:50
+msgid "Advanced..."
+msgstr "Προχωρημένα..."
+
+#: gtk_ardour/new_session_dialog.cc:52
+msgid "show again"
+msgstr "δείξε πάλι"
+
+#: gtk_ardour/new_session_dialog.cc:55
+msgid "Hardware Inputs: use"
+msgstr "Hardware Είσοδοι: χρήση"
+
+#: gtk_ardour/new_session_dialog.cc:56
+msgid "Hardware Outputs: use"
+msgstr "Hardware Έξοδοι: χρήση"
+
+#: gtk_ardour/new_session_dialog.cc:62
+msgid "new session setup"
+msgstr "νέα δαρρύθμιση συνεδρίας"
+
+#: gtk_ardour/new_session_dialog.cc:63
+msgid "ardour_new_session"
+msgstr "ardour_νέα_συνεδρία"
+
+#: gtk_ardour/new_session_dialog.cc:72
+msgid "This session will playback and record at %1 Hz"
+msgstr "Αυτή η συνεδρία θα αναπαράγει και θα εγγράφει στα %1 Hz"
+
+#: gtk_ardour/new_session_dialog.cc:74
+msgid ""
+"This rate is set by JACK and cannot be changed.\n"
+"If you want to use a different sample rate\n"
+"please exit and restart JACK"
+msgstr ""
+"Αυτος ο 'ρυθμός'(sample rate) τίθεται από τον JACK και δεν μπορεί να "
+"αλλάξει.\n"
+"Αν επιθυμείτε να θέσετε διαφορετικό 'ρυθμό'\n"
+"παρακαλώ βγείτε και επανεκκινήστε τον JACK"
+
+#: gtk_ardour/new_session_dialog.cc:155
+msgid "Session template"
+msgstr "Προσχέδιο συνεδρίας"
+
+#: gtk_ardour/new_session_dialog.cc:177 gtk_ardour/tempo_dialog.cc:20
+#: gtk_ardour/tempo_dialog.cc:37 gtk_ardour/tempo_dialog.cc:146
+#: gtk_ardour/tempo_dialog.cc:164
+msgid "Location"
+msgstr "Τοποθεσία"
+
+#: gtk_ardour/new_session_dialog.cc:178
+msgid "Configuration"
+msgstr "Διάταξη"
+
+#: gtk_ardour/new_session_dialog.cc:269
+msgid "blank"
+msgstr "κενό"
+
+#: gtk_ardour/new_session_dialog.cc:328
+msgid "No template - create tracks/busses manually"
+msgstr "Χωρίς προσχέδιο - δημιουργία καναλιών/διαύλων χειροκίνητα"
+
+#: gtk_ardour/new_session_dialog.cc:337
+msgid "No template"
+msgstr "Χωρίς προσχέδιο"
+
+#: gtk_ardour/option_editor.cc:48
+msgid "Internal"
+msgstr "Εσωτερικό"
+
+#: gtk_ardour/option_editor.cc:49
+msgid "Slave to MTC"
+msgstr "Slave στον MTC"
+
+#: gtk_ardour/option_editor.cc:50
+msgid "Sync with JACK"
+msgstr "Σύγχρονος με τον JACK"
+
+#: gtk_ardour/option_editor.cc:51
+msgid "never used but stops crashes"
+msgstr "αχρησιμοποίητο αλλά σταματά τα crashes"
+
+#: gtk_ardour/option_editor.cc:56
+#, fuzzy
+msgid "Later regions are higher"
+msgstr "Υποβίβαση περιοχής κατά ένα στρώμα"
+
+#: gtk_ardour/option_editor.cc:57
+msgid "Most recently added/moved/trimmed regions are higher"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:58
+#, fuzzy
+msgid "Most recently added regions are higher"
+msgstr "Υποβίβαση περιοχής κατά ένα στρώμα"
+
+#: gtk_ardour/option_editor.cc:63
+#, fuzzy
+msgid "Span entire region overlap"
+msgstr "Ανόρθωση περιοχής κατά ένα στρώμα"
+
+#: gtk_ardour/option_editor.cc:64
+msgid "Short fades at the start of the overlap"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:82
+#, fuzzy
+msgid "Automatically create crossfades"
+msgstr "Αυτόματο crossfade στα overlap"
+
+#: gtk_ardour/option_editor.cc:83
+msgid "New full-overlap crossfades are unmuted"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:84
+#, fuzzy
+msgid "Region layering mode"
+msgstr "Τέλη Περιοχών"
+
+#: gtk_ardour/option_editor.cc:85
+#, fuzzy
+msgid "Crossfade model"
+msgstr "Crossfade"
+
+#: gtk_ardour/option_editor.cc:90
+msgid "Latched solo"
+msgstr "Προσκολλημένο σόλο"
+
+#: gtk_ardour/option_editor.cc:91
+msgid "Solo via bus"
+msgstr "Solo μέσω διαύλου"
+
+#: gtk_ardour/option_editor.cc:96
+msgid "Show waveforms while recording"
+msgstr "Ανάδειξη κυματομορφών κατά την εγγραφή"
+
+#: gtk_ardour/option_editor.cc:97
+msgid "Narrow mixer strips"
+msgstr "Στενοί διάδρομοι μείκτη"
+
+#: gtk_ardour/option_editor.cc:98
+msgid "Show measure lines"
+msgstr "Ανάδειξη γραμμών μετρήσεων"
+
+#: gtk_ardour/option_editor.cc:99
+msgid "Follow playhead"
+msgstr "Ακολουθία Αναπαραγωγέα"
+
+#: gtk_ardour/option_editor.cc:103
+msgid "Send MTC"
+msgstr "Αποστολή MTC"
+
+#: gtk_ardour/option_editor.cc:104
+msgid "Send MMC"
+msgstr "Αποστολή MMC"
+
+#: gtk_ardour/option_editor.cc:105
+msgid "JACK time master"
+msgstr "JACK master χρόνου"
+
+#: gtk_ardour/option_editor.cc:107
+#, fuzzy
+msgid "SMPTE offset is negative"
+msgstr "SMPTE Έναρξη"
+
+#: gtk_ardour/option_editor.cc:111
+msgid "Send MIDI parameter feedback"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:112
+msgid "MIDI parameter control"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:113
+#, fuzzy
+msgid "MMC control"
+msgstr "MMC Θύρα"
+
+#: gtk_ardour/option_editor.cc:131
+#, fuzzy
+msgid "Auto-connect new track inputs to hardware"
+msgstr "Αυτο-σύνδεση νέων καναλιών"
+
+#: gtk_ardour/option_editor.cc:132
+#, fuzzy
+msgid "Auto-connect new track outputs to hardware"
+msgstr "Αυτο-σύνδεση νέων καναλιών"
+
+#: gtk_ardour/option_editor.cc:133
+#, fuzzy
+msgid "Auto-connect new track outputs to master bus"
+msgstr "αυτόματη σύνδεση outputs καναλιών σε master outs"
+
+#: gtk_ardour/option_editor.cc:134
+#, fuzzy
+msgid "Manually connect new track outputs"
+msgstr "χειροκίνητη σύνδεση των outputs των καναλιών"
+
+#: gtk_ardour/option_editor.cc:135
+msgid "Use Hardware Monitoring"
+msgstr "Χρήση Hardware Monitoring"
+
+#: gtk_ardour/option_editor.cc:136
+msgid "Use Software Monitoring"
+msgstr "Χρήση Software Monitoring"
+
+#: gtk_ardour/option_editor.cc:137
+msgid "Stop plugins with transport"
+msgstr "Λήξη των plugins με την παύση"
+
+#: gtk_ardour/option_editor.cc:138
+msgid "Run plugins while recording"
+msgstr "Λειτουργία plugins κατα την εγγραφή"
+
+#: gtk_ardour/option_editor.cc:139
+#, fuzzy
+msgid "Verify remove last capture"
+msgstr "Απαλοιφή τελευταίας λήψης"
+
+#: gtk_ardour/option_editor.cc:140
+msgid "Stop recording on xrun"
+msgstr "Παύση εγγραφής στα xrun"
+
+#: gtk_ardour/option_editor.cc:141
+msgid "Stop transport at end of session"
+msgstr "Στάση αναπαραγωγέα στο τέλος της συνεδρίας"
+
+#: gtk_ardour/option_editor.cc:142
+msgid "Debug keyboard events"
+msgstr "Debug γεγονότα πληκτρολογίου"
+
+#: gtk_ardour/option_editor.cc:143
+msgid "-12dB gain reduction for ffwd/rew"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:152
+msgid "ardour: options editor"
+msgstr "ardour: επεξεργαστής ρυθμίσεων"
+
+#: gtk_ardour/option_editor.cc:153
+msgid "ardour_option_editor"
+msgstr "ardour_επεξεργαστής_ρυθμίσεων"
+
+#: gtk_ardour/option_editor.cc:183
+msgid "Misc"
+msgstr "Διάφορα"
+
+#: gtk_ardour/option_editor.cc:184
+msgid "Sync"
+msgstr "Sync"
+
+#: gtk_ardour/option_editor.cc:185
+msgid "Paths/Files"
+msgstr "Paths/Αρχεία"
+
+#: gtk_ardour/option_editor.cc:186
+msgid "Display"
+msgstr "Απεικόνιση"
+
+#: gtk_ardour/option_editor.cc:187
+msgid "Kbd/Mouse"
+msgstr "Πλκτρ/Ποντίκι"
+
+#: gtk_ardour/option_editor.cc:188
+msgid "Click"
+msgstr "Μετρονόμος"
+
+#: gtk_ardour/option_editor.cc:190
+msgid "Layers & Fades"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:195
+msgid "MIDI"
+msgstr "MIDI"
+
+#: gtk_ardour/option_editor.cc:268
+msgid "24 FPS"
+msgstr "24 FPS"
+
+#: gtk_ardour/option_editor.cc:270
+msgid "25 FPS"
+msgstr "25 FPS"
+
+#: gtk_ardour/option_editor.cc:272
+#, fuzzy
+msgid "30 FPS"
+msgstr "30 FPS drop"
+
+#: gtk_ardour/option_editor.cc:278
+msgid "30 FPS drop"
+msgstr "30 FPS drop"
+
+#: gtk_ardour/option_editor.cc:362 gtk_ardour/option_editor.cc:379
+#: gtk_ardour/option_editor.cc:715 gtk_ardour/option_editor.cc:736
+#: gtk_ardour/option_editor.cc:778 gtk_ardour/option_editor.cc:800
+msgid "Medium"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:366 gtk_ardour/option_editor.cc:738
+#: gtk_ardour/option_editor.cc:804
+#, fuzzy
+msgid "Faster"
+msgstr "Ταχύ"
+
+#: gtk_ardour/option_editor.cc:376 gtk_ardour/option_editor.cc:714
+#: gtk_ardour/option_editor.cc:776
+#, fuzzy
+msgid "Short"
+msgstr "θύρα"
+
+#: gtk_ardour/option_editor.cc:382 gtk_ardour/option_editor.cc:716
+#: gtk_ardour/option_editor.cc:780
+msgid "Long"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:396
+msgid "Broadcast WAVE/floating point"
+msgstr "Broadcast WAVE/μεταβλητής υποδ/λής"
+
+#: gtk_ardour/option_editor.cc:397
+msgid "WAVE/floating point"
+msgstr "WAVE/μεταβλητής υποδ/λής"
+
+#: gtk_ardour/option_editor.cc:417
+msgid "session RAID path"
+msgstr "RAID path συνεδρίας"
+
+#: gtk_ardour/option_editor.cc:422
+msgid "Native Format"
+msgstr "Εντόπιο Format"
+
+#: gtk_ardour/option_editor.cc:454 gtk_ardour/option_editor.cc:460
+#: gtk_ardour/option_editor.cc:1382 gtk_ardour/option_editor.cc:1409
+msgid "internal"
+msgstr "εσωτερικό"
+
+#: gtk_ardour/option_editor.cc:537
+msgid "Short crossfade length (msecs)"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:710
+msgid "Meter Peak Hold"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:730
+msgid "Meter Falloff"
+msgstr ""
+
+#: gtk_ardour/option_editor.cc:847
+msgid "Positional Sync"
+msgstr "Τοποθεσιακό Sync"
+
+#: gtk_ardour/option_editor.cc:902
+msgid "SMPTE Frames/second"
+msgstr "SMPTE Καρέ/δεύτερα"
+
+#: gtk_ardour/option_editor.cc:903
+msgid "SMPTE Offset"
+msgstr "SMPTE Έναρξη"
+
+#: gtk_ardour/option_editor.cc:1006 gtk_ardour/option_editor.cc:1013
+#: gtk_ardour/option_editor.cc:1016 gtk_ardour/option_editor.cc:1211
+#, fuzzy
+msgid "online"
+msgstr "γραμμική"
+
+#: gtk_ardour/option_editor.cc:1013 gtk_ardour/option_editor.cc:1014
+#: gtk_ardour/option_editor.cc:1208
+#, fuzzy
+msgid "offline"
+msgstr "γραμμική"
+
+#: gtk_ardour/option_editor.cc:1319
+msgid "Use as click"
+msgstr "Χρήση όπως στο μετρονόμο"
+
+#: gtk_ardour/option_editor.cc:1344
+msgid "Use as click emphasis"
+msgstr "Έμφαση χρήσεως όπως στο μετρονόμο"
+
+#: gtk_ardour/option_editor.cc:1478
+msgid "--unknown--"
+msgstr "--άγνωστο--"
+
+#: gtk_ardour/option_editor.cc:1595
+msgid "Click audio file"
+msgstr "Αρχείο ήχου Μετρονόμου"
+
+#: gtk_ardour/option_editor.cc:1601
+msgid "Click emphasis audiofile"
+msgstr "Αρχείο ήχου εμφάσεως Μετρονόμου"
+
+#: gtk_ardour/option_editor.cc:1638
+msgid ""
+"The auditioner is a dedicated mixer strip used\n"
+"for listening to specific regions outside the context\n"
+"of the overall mix. It can be connected just like any\n"
+"other mixer strip."
+msgstr ""
+"Ο 'ακροατής' είναι ένας αφοσιωμένος διάδρομος μίξεως που χρησιμοποιείται\n"
+"για ακρόαση συγκεκριμένων περιοχών εκτός\n"
+"του γενικού μιξαρίσματος. Μπορεί να συνδεθεί σαν άλλος ένας\n"
+"διάδρομος μίξεως ή κανάλι."
+
+#: gtk_ardour/option_editor.cc:1887
+msgid "Edit using"
+msgstr "Επεξεργασία με"
+
+#: gtk_ardour/option_editor.cc:1894 gtk_ardour/option_editor.cc:1924
+msgid "+ button"
+msgstr "+ κουμπί"
+
+#: gtk_ardour/option_editor.cc:1917
+msgid "Delete using"
+msgstr "Διαγραφή με"
+
+#: gtk_ardour/option_editor.cc:1947
+msgid "Ignore snap using"
+msgstr "Άγνοια έλξεως με"
+
+#: gtk_ardour/opts.cc:46
+msgid "Usage: "
+msgstr "Χρήση: "
+
+#: gtk_ardour/opts.cc:47
+msgid "  -v, --version                    Show version information\n"
+msgstr "  -v, --version                    Πληροφορίες εκδόσεως\n"
+
+#: gtk_ardour/opts.cc:48
+msgid "  -h, --help                       Print this message\n"
+msgstr "  -h, --help                       Προβολή του παρόντος\n"
+
+#: gtk_ardour/opts.cc:49
+msgid ""
+"  -b, --bindings                   Print all possible keyboard binding "
+"names\n"
+msgstr ""
+"  -b, --bindings                   Προβολή όλων των πιθανών δεσμών "
+"πληκτρολογίου ονόματα\n"
+
+#: gtk_ardour/opts.cc:50
+#, fuzzy
+msgid "  -n, --show-splash                Show splash screen\n"
+msgstr "  -n, --no-splash                  Μήν δείξεις την εισαγωγική εικόνα\n"
+
+#: gtk_ardour/opts.cc:51
+#, fuzzy
+msgid ""
+"  -c, --name  name                 Use a specific jack client name, default "
+"is ardour\n"
+msgstr ""
+"  -c, --jack-client-name  name     Χρήση συγκεκριμένου ονόματος για τον "
+"jack, το προκαθορισμένο είναι ardour\n"
+
+#: gtk_ardour/opts.cc:52
+#, fuzzy
+msgid ""
+"  -N, --new session-name           Create a new session from the command "
+"line\n"
+msgstr "  [όνομα-συνεδρίας]                   Όνομα συνεδρίας προς φόρτωση\n"
+
+#: gtk_ardour/opts.cc:53
+msgid ""
+"  -o, --use-hw-optimizations        Try to use h/w specific optimizations\n"
+msgstr ""
+
+#: gtk_ardour/opts.cc:55
+#, fuzzy
+msgid "  -V, --novst                      Do not use VST support\n"
+msgstr "  -n, --no-splash                  Μήν δείξεις την εισαγωγική εικόνα\n"
+
+#: gtk_ardour/opts.cc:57
+msgid "  [session-name]                   Name of session to load\n"
+msgstr "  [όνομα-συνεδρίας]                   Όνομα συνεδρίας προς φόρτωση\n"
+
+#: gtk_ardour/opts.cc:58
+msgid "  -C, --curvetest filename         Curve algorithm debugger\n"
+msgstr ""
+
+#: gtk_ardour/pan_automation_time_axis.cc:58
+msgid "You can't graphically edit panning of more than stream"
+msgstr ""
+
+#: gtk_ardour/pan_automation_time_axis.cc:78
+#, fuzzy
+msgid "add pan automation event"
+msgstr "πρόσθεση συμβάντος αυτοματισμού σε "
+
+#: gtk_ardour/panner2d.cc:581 gtk_ardour/panner_ui.cc:441
+#, fuzzy
+msgid "Bypass"
+msgstr "bypass"
+
+#: gtk_ardour/panner_ui.cc:90 gtk_ardour/panner_ui.cc:222
+#, fuzzy
+msgid "link"
+msgstr "in"
+
+#: gtk_ardour/panner_ui.cc:103
+msgid "panning link control"
+msgstr "έλεγχος panning link"
+
+#: gtk_ardour/panner_ui.cc:105
+msgid "panning link direction"
+msgstr "κατεύθυνση panning link"
+
+#: gtk_ardour/panner_ui.cc:232
+msgid "L"
+msgstr "L"
+
+#: gtk_ardour/panner_ui.cc:344
+#, c-format
+msgid "panner for channel %u"
+msgstr "panner για το κανάλι %u"
+
+#: gtk_ardour/panner_ui.cc:451
+#, fuzzy
+msgid "Reset all"
+msgstr "Επιλογή όλων"
+
+#: gtk_ardour/playlist_selector.cc:46
+msgid "Playlists grouped by track"
+msgstr ""
+
+#: gtk_ardour/playlist_selector.cc:53
+#, fuzzy
+msgid "close"
+msgstr "Κλείσιμο"
+
+#: gtk_ardour/playlist_selector.cc:59
+#, fuzzy
+msgid "ardour: playlists"
+msgstr "ardour: plugins"
+
+#: gtk_ardour/playlist_selector.cc:104
+#, fuzzy
+msgid "ardour: playlist for "
+msgstr "ardour: επεξεργαστής: "
+
+#: gtk_ardour/playlist_selector.cc:122
+#, fuzzy
+msgid "Other tracks"
+msgstr "νύξη καναλιού"
+
+#: gtk_ardour/playlist_selector.cc:138
+msgid "unassigned"
+msgstr ""
+
+#: gtk_ardour/plugin_selector.cc:41
+msgid "Available LADSPA plugins"
+msgstr "Διαθέσιμα LADSPA plugins"
+
+#: gtk_ardour/plugin_selector.cc:42
+msgid "Type"
+msgstr "Τύπωση"
+
+#: gtk_ardour/plugin_selector.cc:43 gtk_ardour/plugin_selector.cc:51
+msgid "# Inputs"
+msgstr "# Είσοδοι"
+
+#: gtk_ardour/plugin_selector.cc:44 gtk_ardour/plugin_selector.cc:52
+msgid "# Outputs"
+msgstr "# Έξοδοι"
+
+#: gtk_ardour/plugin_selector.cc:50
+msgid "Available VST plugins"
+msgstr "Διαθέσιμα VST plugins"
+
+#: gtk_ardour/plugin_selector.cc:58
+msgid "To be added"
+msgstr "Πρόκειται να προστεθούν"
+
+#: gtk_ardour/plugin_selector.cc:72
+msgid "ardour: plugins"
+msgstr "ardour: plugins"
+
+#: gtk_ardour/plugin_selector.cc:82
+msgid "Add a plugin to the effect list"
+msgstr "Πρόσθεση plugin στη λίστα των εφφέ"
+
+#: gtk_ardour/plugin_selector.cc:84
+msgid "Remove a plugin from the effect list"
+msgstr "Απαλοιφή plugin από τη λίστα των εφφέ"
+
+#: gtk_ardour/plugin_selector.cc:88
+msgid "Update"
+msgstr "Ανανέωση"
+
+#: gtk_ardour/plugin_selector.cc:89
+msgid "Update available plugins"
+msgstr "Ανανέωση διαθέσιμων plugins"
+
+#: gtk_ardour/plugin_selector.cc:110
+msgid "LADSPA"
+msgstr "LADSPA"
+
+#: gtk_ardour/plugin_selector.cc:113
+msgid "VST"
+msgstr "VST"
+
+#: gtk_ardour/plugin_ui.cc:83
+msgid ""
+"unknown type of editor-supplying plugin (note: no VST support in this "
+"version of ardour)"
+msgstr ""
+"άγνωστος τύπος προμηθευμένου plugin για τον editor(σημείωση: δεν υπάρχει "
+"υποστήριξη VST στην παρούσα έκδοση του ardour)"
+
+#: gtk_ardour/plugin_ui.cc:269
+msgid "Plugin Editor: could not build control element for port %1"
+msgstr ""
+"Επεξεργαστής Plugin: δεν μπόρεσα να κτίσω στοιχείο ελέγχου για τη θύρα %1"
+
+#: gtk_ardour/plugin_ui.cc:367
+msgid "in"
+msgstr "in"
+
+#: gtk_ardour/plugin_ui.cc:367
+msgid "ins"
+msgstr "ins"
+
+#: gtk_ardour/plugin_ui.cc:368
+msgid "out"
+msgstr "out"
+
+#: gtk_ardour/plugin_ui.cc:368
+msgid "outs"
+msgstr "outs"
+
+#: gtk_ardour/plugin_ui.cc:382
+msgid "automation control"
+msgstr "έλεγχος αυτοματισμού"
+
+#: gtk_ardour/plugin_ui.cc:869
+msgid "save"
+msgstr "αποθήκευση"
+
+#: gtk_ardour/plugin_ui.cc:870
+msgid "bypass"
+msgstr "bypass"
+
+#: gtk_ardour/plugin_ui.cc:892
+msgid "Plugin preset %1 not found"
+msgstr "Προ-ρύθμιση plugin %1 δεν ευρέθη"
+
+#: gtk_ardour/plugin_ui.cc:903
+msgid "Name for plugin settings:"
+msgstr "Όνομα για ρυθμίσεις του plugin:"
+
+#: gtk_ardour/redirect_automation_line.cc:53
+msgid "redirect automation created for non-plugin"
+msgstr "προώθηση αυτοματισμού δημιουργημένου για non-plugin"
+
+#: gtk_ardour/redirect_automation_time_axis.cc:92
+msgid "add automation event to "
+msgstr "πρόσθεση συμβάντος αυτοματισμού σε "
+
+#: gtk_ardour/redirect_box.cc:213
+msgid "New send"
+msgstr "Nέο send"
+
+#: gtk_ardour/redirect_box.cc:214
+msgid "Show send controls"
+msgstr "Ανάδειξη ρυθμίσεων send"
+
+#: gtk_ardour/redirect_box.cc:360
+msgid "New Plugin ..."
+msgstr "Νέο Plugin ..."
+
+#: gtk_ardour/redirect_box.cc:361
+msgid "New Insert"
+msgstr "Νέο Προσθήκη"
+
+#: gtk_ardour/redirect_box.cc:362
+msgid "New Send ..."
+msgstr "Νέο Send ..."
+
+#: gtk_ardour/redirect_box.cc:380
+msgid "Select all"
+msgstr "Επιλογή όλων"
+
+#: gtk_ardour/redirect_box.cc:381
+#, fuzzy
+msgid "Deselect all"
+msgstr "Επιλογή όλων"
+
+#: gtk_ardour/redirect_box.cc:389
+#, fuzzy
+msgid "Inserts"
+msgstr "Αντιστροφή"
+
+#: gtk_ardour/redirect_box.cc:390
+#, fuzzy
+msgid "Sends"
+msgstr "Δευτερόλεπτα"
+
+#: gtk_ardour/redirect_box.cc:393
+msgid "Select all ..."
+msgstr "Επιλογή όλων ..."
+
+#: gtk_ardour/redirect_box.cc:406
+msgid "Activate All"
+msgstr "Ενεργοποίηση όλων"
+
+#: gtk_ardour/redirect_box.cc:407
+msgid "Deactivate All"
+msgstr "Απενεργοποίηση όλων"
+
+#: gtk_ardour/redirect_box.cc:488
+msgid ""
+"You attempted to add a plugin (%1).\n"
+"The plugin has %2 inputs\n"
+"but at the insertion point, there are\n"
+"%3 active signal streams.\n"
+"\n"
+"This makes no sense - you are throwing away\n"
+"part of the signal."
+msgstr ""
+"Αποπειραθήκατε να προσθέσετε ένα plug-in (%1).\n"
+"Το plugin έχει %2 inputs\n"
+"αλλά στο σημείο υποδοχής, υπάρχουν\n"
+"%3 ενεργά σήματα.\n"
+"\n"
+"Δεν έχει νόημα - έτσι χαραμίζετε\n"
+"μέρος του σήματος."
+
+#: gtk_ardour/redirect_box.cc:500
+msgid ""
+"You attempted to add a plugin (%1).\n"
+"The plugin has %2 inputs\n"
+"but at the insertion point there are\n"
+"only %3 active signal streams.\n"
+"\n"
+"This makes no sense - unless the plugin supports\n"
+"side-chain inputs. A future version of Ardour will\n"
+"support this type of configuration."
+msgstr ""
+"Αποπειραθήκατε να προσθέσετε ένα plug-in (%1).\n"
+"Το plugin έχει  %2 inputs\n"
+"αλλά στο σημείο υποδοχής, υπάρχουν\n"
+"μόνο %3 ενεργά σήματα..\n"
+"\n"
+"Δεν έχει νόημα - εκτός αν το plug-in υποστηρίζει\n"
+"επι μέρους inputs. Μελλοντική έκδοση του Ardour θα\n"
+"υποστηρίζει αυτον τον τύπο διατάξεως."
+
+#: gtk_ardour/redirect_box.cc:513
+msgid ""
+"You attempted to add a plugin (%1).\n"
+"\n"
+"The I/O configuration doesn't make sense:\n"
+"\n"
+"The plugin has %2 inputs and %3 outputs.\n"
+"The track/bus has %4 inputs and %5 outputs.\n"
+"The insertion point, has %6 active signals.\n"
+"\n"
+"Ardour does not understand what to do in such situations.\n"
+msgstr ""
+"Αποπειραθήκατε να προσθέσετε ένα plug-in (%1).\n"
+"\n"
+"Η I/O διάταξη δεν έχει νόημα:\n"
+"\n"
+"Το plugin έχει %2 inputs και %3 outputs.\n"
+"Το κανάλι/δίαυλος έχει %4 inputs και %5 outputs.\n"
+"Το σημείο υποδοχής, έχει %6 ενεργά σήματα.\n"
+"\n"
+"Ο Ardour δεν γνωρίζει τι να κάνει σε τέτοιες περιπτώσεις.\n"
+
+#: gtk_ardour/redirect_box.cc:616
+msgid "Pre-fader inserts, sends & plugins:"
+msgstr "Pre-fader εισαγωγές, sends & plugins:"
+
+#: gtk_ardour/redirect_box.cc:619
+msgid "Post-fader inserts, sends & plugins:"
+msgstr "Post-fader εισαγωγές, sends & plugins:"
+
+#: gtk_ardour/redirect_box.cc:781
+msgid ""
+"You cannot reorder this set of redirects\n"
+"in that way because the inputs and\n"
+"outputs do not work correctly."
+msgstr ""
+
+#: gtk_ardour/redirect_box.cc:903
+msgid "ardour: rename redirect"
+msgstr "ardour: μετονομασία redirect"
+
+#: gtk_ardour/redirect_box.cc:992 gtk_ardour/redirect_box.cc:1043
+msgid ""
+"Copying the set of redirects on the clipboard failed,\n"
+"probably because the I/O configuration of the plugins\n"
+"could not match the configuration of this track."
+msgstr ""
+
+#: gtk_ardour/redirect_box.cc:1064
+msgid ""
+"Do you really want to remove all redirects from this track?\n"
+"(this cannot be undone)"
+msgstr ""
+"Στ'αλήθεια θέλετε να απαλοίψετε όλα τα redirects από το κανάλι?\n"
+"(δεν μπορεί να ανακληθεί)"
+
+#: gtk_ardour/redirect_box.cc:1067
+msgid ""
+"Do you really want to remove all redirects from this bus?\n"
+"(this cannot be undone)"
+msgstr ""
+"Στ'αλήθεια θέλετε να απαλοίψετε όλα τα redirects από το δίαυλο?\n"
+"(δεν μπορεί να ανακληθεί)"
+
+#: gtk_ardour/redirect_box.cc:1071
+msgid "Yes, remove them all"
+msgstr "Ναι, απάλοιψέ τα όλα"
+
+#: gtk_ardour/redirect_box.cc:1114
+msgid "ardour: %1"
+msgstr "ardour: %1"
+
+#: gtk_ardour/redirect_box.cc:1156
+#, fuzzy
+msgid "ardour: %1: %2 (by %3)"
+msgstr "ardour: %1: %2"
+
+#: gtk_ardour/region_editor.cc:43
+msgid "NAME:"
+msgstr "ΌΝΟΜΑ:"
+
+#: gtk_ardour/region_editor.cc:44
+msgid "lock"
+msgstr "κλείδωμα"
+
+#: gtk_ardour/region_editor.cc:46
+msgid "opaque"
+msgstr "αδιαφανής"
+
+#: gtk_ardour/region_editor.cc:49
+msgid "Layer"
+msgstr "Στρώμα"
+
+#: gtk_ardour/region_editor.cc:57
+msgid "ENVELOPE"
+msgstr "ΧΡΟΝΟΔΙΑΓΡΑΜΜΑ"
+
+#: gtk_ardour/region_editor.cc:108
+msgid "mute this region"
+msgstr "σιγή παρούσας περιοχής"
+
+#: gtk_ardour/region_editor.cc:109
+msgid "regions underneath this one cannot be heard"
+msgstr "περιοχές κάτωθι της παρούσας δεν μπορούν να ακουστούν"
+
+#: gtk_ardour/region_editor.cc:110
+msgid "prevent any changes to this region"
+msgstr "αποτροπή αλλαγών σε αυτή την περιοχή"
+
+#: gtk_ardour/region_editor.cc:111
+msgid "use the gain envelope during playback"
+msgstr "χρήση χρονοδιαγράμματος του gain κατά την αναπαρ/γή"
+
+#: gtk_ardour/region_editor.cc:112
+msgid "show the gain envelope"
+msgstr "ανάδειξη χρονοδιαγράμματος του gain"
+
+#: gtk_ardour/region_editor.cc:113
+msgid "use fade in curve during playback"
+msgstr "χρήση της καμπύλης fade in κατά την αναπαρ/γή"
+
+#: gtk_ardour/region_editor.cc:114
+msgid "use fade out curve during playback"
+msgstr "χρήση της καμπύλης fade out κατά την αναπαρ/γή"
+
+#: gtk_ardour/region_editor.cc:115
+msgid "audition this region"
+msgstr "ακρόαση της περιοχής"
+
+#: gtk_ardour/region_editor.cc:148
+msgid "START:"
+msgstr "ΑΡΧΗ:"
+
+#: gtk_ardour/region_editor.cc:150
+msgid "END:"
+msgstr "ΛΗΞΗ:"
+
+#: gtk_ardour/region_editor.cc:152
+msgid "LENGTH:"
+msgstr "ΜΗΚΟΣ:"
+
+#: gtk_ardour/region_editor.cc:177 gtk_ardour/region_editor.cc:198
+#: gtk_ardour/region_editor.cc:234
+msgid "active"
+msgstr "ενεργό"
+
+#: gtk_ardour/region_editor.cc:179
+msgid "visible"
+msgstr "ορατό"
+
+#: gtk_ardour/region_editor.cc:197
+msgid "FADE IN"
+msgstr "FADE IN"
+
+#: gtk_ardour/region_editor.cc:199 gtk_ardour/region_editor.cc:235
+msgid "msecs"
+msgstr "msecs"
+
+#: gtk_ardour/region_editor.cc:233
+msgid "FADE OUT"
+msgstr "FADE OUT"
+
+#: gtk_ardour/region_editor.cc:276
+msgid "ardour: region "
+msgstr "ardour: περιοχή "
+
+#: gtk_ardour/region_editor.cc:410
+msgid "fade in edit"
+msgstr "επεξερ/σία fade in"
+
+#: gtk_ardour/region_editor.cc:422
+msgid "fade out edit"
+msgstr "επεξερ/σία fade out"
+
+#: gtk_ardour/regionview.cc:1169
+#, fuzzy
+msgid "add gain control point"
+msgstr "απαλοιφή σημείου ελέγχου"
+
+#: gtk_ardour/route_params_ui.cc:58
+msgid "Tracks/Buses"
+msgstr "κανάλια/δίαυλοι"
+
+#: gtk_ardour/route_params_ui.cc:59
+msgid "Pre Redirects"
+msgstr "Προ-Redirects"
+
+#: gtk_ardour/route_params_ui.cc:60
+msgid "Post Redirects"
+msgstr "Μετα-Redirects"
+
+#: gtk_ardour/route_params_ui.cc:105
+#, fuzzy
+msgid "Pre-fader Redirects"
+msgstr "Προ-Redirects"
+
+#: gtk_ardour/route_params_ui.cc:106
+#, fuzzy
+msgid "Post-fader Redirects"
+msgstr "Μετα-Redirects"
+
+#: gtk_ardour/route_params_ui.cc:138
+#, fuzzy
+msgid "ardour: track/bus inspector"
+msgstr "ardour: Εισαγωγή καναλιού/διαύλου"
+
+#: gtk_ardour/route_params_ui.cc:139
+msgid "ardour_route_parameters"
+msgstr "ardour_παράμετροι_διαδρομών"
+
+#: gtk_ardour/route_params_ui.cc:189
+msgid "route display list item for renamed route not found!"
+msgstr "Η λίστα ανάδειξης διαδρομών για μετονομασμένη διαδρομή δεν ευρέθη!"
+
+#: gtk_ardour/route_params_ui.cc:448
+msgid "NO TRACK"
+msgstr "Κανένα κανάλι"
+
+#: gtk_ardour/route_params_ui.cc:669
+#, fuzzy
+msgid "ardour: track/bus inspector: "
+msgstr "ardour: Εισαγωγή καναλιού/διαύλου"
+
+#: gtk_ardour/route_params_ui.cc:673
+msgid "No Route Selected"
+msgstr "Δεν επελέχθη διαδρομή"
+
+#: gtk_ardour/route_params_ui.cc:674
+#, fuzzy
+msgid "ardour: track/bus/inspector: no route selected"
+msgstr "ardour: παράμετροι διαδρομών: δεν επελέχθη διαδρομή"
+
+#: gtk_ardour/route_ui.cc:134
+msgid "mute change"
+msgstr "αλλαγή σιγής"
+
+#: gtk_ardour/route_ui.cc:210 gtk_ardour/route_ui.cc:220
+msgid "solo change"
+msgstr "αλλαγή σόλο"
+
+#: gtk_ardour/route_ui.cc:284
+msgid "rec-enable change"
+msgstr "αλλαγή rec-enable"
+
+#: gtk_ardour/route_ui.cc:423
+#, fuzzy
+msgid "Solo-safe"
+msgstr "Σόλο"
+
+#: gtk_ardour/route_ui.cc:431 gtk_ardour/route_ui.cc:474
+#, fuzzy
+msgid "MIDI Bind"
+msgstr "MIDI"
+
+#: gtk_ardour/route_ui.cc:445
+msgid "Pre Fader"
+msgstr "Προ Fader"
+
+#: gtk_ardour/route_ui.cc:452
+msgid "Post Fader"
+msgstr "Μετά Fader"
+
+#: gtk_ardour/route_ui.cc:459
+msgid "Control Outs"
+msgstr "Control Outs"
+
+#: gtk_ardour/route_ui.cc:466
+msgid "Main Outs"
+msgstr "Main Outs"
+
+#: gtk_ardour/route_ui.cc:503
+msgid "mix group solo  change"
+msgstr "αλλαγή  solo ομάδας μίξεως"
+
+#: gtk_ardour/route_ui.cc:537
+msgid "mix group mute change"
+msgstr "αλλαγή  mute ομάδας μίξεως"
+
+#: gtk_ardour/route_ui.cc:553
+msgid "mix group rec-enable change"
+msgstr "αλλαγή  rec-enable ομάδας μίξεως"
+
+#: gtk_ardour/route_ui.cc:576 gtk_ardour/visual_time_axis.cc:258
+msgid "ardour: color selection"
+msgstr "ardour: επιλογή χρωμάτων"
+
+#: gtk_ardour/route_ui.cc:652
+msgid ""
+"Do you really want to remove track \"%1\" ?\n"
+"You may also lose the playlist used by this track.\n"
+"(cannot be undone)"
+msgstr ""
+"Στ'αλήθεια θέλετε να απαλοίψετε το κανάλι \"%1\" ?\n"
+"Πιθανόν να χάσετε και τη λίστα που χρησιμοποιείται από το κανάλι.\n"
+"(δεν μπορεί να ανακληθεί)"
+
+#: gtk_ardour/route_ui.cc:654
+msgid ""
+"Do you really want to remove bus \"%1\" ?\n"
+"(cannot be undone)"
+msgstr ""
+"Στ'αλήθεια θέλετε να απαλοίψετε το κανάλι \"%1\" ?\n"
+"(δεν μπορεί να ανακληθεί)"
+
+#: gtk_ardour/route_ui.cc:657 gtk_ardour/visual_time_axis.cc:299
+msgid "Yes, remove it."
+msgstr "Ναι, απάλοιψε το."
+
+#: gtk_ardour/route_ui.cc:691 gtk_ardour/visual_time_axis.cc:358
+msgid "new name: "
+msgstr "νέο όνομα: "
+
+#: gtk_ardour/tempo_dialog.cc:14 gtk_ardour/tempo_dialog.cc:31
+msgid "Beats per minute"
+msgstr "Κτύποι ανά λεπτό"
+
+#: gtk_ardour/tempo_dialog.cc:18 gtk_ardour/tempo_dialog.cc:35
+#: gtk_ardour/tempo_dialog.cc:145 gtk_ardour/tempo_dialog.cc:163
+msgid "Beat"
+msgstr "Κτύπος"
+
+#: gtk_ardour/tempo_dialog.cc:140 gtk_ardour/tempo_dialog.cc:158
+msgid "Meter denominator"
+msgstr "Παρονομαστής Μέτρου"
+
+#: gtk_ardour/tempo_dialog.cc:141 gtk_ardour/tempo_dialog.cc:159
+msgid "Beats per bar"
+msgstr "Κτύποι ανά μπάρα"
+
+#: gtk_ardour/tempo_dialog.cc:178 gtk_ardour/tempo_dialog.cc:189
+msgid "whole (1)"
+msgstr "ολόκληρο (1)"
+
+#: gtk_ardour/tempo_dialog.cc:179 gtk_ardour/tempo_dialog.cc:191
+msgid "second (2)"
+msgstr "δεύτερο (2)"
+
+#: gtk_ardour/tempo_dialog.cc:180 gtk_ardour/tempo_dialog.cc:193
+msgid "third (3)"
+msgstr "τρίτο (3)"
+
+#: gtk_ardour/tempo_dialog.cc:181 gtk_ardour/tempo_dialog.cc:195
+#: gtk_ardour/tempo_dialog.cc:203
+msgid "quarter (4)"
+msgstr "τέταρτο (4)"
+
+#: gtk_ardour/tempo_dialog.cc:182 gtk_ardour/tempo_dialog.cc:197
+msgid "eighth (8)"
+msgstr "όγδοο (8)"
+
+#: gtk_ardour/tempo_dialog.cc:183 gtk_ardour/tempo_dialog.cc:199
+msgid "sixteenth (16)"
+msgstr "δέκατο έκτο (16)"
+
+#: gtk_ardour/tempo_dialog.cc:184 gtk_ardour/tempo_dialog.cc:201
+msgid "thirty-second (32)"
+msgstr "τριακοστό-όγδοο (32)"
+
+#: gtk_ardour/tempo_dialog.cc:301
+msgid "garbaged note type entry (%1)"
+msgstr "είσοδος(type entry) άχρηστης σημειώσεως (%1)"
+
+#: gtk_ardour/tempo_dialog.cc:311
+msgid "incomprehensible note type entry (%1)"
+msgstr "είσοδος(type entry) ακατανόητης σημειώσεως (%1)"
+
+#: gtk_ardour/time_axis_view.cc:95
+msgid "gTortnam"
+msgstr "gTortnam"
+
+#: gtk_ardour/time_axis_view.cc:446
+msgid "Largest"
+msgstr "Μέγιστο"
+
+#: gtk_ardour/time_axis_view.cc:447
+msgid "Large"
+msgstr "Μεγάλο"
+
+#: gtk_ardour/time_axis_view.cc:448
+msgid "Larger"
+msgstr "Μεγαλύτερο"
+
+#: gtk_ardour/time_axis_view.cc:450
+msgid "Smaller"
+msgstr "Μικρότερο"
+
+#: gtk_ardour/time_axis_view.cc:451
+msgid "Small"
+msgstr "Μικρό"
+
+#: gtk_ardour/time_axis_view.cc:785
+msgid "unknown track height name \"%1\" in XML GUI information"
+msgstr "Άγνωστο όνομα ύψους καναλιού\"%1\" στις XML GUI πληροφορίες"
+
+#: gtk_ardour/time_axis_view_item.cc:69
+msgid "TimeAxisViewItemName"
+msgstr ""
+
+#: gtk_ardour/time_axis_view_item.cc:258
+msgid "new duration %1 frames is out of bounds for %2"
+msgstr "νέα διάρκεια %1 καρέ είναι εκτός ορίων για %2"
+
+#: gtk_ardour/time_selection.cc:40
+msgid "programming error: request for non-existent audio range (%1)!"
+msgstr "Σφάλμα προγραμματισμού: request για μη-υπάρχον ηχητικό διάστημα (%1)!"
+
+#: gtk_ardour/utils.cc:57
+msgid ""
+"\"\n"
+"\t ,<.>/?:;'[{}]~`!@#$%^&*()_-+="
+msgstr ""
+"\"\n"
+"\t ,<.>/?:;'[{}]~`!@#$%^&*()_-+="
+
+#: gtk_ardour/utils.cc:66
+msgid "aeiou"
+msgstr "aeiou"
+
+#: gtk_ardour/utils.cc:75
+msgid "AEIOU"
+msgstr "AEIOU"
+
+#: gtk_ardour/utils.cc:84
+msgid "bcdfghjklmnpqrtvwxyz"
+msgstr "bcdfghjklmnpqrtvwxyz"
+
+#: gtk_ardour/utils.cc:93
+msgid "BCDFGHJKLMNPQRTVWXYZ"
+msgstr "BCDFGHJKLMNPQRTVWXYZ"
+
+#: gtk_ardour/utils.cc:222 gtk_ardour/utils.cc:265
+msgid "bad XPM header %1"
+msgstr "εσφαλμένος XPM header %1"
+
+#: gtk_ardour/utils.cc:516
+msgid "missing RGBA style for \"%1\""
+msgstr ""
+
+#: gtk_ardour/visual_time_axis.cc:297
+msgid ""
+"Do you really want to remove track \"%1\" ?\n"
+"(cannot be undone)"
+msgstr ""
+"Στ'αλήθεια θέλετε να απαλοίψετε το κανάλι \"%1\" ?\n"
+"(δεν μπορεί να ανακληθεί)"
+
+#: gtk_ardour/visual_time_axis.cc:385
+msgid "A track already exists with that name"
+msgstr "Κανάλι με αυτό το όνομα ήδη υπάρχει"
+
+#~ msgid "Seamless Looping"
+#~ msgstr "Αδιάσπαστο Looping"
+
+#, fuzzy
+#~ msgid "Align recorded material with:"
+#~ msgstr "Στοίχιση ληφθέντος υλικού με"
+
+#~ msgid "Export to CD"
+#~ msgstr "Εξαγωγή σε CD"
+
+#~ msgid "programming error: location/marker map does not contain location!"
+#~ msgstr ""
+#~ "Σφάλμα προγραμματισμού: ο χάρτης τοποθεσίας/στίγματος δεν περιέχει "
+#~ "τοποθεσίες!"
+
+#~ msgid "No toggle button pixmaps found to match toggle-button-[0-9]*.xpm$"
+#~ msgstr ""
+#~ "Δεν ευρέθησαν 'toggle button pixmaps' να ταιριάζουν στα toggle-button-[0-"
+#~ "9]*.xpm$"
+
+#~ msgid ""
+#~ "No small push button pixmaps found to match small-round-button-[0-9]*.xpm$"
+#~ msgstr ""
+#~ "Δεν ευρέθησαν 'small push button pixmaps' να ταιριάζουν στα small-round-"
+#~ "button-[0-9]*.xpm$"
+
+#~ msgid "No pixmaps found to match hslider[0-9]*.xpm$"
+#~ msgstr "Δεν ευρέθησαν 'pixmaps' να ταιριάζουν στα hslider[0-9]*.xpm$"
+
+#~ msgid "No pixmaps found to match vslider[0-9]*.xpm$"
+#~ msgstr "Δεν ευρέθησαν 'pixmaps' να ταιριάζουν vslider[0-9]*.xpm$"
+
+#~ msgid "Trace MIDI Input"
+#~ msgstr "Αναζήτηση MIDI Input"
+
+#~ msgid "Trace MIDI Output"
+#~ msgstr "Αναζήτηση MIDI Output"
+
+#~ msgid "30 FPS non-drop"
+#~ msgstr "30 FPS non-drop"
+
+#~ msgid "MTC Port"
+#~ msgstr "MTC Θύρα"
+
+#~ msgid "attempt to timestretch a non-audio track!"
+#~ msgstr "απόπειρα να χρονοκαμφθεί ένα μη-ηχητικό κανάλι!"
+
+#~ msgid "cannot create timestretch thread - operation not carried out"
+#~ msgstr ""
+#~ "δεν δημιουργήθηκε σύνδεσμος Χρονοκάμψης - η εργασία δεν ολοκληρώθηκε"
+
+#, fuzzy
+#~ msgid "move region(s) between tracks"
+#~ msgstr "μετακίνηση περιοχής μεταξύ καναλιών"
+
+#, fuzzy
+#~ msgid "copy region(s) between tracks"
+#~ msgstr "αντιγραφή περιοχής μεταξύ καναλιών"
+
+#~ msgid "ardour: tempo editor"
+#~ msgstr "ardour: επεξεργαστής χρόνου"
+
+#~ msgid "mouse brush"
+#~ msgstr "βούρτσα ποντικιού"
+
+#~ msgid "ardour_add_track_bus"
+#~ msgstr "ardour_εισαγωγή_καναλιού_διαύλου"
+
+#~ msgid "ok"
+#~ msgstr "Εν τάξει"
+
+#~ msgid "apply"
+#~ msgstr "ενεργοποίηση"
+
+#~ msgid "fade"
+#~ msgstr "fade"
+
+#~ msgid "Edit left"
+#~ msgstr "Επεξεργασία αριστερού"
+
+#~ msgid "Edit right"
+#~ msgstr "Επεξεργασία δεξιού"
+
+#~ msgid "Edit fade"
+#~ msgstr "Επεξεργασία fade"
+
+#~ msgid "Export region"
+#~ msgstr "Εξαγωγή περιοχής"
+
+#~ msgid "Bounce region"
+#~ msgstr "Αναπήδηση περιοχής"
+
+#~ msgid "Region"
+#~ msgstr "Περιοχή"
+
+#~ msgid "Play selected region"
+#~ msgstr "Αναπαρ/γή επιλεγμένης Περιοχής"
+
+#~ msgid "clear connections"
+#~ msgstr "εκκαθάριση συνδέσεων"
+
+#~ msgid "add comments/notes here"
+#~ msgstr "πρόσθεση σχολίων/σημειώσεων εδώ"
+
+#~ msgid "Crossfades in use"
+#~ msgstr "Crossfades εν ενεργεία"
+
+#, fuzzy
+#~ msgid "outside this computer"
+#~ msgstr "Απόκρυψη παρόντος καναλιού"
+
+#, fuzzy
+#~ msgid "inside this computer"
+#~ msgstr "Απόκρυψη παρόντος καναλιού"
+
+#~ msgid "track %1 has no input connections [This Message To Be Expanded]"
+#~ msgstr "Το κανάλι %1 δεν εχει συνδέσεις  λήψεως[Μήνυμα προς επέκταση]"
+
+#~ msgid "SR: %u kHz"
+#~ msgstr "SR: %u kHz"
+
+#~ msgid "Export CD track markers"
+#~ msgstr "Εξαγωγή σε CD από μαρκάρισμα καναλιού"
+
+#~ msgid "Route Parameters"
+#~ msgstr "Παράμετροι διαδρομών"
+
+#~ msgid "Use Other"
+#~ msgstr "Χρησιμοποίηση άλλου"
+
+#~ msgid "zoom to frame"
+#~ msgstr "zoom σε καρέ"
+
+#~ msgid "Display Automatic Regions"
+#~ msgstr "Ανάδειξη Αυτομάτων Περιοχών"
+
+#~ msgid "Edit tempo"
+#~ msgstr "Επεξ/σία Χρόνου"
+
+#~ msgid "Ardour is done. Come again. Have a nice day. Etc.\n"
+#~ msgstr "Ο Ardour τελείωσε. Να μας ξανάρθετε. Καλή ημέρα να έχετε. Κλπ.\n"
+
+#~ msgid "External MIDI Control"
+#~ msgstr "Εξωτερικός Έλεγχος MIDI"
+
+#~ msgid "  -U, --ui-rcfile  path            Use a specific UI style file\n"
+#~ msgstr ""
+#~ "  -U, --ui-rcfile  path            Χρήση συγκεκριμένου αρχείου για UI "
+#~ "στυλ\n"
+
+#~ msgid "INPUTs"
+#~ msgstr "Είσοδος(οι)"
+
+#~ msgid "OUTPUTs"
+#~ msgstr "'Εξοδος(οι)"
+
+#~ msgid "ardour: route parameters"
+#~ msgstr "ardour: παράμετροι διαδρομών"
+
+#~ msgid "ardour: route parameters: "
+#~ msgstr "ardour: παράμετροι διαδρομών: "

@@ -1,0 +1,440 @@
+/*
+    Copyright (C) 2003 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+    $Id$
+*/
+
+#include <string>
+#include <algorithm>
+
+#include <pbd/error.h>
+
+#include <gtkmmext/utils.h>
+#include <gtkmmext/gtk_ui.h>
+
+#include <ardour/session.h>
+#include <ardour/utils.h>
+
+#include "public_editor.h"
+#include "imageframe_time_axis.h"
+#include "canvas-simplerect.h"
+#include "enums.h"
+#include "imageframe_time_axis_view.h"
+#include "imageframe_time_axis_group.h"
+#include "marker_time_axis_view.h"
+#include "imageframe_view.h"
+#include "marker_time_axis.h"
+#include "marker_view.h"
+#include "gui_thread.h"
+
+#include "i18n.h"
+
+using namespace ARDOUR ;
+using namespace SigC ;
+using namespace Gtk ;
+
+/**
+ * Constructs a new ImageFrameTimeAxis.
+ *
+ * @param track_id the track name/id
+ * @param ed the PublicEditor
+ * @param sess the current session
+ * @param canvas the parent canvas item
+ */
+ImageFrameTimeAxis::ImageFrameTimeAxis(std::string track_id, PublicEditor& ed, ARDOUR::Session& sess, Widget *canvas)
+	: AxisView(sess),
+	  VisualTimeAxis(track_id, ed, sess, canvas)
+{
+	_color = unique_random_color() ;
+	
+	selection_group = gtk_canvas_item_new (GTK_CANVAS_GROUP(canvas_display), gtk_canvas_group_get_type (), NULL) ;
+	gtk_canvas_item_hide(selection_group) ;
+
+	// intialize our data items
+	_marked_for_display = true;
+	y_position = -1 ;
+	name_prompter = 0 ;
+
+	/* create our new image frame view */
+	view = new ImageFrameTimeAxisView(*this) ;
+	
+	/* create the Image Frame Edit Menu */
+	create_imageframe_menu() ;
+	
+	// set the initial time axis text label
+	label_view() ;
+		
+	// set the initial height of this time axis
+	set_height(Normal) ;
+}
+
+/**
+ * Destructor
+ * Responsible for destroying any child image items that may have been added to thie time axis
+ */
+ImageFrameTimeAxis::~ImageFrameTimeAxis ()
+{
+	 GoingAway() ; /* EMIT_SIGNAL */
+	
+	// Destroy all the marker views we may have associaited with this TimeAxis
+	for(MarkerTimeAxisList::iterator iter = marker_time_axis_list.begin(); iter != marker_time_axis_list.end(); ++iter)
+	{
+		MarkerTimeAxis* mta = *iter ;
+		MarkerTimeAxisList::iterator next = iter ;
+		next++ ;
+		
+		marker_time_axis_list.erase(iter) ;
+
+		delete mta ;
+		mta = 0 ;
+		
+		iter = next ;
+	}
+	
+	if(image_action_menu)
+	{
+		delete image_action_menu ;
+		image_action_menu = 0 ;
+	}
+	
+	for(list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i)
+	{
+		gtk_object_destroy (GTK_OBJECT((*i)->rect));
+		gtk_object_destroy (GTK_OBJECT((*i)->start_trim));
+		gtk_object_destroy (GTK_OBJECT((*i)->end_trim));
+	}
+
+	for(list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i)
+	{
+		gtk_object_destroy (GTK_OBJECT((*i)->rect));
+		gtk_object_destroy (GTK_OBJECT((*i)->start_trim));
+		gtk_object_destroy (GTK_OBJECT((*i)->end_trim));
+	}
+	
+	if (selection_group)
+	{
+		gtk_object_destroy (GTK_OBJECT (selection_group));
+		selection_group = 0 ;
+	}
+	
+	// Destroy our Axis View helper
+	if(view)
+	{
+		delete view ;
+		view = 0 ;
+	}
+}
+
+//---------------------------------------------------------------------------------------//
+// ui methods & data
+
+/**
+ * Sets the height of this TrackView to one of ths TrackHeghts
+ *
+ * @param h the TrackHeight value to set
+ */
+void
+ImageFrameTimeAxis::set_height (TrackHeight h)
+{
+	VisualTimeAxis::set_height(h) ;
+	
+	// tell out view helper of the change too
+	if(view != 0)
+	{
+		view->set_height((double) height) ;
+	}
+	
+	// tell those interested that we have had our height changed
+	 gui_changed("track_height",(void*)0); /* EMIT_SIGNAL */
+}
+
+/**
+ * Sets the number of samples per unit that are used.
+ * This is used to determine the siezes of items upon this time axis
+ *
+ * @param spu the number of samples per unit
+ */
+void
+ImageFrameTimeAxis::set_samples_per_unit(double spu)
+{
+	TimeAxisView::set_samples_per_unit (editor.get_current_zoom());
+
+	if(view) {
+		view->set_samples_per_unit(spu) ;
+	}
+}
+
+
+/**
+ * Returns the available height for images to be drawn onto
+ *
+ * @return the available height for an image item to be drawn onto
+ */
+int
+ImageFrameTimeAxis::get_image_display_height()
+{
+	return(height - (gint)TimeAxisViewItem::NAME_HIGHLIGHT_SIZE) ;
+}
+
+
+/**
+ * Show the popup edit menu
+ *
+ * @param button the mouse button pressed
+ * @param time when to show the popup
+ * @param clicked_imageframe the ImageFrameItem that the event ocured upon, or 0 if none
+ * @param with_item true if an item has been selected upon the time axis, used to set context menu
+ */
+void
+ImageFrameTimeAxis::popup_imageframe_edit_menu(int button, int32_t time, ImageFrameView* clicked_imageframe, bool with_item)
+{
+	if (!imageframe_menu)
+	{
+		create_imageframe_menu() ;
+	}
+
+	if(with_item)
+	{
+		imageframe_item_menu->set_sensitive(true) ;
+	}
+	else
+	{
+		imageframe_item_menu->set_sensitive(false) ;
+	}
+	
+	imageframe_menu->popup(button,time) ;
+}
+
+/**
+ * convenience method to select a new track color and apply it to the view and view items
+ *
+ */
+void
+ImageFrameTimeAxis::select_track_color()
+{
+	if (choose_time_axis_color())
+	{
+		if (view)
+		{
+			view->apply_color (_color) ;
+		}
+	}
+}
+
+/**
+ * Handles the building of the popup menu
+ */
+void
+ImageFrameTimeAxis::build_display_menu()
+{
+	using namespace Menu_Helpers;
+
+	/* get the size menu ready */
+
+	build_size_menu();
+
+	/* prepare it */
+
+	TimeAxisView::build_display_menu () ;
+
+	/* now fill it with our stuff */
+
+	MenuList& items = display_menu->items();
+
+	items.push_back (MenuElem (_("Rename"), slot(*this, &ImageFrameTimeAxis::start_time_axis_rename)));
+
+	image_action_menu = new Menu() ;
+	image_action_menu->set_name ("ArdourContextMenu");
+	MenuList image_items = image_action_menu->items() ;
+	
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Height"), *size_menu));
+	items.push_back (MenuElem (_("Color"), slot(*this, &ImageFrameTimeAxis::select_track_color)));
+
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Remove"), bind(slot(*this, &VisualTimeAxis::remove_this_time_axis), (void*)this))) ;
+}
+
+/**
+ * handles the building of the ImageFrameView sub menu
+ */
+void
+ImageFrameTimeAxis::create_imageframe_menu()
+{
+	using namespace Menu_Helpers;
+
+	imageframe_menu = manage(new Menu) ;
+	imageframe_menu->set_name ("ArdourContextMenu");
+	MenuList& items = imageframe_menu->items();
+	
+	imageframe_item_menu = manage(new Menu) ;
+	imageframe_item_menu->set_name ("ArdourContextMenu");
+	MenuList& imageframe_sub_items = imageframe_item_menu->items() ;
+
+	/* duration menu */
+	Menu* duration_menu = manage(new Menu) ;
+	duration_menu->set_name ("ArdourContextMenu");
+	MenuList& duration_items = duration_menu->items() ;
+
+	if(view)
+	{
+		duration_items.push_back(MenuElem (_("0.5 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 0.5))) ;
+		duration_items.push_back(MenuElem (_("1 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 1.0))) ;
+		duration_items.push_back(MenuElem (_("1.5 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 1.5))) ;
+		duration_items.push_back(MenuElem (_("2 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 2.0))) ;
+		duration_items.push_back(MenuElem (_("2.5 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 2.5))) ;
+		duration_items.push_back(MenuElem (_("3 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 3.0))) ;
+		//duration_items.push_back(SeparatorElem()) ;
+		//duration_items.push_back(MenuElem (_("custom"), slot (*this, &ImageFrameTimeAxis::set_imageframe_duration_custom))) ;
+	}
+
+	imageframe_sub_items.push_back(MenuElem(_("Duration (sec)"), *duration_menu)) ;
+
+	imageframe_sub_items.push_back(SeparatorElem()) ;
+	if(view)
+	{
+		imageframe_sub_items.push_back(MenuElem (_("Remove Frame"), bind(slot (view, &ImageFrameTimeAxisView::remove_selected_imageframe_item), (void*)this))) ;
+	}
+	
+	items.push_back(MenuElem(_("Image Frame"), *imageframe_item_menu)) ;
+	items.push_back(MenuElem (_("Rename Track"), slot (*this,&ImageFrameTimeAxis::start_time_axis_rename))) ;
+
+	imageframe_menu->show_all() ;
+}
+
+
+
+
+//---------------------------------------------------------------------------------------//
+// Marker Time Axis Methods
+
+/**
+ * Add a MarkerTimeAxis to the ilst of MarkerTimeAxis' associated with this ImageFrameTimeAxis
+ *
+ * @param marker_track the MarkerTimeAxis to add
+ * @param src the identity of the object that initiated the change
+ * @return true if the addition was a success,
+ *         false otherwise
+ */
+bool
+ImageFrameTimeAxis::add_marker_time_axis(MarkerTimeAxis* marker_track, void* src)
+{
+	bool ret = false ;
+	
+	if(get_named_marker_time_axis(marker_track->name()) != 0)
+	{
+		ret = false ;
+	}
+	else
+	{
+		marker_time_axis_list.push_back(marker_track) ;
+		marker_track->GoingAway.connect(bind(slot(*this, &ImageFrameTimeAxis::remove_time_axis_view), marker_track, (void*)this));
+	
+		 MarkerTimeAxisAdded(marker_track, src) ; /* EMIT_SIGNAL */
+		ret = true ;
+	}
+	
+	return(ret) ;
+}
+
+/**
+ * Returns the named MarkerTimeAxis associated with this ImageFrameTimeAxis
+ *
+ * @param track_id the track_id of the MarkerTimeAxis to search for
+ * @return the named markerTimeAxis, or 0 if the named MarkerTimeAxis is not associated with this ImageFrameTimeAxis
+ */
+MarkerTimeAxis*
+ImageFrameTimeAxis::get_named_marker_time_axis(std::string track_id)
+{
+	MarkerTimeAxis* mta =  0 ;
+	
+	for (MarkerTimeAxisList::iterator i = marker_time_axis_list.begin(); i != marker_time_axis_list.end(); ++i)
+	{
+		if (((MarkerTimeAxis*)*i)->name() == track_id)
+		{
+			mta = ((MarkerTimeAxis*)*i) ;
+			break ;
+		}
+	}
+	return(mta) ;
+}
+
+/**
+ * Removes the named markerTimeAxis from those associated with this ImageFrameTimeAxis
+ *
+ * @param track_id the track id of the MarkerTimeAxis to remove
+ * @param src the identity of the object that initiated the change
+ * @return the removed MarkerTimeAxis
+ */
+MarkerTimeAxis*
+ImageFrameTimeAxis::remove_named_marker_time_axis(std::string track_id, void* src)
+{
+	MarkerTimeAxis* mta = 0 ;
+	
+	for(MarkerTimeAxisList::iterator i = marker_time_axis_list.begin(); i != marker_time_axis_list.end(); ++i)
+	{
+		if (((MarkerTimeAxis*)*i)->name() == track_id)
+		{
+			mta = ((MarkerTimeAxis*)*i) ;
+			
+			// the iterator is invalid after this call, so we can no longer use it as is.
+			marker_time_axis_list.erase(i) ;
+			
+			 MarkerTimeAxisRemoved(mta->name(), src) ; /* EMIT_SIGNAL */
+			break ;
+		}
+	}
+	
+	return(mta) ;
+}
+
+/**
+ * Removes the specified MarkerTimeAxis from the list of MarkerTimaAxis associated with this ImageFrameTimeAxis
+ * Note that the MarkerTimeAxis is not deleted, only removed from the list os associated tracks
+ *
+ * @param mta the TimeAxis to remove
+ * @param src the identity of the object that initiated the change
+ */
+void
+ImageFrameTimeAxis::remove_time_axis_view(MarkerTimeAxis* mta, void* src)
+{
+	ENSURE_GUI_THREAD(bind (slot (*this, &ImageFrameTimeAxis::remove_time_axis_view), mta, src));
+	
+	MarkerTimeAxisList::iterator i;
+	if((i = find (marker_time_axis_list.begin(), marker_time_axis_list.end(), mta)) != marker_time_axis_list.end())
+	{
+		// note that we dont delete the object itself, we just remove it from our list
+		marker_time_axis_list.erase(i) ;
+
+		 MarkerTimeAxisRemoved(mta->name(), src) ; /* EMIT_SIGNAL */
+	}
+}
+
+
+//---------------------------------------------------------------------------------------//
+// Parent/Child helper object accessors
+
+/**
+ * Returns the view helper of this TimeAxis
+ *
+ * @return the view helper of this TimeAxis
+ */
+ImageFrameTimeAxisView*
+ImageFrameTimeAxis::get_view()
+{
+	return(view) ;
+}

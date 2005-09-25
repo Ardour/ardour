@@ -1,0 +1,180 @@
+/*
+    Copyright (C) 2000 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+    $Id$
+*/
+
+#ifndef __ardour_mixer_ui_h__
+#define __ardour_mixer_ui_h__
+
+#include <list>
+
+#include <gtk--.h>
+
+#include <ardour/ardour.h>
+#include <ardour/stateful.h>
+#include <ardour/io.h>
+
+#include "keyboard_target.h"
+#include "route_redirect_selection.h"
+#include "enums.h"
+
+namespace ARDOUR {
+	class Route;
+	class RouteGroup;
+	class Session;
+	class DiskStream;
+	class AudioEngine;
+};
+
+class MixerStrip;
+class PluginSelector;
+
+class Mixer_UI : public Gtk::Window, public KeyboardTarget
+{
+  public:
+	Mixer_UI (ARDOUR::AudioEngine&);
+	~Mixer_UI();
+
+	void connect_to_session (ARDOUR::Session *);
+	
+	PluginSelector&  plugin_selector() { return *_plugin_selector; }
+
+	void  set_strip_width (Width);
+	Width get_strip_width () const { return _strip_width; }
+
+	void unselect_strip_in_display (MixerStrip*);
+	void select_strip_in_display (MixerStrip*);
+
+	XMLNode& get_state (void);
+	int set_state (const XMLNode& );
+
+	void show_window ();
+
+	void ensure_float (Gtk::Window&);
+
+	RouteRedirectSelection& selection() { return _selection; }
+	
+  private:
+	ARDOUR::AudioEngine&     engine;
+	ARDOUR::Session         *session;
+	
+	Gtk::HBox                global_hpacker;
+	Gtk::VBox                global_vpacker;
+	Gtk::ScrolledWindow      scroller;
+	Gtk::EventBox            scroller_base;
+	Gtk::HBox                scroller_hpacker;
+	Gtk::VBox                mixer_scroller_vpacker;
+	Gtk::VBox                list_vpacker;
+	Gtk::CList               track_display_list;
+	Gtk::CList               group_list;
+	Gtk::Label               group_list_button_label;
+	Gtk::Button              group_list_button;
+	Gtk::ScrolledWindow      track_display_scroller;
+	Gtk::ScrolledWindow      group_list_scroller;
+	Gtk::VBox		 group_list_vbox;
+	Gtk::Frame 		 track_display_frame;
+	Gtk::Frame		 group_list_frame;
+	Gtk::VPaned		 rhs_pane1;
+	Gtk::VPaned		 rhs_pane2;
+	Gtk::HBox                strip_packer;
+	Gtk::HBox                out_packer;
+	Gtk::HPaned		 list_hpane;
+
+	void pane_allocation_handler (GtkAllocation*, Gtk::Paned*);
+	
+	list<MixerStrip *> strips;
+
+	gint strip_scroller_button_release (GdkEventButton*);
+
+	void add_strip (ARDOUR::Route*);
+	void remove_strip (MixerStrip *);
+
+	void show_strip (MixerStrip *);
+	void hide_strip (MixerStrip *);
+
+	void hide_all_strips (bool with_select);
+	void unselect_all_strips();
+	void select_all_strips ();
+	void unselect_all_audiotrack_strips ();
+	void select_all_audiotrack_strips ();
+	void unselect_all_audiobus_strips ();
+	void select_all_audiobus_strips ();
+
+	void follow_strip_selection ();
+
+	gint start_updating ();
+	gint stop_updating ();
+
+	void disconnect_from_session ();
+	
+	SigC::Connection screen_update_connection;
+	void update_strips ();
+	SigC::Connection fast_screen_update_connection;
+	void fast_update_strips ();
+
+	void snapshot_display_selected (gint row, gint col, GdkEvent* ev);
+
+	void track_display_selected (gint row, gint col, GdkEvent *ev);
+	void track_display_unselected (gint row, gint col, GdkEvent *ev);
+	void queue_track_display_reordered (gint row, gint col);
+	gint track_display_reordered ();
+	void track_name_changed (MixerStrip *);
+
+	void group_selected (gint row, gint col, GdkEvent *ev);
+	void group_unselected (gint row, gint col, GdkEvent *ev);
+	gint group_list_button_press_event (GdkEventButton *);
+	void group_list_button_clicked();
+	void new_mix_group ();
+	void add_mix_group (ARDOUR::RouteGroup *);
+
+	Gtk::Menu *track_menu;
+	void track_column_click (gint);
+	void build_track_menu ();
+
+	PluginSelector    *_plugin_selector;
+
+	void strip_name_changed (void *src, MixerStrip *);
+
+	static GdkPixmap *check_pixmap;
+	static GdkBitmap *check_mask;
+	static GdkPixmap *empty_pixmap;
+	static GdkBitmap *empty_mask;
+
+	void group_flags_changed (void *src, ARDOUR::RouteGroup *);
+
+	/* snapshots */
+	
+	Gtk::CList          snapshot_display;
+	Gtk::ScrolledWindow snapshot_display_scroller;
+
+	void       redisplay_snapshots();
+	void       session_state_saved (string);
+
+	gint strip_button_release_event (GdkEventButton*, MixerStrip*);
+
+	RouteRedirectSelection _selection;
+
+	Width _strip_width;
+
+	static const int32_t default_width = -1;
+	static const int32_t default_height = 765;
+};
+
+#endif /* __ardour_mixer_ui_h__ */
+
+
