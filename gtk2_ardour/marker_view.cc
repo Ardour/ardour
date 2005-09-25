@@ -18,7 +18,7 @@
     $Id$
 */
 
-#include <gtk--.h>
+#include <gtkmm.h>
 
 #include "imageframe_time_axis.h"
 #include "imageframe_view.h"
@@ -27,9 +27,9 @@
 #include "marker_view.h"
 
 using namespace ARDOUR ;
-using namespace SigC;
+using namespace sigc;
 
-SigC::Signal1<void,MarkerView*> MarkerView::GoingAway;
+sigc::signal<void,MarkerView*> MarkerView::GoingAway;
 
 //---------------------------------------------------------------------------------------//
 // Constructor / Desctructor

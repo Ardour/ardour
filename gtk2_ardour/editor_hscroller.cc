@@ -68,21 +68,21 @@ Editor::hscroll_slider_expose (GdkEventExpose *ev)
 
 	gdk_rectangle_intersect (&ev->area, &bar_rect, &draw_rect);
 
-	gtk_paint_box (edit_hscroll_slider.get_style()->gtkobj(),
+	gtk_paint_box (edit_hscroll_slider.get_style()->gobj(),
 		       edit_hscroll_slider.get_window(),
 		       GTK_STATE_ACTIVE, 
-		       GTK_SHADOW_IN, 
+		       Gtk::SHADOW_IN, 
 		       &ev->area, 
-		       GTK_WIDGET(edit_hscroll_slider.gtkobj()),
+		       GTK_WIDGET(edit_hscroll_slider.gobj()),
 		       "trough",
 		       0, 0, -1, -1);
 
-	gtk_paint_box (edit_hscroll_slider.get_style()->gtkobj(),
+	gtk_paint_box (edit_hscroll_slider.get_style()->gobj(),
 		       edit_hscroll_slider.get_window(),
-		       GTK_STATE_NORMAL, 
-		       GTK_SHADOW_OUT, 
+		       Gtk::STATE_NORMAL, 
+		       Gtk::SHADOW_OUT, 
 		       &draw_rect,
-		       GTK_WIDGET(edit_hscroll_slider.gtkobj()),
+		       GTK_WIDGET(edit_hscroll_slider.gobj()),
 		       "hscale",
 		       bar_rect.x, bar_rect.y, bar_rect.width, bar_rect.height);
 

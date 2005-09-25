@@ -23,7 +23,7 @@
 
 #include <list>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 
 #include <ardour/ardour.h>
 #include <ardour/stateful.h>
@@ -114,14 +114,14 @@ class RouteParams_UI : public ArdourDialog
 	RouteRedirectSelection  _rr_selection;
 
 	ARDOUR::Route           *_route;
-	SigC::Connection            _route_conn;
-	SigC::Connection            _route_ds_conn;
+	sigc::connection            _route_conn;
+	sigc::connection            _route_ds_conn;
 
 	ARDOUR::Redirect       * _pre_redirect;
-	SigC::Connection            _pre_plugin_conn;
+	sigc::connection            _pre_plugin_conn;
 
 	ARDOUR::Redirect       * _post_redirect;
-	SigC::Connection            _post_plugin_conn;
+	sigc::connection            _post_plugin_conn;
 	
 	
 	enum ConfigView {
@@ -173,7 +173,7 @@ class RouteParams_UI : public ArdourDialog
 	void update_title ();
 	//void unselect_all_redirects ();
 
-	SigC::Connection update_connection;
+	sigc::connection update_connection;
 	void update_views ();
 
 	void start_updating ();

@@ -21,7 +21,7 @@
 #define __ardour_dialog_h__
 
 #include <ardour/ardour.h>
-#include <gtk--/window.h>
+#include <gtkmm/window.h>
 
 #include "keyboard_target.h"
 

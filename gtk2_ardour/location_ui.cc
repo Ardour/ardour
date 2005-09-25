@@ -21,8 +21,8 @@
 #include <cmath>
 #include <cstdlib>
 
-#include <gtkmmext/utils.h>
-#include <gtkmmext/stop_signal.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/stop_signal.h>
 
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
@@ -39,7 +39,7 @@
 
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 
 LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	: location(0), session(0),
@@ -82,20 +82,20 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
 
 	isrc_label.set_text ("ISRC: ");
-	isrc_label.set_usize (30, -1);
+	isrc_label.set_size_request (30, -1);
 	performer_label.set_text ("Performer: ");
-	performer_label.set_usize (60, -1);
+	performer_label.set_size_request (60, -1);
 	composer_label.set_text ("Composer: ");
-	composer_label.set_usize (60, -1);
+	composer_label.set_size_request (60, -1);
 
-	isrc_entry.set_usize (112, -1);
+	isrc_entry.set_size_request (112, -1);
 	isrc_entry.set_max_length(12);
 	isrc_entry.set_editable (true);
 
-	performer_entry.set_usize (100, -1);
+	performer_entry.set_size_request (100, -1);
 	performer_entry.set_editable (true);
 
-	composer_entry.set_usize (100, -1);
+	composer_entry.set_size_request (100, -1);
 	composer_entry.set_editable (true);
 
 	cd_track_details_hbox.pack_start (isrc_label, false, false);
@@ -108,16 +108,16 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	cd_track_details_hbox.pack_start (composer_entry, true, true);
 
 	isrc_entry.changed.connect (slot (*this, &LocationEditRow::isrc_entry_changed)); 
-	isrc_entry.focus_in_event.connect (slot (*this, &LocationEditRow::entry_focus_event));
-	isrc_entry.focus_out_event.connect (slot (*this, &LocationEditRow::entry_focus_event));
+	isrc_entry.signal_focus_in_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
+	isrc_entry.signal_focus_out_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
 
 	performer_entry.changed.connect (slot (*this, &LocationEditRow::performer_entry_changed));
-	performer_entry.focus_in_event.connect (slot (*this, &LocationEditRow::entry_focus_event));
-	performer_entry.focus_out_event.connect (slot (*this, &LocationEditRow::entry_focus_event));
+	performer_entry.signal_focus_in_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
+	performer_entry.signal_focus_out_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
 
 	composer_entry.changed.connect (slot (*this, &LocationEditRow::composer_entry_changed));
-	composer_entry.focus_in_event.connect (slot (*this, &LocationEditRow::entry_focus_event));
-	composer_entry.focus_out_event.connect (slot (*this, &LocationEditRow::entry_focus_event));
+	composer_entry.signal_focus_in_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
+	composer_entry.signal_focus_out_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
 
 	scms_check_button.toggled.connect(slot (*this, &LocationEditRow::scms_toggled));
 	preemph_check_button.toggled.connect(slot (*this, &LocationEditRow::preemph_toggled));
@@ -153,9 +153,9 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 //	item_table.attach (length_clock, 3, 4, 0, 1, 0, 0, 4, 0);
 	length_clock.ValueChanged.connect (bind ( slot (*this, &LocationEditRow::clock_changed), LocLength));
 
-//	item_table.attach (cd_check_button, 4, 5, 0, 1, 0, GTK_FILL, 4, 0);
-//	item_table.attach (hide_check_button, 5, 6, 0, 1, 0, GTK_FILL, 4, 0);
-//	item_table.attach (remove_button, 7, 8, 0, 1, 0, GTK_FILL, 4, 0);
+//	item_table.attach (cd_check_button, 4, 5, 0, 1, 0, Gtk::FILL, 4, 0);
+//	item_table.attach (hide_check_button, 5, 6, 0, 1, 0, Gtk::FILL, 4, 0);
+//	item_table.attach (remove_button, 7, 8, 0, 1, 0, Gtk::FILL, 4, 0);
 	
 	cd_check_button.toggled.connect(slot (*this, &LocationEditRow::cd_toggled));
 	hide_check_button.toggled.connect(slot (*this, &LocationEditRow::hide_toggled));
@@ -218,7 +218,7 @@ LocationEditRow::set_location (Location *loc)
 	if (!location) return;
 
 	if (!hide_check_button.get_parent()) {
-		item_table.attach (hide_check_button, 6, 7, 0, 1, 0, GTK_FILL, 4, 0);
+		item_table.attach (hide_check_button, 6, 7, 0, 1, 0, Gtk::FILL, 4, 0);
 	}
 	hide_check_button.set_active (location->is_hidden());
 	
@@ -226,10 +226,10 @@ LocationEditRow::set_location (Location *loc)
 		// use label instead of entry
 
 		name_label.set_text (location->name());
-		name_label.set_usize (80, -1);
+		name_label.set_size_request (80, -1);
 
 		if (!name_label.get_parent()) {
-			item_table.attach (name_label, 1, 2, 0, 1, 0, GTK_FILL, 4, 0);
+			item_table.attach (name_label, 1, 2, 0, 1, 0, Gtk::FILL, 4, 0);
 		}
 		
 		name_label.show();
@@ -237,22 +237,22 @@ LocationEditRow::set_location (Location *loc)
 	} else {
 
 		name_entry.set_text (location->name());
-		name_entry.set_usize (100, -1);
+		name_entry.set_size_request (100, -1);
 		name_entry.set_editable (true);
 		name_entry.changed.connect (slot (*this, &LocationEditRow::name_entry_changed));  
-		name_entry.focus_in_event.connect (slot (*this, &LocationEditRow::entry_focus_event));
-		name_entry.focus_out_event.connect (slot (*this, &LocationEditRow::entry_focus_event));
+		name_entry.signal_focus_in_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
+		name_entry.signal_focus_out_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
 
 		if (!name_entry.get_parent()) {
-			item_table.attach (name_entry, 1, 2, 0, 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 4, 0);
+			item_table.attach (name_entry, 1, 2, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL, 4, 0);
 		}
 		name_entry.show();
 
 		if (!cd_check_button.get_parent()) {
-			item_table.attach (cd_check_button, 5, 6, 0, 1, 0, GTK_FILL, 4, 0);
+			item_table.attach (cd_check_button, 5, 6, 0, 1, 0, Gtk::FILL, 4, 0);
 		}
 		if (!remove_button.get_parent()) {
-			item_table.attach (remove_button, 7, 8, 0, 1, 0, GTK_FILL, 4, 0);
+			item_table.attach (remove_button, 7, 8, 0, 1, 0, Gtk::FILL, 4, 0);
 		}
 
 		/* XXX i can't find a way to hide the button without messing up 
@@ -449,7 +449,7 @@ LocationEditRow::cd_toggled ()
 	  }
 	  
 	  if(!cd_track_details_hbox.get_parent()) {
-	    item_table.attach (cd_track_details_hbox, 1, 8, 1, 2, GTK_FILL | GTK_EXPAND, 0, 4, 0);
+	    item_table.attach (cd_track_details_hbox, 1, 8, 1, 2, Gtk::FILL | Gtk::EXPAND, 0, 4, 0);
 	  }
 	  // item_table.resize(2, 7);
 	  cd_track_details_hbox.show_all();
@@ -613,8 +613,8 @@ LocationUI::LocationUI ()
 	location_rows.set_name("LocationLocRows");
 	location_rows_scroller.add_with_viewport (location_rows);
 	location_rows_scroller.set_name ("LocationLocRowsScroller");
-	location_rows_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	location_rows_scroller.set_usize (-1, 130);
+	location_rows_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	location_rows_scroller.set_size_request (-1, 130);
 
 	loc_frame_box.set_spacing (5);
 	loc_frame_box.set_border_width (5);
@@ -634,8 +634,8 @@ LocationUI::LocationUI ()
 	range_rows.set_name("LocationRangeRows");
 	range_rows_scroller.add_with_viewport (range_rows);
 	range_rows_scroller.set_name ("LocationRangeRowsScroller");
-	range_rows_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	range_rows_scroller.set_usize (-1, 130);
+	range_rows_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	range_rows_scroller.set_size_request (-1, 130);
 	
 	range_frame_box.set_spacing (5);
 	range_frame_box.set_name("LocationFrameBox");
@@ -653,10 +653,10 @@ LocationUI::LocationUI ()
 	
 	location_hpacker.pack_start (location_vpacker, true, true);
 
-	add_location_button.clicked.connect (slot (*this, &LocationUI::add_new_location));
-	add_range_button.clicked.connect (slot (*this, &LocationUI::add_new_range));
+	add_location_button.signal_clicked().connect (slot (*this, &LocationUI::add_new_location));
+	add_range_button.signal_clicked().connect (slot (*this, &LocationUI::add_new_range));
 	
-	//add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_BUTTON_RELEASE_MASK);
+	//add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	
 }

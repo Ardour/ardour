@@ -26,7 +26,7 @@
 #include "utils.h"
 #include "editor.h"
 
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
 

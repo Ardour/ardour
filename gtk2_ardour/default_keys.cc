@@ -18,7 +18,7 @@
     $Id$
 */
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <sigc++/bind.h>
 #include <pbd/error.h>
 
@@ -26,9 +26,9 @@
 #include "keyboard_target.h"
 
 using namespace ARDOUR;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 
 void
 ARDOUR_UI::install_keybindings ()

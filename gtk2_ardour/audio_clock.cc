@@ -20,7 +20,7 @@
 
 #include <cstdio> // for sprintf
 #include <cmath>
-#include <gtkmmext/utils.h>
+#include <gtkmm2ext/utils.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -33,7 +33,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 using namespace Gtk;
 
 const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
@@ -164,7 +164,7 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 	b1.set_name (name);
 	b2.set_name (name);
 
-	clock_frame.set_shadow_type (GTK_SHADOW_IN);
+	clock_frame.set_shadow_type (Gtk::SHADOW_IN);
 	clock_frame.set_name ("BaseFrame");
 
 	clock_frame.add (clock_base);
@@ -185,7 +185,7 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 	   stays disabled.
 	*/
 
-	clock_base.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
+	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	clock_base.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), SMPTE_Hours));
 
 	if (editable) {
@@ -198,31 +198,31 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 void
 AudioClock::setup_events ()
 {
-	clock_base.set_flags (GTK_CAN_FOCUS);
+	clock_base.set_flags (Gtk::CAN_FOCUS);
 
-	hours_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
-	minutes_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
-	seconds_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
-	frames_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
-	bars_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
-	beats_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
-	ticks_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
-	ms_hours_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
-	ms_minutes_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
-	ms_seconds_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
-	audio_frames_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_FOCUS_CHANGE_MASK|GDK_POINTER_MOTION_MASK);
+	hours_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	minutes_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	seconds_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	frames_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	bars_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	beats_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	ticks_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	ms_hours_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	ms_minutes_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	ms_seconds_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	audio_frames_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
 
-	hours_ebox.set_flags (GTK_CAN_FOCUS);
-	minutes_ebox.set_flags (GTK_CAN_FOCUS);
-	seconds_ebox.set_flags (GTK_CAN_FOCUS);
-	frames_ebox.set_flags (GTK_CAN_FOCUS);
-	audio_frames_ebox.set_flags (GTK_CAN_FOCUS);
-	bars_ebox.set_flags (GTK_CAN_FOCUS);
-	beats_ebox.set_flags (GTK_CAN_FOCUS);
-	ticks_ebox.set_flags (GTK_CAN_FOCUS);
-	ms_hours_ebox.set_flags (GTK_CAN_FOCUS);
-	ms_minutes_ebox.set_flags (GTK_CAN_FOCUS);
-	ms_seconds_ebox.set_flags (GTK_CAN_FOCUS);
+	hours_ebox.set_flags (Gtk::CAN_FOCUS);
+	minutes_ebox.set_flags (Gtk::CAN_FOCUS);
+	seconds_ebox.set_flags (Gtk::CAN_FOCUS);
+	frames_ebox.set_flags (Gtk::CAN_FOCUS);
+	audio_frames_ebox.set_flags (Gtk::CAN_FOCUS);
+	bars_ebox.set_flags (Gtk::CAN_FOCUS);
+	beats_ebox.set_flags (Gtk::CAN_FOCUS);
+	ticks_ebox.set_flags (Gtk::CAN_FOCUS);
+	ms_hours_ebox.set_flags (Gtk::CAN_FOCUS);
+	ms_minutes_ebox.set_flags (Gtk::CAN_FOCUS);
+	ms_seconds_ebox.set_flags (Gtk::CAN_FOCUS);
 
 	hours_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), SMPTE_Hours));
 	minutes_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), SMPTE_Minutes));
@@ -272,40 +272,40 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), MS_Minutes));
 	ms_seconds_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), MS_Seconds));
 
-	hours_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Hours));
-	minutes_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Minutes));
-	seconds_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Seconds));
-	frames_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Frames));
-	audio_frames_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), AudioFrames));
-	bars_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), Bars));
-	beats_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), Beats));
-	ticks_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), Ticks));
-	ms_hours_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), MS_Hours));
-	ms_minutes_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), MS_Minutes));
-	ms_seconds_ebox.focus_in_event.connect (bind (slot (*this, &AudioClock::field_focus_in_event), MS_Seconds));
+	hours_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Hours));
+	minutes_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Minutes));
+	seconds_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Seconds));
+	frames_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Frames));
+	audio_frames_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), AudioFrames));
+	bars_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), Bars));
+	beats_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), Beats));
+	ticks_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), Ticks));
+	ms_hours_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), MS_Hours));
+	ms_minutes_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), MS_Minutes));
+	ms_seconds_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), MS_Seconds));
 
-	hours_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Hours));
-	minutes_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Minutes));
-	seconds_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Seconds));
-	frames_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Frames));
-	audio_frames_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), AudioFrames));
-	bars_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), Bars));
-	beats_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), Beats));
-	ticks_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), Ticks));
-	ms_hours_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), MS_Hours));
-	ms_minutes_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), MS_Minutes));
-	ms_seconds_ebox.focus_out_event.connect (bind (slot (*this, &AudioClock::field_focus_out_event), MS_Seconds));
+	hours_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Hours));
+	minutes_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Minutes));
+	seconds_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Seconds));
+	frames_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Frames));
+	audio_frames_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), AudioFrames));
+	bars_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), Bars));
+	beats_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), Beats));
+	ticks_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), Ticks));
+	ms_hours_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), MS_Hours));
+	ms_minutes_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), MS_Minutes));
+	ms_seconds_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), MS_Seconds));
 
-	Gtkmmext::set_usize_to_display_given_text (hours_label, "-88", 0, 2);
-	Gtkmmext::set_usize_to_display_given_text (minutes_label, "88", 0, 2);
-	Gtkmmext::set_usize_to_display_given_text (seconds_label, "88", 0, 2);
-	Gtkmmext::set_usize_to_display_given_text (frames_label, "88", 0, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-88", 0, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "88", 0, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "88", 0, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "88", 0, 2);
 
-	Gtkmmext::set_usize_to_display_given_text (bars_label, "-888", 0, 2);
-	Gtkmmext::set_usize_to_display_given_text (beats_label, "88", 0, 2);
-	Gtkmmext::set_usize_to_display_given_text (ticks_label, "8888", 0, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-888", 0, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "88", 0, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "8888", 0, 2);
 
-	Gtkmmext::set_usize_to_display_given_text (audio_frames_label, "4294967296", 0, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "4294967296", 0, 2);
 }
 
 void
@@ -701,49 +701,49 @@ AudioClock::field_focus_in_event (GdkEventFocus *ev, Field field)
 
 	switch (field) {
 	case SMPTE_Hours:
-		hours_ebox.set_flags (GTK_HAS_FOCUS);
+		hours_ebox.set_flags (Gtk::HAS_FOCUS);
 		hours_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 	case SMPTE_Minutes:
-		minutes_ebox.set_flags (GTK_HAS_FOCUS);
+		minutes_ebox.set_flags (Gtk::HAS_FOCUS);
 		minutes_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 	case SMPTE_Seconds:
-		seconds_ebox.set_flags (GTK_HAS_FOCUS);
+		seconds_ebox.set_flags (Gtk::HAS_FOCUS);
 		seconds_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 	case SMPTE_Frames:
-		frames_ebox.set_flags (GTK_HAS_FOCUS);
+		frames_ebox.set_flags (Gtk::HAS_FOCUS);
 		frames_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 
 	case AudioFrames:
-		audio_frames_ebox.set_flags (GTK_HAS_FOCUS);
+		audio_frames_ebox.set_flags (Gtk::HAS_FOCUS);
 		audio_frames_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 
 	case MS_Hours:
-		ms_hours_ebox.set_flags (GTK_HAS_FOCUS);
+		ms_hours_ebox.set_flags (Gtk::HAS_FOCUS);
 		ms_hours_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 	case MS_Minutes:
-		ms_minutes_ebox.set_flags (GTK_HAS_FOCUS);
+		ms_minutes_ebox.set_flags (Gtk::HAS_FOCUS);
 		ms_minutes_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 	case MS_Seconds:
-		ms_seconds_ebox.set_flags (GTK_HAS_FOCUS);
+		ms_seconds_ebox.set_flags (Gtk::HAS_FOCUS);
 		ms_seconds_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 	case Bars:
-		bars_ebox.set_flags (GTK_HAS_FOCUS);
+		bars_ebox.set_flags (Gtk::HAS_FOCUS);
 		bars_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 	case Beats:
-		beats_ebox.set_flags (GTK_HAS_FOCUS);
+		beats_ebox.set_flags (Gtk::HAS_FOCUS);
 		beats_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 	case Ticks:
-		ticks_ebox.set_flags (GTK_HAS_FOCUS);
+		ticks_ebox.set_flags (Gtk::HAS_FOCUS);
 		ticks_ebox.set_state (GTK_STATE_ACTIVE);
 		break;
 	}
@@ -759,51 +759,51 @@ AudioClock::field_focus_out_event (GdkEventFocus *ev, Field field)
 	switch (field) {
 
 	case SMPTE_Hours:
-		hours_ebox.unset_flags (GTK_HAS_FOCUS);
-		hours_ebox.set_state (GTK_STATE_NORMAL);
+		hours_ebox.unset_flags (Gtk::HAS_FOCUS);
+		hours_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 	case SMPTE_Minutes:
-		minutes_ebox.unset_flags (GTK_HAS_FOCUS);
-		minutes_ebox.set_state (GTK_STATE_NORMAL);
+		minutes_ebox.unset_flags (Gtk::HAS_FOCUS);
+		minutes_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 	case SMPTE_Seconds:
-		seconds_ebox.unset_flags (GTK_HAS_FOCUS);
-		seconds_ebox.set_state (GTK_STATE_NORMAL);
+		seconds_ebox.unset_flags (Gtk::HAS_FOCUS);
+		seconds_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 	case SMPTE_Frames:
-		frames_ebox.unset_flags (GTK_HAS_FOCUS);
-		frames_ebox.set_state (GTK_STATE_NORMAL);
+		frames_ebox.unset_flags (Gtk::HAS_FOCUS);
+		frames_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 
 	case AudioFrames:
-		audio_frames_ebox.unset_flags (GTK_HAS_FOCUS);
-		audio_frames_ebox.set_state (GTK_STATE_NORMAL);
+		audio_frames_ebox.unset_flags (Gtk::HAS_FOCUS);
+		audio_frames_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 
 	case MS_Hours:
-		ms_hours_ebox.unset_flags (GTK_HAS_FOCUS);
-		ms_hours_ebox.set_state (GTK_STATE_NORMAL);
+		ms_hours_ebox.unset_flags (Gtk::HAS_FOCUS);
+		ms_hours_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 	case MS_Minutes:
-		ms_minutes_ebox.unset_flags (GTK_HAS_FOCUS);
-		ms_minutes_ebox.set_state (GTK_STATE_NORMAL);
+		ms_minutes_ebox.unset_flags (Gtk::HAS_FOCUS);
+		ms_minutes_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 	case MS_Seconds:
-		ms_seconds_ebox.unset_flags (GTK_HAS_FOCUS);
-		ms_seconds_ebox.set_state (GTK_STATE_NORMAL);
+		ms_seconds_ebox.unset_flags (Gtk::HAS_FOCUS);
+		ms_seconds_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 
 	case Bars:
-		bars_ebox.unset_flags (GTK_HAS_FOCUS);
-		bars_ebox.set_state (GTK_STATE_NORMAL);
+		bars_ebox.unset_flags (Gtk::HAS_FOCUS);
+		bars_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 	case Beats:
-		beats_ebox.unset_flags (GTK_HAS_FOCUS);
-		beats_ebox.set_state (GTK_STATE_NORMAL);
+		beats_ebox.unset_flags (Gtk::HAS_FOCUS);
+		beats_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 	case Ticks:
-		ticks_ebox.unset_flags (GTK_HAS_FOCUS);
-		ticks_ebox.set_state (GTK_STATE_NORMAL);
+		ticks_ebox.unset_flags (Gtk::HAS_FOCUS);
+		ticks_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
 	}
 
@@ -906,7 +906,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 	
                 /* make absolutely sure that the pointer is grabbed */
 		gdk_pointer_grab(ev->window,FALSE ,
-				 GdkEventMask( GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |GDK_BUTTON_RELEASE_MASK), 
+				 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK), 
 				 NULL,NULL,ev->time);
 		dragging = true;
 		drag_accum = 0;

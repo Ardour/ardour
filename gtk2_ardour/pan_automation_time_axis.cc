@@ -22,7 +22,7 @@
 #include <ardour/route.h>
 #include <ardour/panner.h>
 
-#include <gtkmmext/popup.h>
+#include <gtkmm2ext/popup.h>
 
 #include "pan_automation_time_axis.h"
 #include "automation_line.h"
@@ -53,7 +53,7 @@ PanAutomationTimeAxisView::add_automation_event (GtkCanvasItem* item, GdkEvent* 
 
 	if (lines.size() > 1) {
 
-		Gtkmmext::PopUp* msg = new Gtkmmext::PopUp (GTK_WIN_POS_MOUSE, 5000, true);
+		Gtkmm2ext::PopUp* msg = new Gtkmm2ext::PopUp (Gtk::WIN_POS_MOUSE, 5000, true);
 		
 		msg->set_text (_("You can't graphically edit panning of more than stream"));
 		msg->touch ();

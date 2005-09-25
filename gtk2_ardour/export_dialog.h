@@ -20,7 +20,7 @@
 #ifndef __ardour_export_dialog_h__
 #define __ardour_export_dialog_h__
 
-#include <gtk--.h>
+#include <gtkmm.h>
 
 #include <ardour/export.h>
 #include "ardour_dialog.h"
@@ -98,7 +98,7 @@ class ExportDialog : public ArdourDialog
 
 	static void *_thread (void *arg);
 	gint progress_timeout ();
-	SigC::Connection progress_connection;
+	sigc::connection progress_connection;
 	void build_window ();
 	void end_dialog();
 	gint header_chosen (GdkEventAny *ignored);

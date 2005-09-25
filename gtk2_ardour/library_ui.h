@@ -26,9 +26,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <sigc++/signal_system.h>
-#include <gtk--.h>
-#include <gtkmmext/selector.h>
+#include <sigc++/signal.h>
+#include <gtkmm.h>
+#include <gtkmm2ext/selector.h>
 
 #include <ardour/region.h>
 
@@ -55,7 +55,7 @@ class SoundFileBox : public Gtk::VBox
 	SoundFileBox (string uri, bool metadata);
 	~SoundFileBox ();
 
-	SigC::Signal2<void, string, bool> file_chosen;
+	sigc::signal<void, string, bool> file_chosen;
 
   private:
 	string uri;
@@ -73,7 +73,7 @@ class SoundFileBox : public Gtk::VBox
 	Gtk::Label channels;
 	Gtk::Label samplerate;
 
-	Gtkmmext::Selector fields;
+	Gtkmm2ext::Selector fields;
 	string selected_field;
 
 	Gtk::Frame border_frame;
@@ -97,10 +97,10 @@ class SoundFileBox : public Gtk::VBox
 	void add_field_clicked ();
 	void remove_field_clicked ();
 
-	void field_selected (Gtkmmext::Selector *selector, 
-						 Gtkmmext::SelectionResult *re);
-	void field_chosen (Gtkmmext::Selector *selector, 
-						 Gtkmmext::SelectionResult *re);
+	void field_selected (Gtkmm2ext::Selector *selector, 
+						 Gtkmm2ext::SelectionResult *re);
+	void field_chosen (Gtkmm2ext::Selector *selector, 
+						 Gtkmm2ext::SelectionResult *re);
 	void audition_status_changed (bool state);
 };
 
@@ -110,7 +110,7 @@ class SearchSounds : public ArdourDialog
 	SearchSounds ();
 	~SearchSounds ();
 
-	SigC::Signal2<void, string, bool> file_chosen;
+	sigc::signal<void, string, bool> file_chosen;
 
   private:
 	Gtk::Button find_btn;
@@ -118,7 +118,7 @@ class SearchSounds : public ArdourDialog
 	Gtk::RadioButton and_rbtn;
 	Gtk::RadioButton or_rbtn;
 
-	Gtkmmext::Selector fields;
+	Gtkmm2ext::Selector fields;
 	string selected_field;
 
 	Gtk::VBox main_box;
@@ -129,8 +129,8 @@ class SearchSounds : public ArdourDialog
 	void fields_refiller (Gtk::CList &clist);
 	void setup_fields ();
 
-	void field_selected (Gtkmmext::Selector *selector, 
-						 Gtkmmext::SelectionResult *re);
+	void field_selected (Gtkmm2ext::Selector *selector, 
+						 Gtkmm2ext::SelectionResult *re);
 
 	void find_btn_clicked ();
 
@@ -143,7 +143,7 @@ class SearchResults : public ArdourDialog
 	SearchResults (map<string,string> field_values, bool and_search);
 	~SearchResults ();
 
-	SigC::Signal2<void, string, bool> file_chosen;
+	sigc::signal<void, string, bool> file_chosen;
 
   private:
 	map<string,string> search_info;
@@ -159,14 +159,14 @@ class SearchResults : public ArdourDialog
   
 	SoundFileBox* info_box;
 
-	Gtkmmext::Selector results;
+	Gtkmm2ext::Selector results;
 	static void _results_refiller (Gtk::CList &list, void* arg);
 	void results_refiller (Gtk::CList &clist);
 
 	void import_clicked ();
 
-	void result_chosen (Gtkmmext::Selector *selector, 
-						 Gtkmmext::SelectionResult *re);
+	void result_chosen (Gtkmm2ext::Selector *selector, 
+						 Gtkmm2ext::SelectionResult *re);
 };
 
 class LibraryTree : public Gtk::VBox
@@ -175,11 +175,11 @@ class LibraryTree : public Gtk::VBox
 	LibraryTree ();
 	~LibraryTree ();
 
-	SigC::Signal2<void, string, bool> file_chosen;
-	SigC::Signal0<void> group_selected;
-	SigC::Signal1<void, string> member_selected;
-	SigC::Signal0<void> member_deselected;
-	SigC::Signal0<void> deselected;
+	sigc::signal<void, string, bool> file_chosen;
+	sigc::signal<void> group_selected;
+	sigc::signal<void, string> member_selected;
+	sigc::signal<void> member_deselected;
+	sigc::signal<void> deselected;
 
 	list<string> selection;
 	void clear_selection ();
@@ -236,10 +236,10 @@ class SoundFileBrowser : public Gtk::VBox {
 	SoundFileBrowser ();
 	~SoundFileBrowser ();
   
-	SigC::Signal0<void> group_selected;
-	SigC::Signal1<void, string> member_selected;
-	SigC::Signal0<void> member_deselected;
-	SigC::Signal0<void> deselected;
+	sigc::signal<void> group_selected;
+	sigc::signal<void, string> member_selected;
+	sigc::signal<void> member_deselected;
+	sigc::signal<void> deselected;
   
 	list<RowTaggedString> selection;
 	void clear_selection ();
@@ -272,7 +272,7 @@ class SoundFileSelector : public ArdourDialog {
 	void get_result (vector<string>& paths, bool& split);
 	void hide_import_stuff();
 
-	SigC::Signal2<void,vector<string>,bool> Action;
+	sigc::signal<void,vector<string>,bool> Action;
 	
   private:
 	bool multiable;

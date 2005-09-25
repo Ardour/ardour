@@ -273,7 +273,7 @@ AutomationLine::queue_reset ()
 {
 	if (!update_pending) {
 		update_pending = true;
-		Gtkmmext::UI::instance()->call_slot (slot (*this, &AutomationLine::reset));
+		Gtkmm2ext::UI::instance()->call_slot (slot (*this, &AutomationLine::reset));
 	}
 }
 

@@ -31,8 +31,8 @@
 #include <pbd/basename.h>
 #include <pbd/pthread_utils.h>
 
-#include <gtkmmext/utils.h>
-#include <gtkmmext/choice.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/choice.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
@@ -68,7 +68,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 using namespace Gtk;
 using namespace Editing;
 
@@ -183,7 +183,7 @@ Do you really want to destroy %1 ?"),
 
 	choices.push_back (_("No, do nothing."));
 
-	Gtkmmext::Choice prompter (prompt, choices);
+	Gtkmm2ext::Choice prompter (prompt, choices);
 
 	prompter.chosen.connect (Gtk::Main::quit.slot());
 	prompter.show_all ();
@@ -1743,8 +1743,8 @@ Editor::rename_region ()
 
 	dialog.set_title (_("ardour: rename region"));
 	dialog.set_name ("RegionRenameWindow");
-	dialog.set_usize (300, -1);
-	dialog.set_position (GTK_WIN_POS_MOUSE);
+	dialog.set_size_request (300, -1);
+	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 
 	dialog.get_vbox()->set_border_width (10);
@@ -1759,8 +1759,8 @@ Editor::rename_region ()
 	region_renamed = false;
 
 	entry.activate.connect (bind (slot (*this, &Editor::rename_region_finished), true));
-	ok_button.clicked.connect (bind (slot (*this, &Editor::rename_region_finished), true));
-	cancel_button.clicked.connect (bind (slot (*this, &Editor::rename_region_finished), false));
+	ok_button.signal_clicked().connect (bind (slot (*this, &Editor::rename_region_finished), true));
+	cancel_button.signal_clicked().connect (bind (slot (*this, &Editor::rename_region_finished), false));
 
 	/* recurse */
 
@@ -1832,7 +1832,7 @@ Editor::build_interthread_progress_window ()
 
 	interthread_cancel_button.add (interthread_cancel_label);
 
-	interthread_cancel_button.clicked.connect (slot (*this, &Editor::interthread_cancel_clicked));
+	interthread_cancel_button.signal_clicked().connect (slot (*this, &Editor::interthread_cancel_clicked));
 	
 	interthread_progress_window->set_modal (true);
 	interthread_progress_window->set_default_size (200, 100);
@@ -1893,7 +1893,7 @@ Editor::import_audio (bool as_tracks)
 	}
 
 	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	SigC::Connection c;
+	sigc::connection c;
 	string str;
 
 	if (as_tracks) {
@@ -1917,7 +1917,7 @@ Editor::catch_new_audio_region (AudioRegion* ar)
 void
 Editor::do_import (vector<string> paths, bool split, bool as_tracks)
 {
-	SigC::Connection c;
+	sigc::connection c;
 	
 	/* SFDB sets "multichan" to true to indicate "split channels"
 	   so reverse the setting to match the way libardour
@@ -1931,7 +1931,7 @@ Editor::do_import (vector<string> paths, bool split, bool as_tracks)
 	}
 	
 	interthread_progress_window->set_title (_("ardour: audio import in progress"));
-	interthread_progress_window->set_position (GTK_WIN_POS_MOUSE);
+	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_window->show_all ();
 	interthread_progress_bar.set_percentage (0.0f);
 	interthread_cancel_label.set_text (_("Cancel Import"));
@@ -2000,7 +2000,7 @@ Editor::reject_because_rate_differs (string path, SF_INFO& finfo, string action,
 			choices.push_back (_("Cancel"));
 		}
 
-		Gtkmmext::Choice rate_choice (
+		Gtkmm2ext::Choice rate_choice (
 			compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
 			choices);
 
@@ -2034,7 +2034,7 @@ Editor::embed_audio ()
 	}
 
 	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	SigC::Connection c = sfdb.Action.connect (slot (*this, &Editor::do_embed_sndfiles));
+	sigc::connection c = sfdb.Action.connect (slot (*this, &Editor::do_embed_sndfiles));
 
 	sfdb.run (_("Add to External Region list"), true);
 
@@ -2162,7 +2162,7 @@ void
 Editor::insert_sndfile (bool as_tracks)
 {
 	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	SigC::Connection c;
+	sigc::connection c;
 	string str;
 
 	if (as_tracks) {
@@ -2907,7 +2907,7 @@ Editor::freeze_route ()
 	}
 	
 	interthread_progress_window->set_title (_("ardour: freeze"));
-	interthread_progress_window->set_position (GTK_WIN_POS_MOUSE);
+	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_window->show_all ();
 	interthread_progress_bar.set_percentage (0.0f);
 	interthread_progress_label.set_text ("");
@@ -3434,7 +3434,7 @@ Editor::remove_last_capture ()
 		choices.push_back (_("Yes, destroy it."));
 		choices.push_back (_("No, do nothing."));
 
-		Gtkmmext::Choice prompter (prompt, choices);
+		Gtkmm2ext::Choice prompter (prompt, choices);
 
 		prompter.chosen.connect (Gtk::Main::quit.slot());
 		prompter.show_all ();

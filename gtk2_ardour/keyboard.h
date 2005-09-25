@@ -24,7 +24,7 @@
 #include <vector>
 #include <string>
 
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 #include <gtk/gtk.h>
 
 #include <ardour/types.h>
@@ -36,7 +36,7 @@ using std::string;
 class KeyboardTarget;
 class ArdourDialog;
 
-class Keyboard : public SigC::Object, Stateful
+class Keyboard : public sigc::trackable, Stateful
 {
   public:
 	Keyboard ();

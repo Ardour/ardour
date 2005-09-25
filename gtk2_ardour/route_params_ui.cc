@@ -21,8 +21,8 @@
 #include <algorithm>
 
 #include <pbd/lockmonitor.h>
-#include <gtkmmext/utils.h>
-#include <gtkmmext/stop_signal.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/stop_signal.h>
 
 #include <ardour/session.h>
 #include <ardour/session_route.h>
@@ -53,7 +53,7 @@
 
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 
 static const gchar *route_display_titles[] = { N_("Tracks/Buses"), 0 };
 static const gchar *pre_display_titles[] = { N_("Pre Redirects"), 0 };
@@ -87,15 +87,15 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	
 	route_select_list.column_titles_active();
 	route_select_list.set_name ("RouteParamsListDisplay");
-	route_select_list.set_shadow_type (GTK_SHADOW_IN);
+	route_select_list.set_shadow_type (Gtk::SHADOW_IN);
 	route_select_list.set_selection_mode (GTK_SELECTION_SINGLE);
 	route_select_list.set_reorderable (false);
-	route_select_list.set_usize (75, -1);
+	route_select_list.set_size_request (75, -1);
 	route_select_scroller.add (route_select_list);
-	route_select_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	route_select_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	route_select_frame.set_name("RouteSelectBaseFrame");
-	route_select_frame.set_shadow_type (GTK_SHADOW_IN);
+	route_select_frame.set_shadow_type (Gtk::SHADOW_IN);
 	route_select_frame.add(route_select_scroller);
 
 	list_vpacker.pack_start (route_select_frame, true, true);
@@ -112,7 +112,7 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	
 	// changeable area
 	route_param_frame.set_name("RouteParamsBaseFrame");
-	route_param_frame.set_shadow_type (GTK_SHADOW_IN);
+	route_param_frame.set_shadow_type (Gtk::SHADOW_IN);
 	
 	
 	route_hpacker.pack_start (notebook, true, true);
@@ -144,7 +144,7 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	route_select_list.click_column.connect (slot (*this, &RouteParams_UI::show_track_menu));
 
 
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK|GDK_BUTTON_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
 	
 	_plugin_selector = new PluginSelector (PluginManager::the_manager());
 	_plugin_selector->delete_event.connect (bind (slot (just_hide_it), 

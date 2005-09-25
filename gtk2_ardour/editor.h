@@ -31,12 +31,12 @@
 
 #include <sndfile.h>
 
-#include <gtk--.h>
-#include <gtk--/layout.h>
+#include <gtkmm.h>
+#include <gtkmm/layout.h>
 #include <gtk-canvas.h>
 #include <gtk-canvas/gtk-canvas-util.h>
-#include <gtkmmext/selector.h>
-#include <gtkmmext/click_box.h>
+#include <gtkmm2ext/selector.h>
+#include <gtkmm2ext/click_box.h>
 
 #include <ardour/stateful.h>
 #include <ardour/session.h>
@@ -53,7 +53,7 @@
 #include "enums.h"
 #include "region_selection.h"
 
-namespace Gtkmmext {
+namespace Gtkmm2ext {
 	class TearOff;
 }
 
@@ -786,13 +786,13 @@ class Editor : public PublicEditor
 
 	static void build_cursors ();
 
-	SigC::Connection scroll_connection;
+	sigc::connection scroll_connection;
 	jack_nframes_t last_update_frame;
 	void center_screen (jack_nframes_t);
 	void center_screen_internal (jack_nframes_t, float);
 	
 	void update_current_screen ();
-	SigC::Connection slower_update_connection;
+	sigc::connection slower_update_connection;
 	void update_slower ();
 	
 	gint show_track_context_menu (GdkEventButton *);
@@ -946,7 +946,7 @@ class Editor : public PublicEditor
 	Gtk::ProgressBar interthread_progress_bar;
 	Gtk::Button interthread_cancel_button;
 	Gtk::Label interthread_cancel_label;
-	SigC::Connection  interthread_progress_connection;
+	sigc::connection  interthread_progress_connection;
 	void interthread_cancel_clicked ();
 	void build_interthread_progress_window ();
 	ARDOUR::InterThreadInfo* current_interthread_info;
@@ -1214,7 +1214,7 @@ class Editor : public PublicEditor
 	void set_edit_cursor (GdkEvent* event);
 	void set_playhead_cursor (GdkEvent* event);
 
-	void kbd_driver (SigC::Slot1<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
+	void kbd_driver (sigc::slot<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
 	void kbd_set_playhead_cursor ();
 	void kbd_set_edit_cursor ();
 	void kbd_split ();
@@ -1343,7 +1343,7 @@ class Editor : public PublicEditor
 	Gtk::Label               toolbar_selection_cursor_label;
 	
 	Gtk::Table               mouse_mode_button_table;
-	Gtkmmext::TearOff*       mouse_mode_tearoff;
+	Gtkmm2ext::TearOff*       mouse_mode_tearoff;
 	Gtk::ToggleButton        mouse_select_button;
 	Gtk::ToggleButton        mouse_move_button;
 	Gtk::ToggleButton        mouse_gain_button;
@@ -1395,7 +1395,7 @@ class Editor : public PublicEditor
 	
 	void setup_toolbar ();
 
-	Gtkmmext::TearOff*       tools_tearoff;
+	Gtkmm2ext::TearOff*       tools_tearoff;
 	Gtk::HBox                toolbar_hbox;
 	Gtk::EventBox            toolbar_base;
 	Gtk::Frame               toolbar_frame;
@@ -1689,8 +1689,8 @@ class Editor : public PublicEditor
 	    TimeStretchDialog (Editor& e);
 
 	    gint update_progress ();
-	    SigC::Connection first_cancel;
-	    SigC::Connection first_delete;
+	    sigc::connection first_cancel;
+	    sigc::connection first_delete;
 	    void cancel_timestretch_in_progress ();
 	    gint delete_timestretch_in_progress (GdkEventAny*);
 	};
@@ -1794,14 +1794,14 @@ class Editor : public PublicEditor
 
 	int playlist_deletion_dialog (ARDOUR::Playlist*);
 
-	vector<SigC::Connection> session_connections;
+	vector<sigc::connection> session_connections;
 
 	/* tracking step changes of track height */
 
 	TimeAxisView* current_stepping_trackview;
 	struct timeval last_track_height_step_timestamp;
 	gint track_height_step_timeout();
-	SigC::Connection step_timeout;
+	sigc::connection step_timeout;
 
 	TimeAxisView* entered_track;
 	AudioRegionView* entered_regionview;

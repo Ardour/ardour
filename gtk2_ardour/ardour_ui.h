@@ -38,13 +38,13 @@
 #include <gtk-canvas.h>
 
 #include <pbd/xml++.h>
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/pix.h>
-#include <gtkmmext/spinner.h>
-#include <gtkmmext/pixmap_button.h>
-#include <gtkmmext/popup_selector.h>
-#include <gtkmmext/click_box.h>
-#include <gtkmmext/selector.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/pix.h>
+#include <gtkmm2ext/spinner.h>
+#include <gtkmm2ext/pixmap_button.h>
+#include <gtkmm2ext/popup_selector.h>
+#include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/selector.h>
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 
@@ -66,7 +66,7 @@ class AddRouteDialog;
 class NewSessionDialog;
 class LocationUI;
 
-namespace Gtkmmext {
+namespace Gtkmm2ext {
 	class TearOff;
 };
 
@@ -83,7 +83,7 @@ namespace ALSA {
 
 #define FRAME_NAME "BaseFrame"
 
-class ARDOUR_UI : public Gtkmmext::UI
+class ARDOUR_UI : public Gtkmm2ext::UI
 {
   public:
 	ARDOUR_UI (int *argcp, char **argvp[], string rcfile);
@@ -152,10 +152,10 @@ class ARDOUR_UI : public Gtkmmext::UI
 
 	Gtk::Tooltips& tooltips() { return _tooltips; }
 
-	static SigC::Signal1<void,bool> Blink;
-	static SigC::Signal0<void>      RapidScreenUpdate;
-	static SigC::Signal0<void>      SuperRapidScreenUpdate;
-	static SigC::Signal1<void,jack_nframes_t> Clock;
+	static sigc::signal<void,bool> Blink;
+	static sigc::signal<void>      RapidScreenUpdate;
+	static sigc::signal<void>      SuperRapidScreenUpdate;
+	static sigc::signal<void,jack_nframes_t> Clock;
 
 	/* this is a helper function to centralize the (complex) logic for
 	   blinking rec-enable buttons.
@@ -219,7 +219,7 @@ class ARDOUR_UI : public Gtkmmext::UI
 
   private:
 	struct GlobalClickBox : public Gtk::VBox {
-	    Gtkmmext::ClickBox  *box;
+	    Gtkmm2ext::ClickBox  *box;
 	    Gtk::Frame      frame;
 	    Gtk::Label      label;
 	    vector<string> &strings;
@@ -230,11 +230,11 @@ class ARDOUR_UI : public Gtkmmext::UI
 	    GlobalClickBox (const string &str, vector<string> &vs)
 		    : strings (vs),
 		      adjustment (0, 0, vs.size() - 1, 1, 1, 0) {
-		    box = new Gtkmmext::ClickBox (&adjustment, "ClickButton");
+		    box = new Gtkmm2ext::ClickBox (&adjustment, "ClickButton");
 		    label.set_text (str);
 		    label.set_name ("GlobalButtonLabel");
 		    frame.add (*box);
-		    frame.set_shadow_type (GTK_SHADOW_IN);
+		    frame.set_shadow_type (Gtk::SHADOW_IN);
 		    pack_start (label);
 		    pack_start (frame);
 		    box->set_print_func (printer, this);
@@ -323,7 +323,7 @@ class ARDOUR_UI : public Gtkmmext::UI
   private:
 	Gtk::VBox     top_packer;
 
-	SigC::Connection clock_signal_connection;
+	sigc::connection clock_signal_connection;
 	void         update_clocks ();
 	void         start_clocking ();
 	void         stop_clocking ();
@@ -346,7 +346,7 @@ class ARDOUR_UI : public Gtkmmext::UI
 	void detach_tearoff (Gtk::Box* parent, Gtk::Widget* contents);
 	void reattach_tearoff (Gtk::Box* parent, Gtk::Widget* contents, int32_t order);
 
-	Gtkmmext::TearOff*       transport_tearoff;
+	Gtkmm2ext::TearOff*       transport_tearoff;
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_tearoff_hbox;
 	Gtk::HBox                transport_hbox;
@@ -529,9 +529,9 @@ class ARDOUR_UI : public Gtkmmext::UI
 	gint every_point_one_seconds ();
 	gint every_point_zero_one_seconds ();
 
-	SigC::Connection second_connection;
-	SigC::Connection point_one_second_connection;
-	SigC::Connection point_zero_one_second_connection;
+	sigc::connection second_connection;
+	sigc::connection point_one_second_connection;
+	sigc::connection point_zero_one_second_connection;
 
 	void diskstream_added (ARDOUR::DiskStream*);
 
@@ -543,7 +543,7 @@ class ARDOUR_UI : public Gtkmmext::UI
 	string template_name;
 
 	void new_session_ok_clicked ();
-	void new_session_template_choice (Gtkmmext::Selector *, Gtkmmext::SelectionResult*);
+	void new_session_template_choice (Gtkmm2ext::Selector *, Gtkmm2ext::SelectionResult*);
 	void hide_dialog (ArdourDialog *dialog);
 
 	void fs_cancel_clicked (Gtk::FileSelection*);

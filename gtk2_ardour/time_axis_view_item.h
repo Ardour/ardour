@@ -21,7 +21,7 @@
 #ifndef __gtk_ardour_time_axis_view_item_h__
 #define __gtk_ardour_time_axis_view_item_h__
 
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 #include <gtk-canvas.h>
 #include <jack/jack.h>
 #include <string>
@@ -34,7 +34,7 @@ class TimeAxisView;
  * A base class for 'items' that may appear upon a TimeAxisView
  *
  */
-class TimeAxisViewItem : public SigC::Object, public Selectable
+class TimeAxisViewItem : public sigc::trackable, public Selectable
 {
    public:
        virtual ~TimeAxisViewItem() ;
@@ -290,28 +290,28 @@ class TimeAxisViewItem : public SigC::Object, public Selectable
      * the destructor, this allows us to capture the source of the deletion
      * event
      */
-    SigC::Signal2<void,std::string,void*> ItemRemoved ;
+    sigc::signal<void,std::string,void*> ItemRemoved ;
     
     /** Emitted when the name/Id of this item is changed */
-    SigC::Signal3<void,std::string,std::string,void*> NameChanged ;
+    sigc::signal<void,std::string,std::string,void*> NameChanged ;
     
     /** Emiited when the position of this item changes */
-    SigC::Signal2<void,jack_nframes_t,void*> PositionChanged ;
+    sigc::signal<void,jack_nframes_t,void*> PositionChanged ;
     
     /** Emitted when the position lock of this item is changed */
-    SigC::Signal2<void,bool,void*> PositionLockChanged ;
+    sigc::signal<void,bool,void*> PositionLockChanged ;
     
     /** Emitted when the duration of this item changes */
-    SigC::Signal2<void,jack_nframes_t,void*> DurationChanged ;
+    sigc::signal<void,jack_nframes_t,void*> DurationChanged ;
     
     /** Emitted when the maximum item duration is changed */
-    SigC::Signal2<void,jack_nframes_t,void*> MaxDurationChanged ;
+    sigc::signal<void,jack_nframes_t,void*> MaxDurationChanged ;
     
     /** Emitted when the mionimum item duration is changed */
-    SigC::Signal2<void,jack_nframes_t,void*> MinDurationChanged ;
+    sigc::signal<void,jack_nframes_t,void*> MinDurationChanged ;
     
     /** Emitted when the selected status of this item changes */
-    SigC::Signal1<void, bool> Selected ;
+    sigc::signal<void, bool> Selected ;
     
 
   protected:

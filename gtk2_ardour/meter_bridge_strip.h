@@ -21,9 +21,9 @@
 #ifndef __ardour_meterbridgestrip_h__
 #define __ardour_meterbridgestrip_h__
 
-#include <sigc++/signal_system.h>
-#include <gtk--.h>
-#include <gtkmmext/fastmeter.h>
+#include <sigc++/signal.h>
+#include <gtkmm.h>
+#include <gtkmm2ext/fastmeter.h>
 
 namespace ARDOUR {
 	class AudioEngine;
@@ -31,12 +31,12 @@ namespace ARDOUR {
 	class Route;
 }
 
-namespace Gtkmmext {
+namespace Gtkmm2ext {
 	class Selector;
 	struct SelectionResult;
 }
 
-class MeterBridgeStrip : public SigC::Object
+class MeterBridgeStrip : public sigc::trackable
 
 {
   public:
@@ -74,7 +74,7 @@ class MeterBridgeStrip : public SigC::Object
 	bool                    meter_clear_pending;
 	bool                    over_clear_pending;
 
-	Gtkmmext::FastMeter meter;
+	Gtkmm2ext::FastMeter meter;
 	bool                meter_on;
 
 	Gtk::VBox          above_meter_vbox;

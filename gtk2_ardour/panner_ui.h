@@ -22,9 +22,9 @@
 #define __ardour_gtk_panner_ui_h__
 
 #include <vector>
-#include <gtk--.h>
-#include <gtkmmext/slider_controller.h>
-#include <gtkmmext/click_box.h>
+#include <gtkmm.h>
+#include <gtkmm2ext/slider_controller.h>
+#include <gtkmm2ext/click_box.h>
 
 #include "enums.h"
 
@@ -34,7 +34,7 @@ namespace ARDOUR {
 	class IO;
 	class Session;
 }
-namespace Gtkmmext {
+namespace Gtkmm2ext {
 	class FastMeter;
 	class BarController;
 }
@@ -87,7 +87,7 @@ class PannerUI : public Gtk::HBox
 	void panning_link_direction_clicked ();
 
 	vector<Gtk::Adjustment*> pan_adjustments;
-	vector<Gtkmmext::BarController*> pan_bars;
+	vector<Gtkmm2ext::BarController*> pan_bars;
 
 	void pan_adjustment_changed (uint32_t which);
 	void pan_value_changed (uint32_t which);

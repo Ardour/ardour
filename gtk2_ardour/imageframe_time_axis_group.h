@@ -24,7 +24,7 @@
 #include <list>
 #include <cmath>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
 #include <jack/jack.h>
 #include "imageframe_time_axis_view.h"
@@ -40,7 +40,7 @@ class ImageFrameView ;
  * A viewable object may also be useful...
  *
  */
-class ImageFrameTimeAxisGroup : public SigC::Object
+class ImageFrameTimeAxisGroup : public sigc::trackable
 {
 	public:
 		//---------------------------------------------------------------------------------------//
@@ -234,7 +234,7 @@ class ImageFrameTimeAxisGroup : public SigC::Object
 		//---------------------------------------------------------------------------------//
 		// Emitted Signals
 		
-		SigC::Signal0<void> GoingAway ;
+		sigc::signal<void> GoingAway ;
 		
 		/**
 		 * Emitted when this Group has been removed
@@ -243,16 +243,16 @@ class ImageFrameTimeAxisGroup : public SigC::Object
 		 * the destructor, this allows us to capture the source of the deletion
 		 * event
 		 */
-		SigC::Signal2<void,std::string,void*> GroupRemoved ;
+		sigc::signal<void,std::string,void*> GroupRemoved ;
 		
 		/** Emitted when we have changed the name of this TimeAxis */
-		SigC::Signal3<void,std::string,std::string,void*> NameChanged ;
+		sigc::signal<void,std::string,std::string,void*> NameChanged ;
 		
 		/** Emitted when an ImageFrameView is added to this group */
-		SigC::Signal2<void, ImageFrameView*, void*> ImageFrameAdded ;
+		sigc::signal<void, ImageFrameView*, void*> ImageFrameAdded ;
 		
 		/** Emitted when an ImageFrameView is removed from this group */
-		SigC::Signal4<void, std::string&, std::string&, std::string&, void*> ImageFrameRemoved ;
+		sigc::signal<void, std::string&, std::string&, std::string&, void*> ImageFrameRemoved ;
 		
 	protected:
 

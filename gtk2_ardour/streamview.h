@@ -25,7 +25,7 @@
 #include <map>
 #include <cmath>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
 
 #include <ardour/location.h>
@@ -54,7 +54,7 @@ class AudioRegionSelection;
 class CrossfadeView;
 class Selection;
 
-class StreamView : public SigC::Object
+class StreamView : public sigc::trackable
 {
   public:
 	StreamView (AudioTimeAxisView&);
@@ -80,7 +80,7 @@ class StreamView : public SigC::Object
 
 	GtkCanvasItem* canvas_item() { return canvas_group; }
 
-	SigC::Signal1<void,AudioRegionView*> AudioRegionViewAdded;
+	sigc::signal<void,AudioRegionView*> AudioRegionViewAdded;
 
 	enum ColorTarget {
 		RegionColor,
@@ -93,7 +93,7 @@ class StreamView : public SigC::Object
 	void get_inverted_selectables (Selection&, list<Selectable* >& results);
 	GdkColor get_region_color () const { return region_color; }
 
-	void foreach_regionview (SigC::Slot1<void,AudioRegionView*> slot);
+	void foreach_regionview (sigc::slot<void,AudioRegionView*> slot);
 	void foreach_crossfadeview (void (CrossfadeView::*pmf)(void));
 
 	void attach ();
@@ -122,13 +122,13 @@ class StreamView : public SigC::Object
 	double _samples_per_unit;
 	double _amplitude_above_axis;
 
-	SigC::Connection screen_update_connection;
+	sigc::connection screen_update_connection;
 	vector<RecBoxInfo> rec_rects;
 	list<ARDOUR::AudioRegion* > rec_regions;
 	bool rec_updating;
 	bool rec_active;
 	bool use_rec_regions;
-	list<SigC::Connection> peak_ready_connections;
+	list<sigc::connection> peak_ready_connections;
 	jack_nframes_t last_rec_peak_frame;
 	map<ARDOUR::Source*, bool> rec_peak_ready_map;
 	
@@ -164,8 +164,8 @@ class StreamView : public SigC::Object
 	GdkColor region_color;
 	uint32_t stream_base_color;
 
-	vector<SigC::Connection> playlist_connections;
-	SigC::Connection playlist_change_connection;
+	vector<sigc::connection> playlist_connections;
+	sigc::connection playlist_change_connection;
 };
 
 #endif /* __ardour_streamview_h__ */

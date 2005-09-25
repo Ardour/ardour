@@ -23,12 +23,12 @@
 
 #include <list>
 
-#include <gtk--/eventbox.h>
-#include <gtk--/viewport.h>
-#include <gtk--/scrolledwindow.h>
-#include <gtk--/box.h>
-#include <gtk--/fixed.h>
-#include <gtk--/frame.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/viewport.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/box.h>
+#include <gtkmm/fixed.h>
+#include <gtkmm/frame.h>
 
 #include "keyboard_target.h"
 #include "ardour_dialog.h"
@@ -78,7 +78,7 @@ class MeterBridge : public ArdourDialog
 	list<MeterBridgeStrip*>  meters;
 	
 	bool                    metering;
-	SigC::Connection        metering_connection;
+	sigc::connection        metering_connection;
 
 	void update ();
 

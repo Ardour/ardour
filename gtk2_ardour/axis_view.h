@@ -22,7 +22,7 @@
 #define __ardour_gtk_axis_view_h__
 
 #include <list>
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <pbd/xml++.h>
 #include "prompter.h"
 
@@ -34,7 +34,7 @@ namespace ARDOUR {
  * AxisView defines the abstract base class for time-axis trackviews and routes.
  *
  */
-class AxisView : public SigC::Object
+class AxisView : public sigc::trackable
 {
   public:
 	/**
@@ -63,8 +63,8 @@ class AxisView : public SigC::Object
 	}
 	
 	virtual bool selected() const { return _selected; }
-	SigC::Signal0<void> Hiding;
-	SigC::Signal0<void> GoingAway;
+	sigc::signal<void> Hiding;
+	sigc::signal<void> GoingAway;
 
   protected:
 

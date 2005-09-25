@@ -23,7 +23,7 @@
 #include <cmath>
 
 #include <gtk-canvas.h>
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include <ardour/location.h>
 
@@ -36,7 +36,7 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
 
@@ -739,8 +739,8 @@ Editor::marker_menu_rename ()
 	}
 
 	dialog.set_name ("MarkRenameWindow");
-	dialog.set_usize (300, -1);
-	dialog.set_position (GTK_WIN_POS_MOUSE);
+	dialog.set_size_request (300, -1);
+	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 
 	dialog.get_vbox()->set_border_width (10);
@@ -754,8 +754,8 @@ Editor::marker_menu_rename ()
 	cancel_button.set_name ("EditorGTKButton");
 
 	entry.activate.connect (bind (slot (*this, &Editor::finish_sub_event_loop), 1));
-	cancel_button.clicked.connect (bind (slot (*this, &Editor::finish_sub_event_loop), -1));
-	ok_button.clicked.connect (bind (slot (*this, &Editor::finish_sub_event_loop), 1));
+	cancel_button.signal_clicked().connect (bind (slot (*this, &Editor::finish_sub_event_loop), -1));
+	ok_button.signal_clicked().connect (bind (slot (*this, &Editor::finish_sub_event_loop), 1));
 	dialog.delete_event.connect (bind (slot (*this, &Editor::finish_sub_event_loop_on_delete), -1));
 
 	dialog.show_all ();

@@ -26,7 +26,7 @@
 #include <algorithm>
 
 #include <pbd/error.h>
-#include <gtkmmext/utils.h>
+#include <gtkmm2ext/utils.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -62,7 +62,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 using namespace Gtk;
 using namespace Editing;
 
@@ -1443,7 +1443,7 @@ Editor::motion_handler (GtkCanvasItem* item, GdkEvent* event, ItemType item_type
 	
 	/* We call this so that MOTION_NOTIFY events continue to be
 	   delivered to the canvas. We need to do this because we set
-	   GDK_POINTER_MOTION_HINT_MASK on the canvas. This reduces
+	   Gdk::POINTER_MOTION_HINT_MASK on the canvas. This reduces
 	   the density of the events, at the expense of a round-trip
 	   to the server. Given that this will mostly occur on cases
 	   where DISPLAY = :0.0, and given the cost of what the motion
@@ -1584,7 +1584,7 @@ Editor::start_grab (GdkEvent* event, GdkCursor *cursor)
 	drag_info.copied_location = 0;
 
 	gtk_canvas_item_grab (drag_info.item,
-			      GDK_POINTER_MOTION_MASK|GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK,
+			      Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
 			      cursor,
 			      event->button.time);
 
@@ -2523,7 +2523,7 @@ Editor::start_region_copy_grab (GtkCanvasItem* item, GdkEvent* event)
 		session->add_undo (to_playlist->get_memento ());
 		latest_regionview = 0;
 
-		SigC::Connection c = atv->view->AudioRegionViewAdded.connect (slot (*this, &Editor::collect_new_region_view));
+		sigc::connection c = atv->view->AudioRegionViewAdded.connect (slot (*this, &Editor::collect_new_region_view));
 		
 		/* create a new region with the same name.
 		 */
@@ -3179,7 +3179,7 @@ Editor::region_drag_finished_callback (GtkCanvasItem* item, GdkEvent* event)
 
 			from_playlist->remove_region (&((*i)->region));
 	  
-			SigC::Connection c = atv2->view->AudioRegionViewAdded.connect (slot (*this, &Editor::collect_new_region_view));
+			sigc::connection c = atv2->view->AudioRegionViewAdded.connect (slot (*this, &Editor::collect_new_region_view));
 			to_playlist->add_region (*new_region, where);
 			c.disconnect ();
 			
@@ -3416,7 +3416,7 @@ Editor::start_selection_grab (GtkCanvasItem* item, GdkEvent* event)
 	*/
 	
 	latest_regionview = 0;
-	SigC::Connection c = clicked_audio_trackview->view->AudioRegionViewAdded.connect (slot (*this, &Editor::collect_new_region_view));
+	sigc::connection c = clicked_audio_trackview->view->AudioRegionViewAdded.connect (slot (*this, &Editor::collect_new_region_view));
 	
 	/* A selection grab currently creates two undo/redo operations, one for 
 	   creating the new region and another for moving it.
@@ -4444,7 +4444,7 @@ Editor::end_rubberband_select (GtkCanvasItem* item, GdkEvent* event)
 gint
 Editor::mouse_rename_region (GtkCanvasItem* item, GdkEvent* event)
 {
-	using namespace Gtkmmext;
+	using namespace Gtkmm2ext;
 
 	ArdourPrompter prompter (false);
 

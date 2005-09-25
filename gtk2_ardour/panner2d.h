@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <map>
 #include <string>
-#include <gtk--.h>
+#include <gtkmm.h>
 
 using std::map;
 using std::string;
@@ -59,8 +59,8 @@ class Panner2d : public Gtk::DrawingArea
 	void move_puck (int, float x, float y);
 	void reset (uint32_t n_inputs);
 
-	SigC::Signal1<void,int> PuckMoved;
-	SigC::Signal1<void,int> TargetMoved;
+	sigc::signal<void,int> PuckMoved;
+	sigc::signal<void,int> TargetMoved;
 
   protected:
 	gint expose_event_impl (GdkEventExpose *);

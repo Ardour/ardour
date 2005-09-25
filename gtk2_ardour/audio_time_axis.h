@@ -21,10 +21,10 @@
 #ifndef __ardour_trackview_h__
 #define __ardour_trackview_h__
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
-#include <gtkmmext/selector.h>
-#include <gtkmmext/popup_selector.h>
+#include <gtkmm2ext/selector.h>
+#include <gtkmm2ext/popup_selector.h>
 #include <list>
 
 #include <ardour/types.h>
@@ -183,8 +183,8 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	void add_to_redirect_display (ARDOUR::Redirect *);
 	void redirects_changed (void *);
 
-	SigC::Connection modified_connection;
-	SigC::Connection state_changed_connection;
+	sigc::connection modified_connection;
+	sigc::connection state_changed_connection;
 
 	void take_name_changed (void *);
 	void route_name_changed (void *);

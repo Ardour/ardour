@@ -22,9 +22,9 @@
 
 #include <ardour/io.h>
 #include <ardour/dB.h>
-#include <gtkmmext/utils.h>
-#include <gtkmmext/stop_signal.h>
-#include <gtkmmext/barcontroller.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/barcontroller.h>
 #include <midi++/manager.h>
 #include <pbd/fastlog.h>
 
@@ -41,9 +41,9 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 
 /* XPM */
 static const gchar * forwdblarrow_xpm[] = {
@@ -85,8 +85,8 @@ static const gchar * revdblarrow_xpm[] = {
 PannerUI::PannerUI (IO& io, Session& s)
 	: _io (io),
 	  _session (s),
-	  panning_up_arrow (GTK_ARROW_UP, GTK_SHADOW_OUT),
-	  panning_down_arrow (GTK_ARROW_DOWN, GTK_SHADOW_OUT),
+	  panning_up_arrow (GTK_ARROW_UP, Gtk::SHADOW_OUT),
+	  panning_down_arrow (GTK_ARROW_DOWN, Gtk::SHADOW_OUT),
 	  panning_link_button (_("link"))
 	
 {
@@ -94,8 +94,8 @@ PannerUI::PannerUI (IO& io, Session& s)
 	pan_menu = 0;
 	in_pan_update = false;
 
-	pan_bar_packer.set_usize (-1, 61);
-	panning_viewport.set_usize (61, 61);
+	pan_bar_packer.set_size_request (-1, 61);
+	panning_viewport.set_size_request (61, 61);
 
 	panning_viewport.set_name (X_("BaseFrame"));
 
@@ -212,22 +212,22 @@ PannerUI::set_width (Width w)
 {
 	switch (w) {
 	case Wide:
-		panning_viewport.set_usize (61, 61);
+		panning_viewport.set_size_request (61, 61);
 		if (panner) {
-			panner->set_usize (61, 61);
+			panner->set_size_request (61, 61);
 		}
 		for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-				(*i)->set_usize (61, 15);
+				(*i)->set_size_request (61, 15);
 		}
 		static_cast<Gtk::Label*> (panning_link_button.get_child())->set_text (_("link"));
 		break;
 	case Narrow:
-		panning_viewport.set_usize (31, 61);
+		panning_viewport.set_size_request (31, 61);
 		if (panner) {
-			panner->set_usize (31, 61);
+			panner->set_size_request (31, 61);
 		}
 		for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-				(*i)->set_usize (31, 15);
+				(*i)->set_size_request (31, 15);
 		}
 		static_cast<Gtk::Label*> (panning_link_button.get_child())->set_text (_("L"));
 		break;
@@ -334,8 +334,8 @@ PannerUI::setup_pan ()
 			bc->set_name ("PanSlider");
 			bc->set_shadow_type (GTK_SHADOW_NONE);
 			bc->set_style (BarController::Line);
-			bc->get_spin_button().focus_in_event.connect (slot (*this, &PannerUI::entry_focus_event));
-			bc->get_spin_button().focus_out_event.connect (slot (*this, &PannerUI::entry_focus_event));
+			bc->get_spin_button().signal_focus_in_event().connect (slot (*this, &PannerUI::entry_focus_event));
+			bc->get_spin_button().signal_focus_out_event().connect (slot (*this, &PannerUI::entry_focus_event));
 
 			bc->StartGesture.connect (bind (slot (_io, &IO::start_pan_touch), (uint32_t) asz));
 			bc->StopGesture.connect (bind (slot (_io, &IO::end_pan_touch), (uint32_t) asz));
@@ -350,10 +350,10 @@ PannerUI::setup_pan ()
 			pan_bars.push_back (bc);
 			switch (_width) {
 			case Wide:
-				pan_bars.back()->set_usize (61, 15);
+				pan_bars.back()->set_size_request (61, 15);
 				break;
 			case Narrow:
-				pan_bars.back()->set_usize (31, 15);
+				pan_bars.back()->set_size_request (31, 15);
 				break;
 			}
 
@@ -392,7 +392,7 @@ PannerUI::setup_pan ()
 		
 		update_pan_sensitive ();
 		panner->reset (_io.n_inputs());
-		panner->set_usize (w, 61);
+		panner->set_size_request (w, 61);
 
 		/* and finally, add it to the panner frame */
 

@@ -25,7 +25,7 @@
 
 #include <pbd/error.h>
 
-#include <gtkmmext/popup_selector.h>
+#include <gtkmm2ext/popup_selector.h>
 
 #include <ardour/session.h>
 #include <ardour/region.h>
@@ -39,7 +39,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 
 void
 Editor::install_keybindings ()

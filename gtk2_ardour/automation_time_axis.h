@@ -112,7 +112,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool ignore_state_request;
 
 	void automation_state_changed ();
-	SigC::Connection automation_connection;
+	sigc::connection automation_connection;
 
 	void entered ();
 	void exited ();

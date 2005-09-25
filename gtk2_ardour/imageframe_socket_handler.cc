@@ -29,7 +29,7 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "imageframe_socket_handler.h"
 #include "imageframe_time_axis.h"
@@ -47,12 +47,12 @@
 
 #include <ardour/session.h>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <unistd.h>
 
 using namespace std;
 using namespace ardourvis ;
-using namespace SigC;
+using namespace sigc;
 
 ImageFrameSocketHandler* ImageFrameSocketHandler::_instance = 0 ;
 

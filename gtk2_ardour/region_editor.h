@@ -23,9 +23,9 @@
 
 #include <map>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 
 #include "audio_clock.h"
 #include "ardour_dialog.h"

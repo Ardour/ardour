@@ -24,7 +24,7 @@
 
 #include <pbd/error.h>
 #include <ardour/panner.h>
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "panner2d.h"
 #include "keyboard.h"
@@ -34,7 +34,7 @@
 
 using namespace std;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 
 Panner2d::Target::Target (float xa, float ya, const char *txt)
@@ -67,7 +67,7 @@ Panner2d::Panner2d (Panner& p, int32_t w, int32_t h)
 	panner.StateChanged.connect (slot (*this, &Panner2d::handle_state_change));
 	
 	drag_target = 0;
-	set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_POINTER_MOTION_MASK);
+	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
 }
 
@@ -450,13 +450,13 @@ Panner2d::expose_event_impl (GdkEventExpose *event)
 				fy = max (fy, -1.0f);
 				y = (gint) floor (height * fy - 4);
 				
-				get_window().draw_arc (get_style()->get_fg_gc(GTK_STATE_NORMAL),
+				get_window().draw_arc (get_style()->get_fg_gc(Gtk::STATE_NORMAL),
 						       true,
 						       x, y,
 						       8, 8,
 						       0, 360 * 64);
 				get_window().draw_text (get_style()->get_font(),
-							get_style()->get_fg_gc(GTK_STATE_NORMAL),
+							get_style()->get_fg_gc(Gtk::STATE_NORMAL),
 							x + 6, y + 6,
 							puck->text,
 							puck->textlen);

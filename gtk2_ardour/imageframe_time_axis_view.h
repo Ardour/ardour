@@ -24,7 +24,7 @@
 #include <list>
 #include <cmath>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
 #include <jack/jack.h>
 
@@ -39,7 +39,7 @@ class ImageFrameTimeAxisGroup ;
  * maintains the list of items that have been added to it
  *
  */
-class ImageFrameTimeAxisView : public SigC::Object
+class ImageFrameTimeAxisView : public sigc::trackable
 {
 	public:
 		//---------------------------------------------------------------------------------------//
@@ -222,10 +222,10 @@ class ImageFrameTimeAxisView : public SigC::Object
 		// Emitted Signals
 		
 		/** Emitted when and ImageFrameGroup is added to this time axis */
-		SigC::Signal2<void,ImageFrameTimeAxisGroup*,void*> ImageFrameGroupAdded ;
+		sigc::signal<void,ImageFrameTimeAxisGroup*,void*> ImageFrameGroupAdded ;
 		
 		/** Emitted when an ImageFrameGroup is removed from this time axis */
-		SigC::Signal2<void,std::string,void*> ImageFrameGroupRemoved ;
+		sigc::signal<void,std::string,void*> ImageFrameGroupRemoved ;
 		
 	protected:
 

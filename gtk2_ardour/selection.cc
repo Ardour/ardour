@@ -33,7 +33,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 
 struct AudioRangeComparator {
     bool operator()(AudioRange a, AudioRange b) {
@@ -194,7 +194,7 @@ Selection::add (const list<TimeAxisView*>& track_list)
 	for (list<TimeAxisView*>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
 		if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
 			void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-			(*i)->GoingAway.connect (bind (slot (*this, pmf), (*i)));
+			(*i)->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), (*i)));
 			tracks.push_back (*i);
 			changed = true;
 		}
@@ -210,7 +210,7 @@ Selection::add (TimeAxisView* track)
 {
 	if (find (tracks.begin(), tracks.end(), track) == tracks.end()) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		track->GoingAway.connect (bind (slot (*this, pmf), track));
+		track->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), track));
 		tracks.push_back (track);
 		TracksChanged();
 	}

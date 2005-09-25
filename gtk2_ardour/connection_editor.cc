@@ -19,8 +19,8 @@
 */
 #include <stdint.h>
 
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/utils.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
 #include <sigc++/bind.h>
 
 #include "connection_editor.h"
@@ -41,7 +41,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 
 ConnectionEditor::ConnectionEditor ()
 	: ArdourDialog ("connection editor"),
@@ -59,7 +59,7 @@ ConnectionEditor::ConnectionEditor ()
 	  rescan_button (_("Rescan"))
 	  
 {
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	session = 0;
 	selected_port = -1;
@@ -81,22 +81,22 @@ ConnectionEditor::ConnectionEditor ()
 
 	button_box.set_spacing (15);
 	button_box.set_border_width (5);
-	Gtkmmext::set_usize_to_display_given_text (ok_button, _("OK"), 40, 15);
+	Gtkmm2ext::set_size_request_to_display_given_text (ok_button, _("OK"), 40, 15);
  	button_box.pack_end (ok_button, false, false);
  	// button_box.pack_end (cancel_button, false, false);
 	cancel_button.hide();
 	button_frame.add (button_box);
 
-	ok_button.clicked.connect (slot (*this, &ConnectionEditor::accept));
-	cancel_button.clicked.connect (slot (*this, &ConnectionEditor::cancel));
-	cancel_button.clicked.connect (slot (*this, &ConnectionEditor::rescan));
+	ok_button.signal_clicked().connect (slot (*this, &ConnectionEditor::accept));
+	cancel_button.signal_clicked().connect (slot (*this, &ConnectionEditor::cancel));
+	cancel_button.signal_clicked().connect (slot (*this, &ConnectionEditor::rescan));
 
 	notebook.set_name ("ConnectionEditorNotebook");
-	notebook.set_usize (-1, 125);
+	notebook.set_size_request (-1, 125);
 
 	clear_button.set_name ("ConnectionEditorButton");
 	add_port_button.set_name ("ConnectionEditorButton");
-	Gtkmmext::set_usize_to_display_given_text (add_port_button, _("Add Port"), 35, 15);
+	Gtkmm2ext::set_size_request_to_display_given_text (add_port_button, _("Add Port"), 35, 15);
 
 	selector_frame.set_name ("ConnectionEditorFrame");
 	port_frame.set_name ("ConnectionEditorFrame");
@@ -105,7 +105,7 @@ ConnectionEditor::ConnectionEditor ()
 	
 	selector_button_box.set_spacing (5);
 	selector_button_box.set_border_width (5);
-	Gtkmmext::set_usize_to_display_given_text (rescan_button, _("Rescan"), 35, 15);
+	Gtkmm2ext::set_size_request_to_display_given_text (rescan_button, _("Rescan"), 35, 15);
 	selector_button_box.pack_start (rescan_button, false, false);
 
 	selector_box.set_spacing (5);
@@ -136,20 +136,20 @@ ConnectionEditor::ConnectionEditor ()
 	right_vbox.set_border_width (5);
 	right_vbox.pack_start (port_and_selector_box);
 
-	input_connection_display.set_shadow_type (GTK_SHADOW_IN);
+	input_connection_display.set_shadow_type (Gtk::SHADOW_IN);
 	input_connection_display.set_selection_mode (GTK_SELECTION_SINGLE);
-	input_connection_display.set_usize (80, -1);
+	input_connection_display.set_size_request (80, -1);
 	input_connection_display.set_name ("ConnectionEditorConnectionList");
 	input_connection_display.select_row.connect (bind (slot (*this, &ConnectionEditor::connection_selected), true));
 
-	output_connection_display.set_shadow_type (GTK_SHADOW_IN);
+	output_connection_display.set_shadow_type (Gtk::SHADOW_IN);
 	output_connection_display.set_selection_mode (GTK_SELECTION_SINGLE);
-	output_connection_display.set_usize (80, -1);
+	output_connection_display.set_size_request (80, -1);
 	output_connection_display.set_name ("ConnectionEditorConnectionList");
 	output_connection_display.select_row.connect (bind (slot (*this, &ConnectionEditor::connection_selected), false));
 
-	input_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	output_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	input_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	output_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	input_scroller.add_with_viewport (input_connection_display);
 	output_scroller.add_with_viewport (output_connection_display);
@@ -188,11 +188,11 @@ ConnectionEditor::ConnectionEditor ()
 
 	delete_event.connect (bind (slot (just_hide_it), reinterpret_cast<Window *> (this)));
 
-	clear_button.clicked.connect (slot (*this, &ConnectionEditor::clear));
-	add_port_button.clicked.connect (slot (*this, &ConnectionEditor::add_port));
-	new_input_connection_button.clicked.connect (bind (slot (*this, &ConnectionEditor::new_connection), true));
-	new_output_connection_button.clicked.connect (bind (slot (*this, &ConnectionEditor::new_connection), false));
-	delete_connection_button.clicked.connect (slot (*this, &ConnectionEditor::delete_connection));
+	clear_button.signal_clicked().connect (slot (*this, &ConnectionEditor::clear));
+	add_port_button.signal_clicked().connect (slot (*this, &ConnectionEditor::add_port));
+	new_input_connection_button.signal_clicked().connect (bind (slot (*this, &ConnectionEditor::new_connection), true));
+	new_output_connection_button.signal_clicked().connect (bind (slot (*this, &ConnectionEditor::new_connection), false));
+	delete_connection_button.signal_clicked().connect (slot (*this, &ConnectionEditor::delete_connection));
 }
 
 ConnectionEditor::~ConnectionEditor()
@@ -297,13 +297,13 @@ ConnectionEditor::remove_connection (ARDOUR::Connection *connection)
 void
 ConnectionEditor::proxy_add_connection_and_select (ARDOUR::Connection *connection)
 {
-	Gtkmmext::UI::instance()->call_slot (bind (slot (*this, &ConnectionEditor::add_connection_and_select), connection));
+	Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &ConnectionEditor::add_connection_and_select), connection));
 }
 
 void
 ConnectionEditor::proxy_remove_connection (ARDOUR::Connection *connection)
 {
-	Gtkmmext::UI::instance()->call_slot (bind (slot (*this, &ConnectionEditor::remove_connection), connection));
+	Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &ConnectionEditor::remove_connection), connection));
 }
 
 void
@@ -438,7 +438,7 @@ ConnectionEditor::display_ports ()
 		ScrolledWindow *scroller = manage (new ScrolledWindow);
 
 		scroller->add_with_viewport (*client_port_display);
-		scroller->set_policy (GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+		scroller->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 		client_box->pack_start (*scroller);
 
@@ -520,7 +520,7 @@ ConnectionEditor::display_connection_state (bool for_input)
 		scroller = new ScrolledWindow;
 		
 		scroller->add_with_viewport (*clist);
-		scroller->set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+		scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 		port_displays.insert (port_displays.end(), scroller);
 		port_box.pack_start (*scroller);
@@ -530,9 +530,9 @@ ConnectionEditor::display_connection_state (bool for_input)
 		clist->set_name ("ConnectionEditorPortList");
 		clist->click_column.connect (bind (slot (*this, &ConnectionEditor::port_column_click), clist));
 		clist->set_selection_mode (GTK_SELECTION_SINGLE);
-		clist->set_shadow_type (GTK_SHADOW_IN);
+		clist->set_shadow_type (Gtk::SHADOW_IN);
 
-		scroller->set_usize (-1, 75);
+		scroller->set_size_request (-1, 75);
 
 		/* now fill the clist with the current connections */
 
@@ -638,7 +638,7 @@ ConnectionEditor::new_connection (bool for_input)
 
 	Gtk::Main::run();
 
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string name;
 		prompter.get_result (name);
 

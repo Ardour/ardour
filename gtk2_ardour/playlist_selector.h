@@ -20,9 +20,9 @@
 #ifndef __ardour_playlist_selector_h__
 #define __ardour_playlist_selector_h__
 
-#include <gtk--.h>
-#include <gtk--/ctree.h>
-#include <gtkmmext/selector.h>
+#include <gtkmm.h>
+#include <gtkmm/ctree.h>
+#include <gtkmm2ext/selector.h>
 
 #include <ardour_dialog.h>
 
@@ -54,7 +54,7 @@ class PlaylistSelector : public ArdourDialog
 	DSPL_Map dspl_map;
 	RouteUI* rui;
 
-	SigC::Connection select_connection;
+	sigc::connection select_connection;
 
 	void add_playlist_to_map (ARDOUR::Playlist*);
 	void clear_map ();

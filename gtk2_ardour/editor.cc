@@ -29,9 +29,9 @@
 #include <gtk-canvas.h>
 #include <pbd/error.h>
 
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/tearoff.h>
-#include <gtkmmext/utils.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/tearoff.h>
+#include <gtkmm2ext/utils.h>
 
 #include <ardour/audio_track.h>
 #include <ardour/diskstream.h>
@@ -77,10 +77,10 @@
 /* </CMT Additions> */
 
 using namespace std;
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 using namespace Editing;
 
 /* XXX this is a hack. it ought to be the maximum value of an jack_nframes_t */
@@ -209,8 +209,8 @@ Editor::Editor (AudioEngine& eng)
 	  transport_mark_label (_("Loop/Punch Ranges")),
 
 	  edit_packer (3, 3, false),
-	  edit_hscroll_left_arrow (GTK_ARROW_LEFT, GTK_SHADOW_OUT),
-	  edit_hscroll_right_arrow (GTK_ARROW_RIGHT, GTK_SHADOW_OUT),
+	  edit_hscroll_left_arrow (Gtk::ARROW_LEFT, Gtk::SHADOW_OUT),
+	  edit_hscroll_right_arrow (Gtk::ARROW_RIGHT, Gtk::SHADOW_OUT),
 
 	  region_list_display (internationalize (region_list_display_titles)),
 
@@ -266,10 +266,10 @@ Editor::Editor (AudioEngine& eng)
 	init_colormap ();
 
 	check_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL, 
-							      gtk_widget_get_colormap (GTK_WIDGET(edit_group_list.gtkobj())),
+							      gtk_widget_get_colormap (GTK_WIDGET(edit_group_list.gobj())),
 							      &check_mask, NULL, (gchar **) check_xpm);
 	empty_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL, 
-							      gtk_widget_get_colormap (GTK_WIDGET(edit_group_list.gtkobj())),
+							      gtk_widget_get_colormap (GTK_WIDGET(edit_group_list.gobj())),
 							      &empty_mask, NULL, (gchar **) empty_xpm);
 
 	session = 0;
@@ -373,7 +373,7 @@ Editor::Editor (AudioEngine& eng)
 	initialize_canvas ();
 
 	track_canvas_scroller.add (*track_canvas);
-	track_canvas_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+	track_canvas_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
 	track_canvas_scroller.set_name ("TrackCanvasScroller");
 
 	track_canvas_scroller.get_vadjustment()->value_changed.connect (slot (*this, &Editor::tie_vertical_scrolling));
@@ -392,7 +392,7 @@ Editor::Editor (AudioEngine& eng)
  	edit_hscrollbar.size_allocate.connect (slot (*this, &Editor::hscroll_slider_allocate));
 	
 	time_canvas_scroller.add (*time_canvas);
-	time_canvas_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+	time_canvas_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
 	time_canvas_scroller.set_hadjustment (track_canvas_scroller.get_hadjustment());
 	time_canvas_scroller.set_name ("TimeCanvasScroller");
 
@@ -400,13 +400,13 @@ Editor::Editor (AudioEngine& eng)
 	edit_controls_hbox.pack_start (edit_controls_vbox, true, true);
 	edit_controls_scroller.add_with_viewport (edit_controls_hbox);
 	edit_controls_scroller.set_name ("EditControlsBase");
-	edit_controls_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+	edit_controls_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
 
 	Viewport* viewport = static_cast<Viewport*> (edit_controls_scroller.get_child());
 
 	viewport->set_shadow_type (GTK_SHADOW_NONE);
 	viewport->set_name ("EditControlsBase");
-	viewport->add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK);
+	viewport->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK);
 	viewport->button_release_event.connect (slot (*this, &Editor::edit_controls_button_release));
 
 	build_cursors ();
@@ -422,42 +422,42 @@ Editor::Editor (AudioEngine& eng)
 	time_canvas_vbox.pack_start (*frames_ruler, false, false);
 	time_canvas_vbox.pack_start (*bbt_ruler, false, false);
 	time_canvas_vbox.pack_start (time_canvas_scroller, true, true);
-	time_canvas_vbox.set_usize (-1, (int)(timebar_height * visible_timebars));
+	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
 
 	bbt_label.set_name ("EditorTimeButton");
-	bbt_label.set_usize (-1, (int)timebar_height);
+	bbt_label.set_size_request (-1, (int)timebar_height);
 	bbt_label.set_alignment (1.0, 0.5);
 	bbt_label.set_padding (5,0);
 	minsec_label.set_name ("EditorTimeButton");
-	minsec_label.set_usize (-1, (int)timebar_height);
+	minsec_label.set_size_request (-1, (int)timebar_height);
 	minsec_label.set_alignment (1.0, 0.5);
 	minsec_label.set_padding (5,0);
 	smpte_label.set_name ("EditorTimeButton");
-	smpte_label.set_usize (-1, (int)timebar_height);
+	smpte_label.set_size_request (-1, (int)timebar_height);
 	smpte_label.set_alignment (1.0, 0.5);
 	smpte_label.set_padding (5,0);
 	frame_label.set_name ("EditorTimeButton");
-	frame_label.set_usize (-1, (int)timebar_height);
+	frame_label.set_size_request (-1, (int)timebar_height);
 	frame_label.set_alignment (1.0, 0.5);
 	frame_label.set_padding (5,0);
 	tempo_label.set_name ("EditorTimeButton");
-	tempo_label.set_usize (-1, (int)timebar_height);
+	tempo_label.set_size_request (-1, (int)timebar_height);
 	tempo_label.set_alignment (1.0, 0.5);
 	tempo_label.set_padding (5,0);
 	meter_label.set_name ("EditorTimeButton");
-	meter_label.set_usize (-1, (int)timebar_height);
+	meter_label.set_size_request (-1, (int)timebar_height);
 	meter_label.set_alignment (1.0, 0.5);
 	meter_label.set_padding (5,0);
 	mark_label.set_name ("EditorTimeButton");
-	mark_label.set_usize (-1, (int)timebar_height);
+	mark_label.set_size_request (-1, (int)timebar_height);
 	mark_label.set_alignment (1.0, 0.5);
 	mark_label.set_padding (5,0);
 	range_mark_label.set_name ("EditorTimeButton");
-	range_mark_label.set_usize (-1, (int)timebar_height);
+	range_mark_label.set_size_request (-1, (int)timebar_height);
 	range_mark_label.set_alignment (1.0, 0.5);
 	range_mark_label.set_padding (5,0);
 	transport_mark_label.set_name ("EditorTimeButton");
-	transport_mark_label.set_usize (-1, (int)timebar_height);
+	transport_mark_label.set_size_request (-1, (int)timebar_height);
 	transport_mark_label.set_alignment (1.0, 0.5);
 	transport_mark_label.set_padding (5,0);
 	
@@ -471,7 +471,7 @@ Editor::Editor (AudioEngine& eng)
 
 	time_button_event_box.add (time_button_vbox);
 	
-	time_button_event_box.set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
+	time_button_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	time_button_event_box.set_name ("TimebarLabelBase");
 	time_button_event_box.button_release_event.connect (slot (*this, &Editor::ruler_label_button_release));
 
@@ -482,7 +482,7 @@ Editor::Editor (AudioEngine& eng)
 	track_canvas_event_box.add (track_canvas_scroller);
 
 	time_canvas_event_box.add (time_canvas_vbox);
-	time_canvas_event_box.set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_POINTER_MOTION_MASK);
+	time_canvas_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
 	
 	edit_packer.set_col_spacings (0);
@@ -490,20 +490,20 @@ Editor::Editor (AudioEngine& eng)
 	edit_packer.set_homogeneous (false);
 	edit_packer.set_name ("EditorWindow");
 
-// 	edit_packer.attach (edit_hscroll_left_arrow_event,  0, 1, 0, 1,    GTK_FILL,  0, 0, 0);
-// 	edit_packer.attach (edit_hscroll_slider,            1, 2, 0, 1,    GTK_FILL|GTK_EXPAND,  0, 0, 0);
-// 	edit_packer.attach (edit_hscroll_right_arrow_event, 2, 3, 0, 1,    GTK_FILL,  0, 0, 0);
- 	edit_packer.attach (edit_hscrollbar,            1, 2, 0, 1,    GTK_FILL|GTK_EXPAND,  0, 0, 0);
+// 	edit_packer.attach (edit_hscroll_left_arrow_event,  0, 1, 0, 1,    Gtk::FILL,  0, 0, 0);
+// 	edit_packer.attach (edit_hscroll_slider,            1, 2, 0, 1,    Gtk::FILL|Gtk::EXPAND,  0, 0, 0);
+// 	edit_packer.attach (edit_hscroll_right_arrow_event, 2, 3, 0, 1,    Gtk::FILL,  0, 0, 0);
+ 	edit_packer.attach (edit_hscrollbar,            1, 2, 0, 1,    Gtk::FILL|Gtk::EXPAND,  0, 0, 0);
 
-	edit_packer.attach (time_button_event_box,               0, 1, 1, 2,    GTK_FILL,            0, 0, 0);
-	edit_packer.attach (time_canvas_event_box,          1, 2, 1, 2,    GTK_FILL|GTK_EXPAND, 0, 0, 0);
+	edit_packer.attach (time_button_event_box,               0, 1, 1, 2,    Gtk::FILL,            0, 0, 0);
+	edit_packer.attach (time_canvas_event_box,          1, 2, 1, 2,    Gtk::FILL|Gtk::EXPAND, 0, 0, 0);
 
-	edit_packer.attach (edit_controls_scroller,         0, 1, 2, 3,    GTK_FILL,                   GTK_FILL|GTK_EXPAND, 0, 0);
-	edit_packer.attach (track_canvas_event_box,         1, 2, 2, 3,    GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND, 0, 0);
-	edit_packer.attach (edit_vscrollbar,                2, 3, 2, 3,    0,                   GTK_FILL|GTK_EXPAND, 0, 0);
+	edit_packer.attach (edit_controls_scroller,         0, 1, 2, 3,    Gtk::FILL,                   Gtk::FILL|Gtk::EXPAND, 0, 0);
+	edit_packer.attach (track_canvas_event_box,         1, 2, 2, 3,    Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	edit_packer.attach (edit_vscrollbar,                2, 3, 2, 3,    0,                   Gtk::FILL|Gtk::EXPAND, 0, 0);
 
 	edit_frame.set_name ("BaseFrame");
-	edit_frame.set_shadow_type (GTK_SHADOW_IN);
+	edit_frame.set_shadow_type (Gtk::SHADOW_IN);
 	edit_frame.add (edit_packer);
 
 	zoom_in_button.set_name ("EditorTimeButton");
@@ -516,16 +516,16 @@ Editor::Editor (AudioEngine& eng)
 //	ARDOUR_UI::instance()->tooltips().set_tip (zoom_onetoone_button, _("Zoom in 1:1"));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to session"));
 
-	zoom_in_button.add (*(manage (new Gtk::Pixmap (zoom_in_button_xpm))));
-	zoom_out_button.add (*(manage (new Gtk::Pixmap (zoom_out_button_xpm))));
-	zoom_out_full_button.add (*(manage (new Gtk::Pixmap (zoom_out_full_button_xpm))));
-//	zoom_onetoone_button.add (*(manage (new Gtk::Pixmap (zoom_onetoone_button_xpm))));
+	zoom_in_button.add (*(manage (new Gtk::Image (zoom_in_button_xpm))));
+	zoom_out_button.add (*(manage (new Gtk::Image (zoom_out_button_xpm))));
+	zoom_out_full_button.add (*(manage (new Gtk::Image (zoom_out_full_button_xpm))));
+//	zoom_onetoone_button.add (*(manage (new Gtk::Image (zoom_onetoone_button_xpm))));
 
 	
-	zoom_in_button.clicked.connect (bind (slot (*this, &Editor::temporal_zoom_step), false));
-	zoom_out_button.clicked.connect (bind (slot (*this, &Editor::temporal_zoom_step), true));
-	zoom_out_full_button.clicked.connect (slot (*this, &Editor::temporal_zoom_session));
-//	zoom_onetoone_button.clicked.connect (bind (slot (*this, &Editor::temporal_zoom), 1.0));
+	zoom_in_button.signal_clicked().connect (bind (slot (*this, &Editor::temporal_zoom_step), false));
+	zoom_out_button.signal_clicked().connect (bind (slot (*this, &Editor::temporal_zoom_step), true));
+	zoom_out_full_button.signal_clicked().connect (slot (*this, &Editor::temporal_zoom_session));
+//	zoom_onetoone_button.signal_clicked().connect (bind (slot (*this, &Editor::temporal_zoom), 1.0));
 	
 	zoom_indicator_box.pack_start (zoom_out_button, false, false);
 	zoom_indicator_box.pack_start (zoom_in_button, false, false);
@@ -547,16 +547,16 @@ Editor::Editor (AudioEngine& eng)
 	bottom_hbox.set_spacing (3);
 
 	route_list.set_name ("TrackListDisplay");
-	route_list.set_usize (75,-1);
+	route_list.set_size_request (75,-1);
 	route_list.column_titles_active();
 	route_list.set_compare_func (route_list_compare_func);
-	route_list.set_shadow_type (GTK_SHADOW_IN);
+	route_list.set_shadow_type (Gtk::SHADOW_IN);
 	route_list.set_selection_mode (GTK_SELECTION_MULTIPLE);
 	route_list.set_reorderable (true);
-	edit_group_list.set_usize (75, -1);
+	edit_group_list.set_size_request (75, -1);
 
 	route_list_scroller.add (route_list);
-	route_list_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	route_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	route_list.select_row.connect (slot (*this, &Editor::route_list_selected));
 	route_list.unselect_row.connect (slot (*this, &Editor::route_list_unselected));
@@ -570,17 +570,17 @@ Editor::Editor (AudioEngine& eng)
 
 	edit_group_list.column_titles_hide();
 	edit_group_list.set_name ("MixerGroupList");
-	edit_group_list.set_shadow_type (GTK_SHADOW_IN);
+	edit_group_list.set_shadow_type (Gtk::SHADOW_IN);
 	edit_group_list.set_selection_mode (GTK_SELECTION_MULTIPLE);
 	edit_group_list.set_reorderable (false);
-	edit_group_list.set_usize (75, -1);
+	edit_group_list.set_size_request (75, -1);
 	edit_group_list.set_column_auto_resize (0, true);
 	edit_group_list.columns_autosize ();
 
 	edit_group_list_scroller.add (edit_group_list);
-	edit_group_list_scroller.set_policy (GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	edit_group_list_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-	edit_group_list_button.clicked.connect (slot (*this, &Editor::edit_group_list_button_clicked));
+	edit_group_list_button.signal_clicked().connect (slot (*this, &Editor::edit_group_list_button_clicked));
 	edit_group_list.button_press_event.connect (slot (*this, &Editor::edit_group_list_button_press_event));
 	edit_group_list.select_row.connect (slot (*this, &Editor::edit_group_selected));
 	edit_group_list.unselect_row.connect (slot (*this, &Editor::edit_group_unselected));
@@ -598,11 +598,11 @@ Editor::Editor (AudioEngine& eng)
 	edit_group_vbox.pack_start (edit_group_list_scroller, true, true);
 	
 	route_list_frame.set_name ("BaseFrame");
-	route_list_frame.set_shadow_type (GTK_SHADOW_IN);
+	route_list_frame.set_shadow_type (Gtk::SHADOW_IN);
 	route_list_frame.add (route_list_scroller);
 
 	edit_group_list_frame.set_name ("BaseFrame");
-	edit_group_list_frame.set_shadow_type (GTK_SHADOW_IN);
+	edit_group_list_frame.set_shadow_type (Gtk::SHADOW_IN);
 	edit_group_list_frame.add (edit_group_vbox);
 
 	route_group_vpane.add1 (route_list_frame);
@@ -612,18 +612,18 @@ Editor::Editor (AudioEngine& eng)
 
 	region_list_hidden_node = region_list_display.rows().end();
 
-	region_list_display.add_events (GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK|GDK_POINTER_MOTION_MASK);
+	region_list_display.add_events (GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK|Gdk::POINTER_MOTION_MASK);
 
 	region_list_display.drag_dest_set (GTK_DEST_DEFAULT_ALL,
 					   target_table, n_targets - 1,
-					   GdkDragAction (GDK_ACTION_COPY|GDK_ACTION_MOVE));
+					   GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
 	region_list_display.drag_data_received.connect (slot (*this, &Editor::region_list_display_drag_data_received));
 
 	region_list_scroller.add (region_list_display);
-	region_list_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	region_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	region_list_display.set_name ("RegionListDisplay");
-	region_list_display.set_usize (100, -1);
+	region_list_display.set_size_request (100, -1);
 	region_list_display.column_titles_active ();
 	region_list_display.set_selection_mode (GTK_SELECTION_SINGLE);
 
@@ -632,7 +632,7 @@ Editor::Editor (AudioEngine& eng)
 	region_list_sort_type = ByName;
 	reset_region_list_sort_type (region_list_sort_type);
 
-	region_list_display.set_flags (GTK_CAN_FOCUS);
+	region_list_display.set_flags (Gtk::CAN_FOCUS);
 
 	region_list_display.key_press_event.connect (slot (*this, &Editor::region_list_display_key_press));
 	region_list_display.key_release_event.connect (slot (*this, &Editor::region_list_display_key_release));
@@ -646,10 +646,10 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.click_column.connect (slot (*this, &Editor::region_list_column_click));
 	
 	named_selection_scroller.add (named_selection_display);
-	named_selection_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	named_selection_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	named_selection_display.set_name ("RegionListDisplay");
-	named_selection_display.set_usize (100, -1);
+	named_selection_display.set_size_request (100, -1);
 	named_selection_display.column_titles_active ();
 	named_selection_display.set_selection_mode (GTK_SELECTION_SINGLE);
 
@@ -712,8 +712,8 @@ Editor::Editor (AudioEngine& eng)
 
 	/* nudge stuff */
 
-	nudge_forward_button.add (*(manage (new Gtk::Pixmap (right_arrow_xpm))));
-	nudge_backward_button.add (*(manage (new Gtk::Pixmap (left_arrow_xpm))));
+	nudge_forward_button.add (*(manage (new Gtk::Image (right_arrow_xpm))));
+	nudge_backward_button.add (*(manage (new Gtk::Image (left_arrow_xpm))));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge region/selection forwards"));
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge region/selection backwards"));
@@ -729,7 +729,7 @@ Editor::Editor (AudioEngine& eng)
 	set_wmclass (_("ardour_editor"), "Ardour");
 
 	add (vpacker);
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	configure_event.connect (slot (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	delete_event.connect (slot (*ARDOUR_UI::instance(), &ARDOUR_UI::exit_on_main_window_close));
@@ -830,7 +830,7 @@ Editor::initialize_canvas ()
 	track_canvas = wrap (track_gtk_canvas);
 	track_canvas->set_name ("EditorMainCanvas");
 
-	track_canvas->add_events (GDK_POINTER_MOTION_HINT_MASK);
+	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK);
 
 	track_canvas->leave_notify_event.connect (slot (*this, &Editor::left_track_canvas));
 	
@@ -838,7 +838,7 @@ Editor::initialize_canvas ()
 
 	track_canvas->drag_dest_set (GTK_DEST_DEFAULT_ALL,
 				     target_table, n_targets - 1,
-				     GdkDragAction (GDK_ACTION_COPY|GDK_ACTION_MOVE));
+				     GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
 	track_canvas->drag_data_received.connect (slot (*this, &Editor::track_canvas_drag_data_received));
 
 	/* stuff for the verbose canvas cursor */
@@ -871,7 +871,7 @@ Editor::initialize_canvas ()
 	time_canvas = wrap (time_gtk_canvas);
 	time_canvas->set_name ("EditorTimeCanvas");
 
-	time_canvas->add_events (GDK_POINTER_MOTION_HINT_MASK);
+	time_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK);
 
 	meter_group = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(time_gtk_canvas)),
 					    gtk_canvas_group_get_type(),
@@ -1568,7 +1568,7 @@ Editor::reset_scrolling_region (GtkAllocation *alloc)
 void
 Editor::queue_session_control_changed (Session::ControlType t)
 {
-	Gtkmmext::UI::instance()->call_slot (bind (slot (*this, &Editor::session_control_changed), t));
+	Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &Editor::session_control_changed), t));
 }
 
 void
@@ -1593,25 +1593,25 @@ Editor::session_control_changed (Session::ControlType t)
 void
 Editor::fake_add_edit_group (RouteGroup *group)
 {
-	Gtkmmext::UI::instance()->call_slot (bind (slot (*this, &Editor::add_edit_group), group));
+	Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &Editor::add_edit_group), group));
 }
 
 void
 Editor::fake_handle_new_audio_region (AudioRegion *region)
 {
-	Gtkmmext::UI::instance()->call_slot (bind (slot (*this, &Editor::handle_new_audio_region), region));
+	Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &Editor::handle_new_audio_region), region));
 }
 
 void
 Editor::fake_handle_audio_region_removed (AudioRegion *region)
 {
-	Gtkmmext::UI::instance()->call_slot (bind (slot (*this, &Editor::handle_audio_region_removed), region));
+	Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &Editor::handle_audio_region_removed), region));
 }
 
 void
 Editor::fake_handle_new_duration ()
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &Editor::handle_new_duration));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &Editor::handle_new_duration));
 }
 
 void
@@ -1738,7 +1738,7 @@ Editor::connect_to_session (Session *t)
 
 	/* These signals can all be emitted by a non-GUI thread. Therefore the
 	   handlers for them must not attempt to directly interact with the GUI,
-	   but use Gtkmmext::UI::instance()->call_slot();
+	   but use Gtkmm2ext::UI::instance()->call_slot();
 	*/
 
 	session_connections.push_back (session->TransportStateChange.connect (slot (*this, &Editor::map_transport_state)));
@@ -2774,13 +2774,13 @@ Editor::get_state ()
 		geometry->add_property("x_off", string(buf));
 		snprintf(buf, sizeof(buf), "%d", yoff);
 		geometry->add_property("y_off", string(buf));
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&canvas_region_list_pane)->gtkobj()));
+		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&canvas_region_list_pane)->gobj()));
 		geometry->add_property("canvas_region_list_pane_pos", string(buf));
-		snprintf(buf,sizeof(buf), "%d", gtk_paned_get_position (static_cast<Paned*>(&track_list_canvas_pane)->gtkobj()));
+		snprintf(buf,sizeof(buf), "%d", gtk_paned_get_position (static_cast<Paned*>(&track_list_canvas_pane)->gobj()));
 		geometry->add_property("track_list_canvas_pane_pos", string(buf));
-		snprintf(buf,sizeof(buf), "%d", gtk_paned_get_position (static_cast<Paned*>(&region_selection_vpane)->gtkobj()));
+		snprintf(buf,sizeof(buf), "%d", gtk_paned_get_position (static_cast<Paned*>(&region_selection_vpane)->gobj()));
 		geometry->add_property("region_selection_pane_pos", string(buf));
-		snprintf(buf,sizeof(buf), "%d", gtk_paned_get_position (static_cast<Paned*>(&route_group_vpane)->gtkobj()));
+		snprintf(buf,sizeof(buf), "%d", gtk_paned_get_position (static_cast<Paned*>(&route_group_vpane)->gobj()));
 		geometry->add_property("route_group_pane_pos", string(buf));
 
 		node->add_child_nocopy (*geometry);
@@ -3088,12 +3088,12 @@ Editor::setup_toolbar ()
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("stretch/shrink regions"));
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("listen to specific regions"));
 
-	mouse_move_button.unset_flags (GTK_CAN_FOCUS);
-	mouse_select_button.unset_flags (GTK_CAN_FOCUS);
-	mouse_gain_button.unset_flags (GTK_CAN_FOCUS);
-	mouse_zoom_button.unset_flags (GTK_CAN_FOCUS);
-	mouse_timefx_button.unset_flags (GTK_CAN_FOCUS);
-	mouse_audition_button.unset_flags (GTK_CAN_FOCUS);
+	mouse_move_button.unset_flags (Gtk::CAN_FOCUS);
+	mouse_select_button.unset_flags (Gtk::CAN_FOCUS);
+	mouse_gain_button.unset_flags (Gtk::CAN_FOCUS);
+	mouse_zoom_button.unset_flags (Gtk::CAN_FOCUS);
+	mouse_timefx_button.unset_flags (Gtk::CAN_FOCUS);
+	mouse_audition_button.unset_flags (Gtk::CAN_FOCUS);
 
 	mouse_select_button.toggled.connect (bind (slot (*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
 	mouse_select_button.button_release_event.connect (slot (*this, &Editor::mouse_select_button_release));
@@ -3129,7 +3129,7 @@ Editor::setup_toolbar ()
 
 	/* XXX another disgusting hack because of the way combo boxes size themselves */
 
-	Gtkmmext::set_usize_to_display_given_text (*edit_mode_selector.get_entry(), "EdgtMode", 2, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (*edit_mode_selector.get_entry(), "EdgtMode", 2, 10);
 	edit_mode_selector.set_popdown_strings (internationalize (edit_mode_strings));
 	edit_mode_selector.set_value_in_list (true, false);
 
@@ -3152,7 +3152,7 @@ Editor::setup_toolbar ()
 	/* XXX another disgusting hack because of the way combo boxes size themselves */
 
 	const guint32 FUDGE = 10; // Combo's are stupid - they steal space from the entry for the button
-	Gtkmmext::set_usize_to_display_given_text (*snap_type_selector.get_entry(), "Region bounds", 2+FUDGE, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (*snap_type_selector.get_entry(), "Region bounds", 2+FUDGE, 10);
 	snap_type_selector.set_popdown_strings (internationalize (snap_type_strings));
 	snap_type_selector.set_value_in_list (true, false);
 
@@ -3172,7 +3172,7 @@ Editor::setup_toolbar ()
 	snap_mode_box.set_spacing (3);
 	snap_mode_box.set_border_width (3);
 
-	Gtkmmext::set_usize_to_display_given_text (*snap_mode_selector.get_entry(), "SngpMode", 2, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (*snap_mode_selector.get_entry(), "SngpMode", 2, 10);
 	snap_mode_selector.set_popdown_strings (internationalize (snap_mode_strings));
 	snap_mode_selector.set_value_in_list (true, false);
 
@@ -3194,7 +3194,7 @@ Editor::setup_toolbar ()
 
 	/* XXX another disgusting hack because of the way combo boxes size themselves */
 
-	Gtkmmext::set_usize_to_display_given_text (*zoom_focus_selector.get_entry(), "Edgt Cursor", 2, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (*zoom_focus_selector.get_entry(), "Edgt Cursor", 2, 10);
 	zoom_focus_selector.set_popdown_strings (internationalize (zoom_focus_strings));
 	zoom_focus_selector.set_value_in_list (true, false);
 
@@ -3251,8 +3251,8 @@ Editor::setup_toolbar ()
 
 	HBox *nbox = manage (new HBox);
 	
-	nudge_forward_button.clicked.connect (bind (slot (*this, &Editor::nudge_forward), false));
-	nudge_backward_button.clicked.connect (bind (slot (*this, &Editor::nudge_backward), false));
+	nudge_forward_button.signal_clicked().connect (bind (slot (*this, &Editor::nudge_forward), false));
+	nudge_backward_button.signal_clicked().connect (bind (slot (*this, &Editor::nudge_backward), false));
 
 	nbox->pack_start (nudge_backward_button, false, false);
 	nbox->pack_start (nudge_forward_button, false, false);
@@ -3284,7 +3284,7 @@ Editor::setup_toolbar ()
 	toolbar_base.set_name ("ToolBarBase");
 	toolbar_base.add (toolbar_hbox);
 
-	toolbar_frame.set_shadow_type (GTK_SHADOW_OUT);
+	toolbar_frame.set_shadow_type (Gtk::SHADOW_OUT);
 	toolbar_frame.set_name ("BaseFrame");
 	toolbar_frame.add (toolbar_base);
 }
@@ -3979,8 +3979,8 @@ Editor::duplicate_dialog (bool dup_region)
 	VBox   vbox;
 
 	button_box.set_spacing (7);
-	set_usize_to_display_given_text (ok_button, _("Cancel"), 20, 15); // this is cancel on purpose
-	set_usize_to_display_given_text (cancel_button, _("Cancel"), 20, 15);
+	set_size_request_to_display_given_text (ok_button, _("Cancel"), 20, 15); // this is cancel on purpose
+	set_size_request_to_display_given_text (cancel_button, _("Cancel"), 20, 15);
 	button_box.pack_end (ok_button, false, false);
 	button_box.pack_end (cancel_button, false, false);
 	
@@ -3994,21 +3994,21 @@ Editor::duplicate_dialog (bool dup_region)
 	vbox.pack_start (button_box);
 
 	win.add (vbox);
-	win.set_position (GTK_WIN_POS_MOUSE);
+	win.set_position (Gtk::WIN_POS_MOUSE);
 	win.show_all ();
 
-	ok_button.clicked.connect (bind (slot (win, &ArdourDialog::stop), 0));
+	ok_button.signal_clicked().connect (bind (slot (win, &ArdourDialog::stop), 0));
 	entry.activate.connect (bind (slot (win, &ArdourDialog::stop), 0));
-	cancel_button.clicked.connect (bind (slot (win, &ArdourDialog::stop), 1));
+	cancel_button.signal_clicked().connect (bind (slot (win, &ArdourDialog::stop), 1));
 
-	entry.focus_in_event.connect (slot (ARDOUR_UI::generic_focus_in_event));
-	entry.focus_out_event.connect (slot (ARDOUR_UI::generic_focus_out_event));
+	entry.signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
+	entry.signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
 	
 	entry.set_text ("1");
-	set_usize_to_display_given_text (entry, X_("12345678"), 20, 15);
+	set_size_request_to_display_given_text (entry, X_("12345678"), 20, 15);
 	entry.select_region (0, entry.get_text_length());
 
-	win.set_position (GTK_WIN_POS_MOUSE);
+	win.set_position (Gtk::WIN_POS_MOUSE);
 	win.realize ();
 	win.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 
@@ -4385,7 +4385,7 @@ Editor::pane_allocation_handler (GtkAllocation *alloc, Gtk::Paned* which)
 			pos = atoi (prop->value());
 		}
 
-		if ((done[0] = GTK_WIDGET(track_list_canvas_pane.gtkobj())->allocation.width > pos)) {
+		if ((done[0] = GTK_WIDGET(track_list_canvas_pane.gobj())->allocation.width > pos)) {
 			track_list_canvas_pane.set_position (pos);
 		}
 
@@ -4402,7 +4402,7 @@ Editor::pane_allocation_handler (GtkAllocation *alloc, Gtk::Paned* which)
 			pos = atoi (prop->value());
 		}
 
-		if ((done[1] = GTK_WIDGET(canvas_region_list_pane.gtkobj())->allocation.width > pos)) {
+		if ((done[1] = GTK_WIDGET(canvas_region_list_pane.gobj())->allocation.width > pos)) {
 			canvas_region_list_pane.set_position (pos);
 		}
 
@@ -4419,7 +4419,7 @@ Editor::pane_allocation_handler (GtkAllocation *alloc, Gtk::Paned* which)
 			pos = atoi (prop->value());
 		}
 
-		if ((done[2] = GTK_WIDGET(route_group_vpane.gtkobj())->allocation.height > pos)) {
+		if ((done[2] = GTK_WIDGET(route_group_vpane.gobj())->allocation.height > pos)) {
 			route_group_vpane.set_position (pos);
 		}
 
@@ -4436,7 +4436,7 @@ Editor::pane_allocation_handler (GtkAllocation *alloc, Gtk::Paned* which)
 			pos = atoi (prop->value());
 		}
 
-		if ((done[3] = GTK_WIDGET(region_selection_vpane.gtkobj())->allocation.height > pos)) { 
+		if ((done[3] = GTK_WIDGET(region_selection_vpane.gobj())->allocation.height > pos)) { 
 			region_selection_vpane.set_position (pos);
 		}
 	}
@@ -4507,8 +4507,8 @@ Editor::edit_xfade (Crossfade* xfade)
 		
 	ensure_float (cew);
 	
-	cew.ok_button.clicked.connect (bind (slot (cew, &ArdourDialog::stop), 1));
-	cew.cancel_button.clicked.connect (bind (slot (cew, &ArdourDialog::stop), 0));
+	cew.ok_button.signal_clicked().connect (bind (slot (cew, &ArdourDialog::stop), 1));
+	cew.cancel_button.signal_clicked().connect (bind (slot (cew, &ArdourDialog::stop), 0));
 	cew.delete_event.connect (slot (cew, &ArdourDialog::wm_doi_event_stop));
 
 	cew.run ();
@@ -4572,9 +4572,9 @@ Editor::playlist_deletion_dialog (Playlist* pl)
 	dialog.set_position (GTK_WIN_POS_CENTER);
 	dialog.show_all ();
 
-	del_button.clicked.connect (bind (slot (dialog, &ArdourDialog::stop), 0));
-	keep_button.clicked.connect (bind (slot (dialog, &ArdourDialog::stop), 1));
-	abort_button.clicked.connect (bind (slot (dialog, &ArdourDialog::stop), 2));
+	del_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 0));
+	keep_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 1));
+	abort_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 2));
 
 	dialog.realize ();
 	dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));

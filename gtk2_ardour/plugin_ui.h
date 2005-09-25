@@ -25,10 +25,10 @@
 #include <map>
 #include <list>
 
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 
-#include <gtk--.h>
-#include <gtk--/socket.h>
+#include <gtkmm.h>
+#include <gtkmm/socket.h>
 
 #include <ardour_dialog.h>
 #include <ardour/types.h>
@@ -45,7 +45,7 @@ namespace MIDI {
 	class Controllable;
 }
 
-namespace Gtkmmext {
+namespace Gtkmm2ext {
 	class HSliderController;
 	class BarController;
 	class ClickBox;
@@ -53,7 +53,7 @@ namespace Gtkmmext {
 	class PixmapButton;
 }
 
-class PlugUIBase : public SigC::Object
+class PlugUIBase : public sigc::trackable
 {
   public:
 	PlugUIBase (ARDOUR::PluginInsert&);
@@ -109,7 +109,7 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	bool is_scrollable;
 
 	struct MeterInfo {
-		Gtkmmext::FastMeter *meter;
+		Gtkmm2ext::FastMeter *meter;
 
 		float           min;
 		float           max;
@@ -142,8 +142,8 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	    Gtk::Combo* 	      combo;
   	    std::map<string, float>*  combo_map;
 	    Gtk::ToggleButton*        button;
-	    Gtkmmext::BarController*  control;
-	    Gtkmmext::ClickBox*       clickbox;
+	    Gtkmm2ext::BarController*  control;
+	    Gtkmm2ext::ClickBox*       clickbox;
 	    Gtk::Label         label;
 	    bool               logarithmic;
 	    bool               update_pending;
@@ -163,7 +163,7 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	};
 	
 	std::vector<ControlUI*>   output_controls;
-	SigC::Connection screen_update_connection;
+	sigc::connection screen_update_connection;
 	void output_update();
 	
 	void build (ARDOUR::AudioEngine &);

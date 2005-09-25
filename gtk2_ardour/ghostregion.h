@@ -22,12 +22,12 @@
 #define __ardour_gtk_ghost_region_h__
 
 #include <vector>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 #include <gtk-canvas.h>
 
 class AutomationTimeAxisView;
 
-struct GhostRegion : public SigC::Object
+struct GhostRegion : public sigc::trackable
 {
     AutomationTimeAxisView& trackview;
     GtkCanvasItem* group;
@@ -41,7 +41,7 @@ struct GhostRegion : public SigC::Object
     void set_duration (double units);
     void set_height ();
 
-    SigC::Signal1<void,GhostRegion*> GoingAway;
+    sigc::signal<void,GhostRegion*> GoingAway;
 };
 
 #endif /* __ardour_gtk_ghost_region_h__ */

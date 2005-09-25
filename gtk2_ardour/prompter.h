@@ -21,9 +21,9 @@
 #ifndef __ardour_gtk_prompter_h__
 #define __ardour_gtk_prompter_h__
 
-#include <gtkmmext/prompter.h>
+#include <gtkmm2ext/prompter.h>
 
-class ArdourPrompter : public Gtkmmext::Prompter
+class ArdourPrompter : public Gtkmm2ext::Prompter
 {
   public:
 	ArdourPrompter (bool modal = false);

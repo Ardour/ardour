@@ -18,7 +18,7 @@
     $Id$
 */
 
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 
 #include <ardour/curve.h>
 #include <pbd/fastlog.h>

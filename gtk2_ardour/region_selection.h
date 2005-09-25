@@ -3,7 +3,7 @@
 
 #include <set>
 #include <list>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 #include <ardour/types.h>
 
 using std::list;
@@ -15,7 +15,7 @@ struct AudioRegionComparator {
     bool operator() (const AudioRegionView* a, const AudioRegionView* b) const;
 };
 
-class AudioRegionSelection : public set<AudioRegionView*, AudioRegionComparator>, public SigC::Object
+class AudioRegionSelection : public set<AudioRegionView*, AudioRegionComparator>, public sigc::trackable
 {
   public:
         AudioRegionSelection();

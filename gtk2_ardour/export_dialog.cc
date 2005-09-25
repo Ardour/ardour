@@ -27,8 +27,8 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/xml++.h>
 
-#include <gtk--.h>
-#include <gtkmmext/utils.h>
+#include <gtkmm.h>
+#include <gtkmm2ext/utils.h>
 #include <ardour/export.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/audio_track.h>
@@ -45,7 +45,7 @@
 
 #include "i18n.h"
 
-#define FRAME_SHADOW_STYLE GTK_SHADOW_IN
+#define FRAME_SHADOW_STYLE Gtk::SHADOW_IN
 #define FRAME_NAME "BaseFrame"
 
 GdkPixmap* ExportDialog::check_pixmap = 0;
@@ -56,7 +56,7 @@ GdkPixmap* ExportDialog::empty_mask = 0;
 using namespace std;
 
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 using namespace Gtk;
 
 static const gchar *sample_rates[] = {
@@ -131,7 +131,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	set_title (_("ardour: export"));
 	set_wmclass (_("ardour_export"), "Ardour");
 	set_name ("ExportWindow");
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	add (vpacker);
 
@@ -141,13 +141,13 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	file_selector = 0;
 	spec.running = false;
 
-	file_entry.focus_in_event.connect (slot (ARDOUR_UI::generic_focus_in_event));
-	file_entry.focus_out_event.connect (slot (ARDOUR_UI::generic_focus_out_event));
+	file_entry.signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
+	file_entry.signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
 
 	file_entry.set_name ("ExportFileNameEntry");
 
 	master_selector.set_name ("ExportTrackSelector");
-	master_selector.set_usize (-1, 100);
+	master_selector.set_size_request (-1, 100);
 	master_selector.set_column_min_width (0, 100);
 	master_selector.set_column_min_width (1, 40);
 	master_selector.set_column_auto_resize(1, true);
@@ -159,7 +159,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	master_selector.button_press_event.connect (slot (*this, &ExportDialog::master_selector_button_press_event));
 	
 	track_selector.set_name ("ExportTrackSelector");
-	track_selector.set_usize (-1, 130);
+	track_selector.set_size_request (-1, 130);
 	track_selector.set_column_min_width (0, 100);
 	track_selector.set_column_min_width (1, 40);
 	track_selector.set_column_auto_resize(1, true);
@@ -171,10 +171,10 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	track_selector.button_press_event.connect (slot (*this, &ExportDialog::track_selector_button_press_event));
 
 	check_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL,
-			gtk_widget_get_colormap(GTK_WIDGET(track_selector.gtkobj())),
+			gtk_widget_get_colormap(GTK_WIDGET(track_selector.gobj())),
 			&check_mask, NULL, (gchar**) check_xpm);
 	empty_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL,
-			gtk_widget_get_colormap(GTK_WIDGET(track_selector.gtkobj())),
+			gtk_widget_get_colormap(GTK_WIDGET(track_selector.gobj())),
 			&empty_mask, NULL, (gchar**) empty_xpm);
 
 	progress_bar.set_show_text (false);
@@ -184,8 +184,8 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	format_frame.add (format_table);
 	format_frame.set_name (FRAME_NAME);
 
-	track_scroll.set_policy(GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	master_scroll.set_policy(GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	track_scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	master_scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 	vpacker.pack_start (file_frame, false, false);
 
@@ -198,8 +198,8 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 		master_scroll.add (master_selector);
 		track_scroll.add (track_selector);
 
-		master_scroll.set_usize (220, 100);
-		track_scroll.set_usize (220, 100);
+		master_scroll.set_size_request (220, 100);
+		track_scroll.set_size_request (220, 100);
 
 		
 		
@@ -214,12 +214,12 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	vpacker.pack_start (hpacker, true, true);
 	
 	track_selector_button.set_name ("EditorGTKButton");
-	track_selector_button.clicked.connect (slot (*this, &ExportDialog::track_selector_button_click));
+	track_selector_button.signal_clicked().connect (slot (*this, &ExportDialog::track_selector_button_click));
 
 	vpacker.pack_start (button_box, false, false);
 	vpacker.pack_start (progress_bar, false, false);
 
-	Gtkmmext::set_usize_to_display_given_text (file_entry, X_("Kg/quite/a/reasonable/size/for/files/i/think"), 5, 8);
+	Gtkmm2ext::set_size_request_to_display_given_text (file_entry, X_("Kg/quite/a/reasonable/size/for/files/i/think"), 5, 8);
 
 	file_hbox.set_spacing (5);
 	file_hbox.set_border_width (5);
@@ -281,10 +281,10 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	longest_str[0] = 'g';
 	longest_str[1] = 'l';
 
-	Gtkmmext::set_usize_to_display_given_text (*header_format_combo.get_entry(), longest_str.c_str(), 5+FUDGE, 5);
+	Gtkmm2ext::set_size_request_to_display_given_text (*header_format_combo.get_entry(), longest_str.c_str(), 5+FUDGE, 5);
 
 	// TRANSLATORS: "slereg" is "stereo" with ascender and descender substituted
-	Gtkmmext::set_usize_to_display_given_text (*channel_count_combo.get_entry(), _("slereg"), 5+FUDGE, 5);
+	Gtkmm2ext::set_size_request_to_display_given_text (*channel_count_combo.get_entry(), _("slereg"), 5+FUDGE, 5);
 
 	header_format_combo.set_use_arrows_always (true);
 	bitdepth_format_combo.set_use_arrows_always (true);
@@ -379,11 +379,11 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	file_entry.set_name ("ExportFileDisplay");
 
 	delete_event.connect (slot (*this, &ExportDialog::window_closed));
-	ok_button.clicked.connect (slot (*this, &ExportDialog::do_export));
-	cancel_button.clicked.connect (slot (*this, &ExportDialog::end_dialog));
+	ok_button.signal_clicked().connect (slot (*this, &ExportDialog::do_export));
+	cancel_button.signal_clicked().connect (slot (*this, &ExportDialog::end_dialog));
 	
 	file_browse_button.set_name ("EditorGTKButton");
-	file_browse_button.clicked.connect (slot (*this, &ExportDialog::initiate_browse));
+	file_browse_button.signal_clicked().connect (slot (*this, &ExportDialog::initiate_browse));
 
 	channel_count_combo.get_popwin()->unmap_event.connect (slot (*this, &ExportDialog::channels_chosen));
 	bitdepth_format_combo.get_popwin()->unmap_event.connect (slot (*this, &ExportDialog::bitdepth_chosen));
@@ -575,11 +575,11 @@ ExportDialog::save_state()
 	for (CList_Helpers::RowIterator ri = track_selector.rows().begin(); ri != track_selector.rows().end(); ++ri, ++n) {
 		XMLNode* track = new XMLNode(X_("Track"));
 
-		Gdk_Pixmap left_pixmap = track_selector.cell (n, 1).get_pixmap ();
-		track->add_property(X_("channel1"), left_pixmap.gdkobj() == check_pixmap ? X_("on") : X_("off"));
+		Gdk::Pixmap left_pixmap = track_selector.cell (n, 1).get_pixmap ();
+		track->add_property(X_("channel1"), left_pixmap.gobj() == check_pixmap ? X_("on") : X_("off"));
 
-		Gdk_Pixmap right_pixmap = track_selector.cell (n, 2).get_pixmap ();
-		track->add_property(X_("channel2"), right_pixmap.gdkobj() == check_pixmap ? X_("on") : X_("off"));				
+		Gdk::Pixmap right_pixmap = track_selector.cell (n, 2).get_pixmap ();
+		track->add_property(X_("channel2"), right_pixmap.gobj() == check_pixmap ? X_("on") : X_("off"));				
 
 		tracks->add_child_nocopy(*track);
 	}
@@ -998,17 +998,17 @@ ExportDialog::do_export ()
 				chan = 0;
 			}
 			
-			Gdk_Pixmap left_pixmap = master_selector.cell (n, 1).get_pixmap ();
+			Gdk::Pixmap left_pixmap = master_selector.cell (n, 1).get_pixmap ();
 			
-			if (left_pixmap.gdkobj() == check_pixmap) {
+			if (left_pixmap.gobj() == check_pixmap) {
 				spec.port_map[0].push_back (std::pair<Port*,uint32_t>(port, chan));
 			} 
 			
 			if (spec.channels == 2) {
 				
-				Gdk_Pixmap right_pixmap = master_selector.cell (n, 2).get_pixmap ();
+				Gdk::Pixmap right_pixmap = master_selector.cell (n, 2).get_pixmap ();
 				
-				if (right_pixmap.gdkobj() == check_pixmap) {
+				if (right_pixmap.gobj() == check_pixmap) {
 					spec.port_map[1].push_back (std::pair<Port*,uint32_t>(port, chan));
 				}
 				
@@ -1026,17 +1026,17 @@ ExportDialog::do_export ()
 				chan = 0;
 			}
 			
-			Gdk_Pixmap left_pixmap = track_selector.cell (n, 1).get_pixmap ();
+			Gdk::Pixmap left_pixmap = track_selector.cell (n, 1).get_pixmap ();
 			
-			if (left_pixmap.gdkobj() == check_pixmap) {
+			if (left_pixmap.gobj() == check_pixmap) {
 				spec.port_map[0].push_back (std::pair<Port*,uint32_t>(port, chan));
 			} 
 			
 			if (spec.channels == 2) {
 				
-				Gdk_Pixmap right_pixmap = track_selector.cell (n, 2).get_pixmap ();
+				Gdk::Pixmap right_pixmap = track_selector.cell (n, 2).get_pixmap ();
 				
-				if (right_pixmap.gdkobj() == check_pixmap) {
+				if (right_pixmap.gobj() == check_pixmap) {
 					spec.port_map[1].push_back (std::pair<Port*,uint32_t>(port, chan));
 				}
 				
@@ -1298,12 +1298,12 @@ ExportDialog::track_selector_button_press_event (GdkEventButton* ev)
 		return FALSE;
 	}
 
-	gtk_signal_emit_stop_by_name (GTK_OBJECT(track_selector.gtkobj()), "button_press_event");
+	gtk_signal_emit_stop_by_name (GTK_OBJECT(track_selector.gobj()), "button_press_event");
 	
-	Gdk_Pixmap pixmap = track_selector.cell (row,col).get_pixmap ();
+	Gdk::Pixmap pixmap = track_selector.cell (row,col).get_pixmap ();
 
 	if (col != 0) {
-		if (pixmap.gdkobj() == check_pixmap) {
+		if (pixmap.gobj() == check_pixmap) {
 			track_selector.cell (row,col).set_pixmap (empty_pixmap, empty_mask);
 		} else {
 			track_selector.cell (row,col).set_pixmap (check_pixmap, check_mask);
@@ -1322,12 +1322,12 @@ ExportDialog::master_selector_button_press_event (GdkEventButton* ev)
 		return FALSE;
 	}
 
-	gtk_signal_emit_stop_by_name (GTK_OBJECT(master_selector.gtkobj()), "button_press_event");
+	gtk_signal_emit_stop_by_name (GTK_OBJECT(master_selector.gobj()), "button_press_event");
 	
 	if (col != 0) {
-		Gdk_Pixmap pixmap = master_selector.cell (row,col).get_pixmap ();
+		Gdk::Pixmap pixmap = master_selector.cell (row,col).get_pixmap ();
 		
-		if (pixmap.gdkobj() == check_pixmap) {
+		if (pixmap.gobj() == check_pixmap) {
 			master_selector.cell (row,col).set_pixmap (empty_pixmap, empty_mask);
 		} else {
 			master_selector.cell (row,col).set_pixmap (check_pixmap, check_mask);
@@ -1350,8 +1350,8 @@ ExportDialog::initiate_browse ()
 		file_selector = new FileSelection;
 		file_selector->set_modal (true);
 
-		file_selector->get_cancel_button()->clicked.connect (bind (slot (*this, &ExportDialog::finish_browse), -1));
-		file_selector->get_ok_button()->clicked.connect (bind (slot (*this, &ExportDialog::finish_browse), 1));
+		file_selector->get_cancel_button()-.signal_clicked().connect (bind (slot (*this, &ExportDialog::finish_browse), -1));
+		file_selector->get_ok_button()-.signal_clicked().connect (bind (slot (*this, &ExportDialog::finish_browse), 1));
 		file_selector->map_event.connect (bind (slot (*this, &ExportDialog::change_focus_policy), true));
 		file_selector->unmap_event.connect (bind (slot (*this, &ExportDialog::change_focus_policy), false));
 	}

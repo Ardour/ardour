@@ -21,8 +21,8 @@
 #ifndef __ardour_gtk_about_h__
 #define __ardour_gtk_about_h__
 
-#include <gtk--/window.h>
-#include <gtk--/pixmap.h>
+#include <gtkmm/window.h>
+#include <gtkmm/pixmap.h>
 #include <gtk-canvas.h>
 
 class ARDOUR_UI;
@@ -58,7 +58,7 @@ class About : public Gtk::Window
 	bool support;
 	ARDOUR_UI * _ui;
 	
-	SigC::Connection timeout_connection;
+	sigc::connection timeout_connection;
 	
 	bool load_logo_size ();
 	bool load_logo (Gtk::Window&);
@@ -71,7 +71,7 @@ class About : public Gtk::Window
 	void gone_hidden ();
 	
 #ifdef WITH_PAYMENT_OPTIONS
-	Gtk::Pixmap      paypal_pixmap;
+	Gtk::Image      paypal_pixmap;
 	Gtk::Button      paypal_button;
 	void goto_paypal ();
 #endif

@@ -18,7 +18,7 @@
     $Id$
 */
 
-#include <gtkmmext/utils.h>
+#include <gtkmm2ext/utils.h>
 #include <ardour/audioengine.h>
 
 #include "editor.h"
@@ -238,7 +238,7 @@ Editor::current_mixer_strip_hidden ()
 void
 Editor::session_going_away ()
 {
-	for (vector<SigC::Connection>::iterator i = session_connections.begin(); i != session_connections.end(); ++i) {
+	for (vector<sigc::connection>::iterator i = session_connections.begin(); i != session_connections.end(); ++i) {
 		(*i).disconnect ();
 	}
 

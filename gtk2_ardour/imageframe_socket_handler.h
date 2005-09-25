@@ -22,7 +22,7 @@
 #define __ardour_gtk_imageframe_socket_handler_h__
 
 #include <string>
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <list>
 #include "editor.h"
 #include "ardour_image_compositor_socket.h"
@@ -38,7 +38,7 @@ class ImageFrameTimeAxisGroup ;
  * message passing through a socket.
  *
  */
-class ImageFrameSocketHandler : public SigC::Object
+class ImageFrameSocketHandler : public sigc::trackable
 {
 	public:
 		/**
@@ -270,10 +270,10 @@ class ImageFrameSocketHandler : public SigC::Object
 		// Emitted Signals
 		
 		/** Emitted if the socket connection is shutdown at the other end */
-		SigC::Signal0<void> CompositorSocketShutdown ;
+		sigc::signal<void> CompositorSocketShutdown ;
 		
 		/** Emitted as a generic error is captured from the socket connection to the animatic compositor */
-		SigC::Signal0<void> CompositorSocketError ;
+		sigc::signal<void> CompositorSocketError ;
 		
 		
 	protected:

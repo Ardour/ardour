@@ -33,9 +33,9 @@
 
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 
-#define FRAME_SHADOW_STYLE GTK_SHADOW_IN
+#define FRAME_SHADOW_STYLE Gtk::SHADOW_IN
 #define FRAME_NAME "BaseFrame"
 
 MeterBridge::MeterBridge ()
@@ -65,11 +65,11 @@ MeterBridge::MeterBridge ()
 
 	meter_scroller.add (meter_viewport);
 	meter_scroller.set_name ("MeterBridgeWindow");
-	meter_scroller.set_policy (GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	meter_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	meter_scroller.set_border_width (5);
 
 	add (meter_scroller);
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	set_name ("MeterBridgeWindow");
 	set_title (_("ardour: meter bridge"));
 	set_wmclass (_("ardour_meter_bridge"), "Ardour");

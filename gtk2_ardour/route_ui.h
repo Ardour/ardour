@@ -23,14 +23,14 @@
 
 #include <list>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <pbd/xml++.h>
 #include <ardour/ardour.h>
 #include <ardour/route.h>
 
 #include "axis_view.h"
 
-namespace Gtkmmext {
+namespace Gtkmm2ext {
 	class BindableToggleButton;
 }
 
@@ -61,9 +61,9 @@ class RouteUI : public virtual AxisView
 	bool ignore_toggle;
 	bool wait_for_release;
 
-	Gtkmmext::BindableToggleButton * mute_button;
-	Gtkmmext::BindableToggleButton * solo_button;
-	Gtkmmext::BindableToggleButton * rec_enable_button;
+	Gtkmm2ext::BindableToggleButton * mute_button;
+	Gtkmm2ext::BindableToggleButton * solo_button;
+	Gtkmm2ext::BindableToggleButton * rec_enable_button;
 	
 	virtual string solo_button_name () const { return "SoloButton"; }
 	virtual string safe_solo_button_name () const { return "SafeSoloButton"; }
@@ -107,7 +107,7 @@ class RouteUI : public virtual AxisView
 
 	int  set_color_from_route ();
 
-	SigC::Connection blink_connection;
+	sigc::connection blink_connection;
 
 	void rec_enable_button_blink (bool onoff, ARDOUR::DiskStream *, Gtk::Widget *w);
 	

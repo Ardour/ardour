@@ -22,9 +22,9 @@
 #define __gtk_ardour_crossfade_view_h__
 
 #include <vector>
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 #include <ardour/crossfade.h>
 
 #include "time_axis_view_item.h"
@@ -54,7 +54,7 @@ struct CrossfadeView : public TimeAxisViewItem
     bool visible() const { return _visible; }
     void set_valid (bool yn);
 
-    static SigC::Signal1<void,CrossfadeView*> GoingAway;
+    static sigc::signal<void,CrossfadeView*> GoingAway;
 
     AudioRegionView& upper_regionview () const;
 

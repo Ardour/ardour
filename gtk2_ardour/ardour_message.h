@@ -24,9 +24,9 @@
 
 #include <string>
 
-#include <gtk--/box.h>
-#include <gtk--/button.h>
-#include <gtk--/label.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
 
 #include "ardour_dialog.h"
 

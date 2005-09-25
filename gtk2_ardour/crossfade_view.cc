@@ -21,7 +21,7 @@
 #include <algorithm>
 
 #include <ardour/region.h>
-#include <gtkmmext/doi.h>
+#include <gtkmm2ext/doi.h>
 
 #include "canvas-simplerect.h"
 #include "canvas-curve.h"
@@ -32,11 +32,11 @@
 #include "regionview.h"
 #include "utils.h"
 
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Editing;
 
-SigC::Signal1<void,CrossfadeView*> CrossfadeView::GoingAway;
+sigc::signal<void,CrossfadeView*> CrossfadeView::GoingAway;
 
 CrossfadeView::CrossfadeView (GtkCanvasGroup *parent, 
 			      AudioTimeAxisView &tv, 

@@ -1,8 +1,8 @@
 #include <cmath>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
@@ -273,7 +273,7 @@ StreamView::remove_rec_region (Region *r)
 {
 	ENSURE_GUI_THREAD(bind (slot (*this, &StreamView::remove_rec_region), r));
 	
-	if (!Gtkmmext::UI::instance()->caller_is_gui_thread()) {
+	if (!Gtkmm2ext::UI::instance()->caller_is_gui_thread()) {
 		fatal << "region deleted from non-GUI thread!" << endmsg;
 		/*NOTREACHED*/
 	} 
@@ -340,7 +340,7 @@ StreamView::playlist_changed (DiskStream *ds)
 
 	/* disconnect from old playlist */
 
-	for (vector<SigC::Connection>::iterator i = playlist_connections.begin(); i != playlist_connections.end(); ++i) {
+	for (vector<sigc::connection>::iterator i = playlist_connections.begin(); i != playlist_connections.end(); ++i) {
 		(*i).disconnect();
 	}
 	
@@ -489,9 +489,9 @@ StreamView::diskstream_changed (void *src_ignored)
 	if ((at = _trackview.audio_track()) != 0) {
 		DiskStream& ds = at->disk_stream();
 		/* XXX grrr: when will SigC++ allow me to bind references? */
-		Gtkmmext::UI::instance()->call_slot (bind (slot (*this, &StreamView::display_diskstream), &ds));
+		Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &StreamView::display_diskstream), &ds));
 	} else {
-		Gtkmmext::UI::instance()->call_slot (slot (*this, &StreamView::undisplay_diskstream));
+		Gtkmm2ext::UI::instance()->call_slot (slot (*this, &StreamView::undisplay_diskstream));
 	}
 }
 
@@ -588,19 +588,19 @@ StreamView::region_layered (AudioRegionView* rv)
 void
 StreamView::rec_enable_changed (void *src)
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &StreamView::setup_rec_box));
 }
 
 void
 StreamView::sess_rec_enable_changed ()
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &StreamView::setup_rec_box));
 }
 
 void
 StreamView::transport_changed()
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &StreamView::setup_rec_box));
 }
 
 void
@@ -621,7 +621,7 @@ StreamView::setup_rec_box ()
 
 				AudioRegion::SourceList sources;
 
-				for (list<SigC::Connection>::iterator prc = peak_ready_connections.begin(); prc != peak_ready_connections.end(); ++prc) {
+				for (list<sigc::connection>::iterator prc = peak_ready_connections.begin(); prc != peak_ready_connections.end(); ++prc) {
 					(*prc).disconnect();
 				}
 				peak_ready_connections.clear();
@@ -701,7 +701,7 @@ StreamView::setup_rec_box ()
 			/* disconnect rapid update */
 			screen_update_connection.disconnect();
 
-			for (list<SigC::Connection>::iterator prc = peak_ready_connections.begin(); prc != peak_ready_connections.end(); ++prc) {
+			for (list<sigc::connection>::iterator prc = peak_ready_connections.begin(); prc != peak_ready_connections.end(); ++prc) {
 				(*prc).disconnect();
 			}
 			peak_ready_connections.clear();
@@ -773,7 +773,7 @@ StreamView::find_view (const AudioRegion& region)
 }
 	
 void
-StreamView::foreach_regionview (SigC::Slot1<void,AudioRegionView*> slot)
+StreamView::foreach_regionview (sigc::slot<void,AudioRegionView*> slot)
 {
 	for (list<AudioRegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		slot (*i);

@@ -21,7 +21,7 @@
 #ifndef __ardour_location_ui_h__
 #define __ardour_location_ui_h__
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <ardour/location.h>
 #include <ardour/session.h>
 
@@ -47,8 +47,8 @@ class LocationEditRow  : public Gtk::HBox
 
 	void set_number (int);
 	
-	SigC::Signal1<void,ARDOUR::Location*> remove_requested;  
-	SigC::Signal0<void> redraw_ranges;  
+	sigc::signal<void,ARDOUR::Location*> remove_requested;  
+	sigc::signal<void> redraw_ranges;  
 
   protected:
 
@@ -126,11 +126,11 @@ class LocationEditRow  : public Gtk::HBox
 	void location_changed (ARDOUR::Location *);
 	void flags_changed (ARDOUR::Location *, void *src);
 	
-	SigC::Connection start_changed_connection;
-	SigC::Connection end_changed_connection;
-	SigC::Connection name_changed_connection;
-	SigC::Connection changed_connection;
-	SigC::Connection flags_changed_connection;
+	sigc::connection start_changed_connection;
+	sigc::connection end_changed_connection;
+	sigc::connection name_changed_connection;
+	sigc::connection changed_connection;
+	sigc::connection flags_changed_connection;
 	
 };
 

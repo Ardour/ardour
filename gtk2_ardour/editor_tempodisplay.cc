@@ -28,12 +28,12 @@
 
 #include <pbd/error.h>
 
-#include <gtkmmext/utils.h>
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include <ardour/session.h>
 #include <ardour/tempo.h>
-#include <gtkmmext/doi.h>
+#include <gtkmm2ext/doi.h>
 
 #include "editor.h"
 #include "marker.h"
@@ -45,7 +45,7 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Editing;
@@ -252,10 +252,10 @@ Editor::mouse_add_new_tempo_event (jack_nframes_t frame)
 	TempoDialog tempo_dialog (map, frame, _("add"));
 	
 	tempo_dialog.bpm_entry.activate.connect (bind (slot (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.ok_button.clicked.connect (bind (slot (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.cancel_button.clicked.connect (bind (slot (tempo_dialog, &ArdourDialog::stop), -1));
+	tempo_dialog.ok_button.signal_clicked().connect (bind (slot (tempo_dialog, &ArdourDialog::stop), 0));
+	tempo_dialog.cancel_button.signal_clicked().connect (bind (slot (tempo_dialog, &ArdourDialog::stop), -1));
 
-	tempo_dialog.set_position (GTK_WIN_POS_MOUSE);
+	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	tempo_dialog.realize ();
 	tempo_dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 
@@ -294,10 +294,10 @@ Editor::mouse_add_new_meter_event (jack_nframes_t frame)
 	TempoMap& map(session->tempo_map());
 	MeterDialog meter_dialog (map, frame, _("add"));
 
-	meter_dialog.ok_button.clicked.connect (bind (slot (meter_dialog, &ArdourDialog::stop), 0));
-	meter_dialog.cancel_button.clicked.connect (bind (slot (meter_dialog, &ArdourDialog::stop), -1));
+	meter_dialog.ok_button.signal_clicked().connect (bind (slot (meter_dialog, &ArdourDialog::stop), 0));
+	meter_dialog.cancel_button.signal_clicked().connect (bind (slot (meter_dialog, &ArdourDialog::stop), -1));
 
-	meter_dialog.set_position (GTK_WIN_POS_MOUSE);
+	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	meter_dialog.realize ();
 	meter_dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 
@@ -351,10 +351,10 @@ Editor::edit_meter_section (MeterSection* section)
 {
 	MeterDialog meter_dialog (*section, _("done"));
 
-	meter_dialog.ok_button.clicked.connect (bind (slot (meter_dialog, &ArdourDialog::stop), 0));
-	meter_dialog.cancel_button.clicked.connect (bind (slot (meter_dialog, &ArdourDialog::stop), -1));
+	meter_dialog.ok_button.signal_clicked().connect (bind (slot (meter_dialog, &ArdourDialog::stop), 0));
+	meter_dialog.cancel_button.signal_clicked().connect (bind (slot (meter_dialog, &ArdourDialog::stop), -1));
 
-	meter_dialog.set_position (GTK_WIN_POS_MOUSE);
+	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	meter_dialog.realize ();
 	meter_dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 
@@ -383,10 +383,10 @@ Editor::edit_tempo_section (TempoSection* section)
 	TempoDialog tempo_dialog (*section, _("done"));
 
 	tempo_dialog.bpm_entry.activate.connect (bind (slot (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.ok_button.clicked.connect (bind (slot (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.cancel_button.clicked.connect (bind (slot (tempo_dialog, &ArdourDialog::stop), -1));
+	tempo_dialog.ok_button.signal_clicked().connect (bind (slot (tempo_dialog, &ArdourDialog::stop), 0));
+	tempo_dialog.cancel_button.signal_clicked().connect (bind (slot (tempo_dialog, &ArdourDialog::stop), -1));
 
-	tempo_dialog.set_position (GTK_WIN_POS_MOUSE);
+	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	tempo_dialog.realize ();
 	tempo_dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 

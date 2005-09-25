@@ -7,7 +7,7 @@
 #include "marker_view.h"
 #include "editor.h"
 #include "i18n.h"
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/gtk_ui.h>
 #include <pbd/error.h>
 
 #include <sys/types.h>
@@ -32,7 +32,7 @@ Editor::add_imageframe_time_axis(std::string track_name, void* src)
 	}
 	else
 	{
-		Gtkmmext::UI::instance()->call_slot(bind(slot(*this, &Editor::handle_new_imageframe_time_axis_view),track_name, src)) ;
+		Gtkmm2ext::UI::instance()->call_slot(bind(slot(*this, &Editor::handle_new_imageframe_time_axis_view),track_name, src)) ;
 	}
 }
 
@@ -90,7 +90,7 @@ Editor::add_imageframe_marker_time_axis(std::string track_name, TimeAxisView* ma
 	// Can we only bind 2 data Items?
 	// @todo we really want to bind the src attribute too, for the moment tracks can only be added remotely,
 	//       so this is not too much of an issue, however will need to be looked at again
-	Gtkmmext::UI::instance()->call_slot(SigC::bind(slot(*this, &Editor::handle_new_imageframe_marker_time_axis_view),track_name, marked_track)) ;
+	Gtkmm2ext::UI::instance()->call_slot(SigC::bind(slot(*this, &Editor::handle_new_imageframe_marker_time_axis_view),track_name, marked_track)) ;
 }
 
 void

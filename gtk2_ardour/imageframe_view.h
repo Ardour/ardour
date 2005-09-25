@@ -22,9 +22,9 @@
 #define __gtk_ardour_imageframe_view_h__
 
 #include <string>
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 #include <list>
 
 #include "enums.h"
@@ -78,7 +78,7 @@ class ImageFrameView : public TimeAxisViewItem
 		 */
 		~ImageFrameView() ;
 		
-		static SigC::Signal1<void,ImageFrameView*> GoingAway;
+		static sigc::signal<void,ImageFrameView*> GoingAway;
     
 		//---------------------------------------------------------------------------------------//
 		// Position and duration Accessors/Mutators
@@ -173,10 +173,10 @@ class ImageFrameView : public TimeAxisViewItem
 		// Emitted Signals
 		
 		/** Emitted when a marker Item is added to this Item */
-		SigC::Signal2<void,MarkerView*,void*> MarkerViewAdded ;
+		sigc::signal<void,MarkerView*,void*> MarkerViewAdded ;
 		
 		/** Emitted when a Marker Item is added to this Item */
-		SigC::Signal2<void,MarkerView*,void*> MarkerViewRemoved ;
+		sigc::signal<void,MarkerView*,void*> MarkerViewRemoved ;
 
 	private:
 		/** the list of MarkerViews associated with this item */

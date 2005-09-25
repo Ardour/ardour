@@ -20,8 +20,8 @@
 
 #include <algorithm>
 
-#include <gtk--.h>
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "marker_time_axis_view.h"
 #include "marker_time_axis.h"

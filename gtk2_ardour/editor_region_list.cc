@@ -28,7 +28,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/session_region.h>
 
-#include <gtkmmext/stop_signal.h>
+#include <gtkmm2ext/stop_signal.h>
 
 #include "editor.h"
 #include "editing.h"
@@ -37,7 +37,7 @@
 
 #include "i18n.h"
 
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Editing;
@@ -356,7 +356,7 @@ Editor::region_list_clear ()
 	/* ---------------------------------------- */
 	/* XXX MAKE ME A FUNCTION (no CTree::clear() in gtkmm 1.2) */
 
-	gtk_ctree_remove_node (region_list_display.gtkobj(), NULL);
+	gtk_ctree_remove_node (region_list_display.gobj(), NULL);
 
 	/* ---------------------------------------- */
 }

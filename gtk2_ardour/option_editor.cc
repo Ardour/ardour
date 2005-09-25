@@ -24,8 +24,8 @@
 #include <ardour/auditioner.h>
 #include <ardour/crossfade.h>
 #include <midi++/manager.h>
-#include <gtkmmext/stop_signal.h>
-#include <gtkmmext/utils.h>
+#include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/utils.h>
 
 #include "public_editor.h"
 #include "mixer_ui.h"
@@ -42,7 +42,7 @@
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Editing;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 
 static const gchar *psync_strings[] = {
 	N_("Internal"),
@@ -153,7 +153,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	set_wmclass (_("ardour_option_editor"), "Ardour");
 
 	set_name ("OptionsWindow");
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	
 	layer_mode_label.set_name ("OptionsLabel");
 	xfade_model_label.set_name ("OptionsLabel");
@@ -411,18 +411,18 @@ OptionEditor::setup_path_options()
 
 	session_raid_entry.activate.connect (slot (*this, &OptionEditor::raid_path_changed));
 
-	session_raid_entry.focus_in_event.connect (slot (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	session_raid_entry.focus_out_event.connect (bind (slot (*this, &OptionEditor::focus_out_event_handler), &OptionEditor::raid_path_changed));
+	session_raid_entry.signal_focus_in_event().connect (slot (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	session_raid_entry.signal_focus_out_event().connect (bind (slot (*this, &OptionEditor::focus_out_event_handler), &OptionEditor::raid_path_changed));
 
 	label = manage(new Label(_("session RAID path")));
 	label->set_name ("OptionsLabel");
 	path_table.attach (*label, 0, 1, 0, 1, 0, 0);
-	path_table.attach (session_raid_entry, 1, 3, 0, 1, GTK_FILL|GTK_EXPAND, 0);
+	path_table.attach (session_raid_entry, 1, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
 
 	label = manage(new Label(_("Native Format")));
 	label->set_name ("OptionsLabel");
 	path_table.attach (*label, 0, 1, 1, 2, 0, 0);
-	path_table.attach (native_format_combo, 1, 3, 1, 2, GTK_FILL|GTK_EXPAND, 0);
+	path_table.attach (native_format_combo, 1, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
 
 	vector<string> nfstrings = internationalize (native_format_strings);
 
@@ -531,8 +531,8 @@ OptionEditor::setup_fade_options ()
 	auto_xfade_button.set_active (Config->get_auto_xfade());
 	/* xfade and layer mode active requires session */
 
-	auto_xfade_button.clicked.connect (slot (*this, &OptionEditor::auto_xfade_clicked));
-	xfade_active_button.clicked.connect (slot (*this, &OptionEditor::xfade_active_clicked));
+	auto_xfade_button.signal_clicked().connect (slot (*this, &OptionEditor::auto_xfade_clicked));
+	xfade_active_button.signal_clicked().connect (slot (*this, &OptionEditor::xfade_active_clicked));
 	
 	Label* short_xfade_label = manage (new Label (_("Short crossfade length (msecs)")));
 	short_xfade_label->set_name ("OptionsLabel");
@@ -629,9 +629,9 @@ OptionEditor::setup_solo_options ()
 	hbox->pack_start (solo_latched_button, false, false);
 	solo_packer.pack_start (*hbox, false, false);
 
-	solo_via_bus_button.clicked.connect 
+	solo_via_bus_button.signal_clicked().connect 
 		(slot (*this, &OptionEditor::solo_via_bus_clicked));
-	solo_latched_button.clicked.connect 
+	solo_latched_button.signal_clicked().connect 
 		(slot (*this, &OptionEditor::solo_latched_clicked));
 
 	solo_packer.show_all ();
@@ -751,11 +751,11 @@ OptionEditor::setup_display_options ()
 	display_packer.pack_start (*hbox, false, false);
 	
 	
-	show_waveforms_button.clicked.connect (slot (*this, &OptionEditor::show_waveforms_clicked));
-	show_waveforms_recording_button.clicked.connect (slot (*this, &OptionEditor::show_waveforms_recording_clicked));
-	show_measures_button.clicked.connect (slot (*this, &OptionEditor::show_measures_clicked));
-	mixer_strip_width_button.clicked.connect (slot (*this, &OptionEditor::strip_width_clicked));
-	follow_playhead_button.clicked.connect (slot (*this, &OptionEditor::follow_playhead_clicked));
+	show_waveforms_button.signal_clicked().connect (slot (*this, &OptionEditor::show_waveforms_clicked));
+	show_waveforms_recording_button.signal_clicked().connect (slot (*this, &OptionEditor::show_waveforms_recording_clicked));
+	show_measures_button.signal_clicked().connect (slot (*this, &OptionEditor::show_measures_clicked));
+	mixer_strip_width_button.signal_clicked().connect (slot (*this, &OptionEditor::strip_width_clicked));
+	follow_playhead_button.signal_clicked().connect (slot (*this, &OptionEditor::follow_playhead_clicked));
 
 	editor.DisplayControlChanged.connect (slot (*this, &OptionEditor::display_control_changed));
 
@@ -877,9 +877,9 @@ OptionEditor::setup_sync_options ()
 	jack_time_master_button.set_name ("OptionEditorToggleButton");
 	smpte_offset_negative_button.set_name ("OptionEditorToggleButton");
 
-	send_mtc_button.unset_flags (GTK_CAN_FOCUS);
-	jack_time_master_button.unset_flags (GTK_CAN_FOCUS);
-	smpte_offset_negative_button.unset_flags (GTK_CAN_FOCUS);
+	send_mtc_button.unset_flags (Gtk::CAN_FOCUS);
+	jack_time_master_button.unset_flags (Gtk::CAN_FOCUS);
+	smpte_offset_negative_button.unset_flags (Gtk::CAN_FOCUS);
 
 	hbox = manage (new HBox);
 	hbox->set_border_width (5);
@@ -924,8 +924,8 @@ OptionEditor::setup_sync_options ()
 	jack_time_master_button.set_active (Config->get_jack_time_master());
 
 	send_mtc_button.button_press_event.connect (bind (slot (*this, &OptionEditor::send_mtc_toggled), &send_mtc_button));
-	jack_time_master_button.clicked.connect (slot (*this, &OptionEditor::jack_time_master_clicked));
-	smpte_offset_negative_button.clicked.connect (slot (*this, &OptionEditor::smpte_offset_negative_clicked));
+	jack_time_master_button.signal_clicked().connect (slot (*this, &OptionEditor::jack_time_master_clicked));
+	smpte_offset_negative_button.signal_clicked().connect (slot (*this, &OptionEditor::smpte_offset_negative_clicked));
 }
 
 void
@@ -1011,9 +1011,9 @@ OptionEditor::setup_midi_options ()
 		*/
 
 		if (strlen (_("offline")) > strlen (_("online"))) {
-			set_usize_to_display_given_text (*tb, _("offline"), 15, 12);
+			set_size_request_to_display_given_text (*tb, _("offline"), 15, 12);
 		} else {
-			set_usize_to_display_given_text (*tb, _("online"), 15, 12);
+			set_size_request_to_display_given_text (*tb, _("online"), 15, 12);
 		}
 
 		tb->set_active (!(*i).second->input()->offline());
@@ -1024,13 +1024,13 @@ OptionEditor::setup_midi_options ()
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
 		tb->button_press_event.connect (bind (slot (*this, &OptionEditor::port_trace_in_toggled), (*i).second, tb));
-		tb->set_usize (10, 10);
+		tb->set_size_request (10, 10);
 		table->attach (*tb, 2, 3, n+2, n+3, 0, 0);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
 		tb->button_press_event.connect (bind (slot (*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
-		tb->set_usize (10, 10);
+		tb->set_size_request (10, 10);
 		table->attach (*tb, 3, 4, n+2, n+3, 0, 0);
 
 		rb = manage (new RadioButton ());
@@ -1314,7 +1314,7 @@ void
 OptionEditor::click_browse_clicked ()
 {
 	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	SigC::Connection c = sfdb.Action.connect (slot (*this, &OptionEditor::click_chosen));
+	sigc::connection c = sfdb.Action.connect (slot (*this, &OptionEditor::click_chosen));
 	
 	sfdb.run (_("Use as click"), false, true);
 	c.disconnect ();
@@ -1339,7 +1339,7 @@ void
 OptionEditor::click_emphasis_browse_clicked ()
 {
 	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	SigC::Connection c = sfdb.Action.connect (slot (*this, &OptionEditor::click_emphasis_chosen));
+	sigc::connection c = sfdb.Action.connect (slot (*this, &OptionEditor::click_emphasis_chosen));
 
 	sfdb.run (_("Use as click emphasis"), false, true);
 	c.disconnect ();
@@ -1574,15 +1574,15 @@ OptionEditor::setup_click_editor ()
 	click_path_entry.activate.connect (slot (*this, &OptionEditor::click_sound_changed));
 	click_emphasis_path_entry.activate.connect (slot (*this, &OptionEditor::click_emphasis_sound_changed));
 
-	click_path_entry.focus_in_event.connect (slot (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	click_path_entry.focus_out_event.connect (bind (slot (*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
-	click_emphasis_path_entry.focus_in_event.connect (slot (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	click_emphasis_path_entry.focus_out_event.connect (bind (slot (*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
+	click_path_entry.signal_focus_in_event().connect (slot (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	click_path_entry.signal_focus_out_event().connect (bind (slot (*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
+	click_emphasis_path_entry.signal_focus_in_event().connect (slot (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	click_emphasis_path_entry.signal_focus_out_event().connect (bind (slot (*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
 
 	click_browse_button.set_name ("EditorGTKButton");
 	click_emphasis_browse_button.set_name ("EditorGTKButton");
-	click_browse_button.clicked.connect (slot (*this, &OptionEditor::click_browse_clicked));
-	click_emphasis_browse_button.clicked.connect (slot (*this, &OptionEditor::click_emphasis_browse_clicked));
+	click_browse_button.signal_clicked().connect (slot (*this, &OptionEditor::click_browse_clicked));
+	click_emphasis_browse_button.signal_clicked().connect (slot (*this, &OptionEditor::click_emphasis_browse_clicked));
 
 	click_packer.set_border_width (12);
 	click_packer.set_spacing (5);
@@ -1595,13 +1595,13 @@ OptionEditor::setup_click_editor ()
 	label = manage(new Label(_("Click audio file")));
 	label->set_name ("OptionsLabel");
 	click_table.attach (*label, 0, 1, 0, 1, 0, 0);
-	click_table.attach (click_path_entry, 1, 2, 0, 1, GTK_FILL|GTK_EXPAND, 0);
+	click_table.attach (click_path_entry, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
 	click_table.attach (click_browse_button, 2, 3, 0, 1, 0, 0);
 	
 	label = manage(new Label(_("Click emphasis audiofile")));
 	label->set_name ("OptionsLabel");
 	click_table.attach (*label, 0, 1, 1, 2, 0, 0);
-	click_table.attach (click_emphasis_path_entry, 1, 2, 1, 2, GTK_FILL|GTK_EXPAND, 0);
+	click_table.attach (click_emphasis_path_entry, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
 	click_table.attach (click_emphasis_browse_button, 2, 3, 1, 2, 0, 0);
 
 	hpacker->set_spacing (10);
@@ -1674,16 +1674,16 @@ OptionEditor::setup_misc_options()
 	misc_packer.set_spacing (3);
 	misc_packer.pack_start (*table, true, true);
 
-	table->attach (hw_monitor_button, 0, 1, 0, 1, GTK_FILL, 0, 8, 0);
-	table->attach (sw_monitor_button, 0, 1, 1, 2, GTK_FILL, 0, 8, 0);
-	table->attach (plugins_stop_button, 0, 1, 2, 3, GTK_FILL, 0, 8, 0);
-	table->attach (plugins_on_rec_button, 0, 1, 3, 4, GTK_FILL, 0, 8, 0);
-	table->attach (verify_remove_last_capture_button, 0, 1, 4, 5, GTK_FILL, 0, 8, 0);
+	table->attach (hw_monitor_button, 0, 1, 0, 1, Gtk::FILL, 0, 8, 0);
+	table->attach (sw_monitor_button, 0, 1, 1, 2, Gtk::FILL, 0, 8, 0);
+	table->attach (plugins_stop_button, 0, 1, 2, 3, Gtk::FILL, 0, 8, 0);
+	table->attach (plugins_on_rec_button, 0, 1, 3, 4, Gtk::FILL, 0, 8, 0);
+	table->attach (verify_remove_last_capture_button, 0, 1, 4, 5, Gtk::FILL, 0, 8, 0);
 
-	table->attach (stop_rec_on_xrun_button, 1, 2, 0, 1, GTK_FILL, 0, 8, 0);
-	table->attach (stop_at_end_button, 1, 2, 1, 2, GTK_FILL, 0, 8, 0);
-	table->attach (debug_keyboard_button, 1, 2, 2, 3, GTK_FILL, 0, 8, 0);
-	table->attach (speed_quieten_button, 1, 2, 3, 4, GTK_FILL, 0, 8, 0);
+	table->attach (stop_rec_on_xrun_button, 1, 2, 0, 1, Gtk::FILL, 0, 8, 0);
+	table->attach (stop_at_end_button, 1, 2, 1, 2, Gtk::FILL, 0, 8, 0);
+	table->attach (debug_keyboard_button, 1, 2, 2, 3, Gtk::FILL, 0, 8, 0);
+	table->attach (speed_quieten_button, 1, 2, 3, 4, Gtk::FILL, 0, 8, 0);
 
 	Gtk::VBox* connect_box = manage (new VBox);
 	connect_box->set_spacing (3);
@@ -1723,19 +1723,19 @@ OptionEditor::setup_misc_options()
 	debug_keyboard_button.set_active (false);
 	speed_quieten_button.set_active (Config->get_quieten_at_speed() != 1.0f);
 
-	hw_monitor_button.clicked.connect (slot (*this, &OptionEditor::hw_monitor_clicked));
-	sw_monitor_button.clicked.connect (slot (*this, &OptionEditor::sw_monitor_clicked));
-	plugins_stop_button.clicked.connect (slot (*this, &OptionEditor::plugins_stop_with_transport_clicked));
-	plugins_on_rec_button.clicked.connect (slot (*this, &OptionEditor::plugins_on_while_recording_clicked));
-	verify_remove_last_capture_button.clicked.connect (slot (*this, &OptionEditor::verify_remove_last_capture_clicked));
-	auto_connect_inputs_button.clicked.connect (slot (*this, &OptionEditor::auto_connect_inputs_clicked));
-	auto_connect_output_physical_button.clicked.connect (slot (*this, &OptionEditor::auto_connect_output_physical_clicked));
-	auto_connect_output_master_button.clicked.connect (slot (*this, &OptionEditor::auto_connect_output_master_clicked));
-	auto_connect_output_manual_button.clicked.connect (slot (*this, &OptionEditor::auto_connect_output_manual_clicked));
-	stop_rec_on_xrun_button.clicked.connect (slot (*this, &OptionEditor::stop_rec_on_xrun_clicked));
-	stop_at_end_button.clicked.connect (slot (*this, &OptionEditor::stop_at_end_clicked));
-	debug_keyboard_button.clicked.connect (slot (*this, &OptionEditor::debug_keyboard_clicked));
-	speed_quieten_button.clicked.connect (slot (*this, &OptionEditor::speed_quieten_clicked));
+	hw_monitor_button.signal_clicked().connect (slot (*this, &OptionEditor::hw_monitor_clicked));
+	sw_monitor_button.signal_clicked().connect (slot (*this, &OptionEditor::sw_monitor_clicked));
+	plugins_stop_button.signal_clicked().connect (slot (*this, &OptionEditor::plugins_stop_with_transport_clicked));
+	plugins_on_rec_button.signal_clicked().connect (slot (*this, &OptionEditor::plugins_on_while_recording_clicked));
+	verify_remove_last_capture_button.signal_clicked().connect (slot (*this, &OptionEditor::verify_remove_last_capture_clicked));
+	auto_connect_inputs_button.signal_clicked().connect (slot (*this, &OptionEditor::auto_connect_inputs_clicked));
+	auto_connect_output_physical_button.signal_clicked().connect (slot (*this, &OptionEditor::auto_connect_output_physical_clicked));
+	auto_connect_output_master_button.signal_clicked().connect (slot (*this, &OptionEditor::auto_connect_output_master_clicked));
+	auto_connect_output_manual_button.signal_clicked().connect (slot (*this, &OptionEditor::auto_connect_output_manual_clicked));
+	stop_rec_on_xrun_button.signal_clicked().connect (slot (*this, &OptionEditor::stop_rec_on_xrun_clicked));
+	stop_at_end_button.signal_clicked().connect (slot (*this, &OptionEditor::stop_at_end_clicked));
+	debug_keyboard_button.signal_clicked().connect (slot (*this, &OptionEditor::debug_keyboard_clicked));
+	speed_quieten_button.signal_clicked().connect (slot (*this, &OptionEditor::speed_quieten_clicked));
 }
 
 void
@@ -1888,14 +1888,14 @@ OptionEditor::setup_keyboard_options ()
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
 		
-	keyboard_mouse_table.attach (*label, 0, 1, 0, 1, GTK_FILL|GTK_EXPAND, 0);
-	keyboard_mouse_table.attach (edit_modifier_combo, 1, 2, 0, 1, GTK_FILL|GTK_EXPAND, 0);
+	keyboard_mouse_table.attach (*label, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
+	keyboard_mouse_table.attach (edit_modifier_combo, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
 
 	label = manage (new Label (_("+ button")));
 	label->set_name ("OptionsLabel");
 	
-	keyboard_mouse_table.attach (*label, 3, 4, 0, 1, GTK_FILL|GTK_EXPAND, 0);
-	keyboard_mouse_table.attach (edit_button_spin, 4, 5, 0, 1, GTK_FILL|GTK_EXPAND, 0);
+	keyboard_mouse_table.attach (*label, 3, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
+	keyboard_mouse_table.attach (edit_button_spin, 4, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
 
 	edit_button_spin.set_name ("OptionsEntry");
 	edit_button_adjustment.set_value (Keyboard::edit_button());
@@ -1918,14 +1918,14 @@ OptionEditor::setup_keyboard_options ()
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
 		
-	keyboard_mouse_table.attach (*label, 0, 1, 1, 2, GTK_FILL|GTK_EXPAND, 0);
-	keyboard_mouse_table.attach (delete_modifier_combo, 1, 2, 1, 2, GTK_FILL|GTK_EXPAND, 0);
+	keyboard_mouse_table.attach (*label, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
+	keyboard_mouse_table.attach (delete_modifier_combo, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
 
 	label = manage (new Label (_("+ button")));
 	label->set_name ("OptionsLabel");
 
-	keyboard_mouse_table.attach (*label, 3, 4, 1, 2, GTK_FILL|GTK_EXPAND, 0);
-	keyboard_mouse_table.attach (delete_button_spin, 4, 5, 1, 2, GTK_FILL|GTK_EXPAND, 0);
+	keyboard_mouse_table.attach (*label, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
+	keyboard_mouse_table.attach (delete_button_spin, 4, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
 
 	delete_button_spin.set_name ("OptionsEntry");
 	delete_button_adjustment.set_value (Keyboard::delete_button());
@@ -1948,8 +1948,8 @@ OptionEditor::setup_keyboard_options ()
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
 	
-	keyboard_mouse_table.attach (*label, 0, 1, 2, 3, GTK_FILL|GTK_EXPAND, 0);
-	keyboard_mouse_table.attach (snap_modifier_combo, 1, 2, 2, 3, GTK_FILL|GTK_EXPAND, 0);
+	keyboard_mouse_table.attach (*label, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, 0);
+	keyboard_mouse_table.attach (snap_modifier_combo, 1, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, 0);
 }
 
 gint
@@ -2038,7 +2038,7 @@ OptionEditor::fixup_combo_size (Gtk::Combo& combo, vector<string>& strings)
 
 	const guint32 FUDGE = 10; // Combo's are stupid - they steal space from the entry for the button
 
-	set_usize_to_display_given_text (*combo.get_entry(), maxstring.c_str(), 10 + FUDGE, 10);
+	set_size_request_to_display_given_text (*combo.get_entry(), maxstring.c_str(), 10 + FUDGE, 10);
 }
 
 void

@@ -6,7 +6,7 @@
 #include "region_selection.h"
 
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 
 
 bool 

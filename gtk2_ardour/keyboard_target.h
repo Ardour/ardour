@@ -23,9 +23,9 @@
 
 #include <map>
 #include <string>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 #include <gdk/gdk.h>
-#include <gtk--/window.h>
+#include <gtkmm/window.h>
 #include <pbd/xml++.h>
 
 #include "keyboard.h"
@@ -39,10 +39,10 @@ class KeyboardTarget
 	KeyboardTarget(Gtk::Window& w, string name);
 	virtual ~KeyboardTarget();
 
-	SigC::Signal0<void> Hiding;
-	SigC::Signal0<void> GoingAway;
+	sigc::signal<void> Hiding;
+	sigc::signal<void> GoingAway;
 
-	typedef SigC::Slot0<void> KeyAction;
+	typedef sigc::slot<void> KeyAction;
 
 	string name() const { return _name; }
 

@@ -39,7 +39,7 @@ ArdourMessage::ArdourMessage (Gtk::Window* parent,
 	label.set_name (X_("PrompterLabel"));
 	
 	ok_button.set_name ("EditorGTKButton");	
-	ok_button.clicked.connect (bind (slot (*this, &ArdourDialog::stop), 1));
+	ok_button.signal_clicked().connect (bind (slot (*this, &ArdourDialog::stop), 1));
 	
 	packer.set_spacing (10);
 	packer.set_border_width (10);
@@ -47,7 +47,7 @@ ArdourMessage::ArdourMessage (Gtk::Window* parent,
 	packer.pack_start (ok_button);
 	
 	set_name (X_("Prompter"));
-	set_position (GTK_WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_MOUSE);
 	set_modal (true);
 	add (packer);
 	show_all ();

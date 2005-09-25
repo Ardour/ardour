@@ -23,7 +23,7 @@
 
 #include <ardour/ardour.h>
 #include <gtk-canvas.h>
-#include <gtk--.h>
+#include <gtkmm.h>
 
 #include "automation_line.h"
 

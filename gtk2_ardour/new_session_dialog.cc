@@ -26,7 +26,7 @@
 #include "prompter.h"
 #include "new_session_dialog.h"
 
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace ARDOUR;
 
@@ -61,7 +61,7 @@ NewSessionDialog::NewSessionDialog (ARDOUR::AudioEngine& engine, bool startup, s
 	set_name ("NewSessionDialog");
 	set_title (_("new session setup"));
 	set_wmclass (_("ardour_new_session"), "Ardour");
-	set_position (GTK_WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_MOUSE);
 	set_keyboard_input (true);
 	set_policy (false, true, false);
 	set_modal (true);
@@ -197,8 +197,8 @@ NewSessionDialog::NewSessionDialog (ARDOUR::AudioEngine& engine, bool startup, s
 //	template_selector.control_made.connect (
 //		slot (*this, &NewSessionDialog::mix_template_control));
 
-	file_selector.cancel_button.clicked.connect (bind (slot (*this, &ArdourDialog::stop), -1));
-	file_selector.op_button.clicked.connect (bind (slot (*this, &ArdourDialog::stop), 0));
+	file_selector.cancel_button.signal_clicked().connect (bind (slot (*this, &ArdourDialog::stop), -1));
+	file_selector.op_button.signal_clicked().connect (bind (slot (*this, &ArdourDialog::stop), 0));
 	file_selector.Expanded.connect (slot (*this, &NewSessionDialog::file_selector_expansion));
 
 	delete_event.connect (slot (*this, &ArdourDialog::wm_close_event));
@@ -277,7 +277,7 @@ NewSessionDialog::mix_template_refiller (CList &clist)
 }
 
 void
-NewSessionDialog::mix_template_shift (Gtkmmext::Selector* selector, Gtkmmext::SelectionResult* res)
+NewSessionDialog::mix_template_shift (Gtkmm2ext::Selector* selector, Gtkmm2ext::SelectionResult* res)
 {
 	if (res && res->text){
 		Session::delete_template(*res->text);
@@ -286,7 +286,7 @@ NewSessionDialog::mix_template_shift (Gtkmmext::Selector* selector, Gtkmmext::Se
 }
 
 void
-NewSessionDialog::mix_template_control (Gtkmmext::Selector* selector, Gtkmmext::SelectionResult* res)
+NewSessionDialog::mix_template_control (Gtkmm2ext::Selector* selector, Gtkmm2ext::SelectionResult* res)
 {
 #if 0
 	if (res && res->text) {
@@ -300,7 +300,7 @@ NewSessionDialog::mix_template_control (Gtkmmext::Selector* selector, Gtkmmext::
 		
 		Gtk::Main::run();
 		
-		if (prompter.status == Gtkmmext::Prompter::entered) {
+		if (prompter.status == Gtkmm2ext::Prompter::entered) {
 			string name;
 
 			prompter.get_result (name);

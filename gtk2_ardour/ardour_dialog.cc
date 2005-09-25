@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include <gtkmmext/doi.h>
+#include <gtkmm2ext/doi.h>
 
 #include "ardour_dialog.h"
 #include "keyboard.h"

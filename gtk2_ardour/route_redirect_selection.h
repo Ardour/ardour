@@ -22,12 +22,12 @@
 #define __ardour_gtk_route_redirect_selection_h__
 
 #include <vector>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 
 #include "redirect_selection.h"
 #include "route_selection.h"
 
-class RouteRedirectSelection : public SigC::Object 
+class RouteRedirectSelection : public sigc::trackable 
 {
   public:
 	RedirectSelection    redirects;
@@ -37,8 +37,8 @@ class RouteRedirectSelection : public SigC::Object
 
 	RouteRedirectSelection& operator= (const RouteRedirectSelection& other);
 
-	SigC::Signal0<void> RedirectsChanged;
-	SigC::Signal0<void> RoutesChanged;
+	sigc::signal<void> RedirectsChanged;
+	sigc::signal<void> RoutesChanged;
 
 	void clear ();
 	bool empty();

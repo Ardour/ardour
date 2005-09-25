@@ -19,7 +19,7 @@
 */
 
 #include <ardour/send.h>
-#include <gtkmmext/doi.h>
+#include <gtkmm2ext/doi.h>
 
 #include "utils.h"
 #include "send_ui.h"

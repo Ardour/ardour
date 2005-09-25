@@ -22,9 +22,9 @@
 #include <sigc++/bind.h>
 
 #include <pbd/lockmonitor.h>
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/utils.h>
-#include <gtkmmext/stop_signal.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/stop_signal.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
@@ -45,8 +45,8 @@
 
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace Gtkmmext;
-using namespace SigC;
+using namespace Gtkmm2ext;
+using namespace sigc;
 
 static const gchar* track_display_titles[] = { 
 	N_("Strips"),
@@ -82,41 +82,41 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	track_menu = 0;
 
 	check_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL, 
-		      gtk_widget_get_colormap (GTK_WIDGET(group_list.gtkobj())),
+		      gtk_widget_get_colormap (GTK_WIDGET(group_list.gobj())),
 		      &check_mask, NULL, (gchar **) check_xpm);
 	empty_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL, 
-		      gtk_widget_get_colormap (GTK_WIDGET(group_list.gtkobj())),
+		      gtk_widget_get_colormap (GTK_WIDGET(group_list.gobj())),
 		      &empty_mask, NULL, (gchar **) empty_xpm);
 
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	set_state (*node);
 
- 	scroller_base.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
+ 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
  	scroller_base.set_name ("MixerWindow");
  	scroller_base.button_release_event.connect (slot (*this, &Mixer_UI::strip_scroller_button_release));
 	// add as last item of strip packer
 	strip_packer.pack_end (scroller_base, true, true);
 
 	scroller.add_with_viewport (strip_packer);
-	scroller.set_policy (GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 	track_display_list.column_titles_active();
 	track_display_list.set_name ("MixerTrackDisplayList");
-	track_display_list.set_shadow_type (GTK_SHADOW_IN);
+	track_display_list.set_shadow_type (Gtk::SHADOW_IN);
 	track_display_list.set_selection_mode (GTK_SELECTION_MULTIPLE);
 	track_display_list.set_reorderable (true);
-	track_display_list.set_usize (75, -1);
+	track_display_list.set_size_request (75, -1);
 	track_display_scroller.add (track_display_list);
-	track_display_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	track_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	snapshot_display.column_titles_active();
 	snapshot_display.set_name ("MixerSnapshotDisplayList");
-	snapshot_display.set_shadow_type (GTK_SHADOW_IN);
+	snapshot_display.set_shadow_type (Gtk::SHADOW_IN);
 	snapshot_display.set_selection_mode (GTK_SELECTION_SINGLE);
 	snapshot_display.set_reorderable (true);
-	snapshot_display.set_usize (75, -1);
+	snapshot_display.set_size_request (75, -1);
 	snapshot_display_scroller.add (snapshot_display);
-	snapshot_display_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	snapshot_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	group_list_button_label.set_text (_("Mix Groups"));
 	group_list_button_label.set_name ("MixerGroupTitleButton");
@@ -125,13 +125,13 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	group_list.column_titles_hide();
 	group_list.set_name ("MixerGroupList");
-	group_list.set_shadow_type (GTK_SHADOW_IN);
+	group_list.set_shadow_type (Gtk::SHADOW_IN);
 	group_list.set_selection_mode (GTK_SELECTION_MULTIPLE);
 	group_list.set_reorderable (false);
-	group_list.set_usize (75, -1);
+	group_list.set_size_request (75, -1);
 	group_list.set_column_auto_resize (0, true);
 	group_list_scroller.add (group_list);
-	group_list_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	group_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	
 	group_list_vbox.pack_start (group_list_button, false, false);
 	group_list_vbox.pack_start (group_list_scroller, true, true);
@@ -147,11 +147,11 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	group_list.cell(0,0).set_pixmap (check_pixmap);
 
 	track_display_frame.set_name("BaseFrame");
-	track_display_frame.set_shadow_type (GTK_SHADOW_IN);
+	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	track_display_frame.add(track_display_scroller);
 
 	group_list_frame.set_name ("BaseFrame");
-	group_list_frame.set_shadow_type (GTK_SHADOW_IN);
+	group_list_frame.set_shadow_type (Gtk::SHADOW_IN);
 	group_list_frame.add (group_list_vbox);
 
 	rhs_pane1.add1 (track_display_frame);
@@ -193,7 +193,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	delete_event.connect (bind (slot (just_hide_it), 
 						    static_cast<Gtk::Window *>(this)));
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	snapshot_display.select_row.connect (slot (*this, &Mixer_UI::snapshot_display_selected));
 
@@ -202,7 +202,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	track_display_list.row_move.connect (slot (*this, &Mixer_UI::queue_track_display_reordered));
 	track_display_list.click_column.connect (slot (*this, &Mixer_UI::track_column_click));
 
-	group_list_button.clicked.connect (slot (*this, &Mixer_UI::group_list_button_clicked));
+	group_list_button.signal_clicked().connect (slot (*this, &Mixer_UI::group_list_button_clicked));
 	group_list.button_press_event.connect (slot (*this, &Mixer_UI::group_list_button_press_event));
 	group_list.select_row.connect (slot (*this, &Mixer_UI::group_selected));
 	group_list.unselect_row.connect (slot (*this, &Mixer_UI::group_unselected));
@@ -276,7 +276,7 @@ Mixer_UI::add_strip (Route* route)
 	strip->button_release_event.connect (bind (slot (*this, &Mixer_UI::strip_button_release_event), strip));
 
 //	if (width() < gdk_screen_width()) {
-//		set_usize (width() + (_strip_width == Wide ? 75 : 50), height());
+//		set_size_request (width() + (_strip_width == Wide ? 75 : 50), height());
 //	}
 }
 
@@ -704,7 +704,7 @@ Mixer_UI::new_mix_group ()
 	
 	Main::run ();
 	
-	if (prompter.status != Gtkmmext::Prompter::entered) {
+	if (prompter.status != Gtkmm2ext::Prompter::entered) {
 		return;
 	}
 	
@@ -973,11 +973,11 @@ Mixer_UI::get_state (void)
 		snprintf(buf, sizeof(buf), "%d", yoff);
 		geometry->add_property(X_("y_off"), string(buf));
 
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane1)->gtkobj()));
+		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane1)->gobj()));
 		geometry->add_property(X_("mixer_rhs_pane1_pos"), string(buf));
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane2)->gtkobj()));
+		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane2)->gobj()));
 		geometry->add_property(X_("mixer_rhs_pane2_pos"), string(buf));
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&list_hpane)->gtkobj()));
+		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&list_hpane)->gobj()));
 		geometry->add_property(X_("mixer_list_hpane_pos"), string(buf));
 
 		node->add_child_nocopy (*geometry);
@@ -1021,7 +1021,7 @@ Mixer_UI::pane_allocation_handler (GtkAllocation *alloc, Gtk::Paned* which)
 			pos = atoi (prop->value());
 		}
 
-		if ((done[0] = GTK_WIDGET(rhs_pane1.gtkobj())->allocation.height > pos)) {
+		if ((done[0] = GTK_WIDGET(rhs_pane1.gobj())->allocation.height > pos)) {
 			rhs_pane1.set_position (pos);
 		}
 
@@ -1038,7 +1038,7 @@ Mixer_UI::pane_allocation_handler (GtkAllocation *alloc, Gtk::Paned* which)
 			pos = atoi (prop->value());
 		}
 
-		if ((done[1] = GTK_WIDGET(rhs_pane2.gtkobj())->allocation.height > pos)) {
+		if ((done[1] = GTK_WIDGET(rhs_pane2.gobj())->allocation.height > pos)) {
 			rhs_pane2.set_position (pos);
 		}
 
@@ -1055,7 +1055,7 @@ Mixer_UI::pane_allocation_handler (GtkAllocation *alloc, Gtk::Paned* which)
 			pos = atoi (prop->value());
 		}
 
-		if ((done[2] = GTK_WIDGET(list_hpane.gtkobj())->allocation.width > pos)) {
+		if ((done[2] = GTK_WIDGET(list_hpane.gobj())->allocation.width > pos)) {
 			list_hpane.set_position (pos);
 		}
 	}

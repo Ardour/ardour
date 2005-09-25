@@ -24,7 +24,7 @@
 #include <vector>
 #include <list>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
 
 #include <ardour/types.h>

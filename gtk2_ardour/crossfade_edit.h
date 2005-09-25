@@ -3,9 +3,9 @@
 
 #include <list>
 
-#include <gtk--/box.h>
-#include <gtk--/button.h>
-#include <gtk--/radiobutton.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/radiobutton.h>
 #include <gtk-canvas.h>
 
 #include <ardour/curve.h>

@@ -25,14 +25,14 @@
 #include <iostream>
 #include <cmath>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <pbd/error.h>
 #include <pbd/basename.h>
 #include <pbd/fastlog.h>
-#include <gtkmmext/pix.h>
-#include <gtkmmext/utils.h>
-#include <gtkmmext/click_box.h>
-#include <gtkmmext/tearoff.h>
+#include <gtkmm2ext/pix.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/tearoff.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/ardour.h>
@@ -47,9 +47,9 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 
 int	
 ARDOUR_UI::setup_windows ()
@@ -118,7 +118,7 @@ ARDOUR_UI::setup_adjustables ()
 
 	mmc_id_button->adjustment.value_changed.connect (slot (*this,&ARDOUR_UI::mmc_device_id_adjusted));
 
-	adjuster_table.attach (*online_control_button, 0, 2, 1, 2, GTK_FILL|GTK_EXPAND, 0, 5, 5);
+	adjuster_table.attach (*online_control_button, 0, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, 0, 5, 5);
 	adjuster_table.attach (*mmc_id_button, 2, 3, 1, 2, 0, 0, 5, 5);
 }
 
@@ -194,7 +194,7 @@ ARDOUR_UI::setup_transport ()
 	transport_base.set_name ("TransportBase");
 	transport_base.add (transport_hbox);
 
-	transport_frame.set_shadow_type (GTK_SHADOW_OUT);
+	transport_frame.set_shadow_type (Gtk::SHADOW_OUT);
 	transport_frame.set_name ("BaseFrame");
 	transport_frame.add (transport_base);
 
@@ -204,13 +204,13 @@ ARDOUR_UI::setup_transport ()
 						 static_cast<Gtk::Widget*> (&transport_frame), 1));
 
 
-	goto_start_button.add (*(manage (new Gtk::Pixmap (start_xpm))));
-	goto_end_button.add (*(manage (new Gtk::Pixmap (end_xpm))));
-	roll_button.add (*(manage (new Gtk::Pixmap (arrow_xpm))));
-	stop_button.add (*(manage (new Gtk::Pixmap (stop_xpm))));
-	play_selection_button.add (*(manage (new Gtk::Pixmap (play_selection_xpm))));
-	rec_button.add (*(manage (new Gtk::Pixmap (rec_xpm))));
-	auto_loop_button.add (*(manage (new Gtk::Pixmap (loop_xpm))));
+	goto_start_button.add (*(manage (new Gtk::Image (start_xpm))));
+	goto_end_button.add (*(manage (new Gtk::Image (end_xpm))));
+	roll_button.add (*(manage (new Gtk::Image (arrow_xpm))));
+	stop_button.add (*(manage (new Gtk::Image (stop_xpm))));
+	play_selection_button.add (*(manage (new Gtk::Image (play_selection_xpm))));
+	rec_button.add (*(manage (new Gtk::Image (rec_xpm))));
+	auto_loop_button.add (*(manage (new Gtk::Image (loop_xpm))));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (roll_button, _("Play from playhead"));
 	ARDOUR_UI::instance()->tooltips().set_tip (stop_button, _("Stop playback"));
@@ -230,9 +230,9 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_style_button, _("Select sprung or wheel behaviour"));
 	ARDOUR_UI::instance()->tooltips().set_tip (speed_display_box, _("Current transport speed"));
 	
-	shuttle_box.set_flags (GTK_CAN_FOCUS);
-	shuttle_box.set_events (shuttle_box.get_events() | GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK|GDK_BUTTON_RELEASE_MASK|GDK_BUTTON_PRESS_MASK|GDK_POINTER_MOTION_MASK);
-	shuttle_box.set_usize (100, 15);
+	shuttle_box.set_flags (Gtk::CAN_FOCUS);
+	shuttle_box.set_events (shuttle_box.get_events() | GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK);
+	shuttle_box.set_size_request (100, 15);
 
 	shuttle_box.set_name ("TransportButton");
 	goto_start_button.set_name ("TransportButton");
@@ -250,20 +250,20 @@ ARDOUR_UI::setup_transport ()
 	click_button.set_name ("TransportButton");
 	follow_button.set_name ("TransportButton");
 	
-	goto_start_button.unset_flags (GTK_CAN_FOCUS);
-	goto_end_button.unset_flags (GTK_CAN_FOCUS);
-	roll_button.unset_flags (GTK_CAN_FOCUS);
-	stop_button.unset_flags (GTK_CAN_FOCUS);
-	play_selection_button.unset_flags (GTK_CAN_FOCUS);
-	rec_button.unset_flags (GTK_CAN_FOCUS);
-	auto_loop_button.unset_flags (GTK_CAN_FOCUS);
-	auto_return_button.unset_flags (GTK_CAN_FOCUS);
-	auto_play_button.unset_flags (GTK_CAN_FOCUS);
-	auto_input_button.unset_flags (GTK_CAN_FOCUS);
-	punch_out_button.unset_flags (GTK_CAN_FOCUS);
-	punch_in_button.unset_flags (GTK_CAN_FOCUS);
-	click_button.unset_flags (GTK_CAN_FOCUS);
-	follow_button.unset_flags (GTK_CAN_FOCUS);
+	goto_start_button.unset_flags (Gtk::CAN_FOCUS);
+	goto_end_button.unset_flags (Gtk::CAN_FOCUS);
+	roll_button.unset_flags (Gtk::CAN_FOCUS);
+	stop_button.unset_flags (Gtk::CAN_FOCUS);
+	play_selection_button.unset_flags (Gtk::CAN_FOCUS);
+	rec_button.unset_flags (Gtk::CAN_FOCUS);
+	auto_loop_button.unset_flags (Gtk::CAN_FOCUS);
+	auto_return_button.unset_flags (Gtk::CAN_FOCUS);
+	auto_play_button.unset_flags (Gtk::CAN_FOCUS);
+	auto_input_button.unset_flags (Gtk::CAN_FOCUS);
+	punch_out_button.unset_flags (Gtk::CAN_FOCUS);
+	punch_in_button.unset_flags (Gtk::CAN_FOCUS);
+	click_button.unset_flags (Gtk::CAN_FOCUS);
+	follow_button.unset_flags (Gtk::CAN_FOCUS);
 	
 	goto_start_button.set_events (goto_start_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
 	goto_end_button.set_events (goto_end_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
@@ -280,8 +280,8 @@ ARDOUR_UI::setup_transport ()
 	punch_in_button.set_events (punch_in_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
 	punch_out_button.set_events (punch_out_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
 
-	goto_start_button.clicked.connect (slot (*this,&ARDOUR_UI::transport_goto_start));
-	goto_end_button.clicked.connect (slot (*this,&ARDOUR_UI::transport_goto_end));
+	goto_start_button.signal_clicked().connect (slot (*this,&ARDOUR_UI::transport_goto_start));
+	goto_end_button.signal_clicked().connect (slot (*this,&ARDOUR_UI::transport_goto_end));
 
 	roll_button.button_release_event.connect (slot (*this,&ARDOUR_UI::mouse_transport_roll));
 	play_selection_button.button_release_event.connect (slot (*this,&ARDOUR_UI::mouse_transport_play_selection));
@@ -322,11 +322,11 @@ ARDOUR_UI::setup_transport ()
 	punch_in_button.toggled.connect (slot (*this,&ARDOUR_UI::toggle_punch_in));
 	punch_out_button.toggled.connect (slot (*this,&ARDOUR_UI::toggle_punch_out));
 
-	preroll_button.unset_flags (GTK_CAN_FOCUS);
+	preroll_button.unset_flags (Gtk::CAN_FOCUS);
 	preroll_button.set_events (preroll_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
 	preroll_button.set_name ("TransportButton");
 
-	postroll_button.unset_flags (GTK_CAN_FOCUS);
+	postroll_button.unset_flags (Gtk::CAN_FOCUS);
 	postroll_button.set_events (postroll_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
 	postroll_button.set_name ("TransportButton");
 
@@ -356,24 +356,24 @@ ARDOUR_UI::setup_transport ()
 	Gtk::VBox*  svbox = manage (new VBox);
 	Gtk::HBox*  shbox = manage (new HBox);
 
-	sframe->set_shadow_type (GTK_SHADOW_IN);
+	sframe->set_shadow_type (Gtk::SHADOW_IN);
 	sframe->add (shuttle_box);
 
 	shuttle_box.set_name (X_("ShuttleControl"));
 
 	speed_display_box.add (speed_display_label);
-	set_usize_to_display_given_text (speed_display_box, _("stopped"), 2, 2);
+	set_size_request_to_display_given_text (speed_display_box, _("stopped"), 2, 2);
 	speed_display_box.set_name (X_("ShuttleDisplay"));
 
 	shuttle_units_button.set_name (X_("ShuttleButton"));
-	shuttle_units_button.clicked.connect (slot (*this, &ARDOUR_UI::shuttle_unit_clicked));
+	shuttle_units_button.signal_clicked().connect (slot (*this, &ARDOUR_UI::shuttle_unit_clicked));
 	
 	shuttle_style_button.set_name (X_("ShuttleButton"));
-	shuttle_style_button.clicked.connect (slot (*this, &ARDOUR_UI::shuttle_style_clicked));
+	shuttle_style_button.signal_clicked().connect (slot (*this, &ARDOUR_UI::shuttle_style_clicked));
 
 	Gtk::Frame* sdframe = manage (new Frame);
 
-	sdframe->set_shadow_type (GTK_SHADOW_IN);
+	sdframe->set_shadow_type (Gtk::SHADOW_IN);
 	sdframe->add (speed_display_box);
 
 	shbox->pack_start (*sdframe, false, false);
@@ -483,7 +483,7 @@ ARDOUR_UI::_auditioning_changed (bool onoff)
 void
 ARDOUR_UI::auditioning_changed (bool onoff)
 {
-	Gtkmmext::UI::instance()->call_slot(bind (slot (*this, &ARDOUR_UI::_auditioning_changed), onoff));
+	Gtkmm2ext::UI::instance()->call_slot(bind (slot (*this, &ARDOUR_UI::_auditioning_changed), onoff));
 }
 
 void
@@ -513,11 +513,11 @@ ARDOUR_UI::solo_blink (bool onoff)
 		if (onoff) {
 			solo_alert_button.set_state (GTK_STATE_ACTIVE);
 		} else {
-			solo_alert_button.set_state (GTK_STATE_NORMAL);
+			solo_alert_button.set_state (Gtk::STATE_NORMAL);
 		}
 	} else {
 		solo_alert_button.set_active (false);
-		solo_alert_button.set_state (GTK_STATE_NORMAL);
+		solo_alert_button.set_state (Gtk::STATE_NORMAL);
 	}
 }
 
@@ -532,11 +532,11 @@ ARDOUR_UI::audition_blink (bool onoff)
 		if (onoff) {
 			auditioning_alert_button.set_state (GTK_STATE_ACTIVE);
 		} else {
-			auditioning_alert_button.set_state (GTK_STATE_NORMAL);
+			auditioning_alert_button.set_state (Gtk::STATE_NORMAL);
 		}
 	} else {
 		auditioning_alert_button.set_active (false);
-		auditioning_alert_button.set_state (GTK_STATE_NORMAL);
+		auditioning_alert_button.set_state (Gtk::STATE_NORMAL);
 	}
 }
 

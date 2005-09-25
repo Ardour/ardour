@@ -21,7 +21,7 @@
 #ifndef __ardour_marker_time_axis_h__
 #define __ardour_marker_time_axis_h__
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
 
 #include "ardour_dialog.h"

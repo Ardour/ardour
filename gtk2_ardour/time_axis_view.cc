@@ -26,9 +26,9 @@
 
 #include <pbd/error.h>
 
-#include <gtkmmext/utils.h>
-#include <gtkmmext/selector.h>
-#include <gtkmmext/stop_signal.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/selector.h>
+#include <gtkmm2ext/stop_signal.h>
 
 #include <ardour/session.h>
 #include <ardour/utils.h>
@@ -47,7 +47,7 @@
 #include "i18n.h"
 
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Editing;
 
@@ -58,7 +58,7 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 	  editor(ed),
 	  controls_table (2, 9)
 {
-	canvas_display = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(canvas->gtkobj())),
+	canvas_display = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(canvas->gobj())),
 					      gtk_canvas_group_get_type(),
 					      "x", 0.0,
 					      "y", 0.0,
@@ -89,10 +89,10 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 	name_entry.button_release_event.connect (slot (*this, &TimeAxisView::name_entry_button_release));
 	name_entry.button_press_event.connect (slot (*this, &TimeAxisView::name_entry_button_press));
 	
-	name_entry.focus_in_event.connect (slot (ARDOUR_UI::generic_focus_in_event));
-	name_entry.focus_out_event.connect (slot (ARDOUR_UI::generic_focus_out_event));
+	name_entry.signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
+	name_entry.signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
 
-	Gtkmmext::set_usize_to_display_given_text (name_entry, N_("gTortnam"), 10, 10); // just represents a short name
+	Gtkmm2ext::set_size_request_to_display_given_text (name_entry, N_("gTortnam"), 10, 10); // just represents a short name
 
 	name_label.set_name ("TrackLabel");
 	name_label.set_alignment (0.0, 0.5);
@@ -115,7 +115,7 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 	controls_table.set_homogeneous (true);
 	controls_table.show ();
 
-	controls_table.attach (name_hbox, 0, 5, 0, 1, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND);
+	controls_table.attach (name_hbox, 0, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	controls_table.show ();
 
@@ -124,8 +124,8 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 
 	controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_ebox.add (controls_vbox);
-	controls_ebox.add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
-	controls_ebox.set_flags (GTK_CAN_FOCUS);
+	controls_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	controls_ebox.set_flags (Gtk::CAN_FOCUS);
 
 	controls_ebox.button_release_event.connect (slot (*this, &TimeAxisView::controls_ebox_button_release));
 	
@@ -136,7 +136,7 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 
 	controls_frame.add (controls_hbox);
 	controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
-	controls_frame.set_shadow_type (GTK_SHADOW_OUT);
+	controls_frame.set_shadow_type (Gtk::SHADOW_OUT);
 }
 
 TimeAxisView::~TimeAxisView()
@@ -342,7 +342,7 @@ void
 TimeAxisView::set_height (TrackHeight h)
 {
 	height = (guint32) h;
-	controls_frame.set_usize (-1, height);
+	controls_frame.set_size_request (-1, height);
 
  	if (GTK_OBJECT_FLAGS(GTK_OBJECT(selection_group)) & GTK_CANVAS_ITEM_VISIBLE) {
 		/* resize the selection rect */

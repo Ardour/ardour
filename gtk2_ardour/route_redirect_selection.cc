@@ -31,7 +31,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 
 RouteRedirectSelection&
 RouteRedirectSelection::operator= (const RouteRedirectSelection& other)

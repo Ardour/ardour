@@ -21,12 +21,12 @@
 #include "prompter.h"
 #include "ardour_ui.h"
 
-using namespace SigC;
+using namespace sigc;
 
 ArdourPrompter::ArdourPrompter (bool modal)
-	: Gtkmmext::Prompter (modal)
+	: Gtkmm2ext::Prompter (modal)
 {
-	the_entry().focus_in_event.connect (slot (ARDOUR_UI::generic_focus_in_event));
-	the_entry().focus_out_event.connect (slot (ARDOUR_UI::generic_focus_out_event));
+	the_entry().signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
+	the_entry().signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
 }
 

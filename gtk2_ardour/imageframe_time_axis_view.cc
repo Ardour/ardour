@@ -20,9 +20,9 @@
 
 #include <algorithm>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "imageframe_time_axis_view.h"
 #include "imageframe_time_axis_group.h"

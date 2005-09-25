@@ -1,6 +1,6 @@
 #include <cstdio> // for snprintf, grrr 
 
-#include <gtkmmext/utils.h>
+#include <gtkmm2ext/utils.h>
 
 #include "tempo_dialog.h"
 
@@ -74,16 +74,16 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 		when_bar_label.set_name ("MetricLabel");
 		when_beat_label.set_name ("MetricLabel");
 		
-		Gtkmmext::set_usize_to_display_given_text (when_bar_entry, "999g", 5, 7);
-		Gtkmmext::set_usize_to_display_given_text (when_beat_entry, "999g", 5, 7);
+		Gtkmm2ext::set_size_request_to_display_given_text (when_bar_entry, "999g", 5, 7);
+		Gtkmm2ext::set_size_request_to_display_given_text (when_beat_entry, "999g", 5, 7);
 		
 		when_table.set_homogeneous (true);
 		when_table.set_row_spacings (2);
 		when_table.set_col_spacings (2);
 		when_table.set_border_width (5);
 		
-		when_table.attach (when_bar_label, 0, 1, 0, 1, 0, GTK_FILL|GTK_EXPAND);
-		when_table.attach (when_bar_entry, 0, 1, 1, 2, 0, GTK_FILL|GTK_EXPAND);
+		when_table.attach (when_bar_label, 0, 1, 0, 1, 0, Gtk::FILL|Gtk::EXPAND);
+		when_table.attach (when_bar_entry, 0, 1, 1, 2, 0, Gtk::FILL|Gtk::EXPAND);
 		
 		when_table.attach (when_beat_label, 1, 2, 0, 1, 0, 0);
 		when_table.attach (when_beat_entry, 1, 2, 1, 2, 0, 0);
@@ -172,7 +172,7 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	snprintf (buf, sizeof (buf), "%.2f", bpb);
 	bpb_entry.set_text (buf);
 	bpb_entry.select_region (0, -1);
-	Gtkmmext::set_usize_to_display_given_text (bpb_entry, "999999g", 5, 5);
+	Gtkmm2ext::set_size_request_to_display_given_text (bpb_entry, "999999g", 5, 5);
 
 	
 	strings.push_back (_("whole (1)"));
@@ -203,7 +203,7 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		note_types.get_entry()->set_text(_("quarter (4)"));
 		
 	/* strings.back() just happens to be the longest one to display */
-	Gtkmmext::set_usize_to_display_given_text (*(note_types.get_entry()), strings.back(), 7, 7);
+	Gtkmm2ext::set_size_request_to_display_given_text (*(note_types.get_entry()), strings.back(), 7, 7);
 
 	hspacer1.set_border_width (5);
 	hspacer1.pack_start (note_types, false, false);
@@ -239,16 +239,16 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		when_bar_label.set_name ("MetricLabel");
 		when_beat_label.set_name ("MetricLabel");
 		
-		Gtkmmext::set_usize_to_display_given_text (when_bar_entry, "999g", 5, 7);
-		Gtkmmext::set_usize_to_display_given_text (when_beat_entry, "999g", 5, 7);
+		Gtkmm2ext::set_size_request_to_display_given_text (when_bar_entry, "999g", 5, 7);
+		Gtkmm2ext::set_size_request_to_display_given_text (when_beat_entry, "999g", 5, 7);
 		
 		when_table.set_homogeneous (true);
 		when_table.set_row_spacings (2);
 		when_table.set_col_spacings (2);
 		when_table.set_border_width (5);
 		
-		when_table.attach (when_bar_label, 0, 1, 0, 1, 0, GTK_FILL|GTK_EXPAND);
-		when_table.attach (when_bar_entry, 0, 1, 1, 2, 0, GTK_FILL|GTK_EXPAND);
+		when_table.attach (when_bar_label, 0, 1, 0, 1, 0, Gtk::FILL|Gtk::EXPAND);
+		when_table.attach (when_bar_entry, 0, 1, 1, 2, 0, Gtk::FILL|Gtk::EXPAND);
 		
 		when_table.attach (when_beat_label, 1, 2, 0, 1, 0, 0);
 		when_table.attach (when_beat_entry, 1, 2, 1, 2, 0, 0);

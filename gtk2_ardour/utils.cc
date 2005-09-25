@@ -21,13 +21,13 @@
 #include <cstdlib>
 #include <cctype>
 #include <libart_lgpl/art_misc.h>
-#include <gtk--/window.h>
-#include <gtk--/combo.h>
-#include <gtk--/label.h>
-#include <gtk--/paned.h>
+#include <gtkmm/window.h>
+#include <gtkmm/combo.h>
+#include <gtkmm/label.h>
+#include <gtkmm/paned.h>
 #include <gtk/gtkpaned.h>
 
-#include <gtkmmext/utils.h>
+#include <gtkmm2ext/utils.h>
 
 #include "ardour_ui.h"
 #include "utils.h"
@@ -423,11 +423,11 @@ get_font_for_style (string widgetname)
 	foobar.set_name (widgetname);
 	foobar.ensure_style();
 
-	if (foobar.get_style() == 0 || foobar.get_style()->gtkobj()->rc_style == 0 || foobar.get_style()->gtkobj()->rc_style->font_name == 0) {
+	if (foobar.get_style() == 0 || foobar.get_style()->gobj()->rc_style == 0 || foobar.get_style()->gobj()->rc_style->font_name == 0) {
 		return "fixed";
 	}
 
-	string str = foobar.get_style()->gtkobj()->rc_style->font_name;
+	string str = foobar.get_style()->gobj()->rc_style->font_name;
 
 	if (str.empty()) {
 		return "fixed"; // standard X Window fallback font
@@ -438,7 +438,7 @@ get_font_for_style (string widgetname)
 gint
 pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
 {
-	if (ev->window != Gtkmmext::get_paned_handle (*pane)) {
+	if (ev->window != Gtkmm2ext::get_paned_handle (*pane)) {
 		return FALSE;
 	}
 
@@ -447,7 +447,7 @@ pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
 		gint pos;
 		gint cmp;
 
-		pos = Gtkmmext::gtk_paned_get_position (pane->gtkobj());
+		pos = Gtkmm2ext::gtk_paned_get_position (pane->gobj());
 
 		if (dynamic_cast<VPaned*>(pane)) {
 			cmp = pane->height();
@@ -501,12 +501,12 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 	foo.set_name (style);
 	foo.ensure_style ();
 	
-	GtkRcStyle* waverc = foo.get_style()->gtkobj()->rc_style;
+	GtkRcStyle* waverc = foo.get_style()->gobj()->rc_style;
 
 	if (waverc) {
-		r = waverc->fg[GTK_STATE_NORMAL].red / 257;
-		g = waverc->fg[GTK_STATE_NORMAL].green / 257;
-		b = waverc->fg[GTK_STATE_NORMAL].blue / 257;
+		r = waverc->fg[Gtk::STATE_NORMAL].red / 257;
+		g = waverc->fg[Gtk::STATE_NORMAL].green / 257;
+		b = waverc->fg[Gtk::STATE_NORMAL].blue / 257;
 
 		/* what a hack ... "a" is for "active" */
 

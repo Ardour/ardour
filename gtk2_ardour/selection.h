@@ -21,7 +21,7 @@
 #ifndef __ardour_gtk_selection_h__
 #define __ardour_gtk_selection_h__
 
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 
 #include "time_selection.h"
 #include "region_selection.h"
@@ -35,7 +35,7 @@ class TimeAxisView;
 class AudioRegionView;
 class Selectable;
 
-class Selection : public SigC::Object 
+class Selection : public sigc::trackable 
 {
   public:
 	enum SelectionType {
@@ -58,13 +58,13 @@ class Selection : public SigC::Object
 
 	Selection& operator= (const Selection& other);
 
-	SigC::Signal0<void> RegionsChanged;
-	SigC::Signal0<void> TracksChanged;
-	SigC::Signal0<void> TimeChanged;
-	SigC::Signal0<void> LinesChanged;
-	SigC::Signal0<void> PlaylistsChanged;
-	SigC::Signal0<void> RedirectsChanged;
-	SigC::Signal0<void> PointsChanged;
+	sigc::signal<void> RegionsChanged;
+	sigc::signal<void> TracksChanged;
+	sigc::signal<void> TimeChanged;
+	sigc::signal<void> LinesChanged;
+	sigc::signal<void> PlaylistsChanged;
+	sigc::signal<void> RedirectsChanged;
+	sigc::signal<void> PointsChanged;
 
 	void clear ();
 	bool empty();

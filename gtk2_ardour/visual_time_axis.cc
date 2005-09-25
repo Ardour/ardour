@@ -27,11 +27,11 @@
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
 
-#include <gtkmmext/utils.h>
-#include <gtkmmext/selector.h>
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/stop_signal.h>
-#include <gtkmmext/choice.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/selector.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/choice.h>
 
 #include <ardour/session.h>
 #include <ardour/utils.h>
@@ -54,7 +54,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 using namespace Gtk;
 
 //XXX should really have a common home...
@@ -103,22 +103,22 @@ VisualTimeAxis::VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Sessi
 	size_button.set_name("TrackSizeButton") ;
 	visual_button.set_name("TrackVisualButton") ;
 	hide_button.set_name("TrackRemoveButton") ;
-	hide_button.add(*(Gtk::manage(new Gtk::Pixmap(small_x_xpm)))) ;
+	hide_button.add(*(Gtk::manage(new Gtk::Image(small_x_xpm)))) ;
 	size_button.button_release_event.connect (slot (*this, &VisualTimeAxis::size_click)) ;
-	visual_button.clicked.connect (slot (*this, &VisualTimeAxis::visual_click)) ;
-	hide_button.clicked.connect (slot (*this, &VisualTimeAxis::hide_click)) ;
+	visual_button.signal_clicked().connect (slot (*this, &VisualTimeAxis::visual_click)) ;
+	hide_button.signal_clicked().connect (slot (*this, &VisualTimeAxis::hide_click)) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(size_button,_("Display Height")) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(visual_button, _("Visual options")) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(hide_button, _("Hide this track")) ;
 		
-	controls_table.attach (hide_button, 0, 1, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND);
-	controls_table.attach (visual_button, 1, 2, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND);
-	controls_table.attach (size_button, 2, 3, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND);
+	controls_table.attach (hide_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (visual_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (size_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	/* remove focus from the buttons */
-	size_button.unset_flags(GTK_CAN_FOCUS) ;
-	hide_button.unset_flags(GTK_CAN_FOCUS) ;
-	visual_button.unset_flags(GTK_CAN_FOCUS) ;
+	size_button.unset_flags(Gtk::CAN_FOCUS) ;
+	hide_button.unset_flags(Gtk::CAN_FOCUS) ;
+	visual_button.unset_flags(Gtk::CAN_FOCUS) ;
 	
 	set_height(Normal) ;
 }
@@ -255,7 +255,7 @@ VisualTimeAxis::choose_time_axis_color()
 	current[2] = _color.get_blue() / 65535.0 ;
 	current[3] = 1.0 ;
 	
-	color = Gtkmmext::UI::instance()->get_color(_("ardour: color selection"),picked, current) ;
+	color = Gtkmm2ext::UI::instance()->get_color(_("ardour: color selection"),picked, current) ;
 	
 	if (picked)
 	{
@@ -299,7 +299,7 @@ VisualTimeAxis::remove_this_time_axis(void* src)
 	choices.push_back (_("Yes, remove it."));
 	choices.push_back (_("No, do nothing."));
 
-	Gtkmmext::Choice prompter (prompt, choices);
+	Gtkmm2ext::Choice prompter (prompt, choices);
 
 	prompter.chosen.connect (Gtk::Main::quit.slot());
 	prompter.show_all ();
@@ -372,7 +372,7 @@ VisualTimeAxis::finish_time_axis_rename()
 	name_prompter->hide_all () ;
 	ARDOUR_UI::instance()->allow_focus (false) ;
 	
-	if (name_prompter->status == Gtkmmext::Prompter::cancelled)
+	if (name_prompter->status == Gtkmm2ext::Prompter::cancelled)
 	{
 		return;
 	}

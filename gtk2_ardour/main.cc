@@ -41,9 +41,9 @@
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
 
-#include <gtk--/main.h>
-#include <gtkmmext/popup.h>
-#include <gtkmmext/utils.h>
+#include <gtkmm/main.h>
+#include <gtkmm2ext/popup.h>
+#include <gtkmm2ext/utils.h>
 
 #include "version.h"
 #include "ardour_ui.h"
@@ -54,7 +54,7 @@
 using namespace Gtk;
 using namespace GTK_ARDOUR;
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 
 Transmitter  error (Transmitter::Error);
 Transmitter  info (Transmitter::Info);
@@ -306,13 +306,13 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	win.set_border_width (7);
 	win.add (vpacker);
 	win.show_all ();
-	win.delete_event.connect (SigC::slot (jack_fooey));
-	win.add_events (GDK_BUTTON_RELEASE_MASK|GDK_BUTTON_PRESS_MASK);
+	win.delete_event.connect (sigc::ptr_fun (jack_fooey));
+	win.add_events (Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK);
 	win.set_position (GTK_WIN_POS_CENTER);
 	win.realize ();
 	win.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 
-	ok.clicked.connect (SigC::slot (jack_foobar));
+	ok.signal_clicked().connect (sigc::ptr_fun (jack_foobar));
 	
 	ok.grab_focus ();
 

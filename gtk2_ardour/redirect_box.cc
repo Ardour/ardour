@@ -23,12 +23,12 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/utils.h>
-#include <gtkmmext/choice.h>
-#include <gtkmmext/utils.h>
-#include <gtkmmext/stop_signal.h>
-#include <gtkmmext/doi.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/choice.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/doi.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -60,10 +60,10 @@
 
 #include "i18n.h"
 
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 
 
 
@@ -90,12 +90,12 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	redirect_display.set_button_actions (3, 0);
 	redirect_display.drag_begin.connect (slot (*this, &RedirectBox::redirect_drag_begin));
 	redirect_display.drag_end.connect (slot (*this, &RedirectBox::redirect_drag_end));
-	redirect_display.set_usize (-1, 48);
+	redirect_display.set_size_request (-1, 48);
 	redirect_display.set_selection_mode (GTK_SELECTION_MULTIPLE);
-	redirect_display.set_shadow_type (GTK_SHADOW_IN);
+	redirect_display.set_shadow_type (Gtk::SHADOW_IN);
 	redirect_display.row_move.connect (slot (*this, &RedirectBox::redirects_reordered));
 
-	redirect_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	redirect_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	redirect_scroller.add (redirect_display);
 	redirect_eventbox.add (redirect_scroller);
@@ -128,7 +128,7 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 
 	redirects_changed (0);
 
-	//add_events (GDK_BUTTON_RELEASE_MASK);
+	//add_events (Gdk::BUTTON_RELEASE_MASK);
 }
 
 RedirectBox::~RedirectBox ()
@@ -534,11 +534,11 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, IO& io)
 	vpacker.pack_start (label);
 	vpacker.pack_start (button_box);
 
-	button.clicked.connect (bind (slot (dialog, &ArdourDialog::stop), 0));
+	button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 0));
 
 	dialog.add (vpacker);
 	dialog.set_name (X_("PluginIODialog"));
-	dialog.set_position (GTK_WIN_POS_MOUSE);
+	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 	dialog.show_all ();
 
@@ -790,11 +790,11 @@ outputs do not work correctly."));
 		vpacker.pack_start (label);
 		vpacker.pack_start (button_box);
 		
-		button.clicked.connect (bind (slot (dialog, &ArdourDialog::stop), 0));
+		button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 0));
 		
 		dialog.add (vpacker);
 		dialog.set_name (X_("PluginIODialog"));
-		dialog.set_position (GTK_WIN_POS_MOUSE);
+		dialog.set_position (Gtk::WIN_POS_MOUSE);
 		dialog.set_modal (true);
 		dialog.show_all ();
 
@@ -902,8 +902,8 @@ RedirectBox::rename_redirect (Redirect* redirect)
 
 	dialog.set_title (_("ardour: rename redirect"));
 	dialog.set_name ("RedirectRenameWindow");
-	dialog.set_usize (300, -1);
-	dialog.set_position (GTK_WIN_POS_MOUSE);
+	dialog.set_size_request (300, -1);
+	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 
 	vbox.set_border_width (12);
@@ -924,8 +924,8 @@ RedirectBox::rename_redirect (Redirect* redirect)
 	cancel_button.set_name ("EditorGTKButton");
 
 	entry.activate.connect (bind (slot (dialog, &ArdourDialog::stop), 1));
-	cancel_button.clicked.connect (bind (slot (dialog, &ArdourDialog::stop), -1));
-	ok_button.clicked.connect (bind (slot (dialog, &ArdourDialog::stop), 1));
+	cancel_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), -1));
+	ok_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 1));
 
 	/* recurse */
 	
@@ -1071,7 +1071,7 @@ RedirectBox::clear_redirects()
 	choices.push_back (_("Yes, remove them all"));
 	choices.push_back (_("Cancel"));
 
-	Gtkmmext::Choice prompter (prompt, choices);
+	Gtkmm2ext::Choice prompter (prompt, choices);
 
 	prompter.chosen.connect (Gtk::Main::quit.slot());
 	prompter.show_all ();

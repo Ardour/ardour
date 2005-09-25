@@ -19,8 +19,8 @@
 
 */
 
-#include <gtk--/button.h>
-#include <gtk--/ctree.h>
+#include <gtkmm/button.h>
+#include <gtkmm/ctree.h>
 
 #include <ardour/session_playlist.h>
 #include <ardour/diskstream.h>
@@ -29,7 +29,7 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/configuration.h>
 
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "playlist_selector.h"
 #include "route_ui.h"
@@ -38,7 +38,7 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace SigC;
+using namespace sigc;
 using namespace Gtk;
 using namespace ARDOUR;
 
@@ -54,17 +54,17 @@ PlaylistSelector::PlaylistSelector ()
 {
 	rui = 0;
 	
-	set_position (GTK_WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PlaylistSelectorWindow");
 	set_title (_("ardour: playlists"));
 	set_modal(true);
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
-	set_usize (300, 200);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
+	set_size_request (300, 200);
 
 	scroller.add_with_viewport (tree);
-	scroller.set_policy (GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-	close_button.clicked.connect (slot (*this, &PlaylistSelector::close_button_click));
+	close_button.signal_clicked().connect (slot (*this, &PlaylistSelector::close_button_click));
 
 	vpacker.set_border_width (6);
 	vpacker.set_spacing (12);
@@ -111,7 +111,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 	/* ---------------------------------------- */
 	/* XXX MAKE ME A FUNCTION (no CTree::clear() in gtkmm 1.2) */
-	gtk_ctree_remove_node (tree.gtkobj(), NULL);
+	gtk_ctree_remove_node (tree.gobj(), NULL);
 	/* ---------------------------------------- */
 	
 	session->foreach_playlist (this, &PlaylistSelector::add_playlist_to_map);

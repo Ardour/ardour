@@ -1,11 +1,11 @@
 #ifndef __gtk_ardour_new_session_dialog_h__
 #define __gtk_ardour_new_session_dialog_h__
 
-#include <gtk--/adjustment.h>
-#include <gtk--/radiobutton.h>
-#include <gtk--/frame.h>
-#include <gtk--/box.h>
-#include <gtk--/checkbutton.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/radiobutton.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/box.h>
+#include <gtkmm/checkbutton.h>
 
 namespace Gtk {
 	class CList;
@@ -15,9 +15,9 @@ namespace ARDOUR {
 	class AudioEngine;
 }
 
-#include <gtkmmext/click_box.h>
-#include <gtkmmext/selector.h>
-#include <gtkmmext/newsavedialog.h>
+#include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/selector.h>
+#include <gtkmm2ext/newsavedialog.h>
 #include "ardour_dialog.h"
 
 class NewSessionDialog : public ArdourDialog
@@ -25,7 +25,7 @@ class NewSessionDialog : public ArdourDialog
   public:
 	NewSessionDialog (ARDOUR::AudioEngine&, bool startup, std::string path);
 	
-	Gtkmmext::NewSaveDialog file_selector;
+	Gtkmm2ext::NewSaveDialog file_selector;
 	Gtk::Combo control_out_channel_combo;
 	Gtk::Combo master_out_channel_combo;
 	Gtk::CheckButton use_control_button;
@@ -84,8 +84,8 @@ class NewSessionDialog : public ArdourDialog
 	static void _mix_template_refiller (Gtk::CList &clist, void *);
 	void mix_template_refiller (Gtk::CList &clist);
 
-	void mix_template_shift (Gtkmmext::Selector *, Gtkmmext::SelectionResult*);
-	void mix_template_control (Gtkmmext::Selector *, Gtkmmext::SelectionResult*);
+	void mix_template_shift (Gtkmm2ext::Selector *, Gtkmm2ext::SelectionResult*);
+	void mix_template_control (Gtkmm2ext::Selector *, Gtkmm2ext::SelectionResult*);
 
 	void fixup_at_realize ();
 	void fixup_at_show ();

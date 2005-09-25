@@ -3,13 +3,13 @@
 
 #include <string>
 
-#include <gtk--/entry.h>
-#include <gtk--/radiobutton.h>
-#include <gtk--/adjustment.h>
-#include <gtk--/spinbutton.h>
-#include <gtk--/button.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/radiobutton.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/button.h>
 
-#include <gtkmmext/click_box.h>
+#include <gtkmm2ext/click_box.h>
 
 #include "ardour_dialog.h"
 

@@ -21,7 +21,7 @@
 #ifndef __audio_clock_h__
 #define __audio_clock_h__
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <ardour/ardour.h>
 
 namespace ARDOUR {
@@ -50,7 +50,7 @@ class AudioClock : public Gtk::HBox
 	jack_nframes_t current_duration (jack_nframes_t position = 0) const;
 	void set_session (ARDOUR::Session *s);
 
-	SigC::Signal0<void> ValueChanged;
+	sigc::signal<void> ValueChanged;
 
   private:
 	ARDOUR::Session  *session;

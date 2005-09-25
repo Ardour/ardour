@@ -18,11 +18,11 @@
     $Id$
 */
 
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/stop_signal.h>
-#include <gtkmmext/choice.h>
-#include <gtkmmext/bindable_button.h>
-#include <gtkmmext/doi.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/choice.h>
+#include <gtkmm2ext/bindable_button.h>
+#include <gtkmm2ext/doi.h>
 
 #include <ardour/route_group.h>
 
@@ -38,9 +38,9 @@
 
 #include "i18n.h"
 
-using namespace SigC;
+using namespace sigc;
 using namespace Gtk;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 using namespace ARDOUR;
 
 
@@ -86,9 +86,9 @@ RouteUI::RouteUI (ARDOUR::Route& rt, ARDOUR::Session& sess, const char* m_name,
 		rec_enable_button = manage (new BindableToggleButton (0, r_name ));
 	}
 	
-	mute_button->unset_flags (GTK_CAN_FOCUS);
-	solo_button->unset_flags (GTK_CAN_FOCUS);
-	rec_enable_button->unset_flags (GTK_CAN_FOCUS);
+	mute_button->unset_flags (Gtk::CAN_FOCUS);
+	solo_button->unset_flags (Gtk::CAN_FOCUS);
+	rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
 
 	/* map the current state */
 
@@ -315,7 +315,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 void
 RouteUI::solo_changed(void* src)
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &RouteUI::update_solo_display));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &RouteUI::update_solo_display));
 }
 
 void
@@ -341,7 +341,7 @@ RouteUI::update_solo_display ()
 void
 RouteUI::mute_changed(void* src)
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &RouteUI::update_mute_display));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &RouteUI::update_mute_display));
 }
 
 void
@@ -359,13 +359,13 @@ RouteUI::update_mute_display ()
 void
 RouteUI::route_rec_enable_changed (void *src)
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &RouteUI::update_rec_display));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &RouteUI::update_rec_display));
 }
 
 void
 RouteUI::session_rec_enable_changed ()
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &RouteUI::update_rec_display));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &RouteUI::update_rec_display));
 }
 
 void
@@ -404,8 +404,8 @@ RouteUI::update_rec_display ()
 		}
 
 	} else {
-		if (rec_enable_button->get_state() != GTK_STATE_NORMAL) {
-			rec_enable_button->set_state (GTK_STATE_NORMAL);
+		if (rec_enable_button->get_state() != Gtk::STATE_NORMAL) {
+			rec_enable_button->set_state (Gtk::STATE_NORMAL);
 		}
 	}
 }
@@ -573,7 +573,7 @@ RouteUI::choose_color()
 	current[2] = _color.get_blue() / 65535.0;
 	current[3] = 1.0;
 
-	color = Gtkmmext::UI::instance()->get_color (_("ardour: color selection"), picked, current);
+	color = Gtkmm2ext::UI::instance()->get_color (_("ardour: color selection"), picked, current);
 
 	if (picked) {
 		set_color (color);
@@ -695,7 +695,7 @@ RouteUI::route_rename ()
 
 	Gtk::Main::run();
 
-	if (name_prompter.status == Gtkmmext::Prompter::cancelled) {
+	if (name_prompter.status == Gtkmm2ext::Prompter::cancelled) {
 		return;
 	}
 	
@@ -734,7 +734,7 @@ void
 RouteUI::route_active_changed ()
 {
 	if (route_active_menu_item) {
-		Gtkmmext::UI::instance()->call_slot (bind (slot (*route_active_menu_item, &CheckMenuItem::set_active), _route.active()));
+		Gtkmm2ext::UI::instance()->call_slot (bind (slot (*route_active_menu_item, &CheckMenuItem::set_active), _route.active()));
 	}
 }
 

@@ -23,8 +23,8 @@
 
 #include <pbd/error.h>
 
-#include <gtkmmext/utils.h>
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include <ardour/session.h>
 #include <ardour/utils.h>
@@ -44,7 +44,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR ;
-using namespace SigC ;
+using namespace sigc ;
 using namespace Gtk ;
 
 /**

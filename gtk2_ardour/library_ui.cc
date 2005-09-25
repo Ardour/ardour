@@ -30,9 +30,9 @@
 #include <pbd/basename.h>
 #include <pbd/forkexec.h>
 #include <pbd/ftw.h>
-#include <gtk--.h>
-#include <gtk--/fileselection.h>
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm.h>
+#include <gtkmm/fileselection.h>
+#include <gtkmm2ext/gtk_ui.h>
 #include <ardour/audio_library.h>
 #include <ardour/audioregion.h>
 #include <ardour/region.h>
@@ -41,7 +41,7 @@
 #include <ardour/sndfilesource.h>
 #include <ardour/utils.h>
 
-#include <gtkmmext/doi.h>
+#include <gtkmm2ext/doi.h>
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -54,7 +54,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 
 SoundFileSelector::SoundFileSelector ()
 	: ArdourDialog ("sound file selector"),
@@ -91,7 +91,7 @@ SoundFileSelector::SoundFileSelector ()
 	
 	delete_event.connect (slot (*this, &ArdourDialog::wm_close_event));
 	
-	import_btn.clicked.connect (slot (*this, &SoundFileSelector::import_btn_clicked));
+	import_btn.signal_clicked().connect (slot (*this, &SoundFileSelector::import_btn_clicked));
 
 	sfdb_tree.group_selected.connect (slot(*this, &SoundFileSelector::sfdb_group_selected));
 	sfdb_tree.member_selected.connect (bind (slot(*this, &SoundFileSelector::member_selected), true));
@@ -158,7 +158,7 @@ SoundFileSelector::run (string action, bool multi, bool hide_after)
 	multiable = multi;
 	hide_after_action = hide_after;
 
-	set_position (GTK_WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_MOUSE);
 	ArdourDialog::run ();
 }
 
@@ -307,7 +307,7 @@ SoundFileBrowser::SoundFileBrowser()
 	
 	// This is ugly ugly ugly.  But gtk1 (and gtk2) don't give us any
 	// choice.
-	GtkFileSelection* fs_gtk = fs_selector.gtkobj();
+	GtkFileSelection* fs_gtk = fs_selector.gobj();
 	file_list= Gtk::wrap((GtkCList*)(fs_gtk->file_list));
 
 	Gtk::VBox* vbox = manage(new Gtk::VBox);
@@ -322,8 +322,8 @@ SoundFileBrowser::SoundFileBrowser()
 	Gtk::HBox* hbox = manage(new Gtk::HBox);
 	Gtk::ScrolledWindow* dir_scroll = manage(new Gtk::ScrolledWindow);
 	Gtk::ScrolledWindow* file_scroll = manage(new Gtk::ScrolledWindow);
-	dir_scroll->set_policy(GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	file_scroll->set_policy(GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	dir_scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	file_scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	Gtk::CList* dir_list = Gtk::wrap((GtkCList*)(fs_gtk->dir_list));
 
 	dir_list->reparent(*dir_scroll);
@@ -440,8 +440,8 @@ LibraryTree::LibraryTree ()
 	pack_start(btn_box_bottom, false, false);
 
 	hbox.pack_start(scroll);
-	scroll.set_usize (200, 150);
-	scroll.set_policy (GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	scroll.set_size_request (200, 150);
+	scroll.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	scroll.add_with_viewport(tree);
 	tree.set_selection_mode(GTK_SELECTION_MULTIPLE);
 
@@ -453,16 +453,16 @@ LibraryTree::LibraryTree ()
 
 	remove_btn.set_sensitive (false);
 
-	add_btn.clicked.connect (slot (*this, &LibraryTree::add_btn_clicked));
-	folder_btn.clicked.connect (slot(*this, &LibraryTree::folder_btn_clicked));
-	remove_btn.clicked.connect (slot(*this, &LibraryTree::remove_btn_clicked));
-	find_btn.clicked.connect (slot (*this, &LibraryTree::find_btn_clicked));
+	add_btn.signal_clicked().connect (slot (*this, &LibraryTree::add_btn_clicked));
+	folder_btn.signal_clicked().connect (slot(*this, &LibraryTree::folder_btn_clicked));
+	remove_btn.signal_clicked().connect (slot(*this, &LibraryTree::remove_btn_clicked));
+	find_btn.signal_clicked().connect (slot (*this, &LibraryTree::find_btn_clicked));
 
 	files_select.hide_fileop_buttons();
 	files_select.set_filename("/");
-	files_select.get_ok_button()->clicked.connect (slot ( *this, 
+	files_select.get_ok_button()-.signal_clicked().connect (slot ( *this, 
 				&LibraryTree::file_ok_clicked));
-	files_select.get_cancel_button()->clicked.connect (slot ( *this, 
+	files_select.get_cancel_button()-.signal_clicked().connect (slot ( *this, 
 				&LibraryTree::file_cancel_clicked));
 
 
@@ -721,7 +721,7 @@ LibraryTree::file_ok_clicked ()
 	main_box->pack_start(*bar);
 	Gtk::Button* cancel_btn = manage(new Gtk::Button(_("Cancel")));
 	main_box->pack_start(*cancel_btn);
-	cancel_btn->clicked.connect (slot (*this, &LibraryTree::cancel_import_clicked));
+	cancel_btn-.signal_clicked().connect (slot (*this, &LibraryTree::cancel_import_clicked));
 	progress_win->show_all();
 	
 	clone_ftw((void*)file);
@@ -771,7 +771,7 @@ LibraryTree::folder_btn_clicked ()
 
 	Gtk::Main::run();
 
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string name;
 
 		prompter.get_result(name);
@@ -1002,7 +1002,7 @@ SoundFileBox::SoundFileBox (string uri, bool meta)
 	}
 	main_box.pack_start(bottom_box, false, false);
 
-	fields.set_usize(200, 150);
+	fields.set_size_request(200, 150);
 
 	top_box.set_homogeneous(true);
 	top_box.pack_start(add_field_btn);
@@ -1014,8 +1014,8 @@ SoundFileBox::SoundFileBox (string uri, bool meta)
 	bottom_box.pack_start(play_btn);
 	bottom_box.pack_start(stop_btn);
 
-	play_btn.clicked.connect (slot (*this, &SoundFileBox::play_btn_clicked));
-	stop_btn.clicked.connect (slot (*this, &SoundFileBox::stop_btn_clicked));
+	play_btn.signal_clicked().connect (slot (*this, &SoundFileBox::play_btn_clicked));
+	stop_btn.signal_clicked().connect (slot (*this, &SoundFileBox::stop_btn_clicked));
 
 	PublicEditor& edit = ARDOUR_UI::instance()->the_editor();
 	ARDOUR::Session* sess = edit.current_session();
@@ -1025,9 +1025,9 @@ SoundFileBox::SoundFileBox (string uri, bool meta)
 		sess->AuditionActive.connect(slot (*this, &SoundFileBox::audition_status_changed));
 	}
 
-	add_field_btn.clicked.connect 
+	add_field_btn.signal_clicked().connect 
 			(slot (*this, &SoundFileBox::add_field_clicked));
-	remove_field_btn.clicked.connect 
+	remove_field_btn.signal_clicked().connect 
 			(slot (*this, &SoundFileBox::remove_field_clicked));
 
 	fields.selection_made.connect (slot (*this, &SoundFileBox::field_selected));
@@ -1117,8 +1117,8 @@ SoundFileBox::setup_labels (string uri)
 	path_entry.set_text (file);
 	path_entry.set_position (-1);
 
-	path_entry.focus_in_event.connect (slot (ARDOUR_UI::generic_focus_in_event));
-	path_entry.focus_out_event.connect (slot (ARDOUR_UI::generic_focus_out_event));
+	path_entry.signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
+	path_entry.signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
 
 	length.set_alignment (0.0f, 0.0f);
 	length.set_text (compose("Length: %1", length2string(sf_info->frames, sf_info->samplerate)));
@@ -1211,7 +1211,7 @@ void
 SoundFileBox::audition_status_changed (bool active)
 {
 	if (!active) {
-		Gtkmmext::UI::instance()->call_slot( slot(*this, &SoundFileBox::stop_btn_clicked));
+		Gtkmm2ext::UI::instance()->call_slot( slot(*this, &SoundFileBox::stop_btn_clicked));
 	}
 }
 
@@ -1226,7 +1226,7 @@ SoundFileBox::add_field_clicked ()
 	
 	Gtk::Main::run();
 	
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string name;
 		
 		prompter.get_result(name);
@@ -1254,7 +1254,7 @@ SoundFileBox::setup_fields ()
 }
 
 void
-SoundFileBox::field_chosen (Gtkmmext::Selector *selector, Gtkmmext::SelectionResult *res)
+SoundFileBox::field_chosen (Gtkmm2ext::Selector *selector, Gtkmm2ext::SelectionResult *res)
 {
 	if (res) {
 		remove_field_btn.set_sensitive(true);
@@ -1263,7 +1263,7 @@ SoundFileBox::field_chosen (Gtkmmext::Selector *selector, Gtkmmext::SelectionRes
 }
 
 void
-SoundFileBox::field_selected (Gtkmmext::Selector *selector, Gtkmmext::SelectionResult *res)
+SoundFileBox::field_selected (Gtkmm2ext::Selector *selector, Gtkmm2ext::SelectionResult *res)
 {	
 	if (!res){
 		return;
@@ -1280,7 +1280,7 @@ SoundFileBox::field_selected (Gtkmmext::Selector *selector, Gtkmmext::SelectionR
 
 	Gtk::Main::run();
 	
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string data;
 
 		prompter.get_result(data);
@@ -1311,7 +1311,7 @@ SearchSounds::SearchSounds ()
 	bottom_box.set_homogeneous(true);
 	bottom_box.pack_start(find_btn);
 
-	fields.set_usize(200, 150);
+	fields.set_size_request(200, 150);
 
 	main_box.pack_start(fields);
 	main_box.pack_start(rbtn_box, false, false);
@@ -1319,7 +1319,7 @@ SearchSounds::SearchSounds ()
 
 	delete_event.connect (slot (*this, &ArdourDialog::wm_doi_event));
 
-	find_btn.clicked.connect (slot (*this, &SearchSounds::find_btn_clicked));
+	find_btn.signal_clicked().connect (slot (*this, &SearchSounds::find_btn_clicked));
 	fields.selection_made.connect (slot 
 								   (*this, &SearchSounds::field_selected));
 
@@ -1357,7 +1357,7 @@ SearchSounds::fields_refiller (Gtk::CList &clist)
 }
 
 void
-SearchSounds::field_selected (Gtkmmext::Selector *selector, Gtkmmext::SelectionResult *res)
+SearchSounds::field_selected (Gtkmm2ext::Selector *selector, Gtkmm2ext::SelectionResult *res)
 {	
 	if (!res){
 		return;
@@ -1371,7 +1371,7 @@ SearchSounds::field_selected (Gtkmmext::Selector *selector, Gtkmmext::SelectionR
 
 	Gtk::Main::run();
 	
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string data;
 
 		prompter.get_result(data);
@@ -1450,7 +1450,7 @@ SearchResults::SearchResults (map<string,string> field_values, bool and_search)
 
 	main_box.pack_start(import_box, false, false);
 	
-	results.set_usize (200, 150);
+	results.set_size_request (200, 150);
 	
 	import_box.set_homogeneous(true);
 	import_box.pack_start(import_btn);
@@ -1462,7 +1462,7 @@ SearchResults::SearchResults (map<string,string> field_values, bool and_search)
 	
 	delete_event.connect (slot (*this, &ArdourDialog::wm_doi_event));
 
-	import_btn.clicked.connect (slot (*this, &SearchResults::import_clicked));
+	import_btn.signal_clicked().connect (slot (*this, &SearchResults::import_clicked));
 
 	results.choice_made.connect (slot (*this, &SearchResults::result_chosen));
 
@@ -1519,7 +1519,7 @@ SearchResults::import_clicked ()
 }
 
 void 
-SearchResults::result_chosen (Gtkmmext::Selector *selector, Gtkmmext::SelectionResult *res)
+SearchResults::result_chosen (Gtkmm2ext::Selector *selector, Gtkmm2ext::SelectionResult *res)
 {
 	if (res) {
 		selection = selector->clist().row(res->row)[1].get_text();

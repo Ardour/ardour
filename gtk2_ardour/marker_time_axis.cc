@@ -22,7 +22,7 @@
 
 #include <pbd/error.h>
 
-#include <gtkmmext/utils.h>
+#include <gtkmm2ext/utils.h>
 
 #include <ardour/session.h>
 #include <ardour/utils.h>
@@ -40,7 +40,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 using namespace Gtk;
 
 //---------------------------------------------------------------------------------------//
@@ -312,7 +312,7 @@ MarkerTimeAxis::finish_route_rename()
 	name_prompter->hide_all ();
 	ARDOUR_UI::instance()->allow_focus (false);
 
-	if (name_prompter->status == Gtkmmext::Prompter::cancelled) {
+	if (name_prompter->status == Gtkmm2ext::Prompter::cancelled) {
 		return;
 	}
 	

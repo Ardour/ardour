@@ -24,9 +24,9 @@
 #include <vector>
 
 #include <cmath>
-#include <gtk--.h>
-#include <gtkmmext/auto_spin.h>
-#include <gtkmmext/click_box.h>
+#include <gtkmm.h>
+#include <gtkmm2ext/auto_spin.h>
+#include <gtkmm2ext/click_box.h>
 
 #include <ardour/types.h>
 #include <ardour/ardour.h>
@@ -75,8 +75,8 @@ class RedirectBox : public Gtk::HBox
 	void select_all_inserts ();
 	void select_all_sends ();
 	
-	SigC::Signal1<void,ARDOUR::Redirect *> RedirectSelected;
-	SigC::Signal1<void,ARDOUR::Redirect *> RedirectUnselected;
+	sigc::signal<void,ARDOUR::Redirect *> RedirectSelected;
+	sigc::signal<void,ARDOUR::Redirect *> RedirectUnselected;
 	
   protected:
 	void set_stuff_from_route ();
@@ -99,7 +99,7 @@ class RedirectBox : public Gtk::HBox
 
 	Width _width;
 	
-	SigC::Connection newplug_connection;
+	sigc::connection newplug_connection;
 	
 	Gtk::Menu *send_action_menu;
 	void build_send_action_menu ();
@@ -139,8 +139,8 @@ class RedirectBox : public Gtk::HBox
 
 	void redirects_reordered (gint, gint);
 	gint compute_redirect_sort_keys ();
-	vector<SigC::Connection> redirect_active_connections;
-	vector<SigC::Connection> redirect_name_connections;
+	vector<sigc::connection> redirect_active_connections;
+	vector<sigc::connection> redirect_name_connections;
 	
 	bool redirect_drag_in_progress;
 	void redirect_drag_begin (GdkDragContext*);

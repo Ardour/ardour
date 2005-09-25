@@ -7,9 +7,9 @@
 #include <glib.h>
 #include <gdk/gdktypes.h>
 #include <gtk-canvas.h>
-#include <gtk--/window.h>
+#include <gtkmm/window.h>
 #include <jack/types.h>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 
 #include "editing.h"
 #include "keyboard_target.h"
@@ -108,11 +108,11 @@ class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget 
 	virtual void reposition_x_origin (jack_nframes_t frame) = 0;
 	virtual void remove_last_capture () = 0;
 
-	SigC::Signal1<void,Editing::DisplayControl> DisplayControlChanged;
-	SigC::Signal0<void> ZoomFocusChanged;
-	SigC::Signal0<void> ZoomChanged;
-	SigC::Signal0<void> XOriginChanged;
-	SigC::Signal0<void> Resized;
+	sigc::signal<void,Editing::DisplayControl> DisplayControlChanged;
+	sigc::signal<void> ZoomFocusChanged;
+	sigc::signal<void> ZoomChanged;
+	sigc::signal<void> XOriginChanged;
+	sigc::signal<void> Resized;
 
 	static gint canvas_crossfade_view_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
 	static gint canvas_fade_in_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);

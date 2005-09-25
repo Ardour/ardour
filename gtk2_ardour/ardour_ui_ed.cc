@@ -37,7 +37,7 @@
 
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 
 int
 ARDOUR_UI::create_editor ()

@@ -21,10 +21,10 @@
 #ifndef __ardour_visual_time_axis_h__
 #define __ardour_visual_time_axis_h__
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
-#include <gtkmmext/selector.h>
-#include <gtkmmext/popup_selector.h>
+#include <gtkmm2ext/selector.h>
+#include <gtkmm2ext/popup_selector.h>
 
 #include "ardour_dialog.h"
 #include "route_ui.h"
@@ -114,7 +114,7 @@ class VisualTimeAxis : public TimeAxisView
 		/**
 		 * Emitted when we have changed the gui, and what we have shanged
 		 */
-		SigC::Signal2<void,string,void*> gui_changed ;
+		sigc::signal<void,string,void*> gui_changed ;
 		
 		/**
 		 * Emitted when this Visual Time Axis has been removed
@@ -123,17 +123,17 @@ class VisualTimeAxis : public TimeAxisView
 		 * the destructor, this allows us to capture the source of the deletion
 		 * event
 		 */
-		SigC::Signal2<void,std::string,void*> VisualTimeAxisRemoved ;
+		sigc::signal<void,std::string,void*> VisualTimeAxisRemoved ;
 		
 		/**
 		 * Emitted when we have changed the name of this TimeAxis
 		 */
-		SigC::Signal3<void,std::string,std::string,void*> NameChanged ;
+		sigc::signal<void,std::string,std::string,void*> NameChanged ;
 
 		/**
 		 * Emitted when this time axis has been selected for removal
 		 */
-		//SigC::Signal2<void,std::string,void*> VisualTimeAxisRemoved ;
+		//sigc::signal<void,std::string,void*> VisualTimeAxisRemoved ;
 
 		//---------------------------------------------------------------------------------------//
 		// Constructor / Desctructor

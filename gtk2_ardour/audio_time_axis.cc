@@ -30,11 +30,11 @@
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
 
-#include <gtkmmext/utils.h>
-#include <gtkmmext/selector.h>
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/stop_signal.h>
-#include <gtkmmext/bindable_button.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/selector.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/bindable_button.h>
 
 #include <ardour/session.h>
 #include <ardour/session_playlist.h>
@@ -78,7 +78,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace SigC;
+using namespace sigc;
 using namespace LADSPA;
 using namespace Gtk;
 using namespace Editing;
@@ -162,25 +162,25 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	mute_button->button_release_event.connect (slot (*this, &RouteUI::mute_release));
 	rec_enable_button->button_press_event.connect (slot (*this, &RouteUI::rec_enable_press));
 	edit_group_button.button_release_event.connect (slot (*this, &AudioTimeAxisView::edit_click));
-	playlist_button.clicked.connect (slot (*this, &AudioTimeAxisView::playlist_click));
-	automation_button.clicked.connect (slot (*this, &AudioTimeAxisView::automation_click));
+	playlist_button.signal_clicked().connect (slot (*this, &AudioTimeAxisView::playlist_click));
+	automation_button.signal_clicked().connect (slot (*this, &AudioTimeAxisView::automation_click));
 	size_button.button_release_event.connect (slot (*this, &AudioTimeAxisView::size_click));
-	visual_button.clicked.connect (slot (*this, &AudioTimeAxisView::visual_click));
-	hide_button.clicked.connect (slot (*this, &AudioTimeAxisView::hide_click));
+	visual_button.signal_clicked().connect (slot (*this, &AudioTimeAxisView::visual_click));
+	hide_button.signal_clicked().connect (slot (*this, &AudioTimeAxisView::hide_click));
 
 	name_entry.activate.connect (slot (*this, &AudioTimeAxisView::name_entry_activated));
-	name_entry.focus_out_event.connect (slot (*this, &AudioTimeAxisView::name_entry_focus_out_handler));
+	name_entry.signal_focus_out_event().connect (slot (*this, &AudioTimeAxisView::name_entry_focus_out_handler));
 	name_entry.button_press_event.connect (slot (*this, &AudioTimeAxisView::name_entry_button_press_handler));
 	name_entry.button_release_event.connect (slot (*this, &AudioTimeAxisView::name_entry_button_release_handler));
 	name_entry.key_release_event.connect (slot (*this, &AudioTimeAxisView::name_entry_key_release_handler));
 	
 	if (is_audio_track()) {
-		controls_table.attach (*rec_enable_button, 6, 7, 0, 1, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND, 0, 0);
+		controls_table.attach (*rec_enable_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	}
-	controls_table.attach (*mute_button, 7, 8, 0, 1, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND, 0, 0);
-	controls_table.attach (*solo_button, 8, 9, 0, 1, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_FILL|GTK_EXPAND, 0, 0);
+	controls_table.attach (*mute_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (*solo_button, 8, 9, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|GTK_FILL|Gtk::EXPAND, 0, 0);
 
-	controls_table.attach (edit_group_button, 7, 8, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND, 0, 0);
+	controls_table.attach (edit_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
 	ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 	ARDOUR_UI::instance()->tooltips().set_tip(*solo_button,_("Solo"));
@@ -194,26 +194,26 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	
 	label_view ();
 
-	controls_table.attach (hide_button, 0, 1, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND);
-	controls_table.attach (visual_button, 1, 2, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND);
-	controls_table.attach (size_button, 2, 3, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND);
-	controls_table.attach (automation_button, 3, 4, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND);
+	controls_table.attach (hide_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (visual_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (size_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (automation_button, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	if (is_audio_track()) {
-		controls_table.attach (playlist_button, 6, 7, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND);
+		controls_table.attach (playlist_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	}
 
 	/* remove focus from the buttons */
 	
-	automation_button.unset_flags (GTK_CAN_FOCUS);
-	solo_button->unset_flags (GTK_CAN_FOCUS);
-	mute_button->unset_flags (GTK_CAN_FOCUS);
-	edit_group_button.unset_flags (GTK_CAN_FOCUS);
-	size_button.unset_flags (GTK_CAN_FOCUS);
-	playlist_button.unset_flags (GTK_CAN_FOCUS);
-	hide_button.unset_flags (GTK_CAN_FOCUS);
-	visual_button.unset_flags (GTK_CAN_FOCUS);
+	automation_button.unset_flags (Gtk::CAN_FOCUS);
+	solo_button->unset_flags (Gtk::CAN_FOCUS);
+	mute_button->unset_flags (Gtk::CAN_FOCUS);
+	edit_group_button.unset_flags (Gtk::CAN_FOCUS);
+	size_button.unset_flags (Gtk::CAN_FOCUS);
+	playlist_button.unset_flags (Gtk::CAN_FOCUS);
+	hide_button.unset_flags (Gtk::CAN_FOCUS);
+	visual_button.unset_flags (Gtk::CAN_FOCUS);
 
 	/* map current state of the route */
 
@@ -847,7 +847,7 @@ AudioTimeAxisView::rename_current_playlist ()
 
 	Main::run ();
 
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string name;
 		prompter.get_result (name);
 		pl->set_name (name);
@@ -884,7 +884,7 @@ AudioTimeAxisView::use_copy_playlist ()
 
 	Main::run ();
 
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string name;
 		prompter.get_result (name);
 
@@ -915,7 +915,7 @@ AudioTimeAxisView::use_new_playlist ()
 
 	Main::run ();
 
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string name;
 		prompter.get_result (name);
 
@@ -976,13 +976,13 @@ AudioTimeAxisView::set_waveform_shape (WaveformShape shape)
 void
 AudioTimeAxisView::speed_changed ()
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &AudioTimeAxisView::reset_samples_per_unit));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &AudioTimeAxisView::reset_samples_per_unit));
 }
 
 void
 AudioTimeAxisView::diskstream_changed (void *src)
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &AudioTimeAxisView::update_diskstream_display));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &AudioTimeAxisView::update_diskstream_display));
 }	
 
 void

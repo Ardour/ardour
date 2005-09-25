@@ -1,7 +1,7 @@
 #ifndef __ardour_gtk_tempo_dialog_h__
 #define __ardour_gtk_tempo_dialog_h__
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <ardour/types.h>
 #include <ardour/tempo.h>
 

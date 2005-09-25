@@ -29,7 +29,7 @@ using __gnu_cxx::slist;
 #endif
 
 #include <string>
-#include <gtk--.h>
+#include <gtkmm.h>
 
 #include <ardour_dialog.h>
 
@@ -53,7 +53,7 @@ class IOSelector : public Gtk::VBox {
 		Accepted
 	};
 
-	SigC::Signal1<void,Result> Finished;
+	sigc::signal<void,Result> Finished;
 
   protected:
 	ARDOUR::Session& session;

@@ -22,13 +22,13 @@
 #include <cmath>
 #include <vector>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 
 #include <ardour/named_selection.h>
 #include <ardour/session_selection.h>
 #include <ardour/playlist.h>
 
-#include <gtkmmext/stop_signal.h>
+#include <gtkmm2ext/stop_signal.h>
 
 #include "editor.h"
 #include "selection.h"
@@ -38,10 +38,10 @@
 
 #include "i18n.h"
 
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 
 void
 Editor::handle_new_named_selection ()

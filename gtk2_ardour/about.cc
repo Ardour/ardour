@@ -26,10 +26,10 @@
 #include <ctime>
 #include <cstdlib>
 
-#include <gtk--/label.h>
-#include <gtk--/text.h>
-#include <gtk--/scrolledwindow.h>
-#include <gtk--/notebook.h>
+#include <gtkmm/label.h>
+#include <gtkmm/text.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/notebook.h>
 
 #include <ardour/ardour.h>
 #include <ardour/version.h>
@@ -37,8 +37,8 @@
 #include "utils.h"
 #include "version.h"
 
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/doi.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/doi.h>
 
 #include "about.h"
 #include "rgb_macros.h"
@@ -48,7 +48,7 @@
 
 using namespace Gtk;
 using namespace std;
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 
 #ifdef WITH_PAYMENT_OPTIONS
@@ -125,7 +125,7 @@ static const gchar * paypal_xpm[] = {
 static gint 
 stoppit (GdkEventButton* ev, Gtk::Notebook* notebook)
 {
-	gtk_signal_emit_stop_by_name (GTK_OBJECT(notebook->gtkobj()),
+	gtk_signal_emit_stop_by_name (GTK_OBJECT(notebook->gobj()),
 				      "button_release_event");
 	return TRUE;
 }
@@ -218,8 +218,8 @@ Contributors:\n\t");
 	author_text->insert (str);
 
 	author_scroller->add (*author_text);
-	author_scroller->set_usize (-1, 75);
-	author_scroller->set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	author_scroller->set_size_request (-1, 75);
+	author_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	ScrolledWindow* translator_scroller = manage (new ScrolledWindow);
 	Text* translator_text = manage (new Text);
@@ -237,8 +237,8 @@ Contributors:\n\t");
 	translator_text->insert (str);
 	
 	translator_scroller->add (*translator_text);
-	translator_scroller->set_usize (-1, 75);
-	translator_scroller->set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	translator_scroller->set_size_request (-1, 75);
+	translator_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	Label* author_tab_label = manage (new Label (_("Authors")));
 	Label* translator_tab_label = manage (new Label (_("Translators")));
@@ -261,7 +261,7 @@ Contributors:\n\t");
 	vbox.set_spacing (5);
 
 	if (load_logo_size ()) {
-		logo_area.set_usize (logo_width, logo_height);
+		logo_area.set_size_request (logo_width, logo_height);
 		load_logo (*this);
 
 		vbox.pack_start (logo_area, false, false);
@@ -293,7 +293,7 @@ Contributors:\n\t");
 	delete_event.connect (bind (slot (just_hide_it), static_cast<Gtk::Window*> (this)));
 
 	add (vbox);
-	add_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
+	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	set_position (GTK_WIN_POS_CENTER);
 
@@ -430,10 +430,10 @@ About::load_logo (Gtk::Window& window)
 	
 	window.realize ();
 
-	logo_pixmap = gdk_pixmap_new (GTK_WIDGET(window.gtkobj())->window, logo_width, logo_height,
+	logo_pixmap = gdk_pixmap_new (GTK_WIDGET(window.gobj())->window, logo_width, logo_height,
 				      gtk_preview_get_visual()->depth);
 	gc = gdk_gc_new (logo_pixmap);
-	gtk_preview_put (preview.gtkobj(), logo_pixmap, gc, 0, 0, 0, 0, logo_width, logo_height);
+	gtk_preview_put (preview.gobj(), logo_pixmap, gc, 0, 0, 0, 0, logo_width, logo_height);
 	gdk_gc_destroy (gc);
 	
 	delete [] pixelrow;
@@ -451,7 +451,7 @@ About::logo_area_expose (GdkEventExpose* ev)
 
 	if (logo_pixmap) {
 		logo_area.get_window().draw_pixmap (logo_area.get_style()->get_black_gc(),
-						    Gdk_Pixmap (logo_pixmap),
+						    Gdk::Pixmap (logo_pixmap),
 						    0, 0,
 						    ((logo_area.width() - logo_width) / 2),
 						    ((logo_area.height() - logo_height) / 2),

@@ -51,8 +51,8 @@ class SendUI : public Gtk::HBox
 	Gtk::VBox vbox;
 	Gtk::VBox hbox;
 
-	SigC::Connection screen_update_connection;
-	SigC::Connection fast_screen_update_connection;
+	sigc::connection screen_update_connection;
+	sigc::connection fast_screen_update_connection;
 		
 	void send_going_away (ARDOUR::Redirect*);
 	void ins_changed (ARDOUR::IOChange, void*);

@@ -27,12 +27,12 @@
 #include <pbd/xml++.h>
 #include <pbd/failed_constructor.h>
 
-#include <gtkmmext/click_box.h>
-#include <gtkmmext/fastmeter.h>
-#include <gtkmmext/slider_controller.h>
-#include <gtkmmext/barcontroller.h>
-#include <gtkmmext/utils.h>
-#include <gtkmmext/doi.h>
+#include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/fastmeter.h>
+#include <gtkmm2ext/slider_controller.h>
+#include <gtkmm2ext/barcontroller.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/doi.h>
 
 #include <midi++/manager.h>
 
@@ -56,9 +56,9 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 
 PluginUIWindow::PluginUIWindow (AudioEngine &engine, PluginInsert& insert, bool scrollable)
 	: ArdourDialog ("plugin ui")
@@ -98,9 +98,9 @@ PluginUIWindow::PluginUIWindow (AudioEngine &engine, PluginInsert& insert, bool 
 		unmap_event.connect (slot (*pu, &PluginUI::stop_updating));
 	}
 
-	set_position (GTK_WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	delete_event.connect (bind (slot (just_hide_it), reinterpret_cast<Window*> (this)));
 	insert.GoingAway.connect (slot (*this, &PluginUIWindow::plugin_going_away));
@@ -151,7 +151,7 @@ PluginUI::PluginUI (AudioEngine &engine, PluginInsert& pi, bool scrollable)
 	pack_start (settings_box, false, false);
 
 	if ( is_scrollable ) {
-		scroller.set_policy (GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 		scroller.set_name ("PluginEditor");
 		scroller_view.set_name("PluginEditor");
 		scroller_view.add (hpacker);
@@ -285,7 +285,7 @@ PluginUI::build (AudioEngine &engine)
 				}
 
 				button_table.attach (*cui, button_col, button_col + 1, button_row, button_row+1, 
-						     GTK_FILL|GTK_EXPAND, 0);
+						     Gtk::FILL|Gtk::EXPAND, 0);
 				button_row++;
 
 			} else if (cui->display) {
@@ -299,7 +299,7 @@ PluginUI::build (AudioEngine &engine)
 				}
 				
 				output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1, 
-						     GTK_FILL|GTK_EXPAND, 0);
+						     Gtk::FILL|Gtk::EXPAND, 0);
  
 				output_row++;
 			}
@@ -383,7 +383,7 @@ PluginUI::ControlUI::ControlUI ()
 
 	/* don't fix the height, it messes up the bar controllers */
 
-	set_usize_to_display_given_text (automate_button, X_("longenuff"), 2, -1);
+	set_size_request_to_display_given_text (automate_button, X_("longenuff"), 2, -1);
 
 	ignore_change = 0;
 	display = 0;
@@ -494,13 +494,13 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 		
 			control_ui->button = manage (new ToggleButton ());
 			control_ui->button->set_name ("PluginEditorButton");
-			control_ui->button->set_usize (20, 20);
+			control_ui->button->set_size_request (20, 20);
 
 			control_ui->pack_start (control_ui->label, true, true);
 			control_ui->pack_start (*control_ui->button, false, true);
 			control_ui->pack_start (control_ui->automate_button, false, false);
 
-			control_ui->button->clicked.connect (bind (slot (*this, &PluginUI::control_port_toggled), control_ui));
+			control_ui->button-.signal_clicked().connect (bind (slot (*this, &PluginUI::control_port_toggled), control_ui));
 		
 			if(plugin.get_parameter (port_index) == 1){
 				control_ui->button->set_active(true);
@@ -535,23 +535,23 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 
 		if (desc.integer_step) {
 			control_ui->clickbox = new ClickBox (control_ui->adjustment, "PluginUIClickBox");
-			Gtkmmext::set_usize_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
+			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			control_ui->clickbox->set_print_func (integer_printer, 0);
 		} else {
 //			control_ui->control = new HSliderController (ARDOUR_UI::instance()->plugin_ui_slider_pix(),
 //								     control_ui->adjustment,
 //								     mcontrol);
 
-			SigC::Slot2<void,char*,uint32_t> pslot = SigC::bind (slot (*this, &PluginUI::print_parameter), (uint32_t) port_index);
+			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (slot (*this, &PluginUI::print_parameter), (uint32_t) port_index);
 
 			control_ui->control = new BarController (*control_ui->adjustment, mcontrol, pslot);
-			control_ui->control->set_usize (200, 15);
+			control_ui->control->set_size_request (200, 15);
 			control_ui->control->set_name (X_("PluginSlider"));
 			control_ui->control->set_style (BarController::LeftToRight);
 			control_ui->control->set_use_parent (true);
 
-			control_ui->control->get_spin_button().focus_in_event.connect (slot (*this, &PluginUI::entry_focus_event));
-			control_ui->control->get_spin_button().focus_out_event.connect (slot (*this, &PluginUI::entry_focus_event));
+			control_ui->control->get_spin_button().signal_focus_in_event().connect (slot (*this, &PluginUI::entry_focus_event));
+			control_ui->control->get_spin_button().signal_focus_out_event().connect (slot (*this, &PluginUI::entry_focus_event));
 
 			control_ui->control->StartGesture.connect (bind (slot (*this, &PluginUI::start_touch), control_ui));
 			control_ui->control->StopGesture.connect (bind (slot (*this, &PluginUI::stop_touch), control_ui));
@@ -578,7 +578,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 
 		control_ui->pack_start (control_ui->automate_button, false, false);
 		control_ui->adjustment->value_changed.connect (bind (slot (*this, &PluginUI::control_adjustment_changed), control_ui));
-		control_ui->automate_button.clicked.connect (bind (slot (*this, &PluginUI::astate_clicked), control_ui, (uint32_t) port_index));
+		control_ui->automate_button.signal_clicked().connect (bind (slot (*this, &PluginUI::astate_clicked), control_ui, (uint32_t) port_index));
 
 		automation_state_changed (control_ui);
 
@@ -595,7 +595,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 		control_ui->display_label->set_name ("ParameterValueDisplay");
 
 		control_ui->display->add (*control_ui->display_label);
-		Gtkmmext::set_usize_to_display_given_text (*control_ui->display, "g999999", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->display, "g999999", 2, 2);
 
 		control_ui->display->show_all ();
 
@@ -696,7 +696,7 @@ PluginUI::parameter_changed (uint32_t abs_port_id, float val, ControlUI* cui)
 	if (cui->port_index == abs_port_id) {
 		if (!cui->update_pending) {
 			cui->update_pending = true;
-			Gtkmmext::UI::instance()->call_slot (bind (slot (*this, &PluginUI::update_control_display), cui));
+			Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &PluginUI::update_control_display), cui));
 		}
 	}
 }
@@ -907,7 +907,7 @@ PlugUIBase::save_plugin_setting ()
 
 	Main::run();
 
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string name;
 
 		prompter.get_result(name);

@@ -22,9 +22,9 @@
 #define __gtk_ardour_region_view_h__
 
 #include <vector>
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 #include <ardour/region.h>
 
 #include "time_axis_view_item.h"
@@ -97,8 +97,8 @@ class AudioRegionView : public TimeAxisViewItem
     void region_changed (ARDOUR::Change);
     void envelope_active_changed ();
 
-    static SigC::Signal1<void,AudioRegionView*> AudioRegionViewGoingAway;
-    SigC::Signal0<void> GoingAway;
+    static sigc::signal<void,AudioRegionView*> AudioRegionViewGoingAway;
+    sigc::signal<void> GoingAway;
 
     GhostRegion* add_ghost (AutomationTimeAxisView&);
     void remove_ghost (GhostRegion*);

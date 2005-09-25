@@ -23,7 +23,7 @@
 
 #include <list>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 
 #include <ardour/ardour.h>
 #include <ardour/stateful.h>
@@ -122,9 +122,9 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 
 	void disconnect_from_session ();
 	
-	SigC::Connection screen_update_connection;
+	sigc::connection screen_update_connection;
 	void update_strips ();
-	SigC::Connection fast_screen_update_connection;
+	sigc::connection fast_screen_update_connection;
 	void fast_update_strips ();
 
 	void snapshot_display_selected (gint row, gint col, GdkEvent* ev);

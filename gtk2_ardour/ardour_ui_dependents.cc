@@ -32,7 +32,7 @@
 #include "route_params_ui.h"
 #include "i18n.h"
 
-using namespace SigC;
+using namespace sigc;
 
 
 namespace ARDOUR {

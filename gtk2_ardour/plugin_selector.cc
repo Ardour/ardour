@@ -20,10 +20,10 @@
 #include <cstdio>
 #include <lrdf.h>
 
-#include <gtk--/table.h>
-#include <gtk--/button.h>
-#include <gtk--/notebook.h>
-#include <gtk--/ctree.h>
+#include <gtkmm/table.h>
+#include <gtkmm/button.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/ctree.h>
 
 #include <ardour/plugin_manager.h>
 #include <ardour/plugin.h>
@@ -67,11 +67,11 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 #endif
 	  o_selector (_output_refiller, this, internationalize (o_titles), false, true)
 {
-	set_position (GTK_WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginSelectorWindow");
 	set_title (_("ardour: plugins"));
 	set_modal(true);
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	manager = mgr;
 	session = 0;
@@ -94,16 +94,16 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	btn_remove->set_name("PluginSelectorButton");
 	
 	Gtk::Table* table = manage(new Gtk::Table(7, 10));
-	table->set_usize(750, 500);
+	table->set_size_request(750, 500);
 	table->attach(notebook, 0, 7, 0, 5);
 
-	table->attach(*btn_add, 1, 2, 5, 6, GTK_FILL, 0, 5, 5);
-	table->attach(*btn_remove, 3, 4, 5, 6, GTK_FILL, 0, 5, 5);
-	table->attach(*btn_update, 5, 6, 5, 6, GTK_FILL, 0, 5, 5);
+	table->attach(*btn_add, 1, 2, 5, 6, Gtk::FILL, 0, 5, 5);
+	table->attach(*btn_remove, 3, 4, 5, 6, Gtk::FILL, 0, 5, 5);
+	table->attach(*btn_update, 5, 6, 5, 6, Gtk::FILL, 0, 5, 5);
 
 	table->attach(o_selector, 0, 7, 7, 9);
-	table->attach(*btn_ok, 1, 3, 9, 10, GTK_FILL, 0, 5, 5);
-	table->attach(*btn_cancel, 3, 4, 9, 10, GTK_FILL, 0, 5, 5);
+	table->attach(*btn_ok, 1, 3, 9, 10, Gtk::FILL, 0, 5, 5);
+	table->attach(*btn_cancel, 3, 4, 9, 10, Gtk::FILL, 0, 5, 5);
 	add (*table);
 
 	using namespace Gtk::Notebook_Helpers;
@@ -128,17 +128,17 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	ladspa_display.selection_made.connect (slot(*this, &PluginSelector::i_plugin_selected));
 	ladspa_display.choice_made.connect(slot(*this, &PluginSelector::i_plugin_chosen));
-	ladspa_display.clist().click_column.connect(bind (slot(*this, &PluginSelector::column_clicked), ladspa_display.clist().gtkobj()));
+	ladspa_display.clist().click_column.connect(bind (slot(*this, &PluginSelector::column_clicked), ladspa_display.clist().gobj()));
 #ifdef VST_SUPPORT
 	if (Config->get_use_vst()) {
 		vst_display.selection_made.connect (slot(*this, &PluginSelector::i_plugin_selected));
 		vst_display.choice_made.connect(slot(*this, &PluginSelector::i_plugin_chosen));
-		vst_display.clist().click_column.connect(bind (slot(*this, &PluginSelector::column_clicked), vst_display.clist().gtkobj()));
+		vst_display.clist().click_column.connect(bind (slot(*this, &PluginSelector::column_clicked), vst_display.clist().gobj()));
 	}
 #endif
 	o_selector.selection_made.connect(slot(*this, &PluginSelector::o_plugin_selected));
 	o_selector.choice_made.connect(slot(*this,&PluginSelector::o_plugin_chosen));
-	btn_update->clicked.connect (slot(*this, &PluginSelector::btn_update_clicked));
+	btn_update-.signal_clicked().connect (slot(*this, &PluginSelector::btn_update_clicked));
 	btn_add->clicked.connect(slot(*this, &PluginSelector::btn_add_clicked));
 	btn_remove->clicked.connect(slot(*this, &PluginSelector::btn_remove_clicked));
 	btn_ok->clicked.connect(slot(*this, &PluginSelector::btn_ok_clicked));
@@ -260,8 +260,8 @@ PluginSelector::output_refiller (Gtk::CList &clist)
 }
 
 void
-PluginSelector::i_plugin_chosen (Gtkmmext::Selector *selector,
-				 Gtkmmext::SelectionResult *res)
+PluginSelector::i_plugin_chosen (Gtkmm2ext::Selector *selector,
+				 Gtkmm2ext::SelectionResult *res)
 {
 	if (res) {
 		// get text for name column (0)
@@ -273,8 +273,8 @@ PluginSelector::i_plugin_chosen (Gtkmmext::Selector *selector,
 }
 
 void
-PluginSelector::i_plugin_selected (Gtkmmext::Selector *selector,
-				   Gtkmmext::SelectionResult *res)
+PluginSelector::i_plugin_selected (Gtkmm2ext::Selector *selector,
+				   Gtkmm2ext::SelectionResult *res)
 {
 	if (res) {
 		added_plugins.push_back (static_cast<PluginInfo*> (selector->clist().row(res->row).get_data()));
@@ -284,8 +284,8 @@ PluginSelector::i_plugin_selected (Gtkmmext::Selector *selector,
 }
 
 void
-PluginSelector::o_plugin_chosen (Gtkmmext::Selector *selector,
-			      Gtkmmext::SelectionResult *res)
+PluginSelector::o_plugin_chosen (Gtkmm2ext::Selector *selector,
+			      Gtkmm2ext::SelectionResult *res)
 {
 	if (res && res->text) {
 		o_selected_plug = res->row;
@@ -296,8 +296,8 @@ PluginSelector::o_plugin_chosen (Gtkmmext::Selector *selector,
 }
 
 void
-PluginSelector::o_plugin_selected (Gtkmmext::Selector *selector,
-				Gtkmmext::SelectionResult *res)
+PluginSelector::o_plugin_selected (Gtkmm2ext::Selector *selector,
+				Gtkmm2ext::SelectionResult *res)
 {
 	if(res && res->text){
 		gint row = 0;

@@ -21,7 +21,7 @@
 #ifndef __ardour_imageframe_time_axis_h__
 #define __ardour_imageframe_time_axis_h__
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
 
 #include "ardour_dialog.h"
@@ -158,10 +158,10 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		// Emitted Signals
 		
 		/** Emitted when a Marker Time Axis is Added, or associated with, this time axis */
-		SigC::Signal2<void,MarkerTimeAxis*,void*> MarkerTimeAxisAdded ;
+		sigc::signal<void,MarkerTimeAxis*,void*> MarkerTimeAxisAdded ;
 		
 		/** Emitted when a Marker Time Axis is removed, from this time axis */
-		SigC::Signal2<void,std::string,void*> MarkerTimeAxisRemoved ;
+		sigc::signal<void,std::string,void*> MarkerTimeAxisRemoved ;
 		
 	protected:
 

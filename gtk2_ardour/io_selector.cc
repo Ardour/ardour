@@ -31,8 +31,8 @@
 #include <ardour/session.h>
 #include <ardour/diskstream.h>
 
-#include <gtkmmext/doi.h>
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/doi.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "utils.h"
 #include "ardour_message.h"
@@ -45,7 +45,7 @@
 
 using namespace std;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 
 IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can_cancel)
@@ -56,7 +56,7 @@ IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can
 	  rescan_button (_("Rescan"))
 
 {
-	add_events (GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	set_name ("IOSelectorWindow");
 
 	string title;
@@ -87,12 +87,12 @@ IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can
 	vbox.pack_start (_selector);
 	vbox.pack_start (button_box, false, false);
 
-	ok_button.clicked.connect (slot (*this, &IOSelectorWindow::accept));
-	cancel_button.clicked.connect (slot (*this, &IOSelectorWindow::cancel));
-	rescan_button.clicked.connect (slot (*this, &IOSelectorWindow::rescan));
+	ok_button.signal_clicked().connect (slot (*this, &IOSelectorWindow::accept));
+	cancel_button.signal_clicked().connect (slot (*this, &IOSelectorWindow::cancel));
+	rescan_button.signal_clicked().connect (slot (*this, &IOSelectorWindow::rescan));
 
 	set_title (title);
-	set_position (GTK_WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_MOUSE);
 	add (vbox);
 
 	delete_event.connect (bind (slot (just_hide_it), reinterpret_cast<Window *> (this)));
@@ -146,7 +146,7 @@ IOSelector::IOSelector (Session& sess, IO& ior, bool input)
 	selected_port = 0;
 
 	notebook.set_name ("IOSelectorNotebook");
-	notebook.set_usize (-1, 125);
+	notebook.set_size_request (-1, 125);
 
 	clear_connections_button.set_name ("IOSelectorButton");
 	add_port_button.set_name ("IOSelectorButton");
@@ -172,10 +172,10 @@ IOSelector::IOSelector (Session& sess, IO& ior, bool input)
 
 	port_display_scroller.set_name ("IOSelectorNotebook");
 	port_display_scroller.set_border_width (0);
-	port_display_scroller.set_usize (-1, 170);
+	port_display_scroller.set_size_request (-1, 170);
 	port_display_scroller.add_with_viewport (port_box);
-	port_display_scroller.set_policy (GTK_POLICY_NEVER,
-					  GTK_POLICY_AUTOMATIC);
+	port_display_scroller.set_policy (Gtk::POLICY_NEVER,
+					  Gtk::POLICY_AUTOMATIC);
 
 	port_button_box.set_spacing (5);
 	port_button_box.set_border_width (5);
@@ -234,10 +234,10 @@ IOSelector::IOSelector (Session& sess, IO& ior, bool input)
 	rescan();
 	display_ports ();
 
-	clear_connections_button.clicked.connect (slot (*this, &IOSelector::clear_connections));
+	clear_connections_button.signal_clicked().connect (slot (*this, &IOSelector::clear_connections));
 
-	add_port_button.clicked.connect (slot (*this, &IOSelector::add_port));
-	remove_port_button.clicked.connect (slot (*this, &IOSelector::remove_port));
+	add_port_button.signal_clicked().connect (slot (*this, &IOSelector::add_port));
+	remove_port_button.signal_clicked().connect (slot (*this, &IOSelector::remove_port));
 
 	if (for_input) {
 		io.input_changed.connect (slot (*this, &IOSelector::ports_changed));
@@ -334,7 +334,7 @@ IOSelector::rescan ()
 		ScrolledWindow *scroller = manage (new ScrolledWindow);
 
 		scroller->add_with_viewport (*client_port_display);
-		scroller->set_policy (GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+		scroller->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 		client_box->pack_start (*scroller);
 
@@ -429,7 +429,7 @@ IOSelector::display_ports ()
 			 */
 
 			clist->column(0).get_widget();  // force the column title button to be created
-			GtkButton *b = GTK_BUTTON(clist->gtkobj()->column[0].button); // no API to access this
+			GtkButton *b = GTK_BUTTON(clist->gobj()->column[0].button); // no API to access this
 			Gtk::Button *B = wrap (b); // make C++ signal handling easier.
 
 			clist->column_titles_show ();
@@ -466,8 +466,8 @@ IOSelector::display_ports ()
 
 			clist->set_name ("IOSelectorPortList");
 			clist->set_selection_mode (GTK_SELECTION_SINGLE);
-			clist->set_shadow_type (GTK_SHADOW_IN);
-			clist->set_usize (-1, 75);
+			clist->set_shadow_type (Gtk::SHADOW_IN);
+			clist->set_size_request (-1, 75);
 
 			/* now fill the clist with the current connections */
 
@@ -812,9 +812,9 @@ PortInsertWindow::PortInsertWindow (Session& sess, PortInsert& pi, bool can_canc
 
 	add (vbox);
 
-	ok_button.clicked.connect (slot (*this, &PortInsertWindow::accept));
-	cancel_button.clicked.connect (slot (*this, &PortInsertWindow::cancel));
-	rescan_button.clicked.connect (slot (*this, &PortInsertWindow::rescan));
+	ok_button.signal_clicked().connect (slot (*this, &PortInsertWindow::accept));
+	cancel_button.signal_clicked().connect (slot (*this, &PortInsertWindow::cancel));
+	rescan_button.signal_clicked().connect (slot (*this, &PortInsertWindow::rescan));
 
 	delete_event.connect (bind (slot (just_hide_it), reinterpret_cast<Window *> (this)));	
 	pi.GoingAway.connect (slot (*this, &PortInsertWindow::plugin_going_away));

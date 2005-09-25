@@ -23,13 +23,13 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/utils.h>
-#include <gtkmmext/choice.h>
-#include <gtkmmext/slider_controller.h>
-#include <gtkmmext/stop_signal.h>
-#include <gtkmmext/bindable_button.h>
-#include <gtkmmext/doi.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/choice.h>
+#include <gtkmm2ext/slider_controller.h>
+#include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/bindable_button.h>
+#include <gtkmm2ext/doi.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -61,10 +61,10 @@
 
 #include "i18n.h"
 
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 
 /* XPM */
 static const gchar * small_x_xpm[] = {
@@ -145,8 +145,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	ignore_speed_adjustment = false;
 	comment_window = 0;
 
-	width_button.add (*(manage (new Gtk::Pixmap (lr_xpm))));
-	hide_button.add (*(manage (new Gtk::Pixmap (small_x_xpm))));
+	width_button.add (*(manage (new Gtk::Image (lr_xpm))));
+	hide_button.add (*(manage (new Gtk::Image (small_x_xpm))));
 
 
 	input_label.set_text (_("INPUT"));
@@ -160,7 +160,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	output_label.set_name ("MixerIOButtonLabel");
 
 	rec_enable_button->set_name ("MixerRecordEnableButton");
-	rec_enable_button->unset_flags (GTK_CAN_FOCUS);
+	rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
 
 	solo_button->set_name ("MixerSoloButton");
 	mute_button->set_name ("MixerMuteButton");
@@ -178,17 +178,17 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 	hide_button.set_events (hide_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
 
-	width_button.unset_flags (GTK_CAN_FOCUS);
-	hide_button.unset_flags (GTK_CAN_FOCUS);
-	input_button.unset_flags (GTK_CAN_FOCUS);
-	output_button.unset_flags (GTK_CAN_FOCUS);
-	solo_button->unset_flags (GTK_CAN_FOCUS);
-	mute_button->unset_flags (GTK_CAN_FOCUS);
-	gain_automation_style_button.unset_flags (GTK_CAN_FOCUS);
-	gain_automation_state_button.unset_flags (GTK_CAN_FOCUS);
-	pan_automation_style_button.unset_flags (GTK_CAN_FOCUS);
-	pan_automation_state_button.unset_flags (GTK_CAN_FOCUS);
-	polarity_button.unset_flags (GTK_CAN_FOCUS);
+	width_button.unset_flags (Gtk::CAN_FOCUS);
+	hide_button.unset_flags (Gtk::CAN_FOCUS);
+	input_button.unset_flags (Gtk::CAN_FOCUS);
+	output_button.unset_flags (Gtk::CAN_FOCUS);
+	solo_button->unset_flags (Gtk::CAN_FOCUS);
+	mute_button->unset_flags (Gtk::CAN_FOCUS);
+	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
+	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
+	pan_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
+	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
+	polarity_button.unset_flags (Gtk::CAN_FOCUS);
 
 	button_table.set_homogeneous (true);
 
@@ -251,7 +251,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 		speed_adjustment.value_changed.connect (slot (*this, &MixerStrip::speed_adjustment_changed));
 		
 		speed_frame.set_name ("BaseFrame");
-		speed_frame.set_shadow_type (GTK_SHADOW_IN);
+		speed_frame.set_shadow_type (Gtk::SHADOW_IN);
 		speed_frame.add (speed_spinner);
 		
 		speed_spinner.set_print_func (speed_printer, 0);
@@ -267,7 +267,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	
 	name_button.add (name_label);
 	name_button.set_name ("MixerNameButton");
-	Gtkmmext::set_usize_to_display_given_text (name_button, "longest label", 2, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
 
 	name_label.set_name ("MixerNameButtonLabel");
 	name_label.set_text (_route.name());
@@ -280,7 +280,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, _route.comment()==""	?
 							_("click to add/edit comments"):
 							_route.comment());
-	comment_button.clicked.connect (slot (*this, &MixerStrip::comment_button_clicked));
+	comment_button.signal_clicked().connect (slot (*this, &MixerStrip::comment_button_clicked));
 	
 	global_vpacker.set_border_width (4);
 	global_vpacker.set_spacing (4);
@@ -290,8 +290,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	width_button.set_name ("MixerWidthButton");
 	hide_button.set_name ("MixerHideButton");
 
-	width_button.clicked.connect (slot (*this, &MixerStrip::width_clicked));
-	hide_button.clicked.connect (slot (*this, &MixerStrip::hide_clicked));
+	width_button.signal_clicked().connect (slot (*this, &MixerStrip::width_clicked));
+	hide_button.signal_clicked().connect (slot (*this, &MixerStrip::hide_clicked));
 
 	width_hide_box.pack_start (width_button, false, true);
 	width_hide_box.pack_end (hide_button, false, true);
@@ -308,7 +308,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	global_vpacker.pack_start (comment_button, false, false);
 
 	global_frame.add (global_vpacker);
-	global_frame.set_shadow_type (GTK_SHADOW_IN);
+	global_frame.set_shadow_type (Gtk::SHADOW_IN);
 	global_frame.set_name ("BaseFrame");
 
 	add (global_frame);
@@ -430,7 +430,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	update_input_display ();
 	update_output_display ();
 
-	add_events (GDK_BUTTON_RELEASE_MASK);
+	add_events (Gdk::BUTTON_RELEASE_MASK);
 }
 
 MixerStrip::~MixerStrip ()
@@ -500,7 +500,7 @@ MixerStrip::set_width (Width w)
 
 	switch (w) {
 	case Wide:
-		set_usize (-1, -1);
+		set_size_request (-1, -1);
 		xml_node->add_property ("strip_width", "wide");
 
 		static_cast<Gtk::Label*> (rec_enable_button->get_child())->set_text (_("RECORD"));
@@ -512,11 +512,11 @@ MixerStrip::set_width (Width w)
 		static_cast<Gtk::Label*> (pan_automation_style_button.get_child())->set_text (astyle_string(_route.panner().automation_style()));
 		static_cast<Gtk::Label*> (pan_automation_state_button.get_child())->set_text (astate_string(_route.panner().automation_state()));
 		static_cast<Gtk::Label*> (polarity_button.get_child())->set_text (_("polarity"));
-		Gtkmmext::set_usize_to_display_given_text (name_button, "long", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		break;
 
 	case Narrow:
-		set_usize (50, -1);
+		set_size_request (50, -1);
 		xml_node->add_property ("strip_width", "narrow");
 
 		static_cast<Gtk::Label*> (rec_enable_button->get_child())->set_text (_("REC"));
@@ -528,7 +528,7 @@ MixerStrip::set_width (Width w)
 		static_cast<Gtk::Label*> (pan_automation_style_button.get_child())->set_text (short_astyle_string(_route.panner().automation_style()));
 		static_cast<Gtk::Label*> (pan_automation_state_button.get_child())->set_text (short_astate_string(_route.panner().automation_state()));
 		static_cast<Gtk::Label*> (polarity_button.get_child())->set_text (_("pol"));
-		Gtkmmext::set_usize_to_display_given_text (name_button, "longest label", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
 		break;
 	}
 
@@ -987,7 +987,7 @@ MixerStrip::_astyle_string (AutoStyle style, bool shrt)
 void
 MixerStrip::diskstream_changed (void *src)
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &MixerStrip::update_diskstream_display));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &MixerStrip::update_diskstream_display));
 }	
 
 void
@@ -1100,13 +1100,13 @@ MixerStrip::pan_automation_state_changed ()
 void
 MixerStrip::input_changed (IOChange change, void *src)
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &MixerStrip::update_input_display));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &MixerStrip::update_input_display));
 }
 
 void
 MixerStrip::output_changed (IOChange change, void *src)
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &MixerStrip::update_output_display));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &MixerStrip::update_output_display));
 }
 
 void
@@ -1119,7 +1119,7 @@ MixerStrip::comment_button_clicked ()
 	if (comment_window->is_visible()) {
 		comment_window->hide ();
 	} else {
-		comment_window->set_position (GTK_WIN_POS_MOUSE);
+		comment_window->set_position (Gtk::WIN_POS_MOUSE);
 		comment_window->show_all ();
 	}
 }
@@ -1136,8 +1136,8 @@ MixerStrip::setup_comment_editor ()
 
 	comment_area.set_name ("MixerTrackCommentArea");
 	comment_area.set_editable (true);
-	comment_area.focus_in_event.connect (slot (ARDOUR_UI::generic_focus_in_event));
-	comment_area.focus_out_event.connect (slot (ARDOUR_UI::generic_focus_out_event));
+	comment_area.signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
+	comment_area.signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
 	comment_area.changed.connect (slot (*this, &MixerStrip::comment_edited));
 	comment_area.button_release_event.connect_after (slot (do_not_propagate));
 	comment_area.show ();
@@ -1260,7 +1260,7 @@ MixerStrip::show_route_color ()
 
 	name_button.ensure_style ();
 	style = name_button.get_style()->copy();
-	style->set_bg (GTK_STATE_NORMAL, color());
+	style->set_bg (Gtk::STATE_NORMAL, color());
 	name_button.set_style (*style);
 	style->unref();
 
@@ -1325,7 +1325,7 @@ MixerStrip::speed_adjustment_changed ()
 void
 MixerStrip::speed_changed ()
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &MixerStrip::update_speed_display));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &MixerStrip::update_speed_display));
 }
 
 void
@@ -1357,7 +1357,7 @@ MixerStrip::set_selected (bool yn)
 		global_frame.set_shadow_type (GTK_SHADOW_ETCHED_OUT);
 		global_frame.set_name ("MixerStripSelectedFrame");
 	} else {
-		global_frame.set_shadow_type (GTK_SHADOW_IN);
+		global_frame.set_shadow_type (Gtk::SHADOW_IN);
 		global_frame.set_name ("MixerStripFrame");
 	}
 	global_frame.queue_draw ();

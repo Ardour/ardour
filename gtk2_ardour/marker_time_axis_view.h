@@ -23,7 +23,7 @@
 
 #include <list>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
 
 #include <ardour/location.h>
@@ -40,7 +40,7 @@ class TimeAxisViewItem ;
  * This object is responsible for the time axis canvas view, and
  * maintains the list of items that have been added to it 
  */
-class MarkerTimeAxisView : public SigC::Object
+class MarkerTimeAxisView : public sigc::trackable
 {
 	public:
 		//---------------------------------------------------------------------------------------//
@@ -202,10 +202,10 @@ class MarkerTimeAxisView : public SigC::Object
 		// Emitted Signals
 		
 		/** Emitted when a MarkerView is Added */
-		SigC::Signal2<void,MarkerView*,void*> MarkerViewAdded ;
+		sigc::signal<void,MarkerView*,void*> MarkerViewAdded ;
 		
 		/** Emitted when a MarkerView Item is removed */
-		SigC::Signal2<void,std::string,void*> MarkerViewRemoved ;
+		sigc::signal<void,std::string,void*> MarkerViewRemoved ;
 		
 	private:
 		/**

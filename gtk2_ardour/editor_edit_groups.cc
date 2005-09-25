@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <gtkmmext/stop_signal.h>
+#include <gtkmm2ext/stop_signal.h>
 #include <ardour/route_group.h>
 
 #include "editor.h"
@@ -34,7 +34,7 @@
 
 #include "i18n.h"
 
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
 
@@ -102,7 +102,7 @@ Editor::new_edit_group ()
 	
 	Gtk::Main::run ();
 	
-	if (prompter.status != Gtkmmext::Prompter::entered) {
+	if (prompter.status != Gtkmm2ext::Prompter::entered) {
 		return;
 	}
 	

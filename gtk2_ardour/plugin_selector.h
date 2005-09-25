@@ -20,9 +20,9 @@
 #ifndef __ardour_plugin_selector_h__
 #define __ardour_plugin_selector_h__
 
-#include <gtk--.h>
-#include <gtk--/ctree.h>
-#include <gtkmmext/selector.h>
+#include <gtkmm.h>
+#include <gtkmm/ctree.h>
+#include <gtkmm2ext/selector.h>
 
 #include <ardour_dialog.h>
 
@@ -36,7 +36,7 @@ class PluginSelector : public ArdourDialog
 {
   public:
 	PluginSelector (ARDOUR::PluginManager *);
-	SigC::Signal1<void,ARDOUR::Plugin *> PluginCreated;
+	sigc::signal<void,ARDOUR::Plugin *> PluginCreated;
 
 	void set_session (ARDOUR::Session*);
 
@@ -45,16 +45,16 @@ class PluginSelector : public ArdourDialog
 	Gtk::Notebook notebook;
 
 	// page 1
-	Gtkmmext::Selector ladspa_display;
+	Gtkmm2ext::Selector ladspa_display;
 	void column_clicked (int column, GtkCList* clist);
 
 #ifdef VST_SUPPORT
 	// page 2
-	Gtkmmext::Selector vst_display;
+	Gtkmm2ext::Selector vst_display;
 	static void _vst_refiller (Gtk::CList &, void *);
 	void vst_refiller (Gtk::CList &);
 #endif	
-	Gtkmmext::Selector o_selector;
+	Gtkmm2ext::Selector o_selector;
 
 	ARDOUR::PluginInfo* i_selected_plug;
 
@@ -70,14 +70,14 @@ class PluginSelector : public ArdourDialog
 
 	void input_refiller (Gtk::CList &);
 	void output_refiller (Gtk::CList &);
-	void i_plugin_selected (Gtkmmext::Selector *selector,
-			      Gtkmmext::SelectionResult *res);
-	void i_plugin_chosen (Gtkmmext::Selector *selector,
-			    Gtkmmext::SelectionResult *res);
-	void o_plugin_selected (Gtkmmext::Selector *selector,
-			      Gtkmmext::SelectionResult *res);
-	void o_plugin_chosen (Gtkmmext::Selector *selector,
-			    Gtkmmext::SelectionResult *res);
+	void i_plugin_selected (Gtkmm2ext::Selector *selector,
+			      Gtkmm2ext::SelectionResult *res);
+	void i_plugin_chosen (Gtkmm2ext::Selector *selector,
+			    Gtkmm2ext::SelectionResult *res);
+	void o_plugin_selected (Gtkmm2ext::Selector *selector,
+			      Gtkmm2ext::SelectionResult *res);
+	void o_plugin_chosen (Gtkmm2ext::Selector *selector,
+			    Gtkmm2ext::SelectionResult *res);
 	
 	void btn_add_clicked();
 	void btn_remove_clicked();

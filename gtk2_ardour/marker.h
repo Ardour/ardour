@@ -25,7 +25,7 @@
 #include <glib.h>
 #include <ardour/ardour.h>
 #include <gtk-canvas.h>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 
 namespace ARDOUR {
 	class TempoSection;
@@ -34,7 +34,7 @@ namespace ARDOUR {
 
 class PublicEditor;
 
-class Marker : public SigC::Object
+class Marker : public sigc::trackable
 {
   public:
 	enum Type {

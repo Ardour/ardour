@@ -22,7 +22,7 @@
 #define __gtk_ardour_marker_view_h__
 
 #include <string>
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
 #include "time_axis_view_item.h"
 
@@ -70,7 +70,7 @@ class MarkerView : public TimeAxisViewItem
 		 */
 		~MarkerView() ;
 		
-		static SigC::Signal1<void,MarkerView*> GoingAway;
+		static sigc::signal<void,MarkerView*> GoingAway;
 		
 		//---------------------------------------------------------------------------------------//
 		// Marker Type Methods
@@ -112,10 +112,10 @@ class MarkerView : public TimeAxisViewItem
 		// Emitted Signals
 		
 		/** Emitted when the mark type text is changed */
-		SigC::Signal2<void,std::string,void*> MarkTypeChanged ;
+		sigc::signal<void,std::string,void*> MarkTypeChanged ;
 		
 		/** Emitted when the Marked Item is changed */
-		SigC::Signal2<void,ImageFrameView*,void*> MarkedItemChanged ;
+		sigc::signal<void,ImageFrameView*,void*> MarkedItemChanged ;
 
 		
 	protected:

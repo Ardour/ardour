@@ -21,8 +21,8 @@
 #include <algorithm>
 #include <cmath>
 
-#include <gtk--.h>
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "imageframe_time_axis.h"
 #include "imageframe_time_axis_group.h"
@@ -35,10 +35,10 @@
 #include "canvas-imageframe.h"
 #include "gui_thread.h"
 
-using namespace SigC ;
+using namespace sigc ;
 using namespace ARDOUR ;
 
-SigC::Signal1<void,ImageFrameView*> ImageFrameView::GoingAway;
+sigc::signal<void,ImageFrameView*> ImageFrameView::GoingAway;
 
 /**
  * Constructs a new ImageFrameView upon the canvas

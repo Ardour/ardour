@@ -26,9 +26,9 @@
 #include <string>
 #include <sys/types.h>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <gtk-canvas.h>
-#include <sigc++/signal_system.h>
+#include <sigc++/signal.h>
 
 #include <pbd/undo.h>
 
@@ -84,7 +84,7 @@ class ControlPoint
 	ShapeType _shape;
 };
 
-class AutomationLine : public SigC::Object
+class AutomationLine : public sigc::trackable
 {
   public:
 	AutomationLine (string name, TimeAxisView&, GtkCanvasItem *, ARDOUR::AutomationList&,

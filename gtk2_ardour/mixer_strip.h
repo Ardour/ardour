@@ -24,10 +24,10 @@
 #include <vector>
 
 #include <cmath>
-#include <gtk--.h>
-#include <gtkmmext/auto_spin.h>
-#include <gtkmmext/slider_controller.h>
-#include <gtkmmext/click_box.h>
+#include <gtkmm.h>
+#include <gtkmm2ext/auto_spin.h>
+#include <gtkmm2ext/slider_controller.h>
+#include <gtkmm2ext/click_box.h>
 
 #include <ardour/types.h>
 #include <ardour/ardour.h>
@@ -48,7 +48,7 @@
 class MotionController;
 
 
-namespace Gtkmmext {
+namespace Gtkmm2ext {
 	class SliderController;
 }
 
@@ -130,7 +130,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	Gtk::ToggleButton polarity_button;
 
-	SigC::Connection newplug_connection;
+	sigc::connection newplug_connection;
     
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;
@@ -186,8 +186,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void gain_automation_style_changed();
 	void pan_automation_style_changed();
 
-	SigC::Connection panstate_connection;
-	SigC::Connection panstyle_connection;
+	sigc::connection panstate_connection;
+	sigc::connection panstyle_connection;
 	void connect_to_pan ();
 
 	std::string astate_string (ARDOUR::AutoState);
@@ -235,7 +235,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	/* speed control (for tracks only) */
 
 	Gtk::Adjustment    speed_adjustment;
-	Gtkmmext::ClickBox speed_spinner;
+	Gtkmm2ext::ClickBox speed_spinner;
 	Gtk::Label         speed_label;
 	Gtk::Frame         speed_frame;
 
@@ -246,8 +246,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void map_frozen ();
 	void hide_redirect_editor (ARDOUR::Redirect* redirect);
 
-	SigC::Connection gain_watching;
-	SigC::Connection pan_watching;
+	sigc::connection gain_watching;
+	sigc::connection pan_watching;
 	bool ignore_speed_adjustment;
 
 	string solo_button_name () const { return "MixerSoloButton"; }

@@ -24,7 +24,7 @@
 #include <string>
 
 #include <ardour/tempo.h>
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "editor.h"
 #include "editing.h"
@@ -33,7 +33,7 @@
 
 #include "i18n.h"
 
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Editing;
@@ -58,27 +58,27 @@ Editor::initialize_rulers ()
 	_smpte_ruler = gtk_custom_hruler_new ();
 	smpte_ruler = wrap (_smpte_ruler);
 	smpte_ruler->set_name ("SMPTERuler");
-	smpte_ruler->set_usize (-1, (int)timebar_height);
+	smpte_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_smpte_ruler), &ruler_metrics[ruler_metric_smpte]);
 	ruler_shown[ruler_metric_smpte] = true;
 	
 	_bbt_ruler = gtk_custom_hruler_new ();
 	bbt_ruler = wrap (_bbt_ruler);
 	bbt_ruler->set_name ("BBTRuler");
-	bbt_ruler->set_usize (-1, (int)timebar_height);
+	bbt_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_bbt_ruler), &ruler_metrics[ruler_metric_bbt]);
 	ruler_shown[ruler_metric_bbt] = true;
 
 	_frames_ruler = gtk_custom_hruler_new ();
 	frames_ruler = wrap (_frames_ruler);
 	frames_ruler->set_name ("FramesRuler");
-	frames_ruler->set_usize (-1, (int)timebar_height);
+	frames_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_frames_ruler), &ruler_metrics[ruler_metric_frames]);
 
 	_minsec_ruler = gtk_custom_hruler_new ();
 	minsec_ruler = wrap (_minsec_ruler);
 	minsec_ruler->set_name ("MinSecRuler");
-	minsec_ruler->set_usize (-1, (int)timebar_height);
+	minsec_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
 
 	ruler_shown[ruler_time_meter] = true;
@@ -89,10 +89,10 @@ Editor::initialize_rulers ()
 	ruler_shown[ruler_metric_frames] = false;
 	ruler_shown[ruler_metric_minsec] = false;
 	
-	smpte_ruler->set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
-	bbt_ruler->set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
-	frames_ruler->set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
-	minsec_ruler->set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
+	smpte_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	bbt_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	smpte_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
 	bbt_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
@@ -530,32 +530,32 @@ Editor::update_ruler_visibility ()
 	_smpte_ruler = gtk_custom_hruler_new ();
 	smpte_ruler = wrap (_smpte_ruler);
 	smpte_ruler->set_name ("SMPTERuler");
-	smpte_ruler->set_usize (-1, (int)timebar_height);
+	smpte_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_smpte_ruler), &ruler_metrics[ruler_metric_smpte]);
 	
 	_bbt_ruler = gtk_custom_hruler_new ();
 	bbt_ruler = wrap (_bbt_ruler);
 	bbt_ruler->set_name ("BBTRuler");
-	bbt_ruler->set_usize (-1, (int)timebar_height);
+	bbt_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_bbt_ruler), &ruler_metrics[ruler_metric_bbt]);
 
 	_frames_ruler = gtk_custom_hruler_new ();
 	frames_ruler = wrap (_frames_ruler);
 	frames_ruler->set_name ("FramesRuler");
-	frames_ruler->set_usize (-1, (int)timebar_height);
+	frames_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_frames_ruler), &ruler_metrics[ruler_metric_frames]);
 
 	_minsec_ruler = gtk_custom_hruler_new ();
 	minsec_ruler = wrap (_minsec_ruler);
 	minsec_ruler->set_name ("MinSecRuler");
-	minsec_ruler->set_usize (-1, (int)timebar_height);
+	minsec_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
 
 	
-	smpte_ruler->set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
-	bbt_ruler->set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
-	frames_ruler->set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
-	minsec_ruler->set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
+	smpte_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	bbt_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	smpte_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
 	bbt_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
@@ -684,7 +684,7 @@ Editor::update_ruler_visibility ()
 		gtk_canvas_item_hide (transport_marker_group);
 	}
 	
-	time_canvas_vbox.set_usize (-1, (int)(timebar_height * visible_timebars));
+	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
 	time_canvas_event_box.queue_resize();
 	
 	update_fixed_rulers();

@@ -2,8 +2,8 @@
 #define __ardour_gtk_gui_thread_h__
 
 #define ENSURE_GUI_THREAD(slot) \
-     if (!Gtkmmext::UI::instance()->caller_is_gui_thread()) {\
-	Gtkmmext::UI::instance()->call_slot ((slot));\
+     if (!Gtkmm2ext::UI::instance()->caller_is_gui_thread()) {\
+	Gtkmm2ext::UI::instance()->call_slot ((slot));\
         return;\
      }
 

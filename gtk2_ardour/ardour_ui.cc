@@ -28,19 +28,19 @@
 
 #include <iostream>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 #include <pbd/error.h>
 #include <pbd/basename.h>
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
-#include <gtkmmext/gtk_ui.h>
-#include <gtkmmext/pix.h>
-#include <gtkmmext/utils.h>
-#include <gtkmmext/click_box.h>
-#include <gtkmmext/selector.h>
-#include <gtkmmext/fastmeter.h>
-#include <gtkmmext/stop_signal.h>
-#include <gtkmmext/popup.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/pix.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/selector.h>
+#include <gtkmm2ext/fastmeter.h>
+#include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/popup.h>
 
 #include <midi++/port.h>
 #include <midi++/mmc.h>
@@ -75,17 +75,17 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 using namespace Gtk;
-using namespace SigC;
+using namespace sigc;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 SoundFileSelector* ARDOUR_UI::sfdb_window = 0;
 
-SigC::Signal1<void,bool> ARDOUR_UI::Blink;
-SigC::Signal0<void>      ARDOUR_UI::RapidScreenUpdate;
-SigC::Signal0<void>      ARDOUR_UI::SuperRapidScreenUpdate;
-SigC::Signal1<void,jack_nframes_t> ARDOUR_UI::Clock;
+sigc::signal<void,bool> ARDOUR_UI::Blink;
+sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
+sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
+sigc::signal<void,jack_nframes_t> ARDOUR_UI::Clock;
 
 /* XPM */
 static const gchar *h_meter_strip_xpm[] = {
@@ -782,7 +782,7 @@ vector<string> channel_combo_strings;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
-	: Gtkmmext::UI ("ardour", argcp, argvp, rcfile),
+	: Gtkmm2ext::UI ("ardour", argcp, argvp, rcfile),
 
 	  primary_clock (X_("TransportClockDisplay"), true, false, true),
 	  secondary_clock (X_("SecondaryClockDisplay"), true, false, true),
@@ -824,7 +824,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	Gtkmmext::init();
+	Gtkmm2ext::init();
 
 	/* actually, its already loaded, but ... */
 
@@ -1134,9 +1134,9 @@ ARDOUR_UI::ask_about_saving_session (string what)
 	prompt_label.set_alignment (0.5, 0.5);
 	prompt_label.set_name (X_("PrompterLabel"));
 
-	save_button.clicked.connect (bind(slot(window,&ArdourDialog::stop), 1));
-	nosave_button.clicked.connect (bind(slot(window,&ArdourDialog::stop), 0));
-	noquit_button.clicked.connect (bind(slot(window,&ArdourDialog::stop), -1));
+	save_button.signal_clicked().connect (bind(slot(window,&ArdourDialog::stop), 1));
+	nosave_button.signal_clicked().connect (bind(slot(window,&ArdourDialog::stop), 0));
+	noquit_button.signal_clicked().connect (bind(slot(window,&ArdourDialog::stop), -1));
 
 	button_packer.set_spacing (10);
 	button_packer.pack_start (save_button);
@@ -1150,7 +1150,7 @@ ARDOUR_UI::ask_about_saving_session (string what)
 
 	window.set_name (_("Prompter"));
 	window.set_title (_("ardour: save session?"));
-	window.set_position (GTK_WIN_POS_MOUSE);
+	window.set_position (Gtk::WIN_POS_MOUSE);
 	window.set_modal (true);
 	window.add (packer);
 	window.show_all ();
@@ -1647,7 +1647,7 @@ ARDOUR_UI::session_menu (GdkEventButton *ev)
 void
 ARDOUR_UI::redisplay_recent_sessions ()
 {
-	using namespace Gtkmmext;
+	using namespace Gtkmm2ext;
 	using namespace Gtk::CTree_Helpers;
 
 	vector<string *> *sessions;
@@ -1657,7 +1657,7 @@ ARDOUR_UI::redisplay_recent_sessions ()
 	/* ---------------------------------------- */
 	/* XXX MAKE ME A FUNCTION (no CTree::clear() in gtkmm 1.2) */
 
-	gtk_ctree_remove_node (session_selector.gtkobj(), NULL);
+	gtk_ctree_remove_node (session_selector.gobj(), NULL);
 	/* ---------------------------------------- */
 
 
@@ -1809,14 +1809,14 @@ ARDOUR_UI::build_session_selector ()
 	vpacker->pack_start (*button_packer, false, false);
 
 	scroller->add (session_selector);
-	scroller->set_policy(GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	scroller->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	session_selector_window->add (*vpacker);
 	session_selector_window->set_name ("SessionSelectorWindow");
-	session_selector_window->set_usize (200, 400);
+	session_selector_window->set_size_request (200, 400);
 
 	session_selector_window->delete_event.connect (bind (slot (just_hide_it), static_cast<Gtk::Window*>(session_selector_window)));
-	cancel_button->clicked.connect (bind (slot (*this, &ARDOUR_UI::hide_dialog), session_selector_window));
+	cancel_button-.signal_clicked().connect (bind (slot (*this, &ARDOUR_UI::hide_dialog), session_selector_window));
 	session_selector.tree_select_row.connect (slot (*this, &ARDOUR_UI::session_selection));
 }
 
@@ -1842,8 +1842,8 @@ ARDOUR_UI::open_session ()
 
 	if (open_session_selector == 0) {
 		open_session_selector = new Gtk::FileSelection(_("open session"));
-		open_session_selector->get_ok_button()->clicked.connect (slot (*this, &ARDOUR_UI::open_ok_clicked));
-		open_session_selector->get_cancel_button()->clicked.connect (bind (slot (*this, &ARDOUR_UI::fs_cancel_clicked), open_session_selector));
+		open_session_selector->get_ok_button()-.signal_clicked().connect (slot (*this, &ARDOUR_UI::open_ok_clicked));
+		open_session_selector->get_cancel_button()-.signal_clicked().connect (bind (slot (*this, &ARDOUR_UI::fs_cancel_clicked), open_session_selector));
 		open_session_selector->delete_event.connect (bind (slot (*this, &ARDOUR_UI::fs_delete_event), open_session_selector));
 	}
 
@@ -1872,7 +1872,7 @@ ARDOUR_UI::open_ok_clicked ()
 	
 	/* XXX hack hack hack */
 
-	GtkCList* clist = (GtkCList*) open_session_selector->gtkobj()->file_list;
+	GtkCList* clist = (GtkCList*) open_session_selector->gobj()->file_list;
 	gtk_clist_unselect_all (clist);
 
 	allow_focus(false);
@@ -2226,7 +2226,7 @@ ARDOUR_UI::toggle_record_enable (guint32 dstream)
 void
 ARDOUR_UI::queue_transport_change ()
 {
-	Gtkmmext::UI::instance()->call_slot (slot (*this, &ARDOUR_UI::map_transport_state));
+	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &ARDOUR_UI::map_transport_state));
 }
 
 void
@@ -2554,7 +2554,7 @@ ARDOUR_UI::snapshot_session ()
 
 	Gtk::Main::run ();
 
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string snapname;
 		
 		prompter.get_result (snapname);
@@ -2648,8 +2648,8 @@ ARDOUR_UI::rec_enable_button_blink (bool onoff, DiskStream *dstream, Widget *w)
 		}
 
 	} else {
-		if (w->get_state() != GTK_STATE_NORMAL) {
-			w->set_state (GTK_STATE_NORMAL);
+		if (w->get_state() != Gtk::STATE_NORMAL) {
+			w->set_state (Gtk::STATE_NORMAL);
 		}
 	}
 }
@@ -2666,7 +2666,7 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 		if (onoff) {
 			rec_button.set_state (GTK_STATE_ACTIVE);
 		} else {
-			rec_button.set_state (GTK_STATE_NORMAL);
+			rec_button.set_state (Gtk::STATE_NORMAL);
 		}
 		break;
 
@@ -2676,7 +2676,7 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 
 	default:
 		rec_button.set_active (false);
-		rec_button.set_state (GTK_STATE_NORMAL);
+		rec_button.set_state (Gtk::STATE_NORMAL);
 		break;
 	}
 }
@@ -2723,7 +2723,7 @@ ARDOUR_UI::save_template ()
 	
 	Gtk::Main::run();
 	
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string name;
 
 		prompter.get_result (name);
@@ -2987,7 +2987,7 @@ require some unused files to continue to exist."));
 	Gtk::VBox vpacker;
 	const char* rowtext[1];
 	
-	list_scroller.set_policy (GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	
 	vpacker.set_border_width (10);
 	vpacker.set_spacing (10);
@@ -3014,17 +3014,17 @@ require some unused files to continue to exist."));
 	}
 	
 	list_scroller.add_with_viewport (list);
-	list_scroller.set_usize (-1, 250);
+	list_scroller.set_size_request (-1, 250);
 	
 	vpacker.pack_start (list_scroller, true, true);
 	vpacker.pack_start (ok_button, false, false);
 	
-	ok_button.clicked.connect (Main::quit.slot ());
+	ok_button.signal_clicked().connect (Main::quit.slot ());
 	results.Hiding.connect (Main::quit.slot ());
 	
 	results.add (vpacker);
 	
-	results.set_position (GTK_WIN_POS_MOUSE);
+	results.set_position (Gtk::WIN_POS_MOUSE);
 	results.set_title (_("ardour: cleanup"));
 	results.set_modal (true);
 	results.run ();
@@ -3063,12 +3063,12 @@ Unused audio files will be moved to a \"dead sounds\" location."));
 	checker.set_name (_("CleanupDialog"));
 	checker.set_title (_("ardour cleanup"));
 	checker.set_wmclass (_("ardour_cleanup"), "Ardour");
-	checker.set_position (GTK_WIN_POS_MOUSE);
+	checker.set_position (Gtk::WIN_POS_MOUSE);
 	checker.realize ();
 	checker.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 
-	ok_button.clicked.connect (bind (slot (checker, &ArdourDialog::stop), 1));
-	cancel_button.clicked.connect (bind (slot (checker, &ArdourDialog::stop), 0));
+	ok_button.signal_clicked().connect (bind (slot (checker, &ArdourDialog::stop), 1));
+	cancel_button.signal_clicked().connect (bind (slot (checker, &ArdourDialog::stop), 0));
 
 	checker.run ();
 
@@ -3312,8 +3312,8 @@ what you would like to do.\n"));
 	hpacker.pack_start (use_button);
 	hpacker.pack_start (cancel_button);
 	
-	use_button.clicked.connect (bind (slot (dialog, &ArdourDialog::stop), 0));
-	cancel_button.clicked.connect (bind (slot (dialog, &ArdourDialog::stop), 1));
+	use_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 0));
+	cancel_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 1));
 
 	dialog.add (vpacker);
 	dialog.set_position (GTK_WIN_POS_CENTER);

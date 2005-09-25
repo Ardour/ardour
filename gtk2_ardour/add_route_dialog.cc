@@ -23,15 +23,15 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmmext/utils.h>
+#include <gtkmm2ext/utils.h>
 
 #include "utils.h"
 #include "add_route_dialog.h"
 #include "i18n.h"
 
 using namespace Gtk;
-using namespace Gtkmmext;
-using namespace SigC;
+using namespace Gtkmm2ext;
+using namespace sigc;
 
 extern std::vector<string> channel_combo_strings;
 
@@ -47,7 +47,7 @@ AddRouteDialog::AddRouteDialog ()
 	set_name ("AddRouteDialog");
 	set_title (_("ardour: add track/bus"));
 	set_wmclass (X_("ardour_add_track_bus"), "Ardour");
-	set_position (GTK_WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_MOUSE);
 	set_keyboard_input (true);
 
 	name_template_entry.set_name ("AddRouteDialogNameTemplateEntry");
@@ -89,8 +89,8 @@ AddRouteDialog::AddRouteDialog ()
 
 	HBox* hbbut = manage (new HBox);
 
-	set_usize_to_display_given_text (ok_button, _("Cancel"), 20, 15); // this is cancel on purpose
-	set_usize_to_display_given_text (cancel_button, _("Cancel"), 20, 15);
+	set_size_request_to_display_given_text (ok_button, _("Cancel"), 20, 15); // this is cancel on purpose
+	set_size_request_to_display_given_text (cancel_button, _("Cancel"), 20, 15);
 	
 	hbbut->set_homogeneous (true);
 	hbbut->set_spacing (6);
@@ -115,8 +115,8 @@ AddRouteDialog::AddRouteDialog ()
 	add (*vb2);
 
 	delete_event.connect (slot (*this, &ArdourDialog::wm_close_event));
-	ok_button.clicked.connect (bind (slot (*this,  &ArdourDialog::stop), 0));
-	cancel_button.clicked.connect (bind (slot (*this, &ArdourDialog::stop), 1));
+	ok_button.signal_clicked().connect (bind (slot (*this,  &ArdourDialog::stop), 0));
+	cancel_button.signal_clicked().connect (bind (slot (*this, &ArdourDialog::stop), 1));
 }
 
 AddRouteDialog::~AddRouteDialog ()

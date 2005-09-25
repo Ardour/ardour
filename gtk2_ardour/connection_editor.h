@@ -28,13 +28,13 @@ using __gnu_cxx::slist;
 #include <slist.h>
 #endif
 
-#include <gtk--/box.h>
-#include <gtk--/window.h>
-#include <gtk--/scrolledwindow.h>
-#include <gtk--/button.h>
-#include <gtk--/frame.h>
-#include <gtk--/notebook.h>
-#include <gtk--/clist.h>
+#include <gtkmm/box.h>
+#include <gtkmm/window.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/button.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/clist.h>
 
 #include "ardour_dialog.h"
 
@@ -138,8 +138,8 @@ class ConnectionEditor : public ArdourDialog {
 	gint connection_click (GdkEventButton *ev, Gtk::CList *clist);
 	void connection_selected (gint, gint, GdkEvent *, bool);
 
-	SigC::Connection config_connection;
-	SigC::Connection connect_connection;
+	sigc::connection config_connection;
+	sigc::connection connect_connection;
 	void configuration_changed (bool);
 	void connections_changed (int, bool);
 };

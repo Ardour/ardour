@@ -24,8 +24,8 @@
 
 #include <pbd/pathscanner.h>
 #include <pbd/fastlog.h>
-#include <gtkmmext/utils.h>
-#include <gtkmmext/selector.h>
+#include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/selector.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/route.h>
@@ -41,7 +41,7 @@
 
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 
 MeterBridgeStrip::MeterBridgeStrip (AudioEngine &eng, 
 				    Session& s,
@@ -61,7 +61,7 @@ MeterBridgeStrip::MeterBridgeStrip (AudioEngine &eng,
 	label.set_name ("ChannelMeterLabel");
 
 	label_ebox.set_name ("MeterBridgeWindow");
-	label_ebox.set_events (GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK|GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK);
+	label_ebox.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK);
 	label_ebox.add (label);
 
 	label_ebox.button_release_event.connect (slot (*this, &MeterBridgeStrip::label_button_press_release));
@@ -72,28 +72,28 @@ MeterBridgeStrip::MeterBridgeStrip (AudioEngine &eng,
 	over_long_button.add (over_long_label);
 	over_long_button.set_name ("OverMeter");
 	over_long_frame.add (over_long_button);
-	over_long_frame.set_shadow_type (GTK_SHADOW_IN);
+	over_long_frame.set_shadow_type (Gtk::SHADOW_IN);
 	over_long_frame.set_name ("BaseFrame");
 	over_long_hbox.pack_start (over_long_frame, false, false);
 
 	snprintf(buf, sizeof(buf)-1, _("# of %u-sample overs"), long_over);
 	ARDOUR_UI::instance()->tooltips().set_tip (over_long_button, buf);
 
-	set_usize_to_display_given_text (over_long_button, "88g", 2, 2);
+	set_size_request_to_display_given_text (over_long_button, "88g", 2, 2);
 
 	over_short_label.set_text ("0");
 	over_short_label.set_name ("OverMeterLabel");
 	over_short_button.add (over_short_label);
 	over_short_button.set_name ("OverMeter");
 	over_short_frame.add (over_short_button);
-	over_short_frame.set_shadow_type (GTK_SHADOW_IN);
+	over_short_frame.set_shadow_type (Gtk::SHADOW_IN);
 	over_short_frame.set_name ("BaseFrame");
 	over_short_hbox.pack_start (over_short_frame, false, false);
 
 	snprintf(buf, sizeof(buf)-1, _("# of %u-sample overs"), short_over);
 	ARDOUR_UI::instance()->tooltips().set_tip (over_short_button, buf);
 
-	set_usize_to_display_given_text (over_short_button, "88g", 2, 2);
+	set_size_request_to_display_given_text (over_short_button, "88g", 2, 2);
 	above_meter_vbox.set_spacing (5);
 	below_meter_vbox.set_spacing (5);
 
@@ -223,7 +223,7 @@ MeterBridgeStrip::label_button_press_release (GdkEventButton *ev)
 	
 	Gtk::Main::run();
 	
-	if (prompter.status == Gtkmmext::Prompter::entered) {
+	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string name;
 
 		prompter.get_result (name);

@@ -21,9 +21,9 @@
 #include <cmath>
 #include <algorithm>
 
-#include <gtk--.h>
+#include <gtkmm.h>
 
-#include <gtkmmext/gtk_ui.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include <ardour/playlist.h>
 #include <ardour/audioregion.h>
@@ -47,13 +47,13 @@
 
 #include "i18n.h"
 
-using namespace SigC;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Editing;
 
 static const int32_t sync_mark_width = 9;
 
-SigC::Signal1<void,AudioRegionView*> AudioRegionView::AudioRegionViewGoingAway;
+sigc::signal<void,AudioRegionView*> AudioRegionView::AudioRegionViewGoingAway;
 
 AudioRegionView::AudioRegionView (GtkCanvasGroup *parent, AudioTimeAxisView &tv, 
 				  AudioRegion& r, 
@@ -1136,7 +1136,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
-	Gtkmmext::UI::instance()->call_slot (bind (slot (*this, &AudioRegionView::create_one_wave), which, false));
+	Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &AudioRegionView::create_one_wave), which, false));
 }
 
 void

@@ -39,7 +39,7 @@
 
 using namespace ARDOUR;
 using namespace Gtk;
-using namespace Gtkmmext;
+using namespace Gtkmm2ext;
 
 void
 ARDOUR_UI::connect_to_session (Session *s)

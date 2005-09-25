@@ -21,7 +21,7 @@
 #ifndef __gtk_ardour_option_editor_h__
 #define __gtk_ardour_option_editor_h__
 
-#include <gtk--.h>
+#include <gtkmm.h>
 
 #include <ardour/session.h>
 
