@@ -46,7 +46,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 {
 	session = s;
 
-	session->HaltOnXrun.connect (slot (*this, &ARDOUR_UI::halt_on_xrun_message));
+	session->HaltOnXrun.connect (mem_fun(*this, &ARDOUR_UI::halt_on_xrun_message));
 
 	/* sensitize menu bar options that are now valid */
 
@@ -84,7 +84,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 	if (session->n_diskstreams()) {
 		// meter_bridge_dialog_check->set_sensitive (true);
 	} else {
-		session->DiskStreamAdded.connect (slot (*this, &ARDOUR_UI::diskstream_added));
+		session->DiskStreamAdded.connect (mem_fun(*this, &ARDOUR_UI::diskstream_added));
 	}
 
 	if (connection_editor) {
@@ -104,21 +104,21 @@ ARDOUR_UI::connect_to_session (Session *s)
 	}
 
 
-	Blink.connect (slot (*this, &ARDOUR_UI::transport_rec_enable_blink));
-	Blink.connect (slot (*this, &ARDOUR_UI::solo_blink));
-	Blink.connect (slot (*this, &ARDOUR_UI::audition_blink));
+	Blink.connect (mem_fun(*this, &ARDOUR_UI::transport_rec_enable_blink));
+	Blink.connect (mem_fun(*this, &ARDOUR_UI::solo_blink));
+	Blink.connect (mem_fun(*this, &ARDOUR_UI::audition_blink));
 
 	/* these are all need to be handled in an RT-safe and MT way, so don't
 	   do any GUI work, just queue it for handling by the GUI thread.
 	*/
 
-	session->TransportStateChange.connect (slot (*this, &ARDOUR_UI::queue_transport_change));
-	session->ControlChanged.connect (slot (*this, &ARDOUR_UI::queue_map_control_change));
+	session->TransportStateChange.connect (mem_fun(*this, &ARDOUR_UI::queue_transport_change));
+	session->ControlChanged.connect (mem_fun(*this, &ARDOUR_UI::queue_map_control_change));
 
 	/* alert the user to these things happening */
 
-	session->AuditionActive.connect (slot (*this, &ARDOUR_UI::auditioning_changed));
-	session->SoloActive.connect (slot (*this, &ARDOUR_UI::soloing_changed));
+	session->AuditionActive.connect (mem_fun(*this, &ARDOUR_UI::auditioning_changed));
+	session->SoloActive.connect (mem_fun(*this, &ARDOUR_UI::soloing_changed));
 
 	solo_alert_button.set_active (session->soloing());
 
@@ -146,9 +146,9 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	transport_stopped ();
 
-	second_connection = Main::timeout.connect (slot (*this, &ARDOUR_UI::every_second), 1000);
-	point_one_second_connection = Main::timeout.connect (slot (*this, &ARDOUR_UI::every_point_one_seconds), 100);
-	point_zero_one_second_connection = Main::timeout.connect (slot (*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
+	second_connection = Main::timeout.connect (mem_fun(*this, &ARDOUR_UI::every_second), 1000);
+	point_one_second_connection = Main::timeout.connect (mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
+	point_zero_one_second_connection = Main::timeout.connect (mem_fun(*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
 }
 
 int
@@ -232,7 +232,7 @@ ARDOUR_UI::create_meter_bridge ()
 {
 	if (meter_bridge == 0) {
 		meter_bridge = new MeterBridge ();
-		meter_bridge->Hiding.connect (slot (*this, &ARDOUR_UI::meter_bridge_hiding));
+		meter_bridge->Hiding.connect (mem_fun(*this, &ARDOUR_UI::meter_bridge_hiding));
 	}
 	return 0;
 }
@@ -248,7 +248,7 @@ ARDOUR_UI::create_connection_editor ()
 {
 	if (connection_editor == 0) {
 		connection_editor = new ConnectionEditor ();
-		connection_editor->Hiding.connect (slot (*this, &ARDOUR_UI::connection_editor_hiding));
+		connection_editor->Hiding.connect (mem_fun(*this, &ARDOUR_UI::connection_editor_hiding));
 	}
 
 	if (session) {
@@ -308,7 +308,7 @@ ARDOUR_UI::toggle_options_window ()
 {
 	if (option_editor == 0) {
 		option_editor = new OptionEditor (*this, *editor, *mixer);
-		option_editor->Hiding.connect(slot(*this, &ARDOUR_UI::option_hiding));
+		option_editor->Hiding.connect(mem_fun(*this, &ARDOUR_UI::option_hiding));
 		option_editor->set_session (session);
 	} else if (option_editor->within_hiding()) {
 		return;
@@ -354,7 +354,7 @@ ARDOUR_UI::create_location_ui ()
 	if (location_ui == 0) {
 		location_ui = new LocationUI ();
 		location_ui->set_session (session);
-		location_ui->Hiding.connect (slot (*this, &ARDOUR_UI::location_ui_hiding));
+		location_ui->Hiding.connect (mem_fun(*this, &ARDOUR_UI::location_ui_hiding));
 	} 
 	return 0;
 }
@@ -389,7 +389,7 @@ ARDOUR_UI::create_route_params ()
 	if (route_params == 0) {
 		route_params = new RouteParams_UI (*engine);
 		route_params->set_session (session);
-		route_params->Hiding.connect (slot (*this, &ARDOUR_UI::route_params_hiding));
+		route_params->Hiding.connect (mem_fun(*this, &ARDOUR_UI::route_params_hiding));
 	}
 	return 0;
 }
@@ -423,7 +423,7 @@ ARDOUR_UI::get_sfdb_window ()
 {
 	if (sfdb_window == 0) {
 		sfdb_window = new SoundFileSelector ();
-		sfdb_window->Hiding.connect (slot (*this, &ARDOUR_UI::sfdb_hiding));
+		sfdb_window->Hiding.connect (mem_fun(*this, &ARDOUR_UI::sfdb_hiding));
 		sfdb_window->hide_all ();
 	}
 	

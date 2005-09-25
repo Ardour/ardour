@@ -81,7 +81,7 @@ AudioRegionSelection::add (AudioRegionView* rv, bool dosort)
 		return;
 	}
 
-	rv->AudioRegionViewGoingAway.connect (slot (*this, &AudioRegionSelection::remove_it));
+	rv->AudioRegionViewGoingAway.connect (mem_fun(*this, &AudioRegionSelection::remove_it));
 
 	if (rv->region.first_frame() < _current_start || empty()) {
 		_current_start = rv->region.first_frame();

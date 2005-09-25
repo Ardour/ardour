@@ -70,8 +70,8 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	name_entry.set_name ("AudioRegionEditorEntry");
 	name_label.set_name ("AudioRegionEditorLabel");
 
-	name_entry.signal_focus_in_event().connect (slot (*this, &AudioRegionEditor::focus_change));
-	name_entry.signal_focus_out_event().connect (slot (*this, &AudioRegionEditor::focus_change));
+	name_entry.signal_focus_in_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	name_entry.signal_focus_out_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
 	
 	name_hbox.set_spacing (5);
 	name_hbox.pack_start (name_label, false, false);
@@ -204,9 +204,9 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 
 	fade_in_length_spinner.set_digits (3);
 
-	fade_in_length_spinner.signal_focus_in_event().connect (slot (*this, &AudioRegionEditor::focus_change));
-	fade_in_length_spinner.signal_focus_out_event().connect (slot (*this, &AudioRegionEditor::focus_change));
-	fade_in_length_spinner.activate.connect (slot (*this, &AudioRegionEditor::activation));
+	fade_in_length_spinner.signal_focus_in_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	fade_in_length_spinner.signal_focus_out_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	fade_in_length_spinner.activate.connect (mem_fun(*this, &AudioRegionEditor::activation));
 
 	Gtkmm2ext::set_size_request_to_display_given_text (fade_in_length_spinner, "500g", 20, -1);
 
@@ -240,9 +240,9 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	
 	fade_out_length_spinner.set_digits (3);
 
-	fade_out_length_spinner.signal_focus_in_event().connect (slot (*this, &AudioRegionEditor::focus_change));
-	fade_out_length_spinner.signal_focus_out_event().connect (slot (*this, &AudioRegionEditor::focus_change));
-	fade_out_length_spinner.activate.connect (slot (*this, &AudioRegionEditor::activation));
+	fade_out_length_spinner.signal_focus_in_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	fade_out_length_spinner.signal_focus_out_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	fade_out_length_spinner.activate.connect (mem_fun(*this, &AudioRegionEditor::activation));
 
 	Gtkmm2ext::set_size_request_to_display_given_text (fade_out_length_spinner, "500g", 20, -1);
 
@@ -271,7 +271,7 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	set_name ("AudioRegionEditorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	delete_event.connect (bind (slot (just_hide_it), static_cast<Window *> (this)));
+	delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Window *> (this)));
 
 	string title = _("ardour: region ");
 	title += _region.name();
@@ -303,7 +303,7 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 		envelope_view_button.set_active (false);
 	}
 
-	_region.StateChanged.connect (slot (*this, &AudioRegionEditor::region_changed));
+	_region.StateChanged.connect (mem_fun(*this, &AudioRegionEditor::region_changed));
 	
 	spin_arrow_grab = false;
 	
@@ -425,37 +425,37 @@ AudioRegionEditor::stop_editing_fade_out ()
 void
 AudioRegionEditor::connect_editor_events ()
 {
-	name_entry.changed.connect (slot (*this, &AudioRegionEditor::name_entry_changed));
+	name_entry.changed.connect (mem_fun(*this, &AudioRegionEditor::name_entry_changed));
 
-	start_clock.ValueChanged.connect (slot (*this, &AudioRegionEditor::start_clock_changed));
-	end_clock.ValueChanged.connect (slot (*this, &AudioRegionEditor::end_clock_changed));
-	length_clock.ValueChanged.connect (slot (*this, &AudioRegionEditor::length_clock_changed));
+	start_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::start_clock_changed));
+	end_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::end_clock_changed));
+	length_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::length_clock_changed));
 
-	fade_in_length_spinner.button_press_event.connect (bind (slot (*this, &AudioRegionEditor::bpressed), &fade_in_length_spinner, 
+	fade_in_length_spinner.button_press_event.connect (bind (mem_fun(*this, &AudioRegionEditor::bpressed), &fade_in_length_spinner, 
 								 &AudioRegionEditor::start_editing_fade_in));
-	fade_in_length_spinner.button_release_event.connect (bind (slot (this, &AudioRegionEditor::breleased), &fade_in_length_spinner, 
+	fade_in_length_spinner.button_release_event.connect (bind (mem_fun (*this, &AudioRegionEditor::breleased), &fade_in_length_spinner, 
 								   &AudioRegionEditor::stop_editing_fade_in));
 
-	fade_out_length_spinner.button_press_event.connect (bind (slot (*this, &AudioRegionEditor::bpressed), &fade_out_length_spinner, 
+	fade_out_length_spinner.button_press_event.connect (bind (mem_fun(*this, &AudioRegionEditor::bpressed), &fade_out_length_spinner, 
 								 &AudioRegionEditor::start_editing_fade_out));
-	fade_out_length_spinner.button_release_event.connect (bind (slot (this, &AudioRegionEditor::breleased), &fade_out_length_spinner, 
+	fade_out_length_spinner.button_release_event.connect (bind (mem_fun (*this, &AudioRegionEditor::breleased), &fade_out_length_spinner, 
 								   &AudioRegionEditor::stop_editing_fade_out));
 
-	fade_in_length_adjustment.value_changed.connect (slot (*this, &AudioRegionEditor::fade_in_length_adjustment_changed));
-	fade_out_length_adjustment.value_changed.connect (slot (*this, &AudioRegionEditor::fade_out_length_adjustment_changed));
+	fade_in_length_adjustment.value_changed.connect (mem_fun(*this, &AudioRegionEditor::fade_in_length_adjustment_changed));
+	fade_out_length_adjustment.value_changed.connect (mem_fun(*this, &AudioRegionEditor::fade_out_length_adjustment_changed));
 
-	fade_in_active_button.toggled.connect (slot (*this, &AudioRegionEditor::fade_in_active_toggled));
-	fade_out_active_button.toggled.connect (slot (*this, &AudioRegionEditor::fade_out_active_toggled));
+	fade_in_active_button.toggled.connect (mem_fun(*this, &AudioRegionEditor::fade_in_active_toggled));
+	fade_out_active_button.toggled.connect (mem_fun(*this, &AudioRegionEditor::fade_out_active_toggled));
 
-	envelope_active_button.button_press_event.connect (slot (*this, &AudioRegionEditor::envelope_active_button_press));
-	envelope_active_button.button_release_event.connect (slot (*this, &AudioRegionEditor::envelope_active_button_release));
-	audition_button.toggled.connect (slot (*this, &AudioRegionEditor::audition_button_toggled));
-	envelope_view_button.toggled.connect (slot (*this, &AudioRegionEditor::envelope_view_button_toggled));
-	lock_button.signal_clicked().connect (slot (*this, &AudioRegionEditor::lock_button_clicked));
-	mute_button.signal_clicked().connect (slot (*this, &AudioRegionEditor::mute_button_clicked));
-	opaque_button.signal_clicked().connect (slot (*this, &AudioRegionEditor::opaque_button_clicked));
-	raise_button.signal_clicked().connect (slot (*this, &AudioRegionEditor::raise_button_clicked));
-	lower_button.signal_clicked().connect (slot (*this, &AudioRegionEditor::lower_button_clicked));
+	envelope_active_button.button_press_event.connect (mem_fun(*this, &AudioRegionEditor::envelope_active_button_press));
+	envelope_active_button.button_release_event.connect (mem_fun(*this, &AudioRegionEditor::envelope_active_button_release));
+	audition_button.toggled.connect (mem_fun(*this, &AudioRegionEditor::audition_button_toggled));
+	envelope_view_button.toggled.connect (mem_fun(*this, &AudioRegionEditor::envelope_view_button_toggled));
+	lock_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::lock_button_clicked));
+	mute_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::mute_button_clicked));
+	opaque_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::opaque_button_clicked));
+	raise_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::raise_button_clicked));
+	lower_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::lower_button_clicked));
 }
 
 void

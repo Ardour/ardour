@@ -64,7 +64,7 @@ Panner2d::Panner2d (Panner& p, int32_t w, int32_t h)
 	allow_y = false;
 	allow_target = false;
 
-	panner.StateChanged.connect (slot (*this, &Panner2d::handle_state_change));
+	panner.StateChanged.connect (mem_fun(*this, &Panner2d::handle_state_change));
 	
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -216,7 +216,7 @@ Panner2d::remove_target (int which)
 void
 Panner2d::handle_state_change ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &Panner2d::handle_state_change));
+	ENSURE_GUI_THREAD(mem_fun(*this, &Panner2d::handle_state_change));
 
 	queue_draw ();
 }
@@ -580,7 +580,7 @@ Panner2d::show_context_menu ()
 
 		items.push_back (CheckMenuElem (_("Bypass")));
 		bypass_menu_item = static_cast<CheckMenuItem*> (items.back());
-		bypass_menu_item->toggled.connect (slot (*this, &Panner2d::toggle_bypass));
+		bypass_menu_item->toggled.connect (mem_fun(*this, &Panner2d::toggle_bypass));
 
 	} 
 

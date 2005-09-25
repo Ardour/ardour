@@ -726,7 +726,7 @@ Editor::button_press_handler (GtkCanvasItem* item, GdkEvent* event, ItemType ite
 					if (clicked_trackview) {
 						if (!current_stepping_trackview) {
 							TimeoutSig t;
-							step_timeout = t.connect (slot (*this, &Editor::track_height_step_timeout), 500);
+							step_timeout = t.connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
 							current_stepping_trackview = clicked_trackview;
 						}
 						gettimeofday (&last_track_height_step_timestamp, 0);
@@ -763,7 +763,7 @@ Editor::button_press_handler (GtkCanvasItem* item, GdkEvent* event, ItemType ite
 					if (clicked_trackview) {
 						if (!current_stepping_trackview) {
 							TimeoutSig t;
-							step_timeout = t.connect (slot (*this, &Editor::track_height_step_timeout), 500);
+							step_timeout = t.connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
 							current_stepping_trackview = clicked_trackview;
 						}
 						gettimeofday (&last_track_height_step_timestamp, 0);
@@ -1415,7 +1415,7 @@ Editor::leave_handler (GtkCanvasItem* item, GdkEvent* event, ItemType item_type)
 			gdk_window_set_cursor (track_canvas_scroller.get_window(), current_canvas_cursor);
 
 			clear_entered_track = true;
-			Main::idle.connect (slot (*this, &Editor::left_automation_track));
+			Main::idle.connect (mem_fun(*this, &Editor::left_automation_track));
 		}
 		break;
 		
@@ -2523,7 +2523,7 @@ Editor::start_region_copy_grab (GtkCanvasItem* item, GdkEvent* event)
 		session->add_undo (to_playlist->get_memento ());
 		latest_regionview = 0;
 
-		sigc::connection c = atv->view->AudioRegionViewAdded.connect (slot (*this, &Editor::collect_new_region_view));
+		sigc::connection c = atv->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 		
 		/* create a new region with the same name.
 		 */
@@ -3179,7 +3179,7 @@ Editor::region_drag_finished_callback (GtkCanvasItem* item, GdkEvent* event)
 
 			from_playlist->remove_region (&((*i)->region));
 	  
-			sigc::connection c = atv2->view->AudioRegionViewAdded.connect (slot (*this, &Editor::collect_new_region_view));
+			sigc::connection c = atv2->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 			to_playlist->add_region (*new_region, where);
 			c.disconnect ();
 			
@@ -3416,7 +3416,7 @@ Editor::start_selection_grab (GtkCanvasItem* item, GdkEvent* event)
 	*/
 	
 	latest_regionview = 0;
-	sigc::connection c = clicked_audio_trackview->view->AudioRegionViewAdded.connect (slot (*this, &Editor::collect_new_region_view));
+	sigc::connection c = clicked_audio_trackview->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 	
 	/* A selection grab currently creates two undo/redo operations, one for 
 	   creating the new region and another for moving it.

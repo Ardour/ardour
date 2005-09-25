@@ -114,9 +114,9 @@ AddRouteDialog::AddRouteDialog ()
 
 	add (*vb2);
 
-	delete_event.connect (slot (*this, &ArdourDialog::wm_close_event));
-	ok_button.signal_clicked().connect (bind (slot (*this,  &ArdourDialog::stop), 0));
-	cancel_button.signal_clicked().connect (bind (slot (*this, &ArdourDialog::stop), 1));
+	delete_event.connect (mem_fun(*this, &ArdourDialog::wm_close_event));
+	ok_button.signal_clicked().connect (bind (mem_fun(*this,  &ArdourDialog::stop), 0));
+	cancel_button.signal_clicked().connect (bind (mem_fun(*this, &ArdourDialog::stop), 1));
 }
 
 AddRouteDialog::~AddRouteDialog ()

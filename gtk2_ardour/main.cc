@@ -445,7 +445,7 @@ main (int argc, char *argv[])
 					   once everything else is OK.
 					*/
 
-					Main::idle.connect (bind (slot (*ui, &ARDOUR_UI::cmdline_new_session), path));
+					Main::idle.connect (bind (mem_fun (*ui, &ARDOUR_UI::cmdline_new_session), path));
 					ui->set_will_create_new_session_automatically (true);
 
 				} else {

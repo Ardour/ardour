@@ -366,7 +366,7 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 	gtk_object_set_data (GTK_OBJECT(group), "marker", this);
 	gtk_signal_connect (GTK_OBJECT(group), "event", (GtkSignalFunc) callback, &editor);
 
-	editor.ZoomChanged.connect (slot (*this, &Marker::reposition));
+	editor.ZoomChanged.connect (mem_fun(*this, &Marker::reposition));
 }
 
 Marker::~Marker ()

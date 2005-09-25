@@ -867,27 +867,27 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	set_shuttle_units (Percentage);
 	set_shuttle_behaviour (Sprung);
 
-	shuttle_unit_menu.items().push_back (MenuElem (_("Percentage"), bind (slot (*this, &ARDOUR_UI::set_shuttle_units),
+	shuttle_unit_menu.items().push_back (MenuElem (_("Percentage"), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units),
 								      Percentage)));
-	shuttle_unit_menu.items().push_back (MenuElem (_("Semitones"), bind (slot (*this, &ARDOUR_UI::set_shuttle_units),
+	shuttle_unit_menu.items().push_back (MenuElem (_("Semitones"), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units),
 								      Semitones)));
 
-	shuttle_style_menu.items().push_back (MenuElem (_("Sprung"), bind (slot (*this, &ARDOUR_UI::set_shuttle_behaviour),
+	shuttle_style_menu.items().push_back (MenuElem (_("Sprung"), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour),
 								   Sprung)));
-	shuttle_style_menu.items().push_back (MenuElem (_("Wheel"), bind (slot (*this, &ARDOUR_UI::set_shuttle_behaviour),
+	shuttle_style_menu.items().push_back (MenuElem (_("Wheel"), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour),
 								  Wheel)));
 
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
 
-	ARDOUR::DiskStream::CannotRecordNoInput.connect (slot (*this, &ARDOUR_UI::cannot_record_no_input));
-	ARDOUR::DiskStream::DeleteSources.connect (slot (*this, &ARDOUR_UI::delete_sources_in_the_right_thread));
-	ARDOUR::DiskStream::DiskOverrun.connect (slot (*this, &ARDOUR_UI::disk_overrun_handler));
-	ARDOUR::DiskStream::DiskUnderrun.connect (slot (*this, &ARDOUR_UI::disk_underrun_handler));
+	ARDOUR::DiskStream::CannotRecordNoInput.connect (mem_fun(*this, &ARDOUR_UI::cannot_record_no_input));
+	ARDOUR::DiskStream::DeleteSources.connect (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread));
+	ARDOUR::DiskStream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
+	ARDOUR::DiskStream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
 	/* handle pending state with a dialog */
 
-	ARDOUR::Session::AskAboutPendingState.connect (slot (*this, &ARDOUR_UI::pending_state_dialog));
+	ARDOUR::Session::AskAboutPendingState.connect (mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
 
 	channel_combo_strings = internationalize (channel_setup_names);
 	
@@ -897,7 +897,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 void
 ARDOUR_UI::cannot_record_no_input (DiskStream* ds)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &ARDOUR_UI::cannot_record_no_input), ds));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::cannot_record_no_input), ds));
 	
 	string msg = compose (_("\
 You cannot record-enable\n\
@@ -914,10 +914,10 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 {
 	engine = &e;
 
-	engine->Stopped.connect (slot (*this, &ARDOUR_UI::engine_stopped));
-	engine->Running.connect (slot (*this, &ARDOUR_UI::engine_running));
-	engine->Halted.connect (slot (*this, &ARDOUR_UI::engine_halted));
-	engine->SampleRateChanged.connect (slot (*this, &ARDOUR_UI::update_sample_rate));
+	engine->Stopped.connect (mem_fun(*this, &ARDOUR_UI::engine_stopped));
+	engine->Running.connect (mem_fun(*this, &ARDOUR_UI::engine_running));
+	engine->Halted.connect (mem_fun(*this, &ARDOUR_UI::engine_halted));
+	engine->SampleRateChanged.connect (mem_fun(*this, &ARDOUR_UI::update_sample_rate));
 
 	_tooltips.enable();
 
@@ -953,14 +953,14 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	/* start the time-of-day-clock */
 	
 	update_wall_clock ();
-	Main::timeout.connect (slot (*this, &ARDOUR_UI::update_wall_clock), 60000);
+	Main::timeout.connect (mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
 
 	update_disk_space ();
 	update_cpu_load ();
 	update_sample_rate (engine->frame_rate());
 
-	starting.connect (slot (*this, &ARDOUR_UI::startup));
-	stopping.connect (slot (*this, &ARDOUR_UI::shutdown));
+	starting.connect (mem_fun(*this, &ARDOUR_UI::startup));
+	stopping.connect (mem_fun(*this, &ARDOUR_UI::shutdown));
 }
 
 ARDOUR_UI::~ARDOUR_UI ()
@@ -1019,7 +1019,7 @@ ARDOUR_UI::configure_handler (GdkEventConfigure* conf)
 		gettimeofday (&last_configure_time, 0);
 	} else {
 		TimeoutSig t;
-		t.connect (slot (*this, &ARDOUR_UI::configure_timeout), 100);
+		t.connect (mem_fun(*this, &ARDOUR_UI::configure_timeout), 100);
 		have_configure_timeout = true;
 	}
 		
@@ -1063,7 +1063,7 @@ ARDOUR_UI::startup ()
 	   with the scheduling of the audio thread.
 	*/
 
-	Gtk::Main::idle.connect (slot (*this, &ARDOUR_UI::start_engine));
+	Gtk::Main::idle.connect (mem_fun(*this, &ARDOUR_UI::start_engine));
 }
 
 void
@@ -1134,9 +1134,9 @@ ARDOUR_UI::ask_about_saving_session (string what)
 	prompt_label.set_alignment (0.5, 0.5);
 	prompt_label.set_name (X_("PrompterLabel"));
 
-	save_button.signal_clicked().connect (bind(slot(window,&ArdourDialog::stop), 1));
-	nosave_button.signal_clicked().connect (bind(slot(window,&ArdourDialog::stop), 0));
-	noquit_button.signal_clicked().connect (bind(slot(window,&ArdourDialog::stop), -1));
+	save_button.signal_clicked().connect (bind(mem_fun(window,&ArdourDialog::stop), 1));
+	nosave_button.signal_clicked().connect (bind(mem_fun(window,&ArdourDialog::stop), 0));
+	noquit_button.signal_clicked().connect (bind(mem_fun(window,&ArdourDialog::stop), -1));
 
 	button_packer.set_spacing (10);
 	button_packer.pack_start (save_button);
@@ -1212,7 +1212,7 @@ ARDOUR_UI::update_sample_rate (jack_nframes_t ignored)
 {
 	char buf[32];
 
-	ENSURE_GUI_THREAD (bind (slot (*this, &ARDOUR_UI::update_sample_rate), ignored));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::update_sample_rate), ignored));
 
 	if (!engine->connected()) {
 
@@ -1472,7 +1472,7 @@ ARDOUR_UI::map_button_state ()
 void
 ARDOUR_UI::queue_map_control_change (Session::ControlType t)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &ARDOUR_UI::map_control_change), t));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::map_control_change), t));
 }
 
 void
@@ -1815,9 +1815,9 @@ ARDOUR_UI::build_session_selector ()
 	session_selector_window->set_name ("SessionSelectorWindow");
 	session_selector_window->set_size_request (200, 400);
 
-	session_selector_window->delete_event.connect (bind (slot (just_hide_it), static_cast<Gtk::Window*>(session_selector_window)));
-	cancel_button-.signal_clicked().connect (bind (slot (*this, &ARDOUR_UI::hide_dialog), session_selector_window));
-	session_selector.tree_select_row.connect (slot (*this, &ARDOUR_UI::session_selection));
+	session_selector_window->delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*>(session_selector_window)));
+	cancel_button-.signal_clicked().connect (bind (mem_fun(*this, &ARDOUR_UI::hide_dialog), session_selector_window));
+	session_selector.tree_select_row.connect (mem_fun(*this, &ARDOUR_UI::session_selection));
 }
 
 void
@@ -1842,9 +1842,9 @@ ARDOUR_UI::open_session ()
 
 	if (open_session_selector == 0) {
 		open_session_selector = new Gtk::FileSelection(_("open session"));
-		open_session_selector->get_ok_button()-.signal_clicked().connect (slot (*this, &ARDOUR_UI::open_ok_clicked));
-		open_session_selector->get_cancel_button()-.signal_clicked().connect (bind (slot (*this, &ARDOUR_UI::fs_cancel_clicked), open_session_selector));
-		open_session_selector->delete_event.connect (bind (slot (*this, &ARDOUR_UI::fs_delete_event), open_session_selector));
+		open_session_selector->get_ok_button()-.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::open_ok_clicked));
+		open_session_selector->get_cancel_button()-.signal_clicked().connect (bind (mem_fun(*this, &ARDOUR_UI::fs_cancel_clicked), open_session_selector));
+		open_session_selector->delete_event.connect (bind (mem_fun(*this, &ARDOUR_UI::fs_delete_event), open_session_selector));
 	}
 
 	open_session_selector->show_all ();
@@ -2226,7 +2226,7 @@ ARDOUR_UI::toggle_record_enable (guint32 dstream)
 void
 ARDOUR_UI::queue_transport_change ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &ARDOUR_UI::map_transport_state));
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &ARDOUR_UI::map_transport_state));
 }
 
 void
@@ -2281,7 +2281,7 @@ ARDOUR_UI::GlobalClickBox::printer (char buf[32], Adjustment &adj, void *arg)
 void
 ARDOUR_UI::engine_stopped ()
 {
-	ENSURE_GUI_THREAD (slot (*this, &ARDOUR_UI::engine_stopped));
+	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_stopped));
 
 	jack_disconnect_item->set_sensitive (false);
 	jack_reconnect_item->set_sensitive (true);
@@ -2292,7 +2292,7 @@ ARDOUR_UI::engine_stopped ()
 void
 ARDOUR_UI::engine_running ()
 {
-	ENSURE_GUI_THREAD (slot (*this, &ARDOUR_UI::engine_running));
+	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_running));
 
 	jack_disconnect_item->set_sensitive (true);
 	jack_reconnect_item->set_sensitive (false);
@@ -2302,7 +2302,7 @@ ARDOUR_UI::engine_running ()
 void
 ARDOUR_UI::engine_halted ()
 {
-	ENSURE_GUI_THREAD (slot (*this, &ARDOUR_UI::engine_halted));
+	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_halted));
 
 	jack_disconnect_item->set_sensitive (false);
 	jack_reconnect_item->set_sensitive (true);
@@ -2361,7 +2361,7 @@ ARDOUR_UI::start_engine ()
 		   solution, its what we have.
 		*/
 
-		Main::timeout.connect (slot (*this, &ARDOUR_UI::make_session_clean), 1000);
+		Main::timeout.connect (mem_fun(*this, &ARDOUR_UI::make_session_clean), 1000);
 	}
 
 	return FALSE;
@@ -2376,7 +2376,7 @@ ARDOUR_UI::update_clocks ()
 void
 ARDOUR_UI::start_clocking ()
 {
-	clock_signal_connection = RapidScreenUpdate.connect (slot (*this, &ARDOUR_UI::update_clocks));
+	clock_signal_connection = RapidScreenUpdate.connect (mem_fun(*this, &ARDOUR_UI::update_clocks));
 }
 
 void
@@ -2445,7 +2445,7 @@ ARDOUR_UI::add_diskstream_to_menu (DiskStream& dstream)
 	}
 
 	MenuList& items = diskstream_menu->items();
-	items.push_back (MenuElem (dstream.name(), bind (slot (*this, &ARDOUR_UI::diskstream_selected), (gint32) dstream.id())));
+	items.push_back (MenuElem (dstream.name(), bind (mem_fun(*this, &ARDOUR_UI::diskstream_selected), (gint32) dstream.id())));
 }
 	
 void
@@ -2471,7 +2471,7 @@ ARDOUR_UI::select_diskstream (GdkEventButton *ev)
 	using namespace Menu_Helpers;
 
 	MenuList& items = diskstream_menu->items();
-	items.push_back (MenuElem (_("No Stream"), (bind (slot (*this, &ARDOUR_UI::diskstream_selected), -1))));
+	items.push_back (MenuElem (_("No Stream"), (bind (mem_fun(*this, &ARDOUR_UI::diskstream_selected), -1))));
 
 	session->foreach_diskstream (this, &ARDOUR_UI::add_diskstream_to_menu);
 
@@ -3067,8 +3067,8 @@ Unused audio files will be moved to a \"dead sounds\" location."));
 	checker.realize ();
 	checker.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 
-	ok_button.signal_clicked().connect (bind (slot (checker, &ArdourDialog::stop), 1));
-	cancel_button.signal_clicked().connect (bind (slot (checker, &ArdourDialog::stop), 0));
+	ok_button.signal_clicked().connect (bind (mem_fun (checker, &ArdourDialog::stop), 1));
+	cancel_button.signal_clicked().connect (bind (mem_fun (checker, &ArdourDialog::stop), 0));
 
 	checker.run ();
 
@@ -3222,7 +3222,7 @@ ARDOUR_UI::keyboard_settings () const
 void
 ARDOUR_UI::halt_on_xrun_message ()
 {
-	ENSURE_GUI_THREAD (slot (*this, &ARDOUR_UI::halt_on_xrun_message));
+	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::halt_on_xrun_message));
 
 	ArdourMessage msg (editor, X_("haltonxrun"),
 			   _("Recording was stopped because your system could not keep up."));
@@ -3231,7 +3231,7 @@ ARDOUR_UI::halt_on_xrun_message ()
 void 
 ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::Source*>* deletion_list)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &ARDOUR_UI::delete_sources_in_the_right_thread), deletion_list));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread), deletion_list));
 
 	for (list<Source*>::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
 		delete *i;
@@ -3243,7 +3243,7 @@ ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::Source*>* deletion_l
 void
 ARDOUR_UI::disk_overrun_handler ()
 {
-	ENSURE_GUI_THREAD (slot (*this, &ARDOUR_UI::disk_underrun_handler));
+	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
 	if (!have_disk_overrun_displayed) {
 		have_disk_overrun_displayed = true;
@@ -3260,7 +3260,7 @@ quickly enough to keep up with recording.\n"));
 void
 ARDOUR_UI::disk_underrun_handler ()
 {
-	ENSURE_GUI_THREAD (slot (*this, &ARDOUR_UI::disk_underrun_handler));
+	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
 	if (!have_disk_underrun_displayed) {
 		have_disk_underrun_displayed = true;
@@ -3312,8 +3312,8 @@ what you would like to do.\n"));
 	hpacker.pack_start (use_button);
 	hpacker.pack_start (cancel_button);
 	
-	use_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 0));
-	cancel_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 1));
+	use_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 0));
+	cancel_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
 
 	dialog.add (vpacker);
 	dialog.set_position (GTK_WIN_POS_CENTER);

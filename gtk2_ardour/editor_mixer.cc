@@ -63,7 +63,7 @@ Editor::show_editor_mixer (bool yn)
 										      *session,
 										      atv->route(), false);
 
-						current_mixer_strip->GoingAway.connect (slot (*this, &Editor::cms_deleted));						
+						current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::cms_deleted));						
 						break;
 					}
 				}
@@ -77,7 +77,7 @@ Editor::show_editor_mixer (bool yn)
 						current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
 										      *session,
 										      atv->route(), false);
-						current_mixer_strip->GoingAway.connect (slot (*this, &Editor::cms_deleted));						
+						current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::cms_deleted));						
 						break;
 					}
 				}
@@ -92,8 +92,8 @@ Editor::show_editor_mixer (bool yn)
 		if (current_mixer_strip->get_parent() == 0) {
 
 			current_mixer_strip->set_embedded (true);
-			current_mixer_strip->Hiding.connect (slot (*this, &Editor::current_mixer_strip_hidden));
-			current_mixer_strip->GoingAway.connect (slot (*this, &Editor::current_mixer_strip_removed));
+			current_mixer_strip->Hiding.connect (mem_fun(*this, &Editor::current_mixer_strip_hidden));
+			current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::current_mixer_strip_removed));
 			current_mixer_strip->set_width (editor_mixer_strip_width);
 			current_mixer_strip->show_all ();
 			
@@ -141,7 +141,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
 					      *session,
 					      at->route());
-	current_mixer_strip->GoingAway.connect (slot (*this, &Editor::cms_deleted));
+	current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::cms_deleted));
 	
 	if (show) {
 		show_editor_mixer (true);

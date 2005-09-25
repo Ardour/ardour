@@ -89,7 +89,7 @@ RouteRedirectSelection::add (Redirect* r)
 		redirects.push_back (r);
 		
 		void (RouteRedirectSelection::*pmf)(Redirect*) = &RouteRedirectSelection::remove;
-		r->GoingAway.connect (slot (*this, pmf));
+		r->GoingAway.connect (mem_fun(*this, pmf));
 
 		RedirectsChanged();
 	}
@@ -105,7 +105,7 @@ RouteRedirectSelection::add (const vector<Redirect*>& rlist)
 			redirects.push_back (*i);
 			
 			void (RouteRedirectSelection::*pmf)(Redirect*) = &RouteRedirectSelection::remove;
-			(*i)->GoingAway.connect (slot (*this, pmf));
+			(*i)->GoingAway.connect (mem_fun(*this, pmf));
 			changed = true;
 		}
 	}
@@ -146,7 +146,7 @@ RouteRedirectSelection::add (Route* r)
 		routes.push_back (r);
 
 		void (RouteRedirectSelection::*pmf)(Route*) = &RouteRedirectSelection::remove;
-		r->GoingAway.connect (bind (slot (*this, pmf), r));
+		r->GoingAway.connect (bind (mem_fun(*this, pmf), r));
 
 		RoutesChanged();
 	}

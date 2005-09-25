@@ -141,8 +141,8 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	file_selector = 0;
 	spec.running = false;
 
-	file_entry.signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
-	file_entry.signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
+	file_entry.signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
+	file_entry.signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
 
 	file_entry.set_name ("ExportFileNameEntry");
 
@@ -156,7 +156,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	master_selector.set_column_title (0, _("Output"));
 	master_selector.column_titles_show ();
 	master_selector.set_selection_mode (GTK_SELECTION_MULTIPLE);
-	master_selector.button_press_event.connect (slot (*this, &ExportDialog::master_selector_button_press_event));
+	master_selector.button_press_event.connect (mem_fun(*this, &ExportDialog::master_selector_button_press_event));
 	
 	track_selector.set_name ("ExportTrackSelector");
 	track_selector.set_size_request (-1, 130);
@@ -168,7 +168,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	track_selector.set_column_title (0, _("Track"));
 	track_selector.column_titles_show ();
 	track_selector.set_selection_mode (GTK_SELECTION_MULTIPLE);
-	track_selector.button_press_event.connect (slot (*this, &ExportDialog::track_selector_button_press_event));
+	track_selector.button_press_event.connect (mem_fun(*this, &ExportDialog::track_selector_button_press_event));
 
 	check_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL,
 			gtk_widget_get_colormap(GTK_WIDGET(track_selector.gobj())),
@@ -214,7 +214,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	vpacker.pack_start (hpacker, true, true);
 	
 	track_selector_button.set_name ("EditorGTKButton");
-	track_selector_button.signal_clicked().connect (slot (*this, &ExportDialog::track_selector_button_click));
+	track_selector_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::track_selector_button_click));
 
 	vpacker.pack_start (button_box, false, false);
 	vpacker.pack_start (progress_bar, false, false);
@@ -378,18 +378,18 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	cancel_button.set_name ("EditorGTKButton");
 	file_entry.set_name ("ExportFileDisplay");
 
-	delete_event.connect (slot (*this, &ExportDialog::window_closed));
-	ok_button.signal_clicked().connect (slot (*this, &ExportDialog::do_export));
-	cancel_button.signal_clicked().connect (slot (*this, &ExportDialog::end_dialog));
+	delete_event.connect (mem_fun(*this, &ExportDialog::window_closed));
+	ok_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::do_export));
+	cancel_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::end_dialog));
 	
 	file_browse_button.set_name ("EditorGTKButton");
-	file_browse_button.signal_clicked().connect (slot (*this, &ExportDialog::initiate_browse));
+	file_browse_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::initiate_browse));
 
-	channel_count_combo.get_popwin()->unmap_event.connect (slot (*this, &ExportDialog::channels_chosen));
-	bitdepth_format_combo.get_popwin()->unmap_event.connect (slot (*this, &ExportDialog::bitdepth_chosen));
-	header_format_combo.get_popwin()->unmap_event.connect (slot (*this, &ExportDialog::header_chosen));
-	sample_rate_combo.get_popwin()->unmap_event.connect (slot (*this, &ExportDialog::sample_rate_chosen));
-	cue_file_combo.get_popwin()->unmap_event.connect (slot (*this, &ExportDialog::cue_file_type_chosen));
+	channel_count_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &ExportDialog::channels_chosen));
+	bitdepth_format_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &ExportDialog::bitdepth_chosen));
+	header_format_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &ExportDialog::header_chosen));
+	sample_rate_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &ExportDialog::sample_rate_chosen));
+	cue_file_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &ExportDialog::cue_file_type_chosen));
 }
 
 ExportDialog::~ExportDialog()
@@ -403,7 +403,7 @@ void
 ExportDialog::connect_to_session (Session *s)
 {
 	session = s;
-	session->going_away.connect (slot (*this, &Window::hide_all));
+	session->going_away.connect (mem_fun(*this, &Window::hide_all));
 
 	switch (session->frame_rate()) {
 	case 22050:
@@ -1047,7 +1047,7 @@ ExportDialog::do_export ()
 		}
 	}
 
-	progress_connection = Main::timeout.connect (slot (*this, &ExportDialog::progress_timeout), 100);
+	progress_connection = Main::timeout.connect (mem_fun(*this, &ExportDialog::progress_timeout), 100);
 	cancel_label.set_text (_("Stop Export"));
 
 	if (!audio_region) {
@@ -1350,10 +1350,10 @@ ExportDialog::initiate_browse ()
 		file_selector = new FileSelection;
 		file_selector->set_modal (true);
 
-		file_selector->get_cancel_button()-.signal_clicked().connect (bind (slot (*this, &ExportDialog::finish_browse), -1));
-		file_selector->get_ok_button()-.signal_clicked().connect (bind (slot (*this, &ExportDialog::finish_browse), 1));
-		file_selector->map_event.connect (bind (slot (*this, &ExportDialog::change_focus_policy), true));
-		file_selector->unmap_event.connect (bind (slot (*this, &ExportDialog::change_focus_policy), false));
+		file_selector->get_cancel_button()-.signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), -1));
+		file_selector->get_ok_button()-.signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), 1));
+		file_selector->map_event.connect (bind (mem_fun(*this, &ExportDialog::change_focus_policy), true));
+		file_selector->unmap_event.connect (bind (mem_fun(*this, &ExportDialog::change_focus_policy), false));
 	}
 	file_selector->show_all ();
 }

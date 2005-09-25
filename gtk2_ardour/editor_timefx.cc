@@ -85,7 +85,7 @@ Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
 	antialias_button.set_name (N_("TimeStretchButton"));
 	progress_bar.set_name (N_("TimeStretchProgress"));
 
-	action_button.signal_clicked().connect (bind (slot (*this, &ArdourDialog::stop), 1));
+	action_button.signal_clicked().connect (bind (mem_fun(*this, &ArdourDialog::stop), 1));
 }
 
 gint
@@ -120,8 +120,8 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 	}
 
 	current_timestretch->progress_bar.set_percentage (0.0f);
-	current_timestretch->first_cancel = current_timestretch->cancel_button.signal_clicked().connect (bind (slot (*current_timestretch, &ArdourDialog::stop), -1));
-	current_timestretch->first_delete = current_timestretch->delete_event.connect (slot (*current_timestretch, &ArdourDialog::wm_close_event));
+	current_timestretch->first_cancel = current_timestretch->cancel_button.signal_clicked().connect (bind (mem_fun (*current_timestretch, &ArdourDialog::stop), -1));
+	current_timestretch->first_delete = current_timestretch->delete_event.connect (mem_fun (*current_timestretch, &ArdourDialog::wm_close_event));
 
 	current_timestretch->run ();
 
@@ -143,8 +143,8 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 	current_timestretch->first_cancel.disconnect();
 	current_timestretch->first_delete.disconnect();
 	
-	current_timestretch->cancel_button.signal_clicked().connect (slot (current_timestretch, &TimeStretchDialog::cancel_timestretch_in_progress));
-	current_timestretch->delete_event.connect (slot (current_timestretch, &TimeStretchDialog::delete_timestretch_in_progress));
+	current_timestretch->cancel_button.signal_clicked().connect (mem_fun (current_timestretch, &TimeStretchDialog::cancel_timestretch_in_progress));
+	current_timestretch->delete_event.connect (mem_fun (current_timestretch, &TimeStretchDialog::delete_timestretch_in_progress));
 
 	if (pthread_create_and_store ("timestretch", &thread, 0, timestretch_thread, current_timestretch)) {
 		current_timestretch->close ();
@@ -154,7 +154,7 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 
 	pthread_detach (thread);
 
-	sigc::connection c = Main::timeout.connect (slot (current_timestretch, &TimeStretchDialog::update_progress), 100);
+	sigc::connection c = Main::timeout.connect (mem_fun (current_timestretch, &TimeStretchDialog::update_progress), 100);
 
 	while (current_timestretch->request.running) {
 		gtk_main_iteration ();

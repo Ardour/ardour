@@ -39,7 +39,7 @@ using namespace Gtk;
 void
 Editor::handle_new_route_p (Route* route)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Editor::handle_new_route_p), route));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route_p), route));
 	handle_new_route (*route);
 }
 
@@ -76,9 +76,9 @@ Editor::handle_new_route (Route& route)
 
 	ignore_route_list_reorder = false;
 	
-	route.gui_changed.connect (slot (*this, &Editor::handle_gui_changes));
+	route.gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
 
-	tv->GoingAway.connect (bind (slot (*this, &Editor::remove_route), tv));
+	tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	
 	editor_mixer_button.set_sensitive(true);
 	
@@ -87,7 +87,7 @@ Editor::handle_new_route (Route& route)
 void
 Editor::handle_gui_changes (string what, void *src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Editor::handle_gui_changes), what, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_gui_changes), what, src));
 	
 	if (what == "track_height") {
 		route_list_reordered ();
@@ -97,7 +97,7 @@ Editor::handle_gui_changes (string what, void *src)
 void
 Editor::remove_route (TimeAxisView *tv)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Editor::remove_route), tv));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::remove_route), tv));
 	
 	TrackViewList::iterator i;
 	CList_Helpers::RowList::iterator ri;
@@ -199,7 +199,7 @@ Editor::queue_route_list_reordered (gint arg1, gint arg2)
 	   is complete.
 	*/
 
-	Main::idle.connect (slot (*this, &Editor::route_list_reordered));
+	Main::idle.connect (mem_fun(*this, &Editor::route_list_reordered));
 }
 
 void
@@ -295,12 +295,12 @@ Editor::build_route_list_menu ()
 	MenuList& items = route_list_menu->items();
 	route_list_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Show All"), slot (*this, &Editor::select_all_routes)));
-	items.push_back (MenuElem (_("Hide All"), slot (*this, &Editor::unselect_all_routes)));
-	items.push_back (MenuElem (_("Show All AbstractTracks"), slot (*this, &Editor::select_all_audiotracks)));
-	items.push_back (MenuElem (_("Hide All AbstractTracks"), slot (*this, &Editor::unselect_all_audiotracks)));
-	items.push_back (MenuElem (_("Show All AudioBus"), slot (*this, &Editor::select_all_audiobus)));
-	items.push_back (MenuElem (_("Hide All AudioBus"), slot (*this, &Editor::unselect_all_audiobus)));
+	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Editor::select_all_routes)));
+	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Editor::unselect_all_routes)));
+	items.push_back (MenuElem (_("Show All AbstractTracks"), mem_fun(*this, &Editor::select_all_audiotracks)));
+	items.push_back (MenuElem (_("Hide All AbstractTracks"), mem_fun(*this, &Editor::unselect_all_audiotracks)));
+	items.push_back (MenuElem (_("Show All AudioBus"), mem_fun(*this, &Editor::select_all_audiobus)));
+	items.push_back (MenuElem (_("Hide All AudioBus"), mem_fun(*this, &Editor::unselect_all_audiobus)));
 
 }
 

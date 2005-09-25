@@ -75,7 +75,7 @@ MeterBridge::MeterBridge ()
 	set_wmclass (_("ardour_meter_bridge"), "Ardour");
 	// set_policy (false, false, false); // no user resizing of any kind
 
-	delete_event.connect (bind (slot (just_hide_it), static_cast<Gtk::Window*>(this)));
+	delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*>(this)));
 
 	metering = false;
 
@@ -96,8 +96,8 @@ MeterBridge::set_session (Session *s)
 		// XXX this stuff has to be fixed if we ever use this code again
 		// (refs vs. ptrs)
 		// session->foreach_route (this, &MeterBridge::add_route);
-		session->RouteAdded.connect (slot (*this, &MeterBridge::add_route));
-		session->going_away.connect (slot (*this, &MeterBridge::session_gone));
+		session->RouteAdded.connect (mem_fun(*this, &MeterBridge::add_route));
+		session->going_away.connect (mem_fun(*this, &MeterBridge::session_gone));
 		start_metering ();
 	}
 }
@@ -105,7 +105,7 @@ MeterBridge::set_session (Session *s)
 void
 MeterBridge::session_gone ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &MeterBridge::session_gone));
+	ENSURE_GUI_THREAD(mem_fun(*this, &MeterBridge::session_gone));
 	
 	stop_metering ();
 	hide_all ();
@@ -129,7 +129,7 @@ MeterBridge::session_gone ()
 void
 MeterBridge::add_route (ARDOUR::Route* route)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &MeterBridge::add_route), route));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &MeterBridge::add_route), route));
 	
 	uint32_t n;
 	char buf[32];
@@ -160,20 +160,20 @@ MeterBridge::add_route (ARDOUR::Route* route)
 	meter->meter_widget().show ();
 	meter->below_box().show_all ();
 
-	route->GoingAway.connect (bind (slot (*this, &MeterBridge::remove_route), route));
+	route->GoingAway.connect (bind (mem_fun(*this, &MeterBridge::remove_route), route));
 	meters.insert (meters.begin(), meter);
 
 	set_default_size (30 + ((n+1) * packing_factor), 315);
     
 	meter->set_meter_on(true);
 	
-	session->going_away.connect (slot (*this, &MeterBridge::session_gone));
+	session->going_away.connect (mem_fun(*this, &MeterBridge::session_gone));
 }
 
 void
 MeterBridge::remove_route (Route* route)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &MeterBridge::remove_route), route));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &MeterBridge::remove_route), route));
 	list<MeterBridgeStrip *>::iterator i;
 
 	for (i = meters.begin(); i != meters.end(); ++i) {
@@ -214,7 +214,7 @@ MeterBridge::start_metering ()
 		(*i)->set_meter_on (true);
 	}
 	metering_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
-		(slot (*this, &MeterBridge::update));
+		(mem_fun(*this, &MeterBridge::update));
 	metering = true;
 }
 

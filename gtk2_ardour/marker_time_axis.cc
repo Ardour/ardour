@@ -223,14 +223,14 @@ MarkerTimeAxis::build_display_menu()
 	/* now fill it with our stuff */
 	MenuList& items = display_menu->items();
 
-	items.push_back(MenuElem (_("Rename"), slot (*this, &VisualTimeAxis::start_time_axis_rename)));
+	items.push_back(MenuElem (_("Rename"), mem_fun(*this, &VisualTimeAxis::start_time_axis_rename)));
 
 	items.push_back(SeparatorElem()) ;
 	items.push_back(MenuElem (_("Height"), *size_menu));
-	items.push_back(MenuElem (_("Color"), slot (*this, &MarkerTimeAxis::select_track_color)));
+	items.push_back(MenuElem (_("Color"), mem_fun(*this, &MarkerTimeAxis::select_track_color)));
 	items.push_back(SeparatorElem()) ;
 	
-	items.push_back(MenuElem (_("Remove"), bind(slot(*this, &MarkerTimeAxis::remove_this_time_axis), (void*)this)));
+	items.push_back(MenuElem (_("Remove"), bind(mem_fun(*this, &MarkerTimeAxis::remove_this_time_axis), (void*)this)));
 }
 
 /**
@@ -256,22 +256,22 @@ MarkerTimeAxis::build_marker_menu()
 	
 	if(view)
 	{
-		duration_items.push_back(MenuElem (_("1 seconds"), bind (slot (view, &MarkerTimeAxisView::set_marker_duration_sec), 1.0))) ;
-		duration_items.push_back(MenuElem (_("1.5 seconds"), bind (slot (view, &MarkerTimeAxisView::set_marker_duration_sec), 1.5))) ;
-		duration_items.push_back(MenuElem (_("2 seconds"), bind (slot (view, &MarkerTimeAxisView::set_marker_duration_sec), 2.0))) ;
-		duration_items.push_back(MenuElem (_("2.5 seconds"), bind (slot (view, &MarkerTimeAxisView::set_marker_duration_sec), 2.5))) ;
-		duration_items.push_back(MenuElem (_("3 seconds"), bind (slot (view, &MarkerTimeAxisView::set_marker_duration_sec), 3.0))) ;
+		duration_items.push_back(MenuElem (_("1 seconds"), bind (mem_fun (view, &MarkerTimeAxisView::set_marker_duration_sec), 1.0))) ;
+		duration_items.push_back(MenuElem (_("1.5 seconds"), bind (mem_fun (view, &MarkerTimeAxisView::set_marker_duration_sec), 1.5))) ;
+		duration_items.push_back(MenuElem (_("2 seconds"), bind (mem_fun (view, &MarkerTimeAxisView::set_marker_duration_sec), 2.0))) ;
+		duration_items.push_back(MenuElem (_("2.5 seconds"), bind (mem_fun (view, &MarkerTimeAxisView::set_marker_duration_sec), 2.5))) ;
+		duration_items.push_back(MenuElem (_("3 seconds"), bind (mem_fun (view, &MarkerTimeAxisView::set_marker_duration_sec), 3.0))) ;
 	}
 	//duration_items.push_back(SeparatorElem()) ;
-	//duration_items.push_back(MenuElem (_("custom"), slot (*this, &ImageFrameTimeAxis::set_marker_duration_custom))) ;
+	//duration_items.push_back(MenuElem (_("custom"), mem_fun(*this, &ImageFrameTimeAxis::set_marker_duration_custom))) ;
 
 	marker_sub_items.push_back(MenuElem(_("Duration (sec)"), *duration_menu)) ;
 
 	marker_sub_items.push_back(SeparatorElem()) ;
-	marker_sub_items.push_back(MenuElem (_("Remove Marker"), bind(slot(view, &MarkerTimeAxisView::remove_selected_marker_view),(void*)this))) ;
+	marker_sub_items.push_back(MenuElem (_("Remove Marker"), bind(mem_fun(view, &MarkerTimeAxisView::remove_selected_marker_view),(void*)this))) ;
 	
 	items.push_back(MenuElem(_("Marker"), *marker_item_menu)) ;
-	items.push_back(MenuElem (_("Rename Track"), slot (*this,&MarkerTimeAxis::start_time_axis_rename))) ;
+	items.push_back(MenuElem (_("Rename Track"), mem_fun(*this,&MarkerTimeAxis::start_time_axis_rename))) ;
 
 	marker_menu->show_all() ;
 }

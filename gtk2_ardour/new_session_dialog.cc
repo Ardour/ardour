@@ -179,7 +179,7 @@ NewSessionDialog::NewSessionDialog (ARDOUR::AudioEngine& engine, bool startup, s
 
 	if (startup) {
 		show_again.set_active(true);
-		show_again.toggled.connect (slot (*this, &NewSessionDialog::show_again_toggled));
+		show_again.toggled.connect (mem_fun(*this, &NewSessionDialog::show_again_toggled));
 		file_selector.button_box.pack_end(show_again, false, false);
 	}
 
@@ -193,16 +193,16 @@ NewSessionDialog::NewSessionDialog (ARDOUR::AudioEngine& engine, bool startup, s
 	add (main_vbox);
 
 //	template_selector.shift_made.connect (
-//		slot (*this, &NewSessionDialog::mix_template_shift));
+//		mem_fun(*this, &NewSessionDialog::mix_template_shift));
 //	template_selector.control_made.connect (
-//		slot (*this, &NewSessionDialog::mix_template_control));
+//		mem_fun(*this, &NewSessionDialog::mix_template_control));
 
-	file_selector.cancel_button.signal_clicked().connect (bind (slot (*this, &ArdourDialog::stop), -1));
-	file_selector.op_button.signal_clicked().connect (bind (slot (*this, &ArdourDialog::stop), 0));
-	file_selector.Expanded.connect (slot (*this, &NewSessionDialog::file_selector_expansion));
+	file_selector.cancel_button.signal_clicked().connect (bind (mem_fun(*this, &ArdourDialog::stop), -1));
+	file_selector.op_button.signal_clicked().connect (bind (mem_fun(*this, &ArdourDialog::stop), 0));
+	file_selector.Expanded.connect (mem_fun(*this, &NewSessionDialog::file_selector_expansion));
 
-	delete_event.connect (slot (*this, &ArdourDialog::wm_close_event));
-	show.connect (slot (*this, &NewSessionDialog::fixup_at_show));
+	delete_event.connect (mem_fun(*this, &ArdourDialog::wm_close_event));
+	show.connect (mem_fun(*this, &NewSessionDialog::fixup_at_show));
 
 	file_selector.entry_label.set_name ("NewSessionMainLabel");
 	file_selector.where_label.set_name ("NewSessionMainLabel");
@@ -219,7 +219,7 @@ NewSessionDialog::NewSessionDialog (ARDOUR::AudioEngine& engine, bool startup, s
 	} else {
 		file_selector.set_path (given_path, true);
 		notebook.set_page (-1);
-		notebook.show.connect (bind (slot (notebook, &Notebook::set_page), -1));
+		notebook.show.connect (bind (mem_fun (notebook, &Notebook::set_page), -1));
 	}
  
 	set_default_size(531, 358);

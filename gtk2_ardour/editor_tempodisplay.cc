@@ -85,7 +85,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 void
 Editor::tempo_map_changed (Change ignored)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Editor::tempo_map_changed), ignored));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::tempo_map_changed), ignored));
 	
 	if (current_bbt_points) {
 		delete current_bbt_points;
@@ -342,7 +342,7 @@ Editor::remove_tempo_marker (GtkCanvasItem* item)
 	}		
 
 	if (tempo_marker->tempo().movable()) {
-		Gtk::Main::idle.connect (bind (slot (*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
+		Gtk::Main::idle.connect (bind (mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
 	}
 }
 
@@ -477,7 +477,7 @@ Editor::remove_meter_marker (GtkCanvasItem* item)
 	}		
 
 	if (meter_marker->meter().movable()) {
-		Gtk::Main::idle.connect (bind (slot (*this, &Editor::real_remove_meter_marker), &meter_marker->meter()));
+		Gtk::Main::idle.connect (bind (mem_fun(*this, &Editor::real_remove_meter_marker), &meter_marker->meter()));
 	}
 }
 

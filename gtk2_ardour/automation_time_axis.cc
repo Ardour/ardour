@@ -148,10 +148,10 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 	
 	controls_table.show_all ();
 
-	height_button.signal_clicked().connect (slot (*this, &AutomationTimeAxisView::height_clicked));
-	clear_button.signal_clicked().connect (slot (*this, &AutomationTimeAxisView::clear_clicked));
-	hide_button.signal_clicked().connect (slot (*this, &AutomationTimeAxisView::hide_clicked));
-	auto_button.signal_clicked().connect (slot (*this, &AutomationTimeAxisView::auto_clicked));
+	height_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::height_clicked));
+	clear_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::clear_clicked));
+	hide_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::hide_clicked));
+	auto_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::auto_clicked));
 
 	controls_base_selected_name = X_("AutomationTrackControlsBaseSelected");
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
@@ -187,13 +187,13 @@ AutomationTimeAxisView::auto_clicked ()
 		MenuList& items (automation_menu->items());
 
 		items.push_back (MenuElem (_("off"), 
-					   bind (slot (*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
 		items.push_back (MenuElem (_("play"),
-					   bind (slot (*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
 		items.push_back (MenuElem (_("write"),
-					   bind (slot (*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
 		items.push_back (MenuElem (_("touch"),
-					   bind (slot (*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
 	}
 
 	automation_menu->popup (1, 0);
@@ -446,9 +446,9 @@ AutomationTimeAxisView::build_display_menu ()
 
 	items.push_back (MenuElem (_("Height"), *size_menu));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Hide"), slot (*this, &AutomationTimeAxisView::hide_clicked)));
+	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &AutomationTimeAxisView::hide_clicked)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Clear"), slot (*this, &AutomationTimeAxisView::clear_clicked)));
+	items.push_back (MenuElem (_("Clear"), mem_fun(*this, &AutomationTimeAxisView::clear_clicked)));
 	items.push_back (SeparatorElem());
 
 	Menu* auto_state_menu = manage (new Menu);
@@ -456,19 +456,19 @@ AutomationTimeAxisView::build_display_menu ()
 	MenuList& as_items = auto_state_menu->items();
 	
 	as_items.push_back (CheckMenuElem (_("off"), 
-					   bind (slot (*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
 	auto_off_item = dynamic_cast<CheckMenuItem*>(as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("play"),
-					   bind (slot (*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
 	auto_play_item = dynamic_cast<CheckMenuItem*>(as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("write"),
-					   bind (slot (*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
 	auto_write_item = dynamic_cast<CheckMenuItem*>(as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("touch"),
-					   bind (slot (*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
 	auto_touch_item = dynamic_cast<CheckMenuItem*>(as_items.back());
 
 	items.push_back (MenuElem (_("State"), *auto_state_menu));
@@ -645,7 +645,7 @@ void
 AutomationTimeAxisView::add_ghost (GhostRegion* gr)
 {
 	ghosts.push_back (gr);
-	gr->GoingAway.connect (slot (*this, &AutomationTimeAxisView::remove_ghost));
+	gr->GoingAway.connect (mem_fun(*this, &AutomationTimeAxisView::remove_ghost));
 }
 
 void
@@ -736,7 +736,7 @@ AutomationTimeAxisView::add_line (AutomationLine& line)
 	if (lines.empty()) {
 		/* first line is the Model for automation state */
 		automation_connection = line.the_list().automation_state_changed.connect
-			(slot (*this, &AutomationTimeAxisView::automation_state_changed));
+			(mem_fun(*this, &AutomationTimeAxisView::automation_state_changed));
 		get = true;
 	}
 

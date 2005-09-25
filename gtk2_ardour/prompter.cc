@@ -26,7 +26,7 @@ using namespace sigc;
 ArdourPrompter::ArdourPrompter (bool modal)
 	: Gtkmm2ext::Prompter (modal)
 {
-	the_entry().signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
-	the_entry().signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
+	the_entry().signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
+	the_entry().signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
 }
 

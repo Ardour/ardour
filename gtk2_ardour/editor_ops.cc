@@ -1089,8 +1089,8 @@ Editor::temporal_zoom (gdouble fpu)
 	// leftmost_after_zoom = min (leftmost_after_zoom, session->current_end_frame());
 
 //	begin_reversible_command (_("zoom"));
-//	session->add_undo (bind (slot (*this, &Editor::reposition_and_zoom), current_leftmost, frames_per_unit));
-//	session->add_redo (bind (slot (*this, &Editor::reposition_and_zoom), leftmost_after_zoom, nfpu));
+//	session->add_undo (bind (mem_fun(*this, &Editor::reposition_and_zoom), current_leftmost, frames_per_unit));
+//	session->add_redo (bind (mem_fun(*this, &Editor::reposition_and_zoom), leftmost_after_zoom, nfpu));
 //	commit_reversible_command ();
 
 	reposition_and_zoom (leftmost_after_zoom, nfpu);
@@ -1145,8 +1145,8 @@ Editor::temporal_zoom_by_frame (jack_nframes_t start, jack_nframes_t end, string
 	if (new_leftmost > middle) new_leftmost = 0;
 
 //	begin_reversible_command (op);
-//	session->add_undo (bind (slot (*this, &Editor::reposition_and_zoom), leftmost_frame, frames_per_unit));
-//	session->add_redo (bind (slot (*this, &Editor::reposition_and_zoom), new_leftmost, new_fpu));
+//	session->add_undo (bind (mem_fun(*this, &Editor::reposition_and_zoom), leftmost_frame, frames_per_unit));
+//	session->add_redo (bind (mem_fun(*this, &Editor::reposition_and_zoom), new_leftmost, new_fpu));
 //	commit_reversible_command ();
 
 	reposition_and_zoom (new_leftmost, new_fpu);
@@ -1177,8 +1177,8 @@ Editor::temporal_zoom_to_frame (bool coarser, jack_nframes_t frame)
 	if (new_leftmost > frame) new_leftmost = 0;
 
 //	begin_reversible_command (_("zoom to frame"));
-//	session->add_undo (bind (slot (*this, &Editor::reposition_and_zoom), leftmost_frame, frames_per_unit));
-//	session->add_redo (bind (slot (*this, &Editor::reposition_and_zoom), new_leftmost, new_fpu));
+//	session->add_undo (bind (mem_fun(*this, &Editor::reposition_and_zoom), leftmost_frame, frames_per_unit));
+//	session->add_redo (bind (mem_fun(*this, &Editor::reposition_and_zoom), new_leftmost, new_fpu));
 //	commit_reversible_command ();
 
 	reposition_and_zoom (new_leftmost, new_fpu);
@@ -1758,9 +1758,9 @@ Editor::rename_region ()
 
 	region_renamed = false;
 
-	entry.activate.connect (bind (slot (*this, &Editor::rename_region_finished), true));
-	ok_button.signal_clicked().connect (bind (slot (*this, &Editor::rename_region_finished), true));
-	cancel_button.signal_clicked().connect (bind (slot (*this, &Editor::rename_region_finished), false));
+	entry.activate.connect (bind (mem_fun(*this, &Editor::rename_region_finished), true));
+	ok_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::rename_region_finished), true));
+	cancel_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::rename_region_finished), false));
 
 	/* recurse */
 
@@ -1832,7 +1832,7 @@ Editor::build_interthread_progress_window ()
 
 	interthread_cancel_button.add (interthread_cancel_label);
 
-	interthread_cancel_button.signal_clicked().connect (slot (*this, &Editor::interthread_cancel_clicked));
+	interthread_cancel_button.signal_clicked().connect (mem_fun(*this, &Editor::interthread_cancel_clicked));
 	
 	interthread_progress_window->set_modal (true);
 	interthread_progress_window->set_default_size (200, 100);
@@ -1897,10 +1897,10 @@ Editor::import_audio (bool as_tracks)
 	string str;
 
 	if (as_tracks) {
-		c = sfdb.Action.connect (bind (slot (*this, &Editor::do_import), true));
+		c = sfdb.Action.connect (bind (mem_fun(*this, &Editor::do_import), true));
 		str =_("Import selected as tracks");
 	} else {
-		c = sfdb.Action.connect (bind (slot (*this, &Editor::do_import), false));
+		c = sfdb.Action.connect (bind (mem_fun(*this, &Editor::do_import), false));
 		str = _("Import selected to region list");
 	}
 
@@ -1937,7 +1937,7 @@ Editor::do_import (vector<string> paths, bool split, bool as_tracks)
 	interthread_cancel_label.set_text (_("Cancel Import"));
 	current_interthread_info = &import_status;
 
-	c = session->AudioRegionAdded.connect (slot (*this, &Editor::catch_new_audio_region));
+	c = session->AudioRegionAdded.connect (mem_fun(*this, &Editor::catch_new_audio_region));
 
 	for (vector<string>::iterator i = paths.begin(); i != paths.end(); ++i ) {
 
@@ -1950,7 +1950,7 @@ Editor::do_import (vector<string> paths, bool split, bool as_tracks)
 		import_status.done = 0.0;
 		
 		interthread_progress_connection = 
-			Gtk::Main::timeout.connect (bind (slot (*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
+			Gtk::Main::timeout.connect (bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
 		
 		last_audio_region = 0;
 		
@@ -2034,7 +2034,7 @@ Editor::embed_audio ()
 	}
 
 	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	sigc::connection c = sfdb.Action.connect (slot (*this, &Editor::do_embed_sndfiles));
+	sigc::connection c = sfdb.Action.connect (mem_fun(*this, &Editor::do_embed_sndfiles));
 
 	sfdb.run (_("Add to External Region list"), true);
 
@@ -2167,7 +2167,7 @@ Editor::insert_sndfile (bool as_tracks)
 
 	if (as_tracks) {
 
-		c = sfdb.Action.connect (slot (*this, &Editor::insert_paths_as_new_tracks));
+		c = sfdb.Action.connect (mem_fun(*this, &Editor::insert_paths_as_new_tracks));
 		str = _("Insert selected as new tracks");
 
 	} else {
@@ -2182,7 +2182,7 @@ Editor::insert_sndfile (bool as_tracks)
 			return;
 		}
 
-		c = sfdb.Action.connect (bind (slot (*this, &Editor::do_insert_sndfile), pos));
+		c = sfdb.Action.connect (bind (mem_fun(*this, &Editor::do_insert_sndfile), pos));
 		str = _("Insert selected");
 	}
 
@@ -2915,7 +2915,7 @@ Editor::freeze_route ()
 	current_interthread_info = &itt;
 
 	interthread_progress_connection = 
-		Gtk::Main::timeout.connect (bind (slot (*this, &Editor::freeze_progress_timeout), (gpointer) 0), 100);
+		Gtk::Main::timeout.connect (bind (mem_fun(*this, &Editor::freeze_progress_timeout), (gpointer) 0), 100);
 
 	itt.done = false;
 	itt.cancel = false;

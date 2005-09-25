@@ -102,7 +102,7 @@ ARDOUR_UI::setup_adjustables ()
 	online_control_button = new GlobalClickBox ("CONTROL",
 						    online_control_strings);
 
-	online_control_button->adjustment.value_changed.connect(slot (*this,&ARDOUR_UI::control_methods_adjusted));
+	online_control_button->adjustment.value_changed.connect(mem_fun(*this,&ARDOUR_UI::control_methods_adjusted));
 
 	mmc_id_strings.push_back ("1");
 	mmc_id_strings.push_back ("2");
@@ -116,7 +116,7 @@ ARDOUR_UI::setup_adjustables ()
 
 	mmc_id_button = new GlobalClickBox (_("MMC ID"), mmc_id_strings);
 
-	mmc_id_button->adjustment.value_changed.connect (slot (*this,&ARDOUR_UI::mmc_device_id_adjusted));
+	mmc_id_button->adjustment.value_changed.connect (mem_fun(*this,&ARDOUR_UI::mmc_device_id_adjusted));
 
 	adjuster_table.attach (*online_control_button, 0, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, 0, 5, 5);
 	adjuster_table.attach (*mmc_id_button, 2, 3, 1, 2, 0, 0, 5, 5);
@@ -198,9 +198,9 @@ ARDOUR_UI::setup_transport ()
 	transport_frame.set_name ("BaseFrame");
 	transport_frame.add (transport_base);
 
-	transport_tearoff->Detach.connect (bind (slot (*this, &ARDOUR_UI::detach_tearoff), static_cast<Gtk::Box*>(&top_packer), 
+	transport_tearoff->Detach.connect (bind (mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Gtk::Box*>(&top_packer), 
 						 static_cast<Gtk::Widget*>(&transport_frame)));
-	transport_tearoff->Attach.connect (bind (slot (*this, &ARDOUR_UI::reattach_tearoff), static_cast<Gtk::Box*> (&top_packer), 
+	transport_tearoff->Attach.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Gtk::Box*> (&top_packer), 
 						 static_cast<Gtk::Widget*> (&transport_frame), 1));
 
 
@@ -280,25 +280,25 @@ ARDOUR_UI::setup_transport ()
 	punch_in_button.set_events (punch_in_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
 	punch_out_button.set_events (punch_out_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
 
-	goto_start_button.signal_clicked().connect (slot (*this,&ARDOUR_UI::transport_goto_start));
-	goto_end_button.signal_clicked().connect (slot (*this,&ARDOUR_UI::transport_goto_end));
+	goto_start_button.signal_clicked().connect (mem_fun(*this,&ARDOUR_UI::transport_goto_start));
+	goto_end_button.signal_clicked().connect (mem_fun(*this,&ARDOUR_UI::transport_goto_end));
 
-	roll_button.button_release_event.connect (slot (*this,&ARDOUR_UI::mouse_transport_roll));
-	play_selection_button.button_release_event.connect (slot (*this,&ARDOUR_UI::mouse_transport_play_selection));
-	auto_loop_button.button_release_event.connect (slot (*this,&ARDOUR_UI::mouse_transport_loop));
+	roll_button.button_release_event.connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_roll));
+	play_selection_button.button_release_event.connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_play_selection));
+	auto_loop_button.button_release_event.connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_loop));
 
-	stop_button.button_release_event.connect (slot (*this,&ARDOUR_UI::mouse_transport_stop));
-	rec_button.button_release_event.connect (slot (*this,&ARDOUR_UI::mouse_transport_record));
+	stop_button.button_release_event.connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_stop));
+	rec_button.button_release_event.connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_record));
 
-	shuttle_box.button_press_event.connect (slot (*this, &ARDOUR_UI::shuttle_box_button_press));
-	shuttle_box.button_release_event.connect (slot (*this, &ARDOUR_UI::shuttle_box_button_release));
-	shuttle_box.motion_notify_event.connect (slot (*this, &ARDOUR_UI::shuttle_box_motion));
-	shuttle_box.expose_event.connect (slot (*this, &ARDOUR_UI::shuttle_box_expose));
+	shuttle_box.button_press_event.connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_press));
+	shuttle_box.button_release_event.connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_release));
+	shuttle_box.motion_notify_event.connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_motion));
+	shuttle_box.expose_event.connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_expose));
 
 	/* clocks, etc. */
 
-	ARDOUR_UI::Clock.connect (bind (slot (primary_clock, &AudioClock::set), false));
-	ARDOUR_UI::Clock.connect (bind (slot (secondary_clock, &AudioClock::set), false));
+	ARDOUR_UI::Clock.connect (bind (mem_fun (primary_clock, &AudioClock::set), false));
+	ARDOUR_UI::Clock.connect (bind (mem_fun (secondary_clock, &AudioClock::set), false));
 
 	primary_clock.set_mode (AudioClock::SMPTE);
 	primary_clock.set_name ("TransportClockDisplay");
@@ -306,21 +306,21 @@ ARDOUR_UI::setup_transport ()
 	secondary_clock.set_name ("TransportClockDisplay");
 
 
-	primary_clock.ValueChanged.connect (slot (*this, &ARDOUR_UI::primary_clock_value_changed));
-	secondary_clock.ValueChanged.connect (slot (*this, &ARDOUR_UI::secondary_clock_value_changed));
+	primary_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
+	secondary_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (primary_clock, _("Primary clock"));
 	ARDOUR_UI::instance()->tooltips().set_tip (secondary_clock, _("secondary clock"));
 
 	/* options */
 
-	auto_return_button.toggled.connect (slot (*this,&ARDOUR_UI::toggle_auto_return));
-	auto_play_button.toggled.connect (slot (*this,&ARDOUR_UI::toggle_auto_play));
-	auto_input_button.toggled.connect (slot (*this,&ARDOUR_UI::toggle_auto_input));
-	click_button.toggled.connect (slot (*this,&ARDOUR_UI::toggle_click));
-	follow_button.toggled.connect (slot (*this,&ARDOUR_UI::toggle_follow));
-	punch_in_button.toggled.connect (slot (*this,&ARDOUR_UI::toggle_punch_in));
-	punch_out_button.toggled.connect (slot (*this,&ARDOUR_UI::toggle_punch_out));
+	auto_return_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_return));
+	auto_play_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_play));
+	auto_input_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_input));
+	click_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_click));
+	follow_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_follow));
+	punch_in_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_in));
+	punch_out_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_out));
 
 	preroll_button.unset_flags (Gtk::CAN_FOCUS);
 	preroll_button.set_events (preroll_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
@@ -340,9 +340,9 @@ ARDOUR_UI::setup_transport ()
 	/* CANNOT bind these to clicked or toggled, must use pressed or released */
 
 	solo_alert_button.set_name ("TransportSoloAlert");
-	solo_alert_button.pressed.connect (slot (*this,&ARDOUR_UI::solo_alert_toggle));
+	solo_alert_button.pressed.connect (mem_fun(*this,&ARDOUR_UI::solo_alert_toggle));
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
-	auditioning_alert_button.pressed.connect (slot (*this,&ARDOUR_UI::audition_alert_toggle));
+	auditioning_alert_button.pressed.connect (mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
 
 	alert_box.pack_start (solo_alert_button);
 	alert_box.pack_start (auditioning_alert_button);
@@ -366,10 +366,10 @@ ARDOUR_UI::setup_transport ()
 	speed_display_box.set_name (X_("ShuttleDisplay"));
 
 	shuttle_units_button.set_name (X_("ShuttleButton"));
-	shuttle_units_button.signal_clicked().connect (slot (*this, &ARDOUR_UI::shuttle_unit_clicked));
+	shuttle_units_button.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::shuttle_unit_clicked));
 	
 	shuttle_style_button.set_name (X_("ShuttleButton"));
-	shuttle_style_button.signal_clicked().connect (slot (*this, &ARDOUR_UI::shuttle_style_clicked));
+	shuttle_style_button.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::shuttle_style_clicked));
 
 	Gtk::Frame* sdframe = manage (new Frame);
 
@@ -422,7 +422,7 @@ ARDOUR_UI::setup_transport ()
 void
 ARDOUR_UI::setup_clock ()
 {
-	ARDOUR_UI::Clock.connect (bind (slot (big_clock, &AudioClock::set), false));
+	ARDOUR_UI::Clock.connect (bind (mem_fun (big_clock, &AudioClock::set), false));
 	
 	big_clock_window = new BigClockWindow;
 	
@@ -430,11 +430,11 @@ ARDOUR_UI::setup_clock ()
 	big_clock_window->add  (big_clock);
 	big_clock_window->set_title (_("ardour: clock"));
 	
-	big_clock_window->delete_event.connect (bind (slot (just_hide_it), static_cast<Gtk::Window*>(big_clock_window)));
-	big_clock_window->realize.connect (slot (*this, &ARDOUR_UI::big_clock_realize));
-	big_clock_window->size_allocate.connect (slot (*this, &ARDOUR_UI::big_clock_size_event));
+	big_clock_window->delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*>(big_clock_window)));
+	big_clock_window->realize.connect (mem_fun(*this, &ARDOUR_UI::big_clock_realize));
+	big_clock_window->size_allocate.connect (mem_fun(*this, &ARDOUR_UI::big_clock_size_event));
 
-	big_clock_window->Hiding.connect (slot (*this, &ARDOUR_UI::big_clock_hiding));
+	big_clock_window->Hiding.connect (mem_fun(*this, &ARDOUR_UI::big_clock_hiding));
 }
 
 void
@@ -483,7 +483,7 @@ ARDOUR_UI::_auditioning_changed (bool onoff)
 void
 ARDOUR_UI::auditioning_changed (bool onoff)
 {
-	Gtkmm2ext::UI::instance()->call_slot(bind (slot (*this, &ARDOUR_UI::_auditioning_changed), onoff));
+	Gtkmm2ext::UI::instance()->call_slot(bind (mem_fun(*this, &ARDOUR_UI::_auditioning_changed), onoff));
 }
 
 void

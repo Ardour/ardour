@@ -25,7 +25,7 @@
 #include "selection.h"
 
 void
-Editor::kbd_driver (SigC::Slot1<void,GdkEvent*> theslot, bool use_track_canvas, bool use_time_canvas, bool can_select)
+Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, bool use_time_canvas, bool can_select)
 {
 	gint x, y;
 	double dx, dy;
@@ -63,13 +63,13 @@ Editor::kbd_driver (SigC::Slot1<void,GdkEvent*> theslot, bool use_track_canvas, 
 void
 Editor::kbd_set_playhead_cursor ()
 {
-	kbd_driver (slot (*this, &Editor::set_playhead_cursor), true, true, false);
+	kbd_driver (mem_fun(*this, &Editor::set_playhead_cursor), true, true, false);
 }
 
 void
 Editor::kbd_set_edit_cursor ()
 {
-	kbd_driver (slot (*this, &Editor::set_edit_cursor), true, true, false);
+	kbd_driver (mem_fun(*this, &Editor::set_edit_cursor), true, true, false);
 }
 
 
@@ -92,7 +92,7 @@ Editor::kbd_do_split (GdkEvent* ev)
 void
 Editor::kbd_split ()
 {
-	kbd_driver (slot (*this, &Editor::kbd_do_split), true, true, false);
+	kbd_driver (mem_fun(*this, &Editor::kbd_do_split), true, true, false);
 }
 
 void
@@ -104,7 +104,7 @@ Editor::kbd_do_align (GdkEvent* ev, ARDOUR::RegionPoint what)
 void
 Editor::kbd_align (ARDOUR::RegionPoint what)
 {
-	kbd_driver (bind (slot (*this, &Editor::kbd_do_align), what));
+	kbd_driver (bind (mem_fun(*this, &Editor::kbd_do_align), what));
 }
 
 void
@@ -116,7 +116,7 @@ Editor::kbd_do_align_relative (GdkEvent* ev, ARDOUR::RegionPoint what)
 void
 Editor::kbd_align_relative (ARDOUR::RegionPoint what)
 {
-	kbd_driver (bind (slot (*this, &Editor::kbd_do_align), what), true, true, false);
+	kbd_driver (bind (mem_fun(*this, &Editor::kbd_do_align), what), true, true, false);
 }
 
 void
@@ -128,7 +128,7 @@ Editor::kbd_do_brush (GdkEvent *ev)
 void
 Editor::kbd_brush ()
 {
-	kbd_driver (slot (*this, &Editor::kbd_do_brush), true, true, false);
+	kbd_driver (mem_fun(*this, &Editor::kbd_do_brush), true, true, false);
 }
 
 void
@@ -140,5 +140,5 @@ Editor::kbd_do_audition (GdkEvent *ignored)
 void
 Editor::kbd_audition ()
 {
-	kbd_driver (slot (*this, &Editor::kbd_do_audition), true, false, true);
+	kbd_driver (mem_fun(*this, &Editor::kbd_do_audition), true, false, true);
 }

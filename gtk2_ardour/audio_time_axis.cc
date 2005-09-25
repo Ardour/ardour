@@ -150,35 +150,35 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 
 	hide_button.add (*(manage (new Pixmap (small_x_xpm))));
 	
-	_route.mute_changed.connect (slot (*this, &RouteUI::mute_changed));
-	_route.solo_changed.connect (slot (*this, &RouteUI::solo_changed));
-	_route.solo_safe_changed.connect (slot (*this, &RouteUI::solo_changed));
+	_route.mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
+	_route.solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route.solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 
-	_route.panner().Changed.connect (slot (*this, &AudioTimeAxisView::update_pans));
+	_route.panner().Changed.connect (mem_fun(*this, &AudioTimeAxisView::update_pans));
 
-	solo_button->button_press_event.connect (slot (*this, &RouteUI::solo_press));
-	solo_button->button_release_event.connect (slot (*this, &RouteUI::solo_release));
-	mute_button->button_press_event.connect (slot (*this, &RouteUI::mute_press));
-	mute_button->button_release_event.connect (slot (*this, &RouteUI::mute_release));
-	rec_enable_button->button_press_event.connect (slot (*this, &RouteUI::rec_enable_press));
-	edit_group_button.button_release_event.connect (slot (*this, &AudioTimeAxisView::edit_click));
-	playlist_button.signal_clicked().connect (slot (*this, &AudioTimeAxisView::playlist_click));
-	automation_button.signal_clicked().connect (slot (*this, &AudioTimeAxisView::automation_click));
-	size_button.button_release_event.connect (slot (*this, &AudioTimeAxisView::size_click));
-	visual_button.signal_clicked().connect (slot (*this, &AudioTimeAxisView::visual_click));
-	hide_button.signal_clicked().connect (slot (*this, &AudioTimeAxisView::hide_click));
+	solo_button->button_press_event.connect (mem_fun(*this, &RouteUI::solo_press));
+	solo_button->button_release_event.connect (mem_fun(*this, &RouteUI::solo_release));
+	mute_button->button_press_event.connect (mem_fun(*this, &RouteUI::mute_press));
+	mute_button->button_release_event.connect (mem_fun(*this, &RouteUI::mute_release));
+	rec_enable_button->button_press_event.connect (mem_fun(*this, &RouteUI::rec_enable_press));
+	edit_group_button.button_release_event.connect (mem_fun(*this, &AudioTimeAxisView::edit_click));
+	playlist_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::playlist_click));
+	automation_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::automation_click));
+	size_button.button_release_event.connect (mem_fun(*this, &AudioTimeAxisView::size_click));
+	visual_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::visual_click));
+	hide_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::hide_click));
 
-	name_entry.activate.connect (slot (*this, &AudioTimeAxisView::name_entry_activated));
-	name_entry.signal_focus_out_event().connect (slot (*this, &AudioTimeAxisView::name_entry_focus_out_handler));
-	name_entry.button_press_event.connect (slot (*this, &AudioTimeAxisView::name_entry_button_press_handler));
-	name_entry.button_release_event.connect (slot (*this, &AudioTimeAxisView::name_entry_button_release_handler));
-	name_entry.key_release_event.connect (slot (*this, &AudioTimeAxisView::name_entry_key_release_handler));
+	name_entry.activate.connect (mem_fun(*this, &AudioTimeAxisView::name_entry_activated));
+	name_entry.signal_focus_out_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_focus_out_handler));
+	name_entry.button_press_event.connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_press_handler));
+	name_entry.button_release_event.connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_release_handler));
+	name_entry.key_release_event.connect (mem_fun(*this, &AudioTimeAxisView::name_entry_key_release_handler));
 	
 	if (is_audio_track()) {
 		controls_table.attach (*rec_enable_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	}
 	controls_table.attach (*mute_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	controls_table.attach (*solo_button, 8, 9, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|GTK_FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (*solo_button, 8, 9, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::FILL|Gtk::EXPAND, 0, 0);
 
 	controls_table.attach (edit_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
@@ -229,20 +229,20 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 
 	set_state (*xml_node);
 	
-	_route.mute_changed.connect (slot (*this, &RouteUI::mute_changed));
-	_route.solo_changed.connect (slot (*this, &RouteUI::solo_changed));
-	_route.redirects_changed.connect (slot (*this, &AudioTimeAxisView::redirects_changed));
+	_route.mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
+	_route.solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route.redirects_changed.connect (mem_fun(*this, &AudioTimeAxisView::redirects_changed));
 
-	_route.name_changed.connect (slot (*this, &AudioTimeAxisView::route_name_changed));
+	_route.name_changed.connect (mem_fun(*this, &AudioTimeAxisView::route_name_changed));
 
 	if (is_audio_track()) {
 
 		/* track */
 
-		audio_track()->FreezeChange.connect (slot (*this, &AudioTimeAxisView::map_frozen));
+		audio_track()->FreezeChange.connect (mem_fun(*this, &AudioTimeAxisView::map_frozen));
 
-		audio_track()->diskstream_changed.connect (slot (*this, &AudioTimeAxisView::diskstream_changed));
-		get_diskstream()->speed_changed.connect (slot (*this, &AudioTimeAxisView::speed_changed));
+		audio_track()->diskstream_changed.connect (mem_fun(*this, &AudioTimeAxisView::diskstream_changed));
+		get_diskstream()->speed_changed.connect (mem_fun(*this, &AudioTimeAxisView::speed_changed));
 
 		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
 		controls_base_selected_name = "AudioTrackControlsBaseSelected";
@@ -250,7 +250,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 
 		/* ask for notifications of any new RegionViews */
 
-		view->AudioRegionViewAdded.connect (slot (*this, &AudioTimeAxisView::region_view_added));
+		view->AudioRegionViewAdded.connect (mem_fun(*this, &AudioTimeAxisView::region_view_added));
 
 		view->attach ();
 
@@ -267,7 +267,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 		controls_base_unselected_name = "BusControlsBaseUnselected";
 	}
 
-	editor.ZoomChanged.connect (slot (*this, &AudioTimeAxisView::reset_samples_per_unit));
+	editor.ZoomChanged.connect (mem_fun(*this, &AudioTimeAxisView::reset_samples_per_unit));
 }
 
 AudioTimeAxisView::~AudioTimeAxisView ()
@@ -323,8 +323,8 @@ AudioTimeAxisView::set_playlist (AudioPlaylist *newplaylist)
 	state_changed_connection.disconnect ();
 	
 	if ((pl = dynamic_cast<AudioPlaylist*> (playlist())) != 0) {
-		state_changed_connection = pl->StateChanged.connect (slot (*this, &AudioTimeAxisView::playlist_state_changed));
-		modified_connection = pl->Modified.connect (slot (*this, &AudioTimeAxisView::playlist_modified));
+		state_changed_connection = pl->StateChanged.connect (mem_fun(*this, &AudioTimeAxisView::playlist_state_changed));
+		modified_connection = pl->Modified.connect (mem_fun(*this, &AudioTimeAxisView::playlist_modified));
 	}
 }
 
@@ -347,7 +347,7 @@ AudioTimeAxisView::edit_click (GdkEventButton *ev)
 
 	items.clear ();
 	items.push_back (RadioMenuElem (edit_group_menu_radio_group, _("No group"), 
-				   bind (slot (*this, &AudioTimeAxisView::set_edit_group_from_menu), (RouteGroup *) 0)));
+				   bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), (RouteGroup *) 0)));
 	
 	if (_route.edit_group() == 0) {
 		static_cast<RadioMenuItem*>(items.back())->set_active ();
@@ -366,7 +366,7 @@ AudioTimeAxisView::add_edit_group_menu_item (RouteGroup *eg)
 
 	MenuList &items = edit_group_menu.items();
 	items.push_back (RadioMenuElem (edit_group_menu_radio_group,
-					eg->name(), bind (slot (*this, &AudioTimeAxisView::set_edit_group_from_menu), eg)));
+					eg->name(), bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), eg)));
 	if (_route.edit_group() == eg) {
 		static_cast<RadioMenuItem*>(items.back())->set_active ();
 	}
@@ -382,7 +382,7 @@ AudioTimeAxisView::set_edit_group_from_menu (RouteGroup *eg)
 void
 AudioTimeAxisView::playlist_state_changed (Change ignored)
 {
-	// ENSURE_GUI_THREAD (bind (slot (*this, &AudioTimeAxisView::playlist_state_changed), ignored));
+	// ENSURE_GUI_THREAD (bind (mem_fun(*this, &AudioTimeAxisView::playlist_state_changed), ignored));
 	// why are we here ?
 }
 
@@ -713,12 +713,12 @@ AudioTimeAxisView::build_display_menu ()
 	display_menu->set_name ("ArdourContextMenu");
 	
 	items.push_back (MenuElem (_("Height"), *size_menu));
-	items.push_back (MenuElem (_("Color"), slot (*this, &AudioTimeAxisView::select_track_color)));
+	items.push_back (MenuElem (_("Color"), mem_fun(*this, &AudioTimeAxisView::select_track_color)));
 
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Hide all crossfades"), slot (*this, &AudioTimeAxisView::hide_all_xfades)));
-	items.push_back (MenuElem (_("Show all crossfades"), slot (*this, &AudioTimeAxisView::show_all_xfades)));
+	items.push_back (MenuElem (_("Hide all crossfades"), mem_fun(*this, &AudioTimeAxisView::hide_all_xfades)));
+	items.push_back (MenuElem (_("Show all crossfades"), mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
 	items.push_back (SeparatorElem());
 
 
@@ -727,23 +727,23 @@ AudioTimeAxisView::build_display_menu ()
 	automation_action_menu->set_name ("ArdourContextMenu");
 	
 	automation_items.push_back (MenuElem (_("show all automation"),
-					      slot (*this, &AudioTimeAxisView::show_all_automation)));
+					      mem_fun(*this, &AudioTimeAxisView::show_all_automation)));
 
 	automation_items.push_back (MenuElem (_("show existing automation"),
-					      slot (*this, &AudioTimeAxisView::show_existing_automation)));
+					      mem_fun(*this, &AudioTimeAxisView::show_existing_automation)));
 
 	automation_items.push_back (MenuElem (_("hide all automation"),
-					      slot (*this, &AudioTimeAxisView::hide_all_automation)));
+					      mem_fun(*this, &AudioTimeAxisView::hide_all_automation)));
 
 	automation_items.push_back (SeparatorElem());
 
 	automation_items.push_back (CheckMenuElem (_("gain"), 
-						   slot (*this, &AudioTimeAxisView::toggle_gain_track)));
+						   mem_fun(*this, &AudioTimeAxisView::toggle_gain_track)));
 	gain_automation_item = static_cast<CheckMenuItem*> (automation_items.back());
 	gain_automation_item->set_active(show_gain_automation);
 
 	automation_items.push_back (CheckMenuElem (_("pan"),
-						   slot (*this, &AudioTimeAxisView::toggle_pan_track)));
+						   mem_fun(*this, &AudioTimeAxisView::toggle_pan_track)));
 	pan_automation_item = static_cast<CheckMenuItem*> (automation_items.back());
 	pan_automation_item->set_active(show_pan_automation);
 
@@ -755,7 +755,7 @@ AudioTimeAxisView::build_display_menu ()
 	MenuList& waveform_items = waveform_menu->items();
 	waveform_menu->set_name ("ArdourContextMenu");
 	
-	waveform_items.push_back (CheckMenuElem (_("Show waveforms"), slot (*this, &AudioTimeAxisView::toggle_waveforms)));
+	waveform_items.push_back (CheckMenuElem (_("Show waveforms"), mem_fun(*this, &AudioTimeAxisView::toggle_waveforms)));
 	waveform_item = static_cast<CheckMenuItem *> (waveform_items.back());
 	ignore_toggle = true;
 	waveform_item->set_active (editor.show_waveforms());
@@ -763,10 +763,10 @@ AudioTimeAxisView::build_display_menu ()
 
 	RadioMenuItem::Group group;
 
-	waveform_items.push_back (RadioMenuElem (group, _("Traditional"), bind (slot (*this, &AudioTimeAxisView::set_waveform_shape), Traditional)));
+	waveform_items.push_back (RadioMenuElem (group, _("Traditional"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Traditional)));
 	traditional_item = static_cast<RadioMenuItem *> (waveform_items.back());
 
-	waveform_items.push_back (RadioMenuElem (group, _("Rectified"), bind (slot (*this, &AudioTimeAxisView::set_waveform_shape), Rectified)));
+	waveform_items.push_back (RadioMenuElem (group, _("Rectified"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Rectified)));
 	rectified_item = static_cast<RadioMenuItem *> (waveform_items.back());
 
 	items.push_back (MenuElem (_("Waveform"), *waveform_menu));
@@ -779,12 +779,12 @@ AudioTimeAxisView::build_display_menu ()
 
 		RadioMenuItem::Group align_group;
 		
-		alignment_items.push_back (RadioMenuElem (align_group, _("align with existing material"), bind (slot (*this, &AudioTimeAxisView::set_align_style), ExistingMaterial)));
+		alignment_items.push_back (RadioMenuElem (align_group, _("align with existing material"), bind (mem_fun(*this, &AudioTimeAxisView::set_align_style), ExistingMaterial)));
 		align_existing_item = dynamic_cast<RadioMenuItem*>(alignment_items.back());
 		if (get_diskstream()->alignment_style() == ExistingMaterial) {
 			align_existing_item->set_active();
 		}
-		alignment_items.push_back (RadioMenuElem (align_group, _("align with capture time"), bind (slot (*this, &AudioTimeAxisView::set_align_style), CaptureTime)));
+		alignment_items.push_back (RadioMenuElem (align_group, _("align with capture time"), bind (mem_fun(*this, &AudioTimeAxisView::set_align_style), CaptureTime)));
 		align_capture_item = dynamic_cast<RadioMenuItem*>(alignment_items.back());
 		if (get_diskstream()->alignment_style() == CaptureTime) {
 			align_capture_item->set_active();
@@ -792,16 +792,16 @@ AudioTimeAxisView::build_display_menu ()
 		
 		items.push_back (MenuElem (_("Alignment"), *alignment_menu));
 
-		get_diskstream()->AlignmentStyleChanged.connect (slot (*this, &AudioTimeAxisView::align_style_changed));
+		get_diskstream()->AlignmentStyleChanged.connect (mem_fun(*this, &AudioTimeAxisView::align_style_changed));
 	}
 
 	items.push_back (SeparatorElem());
-	items.push_back (CheckMenuElem (_("Active"), slot (*this, &RouteUI::toggle_route_active)));
+	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (items.back());
 	route_active_menu_item->set_active (_route.active());
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), slot (*this, &RouteUI::remove_this_route)));
+	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
 
 }
 
@@ -976,13 +976,13 @@ AudioTimeAxisView::set_waveform_shape (WaveformShape shape)
 void
 AudioTimeAxisView::speed_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &AudioTimeAxisView::reset_samples_per_unit));
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &AudioTimeAxisView::reset_samples_per_unit));
 }
 
 void
 AudioTimeAxisView::diskstream_changed (void *src)
 {
-	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &AudioTimeAxisView::update_diskstream_display));
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &AudioTimeAxisView::update_diskstream_display));
 }	
 
 void
@@ -1217,7 +1217,7 @@ AudioTimeAxisView::add_gain_automation_child ()
 
 	add_child (gain_track);
 
-	gain_track->Hiding.connect (slot (*this, &AudioTimeAxisView::gain_hidden));
+	gain_track->Hiding.connect (mem_fun(*this, &AudioTimeAxisView::gain_hidden));
 
 	bool hideit = true;
 	
@@ -1247,7 +1247,7 @@ AudioTimeAxisView::add_pan_automation_child ()
 	
 	add_child (pan_track);
 
-	pan_track->Hiding.connect (slot (*this, &AudioTimeAxisView::pan_hidden));
+	pan_track->Hiding.connect (mem_fun(*this, &AudioTimeAxisView::pan_hidden));
 
 	ensure_xml_node ();
 	bool hideit = true;
@@ -1478,7 +1478,7 @@ AudioTimeAxisView::add_redirect_automation_curve (Redirect *redirect, uint32_t w
 
 	ran->view->add_line (*ral);
 
-	ran->view->Hiding.connect (bind (slot (*this, &AudioTimeAxisView::redirect_automation_track_hidden), ran, redirect));
+	ran->view->Hiding.connect (bind (mem_fun(*this, &AudioTimeAxisView::redirect_automation_track_hidden), ran, redirect));
 
 	if (!ran->view->marked_for_display()) {
 		ran->view->hide ();
@@ -1488,7 +1488,7 @@ AudioTimeAxisView::add_redirect_automation_curve (Redirect *redirect, uint32_t w
 
 	add_child (ran->view);
 
-	view->foreach_regionview (bind (slot (*this, &AudioTimeAxisView::add_ghost_to_redirect), ran->view));
+	view->foreach_regionview (bind (mem_fun(*this, &AudioTimeAxisView::add_ghost_to_redirect), ran->view));
 
 	redirect->mark_automation_visible (what, true);
 }
@@ -1594,7 +1594,7 @@ AudioTimeAxisView::add_redirect_to_subplugin_menu (Redirect* r)
 
 		}
 
-		mitem->toggled.connect (bind (slot (*this, &AudioTimeAxisView::redirect_menu_item_toggled), rai, ran));
+		mitem->toggled.connect (bind (mem_fun(*this, &AudioTimeAxisView::redirect_menu_item_toggled), rai, ran));
 	}
 
 	/* add the menu for this redirect, because the subplugin
@@ -1889,15 +1889,15 @@ AudioTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_items.push_back (MenuElem (compose (_("Current: %1"), get_diskstream()->playlist()->name())));
 	playlist_items.push_back (SeparatorElem());
 	
-	playlist_items.push_back (MenuElem (_("Rename"), slot (*this, &AudioTimeAxisView::rename_current_playlist)));
+	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &AudioTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
-	playlist_items.push_back (MenuElem (_("New"), slot (*this, &AudioTimeAxisView::use_new_playlist)));
-	playlist_items.push_back (MenuElem (_("New Copy"), slot(*this, &AudioTimeAxisView::use_copy_playlist)));
+	playlist_items.push_back (MenuElem (_("New"), mem_fun(*this, &AudioTimeAxisView::use_new_playlist)));
+	playlist_items.push_back (MenuElem (_("New Copy"), mem_fun(*this, &AudioTimeAxisView::use_copy_playlist)));
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Clear Current"), slot (*this, &AudioTimeAxisView::clear_playlist)));
+	playlist_items.push_back (MenuElem (_("Clear Current"), mem_fun(*this, &AudioTimeAxisView::clear_playlist)));
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem(_("Select"), slot (*this, &AudioTimeAxisView::show_playlist_selector)));
+	playlist_items.push_back (MenuElem(_("Select"), mem_fun(*this, &AudioTimeAxisView::show_playlist_selector)));
 
 }
 
@@ -1915,7 +1915,7 @@ AudioTimeAxisView::map_frozen ()
 		return;
 	}
 
-	ENSURE_GUI_THREAD (slot (*this, &AudioTimeAxisView::map_frozen));
+	ENSURE_GUI_THREAD (mem_fun(*this, &AudioTimeAxisView::map_frozen));
 
 
 	switch (audio_track()->freeze_state()) {

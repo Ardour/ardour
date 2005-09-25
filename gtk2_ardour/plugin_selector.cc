@@ -126,36 +126,36 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	ladspa_display.clist().column(1).set_auto_resize (true);
 	o_selector.clist().column(0).set_auto_resize (true);
 
-	ladspa_display.selection_made.connect (slot(*this, &PluginSelector::i_plugin_selected));
-	ladspa_display.choice_made.connect(slot(*this, &PluginSelector::i_plugin_chosen));
-	ladspa_display.clist().click_column.connect(bind (slot(*this, &PluginSelector::column_clicked), ladspa_display.clist().gobj()));
+	ladspa_display.selection_made.connect (mem_fun(*this, &PluginSelector::i_plugin_selected));
+	ladspa_display.choice_made.connect(mem_fun(*this, &PluginSelector::i_plugin_chosen));
+	ladspa_display.clist().click_column.connect(bind (mem_fun(*this, &PluginSelector::column_clicked), ladspa_display.clist().gobj()));
 #ifdef VST_SUPPORT
 	if (Config->get_use_vst()) {
-		vst_display.selection_made.connect (slot(*this, &PluginSelector::i_plugin_selected));
-		vst_display.choice_made.connect(slot(*this, &PluginSelector::i_plugin_chosen));
-		vst_display.clist().click_column.connect(bind (slot(*this, &PluginSelector::column_clicked), vst_display.clist().gobj()));
+		vst_display.selection_made.connect (mem_fun(*this, &PluginSelector::i_plugin_selected));
+		vst_display.choice_made.connect(mem_fun(*this, &PluginSelector::i_plugin_chosen));
+		vst_display.clist().click_column.connect(bind (mem_fun(*this, &PluginSelector::column_clicked), vst_display.clist().gobj()));
 	}
 #endif
-	o_selector.selection_made.connect(slot(*this, &PluginSelector::o_plugin_selected));
-	o_selector.choice_made.connect(slot(*this,&PluginSelector::o_plugin_chosen));
-	btn_update-.signal_clicked().connect (slot(*this, &PluginSelector::btn_update_clicked));
-	btn_add->clicked.connect(slot(*this, &PluginSelector::btn_add_clicked));
-	btn_remove->clicked.connect(slot(*this, &PluginSelector::btn_remove_clicked));
-	btn_ok->clicked.connect(slot(*this, &PluginSelector::btn_ok_clicked));
-	btn_cancel->clicked.connect(slot(*this,&PluginSelector::btn_cancel_clicked));
-	delete_event.connect (slot (*this, &PluginSelector::wm_close));
+	o_selector.selection_made.connect(mem_fun(*this, &PluginSelector::o_plugin_selected));
+	o_selector.choice_made.connect(mem_fun(*this,&PluginSelector::o_plugin_chosen));
+	btn_update-.signal_clicked().connect (mem_fun(*this, &PluginSelector::btn_update_clicked));
+	btn_add->clicked.connect(mem_fun(*this, &PluginSelector::btn_add_clicked));
+	btn_remove->clicked.connect(mem_fun(*this, &PluginSelector::btn_remove_clicked));
+	btn_ok->clicked.connect(mem_fun(*this, &PluginSelector::btn_ok_clicked));
+	btn_cancel->clicked.connect(mem_fun(*this,&PluginSelector::btn_cancel_clicked));
+	delete_event.connect (mem_fun(*this, &PluginSelector::wm_close));
 
 }
 
 void
 PluginSelector::set_session (Session* s)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &PluginSelector::set_session), s));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PluginSelector::set_session), s));
 	
 	session = s;
 
 	if (session) {
-		session->going_away.connect (bind (slot (*this, &PluginSelector::set_session), static_cast<Session*> (0)));
+		session->going_away.connect (bind (mem_fun(*this, &PluginSelector::set_session), static_cast<Session*> (0)));
 	}
 }
 

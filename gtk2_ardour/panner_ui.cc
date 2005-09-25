@@ -117,12 +117,12 @@ PannerUI::PannerUI (IO& io, Session& s)
 	panning_link_direction_button.add (*(manage (new Pixmap (forwdblarrow_xpm))));
 
 	panning_link_direction_button.clicked.connect
-		(slot (*this, &PannerUI::panning_link_direction_clicked));
+		(mem_fun(*this, &PannerUI::panning_link_direction_clicked));
 
 	panning_link_button.button_press_event.connect
-		(slot (*this, &PannerUI::panning_link_button_press));
+		(mem_fun(*this, &PannerUI::panning_link_button_press));
 	panning_link_button.button_release_event.connect
-		(slot (*this, &PannerUI::panning_link_button_release));
+		(mem_fun(*this, &PannerUI::panning_link_button_release));
 
 	panning_up.set_border_width (3);
 	panning_down.set_border_width (3);
@@ -143,9 +143,9 @@ PannerUI::PannerUI (IO& io, Session& s)
 
 	panner = 0;
 
-	_io.panner().Changed.connect (slot (*this, &PannerUI::panner_changed));
-	_io.panner().LinkStateChanged.connect (slot (*this, &PannerUI::update_pan_linkage));
-	_io.panner().StateChanged.connect (slot (*this, &PannerUI::update_pan_state));
+	_io.panner().Changed.connect (mem_fun(*this, &PannerUI::panner_changed));
+	_io.panner().LinkStateChanged.connect (mem_fun(*this, &PannerUI::update_pan_linkage));
+	_io.panner().StateChanged.connect (mem_fun(*this, &PannerUI::update_pan_state));
 
 	pan_changed (0);
 	update_pan_sensitive ();
@@ -183,7 +183,7 @@ PannerUI::panning_link_direction_clicked()
 void
 PannerUI::update_pan_linkage ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &PannerUI::update_pan_linkage));
+	ENSURE_GUI_THREAD(mem_fun(*this, &PannerUI::update_pan_linkage));
 	
 	bool x = _io.panner().linked();
 	bool bx = panning_link_button.get_active();
@@ -272,7 +272,7 @@ PannerUI::entry_focus_event (GdkEventFocus* ev)
 void
 PannerUI::panner_changed ()
 {
-	ENSURE_GUI_THREAD (slot (*this, &PannerUI::panner_changed));
+	ENSURE_GUI_THREAD (mem_fun(*this, &PannerUI::panner_changed));
 	setup_pan ();
 }
 
@@ -280,7 +280,7 @@ void
 PannerUI::update_pan_state ()
 {
 	/* currently nothing to do */
-	// ENSURE_GUI_THREAD (slot (*this, &PannerUI::update_panner_state));
+	// ENSURE_GUI_THREAD (mem_fun(*this, &PannerUI::update_panner_state));
 }
 
 void
@@ -319,13 +319,13 @@ PannerUI::setup_pan ()
 			_io.panner()[asz]->get_position (x);
 
 			pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.05, 0.1));
-			pan_adjustments.back()->value_changed.connect (bind (slot (*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
+			pan_adjustments.back()->value_changed.connect (bind (mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
 
-			_io.panner()[asz]->Changed.connect (bind (slot (*this, &PannerUI::pan_value_changed), (uint32_t) asz));
+			_io.panner()[asz]->Changed.connect (bind (mem_fun(*this, &PannerUI::pan_value_changed), (uint32_t) asz));
 
 			bc = new BarController (*pan_adjustments[asz], 
 						&_io.panner()[asz]->midi_control(),
-						bind (slot (*this, &PannerUI::pan_printer), pan_adjustments[asz]));
+						bind (mem_fun(*this, &PannerUI::pan_printer), pan_adjustments[asz]));
 			
 			if (_session.midi_port()) {
 				_io.panner()[asz]->reset_midi_control (_session.midi_port(), true);
@@ -334,18 +334,18 @@ PannerUI::setup_pan ()
 			bc->set_name ("PanSlider");
 			bc->set_shadow_type (GTK_SHADOW_NONE);
 			bc->set_style (BarController::Line);
-			bc->get_spin_button().signal_focus_in_event().connect (slot (*this, &PannerUI::entry_focus_event));
-			bc->get_spin_button().signal_focus_out_event().connect (slot (*this, &PannerUI::entry_focus_event));
+			bc->get_spin_button().signal_focus_in_event().connect (mem_fun(*this, &PannerUI::entry_focus_event));
+			bc->get_spin_button().signal_focus_out_event().connect (mem_fun(*this, &PannerUI::entry_focus_event));
 
-			bc->StartGesture.connect (bind (slot (_io, &IO::start_pan_touch), (uint32_t) asz));
-			bc->StopGesture.connect (bind (slot (_io, &IO::end_pan_touch), (uint32_t) asz));
+			bc->StartGesture.connect (bind (mem_fun (_io, &IO::start_pan_touch), (uint32_t) asz));
+			bc->StopGesture.connect (bind (mem_fun (_io, &IO::end_pan_touch), (uint32_t) asz));
 
 			char buf[64];
 			snprintf (buf, sizeof (buf), _("panner for channel %u"), asz + 1);
 			ARDOUR_UI::instance()->tooltips().set_tip (bc->event_widget(), buf);
 
 			bc->event_widget().button_release_event.connect
-				(bind (slot (*this, &PannerUI::pan_button_event), (uint32_t) asz));
+				(bind (mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) asz));
 
 			pan_bars.push_back (bc);
 			switch (_width) {
@@ -436,17 +436,17 @@ PannerUI::build_pan_menu (uint32_t which)
 
 	(dynamic_cast<CheckMenuItem*> (items.back()))->set_active (_io.panner()[which]->muted());
 	(dynamic_cast<CheckMenuItem*> (items.back()))->toggled.connect
-		(bind (slot (*this, &PannerUI::pan_mute), which));
+		(bind (mem_fun(*this, &PannerUI::pan_mute), which));
 
-	items.push_back (CheckMenuElem (_("Bypass"), slot (*this, &PannerUI::pan_bypass_toggle)));
+	items.push_back (CheckMenuElem (_("Bypass"), mem_fun(*this, &PannerUI::pan_bypass_toggle)));
 	bypass_menu_item = static_cast<CheckMenuItem*> (items.back());
 
 	/* set state first, connect second */
 
 	bypass_menu_item->set_active (_io.panner().bypassed());
-	bypass_menu_item->toggled.connect (slot (*this, &PannerUI::pan_bypass_toggle));
+	bypass_menu_item->toggled.connect (mem_fun(*this, &PannerUI::pan_bypass_toggle));
 
-	items.push_back (MenuElem (_("Reset"), slot (*this, &PannerUI::pan_reset)));
+	items.push_back (MenuElem (_("Reset"), mem_fun(*this, &PannerUI::pan_reset)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Reset all")));
 }
@@ -567,7 +567,7 @@ PannerUI::pan_adjustment_changed (uint32_t which)
 void
 PannerUI::pan_value_changed (uint32_t which)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &PannerUI::pan_value_changed), which));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &PannerUI::pan_value_changed), which));
 							   
 	if (which < _io.panner().size()) {
 		float xpos;

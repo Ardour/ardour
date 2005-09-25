@@ -94,19 +94,19 @@ VisualTimeAxis::VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Sessi
 	_color = unique_random_color() ;
 	_marked_for_display = true;
 	
-	name_entry.activate.connect(slot(*this, &VisualTimeAxis::name_entry_changed)) ;
-	name_entry.focus_out_event.connect(slot(*this, &VisualTimeAxis::name_entry_focus_out_handler)) ;
-	name_entry.button_press_event.connect(slot(*this, &VisualTimeAxis::name_entry_button_press_handler)) ;
-	name_entry.button_release_event.connect(slot(*this, &VisualTimeAxis::name_entry_button_release_handler)) ;
-	name_entry.key_release_event.connect(slot(*this, &VisualTimeAxis::name_entry_key_release_handler)) ;
+	name_entry.activate.connect(mem_fun(*this, &VisualTimeAxis::name_entry_changed)) ;
+	name_entry.focus_out_event.connect(mem_fun(*this, &VisualTimeAxis::name_entry_focus_out_handler)) ;
+	name_entry.button_press_event.connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_press_handler)) ;
+	name_entry.button_release_event.connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_release_handler)) ;
+	name_entry.key_release_event.connect(mem_fun(*this, &VisualTimeAxis::name_entry_key_release_handler)) ;
 	
 	size_button.set_name("TrackSizeButton") ;
 	visual_button.set_name("TrackVisualButton") ;
 	hide_button.set_name("TrackRemoveButton") ;
 	hide_button.add(*(Gtk::manage(new Gtk::Image(small_x_xpm)))) ;
-	size_button.button_release_event.connect (slot (*this, &VisualTimeAxis::size_click)) ;
-	visual_button.signal_clicked().connect (slot (*this, &VisualTimeAxis::visual_click)) ;
-	hide_button.signal_clicked().connect (slot (*this, &VisualTimeAxis::hide_click)) ;
+	size_button.button_release_event.connect (mem_fun (*this, &VisualTimeAxis::size_click)) ;
+	visual_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::visual_click)) ;
+	hide_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::hide_click)) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(size_button,_("Display Height")) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(visual_button, _("Visual options")) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(hide_button, _("Hide this track")) ;
@@ -312,7 +312,7 @@ VisualTimeAxis::remove_this_time_axis(void* src)
 		   defer to idle loop, otherwise we'll delete this object
 		   while we're still inside this function ...
 		*/
-		Gtk::Main::idle.connect(bind(slot(&VisualTimeAxis::idle_remove_this_time_axis), this, src));
+		Gtk::Main::idle.connect(bind(mem_fun(&VisualTimeAxis::idle_remove_this_time_axis), this, src));
 	}
 }
 
@@ -357,7 +357,7 @@ VisualTimeAxis::start_time_axis_rename()
 
 	name_prompter->set_prompt (_("new name: ")) ;
 	ARDOUR_UI::instance()->allow_focus(true) ;
-	name_prompter->done.connect (slot(*this, &VisualTimeAxis::finish_time_axis_rename)) ;
+	name_prompter->done.connect (mem_fun(*this, &VisualTimeAxis::finish_time_axis_rename)) ;
 	name_prompter->show_all() ;
 }
 

@@ -186,7 +186,7 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 	*/
 
 	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	clock_base.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), SMPTE_Hours));
+	clock_base.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), SMPTE_Hours));
 
 	if (editable) {
 		setup_events ();
@@ -224,77 +224,77 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.set_flags (Gtk::CAN_FOCUS);
 	ms_seconds_ebox.set_flags (Gtk::CAN_FOCUS);
 
-	hours_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), SMPTE_Hours));
-	minutes_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), SMPTE_Minutes));
-	seconds_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), SMPTE_Seconds));
-	frames_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), SMPTE_Frames));
-	audio_frames_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), AudioFrames));
-	bars_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), Bars));
-	beats_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), Beats));
-	ticks_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), Ticks));
-	ms_hours_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), MS_Hours));
-	ms_minutes_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), MS_Minutes));
-	ms_seconds_ebox.motion_notify_event.connect (bind (slot (*this, &AudioClock::field_motion_notify_event), MS_Seconds));
+	hours_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), SMPTE_Hours));
+	minutes_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), SMPTE_Minutes));
+	seconds_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), SMPTE_Seconds));
+	frames_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), SMPTE_Frames));
+	audio_frames_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), AudioFrames));
+	bars_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), Bars));
+	beats_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), Beats));
+	ticks_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), Ticks));
+	ms_hours_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), MS_Hours));
+	ms_minutes_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), MS_Minutes));
+	ms_seconds_ebox.motion_notify_event.connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), MS_Seconds));
 
-	hours_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), SMPTE_Hours));
-	minutes_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), SMPTE_Minutes));
-	seconds_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), SMPTE_Seconds));
-	frames_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), SMPTE_Frames));
-	audio_frames_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), AudioFrames));
-	bars_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), Bars));
-	beats_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), Beats));
-	ticks_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), Ticks));
-	ms_hours_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), MS_Hours));
-	ms_minutes_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), MS_Minutes));
-	ms_seconds_ebox.button_press_event.connect (bind (slot (*this, &AudioClock::field_button_press_event), MS_Seconds));
+	hours_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), SMPTE_Hours));
+	minutes_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), SMPTE_Minutes));
+	seconds_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), SMPTE_Seconds));
+	frames_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), SMPTE_Frames));
+	audio_frames_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), AudioFrames));
+	bars_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), Bars));
+	beats_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), Beats));
+	ticks_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), Ticks));
+	ms_hours_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), MS_Hours));
+	ms_minutes_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), MS_Minutes));
+	ms_seconds_ebox.button_press_event.connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), MS_Seconds));
 
-	hours_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), SMPTE_Hours));
-	minutes_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), SMPTE_Minutes));
-	seconds_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), SMPTE_Seconds));
-	frames_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), SMPTE_Frames));
-	audio_frames_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), AudioFrames));
-	bars_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), Bars));
-	beats_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), Beats));
-	ticks_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), Ticks));
-	ms_hours_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), MS_Hours));
-	ms_minutes_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), MS_Minutes));
-	ms_seconds_ebox.button_release_event.connect (bind (slot (*this, &AudioClock::field_button_release_event), MS_Seconds));
+	hours_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), SMPTE_Hours));
+	minutes_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), SMPTE_Minutes));
+	seconds_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), SMPTE_Seconds));
+	frames_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), SMPTE_Frames));
+	audio_frames_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), AudioFrames));
+	bars_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), Bars));
+	beats_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), Beats));
+	ticks_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), Ticks));
+	ms_hours_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), MS_Hours));
+	ms_minutes_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), MS_Minutes));
+	ms_seconds_ebox.button_release_event.connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), MS_Seconds));
 
-	hours_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), SMPTE_Hours));
-	minutes_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), SMPTE_Minutes));
-	seconds_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), SMPTE_Seconds));
-	frames_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), SMPTE_Frames));
-	audio_frames_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), AudioFrames));
-	bars_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), Bars));
-	beats_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), Beats));
-	ticks_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), Ticks));
-	ms_hours_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), MS_Hours));
-	ms_minutes_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), MS_Minutes));
-	ms_seconds_ebox.key_release_event.connect (bind (slot (*this, &AudioClock::field_key_release_event), MS_Seconds));
+	hours_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Hours));
+	minutes_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Minutes));
+	seconds_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Seconds));
+	frames_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Frames));
+	audio_frames_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), AudioFrames));
+	bars_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), Bars));
+	beats_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), Beats));
+	ticks_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), Ticks));
+	ms_hours_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), MS_Hours));
+	ms_minutes_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), MS_Minutes));
+	ms_seconds_ebox.key_release_event.connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), MS_Seconds));
 
-	hours_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Hours));
-	minutes_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Minutes));
-	seconds_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Seconds));
-	frames_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), SMPTE_Frames));
-	audio_frames_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), AudioFrames));
-	bars_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), Bars));
-	beats_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), Beats));
-	ticks_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), Ticks));
-	ms_hours_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), MS_Hours));
-	ms_minutes_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), MS_Minutes));
-	ms_seconds_ebox.signal_focus_in_event().connect (bind (slot (*this, &AudioClock::field_focus_in_event), MS_Seconds));
+	hours_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), SMPTE_Hours));
+	minutes_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), SMPTE_Minutes));
+	seconds_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), SMPTE_Seconds));
+	frames_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), SMPTE_Frames));
+	audio_frames_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), AudioFrames));
+	bars_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), Bars));
+	beats_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), Beats));
+	ticks_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), Ticks));
+	ms_hours_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), MS_Hours));
+	ms_minutes_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), MS_Minutes));
+	ms_seconds_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), MS_Seconds));
 
-	hours_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Hours));
-	minutes_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Minutes));
-	seconds_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Seconds));
-	frames_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), SMPTE_Frames));
-	audio_frames_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), AudioFrames));
-	bars_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), Bars));
-	beats_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), Beats));
-	ticks_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), Ticks));
-	ms_hours_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), MS_Hours));
-	ms_minutes_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), MS_Minutes));
-	ms_seconds_ebox.signal_focus_out_event().connect (bind (slot (*this, &AudioClock::field_focus_out_event), MS_Seconds));
+	hours_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), SMPTE_Hours));
+	minutes_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), SMPTE_Minutes));
+	seconds_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), SMPTE_Seconds));
+	frames_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), SMPTE_Frames));
+	audio_frames_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), AudioFrames));
+	bars_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), Bars));
+	beats_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), Beats));
+	ticks_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), Ticks));
+	ms_hours_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), MS_Hours));
+	ms_minutes_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), MS_Minutes));
+	ms_seconds_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), MS_Seconds));
 
 	Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-88", 0, 2);
 	Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "88", 0, 2);
@@ -1637,11 +1637,11 @@ AudioClock::build_ops_menu ()
 	MenuList& mode_items = mode_menu->items();
 	mode_menu->set_name ("ArdourContextMenu");
 	
-	mode_items.push_back (MenuElem (_("SMPTE"), bind (slot (*this, &AudioClock::set_mode), SMPTE)));
-	mode_items.push_back (MenuElem (_("Bars:Beats"), bind (slot (*this, &AudioClock::set_mode), BBT)));
-	mode_items.push_back (MenuElem (_("Minutes:Seconds"), bind (slot (*this, &AudioClock::set_mode), MinSec)));
-	mode_items.push_back (MenuElem (_("Audio Frames"), bind (slot (*this, &AudioClock::set_mode), Frames)));
-	mode_items.push_back (MenuElem (_("Off"), bind (slot (*this, &AudioClock::set_mode), Off)));
+	mode_items.push_back (MenuElem (_("SMPTE"), bind (mem_fun(*this, &AudioClock::set_mode), SMPTE)));
+	mode_items.push_back (MenuElem (_("Bars:Beats"), bind (mem_fun(*this, &AudioClock::set_mode), BBT)));
+	mode_items.push_back (MenuElem (_("Minutes:Seconds"), bind (mem_fun(*this, &AudioClock::set_mode), MinSec)));
+	mode_items.push_back (MenuElem (_("Audio Frames"), bind (mem_fun(*this, &AudioClock::set_mode), Frames)));
+	mode_items.push_back (MenuElem (_("Off"), bind (mem_fun(*this, &AudioClock::set_mode), Off)));
 
 	ops_items.push_back (MenuElem (_("Mode"), *mode_menu));
 }

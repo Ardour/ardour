@@ -94,16 +94,16 @@ PluginUIWindow::PluginUIWindow (AudioEngine &engine, PluginInsert& insert, bool 
 		_pluginui = pu;
 		add (*pu);
 		
-		map_event.connect (slot (*pu, &PluginUI::start_updating));
-		unmap_event.connect (slot (*pu, &PluginUI::stop_updating));
+		map_event.connect (mem_fun (*pu, &PluginUI::start_updating));
+		unmap_event.connect (mem_fun (*pu, &PluginUI::stop_updating));
 	}
 
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	delete_event.connect (bind (slot (just_hide_it), reinterpret_cast<Window*> (this)));
-	insert.GoingAway.connect (slot (*this, &PluginUIWindow::plugin_going_away));
+	delete_event.connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)));
+	insert.GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
 
 	if (scrollable) {
 		gint h = _pluginui->get_preferred_height ();
@@ -167,7 +167,7 @@ PluginUI::PluginUI (AudioEngine &engine, PluginInsert& pi, bool scrollable)
 		name_ebox.set_name ("PluginNameBox");
 	}
 
-	insert.active_changed.connect (slot (*this, &PluginUI::redirect_active_changed));
+	insert.active_changed.connect (mem_fun(*this, &PluginUI::redirect_active_changed));
 	bypass_button.set_active (!insert.active());
 	
 	build (engine);
@@ -476,8 +476,8 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 				control_ui->combo = new Gtk::Combo;
 				control_ui->combo->set_value_in_list(true, false);
 				control_ui->combo->set_popdown_strings(setup_scale_values(port_index, control_ui));
-				control_ui->combo->get_popwin()->unmap_event.connect(bind (slot (*this, &PluginUI::control_combo_changed), control_ui));
-				plugin.ParameterChanged.connect (bind (slot (*this, &PluginUI::parameter_changed), control_ui));
+				control_ui->combo->get_popwin()->unmap_event.connect(bind (mem_fun(*this, &PluginUI::control_combo_changed), control_ui));
+				plugin.ParameterChanged.connect (bind (mem_fun(*this, &PluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
 				
@@ -500,7 +500,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 			control_ui->pack_start (*control_ui->button, false, true);
 			control_ui->pack_start (control_ui->automate_button, false, false);
 
-			control_ui->button-.signal_clicked().connect (bind (slot (*this, &PluginUI::control_port_toggled), control_ui));
+			control_ui->button-.signal_clicked().connect (bind (mem_fun(*this, &PluginUI::control_port_toggled), control_ui));
 		
 			if(plugin.get_parameter (port_index) == 1){
 				control_ui->button->set_active(true);
@@ -542,7 +542,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 //								     control_ui->adjustment,
 //								     mcontrol);
 
-			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (slot (*this, &PluginUI::print_parameter), (uint32_t) port_index);
+			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &PluginUI::print_parameter), (uint32_t) port_index);
 
 			control_ui->control = new BarController (*control_ui->adjustment, mcontrol, pslot);
 			control_ui->control->set_size_request (200, 15);
@@ -550,11 +550,11 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 			control_ui->control->set_style (BarController::LeftToRight);
 			control_ui->control->set_use_parent (true);
 
-			control_ui->control->get_spin_button().signal_focus_in_event().connect (slot (*this, &PluginUI::entry_focus_event));
-			control_ui->control->get_spin_button().signal_focus_out_event().connect (slot (*this, &PluginUI::entry_focus_event));
+			control_ui->control->get_spin_button().signal_focus_in_event().connect (mem_fun(*this, &PluginUI::entry_focus_event));
+			control_ui->control->get_spin_button().signal_focus_out_event().connect (mem_fun(*this, &PluginUI::entry_focus_event));
 
-			control_ui->control->StartGesture.connect (bind (slot (*this, &PluginUI::start_touch), control_ui));
-			control_ui->control->StopGesture.connect (bind (slot (*this, &PluginUI::stop_touch), control_ui));
+			control_ui->control->StartGesture.connect (bind (mem_fun(*this, &PluginUI::start_touch), control_ui));
+			control_ui->control->StopGesture.connect (bind (mem_fun(*this, &PluginUI::stop_touch), control_ui));
 			
 		}
 
@@ -577,14 +577,14 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 		}
 
 		control_ui->pack_start (control_ui->automate_button, false, false);
-		control_ui->adjustment->value_changed.connect (bind (slot (*this, &PluginUI::control_adjustment_changed), control_ui));
-		control_ui->automate_button.signal_clicked().connect (bind (slot (*this, &PluginUI::astate_clicked), control_ui, (uint32_t) port_index));
+		control_ui->adjustment->value_changed.connect (bind (mem_fun(*this, &PluginUI::control_adjustment_changed), control_ui));
+		control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &PluginUI::astate_clicked), control_ui, (uint32_t) port_index));
 
 		automation_state_changed (control_ui);
 
-		plugin.ParameterChanged.connect (bind (slot (*this, &PluginUI::parameter_changed), control_ui));
+		plugin.ParameterChanged.connect (bind (mem_fun(*this, &PluginUI::parameter_changed), control_ui));
 		insert.automation_list (port_index).automation_state_changed.connect 
-			(bind (slot (*this, &PluginUI::automation_state_changed), control_ui));
+			(bind (mem_fun(*this, &PluginUI::automation_state_changed), control_ui));
 
 	} else if (plugin.parameter_is_output (port_index)) {
 
@@ -627,7 +627,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 		output_controls.push_back (control_ui);
 	}
 	
-	plugin.ParameterChanged.connect (bind (slot (*this, &PluginUI::parameter_changed), control_ui));
+	plugin.ParameterChanged.connect (bind (mem_fun(*this, &PluginUI::parameter_changed), control_ui));
 	return control_ui;
 }
 
@@ -657,13 +657,13 @@ PluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 
 	items.clear ();
 	items.push_back (MenuElem (_("off"), 
-				   bind (slot (*this, &PluginUI::set_automation_state), (AutoState) Off, cui)));
+				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Off, cui)));
 	items.push_back (MenuElem (_("play"),
-				   bind (slot (*this, &PluginUI::set_automation_state), (AutoState) Play, cui)));
+				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Play, cui)));
 	items.push_back (MenuElem (_("write"),
-				   bind (slot (*this, &PluginUI::set_automation_state), (AutoState) Write, cui)));
+				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Write, cui)));
 	items.push_back (MenuElem (_("touch"),
-				   bind (slot (*this, &PluginUI::set_automation_state), (AutoState) Touch, cui)));
+				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Touch, cui)));
 
 	automation_menu->popup (1, 0);
 }
@@ -696,7 +696,7 @@ PluginUI::parameter_changed (uint32_t abs_port_id, float val, ControlUI* cui)
 	if (cui->port_index == abs_port_id) {
 		if (!cui->update_pending) {
 			cui->update_pending = true;
-			Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &PluginUI::update_control_display), cui));
+			Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &PluginUI::update_control_display), cui));
 		}
 	}
 }
@@ -761,7 +761,7 @@ PluginUI::control_combo_changed (GdkEventAny* ignored, ControlUI* cui)
 void
 PluginUIWindow::plugin_going_away (ARDOUR::Redirect* ignored)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &PluginUIWindow::plugin_going_away), ignored));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PluginUIWindow::plugin_going_away), ignored));
 	
 	_pluginui->stop_updating(0);
 	delete_when_idle (this);
@@ -781,7 +781,7 @@ PluginUI::entry_focus_event (GdkEventFocus* ev)
 void
 PluginUI::redirect_active_changed (Redirect* r, void* src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &PluginUI::redirect_active_changed), r, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PluginUI::redirect_active_changed), r, src));
 	
 	bypass_button.set_active (!r->active());
 }
@@ -792,7 +792,7 @@ PluginUI::start_updating (GdkEventAny *ev)
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 		screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
-			(slot (*this, &PluginUI::output_update));
+			(mem_fun(*this, &PluginUI::output_update));
 	}
 	return FALSE;
 }
@@ -874,13 +874,13 @@ PlugUIBase::PlugUIBase (PluginInsert& pi)
 	combo.set_use_arrows_always(true);
 	combo.set_popdown_strings(plugin.get_presets());
 	combo.get_entry()->set_text("");
-	combo.get_popwin()->unmap_event.connect(slot (*this, &PlugUIBase::setting_selected));
+	combo.get_popwin()->unmap_event.connect(mem_fun(*this, &PlugUIBase::setting_selected));
 
 	save_button.set_name ("PluginSaveButton");
-	save_button.clicked.connect(slot (*this, &PlugUIBase::save_plugin_setting));
+	save_button.clicked.connect(mem_fun(*this, &PlugUIBase::save_plugin_setting));
 
 	bypass_button.set_name ("PluginBypassButton");
-	bypass_button.toggled.connect (slot (*this, &PlugUIBase::bypass_toggled));
+	bypass_button.toggled.connect (mem_fun(*this, &PlugUIBase::bypass_toggled));
 }
 
 gint

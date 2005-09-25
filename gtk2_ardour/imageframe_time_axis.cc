@@ -255,7 +255,7 @@ ImageFrameTimeAxis::build_display_menu()
 
 	MenuList& items = display_menu->items();
 
-	items.push_back (MenuElem (_("Rename"), slot(*this, &ImageFrameTimeAxis::start_time_axis_rename)));
+	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &ImageFrameTimeAxis::start_time_axis_rename)));
 
 	image_action_menu = new Menu() ;
 	image_action_menu->set_name ("ArdourContextMenu");
@@ -263,10 +263,10 @@ ImageFrameTimeAxis::build_display_menu()
 	
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Height"), *size_menu));
-	items.push_back (MenuElem (_("Color"), slot(*this, &ImageFrameTimeAxis::select_track_color)));
+	items.push_back (MenuElem (_("Color"), mem_fun(*this, &ImageFrameTimeAxis::select_track_color)));
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), bind(slot(*this, &VisualTimeAxis::remove_this_time_axis), (void*)this))) ;
+	items.push_back (MenuElem (_("Remove"), bind(mem_fun(*this, &VisualTimeAxis::remove_this_time_axis), (void*)this))) ;
 }
 
 /**
@@ -292,14 +292,14 @@ ImageFrameTimeAxis::create_imageframe_menu()
 
 	if(view)
 	{
-		duration_items.push_back(MenuElem (_("0.5 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 0.5))) ;
-		duration_items.push_back(MenuElem (_("1 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 1.0))) ;
-		duration_items.push_back(MenuElem (_("1.5 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 1.5))) ;
-		duration_items.push_back(MenuElem (_("2 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 2.0))) ;
-		duration_items.push_back(MenuElem (_("2.5 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 2.5))) ;
-		duration_items.push_back(MenuElem (_("3 seconds"), bind (slot (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 3.0))) ;
+		duration_items.push_back(MenuElem (_("0.5 seconds"), bind (mem_fun (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 0.5))) ;
+		duration_items.push_back(MenuElem (_("1 seconds"), bind (mem_fun (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 1.0))) ;
+		duration_items.push_back(MenuElem (_("1.5 seconds"), bind (mem_fun (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 1.5))) ;
+		duration_items.push_back(MenuElem (_("2 seconds"), bind (mem_fun (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 2.0))) ;
+		duration_items.push_back(MenuElem (_("2.5 seconds"), bind (mem_fun (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 2.5))) ;
+		duration_items.push_back(MenuElem (_("3 seconds"), bind (mem_fun (view, &ImageFrameTimeAxisView::set_imageframe_duration_sec), 3.0))) ;
 		//duration_items.push_back(SeparatorElem()) ;
-		//duration_items.push_back(MenuElem (_("custom"), slot (*this, &ImageFrameTimeAxis::set_imageframe_duration_custom))) ;
+		//duration_items.push_back(MenuElem (_("custom"), mem_fun(*this, &ImageFrameTimeAxis::set_imageframe_duration_custom))) ;
 	}
 
 	imageframe_sub_items.push_back(MenuElem(_("Duration (sec)"), *duration_menu)) ;
@@ -307,11 +307,11 @@ ImageFrameTimeAxis::create_imageframe_menu()
 	imageframe_sub_items.push_back(SeparatorElem()) ;
 	if(view)
 	{
-		imageframe_sub_items.push_back(MenuElem (_("Remove Frame"), bind(slot (view, &ImageFrameTimeAxisView::remove_selected_imageframe_item), (void*)this))) ;
+		imageframe_sub_items.push_back(MenuElem (_("Remove Frame"), bind(mem_fun (view, &ImageFrameTimeAxisView::remove_selected_imageframe_item), (void*)this))) ;
 	}
 	
 	items.push_back(MenuElem(_("Image Frame"), *imageframe_item_menu)) ;
-	items.push_back(MenuElem (_("Rename Track"), slot (*this,&ImageFrameTimeAxis::start_time_axis_rename))) ;
+	items.push_back(MenuElem (_("Rename Track"), mem_fun(*this,&ImageFrameTimeAxis::start_time_axis_rename))) ;
 
 	imageframe_menu->show_all() ;
 }
@@ -342,7 +342,7 @@ ImageFrameTimeAxis::add_marker_time_axis(MarkerTimeAxis* marker_track, void* src
 	else
 	{
 		marker_time_axis_list.push_back(marker_track) ;
-		marker_track->GoingAway.connect(bind(slot(*this, &ImageFrameTimeAxis::remove_time_axis_view), marker_track, (void*)this));
+		marker_track->GoingAway.connect(bind(mem_fun(*this, &ImageFrameTimeAxis::remove_time_axis_view), marker_track, (void*)this));
 	
 		 MarkerTimeAxisAdded(marker_track, src) ; /* EMIT_SIGNAL */
 		ret = true ;
@@ -412,7 +412,7 @@ ImageFrameTimeAxis::remove_named_marker_time_axis(std::string track_id, void* sr
 void
 ImageFrameTimeAxis::remove_time_axis_view(MarkerTimeAxis* mta, void* src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &ImageFrameTimeAxis::remove_time_axis_view), mta, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameTimeAxis::remove_time_axis_view), mta, src));
 	
 	MarkerTimeAxisList::iterator i;
 	if((i = find (marker_time_axis_list.begin(), marker_time_axis_list.end(), mta)) != marker_time_axis_list.end())

@@ -197,7 +197,7 @@ Editor::handle_new_audio_region (AudioRegion *region)
 void
 Editor::region_hidden (Region* r)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Editor::region_hidden), r));	
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::region_hidden), r));	
 
 	redisplay_regions ();
 }
@@ -393,11 +393,11 @@ Editor::build_region_list_menu ()
 	MenuList& items = region_list_menu->items();
 	region_list_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Audition"), slot (*this, &Editor::audition_region_from_region_list)));
+	items.push_back (MenuElem (_("Audition"), mem_fun(*this, &Editor::audition_region_from_region_list)));
 	rl_context_menu_region_items.push_back (items.back());
-	items.push_back (MenuElem (_("Hide"), slot (*this, &Editor::hide_region_from_region_list)));
+	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::hide_region_from_region_list)));
 	rl_context_menu_region_items.push_back (items.back());
-	items.push_back (MenuElem (_("Remove"), slot (*this, &Editor::remove_region_from_region_list)));
+	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::remove_region_from_region_list)));
 	rl_context_menu_region_items.push_back (items.back());
 
 
@@ -405,7 +405,7 @@ Editor::build_region_list_menu ()
 	
 
 	// items.push_back (MenuElem (_("Find")));
-	items.push_back (CheckMenuElem (_("Show all"), slot (*this, &Editor::toggle_full_region_list)));
+	items.push_back (CheckMenuElem (_("Show all"), mem_fun(*this, &Editor::toggle_full_region_list)));
 	toggle_full_region_list_item = static_cast<CheckMenuItem*> (items.back());
 	
 	Gtk::Menu *sort_menu = manage (new Menu);
@@ -415,46 +415,46 @@ Editor::build_region_list_menu ()
 	RadioMenuItem::Group sort_type_group;
 
 	sort_items.push_back (RadioMenuElem (sort_order_group, _("Ascending"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_direction), true)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), true)));
 	sort_items.push_back (RadioMenuElem (sort_order_group, _("Descending"), 
-					     bind (slot (*this, &Editor::reset_region_list_sort_direction), false)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), false)));
 	sort_items.push_back (SeparatorElem());
 
 	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region Name"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_type), ByName)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByName)));
 	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region Length"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_type), ByLength)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByLength)));
 	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region Position"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_type), ByPosition)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByPosition)));
 	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region Timestamp"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_type), ByTimestamp)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByTimestamp)));
 	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region Start in File"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_type), ByStartInFile)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByStartInFile)));
 	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region End in File"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_type), ByEndInFile)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByEndInFile)));
 	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Source File Name"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_type), BySourceFileName)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileName)));
 	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Source File Length"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_type), BySourceFileLength)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileLength)));
 	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Source File Creation Date"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_type), BySourceFileCreationDate)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileCreationDate)));
 	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Source Filesystem"),
-					     bind (slot (*this, &Editor::reset_region_list_sort_type), BySourceFileFS)));
+					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileFS)));
 	
 	items.push_back (MenuElem (_("Sorting"), *sort_menu));
 	items.push_back (SeparatorElem());
 
-//	items.push_back (CheckMenuElem (_("Display Automatic Regions"), slot (*this, &Editor::toggle_show_auto_regions)));
+//	items.push_back (CheckMenuElem (_("Display Automatic Regions"), mem_fun(*this, &Editor::toggle_show_auto_regions)));
 //	toggle_auto_regions_item = static_cast<CheckMenuItem*> (items.back());
 //	toggle_auto_regions_item->set_active (show_automatic_regions_in_region_list);
 //	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Import audio (copy)"), bind (slot (*this, &Editor::import_audio), false)));
+	items.push_back (MenuElem (_("Import audio (copy)"), bind (mem_fun(*this, &Editor::import_audio), false)));
 	import_audio_item = items.back();
 	if (!session) {
 		import_audio_item->set_sensitive (false);
 	}
-	items.push_back (MenuElem (_("Embed audio (link)"), slot (*this, &Editor::embed_audio)));
+	items.push_back (MenuElem (_("Embed audio (link)"), mem_fun(*this, &Editor::embed_audio)));
 	embed_audio_item = items.back();
 	if (!session) {
 		embed_audio_item->set_sensitive (false);

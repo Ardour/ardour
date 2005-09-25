@@ -107,20 +107,20 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	cd_track_details_hbox.pack_start (composer_label, false, false);
 	cd_track_details_hbox.pack_start (composer_entry, true, true);
 
-	isrc_entry.changed.connect (slot (*this, &LocationEditRow::isrc_entry_changed)); 
-	isrc_entry.signal_focus_in_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
-	isrc_entry.signal_focus_out_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
+	isrc_entry.changed.connect (mem_fun(*this, &LocationEditRow::isrc_entry_changed)); 
+	isrc_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	isrc_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 
-	performer_entry.changed.connect (slot (*this, &LocationEditRow::performer_entry_changed));
-	performer_entry.signal_focus_in_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
-	performer_entry.signal_focus_out_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
+	performer_entry.changed.connect (mem_fun(*this, &LocationEditRow::performer_entry_changed));
+	performer_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	performer_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 
-	composer_entry.changed.connect (slot (*this, &LocationEditRow::composer_entry_changed));
-	composer_entry.signal_focus_in_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
-	composer_entry.signal_focus_out_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
+	composer_entry.changed.connect (mem_fun(*this, &LocationEditRow::composer_entry_changed));
+	composer_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	composer_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 
-	scms_check_button.toggled.connect(slot (*this, &LocationEditRow::scms_toggled));
-	preemph_check_button.toggled.connect(slot (*this, &LocationEditRow::preemph_toggled));
+	scms_check_button.toggled.connect(mem_fun(*this, &LocationEditRow::scms_toggled));
+	preemph_check_button.toggled.connect(mem_fun(*this, &LocationEditRow::preemph_toggled));
 
 
 	set_session (sess);
@@ -135,9 +135,9 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	item_table.attach (start_hbox, 2, 3, 0, 1, 0, 0, 4, 0);
 
 	
-	start_set_button.clicked.connect( bind ( slot (*this, &LocationEditRow::set_button_pressed), LocStart));
-	start_go_button.clicked.connect( bind ( slot (*this, &LocationEditRow::go_button_pressed), LocStart));
- 	start_clock.ValueChanged.connect (bind ( slot (*this, &LocationEditRow::clock_changed), LocStart));
+	start_set_button.clicked.connect( bind ( mem_fun(*this, &LocationEditRow::set_button_pressed), LocStart));
+	start_go_button.clicked.connect( bind ( mem_fun(*this, &LocationEditRow::go_button_pressed), LocStart));
+ 	start_clock.ValueChanged.connect (bind ( mem_fun(*this, &LocationEditRow::clock_changed), LocStart));
 
 	
 	end_hbox.pack_start (end_go_button, false, false);
@@ -146,21 +146,21 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	
 	//item_table.attach (end_hbox, 2, 3, 0, 1, 0, 0, 4, 0);
 	
-	end_set_button.clicked.connect( bind ( slot (*this, &LocationEditRow::set_button_pressed), LocEnd));
-	end_go_button.clicked.connect( bind ( slot (*this, &LocationEditRow::go_button_pressed), LocEnd));
-	end_clock.ValueChanged.connect (bind ( slot (*this, &LocationEditRow::clock_changed), LocEnd));
+	end_set_button.clicked.connect( bind ( mem_fun(*this, &LocationEditRow::set_button_pressed), LocEnd));
+	end_go_button.clicked.connect( bind ( mem_fun(*this, &LocationEditRow::go_button_pressed), LocEnd));
+	end_clock.ValueChanged.connect (bind ( mem_fun(*this, &LocationEditRow::clock_changed), LocEnd));
 	
 //	item_table.attach (length_clock, 3, 4, 0, 1, 0, 0, 4, 0);
-	length_clock.ValueChanged.connect (bind ( slot (*this, &LocationEditRow::clock_changed), LocLength));
+	length_clock.ValueChanged.connect (bind ( mem_fun(*this, &LocationEditRow::clock_changed), LocLength));
 
 //	item_table.attach (cd_check_button, 4, 5, 0, 1, 0, Gtk::FILL, 4, 0);
 //	item_table.attach (hide_check_button, 5, 6, 0, 1, 0, Gtk::FILL, 4, 0);
 //	item_table.attach (remove_button, 7, 8, 0, 1, 0, Gtk::FILL, 4, 0);
 	
-	cd_check_button.toggled.connect(slot (*this, &LocationEditRow::cd_toggled));
-	hide_check_button.toggled.connect(slot (*this, &LocationEditRow::hide_toggled));
+	cd_check_button.toggled.connect(mem_fun(*this, &LocationEditRow::cd_toggled));
+	hide_check_button.toggled.connect(mem_fun(*this, &LocationEditRow::hide_toggled));
 	
-	remove_button.clicked.connect(slot (*this, &LocationEditRow::remove_button_pressed));
+	remove_button.clicked.connect(mem_fun(*this, &LocationEditRow::remove_button_pressed));
 
 	pack_start(item_table, true, true);
 
@@ -239,9 +239,9 @@ LocationEditRow::set_location (Location *loc)
 		name_entry.set_text (location->name());
 		name_entry.set_size_request (100, -1);
 		name_entry.set_editable (true);
-		name_entry.changed.connect (slot (*this, &LocationEditRow::name_entry_changed));  
-		name_entry.signal_focus_in_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
-		name_entry.signal_focus_out_event().connect (slot (*this, &LocationEditRow::entry_focus_event));
+		name_entry.changed.connect (mem_fun(*this, &LocationEditRow::name_entry_changed));  
+		name_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+		name_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 
 		if (!name_entry.get_parent()) {
 			item_table.attach (name_entry, 1, 2, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL, 4, 0);
@@ -294,11 +294,11 @@ LocationEditRow::set_location (Location *loc)
 		length_clock.hide();
 	}
 
-	start_changed_connection = location->start_changed.connect (slot (*this, &LocationEditRow::start_changed));
-	end_changed_connection = location->end_changed.connect (slot (*this, &LocationEditRow::end_changed));
-	name_changed_connection = location->name_changed.connect (slot (*this, &LocationEditRow::name_changed));
-	changed_connection = location->changed.connect (slot (*this, &LocationEditRow::location_changed));
-	flags_changed_connection = location->FlagsChanged.connect (slot (*this, &LocationEditRow::flags_changed));
+	start_changed_connection = location->start_changed.connect (mem_fun(*this, &LocationEditRow::start_changed));
+	end_changed_connection = location->end_changed.connect (mem_fun(*this, &LocationEditRow::end_changed));
+	name_changed_connection = location->name_changed.connect (mem_fun(*this, &LocationEditRow::name_changed));
+	changed_connection = location->changed.connect (mem_fun(*this, &LocationEditRow::location_changed));
+	flags_changed_connection = location->FlagsChanged.connect (mem_fun(*this, &LocationEditRow::flags_changed));
 	
 }
 
@@ -317,7 +317,7 @@ LocationEditRow::entry_focus_event (GdkEventFocus* ev)
 void
 LocationEditRow::name_entry_changed ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &LocationEditRow::name_entry_changed));
+	ENSURE_GUI_THREAD(mem_fun(*this, &LocationEditRow::name_entry_changed));
 	if (i_am_the_modifier || !location) return;
 
 	location->set_name (name_entry.get_text());
@@ -327,7 +327,7 @@ LocationEditRow::name_entry_changed ()
 void
 LocationEditRow::isrc_entry_changed ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &LocationEditRow::isrc_entry_changed));
+	ENSURE_GUI_THREAD(mem_fun(*this, &LocationEditRow::isrc_entry_changed));
 	
 	if (i_am_the_modifier || !location) return;
 
@@ -343,7 +343,7 @@ LocationEditRow::isrc_entry_changed ()
 void
 LocationEditRow::performer_entry_changed ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &LocationEditRow::performer_entry_changed));
+	ENSURE_GUI_THREAD(mem_fun(*this, &LocationEditRow::performer_entry_changed));
 	
 	if (i_am_the_modifier || !location) return;
 
@@ -357,7 +357,7 @@ LocationEditRow::performer_entry_changed ()
 void
 LocationEditRow::composer_entry_changed ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &LocationEditRow::composer_entry_changed));
+	ENSURE_GUI_THREAD(mem_fun(*this, &LocationEditRow::composer_entry_changed));
 	
 	if (i_am_the_modifier || !location) return;
 
@@ -510,7 +510,7 @@ LocationEditRow::preemph_toggled ()
 void
 LocationEditRow::end_changed (ARDOUR::Location *loc)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &LocationEditRow::end_changed), loc));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LocationEditRow::end_changed), loc));
 
 	if (!location) return;
 		
@@ -526,7 +526,7 @@ LocationEditRow::end_changed (ARDOUR::Location *loc)
 void
 LocationEditRow::start_changed (ARDOUR::Location *loc)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &LocationEditRow::start_changed), loc));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LocationEditRow::start_changed), loc));
 	
 	if (!location) return;
 	
@@ -541,7 +541,7 @@ LocationEditRow::start_changed (ARDOUR::Location *loc)
 void
 LocationEditRow::name_changed (ARDOUR::Location *loc)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &LocationEditRow::name_changed), loc));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LocationEditRow::name_changed), loc));
 	
 	if (!location) return;
 
@@ -558,7 +558,7 @@ LocationEditRow::name_changed (ARDOUR::Location *loc)
 void
 LocationEditRow::location_changed (ARDOUR::Location *loc)
 {	
-	ENSURE_GUI_THREAD(bind (slot (*this, &LocationEditRow::location_changed), loc));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LocationEditRow::location_changed), loc));
 	
 	if (!location) return;
 
@@ -575,7 +575,7 @@ LocationEditRow::location_changed (ARDOUR::Location *loc)
 void
 LocationEditRow::flags_changed (ARDOUR::Location *loc, void *src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &LocationEditRow::flags_changed), loc, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LocationEditRow::flags_changed), loc, src));
 	
 	if (!location) return;
 
@@ -598,7 +598,7 @@ LocationUI::LocationUI ()
 	set_wmclass(_("ardour_locations"), "Ardour");
 
 	set_name ("LocationWindow");
-	delete_event.connect (bind (slot (just_hide_it), static_cast<Window*>(this)));
+	delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Window*>(this)));
 
 	add (location_hpacker);
 
@@ -653,8 +653,8 @@ LocationUI::LocationUI ()
 	
 	location_hpacker.pack_start (location_vpacker, true, true);
 
-	add_location_button.signal_clicked().connect (slot (*this, &LocationUI::add_new_location));
-	add_range_button.signal_clicked().connect (slot (*this, &LocationUI::add_new_range));
+	add_location_button.signal_clicked().connect (mem_fun(*this, &LocationUI::add_new_location));
+	add_range_button.signal_clicked().connect (mem_fun(*this, &LocationUI::add_new_range));
 	
 	//add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
 
@@ -692,7 +692,7 @@ void LocationUI::location_remove_requested (ARDOUR::Location *loc)
 	// must do this to prevent problems when destroying
 	// the effective sender of this event
 	
-	Main::idle.connect (bind (slot (*this, &LocationUI::do_location_remove), loc));
+	Main::idle.connect (bind (mem_fun(*this, &LocationUI::do_location_remove), loc));
 }
 
 
@@ -708,7 +708,7 @@ void LocationUI::location_redraw_ranges ()
 void
 LocationUI::location_added (Location* location)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &LocationUI::location_added), location));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LocationUI::location_added), location));
 	
 	if (location->is_auto_punch()) {
 		punch_edit_row.set_location(location);
@@ -724,7 +724,7 @@ LocationUI::location_added (Location* location)
 void
 LocationUI::location_removed (Location* location)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &LocationUI::location_removed), location));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LocationUI::location_removed), location));
 	
 	if (location->is_auto_punch()) {
 		punch_edit_row.set_location(0);
@@ -767,8 +767,8 @@ LocationUI::map_locations (Locations::LocationList& locations)
 		if (location->is_mark()) {
 			mark_n++;
 			erow = manage (new LocationEditRow(session, location, mark_n));
-			erow->remove_requested.connect (slot (*this, &LocationUI::location_remove_requested));
- 			erow->redraw_ranges.connect (slot (*this, &LocationUI::location_redraw_ranges));
+			erow->remove_requested.connect (mem_fun(*this, &LocationUI::location_remove_requested));
+ 			erow->redraw_ranges.connect (mem_fun(*this, &LocationUI::location_redraw_ranges));
 			loc_children.push_back(Box_Helpers::Element(*erow, false, false, 1));
 		}
 		else if (location->is_auto_punch()) {
@@ -781,7 +781,7 @@ LocationUI::map_locations (Locations::LocationList& locations)
 		}
 		else {
 			erow = manage (new LocationEditRow(session, location));
-			erow->remove_requested.connect (slot (*this, &LocationUI::location_remove_requested));
+			erow->remove_requested.connect (mem_fun(*this, &LocationUI::location_remove_requested));
 			range_children.push_back(Box_Helpers::Element(*erow, false, false, 1));
 		}
 	}
@@ -823,7 +823,7 @@ LocationUI::add_new_range()
 void
 LocationUI::refresh_location_list_s (Change ignored)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &LocationUI::refresh_location_list_s), ignored));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LocationUI::refresh_location_list_s), ignored));
 	
 	refresh_location_list ();
 }
@@ -831,7 +831,7 @@ LocationUI::refresh_location_list_s (Change ignored)
 void
 LocationUI::refresh_location_list ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &LocationUI::refresh_location_list));
+	ENSURE_GUI_THREAD(mem_fun(*this, &LocationUI::refresh_location_list));
 	using namespace Box_Helpers;
 
 	BoxList & loc_children = location_rows.children();
@@ -852,11 +852,11 @@ LocationUI::set_session(ARDOUR::Session* sess)
 	ArdourDialog::set_session (sess);
 
 	if (session) {
-		session->locations()->changed.connect (slot (*this, &LocationUI::refresh_location_list));
-		session->locations()->StateChanged.connect (slot (*this, &LocationUI::refresh_location_list_s));
-		session->locations()->added.connect (slot (*this, &LocationUI::location_added));
-		session->locations()->removed.connect (slot (*this, &LocationUI::location_removed));
-		session->going_away.connect (slot (*this, &LocationUI::session_gone));
+		session->locations()->changed.connect (mem_fun(*this, &LocationUI::refresh_location_list));
+		session->locations()->StateChanged.connect (mem_fun(*this, &LocationUI::refresh_location_list_s));
+		session->locations()->added.connect (mem_fun(*this, &LocationUI::location_added));
+		session->locations()->removed.connect (mem_fun(*this, &LocationUI::location_removed));
+		session->going_away.connect (mem_fun(*this, &LocationUI::session_gone));
 	}
 	refresh_location_list ();
 }
@@ -864,7 +864,7 @@ LocationUI::set_session(ARDOUR::Session* sess)
 void
 LocationUI::session_gone()
 {
-	ENSURE_GUI_THREAD(slot (*this, &LocationUI::session_gone));
+	ENSURE_GUI_THREAD(mem_fun(*this, &LocationUI::session_gone));
 	
 	hide_all();
 

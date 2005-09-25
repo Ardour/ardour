@@ -165,7 +165,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	vbox->set_spacing (4);
 	vbox->pack_start(notebook);
 
-	delete_event.connect (slot (*this, &OptionEditor::wm_close));
+	delete_event.connect (mem_fun(*this, &OptionEditor::wm_close));
 
 	notebook.set_show_tabs (true);
 	notebook.set_show_border (true);
@@ -385,7 +385,7 @@ OptionEditor::set_session (Session *s)
 	
 	session_control_changed (Session::SlaveType);
 	session_control_changed (Session::AlignChoice);
-	session->ControlChanged.connect (slot (*this, &OptionEditor::queue_session_control_changed));
+	session->ControlChanged.connect (mem_fun(*this, &OptionEditor::queue_session_control_changed));
 }
 
 OptionEditor::~OptionEditor ()
@@ -409,10 +409,10 @@ OptionEditor::setup_path_options()
 
 	session_raid_entry.set_name ("OptionsEntry");
 
-	session_raid_entry.activate.connect (slot (*this, &OptionEditor::raid_path_changed));
+	session_raid_entry.activate.connect (mem_fun(*this, &OptionEditor::raid_path_changed));
 
-	session_raid_entry.signal_focus_in_event().connect (slot (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	session_raid_entry.signal_focus_out_event().connect (bind (slot (*this, &OptionEditor::focus_out_event_handler), &OptionEditor::raid_path_changed));
+	session_raid_entry.signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	session_raid_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::raid_path_changed));
 
 	label = manage(new Label(_("session RAID path")));
 	label->set_name ("OptionsLabel");
@@ -430,7 +430,7 @@ OptionEditor::setup_path_options()
 	native_format_combo.get_entry()->set_editable (false);
 	native_format_combo.get_entry()->set_name ("OptionsEntry");
 	native_format_combo.set_use_arrows_always (true);
-	native_format_combo.get_popwin()->unmap_event.connect (slot (*this, &OptionEditor::native_format_chosen));
+	native_format_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::native_format_chosen));
 
 	fixup_combo_size (native_format_combo, nfstrings);
 
@@ -495,7 +495,7 @@ OptionEditor::setup_fade_options ()
 	layer_mode_combo.set_value_in_list (true, false);
 	layer_mode_combo.get_entry()->set_editable (false);
 	layer_mode_combo.get_entry()->set_name ("OptionsEntry");
-	layer_mode_combo.get_popwin()->unmap_event.connect (slot (*this, &OptionEditor::layer_mode_chosen));
+	layer_mode_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::layer_mode_chosen));
 
 	fixup_combo_size (layer_mode_combo, layer_mode_strings);
 
@@ -517,7 +517,7 @@ OptionEditor::setup_fade_options ()
 	xfade_model_combo.set_value_in_list (true, false);
 	xfade_model_combo.get_entry()->set_editable (false);
 	xfade_model_combo.get_entry()->set_name ("OptionsEntry");
-	xfade_model_combo.get_popwin()->unmap_event.connect (slot (*this, &OptionEditor::xfade_model_chosen));
+	xfade_model_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::xfade_model_chosen));
 
 	fixup_combo_size (xfade_model_combo, xfade_model_strings);
 
@@ -531,8 +531,8 @@ OptionEditor::setup_fade_options ()
 	auto_xfade_button.set_active (Config->get_auto_xfade());
 	/* xfade and layer mode active requires session */
 
-	auto_xfade_button.signal_clicked().connect (slot (*this, &OptionEditor::auto_xfade_clicked));
-	xfade_active_button.signal_clicked().connect (slot (*this, &OptionEditor::xfade_active_clicked));
+	auto_xfade_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::auto_xfade_clicked));
+	xfade_active_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::xfade_active_clicked));
 	
 	Label* short_xfade_label = manage (new Label (_("Short crossfade length (msecs)")));
 	short_xfade_label->set_name ("OptionsLabel");
@@ -544,7 +544,7 @@ OptionEditor::setup_fade_options ()
 	hbox->pack_start (short_xfade_slider, true, true);
 	fade_packer.pack_start (*hbox, false, false);
 
-	short_xfade_adjustment.value_changed.connect (slot (*this, &OptionEditor::short_xfade_adjustment_changed));
+	short_xfade_adjustment.value_changed.connect (mem_fun(*this, &OptionEditor::short_xfade_adjustment_changed));
 
 	fade_packer.show_all ();
 }
@@ -630,9 +630,9 @@ OptionEditor::setup_solo_options ()
 	solo_packer.pack_start (*hbox, false, false);
 
 	solo_via_bus_button.signal_clicked().connect 
-		(slot (*this, &OptionEditor::solo_via_bus_clicked));
+		(mem_fun(*this, &OptionEditor::solo_via_bus_clicked));
 	solo_latched_button.signal_clicked().connect 
-		(slot (*this, &OptionEditor::solo_latched_clicked));
+		(mem_fun(*this, &OptionEditor::solo_latched_clicked));
 
 	solo_packer.show_all ();
 }
@@ -719,7 +719,7 @@ OptionEditor::setup_display_options ()
 	meter_hold_combo.set_value_in_list (true, false);
 	meter_hold_combo.get_entry()->set_editable (false);
 	meter_hold_combo.get_entry()->set_name ("OptionsEntry");
-	meter_hold_combo.get_popwin()->unmap_event.connect (slot (*this, &OptionEditor::meter_hold_chosen));
+	meter_hold_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::meter_hold_chosen));
 	hbox = manage (new HBox);
 	hbox->set_border_width (8);
 	hbox->set_spacing (8);
@@ -742,7 +742,7 @@ OptionEditor::setup_display_options ()
 	meter_falloff_combo.set_value_in_list (true, false);
 	meter_falloff_combo.get_entry()->set_editable (false);
 	meter_falloff_combo.get_entry()->set_name ("OptionsEntry");
-	meter_falloff_combo.get_popwin()->unmap_event.connect (slot (*this, &OptionEditor::meter_falloff_chosen));
+	meter_falloff_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::meter_falloff_chosen));
 	hbox = manage (new HBox);
 	hbox->set_border_width (8);
 	hbox->set_spacing (8);
@@ -751,13 +751,13 @@ OptionEditor::setup_display_options ()
 	display_packer.pack_start (*hbox, false, false);
 	
 	
-	show_waveforms_button.signal_clicked().connect (slot (*this, &OptionEditor::show_waveforms_clicked));
-	show_waveforms_recording_button.signal_clicked().connect (slot (*this, &OptionEditor::show_waveforms_recording_clicked));
-	show_measures_button.signal_clicked().connect (slot (*this, &OptionEditor::show_measures_clicked));
-	mixer_strip_width_button.signal_clicked().connect (slot (*this, &OptionEditor::strip_width_clicked));
-	follow_playhead_button.signal_clicked().connect (slot (*this, &OptionEditor::follow_playhead_clicked));
+	show_waveforms_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::show_waveforms_clicked));
+	show_waveforms_recording_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::show_waveforms_recording_clicked));
+	show_measures_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::show_measures_clicked));
+	mixer_strip_width_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::strip_width_clicked));
+	follow_playhead_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::follow_playhead_clicked));
 
-	editor.DisplayControlChanged.connect (slot (*this, &OptionEditor::display_control_changed));
+	editor.DisplayControlChanged.connect (mem_fun(*this, &OptionEditor::display_control_changed));
 
 	show_measures_button.set_active (editor.show_measures());
 	show_waveforms_button.set_active (editor.show_waveforms());
@@ -855,7 +855,7 @@ OptionEditor::setup_sync_options ()
 	slave_type_combo.set_value_in_list (true, false);
 	slave_type_combo.get_entry()->set_editable (false);
 	slave_type_combo.get_entry()->set_name ("OptionsEntry");
-	slave_type_combo.get_popwin()->unmap_event.connect (slot (*this, &OptionEditor::slave_type_chosen));
+	slave_type_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::slave_type_chosen));
 
 	dumb.clear ();
 	dumb.push_back (X_("24 FPS"));
@@ -868,10 +868,10 @@ OptionEditor::setup_sync_options ()
 	smpte_fps_combo.set_value_in_list (true, false);
 	smpte_fps_combo.get_entry()->set_editable (false);
 	smpte_fps_combo.get_entry()->set_name ("OptionsEntry");
-	smpte_fps_combo.get_popwin()->unmap_event.connect (slot (*this, &OptionEditor::smpte_fps_chosen));
+	smpte_fps_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::smpte_fps_chosen));
 	
 	smpte_offset_clock.set_mode (AudioClock::SMPTE);
-	smpte_offset_clock.ValueChanged.connect (slot (*this, &OptionEditor::smpte_offset_chosen));
+	smpte_offset_clock.ValueChanged.connect (mem_fun(*this, &OptionEditor::smpte_offset_chosen));
 	
 	send_mtc_button.set_name ("OptionEditorToggleButton");
 	jack_time_master_button.set_name ("OptionEditorToggleButton");
@@ -923,9 +923,9 @@ OptionEditor::setup_sync_options ()
 
 	jack_time_master_button.set_active (Config->get_jack_time_master());
 
-	send_mtc_button.button_press_event.connect (bind (slot (*this, &OptionEditor::send_mtc_toggled), &send_mtc_button));
-	jack_time_master_button.signal_clicked().connect (slot (*this, &OptionEditor::jack_time_master_clicked));
-	smpte_offset_negative_button.signal_clicked().connect (slot (*this, &OptionEditor::smpte_offset_negative_clicked));
+	send_mtc_button.button_press_event.connect (bind (mem_fun(*this, &OptionEditor::send_mtc_toggled), &send_mtc_button));
+	jack_time_master_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::jack_time_master_clicked));
+	smpte_offset_negative_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::smpte_offset_negative_clicked));
 }
 
 void
@@ -1017,19 +1017,19 @@ OptionEditor::setup_midi_options ()
 		}
 
 		tb->set_active (!(*i).second->input()->offline());
-		tb->button_press_event.connect (bind (slot (*this, &OptionEditor::port_online_toggled), (*i).second, tb));
-		(*i).second->input()->OfflineStatusChanged.connect (bind (slot (*this, &OptionEditor::map_port_online), (*i).second, tb));
+		tb->button_press_event.connect (bind (mem_fun(*this, &OptionEditor::port_online_toggled), (*i).second, tb));
+		(*i).second->input()->OfflineStatusChanged.connect (bind (mem_fun(*this, &OptionEditor::map_port_online), (*i).second, tb));
 		table->attach (*tb, 1, 2, n+2, n+3, 0, 0);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
-		tb->button_press_event.connect (bind (slot (*this, &OptionEditor::port_trace_in_toggled), (*i).second, tb));
+		tb->button_press_event.connect (bind (mem_fun(*this, &OptionEditor::port_trace_in_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
 		table->attach (*tb, 2, 3, n+2, n+3, 0, 0);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
-		tb->button_press_event.connect (bind (slot (*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
+		tb->button_press_event.connect (bind (mem_fun(*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
 		table->attach (*tb, 3, 4, n+2, n+3, 0, 0);
 
@@ -1042,7 +1042,7 @@ OptionEditor::setup_midi_options ()
 			rb->set_group (first_mtc_button->group());
 		}
 		table->attach (*rb, 4, 5, n+2, n+3, 0, 0);
-		rb->button_press_event.connect (bind (slot (*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
+		rb->button_press_event.connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
 
 		if (Config->get_mtc_port_name() == i->first) {
 			rb->set_active (true);
@@ -1057,7 +1057,7 @@ OptionEditor::setup_midi_options ()
 			rb->set_group (first_mmc_button->group());
 		}
 		table->attach (*rb, 6, 7, n+2, n+3, 0, 0);
-		rb->button_press_event.connect (bind (slot (*this, &OptionEditor::mmc_port_chosen), (*i).second, rb));
+		rb->button_press_event.connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb));
 
 		if (Config->get_mmc_port_name() == i->first) {
 			rb->set_active (true);
@@ -1072,7 +1072,7 @@ OptionEditor::setup_midi_options ()
 			rb->set_group (first_midi_button->group());
 		}
 		table->attach (*rb, 8, 9, n+2, n+3, 0, 0);
-		rb->button_press_event.connect (bind (slot (*this, &OptionEditor::midi_port_chosen), (*i).second, rb));
+		rb->button_press_event.connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb));
 
 		if (Config->get_midi_port_name() == i->first) {
 			rb->set_active (true);
@@ -1120,10 +1120,10 @@ OptionEditor::setup_midi_options ()
 
 	midi_packer.pack_start (*mmcbuttonbox, false, false);
 
-	mmc_control_button.toggled.connect (bind (slot (*this, &OptionEditor::mmc_control_toggled), &mmc_control_button));
-	midi_control_button.toggled.connect (bind (slot (*this, &OptionEditor::midi_control_toggled), &midi_control_button));
-	send_mmc_button.toggled.connect (bind (slot (*this, &OptionEditor::send_mmc_toggled), &send_mmc_button));
-	midi_feedback_button.toggled.connect (bind (slot (*this, &OptionEditor::midi_feedback_toggled), &midi_feedback_button));
+	mmc_control_button.toggled.connect (bind (mem_fun(*this, &OptionEditor::mmc_control_toggled), &mmc_control_button));
+	midi_control_button.toggled.connect (bind (mem_fun(*this, &OptionEditor::midi_control_toggled), &midi_control_button));
+	send_mmc_button.toggled.connect (bind (mem_fun(*this, &OptionEditor::send_mmc_toggled), &send_mmc_button));
+	midi_feedback_button.toggled.connect (bind (mem_fun(*this, &OptionEditor::midi_feedback_toggled), &midi_feedback_button));
 }
 
 gint
@@ -1314,7 +1314,7 @@ void
 OptionEditor::click_browse_clicked ()
 {
 	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	sigc::connection c = sfdb.Action.connect (slot (*this, &OptionEditor::click_chosen));
+	sigc::connection c = sfdb.Action.connect (mem_fun(*this, &OptionEditor::click_chosen));
 	
 	sfdb.run (_("Use as click"), false, true);
 	c.disconnect ();
@@ -1339,7 +1339,7 @@ void
 OptionEditor::click_emphasis_browse_clicked ()
 {
 	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	sigc::connection c = sfdb.Action.connect (slot (*this, &OptionEditor::click_emphasis_chosen));
+	sigc::connection c = sfdb.Action.connect (mem_fun(*this, &OptionEditor::click_emphasis_chosen));
 
 	sfdb.run (_("Use as click emphasis"), false, true);
 	c.disconnect ();
@@ -1456,7 +1456,7 @@ OptionEditor::just_close_win()
 void
 OptionEditor::queue_session_control_changed (Session::ControlType t)
 {
-	ui.call_slot (bind (slot (*this, &OptionEditor::session_control_changed), t));
+	ui.call_slot (bind (mem_fun(*this, &OptionEditor::session_control_changed), t));
 }
 
 void
@@ -1571,18 +1571,18 @@ OptionEditor::setup_click_editor ()
 	click_path_entry.set_name ("OptionsEntry");
 	click_emphasis_path_entry.set_name ("OptionsEntry");
 	
-	click_path_entry.activate.connect (slot (*this, &OptionEditor::click_sound_changed));
-	click_emphasis_path_entry.activate.connect (slot (*this, &OptionEditor::click_emphasis_sound_changed));
+	click_path_entry.activate.connect (mem_fun(*this, &OptionEditor::click_sound_changed));
+	click_emphasis_path_entry.activate.connect (mem_fun(*this, &OptionEditor::click_emphasis_sound_changed));
 
-	click_path_entry.signal_focus_in_event().connect (slot (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	click_path_entry.signal_focus_out_event().connect (bind (slot (*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
-	click_emphasis_path_entry.signal_focus_in_event().connect (slot (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	click_emphasis_path_entry.signal_focus_out_event().connect (bind (slot (*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
+	click_path_entry.signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	click_path_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
+	click_emphasis_path_entry.signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	click_emphasis_path_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
 
 	click_browse_button.set_name ("EditorGTKButton");
 	click_emphasis_browse_button.set_name ("EditorGTKButton");
-	click_browse_button.signal_clicked().connect (slot (*this, &OptionEditor::click_browse_clicked));
-	click_emphasis_browse_button.signal_clicked().connect (slot (*this, &OptionEditor::click_emphasis_browse_clicked));
+	click_browse_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::click_browse_clicked));
+	click_emphasis_browse_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::click_emphasis_browse_clicked));
 
 	click_packer.set_border_width (12);
 	click_packer.set_spacing (5);
@@ -1723,19 +1723,19 @@ OptionEditor::setup_misc_options()
 	debug_keyboard_button.set_active (false);
 	speed_quieten_button.set_active (Config->get_quieten_at_speed() != 1.0f);
 
-	hw_monitor_button.signal_clicked().connect (slot (*this, &OptionEditor::hw_monitor_clicked));
-	sw_monitor_button.signal_clicked().connect (slot (*this, &OptionEditor::sw_monitor_clicked));
-	plugins_stop_button.signal_clicked().connect (slot (*this, &OptionEditor::plugins_stop_with_transport_clicked));
-	plugins_on_rec_button.signal_clicked().connect (slot (*this, &OptionEditor::plugins_on_while_recording_clicked));
-	verify_remove_last_capture_button.signal_clicked().connect (slot (*this, &OptionEditor::verify_remove_last_capture_clicked));
-	auto_connect_inputs_button.signal_clicked().connect (slot (*this, &OptionEditor::auto_connect_inputs_clicked));
-	auto_connect_output_physical_button.signal_clicked().connect (slot (*this, &OptionEditor::auto_connect_output_physical_clicked));
-	auto_connect_output_master_button.signal_clicked().connect (slot (*this, &OptionEditor::auto_connect_output_master_clicked));
-	auto_connect_output_manual_button.signal_clicked().connect (slot (*this, &OptionEditor::auto_connect_output_manual_clicked));
-	stop_rec_on_xrun_button.signal_clicked().connect (slot (*this, &OptionEditor::stop_rec_on_xrun_clicked));
-	stop_at_end_button.signal_clicked().connect (slot (*this, &OptionEditor::stop_at_end_clicked));
-	debug_keyboard_button.signal_clicked().connect (slot (*this, &OptionEditor::debug_keyboard_clicked));
-	speed_quieten_button.signal_clicked().connect (slot (*this, &OptionEditor::speed_quieten_clicked));
+	hw_monitor_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::hw_monitor_clicked));
+	sw_monitor_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::sw_monitor_clicked));
+	plugins_stop_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::plugins_stop_with_transport_clicked));
+	plugins_on_rec_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::plugins_on_while_recording_clicked));
+	verify_remove_last_capture_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::verify_remove_last_capture_clicked));
+	auto_connect_inputs_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::auto_connect_inputs_clicked));
+	auto_connect_output_physical_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::auto_connect_output_physical_clicked));
+	auto_connect_output_master_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::auto_connect_output_master_clicked));
+	auto_connect_output_manual_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::auto_connect_output_manual_clicked));
+	stop_rec_on_xrun_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::stop_rec_on_xrun_clicked));
+	stop_at_end_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::stop_at_end_clicked));
+	debug_keyboard_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::debug_keyboard_clicked));
+	speed_quieten_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::speed_quieten_clicked));
 }
 
 void
@@ -1875,7 +1875,7 @@ OptionEditor::setup_keyboard_options ()
 	edit_modifier_combo.get_entry()->set_editable (false);
 	edit_modifier_combo.get_entry()->set_name ("OptionsEntry");
 	edit_modifier_combo.set_use_arrows_always (true);
-	edit_modifier_combo.get_popwin()->unmap_event.connect (slot (*this, &OptionEditor::edit_modifier_chosen));
+	edit_modifier_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::edit_modifier_chosen));
 
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
@@ -1899,13 +1899,13 @@ OptionEditor::setup_keyboard_options ()
 
 	edit_button_spin.set_name ("OptionsEntry");
 	edit_button_adjustment.set_value (Keyboard::edit_button());
-	edit_button_adjustment.value_changed.connect (slot (*this, &OptionEditor::edit_button_changed));
+	edit_button_adjustment.value_changed.connect (mem_fun(*this, &OptionEditor::edit_button_changed));
 
 	delete_modifier_combo.set_popdown_strings (dumb);
 	delete_modifier_combo.get_entry()->set_editable (false);
 	delete_modifier_combo.get_entry()->set_name ("OptionsEntry");
 	delete_modifier_combo.set_use_arrows_always (true);
-	delete_modifier_combo.get_popwin()->unmap_event.connect (slot (*this, &OptionEditor::delete_modifier_chosen));
+	delete_modifier_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::delete_modifier_chosen));
 
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == Keyboard::delete_modifier ()) {
@@ -1929,13 +1929,13 @@ OptionEditor::setup_keyboard_options ()
 
 	delete_button_spin.set_name ("OptionsEntry");
 	delete_button_adjustment.set_value (Keyboard::delete_button());
-	delete_button_adjustment.value_changed.connect (slot (*this, &OptionEditor::delete_button_changed));
+	delete_button_adjustment.value_changed.connect (mem_fun(*this, &OptionEditor::delete_button_changed));
 
 	snap_modifier_combo.set_popdown_strings (dumb);
 	snap_modifier_combo.get_entry()->set_editable (false);
 	snap_modifier_combo.get_entry()->set_name ("OptionsEntry");
 	snap_modifier_combo.set_use_arrows_always (true);
-	snap_modifier_combo.get_popwin()->unmap_event.connect (slot (*this, &OptionEditor::snap_modifier_chosen));
+	snap_modifier_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::snap_modifier_chosen));
 	
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {

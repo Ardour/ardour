@@ -310,7 +310,7 @@ ImageFrameView::add_marker_view_item(MarkerView* item, void* src)
 {
 	marker_view_list.push_back(item) ;
 	
-	item->GoingAway.connect(bind(slot(*this, &ImageFrameView::remove_marker_view_item), (void*)this));
+	item->GoingAway.connect(bind(mem_fun(*this, &ImageFrameView::remove_marker_view_item), (void*)this));
 	
 	 MarkerViewAdded(item, src) ; /* EMIT_SIGNAL */
 }
@@ -360,7 +360,7 @@ ImageFrameView::remove_named_marker_view_item(std::string markerId, void* src)
 void
 ImageFrameView::remove_marker_view_item(MarkerView* mv, void* src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &ImageFrameView::remove_marker_view_item), mv, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameView::remove_marker_view_item), mv, src));
 
 	MarkerViewList::iterator i ;
 	

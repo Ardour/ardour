@@ -102,11 +102,11 @@ Editor::add_new_location (Location *location)
 		lam->show ();
 	}
 
-	location->start_changed.connect (slot (*this, &Editor::location_changed));
-	location->end_changed.connect (slot (*this, &Editor::location_changed));
-	location->changed.connect (slot (*this, &Editor::location_changed));
-	location->name_changed.connect (slot (*this, &Editor::location_changed));
-	location->FlagsChanged.connect (slot (*this, &Editor::location_flags_changed));
+	location->start_changed.connect (mem_fun(*this, &Editor::location_changed));
+	location->end_changed.connect (mem_fun(*this, &Editor::location_changed));
+	location->changed.connect (mem_fun(*this, &Editor::location_changed));
+	location->name_changed.connect (mem_fun(*this, &Editor::location_changed));
+	location->FlagsChanged.connect (mem_fun(*this, &Editor::location_flags_changed));
 
 	pair<Location*,LocationMarkers*> newpair;
 
@@ -119,7 +119,7 @@ Editor::add_new_location (Location *location)
 void
 Editor::location_changed (Location *location)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &Editor::location_changed), location));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::location_changed), location));
 
 	LocationMarkers *lam = find_location_markers (location);
 
@@ -141,7 +141,7 @@ Editor::location_changed (Location *location)
 void
 Editor::location_flags_changed (Location *location, void *src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Editor::location_flags_changed), location, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::location_flags_changed), location, src));
 	
 	LocationMarkers *lam = find_location_markers (location);
 	
@@ -226,7 +226,7 @@ Editor::refresh_location_display_internal (Locations::LocationList& locations)
 void
 Editor::refresh_location_display ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &Editor::refresh_location_display));
+	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::refresh_location_display));
 	
 	if (session) {
 		session->locations()->apply (*this, &Editor::refresh_location_display_internal);
@@ -236,7 +236,7 @@ Editor::refresh_location_display ()
 void
 Editor::refresh_location_display_s (Change ignored)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Editor::refresh_location_display_s), ignored));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::refresh_location_display_s), ignored));
 
 	if (session) {
 		session->locations()->apply (*this, &Editor::refresh_location_display_internal);
@@ -315,7 +315,7 @@ Editor::remove_marker (GtkCanvasItem* item, GdkEvent* event)
 			loc->set_hidden (true, this);
 		}
 		else {
-			Gtk::Main::idle.connect (bind (slot (*this, &Editor::really_remove_marker), loc));
+			Gtk::Main::idle.connect (bind (mem_fun(*this, &Editor::really_remove_marker), loc));
 		}
 	}
 }
@@ -334,7 +334,7 @@ Editor::really_remove_marker (Location* loc)
 void
 Editor::location_gone (Location *location)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Editor::location_gone), location));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::location_gone), location));
 	
 	LocationMarkerMap::iterator i;
 
@@ -441,17 +441,17 @@ Editor::build_marker_menu ()
 	MenuList& items = marker_menu->items();
 	marker_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Locate to"), slot (*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from"), slot (*this, &Editor::marker_menu_play_from)));
-	items.push_back (MenuElem (_("Loop range"), slot (*this, &Editor::marker_menu_loop_range)));
-	items.push_back (MenuElem (_("Set from playhead"), slot (*this, &Editor::marker_menu_set_from_playhead)));
-	items.push_back (MenuElem (_("Set from range"), slot (*this, &Editor::marker_menu_set_from_selection)));
+	items.push_back (MenuElem (_("Locate to"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Play from"), mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Loop range"), mem_fun(*this, &Editor::marker_menu_loop_range)));
+	items.push_back (MenuElem (_("Set from playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Set from range"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Rename"), slot (*this, &Editor::marker_menu_rename)));
-	items.push_back (MenuElem (_("Hide"), slot (*this, &Editor::marker_menu_hide)));
-	items.push_back (MenuElem (_("Remove"), slot (*this, &Editor::marker_menu_remove)));
+	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::marker_menu_rename)));
+	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
+	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::marker_menu_remove)));
 }
 
 void
@@ -463,8 +463,8 @@ Editor::build_tm_marker_menu ()
 	MenuList& items = tm_marker_menu->items();
 	tm_marker_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Edit"), slot (*this, &Editor::marker_menu_edit)));
-	items.push_back (MenuElem (_("Remove"), slot (*this, &Editor::marker_menu_remove)));
+	items.push_back (MenuElem (_("Edit"), mem_fun(*this, &Editor::marker_menu_edit)));
+	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::marker_menu_remove)));
 }
 
 void
@@ -476,10 +476,10 @@ Editor::build_new_transport_marker_menu ()
 	MenuList& items = new_transport_marker_menu->items();
 	new_transport_marker_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Set Loop Range"), slot (*this, &Editor::new_transport_marker_menu_set_loop)));
-	items.push_back (MenuElem (_("Set Punch Range"), slot (*this, &Editor::new_transport_marker_menu_set_punch)));
+	items.push_back (MenuElem (_("Set Loop Range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_loop)));
+	items.push_back (MenuElem (_("Set Punch Range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_punch)));
 
-	new_transport_marker_menu->unmap_event.connect ( slot (*this, &Editor::new_transport_marker_menu_popdown)); 
+	new_transport_marker_menu->unmap_event.connect ( mem_fun(*this, &Editor::new_transport_marker_menu_popdown)); 
 }
 
 void
@@ -491,12 +491,12 @@ Editor::build_transport_marker_menu ()
 	MenuList& items = transport_marker_menu->items();
 	transport_marker_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Locate to"), slot (*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from"), slot (*this, &Editor::marker_menu_play_from)));
-	items.push_back (MenuElem (_("Set from playhead"), slot (*this, &Editor::marker_menu_set_from_playhead)));
-	items.push_back (MenuElem (_("Set from range"), slot (*this, &Editor::marker_menu_set_from_selection)));
+	items.push_back (MenuElem (_("Locate to"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Play from"), mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Set from playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Set from range"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Hide"), slot (*this, &Editor::marker_menu_hide)));
+	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
 }
 
 void
@@ -753,10 +753,10 @@ Editor::marker_menu_rename ()
 	ok_button.set_name ("EditorGTKButton");
 	cancel_button.set_name ("EditorGTKButton");
 
-	entry.activate.connect (bind (slot (*this, &Editor::finish_sub_event_loop), 1));
-	cancel_button.signal_clicked().connect (bind (slot (*this, &Editor::finish_sub_event_loop), -1));
-	ok_button.signal_clicked().connect (bind (slot (*this, &Editor::finish_sub_event_loop), 1));
-	dialog.delete_event.connect (bind (slot (*this, &Editor::finish_sub_event_loop_on_delete), -1));
+	entry.activate.connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
+	cancel_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), -1));
+	ok_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
+	dialog.delete_event.connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop_on_delete), -1));
 
 	dialog.show_all ();
 	entry.grab_focus ();
@@ -801,8 +801,8 @@ Editor::new_transport_marker_menu_set_loop ()
 		session->add_redo_no_execute (session->locations()->get_memento());
 	}
 	else {
-		session->add_undo (rettype<void>(bind (slot (*tll, &Location::set), tll->start(), tll->end())));
-		session->add_redo (rettype<void>(bind (slot (*tll, &Location::set), temp_location->start(), temp_location->end())));
+		session->add_undo (rettype<void>(bind (mem_fun (*tll, &Location::set), tll->start(), tll->end())));
+		session->add_redo (rettype<void>(bind (mem_fun (*tll, &Location::set), temp_location->start(), temp_location->end())));
 		tll->set_hidden (false, this);
 		tll->set (temp_location->start(), temp_location->end());
 	}
@@ -826,8 +826,8 @@ Editor::new_transport_marker_menu_set_punch ()
 		session->set_auto_punch_location (tpl);
 		session->add_redo_no_execute (session->locations()->get_memento());
 	} else {
-		session->add_undo (rettype<void>(bind (slot (*tpl, &Location::set), tpl->start(), tpl->end())));
-		session->add_redo (rettype<void>(bind (slot (*tpl, &Location::set), temp_location->start(), temp_location->end())));
+		session->add_undo (rettype<void>(bind (mem_fun (*tpl, &Location::set), tpl->start(), tpl->end())));
+		session->add_redo (rettype<void>(bind (mem_fun (*tpl, &Location::set), temp_location->start(), temp_location->end())));
 		tpl->set_hidden(false, this);
 		tpl->set(temp_location->start(), temp_location->end());
 	}

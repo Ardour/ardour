@@ -69,11 +69,11 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 	_amplitude_above_axis = 1.0;
 
 	if (_trackview.is_audio_track()) {
-		_trackview.audio_track()->diskstream_changed.connect (slot (*this, &StreamView::diskstream_changed));
-		_trackview.session().TransportStateChange.connect (slot (*this, &StreamView::transport_changed));
-		_trackview.get_diskstream()->record_enable_changed.connect (slot (*this, &StreamView::rec_enable_changed));
-		_trackview.session().RecordEnabled.connect (slot (*this, &StreamView::sess_rec_enable_changed));
-		_trackview.session().RecordDisabled.connect (slot (*this, &StreamView::sess_rec_enable_changed));
+		_trackview.audio_track()->diskstream_changed.connect (mem_fun (*this, &StreamView::diskstream_changed));
+		_trackview.session().TransportStateChange.connect (mem_fun (*this, &StreamView::transport_changed));
+		_trackview.get_diskstream()->record_enable_changed.connect (mem_fun (*this, &StreamView::rec_enable_changed));
+		_trackview.session().RecordEnabled.connect (mem_fun (*this, &StreamView::sess_rec_enable_changed));
+		_trackview.session().RecordDisabled.connect (mem_fun (*this, &StreamView::sess_rec_enable_changed));
 	} 
 
 	rec_updating = false;
@@ -191,7 +191,7 @@ StreamView::add_region_view (Region *r)
 void
 StreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &StreamView::add_region_view), r));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::add_region_view), r));
 
 	AudioRegion* region = dynamic_cast<AudioRegion*> (r);
 
@@ -229,7 +229,7 @@ StreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 
 	/* catch regionview going away */
 
-	region->GoingAway.connect (slot (*this, &StreamView::remove_region_view));
+	region->GoingAway.connect (mem_fun (*this, &StreamView::remove_region_view));
 	
 	AudioRegionViewAdded (region_view);
 }
@@ -237,7 +237,7 @@ StreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 void
 StreamView::remove_region_view (Region *r)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &StreamView::remove_region_view), r));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::remove_region_view), r));
 
 	AudioRegion* ar = dynamic_cast<AudioRegion*> (r);
 
@@ -271,7 +271,7 @@ StreamView::remove_region_view (Region *r)
 void
 StreamView::remove_rec_region (Region *r)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &StreamView::remove_rec_region), r));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &StreamView::remove_rec_region), r));
 	
 	if (!Gtkmm2ext::UI::instance()->caller_is_gui_thread()) {
 		fatal << "region deleted from non-GUI thread!" << endmsg;
@@ -312,13 +312,13 @@ StreamView::display_diskstream (DiskStream *ds)
 {
 	playlist_change_connection.disconnect();
 	playlist_changed (ds);
-	playlist_change_connection = ds->PlaylistChanged.connect (bind (slot (*this, &StreamView::playlist_changed), ds));
+	playlist_change_connection = ds->PlaylistChanged.connect (bind (mem_fun (*this, &StreamView::playlist_changed), ds));
 }
 
 void
 StreamView::playlist_modified ()
 {
-	ENSURE_GUI_THREAD (slot (*this, &StreamView::playlist_modified));
+	ENSURE_GUI_THREAD (mem_fun (*this, &StreamView::playlist_modified));
 
 	/* if the playlist is modified, make sure xfades are on top and all the regionviews are stacked 
 	   correctly.
@@ -336,7 +336,7 @@ StreamView::playlist_modified ()
 void
 StreamView::playlist_changed (DiskStream *ds)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &StreamView::playlist_changed), ds));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_changed), ds));
 
 	/* disconnect from old playlist */
 
@@ -353,11 +353,11 @@ StreamView::playlist_changed (DiskStream *ds)
 
 	/* catch changes */
 
-	playlist_connections.push_back (ds->playlist()->RegionAdded.connect (slot (*this, &StreamView::add_region_view)));
-	playlist_connections.push_back (ds->playlist()->RegionRemoved.connect (slot (*this, &StreamView::remove_region_view)));
-	playlist_connections.push_back (ds->playlist()->StateChanged.connect (slot (*this, &StreamView::playlist_state_changed)));
-	playlist_connections.push_back (ds->playlist()->Modified.connect (slot (*this, &StreamView::playlist_modified)));
-	playlist_connections.push_back (ds->playlist()->NewCrossfade.connect (slot (*this, &StreamView::add_crossfade)));
+	playlist_connections.push_back (ds->playlist()->RegionAdded.connect (mem_fun (*this, &StreamView::add_region_view)));
+	playlist_connections.push_back (ds->playlist()->RegionRemoved.connect (mem_fun (*this, &StreamView::remove_region_view)));
+	playlist_connections.push_back (ds->playlist()->StateChanged.connect (mem_fun (*this, &StreamView::playlist_state_changed)));
+	playlist_connections.push_back (ds->playlist()->Modified.connect (mem_fun (*this, &StreamView::playlist_modified)));
+	playlist_connections.push_back (ds->playlist()->NewCrossfade.connect (mem_fun (*this, &StreamView::add_crossfade)));
 }
 
 void
@@ -366,7 +366,7 @@ StreamView::add_crossfade (Crossfade *crossfade)
 	AudioRegionView* lview = 0;
 	AudioRegionView* rview = 0;
 
-	ENSURE_GUI_THREAD (bind (slot (*this, &StreamView::add_crossfade), crossfade));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::add_crossfade), crossfade));
 
 	/* first see if we already have a CrossfadeView for this Crossfade */
 
@@ -400,7 +400,7 @@ StreamView::add_crossfade (Crossfade *crossfade)
 					       region_color,
 					       *lview, *rview);
 
-	crossfade->Invalidated.connect (slot (*this, &StreamView::remove_crossfade));
+	crossfade->Invalidated.connect (mem_fun (*this, &StreamView::remove_crossfade));
 	crossfade_views.push_back (cv);
 
 	if (!crossfades_visible) {
@@ -411,7 +411,7 @@ StreamView::add_crossfade (Crossfade *crossfade)
 void
 StreamView::remove_crossfade (Crossfade *xfade)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &StreamView::remove_crossfade), xfade));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::remove_crossfade), xfade));
 
 	for (list<CrossfadeView*>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
 		if (&(*i)->crossfade == xfade) {
@@ -425,7 +425,7 @@ StreamView::remove_crossfade (Crossfade *xfade)
 void
 StreamView::playlist_state_changed (Change ignored)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &StreamView::playlist_state_changed), ignored));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_state_changed), ignored));
 
 	redisplay_diskstream ();
 }
@@ -489,9 +489,9 @@ StreamView::diskstream_changed (void *src_ignored)
 	if ((at = _trackview.audio_track()) != 0) {
 		DiskStream& ds = at->disk_stream();
 		/* XXX grrr: when will SigC++ allow me to bind references? */
-		Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &StreamView::display_diskstream), &ds));
+		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*this, &StreamView::display_diskstream), &ds));
 	} else {
-		Gtkmm2ext::UI::instance()->call_slot (slot (*this, &StreamView::undisplay_diskstream));
+		Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::undisplay_diskstream));
 	}
 }
 
@@ -588,19 +588,19 @@ StreamView::region_layered (AudioRegionView* rv)
 void
 StreamView::rec_enable_changed (void *src)
 {
-	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::setup_rec_box));
 }
 
 void
 StreamView::sess_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::setup_rec_box));
 }
 
 void
 StreamView::transport_changed()
 {
-	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::setup_rec_box));
 }
 
 void
@@ -630,7 +630,7 @@ StreamView::setup_rec_box ()
 					Source *src = (Source *) _trackview.get_diskstream()->write_source (n);
 					if (src) {
 						sources.push_back (src);
-						peak_ready_connections.push_back (src->PeakRangeReady.connect (bind (slot (*this, &StreamView::rec_peak_range_ready), src))); 
+						peak_ready_connections.push_back (src->PeakRangeReady.connect (bind (mem_fun (*this, &StreamView::rec_peak_range_ready), src))); 
 					}
 				}
 
@@ -645,7 +645,7 @@ StreamView::setup_rec_box ()
 				region->set_position (_trackview.session().transport_frame(), this);
 				rec_regions.push_back (region);
 				/* catch it if it goes away */
-				region->GoingAway.connect (slot (*this, &StreamView::remove_rec_region));
+				region->GoingAway.connect (mem_fun (*this, &StreamView::remove_rec_region));
 
 				/* we add the region later */
 			}
@@ -678,7 +678,7 @@ StreamView::setup_rec_box ()
 			rec_rects.push_back (recbox);
 			
 			screen_update_connection.disconnect();
-			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (slot (*this, &StreamView::update_rec_box));	
+			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun (*this, &StreamView::update_rec_box));	
 			rec_updating = true;
 			rec_active = true;
 
@@ -793,7 +793,7 @@ StreamView::rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt, Sour
 {
 	// this is called from the peak building thread
 
-	ENSURE_GUI_THREAD(bind (slot (*this, &StreamView::rec_peak_range_ready), start, cnt, src));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &StreamView::rec_peak_range_ready), start, cnt, src));
 	
 	if (rec_peak_ready_map.size() == 0 || start+cnt > last_rec_peak_frame) {
 		last_rec_peak_frame = start + cnt;

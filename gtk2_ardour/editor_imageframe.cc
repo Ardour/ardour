@@ -32,7 +32,7 @@ Editor::add_imageframe_time_axis(std::string track_name, void* src)
 	}
 	else
 	{
-		Gtkmm2ext::UI::instance()->call_slot(bind(slot(*this, &Editor::handle_new_imageframe_time_axis_view),track_name, src)) ;
+		Gtkmm2ext::UI::instance()->call_slot(bind(mem_fun(*this, &Editor::handle_new_imageframe_time_axis_view),track_name, src)) ;
 	}
 }
 
@@ -90,7 +90,7 @@ Editor::add_imageframe_marker_time_axis(std::string track_name, TimeAxisView* ma
 	// Can we only bind 2 data Items?
 	// @todo we really want to bind the src attribute too, for the moment tracks can only be added remotely,
 	//       so this is not too much of an issue, however will need to be looked at again
-	Gtkmm2ext::UI::instance()->call_slot(SigC::bind(slot(*this, &Editor::handle_new_imageframe_marker_time_axis_view),track_name, marked_track)) ;
+	Gtkmm2ext::UI::instance()->call_slot(sigc::bind(mem_fun(*this, &Editor::handle_new_imageframe_marker_time_axis_view),track_name, marked_track)) ;
 }
 
 void
@@ -1157,8 +1157,8 @@ Editor::handle_new_imageframe_time_axis_view(std::string track_name, void* src)
 	route_list.rows().push_back(rowdata) ;
 	route_list.rows().back().set_data(iftav) ;
 	route_list.rows().back().select() ;
-	iftav->GoingAway.connect(bind(slot(*this, &Editor::remove_route), (TimeAxisView*)iftav)) ;
-	iftav->gui_changed.connect(slot(*this, &Editor::handle_gui_changes)) ;
+	iftav->GoingAway.connect(bind(mem_fun(*this, &Editor::remove_route), (TimeAxisView*)iftav)) ;
+	iftav->gui_changed.connect(mem_fun(*this, &Editor::handle_gui_changes)) ;
 }
 
 void
@@ -1172,7 +1172,7 @@ Editor::handle_new_imageframe_marker_time_axis_view(std::string track_name, Time
 	route_list.rows().push_back(rowdata) ;
 	route_list.rows().back().set_data (mta) ;
 	route_list.rows().back().select() ;
-	mta->GoingAway.connect(bind(slot (*this, &Editor::remove_route), (TimeAxisView*)mta)) ;
+	mta->GoingAway.connect(bind(mem_fun(*this, &Editor::remove_route), (TimeAxisView*)mta)) ;
  }
 
 

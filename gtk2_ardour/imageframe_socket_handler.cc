@@ -332,7 +332,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_removed(std::string track_id,
 void
 ImageFrameSocketHandler::send_imageframe_time_axis_renamed(std::string new_id, std::string old_id, void* src, ImageFrameTimeAxis* time_axis)
 {
-	// ENSURE_GUI_THREAD(SigC::bind (slot (*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed), new_id, old_id, src, time_axis));
+	// ENSURE_GUI_THREAD(SigC::bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed), new_id, old_id, src, time_axis));
 	
 	if(this == src || src == 0)
 	{
@@ -409,7 +409,7 @@ ImageFrameSocketHandler::send_marker_time_axis_removed(std::string track_id, voi
 void
 ImageFrameSocketHandler::send_marker_time_axis_renamed(std::string new_id, std::string old_id, void* src, MarkerTimeAxis* time_axis)
 {
-	// ENSURE_GUI_THREAD(bind (slot (*this, &ImageFrameSocketHandler::send_marker_time_axis_renamed), new_id, old_id, src, time_axis));
+	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_marker_time_axis_renamed), new_id, old_id, src, time_axis));
 	
 	if(this == src || src == 0)
 	{
@@ -492,7 +492,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_group_removed(std::string gro
 void
 ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed(std::string new_id, std::string old_id, void* src, ImageFrameTimeAxisGroup* group)
 {
-	// ENSURE_GUI_THREAD(bind (slot (*this, &ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed), new_id, old_id, src, group));
+	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed), new_id, old_id, src, group));
 	
 	if(this == src || src == 0)
 	{
@@ -540,7 +540,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed(std::string new
 void
 ImageFrameSocketHandler::send_imageframe_view_position_change(jack_nframes_t pos, void* src, ImageFrameView* item)
 {
-	// ENSURE_GUI_THREAD(bind (slot (*this, &ImageFrameSocketHandler::send_imageframe_view_position_change), pos, src, item));
+	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_position_change), pos, src, item));
 	
 	if(this == src || src == 0)
 	{
@@ -576,7 +576,7 @@ ImageFrameSocketHandler::send_imageframe_view_position_change(jack_nframes_t pos
 void
 ImageFrameSocketHandler::send_imageframe_view_duration_change(jack_nframes_t dur, void* src, ImageFrameView* item)
 {
-	// ENSURE_GUI_THREAD(bind (slot (*this, &ImageFrameSocketHandler::send_imageframe_view_duration_change), dur, src, item));
+	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_duration_change), dur, src, item));
 	
 	if(this == src || src == 0)
 	{
@@ -1164,8 +1164,8 @@ ImageFrameSocketHandler::handle_insert_imageframe_time_axis(const char* msg)
 		if(new_tav)
 		{
 			ImageFrameTimeAxis* ifta = (ImageFrameTimeAxis*)new_tav ;
-			ifta->VisualTimeAxisRemoved.connect(SigC::slot(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_removed)) ;
-			ifta->NameChanged.connect(SigC::bind(SigC::slot(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed), ifta)) ;
+			ifta->VisualTimeAxisRemoved.connect(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_removed)) ;
+			ifta->NameChanged.connect(SigC::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed), ifta)) ;
 			
 			send_return_success() ;
 		}
@@ -1230,8 +1230,8 @@ ImageFrameSocketHandler::handle_insert_marker_time_axis(const char* msg)
 				if(mta)
 				{
 					added = true ;
-					mta->VisualTimeAxisRemoved.connect(SigC::slot(*this, &ImageFrameSocketHandler::send_marker_time_axis_removed)) ;
-					mta->NameChanged.connect(SigC::bind(SigC::slot(*this, &ImageFrameSocketHandler::send_marker_time_axis_renamed), mta)) ;
+					mta->VisualTimeAxisRemoved.connect(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_marker_time_axis_removed)) ;
+					mta->NameChanged.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_marker_time_axis_renamed), mta)) ;
 				}
 			}
 			
@@ -1295,8 +1295,8 @@ ImageFrameSocketHandler::handle_insert_imageframe_group(const char* msg)
 	}
 	else
 	{
-		iftag->NameChanged.connect(SigC::bind(SigC::slot(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed), iftag)) ;
-		iftag->GroupRemoved.connect(SigC::bind(SigC::slot(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_group_removed), iftag)) ;
+		iftag->NameChanged.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed), iftag)) ;
+		iftag->GroupRemoved.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_group_removed), iftag)) ;
 		send_return_success() ;
 	}
 }
@@ -1441,9 +1441,9 @@ ImageFrameSocketHandler::handle_insert_imageframe_view(const char* msg)
 		ImageFrameView* ifv = iftag->add_imageframe_item(image_id, start, duration, rgb_img_buf, (uint32_t)imgWidth, (uint32_t)imgHeight, (uint32_t)imgChannels, this) ;
 		if(ifv)
 		{
-			ifv->PositionChanged.connect(SigC::bind(SigC::slot(*this, &ImageFrameSocketHandler::send_imageframe_view_position_change), ifv)) ;
-			ifv->DurationChanged.connect(SigC::bind(SigC::slot(*this, &ImageFrameSocketHandler::send_imageframe_view_duration_change), ifv)) ;
-			ifv->ItemRemoved.connect(SigC::bind(SigC::slot(*this, &ImageFrameSocketHandler::send_imageframe_view_removed), ifv)) ;
+			ifv->PositionChanged.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_position_change), ifv)) ;
+			ifv->DurationChanged.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_duration_change), ifv)) ;
+			ifv->ItemRemoved.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_removed), ifv)) ;
 		
 			send_return_success() ;
 		}

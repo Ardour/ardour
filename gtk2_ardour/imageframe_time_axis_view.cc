@@ -69,7 +69,7 @@ ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
 
-	_trackview.editor.ZoomChanged.connect (slot (*this, &ImageFrameTimeAxisView::reset_samples_per_unit)) ;
+	_trackview.editor.ZoomChanged.connect (mem_fun(*this, &ImageFrameTimeAxisView::reset_samples_per_unit)) ;
 
 	selected_imageframe_group = 0 ;
 	selected_imageframe_view = 0 ;
@@ -234,7 +234,7 @@ ImageFrameTimeAxisView::add_imageframe_group(std::string group_id, void* src)
 
 		imageframe_groups.push_front(iftag) ;
 	
-		iftag->GoingAway.connect(bind(slot (*this,&ImageFrameTimeAxisView::remove_imageframe_group), iftag, (void*)this)) ;
+		iftag->GoingAway.connect(bind(mem_fun(*this,&ImageFrameTimeAxisView::remove_imageframe_group), iftag, (void*)this)) ;
 	
 		 ImageFrameGroupAdded(iftag, src) ; /* EMIT_SIGNAL */
 	}
@@ -310,7 +310,7 @@ ImageFrameTimeAxisView::remove_named_imageframe_group(std::string group_id, void
 void
 ImageFrameTimeAxisView::remove_imageframe_group(ImageFrameTimeAxisGroup* iftag, void* src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &ImageFrameTimeAxisView::remove_imageframe_group), iftag, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameTimeAxisView::remove_imageframe_group), iftag, src));
 
 	ImageFrameGroupList::iterator i;
 	if((i = find (imageframe_groups.begin(), imageframe_groups.end(), iftag)) != imageframe_groups.end())

@@ -247,7 +247,7 @@ Contributors:\n\t");
 	notebook->pages().push_back (TabElem (*translator_scroller, *translator_tab_label));
 
 	notebook->set_name ("AboutNoteBook");
-	notebook->button_release_event.connect_after (bind (slot (stoppit), notebook));
+	notebook->button_release_event.connect_after (bind (ptr_fun (stoppit), notebook));
 
 	logo_pixmap = 0;
 	logo_height = 0;
@@ -265,9 +265,9 @@ Contributors:\n\t");
 		load_logo (*this);
 
 		vbox.pack_start (logo_area, false, false);
-		logo_area.expose_event.connect (slot (*this, &About::logo_area_expose));
+		logo_area.expose_event.connect (mem_fun(*this, &About::logo_area_expose));
 	} else {
-		expose_event.connect (slot (*this, &About::logo_area_expose));
+		expose_event.connect (mem_fun(*this, &About::logo_area_expose));
 	}
 
  	small_label->set_name  ("AboutWindowSmallLabel");
@@ -290,7 +290,7 @@ Contributors:\n\t");
 	subvbox.pack_start (*payment_box, false, false);
 #endif
 
-	delete_event.connect (bind (slot (just_hide_it), static_cast<Gtk::Window*> (this)));
+	delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*> (this)));
 
 	add (vbox);
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);

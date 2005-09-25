@@ -139,19 +139,19 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	set_wmclass (_("ardour_route_parameters"), "Ardour");
 
 	// events
-	route_select_list.select_row.connect (slot (*this, &RouteParams_UI::route_selected));
-	route_select_list.unselect_row.connect (slot (*this, &RouteParams_UI::route_unselected));
-	route_select_list.click_column.connect (slot (*this, &RouteParams_UI::show_track_menu));
+	route_select_list.select_row.connect (mem_fun(*this, &RouteParams_UI::route_selected));
+	route_select_list.unselect_row.connect (mem_fun(*this, &RouteParams_UI::route_unselected));
+	route_select_list.click_column.connect (mem_fun(*this, &RouteParams_UI::show_track_menu));
 
 
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
 	
 	_plugin_selector = new PluginSelector (PluginManager::the_manager());
-	_plugin_selector->delete_event.connect (bind (slot (just_hide_it), 
+	_plugin_selector->delete_event.connect (bind (ptr_fun (just_hide_it), 
 						     static_cast<Window *> (_plugin_selector)));
 
 
-	delete_event.connect (bind (slot (just_hide_it), static_cast<Gtk::Window*> (this)));
+	delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*> (this)));
 }
 
 RouteParams_UI::~RouteParams_UI ()
@@ -161,7 +161,7 @@ RouteParams_UI::~RouteParams_UI ()
 void
 RouteParams_UI::add_route (Route* route)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteParams_UI::add_route), route));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::add_route), route));
 	
 	if (route->hidden()) {
 		return;
@@ -173,15 +173,15 @@ RouteParams_UI::add_route (Route* route)
 	route_select_list.rows().back().set_data (route);
 	//route_select_list.rows().back().select ();
 	
-	route->name_changed.connect (bind (slot (*this, &RouteParams_UI::route_name_changed), route));
-	route->GoingAway.connect (bind (slot (*this, &RouteParams_UI::route_removed), route));
+	route->name_changed.connect (bind (mem_fun(*this, &RouteParams_UI::route_name_changed), route));
+	route->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::route_removed), route));
 }
 
 
 void
 RouteParams_UI::route_name_changed (void *src, Route *route)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteParams_UI::route_name_changed), src, route));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::route_name_changed), src, route));
 	
 	CList_Helpers::RowList::iterator i;
 
@@ -218,10 +218,10 @@ RouteParams_UI::setup_redirect_boxes()
 	        pre_redir_hpane.add1 (*pre_redirect_box);
 		post_redir_hpane.add1 (*post_redirect_box);
 
-		pre_redirect_box->RedirectSelected.connect (bind (slot (*this, &RouteParams_UI::redirect_selected), PreFader));
-		pre_redirect_box->RedirectUnselected.connect (bind (slot (*this, &RouteParams_UI::redirect_selected), PreFader));
-		post_redirect_box->RedirectSelected.connect (bind (slot (*this, &RouteParams_UI::redirect_selected), PostFader));
-		post_redirect_box->RedirectUnselected.connect (bind (slot (*this, &RouteParams_UI::redirect_selected), PostFader));
+		pre_redirect_box->RedirectSelected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PreFader));
+		pre_redirect_box->RedirectUnselected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PreFader));
+		post_redirect_box->RedirectSelected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PostFader));
+		post_redirect_box->RedirectUnselected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PostFader));
 		
 	}
 	
@@ -317,7 +317,7 @@ RouteParams_UI::cleanup_post_view (bool stopupdate)
 void
 RouteParams_UI::route_removed (Route *route)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteParams_UI::route_removed), route));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::route_removed), route));
 	/*
 	route_select_list.freeze ();
 	route_select_list.clear ();
@@ -359,8 +359,8 @@ RouteParams_UI::set_session (Session *sess)
 
 	if (session) {
 		session->foreach_route (this, &RouteParams_UI::add_route);
-		session->going_away.connect (slot (*this, &ArdourDialog::session_gone));
-		session->RouteAdded.connect (slot (*this, &RouteParams_UI::add_route));
+		session->going_away.connect (mem_fun(*this, &ArdourDialog::session_gone));
+		session->RouteAdded.connect (mem_fun(*this, &RouteParams_UI::add_route));
 		start_updating ();
 	} else {
 		stop_updating ();
@@ -422,7 +422,7 @@ RouteParams_UI::route_selected (gint row, gint col, GdkEvent *ev)
 		setup_redirect_boxes();
 		
 		// bind to redirects changed event for this route
-		_route_conn = route->redirects_changed.connect (slot (*this, &RouteParams_UI::redirects_changed));
+		_route_conn = route->redirects_changed.connect (mem_fun(*this, &RouteParams_UI::redirects_changed));
 
 		track_input_label.set_text (_route->name());
 		
@@ -454,7 +454,7 @@ void
 RouteParams_UI::redirects_changed (void *src)
 
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteParams_UI::redirects_changed), src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::redirects_changed), src));
 	
 // 	pre_redirect_list.freeze ();
 // 	pre_redirect_list.clear ();
@@ -486,7 +486,7 @@ RouteParams_UI::show_track_menu (gint arg)
 		track_menu->set_name ("ArdourContextMenu");
 		track_menu->items().push_back 
 				(MenuElem (_("Add Track/Bus"), 
-					   slot (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route)));
+					   mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route)));
 	}
 	track_menu->popup (1, 0);
 }
@@ -515,7 +515,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 
 			if (place == PreFader) {
 				cleanup_pre_view();
-				_pre_plugin_conn = send->GoingAway.connect (slot (*this, &RouteParams_UI::redirect_going_away));
+				_pre_plugin_conn = send->GoingAway.connect (mem_fun(*this, &RouteParams_UI::redirect_going_away));
 				_active_pre_view = send_ui;
 				
 				pre_redir_hpane.add2 (*_active_pre_view);
@@ -523,7 +523,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 			}
 			else {
 				cleanup_post_view();
-				_post_plugin_conn = send->GoingAway.connect (slot (*this, &RouteParams_UI::redirect_going_away));
+				_post_plugin_conn = send->GoingAway.connect (mem_fun(*this, &RouteParams_UI::redirect_going_away));
 				_active_post_view = send_ui;
 				
 				post_redir_hpane.add2 (*_active_post_view);
@@ -543,7 +543,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 
 			if (place == PreFader) {
 				cleanup_pre_view();
-				_pre_plugin_conn = plugin_insert->plugin().GoingAway.connect (bind (slot (*this, &RouteParams_UI::plugin_going_away), PreFader));
+				_pre_plugin_conn = plugin_insert->plugin().GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PreFader));
 				plugin_ui->start_updating (0);
 				_active_pre_view = plugin_ui;
 				pre_redir_hpane.add2 (*_active_pre_view);
@@ -551,7 +551,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 			}
 			else {
 				cleanup_post_view();
-				_post_plugin_conn = plugin_insert->plugin().GoingAway.connect (bind (slot (*this, &RouteParams_UI::plugin_going_away), PostFader));
+				_post_plugin_conn = plugin_insert->plugin().GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PostFader));
 				plugin_ui->start_updating (0);
 				_active_post_view = plugin_ui;
 				post_redir_hpane.add2 (*_active_post_view);
@@ -564,7 +564,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 					
 			if (place == PreFader) {
 				cleanup_pre_view();
-				_pre_plugin_conn = port_insert->GoingAway.connect (slot (*this, &RouteParams_UI::redirect_going_away));
+				_pre_plugin_conn = port_insert->GoingAway.connect (mem_fun(*this, &RouteParams_UI::redirect_going_away));
 				_active_pre_view = portinsert_ui;
 				pre_redir_hpane.add2 (*_active_pre_view);
 				portinsert_ui->redisplay();
@@ -572,7 +572,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 			}
 			else {
 				cleanup_post_view();
-				_post_plugin_conn = port_insert->GoingAway.connect (slot (*this, &RouteParams_UI::redirect_going_away));
+				_post_plugin_conn = port_insert->GoingAway.connect (mem_fun(*this, &RouteParams_UI::redirect_going_away));
 				_active_post_view = portinsert_ui;
 				post_redir_hpane.add2 (*_active_post_view);
 				portinsert_ui->redisplay();
@@ -613,7 +613,7 @@ RouteParams_UI::redirect_unselected (ARDOUR::Redirect *redirect)
 void
 RouteParams_UI::plugin_going_away (Plugin *plugin, Placement place)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteParams_UI::plugin_going_away), plugin, place));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), plugin, place));
 	
 	// delete the current view without calling finish
 
@@ -631,7 +631,7 @@ void
 RouteParams_UI::redirect_going_away (ARDOUR::Redirect *plugin)
 
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteParams_UI::redirect_going_away), plugin));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), plugin));
 	
 	printf ("redirect going away\n");
 	// delete the current view without calling finish
@@ -680,7 +680,7 @@ void
 RouteParams_UI::start_updating ()
 {
 	update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
-		(slot (*this, &RouteParams_UI::update_views));
+		(mem_fun(*this, &RouteParams_UI::update_views));
 }
 
 void

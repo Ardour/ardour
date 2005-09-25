@@ -115,7 +115,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	_canvas = gtk_canvas_new_aa ();
 
 	canvas = wrap (_canvas);
-	canvas->size_allocate.connect (slot (*this, &CrossfadeEditor::canvas_allocation));
+	canvas->size_allocate.connect (mem_fun(*this, &CrossfadeEditor::canvas_allocation));
 	canvas->set_size_request (425, 200);
 
 	toplevel = gtk_canvas_item_new (gtk_canvas_root (GTK_CANVAS(_canvas)),
@@ -181,8 +181,8 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	select_in_button.set_name (X_("CrossfadeEditCurveButton"));
 	select_out_button.set_name (X_("CrossfadeEditCurveButton"));
 
-	select_in_button.signal_clicked().connect (bind (slot (this, &CrossfadeEditor::curve_select_clicked), In));
-	select_out_button.signal_clicked().connect (bind (slot (this, &CrossfadeEditor::curve_select_clicked), Out));
+	select_in_button.signal_clicked().connect (bind (mem_fun (*this, &CrossfadeEditor::curve_select_clicked), In));
+	select_out_button.signal_clicked().connect (bind (mem_fun (*this, &CrossfadeEditor::curve_select_clicked), Out));
 
 	HBox* acbox = manage (new HBox);
 	
@@ -223,7 +223,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 		pbutton = manage (new Button);
 		pbutton->add (*pxmap);
 		pbutton->set_name ("CrossfadeEditButton");
-		pbutton-.signal_clicked().connect (bind (slot (*this, &CrossfadeEditor::apply_preset), *i));
+		pbutton-.signal_clicked().connect (bind (mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
 		fade_in_table.attach (*pbutton, col, col+1, row, row+1);
 		fade_in_buttons.push_back (pbutton);
 
@@ -244,7 +244,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 		pbutton = manage (new Button);
 		pbutton->add (*pxmap);
 		pbutton->set_name ("CrossfadeEditButton");
-		pbutton-.signal_clicked().connect (bind (slot (*this, &CrossfadeEditor::apply_preset), *i));
+		pbutton-.signal_clicked().connect (bind (mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
 		fade_out_table.attach (*pbutton, col, col+1, row, row+1);
 		fade_out_buttons.push_back (pbutton);
 
@@ -268,13 +268,13 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	audition_right_dry_button.set_name ("CrossfadeEditAuditionButton");
 	audition_right_button.set_name ("CrossfadeEditAuditionButton");
 
-	clear_button.signal_clicked().connect (slot (*this, &CrossfadeEditor::clear));
-	revert_button.signal_clicked().connect (slot (*this, &CrossfadeEditor::reset));
-	audition_both_button.toggled.connect (slot (*this, &CrossfadeEditor::audition_toggled));
-	audition_right_button.toggled.connect (slot (*this, &CrossfadeEditor::audition_right_toggled));
-	audition_right_dry_button.toggled.connect (slot (*this, &CrossfadeEditor::audition_right_dry_toggled));
-	audition_left_button.toggled.connect (slot (*this, &CrossfadeEditor::audition_left_toggled));
-	audition_left_dry_button.toggled.connect (slot (*this, &CrossfadeEditor::audition_left_dry_toggled));
+	clear_button.signal_clicked().connect (mem_fun(*this, &CrossfadeEditor::clear));
+	revert_button.signal_clicked().connect (mem_fun(*this, &CrossfadeEditor::reset));
+	audition_both_button.toggled.connect (mem_fun(*this, &CrossfadeEditor::audition_toggled));
+	audition_right_button.toggled.connect (mem_fun(*this, &CrossfadeEditor::audition_right_toggled));
+	audition_right_dry_button.toggled.connect (mem_fun(*this, &CrossfadeEditor::audition_right_dry_toggled));
+	audition_left_button.toggled.connect (mem_fun(*this, &CrossfadeEditor::audition_left_toggled));
+	audition_left_dry_button.toggled.connect (mem_fun(*this, &CrossfadeEditor::audition_left_dry_toggled));
 
 	action_box.set_border_width (7);
 	action_box.set_spacing (5);
@@ -318,7 +318,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	/* button to allow hackers to check the actual curve values */
 
 //	Button* foobut = manage (new Button ("dump"));
-//	foobut-.signal_clicked().connect (slot (*this, &CrossfadeEditor::dump));
+//	foobut-.signal_clicked().connect (mem_fun(*this, &CrossfadeEditor::dump));
 //	vpacker.pack_start (*foobut, false, false);
 
 	current = In;
@@ -329,9 +329,9 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 
 	curve_select_clicked (In);
 
-	xfade.StateChanged.connect (slot (*this, &CrossfadeEditor::xfade_changed));
+	xfade.StateChanged.connect (mem_fun(*this, &CrossfadeEditor::xfade_changed));
 
-	session.AuditionActive.connect (slot (*this, &CrossfadeEditor::audition_state_changed));
+	session.AuditionActive.connect (mem_fun(*this, &CrossfadeEditor::audition_state_changed));
 }
 
 CrossfadeEditor::~CrossfadeEditor()
@@ -358,7 +358,7 @@ CrossfadeEditor::dump ()
 void
 CrossfadeEditor::audition_state_changed (bool yn)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &CrossfadeEditor::audition_state_changed), yn));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &CrossfadeEditor::audition_state_changed), yn));
 
 	if (!yn) {
 		audition_both_button.set_active (false);
@@ -1104,7 +1104,7 @@ CrossfadeEditor::make_waves (AudioRegion& region, WhichFade which)
 		
 		gdouble yoff = n * ht;
 		
-		if (region.source(n).peaks_ready (bind (slot (*this, &CrossfadeEditor::peaks_ready), &region, which))) {
+		if (region.source(n).peaks_ready (bind (mem_fun(*this, &CrossfadeEditor::peaks_ready), &region, which))) {
 			
 			GtkCanvasItem *wave = gtk_canvas_item_new (gtk_canvas_root (GTK_CANVAS(_canvas)),
 								   gtk_canvas_waveview_get_type (),

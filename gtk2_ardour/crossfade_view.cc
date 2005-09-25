@@ -87,7 +87,7 @@ CrossfadeView::CrossfadeView (GtkCanvasGroup *parent,
 
 	crossfade_changed (Change (~0));
 
-	crossfade.StateChanged.connect (slot (*this, &CrossfadeView::crossfade_changed));
+	crossfade.StateChanged.connect (mem_fun(*this, &CrossfadeView::crossfade_changed));
 }
 
 CrossfadeView::~CrossfadeView ()

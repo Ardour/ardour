@@ -80,7 +80,7 @@ Keyboard::Keyboard ()
 
 	/* some global key actions */
 
-	KeyboardTarget::add_action ("close-dialog", slot (*this, &Keyboard::close_current_dialog));
+	KeyboardTarget::add_action ("close-dialog", mem_fun(*this, &Keyboard::close_current_dialog));
 
 	XMLNode* node = ARDOUR_UI::instance()->keyboard_settings();
 	set_state (*node);
@@ -849,17 +849,17 @@ Keyboard::register_target (KeyboardTarget *kt)
 		return;
 	}
 
-	kt->window().enter_notify_event.connect (bind (slot (*this, &Keyboard::enter_window), kt));
-	kt->window().leave_notify_event.connect (slot (*this, &Keyboard::leave_window));
+	kt->window().enter_notify_event.connect (bind (mem_fun(*this, &Keyboard::enter_window), kt));
+	kt->window().leave_notify_event.connect (mem_fun(*this, &Keyboard::leave_window));
 
-	kt->GoingAway.connect (bind (slot (*this, &Keyboard::maybe_unset_target), kt));
-	kt->Hiding.connect (bind (slot (*this, &Keyboard::maybe_unset_target), kt));
+	kt->GoingAway.connect (bind (mem_fun(*this, &Keyboard::maybe_unset_target), kt));
+	kt->Hiding.connect (bind (mem_fun(*this, &Keyboard::maybe_unset_target), kt));
 }
 
 void
 Keyboard::set_current_dialog (ArdourDialog* dialog)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Keyboard::set_current_dialog), dialog));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Keyboard::set_current_dialog), dialog));
 	
 	current_dialog = dialog;
 
@@ -868,13 +868,13 @@ Keyboard::set_current_dialog (ArdourDialog* dialog)
 		if (find (known_dialogs.begin(), known_dialogs.end(), dialog) == known_dialogs.end()) {
 			
 			current_dialog->GoingAway.connect 
-				(bind (slot (*this, &Keyboard::set_current_dialog), 
+				(bind (mem_fun(*this, &Keyboard::set_current_dialog), 
 				       reinterpret_cast<ArdourDialog *>(0)));
 			current_dialog->Hiding.connect 
-				(bind (slot (*this, &Keyboard::set_current_dialog), 
+				(bind (mem_fun(*this, &Keyboard::set_current_dialog), 
 				       reinterpret_cast<ArdourDialog *>(0)));
 			
-			current_dialog->unmap_event.connect (slot (*this, &Keyboard::current_dialog_vanished));
+			current_dialog->unmap_event.connect (mem_fun(*this, &Keyboard::current_dialog_vanished));
 			
 			known_dialogs.push_back (dialog);
 		}

@@ -254,7 +254,7 @@ AutomationLine::AutomationLine (string name, TimeAxisView& tv, GtkCanvasItem* pa
 	gtk_object_set_data (GTK_OBJECT(line), "line", this);
 	gtk_signal_connect (GTK_OBJECT(line), "event", (GtkSignalFunc) line_handler, this);
 
-	alist.StateChanged.connect (slot (*this, &AutomationLine::list_changed));
+	alist.StateChanged.connect (mem_fun(*this, &AutomationLine::list_changed));
 }
 
 AutomationLine::~AutomationLine ()
@@ -273,7 +273,7 @@ AutomationLine::queue_reset ()
 {
 	if (!update_pending) {
 		update_pending = true;
-		Gtkmm2ext::UI::instance()->call_slot (slot (*this, &AutomationLine::reset));
+		Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &AutomationLine::reset));
 	}
 }
 

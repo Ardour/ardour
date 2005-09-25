@@ -193,7 +193,7 @@ AudioRegionView::AudioRegionView (GtkCanvasGroup *parent, AudioTimeAxisView &tv,
 	fade_in_active_changed ();
 	fade_out_active_changed ();
 
-	region.StateChanged.connect (slot (*this, &AudioRegionView::region_changed));
+	region.StateChanged.connect (mem_fun(*this, &AudioRegionView::region_changed));
 
 	gtk_signal_connect (GTK_OBJECT(group), "event",
 			    (GtkSignalFunc) PublicEditor::canvas_region_view_event,
@@ -274,7 +274,7 @@ AudioRegionView::lock_toggle ()
 void
 AudioRegionView::region_changed (Change what_changed)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &AudioRegionView::region_changed), what_changed));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &AudioRegionView::region_changed), what_changed));
 
 	if (what_changed & BoundsChanged) {
 		region_resized (what_changed);
@@ -394,7 +394,7 @@ AudioRegionView::fade_out_active_changed ()
 void
 AudioRegionView::region_scale_amplitude_changed ()
 {
-	ENSURE_GUI_THREAD (slot (*this, &AudioRegionView::region_scale_amplitude_changed));
+	ENSURE_GUI_THREAD (mem_fun(*this, &AudioRegionView::region_scale_amplitude_changed));
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// force a reload of the cache
@@ -1036,7 +1036,7 @@ AudioRegionView::create_waves ()
 		wave_caches.push_back (gtk_canvas_waveview_cache_new ());
 
 		if (wait_for_waves) {
-			if (region.source(n).peaks_ready (bind (slot (*this, &AudioRegionView::peaks_ready_handler), n))) {
+			if (region.source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n))) {
 				create_one_wave (n, true);
 			} else {
 				create_zero_line = false;
@@ -1136,7 +1136,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
-	Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &AudioRegionView::create_one_wave), which, false));
+	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
 }
 
 void
@@ -1172,9 +1172,9 @@ AudioRegionView::add_gain_point_event (GtkCanvasItem *item, GdkEvent *ev)
 
 
 	if (!region.envelope_active()) {
-		trackview.session().add_undo( bind( slot(region, &AudioRegion::set_envelope_active), false) );
+		trackview.session().add_undo( bind( mem_fun(region, &AudioRegion::set_envelope_active), false) );
 		region.set_envelope_active(true);
-		trackview.session().add_redo( bind( slot(region, &AudioRegion::set_envelope_active), true) );
+		trackview.session().add_redo( bind( mem_fun(region, &AudioRegion::set_envelope_active), true) );
 	}
 
 	region.envelope().add (fx, y);
@@ -1321,7 +1321,7 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 	ghost->set_duration (region.length() / samples_per_unit);
 	ghosts.push_back (ghost);
 
-	ghost->GoingAway.connect (slot (*this, &AudioRegionView::remove_ghost));
+	ghost->GoingAway.connect (mem_fun(*this, &AudioRegionView::remove_ghost));
 
 	return ghost;
 }

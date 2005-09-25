@@ -86,11 +86,11 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 	*/
 
 	name_entry.set_name ("EditorTrackNameDisplay");
-	name_entry.button_release_event.connect (slot (*this, &TimeAxisView::name_entry_button_release));
-	name_entry.button_press_event.connect (slot (*this, &TimeAxisView::name_entry_button_press));
+	name_entry.button_release_event.connect (mem_fun (*this, &TimeAxisView::name_entry_button_release));
+	name_entry.button_press_event.connect (mem_fun (*this, &TimeAxisView::name_entry_button_press));
 	
-	name_entry.signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
-	name_entry.signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
+	name_entry.signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
+	name_entry.signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
 
 	Gtkmm2ext::set_size_request_to_display_given_text (name_entry, N_("gTortnam"), 10, 10); // just represents a short name
 
@@ -127,7 +127,7 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 	controls_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	controls_ebox.set_flags (Gtk::CAN_FOCUS);
 
-	controls_ebox.button_release_event.connect (slot (*this, &TimeAxisView::controls_ebox_button_release));
+	controls_ebox.button_release_event.connect (mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
 	
 	controls_lhs_pad.set_name ("TimeAxisViewControlsPadding");
 	controls_hbox.pack_start (controls_lhs_pad,false,false);
@@ -443,12 +443,12 @@ TimeAxisView::build_size_menu ()
 	size_menu->set_name ("ArdourContextMenu");
 	MenuList& items = size_menu->items();
 	
-	items.push_back (MenuElem (_("Largest"), bind (slot (*this, &TimeAxisView::set_height), Largest)));
-	items.push_back (MenuElem (_("Large"), bind (slot (*this, &TimeAxisView::set_height), Large)));
-	items.push_back (MenuElem (_("Larger"), bind (slot (*this, &TimeAxisView::set_height), Larger)));
-	items.push_back (MenuElem (_("Normal"), bind (slot (*this, &TimeAxisView::set_height), Normal)));
-	items.push_back (MenuElem (_("Smaller"), bind (slot (*this, &TimeAxisView::set_height), Smaller)));
-	items.push_back (MenuElem (_("Small"), bind (slot (*this, &TimeAxisView::set_height), Small)));
+	items.push_back (MenuElem (_("Largest"), bind (mem_fun (*this, &TimeAxisView::set_height), Largest)));
+	items.push_back (MenuElem (_("Large"), bind (mem_fun (*this, &TimeAxisView::set_height), Large)));
+	items.push_back (MenuElem (_("Larger"), bind (mem_fun (*this, &TimeAxisView::set_height), Larger)));
+	items.push_back (MenuElem (_("Normal"), bind (mem_fun (*this, &TimeAxisView::set_height), Normal)));
+	items.push_back (MenuElem (_("Smaller"), bind (mem_fun (*this, &TimeAxisView::set_height), Smaller)));
+	items.push_back (MenuElem (_("Small"), bind (mem_fun (*this, &TimeAxisView::set_height), Small)));
 }
 
 void

@@ -46,7 +46,7 @@ using namespace Gtkmm2ext;
 void
 Editor::handle_new_named_selection ()
 {
-	ARDOUR_UI::instance()->call_slot (slot (*this, &Editor::redisplay_named_selections));
+	ARDOUR_UI::instance()->call_slot (mem_fun(*this, &Editor::redisplay_named_selections));
 }
 
 void
@@ -115,7 +115,7 @@ Editor::name_selection ()
 	ArdourPrompter p;
 
 	p.set_prompt (_("name for chunk:"));
-	p.done.connect (slot (*this, &Editor::named_selection_name_chosen));
+	p.done.connect (mem_fun(*this, &Editor::named_selection_name_chosen));
 	p.change_labels (_("Create chunk"), _("Forget it"));
 	p.show_all ();
 

@@ -93,7 +93,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
  	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
  	scroller_base.set_name ("MixerWindow");
- 	scroller_base.button_release_event.connect (slot (*this, &Mixer_UI::strip_scroller_button_release));
+ 	scroller_base.button_release_event.connect (mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
 	// add as last item of strip packer
 	strip_packer.pack_end (scroller_base, true, true);
 
@@ -168,11 +168,11 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	list_hpane.add1(list_vpacker);
 	list_hpane.add2(global_hpacker);
 
-	rhs_pane1.size_allocate.connect_after (bind (slot (*this, &Mixer_UI::pane_allocation_handler), 
+	rhs_pane1.size_allocate.connect_after (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 
 						      static_cast<Gtk::Paned*> (&rhs_pane1)));
-	rhs_pane2.size_allocate.connect_after (bind (slot (*this, &Mixer_UI::pane_allocation_handler), 
+	rhs_pane2.size_allocate.connect_after (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 
 						      static_cast<Gtk::Paned*> (&rhs_pane2)));
-	list_hpane.size_allocate.connect_after (bind (slot (*this, &Mixer_UI::pane_allocation_handler), 
+	list_hpane.size_allocate.connect_after (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 
 						      static_cast<Gtk::Paned*> (&list_hpane)));
 
 
@@ -180,9 +180,9 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	rhs_pane2.set_data ("collapse-direction", (gpointer) 0);
 	list_hpane.set_data ("collapse-direction", (gpointer) 1);
 
-	rhs_pane1.button_release_event.connect (bind (slot (pane_handler), static_cast<Paned*>(&rhs_pane1)));
-	rhs_pane2.button_release_event.connect (bind (slot (pane_handler), static_cast<Paned*>(&rhs_pane2)));
-	list_hpane.button_release_event.connect (bind (slot (pane_handler), static_cast<Paned*>(&list_hpane)));
+	rhs_pane1.button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane1)));
+	rhs_pane2.button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane2)));
+	list_hpane.button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&list_hpane)));
 	
 	global_vpacker.pack_start (list_hpane, true, true);
 
@@ -191,29 +191,29 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	set_title (_("ardour: mixer"));
 	set_wmclass (_("ardour_mixer"), "Ardour");
 
-	delete_event.connect (bind (slot (just_hide_it), 
+	delete_event.connect (bind (ptr_fun (just_hide_it), 
 						    static_cast<Gtk::Window *>(this)));
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	snapshot_display.select_row.connect (slot (*this, &Mixer_UI::snapshot_display_selected));
+	snapshot_display.select_row.connect (mem_fun(*this, &Mixer_UI::snapshot_display_selected));
 
-	track_display_list.select_row.connect (slot (*this, &Mixer_UI::track_display_selected));
-	track_display_list.unselect_row.connect (slot (*this, &Mixer_UI::track_display_unselected));
-	track_display_list.row_move.connect (slot (*this, &Mixer_UI::queue_track_display_reordered));
-	track_display_list.click_column.connect (slot (*this, &Mixer_UI::track_column_click));
+	track_display_list.select_row.connect (mem_fun(*this, &Mixer_UI::track_display_selected));
+	track_display_list.unselect_row.connect (mem_fun(*this, &Mixer_UI::track_display_unselected));
+	track_display_list.row_move.connect (mem_fun(*this, &Mixer_UI::queue_track_display_reordered));
+	track_display_list.click_column.connect (mem_fun(*this, &Mixer_UI::track_column_click));
 
-	group_list_button.signal_clicked().connect (slot (*this, &Mixer_UI::group_list_button_clicked));
-	group_list.button_press_event.connect (slot (*this, &Mixer_UI::group_list_button_press_event));
-	group_list.select_row.connect (slot (*this, &Mixer_UI::group_selected));
-	group_list.unselect_row.connect (slot (*this, &Mixer_UI::group_unselected));
+	group_list_button.signal_clicked().connect (mem_fun(*this, &Mixer_UI::group_list_button_clicked));
+	group_list.button_press_event.connect (mem_fun(*this, &Mixer_UI::group_list_button_press_event));
+	group_list.select_row.connect (mem_fun(*this, &Mixer_UI::group_selected));
+	group_list.unselect_row.connect (mem_fun(*this, &Mixer_UI::group_unselected));
 
 	_plugin_selector = new PluginSelector (PluginManager::the_manager());
-	_plugin_selector->delete_event.connect (bind (slot (just_hide_it), 
+	_plugin_selector->delete_event.connect (bind (ptr_fun (just_hide_it), 
 						     static_cast<Window *> (_plugin_selector)));
 
-	configure_event.connect (slot (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
+	configure_event.connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 
-	_selection.RoutesChanged.connect (slot (*this, &Mixer_UI::follow_strip_selection));
+	_selection.RoutesChanged.connect (mem_fun(*this, &Mixer_UI::follow_strip_selection));
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -244,7 +244,7 @@ Mixer_UI::show_window ()
 void
 Mixer_UI::add_strip (Route* route)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Mixer_UI::add_strip), route));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_strip), route));
 	
 	MixerStrip* strip;
 	
@@ -270,10 +270,10 @@ Mixer_UI::add_strip (Route* route)
 		track_display_list.rows().back().select ();
 	}
 	
-	route->name_changed.connect (bind (slot (*this, &Mixer_UI::strip_name_changed), strip));
-	strip->GoingAway.connect (bind (slot (*this, &Mixer_UI::remove_strip), strip));
+	route->name_changed.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
+	strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
 
-	strip->button_release_event.connect (bind (slot (*this, &Mixer_UI::strip_button_release_event), strip));
+	strip->button_release_event.connect (bind (mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 
 //	if (width() < gdk_screen_width()) {
 //		set_size_request (width() + (_strip_width == Wide ? 75 : 50), height());
@@ -283,7 +283,7 @@ Mixer_UI::add_strip (Route* route)
 void
 Mixer_UI::remove_strip (MixerStrip* strip)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Mixer_UI::remove_strip), strip));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
 	
 	CList_Helpers::RowList::iterator ri;
 	list<MixerStrip *>::iterator i;
@@ -350,13 +350,13 @@ Mixer_UI::connect_to_session (Session* sess)
 	
 	track_display_list.thaw ();
 
-	session->going_away.connect (slot (*this, &Mixer_UI::disconnect_from_session));
-	session->RouteAdded.connect (slot (*this, &Mixer_UI::add_strip));
-	session->mix_group_added.connect (slot (*this, &Mixer_UI::add_mix_group));
+	session->going_away.connect (mem_fun(*this, &Mixer_UI::disconnect_from_session));
+	session->RouteAdded.connect (mem_fun(*this, &Mixer_UI::add_strip));
+	session->mix_group_added.connect (mem_fun(*this, &Mixer_UI::add_mix_group));
 
 	session->foreach_mix_group(this, &Mixer_UI::add_mix_group);
 	
-	session->StateSaved.connect (slot (*this, &Mixer_UI::session_state_saved));
+	session->StateSaved.connect (mem_fun(*this, &Mixer_UI::session_state_saved));
 	redisplay_snapshots ();
 	
 	_plugin_selector->set_session (session);
@@ -367,7 +367,7 @@ Mixer_UI::connect_to_session (Session* sess)
 void
 Mixer_UI::disconnect_from_session ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &Mixer_UI::disconnect_from_session));
+	ENSURE_GUI_THREAD(mem_fun(*this, &Mixer_UI::disconnect_from_session));
 	
 	group_list.clear ();
 	set_title (_("ardour: mixer"));
@@ -520,8 +520,8 @@ Mixer_UI::hide_strip (MixerStrip* ms)
 gint
 Mixer_UI::start_updating ()
 {
-	screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (slot (*this, &Mixer_UI::update_strips));
-	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (slot (*this, &Mixer_UI::fast_update_strips));
+	screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::update_strips));
+	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::fast_update_strips));
 	return 0;
 }
 
@@ -624,7 +624,7 @@ Mixer_UI::queue_track_display_reordered (gint arg1, gint arg2)
 	   is complete.
 	*/
 
-	Main::idle.connect (slot (*this, &Mixer_UI::track_display_reordered));
+	Main::idle.connect (mem_fun(*this, &Mixer_UI::track_display_reordered));
 }
 
 int
@@ -667,19 +667,19 @@ Mixer_UI::build_track_menu ()
 	MenuList& items = track_menu->items();
 	track_menu->set_name ("ArdourContextMenu");
 	
-	items.push_back (MenuElem (_("Show All"), slot (*this, &Mixer_UI::select_all_strips)));
-	items.push_back (MenuElem (_("Hide All"), slot (*this, &Mixer_UI::unselect_all_strips)));
-	items.push_back (MenuElem (_("Show All AudioTrack MixerStrips"), slot (*this, &Mixer_UI::select_all_audiotrack_strips)));
-	items.push_back (MenuElem (_("Hide All AudioTrack MixerStrips"), slot (*this, &Mixer_UI::unselect_all_audiotrack_strips)));
-	items.push_back (MenuElem (_("Show All AudioBus MixerStrips"), slot (*this, &Mixer_UI::select_all_audiobus_strips)));
-	items.push_back (MenuElem (_("Hide All AudioBus MixerStrips"), slot (*this, &Mixer_UI::unselect_all_audiobus_strips)));
+	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Mixer_UI::select_all_strips)));
+	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Mixer_UI::unselect_all_strips)));
+	items.push_back (MenuElem (_("Show All AudioTrack MixerStrips"), mem_fun(*this, &Mixer_UI::select_all_audiotrack_strips)));
+	items.push_back (MenuElem (_("Hide All AudioTrack MixerStrips"), mem_fun(*this, &Mixer_UI::unselect_all_audiotrack_strips)));
+	items.push_back (MenuElem (_("Show All AudioBus MixerStrips"), mem_fun(*this, &Mixer_UI::select_all_audiobus_strips)));
+	items.push_back (MenuElem (_("Hide All AudioBus MixerStrips"), mem_fun(*this, &Mixer_UI::unselect_all_audiobus_strips)));
 
 }
 
 void
 Mixer_UI::strip_name_changed (void* src, MixerStrip* mx)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Mixer_UI::strip_name_changed), src, mx));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::strip_name_changed), src, mx));
 	
 	CList_Helpers::RowList::iterator i;
 
@@ -796,7 +796,7 @@ Mixer_UI::group_unselected (gint row, gint col, GdkEvent* ev)
 void
 Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Mixer_UI::group_flags_changed), src, group));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::group_flags_changed), src, group));
 	
 	if (src != this) {
 		// select row
@@ -826,7 +826,7 @@ void
 Mixer_UI::add_mix_group (RouteGroup* group)
 
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &Mixer_UI::add_mix_group), group));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_mix_group), group));
 	
 	list<string> names;
 
@@ -840,7 +840,7 @@ Mixer_UI::add_mix_group (RouteGroup* group)
 
 	group_flags_changed (0, group);
 
-	group->FlagsChanged.connect (bind (slot (*this, &Mixer_UI::group_flags_changed), group));
+	group->FlagsChanged.connect (bind (mem_fun(*this, &Mixer_UI::group_flags_changed), group));
 }
 
 void
@@ -877,7 +877,7 @@ Mixer_UI::redisplay_snapshots ()
 void
 Mixer_UI::session_state_saved (string snap_name)
 {
-	ENSURE_GUI_THREAD (bind (slot (*this, &Mixer_UI::session_state_saved), snap_name));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Mixer_UI::session_state_saved), snap_name));
 	redisplay_snapshots ();
 }
 

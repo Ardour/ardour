@@ -87,15 +87,15 @@ IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can
 	vbox.pack_start (_selector);
 	vbox.pack_start (button_box, false, false);
 
-	ok_button.signal_clicked().connect (slot (*this, &IOSelectorWindow::accept));
-	cancel_button.signal_clicked().connect (slot (*this, &IOSelectorWindow::cancel));
-	rescan_button.signal_clicked().connect (slot (*this, &IOSelectorWindow::rescan));
+	ok_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::accept));
+	cancel_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::cancel));
+	rescan_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::rescan));
 
 	set_title (title);
 	set_position (Gtk::WIN_POS_MOUSE);
 	add (vbox);
 
-	delete_event.connect (bind (slot (just_hide_it), reinterpret_cast<Window *> (this)));
+	delete_event.connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }
 
 IOSelectorWindow::~IOSelectorWindow()
@@ -234,18 +234,18 @@ IOSelector::IOSelector (Session& sess, IO& ior, bool input)
 	rescan();
 	display_ports ();
 
-	clear_connections_button.signal_clicked().connect (slot (*this, &IOSelector::clear_connections));
+	clear_connections_button.signal_clicked().connect (mem_fun(*this, &IOSelector::clear_connections));
 
-	add_port_button.signal_clicked().connect (slot (*this, &IOSelector::add_port));
-	remove_port_button.signal_clicked().connect (slot (*this, &IOSelector::remove_port));
+	add_port_button.signal_clicked().connect (mem_fun(*this, &IOSelector::add_port));
+	remove_port_button.signal_clicked().connect (mem_fun(*this, &IOSelector::remove_port));
 
 	if (for_input) {
-		io.input_changed.connect (slot (*this, &IOSelector::ports_changed));
+		io.input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	} else {
-		io.output_changed.connect (slot (*this, &IOSelector::ports_changed));
+		io.output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	}
 
-	io.name_changed.connect (slot (*this, &IOSelector::name_changed));
+	io.name_changed.connect (mem_fun(*this, &IOSelector::name_changed));
 }
 
 IOSelector::~IOSelector ()
@@ -255,7 +255,7 @@ IOSelector::~IOSelector ()
 void
 IOSelector::name_changed (void* src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &IOSelector::name_changed), src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &IOSelector::name_changed), src));
 	
 	display_ports ();
 }
@@ -350,7 +350,7 @@ IOSelector::rescan ()
 		}
 
 		client_port_display->columns_autosize ();
-		client_port_display->select_row.connect (bind (slot (*this, &IOSelector::port_selection_handler), client_port_display));
+		client_port_display->select_row.connect (bind (mem_fun(*this, &IOSelector::port_selection_handler), client_port_display));
 
 		Label *tab_label = manage (new Label);
 
@@ -361,7 +361,7 @@ IOSelector::rescan ()
 	}
 
 	notebook.set_page (current_page);
-	notebook.show.connect (bind (slot (notebook, &Notebook::set_page), current_page));
+	notebook.show.connect (bind (mem_fun (notebook, &Notebook::set_page), current_page));
 	selector_box.show_all ();
 }	
 
@@ -447,7 +447,7 @@ IOSelector::display_ports ()
 				}
 				
 				B->button_release_event.connect 
-					(bind (slot (*this, &IOSelector::port_column_button_release), clist));
+					(bind (mem_fun(*this, &IOSelector::port_column_button_release), clist));
 			
 			} else {
 
@@ -461,7 +461,7 @@ IOSelector::display_ports ()
 				}
 
 				B->button_release_event.connect 
-					(bind (slot (*this, &IOSelector::port_column_button_release), clist));
+					(bind (mem_fun(*this, &IOSelector::port_column_button_release), clist));
 			}
 
 			clist->set_name ("IOSelectorPortList");
@@ -488,7 +488,7 @@ IOSelector::display_ports ()
 			}
 
 			clist->columns_autosize ();
-			clist->button_release_event.connect (bind (slot (*this, &IOSelector::connection_click), clist));
+			clist->button_release_event.connect (bind (mem_fun(*this, &IOSelector::connection_click), clist));
 		}
 
 		port_box.show_all ();
@@ -545,7 +545,7 @@ IOSelector::port_selection_handler (gint row, gint col, GdkEvent *ev, Gtk::CList
 void
 IOSelector::ports_changed (IOChange change, void *src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &IOSelector::ports_changed), change, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &IOSelector::ports_changed), change, src));
 	
 	display_ports ();
 }
@@ -646,7 +646,7 @@ IOSelector::port_column_button_release (GdkEventButton *event, CList *clist)
 		   for whom we are handling an event. not good.
 		*/
 
-		Gtk::Main::idle.connect (bind (slot (*this, &IOSelector::remove_port_when_idle), port));
+		Gtk::Main::idle.connect (bind (mem_fun(*this, &IOSelector::remove_port_when_idle), port));
 
 	} else {
 		select_clist(clist);
@@ -812,18 +812,18 @@ PortInsertWindow::PortInsertWindow (Session& sess, PortInsert& pi, bool can_canc
 
 	add (vbox);
 
-	ok_button.signal_clicked().connect (slot (*this, &PortInsertWindow::accept));
-	cancel_button.signal_clicked().connect (slot (*this, &PortInsertWindow::cancel));
-	rescan_button.signal_clicked().connect (slot (*this, &PortInsertWindow::rescan));
+	ok_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::accept));
+	cancel_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::cancel));
+	rescan_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::rescan));
 
-	delete_event.connect (bind (slot (just_hide_it), reinterpret_cast<Window *> (this)));	
-	pi.GoingAway.connect (slot (*this, &PortInsertWindow::plugin_going_away));
+	delete_event.connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));	
+	pi.GoingAway.connect (mem_fun(*this, &PortInsertWindow::plugin_going_away));
 }
 
 void
 PortInsertWindow::plugin_going_away (ARDOUR::Redirect* ignored)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &PortInsertWindow::plugin_going_away), ignored));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PortInsertWindow::plugin_going_away), ignored));
 	
 	delete_when_idle (this);
 }

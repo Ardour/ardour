@@ -94,20 +94,20 @@ Editor::initialize_rulers ()
 	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	smpte_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
-	bbt_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
-	frames_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
-	minsec_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
+	smpte_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	bbt_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	frames_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	minsec_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
 
-	smpte_ruler->button_press_event.connect (slot (*this, &Editor::ruler_button_press));
-	bbt_ruler->button_press_event.connect (slot (*this, &Editor::ruler_button_press));
-	frames_ruler->button_press_event.connect (slot (*this, &Editor::ruler_button_press));
-	minsec_ruler->button_press_event.connect (slot (*this, &Editor::ruler_button_press));
+	smpte_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	bbt_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	frames_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	minsec_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
 	
-	smpte_ruler->motion_notify_event.connect (slot (*this, &Editor::ruler_mouse_motion));
-	bbt_ruler->motion_notify_event.connect (slot (*this, &Editor::ruler_mouse_motion));
-	frames_ruler->motion_notify_event.connect (slot (*this, &Editor::ruler_mouse_motion));
-	minsec_ruler->motion_notify_event.connect (slot (*this, &Editor::ruler_mouse_motion));
+	smpte_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	bbt_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	frames_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	minsec_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	
 	visible_timebars = 7; /* 4 here, 3 in time_canvas */
 	ruler_pressed_button = 0;
@@ -308,13 +308,13 @@ Editor::popup_ruler_menu (jack_nframes_t where, ItemType t)
 
 	switch (t) {
 	case MarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New location marker"), bind ( slot (*this, &Editor::mouse_add_new_marker), where)));
-		ruler_items.push_back (MenuElem (_("Clear all locations"), slot (*this, &Editor::clear_markers)));
+		ruler_items.push_back (MenuElem (_("New location marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where)));
+		ruler_items.push_back (MenuElem (_("Clear all locations"), mem_fun(*this, &Editor::clear_markers)));
 		ruler_items.push_back (SeparatorElem ());
 		break;
 	case RangeMarkerBarItem:
 		//ruler_items.push_back (MenuElem (_("New Range")));
-		ruler_items.push_back (MenuElem (_("Clear all ranges"), slot (*this, &Editor::clear_ranges)));
+		ruler_items.push_back (MenuElem (_("Clear all ranges"), mem_fun(*this, &Editor::clear_ranges)));
 		ruler_items.push_back (SeparatorElem ());
 
 		break;
@@ -323,13 +323,13 @@ Editor::popup_ruler_menu (jack_nframes_t where, ItemType t)
 		break;
 		
 	case TempoBarItem:
-		ruler_items.push_back (MenuElem (_("New Tempo"), bind ( slot (*this, &Editor::mouse_add_new_tempo_event), where)));
+		ruler_items.push_back (MenuElem (_("New Tempo"), bind ( mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
 		ruler_items.push_back (MenuElem (_("Clear tempo")));
 		ruler_items.push_back (SeparatorElem ());
 		break;
 
 	case MeterBarItem:
-		ruler_items.push_back (MenuElem (_("New Meter"), bind ( slot (*this, &Editor::mouse_add_new_meter_event), where)));
+		ruler_items.push_back (MenuElem (_("New Meter"), bind ( mem_fun(*this, &Editor::mouse_add_new_meter_event), where)));
 		ruler_items.push_back (MenuElem (_("Clear meter")));
 		ruler_items.push_back (SeparatorElem ());
 		break;
@@ -338,25 +338,25 @@ Editor::popup_ruler_menu (jack_nframes_t where, ItemType t)
 		break;
 	}
 	
-	ruler_items.push_back (CheckMenuElem (_("Min:Secs"), bind (slot (*this, &Editor::ruler_toggled), (int)ruler_metric_minsec)));
+	ruler_items.push_back (CheckMenuElem (_("Min:Secs"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_minsec)));
 	mitem = (CheckMenuItem *) ruler_items.back(); 
 	if (ruler_shown[ruler_metric_minsec]) {
 		mitem->set_active(true);
 	}
 
-	ruler_items.push_back (CheckMenuElem (X_("SMPTE"), bind (slot (*this, &Editor::ruler_toggled), (int)ruler_metric_smpte)));
+	ruler_items.push_back (CheckMenuElem (X_("SMPTE"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte)));
 	mitem = (CheckMenuItem *) ruler_items.back(); 
 	if (ruler_shown[ruler_metric_smpte]) {
 		mitem->set_active(true);
 	}
 
-	ruler_items.push_back (CheckMenuElem (_("Frames"), bind (slot (*this, &Editor::ruler_toggled), (int)ruler_metric_frames)));
+	ruler_items.push_back (CheckMenuElem (_("Frames"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_frames)));
 	mitem = (CheckMenuItem *) ruler_items.back(); 
 	if (ruler_shown[ruler_metric_frames]) {
 		mitem->set_active(true);
 	}
 
-	ruler_items.push_back (CheckMenuElem (_("Bars:Beats"), bind (slot (*this, &Editor::ruler_toggled), (int)ruler_metric_bbt)));
+	ruler_items.push_back (CheckMenuElem (_("Bars:Beats"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_bbt)));
 	mitem = (CheckMenuItem *) ruler_items.back(); 
 	if (ruler_shown[ruler_metric_bbt]) {
 		mitem->set_active(true);
@@ -364,31 +364,31 @@ Editor::popup_ruler_menu (jack_nframes_t where, ItemType t)
 
 	ruler_items.push_back (SeparatorElem ());
 
-	ruler_items.push_back (CheckMenuElem (_("Meter"), bind (slot (*this, &Editor::ruler_toggled), (int)ruler_time_meter)));
+	ruler_items.push_back (CheckMenuElem (_("Meter"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_meter)));
 	mitem = (CheckMenuItem *) ruler_items.back(); 
 	if (ruler_shown[ruler_time_meter]) {
 		mitem->set_active(true);
 	}
 
-	ruler_items.push_back (CheckMenuElem (_("Tempo"), bind (slot (*this, &Editor::ruler_toggled), (int)ruler_time_tempo)));
+	ruler_items.push_back (CheckMenuElem (_("Tempo"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_tempo)));
 	mitem = (CheckMenuItem *) ruler_items.back(); 
 	if (ruler_shown[ruler_time_tempo]) {
 		mitem->set_active(true);
 	}
 
-	ruler_items.push_back (CheckMenuElem (_("Location Markers"), bind (slot (*this, &Editor::ruler_toggled), (int)ruler_time_marker)));
+	ruler_items.push_back (CheckMenuElem (_("Location Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_marker)));
 	mitem = (CheckMenuItem *) ruler_items.back(); 
 	if (ruler_shown[ruler_time_marker]) {
 		mitem->set_active(true);
 	}
 
- 	ruler_items.push_back (CheckMenuElem (_("Range Markers"), bind (slot (*this, &Editor::ruler_toggled), (int)ruler_time_range_marker)));
+ 	ruler_items.push_back (CheckMenuElem (_("Range Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_range_marker)));
  	mitem = (CheckMenuItem *) ruler_items.back(); 
  	if (ruler_shown[ruler_time_range_marker]) {
  		mitem->set_active(true);
  	}
 
- 	ruler_items.push_back (CheckMenuElem (_("Loop/Punch Ranges"), bind (slot (*this, &Editor::ruler_toggled), (int)ruler_time_transport_marker)));
+ 	ruler_items.push_back (CheckMenuElem (_("Loop/Punch Ranges"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_transport_marker)));
  	mitem = (CheckMenuItem *) ruler_items.back(); 
  	if (ruler_shown[ruler_time_transport_marker]) {
  		mitem->set_active(true);
@@ -557,20 +557,20 @@ Editor::update_ruler_visibility ()
 	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	smpte_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
-	bbt_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
-	frames_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
-	minsec_ruler->button_release_event.connect (slot (*this, &Editor::ruler_button_release));
+	smpte_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	bbt_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	frames_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	minsec_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
 
-	smpte_ruler->button_press_event.connect (slot (*this, &Editor::ruler_button_press));
-	bbt_ruler->button_press_event.connect (slot (*this, &Editor::ruler_button_press));
-	frames_ruler->button_press_event.connect (slot (*this, &Editor::ruler_button_press));
-	minsec_ruler->button_press_event.connect (slot (*this, &Editor::ruler_button_press));
+	smpte_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	bbt_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	frames_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	minsec_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
 	
-	smpte_ruler->motion_notify_event.connect (slot (*this, &Editor::ruler_mouse_motion));
-	bbt_ruler->motion_notify_event.connect (slot (*this, &Editor::ruler_mouse_motion));
-	frames_ruler->motion_notify_event.connect (slot (*this, &Editor::ruler_mouse_motion));
-	minsec_ruler->motion_notify_event.connect (slot (*this, &Editor::ruler_mouse_motion));
+	smpte_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	bbt_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	frames_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	minsec_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 
 	
 	if (ruler_shown[ruler_metric_minsec]) {
@@ -698,7 +698,7 @@ Editor::update_ruler_visibility ()
 void
 Editor::update_just_smpte ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &Editor::update_just_smpte));
+	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::update_just_smpte));
 	
 	if (session == 0) {
 		return;

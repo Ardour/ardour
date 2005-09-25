@@ -87,9 +87,9 @@ ConnectionEditor::ConnectionEditor ()
 	cancel_button.hide();
 	button_frame.add (button_box);
 
-	ok_button.signal_clicked().connect (slot (*this, &ConnectionEditor::accept));
-	cancel_button.signal_clicked().connect (slot (*this, &ConnectionEditor::cancel));
-	cancel_button.signal_clicked().connect (slot (*this, &ConnectionEditor::rescan));
+	ok_button.signal_clicked().connect (mem_fun(*this, &ConnectionEditor::accept));
+	cancel_button.signal_clicked().connect (mem_fun(*this, &ConnectionEditor::cancel));
+	cancel_button.signal_clicked().connect (mem_fun(*this, &ConnectionEditor::rescan));
 
 	notebook.set_name ("ConnectionEditorNotebook");
 	notebook.set_size_request (-1, 125);
@@ -140,13 +140,13 @@ ConnectionEditor::ConnectionEditor ()
 	input_connection_display.set_selection_mode (GTK_SELECTION_SINGLE);
 	input_connection_display.set_size_request (80, -1);
 	input_connection_display.set_name ("ConnectionEditorConnectionList");
-	input_connection_display.select_row.connect (bind (slot (*this, &ConnectionEditor::connection_selected), true));
+	input_connection_display.select_row.connect (bind (mem_fun(*this, &ConnectionEditor::connection_selected), true));
 
 	output_connection_display.set_shadow_type (Gtk::SHADOW_IN);
 	output_connection_display.set_selection_mode (GTK_SELECTION_SINGLE);
 	output_connection_display.set_size_request (80, -1);
 	output_connection_display.set_name ("ConnectionEditorConnectionList");
-	output_connection_display.select_row.connect (bind (slot (*this, &ConnectionEditor::connection_selected), false));
+	output_connection_display.select_row.connect (bind (mem_fun(*this, &ConnectionEditor::connection_selected), false));
 
 	input_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	output_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -186,13 +186,13 @@ ConnectionEditor::ConnectionEditor ()
 	set_title (_("ardour: connections"));
 	add (main_vbox);
 
-	delete_event.connect (bind (slot (just_hide_it), reinterpret_cast<Window *> (this)));
+	delete_event.connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 
-	clear_button.signal_clicked().connect (slot (*this, &ConnectionEditor::clear));
-	add_port_button.signal_clicked().connect (slot (*this, &ConnectionEditor::add_port));
-	new_input_connection_button.signal_clicked().connect (bind (slot (*this, &ConnectionEditor::new_connection), true));
-	new_output_connection_button.signal_clicked().connect (bind (slot (*this, &ConnectionEditor::new_connection), false));
-	delete_connection_button.signal_clicked().connect (slot (*this, &ConnectionEditor::delete_connection));
+	clear_button.signal_clicked().connect (mem_fun(*this, &ConnectionEditor::clear));
+	add_port_button.signal_clicked().connect (mem_fun(*this, &ConnectionEditor::add_port));
+	new_input_connection_button.signal_clicked().connect (bind (mem_fun(*this, &ConnectionEditor::new_connection), true));
+	new_output_connection_button.signal_clicked().connect (bind (mem_fun(*this, &ConnectionEditor::new_connection), false));
+	delete_connection_button.signal_clicked().connect (mem_fun(*this, &ConnectionEditor::delete_connection));
 }
 
 ConnectionEditor::~ConnectionEditor()
@@ -207,8 +207,8 @@ ConnectionEditor::set_session (Session *s)
 		ArdourDialog::set_session (s);
 		
 		if (session) {
-			session->ConnectionAdded.connect (slot (*this, &ConnectionEditor::proxy_add_connection_and_select));
-			session->ConnectionRemoved.connect (slot (*this, &ConnectionEditor::proxy_remove_connection));
+			session->ConnectionAdded.connect (mem_fun(*this, &ConnectionEditor::proxy_add_connection_and_select));
+			session->ConnectionRemoved.connect (mem_fun(*this, &ConnectionEditor::proxy_remove_connection));
 		} else {
 			hide ();
 		}
@@ -297,13 +297,13 @@ ConnectionEditor::remove_connection (ARDOUR::Connection *connection)
 void
 ConnectionEditor::proxy_add_connection_and_select (ARDOUR::Connection *connection)
 {
-	Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &ConnectionEditor::add_connection_and_select), connection));
+	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &ConnectionEditor::add_connection_and_select), connection));
 }
 
 void
 ConnectionEditor::proxy_remove_connection (ARDOUR::Connection *connection)
 {
-	Gtkmm2ext::UI::instance()->call_slot (bind (slot (*this, &ConnectionEditor::remove_connection), connection));
+	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &ConnectionEditor::remove_connection), connection));
 }
 
 void
@@ -352,9 +352,9 @@ ConnectionEditor::connection_selected (gint row, gint col, GdkEvent *ev, bool in
 
 	if (current_connection) {
 		config_connection = current_connection->ConfigurationChanged.connect 
-			(bind (slot (*this, &ConnectionEditor::configuration_changed), input));
+			(bind (mem_fun(*this, &ConnectionEditor::configuration_changed), input));
 		connect_connection = current_connection->ConnectionsChanged.connect 
-			(bind (slot (*this, &ConnectionEditor::connections_changed), input));
+			(bind (mem_fun(*this, &ConnectionEditor::connections_changed), input));
 	}
 
 	display_connection_state (input);
@@ -454,7 +454,7 @@ ConnectionEditor::display_ports ()
 		}
 
 		client_port_display->columns_autosize ();
-		client_port_display->select_row.connect (bind (slot (*this, &ConnectionEditor::port_selection_handler), client_port_display));
+		client_port_display->select_row.connect (bind (mem_fun(*this, &ConnectionEditor::port_selection_handler), client_port_display));
 		
 		Label *tab_label = manage (new Label);
 
@@ -465,7 +465,7 @@ ConnectionEditor::display_ports ()
 	}
 
 	notebook.set_page (current_page);
-	notebook.show.connect (bind (slot (notebook, &Notebook::set_page), current_page));
+	notebook.show.connect (bind (mem_fun (notebook, &Notebook::set_page), current_page));
 	selector_box.show_all ();
 }	
 
@@ -528,7 +528,7 @@ ConnectionEditor::display_connection_state (bool for_input)
 		clist->set_data ("port", (gpointer) ((intptr_t) n));
 
 		clist->set_name ("ConnectionEditorPortList");
-		clist->click_column.connect (bind (slot (*this, &ConnectionEditor::port_column_click), clist));
+		clist->click_column.connect (bind (mem_fun(*this, &ConnectionEditor::port_column_click), clist));
 		clist->set_selection_mode (GTK_SELECTION_SINGLE);
 		clist->set_shadow_type (Gtk::SHADOW_IN);
 
@@ -546,7 +546,7 @@ ConnectionEditor::display_connection_state (bool for_input)
 		}
 
 		clist->columns_autosize ();
-		clist->button_release_event.connect (bind (slot (*this, &ConnectionEditor::port_button_event), clist));
+		clist->button_release_event.connect (bind (mem_fun(*this, &ConnectionEditor::port_button_event), clist));
 	}
 
 	port_box.show_all ();

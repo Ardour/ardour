@@ -63,8 +63,8 @@ RouteUI::RouteUI (ARDOUR::Route& rt, ARDOUR::Session& sess, const char* m_name,
 		set_color (unique_random_color());
 	}
 
-	_route.GoingAway.connect (slot (*this, &RouteUI::route_removed));
-	_route.active_changed.connect (slot (*this, &RouteUI::route_active_changed));
+	_route.GoingAway.connect (mem_fun (*this, &RouteUI::route_removed));
+	_route.active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed));
 
         mute_button = manage (new BindableToggleButton (& _route.midi_mute_control(), m_name ));
 	mute_button->set_bind_button_state (2, GDK_CONTROL_MASK);
@@ -74,10 +74,10 @@ RouteUI::RouteUI (ARDOUR::Route& rt, ARDOUR::Session& sess, const char* m_name,
 	if (is_audio_track()) {
 		AudioTrack* at = dynamic_cast<AudioTrack*>(&_route);
 
-		get_diskstream()->record_enable_changed.connect (slot (*this, &RouteUI::route_rec_enable_changed));
+		get_diskstream()->record_enable_changed.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
 
-		_session.RecordEnabled.connect (slot (*this, &RouteUI::session_rec_enable_changed));
-		_session.RecordDisabled.connect (slot (*this, &RouteUI::session_rec_enable_changed));
+		_session.RecordEnabled.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
+		_session.RecordDisabled.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
 		rec_enable_button = manage (new BindableToggleButton (& at->midi_rec_enable_control(), r_name ));
 		rec_enable_button->set_bind_button_state (2, GDK_CONTROL_MASK);
@@ -315,7 +315,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 void
 RouteUI::solo_changed(void* src)
 {
-	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &RouteUI::update_solo_display));
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_solo_display));
 }
 
 void
@@ -341,7 +341,7 @@ RouteUI::update_solo_display ()
 void
 RouteUI::mute_changed(void* src)
 {
-	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &RouteUI::update_mute_display));
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_mute_display));
 }
 
 void
@@ -359,13 +359,13 @@ RouteUI::update_mute_display ()
 void
 RouteUI::route_rec_enable_changed (void *src)
 {
-	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &RouteUI::update_rec_display));
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_rec_display));
 }
 
 void
 RouteUI::session_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (slot (*this, &RouteUI::update_rec_display));
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_rec_display));
 }
 
 void
@@ -422,13 +422,13 @@ RouteUI::build_solo_menu (void)
 
 	check = new CheckMenuItem(_("Solo-safe"));
 	check->set_active (_route.solo_safe());
-	check->toggled.connect (bind (slot (*this, &RouteUI::toggle_solo_safe), check));
-	_route.solo_safe_changed.connect(bind (slot (*this, &RouteUI::solo_safe_toggle), check));
+	check->toggled.connect (bind (mem_fun (*this, &RouteUI::toggle_solo_safe), check));
+	_route.solo_safe_changed.connect(bind (mem_fun (*this, &RouteUI::solo_safe_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("MIDI Bind"), slot (*mute_button, &BindableToggleButton::midi_learn)));
+	items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 	
 }
 
@@ -444,34 +444,34 @@ RouteUI::build_mute_menu(void)
 	
 	check = new CheckMenuItem(_("Pre Fader"));
 	init_mute_menu(PRE_FADER, check);
-	check->toggled.connect(bind (slot (*this, &RouteUI::toggle_mute_menu), PRE_FADER, check));
-	_route.pre_fader_changed.connect(bind (slot (*this, &RouteUI::pre_fader_toggle), check));
+	check->toggled.connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), PRE_FADER, check));
+	_route.pre_fader_changed.connect(bind (mem_fun (*this, &RouteUI::pre_fader_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
 	check = new CheckMenuItem(_("Post Fader"));
 	init_mute_menu(POST_FADER, check);
-	check->toggled.connect(bind (slot (*this, &RouteUI::toggle_mute_menu), POST_FADER, check));
-	_route.post_fader_changed.connect(bind (slot (*this, &RouteUI::post_fader_toggle), check));
+	check->toggled.connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), POST_FADER, check));
+	_route.post_fader_changed.connect(bind (mem_fun (*this, &RouteUI::post_fader_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 	
 	check = new CheckMenuItem(_("Control Outs"));
 	init_mute_menu(CONTROL_OUTS, check);
-	check->toggled.connect(bind (slot (*this, &RouteUI::toggle_mute_menu), CONTROL_OUTS, check));
-	_route.control_outs_changed.connect(bind (slot (*this, &RouteUI::control_outs_toggle), check));
+	check->toggled.connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), CONTROL_OUTS, check));
+	_route.control_outs_changed.connect(bind (mem_fun (*this, &RouteUI::control_outs_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
 	check = new CheckMenuItem(_("Main Outs"));
 	init_mute_menu(MAIN_OUTS, check);
-	check->toggled.connect(bind (slot (*this, &RouteUI::toggle_mute_menu), MAIN_OUTS, check));
-	_route.main_outs_changed.connect(bind (slot (*this, &RouteUI::main_outs_toggle), check));
+	check->toggled.connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MAIN_OUTS, check));
+	_route.main_outs_changed.connect(bind (mem_fun (*this, &RouteUI::main_outs_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("MIDI Bind"), slot (*mute_button, &BindableToggleButton::midi_learn)));
+	items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 }
 
 void
@@ -514,8 +514,8 @@ void
 RouteUI::reversibly_apply_route_boolean (string name, void (Route::*func)(bool, void *), bool yn, void *arg)
 {
 	_session.begin_reversible_command (name);
-	_session.add_undo (bind (slot (_route, func), !yn, (void *) arg));
-	_session.add_redo (bind (slot (_route, func), yn, (void *) arg));
+	_session.add_undo (bind (mem_fun (_route, func), !yn, (void *) arg));
+	_session.add_redo (bind (mem_fun (_route, func), yn, (void *) arg));
 	_session.commit_reversible_command ();
 }
 
@@ -523,8 +523,8 @@ void
 RouteUI::reversibly_apply_audio_track_boolean (string name, void (AudioTrack::*func)(bool, void *), bool yn, void *arg)
 {
 	_session.begin_reversible_command (name);
-	_session.add_undo (bind (slot (*audio_track(), func), !yn, (void *) arg));
-	_session.add_redo (bind (slot (*audio_track(), func), yn, (void *) arg));
+	_session.add_undo (bind (mem_fun (*audio_track(), func), !yn, (void *) arg));
+	_session.add_redo (bind (mem_fun (*audio_track(), func), yn, (void *) arg));
 	_session.commit_reversible_command ();
 }
 
@@ -665,7 +665,7 @@ RouteUI::remove_this_route ()
 	Gtk::Main::run ();
 
 	if (prompter.get_choice() == 0) {
-		Main::idle.connect (bind (slot (&RouteUI::idle_remove_this_route), this));
+		Main::idle.connect (bind (mem_fun (&RouteUI::idle_remove_this_route), this));
 	}
 }
 
@@ -679,7 +679,7 @@ RouteUI::idle_remove_this_route (RouteUI *rui)
 void
 RouteUI::route_removed ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &RouteUI::route_removed));
+	ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::route_removed));
 	
 	delete this;
 }
@@ -713,7 +713,7 @@ RouteUI::route_rename ()
 void
 RouteUI::name_changed (void *src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteUI::name_changed), src));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::name_changed), src));
 	
 	name_label.set_text (_route.name());
 }
@@ -734,7 +734,7 @@ void
 RouteUI::route_active_changed ()
 {
 	if (route_active_menu_item) {
-		Gtkmm2ext::UI::instance()->call_slot (bind (slot (*route_active_menu_item, &CheckMenuItem::set_active), _route.active()));
+		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*route_active_menu_item, &CheckMenuItem::set_active), _route.active()));
 	}
 }
 
@@ -750,7 +750,7 @@ RouteUI::solo_safe_toggle(void* src, Gtk::CheckMenuItem* check)
 void
 RouteUI::pre_fader_toggle(void* src, Gtk::CheckMenuItem* check)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteUI::pre_fader_toggle), src, check));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::pre_fader_toggle), src, check));
 	
 	bool yn = _route.get_mute_config(PRE_FADER);
 	if (check->get_active() != yn) {
@@ -761,7 +761,7 @@ RouteUI::pre_fader_toggle(void* src, Gtk::CheckMenuItem* check)
 void
 RouteUI::post_fader_toggle(void* src, Gtk::CheckMenuItem* check)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteUI::post_fader_toggle), src, check));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::post_fader_toggle), src, check));
 	
 	bool yn = _route.get_mute_config(POST_FADER);
 	if (check->get_active() != yn) {
@@ -772,7 +772,7 @@ RouteUI::post_fader_toggle(void* src, Gtk::CheckMenuItem* check)
 void
 RouteUI::control_outs_toggle(void* src, Gtk::CheckMenuItem* check)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteUI::control_outs_toggle), src, check));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::control_outs_toggle), src, check));
 	
 	bool yn = _route.get_mute_config(CONTROL_OUTS);
 	if (check->get_active() != yn) {
@@ -783,7 +783,7 @@ RouteUI::control_outs_toggle(void* src, Gtk::CheckMenuItem* check)
 void
 RouteUI::main_outs_toggle(void* src, Gtk::CheckMenuItem* check)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RouteUI::main_outs_toggle), src, check));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::main_outs_toggle), src, check));
 	
 	bool yn = _route.get_mute_config(MAIN_OUTS);
 	if (check->get_active() != yn) {
@@ -835,7 +835,7 @@ RouteUI::name() const
 void
 RouteUI::map_frozen ()
 {
-	ENSURE_GUI_THREAD (slot (*this, &RouteUI::map_frozen));
+	ENSURE_GUI_THREAD (mem_fun (*this, &RouteUI::map_frozen));
 
  	AudioTrack* at = dynamic_cast<AudioTrack*>(&_route);
 

@@ -88,12 +88,12 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	redirect_display.set_button_actions (1, 0);
 	redirect_display.set_button_actions (2, 0);
 	redirect_display.set_button_actions (3, 0);
-	redirect_display.drag_begin.connect (slot (*this, &RedirectBox::redirect_drag_begin));
-	redirect_display.drag_end.connect (slot (*this, &RedirectBox::redirect_drag_end));
+	redirect_display.drag_begin.connect (mem_fun(*this, &RedirectBox::redirect_drag_begin));
+	redirect_display.drag_end.connect (mem_fun(*this, &RedirectBox::redirect_drag_end));
 	redirect_display.set_size_request (-1, 48);
 	redirect_display.set_selection_mode (GTK_SELECTION_MULTIPLE);
 	redirect_display.set_shadow_type (Gtk::SHADOW_IN);
-	redirect_display.row_move.connect (slot (*this, &RedirectBox::redirects_reordered));
+	redirect_display.row_move.connect (mem_fun(*this, &RedirectBox::redirects_reordered));
 
 	redirect_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
@@ -106,15 +106,15 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	redirect_eventbox.show ();
 	show_all ();
 
-	_route.redirects_changed.connect (slot (*this, &RedirectBox::redirects_changed));
+	_route.redirects_changed.connect (mem_fun(*this, &RedirectBox::redirects_changed));
 
-	redirect_display.button_press_event.connect (slot (*this, &RedirectBox::redirect_button));
-	redirect_display.button_release_event.connect (slot (*this, &RedirectBox::redirect_button));
+	redirect_display.button_press_event.connect (mem_fun(*this, &RedirectBox::redirect_button));
+	redirect_display.button_release_event.connect (mem_fun(*this, &RedirectBox::redirect_button));
 
-	redirect_display.button_release_event.connect_after (slot (do_not_propagate));
-	_plugin_selector.hide.connect(slot(*this,&RedirectBox::disconnect_newplug));
+	redirect_display.button_release_event.connect_after (ptr_fun (do_not_propagate));
+	_plugin_selector.hide.connect(mem_fun(*this,&RedirectBox::disconnect_newplug));
 
-	redirect_display.click_column.connect (slot (*this, &RedirectBox::show_redirect_menu));
+	redirect_display.click_column.connect (mem_fun(*this, &RedirectBox::show_redirect_menu));
 	
 	set_stuff_from_route ();
 
@@ -210,8 +210,8 @@ RedirectBox::build_send_action_menu ()
 	send_action_menu->set_name ("ArdourContextMenu");
 	MenuList& items = send_action_menu->items();
 
-	items.push_back (MenuElem (_("New send"), slot (*this, &RedirectBox::new_send)));
-	items.push_back (MenuElem (_("Show send controls"), slot (*this, &RedirectBox::show_send_controls)));
+	items.push_back (MenuElem (_("New send"), mem_fun(*this, &RedirectBox::new_send)));
+	items.push_back (MenuElem (_("Show send controls"), mem_fun(*this, &RedirectBox::show_send_controls)));
 }
 
 void
@@ -287,7 +287,7 @@ RedirectBox::redirect_button (GdkEventButton *ev)
 
 	if (redirect && Keyboard::is_delete_event (ev)) {
 		
-		Gtk::Main::idle.connect (bind (slot (*this, &RedirectBox::idle_delete_redirect), redirect));
+		Gtk::Main::idle.connect (bind (mem_fun(*this, &RedirectBox::idle_delete_redirect), redirect));
 		return TRUE;
 
 	} else if (redirect && (Keyboard::is_edit_event (ev) || ev->type == GDK_2BUTTON_PRESS)) {
@@ -357,28 +357,28 @@ RedirectBox::build_redirect_menu (CList& clist)
 	
 	/* new stuff */
 	
-	items.push_back (MenuElem (_("New Plugin ..."), slot (*this, &RedirectBox::choose_plugin)));
-	items.push_back (MenuElem (_("New Insert"), slot (*this, &RedirectBox::choose_insert)));
-	items.push_back (MenuElem (_("New Send ..."), slot (*this, &RedirectBox::choose_send)));
+	items.push_back (MenuElem (_("New Plugin ..."), mem_fun(*this, &RedirectBox::choose_plugin)));
+	items.push_back (MenuElem (_("New Insert"), mem_fun(*this, &RedirectBox::choose_insert)));
+	items.push_back (MenuElem (_("New Send ..."), mem_fun(*this, &RedirectBox::choose_send)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Clear"), slot (*this, &RedirectBox::clear_redirects)));
+	items.push_back (MenuElem (_("Clear"), mem_fun(*this, &RedirectBox::clear_redirects)));
 	items.push_back (SeparatorElem());
 
 	/* standard editing stuff */
 
-	items.push_back (MenuElem (_("Cut"), slot (*this, &RedirectBox::cut_redirects)));
+	items.push_back (MenuElem (_("Cut"), mem_fun(*this, &RedirectBox::cut_redirects)));
 	selection_dependent_items.push_back (items.back());
-	items.push_back (MenuElem (_("Copy"), slot (*this, &RedirectBox::copy_redirects)));
+	items.push_back (MenuElem (_("Copy"), mem_fun(*this, &RedirectBox::copy_redirects)));
 	selection_dependent_items.push_back (items.back());
-	items.push_back (MenuElem (_("Paste"), slot (*this, &RedirectBox::paste_redirects)));
+	items.push_back (MenuElem (_("Paste"), mem_fun(*this, &RedirectBox::paste_redirects)));
 	redirect_paste_item = items.back();
 	
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Rename"), slot (*this, &RedirectBox::rename_redirects)));
+	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RedirectBox::rename_redirects)));
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Select all"), slot (*this, &RedirectBox::select_all_redirects)));
-	items.push_back (MenuElem (_("Deselect all"), slot (*this, &RedirectBox::deselect_all_redirects)));
+	items.push_back (MenuElem (_("Select all"), mem_fun(*this, &RedirectBox::select_all_redirects)));
+	items.push_back (MenuElem (_("Deselect all"), mem_fun(*this, &RedirectBox::deselect_all_redirects)));
 
 #if LATER
 	Menu *select_sub_menu = manage (new Menu);
@@ -395,25 +395,25 @@ RedirectBox::build_redirect_menu (CList& clist)
 	/* activation */
 						     
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Activate"), bind (slot (*this, &RedirectBox::for_selected_redirects),
+	items.push_back (MenuElem (_("Activate"), bind (mem_fun(*this, &RedirectBox::for_selected_redirects),
 							&RedirectBox::activate_redirect)));
 	selection_dependent_items.push_back (items.back());
-	items.push_back (MenuElem (_("Deactivate"), bind (slot (*this, &RedirectBox::for_selected_redirects),
+	items.push_back (MenuElem (_("Deactivate"), bind (mem_fun(*this, &RedirectBox::for_selected_redirects),
 							   &RedirectBox::deactivate_redirect)));
 	selection_dependent_items.push_back (items.back());
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Activate All"), bind (slot (*this, &RedirectBox::all_redirects_active), true)));
-	items.push_back (MenuElem (_("Deactivate All"), bind (slot (*this, &RedirectBox::all_redirects_active), false)));
+	items.push_back (MenuElem (_("Activate All"), bind (mem_fun(*this, &RedirectBox::all_redirects_active), true)));
+	items.push_back (MenuElem (_("Deactivate All"), bind (mem_fun(*this, &RedirectBox::all_redirects_active), false)));
 
 	/* show editors */
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Edit"), bind (slot (*this, &RedirectBox::for_selected_redirects),
+	items.push_back (MenuElem (_("Edit"), bind (mem_fun(*this, &RedirectBox::for_selected_redirects),
 						    &RedirectBox::edit_redirect)));
 	selection_dependent_items.push_back (items.back());
 
-	menu->map_event.connect (slot (*this, &RedirectBox::redirect_menu_map_handler));
+	menu->map_event.connect (mem_fun(*this, &RedirectBox::redirect_menu_map_handler));
 
 	return menu;
 }
@@ -461,7 +461,7 @@ RedirectBox::insert_plugin_chosen (Plugin *plugin)
 
 		Redirect *redirect = new PluginInsert (_session, *plugin, _placement);
 		
-		redirect->active_changed.connect (slot (*this, &RedirectBox::show_redirect_active));
+		redirect->active_changed.connect (mem_fun(*this, &RedirectBox::show_redirect_active));
 
 		uint32_t err_streams;
 
@@ -534,7 +534,7 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, IO& io)
 	vpacker.pack_start (label);
 	vpacker.pack_start (button_box);
 
-	button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 0));
+	button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 0));
 
 	dialog.add (vpacker);
 	dialog.set_name (X_("PluginIODialog"));
@@ -552,7 +552,7 @@ void
 RedirectBox::choose_insert ()
 {
 	Redirect *redirect = new PortInsert (_session, _placement);
-	redirect->active_changed.connect (slot (*this, &RedirectBox::show_redirect_active));
+	redirect->active_changed.connect (mem_fun(*this, &RedirectBox::show_redirect_active));
 	_route.add_redirect (redirect, this);
 }
 
@@ -568,7 +568,7 @@ RedirectBox::choose_send ()
 	IOSelectorWindow *ios = new IOSelectorWindow (_session, *send, false, true);
 	
 	ios->show_all ();
-	ios->selector().Finished.connect (bind (slot (*this, &RedirectBox::send_io_finished), static_cast<Redirect*>(send), ios));
+	ios->selector().Finished.connect (bind (mem_fun(*this, &RedirectBox::send_io_finished), static_cast<Redirect*>(send), ios));
 }
 
 void
@@ -595,14 +595,14 @@ RedirectBox::disconnect_newplug ()
 void
 RedirectBox::show_plugin_selector ()
 {
-	newplug_connection = _plugin_selector.PluginCreated.connect (slot (*this,&RedirectBox::insert_plugin_chosen));
+	newplug_connection = _plugin_selector.PluginCreated.connect (mem_fun(*this,&RedirectBox::insert_plugin_chosen));
 	_plugin_selector.show_all ();
 }
 
 void
 RedirectBox::redirects_changed (void *src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RedirectBox::redirects_changed), src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::redirects_changed), src));
 	
 	redirect_display.freeze ();
 	redirect_display.clear ();
@@ -644,9 +644,9 @@ RedirectBox::add_redirect_to_display (Redirect *redirect)
 	show_redirect_active (redirect, this);
 
 	redirect_active_connections.push_back
-		(redirect->active_changed.connect (slot (*this, &RedirectBox::show_redirect_active)));
+		(redirect->active_changed.connect (mem_fun(*this, &RedirectBox::show_redirect_active)));
 	redirect_name_connections.push_back
-		(redirect->name_changed.connect (bind (slot (*this, &RedirectBox::show_redirect_name), redirect)));
+		(redirect->name_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_name), redirect)));
 }
 
 string
@@ -714,7 +714,7 @@ RedirectBox::build_redirect_tooltip (CList& clist, EventBox& box, string start)
 void
 RedirectBox::show_redirect_name (void* src, Redirect *redirect)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RedirectBox::show_redirect_name), src, redirect));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_name), src, redirect));
 	
 	show_redirect_active (redirect, src);
 }
@@ -722,7 +722,7 @@ RedirectBox::show_redirect_name (void* src, Redirect *redirect)
 void
 RedirectBox::show_redirect_active (Redirect *redirect, void *src)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &RedirectBox::show_redirect_active), redirect, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_active), redirect, src));
 
 	CList_Helpers::RowIterator ri;
 	CList *clist;
@@ -749,7 +749,7 @@ RedirectBox::redirects_reordered (gint src, gint dst)
 	   something for idle time.
 	*/
 
-	Gtk::Main::idle.connect (slot (*this, &RedirectBox::compute_redirect_sort_keys));
+	Gtk::Main::idle.connect (mem_fun(*this, &RedirectBox::compute_redirect_sort_keys));
 }
 
 gint
@@ -790,7 +790,7 @@ outputs do not work correctly."));
 		vpacker.pack_start (label);
 		vpacker.pack_start (button_box);
 		
-		button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 0));
+		button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 0));
 		
 		dialog.add (vpacker);
 		dialog.set_name (X_("PluginIODialog"));
@@ -923,9 +923,9 @@ RedirectBox::rename_redirect (Redirect* redirect)
 	ok_button.set_name ("EditorGTKButton");
 	cancel_button.set_name ("EditorGTKButton");
 
-	entry.activate.connect (bind (slot (dialog, &ArdourDialog::stop), 1));
-	cancel_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), -1));
-	ok_button.signal_clicked().connect (bind (slot (dialog, &ArdourDialog::stop), 1));
+	entry.activate.connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
+	cancel_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), -1));
+	ok_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
 
 	/* recurse */
 	

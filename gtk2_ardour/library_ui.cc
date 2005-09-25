@@ -89,17 +89,17 @@ SoundFileSelector::SoundFileSelector ()
 	split_channels.set_active(false);
 	split_channels.set_sensitive (false);
 	
-	delete_event.connect (slot (*this, &ArdourDialog::wm_close_event));
+	delete_event.connect (mem_fun(*this, &ArdourDialog::wm_close_event));
 	
-	import_btn.signal_clicked().connect (slot (*this, &SoundFileSelector::import_btn_clicked));
+	import_btn.signal_clicked().connect (mem_fun(*this, &SoundFileSelector::import_btn_clicked));
 
-	sfdb_tree.group_selected.connect (slot(*this, &SoundFileSelector::sfdb_group_selected));
-	sfdb_tree.member_selected.connect (bind (slot(*this, &SoundFileSelector::member_selected), true));
-	sf_browser.member_selected.connect (bind (slot(*this, &SoundFileSelector::member_selected), false));
-	sf_browser.member_deselected.connect (bind (slot(*this, &SoundFileSelector::member_deselected), false));
-	sfdb_tree.deselected.connect (slot(*this, &SoundFileSelector::sfdb_deselected));
-	sf_browser.group_selected.connect (slot(*this, &SoundFileSelector::browser_group_selected));
-	notebook.switch_page.connect (slot(*this, &SoundFileSelector::page_switched));
+	sfdb_tree.group_selected.connect (mem_fun(*this, &SoundFileSelector::sfdb_group_selected));
+	sfdb_tree.member_selected.connect (bind (mem_fun(*this, &SoundFileSelector::member_selected), true));
+	sf_browser.member_selected.connect (bind (mem_fun(*this, &SoundFileSelector::member_selected), false));
+	sf_browser.member_deselected.connect (bind (mem_fun(*this, &SoundFileSelector::member_deselected), false));
+	sfdb_tree.deselected.connect (mem_fun(*this, &SoundFileSelector::sfdb_deselected));
+	sf_browser.group_selected.connect (mem_fun(*this, &SoundFileSelector::browser_group_selected));
+	notebook.switch_page.connect (mem_fun(*this, &SoundFileSelector::page_switched));
 }
 
 SoundFileSelector::~SoundFileSelector()
@@ -343,9 +343,9 @@ SoundFileBrowser::SoundFileBrowser()
 	
 	pack_start(*vbox, true, true);
 	
-	dir_list->select_row.connect(slot (*this, &SoundFileBrowser::dir_list_selected));
-	file_list->select_row.connect(slot (*this, &SoundFileBrowser::file_list_selected));
-	file_list->unselect_row.connect(slot (*this, &SoundFileBrowser::file_list_deselected));
+	dir_list->select_row.connect(mem_fun(*this, &SoundFileBrowser::dir_list_selected));
+	file_list->select_row.connect(mem_fun(*this, &SoundFileBrowser::file_list_selected));
+	file_list->unselect_row.connect(mem_fun(*this, &SoundFileBrowser::file_list_deselected));
 
 	dir_list->set_name("SoundFileBrowserList");
 	file_list->set_name("SoundFileBrowserList");
@@ -453,23 +453,23 @@ LibraryTree::LibraryTree ()
 
 	remove_btn.set_sensitive (false);
 
-	add_btn.signal_clicked().connect (slot (*this, &LibraryTree::add_btn_clicked));
-	folder_btn.signal_clicked().connect (slot(*this, &LibraryTree::folder_btn_clicked));
-	remove_btn.signal_clicked().connect (slot(*this, &LibraryTree::remove_btn_clicked));
-	find_btn.signal_clicked().connect (slot (*this, &LibraryTree::find_btn_clicked));
+	add_btn.signal_clicked().connect (mem_fun(*this, &LibraryTree::add_btn_clicked));
+	folder_btn.signal_clicked().connect (mem_fun(*this, &LibraryTree::folder_btn_clicked));
+	remove_btn.signal_clicked().connect (mem_fun(*this, &LibraryTree::remove_btn_clicked));
+	find_btn.signal_clicked().connect (mem_fun(*this, &LibraryTree::find_btn_clicked));
 
 	files_select.hide_fileop_buttons();
 	files_select.set_filename("/");
-	files_select.get_ok_button()-.signal_clicked().connect (slot ( *this, 
+	files_select.get_ok_button()-.signal_clicked().connect (mem_fun ( *this, 
 				&LibraryTree::file_ok_clicked));
-	files_select.get_cancel_button()-.signal_clicked().connect (slot ( *this, 
+	files_select.get_cancel_button()-.signal_clicked().connect (mem_fun ( *this, 
 				&LibraryTree::file_cancel_clicked));
 
 
-	Library->added_group.connect (slot (*this, &LibraryTree::added_group));
-	Library->removed_group.connect (slot (*this, &LibraryTree::removed_group));
-	Library->added_member.connect (slot (*this, &LibraryTree::added_member));
-	Library->removed_member.connect (slot (*this, &LibraryTree::removed_member));
+	Library->added_group.connect (mem_fun(*this, &LibraryTree::added_group));
+	Library->removed_group.connect (mem_fun(*this, &LibraryTree::removed_group));
+	Library->added_member.connect (mem_fun(*this, &LibraryTree::added_member));
+	Library->removed_member.connect (mem_fun(*this, &LibraryTree::removed_member));
 	
 	current_group = "";
 	current_member = "";
@@ -495,7 +495,7 @@ void
 LibraryTree::added_group (string group, string parent)
 {
 	using namespace Gtk;
-	ENSURE_GUI_THREAD(bind (slot (*this, &LibraryTree::added_group), group, parent));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LibraryTree::added_group), group, parent));
 
 	Tree* parent_tree;
 	if (parent.length()) {
@@ -527,7 +527,7 @@ LibraryTree::added_group (string group, string parent)
 	item->set_subtree (*subtree);
 	item->expand();
 
-	item->select.connect (bind(slot(*this,&LibraryTree::cb_group_select), item, group));
+	item->select.connect (bind(mem_fun(*this,&LibraryTree::cb_group_select), item, group));
 	
 	uri_mapping.insert(map<string, TreeItem*>::value_type(group, item));
 	uri_parent.insert(map<string,string>::value_type(group, parent));
@@ -543,7 +543,7 @@ LibraryTree::added_group (string group, string parent)
 void
 LibraryTree::removed_group (string group)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &LibraryTree::removed_group), group));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LibraryTree::removed_group), group));
 	
 	Gtk::TreeItem* group_item = uri_mapping[group];
 
@@ -568,7 +568,7 @@ LibraryTree::added_member (string member, string parent)
 {
 	using namespace Gtk;
 
-	ENSURE_GUI_THREAD(bind (slot (*this, &LibraryTree::added_member), member, parent));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LibraryTree::added_member), member, parent));
 
 	Tree* parent_tree;
 	if (parent.length()) {
@@ -596,9 +596,9 @@ LibraryTree::added_member (string member, string parent)
 	parent_tree->tree().insert (i, *item);
 
 	item->select.connect 
-			(bind(slot(*this,&LibraryTree::cb_member_select), item, member));
+			(bind(mem_fun(*this,&LibraryTree::cb_member_select), item, member));
 	item->deselect.connect 
-			(bind(slot(*this,&LibraryTree::cb_member_deselect), item, member));
+			(bind(mem_fun(*this,&LibraryTree::cb_member_deselect), item, member));
 	
 	uri_mapping.insert(map<string, TreeItem*>::value_type(member, item));
 	uri_parent.insert(map<string,string>::value_type(member, parent));
@@ -613,7 +613,7 @@ LibraryTree::added_member (string member, string parent)
 void
 LibraryTree::removed_member (string member)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &LibraryTree::removed_member), member));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LibraryTree::removed_member), member));
 	
 	Gtk::TreeItem* member_item = uri_mapping[member];
 
@@ -660,7 +660,7 @@ LibraryTree::subpopulate (Gtk::Tree* tree, string group)
 		uri_parent.insert(map<string,string>::value_type(*i, group));
 
 		item->select.connect 
-				(bind(slot(*this,&LibraryTree::cb_group_select), item, *i));
+				(bind(mem_fun(*this,&LibraryTree::cb_group_select), item, *i));
 
 		subpopulate (subtree, *i);
 		subtree->show();
@@ -679,9 +679,9 @@ LibraryTree::subpopulate (Gtk::Tree* tree, string group)
 		uri_parent.insert(map<string,string>::value_type(*i, group));
 
 		item->select.connect 
-				(bind(slot(*this,&LibraryTree::cb_member_select), item, *i));
+				(bind(mem_fun(*this,&LibraryTree::cb_member_select), item, *i));
 		item->deselect.connect 
-			(bind(slot(*this,&LibraryTree::cb_member_deselect), item, *i));
+			(bind(mem_fun(*this,&LibraryTree::cb_member_deselect), item, *i));
 
 	}
 }
@@ -721,7 +721,7 @@ LibraryTree::file_ok_clicked ()
 	main_box->pack_start(*bar);
 	Gtk::Button* cancel_btn = manage(new Gtk::Button(_("Cancel")));
 	main_box->pack_start(*cancel_btn);
-	cancel_btn-.signal_clicked().connect (slot (*this, &LibraryTree::cancel_import_clicked));
+	cancel_btn-.signal_clicked().connect (mem_fun(*this, &LibraryTree::cancel_import_clicked));
 	progress_win->show_all();
 	
 	clone_ftw((void*)file);
@@ -817,7 +817,7 @@ LibraryTree::find_btn_clicked ()
 {
 	SearchSounds* search = new SearchSounds ();
 
-	search->file_chosen.connect(slot (*this, &LibraryTree::file_found));
+	search->file_chosen.connect(mem_fun(*this, &LibraryTree::file_found));
 	search->show_all();
 }
 
@@ -1014,26 +1014,26 @@ SoundFileBox::SoundFileBox (string uri, bool meta)
 	bottom_box.pack_start(play_btn);
 	bottom_box.pack_start(stop_btn);
 
-	play_btn.signal_clicked().connect (slot (*this, &SoundFileBox::play_btn_clicked));
-	stop_btn.signal_clicked().connect (slot (*this, &SoundFileBox::stop_btn_clicked));
+	play_btn.signal_clicked().connect (mem_fun(*this, &SoundFileBox::play_btn_clicked));
+	stop_btn.signal_clicked().connect (mem_fun(*this, &SoundFileBox::stop_btn_clicked));
 
 	PublicEditor& edit = ARDOUR_UI::instance()->the_editor();
 	ARDOUR::Session* sess = edit.current_session();
 	if (!sess) {
 		play_btn.set_sensitive(false);
 	} else {
-		sess->AuditionActive.connect(slot (*this, &SoundFileBox::audition_status_changed));
+		sess->AuditionActive.connect(mem_fun(*this, &SoundFileBox::audition_status_changed));
 	}
 
 	add_field_btn.signal_clicked().connect 
-			(slot (*this, &SoundFileBox::add_field_clicked));
+			(mem_fun(*this, &SoundFileBox::add_field_clicked));
 	remove_field_btn.signal_clicked().connect 
-			(slot (*this, &SoundFileBox::remove_field_clicked));
+			(mem_fun(*this, &SoundFileBox::remove_field_clicked));
 
-	fields.selection_made.connect (slot (*this, &SoundFileBox::field_selected));
-	fields.choice_made.connect (slot (*this, &SoundFileBox::field_chosen));
+	fields.selection_made.connect (mem_fun(*this, &SoundFileBox::field_selected));
+	fields.choice_made.connect (mem_fun(*this, &SoundFileBox::field_chosen));
 	
-	Library->fields_changed.connect (slot (*this, &SoundFileBox::setup_fields));
+	Library->fields_changed.connect (mem_fun(*this, &SoundFileBox::setup_fields));
 
 	if (setup_labels (uri)) {
 		throw failed_constructor();
@@ -1117,8 +1117,8 @@ SoundFileBox::setup_labels (string uri)
 	path_entry.set_text (file);
 	path_entry.set_position (-1);
 
-	path_entry.signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
-	path_entry.signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
+	path_entry.signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
+	path_entry.signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
 
 	length.set_alignment (0.0f, 0.0f);
 	length.set_text (compose("Length: %1", length2string(sf_info->frames, sf_info->samplerate)));
@@ -1211,7 +1211,7 @@ void
 SoundFileBox::audition_status_changed (bool active)
 {
 	if (!active) {
-		Gtkmm2ext::UI::instance()->call_slot( slot(*this, &SoundFileBox::stop_btn_clicked));
+		Gtkmm2ext::UI::instance()->call_slot( mem_fun(*this, &SoundFileBox::stop_btn_clicked));
 	}
 }
 
@@ -1248,7 +1248,7 @@ SoundFileBox::remove_field_clicked ()
 void
 SoundFileBox::setup_fields ()
 {
-	ENSURE_GUI_THREAD(slot (*this, &SoundFileBox::setup_fields));
+	ENSURE_GUI_THREAD(mem_fun(*this, &SoundFileBox::setup_fields));
 	
 	fields.rescan();
 }
@@ -1317,10 +1317,10 @@ SearchSounds::SearchSounds ()
 	main_box.pack_start(rbtn_box, false, false);
 	main_box.pack_start(bottom_box, false, false);
 
-	delete_event.connect (slot (*this, &ArdourDialog::wm_doi_event));
+	delete_event.connect (mem_fun(*this, &ArdourDialog::wm_doi_event));
 
-	find_btn.signal_clicked().connect (slot (*this, &SearchSounds::find_btn_clicked));
-	fields.selection_made.connect (slot 
+	find_btn.signal_clicked().connect (mem_fun(*this, &SearchSounds::find_btn_clicked));
+	fields.selection_made.connect (mem_fun 
 								   (*this, &SearchSounds::field_selected));
 
 	show_all();
@@ -1406,7 +1406,7 @@ SearchSounds::find_btn_clicked ()
 		results = new SearchResults(search_info, false);
 	}
 
-	results->file_chosen.connect (slot (*this, &SearchSounds::file_found));
+	results->file_chosen.connect (mem_fun(*this, &SearchSounds::file_found));
 	results->show_all();
 }
 
@@ -1460,11 +1460,11 @@ SearchResults::SearchResults (map<string,string> field_values, bool and_search)
 	multichan_check.set_active(true);
 	multichan_check.set_sensitive(false);
 	
-	delete_event.connect (slot (*this, &ArdourDialog::wm_doi_event));
+	delete_event.connect (mem_fun(*this, &ArdourDialog::wm_doi_event));
 
-	import_btn.signal_clicked().connect (slot (*this, &SearchResults::import_clicked));
+	import_btn.signal_clicked().connect (mem_fun(*this, &SearchResults::import_clicked));
 
-	results.choice_made.connect (slot (*this, &SearchResults::result_chosen));
+	results.choice_made.connect (mem_fun(*this, &SearchResults::result_chosen));
 
 	show_all();
 }

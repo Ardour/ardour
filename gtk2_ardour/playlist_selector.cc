@@ -64,7 +64,7 @@ PlaylistSelector::PlaylistSelector ()
 	scroller.add_with_viewport (tree);
 	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-	close_button.signal_clicked().connect (slot (*this, &PlaylistSelector::close_button_click));
+	close_button.signal_clicked().connect (mem_fun(*this, &PlaylistSelector::close_button_click));
 
 	vpacker.set_border_width (6);
 	vpacker.set_spacing (12);
@@ -173,7 +173,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	}
 
 	show_all ();
-	select_connection = tree.tree_select_row.connect (slot (*this, &PlaylistSelector::row_selected));
+	select_connection = tree.tree_select_row.connect (mem_fun(*this, &PlaylistSelector::row_selected));
 }
 
 void
@@ -204,12 +204,12 @@ PlaylistSelector::add_playlist_to_map (Playlist *pl)
 void
 PlaylistSelector::set_session (Session* s)
 {
-	ENSURE_GUI_THREAD(bind (slot (*this, &PlaylistSelector::set_session), s));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PlaylistSelector::set_session), s));
 
 	session = s;
 
 	if (session) {
-		session->going_away.connect (bind (slot (*this, &PlaylistSelector::set_session), static_cast<Session*> (0)));
+		session->going_away.connect (bind (mem_fun(*this, &PlaylistSelector::set_session), static_cast<Session*> (0)));
 	}
 }
 

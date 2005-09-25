@@ -59,8 +59,8 @@ Editor::build_edit_group_list_menu ()
 	edit_group_list_menu->set_name ("ArdourContextMenu");
 	MenuList& items = edit_group_list_menu->items();
 
-	items.push_back (MenuElem (_("Show All"), slot (*this, &Editor::select_all_edit_groups)));
-	items.push_back (MenuElem (_("Hide All"), slot (*this, &Editor::unselect_all_edit_groups)));
+	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Editor::select_all_edit_groups)));
+	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Editor::unselect_all_edit_groups)));
 }
 
 void
@@ -189,7 +189,7 @@ Editor::add_edit_group (RouteGroup* group)
 	edit_group_list.rows().back().set_data (group);
 	edit_group_list.rows().back().select();
 
-	group->FlagsChanged.connect (bind (slot (*this, &Editor::group_flags_changed), group));
+	group->FlagsChanged.connect (bind (mem_fun(*this, &Editor::group_flags_changed), group));
 }
 
 void
