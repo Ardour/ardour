@@ -1,6 +1,6 @@
-/* Image item type for GtkCanvas widget
+/* Image item type for GnomeCanvas widget
  *
- * GtkCanvas is basically a port of the Tk toolkit's most excellent canvas widget.  Tk is
+ * GnomeCanvas is basically a port of the Tk toolkit's most excellent canvas widget.  Tk is
  * copyrighted by the Regents of the University of California, Sun Microsystems, and other parties.
  *
  * Copyright (C) 1998 The Free Software Foundation
@@ -17,8 +17,8 @@
 #include "libart_lgpl/art_pixbuf.h"
 #include "libart_lgpl/art_rgb_pixbuf_affine.h"
 #include "canvas-imageframe.h"
-#include <gtk-canvas/gtk-canvas-util.h>
-#include <gtk-canvas/gtk-canvastypebuiltins.h>
+#include <libgnomecanvas/gnome-canvas-util.h>
+#include <libgnomecanvas/gnome-canvastypebuiltins.h>
 
 
 enum {
@@ -33,82 +33,82 @@ enum {
 };
 
 
-static void gtk_canvas_imageframe_class_init(GtkCanvasImageFrameClass* class) ;
-static void gtk_canvas_imageframe_init(GtkCanvasImageFrame* image) ;
-static void gtk_canvas_imageframe_destroy(GtkObject* object) ;
-static void gtk_canvas_imageframe_set_arg(GtkObject* object, GtkArg* arg, guint arg_id) ;
-static void gtk_canvas_imageframe_get_arg(GtkObject* object, GtkArg* arg, guint arg_id) ;
+static void gnome_canvas_imageframe_class_init(GnomeCanvasImageFrameClass* class) ;
+static void gnome_canvas_imageframe_init(GnomeCanvasImageFrame* image) ;
+static void gnome_canvas_imageframe_destroy(GtkObject* object) ;
+static void gnome_canvas_imageframe_set_arg(GtkObject* object, GtkArg* arg, guint arg_id) ;
+static void gnome_canvas_imageframe_get_arg(GtkObject* object, GtkArg* arg, guint arg_id) ;
 
-static void gtk_canvas_imageframe_update(GtkCanvasItem *item, double *affine, ArtSVP *clip_path, int flags) ;
-static void gtk_canvas_imageframe_realize(GtkCanvasItem *item) ;
-static void gtk_canvas_imageframe_unrealize(GtkCanvasItem *item) ;
-static void gtk_canvas_imageframe_draw(GtkCanvasItem *item, GdkDrawable *drawable, int x, int y, int width, int height) ;
-static double gtk_canvas_imageframe_point(GtkCanvasItem *item, double x, double y, int cx, int cy, GtkCanvasItem **actual_item) ;
-static void gtk_canvas_imageframe_translate(GtkCanvasItem *item, double dx, double dy) ;
-static void gtk_canvas_imageframe_bounds(GtkCanvasItem *item, double *x1, double *y1, double *x2, double *y2) ;
-static void gtk_canvas_imageframe_render(GtkCanvasItem *item, GtkCanvasBuf *buf) ;
+static void gnome_canvas_imageframe_update(GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags) ;
+static void gnome_canvas_imageframe_realize(GnomeCanvasItem *item) ;
+static void gnome_canvas_imageframe_unrealize(GnomeCanvasItem *item) ;
+static void gnome_canvas_imageframe_draw(GnomeCanvasItem *item, GdkDrawable *drawable, int x, int y, int width, int height) ;
+static double gnome_canvas_imageframe_point(GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item) ;
+static void gnome_canvas_imageframe_translate(GnomeCanvasItem *item, double dx, double dy) ;
+static void gnome_canvas_imageframe_bounds(GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2) ;
+static void gnome_canvas_imageframe_render(GnomeCanvasItem *item, GnomeCanvasBuf *buf) ;
 
-static GtkCanvasItemClass *parent_class;
+static GnomeCanvasItemClass *parent_class;
 
 
 GtkType
-gtk_canvas_imageframe_get_type (void)
+gnome_canvas_imageframe_get_type (void)
 {
 	static GtkType imageframe_type = 0;
 
 	if (!imageframe_type) {
 		GtkTypeInfo imageframe_info = {
-			"GtkCanvasImageFrame",
-			sizeof (GtkCanvasImageFrame),
-			sizeof (GtkCanvasImageFrameClass),
-			(GtkClassInitFunc) gtk_canvas_imageframe_class_init,
-			(GtkObjectInitFunc) gtk_canvas_imageframe_init,
+			"GnomeCanvasImageFrame",
+			sizeof (GnomeCanvasImageFrame),
+			sizeof (GnomeCanvasImageFrameClass),
+			(GtkClassInitFunc) gnome_canvas_imageframe_class_init,
+			(GtkObjectInitFunc) gnome_canvas_imageframe_init,
 			NULL, /* reserved_1 */
 			NULL, /* reserved_2 */
 			(GtkClassInitFunc) NULL
 		};
 
-		imageframe_type = gtk_type_unique (gtk_canvas_item_get_type (), &imageframe_info);
+		imageframe_type = gtk_type_unique (gnome_canvas_item_get_type (), &imageframe_info);
 	}
 
 	return imageframe_type;
 }
 
 static void
-gtk_canvas_imageframe_class_init (GtkCanvasImageFrameClass *class)
+gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 {
 	GtkObjectClass *object_class;
-	GtkCanvasItemClass *item_class;
+	GnomeCanvasItemClass *item_class;
 
 	object_class = (GtkObjectClass *) class;
-	item_class = (GtkCanvasItemClass *) class;
+	item_class = (GnomeCanvasItemClass *) class;
 
-	parent_class = gtk_type_class (gtk_canvas_item_get_type ());
+	parent_class = gtk_type_class (gnome_canvas_item_get_type ());
 
-	gtk_object_add_arg_type ("GtkCanvasImageFrame::pixbuf", GTK_TYPE_BOXED, GTK_ARG_WRITABLE, ARG_PIXBUF);
-	gtk_object_add_arg_type ("GtkCanvasImageFrame::x", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X);
-	gtk_object_add_arg_type ("GtkCanvasImageFrame::y", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y);
-	gtk_object_add_arg_type ("GtkCanvasImageFrame::width", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_WIDTH);
-	gtk_object_add_arg_type ("GtkCanvasImageFrame::drawwidth", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_DRAWWIDTH);
-	gtk_object_add_arg_type ("GtkCanvasImageFrame::height", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_HEIGHT);
-	gtk_object_add_arg_type ("GtkCanvasImageFrame::anchor", GTK_TYPE_ANCHOR_TYPE, GTK_ARG_READWRITE, ARG_ANCHOR);
+	gtk_object_add_arg_type ("GnomeCanvasImageFrame::pixbuf", GTK_TYPE_BOXED, GTK_ARG_WRITABLE, ARG_PIXBUF);
+	gtk_object_add_arg_type ("GnomeCanvasImageFrame::x", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X);
+	gtk_object_add_arg_type ("GnomeCanvasImageFrame::y", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y);
+	gtk_object_add_arg_type ("GnomeCanvasImageFrame::width", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_WIDTH);
+	gtk_object_add_arg_type ("GnomeCanvasImageFrame::drawwidth", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_DRAWWIDTH);
+	gtk_object_add_arg_type ("GnomeCanvasImageFrame::height", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_HEIGHT);
+	gtk_object_add_arg_type ("GnomeCanvasImageFrame::anchor", GTK_TYPE_ANCHOR_TYPE, GTK_ARG_READWRITE, ARG_ANCHOR);
 
-	object_class->destroy = gtk_canvas_imageframe_destroy;
-	object_class->set_arg = gtk_canvas_imageframe_set_arg;
-	object_class->get_arg = gtk_canvas_imageframe_get_arg;
+	object_class->destroy = gnome_canvas_imageframe_destroy;
+	object_class->set_arg = gnome_canvas_imageframe_set_arg;
+	object_class->get_arg = gnome_canvas_imageframe_get_arg;
 
-	item_class->update = gtk_canvas_imageframe_update;
-	item_class->realize = gtk_canvas_imageframe_realize;
-	item_class->unrealize = gtk_canvas_imageframe_unrealize;
-	item_class->draw = gtk_canvas_imageframe_draw;
-	item_class->point = gtk_canvas_imageframe_point;
-	item_class->translate = gtk_canvas_imageframe_translate;
-	item_class->bounds = gtk_canvas_imageframe_bounds;
-	item_class->render = gtk_canvas_imageframe_render;
+	item_class->update = gnome_canvas_imageframe_update;
+	item_class->realize = gnome_canvas_imageframe_realize;
+	item_class->unrealize = gnome_canvas_imageframe_unrealize;
+	item_class->draw = gnome_canvas_imageframe_draw;
+	item_class->point = gnome_canvas_imageframe_point;
+	item_class->translate = gnome_canvas_imageframe_translate;
+	item_class->bounds = gnome_canvas_imageframe_bounds;
+	item_class->render = gnome_canvas_imageframe_render;
 }
 
 static void
-gtk_canvas_imageframe_init (GtkCanvasImageFrame *image)
+gnome_canvas_imageframe_init (GnomeCanvasImageFrame *image)
 {
 	image->x = 0.0;
 	image->y = 0.0;
@@ -116,18 +116,18 @@ gtk_canvas_imageframe_init (GtkCanvasImageFrame *image)
 	image->height = 0.0;
 	image->drawwidth = 0.0;
 	image->anchor = GTK_ANCHOR_CENTER;
-	GTK_CANVAS_ITEM(image)->object.flags |= GTK_CANVAS_ITEM_NO_AUTO_REDRAW;
+	GNOME_CANVAS_ITEM(image)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 static void
-gtk_canvas_imageframe_destroy (GtkObject *object)
+gnome_canvas_imageframe_destroy (GtkObject *object)
 {
-	GtkCanvasImageFrame *image;
+	GnomeCanvasImageFrame *image;
 
 	g_return_if_fail (object != NULL);
-	g_return_if_fail (GTK_CANVAS_IS_CANVAS_IMAGEFRAME (object));
+	g_return_if_fail (GNOME_CANVAS_IS_CANVAS_IMAGEFRAME (object));
 
-	image = GTK_CANVAS_IMAGEFRAME (object);
+	image = GNOME_CANVAS_IMAGEFRAME (object);
 	
 	image->cwidth = 0;
 	image->cheight = 0;
@@ -146,12 +146,12 @@ gtk_canvas_imageframe_destroy (GtkObject *object)
 
 /* Get's the image bounds expressed as item-relative coordinates. */
 static void
-get_bounds_item_relative (GtkCanvasImageFrame *image, double *px1, double *py1, double *px2, double *py2)
+get_bounds_item_relative (GnomeCanvasImageFrame *image, double *px1, double *py1, double *px2, double *py2)
 {
-	GtkCanvasItem *item;
+	GnomeCanvasItem *item;
 	double x, y;
 
-	item = GTK_CANVAS_ITEM (image);
+	item = GNOME_CANVAS_ITEM (image);
 
 	/* Get item coordinates */
 
@@ -207,15 +207,15 @@ get_bounds_item_relative (GtkCanvasImageFrame *image, double *px1, double *py1, 
 }
 
 static void
-get_bounds (GtkCanvasImageFrame *image, double *px1, double *py1, double *px2, double *py2)
+get_bounds (GnomeCanvasImageFrame *image, double *px1, double *py1, double *px2, double *py2)
 {
-	GtkCanvasItem *item;
+	GnomeCanvasItem *item;
 	double i2c[6];
 	ArtDRect i_bbox, c_bbox;
 
-	item = GTK_CANVAS_ITEM (image);
+	item = GNOME_CANVAS_ITEM (image);
 
-	gtk_canvas_item_i2c_affine (item, i2c);
+	gnome_canvas_item_i2c_affine (item, i2c);
 
 	get_bounds_item_relative (image, &i_bbox.x0, &i_bbox.y0, &i_bbox.x1, &i_bbox.y1);
 	art_drect_affine_transform (&c_bbox, &i_bbox, i2c);
@@ -229,11 +229,11 @@ get_bounds (GtkCanvasImageFrame *image, double *px1, double *py1, double *px2, d
 
 /* deprecated */
 static void
-recalc_bounds (GtkCanvasImageFrame *image)
+recalc_bounds (GnomeCanvasImageFrame *image)
 {
-	GtkCanvasItem *item;
+	GnomeCanvasItem *item;
 
-	item = GTK_CANVAS_ITEM (image);
+	item = GNOME_CANVAS_ITEM (image);
 
 	get_bounds (image, &item->x1, &item->y1, &item->x2, &item->y2);
 
@@ -242,19 +242,19 @@ recalc_bounds (GtkCanvasImageFrame *image)
 	item->x2 = image->cx + image->cwidth;
 	item->y2 = image->cy + image->cheight;
 
-	gtk_canvas_group_child_bounds (GTK_CANVAS_GROUP (item->parent), item);
+	gnome_canvas_group_child_bounds (GNOME_CANVAS_GROUP (item->parent), item);
 }
 
 static void
-gtk_canvas_imageframe_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_imageframe_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 {
-	GtkCanvasItem *item;
-	GtkCanvasImageFrame *image;
+	GnomeCanvasItem *item;
+	GnomeCanvasImageFrame *image;
 	int update;
 	int calc_bounds;
 
-	item = GTK_CANVAS_ITEM (object);
-	image = GTK_CANVAS_IMAGEFRAME (object);
+	item = GNOME_CANVAS_ITEM (object);
+	image = GNOME_CANVAS_IMAGEFRAME (object);
 
 	update = FALSE;
 	calc_bounds = FALSE;
@@ -305,22 +305,22 @@ gtk_canvas_imageframe_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 
 #ifdef OLD_XFORM
 	if (update)
-		(* GTK_CANVAS_ITEM_CLASS (item->object.klass)->update) (item, NULL, NULL, 0);
+		(* GNOME_CANVAS_ITEM_CLASS (item->object.klass)->update) (item, NULL, NULL, 0);
 
 	if (calc_bounds)
 		recalc_bounds (image);
 #else
 	if (update)
-		gtk_canvas_item_request_update (item);
+		gnome_canvas_item_request_update (item);
 #endif
 }
 
 static void
-gtk_canvas_imageframe_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_imageframe_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 {
-	GtkCanvasImageFrame *image;
+	GnomeCanvasImageFrame *image;
 
-	image = GTK_CANVAS_IMAGEFRAME (object);
+	image = GNOME_CANVAS_IMAGEFRAME (object);
 
 	switch (arg_id) {
 
@@ -355,14 +355,14 @@ gtk_canvas_imageframe_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 }
 
 static void
-gtk_canvas_imageframe_update (GtkCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
+gnome_canvas_imageframe_update (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
 {
-	GtkCanvasImageFrame *image;
+	GnomeCanvasImageFrame *image;
 	ArtDRect i_bbox, c_bbox;
 	int w = 0;
 	int h = 0;
 
-	image = GTK_CANVAS_IMAGEFRAME (item);
+	image = GNOME_CANVAS_IMAGEFRAME (item);
 
 	if (parent_class->update)
 		(* parent_class->update) (item, affine, clip_path, flags);
@@ -391,7 +391,7 @@ gtk_canvas_imageframe_update (GtkCanvasItem *item, double *affine, ArtSVP *clip_
 	c_bbox.x1++;
 	c_bbox.y1++;
 
-	gtk_canvas_update_bbox (item, c_bbox.x0, c_bbox.y0, c_bbox.x1, c_bbox.y1);
+	gnome_canvas_update_bbox (item, c_bbox.x0, c_bbox.y0, c_bbox.x1, c_bbox.y1);
 
 	if (image->pixbuf) {
 		w = image->pixbuf->width;
@@ -409,11 +409,11 @@ gtk_canvas_imageframe_update (GtkCanvasItem *item, double *affine, ArtSVP *clip_
 }
 
 static void
-gtk_canvas_imageframe_realize (GtkCanvasItem *item)
+gnome_canvas_imageframe_realize (GnomeCanvasItem *item)
 {
-	GtkCanvasImageFrame *image;
+	GnomeCanvasImageFrame *image;
 
-	image = GTK_CANVAS_IMAGEFRAME (item);
+	image = GNOME_CANVAS_IMAGEFRAME (item);
 
 	if (parent_class->realize)
 		(* parent_class->realize) (item);
@@ -421,22 +421,22 @@ gtk_canvas_imageframe_realize (GtkCanvasItem *item)
 }
 
 static void
-gtk_canvas_imageframe_unrealize (GtkCanvasItem *item)
+gnome_canvas_imageframe_unrealize (GnomeCanvasItem *item)
 {
-	GtkCanvasImageFrame *image;
+	GnomeCanvasImageFrame *image;
 
-	image = GTK_CANVAS_IMAGEFRAME(item);
+	image = GNOME_CANVAS_IMAGEFRAME(item);
 
 	if (parent_class->unrealize)
 		(* parent_class->unrealize) (item);
 }
 
 static void
-recalc_if_needed (GtkCanvasImageFrame *image)
+recalc_if_needed (GnomeCanvasImageFrame *image)
 {}
 
 static void
-gtk_canvas_imageframe_draw (GtkCanvasItem *item, GdkDrawable *drawable,
+gnome_canvas_imageframe_draw (GnomeCanvasItem *item, GdkDrawable *drawable,
 			 int x, int y, int width, int height)
 {
 	fprintf(stderr, "please don't use the CanvasImageFrame item in a non-aa Canvas\n") ;
@@ -444,14 +444,14 @@ gtk_canvas_imageframe_draw (GtkCanvasItem *item, GdkDrawable *drawable,
 }
 
 static double
-gtk_canvas_imageframe_point (GtkCanvasItem *item, double x, double y,
-			  int cx, int cy, GtkCanvasItem **actual_item)
+gnome_canvas_imageframe_point (GnomeCanvasItem *item, double x, double y,
+			  int cx, int cy, GnomeCanvasItem **actual_item)
 {
-	GtkCanvasImageFrame *image;
+	GnomeCanvasImageFrame *image;
 	int x1, y1, x2, y2;
 	int dx, dy;
 
-	image = GTK_CANVAS_IMAGEFRAME (item);
+	image = GNOME_CANVAS_IMAGEFRAME (item);
 
 	*actual_item = item;
 
@@ -492,12 +492,12 @@ gtk_canvas_imageframe_point (GtkCanvasItem *item, double x, double y,
 }
 
 static void
-gtk_canvas_imageframe_translate (GtkCanvasItem *item, double dx, double dy)
+gnome_canvas_imageframe_translate (GnomeCanvasItem *item, double dx, double dy)
 {
 #ifdef OLD_XFORM
-	GtkCanvasImageFrame *image;
+	GnomeCanvasImageFrame *image;
 
-	image = GTK_CANVAS_IMAGEFRAME (item);
+	image = GNOME_CANVAS_IMAGEFRAME (item);
 
 	image->x += dx;
 	image->y += dy;
@@ -507,11 +507,11 @@ gtk_canvas_imageframe_translate (GtkCanvasItem *item, double dx, double dy)
 }
 
 static void
-gtk_canvas_imageframe_bounds (GtkCanvasItem *item, double *x1, double *y1, double *x2, double *y2)
+gnome_canvas_imageframe_bounds (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2)
 {
-	GtkCanvasImageFrame *image;
+	GnomeCanvasImageFrame *image;
 
-	image = GTK_CANVAS_IMAGEFRAME (item);
+	image = GNOME_CANVAS_IMAGEFRAME (item);
 
 	*x1 = image->x;
 	*y1 = image->y;
@@ -559,19 +559,19 @@ gtk_canvas_imageframe_bounds (GtkCanvasItem *item, double *x1, double *y1, doubl
 }
 
 static void
-gtk_canvas_imageframe_render      (GtkCanvasItem *item, GtkCanvasBuf *buf)
+gnome_canvas_imageframe_render      (GnomeCanvasItem *item, GnomeCanvasBuf *buf)
 {
-	GtkCanvasImageFrame *image;
+	GnomeCanvasImageFrame *image;
 
-	image = GTK_CANVAS_IMAGEFRAME (item);
+	image = GNOME_CANVAS_IMAGEFRAME (item);
 
-        gtk_canvas_buf_ensure_buf (buf);
+        gnome_canvas_buf_ensure_buf (buf);
 
 #ifdef VERBOSE
 	{
 		char str[128];
 		art_affine_to_string (str, image->affine);
-		g_print ("gtk_canvas_imageframe_render %s\n", str);
+		g_print ("gnome_canvas_imageframe_render %s\n", str);
 	}
 #endif
 

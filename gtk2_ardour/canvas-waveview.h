@@ -1,4 +1,4 @@
-/* gtk-canvas-waveview.h: GtkCanvas item for displaying wave data
+/* libgnomecanvas/gnome-canvas-waveview.h: GnomeCanvas item for displaying wave data
  *
  * Copyright (C) 2001 Paul Davis <pbd@op.net>
  *
@@ -19,56 +19,55 @@
  *
  */
 
-#ifndef __GTK_CANVAS_WAVEVIEW_H__
-#define __GTK_CANVAS_WAVEVIEW_H__
+#ifndef __GNOME_CANVAS_WAVEVIEW_H__
+#define __GNOME_CANVAS_WAVEVIEW_H__
 
 #include <stdint.h>
 
-#include <gtk-canvas/gtk-canvas-defs.h>
-#include "gtk-canvas/gtk-canvas.h"
+#include <libgnomecanvas/libgnomecanvas.h>
 
-BEGIN_GTK_CANVAS_DECLS
+BEGIN_GNOME_CANVAS_DECLS
 
 /* Wave viewer item for canvas.
  */
 
-#define GTK_CANVAS_TYPE_CANVAS_WAVEVIEW            (gtk_canvas_waveview_get_type ())
-#define GTK_CANVAS_WAVEVIEW(obj)                   (GTK_CHECK_CAST ((obj), GTK_CANVAS_TYPE_CANVAS_WAVEVIEW, GtkCanvasWaveView))
-#define GTK_CANVAS_WAVEVIEW_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GTK_CANVAS_TYPE_CANVAS_WAVEVIEW, GtkCanvasWaveViewClass))
-#define GTK_CANVAS_IS_CANVAS_WAVEVIEW(obj)         (GTK_CHECK_TYPE ((obj), GTK_CANVAS_TYPE_CANVAS_WAVEVIEW))
-#define GTK_CANVAS_IS_CANVAS_WAVEVIEW_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GTK_CANVAS_TYPE_CANVAS_WAVEVIEW))
+#define GNOME_CANVAS_TYPE_CANVAS_WAVEVIEW            (gnome_canvas_waveview_get_type ())
+#define GNOME_CANVAS_WAVEVIEW(obj)                   (GTK_CHECK_CAST ((obj), GNOME_CANVAS_TYPE_CANVAS_WAVEVIEW, GnomeCanvasWaveView))
+#define GNOME_CANVAS_WAVEVIEW_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GNOME_CANVAS_TYPE_CANVAS_WAVEVIEW, GnomeCanvasWaveViewClass))
+#define GNOME_CANVAS_IS_CANVAS_WAVEVIEW(obj)         (GTK_CHECK_TYPE ((obj), GNOME_CANVAS_TYPE_CANVAS_WAVEVIEW))
+#define GNOME_CANVAS_IS_CANVAS_WAVEVIEW_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GNOME_CANVAS_TYPE_CANVAS_WAVEVIEW))
 
-typedef struct _GtkCanvasWaveView            GtkCanvasWaveView;
-typedef struct _GtkCanvasWaveViewClass       GtkCanvasWaveViewClass;
-typedef struct _GtkCanvasWaveViewChannelInfo GtkCanvasWaveViewChannelInfo;
-typedef struct _GtkCanvasWaveViewCacheEntry  GtkCanvasWaveViewCacheEntry;
-typedef struct _GtkCanvasWaveViewCache       GtkCanvasWaveViewCache;
+typedef struct _GnomeCanvasWaveView            GnomeCanvasWaveView;
+typedef struct _GnomeCanvasWaveViewClass       GnomeCanvasWaveViewClass;
+typedef struct _GnomeCanvasWaveViewChannelInfo GnomeCanvasWaveViewChannelInfo;
+typedef struct _GnomeCanvasWaveViewCacheEntry  GnomeCanvasWaveViewCacheEntry;
+typedef struct _GnomeCanvasWaveViewCache       GnomeCanvasWaveViewCache;
 
 /* XXX this needs to be synced with ardour/source.h PeakData */
 
-struct _GtkCanvasWaveViewCacheEntry
+struct _GnomeCanvasWaveViewCacheEntry
 {
     float  min;
     float  max;
 };
 
-struct _GtkCanvasWaveViewCache
+struct _GnomeCanvasWaveViewCache
 {
-    GtkCanvasWaveViewCacheEntry* data;
+    GnomeCanvasWaveViewCacheEntry* data;
     gint32                       allocated;
     gint32                       data_size;
     gulong                       start;
     gulong                       end;
 };    
 
-GtkCanvasWaveViewCache* gtk_canvas_waveview_cache_new ();
-void                    gtk_canvas_waveview_cache_destroy (GtkCanvasWaveViewCache*);
+GnomeCanvasWaveViewCache* gnome_canvas_waveview_cache_new ();
+void                    gnome_canvas_waveview_cache_destroy (GnomeCanvasWaveViewCache*);
 
-struct _GtkCanvasWaveView
+struct _GnomeCanvasWaveView
 {
-    GtkCanvasItem item;
+    GnomeCanvasItem item;
     
-    GtkCanvasWaveViewCache *cache;
+    GnomeCanvasWaveViewCache *cache;
     gboolean                cache_updater;
     gint                    screen_width;
 
@@ -117,12 +116,12 @@ struct _GtkCanvasWaveView
     int32_t reload_cache_in_render;
 };
 
-struct _GtkCanvasWaveViewClass {
-	GtkCanvasItemClass parent_class;
+struct _GnomeCanvasWaveViewClass {
+	GnomeCanvasItemClass parent_class;
 };
 
-GtkType gtk_canvas_waveview_get_type (void);
+GtkType gnome_canvas_waveview_get_type (void);
 
-END_GTK_CANVAS_DECLS
+END_GNOME_CANVAS_DECLS
 
-#endif /* __GTK_CANVAS_WAVEVIEW_H__ */
+#endif /* __GNOME_CANVAS_WAVEVIEW_H__ */

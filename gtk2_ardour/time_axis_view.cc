@@ -58,16 +58,16 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 	  editor(ed),
 	  controls_table (2, 9)
 {
-	canvas_display = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(canvas->gobj())),
-					      gtk_canvas_group_get_type(),
+	canvas_display = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(canvas->gobj())),
+					      gnome_canvas_group_get_type(),
 					      "x", 0.0,
 					      "y", 0.0,
 					      NULL);
 
-	selection_group = gtk_canvas_item_new (GTK_CANVAS_GROUP(canvas_display), 
-					       gtk_canvas_group_get_type (), 
+	selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), 
+					       gnome_canvas_group_get_type (), 
 					       NULL);
-	gtk_canvas_item_hide (selection_group);
+	gnome_canvas_item_hide (selection_group);
 	
    	control_parent = 0;
 	display_menu = 0;
@@ -199,13 +199,13 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	   item's parent ...
 	*/
 
-	gtk_canvas_item_get_bounds (canvas_display, &ix1, &iy1, &ix2, &iy2);
-	gtk_canvas_item_i2w (canvas_display->parent, &ix1, &iy1);
+	gnome_canvas_item_get_bounds (canvas_display, &ix1, &iy1, &ix2, &iy2);
+	gnome_canvas_item_i2w (canvas_display->parent, &ix1, &iy1);
 	if (iy1 < 0) {
 		iy1 = 0;
 	}
-	gtk_canvas_item_move (canvas_display, 0.0, y - iy1);
-	gtk_canvas_item_show (canvas_display); /* XXX not necessary */
+	gnome_canvas_item_move (canvas_display, 0.0, y - iy1);
+	gnome_canvas_item_show (canvas_display); /* XXX not necessary */
 
 	y_position = y;
 	order = nth;
@@ -218,10 +218,10 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
 		
 		if ((*i)->marked_for_display()) {
-			gtk_canvas_item_show ((*i)->canvas_display);
+			gnome_canvas_item_show ((*i)->canvas_display);
 		}
 		
-		if (GTK_OBJECT_FLAGS(GTK_OBJECT((*i)->canvas_display)) & GTK_CANVAS_ITEM_VISIBLE) {
+		if (GTK_OBJECT_FLAGS(GTK_OBJECT((*i)->canvas_display)) & GNOME_CANVAS_ITEM_VISIBLE) {
 			++nth;
 			effective_height += (*i)->show_at (y + effective_height, nth, parent);
 		}
@@ -288,7 +288,7 @@ TimeAxisView::hide ()
 		return;
 	}
 
-	gtk_canvas_item_hide (canvas_display);
+	gnome_canvas_item_hide (canvas_display);
 	controls_frame.hide ();
 
 	if (control_parent) {
@@ -344,7 +344,7 @@ TimeAxisView::set_height (TrackHeight h)
 	height = (guint32) h;
 	controls_frame.set_size_request (-1, height);
 
- 	if (GTK_OBJECT_FLAGS(GTK_OBJECT(selection_group)) & GTK_CANVAS_ITEM_VISIBLE) {
+ 	if (GTK_OBJECT_FLAGS(GTK_OBJECT(selection_group)) & GNOME_CANVAS_ITEM_VISIBLE) {
 		/* resize the selection rect */
 		show_selection (editor.get_selection().time);
 	}
@@ -498,19 +498,19 @@ TimeAxisView::show_selection (TimeSelection& ts)
 		(*i)->show_selection (ts);
 	}
 
-	if (GTK_OBJECT_FLAGS(GTK_OBJECT(selection_group)) & GTK_CANVAS_ITEM_VISIBLE) {
+	if (GTK_OBJECT_FLAGS(GTK_OBJECT(selection_group)) & GNOME_CANVAS_ITEM_VISIBLE) {
 		while (!used_selection_rects.empty()) {
 			free_selection_rects.push_front (used_selection_rects.front());
 			used_selection_rects.pop_front();
-			gtk_canvas_item_hide (free_selection_rects.front()->rect);
-			gtk_canvas_item_hide (free_selection_rects.front()->start_trim);
-			gtk_canvas_item_hide (free_selection_rects.front()->end_trim);
+			gnome_canvas_item_hide (free_selection_rects.front()->rect);
+			gnome_canvas_item_hide (free_selection_rects.front()->start_trim);
+			gnome_canvas_item_hide (free_selection_rects.front()->end_trim);
 		}
-		gtk_canvas_item_hide (selection_group);
+		gnome_canvas_item_hide (selection_group);
 	}
 
-	gtk_canvas_item_show (selection_group);
-	gtk_canvas_item_raise_to_top (selection_group);
+	gnome_canvas_item_show (selection_group);
+	gnome_canvas_item_raise_to_top (selection_group);
 	
 	for (list<AudioRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
 		jack_nframes_t start, end, cnt;
@@ -547,14 +547,14 @@ TimeAxisView::show_selection (TimeSelection& ts)
 					"x2", x2,
 					"y2", 1.0 + trim_handle_size,
 					NULL);
-			gtk_canvas_item_show (rect->start_trim);
-			gtk_canvas_item_show (rect->end_trim);
+			gnome_canvas_item_show (rect->start_trim);
+			gnome_canvas_item_show (rect->end_trim);
 		} else {
-			gtk_canvas_item_hide (rect->start_trim);
-			gtk_canvas_item_hide (rect->end_trim);
+			gnome_canvas_item_hide (rect->start_trim);
+			gnome_canvas_item_hide (rect->end_trim);
 		}
 
-		gtk_canvas_item_show (rect->rect);
+		gnome_canvas_item_show (rect->rect);
 		used_selection_rects.push_back (rect);
 	}
 }
@@ -572,15 +572,15 @@ TimeAxisView::reshow_selection (TimeSelection& ts)
 void
 TimeAxisView::hide_selection ()
 {
-	if (GTK_OBJECT_FLAGS(GTK_OBJECT(selection_group)) & GTK_CANVAS_ITEM_VISIBLE) {
+	if (GTK_OBJECT_FLAGS(GTK_OBJECT(selection_group)) & GNOME_CANVAS_ITEM_VISIBLE) {
 		while (!used_selection_rects.empty()) {
 			free_selection_rects.push_front (used_selection_rects.front());
 			used_selection_rects.pop_front();
-			gtk_canvas_item_hide (free_selection_rects.front()->rect);
-			gtk_canvas_item_hide (free_selection_rects.front()->start_trim);
-			gtk_canvas_item_hide (free_selection_rects.front()->end_trim);
+			gnome_canvas_item_hide (free_selection_rects.front()->rect);
+			gnome_canvas_item_hide (free_selection_rects.front()->start_trim);
+			gnome_canvas_item_hide (free_selection_rects.front()->end_trim);
 		}
-		gtk_canvas_item_hide (selection_group);
+		gnome_canvas_item_hide (selection_group);
 	}
 	
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
@@ -589,7 +589,7 @@ TimeAxisView::hide_selection ()
 }
 
 void
-TimeAxisView::order_selection_trims (GtkCanvasItem *item, bool put_start_on_top)
+TimeAxisView::order_selection_trims (GnomeCanvasItem *item, bool put_start_on_top)
 {
 	/* find the selection rect this is for. we have the item corresponding to one
 	   of the trim handles.
@@ -602,9 +602,9 @@ TimeAxisView::order_selection_trims (GtkCanvasItem *item, bool put_start_on_top)
 			   the top one is the one last used.
 			*/
 
-			gtk_canvas_item_raise_to_top ((*i)->rect);
-			gtk_canvas_item_raise_to_top (put_start_on_top ? (*i)->start_trim : (*i)->end_trim);
-			gtk_canvas_item_raise_to_top (put_start_on_top ? (*i)->end_trim : (*i)->start_trim);
+			gnome_canvas_item_raise_to_top ((*i)->rect);
+			gnome_canvas_item_raise_to_top (put_start_on_top ? (*i)->start_trim : (*i)->end_trim);
+			gnome_canvas_item_raise_to_top (put_start_on_top ? (*i)->end_trim : (*i)->start_trim);
 
 			break;
 		}
@@ -639,8 +639,8 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 		rect = new SelectionRect;
 
-		rect->rect = gtk_canvas_item_new (GTK_CANVAS_GROUP(selection_group),
-						  gtk_canvas_simplerect_get_type(),
+		rect->rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(selection_group),
+						  gnome_canvas_simplerect_get_type(),
 						  "x1", 0.0,
 						  "y1", 0.0,
 						  "x2", 0.0,
@@ -650,16 +650,16 @@ TimeAxisView::get_selection_rect (uint32_t id)
 						  NULL);
 		
 		
-		rect->start_trim = gtk_canvas_item_new (GTK_CANVAS_GROUP(selection_group),
-							    gtk_canvas_simplerect_get_type(),
+		rect->start_trim = gnome_canvas_item_new (GNOME_CANVAS_GROUP(selection_group),
+							    gnome_canvas_simplerect_get_type(),
 							    "x1", (gdouble) 0.0,
 							    "x2", (gdouble) 0.0,
 							    "fill_color_rgba" , color_map[cSelectionStartFill],
 							    "outline_color_rgba" , color_map[cSelectionStartOutline],
 							    NULL);
 		
-		rect->end_trim = gtk_canvas_item_new (GTK_CANVAS_GROUP(selection_group),
-							  gtk_canvas_simplerect_get_type(),
+		rect->end_trim = gnome_canvas_item_new (GNOME_CANVAS_GROUP(selection_group),
+							  gnome_canvas_simplerect_get_type(),
 							  "x1", 0.0,
 							  "x2", 0.0,
 							  "fill_color_rgba" , color_map[cSelectionEndFill],

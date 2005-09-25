@@ -19,7 +19,7 @@ class PanAutomationTimeAxisView : public AutomationTimeAxisView
 
 	~PanAutomationTimeAxisView();
 
-	void add_automation_event (GtkCanvasItem *item, GdkEvent *event, jack_nframes_t, double);
+	void add_automation_event (GnomeCanvasItem *item, GdkEvent *event, jack_nframes_t, double);
 	
    private:
         void automation_changed ();

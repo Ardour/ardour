@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 
 #include <ardour/diskstream.h>
 #include <ardour/audioplaylist.h>
@@ -45,14 +45,14 @@ using namespace ARDOUR;
 using namespace Gtk;
 
 gint
-Editor::_canvas_copy_region_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_copy_region_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = (Editor*)data;
 	return editor->canvas_copy_region_event (item, event);
 }
 
 gint
-Editor::_canvas_crossfade_view_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_crossfade_view_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	CrossfadeView* xfv = static_cast<CrossfadeView*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&xfv->get_time_axis_view().editor);
@@ -60,7 +60,7 @@ Editor::_canvas_crossfade_view_event (GtkCanvasItem *item, GdkEvent *event, gpoi
 }
 
 gint
-Editor::_canvas_fade_in_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_fade_in_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	AudioRegionView* rv = static_cast<AudioRegionView*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
@@ -68,7 +68,7 @@ Editor::_canvas_fade_in_event (GtkCanvasItem *item, GdkEvent *event, gpointer da
 }
 
 gint
-Editor::_canvas_fade_in_handle_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_fade_in_handle_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	AudioRegionView* rv = static_cast<AudioRegionView*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
@@ -76,7 +76,7 @@ Editor::_canvas_fade_in_handle_event (GtkCanvasItem *item, GdkEvent *event, gpoi
 }
 
 gint
-Editor::_canvas_fade_out_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_fade_out_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	AudioRegionView* rv = static_cast<AudioRegionView*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
@@ -84,7 +84,7 @@ Editor::_canvas_fade_out_event (GtkCanvasItem *item, GdkEvent *event, gpointer d
 }
 
 gint
-Editor::_canvas_fade_out_handle_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_fade_out_handle_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	AudioRegionView* rv = static_cast<AudioRegionView*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
@@ -92,7 +92,7 @@ Editor::_canvas_fade_out_handle_event (GtkCanvasItem *item, GdkEvent *event, gpo
 }
 
 gint
-Editor::_canvas_region_view_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_region_view_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	AudioRegionView *rv = reinterpret_cast<AudioRegionView *>(data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
@@ -101,7 +101,7 @@ Editor::_canvas_region_view_event (GtkCanvasItem *item, GdkEvent *event, gpointe
 }
 
 gint
-Editor::_canvas_region_view_name_highlight_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_region_view_name_highlight_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	AudioRegionView *rv = reinterpret_cast<AudioRegionView *> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
@@ -110,7 +110,7 @@ Editor::_canvas_region_view_name_highlight_event (GtkCanvasItem *item, GdkEvent 
 }
 
 gint
-Editor::_canvas_region_view_name_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_region_view_name_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	AudioRegionView *rv = reinterpret_cast<AudioRegionView *> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
@@ -119,7 +119,7 @@ Editor::_canvas_region_view_name_event (GtkCanvasItem *item, GdkEvent *event, gp
 }
 
 gint
-Editor::_canvas_stream_view_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_stream_view_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	/* note that stream views are by definition audio track views */
 
@@ -130,7 +130,7 @@ Editor::_canvas_stream_view_event (GtkCanvasItem *item, GdkEvent *event, gpointe
 }
 
 gint
-Editor::_canvas_automation_track_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_automation_track_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	AutomationTimeAxisView* atv = (AutomationTimeAxisView*) data;
 	Editor* editor = dynamic_cast<Editor*>(&atv->editor);
@@ -139,7 +139,7 @@ Editor::_canvas_automation_track_event (GtkCanvasItem *item, GdkEvent *event, gp
 }
 
 gint
-Editor::_canvas_control_point_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_control_point_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	ControlPoint *cp = reinterpret_cast<ControlPoint *>(data);
 	Editor* editor = dynamic_cast<Editor*>(&cp->line.trackview.editor);
@@ -162,7 +162,7 @@ Editor::_canvas_control_point_event (GtkCanvasItem *item, GdkEvent *event, gpoin
 }
 
 gint
-Editor::_canvas_line_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_line_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	AutomationLine *line = reinterpret_cast<AutomationLine*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&line->trackview.editor);
@@ -171,21 +171,21 @@ Editor::_canvas_line_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
 }
 
 gint
-Editor::_canvas_tempo_marker_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_tempo_marker_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
 	return editor->canvas_tempo_marker_event (item, event);
 }
 
 gint
-Editor::_canvas_meter_marker_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_meter_marker_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor *) data);
 	return editor->canvas_meter_marker_event (item, event);
 }
 
 gint
-Editor::_canvas_tempo_bar_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_tempo_bar_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	/* XXX NO CAST */
 	Editor* editor = (Editor*) data;
@@ -193,7 +193,7 @@ Editor::_canvas_tempo_bar_event (GtkCanvasItem *item, GdkEvent *event, gpointer 
 }
 
 gint
-Editor::_canvas_meter_bar_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_meter_bar_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	/* XXX NO CAST */
 	Editor* editor = (Editor*) data;
@@ -201,14 +201,14 @@ Editor::_canvas_meter_bar_event (GtkCanvasItem *item, GdkEvent *event, gpointer 
 }
 
 gint
-Editor::_canvas_marker_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_marker_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
 	return editor->canvas_marker_event (item, event);
 }
 
 gint
-Editor::_canvas_marker_bar_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_marker_bar_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	/* NO CAST */
 	Editor* editor = (Editor*) data;
@@ -216,7 +216,7 @@ Editor::_canvas_marker_bar_event (GtkCanvasItem *item, GdkEvent *event, gpointer
 }
 
 gint
-Editor::_canvas_range_marker_bar_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_range_marker_bar_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	/* NO CAST */
 	Editor* editor = (Editor*) data;
@@ -224,7 +224,7 @@ Editor::_canvas_range_marker_bar_event (GtkCanvasItem *item, GdkEvent *event, gp
 }
 
 gint
-Editor::_canvas_transport_marker_bar_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_transport_marker_bar_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	/* NO CAST */
 	Editor* editor = (Editor*) data;
@@ -232,7 +232,7 @@ Editor::_canvas_transport_marker_bar_event (GtkCanvasItem *item, GdkEvent *event
 }
 
 gint
-Editor::_canvas_playhead_cursor_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_playhead_cursor_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	/* NO CAST */
 	Editor* editor = (Editor*) data;
@@ -240,7 +240,7 @@ Editor::_canvas_playhead_cursor_event (GtkCanvasItem *item, GdkEvent *event, gpo
 }
 
 gint
-Editor::_canvas_edit_cursor_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_edit_cursor_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	/* NO CAST */
 	Editor* editor = (Editor*) data;
@@ -248,35 +248,35 @@ Editor::_canvas_edit_cursor_event (GtkCanvasItem *item, GdkEvent *event, gpointe
 }
 
 gint
-Editor::_canvas_zoom_rect_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_zoom_rect_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
 	return editor->canvas_zoom_rect_event (item, event);
 }
 
 gint
-Editor::_canvas_selection_rect_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_selection_rect_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
 	return editor->canvas_selection_rect_event (item, event);
 }
 
 gint
-Editor::_canvas_selection_start_trim_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_selection_start_trim_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
 	return editor->canvas_selection_start_trim_event (item, event);
 }
 
 gint
-Editor::_canvas_selection_end_trim_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_canvas_selection_end_trim_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
 	return editor->canvas_selection_end_trim_event (item, event);
 }
 
 gint
-Editor::_track_canvas_event (GtkCanvasItem *item, GdkEvent *event, gpointer data)
+Editor::_track_canvas_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	/* NO CAST */
 
@@ -287,7 +287,7 @@ Editor::_track_canvas_event (GtkCanvasItem *item, GdkEvent *event, gpointer data
 /********** END OF.TATIC EVENT HANDLERS */
 
 gint
-Editor::track_canvas_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::track_canvas_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	gint x, y;
 
@@ -314,10 +314,10 @@ Editor::track_canvas_event (GtkCanvasItem *item, GdkEvent *event)
 }
 
 gint
-Editor::track_canvas_motion (GtkCanvasItem *item, GdkEvent *ev)
+Editor::track_canvas_motion (GnomeCanvasItem *item, GdkEvent *ev)
 {
 	if (verbose_cursor_visible) {
-		gtk_canvas_item_set (verbose_canvas_cursor,
+		gnome_canvas_item_set (verbose_canvas_cursor,
 				     "x", ev->motion.x + 20,
 				     "y", ev->motion.y + 20,
 				     NULL);
@@ -326,7 +326,7 @@ Editor::track_canvas_motion (GtkCanvasItem *item, GdkEvent *ev)
 }
 
 gint
-Editor::typed_event (GtkCanvasItem *item, GdkEvent *event, ItemType type)
+Editor::typed_event (GnomeCanvasItem *item, GdkEvent *event, ItemType type)
 {
 	gint ret = FALSE;
 	
@@ -359,7 +359,7 @@ Editor::typed_event (GtkCanvasItem *item, GdkEvent *event, ItemType type)
 }
 
 gint
-Editor::canvas_region_view_event (GtkCanvasItem *item, GdkEvent *event, AudioRegionView *rv)
+Editor::canvas_region_view_event (GnomeCanvasItem *item, GdkEvent *event, AudioRegionView *rv)
 {
 	gint ret = FALSE;
 	
@@ -398,7 +398,7 @@ Editor::canvas_region_view_event (GtkCanvasItem *item, GdkEvent *event, AudioReg
 }
 
 gint
-Editor::canvas_stream_view_event (GtkCanvasItem *item, GdkEvent *event, AudioTimeAxisView *tv)
+Editor::canvas_stream_view_event (GnomeCanvasItem *item, GdkEvent *event, AudioTimeAxisView *tv)
 {
 	gint ret = FALSE;
 	
@@ -434,7 +434,7 @@ Editor::canvas_stream_view_event (GtkCanvasItem *item, GdkEvent *event, AudioTim
 
 
 gint
-Editor::canvas_automation_track_event (GtkCanvasItem *item, GdkEvent *event, AutomationTimeAxisView *atv)
+Editor::canvas_automation_track_event (GnomeCanvasItem *item, GdkEvent *event, AutomationTimeAxisView *atv)
 {
 	gint ret = FALSE;
 	
@@ -473,7 +473,7 @@ Editor::canvas_automation_track_event (GtkCanvasItem *item, GdkEvent *event, Aut
 }
 
 gint
-Editor::canvas_fade_in_event (GtkCanvasItem *item, GdkEvent *event, AudioRegionView *rv)
+Editor::canvas_fade_in_event (GnomeCanvasItem *item, GdkEvent *event, AudioRegionView *rv)
 {
 	/* we handle only button 3 press/release events */
 
@@ -505,7 +505,7 @@ Editor::canvas_fade_in_event (GtkCanvasItem *item, GdkEvent *event, AudioRegionV
 }
 
 gint
-Editor::canvas_fade_in_handle_event (GtkCanvasItem *item, GdkEvent *event, AudioRegionView *rv)
+Editor::canvas_fade_in_handle_event (GnomeCanvasItem *item, GdkEvent *event, AudioRegionView *rv)
 {
 	gint ret = FALSE;
 	
@@ -544,7 +544,7 @@ Editor::canvas_fade_in_handle_event (GtkCanvasItem *item, GdkEvent *event, Audio
 }
 
 gint
-Editor::canvas_fade_out_event (GtkCanvasItem *item, GdkEvent *event, AudioRegionView *rv)
+Editor::canvas_fade_out_event (GnomeCanvasItem *item, GdkEvent *event, AudioRegionView *rv)
 {
 	/* we handle only button 3 press/release events */
 
@@ -576,7 +576,7 @@ Editor::canvas_fade_out_event (GtkCanvasItem *item, GdkEvent *event, AudioRegion
 }
 
 gint
-Editor::canvas_fade_out_handle_event (GtkCanvasItem *item, GdkEvent *event, AudioRegionView *rv)
+Editor::canvas_fade_out_handle_event (GnomeCanvasItem *item, GdkEvent *event, AudioRegionView *rv)
 {
 	gint ret = FALSE;
 	
@@ -621,7 +621,7 @@ struct DescendingRegionLayerSorter {
 };
 
 gint
-Editor::canvas_crossfade_view_event (GtkCanvasItem* item, GdkEvent* event, CrossfadeView* xfv)
+Editor::canvas_crossfade_view_event (GnomeCanvasItem* item, GdkEvent* event, CrossfadeView* xfv)
 {
 	/* we handle only button 3 press/release events */
 
@@ -682,7 +682,7 @@ Editor::canvas_crossfade_view_event (GtkCanvasItem* item, GdkEvent* event, Cross
 }
 
 gint
-Editor::canvas_control_point_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_control_point_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	ItemType type;
 	ControlPoint *cp;
@@ -708,7 +708,7 @@ Editor::canvas_control_point_event (GtkCanvasItem *item, GdkEvent *event)
 }
 
 gint
-Editor::canvas_line_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_line_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	ItemType type;
 	AutomationLine *al;
@@ -735,7 +735,7 @@ Editor::canvas_line_event (GtkCanvasItem *item, GdkEvent *event)
 
 
 gint
-Editor::canvas_selection_rect_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_selection_rect_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	gint ret = FALSE;
 	SelectionRect *rect = 0;
@@ -775,7 +775,7 @@ Editor::canvas_selection_rect_event (GtkCanvasItem *item, GdkEvent *event)
 }
 
 gint
-Editor::canvas_selection_start_trim_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_selection_start_trim_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	gint ret = FALSE;
 	SelectionRect *rect = 0;
@@ -814,7 +814,7 @@ Editor::canvas_selection_start_trim_event (GtkCanvasItem *item, GdkEvent *event)
 }
 
 gint
-Editor::canvas_selection_end_trim_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_selection_end_trim_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	gint ret = FALSE;
 	SelectionRect *rect = 0;
@@ -854,7 +854,7 @@ Editor::canvas_selection_end_trim_event (GtkCanvasItem *item, GdkEvent *event)
 
 
 gint
-Editor::canvas_region_view_name_highlight_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_region_view_name_highlight_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	gint ret = FALSE;
 
@@ -890,7 +890,7 @@ Editor::canvas_region_view_name_highlight_event (GtkCanvasItem *item, GdkEvent *
 }
 
 gint
-Editor::canvas_region_view_name_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_region_view_name_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	gint ret = FALSE;
 
@@ -926,73 +926,73 @@ Editor::canvas_region_view_name_event (GtkCanvasItem *item, GdkEvent *event)
 }
 
 gint
-Editor::canvas_marker_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_marker_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, MarkerItem);
 }
 
 gint
-Editor::canvas_marker_bar_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_marker_bar_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, MarkerBarItem);
 }
 
 gint
-Editor::canvas_range_marker_bar_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_range_marker_bar_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, RangeMarkerBarItem);
 }
 
 gint
-Editor::canvas_transport_marker_bar_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_transport_marker_bar_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, TransportMarkerBarItem);
 }
 
 gint
-Editor::canvas_tempo_marker_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_tempo_marker_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, TempoMarkerItem);
 }
 
 gint
-Editor::canvas_meter_marker_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_meter_marker_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, MeterMarkerItem);
 }
 
 gint
-Editor::canvas_tempo_bar_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_tempo_bar_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, TempoBarItem);
 }
 
 gint
-Editor::canvas_meter_bar_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_meter_bar_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, MeterBarItem);
 }
 
 gint
-Editor::canvas_playhead_cursor_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_playhead_cursor_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, PlayheadCursorItem);
 }
 
 gint
-Editor::canvas_edit_cursor_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_edit_cursor_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, EditCursorItem);
 }
 
 gint
-Editor::canvas_zoom_rect_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_zoom_rect_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, NoItem);
 }
 
 gint
-Editor::canvas_copy_region_event (GtkCanvasItem *item, GdkEvent *event)
+Editor::canvas_copy_region_event (GnomeCanvasItem *item, GdkEvent *event)
 {
 	return typed_event (item, event, RegionItem);
 }

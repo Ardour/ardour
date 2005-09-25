@@ -53,8 +53,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 	auto_play_item = 0;
 	ignore_state_request = false;
 
-	base_rect = gtk_canvas_item_new (GTK_CANVAS_GROUP(canvas_display),
-					 gtk_canvas_simplerect_get_type(),
+	base_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display),
+					 gnome_canvas_simplerect_get_type(),
 					 "x1", 0.0,
 					 "y1", 0.0,
 					 "x2", 1000000.0,

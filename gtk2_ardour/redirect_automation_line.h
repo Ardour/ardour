@@ -22,7 +22,7 @@
 #define __ardour_gtk_redirect_automation_line_h__
 
 #include <ardour/ardour.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm.h>
 
 #include "automation_line.h"
@@ -37,10 +37,10 @@ class TimeAxisView;
 class RedirectAutomationLine : public AutomationLine
 {
   public:
-	RedirectAutomationLine (string name, ARDOUR::Redirect&, uint32_t port, ARDOUR::Session&, TimeAxisView&, GtkCanvasItem* parent,
+	RedirectAutomationLine (string name, ARDOUR::Redirect&, uint32_t port, ARDOUR::Session&, TimeAxisView&, GnomeCanvasItem* parent,
 				ARDOUR::AutomationList&, 
-				gint (*point_callback)(GtkCanvasItem*, GdkEvent*, gpointer),
-				gint (*line_callback)(GtkCanvasItem*, GdkEvent*, gpointer));
+				gint (*point_callback)(GnomeCanvasItem*, GdkEvent*, gpointer),
+				gint (*line_callback)(GnomeCanvasItem*, GdkEvent*, gpointer));
 	
 	uint32_t port() const { return _port; }
 	ARDOUR::Redirect& redirect() const { return _redirect; }

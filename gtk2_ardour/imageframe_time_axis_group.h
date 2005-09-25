@@ -25,7 +25,7 @@
 #include <cmath>
 
 #include <gtkmm.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <jack/jack.h>
 #include "imageframe_time_axis_view.h"
 

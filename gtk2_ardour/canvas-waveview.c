@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <string.h>
 #include <limits.h>
 
@@ -50,100 +50,100 @@ enum {
 	ARG_REGION_START
 };
 
-static void gtk_canvas_waveview_class_init (GtkCanvasWaveViewClass *class);
-static void gtk_canvas_waveview_init       (GtkCanvasWaveView      *waveview);
-static void gtk_canvas_waveview_set_arg    (GtkObject              *object,
+static void gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class);
+static void gnome_canvas_waveview_init       (GnomeCanvasWaveView      *waveview);
+static void gnome_canvas_waveview_set_arg    (GtkObject              *object,
 					      GtkArg                 *arg,
 					      guint                   arg_id);
-static void gtk_canvas_waveview_get_arg    (GtkObject              *object,
+static void gnome_canvas_waveview_get_arg    (GtkObject              *object,
 					      GtkArg                 *arg,
 					      guint                   arg_id);
 
-static void   gtk_canvas_waveview_update      (GtkCanvasItem *item, double *affine, ArtSVP *clip_path, int flags);
-static void   gtk_canvas_waveview_bounds      (GtkCanvasItem *item, double *x1, double *y1, double *x2, double *y2);
-static double gtk_canvas_waveview_point (GtkCanvasItem *item, double x, double y, int cx, int cy, GtkCanvasItem **actual_item);
+static void   gnome_canvas_waveview_update      (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags);
+static void   gnome_canvas_waveview_bounds      (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2);
+static double gnome_canvas_waveview_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item);
 
-static void gtk_canvas_waveview_render (GtkCanvasItem *item, GtkCanvasBuf *buf);
-static void gtk_canvas_waveview_draw (GtkCanvasItem *item, GdkDrawable *drawable, int x, int y, int w, int h);
+static void gnome_canvas_waveview_render (GnomeCanvasItem *item, GnomeCanvasBuf *buf);
+static void gnome_canvas_waveview_draw (GnomeCanvasItem *item, GdkDrawable *drawable, int x, int y, int w, int h);
 
-static void gtk_canvas_waveview_set_data_src      (GtkCanvasWaveView *, void *);
-static void gtk_canvas_waveview_set_channel      (GtkCanvasWaveView *, guint32);
+static void gnome_canvas_waveview_set_data_src      (GnomeCanvasWaveView *, void *);
+static void gnome_canvas_waveview_set_channel      (GnomeCanvasWaveView *, guint32);
 
-static gint32 gtk_canvas_waveview_ensure_cache (GtkCanvasWaveView *waveview, gulong start_sample, gulong end_sample);
+static gint32 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_sample, gulong end_sample);
 
-static GtkCanvasItemClass *parent_class;
+static GnomeCanvasItemClass *parent_class;
 
 GtkType
-gtk_canvas_waveview_get_type (void)
+gnome_canvas_waveview_get_type (void)
 {
 	static GtkType waveview_type = 0;
 
 	if (!waveview_type) {
 		GtkTypeInfo waveview_info = {
-			"GtkCanvasWaveView",
-			sizeof (GtkCanvasWaveView),
-			sizeof (GtkCanvasWaveViewClass),
-			(GtkClassInitFunc) gtk_canvas_waveview_class_init,
-			(GtkObjectInitFunc) gtk_canvas_waveview_init,
+			"GnomeCanvasWaveView",
+			sizeof (GnomeCanvasWaveView),
+			sizeof (GnomeCanvasWaveViewClass),
+			(GtkClassInitFunc) gnome_canvas_waveview_class_init,
+			(GtkObjectInitFunc) gnome_canvas_waveview_init,
 			NULL, /* reserved_1 */
 			NULL, /* reserved_2 */
 			(GtkClassInitFunc) NULL
 		};
 
-		waveview_type = gtk_type_unique (gtk_canvas_item_get_type (), &waveview_info);
+		waveview_type = gtk_type_unique (gnome_canvas_item_get_type (), &waveview_info);
 	}
 
 	return waveview_type;
 }
 
 static void
-gtk_canvas_waveview_class_init (GtkCanvasWaveViewClass *class)
+gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
 {
 	GtkObjectClass *object_class;
-	GtkCanvasItemClass *item_class;
+	GnomeCanvasItemClass *item_class;
 
 	object_class = (GtkObjectClass *) class;
-	item_class = (GtkCanvasItemClass *) class;
+	item_class = (GnomeCanvasItemClass *) class;
 
-	parent_class = gtk_type_class (gtk_canvas_item_get_type ());
+	parent_class = gtk_type_class (gnome_canvas_item_get_type ());
 
-	gtk_object_add_arg_type ("GtkCanvasWaveView::data_src", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_DATA_SRC);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::channel", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_CHANNEL);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::length_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_LENGTH_FUNCTION);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::sourcefile_length_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_SOURCEFILE_LENGTH_FUNCTION);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::peak_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_PEAK_FUNCTION);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::gain_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_GAIN_FUNCTION);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::gain_src", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_GAIN_SRC);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::cache", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_CACHE);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::cache_updater", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_CACHE_UPDATER);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::samples_per_unit", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_SAMPLES_PER_PIXEL);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::amplitude_above_axis", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_AMPLITUDE_ABOVE_AXIS);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::x", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::y", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::height", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_HEIGHT);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::wave_color", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_WAVE_COLOR);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::rectified", GTK_TYPE_BOOL, GTK_ARG_READWRITE, ARG_RECTIFIED);
-	gtk_object_add_arg_type ("GtkCanvasWaveView::region_start", GTK_TYPE_UINT, GTK_ARG_READWRITE, ARG_REGION_START);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::data_src", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_DATA_SRC);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::channel", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_CHANNEL);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::length_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_LENGTH_FUNCTION);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::sourcefile_length_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_SOURCEFILE_LENGTH_FUNCTION);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::peak_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_PEAK_FUNCTION);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::gain_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_GAIN_FUNCTION);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::gain_src", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_GAIN_SRC);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::cache", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_CACHE);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::cache_updater", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_CACHE_UPDATER);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::samples_per_unit", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_SAMPLES_PER_PIXEL);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::amplitude_above_axis", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_AMPLITUDE_ABOVE_AXIS);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::x", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::y", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::height", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_HEIGHT);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::wave_color", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_WAVE_COLOR);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::rectified", GTK_TYPE_BOOL, GTK_ARG_READWRITE, ARG_RECTIFIED);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::region_start", GTK_TYPE_UINT, GTK_ARG_READWRITE, ARG_REGION_START);
 
-	object_class->set_arg = gtk_canvas_waveview_set_arg;
-	object_class->get_arg = gtk_canvas_waveview_get_arg;
+	object_class->set_arg = gnome_canvas_waveview_set_arg;
+	object_class->get_arg = gnome_canvas_waveview_get_arg;
 
-	item_class->update = gtk_canvas_waveview_update;
-	item_class->bounds = gtk_canvas_waveview_bounds;
-	item_class->point = gtk_canvas_waveview_point;
-	item_class->render = gtk_canvas_waveview_render;
-	item_class->draw = gtk_canvas_waveview_draw;
+	item_class->update = gnome_canvas_waveview_update;
+	item_class->bounds = gnome_canvas_waveview_bounds;
+	item_class->point = gnome_canvas_waveview_point;
+	item_class->render = gnome_canvas_waveview_render;
+	item_class->draw = gnome_canvas_waveview_draw;
 }
 
-GtkCanvasWaveViewCache*
-gtk_canvas_waveview_cache_new ()
+GnomeCanvasWaveViewCache*
+gnome_canvas_waveview_cache_new ()
 {
-	GtkCanvasWaveViewCache *c;
+	GnomeCanvasWaveViewCache *c;
 
-	c = g_malloc (sizeof (GtkCanvasWaveViewCache));
+	c = g_malloc (sizeof (GnomeCanvasWaveViewCache));
 
 	c->allocated = 2048;
-	c->data = g_malloc (sizeof (GtkCanvasWaveViewCacheEntry) * c->allocated);
+	c->data = g_malloc (sizeof (GnomeCanvasWaveViewCacheEntry) * c->allocated);
 	c->data_size = 0;
 	c->start = 0;
 	c->end = 0;
@@ -152,14 +152,14 @@ gtk_canvas_waveview_cache_new ()
 }
 
 void
-gtk_canvas_waveview_cache_destroy (GtkCanvasWaveViewCache* cache)
+gnome_canvas_waveview_cache_destroy (GnomeCanvasWaveViewCache* cache)
 {
 	g_free (cache->data);
 	g_free (cache);
 }
 
 static void
-gtk_canvas_waveview_init (GtkCanvasWaveView *waveview)
+gnome_canvas_waveview_init (GnomeCanvasWaveView *waveview)
 {
 	waveview->x = 0.0;
 	waveview->y = 0.0;
@@ -182,13 +182,13 @@ gtk_canvas_waveview_init (GtkCanvasWaveView *waveview)
 
  	waveview->wave_color = RGBA_TO_UINT(44,35,126,255);
 
-	GTK_CANVAS_ITEM(waveview)->object.flags |= GTK_CANVAS_ITEM_NO_AUTO_REDRAW;
+	GNOME_CANVAS_ITEM(waveview)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 #define DEBUG_CACHE 0
 
 static gint32
-gtk_canvas_waveview_ensure_cache (GtkCanvasWaveView *waveview, gulong start_sample, gulong end_sample)
+gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_sample, gulong end_sample)
 {
 	gulong required_cache_entries;
 	gulong rf1, rf2,rf3, required_frames;
@@ -200,7 +200,7 @@ gtk_canvas_waveview_ensure_cache (GtkCanvasWaveView *waveview, gulong start_samp
 	gulong present_frames;
 	gulong present_entries;
 	gulong copied;
-	GtkCanvasWaveViewCache *cache;
+	GnomeCanvasWaveViewCache *cache;
 	float* gain;
 
 	cache = waveview->cache;
@@ -267,7 +267,7 @@ gtk_canvas_waveview_ensure_cache (GtkCanvasWaveView *waveview, gulong start_samp
 #endif
 
 	if (required_cache_entries > cache->allocated) {
-		cache->data = g_realloc (cache->data, sizeof (GtkCanvasWaveViewCacheEntry) * required_cache_entries);
+		cache->data = g_realloc (cache->data, sizeof (GnomeCanvasWaveViewCacheEntry) * required_cache_entries);
 		cache->allocated = required_cache_entries;
 		// cache->start = 0;
 		// cache->end = 0;
@@ -309,7 +309,7 @@ gtk_canvas_waveview_ensure_cache (GtkCanvasWaveView *waveview, gulong start_samp
 
 		memmove (&cache->data[0],
 			 &cache->data[cache->data_size - present_entries],
-			 present_entries * sizeof (GtkCanvasWaveViewCacheEntry));
+			 present_entries * sizeof (GnomeCanvasWaveViewCacheEntry));
 		
 #if DEBUG_CACHE
 		fprintf (stderr, "satisfied %lu of %lu frames, offset = %lu, will start at %lu (ptr = 0x%x)\n",
@@ -340,7 +340,7 @@ gtk_canvas_waveview_ensure_cache (GtkCanvasWaveView *waveview, gulong start_samp
 
 		memmove (&cache->data[cache->data_size - present_entries],
 			 &cache->data[0],
-			 present_entries * sizeof (GtkCanvasWaveViewCacheEntry));
+			 present_entries * sizeof (GnomeCanvasWaveViewCacheEntry));
 		
 #if DEBUG_CACHE		
 		fprintf (stderr, "existing material at start of current cache, move to start of end cache\n");
@@ -399,7 +399,7 @@ gtk_canvas_waveview_ensure_cache (GtkCanvasWaveView *waveview, gulong start_samp
 #if DEBUG_CACHE
 		fprintf (stderr, "zero fill cache for %lu at %lu\n", cache->allocated - npeaks, npeaks);
 #endif
-		memset (&cache->data[npeaks], 0, sizeof (GtkCanvasWaveViewCacheEntry) * (cache->allocated - npeaks));
+		memset (&cache->data[npeaks], 0, sizeof (GnomeCanvasWaveViewCacheEntry) * (cache->allocated - npeaks));
 		cache->data_size = npeaks;
 	} else {
 		cache->data_size = cache->allocated;
@@ -434,7 +434,7 @@ gtk_canvas_waveview_ensure_cache (GtkCanvasWaveView *waveview, gulong start_samp
 }
 
 void
-gtk_canvas_waveview_set_data_src (GtkCanvasWaveView *waveview, void *data_src)
+gnome_canvas_waveview_set_data_src (GnomeCanvasWaveView *waveview, void *data_src)
 {
 
 	if (waveview->cache_updater) {
@@ -451,7 +451,7 @@ gtk_canvas_waveview_set_data_src (GtkCanvasWaveView *waveview, void *data_src)
 }
 
 void
-gtk_canvas_waveview_set_channel (GtkCanvasWaveView *waveview, guint32 chan)
+gnome_canvas_waveview_set_channel (GnomeCanvasWaveView *waveview, guint32 chan)
 {
 	if (waveview->channel == chan) {
 		return;
@@ -461,7 +461,7 @@ gtk_canvas_waveview_set_channel (GtkCanvasWaveView *waveview, guint32 chan)
 }
 
 static void 
-gtk_canvas_waveview_reset_bounds (GtkCanvasItem *item)
+gnome_canvas_waveview_reset_bounds (GnomeCanvasItem *item)
 
 {
 	double x1, x2, y1, y2;
@@ -470,14 +470,14 @@ gtk_canvas_waveview_reset_bounds (GtkCanvasItem *item)
 	int Ix1, Ix2, Iy1, Iy2;
 	double i2w[6];
 
-	gtk_canvas_waveview_bounds (item, &x1, &y1, &x2, &y2);
+	gnome_canvas_waveview_bounds (item, &x1, &y1, &x2, &y2);
 
 	i1.x = x1;
 	i1.y = y1;
 	i2.x = x2;
 	i2.y = y2;
 
-	gtk_canvas_item_i2w_affine (item, i2w);
+	gnome_canvas_item_i2w_affine (item, i2w);
 	art_affine_point (&w1, &i1, i2w);
 	art_affine_point (&w2, &i2, i2w);
 
@@ -486,7 +486,7 @@ gtk_canvas_waveview_reset_bounds (GtkCanvasItem *item)
 	Iy1 = (int) rint(w1.y);
 	Iy2 = (int) rint(w2.y);
 
-	gtk_canvas_update_bbox (item, Ix1, Iy1, Ix2, Iy2);
+	gnome_canvas_update_bbox (item, Ix1, Iy1, Ix2, Iy2);
 }
 
 /* 
@@ -494,27 +494,27 @@ gtk_canvas_waveview_reset_bounds (GtkCanvasItem *item)
  */
 
 static void
-gtk_canvas_waveview_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_waveview_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 {
-	GtkCanvasItem *item;
-	GtkCanvasWaveView *waveview;
+	GnomeCanvasItem *item;
+	GnomeCanvasWaveView *waveview;
 	int redraw;
 	int calc_bounds;
 
-	item = GTK_CANVAS_ITEM (object);
-	waveview = GTK_CANVAS_WAVEVIEW (object);
+	item = GNOME_CANVAS_ITEM (object);
+	waveview = GNOME_CANVAS_WAVEVIEW (object);
 
 	redraw = FALSE;
 	calc_bounds = FALSE;
 
 	switch (arg_id) {
 	case ARG_DATA_SRC:
-		gtk_canvas_waveview_set_data_src (waveview, GTK_VALUE_POINTER(*arg));
+		gnome_canvas_waveview_set_data_src (waveview, GTK_VALUE_POINTER(*arg));
 		redraw = TRUE;
 		break;
 
 	case ARG_CHANNEL:
-		gtk_canvas_waveview_set_channel (waveview, GTK_VALUE_UINT(*arg));
+		gnome_canvas_waveview_set_channel (waveview, GTK_VALUE_UINT(*arg));
 		redraw = TRUE;
 		break;
 
@@ -621,21 +621,21 @@ gtk_canvas_waveview_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 	}
 
 	if (calc_bounds) {
-		gtk_canvas_waveview_reset_bounds (item);
+		gnome_canvas_waveview_reset_bounds (item);
 	}
 
 	if (redraw) {
-		gtk_canvas_item_request_update (item);
+		gnome_canvas_item_request_update (item);
 	}
 
 }
 
 static void
-gtk_canvas_waveview_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_waveview_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 {
-	GtkCanvasWaveView *waveview;
+	GnomeCanvasWaveView *waveview;
 
-	waveview = GTK_CANVAS_WAVEVIEW (object);
+	waveview = GNOME_CANVAS_WAVEVIEW (object);
 
 	switch (arg_id) {
 	case ARG_DATA_SRC:
@@ -710,19 +710,19 @@ gtk_canvas_waveview_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 }
 
 static void
-gtk_canvas_waveview_update (GtkCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
+gnome_canvas_waveview_update (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
 {
-	GtkCanvasWaveView *waveview;
+	GnomeCanvasWaveView *waveview;
 	double x, y;
 
-	waveview = GTK_CANVAS_WAVEVIEW (item);
+	waveview = GNOME_CANVAS_WAVEVIEW (item);
 
 //	check_cache (waveview, "start of update");
 
 	if (parent_class->update)
 		(* parent_class->update) (item, affine, clip_path, flags);
 
-	gtk_canvas_waveview_reset_bounds (item);
+	gnome_canvas_waveview_reset_bounds (item);
 
 	/* get the canvas coordinates of the view. Do NOT use affines
 	   for this, because they do not round to the integer units used
@@ -732,16 +732,16 @@ gtk_canvas_waveview_update (GtkCanvasItem *item, double *affine, ArtSVP *clip_pa
 	x = waveview->x;
 	y = waveview->y;
 
-	gtk_canvas_item_i2w (item, &x, &y);
-	gtk_canvas_w2c (GTK_CANVAS(item->canvas), x, y, &waveview->bbox_ulx, &waveview->bbox_uly);
+	gnome_canvas_item_i2w (item, &x, &y);
+	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x, y, &waveview->bbox_ulx, &waveview->bbox_uly);
 
 	waveview->samples = waveview->length_function (waveview->data_src);
 
 	x = waveview->x + (waveview->samples / waveview->samples_per_unit);
 	y = waveview->y + waveview->height;
 
-	gtk_canvas_item_i2w (item, &x, &y);
-	gtk_canvas_w2c (GTK_CANVAS(item->canvas), x, y, &waveview->bbox_lrx, &waveview->bbox_lry);
+	gnome_canvas_item_i2w (item, &x, &y);
+	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x, y, &waveview->bbox_lrx, &waveview->bbox_lry);
 
 	/* cache the half-height and the end point in canvas units */
 
@@ -756,10 +756,10 @@ gtk_canvas_waveview_update (GtkCanvasItem *item, double *affine, ArtSVP *clip_pa
 }
 
 static void
-gtk_canvas_waveview_render (GtkCanvasItem *item,
-			    GtkCanvasBuf *buf)
+gnome_canvas_waveview_render (GnomeCanvasItem *item,
+			    GnomeCanvasBuf *buf)
 {
-	GtkCanvasWaveView *waveview;
+	GnomeCanvasWaveView *waveview;
 	gulong s1, s2;
 	int clip_length = 0;
 	int pymin, pymax;
@@ -767,7 +767,7 @@ gtk_canvas_waveview_render (GtkCanvasItem *item,
 	double half_height;
 	int x, end, begin;
 
-	waveview = GTK_CANVAS_WAVEVIEW (item);
+	waveview = GNOME_CANVAS_WAVEVIEW (item);
 
 //	check_cache (waveview, "start of render");
 
@@ -776,7 +776,7 @@ gtk_canvas_waveview_render (GtkCanvasItem *item,
 	}
 
 	if (buf->is_bg) {
-		gtk_canvas_buf_ensure_buf (buf);
+		gnome_canvas_buf_ensure_buf (buf);
 		buf->is_bg = FALSE;
 	}
 
@@ -832,7 +832,7 @@ gtk_canvas_waveview_render (GtkCanvasItem *item,
 		waveview->reload_cache_in_render = FALSE;
 	}
 
-	cache_index = gtk_canvas_waveview_ensure_cache (waveview, s1, s2);
+	cache_index = gnome_canvas_waveview_ensure_cache (waveview, s1, s2);
 
 //	check_cache (waveview, "post-ensure");
 
@@ -924,14 +924,14 @@ gtk_canvas_waveview_render (GtkCanvasItem *item,
 }
 
 static void
-gtk_canvas_waveview_draw (GtkCanvasItem *item,
+gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 			  GdkDrawable *drawable,
 			  int x, int y,
 			  int width, int height)
 {
-	GtkCanvasWaveView *waveview;
+	GnomeCanvasWaveView *waveview;
 
-	waveview = GTK_CANVAS_WAVEVIEW (item);
+	waveview = GNOME_CANVAS_WAVEVIEW (item);
 
 	if (parent_class->draw) {
 		(* parent_class->draw) (item, drawable, x, y, width, height);
@@ -942,9 +942,9 @@ gtk_canvas_waveview_draw (GtkCanvasItem *item,
 }
 
 static void
-gtk_canvas_waveview_bounds (GtkCanvasItem *item, double *x1, double *y1, double *x2, double *y2)
+gnome_canvas_waveview_bounds (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2)
 {
-	GtkCanvasWaveView *waveview = GTK_CANVAS_WAVEVIEW (item);
+	GnomeCanvasWaveView *waveview = GNOME_CANVAS_WAVEVIEW (item);
 
 	*x1 = waveview->x;
 	*y1 = waveview->y;
@@ -954,22 +954,22 @@ gtk_canvas_waveview_bounds (GtkCanvasItem *item, double *x1, double *y1, double 
 
 #if 0
 	x = 0; y = 0;
-	gtk_canvas_item_i2w (item, &x, &y);
-	gtk_canvas_w2c_d (GTK_CANVAS(item->canvas), x, y, &a, &b);
+	gnome_canvas_item_i2w (item, &x, &y);
+	gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x, y, &a, &b);
 	x = *x2;
 	y = *y2;
-	gtk_canvas_item_i2w (item, &x, &y);
-	gtk_canvas_w2c_d (GTK_CANVAS(item->canvas), x, y, &c, &d);
+	gnome_canvas_item_i2w (item, &x, &y);
+	gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x, y, &c, &d);
 	printf ("item bounds now (%g,%g),(%g,%g)\n", a, b, c, d);
 #endif		
 
 }
 
 static double
-gtk_canvas_waveview_point (GtkCanvasItem *item, double x, double y, int cx, int cy, GtkCanvasItem **actual_item)
+gnome_canvas_waveview_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item)
 {
 	/* XXX for now, point is never inside the wave 
-	GtkCanvasWaveView *waveview;
+	GnomeCanvasWaveView *waveview;
 	double x1, y1, x2, y2;
 	double dx, dy;
 	*/
@@ -977,13 +977,13 @@ gtk_canvas_waveview_point (GtkCanvasItem *item, double x, double y, int cx, int 
 	return DBL_MAX;
 
 #if 0
-	waveview = GTK_CANVAS_WAVEVIEW (item);
+	waveview = GNOME_CANVAS_WAVEVIEW (item);
 
 	*actual_item = item;
 
 	/* Find the bounds for the rectangle plus its outline width */
 
-	gtk_canvas_waveview_bounds (item, &x1, &y1, &x2, &y2);
+	gnome_canvas_waveview_bounds (item, &x1, &y1, &x2, &y2);
 
 	/* Is point inside rectangle */
 	

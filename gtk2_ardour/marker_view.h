@@ -23,7 +23,7 @@
 
 #include <string>
 #include <gtkmm.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include "time_axis_view_item.h"
 
 class MarkerTimeAxisView ;
@@ -54,7 +54,7 @@ class MarkerView : public TimeAxisViewItem
 		 * @param start the start time of this item
 		 * @param duration the duration of this item
 		 */
-		MarkerView(GtkCanvasGroup *parent,
+		MarkerView(GnomeCanvasGroup *parent,
 			TimeAxisView *tv,
 			ImageFrameView* marked,
 			double spu,

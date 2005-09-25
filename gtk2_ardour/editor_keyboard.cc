@@ -49,7 +49,7 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 			selection->set (entered_regionview);
 		}
 
-		gtk_canvas_window_to_world (GTK_CANVAS(track_gtk_canvas), x, y, &dx, &dy);
+		gnome_canvas_window_to_world (GNOME_CANVAS(track_gnome_canvas), x, y, &dx, &dy);
 
 		ev.type = GDK_BUTTON_PRESS;
 		ev.button.x = dx;

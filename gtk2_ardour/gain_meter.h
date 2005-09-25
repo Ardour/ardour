@@ -25,9 +25,9 @@
 
 #include <ardour/types.h>
 
-#include <gtk--.h>
-#include <gtkmmext/slider_controller.h>
-#include <gtkmmext/click_box.h>
+#include <gtkmm.h>
+#include <gtkmm2ext/slider_controller.h>
+#include <gtkmm2ext/click_box.h>
 
 #include "enums.h"
 
@@ -37,7 +37,7 @@ namespace ARDOUR {
 	class Route;
 	class RouteGroup;
 }
-namespace Gtkmmext {
+namespace Gtkmm2ext {
 	class FastMeter;
 	class BarController;
 	class Pix;
@@ -68,10 +68,10 @@ class GainMeter : public Gtk::VBox
 
 	bool ignore_toggle;
 
-	Gtkmmext::VSliderController *gain_slider;
+	Gtkmm2ext::VSliderController *gain_slider;
 	Gtk::Adjustment              gain_adjustment;
 	Gtk::Frame                   gain_display_frame;
-	Gtkmmext::ClickBox           gain_display;
+	Gtkmm2ext::ClickBox           gain_display;
 	Gtk::Frame                   peak_display_frame;
 	Gtk::EventBox                peak_display;
 	Gtk::Label                   peak_display_label;
@@ -91,7 +91,7 @@ class GainMeter : public Gtk::VBox
 	void gain_printer (char buf[32], Gtk::Adjustment&);
 	
 	struct MeterInfo {
-	    Gtkmmext::FastMeter *meter;
+	    Gtkmm2ext::FastMeter *meter;
 	    gint16          width;   
 	    bool            packed;
 	    
@@ -145,10 +145,10 @@ class GainMeter : public Gtk::VBox
 	void reset_peak_display ();
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
-	static SigC::Signal0<void> ResetAllPeakDisplays;
-	static SigC::Signal1<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
+	static sigc::signal<void> ResetAllPeakDisplays;
+	static sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
 
-	static Gtkmmext::Pix* slider_pix;
+	static Gtkmm2ext::Pix* slider_pix;
 	static int setup_slider_pix ();
 };
 

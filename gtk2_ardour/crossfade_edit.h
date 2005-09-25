@@ -6,7 +6,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/radiobutton.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 
 #include <ardour/curve.h>
 #include "ardour_dialog.h"
@@ -63,8 +63,8 @@ class CrossfadeEditor : public ArdourDialog
     struct Point {
 	~Point();
 
-	GtkCanvasItem* box;
-	GtkCanvasItem* curve;
+	GnomeCanvasItem* box;
+	GnomeCanvasItem* curve;
 	double x;
 	double y;
 
@@ -81,16 +81,16 @@ class CrossfadeEditor : public ArdourDialog
     };
 
     GtkWidget*    _canvas;
-    GtkCanvasItem* toplevel;
+    GnomeCanvasItem* toplevel;
     Gtk::Widget*   canvas;
 
     struct Half {
-	GtkCanvasItem*          line;
-	GtkCanvasItem*          shading;
+	GnomeCanvasItem*          line;
+	GnomeCanvasItem*          shading;
 	list<Point*>            points;
 	ARDOUR::Curve           normative_curve; /* 0 - 1.0, linear */
 	ARDOUR::Curve           gain_curve;      /* 0 - 2.0, gain mapping */
-	vector<GtkCanvasItem*>  waves;
+	vector<GnomeCanvasItem*>  waves;
 
 	Half();
     };
@@ -127,13 +127,13 @@ class CrossfadeEditor : public ArdourDialog
 
     gint event_handler (GdkEvent*);
 
-    static gint _canvas_event (GtkCanvasItem*, GdkEvent* event, gpointer data);
-    static gint _point_event (GtkCanvasItem*, GdkEvent* event, gpointer data);
-    static gint _curve_event (GtkCanvasItem*, GdkEvent* event, gpointer data);
+    static gint _canvas_event (GnomeCanvasItem*, GdkEvent* event, gpointer data);
+    static gint _point_event (GnomeCanvasItem*, GdkEvent* event, gpointer data);
+    static gint _curve_event (GnomeCanvasItem*, GdkEvent* event, gpointer data);
 
-    gint canvas_event (GtkCanvasItem*, GdkEvent* event);
-    gint point_event (GtkCanvasItem*, GdkEvent* event);
-    gint curve_event (GtkCanvasItem*, GdkEvent* event);
+    gint canvas_event (GnomeCanvasItem*, GdkEvent* event);
+    gint point_event (GnomeCanvasItem*, GdkEvent* event);
+    gint curve_event (GnomeCanvasItem*, GdkEvent* event);
 
     void canvas_allocation (GtkAllocation*);
     void add_control_point (double x, double y);

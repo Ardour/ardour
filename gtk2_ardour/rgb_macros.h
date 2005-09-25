@@ -125,7 +125,7 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
 }
 #define PAINT_HORIZ(inbuf, colr, colg, colb, ptx0, ptx1, pty) \
 { \
-  GtkCanvasBuf* ph_buf = (inbuf); \
+  GnomeCanvasBuf* ph_buf = (inbuf); \
   guchar* ph_p; \
   gint ph_a0, ph_a1; \
   gint ph_colr=(colr), ph_colg=(colg), ph_colb=(colb); \
@@ -144,7 +144,7 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
 }
 #define FAST_PAINT_HORIZ(inbuf, colr, colg, colb, ptx0, ptx1, pty) \
 { \
-  GtkCanvasBuf* ph_buf = (inbuf); \
+  GnomeCanvasBuf* ph_buf = (inbuf); \
   guchar* ph_p; \
   gint ph_a0, ph_a1; \
   gint ph_colr=(colr), ph_colg=(colg), ph_colb=(colb); \
@@ -163,7 +163,7 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
 }
 #define PAINT_HORIZA(inbuf, colr, colg, colb, cola, ptx0, ptx1, pty) \
 { \
-  GtkCanvasBuf* ph_buf = (inbuf); \
+  GnomeCanvasBuf* ph_buf = (inbuf); \
   guchar* ph_p; \
   gint ph_a0, ph_a1; \
   gint ph_colr=(colr), ph_colg=(colg), ph_colb=(colb), ph_cola=(cola); \
@@ -182,7 +182,7 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
 }
 #define PAINT_VERT(inbuf, colr, colg, colb, ptx, pty0, pty1) \
 { \
-  GtkCanvasBuf* pv_buf = (inbuf); \
+  GnomeCanvasBuf* pv_buf = (inbuf); \
   guchar* pv_p; \
   gint pv_b0, pv_b1; \
   gint pv_colr=(colr), pv_colg=(colg), pv_colb=(colb);\
@@ -201,7 +201,7 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
 }
 #define FAST_PAINT_VERT(inbuf, colr, colg, colb, ptx, pty0, pty1) \
 { \
-  GtkCanvasBuf* fpv_buf = (inbuf); \
+  GnomeCanvasBuf* fpv_buf = (inbuf); \
   guchar* fpv_p; \
   gint fpv_b0, fpv_b1; \
 \
@@ -218,7 +218,7 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
 }
 #define PAINT_VERTA(inbuf, colr, colg, colb, cola, ptx, pty0, pty1) \
 { \
-  GtkCanvasBuf* pv_buf = (inbuf); \
+  GnomeCanvasBuf* pv_buf = (inbuf); \
   guchar* pv_p; \
   gint pv_b0, pv_b1; \
   gint pv_colr=(colr), pv_colg=(colg), pv_colb=(colb), pv_cola=(cola);\
@@ -236,12 +236,12 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
   } \
 }
 
-/* Paint a solid-colored box into a GtkCanvasBuf (clipping as necessary).
+/* Paint a solid-colored box into a GnomeCanvasBuf (clipping as necessary).
    The box contains (ptx0,pty0), but not (ptx1, pty1).
    Each macro arg should appear exactly once in the body of the code. */
 #define PAINT_BOX(inbuf, colr, colg, colb, cola, ptx0, pty0, ptx1, pty1) \
 { \
-  GtkCanvasBuf* pb_buf = (inbuf); \
+  GnomeCanvasBuf* pb_buf = (inbuf); \
   guchar* pb_p; \
   guchar* pb_pp; \
   gint pb_a0, pb_a1, pb_b0, pb_b1, pb_i, pb_j; \
@@ -269,7 +269,7 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
 
 #define FAST_PAINT_BOX(inbuf, colr, colg, colb, cola, ptx0, pty0, ptx1, pty1) \
 { \
-  GtkCanvasBuf* pb_buf = (inbuf); \
+  GnomeCanvasBuf* pb_buf = (inbuf); \
   guchar* pb_p; \
   guchar* pb_pp; \
   gint pb_i, pb_j; \

@@ -24,7 +24,7 @@
 #include <sigc++/adaptor.h>
 #include <sigc++/scope.h>
 
-namespace SigC
+namespace sigc
 {
 
 /****************************************************************

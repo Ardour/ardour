@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 
 #include "canvas-ruler.h"
 #include "rgb_macros.h"
@@ -17,78 +17,78 @@ enum {
 
 };
 
-static void gtk_canvas_ruler_class_init (GtkCanvasRulerClass *class);
-static void gtk_canvas_ruler_init       (GtkCanvasRuler      *ruler);
-static void gtk_canvas_ruler_set_arg    (GtkObject              *object,
+static void gnome_canvas_ruler_class_init (GnomeCanvasRulerClass *class);
+static void gnome_canvas_ruler_init       (GnomeCanvasRuler      *ruler);
+static void gnome_canvas_ruler_set_arg    (GtkObject              *object,
 					      GtkArg                 *arg,
 					      guint                   arg_id);
-static void gtk_canvas_ruler_get_arg    (GtkObject              *object,
+static void gnome_canvas_ruler_get_arg    (GtkObject              *object,
 					      GtkArg                 *arg,
 					      guint                   arg_id);
 
-static void   gtk_canvas_ruler_update      (GtkCanvasItem *item, double *affine, ArtSVP *clip_path, int flags);
-static void   gtk_canvas_ruler_bounds      (GtkCanvasItem *item, double *x1, double *y1, double *x2, double *y2);
-static double gtk_canvas_ruler_point (GtkCanvasItem *item, double x, double y, int cx, int cy, GtkCanvasItem **actual_item);
-static void   gtk_canvas_ruler_render (GtkCanvasItem *item, GtkCanvasBuf *buf);
-static void   gtk_canvas_ruler_draw (GtkCanvasItem *item, GdkDrawable *drawable, int x, int y, int w, int h);
+static void   gnome_canvas_ruler_update      (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags);
+static void   gnome_canvas_ruler_bounds      (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2);
+static double gnome_canvas_ruler_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item);
+static void   gnome_canvas_ruler_render (GnomeCanvasItem *item, GnomeCanvasBuf *buf);
+static void   gnome_canvas_ruler_draw (GnomeCanvasItem *item, GdkDrawable *drawable, int x, int y, int w, int h);
 
-static GtkCanvasItemClass *parent_class;
+static GnomeCanvasItemClass *parent_class;
 
 
 GtkType
-gtk_canvas_ruler_get_type (void)
+gnome_canvas_ruler_get_type (void)
 {
 	static GtkType ruler_type = 0;
 
 	if (!ruler_type) {
 		GtkTypeInfo ruler_info = {
-			"GtkCanvasRuler",
-			sizeof (GtkCanvasRuler),
-			sizeof (GtkCanvasRulerClass),
-			(GtkClassInitFunc) gtk_canvas_ruler_class_init,
-			(GtkObjectInitFunc) gtk_canvas_ruler_init,
+			"GnomeCanvasRuler",
+			sizeof (GnomeCanvasRuler),
+			sizeof (GnomeCanvasRulerClass),
+			(GtkClassInitFunc) gnome_canvas_ruler_class_init,
+			(GtkObjectInitFunc) gnome_canvas_ruler_init,
 			NULL, /* reserved_1 */
 			NULL, /* reserved_2 */
 			(GtkClassInitFunc) NULL
 		};
 
-		ruler_type = gtk_type_unique (gtk_canvas_item_get_type (), &ruler_info);
+		ruler_type = gtk_type_unique (gnome_canvas_item_get_type (), &ruler_info);
 	}
 
 	return ruler_type;
 }
 
 static void
-gtk_canvas_ruler_class_init (GtkCanvasRulerClass *class)
+gnome_canvas_ruler_class_init (GnomeCanvasRulerClass *class)
 {
 	GtkObjectClass *object_class;
-	GtkCanvasItemClass *item_class;
+	GnomeCanvasItemClass *item_class;
 
 	object_class = (GtkObjectClass *) class;
-	item_class = (GtkCanvasItemClass *) class;
+	item_class = (GnomeCanvasItemClass *) class;
 
-	parent_class = gtk_type_class (gtk_canvas_item_get_type ());
+	parent_class = gtk_type_class (gnome_canvas_item_get_type ());
 
-	gtk_object_add_arg_type ("GtkCanvasRuler::x1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X1);
-	gtk_object_add_arg_type ("GtkCanvasRuler::y1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y1);
-	gtk_object_add_arg_type ("GtkCanvasRuler::x2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X2);
-	gtk_object_add_arg_type ("GtkCanvasRuler::y2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y2);
-	gtk_object_add_arg_type ("GtkCanvasRuler::frames_per_unit", GTK_TYPE_LONG, GTK_ARG_READWRITE, ARG_FRAMES_PER_UNIT);
-	gtk_object_add_arg_type ("GtkCanvasRuler::fill_color", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_FILL_COLOR);
-	gtk_object_add_arg_type ("GtkCanvasRuler::tick_color", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_TICK_COLOR);
+	gtk_object_add_arg_type ("GnomeCanvasRuler::x1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X1);
+	gtk_object_add_arg_type ("GnomeCanvasRuler::y1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y1);
+	gtk_object_add_arg_type ("GnomeCanvasRuler::x2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X2);
+	gtk_object_add_arg_type ("GnomeCanvasRuler::y2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y2);
+	gtk_object_add_arg_type ("GnomeCanvasRuler::frames_per_unit", GTK_TYPE_LONG, GTK_ARG_READWRITE, ARG_FRAMES_PER_UNIT);
+	gtk_object_add_arg_type ("GnomeCanvasRuler::fill_color", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_FILL_COLOR);
+	gtk_object_add_arg_type ("GnomeCanvasRuler::tick_color", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_TICK_COLOR);
 
-	object_class->set_arg = gtk_canvas_ruler_set_arg;
-	object_class->get_arg = gtk_canvas_ruler_get_arg;
+	object_class->set_arg = gnome_canvas_ruler_set_arg;
+	object_class->get_arg = gnome_canvas_ruler_get_arg;
 
-	item_class->update = gtk_canvas_ruler_update;
-	item_class->bounds = gtk_canvas_ruler_bounds;
-	item_class->point = gtk_canvas_ruler_point;
-	item_class->render = gtk_canvas_ruler_render;
-	item_class->draw = gtk_canvas_ruler_draw;
+	item_class->update = gnome_canvas_ruler_update;
+	item_class->bounds = gnome_canvas_ruler_bounds;
+	item_class->point = gnome_canvas_ruler_point;
+	item_class->render = gnome_canvas_ruler_render;
+	item_class->draw = gnome_canvas_ruler_draw;
 }
 
 static void
-gtk_canvas_ruler_init (GtkCanvasRuler *ruler)
+gnome_canvas_ruler_init (GnomeCanvasRuler *ruler)
 {
 	ruler->x1 = 0.0;
 	ruler->y1 = 0.0;
@@ -98,11 +98,11 @@ gtk_canvas_ruler_init (GtkCanvasRuler *ruler)
 	ruler->fill_color = 0;
 	ruler->tick_color = 0;
 
-	GTK_CANVAS_ITEM(ruler)->object.flags |= GTK_CANVAS_ITEM_NO_AUTO_REDRAW;
+	GNOME_CANVAS_ITEM(ruler)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 static void 
-gtk_canvas_ruler_reset_bounds (GtkCanvasItem *item)
+gnome_canvas_ruler_reset_bounds (GnomeCanvasItem *item)
 
 {
 	double x1, x2, y1, y2;
@@ -111,14 +111,14 @@ gtk_canvas_ruler_reset_bounds (GtkCanvasItem *item)
 	int Ix1, Ix2, Iy1, Iy2;
 	double i2w[6];
 
-	gtk_canvas_ruler_bounds (item, &x1, &y1, &x2, &y2);
+	gnome_canvas_ruler_bounds (item, &x1, &y1, &x2, &y2);
 
 	i1.x = x1;
 	i1.y = y1;
 	i2.x = x2;
 	i2.y = y2;
 
-	gtk_canvas_item_i2w_affine (item, i2w);
+	gnome_canvas_item_i2w_affine (item, i2w);
 	art_affine_point (&w1, &i1, i2w);
 	art_affine_point (&w2, &i2, i2w);
 
@@ -127,7 +127,7 @@ gtk_canvas_ruler_reset_bounds (GtkCanvasItem *item)
 	Iy1 = (int) rint(w1.y);
 	Iy2 = (int) rint(w2.y);
 
-	gtk_canvas_update_bbox (item, Ix1, Iy1, Ix2, Iy2);
+	gnome_canvas_update_bbox (item, Ix1, Iy1, Ix2, Iy2);
 }
 
 /* 
@@ -135,15 +135,15 @@ gtk_canvas_ruler_reset_bounds (GtkCanvasItem *item)
  */
 
 static void
-gtk_canvas_ruler_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_ruler_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 {
-	GtkCanvasItem *item;
-	GtkCanvasRuler *ruler;
+	GnomeCanvasItem *item;
+	GnomeCanvasRuler *ruler;
 	int redraw;
 	int calc_bounds;
 
-	item = GTK_CANVAS_ITEM (object);
-	ruler = GTK_CANVAS_RULER (object);
+	item = GNOME_CANVAS_ITEM (object);
+	ruler = GNOME_CANVAS_RULER (object);
 
 	redraw = FALSE;
 	calc_bounds = FALSE;
@@ -203,21 +203,21 @@ gtk_canvas_ruler_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 	}
 
 	if (calc_bounds) {
-		gtk_canvas_ruler_reset_bounds (item);
+		gnome_canvas_ruler_reset_bounds (item);
 	}
 
 	if (redraw) {
-		gtk_canvas_item_request_update (item);
+		gnome_canvas_item_request_update (item);
 	}
 
 }
 
 static void
-gtk_canvas_ruler_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_ruler_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 {
-	GtkCanvasRuler *ruler;
+	GnomeCanvasRuler *ruler;
 
-	ruler = GTK_CANVAS_RULER (object);
+	ruler = GNOME_CANVAS_RULER (object);
 
 	switch (arg_id) {
 	case ARG_X1:
@@ -248,50 +248,50 @@ gtk_canvas_ruler_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 }
 
 static void
-gtk_canvas_ruler_update (GtkCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
+gnome_canvas_ruler_update (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
 {
-	GtkCanvasRuler *ruler;
+	GnomeCanvasRuler *ruler;
 	double x;
 	double y;
 
-	ruler = GTK_CANVAS_RULER (item);
+	ruler = GNOME_CANVAS_RULER (item);
 
 	if (parent_class->update)
 		(* parent_class->update) (item, affine, clip_path, flags);
 
-	gtk_canvas_ruler_reset_bounds (item);
+	gnome_canvas_ruler_reset_bounds (item);
 
 	x = ruler->x1;
 	y = ruler->y1;
 
-	gtk_canvas_item_i2w (item, &x, &y);
-	gtk_canvas_w2c (GTK_CANVAS(item->canvas), x, y, &ruler->bbox_ulx, &ruler->bbox_uly);
+	gnome_canvas_item_i2w (item, &x, &y);
+	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x, y, &ruler->bbox_ulx, &ruler->bbox_uly);
 
 	x = ruler->x2;
 	y = ruler->y2;
 
-	gtk_canvas_item_i2w (item, &x, &y);
-	gtk_canvas_w2c (GTK_CANVAS(item->canvas), x, y, &ruler->bbox_lrx, &ruler->bbox_lry);
+	gnome_canvas_item_i2w (item, &x, &y);
+	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x, y, &ruler->bbox_lrx, &ruler->bbox_lry);
 
 	UINT_TO_RGB (ruler->tick_color, &ruler->tick_r, &ruler->tick_g, &ruler->tick_b);
 	UINT_TO_RGB (ruler->fill_color, &ruler->fill_r, &ruler->fill_g, &ruler->fill_b);
 }
 
 static void
-gtk_canvas_ruler_render (GtkCanvasItem *item,
-			      GtkCanvasBuf *buf)
+gnome_canvas_ruler_render (GnomeCanvasItem *item,
+			      GnomeCanvasBuf *buf)
 {
-	GtkCanvasRuler *ruler;
+	GnomeCanvasRuler *ruler;
 	int end, begin;
 
-	ruler = GTK_CANVAS_RULER (item);
+	ruler = GNOME_CANVAS_RULER (item);
 
 	if (parent_class->render) {
 		(*parent_class->render) (item, buf);
 	}
 
 	if (buf->is_bg) {
-		gtk_canvas_buf_ensure_buf (buf);
+		gnome_canvas_buf_ensure_buf (buf);
 		buf->is_bg = FALSE;
 	}
 
@@ -312,14 +312,14 @@ gtk_canvas_ruler_render (GtkCanvasItem *item,
 }
 
 static void
-gtk_canvas_ruler_draw (GtkCanvasItem *item,
+gnome_canvas_ruler_draw (GnomeCanvasItem *item,
 			    GdkDrawable *drawable,
 			    int x, int y,
 			    int width, int height)
 {
-	GtkCanvasRuler *ruler;
+	GnomeCanvasRuler *ruler;
 
-	ruler = GTK_CANVAS_RULER (item);
+	ruler = GNOME_CANVAS_RULER (item);
 
 	if (parent_class->draw) {
 		(* parent_class->draw) (item, drawable, x, y, width, height);
@@ -330,9 +330,9 @@ gtk_canvas_ruler_draw (GtkCanvasItem *item,
 }
 
 static void
-gtk_canvas_ruler_bounds (GtkCanvasItem *item, double *x1, double *y1, double *x2, double *y2)
+gnome_canvas_ruler_bounds (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2)
 {
-	GtkCanvasRuler *ruler = GTK_CANVAS_RULER (item);
+	GnomeCanvasRuler *ruler = GNOME_CANVAS_RULER (item);
 
 	*x1 = ruler->x1;
 	*y1 = ruler->y1;
@@ -341,19 +341,19 @@ gtk_canvas_ruler_bounds (GtkCanvasItem *item, double *x1, double *y1, double *x2
 }
 
 static double
-gtk_canvas_ruler_point (GtkCanvasItem *item, double x, double y, int cx, int cy, GtkCanvasItem **actual_item)
+gnome_canvas_ruler_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item)
 {
-	GtkCanvasRuler *ruler;
+	GnomeCanvasRuler *ruler;
 	double x1, y1, x2, y2;
 	double dx, dy;
 
-	ruler = GTK_CANVAS_RULER (item);
+	ruler = GNOME_CANVAS_RULER (item);
 
 	*actual_item = item;
 
 	/* Find the bounds for the rectangle plus its outline width */
 
-	gtk_canvas_ruler_bounds (item, &x1, &y1, &x2, &y2);
+	gnome_canvas_ruler_bounds (item, &x1, &y1, &x2, &y2);
 
 	/* Is point inside rectangle */
 	

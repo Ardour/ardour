@@ -27,8 +27,8 @@
 
 #include "i18n.h"
 
-Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const string& annotation, 
-		Type type, gint (*callback)(GtkCanvasItem *, GdkEvent *, gpointer), jack_nframes_t frame)
+Marker::Marker (PublicEditor& ed, GnomeCanvasGroup *parent, guint32 rgba, const string& annotation, 
+		Type type, gint (*callback)(GnomeCanvasItem *, GdkEvent *, gpointer), jack_nframes_t frame)
 
 	: editor (ed), _type(type)
 {
@@ -122,7 +122,7 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 
 	switch (type) {
 	case Mark:
-		points = gtk_canvas_points_new (6);
+		points = gnome_canvas_points_new (6);
 
 		points->coords[0] = 0.0;
 		points->coords[1] = 0.0;
@@ -148,7 +148,7 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 
 	case Tempo:
 	case Meter:
-		points = gtk_canvas_points_new (6);
+		points = gnome_canvas_points_new (6);
 
 		points->coords[0] = 3.0;
 		points->coords[1] = 0.0;
@@ -173,7 +173,7 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 		break;
 
 	case Start:
-		points = gtk_canvas_points_new (6);
+		points = gnome_canvas_points_new (6);
 
 		points->coords[0] = 0.0;
 		points->coords[1] = 0.0;
@@ -198,7 +198,7 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 		break;
 
 	case End:
-		points = gtk_canvas_points_new (6);
+		points = gnome_canvas_points_new (6);
 
 		points->coords[0] = 5.0;
 		points->coords[1] = 0.0;
@@ -223,7 +223,7 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 		break;
 
 	case LoopStart:
-		points = gtk_canvas_points_new (7);
+		points = gnome_canvas_points_new (7);
 
 		points->coords[0] = 0.0;
 		points->coords[1] = 0.0;
@@ -251,7 +251,7 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 		break;
 
 	case LoopEnd:
-		points = gtk_canvas_points_new (7);
+		points = gnome_canvas_points_new (7);
 
 		points->coords[0] = 8.0;
 		points->coords[1] = 0.0;
@@ -279,7 +279,7 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 		break;
 
 	case  PunchIn:
-		points = gtk_canvas_points_new (6);
+		points = gnome_canvas_points_new (6);
 
 		points->coords[0] = 0.0;
 		points->coords[1] = 0.0;
@@ -304,7 +304,7 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 		break;
 		
 	case  PunchOut:
-		points = gtk_canvas_points_new (6);
+		points = gnome_canvas_points_new (6);
 
 		points->coords[0] = 0.0;
 		points->coords[1] = 0.0;
@@ -337,15 +337,15 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 
 	unit_position -= shift;
 
-	group = gtk_canvas_item_new (parent,
-				     gtk_canvas_group_get_type(),
+	group = gnome_canvas_item_new (parent,
+				     gnome_canvas_group_get_type(),
 				     "x", unit_position,
 				     "y", 1.0,
 				     NULL);
 
 	// cerr << "set mark al points, nc = " << points->num_points << endl;
-	mark = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-				    gtk_canvas_polygon_get_type(),
+	mark = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+				    gnome_canvas_polygon_get_type(),
 				    "points", points,
 				    "fill_color_rgba", rgba,
 				    "outline_color", "black",
@@ -353,8 +353,8 @@ Marker::Marker (PublicEditor& ed, GtkCanvasGroup *parent, guint32 rgba, const st
 
 	string fontname = get_font_for_style (N_("MarkerText"));
 
-	text = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-				    gtk_canvas_text_get_type (),
+	text = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+				    gnome_canvas_text_get_type (),
 				    "text", annotation.c_str(),
 				    "x", label_offset,
 				    "y", 0.0,
@@ -373,13 +373,13 @@ Marker::~Marker ()
 {
 	/* destroying the group destroys its contents */
 	gtk_object_destroy (GTK_OBJECT(group));
-	gtk_canvas_points_unref (points);
+	gnome_canvas_points_unref (points);
 }
 
 void
 Marker::set_name (const string& name)
 {
-	gtk_canvas_item_set (text, "text", name.c_str(), NULL);
+	gnome_canvas_item_set (text, "text", name.c_str(), NULL);
 }
 
 void
@@ -387,7 +387,7 @@ Marker::set_position (jack_nframes_t frame)
 {
 	double new_unit_position = editor.frame_to_unit (frame);
 	new_unit_position -= shift;
-	gtk_canvas_item_move (group, new_unit_position - unit_position, 0.0);
+	gnome_canvas_item_move (group, new_unit_position - unit_position, 0.0);
 	frame_position = frame;
 	unit_position = new_unit_position;
 }
@@ -401,26 +401,26 @@ Marker::reposition ()
 void
 Marker::show ()
 {
-	gtk_canvas_item_show (group);
+	gnome_canvas_item_show (group);
 }
 
 void
 Marker::hide ()
 {
-	gtk_canvas_item_hide (group);
+	gnome_canvas_item_hide (group);
 }
 
 void
 Marker::set_color_rgba (uint32_t color)
 {
-	gtk_canvas_item_set (mark, "fill_color_rgba", color, NULL);
+	gnome_canvas_item_set (mark, "fill_color_rgba", color, NULL);
 }
 
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, GtkCanvasGroup *parent, guint32 rgba, const string& text, 
+TempoMarker::TempoMarker (PublicEditor& editor, GnomeCanvasGroup *parent, guint32 rgba, const string& text, 
 			  ARDOUR::TempoSection& temp, 
-			  gint (*callback)(GtkCanvasItem *, GdkEvent *, gpointer))
+			  gint (*callback)(GnomeCanvasItem *, GdkEvent *, gpointer))
 	: Marker (editor, parent, rgba, text, Tempo, callback, 0),
 	  _tempo (temp)
 {
@@ -434,9 +434,9 @@ TempoMarker::~TempoMarker ()
 
 /***********************************************************************/
 
-MeterMarker::MeterMarker (PublicEditor& editor, GtkCanvasGroup *parent, guint32 rgba, const string& text, 
+MeterMarker::MeterMarker (PublicEditor& editor, GnomeCanvasGroup *parent, guint32 rgba, const string& text, 
 			  ARDOUR::MeterSection& m, 
-			  gint (*callback)(GtkCanvasItem *, GdkEvent *, gpointer))
+			  gint (*callback)(GnomeCanvasItem *, GdkEvent *, gpointer))
 	: Marker (editor, parent, rgba, text, Meter, callback, 0),
 	  _meter (m)
 {

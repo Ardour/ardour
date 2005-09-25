@@ -49,7 +49,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace Editing;
 
-ControlPoint::ControlPoint (AutomationLine& al, gint (*event_handler)(GtkCanvasItem*, GdkEvent*, gpointer))
+ControlPoint::ControlPoint (AutomationLine& al, gint (*event_handler)(GnomeCanvasItem*, GdkEvent*, gpointer))
 	: line (al)
 {
 	model = al.the_list().end();
@@ -61,8 +61,8 @@ ControlPoint::ControlPoint (AutomationLine& al, gint (*event_handler)(GtkCanvasI
 	_size = 4.0;
 	selected = false;
 
-	item = gtk_canvas_item_new (line.canvas_group(),
-				    gtk_canvas_simplerect_get_type(),
+	item = gnome_canvas_item_new (line.canvas_group(),
+				    gnome_canvas_simplerect_get_type(),
 				    "draw", (gboolean) TRUE,
 				    "fill", (gboolean) FALSE,
 				    "fill_color_rgba", color_map[cControlPointFill],
@@ -93,8 +93,8 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool dummy_arg_to_force_s
 	_size = other._size;
 	selected = false;
 
-	item = gtk_canvas_item_new (line.canvas_group(),
-				    gtk_canvas_simplerect_get_type(),
+	item = gnome_canvas_item_new (line.canvas_group(),
+				    gnome_canvas_simplerect_get_type(),
 				    "fill", (gboolean) FALSE,
 				    "outline_color_rgba", color_map[cEnteredControlPointOutline],
 				    "outline_pixels", (gint) 1,
@@ -114,19 +114,19 @@ ControlPoint::~ControlPoint ()
 void
 ControlPoint::hide ()
 {
-	gtk_canvas_item_hide (item);
+	gnome_canvas_item_hide (item);
 }
 
 void
 ControlPoint::show()
 {
-	gtk_canvas_item_show (item);
+	gnome_canvas_item_show (item);
 }
 
 void
 ControlPoint::set_visible (bool yn)
 {
-	gtk_canvas_item_set (item, "draw", (gboolean) yn, NULL);
+	gnome_canvas_item_set (item, "draw", (gboolean) yn, NULL);
 }
 
 void
@@ -142,10 +142,10 @@ ControlPoint::show_color (bool entered, bool hide_too)
 {
 	if (entered) {
 		if (selected) {
-			gtk_canvas_item_set (item, "outline_color_rgba", color_map[cEnteredControlPointSelected], NULL);
+			gnome_canvas_item_set (item, "outline_color_rgba", color_map[cEnteredControlPointSelected], NULL);
 			set_visible(true);
 		} else {
-			gtk_canvas_item_set (item, "outline_color_rgba", color_map[cEnteredControlPoint], NULL);
+			gnome_canvas_item_set (item, "outline_color_rgba", color_map[cEnteredControlPoint], NULL);
 			if (hide_too) {
 				set_visible(false);
 			}
@@ -153,10 +153,10 @@ ControlPoint::show_color (bool entered, bool hide_too)
 
 	} else {
 		if (selected) {
-			gtk_canvas_item_set (item, "outline_color_rgba", color_map[cControlPointSelected], NULL);
+			gnome_canvas_item_set (item, "outline_color_rgba", color_map[cControlPointSelected], NULL);
 			set_visible(true);
 		} else {
-			gtk_canvas_item_set (item, "outline_color_rgba", color_map[cControlPoint], NULL);
+			gnome_canvas_item_set (item, "outline_color_rgba", color_map[cControlPoint], NULL);
 			if (hide_too) {
 				set_visible(false);
 			}
@@ -171,11 +171,11 @@ ControlPoint::set_size (double sz)
 
 #if 0	
 	if (_size > 6.0) {
-		gtk_canvas_item_set (item, 
+		gnome_canvas_item_set (item, 
 				     "fill", (gboolean) TRUE,
 				     NULL);
 	} else {
-		gtk_canvas_item_set (item, 
+		gnome_canvas_item_set (item, 
 				     "fill", (gboolean) FALSE,
 				     NULL);
 	}
@@ -206,7 +206,7 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 		break;
 	}
 
-	gtk_canvas_item_set (item, 
+	gnome_canvas_item_set (item, 
 			     "x1", x1,
 			     "x2", x2,
 			     "y1", y - half_size,
@@ -220,9 +220,9 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 
 /*****/
 
-AutomationLine::AutomationLine (string name, TimeAxisView& tv, GtkCanvasItem* parent, AutomationList& al,
-				gint (*point_handler)(GtkCanvasItem*, GdkEvent*, gpointer),
-				gint (*line_handler)(GtkCanvasItem*, GdkEvent*, gpointer))
+AutomationLine::AutomationLine (string name, TimeAxisView& tv, GnomeCanvasItem* parent, AutomationList& al,
+				gint (*point_handler)(GnomeCanvasItem*, GdkEvent*, gpointer),
+				gint (*line_handler)(GnomeCanvasItem*, GdkEvent*, gpointer))
 	: trackview (tv),
 	  _name (name),
 	  alist (al)
@@ -238,14 +238,14 @@ AutomationLine::AutomationLine (string name, TimeAxisView& tv, GtkCanvasItem* pa
 	terminal_points_can_slide = true;
 	_height = 0;
 
-	group = gtk_canvas_item_new (GTK_CANVAS_GROUP(parent),
-				     gtk_canvas_group_get_type(),
+	group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(parent),
+				     gnome_canvas_group_get_type(),
 				     "x", 0.0,
 				     "y", 0.0,
 				     NULL);
 
-	line = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-					 gtk_canvas_line_get_type(),
+	line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+					 gnome_canvas_line_get_type(),
 					 "width_pixels", (guint) 1,
 					 NULL);
 
@@ -260,7 +260,7 @@ AutomationLine::AutomationLine (string name, TimeAxisView& tv, GtkCanvasItem* pa
 AutomationLine::~AutomationLine ()
 {
 	if (point_coords) {
-		gtk_canvas_points_unref (point_coords);
+		gnome_canvas_points_unref (point_coords);
 	}
 
 	vector_delete (&control_points);
@@ -288,7 +288,7 @@ AutomationLine::set_point_size (double sz)
 void
 AutomationLine::show () 
 {
-	gtk_canvas_item_show (line);
+	gnome_canvas_item_show (line);
 
 	if (points_visible) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
@@ -302,7 +302,7 @@ AutomationLine::show ()
 void
 AutomationLine::hide () 
 {
-	gtk_canvas_item_hide (line);
+	gnome_canvas_item_hide (line);
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->hide();
 	}
@@ -331,7 +331,7 @@ void
 AutomationLine::set_line_color (uint32_t color)
 {
 	_line_color = color;
-	gtk_canvas_item_set (line, "fill_color_rgba", color, NULL);
+	gnome_canvas_item_set (line, "fill_color_rgba", color, NULL);
 }
 
 void
@@ -486,7 +486,7 @@ AutomationLine::reset_line_coords (ControlPoint& cp)
 void
 AutomationLine::update_line ()
 {
-	gtk_canvas_item_set (line, "points", point_coords, NULL);	
+	gnome_canvas_item_set (line, "points", point_coords, NULL);	
 }
 
 void
@@ -667,7 +667,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 }
 
 void
-AutomationLine::determine_visible_control_points (GtkCanvasPoints* points)
+AutomationLine::determine_visible_control_points (GnomeCanvasPoints* points)
 {
 	uint32_t xi, yi, view_index, pi;
 	int n;
@@ -684,7 +684,7 @@ AutomationLine::determine_visible_control_points (GtkCanvasPoints* points)
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->hide();
 	}
-	gtk_canvas_item_hide (line);
+	gnome_canvas_item_hide (line);
 
 	if (points == 0 || points->num_points == 0)  {
 		return;
@@ -831,7 +831,7 @@ AutomationLine::determine_visible_control_points (GtkCanvasPoints* points)
 		
 		if (point_coords) {
 			if (point_coords->num_points < (int) npoints) {
-				gtk_canvas_points_unref (point_coords);
+				gnome_canvas_points_unref (point_coords);
 				point_coords = get_canvas_points ("autoline", npoints);
 			} else {
 				point_coords->num_points = npoints;
@@ -850,10 +850,10 @@ AutomationLine::determine_visible_control_points (GtkCanvasPoints* points)
 		}
 
 		// cerr << "set al2 points, nc = " << point_coords->num_points << endl;
-		gtk_canvas_item_set (line, "points", point_coords, NULL);
+		gnome_canvas_item_set (line, "points", point_coords, NULL);
 
 		if (_visible) {
-			gtk_canvas_item_show (line);
+			gnome_canvas_item_show (line);
 		}
 	} 
 
@@ -879,13 +879,13 @@ AutomationLine::get_verbose_cursor_string (float fraction)
 }
 
 bool
-AutomationLine::invalid_point (GtkCanvasPoints* p, uint32_t index)
+AutomationLine::invalid_point (GnomeCanvasPoints* p, uint32_t index)
 {
 	return p->coords[index*2] == max_frames && p->coords[(index*2)+1] == DBL_MAX;
 }
 
 void
-AutomationLine::invalidate_point (GtkCanvasPoints* p, uint32_t index)
+AutomationLine::invalidate_point (GnomeCanvasPoints* p, uint32_t index)
 {
 	p->coords[index*2] = max_frames;
 	p->coords[(index*2)+1] = DBL_MAX;
@@ -1201,7 +1201,7 @@ AutomationLine::list_changed (Change ignored)
 void
 AutomationLine::reset_callback (const AutomationList& events)
 {
-	GtkCanvasPoints *tmp_points;
+	GnomeCanvasPoints *tmp_points;
 	uint32_t npoints = events.size();
 
 	if (npoints == 0) {
@@ -1209,7 +1209,7 @@ AutomationLine::reset_callback (const AutomationList& events)
 			delete *i;
 		}
 		control_points.clear ();
-		gtk_canvas_item_hide (line);
+		gnome_canvas_item_hide (line);
 		return;
 	}
 
@@ -1231,7 +1231,7 @@ AutomationLine::reset_callback (const AutomationList& events)
 	tmp_points->num_points = npoints;
 
 	determine_visible_control_points (tmp_points);
-	gtk_canvas_points_unref (tmp_points);
+	gnome_canvas_points_unref (tmp_points);
 }
 
 void

@@ -1,4 +1,4 @@
-/* gtk-canvas-ruler.h: GtkCanvas item for simple rects
+/* libgnomecanvas/gnome-canvas-ruler.h: GnomeCanvas item for simple rects
  *
  * Copyright (C) 2001 Paul Davis <pbd@op.net>
  *
@@ -19,31 +19,30 @@
  *
  */
 
-#ifndef __GTK_CANVAS_RULER_H__
-#define __GTK_CANVAS_RULER_H__
+#ifndef __GNOME_CANVAS_RULER_H__
+#define __GNOME_CANVAS_RULER_H__
 
 #include <stdint.h>
 
-#include <gtk-canvas/gtk-canvas-defs.h>
-#include "gtk-canvas/gtk-canvas.h"
+#include "libgnomecanvas/libgnomecanvas.h"
 
-BEGIN_GTK_CANVAS_DECLS
+BEGIN_GNOME_CANVAS_DECLS
 
 /* Wave viewer item for canvas.
  */
 
-#define GTK_CANVAS_TYPE_CANVAS_RULER            (gtk_canvas_ruler_get_type ())
-#define GTK_CANVAS_RULER(obj)                   (GTK_CHECK_CAST ((obj), GTK_CANVAS_TYPE_CANVAS_RULER, GtkCanvasRuler))
-#define GTK_CANVAS_RULER_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GTK_CANVAS_TYPE_CANVAS_RULER, GtkCanvasRulerClass))
-#define GTK_CANVAS_IS_CANVAS_RULER(obj)         (GTK_CHECK_TYPE ((obj), GTK_CANVAS_TYPE_CANVAS_RULER))
-#define GTK_CANVAS_IS_CANVAS_RULER_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GTK_CANVAS_TYPE_CANVAS_RULER))
+#define GNOME_CANVAS_TYPE_CANVAS_RULER            (gnome_canvas_ruler_get_type ())
+#define GNOME_CANVAS_RULER(obj)                   (GTK_CHECK_CAST ((obj), GNOME_CANVAS_TYPE_CANVAS_RULER, GnomeCanvasRuler))
+#define GNOME_CANVAS_RULER_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GNOME_CANVAS_TYPE_CANVAS_RULER, GnomeCanvasRulerClass))
+#define GNOME_CANVAS_IS_CANVAS_RULER(obj)         (GTK_CHECK_TYPE ((obj), GNOME_CANVAS_TYPE_CANVAS_RULER))
+#define GNOME_CANVAS_IS_CANVAS_RULER_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GNOME_CANVAS_TYPE_CANVAS_RULER))
 
-typedef struct _GtkCanvasRuler            GtkCanvasRuler;
-typedef struct _GtkCanvasRulerClass       GtkCanvasRulerClass;
+typedef struct _GnomeCanvasRuler            GnomeCanvasRuler;
+typedef struct _GnomeCanvasRulerClass       GnomeCanvasRulerClass;
 
-struct _GtkCanvasRuler
+struct _GnomeCanvasRuler
 {
-    GtkCanvasItem item;
+    GnomeCanvasItem item;
     double x1, y1, x2, y2;
     uint32_t fill_color;
     uint32_t tick_color;
@@ -57,12 +56,12 @@ struct _GtkCanvasRuler
     guint32 bbox_lrx, bbox_lry;
 };
 
-struct _GtkCanvasRulerClass {
-	GtkCanvasItemClass parent_class;
+struct _GnomeCanvasRulerClass {
+	GnomeCanvasItemClass parent_class;
 };
 
-GtkType gtk_canvas_ruler_get_type (void);
+GtkType gnome_canvas_ruler_get_type (void);
 
-END_GTK_CANVAS_DECLS
+END_GNOME_CANVAS_DECLS
 
-#endif /* __GTK_CANVAS_RULER_H__ */
+#endif /* __GNOME_CANVAS_RULER_H__ */

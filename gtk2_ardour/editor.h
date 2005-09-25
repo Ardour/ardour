@@ -33,8 +33,8 @@
 
 #include <gtkmm.h>
 #include <gtkmm/layout.h>
-#include <gtk-canvas.h>
-#include <gtk-canvas/gtk-canvas-util.h>
+#include <libgnomecanvas/libgnomecanvas.h>
+#include <libgnomecanvas/gnome-canvas-util.h>
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/click_box.h>
 
@@ -196,14 +196,14 @@ class Editor : public PublicEditor
 		*/
 
 		if (pixel >= 0) {
-			return (jack_nframes_t) rint (pixel * frames_per_unit * GTK_CANVAS(track_gtk_canvas)->pixels_per_unit);
+			return (jack_nframes_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_gnome_canvas)->pixels_per_unit);
 		} else {
 			return 0;
 		}
 	}
 
 	gulong frame_to_pixel (jack_nframes_t frame) {
-		return (gulong) rint ((frame / (frames_per_unit *  GTK_CANVAS(track_gtk_canvas)->pixels_per_unit)));
+		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_gnome_canvas)->pixels_per_unit)));
 	}
 
 	/* selection */
@@ -389,7 +389,7 @@ class Editor : public PublicEditor
 	void refresh_location_display_internal (ARDOUR::Locations::LocationList&);
 	void add_new_location (ARDOUR::Location *);
 	void location_gone (ARDOUR::Location *);
-	void remove_marker (GtkCanvasItem*, GdkEvent*);
+	void remove_marker (GnomeCanvasItem*, GdkEvent*);
 	gint really_remove_marker (ARDOUR::Location* loc);
 
 	uint32_t location_marker_color;
@@ -417,7 +417,7 @@ class Editor : public PublicEditor
 	typedef map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
 	LocationMarkerMap location_markers;
 
-	void hide_marker (GtkCanvasItem*, GdkEvent*);
+	void hide_marker (GnomeCanvasItem*, GdkEvent*);
 	void clear_marker_display ();
 	void mouse_add_new_marker (jack_nframes_t where);
 
@@ -471,20 +471,20 @@ class Editor : public PublicEditor
 
 	GdkCursor          *current_canvas_cursor;
 
-	GtkWidget          *track_gtk_canvas;
-	GtkWidget          *time_gtk_canvas;
+	GtkWidget          *track_gnome_canvas;
+	GtkWidget          *time_gnome_canvas;
 	Gtk::Widget        *track_canvas;
 	Gtk::Widget        *time_canvas;
 
-	GtkCanvasItem*      first_action_message;
-	GtkCanvasItem      *verbose_canvas_cursor;
+	GnomeCanvasItem*      first_action_message;
+	GnomeCanvasItem      *verbose_canvas_cursor;
 	bool                verbose_cursor_visible;
 
 	void session_control_changed (ARDOUR::Session::ControlType);
 	void queue_session_control_changed (ARDOUR::Session::ControlType);
 
 	
-	gint track_canvas_motion (GtkCanvasItem*, GdkEvent*);
+	gint track_canvas_motion (GnomeCanvasItem*, GdkEvent*);
 	void set_verbose_canvas_cursor (string, double x, double y);
 	void set_verbose_canvas_cursor_text (string);
 	void show_verbose_canvas_cursor();
@@ -499,15 +499,15 @@ class Editor : public PublicEditor
 	Gtk::EventBox      track_canvas_event_box;
 	Gtk::EventBox      time_button_event_box;
 
-	GtkCanvasItem      *minsec_group;
-	GtkCanvasItem      *bbt_group;
-	GtkCanvasItem      *smpte_group;
-	GtkCanvasItem      *frame_group;
-	GtkCanvasItem      *tempo_group;
-	GtkCanvasItem      *meter_group;
-	GtkCanvasItem      *marker_group;
-	GtkCanvasItem      *range_marker_group;
-	GtkCanvasItem      *transport_marker_group;
+	GnomeCanvasItem      *minsec_group;
+	GnomeCanvasItem      *bbt_group;
+	GnomeCanvasItem      *smpte_group;
+	GnomeCanvasItem      *frame_group;
+	GnomeCanvasItem      *tempo_group;
+	GnomeCanvasItem      *meter_group;
+	GnomeCanvasItem      *marker_group;
+	GnomeCanvasItem      *range_marker_group;
+	GnomeCanvasItem      *transport_marker_group;
 	
 	enum {
 		ruler_metric_smpte = 0,
@@ -569,25 +569,25 @@ class Editor : public PublicEditor
 	Gtk::Menu          *editor_ruler_menu;
 
 	
-	GtkCanvasItem      *tempo_bar;
-	GtkCanvasItem      *meter_bar;
-	GtkCanvasItem      *marker_bar;
-	GtkCanvasItem      *range_marker_bar;
+	GnomeCanvasItem      *tempo_bar;
+	GnomeCanvasItem      *meter_bar;
+	GnomeCanvasItem      *marker_bar;
+	GnomeCanvasItem      *range_marker_bar;
 
-	GtkCanvasItem      *transport_marker_bar;
+	GnomeCanvasItem      *transport_marker_bar;
 
 	
-	GtkCanvasItem      *tempo_line;
-	GtkCanvasItem      *meter_line;
-	GtkCanvasItem      *marker_line;
-	GtkCanvasItem      *range_marker_line;
-	GtkCanvasItem      *transport_marker_line;
+	GnomeCanvasItem      *tempo_line;
+	GnomeCanvasItem      *meter_line;
+	GnomeCanvasItem      *marker_line;
+	GnomeCanvasItem      *range_marker_line;
+	GnomeCanvasItem      *transport_marker_line;
 
-	GtkCanvasPoints    *tempo_line_points;
-	GtkCanvasPoints    *meter_line_points;
-	GtkCanvasPoints    *marker_line_points;
-	GtkCanvasPoints    *range_marker_line_points;
-	GtkCanvasPoints    *transport_marker_line_points;
+	GnomeCanvasPoints    *tempo_line_points;
+	GnomeCanvasPoints    *meter_line_points;
+	GnomeCanvasPoints    *marker_line_points;
+	GnomeCanvasPoints    *range_marker_line_points;
+	GnomeCanvasPoints    *transport_marker_line_points;
 
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
@@ -605,8 +605,8 @@ class Editor : public PublicEditor
 
 	struct Cursor {
 	    Editor&             editor;
-	    GtkCanvasPoints    *points;
-	    GtkCanvasItem      *canvas_item;
+	    GnomeCanvasPoints    *points;
+	    GnomeCanvasItem      *canvas_item;
 	    jack_nframes_t      current_frame;
 	    GtkSignalFunc       callback;
 		double				length;
@@ -625,7 +625,7 @@ class Editor : public PublicEditor
 
 	Cursor* playhead_cursor;
 	Cursor* edit_cursor;
-	GtkCanvasItem* cursor_group;
+	GnomeCanvasItem* cursor_group;
 
 	void    cursor_to_next_region_point (Cursor*, ARDOUR::RegionPoint);
 	void    cursor_to_previous_region_point (Cursor*, ARDOUR::RegionPoint);
@@ -803,12 +803,12 @@ class Editor : public PublicEditor
 	jack_nframes_t cut_buffer_start;
 	jack_nframes_t cut_buffer_length;
 
-	gint typed_event (GtkCanvasItem*, GdkEvent*, ItemType);
-	gint button_press_handler (GtkCanvasItem*, GdkEvent*, ItemType);
-	gint button_release_handler (GtkCanvasItem*, GdkEvent*, ItemType);
-	gint motion_handler (GtkCanvasItem*, GdkEvent*, ItemType);
-	gint enter_handler (GtkCanvasItem*, GdkEvent*, ItemType);
-	gint leave_handler (GtkCanvasItem*, GdkEvent*, ItemType);
+	gint typed_event (GnomeCanvasItem*, GdkEvent*, ItemType);
+	gint button_press_handler (GnomeCanvasItem*, GdkEvent*, ItemType);
+	gint button_release_handler (GnomeCanvasItem*, GdkEvent*, ItemType);
+	gint motion_handler (GnomeCanvasItem*, GdkEvent*, ItemType);
+	gint enter_handler (GnomeCanvasItem*, GdkEvent*, ItemType);
+	gint leave_handler (GnomeCanvasItem*, GdkEvent*, ItemType);
 	
 	/* KEYMAP HANDLING */
 
@@ -1037,7 +1037,7 @@ class Editor : public PublicEditor
 	void queue_route_list_reordered (gint row, gint col);
 
 	struct DragInfo {
-	    GtkCanvasItem* item;
+	    GnomeCanvasItem* item;
 	    void* data;
  	    jack_nframes_t last_frame_position;
 	    int32_t pointer_frame_offset;
@@ -1049,8 +1049,8 @@ class Editor : public PublicEditor
 	    double cumulative_y_drag;
 	    double current_pointer_x;
 	    double current_pointer_y;
-	    void (Editor::*motion_callback)(GtkCanvasItem*, GdkEvent*);
-	    void (Editor::*finished_callback)(GtkCanvasItem*, GdkEvent*);
+	    void (Editor::*motion_callback)(GnomeCanvasItem*, GdkEvent*);
+	    void (Editor::*finished_callback)(GnomeCanvasItem*, GdkEvent*);
 	    TimeAxisView* last_trackview;
 	    bool x_constrained;
 	    bool copy;
@@ -1070,56 +1070,56 @@ class Editor : public PublicEditor
 	LineDragInfo current_line_drag_info;
 
 	void start_grab (GdkEvent*, GdkCursor* cursor = 0);
-	bool end_grab (GtkCanvasItem*, GdkEvent*);
+	bool end_grab (GnomeCanvasItem*, GdkEvent*);
 
 	Gtk::Menu fade_context_menu;
-	void popup_fade_context_menu (int, int, GtkCanvasItem*, ItemType);
+	void popup_fade_context_menu (int, int, GnomeCanvasItem*, ItemType);
 
-	void start_fade_in_grab (GtkCanvasItem*, GdkEvent*);
-	void start_fade_out_grab (GtkCanvasItem*, GdkEvent*);
-	void fade_in_drag_motion_callback (GtkCanvasItem*, GdkEvent*);
-	void fade_out_drag_motion_callback (GtkCanvasItem*, GdkEvent*);
-	void fade_in_drag_finished_callback (GtkCanvasItem*, GdkEvent*);
-	void fade_out_drag_finished_callback (GtkCanvasItem*, GdkEvent*);
+	void start_fade_in_grab (GnomeCanvasItem*, GdkEvent*);
+	void start_fade_out_grab (GnomeCanvasItem*, GdkEvent*);
+	void fade_in_drag_motion_callback (GnomeCanvasItem*, GdkEvent*);
+	void fade_out_drag_motion_callback (GnomeCanvasItem*, GdkEvent*);
+	void fade_in_drag_finished_callback (GnomeCanvasItem*, GdkEvent*);
+	void fade_out_drag_finished_callback (GnomeCanvasItem*, GdkEvent*);
 	
 	std::set<ARDOUR::Playlist*> motion_frozen_playlists;
-	void region_drag_motion_callback (GtkCanvasItem*, GdkEvent*);
-	void region_drag_finished_callback (GtkCanvasItem*, GdkEvent*);
-	void region_copy_drag_finished_callback (GtkCanvasItem*, GdkEvent*);
+	void region_drag_motion_callback (GnomeCanvasItem*, GdkEvent*);
+	void region_drag_finished_callback (GnomeCanvasItem*, GdkEvent*);
+	void region_copy_drag_finished_callback (GnomeCanvasItem*, GdkEvent*);
 
-	void cursor_drag_motion_callback (GtkCanvasItem*, GdkEvent*);
-	void cursor_drag_finished_callback (GtkCanvasItem*, GdkEvent*);
-	void marker_drag_motion_callback (GtkCanvasItem*, GdkEvent*);
-	void marker_drag_finished_callback (GtkCanvasItem*, GdkEvent*);
-	void control_point_drag_motion_callback (GtkCanvasItem*, GdkEvent*);
-	void control_point_drag_finished_callback (GtkCanvasItem*, GdkEvent*);
-	void line_drag_motion_callback (GtkCanvasItem*, GdkEvent*);
-	void line_drag_finished_callback (GtkCanvasItem*, GdkEvent*);
+	void cursor_drag_motion_callback (GnomeCanvasItem*, GdkEvent*);
+	void cursor_drag_finished_callback (GnomeCanvasItem*, GdkEvent*);
+	void marker_drag_motion_callback (GnomeCanvasItem*, GdkEvent*);
+	void marker_drag_finished_callback (GnomeCanvasItem*, GdkEvent*);
+	void control_point_drag_motion_callback (GnomeCanvasItem*, GdkEvent*);
+	void control_point_drag_finished_callback (GnomeCanvasItem*, GdkEvent*);
+	void line_drag_motion_callback (GnomeCanvasItem*, GdkEvent*);
+	void line_drag_finished_callback (GnomeCanvasItem*, GdkEvent*);
 
-	void tempo_marker_drag_motion_callback (GtkCanvasItem*, GdkEvent*);
-	void tempo_marker_drag_finished_callback (GtkCanvasItem*, GdkEvent*);
-	void meter_marker_drag_motion_callback (GtkCanvasItem*, GdkEvent*);
-	void meter_marker_drag_finished_callback (GtkCanvasItem*, GdkEvent*);
+	void tempo_marker_drag_motion_callback (GnomeCanvasItem*, GdkEvent*);
+	void tempo_marker_drag_finished_callback (GnomeCanvasItem*, GdkEvent*);
+	void meter_marker_drag_motion_callback (GnomeCanvasItem*, GdkEvent*);
+	void meter_marker_drag_finished_callback (GnomeCanvasItem*, GdkEvent*);
 
-	gint mouse_rename_region (GtkCanvasItem*, GdkEvent*);
+	gint mouse_rename_region (GnomeCanvasItem*, GdkEvent*);
 
-	void start_region_grab (GtkCanvasItem*, GdkEvent*);
-	void start_region_copy_grab (GtkCanvasItem*, GdkEvent*);
-	void start_region_brush_grab (GtkCanvasItem*, GdkEvent*);
-	void start_selection_grab (GtkCanvasItem*, GdkEvent*);
-	void start_cursor_grab (GtkCanvasItem*, GdkEvent*);
-	void start_marker_grab (GtkCanvasItem*, GdkEvent*);
-	void start_control_point_grab (GtkCanvasItem*, GdkEvent*);
-	void start_line_grab_from_regionview (GtkCanvasItem*, GdkEvent*);
-	void start_line_grab_from_line (GtkCanvasItem*, GdkEvent*);
+	void start_region_grab (GnomeCanvasItem*, GdkEvent*);
+	void start_region_copy_grab (GnomeCanvasItem*, GdkEvent*);
+	void start_region_brush_grab (GnomeCanvasItem*, GdkEvent*);
+	void start_selection_grab (GnomeCanvasItem*, GdkEvent*);
+	void start_cursor_grab (GnomeCanvasItem*, GdkEvent*);
+	void start_marker_grab (GnomeCanvasItem*, GdkEvent*);
+	void start_control_point_grab (GnomeCanvasItem*, GdkEvent*);
+	void start_line_grab_from_regionview (GnomeCanvasItem*, GdkEvent*);
+	void start_line_grab_from_line (GnomeCanvasItem*, GdkEvent*);
 	void start_line_grab (AutomationLine *, GdkEvent*);
-	void start_tempo_marker_grab (GtkCanvasItem*, GdkEvent*);
-	void start_meter_marker_grab (GtkCanvasItem*, GdkEvent*);
+	void start_tempo_marker_grab (GnomeCanvasItem*, GdkEvent*);
+	void start_meter_marker_grab (GnomeCanvasItem*, GdkEvent*);
 
 	void region_view_item_click (AudioRegionView&, GdkEventButton*);
 
-	void remove_gain_control_point (GtkCanvasItem*, GdkEvent*);
-	void remove_control_point (GtkCanvasItem*, GdkEvent*);
+	void remove_gain_control_point (GnomeCanvasItem*, GdkEvent*);
+	void remove_control_point (GnomeCanvasItem*, GdkEvent*);
 
 	void mouse_brush_insert_region (AudioRegionView*, jack_nframes_t pos);
 	void brush (jack_nframes_t);
@@ -1129,81 +1129,81 @@ class Editor : public PublicEditor
 
 	/* static versions of these are public in PublicEditor */
 	
-	gint _canvas_crossfade_view_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_fade_in_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_fade_in_handle_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_fade_out_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_fade_out_handle_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_region_view_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_region_view_name_highlight_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_region_view_name_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_stream_view_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_automation_track_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_marker_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_zoom_rect_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_selection_rect_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_selection_start_trim_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_selection_end_trim_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_control_point_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_line_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_tempo_marker_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_meter_marker_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_tempo_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_meter_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_marker_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_range_marker_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_transport_marker_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_imageframe_item_view_event(GtkCanvasItem *item, GdkEvent* event, gpointer data) ;
-	gint _canvas_imageframe_view_event(GtkCanvasItem *item, GdkEvent* event, gpointer data) ;
-	gint _canvas_imageframe_start_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	gint _canvas_imageframe_end_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	gint _canvas_marker_time_axis_view_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	gint _canvas_markerview_item_view_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	gint _canvas_markerview_start_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	gint _canvas_markerview_end_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
+	gint _canvas_crossfade_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_fade_in_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_fade_in_handle_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_fade_out_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_fade_out_handle_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_region_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_region_view_name_highlight_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_region_view_name_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_stream_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_automation_track_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_zoom_rect_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_selection_rect_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_selection_start_trim_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_selection_end_trim_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_control_point_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_line_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_tempo_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_meter_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_tempo_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_meter_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_range_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_transport_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint _canvas_imageframe_item_view_event(GnomeCanvasItem *item, GdkEvent* event, gpointer data) ;
+	gint _canvas_imageframe_view_event(GnomeCanvasItem *item, GdkEvent* event, gpointer data) ;
+	gint _canvas_imageframe_start_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	gint _canvas_imageframe_end_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	gint _canvas_marker_time_axis_view_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	gint _canvas_markerview_item_view_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	gint _canvas_markerview_start_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	gint _canvas_markerview_end_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
 
 	/* now the real things */
 
-	gint canvas_crossfade_view_event (GtkCanvasItem* item, GdkEvent* event, CrossfadeView*);
-	gint canvas_fade_in_event (GtkCanvasItem* item, GdkEvent* event, AudioRegionView*);
-	gint canvas_fade_in_handle_event (GtkCanvasItem* item, GdkEvent* event, AudioRegionView*);
-	gint canvas_fade_out_event (GtkCanvasItem* item, GdkEvent* event, AudioRegionView*);
-	gint canvas_fade_out_handle_event (GtkCanvasItem* item, GdkEvent* event, AudioRegionView*);
-	gint canvas_region_view_event (GtkCanvasItem* item, GdkEvent* event, AudioRegionView*);
-	gint canvas_stream_view_event (GtkCanvasItem* item, GdkEvent* event, AudioTimeAxisView*);
-	gint canvas_automation_track_event (GtkCanvasItem* item, GdkEvent* event, AutomationTimeAxisView*);
-	gint canvas_marker_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_zoom_rect_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_selection_rect_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_selection_start_trim_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_selection_end_trim_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_control_point_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_line_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_tempo_marker_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_meter_marker_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_tempo_bar_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_meter_bar_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_marker_bar_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_range_marker_bar_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_transport_marker_bar_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_region_view_name_highlight_event (GtkCanvasItem* item, GdkEvent* event);
-	gint canvas_region_view_name_event (GtkCanvasItem* item, GdkEvent* event);
+	gint canvas_crossfade_view_event (GnomeCanvasItem* item, GdkEvent* event, CrossfadeView*);
+	gint canvas_fade_in_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
+	gint canvas_fade_in_handle_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
+	gint canvas_fade_out_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
+	gint canvas_fade_out_handle_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
+	gint canvas_region_view_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
+	gint canvas_stream_view_event (GnomeCanvasItem* item, GdkEvent* event, AudioTimeAxisView*);
+	gint canvas_automation_track_event (GnomeCanvasItem* item, GdkEvent* event, AutomationTimeAxisView*);
+	gint canvas_marker_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_zoom_rect_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_selection_rect_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_selection_start_trim_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_selection_end_trim_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_control_point_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_line_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_tempo_marker_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_meter_marker_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_tempo_bar_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_meter_bar_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_range_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_transport_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_region_view_name_highlight_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_region_view_name_event (GnomeCanvasItem* item, GdkEvent* event);
 
 	/* these are not publically accessible, but we still need the static versions
 	   till we use Gnome::Canvas.
 	*/
 	
-	static gint _canvas_copy_region_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint canvas_copy_region_event (GtkCanvasItem* item, GdkEvent* event);
+	static gint _canvas_copy_region_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint canvas_copy_region_event (GnomeCanvasItem* item, GdkEvent* event);
 
-	static gint _canvas_playhead_cursor_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint canvas_playhead_cursor_event (GtkCanvasItem* item, GdkEvent* event);
+	static gint _canvas_playhead_cursor_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint canvas_playhead_cursor_event (GnomeCanvasItem* item, GdkEvent* event);
 
-	static gint _canvas_edit_cursor_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint canvas_edit_cursor_event (GtkCanvasItem* item, GdkEvent* event);
+	static gint _canvas_edit_cursor_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint canvas_edit_cursor_event (GnomeCanvasItem* item, GdkEvent* event);
 	
-	static gint _track_canvas_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	gint track_canvas_event (GtkCanvasItem* item, GdkEvent* event);
+	static gint _track_canvas_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	gint track_canvas_event (GnomeCanvasItem* item, GdkEvent* event);
 
 	gint track_canvas_button_press_event (GdkEventButton *);
 	gint track_canvas_button_release_event (GdkEventButton *);
@@ -1253,12 +1253,12 @@ class Editor : public PublicEditor
 
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
 	
-	typedef vector<GtkCanvasItem*> TimeLineList;
+	typedef vector<GnomeCanvasItem*> TimeLineList;
 	TimeLineList free_measure_lines;
 	TimeLineList used_measure_lines;
 
-	GtkCanvasItem* time_line_group;
-	GtkCanvasItem* get_time_line ();
+	GnomeCanvasItem* time_line_group;
+	GnomeCanvasItem* get_time_line ();
 	void hide_measures ();
 	void draw_measures ();
 	void draw_time_bars ();
@@ -1268,15 +1268,15 @@ class Editor : public PublicEditor
 	void mouse_add_new_tempo_event (jack_nframes_t where);
 	void mouse_add_new_meter_event (jack_nframes_t where);
 
-	void remove_tempo_marker (GtkCanvasItem*);
-	void remove_meter_marker (GtkCanvasItem*);
+	void remove_tempo_marker (GnomeCanvasItem*);
+	void remove_meter_marker (GnomeCanvasItem*);
 	gint real_remove_tempo_marker (ARDOUR::TempoSection*);
 	gint real_remove_meter_marker (ARDOUR::MeterSection*);
 	
 	void edit_tempo_section (ARDOUR::TempoSection*);
 	void edit_meter_section (ARDOUR::MeterSection*);
-	void edit_tempo_marker (GtkCanvasItem*);
-	void edit_meter_marker (GtkCanvasItem*);
+	void edit_tempo_marker (GnomeCanvasItem*);
+	void edit_meter_marker (GnomeCanvasItem*);
 	
 	void marker_menu_edit ();
 	void marker_menu_remove ();
@@ -1292,10 +1292,10 @@ class Editor : public PublicEditor
 	void update_loop_range_view (bool visibility=false);
 	void update_punch_range_view (bool visibility=false);
         gint new_transport_marker_menu_popdown (GdkEventAny*);
-	void marker_context_menu (GdkEventButton*, GtkCanvasItem*);
-	void tm_marker_context_menu (GdkEventButton*, GtkCanvasItem*);
-	void transport_marker_context_menu (GdkEventButton*, GtkCanvasItem*);
-	void new_transport_marker_context_menu (GdkEventButton*, GtkCanvasItem*);
+	void marker_context_menu (GdkEventButton*, GnomeCanvasItem*);
+	void tm_marker_context_menu (GdkEventButton*, GnomeCanvasItem*);
+	void transport_marker_context_menu (GdkEventButton*, GnomeCanvasItem*);
+	void new_transport_marker_context_menu (GdkEventButton*, GnomeCanvasItem*);
 	void build_marker_menu ();
 	void build_tm_marker_menu ();
 	void build_transport_marker_menu ();
@@ -1305,7 +1305,7 @@ class Editor : public PublicEditor
 	Gtk::Menu* marker_menu;
 	Gtk::Menu* transport_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;
-	GtkCanvasItem* marker_menu_item;
+	GnomeCanvasItem* marker_menu_item;
 
 	typedef list<Marker*> Marks;
 	Marks metric_marks;
@@ -1419,9 +1419,9 @@ class Editor : public PublicEditor
 		SelectionMove
 	} selection_op;
 
-	void start_selection_op (GtkCanvasItem* item, GdkEvent* event, SelectionOp);
-	void drag_selection (GtkCanvasItem* item, GdkEvent* event);
-	void end_selection_op (GtkCanvasItem* item, GdkEvent* event);
+	void start_selection_op (GnomeCanvasItem* item, GdkEvent* event, SelectionOp);
+	void drag_selection (GnomeCanvasItem* item, GdkEvent* event);
+	void end_selection_op (GnomeCanvasItem* item, GdkEvent* event);
 	void cancel_selection ();
 
 	void region_selection_op (void (ARDOUR::Region::*pmf)(void));
@@ -1440,28 +1440,28 @@ class Editor : public PublicEditor
 		CreateTransportMarker
 	} range_marker_op;
 
-	void start_range_markerbar_op (GtkCanvasItem* item, GdkEvent* event, RangeMarkerOp);
-	void drag_range_markerbar_op (GtkCanvasItem* item, GdkEvent* event);
-	void end_range_markerbar_op (GtkCanvasItem* item, GdkEvent* event);
+	void start_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event, RangeMarkerOp);
+	void drag_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event);
+	void end_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event);
 
 	
-	GtkCanvasItem      *range_bar_drag_rect;
-	GtkCanvasItem      *transport_bar_drag_rect;
-	GtkCanvasItem      *marker_drag_line;
-	GtkCanvasPoints    *marker_drag_line_points;
-	GtkCanvasItem      *range_marker_drag_rect;
+	GnomeCanvasItem      *range_bar_drag_rect;
+	GnomeCanvasItem      *transport_bar_drag_rect;
+	GnomeCanvasItem      *marker_drag_line;
+	GnomeCanvasPoints    *marker_drag_line_points;
+	GnomeCanvasItem      *range_marker_drag_rect;
 
 	void update_marker_drag_item (ARDOUR::Location *);
 	
-	GtkCanvasItem      *transport_bar_range_rect;
-	GtkCanvasItem      *transport_bar_preroll_rect;
-	GtkCanvasItem      *transport_bar_postroll_rect;
-	GtkCanvasItem      *transport_loop_range_rect;
-	GtkCanvasItem      *transport_punch_range_rect;
-	GtkCanvasItem      *transport_punchin_line;
-	GtkCanvasItem      *transport_punchout_line;
-	GtkCanvasItem      *transport_preroll_rect;
-	GtkCanvasItem      *transport_postroll_rect;
+	GnomeCanvasItem      *transport_bar_range_rect;
+	GnomeCanvasItem      *transport_bar_preroll_rect;
+	GnomeCanvasItem      *transport_bar_postroll_rect;
+	GnomeCanvasItem      *transport_loop_range_rect;
+	GnomeCanvasItem      *transport_punch_range_rect;
+	GnomeCanvasItem      *transport_punchin_line;
+	GnomeCanvasItem      *transport_punchout_line;
+	GnomeCanvasItem      *transport_preroll_rect;
+	GnomeCanvasItem      *transport_postroll_rect;
 
 	ARDOUR::Location*  transport_loop_location();
 	ARDOUR::Location*  transport_punch_location();
@@ -1470,21 +1470,21 @@ class Editor : public PublicEditor
 	
 	/* object rubberband select process */
 	
-	void start_rubberband_select (GtkCanvasItem* item, GdkEvent* event);
-	void drag_rubberband_select (GtkCanvasItem* item, GdkEvent* event);
-	void end_rubberband_select (GtkCanvasItem* item, GdkEvent* event);
+	void start_rubberband_select (GnomeCanvasItem* item, GdkEvent* event);
+	void drag_rubberband_select (GnomeCanvasItem* item, GdkEvent* event);
+	void end_rubberband_select (GnomeCanvasItem* item, GdkEvent* event);
 
 	bool select_all_within (jack_nframes_t start, jack_nframes_t end, gdouble topy, gdouble boty, bool add);
 	
-	GtkCanvasItem   *rubberband_rect;
+	GnomeCanvasItem   *rubberband_rect;
 	
 	/* mouse zoom process */
 
-	void start_mouse_zoom (GtkCanvasItem* item, GdkEvent* event);
-	void drag_mouse_zoom (GtkCanvasItem* item, GdkEvent* event);
-	void end_mouse_zoom (GtkCanvasItem* item, GdkEvent* event);
+	void start_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event);
+	void drag_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event);
+	void end_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event);
 
-	GtkCanvasItem   *zoom_rect;
+	GnomeCanvasItem   *zoom_rect;
 	void reposition_zoom_rect (jack_nframes_t start, jack_nframes_t end);
 	
 	/* diskstream/route display management */
@@ -1552,14 +1552,14 @@ class Editor : public PublicEditor
 		ContentsTrim,
 	} trim_op;
 
-	void start_trim (GtkCanvasItem*, GdkEvent*);
+	void start_trim (GnomeCanvasItem*, GdkEvent*);
 	void point_trim (GdkEvent*);
-	void trim_motion_callback (GtkCanvasItem*, GdkEvent*);
+	void trim_motion_callback (GnomeCanvasItem*, GdkEvent*);
 	void single_contents_trim (AudioRegionView&, jack_nframes_t, bool, bool, bool);
 	void single_start_trim (AudioRegionView&, jack_nframes_t, bool, bool);
 	void single_end_trim (AudioRegionView&, jack_nframes_t, bool, bool);
 
-	void trim_finished_callback (GtkCanvasItem*, GdkEvent*);
+	void trim_finished_callback (GnomeCanvasItem*, GdkEvent*);
 	void thaw_region_after_trim (AudioRegionView& rv);
 	
 	void trim_region_to_edit_cursor ();
@@ -1668,9 +1668,9 @@ class Editor : public PublicEditor
 
 	jack_nframes_t event_frame (GdkEvent*, double* px = 0, double* py = 0);
 
-	void time_fx_motion (GtkCanvasItem*, GdkEvent*);
-	void start_time_fx (GtkCanvasItem*, GdkEvent*);
-	void end_time_fx (GtkCanvasItem*, GdkEvent*);
+	void time_fx_motion (GnomeCanvasItem*, GdkEvent*);
+	void start_time_fx (GnomeCanvasItem*, GdkEvent*);
+	void end_time_fx (GnomeCanvasItem*, GdkEvent*);
 
 	struct TimeStretchDialog : public ArdourDialog {
 	    ARDOUR::Session::TimeStretchRequest request;
@@ -1728,39 +1728,39 @@ class Editor : public PublicEditor
 	void handle_new_imageframe_time_axis_view(std::string track_name, void* src) ;
 	void handle_new_imageframe_marker_time_axis_view(std::string track_name, TimeAxisView* marked_track) ;
 
-	void start_imageframe_grab(GtkCanvasItem*, GdkEvent*) ;
-	void start_markerview_grab(GtkCanvasItem*, GdkEvent*) ;
+	void start_imageframe_grab(GnomeCanvasItem*, GdkEvent*) ;
+	void start_markerview_grab(GnomeCanvasItem*, GdkEvent*) ;
 
-	void imageframe_drag_motion_callback(GtkCanvasItem*, GdkEvent*) ;
-	void markerview_drag_motion_callback(GtkCanvasItem*, GdkEvent*) ;
-	void timeaxis_item_drag_finished_callback(GtkCanvasItem*, GdkEvent*) ;
+	void imageframe_drag_motion_callback(GnomeCanvasItem*, GdkEvent*) ;
+	void markerview_drag_motion_callback(GnomeCanvasItem*, GdkEvent*) ;
+	void timeaxis_item_drag_finished_callback(GnomeCanvasItem*, GdkEvent*) ;
 
-	gint canvas_imageframe_item_view_event(GtkCanvasItem* item, GdkEvent* event, ImageFrameView* ifv);
-	gint canvas_imageframe_view_event(GtkCanvasItem* item, GdkEvent* event, ImageFrameTimeAxis* ifta);
-	gint canvas_imageframe_start_handle_event(GtkCanvasItem* item, GdkEvent* event, ImageFrameView* ifv);
-	gint canvas_imageframe_end_handle_event(GtkCanvasItem* item, GdkEvent* event, ImageFrameView* ifv);
+	gint canvas_imageframe_item_view_event(GnomeCanvasItem* item, GdkEvent* event, ImageFrameView* ifv);
+	gint canvas_imageframe_view_event(GnomeCanvasItem* item, GdkEvent* event, ImageFrameTimeAxis* ifta);
+	gint canvas_imageframe_start_handle_event(GnomeCanvasItem* item, GdkEvent* event, ImageFrameView* ifv);
+	gint canvas_imageframe_end_handle_event(GnomeCanvasItem* item, GdkEvent* event, ImageFrameView* ifv);
 
-	gint canvas_marker_time_axis_view_event(GtkCanvasItem* item, GdkEvent* event, MarkerTimeAxis* mta);
-	gint canvas_markerview_item_view_event(GtkCanvasItem* item, GdkEvent* event, MarkerView* mv);
-	gint canvas_markerview_start_handle_event(GtkCanvasItem* item, GdkEvent* event, MarkerView* mv);
-	gint canvas_markerview_end_handle_event(GtkCanvasItem* item, GdkEvent* event, MarkerView* mv);
+	gint canvas_marker_time_axis_view_event(GnomeCanvasItem* item, GdkEvent* event, MarkerTimeAxis* mta);
+	gint canvas_markerview_item_view_event(GnomeCanvasItem* item, GdkEvent* event, MarkerView* mv);
+	gint canvas_markerview_start_handle_event(GnomeCanvasItem* item, GdkEvent* event, MarkerView* mv);
+	gint canvas_markerview_end_handle_event(GnomeCanvasItem* item, GdkEvent* event, MarkerView* mv);
 
-	void imageframe_start_handle_op(GtkCanvasItem* item, GdkEvent* event) ;
-	void imageframe_end_handle_op(GtkCanvasItem* item, GdkEvent* event) ;
-	void imageframe_start_handle_trim_motion(GtkCanvasItem* item, GdkEvent* event) ;
-	void imageframe_start_handle_end_trim(GtkCanvasItem* item, GdkEvent* event) ;
-	void imageframe_end_handle_trim_motion(GtkCanvasItem* item, GdkEvent* event) ;
-	void imageframe_end_handle_end_trim(GtkCanvasItem* item, GdkEvent* event) ;
+	void imageframe_start_handle_op(GnomeCanvasItem* item, GdkEvent* event) ;
+	void imageframe_end_handle_op(GnomeCanvasItem* item, GdkEvent* event) ;
+	void imageframe_start_handle_trim_motion(GnomeCanvasItem* item, GdkEvent* event) ;
+	void imageframe_start_handle_end_trim(GnomeCanvasItem* item, GdkEvent* event) ;
+	void imageframe_end_handle_trim_motion(GnomeCanvasItem* item, GdkEvent* event) ;
+	void imageframe_end_handle_end_trim(GnomeCanvasItem* item, GdkEvent* event) ;
 	
-	void markerview_item_start_handle_op(GtkCanvasItem* item, GdkEvent* event) ;
-	void markerview_item_end_handle_op(GtkCanvasItem* item, GdkEvent* event) ;
-	void markerview_start_handle_trim_motion(GtkCanvasItem* item, GdkEvent* event) ;
-	void markerview_start_handle_end_trim(GtkCanvasItem* item, GdkEvent* event) ;
-	void markerview_end_handle_trim_motion(GtkCanvasItem* item, GdkEvent* event) ;
-	void markerview_end_handle_end_trim(GtkCanvasItem* item, GdkEvent* event) ;
+	void markerview_item_start_handle_op(GnomeCanvasItem* item, GdkEvent* event) ;
+	void markerview_item_end_handle_op(GnomeCanvasItem* item, GdkEvent* event) ;
+	void markerview_start_handle_trim_motion(GnomeCanvasItem* item, GdkEvent* event) ;
+	void markerview_start_handle_end_trim(GnomeCanvasItem* item, GdkEvent* event) ;
+	void markerview_end_handle_trim_motion(GnomeCanvasItem* item, GdkEvent* event) ;
+	void markerview_end_handle_end_trim(GnomeCanvasItem* item, GdkEvent* event) ;
 
-	void popup_imageframe_edit_menu(int button, int32_t time, GtkCanvasItem* ifv, bool with_frame) ;
-	void popup_marker_time_axis_edit_menu(int button, int32_t time, GtkCanvasItem* ifv, bool with_frame) ;
+	void popup_imageframe_edit_menu(int button, int32_t time, GnomeCanvasItem* ifv, bool with_frame) ;
+	void popup_marker_time_axis_edit_menu(int button, int32_t time, GnomeCanvasItem* ifv, bool with_frame) ;
 
 	ImageFrameSocketHandler* image_socket_listener ;
 	/* </CMT Additions> */

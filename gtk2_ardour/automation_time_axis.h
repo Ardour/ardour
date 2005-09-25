@@ -47,7 +47,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void set_samples_per_unit (double);
 	std::string name() const { return _name; }
 
-	virtual void add_automation_event (GtkCanvasItem *item, GdkEvent *event, jack_nframes_t, double) = 0;
+	virtual void add_automation_event (GnomeCanvasItem *item, GdkEvent *event, jack_nframes_t, double) = 0;
 
 	void clear_lines ();
 	void add_line (AutomationLine&);
@@ -77,7 +77,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
   protected:
 	ARDOUR::Route& route;
-	GtkCanvasItem* base_rect;
+	GnomeCanvasItem* base_rect;
 	string _name;
 	string _state_name;
 	bool    in_destructor;

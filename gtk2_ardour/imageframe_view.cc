@@ -56,7 +56,7 @@ sigc::signal<void,ImageFrameView*> ImageFrameView::GoingAway;
  * @param num_channels the number of color channels within rgb_data
  */
 ImageFrameView::ImageFrameView(std::string item_id,
-	GtkCanvasGroup *parent,
+	GnomeCanvasGroup *parent,
 	ImageFrameTimeAxis* tv,
 	ImageFrameTimeAxisGroup* item_group,
 	double spu,
@@ -93,8 +93,8 @@ ImageFrameView::ImageFrameView(std::string item_id,
 	double im_ratio = (double)width/(double)height ;
 	int im_width = (int)((double)(trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE) * im_ratio) ;
 	
-	imageframe = gtk_canvas_item_new(GTK_CANVAS_GROUP(group),
-		gtk_canvas_imageframe_get_type(),
+	imageframe = gnome_canvas_item_new(GNOME_CANVAS_GROUP(group),
+		gnome_canvas_imageframe_get_type(),
 		"pixbuf", pbuf,
 		"x", (gdouble) 1.0,
 		"y", (gdouble) 1.0,
@@ -117,8 +117,8 @@ ImageFrameView::ImageFrameView(std::string item_id,
 
 	/* handle any specific details required by the initial start end duration values */
 	
-	gtk_canvas_item_raise_to_top(frame_handle_start) ;
-	gtk_canvas_item_raise_to_top(frame_handle_end) ;
+	gnome_canvas_item_raise_to_top(frame_handle_start) ;
+	gnome_canvas_item_raise_to_top(frame_handle_end) ;
 	
     set_position(start, this) ;
     set_duration(duration, this) ;
@@ -230,7 +230,7 @@ ImageFrameView::set_duration(jack_nframes_t dur, void* src)
 	if(ret)
 	{
 		/* handle setting the sizes of our canvas itesm based on the new duration */
-		gtk_canvas_item_set(imageframe, "drawwidth", (gdouble) trackview.editor.frame_to_pixel(get_duration()), NULL) ;
+		gnome_canvas_item_set(imageframe, "drawwidth", (gdouble) trackview.editor.frame_to_pixel(get_duration()), NULL) ;
 	}
 	
 	return(ret) ;
@@ -278,21 +278,21 @@ ImageFrameView::set_height (gdouble h)
 	// @todo might have to re-get the image data, for a large height...hmmm.
 	double im_ratio = (double)image_data_width/(double)image_data_height ;
 	int im_width = (int)((double)(h - TimeAxisViewItem::NAME_Y_OFFSET) * im_ratio) ;
-	gtk_canvas_item_set(imageframe, "width", (gdouble)im_width, NULL) ;
-	gtk_canvas_item_set(imageframe, "height",(gdouble) (h - TimeAxisViewItem::NAME_Y_OFFSET), NULL) ;
+	gnome_canvas_item_set(imageframe, "width", (gdouble)im_width, NULL) ;
+	gnome_canvas_item_set(imageframe, "height",(gdouble) (h - TimeAxisViewItem::NAME_Y_OFFSET), NULL) ;
 
 	
-	gtk_canvas_item_raise_to_top(frame) ;
-	gtk_canvas_item_raise_to_top(imageframe) ;
-	gtk_canvas_item_raise_to_top(name_highlight) ;
-	gtk_canvas_item_raise_to_top(name_text) ;
-	gtk_canvas_item_raise_to_top(frame_handle_start) ;
-	gtk_canvas_item_raise_to_top(frame_handle_end) ;
+	gnome_canvas_item_raise_to_top(frame) ;
+	gnome_canvas_item_raise_to_top(imageframe) ;
+	gnome_canvas_item_raise_to_top(name_highlight) ;
+	gnome_canvas_item_raise_to_top(name_text) ;
+	gnome_canvas_item_raise_to_top(frame_handle_start) ;
+	gnome_canvas_item_raise_to_top(frame_handle_end) ;
  
- 	gtk_canvas_item_set (name_text, "y", h - TimeAxisViewItem::NAME_Y_OFFSET, NULL);
-	gtk_canvas_item_set (frame, "y2", h, NULL);
+ 	gnome_canvas_item_set (name_text, "y", h - TimeAxisViewItem::NAME_Y_OFFSET, NULL);
+	gnome_canvas_item_set (frame, "y2", h, NULL);
 
-	gtk_canvas_item_set (name_highlight, "y1", (gdouble) h - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, "y2", (gdouble) h - 1.0, NULL);
+	gnome_canvas_item_set (name_highlight, "y1", (gdouble) h - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, "y2", (gdouble) h - 1.0, NULL);
 }
 
 

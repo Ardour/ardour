@@ -61,8 +61,8 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(std::string track_id, PublicEditor& ed, A
 {
 	_color = unique_random_color() ;
 	
-	selection_group = gtk_canvas_item_new (GTK_CANVAS_GROUP(canvas_display), gtk_canvas_group_get_type (), NULL) ;
-	gtk_canvas_item_hide(selection_group) ;
+	selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), gnome_canvas_group_get_type (), NULL) ;
+	gnome_canvas_item_hide(selection_group) ;
 
 	// intialize our data items
 	_marked_for_display = true;

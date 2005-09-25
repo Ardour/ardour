@@ -22,7 +22,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/gtk_ui.h>
 
 #include <ardour/location.h>
@@ -69,30 +69,30 @@ Editor::add_new_location (Location *location)
 	}
 
 	if (location->is_mark()) {
-		lam->start = new Marker (*this, GTK_CANVAS_GROUP(marker_group), color, 
+		lam->start = new Marker (*this, GNOME_CANVAS_GROUP(marker_group), color, 
 					 location->name(), Marker::Mark, PublicEditor::canvas_marker_event, location->start());
 		lam->end   = 0;
 
 	} else if (location->is_auto_loop()) {
 		// transport marker
-		lam->start = new Marker (*this, GTK_CANVAS_GROUP(transport_marker_group), color, 
+		lam->start = new Marker (*this, GNOME_CANVAS_GROUP(transport_marker_group), color, 
 					 location->name(), Marker::LoopStart, PublicEditor::canvas_marker_event, location->start());
-		lam->end   = new Marker (*this, GTK_CANVAS_GROUP(transport_marker_group), color, 
+		lam->end   = new Marker (*this, GNOME_CANVAS_GROUP(transport_marker_group), color, 
 					 location->name(), Marker::LoopEnd, PublicEditor::canvas_marker_event, location->end());
 		
 	} else if (location->is_auto_punch()) {
 		// transport marker
-		lam->start = new Marker (*this, GTK_CANVAS_GROUP(transport_marker_group), color, 
+		lam->start = new Marker (*this, GNOME_CANVAS_GROUP(transport_marker_group), color, 
 					 location->name(), Marker::PunchIn, PublicEditor::canvas_marker_event, location->start());
-		lam->end   = new Marker (*this, GTK_CANVAS_GROUP(transport_marker_group), color, 
+		lam->end   = new Marker (*this, GNOME_CANVAS_GROUP(transport_marker_group), color, 
 					 location->name(), Marker::PunchOut, PublicEditor::canvas_marker_event, location->end());
 		
 	} else {
 
 		// range marker
-		lam->start = new Marker (*this, GTK_CANVAS_GROUP(range_marker_group), color, 
+		lam->start = new Marker (*this, GNOME_CANVAS_GROUP(range_marker_group), color, 
 					 location->name(), Marker::Start, PublicEditor::canvas_marker_event, location->start());
-		lam->end   = new Marker (*this, GTK_CANVAS_GROUP(range_marker_group), color, 
+		lam->end   = new Marker (*this, GNOME_CANVAS_GROUP(range_marker_group), color, 
 					 location->name(), Marker::End, PublicEditor::canvas_marker_event, location->end());
 	}
 
@@ -293,7 +293,7 @@ Editor::mouse_add_new_marker (jack_nframes_t where)
 }
 
 void
-Editor::remove_marker (GtkCanvasItem* item, GdkEvent* event)
+Editor::remove_marker (GnomeCanvasItem* item, GdkEvent* event)
 {
 	Marker* marker;
 	bool is_start;
@@ -356,7 +356,7 @@ Editor::location_gone (Location *location)
 }
 
 void
-Editor::tm_marker_context_menu (GdkEventButton* ev, GtkCanvasItem* item)
+Editor::tm_marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
 {
 	if (tm_marker_menu == 0) {
 		build_tm_marker_menu ();
@@ -369,7 +369,7 @@ Editor::tm_marker_context_menu (GdkEventButton* ev, GtkCanvasItem* item)
 
 
 void
-Editor::marker_context_menu (GdkEventButton* ev, GtkCanvasItem* item)
+Editor::marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
 {
 	Marker * marker;
 	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
@@ -412,7 +412,7 @@ Editor::marker_context_menu (GdkEventButton* ev, GtkCanvasItem* item)
 
 
 void
-Editor::new_transport_marker_context_menu (GdkEventButton* ev, GtkCanvasItem* item)
+Editor::new_transport_marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
 {
 	if (new_transport_marker_menu == 0) {
 		build_new_transport_marker_menu ();
@@ -423,7 +423,7 @@ Editor::new_transport_marker_context_menu (GdkEventButton* ev, GtkCanvasItem* it
 }
 
 void
-Editor::transport_marker_context_menu (GdkEventButton* ev, GtkCanvasItem* item)
+Editor::transport_marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
 {
 	if (transport_marker_menu == 0) {
 		build_transport_marker_menu ();
@@ -778,8 +778,8 @@ gint
 Editor::new_transport_marker_menu_popdown (GdkEventAny *ev)
 {
 	// hide rects
-	gtk_canvas_item_hide (transport_bar_drag_rect);
-	gtk_canvas_item_hide (range_marker_drag_rect);
+	gnome_canvas_item_hide (transport_bar_drag_rect);
+	gnome_canvas_item_hide (range_marker_drag_rect);
 
 	return FALSE;
 }
@@ -849,14 +849,14 @@ Editor::update_loop_range_view (bool visibility)
 		double x1 = frame_to_pixel (tll->start());
 		double x2 = frame_to_pixel (tll->end());
 		
-		gtk_canvas_item_set (transport_loop_range_rect, "x1", x1, "x2", x2, NULL);
+		gnome_canvas_item_set (transport_loop_range_rect, "x1", x1, "x2", x2, NULL);
 		
 		if (visibility) {
-			gtk_canvas_item_show (transport_loop_range_rect);
+			gnome_canvas_item_show (transport_loop_range_rect);
 		}
 	}
 	else if (visibility) {
-		gtk_canvas_item_hide (transport_loop_range_rect);
+		gnome_canvas_item_hide (transport_loop_range_rect);
 	}
 }
 
@@ -874,38 +874,38 @@ Editor::update_punch_range_view (bool visibility)
 		double x1 = frame_to_pixel (tpl->start());
 		double x2 = frame_to_pixel (tpl->end());
 		
-		gtk_canvas_item_set (transport_punch_range_rect, "x1", x1, "x2", x2, NULL);
+		gnome_canvas_item_set (transport_punch_range_rect, "x1", x1, "x2", x2, NULL);
 		
 		if (visibility) {
-			gtk_canvas_item_show (transport_punch_range_rect);
+			gnome_canvas_item_show (transport_punch_range_rect);
 		}
 	}
 	else if (visibility) {
-		gtk_canvas_item_hide (transport_punch_range_rect);
+		gnome_canvas_item_hide (transport_punch_range_rect);
 	}
 
 // 	if (session->get_punch_in()) {
 // 		double x = frame_to_pixel (transport_punch_location->start());
-// 		gtk_canvas_item_set (transport_punchin_line, "x1", x, "x2", x, NULL);
+// 		gnome_canvas_item_set (transport_punchin_line, "x1", x, "x2", x, NULL);
 		
 // 		if (visibility) {
-// 			gtk_canvas_item_show (transport_punchin_line);
+// 			gnome_canvas_item_show (transport_punchin_line);
 // 		}
 // 	}
 // 	else if (visibility) {
-// 		gtk_canvas_item_hide (transport_punchin_line);
+// 		gnome_canvas_item_hide (transport_punchin_line);
 // 	}
 	
 // 	if (session->get_punch_out()) {
 // 		double x = frame_to_pixel (transport_punch_location->end());
 		
-// 		gtk_canvas_item_set (transport_punchout_line, "x1", x, "x2", x, NULL);
+// 		gnome_canvas_item_set (transport_punchout_line, "x1", x, "x2", x, NULL);
 		
 // 		if (visibility) {
-// 			gtk_canvas_item_show (transport_punchout_line);
+// 			gnome_canvas_item_show (transport_punchout_line);
 // 		}
 // 	}
 // 	else if (visibility) {
-// 		gtk_canvas_item_hide (transport_punchout_line);
+// 		gnome_canvas_item_hide (transport_punchout_line);
 // 	}
 }

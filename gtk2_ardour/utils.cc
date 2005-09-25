@@ -313,7 +313,7 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 	return (savergb);
 }
 
-GtkCanvasPoints*
+GnomeCanvasPoints*
 get_canvas_points (string who, uint32_t npoints)
 {
 	// cerr << who << ": wants " << npoints << " canvas points" << endl;
@@ -322,7 +322,7 @@ get_canvas_points (string who, uint32_t npoints)
 		abort ();
 	}
 #endif
-	return gtk_canvas_points_new (npoints);
+	return gnome_canvas_points_new (npoints);
 }
 
 int

@@ -6,7 +6,7 @@
 #include <string>
 #include <glib.h>
 #include <gdk/gdktypes.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm/window.h>
 #include <jack/types.h>
 #include <sigc++/signal.h>
@@ -114,72 +114,72 @@ class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget 
 	sigc::signal<void> XOriginChanged;
 	sigc::signal<void> Resized;
 
-	static gint canvas_crossfade_view_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_fade_in_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_fade_in_handle_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_fade_out_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_fade_out_handle_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_region_view_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_region_view_name_highlight_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_region_view_name_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_stream_view_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_marker_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_zoom_rect_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_selection_rect_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_selection_start_trim_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_selection_end_trim_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_control_point_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_line_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_tempo_marker_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_meter_marker_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_tempo_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_meter_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_marker_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_range_marker_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_transport_marker_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data);
-	static gint canvas_imageframe_item_view_event(GtkCanvasItem *item, GdkEvent* event, gpointer data) ;
-	static gint canvas_imageframe_view_event(GtkCanvasItem *item, GdkEvent* event, gpointer data) ;
-	static gint canvas_imageframe_start_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	static gint canvas_imageframe_end_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	static gint canvas_marker_time_axis_view_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	static gint canvas_markerview_item_view_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	static gint canvas_markerview_start_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	static gint canvas_markerview_end_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
-	static gint canvas_automation_track_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) ;
+	static gint canvas_crossfade_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_fade_in_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_fade_in_handle_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_fade_out_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_fade_out_handle_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_region_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_region_view_name_highlight_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_region_view_name_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_stream_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_zoom_rect_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_selection_rect_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_selection_start_trim_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_selection_end_trim_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_control_point_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_line_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_tempo_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_meter_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_tempo_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_meter_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_range_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_transport_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
+	static gint canvas_imageframe_item_view_event(GnomeCanvasItem *item, GdkEvent* event, gpointer data) ;
+	static gint canvas_imageframe_view_event(GnomeCanvasItem *item, GdkEvent* event, gpointer data) ;
+	static gint canvas_imageframe_start_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	static gint canvas_imageframe_end_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	static gint canvas_marker_time_axis_view_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	static gint canvas_markerview_item_view_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	static gint canvas_markerview_start_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	static gint canvas_markerview_end_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	static gint canvas_automation_track_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
 
   protected:
-	virtual gint _canvas_fade_in_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_fade_in_handle_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_fade_out_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_fade_out_handle_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_crossfade_view_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_region_view_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_region_view_name_highlight_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_region_view_name_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_stream_view_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_marker_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_zoom_rect_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_selection_rect_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_selection_start_trim_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_selection_end_trim_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_control_point_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_line_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_tempo_marker_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_meter_marker_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_tempo_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_meter_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_marker_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_range_marker_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_transport_marker_bar_event (GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_imageframe_item_view_event(GtkCanvasItem *item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_imageframe_view_event(GtkCanvasItem *item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_imageframe_start_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_imageframe_end_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_marker_time_axis_view_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_markerview_item_view_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_markerview_start_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_markerview_end_handle_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
-	virtual gint _canvas_automation_track_event(GtkCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_fade_in_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_fade_in_handle_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_fade_out_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_fade_out_handle_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_crossfade_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_region_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_region_view_name_highlight_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_region_view_name_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_stream_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_zoom_rect_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_selection_rect_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_selection_start_trim_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_selection_end_trim_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_control_point_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_line_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_tempo_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_meter_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_tempo_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_meter_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_range_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_transport_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_imageframe_item_view_event(GnomeCanvasItem *item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_imageframe_view_event(GnomeCanvasItem *item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_imageframe_start_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_imageframe_end_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_marker_time_axis_view_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_markerview_item_view_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_markerview_start_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_markerview_end_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
+	virtual gint _canvas_automation_track_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) = 0;
 
 	static PublicEditor* _instance;
 };

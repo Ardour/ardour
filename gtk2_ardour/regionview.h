@@ -23,7 +23,7 @@
 
 #include <vector>
 #include <gtkmm.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <sigc++/signal.h>
 #include <ardour/region.h>
 
@@ -46,7 +46,7 @@ class AutomationTimeAxisView;
 class AudioRegionView : public TimeAxisViewItem
 {
   public:
-    AudioRegionView (GtkCanvasGroup *, 
+    AudioRegionView (GnomeCanvasGroup *, 
 		     AudioTimeAxisView&,
 		     ARDOUR::AudioRegion&,
 		     double initial_samples_per_unit,
@@ -89,8 +89,8 @@ class AudioRegionView : public TimeAxisViewItem
     void show_region_editor ();
     void hide_region_editor();
 
-    void add_gain_point_event (GtkCanvasItem *item, GdkEvent *event);
-    void remove_gain_point_event (GtkCanvasItem *item, GdkEvent *event);
+    void add_gain_point_event (GnomeCanvasItem *item, GdkEvent *event);
+    void remove_gain_point_event (GnomeCanvasItem *item, GdkEvent *event);
 
     AudioRegionGainLine* get_gain_line() const { return gain_line; }
 
@@ -120,15 +120,15 @@ class AudioRegionView : public TimeAxisViewItem
 	    WaveformRectified = 0x8
     };
 
-    vector<GtkCanvasItem *> waves; /* waveviews */
-    vector<GtkCanvasItem *> tmp_waves; /* see ::create_waves()*/
-    GtkCanvasItem* sync_mark; /* polgyon for sync position */
-    GtkCanvasItem* no_wave_msg; /* text */
-    GtkCanvasItem* zero_line; /* simpleline */
-    GtkCanvasItem* fade_in_shape; /* polygon */
-    GtkCanvasItem* fade_out_shape; /* polygon */
-    GtkCanvasItem* fade_in_handle; /* simplerect */
-    GtkCanvasItem* fade_out_handle; /* simplerect */
+    vector<GnomeCanvasItem *> waves; /* waveviews */
+    vector<GnomeCanvasItem *> tmp_waves; /* see ::create_waves()*/
+    GnomeCanvasItem* sync_mark; /* polgyon for sync position */
+    GnomeCanvasItem* no_wave_msg; /* text */
+    GnomeCanvasItem* zero_line; /* simpleline */
+    GnomeCanvasItem* fade_in_shape; /* polygon */
+    GnomeCanvasItem* fade_out_shape; /* polygon */
+    GnomeCanvasItem* fade_in_handle; /* simplerect */
+    GnomeCanvasItem* fade_out_handle; /* simplerect */
 
     AudioRegionGainLine* gain_line;
     AudioRegionEditor *editor;
@@ -163,7 +163,7 @@ class AudioRegionView : public TimeAxisViewItem
     void region_sync_changed ();
     void region_scale_amplitude_changed ();
 
-    static gint _lock_toggle (GtkCanvasItem*, GdkEvent*, void*);
+    static gint _lock_toggle (GnomeCanvasItem*, GdkEvent*, void*);
     void lock_toggle ();
 
     void create_waves ();
@@ -180,7 +180,7 @@ class AudioRegionView : public TimeAxisViewItem
     void reset_width_dependent_items (double pixel_width);
     void set_waveview_data_src();
 
-    vector<GtkCanvasWaveViewCache*> wave_caches;
+    vector<GnomeCanvasWaveViewCache*> wave_caches;
     vector<GhostRegion*> ghosts;
 };
 

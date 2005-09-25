@@ -22,7 +22,7 @@
 #define __ardour_imageframe_time_axis_h__
 
 #include <gtkmm.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 
 #include "ardour_dialog.h"
 #include "enums.h"

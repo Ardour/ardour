@@ -23,7 +23,7 @@
 
 #include <gtkmm/window.h>
 #include <gtkmm/pixmap.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 
 class ARDOUR_UI;
 

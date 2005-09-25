@@ -14,12 +14,12 @@ enum Width {
 	Narrow,
 };
 
-#include <gtk-canvas/gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 
 struct SelectionRect {
-    GtkCanvasItem *rect;
-    GtkCanvasItem *end_trim;
-    GtkCanvasItem *start_trim;
+    GnomeCanvasItem *rect;
+    GnomeCanvasItem *end_trim;
+    GnomeCanvasItem *start_trim;
     uint32_t id;
 };
 

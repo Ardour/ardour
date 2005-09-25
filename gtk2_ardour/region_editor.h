@@ -24,7 +24,7 @@
 #include <map>
 
 #include <gtkmm.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <sigc++/signal.h>
 
 #include "audio_clock.h"

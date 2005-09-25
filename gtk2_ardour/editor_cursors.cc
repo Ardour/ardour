@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 
 #include "utils.h"
 #include "editor.h"
@@ -33,8 +33,8 @@ using namespace Gtk;
 Editor::Cursor::Cursor (Editor& ed, const string& color, GtkSignalFunc callbck)
 	: editor (ed), callback (callbck), length(1.0)
 {
-	GtkCanvasGroup *group;
-	points = gtk_canvas_points_new (2);
+	GnomeCanvasGroup *group;
+	points = gnome_canvas_points_new (2);
 	
 	/* "randomly" initialize coords */
 
@@ -43,11 +43,11 @@ Editor::Cursor::Cursor (Editor& ed, const string& color, GtkSignalFunc callbck)
 	points->coords[2] = 1.0;
 	points->coords[3] = 0.0;
 
-	group = GTK_CANVAS_GROUP (editor.cursor_group);
+	group = GNOME_CANVAS_GROUP (editor.cursor_group);
 
 	// cerr << "set cursor points, nc = " << points->num_points << endl;
-	canvas_item = gtk_canvas_item_new (group,
-					   gtk_canvas_line_get_type(),
+	canvas_item = gnome_canvas_item_new (group,
+					   gnome_canvas_line_get_type(),
 					   "points", points,
 					   "fill_color", color.c_str(),
 					   "width_pixels", 1,
@@ -70,7 +70,7 @@ Editor::Cursor::~Cursor ()
 
 {
 	gtk_object_destroy (GTK_OBJECT(canvas_item));
-	gtk_canvas_points_unref (points);
+	gnome_canvas_points_unref (points);
 }
 
 void
@@ -79,9 +79,9 @@ Editor::Cursor::set_position (jack_nframes_t frame)
 	double new_pos =  editor.frame_to_unit (frame);
 
 	if (editor.session == 0) {
-		gtk_canvas_item_hide (canvas_item);
+		gnome_canvas_item_hide (canvas_item);
 	} else {
-		gtk_canvas_item_show (canvas_item);
+		gnome_canvas_item_show (canvas_item);
 	}
 
 	current_frame = frame;
@@ -90,7 +90,7 @@ Editor::Cursor::set_position (jack_nframes_t frame)
 
 		/* change in position is not visible, so just raise it */
 		
-		gtk_canvas_item_raise_to_top (canvas_item);
+		gnome_canvas_item_raise_to_top (canvas_item);
 		return;
 	} 
 
@@ -98,8 +98,8 @@ Editor::Cursor::set_position (jack_nframes_t frame)
 	points->coords[2] = new_pos;
 
 	// cerr << "set cursor2 al points, nc = " << points->num_points << endl;
-	gtk_canvas_item_set (canvas_item, "points", points, NULL);
-	gtk_canvas_item_raise_to_top (canvas_item);
+	gnome_canvas_item_set (canvas_item, "points", points, NULL);
+	gnome_canvas_item_raise_to_top (canvas_item);
 }
 
 void
@@ -108,7 +108,7 @@ Editor::Cursor::set_length (double units)
 	length = units; 
 	points->coords[3] = points->coords[1] + length;
 	// cerr << "set cursor3 al points, nc = " << points->num_points << endl;
-	gtk_canvas_item_set (canvas_item, "points", points, NULL);
+	gnome_canvas_item_set (canvas_item, "points", points, NULL);
 }
 
 void 
@@ -117,5 +117,5 @@ Editor::Cursor::set_y_axis (double position)
 	points->coords[1] = position;
 	points->coords[3] = position + length;
 	// cerr << "set cursor4 al points, nc = " << points->num_points << endl;
-	gtk_canvas_item_set (canvas_item, "points", points, NULL);
+	gnome_canvas_item_set (canvas_item, "points", points, NULL);
 }

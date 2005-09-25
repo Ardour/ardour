@@ -25,7 +25,7 @@ gtkardour.Merge ( [libraries['ardour'],
                    libraries['pbd3'],
                    libraries['gtkmm2'],
                    libraries['sigc2'],
-                   libraries['libgnomecanvasmm'],
+#                   libraries['libgnomecanvasmm'],
                    libraries['sysmidi'],
                    libraries['sndfile'],
                    libraries['lrdf'],
@@ -125,7 +125,7 @@ ardour_ui.cc
 ardour_ui2.cc
 ardour_ui_dialogs.cc
 audio_time_axis.cc
-automation_line.c
+automation_line.cc
 canvas-imageframe.cc
 about.cc
 editor.cc

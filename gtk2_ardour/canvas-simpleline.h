@@ -1,4 +1,4 @@
-/* gtk-canvas-simpleline.h: GtkCanvas item for simple rects
+/* libgnomecanvas/gnome-canvas-simpleline.h: GnomeCanvas item for simple rects
  *
  * Copyright (C) 2001 Paul Davis <pbd@op.net>
  *
@@ -19,31 +19,30 @@
  *
  */
 
-#ifndef __GTK_CANVAS_SIMPLELINE_H__
-#define __GTK_CANVAS_SIMPLELINE_H__
+#ifndef __GNOME_CANVAS_SIMPLELINE_H__
+#define __GNOME_CANVAS_SIMPLELINE_H__
 
 #include <stdint.h>
 
-#include <gtk-canvas/gtk-canvas-defs.h>
-#include "gtk-canvas/gtk-canvas.h"
+#include <libgnomecanvas/libgnomecanvas.h>
 
-BEGIN_GTK_CANVAS_DECLS
+BEGIN_GNOME_CANVAS_DECLS
 
 /* Wave viewer item for canvas.
  */
 
-#define GTK_CANVAS_TYPE_CANVAS_SIMPLELINE            (gtk_canvas_simpleline_get_type ())
-#define GTK_CANVAS_SIMPLELINE(obj)                   (GTK_CHECK_CAST ((obj), GTK_CANVAS_TYPE_CANVAS_SIMPLELINE, GtkCanvasSimpleLine))
-#define GTK_CANVAS_SIMPLELINE_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GTK_CANVAS_TYPE_CANVAS_SIMPLELINE, GtkCanvasSimpleLineClass))
-#define GTK_CANVAS_IS_CANVAS_SIMPLELINE(obj)         (GTK_CHECK_TYPE ((obj), GTK_CANVAS_TYPE_CANVAS_SIMPLELINE))
-#define GTK_CANVAS_IS_CANVAS_SIMPLELINE_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GTK_CANVAS_TYPE_CANVAS_SIMPLELINE))
+#define GNOME_CANVAS_TYPE_CANVAS_SIMPLELINE            (gnome_canvas_simpleline_get_type ())
+#define GNOME_CANVAS_SIMPLELINE(obj)                   (GTK_CHECK_CAST ((obj), GNOME_CANVAS_TYPE_CANVAS_SIMPLELINE, GnomeCanvasSimpleLine))
+#define GNOME_CANVAS_SIMPLELINE_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GNOME_CANVAS_TYPE_CANVAS_SIMPLELINE, GnomeCanvasSimpleLineClass))
+#define GNOME_CANVAS_IS_CANVAS_SIMPLELINE(obj)         (GTK_CHECK_TYPE ((obj), GNOME_CANVAS_TYPE_CANVAS_SIMPLELINE))
+#define GNOME_CANVAS_IS_CANVAS_SIMPLELINE_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GNOME_CANVAS_TYPE_CANVAS_SIMPLELINE))
 
-typedef struct _GtkCanvasSimpleLine            GtkCanvasSimpleLine;
-typedef struct _GtkCanvasSimpleLineClass       GtkCanvasSimpleLineClass;
+typedef struct _GnomeCanvasSimpleLine            GnomeCanvasSimpleLine;
+typedef struct _GnomeCanvasSimpleLineClass       GnomeCanvasSimpleLineClass;
 
-struct _GtkCanvasSimpleLine
+struct _GnomeCanvasSimpleLine
 {
-    GtkCanvasItem item;
+    GnomeCanvasItem item;
     double x1, y1, x2, y2;
     uint32_t color;
     gboolean horizontal;
@@ -55,12 +54,12 @@ struct _GtkCanvasSimpleLine
     guint32 bbox_lrx, bbox_lry;
 };
 
-struct _GtkCanvasSimpleLineClass {
-	GtkCanvasItemClass parent_class;
+struct _GnomeCanvasSimpleLineClass {
+	GnomeCanvasItemClass parent_class;
 };
 
-GtkType gtk_canvas_simpleline_get_type (void);
+GtkType gnome_canvas_simpleline_get_type (void);
 
-END_GTK_CANVAS_DECLS
+END_GNOME_CANVAS_DECLS
 
-#endif /* __GTK_CANVAS_SIMPLELINE_H__ */
+#endif /* __GNOME_CANVAS_SIMPLELINE_H__ */

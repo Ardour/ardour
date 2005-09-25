@@ -1,6 +1,6 @@
-/* Image item type for GtkCanvas widget
+/* Image item type for GnomeCanvas widget
  *
- * GtkCanvas is basically a port of the Tk toolkit's most excellent canvas widget.  Tk is
+ * GnomeCanvas is basically a port of the Tk toolkit's most excellent canvas widget.  Tk is
  * copyrighted by the Regents of the University of California, Sun Microsystems, and other parties.
  *
  * Copyright (C) 1998 The Free Software Foundation
@@ -9,19 +9,18 @@
  */
  
  
-#ifndef __GTK_CANVAS_IMAGEFRAME_H__
-#define __GTK_CANVAS_IMAGEFRAME_H__
+#ifndef __GNOME_CANVAS_IMAGEFRAME_H__
+#define __GNOME_CANVAS_IMAGEFRAME_H__
 
 #include <stdint.h>
 
-#include <gtk-canvas/gtk-canvas-defs.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtk/gtkpacker.h> /* why the hell is GtkAnchorType here and not in gtkenums.h? */
 #include <libart_lgpl/art_misc.h>
 #include <libart_lgpl/art_pixbuf.h>
-#include "gtk-canvas/gtk-canvas.h"
 
 
-BEGIN_GTK_CANVAS_DECLS
+BEGIN_GNOME_CANVAS_DECLS
 
 
 /* Image item for the canvas.  Images are positioned by anchoring them to a point.
@@ -39,18 +38,18 @@ BEGIN_GTK_CANVAS_DECLS
  */
 
 
-#define GTK_CANVAS_TYPE_CANVAS_IMAGEFRAME            (gtk_canvas_imageframe_get_type ())
-#define GTK_CANVAS_IMAGEFRAME(obj)                   (GTK_CHECK_CAST ((obj), GTK_CANVAS_TYPE_CANVAS_IMAGEFRAME, GtkCanvasImageFrame))
-#define GTK_CANVAS_IMAGEFRAME_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GTK_CANVAS_TYPE_CANVAS_IMAGEFRAME, GtkCanvasImageFrameClass))
-#define GTK_CANVAS_IS_CANVAS_IMAGEFRAME(obj)         (GTK_CHECK_TYPE ((obj), GTK_CANVAS_TYPE_CANVAS_IMAGEFRAME))
-#define GTK_CANVAS_IS_CANVAS_IMAGEFRAME_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GTK_CANVAS_TYPE_CANVAS_IMAGEFRAME))
+#define GNOME_CANVAS_TYPE_CANVAS_IMAGEFRAME            (gnome_canvas_imageframe_get_type ())
+#define GNOME_CANVAS_IMAGEFRAME(obj)                   (GTK_CHECK_CAST ((obj), GNOME_CANVAS_TYPE_CANVAS_IMAGEFRAME, GnomeCanvasImageFrame))
+#define GNOME_CANVAS_IMAGEFRAME_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GNOME_CANVAS_TYPE_CANVAS_IMAGEFRAME, GnomeCanvasImageFrameClass))
+#define GNOME_CANVAS_IS_CANVAS_IMAGEFRAME(obj)         (GTK_CHECK_TYPE ((obj), GNOME_CANVAS_TYPE_CANVAS_IMAGEFRAME))
+#define GNOME_CANVAS_IS_CANVAS_IMAGEFRAME_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GNOME_CANVAS_TYPE_CANVAS_IMAGEFRAME))
 
 
-typedef struct _GtkCanvasImageFrame GtkCanvasImageFrame;
-typedef struct _GtkCanvasImageFrameClass GtkCanvasImageFrameClass;
+typedef struct _GnomeCanvasImageFrame GnomeCanvasImageFrame;
+typedef struct _GnomeCanvasImageFrameClass GnomeCanvasImageFrameClass;
 
-struct _GtkCanvasImageFrame {
-	GtkCanvasItem item;
+struct _GnomeCanvasImageFrame {
+	GnomeCanvasItem item;
 
 	double x, y;			/* Position at anchor, item relative */
 	double width, height;		/* Size of image, item relative */
@@ -66,15 +65,15 @@ struct _GtkCanvasImageFrame {
 	double affine[6];               /* The item -> canvas affine */
 };
 
-struct _GtkCanvasImageFrameClass {
-	GtkCanvasItemClass parent_class;
+struct _GnomeCanvasImageFrameClass {
+	GnomeCanvasItemClass parent_class;
 };
 
 
 /* Standard Gtk function */
-GtkType gtk_canvas_imageframe_get_type (void);
+GtkType gnome_canvas_imageframe_get_type (void);
 
 
-END_GTK_CANVAS_DECLS
+END_GNOME_CANVAS_DECLS
 
 #endif

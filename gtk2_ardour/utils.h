@@ -25,8 +25,8 @@
 #include <vector>
 #include <cmath>
 #include <ardour/types.h>
-#include <gtk-canvas.h>
-#include <gdk--/types.h>
+#include <libgnomecanvas/libgnomecanvas.h>
+#include <gdkmm/types.h>
 
 namespace Gtk {
 	class Window;
@@ -63,7 +63,7 @@ void   allow_keyboard_focus (bool);
 unsigned char* xpm2rgb  (const char** xpm, uint32_t& w, uint32_t& h);
 unsigned char* xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h);
 
-GtkCanvasPoints* get_canvas_points (std::string who, uint32_t npoints);
+GnomeCanvasPoints* get_canvas_points (std::string who, uint32_t npoints);
 
 int channel_combo_get_channel_count (Gtk::Combo& combo);
 std::string get_font_for_style (std::string widgetname);

@@ -225,8 +225,8 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	time_canvas_event_box.get_window().get_pointer (x, y, state);
 
 	
-	gtk_canvas_window_to_world (GTK_CANVAS(track_gtk_canvas), x, y, &wcx, &wcy);
-	gtk_canvas_w2c_d (GTK_CANVAS(track_gtk_canvas), wcx, wcy, &cx, &cy);
+	gnome_canvas_window_to_world (GNOME_CANVAS(track_gnome_canvas), x, y, &wcx, &wcy);
+	gnome_canvas_w2c_d (GNOME_CANVAS(track_gnome_canvas), wcx, wcy, &cx, &cy);
 	
 	jack_nframes_t where = leftmost_frame + pixel_to_frame (x);
 
@@ -608,16 +608,16 @@ Editor::update_ruler_visibility ()
 		gtk_object_getv (GTK_OBJECT(meter_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
 		if (tbpos != old_unit_pos) {
-			gtk_canvas_item_move (meter_group, 0.0, tbpos - old_unit_pos) ;
+			gnome_canvas_item_move (meter_group, 0.0, tbpos - old_unit_pos) ;
 		}
 
-		//gtk_canvas_item_set (meter_group, "y", tbpos, NULL);
-		gtk_canvas_item_show (meter_group);
+		//gnome_canvas_item_set (meter_group, "y", tbpos, NULL);
+		gnome_canvas_item_show (meter_group);
 		tbpos += timebar_height;
 		visible_timebars++;
 	}
 	else {
-		gtk_canvas_item_hide (meter_group);
+		gnome_canvas_item_hide (meter_group);
 	}
 	
 	if (ruler_shown[ruler_time_tempo]) {
@@ -625,15 +625,15 @@ Editor::update_ruler_visibility ()
 		gtk_object_getv (GTK_OBJECT(tempo_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
 		if (tbpos != old_unit_pos) {
-			gtk_canvas_item_move (tempo_group, 0.0, tbpos - old_unit_pos) ;
+			gnome_canvas_item_move (tempo_group, 0.0, tbpos - old_unit_pos) ;
 		}
-		//gtk_canvas_item_set (tempo_group, "y", tbpos, NULL);
-		gtk_canvas_item_show (tempo_group);
+		//gnome_canvas_item_set (tempo_group, "y", tbpos, NULL);
+		gnome_canvas_item_show (tempo_group);
 		tbpos += timebar_height;
 		visible_timebars++;
 	}
 	else {
-		gtk_canvas_item_hide (tempo_group);
+		gnome_canvas_item_hide (tempo_group);
 	}
 	
 	if (ruler_shown[ruler_time_marker]) {
@@ -641,15 +641,15 @@ Editor::update_ruler_visibility ()
 		gtk_object_getv (GTK_OBJECT(marker_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
 		if (tbpos != old_unit_pos) {
-			gtk_canvas_item_move (marker_group, 0.0, tbpos - old_unit_pos) ;
+			gnome_canvas_item_move (marker_group, 0.0, tbpos - old_unit_pos) ;
 		}
-		//gtk_canvas_item_set (marker_group, "y", tbpos, NULL);
-		gtk_canvas_item_show (marker_group);
+		//gnome_canvas_item_set (marker_group, "y", tbpos, NULL);
+		gnome_canvas_item_show (marker_group);
 		tbpos += timebar_height;
 		visible_timebars++;
 	}
 	else {
-		gtk_canvas_item_hide (marker_group);
+		gnome_canvas_item_hide (marker_group);
 	}
 	
 	if (ruler_shown[ruler_time_range_marker]) {
@@ -657,15 +657,15 @@ Editor::update_ruler_visibility ()
 		gtk_object_getv (GTK_OBJECT(range_marker_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
 		if (tbpos != old_unit_pos) {
-			gtk_canvas_item_move (range_marker_group, 0.0, tbpos - old_unit_pos) ;
+			gnome_canvas_item_move (range_marker_group, 0.0, tbpos - old_unit_pos) ;
 		}
-		//gtk_canvas_item_set (marker_group, "y", tbpos, NULL);
-		gtk_canvas_item_show (range_marker_group);
+		//gnome_canvas_item_set (marker_group, "y", tbpos, NULL);
+		gnome_canvas_item_show (range_marker_group);
 		tbpos += timebar_height;
 		visible_timebars++;
 	}
 	else {
-		gtk_canvas_item_hide (range_marker_group);
+		gnome_canvas_item_hide (range_marker_group);
 	}
 
 	if (ruler_shown[ruler_time_transport_marker]) {
@@ -673,15 +673,15 @@ Editor::update_ruler_visibility ()
 		gtk_object_getv (GTK_OBJECT(transport_marker_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
 		if (tbpos != old_unit_pos) {
-			gtk_canvas_item_move (transport_marker_group, 0.0, tbpos - old_unit_pos) ;
+			gnome_canvas_item_move (transport_marker_group, 0.0, tbpos - old_unit_pos) ;
 		}
-		//gtk_canvas_item_set (marker_group, "y", tbpos, NULL);
-		gtk_canvas_item_show (transport_marker_group);
+		//gnome_canvas_item_set (marker_group, "y", tbpos, NULL);
+		gnome_canvas_item_show (transport_marker_group);
 		tbpos += timebar_height;
 		visible_timebars++;
 	}
 	else {
-		gtk_canvas_item_hide (transport_marker_group);
+		gnome_canvas_item_hide (transport_marker_group);
 	}
 	
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));

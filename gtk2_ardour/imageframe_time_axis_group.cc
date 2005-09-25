@@ -203,7 +203,7 @@ ImageFrameTimeAxisGroup::add_imageframe_item(std::string frame_id, jack_nframes_
 	if(get_named_imageframe_item(frame_id) == 0)
 	{
 		ifv = new ImageFrameView(frame_id,
-			GTK_CANVAS_GROUP(_view_helper.canvas_item()),
+			GNOME_CANVAS_GROUP(_view_helper.canvas_item()),
 			&(_view_helper.trackview()),
 			this,
 			_view_helper.trackview().editor.get_current_zoom(),

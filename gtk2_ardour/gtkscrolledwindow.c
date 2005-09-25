@@ -35,7 +35,7 @@
  *   to be best suited to display its contents, including children.
  *   the width and/or height reported from a widget upon size requisition
  *   may be overidden by the user by specifying a width and/or height
- *   other than 0 through gtk_widget_set_usize().
+ *   other than 0 through gtk_widget_set_size_request().
  *
  * a scrolled window needs (for imlementing all three policy types) to
  * request its width and height based on two different rationales.
@@ -619,7 +619,7 @@ gtk_scrolled_window_size_request (GtkWidget      *widget,
 
       gtk_widget_size_request (bin->child, &child_requisition);
 
-      if (scrolled_window->hscrollbar_policy == GTK_POLICY_NEVER)
+      if (scrolled_window->hscrollbar_policy == Gtk::POLICY_NEVER)
 	requisition->width += child_requisition.width;
       else
 	{
@@ -635,7 +635,7 @@ gtk_scrolled_window_size_request (GtkWidget      *widget,
 	    requisition->width += vscrollbar_requisition.width;
 	}
 
-//      if (scrolled_window->vscrollbar_policy == GTK_POLICY_NEVER)
+//      if (scrolled_window->vscrollbar_policy == Gtk::POLICY_NEVER)
 //            requisition->height += child_requisition.height;
 //      else
 	{
@@ -652,7 +652,7 @@ gtk_scrolled_window_size_request (GtkWidget      *widget,
 	}
     }
 
-  if (scrolled_window->hscrollbar_policy == GTK_POLICY_AUTOMATIC ||
+  if (scrolled_window->hscrollbar_policy == Gtk::POLICY_AUTOMATIC ||
       scrolled_window->hscrollbar_policy == GTK_POLICY_ALWAYS)
     {
       requisition->width = MAX (requisition->width, hscrollbar_requisition.width);
@@ -660,7 +660,7 @@ gtk_scrolled_window_size_request (GtkWidget      *widget,
 	extra_height = SCROLLBAR_SPACING (scrolled_window) + hscrollbar_requisition.height;
     }
 
-  if (scrolled_window->vscrollbar_policy == GTK_POLICY_AUTOMATIC ||
+  if (scrolled_window->vscrollbar_policy == Gtk::POLICY_AUTOMATIC ||
       scrolled_window->vscrollbar_policy == GTK_POLICY_ALWAYS)
     {
       requisition->height = MAX (requisition->height, vscrollbar_requisition.height);
@@ -740,11 +740,11 @@ gtk_scrolled_window_size_allocate (GtkWidget     *widget,
 
   if (scrolled_window->hscrollbar_policy == GTK_POLICY_ALWAYS)
     scrolled_window->hscrollbar_visible = TRUE;
-  else if (scrolled_window->hscrollbar_policy == GTK_POLICY_NEVER)
+  else if (scrolled_window->hscrollbar_policy == Gtk::POLICY_NEVER)
     scrolled_window->hscrollbar_visible = FALSE;
   if (scrolled_window->vscrollbar_policy == GTK_POLICY_ALWAYS)
     scrolled_window->vscrollbar_visible = TRUE;
-  else if (scrolled_window->vscrollbar_policy == GTK_POLICY_NEVER)
+  else if (scrolled_window->vscrollbar_policy == Gtk::POLICY_NEVER)
     scrolled_window->vscrollbar_visible = FALSE;
 
   if (bin->child && GTK_WIDGET_VISIBLE (bin->child))
@@ -862,7 +862,7 @@ gtk_scrolled_window_adjustment_changed (GtkAdjustment *adjustment,
 
   if (adjustment == gtk_range_get_adjustment (GTK_RANGE (scrolled_win->hscrollbar)))
     {
-      if (scrolled_win->hscrollbar_policy == GTK_POLICY_AUTOMATIC)
+      if (scrolled_win->hscrollbar_policy == Gtk::POLICY_AUTOMATIC)
 	{
 	  gboolean visible;
 	  
@@ -875,7 +875,7 @@ gtk_scrolled_window_adjustment_changed (GtkAdjustment *adjustment,
     }
   else if (adjustment == gtk_range_get_adjustment (GTK_RANGE (scrolled_win->vscrollbar)))
     {
-      if (scrolled_win->vscrollbar_policy == GTK_POLICY_AUTOMATIC)
+      if (scrolled_win->vscrollbar_policy == Gtk::POLICY_AUTOMATIC)
 	{
 	  gboolean visible;
 

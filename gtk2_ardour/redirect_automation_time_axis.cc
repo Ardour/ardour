@@ -70,11 +70,11 @@ RedirectAutomationTimeAxisView::~RedirectAutomationTimeAxisView ()
 }
 
 void
-RedirectAutomationTimeAxisView::add_automation_event (GtkCanvasItem* item, GdkEvent* event, jack_nframes_t when, double y)
+RedirectAutomationTimeAxisView::add_automation_event (GnomeCanvasItem* item, GdkEvent* event, jack_nframes_t when, double y)
 {
 	double x = 0;
 
-	gtk_canvas_item_w2i (canvas_display, &x, &y);
+	gnome_canvas_item_w2i (canvas_display, &x, &y);
 
 	/* compute vertical fractional position */
 

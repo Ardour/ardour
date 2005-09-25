@@ -22,7 +22,7 @@
 #define __ardour_visual_time_axis_h__
 
 #include <gtkmm.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/popup_selector.h>
 

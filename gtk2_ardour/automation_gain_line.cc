@@ -32,10 +32,10 @@
 using namespace std;
 using namespace ARDOUR;
 
-AutomationGainLine::AutomationGainLine (string name, Session& s, TimeAxisView& tv, GtkCanvasItem* parent,
+AutomationGainLine::AutomationGainLine (string name, Session& s, TimeAxisView& tv, GnomeCanvasItem* parent,
 					Curve& c, 
-					gint (*point_callback)(GtkCanvasItem*, GdkEvent*, gpointer),
-					gint (*line_callback)(GtkCanvasItem*, GdkEvent*, gpointer))
+					gint (*point_callback)(GnomeCanvasItem*, GdkEvent*, gpointer),
+					gint (*line_callback)(GnomeCanvasItem*, GdkEvent*, gpointer))
 	: AutomationLine (name, tv, parent, c, point_callback, line_callback),
 	  session (s)
 {

@@ -112,14 +112,14 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	point_grabbed = false;
 	toplevel = 0;
 
-	_canvas = gtk_canvas_new_aa ();
+	_canvas = gnome_canvas_new_aa ();
 
 	canvas = wrap (_canvas);
 	canvas->size_allocate.connect (mem_fun(*this, &CrossfadeEditor::canvas_allocation));
 	canvas->set_size_request (425, 200);
 
-	toplevel = gtk_canvas_item_new (gtk_canvas_root (GTK_CANVAS(_canvas)),
-					gtk_canvas_simplerect_get_type(),
+	toplevel = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
+					gnome_canvas_simplerect_get_type(),
 					"x1", 0.0,
 					"y1", 0.0,
 					"x2", 10.0,
@@ -134,25 +134,25 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 			    (GtkSignalFunc) _canvas_event,
 			    this);
 
-	fade[Out].line = gtk_canvas_item_new (gtk_canvas_root (GTK_CANVAS(_canvas)),
-					      gtk_canvas_line_get_type (),
+	fade[Out].line = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
+					      gnome_canvas_line_get_type (),
 					      "width_pixels", (guint) 1,
 					      "fill_color_rgba", color_map[cCrossfadeEditorLine],
 					      NULL);
 
-	fade[Out].shading = gtk_canvas_item_new (gtk_canvas_root (GTK_CANVAS(_canvas)),
-						 gtk_canvas_polygon_get_type(),
+	fade[Out].shading = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
+						 gnome_canvas_polygon_get_type(),
 						 "fill_color_rgba", color_map[cCrossfadeEditorLineShading],
 						 NULL);
 	
-	fade[In].line = gtk_canvas_item_new (gtk_canvas_root (GTK_CANVAS(_canvas)),
-					     gtk_canvas_line_get_type (),
+	fade[In].line = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
+					     gnome_canvas_line_get_type (),
 					     "width_pixels", (guint) 1,
 					     "fill_color_rgba", color_map[cCrossfadeEditorLine],
 					     NULL);
 	
-	fade[In].shading = gtk_canvas_item_new (gtk_canvas_root (GTK_CANVAS(_canvas)),
-						gtk_canvas_polygon_get_type(),
+	fade[In].shading = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
+						gnome_canvas_polygon_get_type(),
 						"fill_color_rgba", color_map[cCrossfadeEditorLineShading],
 						NULL);
 
@@ -416,14 +416,14 @@ CrossfadeEditor::set (const ARDOUR::Curve& curve, WhichFade which)
 }
 
 gint		     
-CrossfadeEditor::_canvas_event (GtkCanvasItem* item, GdkEvent* event, gpointer data)
+CrossfadeEditor::_canvas_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
 {
 	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
 	return ed->canvas_event (item, event);
 }
 
 gint
-CrossfadeEditor::canvas_event (GtkCanvasItem* item, GdkEvent* event)
+CrossfadeEditor::canvas_event (GnomeCanvasItem* item, GdkEvent* event)
 {
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
@@ -447,8 +447,8 @@ CrossfadeEditor::make_point ()
 {
 	Point* p = new Point;
 
-	p->box = gtk_canvas_item_new (gtk_canvas_root (GTK_CANVAS(_canvas)),
-				      gtk_canvas_simplerect_get_type(),
+	p->box = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
+				      gnome_canvas_simplerect_get_type(),
 				      "fill", (gboolean) TRUE,
 				      "fill_color_rgba", color_map[cCrossfadeEditorPointFill],
 				      "outline_color_rgba", color_map[cCrossfadeEditorPointOutline],
@@ -495,7 +495,7 @@ CrossfadeEditor::Point::move_to (double nx, double ny, double xfract, double yfr
 	double x1 = nx - half_size;
 	double x2 = nx + half_size;
 
-	gtk_canvas_item_set (box,
+	gnome_canvas_item_set (box,
 			     "x1", x1,
 			     "x2", x2,
 			     "y1", ny - half_size,
@@ -509,7 +509,7 @@ void
 CrossfadeEditor::canvas_allocation (GtkAllocation *alloc)
 {
 	if (toplevel) {
-		gtk_canvas_item_set (toplevel,
+		gnome_canvas_item_set (toplevel,
 				     "x1", 0.0,
 				     "y1", 0.0,
 				     "x2", (double) _canvas->allocation.width + canvas_border,
@@ -517,7 +517,7 @@ CrossfadeEditor::canvas_allocation (GtkAllocation *alloc)
 				     NULL);
 	}
 
-	gtk_canvas_set_scroll_region (GTK_CANVAS(_canvas), 0.0, 0.0,
+	gnome_canvas_set_scroll_region (GNOME_CANVAS(_canvas), 0.0, 0.0,
 				      _canvas->allocation.width,
 				      _canvas->allocation.height);
 
@@ -589,7 +589,7 @@ CrossfadeEditor::canvas_allocation (GtkAllocation *alloc)
 	}
 
 	double ht;
-	vector<GtkCanvasItem*>::iterator i;
+	vector<GnomeCanvasItem*>::iterator i;
 	uint32_t n;
 
 	ht = _canvas->allocation.height / xfade.in().n_channels();
@@ -599,7 +599,7 @@ CrossfadeEditor::canvas_allocation (GtkAllocation *alloc)
 
 		yoff = n * ht;
 
-		gtk_canvas_item_set ((*i),
+		gnome_canvas_item_set ((*i),
 				     "y", yoff,
 				     "height", ht,
 				     "samples_per_unit", spu,
@@ -613,7 +613,7 @@ CrossfadeEditor::canvas_allocation (GtkAllocation *alloc)
 
 		yoff = n * ht;
 
-		gtk_canvas_item_set ((*i),
+		gnome_canvas_item_set ((*i),
 				     "y", yoff,
 				     "height", ht,
 				     "samples_per_unit", spu,
@@ -623,14 +623,14 @@ CrossfadeEditor::canvas_allocation (GtkAllocation *alloc)
 }
 
 gint
-CrossfadeEditor::_point_event (GtkCanvasItem* item, GdkEvent* event, gpointer data)
+CrossfadeEditor::_point_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
 {
 	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
 	return ed->point_event (item, event);
 }
 
 gint
-CrossfadeEditor::point_event (GtkCanvasItem* item, GdkEvent* event)
+CrossfadeEditor::point_event (GnomeCanvasItem* item, GdkEvent* event)
 {
 	Point* point = static_cast<Point*> (gtk_object_get_data (GTK_OBJECT (item), "point"));
 
@@ -678,14 +678,14 @@ CrossfadeEditor::point_event (GtkCanvasItem* item, GdkEvent* event)
 }
 
 gint
-CrossfadeEditor::_curve_event (GtkCanvasItem* item, GdkEvent* event, gpointer data)
+CrossfadeEditor::_curve_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
 {
 	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
 	return ed->curve_event (item, event);
 }
 
 gint
-CrossfadeEditor::curve_event (GtkCanvasItem* item, GdkEvent* event)
+CrossfadeEditor::curve_event (GnomeCanvasItem* item, GdkEvent* event)
 {
 	/* treat it like a toplevel event */
 
@@ -721,8 +721,8 @@ CrossfadeEditor::redraw ()
 
 	fade[current].normative_curve.get_vector (0, 1.0, vec, npoints);
 	
-	GtkCanvasPoints* pts = get_canvas_points ("xfade edit1", npoints);
-	GtkCanvasPoints* spts = get_canvas_points ("xfade edit2", npoints + 3);
+	GnomeCanvasPoints* pts = get_canvas_points ("xfade edit1", npoints);
+	GnomeCanvasPoints* spts = get_canvas_points ("xfade edit2", npoints + 3);
 
 	/* the shade coordinates *MUST* be in anti-clockwise order.
 	 */
@@ -777,14 +777,14 @@ CrossfadeEditor::redraw ()
 		spts->coords[last_spt - (i*2) + 1] = pts->coords[(i*2)+1];
 	}
 
-	gtk_canvas_item_set (fade[current].line, "points", pts, NULL);
-	gtk_canvas_item_set (fade[current].shading, "points", spts, NULL);
+	gnome_canvas_item_set (fade[current].line, "points", pts, NULL);
+	gnome_canvas_item_set (fade[current].shading, "points", spts, NULL);
 
-	gtk_canvas_points_unref (pts);
-	gtk_canvas_points_unref (spts);
+	gnome_canvas_points_unref (pts);
+	gnome_canvas_points_unref (spts);
 
-	for (vector<GtkCanvasItem*>::iterator i = fade[current].waves.begin(); i != fade[current].waves.end(); ++i) {
-		gtk_canvas_item_set ((*i), "gain_src", &fade[current].gain_curve, NULL);
+	for (vector<GnomeCanvasItem*>::iterator i = fade[current].waves.begin(); i != fade[current].waves.end(); ++i) {
+		gnome_canvas_item_set ((*i), "gain_src", &fade[current].gain_curve, NULL);
 	}
 }
 
@@ -1002,25 +1002,25 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 
 	if (wf == In) {
 
-		for (vector<GtkCanvasItem*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
-			gtk_canvas_item_set ((*i), "wave_color", color_map[cSelectedCrossfadeEditorWave], NULL);
+		for (vector<GnomeCanvasItem*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
+			gnome_canvas_item_set ((*i), "wave_color", color_map[cSelectedCrossfadeEditorWave], NULL);
 		}
 
-		for (vector<GtkCanvasItem*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
-			gtk_canvas_item_set ((*i), "wave_color", color_map[cCrossfadeEditorWave], NULL);
+		for (vector<GnomeCanvasItem*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
+			gnome_canvas_item_set ((*i), "wave_color", color_map[cCrossfadeEditorWave], NULL);
 		}
 
-		gtk_canvas_item_set (fade[In].line, "fill_color_rgba", color_map[cSelectedCrossfadeEditorLine], NULL);
-		gtk_canvas_item_set (fade[Out].line, "fill_color_rgba", color_map[cCrossfadeEditorLine], NULL);
-		gtk_canvas_item_hide (fade[Out].shading);
-		gtk_canvas_item_show (fade[In].shading);
+		gnome_canvas_item_set (fade[In].line, "fill_color_rgba", color_map[cSelectedCrossfadeEditorLine], NULL);
+		gnome_canvas_item_set (fade[Out].line, "fill_color_rgba", color_map[cCrossfadeEditorLine], NULL);
+		gnome_canvas_item_hide (fade[Out].shading);
+		gnome_canvas_item_show (fade[In].shading);
 
 		for (list<Point*>::iterator i = fade[Out].points.begin(); i != fade[Out].points.end(); ++i) {
-			gtk_canvas_item_hide ((*i)->box);
+			gnome_canvas_item_hide ((*i)->box);
 		}
 
 		for (list<Point*>::iterator i = fade[In].points.begin(); i != fade[In].points.end(); ++i) {
-			gtk_canvas_item_show ((*i)->box);
+			gnome_canvas_item_show ((*i)->box);
 		}
 
 		for (vector<Button*>::iterator i = fade_out_buttons.begin(); i != fade_out_buttons.end(); ++i) {
@@ -1033,25 +1033,25 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 
 	} else {
 
-		for (vector<GtkCanvasItem*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
-			gtk_canvas_item_set ((*i), "wave_color", color_map[cCrossfadeEditorWave], NULL);
+		for (vector<GnomeCanvasItem*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
+			gnome_canvas_item_set ((*i), "wave_color", color_map[cCrossfadeEditorWave], NULL);
 		}
 
-		for (vector<GtkCanvasItem*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
-			gtk_canvas_item_set ((*i), "wave_color", color_map[cSelectedCrossfadeEditorWave], NULL);
+		for (vector<GnomeCanvasItem*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
+			gnome_canvas_item_set ((*i), "wave_color", color_map[cSelectedCrossfadeEditorWave], NULL);
 		}
 
-		gtk_canvas_item_set (fade[Out].line, "fill_color_rgba", color_map[cSelectedCrossfadeEditorLine], NULL);
-		gtk_canvas_item_set (fade[In].line, "fill_color_rgba", color_map[cCrossfadeEditorLine], NULL);
-		gtk_canvas_item_hide (fade[In].shading);
-		gtk_canvas_item_show (fade[Out].shading);
+		gnome_canvas_item_set (fade[Out].line, "fill_color_rgba", color_map[cSelectedCrossfadeEditorLine], NULL);
+		gnome_canvas_item_set (fade[In].line, "fill_color_rgba", color_map[cCrossfadeEditorLine], NULL);
+		gnome_canvas_item_hide (fade[In].shading);
+		gnome_canvas_item_show (fade[Out].shading);
 
 		for (list<Point*>::iterator i = fade[In].points.begin(); i != fade[In].points.end(); ++i) {
-			gtk_canvas_item_hide ((*i)->box);
+			gnome_canvas_item_hide ((*i)->box);
 		}
 		
 		for (list<Point*>::iterator i = fade[Out].points.begin(); i != fade[Out].points.end(); ++i) {
-			gtk_canvas_item_show ((*i)->box);
+			gnome_canvas_item_show ((*i)->box);
 		}
 
 		for (vector<Button*>::iterator i = fade_out_buttons.begin(); i != fade_out_buttons.end(); ++i) {
@@ -1106,11 +1106,11 @@ CrossfadeEditor::make_waves (AudioRegion& region, WhichFade which)
 		
 		if (region.source(n).peaks_ready (bind (mem_fun(*this, &CrossfadeEditor::peaks_ready), &region, which))) {
 			
-			GtkCanvasItem *wave = gtk_canvas_item_new (gtk_canvas_root (GTK_CANVAS(_canvas)),
-								   gtk_canvas_waveview_get_type (),
+			GnomeCanvasItem *wave = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
+								   gnome_canvas_waveview_get_type (),
 								   "data_src", (gpointer) &region,
 								   "cache_updater", (gboolean) TRUE,
-								   "cache", gtk_canvas_waveview_cache_new (),
+								   "cache", gnome_canvas_waveview_cache_new (),
 								   "channel", (guint32) n,
 								   "length_function", (gpointer) region_length_from_c,
 								   "sourcefile_length_function", (gpointer) sourcefile_length_from_c,
@@ -1125,12 +1125,12 @@ CrossfadeEditor::make_waves (AudioRegion& region, WhichFade which)
 								   "wave_color", color,
 								   NULL);
 			
-			gtk_canvas_item_lower_to_bottom (wave);
+			gnome_canvas_item_lower_to_bottom (wave);
 			fade[which].waves.push_back (wave);
 		}
 	}
 
-	gtk_canvas_item_lower_to_bottom (toplevel);
+	gnome_canvas_item_lower_to_bottom (toplevel);
 }
 
 void

@@ -60,7 +60,7 @@ const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6 ;
  * @param start the start point of this item
  * @param duration the duration of this item
  */
-TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GtkCanvasGroup* parent, TimeAxisView& tv, double spu, GdkColor& base_color, 
+TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GnomeCanvasGroup* parent, TimeAxisView& tv, double spu, GdkColor& base_color, 
 				   jack_nframes_t start, jack_nframes_t duration,
 				   Visibility visibility)
 	: trackview (tv)
@@ -85,10 +85,10 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GtkCanvasGroup* parent, 
 		warning << "Time Axis Item Duration == 0" << endl ;
 	}
 
-	group = gtk_canvas_item_new(GTK_CANVAS_GROUP(parent),gtk_canvas_group_get_type(),NULL) ;
+	group = gnome_canvas_item_new(GNOME_CANVAS_GROUP(parent),gnome_canvas_group_get_type(),NULL) ;
 
-	vestigial_frame = gtk_canvas_item_new(GTK_CANVAS_GROUP(group),
-					      gtk_canvas_simplerect_get_type(),
+	vestigial_frame = gnome_canvas_item_new(GNOME_CANVAS_GROUP(group),
+					      gnome_canvas_simplerect_get_type(),
 					      "x1", (double) 0.0,
 					      "y1", (double) 1.0,
 					      "x2", 2.0,
@@ -96,11 +96,11 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GtkCanvasGroup* parent, 
 					      "outline_color_rgba", color_map[cVestigialFrameOutline],
 					      "fill_color_rgba", color_map[cVestigialFrameFill],
 					      NULL);
-	gtk_canvas_item_hide (vestigial_frame);
+	gnome_canvas_item_hide (vestigial_frame);
 
 	if (visibility & ShowFrame) {
-		frame = gtk_canvas_item_new(GTK_CANVAS_GROUP(group),
-					    gtk_canvas_simplerect_get_type(),
+		frame = gnome_canvas_item_new(GNOME_CANVAS_GROUP(group),
+					    gnome_canvas_simplerect_get_type(),
 					    "x1", (double) 0.0,
 					    "y1", (double) 1.0,
 					    "x2", (double) trackview.editor.frame_to_pixel(duration),
@@ -113,8 +113,8 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GtkCanvasGroup* parent, 
 	}
 
 	if (visibility & ShowNameHighlight) {
-		name_highlight = gtk_canvas_item_new(GTK_CANVAS_GROUP(group),
-						     gtk_canvas_simplerect_get_type(),
+		name_highlight = gnome_canvas_item_new(GNOME_CANVAS_GROUP(group),
+						     gnome_canvas_simplerect_get_type(),
 						     "x1", (double) 1.0,
 						     "x2", (double) (trackview.editor.frame_to_pixel(item_duration)) - 1,
 						     "y1", (double) (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE),
@@ -128,8 +128,8 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GtkCanvasGroup* parent, 
 	}
 
 	if (visibility & ShowNameText) {
-		name_text = gtk_canvas_item_new(GTK_CANVAS_GROUP(group),
-						gtk_canvas_text_get_type(),
+		name_text = gnome_canvas_item_new(GNOME_CANVAS_GROUP(group),
+						gnome_canvas_text_get_type(),
 						"x", (double) TimeAxisViewItem::NAME_X_OFFSET,
 						"y", (double) trackview.height + 1.0 - TimeAxisViewItem::NAME_Y_OFFSET,
 						"font", NAME_FONT.c_str(),
@@ -144,8 +144,8 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GtkCanvasGroup* parent, 
 	/* create our grab handles used for trimming/duration etc */
 
 	if (visibility & ShowHandles) {
-		frame_handle_start = gtk_canvas_item_new(GTK_CANVAS_GROUP(group),
-							 gtk_canvas_simplerect_get_type(),
+		frame_handle_start = gnome_canvas_item_new(GNOME_CANVAS_GROUP(group),
+							 gnome_canvas_simplerect_get_type(),
 							 "x1", (double) 0.0,
 							 "x2", (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH,
 							 "y1", (double) 1.0,
@@ -154,8 +154,8 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GtkCanvasGroup* parent, 
 							 "fill_color_rgba", color_map[cFrameHandleStartFill],
 							 NULL) ;
 		
-		frame_handle_end = gtk_canvas_item_new(GTK_CANVAS_GROUP(group),
-						       gtk_canvas_simplerect_get_type(),
+		frame_handle_end = gnome_canvas_item_new(GNOME_CANVAS_GROUP(group),
+						       gnome_canvas_simplerect_get_type(),
 						       "x1", (double) (trackview.editor.frame_to_pixel(get_duration())) - (TimeAxisViewItem::GRAB_HANDLE_LENGTH),
 						       "x2", (double) trackview.editor.frame_to_pixel(get_duration()),
 						       "y1", (double) 1,
@@ -203,11 +203,11 @@ TimeAxisViewItem::set_position(jack_nframes_t pos, void* src, double* delta)
 
 	frame_position = pos;
 	
-	/*  This sucks. The GtkCanvas version I am using
-	    doesn't correctly implement gtk_canvas_group_set_arg(),
+	/*  This sucks. The GnomeCanvas version I am using
+	    doesn't correctly implement gnome_canvas_group_set_arg(),
 	    so that simply setting the "x" arg of the group
 	    fails to move the group. Instead, we have to
-	    use gtk_canvas_item_move(), which does the right
+	    use gnome_canvas_item_move(), which does the right
 	    thing. I see that in GNOME CVS, the current (Sept 2001)
 	    version of GNOME Canvas rectifies this issue cleanly.
 	*/
@@ -221,7 +221,7 @@ TimeAxisViewItem::set_position(jack_nframes_t pos, void* src, double* delta)
 	old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
 
 	if (new_unit_pos != old_unit_pos) {
-		gtk_canvas_item_move (group, new_unit_pos - old_unit_pos, 0.0) ;
+		gnome_canvas_item_move (group, new_unit_pos - old_unit_pos, 0.0) ;
 	}
 
 	if (delta) {
@@ -261,7 +261,7 @@ TimeAxisViewItem::set_duration (jack_nframes_t dur, void* src)
 	}
 
 	if (dur == 0) {
-		gtk_canvas_item_hide (group);
+		gnome_canvas_item_hide (group);
 	}
 
 	item_duration = dur;
@@ -500,7 +500,7 @@ void
 TimeAxisViewItem::set_name_text(std::string new_name)
 {
 	if (name_text) {
-		gtk_canvas_item_set (name_text, "text", new_name.c_str(), NULL);
+		gnome_canvas_item_set (name_text, "text", new_name.c_str(), NULL);
 	}
 }
 
@@ -514,22 +514,22 @@ TimeAxisViewItem::set_height(double height)
 {
 	if (name_highlight) {
 		if (height < NAME_HIGHLIGHT_THRESH) {
-			gtk_canvas_item_hide (name_highlight);
-			gtk_canvas_item_hide (name_text);
+			gnome_canvas_item_hide (name_highlight);
+			gnome_canvas_item_hide (name_text);
 		} else {
-			gtk_canvas_item_show (name_highlight);
-			gtk_canvas_item_show (name_text);
+			gnome_canvas_item_show (name_highlight);
+			gnome_canvas_item_show (name_text);
 		}
 
 		if (height > NAME_HIGHLIGHT_SIZE) {
-			gtk_canvas_item_set (name_highlight, 
+			gnome_canvas_item_set (name_highlight, 
 					     "y1", (double) height+1 - NAME_HIGHLIGHT_SIZE,
 					     "y2", (double) height,
 					     NULL);
 		}
 		else {
 			/* it gets hidden now anyway */
-			gtk_canvas_item_set (name_highlight, 
+			gnome_canvas_item_set (name_highlight, 
 					     "y1", (double) 1.0,
 					     "y2", (double) height,
 					     NULL);
@@ -537,20 +537,20 @@ TimeAxisViewItem::set_height(double height)
 	}
 
 	if (name_text) {
-		gtk_canvas_item_set (name_text, "y", height+1 - NAME_Y_OFFSET, NULL);
+		gnome_canvas_item_set (name_text, "y", height+1 - NAME_Y_OFFSET, NULL);
 		if (height < NAME_HIGHLIGHT_THRESH) {
-			gtk_canvas_item_set(name_text, "fill_color_rgba",  fill_color, NULL) ;
+			gnome_canvas_item_set(name_text, "fill_color_rgba",  fill_color, NULL) ;
 		}
 		else {
-			gtk_canvas_item_set(name_text, "fill_color_rgba", label_color, NULL) ;
+			gnome_canvas_item_set(name_text, "fill_color_rgba", label_color, NULL) ;
 		}
 	}
 
 	if (frame) {
-		gtk_canvas_item_set (frame, "y2", height+1, NULL) ;
+		gnome_canvas_item_set (frame, "y2", height+1, NULL) ;
 	}
 
-	gtk_canvas_item_set (vestigial_frame, "y2", height+1, NULL) ;
+	gnome_canvas_item_set (vestigial_frame, "y2", height+1, NULL) ;
 }
 
 /**
@@ -566,7 +566,7 @@ TimeAxisViewItem::set_color(GdkColor& base_color)
 /**
  * 
  */
-GtkCanvasItem*
+GnomeCanvasItem*
 TimeAxisViewItem::get_canvas_frame()
 {
 	return(frame) ;
@@ -575,7 +575,7 @@ TimeAxisViewItem::get_canvas_frame()
 /**
  * 
  */
-GtkCanvasItem*
+GnomeCanvasItem*
 TimeAxisViewItem::get_canvas_group()
 {
 	return(group) ;
@@ -584,7 +584,7 @@ TimeAxisViewItem::get_canvas_group()
 /**
  * 
  */
-GtkCanvasItem*
+GnomeCanvasItem*
 TimeAxisViewItem::get_name_highlight()
 {
 	return(name_highlight) ;
@@ -593,7 +593,7 @@ TimeAxisViewItem::get_name_highlight()
 /**
  * 
  */
-GtkCanvasItem*
+GnomeCanvasItem*
 TimeAxisViewItem::get_name_text()
 {
 	return(name_text) ;
@@ -711,16 +711,16 @@ TimeAxisViewItem::set_colors()
 		}
 
 		if (height < NAME_HIGHLIGHT_THRESH) {
-			gtk_canvas_item_set(name_text, "fill_color_rgba",  fill_color, NULL) ;
+			gnome_canvas_item_set(name_text, "fill_color_rgba",  fill_color, NULL) ;
 		}
 		else {
-			gtk_canvas_item_set(name_text, "fill_color_rgba", label_color, NULL) ;
+			gnome_canvas_item_set(name_text, "fill_color_rgba", label_color, NULL) ;
 		}
 	}
 
 	if (name_highlight) {
-		gtk_canvas_item_set(name_highlight, "fill_color_rgba", fill_color, NULL) ;
-		gtk_canvas_item_set(name_highlight, "outline_color_rgba", fill_color, NULL) ;
+		gnome_canvas_item_set(name_highlight, "fill_color_rgba", fill_color, NULL) ;
+		gnome_canvas_item_set(name_highlight, "outline_color_rgba", fill_color, NULL) ;
 	}
 	set_trim_handle_colors() ;
 }
@@ -736,10 +736,10 @@ TimeAxisViewItem::set_frame_color()
 		
 		if (_selected && should_show_selection) {
 			UINT_TO_RGBA(color_map[cSelectedFrameBase], &r, &g, &b, &a);
-			gtk_canvas_item_set(frame, "fill_color_rgba", RGBA_TO_UINT(r, g, b, fill_opacity), NULL) ;
+			gnome_canvas_item_set(frame, "fill_color_rgba", RGBA_TO_UINT(r, g, b, fill_opacity), NULL) ;
 		} else {
 			UINT_TO_RGBA(color_map[cFrameBase], &r, &g, &b, &a);
-			gtk_canvas_item_set(frame, "fill_color_rgba", RGBA_TO_UINT(r, g, b, fill_opacity), NULL) ;
+			gnome_canvas_item_set(frame, "fill_color_rgba", RGBA_TO_UINT(r, g, b, fill_opacity), NULL) ;
 		}
 	}
 }
@@ -753,11 +753,11 @@ TimeAxisViewItem::set_trim_handle_colors()
 {
 	if (frame_handle_start) {
 		if (position_locked) {
-			gtk_canvas_item_set(frame_handle_start, "fill_color_rgba", color_map[cTrimHandleLockedStart], NULL);
-			gtk_canvas_item_set(frame_handle_end, "fill_color_rgba", color_map[cTrimHandleLockedEnd], NULL) ;
+			gnome_canvas_item_set(frame_handle_start, "fill_color_rgba", color_map[cTrimHandleLockedStart], NULL);
+			gnome_canvas_item_set(frame_handle_end, "fill_color_rgba", color_map[cTrimHandleLockedEnd], NULL) ;
 		} else {
-			gtk_canvas_item_set(frame_handle_start, "fill_color_rgba", color_map[cTrimHandleStart], NULL) ;
-			gtk_canvas_item_set(frame_handle_end, "fill_color_rgba", color_map[cTrimHandleEnd], NULL) ;
+			gnome_canvas_item_set(frame_handle_start, "fill_color_rgba", color_map[cTrimHandleStart], NULL) ;
+			gnome_canvas_item_set(frame_handle_end, "fill_color_rgba", color_map[cTrimHandleEnd], NULL) ;
 		}
 	}
 }
@@ -782,32 +782,32 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 	if (pixel_width < GRAB_HANDLE_LENGTH * 2) {
 
 		if (frame_handle_start) {
-			gtk_canvas_item_hide (frame_handle_start);
-			gtk_canvas_item_hide (frame_handle_end);
+			gnome_canvas_item_hide (frame_handle_start);
+			gnome_canvas_item_hide (frame_handle_end);
 		}
 
 	} if (pixel_width < 2.0) {
 
 		if (show_vestigial) {
-			gtk_canvas_item_show (vestigial_frame);
+			gnome_canvas_item_show (vestigial_frame);
 		}
 
 		if (name_highlight) {
-			gtk_canvas_item_hide (name_highlight);
-			gtk_canvas_item_hide (name_text);
+			gnome_canvas_item_hide (name_highlight);
+			gnome_canvas_item_hide (name_text);
 		}
 
 		if (frame) {
-			gtk_canvas_item_hide (frame);
+			gnome_canvas_item_hide (frame);
 		}
 
 		if (frame_handle_start) {
-			gtk_canvas_item_hide (frame_handle_start);
-			gtk_canvas_item_hide (frame_handle_end);
+			gnome_canvas_item_hide (frame_handle_start);
+			gnome_canvas_item_hide (frame_handle_end);
 		}
 		
 	} else {
-		gtk_canvas_item_hide (vestigial_frame);
+		gnome_canvas_item_hide (vestigial_frame);
 
 		if (name_highlight) {
 
@@ -817,31 +817,31 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			double height = GTK_VALUE_DOUBLE (args[0]);
 
 			if (height < NAME_HIGHLIGHT_THRESH) {
-				gtk_canvas_item_hide (name_highlight);
-				gtk_canvas_item_hide (name_text);
+				gnome_canvas_item_hide (name_highlight);
+				gnome_canvas_item_hide (name_text);
 			} else {
-				gtk_canvas_item_show (name_highlight);
-				gtk_canvas_item_show (name_text);
+				gnome_canvas_item_show (name_highlight);
+				gnome_canvas_item_show (name_text);
 				reset_name_width (pixel_width);
 			}
 
-			gtk_canvas_item_set (name_highlight, "x2", pixel_width - 1.0, NULL);
+			gnome_canvas_item_set (name_highlight, "x2", pixel_width - 1.0, NULL);
 		}
 
 		if (frame) {
-			gtk_canvas_item_show (frame);
-			gtk_canvas_item_set (frame, "x2", pixel_width, NULL);
+			gnome_canvas_item_show (frame);
+			gnome_canvas_item_set (frame, "x2", pixel_width, NULL);
 		}
 
 		if (frame_handle_start) {
 			if (pixel_width < (2*TimeAxisViewItem::GRAB_HANDLE_LENGTH)) {
-				gtk_canvas_item_hide (frame_handle_start);
-				gtk_canvas_item_hide (frame_handle_end);
+				gnome_canvas_item_hide (frame_handle_start);
+				gnome_canvas_item_hide (frame_handle_end);
 			}
-			gtk_canvas_item_show (frame_handle_start);
-			gtk_canvas_item_set(GTK_CANVAS_ITEM(frame_handle_end), "x1", pixel_width - (TimeAxisViewItem::GRAB_HANDLE_LENGTH ), NULL) ;
-			gtk_canvas_item_show (frame_handle_end);
-			gtk_canvas_item_set(GTK_CANVAS_ITEM(frame_handle_end), "x2", pixel_width, NULL) ;
+			gnome_canvas_item_show (frame_handle_start);
+			gnome_canvas_item_set(GNOME_CANVAS_ITEM(frame_handle_end), "x1", pixel_width - (TimeAxisViewItem::GRAB_HANDLE_LENGTH ), NULL) ;
+			gnome_canvas_item_show (frame_handle_end);
+			gnome_canvas_item_set(GNOME_CANVAS_ITEM(frame_handle_end), "x2", pixel_width, NULL) ;
 		}
 	}
 }
@@ -885,7 +885,7 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 
 	if (namelen == 0) {
 		
-		gtk_canvas_item_hide (name_text);
+		gnome_canvas_item_hide (name_text);
 		
 	} else {
 		
@@ -903,8 +903,8 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 			}
 		}
 		
-		gtk_canvas_item_set (name_text, "text", cstr, NULL);
-		gtk_canvas_item_show (name_text);
+		gnome_canvas_item_set (name_text, "text", cstr, NULL);
+		gnome_canvas_item_show (name_text);
 	}
 }
 

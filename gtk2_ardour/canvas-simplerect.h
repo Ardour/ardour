@@ -1,4 +1,4 @@
-/* gtk-canvas-simplerect.h: GtkCanvas item for simple rects
+/* libgnomecanvas/gnome-canvas-simplerect.h: GnomeCanvas item for simple rects
  *
  * Copyright (C) 2001 Paul Davis <pbd@op.net>
  *
@@ -19,31 +19,30 @@
  *
  */
 
-#ifndef __GTK_CANVAS_SIMPLERECT_H__
-#define __GTK_CANVAS_SIMPLERECT_H__
+#ifndef __GNOME_CANVAS_SIMPLERECT_H__
+#define __GNOME_CANVAS_SIMPLERECT_H__
 
 #include <stdint.h>
 
-#include <gtk-canvas/gtk-canvas-defs.h>
-#include "gtk-canvas/gtk-canvas.h"
+#include <libgnomecanvas/libgnomecanvas.h>
 
-BEGIN_GTK_CANVAS_DECLS
+BEGIN_GNOME_CANVAS_DECLS
 
 /* Wave viewer item for canvas.
  */
 
-#define GTK_CANVAS_TYPE_CANVAS_SIMPLERECT            (gtk_canvas_simplerect_get_type ())
-#define GTK_CANVAS_SIMPLERECT(obj)                   (GTK_CHECK_CAST ((obj), GTK_CANVAS_TYPE_CANVAS_SIMPLERECT, GtkCanvasSimpleRect))
-#define GTK_CANVAS_SIMPLERECT_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GTK_CANVAS_TYPE_CANVAS_SIMPLERECT, GtkCanvasSimpleRectClass))
-#define GTK_CANVAS_IS_CANVAS_SIMPLERECT(obj)         (GTK_CHECK_TYPE ((obj), GTK_CANVAS_TYPE_CANVAS_SIMPLERECT))
-#define GTK_CANVAS_IS_CANVAS_SIMPLERECT_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GTK_CANVAS_TYPE_CANVAS_SIMPLERECT))
+#define GNOME_CANVAS_TYPE_CANVAS_SIMPLERECT            (gnome_canvas_simplerect_get_type ())
+#define GNOME_CANVAS_SIMPLERECT(obj)                   (GTK_CHECK_CAST ((obj), GNOME_CANVAS_TYPE_CANVAS_SIMPLERECT, GnomeCanvasSimpleRect))
+#define GNOME_CANVAS_SIMPLERECT_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GNOME_CANVAS_TYPE_CANVAS_SIMPLERECT, GnomeCanvasSimpleRectClass))
+#define GNOME_CANVAS_IS_CANVAS_SIMPLERECT(obj)         (GTK_CHECK_TYPE ((obj), GNOME_CANVAS_TYPE_CANVAS_SIMPLERECT))
+#define GNOME_CANVAS_IS_CANVAS_SIMPLERECT_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GNOME_CANVAS_TYPE_CANVAS_SIMPLERECT))
 
-typedef struct _GtkCanvasSimpleRect            GtkCanvasSimpleRect;
-typedef struct _GtkCanvasSimpleRectClass       GtkCanvasSimpleRectClass;
+typedef struct _GnomeCanvasSimpleRect            GnomeCanvasSimpleRect;
+typedef struct _GnomeCanvasSimpleRectClass       GnomeCanvasSimpleRectClass;
 
-struct _GtkCanvasSimpleRect
+struct _GnomeCanvasSimpleRect
 {
-    GtkCanvasItem item;
+    GnomeCanvasItem item;
     double x1, y1, x2, y2;
     gboolean     fill;
     gboolean     draw;
@@ -61,12 +60,12 @@ struct _GtkCanvasSimpleRect
     guint32 bbox_lrx, bbox_lry;
 };
 
-struct _GtkCanvasSimpleRectClass {
-	GtkCanvasItemClass parent_class;
+struct _GnomeCanvasSimpleRectClass {
+	GnomeCanvasItemClass parent_class;
 };
 
-GtkType gtk_canvas_simplerect_get_type (void);
+GtkType gnome_canvas_simplerect_get_type (void);
 
-END_GTK_CANVAS_DECLS
+END_GNOME_CANVAS_DECLS
 
-#endif /* __GTK_CANVAS_SIMPLERECT_H__ */
+#endif /* __GNOME_CANVAS_SIMPLERECT_H__ */

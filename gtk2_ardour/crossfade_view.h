@@ -23,7 +23,7 @@
 
 #include <vector>
 #include <gtkmm.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <sigc++/signal.h>
 #include <ardour/crossfade.h>
 
@@ -34,7 +34,7 @@ class AudioRegionView;
 
 struct CrossfadeView : public TimeAxisViewItem
 {
-    CrossfadeView (GtkCanvasGroup*, 
+    CrossfadeView (GnomeCanvasGroup*, 
 		   AudioTimeAxisView&,
 		   ARDOUR::Crossfade&,
 		   double initial_samples_per_unit, 
@@ -71,10 +71,10 @@ struct CrossfadeView : public TimeAxisViewItem
 
     double spu;
 
-    GtkCanvasItem *overlap_rect;
-    GtkCanvasItem *fade_in;
-    GtkCanvasItem *fade_out;
-    GtkCanvasItem *active_button;
+    GnomeCanvasItem *overlap_rect;
+    GnomeCanvasItem *fade_in;
+    GnomeCanvasItem *fade_out;
+    GnomeCanvasItem *active_button;
 
     void crossfade_changed (ARDOUR::Change);
     void active_changed ();

@@ -55,7 +55,7 @@ static const int32_t sync_mark_width = 9;
 
 sigc::signal<void,AudioRegionView*> AudioRegionView::AudioRegionViewGoingAway;
 
-AudioRegionView::AudioRegionView (GtkCanvasGroup *parent, AudioTimeAxisView &tv, 
+AudioRegionView::AudioRegionView (GnomeCanvasGroup *parent, AudioTimeAxisView &tv, 
 				  AudioRegion& r, 
 				  double spu, 
 				  double amplitude_above_axis,
@@ -69,7 +69,7 @@ AudioRegionView::AudioRegionView (GtkCanvasGroup *parent, AudioTimeAxisView &tv,
 
 	  region (r)
 {
-	GtkCanvasPoints *shape;
+	GnomeCanvasPoints *shape;
 	XMLNode *node;
 
 	editor = 0;
@@ -100,7 +100,7 @@ AudioRegionView::AudioRegionView (GtkCanvasGroup *parent, AudioTimeAxisView &tv,
 	gtk_object_set_data (GTK_OBJECT(name_highlight), "regionview", this);
 	gtk_object_set_data (GTK_OBJECT(name_text), "regionview", this);
 
-	shape = gtk_canvas_points_new (4);
+	shape = gnome_canvas_points_new (4);
 
 	/* an equilateral triangle */
 
@@ -117,23 +117,23 @@ AudioRegionView::AudioRegionView (GtkCanvasGroup *parent, AudioTimeAxisView &tv,
 	shape->coords[7] = 1;
 
 	// cerr << "set sync mark al points, nc = " << shape->num_points << endl;
-	sync_mark = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-					 gtk_canvas_polygon_get_type(),
+	sync_mark = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+					 gnome_canvas_polygon_get_type(),
 					 "points", shape,
 					 "fill_color_rgba", fill_color,
 					 NULL);
-	gtk_canvas_item_hide (sync_mark);
-	gtk_canvas_points_unref (shape);
+	gnome_canvas_item_hide (sync_mark);
+	gnome_canvas_points_unref (shape);
 
 	
-	fade_in_shape = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-					     gtk_canvas_polygon_get_type(),
+	fade_in_shape = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+					     gnome_canvas_polygon_get_type(),
 					     "fill_color_rgba", fade_color,
 					     NULL);
 	gtk_object_set_data (GTK_OBJECT(fade_in_shape), "regionview", this);
 
-	fade_out_shape = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-					      gtk_canvas_polygon_get_type(),
+	fade_out_shape = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+					      gnome_canvas_polygon_get_type(),
 					      "fill_color_rgba", fade_color,
 					      NULL);
 	gtk_object_set_data (GTK_OBJECT(fade_out_shape), "regionview", this);
@@ -145,8 +145,8 @@ AudioRegionView::AudioRegionView (GtkCanvasGroup *parent, AudioTimeAxisView &tv,
 			UINT_TO_RGBA(fill_color,&r,&g,&b,&a);
 	
 
-	fade_in_handle = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-					      gtk_canvas_simplerect_get_type(),
+	fade_in_handle = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+					      gnome_canvas_simplerect_get_type(),
 					      "fill_color_rgba", RGBA_TO_UINT(r,g,b,0),
 					      "outline_pixels", 0,
 					      "y1", 2.0,
@@ -154,8 +154,8 @@ AudioRegionView::AudioRegionView (GtkCanvasGroup *parent, AudioTimeAxisView &tv,
 					      NULL);
 	gtk_object_set_data (GTK_OBJECT(fade_in_handle), "regionview", this);
 	
-	fade_out_handle = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-					       gtk_canvas_simplerect_get_type(),
+	fade_out_handle = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+					       gnome_canvas_simplerect_get_type(),
 					       "fill_color_rgba", RGBA_TO_UINT(r,g,b,0),
 					       "outline_pixels", 0,
 					       "y1", 2.0,
@@ -234,8 +234,8 @@ AudioRegionView::~AudioRegionView ()
 
 	AudioRegionViewGoingAway (this); /* EMIT_SIGNAL */
 
-	for (vector<GtkCanvasWaveViewCache *>::iterator cache = wave_caches.begin(); cache != wave_caches.end() ; ++cache) {
-		gtk_canvas_waveview_cache_destroy (*cache);
+	for (vector<GnomeCanvasWaveViewCache *>::iterator cache = wave_caches.begin(); cache != wave_caches.end() ; ++cache) {
+		gnome_canvas_waveview_cache_destroy (*cache);
 	}
 
 	/* all waveviews will be destroyed when the group is destroyed */
@@ -252,7 +252,7 @@ AudioRegionView::~AudioRegionView ()
 }
 
 gint
-AudioRegionView::_lock_toggle (GtkCanvasItem* item, GdkEvent* ev, void* arg)
+AudioRegionView::_lock_toggle (GnomeCanvasItem* item, GdkEvent* ev, void* arg)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
@@ -351,14 +351,14 @@ AudioRegionView::fade_in_active_changed ()
 
 	if (region.fade_in_active()) {
 		col = RGBA_TO_UINT(r,g,b,120);
-		gtk_canvas_item_set (fade_in_shape, 
+		gnome_canvas_item_set (fade_in_shape, 
 				     "fill_color_rgba", col,
 				     "width_pixels", 0,
 				     "outline_color_rgba", RGBA_TO_UINT(r,g,b,0),
 				     NULL);
 	} else { 
 		col = RGBA_TO_UINT(r,g,b,0);
-		gtk_canvas_item_set (fade_in_shape, 
+		gnome_canvas_item_set (fade_in_shape, 
 				     "fill_color_rgba", col,
 				     "width_pixels", 1,
 				     "outline_color_rgba", RGBA_TO_UINT(r,g,b,255),
@@ -375,14 +375,14 @@ AudioRegionView::fade_out_active_changed ()
 
 	if (region.fade_out_active()) {
 		col = RGBA_TO_UINT(r,g,b,120);
-		gtk_canvas_item_set (fade_out_shape, 
+		gnome_canvas_item_set (fade_out_shape, 
 				     "fill_color_rgba", col,
 				     "width_pixels", 0,
 				     "outline_color_rgba", RGBA_TO_UINT(r,g,b,0),
 				     NULL);
 	} else { 
 		col = RGBA_TO_UINT(r,g,b,0);
-		gtk_canvas_item_set (fade_out_shape, 
+		gnome_canvas_item_set (fade_out_shape, 
 				     "fill_color_rgba", col,
 				     "width_pixels", 1,
 				     "outline_color_rgba", RGBA_TO_UINT(r,g,b,255),
@@ -398,7 +398,7 @@ AudioRegionView::region_scale_amplitude_changed ()
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// force a reload of the cache
-		gtk_canvas_item_set (waves[n], "data_src", &region, NULL);
+		gnome_canvas_item_set (waves[n], "data_src", &region, NULL);
 	}
 }
 
@@ -427,15 +427,15 @@ AudioRegionView::region_resized (Change what_changed)
 		reset_width_dependent_items (unit_length);
 		
 	 	for (uint32_t n = 0; n < waves.size(); ++n) {
- 			gtk_canvas_item_set (waves[n], "region_start", (guint32) region.start(), NULL);
+ 			gnome_canvas_item_set (waves[n], "region_start", (guint32) region.start(), NULL);
  		}
 		
  		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 
  			(*i)->set_duration (unit_length);
 
- 			for (vector<GtkCanvasItem*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
- 				gtk_canvas_item_set ((*w), "region_start", region.start(), NULL);
+ 			for (vector<GnomeCanvasItem*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
+ 				gnome_canvas_item_set ((*w), "region_start", region.start(), NULL);
  			}
  		}
 	}
@@ -448,19 +448,19 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 	_pixel_width = pixel_width;
 
 	if (zero_line) {
-		gtk_canvas_item_set (zero_line, "x2", pixel_width - 1.0, NULL);
+		gnome_canvas_item_set (zero_line, "x2", pixel_width - 1.0, NULL);
 	}
 
 	if (pixel_width <= 6.0) {
-		gtk_canvas_item_hide (fade_in_handle);
-		gtk_canvas_item_hide (fade_out_handle);
+		gnome_canvas_item_hide (fade_in_handle);
+		gnome_canvas_item_hide (fade_out_handle);
 	} else {
 		if (_height < 5.0) {
-			gtk_canvas_item_hide (fade_in_handle);
-			gtk_canvas_item_hide (fade_out_handle);
+			gnome_canvas_item_hide (fade_in_handle);
+			gnome_canvas_item_hide (fade_out_handle);
 		} else {
-			gtk_canvas_item_show (fade_in_handle);
-			gtk_canvas_item_show (fade_out_handle);
+			gnome_canvas_item_show (fade_in_handle);
+			gnome_canvas_item_show (fade_out_handle);
 		}
 	}
 
@@ -482,9 +482,9 @@ AudioRegionView::region_muted ()
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (region.muted()) {
-			gtk_canvas_item_set (waves[n], "wave_color", color_map[cMutedWaveForm], NULL);
+			gnome_canvas_item_set (waves[n], "wave_color", color_map[cMutedWaveForm], NULL);
 		} else {
-			gtk_canvas_item_set (waves[n], "wave_color", color_map[cWaveForm], NULL);
+			gnome_canvas_item_set (waves[n], "wave_color", color_map[cWaveForm], NULL);
 		}
 	}
 }
@@ -535,7 +535,7 @@ AudioRegionView::set_position (jack_nframes_t pos, void* src, double* ignored)
 
 	if (delta) {
 		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-			gtk_canvas_item_move ((*i)->group, delta, 0.0);
+			gnome_canvas_item_move ((*i)->group, delta, 0.0);
 		}
 	}
 
@@ -562,8 +562,8 @@ AudioRegionView::set_height (gdouble height)
 		
 		gdouble yoff = n * (ht+1);
 		
-		gtk_canvas_item_set (waves[n], "height", ht, NULL);
-		gtk_canvas_item_set (waves[n], "y", yoff + 2, NULL);
+		gnome_canvas_item_set (waves[n], "height", ht, NULL);
+		gnome_canvas_item_set (waves[n], "y", yoff + 2, NULL);
 	}
 
 	if ((height/wcnt) < NAME_HIGHLIGHT_SIZE) {
@@ -578,7 +578,7 @@ AudioRegionView::set_height (gdouble height)
 	gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE));
 	reset_fade_shapes ();
 
-	gtk_canvas_item_raise_to_top (name_text) ;
+	gnome_canvas_item_raise_to_top (name_text) ;
 }
 
 void
@@ -590,13 +590,13 @@ AudioRegionView::manage_zero_line ()
 
 	if (_height >= 100) {
 		gdouble wave_midpoint = (_height - NAME_HIGHLIGHT_SIZE) / 2.0;
-		gtk_canvas_item_set (zero_line, 
+		gnome_canvas_item_set (zero_line, 
 				     "y1", wave_midpoint, 
 				     "y2", wave_midpoint, 
 				     NULL);
-		gtk_canvas_item_show (zero_line);
+		gnome_canvas_item_show (zero_line);
 	} else {
-		gtk_canvas_item_hide (zero_line);
+		gnome_canvas_item_hide (zero_line);
 	}
 }
 
@@ -620,14 +620,14 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 
 	width = std::max ((jack_nframes_t) 64, width);
 
-	GtkCanvasPoints* points;
+	GnomeCanvasPoints* points;
 	double pwidth = width / samples_per_unit;
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h; 
 	
 	if (_height < 5) {
-		gtk_canvas_item_hide (fade_in_shape);
-		gtk_canvas_item_hide (fade_in_handle);
+		gnome_canvas_item_hide (fade_in_shape);
+		gnome_canvas_item_hide (fade_in_handle);
 		return;
 	}
 
@@ -640,17 +640,17 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 		handle_center = 3.0;
 	}
 	
-	gtk_canvas_item_set (fade_in_handle, 
+	gnome_canvas_item_set (fade_in_handle, 
 			     "x1",  handle_center - 3.0,
 			     "x2",  handle_center + 3.0,
 			     NULL);
 	
 	if (pwidth < 5) {
-		gtk_canvas_item_hide (fade_in_shape);
+		gnome_canvas_item_hide (fade_in_shape);
 		return;
 	}
 
-	gtk_canvas_item_show (fade_in_shape);
+	gnome_canvas_item_show (fade_in_shape);
 
 	float curve[npoints];
 	region.fade_in().get_vector (0, region.fade_in().back()->when, curve, npoints);
@@ -686,8 +686,8 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 	points->coords[pi++] = points->coords[0];
 	points->coords[pi] = points->coords[1];
 	
-	gtk_canvas_item_set (fade_in_shape, "points", points, NULL);
-	gtk_canvas_points_unref (points);
+	gnome_canvas_item_set (fade_in_shape, "points", points, NULL);
+	gnome_canvas_points_unref (points);
 }
 
 void
@@ -703,14 +703,14 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 
 	width = std::max ((jack_nframes_t) 64, width);
 
-	GtkCanvasPoints* points;
+	GnomeCanvasPoints* points;
 	double pwidth = width / samples_per_unit;
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h;
 
 	if (_height < 5) {
-		gtk_canvas_item_hide (fade_out_shape);
-		gtk_canvas_item_hide (fade_out_handle);
+		gnome_canvas_item_hide (fade_out_shape);
+		gnome_canvas_item_hide (fade_out_handle);
 		return;
 	}
 
@@ -723,7 +723,7 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 		handle_center = 3.0;
 	}
 	
-	gtk_canvas_item_set (fade_out_handle, 
+	gnome_canvas_item_set (fade_out_handle, 
 			     "x1",  handle_center - 3.0,
 			     "x2",  handle_center + 3.0,
 			     NULL);
@@ -731,11 +731,11 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 	/* don't show shape if its too small */
 	
 	if (pwidth < 5) {
-		gtk_canvas_item_hide (fade_out_shape);
+		gnome_canvas_item_hide (fade_out_shape);
 		return;
 	} 
 	
-	gtk_canvas_item_show (fade_out_shape);
+	gnome_canvas_item_show (fade_out_shape);
 
 	float curve[npoints];
 	region.fade_out().get_vector (0, region.fade_out().back()->when, curve, npoints);
@@ -771,8 +771,8 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 	points->coords[pi++] = points->coords[0];
 	points->coords[pi] = points->coords[1];
 
-	gtk_canvas_item_set (fade_out_shape, "points", points, NULL);
-	gtk_canvas_points_unref (points);
+	gnome_canvas_item_set (fade_out_shape, "points", points, NULL);
+	gnome_canvas_points_unref (points);
 }
 
 void
@@ -781,7 +781,7 @@ AudioRegionView::set_samples_per_unit (gdouble spu)
 	TimeAxisViewItem::set_samples_per_unit (spu);
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		gtk_canvas_item_set (waves[n], "samples_per_unit", spu, NULL);
+		gnome_canvas_item_set (waves[n], "samples_per_unit", spu, NULL);
 	}
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -812,7 +812,7 @@ void
 AudioRegionView::set_amplitude_above_axis (gdouble spp)
 {
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		gtk_canvas_item_set (waves[n], "amplitude_above_axis", spp, NULL);
+		gnome_canvas_item_set (waves[n], "amplitude_above_axis", spp, NULL);
 	}
 }
 
@@ -834,13 +834,13 @@ AudioRegionView::set_colors ()
 	TimeAxisViewItem::set_colors ();
 	
 	gain_line->set_line_color (region.envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
-	gtk_canvas_item_set (sync_mark, "fill_color_rgba", fill_color, NULL);
+	gnome_canvas_item_set (sync_mark, "fill_color_rgba", fill_color, NULL);
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (region.muted()) {
-			gtk_canvas_item_set (waves[n], "wave_color", color_map[cMutedWaveForm], NULL);
+			gnome_canvas_item_set (waves[n], "wave_color", color_map[cMutedWaveForm], NULL);
 		} else {
-			gtk_canvas_item_set (waves[n], "wave_color", color_map[cWaveForm], NULL);
+			gnome_canvas_item_set (waves[n], "wave_color", color_map[cWaveForm], NULL);
 		}
 	}
 }
@@ -915,7 +915,7 @@ AudioRegionView::region_sync_changed ()
 
 		/* no sync mark - its the start of the region */
 
-		gtk_canvas_item_hide (sync_mark);
+		gnome_canvas_item_hide (sync_mark);
 
 	} else {
 
@@ -923,19 +923,19 @@ AudioRegionView::region_sync_changed ()
 
 			/* no sync mark - its out of the bounds of the region */
 
-			gtk_canvas_item_hide (sync_mark);
+			gnome_canvas_item_hide (sync_mark);
 
 		} else {
 
 			/* lets do it */
 
 			GtkArg args[1];
-			GtkCanvasPoints* points;
+			GnomeCanvasPoints* points;
 			
 			args[0].name = X_("points");
 			
 			gtk_object_getv (GTK_OBJECT(sync_mark), 1, args);
-			points = static_cast<GtkCanvasPoints *> (GTK_VALUE_POINTER(args[0]));
+			points = static_cast<GnomeCanvasPoints *> (GTK_VALUE_POINTER(args[0]));
 			
 			double offset = sync_offset / samples_per_unit;
 			
@@ -951,10 +951,10 @@ AudioRegionView::region_sync_changed ()
 			points->coords[6] = offset - ((sync_mark_width-1)/2);
 			points->coords[7] = 1;
 			
-			gtk_canvas_item_show (sync_mark);
-			gtk_canvas_item_set (sync_mark, "points", points, NULL);
+			gnome_canvas_item_show (sync_mark);
+			gnome_canvas_item_set (sync_mark, "points", points, NULL);
 
-			gtk_canvas_points_unref (points);
+			gnome_canvas_points_unref (points);
 		}
 	}
 }
@@ -965,12 +965,12 @@ AudioRegionView::set_waveform_visible (bool yn)
 	if (((_flags & WaveformVisible) != yn)) {
 		if (yn) {
 			for (uint32_t n=0; n < waves.size(); ++n) {
-				gtk_canvas_item_show (waves[n]);
+				gnome_canvas_item_show (waves[n]);
 			}
 			_flags |= WaveformVisible;
 		} else {
 			for (uint32_t n=0; n < waves.size(); ++n) {
-				gtk_canvas_item_hide (waves[n]);
+				gnome_canvas_item_hide (waves[n]);
 			}
 			_flags &= ~WaveformVisible;
 		}
@@ -1033,7 +1033,7 @@ AudioRegionView::create_waves ()
 			break;
 		}
 		
-		wave_caches.push_back (gtk_canvas_waveview_cache_new ());
+		wave_caches.push_back (gnome_canvas_waveview_cache_new ());
 
 		if (wait_for_waves) {
 			if (region.source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n))) {
@@ -1047,8 +1047,8 @@ AudioRegionView::create_waves ()
 	}
 
 	if (create_zero_line) {
-		zero_line = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-						 gtk_canvas_simpleline_get_type(),
+		zero_line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+						 gnome_canvas_simpleline_get_type(),
 						 "x1", (gdouble) 1.0,
 						 "x2", (gdouble) (region.length() / samples_per_unit) - 1.0,
 						 "color_rgba", (guint) color_map[cZeroLine],
@@ -1073,8 +1073,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	}
 	gdouble yoff = which * ht;
 
-	GtkCanvasItem *wave = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-						   gtk_canvas_waveview_get_type (),
+	GnomeCanvasItem *wave = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+						   gnome_canvas_waveview_get_type (),
 						   "data_src", (gpointer) &region,
 						   "cache", wave_caches[which],
 						   "cache_updater", (gboolean) true,
@@ -1092,7 +1092,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 						   NULL);
 	
 	if (!(_flags & WaveformVisible)) {
-		gtk_canvas_item_hide (wave);
+		gnome_canvas_item_hide (wave);
 	}
 
 	/* note: calling this function is serialized by the lock
@@ -1122,8 +1122,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		tmp_waves.clear ();
 		
 		if (!zero_line) {
-			zero_line = gtk_canvas_item_new (GTK_CANVAS_GROUP(group),
-							 gtk_canvas_simpleline_get_type(),
+			zero_line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+							 gnome_canvas_simpleline_get_type(),
 							 "x1", (gdouble) 1.0,
 							 "x2", (gdouble) (region.length() / samples_per_unit) - 1.0,
 							 "color_rgba", (guint) color_map[cZeroLine],
@@ -1140,7 +1140,7 @@ AudioRegionView::peaks_ready_handler (uint32_t which)
 }
 
 void
-AudioRegionView::add_gain_point_event (GtkCanvasItem *item, GdkEvent *ev)
+AudioRegionView::add_gain_point_event (GnomeCanvasItem *item, GdkEvent *ev)
 {
 	double x, y;
 
@@ -1151,7 +1151,7 @@ AudioRegionView::add_gain_point_event (GtkCanvasItem *item, GdkEvent *ev)
 	x = ev->button.x;
 	y = ev->button.y;
 
-	gtk_canvas_item_w2i (item, &x, &y);
+	gnome_canvas_item_w2i (item, &x, &y);
 
 	jack_nframes_t fx = trackview.editor.pixel_to_frame (x);
 
@@ -1184,7 +1184,7 @@ AudioRegionView::add_gain_point_event (GtkCanvasItem *item, GdkEvent *ev)
 }
 
 void
-AudioRegionView::remove_gain_point_event (GtkCanvasItem *item, GdkEvent *ev)
+AudioRegionView::remove_gain_point_event (GnomeCanvasItem *item, GdkEvent *ev)
 {
 	ControlPoint *cp = reinterpret_cast<ControlPoint *> (gtk_object_get_data(GTK_OBJECT(item), "control_point"));
 	region.envelope().erase (cp->model);
@@ -1239,15 +1239,15 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 	}
 
 	if (yn != (bool) (_flags & WaveformRectified)) {
-		for (vector<GtkCanvasItem *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
-			gtk_canvas_item_set ((*wave), "rectified", (gboolean) yn, NULL);
+		for (vector<GnomeCanvasItem *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
+			gnome_canvas_item_set ((*wave), "rectified", (gboolean) yn, NULL);
 		}
 
 		if (zero_line) {
 			if (yn) {
-				gtk_canvas_item_hide (zero_line);
+				gnome_canvas_item_hide (zero_line);
 			} else {
-				gtk_canvas_item_show (zero_line);
+				gnome_canvas_item_show (zero_line);
 			}
 		}
 
@@ -1272,12 +1272,12 @@ AudioRegionView::move (double x_delta, double y_delta)
 		return;
 	}
 
-	gtk_canvas_item_move (get_canvas_group(), x_delta, y_delta);
+	gnome_canvas_item_move (get_canvas_group(), x_delta, y_delta);
 
 	/* note: ghosts never leave their tracks so y_delta for them is always zero */
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		gtk_canvas_item_move ((*i)->group, x_delta, 0.0);
+		gnome_canvas_item_move ((*i)->group, x_delta, 0.0);
 	}
 }
 
@@ -1297,8 +1297,8 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 			break;
 		}
 		
-		GtkCanvasItem *wave = gtk_canvas_item_new (GTK_CANVAS_GROUP(ghost->group),
-							   gtk_canvas_waveview_get_type (),
+		GnomeCanvasItem *wave = gnome_canvas_item_new (GNOME_CANVAS_GROUP(ghost->group),
+							   gnome_canvas_waveview_get_type (),
 							   "data_src", (gpointer) &region,
 							   "cache", wave_caches[n],
 							   "cache_updater", (gboolean) false,
@@ -1358,8 +1358,8 @@ AudioRegionView::entered ()
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 	a=255;
 	
-	gtk_canvas_item_set (fade_in_handle,  "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
-	gtk_canvas_item_set (fade_out_handle, "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
+	gnome_canvas_item_set (fade_in_handle,  "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
+	gnome_canvas_item_set (fade_out_handle, "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
 }
 
 void
@@ -1371,8 +1371,8 @@ AudioRegionView::exited ()
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 	a=0;
 	
-	gtk_canvas_item_set (fade_in_handle,  "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
-	gtk_canvas_item_set (fade_out_handle, "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
+	gnome_canvas_item_set (fade_in_handle,  "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
+	gnome_canvas_item_set (fade_out_handle, "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
 }
 
 void
@@ -1389,15 +1389,15 @@ AudioRegionView::set_waveview_data_src()
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// TODO: something else to let it know the channel
-		gtk_canvas_item_set (waves[n], "data_src", &region, NULL);
+		gnome_canvas_item_set (waves[n], "data_src", &region, NULL);
 	}
 	
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		
 		(*i)->set_duration (unit_length);
 		
-		for (vector<GtkCanvasItem*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
-			gtk_canvas_item_set ((*w), "data_src", &region, NULL);
+		for (vector<GnomeCanvasItem*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
+			gnome_canvas_item_set ((*w), "data_src", &region, NULL);
 		}
 	}
 

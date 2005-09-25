@@ -22,7 +22,7 @@
 #define __ardour_trackview_h__
 
 #include <gtkmm.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/popup_selector.h>
 #include <list>
@@ -299,7 +299,7 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	void add_redirect_automation_curve (ARDOUR::Redirect*, uint32_t);
 	void add_existing_redirect_automation_curves (ARDOUR::Redirect*);
 
-	GtkCanvasItem *timestretch_rect;
+	GnomeCanvasItem *timestretch_rect;
 
 	void timestretch (jack_nframes_t start, jack_nframes_t end);
 

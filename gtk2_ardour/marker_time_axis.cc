@@ -65,8 +65,8 @@ MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Widget 
 	_color = unique_random_color() ;
 	time_axis_name = name ;
 
-	selection_group = gtk_canvas_item_new (GTK_CANVAS_GROUP(canvas_display), gtk_canvas_group_get_type (), 0) ;
-	gtk_canvas_item_hide(selection_group) ;
+	selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), gnome_canvas_group_get_type (), 0) ;
+	gnome_canvas_item_hide(selection_group) ;
 
 	// intialize our data items
 	name_prompter = 0 ;

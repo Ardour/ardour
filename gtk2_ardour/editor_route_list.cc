@@ -245,8 +245,8 @@ Editor::route_list_reordered ()
 	edit_controls_scroller.queue_resize ();
 	reset_scrolling_region ();
 
-	//gtk_canvas_item_raise_to_top (time_line_group);
-	gtk_canvas_item_raise_to_top (cursor_group);
+	//gnome_canvas_item_raise_to_top (time_line_group);
+	gnome_canvas_item_raise_to_top (cursor_group);
 	
 	return FALSE;
 }

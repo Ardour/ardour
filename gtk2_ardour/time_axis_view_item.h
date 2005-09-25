@@ -22,7 +22,7 @@
 #define __gtk_ardour_time_axis_view_item_h__
 
 #include <sigc++/signal.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <jack/jack.h>
 #include <string>
 
@@ -220,22 +220,22 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
     /**
      * 
      */
-    GtkCanvasItem* get_canvas_frame() ;
+    GnomeCanvasItem* get_canvas_frame() ;
 
     /**
      * 
      */
-    GtkCanvasItem* get_canvas_group();
+    GnomeCanvasItem* get_canvas_group();
 
     /**
      * 
      */
-    GtkCanvasItem* get_name_highlight();
+    GnomeCanvasItem* get_name_highlight();
 
     /**
      * 
      */
-    GtkCanvasItem* get_name_text();
+    GnomeCanvasItem* get_name_text();
 
     /**
      * Sets the samples per unit of this item.
@@ -334,7 +334,7 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
      * @param start the start point of this item
      * @param duration the duration of this item
      */
-    TimeAxisViewItem(std::string it_name, GtkCanvasGroup* parent, TimeAxisView& tv, double spu, GdkColor& base_color, 
+    TimeAxisViewItem(std::string it_name, GnomeCanvasGroup* parent, TimeAxisView& tv, double spu, GdkColor& base_color, 
 		     jack_nframes_t start, jack_nframes_t duration, Visibility v = Visibility (0));
     
     /**
@@ -440,13 +440,13 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
     uint32_t lock_handle_color_g ;
     uint32_t lock_handle_color_b ;
     
-    GtkCanvasItem* group ;               /* the group */
-    GtkCanvasItem* vestigial_frame ;     /* simplerect */
-    GtkCanvasItem* frame ;               /* simplerect */
-    GtkCanvasItem* name_text ;           /* text */
-    GtkCanvasItem* name_highlight ;      /* simplerect */
-    GtkCanvasItem* frame_handle_start ;  /* simplerect */
-    GtkCanvasItem* frame_handle_end ;    /* simplerect */
+    GnomeCanvasItem* group ;               /* the group */
+    GnomeCanvasItem* vestigial_frame ;     /* simplerect */
+    GnomeCanvasItem* frame ;               /* simplerect */
+    GnomeCanvasItem* name_text ;           /* text */
+    GnomeCanvasItem* name_highlight ;      /* simplerect */
+    GnomeCanvasItem* frame_handle_start ;  /* simplerect */
+    GnomeCanvasItem* frame_handle_end ;    /* simplerect */
 
 }; /* class TimeAxisViewItem */
 

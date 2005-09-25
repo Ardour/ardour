@@ -46,12 +46,12 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 
 	/* set_position() will position the group */
 	
-	canvas_group = gtk_canvas_item_new (GTK_CANVAS_GROUP(_trackview.canvas_display),
-					    gtk_canvas_group_get_type (),
+	canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display),
+					    gnome_canvas_group_get_type (),
 					    NULL);
 
-	canvas_rect = gtk_canvas_item_new (GTK_CANVAS_GROUP(canvas_group),
-					   gtk_canvas_simplerect_get_type(),
+	canvas_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_group),
+					   gnome_canvas_simplerect_get_type(),
 					   "x1", 0.0,
 					   "y1", 0.0,
 					   "x2", 1000000.0,
@@ -100,7 +100,7 @@ int
 StreamView::set_position (gdouble x, gdouble y)
 
 {
-	gtk_canvas_item_set (canvas_group, "x", x, "y", y, NULL);
+	gnome_canvas_item_set (canvas_group, "x", x, "y", y, NULL);
 	return 0;
 }
 
@@ -156,8 +156,8 @@ StreamView::set_samples_per_unit (gdouble spp)
 		gdouble xstart = _trackview.editor.frame_to_pixel ( recbox.start );
 		gdouble xend = _trackview.editor.frame_to_pixel ( recbox.start + recbox.length );
 
-		gtk_canvas_item_set (recbox.rectangle, "x1", xstart, NULL);
-		gtk_canvas_item_set (recbox.rectangle, "x2", xend, NULL);
+		gnome_canvas_item_set (recbox.rectangle, "x1", xstart, NULL);
+		gnome_canvas_item_set (recbox.rectangle, "x2", xend, NULL);
 	}
 
 	return 0;
@@ -213,7 +213,7 @@ StreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 		}
 	}
 
-	region_view = new AudioRegionView (GTK_CANVAS_GROUP(canvas_group),
+	region_view = new AudioRegionView (GNOME_CANVAS_GROUP(canvas_group),
 					   _trackview,
 					   *region,
 					   _samples_per_unit,
@@ -329,7 +329,7 @@ StreamView::playlist_modified ()
 	}
 
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		gtk_canvas_item_raise_to_top ((*i)->get_canvas_group());
+		gnome_canvas_item_raise_to_top ((*i)->get_canvas_group());
 	}
 }
 
@@ -393,7 +393,7 @@ StreamView::add_crossfade (Crossfade *crossfade)
 		}
 	}
 
-	CrossfadeView *cv = new CrossfadeView (GTK_CANVAS_GROUP(_trackview.canvas_display),
+	CrossfadeView *cv = new CrossfadeView (GNOME_CANVAS_GROUP(_trackview.canvas_display),
 					       _trackview,
 					       *crossfade,
 					       _samples_per_unit,
@@ -508,12 +508,12 @@ StreamView::apply_color (GdkColor& color, ColorTarget target)
 			(*i)->set_color (region_color);
 		}
 		// stream_base_color = RGBA_TO_UINT (color.red/256, color.green/256, color.blue/256, 255);
-		// gtk_canvas_item_set (canvas_rect, "fill_color_rgba", stream_base_color, NULL);
+		// gnome_canvas_item_set (canvas_rect, "fill_color_rgba", stream_base_color, NULL);
 		break;
 		
 	case StreamBaseColor:
 		// stream_base_color = RGBA_TO_UINT (color.red/256, color.green/256, color.blue/256, 255);
-		// gtk_canvas_item_set (canvas_rect, "fill_color_rgba", stream_base_color, NULL);
+		// gnome_canvas_item_set (canvas_rect, "fill_color_rgba", stream_base_color, NULL);
 		break;
 	}
 }
@@ -576,13 +576,13 @@ StreamView::set_waveform_shape (WaveformShape shape)
 void
 StreamView::region_layered (AudioRegionView* rv)
 {
-	gtk_canvas_item_lower_to_bottom (rv->get_canvas_group());
+	gnome_canvas_item_lower_to_bottom (rv->get_canvas_group());
 
 	/* don't ever leave it at the bottom, since then it doesn't
 	   get events - the  parent group does instead ...
 	*/
 	
-	gtk_canvas_item_raise (rv->get_canvas_group(), rv->region.layer() + 1);
+	gnome_canvas_item_raise (rv->get_canvas_group(), rv->region.layer() + 1);
 }
 
 void
@@ -660,8 +660,8 @@ StreamView::setup_rec_box ()
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend = xstart;
 			
-			GtkCanvasItem * rec_rect = gtk_canvas_item_new (GTK_CANVAS_GROUP(canvas_group),
-									gtk_canvas_simplerect_get_type(),
+			GnomeCanvasItem * rec_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_group),
+									gnome_canvas_simplerect_get_type(),
 									"x1", xstart,
 									"y1", 1.0,
 									"x2", xend,
@@ -755,8 +755,8 @@ StreamView::update_rec_box ()
 		gdouble xstart = _trackview.editor.frame_to_pixel ( rect.start );
 		gdouble xend = _trackview.editor.frame_to_pixel ( at );
 
-		gtk_canvas_item_set (rect.rectangle, "x1", xstart, NULL);
-		gtk_canvas_item_set (rect.rectangle, "x2", xend, NULL);
+		gnome_canvas_item_set (rect.rectangle, "x1", xstart, NULL);
+		gnome_canvas_item_set (rect.rectangle, "x2", xend, NULL);
 	}
 }
 
@@ -821,7 +821,7 @@ StreamView::update_rec_regions ()
 			tmp = iter;
 			++tmp;
 
-			if ((GTK_OBJECT_FLAGS(GTK_OBJECT(rec_rects[n].rectangle)) & GTK_CANVAS_ITEM_VISIBLE) == 0) {
+			if ((GTK_OBJECT_FLAGS(GTK_OBJECT(rec_rects[n].rectangle)) & GNOME_CANVAS_ITEM_VISIBLE) == 0) {
 				/* rect already hidden, this region is done */
 				iter = tmp;
 				continue;
@@ -849,9 +849,9 @@ StreamView::update_rec_regions ()
 						}
 
 						/* also update rect */
-						GtkCanvasItem * rect = rec_rects[n].rectangle;
+						GnomeCanvasItem * rect = rec_rects[n].rectangle;
 						gdouble xend = _trackview.editor.frame_to_pixel (region->position() + region->length());
-						gtk_canvas_item_set (rect, "x2", xend, NULL);
+						gnome_canvas_item_set (rect, "x2", xend, NULL);
 					}
 				}
 
@@ -874,8 +874,8 @@ StreamView::update_rec_regions ()
 						}
 						
 						/* also hide rect */
-						GtkCanvasItem * rect = rec_rects[n].rectangle;
-						gtk_canvas_item_hide (rect);
+						GnomeCanvasItem * rect = rec_rects[n].rectangle;
+						gnome_canvas_item_hide (rect);
 
 					}
 				}

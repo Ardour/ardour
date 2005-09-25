@@ -35,14 +35,9 @@
 
 #include <cmath>
 
-#include <gtk-canvas.h>
-
 #include <pbd/xml++.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/pix.h>
-#include <gtkmm2ext/spinner.h>
-#include <gtkmm2ext/pixmap_button.h>
-#include <gtkmm2ext/popup_selector.h>
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/selector.h>
 #include <ardour/ardour.h>

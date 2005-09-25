@@ -26,7 +26,7 @@
 
 #include <sigc++/bind.h>
 
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <pbd/error.h>
 
 #include <gtkmm2ext/gtk_ui.h>
@@ -817,17 +817,17 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 void
 Editor::initialize_canvas ()
 {
-	gtk_canvas_init ();
+	gnome_canvas_init ();
 
-	track_gtk_canvas = gtk_canvas_new_aa ();
+	track_gnome_canvas = gnome_canvas_new_aa ();
 
 	/* adjust sensitivity for "picking" items */
 
-	// GTK_CANVAS(track_gtk_canvas)->close_enough = 2;
+	// GNOME_CANVAS(track_gnome_canvas)->close_enough = 2;
 
-	gtk_signal_connect (GTK_OBJECT(gtk_canvas_root (GTK_CANVAS(track_gtk_canvas))), "event",
+	gtk_signal_connect (GTK_OBJECT(gnome_canvas_root (GNOME_CANVAS(track_gnome_canvas))), "event",
 			    (GtkSignalFunc) Editor::_track_canvas_event, this);
-	track_canvas = wrap (track_gtk_canvas);
+	track_canvas = wrap (track_gnome_canvas);
 	track_canvas->set_name ("EditorMainCanvas");
 
 	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK);
@@ -845,8 +845,8 @@ Editor::initialize_canvas ()
 
 	string fontname = get_font_for_style (N_("VerboseCanvasCursor"));
 
-	verbose_canvas_cursor = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(track_gtk_canvas)),
-						     gtk_canvas_text_get_type(),
+	verbose_canvas_cursor = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
+						     gnome_canvas_text_get_type(),
 						     "font", fontname.c_str(),
 						     "anchor", GTK_ANCHOR_NW,
 						     "fill_color_rgba", color_map[cVerboseCanvasCursor],
@@ -855,52 +855,52 @@ Editor::initialize_canvas ()
 
 	/* a group to hold time (measure) lines */
 
-	time_line_group = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(track_gtk_canvas)),
-						  gtk_canvas_group_get_type(),
+	time_line_group = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
+						  gnome_canvas_group_get_type(),
 						  "x", 0.0,
 						  "y", 0.0,
 						  NULL);
 
-	cursor_group = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(track_gtk_canvas)),
-						  gtk_canvas_group_get_type(),
+	cursor_group = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
+						  gnome_canvas_group_get_type(),
 						  "x", 0.0,
 						  "y", 0.0,
 						  NULL);
 	
-	time_gtk_canvas = gtk_canvas_new_aa ();
-	time_canvas = wrap (time_gtk_canvas);
+	time_gnome_canvas = gnome_canvas_new_aa ();
+	time_canvas = wrap (time_gnome_canvas);
 	time_canvas->set_name ("EditorTimeCanvas");
 
 	time_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK);
 
-	meter_group = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(time_gtk_canvas)),
-					    gtk_canvas_group_get_type(),
+	meter_group = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(time_gnome_canvas)),
+					    gnome_canvas_group_get_type(),
 					    "x", 0.0,
 					    "y", 0.0,
 					    NULL);
-	tempo_group = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(time_gtk_canvas)),
-					    gtk_canvas_group_get_type(),
+	tempo_group = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(time_gnome_canvas)),
+					    gnome_canvas_group_get_type(),
 					    "x", 0.0,
 					    "y", timebar_height,
 					    NULL);
-	marker_group = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(time_gtk_canvas)),
-					    gtk_canvas_group_get_type(),
+	marker_group = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(time_gnome_canvas)),
+					    gnome_canvas_group_get_type(),
 					    "x", 0.0,
 					    "y", timebar_height * 2.0,
 					    NULL);
-	range_marker_group = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(time_gtk_canvas)),
-					    gtk_canvas_group_get_type(),
+	range_marker_group = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(time_gnome_canvas)),
+					    gnome_canvas_group_get_type(),
 					    "x", 0.0,
 					    "y", timebar_height * 3.0,
 					    NULL);
-	transport_marker_group = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(time_gtk_canvas)),
-					    gtk_canvas_group_get_type(),
+	transport_marker_group = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(time_gnome_canvas)),
+					    gnome_canvas_group_get_type(),
 					    "x", 0.0,
 					    "y", timebar_height * 4.0,
 					    NULL);
 	
-	tempo_bar = gtk_canvas_item_new (GTK_CANVAS_GROUP(tempo_group),
-					 gtk_canvas_simplerect_get_type(),
+	tempo_bar = gnome_canvas_item_new (GNOME_CANVAS_GROUP(tempo_group),
+					 gnome_canvas_simplerect_get_type(),
 					 "x1", 0.0,
 					 "y1", 0.0,
 					 "x2", max_canvas_coordinate,
@@ -908,8 +908,8 @@ Editor::initialize_canvas ()
 					 "fill_color_rgba", color_map[cTempoBar],
 					 "outline_pixels", 0,
 					  NULL);
-	meter_bar = gtk_canvas_item_new (GTK_CANVAS_GROUP(meter_group),
-					 gtk_canvas_simplerect_get_type(),
+	meter_bar = gnome_canvas_item_new (GNOME_CANVAS_GROUP(meter_group),
+					 gnome_canvas_simplerect_get_type(),
 					 "x1", 0.0,
 					 "y1", 0.0,
 					 "x2", max_canvas_coordinate,
@@ -917,8 +917,8 @@ Editor::initialize_canvas ()
 					 "fill_color_rgba", color_map[cMeterBar],
 					 "outline_pixels", 0,
 					 NULL);
-	marker_bar = gtk_canvas_item_new (GTK_CANVAS_GROUP(marker_group),
-					  gtk_canvas_simplerect_get_type(),
+	marker_bar = gnome_canvas_item_new (GNOME_CANVAS_GROUP(marker_group),
+					  gnome_canvas_simplerect_get_type(),
 					  "x1", 0.0,
 					  "y1", 0.0,
 					  "x2", max_canvas_coordinate,
@@ -926,8 +926,8 @@ Editor::initialize_canvas ()
 					  "fill_color_rgba", color_map[cMarkerBar],
 					  "outline_pixels", 0,
 					  NULL);
-	range_marker_bar = gtk_canvas_item_new (GTK_CANVAS_GROUP(range_marker_group),
-						gtk_canvas_simplerect_get_type(),
+	range_marker_bar = gnome_canvas_item_new (GNOME_CANVAS_GROUP(range_marker_group),
+						gnome_canvas_simplerect_get_type(),
 						"x1", 0.0,
 						"y1", 0.0,
 						"x2", max_canvas_coordinate,
@@ -935,8 +935,8 @@ Editor::initialize_canvas ()
 						"fill_color_rgba", color_map[cRangeMarkerBar],
 						"outline_pixels", 0,
 						NULL);
-	transport_marker_bar = gtk_canvas_item_new (GTK_CANVAS_GROUP(transport_marker_group),
-						    gtk_canvas_simplerect_get_type(),
+	transport_marker_bar = gnome_canvas_item_new (GNOME_CANVAS_GROUP(transport_marker_group),
+						    gnome_canvas_simplerect_get_type(),
 						    "x1", 0.0,
 						    "y1", 0.0,
 						    "x2", max_canvas_coordinate,
@@ -945,8 +945,8 @@ Editor::initialize_canvas ()
 						    "outline_pixels", 0,
 						    NULL);
 	
-	range_bar_drag_rect = gtk_canvas_item_new (GTK_CANVAS_GROUP(range_marker_group),
-						   gtk_canvas_simplerect_get_type(),
+	range_bar_drag_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(range_marker_group),
+						   gnome_canvas_simplerect_get_type(),
 						   "x1", 0.0,
 						   "y1", 0.0,
 						   "x2", 0.0,
@@ -954,10 +954,10 @@ Editor::initialize_canvas ()
 						   "fill_color_rgba", color_map[cRangeDragBarRectFill],
 						   "outline_color_rgba", color_map[cRangeDragBarRect],
 						   NULL);
-	gtk_canvas_item_hide (range_bar_drag_rect);
+	gnome_canvas_item_hide (range_bar_drag_rect);
 
-	transport_bar_drag_rect = gtk_canvas_item_new (GTK_CANVAS_GROUP(transport_marker_group),
-						       gtk_canvas_simplerect_get_type(),
+	transport_bar_drag_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(transport_marker_group),
+						       gnome_canvas_simplerect_get_type(),
 						       "x1", 0.0,
 						       "y1", 0.0,
 						       "x2", 0.0,
@@ -965,10 +965,10 @@ Editor::initialize_canvas ()
 						       "fill_color_rgba", color_map[cTransportDragRectFill],
 						       "outline_color_rgba", color_map[cTransportDragRect],
 						       NULL);
-	gtk_canvas_item_hide (transport_bar_drag_rect);
+	gnome_canvas_item_hide (transport_bar_drag_rect);
 
 	
-	marker_drag_line_points = gtk_canvas_points_new (2);
+	marker_drag_line_points = gnome_canvas_points_new (2);
 	marker_drag_line_points->coords[0] = 0.0;
 	marker_drag_line_points->coords[1] = 0.0;
 	marker_drag_line_points->coords[2] = 0.0;
@@ -976,16 +976,16 @@ Editor::initialize_canvas ()
 	
 	
 	//cerr << "set mdl points, nc = " << marker_drag_line_points->num_points << endl;
-	marker_drag_line = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(track_gtk_canvas)),
-						gtk_canvas_line_get_type(),
+	marker_drag_line = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
+						gnome_canvas_line_get_type(),
 						"width_pixels", 1,
 						"fill_color_rgba", color_map[cMarkerDragLine],
 						"points", marker_drag_line_points,
 						NULL);
-	gtk_canvas_item_hide (marker_drag_line);
+	gnome_canvas_item_hide (marker_drag_line);
 
-	range_marker_drag_rect = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(track_gtk_canvas)),
-					       gtk_canvas_simplerect_get_type(),
+	range_marker_drag_rect = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
+					       gnome_canvas_simplerect_get_type(),
 					       "x1", 0.0,
 					       "y1", 0.0,
 					       "x2", 0.0,
@@ -993,11 +993,11 @@ Editor::initialize_canvas ()
 					       "fill_color_rgba", color_map[cRangeDragRectFill],
 					       "outline_color_rgba", color_map[cRangeDragRect],
 					       NULL);
-	gtk_canvas_item_hide (range_marker_drag_rect);
+	gnome_canvas_item_hide (range_marker_drag_rect);
 	
 
-	transport_loop_range_rect = gtk_canvas_item_new ((GTK_CANVAS_GROUP(time_line_group)),
-					       gtk_canvas_simplerect_get_type(),
+	transport_loop_range_rect = gnome_canvas_item_new ((GNOME_CANVAS_GROUP(time_line_group)),
+					       gnome_canvas_simplerect_get_type(),
 					       "x1", 0.0,
 					       "y1", 0.0,
 					       "x2", 0.0,
@@ -1006,10 +1006,10 @@ Editor::initialize_canvas ()
 					       "outline_color_rgba", color_map[cTransportLoopRect],
 					       "outline_pixels", 1,
 					       NULL);
-	gtk_canvas_item_hide (transport_loop_range_rect);
+	gnome_canvas_item_hide (transport_loop_range_rect);
 
-	transport_punch_range_rect = gtk_canvas_item_new ((GTK_CANVAS_GROUP(time_line_group)),
-					       gtk_canvas_simplerect_get_type(),
+	transport_punch_range_rect = gnome_canvas_item_new ((GNOME_CANVAS_GROUP(time_line_group)),
+					       gnome_canvas_simplerect_get_type(),
 					       "x1", 0.0,
 					       "y1", 0.0,
 					       "x2", 0.0,
@@ -1018,12 +1018,12 @@ Editor::initialize_canvas ()
 					       "outline_color_rgba", color_map[cTransportPunchRect],
 					       "outline_pixels", 0,
 					       NULL);
-	gtk_canvas_item_lower_to_bottom (transport_punch_range_rect);
-	gtk_canvas_item_lower_to_bottom (transport_loop_range_rect); // loop on the bottom
-	gtk_canvas_item_hide (transport_punch_range_rect);
+	gnome_canvas_item_lower_to_bottom (transport_punch_range_rect);
+	gnome_canvas_item_lower_to_bottom (transport_loop_range_rect); // loop on the bottom
+	gnome_canvas_item_hide (transport_punch_range_rect);
 
-	transport_punchin_line = gtk_canvas_item_new ((GTK_CANVAS_GROUP(time_line_group)),
-					       gtk_canvas_simplerect_get_type(),
+	transport_punchin_line = gnome_canvas_item_new ((GNOME_CANVAS_GROUP(time_line_group)),
+					       gnome_canvas_simplerect_get_type(),
 					       "x1", 0.0,
 					       "y1", 0.0,
 					       "x2", 0.0,
@@ -1031,10 +1031,10 @@ Editor::initialize_canvas ()
 					       "outline_color_rgba", color_map[cPunchInLine],
 					       "outline_pixels", 1,
 					       NULL);
-	gtk_canvas_item_hide (transport_punchin_line);
+	gnome_canvas_item_hide (transport_punchin_line);
 
-	transport_punchout_line  = gtk_canvas_item_new ((GTK_CANVAS_GROUP(time_line_group)),
-					       gtk_canvas_simplerect_get_type(),
+	transport_punchout_line  = gnome_canvas_item_new ((GNOME_CANVAS_GROUP(time_line_group)),
+					       gnome_canvas_simplerect_get_type(),
 					       "x1", 0.0,
 					       "y1", 0.0,
 					       "x2", 0.0,
@@ -1042,14 +1042,14 @@ Editor::initialize_canvas ()
 					       "outline_color_rgba", color_map[cPunchOutLine],
 					       "outline_pixels", 1,
 					       NULL);
-	gtk_canvas_item_hide (transport_punchout_line);
+	gnome_canvas_item_hide (transport_punchout_line);
 
 
 
 	
 	// used to show zoom mode active zooming
-	zoom_rect = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(track_gtk_canvas)),
-					 gtk_canvas_simplerect_get_type(),
+	zoom_rect = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
+					 gnome_canvas_simplerect_get_type(),
 					 "x1", 0.0,
 					 "y1", 0.0,
 					 "x2", 0.0,
@@ -1058,14 +1058,14 @@ Editor::initialize_canvas ()
 					 "outline_color_rgba", color_map[cZoomRect],
 					 "outline_pixels", 1,
 					 NULL);
-	gtk_canvas_item_hide (zoom_rect);
+	gnome_canvas_item_hide (zoom_rect);
 	gtk_signal_connect (GTK_OBJECT(zoom_rect), "event",
 			    (GtkSignalFunc) PublicEditor::canvas_zoom_rect_event,
 			    this);
 
 	// used as rubberband rect
-	rubberband_rect = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(track_gtk_canvas)),
-					       gtk_canvas_simplerect_get_type(),
+	rubberband_rect = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
+					       gnome_canvas_simplerect_get_type(),
 					       "x1", 0.0,
 					       "y1", 0.0,
 					       "x2", 0.0,
@@ -1074,7 +1074,7 @@ Editor::initialize_canvas ()
 					       "fill_color_rgba", (guint32) color_map[cRubberBandRectFill],
 					       "outline_pixels", 1,
 					       NULL);
-	gtk_canvas_item_hide (rubberband_rect);
+	gnome_canvas_item_hide (rubberband_rect);
 
 	
 
@@ -1100,14 +1100,14 @@ Editor::initialize_canvas ()
 	
 	/* separator lines */
 
-	tempo_line_points = gtk_canvas_points_new (2);
+	tempo_line_points = gnome_canvas_points_new (2);
 	tempo_line_points->coords[0] = 0;
 	tempo_line_points->coords[1] = timebar_height;
 	tempo_line_points->coords[2] = max_canvas_coordinate;
 	tempo_line_points->coords[3] = timebar_height;
 	//cerr << "set tl points, nc = " << tempo_line_points->num_points << endl;
-	tempo_line = gtk_canvas_item_new (GTK_CANVAS_GROUP(tempo_group),
-					  gtk_canvas_line_get_type(),
+	tempo_line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(tempo_group),
+					  gnome_canvas_line_get_type(),
 					  "width_pixels", 0,
 					  "fill_color", "black",
 					  "points", tempo_line_points,
@@ -1115,14 +1115,14 @@ Editor::initialize_canvas ()
 
 	// cerr << "tempo line @ " << tempo_line << endl;
 
-	meter_line_points = gtk_canvas_points_new (2);
+	meter_line_points = gnome_canvas_points_new (2);
 	meter_line_points->coords[0] = 0;
 	meter_line_points->coords[1] = timebar_height;
 	meter_line_points->coords[2] = max_canvas_coordinate;
 	meter_line_points->coords[3] = timebar_height;
 	// cerr << "set ml points, nc = " << tempo_line_points->num_points << endl;
-	meter_line = gtk_canvas_item_new (GTK_CANVAS_GROUP(meter_group),
-					  gtk_canvas_line_get_type(),
+	meter_line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(meter_group),
+					  gnome_canvas_line_get_type(),
 					  "width_pixels", 0,
 					  "fill_color", "black",
 					  "points", meter_line_points,
@@ -1130,28 +1130,28 @@ Editor::initialize_canvas ()
 
 	// cerr << "meter line @ " << tempo_line << endl;
 	
-	marker_line_points = gtk_canvas_points_new (2);
+	marker_line_points = gnome_canvas_points_new (2);
 	marker_line_points->coords[0] = 0;
 	marker_line_points->coords[1] = timebar_height;
 	marker_line_points->coords[2] = max_canvas_coordinate;
 	marker_line_points->coords[3] = timebar_height;
 	// cerr << "set ml2 points, nc = " << marker_line_points->num_points << endl;
-	marker_line = gtk_canvas_item_new (GTK_CANVAS_GROUP(marker_group),
-					   gtk_canvas_line_get_type(),
+	marker_line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(marker_group),
+					   gnome_canvas_line_get_type(),
 					   "width_pixels", 0,
 					   "fill_color", "black",
 					   "points", marker_line_points,
 					   NULL);
 	// cerr << "set rml points, nc = " << marker_line_points->num_points << endl;
-	range_marker_line = gtk_canvas_item_new (GTK_CANVAS_GROUP(range_marker_group),
-					   gtk_canvas_line_get_type(),
+	range_marker_line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(range_marker_group),
+					   gnome_canvas_line_get_type(),
 					   "width_pixels", 0,
 					   "fill_color", "black",
 					   "points", marker_line_points,
 					   NULL);
 	// cerr << "set tml2 points, nc = " << marker_line_points->num_points << endl;
-	transport_marker_line = gtk_canvas_item_new (GTK_CANVAS_GROUP(transport_marker_group),
-					   gtk_canvas_line_get_type(),
+	transport_marker_line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(transport_marker_group),
+					   gnome_canvas_line_get_type(),
 					   "width_pixels", 0,
 					   "fill_color", "black",
 					   "points", marker_line_points,
@@ -1164,7 +1164,7 @@ Editor::initialize_canvas ()
 	
 	double time_height = timebar_height * 5;
 	double time_width = FLT_MAX/frames_per_unit;
-	gtk_canvas_set_scroll_region (GTK_CANVAS(time_gtk_canvas), 0.0, 0.0, time_width, time_height);
+	gnome_canvas_set_scroll_region (GNOME_CANVAS(time_gnome_canvas), 0.0, 0.0, time_width, time_height);
 
 	edit_cursor = new Cursor (*this, "blue", (GtkSignalFunc) _canvas_edit_cursor_event);
 	playhead_cursor = new Cursor (*this, "red", (GtkSignalFunc) _canvas_playhead_cursor_event);
@@ -1444,8 +1444,8 @@ Editor::track_canvas_allocate (GtkAllocation *alloc)
 			strcpy (txt, _(txt1));
 			strcat (txt, _(txt2));
 			
-			first_action_message = gtk_canvas_item_new (gtk_canvas_root(GTK_CANVAS(track_gtk_canvas)),
-								    gtk_canvas_text_get_type(),
+			first_action_message = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
+								    gnome_canvas_text_get_type(),
 								    "font", fontname.c_str(),
 								    "fill_color_rgba", color_map[cFirstActionMessage],
 								    "x", (gdouble) (canvas_width - width) / 2.0,
@@ -1458,7 +1458,7 @@ Editor::track_canvas_allocate (GtkAllocation *alloc)
 
 			/* center it */
 
-			gtk_canvas_item_set (first_action_message,
+			gnome_canvas_item_set (first_action_message,
 					     "x", (gdouble) (canvas_width - width) / 2.0,
 					     "y", (gdouble) (canvas_height/2.0) - (2.0 * (ascent+descent)),
 					     NULL);
@@ -1520,13 +1520,13 @@ Editor::reset_scrolling_region (GtkAllocation *alloc)
 		canvas_alloc_height = alloc->height;
 		canvas_alloc_width = alloc->width;
 	} else {
-		canvas_alloc_height = track_gtk_canvas->allocation.height;
-		canvas_alloc_width = track_gtk_canvas->allocation.width;
+		canvas_alloc_height = track_gnome_canvas->allocation.height;
+		canvas_alloc_width = track_gnome_canvas->allocation.width;
 	}
 
 	canvas_height = max (canvas_height, canvas_alloc_height);
 
-	gtk_canvas_set_scroll_region (GTK_CANVAS(track_gtk_canvas), 0.0, 0.0, 
+	gnome_canvas_set_scroll_region (GNOME_CANVAS(track_gnome_canvas), 0.0, 0.0, 
 				      max (last_canvas_unit, canvas_alloc_width),
 				      canvas_height);
 
@@ -1536,22 +1536,22 @@ Editor::reset_scrolling_region (GtkAllocation *alloc)
 	if (marker_drag_line) {
 		marker_drag_line_points->coords[3] = canvas_height;
 		// cerr << "set mlA points, nc = " << marker_drag_line_points->num_points << endl;
-		gtk_canvas_item_set (marker_drag_line, "points", marker_drag_line_points, NULL);
+		gnome_canvas_item_set (marker_drag_line, "points", marker_drag_line_points, NULL);
 	}
 	if (range_marker_drag_rect) {
-		gtk_canvas_item_set (range_marker_drag_rect, "y1", 0.0, "y2", (double) canvas_height, NULL);
+		gnome_canvas_item_set (range_marker_drag_rect, "y1", 0.0, "y2", (double) canvas_height, NULL);
 	}
 	if (transport_loop_range_rect) {
-		gtk_canvas_item_set (transport_loop_range_rect, "y1", 0.0, "y2", (double) canvas_height, NULL);
+		gnome_canvas_item_set (transport_loop_range_rect, "y1", 0.0, "y2", (double) canvas_height, NULL);
 	}
 	if (transport_punch_range_rect) {
-		gtk_canvas_item_set (transport_punch_range_rect, "y1", 0.0, "y2", (double) canvas_height, NULL);
+		gnome_canvas_item_set (transport_punch_range_rect, "y1", 0.0, "y2", (double) canvas_height, NULL);
 	}
 	if (transport_punchin_line) {
-		gtk_canvas_item_set (transport_punchin_line, "y1", 0.0, "y2", (double) canvas_height, NULL);
+		gnome_canvas_item_set (transport_punchin_line, "y1", 0.0, "y2", (double) canvas_height, NULL);
 	}
 	if (transport_punchout_line) {
-		gtk_canvas_item_set (transport_punchout_line, "y1", 0.0, "y2", (double) canvas_height, NULL);
+		gnome_canvas_item_set (transport_punchout_line, "y1", 0.0, "y2", (double) canvas_height, NULL);
 	}
 	
 	
@@ -1727,7 +1727,7 @@ Editor::connect_to_session (Session *t)
 	session = t;
 
 	if (first_action_message) {
-		gtk_canvas_item_hide (first_action_message);
+		gnome_canvas_item_hide (first_action_message);
 	}
 
 	flush_track_canvas();
@@ -1948,7 +1948,7 @@ Editor::build_cursors ()
 }
 
 void
-Editor::popup_fade_context_menu (int button, int32_t time, GtkCanvasItem* item, ItemType item_type)
+Editor::popup_fade_context_menu (int button, int32_t time, GnomeCanvasItem* item, ItemType item_type)
 {
 	using namespace Menu_Helpers;
 	AudioRegionView* arv = static_cast<AudioRegionView*> (gtk_object_get_data (GTK_OBJECT(item), "regionview"));
@@ -3478,7 +3478,7 @@ Editor::track_canvas_drag_data_received  (GdkDragContext     *context,
 	double wx;
 	double wy;
 
-	gtk_canvas_window_to_world (GTK_CANVAS(track_gtk_canvas), (double) x, (double) y, &wx, &wy);
+	gnome_canvas_window_to_world (GNOME_CANVAS(track_gnome_canvas), (double) x, (double) y, &wx, &wy);
 
 	ev.type = GDK_BUTTON_RELEASE;
 	ev.button.x = wx;
@@ -3596,7 +3596,7 @@ Editor::flush_track_canvas ()
 	   out this method entirely
 	*/
 	
-	//gtk_canvas_update_now (GTK_CANVAS(track_gtk_canvas));
+	//gnome_canvas_update_now (GNOME_CANVAS(track_gnome_canvas));
 	//gtk_main_iteration ();
 }
 
@@ -3740,8 +3740,8 @@ Editor::set_selected_regionview_from_click (bool add, bool no_track_remove)
 		// leads to a mismatch between actual layering
 		// and visual layering. resolution required ....
 		//
-		// gtk_canvas_item_raise_to_top (clicked_regionview->get_canvas_group());
-		// gtk_canvas_item_raise_to_top (clicked_regionview->get_time_axis_view().canvas_display);
+		// gnome_canvas_item_raise_to_top (clicked_regionview->get_canvas_group());
+		// gnome_canvas_item_raise_to_top (clicked_regionview->get_time_axis_view().canvas_display);
 
 		if (clicked_regionview->get_selected()) {
 			/* no commit necessary: we are the one selected. */
@@ -4037,15 +4037,15 @@ Editor::duplicate_dialog (bool dup_region)
 void
 Editor::show_verbose_canvas_cursor ()
 {
-	gtk_canvas_item_raise_to_top (verbose_canvas_cursor);
-	gtk_canvas_item_show (verbose_canvas_cursor);
+	gnome_canvas_item_raise_to_top (verbose_canvas_cursor);
+	gnome_canvas_item_show (verbose_canvas_cursor);
 	verbose_cursor_visible = true;
 }
 
 void
 Editor::hide_verbose_canvas_cursor ()
 {
-	gtk_canvas_item_hide (verbose_canvas_cursor);
+	gnome_canvas_item_hide (verbose_canvas_cursor);
 	verbose_cursor_visible = false;
 }
 
@@ -4055,13 +4055,13 @@ Editor::set_verbose_canvas_cursor (string txt, double x, double y)
 	/* XXX get origin of canvas relative to root window,
 	   add x and y and check compared to gdk_screen_{width,height}
 	*/
-	gtk_canvas_item_set (verbose_canvas_cursor, "text", txt.c_str(), "x", x, "y", y, NULL);	
+	gnome_canvas_item_set (verbose_canvas_cursor, "text", txt.c_str(), "x", x, "y", y, NULL);	
 }
 
 void
 Editor::set_verbose_canvas_cursor_text (string txt)
 {
-	gtk_canvas_item_set (verbose_canvas_cursor, "text", txt.c_str(), NULL);
+	gnome_canvas_item_set (verbose_canvas_cursor, "text", txt.c_str(), NULL);
 }
 
 gint

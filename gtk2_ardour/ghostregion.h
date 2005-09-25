@@ -23,16 +23,16 @@
 
 #include <vector>
 #include <sigc++/signal.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 
 class AutomationTimeAxisView;
 
 struct GhostRegion : public sigc::trackable
 {
     AutomationTimeAxisView& trackview;
-    GtkCanvasItem* group;
-    GtkCanvasItem* base_rect;
-    std::vector<GtkCanvasItem*> waves;
+    GnomeCanvasItem* group;
+    GnomeCanvasItem* base_rect;
+    std::vector<GnomeCanvasItem*> waves;
 
     GhostRegion (AutomationTimeAxisView& tv, double initial_unit_pos);
     ~GhostRegion ();

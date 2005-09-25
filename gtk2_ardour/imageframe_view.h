@@ -23,7 +23,7 @@
 
 #include <string>
 #include <gtkmm.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 #include <sigc++/signal.h>
 #include <list>
 
@@ -60,7 +60,7 @@ class ImageFrameView : public TimeAxisViewItem
 		 * @param num_channels the number of color channels within rgb_data
 		 */
 		ImageFrameView(std::string item_id,
-			GtkCanvasGroup *parent,
+			GnomeCanvasGroup *parent,
 			ImageFrameTimeAxis *tv,
 			ImageFrameTimeAxisGroup* group,
 			double spu,
@@ -205,7 +205,7 @@ class ImageFrameView : public TimeAxisViewItem
 		// ------- Our canvas element -----------
 		
 		/** the CanvasImageFrame to display the image */
-		GtkCanvasItem* imageframe ;
+		GnomeCanvasItem* imageframe ;
   		
 } ; /* class ImageFrameView */
 

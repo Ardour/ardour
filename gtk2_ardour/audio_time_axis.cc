@@ -486,8 +486,8 @@ AudioTimeAxisView::show_timestretch (jack_nframes_t start, jack_nframes_t end)
 #endif
 
 	if (timestretch_rect == 0) {
-		timestretch_rect = gtk_canvas_item_new (GTK_CANVAS_GROUP(canvas_display),
-							gtk_canvas_simplerect_get_type(),
+		timestretch_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display),
+							gnome_canvas_simplerect_get_type(),
 							"x1", 0.0,
 							"y1", 0.0,
 							"x2", 0.0,
@@ -497,8 +497,8 @@ AudioTimeAxisView::show_timestretch (jack_nframes_t start, jack_nframes_t end)
 							NULL);
 	}
 
-	gtk_canvas_item_show (timestretch_rect);
-	gtk_canvas_item_raise_to_top (timestretch_rect);
+	gnome_canvas_item_show (timestretch_rect);
+	gnome_canvas_item_raise_to_top (timestretch_rect);
 	
 	x1 = start / editor.get_current_zoom();
 	x2 = (end - 1) / editor.get_current_zoom();
@@ -518,7 +518,7 @@ AudioTimeAxisView::hide_timestretch ()
 	TimeAxisView::hide_timestretch ();
 
 	if (timestretch_rect) {
-		gtk_canvas_item_hide (timestretch_rect);
+		gnome_canvas_item_hide (timestretch_rect);
 	}
 }
 
@@ -1312,7 +1312,7 @@ AudioTimeAxisView::toggle_gain_track ()
 	if (showit != gain_track->marked_for_display()) {
 		if (showit) {
 			gain_track->set_marked_for_display (true);
-			gtk_canvas_item_show (gain_track->canvas_display);
+			gnome_canvas_item_show (gain_track->canvas_display);
 			gain_track->get_state_node()->add_property ("shown", X_("yes"));
 		} else {
 			gain_track->set_marked_for_display (false);
@@ -1348,7 +1348,7 @@ AudioTimeAxisView::toggle_pan_track ()
 	if (showit != pan_track->marked_for_display()) {
 		if (showit) {
 			pan_track->set_marked_for_display (true);
-			gtk_canvas_item_show (pan_track->canvas_display);
+			gnome_canvas_item_show (pan_track->canvas_display);
 			pan_track->get_state_node()->add_property ("shown", X_("yes"));
 		} else {
 			pan_track->set_marked_for_display (false);
@@ -1623,7 +1623,7 @@ AudioTimeAxisView::redirect_menu_item_toggled (AudioTimeAxisView::RedirectAutoma
 
 		if (showit) {
 			ran->view->set_marked_for_display (true);
-			gtk_canvas_item_show (ran->view->canvas_display);
+			gnome_canvas_item_show (ran->view->canvas_display);
 		} else {
 			rai->redirect->mark_automation_visible (ran->what, true);
 			ran->view->set_marked_for_display (false);

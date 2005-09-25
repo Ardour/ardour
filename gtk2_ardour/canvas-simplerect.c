@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include <gtk-canvas.h>
+#include <libgnomecanvas/libgnomecanvas.h>
 
 #include "canvas-simplerect.h"
 #include "rgb_macros.h"
@@ -20,81 +20,81 @@ enum {
 	
 };
 
-static void gtk_canvas_simplerect_class_init (GtkCanvasSimpleRectClass *class);
-static void gtk_canvas_simplerect_init       (GtkCanvasSimpleRect      *simplerect);
-static void gtk_canvas_simplerect_set_arg    (GtkObject              *object,
+static void gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class);
+static void gnome_canvas_simplerect_init       (GnomeCanvasSimpleRect      *simplerect);
+static void gnome_canvas_simplerect_set_arg    (GtkObject              *object,
 					      GtkArg                 *arg,
 					      guint                   arg_id);
-static void gtk_canvas_simplerect_get_arg    (GtkObject              *object,
+static void gnome_canvas_simplerect_get_arg    (GtkObject              *object,
 					      GtkArg                 *arg,
 					      guint                   arg_id);
 
-static void   gtk_canvas_simplerect_update      (GtkCanvasItem *item, double *affine, ArtSVP *clip_path, int flags);
-static void   gtk_canvas_simplerect_bounds      (GtkCanvasItem *item, double *x1, double *y1, double *x2, double *y2);
-static double gtk_canvas_simplerect_point (GtkCanvasItem *item, double x, double y, int cx, int cy, GtkCanvasItem **actual_item);
-static void   gtk_canvas_simplerect_render (GtkCanvasItem *item, GtkCanvasBuf *buf);
-static void   gtk_canvas_simplerect_draw (GtkCanvasItem *item, GdkDrawable *drawable, int x, int y, int w, int h);
+static void   gnome_canvas_simplerect_update      (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags);
+static void   gnome_canvas_simplerect_bounds      (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2);
+static double gnome_canvas_simplerect_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item);
+static void   gnome_canvas_simplerect_render (GnomeCanvasItem *item, GnomeCanvasBuf *buf);
+static void   gnome_canvas_simplerect_draw (GnomeCanvasItem *item, GdkDrawable *drawable, int x, int y, int w, int h);
 
-static GtkCanvasItemClass *parent_class;
+static GnomeCanvasItemClass *parent_class;
 
 
 GtkType
-gtk_canvas_simplerect_get_type (void)
+gnome_canvas_simplerect_get_type (void)
 {
 	static GtkType simplerect_type = 0;
 
 	if (!simplerect_type) {
 		GtkTypeInfo simplerect_info = {
-			"GtkCanvasSimpleRect",
-			sizeof (GtkCanvasSimpleRect),
-			sizeof (GtkCanvasSimpleRectClass),
-			(GtkClassInitFunc) gtk_canvas_simplerect_class_init,
-			(GtkObjectInitFunc) gtk_canvas_simplerect_init,
+			"GnomeCanvasSimpleRect",
+			sizeof (GnomeCanvasSimpleRect),
+			sizeof (GnomeCanvasSimpleRectClass),
+			(GtkClassInitFunc) gnome_canvas_simplerect_class_init,
+			(GtkObjectInitFunc) gnome_canvas_simplerect_init,
 			NULL, /* reserved_1 */
 			NULL, /* reserved_2 */
 			(GtkClassInitFunc) NULL
 		};
 
-		simplerect_type = gtk_type_unique (gtk_canvas_item_get_type (), &simplerect_info);
+		simplerect_type = gtk_type_unique (gnome_canvas_item_get_type (), &simplerect_info);
 	}
 
 	return simplerect_type;
 }
 
 static void
-gtk_canvas_simplerect_class_init (GtkCanvasSimpleRectClass *class)
+gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 {
 	GtkObjectClass *object_class;
-	GtkCanvasItemClass *item_class;
+	GnomeCanvasItemClass *item_class;
 
 	object_class = (GtkObjectClass *) class;
-	item_class = (GtkCanvasItemClass *) class;
+	item_class = (GnomeCanvasItemClass *) class;
 
-	parent_class = gtk_type_class (gtk_canvas_item_get_type ());
+	parent_class = gtk_type_class (gnome_canvas_item_get_type ());
 
-	gtk_object_add_arg_type ("GtkCanvasSimpleRect::x1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X1);
-	gtk_object_add_arg_type ("GtkCanvasSimpleRect::y1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y1);
-	gtk_object_add_arg_type ("GtkCanvasSimpleRect::x2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X2);
-	gtk_object_add_arg_type ("GtkCanvasSimpleRect::y2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y2);
-	gtk_object_add_arg_type ("GtkCanvasSimpleRect::fill", GTK_TYPE_BOOL, GTK_ARG_READWRITE, ARG_FILL);
-	gtk_object_add_arg_type ("GtkCanvasSimpleRect::draw", GTK_TYPE_BOOL, GTK_ARG_READWRITE, ARG_DRAW);
-	gtk_object_add_arg_type ("GtkCanvasSimpleRect::fill_color_rgba", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_FILL_COLOR_RGBA);
-	gtk_object_add_arg_type ("GtkCanvasSimpleRect::outline_color_rgba", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_OUTLINE_COLOR_RGBA);
-	gtk_object_add_arg_type ("GtkCanvasSimpleRect::outline_pixels", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_OUTLINE_PIXELS);
-	gtk_object_add_arg_type ("GtkCanvasSimpleRect::outline_what", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_OUTLINE_WHAT);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::x1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X1);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::y1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y1);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::x2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X2);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::y2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y2);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::fill", GTK_TYPE_BOOL, GTK_ARG_READWRITE, ARG_FILL);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::draw", GTK_TYPE_BOOL, GTK_ARG_READWRITE, ARG_DRAW);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::fill_color_rgba", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_FILL_COLOR_RGBA);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::outline_color_rgba", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_OUTLINE_COLOR_RGBA);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::outline_pixels", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_OUTLINE_PIXELS);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::outline_what", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_OUTLINE_WHAT);
 
-	object_class->set_arg = gtk_canvas_simplerect_set_arg;
-	object_class->get_arg = gtk_canvas_simplerect_get_arg;
+	object_class->set_arg = gnome_canvas_simplerect_set_arg;
+	object_class->get_arg = gnome_canvas_simplerect_get_arg;
 
-	item_class->update = gtk_canvas_simplerect_update;
-	item_class->bounds = gtk_canvas_simplerect_bounds;
-	item_class->point = gtk_canvas_simplerect_point;
-	item_class->render = gtk_canvas_simplerect_render;
-	item_class->draw = gtk_canvas_simplerect_draw;
+	item_class->update = gnome_canvas_simplerect_update;
+	item_class->bounds = gnome_canvas_simplerect_bounds;
+	item_class->point = gnome_canvas_simplerect_point;
+	item_class->render = gnome_canvas_simplerect_render;
+	item_class->draw = gnome_canvas_simplerect_draw;
 }
 
 static void
-gtk_canvas_simplerect_init (GtkCanvasSimpleRect *simplerect)
+gnome_canvas_simplerect_init (GnomeCanvasSimpleRect *simplerect)
 {
 	simplerect->x1 = 0.0;
 	simplerect->y1 = 0.0;
@@ -108,13 +108,13 @@ gtk_canvas_simplerect_init (GtkCanvasSimpleRect *simplerect)
 	simplerect->outline_pixels = 1;
 	simplerect->outline_what = 0xf;
 
-	GTK_CANVAS_ITEM(simplerect)->object.flags |= GTK_CANVAS_ITEM_NO_AUTO_REDRAW;
+	GNOME_CANVAS_ITEM(simplerect)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 static void
-gtk_canvas_simplerect_bounds (GtkCanvasItem *item, double *x1, double *y1, double *x2, double *y2)
+gnome_canvas_simplerect_bounds (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2)
 {
-	GtkCanvasSimpleRect *simplerect = GTK_CANVAS_SIMPLERECT (item);
+	GnomeCanvasSimpleRect *simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
 	*x1 = simplerect->x1;
 	*y1 = simplerect->y1;
@@ -124,9 +124,9 @@ gtk_canvas_simplerect_bounds (GtkCanvasItem *item, double *x1, double *y1, doubl
 }
 
 static void 
-gtk_canvas_simplerect_reset_bounds (GtkCanvasItem *item)
+gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 {
-	GtkCanvasSimpleRect* simplerect;
+	GnomeCanvasSimpleRect* simplerect;
 	double x1, x2, y1, y2;
 	double old_x1, old_x2, old_y1, old_y2;
 	double a, b;
@@ -136,9 +136,9 @@ gtk_canvas_simplerect_reset_bounds (GtkCanvasItem *item)
 	old_x2 = item->x2;
 	old_y2 = item->y2;
 
-	gtk_canvas_simplerect_bounds (item, &x1, &y1, &x2, &y2);
-	gtk_canvas_item_i2w (item, &x1, &y1);
-	gtk_canvas_item_i2w (item, &x2, &y2);
+	gnome_canvas_simplerect_bounds (item, &x1, &y1, &x2, &y2);
+	gnome_canvas_item_i2w (item, &x1, &y1);
+	gnome_canvas_item_i2w (item, &x2, &y2);
 
 	item->x1 = x1;
 	item->y1 = y1;
@@ -147,10 +147,10 @@ gtk_canvas_simplerect_reset_bounds (GtkCanvasItem *item)
 
 	/* now compute bounding box in canvas units */
 
-	simplerect = GTK_CANVAS_SIMPLERECT (item);
+	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
-	gtk_canvas_w2c (GTK_CANVAS(item->canvas), x1, y1, &simplerect->bbox_ulx, &simplerect->bbox_uly);
-	gtk_canvas_w2c (GTK_CANVAS(item->canvas), x2, y2, &simplerect->bbox_lrx, &simplerect->bbox_lry);
+	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x1, y1, &simplerect->bbox_ulx, &simplerect->bbox_uly);
+	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x2, y2, &simplerect->bbox_lrx, &simplerect->bbox_lry);
 
 	/* now queue redraws for changed areas */
 
@@ -160,7 +160,7 @@ gtk_canvas_simplerect_reset_bounds (GtkCanvasItem *item)
 		
 		a = MIN(item->x1, old_x1); 
 		b = MAX(item->x1, old_x1);
-		gtk_canvas_request_redraw (item->canvas, a - 1, item->y1, b + 1, item->y2);
+		gnome_canvas_request_redraw (item->canvas, a - 1, item->y1, b + 1, item->y2);
 	}
 	
 	if (item->x2 != old_x2) {
@@ -169,7 +169,7 @@ gtk_canvas_simplerect_reset_bounds (GtkCanvasItem *item)
 		
 		a = MIN(item->x2, old_x2);
 		b = MAX(item->x2, old_x2);
-		gtk_canvas_request_redraw (item->canvas, a - 1, item->y1, b + 1, item->y2);
+		gnome_canvas_request_redraw (item->canvas, a - 1, item->y1, b + 1, item->y2);
 	}
 	
 	if (item->y1 != old_y1) {
@@ -178,7 +178,7 @@ gtk_canvas_simplerect_reset_bounds (GtkCanvasItem *item)
 		
 		a = MIN(item->y1, old_y1);
 		b = MAX(item->y1, old_y1);
-		gtk_canvas_request_redraw (item->canvas, item->x1, a - 1, item->x2, b + 1);
+		gnome_canvas_request_redraw (item->canvas, item->x1, a - 1, item->x2, b + 1);
 	}
 	
 	if (item->y2 != old_y2) {
@@ -187,7 +187,7 @@ gtk_canvas_simplerect_reset_bounds (GtkCanvasItem *item)
 		
 		a = MIN(item->y2, old_y2);
 		b = MAX(item->y2, old_y2);
-		gtk_canvas_request_redraw (item->canvas, item->x1, a - 1, item->x2, b + 1);
+		gnome_canvas_request_redraw (item->canvas, item->x1, a - 1, item->x2, b + 1);
 	}
 }
 
@@ -196,15 +196,15 @@ gtk_canvas_simplerect_reset_bounds (GtkCanvasItem *item)
  */
 
 static void
-gtk_canvas_simplerect_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_simplerect_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 {
-	GtkCanvasItem *item;
-	GtkCanvasSimpleRect *simplerect;
+	GnomeCanvasItem *item;
+	GnomeCanvasSimpleRect *simplerect;
 	int update;
 	int bounds_changed;
 
-	item = GTK_CANVAS_ITEM (object);
-	simplerect = GTK_CANVAS_SIMPLERECT (object);
+	item = GNOME_CANVAS_ITEM (object);
+	simplerect = GNOME_CANVAS_SIMPLERECT (object);
 
 	update = FALSE;
 	bounds_changed = FALSE;
@@ -288,16 +288,16 @@ gtk_canvas_simplerect_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 	simplerect->full_draw_on_update = update;
 
 	if (update || bounds_changed) {
-		gtk_canvas_item_request_update (item);
+		gnome_canvas_item_request_update (item);
 	}
 }
 
 static void
-gtk_canvas_simplerect_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_simplerect_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 {
-	GtkCanvasSimpleRect *simplerect;
+	GnomeCanvasSimpleRect *simplerect;
 
-	simplerect = GTK_CANVAS_SIMPLERECT (object);
+	simplerect = GNOME_CANVAS_SIMPLERECT (object);
 
 	switch (arg_id) {
 	case ARG_X1:
@@ -337,20 +337,20 @@ gtk_canvas_simplerect_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 }
 
 static void
-gtk_canvas_simplerect_update (GtkCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
+gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
 {
-	GtkCanvasSimpleRect *simplerect;
+	GnomeCanvasSimpleRect *simplerect;
 	unsigned char foo;
 
-	simplerect = GTK_CANVAS_SIMPLERECT (item);
+	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
 	if (parent_class->update)
 		(* parent_class->update) (item, affine, clip_path, flags);
 
-	gtk_canvas_simplerect_reset_bounds (item);
+	gnome_canvas_simplerect_reset_bounds (item);
 
 	if (simplerect->full_draw_on_update) {
-		gtk_canvas_request_redraw (item->canvas, 
+		gnome_canvas_request_redraw (item->canvas, 
 					   simplerect->bbox_ulx,
 					   simplerect->bbox_uly,
 					   simplerect->bbox_lrx+1,
@@ -366,17 +366,17 @@ gtk_canvas_simplerect_update (GtkCanvasItem *item, double *affine, ArtSVP *clip_
 #ifdef SIMPLERECT_FAST_RENDERER
 
 static void
-gtk_canvas_simplerect_render (GtkCanvasItem *item,
-			      GtkCanvasBuf *buf)
+gnome_canvas_simplerect_render (GnomeCanvasItem *item,
+			      GnomeCanvasBuf *buf)
 {
-	GtkCanvasSimpleRect *simplerect;
+	GnomeCanvasSimpleRect *simplerect;
 	int end, begin;
 	int ey, sy;
 	unsigned int i;
 	ArtIRect intersection;
 	ArtIRect self;
 
-	simplerect = GTK_CANVAS_SIMPLERECT (item);
+	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
 	if (parent_class->render) {
 		(*parent_class->render) (item, buf);
@@ -393,7 +393,7 @@ gtk_canvas_simplerect_render (GtkCanvasItem *item,
 		// randb = random() % 255;
 		// PAINT_BOX(buf, randr, randg, randb, 255, buf->rect.x0, buf->rect.y0, buf->rect.x1, buf->rect.y1);
 
-		gtk_canvas_buf_ensure_buf (buf);
+		gnome_canvas_buf_ensure_buf (buf);
 		buf->is_bg = FALSE;
 	}
 
@@ -458,15 +458,15 @@ gtk_canvas_simplerect_render (GtkCanvasItem *item,
 #else /* SIMPLERECT_FAST_RENDERER */
 
 static void
-gtk_canvas_simplerect_render (GtkCanvasItem *item,
-			      GtkCanvasBuf *buf)
+gnome_canvas_simplerect_render (GnomeCanvasItem *item,
+			      GnomeCanvasBuf *buf)
 {
-	GtkCanvasSimpleRect *simplerect;
+	GnomeCanvasSimpleRect *simplerect;
 	int end, begin;
 	int ey, sy;
 	unsigned int i;
 
-	simplerect = GTK_CANVAS_SIMPLERECT (item);
+	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
 	if (parent_class->render) {
 		(*parent_class->render) (item, buf);
@@ -483,7 +483,7 @@ gtk_canvas_simplerect_render (GtkCanvasItem *item,
 		// randb = random() % 255;
 		// PAINT_BOX(buf, randr, randg, randb, 255, buf->rect.x0, buf->rect.y0, buf->rect.x1, buf->rect.y1);
 
-		gtk_canvas_buf_ensure_buf (buf);
+		gnome_canvas_buf_ensure_buf (buf);
 		buf->is_bg = FALSE;
 	}
 
@@ -537,7 +537,7 @@ gtk_canvas_simplerect_render (GtkCanvasItem *item,
 #endif /* SIMPLERECT_FAST_RENDERER */
 
 static void
-gtk_canvas_simplerect_draw (GtkCanvasItem *item,
+gnome_canvas_simplerect_draw (GnomeCanvasItem *item,
 			    GdkDrawable *drawable,
 			    int x, int y,
 			    int width, int height)
@@ -547,19 +547,19 @@ gtk_canvas_simplerect_draw (GtkCanvasItem *item,
 }
 
 static double
-gtk_canvas_simplerect_point (GtkCanvasItem *item, double x, double y, int cx, int cy, GtkCanvasItem **actual_item)
+gnome_canvas_simplerect_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item)
 {
-	GtkCanvasSimpleRect *simplerect;
+	GnomeCanvasSimpleRect *simplerect;
 	double x1, y1, x2, y2;
 	double dx, dy;
 
-	simplerect = GTK_CANVAS_SIMPLERECT (item);
+	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
 	*actual_item = item;
 
 	/* Find the bounds for the rectangle plus its outline width */
 
-	gtk_canvas_simplerect_bounds (item, &x1, &y1, &x2, &y2);
+	gnome_canvas_simplerect_bounds (item, &x1, &y1, &x2, &y2);
 
 	/* Is point inside rectangle */
 	

@@ -53,10 +53,10 @@ ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 	region_color = _trackview.color() ;
 	stream_base_color = color_map[cImageTrackBase] ;
 
-	canvas_group = gtk_canvas_item_new (GTK_CANVAS_GROUP(_trackview.canvas_display), gtk_canvas_group_get_type (), 0) ;
+	canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display), gnome_canvas_group_get_type (), 0) ;
 
-	canvas_rect = gtk_canvas_item_new (GTK_CANVAS_GROUP(canvas_group),
-		gtk_canvas_simplerect_get_type(),
+	canvas_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_group),
+		gnome_canvas_simplerect_get_type(),
 		"x1", 0.0,
 		"y1", 0.0,
 		"x2", 1000000.0,
@@ -154,7 +154,7 @@ int
 ImageFrameTimeAxisView::set_position (gdouble x, gdouble y)
 
 {
-	gtk_canvas_item_set (canvas_group, "x", x, "y", y, NULL);
+	gnome_canvas_item_set (canvas_group, "x", x, "y", y, NULL);
 	return 0;
 }
 

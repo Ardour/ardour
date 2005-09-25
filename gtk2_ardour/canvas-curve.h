@@ -1,4 +1,4 @@
-/* gtk-canvas-curve.h: GtkCanvas item for constrained spline curves
+/* libgnomecanvas/gnome-canvas-curve.h: GnomeCanvas item for constrained spline curves
  *
  * Copyright (C) 2003 Paul Davis <pbd@op.net>
  *
@@ -19,29 +19,28 @@
  *
  */
 
-#ifndef __GTK_CANVAS_CURVE_H__
-#define __GTK_CANVAS_CURVE_H__
+#ifndef __GNOME_CANVAS_CURVE_H__
+#define __GNOME_CANVAS_CURVE_H__
 
-#include <gtk-canvas/gtk-canvas-defs.h>
-#include "gtk-canvas/gtk-canvas.h"
+#include <libgnomecanvas/libgnomecanvas.h>
 
-BEGIN_GTK_CANVAS_DECLS
+BEGIN_GNOME_CANVAS_DECLS
 
 /* Wave viewer item for canvas.
  */
 
-#define GTK_CANVAS_TYPE_CANVAS_CURVE            (gtk_canvas_curve_get_type ())
-#define GTK_CANVAS_CURVE(obj)                   (GTK_CHECK_CAST ((obj), GTK_CANVAS_TYPE_CANVAS_CURVE, GtkCanvasCurve))
-#define GTK_CANVAS_CURVE_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GTK_CANVAS_TYPE_CANVAS_CURVE, GtkCanvasCurveClass))
-#define GTK_CANVAS_IS_CANVAS_CURVE(obj)         (GTK_CHECK_TYPE ((obj), GTK_CANVAS_TYPE_CANVAS_CURVE))
-#define GTK_CANVAS_IS_CANVAS_CURVE_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GTK_CANVAS_TYPE_CANVAS_CURVE))
+#define GNOME_CANVAS_TYPE_CANVAS_CURVE            (gnome_canvas_curve_get_type ())
+#define GNOME_CANVAS_CURVE(obj)                   (GTK_CHECK_CAST ((obj), GNOME_CANVAS_TYPE_CANVAS_CURVE, GnomeCanvasCurve))
+#define GNOME_CANVAS_CURVE_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GNOME_CANVAS_TYPE_CANVAS_CURVE, GnomeCanvasCurveClass))
+#define GNOME_CANVAS_IS_CANVAS_CURVE(obj)         (GTK_CHECK_TYPE ((obj), GNOME_CANVAS_TYPE_CANVAS_CURVE))
+#define GNOME_CANVAS_IS_CANVAS_CURVE_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GNOME_CANVAS_TYPE_CANVAS_CURVE))
 
-typedef struct _GtkCanvasCurve            GtkCanvasCurve;
-typedef struct _GtkCanvasCurveClass       GtkCanvasCurveClass;
+typedef struct _GnomeCanvasCurve            GnomeCanvasCurve;
+typedef struct _GnomeCanvasCurveClass       GnomeCanvasCurveClass;
 
-struct _GtkCanvasCurve
+struct _GnomeCanvasCurve
 {
-    GtkCanvasItem item;
+    GnomeCanvasItem item;
     double x1, y1, x2, y2;
     void* curve_arg;
     float* vector;
@@ -55,12 +54,12 @@ struct _GtkCanvasCurve
     guint32 bbox_lrx, bbox_lry;
 };
 
-struct _GtkCanvasCurveClass {
-	GtkCanvasItemClass parent_class;
+struct _GnomeCanvasCurveClass {
+	GnomeCanvasItemClass parent_class;
 };
 
-GtkType gtk_canvas_curve_get_type (void);
+GtkType gnome_canvas_curve_get_type (void);
 
-END_GTK_CANVAS_DECLS
+END_GNOME_CANVAS_DECLS
 
-#endif /* __GTK_CANVAS_CURVE_H__ */
+#endif /* __GNOME_CANVAS_CURVE_H__ */
