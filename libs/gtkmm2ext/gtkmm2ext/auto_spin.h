@@ -29,7 +29,7 @@ class AutoSpin
 
 {
   public:
-	AutoSpin (Gtk::Adjustment &adj, gfloat cr = 0);
+	AutoSpin (Gtk::Adjustment &adj, gfloat cr = 0, bool round_to_steps_yn = false);
 
 	Gtk::Adjustment &get_adjustment() { return adjustment; }
 
@@ -54,6 +54,7 @@ class AutoSpin
 	bool wrap;
 	gint timeout_tag;
 	bool left_is_decrement;
+	bool round_to_steps;
 
 	static const unsigned int initial_timer_interval;
 	static const unsigned int timer_interval;

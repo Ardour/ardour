@@ -31,7 +31,7 @@ namespace Gtkmm2ext {
 class ClickBox : public Gtk::DrawingArea, public AutoSpin
 {
   public:
-	ClickBox (Gtk::Adjustment *adj, const std::string &name);
+	ClickBox (Gtk::Adjustment *adj, const std::string &name, bool round_to_steps = false);
 	~ClickBox ();
 
 	void set_print_func(void (*pf)(char buf[32], Gtk::Adjustment &, void *),

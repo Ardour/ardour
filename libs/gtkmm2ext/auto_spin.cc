@@ -33,7 +33,7 @@ const unsigned int AutoSpin::initial_timer_interval = 500;   /* msecs */
 const unsigned int AutoSpin::timer_interval = 20;            /* msecs */
 const unsigned int AutoSpin::climb_timer_calls = 5;    /* between climbing */
 
-AutoSpin::AutoSpin (Gtk::Adjustment &adjr, gfloat cr) 
+AutoSpin::AutoSpin (Gtk::Adjustment &adjr, gfloat cr, bool round_to_steps_yn) 
 	: adjustment (adjr),
 	  climb_rate (cr)
 
@@ -44,6 +44,7 @@ AutoSpin::AutoSpin (Gtk::Adjustment &adjr, gfloat cr)
 	have_timer = false;
 	need_timer = false;
 	timer_calls = 0;
+	round_to_steps = round_to_steps_yn;
 }
 
 void
@@ -164,7 +165,10 @@ AutoSpin::_timer (void *arg)
 void
 AutoSpin::set_value (gfloat value)
 {
-	adjustment.set_value (value);
+	if (round_to_steps)
+		adjustment.set_value (floor((value / step_increment) + 0.5f) * step_increment);
+	else
+		adjustment.set_value (value);
 }
 
 bool
@@ -193,7 +197,7 @@ AutoSpin::adjust_value (gfloat increment)
 		}
 	}
 
-	adjustment.set_value (val);
+	set_value(val);
 	return done;
 }
 
@@ -253,6 +257,8 @@ AutoSpin::set_bounds (gfloat init, gfloat up, gfloat down, bool with_reset)
 {
 	adjustment.set_upper(up);
 	adjustment.set_lower(down);
+
+	initial = init;
 	
 	adjustment.changed ();
 	

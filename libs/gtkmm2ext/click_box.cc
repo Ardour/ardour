@@ -29,8 +29,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace sigc;
 
-ClickBox::ClickBox (Gtk::Adjustment *adjp, const string &name)
-	: AutoSpin (*adjp)
+ClickBox::ClickBox (Gtk::Adjustment *adjp, const string &name, bool round_to_steps)
+	: AutoSpin (*adjp,0,round_to_steps)
 {
 	print_func = default_printer;
 	print_arg = 0;
@@ -68,9 +68,8 @@ ClickBox::button_release_handler (GdkEventButton* ev)
 	case 2:
 	case 3:
 		stop_spinning (0);
-		remove_modal_grab();
-		break;
 	default:
+	        remove_modal_grab();
 		break;
 	}
 	return true;

@@ -25,12 +25,12 @@
 
 /* XXX g++ 2.95 can't compile this as pair of member function templates */
 
-template<class T> gint idle_delete (T *obj) { delete obj; return FALSE; }
-template<class T> void delete_when_idle (T *obj) {
-	Gtk::Main::idle.connect (sigc::bind (sigc::slot (idle_delete<T>), obj));
+template<typename T> gint idle_delete (T *obj) { delete obj; return FALSE; }
+template<typename T> void delete_when_idle (T *obj) {
+	Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (idle_delete<T>), obj));
 }
-template<class T> gint delete_on_unmap (GdkEventAny *ignored, T *obj) {
-	Gtk::Main::idle.connect (sigc::bind (sigc::slot (idle_delete<T>), obj));
+template<typename T> gint delete_on_unmap (GdkEventAny *ignored, T *obj) {
+	Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (idle_delete<T>), obj));
 	return FALSE;
 }
 

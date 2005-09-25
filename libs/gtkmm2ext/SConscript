@@ -25,7 +25,7 @@ gtkmm2ext.Merge ([
 
 domain = 'libgtkmm2ext'
 
-gtkmm2ext.Append(DOMAIN=domain,MAJOR=0,MINOR=8,MICRO=0)
+gtkmm2ext.Append(DOMAIN=domain,MAJOR=0,MINOR=8,MICRO=1)
 gtkmm2ext.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkmm2ext.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 gtkmm2ext.Append(PACKAGE=domain)

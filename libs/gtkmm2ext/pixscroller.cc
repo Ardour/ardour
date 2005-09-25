@@ -60,7 +60,7 @@ PixScroller::PixScroller (Adjustment& a, Pix& pix)
 	overall_height = railrect.get_height() + sliderrect.get_height();
 
 	sliderrect.set_y((int) rint ((overall_height - sliderrect.get_height()) * (adj.get_upper() - adj.get_value())));
-	railrect.set_x((sliderrect.get_width() / 2) - 3);
+	railrect.set_x((sliderrect.get_width() / 2) - 2);
 }
 
 void

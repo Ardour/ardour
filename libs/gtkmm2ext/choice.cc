@@ -33,7 +33,7 @@ Choice::Choice (string prompt,
 	int n;
 	vector<string>::iterator i;
 
-	set_position (WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_CENTER);
 	set_name ("ChoiceWindow");
 	add (packer);
 	
