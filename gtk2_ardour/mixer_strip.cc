@@ -176,7 +176,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_style_button, _("Pan automation type"));
 	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_style_button, _("Gain automation type"));
 
-	hide_button.set_events (hide_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
+	hide_button.signal_set_events (hide_button.signal_get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
 
 	width_button.unset_flags (Gtk::CAN_FOCUS);
 	hide_button.unset_flags (Gtk::CAN_FOCUS);
@@ -364,35 +364,35 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	_route.comment_changed.connect (mem_fun(*this, &MixerStrip::comment_changed));
 	_route.gui_changed.connect (mem_fun(*this, &MixerStrip::route_gui_changed));
 
-	input_button.button_release_event.connect (mem_fun(*this, &MixerStrip::input_press));
-	output_button.button_release_event.connect (mem_fun(*this, &MixerStrip::output_press));
+	input_button.signal_button_release_event.connect (mem_fun(*this, &MixerStrip::input_press));
+	output_button.signal_button_release_event.connect (mem_fun(*this, &MixerStrip::output_press));
 
-	rec_enable_button->button_press_event.connect (mem_fun(*this, &RouteUI::rec_enable_press));
-	solo_button->button_press_event.connect (mem_fun(*this, &RouteUI::solo_press));
-	solo_button->button_release_event.connect (mem_fun(*this, &RouteUI::solo_release));
-	mute_button->button_press_event.connect (mem_fun(*this, &RouteUI::mute_press));
-	mute_button->button_release_event.connect (mem_fun(*this, &RouteUI::mute_release));
+	rec_enable_button->signal_button_press_event.connect (mem_fun(*this, &RouteUI::rec_enable_press));
+	solo_button->signal_button_press_event.connect (mem_fun(*this, &RouteUI::solo_press));
+	solo_button->signal_button_release_event.connect (mem_fun(*this, &RouteUI::solo_release));
+	mute_button->signal_button_press_event.connect (mem_fun(*this, &RouteUI::mute_press));
+	mute_button->signal_button_release_event.connect (mem_fun(*this, &RouteUI::mute_release));
 
-	gain_automation_style_button.button_press_event.connect_after (ptr_fun (do_not_propagate));
-	pan_automation_style_button.button_press_event.connect_after (ptr_fun (do_not_propagate));
-	gain_automation_state_button.button_press_event.connect_after (ptr_fun (do_not_propagate));
-	pan_automation_state_button.button_press_event.connect_after (ptr_fun (do_not_propagate));
+	gain_automation_style_button.signal_button_press_event.connect_after (ptr_fun (do_not_propagate));
+	pan_automation_style_button.signal_button_press_event.connect_after (ptr_fun (do_not_propagate));
+	gain_automation_state_button.signal_button_press_event.connect_after (ptr_fun (do_not_propagate));
+	pan_automation_state_button.signal_button_press_event.connect_after (ptr_fun (do_not_propagate));
 
-	gain_automation_style_button.button_press_event.connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event));
-	gain_automation_style_button.button_release_event.connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event));
-	pan_automation_style_button.button_press_event.connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event));
-	pan_automation_style_button.button_release_event.connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event));
+	gain_automation_style_button.signal_button_press_event.connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event));
+	gain_automation_style_button.signal_button_release_event.connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event));
+	pan_automation_style_button.signal_button_press_event.connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event));
+	pan_automation_style_button.signal_button_release_event.connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event));
 
-	gain_automation_state_button.button_press_event.connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event));
-	gain_automation_state_button.button_release_event.connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event));
-	pan_automation_state_button.button_press_event.connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event));
-	pan_automation_state_button.button_release_event.connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event));
+	gain_automation_state_button.signal_button_press_event.connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event));
+	gain_automation_state_button.signal_button_release_event.connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event));
+	pan_automation_state_button.signal_button_press_event.connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event));
+	pan_automation_state_button.signal_button_release_event.connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event));
 
 	polarity_button.toggled.connect (mem_fun(*this, &MixerStrip::polarity_toggled));
 
-	name_button.button_release_event.connect (mem_fun(*this, &MixerStrip::name_button_button_release));
+	name_button.signal_button_release_event.connect (mem_fun(*this, &MixerStrip::name_button_button_release));
 
-	group_button.button_press_event.connect (mem_fun(*this, &MixerStrip::select_mix_group));
+	group_button.signal_button_press_event.connect (mem_fun(*this, &MixerStrip::select_mix_group));
 
 	_width = (Width) -1;
 	set_stuff_from_route ();
@@ -1136,14 +1136,14 @@ MixerStrip::setup_comment_editor ()
 
 	comment_area.set_name ("MixerTrackCommentArea");
 	comment_area.set_editable (true);
-	comment_area.signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
-	comment_area.signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
+	comment_area.signal_signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
+	comment_area.signal_signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
 	comment_area.changed.connect (mem_fun(*this, &MixerStrip::comment_edited));
-	comment_area.button_release_event.connect_after (ptr_fun (do_not_propagate));
+	comment_area.signal_button_release_event.connect_after (ptr_fun (do_not_propagate));
 	comment_area.show ();
 
 	comment_window->add (comment_area);
-	comment_window->delete_event.connect (bind (ptr_fun (just_hide_it), comment_window));
+	comment_window->signal_delete_event.connect (bind (ptr_fun (just_hide_it), comment_window));
 }
 
 void

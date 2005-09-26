@@ -108,16 +108,16 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	cd_track_details_hbox.pack_start (composer_entry, true, true);
 
 	isrc_entry.changed.connect (mem_fun(*this, &LocationEditRow::isrc_entry_changed)); 
-	isrc_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
-	isrc_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	isrc_entry.signal_signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	isrc_entry.signal_signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 
 	performer_entry.changed.connect (mem_fun(*this, &LocationEditRow::performer_entry_changed));
-	performer_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
-	performer_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	performer_entry.signal_signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	performer_entry.signal_signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 
 	composer_entry.changed.connect (mem_fun(*this, &LocationEditRow::composer_entry_changed));
-	composer_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
-	composer_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	composer_entry.signal_signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	composer_entry.signal_signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 
 	scms_check_button.toggled.connect(mem_fun(*this, &LocationEditRow::scms_toggled));
 	preemph_check_button.toggled.connect(mem_fun(*this, &LocationEditRow::preemph_toggled));
@@ -240,8 +240,8 @@ LocationEditRow::set_location (Location *loc)
 		name_entry.set_size_request (100, -1);
 		name_entry.set_editable (true);
 		name_entry.changed.connect (mem_fun(*this, &LocationEditRow::name_entry_changed));  
-		name_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
-		name_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+		name_entry.signal_signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+		name_entry.signal_signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 
 		if (!name_entry.get_parent()) {
 			item_table.attach (name_entry, 1, 2, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL, 4, 0);

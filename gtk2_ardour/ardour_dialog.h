@@ -22,6 +22,7 @@
 
 #include <ardour/ardour.h>
 #include <gtkmm/window.h>
+#include <gtkmm/dialog.h>
 
 #include "keyboard_target.h"
 
@@ -44,7 +45,6 @@ class ArdourDialog : public Gtk::Dialog, public KeyboardTarget
 
 	void run ();
 	void stop (int);
-	void close ();
 	void set_keyboard_input (bool yn);
 	void set_hide_on_stop (bool yn);
 	int  run_status();
@@ -64,11 +64,6 @@ class ArdourDialog : public Gtk::Dialog, public KeyboardTarget
 	}
 
 	void quit ();
-	void wm_close();
-	void wm_doi ();
-	gint wm_close_event (GdkEventAny *);
-	gint wm_doi_event (GdkEventAny *);
-	gint wm_doi_event_stop (GdkEventAny *);
 
   private:
 	int  _run_status;

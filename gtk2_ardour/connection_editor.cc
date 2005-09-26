@@ -546,7 +546,7 @@ ConnectionEditor::display_connection_state (bool for_input)
 		}
 
 		clist->columns_autosize ();
-		clist->button_release_event.connect (bind (mem_fun(*this, &ConnectionEditor::port_button_event), clist));
+		clist->signal_button_release_event.connect (bind (mem_fun(*this, &ConnectionEditor::port_button_event), clist));
 	}
 
 	port_box.show_all ();

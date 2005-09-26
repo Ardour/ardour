@@ -446,7 +446,7 @@ IOSelector::display_ports ()
 					}
 				}
 				
-				B->button_release_event.connect 
+				B->signal_button_release_event.connect 
 					(bind (mem_fun(*this, &IOSelector::port_column_button_release), clist));
 			
 			} else {
@@ -460,7 +460,7 @@ IOSelector::display_ports ()
 					}
 				}
 
-				B->button_release_event.connect 
+				B->signal_button_release_event.connect 
 					(bind (mem_fun(*this, &IOSelector::port_column_button_release), clist));
 			}
 
@@ -488,7 +488,7 @@ IOSelector::display_ports ()
 			}
 
 			clist->columns_autosize ();
-			clist->button_release_event.connect (bind (mem_fun(*this, &IOSelector::connection_click), clist));
+			clist->signal_button_release_event.connect (bind (mem_fun(*this, &IOSelector::connection_click), clist));
 		}
 
 		port_box.show_all ();

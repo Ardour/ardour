@@ -57,7 +57,8 @@ AddRouteDialog::AddRouteDialog ()
 	cancel_button.set_name ("AddRouteDialogButton");
 	routes_spinner.set_name ("AddRouteDialogSpinner");
 	
-	bus_button.set_group (track_button.get_group());
+	RadioButton::Group g = track_button.get_group();
+	bus_button.set_group (g);
 	track_button.set_active (true);
 
 	HBox *hbrb = manage (new HBox);

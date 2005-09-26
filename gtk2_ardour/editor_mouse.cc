@@ -999,7 +999,7 @@ Editor::button_release_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType
 		case MouseObject:
 			switch (item_type) {
 			case AutomationTrackItem:
-				dynamic_cast<AutomationTimeAxisView*>(clicked_trackview)->add_automation_event 
+				dynamic_cast<AutomationTimeAxisView*>(clicked_trackview)->signal_add_automation_event 
 					(item,
 					 event,
 					 where,
@@ -1015,7 +1015,7 @@ Editor::button_release_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType
 		case MouseGain:
 			switch (item_type) {
 			case RegionItem:
-				clicked_regionview->add_gain_point_event (item, event);
+				clicked_regionview->signal_add_gain_point_event (item, event);
 				return TRUE;
 				break;
 				

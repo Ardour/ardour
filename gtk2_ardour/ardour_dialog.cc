@@ -70,26 +70,9 @@ ArdourDialog::on_unmap ()
 }
 
 void
-ArdourDialog::wm_close()
-{
-	stop (-1);
-	ARDOUR_UI::instance()->allow_focus(false);
-}
-
-void
 ArdourDialog::set_hide_on_stop (bool yn)
 {
 	hide_on_stop = yn;
-}
-
-void
-ArdourDialog::close ()
-{
-	hide_all ();
-
-	if (kbd_input) {
-		ARDOUR_UI::instance()->allow_focus (false);
-	}
 }
 
 void
@@ -135,6 +118,12 @@ ArdourDialog::run ()
 
 	default:
 		_run_status = -1;
+	}
+
+	hide_all ();
+
+	if (kbd_input) {
+		ARDOUR_UI::instance()->allow_focus (false);
 	}
 }
 

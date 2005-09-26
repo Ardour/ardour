@@ -19,6 +19,8 @@
 
 */
 
+#include <gdkmm/window.h>
+
 #include "ardour_message.h"
 #include "i18n.h"
 
@@ -53,7 +55,7 @@ ArdourMessage::ArdourMessage (Gtk::Window* parent,
 	show_all ();
 	
 	realize();
-	get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
+	get_window()->set_decorations (Gdk::WMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 
 	if (grab_focus) {
 		ok_button.grab_focus ();

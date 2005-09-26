@@ -476,7 +476,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 				control_ui->combo = new Gtk::Combo;
 				control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
-				control_ui->combo->get_popwin()->unmap_event, un(*this, &PluginUI::control_combo_changed), control_ui));
+				control_ui->combo->get_popwin()->signal_unmap_event, un(*this, &PluginUI::control_combo_changed), control_ui));
 				plugin.ParameterChanged.connect (bind (mem_fun(*this, &PluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
@@ -550,8 +550,8 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 			control_ui->control->set_style (BarController::LeftToRight);
 			control_ui->control->set_use_parent (true);
 
-			control_ui->control->get_spin_button().signal_focus_in_event().connect (mem_fun(*this, &PluginUI::entry_focus_event));
-			control_ui->control->get_spin_button().signal_focus_out_event().connect (mem_fun(*this, &PluginUI::entry_focus_event));
+			control_ui->control->get_spin_button().signal_signal_focus_in_event().connect (mem_fun(*this, &PluginUI::entry_focus_event));
+			control_ui->control->get_spin_button().signal_signal_focus_out_event().connect (mem_fun(*this, &PluginUI::entry_focus_event));
 
 			control_ui->control->StartGesture.connect (bind (mem_fun(*this, &PluginUI::start_touch), control_ui));
 			control_ui->control->StopGesture.connect (bind (mem_fun(*this, &PluginUI::stop_touch), control_ui));
@@ -874,7 +874,7 @@ PlugUIBase::PlugUIBase (PluginInsert& pi)
 	combo.set_use_arrows_always(true);
 	set_popdown_strings (combo, plugin.get_presets());
 	combo.set_active_text ("");
-	combo.get_popwin()->unmap_event.connect(mem_fun(*this, &PlugUIBase::setting_selected));
+	combo.get_popwin()->signal_unmap_event.connect(mem_fun(*this, &PlugUIBase::setting_selected));
 
 	save_button.set_name ("PluginSaveButton");
 	save_button.clicked.connect(mem_fun(*this, &PlugUIBase::save_plugin_setting));

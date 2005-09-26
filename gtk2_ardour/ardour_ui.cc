@@ -1815,7 +1815,7 @@ ARDOUR_UI::build_session_selector ()
 	session_selector_window->set_name ("SessionSelectorWindow");
 	session_selector_window->set_size_request (200, 400);
 
-	session_selector_window->delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*>(session_selector_window)));
+	session_selector_window->signal_delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*>(session_selector_window)));
 	cancel_button-.signal_clicked().connect (bind (mem_fun(*this, &ARDOUR_UI::hide_dialog), session_selector_window));
 	session_selector.tree_select_row.connect (mem_fun(*this, &ARDOUR_UI::session_selection));
 }
@@ -1844,7 +1844,7 @@ ARDOUR_UI::open_session ()
 		open_session_selector = new Gtk::FileSelection(_("open session"));
 		open_session_selector->get_ok_button()-.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::open_ok_clicked));
 		open_session_selector->get_cancel_button()-.signal_clicked().connect (bind (mem_fun(*this, &ARDOUR_UI::fs_cancel_clicked), open_session_selector));
-		open_session_selector->delete_event.connect (bind (mem_fun(*this, &ARDOUR_UI::fs_delete_event), open_session_selector));
+		open_session_selector->signal_delete_event.connect (bind (mem_fun(*this, &ARDOUR_UI::fs_delete_event), open_session_selector));
 	}
 
 	open_session_selector->show_all ();

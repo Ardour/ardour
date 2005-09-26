@@ -91,9 +91,9 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	set_state (*node);
 
- 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+ 	scroller_base.signal_add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
  	scroller_base.set_name ("MixerWindow");
- 	scroller_base.button_release_event.connect (mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
+ 	scroller_base.signal_button_release_event.connect (mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
 	// add as last item of strip packer
 	strip_packer.pack_end (scroller_base, true, true);
 
@@ -180,9 +180,9 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	rhs_pane2.set_data ("collapse-direction", (gpointer) 0);
 	list_hpane.set_data ("collapse-direction", (gpointer) 1);
 
-	rhs_pane1.button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane1)));
-	rhs_pane2.button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane2)));
-	list_hpane.button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&list_hpane)));
+	rhs_pane1.signal_button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane1)));
+	rhs_pane2.signal_button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane2)));
+	list_hpane.signal_button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&list_hpane)));
 	
 	global_vpacker.pack_start (list_hpane, true, true);
 
@@ -203,12 +203,12 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	track_display_list.click_column.connect (mem_fun(*this, &Mixer_UI::track_column_click));
 
 	group_list_button.signal_clicked().connect (mem_fun(*this, &Mixer_UI::group_list_button_clicked));
-	group_list.button_press_event.connect (mem_fun(*this, &Mixer_UI::group_list_button_press_event));
+	group_list.signal_button_press_event.connect (mem_fun(*this, &Mixer_UI::group_list_button_press_event));
 	group_list.select_row.connect (mem_fun(*this, &Mixer_UI::group_selected));
 	group_list.unselect_row.connect (mem_fun(*this, &Mixer_UI::group_unselected));
 
 	_plugin_selector = new PluginSelector (PluginManager::the_manager());
-	_plugin_selector->delete_event.connect (bind (ptr_fun (just_hide_it), 
+	_plugin_selector->signal_delete_event.connect (bind (ptr_fun (just_hide_it), 
 						     static_cast<Window *> (_plugin_selector)));
 
 	configure_event.connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
@@ -273,7 +273,7 @@ Mixer_UI::add_strip (Route* route)
 	route->name_changed.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
 	strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
 
-	strip->button_release_event.connect (bind (mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
+	strip->signal_button_release_event.connect (bind (mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 
 //	if (width() < gdk_screen_width()) {
 //		set_size_request (width() + (_strip_width == Wide ? 75 : 50), height());

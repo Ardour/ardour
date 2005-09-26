@@ -89,25 +89,25 @@ Editor::initialize_rulers ()
 	ruler_shown[ruler_metric_frames] = false;
 	ruler_shown[ruler_metric_minsec] = false;
 	
-	smpte_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	bbt_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	smpte_ruler->signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	bbt_ruler->signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	frames_ruler->signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	minsec_ruler->signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	smpte_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
-	bbt_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
-	frames_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
-	minsec_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	smpte_ruler->signal_button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	bbt_ruler->signal_button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	frames_ruler->signal_button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	minsec_ruler->signal_button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
 
-	smpte_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
-	bbt_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
-	frames_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
-	minsec_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	smpte_ruler->signal_button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	bbt_ruler->signal_button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	frames_ruler->signal_button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	minsec_ruler->signal_button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
 	
-	smpte_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	bbt_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	frames_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	minsec_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	smpte_ruler->signal_motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	bbt_ruler->signal_motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	frames_ruler->signal_motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	minsec_ruler->signal_motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	
 	visible_timebars = 7; /* 4 here, 3 in time_canvas */
 	ruler_pressed_button = 0;
@@ -552,25 +552,25 @@ Editor::update_ruler_visibility ()
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
 
 	
-	smpte_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	bbt_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	smpte_ruler->signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	bbt_ruler->signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	frames_ruler->signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	minsec_ruler->signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	smpte_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
-	bbt_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
-	frames_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
-	minsec_ruler->button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	smpte_ruler->signal_button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	bbt_ruler->signal_button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	frames_ruler->signal_button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
+	minsec_ruler->signal_button_release_event.connect (mem_fun(*this, &Editor::ruler_button_release));
 
-	smpte_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
-	bbt_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
-	frames_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
-	minsec_ruler->button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	smpte_ruler->signal_button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	bbt_ruler->signal_button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	frames_ruler->signal_button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
+	minsec_ruler->signal_button_press_event.connect (mem_fun(*this, &Editor::ruler_button_press));
 	
-	smpte_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	bbt_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	frames_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	minsec_ruler->motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	smpte_ruler->signal_motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	bbt_ruler->signal_motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	frames_ruler->signal_motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	minsec_ruler->signal_motion_notify_event.connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 
 	
 	if (ruler_shown[ruler_metric_minsec]) {
