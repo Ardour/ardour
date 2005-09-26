@@ -29,16 +29,13 @@ opts.AddOptions(
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     BoolOption('DEVBUILD', 'Use shared libardour (developers only)', 0),
     BoolOption('SIGCCVSBUILD', 'Use if building sigc++ with a new configure.ac (developers only)', 0),
-    BoolOption('GTK', 'Build the GTK (graphical) version of Ardour', 1),
-    BoolOption('KSI', 'Build the KSI (text) version of Ardour', 0),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     BoolOption('NOARCH', 'Do not use architecture-specific compilation flags', 0),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('VST', 'Compile with support for VST', 0),
     BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('USE_SSE_EVERYWHERE', 'Ask the compiler to use x86/SSE instructions and also our hand-written x86/SSE optimizations when possible (off by default)', 0),
-    BoolOption('BUILD_SSE_OPTIMIZATIONS', 'Use our hand-written x86/SSE optimizations when possible (off by default)', 0),
-    BoolOption('BUILD_VECLIB_OPTIMIZATIONS', 'Build with Apple Accelerate/vecLib optimizations when possible (off by default)', 0)
+    BoolOption('BUILD_SSE_OPTIMIZATIONS', 'Use our hand-written x86/SSE optimizations when possible (off by default)', 0)
   )
 
 
@@ -368,19 +365,25 @@ libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
 libraries['xml'] = LibraryInfo()
 libraries['xml'].ParseConfig('pkg-config --cflags --libs libxml-2.0')
 
-libraries['libart'] = LibraryInfo()
-libraries['libart'].ParseConfig('pkg-config --cflags --libs libart-2.0')
+libraries['glib2'] = LibraryInfo()
+libraries['glib2'].ParseConfig ('pkg-config --cflags --libs glib-2.0')
+libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gobject-2.0')
+libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gmodule-2.0')
 
-libraries['gtk'] = LibraryInfo()
-libraries['gtk'].ParseConfig ('gtk-config --cflags --libs')
+libraries['gtk2'] = LibraryInfo()
+libraries['gtk2'].ParseConfig ('pkg-config --cflags --libs gtk+-2.0')
 
-libraries['glib'] = LibraryInfo()
-libraries['glib'].ParseConfig ('glib-config --cflags --libs')
+libraries['pango'] = LibraryInfo()
+libraries['pango'].ParseConfig ('pkg-config --cflags --libs pango')
+
+libraries['libgnomecanvas2'] = LibraryInfo()
+libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomecanvas-2.0')
 
 libraries['ardour'] = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')
-libraries['midi++'] = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++', CPPPATH='#libs/midi++')
-libraries['pbd']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd', CPPPATH='#libs/pbd')
-libraries['gtkmmext'] = LibraryInfo (LIBS='gtkmmext', LIBPATH='#libs/gtkmmext', CPPPATH='#libs/gtkmmext')
+libraries['midi++2'] = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++2', CPPPATH='#libs/midi++2')
+libraries['pbd3']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd3', CPPPATH='#libs/pbd3')
+libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext', CPPPATH='#libs/gtkmm2ext')
+#libraries['cassowary'] = LibraryInfo(LIBS='cassowary', LIBPATH='#libs/cassowary', CPPPATH='#libs/cassowary')
 
 libraries['fst'] = LibraryInfo()
 if env['VST']:
@@ -408,44 +411,57 @@ env = conf.Finish()
 
 if env['SYSLIBS']:
 
-    libraries['sigc'] = LibraryInfo()
-    libraries['sigc'].ParseConfig('sigc-config --cflags --libs')
+    libraries['sigc2'] = LibraryInfo()
+    libraries['sigc2'].ParseConfig('pkg-config --cflags --libs sigc++-2.0')
 
-    libraries['gtkmm'] = LibraryInfo()
-    libraries['gtkmm'].ParseConfig ('gtkmm-config --cflags --libs')
+    libraries['gtkmm2'] = LibraryInfo()
+    libraries['gtkmm2'].ParseConfig ('pkg-config --cflags --libs gtkmm-2.0')
 
     libraries['soundtouch'] = LibraryInfo(LIBS='SoundTouch')
-    libraries['gtk-canvas'] = LibraryInfo(LIBS='gtk-canvas')
 
     coredirs = [
         'templates'
     ]
 
     subdirs = [
-        'libs/pbd',
-        'libs/midi++',
+#	'libs/cassowary',
+        'libs/pbd3',
+        'libs/midi++2',
         'libs/ardour',
         'templates'
         ]
 
     gtk_subdirs = [
-        'libs/gtkmmext',
-        'gtk_ardour',
+        'libs/gtkmm2ext',
+        'gtk2_ardour',
         ]
 
 else:
-    libraries['sigc'] = LibraryInfo(LIBS='sigc++',
-                                    LIBPATH='#libs/sigc++',
-                                    CPPPATH=['#libs/sigc++', '#libs/sigc++/sigc++/config'])
-    libraries['gtkmm'] = LibraryInfo(LIBS='gtkmm',
-                                     LIBPATH="#libs/gtkmm",
-                                     CPPPATH=[ '#libs/gtkmm', '#libs/gtkmm/gdk--', '#libs/gtkmm/src'])
+    libraries['sigc2'] = LibraryInfo(LIBS='sigc++2',
+                                    LIBPATH='#libs/sigc++2',
+                                    CPPPATH='#libs/sigc++2')
+    libraries['glibmm2'] = LibraryInfo(LIBS='glibmm2',
+                                    LIBPATH='#libs/glibmm2',
+                                    CPPPATH='#libs/glibmm2')
+    libraries['pangomm'] = LibraryInfo(LIBS='pangomm',
+                                    LIBPATH='#libs/gtkmm2/pango',
+                                    CPPPATH='#libs/gtkmm2/pango')
+    libraries['atkmm'] = LibraryInfo(LIBS='atkmm',
+                                     LIBPATH='#libs/gtkmm2/atk',
+                                     CPPPATH='#libs/gtkmm2/atk')
+    libraries['gdkmm2'] = LibraryInfo(LIBS='gdkmm2',
+                                      LIBPATH='#libs/gtkmm2/gdk',
+                                      CPPPATH='#libs/gtkmm2/gdk')
+    libraries['gtkmm2'] = LibraryInfo(LIBS='gtkmm2',
+                                     LIBPATH="#libs/gtkmm2/gtk",
+                                     CPPPATH='#libs/gtkmm2/gtk/')
+    libraries['libgnomecanvasmm'] = LibraryInfo(LIBS='libgnomecanvasmm',
+                                                LIBPATH='#libs/libgnomecanvasmm',
+                                                CPPPATH='#libs/libgnomecanvasmm')
+
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
-    libraries['gtk-canvas'] = LibraryInfo(LIBS='gtk-canvas',
-                                          LIBPATH='#libs/gtk-canvas',
-                                          CPPPATH='#libs/gtk-canvas')
 
     coredirs = [
         'libs/soundtouch',
@@ -453,17 +469,22 @@ else:
     ]
 
     subdirs = [
-        'libs/sigc++',
-        'libs/pbd',
-        'libs/midi++',
+#	'libs/cassowary',
+        'libs/sigc++2',
+        'libs/pbd3',
+        'libs/midi++2',
         'libs/ardour'
         ]
 
     gtk_subdirs = [
-        'libs/gtkmm',
-        'libs/gtkmmext',
-	'libs/gtk-canvas',
-        'gtk_ardour',
+	'libs/glibmm2',
+	'libs/gtkmm2/pango',
+	'libs/gtkmm2/atk',
+	'libs/gtkmm2/gdk',
+	'libs/gtkmm2/gtk',
+	'libs/libgnomecanvasmm',
+        'libs/gtkmm2ext',
+        'gtk2_ardour',
         ]
 
 opts.Save('scache.conf', env)
@@ -520,13 +541,6 @@ if config[config_arch] == 'apple':
         libraries['core'].Append (LIBPATH = [ '/opt/local/lib' ])
     if os.path.isdir('/opt/local/include'):
         libraries['core'].Append (CPPPATH = [ '/opt/local/include' ])
-
-    if env['BUILD_VECLIB_OPTIMIZATIONS'] == 1:
-        opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
-        debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
-        libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
-
-
 if config[config_cpu] == 'powerpc':
     #
     # Apple/PowerPC optimization options
@@ -651,11 +665,9 @@ Export('env install_prefix final_prefix config_prefix final_config_prefix librar
 conf = env.Configure ()
 
 if conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Versions/A/Headers/CoreAudio.h'):
-    subst_dict['%JACK_INPUT%'] = "coreaudio:Built-in Audio:in"
-    subst_dict['%JACK_OUTPUT%'] = "coreaudio:Built-in Audio:out"
+    subst_dict['%JACK_BACKEND%'] = "coreaudio:Built-in Audio:in"
 else:
-    subst_dict['%JACK_INPUT%'] = "alsa_pcm:playback_"
-    subst_dict['%JACK_OUTPUT%'] = "alsa_pcm:capture_"
+    subst_dict['%JACK_BACKEND%'] = "alsa_pcm:playback_"
 
 # posix_memalign available
 if not conf.CheckFunc('posix_memalign'):
@@ -711,16 +723,9 @@ env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 for subdir in coredirs:
     SConscript (subdir + '/SConscript')
 
-if env['GTK'] or env['KSI']:
-    for subdir in subdirs:
-        SConscript (subdir + '/SConscript')
-
-if env['GTK'] or 'tarball' in COMMAND_LINE_TARGETS:
-    for subdir in gtk_subdirs:
-        SConscript (subdir + '/SConscript')
-
-if env['KSI'] or 'tarball' in COMMAND_LINE_TARGETS:
-    SConscript ('ksi_ardour/SConscript')
+for sublistdir in [subdirs, gtk_subdirs]:
+	for subdir in sublistdir:
+	        SConscript (subdir + '/SConscript')
 
 # cleanup
 env.Clean ('scrub', [ 'scache.conf', '.sconf_temp', '.sconsign.dblite', 'config.log'])
