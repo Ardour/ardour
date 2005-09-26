@@ -25,7 +25,7 @@
 #include <vector>
 #include <cmath>
 #include <ardour/types.h>
-#include <libgnomecanvas/libgnomecanvas.h>
+#include <libgnomecanvasmm/line.h>
 #include <gdkmm/types.h>
 
 namespace Gtk {
@@ -51,7 +51,7 @@ slider_position_to_gain (double pos)
 }
 
 std::string short_version (std::string, std::string::size_type target_length);
-std::string fit_to_pixels (std::string, int32_t pixel_width, Gdk_Font&);
+std::string fit_to_pixels (std::string, int32_t pixel_width, Gdk::Font&);
 
 int    atoi (const std::string&);
 double atof (const std::string&);

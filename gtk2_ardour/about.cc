@@ -26,19 +26,11 @@
 #include <ctime>
 #include <cstdlib>
 
-#include <gtkmm/label.h>
-#include <gtkmm/text.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/notebook.h>
-
 #include <ardour/ardour.h>
 #include <ardour/version.h>
 
 #include "utils.h"
 #include "version.h"
-
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/doi.h>
 
 #include "about.h"
 #include "rgb_macros.h"
@@ -47,6 +39,7 @@
 #include "i18n.h"
 
 using namespace Gtk;
+using namespace Gdk;
 using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
@@ -122,15 +115,10 @@ static const gchar * paypal_xpm[] = {
 "::||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"};
 #endif
 
-static gint 
-stoppit (GdkEventButton* ev, Gtk::Notebook* notebook)
-{
-	gtk_signal_emit_stop_by_name (GTK_OBJECT(notebook->gobj()),
-				      "button_release_event");
-	return TRUE;
-}
-
-static const char* author_names[] = {
+static const char* authors[] = {
+	N_("Paul Davis"),
+	N_("Jesse Chappell"),
+	N_("Taybin Rutkin"),
 	N_("Marcus Andersson"),
 	N_("Jeremy Hall"),
 	N_("Steve Harris"),
@@ -165,121 +153,43 @@ static const char* translators[] = {
 };
 
 
-About::About (ARDOUR_UI * ui)
-	: Window (GTK_WINDOW_TOPLEVEL), _ui (ui)
+About::About ()
 #ifdef WITH_PAYMENT_OPTIONS
-	, paypal_pixmap (paypal_xpm)
+	: paypal_pixmap (paypal_xpm)
 #endif
 {
-	using namespace Notebook_Helpers;
+	string path;
+	string t;
 
-	about_index = 0;
-	about_cnt = 0;
-	drawn = false;
+	path = find_data_file ("splash.ppm");
 
-	Gtk::Label* small_label = manage (new Label (_(
-"Copyright (C) 1999-2005 Paul Davis\n"
-"Ardour comes with ABSOLUTELY NO WARRANTY\n"
-"This is free software, and you are welcome to redistribute it\n"
-"under certain conditions; see the file COPYING for details.\n")));
+	Glib::RefPtr<Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file (path);
 
-	Gtk::Label* version_label = 
-		manage (new Label 
-			(compose(_("Ardour: %1\n(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"), 
-				 VERSIONSTRING, 
-				 gtk_ardour_major_version, 
-				 gtk_ardour_minor_version, 
-				 gtk_ardour_micro_version, 
-				 libardour_major_version, 
-				 libardour_minor_version, 
-				 libardour_micro_version))); 
+	set_logo (Gdk::Pixbuf::create_from_file (path));
+	set_authors (authors);
 
-	Notebook* notebook = manage (new Notebook);
-
-	ScrolledWindow* author_scroller = manage (new ScrolledWindow);
-	Text* author_text = manage (new Text);
-
-	author_text->set_editable (false);
-	author_text->set_name (X_("AboutText"));
-
-	string str = _(
-"Primary author:\n\t\
-Paul Davis\n\n\
-Major developers:\n\t\
-Jesse Chappell\n\t\
-Taybin Rutkin\n\
-Contributors:\n\t");
-
-	for (int32_t n = 0; author_names[n] != 0; ++n) {
-		str += _(author_names[n]);
-		str += "\n\t";
+	for (int n = 0; translators[n]; ++n) {
+		t += translators[n];
+		t += ' ';
 	}
 
-	author_text->insert (str);
+	set_translator_credits (t);
+	set_copyright (_("Copyright (C) 1999-2005 Paul Davis\n"));
+	set_license (_("Ardour comes with ABSOLUTELY NO WARRANTY\n"
+		       "This is free software, and you are welcome to redistribute it\n"
+		       "under certain conditions; see the file COPYING for details.\n"));
+	set_name (X_("ardour"));
+	set_website (X_("http://ardour.org/"));
+	set_website_label (X_("ardour.org"));
+	set_version ((compose(_("%1\n(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"), 
+			      VERSIONSTRING, 
+			      gtk_ardour_major_version, 
+			      gtk_ardour_minor_version, 
+			      gtk_ardour_micro_version, 
+			      libardour_major_version, 
+			      libardour_minor_version, 
+			      libardour_micro_version))); 
 
-	author_scroller->add (*author_text);
-	author_scroller->set_size_request (-1, 75);
-	author_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-
-	ScrolledWindow* translator_scroller = manage (new ScrolledWindow);
-	Text* translator_text = manage (new Text);
-
-	translator_text->set_editable (false);
-	translator_text->set_name (X_("AboutText"));
-
-	str = "";
-	
-	for (int32_t n = 0; translators[n] != 0; ++n) {
-		str += _(translators[n]);
-		str += '\n';
-	}
-
-	translator_text->insert (str);
-	
-	translator_scroller->add (*translator_text);
-	translator_scroller->set_size_request (-1, 75);
-	translator_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-
-	Label* author_tab_label = manage (new Label (_("Authors")));
-	Label* translator_tab_label = manage (new Label (_("Translators")));
-
-	notebook->pages().push_back (TabElem (*author_scroller, *author_tab_label));
-	notebook->pages().push_back (TabElem (*translator_scroller, *translator_tab_label));
-
-	notebook->set_name ("AboutNoteBook");
-	notebook->button_release_event.connect_after (bind (ptr_fun (stoppit), notebook));
-
-	logo_pixmap = 0;
-	logo_height = 0;
-	logo_width = 0;
-	
-	set_name ("AboutWindow");
-	set_title ("ardour: about");
-	set_wmclass ("ardour_about", "Ardour");
- 	
-	vbox.set_border_width (5);
-	vbox.set_spacing (5);
-
-	if (load_logo_size ()) {
-		logo_area.set_size_request (logo_width, logo_height);
-		load_logo (*this);
-
-		vbox.pack_start (logo_area, false, false);
-		logo_area.expose_event.connect (mem_fun(*this, &About::logo_area_expose));
-	} else {
-		expose_event.connect (mem_fun(*this, &About::logo_area_expose));
-	}
-
- 	small_label->set_name  ("AboutWindowSmallLabel");
-	version_label->set_name("AboutWindowSmallLabel");
-
-	first_label.set_name ("AboutWindowLabel");
-	third_label.set_name ("AboutWindowPDLabel");
-	second_label.set_name ("AboutWindowLabel");
-
-	subvbox.pack_start (*small_label, false, false);
-	subvbox.pack_start (*version_label, false, false);
-	subvbox.pack_start (*notebook, true, true);
 
 #ifdef WITH_PAYMENT_OPTIONS
 	paypal_button.add (paypal_pixmap);
@@ -290,176 +200,10 @@ Contributors:\n\t");
 	subvbox.pack_start (*payment_box, false, false);
 #endif
 
-	delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*> (this)));
-
-	add (vbox);
-	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-
-	set_position (GTK_WIN_POS_CENTER);
-
-	show_all ();
-	subvbox.hide ();
-
-	/* wait for the first logo expose event to complete so that
-	   we know we are fully drawn.
-	*/
-
-	while (!drawn) {
-		gtk_main_iteration ();
-	}
 }
 
 About::~About ()
 {
-}
-
-void
-About::show_sub (bool yn)
-{
-	if (yn) {
-		vbox.pack_start (subvbox, true, true);
-		subvbox.show_all ();
-	} else {
-		vbox.remove (subvbox);
-		subvbox.hide ();
-	}
-}
-
-gint
-About::button_release_event_impl (GdkEventButton* ev)
-{
-	hide();
-
-	if (!_ui->shown ()) {
-		/* show it immediately */
-		_ui->show();
-	}
-	
-	return TRUE;
-}
-
-void
-About::realize_impl ()
-{
-	Window::realize_impl ();
-	get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
-	// get_window().set_decorations (GdkWMDecoration (0));
-}
-
-bool
-About::load_logo_size ()
-{
-	gchar buf[1024];
-	FILE *fp;
-	string path = find_data_file ("splash.ppm");
-
-	if (path.length() == 0) {
-		return false;
-	}
-
-	if ((fp = fopen (path.c_str(), "rb")) == 0) {
-		error << compose (_("cannot open splash image file \"%1\""), path) << endmsg;
-		return false;
-	}
-	
-	fgets (buf, sizeof (buf), fp);
-	if (strcmp (buf, "P6\n") != 0) {
-		fclose (fp);
-		return false;
-	}
-	
-	fgets (buf, sizeof (buf), fp);
-	fgets (buf, sizeof (buf), fp);
-	sscanf (buf, "%d %d", &logo_width, &logo_height);
-	fclose (fp);
-	return true;
-}
-
-bool
-About::load_logo (Gtk::Window& window)
-{
-	GdkGC* gc;
-	gchar   buf[1024];
-	guchar *pixelrow;
-	FILE *fp;
-	gint count;
-	gint i;
-	string path;
-
-	path = find_data_file ("splash.ppm");
-
-	if (path.length() == 0) {
-		return false;
-	}
-	
-	if ((fp = fopen (path.c_str(), "rb")) == 0) {
-		return false;
-	}
-	
-	fgets (buf, sizeof (buf), fp);
-	if (strcmp (buf, "P6\n") != 0) {
-		fclose (fp);
-		return false;
-	}
-	
-	fgets (buf, sizeof (buf), fp);
-	fgets (buf, sizeof (buf), fp);
-	sscanf (buf, "%d %d", &logo_width, &logo_height);
-	
-	fgets (buf, sizeof (buf), fp);
-	if (strcmp (buf, "255\n") != 0) {
-		fclose (fp);
-		return false;
-	}
-
-	Gtk::Preview preview (GTK_PREVIEW_COLOR);
-
-	preview.size (logo_width, logo_height);
-	pixelrow = new guchar[logo_width * 3];
-	
-	for (i = 0; i < logo_height; i++) {
-		count = fread (pixelrow, sizeof (unsigned char), logo_width * 3, fp);
-		if (count != (logo_width * 3))
-		{
-			delete [] pixelrow;
-			fclose (fp);
-			return false;
-		}
-		preview.draw_row (pixelrow, 0, i, logo_width);
-	}
-	
-	window.realize ();
-
-	logo_pixmap = gdk_pixmap_new (GTK_WIDGET(window.gobj())->window, logo_width, logo_height,
-				      gtk_preview_get_visual()->depth);
-	gc = gdk_gc_new (logo_pixmap);
-	gtk_preview_put (preview.gobj(), logo_pixmap, gc, 0, 0, 0, 0, logo_width, logo_height);
-	gdk_gc_destroy (gc);
-	
-	delete [] pixelrow;
-	fclose (fp);
-	
-	return true;
-}
-
-gint
-About::logo_area_expose (GdkEventExpose* ev)
-{
-	if (!drawn) {
-		drawn = true;
-	}
-
-	if (logo_pixmap) {
-		logo_area.get_window().draw_pixmap (logo_area.get_style()->get_black_gc(),
-						    Gdk::Pixmap (logo_pixmap),
-						    0, 0,
-						    ((logo_area.width() - logo_width) / 2),
-						    ((logo_area.height() - logo_height) / 2),
-						    logo_width, logo_height);
-		gdk_flush ();
-	}
-
-	return FALSE;
 }
 
 #ifdef WITH_PAYMENT_OPTIONS

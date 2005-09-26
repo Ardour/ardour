@@ -35,6 +35,8 @@
 
 #include <cmath>
 
+#include <libgnomecanvasmm/canvas.h>
+
 #include <pbd/xml++.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/pix.h>
@@ -445,14 +447,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	static void rate_printer (char buf[32], Gtk::Adjustment &, void *);
 
-	Gtk::Menu*   session_popup_menu;
-	Gtk::CTree   session_selector;
+	Gtk::Menu*            session_popup_menu;
+	Gtkmm2ext::Selector   session_selector;
 	ArdourDialog* session_selector_window;
 	
 	Gtk::FileSelection* open_session_selector;
 	
 	void build_session_selector();
-	void session_selection (Gtk::CTree::Row, gint col);
+	void session_selection (Gtk::TreeView&, Glib::RefPtr<Gtk::TreeSelection>);
 	struct RecentSessionsSorter {
 	  bool operator() (std::pair<string,string> a, std::pair<string,string> b) const {
 	    return cmp_nocase(a.first, b.first) == -1;
@@ -538,7 +540,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	string template_name;
 
 	void new_session_ok_clicked ();
-	void new_session_template_choice (Gtkmm2ext::Selector *, Gtkmm2ext::SelectionResult*);
+	void new_session_template_choice (Gtk::TreeView&, Glib::RefPtr<Gtk::TreeSelection>);
 	void hide_dialog (ArdourDialog *dialog);
 
 	void fs_cancel_clicked (Gtk::FileSelection*);
