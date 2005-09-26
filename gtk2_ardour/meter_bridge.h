@@ -54,8 +54,8 @@ class MeterBridge : public ArdourDialog
 	void toggle_metering ();
 
   protected:
-	gint map_event_impl (GdkEventAny *);
-	gint unmap_event_impl (GdkEventAny *);
+	gint on_map (GdkEventAny *);
+	gint on_unmap (GdkEventAny *);
 
   private:
 	/* diskstream/recorder display */

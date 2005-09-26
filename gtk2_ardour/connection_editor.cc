@@ -243,10 +243,10 @@ ConnectionEditor::clear ()
 }
 
 gint
-ConnectionEditor::map_event_impl (GdkEventAny *ev)
+ConnectionEditor::on_map (GdkEventAny *ev)
 {
 	refill_connection_display ();
-	return Window::map_event_impl (ev);
+	return Window::on_map (ev);
 }
 
 void

@@ -43,7 +43,7 @@ ArdourDialog::~ArdourDialog ()
 }
 
 gint
-ArdourDialog::enter_notify_event_impl (GdkEventCrossing *ev)
+ArdourDialog::on_enter_notify_event (GdkEventCrossing *ev)
 {
 	if (ev->detail != GDK_NOTIFY_INFERIOR) {
 		Keyboard::the_keyboard().set_current_dialog (this);
@@ -52,7 +52,7 @@ ArdourDialog::enter_notify_event_impl (GdkEventCrossing *ev)
 }
 
 gint
-ArdourDialog::leave_notify_event_impl (GdkEventCrossing *ev)
+ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
 {
 	if (ev->detail != GDK_NOTIFY_INFERIOR) {
 		Keyboard::the_keyboard().set_current_dialog (0);
@@ -61,12 +61,12 @@ ArdourDialog::leave_notify_event_impl (GdkEventCrossing *ev)
 }
 
 gint
-ArdourDialog::unmap_event_impl (GdkEventAny *ev)
+ArdourDialog:on_unmap (GdkEventAny *ev)
 {
 	_within_hiding = true;
 	 Hiding (); /* EMIT_SIGNAL */
 	_within_hiding = false;
-	return Gtk::Window::unmap_event_impl (ev);
+	return Gtk::Window::on_unmap (ev);
 }
 
 void

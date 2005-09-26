@@ -304,8 +304,8 @@ class Editor : public PublicEditor
 	void map_transport_state ();
 	void map_position_change (jack_nframes_t);
 
-	void realize_impl();
-	void map__impl();
+	void on_realize();
+	void on_map ();
 
   private:
 	

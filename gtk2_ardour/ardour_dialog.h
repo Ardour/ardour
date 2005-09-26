@@ -49,9 +49,9 @@ class ArdourDialog : public Gtk::Window, public KeyboardTarget
 	void set_hide_on_stop (bool yn);
 	int  run_status();
 
-	gint enter_notify_event_impl (GdkEventCrossing*);
-	gint leave_notify_event_impl (GdkEventCrossing*);
-	gint unmap_event_impl (GdkEventAny *);
+	gint on_enter_notify_event (GdkEventCrossing*);
+	gint on_leave_notify_event (GdkEventCrossing*);
+	gint on_unmap (GdkEventAny *);
 
 	ARDOUR::Session *session;
 

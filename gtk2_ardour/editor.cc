@@ -1367,7 +1367,7 @@ Editor::deferred_reposition_and_zoom (jack_nframes_t frame, double nfpu)
 }
 
 void
-Editor::realize_impl ()
+Editor::on_realize ()
 {
 	/* Even though we're not using acceleration, we want the
 	   labels to show up.
@@ -1376,7 +1376,7 @@ Editor::realize_impl ()
 	track_context_menu.accelerate (*this->get_toplevel());
 	track_region_context_menu.accelerate (*this->get_toplevel());
 	
-	Window::realize_impl ();
+	Window::on_realize ();
 
 	GdkPixmap* empty_pixmap = gdk_pixmap_new (get_window(), 1, 1, 1);
 	GdkPixmap* empty_bitmap = gdk_pixmap_new (get_window(), 1, 1, 1);
@@ -1386,9 +1386,9 @@ Editor::realize_impl ()
 }
 
 void
-Editor::map__impl ()
+Editor::on_map ()
 {
-	Window::map__impl ();
+	Window::on_map ();
 
 	track_canvas_scroller.get_window().set_cursor (current_canvas_cursor);
 	time_canvas_scroller.get_window().set_cursor (timebar_cursor);

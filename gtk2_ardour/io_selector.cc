@@ -124,10 +124,10 @@ IOSelectorWindow::accept ()
 
 
 gint
-IOSelectorWindow::map_event_impl (GdkEventAny *ev)
+IOSelectorWindow::on_map (GdkEventAny *ev)
 {
 	_selector.redisplay ();
-	return Window::map_event_impl (ev);
+	return Window::on_map (ev);
 }
 
 /*************************
@@ -829,10 +829,10 @@ PortInsertWindow::plugin_going_away (ARDOUR::Redirect* ignored)
 }
 
 gint
-PortInsertWindow::map_event_impl (GdkEventAny *ev)
+PortInsertWindow::on_map (GdkEventAny *ev)
 {
 	_portinsertui.redisplay ();
-	return Window::map_event_impl (ev);
+	return Window::on_map (ev);
 }
 
 

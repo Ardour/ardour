@@ -309,9 +309,9 @@ AudioClock::setup_events ()
 }
 
 void
-AudioClock::realize_impl ()
+AudioClock:on_realize ()
 {
-	HBox::realize_impl ();
+	HBox::on_realize ();
 }
 
 void

@@ -241,16 +241,16 @@ MeterBridge::toggle_metering ()
 }
 
 gint
-MeterBridge::map_event_impl (GdkEventAny *ev)
+MeterBridge::on_map (GdkEventAny *ev)
 {
 	start_metering ();
-	return Window::map_event_impl (ev);
+	return Window::on_map (ev);
 }
 
 gint
-MeterBridge::unmap_event_impl (GdkEventAny *ev)
+MeterBridge::on_unmap (GdkEventAny *ev)
 {
 	stop_metering ();
-	return Window::unmap_event_impl (ev);
+	return Window::on_unmap (ev);
 }
 

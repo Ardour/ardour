@@ -124,12 +124,12 @@ Panner2d::reset (uint32_t n_inputs)
 }
 
 void
-Panner2d::size_allocate_impl (GtkAllocation *alloc)
+Panner2d::on_size_allocate (GtkAllocation *alloc)
 {
 	width = alloc->width;
 	height = alloc->height;
 
-	DrawingArea::size_allocate_impl (alloc);
+	DrawingArea::on_size_allocate (alloc);
 }
 
 int
@@ -353,7 +353,7 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which, bool& is_puck) 
 }		
 
 gint
-Panner2d::motion_notify_event_impl (GdkEventMotion *ev)
+Panner2d::on_motion_notify_event (GdkEventMotion *ev)
 {
 	gint x, y;
 	GdkModifierType state;
@@ -420,7 +420,7 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 }
 
 gint
-Panner2d::expose_event_impl (GdkEventExpose *event)
+Panner2d::on_expose_event (GdkEventExpose *event)
 {
 	gint x, y;
 	float fx, fy;
@@ -492,7 +492,7 @@ Panner2d::expose_event_impl (GdkEventExpose *event)
 }
 
 gint
-Panner2d::button_press_event_impl (GdkEventButton *ev)
+Panner2d::on_button_press_event (GdkEventButton *ev)
 {
 	switch (ev->button) {
 	case 1:
@@ -515,7 +515,7 @@ Panner2d::button_press_event_impl (GdkEventButton *ev)
 }
 
 gint
-Panner2d::button_release_event_impl (GdkEventButton *ev)
+Panner2d::on_button_release_event (GdkEventButton *ev)
 {
 	switch (ev->button) {
 	case 1:

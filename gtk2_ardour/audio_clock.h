@@ -144,7 +144,7 @@ class AudioClock : public Gtk::HBox
 	double drag_y;
 	double drag_accum;
 
-	void realize_impl ();
+	void on_realize ();
 	
 	gint field_motion_notify_event (GdkEventMotion *ev, Field);
 	gint field_button_press_event (GdkEventButton *ev, Field);
