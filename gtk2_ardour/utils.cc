@@ -450,9 +450,9 @@ pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
 		pos = Gtkmm2ext::gtk_paned_get_position (pane->gobj());
 
 		if (dynamic_cast<VPaned*>(pane)) {
-			cmp = pane->height();
+			cmp = pane->get_height();
 		} else {
-			cmp = pane->width();
+			cmp = pane->get_width();
 		}
 
 		/* we have to use approximations here because we can't predict the
@@ -481,9 +481,9 @@ pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
 				pane->set_position (1);
 			} else {
 				if (dynamic_cast<VPaned*>(pane)) {
-					pane->set_position (pane->height());
+					pane->set_position (pane->get_height());
 				} else {
-					pane->set_position (pane->width());
+					pane->set_position (pane->get_width());
 				}
 			}
 		}

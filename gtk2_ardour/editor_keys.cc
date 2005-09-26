@@ -20,12 +20,9 @@
 
 #include <cstdlib>
 #include <cmath>
-
 #include <string>
 
 #include <pbd/error.h>
-
-#include <gtkmm2ext/popup_selector.h>
 
 #include <ardour/session.h>
 #include <ardour/region.h>

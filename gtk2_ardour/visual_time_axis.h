@@ -24,7 +24,6 @@
 #include <gtkmm.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/popup_selector.h>
 
 #include "ardour_dialog.h"
 #include "route_ui.h"

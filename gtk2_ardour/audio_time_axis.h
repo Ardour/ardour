@@ -24,7 +24,6 @@
 #include <gtkmm.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/popup_selector.h>
 #include <list>
 
 #include <ardour/types.h>
