@@ -63,10 +63,10 @@ class Panner2d : public Gtk::DrawingArea
 	sigc::signal<void,int> TargetMoved;
 
   protected:
-	gint on_expose_event (GdkEventExpose *);
-	gint on_button_press_event (GdkEventButton *);
-	gint on_button_release_event (GdkEventButton *);
-	gint on_motion_notify_event (GdkEventMotion *);
+	bool on_expose_event (GdkEventExpose *);
+	bool on_button_press_event (GdkEventButton *);
+	bool on_button_release_event (GdkEventButton *);
+	bool on_motion_notify_event (GdkEventMotion *);
 	void on_size_allocate (GtkAllocation* alloc);
 
   private:

@@ -26,11 +26,11 @@
 namespace Gtkmm2ext {
 	void init ();
 
-	void set_usize_to_display_given_text (Gtk::Widget &w,
-					      const gchar *text,
-					      gint hpadding,
-					      gint vpadding);
-
+	void set_size_request_to_display_given_text (Gtk::Widget &w,
+						     const gchar *text,
+						     gint hpadding,
+						     gint vpadding);
+	
 	template<class T> void deferred_delete (void *ptr) {
 		delete static_cast<T *> (ptr);
 	}

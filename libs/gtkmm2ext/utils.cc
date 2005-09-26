@@ -24,12 +24,12 @@
 #include "i18n.h"
 
 void
-Gtkmm2ext::set_usize_to_display_given_text (Gtk::Widget &w, const gchar *text,
-					   gint hpadding, gint vpadding)
+Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *text,
+					    gint hpadding, gint vpadding)
 
 {
 	w.ensure_style ();
-	set_usize_to_display_given_text(w, text, hpadding, vpadding);
+	set_size_request_to_display_given_text(w, text, hpadding, vpadding);
 }
 
 gint

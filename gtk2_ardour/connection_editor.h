@@ -53,7 +53,7 @@ class ConnectionEditor : public ArdourDialog {
 	void set_session (ARDOUR::Session *);
 
   protected:
-	gint on_map (GdkEventAny *);
+	bool on_map (GdkEventAny *);
 
   private:
 	ARDOUR::Connection *current_connection;

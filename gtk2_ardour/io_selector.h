@@ -116,7 +116,7 @@ class IOSelectorWindow : public ArdourDialog
 	IOSelector& selector() { return _selector; }
 
   protected:
-	gint on_map (GdkEventAny *);
+	bool on_map (GdkEventAny *);
 	
   private:
 	IOSelector _selector;
@@ -158,7 +158,7 @@ class PortInsertWindow : public ArdourDialog
 	PortInsertWindow (ARDOUR::Session&, ARDOUR::PortInsert&, bool can_cancel=false);
 	
   protected:
-	gint on_map (GdkEventAny *);
+	bool on_map (GdkEventAny *);
 	
   private:
 	

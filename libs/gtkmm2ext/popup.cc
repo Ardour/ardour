@@ -85,7 +85,7 @@ PopUp::touch ()
 	if (is_visible ()) {
 		remove ();
 	} else {
-		set_usize_to_display_given_text (label, my_text.c_str(), 25, 10);
+		set_size_request_to_display_given_text (label, my_text.c_str(), 25, 10);
 		label.set_text (my_text);
 		show_all ();
 		
