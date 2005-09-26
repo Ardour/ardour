@@ -66,7 +66,7 @@
   <Connections/>
   <Routes>
     <Route flags="0x2" muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=0:signal=0">
-      <IO name="master" id="1088698373992392" inputs="{ardour:Audio 24/out 1,ardour:Audio 23/out 1,ardour:Audio 22/out 1,ardour:Audio 21/out 1,ardour:Audio 20/out 1,ardour:Audio 19/out 1,ardour:Audio 18/out 1,ardour:Audio 17/out 1,ardour:Audio 16/out 1,ardour:Audio 15/out 1,ardour:Audio 14/out 1,ardour:Audio 13/out 1,ardour:Audio 12/out 1,ardour:Audio 11/out 1,ardour:Audio 10/out 1,ardour:Audio 9/out 1,ardour:Audio 8/out 1,ardour:Audio 7/out 1,ardour:Audio 6/out 1,ardour:Audio 5/out 1,ardour:Audio 4/out 1,ardour:Audio 3/out 1,ardour:Audio 2/out 1,ardour:Audio 1/out 1}{ardour:Audio 24/out 2,ardour:Audio 23/out 2,ardour:Audio 22/out 2,ardour:Audio 21/out 2,ardour:Audio 20/out 2,ardour:Audio 19/out 2,ardour:Audio 18/out 2,ardour:Audio 17/out 2,ardour:Audio 16/out 2,ardour:Audio 15/out 2,ardour:Audio 14/out 2,ardour:Audio 13/out 2,ardour:Audio 12/out 2,ardour:Audio 11/out 2,ardour:Audio 10/out 2,ardour:Audio 9/out 2,ardour:Audio 8/out 2,ardour:Audio 7/out 2,ardour:Audio 6/out 2,ardour:Audio 5/out 2,ardour:Audio 4/out 2,ardour:Audio 3/out 2,ardour:Audio 2/out 2,ardour:Audio 1/out 2}" outputs="{alsa_pcm:playback_1}{alsa_pcm:playback_2}" gain="1" iolimits="-1,2,-1,2" automation-state="0x0" automation-style="0x1">
+      <IO name="master" id="1088698373992392" inputs="{ardour:Audio 24/out 1,ardour:Audio 23/out 1,ardour:Audio 22/out 1,ardour:Audio 21/out 1,ardour:Audio 20/out 1,ardour:Audio 19/out 1,ardour:Audio 18/out 1,ardour:Audio 17/out 1,ardour:Audio 16/out 1,ardour:Audio 15/out 1,ardour:Audio 14/out 1,ardour:Audio 13/out 1,ardour:Audio 12/out 1,ardour:Audio 11/out 1,ardour:Audio 10/out 1,ardour:Audio 9/out 1,ardour:Audio 8/out 1,ardour:Audio 7/out 1,ardour:Audio 6/out 1,ardour:Audio 5/out 1,ardour:Audio 4/out 1,ardour:Audio 3/out 1,ardour:Audio 2/out 1,ardour:Audio 1/out 1}{ardour:Audio 24/out 2,ardour:Audio 23/out 2,ardour:Audio 22/out 2,ardour:Audio 21/out 2,ardour:Audio 20/out 2,ardour:Audio 19/out 2,ardour:Audio 18/out 2,ardour:Audio 17/out 2,ardour:Audio 16/out 2,ardour:Audio 15/out 2,ardour:Audio 14/out 2,ardour:Audio 13/out 2,ardour:Audio 12/out 2,ardour:Audio 11/out 2,ardour:Audio 10/out 2,ardour:Audio 9/out 2,ardour:Audio 8/out 2,ardour:Audio 7/out 2,ardour:Audio 6/out 2,ardour:Audio 5/out 2,ardour:Audio 4/out 2,ardour:Audio 3/out 2,ardour:Audio 2/out 2,ardour:Audio 1/out 2}" outputs="{%JACK_INPUT%1}{%JACK_INPUT%2}" gain="1" iolimits="-1,2,-1,2" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -77,7 +77,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=1:signal=1" diskstream-id="1088698381595945">
-      <IO name="Audio 1" id="1088698381595877" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 1" id="1088698381595877" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -88,7 +88,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=2:signal=2" diskstream-id="1088698381722129">
-      <IO name="Audio 2" id="1088698381722065" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 2" id="1088698381722065" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -99,7 +99,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=3:signal=3" diskstream-id="1088698419793849">
-      <IO name="Audio 3" id="1088698419793786" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 3" id="1088698419793786" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -110,7 +110,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=4:signal=4" diskstream-id="1088698419943526">
-      <IO name="Audio 4" id="1088698419943460" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 4" id="1088698419943460" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -121,7 +121,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=5:signal=5" diskstream-id="1088698450528071">
-      <IO name="Audio 5" id="1088698450528006" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 5" id="1088698450528006" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -132,7 +132,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=6:signal=6" diskstream-id="1088698450754348">
-      <IO name="Audio 6" id="1088698450754242" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 6" id="1088698450754242" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -143,7 +143,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=7:signal=7" diskstream-id="1088698450937150">
-      <IO name="Audio 7" id="1088698450937083" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 7" id="1088698450937083" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -154,7 +154,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=8:signal=8" diskstream-id="1088698451167172">
-      <IO name="Audio 8" id="1088698451167106" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 8" id="1088698451167106" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -165,7 +165,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=9:signal=9" diskstream-id="1088698483525991">
-      <IO name="Audio 9" id="1088698483525928" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 9" id="1088698483525928" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -176,7 +176,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=10:signal=10" diskstream-id="1088698483801345">
-      <IO name="Audio 10" id="1088698483801234" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 10" id="1088698483801234" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -187,7 +187,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=11:signal=11" diskstream-id="1088698484086727">
-      <IO name="Audio 11" id="1088698484086663" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 11" id="1088698484086663" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -198,7 +198,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=12:signal=12" diskstream-id="1088698484325738">
-      <IO name="Audio 12" id="1088698484325672" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 12" id="1088698484325672" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -209,7 +209,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=13:signal=13" diskstream-id="1088698484576054">
-      <IO name="Audio 13" id="1088698484575978" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 13" id="1088698484575978" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -220,7 +220,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=14:signal=14" diskstream-id="1088698484839332">
-      <IO name="Audio 14" id="1088698484839137" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 14" id="1088698484839137" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -231,7 +231,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=15:signal=15" diskstream-id="1088698485116518">
-      <IO name="Audio 15" id="1088698485116451" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 15" id="1088698485116451" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -242,7 +242,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=16:signal=16" diskstream-id="1088698485412133">
-      <IO name="Audio 16" id="1088698485412068" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 16" id="1088698485412068" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -253,7 +253,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=17:signal=17" diskstream-id="1088698520418087">
-      <IO name="Audio 17" id="1088698520418023" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 17" id="1088698520418023" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -264,7 +264,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=18:signal=18" diskstream-id="1088698520803734">
-      <IO name="Audio 18" id="1088698520803668" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 18" id="1088698520803668" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -275,7 +275,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=19:signal=19" diskstream-id="1088698521138071">
-      <IO name="Audio 19" id="1088698521138004" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 19" id="1088698521138004" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -286,7 +286,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=20:signal=20" diskstream-id="1088698521481727">
-      <IO name="Audio 20" id="1088698521481661" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 20" id="1088698521481661" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -297,7 +297,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=21:signal=21" diskstream-id="1088698521848332">
-      <IO name="Audio 21" id="1088698521848267" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 21" id="1088698521848267" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -308,7 +308,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=22:signal=22" diskstream-id="1088698522224190">
-      <IO name="Audio 22" id="1088698522224124" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 22" id="1088698522224124" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -319,7 +319,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=23:signal=23" diskstream-id="1088698522620517">
-      <IO name="Audio 23" id="1088698522620452" inputs="{alsa_pcm:capture_1}{alsa_pcm:capture_2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 23" id="1088698522620452" inputs="{%JACK_OUTPUT%1}{%JACK_OUTPUT%2}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -330,7 +330,7 @@
       </extra>
     </Route>
     <Route muted="no" soloed="no" phase-invert="no" mute-affects-pre-fader="yes" mute-affects-post-fader="yes" mute-affects-control-outs="yes" mute-affects-main-outs="yes" order-keys="editor=24:signal=24" diskstream-id="1088698523020752">
-      <IO name="Audio 24" id="1088698523020686" inputs="{alsa_pcm:capture_2}{alsa_pcm:capture_1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
+      <IO name="Audio 24" id="1088698523020686" inputs="{%JACK_OUTPUT%2}{%JACK_OUTPUT%1}" outputs="{ardour:master/in 1}{ardour:master/in 2}" gain="1" iolimits="1,-1,-1,-1" automation-state="0x0" automation-style="0x1">
         <Panner linked="no" link_direction="0">
           <StreamPanner x="0.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
           <StreamPanner x="1.000000" type="Equal Power Stereo" automation-state="0x0" automation-style="0x1" bypassed="no" muted="no"/>
@@ -345,7 +345,7 @@
   <MixGroups/>
   <Playlists/>
   <Click>
-    <IO name="click" id="1088698373994975" inputs="" outputs="{alsa_pcm:playback_1}" gain="1" iolimits="0,0,-1,-1" automation-state="0x0" automation-style="0x1">
+    <IO name="click" id="1088698373994975" inputs="" outputs="{%JACK_INPUT%1}" gain="1" iolimits="0,0,-1,-1" automation-state="0x0" automation-style="0x1">
       <Panner linked="no" link_direction="0" automation="t1-pan-click.automation"/>
     </IO>
   </Click>

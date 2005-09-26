@@ -2,8 +2,16 @@
 
 import os
 import glob
-template_files = glob.glob('*.template')
+template_files = glob.glob('*.template.in')
 
-Import('env install_prefix')
+Import('env install_prefix subst_dict')
+
+template_build = []
+
+for template in template_files:
+    template_build = template_build + [env.SubstInFile (template[:-3], template, SUBST_DICT = subst_dict)]
+
+Default(template_build)
+
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/templates'), template_files))
 env.Alias('tarball', env.Distribute (env['DISTTREE'], [ 'SConscript' ] + template_files))
