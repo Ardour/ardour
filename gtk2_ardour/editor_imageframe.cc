@@ -162,7 +162,7 @@ Editor::_canvas_imageframe_start_handle_event(GnomeCanvasItem *item, GdkEvent *e
 {
 	ImageFrameView* ifv = (ImageFrameView*) data ;
 	Editor* editor = dynamic_cast<Editor*> (&ifv->get_time_axis_view().editor);
-	return editor->signal_canvas_imageframe_start_handle_event(item,event,ifv);
+	return editor->signal_canvas_imageframe_start_handle_event()(item,event,ifv);
 }
 
 gint
@@ -170,7 +170,7 @@ Editor::_canvas_imageframe_end_handle_event(GnomeCanvasItem *item, GdkEvent *eve
 {
 	ImageFrameView* ifv = (ImageFrameView*) data ;
 	Editor* editor = dynamic_cast<Editor*> (&ifv->get_time_axis_view().editor);
-	return editor->signal_canvas_imageframe_end_handle_event(item,event,ifv);
+	return editor->signal_canvas_imageframe_end_handle_event()(item,event,ifv);
 }
 
 
@@ -179,7 +179,7 @@ Editor::_canvas_imageframe_item_view_event(GnomeCanvasItem *item, GdkEvent* even
 {
 	ImageFrameView *ifv = (ImageFrameView *) data ;
 	Editor* editor = dynamic_cast<Editor*> (&ifv->get_time_axis_view().editor);
-	return editor->signal_canvas_imageframe_item_view_event (item, event, ifv) ;
+	return editor->signal_canvas_imageframe_item_view_event() (item, event, ifv) ;
 }
 
 gint
@@ -187,7 +187,7 @@ Editor::_canvas_imageframe_view_event(GnomeCanvasItem *item, GdkEvent* event, gp
 {
 	ImageFrameTimeAxis *ifta = (ImageFrameTimeAxis*) data ;
 	Editor* editor = dynamic_cast<Editor*> (&ifta->editor);
-	return editor->signal_canvas_imageframe_view_event (item, event, ifta);
+	return editor->signal_canvas_imageframe_view_event() (item, event, ifta);
 }
 
 gint
@@ -195,7 +195,7 @@ Editor::_canvas_marker_time_axis_view_event(GnomeCanvasItem* item, GdkEvent* eve
 {
 	MarkerTimeAxis* mta = (MarkerTimeAxis*)data ;
 	Editor* editor = dynamic_cast<Editor*> (&mta->editor);
-	return editor->signal_canvas_marker_time_axis_view_event(item,event,mta);
+	return editor->signal_canvas_marker_time_axis_view_event()(item,event,mta);
 }
 
 gint
@@ -203,7 +203,7 @@ Editor::_canvas_markerview_item_view_event(GnomeCanvasItem *item, GdkEvent* even
 {
 	MarkerView* mv = (MarkerView*) data ;
 	Editor* editor = dynamic_cast<Editor*> (&mv->get_time_axis_view().editor);
-	return editor->signal_canvas_markerview_item_view_event(item,event,mv);
+	return editor->signal_canvas_markerview_item_view_event()(item,event,mv);
 }
  
 gint
@@ -211,7 +211,7 @@ Editor::_canvas_markerview_start_handle_event(GnomeCanvasItem* item, GdkEvent* e
 {
 	MarkerView* mv = (MarkerView*)data ;
 	Editor* editor = dynamic_cast<Editor*> (&mv->get_time_axis_view().editor);
-	return editor->signal_canvas_markerview_start_handle_event(item,event,mv);
+	return editor->signal_canvas_markerview_start_handle_event()(item,event,mv);
 }
 
 gint
@@ -219,7 +219,7 @@ Editor::_canvas_markerview_end_handle_event(GnomeCanvasItem* item, GdkEvent* eve
 {
 	MarkerView* mv = (MarkerView*)data ;
 	Editor* editor = dynamic_cast<Editor*> (&mv->get_time_axis_view().editor);
-	return editor->signal_canvas_markerview_end_handle_event(item,event,mv);
+	return editor->signal_canvas_markerview_end_handle_event()(item,event,mv);
 }
 
 /**

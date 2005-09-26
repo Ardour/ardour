@@ -147,7 +147,7 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
 	
 	_plugin_selector = new PluginSelector (PluginManager::the_manager());
-	_plugin_selector->signal_delete_event.connect (bind (ptr_fun (just_hide_it), 
+	_plugin_selector->signal_delete_event().connect (bind (ptr_fun (just_hide_it), 
 						     static_cast<Window *> (_plugin_selector)));
 
 

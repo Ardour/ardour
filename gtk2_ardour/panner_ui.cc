@@ -119,9 +119,9 @@ PannerUI::PannerUI (IO& io, Session& s)
 	panning_link_direction_button.clicked.connect
 		(mem_fun(*this, &PannerUI::panning_link_direction_clicked));
 
-	panning_link_button.signal_button_press_event.connect
+	panning_link_button.signal_button_press_event().connect
 		(mem_fun(*this, &PannerUI::panning_link_button_press));
-	panning_link_button.signal_button_release_event.connect
+	panning_link_button.signal_button_release_event().connect
 		(mem_fun(*this, &PannerUI::panning_link_button_release));
 
 	panning_up.set_border_width (3);
@@ -334,8 +334,8 @@ PannerUI::setup_pan ()
 			bc->set_name ("PanSlider");
 			bc->set_shadow_type (GTK_SHADOW_NONE);
 			bc->set_style (BarController::Line);
-			bc->get_spin_button().signal_signal_focus_in_event().connect (mem_fun(*this, &PannerUI::entry_focus_event));
-			bc->get_spin_button().signal_signal_focus_out_event().connect (mem_fun(*this, &PannerUI::entry_focus_event));
+			bc->get_spin_button().signal_focus_in_event()().connect (mem_fun(*this, &PannerUI::entry_focus_event));
+			bc->get_spin_button().signal_focus_out_event()().connect (mem_fun(*this, &PannerUI::entry_focus_event));
 
 			bc->StartGesture.connect (bind (mem_fun (_io, &IO::start_pan_touch), (uint32_t) asz));
 			bc->StopGesture.connect (bind (mem_fun (_io, &IO::end_pan_touch), (uint32_t) asz));
@@ -344,7 +344,7 @@ PannerUI::setup_pan ()
 			snprintf (buf, sizeof (buf), _("panner for channel %u"), asz + 1);
 			ARDOUR_UI::instance()->tooltips().set_tip (bc->event_widget(), buf);
 
-			bc->event_widget().signal_button_release_event.connect
+			bc->event_widget().signal_button_release_event().connect
 				(bind (mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) asz));
 
 			pan_bars.push_back (bc);

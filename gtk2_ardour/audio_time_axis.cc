@@ -156,23 +156,23 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 
 	_route.panner().Changed.connect (mem_fun(*this, &AudioTimeAxisView::update_pans));
 
-	solo_button->signal_signal_button_press_event.connect (mem_fun(*this, &RouteUI::solo_press));
-	solo_button->signal_signal_button_release_event.connect (mem_fun(*this, &RouteUI::solo_release));
-	mute_button->signal_signal_button_press_event.connect (mem_fun(*this, &RouteUI::mute_press));
-	mute_button->signal_signal_button_release_event.connect (mem_fun(*this, &RouteUI::mute_release));
-	rec_enable_button->signal_signal_button_press_event.connect (mem_fun(*this, &RouteUI::rec_enable_press));
- 	edit_group_button.signal_button_release_event.connect (mem_fun(*this, &AudioTimeAxisView::edit_click));
+	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press));
+	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release));
+	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press));
+	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release));
+	rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
+ 	edit_group_button.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::edit_click));
 	playlist_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::playlist_click));
 	automation_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::automation_click));
-	size_button.signal_button_release_event.connect (mem_fun(*this, &AudioTimeAxisView::size_click));
+	size_button.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::size_click));
 	visual_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::visual_click));
 	hide_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::hide_click));
 
 	name_entry.activate.connect (mem_fun(*this, &AudioTimeAxisView::name_entry_activated));
-	name_entry.signal_signal_focus_out_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_focus_out_handler));
-	name_entry.signal_button_press_event.connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_press_handler));
-	name_entry.signal_button_release_event.connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_release_handler));
-	name_entry.signal_key_release_event.connect (mem_fun(*this, &AudioTimeAxisView::name_entry_key_release_handler));
+	name_entry.signal_focus_out_event()().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_focus_out_handler));
+	name_entry.signal_button_press_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_press_handler));
+	name_entry.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_release_handler));
+	name_entry.signal_key_release_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_key_release_handler));
 	
 	if (is_audio_track()) {
 		controls_table.attach (*rec_enable_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);

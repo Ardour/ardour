@@ -411,8 +411,8 @@ OptionEditor::setup_path_options()
 
 	session_raid_entry.activate.connect (mem_fun(*this, &OptionEditor::raid_path_changed));
 
-	session_raid_entry.signal_signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	session_raid_entry.signal_signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::raid_path_changed));
+	session_raid_entry.signal_focus_in_event()().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	session_raid_entry.signal_focus_out_event()().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::raid_path_changed));
 
 	label = manage(new Label(_("session RAID path")));
 	label->set_name ("OptionsLabel");
@@ -427,7 +427,7 @@ OptionEditor::setup_path_options()
 	vector<string> nfstrings = internationalize (native_format_strings);
 
 	set_popdown_strings (native_format_combo, nfstrings);
-	native_format_combo.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &OptionEditor::native_format_chosen));
+	native_format_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::native_format_chosen));
 
 	fixup_combo_size (native_format_combo, nfstrings);
 
@@ -488,7 +488,7 @@ OptionEditor::setup_fade_options ()
 	dumb.push_back (lmode_strings[Session::AddHigher]);
 	set_popdown_strings (layer_mode_combo, dumb);
 
-	layer_mode_combo.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &OptionEditor::layer_mode_chosen));
+	layer_mode_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::layer_mode_chosen));
 
 	fixup_combo_size (layer_mode_combo, layer_mode_strings);
 
@@ -506,7 +506,7 @@ OptionEditor::setup_fade_options ()
 	dumb.push_back (xfade_model_strings[ShortCrossfade]);
 	set_popdown_strings (xfade_model_combo, dumb);
 
-	xfade_model_combo.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &OptionEditor::xfade_model_chosen));
+	xfade_model_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::xfade_model_chosen));
 
 	fixup_combo_size (xfade_model_combo, xfade_model_strings);
 
@@ -704,7 +704,7 @@ OptionEditor::setup_display_options ()
 	dumb.push_back (_("Medium"));
 	dumb.push_back (_("Long"));
 	set_popdown_strings (meter_hold_combo, dumb);
-	meter_hold_combo.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &OptionEditor::meter_hold_chosen));
+	meter_hold_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::meter_hold_chosen));
 	hbox = manage (new HBox);
 	hbox->set_border_width (8);
 	hbox->set_spacing (8);
@@ -723,7 +723,7 @@ OptionEditor::setup_display_options ()
 	dumb.push_back (_("Faster"));
 	dumb.push_back (_("Fastest"));
 	set_popdown_strings (meter_falloff_combo, dumb);
-	meter_falloff_combo.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &OptionEditor::meter_falloff_chosen));
+	meter_falloff_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::meter_falloff_chosen));
 	hbox = manage (new HBox);
 	hbox->set_border_width (8);
 	hbox->set_spacing (8);
@@ -836,7 +836,7 @@ OptionEditor::setup_sync_options ()
 	slave_type_combo.set_value_in_list (true, false);
 	slave_type_combo.get_entry()->set_editable (false);
 	slave_type_combo.get_entry()->set_name ("OptionsEntry");
-	slave_type_combo.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &OptionEditor::slave_type_chosen));
+	slave_type_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::slave_type_chosen));
 
 	dumb.clear ();
 	dumb.push_back (X_("24 FPS"));
@@ -845,7 +845,7 @@ OptionEditor::setup_sync_options ()
 	dumb.push_back (X_("30 FPS non-drop"));
 	
 	set_popdown_strings (smpte_fps_combo, dumb);
-	smpte_fps_combo.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &OptionEditor::smpte_fps_chosen));
+	smpte_fps_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::smpte_fps_chosen));
 	
 	smpte_offset_clock.set_mode (AudioClock::SMPTE);
 	smpte_offset_clock.ValueChanged.connect (mem_fun(*this, &OptionEditor::smpte_offset_chosen));
@@ -900,7 +900,7 @@ OptionEditor::setup_sync_options ()
 
 	jack_time_master_button.set_active (Config->get_jack_time_master());
 
-	send_mtc_button.signal_button_press_event.connect (bind (mem_fun(*this, &OptionEditor::send_mtc_toggled), &send_mtc_button));
+	send_mtc_button.signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::send_mtc_toggled), &send_mtc_button));
 	jack_time_master_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::jack_time_master_clicked));
 	smpte_offset_negative_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::smpte_offset_negative_clicked));
 }
@@ -994,19 +994,19 @@ OptionEditor::setup_midi_options ()
 		}
 
 		tb->set_active (!(*i).second->input()->offline());
-		tb->signal_button_press_event.connect (bind (mem_fun(*this, &OptionEditor::port_online_toggled), (*i).second, tb));
+		tb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::port_online_toggled), (*i).second, tb));
 		(*i).second->input()->OfflineStatusChanged.connect (bind (mem_fun(*this, &OptionEditor::map_port_online), (*i).second, tb));
 		table->attach (*tb, 1, 2, n+2, n+3, 0, 0);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
-		tb->signal_button_press_event.connect (bind (mem_fun(*this, &OptionEditor::port_trace_in_toggled), (*i).second, tb));
+		tb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::port_trace_in_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
 		table->attach (*tb, 2, 3, n+2, n+3, 0, 0);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
-		tb->signal_button_press_event.connect (bind (mem_fun(*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
+		tb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
 		table->attach (*tb, 3, 4, n+2, n+3, 0, 0);
 
@@ -1019,7 +1019,7 @@ OptionEditor::setup_midi_options ()
 			rb->set_group (first_mtc_button->group());
 		}
 		table->attach (*rb, 4, 5, n+2, n+3, 0, 0);
-		rb->signal_button_press_event.connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
+		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
 
 		if (Config->get_mtc_port_name() == i->first) {
 			rb->set_active (true);
@@ -1034,7 +1034,7 @@ OptionEditor::setup_midi_options ()
 			rb->set_group (first_mmc_button->group());
 		}
 		table->attach (*rb, 6, 7, n+2, n+3, 0, 0);
-		rb->signal_button_press_event.connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb));
+		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb));
 
 		if (Config->get_mmc_port_name() == i->first) {
 			rb->set_active (true);
@@ -1049,7 +1049,7 @@ OptionEditor::setup_midi_options ()
 			rb->set_group (first_midi_button->group());
 		}
 		table->attach (*rb, 8, 9, n+2, n+3, 0, 0);
-		rb->signal_button_press_event.connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb));
+		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb));
 
 		if (Config->get_midi_port_name() == i->first) {
 			rb->set_active (true);
@@ -1551,10 +1551,10 @@ OptionEditor::setup_click_editor ()
 	click_path_entry.activate.connect (mem_fun(*this, &OptionEditor::click_sound_changed));
 	click_emphasis_path_entry.activate.connect (mem_fun(*this, &OptionEditor::click_emphasis_sound_changed));
 
-	click_path_entry.signal_signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	click_path_entry.signal_signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
-	click_emphasis_path_entry.signal_signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	click_emphasis_path_entry.signal_signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
+	click_path_entry.signal_focus_in_event()().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	click_path_entry.signal_focus_out_event()().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
+	click_emphasis_path_entry.signal_focus_in_event()().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	click_emphasis_path_entry.signal_focus_out_event()().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
 
 	click_browse_button.set_name ("EditorGTKButton");
 	click_emphasis_browse_button.set_name ("EditorGTKButton");
@@ -1849,7 +1849,7 @@ OptionEditor::setup_keyboard_options ()
 	}
 
 	set_popdown_strings (edit_modifier_combo, dumb);
-	edit_modifier_combo.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &OptionEditor::edit_modifier_chosen));
+	edit_modifier_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::edit_modifier_chosen));
 
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
@@ -1876,7 +1876,7 @@ OptionEditor::setup_keyboard_options ()
 	edit_button_adjustment.value_changed.connect (mem_fun(*this, &OptionEditor::edit_button_changed));
 
 	set_popdown_strings (delete_modifier_combo, dumb);
-	delete_modifier_combo.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &OptionEditor::delete_modifier_chosen));
+	delete_modifier_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::delete_modifier_chosen));
 
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == Keyboard::delete_modifier ()) {
@@ -1903,7 +1903,7 @@ OptionEditor::setup_keyboard_options ()
 	delete_button_adjustment.value_changed.connect (mem_fun(*this, &OptionEditor::delete_button_changed));
 
 	set_popdown_strings (snap_modifier_combo, dumb);
-	snap_modifier_combo.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &OptionEditor::snap_modifier_chosen));
+	snap_modifier_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::snap_modifier_chosen));
 	
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {

@@ -21,7 +21,11 @@
 #ifndef __audio_clock_h__
 #define __audio_clock_h__
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/label.h>
+#include <gtkmm/frame.h>
 #include <ardour/ardour.h>
 
 namespace ARDOUR {

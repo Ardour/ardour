@@ -22,16 +22,24 @@
 #define __gtkmm2ext_prompter_h__
 
 #include <string>
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/label.h>
+#include <gtkmm/dialog.h>
 #include <sigc++/sigc++.h>
+
+namespace Gtk {
+	class Window;
+}
 
 namespace Gtkmm2ext {
 
-class Prompter : public Gtk::Window
+class Prompter : public Gtk::Dialog
 
 {
   public:
 	Prompter (bool modal = false);
+	Prompter (Gtk::Window& parent, bool modal = false);
 	~Prompter () {};
 
 	void set_prompt (std::string prompt) {
@@ -45,40 +53,17 @@ class Prompter : public Gtk::Window
 
 	void change_labels (std::string ok, std::string cancel);
 
-	enum PrompterStatus {
-		entered,
-		cancelled
-	};
-
-	PrompterStatus status;
 	void get_result (std::string &str);
-
-	/* the prompter will send a `done' signal when it is finished.
-	   the "caller" can then check `status' and if it wants to
-	   can then call `get_result()'.
-	*/
-
-	sigc::signal<void> done;
 
   protected:
 	Gtk::Entry& the_entry() { return entry; }
 
   private:
-	Gtk::VBox packer;
-	Gtk::HBox buttonBox;
 	Gtk::Entry entry;
 	Gtk::VBox entryBox;
 	Gtk::Label entryLabel;
-	Gtk::Button ok;
-	Gtk::Button cancel;
-
-	void activated ();
-	void cancel_click ();
-
-	bool deleted (GdkEventAny *);
-
-	void on_realize ();
-	void on_map ();
+	
+	void init ();
 };
 
 } /* namespace */

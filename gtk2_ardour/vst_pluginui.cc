@@ -69,7 +69,7 @@ VSTPluginUI::package (Gtk::Window& win)
 
 	/* forward configure events to plugin window */
 
-	win.signal_configure_event.connect (bind (mem_fun (*this, &VSTPluginUI::configure_handler), socket.gobj()));
+	win.signal_configure_event().connect (bind (mem_fun (*this, &VSTPluginUI::configure_handler), socket.gobj()));
 
 	/* XXX in GTK2, use add_id() instead of steal, although add_id()
 	   assumes that the window's owner understands the XEmbed protocol.

@@ -108,10 +108,10 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 
 	_route.redirects_changed.connect (mem_fun(*this, &RedirectBox::redirects_changed));
 
-	redirect_display.signal_button_press_event.connect (mem_fun(*this, &RedirectBox::redirect_button));
-	redirect_display.signal_button_release_event.connect (mem_fun(*this, &RedirectBox::redirect_button));
+	redirect_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::redirect_button));
+	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button));
 
-	redirect_display.signal_button_release_event.connect_after (ptr_fun (do_not_propagate));
+	redirect_display.signal_button_release_event().connect_after (ptr_fun (do_not_propagate));
 	_plugin_selector.hide.connect(mem_fun(*this,&RedirectBox::disconnect_newplug));
 
 	redirect_display.click_column.connect (mem_fun(*this, &RedirectBox::show_redirect_menu));
@@ -413,7 +413,7 @@ RedirectBox::build_redirect_menu (CList& clist)
 						    &RedirectBox::edit_redirect)));
 	selection_dependent_items.push_back (items.back());
 
-	menu->signal_map_event.connect (mem_fun(*this, &RedirectBox::redirect_menu_map_handler));
+	menu->signal_map_event().connect (mem_fun(*this, &RedirectBox::redirect_menu_map_handler));
 
 	return menu;
 }

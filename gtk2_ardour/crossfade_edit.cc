@@ -419,7 +419,7 @@ gint
 CrossfadeEditor::_canvas_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
 {
 	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
-	return ed->signal_canvas_event (item, event);
+	return ed->signal_canvas_event() (item, event);
 }
 
 gint
@@ -626,7 +626,7 @@ gint
 CrossfadeEditor::_point_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
 {
 	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
-	return ed->signal_point_event (item, event);
+	return ed->signal_point_event() (item, event);
 }
 
 gint
@@ -681,7 +681,7 @@ gint
 CrossfadeEditor::_curve_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
 {
 	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
-	return ed->signal_curve_event (item, event);
+	return ed->signal_curve_event() (item, event);
 }
 
 gint

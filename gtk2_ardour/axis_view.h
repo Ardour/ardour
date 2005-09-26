@@ -42,7 +42,7 @@ class AxisView : public sigc::trackable
 	 *
 	 * @return the current Track Color
 	 */
-	Gdk_Color color() const { return _color; }
+	Gdk::Color color() const { return _color; }
 
 	ARDOUR::Session& session() const { return _session; }
 
@@ -81,7 +81,7 @@ class AxisView : public sigc::trackable
 
 
 	ARDOUR::Session& _session;
-	Gdk_Color _color;
+	Gdk::Color _color;
 
 	static list<GdkColor> used_colors;
 

@@ -261,7 +261,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 					cerr << "PRESS: delivering to target " << target << endl;
 				}
 #endif
-				target->signal_key_press_event (event, state, handled);
+				target->key_press_event (event, state, handled);
 			}
 			
 			if (!handled && default_target) {
@@ -270,7 +270,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 					cerr << "PRESS: not handled, delivering to default target " << default_target << endl;
 				}
 #endif
-				default_target->signal_key_press_event (event, state, handled);
+				default_target->key_press_event (event, state, handled);
 			}
 
 #if KBD_DEBUG
@@ -307,7 +307,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 				cerr << "RELEASE: delivering to target " << target << endl;
 			}
 #endif
-			target->signal_key_release_event (event, state);
+			target->key_release_event (event, state);
 		} 
 
 		if (default_target) {
@@ -316,7 +316,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 				cerr << "RELEASE: delivering to default target " << default_target << endl;
 			}
 #endif
-			default_target->signal_key_release_event (event, state);
+			default_target->key_release_event (event, state);
 		}
 	}
 
@@ -849,8 +849,8 @@ Keyboard::register_target (KeyboardTarget *kt)
 		return;
 	}
 
-	kt->window().signal_enter_notify_event.connect (bind (mem_fun(*this, &Keyboard::enter_window), kt));
-	kt->window().signal_leave_notify_event.connect (mem_fun(*this, &Keyboard::leave_window));
+	kt->window().signal_enter_notify_event().connect (bind (mem_fun(*this, &Keyboard::enter_window), kt));
+	kt->window().signal_leave_notify_event().connect (mem_fun(*this, &Keyboard::leave_window));
 
 	kt->GoingAway.connect (bind (mem_fun(*this, &Keyboard::maybe_unset_target), kt));
 	kt->Hiding.connect (bind (mem_fun(*this, &Keyboard::maybe_unset_target), kt));
@@ -874,7 +874,7 @@ Keyboard::set_current_dialog (ArdourDialog* dialog)
 				(bind (mem_fun(*this, &Keyboard::set_current_dialog), 
 				       reinterpret_cast<ArdourDialog *>(0)));
 			
-			current_dialog->signal_unmap_event.connect (mem_fun(*this, &Keyboard::current_dialog_vanished));
+			current_dialog->signal_unmap_event().connect (mem_fun(*this, &Keyboard::current_dialog_vanished));
 			
 			known_dialogs.push_back (dialog);
 		}

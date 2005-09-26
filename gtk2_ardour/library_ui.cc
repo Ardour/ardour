@@ -1117,8 +1117,8 @@ SoundFileBox::setup_labels (string uri)
 	path_entry.set_text (file);
 	path_entry.set_position (-1);
 
-	path_entry.signal_signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
-	path_entry.signal_signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
+	path_entry.signal_focus_in_event()().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
+	path_entry.signal_focus_out_event()().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
 
 	length.set_alignment (0.0f, 0.0f);
 	length.set_text (compose("Length: %1", length2string(sf_info->frames, sf_info->samplerate)));

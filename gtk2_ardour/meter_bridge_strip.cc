@@ -61,10 +61,10 @@ MeterBridgeStrip::MeterBridgeStrip (AudioEngine &eng,
 	label.set_name ("ChannelMeterLabel");
 
 	label_ebox.set_name ("MeterBridgeWindow");
-	label_ebox.signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK);
+	label_ebox.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	label_ebox.add (label);
 
-	label_ebox.signal_button_release_event.connect (mem_fun(*this, &MeterBridgeStrip::label_button_press_release));
+	label_ebox.signal_button_release_event().connect (mem_fun(*this, &MeterBridgeStrip::label_button_press_release));
 	ARDOUR_UI::instance()->tooltips().set_tip (label_ebox, _route.name());
 
 	over_long_label.set_text ("0");
@@ -102,8 +102,8 @@ MeterBridgeStrip::MeterBridgeStrip (AudioEngine &eng,
 
 	below_meter_vbox.pack_start (label_ebox);
 
-	over_short_button.signal_button_release_event.connect (mem_fun(*this,&MeterBridgeStrip::gui_clear_overs));
-	over_long_button.signal_button_release_event.connect (mem_fun(*this,&MeterBridgeStrip::gui_clear_overs));
+	over_short_button.signal_button_release_event().connect (mem_fun(*this,&MeterBridgeStrip::gui_clear_overs));
+	over_long_button.signal_button_release_event().connect (mem_fun(*this,&MeterBridgeStrip::gui_clear_overs));
 
 	last_over_short = 0;
 	last_over_long = 0;
@@ -215,22 +215,24 @@ MeterBridgeStrip::set_meter_on (bool yn)
 gint
 MeterBridgeStrip::label_button_press_release (GdkEventButton *ev)
 {
+	string name;
 	ArdourPrompter prompter (true);
+
 	prompter.set_prompt (_("New name for meter:"));
 	prompter.set_initial_text (label.get_text());
-	prompter.done.connect (Gtk::Main::quit.slot());
 	prompter.show_all();
 	
-	Gtk::Main::run();
-	
-	if (prompter.status == Gtkmm2ext::Prompter::entered) {
-		string name;
-
+	switch (prompter.run ()) {
+	case Gtk::RESPONSE_ACCEPT:
+		
 		prompter.get_result (name);
-
+		
 		if (name.length()) {
 			label.set_text(name);
 		}
+
+	default:
+		break;
 	}
 	
 	return FALSE;

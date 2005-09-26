@@ -387,8 +387,8 @@ Editor::Editor (AudioEngine& eng)
 	edit_vscrollbar.set_adjustment(track_canvas_scroller.get_vadjustment());
 	edit_hscrollbar.set_adjustment(track_canvas_scroller.get_hadjustment());
 
- 	edit_hscrollbar.signal_button_press_event.connect (mem_fun(*this, &Editor::hscroll_slider_button_press));
- 	edit_hscrollbar.signal_button_release_event.connect (mem_fun(*this, &Editor::hscroll_slider_button_release));
+ 	edit_hscrollbar.signal_button_press_event().connect (mem_fun(*this, &Editor::hscroll_slider_button_press));
+ 	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscroll_slider_button_release));
  	edit_hscrollbar.size_allocate.connect (mem_fun(*this, &Editor::hscroll_slider_allocate));
 	
 	time_canvas_scroller.add (*time_canvas);
@@ -406,8 +406,8 @@ Editor::Editor (AudioEngine& eng)
 
 	viewport->set_shadow_type (GTK_SHADOW_NONE);
 	viewport->set_name ("EditControlsBase");
-	viewport->signal_add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK);
-	viewport->signal_button_release_event.connect (mem_fun(*this, &Editor::edit_controls_button_release));
+	viewport->signal_add_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK);
+	viewport->signal_button_release_event().connect (mem_fun(*this, &Editor::edit_controls_button_release));
 
 	build_cursors ();
 	setup_toolbar ();
@@ -471,9 +471,9 @@ Editor::Editor (AudioEngine& eng)
 
 	time_button_event_box.add (time_button_vbox);
 	
-	time_button_event_box.signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	time_button_event_box.signal_set_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	time_button_event_box.set_name ("TimebarLabelBase");
-	time_button_event_box.signal_button_release_event.connect (mem_fun(*this, &Editor::ruler_label_button_release));
+	time_button_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
 
 	/* these enable us to have a dedicated window (for cursor setting, etc.) 
 	   for the canvas areas.
@@ -482,7 +482,7 @@ Editor::Editor (AudioEngine& eng)
 	track_canvas_event_box.add (track_canvas_scroller);
 
 	time_canvas_event_box.add (time_canvas_vbox);
-	time_canvas_event_box.signal_set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
+	time_canvas_event_box.signal_set_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
 	
 	edit_packer.set_col_spacings (0);
@@ -581,7 +581,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_group_list_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 	edit_group_list_button.signal_clicked().connect (mem_fun(*this, &Editor::edit_group_list_button_clicked));
-	edit_group_list.signal_button_press_event.connect (mem_fun(*this, &Editor::edit_group_list_button_press_event));
+	edit_group_list.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event));
 	edit_group_list.select_row.connect (mem_fun(*this, &Editor::edit_group_selected));
 	edit_group_list.unselect_row.connect (mem_fun(*this, &Editor::edit_group_unselected));
 
@@ -612,7 +612,7 @@ Editor::Editor (AudioEngine& eng)
 
 	region_list_hidden_node = region_list_display.rows().end();
 
-	region_list_display.signal_add_events (GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK|Gdk::POINTER_MOTION_MASK);
+	region_list_display.signal_add_event()s (GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK|Gdk::POINTER_MOTION_MASK);
 
 	region_list_display.drag_dest_set (GTK_DEST_DEFAULT_ALL,
 					   target_table, n_targets - 1,
@@ -634,13 +634,13 @@ Editor::Editor (AudioEngine& eng)
 
 	region_list_display.set_flags (Gtk::CAN_FOCUS);
 
-	region_list_display.signal_key_press_event.connect (mem_fun(*this, &Editor::region_list_display_key_press));
-	region_list_display.signal_key_release_event.connect (mem_fun(*this, &Editor::region_list_display_key_release));
-	region_list_display.signal_button_press_event.connect (mem_fun(*this, &Editor::region_list_display_button_press));
-	region_list_display.signal_button_release_event.connect (mem_fun(*this, &Editor::region_list_display_button_release));
-	region_list_display.signal_motion_notify_event.connect (mem_fun(*this, &Editor::region_list_display_motion));
-	region_list_display.signal_enter_notify_event.connect (mem_fun(*this, &Editor::region_list_display_enter_notify));
-	region_list_display.signal_leave_notify_event.connect (mem_fun(*this, &Editor::region_list_display_leave_notify));
+	region_list_display.signal_key_press_event().connect (mem_fun(*this, &Editor::region_list_display_key_press));
+	region_list_display.signal_key_release_event().connect (mem_fun(*this, &Editor::region_list_display_key_release));
+	region_list_display.signal_button_press_event().connect (mem_fun(*this, &Editor::region_list_display_button_press));
+	region_list_display.signal_button_release_event().connect (mem_fun(*this, &Editor::region_list_display_button_release));
+	region_list_display.signal_motion_notify_event().connect (mem_fun(*this, &Editor::region_list_display_motion));
+	region_list_display.signal_enter_notify_event().connect (mem_fun(*this, &Editor::region_list_display_enter_notify));
+	region_list_display.signal_leave_notify_event().connect (mem_fun(*this, &Editor::region_list_display_leave_notify));
 	region_list_display.select_row.connect (mem_fun(*this, &Editor::region_list_display_selected));
 	region_list_display.unselect_row.connect (mem_fun(*this, &Editor::region_list_display_unselected));
 	region_list_display.click_column.connect (mem_fun(*this, &Editor::region_list_column_click));
@@ -653,7 +653,7 @@ Editor::Editor (AudioEngine& eng)
 	named_selection_display.column_titles_active ();
 	named_selection_display.set_selection_mode (GTK_SELECTION_SINGLE);
 
-	named_selection_display.signal_button_press_event.connect (mem_fun(*this, &Editor::named_selection_display_button_press));
+	named_selection_display.signal_button_press_event().connect (mem_fun(*this, &Editor::named_selection_display_button_press));
 	named_selection_display.select_row.connect (mem_fun(*this, &Editor::named_selection_display_selected));
 	named_selection_display.unselect_row.connect (mem_fun(*this, &Editor::named_selection_display_unselected));
 
@@ -686,10 +686,10 @@ Editor::Editor (AudioEngine& eng)
 	canvas_region_list_pane.set_data ("collapse-direction", (gpointer) 0);
 	track_list_canvas_pane.set_data ("collapse-direction", (gpointer) 1);
 
-	route_group_vpane.signal_button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*> (&route_group_vpane)));
-	region_selection_vpane.signal_button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*> (&region_selection_vpane)));
-	canvas_region_list_pane.signal_button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*> (&canvas_region_list_pane)));
-	track_list_canvas_pane.signal_button_release_event.connect (bind (ptr_fun (pane_handler), static_cast<Paned*> (&track_list_canvas_pane)));
+	route_group_vpane.signal_button_release_event().connect (bind (ptr_fun (pane_handler), static_cast<Paned*> (&route_group_vpane)));
+	region_selection_vpane.signal_button_release_event().connect (bind (ptr_fun (pane_handler), static_cast<Paned*> (&region_selection_vpane)));
+	canvas_region_list_pane.signal_button_release_event().connect (bind (ptr_fun (pane_handler), static_cast<Paned*> (&canvas_region_list_pane)));
+	track_list_canvas_pane.signal_button_release_event().connect (bind (ptr_fun (pane_handler), static_cast<Paned*> (&track_list_canvas_pane)));
 
 	top_hbox.pack_start (toolbar_frame, true, true);
 
@@ -706,7 +706,7 @@ Editor::Editor (AudioEngine& eng)
 	vpacker.pack_end (global_hpacker, true, true);
 	
 	_playlist_selector = new PlaylistSelector();
-	_playlist_selector->signal_delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
+	_playlist_selector->signal_delete_event().connect (bind (ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
 
 	AudioRegionView::AudioRegionViewGoingAway.connect (mem_fun(*this, &Editor::catch_vanishing_audio_regionview));
 
@@ -830,9 +830,9 @@ Editor::initialize_canvas ()
 	track_canvas = wrap (track_gnome_canvas);
 	track_canvas->set_name ("EditorMainCanvas");
 
-	track_canvas->signal_add_events (Gdk::POINTER_MOTION_HINT_MASK);
+	track_canvas->signal_add_event()s (Gdk::POINTER_MOTION_HINT_MASK);
 
-	track_canvas->signal_leave_notify_event.connect (mem_fun(*this, &Editor::left_track_canvas));
+	track_canvas->signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
 	
 	/* set up drag-n-drop */
 
@@ -871,7 +871,7 @@ Editor::initialize_canvas ()
 	time_canvas = wrap (time_gnome_canvas);
 	time_canvas->set_name ("EditorTimeCanvas");
 
-	time_canvas->signal_add_events (Gdk::POINTER_MOTION_HINT_MASK);
+	time_canvas->signal_add_event()s (Gdk::POINTER_MOTION_HINT_MASK);
 
 	meter_group = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(time_gnome_canvas)),
 					    gnome_canvas_group_get_type(),
@@ -2298,7 +2298,7 @@ Editor::add_region_context_items (StreamView* sv, Region* region, Menu_Helpers::
 	   become selected.
 	*/
 
-	region_menu->signal_map_event.connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, region));
+	region_menu->signal_map_event().connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, region));
 
 	items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
 	items.push_back (MenuElem (_("Raise to top layer"), mem_fun(*this, &Editor::raise_region_to_top)));
@@ -3096,7 +3096,7 @@ Editor::setup_toolbar ()
 	mouse_audition_button.unset_flags (Gtk::CAN_FOCUS);
 
 	mouse_select_button.toggled.connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
-	mouse_select_button.signal_button_release_event.connect (mem_fun(*this, &Editor::mouse_select_button_release));
+	mouse_select_button.signal_button_release_event().connect (mem_fun(*this, &Editor::mouse_select_button_release));
 
 	mouse_move_button.toggled.connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
 	mouse_gain_button.toggled.connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));
@@ -3135,7 +3135,7 @@ Editor::setup_toolbar ()
 	edit_mode_box.pack_start (edit_mode_label, false, false);
 	edit_mode_box.pack_start (edit_mode_selector, false, false);
 
-	edit_mode_selector.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &Editor::edit_mode_selection_done));
+	edit_mode_selector.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
 
 	/* Snap Type */
 
@@ -3157,7 +3157,7 @@ Editor::setup_toolbar ()
 	snap_type_box.pack_start (snap_type_label, false, false);
 	snap_type_box.pack_start (snap_type_selector, false, false);
 
-	snap_type_selector.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &Editor::snap_type_selection_done));
+	snap_type_selector.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &Editor::snap_type_selection_done));
 
 	/* Snap mode, not snap type */
 
@@ -3176,7 +3176,7 @@ Editor::setup_toolbar ()
 	snap_mode_box.pack_start (snap_mode_label, false, false);
 	snap_mode_box.pack_start (snap_mode_selector, false, false);
 
-	snap_mode_selector.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &Editor::snap_mode_selection_done));
+	snap_mode_selector.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
 
 	/* Zoom focus mode */
 
@@ -3197,7 +3197,7 @@ Editor::setup_toolbar ()
 	zoom_focus_box.pack_start (zoom_focus_label, false, false);
 	zoom_focus_box.pack_start (zoom_focus_selector, false, false);
 
-	zoom_focus_selector.get_popwin()->signal_unmap_event.connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
+	zoom_focus_selector.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 
 	/* selection/cursor clocks */
 
@@ -3997,8 +3997,8 @@ Editor::duplicate_dialog (bool dup_region)
 	entry.activate.connect (bind (slot (win, &ArdourDialog::stop), 0));
 	cancel_button.signal_clicked().connect (bind (slot (win, &ArdourDialog::stop), 1));
 
-	entry.signal_signal_focus_in_event().connect (slot (ARDOUR_UI::generic_focus_in_event));
-	entry.signal_signal_focus_out_event().connect (slot (ARDOUR_UI::generic_focus_out_event));
+	entry.signal_focus_in_event()().connect (slot (ARDOUR_UI::generic_focus_in_event));
+	entry.signal_focus_out_event()().connect (slot (ARDOUR_UI::generic_focus_out_event));
 	
 	entry.set_text ("1");
 	set_size_request_to_display_given_text (entry, X_("12345678"), 20, 15);
@@ -4505,7 +4505,7 @@ Editor::edit_xfade (Crossfade* xfade)
 	
 	cew.ok_button.signal_clicked().connect (bind (slot (cew, &ArdourDialog::stop), 1));
 	cew.cancel_button.signal_clicked().connect (bind (slot (cew, &ArdourDialog::stop), 0));
-	cew.signal_delete_event.connect (slot (cew, &ArdourDialog::wm_doi_event_stop));
+	cew.signal_delete_event().connect (slot (cew, &ArdourDialog::wm_doi_event_stop));
 
 	cew.run ();
 	

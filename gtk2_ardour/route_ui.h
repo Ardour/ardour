@@ -53,9 +53,8 @@ class RouteUI : public virtual AxisView
 	string name() const;
 	
 	ARDOUR::Route& _route;
-
 	
-	void set_color (Gdk_Color c);
+	void set_color (Gdk::Color c);
 	bool choose_color ();
 
 	bool ignore_toggle;

@@ -97,8 +97,8 @@ GainMeter::GainMeter (IO& io, Session& s)
 						     & _io.midi_gain_control(),
 						     false));
 
-	gain_slider->signal_button_press_event.connect (mem_fun(*this, &GainMeter::start_gain_touch));
-	gain_slider->signal_button_release_event.connect (mem_fun(*this, &GainMeter::end_gain_touch));
+	gain_slider->signal_button_press_event().connect (mem_fun(*this, &GainMeter::start_gain_touch));
+	gain_slider->signal_button_release_event().connect (mem_fun(*this, &GainMeter::end_gain_touch));
 	gain_slider->set_name ("MixerGainMeter");
 
 	if (_session.midi_port()) {
@@ -145,8 +145,8 @@ GainMeter::GainMeter (IO& io, Session& s)
 		
 		set_size_request_to_display_given_text (meter_point_button, _("tupni"), 2, 2);
 
-		meter_point_button.signal_button_press_event.connect (mem_fun(*this, &GainMeter::meter_press));
-		meter_point_button.signal_button_release_event.connect (mem_fun(*this, &GainMeter::meter_release));
+		meter_point_button.signal_button_press_event().connect (mem_fun(*this, &GainMeter::meter_press));
+		meter_point_button.signal_button_release_event().connect (mem_fun(*this, &GainMeter::meter_release));
 
 		top_table.attach (meter_point_button, 1, 2, 0, 1);
 	}
@@ -193,9 +193,9 @@ GainMeter::GainMeter (IO& io, Session& s)
 
 	_io.gain_changed.connect (mem_fun(*this, &GainMeter::gain_changed));
 
-	meter_metric_area.signal_expose_event.connect (mem_fun(*this, &GainMeter::meter_metrics_expose));
+	meter_metric_area.signal_expose_event().connect (mem_fun(*this, &GainMeter::meter_metrics_expose));
 	gain_adjustment.value_changed.connect (mem_fun(*this, &GainMeter::gain_adjusted));
-	peak_display.signal_button_release_event.connect (mem_fun(*this, &GainMeter::peak_button_release));
+	peak_display.signal_button_release_event().connect (mem_fun(*this, &GainMeter::peak_button_release));
 
 	_session.MeterHoldChanged.connect (mem_fun(*this, &GainMeter::meter_hold_changed));
 	
@@ -433,10 +433,10 @@ GainMeter::setup_meters ()
 			meters[n].meter = new FastMeter ((uint32_t) floor (_session.meter_hold()), width, FastMeter::Vertical);
 			meters[n].width = width;
 
-			meters[n].meter->signal_add_events (Gdk::BUTTON_RELEASE_MASK);
-			meters[n].meter->signal_button_release_event.connect
+			meters[n].meter->signal_add_event()s (Gdk::BUTTON_RELEASE_MASK);
+			meters[n].meter->signal_button_release_event().connect
 				(bind (mem_fun(*this, &GainMeter::meter_button_release), n));
-			meters[n].meter->signal_button_release_event.connect_after (ptr_fun (do_not_propagate));
+			meters[n].meter->signal_button_release_event().connect_after (ptr_fun (do_not_propagate));
 		}
 
 		meter_packer.pack_start (*meters[n].meter, false, false);

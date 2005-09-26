@@ -479,7 +479,7 @@ Editor::build_new_transport_marker_menu ()
 	items.push_back (MenuElem (_("Set Loop Range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_loop)));
 	items.push_back (MenuElem (_("Set Punch Range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_punch)));
 
-	new_transport_marker_menu->signal_unmap_event.connect ( mem_fun(*this, &Editor::new_transport_marker_menu_popdown)); 
+	new_transport_marker_menu->signal_unmap_event().connect ( mem_fun(*this, &Editor::new_transport_marker_menu_popdown)); 
 }
 
 void
@@ -756,7 +756,7 @@ Editor::marker_menu_rename ()
 	entry.activate.connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
 	cancel_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), -1));
 	ok_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
-	dialog.signal_delete_event.connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop_on_delete), -1));
+	dialog.signal_delete_event().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop_on_delete), -1));
 
 	dialog.show_all ();
 	entry.grab_focus ();

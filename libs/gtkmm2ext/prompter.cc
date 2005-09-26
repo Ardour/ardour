@@ -20,6 +20,7 @@
 
 #include <string>
 
+#include <gtkmm/stock.h>
 #include <gtkmm2ext/prompter.h>
 
 #include "i18n.h"
@@ -27,16 +28,30 @@
 using namespace std;
 using namespace Gtkmm2ext;
 
+Prompter::Prompter (Gtk::Window& parent, bool modal)
+	: Gtk::Dialog ("", parent, modal)
+{
+	init ();
+}
+
 Prompter::Prompter (bool modal)
-	: Gtk::Window (Gtk::WINDOW_POPUP),
-	  ok (_("OK")),
-	  cancel (_("Cancel"))
+	: Gtk::Dialog ("", modal)
+{
+	init ();
+}
+
+void
+Prompter::init ()
 {
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("Prompter");
-	set_modal (modal);
 
-	add (packer);
+	set_default_response (Gtk::RESPONSE_ACCEPT);
+
+	add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
+	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	
+	add_action_widget (entry, Gtk::RESPONSE_ACCEPT);
 
 	entryLabel.set_line_wrap (true);
 	entryLabel.set_name ("PrompterLabel");
@@ -47,67 +62,16 @@ Prompter::Prompter (bool modal)
 	entryBox.pack_start (entryLabel);
 	entryBox.pack_start (entry, false, false);
 
-	buttonBox.set_homogeneous (true);
-	buttonBox.set_border_width (10);
-	buttonBox.pack_start (ok, false, true);
-	buttonBox.pack_start (cancel, false, true);
-	
-	packer.pack_start (entryBox);
-	packer.pack_start (buttonBox);
+	get_vbox()->pack_start (entryBox);
 
-	entry.signal_activate().connect(mem_fun(*this,&Prompter::activated));
-	ok.signal_clicked().connect(mem_fun(*this,&Prompter::activated));
-	cancel.signal_clicked().connect(mem_fun(*this,&Prompter::cancel_click));
-	signal_delete_event().connect (mem_fun (*this, &Prompter::deleted));
-
+	entry.signal_activate().connect (bind (mem_fun (*this, &Prompter::response), Gtk::RESPONSE_ACCEPT));
 }	
 
 void
 Prompter::change_labels (string okstr, string cancelstr)
 {
-	dynamic_cast<Gtk::Label*>(ok.get_child())->set_text (okstr);
-	dynamic_cast<Gtk::Label*>(cancel.get_child())->set_text (cancelstr);
-}
-
-void
-Prompter::on_realize ()
-{
-	Gtk::Window::on_realize ();
-	Glib::RefPtr<Gdk::Window> win (get_window());
-	win->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH|Gdk::DECOR_MENU));
-}
-
-void
-Prompter::on_map ()
-{
-	entry.grab_focus();
-	Gtk::Window::on_map ();
-}
-	
-void
-Prompter::activated ()
-
-{
-	status = entered;
-	hide_all ();
-	done ();
-}
-
-void
-Prompter::cancel_click ()
-
-{
-	entry.set_text ("");
-	status = cancelled;
-	hide_all ();
-	done ();
-}
-
-bool
-Prompter::deleted (GdkEventAny *ev)
-{
-	cancel_click ();
-	return false;
+	// dynamic_cast<Gtk::Label*>(ok.get_child())->set_text (okstr);
+	// dynamic_cast<Gtk::Label*>(cancel.get_child())->set_text (cancelstr);
 }
 
 void

@@ -64,7 +64,7 @@ KeyboardTarget::add_binding (string keystring, string action)
 {
 	KeyMap::iterator existing;
 	Keyboard::State  state;
-	KeyAction key_action = 0;
+	KeyAction key_action;
 
 	state = Keyboard::translate_key_name (keystring);
 

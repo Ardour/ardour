@@ -95,16 +95,16 @@ VisualTimeAxis::VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Sessi
 	_marked_for_display = true;
 	
 	name_entry.activate.connect(mem_fun(*this, &VisualTimeAxis::name_entry_changed)) ;
-	name_entry.signal_focus_out_event.connect(mem_fun(*this, &VisualTimeAxis::name_entry_focus_out_handler)) ;
-	name_entry.signal_button_press_event.connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_press_handler)) ;
-	name_entry.signal_button_release_event.connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_release_handler)) ;
-	name_entry.signal_key_release_event.connect(mem_fun(*this, &VisualTimeAxis::name_entry_key_release_handler)) ;
+	name_entry.signal_focus_out_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_focus_out_handler)) ;
+	name_entry.signal_button_press_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_press_handler)) ;
+	name_entry.signal_button_release_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_release_handler)) ;
+	name_entry.signal_key_release_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_key_release_handler)) ;
 	
 	size_button.set_name("TrackSizeButton") ;
 	visual_button.set_name("TrackVisualButton") ;
 	hide_button.set_name("TrackRemoveButton") ;
 	hide_button.add(*(Gtk::manage(new Gtk::Image(small_x_xpm)))) ;
-	size_button.signal_button_release_event.connect (mem_fun (*this, &VisualTimeAxis::size_click)) ;
+	size_button.signal_button_release_event().connect (mem_fun (*this, &VisualTimeAxis::size_click)) ;
 	visual_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::visual_click)) ;
 	hide_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::hide_click)) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(size_button,_("Display Height")) ;

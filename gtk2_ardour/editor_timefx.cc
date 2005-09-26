@@ -121,7 +121,7 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 
 	current_timestretch->progress_bar.set_percentage (0.0f);
 	current_timestretch->first_cancel = current_timestretch->cancel_button.signal_clicked().connect (bind (mem_fun (*current_timestretch, &ArdourDialog::stop), -1));
-	current_timestretch->first_delete = current_timestretch->signal_delete_event.connect (mem_fun (*current_timestretch, &ArdourDialog::wm_close_event));
+	current_timestretch->first_delete = current_timestretch->signal_delete_event().connect (mem_fun (*current_timestretch, &ArdourDialog::wm_close_event));
 
 	current_timestretch->run ();
 
@@ -144,7 +144,7 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 	current_timestretch->first_delete.disconnect();
 	
 	current_timestretch->cancel_button.signal_clicked().connect (mem_fun (current_timestretch, &TimeStretchDialog::cancel_timestretch_in_progress));
-	current_timestretch->signal_delete_event.connect (mem_fun (current_timestretch, &TimeStretchDialog::delete_timestretch_in_progress));
+	current_timestretch->signal_delete_event().connect (mem_fun (current_timestretch, &TimeStretchDialog::delete_timestretch_in_progress));
 
 	if (pthread_create_and_store ("timestretch", &thread, 0, timestretch_thread, current_timestretch)) {
 		current_timestretch->close ();

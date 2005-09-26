@@ -24,19 +24,20 @@
 #include <map>
 #include <string>
 #include <sigc++/signal.h>
+#include <sigc++/slot.h>
 #include <gdk/gdk.h>
-#include <gtkmm/window.h>
 #include <pbd/xml++.h>
 
 #include "keyboard.h"
 
-using std::map;
-using std::string;
+namespace Gtk {
+	class Window;
+}
 
 class KeyboardTarget 
 {
   public:
-	KeyboardTarget(Gtk::Window& w, string name);
+	KeyboardTarget(Gtk::Window& w, std::string name);
 	virtual ~KeyboardTarget();
 
 	sigc::signal<void> Hiding;
@@ -44,35 +45,35 @@ class KeyboardTarget
 
 	typedef sigc::slot<void> KeyAction;
 
-	string name() const { return _name; }
+	std::string name() const { return _name; }
 
 	void key_press_event (GdkEventKey *, Keyboard::State&, bool& handled);
 	void key_release_event (GdkEventKey *, Keyboard::State&);
 
-	int add_binding (string keys, string name);
-	string get_binding (string name); /* returns keys bound to name */
+	int add_binding (std::string keys, std::string name);
+	std::string get_binding (std::string name); /* returns keys bound to name */
 
 	XMLNode& get_binding_state () const;
 	int set_binding_state (const XMLNode&);
 
-	static int32_t add_action (string, KeyAction);
-	static int32_t find_action (string, KeyAction&);
-	static int32_t remove_action (string);
+	static int32_t add_action (std::string, KeyAction);
+	static int32_t find_action (std::string, KeyAction&);
+	static int32_t remove_action (std::string);
 	static void show_all_actions();
 
 	Gtk::Window& window() const { return _window; }
 	
   protected:
-	typedef map<Keyboard::State,KeyAction> KeyMap;
-	typedef map<string,string> BindingMap;
+	typedef std::map<Keyboard::State,KeyAction> KeyMap;
+	typedef std::map<std::string,std::string> BindingMap;
 
 	KeyMap     keymap;
 	BindingMap bindings;
 
   private:
-	typedef map<string,KeyAction> ActionMap; 
+	typedef map<std::string,KeyAction> ActionMap; 
 	static ActionMap actions;
-	string _name;
+	std::string _name;
 	Gtk::Window& _window;
 
 	int load_bindings (const XMLNode&);
