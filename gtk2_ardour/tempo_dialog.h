@@ -1,7 +1,15 @@
 #ifndef __ardour_gtk_tempo_dialog_h__
 #define __ardour_gtk_tempo_dialog_h__
 
-#include <gtkmm.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
+#include <gtkmm/table.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/comboboxtext.h>
+
 #include <ardour/types.h>
 #include <ardour/tempo.h>
 
@@ -38,7 +46,7 @@ struct TempoDialog : public ArdourDialog
 struct MeterDialog : public ArdourDialog 
 {
     Gtk::Entry   bpb_entry;
-    Gtk::Combo   note_types;
+    Gtk::ComboBoxText note_types;
     vector<const gchar *> strings;
     Gtk::Frame   note_frame;
     Gtk::Frame   bpb_frame;

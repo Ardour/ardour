@@ -34,7 +34,7 @@ namespace ARDOUR {
  * same mechanism to declare its closing, and to have a common
  * method of connecting and disconnecting from a Session.
  */
-class ArdourDialog : public Gtk::Window, public KeyboardTarget
+class ArdourDialog : public Gtk::Dialog, public KeyboardTarget
 {
   public:
 	ArdourDialog (string name);
@@ -51,7 +51,7 @@ class ArdourDialog : public Gtk::Window, public KeyboardTarget
 
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
-	bool on_unmap (GdkEventAny *);
+	void on_unmap ();
 
 	ARDOUR::Session *session;
 

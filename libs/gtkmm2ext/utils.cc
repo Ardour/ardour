@@ -20,8 +20,11 @@
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/gtkutils.h>
+#include <gtkmm/comboboxtext.h>
 
 #include "i18n.h"
+
+using namespace std;
 
 void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *text,
@@ -45,3 +48,12 @@ Gtkmm2ext::init ()
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 }
 
+void
+Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, vector<string>& strings)
+{
+	cr.clear ();
+
+	for (vector<string>::iterator i = strings.begin(); i != strings.end(); ++i) {
+		cr.append_text (*i);
+	}
+}

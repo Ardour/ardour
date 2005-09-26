@@ -103,8 +103,8 @@ NewSessionDialog::NewSessionDialog (ARDOUR::AudioEngine& engine, bool startup, s
 	use_master_button.set_active (true);
 	use_master_button.set_name ("NewSessionDialogButton");
 	
-	connect_to_physical_outputs_button.set_group (connect_to_master_button.group());
-	manual_connect_outputs_button.set_group (connect_to_master_button.group());
+	connect_to_physical_outputs_button.set_group (connect_to_master_button.get_group());
+	manual_connect_outputs_button.set_group (connect_to_master_button.get_group());
 	connect_to_master_button.set_active (true);
 	
 	connect_to_physical_outputs_button.set_name ("NewSessionDialogButton");
@@ -115,19 +115,15 @@ NewSessionDialog::NewSessionDialog (ARDOUR::AudioEngine& engine, bool startup, s
 	out_count_adjustment.set_value (engine.n_physical_outputs());
 	in_count_adjustment.set_value (engine.n_physical_inputs());
 
-	control_out_channel_combo.set_popdown_strings (channel_combo_strings);
+	set_popdown_strings (control_out_channel_combo, channel_combo_strings);
 	control_out_channel_combo.set_name (X_("NewSessionChannelCombo"));
-	control_out_channel_combo.get_entry()->set_name (X_("NewSessionChannelCombo"));
-	control_out_channel_combo.get_popwin()->set_name (X_("NewSessionChannelCombo"));
 	// use stereo as default
-	control_out_channel_combo.get_list()->select_item (1);
+	control_out_channel_combo.set_active_text (channel_combo_strings.front());
 
-	master_out_channel_combo.set_popdown_strings (channel_combo_strings);
+	set_popdown_strings (master_out_channel_combo, channel_combo_strings);
 	master_out_channel_combo.set_name (X_("NewSessionChannelCombo"));
-	master_out_channel_combo.get_entry()->set_name (X_("NewSessionChannelCombo"));
-	master_out_channel_combo.get_popwin()->set_name (X_("NewSessionChannelCombo"));
 	// use stereo as default
-	master_out_channel_combo.get_list()->select_item (1);
+	master_out_channel_combo.set_active_text (channel_combo_strings.front());
 
 	
 	out_table.set_col_spacings (7);
@@ -327,7 +323,7 @@ NewSessionDialog::reset_templates ()
 	templates.clear ();
 	templates.push_back (_("No template - create tracks/busses manually"));
 	Session::get_template_list (templates);
-	template_combo.set_popdown_strings (templates);
+	set_popdown_strings (template_combo, templates);
 }
 
 string

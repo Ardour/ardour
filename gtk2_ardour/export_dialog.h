@@ -20,7 +20,16 @@
 #ifndef __ardour_export_dialog_h__
 #define __ardour_export_dialog_h__
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/table.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/button.h>
+#include <gtkmm/progressbar.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/fileselection.h>
+#include <gtkmm/comboboxtext.h>
+#include <gdkmm/pixmap.h>
 
 #include <ardour/export.h>
 #include "ardour_dialog.h"
@@ -57,21 +66,21 @@ class ExportDialog : public ArdourDialog
 	Gtk::Frame  format_frame;
 
 	Gtk::Label  sample_rate_label;
-	Gtk::Combo  sample_rate_combo;
+	Gtk::ComboBoxText sample_rate_combo;
 	Gtk::Label  src_quality_label;
-	Gtk::Combo  src_quality_combo;
+	Gtk::ComboBoxText src_quality_combo;
 	Gtk::Label  dither_type_label;
-	Gtk::Combo  dither_type_combo;
+	Gtk::ComboBoxText dither_type_combo;
 	Gtk::Label  cue_file_label;
-	Gtk::Combo  cue_file_combo;
+	Gtk::ComboBoxText cue_file_combo;
 	Gtk::Label  channel_count_label;
-	Gtk::Combo  channel_count_combo;
+	Gtk::ComboBoxText channel_count_combo;
 	Gtk::Label  header_format_label;
-	Gtk::Combo  header_format_combo;
+	Gtk::ComboBoxText header_format_combo;
 	Gtk::Label  bitdepth_format_label;
-	Gtk::Combo  bitdepth_format_combo;
+	Gtk::ComboBoxText bitdepth_format_combo;
 	Gtk::Label  endian_format_label;
-	Gtk::Combo  endian_format_combo;
+	Gtk::ComboBoxText endian_format_combo;
 	Gtk::CheckButton cuefile_only_checkbox;
 
 	Gtk::Frame  file_frame;

@@ -57,7 +57,7 @@ AddRouteDialog::AddRouteDialog ()
 	cancel_button.set_name ("AddRouteDialogButton");
 	routes_spinner.set_name ("AddRouteDialogSpinner");
 	
-	bus_button.set_group (track_button.group());
+	bus_button.set_group (track_button.get_group());
 	track_button.set_active (true);
 
 	HBox *hbrb = manage (new HBox);
@@ -68,11 +68,8 @@ AddRouteDialog::AddRouteDialog ()
 	hbrb->pack_start (track_button, false, false);
 	hbrb->pack_start (bus_button, false, false);
 
-	channel_combo.set_popdown_strings (channel_combo_strings);
-	channel_combo.set_value_in_list (true, false);
+	set_popdown_strings (channel_combo, channel_combo_strings);
 	channel_combo.set_name (X_("ChannelCountSelector"));
-	channel_combo.get_entry()->set_name (X_("ChannelCountSelector"));
-	channel_combo.get_popwin()->set_name (X_("ChannelCountSelector"));
 	
 	VBox *vbcc = manage (new VBox);
 
@@ -114,7 +111,7 @@ AddRouteDialog::AddRouteDialog ()
 
 	add (*vb2);
 
-	delete_event.connect (mem_fun(*this, &ArdourDialog::wm_close_event));
+	// delete_event.connect (mem_fun(*this, &ArdourDialog::wm_close_event));
 	ok_button.signal_clicked().connect (bind (mem_fun(*this,  &ArdourDialog::stop), 0));
 	cancel_button.signal_clicked().connect (bind (mem_fun(*this, &ArdourDialog::stop), 1));
 }

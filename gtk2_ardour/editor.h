@@ -33,6 +33,7 @@
 
 #include <gtkmm.h>
 #include <gtkmm/layout.h>
+#include <gtkmm/comboboxtext.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <libgnomecanvas/gnome-canvas-util.h>
 #include <gtkmm2ext/selector.h>
@@ -1360,25 +1361,25 @@ class Editor : public PublicEditor
 	Gtk::Button              automation_mode_button;
 	Gtk::ToggleButton        global_automation_button;
 
-	Gtk::Combo               edit_mode_selector;
+	Gtk::ComboBoxText edit_mode_selector;
 	Gtk::Label               edit_mode_label;
 	Gtk::VBox                edit_mode_box;
 
 	gint edit_mode_selection_done (GdkEventAny*);
 
-	Gtk::Combo               snap_type_selector;
+	Gtk::ComboBoxText snap_type_selector;
 	Gtk::Label               snap_type_label;
 	Gtk::VBox                snap_type_box;
 
 	gint snap_type_selection_done (GdkEventAny*);
 
-	Gtk::Combo               snap_mode_selector;
+	Gtk::ComboBoxText               snap_mode_selector;
 	Gtk::Label               snap_mode_label;
 	Gtk::VBox                snap_mode_box;
 
 	gint snap_mode_selection_done (GdkEventAny*);
 
-	Gtk::Combo               zoom_focus_selector;
+	Gtk::ComboBoxText zoom_focus_selector;
 	Gtk::Label               zoom_focus_label;
 	Gtk::VBox                zoom_focus_box;
 	

@@ -27,7 +27,18 @@
 
 #include <sigc++/signal.h>
 
-#include <gtkmm.h>
+#include <gtkmm/button.h>
+#include <gtkmm/box.h>
+#include <gtkmm/table.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/viewport.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/label.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/togglebutton.h>
+#include <gtkmm/socket.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/socket.h>
 
 #include <ardour_dialog.h>
@@ -66,7 +77,7 @@ class PlugUIBase : public sigc::trackable
   protected:
 	ARDOUR::PluginInsert& insert;
 	ARDOUR::Plugin& plugin;
-	Gtk::Combo combo;
+	Gtk::ComboBoxText combo;
 	Gtk::Button save_button;
 	Gtk::ToggleButton bypass_button;
 
@@ -139,7 +150,7 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	    /* input */
 	    
 	    Gtk::Adjustment* 	      adjustment;
-	    Gtk::Combo* 	      combo;
+	    Gtk::ComboBoxText* 	      combo;
   	    std::map<string, float>*  combo_map;
 	    Gtk::ToggleButton*        button;
 	    Gtkmm2ext::BarController*  control;

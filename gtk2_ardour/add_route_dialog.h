@@ -8,6 +8,7 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/button.h>
+#include <gtkmm/comboboxtext.h>
 
 #include <gtkmm2ext/click_box.h>
 
@@ -33,7 +34,7 @@ class AddRouteDialog : public ArdourDialog
 	Gtk::RadioButton bus_button;
 	Gtk::Adjustment routes_adjustment;
 	Gtk::SpinButton routes_spinner;
-	Gtk::Combo      channel_combo;
+	Gtk::ComboBoxText channel_combo;
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */

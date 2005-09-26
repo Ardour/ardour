@@ -230,14 +230,14 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	file_frame.set_border_width (5);
 	file_frame.set_name (FRAME_NAME);
 
-	sample_rate_combo.set_popdown_strings (internationalize(sample_rates));
-	src_quality_combo.set_popdown_strings (internationalize (src_qualities));
-	dither_type_combo.set_popdown_strings (internationalize (dither_types));
-	channel_count_combo.set_popdown_strings (internationalize (channel_strings));
-	header_format_combo.set_popdown_strings (internationalize ((const char **) sndfile_header_formats_strings));
-	bitdepth_format_combo.set_popdown_strings (internationalize ((const char **) sndfile_bitdepth_formats_strings));
-	endian_format_combo.set_popdown_strings (internationalize ((const char **) sndfile_endian_formats_strings));
-	cue_file_combo.set_popdown_strings (internationalize (cue_file_types));
+	set_popdown_strings (sample_rate_combo, internationalize(sample_rates));
+	set_popdown_strings (src_quality_combo, internationalize (src_qualities));
+	set_popdown_strings (dither_type_combo, internationalize (dither_types));
+	set_popdown_strings (channel_count_combo, internationalize (channel_strings));
+	set_popdown_strings (header_format_combo, internationalize ((const char **) sndfile_header_formats_strings));
+	set_popdown_strings (bitdepth_format_combo, internationalize ((const char **) sndfile_bitdepth_formats_strings));
+	set_popdown_strings (endian_format_combo, internationalize ((const char **) sndfile_endian_formats_strings));
+	set_popdown_strings (cue_file_combo, internationalize (cue_file_types));
 
 	/* this will re-sensitized as soon as a non RIFF/WAV
 	   header format is chosen.

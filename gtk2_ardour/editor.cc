@@ -3130,8 +3130,7 @@ Editor::setup_toolbar ()
 	/* XXX another disgusting hack because of the way combo boxes size themselves */
 
 	Gtkmm2ext::set_size_request_to_display_given_text (*edit_mode_selector.get_entry(), "EdgtMode", 2, 10);
-	edit_mode_selector.set_popdown_strings (internationalize (edit_mode_strings));
-	edit_mode_selector.set_value_in_list (true, false);
+	set_popdown_string (edit_mode_selector, internationalize (edit_mode_strings));
 
 	edit_mode_box.pack_start (edit_mode_label, false, false);
 	edit_mode_box.pack_start (edit_mode_selector, false, false);
@@ -3153,8 +3152,7 @@ Editor::setup_toolbar ()
 
 	const guint32 FUDGE = 10; // Combo's are stupid - they steal space from the entry for the button
 	Gtkmm2ext::set_size_request_to_display_given_text (*snap_type_selector.get_entry(), "Region bounds", 2+FUDGE, 10);
-	snap_type_selector.set_popdown_strings (internationalize (snap_type_strings));
-	snap_type_selector.set_value_in_list (true, false);
+	set_popdown_strings (snap_type_selector, internationalize (snap_type_strings));
 
 	snap_type_box.pack_start (snap_type_label, false, false);
 	snap_type_box.pack_start (snap_type_selector, false, false);
@@ -3173,8 +3171,7 @@ Editor::setup_toolbar ()
 	snap_mode_box.set_border_width (3);
 
 	Gtkmm2ext::set_size_request_to_display_given_text (*snap_mode_selector.get_entry(), "SngpMode", 2, 10);
-	snap_mode_selector.set_popdown_strings (internationalize (snap_mode_strings));
-	snap_mode_selector.set_value_in_list (true, false);
+	set_popdown_strings (snap_mode_selector, internationalize (snap_mode_strings));
 
 	snap_mode_box.pack_start (snap_mode_label, false, false);
 	snap_mode_box.pack_start (snap_mode_selector, false, false);
@@ -3195,8 +3192,7 @@ Editor::setup_toolbar ()
 	/* XXX another disgusting hack because of the way combo boxes size themselves */
 
 	Gtkmm2ext::set_size_request_to_display_given_text (*zoom_focus_selector.get_entry(), "Edgt Cursor", 2, 10);
-	zoom_focus_selector.set_popdown_strings (internationalize (zoom_focus_strings));
-	zoom_focus_selector.set_value_in_list (true, false);
+	set_popdown_strings (zoom_focus_selector, internationalize (zoom_focus_strings));
 
 	zoom_focus_box.pack_start (zoom_focus_label, false, false);
 	zoom_focus_box.pack_start (zoom_focus_selector, false, false);

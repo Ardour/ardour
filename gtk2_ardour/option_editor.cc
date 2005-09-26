@@ -349,7 +349,7 @@ OptionEditor::set_session (Session *s)
 	if (session->mtc_port()) {
 		dumb.push_back (positional_sync_strings[Session::MTC]);
 	} 
-	slave_type_combo.set_popdown_strings (dumb);
+	set_popdown_strings (slave_type_combo, dumb);
 
 	// meter stuff
 	if (session->meter_falloff() == 0.0f) {
@@ -426,10 +426,7 @@ OptionEditor::setup_path_options()
 
 	vector<string> nfstrings = internationalize (native_format_strings);
 
-	native_format_combo.set_popdown_strings (nfstrings),
-	native_format_combo.get_entry()->set_editable (false);
-	native_format_combo.get_entry()->set_name ("OptionsEntry");
-	native_format_combo.set_use_arrows_always (true);
+	set_popdown_strings (native_format_combo, nfstrings);
 	native_format_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::native_format_chosen));
 
 	fixup_combo_size (native_format_combo, nfstrings);
@@ -489,12 +486,8 @@ OptionEditor::setup_fade_options ()
 	dumb.push_back (lmode_strings[Session::LaterHigher]);
 	dumb.push_back (lmode_strings[Session::MoveAddHigher]);
 	dumb.push_back (lmode_strings[Session::AddHigher]);
-	layer_mode_combo.set_popdown_strings (dumb);
+	set_popdown_strings (layer_mode_combo, dumb);
 
-	layer_mode_combo.set_use_arrows_always (true);
-	layer_mode_combo.set_value_in_list (true, false);
-	layer_mode_combo.get_entry()->set_editable (false);
-	layer_mode_combo.get_entry()->set_name ("OptionsEntry");
 	layer_mode_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::layer_mode_chosen));
 
 	fixup_combo_size (layer_mode_combo, layer_mode_strings);
@@ -511,12 +504,8 @@ OptionEditor::setup_fade_options ()
 	dumb.clear ();
 	dumb.push_back (xfade_model_strings[FullCrossfade]);
 	dumb.push_back (xfade_model_strings[ShortCrossfade]);
-	xfade_model_combo.set_popdown_strings (dumb);
+	set_popdown_strings (xfade_model_combo, dumb);
 
-	xfade_model_combo.set_use_arrows_always (true);
-	xfade_model_combo.set_value_in_list (true, false);
-	xfade_model_combo.get_entry()->set_editable (false);
-	xfade_model_combo.get_entry()->set_name ("OptionsEntry");
 	xfade_model_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::xfade_model_chosen));
 
 	fixup_combo_size (xfade_model_combo, xfade_model_strings);
@@ -714,11 +703,7 @@ OptionEditor::setup_display_options ()
 	dumb.push_back (_("Short"));
 	dumb.push_back (_("Medium"));
 	dumb.push_back (_("Long"));
-	meter_hold_combo.set_popdown_strings (dumb);
-	meter_hold_combo.set_use_arrows_always (true);
-	meter_hold_combo.set_value_in_list (true, false);
-	meter_hold_combo.get_entry()->set_editable (false);
-	meter_hold_combo.get_entry()->set_name ("OptionsEntry");
+	set_popdown_strings (meter_hold_combo, dumb);
 	meter_hold_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::meter_hold_chosen));
 	hbox = manage (new HBox);
 	hbox->set_border_width (8);
@@ -737,11 +722,7 @@ OptionEditor::setup_display_options ()
 	dumb.push_back (_("Fast"));
 	dumb.push_back (_("Faster"));
 	dumb.push_back (_("Fastest"));
-	meter_falloff_combo.set_popdown_strings (dumb);
-	meter_falloff_combo.set_use_arrows_always (true);
-	meter_falloff_combo.set_value_in_list (true, false);
-	meter_falloff_combo.get_entry()->set_editable (false);
-	meter_falloff_combo.get_entry()->set_name ("OptionsEntry");
+	set_popdown_strings (meter_falloff_combo, dumb);
 	meter_falloff_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::meter_falloff_chosen));
 	hbox = manage (new HBox);
 	hbox->set_border_width (8);
@@ -863,11 +844,7 @@ OptionEditor::setup_sync_options ()
 	dumb.push_back (X_("30 FPS drop"));
 	dumb.push_back (X_("30 FPS non-drop"));
 	
-	smpte_fps_combo.set_popdown_strings (dumb);
-	smpte_fps_combo.set_use_arrows_always (true);
-	smpte_fps_combo.set_value_in_list (true, false);
-	smpte_fps_combo.get_entry()->set_editable (false);
-	smpte_fps_combo.get_entry()->set_name ("OptionsEntry");
+	set_popdown_strings (smpte_fps_combo, dumb);
 	smpte_fps_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::smpte_fps_chosen));
 	
 	smpte_offset_clock.set_mode (AudioClock::SMPTE);
@@ -1147,7 +1124,7 @@ OptionEditor::mtc_port_chosen (GdkEventButton* ev, MIDI::Port *port, Gtk::RadioB
 			if (session->mtc_port()) {
 				dumb.push_back (positional_sync_strings[Session::MTC]);
 			}
-			slave_type_combo.set_popdown_strings (dumb);
+			set_popdown_strings (slave_type_combo, dumb);
 
 			rb->set_active (true);
 		}
@@ -1689,8 +1666,8 @@ OptionEditor::setup_misc_options()
 	connect_box->set_spacing (3);
 	connect_box->set_border_width (8);
 
-	auto_connect_output_manual_button.set_group (auto_connect_output_master_button.group());
-	auto_connect_output_physical_button.set_group (auto_connect_output_master_button.group());
+	auto_connect_output_manual_button.set_group (auto_connect_output_master_button.get_group());
+	auto_connect_output_physical_button.set_group (auto_connect_output_master_button.get_group());
 
 	Gtk::HBox* useless_box = manage (new HBox);
 	useless_box->pack_start (auto_connect_inputs_button, false, false);
@@ -1871,10 +1848,7 @@ OptionEditor::setup_keyboard_options ()
 		dumb.push_back (_(modifiers[i].name));
 	}
 
-	edit_modifier_combo.set_popdown_strings (dumb);
-	edit_modifier_combo.get_entry()->set_editable (false);
-	edit_modifier_combo.get_entry()->set_name ("OptionsEntry");
-	edit_modifier_combo.set_use_arrows_always (true);
+	set_popdown_strings (edit_modifier_combo, dumb);
 	edit_modifier_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::edit_modifier_chosen));
 
 	for (int x = 0; modifiers[x].name; ++x) {
@@ -1901,10 +1875,7 @@ OptionEditor::setup_keyboard_options ()
 	edit_button_adjustment.set_value (Keyboard::edit_button());
 	edit_button_adjustment.value_changed.connect (mem_fun(*this, &OptionEditor::edit_button_changed));
 
-	delete_modifier_combo.set_popdown_strings (dumb);
-	delete_modifier_combo.get_entry()->set_editable (false);
-	delete_modifier_combo.get_entry()->set_name ("OptionsEntry");
-	delete_modifier_combo.set_use_arrows_always (true);
+	set_popdown_strings (delete_modifier_combo, dumb);
 	delete_modifier_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::delete_modifier_chosen));
 
 	for (int x = 0; modifiers[x].name; ++x) {
@@ -1931,10 +1902,7 @@ OptionEditor::setup_keyboard_options ()
 	delete_button_adjustment.set_value (Keyboard::delete_button());
 	delete_button_adjustment.value_changed.connect (mem_fun(*this, &OptionEditor::delete_button_changed));
 
-	snap_modifier_combo.set_popdown_strings (dumb);
-	snap_modifier_combo.get_entry()->set_editable (false);
-	snap_modifier_combo.get_entry()->set_name ("OptionsEntry");
-	snap_modifier_combo.set_use_arrows_always (true);
+	set_popdown_strings (snap_modifier_combo, dumb);
 	snap_modifier_combo.get_popwin()->unmap_event.connect (mem_fun(*this, &OptionEditor::snap_modifier_chosen));
 	
 	for (int x = 0; modifiers[x].name; ++x) {

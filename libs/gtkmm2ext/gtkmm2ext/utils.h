@@ -21,7 +21,10 @@
 #ifndef __gtkmm2ext_utils_h__
 #define __gtkmm2ext_utils_h__
 
-#include <gtkmm.h>
+#include <vector>
+#include <string>
+#include <gtkmm/widget.h>
+#include <gtkmm/comboboxtext.h>
 
 namespace Gtkmm2ext {
 	void init ();
@@ -30,6 +33,8 @@ namespace Gtkmm2ext {
 						     const gchar *text,
 						     gint hpadding,
 						     gint vpadding);
+
+	void set_popdown_strings (Gtk::ComboBoxText&, std::vector<std::string>&);
 	
 	template<class T> void deferred_delete (void *ptr) {
 		delete static_cast<T *> (ptr);

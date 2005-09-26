@@ -21,7 +21,17 @@
 #ifndef __gtk_ardour_option_editor_h__
 #define __gtk_ardour_option_editor_h__
 
-#include <gtkmm.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/table.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/box.h>
+#include <gtkmm/label.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/hscale.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/radiobutton.h>
+#include <gtkmm/comboboxtext.h>
 
 #include <ardour/session.h>
 
@@ -68,7 +78,7 @@ class OptionEditor : public ArdourDialog
 
 	Gtk::Entry              session_raid_entry;
 
-	Gtk::Combo              native_format_combo;
+	Gtk::ComboBoxText       native_format_combo;
 
 	void setup_path_options();
 	void add_session_paths ();
@@ -84,9 +94,9 @@ class OptionEditor : public ArdourDialog
 	Gtk::CheckButton auto_xfade_button;
 	Gtk::CheckButton xfade_active_button;
 	Gtk::Label       layer_mode_label;
-	Gtk::Combo       layer_mode_combo;
+	Gtk::ComboBoxText layer_mode_combo;
 	Gtk::Label       xfade_model_label;
-	Gtk::Combo       xfade_model_combo;
+	Gtk::ComboBoxText xfade_model_combo;
 	Gtk::Adjustment  short_xfade_adjustment;
 	Gtk::HScale      short_xfade_slider;
 
@@ -116,8 +126,8 @@ class OptionEditor : public ArdourDialog
 	Gtk::CheckButton mixer_strip_width_button;
 	Gtk::CheckButton show_measures_button;
 	Gtk::CheckButton follow_playhead_button;
-	Gtk::Combo meter_hold_combo;
-	Gtk::Combo meter_falloff_combo;
+	Gtk::ComboBoxText meter_hold_combo;
+	Gtk::ComboBoxText meter_falloff_combo;
 
 	void setup_display_options();
 	void show_waveforms_clicked ();
@@ -137,8 +147,8 @@ class OptionEditor : public ArdourDialog
 	Gtk::CheckButton send_mtc_button;
 	Gtk::CheckButton send_mmc_button;
 	Gtk::CheckButton jack_time_master_button;
-	Gtk::Combo slave_type_combo;
-	Gtk::Combo smpte_fps_combo;
+	Gtk::ComboBoxText slave_type_combo;
+	Gtk::ComboBoxText smpte_fps_combo;
 	AudioClock smpte_offset_clock;
 	Gtk::CheckButton smpte_offset_negative_button;
 
@@ -224,9 +234,9 @@ class OptionEditor : public ArdourDialog
 	/* keyboard/mouse */
 
 	Gtk::Table keyboard_mouse_table;
-	Gtk::Combo edit_modifier_combo;
-	Gtk::Combo delete_modifier_combo;
-	Gtk::Combo snap_modifier_combo;
+	Gtk::ComboBoxText edit_modifier_combo;
+	Gtk::ComboBoxText delete_modifier_combo;
+	Gtk::ComboBoxText snap_modifier_combo;
 	Gtk::Adjustment delete_button_adjustment;
 	Gtk::SpinButton delete_button_spin;
 	Gtk::Adjustment edit_button_adjustment;
@@ -274,7 +284,7 @@ class OptionEditor : public ArdourDialog
 	void debug_keyboard_clicked ();
 	void speed_quieten_clicked ();
 
-	void fixup_combo_size (Gtk::Combo&, vector<string>& strings);
+	void fixup_combo_size (Gtk::ComboBox&, vector<string>& strings);
 };
 
 #endif /* __gtk_ardour_option_editor_h__ */

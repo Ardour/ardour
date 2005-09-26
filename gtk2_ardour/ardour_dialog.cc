@@ -27,7 +27,7 @@
 
 
 ArdourDialog::ArdourDialog (string name)
-	: Gtk::Window (GTK_WINDOW_TOPLEVEL),
+	: Dialog (name), 
 	  KeyboardTarget (*this, name)
 {
 	session = 0;
@@ -42,7 +42,7 @@ ArdourDialog::~ArdourDialog ()
 {
 }
 
-gint
+bool
 ArdourDialog::on_enter_notify_event (GdkEventCrossing *ev)
 {
 	if (ev->detail != GDK_NOTIFY_INFERIOR) {
@@ -51,7 +51,7 @@ ArdourDialog::on_enter_notify_event (GdkEventCrossing *ev)
 	return FALSE;
 }
 
-gint
+bool
 ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
 {
 	if (ev->detail != GDK_NOTIFY_INFERIOR) {
@@ -60,13 +60,13 @@ ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
 	return FALSE;
 }
 
-gint
-ArdourDialog:on_unmap (GdkEventAny *ev)
+void
+ArdourDialog::on_unmap ()
 {
 	_within_hiding = true;
-	 Hiding (); /* EMIT_SIGNAL */
+	Hiding (); /* EMIT_SIGNAL */
 	_within_hiding = false;
-	return Gtk::Window::on_unmap (ev);
+	Dialog::on_unmap ();
 }
 
 void
@@ -74,37 +74,6 @@ ArdourDialog::wm_close()
 {
 	stop (-1);
 	ARDOUR_UI::instance()->allow_focus(false);
-}
-
-void
-ArdourDialog::wm_doi ()
-{
-	if (!hide_on_stop) {
-		Hiding (); /* EMIT_SIGNAL */
-	}
-	stop (-1);
-	delete_when_idle (this);
-}
-
-gint
-ArdourDialog::wm_close_event (GdkEventAny* ev)
-{
-	wm_close ();
-	return TRUE;
-}
-
-gint
-ArdourDialog::wm_doi_event (GdkEventAny* ev)
-{
-	wm_doi ();
-	return TRUE;
-}
-
-gint
-ArdourDialog::wm_doi_event_stop (GdkEventAny* ev)
-{
-	stop (-1);
-	return TRUE;
 }
 
 void
@@ -126,8 +95,6 @@ ArdourDialog::close ()
 void
 ArdourDialog::stop (int rr)
 {
-	_run_status = rr;
-
 	if (hide_on_stop) {
 		Hiding (); /* EMIT_SIGNAL */
 		hide_all ();
@@ -138,7 +105,11 @@ ArdourDialog::stop (int rr)
 	}
 
 	if (running) {
-		Gtk::Main::quit ();
+		if (rr == 0) {
+			response (GTK_RESPONSE_ACCEPT);
+		} else {
+			response (GTK_RESPONSE_CANCEL);
+		}
 		running = false;
 	}
 }
@@ -153,7 +124,18 @@ ArdourDialog::run ()
 	}
 
 	running = true;
-	Gtk::Main::run ();
+	switch (Dialog::run ()) {
+	case GTK_RESPONSE_ACCEPT:
+		_run_status = 0;
+		break;
+		
+	case GTK_RESPONSE_DELETE_EVENT:
+		_run_status = -1;
+		break;
+
+	default:
+		_run_status = -1;
+	}
 }
 
 void

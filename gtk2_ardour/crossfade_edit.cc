@@ -101,7 +101,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	add (vpacker);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
-	select_out_button.set_group (select_in_button.group());
+	select_out_button.set_group (select_in_button.get_group());
 	select_out_button.set_mode (false);
 	select_in_button.set_mode (false);
 

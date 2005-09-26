@@ -1302,7 +1302,7 @@ SearchSounds::SearchSounds ()
 
 	add(main_box);
 
-	or_rbtn.set_group(and_rbtn.group());
+	or_rbtn.set_group(and_rbtn.get_group());
 	or_rbtn.set_active(true);
 	rbtn_box.set_homogeneous(true);
 	rbtn_box.pack_start(and_rbtn);

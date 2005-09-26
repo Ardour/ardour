@@ -6,6 +6,7 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/box.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/comboboxtext.h>
 
 namespace Gtk {
 	class CList;
@@ -26,8 +27,8 @@ class NewSessionDialog : public ArdourDialog
 	NewSessionDialog (ARDOUR::AudioEngine&, bool startup, std::string path);
 	
 	Gtkmm2ext::NewSaveDialog file_selector;
-	Gtk::Combo control_out_channel_combo;
-	Gtk::Combo master_out_channel_combo;
+	Gtk::ComboBoxText control_out_channel_combo;
+	Gtk::ComboBoxText master_out_channel_combo;
 	Gtk::CheckButton use_control_button;
 	Gtk::CheckButton use_master_button;
 	Gtk::CheckButton connect_to_physical_inputs_button;
@@ -72,7 +73,7 @@ class NewSessionDialog : public ArdourDialog
 	Gtk::Button expansion_button;
 	Gtk::Table out_table;
 	Gtk::CheckButton show_again;
-	Gtk::Combo   template_combo;
+	Gtk::ComboBoxText template_combo;
 	list<string> templates;
 	Gtk::SpinButton in_count_spinner;
 	Gtk::SpinButton out_count_spinner;

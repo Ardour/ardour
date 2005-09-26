@@ -183,7 +183,7 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	strings.push_back (_("sixteenth (16)"));
 	strings.push_back (_("thirty-second (32)"));
 	
-	note_types.set_popdown_strings (strings);
+	set_popdown_strings (note_types, strings);
 	
 	if (note_type==1.0f)
 		note_types.get_entry()->set_text(_("whole (1)"));
