@@ -20,7 +20,6 @@
 */
 
 #include <gtkmm/button.h>
-#include <gtkmm/ctree.h>
 
 #include <ardour/session_playlist.h>
 #include <ardour/diskstream.h>
@@ -42,14 +41,8 @@ using namespace sigc;
 using namespace Gtk;
 using namespace ARDOUR;
 
-static const gchar *tree_display_titles[] = {
-	N_("Playlists grouped by track"), 
-	0
-};
-
 PlaylistSelector::PlaylistSelector ()
 	: ArdourDialog ("playlist selector"),
-	  tree (internationalize (tree_display_titles)),
 	  close_button (_("close"))
 {
 	rui = 0;
@@ -61,7 +54,11 @@ PlaylistSelector::PlaylistSelector ()
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	set_size_request (300, 200);
 
-	scroller.add_with_viewport (tree);
+	model = TreeStore::create (columns);
+	tree.set_model (model);
+	tree.append_column (_("Playlists grouped by track"), columns.text);
+
+	scroller.add (tree);
 	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 	close_button.signal_clicked().connect (mem_fun(*this, &PlaylistSelector::close_button_click));
@@ -91,11 +88,7 @@ PlaylistSelector::clear_map ()
 void
 PlaylistSelector::show_for (RouteUI* ruix)
 {
-	using namespace CTree_Helpers;
 	vector<const char*> item;
-	RowList::iterator i;
-	RowList::iterator tmpi;
-	RowList::iterator others;
 	DiskStream* this_ds;
 	string str;
 
@@ -109,19 +102,17 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	clear_map ();
 	select_connection.disconnect ();
 
-	/* ---------------------------------------- */
-	/* XXX MAKE ME A FUNCTION (no CTree::clear() in gtkmm 1.2) */
-	gtk_ctree_remove_node (tree.gobj(), NULL);
-	/* ---------------------------------------- */
+	model.clear ();
 	
 	session->foreach_playlist (this, &PlaylistSelector::add_playlist_to_map);
 
 	this_ds = rui->get_diskstream();
 
-	item.clear();
-	item.push_back (_("Other tracks"));
-	others = tree.rows().insert (tree.rows().begin(), Element (item));
+	Gtk::TreeModel::Row others = *(model->append ());
 
+	others[columns.text] = _("Other tracks");
+	others[columns.playlist] = 0;
+	
 	for (DSPL_Map::iterator x = dspl_map.begin(); x != dspl_map.end(); ++x) {
 
 		DiskStream* ds = session->diskstream_by_id (x->first);
@@ -132,48 +123,52 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 		/* add a node for the diskstream */
 
-		item.clear ();
+		string nodename;
 
 		if (ds->name().empty()) {
-			item.push_back (_("unassigned"));
+			nodename = _("unassigned");
 		} else {
-			item.push_back (ds->name().c_str());
-		}
-
-		if (ds == this_ds) {
-			i = tree.rows().insert (tree.rows().begin(),
-						Gtk::CTree_Helpers::Element (item));
-		} else {
-			i = others->subtree().insert (others->subtree().end(),
-						      Gtk::CTree_Helpers::Element (item));
+			nodename = ds->name().c_str();
 		}
 		
+		TreeModel::Row row;
+		TreeModel::Row* selected_row = 0;
+		TreePath this_path;
+
+		if (ds == this_ds) {
+			row = *(model->prepend());
+			row[columns.text] = nodename;
+			row[columns.playlist] = 0;
+		} else {
+			row = *(model->append (others.children()));
+			row[columns.text] = nodename;
+			row[columns.playlist] = 0;
+		}
+
 		/* Now insert all the playlists for this diskstream/track in a subtree */
 		
 		list<Playlist*> *pls = x->second;
-
+		
 		for (list<Playlist*>::iterator p = pls->begin(); p != pls->end(); ++p) {
 
-			item.clear ();
-			item.push_back ((*p)->name().c_str());
+			TreeModel::Row child_row;
 
-			tmpi = i->subtree().insert (i->subtree().end(), Element (item));
+			child_row = *(model->append (row.children()));
+			child_row[columns.text] = (*p)->name();
+			child_row[columns.playlist] = *p;
 
 			if (*p == this_ds->playlist()) {
-				(*tmpi).select ();
+				selected_row = &child_row;
 			} 
-
-			(*tmpi).set_data (*p);
-			
 		}
-
-		if (ds == this_ds) {
-			i->expand ();
+		
+		if (selected_row != 0) {
+			tree.get_selection()->select (*selected_row);
 		}
 	}
 
 	show_all ();
-	select_connection = tree.tree_select_row.connect (mem_fun(*this, &PlaylistSelector::row_selected));
+	select_connection = tree.get_selection()->signal_changed().connect (mem_fun(*this, &PlaylistSelector::selection_changed));
 }
 
 void
@@ -221,11 +216,18 @@ PlaylistSelector::close_button_click ()
 }
 
 void
-PlaylistSelector::row_selected (Gtk::CTree::Row row, gint col)
+PlaylistSelector::selection_changed ()
 {
 	Playlist *playlist;
-	
-	if ((playlist = (Playlist *) row.get_data()) != 0) {
+
+	TreeModel::iterator iter = tree.get_selection()->get_selected();
+
+	if (!iter) {
+		/* nothing selected */
+		return;
+	}
+
+	if ((playlist = ((*iter)[columns.playlist])) != 0) {
 		
 		AudioTrack* at;
 		AudioPlaylist* apl;
@@ -246,4 +248,4 @@ PlaylistSelector::row_selected (Gtk::CTree::Row row, gint col)
 	}
 
 }
-	
+       

@@ -23,7 +23,15 @@
 
 #include <list>
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/label.h>
+#include <gtkmm/button.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/paned.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/treeview.h>
 
 #include <ardour/ardour.h>
 #include <ardour/stateful.h>
@@ -80,12 +88,11 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 	Gtk::HBox                scroller_hpacker;
 	Gtk::VBox                mixer_scroller_vpacker;
 	Gtk::VBox                list_vpacker;
-	Gtk::CList               track_display_list;
-	Gtk::CList               group_list;
 	Gtk::Label               group_list_button_label;
 	Gtk::Button              group_list_button;
 	Gtk::ScrolledWindow      track_display_scroller;
 	Gtk::ScrolledWindow      group_list_scroller;
+	Gtk::ScrolledWindow      snapshot_display_scroller;
 	Gtk::VBox		 group_list_vbox;
 	Gtk::Frame 		 track_display_frame;
 	Gtk::Frame		 group_list_frame;
@@ -157,10 +164,45 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 
 	void group_flags_changed (void *src, ARDOUR::RouteGroup *);
 
-	/* snapshots */
+	/* various treeviews */
 	
-	Gtk::CList          snapshot_display;
-	Gtk::ScrolledWindow snapshot_display_scroller;
+	template<class T> struct TextDataModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    TrackListModelColumns() { 
+		    add (text);
+		    add (data);
+	    }
+	    Gtk::TreeModelColumn<std::string> text;
+	    Gtk::TreeModelColumn<T*> data;
+	};
+
+	struct TextPairModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    TrackListModelColumns() { 
+		    add (visible);
+		    add (hidden);
+	    }
+	    Gtk::TreeModelColumn<std::string> visible;
+	    Gtk::TreeModelColumn<std::string> hidden;
+	};
+
+	TextDataModelColumns<ARDOUR::Route>                track_display_columns;
+	TextDataGroupListModelColumns<ARDOUR::RouteGroup>  group_list_columns;
+	TextPairModelColumns                               snapshot_display_columns;
+
+	Gtk::TreeView track_display;
+	Gtk::TreeView group_display;
+	Gtk::TreeView snapshot_display;
+
+	Glib::RefPtr<Gtk::ListStore> track_display_model;
+	Glib::RefPtr<Gtk::ListStore> group_display_model;
+	Glib::RefPtr<Gtk::ListStore> snapshot_display_model;
+
+	bool track_display_button_press (GdkEventButton*);
+	bool group_display_button_press (GdkEventButton*);
+	bool snapshot_display_button_press (GdkEventButton*);
+
+	void track_display_selection_changed ();
+	void group_display_selection_changed ();
+	void snapshot_display_selection_changed ();
 
 	void       redisplay_snapshots();
 	void       session_state_saved (string);

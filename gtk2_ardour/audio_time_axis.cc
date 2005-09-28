@@ -109,9 +109,8 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	  playlist_button (_("p")), 
 	  size_button (_("h")), // height
 	  automation_button (_("a")),
-	  visual_button (_("v")),
-	  redirect_window ("redirect window"),
-	  redirect_display (1)
+	  visual_button (_("v"))
+
 {
 	_has_state = true;
 	subplugin_menu.set_name ("ArdourContextMenu");

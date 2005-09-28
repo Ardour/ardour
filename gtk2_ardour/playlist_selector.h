@@ -20,8 +20,10 @@
 #ifndef __ardour_playlist_selector_h__
 #define __ardour_playlist_selector_h__
 
-#include <gtkmm.h>
-#include <gtkmm/ctree.h>
+#include <gtkmm/box.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/button.h>
+#include <gtkmm/treeview.h>
 #include <gtkmm2ext/selector.h>
 
 #include <ardour_dialog.h>
@@ -49,7 +51,6 @@ class PlaylistSelector : public ArdourDialog
 	ARDOUR::Session* session;
 	Gtk::VBox vpacker;
 	Gtk::ScrolledWindow scroller;
-	Gtk::CTree tree;
 	Gtk::Button close_button;
 	DSPL_Map dspl_map;
 	RouteUI* rui;
@@ -59,7 +60,20 @@ class PlaylistSelector : public ArdourDialog
 	void add_playlist_to_map (ARDOUR::Playlist*);
 	void clear_map ();
 	void close_button_click ();
-	void row_selected (Gtk::CTree::Row, int32_t col);
+	void selection_changed ();
+
+	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    ModelColumns () {
+		    add (text);
+		    add (playlist);
+	    }
+	    Gtk::TreeModelColumn<std::string> text;
+	    Gtk::TreeModelColumn<ARDOUR::Playlist*>   playlist;
+	};
+
+	ModelColumns columns;
+	Glib::RefPtr<Gtk::TreeStore> model;
+	Gtk::TreeView tree;
 };
 
 #endif // __ardour_playlist_selector_h__

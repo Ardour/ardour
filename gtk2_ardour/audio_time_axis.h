@@ -151,22 +151,6 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	
 	gint edit_click  (GdkEventButton *);
 
-	/* Redirect handling */
-
-	ArdourDialog redirect_window;
-	Gtk::CList  redirect_display;
-	Gtk::Button redirect_add_button;
-	Gtk::Button redirect_remove_button;
-	Gtk::Button redirect_up_button;
-	Gtk::Button redirect_down_button;
-	Gtk::Button redirect_edit_button;
-	Gtk::HBox   redirect_button_box;
-	Gtk::VBox   redirect_vpacker;
-	Gtk::HBox   redirect_display_hpacker;
-
-	int redirect_selected_row;
-
-
 	// variables to get the context menu
 	// automation buttons correctly initialized
 	bool show_gain_automation;

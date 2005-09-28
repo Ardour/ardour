@@ -3,6 +3,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include "tempo_dialog.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -82,11 +83,11 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 		when_table.set_col_spacings (2);
 		when_table.set_border_width (5);
 		
-		when_table.attach (when_bar_label, 0, 1, 0, 1, 0, Gtk::FILL|Gtk::EXPAND);
-		when_table.attach (when_bar_entry, 0, 1, 1, 2, 0, Gtk::FILL|Gtk::EXPAND);
+		when_table.attach (when_bar_label, 0, 1, 0, 1, Gtk::AttachOptions(0), Gtk::FILL|Gtk::EXPAND);
+		when_table.attach (when_bar_entry, 0, 1, 1, 2, Gtk::AttachOptions(0), Gtk::FILL|Gtk::EXPAND);
 		
-		when_table.attach (when_beat_label, 1, 2, 0, 1, 0, 0);
-		when_table.attach (when_beat_entry, 1, 2, 1, 2, 0, 0);
+		when_table.attach (when_beat_label, 1, 2, 0, 1, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
+		when_table.attach (when_beat_entry, 1, 2, 1, 2, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
 		
 		when_frame.set_name ("MetricDialogFrame");
 		when_frame.add (when_table);
@@ -184,26 +185,27 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	strings.push_back (_("thirty-second (32)"));
 	
 	set_popdown_strings (note_types, strings);
-	
+
 	if (note_type==1.0f)
-		note_types.get_entry()->set_text(_("whole (1)"));
+		note_types.set_active_text (_("whole (1)"));
 	else if (note_type==2.0f)
-		note_types.get_entry()->set_text(_("second (2)"));
+		note_types.set_active_text (_("second (2)"));
 	else if (note_type==3.0f)
-		note_types.get_entry()->set_text(_("third (3)"));
+		note_types.set_active_text (_("third (3)"));
 	else if (note_type==4.0f)
-		note_types.get_entry()->set_text(_("quarter (4)"));
+		note_types.set_active_text (_("quarter (4)"));
 	else if (note_type==8.0f)
-		note_types.get_entry()->set_text(_("eighth (8)"));
+		note_types.set_active_text (_("eighth (8)"));
 	else if (note_type==16.0f)
-		note_types.get_entry()->set_text(_("sixteenth (16)"));
+		note_types.set_active_text (_("sixteenth (16)"));
 	else if (note_type==32.0f)
-		note_types.get_entry()->set_text(_("thirty-second (32)"));
+		note_types.set_active_text (_("thirty-second (32)"));
 	else
-		note_types.get_entry()->set_text(_("quarter (4)"));
+		note_types.set_active_text (_("quarter (4)"));
 		
 	/* strings.back() just happens to be the longest one to display */
-	Gtkmm2ext::set_size_request_to_display_given_text (*(note_types.get_entry()), strings.back(), 7, 7);
+	// GTK2FIX
+	// Gtkmm2ext::set_size_request_to_display_given_text (*(note_types.get_entry()), strings.back(), 7, 7);
 
 	hspacer1.set_border_width (5);
 	hspacer1.pack_start (note_types, false, false);
@@ -247,11 +249,11 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		when_table.set_col_spacings (2);
 		when_table.set_border_width (5);
 		
-		when_table.attach (when_bar_label, 0, 1, 0, 1, 0, Gtk::FILL|Gtk::EXPAND);
-		when_table.attach (when_bar_entry, 0, 1, 1, 2, 0, Gtk::FILL|Gtk::EXPAND);
+		when_table.attach (when_bar_label, 0, 1, 0, 1, Gtk::AttachOptions(0), Gtk::FILL|Gtk::EXPAND);
+		when_table.attach (when_bar_entry, 0, 1, 1, 2, Gtk::AttachOptions(0), Gtk::FILL|Gtk::EXPAND);
 		
-		when_table.attach (when_beat_label, 1, 2, 0, 1, 0, 0);
-		when_table.attach (when_beat_entry, 1, 2, 1, 2, 0, 0);
+		when_table.attach (when_beat_label, 1, 2, 0, 1, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
+		when_table.attach (when_beat_entry, 1, 2, 1, 2, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
 		
 		when_frame.set_name ("MetricDialogFrame");
 		when_frame.add (when_table);
@@ -265,7 +267,6 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	
 	bpb_frame.set_name ("MetricDialogFrame");
 	note_frame.set_name ("MetricDialogFrame");
-	note_types.get_entry()->set_name ("MetricEntry");
 	bpb_entry.set_name ("MetricEntry");
 	ok_button.set_name ("MetricButton");
 	cancel_button.set_name ("MetricButton");
@@ -293,7 +294,7 @@ MeterDialog::get_note_type ()
 {
 	double note_type = 0;
 	vector<const gchar *>::iterator i;
-	string text = note_types.get_entry()->get_text();
+	string text = note_types.get_active_text();
 	
 	for (i = strings.begin(); i != strings.end(); ++i) {
 		if (text == *i) {
