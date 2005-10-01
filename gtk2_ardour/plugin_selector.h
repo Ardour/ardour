@@ -20,8 +20,9 @@
 #ifndef __ardour_plugin_selector_h__
 #define __ardour_plugin_selector_h__
 
-#include <gtkmm.h>
-#include <gtkmm/ctree.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/treeview.h>
 #include <gtkmm2ext/selector.h>
 
 #include <ardour_dialog.h>
@@ -65,19 +66,19 @@ class PluginSelector : public ArdourDialog
 	ARDOUR::PluginManager *manager;
 	list<ARDOUR::PluginInfo*> added_plugins;
 
-	static void _input_refiller (Gtk::CList &, void *);
-	static void _output_refiller (Gtk::CList &, void *);
+	//static void _input_refiller (Gtk::CList &, void *);
+	//static void _output_refiller (Gtk::CList &, void *);
 
-	void input_refiller (Gtk::CList &);
-	void output_refiller (Gtk::CList &);
-	void i_plugin_selected (Gtkmm2ext::Selector *selector,
-			      Gtkmm2ext::SelectionResult *res);
-	void i_plugin_chosen (Gtkmm2ext::Selector *selector,
-			    Gtkmm2ext::SelectionResult *res);
-	void o_plugin_selected (Gtkmm2ext::Selector *selector,
-			      Gtkmm2ext::SelectionResult *res);
-	void o_plugin_chosen (Gtkmm2ext::Selector *selector,
-			    Gtkmm2ext::SelectionResult *res);
+	//void input_refiller (Gtk::CList &);
+	//void output_refiller (Gtk::CList &);
+	//void i_plugin_selected (Gtkmm2ext::Selector *selector,
+	//			Gtkmm2ext::SelectionResult *res);
+        //void i_plugin_chosen (Gtkmm2ext::Selector *selector,
+	//		    Gtkmm2ext::SelectionResult *res);
+	//void o_plugin_selected (Gtkmm2ext::Selector *selector,
+	//		      Gtkmm2ext::SelectionResult *res);
+	//void o_plugin_chosen (Gtkmm2ext::Selector *selector,
+	//		    Gtkmm2ext::SelectionResult *res);
 	
 	void btn_add_clicked();
 	void btn_remove_clicked();

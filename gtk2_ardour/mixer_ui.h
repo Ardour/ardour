@@ -88,14 +88,14 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 	Gtk::HBox                scroller_hpacker;
 	Gtk::VBox                mixer_scroller_vpacker;
 	Gtk::VBox                list_vpacker;
-	Gtk::Label               group_list_button_label;
-	Gtk::Button              group_list_button;
+	Gtk::Label               group_display_button_label;
+	Gtk::Button              group_display_button;
 	Gtk::ScrolledWindow      track_display_scroller;
-	Gtk::ScrolledWindow      group_list_scroller;
+	Gtk::ScrolledWindow      group_display_scroller;
 	Gtk::ScrolledWindow      snapshot_display_scroller;
-	Gtk::VBox		 group_list_vbox;
+	Gtk::VBox		 group_display_vbox;
 	Gtk::Frame 		 track_display_frame;
-	Gtk::Frame		 group_list_frame;
+	Gtk::Frame		 group_display_frame;
 	Gtk::VPaned		 rhs_pane1;
 	Gtk::VPaned		 rhs_pane2;
 	Gtk::HBox                strip_packer;
@@ -122,6 +122,8 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 	void unselect_all_audiobus_strips ();
 	void select_all_audiobus_strips ();
 
+	void select_strip_op (bool);
+
 	void follow_strip_selection ();
 
 	gint start_updating ();
@@ -144,8 +146,7 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 
 	void group_selected (gint row, gint col, GdkEvent *ev);
 	void group_unselected (gint row, gint col, GdkEvent *ev);
-	gint group_list_button_press_event (GdkEventButton *);
-	void group_list_button_clicked();
+	void group_display_active_clicked();
 	void new_mix_group ();
 	void add_mix_group (ARDOUR::RouteGroup *);
 
@@ -166,27 +167,38 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 
 	/* various treeviews */
 	
-	template<class T> struct TextDataModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    TrackListModelColumns() { 
+	struct TrackDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    TrackDisplayModelColumns() { 
 		    add (text);
 		    add (data);
 	    }
-	    Gtk::TreeModelColumn<std::string> text;
-	    Gtk::TreeModelColumn<T*> data;
+	    Gtk::TreeModelColumn<Glib::ustring> text;
+	    Gtk::TreeModelColumn<ARDOUR::Route*> data;
 	};
 
-	struct TextPairModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    TrackListModelColumns() { 
-		    add (visible);
-		    add (hidden);
+	struct GroupDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    GroupDisplayModelColumns() { 
+		    add (active);
+		    add (text);
+		    add (data);
 	    }
-	    Gtk::TreeModelColumn<std::string> visible;
-	    Gtk::TreeModelColumn<std::string> hidden;
+	    Gtk::TreeModelColumn<bool>                active;
+	    Gtk::TreeModelColumn<Glib::ustring>       text;
+	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*> data;
 	};
 
-	TextDataModelColumns<ARDOUR::Route>                track_display_columns;
-	TextDataGroupListModelColumns<ARDOUR::RouteGroup>  group_list_columns;
-	TextPairModelColumns                               snapshot_display_columns;
+	struct SnapshotDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    SnapshotDisplayModelColumns() { 
+		    add (visible_name);
+		    add (real_name);
+	    }
+	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
+	    Gtk::TreeModelColumn<Glib::ustring> real_name;
+	};
+
+	TrackDisplayModelColumns    track_display_columns;
+	GroupDisplayModelColumns    group_display_columns;
+	SnapshotDisplayModelColumns snapshot_display_columns;
 
 	Gtk::TreeView track_display;
 	Gtk::TreeView group_display;

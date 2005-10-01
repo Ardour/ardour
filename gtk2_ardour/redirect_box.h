@@ -94,7 +94,7 @@ class RedirectBox : public Gtk::HBox
 	
 	Gtk::EventBox	    redirect_eventbox;
 	Gtk::HBox           redirect_hpacker;
-	Gtk::CList          redirect_display;
+	Gtk::TreeView       redirect_display;
 	Gtk::ScrolledWindow redirect_scroller;
 
 	Width _width;
@@ -111,8 +111,8 @@ class RedirectBox : public Gtk::HBox
 	vector<Gtk::MenuItem*> selection_dependent_items;
 	Gtk::MenuItem* redirect_paste_item;
 	gint redirect_menu_map_handler (GdkEventAny *ev);
-	Gtk::Menu * build_redirect_menu (Gtk::CList&);
-	void build_redirect_tooltip (Gtk::CList&, Gtk::EventBox&, string);
+	Gtk::Menu * build_redirect_menu (Gtk::TreeView&);
+	void build_redirect_tooltip (Gtk::TreeView&, Gtk::EventBox&, string);
 	void show_redirect_menu (gint arg);
 
 	void choose_send ();

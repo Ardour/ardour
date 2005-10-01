@@ -85,13 +85,13 @@ class IOSelector : public Gtk::VBox {
 	Gtk::ScrolledWindow port_display_scroller;
 
 	PBD::Lock port_display_lock;
-	slist<Gtk::CList *> port_displays;
+	slist<Gtk::TreeView *> port_displays;
 	void display_ports ();
 
 	void rescan ();
 	void clear_connections ();
 
-	void port_selection_handler (gint row, gint col, GdkEvent *ev, Gtk::CList *);
+	void port_selection_changed();
 
 	void ports_changed (ARDOUR::IOChange, void *);
 	void name_changed (void*);
@@ -100,10 +100,10 @@ class IOSelector : public Gtk::VBox {
 	void remove_port ();
 	gint remove_port_when_idle (ARDOUR::Port *);
 
-	gint port_column_button_release (GdkEventButton*, Gtk::CList*);
-	gint connection_click (GdkEventButton *, Gtk::CList *clist);
+	gint port_column_button_release (GdkEventButton*, Gtk::TreeView*);
+	gint connection_click (GdkEventButton *, Gtk::TreeView*);
 	
-	void select_clist(Gtk::CList*);
+	void select_clist(Gtk::TreeView*);
 	void select_next_clist ();
 };
 

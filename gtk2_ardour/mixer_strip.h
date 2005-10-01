@@ -138,7 +138,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Button   name_button;
 
 	Gtk::Window*  comment_window;
-	Gtk::Text     comment_area;
+	Gtk::TextView comment_area;
 	Gtk::Button   comment_button;
 
 	void setup_comment_editor ();
