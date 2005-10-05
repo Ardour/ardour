@@ -102,7 +102,7 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 	Gtk::HBox                out_packer;
 	Gtk::HPaned		 list_hpane;
 
-	void pane_allocation_handler (GtkAllocation*, Gtk::Paned*);
+	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 	
 	list<MixerStrip *> strips;
 
@@ -122,7 +122,8 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 	void unselect_all_audiobus_strips ();
 	void select_all_audiobus_strips ();
 
-	void select_strip_op (bool);
+	void strip_select_op (bool audiotrack, bool select);
+	void select_strip_op (MixerStrip*, bool select);
 
 	void follow_strip_selection ();
 
@@ -136,12 +137,11 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 	sigc::connection fast_screen_update_connection;
 	void fast_update_strips ();
 
-	void snapshot_display_selected (gint row, gint col, GdkEvent* ev);
-
 	void track_display_selected (gint row, gint col, GdkEvent *ev);
 	void track_display_unselected (gint row, gint col, GdkEvent *ev);
 	void queue_track_display_reordered (gint row, gint col);
-	gint track_display_reordered ();
+	void track_display_reordered_proxy (const Gtk::TreePath& path, const Gtk::TreeIter& i, int* n);
+	void track_display_reordered ();
 	void track_name_changed (MixerStrip *);
 
 	void group_selected (gint row, gint col, GdkEvent *ev);
@@ -170,21 +170,23 @@ class Mixer_UI : public Gtk::Window, public KeyboardTarget
 	struct TrackDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    TrackDisplayModelColumns() { 
 		    add (text);
-		    add (data);
+		    add (route);
+		    add (strip);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> text;
-	    Gtk::TreeModelColumn<ARDOUR::Route*> data;
+	    Gtk::TreeModelColumn<Glib::ustring>  text;
+	    Gtk::TreeModelColumn<ARDOUR::Route*> route;
+	    Gtk::TreeModelColumn<MixerStrip*>    strip;
 	};
 
 	struct GroupDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    GroupDisplayModelColumns() { 
 		    add (active);
 		    add (text);
-		    add (data);
+		    add (group);
 	    }
 	    Gtk::TreeModelColumn<bool>                active;
 	    Gtk::TreeModelColumn<Glib::ustring>       text;
-	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*> data;
+	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*> group;
 	};
 
 	struct SnapshotDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {

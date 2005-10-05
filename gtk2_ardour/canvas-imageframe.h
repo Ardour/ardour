@@ -15,12 +15,12 @@
 #include <stdint.h>
 
 #include <libgnomecanvas/libgnomecanvas.h>
-#include <gtk/gtkpacker.h> /* why the hell is GtkAnchorType here and not in gtkenums.h? */
+#include <gtk/gtkenums.h> 
 #include <libart_lgpl/art_misc.h>
 #include <libart_lgpl/art_pixbuf.h>
 
 
-BEGIN_GNOME_CANVAS_DECLS
+G_BEGIN_DECLS
 
 
 /* Image item for the canvas.  Images are positioned by anchoring them to a point.
@@ -74,6 +74,6 @@ struct _GnomeCanvasImageFrameClass {
 GtkType gnome_canvas_imageframe_get_type (void);
 
 
-END_GNOME_CANVAS_DECLS
+G_END_DECLS
 
 #endif

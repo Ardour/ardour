@@ -43,7 +43,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 
-list<GdkColor> AxisView::used_colors;
+list<Gdk::Color> AxisView::used_colors;
 
 AxisView::AxisView (ARDOUR::Session& sess) : _session(sess)
 {
@@ -55,10 +55,10 @@ AxisView::~AxisView()
 
 }
 
-GdkColor
+Gdk::Color
 AxisView::unique_random_color()
 {
-	GdkColor newcolor;
+  	Gdk::Color newcolor;
 	
 	while (1) {
 
@@ -68,22 +68,22 @@ AxisView::unique_random_color()
 
 		const int32_t max_saturation = 48000; // 65535 would open up the whole color wheel
 
-		newcolor.red = random() % max_saturation;
-		newcolor.blue = random() % max_saturation;
-		newcolor.green = random() % max_saturation;
+		newcolor.set_red (random() % max_saturation);
+		newcolor.set_blue (random() % max_saturation);
+		newcolor.set_green (random() % max_saturation);
 
 		if (used_colors.size() == 0) {
 			used_colors.push_back (newcolor);
 			return newcolor;
 		}
 		
-		for (list<GdkColor>::iterator i = used_colors.begin(); i != used_colors.end(); ++i) {
-			GdkColor c = *i;
+		for (list<Gdk::Color>::iterator i = used_colors.begin(); i != used_colors.end(); ++i) {
+		  Gdk::Color c = *i;
 			float rdelta, bdelta, gdelta;
 			
-			rdelta = newcolor.red - c.red;
-			bdelta = newcolor.blue - c.blue;
-			gdelta = newcolor.green - c.green;
+			rdelta = newcolor.get_red() - c.get_red();
+			bdelta = newcolor.get_blue() - c.get_blue();
+			gdelta = newcolor.get_green() - c.get_green();
 
 			if (sqrt (rdelta*rdelta + bdelta*bdelta + gdelta*gdelta) > 25.0) {
 				used_colors.push_back (newcolor);

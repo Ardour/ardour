@@ -64,7 +64,7 @@ class ImageFrameView : public TimeAxisViewItem
 			ImageFrameTimeAxis *tv,
 			ImageFrameTimeAxisGroup* group,
 			double spu,
-			GdkColor& base_color,
+		        Gdk::Color& base_color,
 			jack_nframes_t start,
 			jack_nframes_t duration,
 			unsigned char* rgb_data,

@@ -187,7 +187,7 @@ ImageFrameTimeAxisView::set_samples_per_unit (gdouble spp)
  * @param color the new base color
  */
 void
-ImageFrameTimeAxisView::apply_color(GdkColor& color)
+ImageFrameTimeAxisView::apply_color(Gdk::Color& color)
 {
 	region_color = color ;
 	for(ImageFrameGroupList::const_iterator citer = imageframe_groups.begin(); citer != imageframe_groups.end(); citer++)

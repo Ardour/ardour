@@ -48,7 +48,7 @@ gint
 Editor::_canvas_copy_region_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = (Editor*)data;
-	return editor->signal_canvas_copy_region_event() (item, event);
+	return editor->canvas_copy_region_event (item, event);
 }
 
 gint
@@ -56,7 +56,7 @@ Editor::_canvas_crossfade_view_event (GnomeCanvasItem *item, GdkEvent *event, gp
 {
 	CrossfadeView* xfv = static_cast<CrossfadeView*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&xfv->get_time_axis_view().editor);
-	return editor->signal_canvas_crossfade_view_event() (item, event, xfv);
+	return editor->canvas_crossfade_view_event (item, event, xfv);
 }
 
 gint
@@ -64,7 +64,7 @@ Editor::_canvas_fade_in_event (GnomeCanvasItem *item, GdkEvent *event, gpointer 
 {
 	AudioRegionView* rv = static_cast<AudioRegionView*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
-	return editor->signal_canvas_fade_in_event() (item, event, rv);
+	return editor->canvas_fade_in_event (item, event, rv);
 }
 
 gint
@@ -72,7 +72,7 @@ Editor::_canvas_fade_in_handle_event (GnomeCanvasItem *item, GdkEvent *event, gp
 {
 	AudioRegionView* rv = static_cast<AudioRegionView*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
-	return editor->signal_canvas_fade_in_handle_event() (item, event, rv);
+	return editor->canvas_fade_in_handle_event (item, event, rv);
 }
 
 gint
@@ -80,7 +80,7 @@ Editor::_canvas_fade_out_event (GnomeCanvasItem *item, GdkEvent *event, gpointer
 {
 	AudioRegionView* rv = static_cast<AudioRegionView*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
-	return editor->signal_canvas_fade_out_event() (item, event, rv);
+	return editor->canvas_fade_out_event (item, event, rv);
 }
 
 gint
@@ -88,7 +88,7 @@ Editor::_canvas_fade_out_handle_event (GnomeCanvasItem *item, GdkEvent *event, g
 {
 	AudioRegionView* rv = static_cast<AudioRegionView*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
-	return editor->signal_canvas_fade_out_handle_event() (item, event, rv);
+	return editor->canvas_fade_out_handle_event (item, event, rv);
 }
 
 gint
@@ -97,7 +97,7 @@ Editor::_canvas_region_view_event (GnomeCanvasItem *item, GdkEvent *event, gpoin
 	AudioRegionView *rv = reinterpret_cast<AudioRegionView *>(data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
 
-	return editor->signal_canvas_region_view_event() (item, event, rv);
+	return editor->canvas_region_view_event (item, event, rv);
 }
 
 gint
@@ -106,7 +106,7 @@ Editor::_canvas_region_view_name_highlight_event (GnomeCanvasItem *item, GdkEven
 	AudioRegionView *rv = reinterpret_cast<AudioRegionView *> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
 
-	return editor->signal_canvas_region_view_name_highlight_event() (item, event);
+	return editor->canvas_region_view_name_highlight_event (item, event);
 }
 
 gint
@@ -115,7 +115,7 @@ Editor::_canvas_region_view_name_event (GnomeCanvasItem *item, GdkEvent *event, 
 	AudioRegionView *rv = reinterpret_cast<AudioRegionView *> (data);
 	Editor* editor = dynamic_cast<Editor*>(&rv->get_time_axis_view().editor);
 	
-	return editor->signal_canvas_region_view_name_event() (item, event);
+	return editor->canvas_region_view_name_event (item, event);
 }
 
 gint
@@ -126,7 +126,7 @@ Editor::_canvas_stream_view_event (GnomeCanvasItem *item, GdkEvent *event, gpoin
 	AudioTimeAxisView *tv = (AudioTimeAxisView *) data;
 	Editor* editor = dynamic_cast<Editor*>(&tv->editor);
 
-	return editor->signal_canvas_stream_view_event() (item, event, tv);
+	return editor->canvas_stream_view_event (item, event, tv);
 }
 
 gint
@@ -135,7 +135,7 @@ Editor::_canvas_automation_track_event (GnomeCanvasItem *item, GdkEvent *event, 
 	AutomationTimeAxisView* atv = (AutomationTimeAxisView*) data;
 	Editor* editor = dynamic_cast<Editor*>(&atv->editor);
 
-	return editor->signal_canvas_automation_track_event() (item, event, atv);
+	return editor->canvas_automation_track_event (item, event, atv);
 }
 
 gint
@@ -158,7 +158,7 @@ Editor::_canvas_control_point_event (GnomeCanvasItem *item, GdkEvent *event, gpo
 		break;
 	}
 
-	return editor->signal_canvas_control_point_event() (item, event);
+	return editor->canvas_control_point_event (item, event);
 }
 
 gint
@@ -167,21 +167,21 @@ Editor::_canvas_line_event (GnomeCanvasItem *item, GdkEvent *event, gpointer dat
 	AutomationLine *line = reinterpret_cast<AutomationLine*> (data);
 	Editor* editor = dynamic_cast<Editor*>(&line->trackview.editor);
 
-	return editor->signal_canvas_line_event() (item, event);
+	return editor->canvas_line_event (item, event);
 }
 
 gint
 Editor::_canvas_tempo_marker_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
-	return editor->signal_canvas_tempo_marker_event() (item, event);
+	return editor->canvas_tempo_marker_event (item, event);
 }
 
 gint
 Editor::_canvas_meter_marker_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor *) data);
-	return editor->signal_canvas_meter_marker_event() (item, event);
+	return editor->canvas_meter_marker_event (item, event);
 }
 
 gint
@@ -189,7 +189,7 @@ Editor::_canvas_tempo_bar_event (GnomeCanvasItem *item, GdkEvent *event, gpointe
 {
 	/* XXX NO CAST */
 	Editor* editor = (Editor*) data;
-	return editor->signal_canvas_tempo_bar_event() (item, event);
+	return editor->canvas_tempo_bar_event (item, event);
 }
 
 gint
@@ -197,14 +197,14 @@ Editor::_canvas_meter_bar_event (GnomeCanvasItem *item, GdkEvent *event, gpointe
 {
 	/* XXX NO CAST */
 	Editor* editor = (Editor*) data;
-	return editor->signal_canvas_meter_bar_event() (item, event);
+	return editor->canvas_meter_bar_event (item, event);
 }
 
 gint
 Editor::_canvas_marker_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
-	return editor->signal_canvas_marker_event() (item, event);
+	return editor->canvas_marker_event (item, event);
 }
 
 gint
@@ -212,7 +212,7 @@ Editor::_canvas_marker_bar_event (GnomeCanvasItem *item, GdkEvent *event, gpoint
 {
 	/* NO CAST */
 	Editor* editor = (Editor*) data;
-	return editor->signal_canvas_marker_bar_event() (item, event);
+	return editor->canvas_marker_bar_event (item, event);
 }
 
 gint
@@ -220,7 +220,7 @@ Editor::_canvas_range_marker_bar_event (GnomeCanvasItem *item, GdkEvent *event, 
 {
 	/* NO CAST */
 	Editor* editor = (Editor*) data;
-	return editor->signal_canvas_range_marker_bar_event() (item, event);
+	return editor->canvas_range_marker_bar_event (item, event);
 }
 
 gint
@@ -228,7 +228,7 @@ Editor::_canvas_transport_marker_bar_event (GnomeCanvasItem *item, GdkEvent *eve
 {
 	/* NO CAST */
 	Editor* editor = (Editor*) data;
-	return editor->signal_canvas_transport_marker_bar_event() (item, event);
+	return editor->canvas_transport_marker_bar_event (item, event);
 }
 
 gint
@@ -236,7 +236,7 @@ Editor::_canvas_playhead_cursor_event (GnomeCanvasItem *item, GdkEvent *event, g
 {
 	/* NO CAST */
 	Editor* editor = (Editor*) data;
-	return editor->signal_canvas_playhead_cursor_event() (item, event);
+	return editor->canvas_playhead_cursor_event (item, event);
 }
 
 gint
@@ -244,35 +244,35 @@ Editor::_canvas_edit_cursor_event (GnomeCanvasItem *item, GdkEvent *event, gpoin
 {
 	/* NO CAST */
 	Editor* editor = (Editor*) data;
-	return editor->signal_canvas_edit_cursor_event() (item, event);
+	return editor->canvas_edit_cursor_event (item, event);
 }
 
 gint
 Editor::_canvas_zoom_rect_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
-	return editor->signal_canvas_zoom_rect_event() (item, event);
+	return editor->canvas_zoom_rect_event (item, event);
 }
 
 gint
 Editor::_canvas_selection_rect_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
-	return editor->signal_canvas_selection_rect_event() (item, event);
+	return editor->canvas_selection_rect_event (item, event);
 }
 
 gint
 Editor::_canvas_selection_start_trim_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
-	return editor->signal_canvas_selection_start_trim_event() (item, event);
+	return editor->canvas_selection_start_trim_event (item, event);
 }
 
 gint
 Editor::_canvas_selection_end_trim_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
 	Editor* editor = dynamic_cast<Editor*>((PublicEditor*) data);
-	return editor->signal_canvas_selection_end_trim_event() (item, event);
+	return editor->canvas_selection_end_trim_event (item, event);
 }
 
 gint
@@ -281,7 +281,7 @@ Editor::_track_canvas_event (GnomeCanvasItem *item, GdkEvent *event, gpointer da
 	/* NO CAST */
 
 	Editor* editor = (Editor*) data;
-	return editor->signal_track_canvas_event() (item, event);
+	return editor->track_canvas_event (item, event);
 }
 
 /********** END OF.TATIC EVENT HANDLERS */

@@ -117,7 +117,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 *
 		 * @param color the new base color
 		 */
-		void apply_item_color(GdkColor&) ;
+		void apply_item_color(Gdk::Color&) ;
 		
 		
 		//---------------------------------------------------------------------------------------//

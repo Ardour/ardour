@@ -92,13 +92,13 @@ void
 ARDOUR_UI::goto_editor_window ()
 {
 	editor->show_window ();
-	editor->window().get_window().raise ();
+	editor->present();
 }
 void
 ARDOUR_UI::goto_mixer_window ()
 {
 	mixer->show_window ();
-	mixer->get_window().raise ();
+	mixer->present();
 }
 
 gint

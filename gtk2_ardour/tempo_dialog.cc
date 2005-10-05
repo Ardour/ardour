@@ -8,6 +8,7 @@
 #include "i18n.h"
 
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace ARDOUR;
 
 TempoDialog::TempoDialog (TempoMap& map, jack_nframes_t frame, string action)
@@ -175,6 +176,7 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	bpb_entry.select_region (0, -1);
 	Gtkmm2ext::set_size_request_to_display_given_text (bpb_entry, "999999g", 5, 5);
 
+	vector<string> strings;
 	
 	strings.push_back (_("whole (1)"));
 	strings.push_back (_("second (2)"));

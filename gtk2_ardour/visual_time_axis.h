@@ -202,7 +202,7 @@ class VisualTimeAxis : public TimeAxisView
 		 *
 		 * @param c the new TimeAxis color
 		 */
-		void set_time_axis_color(Gdk_Color c) ;
+		void set_time_axis_color(Gdk::Color c) ;
 		
 		
 		//---------------------------------------------------------------------------------------//

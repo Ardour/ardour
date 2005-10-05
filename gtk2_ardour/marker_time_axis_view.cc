@@ -174,7 +174,7 @@ MarkerTimeAxisView::set_samples_per_unit(gdouble spp)
  * @param color the new base color
  */
 void
-MarkerTimeAxisView::apply_color(GdkColor& color)
+MarkerTimeAxisView::apply_color(Gdk::Color& color)
 {
 	region_color = color;
 

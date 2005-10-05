@@ -77,13 +77,13 @@ class AxisView : public sigc::trackable
 	 *
 	 * @return the unique random color.
 	 */
-	static GdkColor unique_random_color();
+	static Gdk::Color unique_random_color();
 
 
 	ARDOUR::Session& _session;
 	Gdk::Color _color;
 
-	static list<GdkColor> used_colors;
+	static list<Gdk::Color> used_colors;
 
 	Gtk::Label name_label;
 

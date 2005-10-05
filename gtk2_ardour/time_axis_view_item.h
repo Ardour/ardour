@@ -215,7 +215,7 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
     /**
      * 
      */
-    void set_color(GdkColor& color) ;
+    void set_color(Gdk::Color& color) ;
     
     /**
      * 
@@ -334,7 +334,7 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
      * @param start the start point of this item
      * @param duration the duration of this item
      */
-    TimeAxisViewItem(std::string it_name, GnomeCanvasGroup* parent, TimeAxisView& tv, double spu, GdkColor& base_color, 
+    TimeAxisViewItem(std::string it_name, GnomeCanvasGroup* parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
 		     jack_nframes_t start, jack_nframes_t duration, Visibility v = Visibility (0));
     
     /**

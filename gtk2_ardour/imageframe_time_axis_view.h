@@ -112,7 +112,7 @@ class ImageFrameTimeAxisView : public sigc::trackable
 		 *
 		 * @param color the new base color
 		 */
-		void apply_color (GdkColor&) ;
+		void apply_color (Gdk::Color&) ;
 		
 		//---------------------------------------------------------------------------------------//
 		// Child ImageFrameTimeAxisGroup Accessors/Mutators
@@ -263,7 +263,7 @@ class ImageFrameTimeAxisView : public sigc::trackable
 		double _samples_per_unit ;
 		
 		/* XXX why are these different? */
-		GdkColor region_color ;
+		Gdk::Color region_color ;
 		uint32_t stream_base_color ;
 		
 } ; /* class ImageFrameTimeAxisView */

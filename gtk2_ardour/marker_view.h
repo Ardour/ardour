@@ -58,7 +58,7 @@ class MarkerView : public TimeAxisViewItem
 			TimeAxisView *tv,
 			ImageFrameView* marked,
 			double spu,
-			GdkColor& base_color,
+		        Gdk::Color& base_color,
 			std::string mark_type,
 			std::string mark_id,
 			jack_nframes_t start,

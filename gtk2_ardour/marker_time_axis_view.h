@@ -114,7 +114,7 @@ class MarkerTimeAxisView : public sigc::trackable
 		 *
 		 * @param color the new base color
 		 */
-		void apply_color(GdkColor& color) ;
+		void apply_color(Gdk::Color& color) ;
 
 		//---------------------------------------------------------------------------------------//
 		// Child MarkerView Accessors/Mutators
@@ -231,7 +231,7 @@ class MarkerTimeAxisView : public sigc::trackable
 		double _samples_per_unit;
 
 		/* XXX why are these different? */
-		GdkColor region_color;
+		Gdk::Color region_color;
 		uint32_t stream_base_color;
 		
 }; /* class MarkerTimeAxisView */

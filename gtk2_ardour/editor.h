@@ -415,7 +415,7 @@ class Editor : public PublicEditor
 	LocationMarkers  *find_location_markers (ARDOUR::Location *);
 	ARDOUR::Location* find_location_from_marker (Marker *, bool& is_start);
 
-	typedef map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
+	typedef std::map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
 	LocationMarkerMap location_markers;
 
 	void hide_marker (GnomeCanvasItem*, GdkEvent*);
@@ -1817,7 +1817,7 @@ class Editor : public PublicEditor
 	void toggle_gain_envelope_visibility ();
 	void toggle_gain_envelope_active ();
 	
-	typedef map<Editing::ColorID,std::string> ColorStyleMap;
+	typedef std::map<Editing::ColorID,std::string> ColorStyleMap;
 	void init_colormap ();
 };
 
