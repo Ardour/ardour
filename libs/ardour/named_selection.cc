@@ -73,10 +73,10 @@ NamedSelection::NamedSelection (Session& session, const XMLNode& node)
 				playlist->ref();
 				playlists.push_back (playlist);
 			} else {
-				warning << compose (_("Chunk %1 uses an unknown playlist \"%2\""), name, property->value()) << endmsg;
+				warning << string_compose (_("Chunk %1 uses an unknown playlist \"%2\""), name, property->value()) << endmsg;
 			}
 		} else {
-			error << compose (_("Chunk %1 contains misformed playlist information"), name) << endmsg;
+			error << string_compose (_("Chunk %1 contains misformed playlist information"), name) << endmsg;
 			throw failed_constructor();
 		}
 	}

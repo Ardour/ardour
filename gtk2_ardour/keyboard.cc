@@ -416,7 +416,7 @@ Keyboard::translate_key_name (const string& name)
 		}
 		
 		if ((keycode = gdk_keyval_from_name(get_real_keyname (keyname).c_str())) == GDK_VoidSymbol) {
-			error << compose(_("KeyboardTarget: keyname \"%1\" is unknown."), keyname) << endmsg;
+			error << string_compose(_("KeyboardTarget: keyname \"%1\" is unknown."), keyname) << endmsg;
 			result.clear();
 			return result;
 		}
@@ -642,7 +642,7 @@ Keyboard::check_meta_numlock (char keycode, guint mod, string modname)
 				alternate_meta_modname = "Mod2";
 				break;
 			default:
-				error << compose (_("Your system is completely broken - NumLock uses \"%1\""
+				error << string_compose (_("Your system is completely broken - NumLock uses \"%1\""
 						    "as its modifier. This is madness - see the man page "
 						    "for xmodmap to find out how to fix this."),
 						  modname)
@@ -650,7 +650,7 @@ Keyboard::check_meta_numlock (char keycode, guint mod, string modname)
 				return;
 			}
 
-			warning << compose (_("Your system generates \"%1\" when the NumLock key "
+			warning << string_compose (_("Your system generates \"%1\" when the NumLock key "
 					      "is pressed. This can cause problems when editing "
 					      "so Ardour will use %2 to mean Meta rather than %1"),
 					    modname, alternate_meta_modname)
@@ -711,7 +711,7 @@ Keyboard::get_modifier_masks ()
 	}
 #ifdef WARN_ABOUT_DUPLICATE_MODIFIERS
 	if (bound > 1) {
-		warning << compose (_("You have %1 keys bound to \"mod1\""), bound) << endmsg;
+		warning << string_compose (_("You have %1 keys bound to \"mod1\""), bound) << endmsg;
 	}
 #endif
 	bound = 0;
@@ -726,7 +726,7 @@ Keyboard::get_modifier_masks ()
 	}
 #ifdef WARN_ABOUT_DUPLICATE_MODIFIERS
 	if (bound > 1) {
-		warning << compose (_("You have %1 keys bound to \"mod2\""), bound) << endmsg;
+		warning << string_compose (_("You have %1 keys bound to \"mod2\""), bound) << endmsg;
 	}
 #endif
 	bound = 0;
@@ -741,7 +741,7 @@ Keyboard::get_modifier_masks ()
 	}
 #ifdef WARN_ABOUT_DUPLICATE_MODIFIERS
 	if (bound > 1) {
-		warning << compose (_("You have %1 keys bound to \"mod3\""), bound) << endmsg;
+		warning << string_compose (_("You have %1 keys bound to \"mod3\""), bound) << endmsg;
 	}
 #endif
 	bound = 0;
@@ -756,7 +756,7 @@ Keyboard::get_modifier_masks ()
 	}
 #ifdef WARN_ABOUT_DUPLICATE_MODIFIERS
 	if (bound > 1) {
-		warning << compose (_("You have %1 keys bound to \"mod4\""), bound) << endmsg;
+		warning << string_compose (_("You have %1 keys bound to \"mod4\""), bound) << endmsg;
 	}
 #endif
 	bound = 0;
@@ -771,7 +771,7 @@ Keyboard::get_modifier_masks ()
 	}
 #ifdef WARN_ABOUT_DUPLICATE_MODIFIERS
 	if (bound > 1) {
-		warning << compose (_("You have %1 keys bound to \"mod5\""), bound) << endmsg;
+		warning << string_compose (_("You have %1 keys bound to \"mod5\""), bound) << endmsg;
 	}
 #endif
 

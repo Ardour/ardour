@@ -96,7 +96,7 @@ Source::get_state ()
 	char buf[64];
 
 	node->add_property ("name", _name);
-	snprintf (buf, sizeof(buf)-1, "%llu", _id);
+	snprintf (buf, sizeof(buf)-1, "%" PRIu64, _id);
 	node->add_property ("id", buf);
 
 	if (_timestamp != 0) {
@@ -123,7 +123,7 @@ Source::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("id")) != 0) {
-		sscanf (prop->value().c_str(), "%llu", &_id);
+		sscanf (prop->value().c_str(), "%" PRIu64, &_id);
 	} else {
 		return -1;
 	}
@@ -165,7 +165,7 @@ Source::peak_thread_work (void* arg)
 				continue;
 			}
 			
-			error << compose (_("poll on peak request pipe failed (%1)"),
+			error << string_compose (_("poll on peak request pipe failed (%1)"),
 					  strerror (errno))
 			      << endmsg;
 			break;
@@ -237,17 +237,17 @@ Source::start_peak_thread ()
 	}
 
 	if (pipe (peak_request_pipe)) {
-		error << compose(_("Cannot create transport request signal pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("Cannot create transport request signal pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	if (fcntl (peak_request_pipe[0], F_SETFL, O_NONBLOCK)) {
-		error << compose(_("UI: cannot set O_NONBLOCK on peak request pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("UI: cannot set O_NONBLOCK on peak request pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	if (fcntl (peak_request_pipe[1], F_SETFL, O_NONBLOCK)) {
-		error << compose(_("UI: cannot set O_NONBLOCK on peak request pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("UI: cannot set O_NONBLOCK on peak request pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -342,7 +342,7 @@ Source::initialize_peakfile (bool newfile, string audio_path)
 			if (errno != ENOENT) {
 				/* it exists in the peaks dir, but there is some kind of error */
 				
-				error << compose(_("Source: cannot stat peakfile \"%1\""), peakpath) << endmsg;
+				error << string_compose(_("Source: cannot stat peakfile \"%1\""), peakpath) << endmsg;
 				return -1;
 			}
 
@@ -362,7 +362,7 @@ Source::initialize_peakfile (bool newfile, string audio_path)
 					
 					/* it exists in the audio dir , but there is some kind of error */
 					
-					error << compose(_("Source: cannot stat peakfile \"%1\" or \"%2\""), peakpath, oldpeakpath) << endmsg;
+					error << string_compose(_("Source: cannot stat peakfile \"%1\" or \"%2\""), peakpath, oldpeakpath) << endmsg;
 					return -1;
 				}
 				
@@ -394,7 +394,7 @@ Source::initialize_peakfile (bool newfile, string audio_path)
 	}
 
 	if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
-		error << compose(_("Source: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+		error << string_compose(_("Source: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -631,7 +631,7 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 				to_read = min (chunksize, (_length - current_frame));
 				
 				if ((frames_read = read_unlocked (raw_staging, current_frame, to_read)) < 0) {
-					error << compose(_("Source[%1]: peak read - cannot read %2 samples at offset %3")
+					error << string_compose(_("Source[%1]: peak read - cannot read %2 samples at offset %3")
 							 , _name, to_read, current_frame) 
 					      << endmsg;
 					goto out;
@@ -767,7 +767,7 @@ Source::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 		frames_to_read = min (frames_per_peak, cnt);
 
 		if ((frames_read = read_unlocked (buf, current_frame, frames_to_read)) != frames_to_read) {
-			error << compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
+			error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
 			goto out;
 		}
 
@@ -791,8 +791,8 @@ Source::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 		cnt -= frames_read;
 	}
 
-	if (::pwrite (peakfile, peakbuf, sizeof (PeakData) * peaki, first_peak_byte) != (size_t) sizeof (PeakData) * peaki) {
-		error << compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
+	if (::pwrite (peakfile, peakbuf, sizeof (PeakData) * peaki, first_peak_byte) != (ssize_t) sizeof (PeakData) * peaki) {
+		error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
 		goto out;
 	}
 

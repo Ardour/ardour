@@ -1446,7 +1446,7 @@ AudioTimeAxisView::add_redirect_automation_curve (Redirect *redirect, uint32_t w
 
 	if ((ran = find_redirect_automation_node (redirect, what)) == 0) {
 		fatal << _("programming error: ")
-		      << compose (X_("redirect automation curve for %1:%2 not registered with audio track!"),
+		      << string_compose (X_("redirect automation curve for %1:%2 not registered with audio track!"),
 				  redirect->name(), what)
 		      << endmsg;
 		/*NOTREACHED*/
@@ -1885,7 +1885,7 @@ AudioTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_menu = new Menu;
 	playlist_menu->set_name ("ArdourContextMenu");
 
-	playlist_items.push_back (MenuElem (compose (_("Current: %1"), get_diskstream()->playlist()->name())));
+	playlist_items.push_back (MenuElem (string_compose (_("Current: %1"), get_diskstream()->playlist()->name())));
 	playlist_items.push_back (SeparatorElem());
 	
 	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &AudioTimeAxisView::rename_current_playlist)));

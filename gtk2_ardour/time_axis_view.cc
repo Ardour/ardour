@@ -47,7 +47,7 @@
 #include "i18n.h"
 
 using namespace Gtk;
-/*can't use sigc namespace while we have the compose() in libs/pbd3/pbd */
+/*can't use sigc namespace while we have the string_compose() in libs/pbd3/pbd */
 //using namespace sigc; 
 using namespace ARDOUR;
 using namespace Editing;
@@ -783,7 +783,7 @@ TimeAxisView::set_state (const XMLNode& node)
 		} else if (prop->value() == "small") {
 			set_height (Small);
 		} else {
-			error << compose(_("unknown track height name \"%1\" in XML GUI information"), prop->value()) << endmsg;
+			error << string_compose(_("unknown track height name \"%1\" in XML GUI information"), prop->value()) << endmsg;
 			set_height (Normal);
 		}
 

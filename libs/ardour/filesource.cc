@@ -158,13 +158,13 @@ FileSource::init (string pathstr, bool must_exist, jack_nframes_t rate)
 		vector<string*>* result = scanner (search_path, regexp, false, true, -1);
 		
 		if (result == 0 || result->size() == 0) {
-			error << compose (_("FileSource: \"%1\" not found when searching %2 using %3"), 
+			error << string_compose (_("FileSource: \"%1\" not found when searching %2 using %3"), 
 					  pathstr, search_path, regexp) << endmsg;
 			goto out;
 		}
 		
 		if (result->size() > 1) {
-			string msg = compose (_("FileSource: \"%1\" is ambigous when searching %2\n\t"), pathstr, search_path);
+			string msg = string_compose (_("FileSource: \"%1\" is ambigous when searching %2\n\t"), pathstr, search_path);
 			vector<string*>::iterator x = result->begin();
 
 			while (true) {
@@ -199,7 +199,7 @@ FileSource::init (string pathstr, bool must_exist, jack_nframes_t rate)
 
 	if (access (_path.c_str(), F_OK) != 0) {
 		if (must_exist) {
-			error << compose(_("Filesource: cannot find required file (%1): %2"), _path, strerror (errno)) << endmsg;
+			error << string_compose(_("Filesource: cannot find required file (%1): %2"), _path, strerror (errno)) << endmsg;
 			goto out;
 			
 		}
@@ -207,13 +207,13 @@ FileSource::init (string pathstr, bool must_exist, jack_nframes_t rate)
 		if (errno == ENOENT) {
 			new_file = true;
 		} else {
-			error << compose(_("Filesource: cannot check for existing file (%1): %2"), _path, strerror (errno)) << endmsg;
+			error << string_compose(_("Filesource: cannot check for existing file (%1): %2"), _path, strerror (errno)) << endmsg;
 			goto out;
 		}
 	}
 
 	if ((fd = open64 (_path.c_str(), O_RDWR|O_CREAT, 0644)) < 0) {
-		error << compose(_("FileSource: could not open \"%1\": (%2)"), _path, strerror (errno)) << endmsg;
+		error << string_compose(_("FileSource: could not open \"%1\": (%2)"), _path, strerror (errno)) << endmsg;
 		goto out;
 	}
 	
@@ -239,7 +239,7 @@ FileSource::init (string pathstr, bool must_exist, jack_nframes_t rate)
 		is_bwf = Config->get_native_format_is_bwf ();
 
 		if (fill_header (rate)) {
-			error << compose (_("FileSource: cannot write header in %1"), _path) << endmsg;
+			error << string_compose (_("FileSource: cannot write header in %1"), _path) << endmsg;
 			goto out;
 		}
 
@@ -254,17 +254,17 @@ FileSource::init (string pathstr, bool must_exist, jack_nframes_t rate)
 	} else {
 
 		if (discover_chunks (must_exist)) {
-			error << compose (_("FileSource: cannot locate chunks in %1"), _path) << endmsg;
+			error << string_compose (_("FileSource: cannot locate chunks in %1"), _path) << endmsg;
 			goto out;
 		}
 		
 		if (read_header (must_exist)) {
-			error << compose (_("FileSource: cannot read header in %1"), _path) << endmsg;
+			error << string_compose (_("FileSource: cannot read header in %1"), _path) << endmsg;
 			goto out;
 		}
 
 		if (check_header (rate, must_exist)) {
-			error << compose (_("FileSource: cannot check header in %1"), _path) << endmsg;
+			error << string_compose (_("FileSource: cannot check header in %1"), _path) << endmsg;
 			goto out;
 		}
 
@@ -272,7 +272,7 @@ FileSource::init (string pathstr, bool must_exist, jack_nframes_t rate)
 	}
 	
 	if ((ret = initialize_peakfile (new_file, _path))) {
-		error << compose (_("FileSource: cannot initialize peakfile for %1"), _path) << endmsg;
+		error << string_compose (_("FileSource: cannot initialize peakfile for %1"), _path) << endmsg;
 	}
 
   out:
@@ -326,7 +326,7 @@ FileSource::discover_chunks (bool silent)
 
 	if (memcmp (rw.id, "RIFF", 4) || memcmp (rw.text, "WAVE", 4)) {
 		if (!silent) {
-			error << compose (_("FileSource %1: not a RIFF/WAVE file"), _path) << endmsg;
+			error << string_compose (_("FileSource %1: not a RIFF/WAVE file"), _path) << endmsg;
 		}
 		return -1;
 	}
@@ -401,11 +401,11 @@ FileSource::fill_header (jack_nframes_t rate)
 		struct utsname utsinfo;
 
 		if ((pwinfo = getpwuid (getuid())) == 0) {
-			error << compose(_("FileSource: cannot get user information for BWF header (%1)"), strerror(errno)) << endmsg;
+			error << string_compose(_("FileSource: cannot get user information for BWF header (%1)"), strerror(errno)) << endmsg;
 			return -1;
 		}
 		if (uname (&utsinfo)) {
-			error << compose(_("FileSource: cannot get host information for BWF header (%1)"), strerror(errno)) << endmsg;
+			error << string_compose(_("FileSource: cannot get host information for BWF header (%1)"), strerror(errno)) << endmsg;
 			return -1;
 		}
 
@@ -543,7 +543,7 @@ FileSource::update_header (jack_nframes_t when, struct tm& now, time_t tnow)
 	compute_header_size ();
 
 	if (write_header()) {
-		error << compose(_("FileSource[%1]: cannot update data size: %2"), _path, strerror (errno)) << endmsg;
+		error << string_compose(_("FileSource[%1]: cannot update data size: %2"), _path, strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -613,7 +613,7 @@ FileSource::read_broadcast_data (ChunkInfo& info)
 	int32_t coding_history_size;
 
 	if (::pread (fd, (char *) &header.bext, sizeof (header.bext), info.offset + sizeof (GenericChunk)) != sizeof (header.bext)) {
-		error << compose(_("FileSource: cannot read Broadcast Wave data from existing audio file \"%1\" (%2)"),
+		error << string_compose(_("FileSource: cannot read Broadcast Wave data from existing audio file \"%1\" (%2)"),
 				 _path, strerror (errno)) << endmsg;
 		return -1;
 	}
@@ -625,7 +625,7 @@ FileSource::read_broadcast_data (ChunkInfo& info)
 		char data[coding_history_size];
 		
 		if (::pread (fd, data, coding_history_size, info.offset + sizeof (BroadcastChunk)) != coding_history_size) {
-			error << compose(_("FileSource: cannot read Broadcast Wave coding history from audio file \"%1\" (%2)"),
+			error << string_compose(_("FileSource: cannot read Broadcast Wave coding history from audio file \"%1\" (%2)"),
 					 _path, strerror (errno)) << endmsg;
 			return -1;
 		}
@@ -658,7 +658,7 @@ FileSource::check_header (jack_nframes_t rate, bool silent)
 {
 	if (header.format.formatTag != 3) { /* IEEE float */
 		if (!silent) {
-			error << compose(_("FileSource \"%1\" does not use floating point format.\n"   
+			error << string_compose(_("FileSource \"%1\" does not use floating point format.\n"   
 					   "This is probably a programming error."), _path) << endmsg;
 		}
 		return -1;
@@ -697,17 +697,17 @@ FileSource::check_header (jack_nframes_t rate, bool silent)
 	}
 
 	if (data_offset == 0) {
-		error << compose(_("FileSource \"%1\" has no \"data\" chunk"), _path) << endmsg;
+		error << string_compose(_("FileSource \"%1\" has no \"data\" chunk"), _path) << endmsg;
 		return -1;
 	}
 
 	if (_length * sizeof (Sample) != (jack_nframes_t) header.data.size) {
-		warning << compose(_("%1: data length in header (%2) differs from implicit size in file (%3)"),
+		warning << string_compose(_("%1: data length in header (%2) differs from implicit size in file (%3)"),
 				   _path, header.data.size, _length * sizeof (Sample)) << endmsg;
 	}
 
 	if ((jack_nframes_t) header.format.nSamplesPerSec != rate) {
-		warning << compose(_("\"%1\" has a sample rate of %2 instead of %3 as used by this session"),
+		warning << string_compose(_("\"%1\" has a sample rate of %2 instead of %3 as used by this session"),
 				   _path, header.format.nSamplesPerSec, rate) << endmsg;
 	}
 
@@ -724,7 +724,7 @@ FileSource::write_header()
 	pos = 0;
 	
 	if (::pwrite64 (fd, (char *) &header.wave, sizeof (header.wave), pos) != sizeof (header.wave)) {
-		error << compose(_("FileSource: cannot write WAVE chunk: %1"), strerror (errno)) << endmsg;
+		error << string_compose(_("FileSource: cannot write WAVE chunk: %1"), strerror (errno)) << endmsg;
 		return -1;
 	}
 	
@@ -759,14 +759,14 @@ FileSource::write_header()
         /* write fmt and data chunks */
 
 	if (::pwrite64 (fd, (char *) &header.format, sizeof (header.format), pos) != sizeof (header.format)) {
-		error << compose(_("FileSource: cannot write format chunk: %1"), strerror (errno)) << endmsg;
+		error << string_compose(_("FileSource: cannot write format chunk: %1"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	pos += sizeof (header.format);
 	
 	if (::pwrite64 (fd, (char *) &header.data, sizeof (header.data), pos) != sizeof (header.data)) {
-		error << compose(_("FileSource: cannot data chunk: %1"), strerror (errno)) << endmsg;
+		error << string_compose(_("FileSource: cannot data chunk: %1"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -836,7 +836,7 @@ FileSource::write (Sample *data, jack_nframes_t cnt)
 		jack_nframes_t oldlen;
 
 		if (::pwrite64 (fd, (char *) data, byte_cnt, byte_pos) != (off64_t) byte_cnt) {
-			error << compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
 
@@ -960,7 +960,7 @@ FileSource::move_to_trash (const string trash_dir_name)
 		}
 		
 		if (version == 999) {
-			error << compose (_("there are already 1000 files with names like %1; versioning discontinued"),
+			error << string_compose (_("there are already 1000 files with names like %1; versioning discontinued"),
 					  newpath)
 			      << endmsg;
 		} else {
@@ -974,14 +974,14 @@ FileSource::move_to_trash (const string trash_dir_name)
 	}
 
 	if (::rename (_path.c_str(), newpath.c_str()) != 0) {
-		error << compose (_("cannot rename audio file source from %1 to %2 (%3)"),
+		error << string_compose (_("cannot rename audio file source from %1 to %2 (%3)"),
 				  _path, newpath, strerror (errno))
 		      << endmsg;
 		return -1;
 	}
 
 	if (::unlink (peakpath.c_str()) != 0) {
-		error << compose (_("cannot remove peakfile %1 for %2 (%3)"),
+		error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
 				  peakpath, _path, strerror (errno))
 		      << endmsg;
 		/* try to back out */

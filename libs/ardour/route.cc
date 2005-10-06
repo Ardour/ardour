@@ -1458,7 +1458,7 @@ Route::add_redirect_from_xml (const XMLNode& node)
 
 				} else {
 
-					error << compose(_("unknown Insert type \"%1\"; ignored"), prop->value()) << endmsg;
+					error << string_compose(_("unknown Insert type \"%1\"; ignored"), prop->value()) << endmsg;
 				}
 
 				add_redirect (insert, this);
@@ -1487,7 +1487,7 @@ Route::set_state (const XMLNode& node)
 
 
 	if (node.name() != "Route"){
-		error << compose(_("Bad node sent to Route::set_state() [%1]"), node.name()) << endmsg;
+		error << string_compose(_("Bad node sent to Route::set_state() [%1]"), node.name()) << endmsg;
 		return -1;
 	}
 
@@ -1546,7 +1546,7 @@ Route::set_state (const XMLNode& node)
 	if ((prop = node.property ("edit-group")) != 0) {
 		RouteGroup* edit_group = _session.edit_group_by_name(prop->value());
 		if(edit_group == 0) {
-			error << compose(_("Route %1: unknown edit group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
+			error << string_compose(_("Route %1: unknown edit group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
 		} else {
 			set_edit_group(edit_group, this);
 		}
@@ -1562,11 +1562,11 @@ Route::set_state (const XMLNode& node)
 		while (remaining.length()) {
 
 			if ((equal = remaining.find_first_of ('=')) == string::npos || equal == remaining.length()) {
-				error << compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
+				error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 				      << endmsg;
 			} else {
 				if (sscanf (remaining.substr (equal+1).c_str(), "%ld", &n) != 1) {
-					error << compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
+					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 					      << endmsg;
 				} else {
 					set_order_key (remaining.substr (0, equal), n);
@@ -1667,7 +1667,7 @@ Route::set_state (const XMLNode& node)
 	if ((prop = node.property ("mix-group")) != 0) {
 		RouteGroup* mix_group = _session.mix_group_by_name(prop->value());
 		if (mix_group == 0) {
-			error << compose(_("Route %1: unknown mix group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
+			error << string_compose(_("Route %1: unknown mix group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
 		}  else {
 			set_mix_group(mix_group, this);
 		}
@@ -1696,7 +1696,7 @@ Route::set_state (const XMLNode& node)
 				if (get_midi_node_info (child, ev, chn, additional)) {
 					_midi_mute_control.set_control_type (chn, ev, additional);
 				} else {
-					error << compose(_("MIDI mute control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
+					error << string_compose(_("MIDI mute control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
 				}
 			}
 			else if (child->name() == "solo") {
@@ -1704,7 +1704,7 @@ Route::set_state (const XMLNode& node)
 				if (get_midi_node_info (child, ev, chn, additional)) {
 					_midi_solo_control.set_control_type (chn, ev, additional);
 				} else {
-					error << compose(_("MIDI mute control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
+					error << string_compose(_("MIDI mute control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
 				}
 			}
 
@@ -2060,7 +2060,7 @@ Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t 
 		return 0;
 	}
 	
-	jack_nframes_t unused;
+	jack_nframes_t unused = 0;
 
 	if ((nframes = check_initial_delay (nframes, offset, unused)) == 0) {
 		return 0;

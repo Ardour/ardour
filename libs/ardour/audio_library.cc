@@ -103,14 +103,14 @@ void
 AudioLibrary::save_changes ()
 {
 	if (lrdf_export_by_source(src.c_str(), src.substr(5).c_str())) {
-		warning << compose(_("Could not open %1.  Audio Library not saved"), src) << endmsg;
+		warning << string_compose(_("Could not open %1.  Audio Library not saved"), src) << endmsg;
 	}
 }
 
 string
 AudioLibrary::add_group (string group, string parent_uri)
 {
-	string local_group(compose("file:sfbd/group/%1", get_uid()));
+	string local_group(string_compose("file:sfbd/group/%1", get_uid()));
 
 	lrdf_add_triple(src.c_str(), local_group.c_str(), 
 					RDFS_BASE "label", group.c_str(), lrdf_literal);
@@ -184,8 +184,8 @@ AudioLibrary::get_groups (list<string>& groups, string parent_uri)
 string
 AudioLibrary::add_member (string member, string parent_uri)
 {
-	string local_member(compose("file:sfdb/soundfile/%1", get_uid()));
-	string file_uri(compose("file:%1", member));
+	string local_member(string_compose("file:sfdb/soundfile/%1", get_uid()));
+	string file_uri(string_compose("file:%1", member));
 
 	lrdf_add_triple(src.c_str(), local_member.c_str(), RDF_TYPE, 
 			SOUNDFILE, lrdf_uri);

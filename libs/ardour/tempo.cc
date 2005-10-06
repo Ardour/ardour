@@ -67,7 +67,7 @@ TempoSection::TempoSection (const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	if (sscanf (prop->value().c_str(), "%lu|%lu|%lu",
+	if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
 		    &start.bars,
 		    &start.beats,
 		    &start.ticks) < 3) {
@@ -131,7 +131,7 @@ MeterSection::MeterSection (const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	if (sscanf (prop->value().c_str(), "%lu|%lu|%lu",
+	if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
 		    &start.bars,
 		    &start.beats,
 		    &start.ticks) < 3) {

@@ -75,12 +75,12 @@ KeyboardTarget::add_binding (string keystring, string action)
 	}
 
 	if (state.size() == 0) {
-		error << compose(_("KeyboardTarget: no translation found for \"%1\""), keystring) << endmsg;
+		error << string_compose(_("KeyboardTarget: no translation found for \"%1\""), keystring) << endmsg;
 		return -1;
 	}
 
 	if (find_action (action, key_action)) {
-		error << compose(_("KeyboardTarget: unknown action \"%1\""), action) << endmsg;
+		error << string_compose(_("KeyboardTarget: unknown action \"%1\""), action) << endmsg;
 		return -1;
 	}
 

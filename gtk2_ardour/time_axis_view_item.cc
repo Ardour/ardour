@@ -255,7 +255,7 @@ bool
 TimeAxisViewItem::set_duration (jack_nframes_t dur, void* src)
 {
 	if ((dur > max_item_duration) || (dur < min_item_duration)) {
-		warning << compose (_("new duration %1 frames is out of bounds for %2"), get_item_name(), dur)
+		warning << string_compose (_("new duration %1 frames is out of bounds for %2"), get_item_name(), dur)
 			<< endmsg;
 		return false;
 	}

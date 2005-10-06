@@ -416,7 +416,7 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_
 	}
 
 	gain_t dg;
-	gain_t old_gain;
+	gain_t old_gain = _gain;
 
 	if (apply_gain_automation) {
 
@@ -424,7 +424,6 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_
 		   speed quietning.
 		*/
 
-		old_gain = _gain;
 		_gain = 1.0f;
 		dg = _gain;
 		
@@ -585,7 +584,7 @@ IO::disconnect_input (Port* our_port, string other_port, void* src)
 			/* disconnect it from the source */
 			
 			if (_session.engine().disconnect (other_port, our_port->name())) {
-				error << compose(_("IO: cannot disconnect input port %1 from %2"), our_port->name(), other_port) << endmsg;
+				error << string_compose(_("IO: cannot disconnect input port %1 from %2"), our_port->name(), other_port) << endmsg;
 				return -1;
 			}
 
@@ -653,7 +652,7 @@ IO::disconnect_output (Port* our_port, string other_port, void* src)
 			/* disconnect it from the destination */
 			
 			if (_session.engine().disconnect (our_port->name(), other_port)) {
-				error << compose(_("IO: cannot disconnect output port %1 from %2"), our_port->name(), other_port) << endmsg;
+				error << string_compose(_("IO: cannot disconnect output port %1 from %2"), our_port->name(), other_port) << endmsg;
 				return -1;
 			}
 
@@ -800,7 +799,7 @@ IO::add_output_port (string destination, void* src)
 			}
 			
 			if ((our_port = _session.engine().register_audio_output_port (buf)) == 0) {
-				error << compose(_("IO: cannot register output port %1"), buf) << endmsg;
+				error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
 				return -1;
 			}
 			
@@ -901,7 +900,7 @@ IO::add_input_port (string source, void* src)
 			}
 			
 			if ((our_port = _session.engine().register_audio_input_port (buf)) == 0) {
-				error << compose(_("IO: cannot register input port %1"), buf) << endmsg;
+				error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
 				return -1;
 			}
 			
@@ -1007,7 +1006,7 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 		try {
 			
 			if ((input_port = _session.engine().register_audio_input_port (buf)) == 0) {
-				error << compose(_("IO: cannot register input port %1"), buf) << endmsg;
+				error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
 				return -1;
 			}
 		}
@@ -1112,7 +1111,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 			
 			try {
 				if ((port = _session.engine().register_audio_input_port (buf)) == 0) {
-					error << compose(_("IO: cannot register input port %1"), buf) << endmsg;
+					error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
 					return -1;
 				}
 			}
@@ -1145,7 +1144,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 			
 			try { 
 				if ((port = _session.engine().register_audio_output_port (buf)) == 0) {
-					error << compose(_("IO: cannot register output port %1"), buf) << endmsg;
+					error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
 					return -1;
 				}
 			}
@@ -1269,7 +1268,7 @@ IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
 		}
 		
 		if ((output_port = _session.engine().register_audio_output_port (buf)) == 0) {
-			error << compose(_("IO: cannot register output port %1"), buf) << endmsg;
+			error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
 			return -1;
 		}
 		
@@ -1579,7 +1578,7 @@ IO::set_state (const XMLNode& node)
 	*/
 
 	if (node.name() != state_node_name) {
-		error << compose(_("incorrect XML node \"%1\" passed to IO object"), node.name()) << endmsg;
+		error << string_compose(_("incorrect XML node \"%1\" passed to IO object"), node.name()) << endmsg;
 		return -1;
 	}
 
@@ -1589,7 +1588,7 @@ IO::set_state (const XMLNode& node)
 	} 
 
 	if ((prop = node.property ("id")) != 0) {
-		sscanf (prop->value().c_str(), "%llu", &_id);
+		sscanf (prop->value().c_str(), "%" PRIu64, &_id);
 	}
 
 	if ((prop = node.property ("iolimits")) != 0) {
@@ -1634,7 +1633,7 @@ IO::set_state (const XMLNode& node)
 				if (get_midi_node_info (child, ev, chn, additional)) {
 					_midi_gain_control.set_control_type (chn, ev, additional);
 				} else {
-					error << compose(_("MIDI gain control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
+					error << string_compose(_("MIDI gain control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
 				}
 			}
 		}
@@ -1701,14 +1700,14 @@ IO::create_ports (const XMLNode& node)
 		Connection* c = _session.connection_by_name (prop->value());
 		
 		if (c == 0) {
-			error << compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
+			error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
 
 			if ((c = _session.connection_by_name (_("in 1"))) == 0) {
 				error << _("No input connections available as a replacement")
 				      << endmsg;
 				return -1;
 			}  else {
-				info << compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
+				info << string_compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
 				     << endmsg;
 			}
 		} 
@@ -1724,14 +1723,14 @@ IO::create_ports (const XMLNode& node)
 		Connection* c = _session.connection_by_name (prop->value());
 
 		if (c == 0) {
-			error << compose(_("Unknown connection \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
+			error << string_compose(_("Unknown connection \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
 
 			if ((c = _session.connection_by_name (_("out 1"))) == 0) {
 				error << _("No output connections available as a replacement")
 				      << endmsg;
 				return -1;
 			}  else {
-				info << compose (_("Connection %1 was not available - \"out 1\" used instead"), prop->value())
+				info << string_compose (_("Connection %1 was not available - \"out 1\" used instead"), prop->value())
 				     << endmsg;
 			}
 		} 
@@ -1745,7 +1744,7 @@ IO::create_ports (const XMLNode& node)
 	no_panner_reset = true;
 
 	if (ensure_io (num_inputs, num_outputs, true, this)) {
-		error << compose(_("%1: cannot create I/O ports"), _name) << endmsg;
+		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 		return -1;
 	}
 
@@ -1811,14 +1810,14 @@ IO::make_connections (const XMLNode& node)
 		Connection* c = _session.connection_by_name (prop->value());
 		
 		if (c == 0) {
-			error << compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
+			error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
 
 			if ((c = _session.connection_by_name (_("in 1"))) == 0) {
 				error << _("No input connections available as a replacement")
 				      << endmsg;
 				return -1;
 			} else {
-				info << compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
+				info << string_compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
 				     << endmsg;
 			}
 		} 
@@ -1827,7 +1826,7 @@ IO::make_connections (const XMLNode& node)
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 		if (set_inputs (prop->value())) {
-			error << compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
+			error << string_compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
 			return -1;
 		}
 	}
@@ -1836,14 +1835,14 @@ IO::make_connections (const XMLNode& node)
 		Connection* c = _session.connection_by_name (prop->value());
 		
 		if (c == 0) {
-			error << compose(_("Unknown connection \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
+			error << string_compose(_("Unknown connection \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
 
 			if ((c = _session.connection_by_name (_("out 1"))) == 0) {
 				error << _("No output connections available as a replacement")
 				      << endmsg;
 				return -1;
 			}  else {
-				info << compose (_("Connection %1 was not available - \"out 1\" used instead"), prop->value())
+				info << string_compose (_("Connection %1 was not available - \"out 1\" used instead"), prop->value())
 				     << endmsg;
 			}
 		} 
@@ -1852,7 +1851,7 @@ IO::make_connections (const XMLNode& node)
 		
 	} else if ((prop = node.property ("outputs")) != 0) {
 		if (set_outputs (prop->value())) {
-			error << compose(_("improper output channel list in XML node (%1)"), prop->value()) << endmsg;
+			error << string_compose(_("improper output channel list in XML node (%1)"), prop->value()) << endmsg;
 			return -1;
 		}
 	}
@@ -1887,12 +1886,12 @@ IO::set_inputs (const string& str)
 		start += 1;
 
 		if ((end = str.find_first_of ('}', start)) == string::npos) {
-			error << compose(_("IO: badly formed string in XML node for inputs \"%1\""), str) << endmsg;
+			error << string_compose(_("IO: badly formed string in XML node for inputs \"%1\""), str) << endmsg;
 			return -1;
 		}
 
 		if ((n = parse_io_string (str.substr (start, end - start), ports)) < 0) {
-			error << compose(_("bad input string in XML node \"%1\""), str) << endmsg;
+			error << string_compose(_("bad input string in XML node \"%1\""), str) << endmsg;
 
 			return -1;
 			
@@ -1937,12 +1936,12 @@ IO::set_outputs (const string& str)
 		start += 1;
 
 		if ((end = str.find_first_of ('}', start)) == string::npos) {
-			error << compose(_("IO: badly formed string in XML node for outputs \"%1\""), str) << endmsg;
+			error << string_compose(_("IO: badly formed string in XML node for outputs \"%1\""), str) << endmsg;
 			return -1;
 		}
 
 		if ((n = parse_io_string (str.substr (start, end - start), ports)) < 0) {
-			error << compose(_("IO: bad output string in XML node \"%1\""), str) << endmsg;
+			error << string_compose(_("IO: bad output string in XML node \"%1\""), str) << endmsg;
 
 			return -1;
 			
@@ -2480,7 +2479,7 @@ IO::save_automation (const string& path)
 	out.open (fullpath.c_str());
 
 	if (!out) {
-		error << compose(_("%1: could not open automation event file \"%2\""), _name, fullpath) << endmsg;
+		error << string_compose(_("%1: could not open automation event file \"%2\""), _name, fullpath) << endmsg;
 		return -1;
 	}
 
@@ -2519,7 +2518,7 @@ IO::load_automation (const string& path)
 		fullpath += path;
 		in.open (fullpath.c_str());
 		if (!in) {
-				error << compose(_("%1: cannot open automation event file \"%2\""), _name, fullpath) << endmsg;
+				error << string_compose(_("%1: cannot open automation event file \"%2\""), _name, fullpath) << endmsg;
 				return -1;
 		}
 	}
@@ -2534,16 +2533,16 @@ IO::load_automation (const string& path)
 		if (++linecnt == 1) {
 			if (memcmp (line, "version", 7) == 0) {
 				if (sscanf (line, "version %f", &version) != 1) {
-					error << compose(_("badly formed version number in automation event file \"%1\""), path) << endmsg;
+					error << string_compose(_("badly formed version number in automation event file \"%1\""), path) << endmsg;
 					return -1;
 				}
 			} else {
-				error << compose(_("no version information in automation event file \"%1\""), path) << endmsg;
+				error << string_compose(_("no version information in automation event file \"%1\""), path) << endmsg;
 				return -1;
 			}
 
 			if (version != current_automation_version_number) {
-				error << compose(_("mismatched automation event file version (%1)"), version) << endmsg;
+				error << string_compose(_("mismatched automation event file version (%1)"), version) << endmsg;
 				return -1;
 			}
 
@@ -2551,7 +2550,7 @@ IO::load_automation (const string& path)
 		}
 
 		if (sscanf (line, "%c %" PRIu32 " %lf", &type, &when, &value) != 3) {
-			warning << compose(_("badly formatted automation event record at line %1 of %2 (ignored)"), linecnt, path) << endmsg;
+			warning << string_compose(_("badly formatted automation event record at line %1 of %2 (ignored)"), linecnt, path) << endmsg;
 			continue;
 		}
 

@@ -733,7 +733,7 @@ Session::jack_sync_callback (jack_transport_state_t state,
 		break;
 
 	default:
-		error << compose (_("Unknown JACK transport state %1 in sync callback"), state)
+		error << string_compose (_("Unknown JACK transport state %1 in sync callback"), state)
 		      << endmsg;
 	} 
 

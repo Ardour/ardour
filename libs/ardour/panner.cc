@@ -393,7 +393,7 @@ BaseStereoPanner::save (ostream& out) const
 	for (AutomationList::const_iterator i = _automation.const_begin(); i != _automation.const_end(); ++i) {
 		out << '\t' << (jack_nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
 		if (!out) {
-			error << compose (_("error writing pan automation file (%s)"), strerror (errno)) << endmsg;
+			error << string_compose (_("error writing pan automation file (%s)"), strerror (errno)) << endmsg;
 			return -1;
 		}
 	}
@@ -421,7 +421,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 		}
 
 		if (sscanf (line, "%" PRIu32 " %lf", &when, &value) != 2) {
-			warning << compose(_("badly formatted pan automation event record at line %1 of %2 (ignored) [%3]"), linecnt, path, line) << endmsg;
+			warning << string_compose(_("badly formatted pan automation event record at line %1 of %2 (ignored) [%3]"), linecnt, path, line) << endmsg;
 			continue;
 		}
 
@@ -1224,7 +1224,7 @@ Panner::save () const
 	ofstream out (automation_path.c_str());
 	
 	if (!out) {
-		error << compose (_("cannot open pan automation file \"%1\" for saving (%s)"), automation_path, strerror (errno))
+		error << string_compose (_("cannot open pan automation file \"%1\" for saving (%s)"), automation_path, strerror (errno))
 		      << endmsg;
 		return -1;
 	}
@@ -1260,7 +1260,7 @@ Panner::load ()
 	ifstream in (automation_path.c_str());
 
 	if (!in) {
-		error << compose (_("cannot open pan automation file %1 (%2)"),
+		error << string_compose (_("cannot open pan automation file %1 (%2)"),
 				  automation_path, strerror (errno))
 		      << endmsg;
 		return -1;
@@ -1273,17 +1273,17 @@ Panner::load ()
 		if (++linecnt == 1) {
 			if (memcmp (line, X_("version"), 7) == 0) {
 				if (sscanf (line, "version %f", &version) != 1) {
-					error << compose(_("badly formed version number in pan automation event file \"%1\""), automation_path) << endmsg;
+					error << string_compose(_("badly formed version number in pan automation event file \"%1\""), automation_path) << endmsg;
 					return -1;
 				}
 			} else {
-				error << compose(_("no version information in pan automation event file \"%1\" (first line = %2)"), 
+				error << string_compose(_("no version information in pan automation event file \"%1\" (first line = %2)"), 
 						 automation_path, line) << endmsg;
 				return -1;
 			}
 
 			if (version != current_automation_version_number) {
-				error << compose(_("mismatched pan automation event file version (%1)"), version) << endmsg;
+				error << string_compose(_("mismatched pan automation event file version (%1)"), version) << endmsg;
 				return -1;
 			}
 
@@ -1297,7 +1297,7 @@ Panner::load ()
 		if (strcmp (line, "begin") == 0) {
 			
 			if (sp == end()) {
-				error << compose (_("too many panner states found in pan automation file %1"),
+				error << string_compose (_("too many panner states found in pan automation file %1"),
 						  automation_path)
 				      << endmsg;
 				return -1;
@@ -1438,7 +1438,7 @@ Panner::set_state (const XMLNode& node)
 				
 				
 				if (!pan_plugins[i].factory) {
-					error << compose (_("Unknown panner plugin \"%1\" found in pan state - ignored"),
+					error << string_compose (_("Unknown panner plugin \"%1\" found in pan state - ignored"),
 							  prop->value())
 					      << endmsg;
 				}

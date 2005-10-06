@@ -41,7 +41,7 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 	
 	if (!recent) {
 		if (errno != ENOENT) {
-			error << compose (_("cannot open recent session file %1 (%2)"), path, strerror (errno)) << endmsg;
+			error << string_compose (_("cannot open recent session file %1 (%2)"), path, strerror (errno)) << endmsg;
 			return -1;
 		} else {
 			return 1;

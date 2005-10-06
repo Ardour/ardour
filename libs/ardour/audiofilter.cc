@@ -41,7 +41,7 @@ AudioFilter::make_new_sources (AudioRegion& region, AudioRegion::SourceList& nsr
 		string path = session.path_from_region_name (PBD::basename_nosuffix (names[i]), string (""));
 
 		if (path.length() == 0) {
-			error << compose (_("audiofilter: error creating name for new audio file based on %1"), region.name()) 
+			error << string_compose (_("audiofilter: error creating name for new audio file based on %1"), region.name()) 
 			      << endmsg;
 			return -1;
 		}
@@ -51,7 +51,7 @@ AudioFilter::make_new_sources (AudioRegion& region, AudioRegion::SourceList& nsr
 		} 
 
 		catch (failed_constructor& err) {
-			error << compose (_("audiofilter: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
+			error << string_compose (_("audiofilter: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
 			return -1;
 		}
 	}

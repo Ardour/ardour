@@ -197,13 +197,13 @@ namespace StringPrivate
 }
 
 // now for the real thing(s)
-namespace PBD
-{
+//namespace PBD
+//{
   // a series of functions which accept a format string on the form "text %1
   // more %2 less %3" and a number of templated parameters and spits out the
   // composited string
   template <typename T1>
-  inline std::string compose(const std::string &fmt, const T1 &o1)
+  inline std::string string_compose(const std::string &fmt, const T1 &o1)
   {
     StringPrivate::Composition c(fmt);
     c.arg(o1);
@@ -211,7 +211,7 @@ namespace PBD
   }
 
   template <typename T1, typename T2>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2)
   {
     StringPrivate::Composition c(fmt);
@@ -220,7 +220,7 @@ namespace PBD
   }
 
   template <typename T1, typename T2, typename T3>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3)
   {
     StringPrivate::Composition c(fmt);
@@ -229,7 +229,7 @@ namespace PBD
   }
 
   template <typename T1, typename T2, typename T3, typename T4>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4)
   {
@@ -239,7 +239,7 @@ namespace PBD
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5)
   {
@@ -250,7 +250,7 @@ namespace PBD
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6)
   {
@@ -261,7 +261,7 @@ namespace PBD
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
 			     const T7 &o7)
@@ -273,7 +273,7 @@ namespace PBD
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
 			     const T7 &o7, const T8 &o8)
@@ -285,7 +285,7 @@ namespace PBD
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
 			     const T7 &o7, const T8 &o8, const T9 &o9)
@@ -297,7 +297,7 @@ namespace PBD
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
 			     const T7 &o7, const T8 &o8, const T9 &o9,
@@ -312,7 +312,7 @@ namespace PBD
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
 	    typename T11>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
 			     const T7 &o7, const T8 &o8, const T9 &o9,
@@ -327,7 +327,7 @@ namespace PBD
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
 	    typename T11, typename T12>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
 			     const T7 &o7, const T8 &o8, const T9 &o9,
@@ -342,7 +342,7 @@ namespace PBD
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
 	    typename T11, typename T12, typename T13>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
 			     const T7 &o7, const T8 &o8, const T9 &o9,
@@ -358,7 +358,7 @@ namespace PBD
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
 	    typename T11, typename T12, typename T13, typename T14>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
 			     const T7 &o7, const T8 &o8, const T9 &o9,
@@ -375,7 +375,7 @@ namespace PBD
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
 	    typename T11, typename T12, typename T13, typename T14,
 	    typename T15>
-  inline std::string compose(const std::string &fmt,
+  inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
 			     const T7 &o7, const T8 &o8, const T9 &o9,
@@ -387,7 +387,7 @@ namespace PBD
       .arg(o10).arg(o11).arg(o12).arg(o13).arg(o14).arg(o15);
     return c.str();
   }
-}
+//}
 
 
 #endif // STRING_COMPOSE_H

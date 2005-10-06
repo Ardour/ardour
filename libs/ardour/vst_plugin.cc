@@ -183,7 +183,7 @@ VSTPlugin::get_state()
 		if (stat (path.c_str(), &sbuf)) {
 			if (errno == ENOENT) {
 				if (mkdir (path.c_str(), 0600)) {
-					error << compose (_("cannot create VST chunk directory: %1"),
+					error << string_compose (_("cannot create VST chunk directory: %1"),
 							  strerror (errno))
 					      << endmsg;
 					return *root;
@@ -191,14 +191,14 @@ VSTPlugin::get_state()
 
 			} else {
 
-				error << compose (_("cannot check VST chunk directory: %1"),
+				error << string_compose (_("cannot check VST chunk directory: %1"),
 						  strerror (errno))
 				      << endmsg;
 				return *root;
 			}
 
 		} else if (!S_ISDIR (sbuf.st_mode)) {
-			error << compose (_("%1 exists but is not a directory"), path)
+			error << string_compose (_("%1 exists but is not a directory"), path)
 			      << endmsg;
 			return *root;
 		}

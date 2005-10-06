@@ -36,7 +36,7 @@ StateManager::use_state (state_id_t id)
 	for (n = 0, i = states.begin(); n < id && i != states.end(); ++n, ++i);
 
 	if (n != id || i == states.end()) {
-		fatal << compose (_("programming error: illegal state ID (%1) passed to "
+		fatal << string_compose (_("programming error: illegal state ID (%1) passed to "
 				    "StateManager::set_state() (range = 0-%3)"), id,
 				  states.size()-1)
 		      << endmsg;

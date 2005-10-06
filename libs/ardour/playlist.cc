@@ -483,7 +483,7 @@ void
 Playlist::add_region_internal (Region *region, jack_nframes_t position, bool delay_sort)
 {
 	RegionSortByPosition cmp;
-	jack_nframes_t old_length;
+	jack_nframes_t old_length = 0;
 
 	// cerr << "adding region " << region->name() << " at " << position << endl;
 
@@ -550,7 +550,7 @@ int
 Playlist::remove_region_internal (Region *region, bool delay_sort)
 {
 	RegionList::iterator i;
-	jack_nframes_t old_length;
+	jack_nframes_t old_length = 0;
 
 	// cerr << "removing region " << region->name() << endl;
 
@@ -1061,7 +1061,7 @@ Playlist::region_bounds_changed (Change what_changed, Region *region)
 		RegionList::iterator i = find (regions.begin(), regions.end(), region);
 		
 		if (i == regions.end()) {
-			warning << compose (_("%1: bounds changed received for region (%2)not in playlist"),
+			warning << string_compose (_("%1: bounds changed received for region (%2)not in playlist"),
 					    _name, region->name())
 				<< endmsg;
 			return;

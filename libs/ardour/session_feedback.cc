@@ -48,19 +48,19 @@ int
 Session::init_feedback ()
 {
 	if (pipe (feedback_request_pipe) != 0) {
-		error << compose (_("cannot create feedback request pipe (%1)"),
+		error << string_compose (_("cannot create feedback request pipe (%1)"),
 				  strerror (errno))
 		      << endmsg;
 		return -1;
 	}
 
 	if (fcntl (feedback_request_pipe[0], F_SETFL, O_NONBLOCK)) {
-		error << compose(_("UI: cannot set O_NONBLOCK on "    "signal read pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("UI: cannot set O_NONBLOCK on "    "signal read pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	if (fcntl (feedback_request_pipe[1], F_SETFL, O_NONBLOCK)) {
-		error << compose(_("UI: cannot set O_NONBLOCK on "    "signal write pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("UI: cannot set O_NONBLOCK on "    "signal write pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -138,7 +138,7 @@ Session::feedback_thread_work ()
 			if (errno == EINTR) {
 				continue;
 			}
-			error << compose (_("Feedback thread poll failed (%1)"),
+			error << string_compose (_("Feedback thread poll failed (%1)"),
 					  strerror (errno))
 			      << endmsg;
 			break;

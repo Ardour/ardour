@@ -301,7 +301,7 @@ MeterDialog::get_note_type ()
 	for (i = strings.begin(); i != strings.end(); ++i) {
 		if (text == *i) {
 			if (sscanf (text.c_str(), "%*[^0-9]%lf", &note_type) != 1) {
-				error << compose(_("garbaged note type entry (%1)"), text) << endmsg;
+				error << string_compose(_("garbaged note type entry (%1)"), text) << endmsg;
 				return 0;
 			} else {
 				break;
@@ -311,7 +311,7 @@ MeterDialog::get_note_type ()
 	
 	if (i == strings.end()) {
 		if (sscanf (text.c_str(), "%lf", &note_type) != 1) {
-			error << compose(_("incomprehensible note type entry (%1)"), text) << endmsg;
+			error << string_compose(_("incomprehensible note type entry (%1)"), text) << endmsg;
 			return 0;
 		}
 	}

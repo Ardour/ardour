@@ -116,14 +116,14 @@ AudioTrack::deprecated_use_diskstream_connections ()
 		Connection* c = _session.connection_by_name (prop->value());
 		
 		if (c == 0) {
-		  	error << compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
+		  	error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
 			
 			if ((c = _session.connection_by_name (_("in 1"))) == 0) {
 			  	error << _("No input connections available as a replacement")
 			        << endmsg;
 				return -1;
 			} else {
-			  	info << compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
+			  	info << string_compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
 			       << endmsg;
 			}
 		}
@@ -132,7 +132,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 		if (set_inputs (prop->value())) {
-		  	error << compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
+		  	error << string_compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
 			return -1;
 		}
 	}
@@ -176,7 +176,7 @@ AudioTrack::use_diskstream (string name)
 	DiskStream *dstream;
 
 	if ((dstream = _session.diskstream_by_name (name)) == 0) {
-	  error << compose(_("AudioTrack: diskstream \"%1\" not known by session"), name) << endmsg;
+	  error << string_compose(_("AudioTrack: diskstream \"%1\" not known by session"), name) << endmsg;
 		return -1;
 	}
 	
@@ -189,7 +189,7 @@ AudioTrack::use_diskstream (id_t id)
 	DiskStream *dstream;
 
 	if ((dstream = _session.diskstream_by_id (id)) == 0) {
-	  	error << compose(_("AudioTrack: diskstream \"%1\" not known by session"), id) << endmsg;
+	  	error << string_compose(_("AudioTrack: diskstream \"%1\" not known by session"), id) << endmsg;
 		return -1;
 	}
 	
@@ -287,7 +287,7 @@ AudioTrack::set_state (const XMLNode& node)
 				if (get_midi_node_info (child, ev, chn, additional)) {
 					_midi_rec_enable_control.set_control_type (chn, ev, additional);
 				} else {
-				  error << compose(_("MIDI rec_enable control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
+				  error << string_compose(_("MIDI rec_enable control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
 				}
 			}
 		}
@@ -447,7 +447,7 @@ AudioTrack::set_state_part_two ()
 			
 			FreezeRecordInsertInfo* frii = new FreezeRecordInsertInfo (*((*citer)->children().front()));
 			frii->insert = 0;
-			sscanf (prop->value().c_str(), "%llu", &frii->id);
+			sscanf (prop->value().c_str(), "%" PRIu64, &frii->id);
 			_freeze_record.insert_info.push_back (frii);
 		}
 	}
@@ -855,11 +855,11 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	uint32_t n = 1;
 
-	while (n < ULONG_MAX) {
+	while (n < (ULONG_MAX-1)) {
 	 
 		string candidate;
 		
-		candidate = compose ("<F%2>%1", _freeze_record.playlist->name(), n);
+		candidate = string_compose ("<F%2>%1", _freeze_record.playlist->name(), n);
 
 		if (_session.playlist_by_name (candidate) == 0) {
 			new_playlist_name = candidate;
@@ -870,8 +870,8 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	} 
 
-	if (n == ULONG_MAX) {
-	  error << compose (X_("There Are too many frozen versions of playlist \"%1\""
+	if (n == (ULONG_MAX-1)) {
+	  error << string_compose (X_("There Are too many frozen versions of playlist \"%1\""
 	  		    " to create another one"), _freeze_record.playlist->name())
 	       << endmsg;
 		return;

@@ -66,7 +66,7 @@ Session::import_audiofile (import_status& status)
 	string tmp_convert_file;
 	
 	if ((in = sf_open (status.pathname.c_str(), SFM_READ, &info)) == 0) {
-		error << compose(_("Import: cannot open input sound file \"%1\""), status.pathname) << endmsg;
+		error << string_compose(_("Import: cannot open input sound file \"%1\""), status.pathname) << endmsg;
 		return -1;
 	} else {
 		if ((uint32_t) info.samplerate != frame_rate()) {
@@ -75,12 +75,12 @@ Session::import_audiofile (import_status& status)
 			// resample to session frame_rate
 			if (sample_rate_convert(status, status.pathname, tmp_convert_file)) {
 				if ((in = sf_open (tmp_convert_file.c_str(), SFM_READ, &info)) == 0) {
-					error << compose(_("Import: cannot open converted sound file \"%1\""), tmp_convert_file) << endmsg;
+					error << string_compose(_("Import: cannot open converted sound file \"%1\""), tmp_convert_file) << endmsg;
 					return -1;
 				}
 			} else if (!status.cancel){
 				// error
-				error << compose(_("Import: error while resampling sound file \"%1\""), status.pathname) << endmsg;
+				error << string_compose(_("Import: error while resampling sound file \"%1\""), status.pathname) << endmsg;
 				return -1;
 			} else {
 				// canceled
@@ -136,7 +136,7 @@ Session::import_audiofile (import_status& status)
 		}
 
 		catch (failed_constructor& err) {
-			error << compose(_("Session::import_audiofile: cannot open new file source for channel %1"), n+1) << endmsg;
+			error << string_compose(_("Session::import_audiofile: cannot open new file source for channel %1"), n+1) << endmsg;
 			goto out;
 		}
 
@@ -309,7 +309,7 @@ Session::sample_rate_convert (import_status& status, string infile, string& outf
 	outfile = build_tmp_convert_name(infile);
 	SNDFILE* out = sf_open(outfile.c_str(), SFM_RDWR, &sf_info);
 	if(!out) {
-		error << compose(_("Import: could not open temp file: %1"), outfile) << endmsg;
+		error << string_compose(_("Import: could not open temp file: %1"), outfile) << endmsg;
 		return false;
 	}
 	
@@ -318,7 +318,7 @@ Session::sample_rate_convert (import_status& status, string infile, string& outf
 
 	/* Initialize the sample rate converter. */
 	if ((src_state = src_new (SRC_SINC_BEST_QUALITY, sf_info.channels, &err)) == 0) {	
-		error << compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
+		error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
 		return false ;
 	}
 
@@ -346,7 +346,7 @@ Session::sample_rate_convert (import_status& status, string infile, string& outf
 		} 
 
 		if ((err = src_process (src_state, &src_data))) {
-			error << compose(_("Import: %1"), src_strerror (err)) << endmsg ;
+			error << string_compose(_("Import: %1"), src_strerror (err)) << endmsg ;
 			return false ;
 		} 
 

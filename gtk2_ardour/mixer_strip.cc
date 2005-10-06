@@ -460,7 +460,7 @@ MixerStrip::set_stuff_from_route ()
 			set_width (Narrow);
 		}
 		else {
-			error << compose(_("unknown strip width \"%1\" in XML GUI information"), prop->value()) << endmsg;
+			error << string_compose(_("unknown strip width \"%1\" in XML GUI information"), prop->value()) << endmsg;
 			set_width (Wide);
 		}
 	}

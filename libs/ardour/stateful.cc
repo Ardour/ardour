@@ -97,7 +97,7 @@ Stateful::add_instant_xml (XMLNode& node, const string& dir)
 	tree.set_root (copy);
 
 	if (!tree.write()) {
-		error << compose(_("Error: could not write %1"), dir+"/instant.xml") << endmsg;
+		error << string_compose(_("Error: could not write %1"), dir+"/instant.xml") << endmsg;
 	}
 }
 
@@ -111,7 +111,7 @@ Stateful::instant_xml (const string& str, const string& dir)
 			if (tree.read(dir+"/instant.xml")) {
 				_instant_xml = new XMLNode(*(tree.root()));
 			} else {
-				warning << compose(_("Could not understand XML file %1"), instant_file) << endmsg;
+				warning << string_compose(_("Could not understand XML file %1"), instant_file) << endmsg;
 				return 0;
 			}
 		} else {

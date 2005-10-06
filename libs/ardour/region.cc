@@ -843,7 +843,7 @@ Region::state (bool full_state)
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
 	
-	snprintf (buf, sizeof (buf), "%llu", _id);
+	snprintf (buf, sizeof (buf), "%" PRIu64, _id);
 	node->add_property ("id", buf);
 	node->add_property ("name", _name);
 	snprintf (buf, sizeof (buf), "%u", _start);
@@ -885,7 +885,7 @@ Region::set_state (const XMLNode& node)
 		return -1;
 	}
 
-	sscanf (prop->value().c_str(), "%llu", &_id);
+	sscanf (prop->value().c_str(), "%" PRIu64, &_id);
 
 	if ((prop = node.property ("name")) == 0) {
 		error << _("Session: XMLNode describing a Region is incomplete (no name)") << endmsg;

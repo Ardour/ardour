@@ -122,10 +122,10 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 		throw failed_constructor();
 	}
 	
-	sscanf (prop->value().c_str(), "%llu", &id);
+	sscanf (prop->value().c_str(), "%" PRIu64, &id);
 
 	if ((r = playlist.find_region (id)) == 0) {
-		error << compose (_("Crossfade: no \"in\" region %1 found in playlist %2"), id, playlist.name())
+		error << string_compose (_("Crossfade: no \"in\" region %1 found in playlist %2"), id, playlist.name())
 		      << endmsg;
 		throw failed_constructor();
 	}
@@ -139,10 +139,10 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 		throw failed_constructor();
 	}
 
-	sscanf (prop->value().c_str(), "%llu", &id);
+	sscanf (prop->value().c_str(), "%" PRIu64, &id);
 
 	if ((r = playlist.find_region (id)) == 0) {
-		error << compose (_("Crossfade: no \"out\" region %1 found in playlist %2"), id, playlist.name())
+		error << string_compose (_("Crossfade: no \"out\" region %1 found in playlist %2"), id, playlist.name())
 		      << endmsg;
 		throw failed_constructor();
 	}

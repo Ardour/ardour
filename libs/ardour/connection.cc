@@ -224,12 +224,12 @@ Connection::set_connections (const string& str)
 		start += 1;
 
 		if ((end = str.find_first_of ('}', start)) == string::npos) {
-			error << compose(_("IO: badly formed string in XML node for inputs \"%1\""), str) << endmsg;
+			error << string_compose(_("IO: badly formed string in XML node for inputs \"%1\""), str) << endmsg;
 			return -1;
 		}
 
 		if ((n = parse_io_string (str.substr (start, end - start), ports)) < 0) {
-			error << compose(_("bad input string in XML node \"%1\""), str) << endmsg;
+			error << string_compose(_("bad input string in XML node \"%1\""), str) << endmsg;
 
 			return -1;
 			

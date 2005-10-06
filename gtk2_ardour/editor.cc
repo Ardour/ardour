@@ -3886,7 +3886,7 @@ Editor::edit_menu_map_handler ()
 	if (session->undo_depth() == 0) {
 		label = _("Undo");
 	} else {
-		label = compose(_("Undo (%1)"), session->next_undo());
+		label = string_compose(_("Undo (%1)"), session->next_undo());
 	}
 	
 	edit_items.push_back (MenuElem (label, bind (mem_fun(*this, &Editor::undo), 1U)));
@@ -3898,7 +3898,7 @@ Editor::edit_menu_map_handler ()
 	if (session->redo_depth() == 0) {
 		label = _("Redo");
 	} else {
-		label = compose(_("Redo (%1)"), session->next_redo());
+		label = string_compose(_("Redo (%1)"), session->next_redo());
 	}
 	
 	edit_items.push_back (MenuElem (label, bind (mem_fun(*this, &Editor::redo), 1U)));
@@ -4543,7 +4543,7 @@ int
 Editor::playlist_deletion_dialog (Playlist* pl)
 {
 	ArdourDialog dialog ("playlist deletion dialog");
-	Label  label (compose (_("Playlist %1 is currently unused.\n"
+	Label  label (string_compose (_("Playlist %1 is currently unused.\n"
 				 "If left alone, no audio files used by it will be cleaned.\n"
 				 "If deleted, audio files used by it alone by will cleaned."),
 			       pl->name()));

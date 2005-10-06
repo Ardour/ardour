@@ -158,7 +158,7 @@ Session::merge_event (Event* ev)
 	default:
 		for (Events::iterator i = events.begin(); i != events.end(); ++i) {
 			if ((*i)->type == ev->type && (*i)->action_frame == ev->action_frame) {
-			  error << compose(_("Session: cannot have two events of type %1 at the same frame (%2)."), 
+			  error << string_compose(_("Session: cannot have two events of type %1 at the same frame (%2)."), 
 						 event_names[ev->type], ev->action_frame) << endmsg;
 				return;
 			}
@@ -425,7 +425,7 @@ Session::process_event (Event* ev)
 		break;
 
 	default:
-	  fatal << compose(_("Programming error: illegal event type in process_event (%1)"), ev->type) << endmsg;
+	  fatal << string_compose(_("Programming error: illegal event type in process_event (%1)"), ev->type) << endmsg;
 		/*NOTREACHED*/
 		break;
 	};

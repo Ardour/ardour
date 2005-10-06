@@ -96,7 +96,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	char buf[PATH_MAX+1];
 	if (!realpath(fullpath.c_str(), buf) && (errno != ENOENT)) {
-		error << compose(_("Could not use path %1 (%s)"), buf, strerror(errno)) << endmsg;
+		error << string_compose(_("Could not use path %1 (%s)"), buf, strerror(errno)) << endmsg;
 		throw failed_constructor();
 	}
 	_path = string(buf);
@@ -458,7 +458,7 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 		if (errno == EEXIST) {
 			new_session = false;
 		} else {
-			error << compose(_("Session: cannot create session dir \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
+			error << string_compose(_("Session: cannot create session dir \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
 			return -1;
 		}
 	} else {
@@ -469,7 +469,7 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 
 	if (mkdir (dir.c_str(), 0755) < 0) {
 		if (errno != EEXIST) {
-			error << compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			error << string_compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 			return -1;
 		}
 	}
@@ -478,7 +478,7 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 
 	if (mkdir (dir.c_str(), 0755) < 0) {
 		if (errno != EEXIST) {
-			error << compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 			return -1;
 		}
 	}
@@ -487,7 +487,7 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 
 	if (mkdir (dir.c_str(), 0755) < 0) {
 		if (errno != EEXIST) {
-			error << compose(_("Session: cannot create session dead sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			error << string_compose(_("Session: cannot create session dead sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 			return -1;
 		}
 	}
@@ -496,7 +496,7 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 
 	if (mkdir (dir.c_str(), 0755) < 0) {
 		if (errno != EEXIST) {
-			error << compose(_("Session: cannot create session automation dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			error << string_compose(_("Session: cannot create session automation dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 			return -1;
 		}
 	}
@@ -520,14 +520,14 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 			vector<string*>* result= scanner (tpath, lookfor, false, true);
 
 			if (result == 0) {
-				error << compose (_("Could not find a template called %1 in %2"), *mix_template, tpath)
+				error << string_compose (_("Could not find a template called %1 in %2"), *mix_template, tpath)
 				      << endmsg;
 				*mix_template = "";
 			}
 
 			if (result->size() == 0) {
 				delete result;
-				error << compose (_("Could not find a template called %1 in %2"), *mix_template, tpath)
+				error << string_compose (_("Could not find a template called %1 in %2"), *mix_template, tpath)
 				      << endmsg;
 				*mix_template = "";
 			}
@@ -553,13 +553,13 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 					return 0;
 					
 				} else {
-					error << compose (_("Could not open %1 for writing mix template"), out_path) 
+					error << string_compose (_("Could not open %1 for writing mix template"), out_path) 
 					      << endmsg;
 					return -1;
 				}
 				
 			} else {
-				error << compose (_("Could not open mix template %1 for reading"), in_path) 
+				error << string_compose (_("Could not open mix template %1 for reading"), in_path) 
 				      << endmsg;
 				return -1;
 			}
@@ -668,18 +668,18 @@ Session::save_state (string snapshot_name, bool pending)
 	}
 
 	if (!tree.write (xml_path)) {
-		error << compose (_("state could not be saved to %1"), xml_path) << endmsg;
+		error << string_compose (_("state could not be saved to %1"), xml_path) << endmsg;
 
 		/* don't leave a corrupt file lying around if it is
 		   possible to fix.
 		*/
 
 		if (unlink (xml_path.c_str())) {
-			error << compose (_("could not remove corrupt state file %1"), xml_path) << endmsg;
+			error << string_compose (_("could not remove corrupt state file %1"), xml_path) << endmsg;
 		} else {
 			if (!pending) {
 				if (rename (bak_path.c_str(), xml_path.c_str())) {
-					error << compose (_("could not restore state file from backup %1"), bak_path) << endmsg;
+					error << string_compose (_("could not restore state file from backup %1"), bak_path) << endmsg;
 				}
 			}
 		}
@@ -748,7 +748,7 @@ Session::load_state (string snapshot_name)
 	}
 
 	if (access (xmlpath.c_str(), F_OK)) {
-		error << compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
+		error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
 		return 1;
 	}
 
@@ -759,7 +759,7 @@ Session::load_state (string snapshot_name)
 	if (state_tree->read (xmlpath)) {
 		return 0;
 	} else {
-		error << compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
+		error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
 	}
 
 	delete state_tree;
@@ -1715,10 +1715,10 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 		}
 	}
 
-	sscanf (prop->value().c_str(), "%llu", &s_id);
+	sscanf (prop->value().c_str(), "%" PRIu64, &s_id);
 
 	if ((source = get_source (s_id)) == 0) {
-		error << compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
+		error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
 		return 0;
 	}
 
@@ -1729,10 +1729,10 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 	for (uint32_t n=1; n < nchans; ++n) {
 		snprintf (buf, sizeof(buf), X_("source-%d"), n);
 		if ((prop = node.property (buf)) != 0) {
-			sscanf (prop->value().c_str(), "%llu", &s_id);
+			sscanf (prop->value().c_str(), "%" PRIu64, &s_id);
 			
 			if ((source = get_source (s_id)) == 0) {
-				error << compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
+				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
 				return 0;
 			}
 			sources.push_back(source);
@@ -1852,7 +1852,7 @@ Session::save_template (string template_name)
 		closedir (dp);
 	} else {
 		if (mkdir (dir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)<0) {
-			error << compose(_("Could not create mix templates directory \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			error << string_compose(_("Could not create mix templates directory \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 			return -1;
 		}
 	}
@@ -1866,7 +1866,7 @@ Session::save_template (string template_name)
 	ifstream in(xml_path.c_str());
 	
 	if (in) {
-		warning << compose(_("Template \"%1\" already exists - new version not created"), template_name) << endmsg;
+		warning << string_compose(_("Template \"%1\" already exists - new version not created"), template_name) << endmsg;
 		return -1;
 	} else {
 		in.close();
@@ -1933,7 +1933,7 @@ Session::ensure_sound_dir (string path, string& result)
 	
 	if (mkdir (path.c_str(), 0775)) {
 		if (errno != EEXIST) {
-			error << compose(_("cannot create session directory \"%1\"; ignored"), path) << endmsg;
+			error << string_compose(_("cannot create session directory \"%1\"; ignored"), path) << endmsg;
 			return -1;
 		}
 	}
@@ -1946,7 +1946,7 @@ Session::ensure_sound_dir (string path, string& result)
 	
 	if (mkdir (result.c_str(), 0775)) {
 		if (errno != EEXIST) {
-			error << compose(_("cannot create sounds directory \"%1\"; ignored"), result) << endmsg;
+			error << string_compose(_("cannot create sounds directory \"%1\"; ignored"), result) << endmsg;
 			return -1;
 		}
 	}
@@ -1957,7 +1957,7 @@ Session::ensure_sound_dir (string path, string& result)
 	
 	if (mkdir (dead.c_str(), 0775)) {
 		if (errno != EEXIST) {
-			error << compose(_("cannot create dead sounds directory \"%1\"; ignored"), dead) << endmsg;
+			error << string_compose(_("cannot create dead sounds directory \"%1\"; ignored"), dead) << endmsg;
 			return -1;
 		}
 	}
@@ -1968,7 +1968,7 @@ Session::ensure_sound_dir (string path, string& result)
 	
 	if (mkdir (peak.c_str(), 0775)) {
 		if (errno != EEXIST) {
-			error << compose(_("cannot create peak file directory \"%1\"; ignored"), peak) << endmsg;
+			error << string_compose(_("cannot create peak file directory \"%1\"; ignored"), peak) << endmsg;
 			return -1;
 		}
 	}
@@ -2266,7 +2266,7 @@ Session::load_connections (const XMLNode& node)
 		} else if ((*niter)->name() == "OutputConnection") {
 			add_connection (new ARDOUR::OutputConnection (**niter));
 		} else {
-			error << compose(_("Unknown node \"%1\" found in Connections list from state file"), (*niter)->name()) << endmsg;
+			error << string_compose(_("Unknown node \"%1\" found in Connections list from state file"), (*niter)->name()) << endmsg;
 			return -1;
 		}
 	}
@@ -2612,7 +2612,7 @@ Session::read_favorite_dirs (FavoriteDirs & favs)
 	
 	if (!fav) {
 		if (errno != ENOENT) {
-			//error << compose (_("cannot open favorite file %1 (%2)"), path, strerror (errno)) << endmsg;
+			//error << string_compose (_("cannot open favorite file %1 (%2)"), path, strerror (errno)) << endmsg;
 			return -1;
 		} else {
 			return 1;
@@ -2976,7 +2976,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			}
 			
 			if (version == 999) {
-				error << compose (_("there are already 1000 files with names like %1; versioning discontinued"),
+				error << string_compose (_("there are already 1000 files with names like %1; versioning discontinued"),
 						  newpath)
 				      << endmsg;
 			} else {
@@ -2990,7 +2990,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		}
 
 		if (::rename ((*x).c_str(), newpath.c_str()) != 0) {
-			error << compose (_("cannot rename audio file source from %1 to %2 (%3)"),
+			error << string_compose (_("cannot rename audio file source from %1 to %2 (%3)"),
 					  (*x), newpath, strerror (errno))
 			      << endmsg;
 			goto out;
@@ -3005,7 +3005,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 		if (access (peakpath.c_str(), W_OK) == 0) {
 			if (::unlink (peakpath.c_str()) != 0) {
-				error << compose (_("cannot remove peakfile %1 for %2 (%3)"),
+				error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
 						  peakpath, _path, strerror (errno))
 				      << endmsg;
 				/* try to back out */
@@ -3078,7 +3078,7 @@ Session::cleanup_trash_sources (Session::cleanup_report& rep)
 			}
 
 			if (unlink (fullpath.c_str())) {
-				error << compose (_("cannot remove dead sound file %1 (%2)"),
+				error << string_compose (_("cannot remove dead sound file %1 (%2)"),
 						  fullpath, strerror (errno))
 				      << endmsg;
 			}

@@ -145,7 +145,7 @@ Session::setup_click_sounds (int which)
 			if ((sndfile = sf_open (click_sound.c_str(), SFM_READ, &info)) == 0) {
 				char errbuf[256];
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-				warning << compose (_("cannot open click soundfile %1 (%2)"), click_sound, errbuf) << endmsg;
+				warning << string_compose (_("cannot open click soundfile %1 (%2)"), click_sound, errbuf) << endmsg;
 				_clicking = false;
 				return;
 			}
@@ -179,7 +179,7 @@ Session::setup_click_sounds (int which)
 			if ((sndfile = sf_open (click_emphasis_sound.c_str(), SFM_READ, &info)) == 0) {
 				char errbuf[256];
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-				warning << compose (_("cannot open click emphasis soundfile %1 (%2)"), click_emphasis_sound, errbuf) << endmsg;
+				warning << string_compose (_("cannot open click emphasis soundfile %1 (%2)"), click_emphasis_sound, errbuf) << endmsg;
 				return;
 			}
 			

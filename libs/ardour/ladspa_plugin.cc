@@ -95,7 +95,7 @@ LadspaPlugin::init (void *mod, uint32_t index, jack_nframes_t rate)
 	_index = index;
 
 	if (LADSPA_IS_INPLACE_BROKEN(descriptor->Properties)) {
-		error << compose(_("LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"), descriptor->Name) << endmsg;
+		error << string_compose(_("LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"), descriptor->Name) << endmsg;
 		throw failed_constructor();
 	}
 	
@@ -325,7 +325,7 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 		}
 
 	} else {
-		warning << compose (_("illegal parameter number used with plugin \"%1\". This may"
+		warning << string_compose (_("illegal parameter number used with plugin \"%1\". This may"
 				      "indicate a change in the plugin design, and presets may be"
 				      "invalid"), name())
 			<< endmsg;
@@ -494,7 +494,7 @@ LadspaPlugin::set_state(const XMLNode& node)
 				}
 
 			} else {
-				error << compose(_("LADSPA LadspaPlugin MIDI control specification for port %1 is incomplete, so it has been ignored"), port) << endl;
+				error << string_compose(_("LADSPA LadspaPlugin MIDI control specification for port %1 is incomplete, so it has been ignored"), port) << endl;
 			}
 		}
 	}

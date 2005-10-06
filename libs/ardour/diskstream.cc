@@ -324,12 +324,12 @@ DiskStream::find_and_use_playlist (const string& name)
 	AudioPlaylist* playlist;
 		
 	if ((pl = _session.get_playlist (name)) == 0) {
-		error << compose(_("DiskStream: Session doesn't know about a Playlist called \"%1\""), name) << endmsg;
+		error << string_compose(_("DiskStream: Session doesn't know about a Playlist called \"%1\""), name) << endmsg;
 		return -1;
 	}
 
 	if ((playlist = dynamic_cast<AudioPlaylist*> (pl)) == 0) {
-		error << compose(_("DiskStream: Playlist \"%1\" isn't an audio playlist"), name) << endmsg;
+		error << string_compose(_("DiskStream: Playlist \"%1\" isn't an audio playlist"), name) << endmsg;
 		return -1;
 	}
 
@@ -412,7 +412,7 @@ int
 DiskStream::use_copy_playlist ()
 {
 	if (_playlist == 0) {
-		error << compose(_("DiskStream %1: there is no existing playlist to make a copy of!"), _name) << endmsg;
+		error << string_compose(_("DiskStream %1: there is no existing playlist to make a copy of!"), _name) << endmsg;
 		return -1;
 	}
 
@@ -1032,7 +1032,7 @@ DiskStream::overwrite_existing_buffers ()
 
 		if (read ((*chan).playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, 
 			  start, to_read, *chan, n, reversed)) {
-			error << compose(_("DiskStream %1: when refilling, cannot read %2 from playlist at frame %3"),
+			error << string_compose(_("DiskStream %1: when refilling, cannot read %2 from playlist at frame %3"),
 					 _id, size, playback_sample) << endmsg;
 			goto out;
 		}
@@ -1043,7 +1043,7 @@ DiskStream::overwrite_existing_buffers ()
 		
 			if (read ((*chan).playback_buf->buffer(), mixdown_buffer, gain_buffer, 
 				  start, cnt, *chan, n, reversed)) {
-				error << compose(_("DiskStream %1: when refilling, cannot read %2 from playlist at frame %3"),
+				error << string_compose(_("DiskStream %1: when refilling, cannot read %2 from playlist at frame %3"),
 						 _id, size, playback_sample) << endmsg;
 				goto out;
 			}
@@ -1172,7 +1172,7 @@ DiskStream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, jack_
 		this_read = min(cnt,this_read);
 
 		if (_playlist->read (buf+offset, mixdown_buffer, gain_buffer, start, this_read, channel) != this_read) {
-			error << compose(_("DiskStream %1: cannot read %2 from playlist at frame %3"), _id, this_read, 
+			error << string_compose(_("DiskStream %1: cannot read %2 from playlist at frame %3"), _id, this_read, 
 					 start) << endmsg;
 			return -1;
 		}
@@ -1471,7 +1471,7 @@ DiskStream::do_flush (bool force_flush)
 		to_write = min (disk_io_chunk_frames, (jack_nframes_t) vector.len[0]);
 	
 		if ((!(*chan).write_source) || (*chan).write_source->write (vector.buf[0], to_write) != to_write) {
-			error << compose(_("DiskStream %1: cannot write to disk"), _id) << endmsg;
+			error << string_compose(_("DiskStream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
 		}
 
@@ -1487,7 +1487,7 @@ DiskStream::do_flush (bool force_flush)
 			to_write = min ((jack_nframes_t)(disk_io_chunk_frames - to_write), (jack_nframes_t) vector.len[1]);
 		
 			if ((*chan).write_source->write (vector.buf[1], to_write) != to_write) {
-				error << compose(_("DiskStream %1: cannot write to disk"), _id) << endmsg;
+				error << string_compose(_("DiskStream %1: cannot write to disk"), _id) << endmsg;
 				return -1;
 			}
 
@@ -1546,7 +1546,7 @@ DiskStream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture
 		case 1:
 			break;
 		case -1:
-			error << compose(_("DiskStream \"%1\": cannot flush captured data to disk!"), _name) << endmsg;
+			error << string_compose(_("DiskStream \"%1\": cannot flush captured data to disk!"), _name) << endmsg;
 			err++;
 		}
 	}
@@ -1628,7 +1628,7 @@ DiskStream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture
 	}
 	
 	catch (failed_constructor& err) {
-		error << compose(_("%1: could not create region for complete audio file"), _name) << endmsg;
+		error << string_compose(_("%1: could not create region for complete audio file"), _name) << endmsg;
 		/* XXX what now? */
 	}
 
@@ -1801,7 +1801,7 @@ DiskStream::get_state ()
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof(buf), "%d", channels.size());
+	snprintf (buf, sizeof(buf), "%zd", channels.size());
 	node->add_property ("channels", buf);
 
 	node->add_property ("playlist", _playlist->name());
@@ -1877,11 +1877,11 @@ DiskStream::set_state (const XMLNode& node)
 
 	if (deprecated_io_node) {
 		if ((prop = deprecated_io_node->property ("id")) != 0) {
-			sscanf (prop->value().c_str(), "%llu", &_id);
+			sscanf (prop->value().c_str(), "%" PRIu64, &_id);
 		}
 	} else {
 		if ((prop = node.property ("id")) != 0) {
-			sscanf (prop->value().c_str(), "%llu", &_id);
+			sscanf (prop->value().c_str(), "%" PRIu64, &_id);
 		}
 	}
 
@@ -1973,7 +1973,7 @@ DiskStream::use_new_write_source (uint32_t n)
 	}
 
 	if (n >= channels.size()) {
-		error << compose (_("DiskStream: channel %1 out of range"), n) << endmsg;
+		error << string_compose (_("DiskStream: channel %1 out of range"), n) << endmsg;
 		return -1;
 	}
 
@@ -1998,7 +1998,7 @@ DiskStream::use_new_write_source (uint32_t n)
 	} 
 
 	catch (failed_constructor &err) {
-		error << compose (_("%1:%2 new capture file not initialized correctly"), _name, n) << endmsg;
+		error << string_compose (_("%1:%2 new capture file not initialized correctly"), _name, n) << endmsg;
 		chan.write_source = 0;
 		return -1;
 	}
@@ -2191,7 +2191,7 @@ DiskStream::set_loop (Location *location)
 {
 	if (location) {
 		if (location->start() >= location->end()) {
-			error << compose(_("Location \"%1\" not valid for track loop (start >= end)"), location->name()) << endl;
+			error << string_compose(_("Location \"%1\" not valid for track loop (start >= end)"), location->name()) << endl;
 			return -1;
 		}
 	}
@@ -2269,7 +2269,7 @@ DiskStream::use_pending_capture_data (XMLNode& node)
 			}
 
 			catch (failed_constructor& err) {
-				error << compose (_("%1: cannot restore pending capture source file %2"),
+				error << string_compose (_("%1: cannot restore pending capture source file %2"),
 						  _name, prop->value())
 				      << endmsg;
 				return -1;
@@ -2291,7 +2291,7 @@ DiskStream::use_pending_capture_data (XMLNode& node)
 	}
 
 	if (pending_sources.size() != _n_channels) {
-		error << compose (_("%1: incorrect number of pending sources listed - ignoring them all"), _name)
+		error << string_compose (_("%1: incorrect number of pending sources listed - ignoring them all"), _name)
 		      << endmsg;
 		return -1;
 	}
@@ -2307,7 +2307,7 @@ DiskStream::use_pending_capture_data (XMLNode& node)
 	}
 
 	catch (failed_constructor& err) {
-		error << compose (_("%1: cannot create whole-file region from pending capture sources"),
+		error << string_compose (_("%1: cannot create whole-file region from pending capture sources"),
 				  _name)
 		      << endmsg;
 		
@@ -2319,7 +2319,7 @@ DiskStream::use_pending_capture_data (XMLNode& node)
 	}
 
 	catch (failed_constructor& err) {
-		error << compose (_("%1: cannot create region from pending capture sources"),
+		error << string_compose (_("%1: cannot create region from pending capture sources"),
 				  _name)
 		      << endmsg;
 		

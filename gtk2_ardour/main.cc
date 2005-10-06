@@ -187,7 +187,7 @@ catch_signals (void)
 
 //	if (setpgid (0,0)) {
 	if (setsid ()) {
-		warning << compose (_("cannot become new process group leader (%1)"), 
+		warning << string_compose (_("cannot become new process group leader (%1)"), 
 				    strerror (errno))
 			<< endmsg;
 	}
@@ -214,7 +214,7 @@ catch_signals (void)
 	for (int i = 1; i < 32; i++) {
 		if (sigismember (&signals, i)) {
 			if (sigaction (i, &action, 0)) {
-				cerr << compose (_("cannot setup signal handling for %1"), i) << endl;
+				cerr << string_compose (_("cannot setup signal handling for %1"), i) << endl;
 				return -1;
 			}
 		}
@@ -225,7 +225,7 @@ catch_signals (void)
 	*/
 	
 	if (pthread_sigmask (SIG_SETMASK, &signals, 0)) {
-		cerr << compose (_("cannot set default signal mask (%1)"), strerror (errno)) << endl;
+		cerr << string_compose (_("cannot set default signal mask (%1)"), strerror (errno)) << endl;
 		return -1;
 	}
 
@@ -416,7 +416,7 @@ main (int argc, char *argv[])
 
 	catch (AudioEngine::NoBackendAvailable& err) {
 		gui_jack_error ();
-		error << compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
+		error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
 		return -1;
 	}
 	
@@ -432,7 +432,7 @@ main (int argc, char *argv[])
 		bool isnew;
 
 		if (Session::find_session (session_name, path, name, isnew)) {
-			error << compose(_("could not load command line session \"%1\""), session_name) << endmsg;
+			error << string_compose(_("could not load command line session \"%1\""), session_name) << endmsg;
 		} else {
 
 			if (new_session) {
@@ -452,7 +452,7 @@ main (int argc, char *argv[])
 
 					/* it wasn't new, but we require a new session */
 
-					error << compose (_("\n\nA session named \"%1\" already exists.\n\
+					error << string_compose (_("\n\nA session named \"%1\" already exists.\n\
 To avoid this message, start ardour as \"ardour %1"), path)
 					      << endmsg;
 					goto out;
@@ -463,7 +463,7 @@ To avoid this message, start ardour as \"ardour %1"), path)
 				/* command line didn't require a new session */
 				
 				if (isnew) {
-					error << compose (_("\n\nNo session named \"%1\" exists.\n\
+					error << string_compose (_("\n\nNo session named \"%1\" exists.\n\
 To create it from the command line, start ardour as \"ardour --new %1"), path) 
 					      << endmsg;
 					goto out;

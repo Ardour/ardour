@@ -84,12 +84,12 @@ SndFileSource::init (const string& idstr, bool build_peak)
 	if ((sf = sf_open (file.c_str(), SFM_READ, &_info)) == 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << compose(_("SndFileSource: cannot open file \"%1\" (%2)"), file, errbuf) << endmsg;
+		error << string_compose(_("SndFileSource: cannot open file \"%1\" (%2)"), file, errbuf) << endmsg;
 		throw failed_constructor();
 	}
 
 	if (channel >= _info.channels) {
-		error << compose(_("SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"), _info.channels, channel) << endmsg;
+		error << string_compose(_("SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"), _info.channels, channel) << endmsg;
 		sf_close (sf);
 		sf = 0;
 		throw failed_constructor();
@@ -137,7 +137,7 @@ SndFileSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) cons
 	if (sf_seek (sf, (off_t) start, SEEK_SET) < 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << compose(_("SndFileSource: could not seek to frame %1 within %2 (%3)"), start, _name.substr (1), errbuf) << endmsg;
+		error << string_compose(_("SndFileSource: could not seek to frame %1 within %2 (%3)"), start, _name.substr (1), errbuf) << endmsg;
 		return 0;
 	}
 

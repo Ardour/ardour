@@ -94,7 +94,7 @@ setup_midi ()
 					   port_descriptor->type);
 
 		if (request.status != MIDI::PortRequest::OK) {
-			error << compose(_("MIDI port specifications for \"%1\" are not understandable."), port_descriptor->tag) << endmsg;
+			error << string_compose(_("MIDI port specifications for \"%1\" are not understandable."), port_descriptor->tag) << endmsg;
 			continue;
 		}
 		
@@ -143,18 +143,18 @@ setup_midi ()
 	}
 
 	if (default_mmc_port == 0) {
-		warning << compose (_("No MMC control (MIDI port \"%1\" not available)"), Config->get_mmc_port_name()) 
+		warning << string_compose (_("No MMC control (MIDI port \"%1\" not available)"), Config->get_mmc_port_name()) 
 			<< endmsg;
 		return 0;
 	} 
 
 	if (default_mtc_port == 0) {
-		warning << compose (_("No MTC support (MIDI port \"%1\" not available)"), Config->get_mtc_port_name()) 
+		warning << string_compose (_("No MTC support (MIDI port \"%1\" not available)"), Config->get_mtc_port_name()) 
 			<< endmsg;
 	}
 
 	if (default_midi_port == 0) {
-		warning << compose (_("No MIDI parameter support (MIDI port \"%1\" not available)"), Config->get_midi_port_name()) 
+		warning << string_compose (_("No MIDI parameter support (MIDI port \"%1\" not available)"), Config->get_midi_port_name()) 
 			<< endmsg;
 	}
 

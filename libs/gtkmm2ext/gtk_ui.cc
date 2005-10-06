@@ -28,6 +28,7 @@
 
 #include <gtkmm.h>
 #include <pbd/error.h>
+#include <pbd/compose.h>
 #include <pbd/touchable.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/pthread_utils.h>
@@ -346,7 +347,7 @@ UI::get_request (RequestType rt)
 	if (rbuf == 0) {
 		/* Cannot happen, but if it does we can't use the error reporting mechanism */
 		cerr << _("programming error: ")
-		     << compose (X_("no GUI request buffer found for thread %1"), pthread_self())
+		     << string_compose (X_("no GUI request buffer found for thread %1"), pthread_self())
 		     << endl;
 		abort ();
 	}
@@ -357,7 +358,7 @@ UI::get_request (RequestType rt)
 
 	if (vec.len[0] == 0) {
 		if (vec.len[1] == 0) {
-			cerr << compose (X_("no space in GUI request buffer for thread %1"), pthread_self())
+			cerr << string_compose (X_("no space in GUI request buffer for thread %1"), pthread_self())
 			     << endl;
 			return 0;
 		} else {
@@ -541,7 +542,7 @@ UI::send_request (Request *req)
 			   thread isn't registered!
 			*/
 			cerr << _("programming error: ")
-			     << compose (X_("UI::send_request() called from %1, but no request buffer exists for that thread"),
+			     << string_compose (X_("UI::send_request() called from %1, but no request buffer exists for that thread"),
 					 pthread_self())
 			     << endl;
 			abort ();

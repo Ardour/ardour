@@ -169,7 +169,7 @@ Editor::destroy_clicked_region ()
 	vector<string> choices;
 	string prompt;
 	
-	prompt  = compose (_(" This is destructive, will possibly delete audio files\n\
+	prompt  = string_compose (_(" This is destructive, will possibly delete audio files\n\
 It cannot be undone\n\
 Do you really want to destroy %1 ?"),
 			   (selected > 1 ? 
@@ -488,7 +488,7 @@ Editor::build_region_boundary_cache ()
 		point = Start;
 		break;	
 	default:
-		fatal << compose (_("build_region_boundary_cache called with snap_type = %1"), snap_type) << endmsg;
+		fatal << string_compose (_("build_region_boundary_cache called with snap_type = %1"), snap_type) << endmsg;
 		/*NOTREACHED*/
 		return;
 	}
@@ -1941,7 +1941,7 @@ Editor::do_import (vector<string> paths, bool split, bool as_tracks)
 
 	for (vector<string>::iterator i = paths.begin(); i != paths.end(); ++i ) {
 
-		interthread_progress_window->set_title (compose (_("ardour: importing %1"), (*i)));
+		interthread_progress_window->set_title (string_compose (_("ardour: importing %1"), (*i)));
 	
 		import_status.pathname = (*i);
 		import_status.done = false;
@@ -1987,21 +1987,21 @@ Editor::reject_because_rate_differs (string path, SF_INFO& finfo, string action,
 	if (finfo.samplerate != (int) session->frame_rate()) {
 		vector<string> choices;
 
-		choices.push_back (compose (_("%1 it anyway"), action));
+		choices.push_back (string_compose (_("%1 it anyway"), action));
 
 		if (multiple_pending) {
 			/* XXX assumptions about sentence structure
 			   here for translators. Sorry.
 			*/
-			choices.push_back (compose (_("Don't %1 it"), action));
-			choices.push_back (compose (_("%1 all without questions"), action));
+			choices.push_back (string_compose (_("Don't %1 it"), action));
+			choices.push_back (string_compose (_("%1 all without questions"), action));
 			choices.push_back (_("Cancel entire import"));
 		} else {
 			choices.push_back (_("Cancel"));
 		}
 
 		Gtkmm2ext::Choice rate_choice (
-			compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
+			string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
 			choices);
 
 		rate_choice.chosen.connect (Main::quit.slot());
@@ -2087,7 +2087,7 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 	if ((sf = sf_open (path.c_str(), SFM_READ, &finfo)) == 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << compose(_("Editor: cannot open file \"%1\" (%2)"), selection, errbuf) << endmsg;
+		error << string_compose(_("Editor: cannot open file \"%1\" (%2)"), selection, errbuf) << endmsg;
 		return;
 	}
 	sf_close (sf);
@@ -2117,7 +2117,7 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 	for (int n=0; n < finfo.channels; ++n)
 	{
 		idspec = path;
-		idspec += compose(":%1", n);
+		idspec += string_compose(":%1", n);
 		
 		try {
 			source = new SndFileSource (idspec.c_str());
@@ -2125,7 +2125,7 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 		} 
 
 		catch (failed_constructor& err) {
-			error << compose(_("could not open %1"), path) << endmsg;
+			error << string_compose(_("could not open %1"), path) << endmsg;
 			goto out;
 		}
 
@@ -2207,7 +2207,7 @@ Editor::insert_paths_as_new_tracks (vector<string> paths, bool split)
 		if ((sf = sf_open ((*p).c_str(), SFM_READ, &finfo)) == 0) {
 			char errbuf[256];
 			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-			error << compose(_("Editor: cannot open file \"%1\" (%2)"), (*p), errbuf) << endmsg;
+			error << string_compose(_("Editor: cannot open file \"%1\" (%2)"), (*p), errbuf) << endmsg;
 			continue;
 		}
 		
@@ -2283,7 +2283,7 @@ Editor::insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jac
 	if ((sf = sf_open (path.c_str(), SFM_READ, &finfo)) == 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << compose(_("Editor: cannot open file \"%1\" (%2)"), path, errbuf) << endmsg;
+		error << string_compose(_("Editor: cannot open file \"%1\" (%2)"), path, errbuf) << endmsg;
 		return;
 	}
 	sf_close (sf);
@@ -2301,7 +2301,7 @@ Editor::insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jac
 	for (int n=0; n < finfo.channels; ++n)
 	{
 		idspec = path;
-		idspec += compose(":%1", n);
+		idspec += string_compose(":%1", n);
 
 		try {
 			source = new SndFileSource (idspec.c_str());
@@ -2309,7 +2309,7 @@ Editor::insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jac
 		} 
 
 		catch (failed_constructor& err) {
-			error << compose(_("could not open %1"), path) << endmsg;
+			error << string_compose(_("could not open %1"), path) << endmsg;
 			goto out;
 		}
 

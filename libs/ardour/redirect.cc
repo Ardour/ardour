@@ -98,7 +98,7 @@ Redirect::set_placement (const string& str, void *src)
 	} else if (str == _("post")) {
 		set_placement (PostFader, this);
 	} else {
-		error << compose(_("Redirect: unknown placement string \"%1\" (ignored)"), str) << endmsg;
+		error << string_compose(_("Redirect: unknown placement string \"%1\" (ignored)"), str) << endmsg;
 	}
 }
 
@@ -116,7 +116,7 @@ Redirect::load_automation (string path)
 	ifstream in (fullpath.c_str());
 
 	if (!in) {
-		warning << compose(_("%1: cannot open %2 to load automation data (%3)"), _name, fullpath, strerror (errno)) << endmsg;
+		warning << string_compose(_("%1: cannot open %2 to load automation data (%3)"), _name, fullpath, strerror (errno)) << endmsg;
 		return 1;
 	}
 
@@ -145,7 +145,7 @@ Redirect::load_automation (string path)
 	return 0;
 
   bad:
-	error << compose(_("%1: cannot load automation data from %2"), _name, fullpath) << endmsg;
+	error << string_compose(_("%1: cannot load automation data from %2"), _name, fullpath) << endmsg;
 	parameter_automation.clear ();
 	return -1;
 }
@@ -166,7 +166,7 @@ Redirect::save_automation (string path)
 	ofstream out (fullpath.c_str());
 
 	if (!out) {
-		error << compose(_("%1: cannot open %2 to store automation data (%3)"), _name, fullpath, strerror (errno)) << endmsg;
+		error << string_compose(_("%1: cannot open %2 to store automation data (%3)"), _name, fullpath, strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -185,14 +185,14 @@ Redirect::save_automation (string path)
 		
 		if (i != (*li).second->end()) {
 			unlink (fullpath.c_str());
-			error << compose(_("%1: could not save automation state to %2"), _name, fullpath) << endmsg;
+			error << string_compose(_("%1: could not save automation state to %2"), _name, fullpath) << endmsg;
 			return -1;
 		}
 	}
 
 	if (li != parameter_automation.end()) {
 		unlink (fullpath.c_str());
-		error << compose(_("%1: could not save automation state to %2"), _name, fullpath) << endmsg;
+		error << string_compose(_("%1: could not save automation state to %2"), _name, fullpath) << endmsg;
 		return -1;
 	}
 
@@ -237,7 +237,7 @@ Redirect::state (bool full_state)
 		
 		switch (save_automation (path)) {
 		case -1:
-			error << compose(_("Could not get state from Redirect (%1).  Problem with save_automation"), _name) << endmsg;
+			error << string_compose(_("Could not get state from Redirect (%1).  Problem with save_automation"), _name) << endmsg;
 			break;
 			
 		case 0:
@@ -287,7 +287,7 @@ Redirect::set_state (const XMLNode& node)
 	const XMLProperty *prop;
 
 	if (node.name() != state_node_name) {
-		error << compose(_("incorrect XML node \"%1\" passed to Redirect object"), node.name()) << endmsg;
+		error << string_compose(_("incorrect XML node \"%1\" passed to Redirect object"), node.name()) << endmsg;
 		return -1;
 	}
 
@@ -309,7 +309,7 @@ Redirect::set_state (const XMLNode& node)
 			if ((prop = (*niter)->property ("path")) != 0) {
 				load_automation (prop->value());
 			} else {
-				warning << compose(_("%1: Automation node has no path property"), _name) << endmsg;
+				warning << string_compose(_("%1: Automation node has no path property"), _name) << endmsg;
 			}
 
 			if ((prop = (*niter)->property ("visible")) != 0) {

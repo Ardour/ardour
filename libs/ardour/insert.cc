@@ -522,7 +522,7 @@ PluginInsert::plugin_factory (Plugin& other)
 #endif
 	}
 
-	fatal << compose (_("programming error: %1"),
+	fatal << string_compose (_("programming error: %1"),
 			  X_("unknown plugin type in PluginInsert::plugin_factory"))
 	      << endmsg;
 	/*NOTREACHED*/
@@ -597,7 +597,7 @@ PluginInsert::state (bool full)
 	node->add_property ("type", _plugins[0]->state_node_name());
 	snprintf(buf, sizeof(buf), "%s", _plugins[0]->name());
 	node->add_property("id", string(buf));
-	node->add_property("count", compose("%1", _plugins.size()));
+	node->add_property("count", string_compose("%1", _plugins.size()));
 	node->add_child_nocopy (_plugins[0]->get_state());
 
 	/* add port automation state */
@@ -644,7 +644,7 @@ PluginInsert::set_state(const XMLNode& node)
 	} else if (prop->value() == X_("vst")) {
 		type = PluginInfo::VST;
 	} else {
-		error << compose (_("unknown plugin type %1 in plugin insert state"),
+		error << string_compose (_("unknown plugin type %1 in plugin insert state"),
 				  prop->value())
 		      << endmsg;
 		return -1;
@@ -658,7 +658,7 @@ PluginInsert::set_state(const XMLNode& node)
 	Plugin* plugin;
 	
 	if ((plugin = find_plugin (_session, prop->value(), type)) == 0) {
-		error << compose(_("Found a reference to a plugin (\"%1\") that is unknown.\n"
+		error << string_compose(_("Found a reference to a plugin (\"%1\") that is unknown.\n"
 				   "Perhaps it was removed or moved since it was last used."), prop->value()) 
 		      << endmsg;
 		return -1;
@@ -701,7 +701,7 @@ PluginInsert::set_state(const XMLNode& node)
 	}
 
 	if (niter == nlist.end()) {
-		error << compose(_("XML node describing a plugin insert is missing the `%1' information"), plugin->state_node_name()) << endmsg;
+		error << string_compose(_("XML node describing a plugin insert is missing the `%1' information"), plugin->state_node_name()) << endmsg;
 		return -1;
 	}
 	
@@ -748,7 +748,7 @@ PluginInsert::set_state(const XMLNode& node)
 	} 
 
 	if (niter == nlist.end()) {
-		warning << compose(_("XML node describing a port automation is missing the `%1' information"), port_automation_node_name) << endmsg;
+		warning << string_compose(_("XML node describing a port automation is missing the `%1' information"), port_automation_node_name) << endmsg;
 	}
 	
 	

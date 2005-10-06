@@ -219,7 +219,7 @@ xpm2rgb (const char** xpm, uint32_t& w, uint32_t& h)
 	// PARSE HEADER
 	
 	if ( sscanf(xpm[0], "%u%u%u%u", &w, &h, &colors, &cpp) != 4 ) {
-		error << compose (_("bad XPM header %1"), xpm[0])
+		error << string_compose (_("bad XPM header %1"), xpm[0])
 		      << endmsg;
 		return 0;
 	}
@@ -262,7 +262,7 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 	// PARSE HEADER
 
 	if ( sscanf(xpm[0], "%u%u%u%u", &w, &h, &colors, &cpp) != 4 ) {
-		error << compose (_("bad XPM header %1"), xpm[0])
+		error << string_compose (_("bad XPM header %1"), xpm[0])
 		      << endmsg;
 		return 0;
 	}
@@ -513,7 +513,7 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 		a = waverc->fg[GTK_STATE_ACTIVE].red / 257; 
 
 	} else {
-		warning << compose (_("missing RGBA style for \"%1\""), style) << endl;
+		warning << string_compose (_("missing RGBA style for \"%1\""), style) << endl;
 	}
 	
 	return (uint32_t) RGBA_TO_UINT(r,g,b,a);

@@ -37,7 +37,7 @@
 #include <ardour/diskstream.h>
 
 #include "i18n.h"
-/* there is a compose() here.. */
+/* there is a string_compose() here.. */
 //using namespace sigc;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -649,9 +649,9 @@ RouteUI::remove_this_route ()
 	string prompt;
 
 	if (is_audio_track()) {
-		prompt  = compose (_("Do you really want to remove track \"%1\" ?\nYou may also lose the playlist used by this track.\n(cannot be undone)"), _route.name());
+		prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\nYou may also lose the playlist used by this track.\n(cannot be undone)"), _route.name());
 	} else {
-		prompt  = compose (_("Do you really want to remove bus \"%1\" ?\n(cannot be undone)"), _route.name());
+		prompt  = string_compose (_("Do you really want to remove bus \"%1\" ?\n(cannot be undone)"), _route.name());
 	}
 
 	choices.push_back (_("Yes, remove it."));

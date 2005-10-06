@@ -137,13 +137,13 @@ MeterBridgeStrip::update ()
 			meter.set (log_meter (power));
 
 			if (over_short != last_over_short) {
-				buf = compose("%1", over_short);
+				buf = string_compose("%1", over_short);
 				over_short_label.set_text (buf);
 				last_over_short = over_short;
 			}
 			
 			if (over_long != last_over_long) {
-				buf = compose("%1", over_long);
+				buf = string_compose("%1", over_long);
 				over_long_label.set_text (buf);
 				last_over_long = over_long;
 			}

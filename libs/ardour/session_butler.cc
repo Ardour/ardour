@@ -78,17 +78,17 @@ Session::start_butler_thread ()
 	butler_should_run = false;
 
 	if (pipe (butler_request_pipe)) {
-		error << compose(_("Cannot create transport request signal pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("Cannot create transport request signal pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	if (fcntl (butler_request_pipe[0], F_SETFL, O_NONBLOCK)) {
-		error << compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	if (fcntl (butler_request_pipe[1], F_SETFL, O_NONBLOCK)) {
-		error << compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -186,7 +186,7 @@ Session::butler_thread_work ()
 				continue;
 			}
 			
-			error << compose (_("poll on butler request pipe failed (%1)"),
+			error << string_compose (_("poll on butler request pipe failed (%1)"),
 					  strerror (errno))
 			      << endmsg;
 			break;
@@ -269,7 +269,7 @@ Session::butler_thread_work ()
 				
 			default:
 				compute_io = false;
-				error << compose(_("Butler read ahead failure on dstream %1"), (*i)->name()) << endmsg;
+				error << string_compose(_("Butler read ahead failure on dstream %1"), (*i)->name()) << endmsg;
 				break;
 			}
 
@@ -313,7 +313,7 @@ Session::butler_thread_work ()
 			default:
 				err++;
 				compute_io = false;
-				error << compose(_("Butler write-behind failure on dstream %1"), (*i)->name()) << endmsg;
+				error << string_compose(_("Butler write-behind failure on dstream %1"), (*i)->name()) << endmsg;
 				/* don't break - try to flush all streams in case they 
 				   are split across disks.
 				*/

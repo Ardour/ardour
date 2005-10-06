@@ -94,7 +94,7 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 	isnew = false;
 
 	if (!realpath (str.c_str(), buf) && (errno != ENOENT && errno != ENOTDIR)) {
-		error << compose (_("Could not resolve path: %1 (%2)"), buf, strerror(errno)) << endmsg;
+		error << string_compose (_("Could not resolve path: %1 (%2)"), buf, strerror(errno)) << endmsg;
 		return -1;
 	}
 
@@ -106,7 +106,7 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 		if (errno == ENOENT) {
 			isnew = true;
 		} else {
-			error << compose (_("cannot check session path %1 (%2)"), str, strerror (errno))
+			error << string_compose (_("cannot check session path %1 (%2)"), str, strerror (errno))
 			      << endmsg;
 			return -1;
 		}
@@ -136,7 +136,7 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 				/* is it there ? */
 				
 				if (stat (tmp.c_str(), &statbuf)) {
-					error << compose (_("cannot check statefile %1 (%2)"), tmp, strerror (errno))
+					error << string_compose (_("cannot check statefile %1 (%2)"), tmp, strerror (errno))
 					      << endmsg;
 					return -1;
 				}
@@ -172,7 +172,7 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 			suffix = snapshot.find (_statefile_suffix);
 			
 			if (suffix == string::npos) {
-				error << compose (_("%1 is not an Ardour snapshot file"), str) << endmsg;
+				error << string_compose (_("%1 is not an Ardour snapshot file"), str) << endmsg;
 				return -1;
 			}
 
@@ -189,7 +189,7 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 				char cwd[PATH_MAX+1];
 
 				if (getcwd (cwd, sizeof (cwd)) == 0) {
-					error << compose (_("cannot determine current working directory (%1)"), strerror (errno))
+					error << string_compose (_("cannot determine current working directory (%1)"), strerror (errno))
 					      << endmsg;
 					return -1;
 				}
@@ -206,7 +206,7 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 		} else {
 
 			/* what type of file is it? */
-			error << compose (_("unknown file type for session %1"), str) << endmsg;
+			error << string_compose (_("unknown file type for session %1"), str) << endmsg;
 			return -1;
 		}
 
@@ -577,7 +577,7 @@ Session::when_engine_running ()
 	_clicking = false;
 
 	try {
-		XMLNode* child;
+		XMLNode* child = 0;
 		
 		_click_io = new ClickIO (*this, "click", 0, 0, -1, -1);
 
@@ -1432,7 +1432,7 @@ trace_terminal (Route* r1, Route* rbase)
 	Route* r2;
 
 	if ((r1->fed_by.find (rbase) != r1->fed_by.end()) && (rbase->fed_by.find (r1) != rbase->fed_by.end())) {
-		info << compose(_("feedback loop setup between %1 and %2"), r1->name(), rbase->name()) << endmsg;
+		info << string_compose(_("feedback loop setup between %1 and %2"), r1->name(), rbase->name()) << endmsg;
 		return;
 	} 
 
@@ -1566,7 +1566,7 @@ Session::new_audio_track (int input_channels, int output_channels)
 		}
 		n++;
 
-	} while (n < ULONG_MAX);
+	} while (n < (ULONG_MAX-1));
 
 	if (input_auto_connect & AutoConnectPhysical) {
 		nphysical_in = n_physical_inputs;
@@ -1584,7 +1584,7 @@ Session::new_audio_track (int input_channels, int output_channels)
 		track = new AudioTrack (*this, track_name);
 
 		if (track->ensure_io (input_channels, output_channels, false, this)) {
-			error << compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 					  input_channels, output_channels)
 			      << endmsg;
 		}
@@ -1673,13 +1673,13 @@ Session::new_audio_route (int input_channels, int output_channels)
 		}
 		n++;
 
-	} while (n < ULONG_MAX);
+	} while (n < (ULONG_MAX-1));
 
 	try {
 		bus = new Route (*this, bus_name, -1, -1, -1, -1);
 
 		if (bus->ensure_io (input_channels, output_channels, false, this)) {
-			error << compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 					  input_channels, output_channels)
 			      << endmsg;
 		}
@@ -2153,7 +2153,7 @@ Session::new_region_name (string old)
 
 	}
 
-	while (number < ULONG_MAX) {
+	while (number < (ULONG_MAX-1)) {
 
 		AudioRegionList::const_iterator i;
 		string sbuf;
@@ -2174,11 +2174,11 @@ Session::new_region_name (string old)
 		}
 	}
 
-	if (number != ULONG_MAX) {
+	if (number != (ULONG_MAX-1)) {
 		return buf;
 	} 
 
-	error << compose (_("cannot create new name for region \"%1\""), old) << endmsg;
+	error << string_compose (_("cannot create new name for region \"%1\""), old) << endmsg;
 	return old;
 }
 
@@ -2243,7 +2243,7 @@ Session::region_name (string& result, string base, bool newlevel) const
 		}
 			
 		if (name_taken) {
-			fatal << compose(_("too many regions with names like %1"), base) << endmsg;
+			fatal << string_compose(_("too many regions with names like %1"), base) << endmsg;
 			/*NOTREACHED*/
 		}
 	}
@@ -2575,7 +2575,7 @@ Session::create_file_source (DiskStream& ds, int32_t chan)
 	}
 
 	if (cnt > limit) {
-		error << compose(_("There are already %1 recordings for %2, which I consider too many."), limit, ds.name()) << endmsg;
+		error << string_compose(_("There are already %1 recordings for %2, which I consider too many."), limit, ds.name()) << endmsg;
 		throw failed_constructor();
 	}
 
@@ -3341,7 +3341,7 @@ Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_
 		}
 		
 		if (x == 99999) {
-			error << compose (_("too many bounced versions of playlist \"%1\""), playlist->name()) << endmsg;
+			error << string_compose (_("too many bounced versions of playlist \"%1\""), playlist->name()) << endmsg;
 			goto out;
 		}
 		
@@ -3350,7 +3350,7 @@ Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_
 		}
 		
 		catch (failed_constructor& err) {
-			error << compose (_("cannot create new audio file \"%1\" for %2"), buf, track.name()) << endmsg;
+			error << string_compose (_("cannot create new audio file \"%1\" for %2"), buf, track.name()) << endmsg;
 			goto out;
 		}
 

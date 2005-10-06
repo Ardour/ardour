@@ -96,7 +96,7 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy)
 		gnome_canvas_w2c_d (GNOME_CANVAS(track_gnome_canvas), event->crossing.x, event->crossing.y, pcx, pcy);
 		break;
 	default:
-		warning << compose (_("Editor::event_frame() used on unhandled event type %1"), event->type) << endmsg;
+		warning << string_compose (_("Editor::event_frame() used on unhandled event type %1"), event->type) << endmsg;
 		break;
 	}
 

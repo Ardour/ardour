@@ -74,7 +74,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		string path = path_from_region_name (PBD::basename_nosuffix (names[i]), ident);
 
 		if (path.length() == 0) {
-			error << compose (_("tempoize: error creating name for new audio file based on %1"), tsr.region->name()) 
+			error << string_compose (_("tempoize: error creating name for new audio file based on %1"), tsr.region->name()) 
 			      << endmsg;
 			goto out;
 		}
@@ -82,7 +82,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		try {
 			sources.push_back(new FileSource (path, frame_rate()));
 		} catch (failed_constructor& err) {
-			error << compose (_("tempoize: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
+			error << string_compose (_("tempoize: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
 			goto out;
 		}
 	}
@@ -107,7 +107,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 				   subject to timefx.  */
 
 				if ((this_read = tsr.region->master_read_at (buffer, buffer, gain_buffer, pos + tsr.region->position(), this_time)) != this_time) {
-					error << compose (_("tempoize: error reading data from %1"), sources[i]->name()) << endmsg;
+					error << string_compose (_("tempoize: error reading data from %1"), sources[i]->name()) << endmsg;
 					goto out;
 				}
 			
@@ -120,7 +120,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 			
 				while ((this_read = st.receiveSamples (buffer, bufsize)) > 0 && tsr.running) {
 					if (sources[i]->write (buffer, this_read) != this_read) {
-						error << compose (_("error writing tempo-adjusted data to %1"), sources[i]->name()) << endmsg;
+						error << string_compose (_("error writing tempo-adjusted data to %1"), sources[i]->name()) << endmsg;
 						goto out;
 					}
 				}
@@ -132,7 +132,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		
 			while (tsr.running && (this_read = st.receiveSamples (buffer, bufsize)) > 0) {
 				if (sources[i]->write (buffer, this_read) != this_read) {
-					error << compose (_("error writing tempo-adjusted data to %1"), sources[i]->name()) << endmsg;
+					error << string_compose (_("error writing tempo-adjusted data to %1"), sources[i]->name()) << endmsg;
 					goto out;
 				}
 			}

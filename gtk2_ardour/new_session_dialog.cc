@@ -68,7 +68,7 @@ NewSessionDialog::NewSessionDialog (ARDOUR::AudioEngine& engine, bool startup, s
 
 	/* sample rate */
 
-	sr_label1.set_text (compose 
+	sr_label1.set_text (string_compose 
 			   (_("This session will playback and record at %1 Hz"),
 			    engine.frame_rate()));
 	sr_label2.set_text (_("This rate is set by JACK and cannot be changed.\n"

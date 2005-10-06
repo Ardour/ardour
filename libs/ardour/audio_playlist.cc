@@ -473,7 +473,7 @@ AudioPlaylist::set_state (const XMLNode& node)
 			}
 
 			catch (failed_constructor& err) {
-			  //	cout << compose (_("could not create crossfade object in playlist %1"),
+			  //	cout << string_compose (_("could not create crossfade object in playlist %1"),
 			  //	  _name) 
 			  //    << endl;
 				continue;

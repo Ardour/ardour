@@ -201,7 +201,7 @@ Session::set_mtc_port (string port_tag)
 	MIDI::Port* port;
 
 	if ((port = MIDI::Manager::instance()->port (port_tag)) == 0) {
-		error << compose (_("unknown port %1 requested for MTC"), port_tag) << endl;
+		error << string_compose (_("unknown port %1 requested for MTC"), port_tag) << endl;
 		return -1;
 	}
 
@@ -559,7 +559,7 @@ Session::midi_read (MIDI::Port* port)
 		} else if (errno == EAGAIN) {
 			break;
 		} else {
-			fatal << compose(_("Error reading from MIDI port %1"), port->name()) << endmsg;
+			fatal << string_compose(_("Error reading from MIDI port %1"), port->name()) << endmsg;
 			/*NOTREACHED*/
 		}
 	}
@@ -993,7 +993,7 @@ Session::send_midi_time_code ()
 			}			
 			
 			if (_mtc_port->midimsg (mtc_msg, 2)) {
-				error << compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno)) 
+				error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno)) 
 				      << endmsg;
 				
 				return -1;
@@ -1099,7 +1099,7 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 		LockMonitor lm (midi_lock, __LINE__, __FILE__);
 
 		if (_mmc_port->write (mmc_buffer, nbytes) != nbytes) {
-			error << compose(_("MMC: cannot send command %1%2%3"), &hex, cmd, &dec) << endmsg;
+			error << string_compose(_("MMC: cannot send command %1%2%3"), &hex, cmd, &dec) << endmsg;
 		}
 	}
 }
@@ -1201,17 +1201,17 @@ int
 Session::start_midi_thread ()
 {
 	if (pipe (midi_request_pipe)) {
-		error << compose(_("Cannot create transport request signal pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("Cannot create transport request signal pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	if (fcntl (midi_request_pipe[0], F_SETFL, O_NONBLOCK)) {
-		error << compose(_("UI: cannot set O_NONBLOCK on "    "signal read pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("UI: cannot set O_NONBLOCK on "    "signal read pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	if (fcntl (midi_request_pipe[1], F_SETFL, O_NONBLOCK)) {
-		error << compose(_("UI: cannot set O_NONBLOCK on "    "signal write pipe (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("UI: cannot set O_NONBLOCK on "    "signal write pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -1245,7 +1245,7 @@ Session::poke_midi_thread ()
 	char c;
 
 	if (write (midi_request_pipe[1], &c, 1) != 1) {
-		error << compose(_("cannot send signal to midi thread! (%1)"), strerror (errno)) << endmsg;
+		error << string_compose(_("cannot send signal to midi thread! (%1)"), strerror (errno)) << endmsg;
 	}
 }
 
@@ -1340,7 +1340,7 @@ Session::midi_thread_work ()
 				goto again;
 			}
 
-			error << compose(_("MIDI thread poll failed (%1)"), strerror (errno)) << endmsg;
+			error << string_compose(_("MIDI thread poll failed (%1)"), strerror (errno)) << endmsg;
 
 			break;
 		}
@@ -1448,7 +1448,7 @@ Session::midi_thread_work ()
 
 		for (int p = 1; p < nfds; ++p) {
 			if ((pfd[p].revents & ~POLLIN)) {
-				// error << compose(_("Transport: error polling MIDI port %1 (revents =%2%3%4"), p, &hex, pfd[p].revents, &dec) << endmsg;
+				// error << string_compose(_("Transport: error polling MIDI port %1 (revents =%2%3%4"), p, &hex, pfd[p].revents, &dec) << endmsg;
 				break;
 			}
 			

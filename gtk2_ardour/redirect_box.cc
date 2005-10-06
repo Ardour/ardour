@@ -484,7 +484,7 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, IO& io)
 	/* i hate this kind of code */
 
 	if (streams > p.get_info().n_inputs) {
-		label.set_text (compose (_(
+		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
 "but at the insertion point, there are\n"
@@ -496,7 +496,7 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, IO& io)
 					 p.get_info().n_inputs,
 					 streams));
 	} else if (streams < p.get_info().n_inputs) {
-		label.set_text (compose (_(
+		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
 "but at the insertion point there are\n"
@@ -509,7 +509,7 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, IO& io)
 					 p.get_info().n_inputs,
 					 streams));
 	} else {
-		label.set_text (compose (_(
+		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
 "\n"
 "The I/O configuration doesn't make sense:\n"
@@ -1111,7 +1111,7 @@ RedirectBox::edit_redirect (Redirect* redirect)
 		if (send->get_gui() == 0) {
 			
 			string title;
-			title = compose(_("ardour: %1"), send->name());	
+			title = string_compose(_("ardour: %1"), send->name());	
 			
 			send_ui = new SendUIWindow (*send, _session);
 			send_ui->set_title (title);
@@ -1153,7 +1153,7 @@ RedirectBox::edit_redirect (Redirect* redirect)
 					maker += " ...";
 				}
 
-				title = compose(_("ardour: %1: %2 (by %3)"), _route.name(), plugin_insert->name(), maker);	
+				title = string_compose(_("ardour: %1: %2 (by %3)"), _route.name(), plugin_insert->name(), maker);	
 				
 				plugin_ui = new PluginUIWindow (_session.engine(), *plugin_insert);
 				if (_owner_is_mixer) {

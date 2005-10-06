@@ -201,7 +201,7 @@ AudioExportSpecification::prepare (jack_nframes_t blocksize, jack_nframes_t frat
 	
 	if ((out = sf_open (path.c_str(), SFM_WRITE, &sfinfo)) == 0) {
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << compose(_("Export: cannot open output file \"%1\" (%2)"), path, errbuf) << endmsg;
+		error << string_compose(_("Export: cannot open output file \"%1\" (%2)"), path, errbuf) << endmsg;
 		return -1;
 	}
 
@@ -211,7 +211,7 @@ AudioExportSpecification::prepare (jack_nframes_t blocksize, jack_nframes_t frat
 		int err;
 
 		if ((src_state = src_new (src_quality, channels, &err)) == 0) {
-			error << compose (_("cannot initialize sample rate conversion: %1"), src_strerror (err)) << endmsg;
+			error << string_compose (_("cannot initialize sample rate conversion: %1"), src_strerror (err)) << endmsg;
 			return -1;
 		}
 		
@@ -313,7 +313,7 @@ AudioExportSpecification::process (jack_nframes_t nframes)
 			++cnt;
 
 			if ((err = src_process (src_state, &src_data)) != 0) {
-				error << compose (_("an error occured during sample rate conversion: %1"),
+				error << string_compose (_("an error occured during sample rate conversion: %1"),
 						  src_strerror (err))
 				      << endmsg;
 				return -1;
@@ -415,7 +415,7 @@ AudioExportSpecification::process (jack_nframes_t nframes)
 	
 		if ((jack_nframes_t) written != to_write) {
 			sf_error_str (out, errbuf, sizeof (errbuf) - 1);
-			error << compose(_("Export: could not write data to output file (%1)"), errbuf) << endmsg;
+			error << string_compose(_("Export: could not write data to output file (%1)"), errbuf) << endmsg;
 			return -1;
 		}
 
@@ -497,7 +497,7 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 		LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
 		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if ((*i)-> seek (spec.start_frame, true)) {
-				error << compose (_("%1: cannot seek to %2 for export"),
+				error << string_compose (_("%1: cannot seek to %2 for export"),
 						  (*i)->name(), spec.start_frame)
 				      << endmsg;
 				goto out;

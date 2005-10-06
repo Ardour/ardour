@@ -655,7 +655,7 @@ ExportDialog::export_toc_file (Locations::LocationList& locations, const string&
 	gchar buf[18];
 
 	if (!out) {
-		error << compose(_("Editor: cannot open \"%1\" as export file for CD toc file"), filepath) << endmsg;
+		error << string_compose(_("Editor: cannot open \"%1\" as export file for CD toc file"), filepath) << endmsg;
 		return;
 	}
 	out << "CD_DA" << endl;
@@ -729,8 +729,8 @@ ExportDialog::export_toc_file (Locations::LocationList& locations, const string&
 			if ((*i)->cd_info.find("performer") != (*i)->cd_info.end()) {
 			  out << "     PERFORMER \"" << (*i)->cd_info["performer"]  << "\"" << endl;
 			}
-			if ((*i)->cd_info.find("composer") != (*i)->cd_info.end()) {
-			  out  << "     COMPOSER \"" << (*i)->cd_info["composer"] << "\"" << endl;
+			if ((*i)->cd_info.find("string_composer") != (*i)->cd_info.end()) {
+			  out  << "     COMPOSER \"" << (*i)->cd_info["string_composer"] << "\"" << endl;
 			}
 
 			if ((*i)->cd_info.find("isrc") != (*i)->cd_info.end()) {			  
@@ -777,7 +777,7 @@ ExportDialog::export_cue_file (Locations::LocationList& locations, const string&
 	int numtracks = 0, tracknum = 0, indexnum = 0;
 
 	if (!out) {
-		error << compose(_("Editor: cannot open \"%1\" as export file for CD cue file"), filepath) << endmsg;
+		error << string_compose(_("Editor: cannot open \"%1\" as export file for CD cue file"), filepath) << endmsg;
 		return;
 	}
 
@@ -867,8 +867,8 @@ ExportDialog::export_cue_file (Locations::LocationList& locations, const string&
 			out << "PERFORMER \"" <<  (*i)->cd_info["performer"] << "\"" << endl;
 		      }
 		      
-		      if ((*i)->cd_info.find("composer") != (*i)->cd_info.end()) {
-			out << "SONGWRITER \"" << (*i)->cd_info["composer"]  << "\"" << endl;
+		      if ((*i)->cd_info.find("string_composer") != (*i)->cd_info.end()) {
+			out << "SONGWRITER \"" << (*i)->cd_info["string_composer"]  << "\"" << endl;
 		      }
 			snprintf (buf, sizeof(buf), "INDEX %02d", indexnum);
 			out << buf;
@@ -1261,7 +1261,7 @@ ExportDialog::channels_chosen (GdkEventAny* ignored)
 			if (route->n_outputs() == 1) {
 				stupid_list.push_back (route->name());
 			} else {
-				stupid_list.push_back (compose("%1: out-%2", route->name(), i+1));
+				stupid_list.push_back (string_compose("%1: out-%2", route->name(), i+1));
 			}
 
 			stupid_list.push_back ("");

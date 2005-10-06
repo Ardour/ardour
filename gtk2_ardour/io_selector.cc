@@ -61,9 +61,9 @@ IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can
 
 	string title;
 	if (input) {
-		title = compose(_("%1 input"), ior.name());
+		title = string_compose(_("%1 input"), ior.name());
 	} else {
-		title = compose(_("%1 output"), ior.name());
+		title = string_compose(_("%1 output"), ior.name());
 	}
 
 	ok_button.set_name ("IOSelectorButton");

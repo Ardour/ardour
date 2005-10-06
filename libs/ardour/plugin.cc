@@ -326,24 +326,24 @@ Plugin::save_preset (string name, string domain)
 		return false;
 	}
 	
-	string source(compose("file:%1/.%2/rdf/ardour-presets.n3", envvar, domain));
+	string source(string_compose("file:%1/.%2/rdf/ardour-presets.n3", envvar, domain));
 
 	free(lrdf_add_preset(source.c_str(), name.c_str(), unique_id(), &defaults));
 
-	string path = compose("%1/.%2", envvar, domain);
+	string path = string_compose("%1/.%2", envvar, domain);
 	if (mkdir(path.c_str(), 0775) && errno != EEXIST) {
-		warning << compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
+		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
 		return false;
 	}
 	
 	path += "/rdf";
 	if (mkdir(path.c_str(), 0775) && errno != EEXIST) {
-		warning << compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
+		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
 		return false;
 	}
 	
 	if (lrdf_export_by_source(source.c_str(), source.substr(5).c_str())) {
-		warning << compose(_("Error saving presets file %1."), source) << endmsg;
+		warning << string_compose(_("Error saving presets file %1."), source) << endmsg;
 		return false;
 	}
 

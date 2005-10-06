@@ -102,7 +102,7 @@ Session::no_roll (jack_nframes_t nframes, jack_nframes_t offset)
 		
 		if ((*i)->no_roll (nframes, _transport_frame, end_frame, offset, non_realtime_work_pending(), 
 				   actively_recording(), declick)) {
-			error << compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
+			error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
 			ret = -1;
 			break;
 		}

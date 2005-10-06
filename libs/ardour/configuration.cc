@@ -96,12 +96,12 @@ Configuration::load_state ()
 		cerr << "Loading system configuration file " << rcfile << endl;
 
 		if (!tree.read (rcfile.c_str())) {
-			error << compose(_("Ardour: cannot read system configuration file \"%1\""), rcfile) << endmsg;
+			error << string_compose(_("Ardour: cannot read system configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
 		}
 
 		if (set_state (*tree.root())) {
-			error << compose(_("Ardour: system configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+			error << string_compose(_("Ardour: system configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
 	}
@@ -121,13 +121,13 @@ Configuration::load_state ()
 		cerr << "Loading user configuration file " << rcfile << endl;
 
 		if (!tree.read (rcfile)) {
-			error << compose(_("Ardour: cannot read configuration file \"%1\""), rcfile) << endmsg;
+			error << string_compose(_("Ardour: cannot read configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
 		}
 		
 		
 		if (set_state (*tree.root())) {
-			error << compose(_("Ardour: configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+			error << string_compose(_("Ardour: configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
 	}

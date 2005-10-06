@@ -183,14 +183,14 @@ PluginManager::add_presets(string domain)
 		return;
 	}
 
-	string path = compose("%1/.%2/rdf", envvar, domain);
+	string path = string_compose("%1/.%2/rdf", envvar, domain);
 	presets = scanner (path, rdf_filter, 0, true, true);
 
 	if (presets) {
 		for (x = presets->begin(); x != presets->end (); ++x) {
 			string file = "file:" + **x;
 			if (lrdf_read_file(file.c_str())) {
-				warning << compose(_("Could not parse rdf file: %1"), *x) << endmsg;
+				warning << string_compose(_("Could not parse rdf file: %1"), *x) << endmsg;
 			}
 		}
 	}
@@ -232,14 +232,14 @@ PluginManager::ladspa_discover (string path)
 	const char *errstr;
 
 	if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-		error << compose(_("LADSPA: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
+		error << string_compose(_("LADSPA: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
 		return -1;
 	}
 
 	dfunc = (LADSPA_Descriptor_Function) dlsym (module, "ladspa_descriptor");
 
 	if ((errstr = dlerror()) != 0) {
-		error << compose(_("LADSPA: module \"%1\" has no descriptor function."), path) << endmsg;
+		error << string_compose(_("LADSPA: module \"%1\" has no descriptor function."), path) << endmsg;
 		error << errstr << endmsg;
 		dlclose (module);
 		return -1;
@@ -293,7 +293,7 @@ PluginManager::load (Session& session, PluginInfo *info)
 				FSTHandle* handle;
 				
 				if ((handle = fst_load (info->path.c_str())) == 0) {
-					error << compose(_("VST: cannot load module from \"%1\""), info->path) << endmsg;
+					error << string_compose(_("VST: cannot load module from \"%1\""), info->path) << endmsg;
 				} else {
 					plugin = new VSTPlugin (_engine, session, handle);
 				}
@@ -308,7 +308,7 @@ PluginManager::load (Session& session, PluginInfo *info)
 		} else {
 
 			if ((module = dlopen (info->path.c_str(), RTLD_NOW)) == 0) {
-				error << compose(_("LADSPA: cannot load module from \"%1\""), info->path) << endmsg;
+				error << string_compose(_("LADSPA: cannot load module from \"%1\""), info->path) << endmsg;
 				error << dlerror() << endmsg;
 			} else {
 				plugin = new LadspaPlugin (module, _engine, session, info->index, session.frame_rate());
@@ -455,7 +455,7 @@ PluginManager::vst_discover (string path)
 	}
 
 	if (!finfo->canProcessReplacing) {
-		warning << compose (_("VST plugin %1 does not support processReplacing, and so cannot be used in ardour at this time"),
+		warning << string_compose (_("VST plugin %1 does not support processReplacing, and so cannot be used in ardour at this time"),
 				    finfo->name)
 			<< endl;
 	}

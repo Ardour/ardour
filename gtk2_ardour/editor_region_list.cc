@@ -229,7 +229,7 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 
 		item.clear ();
 		if (region->n_channels() > 1) {
-			str = compose("%1  [%2]", region->name(), region->n_channels());
+			str = string_compose("%1  [%2]", region->name(), region->n_channels());
 			item.push_back (str.c_str());
 		} else {
 			item.push_back (region->name().c_str());
@@ -284,7 +284,7 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 					item.clear ();
 					
 					if (region->n_channels() > 1) {
-						str = compose("%1  [%2]", region->name(), region->n_channels());
+						str = string_compose("%1  [%2]", region->name(), region->n_channels());
 						item.push_back (str.c_str());
 					} else {
 						item.push_back (region->name().c_str());
@@ -303,7 +303,7 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 	item.clear ();
 	
 	if (region->n_channels() > 1) {
-		str = compose("%1  [%2]", region->name(), region->n_channels());
+		str = string_compose("%1  [%2]", region->name(), region->n_channels());
 		item.push_back (str.c_str());
 	} else {
 		item.push_back (region->name().c_str());

@@ -266,7 +266,7 @@ PluginUI::build (AudioEngine &engine)
 			}
 
 			if ((cui = build_control_ui (engine, i, plugin.get_nth_midi_control (i))) == 0) {
-				error << compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
+				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
 			}
 				
@@ -889,7 +889,7 @@ PlugUIBase::setting_selected(GdkEventAny* ignored)
 	Entry* entry = combo.get_entry();
 	if (entry->get_text().length() > 0) {
 		if (!plugin.load_preset(entry->get_text())) {
-			warning << compose(_("Plugin preset %1 not found"), entry->get_text()) << endmsg;
+			warning << string_compose(_("Plugin preset %1 not found"), entry->get_text()) << endmsg;
 		}
 	}
 

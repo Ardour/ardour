@@ -30,7 +30,7 @@
 
 #include <gtkmm.h>
 #include <pbd/error.h>
-#include <pbd/compose.h>
+#include <pbd/string_compose.h>
 #include <pbd/basename.h>
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
@@ -900,7 +900,7 @@ ARDOUR_UI::cannot_record_no_input (DiskStream* ds)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::cannot_record_no_input), ds));
 	
-	string msg = PBD::compose (_("\
+	string msg = string_compose (_("\
 You cannot record-enable\n\
 track %1\n\
 because it has no input connections.\n\
@@ -1104,17 +1104,17 @@ ARDOUR_UI::ask_about_saving_session (string what)
 
 	string msg;
 
-	msg = PBD::compose(_("Save and %1"), what);
+	msg = string_compose(_("Save and %1"), what);
 	
 	Gtk::Button save_button (msg);
 	save_button.set_name ("EditorGTKButton");
 
-	msg = PBD::compose(_("Just %1"), what);
+	msg = string_compose(_("Just %1"), what);
 
 	Gtk::Button nosave_button (msg);
 	nosave_button.set_name ("EditorGTKButton");
 
-	msg = PBD::compose(_("Don't %1"), what);
+	msg = string_compose(_("Don't %1"), what);
 
 	Gtk::Button noquit_button (msg);
 	noquit_button.set_name ("EditorGTKButton");
@@ -1127,7 +1127,7 @@ ARDOUR_UI::ask_about_saving_session (string what)
 	} else {
 		type = _("snapshot");
 	}
-	prompt = PBD::compose(_("The %1\n\"%2\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"), 
+	prompt = string_compose(_("The %1\n\"%2\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"), 
 			 type, session->snap_name());
 	
 	prompt_label.set_text (prompt);
@@ -2728,7 +2728,7 @@ ARDOUR_UI::new_session (bool startup, string predetermined_path)
 	// Check that it doesn't already exist.
 	access(session_path.c_str(), R_OK); 
 	if (errno != ENOENT){
-		error << PBD::compose(_("Session %1 already exists at %2"), session_name, session_path) << endmsg;
+		error << string_compose(_("Session %1 already exists at %2"), session_name, session_path) << endmsg;
 		return;
 	}
 
@@ -2812,7 +2812,7 @@ This prevents the session from being loaded."));
 
 	catch (...) {
 
-		error << PBD::compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
+		error << string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
 		return -1;
 	}
 
@@ -2865,7 +2865,7 @@ ARDOUR_UI::build_session (string path, string snap_name,
 
 	catch (...) {
 
-		error << PBD::compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
+		error << string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
 		return -1;
 	}
 
@@ -2966,15 +2966,15 @@ require some unused files to continue to exist."));
 
 	if (rep.space < 1048576.0f) {
 		if (removed > 1) {
-			txt.set_text (PBD::compose (msg, removed, _("files"), (float) rep.space / 1024.0f, "kilo"));
+			txt.set_text (string_compose (msg, removed, _("files"), (float) rep.space / 1024.0f, "kilo"));
 		} else {
-			txt.set_text (PBD::compose (msg, removed, _("file"), (float) rep.space / 1024.0f, "kilo"));
+			txt.set_text (string_compose (msg, removed, _("file"), (float) rep.space / 1024.0f, "kilo"));
 		}
 	} else {
 		if (removed > 1) {
-			txt.set_text (PBD::compose (msg, removed, _("files"), (float) rep.space / 1048576.0f, "mega"));
+			txt.set_text (string_compose (msg, removed, _("files"), (float) rep.space / 1048576.0f, "mega"));
 		} else {
-			txt.set_text (PBD::compose (msg, removed, _("file"), (float) rep.space / 1048576.0f, "mega"));
+			txt.set_text (string_compose (msg, removed, _("file"), (float) rep.space / 1048576.0f, "mega"));
 		}
 	}
 

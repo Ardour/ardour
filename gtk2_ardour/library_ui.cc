@@ -745,7 +745,7 @@ clone_ftw(void* ptr)
 	ftw_return = 0;
 
 	if (ftw (file->c_str(), process_node, 100) < 0){
-		warning << compose(_("%1 not added to database"), *file) << endmsg;
+		warning << string_compose(_("%1 not added to database"), *file) << endmsg;
 	}
 
 	delete old_parent;
@@ -937,17 +937,17 @@ process_node (const char *file, const struct stat *sb, int32_t flag)
 	SNDFILE *sf;
 	SF_INFO info;
 	if ((sf = sf_open ((char *) file, SFM_READ, &info)) < 0) {
-		error << compose(_("file \"%1\" could not be opened"), file) << endmsg;
+		error << string_compose(_("file \"%1\" could not be opened"), file) << endmsg;
 		return ftw_return;
 	}
 	sf_close (sf);
 
 	string uri = Library->add_member(file, parent_uri);
 
-	Library->set_field(uri, "channels", compose("%1", info.channels));
-	Library->set_field(uri, "samplerate", compose("%1", info.samplerate));
-	Library->set_field(uri, "resolution", compose("%1", sndfile_data_width(info.format)));
-	Library->set_field(uri, "format", compose("%1", info.format));
+	Library->set_field(uri, "channels", string_compose("%1", info.channels));
+	Library->set_field(uri, "samplerate", string_compose("%1", info.samplerate));
+	Library->set_field(uri, "resolution", string_compose("%1", sndfile_data_width(info.format)));
+	Library->set_field(uri, "format", string_compose("%1", info.format));
 	
 	return ftw_return;
 }
@@ -1093,7 +1093,7 @@ SoundFileBox::setup_labels (string uri)
 	}
 
 	if ((sf = sf_open ((char *) file.c_str(), SFM_READ, sf_info)) < 0) {
-		error << compose(_("file \"%1\" could not be opened"), file) << endmsg;
+		error << string_compose(_("file \"%1\" could not be opened"), file) << endmsg;
 		return -1;
 	}
 	
@@ -1103,7 +1103,7 @@ SoundFileBox::setup_labels (string uri)
 	    sf_info->format == 0 &&
 	    sf_info->sections == 0) {
 		/* .. ok, its not a sound file */
-		error << compose(_("file \"%1\" appears not to be an audio file"), file) << endmsg;
+		error << string_compose(_("file \"%1\" appears not to be an audio file"), file) << endmsg;
 		return -1;
 	}
 
@@ -1121,18 +1121,18 @@ SoundFileBox::setup_labels (string uri)
 	path_entry.signal_focus_out_event()().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
 
 	length.set_alignment (0.0f, 0.0f);
-	length.set_text (compose("Length: %1", length2string(sf_info->frames, sf_info->samplerate)));
+	length.set_text (string_compose("Length: %1", length2string(sf_info->frames, sf_info->samplerate)));
 
 	format.set_alignment (0.0f, 0.0f);
-	format.set_text (compose("Format: %1, %2", 
+	format.set_text (string_compose("Format: %1, %2", 
 				 sndfile_major_format(sf_info->format), 
 				 sndfile_minor_format(sf_info->format)));
 	
 	channels.set_alignment (0.0f, 0.0f);
-	channels.set_text (compose("Channels: %1", sf_info->channels));
+	channels.set_text (string_compose("Channels: %1", sf_info->channels));
 	
 	samplerate.set_alignment (0.0f, 0.0f);
-	samplerate.set_text (compose("Samplerate: %1", sf_info->samplerate));
+	samplerate.set_text (string_compose("Samplerate: %1", sf_info->samplerate));
 
 	return 0;
 }
@@ -1156,7 +1156,7 @@ SoundFileBox::play_btn_clicked ()
 	}
 
 	if (access(file.c_str(), R_OK)) {
-		warning << compose(_("Could not read file: %1 (%2)."), file, strerror(errno)) << endmsg;
+		warning << string_compose(_("Could not read file: %1 (%2)."), file, strerror(errno)) << endmsg;
 		return;
 	}
 	
@@ -1170,7 +1170,7 @@ SoundFileBox::play_btn_clicked ()
 		for (int n=0; n < sf_info->channels; ++n) {
 			
 			try {
-				sfs =  new SndFileSource(file+":"+compose("%1", n), false);
+				sfs =  new SndFileSource(file+":"+string_compose("%1", n), false);
 				srclist.push_back(sfs);
 				
 			} catch (failed_constructor& err) {

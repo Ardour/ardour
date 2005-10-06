@@ -539,7 +539,7 @@ AudioEngine::connect (const string& source, const string& destination)
 		pair<string,string> c (s, d);
 		port_connections.push_back (c);
 	} else {
-		error << compose(_("AudioEngine: cannot connect %1 (%2) to %3 (%4)"), 
+		error << string_compose(_("AudioEngine: cannot connect %1 (%2) to %3 (%4)"), 
 				 source, s, destination, d) 
 		      << endmsg;
 	}
@@ -908,7 +908,7 @@ AudioEngine::connect_to_jack (string client_name)
 			error << _("Unable to connect to JACK server") << endmsg;
 		}
 		
-		error << compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
+		error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
 		return -1;
 	}
 
@@ -988,7 +988,7 @@ AudioEngine::reconnect_to_jack ()
 		short_name = long_name.substr (long_name.find_last_of (':') + 1);
 
 		if (((*i)->port = jack_port_register (_jack, short_name.c_str(), (*i)->type(), (*i)->flags(), 0)) == 0) {
-			error << compose (_("could not reregister %1"), (*i)->name()) << endmsg;
+			error << string_compose (_("could not reregister %1"), (*i)->name()) << endmsg;
 			break;
 		} else {
 		}
@@ -1045,7 +1045,7 @@ AudioEngine::reconnect_to_jack ()
 		
 		if ((err = jack_connect (_jack, (*i).first.c_str(), (*i).second.c_str())) != 0) {
 			if (err != EEXIST) {
-				error << compose (_("could not reconnect %1 and %2 (err = %3)"),
+				error << string_compose (_("could not reconnect %1 and %2 (err = %3)"),
 						  (*i).first, (*i).second, err)
 				      << endmsg;
 			}
