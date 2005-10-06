@@ -16,6 +16,7 @@ domain = 'gtk_ardour'
 
 gtkardour.Append(DOMAIN=domain, MAJOR=1,MINOR=0,MICRO=2)
 gtkardour.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
+gtkardour.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 gtkardour.Append(PACKAGE=domain)
 gtkardour.Append(POTFILE=domain + '.pot')
 
