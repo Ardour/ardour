@@ -69,7 +69,7 @@ class RouteParams_UI : public ArdourDialog
 	Gtk::VBox                mixer_scroller_vpacker;
 
 	Gtk::VBox                list_vpacker;
-	Gtk::CList               route_select_list;
+	Gtk::TreeView            route_select_list;
 	Gtk::Label               route_list_button_label;
 	Gtk::Button              route_list_button;
 	Gtk::ScrolledWindow      route_select_scroller;

@@ -44,8 +44,8 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	  lock_button (_("lock")),
 	  mute_button (_("mute")),
 	  opaque_button (_("opaque")),
-	  raise_arrow (GTK_ARROW_UP, Gtk::SHADOW_OUT),
-	  lower_arrow (GTK_ARROW_DOWN, Gtk::SHADOW_OUT),
+	  raise_arrow (Gtk::ARROW_UP, Gtk::SHADOW_OUT),
+	  lower_arrow (Gtk::ARROW_DOWN, Gtk::SHADOW_OUT),
 	  layer_label (_("Layer")),
 	  audition_label (_("play")),
 	  time_table (3, 2),
@@ -70,8 +70,8 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	name_entry.set_name ("AudioRegionEditorEntry");
 	name_label.set_name ("AudioRegionEditorLabel");
 
-	name_entry.signal_focus_in_event()().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
-	name_entry.signal_focus_out_event()().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	name_entry.signal_focus_in_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	name_entry.signal_focus_out_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
 	
 	name_hbox.set_spacing (5);
 	name_hbox.pack_start (name_label, false, false);
@@ -123,14 +123,14 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	fade_out_active_button.unset_flags (Gtk::CAN_FOCUS);
 	audition_button.unset_flags (Gtk::CAN_FOCUS);
 	
-	mute_button.signal_set_event()s (mute_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	opaque_button.signal_set_event()s (opaque_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	lock_button.signal_set_event()s (lock_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	envelope_active_button.signal_set_event()s (envelope_active_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	envelope_view_button.signal_set_event()s (envelope_view_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	fade_in_active_button.signal_set_event()s (fade_in_active_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	fade_out_active_button.signal_set_event()s (fade_out_active_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	audition_button.signal_set_event()s (audition_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
+	mute_button.set_events (mute_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	opaque_button.set_events (opaque_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	lock_button.set_events (lock_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	envelope_active_button.set_events (envelope_active_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	envelope_view_button.set_events (envelope_view_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	fade_in_active_button.set_events (fade_in_active_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	fade_out_active_button.set_events (fade_out_active_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	audition_button.set_events (audition_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	top_row_button_hbox.set_border_width (5);
 	top_row_button_hbox.set_spacing (5);
@@ -163,14 +163,14 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	end_alignment.add (end_label);
 	length_alignment.add (length_label);
 
-	time_table.attach (start_alignment, 0, 1, 0, 1);
-	time_table.attach (start_clock, 1, 2, 0, 1, 0, 0);
+	time_table.attach (start_alignment, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
+	time_table.attach (start_clock, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
 
-	time_table.attach (end_alignment, 0, 1, 1, 2);
-	time_table.attach (end_clock, 1, 2, 1, 2, 0, 0);
+	time_table.attach (end_alignment, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
+	time_table.attach (end_clock, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
 
-	time_table.attach (length_alignment, 0, 1, 2, 3);
-	time_table.attach (length_clock, 1, 2, 2, 3, 0, 0);
+	time_table.attach (length_alignment, 0, 1, 2, 3, Gtk::FILL, Gtk::FILL);
+	time_table.attach (length_clock, 1, 2, 2, 3, Gtk::FILL, Gtk::FILL);
 
 	envelope_label.set_name ("AudioRegionEditorLabel");
 
@@ -181,9 +181,9 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 
 	envelope_loop_table.set_border_width (5);
 	envelope_loop_table.set_row_spacings (2);
-	envelope_loop_table.attach (envelope_label, 0, 1, 0, 1, 0, 0);
-	envelope_loop_table.attach (envelope_active_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
-	envelope_loop_table.attach (envelope_view_button, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, 0);
+	envelope_loop_table.attach (envelope_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
+	envelope_loop_table.attach (envelope_active_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL);
+	envelope_loop_table.attach (envelope_view_button, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL);
 
 	/* fade in */
 
@@ -204,9 +204,9 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 
 	fade_in_length_spinner.set_digits (3);
 
-	fade_in_length_spinner.signal_focus_in_event()().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
-	fade_in_length_spinner.signal_focus_out_event()().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
-	fade_in_length_spinner.activate.connect (mem_fun(*this, &AudioRegionEditor::activation));
+	fade_in_length_spinner.signal_focus_in_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	fade_in_length_spinner.signal_focus_out_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	fade_in_length_spinner.signal_activate().connect (mem_fun(*this, &AudioRegionEditor::activation));
 
 	Gtkmm2ext::set_size_request_to_display_given_text (fade_in_length_spinner, "500g", 20, -1);
 
@@ -214,12 +214,12 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	fade_in_label_align.set (0.5);
 
 
-	fade_in_table.attach (fade_in_label_align,   0, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, 0, 0, 0);
+	fade_in_table.attach (fade_in_label_align,   0, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL);
 
-	fade_in_table.attach (fade_in_length_label,   0, 1, 1, 2, Gtk::EXPAND, 0, 0, 0);
-	fade_in_table.attach (fade_in_length_spinner, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, 0, 0, 0);
+	fade_in_table.attach (fade_in_length_label,   0, 1, 1, 2, Gtk::EXPAND, Gtk::FILL);
+	fade_in_table.attach (fade_in_length_spinner, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL);
 
-	fade_in_table.attach (fade_in_active_button,        0, 2, 3, 5, Gtk::FILL|Gtk::EXPAND, 0);
+	fade_in_table.attach (fade_in_active_button,        0, 2, 3, 5, Gtk::FILL|Gtk::EXPAND, Gtk::FILL);
 
 	/* fade out */
 
@@ -240,21 +240,21 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	
 	fade_out_length_spinner.set_digits (3);
 
-	fade_out_length_spinner.signal_focus_in_event()().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
-	fade_out_length_spinner.signal_focus_out_event()().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
-	fade_out_length_spinner.activate.connect (mem_fun(*this, &AudioRegionEditor::activation));
+	fade_out_length_spinner.signal_focus_in_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	fade_out_length_spinner.signal_focus_out_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
+	fade_out_length_spinner.signal_activate().connect (mem_fun(*this, &AudioRegionEditor::activation));
 
 	Gtkmm2ext::set_size_request_to_display_given_text (fade_out_length_spinner, "500g", 20, -1);
 
 	fade_out_label_align.add (fade_out_label);
 	fade_out_label_align.set (0.5);
 
-	fade_out_table.attach (fade_out_label_align,   0, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, 0, 0, 0);
+	fade_out_table.attach (fade_out_label_align,   0, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL);
 
-	fade_out_table.attach (fade_out_length_label,   0, 1, 1, 2, Gtk::EXPAND, 0, 0, 0);
-	fade_out_table.attach (fade_out_length_spinner, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, 0, 0, 0);
+	fade_out_table.attach (fade_out_length_label,   0, 1, 1, 2, Gtk::EXPAND, Gtk::FILL);
+	fade_out_table.attach (fade_out_length_spinner, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL);
 
-	fade_out_table.attach (fade_out_active_button,        0, 2, 3, 5, Gtk::FILL|Gtk::EXPAND, 0);
+	fade_out_table.attach (fade_out_active_button,        0, 2, 3, 5, Gtk::FILL|Gtk::EXPAND, Gtk::FILL);
 
 	lower_hbox.pack_start (time_table, true, true);
 	lower_hbox.pack_start (sep1, false, false);
@@ -271,7 +271,7 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	set_name ("AudioRegionEditorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Window *> (this)));
+	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (this)));
 
 	string title = _("ardour: region ");
 	title += _region.name();
@@ -425,7 +425,7 @@ AudioRegionEditor::stop_editing_fade_out ()
 void
 AudioRegionEditor::connect_editor_events ()
 {
-	name_entry.changed.connect (mem_fun(*this, &AudioRegionEditor::name_entry_changed));
+  name_entry.signal_changed().connect (mem_fun(*this, &AudioRegionEditor::name_entry_changed));
 
 	start_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::start_clock_changed));
 	end_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::end_clock_changed));
@@ -441,16 +441,16 @@ AudioRegionEditor::connect_editor_events ()
 	fade_out_length_spinner.signal_button_release_event().connect (bind (mem_fun (*this, &AudioRegionEditor::breleased), &fade_out_length_spinner, 
 								   &AudioRegionEditor::stop_editing_fade_out));
 
-	fade_in_length_adjustment.value_changed.connect (mem_fun(*this, &AudioRegionEditor::fade_in_length_adjustment_changed));
-	fade_out_length_adjustment.value_changed.connect (mem_fun(*this, &AudioRegionEditor::fade_out_length_adjustment_changed));
+	fade_in_length_adjustment.signal_value_changed().connect (mem_fun(*this, &AudioRegionEditor::fade_in_length_adjustment_changed));
+	fade_out_length_adjustment.signal_value_changed().connect (mem_fun(*this, &AudioRegionEditor::fade_out_length_adjustment_changed));
 
-	fade_in_active_button.toggled.connect (mem_fun(*this, &AudioRegionEditor::fade_in_active_toggled));
-	fade_out_active_button.toggled.connect (mem_fun(*this, &AudioRegionEditor::fade_out_active_toggled));
+	fade_in_active_button.signal_toggled().connect (mem_fun(*this, &AudioRegionEditor::fade_in_active_toggled));
+	fade_out_active_button.signal_toggled().connect (mem_fun(*this, &AudioRegionEditor::fade_out_active_toggled));
 
 	envelope_active_button.signal_button_press_event().connect (mem_fun(*this, &AudioRegionEditor::envelope_active_button_press));
 	envelope_active_button.signal_button_release_event().connect (mem_fun(*this, &AudioRegionEditor::envelope_active_button_release));
-	audition_button.toggled.connect (mem_fun(*this, &AudioRegionEditor::audition_button_toggled));
-	envelope_view_button.toggled.connect (mem_fun(*this, &AudioRegionEditor::envelope_view_button_toggled));
+	audition_button.signal_toggled().connect (mem_fun(*this, &AudioRegionEditor::audition_button_toggled));
+	envelope_view_button.signal_toggled().connect (mem_fun(*this, &AudioRegionEditor::envelope_view_button_toggled));
 	lock_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::lock_button_clicked));
 	mute_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::mute_button_clicked));
 	opaque_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::opaque_button_clicked));

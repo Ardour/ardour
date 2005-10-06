@@ -712,8 +712,8 @@ class Editor : public PublicEditor
 	bool no_zoom_repos_update;
 	bool no_tempo_map_update;
 
-	Gtk::CTree          region_list_display;
-	Gtk::CTree_Helpers::RowList::iterator region_list_hidden_node;
+	Gtk::TreeView          region_list_display;
+	//Gtk::CTree_Helpers::RowList::iterator region_list_hidden_node;
 	Gtk::Menu          *region_list_menu;
 	vector<Gtk::MenuItem*> rl_context_menu_region_items;
 	Gtk::ScrolledWindow region_list_scroller;
@@ -746,13 +746,13 @@ class Editor : public PublicEditor
 	void toggle_full_region_list ();
 	void toggle_show_auto_regions ();
 
-	static gint _region_list_sorter (GtkCList*, gconstpointer, gconstpointer);
+	static gint _region_list_sorter (GtkTreeView*, gconstpointer, gconstpointer);
 	gint region_list_sorter (gconstpointer, gconstpointer);
 
 	/* named selections */
 
 	Gtk::VPaned         region_selection_vpane;
-	Gtk::CList          named_selection_display;
+	Gtk::TreeView          named_selection_display;
 	Gtk::ScrolledWindow named_selection_scroller;
 
 	void name_selection();
@@ -1490,7 +1490,7 @@ class Editor : public PublicEditor
 	
 	/* diskstream/route display management */
 
-	Gtk::CList          route_list;
+	Gtk::TreeView          route_list;
 	Gtk::ScrolledWindow route_list_scroller;
 	Gtk::Menu          *route_list_menu;
 
@@ -1507,7 +1507,7 @@ class Editor : public PublicEditor
 
 	Gtk::Button         edit_group_list_button;
 	Gtk::Label          edit_group_list_button_label;
-	Gtk::CList          edit_group_list;
+	Gtk::TreeView       edit_group_list;
 	Gtk::ScrolledWindow edit_group_list_scroller;
 	Gtk::Menu          *edit_group_list_menu;
 	Gtk::VBox           edit_group_vbox;

@@ -18,7 +18,7 @@
     $Id$
 */
 
-#include <sigc++/rettype.h>
+#include <sigc++/retype.h>
 #include <cstdlib>
 #include <cmath>
 
@@ -315,7 +315,7 @@ Editor::remove_marker (GnomeCanvasItem* item, GdkEvent* event)
 			loc->set_hidden (true, this);
 		}
 		else {
-			Gtk::Main::idle.connect (bind (mem_fun(*this, &Editor::really_remove_marker), loc));
+		  	Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::really_remove_marker), loc));
 		}
 	}
 }
@@ -394,7 +394,7 @@ Editor::marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
 		Menu_Helpers::MenuList & children = marker_menu->items();
 		// XXX: should really find this some other way
 		if (children.size() >= 3) {
-			MenuItem * loopitem = children[2];
+			MenuItem * loopitem = &children[2];
 			if (loopitem) {
 				if (loc->is_mark()) {
 					loopitem->set_sensitive(false);
@@ -753,7 +753,7 @@ Editor::marker_menu_rename ()
 	ok_button.set_name ("EditorGTKButton");
 	cancel_button.set_name ("EditorGTKButton");
 
-	entry.activate.connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
+	entry.signal_activate().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
 	cancel_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), -1));
 	ok_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
 	dialog.signal_delete_event().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop_on_delete), -1));
@@ -801,8 +801,8 @@ Editor::new_transport_marker_menu_set_loop ()
 		session->add_redo_no_execute (session->locations()->get_memento());
 	}
 	else {
-		session->add_undo (rettype<void>(bind (mem_fun (*tll, &Location::set), tll->start(), tll->end())));
-		session->add_redo (rettype<void>(bind (mem_fun (*tll, &Location::set), temp_location->start(), temp_location->end())));
+		session->add_undo (retype_return<void>(bind (mem_fun (*tll, &Location::set), tll->start(), tll->end())));
+		session->add_redo (retype_return<void>(bind (mem_fun (*tll, &Location::set), temp_location->start(), temp_location->end())));
 		tll->set_hidden (false, this);
 		tll->set (temp_location->start(), temp_location->end());
 	}
@@ -826,8 +826,8 @@ Editor::new_transport_marker_menu_set_punch ()
 		session->set_auto_punch_location (tpl);
 		session->add_redo_no_execute (session->locations()->get_memento());
 	} else {
-		session->add_undo (rettype<void>(bind (mem_fun (*tpl, &Location::set), tpl->start(), tpl->end())));
-		session->add_redo (rettype<void>(bind (mem_fun (*tpl, &Location::set), temp_location->start(), temp_location->end())));
+		session->add_undo (retype_return<void>(bind (mem_fun (*tpl, &Location::set), tpl->start(), tpl->end())));
+		session->add_redo (retype_return<void>(bind (mem_fun (*tpl, &Location::set), temp_location->start(), temp_location->end())));
 		tpl->set_hidden(false, this);
 		tpl->set(temp_location->start(), temp_location->end());
 	}

@@ -87,11 +87,11 @@ class StreamView : public sigc::trackable
 		StreamBaseColor
 	};
 
-	void apply_color (GdkColor&, ColorTarget t);
+	void apply_color (Gdk::Color&, ColorTarget t);
 	void set_selected_regionviews (AudioRegionSelection&);
 	void get_selectables (jack_nframes_t start, jack_nframes_t end, list<Selectable* >&);
 	void get_inverted_selectables (Selection&, list<Selectable* >& results);
-	GdkColor get_region_color () const { return region_color; }
+	Gdk::Color get_region_color () const { return region_color; }
 
 	void foreach_regionview (sigc::slot<void,AudioRegionView*> slot);
 	void foreach_crossfadeview (void (CrossfadeView::*pmf)(void));
@@ -161,7 +161,7 @@ class StreamView : public sigc::trackable
 
 	/* XXX why are these different? */
 	
-	GdkColor region_color;
+	Gdk::Color region_color;
 	uint32_t stream_base_color;
 
 	vector<sigc::connection> playlist_connections;

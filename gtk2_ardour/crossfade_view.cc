@@ -42,7 +42,7 @@ CrossfadeView::CrossfadeView (GnomeCanvasGroup *parent,
 			      AudioTimeAxisView &tv, 
 			      Crossfade& xf, 
 			      double spu,
-			      GdkColor& basic_color,
+			      Gdk::Color& basic_color,
 			      AudioRegionView& lview,
 			      AudioRegionView& rview)
 			      

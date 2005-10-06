@@ -251,13 +251,13 @@ Editor::mouse_add_new_tempo_event (jack_nframes_t frame)
 	TempoMap& map(session->tempo_map());
 	TempoDialog tempo_dialog (map, frame, _("add"));
 	
-	tempo_dialog.bpm_entry.activate.connect (bind (slot (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.ok_button.signal_clicked().connect (bind (slot (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.cancel_button.signal_clicked().connect (bind (slot (tempo_dialog, &ArdourDialog::stop), -1));
+	tempo_dialog.bpm_entry.signal_activate().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), 0));
+	tempo_dialog.ok_button.signal_clicked().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), 0));
+	tempo_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), -1));
 
 	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	tempo_dialog.realize ();
-	tempo_dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
+	tempo_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	ensure_float (tempo_dialog);
 
@@ -294,12 +294,12 @@ Editor::mouse_add_new_meter_event (jack_nframes_t frame)
 	TempoMap& map(session->tempo_map());
 	MeterDialog meter_dialog (map, frame, _("add"));
 
-	meter_dialog.ok_button.signal_clicked().connect (bind (slot (meter_dialog, &ArdourDialog::stop), 0));
-	meter_dialog.cancel_button.signal_clicked().connect (bind (slot (meter_dialog, &ArdourDialog::stop), -1));
+	meter_dialog.ok_button.signal_clicked().connect (bind (mem_fun (meter_dialog, &ArdourDialog::stop), 0));
+	meter_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (meter_dialog, &ArdourDialog::stop), -1));
 
 	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	meter_dialog.realize ();
-	meter_dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
+	meter_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	ensure_float (meter_dialog);
 	
@@ -342,7 +342,7 @@ Editor::remove_tempo_marker (GnomeCanvasItem* item)
 	}		
 
 	if (tempo_marker->tempo().movable()) {
-		Gtk::Main::idle.connect (bind (mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
+	  Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
 	}
 }
 
@@ -351,12 +351,12 @@ Editor::edit_meter_section (MeterSection* section)
 {
 	MeterDialog meter_dialog (*section, _("done"));
 
-	meter_dialog.ok_button.signal_clicked().connect (bind (slot (meter_dialog, &ArdourDialog::stop), 0));
-	meter_dialog.cancel_button.signal_clicked().connect (bind (slot (meter_dialog, &ArdourDialog::stop), -1));
+	meter_dialog.ok_button.signal_clicked().connect (bind (mem_fun (meter_dialog, &ArdourDialog::stop), 0));
+	meter_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (meter_dialog, &ArdourDialog::stop), -1));
 
 	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	meter_dialog.realize ();
-	meter_dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
+	meter_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	ensure_float (meter_dialog);
 
@@ -382,13 +382,13 @@ Editor::edit_tempo_section (TempoSection* section)
 {
 	TempoDialog tempo_dialog (*section, _("done"));
 
-	tempo_dialog.bpm_entry.activate.connect (bind (slot (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.ok_button.signal_clicked().connect (bind (slot (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.cancel_button.signal_clicked().connect (bind (slot (tempo_dialog, &ArdourDialog::stop), -1));
+	tempo_dialog.bpm_entry.signal_activate().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), 0));
+	tempo_dialog.ok_button.signal_clicked().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), 0));
+	tempo_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), -1));
 
 	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	tempo_dialog.realize ();
-	tempo_dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
+	tempo_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	ensure_float (tempo_dialog);
 	
@@ -477,7 +477,7 @@ Editor::remove_meter_marker (GnomeCanvasItem* item)
 	}		
 
 	if (meter_marker->meter().movable()) {
-		Gtk::Main::idle.connect (bind (mem_fun(*this, &Editor::real_remove_meter_marker), &meter_marker->meter()));
+	  Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::real_remove_meter_marker), &meter_marker->meter()));
 	}
 }
 

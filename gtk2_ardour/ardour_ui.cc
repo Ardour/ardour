@@ -867,16 +867,20 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	set_shuttle_units (Percentage);
 	set_shuttle_behaviour (Sprung);
 
-	shuttle_unit_menu.items().push_back (MenuElem (_("Percentage"), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units),
-								      Percentage)));
-	shuttle_unit_menu.items().push_back (MenuElem (_("Semitones"), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units),
-								      Semitones)));
+	Glib::RefPtr<ActionGroup> shuttle_style_actions = ActionGroup::create ();
+	Glib::RefPtr<ActionGroup> shuttle_unit_actions = ActionGroup::create ();
+	
+	shuttle_unit_actions->add (Action::create (_("Percentage")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Percentage));
+	shuttle_unit_actions->add (Action::create (_("Semitones")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Semitones));
+	shuttle_style_actions->add (Action::create (_("Sprung")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Sprung));
+	shuttle_style_actions->add (Action::create (_("Wheel")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Wheel));
+	
+	uiManager->insert_action_group (shuttle_style_actions);
+	uiManager->insert_action_group (shuttle_unit_actions);
 
-	shuttle_style_menu.items().push_back (MenuElem (_("Sprung"), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour),
-								   Sprung)));
-	shuttle_style_menu.items().push_back (MenuElem (_("Wheel"), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour),
-								  Wheel)));
-
+	shuttle_style_menu = uiManager.get_widget ('/ShuttleStyle');
+	shuttle_unit_menu = uiManager.get_widget ('/ShuttleUnits');
+	
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
 

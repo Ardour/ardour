@@ -124,10 +124,10 @@ Panner2d::reset (uint32_t n_inputs)
 }
 
 void
-Panner2d::on_size_allocate (GtkAllocation *alloc)
+Panner2d::on_size_allocate (Gtk::Allocation alloc)
 {
-	width = alloc->width;
-	height = alloc->height;
+  	width = alloc.get_width();
+  	height = alloc.get_height();
 
 	DrawingArea::on_size_allocate (alloc);
 }
@@ -352,7 +352,7 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which, bool& is_puck) 
 	return closest;
 }		
 
-gint
+bool
 Panner2d::on_motion_notify_event (GdkEventMotion *ev)
 {
 	gint x, y;
@@ -419,7 +419,7 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 	return TRUE;
 }
 
-gint
+bool
 Panner2d::on_expose_event (GdkEventExpose *event)
 {
 	gint x, y;
@@ -427,7 +427,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 	/* redraw the background */
 
-	get_window().draw_rectangle (get_style()->get_bg_gc(get_state()),
+	get_window()->draw_rectangle (get_style()->get_bg_gc(get_state()),
 				     true,
 				     event->area.x, event->area.y,
 				     event->area.width, event->area.height);
@@ -450,7 +450,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 				fy = max (fy, -1.0f);
 				y = (gint) floor (height * fy - 4);
 				
-				get_window().draw_arc (get_style()->get_fg_gc(Gtk::STATE_NORMAL),
+				get_window()->draw_arc (get_style()->get_fg_gc(Gtk::STATE_NORMAL),
 						       true,
 						       x, y,
 						       8, 8,
@@ -480,7 +480,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 				fy = max (fy, -1.0f);
 				y = (gint) floor ((height - 8) * fy);
 
-				get_window().draw_rectangle (get_style()->get_fg_gc(GTK_STATE_ACTIVE),
+				get_window()->draw_rectangle (get_style()->get_fg_gc(Gtk::STATE_ACTIVE),
 							     true,
 							     x, y,
 							     4, 4);
@@ -491,7 +491,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	return TRUE;
 }
 
-gint
+bool
 Panner2d::on_button_press_event (GdkEventButton *ev)
 {
 	switch (ev->button) {
@@ -514,7 +514,7 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
 	return FALSE;
 }
 
-gint
+bool
 Panner2d::on_button_release_event (GdkEventButton *ev)
 {
 	switch (ev->button) {
@@ -579,8 +579,8 @@ Panner2d::show_context_menu ()
 		MenuList& items = context_menu->items();
 
 		items.push_back (CheckMenuElem (_("Bypass")));
-		bypass_menu_item = static_cast<CheckMenuItem*> (items.back());
-		bypass_menu_item->toggled.connect (mem_fun(*this, &Panner2d::toggle_bypass));
+		bypass_menu_item = static_cast<CheckMenuItem*> (&items.back());
+		bypass_menu_item->signal_toggled().connect (mem_fun(*this, &Panner2d::toggle_bypass));
 
 	} 
 

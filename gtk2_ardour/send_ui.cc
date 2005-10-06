@@ -133,7 +133,7 @@ SendUIWindow::SendUIWindow (Send& s, Session& ss)
 
 	s.GoingAway.connect (mem_fun (*this, &SendUIWindow::send_going_away));
 
-	delete_event.connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
+	signal_delete_event().connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 
 }
 

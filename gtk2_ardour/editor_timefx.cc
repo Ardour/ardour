@@ -91,7 +91,7 @@ Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
 gint
 Editor::TimeStretchDialog::update_progress ()
 {
-	progress_bar.set_percentage (request.progress);
+	progress_bar.set_fraction (request.progress/100);
 	return request.running;
 }
 
@@ -119,7 +119,7 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 		current_timestretch = new TimeStretchDialog (*this);
 	}
 
-	current_timestretch->progress_bar.set_percentage (0.0f);
+	current_timestretch->progress_bar.set_fraction (0.0f);
 	current_timestretch->first_cancel = current_timestretch->cancel_button.signal_clicked().connect (bind (mem_fun (*current_timestretch, &ArdourDialog::stop), -1));
 	current_timestretch->first_delete = current_timestretch->signal_delete_event().connect (mem_fun (*current_timestretch, &ArdourDialog::wm_close_event));
 
@@ -154,7 +154,7 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 
 	pthread_detach (thread);
 
-	sigc::connection c = Main::timeout.connect (mem_fun (current_timestretch, &TimeStretchDialog::update_progress), 100);
+	sigc::connection c = Glib::signal_timeout().connect (mem_fun (current_timestretch, &TimeStretchDialog::update_progress), 100);
 
 	while (current_timestretch->request.running) {
 		gtk_main_iteration ();

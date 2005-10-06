@@ -288,7 +288,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		std::string _group_id ;
 		
 		/* XXX why are these different? */
-		GdkColor region_color ;
+		Gdk::Color region_color ;
 		uint32_t stream_base_color ;
 		
 		/** indicates if this group is currently selected */

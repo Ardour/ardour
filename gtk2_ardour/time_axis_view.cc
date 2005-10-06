@@ -47,7 +47,8 @@
 #include "i18n.h"
 
 using namespace Gtk;
-using namespace sigc;
+/*can't use sigc namespace while we have the compose() in libs/pbd3/pbd */
+//using namespace sigc; 
 using namespace ARDOUR;
 using namespace Editing;
 
@@ -89,8 +90,8 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 	name_entry.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::name_entry_button_release));
 	name_entry.signal_button_press_event().connect (mem_fun (*this, &TimeAxisView::name_entry_button_press));
 	
-	name_entry.signal_focus_in_event()().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
-	name_entry.signal_focus_out_event()().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
+	name_entry.signal_focus_in_event().connect (sigc::ptr_fun (ARDOUR_UI::generic_focus_in_event));
+	name_entry.signal_focus_out_event().connect (sigc::ptr_fun (ARDOUR_UI::generic_focus_out_event));
 
 	Gtkmm2ext::set_size_request_to_display_given_text (name_entry, N_("gTortnam"), 10, 10); // just represents a short name
 
@@ -124,7 +125,7 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 
 	controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_ebox.add (controls_vbox);
-	controls_ebox.signal_add_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	controls_ebox.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	controls_ebox.set_flags (Gtk::CAN_FOCUS);
 
 	controls_ebox.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::controls_ebox_button_release));

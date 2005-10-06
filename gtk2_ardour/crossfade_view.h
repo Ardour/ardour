@@ -38,7 +38,7 @@ struct CrossfadeView : public TimeAxisViewItem
 		   AudioTimeAxisView&,
 		   ARDOUR::Crossfade&,
 		   double initial_samples_per_unit, 
-		   GdkColor& basic_color,
+		   Gdk::Color& basic_color,
 		   AudioRegionView& leftview,
 		   AudioRegionView& rightview);
     ~CrossfadeView ();

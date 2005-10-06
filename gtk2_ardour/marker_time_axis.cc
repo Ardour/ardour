@@ -303,31 +303,3 @@ MarkerTimeAxis::get_marked_time_axis()
 
 
 
-/**
- * Handle the closing of the renaming dialog during the rename of this item
- */
-void
-MarkerTimeAxis::finish_route_rename()
-{
-	name_prompter->hide_all ();
-	ARDOUR_UI::instance()->allow_focus (false);
-
-	if (name_prompter->status == Gtkmm2ext::Prompter::cancelled) {
-		return;
-	}
-	
-	string result;
-	name_prompter->get_result(result);
-	time_axis_name = result ;
-	editor.route_name_changed(this) ;
-	label_view() ;
-	delete name_prompter ;
-	name_prompter = 0 ;
-}
-
-
-
-
-
-
-

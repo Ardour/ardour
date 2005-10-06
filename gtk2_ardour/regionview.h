@@ -51,7 +51,7 @@ class AudioRegionView : public TimeAxisViewItem
 		     ARDOUR::AudioRegion&,
 		     double initial_samples_per_unit,
 		     double amplitude_above_axis,
-		     GdkColor& base_color,
+		     Gdk::Color& base_color,
 		     bool wait_for_waves);
     ~AudioRegionView ();
 
@@ -175,7 +175,7 @@ class AudioRegionView : public TimeAxisViewItem
     void store_flags ();
 
     void set_colors ();
-    void compute_colors (GdkColor&);
+    void compute_colors (Gdk::Color&);
     void set_frame_color ();
     void reset_width_dependent_items (double pixel_width);
     void set_waveview_data_src();

@@ -103,9 +103,9 @@ Editor::write_a_region ()
 
 	FileSelection file_selector;
 
-	file_selector.get_selection_entry()->activate.connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
-	file_selector.get_cancel_button()-.signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), -1));
-	file_selector.get_ok_button()-.signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
+	file_selector.get_selection_entry()->signal_activate().connect (sigc::bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
+	file_selector.get_cancel_button()->signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), -1));
+	file_selector.get_ok_button()->signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
 	file_selector.signal_delete_event().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop_on_delete), -1));
 
 	file_selector.show_all();

@@ -120,13 +120,6 @@ class MarkerTimeAxis : public VisualTimeAxis
 		TimeAxisView* get_marked_time_axis() ;
 
 
-	protected:
-	
-		/**
-		 * Handle the closing of the renaming dialog during the rename of this item
-		 */
-		virtual void finish_route_rename() ;
-
 	private:
 	
 		/**

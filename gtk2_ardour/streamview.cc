@@ -22,7 +22,7 @@
 #include "ardour_ui.h"
 #include "crossfade_view.h"
 #include "rgb_macros.h"
-#include "extra_bind.h"
+//#include "extra_bind.h"
 #include "gui_thread.h"
 
 using namespace ARDOUR;
@@ -496,7 +496,7 @@ StreamView::diskstream_changed (void *src_ignored)
 }
 
 void
-StreamView::apply_color (GdkColor& color, ColorTarget target)
+StreamView::apply_color (Gdk::Color& color, ColorTarget target)
 
 {
 	list<AudioRegionView *>::iterator i;

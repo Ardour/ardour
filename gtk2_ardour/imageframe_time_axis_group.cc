@@ -166,7 +166,7 @@ ImageFrameTimeAxisGroup::set_item_samples_per_units(gdouble spp)
  * @param color the new base color
  */
 void
-ImageFrameTimeAxisGroup::apply_item_color(GdkColor& color)
+ImageFrameTimeAxisGroup::apply_item_color(Gdk::Color& color)
 {
 	region_color = color ;
 	for(ImageFrameViewList::const_iterator citer = imageframe_views.begin(); citer != imageframe_views.end(); citer++)
@@ -439,7 +439,7 @@ ImageFrameTimeAxisGroup::remove_this_group(void* src)
 	   defer to idle loop, otherwise we'll delete this object
 	   while we're still inside this function ...
 	*/
-	Gtk::Main::idle.connect(bind(mem_fun(&ImageFrameTimeAxisGroup::idle_remove_this_group), this, src));
+  	Glib::signal_idle().connect(bind(ptr_fun(&ImageFrameTimeAxisGroup::idle_remove_this_group), this, src));
 }
 
 /**

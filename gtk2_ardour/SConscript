@@ -76,7 +76,6 @@ automation_pan_line.cc
 curvetest.cc
 editor_scrub.cc
 ghostregion.cc
-gtkscrolledwindow.c
 imageframe_time_axis.cc
 imageframe_time_axis_view.cc
 imageframe_view.cc

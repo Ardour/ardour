@@ -59,7 +59,7 @@ AudioRegionView::AudioRegionView (GnomeCanvasGroup *parent, AudioTimeAxisView &t
 				  AudioRegion& r, 
 				  double spu, 
 				  double amplitude_above_axis,
-				  GdkColor& basic_color,
+				  Gdk::Color& basic_color,
 				  bool wfw)
 
 	: TimeAxisViewItem (r.name(), parent, tv, spu, basic_color, r.position(), r.length(),
@@ -817,7 +817,7 @@ AudioRegionView::set_amplitude_above_axis (gdouble spp)
 }
 
 void
-AudioRegionView::compute_colors (GdkColor& basic_color)
+AudioRegionView::compute_colors (Gdk::Color& basic_color)
 {
 	TimeAxisViewItem::compute_colors (basic_color);
 	uint32_t r, g, b, a;
