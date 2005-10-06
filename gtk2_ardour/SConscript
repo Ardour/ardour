@@ -20,28 +20,29 @@ gtkardour.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 gtkardour.Append(PACKAGE=domain)
 gtkardour.Append(POTFILE=domain + '.pot')
 
-gtkardour.Merge ( [libraries['ardour'],
-                   libraries['gtkmm2ext'],
-                   libraries['midi++2'],
-                   libraries['pbd3'],
-                   libraries['gtkmm2'],
-                   libraries['sigc2'],
-                   libraries['libgnomecanvasmm'],
-                   libraries['sysmidi'],
-                   libraries['sndfile'],
-                   libraries['lrdf'],
-                   libraries['glibmm2'],
-                   libraries['pangomm'],
-                   libraries['atkmm'],
-                   libraries['gdkmm2'],
-                   libraries['gtk2'],
-                   libraries['libgnomecanvas2'],
-                   libraries['xml'],
-                   libraries['soundtouch'],
-                   libraries['raptor'],
-                   libraries['samplerate'],
-                   libraries['jack']]
-              )
+gtkardour.Merge ([
+    libraries['ardour'],
+    libraries['gtkmm2ext'],
+    libraries['midi++2'],
+    libraries['pbd3'],
+    libraries['gtkmm2'],
+    libraries['libgnomecanvasmm'],
+    libraries['sysmidi'],
+    libraries['sndfile'],
+    libraries['lrdf'],
+    libraries['glibmm2'],
+    libraries['pangomm'],
+    libraries['atkmm'],
+    libraries['gdkmm2'],
+    libraries['sigc2'],
+    libraries['gtk2'],
+    libraries['libgnomecanvas2'],
+    libraries['xml'],
+    libraries['soundtouch'],
+    libraries['raptor'],
+    libraries['samplerate'],
+    libraries['jack']
+])
 
 if gtkardour['VST']:
     gtkardour.Merge ([ libraries['fst']])

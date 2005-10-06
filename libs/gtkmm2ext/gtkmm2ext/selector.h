@@ -55,13 +55,21 @@ public:
 		tview.columns_autosize ();
 	}
 
+	struct Result {
+	    Gtk::TreeView& view;
+	    Glib::RefPtr<Gtk::TreeSelection> selection;
+
+	    Result (Gtk::TreeView& v, Glib::RefPtr<Gtk::TreeSelection> sel)
+		    : view (v), selection (sel) {}
+	};
+
 	/* selection is activated via a double click, choice via
 	   a single click.
 	*/
-	sigc::signal<void,Gtk::TreeView&, Glib::RefPtr<Gtk::TreeSelection> > selection_made;
-	sigc::signal<void,Gtk::TreeView&, Glib::RefPtr<Gtk::TreeSelection> > choice_made;
-	sigc::signal<void,Gtk::TreeView&, Glib::RefPtr<Gtk::TreeSelection> > shift_made;
-	sigc::signal<void,Gtk::TreeView&, Glib::RefPtr<Gtk::TreeSelection> > control_made;
+	sigc::signal<void,Result*> selection_made;
+	sigc::signal<void,Result*> choice_made;
+	sigc::signal<void,Result*> shift_made;
+	sigc::signal<void,Result*> control_made;
 
 	sigc::signal<void> update_contents;
 

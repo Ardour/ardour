@@ -30,6 +30,7 @@
 
 #include <gtkmm.h>
 #include <pbd/error.h>
+#include <pbd/compose.h>
 #include <pbd/basename.h>
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
@@ -37,7 +38,6 @@
 #include <gtkmm2ext/pix.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/popup.h>
@@ -816,9 +816,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	  follow_button (_("follow\nPH")),
 	  auditioning_alert_button (_("AUDITIONING")),
 	  solo_alert_button (_("SOLO")),
-
-	  session_selector (1, 0),
-
 	  shown_flag (false)
 
 {
@@ -861,25 +858,25 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	last_configure_time.tv_sec = 0;
 	last_configure_time.tv_usec = 0;
 
+	ui_manager = UIManager::create ();
+
 	shuttle_grabbed = false;
 	shuttle_fract = 0.0;
 
 	set_shuttle_units (Percentage);
 	set_shuttle_behaviour (Sprung);
 
-	Glib::RefPtr<ActionGroup> shuttle_style_actions = ActionGroup::create ();
-	Glib::RefPtr<ActionGroup> shuttle_unit_actions = ActionGroup::create ();
+	Glib::RefPtr<ActionGroup> shuttle_actions = ActionGroup::create ("ShuttleActions");
 	
-	shuttle_unit_actions->add (Action::create (_("Percentage")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Percentage));
-	shuttle_unit_actions->add (Action::create (_("Semitones")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Semitones));
-	shuttle_style_actions->add (Action::create (_("Sprung")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Sprung));
-	shuttle_style_actions->add (Action::create (_("Wheel")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Wheel));
+	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Percentage));
+	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Semitones));
+	shuttle_actions->add (Action::create (X_("SetShuttleActionSprung"), _("Sprung")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Sprung));
+	shuttle_actions->add (Action::create (X_("SetShuttleActionWheel"), _("Wheel")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Wheel));
 	
-	uiManager->insert_action_group (shuttle_style_actions);
-	uiManager->insert_action_group (shuttle_unit_actions);
+	ui_manager->insert_action_group (shuttle_actions);
 
-	shuttle_style_menu = uiManager.get_widget ('/ShuttleStyle');
-	shuttle_unit_menu = uiManager.get_widget ('/ShuttleUnits');
+	shuttle_style_menu = dynamic_cast<Menu*> (ui_manager->get_widget ("ShuttleStylePopup"));
+	shuttle_unit_menu = dynamic_cast<Menu*> (ui_manager->get_widget ("ShuttleUnitPopup"));
 	
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
@@ -903,7 +900,7 @@ ARDOUR_UI::cannot_record_no_input (DiskStream* ds)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::cannot_record_no_input), ds));
 	
-	string msg = compose (_("\
+	string msg = PBD::compose (_("\
 You cannot record-enable\n\
 track %1\n\
 because it has no input connections.\n\
@@ -957,7 +954,7 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	/* start the time-of-day-clock */
 	
 	update_wall_clock ();
-	Main::timeout.connect (mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
+	Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
 
 	update_disk_space ();
 	update_cpu_load ();
@@ -1022,8 +1019,7 @@ ARDOUR_UI::configure_handler (GdkEventConfigure* conf)
 	if (have_configure_timeout) {
 		gettimeofday (&last_configure_time, 0);
 	} else {
-		TimeoutSig t;
-		t.connect (mem_fun(*this, &ARDOUR_UI::configure_timeout), 100);
+		Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::configure_timeout), 100);
 		have_configure_timeout = true;
 	}
 		
@@ -1067,7 +1063,7 @@ ARDOUR_UI::startup ()
 	   with the scheduling of the audio thread.
 	*/
 
-	Gtk::Main::idle.connect (mem_fun(*this, &ARDOUR_UI::start_engine));
+	Glib::signal_idle().connect (mem_fun(*this, &ARDOUR_UI::start_engine));
 }
 
 void
@@ -1108,17 +1104,17 @@ ARDOUR_UI::ask_about_saving_session (string what)
 
 	string msg;
 
-	msg = compose(_("Save and %1"), what);
+	msg = PBD::compose(_("Save and %1"), what);
 	
 	Gtk::Button save_button (msg);
 	save_button.set_name ("EditorGTKButton");
 
-	msg = compose(_("Just %1"), what);
+	msg = PBD::compose(_("Just %1"), what);
 
 	Gtk::Button nosave_button (msg);
 	nosave_button.set_name ("EditorGTKButton");
 
-	msg = compose(_("Don't %1"), what);
+	msg = PBD::compose(_("Don't %1"), what);
 
 	Gtk::Button noquit_button (msg);
 	noquit_button.set_name ("EditorGTKButton");
@@ -1131,7 +1127,7 @@ ARDOUR_UI::ask_about_saving_session (string what)
 	} else {
 		type = _("snapshot");
 	}
-	prompt = compose(_("The %1\n\"%2\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"), 
+	prompt = PBD::compose(_("The %1\n\"%2\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"), 
 			 type, session->snap_name());
 	
 	prompt_label.set_text (prompt);
@@ -1158,9 +1154,6 @@ ARDOUR_UI::ask_about_saving_session (string what)
 	window.set_modal (true);
 	window.add (packer);
 	window.show_all ();
-
-	window.realize();
-	window.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 	window.set_keyboard_input (true);
 
 	save_the_session = 0;
@@ -1644,49 +1637,42 @@ ARDOUR_UI::toggle_some_session_state (ToggleButton& button,
 gint
 ARDOUR_UI::session_menu (GdkEventButton *ev)
 {
-	session_popup_menu->popup (0, 0, 0, 0);
+	session_popup_menu->popup (0, 0);
 	return TRUE;
 }
 
 void
 ARDOUR_UI::redisplay_recent_sessions ()
 {
-	using namespace Gtkmm2ext;
-	using namespace Gtk::CTree_Helpers;
-
 	vector<string *> *sessions;
 	vector<string *>::iterator i;
 	RecentSessionsSorter cmp;
-
-	/* ---------------------------------------- */
-	/* XXX MAKE ME A FUNCTION (no CTree::clear() in gtkmm 1.2) */
-
-	gtk_ctree_remove_node (session_selector.gobj(), NULL);
-	/* ---------------------------------------- */
-
+	
+	recent_session_display.set_model (Glib::RefPtr<TreeModel>(0));
+	recent_session_model->clear ();
 
 	RecentSessions rs;
 	ARDOUR::read_recent_sessions (rs);
 
 	if (rs.empty()) {
-		session_selector.thaw();
+		recent_session_display.set_model (recent_session_model);
 		return;
 	}
+
 	/* sort them alphabetically */
-	sort(rs.begin(), rs.end(), cmp);
+	sort (rs.begin(), rs.end(), cmp);
 	sessions = new vector<string*>;
+
 	for (RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
 		sessions->push_back (new string ((*i).second));
 	}
-
-	session_selector.freeze();
 
 	for (i = sessions->begin(); i != sessions->end(); ++i) {
 
 		vector<string*>* states;
 		vector<const gchar*> item;
 		string fullpath = *(*i);
-
+		
 		/* remove any trailing / */
 
 		if (fullpath[fullpath.length()-1] == '/') {
@@ -1695,49 +1681,27 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 		/* now get available states for this session */
 
-		if ((states = Session::possible_states(fullpath)) == 0) {
+		if ((states = Session::possible_states (fullpath)) == 0) {
 			/* no state file? */
 			continue;
 		}
 
-		/* OK, try to add entries for this session */
+		TreeModel::Row row = *(recent_session_model->append());
 
+		row[recent_session_columns.visible_name] = PBD::basename (fullpath);
+		row[recent_session_columns.fullpath] = fullpath;
 
-		/* add the parent */
+		if (states->size() > 1) {
 
-		item.clear ();
-		string basen = PBD::basename (fullpath);
-		item.push_back (basen.c_str());
-		session_selector.rows().push_back (Element (item));
-
-		session_selector.rows().back().set_data (new string (fullpath), deferred_delete<string>);
-
-		if (states->size() == 1) {
-
-			/* only 1 state, show it at the top level */
-
-			session_selector.rows().back().set_leaf (true);
-
-		} else {
-
-			session_selector.rows().back().set_leaf (false);
-
-			vector<string *>::iterator i2;
-			
 			/* add the children */
 			
-			for (i2 = states->begin(); i2 != states->end(); ++i2) {
+			for (vector<string*>::iterator i2 = states->begin(); i2 != states->end(); ++i2) {
 				
-				string statename = *(*i2);
-				
-				item.clear ();
-				item.push_back (statename.c_str());
-				
-				session_selector.rows().back().subtree().push_back (Element (item));
-				session_selector.rows().back().subtree().back().set_data (new string (statename),
-											  deferred_delete<string>);
-				session_selector.rows().back().subtree().back().set_leaf (true);
-				
+				TreeModel::Row child_row = *(recent_session_model->append (row.children()));
+
+				child_row[recent_session_columns.visible_name] = **i2;
+				child_row[recent_session_columns.fullpath] = fullpath;
+
 				delete *i2;
 			}
 		}
@@ -1745,54 +1709,8 @@ ARDOUR_UI::redisplay_recent_sessions ()
 		delete states;
 	}
 
-	session_selector.thaw();
+	recent_session_display.set_model (recent_session_model);
 	delete sessions;
-}
-
-void
-ARDOUR_UI::session_selection (Gtk::CTree_Helpers::Row row, gint column)
-{
-	using namespace Gtk::CTree_Helpers;
-
-	string session_name;
-	string session_path;
-	string session_state;
-
-	if (!row.is_leaf()) {
-		row.expand();
-		return;
-	}
-
-	string *stp = static_cast<string *> (row.get_data());
-
-	if ((*stp)[0] != '/' && (*stp)[0] != '.') {
-		
-		/* its a state file node, so get the parent for the session information,
-		   and combine with the state file name.
-		*/
-		
-		string *spp = static_cast<string *> (row.get_parent().get_data());
-		
-		session_name = *spp;
-		session_path = *spp;
-		session_state = *stp;
-		
-	} else {
-		
-		/* its a session directory node, so just get the session path,
-		   and use "default" to load the state.
-		*/
-		
-		string *spp = static_cast<string *> (row.get_data());
-		
-		session_name = *spp;
-		session_path = *spp;
-		session_state = PBD::basename (*spp);
-	}
-
-	session_selector_window->hide ();
-	_session_is_new = false;
-	load_session (session_path, session_state);
 }
 
 void
@@ -1800,11 +1718,11 @@ ARDOUR_UI::build_session_selector ()
 {
 	session_selector_window = new ArdourDialog ("session selector");
 	
-	Gtk::VBox *vpacker = new Gtk::VBox;
-	Gtk::ScrolledWindow *scroller = new Gtk::ScrolledWindow;
-	Gtk::HBox *button_packer = new Gtk::HBox;
-	Gtk::Button *cancel_button = new Gtk::Button (_("cancel"));
-	Gtk::Button *rescan_button = new Gtk::Button (_("rescan"));
+	Gtk::VBox *vpacker = manage (new Gtk::VBox);
+	Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow);
+	Gtk::HBox *button_packer = manage (new Gtk::HBox);
+	Gtk::Button *cancel_button = manage (new Gtk::Button (_("cancel")));
+	Gtk::Button *rescan_button = manage (new Gtk::Button (_("rescan")));
 
 	button_packer->pack_start (*rescan_button);
 	button_packer->pack_start (*cancel_button);
@@ -1812,16 +1730,55 @@ ARDOUR_UI::build_session_selector ()
 	vpacker->pack_start (*scroller);
 	vpacker->pack_start (*button_packer, false, false);
 
-	scroller->add (session_selector);
-	scroller->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	recent_session_model = TreeStore::create (recent_session_columns);
+	recent_session_display.set_model (recent_session_model);
+	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
+	recent_session_display.set_headers_visible (false);
+
+	scroller->add (recent_session_display);
+	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	session_selector_window->add (*vpacker);
 	session_selector_window->set_name ("SessionSelectorWindow");
 	session_selector_window->set_size_request (200, 400);
+}
 
-	session_selector_window->signal_delete_event().connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*>(session_selector_window)));
-	cancel_button-.signal_clicked().connect (bind (mem_fun(*this, &ARDOUR_UI::hide_dialog), session_selector_window));
-	session_selector.tree_select_row.connect (mem_fun(*this, &ARDOUR_UI::session_selection));
+void
+ARDOUR_UI::open_recent_session ()
+{
+	/* popup selector window */
+
+	if (session_selector_window == 0) {
+		build_session_selector ();
+	}
+
+	redisplay_recent_sessions ();
+
+	session_selector_window->run ();
+
+
+	switch (session_selector_window->run_status()) {
+	case 0:
+		break;
+
+	default:
+		return;
+	}
+
+	Gtk::TreeModel::iterator i = recent_session_display.get_selection()->get_selected();
+
+	if (i == recent_session_model->children().end()) {
+		return;
+	}
+	
+	Glib::ustring path = (*i)[recent_session_columns.fullpath];
+	Glib::ustring state = (*i)[recent_session_columns.visible_name];
+
+	session_selector_window->response (RESPONSE_ACCEPT);
+	_session_is_new = false;
+
+	load_session (path, state);
+
 }
 
 void
@@ -1839,28 +1796,55 @@ ARDOUR_UI::fs_delete_event (GdkEventAny* ev, Gtk::FileSelection* fs)
 	return 1;
 }
 
+bool
+ARDOUR_UI::filter_ardour_session_dirs (const FileFilter::Info& info) 
+{
+	struct stat statbuf;
+	
+	if (stat (info.filename.c_str(), &statbuf) != 0) {
+		return false;
+	}
+
+	if (!S_ISDIR(statbuf.st_mode)) {
+		return false;
+	}
+
+	string session_file = info.filename;
+	session_file += '/';
+	session_file += PBD::basename (info.filename);
+	session_file += ".ardour";
+	
+	if (stat (session_file.c_str(), &statbuf) != 0) {
+		return false;
+	}
+
+	return S_ISREG (statbuf.st_mode);
+}
+
 void
 ARDOUR_UI::open_session ()
 {
 	/* popup selector window */
 
 	if (open_session_selector == 0) {
-		open_session_selector = new Gtk::FileSelection(_("open session"));
-		open_session_selector->get_ok_button()-.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::open_ok_clicked));
-		open_session_selector->get_cancel_button()-.signal_clicked().connect (bind (mem_fun(*this, &ARDOUR_UI::fs_cancel_clicked), open_session_selector));
-		open_session_selector->signal_delete_event().connect (bind (mem_fun(*this, &ARDOUR_UI::fs_delete_event), open_session_selector));
+		open_session_selector = new Gtk::FileChooserDialog (_("open session"), FILE_CHOOSER_ACTION_OPEN);
+		open_session_selector->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		open_session_selector->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+		
+		FileFilter filter_ardour;
+		filter_ardour.set_name (_("Ardour sessions"));
+		filter_ardour.add_custom (FILE_FILTER_FILENAME, mem_fun (*this, &ARDOUR_UI::filter_ardour_session_dirs));
+
+		open_session_selector->add_filter (filter_ardour);
+  	}
+
+	switch (open_session_selector->run ()) {
+	case RESPONSE_OK:
+		break;
+	default:
+		return;
 	}
 
-	open_session_selector->show_all ();
-	allow_focus (true);
-
-	/* wait for selection */
-}
-
-void
-ARDOUR_UI::open_ok_clicked ()
-{
-	open_session_selector->hide_all();
 	string session_path = open_session_selector->get_filename();
 	string path, name;
 	bool isnew;
@@ -1871,31 +1855,8 @@ ARDOUR_UI::open_ok_clicked ()
 			load_session (path, name);
 		}
 	}
-
-	open_session_selector->get_selection_entry()->set_text("");
-	
-	/* XXX hack hack hack */
-
-	GtkCList* clist = (GtkCList*) open_session_selector->gobj()->file_list;
-	gtk_clist_unselect_all (clist);
-
-	allow_focus(false);
 }
 
-void
-ARDOUR_UI::open_recent_session ()
-{
-	/* popup selector window */
-
-	if (session_selector_window == 0) {
-		build_session_selector ();
-	}
-
-	redisplay_recent_sessions ();
-	session_selector_window->show_all ();
-
-	/* wait for selection */
-}
 
 void
 ARDOUR_UI::session_add_midi_track ()
@@ -2365,7 +2326,7 @@ ARDOUR_UI::start_engine ()
 		   solution, its what we have.
 		*/
 
-		Main::timeout.connect (mem_fun(*this, &ARDOUR_UI::make_session_clean), 1000);
+		Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::make_session_clean), 1000);
 	}
 
 	return FALSE;
@@ -2543,6 +2504,7 @@ void
 ARDOUR_UI::snapshot_session ()
 {
 	ArdourPrompter prompter (true);
+	string snapname;
 	string now;
 	time_t n;
 
@@ -2553,18 +2515,17 @@ ARDOUR_UI::snapshot_session ()
 	prompter.set_name ("Prompter");
 	prompter.set_prompt (_("Name for snapshot"));
 	prompter.set_initial_text (now);
-	prompter.done.connect (Gtk::Main::quit.slot());
-	prompter.show_all ();
-
-	Gtk::Main::run ();
-
-	if (prompter.status == Gtkmm2ext::Prompter::entered) {
-		string snapname;
-		
+	
+	switch (prompter.run()) {
+	case RESPONSE_ACCEPT:
 		prompter.get_result (snapname);
 		if (snapname.length()){
 			save_state (snapname);
 		}
+		break;
+
+	default:
+		break;
 	}
 }
 
@@ -2639,21 +2600,21 @@ ARDOUR_UI::rec_enable_button_blink (bool onoff, DiskStream *dstream, Widget *w)
 		switch (rs) {
 		case Session::Disabled:
 		case Session::Enabled:
-			if (w->get_state() != GTK_STATE_SELECTED) {
-				w->set_state (GTK_STATE_SELECTED);
+			if (w->get_state() != STATE_SELECTED) {
+				w->set_state (STATE_SELECTED);
 			}
 			break;
 
 		case Session::Recording:
-			if (w->get_state() != GTK_STATE_ACTIVE) {
-				w->set_state (GTK_STATE_ACTIVE);
+			if (w->get_state() != STATE_ACTIVE) {
+				w->set_state (STATE_ACTIVE);
 			}
 			break;
 		}
 
 	} else {
-		if (w->get_state() != Gtk::STATE_NORMAL) {
-			w->set_state (Gtk::STATE_NORMAL);
+		if (w->get_state() != STATE_NORMAL) {
+			w->set_state (STATE_NORMAL);
 		}
 	}
 }
@@ -2668,19 +2629,19 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	switch (session->record_status()) {
 	case Session::Enabled:
 		if (onoff) {
-			rec_button.set_state (GTK_STATE_ACTIVE);
+			rec_button.set_state (STATE_ACTIVE);
 		} else {
-			rec_button.set_state (Gtk::STATE_NORMAL);
+			rec_button.set_state (STATE_NORMAL);
 		}
 		break;
 
 	case Session::Recording:
-		rec_button.set_state (GTK_STATE_ACTIVE);
+		rec_button.set_state (STATE_ACTIVE);
 		break;
 
 	default:
 		rec_button.set_active (false);
-		rec_button.set_state (Gtk::STATE_NORMAL);
+		rec_button.set_state (STATE_NORMAL);
 		break;
 	}
 }
@@ -2718,23 +2679,23 @@ ARDOUR_UI::save_template ()
 
 {
 	ArdourPrompter prompter (true);
-	prompter.set_name ("Prompter");
+	string name;
+
+	prompter.set_name (X_("Prompter"));
 	prompter.set_prompt (_("Name for mix template:"));
 	prompter.set_initial_text(session->name() + _("-template"));
-
-	prompter.done.connect(Gtk::Main::quit.slot());
-	prompter.show_all();
 	
-	Gtk::Main::run();
-	
-	if (prompter.status == Gtkmm2ext::Prompter::entered) {
-		string name;
-
+	switch (prompter.run()) {
+	case RESPONSE_ACCEPT:
 		prompter.get_result (name);
-
+		
 		if (name.length()) {
 			session->save_template (name);
 		}
+		break;
+
+	default:
+		break;
 	}
 }
 
@@ -2748,6 +2709,9 @@ ARDOUR_UI::new_session (bool startup, string predetermined_path)
 
 	new_session_window->run ();
 
+#if 0
+	// GTK2FIX
+	
 	/* write favorites either way */
 	Session::FavoriteDirs favs;
 	new_session_window->file_selector.get_favorites (favs);
@@ -2756,14 +2720,15 @@ ARDOUR_UI::new_session (bool startup, string predetermined_path)
 	if (new_session_window->run_status()) {
 		return;
 	}
+#endif
 
-	string session_path = new_session_window->file_selector.get_path ();
+	string session_path = new_session_window->file_selector.get_filename ();
 	string session_name = PBD::basename (session_path);
 
 	// Check that it doesn't already exist.
 	access(session_path.c_str(), R_OK); 
 	if (errno != ENOENT){
-		error << compose(_("Session %1 already exists at %2"), session_name, session_path) << endmsg;
+		error << PBD::compose(_("Session %1 already exists at %2"), session_name, session_path) << endmsg;
 		return;
 	}
 
@@ -2847,7 +2812,7 @@ This prevents the session from being loaded."));
 
 	catch (...) {
 
-		error << compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
+		error << PBD::compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
 		return -1;
 	}
 
@@ -2900,7 +2865,7 @@ ARDOUR_UI::build_session (string path, string snap_name,
 
 	catch (...) {
 
-		error << compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
+		error << PBD::compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
 		return -1;
 	}
 
@@ -2932,7 +2897,7 @@ ARDOUR_UI::show ()
 	}
 	
 	if (about) {
-		about->get_window().raise ();
+		about->present ();
 	}
 }
 
@@ -2940,16 +2905,9 @@ void
 ARDOUR_UI::show_splash ()
 {
 	if (about == 0) {
-		about = new About(this);
-		about->show_all();
-		about->show_sub (true);
-		about->get_window().raise ();
+		about = new About();
 	}
-	else {
-		about->get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
-		about->show_all ();
-		about->get_window().raise ();
-	}
+	about->present();
 }
 
 void
@@ -2979,58 +2937,68 @@ require some unused files to continue to exist."));
 
 	ArdourDialog results ("cleanup results");
 	
-	const gchar* list_titles[] = { 
-		list_title,
-		0
+	struct CleanupResultsModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    CleanupResultsModelColumns() { 
+		    add (visible_name);
+		    add (fullpath);
+	    }
+	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
+	    Gtk::TreeModelColumn<Glib::ustring> fullpath;
 	};
+
 	
-	Gtk::CList list (internationalize (list_titles));
+	Glib::RefPtr<Gtk::ListStore> results_model;
+	CleanupResultsModelColumns results_columns;
+	Gtk::TreeView results_display;
+	
+	results_model = ListStore::create (results_columns);
+	results_display.set_model (results_model);
+	results_display.append_column (list_title, results_columns.visible_name);
+	results_display.set_headers_visible (true);
+
 	Gtk::ScrolledWindow list_scroller;
 	Gtk::Label txt;
 	Gtk::Button ok_button (_("OK"));
 	Gtk::VBox vpacker;
-	const char* rowtext[1];
-	
-	list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	
 	vpacker.set_border_width (10);
 	vpacker.set_spacing (10);
 
 	if (rep.space < 1048576.0f) {
 		if (removed > 1) {
-			txt.set_text (compose (msg, removed, _("files"), (float) rep.space / 1024.0f, "kilo"));
+			txt.set_text (PBD::compose (msg, removed, _("files"), (float) rep.space / 1024.0f, "kilo"));
 		} else {
-			txt.set_text (compose (msg, removed, _("file"), (float) rep.space / 1024.0f, "kilo"));
+			txt.set_text (PBD::compose (msg, removed, _("file"), (float) rep.space / 1024.0f, "kilo"));
 		}
 	} else {
 		if (removed > 1) {
-			txt.set_text (compose (msg, removed, _("files"), (float) rep.space / 1048576.0f, "mega"));
+			txt.set_text (PBD::compose (msg, removed, _("files"), (float) rep.space / 1048576.0f, "mega"));
 		} else {
-			txt.set_text (compose (msg, removed, _("file"), (float) rep.space / 1048576.0f, "mega"));
+			txt.set_text (PBD::compose (msg, removed, _("file"), (float) rep.space / 1048576.0f, "mega"));
 		}
 	}
 
 	vpacker.pack_start (txt, false, false);
 	
 	for (vector<string>::iterator i = rep.paths.begin(); i != rep.paths.end(); ++i) {
-		rowtext[0] = (*i).c_str();
-		list.rows().push_back (rowtext);
+		TreeModel::Row row = *(results_model->append());
+		row[results_columns.visible_name] = *i;
+		row[results_columns.fullpath] = *i;
 	}
 	
-	list_scroller.add_with_viewport (list);
+	list_scroller.add (results_display);
 	list_scroller.set_size_request (-1, 250);
+	list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	
 	vpacker.pack_start (list_scroller, true, true);
 	vpacker.pack_start (ok_button, false, false);
-	
-	ok_button.signal_clicked().connect (Main::quit.slot ());
-	results.Hiding.connect (Main::quit.slot ());
 	
 	results.add (vpacker);
 	
 	results.set_position (Gtk::WIN_POS_MOUSE);
 	results.set_title (_("ardour: cleanup"));
 	results.set_modal (true);
+
 	results.run ();
 }
 
@@ -3068,15 +3036,16 @@ Unused audio files will be moved to a \"dead sounds\" location."));
 	checker.set_title (_("ardour cleanup"));
 	checker.set_wmclass (_("ardour_cleanup"), "Ardour");
 	checker.set_position (Gtk::WIN_POS_MOUSE);
-	checker.realize ();
-	checker.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 
 	ok_button.signal_clicked().connect (bind (mem_fun (checker, &ArdourDialog::stop), 1));
 	cancel_button.signal_clicked().connect (bind (mem_fun (checker, &ArdourDialog::stop), 0));
 
 	checker.run ();
 
-	if (checker.run_status() != 1) {
+	switch (checker.run_status()) {
+	case 0:
+		break;
+	default:
 		return;
 	}
 
@@ -3320,14 +3289,12 @@ what you would like to do.\n"));
 	cancel_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
 
 	dialog.add (vpacker);
-	dialog.set_position (GTK_WIN_POS_CENTER);
+	dialog.set_position (WIN_POS_CENTER);
 	dialog.show_all ();
-	dialog.realize();
-	dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
 	
 	dialog.run ();
 
-	if (dialog.run_status () == 0) {
+	if (dialog.run_status () != 0) {
 		return 1;
 	}
 

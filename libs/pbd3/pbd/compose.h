@@ -197,8 +197,8 @@ namespace StringPrivate
 }
 
 // now for the real thing(s)
-//namespace String 
-//{
+namespace PBD
+{
   // a series of functions which accept a format string on the form "text %1
   // more %2 less %3" and a number of templated parameters and spits out the
   // composited string
@@ -387,7 +387,7 @@ namespace StringPrivate
       .arg(o10).arg(o11).arg(o12).arg(o13).arg(o14).arg(o15);
     return c.str();
   }
-//}
+}
 
 
 #endif // STRING_COMPOSE_H

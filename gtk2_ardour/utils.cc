@@ -518,3 +518,9 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 	
 	return (uint32_t) RGBA_TO_UINT(r,g,b,a);
 }
+
+void
+decorate (Gtk::Window& w, Gdk::WMDecoration d)
+{
+	w.get_window().set_decorations (d);
+}

@@ -37,8 +37,8 @@
 #include <ardour/diskstream.h>
 
 #include "i18n.h"
-
-using namespace sigc;
+/* there is a compose() here.. */
+//using namespace sigc;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
@@ -391,14 +391,14 @@ RouteUI::update_rec_display ()
 		switch (_session.record_status ()) {
 		case Session::Disabled:
 		case Session::Enabled:
-			if (rec_enable_button->get_state() != GTK_STATE_ACTIVE) {
-				rec_enable_button->set_state (GTK_STATE_ACTIVE);
+		        if (rec_enable_button->get_state() != Gtk::STATE_ACTIVE) {
+		    		rec_enable_button->set_state (Gtk::STATE_ACTIVE);
 			}
 			break;
 
 		case Session::Recording:
-			if (rec_enable_button->get_state() != GTK_STATE_SELECTED) {
-				rec_enable_button->set_state (GTK_STATE_SELECTED);
+		        if (rec_enable_button->get_state() != Gtk::STATE_SELECTED) {
+		    		rec_enable_button->set_state (Gtk::STATE_SELECTED);
 			}
 			break;
 		}
@@ -422,7 +422,7 @@ RouteUI::build_solo_menu (void)
 
 	check = new CheckMenuItem(_("Solo-safe"));
 	check->set_active (_route.solo_safe());
-	check->toggled.connect (bind (mem_fun (*this, &RouteUI::toggle_solo_safe), check));
+	check->signal_toggled().connect (bind (mem_fun (*this, &RouteUI::toggle_solo_safe), check));
 	_route.solo_safe_changed.connect(bind (mem_fun (*this, &RouteUI::solo_safe_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
@@ -444,28 +444,28 @@ RouteUI::build_mute_menu(void)
 	
 	check = new CheckMenuItem(_("Pre Fader"));
 	init_mute_menu(PRE_FADER, check);
-	check->toggled.connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), PRE_FADER, check));
+	check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), PRE_FADER, check));
 	_route.pre_fader_changed.connect(bind (mem_fun (*this, &RouteUI::pre_fader_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
 	check = new CheckMenuItem(_("Post Fader"));
 	init_mute_menu(POST_FADER, check);
-	check->toggled.connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), POST_FADER, check));
+	check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), POST_FADER, check));
 	_route.post_fader_changed.connect(bind (mem_fun (*this, &RouteUI::post_fader_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 	
 	check = new CheckMenuItem(_("Control Outs"));
 	init_mute_menu(CONTROL_OUTS, check);
-	check->toggled.connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), CONTROL_OUTS, check));
+	check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), CONTROL_OUTS, check));
 	_route.control_outs_changed.connect(bind (mem_fun (*this, &RouteUI::control_outs_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
 	check = new CheckMenuItem(_("Main Outs"));
 	init_mute_menu(MAIN_OUTS, check);
-	check->toggled.connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MAIN_OUTS, check));
+	check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MAIN_OUTS, check));
 	_route.main_outs_changed.connect(bind (mem_fun (*this, &RouteUI::main_outs_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
@@ -565,7 +565,7 @@ bool
 RouteUI::choose_color()
 {
 	bool picked;
-	GdkColor color;
+	Gdk::Color color;
 	gdouble current[4];
 
 	current[0] = _color.get_red()  / 65535.0;
@@ -583,14 +583,14 @@ RouteUI::choose_color()
 }
 
 void
-RouteUI::set_color (Gdk_Color c)
+RouteUI::set_color (Gdk::Color c)
 {
 	char buf[64];
 	
 	_color = c;
 	
 	ensure_xml_node ();
-	snprintf (buf, sizeof (buf), "%d:%d:%d", c.red, c.green, c.blue);
+	snprintf (buf, sizeof (buf), "%d:%d:%d", c.get_red(), c.get_green(), c.get_blue());
 	xml_node->add_property ("color", buf);
 
 	 _route.gui_changed ("color", (void *) 0); /* EMIT_SIGNAL */
@@ -634,9 +634,9 @@ RouteUI::set_color_from_route ()
 	if ((prop = xml_node->property ("color")) != 0) {
 		int r, g, b;
 		sscanf (prop->value().c_str(), "%d:%d:%d", &r, &g, &b);
-		_color.red = r;
-		_color.green = g;
-		_color.blue = b;
+		_color.set_red(r);
+		_color.set_green(g);
+		_color.set_blue(b);
 		return 0;
 	} 
 	return 1;
@@ -665,7 +665,7 @@ RouteUI::remove_this_route ()
 	Gtk::Main::run ();
 
 	if (prompter.get_choice() == 0) {
-		Main::idle.connect (bind (mem_fun (&RouteUI::idle_remove_this_route), this));
+	  	Glib::signal_idle().connect (bind (mem_fun (&RouteUI::idle_remove_this_route), this));
 	}
 }
 

@@ -41,7 +41,6 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/pix.h>
 #include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/selector.h>
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 
@@ -380,8 +379,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::Label       speed_display_label;
 	Gtk::Button      shuttle_units_button;
 	Gtk::Button      shuttle_style_button;
-	Gtk::Menu        shuttle_unit_menu;
-	Gtk::Menu        shuttle_style_menu;
+	Gtk::Menu*       shuttle_unit_menu;
+	Gtk::Menu*       shuttle_style_menu;
 	ShuttleBehaviour shuttle_behaviour;
 	ShuttleUnits     shuttle_units;
 
@@ -447,26 +446,39 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	static void rate_printer (char buf[32], Gtk::Adjustment &, void *);
 
-	Gtk::Menu*            session_popup_menu;
-	Gtkmm2ext::Selector   session_selector;
-	ArdourDialog* session_selector_window;
-	
-	Gtk::FileSelection* open_session_selector;
+	Gtk::Menu*        session_popup_menu;
+
+	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    RecentSessionModelColumns() { 
+		    add (visible_name);
+		    add (fullpath);
+	    }
+	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
+	    Gtk::TreeModelColumn<Glib::ustring> fullpath;
+	};
+
+	RecentSessionModelColumns    recent_session_columns;
+	Gtk::TreeView                recent_session_display;
+	Glib::RefPtr<Gtk::TreeStore> recent_session_model;
+
+	ArdourDialog*     session_selector_window;
+	Gtk::FileChooserDialog* open_session_selector;
 	
 	void build_session_selector();
-	void session_selection (Gtk::TreeView&, Glib::RefPtr<Gtk::TreeSelection>);
+	void recent_session_selection_changed ();
+	void redisplay_recent_sessions();
+
 	struct RecentSessionsSorter {
-	  bool operator() (std::pair<string,string> a, std::pair<string,string> b) const {
-	    return cmp_nocase(a.first, b.first) == -1;
+	    bool operator() (std::pair<string,string> a, std::pair<string,string> b) const {
+		    return cmp_nocase(a.first, b.first) == -1;
 	    }
 	};
-	void redisplay_recent_sessions();
 
 	/* menu bar and associated stuff */
 
-	Gtk::MenuBar menu_bar;
-	Gtk::Fixed   menu_bar_base;
-	Gtk::HBox    menu_hbox;
+	Gtk::MenuBar* menu_bar;
+	Gtk::Fixed    menu_bar_base;
+	Gtk::HBox     menu_hbox;
 
 	void build_menu_bar ();
 	void pack_toplevel_controls();
@@ -720,6 +732,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::Menu*     jack_bufsize_menu;
 
 	int make_session_clean ();
+	bool filter_ardour_session_dirs (const Gtk::FileFilter::Info&);
+
+	Glib::RefPtr<Gtk::UIManager> ui_manager;
 };
 
 #endif /* __ardour_gui_h__ */

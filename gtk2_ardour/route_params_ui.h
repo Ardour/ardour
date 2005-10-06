@@ -23,7 +23,15 @@
 
 #include <list>
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/label.h>
+#include <gtkmm/paned.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/togglebutton.h>
+#include <gtkmm/treeview.h>
 
 #include <ardour/ardour.h>
 #include <ardour/stateful.h>
@@ -69,7 +77,6 @@ class RouteParams_UI : public ArdourDialog
 	Gtk::VBox                mixer_scroller_vpacker;
 
 	Gtk::VBox                list_vpacker;
-	Gtk::TreeView            route_select_list;
 	Gtk::Label               route_list_button_label;
 	Gtk::Button              route_list_button;
 	Gtk::ScrolledWindow      route_select_scroller;
@@ -134,6 +141,22 @@ class RouteParams_UI : public ArdourDialog
 	};
 	
 	ConfigView _current_view;
+
+
+	/* treeview */
+ 	struct RouteDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+		RouteDisplayModelColumns() {
+			add(text);
+			add(route);
+		}
+		Gtk::TreeModelColumn<Glib::ustring> text;
+		Gtk::TreeModelColumn<ARDOUR::Route*> route;
+	};
+
+	RouteDisplayModelColumns route_display_columns ;
+	Gtk::TreeView route_display;
+	Glib::RefPtr<Gtk::ListStore> route_display_model;
+
 	
 	void add_route (ARDOUR::Route*);
 
@@ -141,8 +164,8 @@ class RouteParams_UI : public ArdourDialog
 	void route_removed (ARDOUR::Route *route);
 
 
-	void route_selected (gint row, gint col, GdkEvent *ev);
-	void route_unselected (gint row, gint col, GdkEvent *ev);
+	void route_selected();
+	//void route_unselected (gint row, gint col, GdkEvent *ev);
 
 	void setup_io_frames();
 	void cleanup_io_frames();
@@ -168,7 +191,7 @@ class RouteParams_UI : public ArdourDialog
 	void update_routeinfo (ARDOUR::Route * route);
 	
 	Gtk::Menu *track_menu;
-	void show_track_menu(gint arg);
+	void show_track_menu();
 	
 	void update_title ();
 	//void unselect_all_redirects ();

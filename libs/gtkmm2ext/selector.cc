@@ -143,7 +143,8 @@ Selector::accept ()
 	Gtk::TreeModel::iterator iter = tree_sel->get_selected();
 
 	if (iter) {
-		selection_made (tview, tree_sel);
+
+		selection_made (new Result (tview, tree_sel));
 	} else {
 		cancel ();
 	}
@@ -151,13 +152,12 @@ Selector::accept ()
 
 void
 Selector::chosen ()
-
 {
 	Glib::RefPtr<Gtk::TreeSelection> tree_sel = tview.get_selection();
 	Gtk::TreeModel::iterator iter = tree_sel->get_selected();
-
+	
 	if (iter) {
-		choice_made (tview, tree_sel);
+		choice_made (new Result (tview, tree_sel));
 	} else {
 		cancel ();
 	}
@@ -165,13 +165,12 @@ Selector::chosen ()
 
 void
 Selector::shift_clicked ()
-
 {
 	Glib::RefPtr<Gtk::TreeSelection> tree_sel = tview.get_selection();
 	Gtk::TreeModel::iterator iter = tree_sel->get_selected();
 
 	if (iter) {
-		shift_made (tview, tree_sel);
+		shift_made (new Result (tview, tree_sel));
 	} else {
 		cancel ();
 	}
@@ -179,13 +178,12 @@ Selector::shift_clicked ()
 
 void
 Selector::control_clicked ()
-
 {
 	Glib::RefPtr<Gtk::TreeSelection> tree_sel = tview.get_selection();
 	Gtk::TreeModel::iterator iter = tree_sel->get_selected();
 
 	if (iter) {
-		control_made (tview, tree_sel);
+		control_made (new Result (tview, tree_sel));
 	} else {
 		cancel ();
 	}
@@ -193,12 +191,11 @@ Selector::control_clicked ()
 
 void
 Selector::cancel ()
-
 {
         Glib::RefPtr<Gtk::TreeSelection> tree_sel = tview.get_selection();
 	tree_sel->unselect_all();
 
-	selection_made (tview, tree_sel);
+	selection_made (new Result (tview, tree_sel));
 }
 
 void

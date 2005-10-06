@@ -55,14 +55,9 @@ using namespace ARDOUR;
 using namespace Gtk;
 using namespace sigc;
 
-static const gchar *route_display_titles[] = { N_("Tracks/Buses"), 0 };
-static const gchar *pre_display_titles[] = { N_("Pre Redirects"), 0 };
-static const gchar *post_display_titles[] = { N_("Post Redirects"), 0 };
-
 RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	: ArdourDialog ("track/bus inspector"),
 	  engine (eng),
-	  route_select_list (internationalize(route_display_titles)),
 	  _route(0), 
 	  track_menu(0)
 {
@@ -78,21 +73,29 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	
 	using namespace Notebook_Helpers;
 
-	input_frame.set_shadow_type(GTK_SHADOW_NONE);
-	output_frame.set_shadow_type(GTK_SHADOW_NONE);
+	input_frame.set_shadow_type(Gtk::SHADOW_NONE);
+	output_frame.set_shadow_type(Gtk::SHADOW_NONE);
 	
 	notebook.set_show_tabs (true);
 	notebook.set_show_border (true);
 	notebook.set_name ("RouteParamNotebook");
-	
-	route_select_list.column_titles_active();
-	route_select_list.set_name ("RouteParamsListDisplay");
-	route_select_list.set_shadow_type (Gtk::SHADOW_IN);
-	route_select_list.set_selection_mode (GTK_SELECTION_SINGLE);
-	route_select_list.set_reorderable (false);
-	route_select_list.set_size_request (75, -1);
-	route_select_scroller.add (route_select_list);
-	route_select_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
+	// create the tree model
+	route_display_model = ListStore::create(route_display_columns);
+
+	// setup the treeview
+	route_display.set_model(route_display_model);
+	route_display.append_column(_("Tracks/Buses"), route_display_columns.text);
+	route_display.set_name(X_("RouteParamsListDisplay"));
+	route_display.get_selection()->set_mode(Gtk::SELECTION_SINGLE); // default
+	route_display.set_reorderable(false);
+	route_display.set_size_request(75, -1);
+	route_display.set_headers_visible(true);
+	route_display.set_headers_clickable(true);
+
+	route_select_scroller.add(route_display);
+	route_select_scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
 
 	route_select_frame.set_name("RouteSelectBaseFrame");
 	route_select_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -139,10 +142,8 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	set_wmclass (_("ardour_route_parameters"), "Ardour");
 
 	// events
-	route_select_list.select_row.connect (mem_fun(*this, &RouteParams_UI::route_selected));
-	route_select_list.unselect_row.connect (mem_fun(*this, &RouteParams_UI::route_unselected));
-	route_select_list.click_column.connect (mem_fun(*this, &RouteParams_UI::show_track_menu));
-
+	route_display.get_selection()->signal_changed().connect(mem_fun(*this, &RouteParams_UI::route_selected));
+	route_display.get_column(0)->signal_clicked().connect(mem_fun(*this, &RouteParams_UI::show_track_menu));
 
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
 	
@@ -151,7 +152,7 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 						     static_cast<Window *> (_plugin_selector)));
 
 
-	delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*> (this)));
+	signal_delete_event().connect(bind(ptr_fun(just_hide_it), static_cast<Gtk::Window *>(this)));
 }
 
 RouteParams_UI::~RouteParams_UI ()
@@ -167,10 +168,10 @@ RouteParams_UI::add_route (Route* route)
 		return;
 	}
 
-	const gchar *rowdata[1];
-	rowdata[0] = route->name().c_str();
-	route_select_list.rows().push_back (rowdata);
-	route_select_list.rows().back().set_data (route);
+	TreeModel::Row row = *(route_display_model->append());
+	row[route_display_columns.text] = route->name();
+	row[route_display_columns.route] = route;
+
 	//route_select_list.rows().back().select ();
 	
 	route->name_changed.connect (bind (mem_fun(*this, &RouteParams_UI::route_name_changed), route));
@@ -182,15 +183,21 @@ void
 RouteParams_UI::route_name_changed (void *src, Route *route)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::route_name_changed), src, route));
-	
-	CList_Helpers::RowList::iterator i;
 
-	if ((i = route_select_list.rows().find_data (route)) == route_select_list.rows().end()) {
-		error << _("route display list item for renamed route not found!") << endmsg;
-		return;
+	bool found = false ;
+	TreeModel::Children rows = route_display_model->children();
+	for(TreeModel::Children::iterator iter = rows.begin(); iter != rows.end(); ++iter) {
+		if((*iter)[route_display_columns.route] == route) {
+			(*iter)[route_display_columns.text] = route->name() ;
+			found = true ;
+			break;
+		}
 	}
 
-	route_select_list.cell ((*i)->get_row_num(), 0).set_text (route->name());
+	if(!found)
+	{
+		error << _("route display list item for renamed route not found!") << endmsg;
+	}
 
 	if (route == _route) {
 		track_input_label.set_text (route->name());
@@ -210,9 +217,9 @@ RouteParams_UI::setup_redirect_boxes()
 		pre_redirect_box = new RedirectBox(PreFader, *session, *_route, *_plugin_selector, _rr_selection);
 		post_redirect_box = new RedirectBox(PostFader, *session, *_route, *_plugin_selector, _rr_selection);
 
-		pre_redirect_box->set_title (pre_display_titles[0]);
+		pre_redirect_box->set_title(_("Pre Redirects"));
 		pre_redirect_box->set_title_shown (true);
-		post_redirect_box->set_title (post_display_titles[0]);
+		post_redirect_box->set_title(_("Post Redirects"));
 		post_redirect_box->set_title_shown (true);
 
 	        pre_redir_hpane.add1 (*pre_redirect_box);
@@ -324,12 +331,15 @@ RouteParams_UI::route_removed (Route *route)
 	session->foreach_route (this, &RouteParams_UI::add_route);
 	route_select_list.thaw ();
 	*/
-	
-	CList_Helpers::RowList::iterator i;
-	
-	if ((i = route_select_list.rows().find_data (route)) == route_select_list.rows().end()) {
-		// couldn't find route to be deleted
-		return;
+
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator ri;
+
+	for(TreeModel::Children::iterator iter = rows.begin(); iter != rows.end(); ++iter) {
+		if((*iter)[route_display_columns.route] == route) {
+			route_display_model->erase(iter);
+			break;
+		}
 	}
 
 	if (route == _route)
@@ -344,9 +354,6 @@ RouteParams_UI::route_removed (Route *route)
 		_post_redirect = 0;
 		update_title();
 	}
-
-	route_select_list.rows().erase(i);
-	
 }
 
 void
@@ -354,8 +361,10 @@ RouteParams_UI::set_session (Session *sess)
 {
 	ArdourDialog::set_session (sess);
 
-	route_select_list.freeze ();
-	route_select_list.clear ();
+	// GTK2FIX
+	// route_select_list.freeze ();
+
+	route_display_model.clear();
 
 	if (session) {
 		session->foreach_route (this, &RouteParams_UI::add_route);
@@ -366,7 +375,7 @@ RouteParams_UI::set_session (Session *sess)
 		stop_updating ();
 	}
 
-	route_select_list.thaw ();
+	//route_select_list.thaw ();
 
 	_plugin_selector->set_session (session);
 }	
@@ -375,8 +384,9 @@ RouteParams_UI::set_session (Session *sess)
 void
 RouteParams_UI::session_gone ()
 {
+	ENSURE_GUI_THREAD(mem_fun(*this, &RouteParams_UI::session_gone));
 
-	route_select_list.clear ();
+	route_display_model.clear();
 
 	cleanup_io_frames();
 	cleanup_pre_view();
@@ -393,17 +403,19 @@ RouteParams_UI::session_gone ()
 }
 
 void
-RouteParams_UI::route_selected (gint row, gint col, GdkEvent *ev)
+RouteParams_UI::route_selected()
 {
-	Route *route;
-
-	if ((route = (Route *) route_select_list.get_row_data (row)) != 0) {
+	Glib::RefPtr<TreeSelection> selection = route_display.get_selection();
+	TreeModel::iterator iter = selection->get_selected(); // only used with Gtk::SELECTION_SINGLE
+	if(iter) {
+		//If anything is selected
+		Route* route = (*iter)[route_display_columns.route] ;
 
 		if (_route == route) {
 			// do nothing
 			return;
 		}
-		
+
 		// remove event binding from previously selected
 		if (_route) {
 			_route_conn.disconnect();
@@ -413,42 +425,59 @@ RouteParams_UI::route_selected (gint row, gint col, GdkEvent *ev)
 			cleanup_post_view();
 			cleanup_io_frames();
 		}
-	
+
 		// update the other panes with the correct info
 		_route = route;
 		//update_routeinfo (route);
 
 		setup_io_frames();
 		setup_redirect_boxes();
-		
+
 		// bind to redirects changed event for this route
 		_route_conn = route->redirects_changed.connect (mem_fun(*this, &RouteParams_UI::redirects_changed));
 
 		track_input_label.set_text (_route->name());
-		
+
 		update_title();
+	} else {
+		// no selection
+		if (_route) {
+			_route_conn.disconnect();
+
+			// remove from view
+			cleanup_io_frames();
+			cleanup_pre_view();
+			cleanup_post_view();
+			cleanup_redirect_boxes();
+
+			_route = 0;
+			_pre_redirect = 0;
+			_post_redirect = 0;
+			track_input_label.set_text(_("NO TRACK"));
+			update_title();
+		}
 	}
 }
 
-void
-RouteParams_UI::route_unselected (gint row, gint col, GdkEvent *ev)
-{
-	if (_route) {
-		_route_conn.disconnect();
+//void
+//RouteParams_UI::route_unselected (gint row, gint col, GdkEvent *ev)
+//{
+//	if (_route) {
+//		_route_conn.disconnect();
 
 		// remove from view
-		cleanup_io_frames();
-		cleanup_pre_view();
-		cleanup_post_view();
-		cleanup_redirect_boxes();
+//		cleanup_io_frames();
+//		cleanup_pre_view();
+//		cleanup_post_view();
+//		cleanup_redirect_boxes();
 		
-		_route = 0;
-		_pre_redirect = 0;
-		_post_redirect = 0;
-		track_input_label.set_text(_("NO TRACK"));
-		update_title();
-	}
-}
+//		_route = 0;
+//		_pre_redirect = 0;
+//		_post_redirect = 0;
+//		track_input_label.set_text(_("NO TRACK"));
+//		update_title();
+//	}
+//}
 
 void
 RouteParams_UI::redirects_changed (void *src)
@@ -477,7 +506,7 @@ RouteParams_UI::redirects_changed (void *src)
 
 
 void
-RouteParams_UI::show_track_menu (gint arg)
+RouteParams_UI::show_track_menu()
 {
 	using namespace Menu_Helpers;
 	

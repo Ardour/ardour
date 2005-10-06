@@ -4,6 +4,7 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/filechooserwidget.h>
 #include <gtkmm/box.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
@@ -18,7 +19,6 @@ namespace ARDOUR {
 
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/newsavedialog.h>
 #include "ardour_dialog.h"
 
 class NewSessionDialog : public ArdourDialog
@@ -26,7 +26,7 @@ class NewSessionDialog : public ArdourDialog
   public:
 	NewSessionDialog (ARDOUR::AudioEngine&, bool startup, std::string path);
 	
-	Gtkmm2ext::NewSaveDialog file_selector;
+	Gtk::FileChooserWidget file_selector;
 	Gtk::ComboBoxText control_out_channel_combo;
 	Gtk::ComboBoxText master_out_channel_combo;
 	Gtk::CheckButton use_control_button;
@@ -85,8 +85,8 @@ class NewSessionDialog : public ArdourDialog
 	static void _mix_template_refiller (Gtk::CList &clist, void *);
 	void mix_template_refiller (Gtk::CList &clist);
 
-	void mix_template_shift (Gtkmm2ext::Selector *, Gtkmm2ext::SelectionResult*);
-	void mix_template_control (Gtkmm2ext::Selector *, Gtkmm2ext::SelectionResult*);
+	void mix_template_shift (Gtkmm2ext::Selector *, Gtkmm2ext::Selector::Result*);
+	void mix_template_control (Gtkmm2ext::Selector *, Gtkmm2ext::Selector::Result*);
 
 	void fixup_at_realize ();
 	void fixup_at_show ();
