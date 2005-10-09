@@ -114,9 +114,9 @@ PannerUI::PannerUI (IO& io, Session& s)
 	   we need a pixmap in the button just to get started.
 	*/
 
-	panning_link_direction_button.add (*(manage (new Pixmap (forwdblarrow_xpm))));
+	panning_link_direction_button.add (*(manage (new Image (forwdblarrow_xpm))));
 
-	panning_link_direction_button.clicked.connect
+	panning_link_direction_button.signal_clicked().connect
 		(mem_fun(*this, &PannerUI::panning_link_direction_clicked));
 
 	panning_link_button.signal_button_press_event().connect
@@ -319,7 +319,7 @@ PannerUI::setup_pan ()
 			_io.panner()[asz]->get_position (x);
 
 			pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.05, 0.1));
-			pan_adjustments.back()->value_changed.connect (bind (mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
+			pan_adjustments.back()->signal_value_changed().connect (bind (mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
 
 			_io.panner()[asz]->Changed.connect (bind (mem_fun(*this, &PannerUI::pan_value_changed), (uint32_t) asz));
 
@@ -332,10 +332,10 @@ PannerUI::setup_pan ()
 			}
 			
 			bc->set_name ("PanSlider");
-			bc->set_shadow_type (GTK_SHADOW_NONE);
+			bc->set_shadow_type (Gtk::SHADOW_NONE);
 			bc->set_style (BarController::Line);
-			bc->get_spin_button().signal_focus_in_event()().connect (mem_fun(*this, &PannerUI::entry_focus_event));
-			bc->get_spin_button().signal_focus_out_event()().connect (mem_fun(*this, &PannerUI::entry_focus_event));
+			bc->get_spin_button().signal_focus_in_event().connect (mem_fun(*this, &PannerUI::entry_focus_event));
+			bc->get_spin_button().signal_focus_out_event().connect (mem_fun(*this, &PannerUI::entry_focus_event));
 
 			bc->StartGesture.connect (bind (mem_fun (_io, &IO::start_pan_touch), (uint32_t) asz));
 			bc->StopGesture.connect (bind (mem_fun (_io, &IO::end_pan_touch), (uint32_t) asz));
@@ -434,17 +434,17 @@ PannerUI::build_pan_menu (uint32_t which)
 	
 	/* set state first, connect second */
 
-	(dynamic_cast<CheckMenuItem*> (items.back()))->set_active (_io.panner()[which]->muted());
-	(dynamic_cast<CheckMenuItem*> (items.back()))->toggled.connect
+	(dynamic_cast<CheckMenuItem*> (&items.back()))->set_active (_io.panner()[which]->muted());
+	(dynamic_cast<CheckMenuItem*> (&items.back()))->signal_toggled().connect
 		(bind (mem_fun(*this, &PannerUI::pan_mute), which));
 
 	items.push_back (CheckMenuElem (_("Bypass"), mem_fun(*this, &PannerUI::pan_bypass_toggle)));
-	bypass_menu_item = static_cast<CheckMenuItem*> (items.back());
+	bypass_menu_item = static_cast<CheckMenuItem*> (&items.back());
 
 	/* set state first, connect second */
 
 	bypass_menu_item->set_active (_io.panner().bypassed());
-	bypass_menu_item->toggled.connect (mem_fun(*this, &PannerUI::pan_bypass_toggle));
+	bypass_menu_item->signal_toggled().connect (mem_fun(*this, &PannerUI::pan_bypass_toggle));
 
 	items.push_back (MenuElem (_("Reset"), mem_fun(*this, &PannerUI::pan_reset)));
 	items.push_back (SeparatorElem());

@@ -41,7 +41,6 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "audio_clock.h"
-#include "extra_bind.h"
 
 #include "i18n.h"
 
@@ -102,7 +101,7 @@ ARDOUR_UI::setup_adjustables ()
 	online_control_button = new GlobalClickBox ("CONTROL",
 						    online_control_strings);
 
-	online_control_button->adjustment.value_changed.connect(mem_fun(*this,&ARDOUR_UI::control_methods_adjusted));
+	online_control_button->adjustment.signal_value_changed().connect(mem_fun(*this,&ARDOUR_UI::control_methods_adjusted));
 
 	mmc_id_strings.push_back ("1");
 	mmc_id_strings.push_back ("2");
@@ -116,10 +115,10 @@ ARDOUR_UI::setup_adjustables ()
 
 	mmc_id_button = new GlobalClickBox (_("MMC ID"), mmc_id_strings);
 
-	mmc_id_button->adjustment.value_changed.connect (mem_fun(*this,&ARDOUR_UI::mmc_device_id_adjusted));
+	mmc_id_button->adjustment.signal_value_changed().connect (mem_fun(*this,&ARDOUR_UI::mmc_device_id_adjusted));
 
-	adjuster_table.attach (*online_control_button, 0, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, 0, 5, 5);
-	adjuster_table.attach (*mmc_id_button, 2, 3, 1, 2, 0, 0, 5, 5);
+	adjuster_table.attach (*online_control_button, 0, 2, 1, 2, FILL|EXPAND, FILL, 5, 5);
+	adjuster_table.attach (*mmc_id_button, 2, 3, 1, 2, FILL, FILL, 5, 5);
 }
 
 #include "transport_xpms"
@@ -204,13 +203,14 @@ ARDOUR_UI::setup_transport ()
 						 static_cast<Gtk::Widget*> (&transport_frame), 1));
 
 
-	goto_start_button.add (*(manage (new Gtk::Image (start_xpm))));
-	goto_end_button.add (*(manage (new Gtk::Image (end_xpm))));
-	roll_button.add (*(manage (new Gtk::Image (arrow_xpm))));
-	stop_button.add (*(manage (new Gtk::Image (stop_xpm))));
-	play_selection_button.add (*(manage (new Gtk::Image (play_selection_xpm))));
-	rec_button.add (*(manage (new Gtk::Image (rec_xpm))));
-	auto_loop_button.add (*(manage (new Gtk::Image (loop_xpm))));
+	goto_start_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(start_xpm)))));
+	goto_end_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(end_xpm)))));
+	roll_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(arrow_xpm)))));
+	
+	stop_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(stop_xpm)))));
+	play_selection_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(play_selection_xpm)))));
+	rec_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(rec_xpm)))));
+	auto_loop_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(loop_xpm)))));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (roll_button, _("Play from playhead"));
 	ARDOUR_UI::instance()->tooltips().set_tip (stop_button, _("Stop playback"));
@@ -230,8 +230,8 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_style_button, _("Select sprung or wheel behaviour"));
 	ARDOUR_UI::instance()->tooltips().set_tip (speed_display_box, _("Current transport speed"));
 	
-	shuttle_box.set_flags (Gtk::CAN_FOCUS);
-	shuttle_box.signal_set_event()s (shuttle_box.signal_get_event()s() | GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK);
+	shuttle_box.set_flags (CAN_FOCUS);
+	shuttle_box.set_events (shuttle_box.get_events() | Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK);
 	shuttle_box.set_size_request (100, 15);
 
 	shuttle_box.set_name ("TransportButton");
@@ -265,20 +265,20 @@ ARDOUR_UI::setup_transport ()
 	click_button.unset_flags (Gtk::CAN_FOCUS);
 	follow_button.unset_flags (Gtk::CAN_FOCUS);
 	
-	goto_start_button.signal_set_event()s (goto_start_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	goto_end_button.signal_set_event()s (goto_end_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	roll_button.signal_set_event()s (roll_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	stop_button.signal_set_event()s (stop_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	play_selection_button.signal_set_event()s (play_selection_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	rec_button.signal_set_event()s (rec_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	auto_loop_button.signal_set_event()s (auto_loop_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	auto_return_button.signal_set_event()s (auto_return_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	auto_play_button.signal_set_event()s (auto_play_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	auto_input_button.signal_set_event()s (auto_input_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	click_button.signal_set_event()s (click_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	follow_button.signal_set_event()s (click_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	punch_in_button.signal_set_event()s (punch_in_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
-	punch_out_button.signal_set_event()s (punch_out_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
+	goto_start_button.set_events (goto_start_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	goto_end_button.set_events (goto_end_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	roll_button.set_events (roll_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	stop_button.set_events (stop_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	play_selection_button.set_events (play_selection_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	rec_button.set_events (rec_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	auto_loop_button.set_events (auto_loop_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	auto_return_button.set_events (auto_return_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	auto_play_button.set_events (auto_play_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	auto_input_button.set_events (auto_input_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	click_button.set_events (click_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	follow_button.set_events (click_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	punch_in_button.set_events (punch_in_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	punch_out_button.set_events (punch_out_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	goto_start_button.signal_clicked().connect (mem_fun(*this,&ARDOUR_UI::transport_goto_start));
 	goto_end_button.signal_clicked().connect (mem_fun(*this,&ARDOUR_UI::transport_goto_end));
@@ -314,20 +314,20 @@ ARDOUR_UI::setup_transport ()
 
 	/* options */
 
-	auto_return_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_return));
-	auto_play_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_play));
-	auto_input_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_input));
-	click_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_click));
-	follow_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_follow));
-	punch_in_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_in));
-	punch_out_button.toggled.connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_out));
+	auto_return_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_return));
+	auto_play_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_play));
+	auto_input_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_input));
+	click_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_click));
+	follow_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_follow));
+	punch_in_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_in));
+	punch_out_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_out));
 
 	preroll_button.unset_flags (Gtk::CAN_FOCUS);
-	preroll_button.signal_set_event()s (preroll_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
+	preroll_button.set_events (preroll_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	preroll_button.set_name ("TransportButton");
 
 	postroll_button.unset_flags (Gtk::CAN_FOCUS);
-	postroll_button.signal_set_event()s (postroll_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
+	postroll_button.set_events (postroll_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	postroll_button.set_name ("TransportButton");
 
 	preroll_clock.set_mode (AudioClock::MinSec);
@@ -340,9 +340,9 @@ ARDOUR_UI::setup_transport ()
 	/* CANNOT bind these to clicked or toggled, must use pressed or released */
 
 	solo_alert_button.set_name ("TransportSoloAlert");
-	solo_alert_button.pressed.connect (mem_fun(*this,&ARDOUR_UI::solo_alert_toggle));
+	solo_alert_button.signal_pressed().connect (mem_fun(*this,&ARDOUR_UI::solo_alert_toggle));
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
-	auditioning_alert_button.pressed.connect (mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
+	auditioning_alert_button.signal_pressed().connect (mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
 
 	alert_box.pack_start (solo_alert_button);
 	alert_box.pack_start (auditioning_alert_button);
@@ -430,8 +430,8 @@ ARDOUR_UI::setup_clock ()
 	big_clock_window->add  (big_clock);
 	big_clock_window->set_title (_("ardour: clock"));
 	
-	big_clock_window->signal_delete_event().connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*>(big_clock_window)));
-	big_clock_window->realize.connect (mem_fun(*this, &ARDOUR_UI::big_clock_realize));
+	big_clock_window->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Gtk::Window*>(big_clock_window)));
+	big_clock_window->signal_realize().connect (mem_fun(*this, &ARDOUR_UI::big_clock_realize));
 	big_clock_window->size_allocate.connect (mem_fun(*this, &ARDOUR_UI::big_clock_size_event));
 
 	big_clock_window->Hiding.connect (mem_fun(*this, &ARDOUR_UI::big_clock_hiding));
@@ -446,7 +446,7 @@ ARDOUR_UI::big_clock_size_event (GtkAllocation *alloc)
 void
 ARDOUR_UI::big_clock_realize ()
 {
-	big_clock_window->get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH|GDK_DECOR_MAXIMIZE|GDK_DECOR_MINIMIZE));
+  big_clock_window->get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH|Gdk::DECOR_MAXIMIZE|Gdk::DECOR_MINIMIZE));
 }
 
 void
@@ -511,7 +511,7 @@ ARDOUR_UI::solo_blink (bool onoff)
 	
 	if (session->soloing()) {
 		if (onoff) {
-			solo_alert_button.set_state (GTK_STATE_ACTIVE);
+			solo_alert_button.set_state (Gtk::STATE_ACTIVE);
 		} else {
 			solo_alert_button.set_state (Gtk::STATE_NORMAL);
 		}
@@ -530,7 +530,7 @@ ARDOUR_UI::audition_blink (bool onoff)
 	
 	if (session->is_auditioning()) {
 		if (onoff) {
-			auditioning_alert_button.set_state (GTK_STATE_ACTIVE);
+			auditioning_alert_button.set_state (Gtk::STATE_ACTIVE);
 		} else {
 			auditioning_alert_button.set_state (Gtk::STATE_NORMAL);
 		}
@@ -627,7 +627,7 @@ ARDOUR_UI::shuttle_box_motion (GdkEventMotion* ev)
 gint
 ARDOUR_UI::mouse_shuttle (double x, bool force)
 {
-	double half_width = shuttle_box.width() / 2.0;
+	double half_width = shuttle_box.get_width() / 2.0;
 	double distance = x - half_width;
 
 	if (distance > 0) {
@@ -676,7 +676,7 @@ gint
 ARDOUR_UI::shuttle_box_expose (GdkEventExpose* event)
 {
 	gint x;
-	Gdk_Window win (shuttle_box.get_window());
+	Gdk::Window win (shuttle_box.get_window());
 
 	/* redraw the background */
 
@@ -686,7 +686,7 @@ ARDOUR_UI::shuttle_box_expose (GdkEventExpose* event)
 			    event->area.width, event->area.height);
 
 
-	x = (gint) floor ((shuttle_box.width() / 2.0) + (0.5 * (shuttle_box.width() * shuttle_fract)));
+	x = (gint) floor ((shuttle_box.get_width() / 2.0) + (0.5 * (shuttle_box.get_width() * shuttle_fract)));
 
 	/* draw line */
 
@@ -694,7 +694,7 @@ ARDOUR_UI::shuttle_box_expose (GdkEventExpose* event)
 		       x,
 		       0,
 		       x,
-		       shuttle_box.height());
+		       shuttle_box.get_height());
 	return TRUE;
 }
 

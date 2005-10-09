@@ -23,7 +23,7 @@
 #include <sigc++/bind.h>
 
 #include <gtkmm/frame.h>
-#include <gtkmm/pixmap.h>
+#include <gtkmm/image.h>
 #include <gtkmm/scrolledwindow.h>
 
 #include <ardour/automation_event.h>
@@ -101,7 +101,8 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	add (vpacker);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
-	select_out_button.set_group (select_in_button.get_group());
+	RadioButtonGroup sel_but_group = select_in_button.get_group();
+	select_out_button.set_group (sel_but_group);
 	select_out_button.set_mode (false);
 	select_in_button.set_mode (false);
 
@@ -114,8 +115,8 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 
 	_canvas = gnome_canvas_new_aa ();
 
-	canvas = wrap (_canvas);
-	canvas->size_allocate.connect (mem_fun(*this, &CrossfadeEditor::canvas_allocation));
+	canvas = Glib::wrap (_canvas);
+	canvas->signal_size_allocate().connect (mem_fun(*this, &CrossfadeEditor::canvas_allocation));
 	canvas->set_size_request (425, 200);
 
 	toplevel = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
@@ -209,7 +210,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	fade_in_table.attach (select_in_button, 0, 2, 0, 1, Gtk::FILL|Gtk::EXPAND);
 	fade_out_table.attach (select_out_button, 0, 2, 0, 1, Gtk::FILL|Gtk::EXPAND);
 
-	Pixmap *pxmap;
+	Image *pxmap;
 	Button* pbutton;
 	int row;
 	int col;
@@ -219,11 +220,11 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 
 	for (list<Preset*>::iterator i = fade_in_presets->begin(); i != fade_in_presets->end(); ++i) {
 
-		pxmap = manage (new Pixmap ((*i)->xpm));
+	        pxmap = manage (new Image (Gdk::Pixbuf::create_from_xpm_data((*i)->xpm)));
 		pbutton = manage (new Button);
 		pbutton->add (*pxmap);
 		pbutton->set_name ("CrossfadeEditButton");
-		pbutton-.signal_clicked().connect (bind (mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
+		pbutton->signal_clicked().connect (bind (mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
 		fade_in_table.attach (*pbutton, col, col+1, row, row+1);
 		fade_in_buttons.push_back (pbutton);
 
@@ -240,11 +241,11 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 
 	for (list<Preset*>::iterator i = fade_out_presets->begin(); i != fade_out_presets->end(); ++i) {
 
-		pxmap = manage (new Pixmap ((*i)->xpm));
+	        pxmap = manage (new Image (Gdk::Pixbuf::create_from_xpm_data((*i)->xpm)));
 		pbutton = manage (new Button);
 		pbutton->add (*pxmap);
 		pbutton->set_name ("CrossfadeEditButton");
-		pbutton-.signal_clicked().connect (bind (mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
+		pbutton->signal_clicked().connect (bind (mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
 		fade_out_table.attach (*pbutton, col, col+1, row, row+1);
 		fade_out_buttons.push_back (pbutton);
 
@@ -270,11 +271,11 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 
 	clear_button.signal_clicked().connect (mem_fun(*this, &CrossfadeEditor::clear));
 	revert_button.signal_clicked().connect (mem_fun(*this, &CrossfadeEditor::reset));
-	audition_both_button.toggled.connect (mem_fun(*this, &CrossfadeEditor::audition_toggled));
-	audition_right_button.toggled.connect (mem_fun(*this, &CrossfadeEditor::audition_right_toggled));
-	audition_right_dry_button.toggled.connect (mem_fun(*this, &CrossfadeEditor::audition_right_dry_toggled));
-	audition_left_button.toggled.connect (mem_fun(*this, &CrossfadeEditor::audition_left_toggled));
-	audition_left_dry_button.toggled.connect (mem_fun(*this, &CrossfadeEditor::audition_left_dry_toggled));
+	audition_both_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_toggled));
+	audition_right_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_right_toggled));
+	audition_right_dry_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_right_dry_toggled));
+	audition_left_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_left_toggled));
+	audition_left_dry_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_left_dry_toggled));
 
 	action_box.set_border_width (7);
 	action_box.set_spacing (5);
@@ -419,7 +420,7 @@ gint
 CrossfadeEditor::_canvas_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
 {
 	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
-	return ed->signal_canvas_event() (item, event);
+	return ed->canvas_event (item, event);
 }
 
 gint
@@ -626,7 +627,7 @@ gint
 CrossfadeEditor::_point_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
 {
 	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
-	return ed->signal_point_event() (item, event);
+	return ed->point_event (item, event);
 }
 
 gint
@@ -681,7 +682,7 @@ gint
 CrossfadeEditor::_curve_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
 {
 	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
-	return ed->signal_curve_event() (item, event);
+	return ed->curve_event (item, event);
 }
 
 gint

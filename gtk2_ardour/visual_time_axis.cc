@@ -94,7 +94,7 @@ VisualTimeAxis::VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Sessi
 	_color = unique_random_color() ;
 	_marked_for_display = true;
 	
-	name_entry.activate.connect(mem_fun(*this, &VisualTimeAxis::name_entry_changed)) ;
+	name_entry.signal_activate().connect(mem_fun(*this, &VisualTimeAxis::name_entry_changed)) ;
 	name_entry.signal_focus_out_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_focus_out_handler)) ;
 	name_entry.signal_button_press_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_press_handler)) ;
 	name_entry.signal_button_release_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_release_handler)) ;
@@ -103,7 +103,8 @@ VisualTimeAxis::VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Sessi
 	size_button.set_name("TrackSizeButton") ;
 	visual_button.set_name("TrackVisualButton") ;
 	hide_button.set_name("TrackRemoveButton") ;
-	hide_button.add(*(Gtk::manage(new Gtk::Image(small_x_xpm)))) ;
+	Glib::RefPtr<Gdk::Pixbuf> small_x_pixbuf = Gdk::Pixbuf::create_from_xpm_data(small_x_xpm);
+	hide_button.add(*(Gtk::manage(new Gtk::Image(small_x_pixbuf)))) ;
 	size_button.signal_button_release_event().connect (mem_fun (*this, &VisualTimeAxis::size_click)) ;
 	visual_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::visual_click)) ;
 	hide_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::hide_click)) ;
@@ -247,15 +248,17 @@ bool
 VisualTimeAxis::choose_time_axis_color()
 {
 	bool picked ;
-	GdkColor color ;
+	Gdk::Color color ;
 	gdouble current[4] ;
+	Gdk::Color* current_color ;
 	
 	current[0] = _color.get_red() / 65535.0 ;
 	current[1] = _color.get_green() / 65535.0 ;
 	current[2] = _color.get_blue() / 65535.0 ;
 	current[3] = 1.0 ;
-	
-	color = Gtkmm2ext::UI::instance()->get_color(_("ardour: color selection"),picked, current) ;
+
+	current_color->set_rgb_p (current[0],current[1],current[2]);
+	color = Gtkmm2ext::UI::instance()->get_color(_("ardour: color selection"),picked, current_color) ;
 	
 	if (picked)
 	{
@@ -270,7 +273,7 @@ VisualTimeAxis::choose_time_axis_color()
  * @param c the new TimeAxis color
  */
 void
-VisualTimeAxis::set_time_axis_color(Gdk_Color c)
+VisualTimeAxis::set_time_axis_color(Gdk::Color c)
 {
 	_color = c ;
 }
@@ -312,7 +315,7 @@ VisualTimeAxis::remove_this_time_axis(void* src)
 		   defer to idle loop, otherwise we'll delete this object
 		   while we're still inside this function ...
 		*/
-		Gtk::Main::idle.connect(bind(mem_fun(&VisualTimeAxis::idle_remove_this_time_axis), this, src));
+	  Glib::signal_idle().connect(bind(sigc::ptr_fun(&VisualTimeAxis::idle_remove_this_time_axis), this, src));
 	}
 }
 

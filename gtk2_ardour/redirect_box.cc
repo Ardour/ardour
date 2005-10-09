@@ -91,7 +91,7 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	redirect_display.drag_begin.connect (mem_fun(*this, &RedirectBox::redirect_drag_begin));
 	redirect_display.drag_end.connect (mem_fun(*this, &RedirectBox::redirect_drag_end));
 	redirect_display.set_size_request (-1, 48);
-	redirect_display.set_selection_mode (GTK_SELECTION_MULTIPLE);
+	redirect_display.set_selection_mode (Gtk::SELECTION_MULTIPLE);
 	redirect_display.set_shadow_type (Gtk::SHADOW_IN);
 	redirect_display.row_move.connect (mem_fun(*this, &RedirectBox::redirects_reordered));
 
@@ -543,7 +543,7 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, IO& io)
 	dialog.show_all ();
 
 	dialog.realize();
-	dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
+	dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	dialog.run ();
 }
@@ -749,7 +749,7 @@ RedirectBox::redirects_reordered (gint src, gint dst)
 	   something for idle time.
 	*/
 
-	Gtk::Main::idle.connect (mem_fun(*this, &RedirectBox::compute_redirect_sort_keys));
+        Glib::signal_idle().connect (mem_fun(*this, &RedirectBox::compute_redirect_sort_keys));
 }
 
 gint
@@ -799,7 +799,7 @@ outputs do not work correctly."));
 		dialog.show_all ();
 
 		dialog.realize();
-		dialog.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
+		dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 		
 		dialog.run ();
 	}
@@ -923,7 +923,7 @@ RedirectBox::rename_redirect (Redirect* redirect)
 	ok_button.set_name ("EditorGTKButton");
 	cancel_button.set_name ("EditorGTKButton");
 
-	entry.activate.connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
+	entry.signal_activate().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
 	cancel_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), -1));
 	ok_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
 
@@ -1122,7 +1122,7 @@ RedirectBox::edit_redirect (Redirect* redirect)
 		}
 		
 		if (send_ui->is_visible()) {
-			send_ui->get_window().raise ();
+			send_ui->get_window()->raise ();
 		} else {
 			send_ui->show_all ();
 		}
@@ -1169,7 +1169,7 @@ RedirectBox::edit_redirect (Redirect* redirect)
 			}
 			
 			if (plugin_ui->is_visible()) {
-				plugin_ui->get_window().raise ();
+				plugin_ui->get_window()->raise ();
 			} else {
 				plugin_ui->show_all ();
 			}
@@ -1192,7 +1192,7 @@ RedirectBox::edit_redirect (Redirect* redirect)
 			}
 			
 			if (io_selector->is_visible()) {
-				io_selector->get_window().raise ();
+				io_selector->get_window()->raise ();
 			} else {
 				io_selector->show_all ();
 			}

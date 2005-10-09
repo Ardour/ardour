@@ -57,7 +57,6 @@
 #include "streamview.h"
 #include "regionview.h"
 #include "rgb_macros.h"
-#include "extra_bind.h"
 #include "selection_templates.h"
 #include "selection.h"
 #include "library_ui.h"
@@ -1758,7 +1757,7 @@ Editor::rename_region ()
 
 	region_renamed = false;
 
-	entry.activate.connect (bind (mem_fun(*this, &Editor::rename_region_finished), true));
+	entry.signal_activate().connect (bind (mem_fun(*this, &Editor::rename_region_finished), true));
 	ok_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::rename_region_finished), true));
 	cancel_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::rename_region_finished), false));
 
@@ -1822,7 +1821,7 @@ Editor::build_interthread_progress_window ()
 {
 	interthread_progress_window = new ArdourDialog (X_("interthread progress"));
 
-	interthread_progress_bar.set_orientation (GTK_PROGRESS_LEFT_TO_RIGHT);
+	interthread_progress_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
 	
 	interthread_progress_vbox.set_border_width (10);
 	interthread_progress_vbox.set_spacing (5);
@@ -1878,7 +1877,7 @@ Editor::import_progress_timeout (void *arg)
 		interthread_progress_bar.set_activity_mode (true);
 		return FALSE;
 	} else {
-		interthread_progress_bar.set_percentage (import_status.progress);
+		interthread_progress_bar.set_fraction (import_status.progress/100);
 	}
 
 	return !(import_status.done || import_status.cancel);
@@ -1933,7 +1932,7 @@ Editor::do_import (vector<string> paths, bool split, bool as_tracks)
 	interthread_progress_window->set_title (_("ardour: audio import in progress"));
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_window->show_all ();
-	interthread_progress_bar.set_percentage (0.0f);
+	interthread_progress_bar.set_fraction (0.0f);
 	interthread_cancel_label.set_text (_("Cancel Import"));
 	current_interthread_info = &import_status;
 
@@ -1950,7 +1949,7 @@ Editor::do_import (vector<string> paths, bool split, bool as_tracks)
 		import_status.done = 0.0;
 		
 		interthread_progress_connection = 
-			Gtk::Main::timeout.connect (bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
+		  Glib::signal_timeout().connect (bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
 		
 		last_audio_region = 0;
 		
@@ -2109,7 +2108,7 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 		}
 	}
 
-	track_canvas_scroller.get_window().set_cursor (GDK_WATCH);
+	track_canvas_scroller.get_window()->set_cursor (GDK_WATCH);
 	ARDOUR_UI::instance()->flush_pending ();
 
 	/* make the proper number of channels in the region */
@@ -2155,7 +2154,7 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 	}
 
   out:
-	track_canvas_scroller.get_window().set_cursor (current_canvas_cursor);
+	track_canvas_scroller.get_window()->set_cursor (current_canvas_cursor);
 }
 
 void
@@ -2293,7 +2292,7 @@ Editor::insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jac
 		return;
 	}
 
-	track_canvas_scroller.get_window().set_cursor (GDK_WATCH);
+	track_canvas_scroller.get_window()->set_cursor (GDK_WATCH);
 	ARDOUR_UI::instance()->flush_pending ();
 
 	/* make the proper number of channels in the region */
@@ -2336,7 +2335,7 @@ Editor::insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jac
 	}
 
   out:
-	track_canvas_scroller.get_window().set_cursor (current_canvas_cursor);
+	track_canvas_scroller.get_window()->set_cursor (current_canvas_cursor);
 	return;
 }
 
@@ -2889,7 +2888,7 @@ Editor::freeze_thread ()
 gint
 Editor::freeze_progress_timeout (void *arg)
 {
-	interthread_progress_bar.set_percentage (current_interthread_info->progress);
+	interthread_progress_bar.set_fraction (current_interthread_info->progress/100);
 	return !(current_interthread_info->done || current_interthread_info->cancel);
 }
 
@@ -2915,7 +2914,7 @@ Editor::freeze_route ()
 	current_interthread_info = &itt;
 
 	interthread_progress_connection = 
-		Gtk::Main::timeout.connect (bind (mem_fun(*this, &Editor::freeze_progress_timeout), (gpointer) 0), 100);
+	  Glib::signal_timeout().connect (bind (mem_fun(*this, &Editor::freeze_progress_timeout), (gpointer) 0), 100);
 
 	itt.done = false;
 	itt.cancel = false;
@@ -2923,7 +2922,7 @@ Editor::freeze_route ()
 
 	pthread_create (&itt.thread, 0, _freeze_thread, this);
 
-	track_canvas_scroller.get_window().set_cursor (GDK_WATCH);
+	track_canvas_scroller.get_window()->set_cursor (GDK_WATCH);
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
@@ -2932,7 +2931,7 @@ Editor::freeze_route ()
 	interthread_progress_connection.disconnect ();
 	interthread_progress_window->hide_all ();
 	current_interthread_info = 0;
-	track_canvas_scroller.get_window().set_cursor (current_canvas_cursor);
+	track_canvas_scroller.get_window()->set_cursor (current_canvas_cursor);
 }
 
 void
@@ -3462,7 +3461,7 @@ Editor::normalize_region ()
 
 	begin_reversible_command (_("normalize"));
 
-	track_canvas_scroller.get_window().set_cursor (wait_cursor);
+	track_canvas_scroller.get_window()->set_cursor (wait_cursor);
 	gdk_flush ();
 
 	for (AudioRegionSelection::iterator r = selection->audio_regions.begin(); r != selection->audio_regions.end(); ++r) {
@@ -3472,7 +3471,7 @@ Editor::normalize_region ()
 	}
 
 	commit_reversible_command ();
-	gdk_window_set_cursor (track_canvas_scroller.get_window(), current_canvas_cursor);
+	gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
 }
 
 
@@ -3519,7 +3518,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 
 	begin_reversible_command (command);
 
-	track_canvas_scroller.get_window().set_cursor (wait_cursor);
+	track_canvas_scroller.get_window()->set_cursor (wait_cursor);
 	gdk_flush ();
 
 	for (AudioRegionSelection::iterator r = selection->audio_regions.begin(); r != selection->audio_regions.end(); ) {
@@ -3548,7 +3547,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 	selection->audio_regions.clear ();
 
   out:
-	gdk_window_set_cursor (track_canvas_scroller.get_window(), current_canvas_cursor);
+	gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
 }
 
 void

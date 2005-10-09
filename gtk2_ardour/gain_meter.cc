@@ -52,8 +52,8 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 
-Signal0<void> GainMeter::ResetAllPeakDisplays;
-Signal1<void,RouteGroup*> GainMeter::ResetGroupPeakDisplays;
+sigc::signal<void> GainMeter::ResetAllPeakDisplays;
+sigc::signal<void,RouteGroup*> GainMeter::ResetGroupPeakDisplays;
 Pix* GainMeter::slider_pix = 0;
 
 int
@@ -194,7 +194,7 @@ GainMeter::GainMeter (IO& io, Session& s)
 	_io.gain_changed.connect (mem_fun(*this, &GainMeter::gain_changed));
 
 	meter_metric_area.signal_expose_event().connect (mem_fun(*this, &GainMeter::meter_metrics_expose));
-	gain_adjustment.value_changed.connect (mem_fun(*this, &GainMeter::gain_adjusted));
+	gain_adjustment.signal_value_changed().connect (mem_fun(*this, &GainMeter::gain_adjusted));
 	peak_display.signal_button_release_event().connect (mem_fun(*this, &GainMeter::peak_button_release));
 
 	_session.MeterHoldChanged.connect (mem_fun(*this, &GainMeter::meter_hold_changed));
@@ -229,7 +229,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 
 	double fraction;
 
-	Gdk_Window win (meter_metric_area.get_window());
+	GdkWindow win (meter_metric_area.get_window());
 	Gdk_GC fg_gc (meter_metric_area.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
 	Gdk_GC bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
 	Gdk_Font font (meter_metric_area.get_style()->get_font());
@@ -433,7 +433,7 @@ GainMeter::setup_meters ()
 			meters[n].meter = new FastMeter ((uint32_t) floor (_session.meter_hold()), width, FastMeter::Vertical);
 			meters[n].width = width;
 
-			meters[n].meter->signal_add_event()s (Gdk::BUTTON_RELEASE_MASK);
+			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
 			meters[n].meter->signal_button_release_event().connect
 				(bind (mem_fun(*this, &GainMeter::meter_button_release), n));
 			meters[n].meter->signal_button_release_event().connect_after (ptr_fun (do_not_propagate));

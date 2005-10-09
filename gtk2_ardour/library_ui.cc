@@ -328,7 +328,7 @@ SoundFileBrowser::SoundFileBrowser()
 
 	dir_list->reparent(*dir_scroll);
 	file_list->reparent(*file_scroll);
-	file_list->set_selection_mode (GTK_SELECTION_MULTIPLE);
+	file_list->set_selection_mode (Gtk::SELECTION_MULTIPLE);
 	hbox->pack_start(*dir_scroll);
 	hbox->pack_start(*file_scroll);
 	vbox->pack_start(*hbox, true, true);
@@ -443,7 +443,7 @@ LibraryTree::LibraryTree ()
 	scroll.set_size_request (200, 150);
 	scroll.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	scroll.add_with_viewport(tree);
-	tree.set_selection_mode(GTK_SELECTION_MULTIPLE);
+	tree.set_selection_mode(Gtk::SELECTION_MULTIPLE);
 
 	btn_box_top.pack_start(add_btn);
 	btn_box_top.pack_start(folder_btn);

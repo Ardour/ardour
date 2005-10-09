@@ -176,7 +176,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_style_button, _("Pan automation type"));
 	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_style_button, _("Gain automation type"));
 
-	hide_button.signal_set_event()s (hide_button.signal_get_event()s() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
+	hide_button.set_events (hide_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
 
 	width_button.unset_flags (Gtk::CAN_FOCUS);
 	hide_button.unset_flags (Gtk::CAN_FOCUS);
@@ -388,7 +388,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	pan_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event));
 	pan_automation_state_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event));
 
-	polarity_button.toggled.connect (mem_fun(*this, &MixerStrip::polarity_toggled));
+	polarity_button.signal_toggled().connect (mem_fun(*this, &MixerStrip::polarity_toggled));
 
 	name_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::name_button_button_release));
 
@@ -587,7 +587,7 @@ MixerStrip::edit_output_configuration ()
 	} 
 
 	if (output_selector->is_visible()) {
-		output_selector->get_toplevel()->get_window().raise();
+		output_selector->get_toplevel()->get_window()->raise();
 	} else {
 		output_selector->show_all ();
 	}
@@ -601,7 +601,7 @@ MixerStrip::edit_input_configuration ()
 	} 
 
 	if (input_selector->is_visible()) {
-		input_selector->get_toplevel()->get_window().raise();
+		input_selector->get_toplevel()->get_window()->raise();
 	} else {
 		input_selector->show_all ();
 	}
@@ -689,7 +689,7 @@ MixerStrip::add_connection_to_input_menu (ARDOUR::Connection* c)
 		
 		if (current == c) {
 			ignore_toggle = true;
-			dynamic_cast<CheckMenuItem *> (citems.back())->set_active (true);
+			dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
 			ignore_toggle = false;
 		}
 	}
@@ -713,7 +713,7 @@ MixerStrip::add_connection_to_output_menu (ARDOUR::Connection* c)
 		
 		if (current == c) {
 			ignore_toggle = true;
-			dynamic_cast<CheckMenuItem *> (citems.back())->set_active (true);
+			dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
 			ignore_toggle = false;
 		}
 	}
@@ -738,7 +738,7 @@ MixerStrip::select_stream_input ()
 			
 			if (get_diskstream() == *i) {
 				ignore_toggle = true;
-				static_cast<CheckMenuItem *> (items.back())->set_active (true);
+				static_cast<CheckMenuItem *> (&items.back())->set_active (true);
 				ignore_toggle = false;
 			} 
 		}
@@ -1127,7 +1127,7 @@ MixerStrip::comment_button_clicked ()
 void
 MixerStrip::setup_comment_editor ()
 {
-	comment_window = new Window (GTK_WINDOW_TOPLEVEL);
+	comment_window = new Window (WINDOW_TOPLEVEL);
 
 	string str;
 	str = _route.name();
@@ -1136,8 +1136,8 @@ MixerStrip::setup_comment_editor ()
 
 	comment_area.set_name ("MixerTrackCommentArea");
 	comment_area.set_editable (true);
-	comment_area.signal_focus_in_event()().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
-	comment_area.signal_focus_out_event()().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
+	comment_area.signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
+	comment_area.signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
 	comment_area.changed.connect (mem_fun(*this, &MixerStrip::comment_edited));
 	comment_area.signal_button_release_event().connect_after (ptr_fun (do_not_propagate));
 	comment_area.show ();
@@ -1286,7 +1286,7 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteUI::route_rename)));
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
-	route_active_menu_item = dynamic_cast<CheckMenuItem *> (items.back());
+	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	route_active_menu_item->set_active (_route.active());
 
 	items.push_back (SeparatorElem());
@@ -1354,7 +1354,7 @@ MixerStrip::set_selected (bool yn)
 {
 	AxisView::set_selected (yn);
 	if (_selected) {
-		global_frame.set_shadow_type (GTK_SHADOW_ETCHED_OUT);
+		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 		global_frame.set_name ("MixerStripSelectedFrame");
 	} else {
 		global_frame.set_shadow_type (Gtk::SHADOW_IN);

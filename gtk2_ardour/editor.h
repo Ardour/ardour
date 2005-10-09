@@ -147,9 +147,9 @@ class Editor : public PublicEditor
 	TimeAxisView* get_named_time_axis(std::string name) ;
 	/* </CMT Additions> */
 
-	/* public access to auditioning */
-
-	bool consider_auditioning (ARDOUR::AudioRegion*);
+	void consider_auditioning (ARDOUR::Region&);
+	void hide_a_region (ARDOUR::Region&);
+	void remove_a_region (ARDOUR::Region&);
 
 	/* option editor-access */
 
@@ -712,23 +712,35 @@ class Editor : public PublicEditor
 	bool no_zoom_repos_update;
 	bool no_tempo_map_update;
 
-	Gtk::TreeView          region_list_display;
-	//Gtk::CTree_Helpers::RowList::iterator region_list_hidden_node;
+	struct RegionListDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    RegionListDisplayModelColumns() {
+		    add (name);
+		    add (region);
+	    }
+	    Gtk::TreeModelColumn<Glib::ustring> name;
+	    Gtk::TreeModelColumn<ARDOUR::Region*> region;
+	};
+	    
+	RegionListDisplayModelColumns    region_list_columns;
+	Gtk::TreeView                    region_list_display;
+	Glib::RefPtr<Gtk::TreeStore>     region_list_model;
+	Glib::RefPtr<Gtk::TreeModelSort> region_list_sort_model;
+	Glib::RefPtr<Gtk::Action>        toggle_full_region_list_action;
+
+	void region_list_selection_changed ();
+
 	Gtk::Menu          *region_list_menu;
-	vector<Gtk::MenuItem*> rl_context_menu_region_items;
 	Gtk::ScrolledWindow region_list_scroller;
 	Gtk::Frame          region_list_frame;
 
-	gint region_list_display_key_press (GdkEventKey *);
-	gint region_list_display_key_release (GdkEventKey *);
-	gint region_list_display_button_press (GdkEventButton *);
-	gint region_list_display_button_release (GdkEventButton *);
-	gint region_list_display_enter_notify (GdkEventCrossing *);
-	gint region_list_display_leave_notify (GdkEventCrossing *);
-	void region_list_display_selected (gint row, gint col, GdkEvent* ev);
-	void region_list_display_unselected (gint row, gint col, GdkEvent* ev);
-	void region_list_column_click (gint);
+	bool region_list_display_key_press (GdkEventKey *);
+	bool region_list_display_key_release (GdkEventKey *);
+	bool region_list_display_button_press (GdkEventButton *);
+	bool region_list_display_button_release (GdkEventButton *);
+	bool region_list_display_enter_notify (GdkEventCrossing *);
+	bool region_list_display_leave_notify (GdkEventCrossing *);
 	void region_list_clear ();
+	void region_list_selection_mapover (sigc::slot<void,ARDOUR::Region&>);
 	void build_region_list_menu ();
 
 	Gtk::CheckMenuItem* toggle_auto_regions_item;
@@ -746,8 +758,7 @@ class Editor : public PublicEditor
 	void toggle_full_region_list ();
 	void toggle_show_auto_regions ();
 
-	static gint _region_list_sorter (GtkTreeView*, gconstpointer, gconstpointer);
-	gint region_list_sorter (gconstpointer, gconstpointer);
+	int region_list_sorter (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
 
 	/* named selections */
 
@@ -870,9 +881,7 @@ class Editor : public PublicEditor
 	void normalize_region ();
 	void denormalize_region ();
 
-	ARDOUR::Region* region_list_button_region;
 	void audition_region_from_region_list ();
-	void remove_region_from_region_list ();
 	void hide_region_from_region_list ();
 	void remove_selected_regions_from_region_list ();
 
@@ -918,10 +927,6 @@ class Editor : public PublicEditor
 
 	void amplitude_zoom (gdouble scale);
 	void amplitude_zoom_step (bool in);
-
-	ARDOUR::AudioRegion* region_list_display_drag_region;
-	char                 need_wave_cursor;
-	gint                 region_list_display_motion (GdkEventMotion*);
 
 	void insert_region_list_drag (ARDOUR::AudioRegion&);
 	void insert_region_list_selection (float times);
@@ -1819,6 +1824,12 @@ class Editor : public PublicEditor
 	
 	typedef std::map<Editing::ColorID,std::string> ColorStyleMap;
 	void init_colormap ();
+
+	/* GTK2 stuff */
+
+	Glib::RefPtr<Gtk::UIManager> ui_manager;
+	vector<Glib::RefPtr<Gtk::Action> > session_requiring_actions;
+	vector<Glib::RefPtr<Gtk::Action> > region_list_selection_requiring_actions;
 };
 
 #endif /* __ardour_editor_h__ */

@@ -64,13 +64,13 @@ Editor::hscroll_slider_expose (GdkEventExpose *ev)
 
 	/* make sure we can see the bar at all times, and have enough to do zoom-trim on */
 
-	bar_rect.width = max ((guint16) (edit_hscroll_edge_width+5), bar_rect.width);
+	bar_rect.width = max ((guint16) (edit_hscroll_edge_width+5), (guint16) bar_rect.width);
 
 	gdk_rectangle_intersect (&ev->area, &bar_rect, &draw_rect);
 
 	gtk_paint_box (edit_hscroll_slider.get_style()->gobj(),
-		       edit_hscroll_slider.get_window(),
-		       GTK_STATE_ACTIVE, 
+		       edit_hscroll_slider.get_window()->gobj(),
+		       Gtk::STATE_ACTIVE, 
 		       Gtk::SHADOW_IN, 
 		       &ev->area, 
 		       GTK_WIDGET(edit_hscroll_slider.gobj()),
@@ -78,7 +78,7 @@ Editor::hscroll_slider_expose (GdkEventExpose *ev)
 		       0, 0, -1, -1);
 
 	gtk_paint_box (edit_hscroll_slider.get_style()->gobj(),
-		       edit_hscroll_slider.get_window(),
+		       edit_hscroll_slider.get_window()->gobj(),
 		       Gtk::STATE_NORMAL, 
 		       Gtk::SHADOW_OUT, 
 		       &draw_rect,
@@ -174,14 +174,14 @@ gint
 Editor::hscroll_slider_motion (GdkEventMotion *ev)
 {
 	gint x, y;
-	GdkModifierType state;
+	Gdk::ModifierType state;
 	gint bar_max = edit_hscroll_slider_width - 2;
 
 	if (!session || !edit_hscroll_dragging) {
 		return TRUE;
 	}
 
-	edit_hscroll_slider.get_window().get_pointer (x, y, state);
+	edit_hscroll_slider.get_window()->get_pointer (x, y, state);
 
 	jack_nframes_t new_frame;
 	jack_nframes_t frames;

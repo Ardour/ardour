@@ -78,7 +78,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace sigc;
+//using namespace sigc;
 using namespace LADSPA;
 using namespace Gtk;
 using namespace Editing;
@@ -147,7 +147,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	visual_button.set_name ("TrackVisualButton");
 	hide_button.set_name ("TrackRemoveButton");
 
-	hide_button.add (*(manage (new Pixmap (small_x_xpm))));
+	hide_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(small_x_xpm)))));
 	
 	_route.mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
 	_route.solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
@@ -167,8 +167,8 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	visual_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::visual_click));
 	hide_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::hide_click));
 
-	name_entry.activate.connect (mem_fun(*this, &AudioTimeAxisView::name_entry_activated));
-	name_entry.signal_focus_out_event()().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_focus_out_handler));
+	name_entry.signal_activate().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_activated));
+	name_entry.signal_focus_out_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_focus_out_handler));
 	name_entry.signal_button_press_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_press_handler));
 	name_entry.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_release_handler));
 	name_entry.signal_key_release_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_key_release_handler));
@@ -349,7 +349,7 @@ AudioTimeAxisView::edit_click (GdkEventButton *ev)
 				   bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), (RouteGroup *) 0)));
 	
 	if (_route.edit_group() == 0) {
-		static_cast<RadioMenuItem*>(items.back())->set_active ();
+		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 
 	_session.foreach_edit_group (this, &AudioTimeAxisView::add_edit_group_menu_item);
@@ -367,7 +367,7 @@ AudioTimeAxisView::add_edit_group_menu_item (RouteGroup *eg)
 	items.push_back (RadioMenuElem (edit_group_menu_radio_group,
 					eg->name(), bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), eg)));
 	if (_route.edit_group() == eg) {
-		static_cast<RadioMenuItem*>(items.back())->set_active ();
+		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 }
 
@@ -738,12 +738,12 @@ AudioTimeAxisView::build_display_menu ()
 
 	automation_items.push_back (CheckMenuElem (_("gain"), 
 						   mem_fun(*this, &AudioTimeAxisView::toggle_gain_track)));
-	gain_automation_item = static_cast<CheckMenuItem*> (automation_items.back());
+	gain_automation_item = static_cast<CheckMenuItem*> (&automation_items.back());
 	gain_automation_item->set_active(show_gain_automation);
 
 	automation_items.push_back (CheckMenuElem (_("pan"),
 						   mem_fun(*this, &AudioTimeAxisView::toggle_pan_track)));
-	pan_automation_item = static_cast<CheckMenuItem*> (automation_items.back());
+	pan_automation_item = static_cast<CheckMenuItem*> (&automation_items.back());
 	pan_automation_item->set_active(show_pan_automation);
 
 	automation_items.push_back (MenuElem (_("Plugins"), subplugin_menu));
@@ -755,7 +755,7 @@ AudioTimeAxisView::build_display_menu ()
 	waveform_menu->set_name ("ArdourContextMenu");
 	
 	waveform_items.push_back (CheckMenuElem (_("Show waveforms"), mem_fun(*this, &AudioTimeAxisView::toggle_waveforms)));
-	waveform_item = static_cast<CheckMenuItem *> (waveform_items.back());
+	waveform_item = static_cast<CheckMenuItem *> (&waveform_items.back());
 	ignore_toggle = true;
 	waveform_item->set_active (editor.show_waveforms());
 	ignore_toggle = false;
@@ -763,10 +763,10 @@ AudioTimeAxisView::build_display_menu ()
 	RadioMenuItem::Group group;
 
 	waveform_items.push_back (RadioMenuElem (group, _("Traditional"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Traditional)));
-	traditional_item = static_cast<RadioMenuItem *> (waveform_items.back());
+	traditional_item = static_cast<RadioMenuItem *> (&waveform_items.back());
 
 	waveform_items.push_back (RadioMenuElem (group, _("Rectified"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Rectified)));
-	rectified_item = static_cast<RadioMenuItem *> (waveform_items.back());
+	rectified_item = static_cast<RadioMenuItem *> (&waveform_items.back());
 
 	items.push_back (MenuElem (_("Waveform"), *waveform_menu));
 
@@ -779,12 +779,12 @@ AudioTimeAxisView::build_display_menu ()
 		RadioMenuItem::Group align_group;
 		
 		alignment_items.push_back (RadioMenuElem (align_group, _("align with existing material"), bind (mem_fun(*this, &AudioTimeAxisView::set_align_style), ExistingMaterial)));
-		align_existing_item = dynamic_cast<RadioMenuItem*>(alignment_items.back());
+		align_existing_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
 		if (get_diskstream()->alignment_style() == ExistingMaterial) {
 			align_existing_item->set_active();
 		}
 		alignment_items.push_back (RadioMenuElem (align_group, _("align with capture time"), bind (mem_fun(*this, &AudioTimeAxisView::set_align_style), CaptureTime)));
-		align_capture_item = dynamic_cast<RadioMenuItem*>(alignment_items.back());
+		align_capture_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
 		if (get_diskstream()->alignment_style() == CaptureTime) {
 			align_capture_item->set_active();
 		}
@@ -796,7 +796,7 @@ AudioTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
-	route_active_menu_item = dynamic_cast<CheckMenuItem *> (items.back());
+	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	route_active_menu_item->set_active (_route.active());
 
 	items.push_back (SeparatorElem());
@@ -1573,7 +1573,7 @@ AudioTimeAxisView::add_redirect_to_subplugin_menu (Redirect* r)
 		string name = r->describe_parameter (*i);
 		
 		items.push_back (CheckMenuElem (name));
-		mitem = dynamic_cast<CheckMenuItem*> (items.back());
+		mitem = dynamic_cast<CheckMenuItem*> (&items.back());
 
 		if (has_visible_automation.find((*i)) != has_visible_automation.end()) {
 			mitem->set_active(true);
@@ -1593,7 +1593,7 @@ AudioTimeAxisView::add_redirect_to_subplugin_menu (Redirect* r)
 
 		}
 
-		mitem->toggled.connect (bind (mem_fun(*this, &AudioTimeAxisView::redirect_menu_item_toggled), rai, ran));
+		mitem->signal_toggled().connect (bind (mem_fun(*this, &AudioTimeAxisView::redirect_menu_item_toggled), rai, ran));
 	}
 
 	/* add the menu for this redirect, because the subplugin

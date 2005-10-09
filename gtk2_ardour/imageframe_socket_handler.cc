@@ -40,7 +40,6 @@
 #include "marker_time_axis_view.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
-#include "extra_bind.h"
 #include "gui_thread.h"
 
 #include "i18n.h"
@@ -555,7 +554,7 @@ ImageFrameSocketHandler::send_imageframe_view_position_change(jack_nframes_t pos
 	msgBuffer << ardourvis::ITEM_UPDATE << ardourvis::IMAGEFRAME_ITEM << ardourvis::POSITION_CHANGE ;
 	
 	// add the item description
-	this->string_compose_imageframe_item_desc(item, msgBuffer) ;
+	this->compose_imageframe_item_desc(item, msgBuffer) ;
 
 	msgBuffer << std::setw(ardourvis::TIME_VALUE_CHARS) << pos ;
 	
@@ -590,7 +589,7 @@ ImageFrameSocketHandler::send_imageframe_view_duration_change(jack_nframes_t dur
 	// add the msg type
 	msgBuffer << ardourvis::ITEM_UPDATE << ardourvis::IMAGEFRAME_ITEM << ardourvis::DURATION_CHANGE ;
 	
-	this->string_compose_imageframe_item_desc(item, msgBuffer) ;
+	this->compose_imageframe_item_desc(item, msgBuffer) ;
 
 	msgBuffer << std::setw(ardourvis::TIME_VALUE_CHARS) << dur ;
 	
@@ -624,7 +623,7 @@ ImageFrameSocketHandler::send_imageframe_view_renamed(std::string new_id, std::s
 	// add the msg type
 	msgBuffer << ardourvis::RENAME_ITEM << ardourvis::IMAGEFRAME_ITEM ;
 	
-	this->string_compose_imageframe_item_desc(item, msgBuffer) ;
+	this->compose_imageframe_item_desc(item, msgBuffer) ;
 	
 	// add the old id and length
 	msgBuffer << std::setw(3) << old_id.length() ;
@@ -703,7 +702,7 @@ ImageFrameSocketHandler::send_marker_view_position_change(jack_nframes_t pos, vo
 	msgBuffer << ardourvis::ITEM_UPDATE << ardourvis::MARKER_ITEM << ardourvis::POSITION_CHANGE ;
 	
 	// add the item description
-	this->string_compose_marker_item_desc(item, msgBuffer) ;
+	this->compose_marker_item_desc(item, msgBuffer) ;
 
 	msgBuffer << std::setw(ardourvis::TIME_VALUE_CHARS) << pos ;
 	
@@ -736,7 +735,7 @@ ImageFrameSocketHandler::send_marker_view_duration_change(jack_nframes_t dur, vo
 	// add the msg type
 	msgBuffer << ardourvis::ITEM_UPDATE << ardourvis::MARKER_ITEM << ardourvis::DURATION_CHANGE ;
 	
-	this->string_compose_marker_item_desc(item, msgBuffer) ;
+	this->compose_marker_item_desc(item, msgBuffer) ;
 
 	msgBuffer << std::setw(ardourvis::TIME_VALUE_CHARS) << dur ;
 	
@@ -772,7 +771,7 @@ ImageFrameSocketHandler::send_marker_view_renamed(std::string new_id, std::strin
 	// add the msg type
 	msgBuffer << ardourvis::RENAME_ITEM << ardourvis::MARKER_ITEM ;
 	
-	this->string_compose_marker_item_desc(item, msgBuffer) ;
+	this->compose_marker_item_desc(item, msgBuffer) ;
 	
 	// add the old id and length
 	msgBuffer << std::setw(3) << old_id.length() ;
@@ -1066,7 +1065,7 @@ ImageFrameSocketHandler::handle_item_selected(const char* msg)
 		int scene_id_size ;
 		int item_id_size ;
 	
-		this->dstring_ecompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
+		this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
 		
 		// get the named time axis
 		ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(thePublicEditor.get_named_time_axis(track_id)) ;
@@ -1165,7 +1164,7 @@ ImageFrameSocketHandler::handle_insert_imageframe_time_axis(const char* msg)
 		{
 			ImageFrameTimeAxis* ifta = (ImageFrameTimeAxis*)new_tav ;
 			ifta->VisualTimeAxisRemoved.connect(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_removed)) ;
-			ifta->NameChanged.connect(SigC::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed), ifta)) ;
+			ifta->NameChanged.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed), ifta)) ;
 			
 			send_return_success() ;
 		}
@@ -1671,7 +1670,7 @@ ImageFrameSocketHandler::handle_imageframe_view_position_update(const char* msg)
 	int scene_id_size ;
 	int item_id_size ;
 	
-	this->dstring_ecompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
+	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
 	
 	jack_nframes_t start_frame = strtoul(get_message_part(position, ardourvis::TIME_VALUE_CHARS, msg).c_str(), 0, 10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
@@ -1723,7 +1722,7 @@ ImageFrameSocketHandler::handle_imageframe_view_duration_update(const char* msg)
 	int scene_id_size ;
 	int item_id_size ;
 	
-	this->dstring_ecompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
+	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
 	
 	jack_nframes_t duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
@@ -1774,7 +1773,7 @@ ImageFrameSocketHandler::handle_imageframe_position_lock_update(const char* msg)
 	int group_id_size ;
 	int item_id_size ;
 	
-	this->dstring_ecompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
+	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
 	
 	std::string pos_lock = get_message_part(position,1,msg) ;
 	bool pos_lock_active = false ;
@@ -1826,7 +1825,7 @@ ImageFrameSocketHandler::handle_imageframe_view_max_duration_update(const char* 
 	int group_id_size ;
 	int item_id_size ;
 	
-	this->dstring_ecompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
+	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
 	
 	jack_nframes_t max_duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
@@ -1862,7 +1861,7 @@ ImageFrameSocketHandler::handle_imageframe_view_max_duration_enable_update(const
 	int group_id_size ;
 	int item_id_size ;
 	
-	this->dstring_ecompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
+	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
 	
 	std::string active = get_message_part(position,1,msg) ;
 	bool max_duration_active = false ;
@@ -1914,7 +1913,7 @@ ImageFrameSocketHandler::handle_imageframe_view_min_duration_update(const char* 
 	int group_id_size ;
 	int item_id_size ;
 	
-	this->dstring_ecompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
+	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
 	
 	jack_nframes_t min_duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
@@ -1950,7 +1949,7 @@ ImageFrameSocketHandler::handle_imageframe_view_min_duration_enable_update(const
 	int group_id_size ;
 	int item_id_size ;
 	
-	this->dstring_ecompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
+	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
 	
 	std::string active = get_message_part(position,1,msg) ;
 	bool min_duration_active = false ;
@@ -2146,7 +2145,7 @@ ImageFrameSocketHandler::get_message_part(int start, int32_t num_chars, const ch
  * @param item_id_size
  */
 void
-ImageFrameSocketHandler::dstring_ecompose_imageframe_item_desc(const char* msg, int& position, std::string& track_id,
+ImageFrameSocketHandler::decompose_imageframe_item_desc(const char* msg, int& position, std::string& track_id,
 	int& track_id_size, std::string& scene_id, int& scene_id_size, std::string& item_id, int& item_id_size)
 {
 	// get the track Id size

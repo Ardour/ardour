@@ -43,7 +43,6 @@
 #include "keyboard.h"
 #include "editing.h"
 #include "rgb_macros.h"
-#include "extra_bind.h"
 
 #include <ardour/types.h>
 #include <ardour/route.h>
@@ -243,7 +242,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	ignore_mouse_mode_toggle = false;
 
 	if (is_drawable()) {
-		gdk_window_set_cursor (track_canvas_scroller.get_window(), current_canvas_cursor);
+	  gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
 	}
 }
 
@@ -999,7 +998,7 @@ Editor::button_release_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType
 		case MouseObject:
 			switch (item_type) {
 			case AutomationTrackItem:
-				dynamic_cast<AutomationTimeAxisView*>(clicked_trackview)->signal_add_automation_event() 
+				dynamic_cast<AutomationTimeAxisView*>(clicked_trackview)->add_automation_event 
 					(item,
 					 event,
 					 where,
@@ -1015,7 +1014,7 @@ Editor::button_release_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType
 		case MouseGain:
 			switch (item_type) {
 			case RegionItem:
-				clicked_regionview->signal_add_gain_point_event() (item, event);
+				clicked_regionview->add_gain_point_event (item, event);
 				return TRUE;
 				break;
 				
@@ -1142,7 +1141,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 			show_verbose_canvas_cursor ();
 
 			if (is_drawable()) {
-				gdk_window_set_cursor (track_canvas_scroller.get_window(), fader_cursor);
+			  gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), fader_cursor);
 			}
 		}
 		break;
@@ -1166,7 +1165,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		show_verbose_canvas_cursor ();
 		
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window(), fader_cursor);
+		  gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), fader_cursor);
 		}
 		break;
 		
@@ -1174,7 +1173,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		if (mouse_mode == MouseGain) {
 			gnome_canvas_item_set (item, "fill_color_rgba", color_map[cEnteredGainLine], NULL);
 			if (is_drawable()) {
-				gdk_window_set_cursor (track_canvas_scroller.get_window(), fader_cursor);
+				gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), fader_cursor);
 			}
 		}
 		break;
@@ -1184,13 +1183,13 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case PanAutomationLineItem:
 		gnome_canvas_item_set (item, "fill_color_rgba", color_map[cEnteredAutomationLine], NULL);
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window(), fader_cursor);
+			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), fader_cursor);
 		}
 		break;
 		
 	case AudioRegionViewNameHighlight:
 		if (is_drawable() && mouse_mode == MouseObject) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window(), trimmer_cursor);
+			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), trimmer_cursor);
 		}
 		break;
 
@@ -1204,14 +1203,14 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	/* </CMT Additions> */
 
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window(), trimmer_cursor);
+			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), trimmer_cursor);
 		}
 		break;
 
 	case EditCursorItem:
 	case PlayheadCursorItem:
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window(), grabber_cursor);
+			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), grabber_cursor);
 		}
 		break;
 
@@ -1221,7 +1220,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 
 		if (!reinterpret_cast<AudioRegionView *> (gtk_object_get_data(GTK_OBJECT(item), "regionview"))->name_active()) {
 			if (mouse_mode == MouseObject && is_drawable()) {
-				gdk_window_set_cursor (track_canvas_scroller.get_window(), trimmer_cursor);
+				gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), trimmer_cursor);
 			}
 		} 
 		break;
@@ -1242,7 +1241,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 				break;
 			}
 
-			gdk_window_set_cursor (track_canvas_scroller.get_window(), cursor);
+			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), cursor);
 
 			AutomationTimeAxisView* atv;
 			if ((atv = static_cast<AutomationTimeAxisView*>(gtk_object_get_data(GTK_OBJECT(item), "trackview"))) != 0) {
@@ -1258,7 +1257,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case MeterBarItem:
 	case TempoBarItem:
 		if (is_drawable()) {
-			gdk_window_set_cursor (time_canvas_scroller.get_window(), timebar_cursor);
+			gdk_window_set_cursor (time_canvas_scroller.get_window()->gobj(), timebar_cursor);
 		}
 		break;
 
@@ -1271,7 +1270,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case MeterMarkerItem:
 	case TempoMarkerItem:
 		if (is_drawable()) {
-			gdk_window_set_cursor (time_canvas_scroller.get_window(), timebar_cursor);
+			gdk_window_set_cursor (time_canvas_scroller.get_window()->gobj(), timebar_cursor);
 		}
 		break;
 	case FadeInHandleItem:
@@ -1336,7 +1335,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		}
 		
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window(), current_canvas_cursor);
+			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
 		}
 
 		hide_verbose_canvas_cursor ();
@@ -1354,7 +1353,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case MarkerViewHandleEndItem:
 	/* </CMT Additions> */
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window(), current_canvas_cursor);
+			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
 		}
 		break;
 
@@ -1365,7 +1364,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		al = reinterpret_cast<AutomationLine*> (gtk_object_get_data (GTK_OBJECT(item),"line"));
 		gnome_canvas_item_set (item, "fill_color_rgba", al->get_line_color(), NULL);
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window(), current_canvas_cursor);
+			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
 		}
 		break;
 
@@ -1373,7 +1372,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		/* see enter_handler() for notes */
 		if (!reinterpret_cast<AudioRegionView *> (gtk_object_get_data(GTK_OBJECT(item), "regionview"))->name_active()) {
 			if (is_drawable() && mouse_mode == MouseObject) {
-				gdk_window_set_cursor (track_canvas_scroller.get_window(), current_canvas_cursor);
+				gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
 			}
 		}
 		break;
@@ -1384,7 +1383,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case TempoBarItem:
 	case MarkerBarItem:
 		if (is_drawable()) {
-			gdk_window_set_cursor (time_canvas_scroller.get_window(), timebar_cursor);
+			gdk_window_set_cursor (time_canvas_scroller.get_window()->gobj(), timebar_cursor);
 		}
 		break;
 		
@@ -1399,7 +1398,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case TempoMarkerItem:
 		
 		if (is_drawable()) {
-			gdk_window_set_cursor (time_canvas_scroller.get_window(), timebar_cursor);
+			gdk_window_set_cursor (time_canvas_scroller.get_window()->gobj(), timebar_cursor);
 		}
 
 		break;
@@ -1412,10 +1411,10 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 
 	case AutomationTrackItem:
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window(), current_canvas_cursor);
+			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
 
 			clear_entered_track = true;
-			Main::idle.connect (mem_fun(*this, &Editor::left_automation_track));
+			Glib::signal_idle().connect (mem_fun(*this, &Editor::left_automation_track));
 		}
 		break;
 		

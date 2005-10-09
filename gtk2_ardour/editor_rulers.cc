@@ -56,27 +56,27 @@ Editor::initialize_rulers ()
 	ruler_grabbed_widget = 0;
 	
 	_smpte_ruler = gtk_custom_hruler_new ();
-	smpte_ruler = wrap (_smpte_ruler);
+	smpte_ruler = Glib::wrap (_smpte_ruler);
 	smpte_ruler->set_name ("SMPTERuler");
 	smpte_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_smpte_ruler), &ruler_metrics[ruler_metric_smpte]);
 	ruler_shown[ruler_metric_smpte] = true;
 	
 	_bbt_ruler = gtk_custom_hruler_new ();
-	bbt_ruler = wrap (_bbt_ruler);
+	bbt_ruler = Glib::wrap (_bbt_ruler);
 	bbt_ruler->set_name ("BBTRuler");
 	bbt_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_bbt_ruler), &ruler_metrics[ruler_metric_bbt]);
 	ruler_shown[ruler_metric_bbt] = true;
 
 	_frames_ruler = gtk_custom_hruler_new ();
-	frames_ruler = wrap (_frames_ruler);
+	frames_ruler = Glib::wrap (_frames_ruler);
 	frames_ruler->set_name ("FramesRuler");
 	frames_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_frames_ruler), &ruler_metrics[ruler_metric_frames]);
 
 	_minsec_ruler = gtk_custom_hruler_new ();
-	minsec_ruler = wrap (_minsec_ruler);
+	minsec_ruler = Glib::wrap (_minsec_ruler);
 	minsec_ruler->set_name ("MinSecRuler");
 	minsec_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
@@ -89,10 +89,10 @@ Editor::initialize_rulers ()
 	ruler_shown[ruler_metric_frames] = false;
 	ruler_shown[ruler_metric_minsec] = false;
 	
-	smpte_ruler->signal_set_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	bbt_ruler->signal_set_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	frames_ruler->signal_set_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	minsec_ruler->signal_set_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	smpte_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	bbt_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	smpte_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
 	bbt_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
@@ -127,10 +127,10 @@ Editor::ruler_button_press (GdkEventButton* ev)
 	//Gtk::Main::grab_add (*minsec_ruler);
 	Widget * grab_widget = 0;
 
-	if (smpte_ruler->is_realized() && ev->window == smpte_ruler->get_window()) grab_widget = smpte_ruler;
-	else if (bbt_ruler->is_realized() && ev->window == bbt_ruler->get_window()) grab_widget = bbt_ruler;
-	else if (frames_ruler->is_realized() && ev->window == frames_ruler->get_window()) grab_widget = frames_ruler;
-	else if (minsec_ruler->is_realized() && ev->window == minsec_ruler->get_window()) grab_widget = minsec_ruler;
+	if (smpte_ruler->is_realized() && ev->window == smpte_ruler->get_window()->gobj()) grab_widget = smpte_ruler;
+	else if (bbt_ruler->is_realized() && ev->window == bbt_ruler->get_window()->gobj()) grab_widget = bbt_ruler;
+	else if (frames_ruler->is_realized() && ev->window == frames_ruler->get_window()->gobj()) grab_widget = frames_ruler;
+	else if (minsec_ruler->is_realized() && ev->window == minsec_ruler->get_window()->gobj()) grab_widget = minsec_ruler;
 
 	if (grab_widget) {
 		Gtk::Main::grab_add (*grab_widget);
@@ -144,10 +144,10 @@ gint
 Editor::ruler_button_release (GdkEventButton* ev)
 {
 	gint x,y;
-	GdkModifierType state;
+	Gdk::ModifierType state;
 
 	/* need to use the correct x,y, the event lies */
-	time_canvas_event_box.get_window().get_pointer (x, y, state);
+	time_canvas_event_box.get_window()->get_pointer (x, y, state);
 
 
 	ruler_pressed_button = 0;
@@ -219,10 +219,10 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	double cx=0,cy=0;
 
 	gint x,y;
-	GdkModifierType state;
+	Gdk::ModifierType state;
 
 	/* need to use the correct x,y, the event lies */
-	time_canvas_event_box.get_window().get_pointer (x, y, state);
+	time_canvas_event_box.get_window()->get_pointer (x, y, state);
 
 	
 	gnome_canvas_window_to_world (GNOME_CANVAS(track_gnome_canvas), x, y, &wcx, &wcy);
@@ -339,25 +339,25 @@ Editor::popup_ruler_menu (jack_nframes_t where, ItemType t)
 	}
 	
 	ruler_items.push_back (CheckMenuElem (_("Min:Secs"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_minsec)));
-	mitem = (CheckMenuItem *) ruler_items.back(); 
+	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_metric_minsec]) {
 		mitem->set_active(true);
 	}
 
 	ruler_items.push_back (CheckMenuElem (X_("SMPTE"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte)));
-	mitem = (CheckMenuItem *) ruler_items.back(); 
+	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_metric_smpte]) {
 		mitem->set_active(true);
 	}
 
 	ruler_items.push_back (CheckMenuElem (_("Frames"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_frames)));
-	mitem = (CheckMenuItem *) ruler_items.back(); 
+	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_metric_frames]) {
 		mitem->set_active(true);
 	}
 
 	ruler_items.push_back (CheckMenuElem (_("Bars:Beats"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_bbt)));
-	mitem = (CheckMenuItem *) ruler_items.back(); 
+	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_metric_bbt]) {
 		mitem->set_active(true);
 	}
@@ -365,31 +365,31 @@ Editor::popup_ruler_menu (jack_nframes_t where, ItemType t)
 	ruler_items.push_back (SeparatorElem ());
 
 	ruler_items.push_back (CheckMenuElem (_("Meter"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_meter)));
-	mitem = (CheckMenuItem *) ruler_items.back(); 
+	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_time_meter]) {
 		mitem->set_active(true);
 	}
 
 	ruler_items.push_back (CheckMenuElem (_("Tempo"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_tempo)));
-	mitem = (CheckMenuItem *) ruler_items.back(); 
+	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_time_tempo]) {
 		mitem->set_active(true);
 	}
 
 	ruler_items.push_back (CheckMenuElem (_("Location Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_marker)));
-	mitem = (CheckMenuItem *) ruler_items.back(); 
+	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_time_marker]) {
 		mitem->set_active(true);
 	}
 
  	ruler_items.push_back (CheckMenuElem (_("Range Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_range_marker)));
- 	mitem = (CheckMenuItem *) ruler_items.back(); 
+ 	mitem = (CheckMenuItem *) &ruler_items.back(); 
  	if (ruler_shown[ruler_time_range_marker]) {
  		mitem->set_active(true);
  	}
 
  	ruler_items.push_back (CheckMenuElem (_("Loop/Punch Ranges"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_transport_marker)));
- 	mitem = (CheckMenuItem *) ruler_items.back(); 
+ 	mitem = (CheckMenuItem *) &ruler_items.back(); 
  	if (ruler_shown[ruler_time_transport_marker]) {
  		mitem->set_active(true);
  	}
@@ -528,34 +528,34 @@ Editor::update_ruler_visibility ()
 	BoxList::iterator canvaspos = ruler_children.begin();
 	
 	_smpte_ruler = gtk_custom_hruler_new ();
-	smpte_ruler = wrap (_smpte_ruler);
+	smpte_ruler = Glib::wrap (_smpte_ruler);
 	smpte_ruler->set_name ("SMPTERuler");
 	smpte_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_smpte_ruler), &ruler_metrics[ruler_metric_smpte]);
 	
 	_bbt_ruler = gtk_custom_hruler_new ();
-	bbt_ruler = wrap (_bbt_ruler);
+	bbt_ruler = Glib::wrap (_bbt_ruler);
 	bbt_ruler->set_name ("BBTRuler");
 	bbt_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_bbt_ruler), &ruler_metrics[ruler_metric_bbt]);
 
 	_frames_ruler = gtk_custom_hruler_new ();
-	frames_ruler = wrap (_frames_ruler);
+	frames_ruler = Glib::wrap (_frames_ruler);
 	frames_ruler->set_name ("FramesRuler");
 	frames_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_frames_ruler), &ruler_metrics[ruler_metric_frames]);
 
 	_minsec_ruler = gtk_custom_hruler_new ();
-	minsec_ruler = wrap (_minsec_ruler);
+	minsec_ruler = Glib::wrap (_minsec_ruler);
 	minsec_ruler->set_name ("MinSecRuler");
 	minsec_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
 
 	
-	smpte_ruler->signal_set_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	bbt_ruler->signal_set_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	frames_ruler->signal_set_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	minsec_ruler->signal_set_event()s (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	smpte_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	bbt_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	smpte_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
 	bbt_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
@@ -574,26 +574,26 @@ Editor::update_ruler_visibility ()
 
 	
 	if (ruler_shown[ruler_metric_minsec]) {
-		lab_children.push_back (Element(minsec_label, false, false));
-		ruler_children.insert (canvaspos, Element(*minsec_ruler, false, false));
+		lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
+		ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
 		visible_timebars++;
 	}
 
 	if (ruler_shown[ruler_metric_smpte]) {
-		lab_children.push_back (Element(smpte_label, false, false));
-		ruler_children.insert (canvaspos, Element(*smpte_ruler, false, false));
+		lab_children.push_back (Element(smpte_label, PACK_SHRINK, PACK_START));
+		ruler_children.insert (canvaspos, Element(*smpte_ruler, PACK_SHRINK, PACK_START));
 		visible_timebars++;
 	}
 
 	if (ruler_shown[ruler_metric_frames]) {
-		lab_children.push_back (Element(frame_label, false, false));
-		ruler_children.insert (canvaspos, Element(*frames_ruler, false, false));
+		lab_children.push_back (Element(frame_label, PACK_SHRINK, PACK_START));
+		ruler_children.insert (canvaspos, Element(*frames_ruler, PACK_SHRINK, PACK_START));
 		visible_timebars++;
 	}
 
 	if (ruler_shown[ruler_metric_bbt]) {
-		lab_children.push_back (Element(bbt_label, false, false));
-		ruler_children.insert (canvaspos, Element(*bbt_ruler, false, false));
+		lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
+		ruler_children.insert (canvaspos, Element(*bbt_ruler, PACK_SHRINK, PACK_START));
 		visible_timebars++;
 	}
 
@@ -603,7 +603,7 @@ Editor::update_ruler_visibility ()
 	args[0].name = "y";
 	
 	if (ruler_shown[ruler_time_meter]) {
-		lab_children.push_back (Element(meter_label, false, false));
+		lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
 
 		gtk_object_getv (GTK_OBJECT(meter_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
@@ -621,7 +621,7 @@ Editor::update_ruler_visibility ()
 	}
 	
 	if (ruler_shown[ruler_time_tempo]) {
-		lab_children.push_back (Element(tempo_label, false, false));
+		lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
 		gtk_object_getv (GTK_OBJECT(tempo_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
 		if (tbpos != old_unit_pos) {
@@ -637,7 +637,7 @@ Editor::update_ruler_visibility ()
 	}
 	
 	if (ruler_shown[ruler_time_marker]) {
-		lab_children.push_back (Element(mark_label, false, false));
+		lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 		gtk_object_getv (GTK_OBJECT(marker_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
 		if (tbpos != old_unit_pos) {
@@ -653,7 +653,7 @@ Editor::update_ruler_visibility ()
 	}
 	
 	if (ruler_shown[ruler_time_range_marker]) {
-		lab_children.push_back (Element(range_mark_label, false, false));
+		lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
 		gtk_object_getv (GTK_OBJECT(range_marker_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
 		if (tbpos != old_unit_pos) {
@@ -669,7 +669,7 @@ Editor::update_ruler_visibility ()
 	}
 
 	if (ruler_shown[ruler_time_transport_marker]) {
-		lab_children.push_back (Element(transport_mark_label, false, false));
+		lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
 		gtk_object_getv (GTK_OBJECT(transport_marker_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
 		if (tbpos != old_unit_pos) {

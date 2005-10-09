@@ -24,7 +24,7 @@
 
 #include <libgnomecanvas/libgnomecanvas.h>
 
-BEGIN_GNOME_CANVAS_DECLS
+G_BEGIN_DECLS
 
 /* Wave viewer item for canvas.
  */
@@ -60,6 +60,6 @@ struct _GnomeCanvasCurveClass {
 
 GtkType gnome_canvas_curve_get_type (void);
 
-END_GNOME_CANVAS_DECLS
+G_END_DECLS
 
 #endif /* __GNOME_CANVAS_CURVE_H__ */

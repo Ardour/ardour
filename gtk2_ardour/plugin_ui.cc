@@ -102,7 +102,7 @@ PluginUIWindow::PluginUIWindow (AudioEngine &engine, PluginInsert& insert, bool 
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	delete_event.connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)));
+	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)));
 	insert.GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
 
 	if (scrollable) {
@@ -285,7 +285,7 @@ PluginUI::build (AudioEngine &engine)
 				}
 
 				button_table.attach (*cui, button_col, button_col + 1, button_row, button_row+1, 
-						     Gtk::FILL|Gtk::EXPAND, 0);
+						     FILL|EXPAND, FILL);
 				button_row++;
 
 			} else if (cui->display) {
@@ -299,7 +299,7 @@ PluginUI::build (AudioEngine &engine)
 				}
 				
 				output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1, 
-						     Gtk::FILL|Gtk::EXPAND, 0);
+						     FILL|EXPAND, FILL);
  
 				output_row++;
 			}
@@ -476,7 +476,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 				control_ui->combo = new Gtk::Combo;
 				control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
-				control_ui->combo->get_popwin()->signal_unmap_event(), un(*this, &PluginUI::control_combo_changed), control_ui));
+				control_ui->combo->get_popwin()->signal_unmap_event(), mem_fun(*this, &PluginUI::control_combo_changed), control_ui));
 				plugin.ParameterChanged.connect (bind (mem_fun(*this, &PluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
@@ -500,7 +500,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 			control_ui->pack_start (*control_ui->button, false, true);
 			control_ui->pack_start (control_ui->automate_button, false, false);
 
-			control_ui->button-.signal_clicked().connect (bind (mem_fun(*this, &PluginUI::control_port_toggled), control_ui));
+			control_ui->button->signal_clicked().connect (bind (mem_fun(*this, &PluginUI::control_port_toggled), control_ui));
 		
 			if(plugin.get_parameter (port_index) == 1){
 				control_ui->button->set_active(true);
@@ -550,8 +550,8 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 			control_ui->control->set_style (BarController::LeftToRight);
 			control_ui->control->set_use_parent (true);
 
-			control_ui->control->get_spin_button().signal_focus_in_event()().connect (mem_fun(*this, &PluginUI::entry_focus_event));
-			control_ui->control->get_spin_button().signal_focus_out_event()().connect (mem_fun(*this, &PluginUI::entry_focus_event));
+			control_ui->control->get_spin_button().signal_focus_in_event().connect (mem_fun(*this, &PluginUI::entry_focus_event));
+			control_ui->control->get_spin_button().signal_focus_out_event().connect (mem_fun(*this, &PluginUI::entry_focus_event));
 
 			control_ui->control->StartGesture.connect (bind (mem_fun(*this, &PluginUI::start_touch), control_ui));
 			control_ui->control->StopGesture.connect (bind (mem_fun(*this, &PluginUI::stop_touch), control_ui));
@@ -577,7 +577,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 		}
 
 		control_ui->pack_start (control_ui->automate_button, false, false);
-		control_ui->adjustment->value_changed.connect (bind (mem_fun(*this, &PluginUI::control_adjustment_changed), control_ui));
+control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &PluginUI::control_adjustment_changed), control_ui));
 		control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &PluginUI::astate_clicked), control_ui, (uint32_t) port_index));
 
 		automation_state_changed (control_ui);
@@ -712,7 +712,7 @@ PluginUI::update_control_display (ControlUI* cui)
 
 	cui->ignore_change++;
 	if (cui->combo) {
-		map<string,float>::iterator it;
+	        std::map<string,float>::iterator it;
 		for (it = cui->combo_map->begin(); it != cui->combo_map->end(); ++it) {
 			if (it->second == val) {
 				cui->combo->get_entry()->set_text(it->first);
@@ -751,7 +751,7 @@ PluginUI::control_combo_changed (GdkEventAny* ignored, ControlUI* cui)
 {
 	if (!cui->ignore_change) {
 		string value = cui->combo->get_entry()->get_text();
-		map<string,float> mapping = *cui->combo_map;
+		std::map<string,float> mapping = *cui->combo_map;
 		insert.set_parameter (cui->port_index, mapping[value]);
 	}
 
@@ -846,7 +846,7 @@ PluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 	list<string> enums;
 	LadspaPlugin* lp = dynamic_cast<LadspaPlugin*> (&plugin);
 
-	cui->combo_map = new map<string, float>;
+	cui->combo_map = new std::map<string, float>;
 	lrdf_defaults* defaults = lrdf_get_scale_values(lp->unique_id(), port_index);
 	if (defaults)	{
 		for (uint32_t i = 0; i < defaults->count; ++i) {
@@ -877,10 +877,10 @@ PlugUIBase::PlugUIBase (PluginInsert& pi)
 	combo.get_popwin()->signal_unmap_event().connect(mem_fun(*this, &PlugUIBase::setting_selected));
 
 	save_button.set_name ("PluginSaveButton");
-	save_button.clicked.connect(mem_fun(*this, &PlugUIBase::save_plugin_setting));
+	save_button.signal_clicked().connect(mem_fun(*this, &PlugUIBase::save_plugin_setting));
 
 	bypass_button.set_name ("PluginBypassButton");
-	bypass_button.toggled.connect (mem_fun(*this, &PlugUIBase::bypass_toggled));
+	bypass_button.signal_toggled().connect (mem_fun(*this, &PlugUIBase::bypass_toggled));
 }
 
 gint

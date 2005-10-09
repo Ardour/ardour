@@ -342,7 +342,7 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
      *
      * @param color the base color of the item
      */
-    virtual void compute_colors(GdkColor& color) ;
+    virtual void compute_colors(Gdk::Color& color) ;
     
     /**
      * convenience method to set the various canvas item colors

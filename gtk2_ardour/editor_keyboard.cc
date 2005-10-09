@@ -31,14 +31,14 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 	double dx, dy;
 	GdkEvent ev;
 	GdkModifierType mask;
-	Gdk_Window evw (track_canvas->get_window().get_pointer (x, y, mask));
+	GdkWindow evw (track_canvas->get_window().get_pointer (x, y, mask));
 	bool doit = false;
 
-	if (use_track_canvas && gdk_window_get_pointer (track_canvas_event_box.get_window(),
+	if (use_track_canvas && gdk_window_get_pointer (track_canvas_event_box.get_window()->gobj(),
 							&x, &y, &mask)) {
 		doit = true;
 
-	} else if (use_time_canvas && gdk_window_get_pointer (time_canvas_event_box.get_window(),
+	} else if (use_time_canvas && gdk_window_get_pointer (time_canvas_event_box.get_window()->gobj(),
 							      &x, &y, &mask)) {
 		doit = true;
 	}

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2005 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -205,12 +205,8 @@ Editor::region_hidden (Region* r)
 void
 Editor::add_audio_region_to_region_display (AudioRegion *region)
 {
-	using namespace Gtk::CTree_Helpers;
-
-	vector<const char*> item;
-	RowList::iterator i;
-	RowList::iterator tmpi;
 	string str;
+	TreeModel::Row row;
 
 	if (!show_automatic_regions_in_region_list && region->automatic()) {
 		return;
@@ -218,31 +214,25 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 
 	if (region->hidden()) {
 
-		if (region_list_hidden_node == region_list_display.rows().end()) {
-			item.clear ();
-			item.push_back (_("hidden"));
-			region_list_hidden_node = region_list_display.rows().insert (region_list_display.rows().end(),
-									 Element (item));
-			(*region_list_hidden_node).set_data (0);
-			(*region_list_hidden_node).set_leaf (false);
-		}
+		TreeModel::iterator iter = region_list_model->get_iter (_("/Hidden"));
+		TreeModel::Row parent;
+		TreeModel::Row child;
 
-		item.clear ();
-		if (region->n_channels() > 1) {
-			str = string_compose("%1  [%2]", region->name(), region->n_channels());
-			item.push_back (str.c_str());
+		if (iter == region_list_model->children().end()) {
+			
+			parent = *(region_list_model->append());
+			
+			parent[region_list_columns.name] = _("Hidden");
+			parent[region_list_columns.region] = 0;
 		} else {
-			item.push_back (region->name().c_str());
+			parent = *iter;
 		}
 
-		tmpi = region_list_hidden_node->subtree().insert (region_list_hidden_node->subtree().end(), 
-								  Element (item));
-		(*tmpi).set_data (region);
-		return;
+		row = *(region_list_model->append (parent.children()));
 
 	} else if (region->whole_file()) {
 
-		item.clear ();
+		TreeModel::Row row = *(region_list_model->append());
 
 		if (region->source().name()[0] == '/') { // external file
 
@@ -259,13 +249,8 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 
 		}
 
-		item.push_back (str.c_str());
-
-		tmpi = region_list_display.rows().insert (region_list_display.rows().end(), 
-							  Element (item));
-
-		(*tmpi).set_data (region);
-		(*tmpi).set_leaf (false);
+		row[region_list_columns.name] = str;
+		row[region_list_columns.region] = region;
 
 		return;
 		
@@ -273,45 +258,57 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 
 		/* find parent node, add as new child */
 		
-		for (i = region_list_display.rows().begin(); i != region_list_display.rows().end(); ++i) {
+		TreeModel::iterator i;
+		TreeModel::Children rows = region_list_model->children();
 
-			AudioRegion* r = static_cast<AudioRegion*> ((*i).get_data());
+		for (i = rows.begin(); i != rows.end(); ++i) {
+
+			Region* rr = (*i)[region_list_columns.region];
+			AudioRegion* r = dynamic_cast<AudioRegion*>(rr);
 
 			if (r && r->whole_file()) {
 				
 				if (region->source_equivalent (*r)) {
-
-					item.clear ();
-					
-					if (region->n_channels() > 1) {
-						str = string_compose("%1  [%2]", region->name(), region->n_channels());
-						item.push_back (str.c_str());
-					} else {
-						item.push_back (region->name().c_str());
-					}
-
-					
-					tmpi = i->subtree().insert (i->subtree().end(), Element (item));
-					(*tmpi).set_data (region);
-					
-					return;
+					row = *(region_list_model->append ((*i).children()));
+					break;
 				}
 			}
 		}
+
+		if (i == rows.end()) {
+			TreeModel::Row row = *(region_list_model->append());
+		}
+
+		
 	}
 	
-	item.clear ();
+	row[region_list_columns.region] = region;
 	
 	if (region->n_channels() > 1) {
-		str = string_compose("%1  [%2]", region->name(), region->n_channels());
-		item.push_back (str.c_str());
+		row[region_list_columns.name] = string_compose("%1  [%2]", region->name(), region->n_channels());
 	} else {
-		item.push_back (region->name().c_str());
+		row[region_list_columns.name] = region->name();
+	}
+}
+
+void
+Editor::region_list_selection_changed() 
+{
+	bool sensitive;
+
+	if (region_list_display.get_selection()->count_selected_rows() > 0) {
+		sensitive = true;
+	} else {
+		sensitive = false;
 	}
 	
-	tmpi = region_list_display.rows().insert (region_list_display.rows().end(), Element (item));
-	(*tmpi).set_data (region);
-	(*tmpi).set_leaf (true);
+	for (vector<Glib::RefPtr<Gtk::Action> >::iterator i = region_list_selection_requiring_actions.begin(); i != region_list_selection_requiring_actions.end(); ++i) {
+		(*i)->set_sensitive (sensitive);
+	}
+
+	// GTK2FIX
+	// set_selected_regionview_from_region_list (*region, false);
+
 }
 
 void
@@ -330,9 +327,9 @@ void
 Editor::redisplay_regions ()
 {
 	if (session) {
-		region_list_display.freeze ();
-		region_list_clear ();
-		region_list_hidden_node = region_list_display.rows().end();
+		
+		region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+		region_list_model.clear ();
 
 		/* now add everything we have, via a temporary list used to help with
 		   sorting.
@@ -345,120 +342,31 @@ Editor::redisplay_regions ()
 			add_audio_region_to_region_display (*r);
 		}
 		
-		region_list_display.sort ();
-		region_list_display.thaw ();
+		region_list_display.set_model (region_list_sort_model);
 	}
 }
 
 void
 Editor::region_list_clear ()
 {
-	/* ---------------------------------------- */
-	/* XXX MAKE ME A FUNCTION (no CTree::clear() in gtkmm 1.2) */
-
-	gtk_ctree_remove_node (region_list_display.gobj(), NULL);
-
-	/* ---------------------------------------- */
-}
-
-void
-Editor::region_list_column_click (gint col)
-{
-	bool sensitive;
-
-	if (region_list_menu == 0) {
-		build_region_list_menu ();
-	}
-
-	if (region_list_display.selection().size() != 0) {
-		sensitive = true;
-	} else {
-		sensitive = false;
-	}
-
-	for (vector<MenuItem*>::iterator i = rl_context_menu_region_items.begin(); i != rl_context_menu_region_items.end(); ++i) {
-		(*i)->set_sensitive (sensitive);
-	}
-
-	region_list_menu->popup (0, 0);
+	region_list_model->clear();
 }
 
 void
 Editor::build_region_list_menu ()
 {
-	using namespace Gtk::Menu_Helpers;
+	region_list_menu = dynamic_cast<Menu*>(ui_manager->get_widget ("/RegionListMenu"));
+					       
+	/* now grab specific menu items that we need */
 
-	region_list_menu = new Menu;
+	toggle_full_region_list_action = ui_manager->get_action ("<Actions>/RegionList/rlShowAll");
 	
-	MenuList& items = region_list_menu->items();
-	region_list_menu->set_name ("ArdourContextMenu");
+	region_list_selection_requiring_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlHide"));
+	region_list_selection_requiring_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlAudition"));
+	region_list_selection_requiring_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlRemove"));
 
-	items.push_back (MenuElem (_("Audition"), mem_fun(*this, &Editor::audition_region_from_region_list)));
-	rl_context_menu_region_items.push_back (items.back());
-	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::hide_region_from_region_list)));
-	rl_context_menu_region_items.push_back (items.back());
-	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::remove_region_from_region_list)));
-	rl_context_menu_region_items.push_back (items.back());
-
-
-	items.push_back (SeparatorElem());
-	
-
-	// items.push_back (MenuElem (_("Find")));
-	items.push_back (CheckMenuElem (_("Show all"), mem_fun(*this, &Editor::toggle_full_region_list)));
-	toggle_full_region_list_item = static_cast<CheckMenuItem*> (items.back());
-	
-	Gtk::Menu *sort_menu = manage (new Menu);
-	MenuList& sort_items = sort_menu->items();
-	sort_menu->set_name ("ArdourContextMenu");
-	RadioMenuItem::Group sort_order_group;
-	RadioMenuItem::Group sort_type_group;
-
-	sort_items.push_back (RadioMenuElem (sort_order_group, _("Ascending"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), true)));
-	sort_items.push_back (RadioMenuElem (sort_order_group, _("Descending"), 
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), false)));
-	sort_items.push_back (SeparatorElem());
-
-	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region Name"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByName)));
-	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region Length"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByLength)));
-	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region Position"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByPosition)));
-	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region Timestamp"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByTimestamp)));
-	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region Start in File"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByStartInFile)));
-	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Region End in File"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByEndInFile)));
-	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Source File Name"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileName)));
-	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Source File Length"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileLength)));
-	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Source File Creation Date"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileCreationDate)));
-	sort_items.push_back (RadioMenuElem (sort_type_group, _("By Source Filesystem"),
-					     bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileFS)));
-	
-	items.push_back (MenuElem (_("Sorting"), *sort_menu));
-	items.push_back (SeparatorElem());
-
-//	items.push_back (CheckMenuElem (_("Display Automatic Regions"), mem_fun(*this, &Editor::toggle_show_auto_regions)));
-//	toggle_auto_regions_item = static_cast<CheckMenuItem*> (items.back());
-//	toggle_auto_regions_item->set_active (show_automatic_regions_in_region_list);
-//	items.push_back (SeparatorElem());
-
-	items.push_back (MenuElem (_("Import audio (copy)"), bind (mem_fun(*this, &Editor::import_audio), false)));
-	import_audio_item = items.back();
-	if (!session) {
-		import_audio_item->set_sensitive (false);
-	}
-	items.push_back (MenuElem (_("Embed audio (link)"), mem_fun(*this, &Editor::embed_audio)));
-	embed_audio_item = items.back();
-	if (!session) {
-		embed_audio_item->set_sensitive (false);
-	}
+	session_requiring_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlEmbedAudio"));
+	session_requiring_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlImportAudio"));
 }
 
 void
@@ -472,325 +380,226 @@ Editor::toggle_show_auto_regions ()
 void
 Editor::toggle_full_region_list ()
 {
-	region_list_display.freeze ();
 	if (toggle_full_region_list_item->get_active()) {
-		for (CTree_Helpers::RowIterator r = region_list_display.rows().begin(); r != region_list_display.rows().end(); ++r) {
-			r->expand_recursive ();
-		}
+		region_list_display.expand_all ();
 	} else {
-		for (CTree_Helpers::RowIterator r = region_list_display.rows().begin(); r != region_list_display.rows().end(); ++r) {
-			r->collapse ();
-		}
+		region_list_display.collapse_all ();
 	}
-	region_list_display.thaw ();
 }
 
-gint
+bool
 Editor::region_list_display_key_press (GdkEventKey* ev)
 {
-	return FALSE;
+	return false;
 }
 
-gint
+bool
 Editor::region_list_display_key_release (GdkEventKey* ev)
 {
 	switch (ev->keyval) {
 	case GDK_Delete:
 		remove_selected_regions_from_region_list ();
-		return TRUE;
+		return true;
 		break;
 	default:
 		break;
 	}
 
-	return FALSE;
-
+	return false;
 }
 
-gint
+bool
 Editor::region_list_display_button_press (GdkEventButton *ev)
 {
-	int row, col;
-	AudioRegion *region;
+	Region* region;
+	TreeIter iter;
+	TreeModel::Path path;
+	TreeViewColumn* column;
+	int cellx;
+	int celly;
+
+	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+		if ((iter = region_list_model->get_iter (path))) {
+			region = (*iter)[region_list_columns.region];
+		}
+	}
+
+	if (region == 0) {
+		return false;
+	}
 
 	if (Keyboard::is_delete_event (ev)) {
-		if (region_list_display.get_selection_info ((int)ev->x, (int)ev->y, &row, &col) != 0) {
-			if ((region = (AudioRegion *) region_list_display.row(row).get_data()) != 0) {
-				delete region;
-			}
-		}
-		return TRUE;
+		session->remove_region_from_region_list (*region);
+		return true;
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		region_list_column_click (-1);
-		return TRUE;
+		if (region_list_menu == 0) {
+			build_region_list_menu ();
+		}
+		region_list_menu->popup (ev->button, ev->time);
+		return true;
 	}
 
 	switch (ev->button) {
 	case 1:
-		if (region_list_display.get_selection_info ((int)ev->x, (int)ev->y, &row, &col) != 0) {
-			if ((region = (AudioRegion *) region_list_display.row(row).get_data()) != 0) {
-
-				if (wave_cursor == 0) {
-					GdkPixmap *source, *mask;
-					GdkColor fg = { 0, 65535, 0, 0 }; /* Red. */
-					GdkColor bg = { 0, 0, 0, 65535 }; /* Blue. */
-					
-					source = gdk_bitmap_create_from_data (NULL, wave_cursor_bits,
-									      wave_cursor_width, wave_cursor_height);
-					mask = gdk_bitmap_create_from_data (NULL, wave_cursor_mask_bits,
-									    wave_cursor_mask_width, wave_cursor_mask_height);
-
-					wave_cursor = gdk_cursor_new_from_pixmap (source, 
-										  mask,
-										  &fg, 
-										  &bg,
-										  wave_cursor_x_hot,
-										  wave_cursor_y_hot);
-					gdk_pixmap_unref (source);
-					gdk_pixmap_unref (mask);
-				}
-				region_list_display_drag_region = region;
-				need_wave_cursor = 1;
-
-				/* audition on double click */
-				if (ev->type == GDK_2BUTTON_PRESS) {
-					consider_auditioning (region);
-				}
-
-				return TRUE;
-			}
-			
+		/* audition on double click */
+		if (ev->type == GDK_2BUTTON_PRESS) {
+			consider_auditioning (*region);
+			return true;
 		}
+		return false;
 		break;
 
 	case 2:
 		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
-			if (region_list_display.get_selection_info ((int)ev->x, (int)ev->y, &row, &col) != 0) {
-				if ((region = (AudioRegion *) region_list_display.get_row_data (row)) != 0) {
-					if (consider_auditioning (region)) {
-						region_list_display.row(row).select();
-					}
-					else {
-						region_list_display.row(row).unselect();
-					}
-					return TRUE;
-				}
-			}
-		} 
-
-		/* to prevent regular selection -- i dont think this is needed JLC */
-		return stop_signal (region_list_display, "button_press_event");
+			consider_auditioning (*region);
+		}
+		return true;
 		break;
 
-	case 3:
-		break;
 	default:
 		break; 
 	}
 
-	return FALSE;
-}
+	return false;
+}	
 
-gint
+bool
 Editor::region_list_display_button_release (GdkEventButton *ev)
 {
-	int row, col;
+	TreeIter iter;
+	TreeModel::Path path;
+	TreeViewColumn* column;
+	int cellx;
+	int celly;
+	Region* region;
 
-	if (region_list_display.get_selection_info ((int)ev->x, (int)ev->y, &row, &col) != 0) {
-		region_list_button_region = (AudioRegion *) region_list_display.get_row_data (row);
-	} else {
-		region_list_button_region = 0;
+	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+		if ((iter = region_list_model->get_iter (path))) {
+			region = (*iter)[region_list_columns.region];
+		}
 	}
 
 	if (Keyboard::is_delete_event (ev)) {
-		remove_region_from_region_list ();
-		return TRUE;
+		session->remove_region_from_region_list (*region);
+		return true;
 	}
 
 	switch (ev->button) {
 	case 1:
-		if (region_list_display_drag_region) {
-			insert_region_list_drag (*region_list_display_drag_region);
-		}
-
-		track_canvas_scroller.get_window().set_cursor (current_canvas_cursor);
-		region_list_display.get_window().set_cursor (0);
-
-		region_list_display_drag_region = 0;
-		need_wave_cursor = 0;
-
-		return TRUE;
+		return false;
 		break;
 
 	case 3:
-		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
-
-			if (region_list_menu == 0) {
-				build_region_list_menu ();
-			}
-			
-			bool sensitive;
-			
-			if (region_list_display.selection().size() != 0) {
-				sensitive = true;
-			} else {
-				sensitive = false;
-			}
-
-			for (vector<MenuItem*>::iterator i = rl_context_menu_region_items.begin(); i != rl_context_menu_region_items.end(); ++i) {
-				(*i)->set_sensitive (sensitive);
-			}
-
-			region_list_menu->popup (0, 0);
-		}
-
-		return TRUE;
+		return false;
 		break;
+
 	default:
 		break;
 	}
-	return FALSE;
-}
 
-gint
-Editor::region_list_display_motion (GdkEventMotion *ev)
-{
-	if (need_wave_cursor == 1) {
-		track_canvas_scroller.get_window().set_cursor (wave_cursor);
-		region_list_display.get_window().set_cursor (wave_cursor);
-		gdk_flush ();
-		need_wave_cursor = 2;
-	}
-	return FALSE;
+	return false;
 }
 
 void
-Editor::region_list_display_selected (gint row, gint col, GdkEvent *ev)
+Editor::consider_auditioning (Region& region)
 {
-	AudioRegion* region = static_cast<AudioRegion *>(region_list_display.get_row_data (row));
+	AudioRegion* r = dynamic_cast<AudioRegion*> (&region);
 
-	if (session == 0 || region == 0) {
-		return;
-	}
-
-	set_selected_regionview_from_region_list (*region, false);
-}
-
-void
-Editor::region_list_display_unselected (gint row, gint col, GdkEvent *ev)
-{
-}
-
-bool
-Editor::consider_auditioning (AudioRegion *r)
-{
 	if (r == 0) {
 		session->cancel_audition ();
-		return false;
+		return;
 	}
 
 	if (session->is_auditioning()) {
 		session->cancel_audition ();
 		if (r == last_audition_region) {
-			return false;
+			return;
 		}
 	}
 
 	session->audition_region (*r);
 	last_audition_region = r;
-
-	return true;
 }
 
-gint
-Editor::region_list_display_enter_notify (GdkEventCrossing *ev)
+int
+Editor::region_list_sorter (TreeModel::iterator a, TreeModel::iterator b)
 {
-	ARDOUR_UI::instance()->allow_focus (true);
-	region_list_display.grab_focus ();
-	return FALSE;
-}
+	int cmp;
 
-gint
-Editor::region_list_display_leave_notify (GdkEventCrossing *ev)
-{
-	ARDOUR_UI::instance()->allow_focus (false);
-	return FALSE;
-}
+	Region* r1 = (*a)[region_list_columns.region];
+	Region* r2 = (*b)[region_list_columns.region];
 
-gint
-Editor::_region_list_sorter (GtkCList* clist, gconstpointer a, gconstpointer b)
-{
-	Editor* editor = static_cast<Editor*> (gtk_object_get_data (GTK_OBJECT(clist), "editor"));
-	return editor->region_list_sorter (a, b);
-}
-
-gint
-Editor::region_list_sorter (gconstpointer a, gconstpointer b)
-{
-	GtkCListRow* row1 = (GtkCListRow *) a;
-	GtkCListRow* row2 = (GtkCListRow *) b;
-
-	AudioRegion* region1 = static_cast<AudioRegion*> (row1->data);
-	AudioRegion* region2 = static_cast<AudioRegion*> (row2->data);
+	AudioRegion* region1 = dynamic_cast<AudioRegion*> (r1);
+	AudioRegion* region2 = dynamic_cast<AudioRegion*> (r2);
 
 	if (region1 == 0 || region2 == 0) {
+		Glib::ustring s1;
+		Glib::ustring s2;
 		switch (region_list_sort_type) {
 		case ByName:
-			return true; /* XXX compare text in rows */
+			s1 = (*a)[region_list_columns.name];
+			s2 = (*b)[region_list_columns.name];
+			return (s1.compare (s2));
 		default:
-			return true;
+			return 0;
 		}
 	}
 
 	switch (region_list_sort_type) {
 	case ByName:
-		return strcasecmp (region1->name().c_str(), region2->name().c_str());
+		cmp = strcasecmp (region1->name().c_str(), region2->name().c_str());
 		break;
 
 	case ByLength:
-		return region1->length() - region2->length();
+		cmp = region1->length() - region2->length();
 		break;
 		
 	case ByPosition:
-		return region1->position() - region2->position();
+		cmp = region1->position() - region2->position();
 		break;
 		
 	case ByTimestamp:
-		return region1->source().timestamp() - region2->source().timestamp();
+		cmp = region1->source().timestamp() - region2->source().timestamp();
 		break;
 	
 	case ByStartInFile:
-		return region1->start() - region2->start();
+		cmp = region1->start() - region2->start();
 		break;
 		
 	case ByEndInFile:
-		return (region1->start() + region1->length()) - (region2->start() + region2->length());
+		cmp = (region1->start() + region1->length()) - (region2->start() + region2->length());
 		break;
 		
 	case BySourceFileName:
-		return strcasecmp (region1->source().name().c_str(), region2->source().name().c_str());
+		cmp = strcasecmp (region1->source().name().c_str(), region2->source().name().c_str());
 		break;
 
 	case BySourceFileLength:
-		return region1->source().length() - region2->source().length();
+		cmp = region1->source().length() - region2->source().length();
 		break;
 		
 	case BySourceFileCreationDate:
-		return region1->source().timestamp() - region2->source().timestamp();
+		cmp = region1->source().timestamp() - region2->source().timestamp();
 		break;
 
 	case BySourceFileFS:
 		if (region1->source().name() == region2->source().name()) {
-			return strcasecmp (region1->name().c_str(),  region2->name().c_str());
+			cmp = strcasecmp (region1->name().c_str(),  region2->name().c_str());
 		} else {
-			return strcasecmp (region1->source().name().c_str(),  region2->source().name().c_str());
+			cmp = strcasecmp (region1->source().name().c_str(),  region2->source().name().c_str());
 		}
 		break;
 	}
 
-	return FALSE;
+	if (cmp < 0) {
+		return -1;
+	} else if (cmp > 0) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 void
@@ -801,110 +610,107 @@ Editor::reset_region_list_sort_type (RegionListSortType type)
 
 		switch (type) {
 		case ByName:
-			region_list_display.set_column_title(0, _("Regions/name"));
+			region_list_display.get_column (0)->set_title (_("Regions/name"));
 			break;
 			
 		case ByLength:
-			region_list_display.set_column_title (0, _("Regions/length"));
+			region_list_display.get_column (0)->set_title (_("Regions/length"));
 			break;
 			
 		case ByPosition:
-			region_list_display.set_column_title (0, _("Regions/position"));
+			region_list_display.get_column (0)->set_title (_("Regions/position"));
 			break;
 			
 		case ByTimestamp:
-			region_list_display.set_column_title (0, _("Regions/creation"));
+			region_list_display.get_column (0)->set_title (_("Regions/creation"));
 			break;
 			
 		case ByStartInFile:
-			region_list_display.set_column_title (0, _("Regions/start"));
+			region_list_display.get_column (0)->set_title (_("Regions/start"));
 			break;
 			
 		case ByEndInFile:
-			region_list_display.set_column_title (0, _("Regions/end"));
+			region_list_display.get_column (0)->set_title (_("Regions/end"));
 			break;
 			
 		case BySourceFileName:
-			region_list_display.set_column_title (0, _("Regions/file name"));
+			region_list_display.get_column (0)->set_title (_("Regions/file name"));
 			break;
 			
 		case BySourceFileLength:
-			region_list_display.set_column_title (0, _("Regions/file size"));
+			region_list_display.get_column (0)->set_title (_("Regions/file size"));
 			break;
 			
 		case BySourceFileCreationDate:
-			region_list_display.set_column_title (0, _("Regions/file date"));
+			region_list_display.get_column (0)->set_title (_("Regions/file date"));
 			break;
 			
 		case BySourceFileFS:
-			region_list_display.set_column_title (0, _("Regions/file system"));
+			region_list_display.get_column (0)->set_title (_("Regions/file system"));
 			break;
 		}
 			
-		region_list_display.sort ();
+		region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
 	}
 }
 
 void
 Editor::reset_region_list_sort_direction (bool up)
 {
-	region_list_display.set_sort_type (up ? GTK_SORT_ASCENDING : GTK_SORT_DESCENDING);
-	region_list_display.sort ();
+	// GTK2FIX
+	//region_list_display.set_sort_type (up ? GTK_SORT_ASCENDING : GTK_SORT_DESCENDING);
+	/* reset to force resort */
+	region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
+}
+
+void
+Editor::region_list_selection_mapover (slot<void,Region&> sl)
+{
+	Glib::RefPtr<TreeSelection> selection = region_list_display.get_selection();
+	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();
+	TreeView::Selection::ListHandle_Path::iterator i = rows.begin();
+
+	if (selection->count_selected_rows() == 0 || session == 0) {
+		return;
+	}
+
+	for (; i != rows.end(); ++i) {
+		TreeIter iter;
+
+		if ((iter = region_list_model->get_iter (*i))) {
+			sl (*((*iter)[region_list_columns.region]));
+		}
+	}
+}
+
+void
+Editor::hide_a_region (Region& r)
+{
+	r.set_hidden (true);
+}
+
+void
+Editor::remove_a_region (Region& r)
+{
+	session->remove_region_from_region_list (r);
 }
 
 void
 Editor::audition_region_from_region_list ()
 {
-	if (region_list_button_region) {
-		consider_auditioning (dynamic_cast<AudioRegion*> (region_list_button_region));
-	}
+	region_list_selection_mapover (mem_fun (*this, &Editor::consider_auditioning));
 }
 
 void
 Editor::hide_region_from_region_list ()
 {
-	if (session == 0 || region_list_button_region == 0) {
-		return;
-	}
-
-	region_list_button_region->set_hidden (true);
-}
-
-void
-Editor::remove_region_from_region_list ()
-{
-	if (session == 0 || region_list_button_region == 0) {
-		return;
-	}
-
-	session->remove_region_from_region_list (*region_list_button_region);
+	region_list_selection_mapover (mem_fun (*this, &Editor::hide_a_region));
 }
 
 void
 Editor::remove_selected_regions_from_region_list ()
 {
-	using namespace Gtk::CTree_Helpers;
-	SelectionList& selected = region_list_display.selection();
-
-	/* called from idle context to avoid snafus with the list
-	   state.
-	*/
-	
-	if (selected.empty() || session == 0) {
-		return;
-	}
-	
-	vector<Region*> to_be_deleted;
-
-	for (SelectionList::iterator i = selected.begin(); i != selected.end(); ++i) {
-		to_be_deleted.push_back (static_cast<Region*> ((*i).get_data()));
-	}
-
-	for (vector<Region*>::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
-		session->remove_region_from_region_list (**i);
-	}
-
-	return;
+	region_list_selection_mapover (mem_fun (*this, &Editor::remove_a_region));
 }
 
 void  

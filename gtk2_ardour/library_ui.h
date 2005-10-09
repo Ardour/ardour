@@ -146,7 +146,7 @@ class SearchResults : public ArdourDialog
 	sigc::signal<void, string, bool> file_chosen;
 
   private:
-	map<string,string> search_info;
+	std::map<string,string> search_info;
 	bool search_and;
 	string selection;
 
@@ -185,8 +185,8 @@ class LibraryTree : public Gtk::VBox
 	void clear_selection ();
 	
   private:
-	map<string, Gtk::TreeItem*> uri_mapping;
-	map<string, string> uri_parent; // this ugly, but necessary
+	std::map<string, Gtk::TreeItem*> uri_mapping;
+	std::map<string, string> uri_parent; // this ugly, but necessary
 
 	string current_member;
 	string current_group;

@@ -60,7 +60,7 @@ const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6 ;
  * @param start the start point of this item
  * @param duration the duration of this item
  */
-TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GnomeCanvasGroup* parent, TimeAxisView& tv, double spu, GdkColor& base_color, 
+TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GnomeCanvasGroup* parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
 				   jack_nframes_t start, jack_nframes_t duration,
 				   Visibility visibility)
 	: trackview (tv)
@@ -557,7 +557,7 @@ TimeAxisViewItem::set_height(double height)
  * 
  */
 void
-TimeAxisViewItem::set_color(GdkColor& base_color)
+TimeAxisViewItem::set_color(Gdk::Color& base_color)
 {
 	compute_colors (base_color);
 	set_colors ();
@@ -929,7 +929,7 @@ TimeAxisViewItem::remove_this_item(void* src)
 	   defer to idle loop, otherwise we'll delete this object
 	   while we're still inside this function ...
 	*/
-	Gtk::Main::idle.connect(bind(mem_fun(&TimeAxisViewItem::idle_remove_this_item), this, src));
+        Glib::signal_idle().connect(bind (sigc::ptr_fun (&TimeAxisViewItem::idle_remove_this_item), this, src));
 }
 
 /**

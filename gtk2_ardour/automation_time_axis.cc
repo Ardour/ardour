@@ -70,7 +70,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 			    (GtkSignalFunc) PublicEditor::canvas_automation_track_event,
 			    this);
 
-	hide_button.add (*(manage (new Pixmap (small_x_xpm))));
+	hide_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(small_x_xpm)))));
 
 	height_button.set_name ("TrackSizeButton");
 	auto_button.set_name ("TrackVisualButton");
@@ -157,7 +157,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
 	controls_ebox.set_name (controls_base_unselected_name);
 
-	controls_frame.set_shadow_type (GTK_SHADOW_ETCHED_OUT);
+	controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
 	XMLNode* xml_node = get_parent_with_state()->get_child_xml_node (_state_name);
 	set_state (*xml_node);
@@ -457,19 +457,19 @@ AutomationTimeAxisView::build_display_menu ()
 	
 	as_items.push_back (CheckMenuElem (_("off"), 
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
-	auto_off_item = dynamic_cast<CheckMenuItem*>(as_items.back());
+	auto_off_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("play"),
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
-	auto_play_item = dynamic_cast<CheckMenuItem*>(as_items.back());
+	auto_play_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("write"),
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
-	auto_write_item = dynamic_cast<CheckMenuItem*>(as_items.back());
+	auto_write_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("touch"),
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
-	auto_touch_item = dynamic_cast<CheckMenuItem*>(as_items.back());
+	auto_touch_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	items.push_back (MenuElem (_("State"), *auto_state_menu));
 

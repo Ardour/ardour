@@ -62,9 +62,9 @@ ARDOUR_UI::build_menu_bar ()
 {
 	using namespace Menu_Helpers;
 
-	menu_bar.set_name ("MainMenuBar");
+	menu_bar->set_name ("MainMenuBar");
 
-	MenuList& items = menu_bar.items();
+	MenuList& items = menu_bar->items();
 
 	/* file menu */
 	
@@ -76,13 +76,13 @@ ARDOUR_UI::build_menu_bar ()
 	session_items.push_back (MenuElem (_("Open"), mem_fun(*this, &ARDOUR_UI::open_session)));
 	session_items.push_back (MenuElem (_("Recent"), mem_fun(*this, &ARDOUR_UI::open_recent_session)));
 	session_items.push_back (MenuElem (_("Close"), mem_fun(*this, &ARDOUR_UI::close_session)));
-	close_item = session_items.back();
+	close_item = &session_items.back();
 	close_item->set_sensitive (false);
 
 	session_items.push_back (SeparatorElem());
 
 	session_items.push_back (MenuElem (_("Add Track/Bus"), mem_fun(*this, &ARDOUR_UI::add_route)));
-	add_track_item = session_items.back ();
+	add_track_item = &session_items.back ();
 	add_track_item->set_sensitive (false);
 
 	session_items.push_back (SeparatorElem());
@@ -98,7 +98,7 @@ ARDOUR_UI::build_menu_bar ()
 		image_compositor_menu->set_name ("ArdourContextMenu");
 		image_compositor_items.push_back(MenuElem (_("Connect"), (mem_fun (editor, &PublicEditor::connect_to_image_compositor)))) ;
 		session_items.push_back(MenuElem (_("Image Compositor"), *image_compositor_menu)) ;
-		image_compositor_item = session_items.back() ;
+		image_compositor_item = &session_items.back() ;
 		image_compositor_item->set_sensitive(false) ;
 		session_items.push_back (SeparatorElem());
 	} else {
@@ -112,11 +112,11 @@ ARDOUR_UI::build_menu_bar ()
 	/* </CMT Additions> */
 
 	session_items.push_back (MenuElem (_("Save"), bind (mem_fun(*this, &ARDOUR_UI::save_state), string(""))));
-	save_item = session_items.back();
+	save_item = &session_items.back();
 	save_item->set_sensitive (false);
 
 	session_items.push_back (MenuElem (_("Snapshot"), mem_fun(*this, &ARDOUR_UI::snapshot_session)));
-	snapshot_item = session_items.back();
+	snapshot_item = &session_items.back();
 	snapshot_item->set_sensitive (false);
 /*
 	session_items.push_back (MenuElem (_("Save as...")));
@@ -124,7 +124,7 @@ ARDOUR_UI::build_menu_bar ()
 	save_as_item->set_sensitive (false);
 */
 	session_items.push_back (MenuElem (_("Save Template..."), mem_fun(*this, &ARDOUR_UI::save_template)));
-	save_template_item = session_items.back();
+	save_template_item = &session_items.back();
 	save_template_item->set_sensitive (false);
 
 	Menu *export_menu = manage (new Menu);
@@ -135,7 +135,7 @@ ARDOUR_UI::build_menu_bar ()
 	// export_items.back()->set_sensitive (false);
 
 	session_items.push_back (MenuElem (_("Export"), *export_menu));
-	export_item = session_items.back();
+	export_item = &session_items.back();
 	export_item->set_sensitive (false);
 
 	session_items.push_back (SeparatorElem());
@@ -147,7 +147,7 @@ ARDOUR_UI::build_menu_bar ()
 	cleanup_items.push_back (MenuElem (_("Flush wastebasket"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash)));
 
 	session_items.push_back (MenuElem (_("Cleanup"), *cleanup_menu));
-	cleanup_item = session_items.back ();
+	cleanup_item = &session_items.back ();
 	cleanup_item->set_sensitive (false);
 
 	session_items.push_back (SeparatorElem());
@@ -170,10 +170,10 @@ ARDOUR_UI::build_menu_bar ()
 	jack_menu->set_name ("ArdourContextMenu");
 	
 	jack_items.push_back (MenuElem (_("Disconnect"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::disconnect_from_jack)));
-	jack_disconnect_item = jack_items.back();
+	jack_disconnect_item = &jack_items.back();
 	jack_disconnect_item->set_sensitive (false);
 	jack_items.push_back (MenuElem (_("Reconnect"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::reconnect_to_jack)));
-	jack_reconnect_item = jack_items.back();
+	jack_reconnect_item = &jack_items.back();
 	jack_reconnect_item->set_sensitive (false);
 
 	jack_bufsize_menu = manage (new Menu);
@@ -212,27 +212,27 @@ ARDOUR_UI::build_menu_bar ()
 		(CheckMenuElem 
 		 (_("Options Editor"),
 		  mem_fun(*this, &ARDOUR_UI::toggle_options_window)));
-	 options_window_check = dynamic_cast<CheckMenuItem*>(window_items.back());
+	 options_window_check = dynamic_cast<CheckMenuItem*>(&window_items.back());
 	// options_window_check->set_sensitive (false);
 
 	window_items.push_back
 		(CheckMenuElem
 		 (_("Audio Library"),
 		  mem_fun(*this, &ARDOUR_UI::toggle_sfdb_window)));
-	sfdb_check = dynamic_cast<CheckMenuItem*>(window_items.back());
+	sfdb_check = dynamic_cast<CheckMenuItem*>(&window_items.back());
 
 	window_items.push_back 
 		(CheckMenuElem 
 		 (_("Track/Bus Inspector"),
 		  mem_fun(*this, &ARDOUR_UI::toggle_route_params_window)));
-	route_params_check = dynamic_cast<CheckMenuItem*>(window_items.back());
+	route_params_check = dynamic_cast<CheckMenuItem*>(&window_items.back());
 	route_params_check->set_sensitive (false);
 
 	window_items.push_back 
 		(CheckMenuElem 
 		 (_("Connections"),
 		  mem_fun(*this, &ARDOUR_UI::toggle_connection_editor)));
-	connection_editor_check = dynamic_cast<CheckMenuItem*>(window_items.back());
+	connection_editor_check = dynamic_cast<CheckMenuItem*>(&window_items.back());
 	connection_editor_check->set_sensitive (false);
 
 #if 0
@@ -240,7 +240,7 @@ ARDOUR_UI::build_menu_bar ()
 		(CheckMenuElem 
 		 (_("Meter Bridge"),
 		  mem_fun(*this, &ARDOUR_UI::toggle_meter_bridge_window)));
-	meter_bridge_dialog_check = dynamic_cast<CheckMenuItem*>(window_items.back());
+	meter_bridge_dialog_check = dynamic_cast<CheckMenuItem*>(&window_items.back());
 	meter_bridge_dialog_check->set_sensitive (false);
 #endif
 
@@ -248,14 +248,14 @@ ARDOUR_UI::build_menu_bar ()
 		(CheckMenuElem 
 		 (_("Locations"),
 		  mem_fun(*this, &ARDOUR_UI::toggle_location_window)));
-	locations_dialog_check = dynamic_cast<CheckMenuItem*>(window_items.back());
+	locations_dialog_check = dynamic_cast<CheckMenuItem*>(&window_items.back());
 	locations_dialog_check->set_sensitive (false);
 
 	window_items.push_back 
 		(CheckMenuElem 
 		 (_("Big Clock"),
 		  mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window)));
-	big_clock_check = dynamic_cast<CheckMenuItem*>(window_items.back());
+	big_clock_check = dynamic_cast<CheckMenuItem*>(&window_items.back());
 
 	window_items.push_back (SeparatorElem());
 
@@ -288,7 +288,7 @@ ARDOUR_UI::build_menu_bar ()
 	sample_rate_box.set_name ("SampleRate");
 	sample_rate_label.set_name ("SampleRate");
 
-	menu_hbox.pack_start (menu_bar, true, true);
+	menu_hbox.pack_start (*menu_bar, true, true);
 	menu_hbox.pack_end (wall_clock_box, false, false, 10);
 	menu_hbox.pack_end (disk_space_box, false, false, 10);
 	menu_hbox.pack_end (cpu_load_box, false, false, 10);

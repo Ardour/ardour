@@ -1097,10 +1097,10 @@ OptionEditor::setup_midi_options ()
 
 	midi_packer.pack_start (*mmcbuttonbox, false, false);
 
-	mmc_control_button.toggled.connect (bind (mem_fun(*this, &OptionEditor::mmc_control_toggled), &mmc_control_button));
-	midi_control_button.toggled.connect (bind (mem_fun(*this, &OptionEditor::midi_control_toggled), &midi_control_button));
-	send_mmc_button.toggled.connect (bind (mem_fun(*this, &OptionEditor::send_mmc_toggled), &send_mmc_button));
-	midi_feedback_button.toggled.connect (bind (mem_fun(*this, &OptionEditor::midi_feedback_toggled), &midi_feedback_button));
+	mmc_control_button.signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mmc_control_toggled), &mmc_control_button));
+	midi_control_button.signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::midi_control_toggled), &midi_control_button));
+	send_mmc_button.signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::send_mmc_toggled), &send_mmc_button));
+	midi_feedback_button.signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::midi_feedback_toggled), &midi_feedback_button));
 }
 
 gint

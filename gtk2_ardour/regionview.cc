@@ -867,7 +867,7 @@ AudioRegionView::show_region_editor ()
 	} 
 
 	editor->show_all ();
-	editor->get_window().raise();
+	editor->get_window()->raise();
 }
 
 void

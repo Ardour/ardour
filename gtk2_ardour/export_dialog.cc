@@ -141,8 +141,8 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	file_selector = 0;
 	spec.running = false;
 
-	file_entry.signal_focus_in_event()().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
-	file_entry.signal_focus_out_event()().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
+	file_entry.signal_focus_in_event().connect (sigc::ptr_fun (ARDOUR_UI::generic_focus_in_event));
+	file_entry.signal_focus_out_event().connect (sigc::ptr_fun (ARDOUR_UI::generic_focus_out_event));
 
 	file_entry.set_name ("ExportFileNameEntry");
 
@@ -155,7 +155,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	master_selector.set_column_auto_resize(2, true);
 	master_selector.set_column_title (0, _("Output"));
 	master_selector.column_titles_show ();
-	master_selector.set_selection_mode (GTK_SELECTION_MULTIPLE);
+	master_selector.set_selection_mode (Gtk::SELECTION_MULTIPLE);
 	master_selector.signal_button_press_event().connect (mem_fun(*this, &ExportDialog::master_selector_button_press_event));
 	
 	track_selector.set_name ("ExportTrackSelector");
@@ -167,7 +167,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	track_selector.set_column_auto_resize(2, true);
 	track_selector.set_column_title (0, _("Track"));
 	track_selector.column_titles_show ();
-	track_selector.set_selection_mode (GTK_SELECTION_MULTIPLE);
+	track_selector.set_selection_mode (Gtk::SELECTION_MULTIPLE);
 	track_selector.signal_button_press_event().connect (mem_fun(*this, &ExportDialog::track_selector_button_press_event));
 
 	check_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL,
@@ -178,7 +178,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 			&empty_mask, NULL, (gchar**) empty_xpm);
 
 	progress_bar.set_show_text (false);
-	progress_bar.set_orientation (GTK_PROGRESS_LEFT_TO_RIGHT);
+	progress_bar.set_orientation (PROGRESS_LEFT_TO_RIGHT);
 	progress_bar.set_name ("ExportProgress");
 
 	format_frame.add (format_table);
@@ -603,7 +603,7 @@ ExportDialog::set_range (jack_nframes_t start, jack_nframes_t end)
 gint
 ExportDialog::progress_timeout ()
 {
-	progress_bar.set_percentage (spec.progress);
+	progress_bar.set_fraction (spec.progress/100);
 	return TRUE;
 }
 
@@ -1125,7 +1125,7 @@ ExportDialog::start_export ()
 		file_entry.set_text (dir);
 	}
 	
-	progress_bar.set_percentage (0);
+	progress_bar.set_fraction (0);
 	cancel_label.set_text (_("Cancel"));
 
 	show_all ();
@@ -1350,8 +1350,8 @@ ExportDialog::initiate_browse ()
 		file_selector = new FileSelection;
 		file_selector->set_modal (true);
 
-		file_selector->get_cancel_button()-.signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), -1));
-		file_selector->get_ok_button()-.signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), 1));
+		file_selector->get_cancel_button()->signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), -1));
+		file_selector->get_ok_button()->signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), 1));
 		file_selector->signal_map_event().connect (bind (mem_fun(*this, &ExportDialog::change_focus_policy), true));
 		file_selector->signal_unmap_event().connect (bind (mem_fun(*this, &ExportDialog::change_focus_policy), false));
 	}

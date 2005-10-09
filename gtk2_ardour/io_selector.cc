@@ -37,7 +37,6 @@
 #include "utils.h"
 #include "ardour_message.h"
 #include "io_selector.h"
-#include "extra_bind.h"
 #include "keyboard.h"
 #include "gui_thread.h"
 
@@ -95,7 +94,7 @@ IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can
 	set_position (Gtk::WIN_POS_MOUSE);
 	add (vbox);
 
-	delete_event.connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
+	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }
 
 IOSelectorWindow::~IOSelectorWindow()
@@ -123,7 +122,7 @@ IOSelectorWindow::accept ()
 }
 
 
-gint
+bool
 IOSelectorWindow::on_map (GdkEventAny *ev)
 {
 	_selector.redisplay ();
@@ -276,7 +275,7 @@ IOSelector::rescan ()
 	using namespace Notebook_Helpers;
 	using namespace CList_Helpers;
 
-	typedef map<string,vector<pair<string,string> > > PortMap;
+	typedef std::map<string,vector<pair<string,string> > > PortMap;
 	PortMap portmap;
 	const char **ports;
 	PageList& pages = notebook.pages();
@@ -300,7 +299,7 @@ IOSelector::rescan ()
 
 		pair<string,vector<pair<string,string> > > newpair;
 		pair<string,string> strpair;
-		pair<PortMap::iterator,bool> result;
+		std::pair<PortMap::iterator,bool> result;
 
 		string str = ports[n];
 		string::size_type pos;
@@ -338,7 +337,7 @@ IOSelector::rescan ()
 
 		client_box->pack_start (*scroller);
 
-		client_port_display->set_selection_mode (GTK_SELECTION_BROWSE);
+		client_port_display->set_selection_mode (Gtk::SELECTION_BROWSE);
 		client_port_display->set_name ("IOSelectorList");
 
 		for (vector<pair<string,string> >::iterator s = i->second.begin(); s != i->second.end(); ++s) {
@@ -361,7 +360,7 @@ IOSelector::rescan ()
 	}
 
 	notebook.set_page (current_page);
-	notebook.show.connect (bind (mem_fun (notebook, &Notebook::set_page), current_page));
+	notebook.signal_show().connect (bind (mem_fun (notebook, &Notebook::set_current_page), current_page));
 	selector_box.show_all ();
 }	
 
@@ -430,7 +429,7 @@ IOSelector::display_ports ()
 
 			clist->column(0).get_widget();  // force the column title button to be created
 			GtkButton *b = GTK_BUTTON(clist->gobj()->column[0].button); // no API to access this
-			Gtk::Button *B = wrap (b); // make C++ signal handling easier.
+			Gtk::Button *B = Glib::wrap (b); // make C++ signal handling easier.
 
 			clist->column_titles_show ();
 			clist->column_titles_active ();
@@ -465,7 +464,7 @@ IOSelector::display_ports ()
 			}
 
 			clist->set_name ("IOSelectorPortList");
-			clist->set_selection_mode (GTK_SELECTION_SINGLE);
+			clist->set_selection_mode (Gtk::SELECTION_SINGLE);
 			clist->set_shadow_type (Gtk::SHADOW_IN);
 			clist->set_size_request (-1, 75);
 
@@ -646,7 +645,7 @@ IOSelector::port_column_button_release (GdkEventButton *event, CList *clist)
 		   for whom we are handling an event. not good.
 		*/
 
-		Gtk::Main::idle.connect (bind (mem_fun(*this, &IOSelector::remove_port_when_idle), port));
+		Glib::signal_idle().connect (bind (mem_fun(*this, &IOSelector::remove_port_when_idle), port));
 
 	} else {
 		select_clist(clist);
@@ -816,7 +815,7 @@ PortInsertWindow::PortInsertWindow (Session& sess, PortInsert& pi, bool can_canc
 	cancel_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::cancel));
 	rescan_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::rescan));
 
-	delete_event.connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));	
+	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));	
 	pi.GoingAway.connect (mem_fun(*this, &PortInsertWindow::plugin_going_away));
 }
 

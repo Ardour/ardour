@@ -61,7 +61,7 @@ MeterBridge::MeterBridge ()
 	meter_scroll_base.add (metering_hbox);
 
 	meter_viewport.add (meter_scroll_base);
-	meter_viewport.set_shadow_type (GTK_SHADOW_NONE);
+	meter_viewport.set_shadow_type (Gtk::SHADOW_NONE);
 
 	meter_scroller.add (meter_viewport);
 	meter_scroller.set_name ("MeterBridgeWindow");
@@ -75,7 +75,7 @@ MeterBridge::MeterBridge ()
 	set_wmclass (_("ardour_meter_bridge"), "Ardour");
 	// set_policy (false, false, false); // no user resizing of any kind
 
-	delete_event.connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window*>(this)));
+	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Gtk::Window*>(this)));
 
 	metering = false;
 
@@ -240,14 +240,14 @@ MeterBridge::toggle_metering ()
 	}
 }
 
-gint
+bool
 MeterBridge::on_map (GdkEventAny *ev)
 {
 	start_metering ();
 	return Window::on_map (ev);
 }
 
-gint
+bool
 MeterBridge::on_unmap (GdkEventAny *ev)
 {
 	stop_metering ();

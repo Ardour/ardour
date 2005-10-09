@@ -146,9 +146,9 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	transport_stopped ();
 
-	second_connection = Main::timeout.connect (mem_fun(*this, &ARDOUR_UI::every_second), 1000);
-	point_one_second_connection = Main::timeout.connect (mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
-	point_zero_one_second_connection = Main::timeout.connect (mem_fun(*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
+	second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_second), 1000);
+	point_one_second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
+	point_zero_one_second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
 }
 
 int

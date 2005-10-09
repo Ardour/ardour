@@ -97,13 +97,13 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	table->set_size_request(750, 500);
 	table->attach(notebook, 0, 7, 0, 5);
 
-	table->attach(*btn_add, 1, 2, 5, 6, Gtk::FILL, 0, 5, 5);
-	table->attach(*btn_remove, 3, 4, 5, 6, Gtk::FILL, 0, 5, 5);
-	table->attach(*btn_update, 5, 6, 5, 6, Gtk::FILL, 0, 5, 5);
+	table->attach(*btn_add, 1, 2, 5, 6, Gtk::FILL, Gtk::FILL, 5, 5);
+	table->attach(*btn_remove, 3, 4, 5, 6, Gtk::FILL, Gtk::FILL, 5, 5);
+	table->attach(*btn_update, 5, 6, 5, 6, Gtk::FILL, Gtk::FILL, 5, 5);
 
 	table->attach(o_selector, 0, 7, 7, 9);
-	table->attach(*btn_ok, 1, 3, 9, 10, Gtk::FILL, 0, 5, 5);
-	table->attach(*btn_cancel, 3, 4, 9, 10, Gtk::FILL, 0, 5, 5);
+	table->attach(*btn_ok, 1, 3, 9, 10, Gtk::FILL, Gtk::FILL, 5, 5);
+	table->attach(*btn_cancel, 3, 4, 9, 10, Gtk::FILL, Gtk::FILL, 5, 5);
 	add (*table);
 
 	using namespace Gtk::Notebook_Helpers;
@@ -138,12 +138,12 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 #endif
 	o_selector.selection_made.connect(mem_fun(*this, &PluginSelector::o_plugin_selected));
 	o_selector.choice_made.connect(mem_fun(*this,&PluginSelector::o_plugin_chosen));
-	btn_update-.signal_clicked().connect (mem_fun(*this, &PluginSelector::btn_update_clicked));
+	btn_update->signal_clicked().connect (mem_fun(*this, &PluginSelector::btn_update_clicked));
 	btn_add->clicked.connect(mem_fun(*this, &PluginSelector::btn_add_clicked));
-	btn_remove->clicked.connect(mem_fun(*this, &PluginSelector::btn_remove_clicked));
-	btn_ok->clicked.connect(mem_fun(*this, &PluginSelector::btn_ok_clicked));
-	btn_cancel->clicked.connect(mem_fun(*this,&PluginSelector::btn_cancel_clicked));
-	delete_event.connect (mem_fun(*this, &PluginSelector::wm_close));
+	btn_remove->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_remove_clicked));
+	btn_ok->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_ok_clicked));
+	btn_cancel->signal_clicked().connect(mem_fun(*this,&PluginSelector::btn_cancel_clicked));
+	signal_delete_event().connect (mem_fun(*this, &PluginSelector::wm_close));
 
 }
 
