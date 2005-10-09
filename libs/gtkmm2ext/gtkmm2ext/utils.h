@@ -24,6 +24,7 @@
 #include <vector>
 #include <string>
 #include <gtkmm/widget.h>
+#include <gtkmm/paned.h>
 #include <gtkmm/comboboxtext.h>
 
 namespace Gtkmm2ext {
@@ -39,8 +40,8 @@ namespace Gtkmm2ext {
 	template<class T> void deferred_delete (void *ptr) {
 		delete static_cast<T *> (ptr);
 	}
-};
 
-gint do_not_propagate (GdkEventButton*);
+	GdkWindow* get_paned_handle (Gtk::Paned& paned);
+};
 
 #endif /*  __gtkmm2ext_utils_h__ */

@@ -25,6 +25,10 @@
 #include <gtkmm/combo.h>
 #include <gtkmm/label.h>
 #include <gtkmm/paned.h>
+#include <gtkmm/action.h>
+#include <gtkmm/actiongroup.h>
+#include <gtkmm/accelgroup.h>
+#include <gtkmm/accelmap.h>
 #include <gtk/gtkpaned.h>
 
 #include <gtkmm2ext/utils.h>
@@ -36,6 +40,7 @@
 
 using namespace std;
 using namespace Gtk;
+using namespace sigc;
 
 string
 short_version (string orig, string::size_type target_length)
@@ -102,27 +107,22 @@ short_version (string orig, string::size_type target_length)
 }
 
 string
-fit_to_pixels (string str, int32_t pixel_width, Gdk_Font& font)
+fit_to_pixels (string str, int pixel_width, string font)
 {
-	gint width;
-	gint lbearing;
-	gint rbearing;
-	gint ascent;
-	gint descent;
-
+	Label foo;
+	int width;
+	int height;
+	Pango::FontDescription fontdesc (font);
+	
 	int namelen = str.length();
 	char cstr[namelen+1];
 	strcpy (cstr, str.c_str());
 	
 	while (namelen) {
-		
-		gdk_string_extents (font,
-				    cstr,
-				    &lbearing,
-				    &rbearing,
-				    &width,
-				    &ascent,
-				    &descent);
+		Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (cstr);
+
+		layout->set_font_description (fontdesc);
+		layout->get_pixel_size (width, height);
 
 		if (width < (pixel_width)) {
 			break;
@@ -415,26 +415,19 @@ url_decode (string& url)
 	}
 }
 
-string
+Pango::FontDescription
 get_font_for_style (string widgetname)
 {
 	Gtk::Label foobar;
+	Glib::RefPtr<Style> style;
 
 	foobar.set_name (widgetname);
 	foobar.ensure_style();
 
-	if (foobar.get_style() == 0 || foobar.get_style()->gobj()->rc_style == 0 || foobar.get_style()->gobj()->rc_style->font_name == 0) {
-		return "fixed";
-	}
-
-	string str = foobar.get_style()->gobj()->rc_style->font_name;
-
-	if (str.empty()) {
-		return "fixed"; // standard X Window fallback font
-	} else {
-		return str;
-	}
+	style = foobar.get_style ();
+	return style->get_font();
 }
+
 gint
 pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
 {
@@ -446,8 +439,8 @@ pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
 
 		gint pos;
 		gint cmp;
-
-		pos = Gtkmm2ext::gtk_paned_get_position (pane->gobj());
+		
+		pos = pane->get_position ();
 
 		if (dynamic_cast<VPaned*>(pane)) {
 			cmp = pane->get_height();
@@ -522,5 +515,39 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 void
 decorate (Gtk::Window& w, Gdk::WMDecoration d)
 {
-	w.get_window().set_decorations (d);
+	w.get_window()->set_decorations (d);
+}
+
+Glib::RefPtr<Action>
+register_action (Glib::RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
+{
+	Glib::RefPtr<Action> act;
+
+	act = Action::create (name, label);
+	group->add (act, sl);
+	AccelMap::add_entry (act->get_accel_path(), key, mods);
+
+	return act;
+}
+
+Glib::RefPtr<Action>
+register_action (Glib::RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
+{
+	Glib::RefPtr<Action> act;
+
+	act = Action::create (name, label);
+	group->add (act, sl);
+
+	return act;
+}
+
+Glib::RefPtr<Action>
+register_action (Glib::RefPtr<ActionGroup> group, string name, string label)
+{
+	Glib::RefPtr<Action> act;
+
+	act = Action::create (name, label);
+	group->add (act);
+
+	return act;
 }

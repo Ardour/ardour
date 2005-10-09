@@ -351,17 +351,17 @@ Marker::Marker (PublicEditor& ed, GnomeCanvasGroup *parent, guint32 rgba, const 
 				    "outline_color", "black",
 				    NULL);
 
-	string fontname = get_font_for_style (N_("MarkerText"));
+	Pango::FontDescription font = get_font_for_style (N_("MarkerText"));
 
 	text = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-				    gnome_canvas_text_get_type (),
-				    "text", annotation.c_str(),
-				    "x", label_offset,
-				    "y", 0.0,
-				    "font", fontname.c_str(),
-				    "anchor", GTK_ANCHOR_NW,
-				    "fill_color", "black",
-				    NULL);
+				      gnome_canvas_text_get_type (),
+				      "text", annotation.c_str(),
+				      "x", label_offset,
+				      "y", 0.0,
+				      "fontdesc", font,
+				      "anchor", GTK_ANCHOR_NW,
+				      "fill_color", "black",
+				      NULL);
 
 	gtk_object_set_data (GTK_OBJECT(group), "marker", this);
 	gtk_signal_connect (GTK_OBJECT(group), "event", (GtkSignalFunc) callback, &editor);

@@ -830,14 +830,14 @@ Editor::initialize_canvas ()
 
 	/* stuff for the verbose canvas cursor */
 
-	string fontname = get_font_for_style (N_("VerboseCanvasCursor"));
+	Pango::FontDescription font = get_font_for_style (N_("VerboseCanvasCursor"));
 
 	verbose_canvas_cursor = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
-						     gnome_canvas_text_get_type(),
-						     "font", fontname.c_str(),
-						     "anchor", GTK_ANCHOR_NW,
-						     "fill_color_rgba", color_map[cVerboseCanvasCursor],
-						     NULL);
+						       gnome_canvas_text_get_type(),
+						       "font-desc", fontname,
+						       "anchor", GTK_ANCHOR_NW,
+						       "fill_color_rgba", color_map[cVerboseCanvasCursor],
+						       NULL);
 	verbose_cursor_visible = false;
 
 	/* a group to hold time (measure) lines */
@@ -1389,7 +1389,7 @@ Editor::track_canvas_allocate (GtkAllocation *alloc)
 
 	if (session == 0 && !ARDOUR_UI::instance()->will_create_new_session_automatically()) {
 
-		string fontname = get_font_for_style (N_("FirstActionMessage"));
+		Pango::FontDescription font = get_font_for_style (N_("FirstActionMessage"));
 
 		const char *txt1 = _("Start a new session\n");
 		const char *txt2 = _("via Session menu");
@@ -1400,27 +1400,21 @@ Editor::track_canvas_allocate (GtkAllocation *alloc)
 		   compute width, and multiply the height by 2.
 		*/
 			
-		gint width;
-		gint lbearing;
-		gint rbearing;
-		gint ascent;
-		gint descent;
+		int pixel_height;
+		int pixel_width;
 		
 		/* this is a dummy widget that exists so that we can get the
 		   style from the RC file. 
 		*/
 		
 		Label foo (_(txt2));
+		Glib::RefPtr<Pango::Layout> layout;
 		foo.set_name ("NoSessionMessage");
 		foo.ensure_style ();
 		
-		gdk_string_extents (foo.get_style()->get_font(),
-				    _(txt2),
-				    &lbearing,
-				    &rbearing,
-				    &width,
-				    &ascent,
-				    &descent);
+		layout = foo.create_pango_layout (_(txt2));
+		layout->set_font_description (font);
+		layout->get_pixel_size (pixel_width, pixel_height);
 			
 		if (first_action_message == 0) {
 			
@@ -1432,22 +1426,22 @@ Editor::track_canvas_allocate (GtkAllocation *alloc)
 			strcat (txt, _(txt2));
 			
 			first_action_message = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
-								    gnome_canvas_text_get_type(),
-								    "font", fontname.c_str(),
-								    "fill_color_rgba", color_map[cFirstActionMessage],
-								    "x", (gdouble) (canvas_width - width) / 2.0,
-								    "y", (gdouble) (canvas_height/2.0) - (2.0 * (ascent+descent)),
-								    "anchor", GTK_ANCHOR_NORTH_WEST,
-								    "text", txt,
-								    NULL);
+								      gnome_canvas_text_get_type(),
+								      "fontdesc", font,
+								      "fill_color_rgba", color_map[cFirstActionMessage],
+								      "x", (gdouble) (canvas_width - pixel_width) / 2.0,
+								      "y", (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height)),
+								      "anchor", GTK_ANCHOR_NORTH_WEST,
+								      "text", txt,
+								      NULL);
 			
 		} else {
 
 			/* center it */
 
 			gnome_canvas_item_set (first_action_message,
-					     "x", (gdouble) (canvas_width - width) / 2.0,
-					     "y", (gdouble) (canvas_height/2.0) - (2.0 * (ascent+descent)),
+					     "x", (gdouble) (canvas_width - pixel_width) / 2.0,
+					     "y", (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height)),
 					     NULL);
 		}
 	}

@@ -38,7 +38,8 @@ using namespace Editing;
 
 //------------------------------------------------------------------------------
 /** Initialize static memeber data */
-std::string TimeAxisViewItem::NAME_FONT;
+Pango::FontDescription TimeAxisViewItem::NAME_FONT;
+bool TimeAxisViewItem::have_name_font = false;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
 const double TimeAxisViewItem::NAME_Y_OFFSET = 15.0 ;           /* XXX depends a lot on the font size, sigh. */
 const double TimeAxisViewItem::NAME_HIGHLIGHT_SIZE = 15.0 ;     /* ditto */
@@ -65,8 +66,9 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, GnomeCanvasGroup* parent
 				   Visibility visibility)
 	: trackview (tv)
 {
-	if (NAME_FONT.empty()) {
+	if (!have_name_font) {
 		NAME_FONT = get_font_for_style (N_("TimeAxisViewItemName"));
+		have_name_font = true;
 	}
 
 	item_name = it_name ;

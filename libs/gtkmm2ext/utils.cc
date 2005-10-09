@@ -18,6 +18,7 @@
     $Id$
 */
 
+#include <gtk/gtkpaned.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/gtkutils.h>
 #include <gtkmm/comboboxtext.h>
@@ -35,12 +36,6 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *
 	set_size_request_to_display_given_text(w, text, hpadding, vpadding);
 }
 
-gint
-do_not_propagate (GdkEventButton *ev)
-{
-	return TRUE;
-}
-
 void
 Gtkmm2ext::init ()
 {
@@ -56,4 +51,10 @@ Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, vector<string>& strings)
 	for (vector<string>::iterator i = strings.begin(); i != strings.end(); ++i) {
 		cr.append_text (*i);
 	}
+}
+
+GdkWindow*
+Gtkmm2ext::get_paned_handle (Gtk::Paned& paned)
+{
+	return GTK_PANED(paned.gobj())->handle;
 }

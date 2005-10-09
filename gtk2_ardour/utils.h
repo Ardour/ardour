@@ -51,7 +51,7 @@ slider_position_to_gain (double pos)
 }
 
 std::string short_version (std::string, std::string::size_type target_length);
-std::string fit_to_pixels (std::string, int32_t pixel_width, Gdk::Font&);
+std::string fit_to_pixels (std::string, int pixel_width, std::string font);
 
 int    atoi (const std::string&);
 double atof (const std::string&);
@@ -66,9 +66,14 @@ unsigned char* xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h);
 GnomeCanvasPoints* get_canvas_points (std::string who, uint32_t npoints);
 
 int channel_combo_get_channel_count (Gtk::ComboBoxText& combo);
-std::string get_font_for_style (std::string widgetname);
+Pango::FontDescription get_font_for_style (std::string widgetname);
 
 gint pane_handler (GdkEventButton*, Gtk::Paned*);
 uint32_t rgba_from_style (std::string style, uint32_t, uint32_t, uint32_t, uint32_t);
+
+Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, string name, string label, sigc::slot<void> sl, guint key, Gdk::ModifierType mods);
+Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, string name, string label, sigc::slot<void> sl);
+Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, string name, string label);
+
 
 #endif /* __ardour_gtk_utils_h__ */
