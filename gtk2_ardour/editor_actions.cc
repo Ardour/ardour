@@ -1,193 +1,210 @@
+#include <ardour/ardour.h>
+
+#include "utils.h"
+#include "editor.h"
+#include "editing.h"
+
+#include "i18n.h"
+
+using namespace Gtk;
+using namespace std;
+using namespace sigc;
+using namespace ARDOUR;
+using namespace Editing;
+
 void
 Editor::register_actions ()
 {
 	/* add named actions for the editor */
 
-	Glib::RefPtr<ActionGroup> region_list_actions = ActionGroup::create ("Editor");
+	Glib::RefPtr<ActionGroup> editor_actions = ActionGroup::create (X_("Editor"));
 
-	add_action ("toggle-xfades-active", mem_fun(*this, &Editor::toggle_xfades_active));
+	register_action (editor_actions, "toggle-xfades-active", "toggle-xfades-active", mem_fun(*this, &Editor::toggle_xfades_active));
 
-	add_action ("playhead-to-next-region-start", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (Start)));
-	add_action ("playhead-to-next-region-end", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (End)));
-	add_action ("playhead-to-next-region-sync", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (SyncPoint)));
+	register_action (editor_actions, "playhead-to-next-region-start", "playhead-to-next-region-start", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (Start)));
+	register_action (editor_actions, "playhead-to-next-region-end", "playhead-to-next-region-end", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (End)));
+	register_action (editor_actions, "playhead-to-next-region-sync", "playhead-to-next-region-sync", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (SyncPoint)));
 
-	add_action ("playhead-to-previous-region-start", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (Start)));
-	add_action ("playhead-to-previous-region-end", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (End)));
-	add_action ("playhead-to-previous-region-sync", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (SyncPoint)));
+	register_action (editor_actions, "playhead-to-previous-region-start", "playhead-to-previous-region-start", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (Start)));
+	register_action (editor_actions, "playhead-to-previous-region-end", "playhead-to-previous-region-end", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (End)));
+	register_action (editor_actions, "playhead-to-previous-region-sync", "playhead-to-previous-region-sync", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (SyncPoint)));
 
-	add_action ("edit-cursor-to-next-region-start", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (Start)));
-	add_action ("edit-cursor-to-next-region-end", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (End)));
-	add_action ("edit-cursor-to-next-region-sync", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (SyncPoint)));
+	register_action (editor_actions, "edit-cursor-to-next-region-start", "edit-cursor-to-next-region-start", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (Start)));
+	register_action (editor_actions, "edit-cursor-to-next-region-end", "edit-cursor-to-next-region-end", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (End)));
+	register_action (editor_actions, "edit-cursor-to-next-region-sync", "edit-cursor-to-next-region-sync", bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (SyncPoint)));
 
-	add_action ("edit-cursor-to-previous-region-start", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (Start)));
-	add_action ("edit-cursor-to-previous-region-end", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (End)));
-	add_action ("edit-cursor-to-previous-region-sync", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (SyncPoint)));
+	register_action (editor_actions, "edit-cursor-to-previous-region-start", "edit-cursor-to-previous-region-start", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (Start)));
+	register_action (editor_actions, "edit-cursor-to-previous-region-end", "edit-cursor-to-previous-region-end", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (End)));
+	register_action (editor_actions, "edit-cursor-to-previous-region-sync", "edit-cursor-to-previous-region-sync", bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (SyncPoint)));
 
-	add_action ("playhead-to-range-start", bind (mem_fun(*this, &Editor::cursor_to_selection_start), playhead_cursor));
-	add_action ("playhead-to-range-end", bind (mem_fun(*this, &Editor::cursor_to_selection_end), playhead_cursor));
+	register_action (editor_actions, "playhead-to-range-start", "playhead-to-range-start", bind (mem_fun(*this, &Editor::cursor_to_selection_start), playhead_cursor));
+	register_action (editor_actions, "playhead-to-range-end", "playhead-to-range-end", bind (mem_fun(*this, &Editor::cursor_to_selection_end), playhead_cursor));
 
-	add_action ("edit-cursor-to-range-start", bind (mem_fun(*this, &Editor::cursor_to_selection_start), edit_cursor));
-	add_action ("edit-cursor-to-range-end", bind (mem_fun(*this, &Editor::cursor_to_selection_end), edit_cursor));
+	register_action (editor_actions, "edit-cursor-to-range-start", "edit-cursor-to-range-start", bind (mem_fun(*this, &Editor::cursor_to_selection_start), edit_cursor));
+	register_action (editor_actions, "edit-cursor-to-range-end", "edit-cursor-to-range-end", bind (mem_fun(*this, &Editor::cursor_to_selection_end), edit_cursor));
 
-	add_action ("jump-forward-to-mark", mem_fun(*this, &Editor::jump_forward_to_mark));
-	add_action ("jump-backward-to-mark", mem_fun(*this, &Editor::jump_backward_to_mark));
-	add_action ("add-location-from-playhead", mem_fun(*this, &Editor::add_location_from_playhead_cursor));
+	register_action (editor_actions, "jump-forward-to-mark", "jump-forward-to-mark", mem_fun(*this, &Editor::jump_forward_to_mark));
+	register_action (editor_actions, "jump-backward-to-mark", "jump-backward-to-mark", mem_fun(*this, &Editor::jump_backward_to_mark));
+	register_action (editor_actions, "add-location-from-playhead", "add-location-from-playhead", mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 
-	add_action ("nudge-forward", bind (mem_fun(*this, &Editor::nudge_forward), false));
-	add_action ("nudge-next-forward", bind (mem_fun(*this, &Editor::nudge_forward), true));
-	add_action ("nudge-backward", bind (mem_fun(*this, &Editor::nudge_backward), false));
-	add_action ("nudge-next-backward", bind (mem_fun(*this, &Editor::nudge_backward), true));
+	register_action (editor_actions, "nudge-forward", "nudge-forward", bind (mem_fun(*this, &Editor::nudge_forward), false));
+	register_action (editor_actions, "nudge-next-forward", "nudge-next-forward", bind (mem_fun(*this, &Editor::nudge_forward), true));
+	register_action (editor_actions, "nudge-backward", "nudge-backward", bind (mem_fun(*this, &Editor::nudge_backward), false));
+	register_action (editor_actions, "nudge-next-backward", "nudge-next-backward", bind (mem_fun(*this, &Editor::nudge_backward), true));
 
-	add_action ("toggle-playback", bind (mem_fun(*this, &Editor::toggle_playback), false));
-	add_action ("toggle-playback-forget-capture", bind (mem_fun(*this, &Editor::toggle_playback), true));
+	register_action (editor_actions, "toggle-playback", "toggle-playback", bind (mem_fun(*this, &Editor::toggle_playback), false));
+	register_action (editor_actions, "toggle-playback-forget-capture", "toggle-playback-forget-capture", bind (mem_fun(*this, &Editor::toggle_playback), true));
 
-	add_action ("toggle-loop-playback", mem_fun(*this, &Editor::toggle_loop_playback));
+	register_action (editor_actions, "toggle-loop-playback", "toggle-loop-playback", mem_fun(*this, &Editor::toggle_loop_playback));
 	
-	add_action ("temporal-zoom-out", bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
-	add_action ("temporal-zoom-in", bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
-	add_action ("zoom-to-session", mem_fun(*this, &Editor::temporal_zoom_session));
+	register_action (editor_actions, "temporal-zoom-out", "temporal-zoom-out", bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
+	register_action (editor_actions, "temporal-zoom-in", "temporal-zoom-in", bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
+	register_action (editor_actions, "zoom-to-session", "zoom-to-session", mem_fun(*this, &Editor::temporal_zoom_session));
 
-	add_action ("scroll-tracks-up", mem_fun(*this, &Editor::scroll_tracks_up));
-	add_action ("scroll-tracks-down", mem_fun(*this, &Editor::scroll_tracks_down));
-	add_action ("step-tracks-up", mem_fun(*this, &Editor::scroll_tracks_up_line));
-	add_action ("step-tracks-down", mem_fun(*this, &Editor::scroll_tracks_down_line));
+	register_action (editor_actions, "scroll-tracks-up", "scroll-tracks-up", mem_fun(*this, &Editor::scroll_tracks_up));
+	register_action (editor_actions, "scroll-tracks-down", "scroll-tracks-down", mem_fun(*this, &Editor::scroll_tracks_down));
+	register_action (editor_actions, "step-tracks-up", "step-tracks-up", mem_fun(*this, &Editor::scroll_tracks_up_line));
+	register_action (editor_actions, "step-tracks-down", "step-tracks-down", mem_fun(*this, &Editor::scroll_tracks_down_line));
 
-	add_action ("scroll-backward", bind (mem_fun(*this, &Editor::scroll_backward), 0.8f));
-	add_action ("scroll-forward", bind (mem_fun(*this, &Editor::scroll_forward), 0.8f));
-	add_action ("goto", mem_fun(*this, &Editor::goto_frame));
-	add_action ("center-playhead", mem_fun(*this, &Editor::center_playhead));
-	add_action ("center-edit_cursor", mem_fun(*this, &Editor::center_edit_cursor));
-	add_action ("playhead-forward", mem_fun(*this, &Editor::playhead_forward));
-	add_action ("playhead-backward", mem_fun(*this, &Editor::playhead_backward));
-	add_action ("playhead-to-edit", bind (mem_fun(*this, &Editor::cursor_align), true));
-	add_action ("edit-to-playhead", bind (mem_fun(*this, &Editor::cursor_align), false));
+	register_action (editor_actions, "scroll-backward", "scroll-backward", bind (mem_fun(*this, &Editor::scroll_backward), 0.8f));
+	register_action (editor_actions, "scroll-forward", "scroll-forward", bind (mem_fun(*this, &Editor::scroll_forward), 0.8f));
+	register_action (editor_actions, "goto", "goto", mem_fun(*this, &Editor::goto_frame));
+	register_action (editor_actions, "center-playhead", "center-playhead", mem_fun(*this, &Editor::center_playhead));
+	register_action (editor_actions, "center-edit_cursor", "center-edit_cursor", mem_fun(*this, &Editor::center_edit_cursor));
+	register_action (editor_actions, "playhead-forward", "playhead-forward", mem_fun(*this, &Editor::playhead_forward));
+	register_action (editor_actions, "playhead-backward", "playhead-backward", mem_fun(*this, &Editor::playhead_backward));
+	register_action (editor_actions, "playhead-to-edit", "playhead-to-edit", bind (mem_fun(*this, &Editor::cursor_align), true));
+	register_action (editor_actions, "edit-to-playhead", "edit-to-playhead", bind (mem_fun(*this, &Editor::cursor_align), false));
 
-	add_action ("align-regions-start", bind (mem_fun(*this, &Editor::align), ARDOUR::Start));
-	add_action ("align-regions-start-relative", bind (mem_fun(*this, &Editor::align_relative), ARDOUR::Start));
-	add_action ("align-regions-end", bind (mem_fun(*this, &Editor::align), ARDOUR::End));
-	add_action ("align-regions-end-relative", bind (mem_fun(*this, &Editor::align_relative), ARDOUR::End));
-	add_action ("align-regions-sync", bind (mem_fun(*this, &Editor::align), ARDOUR::SyncPoint));
-	add_action ("align-regions-sync-relative", bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint));
+	register_action (editor_actions, "align-regions-start", "align-regions-start", bind (mem_fun(*this, &Editor::align), ARDOUR::Start));
+	register_action (editor_actions, "align-regions-start-relative", "align-regions-start-relative", bind (mem_fun(*this, &Editor::align_relative), ARDOUR::Start));
+	register_action (editor_actions, "align-regions-end", "align-regions-end", bind (mem_fun(*this, &Editor::align), ARDOUR::End));
+	register_action (editor_actions, "align-regions-end-relative", "align-regions-end-relative", bind (mem_fun(*this, &Editor::align_relative), ARDOUR::End));
+	register_action (editor_actions, "align-regions-sync", "align-regions-sync", bind (mem_fun(*this, &Editor::align), ARDOUR::SyncPoint));
+	register_action (editor_actions, "align-regions-sync-relative", "align-regions-sync-relative", bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint));
 	
-	add_action ("set-playhead", mem_fun(*this, &Editor::kbd_set_playhead_cursor));
-	add_action ("set-edit-cursor", mem_fun(*this, &Editor::kbd_set_edit_cursor));
+	register_action (editor_actions, "set-playhead", "set-playhead", mem_fun(*this, &Editor::kbd_set_playhead_cursor));
+	register_action (editor_actions, "set-edit-cursor", "set-edit-cursor", mem_fun(*this, &Editor::kbd_set_edit_cursor));
 
-	add_action ("set-mouse-mode-object", bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseObject, false));
-	add_action ("set-mouse-mode-range", bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseRange, false));
-	add_action ("set-mouse-mode-gain", bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseGain, false));
-	add_action ("set-mouse-mode-zoom", bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
-	add_action ("set-mouse-mode-timefx", bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
+	register_action (editor_actions, "set-undo", "set-undo", bind (mem_fun(*this, &Editor::undo), 1U));
+	register_action (editor_actions, "set-redo", "set-redo", bind (mem_fun(*this, &Editor::redo), 1U));
 
-	add_action ("set-undo", bind (mem_fun(*this, &Editor::undo), 1U));
-	add_action ("set-redo", bind (mem_fun(*this, &Editor::redo), 1U));
+	register_action (editor_actions, "export-session", "export-session", mem_fun(*this, &Editor::export_session));
+	register_action (editor_actions, "export-range", "export-range", mem_fun(*this, &Editor::export_selection));
 
-	add_action ("export-session", mem_fun(*this, &Editor::export_session));
-	add_action ("export-range", mem_fun(*this, &Editor::export_selection));
+	register_action (editor_actions, "editor-cut", "editor-cut", mem_fun(*this, &Editor::cut));
+	register_action (editor_actions, "editor-copy", "editor-copy", mem_fun(*this, &Editor::copy));
+	register_action (editor_actions, "editor-paste", "editor-paste", mem_fun(*this, &Editor::keyboard_paste));
+	register_action (editor_actions, "duplicate-region", "duplicate-region", mem_fun(*this, &Editor::keyboard_duplicate_region));
+	register_action (editor_actions, "duplicate-range", "duplicate-range", mem_fun(*this, &Editor::keyboard_duplicate_selection));
+	register_action (editor_actions, "insert-region", "insert-region", mem_fun(*this, &Editor::keyboard_insert_region_list_selection));
+	register_action (editor_actions, "reverse-region", "reverse-region", mem_fun(*this, &Editor::reverse_region));
+	register_action (editor_actions, "normalize-region", "normalize-region", mem_fun(*this, &Editor::normalize_region));
+	register_action (editor_actions, "editor-crop", "editor-crop", mem_fun(*this, &Editor::crop_region_to_selection));
+	register_action (editor_actions, "insert-chunk", "insert-chunk", bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f));
 
-	add_action ("editor-cut", mem_fun(*this, &Editor::cut));
-	add_action ("editor-copy", mem_fun(*this, &Editor::copy));
-	add_action ("editor-paste", mem_fun(*this, &Editor::keyboard_paste));
-	add_action ("duplicate-region", mem_fun(*this, &Editor::keyboard_duplicate_region));
-	add_action ("duplicate-range", mem_fun(*this, &Editor::keyboard_duplicate_selection));
-	add_action ("insert-region", mem_fun(*this, &Editor::keyboard_insert_region_list_selection));
-	add_action ("reverse-region", mem_fun(*this, &Editor::reverse_region));
-	add_action ("normalize-region", mem_fun(*this, &Editor::normalize_region));
-	add_action ("editor-crop", mem_fun(*this, &Editor::crop_region_to_selection));
-	add_action ("insert-chunk", bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f));
+	register_action (editor_actions, "split-at-edit-cursor", "split-at-edit-cursor", mem_fun(*this, &Editor::split_region));
+	register_action (editor_actions, "split-at-mouse", "split-at-mouse", mem_fun(*this, &Editor::kbd_split));
 
-	add_action ("split-at-edit-cursor", mem_fun(*this, &Editor::split_region));
-	add_action ("split-at-mouse", mem_fun(*this, &Editor::kbd_split));
+	register_action (editor_actions, "brush-at-mouse", "brush-at-mouse", mem_fun(*this, &Editor::kbd_brush));
+	register_action (editor_actions, "audition-at-mouse", "audition-at-mouse", mem_fun(*this, &Editor::kbd_audition));
 
-	add_action ("brush-at-mouse", mem_fun(*this, &Editor::kbd_brush));
-	add_action ("audition-at-mouse", mem_fun(*this, &Editor::kbd_audition));
+	register_action (editor_actions, "start-range", "start-range", mem_fun(*this, &Editor::keyboard_selection_begin));
+	register_action (editor_actions, "finish-range", "finish-range", bind (mem_fun(*this, &Editor::keyboard_selection_finish), false));
+	register_action (editor_actions, "finish-add-range", "finish-add-range", bind (mem_fun(*this, &Editor::keyboard_selection_finish), true));
 
-	add_action ("start-range", mem_fun(*this, &Editor::keyboard_selection_begin));
-	add_action ("finish-range", bind (mem_fun(*this, &Editor::keyboard_selection_finish), false));
-	add_action ("finish-add-range", bind (mem_fun(*this, &Editor::keyboard_selection_finish), true));
+	register_action (editor_actions, "extend-range-to-end-of-region", "extend-range-to-end-of-region", bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false));
+	register_action (editor_actions, "extend-range-to-start-of-region", "extend-range-to-start-of-region", bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false));
 
-	add_action ("extend-range-to-end-of-region", bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false));
-	add_action ("extend-range-to-start-of-region", bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false));
+	register_action (editor_actions, "toggle-follow-playhead", "toggle-follow-playhead", (mem_fun(*this, &Editor::toggle_follow_playhead)));
+	register_action (editor_actions, "remove-last-capture", "remove-last-capture", (mem_fun(*this, &Editor::remove_last_capture)));
 
-	add_action ("toggle-follow-playhead", (mem_fun(*this, &Editor::toggle_follow_playhead)));
-	add_action ("remove-last-capture", (mem_fun(*this, &Editor::remove_last_capture)));
+	Glib::RefPtr<ActionGroup> zoom_actions = ActionGroup::create (X_("Zoom"));
+	RadioAction::Group zoom_group;
 
-	Glib::RefPtr<ActionGroup> region_list_actions = ActionGroup::create ("Zoom");
+	register_radio_action (zoom_actions, zoom_group, "zoom-focus-left", "zoom-focus-left", bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusLeft));
+	register_radio_action (zoom_actions, zoom_group, "zoom-focus-right", "zoom-focus-right", bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusRight));
+	register_radio_action (zoom_actions, zoom_group, "zoom-focus-center", "zoom-focus-center", bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusCenter));
+	register_radio_action (zoom_actions, zoom_group, "zoom-focus-playhead", "zoom-focus-playhead", bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusPlayhead));
+	register_radio_action (zoom_actions, zoom_group, "zoom-focus-edit", "zoom-focus-edit", bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusEdit));
+
+	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionGroup::create (X_("MouseMode"));
+	RadioAction::Group mouse_mode_group;
+
+	register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", "set-mouse-mode-object", bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseObject, false));
+	register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", "set-mouse-mode-range", bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseRange, false));
+	register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", "set-mouse-mode-gain", bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseGain, false));
+	register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", "set-mouse-mode-zoom", bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
+	register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", "set-mouse-mode-timefx", bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
+
+	Glib::RefPtr<ActionGroup> snap_actions = ActionGroup::create (X_("Snap"));
 	RadioAction::Group snap_choice_group;
 
-	add_action ("zoom-focus-left", bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusLeft));
-	add_action ("zoom-focus-right", bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusRight));
-	add_action ("zoom-focus-center", bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusCenter));
-	add_action ("zoom-focus-playhead", bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusPlayhead));
-	add_action ("zoom-focus-edit", bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusEdit));
-
-	Glib::RefPtr<ActionGroup> snap_actions = ActionGroup::create ("Snap");
-	RadioAction::Group snap_choice_group;
-
-	add_action ("snap-to-frame", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToFrame)));
-	add_action ("snap-to-cd-frame", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToCDFrame)));
-	add_action ("snap-to-smpte-frame", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTEFrame)));
-	add_action ("snap-to-smpte-seconds", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTESeconds)));
-	add_action ("snap-to-smpte-minutes", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTEMinutes)));
-	add_action ("snap-to-seconds", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSeconds)));
-	add_action ("snap-to-minutes", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToMinutes)));
-	add_action ("snap-to-thirtyseconds", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAThirtysecondBeat)));
-	add_action ("snap-to-asixteenthbeat", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToASixteenthBeat)));
-	add_action ("snap-to-eighths", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAEighthBeat)));
-	add_action ("snap-to-quarters", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAQuarterBeat)));
-	add_action ("snap-to-thirds", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAThirdBeat)));
-	add_action ("snap-to-beat", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToBeat)));
-	add_action ("snap-to-bar", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToBar)));
-	add_action ("snap-to-mark", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToMark)));
-	add_action ("snap-to-edit-cursor", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToEditCursor)));
-	add_action ("snap-to-region-start", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionStart)));
-	add_action ("snap-to-region-end", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionEnd)));
-	add_action ("snap-to-region-sync", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionSync)));
-	add_action ("snap-to-region-boundary", (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionBoundary)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-frame"), _("snap-to-frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToFrame)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-cd-frame"), _("snap-to-cd-frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToCDFrame)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-frame"), _("snap-to-smpte-frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTEFrame)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-seconds"), _("snap-to-smpte-seconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTESeconds)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-minutes"), _("snap-to-smpte-minutes"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTEMinutes)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-seconds"), _("snap-to-seconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSeconds)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-minutes"), _("snap-to-minutes"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToMinutes)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("snap-to-thirtyseconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAThirtysecondBeat)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("snap-to-asixteenthbeat"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToASixteenthBeat)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-eighths"), _("snap-to-eighths"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAEighthBeat)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-quarters"), _("snap-to-quarters"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAQuarterBeat)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirds"), _("snap-to-thirds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAThirdBeat)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-beat"), _("snap-to-beat"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToBeat)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-bar"), _("snap-to-bar"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToBar)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-mark"), _("snap-to-mark"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToMark)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-edit-cursor"), _("snap-to-edit-cursor"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToEditCursor)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-start"), _("snap-to-region-start"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionStart)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-end"), _("snap-to-region-end"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionEnd)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-sync"), _("snap-to-region-sync"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionSync)));
+	register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-boundary"), _("snap-to-region-boundary"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionBoundary)));
 
 	/* REGION LIST */
 
-	Glib::RefPtr<ActionGroup> region_list_actions = ActionGroup::create ("RegionList");
+	Glib::RefPtr<ActionGroup> rl_actions = ActionGroup::create (X_("RegionList"));
+	RadioAction::Group sort_type_group;
 	RadioAction::Group sort_order_group;
-	RadioAction::Group sort_order_group;
 
-	region_list_actions->add (Action::create (X_("rlAudition"), _("Audition")), mem_fun(*this, &Editor::audition_region_from_region_list));
-	region_list_actions->add (Action::create (X_("rlHide"), _("Hide")), mem_fun(*this, &Editor::hide_region_from_region_list));
-	region_list_actions->add (Action::create (X_("rlRemove"), _("Remove")), mem_fun(*this, &Editor::remove_region_from_region_list));
+	register_action (rl_actions, X_("rlAudition"), _("Audition"), mem_fun(*this, &Editor::audition_region_from_region_list));
+	register_action (rl_actions, X_("rlHide"), _("Hide"), mem_fun(*this, &Editor::hide_region_from_region_list));
+	register_action (rl_actions, X_("rlRemove"), _("Remove"), mem_fun (*this, &Editor::remove_region_from_region_list));
+	register_action (rl_actions, X_("rlShowAll"), _("Show all"), mem_fun(*this, &Editor::toggle_full_region_list));
 
-	region_list_actions->add (ToggleAction::create (X_("rlShowAll"), _("Show all")), mem_fun(*this, &Editor::toggle_full_region_list));
-
-	region_list_actions->add (RadioAction::create (sort_order_group, X_("SortAscending"),  _("Ascending")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), true));
-	region_list_actions->add (RadioAction::create (sort_order_group, X_("SortDescending"),   _("Descending"),),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), false));
-
-	region_list_actions->add (RadioAction::create (sort_type_group, X_("SortByRegionName"),  _("By Region Name")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByName));
-	region_list_actions->add (RadioAction::create (sort_type_group, X_("SortByRegionLength"),  _("By Region Length")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByLength));
-	region_list_actions->add (RadioAction::create (sort_type_group, X_("SortByRegionPosition"),  _("By Region Position")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByPosition));
-	region_list_actions->add (RadioAction::create (sort_type_group, X_("SortByRegionTimestamp"),  _("By Region Timestamp")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByTimestamp));
-	region_list_actions->add (RadioAction::create (sort_type_group, X_("SortByRegionStartinFile"),  _("By Region Start in File")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByStartInFile));
-	region_list_actions->add (RadioAction::create (sort_type_group, X_("SortByRegionEndinFile"),  _("By Region End in File")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByEndInFile));
-	region_list_actions->add (RadioAction::create (sort_type_group, X_("SortBySourceFileName"),  _("By Source File Name")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileName));
-	region_list_actions->add (RadioAction::create (sort_type_group, X_("SortBySourceFileLength"),  _("By Source File Length")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileLength));
-	region_list_actions->add (RadioAction::create (sort_type_group, X_("SortBySourceFileCreationDate"),  _("By Source File Creation Date")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileCreationDate));
-	region_list_actions->add (RadioAction::create (sort_type_group, X_("SortBySourceFilesystem"),  _("By Source Filesystem")),
-				  bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileFS));
-
-	region_list_actions->add (Action::create (X_("rlEmbedAudio"), _("Embed audio (link)")), mem_fun(*this, &Editor::embed_audio));
-	region_list_actions->add (Action::create (X_("rlImportAudio"), _("Embed audio (link)")), bind (mem_fun(*this, &Editor::import_audio), false));
+	register_radio_action (rl_actions, sort_order_group, X_("SortAscending"),  _("Ascending"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), true));
+	register_radio_action (rl_actions, sort_order_group, X_("SortDescending"),   _("Descending"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), false));
+	
+	register_radio_action (rl_actions, sort_type_group, X_("SortByRegionName"),  _("By Region Name"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByName));
+	register_radio_action (rl_actions, sort_type_group, X_("SortByRegionLength"),  _("By Region Length"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByLength));
+	register_radio_action (rl_actions, sort_type_group, X_("SortByRegionPosition"),  _("By Region Position"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByPosition));
+	register_radio_action (rl_actions, sort_type_group, X_("SortByRegionTimestamp"),  _("By Region Timestamp"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByTimestamp));
+	register_radio_action (rl_actions, sort_type_group, X_("SortByRegionStartinFile"),  _("By Region Start in File"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByStartInFile));
+	register_radio_action (rl_actions, sort_type_group, X_("SortByRegionEndinFile"),  _("By Region End in File"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByEndInFile));
+	register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFileName"),  _("By Source File Name"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileName));
+	register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFileLength"),  _("By Source File Length"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileLength));
+	register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFileCreationDate"),  _("By Source File Creation Date"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileCreationDate));
+	register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFilesystem"),  _("By Source Filesystem"),
+			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileFS));
+	
+	register_action (rl_actions, X_("rlEmbedAudio"), _("Embed audio (link)"), mem_fun(*this, &Editor::embed_audio));
+	register_action (rl_actions, X_("rlImportAudio"), _("Embed audio (link)"), bind (mem_fun(*this, &Editor::import_audio), false));
 
 	/* now add them all */
 
-	ui_manager->insert_action_group (region_list_actions);
+	ui_manager->insert_action_group (rl_actions);
+	ui_manager->insert_action_group (mouse_mode_actions);
 	ui_manager->insert_action_group (snap_actions);
 	ui_manager->insert_action_group (editor_actions);
 }

@@ -521,10 +521,7 @@ decorate (Gtk::Window& w, Gdk::WMDecoration d)
 Glib::RefPtr<Action>
 register_action (Glib::RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
 {
-	Glib::RefPtr<Action> act;
-
-	act = Action::create (name, label);
-	group->add (act, sl);
+	Glib::RefPtr<Action> act = register_action (group, name, label, sl);
 	AccelMap::add_entry (act->get_accel_path(), key, mods);
 
 	return act;
@@ -533,9 +530,49 @@ register_action (Glib::RefPtr<ActionGroup> group, string name, string label, slo
 Glib::RefPtr<Action>
 register_action (Glib::RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
 {
+	Glib::RefPtr<Action> act = register_action (group, name, label);
+	group->add (act, sl);
+
+	return act;
+}
+
+
+Glib::RefPtr<Action>
+register_radio_action (Glib::RefPtr<ActionGroup> group, RadioAction::Group rgroup, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
+{
+	Glib::RefPtr<Action> act = register_radio_action (group, rgroup, name, label, sl);
+	AccelMap::add_entry (act->get_accel_path(), key, mods);
+
+	return act;
+}
+
+Glib::RefPtr<Action>
+register_radio_action (Glib::RefPtr<ActionGroup> group, RadioAction::Group rgroup, string name, string label, slot<void> sl)
+{
 	Glib::RefPtr<Action> act;
 
-	act = Action::create (name, label);
+	act = RadioAction::create (rgroup, name, label);
+	group->add (act, sl);
+
+	return act;
+}
+
+
+Glib::RefPtr<Action>
+register_toggle_action (Glib::RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
+{
+	Glib::RefPtr<Action> act = register_toggle_action (group,name, label, sl);
+	AccelMap::add_entry (act->get_accel_path(), key, mods);
+
+	return act;
+}
+
+Glib::RefPtr<Action>
+register_toggle_action (Glib::RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
+{
+	Glib::RefPtr<Action> act;
+
+	act = ToggleAction::create (name, label);
 	group->add (act, sl);
 
 	return act;

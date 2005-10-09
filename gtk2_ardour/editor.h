@@ -824,6 +824,7 @@ class Editor : public PublicEditor
 	
 	/* KEYMAP HANDLING */
 
+	void register_actions ();
 	void install_keybindings ();
 
 	int ensure_cursor (jack_nframes_t* pos);
@@ -883,7 +884,7 @@ class Editor : public PublicEditor
 
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
-	void remove_selected_regions_from_region_list ();
+	void remove_region_from_region_list ();
 
 	void align (ARDOUR::RegionPoint);
 	void align_relative (ARDOUR::RegionPoint);

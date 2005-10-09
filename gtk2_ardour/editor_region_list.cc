@@ -398,7 +398,7 @@ Editor::region_list_display_key_release (GdkEventKey* ev)
 {
 	switch (ev->keyval) {
 	case GDK_Delete:
-		remove_selected_regions_from_region_list ();
+		remove_region_from_region_list ();
 		return true;
 		break;
 	default:
@@ -708,7 +708,7 @@ Editor::hide_region_from_region_list ()
 }
 
 void
-Editor::remove_selected_regions_from_region_list ()
+Editor::remove_region_from_region_list ()
 {
 	region_list_selection_mapover (mem_fun (*this, &Editor::remove_a_region));
 }
