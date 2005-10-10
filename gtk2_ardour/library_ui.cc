@@ -725,7 +725,7 @@ LibraryTree::file_ok_clicked ()
 	progress_win->show_all();
 	
 	clone_ftw((void*)file);
-	
+
 	delete progress_win;
 }
 
@@ -748,6 +748,8 @@ clone_ftw(void* ptr)
 		warning << string_compose(_("%1 not added to database"), *file) << endmsg;
 	}
 
+	Library->save_changes();
+	
 	delete old_parent;
 	delete old_parent_uri;
 
@@ -778,6 +780,7 @@ LibraryTree::folder_btn_clicked ()
 
 		if (name.length()) {
 			Library->add_group(name, current_group);
+			Library->save_changes();
 		}
 	}
 }
@@ -837,6 +840,8 @@ LibraryTree::remove_btn_clicked ()
 	} else {
 		error << _("Should not be reached") << endmsg;
 	}
+
+	Library->save_changes();
 
 	current_member = "";
 	current_group = "";
@@ -1233,6 +1238,7 @@ SoundFileBox::add_field_clicked ()
 		
 		if (name.length()) {
 			Library->add_field(name);
+			Library->save_changes();
 		}
 	}
 }
@@ -1241,6 +1247,7 @@ void
 SoundFileBox::remove_field_clicked ()
 {
 	Library->remove_field(selected_field);
+	Library->save_changes();
 	selected_field = "";
 	remove_field_btn.set_sensitive(false);
 }
@@ -1285,6 +1292,7 @@ SoundFileBox::field_selected (Gtkmm2ext::Selector *selector, Gtkmm2ext::Selectio
 
 		prompter.get_result(data);
 		Library->set_field(uri, field_name, data);
+		Library->save_changes();
 	}
 
 	fields.rescan();

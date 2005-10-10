@@ -147,7 +147,6 @@ AudioLibrary::remove_group (string uri)
 	}
 
 	lrdf_remove_uri_matches(uri.c_str());
-	save_changes ();
 
 	 removed_group(uri); /* EMIT SIGNAL */
 }
@@ -206,9 +205,7 @@ AudioLibrary::add_member (string member, string parent_uri)
 			parent_uri.c_str(), lrdf_uri);
 	}
 
-	save_changes ();
-
-	 added_member (local_member, parent_uri); /* EMIT SIGNAL */
+	added_member (local_member, parent_uri); /* EMIT SIGNAL */
 
 	return local_member;
 }
@@ -217,8 +214,6 @@ void
 AudioLibrary::remove_member (string uri)
 {
 	lrdf_remove_uri_matches (uri.c_str());
-
-	save_changes ();
 
 	 removed_member(uri); /* EMIT SIGNAL */
 }
@@ -376,8 +371,6 @@ AudioLibrary::add_field (string name)
 
 	set_label (local_field, name);
 	
-	save_changes();
-
 	 fields_changed(); /* EMIT SIGNAL */
 }
 
@@ -410,7 +403,6 @@ void
 AudioLibrary::remove_field (string name)
 {
 	lrdf_remove_uri_matches(field_uri(name).c_str());
-	save_changes();
 	 fields_changed (); /* EMIT SIGNAL */
 }
 
@@ -458,8 +450,6 @@ AudioLibrary::set_field (string uri, string field, string literal)
 
 	lrdf_add_triple(src.c_str(), uri.c_str(), local_field.c_str(), 
 			literal.c_str(), lrdf_literal);
-
-	save_changes();
 
 	 fields_changed(); /* EMIT SIGNAL */
 }

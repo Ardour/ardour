@@ -65,6 +65,8 @@ class AudioLibrary
 	string get_label (string uri);
 	void set_label (string uri, string label);
 
+	void save_changes();
+
 	sigc::signal<void, string, string> added_group; // group, parent
 	sigc::signal<void, string, string> added_member;// member, parent
 	sigc::signal<void, string> removed_group;
@@ -72,7 +74,6 @@ class AudioLibrary
 	sigc::signal<void> fields_changed;
 	
   private:
-	void save_changes ();
 	string field_uri (string name);
 
 	bool is_rdf_type (string uri, string type);
