@@ -37,8 +37,7 @@
 #include <ardour/diskstream.h>
 
 #include "i18n.h"
-/* there is a string_compose() here.. */
-//using namespace sigc;
+using namespace sigc;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
@@ -566,14 +565,14 @@ RouteUI::choose_color()
 {
 	bool picked;
 	Gdk::Color color;
-	gdouble current[4];
+	Gdk::Color current;
 
-	current[0] = _color.get_red()  / 65535.0;
-	current[1] = _color.get_green() / 65535.0;
-	current[2] = _color.get_blue() / 65535.0;
-	current[3] = 1.0;
+	current.set_red ( _color.get_red()  / 65535.0);
+	current.set_green (_color.get_green() / 65535.0);
+	current.set_blue (_color.get_blue() / 65535.0);
+	//current[3] = 1.0;
 
-	color = Gtkmm2ext::UI::instance()->get_color (_("ardour: color selection"), picked, current);
+	color = Gtkmm2ext::UI::instance()->get_color (_("ardour: color selection"), picked, &current);
 
 	if (picked) {
 		set_color (color);
@@ -665,7 +664,7 @@ RouteUI::remove_this_route ()
 	Gtk::Main::run ();
 
 	if (prompter.get_choice() == 0) {
-	  	Glib::signal_idle().connect (bind (mem_fun (&RouteUI::idle_remove_this_route), this));
+	  Glib::signal_idle().connect (bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));
 	}
 }
 

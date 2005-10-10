@@ -26,7 +26,11 @@
 #include <map>
 
 #include <pthread.h>
-#include <gtkmm.h>
+#include <gtkmm/widget.h>
+#include <gtkmm/style.h>
+#include <gtkmm/main.h>
+#include <gtkmm/tooltips.h>
+#include <gdkmm/color.h>
 #include <pbd/abstract_ui.h>
 #include <pbd/ringbufferNPT.h>
 #include <pbd/atomic.h>

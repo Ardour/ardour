@@ -49,6 +49,7 @@ if gtkardour['VST']:
 
 gtkardour_files=Split("""
 about.cc
+actions.cc
 add_route_dialog.cc
 ardour_dialog.cc
 ardour_message.cc
@@ -65,7 +66,7 @@ automation_line.cc
 automation_pan_line.cc
 automation_time_axis.cc
 axis_view.cc
-canvas-imageframe.cc
+canvas-imageframe.c
 canvas-ruler.c
 canvas-simpleline.c
 canvas-simplerect.c

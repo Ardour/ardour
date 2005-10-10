@@ -25,7 +25,7 @@
 #include <iostream>
 #include <cmath>
 
-#include <gtkmm.h>
+#include <sigc++/bind.h>
 #include <pbd/error.h>
 #include <pbd/basename.h>
 #include <pbd/fastlog.h>
@@ -41,6 +41,7 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "audio_clock.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -424,29 +425,16 @@ ARDOUR_UI::setup_clock ()
 {
 	ARDOUR_UI::Clock.connect (bind (mem_fun (big_clock, &AudioClock::set), false));
 	
-	big_clock_window = new BigClockWindow;
+	big_clock_window = new ArdourDialog ("big clock window");
 	
 	big_clock_window->set_border_width (0);
 	big_clock_window->add  (big_clock);
 	big_clock_window->set_title (_("ardour: clock"));
-	
+	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_MENU);
+
 	big_clock_window->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Gtk::Window*>(big_clock_window)));
-	big_clock_window->signal_realize().connect (mem_fun(*this, &ARDOUR_UI::big_clock_realize));
-	big_clock_window->size_allocate.connect (mem_fun(*this, &ARDOUR_UI::big_clock_size_event));
 
 	big_clock_window->Hiding.connect (mem_fun(*this, &ARDOUR_UI::big_clock_hiding));
-}
-
-void
-ARDOUR_UI::big_clock_size_event (GtkAllocation *alloc)
-{
-	return;
-}
-
-void
-ARDOUR_UI::big_clock_realize ()
-{
-  big_clock_window->get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH|Gdk::DECOR_MAXIMIZE|Gdk::DECOR_MINIMIZE));
 }
 
 void
@@ -550,7 +538,7 @@ ARDOUR_UI::shuttle_box_button_press (GdkEventButton* ev)
 
 	switch (ev->button) {
 	case 1:
-		Gtk::Main::grab_add (shuttle_box);
+		shuttle_box.add_modal_grab ();
 		shuttle_grabbed = true;
 		mouse_shuttle (ev->x, true);
 		break;
@@ -580,7 +568,7 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 	case 1:
 		mouse_shuttle (ev->x, true);
 		shuttle_grabbed = false;
-		Gtk::Main::grab_remove (shuttle_box);
+		shuttle_box.remove_modal_grab ();
 		if (shuttle_behaviour == Sprung) {
 			shuttle_fract = SHUTTLE_FRACT_SPEED1;
 			session->request_transport_speed (1.0);
@@ -676,38 +664,38 @@ gint
 ARDOUR_UI::shuttle_box_expose (GdkEventExpose* event)
 {
 	gint x;
-	Gdk::Window win (shuttle_box.get_window());
+	Glib::RefPtr<Gdk::Window> win (shuttle_box.get_window());
 
 	/* redraw the background */
 
-	win.draw_rectangle (shuttle_box.get_style()->get_bg_gc (shuttle_box.get_state()),
-			    true,
-			    event->area.x, event->area.y,
-			    event->area.width, event->area.height);
+	win->draw_rectangle (shuttle_box.get_style()->get_bg_gc (shuttle_box.get_state()),
+			     true,
+			     event->area.x, event->area.y,
+			     event->area.width, event->area.height);
 
 
 	x = (gint) floor ((shuttle_box.get_width() / 2.0) + (0.5 * (shuttle_box.get_width() * shuttle_fract)));
 
 	/* draw line */
 
-	win.draw_line (shuttle_box.get_style()->get_fg_gc (shuttle_box.get_state()),
-		       x,
-		       0,
-		       x,
-		       shuttle_box.get_height());
+	win->draw_line (shuttle_box.get_style()->get_fg_gc (shuttle_box.get_state()),
+			x,
+			0,
+			x,
+			shuttle_box.get_height());
 	return TRUE;
 }
 
 void
 ARDOUR_UI::shuttle_style_clicked ()
 {
-	shuttle_style_menu.popup (1, 0);
+	shuttle_style_menu->popup (1, 0);
 }
 
 void
 ARDOUR_UI::shuttle_unit_clicked ()
 {
-	shuttle_unit_menu.popup (1, 0);
+	shuttle_unit_menu->popup (1, 0);
 }
 
 void

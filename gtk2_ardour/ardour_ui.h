@@ -38,6 +38,20 @@
 #include <libgnomecanvasmm/canvas.h>
 
 #include <pbd/xml++.h>
+#include <gtkmm/box.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/label.h>
+#include <gtkmm/table.h>
+#include <gtkmm/fixed.h>
+#include <gtkmm/drawingarea.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
+#include <gtkmm/button.h>
+#include <gtkmm/togglebutton.h>
+#include <gtkmm/treeview.h>
+#include <gtkmm/menubar.h>
+#include <gtkmm/adjustment.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/pix.h>
 #include <gtkmm2ext/click_box.h>
@@ -324,18 +338,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void         start_clocking ();
 	void         stop_clocking ();
 
-	class BigClockWindow : public ArdourDialog
-	{
-	  public:
-		BigClockWindow () : ArdourDialog ("big clock window") {};
-	};
-
 	AudioClock               big_clock;
 	Gtk::Frame               big_clock_frame;
-	BigClockWindow*          big_clock_window;
-
-	void big_clock_size_event (GtkAllocation *alloc);
-	void big_clock_realize ();
+	ArdourDialog*          big_clock_window;
 
 	/* Transport Control */
 
@@ -681,6 +686,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	/* Keymap handling */
 
 	void install_keybindings ();
+	void install_actions ();
 	void test_binding_action (const char *);
 	void start_keyboard_prefix();
 

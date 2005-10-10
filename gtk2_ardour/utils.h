@@ -26,10 +26,6 @@
 #include <cmath>
 #include <ardour/types.h>
 #include <libgnomecanvasmm/line.h>
-#include <gtkmm/action.h>
-#include <gtkmm/radioaction.h>
-#include <gtkmm/toggleaction.h>
-#include <gtkmm/actiongroup.h>
 #include <gdkmm/types.h>
 
 namespace Gtk {
@@ -75,24 +71,6 @@ Pango::FontDescription get_font_for_style (std::string widgetname);
 gint pane_handler (GdkEventButton*, Gtk::Paned*);
 uint32_t rgba_from_style (std::string style, uint32_t, uint32_t, uint32_t, uint32_t);
 
-Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-					   std::string name, std::string label);
-Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-					   std::string name, std::string label, sigc::slot<void> sl, 
-					   guint key, Gdk::ModifierType mods);
-Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-					   std::string name, std::string label, sigc::slot<void> sl);
-
-Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group, 
-						 std::string name, std::string label, sigc::slot<void> sl, 
-						 guint key, Gdk::ModifierType mods);
-Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group, 
-						 std::string name, std::string label, sigc::slot<void> sl);
-
-Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-						  std::string name, std::string label, sigc::slot<void> sl, 
-						  guint key, Gdk::ModifierType mods);
-Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-						  std::string name, std::string label, sigc::slot<void> sl);
+void decorate (Gtk::Window& w, Gdk::WMDecoration d);
 
 #endif /* __ardour_gtk_utils_h__ */

@@ -1829,8 +1829,6 @@ class Editor : public PublicEditor
 	/* GTK2 stuff */
 
 	Glib::RefPtr<Gtk::UIManager> ui_manager;
-	vector<Glib::RefPtr<Gtk::Action> > session_requiring_actions;
-	vector<Glib::RefPtr<Gtk::Action> > region_list_selection_requiring_actions;
 };
 
 #endif /* __ardour_editor_h__ */

@@ -221,7 +221,6 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	mute_changed(0);
 	redirects_changed (0);
 	reset_redirect_automation_curves ();
-	edit_group_menu_radio_group = 0;
 	y_position = -1;
 
 	ensure_xml_node ();
@@ -831,6 +830,7 @@ void
 AudioTimeAxisView::rename_current_playlist ()
 {
 	ArdourPrompter prompter (true);
+	string name;
 
 	AudioPlaylist *pl;
 	DiskStream *ds;
@@ -841,15 +841,15 @@ AudioTimeAxisView::rename_current_playlist ()
 
 	prompter.set_prompt (_("Name for playlist"));
 	prompter.set_initial_text (pl->name());
-	prompter.done.connect (Main::quit.slot());
-	prompter.show_all ();
 
-	Main::run ();
-
-	if (prompter.status == Gtkmm2ext::Prompter::entered) {
-		string name;
+	switch (prompter.run ()) {
+	case GTK_RESPONSE_ACCEPT:
 		prompter.get_result (name);
 		pl->set_name (name);
+		break;
+
+	default:
+		break;
 	}
 }
 
@@ -868,29 +868,29 @@ AudioTimeAxisView::use_copy_playlist ()
 {
 	AudioPlaylist *pl;
 	DiskStream *ds;
+	string name;
 
 	if (((ds = get_diskstream()) == 0) || ((pl = ds->playlist()) == 0)) {
 		return;
 	}
-
+	
 	ArdourPrompter prompter (true);
 	string new_name = Playlist::bump_name (pl->name(), _session);
-
+	
 	prompter.set_prompt (_("Name for playlist"));
 	prompter.set_initial_text (new_name);
-	prompter.done.connect (Main::quit.slot());
 	prompter.show_all ();
 
-	Main::run ();
-
-	if (prompter.status == Gtkmm2ext::Prompter::entered) {
-		string name;
+	switch (prompter.run ()) {
+	case GTK_RESPONSE_ACCEPT:
 		prompter.get_result (name);
-
 		ds->use_copy_playlist ();
-
 		pl = ds->playlist();
 		pl->set_name (name);
+		break;
+
+	default:
+		break;
 	}
 }
 
@@ -899,6 +899,7 @@ AudioTimeAxisView::use_new_playlist ()
 {
 	AudioPlaylist *pl;
 	DiskStream *ds;
+	string name;
 
 	if (((ds = get_diskstream()) == 0) || ((pl = ds->playlist()) == 0)) {
 		return;
@@ -909,19 +910,17 @@ AudioTimeAxisView::use_new_playlist ()
 
 	prompter.set_prompt (_("Name for playlist"));
 	prompter.set_initial_text (new_name);
-	prompter.done.connect (Main::quit.slot());
-	prompter.show_all ();
-
-	Main::run ();
-
-	if (prompter.status == Gtkmm2ext::Prompter::entered) {
-		string name;
+	
+	switch (prompter.run ()) {
+	case GTK_RESPONSE_ACCEPT:
 		prompter.get_result (name);
-
 		ds->use_new_playlist ();
-
 		pl = ds->playlist();
 		pl->set_name (name);
+		break;
+
+	default:
+		break;
 	}
 }	
 
@@ -942,7 +941,7 @@ void
 AudioTimeAxisView::toggle_waveforms ()
 {
 	if (view && waveform_item && !ignore_toggle) {
-		view->set_show_waveforms (waveform_item->is_active());
+		view->set_show_waveforms (waveform_item->get_active());
 	}
 }
 

@@ -18,7 +18,8 @@
 #include "libart_lgpl/art_rgb_pixbuf_affine.h"
 #include "canvas-imageframe.h"
 #include <libgnomecanvas/gnome-canvas-util.h>
-#include <libgnomecanvas/gnome-canvastypebuiltins.h>
+//GTK2FIX
+//#include <libgnomecanvas/gnome-canvastypebuiltins.h>
 
 
 enum {
@@ -44,7 +45,6 @@ static void gnome_canvas_imageframe_realize(GnomeCanvasItem *item) ;
 static void gnome_canvas_imageframe_unrealize(GnomeCanvasItem *item) ;
 static void gnome_canvas_imageframe_draw(GnomeCanvasItem *item, GdkDrawable *drawable, int x, int y, int width, int height) ;
 static double gnome_canvas_imageframe_point(GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item) ;
-static void gnome_canvas_imageframe_translate(GnomeCanvasItem *item, double dx, double dy) ;
 static void gnome_canvas_imageframe_bounds(GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2) ;
 static void gnome_canvas_imageframe_render(GnomeCanvasItem *item, GnomeCanvasBuf *buf) ;
 
@@ -102,7 +102,6 @@ gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 	item_class->unrealize = gnome_canvas_imageframe_unrealize;
 	item_class->draw = gnome_canvas_imageframe_draw;
 	item_class->point = gnome_canvas_imageframe_point;
-	item_class->translate = gnome_canvas_imageframe_translate;
 	item_class->bounds = gnome_canvas_imageframe_bounds;
 	item_class->render = gnome_canvas_imageframe_render;
 }
@@ -116,7 +115,8 @@ gnome_canvas_imageframe_init (GnomeCanvasImageFrame *image)
 	image->height = 0.0;
 	image->drawwidth = 0.0;
 	image->anchor = GTK_ANCHOR_CENTER;
-	GNOME_CANVAS_ITEM(image)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
+	// GTK2FIX
+	// GNOME_CANVAS_ITEM(image)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 static void
@@ -207,45 +207,6 @@ get_bounds_item_relative (GnomeCanvasImageFrame *image, double *px1, double *py1
 }
 
 static void
-get_bounds (GnomeCanvasImageFrame *image, double *px1, double *py1, double *px2, double *py2)
-{
-	GnomeCanvasItem *item;
-	double i2c[6];
-	ArtDRect i_bbox, c_bbox;
-
-	item = GNOME_CANVAS_ITEM (image);
-
-	gnome_canvas_item_i2c_affine (item, i2c);
-
-	get_bounds_item_relative (image, &i_bbox.x0, &i_bbox.y0, &i_bbox.x1, &i_bbox.y1);
-	art_drect_affine_transform (&c_bbox, &i_bbox, i2c);
-
-	/* add a fudge factor */
-	*px1 = c_bbox.x0 - 1;
-	*py1 = c_bbox.y0 - 1;
-	*px2 = c_bbox.x1 + 1;
-	*py2 = c_bbox.y1 + 1;
-}
-
-/* deprecated */
-static void
-recalc_bounds (GnomeCanvasImageFrame *image)
-{
-	GnomeCanvasItem *item;
-
-	item = GNOME_CANVAS_ITEM (image);
-
-	get_bounds (image, &item->x1, &item->y1, &item->x2, &item->y2);
-
-	item->x1 = image->cx;
-	item->y1 = image->cy;
-	item->x2 = image->cx + image->cwidth;
-	item->y2 = image->cy + image->cheight;
-
-	gnome_canvas_group_child_bounds (GNOME_CANVAS_GROUP (item->parent), item);
-}
-
-static void
 gnome_canvas_imageframe_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 {
 	GnomeCanvasItem *item;
@@ -303,16 +264,8 @@ gnome_canvas_imageframe_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 		break;
 	}
 
-#ifdef OLD_XFORM
-	if (update)
-		(* GNOME_CANVAS_ITEM_CLASS (item->object.klass)->update) (item, NULL, NULL, 0);
-
-	if (calc_bounds)
-		recalc_bounds (image);
-#else
 	if (update)
 		gnome_canvas_item_request_update (item);
-#endif
 }
 
 static void
@@ -375,9 +328,6 @@ gnome_canvas_imageframe_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 		image->need_recalc = TRUE ;
 	}
 
-#ifdef OLD_XFORM
-	recalc_bounds (image);
-#else
 	get_bounds_item_relative (image, &i_bbox.x0, &i_bbox.y0, &i_bbox.x1, &i_bbox.y1);
 	art_drect_affine_transform (&c_bbox, &i_bbox, affine);
 
@@ -404,8 +354,6 @@ gnome_canvas_imageframe_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 	image->affine[3] = (affine[3] * image->height) / h;
 	image->affine[4] = i_bbox.x0 * affine[0] + i_bbox.y0 * affine[2] + affine[4];
 	image->affine[5] = i_bbox.x0 * affine[1] + i_bbox.y0 * affine[3] + affine[5];
-	
-#endif
 }
 
 static void
@@ -489,21 +437,6 @@ gnome_canvas_imageframe_point (GnomeCanvasItem *item, double x, double y,
 		dy = 0;
 
 	return sqrt (dx * dx + dy * dy) / item->canvas->pixels_per_unit;
-}
-
-static void
-gnome_canvas_imageframe_translate (GnomeCanvasItem *item, double dx, double dy)
-{
-#ifdef OLD_XFORM
-	GnomeCanvasImageFrame *image;
-
-	image = GNOME_CANVAS_IMAGEFRAME (item);
-
-	image->x += dx;
-	image->y += dy;
-
-	recalc_bounds (image);
-#endif
 }
 
 static void

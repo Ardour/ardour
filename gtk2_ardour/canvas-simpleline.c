@@ -91,7 +91,8 @@ gnome_canvas_simpleline_init (GnomeCanvasSimpleLine *simpleline)
 	simpleline->y2 = 0.0;
 	simpleline->color = RGBA_TO_UINT(98,123,174,241);
 	simpleline->horizontal = TRUE; /* reset in the _update() method */
-	GNOME_CANVAS_ITEM(simpleline)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
+	// GTK2FIX
+	// GNOME_CANVAS_ITEM(simpleline)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 static void

@@ -45,8 +45,6 @@ using namespace sigc;
 
 ConnectionEditor::ConnectionEditor ()
 	: ArdourDialog ("connection editor"),
-	  input_connection_display (1),
-	  output_connection_display (1),
 	  input_frame (_("Input Connections")),
 	  output_frame (_("Output Connections")),
 	  new_input_connection_button (_("New Input")),

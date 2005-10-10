@@ -34,7 +34,7 @@ using __gnu_cxx::slist;
 #include <gtkmm/button.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/notebook.h>
-#include <gtkmm/clist.h>
+#include <gtkmm/treeview.h>
 
 #include "ardour_dialog.h"
 
@@ -60,8 +60,8 @@ class ConnectionEditor : public ArdourDialog {
 	int                 selected_port;
 	bool                push_at_front;
 
-	Gtk::CList input_connection_display;
-	Gtk::CList output_connection_display;
+	Gtk::TreeView input_connection_display;
+	Gtk::TreeView output_connection_display;
 	Gtk::ScrolledWindow input_scroller;
 	Gtk::ScrolledWindow output_scroller;
 
@@ -128,14 +128,14 @@ class ConnectionEditor : public ArdourDialog {
 	void cancel ();
 	void accept ();
 
-	void port_selection_handler (gint row, gint col, GdkEvent *ev, Gtk::CList *);
+	void port_selection_handler (gint row, gint col, GdkEvent*, Gtk::TreeView*);
 
 	void add_port ();
 	void remove_port (int which_port);
 
-	void port_column_click (gint col, Gtk::CList *clist);
-	gint port_button_event (GdkEventButton *, Gtk::CList *clist);
-	gint connection_click (GdkEventButton *ev, Gtk::CList *clist);
+	void port_column_click (gint col, Gtk::TreeView* );
+	gint port_button_event (GdkEventButton *, Gtk::TreeView*);
+	gint connection_click (GdkEventButton *ev, Gtk::TreeView*);
 	void connection_selected (gint, gint, GdkEvent *, bool);
 
 	sigc::connection config_connection;

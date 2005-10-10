@@ -70,8 +70,8 @@ Editor::hscroll_slider_expose (GdkEventExpose *ev)
 
 	gtk_paint_box (edit_hscroll_slider.get_style()->gobj(),
 		       edit_hscroll_slider.get_window()->gobj(),
-		       Gtk::STATE_ACTIVE, 
-		       Gtk::SHADOW_IN, 
+		       GTK_STATE_ACTIVE, 
+		       GTK_SHADOW_IN, 
 		       &ev->area, 
 		       GTK_WIDGET(edit_hscroll_slider.gobj()),
 		       "trough",
@@ -79,8 +79,8 @@ Editor::hscroll_slider_expose (GdkEventExpose *ev)
 
 	gtk_paint_box (edit_hscroll_slider.get_style()->gobj(),
 		       edit_hscroll_slider.get_window()->gobj(),
-		       Gtk::STATE_NORMAL, 
-		       Gtk::SHADOW_OUT, 
+		       GTK_STATE_NORMAL, 
+		       GTK_SHADOW_OUT, 
 		       &draw_rect,
 		       GTK_WIDGET(edit_hscroll_slider.gobj()),
 		       "hscale",

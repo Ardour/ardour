@@ -141,7 +141,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 	start_blinking ();
 
 	if (editor) {
-		editor->window().realize();
+		editor->window().present();
 	}
 
 	transport_stopped ();

@@ -50,8 +50,8 @@ struct _GnomeCanvasSimpleLine
     /* cached values set during update/used during render */
 
     unsigned char r, b, g, a;
-    guint32 bbox_ulx, bbox_uly;
-    guint32 bbox_lrx, bbox_lry;
+    gint32 bbox_ulx, bbox_uly;
+    gint32 bbox_lrx, bbox_lry;
 };
 
 struct _GnomeCanvasSimpleLineClass {

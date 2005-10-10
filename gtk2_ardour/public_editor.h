@@ -17,7 +17,7 @@
 namespace ARDOUR {
 	class Session;
 	class AudioExportSpecification;
-	class AudioRegion;
+	class Region;
 	class Playlist;
 	class RouteGroup;
 }
@@ -59,7 +59,7 @@ class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget 
 	virtual void connect_to_image_compositor()  = 0;
 	virtual void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)  = 0;
 	virtual TimeAxisView* get_named_time_axis(std::string name)  = 0;
-	virtual bool consider_auditioning (ARDOUR::AudioRegion*) = 0;
+	virtual void consider_auditioning (ARDOUR::Region&) = 0;
 	virtual void set_show_waveforms (bool yn) = 0;
 	virtual bool show_waveforms() const = 0;
 	virtual void set_show_waveforms_recording (bool yn) = 0;

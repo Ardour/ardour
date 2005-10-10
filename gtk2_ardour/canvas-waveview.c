@@ -182,7 +182,8 @@ gnome_canvas_waveview_init (GnomeCanvasWaveView *waveview)
 
  	waveview->wave_color = RGBA_TO_UINT(44,35,126,255);
 
-	GNOME_CANVAS_ITEM(waveview)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
+	// GTK2FIX
+	// GNOME_CANVAS_ITEM(waveview)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 #define DEBUG_CACHE 0
@@ -197,8 +198,6 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 	gulong npeaks;
 	gulong offset;
 	gulong ostart;
-	gulong present_frames;
-	gulong present_entries;
 	gulong copied;
 	GnomeCanvasWaveViewCache *cache;
 	float* gain;

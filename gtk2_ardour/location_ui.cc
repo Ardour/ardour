@@ -77,16 +77,16 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	preemph_check_button.set_name ("LocationEditCdButton");
 	performer_label.set_name ("LocationEditNumberLabel");
 	performer_entry.set_name ("LocationEditNameEntry");
-	string_composer_label.set_name ("LocationEditNumberLabel");
-	string_composer_entry.set_name ("LocationEditNameEntry");
+	composer_label.set_name ("LocationEditNumberLabel");
+	composer_entry.set_name ("LocationEditNameEntry");
 
 
 	isrc_label.set_text ("ISRC: ");
 	isrc_label.set_size_request (30, -1);
 	performer_label.set_text ("Performer: ");
 	performer_label.set_size_request (60, -1);
-	string_composer_label.set_text ("Composer: ");
-	string_composer_label.set_size_request (60, -1);
+	composer_label.set_text ("Composer: ");
+	composer_label.set_size_request (60, -1);
 
 	isrc_entry.set_size_request (112, -1);
 	isrc_entry.set_max_length(12);
@@ -95,8 +95,8 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	performer_entry.set_size_request (100, -1);
 	performer_entry.set_editable (true);
 
-	string_composer_entry.set_size_request (100, -1);
-	string_composer_entry.set_editable (true);
+	composer_entry.set_size_request (100, -1);
+	composer_entry.set_editable (true);
 
 	cd_track_details_hbox.pack_start (isrc_label, false, false);
 	cd_track_details_hbox.pack_start (isrc_entry, false, false);
@@ -104,8 +104,8 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	cd_track_details_hbox.pack_start (preemph_check_button, false, false);
 	cd_track_details_hbox.pack_start (performer_label, false, false);
 	cd_track_details_hbox.pack_start (performer_entry, true, true);
-	cd_track_details_hbox.pack_start (string_composer_label, false, false);
-	cd_track_details_hbox.pack_start (string_composer_entry, true, true);
+	cd_track_details_hbox.pack_start (composer_label, false, false);
+	cd_track_details_hbox.pack_start (composer_entry, true, true);
 
 	isrc_entry.signal_changed().connect (mem_fun(*this, &LocationEditRow::isrc_entry_changed)); 
 	isrc_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
@@ -115,9 +115,9 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	performer_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 	performer_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 
-	string_composer_entry.signal_changed().connect (mem_fun(*this, &LocationEditRow::composer_entry_changed));
-	string_composer_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
-	string_composer_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	composer_entry.signal_changed().connect (mem_fun(*this, &LocationEditRow::composer_entry_changed));
+	composer_entry.signal_focus_in_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
+	composer_entry.signal_focus_out_event().connect (mem_fun(*this, &LocationEditRow::entry_focus_event));
 
 	scms_check_button.signal_toggled().connect(mem_fun(*this, &LocationEditRow::scms_toggled));
 	preemph_check_button.signal_toggled().connect(mem_fun(*this, &LocationEditRow::preemph_toggled));
@@ -361,10 +361,10 @@ LocationEditRow::composer_entry_changed ()
 	
 	if (i_am_the_modifier || !location) return;
 
-	if (string_composer_entry.get_text() != "") {
-	location->cd_info["string_composer"] = string_composer_entry.get_text();
+	if (composer_entry.get_text() != "") {
+	location->cd_info["composer"] = composer_entry.get_text();
 	} else {
-	  location->cd_info.erase("string_composer");
+	  location->cd_info.erase("composer");
 	}
 }
 
@@ -438,8 +438,8 @@ LocationEditRow::cd_toggled ()
 	  if (location->cd_info.find("performer") != location->cd_info.end()) {
 	    performer_entry.set_text(location->cd_info["performer"]);
 	  }
-	  if (location->cd_info.find("string_composer") != location->cd_info.end()) {
-	    string_composer_entry.set_text(location->cd_info["string_composer"]);
+	  if (location->cd_info.find("composer") != location->cd_info.end()) {
+	    composer_entry.set_text(location->cd_info["composer"]);
 	  }
 	  if (location->cd_info.find("scms") != location->cd_info.end()) {
 	    scms_check_button.set_active(true);

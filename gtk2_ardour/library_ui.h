@@ -27,7 +27,16 @@
 #include <sys/types.h>
 
 #include <sigc++/signal.h>
-#include <gtkmm.h>
+#include <gtkmm/label.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/radiobutton.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/treeview.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/fileselection.h>
+#include <gtkmm/notebook.h>
 #include <gtkmm2ext/selector.h>
 
 #include <ardour/region.h>
@@ -87,8 +96,8 @@ class SoundFileBox : public Gtk::VBox
 	Gtk::Button add_field_btn;
 	Gtk::Button remove_field_btn;
 
-	static void _fields_refiller (Gtk::CList &list, void* arg);
-	void fields_refiller (Gtk::CList &clist);
+	static void _fields_refiller (Gtk::TreeView &list, void* arg);
+	void fields_refiller (Gtk::TreeView);
 	int setup_labels (string uri);
 	void setup_fields ();
 
@@ -98,9 +107,9 @@ class SoundFileBox : public Gtk::VBox
 	void remove_field_clicked ();
 
 	void field_selected (Gtkmm2ext::Selector *selector, 
-						 Gtkmm2ext::SelectionResult *re);
+			     Gtkmm2ext::Selector::Result *re);
 	void field_chosen (Gtkmm2ext::Selector *selector, 
-						 Gtkmm2ext::SelectionResult *re);
+			   Gtkmm2ext::Selector::Result *re);
 	void audition_status_changed (bool state);
 };
 
@@ -125,12 +134,12 @@ class SearchSounds : public ArdourDialog
 	Gtk::HBox rbtn_box;
 	Gtk::HBox bottom_box;
 
-	static void _fields_refiller (Gtk::CList &list, void* arg);
-	void fields_refiller (Gtk::CList &clist);
+	static void _fields_refiller (Gtk::TreeView&, void* arg);
+	void fields_refiller (Gtk::TreeView&);
 	void setup_fields ();
-
+	
 	void field_selected (Gtkmm2ext::Selector *selector, 
-						 Gtkmm2ext::SelectionResult *re);
+			     Gtkmm2ext::Selector::Result *re);
 
 	void find_btn_clicked ();
 
@@ -140,15 +149,15 @@ class SearchSounds : public ArdourDialog
 class SearchResults : public ArdourDialog
 {
   public:
-	SearchResults (map<string,string> field_values, bool and_search);
+	SearchResults (std::map<std::string,std::string> field_values, bool and_search);
 	~SearchResults ();
 
-	sigc::signal<void, string, bool> file_chosen;
+	sigc::signal<void, std::string, bool> file_chosen;
 
   private:
-	std::map<string,string> search_info;
+	std::map<std::string,std::string> search_info;
 	bool search_and;
-	string selection;
+	std::string selection;
 
 	Gtk::VBox main_box;
 	Gtk::HBox hbox;
@@ -160,13 +169,13 @@ class SearchResults : public ArdourDialog
 	SoundFileBox* info_box;
 
 	Gtkmm2ext::Selector results;
-	static void _results_refiller (Gtk::CList &list, void* arg);
-	void results_refiller (Gtk::CList &clist);
+	static void _results_refiller (Gtk::TreeView &list, void* arg);
+	void results_refiller (Gtk::TreeView&);
 
 	void import_clicked ();
 
 	void result_chosen (Gtkmm2ext::Selector *selector, 
-						 Gtkmm2ext::SelectionResult *re);
+			    Gtkmm2ext::Selector::Result *re);
 };
 
 class LibraryTree : public Gtk::VBox
@@ -175,21 +184,21 @@ class LibraryTree : public Gtk::VBox
 	LibraryTree ();
 	~LibraryTree ();
 
-	sigc::signal<void, string, bool> file_chosen;
+	sigc::signal<void, std::string, bool> file_chosen;
 	sigc::signal<void> group_selected;
-	sigc::signal<void, string> member_selected;
+	sigc::signal<void, std::string> member_selected;
 	sigc::signal<void> member_deselected;
 	sigc::signal<void> deselected;
 
-	list<string> selection;
+	std::list<std::string> selection;
 	void clear_selection ();
 	
   private:
-	std::map<string, Gtk::TreeItem*> uri_mapping;
-	std::map<string, string> uri_parent; // this ugly, but necessary
+	std::map<std::string, Gtk::TreeViewColumn> uri_mapping;
+	std::map<std::string, std::string> uri_parent; // this ugly, but necessary
 
-	string current_member;
-	string current_group;
+	std::string current_member;
+	std::string current_group;
 	
 	Gtk::HBox hbox;
 	Gtk::VBox framed_box;
@@ -197,7 +206,7 @@ class LibraryTree : public Gtk::VBox
 	Gtk::HBox btn_box_bottom;
 
 	Gtk::ScrolledWindow scroll;
-	Gtk::Tree tree;
+	Gtk::TreeView tree;
 
 	Gtk::Button add_btn;
 	Gtk::Button remove_btn;
@@ -214,19 +223,19 @@ class LibraryTree : public Gtk::VBox
 	void remove_btn_clicked ();
 	void find_btn_clicked ();
 
-	void file_found (string uri, bool multi);
+	void file_found (std::string uri, bool multi);
 
-	void cb_group_select (Gtk::TreeItem* item, string uri);
-	void cb_member_select (Gtk::TreeItem* item, string uri);
-	void cb_member_deselect (Gtk::TreeItem* item, string uri);
+	void cb_group_select (Gtk::TreeViewColumn&, std::string uri);
+	void cb_member_select (Gtk::TreeViewColumn&, std::string uri);
+	void cb_member_deselect (Gtk::TreeViewColumn&, std::string uri);
 
 	void populate ();
-	void subpopulate (Gtk::Tree*, string group);
+	void subpopulate (Gtk::TreeView&, std::string group);
 
-	void added_group (string, string);
-	void removed_group (string);
-	void added_member (string, string);
-	void removed_member (string);
+	void added_group (std::string, std::string);
+	void removed_group (std::string);
+	void added_member (std::string, std::string);
+	void removed_member (std::string);
 	
 	void cancel_import_clicked ();
 };
@@ -237,7 +246,7 @@ class SoundFileBrowser : public Gtk::VBox {
 	~SoundFileBrowser ();
   
 	sigc::signal<void> group_selected;
-	sigc::signal<void, string> member_selected;
+	sigc::signal<void, std::string> member_selected;
 	sigc::signal<void> member_deselected;
 	sigc::signal<void> deselected;
   
@@ -245,16 +254,16 @@ class SoundFileBrowser : public Gtk::VBox {
 	void clear_selection ();
 
   private:
-	string current_member;
-	string current_group;
+	std::string current_member;
+	std::string current_group;
 	Gtk::FileSelection fs_selector;
-	Gtk::CList* file_list;
+	Gtk::TreeView* file_list;
 
 	void dir_list_selected(gint row, gint col, GdkEvent* ev);
 	void file_list_selected(gint row, gint col, GdkEvent* ev);
 	void file_list_deselected(gint row, gint col, GdkEvent* ev);
   
-	string safety_check_file(string file);
+	std::string safety_check_file(std::string file);
 };
 
 class SoundFileSelector : public ArdourDialog {
@@ -268,11 +277,11 @@ class SoundFileSelector : public ArdourDialog {
 	SoundFileSelector ();
 	~SoundFileSelector ();
   
-	void run (string action, bool split_makes_sense, bool hide_after_action = false);
-	void get_result (vector<string>& paths, bool& split);
+	void run (std::string action, bool split_makes_sense, bool hide_after_action = false);
+	void get_result (vector<std::string>& paths, bool& split);
 	void hide_import_stuff();
 
-	sigc::signal<void,vector<string>,bool> Action;
+	sigc::signal<void,vector<std::string>,bool> Action;
 	
   private:
 	bool multiable;
@@ -282,7 +291,7 @@ class SoundFileSelector : public ArdourDialog {
   	void import_btn_clicked ();
 	void sfdb_group_selected();
 	void browser_group_selected();
-	void member_selected(string member, bool sfdb);
+	void member_selected(std::string member, bool sfdb);
 	void member_deselected(bool sfdb);
 	void sfdb_deselected();
 	void page_switched(Gtk::Notebook_Helpers::Page* page, guint page_num);

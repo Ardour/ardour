@@ -34,6 +34,7 @@
 #include "editing.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
+#include "actions.h"
 
 #include "i18n.h"
 
@@ -41,6 +42,7 @@ using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Editing;
+using namespace ActionManager;
 
 #define wave_cursor_width 43
 #define wave_cursor_height 61
@@ -302,7 +304,7 @@ Editor::region_list_selection_changed()
 		sensitive = false;
 	}
 	
-	for (vector<Glib::RefPtr<Gtk::Action> >::iterator i = region_list_selection_requiring_actions.begin(); i != region_list_selection_requiring_actions.end(); ++i) {
+	for (vector<Glib::RefPtr<Gtk::Action> >::iterator i = region_list_selection_sensitive_actions.begin(); i != region_list_selection_sensitive_actions.end(); ++i) {
 		(*i)->set_sensitive (sensitive);
 	}
 
@@ -361,12 +363,12 @@ Editor::build_region_list_menu ()
 
 	toggle_full_region_list_action = ui_manager->get_action ("<Actions>/RegionList/rlShowAll");
 	
-	region_list_selection_requiring_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlHide"));
-	region_list_selection_requiring_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlAudition"));
-	region_list_selection_requiring_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlRemove"));
+	region_list_selection_sensitive_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlHide"));
+	region_list_selection_sensitive_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlAudition"));
+	region_list_selection_sensitive_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlRemove"));
 
-	session_requiring_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlEmbedAudio"));
-	session_requiring_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlImportAudio"));
+	session_sensitive_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlEmbedAudio"));
+	session_sensitive_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlImportAudio"));
 }
 
 void

@@ -108,7 +108,8 @@ gnome_canvas_simplerect_init (GnomeCanvasSimpleRect *simplerect)
 	simplerect->outline_pixels = 1;
 	simplerect->outline_what = 0xf;
 
-	GNOME_CANVAS_ITEM(simplerect)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
+	// GTK2FIX
+	// GNOME_CANVAS_ITEM(simplerect)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 static void

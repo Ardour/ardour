@@ -25,10 +25,6 @@
 #include <gtkmm/combo.h>
 #include <gtkmm/label.h>
 #include <gtkmm/paned.h>
-#include <gtkmm/action.h>
-#include <gtkmm/actiongroup.h>
-#include <gtkmm/accelgroup.h>
-#include <gtkmm/accelmap.h>
 #include <gtk/gtkpaned.h>
 
 #include <gtkmm2ext/utils.h>
@@ -516,75 +512,4 @@ void
 decorate (Gtk::Window& w, Gdk::WMDecoration d)
 {
 	w.get_window()->set_decorations (d);
-}
-
-Glib::RefPtr<Action>
-register_action (Glib::RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
-{
-	Glib::RefPtr<Action> act = register_action (group, name, label, sl);
-	AccelMap::add_entry (act->get_accel_path(), key, mods);
-
-	return act;
-}
-
-Glib::RefPtr<Action>
-register_action (Glib::RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
-{
-	Glib::RefPtr<Action> act = register_action (group, name, label);
-	group->add (act, sl);
-
-	return act;
-}
-
-
-Glib::RefPtr<Action>
-register_radio_action (Glib::RefPtr<ActionGroup> group, RadioAction::Group rgroup, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
-{
-	Glib::RefPtr<Action> act = register_radio_action (group, rgroup, name, label, sl);
-	AccelMap::add_entry (act->get_accel_path(), key, mods);
-
-	return act;
-}
-
-Glib::RefPtr<Action>
-register_radio_action (Glib::RefPtr<ActionGroup> group, RadioAction::Group rgroup, string name, string label, slot<void> sl)
-{
-	Glib::RefPtr<Action> act;
-
-	act = RadioAction::create (rgroup, name, label);
-	group->add (act, sl);
-
-	return act;
-}
-
-
-Glib::RefPtr<Action>
-register_toggle_action (Glib::RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
-{
-	Glib::RefPtr<Action> act = register_toggle_action (group,name, label, sl);
-	AccelMap::add_entry (act->get_accel_path(), key, mods);
-
-	return act;
-}
-
-Glib::RefPtr<Action>
-register_toggle_action (Glib::RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
-{
-	Glib::RefPtr<Action> act;
-
-	act = ToggleAction::create (name, label);
-	group->add (act, sl);
-
-	return act;
-}
-
-Glib::RefPtr<Action>
-register_action (Glib::RefPtr<ActionGroup> group, string name, string label)
-{
-	Glib::RefPtr<Action> act;
-
-	act = Action::create (name, label);
-	group->add (act);
-
-	return act;
 }

@@ -28,7 +28,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/label.h>
 #include <gtkmm/adjustment.h>
-#include <gtkmm/hscale.h>
+#include <gtkmm/scale.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/comboboxtext.h>

@@ -30,7 +30,7 @@
 
 #include <gtkmm.h>
 #include <pbd/error.h>
-#include <pbd/string_compose.h>
+#include <pbd/compose.h>
 #include <pbd/basename.h>
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>

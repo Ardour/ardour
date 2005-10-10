@@ -607,7 +607,7 @@ TimeAxisViewItem::get_name_text()
  * @param color the base color of the item
  */
 void
-TimeAxisViewItem::compute_colors(GdkColor& base_color)
+TimeAxisViewItem::compute_colors(Gdk::Color& base_color)
 {
 	unsigned char radius ;
 	char minor_shift ;
@@ -615,9 +615,9 @@ TimeAxisViewItem::compute_colors(GdkColor& base_color)
 	unsigned char r,g,b ;
 
 	/* FILL: this is simple */
-	r = base_color.red/256 ;
-	g = base_color.green/256 ;
-	b = base_color.blue/256 ;
+	r = base_color.get_red()/256 ;
+	g = base_color.get_green()/256 ;
+	b = base_color.get_blue()/256 ;
 	fill_color = RGBA_TO_UINT(r,g,b,255) ;
 
 	/*  for minor colors:
@@ -633,9 +633,9 @@ TimeAxisViewItem::compute_colors(GdkColor& base_color)
 
 	/* LABEL: rotate around color wheel by 120 degrees anti-clockwise */
 
-	r = base_color.red/256;
-	g = base_color.green/256;
-	b = base_color.blue/256;
+	r = base_color.get_red()/256;
+	g = base_color.get_green()/256;
+	b = base_color.get_blue()/256;
   
 	if (r > b)
 	{
@@ -669,9 +669,9 @@ TimeAxisViewItem::compute_colors(GdkColor& base_color)
 	g += minor_shift;
   
 	label_color = RGBA_TO_UINT(r,g,b,255);
-	r = (base_color.red/256)   + 127 ;
-	g = (base_color.green/256) + 127 ;
-	b = (base_color.blue/256)  + 127 ;
+	r = (base_color.get_red()/256)   + 127 ;
+	g = (base_color.get_green()/256) + 127 ;
+	b = (base_color.get_blue()/256)  + 127 ;
   
 	label_color = RGBA_TO_UINT(r,g,b,255);
 
