@@ -32,7 +32,7 @@
 #include "ardour_ui.h"
 #include "io_selector.h"
 #include "gain_meter.h"
-#include "library_ui.h"
+#include "sfdb_ui.h"
 #include "utils.h"
 #include "editing.h"
 #include "option_editor.h"
@@ -43,6 +43,7 @@ using namespace ARDOUR;
 using namespace Gtk;
 using namespace Editing;
 using namespace Gtkmm2ext;
+using namespace std;
 
 static const gchar *psync_strings[] = {
 	N_("Internal"),
@@ -1290,24 +1291,20 @@ OptionEditor::raid_path_changed ()
 void
 OptionEditor::click_browse_clicked ()
 {
-	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	sigc::connection c = sfdb.Action.connect (mem_fun(*this, &OptionEditor::click_chosen));
+	SoundFileChooser sfdb (_("Choose Click"), false);
 	
-	sfdb.run (_("Use as click"), false, true);
-	c.disconnect ();
-}
+	int result = sfdb.run ();
 
-void
-OptionEditor::click_chosen (vector<string> paths, bool ignore)
-{
-	string path;
-
-	if (!paths.empty()) {
-		path = paths.front();
-	} else {
+	if (result != Gtk::RESPONSE_ACCEPT) {
 		return;
 	}
 
+	click_chosen(sfdb.get_filename());
+}
+
+void
+OptionEditor::click_chosen (string path)
+{
 	click_path_entry.set_text (path);
 	click_sound_changed ();
 }
@@ -1315,25 +1312,20 @@ OptionEditor::click_chosen (vector<string> paths, bool ignore)
 void
 OptionEditor::click_emphasis_browse_clicked ()
 {
-	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	sigc::connection c = sfdb.Action.connect (mem_fun(*this, &OptionEditor::click_emphasis_chosen));
+	SoundFileChooser sfdb (_("Click Emphasis"), false);
 
-	sfdb.run (_("Use as click emphasis"), false, true);
-	c.disconnect ();
+	int result = sfdb.run ();
 
-}
-
-void
-OptionEditor::click_emphasis_chosen (vector<string> paths, bool ignore)
-{	
-	string path;
-
-	if (!paths.empty()) {
-		path = paths.front();
-	} else {
+	if (result != Gtk::RESPONSE_ACCEPT) {
 		return;
 	}
 
+	click_emphasis_chosen (sfdb.get_filename());
+}
+
+void
+OptionEditor::click_emphasis_chosen (std::string path)
+{	
 	click_emphasis_path_entry.set_text (path);
 	click_emphasis_sound_changed ();
 }

@@ -70,7 +70,7 @@ class OptionEditor;
 class Mixer_UI;
 class ConnectionEditor;
 class RouteParams_UI;
-class SoundFileSelector;
+class SoundFileChooser;
 class About;
 class AddRouteDialog;
 class NewSessionDialog;
@@ -154,9 +154,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_connection_editor ();
 	void toggle_route_params_window ();
 	void toggle_tempo_window ();
-	void toggle_sfdb_window ();
-
-	SoundFileSelector& get_sfdb_window();
 
 	gint32 select_diskstream (GdkEventButton *ev);
 
@@ -278,8 +275,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::Table          transport_table;
 	Gtk::Table          option_table;
-
-	static SoundFileSelector* sfdb_window;
 
 	int  setup_windows ();
 	void setup_session_menu ();
@@ -507,7 +502,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::CheckMenuItem *locations_dialog_check;
 	Gtk::CheckMenuItem *big_clock_check;
 	Gtk::CheckMenuItem *tempo_editor_check;
-	Gtk::CheckMenuItem *sfdb_check;
+//	Gtk::CheckMenuItem *sfdb_check;
 	Gtk::CheckMenuItem *options_window_check;
 	
 	/* <CMT Additions> */
@@ -663,7 +658,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void big_clock_hiding ();
 	void route_params_hiding ();
 	void connection_editor_hiding ();
-	void sfdb_hiding ();
 	void option_hiding ();
 
 	/* Various options */

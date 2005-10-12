@@ -39,7 +39,6 @@ gtkardour.Merge ([
     libraries['libgnomecanvas2'],
     libraries['xml'],
     libraries['soundtouch'],
-    libraries['raptor'],
     libraries['samplerate'],
     libraries['jack']
 ])
@@ -118,7 +117,6 @@ imageframe_view.cc
 io_selector.cc
 keyboard.cc
 keyboard_target.cc
-library_ui.cc
 location_ui.cc
 main.cc
 marker.cc
@@ -151,6 +149,7 @@ route_params_ui.cc
 route_redirect_selection.cc
 route_ui.cc
 selection.cc
+sfdb_ui.cc
 send_ui.cc
 streamview.cc
 tempo_dialog.cc

@@ -192,7 +192,7 @@ class OptionEditor : public ArdourDialog
 		MidiIndex = 2
 	};
 
-	std::map<MIDI::Port*,vector<Gtk::RadioButton*> > port_toggle_buttons;
+	std::map<MIDI::Port*,std::vector<Gtk::RadioButton*> > port_toggle_buttons;
 
 	/* Click */
 
@@ -209,8 +209,8 @@ class OptionEditor : public ArdourDialog
 	void setup_click_editor ();
 	void clear_click_editor ();
 
-	void click_chosen (vector<string> paths, bool ignore);
-	void click_emphasis_chosen (vector<string> paths, bool ignore);
+	void click_chosen (std::string paths);
+	void click_emphasis_chosen (std::string paths);
 
 	void click_browse_clicked ();
 	void click_emphasis_browse_clicked ();
@@ -284,7 +284,7 @@ class OptionEditor : public ArdourDialog
 	void debug_keyboard_clicked ();
 	void speed_quieten_clicked ();
 
-	void fixup_combo_size (Gtk::ComboBox&, vector<string>& strings);
+	void fixup_combo_size (Gtk::ComboBox&, std::vector<std::string>& strings);
 };
 
 #endif /* __gtk_ardour_option_editor_h__ */

@@ -417,38 +417,3 @@ ARDOUR_UI::route_params_hiding ()
 {
 	route_params_check->set_active (false);
 }
-
-SoundFileSelector&
-ARDOUR_UI::get_sfdb_window ()
-{
-	if (sfdb_window == 0) {
-		sfdb_window = new SoundFileSelector ();
-		sfdb_window->Hiding.connect (mem_fun(*this, &ARDOUR_UI::sfdb_hiding));
-		sfdb_window->hide_all ();
-	}
-	
-	return *sfdb_window;
-}
-
-void
-ARDOUR_UI::toggle_sfdb_window ()
-{
-	get_sfdb_window ();
-
-	if (sfdb_window->within_hiding()) {
-		return;
-	}
-
-	if (sfdb_window->is_visible ()) {
-		sfdb_window->hide_all ();
-	} else {
-		sfdb_window->show_all ();
-		sfdb_window->hide_import_stuff();
-	}
-}
-
-void
-ARDOUR_UI::sfdb_hiding ()
-{
-	sfdb_check->set_active (false);
-}

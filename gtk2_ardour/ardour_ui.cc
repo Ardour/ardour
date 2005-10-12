@@ -80,7 +80,6 @@ using namespace Gtk;
 using namespace sigc;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
-SoundFileSelector* ARDOUR_UI::sfdb_window = 0;
 
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
@@ -846,7 +845,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	meter_bridge = 0;
 	option_editor = 0;
 	location_ui = 0;
-	sfdb_window = 0;
 	new_session_window = 0;
 	open_session_selector = 0;
 	have_configure_timeout = false;
