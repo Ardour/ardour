@@ -70,7 +70,7 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 	gtk_object_add_arg_type ("GnomeCanvasSimpleLine::y1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y1);
 	gtk_object_add_arg_type ("GnomeCanvasSimpleLine::x2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X2);
 	gtk_object_add_arg_type ("GnomeCanvasSimpleLine::y2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y2);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleLine::color_rgba", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_COLOR_RGBA);
+	gtk_object_add_arg_type ("GnomeCanvasSimpleLine::color-rgba", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_COLOR_RGBA);
 
 	object_class->set_arg = gnome_canvas_simpleline_set_arg;
 	object_class->get_arg = gnome_canvas_simpleline_get_arg;

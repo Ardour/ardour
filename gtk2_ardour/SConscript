@@ -67,10 +67,13 @@ automation_pan_line.cc
 automation_time_axis.cc
 axis_view.cc
 canvas-imageframe.c
-canvas-ruler.c
+imagegrame.cc
 canvas-simpleline.c
+simpleline.cc
 canvas-simplerect.c
+simplerect.cc
 canvas-waveview.c
+waveview.cc
 connection_editor.cc
 crossfade_edit.cc
 crossfade_view.cc

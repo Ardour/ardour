@@ -138,19 +138,19 @@ ConnectionEditor::ConnectionEditor ()
 	input_connection_display.set_selection_mode (GTK_SELECTION_SINGLE);
 	input_connection_display.set_size_request (80, -1);
 	input_connection_display.set_name ("ConnectionEditorConnectionList");
-	input_connection_display.select_row.connect (bind (mem_fun(*this, &ConnectionEditor::connection_selected), true));
+	input_connection_display.signal_selection_changed().connect (bind (mem_fun(*this, &ConnectionEditor::connection_selection_changed), input_connection_display));
 
 	output_connection_display.set_shadow_type (Gtk::SHADOW_IN);
 	output_connection_display.set_selection_mode (GTK_SELECTION_SINGLE);
 	output_connection_display.set_size_request (80, -1);
 	output_connection_display.set_name ("ConnectionEditorConnectionList");
-	output_connection_display.select_row.connect (bind (mem_fun(*this, &ConnectionEditor::connection_selected), false));
+	output_connection_display.signal_selection_changed().connect (bind (mem_fun(*this, &ConnectionEditor::connection_selected), output_connection_display));
 
 	input_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	output_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	input_scroller.add_with_viewport (input_connection_display);
-	output_scroller.add_with_viewport (output_connection_display);
+	input_scroller.add (input_connection_display);
+	output_scroller.add (output_connection_display);
 
 	input_box.set_border_width (5);
 	input_box.set_spacing (5);
@@ -250,46 +250,56 @@ ConnectionEditor::on_map (GdkEventAny *ev)
 void
 ConnectionEditor::add_connection (ARDOUR::Connection *connection)
 {
-	using namespace CList_Helpers;
-	const char *rowtext[1];
-
-	rowtext[0] = connection->name().c_str();
+	TreeModel::Row row;
 
 	if (dynamic_cast<InputConnection *> (connection)) {
+
 		if (push_at_front) {
-			input_connection_display.rows().push_front (rowtext);
-			input_connection_display.rows().front().set_data (connection);
+			row = *(input_connection_model.prepend());
 		} else {
-			input_connection_display.rows().push_back (rowtext);
-			input_connection_display.rows().back().set_data (connection);
+			row = *(input_connection_model.append());
 		}
+
+		row[input_connection_columns.connection] = connection;
+		row[input_connection_columns.name] = connection->name();
+		
+
 	} else {
 		if (push_at_front) {
-			output_connection_display.rows().push_front (rowtext);
-			output_connection_display.rows().front().set_data (connection);
+			row = *(output_connection_model.prepend());
 		} else {
-			output_connection_display.rows().push_back (rowtext);
-			output_connection_display.rows().back().set_data (connection);
+			row = *(output_connection_model.append());
 		}
+
+		row[output_connection_columns.connection] = connection;
+		row[output_connection_columns.name] = connection->name();
 	}
 }
 
 void
 ConnectionEditor::remove_connection (ARDOUR::Connection *connection)
 {
-	using namespace Gtk::CList_Helpers;
-	RowList::iterator i;
-	RowList* rlist;
+	TreeModel::Children rows;
+	TreeModel::iterator i;
 
 	if (dynamic_cast<InputConnection *> (connection)) {
-		rlist = &input_connection_display.rows();
+		TreeModel::Children rows = input_connection_model->children();
+		for (i = rows.begin(); i != rows.end(); ++i) {
+			if ((*i)[input_connection_columns.connection] == connection) {
+				rows.erase (i);
+				break;
+			}
+		}
 	} else {
-		rlist = &output_connection_display.rows();
+		TreeModel::Children rows = output_connection_model->children();
+		for (i = rows.begin(); i != rows.end(); ++i) {
+			if ((*i)[output_connection_columns.connection] == connection) {
+				rows.erase (i);
+			break;
+			}
+		}
 	}
 
-	if ((i = rlist->find_data (connection)) != rlist->end()) {
-		rlist->erase (i);
-	}
 }
 
 void
@@ -319,29 +329,35 @@ ConnectionEditor::add_connection_and_select (ARDOUR::Connection *connection)
 void
 ConnectionEditor::refill_connection_display ()
 {
-	input_connection_display.clear();
-	output_connection_display.clear();
+	input_connection_display.set_model (0);
+	output_connection_display.set_model (0);
+
+	input_connection_model.clear();
+	output_connection_model.clear();
 
 	current_connection = 0;
 	
 	if (session) {
 		session->foreach_connection (this, &ConnectionEditor::add_connection);
 	}
+
+	input_connection_display.set_model (input_connection_model);
+	output_connection_display.set_model (output_connection_model);
+
 }
 	
 void
-ConnectionEditor::connection_selected (gint row, gint col, GdkEvent *ev, bool input)
+ConnectionEditor::connection_selection_changed (TreeView& view, Glib::RefPtr<ListStore>& model)
 {
 	ARDOUR::Connection *old_current = current_connection;
 
-
-	if (input) {
-		output_connection_display.unselect_all ();
-		current_connection = reinterpret_cast<ARDOUR::Connection*> (input_connection_display.row(row).get_data());
-	} else {
-		input_connection_display.unselect_all ();
-		current_connection = reinterpret_cast<ARDOUR::Connection*> (output_connection_display.row(row).get_data());
-	}
+	TreeIter iter;
+	TreeModel::Path path;
+	Glib::RefPtr<TreeView::Selection> selection = view->get_selection();
+	
+	iter = model->get_iter (path);
+	
+	current_connection = (*iter)[input_connection_columns.connection];
 
 	if (old_current != current_connection) {
 		config_connection.disconnect ();
@@ -513,22 +529,24 @@ ConnectionEditor::display_connection_state (bool for_input)
 			snprintf(buf, sizeof(buf)-1, _("out %d"), n+1);
 		}
 			
-		title[0] = buf;
-		clist = manage (new CList (1, title));
-		scroller = new ScrolledWindow;
+		tview = manage (new TreeView());
+		Glib::RefPtr<ListStore> port_model = ListStore::create (*port_display_columns);
 		
-		scroller->add_with_viewport (*clist);
+		tview->set_model (port_model);
+		tview->append_column (_(buf), port_display_columns->name);
+		tview->set_selection()->set_mode (Gtk::SELECTION_SINGLE);
+		tview->set_data ("port", (gpointer) ((intptr_t) n));
+		tview->set_headers_visible (true);
+		tview->set_name ("ConnectionEditorPortList");
+		tview->signal_button_press_event().connect (bind (mem_fun(*this, &ConnectionEditor::port_column_click), clist));
+
+		scroller = manage (new ScrolledWindow);
+		
+		scroller->add (*tview);
 		scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 		port_displays.insert (port_displays.end(), scroller);
 		port_box.pack_start (*scroller);
-
-		clist->set_data ("port", (gpointer) ((intptr_t) n));
-
-		clist->set_name ("ConnectionEditorPortList");
-		clist->click_column.connect (bind (mem_fun(*this, &ConnectionEditor::port_column_click), clist));
-		clist->set_selection_mode (GTK_SELECTION_SINGLE);
-		clist->set_shadow_type (Gtk::SHADOW_IN);
 
 		scroller->set_size_request (-1, 75);
 
@@ -537,25 +555,28 @@ ConnectionEditor::display_connection_state (bool for_input)
 		const ARDOUR::Connection::PortList& connections = current_connection->port_connections (n);
 	
 		for (ARDOUR::Connection::PortList::const_iterator i = connections.begin(); i != connections.end(); ++i) {
-			const gchar *data[1];
-			
-			data[0] = (*i).c_str();
-			clist->rows().push_back (data);
-		}
 
-		clist->columns_autosize ();
-		clist->signal_button_release_event().connect (bind (mem_fun(*this, &ConnectionEditor::port_button_event), clist));
+			TreeModel::Row row = *(model->append());
+
+			row[port_connection_columns.name] = (*i)->name();
+		}
 	}
 
 	port_box.show_all ();
 }
 
 void
-ConnectionEditor::port_selection_handler (gint row, gint col, GdkEvent *ev, Gtk::CList *clist)
+ConnectionEditor::port_selection_changed (TreeView* tview)
 {
-	using namespace CList_Helpers;
+	Glib::RefPtr<TreeView::Selection> sel = tview->get_selection();
+	TreeModel::iterator iter = sel->get_selected();
 
-	string other_port_name = (char *) clist->rows()[row].get_data();
+	if (iter) {
+		TreeModel::Row row = *iter;
+		string other_port_name = row[port_display_columns.name];
+	} else {
+		selected_port = -1;
+	}
 	
 	if (current_connection && selected_port >= 0) {
 		current_connection->add_connection (selected_port, other_port_name);
@@ -572,29 +593,24 @@ ConnectionEditor::add_port ()
 }
 
 void
-ConnectionEditor::port_column_click (gint col, CList *clist)
+ConnectionEditor::port_button_press_event (GdkEventButton* ev, TreeView* tview)
 {
-	/* Gack. CList's don't respond visually to a change
-	   in their state, so rename them to force a style
-	   switch.
-	*/
-
 	LockMonitor lm (port_display_lock, __LINE__, __FILE__);
 
-	int which_port = reinterpret_cast<intptr_t> (clist->get_data ("port"));
+	int which_port = reinterpret_cast<intptr_t> (treeview->get_data ("port"));
 
 	if (which_port != selected_port) {
 		
 		selected_port = which_port;
 		display_ports ();
 
-		clist->set_name ("ConnectionEditorPortListSelected");
+		tview->set_name ("ConnectionEditorPortListSelected");
 
 		for (slist<ScrolledWindow *>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
 
 			Widget *child = (*i)->get_child();
 
-			if (static_cast<CList *> (child) != clist) {
+			if (static_cast<TreeView *> (child) != tview) {
 				child->set_name ("ConnectionEditorPortList");
 				child->queue_draw ();
 			}
@@ -608,23 +624,25 @@ ConnectionEditor::port_column_click (gint col, CList *clist)
 	}
 }
 
-gint
-ConnectionEditor::connection_click (GdkEventButton *ev, CList *clist)
+void
+ConnectionEditor::connection_selection_changed (TreeView* tview);
 {
-	gint row, col;
+	Glib::RefPtr<TreeView::Selection> sel = tview->get_selection();
+	TreeModel::iterator iter = sel->get_selected();
 
-	if (clist->get_selection_info ((int)ev->x, (int)ev->y, &row, &col) == 0) {
-		return FALSE;
+	if (iter) {
+		TreeModel::Row row = *iter;
+		current_connection = row[XXXX_display_columns.connection];
+	} else {
+		current_connection = 0;
 	}
-
-	current_connection = reinterpret_cast<ARDOUR::Connection *> (clist->row(row).get_data ());
-
-	return TRUE;
 }
 
 void
 ConnectionEditor::new_connection (bool for_input)
 {
+	string name;
+
 	if (session == 0) {
 		return;
 	}
@@ -632,16 +650,11 @@ ConnectionEditor::new_connection (bool for_input)
 	ArdourPrompter prompter (true);
 	prompter.set_prompt (_("Name for new connection:"));
 	prompter.done.connect (Gtk::Main::quit.slot());
-	prompter.show_all();
 
-	Gtk::Main::run();
-
-	if (prompter.status == Gtkmm2ext::Prompter::entered) {
-		string name;
+	switch (prompter.run()) {
+	case GTK_RESPONSE_ACCEPT:
 		prompter.get_result (name);
-
 		push_at_front = true;
-
 		if (name.length()) {
 			if (for_input) {
 				session->add_connection (new ARDOUR::InputConnection (name));
@@ -650,6 +663,10 @@ ConnectionEditor::new_connection (bool for_input)
 			}
 		}
 		push_at_front = false;
+		break;
+
+	default:
+		break;
 	}
 }
 

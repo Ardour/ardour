@@ -60,6 +60,22 @@ class ConnectionEditor : public ArdourDialog {
 	int                 selected_port;
 	bool                push_at_front;
 
+
+	struct ConnectionDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    SnapshotDisplayModelColumns() { 
+		    add (visible_name);
+		    add (real_name);
+	    }
+	    Gtk::TreeModelColumn<Glib::ustring> name;
+	    Gtk::TreeModelColumn<ARDOUR::Connection*> connection;
+	};
+
+	ConnectionDisplayModelColumns input_connection_columns;
+	ConnectionDisplayModelColumns output_connection_columns;
+
+	Glib::RefPtr<Gtk::ListStore> input_connection_model;
+	Glib::RefPtr<Gtk::ListStore> output_connection_model;
+
 	Gtk::TreeView input_connection_display;
 	Gtk::TreeView output_connection_display;
 	Gtk::ScrolledWindow input_scroller;

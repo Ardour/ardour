@@ -197,14 +197,14 @@ class Editor : public PublicEditor
 		*/
 
 		if (pixel >= 0) {
-			return (jack_nframes_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_gnome_canvas)->pixels_per_unit);
+			return (jack_nframes_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_gnome_canvas.gobj())->pixels_per_unit);
 		} else {
 			return 0;
 		}
 	}
 
 	gulong frame_to_pixel (jack_nframes_t frame) {
-		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_gnome_canvas)->pixels_per_unit)));
+		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_gnome_canvas.gobj())->pixels_per_unit)));
 	}
 
 	/* selection */
@@ -390,7 +390,7 @@ class Editor : public PublicEditor
 	void refresh_location_display_internal (ARDOUR::Locations::LocationList&);
 	void add_new_location (ARDOUR::Location *);
 	void location_gone (ARDOUR::Location *);
-	void remove_marker (GnomeCanvasItem*, GdkEvent*);
+	void remove_marker (Gnome::Canvas::Polygon&, GdkEvent*);
 	gint really_remove_marker (ARDOUR::Location* loc);
 
 	uint32_t location_marker_color;
@@ -472,20 +472,18 @@ class Editor : public PublicEditor
 
 	GdkCursor          *current_canvas_cursor;
 
-	GtkWidget          *track_gnome_canvas;
-	GtkWidget          *time_gnome_canvas;
-	Gtk::Widget        *track_canvas;
-	Gtk::Widget        *time_canvas;
+	Gnome::CanvasAA track_canvas;
+	Gnome::CanvasAA time_canvas;
 
-	GnomeCanvasItem*      first_action_message;
-	GnomeCanvasItem      *verbose_canvas_cursor;
-	bool                verbose_cursor_visible;
+	Gnome::Canvas::Text* first_action_message;
+	Gnome::Canvas::Text* verbose_canvas_cursor;
+	bool                 verbose_cursor_visible;
 
 	void session_control_changed (ARDOUR::Session::ControlType);
 	void queue_session_control_changed (ARDOUR::Session::ControlType);
 
 	
-	gint track_canvas_motion (GnomeCanvasItem*, GdkEvent*);
+	gint track_canvas_motion (GdkEvent*);
 	void set_verbose_canvas_cursor (string, double x, double y);
 	void set_verbose_canvas_cursor_text (string);
 	void show_verbose_canvas_cursor();
@@ -500,15 +498,15 @@ class Editor : public PublicEditor
 	Gtk::EventBox      track_canvas_event_box;
 	Gtk::EventBox      time_button_event_box;
 
-	GnomeCanvasItem      *minsec_group;
-	GnomeCanvasItem      *bbt_group;
-	GnomeCanvasItem      *smpte_group;
-	GnomeCanvasItem      *frame_group;
-	GnomeCanvasItem      *tempo_group;
-	GnomeCanvasItem      *meter_group;
-	GnomeCanvasItem      *marker_group;
-	GnomeCanvasItem      *range_marker_group;
-	GnomeCanvasItem      *transport_marker_group;
+	Gnome::Canvas::Group      *minsec_group;
+	Gnome::Canvas::Group      *bbt_group;
+	Gnome::Canvas::Group      *smpte_group;
+	Gnome::Canvas::Group      *frame_group;
+	Gnome::Canvas::Group      *tempo_group;
+	Gnome::Canvas::Group      *meter_group;
+	Gnome::Canvas::Group      *marker_group;
+	Gnome::Canvas::Group      *range_marker_group;
+	Gnome::Canvas::Group      *transport_marker_group;
 	
 	enum {
 		ruler_metric_smpte = 0,
@@ -568,27 +566,25 @@ class Editor : public PublicEditor
 	static const double timebar_height;
 	guint32 visible_timebars;
 	Gtk::Menu          *editor_ruler_menu;
+	
+	Gnome::Canvas::SimpleRect* tempo_bar;
+	Gnome::Canvas::SimpleRect* meter_bar;
+	Gnome::Canvas::SimpleRect* marker_bar;
+	Gnome::Canvas::SimpleRect* range_marker_bar;
+	Gnome::Canvas::SimpleRect* transport_marker_bar;
 
 	
-	GnomeCanvasItem      *tempo_bar;
-	GnomeCanvasItem      *meter_bar;
-	GnomeCanvasItem      *marker_bar;
-	GnomeCanvasItem      *range_marker_bar;
+	Gnome::Canvas::Line* tempo_line;
+	Gnome::Canvas::Line* meter_line;
+	Gnome::Canvas::Line* marker_line;
+	Gnome::Canvas::Line* range_marker_line;
+	Gnome::Canvas::Line* transport_marker_line;
 
-	GnomeCanvasItem      *transport_marker_bar;
-
-	
-	GnomeCanvasItem      *tempo_line;
-	GnomeCanvasItem      *meter_line;
-	GnomeCanvasItem      *marker_line;
-	GnomeCanvasItem      *range_marker_line;
-	GnomeCanvasItem      *transport_marker_line;
-
-	GnomeCanvasPoints    *tempo_line_points;
-	GnomeCanvasPoints    *meter_line_points;
-	GnomeCanvasPoints    *marker_line_points;
-	GnomeCanvasPoints    *range_marker_line_points;
-	GnomeCanvasPoints    *transport_marker_line_points;
+	Gnome::Canvas::Points* tempo_line_points;
+	Gnome::Canvas::Points* meter_line_points;
+	Gnome::Canvas::Points* marker_line_points;
+	Gnome::Canvas::Points* range_marker_line_points;
+	Gnome::Canvas::Points* transport_marker_line_points;
 
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
@@ -606,8 +602,8 @@ class Editor : public PublicEditor
 
 	struct Cursor {
 	    Editor&             editor;
-	    GnomeCanvasPoints    *points;
-	    GnomeCanvasItem      *canvas_item;
+	    Gnome::Canvas::Points* points;
+	    Gnome::Canvas::Item*   canvas_item;
 	    jack_nframes_t      current_frame;
 	    GtkSignalFunc       callback;
 		double				length;
@@ -626,7 +622,7 @@ class Editor : public PublicEditor
 
 	Cursor* playhead_cursor;
 	Cursor* edit_cursor;
-	GnomeCanvasItem* cursor_group;
+	Gnome::Canvas::Group* cursor_group;
 
 	void    cursor_to_next_region_point (Cursor*, ARDOUR::RegionPoint);
 	void    cursor_to_previous_region_point (Cursor*, ARDOUR::RegionPoint);
@@ -1134,43 +1130,42 @@ class Editor : public PublicEditor
 	void show_verbose_time_cursor (jack_nframes_t frame, double offset = 0, double xpos=-1, double ypos=-1);
 	void show_verbose_duration_cursor (jack_nframes_t start, jack_nframes_t end, double offset = 0, double xpos=-1, double ypos=-1);
 
-	/* static versions of these are public in PublicEditor */
-	
-	gint _canvas_crossfade_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_fade_in_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_fade_in_handle_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_fade_out_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_fade_out_handle_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_region_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_region_view_name_highlight_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_region_view_name_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_stream_view_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_automation_track_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_zoom_rect_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_selection_rect_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_selection_start_trim_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_selection_end_trim_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_control_point_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_line_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_tempo_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_meter_marker_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_tempo_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_meter_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_range_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_transport_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint _canvas_imageframe_item_view_event(GnomeCanvasItem *item, GdkEvent* event, gpointer data) ;
-	gint _canvas_imageframe_view_event(GnomeCanvasItem *item, GdkEvent* event, gpointer data) ;
-	gint _canvas_imageframe_start_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
-	gint _canvas_imageframe_end_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
-	gint _canvas_marker_time_axis_view_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
-	gint _canvas_markerview_item_view_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
-	gint _canvas_markerview_start_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
-	gint _canvas_markerview_end_handle_event(GnomeCanvasItem* item, GdkEvent* event, gpointer data) ;
+	/* Canvas event handlers */
 
-	/* now the real things */
+	gint canvas_crossfade_view_event (GdkEvent* event);
+	gint canvas_fade_in_event (GdkEvent* event);
+	gint canvas_fade_in_handle_event (GdkEvent* event);
+	gint canvas_fade_out_event (GdkEvent* event);
+	gint canvas_fade_out_handle_event (GdkEvent* event);
+	gint canvas_region_view_event (GdkEvent* event);
+	gint canvas_region_view_name_highlight_event (GdkEvent* event);
+	gint canvas_region_view_name_event (GdkEvent* event);
+	gint canvas_stream_view_event (GdkEvent* event);
+	gint canvas_marker_event (GdkEvent* event);
+	gint canvas_zoom_rect_event (GdkEvent* event);
+	gint canvas_selection_rect_event (GdkEvent* event);
+	gint canvas_selection_start_trim_event (GdkEvent* event);
+	gint canvas_selection_end_trim_event (GdkEvent* event);
+	gint canvas_control_point_event (GdkEvent* event);
+	gint canvas_line_event (GdkEvent* event);
+	gint canvas_tempo_marker_event (GdkEvent* event);
+	gint canvas_meter_marker_event (GdkEvent* event);
+	gint canvas_tempo_bar_event (GdkEvent* event);
+	gint canvas_meter_bar_event (GdkEvent* event);
+	gint canvas_marker_bar_event (GdkEvent* event);
+	gint canvas_range_marker_bar_event (GdkEvent* event);
+	gint canvas_transport_marker_bar_event (GdkEvent* event);
+	gint canvas_imageframe_item_view_event(GdkEvent* event) ;
+	gint canvas_imageframe_view_event(GdkEvent* event) ;
+	gint canvas_imageframe_start_handle_event(GdkEvent* event) ;
+	gint canvas_imageframe_end_handle_event(GdkEvent* event) ;
+	gint canvas_marker_time_axis_view_event(GdkEvent* event) ;
+	gint canvas_markerview_item_view_event(GdkEvent* event) ;
+	gint canvas_markerview_start_handle_event(GdkEvent* event) ;
+	gint canvas_markerview_end_handle_event(GdkEvent* event) ;
+	gint canvas_automation_track_event(GdkEvent* event) ;
 
+#if 0
 	gint canvas_crossfade_view_event (GnomeCanvasItem* item, GdkEvent* event, CrossfadeView*);
 	gint canvas_fade_in_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
 	gint canvas_fade_in_handle_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
@@ -1195,22 +1190,12 @@ class Editor : public PublicEditor
 	gint canvas_transport_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event);
 	gint canvas_region_view_name_highlight_event (GnomeCanvasItem* item, GdkEvent* event);
 	gint canvas_region_view_name_event (GnomeCanvasItem* item, GdkEvent* event);
+#endif	
 
-	/* these are not publically accessible, but we still need the static versions
-	   till we use Gnome::Canvas.
-	*/
-	
-	static gint _canvas_copy_region_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint canvas_copy_region_event (GnomeCanvasItem* item, GdkEvent* event);
-
-	static gint _canvas_playhead_cursor_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint canvas_playhead_cursor_event (GnomeCanvasItem* item, GdkEvent* event);
-
-	static gint _canvas_edit_cursor_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint canvas_edit_cursor_event (GnomeCanvasItem* item, GdkEvent* event);
-	
-	static gint _track_canvas_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data);
-	gint track_canvas_event (GnomeCanvasItem* item, GdkEvent* event);
+	gint canvas_copy_region_event (GdkEvent* event);
+	gint canvas_playhead_cursor_event (GdkEvent* event);
+	gint canvas_edit_cursor_event (GdkEvent* event);
+	gint track_canvas_event (GdkEvent* event);
 
 	gint track_canvas_button_press_event (GdkEventButton *);
 	gint track_canvas_button_release_event (GdkEventButton *);

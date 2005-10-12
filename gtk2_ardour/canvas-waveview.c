@@ -107,23 +107,23 @@ gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
 
 	parent_class = gtk_type_class (gnome_canvas_item_get_type ());
 
-	gtk_object_add_arg_type ("GnomeCanvasWaveView::data_src", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_DATA_SRC);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::data-src", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_DATA_SRC);
 	gtk_object_add_arg_type ("GnomeCanvasWaveView::channel", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_CHANNEL);
-	gtk_object_add_arg_type ("GnomeCanvasWaveView::length_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_LENGTH_FUNCTION);
-	gtk_object_add_arg_type ("GnomeCanvasWaveView::sourcefile_length_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_SOURCEFILE_LENGTH_FUNCTION);
-	gtk_object_add_arg_type ("GnomeCanvasWaveView::peak_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_PEAK_FUNCTION);
-	gtk_object_add_arg_type ("GnomeCanvasWaveView::gain_function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_GAIN_FUNCTION);
-	gtk_object_add_arg_type ("GnomeCanvasWaveView::gain_src", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_GAIN_SRC);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::length-function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_LENGTH_FUNCTION);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::sourcefile-length-function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_SOURCEFILE_LENGTH_FUNCTION);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::peak-function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_PEAK_FUNCTION);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::gain-function", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_GAIN_FUNCTION);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::gain-src", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_GAIN_SRC);
 	gtk_object_add_arg_type ("GnomeCanvasWaveView::cache", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_CACHE);
-	gtk_object_add_arg_type ("GnomeCanvasWaveView::cache_updater", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_CACHE_UPDATER);
-	gtk_object_add_arg_type ("GnomeCanvasWaveView::samples_per_unit", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_SAMPLES_PER_PIXEL);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::cache-updater", GTK_TYPE_POINTER, GTK_ARG_READWRITE, ARG_CACHE_UPDATER);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::samples-per-unit", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_SAMPLES_PER_PIXEL);
 	gtk_object_add_arg_type ("GnomeCanvasWaveView::amplitude_above_axis", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_AMPLITUDE_ABOVE_AXIS);
 	gtk_object_add_arg_type ("GnomeCanvasWaveView::x", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X);
 	gtk_object_add_arg_type ("GnomeCanvasWaveView::y", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y);
 	gtk_object_add_arg_type ("GnomeCanvasWaveView::height", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_HEIGHT);
-	gtk_object_add_arg_type ("GnomeCanvasWaveView::wave_color", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_WAVE_COLOR);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::wave-color", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_WAVE_COLOR);
 	gtk_object_add_arg_type ("GnomeCanvasWaveView::rectified", GTK_TYPE_BOOL, GTK_ARG_READWRITE, ARG_RECTIFIED);
-	gtk_object_add_arg_type ("GnomeCanvasWaveView::region_start", GTK_TYPE_UINT, GTK_ARG_READWRITE, ARG_REGION_START);
+	gtk_object_add_arg_type ("GnomeCanvasWaveView::region-start", GTK_TYPE_UINT, GTK_ARG_READWRITE, ARG_REGION_START);
 
 	object_class->set_arg = gnome_canvas_waveview_set_arg;
 	object_class->get_arg = gnome_canvas_waveview_get_arg;
