@@ -97,7 +97,6 @@ class TimeSelection;
 class TrackSelection;
 class AutomationSelection;
 class MixerStrip;
-class SoundFileSelector;
 class StreamView;
 class ControlPoint;
 

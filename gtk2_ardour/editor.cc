@@ -53,7 +53,6 @@
 #include "editor.h"
 #include "grouped_buttons.h"
 #include "keyboard.h"
-#include "library_ui.h"
 #include "marker.h"
 #include "playlist_selector.h"
 #include "regionview.h"

@@ -1291,7 +1291,7 @@ OptionEditor::raid_path_changed ()
 void
 OptionEditor::click_browse_clicked ()
 {
-	SoundFileChooser sfdb (_("Choose Click"), false);
+	SoundFileChooser sfdb (_("Choose Click"), false, false);
 	
 	int result = sfdb.run ();
 
@@ -1312,7 +1312,7 @@ OptionEditor::click_chosen (string path)
 void
 OptionEditor::click_emphasis_browse_clicked ()
 {
-	SoundFileChooser sfdb (_("Click Emphasis"), false);
+	SoundFileChooser sfdb (_("Click Emphasis"), false, false);
 
 	int result = sfdb.run ();
 

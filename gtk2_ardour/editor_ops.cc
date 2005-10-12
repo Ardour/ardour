@@ -59,7 +59,7 @@
 #include "rgb_macros.h"
 #include "selection_templates.h"
 #include "selection.h"
-#include "library_ui.h"
+#include "sfdb_ui.h"
 #include "editing.h"
 #include "gtk-custom-hruler.h"
 
@@ -1891,20 +1891,21 @@ Editor::import_audio (bool as_tracks)
 		return;
 	}
 
-	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	sigc::connection c;
 	string str;
 
 	if (as_tracks) {
-		c = sfdb.Action.connect (bind (mem_fun(*this, &Editor::do_import), true));
 		str =_("Import selected as tracks");
 	} else {
-		c = sfdb.Action.connect (bind (mem_fun(*this, &Editor::do_import), false));
 		str = _("Import selected to region list");
 	}
 
-	sfdb.run (str, true);
-	c.disconnect ();
+	SoundFileChooser sfdb (str, true, true);
+
+	int result = sfdb.run();
+
+	if (result == Gtk::RESULT_ACCEPTED) {
+		do_import(sfdb.get_filenames, sfdb.get_split(), as_tracks);
+	}
 }
 
 void
@@ -2032,12 +2033,9 @@ Editor::embed_audio ()
 		return;
 	}
 
-	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
-	sigc::connection c = sfdb.Action.connect (mem_fun(*this, &Editor::do_embed_sndfiles));
+	SoundFileSelector sfdb (_("Add to External Region list"), true, true);
 
-	sfdb.run (_("Add to External Region list"), true);
-
-	c.disconnect ();
+	int result = sfdb.run ();
 }
 
 void

@@ -33,7 +33,6 @@
 #include "option_editor.h"
 #include "location_ui.h"
 #include "route_params_ui.h"
-#include "library_ui.h"
 
 #include "i18n.h"
 
