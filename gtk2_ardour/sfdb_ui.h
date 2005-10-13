@@ -4,7 +4,11 @@
 #include <string>
 #include <vector>
 
+#include <sigc++/signal.h>
+
+#include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/filechooserwidget.h>
 
@@ -12,38 +16,37 @@ class SoundFileBrowser : public Gtk::Dialog
 {
   public:
     SoundFileBrowser (std::string title);
-    virtual ~SoundFileBrowser ();
+    virtual ~SoundFileBrowser () {}
 
   protected:
-    Gtk::FileChooserWidget* chooser;
-
-    Gtk::Button* ok_btn;
+    Gtk::FileChooserWidget chooser;
 };
 
 class SoundFileChooser : public SoundFileBrowser
 {
   public:
     SoundFileChooser (std::string title);
-    virtual ~SoundFileChooser ();
+    virtual ~SoundFileChooser () {};
 
-    std::string get_filename ();
-
-  protected:
-    Gtk::Button* open_btn;
+    std::string get_filename () {return chooser.get_filename();};
 };
 
-class SoundFileOmega : public SoundFileChooser
+class SoundFileOmega : public SoundFileBrowser
 {
   public:
     SoundFileOmega (std::string title);
-    virtual ~SoundFileOmega ();
+    virtual ~SoundFileOmega () {};
 
-    std::vector<std::string> get_filenames();
-    bool get_split();
+    sigc::signal<void, std::vector<std::string>, bool> Embedded;
+    sigc::signal<void, std::vector<std::string>, bool> Imported;
 
   protected:
-    Gtk::Button* insert_btn;
-    Gtk::Button* import_btn;
-}
+    Gtk::Button embed_btn;
+    Gtk::Button import_btn;
+    Gtk::CheckButton split_check;
+
+    void embed_clicked ();
+    void import_clicked ();
+};
 
 #endif // __ardour_sfdb_ui_h__

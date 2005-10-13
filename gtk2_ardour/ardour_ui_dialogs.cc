@@ -26,13 +26,14 @@
 #include <ardour/session.h>
 
 #include "ardour_ui.h"
-#include "mixer_ui.h"
-#include "meter_bridge.h"
 #include "connection_editor.h"
-#include "public_editor.h"
-#include "option_editor.h"
 #include "location_ui.h"
+#include "meter_bridge.h"
+#include "mixer_ui.h"
+#include "option_editor.h"
+#include "public_editor.h"
 #include "route_params_ui.h"
+#include "sfdb_ui.h"
 
 #include "i18n.h"
 
@@ -416,3 +417,16 @@ ARDOUR_UI::route_params_hiding ()
 {
 	route_params_check->set_active (false);
 }
+
+void
+ARDOUR_UI::toggle_sound_file_browser ()
+{
+	if (sfdb_check->get_active()) {
+		SoundFileBrowser sfdb(_("Sound File Browser"));
+
+		sfdb_check->signal_toggled().connect (bind (mem_fun (sfdb, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
+		sfdb.run();
+		sfdb_check->set_active(false);
+	}
+}
+

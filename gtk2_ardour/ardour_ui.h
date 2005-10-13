@@ -502,7 +502,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::CheckMenuItem *locations_dialog_check;
 	Gtk::CheckMenuItem *big_clock_check;
 	Gtk::CheckMenuItem *tempo_editor_check;
-//	Gtk::CheckMenuItem *sfdb_check;
+	Gtk::CheckMenuItem *sfdb_check;
 	Gtk::CheckMenuItem *options_window_check;
 	
 	/* <CMT Additions> */
@@ -672,6 +672,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	AddRouteDialog *add_route_dialog;
 	void add_route_dialog_done (int status);
+
+	/* SoundFile Browser */
+	void toggle_sound_file_browser ();
 	
 	/* Keyboard Handling */
 	

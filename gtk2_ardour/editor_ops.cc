@@ -1899,13 +1899,10 @@ Editor::import_audio (bool as_tracks)
 		str = _("Import selected to region list");
 	}
 
-	SoundFileChooser sfdb (str, true, true);
+	SoundFileOmega sfdb (str);
+	sfdb.Imported.connect (bind (mem_fun (*this, &Editor::do_import), as_tracks));
 
-	int result = sfdb.run();
-
-	if (result == Gtk::RESULT_ACCEPTED) {
-		do_import(sfdb.get_filenames, sfdb.get_split(), as_tracks);
-	}
+	sfdb.run();
 }
 
 void
@@ -2033,9 +2030,10 @@ Editor::embed_audio ()
 		return;
 	}
 
-	SoundFileSelector sfdb (_("Add to External Region list"), true, true);
+	SoundFileOmega sfdb (_("Add to External Region list"));
+	sfdb.Embedded.connect (mem_fun (*this, &Editor::do_embed_sndfiles));
 
-	int result = sfdb.run ();
+	sfdb.run ();
 }
 
 void
@@ -2158,13 +2156,13 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 void
 Editor::insert_sndfile (bool as_tracks)
 {
-	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
+//	SoundFileSelector& sfdb (ARDOUR_UI::instance()->get_sfdb_window());
 	sigc::connection c;
 	string str;
 
 	if (as_tracks) {
 
-		c = sfdb.Action.connect (mem_fun(*this, &Editor::insert_paths_as_new_tracks));
+//		c = sfdb.Action.connect (mem_fun(*this, &Editor::insert_paths_as_new_tracks));
 		str = _("Insert selected as new tracks");
 
 	} else {
@@ -2179,12 +2177,12 @@ Editor::insert_sndfile (bool as_tracks)
 			return;
 		}
 
-		c = sfdb.Action.connect (bind (mem_fun(*this, &Editor::do_insert_sndfile), pos));
+//		c = sfdb.Action.connect (bind (mem_fun(*this, &Editor::do_insert_sndfile), pos));
 		str = _("Insert selected");
 	}
 
-	sfdb.run (str, false);
-	c.disconnect ();
+//	sfdb.run (str, false);
+//	c.disconnect ();
 }
 
 void
