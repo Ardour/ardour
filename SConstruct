@@ -379,6 +379,8 @@ libraries['pango'].ParseConfig ('pkg-config --cflags --libs pango')
 libraries['libgnomecanvas2'] = LibraryInfo()
 libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomecanvas-2.0')
 
+libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
+
 libraries['ardour'] = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')
 libraries['midi++2'] = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++2', CPPPATH='#libs/midi++2')
 libraries['pbd3']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd3', CPPPATH='#libs/pbd3')
@@ -483,6 +485,7 @@ else:
 	'libs/gtkmm2/gdk',
 	'libs/gtkmm2/gtk',
 	'libs/libgnomecanvasmm',
+	'libs/flowcanvas',
         'libs/gtkmm2ext',
         'gtk2_ardour',
         ]
