@@ -1,0 +1,45 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env final_prefix install_prefix libraries')
+
+flowcanvas = env.Copy()
+flowcanvas.Merge ([ 
+    libraries['sigc2'], 
+    libraries['gtk2'],
+    libraries['glibmm2'],
+    libraries['pangomm'],
+    libraries['atkmm'],
+    libraries['gdkmm2'],
+    libraries['gtkmm2'],
+    libraries['libgnomecanvas2'],
+    libraries['libgnomecanvasmm']
+    ])
+
+#
+# this defines the version number of libflowcanvas
+# 
+
+domain = 'libflowcanvas'
+
+flowcanvas.Append(DOMAIN=domain,MAJOR=0,MINOR=8,MICRO=1)
+flowcanvas.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
+
+flowcanvas_files = Split("""
+src/Connection.cpp
+src/FlowCanvas.cpp
+src/Module.cpp
+src/Port.cpp
+""")
+
+libflowcanvas = flowcanvas.StaticLibrary('flowcanvas', flowcanvas_files)
+
+Default(libflowcanvas)
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript'] +
+                                     flowcanvas_files +
+                                     glob.glob('flowcanvas/*.h')))
