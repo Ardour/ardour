@@ -31,11 +31,18 @@
 
 #include <sndfile.h>
 
-#include <gtkmm.h>
 #include <gtkmm/layout.h>
 #include <gtkmm/comboboxtext.h>
+
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <libgnomecanvas/gnome-canvas-util.h>
+
+#include <libgnomecanvasmm/canvas.h>
+#include <libgnomecanvasmm/polygon.h>
+#include <libgnomecanvasmm/text.h>
+#include <libgnomecanvasmm/rect.h>
+#include <libgnomecanvasmm/line.h>
+
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/click_box.h>
 
@@ -196,14 +203,14 @@ class Editor : public PublicEditor
 		*/
 
 		if (pixel >= 0) {
-			return (jack_nframes_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_gnome_canvas.gobj())->pixels_per_unit);
+			return (jack_nframes_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit);
 		} else {
 			return 0;
 		}
 	}
 
 	gulong frame_to_pixel (jack_nframes_t frame) {
-		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_gnome_canvas.gobj())->pixels_per_unit)));
+		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit)));
 	}
 
 	/* selection */
@@ -471,8 +478,8 @@ class Editor : public PublicEditor
 
 	GdkCursor          *current_canvas_cursor;
 
-	Gnome::CanvasAA track_canvas;
-	Gnome::CanvasAA time_canvas;
+	Gnome::Canvas::CanvasAA track_canvas;
+	Gnome::Canvas::CanvasAA time_canvas;
 
 	Gnome::Canvas::Text* first_action_message;
 	Gnome::Canvas::Text* verbose_canvas_cursor;
@@ -566,11 +573,11 @@ class Editor : public PublicEditor
 	guint32 visible_timebars;
 	Gtk::Menu          *editor_ruler_menu;
 	
-	Gnome::Canvas::SimpleRect* tempo_bar;
-	Gnome::Canvas::SimpleRect* meter_bar;
-	Gnome::Canvas::SimpleRect* marker_bar;
-	Gnome::Canvas::SimpleRect* range_marker_bar;
-	Gnome::Canvas::SimpleRect* transport_marker_bar;
+	Gnome::Canvas::Rect* tempo_bar;
+	Gnome::Canvas::Rect* meter_bar;
+	Gnome::Canvas::Rect* marker_bar;
+	Gnome::Canvas::Rect* range_marker_bar;
+	Gnome::Canvas::Rect* transport_marker_bar;
 
 	
 	Gnome::Canvas::Line* tempo_line;

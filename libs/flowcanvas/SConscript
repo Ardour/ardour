@@ -25,8 +25,8 @@ flowcanvas.Merge ([
 
 domain = 'libflowcanvas'
 
-flowcanvas.Append(DOMAIN=domain,MAJOR=0,MINOR=8,MICRO=1)
-flowcanvas.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
+flowcanvas.Append(DOMAIN=domain,MAJOR=0,MINOR=0,MICRO=1)
+flowcanvas.Append(CXXFLAGS="-DFLOWCANVAS_AA")
 
 flowcanvas_files = Split("""
 src/Connection.cpp
@@ -40,6 +40,6 @@ libflowcanvas = flowcanvas.StaticLibrary('flowcanvas', flowcanvas_files)
 Default(libflowcanvas)
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-                                     [ 'SConscript'] +
+                                     ['SConscript'] +
                                      flowcanvas_files +
                                      glob.glob('flowcanvas/*.h')))

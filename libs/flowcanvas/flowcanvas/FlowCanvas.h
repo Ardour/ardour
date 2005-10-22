@@ -52,11 +52,11 @@ class Module;
  *
  * \ingroup FlowCanvas
  */
-#ifdef ANTI_ALIAS
+#ifdef FLOWCANVAS_AA
 class FlowCanvas : public Gnome::Canvas::CanvasAA
 #else
 class FlowCanvas : public Gnome::Canvas::Canvas
-#endif
+#endif // FLOWCANVAS_AA
 {
 public:
 	FlowCanvas(double width, double height);

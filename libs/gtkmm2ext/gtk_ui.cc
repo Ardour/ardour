@@ -28,7 +28,6 @@
 
 #include <gtkmm.h>
 #include <pbd/error.h>
-#include <pbd/compose.h>
 #include <pbd/touchable.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/pthread_utils.h>

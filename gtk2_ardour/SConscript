@@ -16,16 +16,19 @@ domain = 'gtk_ardour'
 
 gtkardour.Append(DOMAIN=domain, MAJOR=1,MINOR=0,MICRO=2)
 gtkardour.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
-gtkardour.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+gtkardour.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+gtkardour.Append(CXXFLAGS="-DFLOWCANVAS_AA")
 gtkardour.Append(PACKAGE=domain)
 gtkardour.Append(POTFILE=domain + '.pot')
 
 gtkardour.Merge ([
     libraries['ardour'],
     libraries['gtkmm2ext'],
+    libraries['flowcanvas'],
     libraries['midi++2'],
     libraries['pbd3'],
     libraries['gtkmm2'],
+    libraries['libgnomecanvas2'],
     libraries['libgnomecanvasmm'],
     libraries['sysmidi'],
     libraries['sndfile'],
@@ -36,7 +39,6 @@ gtkardour.Merge ([
     libraries['gdkmm2'],
     libraries['sigc2'],
     libraries['gtk2'],
-    libraries['libgnomecanvas2'],
     libraries['xml'],
     libraries['soundtouch'],
     libraries['samplerate'],

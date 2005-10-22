@@ -35,6 +35,7 @@ using __gnu_cxx::slist;
 #include <gtkmm/frame.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/treeview.h>
+#include <gtkmm/liststore.h>
 
 #include "ardour_dialog.h"
 
@@ -62,9 +63,9 @@ class ConnectionEditor : public ArdourDialog {
 
 
 	struct ConnectionDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    SnapshotDisplayModelColumns() { 
-		    add (visible_name);
-		    add (real_name);
+	    ConnectionDisplayModelColumns() { 
+		    add (name);
+		    add (connection);
 	    }
 	    Gtk::TreeModelColumn<Glib::ustring> name;
 	    Gtk::TreeModelColumn<ARDOUR::Connection*> connection;
