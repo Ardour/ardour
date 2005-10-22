@@ -60,6 +60,7 @@
 #include "editing.h"
 #include "enums.h"
 #include "region_selection.h"
+#include "simplerect.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -573,11 +574,11 @@ class Editor : public PublicEditor
 	guint32 visible_timebars;
 	Gtk::Menu          *editor_ruler_menu;
 	
-	Gnome::Canvas::Rect* tempo_bar;
-	Gnome::Canvas::Rect* meter_bar;
-	Gnome::Canvas::Rect* marker_bar;
-	Gnome::Canvas::Rect* range_marker_bar;
-	Gnome::Canvas::Rect* transport_marker_bar;
+	Gnome::Canvas::SimpleRect* tempo_bar;
+	Gnome::Canvas::SimpleRect* meter_bar;
+	Gnome::Canvas::SimpleRect* marker_bar;
+	Gnome::Canvas::SimpleRect* range_marker_bar;
+	Gnome::Canvas::SimpleRect* transport_marker_bar;
 
 	
 	Gnome::Canvas::Line* tempo_line;
