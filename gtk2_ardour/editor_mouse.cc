@@ -85,14 +85,14 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy)
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
-		gnome_canvas_w2c_d (GNOME_CANVAS(track_gnome_canvas), event->button.x, event->button.y, pcx, pcy);
+		gnome_canvas_w2c_d (GNOME_CANVAS(track_canvas), event->button.x, event->button.y, pcx, pcy);
 		break;
 	case GDK_MOTION_NOTIFY:
-		gnome_canvas_w2c_d (GNOME_CANVAS(track_gnome_canvas), event->motion.x, event->motion.y, pcx, pcy);
+		gnome_canvas_w2c_d (GNOME_CANVAS(track_canvas), event->motion.x, event->motion.y, pcx, pcy);
 		break;
 	case GDK_ENTER_NOTIFY:
 	case GDK_LEAVE_NOTIFY:
-		gnome_canvas_w2c_d (GNOME_CANVAS(track_gnome_canvas), event->crossing.x, event->crossing.y, pcx, pcy);
+		gnome_canvas_w2c_d (GNOME_CANVAS(track_canvas), event->crossing.x, event->crossing.y, pcx, pcy);
 		break;
 	default:
 		warning << string_compose (_("Editor::event_frame() used on unhandled event type %1"), event->type) << endmsg;

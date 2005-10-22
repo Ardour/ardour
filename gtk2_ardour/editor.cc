@@ -802,7 +802,7 @@ Editor::initialize_canvas ()
 
 	/* adjust sensitivity for "picking" items */
 
-	// GNOME_CANVAS(track_gnome_canvas)->close_enough = 2;
+	// GNOME_CANVAS(track_canvas)->close_enough = 2;
 
 	track_canvas.signal_event().connect (slot (*this, &Editor::track_canvas_event));
 	track_canvas.set_name ("EditorMainCanvas");
@@ -916,7 +916,7 @@ Editor::initialize_canvas ()
 	transport_punchout_line->hide();
 	
 	// used to show zoom mode active zooming
-	zoom_rect = new Canvas::Simplerect (track_gnome_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	zoom_rect = new Canvas::Simplerect (track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
 	zoom_rect->property_fill_color_rgba() << color_map[cZoomRectFill];
 	zoom_rect->property_outline_color_rgba() << color_map[cZoomRect];
 	zoom_rect->property_outline_pixels() << 1;
@@ -925,7 +925,7 @@ Editor::initialize_canvas ()
 	zoom_rect.signal_event().connect (slot (*this, &PublicEditor::canvas_zoom_rect_event));
 
 	// used as rubberband rect
-	rubberband_rect = new Canvas::Simplerect (track_gnome_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	rubberband_rect = new Canvas::Simplerect (track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
 	rubberband_rect->property_outline_color_rgba() << color_map[cRubberBandRect];
 	rubberband_rect->property_fill_color_rgba() << (guint32) color_map[cRubberBandRectFill];
 	rubberband_rect->property_outline_pixels() << 1;
@@ -982,7 +982,7 @@ Editor::initialize_canvas ()
 	
 	double time_height = timebar_height * 5;
 	double time_width = FLT_MAX/frames_per_unit;
-	gnome_canvas_set_scroll_region (GNOME_CANVAS(time_gnome_canvas), 0.0, 0.0, time_width, time_height);
+	gnome_canvas_set_scroll_region (GNOME_CANVAS(time_canvas), 0.0, 0.0, time_width, time_height);
 
 	edit_cursor = new Cursor (*this, "blue", (GtkSignalFunc) _canvas_edit_cursor_event);
 	playhead_cursor = new Cursor (*this, "red", (GtkSignalFunc) _canvas_playhead_cursor_event);
@@ -1256,7 +1256,7 @@ Editor::track_canvas_allocate (GtkAllocation *alloc)
 			strcpy (txt, _(txt1));
 			strcat (txt, _(txt2));
 			
-			first_action_message = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_gnome_canvas)),
+			first_action_message = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_canvas)),
 								      gnome_canvas_text_get_type(),
 								      "fontdesc", font,
 								      "fill_color_rgba", color_map[cFirstActionMessage],
@@ -1332,13 +1332,13 @@ Editor::reset_scrolling_region (GtkAllocation *alloc)
 		canvas_alloc_height = alloc->height;
 		canvas_alloc_width = alloc->width;
 	} else {
-		canvas_alloc_height = track_gnome_canvas->allocation.height;
-		canvas_alloc_width = track_gnome_canvas->allocation.width;
+		canvas_alloc_height = track_canvas->allocation.height;
+		canvas_alloc_width = track_canvas->allocation.width;
 	}
 
 	canvas_height = max (canvas_height, canvas_alloc_height);
 
-	gnome_canvas_set_scroll_region (GNOME_CANVAS(track_gnome_canvas), 0.0, 0.0, 
+	gnome_canvas_set_scroll_region (GNOME_CANVAS(track_canvas), 0.0, 0.0, 
 				      max (last_canvas_unit, canvas_alloc_width),
 				      canvas_height);
 
@@ -3286,7 +3286,7 @@ Editor::track_canvas_drag_data_received  (GdkDragContext     *context,
 	double wx;
 	double wy;
 
-	gnome_canvas_window_to_world (GNOME_CANVAS(track_gnome_canvas), (double) x, (double) y, &wx, &wy);
+	gnome_canvas_window_to_world (GNOME_CANVAS(track_canvas), (double) x, (double) y, &wx, &wy);
 
 	ev.type = GDK_BUTTON_RELEASE;
 	ev.button.x = wx;
@@ -3404,7 +3404,7 @@ Editor::flush_track_canvas ()
 	   out this method entirely
 	*/
 	
-	//gnome_canvas_update_now (GNOME_CANVAS(track_gnome_canvas));
+	//gnome_canvas_update_now (GNOME_CANVAS(track_canvas));
 	//gtk_main_iteration ();
 }
 

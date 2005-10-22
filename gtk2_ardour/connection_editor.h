@@ -153,7 +153,7 @@ class ConnectionEditor : public ArdourDialog {
 	void port_column_click (gint col, Gtk::TreeView* );
 	gint port_button_event (GdkEventButton *, Gtk::TreeView*);
 	gint connection_click (GdkEventButton *ev, Gtk::TreeView*);
-	void connection_selected (gint, gint, GdkEvent *, bool);
+	void connection_selection_changed (Gtk::TreeView&, Glib::RefPtr<Gtk::ListStore>&);
 
 	sigc::connection config_connection;
 	sigc::connection connect_connection;

@@ -225,8 +225,8 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	time_canvas_event_box.get_window()->get_pointer (x, y, state);
 
 	
-	gnome_canvas_window_to_world (GNOME_CANVAS(track_gnome_canvas), x, y, &wcx, &wcy);
-	gnome_canvas_w2c_d (GNOME_CANVAS(track_gnome_canvas), wcx, wcy, &cx, &cy);
+	gnome_canvas_window_to_world (GNOME_CANVAS(track_canvas), x, y, &wcx, &wcy);
+	gnome_canvas_w2c_d (GNOME_CANVAS(track_canvas), wcx, wcy, &cx, &cy);
 	
 	jack_nframes_t where = leftmost_frame + pixel_to_frame (x);
 

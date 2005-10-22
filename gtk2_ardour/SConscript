@@ -68,7 +68,7 @@ automation_pan_line.cc
 automation_time_axis.cc
 axis_view.cc
 canvas-imageframe.c
-imagegrame.cc
+imageframe.cc
 canvas-simpleline.c
 simpleline.cc
 canvas-simplerect.c

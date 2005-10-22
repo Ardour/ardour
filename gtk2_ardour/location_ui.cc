@@ -611,7 +611,7 @@ LocationUI::LocationUI ()
 	location_vpacker.pack_start (punch_edit_row, false, false);
 
 	location_rows.set_name("LocationLocRows");
-	location_rows_scroller.add_with_viewport (location_rows);
+	location_rows_scroller.add (location_rows);
 	location_rows_scroller.set_name ("LocationLocRowsScroller");
 	location_rows_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	location_rows_scroller.set_size_request (-1, 130);
@@ -632,7 +632,7 @@ LocationUI::LocationUI ()
 
 	
 	range_rows.set_name("LocationRangeRows");
-	range_rows_scroller.add_with_viewport (range_rows);
+	range_rows_scroller.add (range_rows);
 	range_rows_scroller.set_name ("LocationRangeRowsScroller");
 	range_rows_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	range_rows_scroller.set_size_request (-1, 130);

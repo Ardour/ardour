@@ -134,17 +134,15 @@ ConnectionEditor::ConnectionEditor ()
 	right_vbox.set_border_width (5);
 	right_vbox.pack_start (port_and_selector_box);
 
-	input_connection_display.set_shadow_type (Gtk::SHADOW_IN);
-	input_connection_display.set_selection_mode (GTK_SELECTION_SINGLE);
+	input_connection_display.get_selection()->set_mode(Gtk::SELECTION_SINGLE);
 	input_connection_display.set_size_request (80, -1);
 	input_connection_display.set_name ("ConnectionEditorConnectionList");
-	input_connection_display.signal_selection_changed().connect (bind (mem_fun(*this, &ConnectionEditor::connection_selection_changed), input_connection_display));
+	input_connection_display.get_selection()->signal_changed().connect (bind (mem_fun(*this, &ConnectionEditor::connection_selection_changed), input_connection_display));
 
-	output_connection_display.set_shadow_type (Gtk::SHADOW_IN);
-	output_connection_display.set_selection_mode (GTK_SELECTION_SINGLE);
+	output_connection_display.get_selection()->set_mode(Gtk::SELECTION_SINGLE);
 	output_connection_display.set_size_request (80, -1);
 	output_connection_display.set_name ("ConnectionEditorConnectionList");
-	output_connection_display.signal_selection_changed().connect (bind (mem_fun(*this, &ConnectionEditor::connection_selected), output_connection_display));
+	output_connection_display.get_selection()->signal_changed().connect (bind (mem_fun(*this, &ConnectionEditor::connection_selection_changed), output_connection_display));
 
 	input_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	output_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -451,7 +449,7 @@ ConnectionEditor::display_ports ()
 		Gtk::CList *client_port_display = manage (new Gtk::CList (1));
 		ScrolledWindow *scroller = manage (new ScrolledWindow);
 
-		scroller->add_with_viewport (*client_port_display);
+		scroller->add (*client_port_display);
 		scroller->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 		client_box->pack_start (*scroller);

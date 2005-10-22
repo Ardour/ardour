@@ -172,7 +172,7 @@ IOSelector::IOSelector (Session& sess, IO& ior, bool input)
 	port_display_scroller.set_name ("IOSelectorNotebook");
 	port_display_scroller.set_border_width (0);
 	port_display_scroller.set_size_request (-1, 170);
-	port_display_scroller.add_with_viewport (port_box);
+	port_display_scroller.add (port_box);
 	port_display_scroller.set_policy (Gtk::POLICY_NEVER,
 					  Gtk::POLICY_AUTOMATIC);
 
@@ -332,7 +332,7 @@ IOSelector::rescan ()
 		Gtk::CList *client_port_display = manage (new Gtk::CList (1));
 		ScrolledWindow *scroller = manage (new ScrolledWindow);
 
-		scroller->add_with_viewport (*client_port_display);
+		scroller->add (*client_port_display);
 		scroller->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 		client_box->pack_start (*scroller);

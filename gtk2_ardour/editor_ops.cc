@@ -1471,7 +1471,7 @@ Editor::insert_region_list_drag (AudioRegion& region)
 	
 	track_canvas->get_pointer (x, y);
 
-	gnome_canvas_window_to_world (GNOME_CANVAS(track_gnome_canvas), x, y, &wx, &wy);
+	gnome_canvas_window_to_world (GNOME_CANVAS(track_canvas), x, y, &wx, &wy);
 	
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
@@ -3168,7 +3168,7 @@ Editor::mouse_paste ()
 	double wx, wy;
 	track_canvas->get_pointer (x, y);
 
-	gnome_canvas_window_to_world (GNOME_CANVAS(track_gnome_canvas), x, y, &wx, &wy);
+	gnome_canvas_window_to_world (GNOME_CANVAS(track_canvas), x, y, &wx, &wy);
 	
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
