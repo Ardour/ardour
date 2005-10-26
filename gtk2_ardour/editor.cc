@@ -184,8 +184,6 @@ GdkBitmap *Editor::check_mask = 0;
 GdkPixmap *Editor::empty_pixmap = 0;
 GdkBitmap *Editor::empty_mask = 0;
 
-extern gint route_list_compare_func (GtkCList*,gconstpointer,gconstpointer);
-
 Editor::Editor (AudioEngine& eng) 
 	: engine (eng),
 
@@ -357,7 +355,7 @@ Editor::Editor (AudioEngine& eng)
 	initialize_rulers ();
 	initialize_canvas ();
 
-	track_canvas_scroller.add (*track_canvas);
+	track_canvas_scroller.add (track_canvas);
 	track_canvas_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
 	track_canvas_scroller.set_name ("TrackCanvasScroller");
 
@@ -376,7 +374,7 @@ Editor::Editor (AudioEngine& eng)
  	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscroll_slider_button_release));
  	edit_hscrollbar.size_allocate.connect (mem_fun(*this, &Editor::hscroll_slider_allocate));
 	
-	time_canvas_scroller.add (*time_canvas);
+	time_canvas_scroller.add (time_canvas);
 	time_canvas_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
 	time_canvas_scroller.set_hadjustment (*track_canvas_scroller.get_hadjustment());
 	time_canvas_scroller.set_name ("TimeCanvasScroller");
@@ -531,45 +529,66 @@ Editor::Editor (AudioEngine& eng)
 	bottom_hbox.set_border_width (3);
 	bottom_hbox.set_spacing (3);
 
+	route_display_model = ListStore::create(route_display_columns);
+	route_list.set_model (route_display_model);
+	route_list.append_column (_("Tracks"), route_display_columns.text);
 	route_list.set_name ("TrackListDisplay");
-	route_list.set_size_request (75,-1);
-	route_list.column_titles_active();
-	route_list.set_compare_func (route_list_compare_func);
-	route_list.set_shadow_type (Gtk::SHADOW_IN);
-	route_list.set_selection_mode (Gtk::SELECTION_MULTIPLE);
+	route_list.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
 	route_list.set_reorderable (true);
-	edit_group_list.set_size_request (75, -1);
+	
+	route_list.set_size_request (75,-1);
+	route_list.set_headers_visible (true);
+	route_list.set_headers_clickable (true);
+
+	route_display_model->set_sort_func (0, mem_fun (*this, &Editor::route_list_compare_func));
+
+	//route_list.set_shadow_type (Gtk::SHADOW_IN);
 
 	route_list_scroller.add (route_list);
 	route_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	route_list.select_row.connect (mem_fun(*this, &Editor::route_list_selected));
-	route_list.unselect_row.connect (mem_fun(*this, &Editor::route_list_unselected));
-	route_list.row_move.connect (mem_fun(*this, &Editor::queue_route_list_reordered));
-	route_list.click_column.connect (mem_fun(*this, &Editor::route_list_column_click));
+	route_list.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::route_display_selection_changed));
+	route_display_model->signal_rows_reordered().connect (mem_fun (*this, &Editor::queue_route_list_reordered));
+	route_list.signal_button_press_event().connect (mem_fun(*this, &Editor::route_list_column_click));
 
 	edit_group_list_button_label.set_text (_("Edit Groups"));
 	edit_group_list_button_label.set_name ("EditGroupTitleButton");
 	edit_group_list_button.add (edit_group_list_button_label);
 	edit_group_list_button.set_name ("EditGroupTitleButton");
 
-	edit_group_list.column_titles_hide();
+	group_model = ListStore::create(group_columns);
+	edit_group_list.set_model (group_model);
+	edit_group_list.append_column (_("active"), group_columns.is_active);
+	edit_group_list.append_column (_("groupname"), group_columns.text);
+	edit_group_list.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
+	edit_group_list.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+
+	/* use checkbox for the active column */
+
+	CellRendererToggle *active_cell = dynamic_cast<CellRendererToggle*>(edit_group_list.get_column_cell_renderer (0));
+	active_cell->property_activatable() = true;
+	active_cell->property_radio() = false;
+
 	edit_group_list.set_name ("MixerGroupList");
-	edit_group_list.set_shadow_type (Gtk::SHADOW_IN);
-	edit_group_list.set_selection_mode (Gtk::SELECTION_MULTIPLE);
+	//edit_group_list.set_shadow_type (Gtk::SHADOW_IN);
+	route_list.set_headers_visible (false);
 	edit_group_list.set_reorderable (false);
 	edit_group_list.set_size_request (75, -1);
-	edit_group_list.set_column_auto_resize (0, true);
 	edit_group_list.columns_autosize ();
+	edit_group_list.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
 
 	edit_group_list_scroller.add (edit_group_list);
 	edit_group_list_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 	edit_group_list_button.signal_clicked().connect (mem_fun(*this, &Editor::edit_group_list_button_clicked));
 	edit_group_list.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event));
-	edit_group_list.select_row.connect (mem_fun(*this, &Editor::edit_group_selected));
-	edit_group_list.unselect_row.connect (mem_fun(*this, &Editor::edit_group_unselected));
-
+	edit_group_list.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::edit_group_selection_changed));
+	
+	TreeModel::Row row = *(group_model->append());
+	row[group_columns.is_active] = false;
+	row[group_columns.text] = (_("-all-"));
+	edit_group_list.get_selection()->select (row);
+/* GTK2FIX is set_data(0) setting the is_active to false here?
 	list<string> stupid_list;
 
 	stupid_list.push_back ("*");
@@ -579,6 +598,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_group_list.rows().back().set_data (0);
 	edit_group_list.rows().back().select();
 	
+*/
 	edit_group_vbox.pack_start (edit_group_list_button, false, false);
 	edit_group_vbox.pack_start (edit_group_list_scroller, true, true);
 	
@@ -595,7 +615,7 @@ Editor::Editor (AudioEngine& eng)
 
 	list_vpacker.pack_start (route_group_vpane, true, true);
 
-	region_list_model = TreeStore::create (region_list_columns));
+	region_list_model = TreeStore::create (region_list_columns);
 	region_list_sort_model = TreeModelSort::create (region_list_model);
 	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
 
@@ -629,14 +649,15 @@ Editor::Editor (AudioEngine& eng)
 	named_selection_scroller.add (named_selection_display);
 	named_selection_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
+	named_selection_model = TreeStore::create (named_selection_columns);
+	named_selection_display.set_model (named_selection_model);
 	named_selection_display.set_name ("RegionListDisplay");
 	named_selection_display.set_size_request (100, -1);
-	named_selection_display.column_titles_active ();
-	named_selection_display.set_selection_mode (Gtk::SELECTION_SINGLE);
-
+	named_selection_display.set_headers_visible (true);
+	named_selection_display.set_headers_clickable (true);
+	named_selection_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	named_selection_display.signal_button_press_event().connect (mem_fun(*this, &Editor::named_selection_display_button_press));
-	named_selection_display.select_row.connect (mem_fun(*this, &Editor::named_selection_display_selected));
-	named_selection_display.unselect_row.connect (mem_fun(*this, &Editor::named_selection_display_unselected));
+	named_selection_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::named_selection_display_selection_changed));
 
 	region_selection_vpane.pack1 (region_list_scroller, true, true);
 	region_selection_vpane.pack2 (named_selection_scroller, true, true);
@@ -713,7 +734,7 @@ Editor::Editor (AudioEngine& eng)
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	configure_event.connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
-	delete_event.connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::exit_on_main_window_close));
+	signal_delete_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::exit_on_main_window_close));
 
 	constructed = true;
 	instant_save ();
@@ -862,7 +883,7 @@ Editor::initialize_canvas ()
 	transport_marker_bar->property_fill_color_rgba() << color_map[cTransportMarkerBar];
 	transport_marker_bar->property_outline_pixels() << 0;
 
-	range_bar_drag_rect = Canvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	range_bar_drag_rect = Canvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height).gobj();
 	range_bar_drag_rect->property_fill_color_rgba() << color_map[cRangeBarDragRectFill];
 	range_bar_drag_rect->property_outline_color_rgba() << color_map[cRangeBarDragRect];
 	range_bar_drag_rect->property_outline_pixels() << 0;
@@ -1641,7 +1662,7 @@ Editor::connect_to_session (Session *t)
 	redisplay_named_selections ();
 
 	route_list.freeze ();
-	route_list.clear ();
+	route_display_model.clear ();
 	session->foreach_route (this, &Editor::handle_new_route);
 	// route_list.select_all ();
 	route_list.sort ();
@@ -1685,23 +1706,24 @@ Editor::connect_to_session (Session *t)
 
 	if (ARDOUR_UI::instance()->session_is_new ()) {
 
-		Gtk::CList_Helpers::RowList::iterator i;
-		Gtk::CList_Helpers::RowList& rowlist = route_list.rows();
-
-		route_list.freeze ();
+	        TreeModel::Children rows = route_display_model->children();
+		TreeModel::Children::iterator i;
+	
+		//route_list.freeze ();
 		
-		for (i = rowlist.begin(); i != rowlist.end(); ++i) {
-			TimeAxisView *tv = (TimeAxisView *) i->get_data ();
+		for (i = rows.begin(); i != rows.end(); ++i) {
+		  TimeAxisView *tv =  (*i)[route_display_columns.tv];
 			AudioTimeAxisView *atv;
 
 			if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
 				if (atv->route().master()) {
-					(*i)->unselect ();
+					route_list.get_selection()->unselect (i);
+					//(*i)->unselect ();
 				}
 			}
 		}
 
-		route_list.thaw ();
+		//route_list.thaw ();
 	}
 }
 

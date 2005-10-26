@@ -52,60 +52,53 @@ Editor::handle_new_named_selection ()
 void
 Editor::add_named_selection_to_named_selection_display (NamedSelection& selection)
 {
-	const gchar *row[1];
-
-	row[0] = selection.name.c_str();
-	named_selection_display.rows().push_back (row);
-	named_selection_display.rows().back().set_data (&selection);
+        TreeModel::Row row = *(named_selection_model->append());
+	row[named_selection_columns.text] = selection.name;
+	row[named_selection_columns.selection] = &selection;
 }
 
 void
 Editor::redisplay_named_selections ()
 {
-	named_selection_display.freeze ();
-	named_selection_display.clear ();
+        //GTK2FIX
+        //named_selection_display.freeze ();
+	named_selection_model.clear ();
 	session->foreach_named_selection (*this, &Editor::add_named_selection_to_named_selection_display);
-	named_selection_display.thaw ();
+	//named_selection_display.thaw ();
 }
 
 gint
 Editor::named_selection_display_button_press (GdkEventButton *ev)
 {
-	NamedSelection* named_selection;
-	gint row;
-	gint col;
 
-	switch (ev->button) {
-	case 1:
-		if (Keyboard::is_delete_event (ev)) {
-			if (named_selection_display.get_selection_info ((int)ev->x, (int)ev->y, &row, &col) != 0) {
-				if ((named_selection = reinterpret_cast<NamedSelection *> (named_selection_display.get_row_data (row))) != 0) {
-					session->remove_named_selection (named_selection);
+	TreeModel::Children rows = named_selection_model->children();
+	TreeModel::Children::iterator i;
+	Glib::RefPtr<TreeSelection> selection = named_selection_display.get_selection();
+
+	for (i = rows.begin(); i != rows.end(); ++i) {
+	        if (selection->is_selected (i)) {
+		        switch (ev->button) {
+			case 1:
+			        if (Keyboard::is_delete_event (ev)) {
+				        session->remove_named_selection ((*i)[named_selection_columns.selection]);
 					return stop_signal (named_selection_display, "button_press_event");
 				}
+				break;
+			case 2:
+			        break;
+			case 3:
+			        break;
+			default:
+			        break;
 			}
-		} 
-		break;
-
-	case 2:
-		break;
-
-	case 3:
-		break;
-	default:
-		break;
+		}
 	}
 	return FALSE;
 }
 
 
 void
-Editor::named_selection_display_selected (gint row, gint col, GdkEvent *ev)
-{
-}
-
-void
-Editor::named_selection_display_unselected (gint row, gint col, GdkEvent *ev)
+Editor::named_selection_display_selection_changed ()
 {
 }
 
@@ -115,20 +108,19 @@ Editor::name_selection ()
 	ArdourPrompter p;
 
 	p.set_prompt (_("name for chunk:"));
-	p.done.connect (mem_fun(*this, &Editor::named_selection_name_chosen));
 	p.change_labels (_("Create chunk"), _("Forget it"));
 	p.show_all ();
 
-	Gtk::Main::run ();
-
-	if (p.status == Prompter::entered) {
-		string name;
+	switch (p.run ()) {
+	case GTK_RESPONSE_ACCEPT:
+	  string name;
 		p.get_result (name);
-		
-		if (name.length()){
-			create_named_selection (name);
-		}
+		if (name.length()) {
+		  create_named_selection (name);
+		}	
+		break;
 	}
+
 }
 
 void
@@ -175,11 +167,15 @@ Editor::create_named_selection (string name)
 	}
 
 	NamedSelection* ns;
+	TreeModel::Row row = *(named_selection_model->append());
 
 	ns = new NamedSelection (name, thelist);
+	row[named_selection_columns.selection] = ns;
+	row[named_selection_columns.text] = name;
 
 	/* make the one we just added be selected */
 
-	named_selection_display.rows().back().select ();
+	named_selection_display.get_selection()->select (row);
+
 }
 

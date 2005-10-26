@@ -264,8 +264,8 @@ class Editor : public PublicEditor
 	Width editor_mixer_strip_width;
 	void show_editor_mixer (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
-	void unselect_strip_in_display (TimeAxisView& tv);
-	void select_strip_in_display (TimeAxisView& tv);
+	void unselect_strip_in_display (TimeAxisView* tv);
+	void select_strip_in_display (TimeAxisView* tv);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
@@ -765,6 +765,18 @@ class Editor : public PublicEditor
 
 	/* named selections */
 
+	struct NamedSelectionDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    NamedSelectionDisplayModelColumns() { 
+		    add (text);
+		    add (selection);
+	    }
+	    Gtk::TreeModelColumn<Glib::ustring>  text;
+	    Gtk::TreeModelColumn<ARDOUR::NamedSelection*>    selection;
+	};
+
+	NamedSelectionDisplayModelColumns named_selection_columns;
+	Glib::RefPtr<Gtk::TreeStore>     named_selection_model;
+
 	Gtk::VPaned         region_selection_vpane;
 	Gtk::TreeView          named_selection_display;
 	Gtk::ScrolledWindow named_selection_scroller;
@@ -779,8 +791,7 @@ class Editor : public PublicEditor
 	void redisplay_named_selections ();
 
 	gint named_selection_display_button_press (GdkEventButton *ev);
-	void named_selection_display_selected (gint row, gint col, GdkEvent *ev);
-	void named_selection_display_unselected (gint row, gint col, GdkEvent *ev);
+	void named_selection_display_selection_changed ();
 
 	/* track views */
 	int track_spacing;
@@ -1039,12 +1050,11 @@ class Editor : public PublicEditor
 
 	void    hide_all_tracks (bool with_select);
 
-	void route_list_selected (gint row, gint col, GdkEvent* ev);
-	void route_list_unselected (gint row, gint col, GdkEvent* ev);
+	void route_display_selection_changed ();
 	void redisplay_route_list();
 	gint route_list_reordered ();
 	bool ignore_route_list_reorder;
-	void queue_route_list_reordered (gint row, gint col);
+	void queue_route_list_reordered ();
 
 	struct DragInfo {
 	    GnomeCanvasItem* item;
@@ -1488,11 +1498,25 @@ class Editor : public PublicEditor
 	
 	/* diskstream/route display management */
 
-	Gtk::TreeView          route_list;
+	struct RouteDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    RouteDisplayModelColumns() { 
+		    add (text);
+		    add (tv);
+	    }
+	    Gtk::TreeModelColumn<Glib::ustring>  text;
+	    Gtk::TreeModelColumn<TimeAxisView*>    tv;
+	};
+
+	RouteDisplayModelColumns    route_display_columns;
+	Glib::RefPtr<Gtk::ListStore> route_display_model;
+	Glib::RefPtr<Gtk::TreeSelection> route_display_selection;
+
+	gint route_list_compare_func (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
+	Gtk::TreeView          route_list; //GTK2FIX rename to route_display
 	Gtk::ScrolledWindow route_list_scroller;
 	Gtk::Menu          *route_list_menu;
 
-	void route_list_column_click (gint);
+	void route_list_column_click ();
 	void build_route_list_menu ();
 	void select_all_routes ();
 	void unselect_all_routes ();
@@ -1503,13 +1527,27 @@ class Editor : public PublicEditor
 
 	/* edit group management */
 
+        struct GroupListModelColumns : public Gtk::TreeModel::ColumnRecord {
+                GroupListModelColumns () {
+		       add (is_active);
+                       add (text);
+		       add (routegroup);
+                }
+	        Gtk::TreeModelColumn<bool> is_active;
+	        Gtk::TreeModelColumn<std::string> text;
+	        Gtk::TreeModelColumn<ARDOUR::RouteGroup*>   routegroup;
+	};
+
+	GroupListModelColumns group_columns;
+	Glib::RefPtr<Gtk::ListStore> group_model;
+	Glib::RefPtr<Gtk::TreeSelection> group_selection;
+
 	Gtk::Button         edit_group_list_button;
 	Gtk::Label          edit_group_list_button_label;
 	Gtk::TreeView       edit_group_list;
 	Gtk::ScrolledWindow edit_group_list_scroller;
 	Gtk::Menu          *edit_group_list_menu;
 	Gtk::VBox           edit_group_vbox;
-
 
 	void edit_group_list_column_click (gint);
 	void build_edit_group_list_menu ();
@@ -1518,8 +1556,7 @@ class Editor : public PublicEditor
 	void new_edit_group ();
 	void edit_group_list_button_clicked ();
 	gint edit_group_list_button_press_event (GdkEventButton* ev);
-	void edit_group_selected (gint row, gint col, GdkEvent* ev);
-	void edit_group_unselected (gint row, gint col, GdkEvent* ev);
+	void edit_group_selection_changed ();
 	void fake_add_edit_group (ARDOUR::RouteGroup* group);
 	void add_edit_group (ARDOUR::RouteGroup* group);
 	void group_flags_changed (void*, ARDOUR::RouteGroup*);

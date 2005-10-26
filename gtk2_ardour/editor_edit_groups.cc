@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/gtk_ui.h>
 #include <ardour/route_group.h>
 
 #include "editor.h"
@@ -29,6 +30,7 @@
 #include "marker.h"
 #include "time_axis_view.h"
 #include "prompter.h"
+#include "gui_thread.h"
 
 #include <ardour/route.h>
 
@@ -73,14 +75,14 @@ void
 Editor::select_all_edit_groups ()
 
 {
-	CList_Helpers::RowList::iterator i;
-
+ 
 	/* XXX potential race with remove_track(), but the select operation
 	   cannot be done with the track_lock held.
 	*/
 
-	for (i = route_list.rows().begin(); i != route_list.rows().end(); ++i) {
-		i->select ();
+        Gtk::TreeModel::Children children = group_model->children();
+	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+	        edit_group_list.get_selection()->select (iter);
 	}
 }
 
@@ -96,20 +98,15 @@ Editor::new_edit_group ()
 	string result;
 
 	prompter.set_prompt (_("Name for new edit group"));
-	prompter.done.connect (Gtk::Main::quit.slot());
-
 	prompter.show_all ();
-	
-	Gtk::Main::run ();
-	
-	if (prompter.status != Gtkmm2ext::Prompter::entered) {
-		return;
-	}
-	
-	prompter.get_result (result);
 
-	if (result.length()) {
-		session->add_edit_group (result);
+	switch (prompter.run ()) {
+	case GTK_RESPONSE_ACCEPT:
+	        prompter.get_result (result);
+		if (result.length()) {
+		  session->add_edit_group (result);
+		}
+		break;
 	}
 }
 
@@ -122,13 +119,21 @@ Editor::edit_group_list_button_clicked ()
 gint
 Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 {
-	gint row, col;
 
-	if (edit_group_list.get_selection_info ((int)ev->x, (int)ev->y, &row, &col) == 0) {
-		return FALSE;
+        RouteGroup* group;
+	TreeIter iter;
+	TreeModel::Path path;
+	TreeViewColumn* column;
+	int cellx;
+	int celly;
+	
+	if (!edit_group_list.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+		return false;
 	}
 
-	if (col == 1) {
+	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
+	  
+	case 1:
 
 		if (Keyboard::is_edit_event (ev)) {
 			// RouteGroup* group = (RouteGroup *) edit_group_list.row(row).get_data ();
@@ -140,54 +145,61 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 			/* allow regular select to occur */
 			return FALSE;
 		}
+		break;
 
-	} else if (col == 0) {
-
-		RouteGroup* group = reinterpret_cast<RouteGroup *>(edit_group_list.row(row).get_data ());
-
-		if (group) {
-			group->set_active (!group->is_active(), this);
+	case 0:
+		if ((iter = group_model->get_iter (path))) {
+			/* path points to a valid node */
+			
+		        if ((group = (*iter)[group_columns.routegroup]) != 0) {
+				group->set_active (!group->is_active (), this);
+			}
 		}
+		break;
 	}
-	
+      
 	return stop_signal (edit_group_list, "button_press_event");
 }
 
 void
-Editor::edit_group_selected (gint row, gint col, GdkEvent* ev)
+Editor::edit_group_selection_changed ()
 {
-	RouteGroup* group = (RouteGroup *) edit_group_list.row(row).get_data ();
+	TreeModel::iterator i;
+	TreeModel::Children rows = group_model->children();
+	Glib::RefPtr<TreeSelection> selection = edit_group_list.get_selection();
 
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		if ((*i)->edit_group() == group) {
-			select_strip_in_display (*(*i));
-		}
-	}
-}
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		RouteGroup* group;
 
-void
-Editor::edit_group_unselected (gint row, gint col, GdkEvent* ev)
-{
-	RouteGroup* group = (RouteGroup *) edit_group_list.row(row).get_data ();
+		group = (*i)[group_columns.routegroup];
 
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		if ((*i)->edit_group() == group) {
-			unselect_strip_in_display (*(*i));
+		if (selection->is_selected (i)) {
+		  for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+		    if ((*j)->edit_group() == group) {
+		      select_strip_in_display (*j);
+		    }
+		  }
+		} else {
+		  for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+		    if ((*j)->edit_group() == group) {
+		      unselect_strip_in_display (*j);
+		    }
+		  }
 		}
 	}
 }
 
 void
 Editor::add_edit_group (RouteGroup* group)
+
 {
-	list<string> names;
+        
+        ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::add_edit_group), group));
 
-	names.push_back ("*");
-	names.push_back (group->name());
-
-	edit_group_list.rows().push_back (names);
-	edit_group_list.rows().back().set_data (group);
-	edit_group_list.rows().back().select();
+	TreeModel::Row row = *(group_model->append());
+	row[group_columns.is_active] = group->is_active();
+	row[group_columns.text] = group->name();
+	row[group_columns.routegroup] = group;
 
 	group->FlagsChanged.connect (bind (mem_fun(*this, &Editor::group_flags_changed), group));
 }
@@ -195,6 +207,8 @@ Editor::add_edit_group (RouteGroup* group)
 void
 Editor::group_flags_changed (void* src, RouteGroup* group)
 {
+  /* GTK2FIX not needed in gtk2?
+
 	if (src != this) {
 		// select row
 	}
@@ -206,5 +220,7 @@ Editor::group_flags_changed (void* src, RouteGroup* group)
 	} else {
 		edit_group_list.cell (ri->get_row_num(),0).set_pixmap (empty_pixmap, empty_mask);
 	}
+  */
 }
+
 
