@@ -28,7 +28,6 @@
 
 #include <iostream>
 
-#include <gtkmm.h>
 #include <pbd/error.h>
 #include <pbd/compose.h>
 #include <pbd/basename.h>

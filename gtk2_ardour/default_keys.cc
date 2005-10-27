@@ -18,7 +18,6 @@
     $Id$
 */
 
-#include <gtkmm.h>
 #include <sigc++/bind.h>
 #include <pbd/error.h>
 

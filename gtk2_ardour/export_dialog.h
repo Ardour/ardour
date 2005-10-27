@@ -29,18 +29,20 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/fileselection.h>
 #include <gtkmm/comboboxtext.h>
-#include <gdkmm/pixmap.h>
+#include <gtkmm/treeview.h>
+#include <gtkmm/liststore.h>
 
 #include <ardour/export.h>
-#include "ardour_dialog.h"
 #include <ardour/location.h>
 
+#include "ardour_dialog.h"
 
 class PublicEditor;
 
 namespace ARDOUR {
 	class Session;
 	class AudioRegion;
+	class Port;
 }
 
 class ExportDialog : public ArdourDialog
@@ -52,6 +54,20 @@ class ExportDialog : public ArdourDialog
 	void connect_to_session (ARDOUR::Session*);
 	void set_range (jack_nframes_t start, jack_nframes_t end);
 	void start_export ();
+
+  protected:
+	struct ExportModelColumns : public Gtk::TreeModel::ColumnRecord
+	{
+	public:
+	  Gtk::TreeModelColumn<std::string>	output;
+	  Gtk::TreeModelColumn<bool>		left;
+	  Gtk::TreeModelColumn<bool>		right;
+	  Gtk::TreeModelColumn<ARDOUR::Port*>	port;
+
+	  ExportModelColumns() { add(output); add(left); add(right); add(port);}
+	};
+
+	ExportModelColumns exp_cols;
 
   private:
 	PublicEditor&    editor;
@@ -95,28 +111,25 @@ class ExportDialog : public ArdourDialog
 	Gtk::ScrolledWindow track_scroll;
 	Gtk::ScrolledWindow master_scroll;
 	Gtk::Button         track_selector_button;
-	Gtk::CList  track_selector;
-	Gtk::CList  master_selector;
+	Gtk::TreeView  track_selector;
+	Glib::RefPtr<Gtk::ListStore> track_list;
+	Gtk::TreeView  master_selector;
+	Glib::RefPtr<Gtk::ListStore> master_list;
 	Gtk::FileSelection *file_selector;
 	ARDOUR::AudioExportSpecification spec;
-
-	static GdkPixmap *check_pixmap;
-	static GdkBitmap *check_mask;
-	static GdkPixmap *empty_pixmap;
-	static GdkBitmap *empty_mask;
 
 	static void *_thread (void *arg);
 	gint progress_timeout ();
 	sigc::connection progress_connection;
 	void build_window ();
 	void end_dialog();
-	gint header_chosen (GdkEventAny *ignored);
-	gint channels_chosen (GdkEventAny *ignored);
-	gint bitdepth_chosen (GdkEventAny *ignored);
-	gint sample_rate_chosen (GdkEventAny *ignored);
-	gint cue_file_type_chosen(GdkEventAny *ignored);
-	gint track_selector_button_press_event (GdkEventButton *ev);
-	gint master_selector_button_press_event (GdkEventButton *ev);
+	void header_chosen ();
+	void channels_chosen ();
+	void bitdepth_chosen ();
+	void sample_rate_chosen ();
+	void cue_file_type_chosen();
+
+	void fill_lists();
 
       	void do_export_cd_markers (const string& path, const string& cuefile_type);
 	void export_cue_file (ARDOUR::Locations::LocationList& locations, const string& path);

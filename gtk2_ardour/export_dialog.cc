@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2003 Paul Davis 
+    Copyright (C) 1999-2005 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,12 +22,10 @@
 
 #include <fstream>
 
-
 #include <samplerate.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/xml++.h>
 
-#include <gtkmm.h>
 #include <gtkmm2ext/utils.h>
 #include <ardour/export.h>
 #include <ardour/sndfile_helpers.h>
@@ -38,20 +36,13 @@
 #include <ardour/utils.h>
 
 #include "export_dialog.h"
-#include "check_mark.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "keyboard.h"
 
 #include "i18n.h"
 
-#define FRAME_SHADOW_STYLE Gtk::SHADOW_IN
 #define FRAME_NAME "BaseFrame"
-
-GdkPixmap* ExportDialog::check_pixmap = 0;
-GdkPixmap* ExportDialog::check_mask = 0;
-GdkPixmap* ExportDialog::empty_pixmap = 0;
-GdkPixmap* ExportDialog::empty_mask = 0;
 
 using namespace std;
 
@@ -116,9 +107,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	  file_frame (_("EXPORT TO FILE")),
 	  file_browse_button (_("Browse")),
 	  ok_button (_("Export")),
-	  track_selector_button (_("Specific tracks ...")),
-	  track_selector (3),
-	  master_selector (3)
+	  track_selector_button (_("Specific tracks ..."))
 {
 	guint32 n;
 	guint32 len;
@@ -146,39 +135,38 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 
 	file_entry.set_name ("ExportFileNameEntry");
 
+	master_list = ListStore::create (exp_cols);
+	master_selector.set_model (master_list);
+
 	master_selector.set_name ("ExportTrackSelector");
 	master_selector.set_size_request (-1, 100);
-	master_selector.set_column_min_width (0, 100);
-	master_selector.set_column_min_width (1, 40);
-	master_selector.set_column_auto_resize(1, true);
-	master_selector.set_column_min_width (2, 40);
-	master_selector.set_column_auto_resize(2, true);
-	master_selector.set_column_title (0, _("Output"));
-	master_selector.column_titles_show ();
-	master_selector.set_selection_mode (Gtk::SELECTION_MULTIPLE);
-	master_selector.signal_button_press_event().connect (mem_fun(*this, &ExportDialog::master_selector_button_press_event));
+	master_selector.append_column(_("Output"), exp_cols.output);
+	master_selector.append_column_editable(_("Left"), exp_cols.left);
+	master_selector.append_column_editable(_("Right"), exp_cols.right);
+	master_selector.get_column(0)->set_min_width(100);
 	
+	master_selector.get_column(1)->set_min_width(40);
+	master_selector.get_column(1)->set_sizing(Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
+	master_selector.get_column(2)->set_min_width(40);
+	master_selector.get_column(2)->set_sizing(Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
+	master_selector.get_selection()->set_mode (Gtk::SELECTION_NONE);
+
+	track_list = ListStore::create (exp_cols);
+	track_selector.set_model (track_list);
+
 	track_selector.set_name ("ExportTrackSelector");
 	track_selector.set_size_request (-1, 130);
-	track_selector.set_column_min_width (0, 100);
-	track_selector.set_column_min_width (1, 40);
-	track_selector.set_column_auto_resize(1, true);
-	track_selector.set_column_min_width (2, 40);
-	track_selector.set_column_auto_resize(2, true);
-	track_selector.set_column_title (0, _("Track"));
-	track_selector.column_titles_show ();
-	track_selector.set_selection_mode (Gtk::SELECTION_MULTIPLE);
-	track_selector.signal_button_press_event().connect (mem_fun(*this, &ExportDialog::track_selector_button_press_event));
+	track_selector.append_column(_("Output"), exp_cols.output);
+	track_selector.append_column_editable(_("Left"), exp_cols.left);
+	track_selector.append_column_editable(_("Right"), exp_cols.right);
 
-	check_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL,
-			gtk_widget_get_colormap(GTK_WIDGET(track_selector.gobj())),
-			&check_mask, NULL, (gchar**) check_xpm);
-	empty_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL,
-			gtk_widget_get_colormap(GTK_WIDGET(track_selector.gobj())),
-			&empty_mask, NULL, (gchar**) empty_xpm);
+	track_selector.get_column(0)->set_min_width(100);
+	track_selector.get_column(1)->set_min_width(40);
+	track_selector.get_column(1)->set_sizing(Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
+	track_selector.get_column(2)->set_min_width(40);
+	track_selector.get_column(2)->set_sizing(Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
+	track_selector.get_selection()->set_mode (Gtk::SELECTION_NONE);
 
-	progress_bar.set_show_text (false);
-	progress_bar.set_orientation (PROGRESS_LEFT_TO_RIGHT);
 	progress_bar.set_name ("ExportProgress");
 
 	format_frame.add (format_table);
@@ -204,14 +192,14 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 		
 		
 		/* we may hide some of these later */
-		track_vpacker.pack_start (master_scroll, true, true);
-		track_vpacker.pack_start (track_scroll, true, true);
-		track_vpacker.pack_start (track_selector_button, false);
+		track_vpacker.pack_start (master_scroll);
+		track_vpacker.pack_start (track_scroll);
+		track_vpacker.pack_start (track_selector_button, Gtk::PACK_EXPAND_PADDING);
 
-		hpacker.pack_start (track_vpacker, true, true);
+		hpacker.pack_start (track_vpacker);
 	}
 
-	vpacker.pack_start (hpacker, true, true);
+	vpacker.pack_start (hpacker);
 	
 	track_selector_button.set_name ("EditorGTKButton");
 	track_selector_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::track_selector_button_click));
@@ -230,14 +218,24 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	file_frame.set_border_width (5);
 	file_frame.set_name (FRAME_NAME);
 
-	set_popdown_strings (sample_rate_combo, internationalize(sample_rates));
-	set_popdown_strings (src_quality_combo, internationalize (src_qualities));
-	set_popdown_strings (dither_type_combo, internationalize (dither_types));
-	set_popdown_strings (channel_count_combo, internationalize (channel_strings));
-	set_popdown_strings (header_format_combo, internationalize ((const char **) sndfile_header_formats_strings));
-	set_popdown_strings (bitdepth_format_combo, internationalize ((const char **) sndfile_bitdepth_formats_strings));
-	set_popdown_strings (endian_format_combo, internationalize ((const char **) sndfile_endian_formats_strings));
-	set_popdown_strings (cue_file_combo, internationalize (cue_file_types));
+	/* pop_strings needs to be created on the stack because set_popdown_strings()
+	 * takes a reference. */
+	vector<string> pop_strings = internationalize(sample_rates);
+	Gtkmm2ext::set_popdown_strings (sample_rate_combo, pop_strings);
+	pop_strings = internationalize(sample_rates);
+	Gtkmm2ext::set_popdown_strings (src_quality_combo, pop_strings);
+	pop_strings = internationalize(dither_types);
+	Gtkmm2ext::set_popdown_strings (dither_type_combo, pop_strings);
+	pop_strings = internationalize(channel_strings);
+	Gtkmm2ext::set_popdown_strings (channel_count_combo, pop_strings);
+	pop_strings = internationalize((const char **) sndfile_header_formats_strings);
+	Gtkmm2ext::set_popdown_strings (header_format_combo, pop_strings);
+	pop_strings = internationalize((const char **) sndfile_bitdepth_formats_strings);
+	Gtkmm2ext::set_popdown_strings (bitdepth_format_combo, pop_strings);
+	pop_strings = internationalize((const char **) sndfile_endian_formats_strings);
+	Gtkmm2ext::set_popdown_strings (endian_format_combo, pop_strings);
+	pop_strings = internationalize(cue_file_types);
+	Gtkmm2ext::set_popdown_strings (cue_file_combo, pop_strings);
 
 	/* this will re-sensitized as soon as a non RIFF/WAV
 	   header format is chosen.
@@ -281,38 +279,20 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	longest_str[0] = 'g';
 	longest_str[1] = 'l';
 
-	Gtkmm2ext::set_size_request_to_display_given_text (*header_format_combo.get_entry(), longest_str.c_str(), 5+FUDGE, 5);
+	Gtkmm2ext::set_size_request_to_display_given_text (header_format_combo, longest_str.c_str(), 5+FUDGE, 5);
 
 	// TRANSLATORS: "slereg" is "stereo" with ascender and descender substituted
-	Gtkmm2ext::set_size_request_to_display_given_text (*channel_count_combo.get_entry(), _("slereg"), 5+FUDGE, 5);
+	Gtkmm2ext::set_size_request_to_display_given_text (channel_count_combo, _("slereg"), 5+FUDGE, 5);
 
-	header_format_combo.set_use_arrows_always (true);
-	bitdepth_format_combo.set_use_arrows_always (true);
-	endian_format_combo.set_use_arrows_always (true);
-	channel_count_combo.set_use_arrows_always (true);
-	src_quality_combo.set_use_arrows_always (true);
-	dither_type_combo.set_use_arrows_always (true);
-	sample_rate_combo.set_use_arrows_always (true);
-	cue_file_combo.set_use_arrows_always (true);
-
-	header_format_combo.set_value_in_list (true, false);
-	bitdepth_format_combo.set_value_in_list (true, false);
-	endian_format_combo.set_value_in_list (true, false);
-	channel_count_combo.set_value_in_list (true, false);
-	src_quality_combo.set_value_in_list (true, false);
-	dither_type_combo.set_value_in_list (true, false);
-	sample_rate_combo.set_value_in_list (true, false);
-	cue_file_combo.set_value_in_list (true, false);
-
-	header_format_combo.get_entry()->set_editable (false);
-	bitdepth_format_combo.get_entry()->set_editable (false);
-	endian_format_combo.get_entry()->set_editable (false);
-	channel_count_combo.get_entry()->set_editable (false);
-	src_quality_combo.get_entry()->set_editable (false);
-	dither_type_combo.get_entry()->set_editable (false);
-	sample_rate_combo.get_entry()->set_editable (false);
-	cue_file_combo.get_entry()->set_editable (false);
-
+/*	header_format_combo.set_focus_on_click (true);
+	bitdepth_format_combo.set_focus_on_click (true);
+	endian_format_combo.set_focus_on_click (true);
+	channel_count_combo.set_focus_on_click (true);
+	src_quality_combo.set_focus_on_click (true);
+	dither_type_combo.set_focus_on_click (true);
+	sample_rate_combo.set_focus_on_click (true);
+	cue_file_combo.set_focus_on_click (true);
+*/
 	dither_type_label.set_name ("ExportFormatLabel");
 	sample_rate_label.set_name ("ExportFormatLabel");
 	src_quality_label.set_name ("ExportFormatLabel");
@@ -322,14 +302,14 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	endian_format_label.set_name ("ExportFormatLabel");
 	cue_file_label.set_name ("ExportFormatLabel");
 
-	header_format_combo.get_entry()->set_name ("ExportFormatDisplay");
-	bitdepth_format_combo.get_entry()->set_name ("ExportFormatDisplay");
-	endian_format_combo.get_entry()->set_name ("ExportFormatDisplay");
-	channel_count_combo.get_entry()->set_name ("ExportFormatDisplay");
-	dither_type_combo.get_entry()->set_name ("ExportFormatDisplay");
-	src_quality_combo.get_entry()->set_name ("ExportFormatDisplay");
-	sample_rate_combo.get_entry()->set_name ("ExportFormatDisplay");
-	cue_file_combo.get_entry()->set_name ("ExportFormatDisplay");
+	header_format_combo.set_name ("ExportFormatDisplay");
+	bitdepth_format_combo.set_name ("ExportFormatDisplay");
+	endian_format_combo.set_name ("ExportFormatDisplay");
+	channel_count_combo.set_name ("ExportFormatDisplay");
+	dither_type_combo.set_name ("ExportFormatDisplay");
+	src_quality_combo.set_name ("ExportFormatDisplay");
+	sample_rate_combo.set_name ("ExportFormatDisplay");
+	cue_file_combo.set_name ("ExportFormatDisplay");
 
 	cuefile_only_checkbox.set_name ("ExportCheckbox");
 
@@ -378,18 +358,18 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	cancel_button.set_name ("EditorGTKButton");
 	file_entry.set_name ("ExportFileDisplay");
 
-	delete_event.connect (mem_fun(*this, &ExportDialog::window_closed));
+	signal_delete_event().connect (mem_fun(*this, &ExportDialog::window_closed));
 	ok_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::do_export));
 	cancel_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::end_dialog));
 	
 	file_browse_button.set_name ("EditorGTKButton");
 	file_browse_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::initiate_browse));
 
-	channel_count_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &ExportDialog::channels_chosen));
-	bitdepth_format_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &ExportDialog::bitdepth_chosen));
-	header_format_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &ExportDialog::header_chosen));
-	sample_rate_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &ExportDialog::sample_rate_chosen));
-	cue_file_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &ExportDialog::cue_file_type_chosen));
+	channel_count_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::channels_chosen));
+	bitdepth_format_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::bitdepth_chosen));
+	header_format_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::header_chosen));
+	sample_rate_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::sample_rate_chosen));
+	cue_file_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::cue_file_type_chosen));
 }
 
 ExportDialog::~ExportDialog()
@@ -407,25 +387,25 @@ ExportDialog::connect_to_session (Session *s)
 
 	switch (session->frame_rate()) {
 	case 22050:
-		sample_rate_combo.get_entry()->set_text (N_("22.05kHz"));
+		sample_rate_combo.set_active_text (N_("22.05kHz"));
 		break;
 	case 44100:
-		sample_rate_combo.get_entry()->set_text (N_("44.1kHz"));
+		sample_rate_combo.set_active_text (N_("44.1kHz"));
 		break;
 	case 48000:
-		sample_rate_combo.get_entry()->set_text (N_("48kHz"));
+		sample_rate_combo.set_active_text (N_("48kHz"));
 		break;
 	case 88200:
-		sample_rate_combo.get_entry()->set_text (N_("88.2kHz"));
+		sample_rate_combo.set_active_text (N_("88.2kHz"));
 		break;
 	case 96000:
-		sample_rate_combo.get_entry()->set_text (N_("96kHz"));
+		sample_rate_combo.set_active_text (N_("96kHz"));
 		break;
 	case 192000:
-		sample_rate_combo.get_entry()->set_text (N_("192kHz"));
+		sample_rate_combo.set_active_text (N_("192kHz"));
 		break;
 	default:
-		sample_rate_combo.get_entry()->set_text (N_("44.1kHz"));
+		sample_rate_combo.set_active_text (N_("44.1kHz"));
 		break;
 	}
 
@@ -443,38 +423,38 @@ ExportDialog::set_state()
 	if (node) {
 
 		if ((prop = node->property (X_("sample_rate"))) != 0) {
-			sample_rate_combo.get_entry()->set_text(prop->value());
+			sample_rate_combo.set_active_text(prop->value());
 		}
 		if ((prop = node->property (X_("src_quality"))) != 0) {
-			src_quality_combo.get_entry()->set_text(prop->value());
+			src_quality_combo.set_active_text(prop->value());
 		}
 		if ((prop = node->property (X_("dither_type"))) != 0) {
-			dither_type_combo.get_entry()->set_text(prop->value());
+			dither_type_combo.set_active_text(prop->value());
 		}
 		if ((prop = node->property (X_("channel_count"))) != 0) {
-			channel_count_combo.get_entry()->set_text(prop->value());
+			channel_count_combo.set_active_text(prop->value());
 		}
 		if ((prop = node->property (X_("header_format"))) != 0) {
-			header_format_combo.get_entry()->set_text(prop->value());
+			header_format_combo.set_active_text(prop->value());
 		}
 		if ((prop = node->property (X_("bitdepth_format"))) != 0) {
-			bitdepth_format_combo.get_entry()->set_text(prop->value());
+			bitdepth_format_combo.set_active_text(prop->value());
 		}
 		if ((prop = node->property (X_("endian_format"))) != 0) {
-			endian_format_combo.get_entry()->set_text(prop->value());
+			endian_format_combo.set_active_text(prop->value());
 		}
 		if ((prop = node->property (X_("filename"))) != 0) {
 			file_entry.set_text(prop->value());
 		}
 		if ((prop = node->property (X_("cue_file_type"))) != 0) {
-		        cue_file_combo.get_entry()->set_text(prop->value());
+		        cue_file_combo.set_active_text(prop->value());
 		}
 	}
 
-	header_chosen (0);
-	bitdepth_chosen(0);
-	channels_chosen(0);
-	sample_rate_chosen(0);
+	header_chosen ();
+	bitdepth_chosen();
+	channels_chosen();
+	sample_rate_chosen();
 
 	if (session->master_out()) {
 		track_scroll.hide ();
@@ -494,21 +474,25 @@ ExportDialog::set_state()
 		if (!master) {
 			
 			/* default is to use all */
-			if (channel_count_combo.get_entry()->get_text() == _("mono")) {
+			if (channel_count_combo.get_active_text() == _("mono")) {
 				nchns = 1;
 			} else {
 				nchns = 2;
 			}
 
+			TreeModel::Children rows = master_selector.get_model()->children();
 			for (uint32_t r = 0; r < session->master_out()->n_outputs(); ++r) {
 				if (nchns == 2) {
 					if (r % 2) {
-						master_selector.cell (r, 2).set_pixmap (check_pixmap, check_mask);
+						rows[r][exp_cols.right] = true;
+//						master_selector.cell (r, 2).set_pixmap (check_pixmap, check_mask);
 					} else {
-						master_selector.cell (r, 1).set_pixmap (check_pixmap, check_mask);
+						rows[r][exp_cols.left] = true;
+//						master_selector.cell (r, 1).set_pixmap (check_pixmap, check_mask);
 					}
 				} else {
-					master_selector.cell (r, 1).set_pixmap (check_pixmap, check_mask);
+					rows[r][exp_cols.left] = true;
+//					master_selector.cell (r, 1).set_pixmap (check_pixmap, check_mask);
 				}
 			}
 
@@ -523,32 +507,35 @@ ExportDialog::set_state()
 	}
 	
 	XMLNodeList track_list = tracks->children(X_("Track"));
-	CList_Helpers::RowIterator ri = track_selector.rows().begin();
-	uint32_t n = 0;
-	for (XMLNodeIterator it = track_list.begin(); it != track_list.end(); ++it, ++ri, ++n) {
-		if (ri == track_selector.rows().end()) {
+	TreeModel::Children rows = track_selector.get_model()->children();
+	TreeModel::Children::iterator ri = rows.begin();
+	TreeModel::Row row;
+
+	for (XMLNodeIterator it = track_list.begin(); it != track_list.end(); ++it, ++ri) {
+		if (ri == rows.end()){
 			break;
 		}
 
 		XMLNode* track = *it;
+		row = *ri;
 
 		if ((prop = track->property(X_("channel1"))) != 0) {
 			if (prop->value() == X_("on")) {
-				track_selector.cell (n,1).set_pixmap (check_pixmap, check_mask);
+				row[exp_cols.left] = true;
 			} else {
-				track_selector.cell (n,1).set_pixmap (empty_pixmap, empty_mask);
+				row[exp_cols.left] = false;
 			}
 		}
 
 		if ((prop = track->property(X_("channel2"))) != 0) {
 			if (prop->value() == X_("on")) {
-				track_selector.cell (n,2).set_pixmap (check_pixmap, check_mask);
+				row[exp_cols.right] = true;
 			} else {
-				track_selector.cell (n,2).set_pixmap (empty_pixmap, empty_mask);
+				row[exp_cols.right] = false;
 			}
 		}
 	}
-	}
+}
 
 void
 ExportDialog::save_state()
@@ -559,27 +546,26 @@ ExportDialog::save_state()
 
 	XMLNode* node = new XMLNode(X_("ExportDialog"));
 
-	node->add_property(X_("sample_rate"), sample_rate_combo.get_entry()->get_text());
-	node->add_property(X_("src_quality"), src_quality_combo.get_entry()->get_text());
-	node->add_property(X_("dither_type"), dither_type_combo.get_entry()->get_text());
-	node->add_property(X_("channel_count"), channel_count_combo.get_entry()->get_text());
-	node->add_property(X_("header_format"), header_format_combo.get_entry()->get_text());
-	node->add_property(X_("bitdepth_format"), bitdepth_format_combo.get_entry()->get_text());
-	node->add_property(X_("endian_format"), endian_format_combo.get_entry()->get_text());
+	node->add_property(X_("sample_rate"), sample_rate_combo.get_active_text());
+	node->add_property(X_("src_quality"), src_quality_combo.get_active_text());
+	node->add_property(X_("dither_type"), dither_type_combo.get_active_text());
+	node->add_property(X_("channel_count"), channel_count_combo.get_active_text());
+	node->add_property(X_("header_format"), header_format_combo.get_active_text());
+	node->add_property(X_("bitdepth_format"), bitdepth_format_combo.get_active_text());
+	node->add_property(X_("endian_format"), endian_format_combo.get_active_text());
 	node->add_property(X_("filename"), file_entry.get_text());
-	node->add_property(X_("cue_file_type"), cue_file_combo.get_entry()->get_text());
+	node->add_property(X_("cue_file_type"), cue_file_combo.get_active_text());
 
 	XMLNode* tracks = new XMLNode(X_("Tracks"));
 
-	uint32_t n = 0;
-	for (CList_Helpers::RowIterator ri = track_selector.rows().begin(); ri != track_selector.rows().end(); ++ri, ++n) {
+	TreeModel::Children rows = track_selector.get_model()->children();
+	TreeModel::Row row;
+	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
 		XMLNode* track = new XMLNode(X_("Track"));
 
-		Gdk::Pixmap left_pixmap = track_selector.cell (n, 1).get_pixmap ();
-		track->add_property(X_("channel1"), left_pixmap.gobj() == check_pixmap ? X_("on") : X_("off"));
-
-		Gdk::Pixmap right_pixmap = track_selector.cell (n, 2).get_pixmap ();
-		track->add_property(X_("channel2"), right_pixmap.gobj() == check_pixmap ? X_("on") : X_("off"));				
+		row = *ri;
+		track->add_property(X_("channel1"), row[exp_cols.left] ? X_("on") : X_("off"));
+		track->add_property(X_("channel1"), row[exp_cols.right] ? X_("on") : X_("off"));
 
 		tracks->add_child_nocopy(*track);
 	}
@@ -796,10 +782,10 @@ ExportDialog::export_cue_file (Locations::LocationList& locations, const string&
 	out << "REM Cue file generated by Ardour" << endl;
 	out << "TITLE \"" << session->name() << "\"" << endl;
 
-	if ((header_format_combo.get_entry()->get_text() == N_("WAV"))) {
+	if ((header_format_combo.get_active_text() == N_("WAV"))) {
 		  out << "FILE " << path  << " WAVE" << endl;
 	} else {
-		  out << "FILE " << path  << ' ' << (header_format_combo.get_entry()->get_text()) << endl;
+		  out << "FILE " << path  << ' ' << (header_format_combo.get_active_text()) << endl;
 	}
 
 	if (numtracks == 0) {
@@ -904,13 +890,11 @@ ExportDialog::do_export_cd_markers (const string& path,const string& cuefile_typ
 void
 ExportDialog::do_export ()
 {
-	using namespace CList_Helpers;
-
 	ok_button.set_sensitive(false);
 	save_state();
 
-	if (cue_file_combo.get_entry()->get_text () != _("None")) {
-		do_export_cd_markers (file_entry.get_text(), cue_file_combo.get_entry()->get_text ());
+	if (cue_file_combo.get_active_text () != _("None")) {
+		do_export_cd_markers (file_entry.get_text(), cue_file_combo.get_active_text ());
 	}
 
 	if (cuefile_only_checkbox.get_active()) {
@@ -926,7 +910,7 @@ ExportDialog::do_export ()
 	spec.stop = false;
 	spec.port_map.clear();
 	
-	if (channel_count_combo.get_entry()->get_text() == _("mono")) {
+	if (channel_count_combo.get_active_text() == _("mono")) {
 		spec.channels = 1;
 	} else {
 		spec.channels = 2;
@@ -934,16 +918,16 @@ ExportDialog::do_export ()
 
 	spec.format = 0;
 
-	spec.format |= sndfile_header_format_from_string (header_format_combo.get_entry()->get_text ());
+	spec.format |= sndfile_header_format_from_string (header_format_combo.get_active_text ());
 	
 	if ((spec.format & SF_FORMAT_WAV) == 0) {
 		/* RIFF/WAV specifies endianess */
-		spec.format |= sndfile_endian_format_from_string (endian_format_combo.get_entry()->get_text ());
+		spec.format |= sndfile_endian_format_from_string (endian_format_combo.get_active_text ());
 	}
 
-	spec.format |= sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_entry()->get_text ());
+	spec.format |= sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());
 
-	string sr_str = sample_rate_combo.get_entry()->get_text();
+	string sr_str = sample_rate_combo.get_active_text();
 	if (sr_str == N_("22.05kHz")) {
 		spec.sample_rate = 22050;
 	} else if (sr_str == N_("44.1kHz")) {
@@ -960,7 +944,7 @@ ExportDialog::do_export ()
 		spec.sample_rate = session->frame_rate();
 	}
 	
-	string src_str = src_quality_combo.get_entry()->get_text();
+	string src_str = src_quality_combo.get_active_text();
 	if (src_str == _("fastest")) {
 		spec.src_quality = SRC_ZERO_ORDER_HOLD;
 	} else if (src_str == _("linear")) {
@@ -973,7 +957,7 @@ ExportDialog::do_export ()
 		spec.src_quality = SRC_SINC_BEST_QUALITY;
 	}
 
-	string dither_str = dither_type_combo.get_entry()->get_text();
+	string dither_str = dither_type_combo.get_active_text();
 	if (dither_str == _("None")) {
 		spec.dither_type = GDitherNone;
 	} else if (dither_str == _("Rectangular")) {
@@ -986,57 +970,49 @@ ExportDialog::do_export ()
 
 	if (!audio_region) {
 
-		uint32_t n = 0;
 		uint32_t chan=0;
 		Port *last_port = 0;
 		
-		for (RowIterator ri = master_selector.rows().begin(); ri != master_selector.rows().end(); ++ri, ++n) {
-			
-			Port* port = static_cast<Port*> ((*ri)->get_data ());
+		TreeModel::Children rows = master_selector.get_model()->children();
+		TreeModel::Children::iterator ri;
+		TreeModel::Row row;
+		for (ri = rows.begin(); ri != rows.end(); ++ri) {
+			row = *ri;
+			Port* port = row[exp_cols.port];
 			
 			if (last_port != port) {
 				chan = 0;
 			}
 			
-			Gdk::Pixmap left_pixmap = master_selector.cell (n, 1).get_pixmap ();
-			
-			if (left_pixmap.gobj() == check_pixmap) {
+			if (row[exp_cols.left]) {
 				spec.port_map[0].push_back (std::pair<Port*,uint32_t>(port, chan));
 			} 
 			
 			if (spec.channels == 2) {
-				
-				Gdk::Pixmap right_pixmap = master_selector.cell (n, 2).get_pixmap ();
-				
-				if (right_pixmap.gobj() == check_pixmap) {
+				if (row[exp_cols.right]) {
 					spec.port_map[1].push_back (std::pair<Port*,uint32_t>(port, chan));
 				}
-				
 			}
 		}
 
 		chan = 0;
-		n = 0;
 
-		for (RowIterator ri = track_selector.rows().begin(); ri != track_selector.rows().end(); ++ri, ++n) {
+		rows = track_selector.get_model()->children();
+		for (ri = rows.begin(); ri != rows.end(); ++ri) {
+			row = *ri;
 			
-			Port* port = static_cast<Port*> ((*ri)->get_data ());
+			Port* port = row[exp_cols.port];
 			
 			if (last_port != port) {
 				chan = 0;
 			}
 			
-			Gdk::Pixmap left_pixmap = track_selector.cell (n, 1).get_pixmap ();
-			
-			if (left_pixmap.gobj() == check_pixmap) {
+			if (row[exp_cols.left]) {
 				spec.port_map[0].push_back (std::pair<Port*,uint32_t>(port, chan));
 			} 
 			
 			if (spec.channels == 2) {
-				
-				Gdk::Pixmap right_pixmap = track_selector.cell (n, 2).get_pixmap ();
-				
-				if (right_pixmap.gobj() == check_pixmap) {
+				if (row[exp_cols.right]) {
 					spec.port_map[1].push_back (std::pair<Port*,uint32_t>(port, chan));
 				}
 				
@@ -1047,7 +1023,7 @@ ExportDialog::do_export ()
 		}
 	}
 
-	progress_connection = Main::timeout.connect (mem_fun(*this, &ExportDialog::progress_timeout), 100);
+	progress_connection = Glib::signal_timeout().connect (mem_fun(*this, &ExportDialog::progress_timeout), 100);
 	cancel_label.set_text (_("Stop Export"));
 
 	if (!audio_region) {
@@ -1138,21 +1114,20 @@ ExportDialog::start_export ()
 	}
 }
 
-gint
-ExportDialog::header_chosen (GdkEventAny* ignored)
+void
+ExportDialog::header_chosen ()
 {
-	if (sndfile_header_format_from_string (header_format_combo.get_entry()->get_text ()) == SF_FORMAT_WAV) {
+	if (sndfile_header_format_from_string (header_format_combo.get_active_text ()) == SF_FORMAT_WAV) {
 		endian_format_combo.set_sensitive (false);
 	} else {
 		endian_format_combo.set_sensitive (true);
 	}
-	return FALSE;
 }
 
-gint
-ExportDialog::bitdepth_chosen (GdkEventAny* ignored)
+void
+ExportDialog::bitdepth_chosen ()
 {
-	int format = sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_entry()->get_text ());	
+	int format = sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());	
 	switch (format) {
 	case SF_FORMAT_PCM_24:
 	case SF_FORMAT_PCM_32:
@@ -1164,26 +1139,23 @@ ExportDialog::bitdepth_chosen (GdkEventAny* ignored)
 		dither_type_combo.set_sensitive (true);
 		break;
 	}
-
-	return FALSE;
 }
 
-gint
-ExportDialog::cue_file_type_chosen (GdkEventAny* ignored)
+void
+ExportDialog::cue_file_type_chosen ()
 {
-	if (cue_file_combo.get_entry()->get_text () != "None") {
+	if (cue_file_combo.get_active_text () != "None") {
 		cuefile_only_checkbox.set_sensitive (true);
 	} else {
 		cuefile_only_checkbox.set_active (false);
 		cuefile_only_checkbox.set_sensitive (false);
 	}
-       	return FALSE;
 }
 
-gint
-ExportDialog::sample_rate_chosen (GdkEventAny* ignored)
+void
+ExportDialog::sample_rate_chosen ()
 {
-	string sr_str = sample_rate_combo.get_entry()->get_text();
+	string sr_str = sample_rate_combo.get_active_text();
 	jack_nframes_t rate;
 
 	if (sr_str == N_("22.05kHz")) {
@@ -1207,42 +1179,42 @@ ExportDialog::sample_rate_chosen (GdkEventAny* ignored)
 	} else {
 		src_quality_combo.set_sensitive (false);
 	}
-
-	return FALSE;
 }
 
-gint
-ExportDialog::channels_chosen (GdkEventAny* ignored)
+void
+ExportDialog::channels_chosen ()
 {
 	bool mono;
 
-	mono = (channel_count_combo.get_entry()->get_text() == _("mono"));
+	mono = (channel_count_combo.get_active_text() == _("mono"));
 
 	if (mono) {
-		track_selector.set_column_visibility (2, false);
-		track_selector.set_column_title (1, _("Export"));
+		track_selector.get_column(2)->set_visible(false);
+		track_selector.get_column(1)->set_title(_("Export"));
 
 		if (session->master_out()) {
-			master_selector.set_column_visibility (2, false);
-			master_selector.set_column_title (1, _("Export"));
+			master_selector.get_column(2)->set_visible(false);
+			master_selector.get_column(1)->set_title(_("Export"));
 		}
 
 	} else {
-		track_selector.set_column_visibility (2, true);
-		track_selector.set_column_title (1, _("Left"));
-		track_selector.set_column_title (2, _("Right"));
+		track_selector.get_column(2)->set_visible(true);
+		track_selector.get_column(1)->set_title(_("Left"));
 
 		if (session->master_out()) {
-			master_selector.set_column_visibility (2, true);
-			master_selector.set_column_title (1, _("Left"));
-			master_selector.set_column_title (2, _("Right"));
+			master_selector.get_column(2)->set_visible(true);
+			master_selector.get_column(1)->set_title(_("Left"));
 		}
 	}
 
-	track_selector.column_titles_show ();
-	track_selector.clear ();
-	master_selector.column_titles_show ();
-	master_selector.clear ();
+	fill_lists();
+}
+
+void
+ExportDialog::fill_lists ()
+{
+	track_list->clear();
+	master_list->clear();
 	
 	Session::RouteList routes = session->get_routes ();
 
@@ -1255,86 +1227,30 @@ ExportDialog::channels_chosen (GdkEventAny* ignored)
 		}
 
 		for (uint32_t i=0; i < route->n_outputs(); ++i) {
-			
-			list<string> stupid_list;
-
+			string name;
 			if (route->n_outputs() == 1) {
-				stupid_list.push_back (route->name());
+				name = route->name();
 			} else {
-				stupid_list.push_back (string_compose("%1: out-%2", route->name(), i+1));
+				name = string_compose("%1: out-%2", route->name(), i+1);
 			}
-
-			stupid_list.push_back ("");
-			stupid_list.push_back ("");
 
 			if (route == session->master_out()) {
-				master_selector.rows().push_back (stupid_list);
-				CList_Helpers::Row row = master_selector.rows().back();
-				row.set_data (route->output (i));
-				master_selector.cell (row.get_row_num(), 1).set_pixmap (empty_pixmap, empty_mask);
-				master_selector.cell (row.get_row_num(), 2).set_pixmap (empty_pixmap, empty_mask);
+				TreeModel::iterator iter = master_list->append();
+				TreeModel::Row row = *iter;
+				row[exp_cols.output] = name;
+				row[exp_cols.left] = false;
+				row[exp_cols.right] = false;
+				row[exp_cols.port] = route->output (i);
 			} else {
-				track_selector.rows().push_back (stupid_list);
-				CList_Helpers::Row row = track_selector.rows().back();
-				row.set_data (route->output (i));
-				track_selector.cell (row.get_row_num(), 1).set_pixmap (empty_pixmap, empty_mask);
-				track_selector.cell (row.get_row_num(), 2).set_pixmap (empty_pixmap, empty_mask);
+				TreeModel::iterator iter = track_list->append();
+				TreeModel::Row row = *iter;
+				row[exp_cols.output] = name;
+				row[exp_cols.left] = false;
+				row[exp_cols.right] = false;
+				row[exp_cols.port] = route->output (i);
 			}
 		}
 	}
-	
-	track_selector.select_all ();
-	master_selector.select_all ();
-
-	return FALSE;
-}
-
-gint
-ExportDialog::track_selector_button_press_event (GdkEventButton* ev)
-{
-	gint row, col;
-
-	if (track_selector.get_selection_info ((int)ev->x, (int)ev->y, &row, &col) == 0) {
-		return FALSE;
-	}
-
-	gtk_signal_emit_stop_by_name (GTK_OBJECT(track_selector.gobj()), "button_press_event");
-	
-	Gdk::Pixmap pixmap = track_selector.cell (row,col).get_pixmap ();
-
-	if (col != 0) {
-		if (pixmap.gobj() == check_pixmap) {
-			track_selector.cell (row,col).set_pixmap (empty_pixmap, empty_mask);
-		} else {
-			track_selector.cell (row,col).set_pixmap (check_pixmap, check_mask);
-		}
-	}
-	
-	return TRUE;
-}
-
-gint
-ExportDialog::master_selector_button_press_event (GdkEventButton* ev)
-{
-	gint row, col;
-
-	if (master_selector.get_selection_info ((int)ev->x, (int)ev->y, &row, &col) == 0) {
-		return FALSE;
-	}
-
-	gtk_signal_emit_stop_by_name (GTK_OBJECT(master_selector.gobj()), "button_press_event");
-	
-	if (col != 0) {
-		Gdk::Pixmap pixmap = master_selector.cell (row,col).get_pixmap ();
-		
-		if (pixmap.gobj() == check_pixmap) {
-			master_selector.cell (row,col).set_pixmap (empty_pixmap, empty_mask);
-		} else {
-			master_selector.cell (row,col).set_pixmap (check_pixmap, check_mask);
-		}
-	}
-	
-	return TRUE;
 }
 
 gint
