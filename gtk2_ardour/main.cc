@@ -286,7 +286,7 @@ jack_foobar ()
 void
 gui_jack_error ()
 {
-	Window win (GTK_WINDOW_DIALOG);
+	Window win (Gtk::WINDOW_POPUP);
 	VBox   vpacker;
 	Button ok (_("OK"));
 	Label label (_("Ardour could not connect to JACK.\n\
@@ -307,10 +307,8 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	win.add (vpacker);
 	win.show_all ();
 	win.signal_delete_event().connect (sigc::ptr_fun (jack_fooey));
-	win.signal_add_event()s (Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK);
-	win.set_position (GTK_WIN_POS_CENTER);
-	win.realize ();
-	win.get_window().set_decorations (GdkWMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
+	win.add_events (Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK);
+	win.set_position (Gtk::WIN_POS_CENTER);
 
 	ok.signal_clicked().connect (sigc::ptr_fun (jack_foobar));
 	
@@ -445,7 +443,7 @@ main (int argc, char *argv[])
 					   once everything else is OK.
 					*/
 
-					Main::idle.connect (bind (mem_fun (*ui, &ARDOUR_UI::cmdline_new_session), path));
+					Glib::signal_idle().connect (bind (mem_fun (*ui, &ARDOUR_UI::cmdline_new_session), path));
 					ui->set_will_create_new_session_automatically (true);
 
 				} else {
