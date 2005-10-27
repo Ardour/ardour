@@ -687,26 +687,24 @@ void
 RouteUI::route_rename ()
 {
 	ArdourPrompter name_prompter (true);
+	string result;
 	name_prompter.set_prompt (_("new name: "));
 	name_prompter.set_initial_text (_route.name());
-	name_prompter.done.connect (Gtk::Main::quit.slot());
 	name_prompter.show_all ();
 
-	Gtk::Main::run();
+	switch (name_prompter.run ()) {
 
-	if (name_prompter.status == Gtkmm2ext::Prompter::cancelled) {
-		return;
-	}
-	
-	string result;
-	name_prompter.get_result (result);
-
-	if (result.length() == 0) {
-		return;
+	case GTK_RESPONSE_ACCEPT:
+	        name_prompter.get_result (result);
+	        if (result.length()) {
+		        strip_whitespace_edges (result);
+			_route.set_name (result, this);
+		}	
+		break;
 	}
 
-	strip_whitespace_edges (result);
-	_route.set_name (result, this);
+	return;
+  
 }
 
 void

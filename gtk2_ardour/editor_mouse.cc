@@ -85,14 +85,14 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy)
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
-		gnome_canvas_w2c_d (GNOME_CANVAS(track_canvas), event->button.x, event->button.y, pcx, pcy);
+		gnome_canvas_w2c_d (GNOME_CANVAS(&track_canvas), event->button.x, event->button.y, pcx, pcy);
 		break;
 	case GDK_MOTION_NOTIFY:
-		gnome_canvas_w2c_d (GNOME_CANVAS(track_canvas), event->motion.x, event->motion.y, pcx, pcy);
+		gnome_canvas_w2c_d (GNOME_CANVAS(&track_canvas), event->motion.x, event->motion.y, pcx, pcy);
 		break;
 	case GDK_ENTER_NOTIFY:
 	case GDK_LEAVE_NOTIFY:
-		gnome_canvas_w2c_d (GNOME_CANVAS(track_canvas), event->crossing.x, event->crossing.y, pcx, pcy);
+		gnome_canvas_w2c_d (GNOME_CANVAS(&track_canvas), event->crossing.x, event->crossing.y, pcx, pcy);
 		break;
 	default:
 		warning << string_compose (_("Editor::event_frame() used on unhandled event type %1"), event->type) << endmsg;
@@ -724,8 +724,7 @@ Editor::button_press_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType i
 				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
 					if (clicked_trackview) {
 						if (!current_stepping_trackview) {
-							TimeoutSig t;
-							step_timeout = t.connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
+						  step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
 							current_stepping_trackview = clicked_trackview;
 						}
 						gettimeofday (&last_track_height_step_timestamp, 0);
@@ -761,8 +760,7 @@ Editor::button_press_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType i
 				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
 					if (clicked_trackview) {
 						if (!current_stepping_trackview) {
-							TimeoutSig t;
-							step_timeout = t.connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
+						  step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
 							current_stepping_trackview = clicked_trackview;
 						}
 						gettimeofday (&last_track_height_step_timestamp, 0);
@@ -1449,7 +1447,7 @@ Editor::motion_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_ty
 	   event might do, its a good tradeoff.  
 	*/
 
-	track_canvas->get_pointer (x, y);
+	track_canvas.get_pointer (x, y);
 
 	if (current_stepping_trackview) {
 		/* don't keep the persistent stepped trackview if the mouse moves */
@@ -1540,7 +1538,7 @@ Editor::motion_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_ty
 	}
 
   handled:
-	track_canvas_motion (item, event);
+	track_canvas_motion (event);
 	return TRUE;
 	
   not_handled:
@@ -4450,19 +4448,17 @@ Editor::mouse_rename_region (GnomeCanvasItem* item, GdkEvent* event)
 	prompter.set_prompt (_("Name for region:"));
 	prompter.set_initial_text (clicked_regionview->region.name());
 	prompter.show_all ();
-	prompter.done.connect (Main::quit.slot());
+	prompter.chosen.connect(sigc::ptr_fun(Gtk::Main::quit));
+	switch (prompter.run ()) {
+	case GTK_RESPONSE_ACCEPT:
+	        string str;
+		prompter.get_result(str);
+		if (str.length()) {
 	
-	Main::run ();
-
-	if (prompter.status == Prompter::cancelled) {
-		return TRUE;
+		        clicked_regionview->region.set_name (str);
+		}
+		break;
 	}
-
-	string str;
-
-	prompter.get_result(str);
-	clicked_regionview->region.set_name (str);
-
 	return TRUE;
 }
 

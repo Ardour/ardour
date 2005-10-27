@@ -166,7 +166,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	vbox->set_spacing (4);
 	vbox->pack_start(notebook);
 
-	delete_event.connect (mem_fun(*this, &OptionEditor::wm_close));
+	signal_delete_event().connect (mem_fun(*this, &OptionEditor::wm_close));
 
 	notebook.set_show_tabs (true);
 	notebook.set_show_border (true);
@@ -266,19 +266,19 @@ OptionEditor::set_session (Session *s)
 	if (!s->smpte_drop_frames) {
 		// non-drop frames
 		if (s->smpte_frames_per_second == 24.0)
-			smpte_fps_combo.get_entry ()->set_text (_("24 FPS"));
+			smpte_fps_combo.set_active_text (_("24 FPS"));
 		else if (s->smpte_frames_per_second == 25.0)
-			smpte_fps_combo.get_entry ()->set_text (_("25 FPS"));
+			smpte_fps_combo.set_active_text (_("25 FPS"));
 		else if (s->smpte_frames_per_second == 30.0)
-			smpte_fps_combo.get_entry ()->set_text (_("30 FPS"));
+			smpte_fps_combo.set_active_text (_("30 FPS"));
 		else
-			smpte_fps_combo.get_entry ()->set_text (_("???"));
+			smpte_fps_combo.set_active_text (_("???"));
 	} else {
 		// drop frames
 		if (floor(s->smpte_frames_per_second) == 29.0)
-			smpte_fps_combo.get_entry ()->set_text (_("30 FPS drop"));
+			smpte_fps_combo.set_active_text (_("30 FPS drop"));
 		else
-			smpte_fps_combo.get_entry ()->set_text (_("???"));
+			smpte_fps_combo.set_active_text (_("???"));
 	}
 	
 	smpte_offset_clock.set_session (s);
@@ -296,7 +296,7 @@ OptionEditor::set_session (Session *s)
 
 	/* set up port assignments */
 
-	map<MIDI::Port*,vector<RadioButton*> >::iterator res;
+	std::map<MIDI::Port*,vector<RadioButton*> >::iterator res;
 
 	if (session->mtc_port()) {
 		if ((res = port_toggle_buttons.find (session->mtc_port())) != port_toggle_buttons.end()) {
@@ -333,8 +333,8 @@ OptionEditor::set_session (Session *s)
 	plugins_on_rec_button.set_active (session->get_recording_plugins ());
 	verify_remove_last_capture_button.set_active (Config->get_verify_remove_last_capture());
 
-	layer_mode_combo.get_entry()->set_text (layer_mode_strings[session->get_layer_model()]);
-	xfade_model_combo.get_entry()->set_text (xfade_model_strings[session->get_xfade_model()]);
+	layer_mode_combo.set_active_text (layer_mode_strings[session->get_layer_model()]);
+	xfade_model_combo.set_active_text (xfade_model_strings[session->get_xfade_model()]);
 
 	short_xfade_adjustment.set_value ((Crossfade::short_xfade_length() / (float) session->frame_rate()) * 1000.0);
 
@@ -354,33 +354,33 @@ OptionEditor::set_session (Session *s)
 
 	// meter stuff
 	if (session->meter_falloff() == 0.0f) {
-		meter_falloff_combo.get_entry ()->set_text (_("Off"));
+		meter_falloff_combo.set_active_text (_("Off"));
 	} else if (session->meter_falloff() <= 0.3f) {
-		meter_falloff_combo.get_entry ()->set_text (_("Slowest"));
+		meter_falloff_combo.set_active_text (_("Slowest"));
 	} else if (session->meter_falloff() <= 0.4f) {
-		meter_falloff_combo.get_entry ()->set_text (_("Slow"));
+		meter_falloff_combo.set_active_text (_("Slow"));
 	} else if (session->meter_falloff() <= 0.8f) {
-		meter_falloff_combo.get_entry ()->set_text (_("Medium"));
+		meter_falloff_combo.set_active_text (_("Medium"));
 	} else if (session->meter_falloff() <= 1.4f) {
-		meter_falloff_combo.get_entry ()->set_text (_("Fast"));
+		meter_falloff_combo.set_active_text (_("Fast"));
 	} else if (session->meter_falloff() <= 2.0f) {
-		meter_falloff_combo.get_entry ()->set_text (_("Faster"));
+		meter_falloff_combo.set_active_text (_("Faster"));
 	} else {
-		meter_falloff_combo.get_entry ()->set_text (_("Fastest"));
+		meter_falloff_combo.set_active_text (_("Fastest"));
 	}
 
 	switch ((int) floor (session->meter_hold())) {
 	case 0:
-		meter_hold_combo.get_entry ()->set_text (_("Off"));
+		meter_hold_combo.set_active_text (_("Off"));
 		break;
 	case 40:
-		meter_hold_combo.get_entry ()->set_text (_("Short"));
+		meter_hold_combo.set_active_text (_("Short"));
 		break;
 	case 100:
-		meter_hold_combo.get_entry ()->set_text (_("Medium"));
+		meter_hold_combo.set_active_text (_("Medium"));
 		break;
 	case 200:
-		meter_hold_combo.get_entry ()->set_text (_("Long"));
+		meter_hold_combo.set_active_text (_("Long"));
 		break;
 	}
 	
@@ -410,32 +410,32 @@ OptionEditor::setup_path_options()
 
 	session_raid_entry.set_name ("OptionsEntry");
 
-	session_raid_entry.activate.connect (mem_fun(*this, &OptionEditor::raid_path_changed));
+	session_raid_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::raid_path_changed));
 
-	session_raid_entry.signal_focus_in_event()().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	session_raid_entry.signal_focus_out_event()().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::raid_path_changed));
+	session_raid_entry.signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	session_raid_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::raid_path_changed));
 
 	label = manage(new Label(_("session RAID path")));
 	label->set_name ("OptionsLabel");
-	path_table.attach (*label, 0, 1, 0, 1, 0, 0);
-	path_table.attach (session_raid_entry, 1, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
+	path_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
+	path_table.attach (session_raid_entry, 1, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 
 	label = manage(new Label(_("Native Format")));
 	label->set_name ("OptionsLabel");
-	path_table.attach (*label, 0, 1, 1, 2, 0, 0);
-	path_table.attach (native_format_combo, 1, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
+	path_table.attach (*label, 0, 1, 1, 2, FILL|EXPAND, FILL);
+	path_table.attach (native_format_combo, 1, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
 
 	vector<string> nfstrings = internationalize (native_format_strings);
 
 	set_popdown_strings (native_format_combo, nfstrings);
-	native_format_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::native_format_chosen));
+	native_format_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::native_format_chosen));
 
 	fixup_combo_size (native_format_combo, nfstrings);
 
 	if (Config->get_native_format_is_bwf()) {
-		native_format_combo.get_entry()->set_text (native_format_strings[0]);
+		native_format_combo.set_active_text (native_format_strings[0]);
 	} else {
-		native_format_combo.get_entry()->set_text (native_format_strings[1]);
+		native_format_combo.set_active_text (native_format_strings[1]);
 	}
 	
 	path_table.show_all();
@@ -489,7 +489,7 @@ OptionEditor::setup_fade_options ()
 	dumb.push_back (lmode_strings[Session::AddHigher]);
 	set_popdown_strings (layer_mode_combo, dumb);
 
-	layer_mode_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::layer_mode_chosen));
+	layer_mode_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::layer_mode_chosen));
 
 	fixup_combo_size (layer_mode_combo, layer_mode_strings);
 
@@ -507,7 +507,7 @@ OptionEditor::setup_fade_options ()
 	dumb.push_back (xfade_model_strings[ShortCrossfade]);
 	set_popdown_strings (xfade_model_combo, dumb);
 
-	xfade_model_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::xfade_model_chosen));
+	xfade_model_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::xfade_model_chosen));
 
 	fixup_combo_size (xfade_model_combo, xfade_model_strings);
 
@@ -534,7 +534,7 @@ OptionEditor::setup_fade_options ()
 	hbox->pack_start (short_xfade_slider, true, true);
 	fade_packer.pack_start (*hbox, false, false);
 
-	short_xfade_adjustment.value_changed.connect (mem_fun(*this, &OptionEditor::short_xfade_adjustment_changed));
+	short_xfade_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::short_xfade_adjustment_changed));
 
 	fade_packer.show_all ();
 }
@@ -558,7 +558,7 @@ OptionEditor::layer_mode_chosen (GdkEventAny* ev)
 		return FALSE;
 	}
 
-	string which = layer_mode_combo.get_entry()->get_text ();
+	string which = layer_mode_combo.get_active_text ();
 
 	if (which == layer_mode_strings[Session::LaterHigher]) {
 		session->set_layer_model (Session::LaterHigher);
@@ -577,7 +577,7 @@ OptionEditor::xfade_model_chosen (GdkEventAny* ev)
 		return FALSE;
 	}
 
-	string which = xfade_model_combo.get_entry()->get_text ();
+	string which = xfade_model_combo.get_active_text ();
 
 	if (which == xfade_model_strings[FullCrossfade]) {
 		session->set_xfade_model (FullCrossfade);
@@ -705,7 +705,7 @@ OptionEditor::setup_display_options ()
 	dumb.push_back (_("Medium"));
 	dumb.push_back (_("Long"));
 	set_popdown_strings (meter_hold_combo, dumb);
-	meter_hold_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::meter_hold_chosen));
+	meter_hold_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::meter_hold_chosen));
 	hbox = manage (new HBox);
 	hbox->set_border_width (8);
 	hbox->set_spacing (8);
@@ -724,7 +724,7 @@ OptionEditor::setup_display_options ()
 	dumb.push_back (_("Faster"));
 	dumb.push_back (_("Fastest"));
 	set_popdown_strings (meter_falloff_combo, dumb);
-	meter_falloff_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::meter_falloff_chosen));
+	meter_falloff_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::meter_falloff_chosen));
 	hbox = manage (new HBox);
 	hbox->set_border_width (8);
 	hbox->set_spacing (8);
@@ -751,7 +751,7 @@ gint
 OptionEditor::meter_hold_chosen (GdkEventAny* ev)
 {
 	if (session) {
-		string str = meter_hold_combo.get_entry()->get_text();
+		string str = meter_hold_combo.get_active_text();
 		
 		if (str == _("Off")) {
 			session->set_meter_hold (0);
@@ -771,7 +771,7 @@ gint
 OptionEditor::meter_falloff_chosen (GdkEventAny* ev)
 {
 	if (session) {
-		string str = meter_falloff_combo.get_entry()->get_text();
+		string str = meter_falloff_combo.get_active_text();
 		
 		if (str == _("Off")) {
 			session->set_meter_falloff (0.0f);
@@ -835,9 +835,9 @@ OptionEditor::setup_sync_options ()
 
 	slave_type_combo.set_use_arrows_always (true);
 	slave_type_combo.set_value_in_list (true, false);
-	slave_type_combo.get_entry()->set_editable (false);
-	slave_type_combo.get_entry()->set_name ("OptionsEntry");
-	slave_type_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::slave_type_chosen));
+	slave_type_combo.set_editable (false);
+	slave_type_combo.set_name ("OptionsEntry");
+	slave_type_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::slave_type_chosen));
 
 	dumb.clear ();
 	dumb.push_back (X_("24 FPS"));
@@ -846,7 +846,7 @@ OptionEditor::setup_sync_options ()
 	dumb.push_back (X_("30 FPS non-drop"));
 	
 	set_popdown_strings (smpte_fps_combo, dumb);
-	smpte_fps_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::smpte_fps_chosen));
+	smpte_fps_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::smpte_fps_chosen));
 	
 	smpte_offset_clock.set_mode (AudioClock::SMPTE);
 	smpte_offset_clock.ValueChanged.connect (mem_fun(*this, &OptionEditor::smpte_offset_chosen));
@@ -918,7 +918,7 @@ gint
 OptionEditor::smpte_fps_chosen (GdkEventAny* ev)
 {
 	if (session) {
-		string str = smpte_fps_combo.get_entry()->get_text();
+		string str = smpte_fps_combo.get_active_text();
 		
 		if (str == X_("24 FPS")) {
 			session->set_smpte_type (24.0, false);
@@ -980,7 +980,7 @@ OptionEditor::setup_midi_options ()
 
 		newpair.first = i->second;
 
-		table->attach (*(manage (new Label (i->first))), 0, 1, n+2, n+3, 0, 0);
+		table->attach (*(manage (new Label (i->first))), 0, 1, n+2, n+3,FILL|EXPAND, FILL );
 		tb = manage (new ToggleButton (_("online")));
 		tb->set_name ("OptionEditorToggleButton");
 
@@ -997,19 +997,19 @@ OptionEditor::setup_midi_options ()
 		tb->set_active (!(*i).second->input()->offline());
 		tb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::port_online_toggled), (*i).second, tb));
 		(*i).second->input()->OfflineStatusChanged.connect (bind (mem_fun(*this, &OptionEditor::map_port_online), (*i).second, tb));
-		table->attach (*tb, 1, 2, n+2, n+3, 0, 0);
+		table->attach (*tb, 1, 2, n+2, n+3, FILL|EXPAND, FILL);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
 		tb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::port_trace_in_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
-		table->attach (*tb, 2, 3, n+2, n+3, 0, 0);
+		table->attach (*tb, 2, 3, n+2, n+3, FILL|EXPAND, FILL);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
 		tb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
-		table->attach (*tb, 3, 4, n+2, n+3, 0, 0);
+		table->attach (*tb, 3, 4, n+2, n+3, FILL|EXPAND, FILL);
 
 		rb = manage (new RadioButton ());
 		newpair.second.push_back (rb);
@@ -1017,9 +1017,9 @@ OptionEditor::setup_midi_options ()
 		if (n == 0) {
 			first_mtc_button = rb;
 		} else {
-			rb->set_group (first_mtc_button->group());
+			rb->set_group (first_mtc_button->get_group());
 		}
-		table->attach (*rb, 4, 5, n+2, n+3, 0, 0);
+		table->attach (*rb, 4, 5, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
 
 		if (Config->get_mtc_port_name() == i->first) {
@@ -1032,9 +1032,9 @@ OptionEditor::setup_midi_options ()
 		if (n == 0) {
 			first_mmc_button = rb;
 		} else {
-			rb->set_group (first_mmc_button->group());
+			rb->set_group (first_mmc_button->get_group());
 		}
-		table->attach (*rb, 6, 7, n+2, n+3, 0, 0);
+		table->attach (*rb, 6, 7, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb));
 
 		if (Config->get_mmc_port_name() == i->first) {
@@ -1047,9 +1047,9 @@ OptionEditor::setup_midi_options ()
 		if (n == 0) {
 			first_midi_button = rb;
 		} else {
-			rb->set_group (first_midi_button->group());
+			rb->set_group (first_midi_button->get_group());
 		}
-		table->attach (*rb, 8, 9, n+2, n+3, 0, 0);
+		table->attach (*rb, 8, 9, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb));
 
 		if (Config->get_midi_port_name() == i->first) {
@@ -1431,16 +1431,16 @@ OptionEditor::session_control_changed (Session::ControlType t)
 	case Session::SlaveType:
 		switch (session->slave_source()) {
 		case Session::None:
-			slave_type_combo.get_entry()->set_text (positional_sync_strings[Session::None]);
+			slave_type_combo.set_active_text (positional_sync_strings[Session::None]);
 			break;
 		case Session::MTC:
-			slave_type_combo.get_entry()->set_text (positional_sync_strings[Session::MTC]);
+			slave_type_combo.set_active_text (positional_sync_strings[Session::MTC]);
 			break;
 		case Session::JACK:
-			slave_type_combo.get_entry()->set_text (positional_sync_strings[Session::JACK]);
+			slave_type_combo.set_active_text (positional_sync_strings[Session::JACK]);
 			break;
 		default:
-			slave_type_combo.get_entry()->set_text (_("--unknown--"));
+			slave_type_combo.set_active_text (_("--unknown--"));
 			break;
 		}
 		
@@ -1480,7 +1480,7 @@ OptionEditor::native_format_chosen (GdkEventAny *ignored)
 		return FALSE;
 	}
 
-	bool use_bwf = (native_format_combo.get_entry()->get_text() == native_format_strings[0]);
+	bool use_bwf = (native_format_combo.get_active_text() == native_format_strings[0]);
 
 	if (use_bwf != Config->get_native_format_is_bwf()) {
 		Config->set_native_format_is_bwf (use_bwf);
@@ -1499,7 +1499,7 @@ OptionEditor::slave_type_chosen (GdkEventAny *ignored)
 		return FALSE;
 	}
 
-	which = slave_type_combo.get_entry()->get_text();
+	which = slave_type_combo.get_active_text();
 
 	if (which == positional_sync_strings[Session::None]) {
 		session->request_slave_source (Session::None);
@@ -1536,13 +1536,13 @@ OptionEditor::setup_click_editor ()
 	click_path_entry.set_name ("OptionsEntry");
 	click_emphasis_path_entry.set_name ("OptionsEntry");
 	
-	click_path_entry.activate.connect (mem_fun(*this, &OptionEditor::click_sound_changed));
-	click_emphasis_path_entry.activate.connect (mem_fun(*this, &OptionEditor::click_emphasis_sound_changed));
+	click_path_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::click_sound_changed));
+	click_emphasis_path_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::click_emphasis_sound_changed));
 
-	click_path_entry.signal_focus_in_event()().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	click_path_entry.signal_focus_out_event()().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
-	click_emphasis_path_entry.signal_focus_in_event()().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	click_emphasis_path_entry.signal_focus_out_event()().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
+	click_path_entry.signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	click_path_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
+	click_emphasis_path_entry.signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
+	click_emphasis_path_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
 
 	click_browse_button.set_name ("EditorGTKButton");
 	click_emphasis_browse_button.set_name ("EditorGTKButton");
@@ -1559,15 +1559,15 @@ OptionEditor::setup_click_editor ()
 	
 	label = manage(new Label(_("Click audio file")));
 	label->set_name ("OptionsLabel");
-	click_table.attach (*label, 0, 1, 0, 1, 0, 0);
-	click_table.attach (click_path_entry, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
-	click_table.attach (click_browse_button, 2, 3, 0, 1, 0, 0);
+	click_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
+	click_table.attach (click_path_entry, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
+	click_table.attach (click_browse_button, 2, 3, 0, 1, FILL|EXPAND, FILL);
 	
 	label = manage(new Label(_("Click emphasis audiofile")));
 	label->set_name ("OptionsLabel");
-	click_table.attach (*label, 0, 1, 1, 2, 0, 0);
-	click_table.attach (click_emphasis_path_entry, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
-	click_table.attach (click_emphasis_browse_button, 2, 3, 1, 2, 0, 0);
+	click_table.attach (*label, 0, 1, 1, 2, FILL|EXPAND, FILL);
+	click_table.attach (click_emphasis_path_entry, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
+	click_table.attach (click_emphasis_browse_button, 2, 3, 1, 2, FILL|EXPAND, FILL);
 
 	hpacker->set_spacing (10);
 	hpacker->pack_start (*click_io_selector, false, false);
@@ -1639,16 +1639,16 @@ OptionEditor::setup_misc_options()
 	misc_packer.set_spacing (3);
 	misc_packer.pack_start (*table, true, true);
 
-	table->attach (hw_monitor_button, 0, 1, 0, 1, Gtk::FILL, 0, 8, 0);
-	table->attach (sw_monitor_button, 0, 1, 1, 2, Gtk::FILL, 0, 8, 0);
-	table->attach (plugins_stop_button, 0, 1, 2, 3, Gtk::FILL, 0, 8, 0);
-	table->attach (plugins_on_rec_button, 0, 1, 3, 4, Gtk::FILL, 0, 8, 0);
-	table->attach (verify_remove_last_capture_button, 0, 1, 4, 5, Gtk::FILL, 0, 8, 0);
+	table->attach (hw_monitor_button, 0, 1, 0, 1, Gtk::FILL, FILL, 8, 0);
+	table->attach (sw_monitor_button, 0, 1, 1, 2, Gtk::FILL, FILL, 8, 0);
+	table->attach (plugins_stop_button, 0, 1, 2, 3, Gtk::FILL, FILL, 8, 0);
+	table->attach (plugins_on_rec_button, 0, 1, 3, 4, Gtk::FILL, FILL, 8, 0);
+	table->attach (verify_remove_last_capture_button, 0, 1, 4, 5, Gtk::FILL, FILL, 8, 0);
 
-	table->attach (stop_rec_on_xrun_button, 1, 2, 0, 1, Gtk::FILL, 0, 8, 0);
-	table->attach (stop_at_end_button, 1, 2, 1, 2, Gtk::FILL, 0, 8, 0);
-	table->attach (debug_keyboard_button, 1, 2, 2, 3, Gtk::FILL, 0, 8, 0);
-	table->attach (speed_quieten_button, 1, 2, 3, 4, Gtk::FILL, 0, 8, 0);
+	table->attach (stop_rec_on_xrun_button, 1, 2, 0, 1, Gtk::FILL, FILL, 8, 0);
+	table->attach (stop_at_end_button, 1, 2, 1, 2, Gtk::FILL, FILL, 8, 0);
+	table->attach (debug_keyboard_button, 1, 2, 2, 3, Gtk::FILL, FILL, 8, 0);
+	table->attach (speed_quieten_button, 1, 2, 3, 4, Gtk::FILL, FILL, 8, 0);
 
 	Gtk::VBox* connect_box = manage (new VBox);
 	connect_box->set_spacing (3);
@@ -1837,11 +1837,11 @@ OptionEditor::setup_keyboard_options ()
 	}
 
 	set_popdown_strings (edit_modifier_combo, dumb);
-	edit_modifier_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::edit_modifier_chosen));
+	edit_modifier_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::edit_modifier_chosen));
 
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
-			edit_modifier_combo.get_entry()->set_text (_(modifiers[x].name));
+			edit_modifier_combo.set_active_text (_(modifiers[x].name));
 			break;
 		}
 	}
@@ -1850,25 +1850,25 @@ OptionEditor::setup_keyboard_options ()
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
 		
-	keyboard_mouse_table.attach (*label, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
-	keyboard_mouse_table.attach (edit_modifier_combo, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
+	keyboard_mouse_table.attach (*label, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
+	keyboard_mouse_table.attach (edit_modifier_combo, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 
 	label = manage (new Label (_("+ button")));
 	label->set_name ("OptionsLabel");
 	
-	keyboard_mouse_table.attach (*label, 3, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
-	keyboard_mouse_table.attach (edit_button_spin, 4, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, 0);
+	keyboard_mouse_table.attach (*label, 3, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
+	keyboard_mouse_table.attach (edit_button_spin, 4, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 
 	edit_button_spin.set_name ("OptionsEntry");
 	edit_button_adjustment.set_value (Keyboard::edit_button());
-	edit_button_adjustment.value_changed.connect (mem_fun(*this, &OptionEditor::edit_button_changed));
+	edit_button_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::edit_button_changed));
 
 	set_popdown_strings (delete_modifier_combo, dumb);
-	delete_modifier_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::delete_modifier_chosen));
+	delete_modifier_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::delete_modifier_chosen));
 
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == Keyboard::delete_modifier ()) {
-			delete_modifier_combo.get_entry()->set_text (_(modifiers[x].name));
+			delete_modifier_combo.set_active_text (_(modifiers[x].name));
 			break;
 		}
 	}
@@ -1877,25 +1877,25 @@ OptionEditor::setup_keyboard_options ()
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
 		
-	keyboard_mouse_table.attach (*label, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
-	keyboard_mouse_table.attach (delete_modifier_combo, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
+	keyboard_mouse_table.attach (*label, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
+	keyboard_mouse_table.attach (delete_modifier_combo, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
 
 	label = manage (new Label (_("+ button")));
 	label->set_name ("OptionsLabel");
 
-	keyboard_mouse_table.attach (*label, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
-	keyboard_mouse_table.attach (delete_button_spin, 4, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, 0);
+	keyboard_mouse_table.attach (*label, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
+	keyboard_mouse_table.attach (delete_button_spin, 4, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
 
 	delete_button_spin.set_name ("OptionsEntry");
 	delete_button_adjustment.set_value (Keyboard::delete_button());
-	delete_button_adjustment.value_changed.connect (mem_fun(*this, &OptionEditor::delete_button_changed));
+	delete_button_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::delete_button_changed));
 
 	set_popdown_strings (snap_modifier_combo, dumb);
-	snap_modifier_combo.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &OptionEditor::snap_modifier_chosen));
+	snap_modifier_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::snap_modifier_chosen));
 	
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {
-			snap_modifier_combo.get_entry()->set_text (_(modifiers[x].name));
+			snap_modifier_combo.set_active_text (_(modifiers[x].name));
 			break;
 		}
 	}
@@ -1904,8 +1904,8 @@ OptionEditor::setup_keyboard_options ()
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
 	
-	keyboard_mouse_table.attach (*label, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, 0);
-	keyboard_mouse_table.attach (snap_modifier_combo, 1, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, 0);
+	keyboard_mouse_table.attach (*label, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
+	keyboard_mouse_table.attach (snap_modifier_combo, 1, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
 }
 
 gint
@@ -1913,7 +1913,7 @@ OptionEditor::edit_modifier_chosen (GdkEventAny *ev)
 {
 	string txt;
 	
-	txt = edit_modifier_combo.get_entry()->get_text();
+	txt = edit_modifier_combo.get_active_text();
 
 	for (int i = 0; modifiers[i].name; ++i) {
 		if (txt == _(modifiers[i].name)) {
@@ -1929,7 +1929,7 @@ OptionEditor::delete_modifier_chosen (GdkEventAny *ev)
 {
 	string txt;
 	
-	txt = delete_modifier_combo.get_entry()->get_text();
+	txt = delete_modifier_combo.get_active_text();
 
 	for (int i = 0; modifiers[i].name; ++i) {
 		if (txt == _(modifiers[i].name)) {
@@ -1945,7 +1945,7 @@ OptionEditor::snap_modifier_chosen (GdkEventAny *ev)
 {
 	string txt;
 	
-	txt = snap_modifier_combo.get_entry()->get_text();
+	txt = snap_modifier_combo.get_active_text();
 
 	for (int i = 0; modifiers[i].name; ++i) {
 		if (txt == _(modifiers[i].name)) {

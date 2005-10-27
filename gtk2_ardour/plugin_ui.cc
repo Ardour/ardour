@@ -476,7 +476,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 				control_ui->combo = new Gtk::Combo;
 				control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
-				control_ui->combo->get_popwin()->signal_unmap_event(), mem_fun(*this, &PluginUI::control_combo_changed), control_ui));
+				control_ui->combo->signal_unmap_event().connect( mem_fun(*this, &PluginUI::control_combo_changed), control_ui);
 				plugin.ParameterChanged.connect (bind (mem_fun(*this, &PluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
@@ -715,7 +715,7 @@ PluginUI::update_control_display (ControlUI* cui)
 	        std::map<string,float>::iterator it;
 		for (it = cui->combo_map->begin(); it != cui->combo_map->end(); ++it) {
 			if (it->second == val) {
-				cui->combo->get_entry()->set_text(it->first);
+				cui->combo->set_active_text(it->first);
 				break;
 			}
 		}
@@ -750,7 +750,7 @@ gint
 PluginUI::control_combo_changed (GdkEventAny* ignored, ControlUI* cui)
 {
 	if (!cui->ignore_change) {
-		string value = cui->combo->get_entry()->get_text();
+		string value = cui->combo->get_active_text();
 		std::map<string,float> mapping = *cui->combo_map;
 		insert.set_parameter (cui->port_index, mapping[value]);
 	}
@@ -874,7 +874,7 @@ PlugUIBase::PlugUIBase (PluginInsert& pi)
 	combo.set_use_arrows_always(true);
 	set_popdown_strings (combo, plugin.get_presets());
 	combo.set_active_text ("");
-	combo.get_popwin()->signal_unmap_event().connect(mem_fun(*this, &PlugUIBase::setting_selected));
+	combo.signal_unmap_event().connect(mem_fun(*this, &PlugUIBase::setting_selected));
 
 	save_button.set_name ("PluginSaveButton");
 	save_button.signal_clicked().connect(mem_fun(*this, &PlugUIBase::save_plugin_setting));
@@ -886,10 +886,9 @@ PlugUIBase::PlugUIBase (PluginInsert& pi)
 gint
 PlugUIBase::setting_selected(GdkEventAny* ignored)
 {
-	Entry* entry = combo.get_entry();
-	if (entry->get_text().length() > 0) {
-		if (!plugin.load_preset(entry->get_text())) {
-			warning << string_compose(_("Plugin preset %1 not found"), entry->get_text()) << endmsg;
+	if (combo.get_active_text().length() > 0) {
+		if (!plugin.load_preset(combo.get_active_text())) {
+			warning << string_compose(_("Plugin preset %1 not found"), combo.get_active_text()) << endmsg;
 		}
 	}
 
@@ -903,11 +902,10 @@ PlugUIBase::save_plugin_setting ()
 	prompter.set_prompt(_("Name for plugin settings:"));
 
 	prompter.show_all();
-	prompter.done.connect(Main::quit.slot());
 
-	Main::run();
+	switch (prompter.run ()) {
+	case GTK_RESPONSE_ACCEPT:
 
-	if (prompter.status == Gtkmm2ext::Prompter::entered) {
 		string name;
 
 		prompter.get_result(name);
@@ -918,6 +916,7 @@ PlugUIBase::save_plugin_setting ()
 				combo.set_active_text (name);
 			}
 		}
+		break;
 	}
 }
 

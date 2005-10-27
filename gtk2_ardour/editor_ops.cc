@@ -1469,7 +1469,7 @@ Editor::insert_region_list_drag (AudioRegion& region)
 	AudioTimeAxisView *atv = 0;
 	Playlist *playlist;
 	
-	track_canvas->get_pointer (x, y);
+	track_canvas.get_pointer (x, y);
 
 	gnome_canvas_window_to_world (GNOME_CANVAS(track_canvas), x, y, &wx, &wy);
 	
@@ -2904,7 +2904,7 @@ Editor::freeze_route ()
 	interthread_progress_window->set_title (_("ardour: freeze"));
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_window->show_all ();
-	interthread_progress_bar.set_percentage (0.0f);
+	interthread_progress_bar.set_fraction (0.0f);
 	interthread_progress_label.set_text ("");
 	interthread_cancel_label.set_text (_("Cancel Freeze"));
 	current_interthread_info = &itt;
@@ -2918,7 +2918,7 @@ Editor::freeze_route ()
 
 	pthread_create (&itt.thread, 0, _freeze_thread, this);
 
-	track_canvas_scroller.get_window()->set_cursor (GDK_WATCH);
+	track_canvas_scroller.get_window()->set_cursor (Gdk::WATCH);
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
@@ -3070,7 +3070,7 @@ Editor::cut_copy_points (CutCopyOp op)
 void
 Editor::cut_copy_regions (CutCopyOp op)
 {
-	typedef map<AudioPlaylist*,AudioPlaylist*> PlaylistMapping;
+        typedef std::map<AudioPlaylist*,AudioPlaylist*> PlaylistMapping;
 	PlaylistMapping pmap;
 	jack_nframes_t first_position = max_frames;
 	set<Playlist*> freezelist;
@@ -3166,7 +3166,7 @@ Editor::mouse_paste ()
 {
 	gint x, y;
 	double wx, wy;
-	track_canvas->get_pointer (x, y);
+	track_canvas.get_pointer (x, y);
 
 	gnome_canvas_window_to_world (GNOME_CANVAS(track_canvas), x, y, &wx, &wy);
 	

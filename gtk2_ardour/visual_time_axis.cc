@@ -360,8 +360,24 @@ VisualTimeAxis::start_time_axis_rename()
 
 	name_prompter->set_prompt (_("new name: ")) ;
 	ARDOUR_UI::instance()->allow_focus(true) ;
-	name_prompter->done.connect (mem_fun(*this, &VisualTimeAxis::finish_time_axis_rename)) ;
 	name_prompter->show_all() ;
+
+	switch (name_prompter->run ()) {
+	case GTK_RESPONSE_ACCEPT:
+	  string result;
+	  name_prompter->get_result (result);
+	  if (editor.get_named_time_axis(result) != 0) {
+	    ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
+	    return ;
+	  }
+	  
+	  set_time_axis_name(result, this) ;
+	}
+	delete name_prompter ;
+	name_prompter = 0 ;
+	label_view() ;
+
+
 }
 
 /**
@@ -369,37 +385,7 @@ VisualTimeAxis::start_time_axis_rename()
  *
  * @see start_time_axis_rename()
  */
-void
-VisualTimeAxis::finish_time_axis_rename()
-{
-	name_prompter->hide_all () ;
-	ARDOUR_UI::instance()->allow_focus (false) ;
-	
-	if (name_prompter->status == Gtkmm2ext::Prompter::cancelled)
-	{
-		return;
-	}
-	
-	string result ;
-	name_prompter->get_result (result) ;
-	//time_axis_name = result ;
-	
-	if (editor.get_named_time_axis(result) != 0) {
-		ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
-		return ;
-	}
 
-	set_time_axis_name(result, this) ;
-	
-	delete name_prompter ;
-	name_prompter = 0 ;
-	label_view() ;
-}
-
-/**
- * Handle the (re-)displaying of the TimeAxis name label
- *
- */
 void
 VisualTimeAxis::label_view()
 {

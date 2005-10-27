@@ -117,7 +117,7 @@ Editor::hscroll_slider_button_press (GdkEventButton *ev)
 		
 		edit_hscroll_drag_last = x;
 		edit_hscroll_dragging = true;
-		Gtk::Main::grab_add (edit_hscroll_slider);
+		edit_hscroll_slider.add_modal_grab();
 	}
 
 	return TRUE;
@@ -164,7 +164,7 @@ Editor::hscroll_slider_button_release (GdkEventButton *ev)
 		// lets do a tempo redisplay now only, because it is dog slow
 		tempo_map_changed (Change (0));
 		edit_hscroll_dragging = false;
-		Gtk::Main::grab_remove (edit_hscroll_slider);
+		edit_hscroll_slider.remove_modal_grab();
 	} 
 
 	return TRUE;

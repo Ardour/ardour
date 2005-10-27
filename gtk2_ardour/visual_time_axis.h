@@ -220,12 +220,6 @@ class VisualTimeAxis : public TimeAxisView
 		 *
 		 * @see start_time_axis_rename()
 		 */
-		void finish_time_axis_rename() ;
-
-		/**
-		 * Handle the (re-)displaying of the TimeAxis name label
-		 *
-		 */
 		virtual void label_view() ;
 		
 		
