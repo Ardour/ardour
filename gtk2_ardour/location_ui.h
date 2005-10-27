@@ -21,7 +21,13 @@
 #ifndef __ardour_location_ui_h__
 #define __ardour_location_ui_h__
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/button.h>
+#include <gtkmm/table.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/label.h>
+
 #include <ardour/location.h>
 #include <ardour/session.h>
 
