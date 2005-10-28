@@ -167,17 +167,17 @@ static GtkTargetEntry target_table[] = {
 
 static guint n_targets = sizeof(target_table) / sizeof(target_table[0]);
 
-GdkCursor* Editor::cross_hair_cursor = 0;
-GdkCursor* Editor::selector_cursor = 0;
-GdkCursor* Editor::trimmer_cursor = 0;
-GdkCursor* Editor::grabber_cursor = 0;
-GdkCursor* Editor::zoom_cursor = 0;
-GdkCursor* Editor::time_fx_cursor = 0;
-GdkCursor* Editor::fader_cursor = 0;
-GdkCursor* Editor::speaker_cursor = 0;
-GdkCursor* Editor::null_cursor = 0;
-GdkCursor* Editor::wait_cursor = 0;
-GdkCursor* Editor::timebar_cursor = 0;
+Gdk::Cursor* Editor::cross_hair_cursor = 0;
+Gdk::Cursor* Editor::selector_cursor = 0;
+Gdk::Cursor* Editor::trimmer_cursor = 0;
+Gdk::Cursor* Editor::grabber_cursor = 0;
+Gdk::Cursor* Editor::zoom_cursor = 0;
+Gdk::Cursor* Editor::time_fx_cursor = 0;
+Gdk::Cursor* Editor::fader_cursor = 0;
+Gdk::Cursor* Editor::speaker_cursor = 0;
+Gdk::Cursor* Editor::null_cursor = 0;
+Gdk::Cursor* Editor::wait_cursor = 0;
+Gdk::Cursor* Editor::timebar_cursor = 0;
 
 GdkPixmap *Editor::check_pixmap = 0;
 GdkBitmap *Editor::check_mask = 0;
@@ -548,8 +548,8 @@ Editor::Editor (AudioEngine& eng)
 	route_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	route_list.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::route_display_selection_changed));
-	route_display_model->signal_rows_reordered().connect (mem_fun (*this, &Editor::queue_route_list_reordered));
-	route_list.signal_button_press_event().connect (mem_fun(*this, &Editor::route_list_column_click));
+	route_list.rows_reordered.connect (mem_fun (*this, &Editor::queue_route_list_reordered));
+	route_list.signal_columns_changed().connect (mem_fun(*this, &Editor::route_list_column_click));
 
 	edit_group_list_button_label.set_text (_("Edit Groups"));
 	edit_group_list_button_label.set_name ("EditGroupTitleButton");
@@ -566,8 +566,8 @@ Editor::Editor (AudioEngine& eng)
 	/* use checkbox for the active column */
 
 	CellRendererToggle *active_cell = dynamic_cast<CellRendererToggle*>(edit_group_list.get_column_cell_renderer (0));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
+	active_cell->set_property ("activatable", true);
+	active_cell->set_property ("radio", false);
 
 	edit_group_list.set_name ("MixerGroupList");
 	//edit_group_list.set_shadow_type (Gtk::SHADOW_IN);
@@ -642,9 +642,9 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.signal_motion_notify_event().connect (mem_fun(*this, &Editor::region_list_display_motion));
 	region_list_display.signal_enter_notify_event().connect (mem_fun(*this, &Editor::region_list_display_enter_notify));
 	region_list_display.signal_leave_notify_event().connect (mem_fun(*this, &Editor::region_list_display_leave_notify));
-	region_list_display.select_row.connect (mem_fun(*this, &Editor::region_list_display_selected));
-	region_list_display.unselect_row.connect (mem_fun(*this, &Editor::region_list_display_unselected));
-	region_list_display.click_column.connect (mem_fun(*this, &Editor::region_list_column_click));
+	region_list_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::region_list_selection_changed));
+	//region_list_display.unselect_row.connect (mem_fun(*this, &Editor::region_list_display_unselected));
+	region_list_display.signal_columns_changed().connect (mem_fun(*this, &Editor::region_list_column_click));
 	
 	named_selection_scroller.add (named_selection_display);
 	named_selection_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -665,13 +665,13 @@ Editor::Editor (AudioEngine& eng)
 	canvas_region_list_pane.pack1 (edit_frame, true, true);
 	canvas_region_list_pane.pack2 (region_selection_vpane, true, true);
 
-	track_list_canvas_pane.signal_size_allocate().connect_after (bind (mem_fun(*this, &Editor::pane_allocation_handler),
-								  static_cast<Gtk::Paned*> (&track_list_canvas_pane)));
-	canvas_region_list_pane.signal_size_allocate().connect_after (bind (mem_fun(*this, &Editor::pane_allocation_handler),
+	track_list_canvas_pane.size_allocate.connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
+								   static_cast<Gtk::Paned*> (&track_list_canvas_pane)));
+	canvas_region_list_pane.size_allocate.connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
 								   static_cast<Gtk::Paned*> (&canvas_region_list_pane)));
-	route_group_vpane.signal_size_allocate().connect_after (bind (mem_fun(*this, &Editor::pane_allocation_handler),
+	route_group_vpane.size_allocate.connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
 							     static_cast<Gtk::Paned*> (&route_group_vpane)));
-	region_selection_vpane.signal_size_allocate().connect_after (bind (mem_fun(*this, &Editor::pane_allocation_handler),
+	region_selection_vpane.size_allocate.connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
 								  static_cast<Gtk::Paned*> (&region_selection_vpane)));
 	
 	track_list_canvas_pane.pack1 (list_vpacker, true, true);
@@ -733,7 +733,7 @@ Editor::Editor (AudioEngine& eng)
 	add (vpacker);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	configure_event.connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
+	signal_configure_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	signal_delete_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::exit_on_main_window_close));
 
 	constructed = true;
@@ -825,10 +825,10 @@ Editor::initialize_canvas ()
 
 	// GNOME_CANVAS(track_canvas)->close_enough = 2;
 
-	track_canvas.signal_event().connect (slot (*this, &Editor::track_canvas_event));
+	track_canvas.signal_event().connect (mem_fun (*this, &Editor::track_canvas_event));
 	track_canvas.set_name ("EditorMainCanvas");
 	track_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
-	track_canvas.signal_event().connect (slot (*this, &Editor::track_canvas_event));
+	track_canvas.signal_event().connect (mem_fun (*this, &Editor::track_canvas_event));
 	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
 	
 	/* set up drag-n-drop */
@@ -842,169 +842,169 @@ Editor::initialize_canvas ()
 
 	Pango::FontDescription font = get_font_for_style (N_("VerboseCanvasCursor"));
 
-	verbose_canvas_cursor = new Canvas::Text (track_canvas.root());
-	verbose_canvas_cursor->property_font_descr() << font;
-	verbose_canvas_cursor->property_anchor() << GTK_ANCHOR_NW;
-	verbose_canvas_cursor->property_fill_color_rgba() << color_map[cVerboseCanvasCursor];
-
+	verbose_canvas_cursor = new Gnome::Canvas::Text (*track_canvas.root());
+	verbose_canvas_cursor->set_property ("font_desc", font);
+	verbose_canvas_cursor->set_property ("anchor", GTK_ANCHOR_NW);
+	verbose_canvas_cursor->set_property ("fill_color_rgba", color_map[cVerboseCanvasCursor]);
+	
 	verbose_cursor_visible = false;
-
+	
 	/* a group to hold time (measure) lines */
-
-	time_line_group = new Canvas::Group (track_canvas.root(), 0.0, 0.0);
-	cursor_group = new Canvas::Group (track_canvas.root(), 0.0, 0.0);
+	
+	time_line_group = new Gnome::Canvas::Group (*track_canvas.root(), 0.0, 0.0);
+	cursor_group = new Gnome::Canvas::Group (*track_canvas.root(), 0.0, 0.0);
 	
 	time_canvas.set_name ("EditorTimeCanvas");
 	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
-
-	meter_group = new Canvas::Group (time_canvas.root(), 0.0, 0.0);
-	tempo_group = new Canvas::Group (time_canvas.root(), 0.0, 0.0);
-	marker_group = new Canvas::Group (time_canvas.root(), 0.0, timebar_height * 2.0);
-	range_marker_group = new Canvas::Group (time_canvas.root(), 0.0, timebar_height * 3.0);
-	transport_marker_group = new Canvas::Group (time_canvas.root(), 0.0, timebar_height * 4.0);
-
-	tempo_bar = Canvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	tempo_bar->property_fill_color_rgba() << color_map[cTempoBar];
-	tempo_bar->property_outline_pixels() << 0;
-
-	meter_bar = Canvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	meter_bar->property_fill_color_rgba() << color_map[cMeterBar];
-	meter_bar->property_outline_pixels() << 0;
-
-	marker_bar = Canvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	marker_bar->property_fill_color_rgba() << color_map[cMarkerBar];
-	marker_bar->property_outline_pixels() << 0;
-
-	range_marker_bar = Canvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	range_marker_bar->property_fill_color_rgba() << color_map[cRangeMarkerBar];
-	range_marker_bar->property_outline_pixels() << 0;
-
-	transport_marker_bar = Canvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	transport_marker_bar->property_fill_color_rgba() << color_map[cTransportMarkerBar];
-	transport_marker_bar->property_outline_pixels() << 0;
-
-	range_bar_drag_rect = Canvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height).gobj();
-	range_bar_drag_rect->property_fill_color_rgba() << color_map[cRangeBarDragRectFill];
-	range_bar_drag_rect->property_outline_color_rgba() << color_map[cRangeBarDragRect];
-	range_bar_drag_rect->property_outline_pixels() << 0;
+	
+	meter_group = new Gnome::Canvas::Group (*time_canvas.root(), 0.0, 0.0);
+	tempo_group = new Gnome::Canvas::Group (*time_canvas.root(), 0.0, 0.0);
+	marker_group = new Gnome::Canvas::Group (*time_canvas.root(), 0.0, timebar_height * 2.0);
+	range_marker_group = new Gnome::Canvas::Group (*time_canvas.root(), 0.0, timebar_height * 3.0);
+	transport_marker_group = new Gnome::Canvas::Group (*time_canvas.root(), 0.0, timebar_height * 4.0);
+	
+	tempo_bar = new Gnome::Canvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	tempo_bar->set_property ("fill_color_rgba", color_map[cTempoBar]);
+	tempo_bar->set_property ("outline_pixels", 0);
+	
+	meter_bar = new Gnome::Canvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	meter_bar->set_property ("fill_color_rgba", color_map[cMeterBar]);
+	meter_bar->set_property ("outline_pixels",0);
+	
+	marker_bar = new Gnome::Canvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	marker_bar->set_property ("fill_color_rgba", color_map[cMarkerBar]);
+	marker_bar->set_property ("outline_pixels", 0);
+	
+	range_marker_bar = new Gnome::Canvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	range_marker_bar->set_property ("fill_color_rgba", color_map[cRangeMarkerBar]);
+	range_marker_bar->set_property ("outline_pixels", 0);
+	
+	transport_marker_bar = new Gnome::Canvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	transport_marker_bar->set_property ("fill_color_rgba", color_map[cTransportMarkerBar]);
+	transport_marker_bar->set_property ("outline_pixels", 0);
+	
+	range_bar_drag_rect = new Gnome::Canvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	range_bar_drag_rect->set_property ("fill_color_rgba", color_map[cRangeBarDragRectFill]);
+	range_bar_drag_rect->set_property ("outline_color_rgba", color_map[cRangeBarDragRect]);
+	range_bar_drag_rect->set_property ("outline_pixels", 0);
 	range_bar_drag_rect->hide ();
-
-	transport_bar_drag_rect = Canvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	transport_bar_drag_rect ->property_fill_color_rgba() << color_map[cTransportBarDragRectFill];
-	transport_bar_drag_rect->property_outline_color_rgba() << color_map[cTransportBarDragRect];
-	transport_bar_drag_rect->property_outline_pixels() << 0;
+	
+	transport_bar_drag_rect = new Gnome::Canvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	transport_bar_drag_rect ->set_property ("fill_color_rgba", color_map[cTransportBarDragRectFill]);
+	transport_bar_drag_rect->set_property ("outline_color_rgba", color_map[cTransportBarDragRect]);
+	transport_bar_drag_rect->set_property ("outline_pixels", 0);
 	transport_bar_drag_rect->hide ();
 	
-	marker_drag_line_points = new Canvas::Points (2);
+	marker_drag_line_points = new  Gnome::Canvas::Points (2);
 	marker_drag_line_points[0]->set_x (0.0);
 	marker_drag_line_points[0]->set_y (0.0);
 	marker_drag_line_points[1]->set_x (0.0);
 	marker_drag_line_points[1]->set_y (0.0);
-
-	marker_drag_line = Canvas::Line (track_canvas.root());
-	marker_drag_line->property_width_pixels() << 1;
-	marker_drag_line->property_fill_color_rgba() << color_map[cMarkerDragLine];
-	marker_drag_line->property_points() << marker_drag_line_points;
+	
+	marker_drag_line = new Gnome::Canvas::Line (*track_canvas.root());
+	marker_drag_line->set_property ("width_pixels", 1);
+	marker_drag_line->set_property("fill_color_rgba", color_map[cMarkerDragLine]);
+	marker_drag_line->set_property("points", marker_drag_line_points);
 	marker_drag_line->hide();
 
-	range_marker_drag_rect = new Canvas::SimpleRect (track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	range_marker_drag_rect->property_fill_color_rgba() << color_map[cRangeDragRectFill];
-	range_marker_drag_rect->property_outline_color_rgba() << color_map[cRangeDragRect];
+	range_marker_drag_rect = new Gnome::Canvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	range_marker_drag_rect->set_property ("fill_color_rgba", color_map[cRangeDragRectFill]);
+	range_marker_drag_rect->set_property ("outline_color_rgba", color_map[cRangeDragRect]);
 	range_marker_drag_rect->hide ();
 	
-	transport_loop_range_rect = new Canvas::Simplerect (group.root(), 0.0, 0.0, 0.0, 0.0);
-	transport_loop_range_rect->property_fill_color_rgba() << color_map[cTransportLoopRectFill];
-	transport_loop_range_rect->property_outline_color_rgba() << color_map[cTransportLoopRect];
-	transport_loop_range_rect->property_outline_pixels() << 1;
+	transport_loop_range_rect = new Gnome::Canvas::SimpleRect (group.root(), 0.0, 0.0, 0.0, 0.0);
+	transport_loop_range_rect->set_property ("fill_color_rgba", color_map[cTransportLoopRectFill]);
+	transport_loop_range_rect->set_property ("outline_color_rgba", color_map[cTransportLoopRect]);
+	transport_loop_range_rect->set_property ("outline_pixels", 1);
 	transport_loop_range_rect->hide();
 
-	transport_punch_range_rect = new Canvas::Simplerect (group.root(), 0.0, 0.0, 0.0, 0.0);
-	transport_punch_range_rect->property_fill_color_rgba() << color_map[cTransportPunchRectFill];
-	transport_punch_range_rect->property_outline_color_rgba() << color_map[cTransportPunchRect];
-	transport_punch_range_rect->property_outline_pixels() << 0;
+	transport_punch_range_rect = new Gnome::Canvas::SimpleRect (group.root(), 0.0, 0.0, 0.0, 0.0);
+	transport_punch_range_rect->set_property ("fill_color_rgba", color_map[cTransportPunchRectFill]);
+	transport_punch_range_rect->set_property ("outline_color_rgba", color_map[cTransportPunchRect]);
+	transport_punch_range_rect->set_property ("outline_pixels", 0);
 	transport_punch_range_rect->hide();
 	
 	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
 
-	transport_punchin_line = new Canvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
-	transport_punchin_line->property_outline_color_rgba() << color_map[cPunchInLine];
-	transport_punchin_line->property_outline_pixels() << 1;
+	transport_punchin_line = new Gnome::Canvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
+	transport_punchin_line->set_property ("outline_color_rgba", color_map[cPunchInLine]);
+	transport_punchin_line->set_property ("outline_pixels", 1);
 	transport_punchin_line->hide ();
-
-	transport_punchout_line  = new Canvas::Simplerect (group.root(), 0.0, 0.0, 0.0, 0.0);
-	transport_punchout_line->property_outline_color_rgba() << color_map[cPunchOutLine];
-	transport_punchout_line->property_outline_pixels() << 1;
+	
+	transport_punchout_line  = new Gnome::Canvas::SimpleRect (group.root(), 0.0, 0.0, 0.0, 0.0);
+	transport_punchout_line->set_property ("outline_color_rgba", color_map[cPunchOutLine]);
+	transport_punchout_line->set_property ("outline_pixels", 1);
 	transport_punchout_line->hide();
 	
 	// used to show zoom mode active zooming
-	zoom_rect = new Canvas::Simplerect (track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	zoom_rect->property_fill_color_rgba() << color_map[cZoomRectFill];
-	zoom_rect->property_outline_color_rgba() << color_map[cZoomRect];
-	zoom_rect->property_outline_pixels() << 1;
+	zoom_rect = new Gnome::Canvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	zoom_rect->set_property ("fill_color_rgba", color_map[cZoomRectFill]);
+	zoom_rect->set_property ("outline_color_rgba", color_map[cZoomRect]);
+	zoom_rect->set_property ("outline_pixels", 1);
 	zoom_rect->hide();
-
-	zoom_rect.signal_event().connect (slot (*this, &PublicEditor::canvas_zoom_rect_event));
-
+	
+	zoom_rect->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_zoom_rect_event));
+	
 	// used as rubberband rect
-	rubberband_rect = new Canvas::Simplerect (track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	rubberband_rect->property_outline_color_rgba() << color_map[cRubberBandRect];
-	rubberband_rect->property_fill_color_rgba() << (guint32) color_map[cRubberBandRectFill];
-	rubberband_rect->property_outline_pixels() << 1;
+	rubberband_rect = new Gnome::Canvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	rubberband_rect->set_property ("outline_color_rgba", color_map[cRubberBandRect]);
+	rubberband_rect->set_property ("fill_color_rgba", (guint32) color_map[cRubberBandRectFill]);
+	rubberband_rect->set_property ("outline_pixels", 1);
 	rubberband_rect->hide();
-
-	tempo_bar.signal_event().connect (slot (*this, &PublicEditor::canvas_tempo_bar_event));
-	meter_bar.signal_event().connect (slot (*this, &PublicEditor::canvas_meter_bar_event));
-	marker_bar.signal_event().connect (slot (*this, &PublicEditor::canvas_marker_bar_event));
-	range_marker_bar.signal_event().connect (slot (*this, &PublicEditor::canvas_range_marker_bar_event));
-	transport_marker_bar.signal_event().connect (slot (*this, &PublicEditor::canvas_transport_marker_bar_event));
-
+	
+	tempo_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_tempo_bar_event));
+	meter_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_meter_bar_event));
+	marker_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_marker_bar_event));
+	range_marker_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_range_marker_bar_event));
+	transport_marker_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_transport_marker_bar_event));
+	
 	/* separator lines */
-
-	tempo_line_points = new Canvas::Points (2);
+	
+	tempo_line_points = new Gnome::Canvas::Points (2);
 	tempo_line_points[0]->set_x (0.0);
 	tempo_line_points[0]->set_y (timebar_height);
 	tempo_line_points[1]->set_x (max_canvas_coordinate);
 	tempo_line_points[1]->set_y (timebar_height);
-
-	tempo_line = Canvas::Line (*tempo_group, *tempo_line_points);
-	tempo_line->property_width_pixels() << 0;
-	tempo_line->property_fill_color() << "black";
-
-	meter_line_points = new Canvas::Points (2);
+	
+	tempo_line = new Gnome::Canvas::Line (*tempo_group, *tempo_line_points);
+	tempo_line->set_property ("width_pixels", 0);
+	tempo_line->set_property ("fill_color", black);
+	
+	meter_line_points = new Gnome::Canvas::Points (2);
 	meter_line_points[0]->set_x (0);
 	meter_line_points[0]->set_y (timebar_height);
 	meter_line_points[1]->set_x (max_canvas_coordinate);
 	meter_line_points[1]->set_y (timebar_height);
-
-	meter_line = Canvas::Line (*meter_group, *meter_line_points);
-	meter_line->property_width_pixels() << 0;
-	meter_line->property_fill_color() << "black";
-
-	marker_line_points = Canvas::Points (2);
+	
+	meter_line = new Gnome::Canvas::Line (*meter_group, *meter_line_points);
+	meter_line->set_property ("width_pixels", 0);
+	meter_line->set_property ("fill_color", black);
+	
+	marker_line_points = new Gnome::Canvas::Points (2);
 	marker_line_points[0]->set_x (0);
 	marker_line_points[0]->set_y (timebar_height);
 	marker_line_points[1]->set_x (max_canvas_coordinate);
 	marker_line_points[1]->set_y (timebar_height);
-
-	marker_line =  new Canvas::Line (*marker_group, *marker_line_points);
-	marker_line->property_width_pixels() << 0;
-	marker_line->property_fill_color() << "black";
-
-	range_marker_line =  new Canvas::Line (*range_marker_group, marker_line_points);
-	range_marker_line->property_width_pixels() << 0;
-	range_marker_line->property_fill_color() << "black";
-
-	transport_marker_line =  new Canvas::Line (*transport_marker_group, marker_line_points);
-	transport_marker_line->property_width_pixels() << 0;
-	transport_marker_line->property_fill_color() << "black";
-
+	
+	marker_line =  new Gnome::Canvas::Line (*marker_group, *marker_line_points);
+	marker_line->set_property ("width_pixels", 0);
+	marker_line->set_property ("fill_color", black);
+	
+	range_marker_line =  new Gnome::Canvas::Line (*range_marker_group, *marker_line_points);
+	range_marker_line->set_property ("width_pixels", 0);
+	range_marker_line->set_property ("fill_color", black);
+	
+	transport_marker_line =  new Gnome::Canvas::Line (*transport_marker_group, *marker_line_points);
+	transport_marker_line->set_property ("width_pixels", 0);
+	transport_marker_line->set_property ("fill_color", black);
+	
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_loop_range_view), false));
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_punch_range_view), false));
 	
 	double time_height = timebar_height * 5;
 	double time_width = FLT_MAX/frames_per_unit;
-	gnome_canvas_set_scroll_region (GNOME_CANVAS(time_canvas), 0.0, 0.0, time_width, time_height);
-
+	time_canvas.set_scroll_region(0.0, 0.0, time_width, time_height);
+	
 	edit_cursor = new Cursor (*this, "blue", (GtkSignalFunc) _canvas_edit_cursor_event);
 	playhead_cursor = new Cursor (*this, "red", (GtkSignalFunc) _canvas_playhead_cursor_event);
 	
@@ -1211,17 +1211,17 @@ Editor::on_realize ()
 	/* Even though we're not using acceleration, we want the
 	   labels to show up.
 	*/
+        Glib::RefPtr<Gdk::Pixmap> empty_pixmap = Gdk::Pixmap::create(get_window(), 1, 1, 1);
+	Glib::RefPtr<Gdk::Pixmap> empty_bitmap = Gdk::Pixmap::create(get_window(), 1, 1, 1);
+
 
 	track_context_menu.accelerate (*this->get_toplevel());
 	track_region_context_menu.accelerate (*this->get_toplevel());
 	
 	Window::on_realize ();
 
-	GdkPixmap* empty_pixmap = gdk_pixmap_new (get_window()->gobj(), 1, 1, 1);
-	GdkPixmap* empty_bitmap = gdk_pixmap_new (get_window()->gobj(), 1, 1, 1);
-	GdkColor white = { 0, 0, 0 };
-
-	null_cursor = gdk_cursor_new_from_pixmap (empty_pixmap, empty_bitmap, &white, &white, 0, 0);
+	Gdk::Color white ("#ffffff" );
+	null_cursor = new Gdk::Cursor(empty_pixmap, empty_bitmap, white, white, 0, 0);
 }
 
 void
@@ -1229,8 +1229,8 @@ Editor::on_map ()
 {
 	Window::on_map ();
 
-	track_canvas_scroller.get_window()->set_cursor (current_canvas_cursor);
-	time_canvas_scroller.get_window()->set_cursor (timebar_cursor);
+	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+	time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
 }
 
 void
@@ -1290,11 +1290,8 @@ Editor::track_canvas_allocate (GtkAllocation *alloc)
 		} else {
 
 			/* center it */
-
-			gnome_canvas_item_set (first_action_message,
-					     "x", (gdouble) (canvas_width - pixel_width) / 2.0,
-					     "y", (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height)),
-					     NULL);
+		        first_action_message->set_property ("x", (gdouble) (canvas_width - pixel_width) / 2.0),
+			first_action_message->set_property ("y", (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height)));
 		}
 	}
 
@@ -1353,15 +1350,12 @@ Editor::reset_scrolling_region (GtkAllocation *alloc)
 		canvas_alloc_height = alloc->height;
 		canvas_alloc_width = alloc->width;
 	} else {
-		canvas_alloc_height = track_canvas->allocation.height;
-		canvas_alloc_width = track_canvas->allocation.width;
+	  canvas_alloc_height = track_canvas.get_height();
+	  canvas_alloc_width = track_canvas.get_width();
 	}
 
 	canvas_height = max (canvas_height, canvas_alloc_height);
-
-	gnome_canvas_set_scroll_region (GNOME_CANVAS(track_canvas), 0.0, 0.0, 
-				      max (last_canvas_unit, canvas_alloc_width),
-				      canvas_height);
+	track_canvas.set_scroll_region ( 0.0, 0.0, max (last_canvas_unit, canvas_alloc_width), canvas_height);
 
 	if (edit_cursor) edit_cursor->set_length (canvas_alloc_height);
 	if (playhead_cursor) playhead_cursor->set_length (canvas_alloc_height);
@@ -1369,25 +1363,29 @@ Editor::reset_scrolling_region (GtkAllocation *alloc)
 	if (marker_drag_line) {
 		marker_drag_line_points->coords[3] = canvas_height;
 		// cerr << "set mlA points, nc = " << marker_drag_line_points->num_points << endl;
-		gnome_canvas_item_set (marker_drag_line, "points", marker_drag_line_points, NULL);
+		marker_drag_line->set_property("points", marker_drag_line_points);
 	}
 	if (range_marker_drag_rect) {
-		gnome_canvas_item_set (range_marker_drag_rect, "y1", 0.0, "y2", (double) canvas_height, NULL);
+	  range_marker_drag_rect->set_property("y1", 0.0);
+	  range_marker_drag_rect->set_property("y2", (double) canvas_height);
 	}
 	if (transport_loop_range_rect) {
-		gnome_canvas_item_set (transport_loop_range_rect, "y1", 0.0, "y2", (double) canvas_height, NULL);
+	  transport_loop_range_rect->set_property("y1", 0.0);
+	  transport_loop_range_rect->set_property("y2", (double) canvas_height);
 	}
 	if (transport_punch_range_rect) {
-		gnome_canvas_item_set (transport_punch_range_rect, "y1", 0.0, "y2", (double) canvas_height, NULL);
+	  transport_punch_range_rect->set_property("y1", 0.0);
+	  transport_punch_range_rect->set_property("y2", (double) canvas_height);
 	}
 	if (transport_punchin_line) {
-		gnome_canvas_item_set (transport_punchin_line, "y1", 0.0, "y2", (double) canvas_height, NULL);
+	  transport_punchin_line->set_property("y1", 0.0);
+	  transport_punchin_line->set_property("y2", (double) canvas_height);
 	}
 	if (transport_punchout_line) {
-		gnome_canvas_item_set (transport_punchout_line, "y1", 0.0, "y2", (double) canvas_height, NULL);
+	  transport_punchout_line->set_property("y1", 0.0);
+	  transport_punchout_line->set_property("y2", (double) canvas_height);
 	}
-	
-	
+		
 	update_fixed_rulers ();
 
 	if (is_visible() && first_time) {
@@ -1560,7 +1558,7 @@ Editor::connect_to_session (Session *t)
 	session = t;
 
 	if (first_action_message) {
-		gnome_canvas_item_hide (first_action_message);
+	        first_action_message->hide();
 	}
 
 	flush_track_canvas();
@@ -1607,11 +1605,11 @@ Editor::connect_to_session (Session *t)
 
 	switch (session->get_edit_mode()) {
 	case Splice:
-		edit_mode_selector.get_entry()->set_text (edit_mode_strings[splice_index]);
+		edit_mode_selector.set_active_text (edit_mode_strings[splice_index]);
 		break;
 
 	case Slide:
-		edit_mode_selector.get_entry()->set_text (edit_mode_strings[slide_index]);
+		edit_mode_selector.set_active_text (edit_mode_strings[slide_index]);
 		break;
 	}
 
@@ -1661,13 +1659,13 @@ Editor::connect_to_session (Session *t)
 	redisplay_regions ();
 	redisplay_named_selections ();
 
-	route_list.freeze ();
+	//route_list.freeze (); GTK2FIX
 	route_display_model.clear ();
 	session->foreach_route (this, &Editor::handle_new_route);
 	// route_list.select_all ();
 	route_list.sort ();
 	route_list_reordered ();
-	route_list.thaw ();
+	//route_list.thaw ();
 
 	if (embed_audio_item) {
 		embed_audio_item->set_sensitive (true);
@@ -1730,55 +1728,54 @@ Editor::connect_to_session (Session *t)
 void
 Editor::build_cursors ()
 {
-	GdkPixmap *source, *mask;
-	GdkColor fg = { 0, 65535, 0, 0 }; /* Red. */
-	GdkColor bg = { 0, 0, 0, 65535 }; /* Blue. */
+        Glib::RefPtr <Gdk::Pixmap> source, mask;
+	Gdk::Color fg ("#ff0000"); /* Red. */
+	Gdk::Color bg ("#0000ff"); /* Blue. */
+
+        Gdk::Pixmap::create_from_data (source, hand_bits,
+				       hand_width, hand_height, 1, fg, bg);
+	Gdk::Pixmap::create_from_data(mask, handmask_bits,
+				      handmask_width, handmask_height, 1, fg, bg);
+	grabber_cursor = new Gdk::Cursor (source, mask, fg, bg, hand_x_hot, hand_y_hot);
+	source->unreference();
+	mask->unreference();
 	
-	source = gdk_bitmap_create_from_data (NULL, hand_bits,
-					      hand_width, hand_height);
-	mask = gdk_bitmap_create_from_data (NULL, handmask_bits,
-					    handmask_width, handmask_height);
-	grabber_cursor = gdk_cursor_new_from_pixmap (source, mask, &fg, &bg, hand_x_hot, hand_y_hot);
-	gdk_pixmap_unref (source);
-	gdk_pixmap_unref (mask);
-
-
-	GdkColor mbg = { 0, 0, 0, 0 }; /* Black */
-	GdkColor mfg = { 0, 0, 0, 65535 }; /* Blue. */
+	Gdk::Color mbg ("#000000" ); /* Black */
+	Gdk::Color mfg ("#0000ff" ); /* Blue. */
 	
-	source = gdk_bitmap_create_from_data (NULL, mag_bits,
-					      mag_width, mag_height);
-	mask = gdk_bitmap_create_from_data (NULL, magmask_bits,
-					    mag_width, mag_height);
-	zoom_cursor = gdk_cursor_new_from_pixmap (source, mask, &mfg, &mbg, mag_x_hot, mag_y_hot);
-	gdk_pixmap_unref (source);
-	gdk_pixmap_unref (mask);
+	Gdk::Pixmap::create_from_data (source, mag_bits,
+				       mag_width, mag_height, 1, fg, bg);
+	Gdk::Pixmap::create_from_data (mask, magmask_bits,
+				       mag_width, mag_height, 1, fg, bg);
+	zoom_cursor = new Gdk::Cursor (source, mask, mfg, mbg, mag_x_hot, mag_y_hot);
+	source->unreference();
+	mask->unreference();
 
-	GdkColor fbg = { 0, 65535, 65535, 65535 };
-	GdkColor ffg = { 0, 0, 0, 0 };
+	Gdk::Color fbg ("#ffffff" );
+	Gdk::Color ffg  ("#000000" );
 	
-	source = gdk_bitmap_create_from_data (NULL, fader_cursor_bits,
-					      fader_cursor_width, fader_cursor_height);
-	mask = gdk_bitmap_create_from_data (NULL, fader_cursor_mask_bits,
-					    fader_cursor_width, fader_cursor_height);
-	fader_cursor = gdk_cursor_new_from_pixmap (source, mask, &ffg, &fbg, fader_cursor_x_hot, fader_cursor_y_hot);
-	gdk_pixmap_unref (source);
-	gdk_pixmap_unref (mask);
+	Gdk::Pixmap::create_from_data (source, fader_cursor_bits,
+				       fader_cursor_width, fader_cursor_height, 1, fg, bg);
+	Gdk::Pixmap::create_from_data (mask, fader_cursor_mask_bits,
+				       fader_cursor_width, fader_cursor_height, 1, fg, bg);
+	fader_cursor = new Gdk::Cursor (source, mask, ffg, fbg, fader_cursor_x_hot, fader_cursor_y_hot);
+	source->unreference();
+	mask->unreference();
 
-	source = gdk_bitmap_create_from_data (NULL, speaker_cursor_bits,
-					      speaker_cursor_width, speaker_cursor_height);
-	mask = gdk_bitmap_create_from_data (NULL, speaker_cursor_mask_bits,
-					    speaker_cursor_width, speaker_cursor_height);
-	speaker_cursor = gdk_cursor_new_from_pixmap (source, mask, &ffg, &fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
-	gdk_pixmap_unref (source);
-	gdk_pixmap_unref (mask);
-
-	cross_hair_cursor = gdk_cursor_new (GDK_CROSSHAIR);
-	trimmer_cursor = gdk_cursor_new (GDK_SB_H_DOUBLE_ARROW);
-	selector_cursor = gdk_cursor_new (GDK_XTERM);
-	time_fx_cursor = gdk_cursor_new (GDK_SIZING);
-	wait_cursor = gdk_cursor_new (GDK_WATCH);
-	timebar_cursor = gdk_cursor_new (GDK_LEFT_PTR);
+	Gdk::Pixmap::create_from_data (source,speaker_cursor_bits,
+				       speaker_cursor_width, speaker_cursor_height, 1, fg, bg);
+	Gdk::Pixmap::create_from_data (mask, speaker_cursor_mask_bits,
+				       speaker_cursor_width, speaker_cursor_height, 1, fg, bg);
+	speaker_cursor = new Gdk::Cursor (source, mask, ffg, fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
+	source->unreference();
+	mask->unreference();
+	
+	cross_hair_cursor = new Gdk::Cursor (Gdk::CROSSHAIR);
+	trimmer_cursor =  new Gdk::Cursor (Gdk::SB_H_DOUBLE_ARROW);
+	selector_cursor = new Gdk::Cursor (Gdk::XTERM);
+	time_fx_cursor = new Gdk::Cursor (Gdk::SIZING);
+	wait_cursor = new Gdk::Cursor  (Gdk::WATCH);
+	timebar_cursor = new Gdk::Cursor(Gdk::LEFT_PTR);
 }
 
 void
@@ -2420,7 +2417,7 @@ Editor::set_snap_to (SnapType st)
 {
 	snap_type = st;
 	vector<string> txt = internationalize (snap_type_strings);
-	snap_type_selector.get_entry()->set_text (txt[(int)st]);
+	snap_type_selector.set_active_text (txt[(int)st]);
 
 	instant_save ();
 
@@ -2442,7 +2439,7 @@ Editor::set_snap_mode (SnapMode mode)
 {
 	snap_mode = mode;
 	vector<string> txt = internationalize (snap_mode_strings);
-	snap_mode_selector.get_entry()->set_text (txt[(int)mode]);
+	snap_mode_selector.set_active_text (txt[(int)mode]);
 
 	instant_save ();
 }
@@ -2511,7 +2508,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	set_default_size(width, height);
-	set_uposition(x, y-yoff);
+	set_position(x, y-yoff);
 
 	if ((prop = node.property ("zoom-focus"))) {
 		set_zoom_focus ((ZoomFocus) atoi (prop->value()));
@@ -2587,12 +2584,12 @@ Editor::get_state ()
 	char buf[32];
 
 	if (is_realized()) {
-		Gdk_Window win = get_window();
+	        Glib::RefPtr<Gdk::Window> win = get_window();
 		
 		int x, y, xoff, yoff, width, height;
-		win.get_root_origin(x, y);
-		win.get_position(xoff, yoff);
-		win.get_size(width, height);
+		win->get_root_origin(x, y);
+		win->get_position(xoff, yoff);
+		win->get_size(width, height);
 		
 		XMLNode* geometry = new XMLNode ("geometry");
 		char buf[32];
@@ -2876,7 +2873,7 @@ Editor::snap_to (jack_nframes_t& start, int32_t direction, bool for_mark)
 void
 Editor::setup_toolbar ()
 {
-	nstring pixmap_path;
+	string pixmap_path;
 	vector<ToggleButton *> mouse_mode_buttons;
 
 	mouse_mode_buttons.push_back (&mouse_move_button);
@@ -2955,29 +2952,24 @@ Editor::setup_toolbar ()
 	edit_mode_label.set_name ("ToolBarLabel");
 
 	edit_mode_selector.set_name ("EditModeSelector");
-	edit_mode_selector.get_entry()->set_name ("EditModeSelector");
-	edit_mode_selector.get_popwin()->set_name ("EditModeSelector");
 
 	edit_mode_box.set_spacing (3);
 	edit_mode_box.set_border_width (3);
 
 	/* XXX another disgusting hack because of the way combo boxes size themselves */
 
-	Gtkmm2ext::set_size_request_to_display_given_text (*edit_mode_selector.get_entry(), "EdgtMode", 2, 10);
-	set_popdown_string (edit_mode_selector, internationalize (edit_mode_strings));
-
+	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "EdgtMode", 2, 10);
+	set_popdown_strings (edit_mode_selector, internationalize (edit_mode_strings));
 	edit_mode_box.pack_start (edit_mode_label, false, false);
 	edit_mode_box.pack_start (edit_mode_selector, false, false);
 
-	edit_mode_selector.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
+	edit_mode_selector.signal_unmap_event().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
 
 	/* Snap Type */
 
 	snap_type_label.set_name ("ToolBarLabel");
 
 	snap_type_selector.set_name ("SnapTypeSelector");
-	snap_type_selector.get_entry()->set_name ("SnapTypeSelector");
-	snap_type_selector.get_popwin()->set_name ("SnapTypeSelector");
 
 	snap_type_box.set_spacing (3);
 	snap_type_box.set_border_width (3);
@@ -2985,53 +2977,49 @@ Editor::setup_toolbar ()
 	/* XXX another disgusting hack because of the way combo boxes size themselves */
 
 	const guint32 FUDGE = 10; // Combo's are stupid - they steal space from the entry for the button
-	Gtkmm2ext::set_size_request_to_display_given_text (*snap_type_selector.get_entry(), "Region bounds", 2+FUDGE, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, "Region bounds", 2+FUDGE, 10);
 	set_popdown_strings (snap_type_selector, internationalize (snap_type_strings));
 
 	snap_type_box.pack_start (snap_type_label, false, false);
 	snap_type_box.pack_start (snap_type_selector, false, false);
 
-	snap_type_selector.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &Editor::snap_type_selection_done));
+	snap_type_selector.signal_unmap_event().connect (mem_fun(*this, &Editor::snap_type_selection_done));
 
 	/* Snap mode, not snap type */
 
 	snap_mode_label.set_name ("ToolBarLabel");
 
 	snap_mode_selector.set_name ("SnapModeSelector");
-	snap_mode_selector.get_entry()->set_name ("SnapModeSelector");
-	snap_mode_selector.get_popwin()->set_name ("SnapModeSelector");
 	
 	snap_mode_box.set_spacing (3);
 	snap_mode_box.set_border_width (3);
 
-	Gtkmm2ext::set_size_request_to_display_given_text (*snap_mode_selector.get_entry(), "SngpMode", 2, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, "SngpMode", 2, 10);
 	set_popdown_strings (snap_mode_selector, internationalize (snap_mode_strings));
 
 	snap_mode_box.pack_start (snap_mode_label, false, false);
 	snap_mode_box.pack_start (snap_mode_selector, false, false);
 
-	snap_mode_selector.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
+	snap_mode_selector.signal_unmap_event().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
 
 	/* Zoom focus mode */
 
 	zoom_focus_label.set_name ("ToolBarLabel");
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
-	zoom_focus_selector.get_entry()->set_name ("ZoomFocusSelector");
-	zoom_focus_selector.get_popwin()->set_name ("ZoomFocusSelector");
 
 	zoom_focus_box.set_spacing (3);
 	zoom_focus_box.set_border_width (3);
 
 	/* XXX another disgusting hack because of the way combo boxes size themselves */
 
-	Gtkmm2ext::set_size_request_to_display_given_text (*zoom_focus_selector.get_entry(), "Edgt Cursor", 2, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Edgt Cursor", 2, 10);
 	set_popdown_strings (zoom_focus_selector, internationalize (zoom_focus_strings));
 
 	zoom_focus_box.pack_start (zoom_focus_label, false, false);
 	zoom_focus_box.pack_start (zoom_focus_selector, false, false);
 
-	zoom_focus_selector.get_popwin()->signal_unmap_event().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
+	zoom_focus_selector.signal_unmap_event().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 
 	/* selection/cursor clocks */
 
@@ -3308,7 +3296,7 @@ Editor::track_canvas_drag_data_received  (GdkDragContext     *context,
 	double wx;
 	double wy;
 
-	gnome_canvas_window_to_world (GNOME_CANVAS(track_canvas), (double) x, (double) y, &wx, &wy);
+	track_canvas.c2w( x, y, wx, wy);
 
 	ev.type = GDK_BUTTON_RELEASE;
 	ev.button.x = wx;
@@ -3867,15 +3855,15 @@ Editor::duplicate_dialog (bool dup_region)
 void
 Editor::show_verbose_canvas_cursor ()
 {
-	gnome_canvas_item_raise_to_top (verbose_canvas_cursor);
-	gnome_canvas_item_show (verbose_canvas_cursor);
+        verbose_canvas_cursor->raise_to_top();
+        verbose_canvas_cursor->show();
 	verbose_cursor_visible = true;
 }
 
 void
 Editor::hide_verbose_canvas_cursor ()
 {
-	gnome_canvas_item_hide (verbose_canvas_cursor);
+        verbose_canvas_cursor->hide();
 	verbose_cursor_visible = false;
 }
 
@@ -3885,13 +3873,15 @@ Editor::set_verbose_canvas_cursor (string txt, double x, double y)
 	/* XXX get origin of canvas relative to root window,
 	   add x and y and check compared to gdk_screen_{width,height}
 	*/
-	gnome_canvas_item_set (verbose_canvas_cursor, "text", txt.c_str(), "x", x, "y", y, NULL);	
+	verbose_canvas_cursor->set_property("text", txt.c_str());
+	verbose_canvas_cursor->set_property("x", x);
+	verbose_canvas_cursor->set_property("y", y);
 }
 
 void
 Editor::set_verbose_canvas_cursor_text (string txt)
 {
-	gnome_canvas_item_set (verbose_canvas_cursor, "text", txt.c_str(), NULL);
+	verbose_canvas_cursor->set_property("text", txt.c_str());
 }
 
 gint
@@ -3901,7 +3891,7 @@ Editor::edit_mode_selection_done (GdkEventAny *ev)
 		return FALSE;
 	}
 
-	string choice = edit_mode_selector.get_entry()->get_text();
+	string choice = edit_mode_selector.get_active_text();
 	EditMode mode = Slide;
 
 	if (choice == _("Splice")) {
@@ -3922,7 +3912,7 @@ Editor::snap_type_selection_done (GdkEventAny *ev)
 		return FALSE;
 	}
 
-	string choice = snap_type_selector.get_entry()->get_text();
+	string choice = snap_type_selector.get_active_text();
 	SnapType snaptype = SnapToFrame;
 	
 	if (choice == _("Beats/3")) {
@@ -3977,7 +3967,7 @@ Editor::snap_mode_selection_done (GdkEventAny *ev)
 {
 	if(session == 0) return FALSE;
 
-	string choice = snap_mode_selector.get_entry()->get_text();
+	string choice = snap_mode_selector.get_active_text();
 	SnapMode mode = SnapNormal;
 
 	if (choice == _("Normal")) {
@@ -3998,7 +3988,7 @@ Editor::zoom_focus_selection_done (GdkEventAny *ev)
 		return FALSE;
 	}
 
-	string choice = zoom_focus_selector.get_entry()->get_text();
+	string choice = zoom_focus_selector.get_active_text();
 	ZoomFocus focus_type = ZoomFocusLeft;
 
 	if (choice == _("Left")) {
@@ -4166,7 +4156,7 @@ Editor::set_zoom_focus (ZoomFocus f)
 	if (zoom_focus != f) {
 		zoom_focus = f;
 		vector<string> txt = internationalize (zoom_focus_strings);
-		zoom_focus_selector.get_entry()->set_text (txt[(int)f]);
+		zoom_focus_selector.set_active_text (txt[(int)f]);
 		ZoomFocusChanged (); /* EMIT_SIGNAL */
 
 		instant_save ();

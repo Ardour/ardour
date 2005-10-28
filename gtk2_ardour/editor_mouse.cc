@@ -242,7 +242,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	ignore_mouse_mode_toggle = false;
 
 	if (is_drawable()) {
-	  gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
+	        track_canvas_scroller.get_window()->set_cursor(*current_canvas_cursor);
 	}
 }
 
@@ -926,7 +926,7 @@ Editor::button_release_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType
 			break;
 
 		case MarkerItem:
-			remove_marker (item, event);
+			remove_marker (item, &event);
 			break;
 
 		case RegionItem:
@@ -1139,7 +1139,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 			show_verbose_canvas_cursor ();
 
 			if (is_drawable()) {
-			  gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), fader_cursor);
+			        track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
 			}
 		}
 		break;
@@ -1163,7 +1163,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		show_verbose_canvas_cursor ();
 		
 		if (is_drawable()) {
-		  gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), fader_cursor);
+		        track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
 		}
 		break;
 		
@@ -1171,7 +1171,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		if (mouse_mode == MouseGain) {
 			gnome_canvas_item_set (item, "fill_color_rgba", color_map[cEnteredGainLine], NULL);
 			if (is_drawable()) {
-				gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), fader_cursor);
+				track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
 			}
 		}
 		break;
@@ -1181,13 +1181,13 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case PanAutomationLineItem:
 		gnome_canvas_item_set (item, "fill_color_rgba", color_map[cEnteredAutomationLine], NULL);
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), fader_cursor);
+			track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
 		}
 		break;
 		
 	case AudioRegionViewNameHighlight:
 		if (is_drawable() && mouse_mode == MouseObject) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), trimmer_cursor);
+			track_canvas_scroller.get_window()->set_cursor (*trimmer_cursor);
 		}
 		break;
 
@@ -1201,14 +1201,14 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	/* </CMT Additions> */
 
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), trimmer_cursor);
+			track_canvas_scroller.get_window()->set_cursor (*trimmer_cursor);
 		}
 		break;
 
 	case EditCursorItem:
 	case PlayheadCursorItem:
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), grabber_cursor);
+			track_canvas_scroller.get_window()->set_cursor (*grabber_cursor);
 		}
 		break;
 
@@ -1218,7 +1218,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 
 		if (!reinterpret_cast<AudioRegionView *> (gtk_object_get_data(GTK_OBJECT(item), "regionview"))->name_active()) {
 			if (mouse_mode == MouseObject && is_drawable()) {
-				gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), trimmer_cursor);
+				track_canvas_scroller.get_window()->set_cursor (*trimmer_cursor);
 			}
 		} 
 		break;
@@ -1226,7 +1226,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 
 	case AutomationTrackItem:
 		if (is_drawable()) {
-			GdkCursor *cursor;
+		        Gdk::Cursor *cursor;
 			switch (mouse_mode) {
 			case MouseRange:
 				cursor = selector_cursor;
@@ -1239,7 +1239,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 				break;
 			}
 
-			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), cursor);
+			track_canvas_scroller.get_window()->set_cursor (*cursor);
 
 			AutomationTimeAxisView* atv;
 			if ((atv = static_cast<AutomationTimeAxisView*>(gtk_object_get_data(GTK_OBJECT(item), "trackview"))) != 0) {
@@ -1255,7 +1255,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case MeterBarItem:
 	case TempoBarItem:
 		if (is_drawable()) {
-			gdk_window_set_cursor (time_canvas_scroller.get_window()->gobj(), timebar_cursor);
+			time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 
@@ -1268,7 +1268,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case MeterMarkerItem:
 	case TempoMarkerItem:
 		if (is_drawable()) {
-			gdk_window_set_cursor (time_canvas_scroller.get_window()->gobj(), timebar_cursor);
+			time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 	case FadeInHandleItem:
@@ -1333,7 +1333,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		}
 		
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
+			track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 		}
 
 		hide_verbose_canvas_cursor ();
@@ -1351,7 +1351,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case MarkerViewHandleEndItem:
 	/* </CMT Additions> */
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
+			track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 		}
 		break;
 
@@ -1362,7 +1362,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		al = reinterpret_cast<AutomationLine*> (gtk_object_get_data (GTK_OBJECT(item),"line"));
 		gnome_canvas_item_set (item, "fill_color_rgba", al->get_line_color(), NULL);
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
+			track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 		}
 		break;
 
@@ -1370,7 +1370,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		/* see enter_handler() for notes */
 		if (!reinterpret_cast<AudioRegionView *> (gtk_object_get_data(GTK_OBJECT(item), "regionview"))->name_active()) {
 			if (is_drawable() && mouse_mode == MouseObject) {
-				gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
+				track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 			}
 		}
 		break;
@@ -1381,7 +1381,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case TempoBarItem:
 	case MarkerBarItem:
 		if (is_drawable()) {
-			gdk_window_set_cursor (time_canvas_scroller.get_window()->gobj(), timebar_cursor);
+			time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 		
@@ -1396,7 +1396,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case TempoMarkerItem:
 		
 		if (is_drawable()) {
-			gdk_window_set_cursor (time_canvas_scroller.get_window()->gobj(), timebar_cursor);
+			time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
 		}
 
 		break;
@@ -1409,8 +1409,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 
 	case AutomationTrackItem:
 		if (is_drawable()) {
-			gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
-
+			track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 			clear_entered_track = true;
 			Glib::signal_idle().connect (mem_fun(*this, &Editor::left_automation_track));
 		}
@@ -1546,7 +1545,7 @@ Editor::motion_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_ty
 }
 
 void
-Editor::start_grab (GdkEvent* event, GdkCursor *cursor)
+Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 {
 	if (drag_info.item == 0) {
 		fatal << _("programming error: start_grab called without drag item") << endmsg;
@@ -1581,9 +1580,12 @@ Editor::start_grab (GdkEvent* event, GdkCursor *cursor)
 	drag_info.copied_location = 0;
 
 	gnome_canvas_item_grab (drag_info.item,
-			      Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
-			      cursor,
-			      event->button.time);
+				Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
+				cursor->gobj(),
+				event->button.time);
+	//drag_info.item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
+	//		      cursor,
+	//		      event->button.time);
 
 	if (session && session->transport_rolling()) {
 		drag_info.was_rolling = true;
@@ -1941,10 +1943,11 @@ Editor::update_marker_drag_item (Location *location)
 	if (location->is_mark()) {
 		marker_drag_line_points->coords[0] = x1;
 		marker_drag_line_points->coords[2] = x1;
-		gnome_canvas_item_set (marker_drag_line, "points", marker_drag_line_points, NULL);
+		marker_drag_line->set_property ("points", marker_drag_line_points);
 	}
 	else {
-		gnome_canvas_item_set (range_marker_drag_rect, "x1", x1, "x2", x2, NULL);
+		range_marker_drag_rect->set_property ("x1", x1);
+		range_marker_drag_rect->set_property ("x2", x2);
 	}
 }
 
@@ -1975,12 +1978,12 @@ Editor::start_marker_grab (GnomeCanvasItem* item, GdkEvent* event)
 	update_marker_drag_item (location);
 
 	if (location->is_mark()) {
-		gnome_canvas_item_show (marker_drag_line);
-		gnome_canvas_item_raise_to_top (marker_drag_line);
+		marker_drag_line->show();
+		marker_drag_line->raise_to_top();
 	}
 	else {
-		gnome_canvas_item_show (range_marker_drag_rect);
-		gnome_canvas_item_raise_to_top (range_marker_drag_rect);
+		range_marker_drag_rect->show();
+		range_marker_drag_rect->raise_to_top();
 	}
 	
 	if (is_start) show_verbose_time_cursor (location->start(), 10);
@@ -2081,8 +2084,8 @@ Editor::marker_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
 		location->set (drag_info.copied_location->start(), drag_info.copied_location->end());
 	}
 	
-	gnome_canvas_item_hide (marker_drag_line);
-	gnome_canvas_item_hide (range_marker_drag_rect);
+	marker_drag_line->hide();
+	range_marker_drag_rect->hide();
 }
 
 void
@@ -3004,7 +3007,7 @@ Editor::region_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 
 			gnome_canvas_item_raise_to_top (rv->get_canvas_group());
 			gnome_canvas_item_raise_to_top (rv->get_time_axis_view().canvas_display);
-			gnome_canvas_item_raise_to_top (cursor_group);
+			cursor_group->raise_to_top();
 
 			/* freeze the playlists from notifying till
 			   the motion is done.
@@ -3033,7 +3036,7 @@ Editor::region_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 	}
 		
 	if (drag_info.first_move) {
-		gnome_canvas_item_raise_to_top (cursor_group);
+		cursor_group->raise_to_top();
 	}
 		
 	drag_info.first_move = false;
@@ -4157,8 +4160,8 @@ Editor::drag_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event)
 			gnome_canvas_item_show (crect);
 
 			update_marker_drag_item (temp_location);
-			gnome_canvas_item_show (range_marker_drag_rect);
-			gnome_canvas_item_raise_to_top (range_marker_drag_rect);
+			range_marker_drag_rect->show();
+			range_marker_drag_rect->raise_to_top();
 			
 		} 
 		break;		
@@ -4204,8 +4207,8 @@ Editor::end_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event)
 			session->add_redo_no_execute (session->locations()->get_memento());
 			commit_reversible_command ();
 			
-			gnome_canvas_item_hide (range_bar_drag_rect);
-			gnome_canvas_item_hide (range_marker_drag_rect);
+			range_bar_drag_rect->hide();
+			range_marker_drag_rect->hide();
 			break;
 
 		case CreateTransportMarker:
@@ -4269,8 +4272,8 @@ Editor::drag_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event)
 	if (start != end) {
 
 		if (drag_info.first_move) {
-			gnome_canvas_item_show (zoom_rect);
-			gnome_canvas_item_raise_to_top (zoom_rect);
+			zoom_rect->show();
+			zoom_rect->raise_to_top();
 		}
 
 		reposition_zoom_rect(start, end);
@@ -4301,7 +4304,7 @@ Editor::end_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event)
 		*/
 	}
 
-	gnome_canvas_item_hide (zoom_rect);
+	zoom_rect->hide();
 }
 
 void
@@ -4385,8 +4388,8 @@ Editor::drag_rubberband_select (GnomeCanvasItem* item, GdkEvent* event)
 				"y2", y2,
 				NULL);
 
-		gnome_canvas_item_show (rubberband_rect);
-		gnome_canvas_item_raise_to_top (rubberband_rect);
+		rubberband_rect->show();
+		rubberband_rect->raise_to_top();
 		
 		drag_info.last_pointer_frame = drag_info.current_pointer_frame;
 		drag_info.first_move = false;
@@ -4434,7 +4437,7 @@ Editor::end_rubberband_select (GnomeCanvasItem* item, GdkEvent* event)
 		selection->clear_lines ();
 	}
 
-	gnome_canvas_item_hide (rubberband_rect);
+	rubberband_rect->hide();
 }
 
 

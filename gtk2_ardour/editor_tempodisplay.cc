@@ -236,8 +236,8 @@ Editor::draw_measures ()
 
 	/* the cursors are always on top of everything */
 
-	gnome_canvas_item_raise_to_top (cursor_group);
-	gnome_canvas_item_lower_to_bottom (time_line_group);
+	cursor_group->raise_to_top();
+	time_line_group->lower_to_bottom();
 }
 
 void

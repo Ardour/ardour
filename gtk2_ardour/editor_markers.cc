@@ -778,8 +778,8 @@ gint
 Editor::new_transport_marker_menu_popdown (GdkEventAny *ev)
 {
 	// hide rects
-	gnome_canvas_item_hide (transport_bar_drag_rect);
-	gnome_canvas_item_hide (range_marker_drag_rect);
+	transport_bar_drag_rect->hide();
+	range_marker_drag_rect->hide();
 
 	return FALSE;
 }
@@ -849,14 +849,15 @@ Editor::update_loop_range_view (bool visibility)
 		double x1 = frame_to_pixel (tll->start());
 		double x2 = frame_to_pixel (tll->end());
 		
-		gnome_canvas_item_set (transport_loop_range_rect, "x1", x1, "x2", x2, NULL);
+		transport_loop_range_rect->set_property ("x1", x1);
+		transport_loop_range_rect->set_property ("x2", x2);
 		
 		if (visibility) {
-			gnome_canvas_item_show (transport_loop_range_rect);
+			transport_loop_range_rect->show();
 		}
 	}
 	else if (visibility) {
-		gnome_canvas_item_hide (transport_loop_range_rect);
+		transport_loop_range_rect->hide();
 	}
 }
 
@@ -874,14 +875,15 @@ Editor::update_punch_range_view (bool visibility)
 		double x1 = frame_to_pixel (tpl->start());
 		double x2 = frame_to_pixel (tpl->end());
 		
-		gnome_canvas_item_set (transport_punch_range_rect, "x1", x1, "x2", x2, NULL);
+		transport_punch_range_rect->set_property ("x1", x1);
+		transport_punch_range_rect->set_property ("x2", x2);
 		
 		if (visibility) {
-			gnome_canvas_item_show (transport_punch_range_rect);
+		        transport_punch_range_rect->show();
 		}
 	}
 	else if (visibility) {
-		gnome_canvas_item_hide (transport_punch_range_rect);
+	        transport_punch_range_rect->hide();
 	}
 
 // 	if (session->get_punch_in()) {

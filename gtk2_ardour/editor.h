@@ -477,7 +477,7 @@ class Editor : public PublicEditor
 	Gtk::VBox           global_vpacker;
 	Gtk::VBox           vpacker;
 
-	GdkCursor          *current_canvas_cursor;
+	Gdk::Cursor*          current_canvas_cursor;
 
 	Gnome::Canvas::CanvasAA track_canvas;
 	Gnome::Canvas::CanvasAA time_canvas;
@@ -798,17 +798,17 @@ class Editor : public PublicEditor
 	TrackViewList  track_views;
 	TimeAxisView     *trackview_by_y_position (double ypos);
 
-	static GdkCursor* cross_hair_cursor;
-	static GdkCursor* trimmer_cursor;
-	static GdkCursor* selector_cursor;
-	static GdkCursor* grabber_cursor;
-	static GdkCursor* zoom_cursor;
-	static GdkCursor* time_fx_cursor;
-	static GdkCursor* fader_cursor;
-	static GdkCursor* speaker_cursor;
-	static GdkCursor* null_cursor;
-	static GdkCursor* wait_cursor;
-	static GdkCursor* timebar_cursor;
+	static Gdk::Cursor* cross_hair_cursor;
+	static Gdk::Cursor* trimmer_cursor;
+	static Gdk::Cursor* selector_cursor;
+	static Gdk::Cursor* grabber_cursor;
+	static Gdk::Cursor* zoom_cursor;
+	static Gdk::Cursor* time_fx_cursor;
+	static Gdk::Cursor* fader_cursor;
+	static Gdk::Cursor* speaker_cursor;
+	static Gdk::Cursor* null_cursor;
+	static Gdk::Cursor* wait_cursor;
+	static Gdk::Cursor* timebar_cursor;
 
 	static void build_cursors ();
 
@@ -1089,7 +1089,7 @@ class Editor : public PublicEditor
 
 	LineDragInfo current_line_drag_info;
 
-	void start_grab (GdkEvent*, GdkCursor* cursor = 0);
+	void start_grab (GdkEvent*, Gdk::Cursor* cursor = 0);
 	bool end_grab (GnomeCanvasItem*, GdkEvent*);
 
 	Gtk::Menu fade_context_menu;
@@ -1266,7 +1266,7 @@ class Editor : public PublicEditor
 	TimeLineList free_measure_lines;
 	TimeLineList used_measure_lines;
 
-	GnomeCanvasItem* time_line_group;
+	Gnome::Canvas::Group* time_line_group;
 	GnomeCanvasItem* get_time_line ();
 	void hide_measures ();
 	void draw_measures ();
@@ -1454,21 +1454,21 @@ class Editor : public PublicEditor
 	void end_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event);
 
 	
-	GnomeCanvasItem      *range_bar_drag_rect;
-	GnomeCanvasItem      *transport_bar_drag_rect;
-	GnomeCanvasItem      *marker_drag_line;
-	GnomeCanvasPoints    *marker_drag_line_points;
-	GnomeCanvasItem      *range_marker_drag_rect;
+	Gnome::Canvas::Item      *range_bar_drag_rect;
+	Gnome::Canvas::Item      *transport_bar_drag_rect;
+	Gnome::Canvas::Item      *marker_drag_line;
+	Gnome::Canvas::Points    *marker_drag_line_points;
+	Gnome::Canvas::Item      *range_marker_drag_rect;
 
 	void update_marker_drag_item (ARDOUR::Location *);
 	
 	GnomeCanvasItem      *transport_bar_range_rect;
 	GnomeCanvasItem      *transport_bar_preroll_rect;
 	GnomeCanvasItem      *transport_bar_postroll_rect;
-	GnomeCanvasItem      *transport_loop_range_rect;
-	GnomeCanvasItem      *transport_punch_range_rect;
-	GnomeCanvasItem      *transport_punchin_line;
-	GnomeCanvasItem      *transport_punchout_line;
+	Gnome::Canvas::Item      *transport_loop_range_rect;
+	Gnome::Canvas::Item      *transport_punch_range_rect;
+	Gnome::Canvas::Item      *transport_punchin_line;
+	Gnome::Canvas::Item      *transport_punchout_line;
 	GnomeCanvasItem      *transport_preroll_rect;
 	GnomeCanvasItem      *transport_postroll_rect;
 
@@ -1485,7 +1485,7 @@ class Editor : public PublicEditor
 
 	bool select_all_within (jack_nframes_t start, jack_nframes_t end, gdouble topy, gdouble boty, bool add);
 	
-	GnomeCanvasItem   *rubberband_rect;
+	Gnome::Canvas::Item   *rubberband_rect;
 	
 	/* mouse zoom process */
 
@@ -1493,7 +1493,7 @@ class Editor : public PublicEditor
 	void drag_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event);
 	void end_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event);
 
-	GnomeCanvasItem   *zoom_rect;
+	Gnome::Canvas::Item   *zoom_rect;
 	void reposition_zoom_rect (jack_nframes_t start, jack_nframes_t end);
 	
 	/* diskstream/route display management */

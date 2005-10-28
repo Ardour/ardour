@@ -304,7 +304,7 @@ VisualTimeAxis::remove_this_time_axis(void* src)
 
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
-	prompter.chosen.connect (Gtk::Main::quit.slot());
+	prompter.chosen.connect(sigc::ptr_fun(Gtk::Main::quit));
 	prompter.show_all ();
 
 	Gtk::Main::run ();
