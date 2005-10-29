@@ -895,12 +895,9 @@ Editor::initialize_canvas ()
 	transport_bar_drag_rect->set_property ("outline_pixels", 0);
 	transport_bar_drag_rect->hide ();
 	
-	marker_drag_line_points = new  Gnome::Canvas::Points (2);
-	marker_drag_line_points[0]->set_x (0.0);
-	marker_drag_line_points[0]->set_y (0.0);
-	marker_drag_line_points[1]->set_x (0.0);
-	marker_drag_line_points[1]->set_y (0.0);
-	
+	marker_drag_line_points->push_back(Gnome::Art::Point(0.0, 0.0));
+	marker_drag_line_points->push_back(Gnome::Art::Point(0.0, 0.0));
+
 	marker_drag_line = new Gnome::Canvas::Line (*track_canvas.root());
 	marker_drag_line->set_property ("width_pixels", 1);
 	marker_drag_line->set_property("fill_color_rgba", color_map[cMarkerDragLine]);
@@ -959,44 +956,35 @@ Editor::initialize_canvas ()
 	transport_marker_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_transport_marker_bar_event));
 	
 	/* separator lines */
-	
-	tempo_line_points = new Gnome::Canvas::Points (2);
-	tempo_line_points[0]->set_x (0.0);
-	tempo_line_points[0]->set_y (timebar_height);
-	tempo_line_points[1]->set_x (max_canvas_coordinate);
-	tempo_line_points[1]->set_y (timebar_height);
+
+	tempo_line_points->push_back(Gnome::Art::Point(0, timebar_height));
+	tempo_line_points->push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 	
 	tempo_line = new Gnome::Canvas::Line (*tempo_group, *tempo_line_points);
 	tempo_line->set_property ("width_pixels", 0);
-	tempo_line->set_property ("fill_color", black);
-	
-	meter_line_points = new Gnome::Canvas::Points (2);
-	meter_line_points[0]->set_x (0);
-	meter_line_points[0]->set_y (timebar_height);
-	meter_line_points[1]->set_x (max_canvas_coordinate);
-	meter_line_points[1]->set_y (timebar_height);
-	
+	tempo_line->set_property ("fill_color", #000000);
+
+	meter_line_points->push_back(Gnome::Art::Point (0, timebar_height));
+	meter_line_points->push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
+
 	meter_line = new Gnome::Canvas::Line (*meter_group, *meter_line_points);
 	meter_line->set_property ("width_pixels", 0);
-	meter_line->set_property ("fill_color", black);
-	
-	marker_line_points = new Gnome::Canvas::Points (2);
-	marker_line_points[0]->set_x (0);
-	marker_line_points[0]->set_y (timebar_height);
-	marker_line_points[1]->set_x (max_canvas_coordinate);
-	marker_line_points[1]->set_y (timebar_height);
-	
+	meter_line->set_property ("fill_color", #000000);
+
+	marker_line_points->push_back(Gnome::Art::Point (0, timebar_height));
+	marker_line_points->push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
+
 	marker_line =  new Gnome::Canvas::Line (*marker_group, *marker_line_points);
 	marker_line->set_property ("width_pixels", 0);
-	marker_line->set_property ("fill_color", black);
+	marker_line->set_property ("fill_color", #000000);
 	
 	range_marker_line =  new Gnome::Canvas::Line (*range_marker_group, *marker_line_points);
 	range_marker_line->set_property ("width_pixels", 0);
-	range_marker_line->set_property ("fill_color", black);
+	range_marker_line->set_property ("fill_color", #000000);
 	
 	transport_marker_line =  new Gnome::Canvas::Line (*transport_marker_group, *marker_line_points);
 	transport_marker_line->set_property ("width_pixels", 0);
-	transport_marker_line->set_property ("fill_color", black);
+	transport_marker_line->set_property ("fill_color", #000000);
 	
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_loop_range_view), false));
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_punch_range_view), false));
