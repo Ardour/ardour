@@ -145,8 +145,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	ignore_speed_adjustment = false;
 	comment_window = 0;
 
-	width_button.add (*(manage (new Gtk::Image (lr_xpm))));
-	hide_button.add (*(manage (new Gtk::Image (small_x_xpm))));
+	width_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(lr_xpm)))));
+	hide_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(small_x_xpm)))));
 
 
 	input_label.set_text (_("INPUT"));
@@ -176,7 +176,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_style_button, _("Pan automation type"));
 	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_style_button, _("Gain automation type"));
 
-	hide_button.set_events (hide_button.get_events() & ~(GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK));
+	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	width_button.unset_flags (Gtk::CAN_FOCUS);
 	hide_button.unset_flags (Gtk::CAN_FOCUS);
@@ -248,7 +248,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 		at->FreezeChange.connect (mem_fun(*this, &MixerStrip::map_frozen));
 
-		speed_adjustment.value_changed.connect (mem_fun(*this, &MixerStrip::speed_adjustment_changed));
+		speed_adjustment.signal_value_changed().connect (mem_fun(*this, &MixerStrip::speed_adjustment_changed));
 		
 		speed_frame.set_name ("BaseFrame");
 		speed_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -1154,9 +1154,9 @@ MixerStrip::comment_changed (void *src)
 	if (src != this) {
 		ignore_comment_edit = true;
 		comment_area.freeze ();
-		comment_area.delete_text (0, -1);
-		comment_area.set_point (0);
-		comment_area.insert (_route.comment());
+		//comment_area.get_buffer()->delete_text (0, -1);
+		//comment_area.set_point (0);
+		comment_area.get_buffer()->set_text (_route.comment());
 		comment_area.thaw ();
 		ignore_comment_edit = false;
 	}
@@ -1168,7 +1168,7 @@ MixerStrip::comment_edited ()
 	ENSURE_GUI_THREAD(mem_fun(*this, &MixerStrip::comment_edited));
 	
 	if (!ignore_comment_edit) {
-		string str =  comment_area.get_chars(0,-1);
+		string str =  comment_area.get_buffer()->get_text();
 		_route.set_comment (str, this);
 		ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
 							   str.empty() ? _("click to add/edit comments") : str);
@@ -1256,13 +1256,13 @@ MixerStrip::route_gui_changed (string what_changed, void* ignored)
 void
 MixerStrip::show_route_color ()
 {
-	Gtk::Style *style;
+	Glib::RefPtr<Gtk::Style> style;
 
 	name_button.ensure_style ();
 	style = name_button.get_style()->copy();
 	style->set_bg (Gtk::STATE_NORMAL, color());
-	name_button.set_style (*style);
-	style->unref();
+	name_button.set_style (style);
+	style->unrefernce();
 
 	route_active_changed ();
 }

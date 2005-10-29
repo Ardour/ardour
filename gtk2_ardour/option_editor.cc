@@ -833,9 +833,6 @@ OptionEditor::setup_sync_options ()
 	slave_type_label->set_name("OptionsLabel");
 	positional_sync_strings = internationalize (psync_strings);
 
-	slave_type_combo.set_use_arrows_always (true);
-	slave_type_combo.set_value_in_list (true, false);
-	slave_type_combo.set_editable (false);
 	slave_type_combo.set_name ("OptionsEntry");
 	slave_type_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::slave_type_chosen));
 
@@ -1662,7 +1659,7 @@ OptionEditor::setup_misc_options()
 	connect_box->pack_start (*useless_box, false, false);
 	connect_box->pack_start (auto_connect_output_master_button, false, false);
 	connect_box->pack_start (auto_connect_output_physical_button, false, false);
-	connect_box->pack_start (auto_connect_output_manual_button, false);
+	connect_box->pack_start (auto_connect_output_manual_button, false, false);
 
 	misc_packer.pack_start (*connect_box, false, false);
 	

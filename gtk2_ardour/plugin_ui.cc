@@ -473,8 +473,8 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 			
 			if (defaults && defaults->count > 0)	{
 				
-				control_ui->combo = new Gtk::Combo;
-				control_ui->combo->set_value_in_list(true, false);
+				control_ui->combo = new Gtk::ComboBoxText;
+				//control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
 				control_ui->combo->signal_unmap_event().connect( mem_fun(*this, &PluginUI::control_combo_changed), control_ui);
 				plugin.ParameterChanged.connect (bind (mem_fun(*this, &PluginUI::parameter_changed), control_ui));
@@ -869,9 +869,7 @@ PlugUIBase::PlugUIBase (PluginInsert& pi)
 	  save_button(_("save")),
 	  bypass_button (_("bypass"))
 {
-	combo.set_value_in_list(true,true);
-	combo.set_use_arrows(true);
-	combo.set_use_arrows_always(true);
+        //combo.set_use_arrows_always(true);
 	set_popdown_strings (combo, plugin.get_presets());
 	combo.set_active_text ("");
 	combo.signal_unmap_event().connect(mem_fun(*this, &PlugUIBase::setting_selected));

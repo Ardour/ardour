@@ -85,8 +85,8 @@ static const gchar * revdblarrow_xpm[] = {
 PannerUI::PannerUI (IO& io, Session& s)
 	: _io (io),
 	  _session (s),
-	  panning_up_arrow (GTK_ARROW_UP, Gtk::SHADOW_OUT),
-	  panning_down_arrow (GTK_ARROW_DOWN, Gtk::SHADOW_OUT),
+	  panning_up_arrow (Gtk::ARROW_UP, Gtk::SHADOW_OUT),
+	  panning_down_arrow (Gtk::ARROW_DOWN, Gtk::SHADOW_OUT),
 	  panning_link_button (_("link"))
 	
 {
@@ -114,7 +114,7 @@ PannerUI::PannerUI (IO& io, Session& s)
 	   we need a pixmap in the button just to get started.
 	*/
 
-	panning_link_direction_button.add (*(manage (new Image (forwdblarrow_xpm))));
+	panning_link_direction_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(forwdblarrow_xpm)))));
 
 	panning_link_direction_button.signal_clicked().connect
 		(mem_fun(*this, &PannerUI::panning_link_direction_clicked));
@@ -199,10 +199,10 @@ PannerUI::update_pan_linkage ()
 
 	switch (_io.panner().link_direction()) {
 	case Panner::SameDirection:
-		static_cast<Pixmap*> (panning_link_direction_button.get_child())->set (forwdblarrow_xpm);
+	  static_cast<Gdk::Pixmap*> (panning_link_direction_button.get_child())->set (forwdblarrow_xpm);
 		break;
 	default:
-		static_cast<Pixmap*> (panning_link_direction_button.get_child())->set (revdblarrow_xpm);
+		static_cast<Gdk::Pixmap*> (panning_link_direction_button.get_child())->set (revdblarrow_xpm);
 		break;
 	}
 }
