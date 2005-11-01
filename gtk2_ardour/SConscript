@@ -28,6 +28,7 @@ gtkardour.Merge ([
     libraries['midi++2'],
     libraries['pbd3'],
     libraries['gtkmm2'],
+    libraries['glib2'],
     libraries['libgnomecanvas2'],
     libraries['libgnomecanvasmm'],
     libraries['sysmidi'],
@@ -47,6 +48,10 @@ gtkardour.Merge ([
 
 if gtkardour['VST']:
     gtkardour.Merge ([ libraries['fst']])
+
+skipped_files=Split("""
+connection_editor.cc
+""")
 
 gtkardour_files=Split("""
 about.cc
@@ -75,7 +80,6 @@ canvas-simplerect.c
 simplerect.cc
 canvas-waveview.c
 waveview.cc
-connection_editor.cc
 crossfade_edit.cc
 crossfade_view.cc
 curvetest.cc
@@ -167,6 +171,10 @@ mtest_files=Split("""
 mtest.cc
 """)
 
+itest_files=Split("""
+itest.cc
+""")
+
 extra_sources = []
 vst_files = [ 'vst_pluginui.cc' ]
 
@@ -187,6 +195,7 @@ executable = 'ardour.bin'
 
 ardour = gtkardour.Program(target = executable, source = gtkardour_files + extra_sources)
 mtest = gtkardour.Program(target = 'mtest', source = mtest_files)
+itest = gtkardour.Program(target = 'itest', source = itest_files)
 
 Default(ardour)
 

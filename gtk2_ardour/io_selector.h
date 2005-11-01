@@ -29,7 +29,13 @@ using __gnu_cxx::slist;
 #endif
 
 #include <string>
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/button.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/treeview.h>
+#include <gtkmm/liststore.h>
 
 #include <ardour_dialog.h>
 
@@ -66,6 +72,21 @@ class IOSelector : public Gtk::VBox {
 	Gtk::VBox main_box;
 	Gtk::HBox port_and_selector_box;
 
+	/* column model */
+
+	struct PortDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+
+	    PortDisplayModelColumns() { 
+		    add (displayed_name);
+		    add (full_name);
+	    }
+
+	    Gtk::TreeModelColumn<Glib::ustring>       displayed_name;
+	    Gtk::TreeModelColumn<Glib::ustring>       full_name;
+	};
+
+	PortDisplayModelColumns port_display_columns;
+
 	/* client/port selection */
 
 	Gtk::Notebook notebook;
@@ -91,7 +112,7 @@ class IOSelector : public Gtk::VBox {
 	void rescan ();
 	void clear_connections ();
 
-	void port_selection_changed();
+	void port_selection_changed(Gtk::TreeView*);
 
 	void ports_changed (ARDOUR::IOChange, void *);
 	void name_changed (void*);
@@ -101,10 +122,10 @@ class IOSelector : public Gtk::VBox {
 	gint remove_port_when_idle (ARDOUR::Port *);
 
 	gint port_column_button_release (GdkEventButton*, Gtk::TreeView*);
-	gint connection_click (GdkEventButton *, Gtk::TreeView*);
+	gint connection_button_release (GdkEventButton *, Gtk::TreeView*);
 	
-	void select_clist(Gtk::TreeView*);
-	void select_next_clist ();
+	void select_treeview(Gtk::TreeView*);
+	void select_next_treeview ();
 };
 
 class IOSelectorWindow : public ArdourDialog
@@ -116,7 +137,7 @@ class IOSelectorWindow : public ArdourDialog
 	IOSelector& selector() { return _selector; }
 
   protected:
-	bool on_map (GdkEventAny *);
+	void on_map ();
 	
   private:
 	IOSelector _selector;
@@ -158,7 +179,7 @@ class PortInsertWindow : public ArdourDialog
 	PortInsertWindow (ARDOUR::Session&, ARDOUR::PortInsert&, bool can_cancel=false);
 	
   protected:
-	bool on_map (GdkEventAny *);
+	void on_map ();
 	
   private:
 	

@@ -54,7 +54,7 @@ class ConnectionEditor : public ArdourDialog {
 	void set_session (ARDOUR::Session *);
 
   protected:
-	bool on_map (GdkEventAny *);
+	void on_map ();
 
   private:
 	ARDOUR::Connection *current_connection;
@@ -71,8 +71,7 @@ class ConnectionEditor : public ArdourDialog {
 	    Gtk::TreeModelColumn<ARDOUR::Connection*> connection;
 	};
 
-	ConnectionDisplayModelColumns input_connection_columns;
-	ConnectionDisplayModelColumns output_connection_columns;
+	ConnectionDisplayModelColumns connection_columns;
 
 	Glib::RefPtr<Gtk::ListStore> input_connection_model;
 	Glib::RefPtr<Gtk::ListStore> output_connection_model;
@@ -145,7 +144,7 @@ class ConnectionEditor : public ArdourDialog {
 	void cancel ();
 	void accept ();
 
-	void port_selection_handler (gint row, gint col, GdkEvent*, Gtk::TreeView*);
+	void selection_changed (Gtk::TreeView* display);
 
 	void add_port ();
 	void remove_port (int which_port);

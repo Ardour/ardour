@@ -1204,10 +1204,10 @@ AudioTimeAxisView::add_gain_automation_child ()
 	
 	
 	line = new AutomationGainLine ("automation gain", _session, *gain_track,
-						   gain_track->canvas_display,
-						   _route.gain_automation_curve(),
-						   PublicEditor::canvas_control_point_event,
-						   PublicEditor::canvas_line_event);
+				       gain_track->canvas_display,
+				       _route.gain_automation_curve(),
+				       slot (mem_fun (ed, &PublicEditor::canvas_control_point_event)),
+				       slot (mem_fun (ed, &PublicEditor::canvas_line_event)));
 	line->set_line_color (color_map[cAutomationLine]);
 	
 

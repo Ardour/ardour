@@ -264,7 +264,7 @@ class Editor : public PublicEditor
 	Width editor_mixer_strip_width;
 	void show_editor_mixer (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
-	void unselect_strip_in_display (TimeAxisView* tv);
+	void unselect_strip_in_display (TimeAxisView& tv);
 	void select_strip_in_display (TimeAxisView* tv);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */

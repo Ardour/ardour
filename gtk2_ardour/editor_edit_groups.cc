@@ -119,7 +119,6 @@ Editor::edit_group_list_button_clicked ()
 gint
 Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 {
-
         RouteGroup* group;
 	TreeIter iter;
 	TreeModel::Path path;

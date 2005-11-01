@@ -24,9 +24,14 @@
 #include <vector>
 
 #include <cmath>
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm2ext/dndtreeview.h>
 #include <gtkmm2ext/auto_spin.h>
 #include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/dndtreeview.h>
 
 #include <ardour/types.h>
 #include <ardour/ardour.h>
@@ -91,11 +96,25 @@ class RedirectBox : public Gtk::HBox
 	PluginSelector     & _plugin_selector;
 	RouteRedirectSelection  & _rr_selection;
 	
+	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
+		ModelColumns () {
+			add (text);
+		    add (redirect);
+		}
+	    Gtk::TreeModelColumn<std::string> text;
+	    Gtk::TreeModelColumn<ARDOUR::Redirect*>   redirect;
+	};
+
+	ModelColumns columns;
+	Glib::RefPtr<Gtk::ListStore> model;
+	Glib::RefPtr<Gtk::TreeSelection> selection;
 	
-	Gtk::EventBox	    redirect_eventbox;
-	Gtk::HBox           redirect_hpacker;
-	Gtk::TreeView       redirect_display;
-	Gtk::ScrolledWindow redirect_scroller;
+	Gtk::EventBox	       redirect_eventbox;
+	Gtk::HBox              redirect_hpacker;
+	Gtkmm2ext::DnDTreeView redirect_display;
+	Gtk::ScrolledWindow    redirect_scroller;
+
+	void object_drop (std::string type, uint32_t cnt, void**);
 
 	Width _width;
 	
@@ -107,12 +126,13 @@ class RedirectBox : public Gtk::HBox
 	void new_send ();
 	void show_send_controls ();
 
+	Glib::RefPtr<Gtk::UIManager> popup_ui_mgr;
+	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp;
 	Gtk::Menu *redirect_menu;
-	vector<Gtk::MenuItem*> selection_dependent_items;
-	Gtk::MenuItem* redirect_paste_item;
+	vector<Glib::RefPtr<Gtk::Action> > selection_dependent_items;
 	gint redirect_menu_map_handler (GdkEventAny *ev);
-	Gtk::Menu * build_redirect_menu (Gtk::TreeView&);
-	void build_redirect_tooltip (Gtk::TreeView&, Gtk::EventBox&, string);
+	Gtk::Menu * build_redirect_menu ();
+	void build_redirect_tooltip (Gtk::EventBox&, string);
 	void show_redirect_menu (gint arg);
 
 	void choose_send ();
@@ -137,7 +157,7 @@ class RedirectBox : public Gtk::HBox
 
 	void disconnect_newplug();
 
-	void redirects_reordered (gint, gint);
+	void redirects_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	gint compute_redirect_sort_keys ();
 	vector<sigc::connection> redirect_active_connections;
 	vector<sigc::connection> redirect_name_connections;
