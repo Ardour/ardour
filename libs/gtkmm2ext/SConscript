@@ -38,6 +38,7 @@ bindable_button.cc
 choice.cc
 click_box.cc
 controller.cc
+dndtreeview.cc
 fastmeter.cc
 gtk_ui.cc
 gtkutils.cc

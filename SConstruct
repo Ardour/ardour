@@ -38,7 +38,6 @@ opts.AddOptions(
     BoolOption('BUILD_SSE_OPTIMIZATIONS', 'Use our hand-written x86/SSE optimizations when possible (off by default)', 0)
   )
 
-
 #----------------------------------------------------------------------
 # a handy helper that provides a way to merge compile/link information
 # from multiple different "environments"
@@ -518,6 +517,20 @@ else:
     final_config_prefix = env['PREFIX'] + '/etc'
 
 config_prefix = '$DESTDIR' + final_config_prefix
+
+
+# SCons should really do this for us
+
+conf = Configure (env)
+
+have_cxx = conf.TryAction (Action (env['CXX'] + ' --version'));
+if have_cxx[0] != 1:
+    print "This system has no functional C++ compiler. You cannot build Ardour from source without one."
+    exit (1);
+else:
+    print "Congratulations, you have a functioning C++ compiler."
+    
+env = conf.Finish()
 
 #
 # Compiler flags and other system-dependent stuff

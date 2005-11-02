@@ -26,7 +26,8 @@
 
 #include <sigc++/bind.h>
 
-#include <libgnomecanvas/libgnomecanvas.h>
+#include <libgnomecanvasmm/init.h>
+
 #include <pbd/error.h>
 
 #include <gtkmm2ext/gtk_ui.h>
@@ -78,6 +79,7 @@ using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
+using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
@@ -152,21 +154,6 @@ static const gchar *zoom_focus_strings[] = {
 
 /* Soundfile  drag-n-drop */
 
-enum {
-  TARGET_STRING,
-  TARGET_ROOTWIN,
-  TARGET_URL
-};
-
-static GtkTargetEntry target_table[] = {
-  { "STRING",     0, TARGET_STRING },
-  { "text/plain", 0, TARGET_STRING },
-  { "text/uri-list", 0, TARGET_URL },
-  { "application/x-rootwin-drop", 0, TARGET_ROOTWIN }
-};
-
-static guint n_targets = sizeof(target_table) / sizeof(target_table[0]);
-
 Gdk::Cursor* Editor::cross_hair_cursor = 0;
 Gdk::Cursor* Editor::selector_cursor = 0;
 Gdk::Cursor* Editor::trimmer_cursor = 0;
@@ -203,8 +190,6 @@ Editor::Editor (AudioEngine& eng)
 	  edit_hscroll_left_arrow (Gtk::ARROW_LEFT, Gtk::SHADOW_OUT),
 	  edit_hscroll_right_arrow (Gtk::ARROW_RIGHT, Gtk::SHADOW_OUT),
 
-	  named_selection_display (internationalize (named_selection_display_titles)),
-	  
 	  /* tool bar related */
 
  	  editor_mixer_button (_("editor\nmixer")),
@@ -372,7 +357,7 @@ Editor::Editor (AudioEngine& eng)
 
  	edit_hscrollbar.signal_button_press_event().connect (mem_fun(*this, &Editor::hscroll_slider_button_press));
  	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscroll_slider_button_release));
- 	edit_hscrollbar.size_allocate.connect (mem_fun(*this, &Editor::hscroll_slider_allocate));
+ 	edit_hscrollbar.signal_size_allocate().connect (mem_fun(*this, &Editor::hscroll_slider_allocate));
 	
 	time_canvas_scroller.add (time_canvas);
 	time_canvas_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
@@ -541,14 +526,15 @@ Editor::Editor (AudioEngine& eng)
 	route_list.set_headers_clickable (true);
 
 	route_display_model->set_sort_func (0, mem_fun (*this, &Editor::route_list_compare_func));
+	route_display_model->signal_rows_reordered().connect (mem_fun (*this, &Editor::queue_route_list_reordered));
 
+	// GTK2FIX
 	//route_list.set_shadow_type (Gtk::SHADOW_IN);
 
 	route_list_scroller.add (route_list);
 	route_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	route_list.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::route_display_selection_changed));
-	route_list.rows_reordered.connect (mem_fun (*this, &Editor::queue_route_list_reordered));
 	route_list.signal_columns_changed().connect (mem_fun(*this, &Editor::route_list_column_click));
 
 	edit_group_list_button_label.set_text (_("Edit Groups"));
@@ -630,21 +616,26 @@ Editor::Editor (AudioEngine& eng)
 	region_list_scroller.add (region_list_display);
 	region_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	region_list_display.drag_dest_set (GTK_DEST_DEFAULT_ALL,
-					   target_table, n_targets - 1,
-					   GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
-	region_list_display.drag_data_received.connect (mem_fun(*this, &Editor::region_list_display_drag_data_received));
+	vector<Gtk::TargetEntry> region_list_target_table;
+	
+	region_list_target_table.push_back (TargetEntry ("STRING"));
+	region_list_target_table.push_back (TargetEntry ("text/plain"));
+	region_list_target_table.push_back (TargetEntry ("text/uri-list"));
+	region_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
+
+	region_list_display.drag_dest_set (region_list_target_table, DEST_DEFAULT_ALL, GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
+	region_list_display.signal_drag_data_received().connect (mem_fun(*this, &Editor::region_list_display_drag_data_received));
 
 	region_list_display.signal_key_press_event().connect (mem_fun(*this, &Editor::region_list_display_key_press));
 	region_list_display.signal_key_release_event().connect (mem_fun(*this, &Editor::region_list_display_key_release));
 	region_list_display.signal_button_press_event().connect (mem_fun(*this, &Editor::region_list_display_button_press));
 	region_list_display.signal_button_release_event().connect (mem_fun(*this, &Editor::region_list_display_button_release));
-	region_list_display.signal_motion_notify_event().connect (mem_fun(*this, &Editor::region_list_display_motion));
 	region_list_display.signal_enter_notify_event().connect (mem_fun(*this, &Editor::region_list_display_enter_notify));
 	region_list_display.signal_leave_notify_event().connect (mem_fun(*this, &Editor::region_list_display_leave_notify));
 	region_list_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::region_list_selection_changed));
+	// GTK2FIX
 	//region_list_display.unselect_row.connect (mem_fun(*this, &Editor::region_list_display_unselected));
-	region_list_display.signal_columns_changed().connect (mem_fun(*this, &Editor::region_list_column_click));
+	//region_list_display.signal_columns_changed().connect (mem_fun(*this, &Editor::region_list_column_click));
 	
 	named_selection_scroller.add (named_selection_display);
 	named_selection_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -665,14 +656,14 @@ Editor::Editor (AudioEngine& eng)
 	canvas_region_list_pane.pack1 (edit_frame, true, true);
 	canvas_region_list_pane.pack2 (region_selection_vpane, true, true);
 
-	track_list_canvas_pane.size_allocate.connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
-								   static_cast<Gtk::Paned*> (&track_list_canvas_pane)));
-	canvas_region_list_pane.size_allocate.connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
-								   static_cast<Gtk::Paned*> (&canvas_region_list_pane)));
-	route_group_vpane.size_allocate.connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
-							     static_cast<Gtk::Paned*> (&route_group_vpane)));
-	region_selection_vpane.size_allocate.connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
-								  static_cast<Gtk::Paned*> (&region_selection_vpane)));
+	track_list_canvas_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
+									    static_cast<Gtk::Paned*> (&track_list_canvas_pane)));
+	canvas_region_list_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
+								    static_cast<Gtk::Paned*> (&canvas_region_list_pane)));
+	route_group_vpane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
+							      static_cast<Gtk::Paned*> (&route_group_vpane)));
+	region_selection_vpane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
+								   static_cast<Gtk::Paned*> (&region_selection_vpane)));
 	
 	track_list_canvas_pane.pack1 (list_vpacker, true, true);
 	track_list_canvas_pane.pack2 (canvas_region_list_pane, true, true);
@@ -819,7 +810,7 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 void
 Editor::initialize_canvas ()
 {
-	gnome_canvas_init ();
+	Gnome::Canvas::init ();
 
 	/* adjust sensitivity for "picking" items */
 
@@ -832,11 +823,15 @@ Editor::initialize_canvas ()
 	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
 	
 	/* set up drag-n-drop */
+	vector<Gtk::TargetEntry> target_table;
+	
+	target_table.push_back (TargetEntry ("STRING"));
+	target_table.push_back (TargetEntry ("text/plain"));
+	target_table.push_back (TargetEntry ("text/uri-list"));
+	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
-	track_canvas.drag_dest_set (GTK_DEST_DEFAULT_ALL,
-				     target_table, n_targets - 1,
-				     GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
-	track_canvas.drag_data_received.connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
+	track_canvas.drag_dest_set (target_table, DEST_DEFAULT_ALL, GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
+	track_canvas.signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
 
 	/* stuff for the verbose canvas cursor */
 
@@ -884,14 +879,14 @@ Editor::initialize_canvas ()
 	transport_marker_bar->set_property ("outline_pixels", 0);
 	
 	range_bar_drag_rect = new Gnome::Canvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	range_bar_drag_rect->set_property ("fill_color_rgba", color_map[cRangeBarDragRectFill]);
-	range_bar_drag_rect->set_property ("outline_color_rgba", color_map[cRangeBarDragRect]);
+	range_bar_drag_rect->set_property ("fill_color_rgba", color_map[cRangeDragBarRectFill]);
+	range_bar_drag_rect->set_property ("outline_color_rgba", color_map[cRangeDragBarRect]);
 	range_bar_drag_rect->set_property ("outline_pixels", 0);
 	range_bar_drag_rect->hide ();
 	
 	transport_bar_drag_rect = new Gnome::Canvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	transport_bar_drag_rect ->set_property ("fill_color_rgba", color_map[cTransportBarDragRectFill]);
-	transport_bar_drag_rect->set_property ("outline_color_rgba", color_map[cTransportBarDragRect]);
+	transport_bar_drag_rect ->set_property ("fill_color_rgba", color_map[cTransportDragRectFill]);
+	transport_bar_drag_rect->set_property ("outline_color_rgba", color_map[cTransportDragRect]);
 	transport_bar_drag_rect->set_property ("outline_pixels", 0);
 	transport_bar_drag_rect->hide ();
 	
@@ -909,13 +904,13 @@ Editor::initialize_canvas ()
 	range_marker_drag_rect->set_property ("outline_color_rgba", color_map[cRangeDragRect]);
 	range_marker_drag_rect->hide ();
 	
-	transport_loop_range_rect = new Gnome::Canvas::SimpleRect (group.root(), 0.0, 0.0, 0.0, 0.0);
+	transport_loop_range_rect = new Gnome::Canvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
 	transport_loop_range_rect->set_property ("fill_color_rgba", color_map[cTransportLoopRectFill]);
 	transport_loop_range_rect->set_property ("outline_color_rgba", color_map[cTransportLoopRect]);
 	transport_loop_range_rect->set_property ("outline_pixels", 1);
 	transport_loop_range_rect->hide();
 
-	transport_punch_range_rect = new Gnome::Canvas::SimpleRect (group.root(), 0.0, 0.0, 0.0, 0.0);
+	transport_punch_range_rect = new Gnome::Canvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
 	transport_punch_range_rect->set_property ("fill_color_rgba", color_map[cTransportPunchRectFill]);
 	transport_punch_range_rect->set_property ("outline_color_rgba", color_map[cTransportPunchRect]);
 	transport_punch_range_rect->set_property ("outline_pixels", 0);
@@ -928,7 +923,7 @@ Editor::initialize_canvas ()
 	transport_punchin_line->set_property ("outline_pixels", 1);
 	transport_punchin_line->hide ();
 	
-	transport_punchout_line  = new Gnome::Canvas::SimpleRect (group.root(), 0.0, 0.0, 0.0, 0.0);
+	transport_punchout_line  = new Gnome::Canvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
 	transport_punchout_line->set_property ("outline_color_rgba", color_map[cPunchOutLine]);
 	transport_punchout_line->set_property ("outline_pixels", 1);
 	transport_punchout_line->hide();
@@ -962,29 +957,29 @@ Editor::initialize_canvas ()
 	
 	tempo_line = new Gnome::Canvas::Line (*tempo_group, *tempo_line_points);
 	tempo_line->set_property ("width_pixels", 0);
-	tempo_line->set_property ("fill_color", #000000);
+	tempo_line->set_property ("fill_color", "#000000");
 
 	meter_line_points->push_back(Gnome::Art::Point (0, timebar_height));
 	meter_line_points->push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 
 	meter_line = new Gnome::Canvas::Line (*meter_group, *meter_line_points);
 	meter_line->set_property ("width_pixels", 0);
-	meter_line->set_property ("fill_color", #000000);
+	meter_line->set_property ("fill_color", "#000000");
 
 	marker_line_points->push_back(Gnome::Art::Point (0, timebar_height));
 	marker_line_points->push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 
 	marker_line =  new Gnome::Canvas::Line (*marker_group, *marker_line_points);
 	marker_line->set_property ("width_pixels", 0);
-	marker_line->set_property ("fill_color", #000000);
+	marker_line->set_property ("fill_color", "#000000");
 	
 	range_marker_line =  new Gnome::Canvas::Line (*range_marker_group, *marker_line_points);
 	range_marker_line->set_property ("width_pixels", 0);
-	range_marker_line->set_property ("fill_color", #000000);
+	range_marker_line->set_property ("fill_color", "#000000");
 	
 	transport_marker_line =  new Gnome::Canvas::Line (*transport_marker_group, *marker_line_points);
 	transport_marker_line->set_property ("width_pixels", 0);
-	transport_marker_line->set_property ("fill_color", #000000);
+	transport_marker_line->set_property ("fill_color", "#000000");
 	
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_loop_range_view), false));
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_punch_range_view), false));
@@ -996,7 +991,7 @@ Editor::initialize_canvas ()
 	edit_cursor = new Cursor (*this, "blue", (GtkSignalFunc) _canvas_edit_cursor_event);
 	playhead_cursor = new Cursor (*this, "red", (GtkSignalFunc) _canvas_playhead_cursor_event);
 	
-	track_canvas.size_allocate.connect (mem_fun(*this, &Editor::track_canvas_allocate));
+	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
 }
 
 void
@@ -1265,15 +1260,13 @@ Editor::track_canvas_allocate (GtkAllocation *alloc)
 			strcpy (txt, _(txt1));
 			strcat (txt, _(txt2));
 			
-			first_action_message = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(track_canvas)),
-								      gnome_canvas_text_get_type(),
-								      "fontdesc", font,
-								      "fill_color_rgba", color_map[cFirstActionMessage],
-								      "x", (gdouble) (canvas_width - pixel_width) / 2.0,
-								      "y", (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height)),
-								      "anchor", GTK_ANCHOR_NORTH_WEST,
-								      "text", txt,
-								      NULL);
+			first_action_message = new Gnome::Canvas::Text (*track_canvas.root());
+			first_action_message->set_property ("font_desc", font);
+			first_action_message->set_property ("fill_color_rgba", color_map[cFirstActionMessage]);
+			first_action_message->set_property ("x", (gdouble) (canvas_width - pixel_width) / 2.0);
+			first_action_message->set_property ("y", (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height)));
+			first_action_message->set_property ("anchor", GTK_ANCHOR_NORTH_WEST);
+			first_action_message->set_property ("text", ustring (txt));
 			
 		} else {
 
