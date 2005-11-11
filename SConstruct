@@ -378,6 +378,9 @@ libraries['pango'].ParseConfig ('pkg-config --cflags --libs pango')
 libraries['libgnomecanvas2'] = LibraryInfo()
 libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomecanvas-2.0')
 
+libraries['glade2'] = LibraryInfo()
+libraries['glade2'].ParseConfig ('pkg-config --cflags --libs libglade-2.0')
+
 libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
 
 libraries['ardour'] = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')
@@ -417,7 +420,10 @@ if env['SYSLIBS']:
 
     libraries['gtkmm2'] = LibraryInfo()
     libraries['gtkmm2'].ParseConfig ('pkg-config --cflags --libs gtkmm-2.0')
-
+    
+    libraries['libglademm'] = LibraryInfo()
+    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
+    
     libraries['soundtouch'] = LibraryInfo(LIBS='SoundTouch')
 
     coredirs = [
@@ -463,6 +469,9 @@ else:
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
+    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
+                                          LIBPATH='#libs/libglademm',
+                                          CPPPATH='#libs/libglademm')
 
     coredirs = [
         'libs/soundtouch',
@@ -483,10 +492,11 @@ else:
 	'libs/gtkmm2/atk',
 	'libs/gtkmm2/gdk',
 	'libs/gtkmm2/gtk',
+        'libs/libglademm',
 	'libs/libgnomecanvasmm',
 	'libs/flowcanvas',
         'libs/gtkmm2ext',
-        'gtk2_ardour',
+        'gtk2_ardour'
         ]
 
 opts.Save('scache.conf', env)
