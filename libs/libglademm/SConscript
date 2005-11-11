@@ -1,0 +1,14 @@
+# -*- python -*-
+import glob
+import os
+
+Import('env libraries')
+
+libglademm_files = glob.glob('libglademm/*.cc')
+
+libglademm = env.Copy()
+libglademm.Merge([libraries['gtk2'], libraries['glade2'], libraries['sigc2'], libraries['glibmm2'], libraries['pangomm'], libraries['atkmm'], libraries['gdkmm2'], libraries['gtkmm2']])
+
+libglade = libglademm.StaticLibrary('libglademm', libglademm_files)
+
+Default(libglade)
