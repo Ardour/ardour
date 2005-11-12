@@ -356,24 +356,23 @@ TimeAxisView::set_height (TrackHeight h)
 
 }
 
-
-gint
+bool
 TimeAxisView::name_entry_button_press (GdkEventButton *ev)
 {
 	if (ev->button == 3) {
-		return do_not_propagate (ev);
+		return true;
 	}
-	return FALSE;
+	return false
 }
 
-gint
+bool
 TimeAxisView::name_entry_button_release (GdkEventButton *ev)
 {
 	if (ev->button == 3) {
 		popup_display_menu (ev->time);
-		return stop_signal (name_entry, "button_release_event");
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 void

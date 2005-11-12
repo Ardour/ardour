@@ -455,11 +455,12 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 						       x, y,
 						       8, 8,
 						       0, 360 * 64);
-				get_window().draw_text (get_style()->get_font(),
-							get_style()->get_fg_gc(Gtk::STATE_NORMAL),
-							x + 6, y + 6,
-							puck->text,
-							puck->textlen);
+				// GTK2FIX : needs a pango layout
+				// get_window().draw_text (get_style()->get_font(),
+				// get_style()->get_fg_gc(Gtk::STATE_NORMAL),
+				// x + 6, y + 6,
+				// puck->text,
+				// puck->textlen);
 			}
 		}
 

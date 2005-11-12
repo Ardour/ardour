@@ -121,6 +121,9 @@ PluginUI::PluginUI (AudioEngine &engine, PluginInsert& pi, bool scrollable)
 	  engine(engine),
 	  button_table (initial_button_rows, initial_button_cols),
 	  output_table (initial_output_rows, initial_output_cols),
+	  hAdjustment(0.0, 0.0, 0.0),
+	  vAdjustment(0.0, 0.0, 0.0),
+	  scroller_view(hAdjustment, vAdjustment),
 	  automation_menu (0),
 	  is_scrollable(scrollable)
 {
@@ -476,8 +479,8 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 				control_ui->combo = new Gtk::ComboBoxText;
 				//control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
-				control_ui->combo->signal_unmap_event().connect( mem_fun(*this, &PluginUI::control_combo_changed), control_ui);
-				plugin.ParameterChanged.connect (bind (mem_fun(*this, &PluginUI::parameter_changed), control_ui));
+				control_ui->combo->signal_unmap_event().connect (bind (mem_fun(*this, &PluginUI::control_combo_changed), control_ui));
+				plugin.ParameterChanged.connect (bind (mem_fun (*this, &PluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
 				
@@ -746,7 +749,7 @@ PluginUI::control_port_toggled (ControlUI* cui)
 	}
 }
 
-gint
+bool
 PluginUI::control_combo_changed (GdkEventAny* ignored, ControlUI* cui)
 {
 	if (!cui->ignore_change) {
@@ -763,7 +766,7 @@ PluginUIWindow::plugin_going_away (ARDOUR::Redirect* ignored)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PluginUIWindow::plugin_going_away), ignored));
 	
-	_pluginui->stop_updating(0);
+	_pluginui->stop_updating();
 	delete_when_idle (this);
 }
 
@@ -786,24 +789,22 @@ PluginUI::redirect_active_changed (Redirect* r, void* src)
 	bypass_button.set_active (!r->active());
 }
 
-gint
-PluginUI::start_updating (GdkEventAny *ev)
+void
+PluginUI::start_updating ()
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 		screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
 			(mem_fun(*this, &PluginUI::output_update));
 	}
-	return FALSE;
 }
 
-gint 
-PluginUI::stop_updating (GdkEventAny *ev)
+void
+PluginUI::stop_updating ()
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 	}
-	return FALSE;
 }
 
 void
@@ -840,10 +841,10 @@ PluginUI::output_update ()
 	}
 }
 
-list<string> 
+vector<string> 
 PluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 {
-	list<string> enums;
+	vector<string> enums;
 	LadspaPlugin* lp = dynamic_cast<LadspaPlugin*> (&plugin);
 
 	cui->combo_map = new std::map<string, float>;

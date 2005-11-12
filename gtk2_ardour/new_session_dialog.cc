@@ -63,7 +63,8 @@ NewSessionDialog::NewSessionDialog (ARDOUR::AudioEngine& engine, bool startup, s
 	set_wmclass (_("ardour_new_session"), "Ardour");
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_keyboard_input (true);
-	set_policy (false, true, false);
+	// GTK2FIX
+	// set_policy (false, true, false);
 	set_modal (true);
 
 	/* sample rate */

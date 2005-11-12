@@ -173,14 +173,14 @@ Editor::route_display_selection_changed ()
 }
 
 void
-Editor::unselect_strip_in_display (TimeAxisView* tv)
+Editor::unselect_strip_in_display (TimeAxisView& tv)
 {
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 	Glib::RefPtr<TreeSelection> selection = route_list.get_selection();
 	
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		if ((*i)[route_display_columns.tv] == tv) { 
+		if ((*i)[route_display_columns.tv] == &tv) { 
 		       selection->unselect (*i);
 		}
 	}

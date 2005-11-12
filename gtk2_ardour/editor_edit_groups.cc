@@ -181,7 +181,7 @@ Editor::edit_group_selection_changed ()
 		} else {
 		  for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
 		    if ((*j)->edit_group() == group) {
-		      unselect_strip_in_display (*j);
+		      unselect_strip_in_display (**j);
 		    }
 		  }
 		}

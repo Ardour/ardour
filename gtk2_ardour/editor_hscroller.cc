@@ -26,7 +26,7 @@ using namespace std;
 using namespace ARDOUR;
 
 void
-Editor::hscroll_slider_allocate (GtkAllocation *alloc)
+Editor::hscroll_slider_allocate (Gtk::Allocation &alloc)
 {
 	//edit_hscroll_slider_width = alloc->width;
 	//edit_hscroll_slider_height = alloc->height ;

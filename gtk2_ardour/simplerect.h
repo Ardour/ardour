@@ -56,7 +56,7 @@ namespace Canvas
 //class Group;
 
 
-class SimpleRect : public Shape
+class SimpleRect : public Item
 {
   public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

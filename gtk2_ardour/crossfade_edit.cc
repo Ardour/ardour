@@ -507,7 +507,7 @@ CrossfadeEditor::Point::move_to (double nx, double ny, double xfract, double yfr
 }
 
 void
-CrossfadeEditor::canvas_allocation (GtkAllocation *alloc)
+CrossfadeEditor::canvas_allocation (Gtk::Allocation& alloc)
 {
 	if (toplevel) {
 		gnome_canvas_item_set (toplevel,

@@ -133,7 +133,7 @@ Editor::ruler_button_press (GdkEventButton* ev)
 	else if (minsec_ruler->is_realized() && ev->window == minsec_ruler->get_window()->gobj()) grab_widget = minsec_ruler;
 
 	if (grab_widget) {
-		Gtk::Main::grab_add (*grab_widget);
+		grab_widget->add_modal_grab ();
 		ruler_grabbed_widget = grab_widget;
 	}
 
@@ -189,7 +189,7 @@ Editor::ruler_button_release (GdkEventButton* ev)
 
 
 	if (ruler_grabbed_widget) {
-		Gtk::Main::grab_remove (*ruler_grabbed_widget);
+		ruler_grabbed_widget->remove_modal_grab();
 		ruler_grabbed_widget = 0;
 	}
 
@@ -605,8 +605,7 @@ Editor::update_ruler_visibility ()
 	if (ruler_shown[ruler_time_meter]) {
 		lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
 
-		gtk_object_getv (GTK_OBJECT(meter_group), 1, args) ;
-		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
+		gtk_object_get (GTK_OBJECT(meter_group), "y", &old_unit_pos);
 		if (tbpos != old_unit_pos) {
 			meter_group->move ( 0.0, tbpos - old_unit_pos);
 		}
@@ -622,8 +621,7 @@ Editor::update_ruler_visibility ()
 	
 	if (ruler_shown[ruler_time_tempo]) {
 		lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
-		gtk_object_getv (GTK_OBJECT(tempo_group), 1, args) ;
-		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
+		gtk_object_get (GTK_OBJECT(tempo_group), "y", &old_unit_pos);
 		if (tbpos != old_unit_pos) {
 			tempo_group->move(0.0, tbpos - old_unit_pos);
 		}
@@ -640,6 +638,7 @@ Editor::update_ruler_visibility ()
 		lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 		gtk_object_getv (GTK_OBJECT(marker_group), 1, args) ;
 		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
+		gtk_object_get (GTK_OBJECT(marker_group), "y", &old_unit_pos);
 		if (tbpos != old_unit_pos) {
 			marker_group->move ( 0.0, tbpos - old_unit_pos);
 		}
@@ -670,8 +669,7 @@ Editor::update_ruler_visibility ()
 
 	if (ruler_shown[ruler_time_transport_marker]) {
 		lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
-		gtk_object_getv (GTK_OBJECT(transport_marker_group), 1, args) ;
-		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
+		gtk_object_get (GTK_OBJECT(transport_marker_group), "y", &old_unit_pos);
 		if (tbpos != old_unit_pos) {
 			transport_marker_group->move ( 0.0, tbpos - old_unit_pos);
 		}

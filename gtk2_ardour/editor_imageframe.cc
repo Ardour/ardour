@@ -494,10 +494,10 @@ Editor::start_imageframe_grab(GnomeCanvasItem* item, GdkEvent* event)
 	   so move them to the top afterwards.
 	*/
 
-	gnome_canvas_item_raise_to_top(drag_info.item) ;
-	gnome_canvas_item_raise_to_top(drag_info.last_trackview->canvas_display) ;
-	//gnome_canvas_item_raise_to_top(time_line_group) ;
-	gnome_canvas_item_raise_to_top (cursor_group);
+	drag_info.item->raise_to_top();
+	drag_info.last_trackview->canvas_display->raise_to_top();
+	//time_line_group->raise_to_top();
+	cursor_group->raise_to_top ();
 
 	start_grab(event) ;
 
@@ -527,10 +527,10 @@ Editor::start_markerview_grab(GnomeCanvasItem* item, GdkEvent* event)
 	   so move them to the top afterwards.
 	*/
 
-	gnome_canvas_item_raise_to_top(drag_info.item) ;
-	gnome_canvas_item_raise_to_top(drag_info.last_trackview->canvas_display) ;
-	//gnome_canvas_item_raise_to_top(time_line_group) ;
-  	gnome_canvas_item_raise_to_top (cursor_group);
+	drag_info.item->raise_to_top();
+	drag_info.last_trackview->canvas_display->raise_to_top();
+	//time_line_group->raise_to_top();
+	cursor_group->raise_to_top ();
 
 	start_grab(event) ;
   
@@ -1152,11 +1152,13 @@ Editor::handle_new_imageframe_time_axis_view(std::string track_name, void* src)
 	iftav = new ImageFrameTimeAxis(track_name, *this, *session, track_canvas) ;
 	iftav->set_time_axis_name(track_name, this) ;
 	track_views.push_back(iftav) ;
-	const gchar *rowdata[1] ;
-	rowdata[0] = iftav->name().c_str() ;
-	route_list.rows().push_back(rowdata) ;
-	route_list.rows().back().set_data(iftav) ;
-	route_list.rows().back().select() ;
+
+	TreeModel::Row row = *(route_display_mode->append());
+
+	row[route_display_columns.text] = iftav->name();
+	row[route_display_columns.tv] = iftav;
+	route_list.get_selection()->select (row);
+
 	iftav->GoingAway.connect(bind(mem_fun(*this, &Editor::remove_route), (TimeAxisView*)iftav)) ;
 	iftav->gui_changed.connect(mem_fun(*this, &Editor::handle_gui_changes)) ;
 }
@@ -1167,11 +1169,13 @@ Editor::handle_new_imageframe_marker_time_axis_view(std::string track_name, Time
 	MarkerTimeAxis* mta = new MarkerTimeAxis (*this, *this->current_session(), track_canvas, track_name, marked_track) ;
 	((ImageFrameTimeAxis*)marked_track)->add_marker_time_axis(mta, this) ;
 	track_views.push_back(mta) ;
-	const gchar *rowdata[1] ;
-	rowdata[0] = mta->name().c_str() ;
-	route_list.rows().push_back(rowdata) ;
-	route_list.rows().back().set_data (mta) ;
-	route_list.rows().back().select() ;
+
+	TreeModel::Row row = *(route_display_mode->append());
+
+	row[route_display_columns.text] = mta->name();
+	row[route_display_columns.tv] = mta;
+	route_list.get_selection()->select (row);
+
 	mta->GoingAway.connect(bind(mem_fun(*this, &Editor::remove_route), (TimeAxisView*)mta)) ;
  }
 

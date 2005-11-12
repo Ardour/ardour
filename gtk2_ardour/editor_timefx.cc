@@ -121,12 +121,14 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 
 	current_timestretch->progress_bar.set_fraction (0.0f);
 	current_timestretch->first_cancel = current_timestretch->cancel_button.signal_clicked().connect (bind (mem_fun (*current_timestretch, &ArdourDialog::stop), -1));
-	current_timestretch->first_delete = current_timestretch->signal_delete_event().connect (mem_fun (*current_timestretch, &ArdourDialog::wm_close_event));
+	// GTK2FIX
+	// current_timestretch->first_delete = current_timestretch->signal_delete_event().connect (mem_fun (*current_timestretch, &ArdourDialog::wm_close_event));
 
 	current_timestretch->run ();
 
 	if (current_timestretch->run_status() != 1) {
-		current_timestretch->close ();
+		// GTK2FIX
+		// current_timestretch->close ();
 		return 1; /* no error, but we did nothing */
 	}
 
@@ -161,8 +163,9 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 	}
 
 	c.disconnect ();
-
-	current_timestretch->close ();
+	
+	// GTK2FIX
+	// current_timestretch->close ();
 	return current_timestretch->status;
 }
 

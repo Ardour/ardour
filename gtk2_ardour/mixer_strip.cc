@@ -373,11 +373,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press));
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release));
 
-	gain_automation_style_button.signal_button_press_event().connect_after (ptr_fun (do_not_propagate));
-	pan_automation_style_button.signal_button_press_event().connect_after (ptr_fun (do_not_propagate));
-	gain_automation_state_button.signal_button_press_event().connect_after (ptr_fun (do_not_propagate));
-	pan_automation_state_button.signal_button_press_event().connect_after (ptr_fun (do_not_propagate));
-
 	gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event));
 	gain_automation_style_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event));
 	pan_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event));
@@ -1139,7 +1134,8 @@ MixerStrip::setup_comment_editor ()
 	comment_area.signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
 	comment_area.signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
 	comment_area.changed.connect (mem_fun(*this, &MixerStrip::comment_edited));
-	comment_area.signal_button_release_event().connect_after (ptr_fun (do_not_propagate));
+	// GTK2FIX
+	// comment_area.signal_button_release_event().connect_after (ptr_fun (do_not_propagate));
 	comment_area.show ();
 
 	comment_window->add (comment_area);
@@ -1153,11 +1149,11 @@ MixerStrip::comment_changed (void *src)
 	
 	if (src != this) {
 		ignore_comment_edit = true;
-		comment_area.freeze ();
+		// comment_area.freeze ();
 		//comment_area.get_buffer()->delete_text (0, -1);
 		//comment_area.set_point (0);
 		comment_area.get_buffer()->set_text (_route.comment());
-		comment_area.thaw ();
+		// comment_area.thaw ();
 		ignore_comment_edit = false;
 	}
 }

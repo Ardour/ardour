@@ -34,9 +34,6 @@
 #include <gtkmm/layout.h>
 #include <gtkmm/comboboxtext.h>
 
-#include <libgnomecanvas/libgnomecanvas.h>
-#include <libgnomecanvas/gnome-canvas-util.h>
-
 #include <libgnomecanvasmm/canvas.h>
 #include <libgnomecanvasmm/polygon.h>
 #include <libgnomecanvasmm/text.h>
@@ -379,7 +376,7 @@ class Editor : public PublicEditor
 	Editing::MouseMode mouse_mode;
 	void      mouse_insert (GdkEventButton *);
 
-	void pane_allocation_handler (GtkAllocation*, Gtk::Paned*);
+	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 
 	Gtk::HPaned   canvas_region_list_pane;
 	Gtk::HPaned   track_list_canvas_pane;
@@ -587,11 +584,11 @@ class Editor : public PublicEditor
 	Gnome::Canvas::Line* range_marker_line;
 	Gnome::Canvas::Line* transport_marker_line;
 
-	Gnome::Canvas::Points* tempo_line_points;
-	Gnome::Canvas::Points* meter_line_points;
-	Gnome::Canvas::Points* marker_line_points;
-	Gnome::Canvas::Points* range_marker_line_points;
-	Gnome::Canvas::Points* transport_marker_line_points;
+	Gnome::Canvas::Points tempo_line_points;
+	Gnome::Canvas::Points meter_line_points;
+	Gnome::Canvas::Points marker_line_points;
+	Gnome::Canvas::Points range_marker_line_points;
+	Gnome::Canvas::Points transport_marker_line_points;
 
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
@@ -608,19 +605,18 @@ class Editor : public PublicEditor
 	Gtk::HBox          time_button_hbox;
 
 	struct Cursor {
-	    Editor&             editor;
-	    Gnome::Canvas::Points* points;
-	    Gnome::Canvas::Item*   canvas_item;
-	    jack_nframes_t      current_frame;
-	    GtkSignalFunc       callback;
-		double				length;
+	    Editor&               editor;
+	    Gnome::Canvas::Points points;
+	    Gnome::Canvas::Item*  canvas_item;
+	    jack_nframes_t        current_frame;
+	    double		  length;
 
-	    Cursor (Editor&, const string& color, GtkSignalFunc callback);
+	    Cursor (Editor&, const string& color, bool (Editor::*)(GdkEvent*));
 	    ~Cursor ();
 
 	    void set_position (jack_nframes_t);
 	    void set_length (double units);
-		void set_y_axis (double position);
+	    void set_y_axis (double position);
 	};
 
 	friend struct Cursor; /* it needs access to several private
@@ -670,7 +666,7 @@ class Editor : public PublicEditor
 	bool                edit_hscroll_dragging;
 	double              edit_hscroll_drag_last;
 	
-	void hscroll_slider_allocate (GtkAllocation *);
+	void hscroll_slider_allocate (Gtk::Allocation &);
 	gint hscroll_slider_expose (GdkEventExpose*);
 	gint hscroll_slider_button_press (GdkEventButton*);
 	gint hscroll_slider_button_release (GdkEventButton*);
@@ -1454,11 +1450,11 @@ class Editor : public PublicEditor
 	void end_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event);
 
 	
-	Gnome::Canvas::Item      *range_bar_drag_rect;
-	Gnome::Canvas::Item      *transport_bar_drag_rect;
-	Gnome::Canvas::Item      *marker_drag_line;
-	Gnome::Canvas::Points    *marker_drag_line_points;
-	Gnome::Canvas::Item      *range_marker_drag_rect;
+	Gnome::Canvas::Item*   range_bar_drag_rect;
+	Gnome::Canvas::Item*   transport_bar_drag_rect;
+	Gnome::Canvas::Item*   marker_drag_line;
+	Gnome::Canvas::Points  marker_drag_line_points;
+	Gnome::Canvas::Item*   range_marker_drag_rect;
 
 	void update_marker_drag_item (ARDOUR::Location *);
 	
@@ -1749,8 +1745,8 @@ class Editor : public PublicEditor
 	void current_mixer_strip_hidden ();
 	void current_mixer_strip_removed ();
 
-	void detach_tearoff (Gtk::Box* b, Gtk::Widget* w);
-	void reattach_tearoff (Gtk::Box* b, Gtk::Widget* w, int32_t n);
+	void detach_tearoff (Gtk::Box* b, Gtk::Window* w);
+	void reattach_tearoff (Gtk::Box* b, Gtk::Window* w, int32_t n);
 
 	/* nudging tracks */
 

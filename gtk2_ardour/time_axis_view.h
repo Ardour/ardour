@@ -195,14 +195,14 @@ class TimeAxisView : public virtual AxisView
 	 *
 	 * @param ev the event
 	 */
-	virtual gint name_entry_button_press (GdkEventButton *ev);
+	virtual bool name_entry_button_press (GdkEventButton *ev);
 
 	/**
 	 * Handle mouse relaese on our LHS control name entry.
 	 * 
 	 *@ param ev the event
 	 */
-	virtual gint name_entry_button_release (GdkEventButton *ev);
+	virtual bool name_entry_button_release (GdkEventButton *ev);
 
 	/**
 	 * Handle mouse relaese on our LHS control name ebox.

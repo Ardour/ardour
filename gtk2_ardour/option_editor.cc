@@ -950,9 +950,6 @@ OptionEditor::setup_midi_options ()
 	int n;
 	ToggleButton* tb;
 	RadioButton* rb;
-	RadioButton* first_mtc_button = 0;
-	RadioButton* first_mmc_button = 0;
-	RadioButton* first_midi_button = 0;
 
 	Gtk::Table* table = manage (new Table (ports.size() + 4, 9));
 
@@ -1012,9 +1009,9 @@ OptionEditor::setup_midi_options ()
 		newpair.second.push_back (rb);
 		rb->set_name ("OptionEditorToggleButton");
 		if (n == 0) {
-			first_mtc_button = rb;
+			mtc_button_group = rb->get_group();
 		} else {
-			rb->set_group (first_mtc_button->get_group());
+			rb->set_group (mtc_button_group);
 		}
 		table->attach (*rb, 4, 5, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
@@ -1027,9 +1024,9 @@ OptionEditor::setup_midi_options ()
 		newpair.second.push_back (rb);
 		rb->set_name ("OptionEditorToggleButton");
 		if (n == 0) {
-			first_mmc_button = rb;
+			mmc_button_group = rb->get_group();
 		} else {
-			rb->set_group (first_mmc_button->get_group());
+			rb->set_group (mmc_button_group);
 		}
 		table->attach (*rb, 6, 7, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb));
@@ -1042,9 +1039,9 @@ OptionEditor::setup_midi_options ()
 		newpair.second.push_back (rb);
 		rb->set_name ("OptionEditorToggleButton");
 		if (n == 0) {
-			first_midi_button = rb;
+			midi_button_group = rb->get_group();
 		} else {
-			rb->set_group (first_midi_button->get_group());
+			rb->set_group (midi_button_group);
 		}
 		table->attach (*rb, 8, 9, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb));
@@ -1651,8 +1648,9 @@ OptionEditor::setup_misc_options()
 	connect_box->set_spacing (3);
 	connect_box->set_border_width (8);
 
-	auto_connect_output_manual_button.set_group (auto_connect_output_master_button.get_group());
-	auto_connect_output_physical_button.set_group (auto_connect_output_master_button.get_group());
+	auto_connect_output_button_group = auto_connect_output_master_button.get_group();
+	auto_connect_output_manual_button.set_group (auto_connect_output_button_group);
+	auto_connect_output_physical_button.set_group (auto_connect_output_button_group);
 
 	Gtk::HBox* useless_box = manage (new HBox);
 	useless_box->pack_start (auto_connect_inputs_button, false, false);
@@ -1991,7 +1989,7 @@ OptionEditor::fixup_combo_size (Gtk::Combo& combo, vector<string>& strings)
 
 	const guint32 FUDGE = 10; // Combo's are stupid - they steal space from the entry for the button
 
-	set_size_request_to_display_given_text (*combo.get_entry(), maxstring.c_str(), 10 + FUDGE, 10);
+	set_size_request_to_display_given_text (combo, maxstring.c_str(), 10 + FUDGE, 10);
 }
 
 void

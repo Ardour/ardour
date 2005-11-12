@@ -71,8 +71,8 @@ class PlugUIBase : public sigc::trackable
 	virtual ~PlugUIBase() {}
 
 	virtual gint get_preferred_height () = 0;
-	virtual gint start_updating(GdkEventAny*) = 0;
-	virtual gint stop_updating(GdkEventAny*) = 0;
+	virtual void start_updating() = 0;
+	virtual void stop_updating() = 0;
 
   protected:
 	ARDOUR::PluginInsert& insert;
@@ -94,8 +94,8 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	
 	gint get_preferred_height () { return prefheight; }
 
-	gint start_updating(GdkEventAny*);
-	gint stop_updating(GdkEventAny*);
+	void start_updating();
+	void stop_updating();
 
   private:
 	ARDOUR::AudioEngine &engine;
@@ -108,6 +108,8 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Table output_table;
 
 	Gtk::ScrolledWindow scroller;
+	Gtk::Adjustment hAdjustment;
+	Gtk::Adjustment vAdjustment;
 	Gtk::Viewport scroller_view;
 	Gtk::Label nameinfo_label;
 	Gtk::Label paraminfo_label;
@@ -179,12 +181,12 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	
 	void build (ARDOUR::AudioEngine &);
 	ControlUI* build_control_ui (ARDOUR::AudioEngine &, guint32 port_index, MIDI::Controllable *);
-	std::list<string> setup_scale_values(guint32 port_index, ControlUI* cui);
+	std::vector<string> setup_scale_values(guint32 port_index, ControlUI* cui);
 	void control_adjustment_changed (ControlUI* cui);
 	void parameter_changed (uint32_t, float, ControlUI* cui);
 	void update_control_display (ControlUI* cui);
 	void control_port_toggled (ControlUI* cui);
-	gint control_combo_changed (GdkEventAny* ignored, ControlUI* cui);
+	bool control_combo_changed (GdkEventAny* ignored, ControlUI* cui);
 	gint entry_focus_event (GdkEventFocus* ev);
 
 	void redirect_active_changed (ARDOUR::Redirect*, void*);
@@ -222,8 +224,8 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	~VSTPluginUI ();
 
 	gint get_preferred_height ();
-	gint start_updating(GdkEventAny*) { return 0; }
-	gint stop_updating(GdkEventAny*) { return 0; }
+	void start_updating() {}
+	void stop_updating() {}
 
 	int package (Gtk::Window&);
 

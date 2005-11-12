@@ -926,7 +926,7 @@ Editor::button_release_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType
 			break;
 
 		case MarkerItem:
-			remove_marker (item, &event);
+			remove_marker (item, event);
 			break;
 
 		case RegionItem:
@@ -1941,9 +1941,9 @@ Editor::update_marker_drag_item (Location *location)
 	double x2 = frame_to_pixel (location->end());
 
 	if (location->is_mark()) {
-		marker_drag_line_points->coords[0] = x1;
-		marker_drag_line_points->coords[2] = x1;
-		marker_drag_line->set_property ("points", marker_drag_line_points);
+		marker_drag_line_points[0].set_x (x1);
+		marker_drag_line_points[1].set_x (x1);
+		marker_drag_line->set_property ("points", marker_drag_line_points.gobj());
 	}
 	else {
 		range_marker_drag_rect->set_property ("x1", x1);
@@ -4122,7 +4122,7 @@ Editor::drag_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event)
 	jack_nframes_t start = 0;
 	jack_nframes_t end = 0;
 	
-	GnomeCanvasItem * crect = (range_marker_op == CreateRangeMarker) ? range_bar_drag_rect: transport_bar_drag_rect;
+	Gnome::Canvas::Item* crect = (range_marker_op == CreateRangeMarker) ? range_bar_drag_rect: transport_bar_drag_rect;
 	
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 		snap_to (drag_info.current_pointer_frame);
@@ -4157,7 +4157,7 @@ Editor::drag_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event)
 			
 			temp_location->set (start, end);
 			
-			gnome_canvas_item_show (crect);
+			crect->show ();
 
 			update_marker_drag_item (temp_location);
 			range_marker_drag_rect->show();
@@ -4177,7 +4177,8 @@ Editor::drag_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event)
 
 		double x1 = frame_to_pixel (start);
 		double x2 = frame_to_pixel (end);
-		gnome_canvas_item_set (crect, "x1", x1, "x2", x2, NULL);
+		crect->set_property ("x1", x1);
+		crect->set_property ("x2", x2);
 
 		update_marker_drag_item (temp_location);
 	}

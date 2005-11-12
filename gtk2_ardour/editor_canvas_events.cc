@@ -317,10 +317,8 @@ gint
 Editor::track_canvas_motion (GnomeCanvasItem *item, GdkEvent *ev)
 {
 	if (verbose_cursor_visible) {
-		gnome_canvas_item_set (verbose_canvas_cursor,
-				     "x", ev->motion.x + 20,
-				     "y", ev->motion.y + 20,
-				     NULL);
+		verbose_canvas_cursor->set_property ("x", ev->motion.x + 20);
+		verbose_canvas_cursor->set_property ("y", ev->motion.y + 20);
 	}
 	return FALSE;
 }

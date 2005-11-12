@@ -998,13 +998,15 @@ Editor::scroll_tracks_up ()
 void
 Editor::scroll_tracks_down_line ()
 {
-	edit_vscrollbar.default_vmotion (0, 10);
+	GtkAdjustment* adj = edit_vscrollbar.get_adjustment();
+	adj->set_value (adj->get_value() + 10);
 }
 
 void
 Editor::scroll_tracks_up_line ()
 {
-	edit_vscrollbar.default_vmotion (0, -10);
+	GtkAdjustment* adj = edit_vscrollbar.get_adjustment();
+	adj->set_value (adj->get_value() - 10);
 }
 
 /* ZOOM */
@@ -1461,7 +1463,7 @@ Editor::clear_locations ()
 void
 Editor::insert_region_list_drag (AudioRegion& region)
 {
-	gint x, y;
+	double x, y;
 	double wx, wy;
 	double cx, cy;
 	TimeAxisView *tv;
@@ -1471,7 +1473,7 @@ Editor::insert_region_list_drag (AudioRegion& region)
 	
 	track_canvas.get_pointer (x, y);
 
-	gnome_canvas_window_to_world (GNOME_CANVAS(track_canvas), x, y, &wx, &wy);
+	track_canvas.window_to_world (x, y, wx, wy);
 	
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
@@ -1526,13 +1528,14 @@ Editor::insert_region_list_selection (float times)
 		return;
 	}
 	
-	Gtk::CTree_Helpers::SelectionList& selected = region_list_display.selection();
+	RefPtr<TreeSelection> selected = region_list_display.get_selection();
 	
-	if (selected.empty()) {
+	if (selected.count_selected_rows() != 1) {
 		return;
 	}
 	
-	Region* region = reinterpret_cast<Region *> (selected.front().get_data ());
+	TreeModel::iterator i = region_list_display.get_selection()->get_selected();
+	Region* region = (*i)[region_list_display_columns.region];
 
 	begin_reversible_command (_("insert region"));
 	session->add_undo (playlist->get_memento());
@@ -1874,7 +1877,7 @@ Editor::import_progress_timeout (void *arg)
 	}
 
 	if (import_status.doing_what == "building peak files") {
-		interthread_progress_bar.set_activity_mode (true);
+		interthread_progress_bar.pulse ();
 		return FALSE;
 	} else {
 		interthread_progress_bar.set_fraction (import_status.progress/100);
@@ -2104,7 +2107,7 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 		}
 	}
 
-	track_canvas_scroller.get_window()->set_cursor (GDK_WATCH);
+	track_canvas_scroller.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
 
 	/* make the proper number of channels in the region */
@@ -2141,16 +2144,18 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 		
 		/* make sure we can see it in the list */
 
-		Gtk::CTree_Helpers::RowList::iterator external_node;
-		external_node = region_list_display.rows().begin();
-		++external_node; /* its the second node, always */
-		external_node->expand_recursive ();
+                /* its the second node, always */
+
+		// GTK2FIX ?? is it still always the 2nd node
+
+		TreeModel::Path path ("2");
+		region_list_display.expand_row (path, true);
 
 		ARDOUR_UI::instance()->flush_pending ();
 	}
 
   out:
-	track_canvas_scroller.get_window()->set_cursor (current_canvas_cursor);
+	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 }
 
 void
@@ -2288,7 +2293,7 @@ Editor::insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jac
 		return;
 	}
 
-	track_canvas_scroller.get_window()->set_cursor (GDK_WATCH);
+	track_canvas_scroller.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
 
 	/* make the proper number of channels in the region */
@@ -2331,7 +2336,7 @@ Editor::insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jac
 	}
 
   out:
-	track_canvas_scroller.get_window()->set_cursor (current_canvas_cursor);
+	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 	return;
 }
 
@@ -2598,13 +2603,14 @@ Editor::region_fill_selection ()
 
 	Region *region;
 
-	Gtk::CTree_Helpers::SelectionList& selected = region_list_display.selection();
-	
-	if (selected.empty()) {
+	RefPtr<TreeSelection> selected = region_list_display.get_selection();
+
+	if (selected.count_selected_rows() != 1) {
 		return;
 	}
 
-	region = reinterpret_cast<Region *> (selected.front().get_data());
+	TreeModel::iterator i = region_list_display.get_selection()->get_selected();
+	region = (*i)[region_list_display_columns.region];
 
 	jack_nframes_t start = selection->time[clicked_selection].start;
 	jack_nframes_t end = selection->time[clicked_selection].end;
@@ -2918,7 +2924,7 @@ Editor::freeze_route ()
 
 	pthread_create (&itt.thread, 0, _freeze_thread, this);
 
-	track_canvas_scroller.get_window()->set_cursor (Gdk::WATCH);
+	track_canvas_scroller.get_window()->set_cursor (Cursor (WATCH));
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
@@ -2927,7 +2933,7 @@ Editor::freeze_route ()
 	interthread_progress_connection.disconnect ();
 	interthread_progress_window->hide_all ();
 	current_interthread_info = 0;
-	track_canvas_scroller.get_window()->set_cursor (current_canvas_cursor);
+	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 }
 
 void
@@ -3164,11 +3170,11 @@ Editor::paste (float times)
 void
 Editor::mouse_paste ()
 {
-	gint x, y;
+	double x, y;
 	double wx, wy;
 	track_canvas.get_pointer (x, y);
 
-	gnome_canvas_window_to_world (GNOME_CANVAS(track_canvas), x, y, &wx, &wy);
+	track_canvas.window_to_world (x, y, wx, wy);
 	
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
@@ -3215,14 +3221,17 @@ Editor::paste_internal (jack_nframes_t position, float times)
 void
 Editor::paste_named_selection (float times)
 {
-	Gtk::CList_Helpers::SelectionList& selected = named_selection_display.selection();
 	TrackSelection::iterator i;
 
-	if (selected.empty() || selection->tracks.empty()) {
+	RefPtr<TreeSelection> selected = named_selection_display.get_selection();
+
+	if (selected.count_selected_rows() == 0 || selection->tracks.empty()) {
 		return;
 	}
 
-	NamedSelection* ns = static_cast<NamedSelection*> (selected.front()->get_data ());
+	TreeModel::iterator i = selected->get_selected();
+	NamedSection* ns = (*i)[named_selection_columns.selection];
+
 	list<Playlist*>::iterator chunk;
 	list<Playlist*>::iterator tmp;
 
@@ -3457,7 +3466,7 @@ Editor::normalize_region ()
 
 	begin_reversible_command (_("normalize"));
 
-	track_canvas_scroller.get_window()->set_cursor (wait_cursor);
+	track_canvas_scroller.get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
 	for (AudioRegionSelection::iterator r = selection->audio_regions.begin(); r != selection->audio_regions.end(); ++r) {
@@ -3467,7 +3476,7 @@ Editor::normalize_region ()
 	}
 
 	commit_reversible_command ();
-	gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
+	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 }
 
 
@@ -3514,7 +3523,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 
 	begin_reversible_command (command);
 
-	track_canvas_scroller.get_window()->set_cursor (wait_cursor);
+	track_canvas_scroller.get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
 	for (AudioRegionSelection::iterator r = selection->audio_regions.begin(); r != selection->audio_regions.end(); ) {
@@ -3543,7 +3552,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 	selection->audio_regions.clear ();
 
   out:
-	gdk_window_set_cursor (track_canvas_scroller.get_window()->gobj(), current_canvas_cursor);
+	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 }
 
 void

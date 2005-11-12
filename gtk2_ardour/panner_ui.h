@@ -67,6 +67,8 @@ class PannerUI : public Gtk::HBox
 	Panner2d*   panner;
 
 	Gtk::VBox           pan_bar_packer;
+	Gtk::Adjustment	    hAdjustment;
+	Gtk::Adjustment     vAdjustment;
 	Gtk::Viewport       panning_viewport;
 	Gtk::EventBox       panning_up;
 	Gtk::Arrow          panning_up_arrow;

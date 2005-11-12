@@ -85,6 +85,9 @@ static const gchar * revdblarrow_xpm[] = {
 PannerUI::PannerUI (IO& io, Session& s)
 	: _io (io),
 	  _session (s),
+	  hAdjustment(0.0, 0.0, 0.0),
+	  vAdjustment(0.0, 0.0, 0.0),
+	  panning_viewport(hAdjustment, vAdjustment),
 	  panning_up_arrow (Gtk::ARROW_UP, Gtk::SHADOW_OUT),
 	  panning_down_arrow (Gtk::ARROW_DOWN, Gtk::SHADOW_OUT),
 	  panning_link_button (_("link"))

@@ -135,7 +135,7 @@ class CrossfadeEditor : public ArdourDialog
     gint point_event (GnomeCanvasItem*, GdkEvent* event);
     gint curve_event (GnomeCanvasItem*, GdkEvent* event);
 
-    void canvas_allocation (GtkAllocation*);
+    void canvas_allocation (Gtk::Allocation&);
     void add_control_point (double x, double y);
     Point* make_point ();
     void redraw ();

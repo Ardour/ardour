@@ -33,14 +33,14 @@ namespace Canvas
 {
 
 SimpleRect::SimpleRect(Group& parentx, double x1, double y1, double x2, double y2)
-: Shape(GNOME_CANVAS_SHAPE(g_object_new(get_type(),0)))
+: Item(GNOME_CANVAS_ITEM(g_object_new(get_type(),0)))
 {
   item_construct(parentx);
   set("x1",x1,"y1",y1,"x2",x2,"y2",y2,0);
 }
 
 SimpleRect::SimpleRect(Group& parentx)
-: Shape(GNOME_CANVAS_SHAPE(g_object_new(get_type(),0)))
+: Item(GNOME_CANVAS_ITEM(g_object_new(get_type(),0)))
 {
   item_construct(parentx);
 }
@@ -57,7 +57,7 @@ namespace
 namespace Glib
 {
 
-Gnome::Canvas::SimpleRect* wrap(GnomeCanvasRect* object, bool take_copy)
+Gnome::Canvas::SimpleRect* wrap(GnomeCanvasSimpleRect* object, bool take_copy)
 {
   return dynamic_cast<Gnome::Canvas::SimpleRect *> (Glib::wrap_auto ((GObject*)(object), take_copy));
 }
@@ -78,7 +78,7 @@ const Glib::Class& SimpleRect_Class::init()
   if(!gtype_) // create the GType if necessary
   {
     // Glib::Class has to know the class init function to clone custom types.
-    class_init_func_ = &Shape_Class::class_init_function;
+    class_init_func_ = &SimpleRect_Class::class_init_function;
 
     // This is actually just optimized away, apparently with no harm.
     // Make sure that the parent type has been created.
@@ -109,14 +109,14 @@ Glib::ObjectBase* SimpleRect_Class::wrap_new(GObject* o)
 /* The implementation: */
 
 SimpleRect::SimpleRect(const Glib::ConstructParams& construct_params)
-: Shape(construct_params)
+: Item(construct_params)
 {
   }
 
 SimpleRect::SimpleRect(GnomeCanvasSimpleRect* castitem)
-: Shape ((GnomeCanvasShape*)(castitem))
+: Item ((GnomeCanvasItem*)(castitem))
 {
-  }
+}
 
 SimpleRect::~SimpleRect()
 {

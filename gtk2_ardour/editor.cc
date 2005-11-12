@@ -890,13 +890,13 @@ Editor::initialize_canvas ()
 	transport_bar_drag_rect->set_property ("outline_pixels", 0);
 	transport_bar_drag_rect->hide ();
 	
-	marker_drag_line_points->push_back(Gnome::Art::Point(0.0, 0.0));
-	marker_drag_line_points->push_back(Gnome::Art::Point(0.0, 0.0));
+	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
+	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
 
 	marker_drag_line = new Gnome::Canvas::Line (*track_canvas.root());
 	marker_drag_line->set_property ("width_pixels", 1);
 	marker_drag_line->set_property("fill_color_rgba", color_map[cMarkerDragLine]);
-	marker_drag_line->set_property("points", marker_drag_line_points);
+	marker_drag_line->set_property("points", marker_drag_line_points.gobj());
 	marker_drag_line->hide();
 
 	range_marker_drag_rect = new Gnome::Canvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
@@ -935,7 +935,7 @@ Editor::initialize_canvas ()
 	zoom_rect->set_property ("outline_pixels", 1);
 	zoom_rect->hide();
 	
-	zoom_rect->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_zoom_rect_event));
+	zoom_rect->signal_event().connect (mem_fun (*this, &Editor::canvas_zoom_rect_event));
 	
 	// used as rubberband rect
 	rubberband_rect = new Gnome::Canvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
@@ -944,30 +944,30 @@ Editor::initialize_canvas ()
 	rubberband_rect->set_property ("outline_pixels", 1);
 	rubberband_rect->hide();
 	
-	tempo_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_tempo_bar_event));
-	meter_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_meter_bar_event));
-	marker_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_marker_bar_event));
-	range_marker_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_range_marker_bar_event));
-	transport_marker_bar->signal_event().connect (mem_fun (*this, &PublicEditor::canvas_transport_marker_bar_event));
+	tempo_bar->signal_event().connect (mem_fun (*this, &Editor::canvas_tempo_bar_event));
+	meter_bar->signal_event().connect (mem_fun (*this, &Editor::canvas_meter_bar_event));
+	marker_bar->signal_event().connect (mem_fun (*this, &Editor::canvas_marker_bar_event));
+	range_marker_bar->signal_event().connect (mem_fun (*this, &Editor::canvas_range_marker_bar_event));
+	transport_marker_bar->signal_event().connect (mem_fun (*this, &Editor::canvas_transport_marker_bar_event));
 	
 	/* separator lines */
 
-	tempo_line_points->push_back(Gnome::Art::Point(0, timebar_height));
-	tempo_line_points->push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
+	tempo_line_points.push_back(Gnome::Art::Point(0, timebar_height));
+	tempo_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 	
 	tempo_line = new Gnome::Canvas::Line (*tempo_group, *tempo_line_points);
 	tempo_line->set_property ("width_pixels", 0);
 	tempo_line->set_property ("fill_color", "#000000");
 
-	meter_line_points->push_back(Gnome::Art::Point (0, timebar_height));
-	meter_line_points->push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
+	meter_line_points.push_back(Gnome::Art::Point (0, timebar_height));
+	meter_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 
 	meter_line = new Gnome::Canvas::Line (*meter_group, *meter_line_points);
 	meter_line->set_property ("width_pixels", 0);
 	meter_line->set_property ("fill_color", "#000000");
 
-	marker_line_points->push_back(Gnome::Art::Point (0, timebar_height));
-	marker_line_points->push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
+	marker_line_points.push_back(Gnome::Art::Point (0, timebar_height));
+	marker_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 
 	marker_line =  new Gnome::Canvas::Line (*marker_group, *marker_line_points);
 	marker_line->set_property ("width_pixels", 0);
@@ -988,8 +988,8 @@ Editor::initialize_canvas ()
 	double time_width = FLT_MAX/frames_per_unit;
 	time_canvas.set_scroll_region(0.0, 0.0, time_width, time_height);
 	
-	edit_cursor = new Cursor (*this, "blue", (GtkSignalFunc) _canvas_edit_cursor_event);
-	playhead_cursor = new Cursor (*this, "red", (GtkSignalFunc) _canvas_playhead_cursor_event);
+	edit_cursor = new Cursor (*this, "blue", canvas_edit_cursor_event);
+	playhead_cursor = new Cursor (*this, "red", canvas_playhead_cursor_event);
 	
 	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
 }
@@ -1342,29 +1342,32 @@ Editor::reset_scrolling_region (GtkAllocation *alloc)
 	if (playhead_cursor) playhead_cursor->set_length (canvas_alloc_height);
 
 	if (marker_drag_line) {
-		marker_drag_line_points->coords[3] = canvas_height;
-		// cerr << "set mlA points, nc = " << marker_drag_line_points->num_points << endl;
-		marker_drag_line->set_property("points", marker_drag_line_points);
+		marker_drag_line_points[1].set_y (canvas_height);
+		marker_drag_line->set_property("points", marker_drag_line_points.gobj());
 	}
 	if (range_marker_drag_rect) {
-	  range_marker_drag_rect->set_property("y1", 0.0);
-	  range_marker_drag_rect->set_property("y2", (double) canvas_height);
+		range_marker_drag_rect->set_property("y1", 0.0);
+		range_marker_drag_rect->set_property("y2", (double) canvas_height);
 	}
+
 	if (transport_loop_range_rect) {
-	  transport_loop_range_rect->set_property("y1", 0.0);
-	  transport_loop_range_rect->set_property("y2", (double) canvas_height);
+		transport_loop_range_rect->set_property("y1", 0.0);
+		transport_loop_range_rect->set_property("y2", (double) canvas_height);
 	}
+
 	if (transport_punch_range_rect) {
-	  transport_punch_range_rect->set_property("y1", 0.0);
-	  transport_punch_range_rect->set_property("y2", (double) canvas_height);
+		transport_punch_range_rect->set_property("y1", 0.0);
+		transport_punch_range_rect->set_property("y2", (double) canvas_height);
 	}
+
 	if (transport_punchin_line) {
-	  transport_punchin_line->set_property("y1", 0.0);
-	  transport_punchin_line->set_property("y2", (double) canvas_height);
+		transport_punchin_line->set_property("y1", 0.0);
+		transport_punchin_line->set_property("y2", (double) canvas_height);
 	}
+
 	if (transport_punchout_line) {
-	  transport_punchout_line->set_property("y1", 0.0);
-	  transport_punchout_line->set_property("y2", (double) canvas_height);
+		transport_punchout_line->set_property("y1", 0.0);
+		transport_punchout_line->set_property("y2", (double) canvas_height);
 	}
 		
 	update_fixed_rulers ();
@@ -1644,7 +1647,8 @@ Editor::connect_to_session (Session *t)
 	route_display_model.clear ();
 	session->foreach_route (this, &Editor::handle_new_route);
 	// route_list.select_all ();
-	route_list.sort ();
+	// GTK2FIX
+	//route_list.sort ();
 	route_list_reordered ();
 	//route_list.thaw ();
 
@@ -1709,48 +1713,53 @@ Editor::connect_to_session (Session *t)
 void
 Editor::build_cursors ()
 {
-        Glib::RefPtr <Gdk::Pixmap> source, mask;
 	Gdk::Color fg ("#ff0000"); /* Red. */
 	Gdk::Color bg ("#0000ff"); /* Blue. */
 
-        Gdk::Pixmap::create_from_data (source, hand_bits,
-				       hand_width, hand_height, 1, fg, bg);
-	Gdk::Pixmap::create_from_data(mask, handmask_bits,
-				      handmask_width, handmask_height, 1, fg, bg);
-	grabber_cursor = new Gdk::Cursor (source, mask, fg, bg, hand_x_hot, hand_y_hot);
-	source->unreference();
-	mask->unreference();
-	
+	{
+		Glib::RefPtr <Gdk::Pixmap> source, mask;
+		source = Gdk::Pixmap::create_from_data (source, hand_bits,
+							hand_width, hand_height, 1, fg, bg);
+		Gdk::Pixmap::create_from_data(mask, handmask_bits,
+					      handmask_width, handmask_height, 1, fg, bg);
+		grabber_cursor = new Gdk::Cursor (source, mask, fg, bg, hand_x_hot, hand_y_hot);
+	}
+
 	Gdk::Color mbg ("#000000" ); /* Black */
 	Gdk::Color mfg ("#0000ff" ); /* Blue. */
-	
-	Gdk::Pixmap::create_from_data (source, mag_bits,
-				       mag_width, mag_height, 1, fg, bg);
-	Gdk::Pixmap::create_from_data (mask, magmask_bits,
-				       mag_width, mag_height, 1, fg, bg);
-	zoom_cursor = new Gdk::Cursor (source, mask, mfg, mbg, mag_x_hot, mag_y_hot);
-	source->unreference();
-	mask->unreference();
+
+	{
+		Glib::RefPtr <Gdk::Pixmap> source, mask;
+		
+		Gdk::Pixmap::create_from_data (source, mag_bits,
+					       mag_width, mag_height, 1, fg, bg);
+		Gdk::Pixmap::create_from_data (mask, magmask_bits,
+					       mag_width, mag_height, 1, fg, bg);
+		zoom_cursor = new Gdk::Cursor (source, mask, mfg, mbg, mag_x_hot, mag_y_hot);
+	}
 
 	Gdk::Color fbg ("#ffffff" );
 	Gdk::Color ffg  ("#000000" );
 	
-	Gdk::Pixmap::create_from_data (source, fader_cursor_bits,
-				       fader_cursor_width, fader_cursor_height, 1, fg, bg);
-	Gdk::Pixmap::create_from_data (mask, fader_cursor_mask_bits,
-				       fader_cursor_width, fader_cursor_height, 1, fg, bg);
-	fader_cursor = new Gdk::Cursor (source, mask, ffg, fbg, fader_cursor_x_hot, fader_cursor_y_hot);
-	source->unreference();
-	mask->unreference();
+	{
+		Glib::RefPtr <Gdk::Pixmap> source, mask;
+		
+		Gdk::Pixmap::create_from_data (source, fader_cursor_bits,
+					       fader_cursor_width, fader_cursor_height, 1, fg, bg);
+		Gdk::Pixmap::create_from_data (mask, fader_cursor_mask_bits,
+					       fader_cursor_width, fader_cursor_height, 1, fg, bg);
+		fader_cursor = new Gdk::Cursor (source, mask, ffg, fbg, fader_cursor_x_hot, fader_cursor_y_hot);
+	}
 
-	Gdk::Pixmap::create_from_data (source,speaker_cursor_bits,
-				       speaker_cursor_width, speaker_cursor_height, 1, fg, bg);
-	Gdk::Pixmap::create_from_data (mask, speaker_cursor_mask_bits,
-				       speaker_cursor_width, speaker_cursor_height, 1, fg, bg);
-	speaker_cursor = new Gdk::Cursor (source, mask, ffg, fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
-	source->unreference();
-	mask->unreference();
-	
+	{ 
+		Glib::RefPtr <Gdk::Pixmap> source, mask;
+		Gdk::Pixmap::create_from_data (source,speaker_cursor_bits,
+					       speaker_cursor_width, speaker_cursor_height, 1, fg, bg);
+		Gdk::Pixmap::create_from_data (mask, speaker_cursor_mask_bits,
+					       speaker_cursor_width, speaker_cursor_height, 1, fg, bg);
+		speaker_cursor = new Gdk::Cursor (source, mask, ffg, fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
+	}
+
 	cross_hair_cursor = new Gdk::Cursor (Gdk::CROSSHAIR);
 	trimmer_cursor =  new Gdk::Cursor (Gdk::SB_H_DOUBLE_ARROW);
 	selector_cursor = new Gdk::Cursor (Gdk::XTERM);
@@ -2489,7 +2498,8 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	set_default_size(width, height);
-	set_position(x, y-yoff);
+	// GTK2FIX
+	// set_position(x, y-yoff);
 
 	if ((prop = node.property ("zoom-focus"))) {
 		set_zoom_focus ((ZoomFocus) atoi (prop->value()));
@@ -2882,9 +2892,9 @@ Editor::setup_toolbar ()
 	mouse_mode_tearoff->set_name ("MouseModeBase");
 
 	mouse_mode_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Gtk::Box*>(&toolbar_hbox), 
-						  static_cast<Gtk::Widget*>(&mouse_mode_button_table)));
+						  mouse_mode_tearoff->tearoff_window()));
 	mouse_mode_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Gtk::Box*> (&toolbar_hbox), 
-						  static_cast<Gtk::Widget*> (&mouse_mode_button_table), 1));
+						  mmouse_mode_tearoff->tearoff_window(), 1));
 
 	mouse_move_button.set_name ("MouseModeButton");
 	mouse_select_button.set_name ("MouseModeButton");
@@ -3070,9 +3080,10 @@ Editor::setup_toolbar ()
 	tools_tearoff->set_name ("MouseModeBase");
 
 	tools_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Gtk::Box*>(&toolbar_hbox), 
-					     static_cast<Gtk::Widget*>(hbox)));
+					     tools_tearoff->tearoff_window());
 	tools_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Gtk::Box*> (&toolbar_hbox), 
-					     static_cast<Gtk::Widget*> (hbox), 0));
+					     tools_tearoff->tearoff_window(), 0));
+
 
 	toolbar_hbox.set_spacing (8);
 	toolbar_hbox.set_border_width (2);
@@ -3668,7 +3679,7 @@ void
 Editor::set_edit_menu (Menu& menu)
 {
 	edit_menu = &menu;
-	edit_menu->map_.connect (mem_fun(*this, &Editor::edit_menu_map_handler));
+	edit_menu->signal_map.connect (mem_fun(*this, &Editor::edit_menu_map_handler));
 }
 
 void
@@ -3808,8 +3819,9 @@ Editor::duplicate_dialog (bool dup_region)
 	entry.select_region (0, entry.get_text_length());
 
 	win.set_position (Gtk::WIN_POS_MOUSE);
-	win.realize ();
-	win.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	// GTK2FIX
+	// win.realize ();
+	// win.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	entry.grab_focus ();
 
@@ -4151,7 +4163,7 @@ Editor::ensure_float (Window& win)
 }
 
 void 
-Editor::pane_allocation_handler (GtkAllocation *alloc, Gtk::Paned* which)
+Editor::pane_allocation_handler (Gtk::Allocation &alloc, Gtk::Paned* which)
 {
 	/* recover or initialize pane positions. do this here rather than earlier because
 	   we don't want the positions to change the child allocations, which they seem to do.
@@ -4244,18 +4256,18 @@ Editor::pane_allocation_handler (GtkAllocation *alloc, Gtk::Paned* which)
 }
 
 void
-Editor::detach_tearoff (Gtk::Box* b, Gtk::Widget* w)
+Editor::detach_tearoff (Gtk::Box* b, Gtk::Window* w)
 {
 	if (tools_tearoff->torn_off() && 
 	    mouse_mode_tearoff->torn_off()) {
 		top_hbox.remove (toolbar_frame);
 	}
 	
-	ensure_float (*w->get_toplevel());
+	ensure_float (*w);
 }
 
 void
-Editor::reattach_tearoff (Gtk::Box* b, Gtk::Widget* w, int32_t n)
+Editor::reattach_tearoff (Gtk::Box* b, Gtk::Window* w, int32_t n)
 {
 	if (toolbar_frame.get_parent() == 0) {
 		top_hbox.pack_end (toolbar_frame);
@@ -4310,7 +4322,8 @@ Editor::edit_xfade (Crossfade* xfade)
 	
 	cew.ok_button.signal_clicked().connect (bind (mem_fun (cew, &ArdourDialog::stop), 1));
 	cew.cancel_button.signal_clicked().connect (bind (mem_fun (cew, &ArdourDialog::stop), 0));
-	cew.signal_delete_event().connect (mem_fun (cew, &ArdourDialog::wm_doi_event_stop));
+	// GTK2FIX
+	// cew.signal_delete_event().connect (mem_fun (cew, &ArdourDialog::wm_doi_event_stop));
 
 	cew.run ();
 	
@@ -4377,8 +4390,9 @@ Editor::playlist_deletion_dialog (Playlist* pl)
 	keep_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
 	abort_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 2));
 
-	dialog.realize ();
-	dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	// GTK2FIX
+	// dialog.realize ();
+	// dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	dialog.run ();
 

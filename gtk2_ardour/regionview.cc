@@ -862,8 +862,9 @@ AudioRegionView::show_region_editor ()
 {
 	if (editor == 0) {
 		editor = new AudioRegionEditor (trackview.session(), region, *this);
-		editor->realize ();
-		trackview.editor.ensure_float (*editor);
+		// GTK2FIX : how to ensure float without realizing
+		// editor->realize ();
+		// trackview.editor.ensure_float (*editor);
 	} 
 
 	editor->show_all ();
@@ -934,8 +935,7 @@ AudioRegionView::region_sync_changed ()
 			
 			args[0].name = X_("points");
 			
-			gtk_object_getv (GTK_OBJECT(sync_mark), 1, args);
-			points = static_cast<GnomeCanvasPoints *> (GTK_VALUE_POINTER(args[0]));
+			sync_mark->get (X_("points"), &points);
 			
 			double offset = sync_offset / samples_per_unit;
 			

@@ -256,8 +256,9 @@ Editor::mouse_add_new_tempo_event (jack_nframes_t frame)
 	tempo_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), -1));
 
 	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
-	tempo_dialog.realize ();
-	tempo_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	// GTK2FIX
+	// tempo_dialog.realize ();
+	// tempo_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	ensure_float (tempo_dialog);
 
@@ -298,8 +299,9 @@ Editor::mouse_add_new_meter_event (jack_nframes_t frame)
 	meter_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (meter_dialog, &ArdourDialog::stop), -1));
 
 	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
-	meter_dialog.realize ();
-	meter_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	// GTK2FIX
+	// meter_dialog.realize ();
+	// meter_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	ensure_float (meter_dialog);
 	
@@ -355,8 +357,9 @@ Editor::edit_meter_section (MeterSection* section)
 	meter_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (meter_dialog, &ArdourDialog::stop), -1));
 
 	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
-	meter_dialog.realize ();
-	meter_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	// GTK2FIX
+	// meter_dialog.realize ();
+	// meter_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	ensure_float (meter_dialog);
 
@@ -387,8 +390,9 @@ Editor::edit_tempo_section (TempoSection* section)
 	tempo_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), -1));
 
 	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
-	tempo_dialog.realize ();
-	tempo_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	// GTK2FIX
+	// tempo_dialog.realize ();
+	// tempo_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
 	ensure_float (tempo_dialog);
 	

@@ -169,6 +169,10 @@ class OptionEditor : public ArdourDialog
 	Gtk::CheckButton midi_control_button;
 	Gtk::CheckButton mmc_control_button;
 
+	Gtk::RadioButton::Group mtc_button_group;
+	Gtk::RadioButton::Group mmc_button_group;
+	Gtk::RadioButton::Group midi_button_group;
+
 	void send_mmc_toggled (Gtk::CheckButton*);
 	void mmc_control_toggled (Gtk::CheckButton*);
 	void midi_control_toggled (Gtk::CheckButton*);
@@ -258,6 +262,7 @@ class OptionEditor : public ArdourDialog
 	Gtk::RadioButton auto_connect_output_physical_button;
 	Gtk::RadioButton auto_connect_output_master_button;
 	Gtk::RadioButton auto_connect_output_manual_button;
+	Gtk::RadioButton::Group auto_connect_output_button_group;
 
 	Gtk::CheckButton hw_monitor_button;
 	Gtk::CheckButton sw_monitor_button;

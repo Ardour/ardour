@@ -229,10 +229,10 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 
 	double fraction;
 
-	GdkWindow win (meter_metric_area.get_window());
-	Gdk_GC fg_gc (meter_metric_area.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
-	Gdk_GC bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
-	Gdk_Font font (meter_metric_area.get_style()->get_font());
+	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
+	Glib::RefPtr<Gdk::GC> fg_gc (meter_metric_area.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
+	Pango::FontDescription font (meter_metric_area.get_style()->get_font());
 	gint x, y, width, height, depth;
 	gint pos;
 	int  db_points[] = { -50, -10, -3, 0, 6 };
@@ -241,7 +241,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
 
-	win.get_geometry (x, y, width, height, depth);
+	win->get_geometry (x, y, width, height, depth);
 	
 	base_rect.width = width;
 	base_rect.height = height;
@@ -249,7 +249,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	base_rect.y = 0;
 
 	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
-	win.draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 
 	for (i = 0; i < sizeof (db_points)/sizeof (db_points[0]); ++i) {
 		fraction = log_meter (db_points[i]);
@@ -257,21 +257,9 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 
 		snprintf (buf, sizeof (buf), "%d", db_points[i]);
 
-		gint twidth;
-		gint lbearing;
-		gint rbearing;
-		gint ascent;
-		gint descent;
-
-		gdk_string_extents (font,
-				    buf,
-				    &lbearing,
-				    &rbearing,
-				    &twidth,
-				    &ascent,
-				    &descent);
-
-		win.draw_text (font, fg_gc, width - twidth, pos + ascent, buf, strlen (buf));
+		Glib::RefPtr<Pango::Layout> Layout = meter_metric_area.create_pango_layout(buf);
+		// GTK2FIX - how to get twidth, ascent
+		win->draw_layout(fg_gc, width /* - twidth */, pos /*  + ascent */, Layout);
 	}
 
 	return TRUE;
@@ -434,9 +422,7 @@ GainMeter::setup_meters ()
 			meters[n].width = width;
 
 			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
-			meters[n].meter->signal_button_release_event().connect
-				(bind (mem_fun(*this, &GainMeter::meter_button_release), n));
-			meters[n].meter->signal_button_release_event().connect_after (ptr_fun (do_not_propagate));
+			meters[n].meter->signal_button_release_event().connect (bind (mem_fun(*this, &GainMeter::meter_button_release), n));
 		}
 
 		meter_packer.pack_start (*meters[n].meter, false, false);

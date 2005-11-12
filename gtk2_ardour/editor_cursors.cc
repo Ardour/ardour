@@ -30,38 +30,26 @@ using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
 
-Editor::Cursor::Cursor (Editor& ed, const string& color, GtkSignalFunc callbck)
-	: editor (ed), callback (callbck), length(1.0)
+Editor::Cursor::Cursor (Editor& ed, const string& color, bool (Editor::*callbck)(GdkEvent*))
+	: editor (ed), length(1.0)
 {
-	GnomeCanvasGroup *group;
-	points = gnome_canvas_points_new (2);
-	
 	/* "randomly" initialize coords */
+	
+	points.push_back (Gnome::Art::Point (-9383839.0, 0.0));
+	points.push_back (Gnome::Art::Point (1.0, 0.0));
+	
+	canvas_item = new Gnome::Canvas::Line (editor.cursor_group);
+	canvas_item->set_property ("points", points.gobj());
+	canvas_item->set_property ("fill_color", color.c_str());
+	canvas_item->set_property ("width_pixels", 1);
+	canvas_item->set_property ("first_arrowhead", (gboolean) TRUE);
+	canvas_item->set_property ("last_arrowhead", (gboolean) TRUE);
+	canvas_item->set_property ("arrow_shape_a", 11.0);
+	canvas_item->set_property ("arrow_shape_b", 0.0);
+	canvas_item->set_property ("arrow_shape_c", 9.0);
 
-	points->coords[0] = -9383839.0;
-	points->coords[1] = 0.0;
-	points->coords[2] = 1.0;
-	points->coords[3] = 0.0;
-
-	group = GNOME_CANVAS_GROUP (editor.cursor_group);
-
-	// cerr << "set cursor points, nc = " << points->num_points << endl;
-	canvas_item = gnome_canvas_item_new (group,
-					   gnome_canvas_line_get_type(),
-					   "points", points,
-					   "fill_color", color.c_str(),
-					   "width_pixels", 1,
-					   "first_arrowhead", (gboolean) TRUE,
-					   "last_arrowhead", (gboolean) TRUE,
-					   "arrow_shape_a", 11.0,
-					   "arrow_shape_b", 0.0,
-					   "arrow_shape_c", 9.0,
-					   NULL);
-
-	// cerr << "cursor line @ " << canvas_item << endl;
-
-	gtk_object_set_data (GTK_OBJECT(canvas_item), "cursor", this);
-	gtk_signal_connect (GTK_OBJECT(canvas_item), "event", callback, &editor);
+	canvas_item->set_data ("cursor", this);
+	canvas_item->signal_event().connect (slot (ed, callback));
 
 	current_frame = 1; /* force redraw at 0 */
 }

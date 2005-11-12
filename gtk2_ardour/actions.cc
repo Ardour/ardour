@@ -9,7 +9,6 @@ using namespace std;
 using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
-using namespace ActionManager;
 
 vector<Glib::RefPtr<Gtk::Action> > ActionManager::session_sensitive_actions;
 vector<Glib::RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;
@@ -18,6 +17,8 @@ vector<Glib::RefPtr<Gtk::Action> > ActionManager::track_selection_sensitive_acti
 vector<Glib::RefPtr<Gtk::Action> > ActionManager::plugin_selection_sensitive_actions;
 vector<Glib::RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
 vector<Glib::RefPtr<Gtk::Action> > ActionManager::jack_sensitive_actions;
+
+namespace ActionManager {
 
 static vector<Glib::RefPtr<UIManager> > ui_managers;
 
@@ -41,6 +42,17 @@ register_action (RefPtr<ActionGroup> group, string name, string label, slot<void
 {
 	RefPtr<Action> act = register_action (group, name, label);
 	group->add (act, sl);
+
+	return act;
+}
+
+RefPtr<Action>
+register_action (RefPtr<ActionGroup> group, string name, string label)
+{
+	RefPtr<Action> act;
+
+	act = Action::create (name, label);
+	group->add (act);
 
 	return act;
 }
@@ -83,17 +95,6 @@ register_toggle_action (RefPtr<ActionGroup> group, string name, string label, sl
 
 	act = ToggleAction::create (name, label);
 	group->add (act, sl);
-
-	return act;
-}
-
-RefPtr<Action>
-register_action (RefPtr<ActionGroup> group, string name, string label)
-{
-	RefPtr<Action> act;
-
-	act = Action::create (name, label);
-	group->add (act);
 
 	return act;
 }

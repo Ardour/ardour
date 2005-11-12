@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "editor.h"
 #include "editing.h"
+#include "actions.h"
 
 #include "i18n.h"
 

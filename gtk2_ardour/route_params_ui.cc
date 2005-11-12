@@ -294,7 +294,7 @@ RouteParams_UI::cleanup_pre_view (bool stopupdate)
 		PluginUI *   plugui = 0;
 		
 		if (stopupdate && (plugui = dynamic_cast<PluginUI*>(_active_pre_view)) != 0) {
-			  plugui->stop_updating (0);
+			  plugui->stop_updating ();
 		}
 
 		_pre_plugin_conn.disconnect();
@@ -311,7 +311,7 @@ RouteParams_UI::cleanup_post_view (bool stopupdate)
 		PluginUI *   plugui = 0;
 		
 		if (stopupdate && (plugui = dynamic_cast<PluginUI*>(_active_post_view)) != 0) {
-			  plugui->stop_updating (0);
+			  plugui->stop_updating ();
 		}
 		_post_plugin_conn.disconnect();
 		post_redir_hpane.remove(*_active_post_view);
@@ -573,7 +573,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 			if (place == PreFader) {
 				cleanup_pre_view();
 				_pre_plugin_conn = plugin_insert->plugin().GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PreFader));
-				plugin_ui->start_updating (0);
+				plugin_ui->start_updating ();
 				_active_pre_view = plugin_ui;
 				pre_redir_hpane.add2 (*_active_pre_view);
 				pre_redir_hpane.show_all();
@@ -581,7 +581,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 			else {
 				cleanup_post_view();
 				_post_plugin_conn = plugin_insert->plugin().GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PostFader));
-				plugin_ui->start_updating (0);
+				plugin_ui->start_updating ();
 				_active_post_view = plugin_ui;
 				post_redir_hpane.add2 (*_active_post_view);
 				post_redir_hpane.show_all();
