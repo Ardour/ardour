@@ -28,7 +28,7 @@
 #include <ardour/curve.h>
 #include <ardour/dB.h>
 
-#include "canvas-simplerect.h"
+#include "simplerect.h"
 #include "automation_line.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
@@ -46,10 +46,12 @@
 #include "i18n.h"
 
 using namespace std;
+using namespace sigc;
 using namespace ARDOUR;
 using namespace Editing;
+using namespace Gnome; // for Canvas
 
-ControlPoint::ControlPoint (AutomationLine& al, gint (*event_handler)(Gnome::Canvas::Item*, GdkEvent*, gpointer))
+ControlPoint::ControlPoint (AutomationLine& al, sigc::slot<bool,GdkEvent*,ControlPoint*> handler)
 	: line (al)
 {
 	model = al.the_list().end();
@@ -61,17 +63,14 @@ ControlPoint::ControlPoint (AutomationLine& al, gint (*event_handler)(Gnome::Can
 	_size = 4.0;
 	selected = false;
 
-	item = gnome_canvas_item_new (line.canvas_group(),
-				    gnome_canvas_simplerect_get_type(),
-				    "draw", (gboolean) TRUE,
-				    "fill", (gboolean) FALSE,
-				    "fill_color_rgba", color_map[cControlPointFill],
-				    "outline_color_rgba", color_map[cControlPointOutline],
-				    "outline_pixels", (gint) 1,
-				    NULL);
-
-	gtk_object_set_data (GTK_OBJECT(item), "control_point", this);
-	gtk_signal_connect (GTK_OBJECT(item), "event", (GtkSignalFunc) event_handler, this);
+	item = new Canvas::SimpleRect (line.canvas_group());
+	item->property_draw() = true;
+	item->property_fill() = false;
+	item->property_fill_color_rgba() =  color_map[cControlPointFill];
+	item->property_outline_color_rgba() = color_map[cControlPointOutline];
+	item->property_outline_pixels() = 1;
+	item->set_data ("control_point", this);
+	item->signal_event().connect (bind (handler, this));
 
 	hide ();
 	set_visible (false);
@@ -93,12 +92,10 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool dummy_arg_to_force_s
 	_size = other._size;
 	selected = false;
 
-	item = gnome_canvas_item_new (line.canvas_group(),
-				    gnome_canvas_simplerect_get_type(),
-				    "fill", (gboolean) FALSE,
-				    "outline_color_rgba", color_map[cEnteredControlPointOutline],
-				    "outline_pixels", (gint) 1,
-				    NULL);
+	item = new Canvas::SimpleRect (line.canvas_group());
+	item->property_fill() = false;
+	item->property_outline_color_rgba() = color_map[cEnteredControlPointOutline];
+	item->property_outline_pixels() = 1;
 	
 	/* NOTE: no event handling in copied ControlPoints */
 
@@ -214,45 +211,39 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 
 /*****/
 
-AutomationLine::AutomationLine (string name, TimeAxisView& tv, Gnome::Canvas::Item* parent, AutomationList& al,
-				gint (*point_handler)(Gnome::Canvas::Item*, GdkEvent*, gpointer),
-				gint (*line_handler)(Gnome::Canvas::Item*, GdkEvent*, gpointer))
+AutomationLine::AutomationLine (string name, TimeAxisView& tv, Gnome::Canvas::Group& parent, AutomationList& al,
+				slot<bool,GdkEvent*,ControlPoint*> point_handler,
+				slot<bool,GdkEvent*,AutomationLine*> line_handler)
+
 	: trackview (tv),
 	  _name (name),
-	  alist (al)
+	  alist (al),
+	  _parent_group (parent)
 {
-	point_coords = 0;
 	points_visible = false;
 	update_pending = false;
 	_vc_uses_gain_mapping = false;
 	no_draw = false;
 	_visible = true;
-	point_callback = point_handler;
-	_parent_group = parent;
+	point_slot = point_handler;
 	terminal_points_can_slide = true;
 	_height = 0;
 
-	group = new Gnome::Canvas::Group (*parent);
+	group = new Gnome::Canvas::Group (parent);
 	group->set_property ("x", 0.0);
 	group->set_property ("y", 0.0);
 
 	line = new Gnome::Canvas::Line (*group);
 	line->set_property ("width_pixels", (guint)1);
 
-	// cerr << _name << " line @ " << line << endl;
-
 	line->set_data ("line", this);
-	gtk_signal_connect (GTK_OBJECT(line), "event", (GtkSignalFunc) line_handler, this);
+	line->signal_event().connect (bind (line_handler, this));
 
 	alist.StateChanged.connect (mem_fun(*this, &AutomationLine::list_changed));
 }
 
 AutomationLine::~AutomationLine ()
 {
-	if (point_coords) {
-	        gnome_canvas_points_unref (point_coords->gobj());
-	}
-
 	vector_delete (&control_points);
 
 	gtk_object_destroy (GTK_OBJECT(group));
@@ -467,16 +458,14 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 void
 AutomationLine::reset_line_coords (ControlPoint& cp)
 {	
-	if (point_coords) {
-		point_coords[cp.view_index] = cp.get_x();
-		point_coords[cp.view_index] = cp.get_y();
-	}
+	line_points[cp.view_index].set_x (cp.get_x());
+	line_points[cp.view_index].set_y (cp.get_y());
 }
 
 void
 AutomationLine::update_line ()
 {
-	line->set_property ("points", point_coords);
+	line->property_points() = line_points;
 }
 
 void
@@ -657,12 +646,11 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 }
 
 void
-AutomationLine::determine_visible_control_points (Gnome::Canvas::Points* points)
+AutomationLine::determine_visible_control_points (ALPoints& points)
 {
-	uint32_t xi, yi, view_index, pi;
-	int n;
+	uint32_t view_index, pi, n;
 	AutomationList::iterator model;
-	uint32_t npoints = points->size();
+	uint32_t npoints;
 	double last_control_point_x = 0.0;
 	double last_control_point_y = 0.0;
 	uint32_t this_rx = 0;
@@ -670,31 +658,39 @@ AutomationLine::determine_visible_control_points (Gnome::Canvas::Points* points)
 	uint32_t this_ry = 0;
  	uint32_t prev_ry = 0;	
 	double* slope;
+
+	/* hide all existing points, and the line */
 	
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->hide();
 	}
-	gnome_canvas_item_hide (line);
 
-	if (points == 0 || points->num_points == 0)  {
+	line->hide ();
+
+	if (points.empty()) {
 		return;
 	}
+
+	npoints = points.size();
 
 	/* compute derivative/slope for the entire line */
 
 	slope = new double[npoints];
 
-	for (n = 0, xi = 2, yi = 3, view_index = 0; n < points->num_points - 1; xi += 2, yi +=2, ++n, ++view_index) {
-		double xdelta;
-		double ydelta;
-		xdelta = points->coords[xi] - points->coords[xi-2];
-		ydelta = points->coords[yi] - points->coords[yi-2];
-		slope[view_index] = ydelta/xdelta;
+	for (n = 0; n < npoints - 1; ++n) {
+		double xdelta = points[n+1].x - points[n].x;
+		double ydelta = points[n+1].y - points[n].y;
+		slope[n] = ydelta/xdelta;
 	}
 
 	/* read all points and decide which ones to show as control points */
 
-	for (model = alist.begin(), pi = 0, xi = 0, yi = 1, view_index = 0; pi < npoints; ++model, xi += 2, yi +=2, ++pi) {
+	view_index = 0;
+
+	for (model = alist.begin(), pi = 0; pi < npoints; ++model, ++pi) {
+
+		double tx = points[pi].x;
+		double ty = points[pi].y;
 
 		/* now ensure that the control_points vector reflects the current curve
 		   state, but don't plot control points too close together. also, don't
@@ -727,8 +723,8 @@ AutomationLine::determine_visible_control_points (Gnome::Canvas::Points* points)
 		   points.
 		*/
 
-		this_rx = (uint32_t) rint (points->coords[xi]);
-      		this_ry = (unsigned long) rint (points->coords[yi]); 
+		this_rx = (uint32_t) rint (tx);
+      		this_ry = (unsigned long) rint (ty); 
  
  		if (view_index && pi != npoints && (this_rx == prev_rx) && (this_ry == prev_ry)) {
  
@@ -740,7 +736,7 @@ AutomationLine::determine_visible_control_points (Gnome::Canvas::Points* points)
 		if (view_index >= control_points.size()) {
 			/* make sure we have enough control points */
 
-			ControlPoint* ncp = new ControlPoint (*this, point_callback);
+			ControlPoint* ncp = new ControlPoint (*this, point_slot);
 
 			if (_height > (guint32) TimeAxisView::Larger) {
 				ncp->set_size (8.0);
@@ -758,7 +754,7 @@ AutomationLine::determine_visible_control_points (Gnome::Canvas::Points* points)
 		if (!terminal_points_can_slide) {
 			if (pi == 0) {
 				control_points[view_index]->can_slide = false;
-				if (points->coords[xi] == 0) {
+				if (tx == 0) {
 					shape = ControlPoint::Start;
 				} else {
 					shape = ControlPoint::Full;
@@ -775,10 +771,10 @@ AutomationLine::determine_visible_control_points (Gnome::Canvas::Points* points)
 			shape = ControlPoint::Full;
 		}
 
-		control_points[view_index]->reset (points->coords[xi], points->coords[yi], model, view_index, shape);
+		last_control_point_x = tx;
+		last_control_point_y = ty;
 
-		last_control_point_x = points->coords[xi];
-		last_control_point_y = points->coords[yi];
+		control_points[view_index]->reset (tx, ty, model, view_index, shape);
 
 		prev_rx = this_rx;
 		prev_ry = this_ry;
@@ -811,39 +807,25 @@ AutomationLine::determine_visible_control_points (Gnome::Canvas::Points* points)
 
 	delete [] slope;
 
-	/* Now make sure the "point_coords" array is large enough
-	   to represent all the visible points.
-	*/
-
 	if (view_index > 1) {
 
 		npoints = view_index;
 		
-		if (point_coords) {
-			if (point_coords->num_points < (int) npoints) {
-				gnome_canvas_points_unref (point_coords);
-				point_coords = get_canvas_points ("autoline", npoints);
-			} else {
-				point_coords->num_points = npoints;
-			}
-		} else {
-			point_coords = get_canvas_points ("autoline", npoints);
-		}
-		
 		/* reset the line coordinates */
 
-		uint32_t pci;
-		
-		for (pci = 0, view_index = 0; view_index < npoints; ++view_index) {
-			point_coords->coords[pci++] = control_points[view_index]->get_x();
-			point_coords->coords[pci++] = control_points[view_index]->get_y();
+		while (line_points.size() < npoints) {
+			line_points.push_back (Art::Point (0,0));
 		}
 
-		// cerr << "set al2 points, nc = " << point_coords->num_points << endl;
-		gnome_canvas_item_set (line, "points", point_coords, NULL);
+		for (view_index = 0; view_index < npoints; ++view_index) {
+			line_points[view_index].set_x (control_points[view_index]->get_x());
+			line_points[view_index].set_y (control_points[view_index]->get_y());
+		}
+		
+		line->property_points() = line_points;
 
 		if (_visible) {
-			gnome_canvas_item_show (line);
+			line->show ();
 		}
 	} 
 
@@ -869,16 +851,16 @@ AutomationLine::get_verbose_cursor_string (float fraction)
 }
 
 bool
-AutomationLine::invalid_point (GnomeCanvasPoints* p, uint32_t index)
+AutomationLine::invalid_point (ALPoints& p, uint32_t index)
 {
-	return p->coords[index*2] == max_frames && p->coords[(index*2)+1] == DBL_MAX;
+	return p[index].x == max_frames && p[index].y == DBL_MAX;
 }
 
 void
-AutomationLine::invalidate_point (GnomeCanvasPoints* p, uint32_t index)
+AutomationLine::invalidate_point (ALPoints& p, uint32_t index)
 {
-	p->coords[index*2] = max_frames;
-	p->coords[(index*2)+1] = DBL_MAX;
+	p[index].x = max_frames;
+	p[index].y = DBL_MAX;
 }
 
 void
@@ -1191,7 +1173,7 @@ AutomationLine::list_changed (Change ignored)
 void
 AutomationLine::reset_callback (const AutomationList& events)
 {
-        Gnome::Canvas::Points *tmp_points;
+        ALPoints tmp_points;
 	uint32_t npoints = events.size();
 
 	if (npoints == 0) {
@@ -1203,26 +1185,20 @@ AutomationLine::reset_callback (const AutomationList& events)
 		return;
 	}
 
-	tmp_points = get_canvas_points ("autoline reset", max (npoints, (uint32_t) 2));
-
-	uint32_t xi, yi;
 	AutomationList::const_iterator ai;
 
-	for (ai = events.const_begin(), xi = 0, yi = 0; ai != events.const_end(); xi += 1, yi +=1, ++ai) {
+	for (ai = events.const_begin(); ai != events.const_end(); ++ai) {
 
-		tmp_points[xi] = trackview.editor.frame_to_unit ((*ai)->when);
 		double translated_y;
-
+		
 		translated_y = (*ai)->value;
 		model_to_view_y (translated_y);
-		tmp_points[yi] = _height - (translated_y * _height);
+
+		tmp_points.push_back (ALPoint (trackview.editor.frame_to_unit ((*ai)->when),
+					       _height - (translated_y * _height)));
 	}
-
-	tmp_points->num_points = npoints;
-
+	
 	determine_visible_control_points (tmp_points);
-	gnome_canvas_points_unref (tmp_points->gobj());
-
 }
 
 void

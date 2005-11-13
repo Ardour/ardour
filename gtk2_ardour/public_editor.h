@@ -34,6 +34,9 @@ class PluginSelector;
 class PlaylistSelector;
 class XMLNode;
 class Selection;
+class AutomationLine;
+class ControlPoint;
+class SelectionRect;
 
 class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget {
   public:
@@ -114,6 +117,17 @@ class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget 
 	sigc::signal<void> XOriginChanged;
 	sigc::signal<void> Resized;
 
+	// FIXED FOR GTK2
+
+	virtual bool canvas_control_point_event (GdkEvent* event,ControlPoint*) = 0;
+	virtual bool canvas_line_event (GdkEvent* event,AutomationLine*) = 0;
+	virtual bool canvas_selection_rect_event (GdkEvent* event,SelectionRect*) = 0;
+	virtual bool canvas_selection_start_trim_event (GdkEvent* event,SelectionRect*) = 0;
+	virtual bool canvas_selection_end_trim_event (GdkEvent* event,SelectionRect*) = 0;
+
+	// PENDING
+
+
 	virtual gint canvas_crossfade_view_event (GdkEvent* event) = 0;
 	virtual gint canvas_fade_in_event (GdkEvent* event) = 0;
 	virtual gint canvas_fade_in_handle_event (GdkEvent* event) = 0;
@@ -125,11 +139,7 @@ class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget 
 	virtual gint canvas_stream_view_event (GdkEvent* event) = 0;
 	virtual gint canvas_marker_event (GdkEvent* event) = 0;
 	virtual gint canvas_zoom_rect_event (GdkEvent* event) = 0;
-	virtual gint canvas_selection_rect_event (GdkEvent* event) = 0;
-	virtual gint canvas_selection_start_trim_event (GdkEvent* event) = 0;
-	virtual gint canvas_selection_end_trim_event (GdkEvent* event) = 0;
-	virtual gint canvas_control_point_event (GdkEvent* event) = 0;
-	virtual gint canvas_line_event (GdkEvent* event) = 0;
+
 	virtual gint canvas_tempo_marker_event (GdkEvent* event) = 0;
 	virtual gint canvas_meter_marker_event (GdkEvent* event) = 0;
 	virtual gint canvas_tempo_bar_event (GdkEvent* event) = 0;

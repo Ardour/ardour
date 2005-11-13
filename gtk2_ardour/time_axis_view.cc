@@ -39,7 +39,7 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "time_axis_view.h"
-#include "canvas-simplerect.h"
+#include "simplerect.h"
 #include "selection.h"
 #include "keyboard.h"
 #include "rgb_macros.h"
@@ -50,33 +50,19 @@ using namespace Gtk;
 using namespace sigc; 
 using namespace ARDOUR;
 using namespace Editing;
+using namespace Gnome::Canvas;
 
 const double trim_handle_size = 6.0; /* pixels */
 
-TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Gtk::Widget *canvas) 
-	: AxisView(sess), 
-	  editor(ed),
+TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& canvas) 
+	: AxisView (sess), 
+	  editor (ed),
 	  controls_table (2, 9)
 {
-  //GTK2FIX -- whats going on here? is this canvas really a group?
-  //canvas_display = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(canvas->gobj())),
-  //				      gnome_canvas_group_get_type(),
-  //				      "x", 0.0,
-  //				      "y", 0.0,
-  //				      NULL);
-
-
-  canvas_display = new Gnome::Canvas::Item (*canvas);
-  canvas_display->set_property ("x", 0.0);
-  canvas_display->set_property ("y", 0.0);
-
-  selection_group = new Gnome::Canvas::Group (*canvas_display);
-  selection_group->hide();
-
-  //lection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), 
-  //				       gnome_canvas_group_get_type (), 
-  //				       NULL);
-  //ome_canvas_item_hide (selection_group);
+	canvas_display = new Group (*canvas.root(), 0.0, 0.0);
+	
+	selection_group = new Group (*canvas_display);
+	selection_group->hide();
 	
    	control_parent = 0;
 	display_menu = 0;
@@ -167,12 +153,12 @@ TimeAxisView::~TimeAxisView()
 	}
 
 	if (selection_group) {
-		gtk_object_destroy (GTK_OBJECT (selection_group));
+		delete selection_group;
 		selection_group = 0;
 	}
 
 	if (canvas_display) {
-		gtk_object_destroy (GTK_OBJECT (canvas_display));	
+		delete canvas_display;
 		canvas_display = 0;
 	}
 
@@ -209,7 +195,9 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	*/
 
 	canvas_display->get_bounds (ix1, iy1, ix2, iy2);
-	canvas_display->parent()->i2w (ix1, iy1);
+	Group* pg = canvas_display->property_parent();
+	pg->i2w (ix1, iy1);
+
 	if (iy1 < 0) {
 		iy1 = 0;
 	}
@@ -510,9 +498,9 @@ TimeAxisView::show_selection (TimeSelection& ts)
 		while (!used_selection_rects.empty()) {
 			free_selection_rects.push_front (used_selection_rects.front());
 			used_selection_rects.pop_front();
-			gnome_canvas_item_hide (free_selection_rects.front()->rect);
-			gnome_canvas_item_hide (free_selection_rects.front()->start_trim);
-			gnome_canvas_item_hide (free_selection_rects.front()->end_trim);
+			free_selection_rects.front()->rect->hide();
+			free_selection_rects.front()->start_trim->hide();
+			free_selection_rects.front()->end_trim->hide();
 		}
 		selection_group->hide();
 	}
@@ -555,14 +543,14 @@ TimeAxisView::show_selection (TimeSelection& ts)
 					"x2", x2,
 					"y2", 1.0 + trim_handle_size,
 					NULL);
-			gnome_canvas_item_show (rect->start_trim);
-			gnome_canvas_item_show (rect->end_trim);
+			rect->start_trim->show();
+			rect->end_trim->show();
 		} else {
-			gnome_canvas_item_hide (rect->start_trim);
-			gnome_canvas_item_hide (rect->end_trim);
+			rect->start_trim->hide();
+			rect->end_trim->hide();
 		}
 
-		gnome_canvas_item_show (rect->rect);
+		rect->rect->show ();
 		used_selection_rects.push_back (rect);
 	}
 }
@@ -584,9 +572,9 @@ TimeAxisView::hide_selection ()
 		while (!used_selection_rects.empty()) {
 			free_selection_rects.push_front (used_selection_rects.front());
 			used_selection_rects.pop_front();
-			gnome_canvas_item_hide (free_selection_rects.front()->rect);
-			gnome_canvas_item_hide (free_selection_rects.front()->start_trim);
-			gnome_canvas_item_hide (free_selection_rects.front()->end_trim);
+			free_selection_rects.front()->rect->hide();
+			free_selection_rects.front()->start_trim->hide();
+			free_selection_rects.front()->end_trim->hide();
 		}
 		selection_group->hide();
 	}
@@ -604,16 +592,16 @@ TimeAxisView::order_selection_trims (Gnome::Canvas::Item *item, bool put_start_o
 	 */
 
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
-	  if ((*i)->start_trim == item->gobj() || (*i)->end_trim == item->gobj()) {
-
+		if ((*i)->start_trim == item || (*i)->end_trim == item) {
+			
 			/* make one trim handle be "above" the other so that if they overlap,
 			   the top one is the one last used.
 			*/
-
-			gnome_canvas_item_raise_to_top ((*i)->rect);
-			gnome_canvas_item_raise_to_top (put_start_on_top ? (*i)->start_trim : (*i)->end_trim);
-			gnome_canvas_item_raise_to_top (put_start_on_top ? (*i)->end_trim : (*i)->start_trim);
-
+			
+			(*i)->rect->raise_to_top ();
+			(put_start_on_top ? (*i)->start_trim : (*i)->end_trim)->raise_to_top ();
+			(put_start_on_top ? (*i)->end_trim : (*i)->start_trim)->raise_to_top ();
+			
 			break;
 		}
 	}
@@ -647,47 +635,31 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 		rect = new SelectionRect;
 
-		rect->rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(selection_group),
-						  gnome_canvas_simplerect_get_type(),
-						  "x1", 0.0,
-						  "y1", 0.0,
-						  "x2", 0.0,
-						  "y2", 0.0,
-						  "fill_color_rgba", color_map[cSelectionRectFill],
-						  "outline_color_rgba" , color_map[cSelectionRectOutline],
-						  NULL);
+		rect->rect = new SimpleRect (*selection_group);
+		rect->rect->property_x1() = 0.0;
+		rect->rect->property_y1() = 0.0;
+		rect->rect->property_x2() = 0.0;
+		rect->rect->property_y2() = 0.0;
+		rect->rect->property_fill_color_rgba() = color_map[cSelectionRectFill];
+		rect->rect->property_outline_color_rgba() = color_map[cSelectionRectOutline];
 		
+		rect->start_trim = new SimpleRect (*selection_group);
+		rect->start_trim->property_x1() = 0.0;
+		rect->start_trim->property_x2() = 0.0;
+		rect->start_trim->property_fill_color_rgba() = color_map[cSelectionStartFill];
+		rect->start_trim->property_outline_color_rgba() = color_map[cSelectionStartOutline];
 		
-		rect->start_trim = gnome_canvas_item_new (GNOME_CANVAS_GROUP(selection_group),
-							    gnome_canvas_simplerect_get_type(),
-							    "x1", (gdouble) 0.0,
-							    "x2", (gdouble) 0.0,
-							    "fill_color_rgba" , color_map[cSelectionStartFill],
-							    "outline_color_rgba" , color_map[cSelectionStartOutline],
-							    NULL);
-		
-		rect->end_trim = gnome_canvas_item_new (GNOME_CANVAS_GROUP(selection_group),
-							  gnome_canvas_simplerect_get_type(),
-							  "x1", 0.0,
-							  "x2", 0.0,
-							  "fill_color_rgba" , color_map[cSelectionEndFill],
-							  "outline_color_rgba" , color_map[cSelectionEndOutline],
-							  NULL);
+		rect->end_trim = new SimpleRect (*selection_group);
+		rect->end_trim->property_x1() = 0.0;
+		rect->end_trim->property_x2() = 0.0;
+		rect->end_trim->property_fill_color_rgba() = color_map[cSelectionEndFill];
+		rect->end_trim->property_outline_color_rgba() = color_map[cSelectionEndOutline];
+
 		free_selection_rects.push_front (rect);
 
-		gtk_signal_connect (GTK_OBJECT(rect->rect), "event",
-				    (GtkSignalFunc) PublicEditor::canvas_selection_rect_event,
-				    &editor);
-		gtk_signal_connect (GTK_OBJECT(rect->start_trim), "event",
-				    (GtkSignalFunc) PublicEditor::canvas_selection_start_trim_event,
-				    &editor);
-		gtk_signal_connect (GTK_OBJECT(rect->end_trim), "event",
-				    (GtkSignalFunc) PublicEditor::canvas_selection_end_trim_event,
-				    &editor);
-
-		gtk_object_set_data(GTK_OBJECT(rect->rect), "rect", rect);
-		gtk_object_set_data(GTK_OBJECT(rect->start_trim), "rect", rect);
-		gtk_object_set_data(GTK_OBJECT(rect->end_trim), "rect", rect);
+		rect->rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_selection_rect_event), rect));
+		rect->start_trim->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_selection_start_trim_event), rect));
+		rect->end_trim->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_selection_end_trim_event), rect));
 	} 
 
 	rect = free_selection_rects.front();

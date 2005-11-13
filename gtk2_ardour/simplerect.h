@@ -110,9 +110,29 @@ private:
 
 
 public:
-  SimpleRect(Group& parent, double x1, double y1, double x2, double y2);
-  explicit SimpleRect(Group& parent);
+    SimpleRect(Group& parent, double x1, double y1, double x2, double y2);
+    explicit SimpleRect(Group& parent);
 
+    Glib::PropertyProxy<double> property_x1();
+    Glib::PropertyProxy_ReadOnly<double> property_x1() const;
+    Glib::PropertyProxy<double> property_y1();
+    Glib::PropertyProxy_ReadOnly<double> property_y1() const;
+    Glib::PropertyProxy<double> property_x2();
+    Glib::PropertyProxy_ReadOnly<double> property_x2() const;
+    Glib::PropertyProxy<double> property_y2();
+    Glib::PropertyProxy_ReadOnly<double> property_y2() const;
+    Glib::PropertyProxy<guint> property_outline_pixels();
+    Glib::PropertyProxy_ReadOnly<guint> property_outline_pixels() const;
+    Glib::PropertyProxy<guint> property_outline_what();
+    Glib::PropertyProxy_ReadOnly<guint> property_outline_what() const;
+    Glib::PropertyProxy<bool> property_fill();
+    Glib::PropertyProxy_ReadOnly<bool> property_fill() const;
+    Glib::PropertyProxy<guint> property_fill_color_rgba();
+    Glib::PropertyProxy_ReadOnly<guint> property_fill_color_rgba() const;
+    Glib::PropertyProxy<guint> property_outline_color_rgba();
+    Glib::PropertyProxy_ReadOnly<guint> property_outline_color_rgba() const;
+    Glib::PropertyProxy<bool> property_draw();
+    Glib::PropertyProxy_ReadOnly<bool> property_draw() const;
 
 };
 

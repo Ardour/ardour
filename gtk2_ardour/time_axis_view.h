@@ -75,7 +75,7 @@ class TimeAxisView : public virtual AxisView
 		Small = 21
 	};
 
-	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, Gtk::Widget *canvas);
+	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, Gnome::Canvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
 	/* public data: XXX create accessor/mutators for these ?? */
@@ -88,7 +88,7 @@ class TimeAxisView : public virtual AxisView
 	int     order;
 
 	
-	Gnome::Canvas::Item   *canvas_display;
+	Gnome::Canvas::Group   *canvas_display;
  	Gtk::VBox       *control_parent;
 
 	/* The Standard LHS Controls */

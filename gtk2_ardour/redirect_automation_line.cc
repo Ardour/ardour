@@ -34,12 +34,12 @@ using namespace std;
 using namespace ARDOUR;
 
 RedirectAutomationLine::RedirectAutomationLine (string name, Redirect& rd, uint32_t port, Session& s,
-						TimeAxisView& tv, Gnome::Canvas::Item& parent,
+						TimeAxisView& tv, Gnome::Canvas::Group& parent,
 						AutomationList& l,
-						gint (*point_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer),
-						gint (*line_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer))
+						sigc::slot<bool,GdkEvent*,ControlPoint*> point_handler,
+						sigc::slot<bool,GdkEvent*,AutomationLine*> line_handler),
 
-	: AutomationLine (name, tv, parent, l, point_callback, line_callback),
+	: AutomationLine (name, tv, parent, l, point_handler, line_handler),
 	  session (s),
 	  _redirect (rd),
 	  _port (port)

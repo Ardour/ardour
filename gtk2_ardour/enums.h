@@ -14,12 +14,16 @@ enum Width {
 	Narrow,
 };
 
-#include <libgnomecanvas/libgnomecanvas.h>
+namespace Gnome {
+	namespace Canvas {
+		class SimpleRect;
+	}
+}
 
 struct SelectionRect {
-    GnomeCanvasItem *rect;
-    GnomeCanvasItem *end_trim;
-    GnomeCanvasItem *start_trim;
+    Gnome::Canvas::SimpleRect *rect;
+    Gnome::Canvas::SimpleRect *end_trim;
+    Gnome::Canvas::SimpleRect *start_trim;
     uint32_t id;
 };
 

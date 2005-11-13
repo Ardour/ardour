@@ -46,10 +46,16 @@ class AutomationTimeAxisView;
 class Selectable;
 class Selection;
 
+namespace Gnome {
+	namespace Canvas {
+		class SimpleRect;
+	}
+}
+
 class ControlPoint 
 {
   public:
-        ControlPoint (AutomationLine& al, gint (*event_handler)(Gnome::Canvas::Item*, GdkEvent*, gpointer));
+        ControlPoint (AutomationLine& al, sigc::slot<bool,GdkEvent*,ControlPoint*>);
 	ControlPoint (const ControlPoint&, bool dummy_arg_to_force_special_copy_constructor);
 	~ControlPoint ();
 
@@ -71,7 +77,7 @@ class ControlPoint
 	void set_size (double);
 	void set_visible (bool);
 
-	Gnome::Canvas::Item* item;
+	Gnome::Canvas::SimpleRect* item;
 	AutomationLine& line;
 	uint32_t view_index;
 	ARDOUR::AutomationList::iterator model;
@@ -88,9 +94,8 @@ class ControlPoint
 class AutomationLine : public sigc::trackable
 {
   public:
-        AutomationLine (string name, TimeAxisView&, Gnome::Canvas::Item&, ARDOUR::AutomationList&,
-			gint (*point_event_handler)(Gnome::Canvas::Item*, GdkEvent*, gpointer),
-			gint (*line_event_handler)(Gnome::Canvas::Item*, GdkEvent*, gpointer));
+        AutomationLine (string name, TimeAxisView&, Gnome::Canvas::Group&, ARDOUR::AutomationList&,
+			sigc::slot<bool,GdkEvent*,ControlPoint*>, sigc::slot<bool,GdkEvent*,AutomationLine*>);
 
 	virtual ~AutomationLine ();
 
@@ -131,18 +136,15 @@ class AutomationLine : public sigc::trackable
 
 	TimeAxisView& trackview;
 
-	Gnome::Canvas::Group* canvas_group() const { return group; }
-	Gnome::Canvas::Item*  parent_group() const { return _parent_group; }
-	Gnome::Canvas::Item*  grab_item() const { return line; }
+	Gnome::Canvas::Group& canvas_group() const { return *group; }
+	Gnome::Canvas::Item&  parent_group() const { return _parent_group; }
+	Gnome::Canvas::Item&  grab_item() const { return *line; }
 
 	void show_selection();
 	void hide_selection ();
 
 	void set_point_size (double size);
 
-	static void invalidate_point (Gnome::Canvas::Points*, uint32_t index);
-	static bool invalid_point (Gnome::Canvas::Points*, uint32_t index);
-	
 	virtual string  get_verbose_cursor_string (float);
 	virtual void view_to_model_y (double&) = 0;
 	virtual void model_to_view_y (double&) = 0;
@@ -168,15 +170,26 @@ class AutomationLine : public sigc::trackable
 	bool    no_draw : 1;
 	bool    points_visible : 1;
 	
-	Gnome::Canvas::Item*  _parent_group;
+	Gnome::Canvas::Group&  _parent_group;
 	Gnome::Canvas::Group*   group;
 	Gnome::Canvas::Line*   line; /* line */
-	Gnome::Canvas::Points* point_coords; /* coordinates for canvas line */
-	vector<ControlPoint*> control_points; /* visible control points */
+	Gnome::Canvas::Points  line_points; /* coordinates for canvas line */
+	vector<ControlPoint*>  control_points; /* visible control points */
 
-	gint   (*point_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer);
+	sigc::slot<bool,GdkEvent*,ControlPoint*> point_slot;
 
-	void determine_visible_control_points (Gnome::Canvas::Points*);
+	struct ALPoint {
+	    double x;
+	    double y;
+	    ALPoint (double xx, double yy) : x(xx), y(yy) {}
+	};
+
+	typedef std::vector<ALPoint> ALPoints;
+
+	static void invalidate_point (ALPoints&, uint32_t index);
+	static bool invalid_point (ALPoints&, uint32_t index);
+	
+	void determine_visible_control_points (ALPoints&);
 	void sync_model_from (ControlPoint&);
 	void sync_model_with_view_point (ControlPoint&);
 	void sync_model_with_view_line (uint32_t, uint32_t);
@@ -189,7 +202,6 @@ class AutomationLine : public sigc::trackable
 	void list_changed (ARDOUR::Change);
 
 	UndoAction get_memento();
-
 	
   private:
 	uint32_t drags;

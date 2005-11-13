@@ -1202,12 +1202,14 @@ AudioTimeAxisView::add_gain_automation_child ()
 	gain_track = new GainAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, _("gain"),
 						     _route.gain_automation_curve());
 	
+
+	sigc::slot<bool,GdkEvent*,ControlPoint*> cslot = mem_fun (editor, &PublicEditor::canvas_control_point_event);
+	sigc::slot<bool,GdkEvent*,AutomationLine*> lslot = mem_fun (editor, &PublicEditor::canvas_line_event);
 	
 	line = new AutomationGainLine ("automation gain", _session, *gain_track,
 				       *gain_track->canvas_display,
-				       _route.gain_automation_curve(),
-				       PublicEditor::canvas_control_point_event,
-				       PublicEditor::canvas_line_event);
+				       _route.gain_automation_curve(), cslot, lslot);
+
 	line->set_line_color (color_map[cAutomationLine]);
 	
 

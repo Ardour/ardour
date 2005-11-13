@@ -163,6 +163,7 @@ time_selection.cc
 utils.cc
 version.cc
 visual_time_axis.cc
+waveview.cc
 """)
 
 mtest_files=Split("""

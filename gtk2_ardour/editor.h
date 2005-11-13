@@ -1145,6 +1145,16 @@ class Editor : public PublicEditor
 
 	/* Canvas event handlers */
 
+	// FIXED FOR GTK2
+
+	bool canvas_control_point_event (GdkEvent* event,ControlPoint*);
+	bool canvas_line_event (GdkEvent* event,AutomationLine*);
+	bool canvas_selection_rect_event (GdkEvent* event,SelectionRect*);
+	bool canvas_selection_start_trim_event (GdkEvent* event,SelectionRect*);
+	bool canvas_selection_end_trim_event (GdkEvent* event,SelectionRect*);
+	
+	// PENDING
+
 	gint canvas_crossfade_view_event (GdkEvent* event);
 	gint canvas_fade_in_event (GdkEvent* event);
 	gint canvas_fade_in_handle_event (GdkEvent* event);
@@ -1156,11 +1166,6 @@ class Editor : public PublicEditor
 	gint canvas_stream_view_event (GdkEvent* event);
 	gint canvas_marker_event (GdkEvent* event);
 	gint canvas_zoom_rect_event (GdkEvent* event);
-	gint canvas_selection_rect_event (GdkEvent* event);
-	gint canvas_selection_start_trim_event (GdkEvent* event);
-	gint canvas_selection_end_trim_event (GdkEvent* event);
-	gint canvas_control_point_event (GdkEvent* event);
-	gint canvas_line_event (GdkEvent* event);
 	gint canvas_tempo_marker_event (GdkEvent* event);
 	gint canvas_meter_marker_event (GdkEvent* event);
 	gint canvas_tempo_bar_event (GdkEvent* event);
@@ -1178,32 +1183,6 @@ class Editor : public PublicEditor
 	gint canvas_markerview_end_handle_event(GdkEvent* event) ;
 	gint canvas_automation_track_event(GdkEvent* event) ;
 
-#if 0
-	gint canvas_crossfade_view_event (GnomeCanvasItem* item, GdkEvent* event, CrossfadeView*);
-	gint canvas_fade_in_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
-	gint canvas_fade_in_handle_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
-	gint canvas_fade_out_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
-	gint canvas_fade_out_handle_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
-	gint canvas_region_view_event (GnomeCanvasItem* item, GdkEvent* event, AudioRegionView*);
-	gint canvas_stream_view_event (GnomeCanvasItem* item, GdkEvent* event, AudioTimeAxisView*);
-	gint canvas_automation_track_event (GnomeCanvasItem* item, GdkEvent* event, AutomationTimeAxisView*);
-	gint canvas_marker_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_zoom_rect_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_selection_rect_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_selection_start_trim_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_selection_end_trim_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_control_point_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_line_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_tempo_marker_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_meter_marker_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_tempo_bar_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_meter_bar_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_range_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_transport_marker_bar_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_region_view_name_highlight_event (GnomeCanvasItem* item, GdkEvent* event);
-	gint canvas_region_view_name_event (GnomeCanvasItem* item, GdkEvent* event);
-#endif	
 
 	gint canvas_copy_region_event (GdkEvent* event);
 	gint canvas_playhead_cursor_event (GdkEvent* event);

@@ -135,6 +135,88 @@ GType SimpleRect::get_base_type()
   return gnome_canvas_simplerect_get_type();
 }
 
+Glib::PropertyProxy<double> SimpleRect::property_x1()
+{
+	return Glib::PropertyProxy<double> (this, "x1");
+}
+Glib::PropertyProxy_ReadOnly<double> SimpleRect::property_x1() const
+{
+	return Glib::PropertyProxy_ReadOnly<double> (this, "x1");
+}
+Glib::PropertyProxy<double> SimpleRect::property_y1()
+{
+	return Glib::PropertyProxy<double> (this, "y1");
+}
+Glib::PropertyProxy_ReadOnly<double> SimpleRect::property_y1() const
+{
+	return Glib::PropertyProxy_ReadOnly<double> (this, "y1");
+}
+Glib::PropertyProxy<double> SimpleRect::property_x2()
+{
+	return Glib::PropertyProxy<double> (this, "x2");
+}
+Glib::PropertyProxy_ReadOnly<double> SimpleRect::property_x2() const
+{
+	return Glib::PropertyProxy_ReadOnly<double> (this, "x2");
+}
+Glib::PropertyProxy<double> SimpleRect::property_y2()
+{
+	return Glib::PropertyProxy<double> (this, "y2");
+}
+Glib::PropertyProxy_ReadOnly<double> SimpleRect::property_y2() const
+{
+	return Glib::PropertyProxy_ReadOnly<double> (this, "y2");
+}
+Glib::PropertyProxy<guint> SimpleRect::property_outline_pixels()
+{
+	return Glib::PropertyProxy<guint> (this, "outline_pixels");
+}
+Glib::PropertyProxy_ReadOnly<guint> SimpleRect::property_outline_pixels() const
+{
+	return Glib::PropertyProxy_ReadOnly<guint> (this, "outline_pixels");
+}
+Glib::PropertyProxy<guint> SimpleRect::property_outline_what()
+{
+	return Glib::PropertyProxy<guint> (this, "outline_what");
+}
+Glib::PropertyProxy_ReadOnly<guint> SimpleRect::property_outline_what() const
+{
+	return Glib::PropertyProxy_ReadOnly<guint> (this, "outline_what");
+}
+Glib::PropertyProxy<bool> SimpleRect::property_fill()
+{
+	return Glib::PropertyProxy<bool> (this, "fill");
+}
+Glib::PropertyProxy_ReadOnly<bool> SimpleRect::property_fill() const
+{
+	return Glib::PropertyProxy_ReadOnly<bool> (this, "fill");
+}
+Glib::PropertyProxy<guint> SimpleRect::property_fill_color_rgba()
+{
+	return Glib::PropertyProxy<guint> (this, "fill_color_rgba");
+}
+Glib::PropertyProxy_ReadOnly<guint> SimpleRect::property_fill_color_rgba() const
+{
+	return Glib::PropertyProxy_ReadOnly<guint> (this, "fill_color_rgba");
+}
+Glib::PropertyProxy<guint> SimpleRect::property_outline_color_rgba()
+{
+	return Glib::PropertyProxy<guint> (this, "outline_color_rgba");
+}
+Glib::PropertyProxy_ReadOnly<guint> SimpleRect::property_outline_color_rgba() const
+{
+	return Glib::PropertyProxy_ReadOnly<guint> (this, "outline_color_rgba");
+}
+Glib::PropertyProxy<bool> SimpleRect::property_draw()
+{
+	return Glib::PropertyProxy<bool> (this, "draw");
+}
+Glib::PropertyProxy_ReadOnly<bool> SimpleRect::property_draw() const
+{
+	return Glib::PropertyProxy_ReadOnly<bool> (this, "draw");
+}
+
+
 
 } // namespace Canvas
 

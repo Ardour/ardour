@@ -34,6 +34,7 @@
 
 using namespace std;
 using namespace Editing;
+using namespace Glib;
 
 //------------------------------------------------------------------------------
 /** Initialize static memeber data */
@@ -209,7 +210,7 @@ TimeAxisViewItem::set_position(jack_nframes_t pos, void* src, double* delta)
 	double old_unit_pos ;
 	double new_unit_pos = pos / samples_per_unit ;
 
-	group->get_property ("x", &old_unit_pos);
+	old_unit_pos = group->property_x();
 
 	if (new_unit_pos != old_unit_pos) {
 		group->move (new_unit_pos - old_unit_pos, 0.0);
@@ -691,7 +692,7 @@ TimeAxisViewItem::set_colors()
 		double height = NAME_HIGHLIGHT_THRESH;
 
 		if (frame) {
-			frame->get_property ("y2", &height);
+			height = frame->property_y2();
 		}
 
 		if (height < NAME_HIGHLIGHT_THRESH) {
@@ -795,7 +796,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 		if (name_highlight) {
 
-			name_highlight->get_property ("y2", &height);
+			double height = name_highlight->property_y2 ();
 
 			if (height < NAME_HIGHLIGHT_THRESH) {
 				name_highlight->hide();
@@ -832,22 +833,22 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 {
 	int width;
 	int height;
+	ustring ustr;
 	Pango::FontDescription fd (NAME_FONT);
 
 	if (name_text == 0) {
 		return;
 	}
                        
-	int namelen = item_name.length();
-	char cstr[namelen+1];
-	strcpy (cstr, item_name.c_str());
-	
-	Glib::RefPtr<Pango::Layout> layout = group->get_canvas()->create_pango_layout();
+	ustr = item_name;
+	int namelen = ustr.length();
+
+	Glib::RefPtr<Pango::Layout> layout = group->get_canvas()->create_pango_layout (ustr);
 	layout->set_font_description (fd);
 
 	while (namelen) {
 		
-		layout->set_text (cstr);
+		layout->set_text (ustr);
 		layout->get_pixel_size (width, height);
 
 		if (width < (pixel_width - NAME_X_OFFSET)) {
@@ -855,8 +856,7 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 		}
 
 		--namelen;
-		cstr[namelen] = '\0';
-
+		ustr = ustr.substr (0, namelen);
 	}
 
 	if (namelen == 0) {
@@ -879,7 +879,7 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 			}
 		}
 		
-		name_text->set_property ("text", cstr);
+		name_text->property_text() = ustr;
 		name_text->show();
 	}
 }
