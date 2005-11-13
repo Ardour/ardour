@@ -28,7 +28,6 @@
 #include "imageframe_time_axis_group.h"
 #include "marker_time_axis.h"
 #include "marker_time_axis_view.h"
-#include "canvas-simplerect.h"
 #include "public_editor.h"
 #include "utils.h"
 #include "imageframe_view.h"
@@ -56,7 +55,7 @@ sigc::signal<void,ImageFrameView*> ImageFrameView::GoingAway;
  * @param num_channels the number of color channels within rgb_data
  */
 ImageFrameView::ImageFrameView(std::string item_id,
-	GnomeCanvasGroup *parent,
+	Gnome::Canvas::Group *parent,
 	ImageFrameTimeAxis* tv,
 	ImageFrameTimeAxisGroup* item_group,
 	double spu,
@@ -117,8 +116,8 @@ ImageFrameView::ImageFrameView(std::string item_id,
 
 	/* handle any specific details required by the initial start end duration values */
 	
-	gnome_canvas_item_raise_to_top(frame_handle_start) ;
-	gnome_canvas_item_raise_to_top(frame_handle_end) ;
+	frame_handle_start->raise_to_top();
+	frame_handle_end->raise_to_top();
 	
     set_position(start, this) ;
     set_duration(duration, this) ;
@@ -281,18 +280,19 @@ ImageFrameView::set_height (gdouble h)
 	gnome_canvas_item_set(imageframe, "width", (gdouble)im_width, NULL) ;
 	gnome_canvas_item_set(imageframe, "height",(gdouble) (h - TimeAxisViewItem::NAME_Y_OFFSET), NULL) ;
 
-	
-	gnome_canvas_item_raise_to_top(frame) ;
+	frame->raise_to_top();
 	gnome_canvas_item_raise_to_top(imageframe) ;
-	gnome_canvas_item_raise_to_top(name_highlight) ;
-	gnome_canvas_item_raise_to_top(name_text) ;
-	gnome_canvas_item_raise_to_top(frame_handle_start) ;
-	gnome_canvas_item_raise_to_top(frame_handle_end) ;
+	//imageframe->raise_to_top();
+	name_highlight->raise_to_top();
+	name_text->raise_to_top();
+	frame_handle_start->raise_to_top();
+	frame_handle_end->raise_to_top();
  
- 	gnome_canvas_item_set (name_text, "y", h - TimeAxisViewItem::NAME_Y_OFFSET, NULL);
-	gnome_canvas_item_set (frame, "y2", h, NULL);
+	name_text->set_property ("y", h - TimeAxisViewItem::NAME_Y_OFFSET);
+	frame->set_property ("y2", h);
 
-	gnome_canvas_item_set (name_highlight, "y1", (gdouble) h - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, "y2", (gdouble) h - 1.0, NULL);
+	name_highlight->set_property ("y1", (gdouble) h - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
+	name_highlight->set_property ("y2", (gdouble) h - 1.0);
 }
 
 

@@ -1133,7 +1133,7 @@ MixerStrip::setup_comment_editor ()
 	comment_area.set_editable (true);
 	comment_area.signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
 	comment_area.signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
-	comment_area.changed.connect (mem_fun(*this, &MixerStrip::comment_edited));
+	  comment_area.changed.connect (mem_fun(*this, &MixerStrip::comment_edited));
 	// GTK2FIX
 	// comment_area.signal_button_release_event().connect_after (ptr_fun (do_not_propagate));
 	comment_area.show ();
@@ -1258,7 +1258,7 @@ MixerStrip::show_route_color ()
 	style = name_button.get_style()->copy();
 	style->set_bg (Gtk::STATE_NORMAL, color());
 	name_button.set_style (style);
-	style->unrefernce();
+	style->unreference();
 
 	route_active_changed ();
 }

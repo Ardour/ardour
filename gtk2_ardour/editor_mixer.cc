@@ -161,8 +161,7 @@ Editor::update_current_screen ()
 
 		if (_follow_playhead) {
 
-			gnome_canvas_item_show (playhead_cursor->canvas_item);
-
+		  playhead_cursor->canvas_item->show();
 			if (frame != last_update_frame) {
 
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
@@ -185,7 +184,7 @@ Editor::update_current_screen ()
 			
 			if (frame != last_update_frame) {
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
-					gnome_canvas_item_hide (playhead_cursor->canvas_item);
+					playhead_cursor->canvas_item->hide();
 				} else {
 					playhead_cursor->set_position (frame);
 				}

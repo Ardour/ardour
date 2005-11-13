@@ -890,13 +890,13 @@ Editor::initialize_canvas ()
 	transport_bar_drag_rect->set_property ("outline_pixels", 0);
 	transport_bar_drag_rect->hide ();
 	
-	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
-	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
+	marker_drag_line_points->push_back(Gnome::Art::Point(0.0, 0.0));
+	marker_drag_line_points->push_back(Gnome::Art::Point(0.0, 0.0));
 
 	marker_drag_line = new Gnome::Canvas::Line (*track_canvas.root());
 	marker_drag_line->set_property ("width_pixels", 1);
 	marker_drag_line->set_property("fill_color_rgba", color_map[cMarkerDragLine]);
-	marker_drag_line->set_property("points", marker_drag_line_points.gobj());
+	marker_drag_line->set_property("points", marker_drag_line_points->gobj());
 	marker_drag_line->hide();
 
 	range_marker_drag_rect = new Gnome::Canvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
@@ -918,12 +918,21 @@ Editor::initialize_canvas ()
 	
 	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
 
-	transport_punchin_line = new Gnome::Canvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
+	transport_punchin_line = new Gnome::Canvas::Line (*time_line_group);
+	transport_punchin_line->set_property ("x1", 0.0);
+	transport_punchin_line->set_property ("y1", 0.0);
+	transport_punchin_line->set_property ("x2", 0.0);
+	transport_punchin_line->set_property ("y2", 0.0);
+
 	transport_punchin_line->set_property ("outline_color_rgba", color_map[cPunchInLine]);
 	transport_punchin_line->set_property ("outline_pixels", 1);
 	transport_punchin_line->hide ();
 	
-	transport_punchout_line  = new Gnome::Canvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
+	transport_punchout_line  = new Gnome::Canvas::Line (*time_line_group);
+	transport_punchout_line->set_property ("x1", 0.0);
+	transport_punchout_line->set_property ("y1", 0.0);
+	transport_punchout_line->set_property ("x2", 0.0);
+	transport_punchout_line->set_property ("y2", 0.0);
 	transport_punchout_line->set_property ("outline_color_rgba", color_map[cPunchOutLine]);
 	transport_punchout_line->set_property ("outline_pixels", 1);
 	transport_punchout_line->hide();
@@ -955,32 +964,32 @@ Editor::initialize_canvas ()
 	tempo_line_points.push_back(Gnome::Art::Point(0, timebar_height));
 	tempo_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 	
-	tempo_line = new Gnome::Canvas::Line (*tempo_group, *tempo_line_points);
+	tempo_line = new Gnome::Canvas::Line (*tempo_group, tempo_line_points);
 	tempo_line->set_property ("width_pixels", 0);
-	tempo_line->set_property ("fill_color", "#000000");
+	tempo_line->set_property ("fill_color", Gdk::Color ("#000000"));
 
 	meter_line_points.push_back(Gnome::Art::Point (0, timebar_height));
 	meter_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 
-	meter_line = new Gnome::Canvas::Line (*meter_group, *meter_line_points);
+	meter_line = new Gnome::Canvas::Line (*meter_group, meter_line_points);
 	meter_line->set_property ("width_pixels", 0);
-	meter_line->set_property ("fill_color", "#000000");
+	meter_line->set_property ("fill_color", Gdk::Color ("#000000"));
 
 	marker_line_points.push_back(Gnome::Art::Point (0, timebar_height));
 	marker_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 
-	marker_line =  new Gnome::Canvas::Line (*marker_group, *marker_line_points);
+	marker_line =  new Gnome::Canvas::Line (*marker_group, marker_line_points);
 	marker_line->set_property ("width_pixels", 0);
-	marker_line->set_property ("fill_color", "#000000");
+	marker_line->set_property ("fill_color", Gdk::Color ("#000000"));
 	
-	range_marker_line =  new Gnome::Canvas::Line (*range_marker_group, *marker_line_points);
+	range_marker_line =  new Gnome::Canvas::Line (*range_marker_group, marker_line_points);
 	range_marker_line->set_property ("width_pixels", 0);
-	range_marker_line->set_property ("fill_color", "#000000");
-	
-	transport_marker_line =  new Gnome::Canvas::Line (*transport_marker_group, *marker_line_points);
+	range_marker_line->set_property ("fill_color", Gdk::Color ("#000000"));
+
+	transport_marker_line =  new Gnome::Canvas::Line (*transport_marker_group, marker_line_points);
 	transport_marker_line->set_property ("width_pixels", 0);
-	transport_marker_line->set_property ("fill_color", "#000000");
-	
+	transport_marker_line->set_property ("fill_color", Gdk::Color ("#000000"));
+
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_loop_range_view), false));
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_punch_range_view), false));
 	
@@ -1342,8 +1351,9 @@ Editor::reset_scrolling_region (GtkAllocation *alloc)
 	if (playhead_cursor) playhead_cursor->set_length (canvas_alloc_height);
 
 	if (marker_drag_line) {
-		marker_drag_line_points[1].set_y (canvas_height);
-		marker_drag_line->set_property("points", marker_drag_line_points.gobj());
+		marker_drag_line_points->back().set_x(canvas_height);
+		// cerr << "set mlA points, nc = " << marker_drag_line_points->num_points << endl;
+		marker_drag_line->set_property("points", marker_drag_line_points);
 	}
 	if (range_marker_drag_rect) {
 		range_marker_drag_rect->set_property("y1", 0.0);
@@ -1769,7 +1779,7 @@ Editor::build_cursors ()
 }
 
 void
-Editor::popup_fade_context_menu (int button, int32_t time, GnomeCanvasItem* item, ItemType item_type)
+Editor::popup_fade_context_menu (int button, int32_t time, Gnome::Canvas::Item* item, ItemType item_type)
 {
 	using namespace Menu_Helpers;
 	AudioRegionView* arv = static_cast<AudioRegionView*> (gtk_object_get_data (GTK_OBJECT(item), "regionview"));
@@ -2894,7 +2904,7 @@ Editor::setup_toolbar ()
 	mouse_mode_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Gtk::Box*>(&toolbar_hbox), 
 						  mouse_mode_tearoff->tearoff_window()));
 	mouse_mode_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Gtk::Box*> (&toolbar_hbox), 
-						  mmouse_mode_tearoff->tearoff_window(), 1));
+						  mouse_mode_tearoff->tearoff_window(), 1));
 
 	mouse_move_button.set_name ("MouseModeButton");
 	mouse_select_button.set_name ("MouseModeButton");
@@ -3080,7 +3090,7 @@ Editor::setup_toolbar ()
 	tools_tearoff->set_name ("MouseModeBase");
 
 	tools_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Gtk::Box*>(&toolbar_hbox), 
-					     tools_tearoff->tearoff_window());
+					     tools_tearoff->tearoff_window(), 0));
 	tools_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Gtk::Box*> (&toolbar_hbox), 
 					     tools_tearoff->tearoff_window(), 0));
 
@@ -3679,7 +3689,7 @@ void
 Editor::set_edit_menu (Menu& menu)
 {
 	edit_menu = &menu;
-	edit_menu->signal_map.connect (mem_fun(*this, &Editor::edit_menu_map_handler));
+	edit_menu->signal_map_event().connect (mem_fun(*this, &Editor::edit_menu_map_handler));
 }
 
 void

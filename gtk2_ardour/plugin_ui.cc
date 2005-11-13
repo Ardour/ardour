@@ -94,8 +94,8 @@ PluginUIWindow::PluginUIWindow (AudioEngine &engine, PluginInsert& insert, bool 
 		_pluginui = pu;
 		add (*pu);
 		
-		map_event.connect (mem_fun (*pu, &PluginUI::start_updating));
-		unmap_event.connect (mem_fun (*pu, &PluginUI::stop_updating));
+		signal_map_event().connect (mem_fun (*pu, &PluginUI::start_updating));
+		signal_unmap_event().connect (mem_fun (*pu, &PluginUI::stop_updating));
 	}
 
 	set_position (Gtk::WIN_POS_MOUSE);

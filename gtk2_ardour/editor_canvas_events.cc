@@ -990,7 +990,7 @@ Editor::canvas_zoom_rect_event (GnomeCanvasItem *item, GdkEvent *event)
 }
 
 gint
-Editor::canvas_copy_region_event (GnomeCanvasItem *item, GdkEvent *event)
+Editor::canvas_copy_region_event (GnomeCanvasItem *item GdkEvent *event)
 {
 	return typed_event (item, event, RegionItem);
 }

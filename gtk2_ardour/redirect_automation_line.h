@@ -37,10 +37,10 @@ class TimeAxisView;
 class RedirectAutomationLine : public AutomationLine
 {
   public:
-	RedirectAutomationLine (string name, ARDOUR::Redirect&, uint32_t port, ARDOUR::Session&, TimeAxisView&, GnomeCanvasItem* parent,
+  RedirectAutomationLine (string name, ARDOUR::Redirect&, uint32_t port, ARDOUR::Session&, TimeAxisView&, Gnome::Canvas::Item& parent,
 				ARDOUR::AutomationList&, 
-				gint (*point_callback)(GnomeCanvasItem*, GdkEvent*, gpointer),
-				gint (*line_callback)(GnomeCanvasItem*, GdkEvent*, gpointer));
+			  gint (*point_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer),
+			  gint (*line_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer));
 	
 	uint32_t port() const { return _port; }
 	ARDOUR::Redirect& redirect() const { return _redirect; }

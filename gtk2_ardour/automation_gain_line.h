@@ -17,10 +17,10 @@ class TimeAxisView;
 class AutomationGainLine : public AutomationLine
 {
   public:
-	AutomationGainLine (string name, ARDOUR::Session&, TimeAxisView&, GnomeCanvasItem* parent,
+  AutomationGainLine (string name, ARDOUR::Session&, TimeAxisView&, Gnome::Canvas::Item* parent,
 			    ARDOUR::Curve&, 
-			    gint (*point_callback)(GnomeCanvasItem*, GdkEvent*, gpointer),
-			    gint (*line_callback)(GnomeCanvasItem*, GdkEvent*, gpointer));
+		      gint (*point_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer),
+		      gint (*line_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer));
 	
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);

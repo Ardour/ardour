@@ -74,7 +74,7 @@ RedirectAutomationTimeAxisView::add_automation_event (GnomeCanvasItem* item, Gdk
 {
 	double x = 0;
 
-	gnome_canvas_item_w2i (canvas_display, &x, &y);
+	canvas_display->w2i (x, y);
 
 	/* compute vertical fractional position */
 

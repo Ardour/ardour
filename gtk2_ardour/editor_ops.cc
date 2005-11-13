@@ -998,14 +998,14 @@ Editor::scroll_tracks_up ()
 void
 Editor::scroll_tracks_down_line ()
 {
-	GtkAdjustment* adj = edit_vscrollbar.get_adjustment();
+        Gtk::Adjustment* adj = edit_vscrollbar.get_adjustment();
 	adj->set_value (adj->get_value() + 10);
 }
 
 void
 Editor::scroll_tracks_up_line ()
 {
-	GtkAdjustment* adj = edit_vscrollbar.get_adjustment();
+        Gtk::Adjustment* adj = edit_vscrollbar.get_adjustment();
 	adj->set_value (adj->get_value() - 10);
 }
 
@@ -1474,7 +1474,7 @@ Editor::insert_region_list_drag (AudioRegion& region)
 	track_canvas.get_pointer (x, y);
 
 	track_canvas.window_to_world (x, y, wx, wy);
-	
+
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
 	event.button.x = wx;
@@ -1528,14 +1528,14 @@ Editor::insert_region_list_selection (float times)
 		return;
 	}
 	
-	RefPtr<TreeSelection> selected = region_list_display.get_selection();
+	Glib::RefPtr<TreeSelection> selected = region_list_display.get_selection();
 	
 	if (selected.count_selected_rows() != 1) {
 		return;
 	}
 	
 	TreeModel::iterator i = region_list_display.get_selection()->get_selected();
-	Region* region = (*i)[region_list_display_columns.region];
+	Region* region = (*i)[region_list_columns.region];
 
 	begin_reversible_command (_("insert region"));
 	session->add_undo (playlist->get_memento());
@@ -2603,14 +2603,14 @@ Editor::region_fill_selection ()
 
 	Region *region;
 
-	RefPtr<TreeSelection> selected = region_list_display.get_selection();
+	Glib::RefPtr<TreeSelection> selected = region_list_display.get_selection();
 
 	if (selected.count_selected_rows() != 1) {
 		return;
 	}
 
 	TreeModel::iterator i = region_list_display.get_selection()->get_selected();
-	region = (*i)[region_list_display_columns.region];
+	region = (*i)[region_list_columns.region];
 
 	jack_nframes_t start = selection->time[clicked_selection].start;
 	jack_nframes_t end = selection->time[clicked_selection].end;
@@ -2924,7 +2924,7 @@ Editor::freeze_route ()
 
 	pthread_create (&itt.thread, 0, _freeze_thread, this);
 
-	track_canvas_scroller.get_window()->set_cursor (Cursor (WATCH));
+	track_canvas_scroller.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
@@ -3173,9 +3173,7 @@ Editor::mouse_paste ()
 	double x, y;
 	double wx, wy;
 	track_canvas.get_pointer (x, y);
-
 	track_canvas.window_to_world (x, y, wx, wy);
-	
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
 	event.button.x = wx;
@@ -3223,14 +3221,14 @@ Editor::paste_named_selection (float times)
 {
 	TrackSelection::iterator i;
 
-	RefPtr<TreeSelection> selected = named_selection_display.get_selection();
+	Glib::RefPtr<TreeSelection> selected = named_selection_display.get_selection();
 
 	if (selected.count_selected_rows() == 0 || selection->tracks.empty()) {
 		return;
 	}
 
 	TreeModel::iterator i = selected->get_selected();
-	NamedSection* ns = (*i)[named_selection_columns.selection];
+	NamedSelection* ns = (*i)[named_selection_columns.selection];
 
 	list<Playlist*>::iterator chunk;
 	list<Playlist*>::iterator tmp;
@@ -3439,8 +3437,7 @@ Editor::remove_last_capture ()
 		choices.push_back (_("No, do nothing."));
 
 		Gtkmm2ext::Choice prompter (prompt, choices);
-
-		prompter.chosen.connect (Gtk::Main::quit.slot());
+		prompter.done.connect (Gtk::Main::quit.slot());
 		prompter.show_all ();
 
 		Gtk::Main::run ();

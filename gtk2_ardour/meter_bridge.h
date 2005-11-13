@@ -54,12 +54,13 @@ class MeterBridge : public ArdourDialog
 	void toggle_metering ();
 
   protected:
-	bool on_map (GdkEventAny *);
-	bool on_unmap (GdkEventAny *);
+	void on_map ();
+	void on_unmap ();
 
   private:
 	/* diskstream/recorder display */
-
+	Gtk::Adjustment		 hadjustment;
+	Gtk::Adjustment		 vadjustment;
 	Gtk::Viewport            meter_viewport;
 	Gtk::ScrolledWindow      meter_scroller;
 	Gtk::EventBox            meter_scroll_base;

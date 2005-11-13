@@ -47,8 +47,7 @@
 #include "i18n.h"
 
 using namespace Gtk;
-/*can't use sigc namespace while we have the string_compose() in libs/pbd3/pbd */
-//using namespace sigc; 
+using namespace sigc; 
 using namespace ARDOUR;
 using namespace Editing;
 
@@ -59,16 +58,25 @@ TimeAxisView::TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView
 	  editor(ed),
 	  controls_table (2, 9)
 {
-	canvas_display = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(canvas->gobj())),
-					      gnome_canvas_group_get_type(),
-					      "x", 0.0,
-					      "y", 0.0,
-					      NULL);
+  //GTK2FIX -- whats going on here? is this canvas really a group?
+  //canvas_display = gnome_canvas_item_new (gnome_canvas_root(GNOME_CANVAS(canvas->gobj())),
+  //				      gnome_canvas_group_get_type(),
+  //				      "x", 0.0,
+  //				      "y", 0.0,
+  //				      NULL);
 
-	selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), 
-					       gnome_canvas_group_get_type (), 
-					       NULL);
-	gnome_canvas_item_hide (selection_group);
+
+  canvas_display = new Gnome::Canvas::Item (*canvas);
+  canvas_display->set_property ("x", 0.0);
+  canvas_display->set_property ("y", 0.0);
+
+  selection_group = new Gnome::Canvas::Group (*canvas_display);
+  selection_group->hide();
+
+  //lection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), 
+  //				       gnome_canvas_group_get_type (), 
+  //				       NULL);
+  //ome_canvas_item_hide (selection_group);
 	
    	control_parent = 0;
 	display_menu = 0;
@@ -200,14 +208,14 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	   item's parent ...
 	*/
 
-	gnome_canvas_item_get_bounds (canvas_display, &ix1, &iy1, &ix2, &iy2);
-	gnome_canvas_item_i2w (canvas_display->parent, &ix1, &iy1);
+	canvas_display->get_bounds (ix1, iy1, ix2, iy2);
+	canvas_display->parent()->i2w (ix1, iy1);
 	if (iy1 < 0) {
 		iy1 = 0;
 	}
-	gnome_canvas_item_move (canvas_display, 0.0, y - iy1);
-	gnome_canvas_item_show (canvas_display); /* XXX not necessary */
 
+	canvas_display->move (0.0, y - iy1);
+	canvas_display->show();/* XXX not necessary */
 	y_position = y;
 	order = nth;
 	_hidden = false;
@@ -219,7 +227,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
 		
 		if ((*i)->marked_for_display()) {
-			gnome_canvas_item_show ((*i)->canvas_display);
+			(*i)->canvas_display->show();
 		}
 		
 		if (GTK_OBJECT_FLAGS(GTK_OBJECT((*i)->canvas_display)) & GNOME_CANVAS_ITEM_VISIBLE) {
@@ -289,7 +297,7 @@ TimeAxisView::hide ()
 		return;
 	}
 
-	gnome_canvas_item_hide (canvas_display);
+	canvas_display->hide();
 	controls_frame.hide ();
 
 	if (control_parent) {
@@ -362,7 +370,7 @@ TimeAxisView::name_entry_button_press (GdkEventButton *ev)
 	if (ev->button == 3) {
 		return true;
 	}
-	return false
+	return false;
 }
 
 bool
@@ -506,11 +514,11 @@ TimeAxisView::show_selection (TimeSelection& ts)
 			gnome_canvas_item_hide (free_selection_rects.front()->start_trim);
 			gnome_canvas_item_hide (free_selection_rects.front()->end_trim);
 		}
-		gnome_canvas_item_hide (selection_group);
+		selection_group->hide();
 	}
 
-	gnome_canvas_item_show (selection_group);
-	gnome_canvas_item_raise_to_top (selection_group);
+	selection_group->show();
+	selection_group->raise_to_top();
 	
 	for (list<AudioRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
 		jack_nframes_t start, end, cnt;
@@ -580,7 +588,7 @@ TimeAxisView::hide_selection ()
 			gnome_canvas_item_hide (free_selection_rects.front()->start_trim);
 			gnome_canvas_item_hide (free_selection_rects.front()->end_trim);
 		}
-		gnome_canvas_item_hide (selection_group);
+		selection_group->hide();
 	}
 	
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
@@ -589,14 +597,14 @@ TimeAxisView::hide_selection ()
 }
 
 void
-TimeAxisView::order_selection_trims (GnomeCanvasItem *item, bool put_start_on_top)
+TimeAxisView::order_selection_trims (Gnome::Canvas::Item *item, bool put_start_on_top)
 {
 	/* find the selection rect this is for. we have the item corresponding to one
 	   of the trim handles.
 	 */
 
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
-		if ((*i)->start_trim == item || (*i)->end_trim == item) {
+	  if ((*i)->start_trim == item->gobj() || (*i)->end_trim == item->gobj()) {
 
 			/* make one trim handle be "above" the other so that if they overlap,
 			   the top one is the one last used.

@@ -289,7 +289,7 @@ class OptionEditor : public ArdourDialog
 	void debug_keyboard_clicked ();
 	void speed_quieten_clicked ();
 
-	void fixup_combo_size (Gtk::ComboBox&, std::vector<std::string>& strings);
+	void fixup_combo_size (Gtk::ComboBoxText&, std::vector<std::string>& strings);
 };
 
 #endif /* __gtk_ardour_option_editor_h__ */

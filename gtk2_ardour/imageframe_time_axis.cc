@@ -61,8 +61,10 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(std::string track_id, PublicEditor& ed, A
 {
 	_color = unique_random_color() ;
 	
-	selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), gnome_canvas_group_get_type (), NULL) ;
-	gnome_canvas_item_hide(selection_group) ;
+	//GTK2FIX -- how to get the group? is the canvas display really a group?
+	//selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), gnome_canvas_group_get_type (), NULL) ;
+	selection_group = new Gnome::Canvas::Group (GNOME_CANVAS_GROUP(canvas_display));
+	selection_group->hide();
 
 	// intialize our data items
 	_marked_for_display = true;

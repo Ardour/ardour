@@ -47,7 +47,7 @@ sigc::signal<void,MarkerView*> MarkerView::GoingAway;
  * @param start the start time of this item
  * @param duration the duration of this item
  */
-MarkerView::MarkerView(GnomeCanvasGroup *parent,
+MarkerView::MarkerView(Gnome::Canvas::Group *parent,
 	TimeAxisView* tv,
 	ImageFrameView* marked,
 	double spu,

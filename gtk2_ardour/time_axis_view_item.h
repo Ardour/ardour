@@ -22,6 +22,7 @@
 #define __gtk_ardour_time_axis_view_item_h__
 
 #include <sigc++/signal.h>
+
 #include <jack/jack.h>
 #include <string>
 
@@ -237,7 +238,8 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
     /**
      * 
      */
-    Gnome::Canvas::Item* get_name_text();
+    Gnome::Canvas::Text* get_name_text();
+
 
     /**
      * Sets the samples per unit of this item.

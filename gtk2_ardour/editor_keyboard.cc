@@ -30,16 +30,14 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 	gint x, y;
 	double dx, dy;
 	GdkEvent ev;
-	GdkModifierType mask;
+	Gdk::ModifierType mask;
+	Glib::RefPtr<Gdk::Window> evw = track_canvas.get_window()->get_pointer (x, y, mask);
 	bool doit = false;
 
-	/* get the pointer location */
-
-	RefPtr<GdkWindow> notused (track_canvas.get_window()->get_pointer (x, y, mask));
-
-	if (use_track_canvas && (track_canvas_event_box.get_window()->get_pointer (x, y, mask) != 0)) {
+	if (use_track_canvas && track_canvas_event_box.get_window()->get_pointer(x, y, mask) != 0) {
 		doit = true;
-	} else if (use_time_canvas && (time_canvas_event_box.get_window()->get_pointer (x, y, mask)) != 0) {
+
+	} else if (use_time_canvas && time_canvas_event_box.get_window()->get_pointer(x, y, mask)!= 0) {
 		doit = true;
 	}
 

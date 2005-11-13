@@ -38,7 +38,7 @@ using namespace Editing;
 
 sigc::signal<void,CrossfadeView*> CrossfadeView::GoingAway;
 
-CrossfadeView::CrossfadeView (GnomeCanvasGroup *parent, 
+CrossfadeView::CrossfadeView (Gnome::Canvas::Group *parent, 
 			      AudioTimeAxisView &tv, 
 			      Crossfade& xf, 
 			      double spu,
@@ -47,7 +47,7 @@ CrossfadeView::CrossfadeView (GnomeCanvasGroup *parent,
 			      AudioRegionView& rview)
 			      
 
-	: TimeAxisViewItem ("xf.name()", parent, tv, spu, basic_color, xf.position(), 
+	: TimeAxisViewItem ("xf.name()", *parent, tv, spu, basic_color, xf.position(), 
 			    xf.overlap_length(), TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
 	  crossfade (xf),
 	  left_view (lview),
@@ -73,11 +73,11 @@ CrossfadeView::CrossfadeView (GnomeCanvasGroup *parent,
 
 	/* no frame around the xfade or overlap rects */
 
-	gnome_canvas_item_set (frame, "outline_what", 0, NULL);
+	frame->set_property ("outline_what", 0);
 
 	/* never show the vestigial frame */
 
-	gnome_canvas_item_hide (vestigial_frame);
+	vestigial_frame->hide();
 	show_vestigial = false;
 
 	gtk_object_set_data (GTK_OBJECT(group), "crossfadeview", this);
@@ -211,16 +211,16 @@ CrossfadeView::redraw_curves ()
 	   as regions. This puts crossfade views on top of a track, above all regions.
 	*/
 
-	gnome_canvas_item_raise_to_top (group);
+	group->raise_to_top();
 }
 
 void
 CrossfadeView::active_changed ()
 {
 	if (crossfade.active()) {
-		gnome_canvas_item_set (frame, "fill_color_rgba", color_map[cActiveCrossfade], NULL);
+		frame->set_property ("fill_color_rgba", color_map[cActiveCrossfade]);
 	} else {
-		gnome_canvas_item_set (frame, "fill_color_rgba", color_map[cInactiveCrossfade], NULL);
+		frame->set_property ("fill_color_rgba", color_map[cInactiveCrossfade]);
 	}
 
 	redraw_curves ();
@@ -245,19 +245,19 @@ CrossfadeView::upper_regionview () const
 void
 CrossfadeView::show ()
 {
-	gnome_canvas_item_show (group);
+	group->show();
 	_visible = true;
 }
 
 void
 CrossfadeView::hide ()
 {
-	gnome_canvas_item_hide (group);
+	group->hide();
 	_visible = false;
 }
 
 void
 CrossfadeView::fake_hide ()
 {
-	gnome_canvas_item_hide (group);
+	group->hide();
 }

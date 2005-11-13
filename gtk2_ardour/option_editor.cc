@@ -1012,6 +1012,7 @@ OptionEditor::setup_midi_options ()
 			mtc_button_group = rb->get_group();
 		} else {
 			rb->set_group (mtc_button_group);
+
 		}
 		table->attach (*rb, 4, 5, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
@@ -1964,7 +1965,7 @@ OptionEditor::edit_button_changed ()
 }
 
 void
-OptionEditor::fixup_combo_size (Gtk::Combo& combo, vector<string>& strings)
+OptionEditor::fixup_combo_size (Gtk::ComboBoxText& combo, vector<string>& strings)
 {
 	/* find the widest string */
 

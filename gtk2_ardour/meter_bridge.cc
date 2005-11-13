@@ -39,7 +39,10 @@ using namespace sigc;
 #define FRAME_NAME "BaseFrame"
 
 MeterBridge::MeterBridge ()
-	: ArdourDialog ("meter bridge")
+	: ArdourDialog ("meter bridge"),
+	  hadjustment (0.0, 0.0, 0.0),
+	  vadjustment (0.0, 0.0, 0.0),
+	meter_viewport (hadjustment, vadjustment)
 {
 	meter_base.set_name ("MeterBase");
 	meter_frame.set_shadow_type (FRAME_SHADOW_STYLE);
@@ -240,17 +243,17 @@ MeterBridge::toggle_metering ()
 	}
 }
 
-bool
-MeterBridge::on_map (GdkEventAny *ev)
+void
+MeterBridge::on_map ()
 {
 	start_metering ();
-	return Window::on_map (ev);
+	return Window::on_map ();
 }
 
-bool
-MeterBridge::on_unmap (GdkEventAny *ev)
+void
+MeterBridge::on_unmap ()
 {
 	stop_metering ();
-	return Window::on_unmap (ev);
+	return Window::on_unmap ();
 }
 

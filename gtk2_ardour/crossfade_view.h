@@ -34,7 +34,7 @@ class AudioRegionView;
 
 struct CrossfadeView : public TimeAxisViewItem
 {
-    CrossfadeView (GnomeCanvasGroup*, 
+    CrossfadeView (Gnome::Canvas::Group*, 
 		   AudioTimeAxisView&,
 		   ARDOUR::Crossfade&,
 		   double initial_samples_per_unit, 

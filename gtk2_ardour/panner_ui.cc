@@ -202,10 +202,10 @@ PannerUI::update_pan_linkage ()
 
 	switch (_io.panner().link_direction()) {
 	case Panner::SameDirection:
-	  static_cast<Gdk::Pixmap*> (panning_link_direction_button.get_child())->set (forwdblarrow_xpm);
+	        panning_link_direction_button.set_image (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data (forwdblarrow_xpm)))));
 		break;
 	default:
-		static_cast<Gdk::Pixmap*> (panning_link_direction_button.get_child())->set (revdblarrow_xpm);
+	        panning_link_direction_button.set_image (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data (revdblarrow_xpm)))));
 		break;
 	}
 }

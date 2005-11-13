@@ -1204,10 +1204,10 @@ AudioTimeAxisView::add_gain_automation_child ()
 	
 	
 	line = new AutomationGainLine ("automation gain", _session, *gain_track,
-				       gain_track->canvas_display,
+				       *gain_track->canvas_display,
 				       _route.gain_automation_curve(),
-				       slot (mem_fun (ed, &PublicEditor::canvas_control_point_event)),
-				       slot (mem_fun (ed, &PublicEditor::canvas_line_event)));
+				       PublicEditor::canvas_control_point_event,
+				       PublicEditor::canvas_line_event);
 	line->set_line_color (color_map[cAutomationLine]);
 	
 
@@ -1284,7 +1284,7 @@ AudioTimeAxisView::update_pans ()
 		AutomationLine* line;
 
 		line = new AutomationPanLine ("automation pan", _session, *pan_track,
-					      pan_track->canvas_display, 
+					      *pan_track->canvas_display, 
 					      (*p)->automation(),
 					      PublicEditor::canvas_control_point_event,
 					      PublicEditor::canvas_line_event);
@@ -1310,7 +1310,7 @@ AudioTimeAxisView::toggle_gain_track ()
 	if (showit != gain_track->marked_for_display()) {
 		if (showit) {
 			gain_track->set_marked_for_display (true);
-			gnome_canvas_item_show (gain_track->canvas_display);
+			gain_track->canvas_display->show();
 			gain_track->get_state_node()->add_property ("shown", X_("yes"));
 		} else {
 			gain_track->set_marked_for_display (false);
@@ -1346,7 +1346,7 @@ AudioTimeAxisView::toggle_pan_track ()
 	if (showit != pan_track->marked_for_display()) {
 		if (showit) {
 			pan_track->set_marked_for_display (true);
-			gnome_canvas_item_show (pan_track->canvas_display);
+			pan_track->canvas_display->show();
 			pan_track->get_state_node()->add_property ("shown", X_("yes"));
 		} else {
 			pan_track->set_marked_for_display (false);
@@ -1467,7 +1467,7 @@ AudioTimeAxisView::add_redirect_automation_curve (Redirect *redirect, uint32_t w
 
 	ral = new RedirectAutomationLine (name, 
 					  *redirect, what, _session, *ran->view,
-					  ran->view->canvas_display, redirect->automation_list (what), 
+					  *ran->view->canvas_display, redirect->automation_list (what), 
 					  PublicEditor::canvas_control_point_event,
 					  PublicEditor::canvas_line_event);
 	
@@ -1621,7 +1621,7 @@ AudioTimeAxisView::redirect_menu_item_toggled (AudioTimeAxisView::RedirectAutoma
 
 		if (showit) {
 			ran->view->set_marked_for_display (true);
-			gnome_canvas_item_show (ran->view->canvas_display);
+			ran->view->canvas_display->show();
 		} else {
 			rai->redirect->mark_automation_visible (ran->what, true);
 			ran->view->set_marked_for_display (false);

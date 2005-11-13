@@ -55,7 +55,7 @@ static const int32_t sync_mark_width = 9;
 
 sigc::signal<void,AudioRegionView*> AudioRegionView::AudioRegionViewGoingAway;
 
-AudioRegionView::AudioRegionView (GnomeCanvasGroup *parent, AudioTimeAxisView &tv, 
+AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisView &tv, 
 				  AudioRegion& r, 
 				  double spu, 
 				  double amplitude_above_axis,
@@ -69,7 +69,7 @@ AudioRegionView::AudioRegionView (GnomeCanvasGroup *parent, AudioTimeAxisView &t
 
 	  region (r)
 {
-	GnomeCanvasPoints *shape;
+        Gnome::Canvas::Points *shape;
 	XMLNode *node;
 
 	editor = 0;
@@ -100,44 +100,29 @@ AudioRegionView::AudioRegionView (GnomeCanvasGroup *parent, AudioTimeAxisView &t
 	gtk_object_set_data (GTK_OBJECT(name_highlight), "regionview", this);
 	gtk_object_set_data (GTK_OBJECT(name_text), "regionview", this);
 
-	shape = gnome_canvas_points_new (4);
+	shape = new Gnome::Canvas::Points ();
 
 	/* an equilateral triangle */
 
-	shape->coords[0] = -((sync_mark_width-1)/2);
-	shape->coords[1] = 1;
+	shape->push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
+	shape->push_back (Gnome::Art::Point ((sync_mark_width - 1)/2, 1));
+	shape->push_back (Gnome::Art::Point (0, sync_mark_width - 1));
+	shape->push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
 
-	shape->coords[2] = (sync_mark_width - 1)/2;
-	shape->coords[3] = 1;
+	sync_mark =  new Gnome::Canvas::Polygon (*group);
+	sync_mark->set_property ("points", shape);
+	sync_mark->set_property ("fill_color_rgba", fill_color);
+	sync_mark->hide();
+	gnome_canvas_points_unref (shape->gobj());
 
-	shape->coords[4] = 0;
-	shape->coords[5] = sync_mark_width - 1;
-
-	shape->coords[6] = -((sync_mark_width-1)/2);
-	shape->coords[7] = 1;
-
-	// cerr << "set sync mark al points, nc = " << shape->num_points << endl;
-	sync_mark = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-					 gnome_canvas_polygon_get_type(),
-					 "points", shape,
-					 "fill_color_rgba", fill_color,
-					 NULL);
-	gnome_canvas_item_hide (sync_mark);
-	gnome_canvas_points_unref (shape);
-
+	fade_in_shape = new Gnome::Canvas::Polygon (*group);
+	fade_in_shape->set_property ("fill_color_rgba", fade_color);
+	fade_in_shape->set_data ("regionview", this);
 	
-	fade_in_shape = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-					     gnome_canvas_polygon_get_type(),
-					     "fill_color_rgba", fade_color,
-					     NULL);
-	gtk_object_set_data (GTK_OBJECT(fade_in_shape), "regionview", this);
-
-	fade_out_shape = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-					      gnome_canvas_polygon_get_type(),
-					      "fill_color_rgba", fade_color,
-					      NULL);
-	gtk_object_set_data (GTK_OBJECT(fade_out_shape), "regionview", this);
-
+	fade_out_shape = new Gnome::Canvas::Polygon (*group);
+	fade_out_shape->set_property ("fill_color_rgba", fade_color);
+	fade_out_shape->set_data ("regionview", this);
+	
 
 
 	{
@@ -145,22 +130,20 @@ AudioRegionView::AudioRegionView (GnomeCanvasGroup *parent, AudioTimeAxisView &t
 			UINT_TO_RGBA(fill_color,&r,&g,&b,&a);
 	
 
-	fade_in_handle = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-					      gnome_canvas_simplerect_get_type(),
-					      "fill_color_rgba", RGBA_TO_UINT(r,g,b,0),
-					      "outline_pixels", 0,
-					      "y1", 2.0,
-					      "y2", 7.0,
-					      NULL);
-	gtk_object_set_data (GTK_OBJECT(fade_in_handle), "regionview", this);
+	fade_in_handle = new Gnome::Canvas::SimpleRect (*group);
+	fade_in_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,0));
+	fade_in_handle->set_property ("outline_pixels", 0);
+	fade_in_handle->set_property ("y1", 2.0);
+	fade_in_handle->set_property ("y2", 7.0);
+
+	fade_in_handle->set_data ("regionview", this);
 	
-	fade_out_handle = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-					       gnome_canvas_simplerect_get_type(),
-					       "fill_color_rgba", RGBA_TO_UINT(r,g,b,0),
-					       "outline_pixels", 0,
-					       "y1", 2.0,
-					       "y2", 7.0,
-					       NULL);
+	fade_out_handle = new Gnome::Canvas::SimpleRect (*group);
+	fade_out_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,0));
+	fade_out_handle->set_property ("outline_pixels", 0);
+	fade_out_handle->set_property ("y1", 2.0);
+	fade_out_handle->set_property ("y2", 7.0);
+
 	gtk_object_set_data (GTK_OBJECT(fade_out_handle), "regionview", this);
 	}
 
@@ -168,7 +151,7 @@ AudioRegionView::AudioRegionView (GnomeCanvasGroup *parent, AudioTimeAxisView &t
 	foo += ':';
 	foo += "gain";
 
-	gain_line = new AudioRegionGainLine (foo, tv.session(), *this, group, region.envelope(),
+	gain_line = new AudioRegionGainLine (foo, tv.session(), *this, &group, region.envelope(),
 					     PublicEditor::canvas_control_point_event,
 					     PublicEditor::canvas_line_event);
 
@@ -196,30 +179,30 @@ AudioRegionView::AudioRegionView (GnomeCanvasGroup *parent, AudioTimeAxisView &t
 	region.StateChanged.connect (mem_fun(*this, &AudioRegionView::region_changed));
 
 	gtk_signal_connect (GTK_OBJECT(group), "event",
-			    (GtkSignalFunc) PublicEditor::canvas_region_view_event,
+			    GTK_SIGNAL_FUNC (PublicEditor::canvas_region_view_event),
 			    this);
 	gtk_signal_connect (GTK_OBJECT(name_highlight), "event",
-			    (GtkSignalFunc) PublicEditor::canvas_region_view_name_highlight_event,
+			    GTK_SIGNAL_FUNC (PublicEditor::canvas_region_view_name_highlight_event),
 			    this);
 
 	gtk_signal_connect (GTK_OBJECT(name_text), "event",
-			    (GtkSignalFunc) PublicEditor::canvas_region_view_name_event,
+			    GTK_SIGNAL_FUNC (PublicEditor::canvas_region_view_name_event),
 			    this);
 
 	gtk_signal_connect (GTK_OBJECT(fade_in_shape), "event",
-			    (GtkSignalFunc) PublicEditor::canvas_fade_in_event,
+			    GTK_SIGNAL_FUNC (PublicEditor::canvas_fade_in_event),
 			    this);
 
 	gtk_signal_connect (GTK_OBJECT(fade_in_handle), "event",
-			    (GtkSignalFunc) PublicEditor::canvas_fade_in_handle_event,
+			    GTK_SIGNAL_FUNC (PublicEditor::canvas_fade_in_handle_event),
 			    this);
 
 	gtk_signal_connect (GTK_OBJECT(fade_out_shape), "event",
-			    (GtkSignalFunc) PublicEditor::canvas_fade_out_event,
+			    GTK_SIGNAL_FUNC ( PublicEditor::canvas_fade_out_event),
 			    this);
 
-	gtk_signal_connect (GTK_OBJECT(fade_out_handle), "event",
-			    (GtkSignalFunc) PublicEditor::canvas_fade_out_handle_event,
+	gtk_signal_connect_object (GTK_OBJECT(fade_out_handle), "event",
+			    GTK_SIGNAL_FUNC ( PublicEditor::canvas_fade_out_handle_event),
 			    this);
 
 	set_colors ();
@@ -252,7 +235,7 @@ AudioRegionView::~AudioRegionView ()
 }
 
 gint
-AudioRegionView::_lock_toggle (GnomeCanvasItem* item, GdkEvent* ev, void* arg)
+AudioRegionView::_lock_toggle (Gnome::Canvas::Item* item, GdkEvent* ev, void* arg)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
@@ -351,18 +334,14 @@ AudioRegionView::fade_in_active_changed ()
 
 	if (region.fade_in_active()) {
 		col = RGBA_TO_UINT(r,g,b,120);
-		gnome_canvas_item_set (fade_in_shape, 
-				     "fill_color_rgba", col,
-				     "width_pixels", 0,
-				     "outline_color_rgba", RGBA_TO_UINT(r,g,b,0),
-				     NULL);
+		fade_in_shape->set_property ("fill_color_rgba", col);
+		fade_in_shape->set_property ("width_pixels", 0);
+		fade_in_shape->set_property ("outline_color_rgba", RGBA_TO_UINT(r,g,b,0));
 	} else { 
 		col = RGBA_TO_UINT(r,g,b,0);
-		gnome_canvas_item_set (fade_in_shape, 
-				     "fill_color_rgba", col,
-				     "width_pixels", 1,
-				     "outline_color_rgba", RGBA_TO_UINT(r,g,b,255),
-				     NULL);
+		fade_in_shape->set_property ("fill_color_rgba", col);
+		fade_in_shape->set_property ("width_pixels", 1);
+		fade_in_shape->set_property ("outline_color_rgba", RGBA_TO_UINT(r,g,b,255));
 	}
 }
 
@@ -375,18 +354,14 @@ AudioRegionView::fade_out_active_changed ()
 
 	if (region.fade_out_active()) {
 		col = RGBA_TO_UINT(r,g,b,120);
-		gnome_canvas_item_set (fade_out_shape, 
-				     "fill_color_rgba", col,
-				     "width_pixels", 0,
-				     "outline_color_rgba", RGBA_TO_UINT(r,g,b,0),
-				     NULL);
+		fade_out_shape->set_property ("fill_color_rgba", col);
+		fade_out_shape->set_property ("width_pixels", 0);
+		fade_out_shape->set_property ("outline_color_rgba", RGBA_TO_UINT(r,g,b,0));
 	} else { 
 		col = RGBA_TO_UINT(r,g,b,0);
-		gnome_canvas_item_set (fade_out_shape, 
-				     "fill_color_rgba", col,
-				     "width_pixels", 1,
-				     "outline_color_rgba", RGBA_TO_UINT(r,g,b,255),
-				     NULL);
+		fade_out_shape->set_property ("fill_color_rgba", col);
+		fade_out_shape->set_property ("width_pixels", 1);
+		fade_out_shape->set_property ("outline_color_rgba", RGBA_TO_UINT(r,g,b,255));
 	}
 }
 
@@ -448,19 +423,19 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 	_pixel_width = pixel_width;
 
 	if (zero_line) {
-		gnome_canvas_item_set (zero_line, "x2", pixel_width - 1.0, NULL);
+		zero_line->set_property ("x2", pixel_width - 1.0);
 	}
 
 	if (pixel_width <= 6.0) {
-		gnome_canvas_item_hide (fade_in_handle);
-		gnome_canvas_item_hide (fade_out_handle);
+		fade_in_handle->hide();
+		fade_out_handle->hide();
 	} else {
 		if (_height < 5.0) {
-			gnome_canvas_item_hide (fade_in_handle);
-			gnome_canvas_item_hide (fade_out_handle);
+			fade_in_handle->hide();
+			fade_out_handle->hide();
 		} else {
-			gnome_canvas_item_show (fade_in_handle);
-			gnome_canvas_item_show (fade_out_handle);
+			fade_in_handle->show();
+			fade_out_handle->show();
 		}
 	}
 
@@ -535,7 +510,7 @@ AudioRegionView::set_position (jack_nframes_t pos, void* src, double* ignored)
 
 	if (delta) {
 		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-			gnome_canvas_item_move ((*i)->group, delta, 0.0);
+			(*i)->group->move (delta, 0.0);
 		}
 	}
 
@@ -578,7 +553,7 @@ AudioRegionView::set_height (gdouble height)
 	gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE));
 	reset_fade_shapes ();
 
-	gnome_canvas_item_raise_to_top (name_text) ;
+	name_text->raise_to_top();
 }
 
 void
@@ -590,13 +565,11 @@ AudioRegionView::manage_zero_line ()
 
 	if (_height >= 100) {
 		gdouble wave_midpoint = (_height - NAME_HIGHLIGHT_SIZE) / 2.0;
-		gnome_canvas_item_set (zero_line, 
-				     "y1", wave_midpoint, 
-				     "y2", wave_midpoint, 
-				     NULL);
-		gnome_canvas_item_show (zero_line);
+		zero_line->set_property ("y1", wave_midpoint);
+		zero_line->set_property ("y2", wave_midpoint);
+		zero_line->show();
 	} else {
-		gnome_canvas_item_hide (zero_line);
+		zero_line->hide();
 	}
 }
 
@@ -626,8 +599,8 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 	double h; 
 	
 	if (_height < 5) {
-		gnome_canvas_item_hide (fade_in_shape);
-		gnome_canvas_item_hide (fade_in_handle);
+		fade_in_shape->hide();
+		fade_in_handle->hide();
 		return;
 	}
 
@@ -640,17 +613,15 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 		handle_center = 3.0;
 	}
 	
-	gnome_canvas_item_set (fade_in_handle, 
-			     "x1",  handle_center - 3.0,
-			     "x2",  handle_center + 3.0,
-			     NULL);
+	fade_in_handle->set_property ("x1",  handle_center - 3.0);
+	fade_in_handle->set_property ("x2",  handle_center + 3.0);
 	
 	if (pwidth < 5) {
-		gnome_canvas_item_hide (fade_in_shape);
+		fade_in_shape->hide();
 		return;
 	}
 
-	gnome_canvas_item_show (fade_in_shape);
+	fade_in_shape->show();
 
 	float curve[npoints];
 	region.fade_in().get_vector (0, region.fade_in().back()->when, curve, npoints);
@@ -686,7 +657,7 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 	points->coords[pi++] = points->coords[0];
 	points->coords[pi] = points->coords[1];
 	
-	gnome_canvas_item_set (fade_in_shape, "points", points, NULL);
+	fade_in_shape->set_property ("points", points);
 	gnome_canvas_points_unref (points);
 }
 
@@ -709,8 +680,8 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 	double h;
 
 	if (_height < 5) {
-		gnome_canvas_item_hide (fade_out_shape);
-		gnome_canvas_item_hide (fade_out_handle);
+		fade_out_shape->hide();
+		fade_out_handle->hide();
 		return;
 	}
 
@@ -723,19 +694,17 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 		handle_center = 3.0;
 	}
 	
-	gnome_canvas_item_set (fade_out_handle, 
-			     "x1",  handle_center - 3.0,
-			     "x2",  handle_center + 3.0,
-			     NULL);
+	fade_out_handle->set_property ("x1",  handle_center - 3.0);
+	fade_out_handle->set_property ("x2",  handle_center + 3.0);
 
 	/* don't show shape if its too small */
 	
 	if (pwidth < 5) {
-		gnome_canvas_item_hide (fade_out_shape);
+		fade_out_shape->hide();
 		return;
 	} 
 	
-	gnome_canvas_item_show (fade_out_shape);
+	fade_out_shape->show();
 
 	float curve[npoints];
 	region.fade_out().get_vector (0, region.fade_out().back()->when, curve, npoints);
@@ -771,7 +740,7 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 	points->coords[pi++] = points->coords[0];
 	points->coords[pi] = points->coords[1];
 
-	gnome_canvas_item_set (fade_out_shape, "points", points, NULL);
+	fade_out_shape->set_property ("points", points);
 	gnome_canvas_points_unref (points);
 }
 
@@ -834,7 +803,7 @@ AudioRegionView::set_colors ()
 	TimeAxisViewItem::set_colors ();
 	
 	gain_line->set_line_color (region.envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
-	gnome_canvas_item_set (sync_mark, "fill_color_rgba", fill_color, NULL);
+	sync_mark->set_property ("fill_color_rgba", fill_color);
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (region.muted()) {
@@ -916,7 +885,7 @@ AudioRegionView::region_sync_changed ()
 
 		/* no sync mark - its the start of the region */
 
-		gnome_canvas_item_hide (sync_mark);
+		sync_mark->hide();
 
 	} else {
 
@@ -924,7 +893,7 @@ AudioRegionView::region_sync_changed ()
 
 			/* no sync mark - its out of the bounds of the region */
 
-			gnome_canvas_item_hide (sync_mark);
+			sync_mark->hide();
 
 		} else {
 
@@ -951,8 +920,8 @@ AudioRegionView::region_sync_changed ()
 			points->coords[6] = offset - ((sync_mark_width-1)/2);
 			points->coords[7] = 1;
 			
-			gnome_canvas_item_show (sync_mark);
-			gnome_canvas_item_set (sync_mark, "points", points, NULL);
+			sync_mark->show();
+			sync_mark->set_property ("points", points);
 
 			gnome_canvas_points_unref (points);
 		}
@@ -1047,12 +1016,10 @@ AudioRegionView::create_waves ()
 	}
 
 	if (create_zero_line) {
-		zero_line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-						 gnome_canvas_simpleline_get_type(),
-						 "x1", (gdouble) 1.0,
-						 "x2", (gdouble) (region.length() / samples_per_unit) - 1.0,
-						 "color_rgba", (guint) color_map[cZeroLine],
-						 NULL);
+		zero_line = new Gnome::Canvas::Line (*group);
+		zero_line->set_property ("x1", (gdouble) 1.0);
+		zero_line->set_property ("x2", (gdouble) (region.length() / samples_per_unit) - 1.0);
+		zero_line->set_property ("color_rgba", (guint) color_map[cZeroLine]);
 		manage_zero_line ();
 	}
 }
@@ -1122,12 +1089,10 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		tmp_waves.clear ();
 		
 		if (!zero_line) {
-			zero_line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-							 gnome_canvas_simpleline_get_type(),
-							 "x1", (gdouble) 1.0,
-							 "x2", (gdouble) (region.length() / samples_per_unit) - 1.0,
-							 "color_rgba", (guint) color_map[cZeroLine],
-							 NULL);
+			zero_line = new Gnome::Canvas::Line (*group);
+			zero_line->set_property ("x1", (gdouble) 1.0);
+			zero_line->set_property ("x2", (gdouble) (region.length() / samples_per_unit) - 1.0);
+			zero_line->set_property ("color_rgba", (guint) color_map[cZeroLine]);
 			manage_zero_line ();
 		}
 	}
@@ -1140,7 +1105,7 @@ AudioRegionView::peaks_ready_handler (uint32_t which)
 }
 
 void
-AudioRegionView::add_gain_point_event (GnomeCanvasItem *item, GdkEvent *ev)
+AudioRegionView::add_gain_point_event (Gnome::Canvas::Item *item, GdkEvent *ev)
 {
 	double x, y;
 
@@ -1151,7 +1116,7 @@ AudioRegionView::add_gain_point_event (GnomeCanvasItem *item, GdkEvent *ev)
 	x = ev->button.x;
 	y = ev->button.y;
 
-	gnome_canvas_item_w2i (item, &x, &y);
+	item->w2i (x, y);
 
 	jack_nframes_t fx = trackview.editor.pixel_to_frame (x);
 
@@ -1184,9 +1149,9 @@ AudioRegionView::add_gain_point_event (GnomeCanvasItem *item, GdkEvent *ev)
 }
 
 void
-AudioRegionView::remove_gain_point_event (GnomeCanvasItem *item, GdkEvent *ev)
+AudioRegionView::remove_gain_point_event (Gnome::Canvas::Item *item, GdkEvent *ev)
 {
-	ControlPoint *cp = reinterpret_cast<ControlPoint *> (gtk_object_get_data(GTK_OBJECT(item), "control_point"));
+        ControlPoint *cp = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
 	region.envelope().erase (cp->model);
 }
 
@@ -1245,9 +1210,9 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 
 		if (zero_line) {
 			if (yn) {
-				gnome_canvas_item_hide (zero_line);
+				zero_line->hide();
 			} else {
-				gnome_canvas_item_show (zero_line);
+				zero_line->show();
 			}
 		}
 
@@ -1272,12 +1237,12 @@ AudioRegionView::move (double x_delta, double y_delta)
 		return;
 	}
 
-	gnome_canvas_item_move (get_canvas_group(), x_delta, y_delta);
+	get_canvas_group()->move (x_delta, y_delta);
 
 	/* note: ghosts never leave their tracks so y_delta for them is always zero */
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		gnome_canvas_item_move ((*i)->group, x_delta, 0.0);
+		(*i)->group->move (x_delta, 0.0);
 	}
 }
 
@@ -1358,8 +1323,8 @@ AudioRegionView::entered ()
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 	a=255;
 	
-	gnome_canvas_item_set (fade_in_handle,  "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
-	gnome_canvas_item_set (fade_out_handle, "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
+	fade_in_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,a));
+	fade_out_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,a));
 }
 
 void
@@ -1371,8 +1336,8 @@ AudioRegionView::exited ()
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 	a=0;
 	
-	gnome_canvas_item_set (fade_in_handle,  "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
-	gnome_canvas_item_set (fade_out_handle, "fill_color_rgba", RGBA_TO_UINT(r,g,b,a), NULL);
+	fade_in_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,a));
+	fade_out_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,a));
 }
 
 void

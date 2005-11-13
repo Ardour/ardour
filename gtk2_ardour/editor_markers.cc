@@ -69,30 +69,30 @@ Editor::add_new_location (Location *location)
 	}
 
 	if (location->is_mark()) {
-		lam->start = new Marker (*this, GNOME_CANVAS_GROUP(marker_group), color, 
+		lam->start = new Marker (*this, *marker_group, color, 
 					 location->name(), Marker::Mark, PublicEditor::canvas_marker_event, location->start());
 		lam->end   = 0;
 
 	} else if (location->is_auto_loop()) {
 		// transport marker
-		lam->start = new Marker (*this, GNOME_CANVAS_GROUP(transport_marker_group), color, 
+		lam->start = new Marker (*this, *transport_marker_group, color, 
 					 location->name(), Marker::LoopStart, PublicEditor::canvas_marker_event, location->start());
-		lam->end   = new Marker (*this, GNOME_CANVAS_GROUP(transport_marker_group), color, 
+		lam->end   = new Marker (*this, *transport_marker_group, color, 
 					 location->name(), Marker::LoopEnd, PublicEditor::canvas_marker_event, location->end());
 		
 	} else if (location->is_auto_punch()) {
 		// transport marker
-		lam->start = new Marker (*this, GNOME_CANVAS_GROUP(transport_marker_group), color, 
+		lam->start = new Marker (*this, *transport_marker_group, color, 
 					 location->name(), Marker::PunchIn, PublicEditor::canvas_marker_event, location->start());
-		lam->end   = new Marker (*this, GNOME_CANVAS_GROUP(transport_marker_group), color, 
+		lam->end   = new Marker (*this, *transport_marker_group, color, 
 					 location->name(), Marker::PunchOut, PublicEditor::canvas_marker_event, location->end());
 		
 	} else {
 
 		// range marker
-		lam->start = new Marker (*this, GNOME_CANVAS_GROUP(range_marker_group), color, 
+		lam->start = new Marker (*this, *range_marker_group, color, 
 					 location->name(), Marker::Start, PublicEditor::canvas_marker_event, location->start());
-		lam->end   = new Marker (*this, GNOME_CANVAS_GROUP(range_marker_group), color, 
+		lam->end   = new Marker (*this, *range_marker_group, color, 
 					 location->name(), Marker::End, PublicEditor::canvas_marker_event, location->end());
 	}
 
@@ -293,12 +293,12 @@ Editor::mouse_add_new_marker (jack_nframes_t where)
 }
 
 void
-Editor::remove_marker (GnomeCanvasItem* item, GdkEvent* event)
+Editor::remove_marker (Gnome::Canvas::Item& item, GdkEvent* event)
 {
 	Marker* marker;
 	bool is_start;
 
-	if ((marker = static_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+	if ((marker = item.get_data ("marker")) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -356,7 +356,7 @@ Editor::location_gone (Location *location)
 }
 
 void
-Editor::tm_marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
+Editor::tm_marker_context_menu (GdkEventButton* ev, Gnome::Canvas::Item* item)
 {
 	if (tm_marker_menu == 0) {
 		build_tm_marker_menu ();
@@ -369,7 +369,7 @@ Editor::tm_marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
 
 
 void
-Editor::marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
+Editor::marker_context_menu (GdkEventButton* ev, Gnome::Canvas::Item* item)
 {
 	Marker * marker;
 	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
@@ -412,7 +412,7 @@ Editor::marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
 
 
 void
-Editor::new_transport_marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
+Editor::new_transport_marker_context_menu (GdkEventButton* ev, Gnome::Canvas::Item* item)
 {
 	if (new_transport_marker_menu == 0) {
 		build_new_transport_marker_menu ();
@@ -423,7 +423,7 @@ Editor::new_transport_marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* 
 }
 
 void
-Editor::transport_marker_context_menu (GdkEventButton* ev, GnomeCanvasItem* item)
+Editor::transport_marker_context_menu (GdkEventButton* ev, Gnome::Canvas::Item* item)
 {
 	if (transport_marker_menu == 0) {
 		build_transport_marker_menu ();
@@ -706,7 +706,7 @@ Editor::marker_menu_remove ()
 	} else if ((tm = dynamic_cast<TempoMarker*> (marker)) != 0) {
 		remove_tempo_marker (marker_menu_item);
 	} else {
-		remove_marker (marker_menu_item, (GdkEvent*) 0);
+		remove_marker (*marker_menu_item, (GdkEvent*) 0);
 	}
 }
 

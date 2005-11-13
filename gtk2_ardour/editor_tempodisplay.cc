@@ -24,7 +24,7 @@
 #include <string>
 #include <climits>
 
-#include <libgnomecanvas/libgnomecanvas.h>
+#include <libgnomecanvasmm/libgnomecanvasmm.h>
 
 #include <pbd/error.h>
 
@@ -71,11 +71,11 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->beats_per_bar(), ms->note_divisor ());
-			metric_marks.push_back (new MeterMarker (*this, GNOME_CANVAS_GROUP(meter_group), color_map[cMeterMarker], buf, 
+			metric_marks.push_back (new MeterMarker (*this, *meter_group, color_map[cMeterMarker], buf, 
 								 *(const_cast<MeterSection*>(ms)), PublicEditor::canvas_meter_marker_event));
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());
-			metric_marks.push_back (new TempoMarker (*this, GNOME_CANVAS_GROUP(tempo_group), color_map[cTempoMarker], buf, 
+			metric_marks.push_back (new TempoMarker (*this, *tempo_group, color_map[cTempoMarker], buf, 
 								 *(const_cast<TempoSection*>(ts)), PublicEditor::canvas_tempo_marker_event));
 		}
 		
@@ -120,21 +120,19 @@ void
 Editor::hide_measures ()
 {
 	for (TimeLineList::iterator i = used_measure_lines.begin(); i != used_measure_lines.end(); ++i) {
-		gnome_canvas_item_hide (*i);
+		(*i)->hide();
 		free_measure_lines.push_back (*i);
 	}
 	used_measure_lines.clear ();
 }
 
-GnomeCanvasItem *
+Gnome::Canvas::Line *
 Editor::get_time_line ()
 {
-	GnomeCanvasItem *line;
+         Gnome::Canvas::Line *line;
 
 	if (free_measure_lines.empty()) {
-		line = gnome_canvas_item_new (GNOME_CANVAS_GROUP(time_line_group),
-					    gnome_canvas_simpleline_get_type(),
-					    NULL);
+	        line = new Gnome::Canvas::Line (*time_line_group);
 		// cerr << "measure line @ " << line << endl;
 		used_measure_lines.push_back (line);
 	} else {
@@ -155,7 +153,7 @@ Editor::draw_measures ()
 
 	TempoMap::BBTPointList::iterator i;
 	TempoMap::BBTPointList *all_bbt_points;
-	GnomeCanvasItem *line;
+	Gnome::Canvas::Line *line;
 	gdouble xpos, last_xpos;
 	uint32_t cnt;
 	uint32_t color;
@@ -217,14 +215,12 @@ Editor::draw_measures ()
 
 			if (cnt == 0 || xpos - last_xpos > 4.0) {
 				line = get_time_line ();
-				gtk_object_set (GTK_OBJECT(line),
-						"x1", xpos,
-						"x2", xpos,
-						"y2", (gdouble) canvas_height,
-						"color_rgba", color,
-						NULL);
-				gnome_canvas_item_raise_to_top (line);
-				gnome_canvas_item_show (line);
+				line->set_property ("x1", xpos);
+				line->set_property ("x2", xpos);
+				line->set_property ("y2", (gdouble) canvas_height);
+				line->set_property ("color_rgba", color);
+				line->raise_to_top();
+				line->show();
 				last_xpos = xpos;	
 				++cnt;
 			} 
@@ -328,7 +324,7 @@ Editor::mouse_add_new_meter_event (jack_nframes_t frame)
 }
 
 void
-Editor::remove_tempo_marker (GnomeCanvasItem* item)
+Editor::remove_tempo_marker (Gnome::Canvas::Item* item)
 {
 	Marker* marker;
 	TempoMarker* tempo_marker;
@@ -415,7 +411,7 @@ Editor::edit_tempo_section (TempoSection* section)
 }
 
 void
-Editor::edit_tempo_marker (GnomeCanvasItem *item)
+Editor::edit_tempo_marker (Gnome::Canvas::Item *item)
 {
 	Marker* marker;
 	TempoMarker* tempo_marker;
@@ -434,7 +430,7 @@ Editor::edit_tempo_marker (GnomeCanvasItem *item)
 }
 
 void
-Editor::edit_meter_marker (GnomeCanvasItem *item)
+Editor::edit_meter_marker (Gnome::Canvas::Item *item)
 {
 	Marker* marker;
 	MeterMarker* meter_marker;
@@ -465,7 +461,7 @@ Editor::real_remove_tempo_marker (TempoSection *section)
 }
 
 void
-Editor::remove_meter_marker (GnomeCanvasItem* item)
+Editor::remove_meter_marker (Gnome::Canvas::Item* item)
 {
 	Marker* marker;
 	MeterMarker* meter_marker;

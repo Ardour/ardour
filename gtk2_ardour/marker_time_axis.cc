@@ -65,8 +65,10 @@ MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Widget 
 	_color = unique_random_color() ;
 	time_axis_name = name ;
 
-	selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), gnome_canvas_group_get_type (), 0) ;
-	gnome_canvas_item_hide(selection_group) ;
+	//GTK2FIX -- how to get the group? is the canvas display really a group?
+	//selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), gnome_canvas_group_get_type (), 0) ;
+	selection_group = new Gnome::Canvas::Group (*canvas_display);
+	selection_group->hide();
 
 	// intialize our data items
 	name_prompter = 0 ;

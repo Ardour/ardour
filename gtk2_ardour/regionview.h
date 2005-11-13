@@ -23,7 +23,8 @@
 
 #include <vector>
 #include <gtkmm.h>
-#include <libgnomecanvas/libgnomecanvas.h>
+#include <libgnomecanvasmm/libgnomecanvasmm.h>
+#include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
 #include <ardour/region.h>
 
@@ -46,7 +47,7 @@ class AutomationTimeAxisView;
 class AudioRegionView : public TimeAxisViewItem
 {
   public:
-    AudioRegionView (GnomeCanvasGroup *, 
+  AudioRegionView (Gnome::Canvas::Group *, 
 		     AudioTimeAxisView&,
 		     ARDOUR::AudioRegion&,
 		     double initial_samples_per_unit,
@@ -89,8 +90,8 @@ class AudioRegionView : public TimeAxisViewItem
     void show_region_editor ();
     void hide_region_editor();
 
-    void add_gain_point_event (GnomeCanvasItem *item, GdkEvent *event);
-    void remove_gain_point_event (GnomeCanvasItem *item, GdkEvent *event);
+    void add_gain_point_event (Gnome::Canvas::Item *item, GdkEvent *event);
+    void remove_gain_point_event (Gnome::Canvas::Item *item, GdkEvent *event);
 
     AudioRegionGainLine* get_gain_line() const { return gain_line; }
 
@@ -122,13 +123,13 @@ class AudioRegionView : public TimeAxisViewItem
 
     vector<GnomeCanvasItem *> waves; /* waveviews */
     vector<GnomeCanvasItem *> tmp_waves; /* see ::create_waves()*/
-    GnomeCanvasItem* sync_mark; /* polgyon for sync position */
-    GnomeCanvasItem* no_wave_msg; /* text */
-    GnomeCanvasItem* zero_line; /* simpleline */
-    GnomeCanvasItem* fade_in_shape; /* polygon */
-    GnomeCanvasItem* fade_out_shape; /* polygon */
-    GnomeCanvasItem* fade_in_handle; /* simplerect */
-    GnomeCanvasItem* fade_out_handle; /* simplerect */
+    Gnome::Canvas::Polygon* sync_mark; /* polgyon for sync position */
+    Gnome::Canvas::Text* no_wave_msg; /* text */
+    Gnome::Canvas::Line* zero_line; /* simpleline */
+    Gnome::Canvas::Polygon* fade_in_shape; /* polygon */
+    Gnome::Canvas::Polygon* fade_out_shape; /* polygon */
+    Gnome::Canvas::SimpleRect* fade_in_handle; /* simplerect */
+    Gnome::Canvas::SimpleRect* fade_out_handle; /* simplerect */
 
     AudioRegionGainLine* gain_line;
     AudioRegionEditor *editor;
@@ -163,7 +164,7 @@ class AudioRegionView : public TimeAxisViewItem
     void region_sync_changed ();
     void region_scale_amplitude_changed ();
 
-    static gint _lock_toggle (GnomeCanvasItem*, GdkEvent*, void*);
+    static gint _lock_toggle (Gnome::Canvas::Item*, GdkEvent*, void*);
     void lock_toggle ();
 
     void create_waves ();

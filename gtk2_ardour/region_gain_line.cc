@@ -17,15 +17,15 @@
 using namespace std;
 using namespace ARDOUR;
 
-AudioRegionGainLine::AudioRegionGainLine (string name, Session& s, AudioRegionView& r, GnomeCanvasItem* parent,
+AudioRegionGainLine::AudioRegionGainLine (string name, Session& s, AudioRegionView& r, Gnome::Canvas::Item& parent,
 					  Curve& c, 
-					  gint (*point_callback)(GnomeCanvasItem*, GdkEvent*, gpointer),
-					  gint (*line_callback)(GnomeCanvasItem*, GdkEvent*, gpointer))
+					  gint (*point_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer),
+					  gint (*line_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer))
 	: AutomationLine (name, r.get_time_axis_view(), parent, c, point_callback, line_callback),
 	  session (s),
 	  rv (r)
 {
-	gnome_canvas_item_raise_to_top (group);
+	group->raise_to_top ();
 	set_verbose_cursor_uses_gain_mapping (true);
 	terminal_points_can_slide = false;
 }

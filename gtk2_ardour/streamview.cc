@@ -22,7 +22,6 @@
 #include "ardour_ui.h"
 #include "crossfade_view.h"
 #include "rgb_macros.h"
-//#include "extra_bind.h"
 #include "gui_thread.h"
 
 using namespace ARDOUR;
@@ -45,22 +44,33 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 	}
 
 	/* set_position() will position the group */
-	
-	canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display),
-					    gnome_canvas_group_get_type (),
-					    NULL);
 
-	canvas_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_group),
-					   gnome_canvas_simplerect_get_type(),
-					   "x1", 0.0,
-					   "y1", 0.0,
-					   "x2", 1000000.0,
-					   "y2", (double) tv.height,
-					   "outline_color_rgba", color_map[cAudioTrackOutline],
-					   /* outline ends and bottom */
-					   "outline_what", (guint32) (0x1|0x2|0x8),
-					   "fill_color_rgba", stream_base_color,
-					   NULL);
+	//GTK2FIX -- how to get the group? is the canvas display really a group?
+	//canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display),
+	//			    gnome_canvas_group_get_type (),
+	//			    NULL);
+	canvas_group = new Gnome::Canvas::Group(GNOME_CANVAS_GROUP(_trackview.canvas_display));
+
+	//canvas_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_group),
+	//			   gnome_canvas_simplerect_get_type(),
+	//			   "x1", 0.0,
+	//			   "y1", 0.0,
+	//			   "x2", 1000000.0,
+	//			   "y2", (double) tv.height,
+	//			   "outline_color_rgba", color_map[cAudioTrackOutline],
+	//			   /* outline ends and bottom */
+	//			   "outline_what", (guint32) (0x1|0x2|0x8),
+	//			   "fill_color_rgba", stream_base_color,
+	//			   NULL);
+	canvas_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
+	canvas_rect->set_property ("x1", 0.0);
+	canvas_rect->set_property ("y1", 0.0);
+	canvas_rect->set_property ("x2", 1000000.0);
+	canvas_rect->set_property ("y2", (double) tv.height);
+	canvas_rect->set_property ("outline_color_rgba", color_map[cAudioTrackOutline]);
+	/* outline ends and bottom */
+	canvas_rect->set_property ("outline_what", (guint32) (0x1|0x2|0x8));
+	canvas_rect->set_property ("fill_color_rgba", stream_base_color);
 
 	gtk_signal_connect (GTK_OBJECT(canvas_rect), "event",
 			    (GtkSignalFunc) PublicEditor::canvas_stream_view_event, &_trackview);
@@ -100,7 +110,8 @@ int
 StreamView::set_position (gdouble x, gdouble y)
 
 {
-	gnome_canvas_item_set (canvas_group, "x", x, "y", y, NULL);
+	canvas_group->set_property ("x", x);
+	canvas_group->set_property ("y", y);
 	return 0;
 }
 
@@ -156,8 +167,8 @@ StreamView::set_samples_per_unit (gdouble spp)
 		gdouble xstart = _trackview.editor.frame_to_pixel ( recbox.start );
 		gdouble xend = _trackview.editor.frame_to_pixel ( recbox.start + recbox.length );
 
-		gnome_canvas_item_set (recbox.rectangle, "x1", xstart, NULL);
-		gnome_canvas_item_set (recbox.rectangle, "x2", xend, NULL);
+		recbox.rectangle->set_property ("x1", xstart);
+		recbox.rectangle->set_property ("x2", xend);
 	}
 
 	return 0;
@@ -213,7 +224,7 @@ StreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 		}
 	}
 
-	region_view = new AudioRegionView (GNOME_CANVAS_GROUP(canvas_group),
+	region_view = new AudioRegionView (canvas_group,
 					   _trackview,
 					   *region,
 					   _samples_per_unit,
@@ -329,7 +340,7 @@ StreamView::playlist_modified ()
 	}
 
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		gnome_canvas_item_raise_to_top ((*i)->get_canvas_group());
+		(*i)->get_canvas_group()->raise_to_top();
 	}
 }
 
@@ -393,7 +404,7 @@ StreamView::add_crossfade (Crossfade *crossfade)
 		}
 	}
 
-	CrossfadeView *cv = new CrossfadeView (GNOME_CANVAS_GROUP(_trackview.canvas_display),
+	CrossfadeView *cv = new CrossfadeView (_trackview.canvas_display,
 					       _trackview,
 					       *crossfade,
 					       _samples_per_unit,
@@ -576,13 +587,13 @@ StreamView::set_waveform_shape (WaveformShape shape)
 void
 StreamView::region_layered (AudioRegionView* rv)
 {
-	gnome_canvas_item_lower_to_bottom (rv->get_canvas_group());
+	rv->get_canvas_group()->lower_to_bottom();
 
 	/* don't ever leave it at the bottom, since then it doesn't
 	   get events - the  parent group does instead ...
 	*/
 	
-	gnome_canvas_item_raise (rv->get_canvas_group(), rv->region.layer() + 1);
+	rv->get_canvas_group()->raise (rv->region.layer() + 1);
 }
 
 void
@@ -660,15 +671,13 @@ StreamView::setup_rec_box ()
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend = xstart;
 			
-			GnomeCanvasItem * rec_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_group),
-									gnome_canvas_simplerect_get_type(),
-									"x1", xstart,
-									"y1", 1.0,
-									"x2", xend,
-									"y2", (double) _trackview.height - 1,
-									"outline_color_rgba", color_map[cRecordingRectOutline],
-									"fill_color_rgba",  color_map[cRecordingRectFill],
-									NULL);
+			Gnome::Canvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
+			rec_rect->set_property ("x1", xstart);
+			rec_rect->set_property ("y1", 1.0);
+			rec_rect->set_property ("x2", xend);
+			rec_rect->set_property ("y2", (double) _trackview.height - 1);
+			rec_rect->set_property ("outline_color_rgba", color_map[cRecordingRectOutline]);
+			rec_rect->set_property ("fill_color_rgba",  color_map[cRecordingRectFill]);
 			
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
@@ -755,8 +764,8 @@ StreamView::update_rec_box ()
 		gdouble xstart = _trackview.editor.frame_to_pixel ( rect.start );
 		gdouble xend = _trackview.editor.frame_to_pixel ( at );
 
-		gnome_canvas_item_set (rect.rectangle, "x1", xstart, NULL);
-		gnome_canvas_item_set (rect.rectangle, "x2", xend, NULL);
+		rect.rectangle->set_property ("x1", xstart);
+		rect.rectangle->set_property ("x2", xend);
 	}
 }
 
@@ -849,9 +858,9 @@ StreamView::update_rec_regions ()
 						}
 
 						/* also update rect */
-						GnomeCanvasItem * rect = rec_rects[n].rectangle;
+						Gnome::Canvas::Item * rect = rec_rects[n].rectangle;
 						gdouble xend = _trackview.editor.frame_to_pixel (region->position() + region->length());
-						gnome_canvas_item_set (rect, "x2", xend, NULL);
+						rect->set_property ("x2", xend);
 					}
 				}
 
@@ -874,8 +883,8 @@ StreamView::update_rec_regions ()
 						}
 						
 						/* also hide rect */
-						GnomeCanvasItem * rect = rec_rects[n].rectangle;
-						gnome_canvas_item_hide (rect);
+						Gnome::Canvas::Item * rect = rec_rects[n].rectangle;
+						rect->hide();
 
 					}
 				}

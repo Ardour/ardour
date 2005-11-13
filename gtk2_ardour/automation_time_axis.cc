@@ -53,18 +53,26 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 	auto_play_item = 0;
 	ignore_state_request = false;
 
-	base_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display),
-					 gnome_canvas_simplerect_get_type(),
-					 "x1", 0.0,
-					 "y1", 0.0,
-					 "x2", 1000000.0,
-					 "outline_color_rgba", color_map[cAutomationTrackOutline],
-					 /* outline ends and bottom */
-					 "outline_what", (guint32) (0x1|0x2|0x8),
-					 "fill_color_rgba", color_map[cAutomationTrackFill],
-					 NULL);
-
-	gtk_object_set_data (GTK_OBJECT(base_rect), "trackview", this);
+	//	base_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display),
+	//			 gnome_canvas_simplerect_get_type(),
+	//			 "x1", 0.0,
+	//			 "y1", 0.0,
+	//			 "x2", 1000000.0,
+	//			 "outline_color_rgba", color_map[cAutomationTrackOutline],
+	//			 /* outline ends and bottom */
+	//			 "outline_what", (guint32) (0x1|0x2|0x8),
+	//			 "fill_color_rgba", color_map[cAutomationTrackFill],
+	//			 NULL);
+	base_rect = new Gnome::Canvas::SimpleRect(*canvas_display);
+	base_rect->set_property ("x1", 0.0);
+	base_rect->set_property ("y1", 0.0);
+	base_rect->set_property ("x2", 1000000.0);
+	base_rect->set_property ("outline_color_rgba", color_map[cAutomationTrackOutline]);
+	/* outline ends and bottom */
+	base_rect->set_property ("outline_what", (guint32) (0x1|0x2|0x8));
+	base_rect->set_property ("fill_color_rgba", color_map[cAutomationTrackFill]);
+	
+	base_rect->set_data ("trackview", this);
 
 	gtk_signal_connect (GTK_OBJECT(base_rect), "event",
 			    (GtkSignalFunc) PublicEditor::canvas_automation_track_event,

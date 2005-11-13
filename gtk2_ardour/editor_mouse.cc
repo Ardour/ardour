@@ -283,7 +283,7 @@ Editor::step_mouse_mode (bool next)
 }
 
 gint
-Editor::button_press_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_type)
+Editor::button_press_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	jack_nframes_t where = event_frame (event, 0, 0);
 
@@ -380,7 +380,7 @@ Editor::button_press_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType i
 		if (event->type == GDK_BUTTON_PRESS) {
 
 			if (drag_info.item) {
-				gnome_canvas_item_ungrab (drag_info.item, event->button.time);
+				drag_info.item->ungrab (event->button.time);
 			}
 
 			/* single mouse clicks on any of these item types operate
@@ -781,7 +781,7 @@ Editor::button_press_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType i
 }
 
 gint
-Editor::button_release_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_type)
+Editor::button_release_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	jack_nframes_t where = event_frame (event, 0, 0);
 
@@ -926,7 +926,9 @@ Editor::button_release_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType
 			break;
 
 		case MarkerItem:
-			remove_marker (item, event);
+
+			remove_marker (*item, event);
+
 			break;
 
 		case RegionItem:
@@ -1114,7 +1116,7 @@ Editor::maybe_autoscroll (GdkEvent* event)
 }
 
 gint
-Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_type)
+Editor::enter_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	ControlPoint* cp;
 	Marker * marker;
@@ -1129,7 +1131,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 			double at_x, at_y;
 			at_x = cp->get_x();
 			at_y = cp->get_y ();
-			gnome_canvas_item_i2w (cp->item, &at_x, &at_y);
+			cp->item->i2w (at_x, at_y);
 			at_x += 20.0;
 			at_y += 20.0;
 
@@ -1153,7 +1155,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		double at_x, at_y;
 		at_x = cp->get_x();
 		at_y = cp->get_y ();
-		gnome_canvas_item_i2w (cp->item, &at_x, &at_y);
+		cp->item->i2w (at_x, at_y);
 		at_x += 20.0;
 		at_y += 20.0;
 
@@ -1169,7 +1171,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 		
 	case GainLineItem:
 		if (mouse_mode == MouseGain) {
-			gnome_canvas_item_set (item, "fill_color_rgba", color_map[cEnteredGainLine], NULL);
+			item->set_property ("fill_color_rgba", color_map[cEnteredGainLine]);
 			if (is_drawable()) {
 				track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
 			}
@@ -1179,7 +1181,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case GainAutomationLineItem:
 	case RedirectAutomationLineItem:
 	case PanAutomationLineItem:
-		gnome_canvas_item_set (item, "fill_color_rgba", color_map[cEnteredAutomationLine], NULL);
+		item->set_property ("fill_color_rgba", color_map[cEnteredAutomationLine]);
 		if (is_drawable()) {
 			track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
 		}
@@ -1274,7 +1276,8 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
 		if (mouse_mode == MouseObject) {
-			gnome_canvas_item_set (item, "fill_color_rgba", 0, "outline_pixels", 1, NULL);
+			item->set_property ("fill_color_rgba", 0);
+			item->set_property ("outline_pixels", 1);
 		}
 		break;
 
@@ -1311,7 +1314,7 @@ Editor::enter_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 }
 
 gint
-Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_type)
+Editor::leave_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	AutomationLine* al;
 	ControlPoint* cp;
@@ -1360,7 +1363,7 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case RedirectAutomationLineItem:
 	case PanAutomationLineItem:
 		al = reinterpret_cast<AutomationLine*> (gtk_object_get_data (GTK_OBJECT(item),"line"));
-		gnome_canvas_item_set (item, "fill_color_rgba", al->get_line_color(), NULL);
+		item->set_property ("fill_color_rgba", al->get_line_color());
 		if (is_drawable()) {
 			track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 		}
@@ -1404,7 +1407,8 @@ Editor::leave_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_typ
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
 		rv = static_cast<AudioRegionView*>(gtk_object_get_data (GTK_OBJECT(item), "regionview"));
-		gnome_canvas_item_set (item, "fill_color_rgba", rv->get_fill_color(), "outline_pixels", 0, NULL);
+		item->set_property ("fill_color_rgba", rv->get_fill_color());
+		item->set_property ("outline_pixels", 0);
 		break;
 
 	case AutomationTrackItem:
@@ -1433,7 +1437,7 @@ Editor::left_automation_track ()
 }
 
 gint
-Editor::motion_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_type)
+Editor::motion_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	gint x, y;
 	
@@ -1506,8 +1510,8 @@ Editor::motion_handler (GnomeCanvasItem* item, GdkEvent* event, ItemType item_ty
 	case MarkerViewHandleStartItem:
 	case MarkerViewHandleEndItem:
 	/* </CMT Additions> */
-		if (drag_info.item && (event->motion.state & GDK_BUTTON1_MASK ||
-				       (event->motion.state & GDK_BUTTON2_MASK))) {
+	  if (drag_info.item && (event->motion.state & Gdk::BUTTON1_MASK ||
+				 (event->motion.state & Gdk::BUTTON2_MASK))) {
 			maybe_autoscroll (event);
 			(this->*(drag_info.motion_callback)) (item, event);
 			goto handled;
@@ -1579,13 +1583,9 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	drag_info.brushing = false;
 	drag_info.copied_location = 0;
 
-	gnome_canvas_item_grab (drag_info.item,
-				Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
-				cursor->gobj(),
-				event->button.time);
-	//drag_info.item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
-	//		      cursor,
-	//		      event->button.time);
+	drag_info.item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
+			      *cursor,
+			      event->button.time);
 
 	if (session && session->transport_rolling()) {
 		drag_info.was_rolling = true;
@@ -1606,7 +1606,7 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 }
 
 bool
-Editor::end_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::end_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	bool did_drag = false;
 
@@ -1616,7 +1616,7 @@ Editor::end_grab (GnomeCanvasItem* item, GdkEvent* event)
 		return false;
 	}
 	
-	gnome_canvas_item_ungrab (drag_info.item, event->button.time);
+	drag_info.item->ungrab (event->button.time);
 
 	if (drag_info.finished_callback) {
 		(this->*(drag_info.finished_callback)) (item, event);
@@ -1675,7 +1675,7 @@ Editor::set_playhead_cursor (GdkEvent* event)
 }
 
 void
-Editor::start_fade_in_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_fade_in_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	drag_info.item = item;
 	drag_info.motion_callback = &Editor::fade_in_drag_motion_callback;
@@ -1694,7 +1694,7 @@ Editor::start_fade_in_grab (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::fade_in_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::fade_in_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	AudioRegionView* arv = static_cast<AudioRegionView*>(drag_info.data);
 	jack_nframes_t pos;
@@ -1727,7 +1727,7 @@ Editor::fade_in_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::fade_in_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::fade_in_drag_finished_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (drag_info.first_move) return;
 
@@ -1765,7 +1765,7 @@ Editor::fade_in_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::start_fade_out_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_fade_out_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	drag_info.item = item;
 	drag_info.motion_callback = &Editor::fade_out_drag_motion_callback;
@@ -1784,7 +1784,7 @@ Editor::start_fade_out_grab (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::fade_out_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::fade_out_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	AudioRegionView* arv = static_cast<AudioRegionView*>(drag_info.data);
 	jack_nframes_t pos;
@@ -1819,7 +1819,7 @@ Editor::fade_out_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::fade_out_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::fade_out_drag_finished_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (drag_info.first_move) return;
 
@@ -1858,7 +1858,7 @@ Editor::fade_out_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::start_cursor_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_cursor_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	drag_info.item = item;
 	drag_info.motion_callback = &Editor::cursor_drag_motion_callback;
@@ -1885,7 +1885,7 @@ Editor::start_cursor_grab (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::cursor_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::cursor_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	Cursor* cursor = (Cursor *) drag_info.data;
 	jack_nframes_t adjusted_frame;
@@ -1918,7 +1918,7 @@ Editor::cursor_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::cursor_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::cursor_drag_finished_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (drag_info.first_move) return;
 	
@@ -1941,9 +1941,9 @@ Editor::update_marker_drag_item (Location *location)
 	double x2 = frame_to_pixel (location->end());
 
 	if (location->is_mark()) {
-		marker_drag_line_points[0].set_x (x1);
-		marker_drag_line_points[1].set_x (x1);
-		marker_drag_line->set_property ("points", marker_drag_line_points.gobj());
+	        marker_drag_line_points->front().set_x(x1);
+		marker_drag_line_points->back().set_x(x1);
+		marker_drag_line->set_property ("points", marker_drag_line_points);
 	}
 	else {
 		range_marker_drag_rect->set_property ("x1", x1);
@@ -1952,7 +1952,7 @@ Editor::update_marker_drag_item (Location *location)
 }
 
 void
-Editor::start_marker_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_marker_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	Marker* marker;
 
@@ -1991,7 +1991,7 @@ Editor::start_marker_grab (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::marker_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::marker_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	jack_nframes_t f_delta;	
 	Marker* marker = (Marker *) drag_info.data;
@@ -2070,7 +2070,7 @@ Editor::marker_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::marker_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::marker_drag_finished_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (drag_info.first_move) {
 		marker_drag_motion_callback (item, event);
@@ -2089,7 +2089,7 @@ Editor::marker_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::start_meter_marker_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_meter_marker_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	Marker* marker;
 	MeterMarker* meter_marker;
@@ -2120,7 +2120,7 @@ Editor::start_meter_marker_grab (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::meter_marker_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::meter_marker_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	MeterMarker* marker = (MeterMarker *) drag_info.data;
 	jack_nframes_t adjusted_frame;
@@ -2148,7 +2148,7 @@ Editor::meter_marker_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* even
 }
 
 void
-Editor::meter_marker_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::meter_marker_drag_finished_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (drag_info.first_move) return;
 
@@ -2168,7 +2168,7 @@ Editor::meter_marker_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* ev
 }
 
 void
-Editor::start_tempo_marker_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_tempo_marker_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	Marker* marker;
 	TempoMarker* tempo_marker;
@@ -2201,7 +2201,7 @@ Editor::start_tempo_marker_grab (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::tempo_marker_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::tempo_marker_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	TempoMarker* marker = (TempoMarker *) drag_info.data;
 	jack_nframes_t adjusted_frame;
@@ -2230,7 +2230,7 @@ Editor::tempo_marker_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* even
 }
 
 void
-Editor::tempo_marker_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::tempo_marker_drag_finished_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (drag_info.first_move) return;
 	
@@ -2250,7 +2250,7 @@ Editor::tempo_marker_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* ev
 }
 
 void
-Editor::remove_gain_control_point (GnomeCanvasItem*item, GdkEvent* event)
+Editor::remove_gain_control_point (Gnome::Canvas::Item*item, GdkEvent* event)
 {
 	ControlPoint* control_point;
 
@@ -2269,7 +2269,7 @@ Editor::remove_gain_control_point (GnomeCanvasItem*item, GdkEvent* event)
 }
 
 void
-Editor::remove_control_point (GnomeCanvasItem*item, GdkEvent* event)
+Editor::remove_control_point (Gnome::Canvas::Item*item, GdkEvent* event)
 {
 	ControlPoint* control_point;
 
@@ -2282,7 +2282,7 @@ Editor::remove_control_point (GnomeCanvasItem*item, GdkEvent* event)
 }
 
 void
-Editor::start_control_point_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_control_point_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	ControlPoint* control_point;
 	
@@ -2308,7 +2308,7 @@ Editor::start_control_point_grab (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::control_point_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::control_point_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	ControlPoint* cp = reinterpret_cast<ControlPoint *> (drag_info.data);
 
@@ -2331,7 +2331,7 @@ Editor::control_point_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* eve
 	
 	} 
 
-	gnome_canvas_item_w2i (cp->line.parent_group(), &cx, &cy);
+	cp->line.parent_group()->w2i (cx, cy);
 
 	cx = max (0.0, cx);
 	cy = max (0.0, cy);
@@ -2360,7 +2360,7 @@ Editor::control_point_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* eve
 }
 
 void
-Editor::control_point_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::control_point_drag_finished_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	ControlPoint* cp = reinterpret_cast<ControlPoint *> (drag_info.data);
 	control_point_drag_motion_callback (item, event);
@@ -2368,7 +2368,7 @@ Editor::control_point_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* e
 }
 
 void
-Editor::start_line_grab_from_regionview (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_line_grab_from_regionview (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	switch (mouse_mode) {
 	case MouseGain:
@@ -2380,7 +2380,7 @@ Editor::start_line_grab_from_regionview (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::start_line_grab_from_line (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_line_grab_from_line (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	AutomationLine* al;
 	
@@ -2405,7 +2405,7 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 
 	cx = event->button.x;
 	cy = event->button.y;
-	gnome_canvas_item_w2i (line->parent_group(), &cx, &cy);
+	line->parent_group()->w2i (cx, cy);
 	frame_within_region = (jack_nframes_t) floor (cx * frames_per_unit);
 
 	if (!line->control_points_adjacent (frame_within_region, current_line_drag_info.before, 
@@ -2431,13 +2431,13 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 }
 
 void
-Editor::line_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::line_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	AutomationLine* line = reinterpret_cast<AutomationLine *> (drag_info.data);
 	double cx = drag_info.current_pointer_x;
 	double cy = drag_info.current_pointer_y;
 
-	gnome_canvas_item_w2i (line->parent_group(), &cx, &cy);
+	line->parent_group()->w2i (cx, cy);
 	
 	double fraction;
 	fraction = 1.0 - (cy / line->height());
@@ -2456,7 +2456,7 @@ Editor::line_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::line_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::line_drag_finished_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	AutomationLine* line = reinterpret_cast<AutomationLine *> (drag_info.data);
 	line_drag_motion_callback (item, event);
@@ -2464,7 +2464,7 @@ Editor::line_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::start_region_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_region_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (selection->audio_regions.empty() || clicked_regionview == 0) {
 		return;
@@ -2498,7 +2498,7 @@ Editor::start_region_grab (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::start_region_copy_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_region_copy_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (selection->audio_regions.empty() || clicked_regionview == 0) {
 		return;
@@ -2580,7 +2580,7 @@ Editor::start_region_copy_grab (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::start_region_brush_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_region_brush_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (selection->audio_regions.empty() || clicked_regionview == 0) {
 		return;
@@ -2613,7 +2613,7 @@ Editor::start_region_brush_grab (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::region_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::region_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	double x_delta;
 	double y_delta = 0;
@@ -2719,8 +2719,8 @@ Editor::region_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 			double ix1, ix2, iy1, iy2;
 			int32_t n = 0;
 
-			gnome_canvas_item_get_bounds (rv2->get_canvas_frame(), &ix1, &iy1, &ix2, &iy2);
-			gnome_canvas_item_i2w (rv2->get_canvas_group(), &ix1, &iy1);
+			rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+			rv2->get_canvas_group()->i2w (ix1, iy1);
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
 
@@ -2889,8 +2889,8 @@ Editor::region_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 			*/
 			
 			double ix1, ix2, iy1, iy2;
-			gnome_canvas_item_get_bounds (rv2->get_canvas_frame(), &ix1, &iy1, &ix2, &iy2);
-			gnome_canvas_item_i2w (rv2->get_canvas_group(), &ix1, &iy1);
+			rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+			rv2->get_canvas_group()->i2w (ix1, iy1);
 
 			if (ix1 <= 1) {
 				x_delta = 0;
@@ -2917,8 +2917,8 @@ Editor::region_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 		   the parent.
 		*/
 
-		gnome_canvas_item_get_bounds (rv->get_canvas_frame(), &ix1, &iy1, &ix2, &iy2);
-		gnome_canvas_item_i2w (rv->get_canvas_group(), &ix1, &iy1);
+		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+		rv->get_canvas_group()->i2w (ix1, iy1);
 		TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 		AudioTimeAxisView* canvas_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
 		AudioTimeAxisView* temp_atv;
@@ -3005,8 +3005,8 @@ Editor::region_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 			   on the top, since its parent is the whole canvas.
 			*/
 
-			gnome_canvas_item_raise_to_top (rv->get_canvas_group());
-			gnome_canvas_item_raise_to_top (rv->get_time_axis_view().canvas_display);
+			rv->get_canvas_group()->raise_to_top();
+			rv->get_time_axis_view().canvas_display->raise_to_top();
 			cursor_group->raise_to_top();
 
 			/* freeze the playlists from notifying till
@@ -3048,7 +3048,7 @@ Editor::region_drag_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
 } 
 
 void
-Editor::region_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::region_drag_finished_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	jack_nframes_t where;
 	AudioRegionView* rv = reinterpret_cast<AudioRegionView *> (drag_info.data);
@@ -3129,8 +3129,8 @@ Editor::region_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
 				
 			double ix1, ix2, iy1, iy2;
 	    
-			gnome_canvas_item_get_bounds ((*i)->get_canvas_frame(), &ix1, &iy1, &ix2, &iy2);
-			gnome_canvas_item_i2w ((*i)->get_canvas_group(), &ix1, &iy1);
+			(*i)->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+			(*i)->get_canvas_group()->i2w (ix1, iy1);
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
 	    
@@ -3164,8 +3164,8 @@ Editor::region_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
 				
 			double ix1, ix2, iy1, iy2;
 	    
-			gnome_canvas_item_get_bounds ((*i)->get_canvas_frame(), &ix1, &iy1, &ix2, &iy2);
-			gnome_canvas_item_i2w ((*i)->get_canvas_group(), &ix1, &iy1);
+			(*i)->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+			(*i)->get_canvas_group()->i2w (ix1, iy1);
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
 	    
@@ -3212,8 +3212,8 @@ Editor::region_drag_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
 				
 				double ix1, ix2, iy1, iy2;
 				
-				gnome_canvas_item_get_bounds (rv->get_canvas_frame(), &ix1, &iy1, &ix2, &iy2);
-				gnome_canvas_item_i2w (rv->get_canvas_group(), &ix1, &iy1);
+				rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+				rv->get_canvas_group()->i2w (ix1, iy1);
 				where = (jack_nframes_t) (unit_to_frame (ix1) * ownspeed);
 				
 			} else {
@@ -3389,7 +3389,7 @@ Editor::collect_new_region_view (AudioRegionView* rv)
 }
 
 void
-Editor::start_selection_grab (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_selection_grab (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (clicked_regionview == 0) {
 		return;
@@ -3468,7 +3468,7 @@ Editor::cancel_selection ()
 }	
 
 void
-Editor::start_selection_op (GnomeCanvasItem* item, GdkEvent* event, SelectionOp op)
+Editor::start_selection_op (Gnome::Canvas::Item* item, GdkEvent* event, SelectionOp op)
 {
 	jack_nframes_t start = 0;
 	jack_nframes_t end = 0;
@@ -3523,7 +3523,7 @@ Editor::start_selection_op (GnomeCanvasItem* item, GdkEvent* event, SelectionOp 
 }
 
 void
-Editor::drag_selection (GnomeCanvasItem* item, GdkEvent* event)
+Editor::drag_selection (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	jack_nframes_t start = 0;
 	jack_nframes_t end = 0;
@@ -3653,7 +3653,7 @@ Editor::drag_selection (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::end_selection_op (GnomeCanvasItem* item, GdkEvent* event)
+Editor::end_selection_op (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (!drag_info.first_move) {
 		drag_selection (item, event);
@@ -3678,7 +3678,7 @@ Editor::end_selection_op (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::start_trim (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_trim (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_trackview;
@@ -3728,7 +3728,7 @@ Editor::start_trim (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::trim_motion_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::trim_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	AudioRegionView* rv = clicked_regionview;
 	jack_nframes_t frame_delta = 0;
@@ -3954,7 +3954,7 @@ Editor::single_end_trim (AudioRegionView& rv, jack_nframes_t frame_delta, bool l
 }
 	
 void
-Editor::trim_finished_callback (GnomeCanvasItem* item, GdkEvent* event)
+Editor::trim_finished_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (!drag_info.first_move) {
 		trim_motion_callback (item, event);
@@ -4066,7 +4066,7 @@ Editor::thaw_region_after_trim (AudioRegionView& rv)
 }
 
 void
-Editor::hide_marker (GnomeCanvasItem* item, GdkEvent* event)
+Editor::hide_marker (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	Marker* marker;
 	bool is_start;
@@ -4082,7 +4082,7 @@ Editor::hide_marker (GnomeCanvasItem* item, GdkEvent* event)
 
 
 void
-Editor::start_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event, RangeMarkerOp op)
+Editor::start_range_markerbar_op (Gnome::Canvas::Item* item, GdkEvent* event, RangeMarkerOp op)
 {
 
 	if (session == 0) {
@@ -4117,11 +4117,10 @@ Editor::start_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event, RangeM
 }
 
 void
-Editor::drag_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event)
+Editor::drag_range_markerbar_op (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	jack_nframes_t start = 0;
 	jack_nframes_t end = 0;
-	
 	Gnome::Canvas::Item* crect = (range_marker_op == CreateRangeMarker) ? range_bar_drag_rect: transport_bar_drag_rect;
 	
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
@@ -4191,7 +4190,7 @@ Editor::drag_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::end_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event)
+Editor::end_range_markerbar_op (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	Location * newloc = 0;
 	
@@ -4234,7 +4233,7 @@ Editor::end_range_markerbar_op (GnomeCanvasItem* item, GdkEvent* event)
 
 
 void
-Editor::start_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_mouse_zoom (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	drag_info.item = item;
 	drag_info.motion_callback = &Editor::drag_mouse_zoom;
@@ -4246,7 +4245,7 @@ Editor::start_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::drag_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event)
+Editor::drag_mouse_zoom (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	jack_nframes_t start;
 	jack_nframes_t end;
@@ -4287,7 +4286,7 @@ Editor::drag_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::end_mouse_zoom (GnomeCanvasItem* item, GdkEvent* event)
+Editor::end_mouse_zoom (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (!drag_info.first_move) {
 		drag_mouse_zoom (item, event);
@@ -4315,16 +4314,14 @@ Editor::reposition_zoom_rect (jack_nframes_t start, jack_nframes_t end)
 	double x2 = frame_to_pixel (end);
 	double y2 = canvas_height - 2;
 
-	gtk_object_set (GTK_OBJECT(zoom_rect), 
-			"x1", x1,
-			"y1", 1.0,
-			"x2", x2,
-			"y2", y2,
-			NULL);
+	zoom_rect->set_property ("x1", x1);
+	zoom_rect->set_property ("y1", 1.0);
+	zoom_rect->set_property ("x2", x2);
+	zoom_rect->set_property ("y2", y2);
 }
 
 void
-Editor::start_rubberband_select (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_rubberband_select (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	drag_info.item = item;
 	drag_info.motion_callback = &Editor::drag_rubberband_select;
@@ -4336,7 +4333,7 @@ Editor::start_rubberband_select (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::drag_rubberband_select (GnomeCanvasItem* item, GdkEvent* event)
+Editor::drag_rubberband_select (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	jack_nframes_t start;
 	jack_nframes_t end;
@@ -4400,7 +4397,7 @@ Editor::drag_rubberband_select (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::end_rubberband_select (GnomeCanvasItem* item, GdkEvent* event)
+Editor::end_rubberband_select (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	if (!drag_info.first_move) {
 
@@ -4443,7 +4440,7 @@ Editor::end_rubberband_select (GnomeCanvasItem* item, GdkEvent* event)
 
 
 gint
-Editor::mouse_rename_region (GnomeCanvasItem* item, GdkEvent* event)
+Editor::mouse_rename_region (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	using namespace Gtkmm2ext;
 
@@ -4452,7 +4449,6 @@ Editor::mouse_rename_region (GnomeCanvasItem* item, GdkEvent* event)
 	prompter.set_prompt (_("Name for region:"));
 	prompter.set_initial_text (clicked_regionview->region.name());
 	prompter.show_all ();
-	prompter.chosen.connect(sigc::ptr_fun(Gtk::Main::quit));
 	switch (prompter.run ()) {
 	case GTK_RESPONSE_ACCEPT:
 	        string str;
@@ -4467,7 +4463,7 @@ Editor::mouse_rename_region (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::start_time_fx (GnomeCanvasItem* item, GdkEvent* event)
+Editor::start_time_fx (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	drag_info.item = item;
 	drag_info.motion_callback = &Editor::time_fx_motion;
@@ -4479,7 +4475,7 @@ Editor::start_time_fx (GnomeCanvasItem* item, GdkEvent* event)
 }
 
 void
-Editor::time_fx_motion (GnomeCanvasItem *item, GdkEvent* event)
+Editor::time_fx_motion (Gnome::Canvas::Item *item, GdkEvent* event)
 {
 	AudioRegionView* rv = clicked_regionview;
 
@@ -4502,7 +4498,7 @@ Editor::time_fx_motion (GnomeCanvasItem *item, GdkEvent* event)
 }
 
 void
-Editor::end_time_fx (GnomeCanvasItem* item, GdkEvent* event)
+Editor::end_time_fx (Gnome::Canvas::Item* item, GdkEvent* event)
 {
 	clicked_regionview->get_time_axis_view().hide_timestretch ();
 

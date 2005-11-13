@@ -52,18 +52,18 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	region_color = _trackview.color();
 	stream_base_color = color_map[cMarkerTrackBase];
 
-	canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display), gnome_canvas_group_get_type (), 0);
+	//GTK2FIX -- how to get the group? is the canvas display really a group?
+	//canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display), gnome_canvas_group_get_type (), 0);
+	canvas_group = new Gnome::Canvas::Group (*_trackview.canvas_display);
 
-	canvas_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_group),
-		gnome_canvas_simplerect_get_type(),
-		"x1", 0.0,
-		"y1", 0.0,
-		"x2", 1000000.0,
-		"y2", (double)20,
-		"outline_color_rgba", color_map[cMarkerTrackOutline],
-		"fill_color_rgba", stream_base_color,
-		0) ;
-					   
+	canvas_rect =  new Gnome::Canvas::SimpleRect (*canvas_group);
+	canvas_rect->set_property ("x1", 0.0);
+	canvas_rect->set_property ("y1", 0.0);
+	canvas_rect->set_property ("x2", 1000000.0);
+	canvas_rect->set_property ("y2", (double)20);
+	canvas_rect->set_property ("outline_color_rgba", color_map[cMarkerTrackOutline]);
+	canvas_rect->set_property ("fill_color_rgba", stream_base_color);
+		   
 	gtk_signal_connect(GTK_OBJECT(canvas_rect), "event", (GtkSignalFunc)PublicEditor::canvas_marker_time_axis_view_event, &_trackview) ;
 
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
@@ -142,7 +142,8 @@ MarkerTimeAxisView::set_height(gdouble h)
 int
 MarkerTimeAxisView::set_position(gdouble x, gdouble y)
 {
-	gnome_canvas_item_set (canvas_group, "x", x, "y", y, NULL);
+	canvas_group->set_property ("x", x);
+	canvas_group->set_property ("y", y);
 	return 0;
 }
 
@@ -207,7 +208,7 @@ MarkerTimeAxisView::add_marker_view(ImageFrameView* ifv, std::string mark_type, 
 		return(0) ;
 	}
 	
-	MarkerView* mv = new MarkerView(GNOME_CANVAS_GROUP(canvas_group),
+	MarkerView* mv = new MarkerView(canvas_group,
 		 &_trackview,
 		 ifv,
 		 _trackview.editor.get_current_zoom(),

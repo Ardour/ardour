@@ -524,20 +524,20 @@ TimeAxisViewItem::set_height(double height)
 	}
 
 	if (name_text) {
-		name_text->set ("y", height+1 - NAME_Y_OFFSET, NULL);
+		name_text->set_property ("y", height+1 - NAME_Y_OFFSET);
 		if (height < NAME_HIGHLIGHT_THRESH) {
-			name_text->set_property ("fill_color_rgba",  fill_color, NULL) ;
+			name_text->set_property ("fill_color_rgba",  fill_color) ;
 		}
 		else {
-			name_text->set_property ("fill_color_rgba", label_color, NULL) ;
+			name_text->set_property ("fill_color_rgba", label_color) ;
 		}
 	}
 
 	if (frame) {
-		frame->set_property ("y2", height+1, NULL) ;
+		frame->set_property ("y2", height+1) ;
 	}
 
-	vestigial_frame->set_property ("y2", height+1, NULL) ;
+	vestigial_frame->set_property ("y2", height+1) ;
 }
 
 /**
@@ -553,7 +553,7 @@ TimeAxisViewItem::set_color(Gdk::Color& base_color)
 /**
  * 
  */
-GnomeCanvasItem*
+Gnome::Canvas::Item*
 TimeAxisViewItem::get_canvas_frame()
 {
 	return(frame) ;
@@ -562,7 +562,7 @@ TimeAxisViewItem::get_canvas_frame()
 /**
  * 
  */
-GnomeCanvasItem*
+Gnome::Canvas::Item*
 TimeAxisViewItem::get_canvas_group()
 {
 	return(group) ;
@@ -571,7 +571,7 @@ TimeAxisViewItem::get_canvas_group()
 /**
  * 
  */
-GnomeCanvasItem*
+Gnome::Canvas::Item*
 TimeAxisViewItem::get_name_highlight()
 {
 	return(name_highlight) ;
@@ -580,7 +580,7 @@ TimeAxisViewItem::get_name_highlight()
 /**
  * 
  */
-GnomeCanvasItem*
+Gnome::Canvas::Text*
 TimeAxisViewItem::get_name_text()
 {
 	return(name_text) ;
@@ -773,7 +773,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 	} if (pixel_width < 2.0) {
 
 		if (show_vestigial) {
-			vestigial_frame->hide ();
+			vestigial_frame->show();
 		}
 
 		if (name_highlight) {
@@ -782,7 +782,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 		}
 
 		if (frame) {
-			frame->hide ();
+			frame->hide();
 		}
 
 		if (frame_handle_start) {
@@ -806,12 +806,12 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				reset_name_width (pixel_width);
 			}
 
-			name_highlight->set_property ("x1", pixel_width - 1.0, NULL);
+			name_highlight->set_property ("x2", pixel_width - 1.0);
 		}
 
 		if (frame) {
 			frame->show();
-			frame->set_property ("x2", pixel_width, NULL);
+			frame->set_property ("x2", pixel_width);
 		}
 
 		if (frame_handle_start) {
@@ -819,9 +819,10 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				frame_handle_start->hide();
 				frame_handle_end->hide();
 			}
-			frame_handle_end->set_property ("x1", pixel_width - (TimeAxisViewItem::GRAB_HANDLE_LENGTH ), NULL) ;
+			frame_handle_start->show();
+			frame_handle_end->set_property ("x1", pixel_width - (TimeAxisViewItem::GRAB_HANDLE_LENGTH));
 			frame_handle_end->show();
-			frame_handle_end->set_property ("x2", pixel_width, NULL) ;
+			frame_handle_end->set_property ("x2", pixel_width);
 		}
 	}
 }
@@ -831,17 +832,17 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 {
 	int width;
 	int height;
-	FontDescription fd (NAME_FONT);
+	Pango::FontDescription fd (NAME_FONT);
 
 	if (name_text == 0) {
 		return;
 	}
-
+                       
 	int namelen = item_name.length();
 	char cstr[namelen+1];
 	strcpy (cstr, item_name.c_str());
 	
-	RefPtr<Pango::Layout> layout = group.get_canvas()->create_pango_layout();
+	Glib::RefPtr<Pango::Layout> layout = group->get_canvas()->create_pango_layout();
 	layout->set_font_description (fd);
 
 	while (namelen) {

@@ -7,6 +7,7 @@
 #include <ardour/types.h>
 
 #include "time_axis_view.h"
+#include "simplerect.h"
 
 using std::vector;
 using std::list;
@@ -47,7 +48,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void set_samples_per_unit (double);
 	std::string name() const { return _name; }
 
-	virtual void add_automation_event (GnomeCanvasItem *item, GdkEvent *event, jack_nframes_t, double) = 0;
+	virtual void add_automation_event (Gnome::Canvas::Item *item, GdkEvent *event, jack_nframes_t, double) = 0;
 
 	void clear_lines ();
 	void add_line (AutomationLine&);
@@ -77,7 +78,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
   protected:
 	ARDOUR::Route& route;
-	GnomeCanvasItem* base_rect;
+	Gnome::Canvas::SimpleRect* base_rect;
 	string _name;
 	string _state_name;
 	bool    in_destructor;

@@ -54,7 +54,7 @@ class MarkerView : public TimeAxisViewItem
 		 * @param start the start time of this item
 		 * @param duration the duration of this item
 		 */
-		MarkerView(GnomeCanvasGroup *parent,
+                 MarkerView(Gnome::Canvas::Group *parent,
 			TimeAxisView *tv,
 			ImageFrameView* marked,
 			double spu,

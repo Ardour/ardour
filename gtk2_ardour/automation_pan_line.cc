@@ -31,10 +31,10 @@
 
 using namespace ARDOUR;
 
-AutomationPanLine::AutomationPanLine (string name, Session& s, TimeAxisView& tv, GnomeCanvasItem* parent,
+AutomationPanLine::AutomationPanLine (string name, Session& s, TimeAxisView& tv, Gnome::Canvas::Item* parent,
 				      Curve& c, 
-				      gint (*point_callback)(GnomeCanvasItem*, GdkEvent*, gpointer),
-				      gint (*line_callback)(GnomeCanvasItem*, GdkEvent*, gpointer))
+				      gint (*point_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer),
+				      gint (*line_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer))
 	: AutomationLine (name, tv, parent, c, point_callback, line_callback),
 	  session (s)
 {

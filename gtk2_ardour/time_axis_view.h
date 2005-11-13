@@ -25,7 +25,8 @@
 #include <list>
 
 #include <gtkmm.h>
-#include <libgnomecanvas/libgnomecanvas.h>
+#include <libgnomecanvasmm/group.h>
+#include <libgnomecanvasmm/canvas.h>
 
 #include <ardour/types.h>
 #include <ardour/region.h>
@@ -87,7 +88,7 @@ class TimeAxisView : public virtual AxisView
 	int     order;
 
 	
-	GnomeCanvasItem   *canvas_display;
+	Gnome::Canvas::Item   *canvas_display;
  	Gtk::VBox       *control_parent;
 
 	/* The Standard LHS Controls */
@@ -168,7 +169,7 @@ class TimeAxisView : public virtual AxisView
 		return 0;
 	}
 
-  	void order_selection_trims (GnomeCanvasItem *item, bool put_start_on_top);
+  	void order_selection_trims (Gnome::Canvas::Item *item, bool put_start_on_top);
 
 	virtual void get_selectables (jack_nframes_t start, jack_nframes_t end, double top, double bot, list<Selectable*>& results);
 	virtual void get_inverted_selectables (Selection&, list<Selectable *>& results);
@@ -272,7 +273,7 @@ class TimeAxisView : public virtual AxisView
 
 	/* selection display */
 
-  	GnomeCanvasItem      *selection_group;
+	Gnome::Canvas::Group      *selection_group;
 
 	list<SelectionRect*> free_selection_rects;
 	list<SelectionRect*> used_selection_rects;

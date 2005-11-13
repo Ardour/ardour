@@ -2,7 +2,7 @@
 #define __ardour_gtk_region_gain_line_h__
 
 #include <ardour/ardour.h>
-#include <libgnomecanvas/libgnomecanvas.h>
+#include <libgnomecanvasmm/libgnomecanvasmm.h>
 #include <gtkmm.h>
 
 #include "automation_line.h"
@@ -17,10 +17,10 @@ class AudioRegionView;
 class AudioRegionGainLine : public AutomationLine
 {
   public:
-	AudioRegionGainLine (string name, ARDOUR::Session&, AudioRegionView&, GnomeCanvasItem* parent,
+        AudioRegionGainLine (string name, ARDOUR::Session&, AudioRegionView&, Gnome::Canvas::Item& parent,
 			     ARDOUR::Curve&, 
-			     gint (*point_callback)(GnomeCanvasItem*, GdkEvent*, gpointer),
-			     gint (*line_callback)(GnomeCanvasItem*, GdkEvent*, gpointer));
+		       gint (*point_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer),
+		       gint (*line_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer));
 	
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);
