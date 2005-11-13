@@ -1,0 +1,7 @@
+<ui>
+      <menubar name='SharedMenuBar'>
+	<menu action='SharedMenu'>
+	   <menuitem action='Baz'/>
+	</menu>
+      </menubar>
+</ui>

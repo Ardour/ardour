@@ -1,0 +1,8 @@
+<ui>
+      <menubar name='OTop'>
+	<menu action='OTopMenu'>
+	   <menuitem action='OFoo'/>
+	   <menuitem action='OBar'/>
+	</menu>
+      </menubar>
+</ui>
