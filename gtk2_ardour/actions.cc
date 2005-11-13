@@ -147,3 +147,5 @@ get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& k
 		}
 	}
 }
+
+}
