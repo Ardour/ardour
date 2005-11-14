@@ -39,7 +39,8 @@ installed:
  		http://www.freedesktop.org/software/pkgconfig/
 	   
        lex and yacc are also required.
-   		any verison of bison >= 1.35 should work fine.
+   		any version of bison >= 1.35 should work fine.
+       intltool try 0.32 or above
 
 * Libraries:
 
@@ -64,6 +65,9 @@ requirement.
 
        GTK+ 1.2   (http://www.gtk.org)
 	gtk+-1.2.8 (included with most distributions)
+
+       libglade2 (http://www.gnome.org/)
+	unsure of minimum version. XXX todo.
 
        libsndfile (http://www.mega-nerd.com/libsndfile/)
 	libsndfile-1.0 or higher
