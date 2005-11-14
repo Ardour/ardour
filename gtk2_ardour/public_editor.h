@@ -6,13 +6,13 @@
 #include <string>
 #include <glib.h>
 #include <gdk/gdktypes.h>
-#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm/window.h>
 #include <jack/types.h>
 #include <sigc++/signal.h>
 
 #include "editing.h"
 #include "keyboard_target.h"
+#include "canvas.h"
 
 namespace ARDOUR {
 	class Session;
@@ -37,6 +37,13 @@ class Selection;
 class AutomationLine;
 class ControlPoint;
 class SelectionRect;
+class CrossfadeView;
+class AudioTimeAxisView;
+class AudioRegionView;
+class TempoMarker;
+class MeterMarker;
+class Marker;
+class AutomationTimeAxisView;
 
 class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget {
   public:
@@ -119,34 +126,34 @@ class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget 
 
 	// FIXED FOR GTK2
 
-	virtual bool canvas_control_point_event (GdkEvent* event,ControlPoint*) = 0;
-	virtual bool canvas_line_event (GdkEvent* event,AutomationLine*) = 0;
-	virtual bool canvas_selection_rect_event (GdkEvent* event,SelectionRect*) = 0;
-	virtual bool canvas_selection_start_trim_event (GdkEvent* event,SelectionRect*) = 0;
-	virtual bool canvas_selection_end_trim_event (GdkEvent* event,SelectionRect*) = 0;
+	virtual bool canvas_control_point_event (GdkEvent* event,ArdourCanvas::Item*, ControlPoint*) = 0;
+	virtual bool canvas_line_event (GdkEvent* event,ArdourCanvas::Item*, AutomationLine*) = 0;
+	virtual bool canvas_selection_rect_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*) = 0;
+	virtual bool canvas_selection_start_trim_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*) = 0;
+	virtual bool canvas_selection_end_trim_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*) = 0;
+	virtual bool canvas_crossfade_view_event (GdkEvent* event,ArdourCanvas::Item*, CrossfadeView*) = 0;
+	virtual bool canvas_fade_in_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*) = 0;
+	virtual bool canvas_fade_in_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*) = 0;
+	virtual bool canvas_fade_out_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*) = 0;
+	virtual bool canvas_fade_out_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*) = 0;
+	virtual bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*) = 0;
+	virtual bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*) = 0;
+	virtual bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*) = 0;
+	virtual bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, AudioTimeAxisView*) = 0;
+	virtual bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, Marker*) = 0;
+	virtual bool canvas_zoom_rect_event (GdkEvent* event,ArdourCanvas::Item*) = 0;
+	virtual bool canvas_tempo_marker_event (GdkEvent* event,ArdourCanvas::Item*, TempoMarker*) = 0;
+	virtual bool canvas_meter_marker_event (GdkEvent* event,ArdourCanvas::Item*, MeterMarker*) = 0;
+	virtual bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*) = 0;
+
+	virtual bool canvas_tempo_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
+	virtual bool canvas_meter_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
+	virtual bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
+	virtual bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
+	virtual bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 
 	// PENDING
 
-
-	virtual gint canvas_crossfade_view_event (GdkEvent* event) = 0;
-	virtual gint canvas_fade_in_event (GdkEvent* event) = 0;
-	virtual gint canvas_fade_in_handle_event (GdkEvent* event) = 0;
-	virtual gint canvas_fade_out_event (GdkEvent* event) = 0;
-	virtual gint canvas_fade_out_handle_event (GdkEvent* event) = 0;
-	virtual gint canvas_region_view_event (GdkEvent* event) = 0;
-	virtual gint canvas_region_view_name_highlight_event (GdkEvent* event) = 0;
-	virtual gint canvas_region_view_name_event (GdkEvent* event) = 0;
-	virtual gint canvas_stream_view_event (GdkEvent* event) = 0;
-	virtual gint canvas_marker_event (GdkEvent* event) = 0;
-	virtual gint canvas_zoom_rect_event (GdkEvent* event) = 0;
-
-	virtual gint canvas_tempo_marker_event (GdkEvent* event) = 0;
-	virtual gint canvas_meter_marker_event (GdkEvent* event) = 0;
-	virtual gint canvas_tempo_bar_event (GdkEvent* event) = 0;
-	virtual gint canvas_meter_bar_event (GdkEvent* event) = 0;
-	virtual gint canvas_marker_bar_event (GdkEvent* event) = 0;
-	virtual gint canvas_range_marker_bar_event (GdkEvent* event) = 0;
-	virtual gint canvas_transport_marker_bar_event (GdkEvent* event) = 0;
 	virtual gint canvas_imageframe_item_view_event(GdkEvent* event)  = 0;
 	virtual gint canvas_imageframe_view_event(GdkEvent* event)  = 0;
 	virtual gint canvas_imageframe_start_handle_event(GdkEvent* event)  = 0;
@@ -155,7 +162,6 @@ class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget 
 	virtual gint canvas_markerview_item_view_event(GdkEvent* event)  = 0;
 	virtual gint canvas_markerview_start_handle_event(GdkEvent* event)  = 0;
 	virtual gint canvas_markerview_end_handle_event(GdkEvent* event)  = 0;
-	virtual gint canvas_automation_track_event(GdkEvent* event)  = 0;
 
 	static PublicEditor* _instance;
 };

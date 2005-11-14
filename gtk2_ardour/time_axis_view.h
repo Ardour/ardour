@@ -25,8 +25,6 @@
 #include <list>
 
 #include <gtkmm.h>
-#include <libgnomecanvasmm/group.h>
-#include <libgnomecanvasmm/canvas.h>
 
 #include <ardour/types.h>
 #include <ardour/region.h>
@@ -35,6 +33,8 @@
 #include "axis_view.h"
 #include "enums.h"
 #include "editing.h"
+
+namespace ArdourCanvas = Gnome::Canvas;
 
 namespace ARDOUR {
 	class Session;
@@ -75,7 +75,7 @@ class TimeAxisView : public virtual AxisView
 		Small = 21
 	};
 
-	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, Gnome::Canvas::Canvas& canvas);
+	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
 	/* public data: XXX create accessor/mutators for these ?? */
@@ -88,7 +88,7 @@ class TimeAxisView : public virtual AxisView
 	int     order;
 
 	
-	Gnome::Canvas::Group   *canvas_display;
+	ArdourCanvas::Group   *canvas_display;
  	Gtk::VBox       *control_parent;
 
 	/* The Standard LHS Controls */
@@ -169,7 +169,7 @@ class TimeAxisView : public virtual AxisView
 		return 0;
 	}
 
-  	void order_selection_trims (Gnome::Canvas::Item *item, bool put_start_on_top);
+  	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
 	virtual void get_selectables (jack_nframes_t start, jack_nframes_t end, double top, double bot, list<Selectable*>& results);
 	virtual void get_inverted_selectables (Selection&, list<Selectable *>& results);
@@ -273,7 +273,7 @@ class TimeAxisView : public virtual AxisView
 
 	/* selection display */
 
-	Gnome::Canvas::Group      *selection_group;
+	ArdourCanvas::Group      *selection_group;
 
 	list<SelectionRect*> free_selection_rects;
 	list<SelectionRect*> used_selection_rects;
