@@ -61,6 +61,7 @@
 #include "audio_clock.h"
 #include "ardour_dialog.h"
 #include "editing.h"
+#include "glade_factory.h"
 
 class AudioClock;
 class PublicEditor;
@@ -127,7 +128,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-	void new_session (bool startup = false, std::string path = string());
+	void new_session(bool startup = false, std::string path = string());
 	gint cmdline_new_session (std::string path);
 	int  unload_session ();
 	void close_session() { unload_session(); }
@@ -548,16 +549,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	bool _will_create_new_session_automatically;
 
-	NewSessionDialog* new_session_window;
-	string template_name;
-
-	void new_session_ok_clicked ();
-	void new_session_template_choice (Gtk::TreeView&, Glib::RefPtr<Gtk::TreeSelection>);
-	void hide_dialog (ArdourDialog *dialog);
-
-	void fs_cancel_clicked (Gtk::FileSelection*);
-	gint fs_delete_event (GdkEventAny*, Gtk::FileSelection*);
-
+	GladeRef m_new_session_dialog_ref;
+	NewSessionDialog* m_new_session_dialog;
+	
 	void open_session ();
 	void open_recent_session ();
 	void open_ok_clicked ();

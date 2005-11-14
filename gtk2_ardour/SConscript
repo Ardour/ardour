@@ -43,7 +43,8 @@ gtkardour.Merge ([
     libraries['xml'],
     libraries['soundtouch'],
     libraries['samplerate'],
-    libraries['jack']
+    libraries['jack'],
+    libraries['libglademm']
 ])
 
 if gtkardour['VST']:
@@ -110,6 +111,8 @@ export_dialog.cc
 gain_automation_time_axis.cc
 gain_meter.cc
 ghostregion.cc
+glade_path.cc
+glade_factory.cc
 grouped_buttons.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
@@ -166,6 +169,10 @@ visual_time_axis.cc
 waveview.cc
 """)
 
+glade_files=glob.glob('glade/*.glade')
+
+intl_files = gtkardour_files + glade_files + glob.glob('*.h')
+
 mtest_files=Split("""
 mtest.cc
 """)
@@ -180,9 +187,12 @@ vst_files = [ 'vst_pluginui.cc' ]
 if env['VST']:
    extra_sources += vst_files
 
+intl_files += extra_sources
+
 gtkardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 gtkardour.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
 gtkardour.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+gtkardour.Append(CXXFLAGS="-DGLADEPATH=\\\""+final_prefix+"/share/ardour/glade\\\"")
 
 versionflag = '-DVERSIONSTRING=\\\"' + env['VERSION'] + '\\\"'
 
@@ -202,14 +212,16 @@ if env['VERSIONED']:
     Default (env.VersionedExecutable ('tagged_executable', ardour))
 
 if env['NLS']:
-    i18n (gtkardour, gtkardour_files + extra_sources, env)
-
+    Export('gtkardour', 'intl_files')
+    SConscript ('po/SConscript')
+    
 #install
 
 
 env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour', ardour))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour_ui.rc'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour'), 'splash.ppm'))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/glade'), glade_files))
 
 #dist
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],
@@ -218,7 +230,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                         'editor_xpms', 'misc_xpms', 'transport_xpms',
                                         'ardour_ui.rc', 'splash.ppm'
                                         ] +
-                                      gtkardour_files + vst_files +
+                                      gtkardour_files + vst_files + glade_files +
                                       glob.glob('po/*.po') + glob.glob('*.h')))
 
 # generate a prototype full-featured ardour_ui.rc file

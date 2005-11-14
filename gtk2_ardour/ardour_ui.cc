@@ -781,7 +781,7 @@ vector<string> channel_combo_strings;
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	: Gtkmm2ext::UI ("ardour", argcp, argvp, rcfile),
-
+	  
 	  primary_clock (X_("TransportClockDisplay"), true, false, true),
 	  secondary_clock (X_("SecondaryClockDisplay"), true, false, true),
 	  preroll_clock (X_("PreRollClock"), true, true),
@@ -830,7 +830,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	if (theArdourUI == 0) {
 		theArdourUI = this;
 	}
-
+	
+	m_new_session_dialog = 0;
+	m_new_session_dialog_ref = NewSessionDialogFactory::create();
+	m_new_session_dialog_ref->get_widget_derived(NewSessionDialogFactory::top_level_widget_name(),
+						     m_new_session_dialog);
 	editor = 0;
 	mixer = 0;
 	session = 0;
@@ -844,13 +848,13 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	meter_bridge = 0;
 	option_editor = 0;
 	location_ui = 0;
-	new_session_window = 0;
 	open_session_selector = 0;
 	have_configure_timeout = false;
 	have_disk_overrun_displayed = false;
 	have_disk_underrun_displayed = false;
 	_will_create_new_session_automatically = false;
 	session_loaded = false;
+
 
 	last_configure_time.tv_sec = 0;
 	last_configure_time.tv_usec = 0;
@@ -1778,21 +1782,6 @@ ARDOUR_UI::open_recent_session ()
 
 }
 
-void
-ARDOUR_UI::fs_cancel_clicked (Gtk::FileSelection* fs)
-{
-	fs->hide_all();
-	fs->get_selection_entry()->set_text("");
-	allow_focus (false);
-}
-
-gint 
-ARDOUR_UI::fs_delete_event (GdkEventAny* ev, Gtk::FileSelection* fs)
-{
-	fs_cancel_clicked (fs);
-	return 1;
-}
-
 bool
 ARDOUR_UI::filter_ardour_session_dirs (const FileFilter::Info& info) 
 {
@@ -2697,87 +2686,81 @@ ARDOUR_UI::save_template ()
 }
 
 void
-ARDOUR_UI::new_session (bool startup, string predetermined_path)
+ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 {
-	if (new_session_window == 0){
-		new_session_window = new NewSessionDialog (*engine, startup, predetermined_path);
-		editor->ensure_float (*new_session_window);
-	}
+	m_new_session_dialog->show_all();
+	m_new_session_dialog->set_transient_for(*editor);
+	m_new_session_dialog->set_name(predetermined_path);
 
-	new_session_window->run ();
+	int response = Gtk::RESPONSE_CANCEL;
 
-#if 0
-	// GTK2FIX
+	do {
+		response = m_new_session_dialog->run ();
 	
-	/* write favorites either way */
-	Session::FavoriteDirs favs;
-	new_session_window->file_selector.get_favorites (favs);
-	Session::write_favorite_dirs (favs);
+		if(response == Gtk::RESPONSE_OK) {
 
-	if (new_session_window->run_status()) {
-		return;
-	}
-#endif
-
-	string session_path = new_session_window->file_selector.get_filename ();
-	string session_name = PBD::basename (session_path);
-
-	// Check that it doesn't already exist.
-	access(session_path.c_str(), R_OK); 
-	if (errno != ENOENT){
-		error << string_compose(_("Session %1 already exists at %2"), session_name, session_path) << endmsg;
-		return;
-	}
-
-	_session_is_new = true;
-
-	if (session_path[session_path.length()-1] != '/') {
-
-		string template_name = new_session_window->get_template_name ();
-
-		if (template_name.length()) {
-
-			load_session (session_path, session_name, &template_name);
-
-		} else {
-
-			uint32_t cchns;
-			uint32_t mchns;
-			Session::AutoConnectOption iconnect;
-			Session::AutoConnectOption oconnect;
-
-			if (new_session_window->use_control_button.get_active()) {
-				cchns = (uint32_t) channel_combo_get_channel_count (new_session_window->control_out_channel_combo);
+			_session_is_new = true;
+			
+			std::string session_name = m_new_session_dialog->session_name();
+			std::string session_path = m_new_session_dialog->session_folder();
+			std::string template_name = m_new_session_dialog->session_template_name();
+			
+			if (m_new_session_dialog->use_session_template()) {
+				
+				load_session (session_path, session_name, &template_name);
+				
 			} else {
-				cchns = 0;
-			}
-			if (new_session_window->use_master_button.get_active()) {
-				mchns = (uint32_t) channel_combo_get_channel_count (new_session_window->master_out_channel_combo);
-			} else {
-				mchns = 0;
-			}
+				
+				uint32_t cchns;
+				uint32_t mchns;
+				Session::AutoConnectOption iconnect;
+				Session::AutoConnectOption oconnect;
+				
+				if (m_new_session_dialog->create_control_track()) {
+					cchns = (uint32_t) m_new_session_dialog->control_channel_count();
+				} else {
+					cchns = 0;
+				}
+				
+				if (m_new_session_dialog->create_master_track()) {
+					mchns = (uint32_t) m_new_session_dialog->master_channel_count();
+				} else {
+					mchns = 0;
+				}
+				
+				if (m_new_session_dialog->connect_inputs()) {
+					iconnect = Session::AutoConnectPhysical;
+				} else {
+					iconnect = Session::AutoConnectOption (0);
+				}
+				
+				/// @todo some minor tweaks.
 
-			if (new_session_window->connect_to_physical_inputs_button.get_active()) {
-				iconnect = Session::AutoConnectPhysical;
-			} else {
-				iconnect = Session::AutoConnectOption (0);
-			}
-
-			if (new_session_window->connect_to_master_button.get_active ()) {
-				oconnect = Session::AutoConnectMaster;
-			} else if (new_session_window->connect_to_physical_outputs_button.get_active ()) {
-				oconnect = Session::AutoConnectPhysical;
-			} else {
-				oconnect = Session::AutoConnectOption (0);
-			} 
-
-			uint32_t nphysin = (uint32_t) new_session_window->in_count_adjustment.get_value();
-			uint32_t nphysout = (uint32_t) new_session_window->out_count_adjustment.get_value();
-
-			build_session (session_path, session_name, cchns, mchns, iconnect, oconnect, nphysin, nphysout, 
-				       engine->frame_rate() * 60 * 5);
+				if (m_new_session_dialog->connect_outs_to_master()) {
+					oconnect = Session::AutoConnectMaster;
+				} else if (m_new_session_dialog->connect_outs_to_physical()) {
+					oconnect = Session::AutoConnectPhysical;
+				} else {
+					oconnect = Session::AutoConnectOption (0);
+				} 
+				
+				uint32_t nphysin = (uint32_t) m_new_session_dialog->input_limit_count();
+				uint32_t nphysout = (uint32_t) m_new_session_dialog->output_limit_count();
+				
+				build_session (session_path,
+					       session_name,
+					       cchns,
+					       mchns,
+					       iconnect,
+					       oconnect,
+					       nphysin,
+					       nphysout, 
+					       engine->frame_rate() * 60 * 5);
+			}		
 		}
-	}
+
+	} while(response == Gtk::RESPONSE_HELP);
+	m_new_session_dialog->hide_all();
 }
 
 int
@@ -2873,12 +2856,6 @@ ARDOUR_UI::build_session (string path, string snap_name,
 	//}
 	session_loaded = true;
 	return 0;
-}
-
-void
-ARDOUR_UI::hide_dialog (ArdourDialog *dialog)
-{
-	dialog->hide_all();
 }
 
 void
