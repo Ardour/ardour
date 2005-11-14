@@ -137,6 +137,7 @@ static const char* authors[] = {
 	N_("Rob Holland"),
 	N_("Per Sigmond"),
 	N_("Doug Mclain"),
+	N_("Petter Sundlöf"),
 	0
 };
 
