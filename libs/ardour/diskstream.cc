@@ -453,7 +453,7 @@ DiskStream::set_name (string str, void *src)
 }
 
 void
-DiskStream::set_speed (float sp)
+DiskStream::set_speed (double sp)
 {
 	_session.request_diskstream_speed (*this, sp);
 
@@ -462,10 +462,10 @@ DiskStream::set_speed (float sp)
 }
 
 bool
-DiskStream::realtime_set_speed (float sp, bool global)
+DiskStream::realtime_set_speed (double sp, bool global)
 {
 	bool changed = false;
-	float new_speed = sp * _session.transport_speed();
+	double new_speed = sp * _session.transport_speed();
 	
 	if (_visible_speed != sp) {
 		_visible_speed = sp;
@@ -1938,7 +1938,7 @@ DiskStream::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("speed")) != 0) {
-		float sp = atof (prop->value().c_str());
+		double sp = atof (prop->value().c_str());
 
 		if (realtime_set_speed (sp, false)) {
 			non_realtime_set_speed ();
@@ -2053,7 +2053,7 @@ DiskStream::allocate_temporary_buffers ()
 	   when slaving to MTC, SMPTE etc.
 	*/
 
-	float sp = max (fabsf (_actual_speed), 1.2f);
+	double sp = max (fabsf (_actual_speed), 1.2f);
 	jack_nframes_t required_wrap_size = (jack_nframes_t) floor (_session.get_block_size() * sp) + 1;
 
 	if (required_wrap_size > wrap_buffer_size) {

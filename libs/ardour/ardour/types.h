@@ -239,5 +239,20 @@ namespace ARDOUR {
 	};
 };
 
+
+static inline jack_nframes_t
+session_frame_to_track_frame (jack_nframes_t session_frame, double speed)
+{
+	return (jack_nframes_t)( (double)session_frame * speed );
+}
+
+
+static inline jack_nframes_t
+track_frame_to_session_frame (jack_nframes_t track_frame, double speed)
+{
+	return (jack_nframes_t)( (double)track_frame / speed );
+}
+
+
 #endif /* __ardour_types_h__ */
 

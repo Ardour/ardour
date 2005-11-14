@@ -1038,9 +1038,9 @@ AudioTimeAxisView::get_selectables (jack_nframes_t start, jack_nframes_t end, do
 		speed = get_diskstream()->speed();
 	}
 	
-	jack_nframes_t start_adjusted = (jack_nframes_t) (start * speed);
-	jack_nframes_t end_adjusted = (jack_nframes_t) (end * speed);
-	
+	jack_nframes_t start_adjusted = session_frame_to_track_frame(start, speed);
+	jack_nframes_t end_adjusted = session_frame_to_track_frame(start, speed);
+
 	if (view && touched (top, bot)) {
 		view->get_selectables (start_adjusted, end_adjusted, results);
 	}
@@ -1782,8 +1782,8 @@ AudioTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	float speed = ds->speed();
 	if (speed != 1.0f) {
 		for (TimeSelection::iterator i = time.begin(); i != time.end(); ++i) {
-			(*i).start = (jack_nframes_t)floor( (float) (*i).start * speed);
-			(*i).end   = (jack_nframes_t)floor( (float) (*i).end   * speed);
+			(*i).start = session_frame_to_track_frame((*i).start, speed);
+			(*i).end   = session_frame_to_track_frame((*i).end,   speed);
 		}
 	}
 	
@@ -1832,7 +1832,7 @@ AudioTimeAxisView::paste (jack_nframes_t pos, float times, Selection& selection,
 	}
 
 	if (get_diskstream()->speed() != 1.0f)
-		pos = (jack_nframes_t) floor( (float) pos * get_diskstream()->speed() );
+		pos = session_frame_to_track_frame(pos, get_diskstream()->speed() );
 	
 	_session.add_undo (playlist->get_memento());
 	playlist->paste (**p, pos, times);

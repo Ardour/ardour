@@ -116,8 +116,8 @@ class DiskStream : public Stateful, public sigc::trackable
 	void punch_out ();
 
 	bool  reversed() const { return _actual_speed < 0.0f; }
-	float speed() const { return _visible_speed; }
-	void set_speed (float);
+	double speed() const { return _visible_speed; }
+	void set_speed (double);
 
 	float peak_power(uint32_t n=0) { 
 		float x = channels[n].peak_power;
@@ -307,8 +307,8 @@ class DiskStream : public Stateful, public sigc::trackable
 	atomic_t                 _record_enabled;
 	bool                      rec_monitoring_off_for_roll;
 	AudioPlaylist*           _playlist;
-	float                    _visible_speed;
-	float                    _actual_speed;
+	double                   _visible_speed;
+	double                   _actual_speed;
 	/* items needed for speed change logic */
 	bool                     _buffer_reallocation_required;
 	bool                     _seek_required;
@@ -413,7 +413,7 @@ class DiskStream : public Stateful, public sigc::trackable
 
 	int ports_created ();
 
-	bool realtime_set_speed (float, bool global_change);
+	bool realtime_set_speed (double, bool global_change);
 	void non_realtime_set_speed ();
 
 	std::list<Region*> _last_capture_regions;

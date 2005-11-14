@@ -547,7 +547,7 @@ Editor::build_region_boundary_cache ()
 			}
 		}
 
-		rpos = (jack_nframes_t) floor ( (float) rpos / speed );
+		rpos = track_frame_to_session_frame(rpos, speed);
 
 		if (region_boundary_cache.empty() || rpos != region_boundary_cache.back()) {
 			if (snap_type == SnapToRegionBoundary) {
@@ -583,7 +583,7 @@ Editor::find_next_region (jack_nframes_t frame, RegionPoint point, int32_t dir, 
 				track_speed = atav->get_diskstream()->speed();
 		}
 
-		track_frame = (jack_nframes_t) floor ( (float) frame * track_speed );
+		track_frame = session_frame_to_track_frame(frame, track_speed);
 
 		if ((r = (*i)->find_next_region (track_frame, point, dir)) == 0) {
 			continue;
@@ -602,8 +602,8 @@ Editor::find_next_region (jack_nframes_t frame, RegionPoint point, int32_t dir, 
 			rpos = r->adjust_to_sync (r->first_frame());
 			break;
 		}
-		// rpos is a "track frame", converting it to "time frame"
-		rpos = (jack_nframes_t) floor ( (float) rpos / track_speed );
+		// rpos is a "track frame", converting it to "session frame"
+		rpos = track_frame_to_session_frame(rpos, track_speed);
 
 		if (rpos > frame) {
 			distance = rpos - frame;
@@ -681,8 +681,7 @@ Editor::cursor_to_region_point (Cursor* cursor, RegionPoint point, int32_t dir)
 		}
 	}
 
-	pos = (jack_nframes_t) floor ( (float) pos / speed );
-	
+	pos = track_frame_to_session_frame(pos, speed);
 	
 	if (cursor == playhead_cursor) {
 		session->request_locate (pos);
@@ -2833,7 +2832,7 @@ Editor::trim_region_to_edit_cursor ()
 
 	begin_reversible_command (_("trim to edit"));
 	session->add_undo (region.playlist()->get_memento());
-	region.trim_end ( (jack_nframes_t) floor( (float)edit_cursor->current_frame * speed), this);
+	region.trim_end( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
 	session->add_redo_no_execute (region.playlist()->get_memento());
 	commit_reversible_command ();
 }
@@ -2858,7 +2857,7 @@ Editor::trim_region_from_edit_cursor ()
 
 	begin_reversible_command (_("trim to edit"));
 	session->add_undo (region.playlist()->get_memento());
-	region.trim_front ( (jack_nframes_t) floor( (float)edit_cursor->current_frame * speed), this);
+	region.trim_end( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
 	session->add_redo_no_execute (region.playlist()->get_memento());
 	commit_reversible_command ();
 }
