@@ -28,7 +28,6 @@ opts.AddOptions(
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     BoolOption('DEVBUILD', 'Use shared libardour (developers only)', 0),
-    BoolOption('SIGCCVSBUILD', 'Use if building sigc++ with a new configure.ac (developers only)', 0),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     BoolOption('NOARCH', 'Do not use architecture-specific compilation flags', 0),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
