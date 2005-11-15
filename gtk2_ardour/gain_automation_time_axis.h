@@ -1,6 +1,7 @@
 #ifndef __ardour_gtk_gain_automation_time_axis_h__
 #define __ardour_gtk_gain_automation_time_axis_h__
 
+#include "canvas.h"
 #include "automation_time_axis.h"
 
 namespace ARDOUR {
@@ -15,13 +16,13 @@ class GainAutomationTimeAxisView : public AutomationTimeAxisView
 				    ARDOUR::Route&,
 				    PublicEditor&,
 				    TimeAxisView& parent_axis,
-				    Gtk::Widget* parent,
+				    ArdourCanvas::Group& parent,
 				    std::string name,
 				    ARDOUR::Curve&);
 	
 	~GainAutomationTimeAxisView();
 
-	void add_automation_event (Gnome::Canvas::Item *item, GdkEvent *event, jack_nframes_t, double);
+	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, jack_nframes_t, double);
 	
    private:
 	ARDOUR::Curve& curve;

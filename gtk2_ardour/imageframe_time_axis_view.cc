@@ -65,7 +65,7 @@ ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 		"fill_color_rgba", stream_base_color,
 		0) ;
 
-	gtk_signal_connect(GTK_OBJECT(canvas_rect), "event", (GtkSignalFunc) PublicEditor::canvas_imageframe_view_event, &_trackview) ;
+	canvas_rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_imageframe_view_event), canvas_rect, &_trackview));
 
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
 

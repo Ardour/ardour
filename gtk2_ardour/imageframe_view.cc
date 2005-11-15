@@ -93,28 +93,19 @@ ImageFrameView::ImageFrameView(std::string item_id,
 	int im_width = (int)((double)(trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE) * im_ratio) ;
 	
 	imageframe = gnome_canvas_item_new(GNOME_CANVAS_GROUP(group),
-		gnome_canvas_imageframe_get_type(),
-		"pixbuf", pbuf,
-		"x", (gdouble) 1.0,
-		"y", (gdouble) 1.0,
-		"anchor", GTK_ANCHOR_NW,
-		"width", (gdouble) im_width,
-		"height", (gdouble) (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE),
-		NULL) ;
+					   gnome_canvas_imageframe_get_type(),
+					   "pixbuf", pbuf,
+					   "x", (gdouble) 1.0,
+					   "y", (gdouble) 1.0,
+					   "anchor", GTK_ANCHOR_NW,
+					   "width", (gdouble) im_width,
+					   "height", (gdouble) (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE),
+					   NULL) ;
 
+	frame_handle_start->signal_event().connect() (bind (mem_fun (editor, &PublicEditor::canvas_imageframe_start_handle_event), frame_handle_start));
+	frame_handle_end->signal_event().connect() (bind (mem_fun (editor, &PublicEditor::canvas_imageframe_end_handle_event), frame_handle_end));
+	group->signal_event().connect() (bind (mem_fun (editor, &PublicEditor::canvas_imageframe_item_view_event, this);), group));
 
-	gtk_signal_connect (GTK_OBJECT(frame_handle_start), "event",
-						(GtkSignalFunc) PublicEditor::canvas_imageframe_start_handle_event,
-						this);
-	
-	gtk_signal_connect (GTK_OBJECT(frame_handle_end), "event",
-						(GtkSignalFunc) PublicEditor::canvas_imageframe_end_handle_event,
-						this);
-						
-	gtk_signal_connect (GTK_OBJECT(group), "event",
-		(GtkSignalFunc) PublicEditor::canvas_imageframe_item_view_event, this); 
-
-	/* handle any specific details required by the initial start end duration values */
 	
 	frame_handle_start->raise_to_top();
 	frame_handle_end->raise_to_top();

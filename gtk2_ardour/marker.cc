@@ -261,10 +261,7 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 	text->set_property ("anchor", Gtk::ANCHOR_NW);
 	text->set_property ("fill_color", Gdk::Color ("black"));
 
-	group->set_data ("marker", this);
-	gtk_signal_connect (GTK_OBJECT(group), "event", (GtkSignalFunc) callback, &editor);
-
-	editor.ZoomChanged.connect (mem_fun(*this, &Marker::reposition));
+	group->signal_event().connect() (bind (mem_fun (editor, &PublicEditor::reposition), group, this));
 }
 
 Marker::~Marker ()

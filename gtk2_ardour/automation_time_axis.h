@@ -48,7 +48,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void set_samples_per_unit (double);
 	std::string name() const { return _name; }
 
-	virtual void add_automation_event (Gnome::Canvas::Item *item, GdkEvent *event, jack_nframes_t, double) = 0;
+	virtual void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, jack_nframes_t, double) = 0;
 
 	void clear_lines ();
 	void add_line (AutomationLine&);

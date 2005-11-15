@@ -72,8 +72,7 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 	canvas_rect->set_property ("outline_what", (guint32) (0x1|0x2|0x8));
 	canvas_rect->set_property ("fill_color_rgba", stream_base_color);
 
-	gtk_signal_connect (GTK_OBJECT(canvas_rect), "event",
-			    (GtkSignalFunc) PublicEditor::canvas_stream_view_event, &_trackview);
+	canvas_rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_stream_view_event), canvas_rect, this));
 
 	_samples_per_unit = _trackview.editor.get_current_zoom();
 	_amplitude_above_axis = 1.0;

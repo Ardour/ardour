@@ -178,32 +178,13 @@ AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisVie
 
 	region.StateChanged.connect (mem_fun(*this, &AudioRegionView::region_changed));
 
-	gtk_signal_connect (GTK_OBJECT(group), "event",
-			    GTK_SIGNAL_FUNC (PublicEditor::canvas_region_view_event),
-			    this);
-	gtk_signal_connect (GTK_OBJECT(name_highlight), "event",
-			    GTK_SIGNAL_FUNC (PublicEditor::canvas_region_view_name_highlight_event),
-			    this);
+	group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::UNC (PublicEditor::canvas_region_view_event)), group, this));
+	region_view_name_highlight->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_region_view_name_highlight_event), region_view_name_highlight, this));
+	fade_in_shape->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
 
-	gtk_signal_connect (GTK_OBJECT(name_text), "event",
-			    GTK_SIGNAL_FUNC (PublicEditor::canvas_region_view_name_event),
-			    this);
-
-	gtk_signal_connect (GTK_OBJECT(fade_in_shape), "event",
-			    GTK_SIGNAL_FUNC (PublicEditor::canvas_fade_in_event),
-			    this);
-
-	gtk_signal_connect (GTK_OBJECT(fade_in_handle), "event",
-			    GTK_SIGNAL_FUNC (PublicEditor::canvas_fade_in_handle_event),
-			    this);
-
-	gtk_signal_connect (GTK_OBJECT(fade_out_shape), "event",
-			    GTK_SIGNAL_FUNC ( PublicEditor::canvas_fade_out_event),
-			    this);
-
-	gtk_signal_connect_object (GTK_OBJECT(fade_out_handle), "event",
-			    GTK_SIGNAL_FUNC ( PublicEditor::canvas_fade_out_handle_event),
-			    this);
+	fade_in_handle->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
+	fade_out_shape->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_out_event)), fade_out_shape, this));
+	fade_out_handle->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_out_handle_event), fade_out_handle, this));
 
 	set_colors ();
 

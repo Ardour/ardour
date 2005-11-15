@@ -51,7 +51,7 @@
 #include "public_editor.h"
 #include "audio_time_axis.h"
 #include "streamview.h"
-#include "canvas-simplerect.h"
+#include "simplerect.h"
 #include "playlist_selector.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
@@ -72,6 +72,7 @@
 #include "prompter.h"
 #include "crossfade_view.h"
 #include "gui_thread.h"
+#include "canvas_impl.h"
 
 #include <ardour/audio_track.h>
 
@@ -99,7 +100,7 @@ static const gchar * small_x_xpm[] = {
 "           ",
 "           "};
 
-AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt, Widget *canvas)
+AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt, CanvasAA& canvas)
 	: AxisView(sess),
 	  RouteUI(rt, sess, _("m"), _("s"), _("r")), // mute, solo, and record
 	  TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas),
@@ -484,20 +485,18 @@ AudioTimeAxisView::show_timestretch (jack_nframes_t start, jack_nframes_t end)
 #endif
 
 	if (timestretch_rect == 0) {
-		timestretch_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display),
-							gnome_canvas_simplerect_get_type(),
-							"x1", 0.0,
-							"y1", 0.0,
-							"x2", 0.0,
-							"y2", 0.0,
-							"fill_color_rgba", color_map[cTimeStretchFill],
-							"outline_color_rgba" , color_map[cTimeStretchOutline],
-							NULL);
+		timestretch_rect = new SimpleRect (*canvas_display);
+		timestretch_rect->property_x1() =  0.0;
+		timestretch_rect->property_y1() =  0.0;
+		timestretch_rect->property_x2() =  0.0;
+		timestretch_rect->property_y2() =  0.0;
+		timestretch_rect->property_fill_color_rgba() =  color_map[cTimeStretchFill];
+		timestretch_rect->property_outline_color_rgba() = color_map[cTimeStretchOutline];
 	}
 
-	gnome_canvas_item_show (timestretch_rect);
-	gnome_canvas_item_raise_to_top (timestretch_rect);
-	
+	timestretch_rect->show ();
+	timestretch_rect->raise_to_top ();
+
 	x1 = start / editor.get_current_zoom();
 	x2 = (end - 1) / editor.get_current_zoom();
 	y2 = height - 2;
@@ -516,7 +515,7 @@ AudioTimeAxisView::hide_timestretch ()
 	TimeAxisView::hide_timestretch ();
 
 	if (timestretch_rect) {
-		gnome_canvas_item_hide (timestretch_rect);
+		timestretch_rect->hide ();
 	}
 }
 
@@ -1203,19 +1202,20 @@ AudioTimeAxisView::add_gain_automation_child ()
 						     _route,
 						     editor,
 						     *this,
-						     parent_canvas,
+						     *(parent_canvas.root()),
 						     _("gain"),
 						     _route.gain_automation_curve());
 	
 
-	sigc::slot<bool,GdkEvent*,ControlPoint*> cslot = mem_fun (editor, &PublicEditor::canvas_control_point_event);
-	sigc::slot<bool,GdkEvent*,AutomationLine*> lslot = mem_fun (editor, &PublicEditor::canvas_line_event);
-	
+#if 0
 	line = new AutomationGainLine ("automation gain",
 				       _session,
 				       *gain_track,
 				       *gain_track->canvas_display,
-				       _route.gain_automation_curve(), cslot, lslot);
+				       _route.gain_automation_curve(),
+				       mem_fun (editor, &PublicEditor::canvas_control_point_event),
+				       mem_fun (editor, &PublicEditor::canvas_line_event));
+#endif
 
 	line->set_line_color (color_map[cAutomationLine]);
 	
@@ -1248,7 +1248,7 @@ AudioTimeAxisView::add_pan_automation_child ()
 {
 	XMLProperty* prop;
 
-	pan_track = new PanAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, _("pan"));
+	pan_track = new PanAutomationTimeAxisView (_session, _route, editor, *this, *(parent_canvas.root()), _("pan"));
 
 	update_pans ();
 	
@@ -1295,8 +1295,8 @@ AudioTimeAxisView::update_pans ()
 		line = new AutomationPanLine ("automation pan", _session, *pan_track,
 					      *pan_track->canvas_display, 
 					      (*p)->automation(),
-					      PublicEditor::canvas_control_point_event,
-					      PublicEditor::canvas_line_event);
+					      mem_fun (editor, &PublicEditor::canvas_control_point_event),
+					      mem_fun (editor, &PublicEditor::canvas_line_event));
 
 		if (p == _route.panner().begin()) {
 			/* first line is a nice orange */
@@ -1472,13 +1472,13 @@ AudioTimeAxisView::add_redirect_automation_curve (Redirect *redirect, uint32_t w
 	char state_name[256];
 	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (redirect->name()).c_str(), what);
 
-	ran->view = new RedirectAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, name, what, *redirect, state_name);
+	ran->view = new RedirectAutomationTimeAxisView (_session, _route, editor, *this, (*parent_canvas.root()), name, what, *redirect, state_name);
 
 	ral = new RedirectAutomationLine (name, 
 					  *redirect, what, _session, *ran->view,
 					  *ran->view->canvas_display, redirect->automation_list (what), 
-					  PublicEditor::canvas_control_point_event,
-					  PublicEditor::canvas_line_event);
+					  mem_fun (editor, &PublicEditor::canvas_control_point_event),
+					  mem_fun (editor, &PublicEditor::canvas_line_event));
 	
 	ral->set_line_color (color_map[cRedirectAutomationLine]);
 	ral->queue_reset ();

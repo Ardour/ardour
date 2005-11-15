@@ -64,21 +64,14 @@ MarkerView::MarkerView(Gnome::Canvas::Group *parent,
 	// set the canvas item text to the marker type, not the id
 	set_name_text(mark_type_text) ;
 
-	// hoo up our canvas events
-	gtk_signal_connect (GTK_OBJECT(frame_handle_start), "event",
-		(GtkSignalFunc) PublicEditor::canvas_markerview_start_handle_event,
-		this);
+	// hook up our canvas events
+
+	frame_handle_start->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_markerview_start_handle_event), frame_handle_start, this));
+	frame_handle_end->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_markerview_end_handle_event), frame_handle_end, this));;
+	group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_markerview_item_view_event,	this), group, this));
 	
-	gtk_signal_connect (GTK_OBJECT(frame_handle_end), "event",
-		(GtkSignalFunc) PublicEditor::canvas_markerview_end_handle_event,
-		this);
-		
-	gtk_signal_connect (GTK_OBJECT(group), "event",
-		(GtkSignalFunc) PublicEditor::canvas_markerview_item_view_event,	this);
-	
-    /* handle any specific details required by the initial start end duration values */
-    set_position(start, this) ;
-    set_duration(duration, this) ;
+	set_position(start, this) ;
+	set_duration(duration, this) ;
 }
 
 /**

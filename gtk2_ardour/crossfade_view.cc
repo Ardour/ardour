@@ -80,10 +80,7 @@ CrossfadeView::CrossfadeView (Gnome::Canvas::Group *parent,
 	vestigial_frame->hide();
 	show_vestigial = false;
 
-	gtk_object_set_data (GTK_OBJECT(group), "crossfadeview", this);
-	gtk_signal_connect (GTK_OBJECT(group), "event",
-			    (GtkSignalFunc) PublicEditor::canvas_crossfade_view_event,
-			    this);
+	group->signal_event.connect (bind (mem_fun (editor, &Public::canvas_crossfade_view_event), group, this));
 
 	crossfade_changed (Change (~0));
 

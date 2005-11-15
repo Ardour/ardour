@@ -1173,17 +1173,14 @@ class Editor : public PublicEditor
 	bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 
-	// PENDING
-
-
-	gint canvas_imageframe_item_view_event(GdkEvent* event) ;
-	gint canvas_imageframe_view_event(GdkEvent* event) ;
-	gint canvas_imageframe_start_handle_event(GdkEvent* event) ;
-	gint canvas_imageframe_end_handle_event(GdkEvent* event) ;
-	gint canvas_marker_time_axis_view_event(GdkEvent* event) ;
-	gint canvas_markerview_item_view_event(GdkEvent* event) ;
-	gint canvas_markerview_start_handle_event(GdkEvent* event) ;
-	gint canvas_markerview_end_handle_event(GdkEvent* event) ;
+	bool canvas_imageframe_item_view_event(GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_imageframe_view_event(GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_imageframe_start_handle_event(GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_imageframe_end_handle_event(GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_marker_time_axis_view_event(GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_markerview_item_view_event(GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*);
 
 	/* non-public event handlers */
 

@@ -2,6 +2,8 @@
 #define __ardour_gtk_redirect_automation_time_axis_h__
 
 #include <pbd/xml++.h>
+
+#include "canvas.h"
 #include "automation_time_axis.h"
 
 namespace ARDOUR {
@@ -15,15 +17,15 @@ class RedirectAutomationTimeAxisView : public AutomationTimeAxisView
 					ARDOUR::Route&,
 					PublicEditor&,
 					TimeAxisView& parent,
-					Gtk::Widget* parent,
+					ArdourCanvas::Group& parent,
 					std::string name,
 					uint32_t port,
 					ARDOUR::Redirect& rd,
 					std::string state_name);
 
 	~RedirectAutomationTimeAxisView();
-
-	void add_automation_event (GnomeCanvasItem *item, GdkEvent *event, jack_nframes_t, double);
+	
+	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, jack_nframes_t, double);
 
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();

@@ -22,9 +22,9 @@
 #define __ardour_gtk_redirect_automation_line_h__
 
 #include <ardour/ardour.h>
-#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm.h>
 
+#include "canvas.h"
 #include "automation_line.h"
 
 namespace ARDOUR {
@@ -38,7 +38,7 @@ class RedirectAutomationLine : public AutomationLine
 {
   public:
   RedirectAutomationLine (string name, ARDOUR::Redirect&, uint32_t port, ARDOUR::Session&, TimeAxisView&, 
-			  Gnome::Canvas::Group& parent,
+			  ArdourCanvas::Group& parent,
 			  ARDOUR::AutomationList&, 
 			  sigc::slot<bool,GdkEvent*,ControlPoint*> point_handler,
 			  sigc::slot<bool,GdkEvent*,AutomationLine*> line_handler);

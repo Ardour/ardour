@@ -1,6 +1,7 @@
 #ifndef __ardour_gtk_pan_automation_time_axis_h__
 #define __ardour_gtk_pan_automation_time_axis_h__
 
+#include "canvas.h"
 #include "automation_time_axis.h"
 
 namespace ARDOUR {
@@ -14,12 +15,12 @@ class PanAutomationTimeAxisView : public AutomationTimeAxisView
 				   ARDOUR::Route&,
 				   PublicEditor&,
 				   TimeAxisView& parent_axis,
-				   Gtk::Widget* parent,
+				   ArdourCanvas::Group& parent,
 				   std::string name);
 
 	~PanAutomationTimeAxisView();
 
-	void add_automation_event (GnomeCanvasItem *item, GdkEvent *event, jack_nframes_t, double);
+	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, jack_nframes_t, double);
 	
    private:
         void automation_changed ();

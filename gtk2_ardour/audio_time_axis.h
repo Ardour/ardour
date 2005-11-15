@@ -22,7 +22,6 @@
 #define __ardour_trackview_h__
 
 #include <gtkmm.h>
-#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/selector.h>
 #include <list>
 
@@ -33,6 +32,7 @@
 #include "route_ui.h"
 #include "enums.h"
 #include "time_axis_view.h"
+#include "canvas.h"
 
 namespace ALSA {
 	class MultiChannelDevice;
@@ -69,7 +69,7 @@ class AutomationTimeAxisView;
 class AudioTimeAxisView : public RouteUI, public TimeAxisView
 {
   public:
- 	AudioTimeAxisView (PublicEditor&, ARDOUR::Session&, ARDOUR::Route&, Gtk::Widget *canvas);
+ 	AudioTimeAxisView (PublicEditor&, ARDOUR::Session&, ARDOUR::Route&, ArdourCanvas::CanvasAA& canvas);
  	virtual ~AudioTimeAxisView ();
 
 	void show_selection (TimeSelection&);
@@ -122,7 +122,7 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	friend class StreamView;
 	friend class AudioRegionView;
 
-	Gtk::Widget* parent_canvas;
+	ArdourCanvas::Canvas& parent_canvas;
 
 	bool         no_redraw;
   
@@ -282,7 +282,7 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	void add_redirect_automation_curve (ARDOUR::Redirect*, uint32_t);
 	void add_existing_redirect_automation_curves (ARDOUR::Redirect*);
 
-	GnomeCanvasItem *timestretch_rect;
+	ArdourCanvas::SimpleRect *timestretch_rect;
 
 	void timestretch (jack_nframes_t start, jack_nframes_t end);
 
