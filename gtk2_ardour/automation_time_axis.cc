@@ -74,9 +74,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 	
 	base_rect->set_data ("trackview", this);
 
-	gtk_signal_connect (GTK_OBJECT(base_rect), "event",
-			    (GtkSignalFunc) PublicEditor::canvas_automation_track_event,
-			    this);
+	base_rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_automation_track_event),
+						 base_rect, this));
 
 	hide_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(small_x_xpm)))));
 

@@ -6,10 +6,10 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/radiobutton.h>
-#include <libgnomecanvas/libgnomecanvas.h>
 
 #include <ardour/curve.h>
 #include "ardour_dialog.h"
+#include "canvas.h"
 
 namespace ARDOUR
 {
@@ -63,8 +63,8 @@ class CrossfadeEditor : public ArdourDialog
     struct Point {
 	~Point();
 
-	GnomeCanvasItem* box;
-	GnomeCanvasItem* curve;
+	ArdourCanvas::SimpleRect* box;
+	ArdourCanvas::Line* curve;
 	double x;
 	double y;
 
@@ -80,17 +80,16 @@ class CrossfadeEditor : public ArdourDialog
 	}
     };
 
-    GtkWidget*    _canvas;
-    GnomeCanvasItem* toplevel;
-    Gtk::Widget*   canvas;
+    ArdourCanvas::SimpleRect*   toplevel;
+    ArdourCanvas::Canvas* canvas;
 
     struct Half {
-	GnomeCanvasItem*          line;
-	GnomeCanvasItem*          shading;
+	ArdourCanvas::Line*     line;
+	ArdourCanvas::Polygon*  shading;
 	list<Point*>            points;
 	ARDOUR::Curve           normative_curve; /* 0 - 1.0, linear */
 	ARDOUR::Curve           gain_curve;      /* 0 - 2.0, gain mapping */
-	vector<GnomeCanvasItem*>  waves;
+	vector<ArdourCanvas::WaveView*>  waves;
 
 	Half();
     };
@@ -127,21 +126,17 @@ class CrossfadeEditor : public ArdourDialog
 
     gint event_handler (GdkEvent*);
 
-    static gint _canvas_event (GnomeCanvasItem*, GdkEvent* event, gpointer data);
-    static gint _point_event (GnomeCanvasItem*, GdkEvent* event, gpointer data);
-    static gint _curve_event (GnomeCanvasItem*, GdkEvent* event, gpointer data);
-
-    gint canvas_event (GnomeCanvasItem*, GdkEvent* event);
-    gint point_event (GnomeCanvasItem*, GdkEvent* event);
-    gint curve_event (GnomeCanvasItem*, GdkEvent* event);
+    bool canvas_event (GdkEvent* event);
+    bool point_event (GdkEvent* event, Point*);
+    bool curve_event (GdkEvent* event);
 
     void canvas_allocation (Gtk::Allocation&);
     void add_control_point (double x, double y);
     Point* make_point ();
     void redraw ();
     
-    double effective_width () const { return _canvas->allocation.width - (2.0 * canvas_border); }
-    double effective_height () const { return _canvas->allocation.height - (2.0 * canvas_border); }
+    double effective_width () const { return canvas->get_allocation().get_width() - (2.0 * canvas_border); }
+    double effective_height () const { return canvas->get_allocation().get_height() - (2.0 * canvas_border); }
 
     void clear ();
     void reset ();

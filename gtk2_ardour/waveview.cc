@@ -126,6 +126,12 @@ GType WaveView::get_base_type()
   return gnome_canvas_waveview_get_type();
 }
 
+void*
+WaveView::create_cache ()
+{
+	return gnome_canvas_waveview_cache_new ();
+}
+
 Glib::PropertyProxy<void*> WaveView::property_data_src()
 {
 	return Glib::PropertyProxy<void*> (this, "data-src");
@@ -134,11 +140,11 @@ Glib::PropertyProxy_ReadOnly<void*> WaveView::property_data_src() const
 {
 	return Glib::PropertyProxy_ReadOnly<void*> (this, "data-src");
 }
-Glib::PropertyProxy<void*> WaveView::property_channel() 
+Glib::PropertyProxy<uint32_t*> WaveView::property_channel() 
 {
 	return Glib::PropertyProxy<void*> (this, "channel");
 }
-Glib::PropertyProxy_ReadOnly<void*> WaveView::property_channel()  const
+Glib::PropertyProxy_ReadOnly<uint32_t*> WaveView::property_channel()  const
 {
 	return Glib::PropertyProxy_ReadOnly<void*> (this, "channel");
 }
@@ -190,11 +196,11 @@ Glib::PropertyProxy_ReadOnly<void*> WaveView::property_cache() const
 {
 	return Glib::PropertyProxy_ReadOnly<void*> (this, "cache");
 }
-Glib::PropertyProxy<void*> WaveView::property_cache_updater()
+Glib::PropertyProxy<bool> WaveView::property_cache_updater()
 {
 	return Glib::PropertyProxy<void*> (this, "cache-updater");
 }
-Glib::PropertyProxy_ReadOnly<void*> WaveView::property_cache_updater() const
+Glib::PropertyProxy_ReadOnly<bool> WaveView::property_cache_updater() const
 {
 	return Glib::PropertyProxy_ReadOnly<void*> (this, "cache-updater");
 }

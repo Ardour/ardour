@@ -26,6 +26,8 @@
 #include <gtkmm/image.h>
 #include <gtkmm/scrolledwindow.h>
 
+#include <libgnomecanvasmm/line.h>
+
 #include <ardour/automation_event.h>
 #include <ardour/curve.h>
 #include <ardour/crossfade.h>
@@ -39,11 +41,12 @@
 #include "ardour_ui.h"
 #include "crossfade_edit.h"
 #include "rgb_macros.h"
-#include "canvas-simplerect.h"
-#include "canvas-waveview.h"
 #include "keyboard.h"
 #include "utils.h"
 #include "gui_thread.h"
+#include "canvas_impl.h"
+#include "simplerect.h"
+#include "waveview.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -113,71 +116,38 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	point_grabbed = false;
 	toplevel = 0;
 
-	_canvas = gnome_canvas_new_aa ();
-
-	canvas = Glib::wrap (_canvas);
+	canvas = new ArdourCanvas::CanvasAA ();
 	canvas->signal_size_allocate().connect (mem_fun(*this, &CrossfadeEditor::canvas_allocation));
 	canvas->set_size_request (425, 200);
-
-	toplevel = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
-					gnome_canvas_simplerect_get_type(),
-					"x1", 0.0,
-					"y1", 0.0,
-					"x2", 10.0,
-					"y2", 10.0,
-					"fill", (gboolean) TRUE,
-					"fill_color_rgba", (guint32) color_map[cCrossfadeEditorBase],
-					"outline_pixels", 0,
-					NULL);
-
-	gtk_signal_connect (GTK_OBJECT(toplevel),
-			    "event",
-			    (GtkSignalFunc) _canvas_event,
-			    this);
-
-	fade[Out].line = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
-					      gnome_canvas_line_get_type (),
-					      "width_pixels", (guint) 1,
-					      "fill_color_rgba", color_map[cCrossfadeEditorLine],
-					      NULL);
-
-	fade[Out].shading = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
-						 gnome_canvas_polygon_get_type(),
-						 "fill_color_rgba", color_map[cCrossfadeEditorLineShading],
-						 NULL);
 	
-	fade[In].line = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
-					     gnome_canvas_line_get_type (),
-					     "width_pixels", (guint) 1,
-					     "fill_color_rgba", color_map[cCrossfadeEditorLine],
-					     NULL);
+	toplevel = new ArdourCanvas::SimpleRect (*(canvas->root()));
+	toplevel->property_x1() =  0.0;
+	toplevel->property_y1() =  0.0;
+	toplevel->property_x2() =  10.0;
+	toplevel->property_y2() =  10.0;
+	toplevel->property_fill() =  true;
+	toplevel->property_fill_color_rgba() =  (guint32) color_map[cCrossfadeEditorBase];
+	toplevel->property_outline_pixels() =  0;
+	toplevel->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
 	
-	fade[In].shading = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
-						gnome_canvas_polygon_get_type(),
-						"fill_color_rgba", color_map[cCrossfadeEditorLineShading],
-						NULL);
+	fade[Out].line = new ArdourCanvas::Line (*(canvas->root()));
+	fade[Out].line->property_width_pixels() = 1;
+	fade[Out].line->property_fill_color_rgba() = color_map[cCrossfadeEditorLine];
+		
+	fade[Out].shading = new ArdourCanvas::Polygon (*(canvas->root()));
+	fade[Out].shading->property_fill_color_rgba() = color_map[cCrossfadeEditorLineShading];
 
-	gtk_signal_connect (GTK_OBJECT(fade[In].shading),
-			    "event",
-			    (GtkSignalFunc) _canvas_event,
-			    this);
-
-
-	gtk_signal_connect (GTK_OBJECT(fade[Out].shading),
-			    "event",
-			    (GtkSignalFunc) _canvas_event,
-			    this);
-
-	gtk_signal_connect (GTK_OBJECT(fade[In].line),
-			    "event",
-			    (GtkSignalFunc) _curve_event,
-			    this);
-
-	gtk_signal_connect (GTK_OBJECT(fade[Out].line),
-			    "event",
-			    (GtkSignalFunc) _curve_event,
-			    this);
-
+	fade[In].line = new ArdourCanvas::Line (*(canvas->root()));
+	fade[In].line->property_width_pixels() = 1;
+	fade[In].line->property_fill_color_rgba() = color_map[cCrossfadeEditorLine];
+		
+	fade[In].shading = new ArdourCanvas::Polygon (*(canvas->root()));
+	fade[In].shading->property_fill_color_rgba() = color_map[cCrossfadeEditorLineShading];
+	
+	fade[In].shading->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
+	fade[In].line->signal_event().connect (mem_fun (*this, &CrossfadeEditor::curve_event));
+	fade[Out].shading->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
+	fade[Out].line->signal_event().connect (mem_fun (*this, &CrossfadeEditor::curve_event));
 
 	select_in_button.set_name (X_("CrossfadeEditCurveButton"));
 	select_out_button.set_name (X_("CrossfadeEditCurveButton"));
@@ -416,15 +386,63 @@ CrossfadeEditor::set (const ARDOUR::Curve& curve, WhichFade which)
 	swap (which, current);
 }
 
-gint		     
-CrossfadeEditor::_canvas_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
+bool
+CrossfadeEditor::curve_event (GdkEvent* event)
 {
-	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
-	return ed->canvas_event (item, event);
+	/* treat it like a toplevel event */
+
+	return canvas_event (event);
 }
 
-gint
-CrossfadeEditor::canvas_event (GnomeCanvasItem* item, GdkEvent* event)
+bool
+CrossfadeEditor::point_event (GdkEvent* event, Point* point)
+{
+
+	if (point->curve != fade[current].line) {
+		return FALSE;
+	}
+
+	switch (event->type) {
+	case GDK_BUTTON_PRESS:
+		point_grabbed = true;
+		break;
+	case GDK_BUTTON_RELEASE:
+		point_grabbed = false;
+
+		if (Keyboard::is_delete_event (&event->button)) {
+			fade[current].points.remove (point);
+			delete point;
+		}
+
+		redraw ();
+		break;
+
+	case GDK_MOTION_NOTIFY:
+		if (point_grabbed) {
+			double new_x, new_y;
+
+			/* can't drag first or last points horizontally */
+
+			if (point == fade[current].points.front() || point == fade[current].points.back()) {
+				new_x = point->x;
+			} else {
+				new_x = (event->motion.x - canvas_border)/effective_width();
+			}
+
+			new_y = 1.0 - ((event->motion.y - canvas_border)/effective_height());
+			point->move_to (x_coordinate (new_x), y_coordinate (new_y), 
+					new_x, new_y);
+			redraw ();
+		}
+		break;
+	default:
+		break;
+	}
+	return TRUE;
+}
+
+bool
+CrossfadeEditor::canvas_event (GdkEvent* event)
 {
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
@@ -448,20 +466,15 @@ CrossfadeEditor::make_point ()
 {
 	Point* p = new Point;
 
-	p->box = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
-				      gnome_canvas_simplerect_get_type(),
-				      "fill", (gboolean) TRUE,
-				      "fill_color_rgba", color_map[cCrossfadeEditorPointFill],
-				      "outline_color_rgba", color_map[cCrossfadeEditorPointOutline],
-				      "outline_pixels", (gint) 1,
-				      NULL);
+	p->box = new ArdourCanvas::SimpleRect (*(canvas->root()));
+	p->box->property_fill() = true;
+	p->box->property_fill_color_rgba() = color_map[cCrossfadeEditorPointFill];
+	p->box->property_outline_color_rgba() = color_map[cCrossfadeEditorPointOutline];
+	p->box->property_outline_pixels() = 1;
 
 	p->curve = fade[current].line;
 
-	gtk_object_set_data (GTK_OBJECT(p->box), "point", p);
-	gtk_signal_connect (GTK_OBJECT(p->box), "event", 
-			    (GtkSignalFunc) _point_event, 
-			    this);
+	p->box->signal_event().connect (bind (mem_fun (*this, &CrossfadeEditor::point_event), p));
 	
 	return p;
 }
@@ -496,12 +509,12 @@ CrossfadeEditor::Point::move_to (double nx, double ny, double xfract, double yfr
 	double x1 = nx - half_size;
 	double x2 = nx + half_size;
 
-	gnome_canvas_item_set (box,
-			     "x1", x1,
-			     "x2", x2,
-			     "y1", ny - half_size,
-			     "y2", ny + half_size,
-			     NULL);
+	box->property_x1() = x1;
+	box->property_x2() = x2;
+
+	box->property_y1() = ny - half_size;
+	box->property_y2() = ny + half_size;
+
 	x = xfract;
 	y = yfract;
 }
@@ -510,17 +523,15 @@ void
 CrossfadeEditor::canvas_allocation (Gtk::Allocation& alloc)
 {
 	if (toplevel) {
-		gnome_canvas_item_set (toplevel,
-				     "x1", 0.0,
-				     "y1", 0.0,
-				     "x2", (double) _canvas->allocation.width + canvas_border,
-				     "y2", (double) _canvas->allocation.height + canvas_border,
-				     NULL);
+		toplevel->property_x1() = 0.0;
+		toplevel->property_y1() = 0.0;
+		toplevel->property_x2() = (double) canvas->get_allocation().get_width() + canvas_border;
+		toplevel->property_y2() = (double) canvas->get_allocation().get_height() + canvas_border;
 	}
-
-	gnome_canvas_set_scroll_region (GNOME_CANVAS(_canvas), 0.0, 0.0,
-				      _canvas->allocation.width,
-				      _canvas->allocation.height);
+	
+	canvas->set_scroll_region (0.0, 0.0, 
+				   canvas->get_allocation().get_width(), 
+				   canvas->get_allocation().get_height());
 
 	Point* end = make_point ();
 	PointSorter cmp;
@@ -590,108 +601,35 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& alloc)
 	}
 
 	double ht;
-	vector<GnomeCanvasItem*>::iterator i;
+	vector<ArdourCanvas::WaveView*>::iterator i;
 	uint32_t n;
 
-	ht = _canvas->allocation.height / xfade.in().n_channels();
+	ht = canvas->get_allocation().get_height() / xfade.in().n_channels();
 
 	for (n = 0, i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i, ++n) {
 		double yoff;
 
 		yoff = n * ht;
 
-		gnome_canvas_item_set ((*i),
-				     "y", yoff,
-				     "height", ht,
-				     "samples_per_unit", spu,
-				     NULL);
+		(*i)->property_y() = yoff;
+		(*i)->property_height() = ht;
+		(*i)->property_samples_per_unit() = spu;
 	}
 
-	ht = _canvas->allocation.height / xfade.out().n_channels();
+	ht = canvas->get_allocation().get_height() / xfade.out().n_channels();
 
 	for (n = 0, i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i, ++n) {
 		double yoff;
 
 		yoff = n * ht;
 
-		gnome_canvas_item_set ((*i),
-				     "y", yoff,
-				     "height", ht,
-				     "samples_per_unit", spu,
-				     NULL);
+		(*i)->property_y() = yoff;
+		(*i)->property_height() = ht;
+		(*i)->property_samples_per_unit() = spu;
 	}
 
 }
 
-gint
-CrossfadeEditor::_point_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
-{
-	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
-	return ed->point_event (item, event);
-}
-
-gint
-CrossfadeEditor::point_event (GnomeCanvasItem* item, GdkEvent* event)
-{
-	Point* point = static_cast<Point*> (gtk_object_get_data (GTK_OBJECT (item), "point"));
-
-	if (point->curve != fade[current].line) {
-		return FALSE;
-	}
-
-	switch (event->type) {
-	case GDK_BUTTON_PRESS:
-		point_grabbed = true;
-		break;
-	case GDK_BUTTON_RELEASE:
-		point_grabbed = false;
-
-		if (Keyboard::is_delete_event (&event->button)) {
-			fade[current].points.remove (point);
-			delete point;
-		}
-
-		redraw ();
-		break;
-
-	case GDK_MOTION_NOTIFY:
-		if (point_grabbed) {
-			double new_x, new_y;
-
-			/* can't drag first or last points horizontally */
-
-			if (point == fade[current].points.front() || point == fade[current].points.back()) {
-				new_x = point->x;
-			} else {
-				new_x = (event->motion.x - canvas_border)/effective_width();
-			}
-
-			new_y = 1.0 - ((event->motion.y - canvas_border)/effective_height());
-			point->move_to (x_coordinate (new_x), y_coordinate (new_y), 
-					new_x, new_y);
-			redraw ();
-		}
-		break;
-	default:
-		break;
-	}
-	return TRUE;
-}
-
-gint
-CrossfadeEditor::_curve_event (GnomeCanvasItem* item, GdkEvent* event, gpointer data)
-{
-	CrossfadeEditor* ed = static_cast<CrossfadeEditor*> (data);
-	return ed->curve_event (item, event);
-}
-
-gint
-CrossfadeEditor::curve_event (GnomeCanvasItem* item, GdkEvent* event)
-{
-	/* treat it like a toplevel event */
-
-	return canvas_event (item, event);
-}
 
 void
 CrossfadeEditor::xfade_changed (Change ignored)
@@ -703,7 +641,7 @@ CrossfadeEditor::xfade_changed (Change ignored)
 void
 CrossfadeEditor::redraw ()
 {
-	if (_canvas->allocation.width < 2) {
+	if (canvas->get_allocation().get_width() < 2) {
 		return;
 	}
 
@@ -722,8 +660,16 @@ CrossfadeEditor::redraw ()
 
 	fade[current].normative_curve.get_vector (0, 1.0, vec, npoints);
 	
-	GnomeCanvasPoints* pts = get_canvas_points ("xfade edit1", npoints);
-	GnomeCanvasPoints* spts = get_canvas_points ("xfade edit2", npoints + 3);
+	Gnome::Canvas::Points pts;
+	Gnome::Canvas::Points spts;
+
+	while (pts.size() < npoints) {
+		pts.push_back (Gnome::Art::Point (0,0));
+	}
+
+	while (spts.size() < npoints + 3) {
+		spts.push_back (Gnome::Art::Point (0,0));
+	}
 
 	/* the shade coordinates *MUST* be in anti-clockwise order.
 	 */
@@ -732,60 +678,59 @@ CrossfadeEditor::redraw ()
 
 		/* lower left */
 
-		spts->coords[0] = canvas_border;
-		spts->coords[1] = effective_height() + canvas_border;
+		spts[0].set_x (canvas_border);
+		spts[0].set_y (effective_height() + canvas_border);
 
 		/* lower right */
 
-		spts->coords[2] = effective_width() + canvas_border;
-		spts->coords[3] = effective_height() + canvas_border;
+		spts[1].set_x (effective_width() + canvas_border);
+		spts[1].set_y (effective_height() + canvas_border);
 
 		/* upper right */
 
-		spts->coords[4] = effective_width() + canvas_border;
-		spts->coords[5] = canvas_border;
+		spts[2].set_x (effective_width() + canvas_border);
+		spts[2].set_y (canvas_border);
 
 		
 	} else {
 
 		/*  upper left */
 		
-		spts->coords[0] = canvas_border;
-		spts->coords[1] = canvas_border;
+		spts[0].set_x (canvas_border);
+		spts[0].set_y (canvas_border);
 
 		/* lower left */
 
-		spts->coords[2] = canvas_border;
-		spts->coords[3] = effective_height() + canvas_border;
+		spts[1].set_x (canvas_border);
+		spts[1].set_y (effective_height() + canvas_border);
 
 		/* lower right */
 
-		spts->coords[4] = effective_width() + canvas_border;
-		spts->coords[5] = effective_height() + canvas_border;
+		spts[2].set_x (effective_width() + canvas_border);
+		spts[2].set_y (effective_height() + canvas_border);
 
 	}
 
-	size_t last_spt = ((npoints + 3) * 2) - 2;
+	// GTK2FIX some odd math to fix up here
+
+	size_t last_spt = (npoints + 3) - 1;
 
 	for (size_t i = 0; i < npoints; ++i) {
 
 		double y = vec[i];
 		
-		pts->coords[i*2] = canvas_border + i;
-		pts->coords[(i*2)+1] = y_coordinate (y);
+		pts[i].set_x (canvas_border + i);
+		pts[i].set_y  (y_coordinate (y));
 
-		spts->coords[last_spt - (i*2)] = canvas_border + i;
-		spts->coords[last_spt - (i*2) + 1] = pts->coords[(i*2)+1];
+		spts[last_spt - i].set_x (canvas_border + i);
+		spts[last_spt - i].set_y (pts[i].get_y());
 	}
 
-	gnome_canvas_item_set (fade[current].line, "points", pts, NULL);
-	gnome_canvas_item_set (fade[current].shading, "points", spts, NULL);
+	fade[current].line->property_points() = pts;
+	fade[current].shading->property_points() = spts;
 
-	gnome_canvas_points_unref (pts);
-	gnome_canvas_points_unref (spts);
-
-	for (vector<GnomeCanvasItem*>::iterator i = fade[current].waves.begin(); i != fade[current].waves.end(); ++i) {
-		gnome_canvas_item_set ((*i), "gain_src", &fade[current].gain_curve, NULL);
+	for (vector<Gnome::Canvas::WaveView*>::iterator i = fade[current].waves.begin(); i != fade[current].waves.end(); ++i) {
+		(*i)->property_gain_src() = &fade[current].gain_curve;
 	}
 }
 
@@ -1000,28 +945,28 @@ void
 CrossfadeEditor::curve_select_clicked (WhichFade wf)
 {
 	current = wf;
-
+	
 	if (wf == In) {
-
-		for (vector<GnomeCanvasItem*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
-			gnome_canvas_item_set ((*i), "wave_color", color_map[cSelectedCrossfadeEditorWave], NULL);
+		
+		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
+			(*i)->property_wave_color() = color_map[cSelectedCrossfadeEditorWave];
 		}
 
-		for (vector<GnomeCanvasItem*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
-			gnome_canvas_item_set ((*i), "wave_color", color_map[cCrossfadeEditorWave], NULL);
+		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
+			(*i)->property_wave_color() = color_map[cCrossfadeEditorWave];
 		}
 
-		gnome_canvas_item_set (fade[In].line, "fill_color_rgba", color_map[cSelectedCrossfadeEditorLine], NULL);
-		gnome_canvas_item_set (fade[Out].line, "fill_color_rgba", color_map[cCrossfadeEditorLine], NULL);
-		gnome_canvas_item_hide (fade[Out].shading);
-		gnome_canvas_item_show (fade[In].shading);
+		fade[In].line->property_fill_color_rgba() = color_map[cSelectedCrossfadeEditorLine];
+		fade[Out].line->property_fill_color_rgba() = color_map[cCrossfadeEditorLine];
+		fade[Out].shading->hide();
+		fade[In].shading->show();
 
 		for (list<Point*>::iterator i = fade[Out].points.begin(); i != fade[Out].points.end(); ++i) {
-			gnome_canvas_item_hide ((*i)->box);
+			(*i)->box->hide();
 		}
 
 		for (list<Point*>::iterator i = fade[In].points.begin(); i != fade[In].points.end(); ++i) {
-			gnome_canvas_item_show ((*i)->box);
+			(*i)->box->show ();
 		}
 
 		for (vector<Button*>::iterator i = fade_out_buttons.begin(); i != fade_out_buttons.end(); ++i) {
@@ -1034,25 +979,25 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 
 	} else {
 
-		for (vector<GnomeCanvasItem*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
-			gnome_canvas_item_set ((*i), "wave_color", color_map[cCrossfadeEditorWave], NULL);
+		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
+			(*i)->property_wave_color() = color_map[cCrossfadeEditorWave];
 		}
 
-		for (vector<GnomeCanvasItem*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
-			gnome_canvas_item_set ((*i), "wave_color", color_map[cSelectedCrossfadeEditorWave], NULL);
+		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
+			(*i)->property_wave_color() = color_map[cSelectedCrossfadeEditorWave];
 		}
 
-		gnome_canvas_item_set (fade[Out].line, "fill_color_rgba", color_map[cSelectedCrossfadeEditorLine], NULL);
-		gnome_canvas_item_set (fade[In].line, "fill_color_rgba", color_map[cCrossfadeEditorLine], NULL);
-		gnome_canvas_item_hide (fade[In].shading);
-		gnome_canvas_item_show (fade[Out].shading);
+		fade[Out].line->property_fill_color_rgba() = color_map[cSelectedCrossfadeEditorLine];
+		fade[In].line->property_fill_color_rgba() = color_map[cCrossfadeEditorLine];
+		fade[In].shading->hide();
+		fade[Out].shading->show();
 
 		for (list<Point*>::iterator i = fade[In].points.begin(); i != fade[In].points.end(); ++i) {
-			gnome_canvas_item_hide ((*i)->box);
+			(*i)->box->hide();
 		}
 		
 		for (list<Point*>::iterator i = fade[Out].points.begin(); i != fade[Out].points.end(); ++i) {
-			gnome_canvas_item_show ((*i)->box);
+			(*i)->box->hide();
 		}
 
 		for (vector<Button*>::iterator i = fade_out_buttons.begin(); i != fade_out_buttons.end(); ++i) {
@@ -1081,7 +1026,7 @@ CrossfadeEditor::y_coordinate (double& yfract) const
 	yfract = min (1.0, yfract);
 	yfract = max (0.0, yfract);
 
-	return (_canvas->allocation.height - (canvas_border)) - (yfract * effective_height());
+	return (canvas->get_allocation().get_height() - (canvas_border)) - (yfract * effective_height());
 }
 
 void
@@ -1098,7 +1043,7 @@ CrossfadeEditor::make_waves (AudioRegion& region, WhichFade which)
 		color = color_map[cCrossfadeEditorWave];
 	}
 
-	ht = _canvas->allocation.height / (double) nchans;
+	ht = canvas->get_allocation().get_height() / (double) nchans;
 	spu = xfade.length() / (double) effective_width();
 
 	for (uint32_t n = 0; n < nchans; ++n) {
@@ -1107,31 +1052,30 @@ CrossfadeEditor::make_waves (AudioRegion& region, WhichFade which)
 		
 		if (region.source(n).peaks_ready (bind (mem_fun(*this, &CrossfadeEditor::peaks_ready), &region, which))) {
 			
-			GnomeCanvasItem *wave = gnome_canvas_item_new (gnome_canvas_root (GNOME_CANVAS(_canvas)),
-								   gnome_canvas_waveview_get_type (),
-								   "data_src", (gpointer) &region,
-								   "cache_updater", (gboolean) TRUE,
-								   "cache", gnome_canvas_waveview_cache_new (),
-								   "channel", (guint32) n,
-								   "length_function", (gpointer) region_length_from_c,
-								   "sourcefile_length_function", (gpointer) sourcefile_length_from_c,
-								   "peak_function", (gpointer) region_read_peaks_from_c,
-								   "gain_function", (gpointer) curve_get_vector_from_c,
-								   "gain_src", &fade[which].gain_curve,
-								   "x", (double) canvas_border,
-								   "y", yoff,
-								   "height", ht,
-								   "samples_per_unit", spu,
-								   "amplitude_above_axis", 2.0,
-								   "wave_color", color,
-								   NULL);
+			WaveView* waveview = new WaveView (*(canvas->root()));
+
+			waveview->property_data_src() = &region;
+			waveview->property_cache_updater() =  true;
+			waveview->property_cache() = WaveView::create_cache();
+			waveview->property_channel() = n;
+			waveview->property_length_function() = (void*) region_length_from_c;
+			waveview->property_sourcefile_length_function() = (void*) sourcefile_length_from_c;
+			waveview->property_peak_function() = (void*) region_read_peaks_from_c;
+			waveview->property_gain_function() = (void*) curve_get_vector_from_c;
+			waveview->property_gain_src() = &fade[which].gain_curve;
+			waveview->property_x() = canvas_border;
+			waveview->property_y() = yoff;
+			waveview->property_height() = ht;
+			waveview->property_samples_per_unit() = spu;
+			waveview->property_amplitude_above_axis() = 2.0;
+			waveview->property_wave_color() = color;
 			
-			gnome_canvas_item_lower_to_bottom (wave);
-			fade[which].waves.push_back (wave);
+			waveview->lower_to_bottom();
+			fade[which].waves.push_back (waveview);
 		}
 	}
 
-	gnome_canvas_item_lower_to_bottom (toplevel);
+	toplevel->lower_to_bottom();
 }
 
 void

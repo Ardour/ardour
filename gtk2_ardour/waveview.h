@@ -111,10 +111,12 @@ private:
 public:
   WaveView(Group& parent);
 
+  static void* create_cache();
+
   Glib::PropertyProxy<void*> property_data_src();
   Glib::PropertyProxy_ReadOnly<void*> property_data_src() const;
-  Glib::PropertyProxy<void*> property_channel();
-  Glib::PropertyProxy_ReadOnly<void*> property_channel() const;
+  Glib::PropertyProxy<uint32_t> property_channel();
+  Glib::PropertyProxy_ReadOnly<uint32_t> property_channel() const;
   Glib::PropertyProxy<void*> property_length_function();
   Glib::PropertyProxy_ReadOnly<void*> property_length_function() const;
   Glib::PropertyProxy<void*> property_sourcefile_length_function();
@@ -127,8 +129,8 @@ public:
   Glib::PropertyProxy_ReadOnly<void*> property_gain_src() const;
   Glib::PropertyProxy<void*> property_cache();
   Glib::PropertyProxy_ReadOnly<void*> property_cache() const;
-  Glib::PropertyProxy<void*> property_cache_updater();
-  Glib::PropertyProxy_ReadOnly<void*> property_cache_updater() const;
+  Glib::PropertyProxy<bool> property_cache_updater();
+  Glib::PropertyProxy_ReadOnly<bool> property_cache_updater() const;
   Glib::PropertyProxy<double> property_samples_per_unit();
   Glib::PropertyProxy_ReadOnly<double> property_samples_per_unit() const;
   Glib::PropertyProxy<double> property_amplitude_above_axis();
