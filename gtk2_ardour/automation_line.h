@@ -55,9 +55,9 @@ namespace Gnome {
 class ControlPoint 
 {
   public:
-        ControlPoint (AutomationLine& al, sigc::slot<bool,GdkEvent*,ControlPoint*>);
+        ControlPoint (AutomationLine& al);
 	ControlPoint (const ControlPoint&, bool dummy_arg_to_force_special_copy_constructor);
-	~ControlPoint ();
+	virtual ~ControlPoint ();
 
 	enum ShapeType {
 		Full,
@@ -84,6 +84,9 @@ class ControlPoint
 	bool can_slide;
 	bool selected;
 	
+  protected:
+	virtual bool event_handler (GdkEvent*);
+
   private:
 	double _x;
 	double _y;
@@ -94,9 +97,7 @@ class ControlPoint
 class AutomationLine : public sigc::trackable
 {
   public:
-        AutomationLine (string name, TimeAxisView&, Gnome::Canvas::Group&, ARDOUR::AutomationList&,
-			sigc::slot<bool,GdkEvent*,ControlPoint*>, sigc::slot<bool,GdkEvent*,AutomationLine*>);
-
+        AutomationLine (string name, TimeAxisView&, Gnome::Canvas::Group&, ARDOUR::AutomationList&);
 	virtual ~AutomationLine ();
 
 	void queue_reset ();
@@ -176,8 +177,6 @@ class AutomationLine : public sigc::trackable
 	Gnome::Canvas::Points  line_points; /* coordinates for canvas line */
 	vector<ControlPoint*>  control_points; /* visible control points */
 
-	sigc::slot<bool,GdkEvent*,ControlPoint*> point_slot;
-
 	struct ALPoint {
 	    double x;
 	    double y;
@@ -202,6 +201,8 @@ class AutomationLine : public sigc::trackable
 	void list_changed (ARDOUR::Change);
 
 	UndoAction get_memento();
+
+	virtual bool event_handler (GdkEvent*);
 	
   private:
 	uint32_t drags;

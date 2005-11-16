@@ -32,12 +32,9 @@
 using namespace std;
 using namespace ARDOUR;
 
-AutomationGainLine::AutomationGainLine (string name, Session& s, TimeAxisView& tv, Gnome::Canvas::Group& parent,
-					Curve& c, 
-					sigc::slot<bool,GdkEvent*,ControlPoint*> point_callback, 
-					sigc::slot<bool,GdkEvent*,AutomationLine*> line_callback)
+AutomationGainLine::AutomationGainLine (string name, Session& s, TimeAxisView& tv, Gnome::Canvas::Group& parent, Curve& c)
 
-	: AutomationLine (name, tv, parent, c, point_callback, line_callback),
+	: AutomationLine (name, tv, parent, c),
 	  session (s)
 {
 	set_verbose_cursor_uses_gain_mapping (true);

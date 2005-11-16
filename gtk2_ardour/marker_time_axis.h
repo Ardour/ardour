@@ -21,6 +21,7 @@
 #ifndef __ardour_marker_time_axis_h__
 #define __ardour_marker_time_axis_h__
 
+#include <string>
 #include <gtkmm.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 
@@ -28,7 +29,7 @@
 #include "route_ui.h"
 #include "enums.h"
 #include "time_axis_view.h"
-#include <string>
+#include "canvas.h"
 #include "visual_time_axis.h"
 
 namespace ARDOUR {
@@ -63,7 +64,7 @@ class MarkerTimeAxis : public VisualTimeAxis
 		 * @param name the name/id of this time axis
 		 * @param tav the associated track view that this MarkerTimeAxis is marking up
 		 */
-		MarkerTimeAxis(PublicEditor& ed, ARDOUR::Session& sess, Gtk::Widget* canvas, std::string name, TimeAxisView* tav) ;
+		MarkerTimeAxis(PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas, std::string name, TimeAxisView* tav) ;
 		
 		/**
 		 * Destructor

@@ -22,14 +22,13 @@
 #define __ardour_visual_time_axis_h__
 
 #include <gtkmm.h>
-#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/selector.h>
 
 #include "ardour_dialog.h"
 #include "route_ui.h"
 #include "enums.h"
 #include "time_axis_view.h"
-
+#include "canvas.h"
 
 namespace ARDOUR
 {
@@ -145,7 +144,7 @@ class VisualTimeAxis : public TimeAxisView
 		 * @param sess the current session
 		 * @param canvas the parent canvas object
 		 */
-		VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Session& sess, Gtk::Widget* canvas) ;
+		VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
 		
 		
 		//---------------------------------------------------------------------------------------//

@@ -437,7 +437,7 @@ class Editor : public PublicEditor
 	void set_selected_track_from_click (bool add = false, bool with_undo = true, bool no_remove=false);
 	void set_selected_regionview_from_click (bool add = false, bool no_track_remove=false);
 	void set_selected_regionview_from_region_list (ARDOUR::Region& region, bool add = false);
-	gint set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, ARDOUR::Region*);
+	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, ARDOUR::Region*);
 	void collect_new_region_view (AudioRegionView *);
 
 	Gtk::Menu track_context_menu;
@@ -1184,15 +1184,15 @@ class Editor : public PublicEditor
 
 	/* non-public event handlers */
 
-	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_edit_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_playhead_cursor_event (GdkEvent* event);
+	bool canvas_edit_cursor_event (GdkEvent* event);
 	bool track_canvas_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	bool track_canvas_button_press_event (GdkEventButton *);
 	bool track_canvas_button_release_event (GdkEventButton *);
 	
-	void track_canvas_allocate (GtkAllocation* alloc);
-	void time_canvas_allocate (GtkAllocation* alloc);
+	void track_canvas_allocate (Gtk::Allocation alloc);
+	void time_canvas_allocate (Gtk::Allocation alloc);
 
 	void set_edit_cursor (GdkEvent* event);
 	void set_playhead_cursor (GdkEvent* event);
@@ -1215,7 +1215,7 @@ class Editor : public PublicEditor
 	void fake_handle_new_duration ();
 	void handle_new_duration ();
 	void initialize_canvas ();
-	void reset_scrolling_region (GtkAllocation* alloc = 0);
+	void reset_scrolling_region (Gtk::Allocation* alloc = 0);
 	void scroll_canvas ();
 
         /* sub-event loop handling */
@@ -1347,25 +1347,25 @@ class Editor : public PublicEditor
 	Gtk::Label               edit_mode_label;
 	Gtk::VBox                edit_mode_box;
 
-	gint edit_mode_selection_done (GdkEventAny*);
+	void edit_mode_selection_done ();
 
 	Gtk::ComboBoxText snap_type_selector;
 	Gtk::Label               snap_type_label;
 	Gtk::VBox                snap_type_box;
 
-	gint snap_type_selection_done (GdkEventAny*);
+	void snap_type_selection_done ();
 
 	Gtk::ComboBoxText               snap_mode_selector;
 	Gtk::Label               snap_mode_label;
 	Gtk::VBox                snap_mode_box;
 
-	gint snap_mode_selection_done (GdkEventAny*);
-
+	void snap_mode_selection_done ();
+	
 	Gtk::ComboBoxText zoom_focus_selector;
 	Gtk::Label               zoom_focus_label;
 	Gtk::VBox                zoom_focus_box;
 	
-	gint zoom_focus_selection_done (GdkEventAny*);
+	void zoom_focus_selection_done ();
 
 	Gtk::Label          zoom_indicator_label;
 	Gtk::HBox           zoom_indicator_box;
@@ -1673,7 +1673,7 @@ class Editor : public PublicEditor
 	/* edit menu */
 
 	Gtk::Menu* edit_menu;
-	void edit_menu_map_handler ();
+	bool edit_menu_map_handler (GdkEventAny*);
 
 	jack_nframes_t event_frame (GdkEvent*, double* px = 0, double* py = 0);
 

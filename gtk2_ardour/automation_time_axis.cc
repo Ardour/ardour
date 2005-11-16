@@ -4,13 +4,13 @@
 #include "automation_time_axis.h"
 #include "automation_line.h"
 #include "public_editor.h"
-#include "canvas-simplerect.h"
-#include "canvas-waveview.h"
+#include "simplerect.h"
 #include "selection.h"
 #include "ghostregion.h"
 #include "rgb_macros.h"
 #include "automation_selectable.h"
 #include "point_selection.h"
+#include "canvas_impl.h"
 
 #include "i18n.h"
 
@@ -34,10 +34,12 @@ static const gchar * small_x_xpm[] = {
 "           ",
 "           "};
 
-AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& rent, Widget* p, std::string nom, std::string state_name, std::string nomparent)
+AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& rent, 
+						ArdourCanvas::Canvas& canvas, std::string nom, 
+						std::string state_name, std::string nomparent)
 
 	: AxisView (s), 
-	  TimeAxisView (s, e, &rent, p),
+	  TimeAxisView (s, e, &rent, canvas),
 	  route (r),
 	  _name (nom),
 	  _state_name (state_name),
@@ -63,7 +65,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 	//			 "outline_what", (guint32) (0x1|0x2|0x8),
 	//			 "fill_color_rgba", color_map[cAutomationTrackFill],
 	//			 NULL);
-	base_rect = new Gnome::Canvas::SimpleRect(*canvas_display);
+	base_rect = new SimpleRect(*canvas_display);
 	base_rect->set_property ("x1", 0.0);
 	base_rect->set_property ("y1", 0.0);
 	base_rect->set_property ("x2", 1000000.0);

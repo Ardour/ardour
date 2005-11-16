@@ -24,7 +24,6 @@
 #include <ardour/ardour.h>
 #include <gtkmm.h>
 
-#include "canvas.h"
 #include "automation_line.h"
 
 namespace ARDOUR {
@@ -37,11 +36,8 @@ class TimeAxisView;
 class RedirectAutomationLine : public AutomationLine
 {
   public:
-  RedirectAutomationLine (string name, ARDOUR::Redirect&, uint32_t port, ARDOUR::Session&, TimeAxisView&, 
-			  ArdourCanvas::Group& parent,
-			  ARDOUR::AutomationList&, 
-			  sigc::slot<bool,GdkEvent*,ControlPoint*> point_handler,
-			  sigc::slot<bool,GdkEvent*,AutomationLine*> line_handler);
+	RedirectAutomationLine (string name, ARDOUR::Redirect&, uint32_t port, ARDOUR::Session&, TimeAxisView&, 
+				ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
 	
 	uint32_t port() const { return _port; }
 	ARDOUR::Redirect& redirect() const { return _redirect; }

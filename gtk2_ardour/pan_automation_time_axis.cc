@@ -26,16 +26,17 @@
 
 #include "pan_automation_time_axis.h"
 #include "automation_line.h"
+#include "canvas_impl.h"
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
 
-PanAutomationTimeAxisView::PanAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, Widget* p, std::string n)
+PanAutomationTimeAxisView::PanAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, Canvas& canvas, std::string n)
 
 	: AxisView (s),
-	  AutomationTimeAxisView (s, r, e, parent, p, n, X_("pan"), "")
+	  AutomationTimeAxisView (s, r, e, parent, canvas, n, X_("pan"), "")
 {
 }
 

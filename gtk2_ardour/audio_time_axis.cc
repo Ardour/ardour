@@ -100,7 +100,7 @@ static const gchar * small_x_xpm[] = {
 "           ",
 "           "};
 
-AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt, CanvasAA& canvas)
+AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt, Canvas& canvas)
 	: AxisView(sess),
 	  RouteUI(rt, sess, _("m"), _("s"), _("r")), // mute, solo, and record
 	  TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas),
@@ -1202,20 +1202,15 @@ AudioTimeAxisView::add_gain_automation_child ()
 						     _route,
 						     editor,
 						     *this,
-						     *(parent_canvas.root()),
+						     parent_canvas,
 						     _("gain"),
 						     _route.gain_automation_curve());
 	
-
-#if 0
 	line = new AutomationGainLine ("automation gain",
 				       _session,
 				       *gain_track,
 				       *gain_track->canvas_display,
-				       _route.gain_automation_curve(),
-				       mem_fun (editor, &PublicEditor::canvas_control_point_event),
-				       mem_fun (editor, &PublicEditor::canvas_line_event));
-#endif
+				       _route.gain_automation_curve());
 
 	line->set_line_color (color_map[cAutomationLine]);
 	
@@ -1248,7 +1243,7 @@ AudioTimeAxisView::add_pan_automation_child ()
 {
 	XMLProperty* prop;
 
-	pan_track = new PanAutomationTimeAxisView (_session, _route, editor, *this, *(parent_canvas.root()), _("pan"));
+	pan_track = new PanAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, _("pan"));
 
 	update_pans ();
 	
@@ -1294,9 +1289,7 @@ AudioTimeAxisView::update_pans ()
 
 		line = new AutomationPanLine ("automation pan", _session, *pan_track,
 					      *pan_track->canvas_display, 
-					      (*p)->automation(),
-					      mem_fun (editor, &PublicEditor::canvas_control_point_event),
-					      mem_fun (editor, &PublicEditor::canvas_line_event));
+					      (*p)->automation());
 
 		if (p == _route.panner().begin()) {
 			/* first line is a nice orange */
@@ -1472,13 +1465,11 @@ AudioTimeAxisView::add_redirect_automation_curve (Redirect *redirect, uint32_t w
 	char state_name[256];
 	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (redirect->name()).c_str(), what);
 
-	ran->view = new RedirectAutomationTimeAxisView (_session, _route, editor, *this, (*parent_canvas.root()), name, what, *redirect, state_name);
+	ran->view = new RedirectAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, name, what, *redirect, state_name);
 
 	ral = new RedirectAutomationLine (name, 
 					  *redirect, what, _session, *ran->view,
-					  *ran->view->canvas_display, redirect->automation_list (what), 
-					  mem_fun (editor, &PublicEditor::canvas_control_point_event),
-					  mem_fun (editor, &PublicEditor::canvas_line_event));
+					  *ran->view->canvas_display, redirect->automation_list (what));
 	
 	ral->set_line_color (color_map[cRedirectAutomationLine]);
 	ral->queue_reset ();

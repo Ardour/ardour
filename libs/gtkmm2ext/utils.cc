@@ -44,11 +44,11 @@ Gtkmm2ext::init ()
 }
 
 void
-Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, vector<string>& strings)
+Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, const vector<string>& strings)
 {
 	cr.clear ();
 
-	for (vector<string>::iterator i = strings.begin(); i != strings.end(); ++i) {
+	for (vector<string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
 		cr.append_text (*i);
 	}
 }

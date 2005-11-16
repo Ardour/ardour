@@ -1,6 +1,8 @@
 #ifndef __ardour_gtk_canvas_impl_h__
 #define __ardour_gtk_canvas_impl_h__
 
+#include "canvas.h"
+
 #include <libgnomecanvasmm/canvas.h>
 #include <libgnomecanvasmm/polygon.h>
 #include <libgnomecanvasmm/text.h>

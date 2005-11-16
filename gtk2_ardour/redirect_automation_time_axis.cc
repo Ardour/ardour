@@ -24,17 +24,18 @@
 
 #include "redirect_automation_time_axis.h"
 #include "automation_line.h"
+#include "canvas_impl.h"
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
 
-RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, ArdourCanvas::Group& gp, std::string n,
+RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, Canvas& canvas, std::string n,
 								uint32_t prt, Redirect& rd, string state_name)
 
 	: AxisView (s),
-	  AutomationTimeAxisView (s, r, e, parent, gp, n, state_name, rd.name()),
+	  AutomationTimeAxisView (s, r, e, parent, canvas, n, state_name, rd.name()),
 	  redirect (rd),
 	  port (prt)
 	

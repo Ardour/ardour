@@ -428,7 +428,7 @@ OptionEditor::setup_path_options()
 	vector<string> nfstrings = internationalize (native_format_strings);
 
 	set_popdown_strings (native_format_combo, nfstrings);
-	native_format_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::native_format_chosen));
+	native_format_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::native_format_chosen));
 
 	fixup_combo_size (native_format_combo, nfstrings);
 
@@ -489,7 +489,7 @@ OptionEditor::setup_fade_options ()
 	dumb.push_back (lmode_strings[Session::AddHigher]);
 	set_popdown_strings (layer_mode_combo, dumb);
 
-	layer_mode_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::layer_mode_chosen));
+	layer_mode_combo.signal_changed ().connect (mem_fun(*this, &OptionEditor::layer_mode_chosen));
 
 	fixup_combo_size (layer_mode_combo, layer_mode_strings);
 
@@ -507,7 +507,7 @@ OptionEditor::setup_fade_options ()
 	dumb.push_back (xfade_model_strings[ShortCrossfade]);
 	set_popdown_strings (xfade_model_combo, dumb);
 
-	xfade_model_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::xfade_model_chosen));
+	xfade_model_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::xfade_model_chosen));
 
 	fixup_combo_size (xfade_model_combo, xfade_model_strings);
 
@@ -551,11 +551,11 @@ OptionEditor::short_xfade_adjustment_changed ()
 	}
 }
 
-gint
-OptionEditor::layer_mode_chosen (GdkEventAny* ev)
+void
+OptionEditor::layer_mode_chosen ()
 {
 	if (!session) {
-		return FALSE;
+		return;
 	}
 
 	string which = layer_mode_combo.get_active_text ();
@@ -567,14 +567,13 @@ OptionEditor::layer_mode_chosen (GdkEventAny* ev)
 	} else if (which == layer_mode_strings[Session::AddHigher]) {
 		session->set_layer_model (Session::AddHigher);
 	}
-	return FALSE;
 }
 
-gint
-OptionEditor::xfade_model_chosen (GdkEventAny* ev)
+void
+OptionEditor::xfade_model_chosen ()
 {
 	if (!session) {
-		return FALSE;
+		return;
 	}
 
 	string which = xfade_model_combo.get_active_text ();
@@ -584,7 +583,6 @@ OptionEditor::xfade_model_chosen (GdkEventAny* ev)
 	} else if (which == xfade_model_strings[ShortCrossfade]) {
 		session->set_xfade_model (ShortCrossfade);
 	}
-	return FALSE;
 }
 
 void
@@ -705,7 +703,7 @@ OptionEditor::setup_display_options ()
 	dumb.push_back (_("Medium"));
 	dumb.push_back (_("Long"));
 	set_popdown_strings (meter_hold_combo, dumb);
-	meter_hold_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::meter_hold_chosen));
+	meter_hold_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::meter_hold_chosen));
 	hbox = manage (new HBox);
 	hbox->set_border_width (8);
 	hbox->set_spacing (8);
@@ -724,7 +722,7 @@ OptionEditor::setup_display_options ()
 	dumb.push_back (_("Faster"));
 	dumb.push_back (_("Fastest"));
 	set_popdown_strings (meter_falloff_combo, dumb);
-	meter_falloff_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::meter_falloff_chosen));
+	meter_falloff_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::meter_falloff_chosen));
 	hbox = manage (new HBox);
 	hbox->set_border_width (8);
 	hbox->set_spacing (8);
@@ -747,8 +745,8 @@ OptionEditor::setup_display_options ()
 	follow_playhead_button.set_active (editor.follow_playhead());
 }
 
-gint
-OptionEditor::meter_hold_chosen (GdkEventAny* ev)
+void
+OptionEditor::meter_hold_chosen ()
 {
 	if (session) {
 		string str = meter_hold_combo.get_active_text();
@@ -763,12 +761,10 @@ OptionEditor::meter_hold_chosen (GdkEventAny* ev)
 			session->set_meter_hold (200);
 		}
 	}
-
-	return TRUE;
 }
 
-gint
-OptionEditor::meter_falloff_chosen (GdkEventAny* ev)
+void
+OptionEditor::meter_falloff_chosen ()
 {
 	if (session) {
 		string str = meter_falloff_combo.get_active_text();
@@ -789,8 +785,6 @@ OptionEditor::meter_falloff_chosen (GdkEventAny* ev)
 			session->set_meter_falloff (2.5f);
 		}
 	}
-
-	return TRUE;
 }
 
 void
@@ -834,7 +828,7 @@ OptionEditor::setup_sync_options ()
 	positional_sync_strings = internationalize (psync_strings);
 
 	slave_type_combo.set_name ("OptionsEntry");
-	slave_type_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::slave_type_chosen));
+	slave_type_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::slave_type_chosen));
 
 	dumb.clear ();
 	dumb.push_back (X_("24 FPS"));
@@ -843,7 +837,7 @@ OptionEditor::setup_sync_options ()
 	dumb.push_back (X_("30 FPS non-drop"));
 	
 	set_popdown_strings (smpte_fps_combo, dumb);
-	smpte_fps_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::smpte_fps_chosen));
+	smpte_fps_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::smpte_fps_chosen));
 	
 	smpte_offset_clock.set_mode (AudioClock::SMPTE);
 	smpte_offset_clock.ValueChanged.connect (mem_fun(*this, &OptionEditor::smpte_offset_chosen));
@@ -911,8 +905,8 @@ OptionEditor::smpte_offset_negative_clicked ()
 	}
 }
 
-gint
-OptionEditor::smpte_fps_chosen (GdkEventAny* ev)
+void
+OptionEditor::smpte_fps_chosen ()
 {
 	if (session) {
 		string str = smpte_fps_combo.get_active_text();
@@ -927,8 +921,6 @@ OptionEditor::smpte_fps_chosen (GdkEventAny* ev)
 			session->set_smpte_type (30.0, false);
 		}
 	}
-	
-	return TRUE;
 }
 
 void
@@ -1466,13 +1458,13 @@ OptionEditor::session_control_changed (Session::ControlType t)
 	}
 }
 
-gint
-OptionEditor::native_format_chosen (GdkEventAny *ignored)
+void
+OptionEditor::native_format_chosen ()
 {
 	string which;
 
 	if (session == 0) {
-		return FALSE;
+		return;
 	}
 
 	bool use_bwf = (native_format_combo.get_active_text() == native_format_strings[0]);
@@ -1481,17 +1473,15 @@ OptionEditor::native_format_chosen (GdkEventAny *ignored)
 		Config->set_native_format_is_bwf (use_bwf);
 		session->reset_native_file_format ();
 	}
-
-	return TRUE;
 }
 
-gint
-OptionEditor::slave_type_chosen (GdkEventAny *ignored)
+void
+OptionEditor::slave_type_chosen ()
 {
 	string which;
 
 	if (session == 0) {
-		return FALSE;
+		return;
 	}
 
 	which = slave_type_combo.get_active_text();
@@ -1503,7 +1493,6 @@ OptionEditor::slave_type_chosen (GdkEventAny *ignored)
 	} else if (which == positional_sync_strings[Session::JACK]) {
 		session->request_slave_source (Session::JACK);
 	} 
-	return FALSE;
 }
 
 void
@@ -1833,7 +1822,7 @@ OptionEditor::setup_keyboard_options ()
 	}
 
 	set_popdown_strings (edit_modifier_combo, dumb);
-	edit_modifier_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::edit_modifier_chosen));
+	edit_modifier_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::edit_modifier_chosen));
 
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
@@ -1860,7 +1849,7 @@ OptionEditor::setup_keyboard_options ()
 	edit_button_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::edit_button_changed));
 
 	set_popdown_strings (delete_modifier_combo, dumb);
-	delete_modifier_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::delete_modifier_chosen));
+	delete_modifier_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::delete_modifier_chosen));
 
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == Keyboard::delete_modifier ()) {
@@ -1887,7 +1876,7 @@ OptionEditor::setup_keyboard_options ()
 	delete_button_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::delete_button_changed));
 
 	set_popdown_strings (snap_modifier_combo, dumb);
-	snap_modifier_combo.signal_unmap_event().connect (mem_fun(*this, &OptionEditor::snap_modifier_chosen));
+	snap_modifier_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::snap_modifier_chosen));
 	
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {
@@ -1904,8 +1893,8 @@ OptionEditor::setup_keyboard_options ()
 	keyboard_mouse_table.attach (snap_modifier_combo, 1, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
 }
 
-gint
-OptionEditor::edit_modifier_chosen (GdkEventAny *ev)
+void
+OptionEditor::edit_modifier_chosen ()
 {
 	string txt;
 	
@@ -1917,11 +1906,10 @@ OptionEditor::edit_modifier_chosen (GdkEventAny *ev)
 			break;
 		}
 	}
-	return TRUE;
 }
 
-gint
-OptionEditor::delete_modifier_chosen (GdkEventAny *ev)
+void
+OptionEditor::delete_modifier_chosen ()
 {
 	string txt;
 	
@@ -1933,11 +1921,10 @@ OptionEditor::delete_modifier_chosen (GdkEventAny *ev)
 			break;
 		}
 	}
-	return TRUE;
 }
 
-gint
-OptionEditor::snap_modifier_chosen (GdkEventAny *ev)
+void
+OptionEditor::snap_modifier_chosen ()
 {
 	string txt;
 	
@@ -1949,7 +1936,6 @@ OptionEditor::snap_modifier_chosen (GdkEventAny *ev)
 			break;
 		}
 	}
-	return TRUE;
 }
 
 void

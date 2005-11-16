@@ -21,13 +21,14 @@
 #ifndef __ardour_imageframe_time_axis_h__
 #define __ardour_imageframe_time_axis_h__
 
+#include <list>
 #include <gtkmm.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 
 #include "ardour_dialog.h"
 #include "enums.h"
 #include "time_axis_view.h"
-#include <list>
+#include "canvas.h"
 #include "visual_time_axis.h"
 
 namespace ARDOUR
@@ -59,7 +60,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * @param sess the current session
 		 * @param canvas the parent canvas item
 		 */
-		ImageFrameTimeAxis(std::string track_id, PublicEditor& ed, ARDOUR::Session& sess, Gtk::Widget *canvas) ;
+		ImageFrameTimeAxis(std::string track_id, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
 		
 		/**
 		 * Destructor

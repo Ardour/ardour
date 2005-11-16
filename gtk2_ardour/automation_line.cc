@@ -51,7 +51,7 @@ using namespace ARDOUR;
 using namespace Editing;
 using namespace Gnome; // for Canvas
 
-ControlPoint::ControlPoint (AutomationLine& al, sigc::slot<bool,GdkEvent*,ControlPoint*> handler)
+ControlPoint::ControlPoint (AutomationLine& al)
 	: line (al)
 {
 	model = al.the_list().end();
@@ -70,7 +70,7 @@ ControlPoint::ControlPoint (AutomationLine& al, sigc::slot<bool,GdkEvent*,Contro
 	item->property_outline_color_rgba() = color_map[cControlPointOutline];
 	item->property_outline_pixels() = 1;
 	item->set_data ("control_point", this);
-	item->signal_event().connect (bind (handler, this));
+	item->signal_event().connect (mem_fun (this, &ControlPoint::event_handler));
 
 	hide ();
 	set_visible (false);
@@ -106,6 +106,12 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool dummy_arg_to_force_s
 ControlPoint::~ControlPoint ()
 {
 	gtk_object_destroy (GTK_OBJECT(item));
+}
+
+bool
+ControlPoint::event_handler (GdkEvent* event)
+{
+	return PublicEditor::instance().canvas_control_point_event (event, item, this);
 }
 
 void
@@ -211,10 +217,7 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 
 /*****/
 
-AutomationLine::AutomationLine (string name, TimeAxisView& tv, Gnome::Canvas::Group& parent, AutomationList& al,
-				slot<bool,GdkEvent*,ControlPoint*> point_handler,
-				slot<bool,GdkEvent*,AutomationLine*> line_handler)
-
+AutomationLine::AutomationLine (string name, TimeAxisView& tv, Gnome::Canvas::Group& parent, AutomationList& al)
 	: trackview (tv),
 	  _name (name),
 	  alist (al),
@@ -225,7 +228,6 @@ AutomationLine::AutomationLine (string name, TimeAxisView& tv, Gnome::Canvas::Gr
 	_vc_uses_gain_mapping = false;
 	no_draw = false;
 	_visible = true;
-	point_slot = point_handler;
 	terminal_points_can_slide = true;
 	_height = 0;
 
@@ -236,8 +238,7 @@ AutomationLine::AutomationLine (string name, TimeAxisView& tv, Gnome::Canvas::Gr
 	line = new Gnome::Canvas::Line (*group);
 	line->set_property ("width_pixels", (guint)1);
 
-	line->set_data ("line", this);
-	line->signal_event().connect (bind (line_handler, this));
+	line->signal_event().connect (mem_fun (*this, &AutomationLine::event_handler));
 
 	alist.StateChanged.connect (mem_fun(*this, &AutomationLine::list_changed));
 }
@@ -247,6 +248,12 @@ AutomationLine::~AutomationLine ()
 	vector_delete (&control_points);
 
 	gtk_object_destroy (GTK_OBJECT(group));
+}
+
+bool
+AutomationLine::event_handler (GdkEvent* event)
+{
+	return PublicEditor::instance().canvas_line_event (event, line, this);
 }
 
 void
@@ -736,7 +743,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		if (view_index >= control_points.size()) {
 			/* make sure we have enough control points */
 
-			ControlPoint* ncp = new ControlPoint (*this, point_slot);
+			ControlPoint* ncp = new ControlPoint (*this);
 
 			if (_height > (guint32) TimeAxisView::Larger) {
 				ncp->set_size (8.0);

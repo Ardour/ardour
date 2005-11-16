@@ -6,6 +6,7 @@
 #include <string>
 #include <ardour/types.h>
 
+#include "canvas.h"
 #include "time_axis_view.h"
 #include "simplerect.h"
 
@@ -16,10 +17,6 @@ using std::string;
 namespace ARDOUR {
 	class Session;
 	class Route;
-}
-
-namespace Gtk {
-	class Widget;
 }
 
 class PublicEditor;
@@ -37,7 +34,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 				ARDOUR::Route&,
 				PublicEditor&,
 				TimeAxisView& parent,
-				Gtk::Widget* parent,
+				ArdourCanvas::Canvas& canvas,
 				std::string name, /* translatable */
 				std::string state_name, /* not translatable */
 				std::string plug_name = "");
@@ -78,7 +75,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
   protected:
 	ARDOUR::Route& route;
-	Gnome::Canvas::SimpleRect* base_rect;
+	ArdourCanvas::SimpleRect* base_rect;
 	string _name;
 	string _state_name;
 	bool    in_destructor;

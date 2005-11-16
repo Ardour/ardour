@@ -83,7 +83,7 @@ class OptionEditor : public ArdourDialog
 	void setup_path_options();
 	void add_session_paths ();
 	void remove_session_paths ();
-	gint native_format_chosen (GdkEventAny *);
+	void native_format_chosen ();
 	void raid_path_changed ();
 
 	/* fades */
@@ -102,8 +102,8 @@ class OptionEditor : public ArdourDialog
 
 	void auto_xfade_clicked ();
 	void xfade_active_clicked ();
-	gint layer_mode_chosen (GdkEventAny*);
-	gint xfade_model_chosen (GdkEventAny*);
+	void layer_mode_chosen ();
+	void xfade_model_chosen ();
 	void setup_fade_options();
 	void short_xfade_adjustment_changed ();
 
@@ -135,8 +135,8 @@ class OptionEditor : public ArdourDialog
 	void show_measures_clicked ();
 	void strip_width_clicked ();
 	void follow_playhead_clicked ();
-	gint meter_hold_chosen (GdkEventAny *);
-	gint meter_falloff_chosen (GdkEventAny *);
+	void meter_hold_chosen ();
+	void meter_falloff_chosen ();
 	
 	void display_control_changed (Editing::DisplayControl);
 
@@ -155,10 +155,10 @@ class OptionEditor : public ArdourDialog
 	void setup_sync_options ();
 	gint send_mtc_toggled (GdkEventButton*, Gtk::CheckButton*);
 
-	gint slave_type_chosen (GdkEventAny*);
+	void slave_type_chosen ();
 	void jack_time_master_clicked ();
 	void jack_transport_master_clicked ();
-	gint smpte_fps_chosen (GdkEventAny*);
+	void smpte_fps_chosen ();
 	void smpte_offset_chosen ();
 	void smpte_offset_negative_clicked ();
 
@@ -247,9 +247,9 @@ class OptionEditor : public ArdourDialog
 	Gtk::SpinButton edit_button_spin;
 
 	void setup_keyboard_options ();
-	gint delete_modifier_chosen (GdkEventAny*);
-	gint edit_modifier_chosen (GdkEventAny*);
-	gint snap_modifier_chosen (GdkEventAny*);
+	void delete_modifier_chosen ();
+	void edit_modifier_chosen ();
+	void snap_modifier_chosen ();
 	void edit_button_changed ();
 	void delete_button_changed ();
 

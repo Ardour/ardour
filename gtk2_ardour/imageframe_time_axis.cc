@@ -31,7 +31,7 @@
 
 #include "public_editor.h"
 #include "imageframe_time_axis.h"
-#include "canvas-simplerect.h"
+#include "simplerect.h"
 #include "enums.h"
 #include "imageframe_time_axis_view.h"
 #include "imageframe_time_axis_group.h"
@@ -40,6 +40,7 @@
 #include "marker_time_axis.h"
 #include "marker_view.h"
 #include "gui_thread.h"
+#include "canvas_impl.h"
 
 #include "i18n.h"
 
@@ -55,7 +56,7 @@ using namespace Gtk ;
  * @param sess the current session
  * @param canvas the parent canvas item
  */
-ImageFrameTimeAxis::ImageFrameTimeAxis(std::string track_id, PublicEditor& ed, ARDOUR::Session& sess, Widget *canvas)
+ImageFrameTimeAxis::ImageFrameTimeAxis(std::string track_id, PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas)
 	: AxisView(sess),
 	  VisualTimeAxis(track_id, ed, sess, canvas)
 {

@@ -17,7 +17,7 @@ class RedirectAutomationTimeAxisView : public AutomationTimeAxisView
 					ARDOUR::Route&,
 					PublicEditor&,
 					TimeAxisView& parent,
-					ArdourCanvas::Group& parent,
+					ArdourCanvas::Canvas& canvas,
 					std::string name,
 					uint32_t port,
 					ARDOUR::Redirect& rd,

@@ -80,8 +80,9 @@ CrossfadeView::CrossfadeView (Gnome::Canvas::Group *parent,
 	vestigial_frame->hide();
 	show_vestigial = false;
 
-	group->signal_event.connect (bind (mem_fun (editor, &Public::canvas_crossfade_view_event), group, this));
-
+	// GTK2FIX
+	// group->signal_event.connect (bind (mem_fun (tv.editor, &PublicEditor::canvas_crossfade_view_event), group, this));
+	
 	crossfade_changed (Change (~0));
 
 	crossfade.StateChanged.connect (mem_fun(*this, &CrossfadeView::crossfade_changed));

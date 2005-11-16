@@ -69,7 +69,7 @@ class AutomationTimeAxisView;
 class AudioTimeAxisView : public RouteUI, public TimeAxisView
 {
   public:
- 	AudioTimeAxisView (PublicEditor&, ARDOUR::Session&, ARDOUR::Route&, ArdourCanvas::CanvasAA& canvas);
+ 	AudioTimeAxisView (PublicEditor&, ARDOUR::Session&, ARDOUR::Route&, ArdourCanvas::Canvas& canvas);
  	virtual ~AudioTimeAxisView ();
 
 	void show_selection (TimeSelection&);

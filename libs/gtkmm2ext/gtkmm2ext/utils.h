@@ -35,7 +35,7 @@ namespace Gtkmm2ext {
 						     gint hpadding,
 						     gint vpadding);
 
-	void set_popdown_strings (Gtk::ComboBoxText&, std::vector<std::string>&);
+	void set_popdown_strings (Gtk::ComboBoxText&, const std::vector<std::string>&);
 	
 	template<class T> void deferred_delete (void *ptr) {
 		delete static_cast<T *> (ptr);

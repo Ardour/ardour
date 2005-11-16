@@ -229,7 +229,7 @@ class TimeAxisView : public virtual AxisView
          * Do anything that needs to be done to dynamically reset
 	 * the LHS control menu.
 	 */
-	virtual gint handle_display_menu_map_event (GdkEventAny *ev) { return FALSE; }
+	virtual bool handle_display_menu_map_event (GdkEventAny *ev) { return false; }
 
 	/**
 	 * Build the standard LHS control size menu for the default TrackHeight options.

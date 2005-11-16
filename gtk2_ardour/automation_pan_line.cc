@@ -22,6 +22,7 @@
 
 #include <ardour/curve.h>
 
+#include "canvas_impl.h"
 #include "public_editor.h"
 #include "automation_pan_line.h"
 #include "utils.h"
@@ -31,12 +32,9 @@
 
 using namespace ARDOUR;
 
-AutomationPanLine::AutomationPanLine (string name, Session& s, TimeAxisView& tv, Gnome::Canvas::Group& parent,
-				      Curve& c, 
-				      sigc::slot<bool,GdkEvent*,ControlPoint*> point_handler,
-				      sigc::slot<bool,GdkEvent*,AutomationLine*> line_handler)
+AutomationPanLine::AutomationPanLine (string name, Session& s, TimeAxisView& tv, Gnome::Canvas::Group& parent, Curve& c)
 
-	: AutomationLine (name, tv, parent, c, point_handler, line_handler),
+	: AutomationLine (name, tv, parent, c),
 	  session (s)
 {
 }

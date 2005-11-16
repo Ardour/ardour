@@ -81,7 +81,7 @@ class PlugUIBase : public sigc::trackable
 	Gtk::Button save_button;
 	Gtk::ToggleButton bypass_button;
 
-	gint setting_selected(GdkEventAny* ignored);
+	void setting_selected();
 	void save_plugin_setting (void);
 	void bypass_toggled();
 };
@@ -186,7 +186,7 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	void parameter_changed (uint32_t, float, ControlUI* cui);
 	void update_control_display (ControlUI* cui);
 	void control_port_toggled (ControlUI* cui);
-	bool control_combo_changed (GdkEventAny* ignored, ControlUI* cui);
+	void control_combo_changed (GdkEventAny* ignored, ControlUI* cui);
 	gint entry_focus_event (GdkEventFocus* ev);
 
 	void redirect_active_changed (ARDOUR::Redirect*, void*);

@@ -16,7 +16,7 @@ class GainAutomationTimeAxisView : public AutomationTimeAxisView
 				    ARDOUR::Route&,
 				    PublicEditor&,
 				    TimeAxisView& parent_axis,
-				    ArdourCanvas::Group& parent,
+				    ArdourCanvas::Canvas& canvas,
 				    std::string name,
 				    ARDOUR::Curve&);
 	

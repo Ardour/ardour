@@ -52,7 +52,7 @@ class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget 
 
 	typedef list<TimeAxisView *> TrackViewList;
 
-	static PublicEditor* instance() { return _instance; }
+	static PublicEditor& instance() { return *_instance; }
 
 	virtual void             connect_to_session (ARDOUR::Session*) = 0;
 	virtual ARDOUR::Session* current_session() const = 0;

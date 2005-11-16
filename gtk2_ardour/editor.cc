@@ -90,20 +90,6 @@ const double Editor::timebar_height = 15.0;
 
 #include "editor_xpms"
 
-static const gchar *route_list_titles[] = {
-	N_("Tracks"),
-	0
-};
-
-static const gchar *edit_group_list_titles[] = {
-	"foo", "bar", 0
-};
-
-static const gchar *named_selection_display_titles[] = {
-	N_("Chunks"), 
-	0
-};
-
 static const int32_t slide_index = 0;
 static const int32_t splice_index = 1;
 
@@ -525,8 +511,11 @@ Editor::Editor (AudioEngine& eng)
 	route_list.set_headers_visible (true);
 	route_list.set_headers_clickable (true);
 
-	route_display_model->set_sort_func (0, mem_fun (*this, &Editor::route_list_compare_func));
-	route_display_model->signal_rows_reordered().connect (mem_fun (*this, &Editor::queue_route_list_reordered));
+	// GTK2FIX
+	// route_list.signal_rows_reordered().connect (mem_fun (*this, &Editor::queue_route_list_reordered));
+
+	// GTK2FIX
+	// route_display_model->set_sort_func (0, mem_fun (*this, &Editor::route_list_compare_func));
 
 	// GTK2FIX
 	//route_list.set_shadow_type (Gtk::SHADOW_IN);
@@ -616,15 +605,16 @@ Editor::Editor (AudioEngine& eng)
 	region_list_scroller.add (region_list_display);
 	region_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	vector<Gtk::TargetEntry> region_list_target_table;
+	list<Gtk::TargetEntry> region_list_target_table;
 	
 	region_list_target_table.push_back (TargetEntry ("STRING"));
 	region_list_target_table.push_back (TargetEntry ("text/plain"));
 	region_list_target_table.push_back (TargetEntry ("text/uri-list"));
 	region_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
-	region_list_display.drag_dest_set (region_list_target_table, DEST_DEFAULT_ALL, GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
-	region_list_display.signal_drag_data_received().connect (mem_fun(*this, &Editor::region_list_display_drag_data_received));
+	// GTK2FIX
+	// region_list_display.drag_dest_set (region_list_target_table, DEST_DEFAULT_ALL, GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
+	// region_list_display.signal_drag_data_received().connect (mem_fun(*this, &Editor::region_list_display_drag_data_received));
 
 	region_list_display.signal_key_press_event().connect (mem_fun(*this, &Editor::region_list_display_key_press));
 	region_list_display.signal_key_release_event().connect (mem_fun(*this, &Editor::region_list_display_key_release));
@@ -816,10 +806,9 @@ Editor::initialize_canvas ()
 
 	// GNOME_CANVAS(track_canvas)->close_enough = 2;
 
-	track_canvas.signal_event().connect (mem_fun (*this, &Editor::track_canvas_event));
+	track_canvas.signal_event().connect (bind (mem_fun (*this, &Editor::track_canvas_event), (ArdourCanvas::Item*) 0));
 	track_canvas.set_name ("EditorMainCanvas");
 	track_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
-	track_canvas.signal_event().connect (mem_fun (*this, &Editor::track_canvas_event));
 	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
 	
 	/* set up drag-n-drop */
@@ -830,8 +819,9 @@ Editor::initialize_canvas ()
 	target_table.push_back (TargetEntry ("text/uri-list"));
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
-	track_canvas.drag_dest_set (target_table, DEST_DEFAULT_ALL, GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
-	track_canvas.signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
+	// GTK2FIX
+	// track_canvas.drag_dest_set (target_table, DEST_DEFAULT_ALL, GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
+	// track_canvas.signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
 
 	/* stuff for the verbose canvas cursor */
 
@@ -944,7 +934,7 @@ Editor::initialize_canvas ()
 	zoom_rect->set_property ("outline_pixels", 1);
 	zoom_rect->hide();
 	
-	zoom_rect->signal_event().connect (mem_fun (*this, &Editor::canvas_zoom_rect_event));
+	zoom_rect->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
 	
 	// used as rubberband rect
 	rubberband_rect = new Gnome::Canvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
@@ -953,11 +943,11 @@ Editor::initialize_canvas ()
 	rubberband_rect->set_property ("outline_pixels", 1);
 	rubberband_rect->hide();
 	
-	tempo_bar->signal_event().connect (mem_fun (*this, &Editor::canvas_tempo_bar_event));
-	meter_bar->signal_event().connect (mem_fun (*this, &Editor::canvas_meter_bar_event));
-	marker_bar->signal_event().connect (mem_fun (*this, &Editor::canvas_marker_bar_event));
-	range_marker_bar->signal_event().connect (mem_fun (*this, &Editor::canvas_range_marker_bar_event));
-	transport_marker_bar->signal_event().connect (mem_fun (*this, &Editor::canvas_transport_marker_bar_event));
+	tempo_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
+	meter_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
+	marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_marker_bar_event), marker_bar));
+	range_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
+	transport_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 	
 	/* separator lines */
 
@@ -997,8 +987,8 @@ Editor::initialize_canvas ()
 	double time_width = FLT_MAX/frames_per_unit;
 	time_canvas.set_scroll_region(0.0, 0.0, time_width, time_height);
 	
-	edit_cursor = new Cursor (*this, "blue", canvas_edit_cursor_event);
-	playhead_cursor = new Cursor (*this, "red", canvas_playhead_cursor_event);
+	edit_cursor = new Cursor (*this, "blue", &Editor::canvas_edit_cursor_event);
+	playhead_cursor = new Cursor (*this, "red", &Editor::canvas_playhead_cursor_event);
 	
 	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
 }
@@ -1226,10 +1216,10 @@ Editor::on_map ()
 }
 
 void
-Editor::track_canvas_allocate (GtkAllocation *alloc)
+Editor::track_canvas_allocate (Gtk::Allocation alloc)
 {
-	canvas_width = alloc->width;
-	canvas_height = alloc->height;
+	canvas_width = alloc.get_width();
+	canvas_height = alloc.get_height();
 
 	if (session == 0 && !ARDOUR_UI::instance()->will_create_new_session_automatically()) {
 
@@ -1288,13 +1278,13 @@ Editor::track_canvas_allocate (GtkAllocation *alloc)
 	zoom_range_clock.set ((jack_nframes_t) (canvas_width * frames_per_unit));
 	edit_cursor->set_position (edit_cursor->current_frame);
 	playhead_cursor->set_position (playhead_cursor->current_frame);
-	reset_scrolling_region (alloc);
+	reset_scrolling_region (&alloc);
 	
 	Resized (); /* EMIT_SIGNAL */
 }
 
 void
-Editor::reset_scrolling_region (GtkAllocation *alloc)
+Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 {
 	guint32 last_canvas_unit;
 	double height;
@@ -1337,11 +1327,11 @@ Editor::reset_scrolling_region (GtkAllocation *alloc)
 	canvas_height = (guint32) height;
 	
 	if (alloc) {
-		canvas_alloc_height = alloc->height;
-		canvas_alloc_width = alloc->width;
+		canvas_alloc_height = alloc->get_height();
+		canvas_alloc_width = alloc->get_width();
 	} else {
-	  canvas_alloc_height = track_canvas.get_height();
-	  canvas_alloc_width = track_canvas.get_width();
+		canvas_alloc_height = track_canvas.get_height();
+		canvas_alloc_width = track_canvas.get_width();
 	}
 
 	canvas_height = max (canvas_height, canvas_alloc_height);
@@ -2964,7 +2954,7 @@ Editor::setup_toolbar ()
 	edit_mode_box.pack_start (edit_mode_label, false, false);
 	edit_mode_box.pack_start (edit_mode_selector, false, false);
 
-	edit_mode_selector.signal_unmap_event().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
+	edit_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
 
 	/* Snap Type */
 
@@ -2984,7 +2974,7 @@ Editor::setup_toolbar ()
 	snap_type_box.pack_start (snap_type_label, false, false);
 	snap_type_box.pack_start (snap_type_selector, false, false);
 
-	snap_type_selector.signal_unmap_event().connect (mem_fun(*this, &Editor::snap_type_selection_done));
+	snap_type_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_type_selection_done));
 
 	/* Snap mode, not snap type */
 
@@ -3001,7 +2991,7 @@ Editor::setup_toolbar ()
 	snap_mode_box.pack_start (snap_mode_label, false, false);
 	snap_mode_box.pack_start (snap_mode_selector, false, false);
 
-	snap_mode_selector.signal_unmap_event().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
+	snap_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
 
 	/* Zoom focus mode */
 
@@ -3020,7 +3010,7 @@ Editor::setup_toolbar ()
 	zoom_focus_box.pack_start (zoom_focus_label, false, false);
 	zoom_focus_box.pack_start (zoom_focus_selector, false, false);
 
-	zoom_focus_selector.signal_unmap_event().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
+	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 
 	/* selection/cursor clocks */
 
@@ -3090,7 +3080,7 @@ Editor::setup_toolbar ()
 	tools_tearoff->set_name ("MouseModeBase");
 
 	tools_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Gtk::Box*>(&toolbar_hbox), 
-					     tools_tearoff->tearoff_window(), 0));
+					     tools_tearoff->tearoff_window()));
 	tools_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Gtk::Box*> (&toolbar_hbox), 
 					     tools_tearoff->tearoff_window(), 0));
 
@@ -3630,7 +3620,7 @@ Editor::set_selected_regionview_from_region_list (Region& r, bool add)
 	commit_reversible_command () ;
 }
 
-gint
+bool
 Editor::set_selected_regionview_from_map_event (GdkEventAny* ev, StreamView* sv, Region* r)
 {
 	AudioRegionView* rv;
@@ -3692,8 +3682,8 @@ Editor::set_edit_menu (Menu& menu)
 	edit_menu->signal_map_event().connect (mem_fun(*this, &Editor::edit_menu_map_handler));
 }
 
-void
-Editor::edit_menu_map_handler ()
+bool
+Editor::edit_menu_map_handler (GdkEventAny* ev)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items = edit_menu->items();
@@ -3704,7 +3694,7 @@ Editor::edit_menu_map_handler ()
 	edit_items.clear ();
 
 	if (session == 0) {
-		return;
+		return false;
 	}
 
 	if (session->undo_depth() == 0) {
@@ -3774,6 +3764,8 @@ Editor::edit_menu_map_handler ()
 	if (!session->have_captured()) {
 		edit_items.back().set_sensitive (false);
 	}
+
+	return false;
 }
 
 void
@@ -3887,11 +3879,11 @@ Editor::set_verbose_canvas_cursor_text (string txt)
 	verbose_canvas_cursor->set_property("text", txt.c_str());
 }
 
-gint
-Editor::edit_mode_selection_done (GdkEventAny *ev)
+void
+Editor::edit_mode_selection_done ()
 {
 	if (session == 0) {
-		return FALSE;
+		return;
 	}
 
 	string choice = edit_mode_selector.get_active_text();
@@ -3904,15 +3896,13 @@ Editor::edit_mode_selection_done (GdkEventAny *ev)
 	}
 
 	session->set_edit_mode (mode);
-
-	return FALSE;
 }	
 
-gint
-Editor::snap_type_selection_done (GdkEventAny *ev)
+void
+Editor::snap_type_selection_done ()
 {
 	if (session == 0) {
-		return FALSE;
+		return;
 	}
 
 	string choice = snap_type_selector.get_active_text();
@@ -3961,14 +3951,14 @@ Editor::snap_type_selection_done (GdkEventAny *ev)
 	}
 	
 	set_snap_to (snaptype);
-
-	return FALSE;
 }	
 
-gint
-Editor::snap_mode_selection_done (GdkEventAny *ev)
+void
+Editor::snap_mode_selection_done ()
 {
-	if(session == 0) return FALSE;
+	if(session == 0) {
+		return;
+	}
 
 	string choice = snap_mode_selector.get_active_text();
 	SnapMode mode = SnapNormal;
@@ -3980,15 +3970,13 @@ Editor::snap_mode_selection_done (GdkEventAny *ev)
 	}
 
 	set_snap_mode (mode);
-
-	return FALSE;
 }
 
-gint
-Editor::zoom_focus_selection_done (GdkEventAny *ev)
+void
+Editor::zoom_focus_selection_done ()
 {
 	if (session == 0) {
-		return FALSE;
+		return;
 	}
 
 	string choice = zoom_focus_selector.get_active_text();
@@ -4007,8 +3995,6 @@ Editor::zoom_focus_selection_done (GdkEventAny *ev)
 	} 
 
 	set_zoom_focus (focus_type);
-
-	return FALSE;
 }	
 
 gint

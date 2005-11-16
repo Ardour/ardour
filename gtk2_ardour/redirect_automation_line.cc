@@ -35,11 +35,9 @@ using namespace ARDOUR;
 
 RedirectAutomationLine::RedirectAutomationLine (string name, Redirect& rd, uint32_t port, Session& s,
 						TimeAxisView& tv, Gnome::Canvas::Group& parent,
-						AutomationList& l,
-						sigc::slot<bool,GdkEvent*,ControlPoint*> point_handler,
-						sigc::slot<bool,GdkEvent*,AutomationLine*> line_handler),
+						AutomationList& l)
 
-	: AutomationLine (name, tv, parent, l, point_handler, line_handler),
+	: AutomationLine (name, tv, parent, l)
 	  session (s),
 	  _redirect (rd),
 	  _port (port)

@@ -23,16 +23,17 @@
 
 #include "gain_automation_time_axis.h"
 #include "automation_line.h"
+#include "canvas.h"
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
 
-GainAutomationTimeAxisView::GainAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, Widget* p, std::string n, ARDOUR::Curve& c)
+GainAutomationTimeAxisView::GainAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, Canvas& canvas, std::string n, ARDOUR::Curve& c)
 
 	: AxisView (s),
-	  AutomationTimeAxisView (s, r, e, parent, p, n, X_("gain"), ""),
+	  AutomationTimeAxisView (s, r, e, parent, canvas, n, X_("gain"), ""),
 	  curve (c)
 	
 {

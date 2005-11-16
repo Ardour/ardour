@@ -30,12 +30,12 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "imageframe_time_axis.h"
-#include "canvas-simplerect.h"
 #include "selection.h"
 #include "imageframe_time_axis_view.h"
 #include "marker_time_axis_view.h"
 #include "imageframe_view.h"
 #include "marker_time_axis.h"
+#include "canvas_impl.h"
 
 #include "i18n.h"
 
@@ -55,7 +55,7 @@ using namespace Gtk;
  * @param name the name/id of this time axis
  * @param tav the associated track view that this MarkerTimeAxis is marking up
  */
-MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Widget *canvas, std::string name, TimeAxisView* tav)
+MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas, std::string name, TimeAxisView* tav)
 	: AxisView(sess),
 	  VisualTimeAxis(name, ed, sess, canvas)
 {
@@ -65,9 +65,7 @@ MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Widget 
 	_color = unique_random_color() ;
 	time_axis_name = name ;
 
-	//GTK2FIX -- how to get the group? is the canvas display really a group?
-	//selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), gnome_canvas_group_get_type (), 0) ;
-	selection_group = new Gnome::Canvas::Group (*canvas_display);
+	selection_group = new Group (*canvas_display);
 	selection_group->hide();
 
 	// intialize our data items
@@ -96,28 +94,28 @@ MarkerTimeAxis::~MarkerTimeAxis()
 
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i)
 	{
-		gtk_object_destroy (GTK_OBJECT((*i)->rect));
-		gtk_object_destroy (GTK_OBJECT((*i)->start_trim));
-		gtk_object_destroy (GTK_OBJECT((*i)->end_trim));
+		delete (*i)->rect;
+		delete (*i)->start_trim;
+		delete (*i)->end_trim;
 	}
 
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i)
 	{
-		gtk_object_destroy (GTK_OBJECT((*i)->rect));
-		gtk_object_destroy (GTK_OBJECT((*i)->start_trim));
-		gtk_object_destroy (GTK_OBJECT((*i)->end_trim));
+		delete (*i)->rect;
+		delete (*i)->start_trim;
+		delete (*i)->end_trim;
 	}
 	
 	if(selection_group)
 	{
-		gtk_object_destroy(GTK_OBJECT (selection_group)) ;
+		delete selection_group;
 		selection_group = 0 ;
 	}
 
 	// destroy the view helper
 	// this handles removing and destroying individual marker items
-	if(view)
-	{
+
+	if(view) {
 		delete view ;
 		view = 0 ;
 	}

@@ -41,7 +41,6 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "imageframe_time_axis.h"
-#include "canvas-simplerect.h"
 #include "imageframe_time_axis_view.h"
 #include "marker_time_axis_view.h"
 #include "imageframe_view.h"
@@ -50,6 +49,7 @@
 #include "utils.h"
 #include "prompter.h"
 #include "rgb_macros.h"
+#include "canvas_impl.h"
 
 #include "i18n.h"
 
@@ -83,7 +83,7 @@ static const gchar* small_x_xpm[] = {
  * @param sess the current session
  * @param canvas the parent canvas object
  */
-VisualTimeAxis::VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Session& sess, Widget *canvas)
+VisualTimeAxis::VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas)
 	: AxisView(sess),
 	  TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas),
 	  visual_button (_("v")),
