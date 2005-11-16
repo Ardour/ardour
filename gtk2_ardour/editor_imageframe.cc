@@ -7,6 +7,8 @@
 #include "marker_view.h"
 #include "editor.h"
 #include "i18n.h"
+#include "canvas_impl.h"
+
 #include <gtkmm2ext/gtk_ui.h>
 #include <pbd/error.h>
 
@@ -19,6 +21,8 @@
 #include "imageframe_socket_handler.h"
 #include "ardour_image_compositor_socket.h"
 #include "public_editor.h"
+
+using namespace Gtk;
 
 /* <CMT Additions file="editor.cc"> */
 
@@ -149,86 +153,8 @@ Editor::get_named_time_axis(std::string name)
 
 
 /* <CMT Additions file="editor_canvas_events.cc"> */
- 
-/**
- * ---------------------------------------------------------------------------------------------------
- * Static event handlers
- * These handlers deal with events from the GnomeCanvas, a c-based component
- */
-
-
-gint
-Editor::_canvas_imageframe_start_handle_event(Gnome::Canvas::Item *item, GdkEvent *event, gpointer data)
-{
-	ImageFrameView* ifv = (ImageFrameView*) data ;
-	Editor* editor = dynamic_cast<Editor*> (&ifv->get_time_axis_view().editor);
-	return editor->canvas_imageframe_start_handle_event(item,event,ifv);
-}
-
-gint
-Editor::_canvas_imageframe_end_handle_event(Gnome::Canvas::Item *item, GdkEvent *event, gpointer data)
-{
-	ImageFrameView* ifv = (ImageFrameView*) data ;
-	Editor* editor = dynamic_cast<Editor*> (&ifv->get_time_axis_view().editor);
-	return editor->canvas_imageframe_end_handle_event(item,event,ifv);
-}
-
-
-gint
-Editor::_canvas_imageframe_item_view_event(Gnome::Canvas::Item *item, GdkEvent* event, gpointer data)
-{
-	ImageFrameView *ifv = (ImageFrameView *) data ;
-	Editor* editor = dynamic_cast<Editor*> (&ifv->get_time_axis_view().editor);
-	return editor->canvas_imageframe_item_view_event (item, event, ifv) ;
-}
-
-gint
-Editor::_canvas_imageframe_view_event(Gnome::Canvas::Item *item, GdkEvent* event, gpointer data)
-{
-	ImageFrameTimeAxis *ifta = (ImageFrameTimeAxis*) data ;
-	Editor* editor = dynamic_cast<Editor*> (&ifta->editor);
-	return editor->canvas_imageframe_view_event (item, event, ifta);
-}
-
-gint
-Editor::_canvas_marker_time_axis_view_event(Gnome::Canvas::Item* item, GdkEvent* event, gpointer data)
-{
-	MarkerTimeAxis* mta = (MarkerTimeAxis*)data ;
-	Editor* editor = dynamic_cast<Editor*> (&mta->editor);
-	return editor->canvas_marker_time_axis_view_event(item,event,mta);
-}
-
-gint
-Editor::_canvas_markerview_item_view_event(Gnome::Canvas::Item *item, GdkEvent* event, gpointer data)
-{
-	MarkerView* mv = (MarkerView*) data ;
-	Editor* editor = dynamic_cast<Editor*> (&mv->get_time_axis_view().editor);
-	return editor->canvas_markerview_item_view_event(item,event,mv);
-}
- 
-gint
-Editor::_canvas_markerview_start_handle_event(Gnome::Canvas::Item* item, GdkEvent* event, gpointer data)
-{
-	MarkerView* mv = (MarkerView*)data ;
-	Editor* editor = dynamic_cast<Editor*> (&mv->get_time_axis_view().editor);
-	return editor->canvas_markerview_start_handle_event(item,event,mv);
-}
-
-gint
-Editor::_canvas_markerview_end_handle_event(Gnome::Canvas::Item* item, GdkEvent* event, gpointer data)
-{
-	MarkerView* mv = (MarkerView*)data ;
-	Editor* editor = dynamic_cast<Editor*> (&mv->get_time_axis_view().editor);
-	return editor->canvas_markerview_end_handle_event(item,event,mv);
-}
-
-/**
- * ---------------------------------------------------------------------------------------------------
- * End of Static event handlers
- */
-
-gint
-Editor::canvas_imageframe_item_view_event(Gnome::Canvas::Item *item, GdkEvent *event, ImageFrameView *ifv)
+bool
+Editor::canvas_imageframe_item_view_event (GdkEvent *event, ArdourCanvas::Item* item, ImageFrameView *ifv)
 {
 	gint ret = FALSE ;
 	ImageFrameTimeAxisGroup* iftag = 0 ;
@@ -255,8 +181,8 @@ Editor::canvas_imageframe_item_view_event(Gnome::Canvas::Item *item, GdkEvent *e
 	return(ret) ;
 }
 
-gint
-Editor::canvas_imageframe_start_handle_event(Gnome::Canvas::Item *item, GdkEvent *event, ImageFrameView *ifv)
+bool
+Editor::canvas_imageframe_start_handle_event (GdkEvent *event, ArdourCanvas::Item* item, ImageFrameView *ifv)
 {
 	gint ret = FALSE ;
 	ImageFrameTimeAxisGroup* iftag = 0 ;
@@ -290,8 +216,8 @@ Editor::canvas_imageframe_start_handle_event(Gnome::Canvas::Item *item, GdkEvent
 	return(ret) ;
 }
 
-gint
-Editor::canvas_imageframe_end_handle_event(Gnome::Canvas::Item *item, GdkEvent *event, ImageFrameView *ifv)
+bool
+Editor::canvas_imageframe_end_handle_event (GdkEvent *event, ArdourCanvas::Item* item, ImageFrameView *ifv)
 {
 	gint ret = FALSE ;
 	ImageFrameTimeAxisGroup* iftag = 0 ;
@@ -325,8 +251,8 @@ Editor::canvas_imageframe_end_handle_event(Gnome::Canvas::Item *item, GdkEvent *
 	return(ret) ;
 }
 
-gint
-Editor::canvas_imageframe_view_event(Gnome::Canvas::Item* item, GdkEvent* event, ImageFrameTimeAxis* ifta)
+bool
+Editor::canvas_imageframe_view_event (GdkEvent* event, ArdourCanvas::Item* item, ImageFrameTimeAxis* ifta)
 {
 	gint ret = FALSE ;
 	switch (event->type)
@@ -348,8 +274,8 @@ Editor::canvas_imageframe_view_event(Gnome::Canvas::Item* item, GdkEvent* event,
 	return(ret) ;
 }
 
-gint
-Editor::canvas_marker_time_axis_view_event(Gnome::Canvas::Item *item, GdkEvent* event, MarkerTimeAxis* mta)
+bool
+Editor::canvas_marker_time_axis_view_event (GdkEvent* event, ArdourCanvas::Item* item, MarkerTimeAxis* mta)
 {
 	gint ret = FALSE ;
 	switch (event->type)
@@ -371,8 +297,8 @@ Editor::canvas_marker_time_axis_view_event(Gnome::Canvas::Item *item, GdkEvent* 
 }
 
 
-gint
-Editor::canvas_markerview_item_view_event(Gnome::Canvas::Item *item, GdkEvent* event, MarkerView* mta)
+bool
+Editor::canvas_markerview_item_view_event (GdkEvent* event, ArdourCanvas::Item* item, MarkerView* mta)
 {
 	gint ret = FALSE ;
 	switch (event->type)
@@ -396,8 +322,8 @@ Editor::canvas_markerview_item_view_event(Gnome::Canvas::Item *item, GdkEvent* e
 	return(ret) ;
 }
 
-gint
-Editor::canvas_markerview_start_handle_event(Gnome::Canvas::Item* item, GdkEvent* event, MarkerView* mta)
+bool
+Editor::canvas_markerview_start_handle_event (GdkEvent* event, ArdourCanvas::Item* item, MarkerView* mta)
 {
 	gint ret = FALSE ;
 	switch (event->type)
@@ -427,8 +353,8 @@ Editor::canvas_markerview_start_handle_event(Gnome::Canvas::Item* item, GdkEvent
 	return(ret) ;
 }
 
-gint
-Editor::canvas_markerview_end_handle_event(Gnome::Canvas::Item* item, GdkEvent* event, MarkerView* mta)
+bool
+Editor::canvas_markerview_end_handle_event (GdkEvent* event, ArdourCanvas::Item* item, MarkerView* mta)
 {
 	gint ret = FALSE ;
 	switch (event->type)
@@ -1153,7 +1079,7 @@ Editor::handle_new_imageframe_time_axis_view(std::string track_name, void* src)
 	iftav->set_time_axis_name(track_name, this) ;
 	track_views.push_back(iftav) ;
 
-	TreeModel::Row row = *(route_display_mode->append());
+	TreeModel::Row row = *(route_display_model->append());
 
 	row[route_display_columns.text] = iftav->name();
 	row[route_display_columns.tv] = iftav;
@@ -1170,7 +1096,7 @@ Editor::handle_new_imageframe_marker_time_axis_view(std::string track_name, Time
 	((ImageFrameTimeAxis*)marked_track)->add_marker_time_axis(mta, this) ;
 	track_views.push_back(mta) ;
 
-	TreeModel::Row row = *(route_display_mode->append());
+	TreeModel::Row row = *(route_display_model->append());
 
 	row[route_display_columns.text] = mta->name();
 	row[route_display_columns.tv] = mta;
