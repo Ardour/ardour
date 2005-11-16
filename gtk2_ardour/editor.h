@@ -610,7 +610,7 @@ class Editor : public PublicEditor
 	    jack_nframes_t        current_frame;
 	    double		  length;
 
-	    Cursor (Editor&, const string& color, bool (Editor::*)(GdkEvent*));
+	    Cursor (Editor&, const string& color, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
 	    ~Cursor ();
 
 	    void set_position (jack_nframes_t);
@@ -1184,8 +1184,8 @@ class Editor : public PublicEditor
 
 	/* non-public event handlers */
 
-	bool canvas_playhead_cursor_event (GdkEvent* event);
-	bool canvas_edit_cursor_event (GdkEvent* event);
+	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_edit_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	bool track_canvas_button_press_event (GdkEventButton *);

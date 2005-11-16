@@ -30,7 +30,7 @@ using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
 
-Editor::Cursor::Cursor (Editor& ed, const string& color, bool (Editor::*callbck)(GdkEvent*))
+Editor::Cursor::Cursor (Editor& ed, const string& color, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
 	: editor (ed), length(1.0)
 {
 	
@@ -54,7 +54,7 @@ Editor::Cursor::Cursor (Editor& ed, const string& color, bool (Editor::*callbck)
 	// cerr << "cursor line @ " << canvas_item << endl;
 
 	canvas_item->set_data ("cursor", this);
-	canvas_item->signal_event().connect (mem_fun (ed, callbck));
+	canvas_item->signal_event().connect (bind (mem_fun (ed, callbck), canvas_item));
 
 	current_frame = 1; /* force redraw at 0 */
 }
