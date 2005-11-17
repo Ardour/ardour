@@ -4,8 +4,7 @@
 PublicEditor* PublicEditor::_instance = 0;
 
 PublicEditor::PublicEditor ()
-  	: Window (Gtk::WINDOW_TOPLEVEL),
-	  KeyboardTarget (*this, "editor")
+  	: Window (Gtk::WINDOW_TOPLEVEL)
 {
 }
 

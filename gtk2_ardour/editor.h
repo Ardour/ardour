@@ -47,7 +47,6 @@
 #include <ardour/location.h>
 #include <ardour/region.h>
 
-#include "keyboard_target.h"
 #include "audio_clock.h"
 #include "gtk-custom-ruler.h"
 #include "ardour_dialog.h"
@@ -834,7 +833,6 @@ class Editor : public PublicEditor
 	/* KEYMAP HANDLING */
 
 	void register_actions ();
-	void install_keybindings ();
 
 	int ensure_cursor (jack_nframes_t* pos);
 

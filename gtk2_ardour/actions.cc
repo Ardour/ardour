@@ -29,21 +29,21 @@ using namespace std;
 using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
+using namespace ActionManager;
 
-vector<Glib::RefPtr<Gtk::Action> > ActionManager::session_sensitive_actions;
-vector<Glib::RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;
-vector<Glib::RefPtr<Gtk::Action> > ActionManager::region_selection_sensitive_actions;
-vector<Glib::RefPtr<Gtk::Action> > ActionManager::track_selection_sensitive_actions;
-vector<Glib::RefPtr<Gtk::Action> > ActionManager::plugin_selection_sensitive_actions;
-vector<Glib::RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
-vector<Glib::RefPtr<Gtk::Action> > ActionManager::jack_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::session_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::region_selection_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::track_selection_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::plugin_selection_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::jack_sensitive_actions;
+string ActionManager::unbound_string = "--";
 
-namespace ActionManager {
-
-static vector<Glib::RefPtr<UIManager> > ui_managers;
+static vector<RefPtr<UIManager> > ui_managers;
 
 void
-register_ui_manager (Glib::RefPtr<UIManager> uim)
+register_ui_manager (RefPtr<UIManager> uim)
 {
 	ui_managers.push_back (uim);
 }
@@ -119,7 +119,7 @@ register_toggle_action (RefPtr<ActionGroup> group, string name, string label, sl
 	return act;
 }
 
-bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key)
+bool lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
 {
 	GtkAccelKey gkey;
 	bool known = gtk_accel_map_lookup_entry (accel_path.c_str(), &gkey);
@@ -134,9 +134,20 @@ bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key)
 }
 
 void
+merge_actions (RefPtr<ActionGroup> dst, const RefPtr<ActionGroup> src)
+{
+	ListHandle<RefPtr<Action> > group_actions = src->get_actions();
+
+	for (ListHandle<RefPtr<Action> >::iterator a = group_actions.begin(); a != group_actions.end(); ++a) {
+		RefPtr<Action> act = Action::create ((*a)->get_name(), (*a)->property_label());
+		dst->add (act);
+	}
+}
+
+void
 get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& keys, vector<AccelKey>& bindings)
 {
-	for (vector<Glib::RefPtr<UIManager> >::iterator u = ui_managers.begin(); u != ui_managers.end(); ++u) {
+	for (vector<RefPtr<UIManager> >::iterator u = ui_managers.begin(); u != ui_managers.end(); ++u) {
 
 		ListHandle<RefPtr<ActionGroup> > uim_groups = (*u)->get_action_groups ();
 
@@ -159,13 +170,11 @@ get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& k
 				if (known) {
 					keys.push_back ((*u)->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod())));
 				} else {
-					keys.push_back ("--");
+					keys.push_back (unbound_string);
 				}
 
 				bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
 			}
 		}
 	}
-}
-
 }

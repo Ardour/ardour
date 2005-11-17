@@ -2,7 +2,8 @@
       <menubar name='OTop'>
 	<menu action='OTopMenu'>
 	   <menuitem action='OFoo'/>
-	   <menuitem action='OBar'/>
+	   <menuitem action='Bar'/>
+	   <menuitem action='Baz'/>
 	</menu>
       </menubar>
 </ui>

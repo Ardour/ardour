@@ -677,6 +677,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	/* Keymap handling */
 
 	void install_keybindings ();
+	Glib::RefPtr<Gtk::ActionGroup> get_common_actions();
 	void install_actions ();
 	void test_binding_action (const char *);
 	void start_keyboard_prefix();
@@ -732,6 +733,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool filter_ardour_session_dirs (const Gtk::FileFilter::Info&);
 
 	Glib::RefPtr<Gtk::UIManager> ui_manager;
+	Glib::RefPtr<Gtk::ActionGroup> common_actions;
 };
 
 #endif /* __ardour_gui_h__ */

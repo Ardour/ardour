@@ -44,8 +44,12 @@ class TempoMarker;
 class MeterMarker;
 class Marker;
 class AutomationTimeAxisView;
+class MarkerTimeAxis;
+class ImageFrameView;
+class ImageFrameTimeAxis;
+class MarkerView;
 
-class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget {
+class PublicEditor : public Gtk::Window, public Stateful {
   public:
 	PublicEditor();
 	virtual ~PublicEditor();
@@ -152,14 +156,14 @@ class PublicEditor : public Gtk::Window, public Stateful, public KeyboardTarget 
 	virtual bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 
-	virtual bool canvas_imageframe_item_view_event(GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_imageframe_view_event(GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_imageframe_start_handle_event(GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_imageframe_end_handle_event(GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_marker_time_axis_view_event(GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_markerview_item_view_event(GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*) = 0;
+	virtual bool canvas_imageframe_item_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*) = 0;
+	virtual bool canvas_imageframe_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameTimeAxis*) = 0;
+	virtual bool canvas_imageframe_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*) = 0;
+	virtual bool canvas_imageframe_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*) = 0;
+	virtual bool canvas_marker_time_axis_view_event(GdkEvent* event, ArdourCanvas::Item*,MarkerTimeAxis*) = 0;
+	virtual bool canvas_markerview_item_view_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
+	virtual bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
+	virtual bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 
 	static PublicEditor* _instance;
 };

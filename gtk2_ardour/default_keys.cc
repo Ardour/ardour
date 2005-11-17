@@ -32,74 +32,73 @@ using namespace sigc;
 void
 ARDOUR_UI::install_keybindings ()
 {
-	KeyboardTarget::add_action ("start-prefix", mem_fun(*this, &ARDOUR_UI::start_keyboard_prefix));
+	register_action (shared_actions, "start-prefix", _("start-prefix"), mem_fun(*this, &ARDOUR_UI::start_keyboard_prefix));
 
-	KeyboardTarget::add_action ("toggle-editor-window", mem_fun(*this, &ARDOUR_UI::goto_editor_window));
-	KeyboardTarget::add_action ("toggle-mixer-window", mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
-	KeyboardTarget::add_action ("toggle-locations-window", mem_fun(*this, &ARDOUR_UI::toggle_location_window));
-	KeyboardTarget::add_action ("toggle-big-clock-window", mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window));
-	KeyboardTarget::add_action ("toggle-options-window", mem_fun(*this, &ARDOUR_UI::toggle_options_window));
-	KeyboardTarget::add_action ("toggle-auto-loop", mem_fun(*this, &ARDOUR_UI::toggle_session_auto_loop));
-	KeyboardTarget::add_action ("toggle-punch-in", mem_fun(*this, &ARDOUR_UI::toggle_session_punch_in));
+	register_action (shared_actions, "toggle-editor-window", _("toggle-editor-window"), mem_fun(*this, &ARDOUR_UI::goto_editor_window));
+	register_action (shared_actions, "toggle-mixer-window", _("toggle-mixer-window"), mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
+	register_action (shared_actions, "toggle-locations-window", _("toggle-locations-window"), mem_fun(*this, &ARDOUR_UI::toggle_location_window));
+	register_action (shared_actions, "toggle-big-clock-window", _("toggle-big-clock-window"), mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window));
+	register_action (shared_actions, "toggle-options-window", _("toggle-options-window"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
+	register_action (shared_actions, "toggle-auto-loop", _("toggle-auto-loop"), mem_fun(*this, &ARDOUR_UI::toggle_session_auto_loop));
+	register_action (shared_actions, "toggle-punch-in", _("toggle-punch-in"), mem_fun(*this, &ARDOUR_UI::toggle_session_punch_in));
 
-	KeyboardTarget::add_action ("new-session", bind (mem_fun(*this, &ARDOUR_UI::new_session), false, string()));
-	KeyboardTarget::add_action ("add-audio-track", bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1));
-	KeyboardTarget::add_action ("add-audio-bus", bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_bus), 1, 1));
+	register_action (shared_actions, "new-session", _("new-session"), bind (mem_fun(*this, &ARDOUR_UI::new_session), false, string()));
+	register_action (shared_actions, "add-audio-track", _("add-audio-track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1));
+	register_action (shared_actions, "add-audio-bus", _("add-audio-bus"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_bus), 1, 1));
 
-	KeyboardTarget::add_action ("save-state", bind (mem_fun(*this, &ARDOUR_UI::save_state), string ("")));
-	KeyboardTarget::add_action ("quit", (mem_fun(*this, &ARDOUR_UI::finish)));
+	register_action (shared_actions, "save-state", _("save-state"), bind (mem_fun(*this, &ARDOUR_UI::save_state), string ("")));
+	register_action (shared_actions, "quit", _("quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
+	register_action (shared_actions, "remove-last-capture", _("remove-last-capture"), mem_fun(*this, &ARDOUR_UI::remove_last_capture));
 
-	KeyboardTarget::add_action ("remove-last-capture", mem_fun(*this, &ARDOUR_UI::remove_last_capture));
+	register_action (shared_actions, "transport-stop", _("transport-stop"), mem_fun(*this, &ARDOUR_UI::transport_stop));
+	register_action (shared_actions, "transport-stop-and-forget-capture", _("transport-stop-and-forget-capture"), mem_fun(*this, &ARDOUR_UI::transport_stop_and_forget_capture));
+	register_action (shared_actions, "transport-roll", _("transport-roll"), mem_fun(*this, &ARDOUR_UI::transport_roll));
+	register_action (shared_actions, "transport-loop", _("transport-loop"), mem_fun(*this, &ARDOUR_UI::transport_loop));
+	register_action (shared_actions, "transport-record", _("transport-record"), mem_fun(*this, &ARDOUR_UI::transport_record));
+	register_action (shared_actions, "transport-rewind", _("transport-rewind"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 0));
+	register_action (shared_actions, "transport-rewind-slow", _("transport-rewind-slow"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), -1));
+	register_action (shared_actions, "transport-rewind-fast", _("transport-rewind-fast"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 1));
+	register_action (shared_actions, "transport-forward", _("transport-forward"), bind (mem_fun(*this, &ARDOUR_UI::transport_forward), 0));
+	register_action (shared_actions, "transport-forward-slow", _("transport-forward-slow"), bind (mem_fun(*this, &ARDOUR_UI::transport_forward), -1));
+	register_action (shared_actions, "transport-forward-fast", _("transport-forward-fast"), bind (mem_fun(*this, &ARDOUR_UI::transport_forward), 1));
 
-	KeyboardTarget::add_action ("transport-stop", mem_fun(*this, &ARDOUR_UI::transport_stop));
-	KeyboardTarget::add_action ("transport-stop-and-forget-capture", mem_fun(*this, &ARDOUR_UI::transport_stop_and_forget_capture));
-	KeyboardTarget::add_action ("transport-roll", mem_fun(*this, &ARDOUR_UI::transport_roll));
-	KeyboardTarget::add_action ("transport-loop", mem_fun(*this, &ARDOUR_UI::transport_loop));
-	KeyboardTarget::add_action ("transport-record", mem_fun(*this, &ARDOUR_UI::transport_record));
-	KeyboardTarget::add_action ("transport-rewind", bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 0));
-	KeyboardTarget::add_action ("transport-rewind-slow", bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), -1));
-	KeyboardTarget::add_action ("transport-rewind-fast", bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 1));
-	KeyboardTarget::add_action ("transport-forward", bind (mem_fun(*this, &ARDOUR_UI::transport_forward), 0));
-	KeyboardTarget::add_action ("transport-forward-slow", bind (mem_fun(*this, &ARDOUR_UI::transport_forward), -1));
-	KeyboardTarget::add_action ("transport-forward-fast", bind (mem_fun(*this, &ARDOUR_UI::transport_forward), 1));
+	register_action (shared_actions, "transport-goto-start", _("transport-goto-start"), mem_fun(*this, &ARDOUR_UI::transport_goto_start));
+	register_action (shared_actions, "transport-goto-end", _("transport-goto-end"), mem_fun(*this, &ARDOUR_UI::transport_goto_end));
 
-	KeyboardTarget::add_action ("transport-goto-start", mem_fun(*this, &ARDOUR_UI::transport_goto_start));
-	KeyboardTarget::add_action ("transport-goto-end", mem_fun(*this, &ARDOUR_UI::transport_goto_end));
-
-	KeyboardTarget::add_action ("send-all-midi-feedback", mem_fun(*this, &ARDOUR_UI::send_all_midi_feedback));
+	register_action (shared_actions, "send-all-midi-feedback", _("send-all-midi-feedback"), mem_fun(*this, &ARDOUR_UI::send_all_midi_feedback));
 	
-	KeyboardTarget::add_action ("toggle-record-enable-track1", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  0U));
-	KeyboardTarget::add_action ("toggle-record-enable-track2", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  1U));
-	KeyboardTarget::add_action ("toggle-record-enable-track3", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  2U));
-	KeyboardTarget::add_action ("toggle-record-enable-track4", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  3U));
-	KeyboardTarget::add_action ("toggle-record-enable-track5", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  4U));
-	KeyboardTarget::add_action ("toggle-record-enable-track6", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  5U));
-	KeyboardTarget::add_action ("toggle-record-enable-track7", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  6U));
-	KeyboardTarget::add_action ("toggle-record-enable-track8", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  7U));
-	KeyboardTarget::add_action ("toggle-record-enable-track9", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  8U));
-	KeyboardTarget::add_action ("toggle-record-enable-track10", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 9U));
-	KeyboardTarget::add_action ("toggle-record-enable-track11", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 10U));
-	KeyboardTarget::add_action ("toggle-record-enable-track12", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 11U));
-	KeyboardTarget::add_action ("toggle-record-enable-track13", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 12U));
-	KeyboardTarget::add_action ("toggle-record-enable-track14", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 13U));
-	KeyboardTarget::add_action ("toggle-record-enable-track15", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 14U));
-	KeyboardTarget::add_action ("toggle-record-enable-track16", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 15U));
-	KeyboardTarget::add_action ("toggle-record-enable-track17", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 16U));
-	KeyboardTarget::add_action ("toggle-record-enable-track18", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 17U));
-	KeyboardTarget::add_action ("toggle-record-enable-track19", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 18U));
-	KeyboardTarget::add_action ("toggle-record-enable-track20", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 19U));
-	KeyboardTarget::add_action ("toggle-record-enable-track21", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 20U));
-	KeyboardTarget::add_action ("toggle-record-enable-track22", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 21U));
-	KeyboardTarget::add_action ("toggle-record-enable-track23", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 22U));
-	KeyboardTarget::add_action ("toggle-record-enable-track24", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 23U));
-	KeyboardTarget::add_action ("toggle-record-enable-track25", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 24U));
-	KeyboardTarget::add_action ("toggle-record-enable-track26", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 25U));
-	KeyboardTarget::add_action ("toggle-record-enable-track27", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 26U));
-	KeyboardTarget::add_action ("toggle-record-enable-track28", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 27U));
-	KeyboardTarget::add_action ("toggle-record-enable-track29", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 28U));
-	KeyboardTarget::add_action ("toggle-record-enable-track30", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 29U));
-	KeyboardTarget::add_action ("toggle-record-enable-track31", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 30U));
-	KeyboardTarget::add_action ("toggle-record-enable-track32", bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 31U));
+	register_action (shared_actions, "toggle-record-enable-track1", _("toggle-record-enable-track1"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  0U));
+	register_action (shared_actions, "toggle-record-enable-track2", _("toggle-record-enable-track2"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  1U));
+	register_action (shared_actions, "toggle-record-enable-track3", _("toggle-record-enable-track3"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  2U));
+	register_action (shared_actions, "toggle-record-enable-track4", _("toggle-record-enable-track4"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  3U));
+	register_action (shared_actions, "toggle-record-enable-track5", _("toggle-record-enable-track5"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  4U));
+	register_action (shared_actions, "toggle-record-enable-track6", _("toggle-record-enable-track6"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  5U));
+	register_action (shared_actions, "toggle-record-enable-track7", _("toggle-record-enable-track7"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  6U));
+	register_action (shared_actions, "toggle-record-enable-track8", _("toggle-record-enable-track8"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  7U));
+	register_action (shared_actions, "toggle-record-enable-track9", _("toggle-record-enable-track9"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  8U));
+	register_action (shared_actions, "toggle-record-enable-track10", _("toggle-record-enable-track10"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 9U));
+	register_action (shared_actions, "toggle-record-enable-track11", _("toggle-record-enable-track11"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 10U));
+	register_action (shared_actions, "toggle-record-enable-track12", _("toggle-record-enable-track12"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 11U));
+	register_action (shared_actions, "toggle-record-enable-track13", _("toggle-record-enable-track13"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 12U));
+	register_action (shared_actions, "toggle-record-enable-track14", _("toggle-record-enable-track14"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 13U));
+	register_action (shared_actions, "toggle-record-enable-track15", _("toggle-record-enable-track15"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 14U));
+	register_action (shared_actions, "toggle-record-enable-track16", _("toggle-record-enable-track16"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 15U));
+	register_action (shared_actions, "toggle-record-enable-track17", _("toggle-record-enable-track17"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 16U));
+	register_action (shared_actions, "toggle-record-enable-track18", _("toggle-record-enable-track18"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 17U));
+	register_action (shared_actions, "toggle-record-enable-track19", _("toggle-record-enable-track19"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 18U));
+	register_action (shared_actions, "toggle-record-enable-track20", _("toggle-record-enable-track20"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 19U));
+	register_action (shared_actions, "toggle-record-enable-track21", _("toggle-record-enable-track21"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 20U));
+	register_action (shared_actions, "toggle-record-enable-track22", _("toggle-record-enable-track22"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 21U));
+	register_action (shared_actions, "toggle-record-enable-track23", _("toggle-record-enable-track23"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 22U));
+	register_action (shared_actions, "toggle-record-enable-track24", _("toggle-record-enable-track24"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 23U));
+	register_action (shared_actions, "toggle-record-enable-track25", _("toggle-record-enable-track25"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 24U));
+	register_action (shared_actions, "toggle-record-enable-track26", _("toggle-record-enable-track26"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 25U));
+	register_action (shared_actions, "toggle-record-enable-track27", _("toggle-record-enable-track27"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 26U));
+	register_action (shared_actions, "toggle-record-enable-track28", _("toggle-record-enable-track28"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 27U));
+	register_action (shared_actions, "toggle-record-enable-track29", _("toggle-record-enable-track29"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 28U));
+	register_action (shared_actions, "toggle-record-enable-track30", _("toggle-record-enable-track30"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 29U));
+	register_action (shared_actions, "toggle-record-enable-track31", _("toggle-record-enable-track31"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 30U));
+	register_action (shared_actions, "toggle-record-enable-track32", _("toggle-record-enable-track32"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 31U));
 	
 #if 0
 	ADD ME TO ARDOUR RC SOMEDAY

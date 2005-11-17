@@ -139,7 +139,9 @@ ARDOUR_UI::install_actions ()
 	act = 	register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency8192"), X_("8192"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (jack_nframes_t) 8192));
 	jack_sensitive_actions.push_back (act);
 	
-	Glib::RefPtr<ActionGroup> common_actions = ActionGroup::create (X_("Common"));
+	/* these actions are intended to be shared across all windows */
+	
+	common_actions = ActionGroup::create (X_("Common"));
 
 	register_action (common_actions, X_("Start-Prefix"), _("start prefix"), mem_fun(*this, &ARDOUR_UI::start_keyboard_prefix));
 	register_action (common_actions, X_("Quit"), _("quit"), (mem_fun(*this, &ARDOUR_UI::finish)));

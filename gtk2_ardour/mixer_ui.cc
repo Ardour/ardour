@@ -49,7 +49,6 @@ using namespace sigc;
 
 Mixer_UI::Mixer_UI (AudioEngine& eng)
 	: Window (Gtk::WINDOW_TOPLEVEL),
-	  KeyboardTarget (*this, "mixer"),
 	  engine (eng)
 {
 	_strip_width = Wide;

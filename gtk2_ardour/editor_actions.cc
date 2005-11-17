@@ -17,9 +17,14 @@ using namespace ActionManager;
 void
 Editor::register_actions ()
 {
-	/* add named actions for the editor */
 
 	Glib::RefPtr<ActionGroup> editor_actions = ActionGroup::create (X_("Editor"));
+
+	/* start with actions shared between all top level (major) windows */
+
+	merge_actions (editor_actions, ARDOUR_UI::instance()::get_common_actions());
+
+	/* add named actions for the editor */
 
 	register_action (editor_actions, "toggle-xfades-active", _("toggle xfades active"), mem_fun(*this, &Editor::toggle_xfades_active));
 

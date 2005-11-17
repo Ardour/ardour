@@ -52,7 +52,7 @@ namespace ARDOUR {
 class MixerStrip;
 class PluginSelector;
 
-class Mixer_UI : public Gtk::Window, public KeyboardTarget
+class Mixer_UI : public Gtk::Window
 {
   public:
 	Mixer_UI (ARDOUR::AudioEngine&);

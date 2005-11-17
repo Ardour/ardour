@@ -3,6 +3,7 @@
 	<menu action='TopMenu'>
 	   <menuitem action='Foo'/>
 	   <menuitem action='Bar'/>
+	   <menuitem action='Baz'/>
 	</menu>
       </menubar>
 </ui>
