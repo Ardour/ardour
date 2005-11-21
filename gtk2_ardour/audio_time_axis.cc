@@ -1038,7 +1038,7 @@ AudioTimeAxisView::get_selectables (jack_nframes_t start, jack_nframes_t end, do
 	}
 	
 	jack_nframes_t start_adjusted = session_frame_to_track_frame(start, speed);
-	jack_nframes_t end_adjusted = session_frame_to_track_frame(start, speed);
+	jack_nframes_t end_adjusted   = session_frame_to_track_frame(end, speed);
 
 	if (view && touched (top, bot)) {
 		view->get_selectables (start_adjusted, end_adjusted, results);
