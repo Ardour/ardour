@@ -33,9 +33,9 @@
 #include "streamview.h"
 #include "regionview.h"
 #include "audio_time_axis.h"
-#include "canvas-simplerect.h"
-#include "canvas-simpleline.h"
-#include "canvas-waveview.h"
+#include "simplerect.h"
+#include "simpleline.h"
+#include "waveview.h"
 #include "public_editor.h"
 #include "region_editor.h"
 #include "region_gain_line.h"
@@ -50,6 +50,7 @@
 using namespace sigc;
 using namespace ARDOUR;
 using namespace Editing;
+using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
 
@@ -62,14 +63,14 @@ AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisVie
 				  Gdk::Color& basic_color,
 				  bool wfw)
 
-	: TimeAxisViewItem (r.name(), parent, tv, spu, basic_color, r.position(), r.length(),
+	: TimeAxisViewItem (r.name(), *parent, tv, spu, basic_color, r.position(), r.length(),
 			    TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
 				                          TimeAxisViewItem::ShowNameHighlight|
 							  TimeAxisViewItem::ShowFrame)),
 
 	  region (r)
 {
-        Gnome::Canvas::Points *shape;
+        Gnome::Canvas::Points shape;
 	XMLNode *node;
 
 	editor = 0;
@@ -100,20 +101,19 @@ AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisVie
 	gtk_object_set_data (GTK_OBJECT(name_highlight), "regionview", this);
 	gtk_object_set_data (GTK_OBJECT(name_text), "regionview", this);
 
-	shape = new Gnome::Canvas::Points ();
+	//	shape = new Gnome::Canvas::Points ();
 
 	/* an equilateral triangle */
 
-	shape->push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
-	shape->push_back (Gnome::Art::Point ((sync_mark_width - 1)/2, 1));
-	shape->push_back (Gnome::Art::Point (0, sync_mark_width - 1));
-	shape->push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
+	shape.push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
+	shape.push_back (Gnome::Art::Point ((sync_mark_width - 1)/2, 1));
+	shape.push_back (Gnome::Art::Point (0, sync_mark_width - 1));
+	shape.push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
 
 	sync_mark =  new Gnome::Canvas::Polygon (*group);
-	sync_mark->set_property ("points", shape);
+	sync_mark->property_points().set_value(shape);
 	sync_mark->set_property ("fill_color_rgba", fill_color);
 	sync_mark->hide();
-	gnome_canvas_points_unref (shape->gobj());
 
 	fade_in_shape = new Gnome::Canvas::Polygon (*group);
 	fade_in_shape->set_property ("fill_color_rgba", fade_color);
@@ -354,7 +354,7 @@ AudioRegionView::region_scale_amplitude_changed ()
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// force a reload of the cache
-		gnome_canvas_item_set (waves[n], "data_src", &region, NULL);
+		waves[n]->property_data_src().set_value(&region);
 	}
 }
 
@@ -383,15 +383,15 @@ AudioRegionView::region_resized (Change what_changed)
 		reset_width_dependent_items (unit_length);
 		
 	 	for (uint32_t n = 0; n < waves.size(); ++n) {
- 			gnome_canvas_item_set (waves[n], "region_start", (guint32) region.start(), NULL);
+ 			waves[n]->property_region_start().set_value(region.start());
  		}
 		
  		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 
  			(*i)->set_duration (unit_length);
 
- 			for (vector<GnomeCanvasItem*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
- 				gnome_canvas_item_set ((*w), "region_start", region.start(), NULL);
+ 			for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
+				(*w)->property_region_start().set_value(region.start());
  			}
  		}
 	}
@@ -438,9 +438,9 @@ AudioRegionView::region_muted ()
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (region.muted()) {
-			gnome_canvas_item_set (waves[n], "wave_color", color_map[cMutedWaveForm], NULL);
+			waves[n]->property_wave_color().set_value(color_map[cMutedWaveForm]);
 		} else {
-			gnome_canvas_item_set (waves[n], "wave_color", color_map[cWaveForm], NULL);
+			waves[n]->property_wave_color().set_value(color_map[cWaveForm]);
 		}
 	}
 }
@@ -518,8 +518,8 @@ AudioRegionView::set_height (gdouble height)
 		
 		gdouble yoff = n * (ht+1);
 		
-		gnome_canvas_item_set (waves[n], "height", ht, NULL);
-		gnome_canvas_item_set (waves[n], "y", yoff + 2, NULL);
+		waves[n]->property_height().set_value(ht);
+		waves[n]->property_y().set_value(yoff + 2);
 	}
 
 	if ((height/wcnt) < NAME_HIGHLIGHT_SIZE) {
@@ -574,7 +574,7 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 
 	width = std::max ((jack_nframes_t) 64, width);
 
-	GnomeCanvasPoints* points;
+	Points* points;
 	double pwidth = width / samples_per_unit;
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h; 
@@ -621,25 +621,24 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 	double xdelta = pwidth/npoints;
 
 	for (pi = 0, pc = 0; pc < npoints; ++pc) {
-		points->coords[pi++] = 1 + (pc * xdelta);
-		points->coords[pi++] = 2 + (h - (curve[pc] * h));
+		(*points)[pi].set_x(1 + (pc * xdelta));
+		(*points)[pi++].set_y(2 + (h - (curve[pc] * h)));
 	}
 	
 	/* fold back */
 
-	points->coords[pi++] = pwidth;
-	points->coords[pi++] = 2;
+	(*points)[pi].set_x(pwidth);
+	(*points)[pi++].set_y(2);
 
-	points->coords[pi++] = 1;
-	points->coords[pi++] = 2;
+	(*points)[pi].set_x(1);
+	(*points)[pi++].set_y(2);
 
 	/* connect the dots ... */
 
-	points->coords[pi++] = points->coords[0];
-	points->coords[pi] = points->coords[1];
+	(*points)[pi] = (*points)[0];
 	
-	fade_in_shape->set_property ("points", points);
-	gnome_canvas_points_unref (points);
+	fade_in_shape->property_points().set_value(*points);
+	delete points;
 }
 
 void
@@ -655,7 +654,7 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 
 	width = std::max ((jack_nframes_t) 64, width);
 
-	GnomeCanvasPoints* points;
+	Points* points;
 	double pwidth = width / samples_per_unit;
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h;
@@ -704,25 +703,24 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 	double xdelta = pwidth/npoints;
 
 	for (pi = 0, pc = 0; pc < npoints; ++pc) {
-		points->coords[pi++] = _pixel_width - 1 - pwidth + (pc*xdelta);
-		points->coords[pi++] = 2 + (h - (curve[pc] * h));
+		(*points)[pi] = _pixel_width - 1 - pwidth + (pc*xdelta);
+		(*points)[pi++] = 2 + (h - (curve[pc] * h));
 	}
 	
 	/* fold back */
 
-	points->coords[pi++] = _pixel_width;
-	points->coords[pi++] = h;
+	(*points)[pi] = _pixel_width;
+	(*points)[pi++] = h;
 
-	points->coords[pi++] = _pixel_width;
-	points->coords[pi++] = 2;
+	(*points)[pi] = _pixel_width;
+	(*points)[pi++] = 2;
 
 	/* connect the dots ... */
 
-	points->coords[pi++] = points->coords[0];
-	points->coords[pi] = points->coords[1];
+	(*points)[pi] = (*points)[0];
 
-	fade_out_shape->set_property ("points", points);
-	gnome_canvas_points_unref (points);
+	fade_out_shape->set_property ("points", *points);
+	delete points;
 }
 
 void
@@ -731,7 +729,7 @@ AudioRegionView::set_samples_per_unit (gdouble spu)
 	TimeAxisViewItem::set_samples_per_unit (spu);
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		gnome_canvas_item_set (waves[n], "samples_per_unit", spu, NULL);
+		waves[n]->property_samples_per_unit().set_value(spu);
 	}
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -762,7 +760,7 @@ void
 AudioRegionView::set_amplitude_above_axis (gdouble spp)
 {
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		gnome_canvas_item_set (waves[n], "amplitude_above_axis", spp, NULL);
+		waves[n]->property_amplitude_above_axis().set_value(spp);
 	}
 }
 
@@ -788,9 +786,9 @@ AudioRegionView::set_colors ()
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (region.muted()) {
-			gnome_canvas_item_set (waves[n], "wave_color", color_map[cMutedWaveForm], NULL);
+			waves[n]->property_wave_color().set_value(color_map[cMutedWaveForm]);
 		} else {
-			gnome_canvas_item_set (waves[n], "wave_color", color_map[cWaveForm], NULL);
+			waves[n]->property_wave_color().set_value(color_map[cWaveForm]);
 		}
 	}
 }
@@ -880,31 +878,27 @@ AudioRegionView::region_sync_changed ()
 
 			/* lets do it */
 
-			GtkArg args[1];
-			GnomeCanvasPoints* points;
+			Points points;
 			
-			args[0].name = X_("points");
-			
-			sync_mark->get (X_("points"), &points);
+			points = sync_mark->property_points().get_value();
 			
 			double offset = sync_offset / samples_per_unit;
 			
-			points->coords[0] = offset - ((sync_mark_width-1)/2);
-			points->coords[1] = 1;
+			points[0].set_x(offset - ((sync_mark_width-1)/2));
+			points[0].set_y(1);
 			
-			points->coords[2] = offset + (sync_mark_width-1)/2;
-			points->coords[3] = 1;
+			points[1].set_x(offset + (sync_mark_width-1)/2);
+			points[1].set_y(1);
 			
-			points->coords[4] = offset;
-			points->coords[5] = sync_mark_width - 1;
+			points[2].set_x(offset);
+			points[2].set_y(sync_mark_width - 1);
 			
-			points->coords[6] = offset - ((sync_mark_width-1)/2);
-			points->coords[7] = 1;
+			points[3].set_x(offset - ((sync_mark_width-1)/2));
+			points[3].set_y(1);
 			
 			sync_mark->show();
-			sync_mark->set_property ("points", points);
+			sync_mark->property_points().set_value(points);
 
-			gnome_canvas_points_unref (points);
 		}
 	}
 }
@@ -915,12 +909,12 @@ AudioRegionView::set_waveform_visible (bool yn)
 	if (((_flags & WaveformVisible) != yn)) {
 		if (yn) {
 			for (uint32_t n=0; n < waves.size(); ++n) {
-				gnome_canvas_item_show (waves[n]);
+				waves[n]->show();
 			}
 			_flags |= WaveformVisible;
 		} else {
 			for (uint32_t n=0; n < waves.size(); ++n) {
-				gnome_canvas_item_hide (waves[n]);
+				waves[n]->hide();
 			}
 			_flags &= ~WaveformVisible;
 		}
@@ -983,7 +977,7 @@ AudioRegionView::create_waves ()
 			break;
 		}
 		
-		wave_caches.push_back (gnome_canvas_waveview_cache_new ());
+		wave_caches.push_back (WaveView::create_cache ());
 
 		if (wait_for_waves) {
 			if (region.source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n))) {
@@ -1021,26 +1015,42 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	}
 	gdouble yoff = which * ht;
 
-	GnomeCanvasItem *wave = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-						   gnome_canvas_waveview_get_type (),
-						   "data_src", (gpointer) &region,
-						   "cache", wave_caches[which],
-						   "cache_updater", (gboolean) true,
-						   "channel", (guint32) which,
-						   "length_function", (gpointer) region_length_from_c,
-						   "sourcefile_length_function",(gpointer) sourcefile_length_from_c,
-						   "peak_function", (gpointer) region_read_peaks_from_c,
-						   "x", 0.0,
-						   "y", yoff,
-						   "height", (double) ht,
-						   "samples_per_unit", samples_per_unit,
-						   "amplitude_above_axis", _amplitude_above_axis,
-						   "wave_color", (guint32) (region.muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm]),
-						   "region_start",(guint32) region.start(),
-						   NULL);
+	WaveView *wave = new WaveView(*group);
+
+	wave->property_data_src().set_value( (gpointer) &region);
+	wave->property_cache().set_value( wave_caches[which]);
+	wave->property_cache_updater().set_value( (gboolean) true);
+	wave->property_channel().set_value( (guint32) which);
+	wave->property_length_function().set_value( (gpointer) region_length_from_c);
+	wave->property_sourcefile_length_function().set_value((gpointer) sourcefile_length_from_c);
+	wave->property_peak_function().set_value( (gpointer) region_read_peaks_from_c);
+	wave->property_x().set_value( 0.0);
+	wave->property_y().set_value( yoff);
+	wave->property_height().set_value( (double) ht);
+	wave->property_samples_per_unit().set_value( samples_per_unit);
+	wave->property_amplitude_above_axis().set_value( _amplitude_above_axis);
+	wave->property_wave_color().set_value(region.muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm]);
+	wave->property_region_start().set_value(region.start());
+// 	WaveView *wave = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
+// 						   gnome_canvas_waveview_get_type (),
+// 						   "data_src", (gpointer) &region,
+// 						   "cache", wave_caches[which],
+// 						   "cache_updater", (gboolean) true,
+// 						   "channel", (guint32) which,
+// 						   "length_function", (gpointer) region_length_from_c,
+// 						   "sourcefile_length_function",(gpointer) sourcefile_length_from_c,
+// 						   "peak_function", (gpointer) region_read_peaks_from_c,
+// 						   "x", 0.0,
+// 						   "y", yoff,
+// 						   "height", (double) ht,
+// 						   "samples_per_unit", samples_per_unit,
+// 						   "amplitude_above_axis", _amplitude_above_axis,
+// 						   "wave_color", (guint32) (region.muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm]),
+// 						   "region_start",(guint32) region.start(),
+// 						   NULL);
 	
 	if (!(_flags & WaveformVisible)) {
-		gnome_canvas_item_hide (wave);
+		wave->hide();
 	}
 
 	/* note: calling this function is serialized by the lock
@@ -1185,8 +1195,8 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 	}
 
 	if (yn != (bool) (_flags & WaveformRectified)) {
-		for (vector<GnomeCanvasItem *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
-			gnome_canvas_item_set ((*wave), "rectified", (gboolean) yn, NULL);
+		for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
+			(*wave)->property_rectified().set_value(yn);
 		}
 
 		if (zero_line) {
@@ -1243,21 +1253,35 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 			break;
 		}
 		
-		GnomeCanvasItem *wave = gnome_canvas_item_new (GNOME_CANVAS_GROUP(ghost->group),
-							   gnome_canvas_waveview_get_type (),
-							   "data_src", (gpointer) &region,
-							   "cache", wave_caches[n],
-							   "cache_updater", (gboolean) false,
-							   "channel", (guint32) n,
-							   "length_function", (gpointer) region_length_from_c,
-							   "sourcefile_length_function",(gpointer) sourcefile_length_from_c,
-							   "peak_function", (gpointer) region_read_peaks_from_c,
-							   "x", 0.0,
-							   "samples_per_unit", samples_per_unit,
-							   "amplitude_above_axis", _amplitude_above_axis,
-							   "wave_color", color_map[cGhostTrackWave],
-							   "region_start", (guint32) region.start(),
-							   NULL);
+		WaveView *wave = new WaveView(*ghost->group);
+
+		wave->property_data_src().set_value( &region);
+		wave->property_cache().set_value( wave_caches[n]);
+		wave->property_cache_updater().set_value(false);
+		wave->property_channel().set_value(n);
+		wave->property_length_function().set_value((gpointer)region_length_from_c);
+		wave->property_sourcefile_length_function().set_value((gpointer) sourcefile_length_from_c);
+		wave->property_peak_function().set_value( (gpointer) region_read_peaks_from_c);
+		wave->property_x().set_value( 0.0);
+		wave->property_samples_per_unit().set_value( samples_per_unit);
+		wave->property_amplitude_above_axis().set_value( _amplitude_above_axis);
+		wave->property_wave_color().set_value(color_map[cGhostTrackWave]);
+		wave->property_region_start().set_value(region.start());
+		// 		WaveView *wave = gnome_canvas_item_new (GNOME_CANVAS_GROUP(ghost->group),
+		// 							   gnome_canvas_waveview_get_type (),
+		// 							   "data_src", (gpointer) &region,
+		// 							   "cache", wave_caches[n],
+		// 							   "cache_updater", (gboolean) false,
+		// 							   "channel", (guint32) n,
+		// 							   "length_function", (gpointer) region_length_from_c,
+		// 							   "sourcefile_length_function",(gpointer) sourcefile_length_from_c,
+		// 							   "peak_function", (gpointer) region_read_peaks_from_c,
+		// 							   "x", 0.0,
+		// 							   "samples_per_unit", samples_per_unit,
+		// 							   "amplitude_above_axis", _amplitude_above_axis,
+		// 							   "wave_color", color_map[cGhostTrackWave],
+		// 							   "region_start", (guint32) region.start(),
+		// 							   NULL);
 
 		
 		ghost->waves.push_back(wave);
@@ -1335,15 +1359,15 @@ AudioRegionView::set_waveview_data_src()
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// TODO: something else to let it know the channel
-		gnome_canvas_item_set (waves[n], "data_src", &region, NULL);
+		waves[n]->property_data_src().set_value(&region);
 	}
 	
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		
 		(*i)->set_duration (unit_length);
 		
-		for (vector<GnomeCanvasItem*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
-			gnome_canvas_item_set ((*w), "data_src", &region, NULL);
+		for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
+			(*w)->property_data_src().set_value(&region);
 		}
 	}
 

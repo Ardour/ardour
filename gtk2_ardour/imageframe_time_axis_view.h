@@ -24,9 +24,12 @@
 #include <list>
 #include <cmath>
 
-#include <gtkmm.h>
-#include <libgnomecanvas/libgnomecanvas.h>
 #include <jack/jack.h>
+#include <gtkmm.h>
+#include <libgnomecanvasmm/libgnomecanvasmm.h>
+#include "canvas.h"
+#include "simplerect.h"
+
 
 class PublicEditor ;
 class ImageFrameTimeAxis ;
@@ -71,7 +74,7 @@ class ImageFrameTimeAxisView : public sigc::trackable
 		/**
 		 *
 		 */
-		GnomeCanvasItem* canvas_item() { return canvas_group; }
+		ArdourCanvas::Group * canvas_item() { return &canvas_group; }
 		
 		
 		//---------------------------------------------------------------------------------------//
@@ -256,8 +259,8 @@ class ImageFrameTimeAxisView : public sigc::trackable
 		/* the TimeAxisView that this object is acting as the view helper for */
 		ImageFrameTimeAxis& _trackview ;
 		
-		GnomeCanvasItem *canvas_group ;
-		GnomeCanvasItem *canvas_rect; /* frame around the whole thing */
+		ArdourCanvas::Group       canvas_group ;
+		ArdourCanvas::SimpleRect  canvas_rect; /* frame around the whole thing */
 		
 		/** the current samples per unit */
 		double _samples_per_unit ;

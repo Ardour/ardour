@@ -1,9 +1,11 @@
-#include "canvas-simplerect.h"
+#include "simplerect.h"
+#include "waveview.h"
 #include "ghostregion.h"
 #include "automation_time_axis.h"
 #include "rgb_macros.h"
 
 using namespace Editing;
+using namespace ArdourCanvas;
 
 GhostRegion::GhostRegion (AutomationTimeAxisView& atv, double initial_pos)
 	: trackview (atv)
@@ -32,14 +34,15 @@ GhostRegion::GhostRegion (AutomationTimeAxisView& atv, double initial_pos)
 GhostRegion::~GhostRegion ()
 {
 	GoingAway (this);
-	gtk_object_destroy (GTK_OBJECT(group));
+	delete base_rect;
+	delete group;
 }
 
 void
 GhostRegion::set_samples_per_unit (double spu)
 {
-	for (vector<GnomeCanvasItem*>::iterator i = waves.begin(); i != waves.end(); ++i) {
-	        gnome_canvas_item_set ((*i), "samples_per_unit", spu, NULL);
+	for (vector<WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
+		(*i)->property_samples_per_unit().set_value(spu);
 	}		
 }
 
@@ -53,7 +56,7 @@ void
 GhostRegion::set_height ()
 {
 	gdouble ht;
-	vector<GnomeCanvasItem*>::iterator i;
+	vector<WaveView*>::iterator i;
 	uint32_t n;
 
 	base_rect->set_property ("y2", (double) trackview.height);
@@ -61,7 +64,8 @@ GhostRegion::set_height ()
 	
 	for (n = 0, i = waves.begin(); i != waves.end(); ++i, ++n) {
 		gdouble yoff = n * ht;
-		gnome_canvas_item_set ((*i), "height", ht, "y", yoff, NULL);
+		(*i)->property_height().set_value(ht);
+		(*i)->property_y().set_value(yoff);
 	}
 }
 

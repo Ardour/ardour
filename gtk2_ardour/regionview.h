@@ -31,7 +31,8 @@
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"
-#include "canvas-waveview.h"
+#include "waveview.h"
+#include "canvas.h"
 
 namespace ARDOUR {
 	class AudioRegion;
@@ -121,8 +122,8 @@ class AudioRegionView : public TimeAxisViewItem
 	    WaveformRectified = 0x8
     };
 
-    vector<GnomeCanvasItem *> waves; /* waveviews */
-    vector<GnomeCanvasItem *> tmp_waves; /* see ::create_waves()*/
+    vector<ArdourCanvas::WaveView *> waves; /* waveviews */
+    vector<ArdourCanvas::WaveView *> tmp_waves; /* see ::create_waves()*/
     Gnome::Canvas::Polygon* sync_mark; /* polgyon for sync position */
     Gnome::Canvas::Text* no_wave_msg; /* text */
     Gnome::Canvas::Line* zero_line; /* simpleline */

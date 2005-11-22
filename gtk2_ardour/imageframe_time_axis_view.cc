@@ -48,24 +48,17 @@ using namespace Editing;
  * @param ifta the parent ImageFrameTimeAxis of this view helper
  */
 ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
-	: _trackview (tv)
+	: _trackview (tv),
+	  canvas_group (*_trackview.canvas_display),
+	  canvas_rect (canvas_group, 0.0, 0.0, 1000000.0, tv.height)
 {
 	region_color = _trackview.color() ;
 	stream_base_color = color_map[cImageTrackBase] ;
 
-	canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display), gnome_canvas_group_get_type (), 0) ;
+	canvas_rect.property_outline_color_rgba().set_value(color_map[cImageTrackOutline]);
+	canvas_rect.property_fill_color_rgba().set_value(stream_base_color);
 
-	canvas_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_group),
-		gnome_canvas_simplerect_get_type(),
-		"x1", 0.0,
-		"y1", 0.0,
-		"x2", 1000000.0,
-		"y2", (double) tv.height,
-		"outline_color_rgba", color_map[cImageTrackOutline],
-		"fill_color_rgba", stream_base_color,
-		0) ;
-
-	canvas_rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_imageframe_view_event), canvas_rect, &_trackview));
+	canvas_rect.signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_imageframe_view_event), canvas_rect, &_trackview));
 
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
 
@@ -99,18 +92,6 @@ ImageFrameTimeAxisView::~ImageFrameTimeAxisView()
 		iter = next ;
 	}
 	
-	// Destroy all our canvas components
-	if(canvas_rect)
-	{
-		gtk_object_destroy(GTK_OBJECT(canvas_rect)) ;
-		canvas_rect = 0 ;
-	}
-	
-	if(canvas_group)
-	{
-		gtk_object_destroy(GTK_OBJECT(canvas_group));
-		canvas_group = 0 ;
-	}
 }
 
 
@@ -126,15 +107,12 @@ int
 ImageFrameTimeAxisView::set_height (gdouble h)
 {
 	/* limit the values to something sane-ish */
-	if (h < 10.0 || h > 1000.0)
-	{
+	if (h < 10.0 || h > 1000.0) {
 		return(-1) ;
 	}
 	
-	if(canvas_rect != 0)
-	{
-		gtk_object_set(GTK_OBJECT(canvas_rect), "y2", h, NULL) ;
-	}
+	canvas_rect.property_y2().set_value(h) ;
+
 
 	for(ImageFrameGroupList::const_iterator citer = imageframe_groups.begin(); citer != imageframe_groups.end(); ++citer)
 	{
@@ -154,7 +132,9 @@ int
 ImageFrameTimeAxisView::set_position (gdouble x, gdouble y)
 
 {
-	gnome_canvas_item_set (canvas_group, "x", x, "y", y, NULL);
+	canvas_group.property_x().set_value(x);
+	canvas_group.property_y().set_value(y);
+
 	return 0;
 }
 

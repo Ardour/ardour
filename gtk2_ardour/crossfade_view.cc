@@ -35,6 +35,8 @@
 using namespace sigc;
 using namespace ARDOUR;
 using namespace Editing;
+using namespace Gnome;
+using namespace Canvas;
 
 sigc::signal<void,CrossfadeView*> CrossfadeView::GoingAway;
 
@@ -57,17 +59,13 @@ CrossfadeView::CrossfadeView (Gnome::Canvas::Group *parent,
 	_valid = true;
 	_visible = true;
 
-	fade_in = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-				       gnome_canvas_line_get_type(),
-				       "fill_color_rgba", color_map[cCrossfadeLine],
-					"width_pixels", (guint) 1,
-				       NULL);
+	fade_in = new Line (*group);
+	fade_in->property_fill_color_rgba().set_value(color_map[cCrossfadeLine]);
+	fade_in->property_width_pixels().set_value(1);
 
-	fade_out = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-					gnome_canvas_line_get_type(),
-					"fill_color_rgba", color_map[cCrossfadeLine],
-					"width_pixels", (guint) 1,
-					NULL);
+	fade_out = new Line (*group);
+	fade_out->property_fill_color_rgba().set_value(color_map[cCrossfadeLine]);
+	fade_out->property_width_pixels().set_value(1);
 	
 	set_height (get_time_axis_view().height);
 
@@ -108,8 +106,8 @@ CrossfadeView::reset_width_dependent_items (double pixel_width)
 	active_changed ();
 
 	if (pixel_width < 5) {
-		gnome_canvas_item_hide (fade_in);
-		gnome_canvas_item_hide (fade_out);
+		fade_in->hide();
+		fade_out->hide();
 	}
 }
 
@@ -147,7 +145,7 @@ CrossfadeView::crossfade_changed (Change what_changed)
 void
 CrossfadeView::redraw_curves ()
 {
-	GnomeCanvasPoints* points; 
+	Points* points; 
 	int32_t npoints;
 	float* vec;
 	
@@ -176,12 +174,12 @@ CrossfadeView::redraw_curves ()
 	npoints = std::min (gdk_screen_width(), npoints);
 
 	if (!_visible || !crossfade.active() || npoints < 3) {
-		gnome_canvas_item_hide (fade_in);
-		gnome_canvas_item_hide (fade_out);
+		fade_in->hide();
+		fade_out->hide();
 		return;
 	} else {
-		gnome_canvas_item_show (fade_in);
-		gnome_canvas_item_show (fade_out);
+		fade_in->show();
+		fade_out->show();
 	} 
 
 	points = get_canvas_points ("xfade edit redraw", npoints);
@@ -189,21 +187,23 @@ CrossfadeView::redraw_curves ()
 
 	crossfade.fade_in().get_vector (0, crossfade.length(), vec, npoints);
 	for (int i = 0, pci = 0; i < npoints; ++i) {
-		points->coords[pci++] = i;
-		points->coords[pci++] = 2.0 + h - (h * vec[i]);
+		Art::Point &p = (*points)[pci++];
+		p.set_x(i);
+		p.set_y(2.0 + h - (h * vec[i]));
 	}
-	gnome_canvas_item_set (fade_in, "points", points, NULL);
+	fade_in->property_points().set_value(*points);
 
 	crossfade.fade_out().get_vector (0, crossfade.length(), vec, npoints);
 	for (int i = 0, pci = 0; i < npoints; ++i) {
-		points->coords[pci++] = i;
-		points->coords[pci++] = 2.0 + h - (h * vec[i]);
+		Art::Point &p = (*points)[pci++];
+		p.set_x(i);
+		p.set_y(2.0 + h - (h * vec[i]));
 	}
-	gnome_canvas_item_set (fade_out, "points", points, NULL);
+	fade_out->property_points().set_value(*points);
 
 	delete [] vec;
 
-	gnome_canvas_points_unref (points);
+	delete points;
 
 	/* XXX this is ugly, but it will have to wait till Crossfades are reimplented
 	   as regions. This puts crossfade views on top of a track, above all regions.

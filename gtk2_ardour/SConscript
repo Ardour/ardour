@@ -116,6 +116,7 @@ glade_factory.cc
 grouped_buttons.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
+imageframe.cc
 imageframe_socket_handler.cc
 imageframe_time_axis.cc
 imageframe_time_axis_group.cc

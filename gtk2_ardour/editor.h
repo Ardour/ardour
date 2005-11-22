@@ -604,8 +604,8 @@ class Editor : public PublicEditor
 
 	struct Cursor {
 	    Editor&               editor;
-	    ArdourCanvas::Points* points;
-	    ArdourCanvas::Item*  canvas_item;
+	    ArdourCanvas::Points  points;
+	    ArdourCanvas::Line    canvas_item;
 	    jack_nframes_t        current_frame;
 	    double		  length;
 

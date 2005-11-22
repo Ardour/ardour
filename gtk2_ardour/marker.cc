@@ -267,8 +267,9 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 Marker::~Marker ()
 {
 	/* destroying the group destroys its contents */
-	gtk_object_destroy (GTK_OBJECT(group));
-	gnome_canvas_points_unref (points->gobj());
+	delete text;
+	delete mark;
+	delete points;
 }
 
 void

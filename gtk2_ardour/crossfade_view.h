@@ -23,7 +23,7 @@
 
 #include <vector>
 #include <gtkmm.h>
-#include <libgnomecanvas/libgnomecanvas.h>
+#include <libgnomecanvasmm/libgnomecanvasmm.h>
 #include <sigc++/signal.h>
 #include <ardour/crossfade.h>
 
@@ -71,10 +71,10 @@ struct CrossfadeView : public TimeAxisViewItem
 
     double spu;
 
-    GnomeCanvasItem *overlap_rect;
-    GnomeCanvasItem *fade_in;
-    GnomeCanvasItem *fade_out;
-    GnomeCanvasItem *active_button;
+    Gnome::Canvas::Item *overlap_rect;
+    Gnome::Canvas::Line *fade_in;
+    Gnome::Canvas::Line *fade_out;
+    Gnome::Canvas::Item *active_button;
 
     void crossfade_changed (ARDOUR::Change);
     void active_changed ();

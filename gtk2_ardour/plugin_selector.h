@@ -46,16 +46,63 @@ class PluginSelector : public ArdourDialog
 	Gtk::Notebook notebook;
 
 	// page 1
-	Gtkmm2ext::Selector ladspa_display;
+	//Gtkmm2ext::Selector ladspa_display;
+	struct LadspaColumns : public Gtk::TreeModel::ColumnRecord {
+		LadspaColumns () {
+			add (name);
+		    add (type);
+			add (ins);
+			add (outs);
+			add (plugin);
+		}
+	    Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> type;
+		Gtk::TreeModelColumn<std::string> ins;
+		Gtk::TreeModelColumn<std::string> outs;
+	    Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
+	};
+	LadspaColumns lcols;
+	Glib::RefPtr<Gtk::ListStore> lmodel;
+	Glib::RefPtr<Gtk::TreeSelection> lselection;
+	Gtk::TreeView ladspa_display;
+
+	struct AddedColumns : public Gtk::TreeModel::ColumnRecord {
+		AddedColumns () {
+			add (text);
+			add (plugin);
+		}
+		Gtk::TreeModelColumn<std::string> text;
+		Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
+	};
+	AddedColumns acols;
+	Glib::RefPtr<Gtk::ListStore> amodel;
+	Glib::RefPtr<Gtk::TreeSelection> aselection;
+	Gtk::TreeView added_list;
+
 	void column_clicked (int column, GtkCList* clist);
 
 #ifdef VST_SUPPORT
 	// page 2
-	Gtkmm2ext::Selector vst_display;
-	static void _vst_refiller (Gtk::CList &, void *);
-	void vst_refiller (Gtk::CList &);
+	struct VstColumns : public Gtk::TreeModel::ColumnRecord {
+		VstColumns () {
+			add (name);
+			add (ins);
+			add (outs);
+			add (plugin);
+		}
+	    Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> ins;
+		Gtk::TreeModelColumn<std::string> outs;
+	    Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
+	};
+	LadspaColumns vcols;
+	Glib::RefPtr<Gtk::ListStore> vmodel;
+	Glib::RefPtr<Gtk::TreeSelection> vselection;
+	Gtk::TreeView vst_display;
+	static void _vst_refiller (void *);
+	void vst_refiller ();
 #endif	
-	Gtkmm2ext::Selector o_selector;
+	//Gtkmm2ext::Selector o_selector;
 
 	ARDOUR::PluginInfo* i_selected_plug;
 
@@ -66,20 +113,11 @@ class PluginSelector : public ArdourDialog
 	ARDOUR::PluginManager *manager;
 	list<ARDOUR::PluginInfo*> added_plugins;
 
-	//static void _input_refiller (Gtk::CList &, void *);
-	//static void _output_refiller (Gtk::CList &, void *);
+	static void _input_refiller (void *);
+	//static void _output_refiller (void *);
 
-	//void input_refiller (Gtk::CList &);
-	//void output_refiller (Gtk::CList &);
-	//void i_plugin_selected (Gtkmm2ext::Selector *selector,
-	//			Gtkmm2ext::SelectionResult *res);
-        //void i_plugin_chosen (Gtkmm2ext::Selector *selector,
-	//		    Gtkmm2ext::SelectionResult *res);
-	//void o_plugin_selected (Gtkmm2ext::Selector *selector,
-	//		      Gtkmm2ext::SelectionResult *res);
-	//void o_plugin_chosen (Gtkmm2ext::Selector *selector,
-	//		    Gtkmm2ext::SelectionResult *res);
-	
+	void input_refiller ();
+	void row_clicked(GdkEventButton *);
 	void btn_add_clicked();
 	void btn_remove_clicked();
 	void btn_ok_clicked();

@@ -85,14 +85,14 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy)
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
-		gnome_canvas_w2c_d (GNOME_CANVAS(&track_canvas), event->button.x, event->button.y, pcx, pcy);
+		track_canvas.w2c(event->button.x, event->button.y, *pcx, *pcy);
 		break;
 	case GDK_MOTION_NOTIFY:
-		gnome_canvas_w2c_d (GNOME_CANVAS(&track_canvas), event->motion.x, event->motion.y, pcx, pcy);
+		track_canvas.w2c(event->motion.x, event->motion.y, *pcx, *pcy);
 		break;
 	case GDK_ENTER_NOTIFY:
 	case GDK_LEAVE_NOTIFY:
-		gnome_canvas_w2c_d (GNOME_CANVAS(&track_canvas), event->crossing.x, event->crossing.y, pcx, pcy);
+		track_canvas.w2c(event->crossing.x, event->crossing.y, *pcx, *pcy);
 		break;
 	default:
 		warning << string_compose (_("Editor::event_frame() used on unhandled event type %1"), event->type) << endmsg;
@@ -282,7 +282,7 @@ Editor::step_mouse_mode (bool next)
 	}
 }
 
-gint
+bool
 Editor::button_press_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	jack_nframes_t where = event_frame (event, 0, 0);
@@ -780,7 +780,7 @@ Editor::button_press_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemTy
 	return FALSE;
 }
 
-gint
+bool
 Editor::button_release_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	jack_nframes_t where = event_frame (event, 0, 0);
@@ -1115,7 +1115,7 @@ Editor::maybe_autoscroll (GdkEvent* event)
 	}
 }
 
-gint
+bool
 Editor::enter_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	ControlPoint* cp;
@@ -1313,7 +1313,7 @@ Editor::enter_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item
 	return FALSE;
 }
 
-gint
+bool
 Editor::leave_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	AutomationLine* al;
@@ -1436,7 +1436,7 @@ Editor::left_automation_track ()
 	return FALSE;
 }
 
-gint
+bool
 Editor::motion_handler (Gnome::Canvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	gint x, y;
@@ -1924,11 +1924,11 @@ Editor::cursor_drag_finished_callback (Gnome::Canvas::Item* item, GdkEvent* even
 	
 	cursor_drag_motion_callback (item, event);
 	
-	if (item == playhead_cursor->canvas_item) {
+	if (item == &playhead_cursor->canvas_item) {
 		if (session) {
 			session->request_locate (playhead_cursor->current_frame, drag_info.was_rolling);
 		}
-	} else if (item == edit_cursor->canvas_item) {
+	} else if (item == &edit_cursor->canvas_item) {
 		edit_cursor->set_position (edit_cursor->current_frame);
 		edit_cursor_clock.set (edit_cursor->current_frame);
 	} 
@@ -2331,7 +2331,7 @@ Editor::control_point_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent*
 	
 	} 
 
-	cp->line.parent_group()->w2i (cx, cy);
+	cp->line.parent_group().w2i (cx, cy);
 
 	cx = max (0.0, cx);
 	cy = max (0.0, cy);
@@ -2405,7 +2405,7 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 
 	cx = event->button.x;
 	cy = event->button.y;
-	line->parent_group()->w2i (cx, cy);
+	line->parent_group().w2i (cx, cy);
 	frame_within_region = (jack_nframes_t) floor (cx * frames_per_unit);
 
 	if (!line->control_points_adjacent (frame_within_region, current_line_drag_info.before, 
@@ -2414,7 +2414,7 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 		return;
 	}
 
-	drag_info.item = line->grab_item();
+	drag_info.item = &line->grab_item();
 	drag_info.data = line;
 	drag_info.motion_callback = &Editor::line_drag_motion_callback;
 	drag_info.finished_callback = &Editor::line_drag_finished_callback;
@@ -2437,7 +2437,7 @@ Editor::line_drag_motion_callback (Gnome::Canvas::Item* item, GdkEvent* event)
 	double cx = drag_info.current_pointer_x;
 	double cy = drag_info.current_pointer_y;
 
-	line->parent_group()->w2i (cx, cy);
+	line->parent_group().w2i (cx, cy);
 	
 	double fraction;
 	fraction = 1.0 - (cy / line->height());
