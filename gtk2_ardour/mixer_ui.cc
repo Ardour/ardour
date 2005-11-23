@@ -278,8 +278,6 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 		   at the same time.
 		*/
 		
-		ARDOUR_UI::instance()->allow_focus (false);
-		
 		if (_selection.selected (&strip->route())) {
 			_selection.remove (&strip->route());
 		} else {

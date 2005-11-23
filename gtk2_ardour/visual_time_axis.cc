@@ -95,7 +95,6 @@ VisualTimeAxis::VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Sessi
 	_marked_for_display = true;
 	
 	name_entry.signal_activate().connect(mem_fun(*this, &VisualTimeAxis::name_entry_changed)) ;
-	name_entry.signal_focus_out_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_focus_out_handler)) ;
 	name_entry.signal_button_press_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_press_handler)) ;
 	name_entry.signal_button_release_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_release_handler)) ;
 	name_entry.signal_key_release_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_key_release_handler)) ;
@@ -359,7 +358,6 @@ VisualTimeAxis::start_time_axis_rename()
 	name_prompter = new ArdourPrompter() ;
 
 	name_prompter->set_prompt (_("new name: ")) ;
-	ARDOUR_UI::instance()->allow_focus(true) ;
 	name_prompter->show_all() ;
 
 	switch (name_prompter->run ()) {
@@ -401,8 +399,6 @@ VisualTimeAxis::label_view()
 void
 VisualTimeAxis::name_entry_changed()
 {
-	ARDOUR_UI::generic_focus_out_event (0);
-
 	string x = name_entry.get_text ();
 	
 	if (x == time_axis_name) {
@@ -437,13 +433,6 @@ gint
 VisualTimeAxis::name_entry_button_release_handler(GdkEventButton *ev)
 {
 	return FALSE;
-}
-
-gint
-VisualTimeAxis::name_entry_focus_out_handler(GdkEventFocus* ev)
-{
-	name_entry_changed();
-	return TRUE;
 }
 
 gint

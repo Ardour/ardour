@@ -552,18 +552,6 @@ GainMeter::gain_changed (void *src)
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &GainMeter::effective_gain_display));
 }
 
-gint
-GainMeter::entry_focus_event (GdkEventFocus* ev)
-{
-	if (ev->in) {
-		ARDOUR_UI::instance()->allow_focus (true);
-	} else {
-		ARDOUR_UI::instance()->allow_focus (false);
-	}
-	return TRUE;
-}
-
-
 void
 GainMeter::set_meter_strip_name (string name)
 {

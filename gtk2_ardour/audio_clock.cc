@@ -696,8 +696,6 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 gint
 AudioClock::field_focus_in_event (GdkEventFocus *ev, Field field)
 {
-	ARDOUR_UI::instance()->allow_focus (true);
-
 	key_entry_state = 0;
 
 	switch (field) {
@@ -755,8 +753,6 @@ AudioClock::field_focus_in_event (GdkEventFocus *ev, Field field)
 gint
 AudioClock::field_focus_out_event (GdkEventFocus *ev, Field field)
 {
-	ARDOUR_UI::instance()->allow_focus (false);
-
 	switch (field) {
 
 	case SMPTE_Hours:
@@ -1657,9 +1653,8 @@ AudioClock::set_mode (Mode m)
 	   started editing the clock and then we switch clock mode.
 	*/
 
-	if (ARDOUR_UI::instance()) {
-		ARDOUR_UI::instance()->allow_focus (false);
-	}
+	// GTK2FIX might need an equivalent here for drop focus
+
 
 	if (_mode == m) {
 		return;

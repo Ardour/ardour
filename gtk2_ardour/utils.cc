@@ -185,15 +185,8 @@ internationalize (const char **array)
 gint
 just_hide_it (GdkEventAny *ev, Gtk::Window *win)
 {
-	ARDOUR_UI::instance()->allow_focus (false);
 	win->hide_all ();
 	return TRUE;
-}
-
-void
-allow_keyboard_focus (bool yn)
-{
-	ARDOUR_UI::instance()->allow_focus (yn);
 }
 
 /* xpm2rgb copied from nixieclock, which bore the legend:

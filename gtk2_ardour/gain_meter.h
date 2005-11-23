@@ -131,8 +131,6 @@ class GainMeter : public Gtk::VBox
 	gint start_gain_touch (GdkEventButton*);
 	gint end_gain_touch (GdkEventButton*);
 
-	gint entry_focus_event (GdkEventFocus* ev);
-
 	void set_mix_group_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
 	void set_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
 	gint meter_release (GdkEventButton*);

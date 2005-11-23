@@ -130,9 +130,6 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	file_selector = 0;
 	spec.running = false;
 
-	file_entry.signal_focus_in_event().connect (sigc::ptr_fun (ARDOUR_UI::generic_focus_in_event));
-	file_entry.signal_focus_out_event().connect (sigc::ptr_fun (ARDOUR_UI::generic_focus_out_event));
-
 	file_entry.set_name ("ExportFileNameEntry");
 
 	master_list = ListStore::create (exp_cols);
@@ -1268,17 +1265,9 @@ ExportDialog::initiate_browse ()
 
 		file_selector->get_cancel_button()->signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), -1));
 		file_selector->get_ok_button()->signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), 1));
-		file_selector->signal_map_event().connect (bind (mem_fun(*this, &ExportDialog::change_focus_policy), true));
 		file_selector->signal_unmap_event().connect (bind (mem_fun(*this, &ExportDialog::change_focus_policy), false));
 	}
 	file_selector->show_all ();
-}
-
-gint
-ExportDialog::change_focus_policy (GdkEventAny *ev, bool yn)
-{
-	Keyboard::the_keyboard().allow_focus (yn);
-	return FALSE;
 }
 
 void

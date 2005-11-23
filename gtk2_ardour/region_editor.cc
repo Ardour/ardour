@@ -70,9 +70,6 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	name_entry.set_name ("AudioRegionEditorEntry");
 	name_label.set_name ("AudioRegionEditorLabel");
 
-	name_entry.signal_focus_in_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
-	name_entry.signal_focus_out_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
-	
 	name_hbox.set_spacing (5);
 	name_hbox.pack_start (name_label, false, false);
 	name_hbox.pack_start (name_entry, false, false);
@@ -204,8 +201,6 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 
 	fade_in_length_spinner.set_digits (3);
 
-	fade_in_length_spinner.signal_focus_in_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
-	fade_in_length_spinner.signal_focus_out_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
 	fade_in_length_spinner.signal_activate().connect (mem_fun(*this, &AudioRegionEditor::activation));
 
 	Gtkmm2ext::set_size_request_to_display_given_text (fade_in_length_spinner, "500g", 20, -1);
@@ -240,8 +235,6 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	
 	fade_out_length_spinner.set_digits (3);
 
-	fade_out_length_spinner.signal_focus_in_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
-	fade_out_length_spinner.signal_focus_out_event().connect (mem_fun(*this, &AudioRegionEditor::focus_change));
 	fade_out_length_spinner.signal_activate().connect (mem_fun(*this, &AudioRegionEditor::activation));
 
 	Gtkmm2ext::set_size_request_to_display_given_text (fade_out_length_spinner, "500g", 20, -1);
@@ -620,17 +613,6 @@ AudioRegionEditor::bounds_changed (Change what_changed)
 		end_clock.set (_region.position() + _region.length(), true);
 		length_clock.set (_region.length(), true);
 	}
-}
-
-gint
-AudioRegionEditor::focus_change (GdkEventFocus *ev)
-{
-	if (ev->in) {
-		ARDOUR_UI::instance()->allow_focus (true);
-	} else {
-		ARDOUR_UI::instance()->allow_focus (false);
-	}
-	return TRUE;
 }
 
 void

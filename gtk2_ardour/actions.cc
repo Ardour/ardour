@@ -29,7 +29,6 @@ using namespace std;
 using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
-using namespace ActionManager;
 
 vector<RefPtr<Gtk::Action> > ActionManager::session_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;
@@ -40,16 +39,9 @@ vector<RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::jack_sensitive_actions;
 string ActionManager::unbound_string = "--";
 
-static vector<RefPtr<UIManager> > ui_managers;
-
-void
-register_ui_manager (RefPtr<UIManager> uim)
-{
-	ui_managers.push_back (uim);
-}
 
 RefPtr<Action>
-register_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
+ActionManager::register_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
 {
 	RefPtr<Action> act = register_action (group, name, label, sl);
 	AccelMap::add_entry (act->get_accel_path(), key, mods);
@@ -58,7 +50,7 @@ register_action (RefPtr<ActionGroup> group, string name, string label, slot<void
 }
 
 RefPtr<Action>
-register_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
+ActionManager::register_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
 {
 	RefPtr<Action> act = register_action (group, name, label);
 	group->add (act, sl);
@@ -67,7 +59,7 @@ register_action (RefPtr<ActionGroup> group, string name, string label, slot<void
 }
 
 RefPtr<Action>
-register_action (RefPtr<ActionGroup> group, string name, string label)
+ActionManager::register_action (RefPtr<ActionGroup> group, string name, string label)
 {
 	RefPtr<Action> act;
 
@@ -79,7 +71,7 @@ register_action (RefPtr<ActionGroup> group, string name, string label)
 
 
 RefPtr<Action>
-register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
+ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
 {
 	RefPtr<Action> act = register_radio_action (group, rgroup, name, label, sl);
 	AccelMap::add_entry (act->get_accel_path(), key, mods);
@@ -88,7 +80,7 @@ register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, str
 }
 
 RefPtr<Action>
-register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, string name, string label, slot<void> sl)
+ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, string name, string label, slot<void> sl)
 {
 	RefPtr<Action> act;
 
@@ -100,7 +92,7 @@ register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, str
 
 
 RefPtr<Action>
-register_toggle_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
+ActionManager::register_toggle_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
 {
 	RefPtr<Action> act = register_toggle_action (group,name, label, sl);
 	AccelMap::add_entry (act->get_accel_path(), key, mods);
@@ -109,7 +101,7 @@ register_toggle_action (RefPtr<ActionGroup> group, string name, string label, sl
 }
 
 RefPtr<Action>
-register_toggle_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
+ActionManager::register_toggle_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
 {
 	RefPtr<Action> act;
 
@@ -119,7 +111,8 @@ register_toggle_action (RefPtr<ActionGroup> group, string name, string label, sl
 	return act;
 }
 
-bool lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
+bool 
+ActionManager::lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
 {
 	GtkAccelKey gkey;
 	bool known = gtk_accel_map_lookup_entry (accel_path.c_str(), &gkey);
@@ -134,47 +127,39 @@ bool lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
 }
 
 void
-merge_actions (RefPtr<ActionGroup> dst, const RefPtr<ActionGroup> src)
+ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& keys, vector<AccelKey>& bindings)
 {
-	ListHandle<RefPtr<Action> > group_actions = src->get_actions();
-
-	for (ListHandle<RefPtr<Action> >::iterator a = group_actions.begin(); a != group_actions.end(); ++a) {
-		RefPtr<Action> act = Action::create ((*a)->get_name(), (*a)->property_label());
-		dst->add (act);
+	ListHandle<RefPtr<ActionGroup> > uim_groups = ui_manager.get_action_groups ();
+	
+	for (ListHandle<RefPtr<ActionGroup> >::iterator g = uim_groups.begin(); g != uim_groups.end(); ++g) {
+		
+		ListHandle<RefPtr<Action> > group_actions = (*g)->get_actions();
+		
+		for (ListHandle<RefPtr<Action> >::iterator a = group_actions.begin(); a != group_actions.end(); ++a) {
+			
+			ustring accel_path;
+			
+			accel_path = (*a)->get_accel_path();
+			
+			names.push_back ((*a)->get_name());
+			paths.push_back (accel_path);
+			
+			AccelKey key;
+			bool known = lookup_entry (accel_path, key);
+			
+			if (known) {
+				keys.push_back (ui_manager.get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod())));
+			} else {
+				keys.push_back (unbound_string);
+			}
+			
+			bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
+		}
 	}
 }
 
 void
-get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& keys, vector<AccelKey>& bindings)
+ActionManager::add_action_group (RefPtr<ActionGroup> grp)
 {
-	for (vector<RefPtr<UIManager> >::iterator u = ui_managers.begin(); u != ui_managers.end(); ++u) {
-
-		ListHandle<RefPtr<ActionGroup> > uim_groups = (*u)->get_action_groups ();
-
-		for (ListHandle<RefPtr<ActionGroup> >::iterator g = uim_groups.begin(); g != uim_groups.end(); ++g) {
-
-			ListHandle<RefPtr<Action> > group_actions = (*g)->get_actions();
-
-			for (ListHandle<RefPtr<Action> >::iterator a = group_actions.begin(); a != group_actions.end(); ++a) {
-				
-				ustring accel_path;
-				
-				accel_path = (*a)->get_accel_path();
-				
-				names.push_back ((*a)->get_name());
-				paths.push_back (accel_path);
-
-				AccelKey key;
-				bool known = lookup_entry (accel_path, key);
-
-				if (known) {
-					keys.push_back ((*u)->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod())));
-				} else {
-					keys.push_back (unbound_string);
-				}
-
-				bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
-			}
-		}
-	}
+	ui_manager.insert_action_group (grp);
 }

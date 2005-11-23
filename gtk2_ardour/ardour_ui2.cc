@@ -434,7 +434,7 @@ ARDOUR_UI::setup_clock ()
 
 	big_clock_window->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Gtk::Window*>(big_clock_window)));
 
-	big_clock_window->Hiding.connect (mem_fun(*this, &ARDOUR_UI::big_clock_hiding));
+	big_clock_window->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::big_clock_hiding));
 }
 
 void

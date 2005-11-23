@@ -145,11 +145,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	PublicEditor&	  the_editor(){return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
 	
-	void allow_focus (bool yn);
-
-	static gint generic_focus_in_event (GdkEventFocus *);
-	static gint generic_focus_out_event (GdkEventFocus *);
-
 	void toggle_location_window ();
 	void toggle_big_clock_window ();
 	void toggle_connection_editor ();

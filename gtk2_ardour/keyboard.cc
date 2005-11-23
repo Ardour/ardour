@@ -31,8 +31,6 @@
 #include <pbd/error.h>
 
 #include "keyboard.h"
-#include "keyboard_target.h"
-#include "ardour_dialog.h"
 #include "gui_thread.h"
 
 #include "i18n.h"
@@ -65,22 +63,11 @@ Keyboard::Keyboard ()
 		_the_keyboard = this;
 	}
 
-	target = 0;
-	default_target = 0;
-	_queue_events = false;
-	_flush_queue = false;
-	playback_ignore_count = 0;
-	focus_allowed = false;
 	collecting_prefix = false;
-	current_dialog = 0;
 
 	get_modifier_masks ();
 
 	snooper_id = gtk_key_snooper_install (_snooper, (gpointer) this);
-
-	/* some global key actions */
-
-	KeyboardTarget::add_action ("close-dialog", mem_fun(*this, &Keyboard::close_current_dialog));
 
 	XMLNode* node = ARDOUR_UI::instance()->keyboard_settings();
 	set_state (*node);
@@ -149,26 +136,15 @@ Keyboard::_snooper (GtkWidget *widget, GdkEventKey *event, gpointer data)
 gint
 Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 {
-	bool handled = false;
 	uint32_t keyval;
 
 #if KBD_DEBUG
 	if (debug_keyboard) {
 		cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type 
-		     << " focus allowed? " << focus_allowed << " current dialog = " << current_dialog
 		     << endl;
 	}
 #endif
 
-	/* Only allow key events to propagate to the
-	   usual GTK model when specifically allowed. 
-	   Returning FALSE here does that.
-	*/
-
-	if (focus_allowed) {
-		return FALSE;
-	}
-	
 	if (event->keyval == GDK_Shift_R) {
 		keyval = GDK_Shift_L;
 
@@ -178,7 +154,6 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 	} else {
 		keyval = event->keyval;
 	}
-	
 		
 	if (event->type == GDK_KEY_PRESS) {
 		bool was_prefix = false;
@@ -241,57 +216,6 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 			sort (state.begin(), state.end());
 		}
 
-#if KBD_DEBUG
-		if (debug_keyboard) {
-			cerr << "STATE: ";
-			for (State::iterator i = state.begin(); i != state.end(); ++i) {
-				cerr << (*i) << ' ';
-			}
-			cerr << endl;
-		}
-#endif
-
-		if (!was_prefix) {
-
-			bool old_collecting_prefix = collecting_prefix;
-
-			if (target) {
-#if KBD_DEBUG
-				if (debug_keyboard) {
-					cerr << "PRESS: delivering to target " << target << endl;
-				}
-#endif
-				target->key_press_event (event, state, handled);
-			}
-			
-			if (!handled && default_target) {
-#if KBD_DEBUG
-				if (debug_keyboard) {
-					cerr << "PRESS: not handled, delivering to default target " << default_target << endl;
-				}
-#endif
-				default_target->key_press_event (event, state, handled);
-			}
-
-#if KBD_DEBUG
-			if (debug_keyboard) {
-				cerr << "PRESS: handled ? " << handled << endl;
-			}
-#endif
-
-			if (handled) {
-				
-				/* don't reset collecting prefix is start_prefix()
-				   was called by the handler.
-				*/
-				
-				if (collecting_prefix == old_collecting_prefix) {
-					collecting_prefix = false;
-					current_prefix = "";
-				}
-			}
-		}
-
 	} else if (event->type == GDK_KEY_RELEASE) {
 
 		State::iterator i;
@@ -301,61 +225,15 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 			sort (state.begin(), state.end());
 		} 
 
-		if (target) {
-#if KBD_DEBUG
-			if (debug_keyboard) {
-				cerr << "RELEASE: delivering to target " << target << endl;
-			}
-#endif
-			target->key_release_event (event, state);
-		} 
-
-		if (default_target) {
-#if KBD_DEBUG
-			if (debug_keyboard) {
-				cerr << "RELEASE: delivering to default target " << default_target << endl;
-			}
-#endif
-			default_target->key_release_event (event, state);
-		}
 	}
 
-	return TRUE;
+	return false;
 }
 
 bool
 Keyboard::key_is_down (uint32_t keyval)
 {
 	return find (state.begin(), state.end(), keyval) != state.end();
-}
-
-void
-Keyboard::set_target (KeyboardTarget *kt)
-{
-	/* XXX possible thread issues here */
-	target = kt;
-}
-
-void
-Keyboard::maybe_unset_target (KeyboardTarget* kt)
-{
-	if (target == kt) {
-		target = 0;
-	}
-}
-
-void
-Keyboard::set_default_target (KeyboardTarget *kt)
-{
-	/* XXX possible thread issues here */
-
-	default_target = kt;
-}
-
-void
-Keyboard::allow_focus (bool yn)
-{
-	focus_allowed = yn;
 }
 
 Keyboard::State
@@ -778,36 +656,24 @@ Keyboard::get_modifier_masks ()
 	XFreeModifiermap (modifiers);
 }
 
-gint
-Keyboard::enter_window (GdkEventCrossing *ev, KeyboardTarget *kt)
+bool
+Keyboard::enter_window (GdkEventCrossing *ev)
 {
 	switch (ev->detail) {
 	case GDK_NOTIFY_INFERIOR:
-		if (debug_keyboard) {
-			cerr << "INFERIOR crossing to " << kt->name() << endl;
-		}
 		break;
 
 	case GDK_NOTIFY_VIRTUAL:
-		if (debug_keyboard) {
-			cerr << "VIRTUAL crossing to " << kt->name() << endl;
-		}
 		/* fallthru */
 
 	default:
-		if (debug_keyboard) {
-			cerr << "REAL crossing to " << kt->name() << endl;
-			cerr << "set current target to " << kt->name() << endl;
-		}
-
-		set_target (kt);
 		check_modifier_state ();
 	}
 
 	return FALSE;
 }
 
-gint
+bool
 Keyboard::leave_window (GdkEventCrossing *ev)
 {
 	switch (ev->detail) {
@@ -828,77 +694,11 @@ Keyboard::leave_window (GdkEventCrossing *ev)
 			cerr << "REAL CROSSING ... out\n";
 			cerr << "clearing current target\n";
 		}
-
-		set_target (0);
 		state.clear ();
 		clear_modifier_state ();
 	}
 	return FALSE;
 
-}
-
-void
-Keyboard::register_target (KeyboardTarget *kt)
-{
-	/* do not register the default - its not meant to be 
-	   an actual window, just a fallback if the current
-	   target for keyboard events doesn't handle an event.
-	*/
-
-	if (kt->name() == X_("default")) {
-		return;
-	}
-
-	kt->window().signal_enter_notify_event().connect (bind (mem_fun(*this, &Keyboard::enter_window), kt));
-	kt->window().signal_leave_notify_event().connect (mem_fun(*this, &Keyboard::leave_window));
-
-	kt->GoingAway.connect (bind (mem_fun(*this, &Keyboard::maybe_unset_target), kt));
-	kt->Hiding.connect (bind (mem_fun(*this, &Keyboard::maybe_unset_target), kt));
-}
-
-void
-Keyboard::set_current_dialog (ArdourDialog* dialog)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Keyboard::set_current_dialog), dialog));
-	
-	current_dialog = dialog;
-
-	if (current_dialog) {
-
-		if (find (known_dialogs.begin(), known_dialogs.end(), dialog) == known_dialogs.end()) {
-			
-			current_dialog->GoingAway.connect 
-				(bind (mem_fun(*this, &Keyboard::set_current_dialog), 
-				       reinterpret_cast<ArdourDialog *>(0)));
-			current_dialog->Hiding.connect 
-				(bind (mem_fun(*this, &Keyboard::set_current_dialog), 
-				       reinterpret_cast<ArdourDialog *>(0)));
-			
-			current_dialog->signal_unmap_event().connect (mem_fun(*this, &Keyboard::current_dialog_vanished));
-			
-			known_dialogs.push_back (dialog);
-		}
-	}
-}
-
-gint
-Keyboard::current_dialog_vanished (GdkEventAny *ev)
-{
-	current_dialog = 0;
-	state.clear ();
-	focus_allowed = false;
-	clear_modifier_state ();
-	current_prefix = "";
-
-	return FALSE;
-}
-
-void
-Keyboard::close_current_dialog ()
-{
-	if (current_dialog) {
-		current_dialog->hide ();
-	}
 }
 
 void
@@ -991,16 +791,3 @@ Keyboard::modifier_state_equals (guint state, ModifierMask mask)
 	return (state & RelevantModifierKeyMask) == (guint) mask;
 }
 
-gint
-Keyboard::focus_in_handler (GdkEventFocus* ev)
-{
-	allow_focus (true);
-	return FALSE;
-}
-
-gint
-Keyboard::focus_out_handler (GdkEventFocus* ev)
-{
-	allow_focus (false);
-	return FALSE;
-}

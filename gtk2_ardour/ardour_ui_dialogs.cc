@@ -141,7 +141,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 	start_blinking ();
 
 	if (editor) {
-		editor->window().present();
+		editor->present();
 	}
 
 	transport_stopped ();
@@ -232,7 +232,7 @@ ARDOUR_UI::create_meter_bridge ()
 {
 	if (meter_bridge == 0) {
 		meter_bridge = new MeterBridge ();
-		meter_bridge->Hiding.connect (mem_fun(*this, &ARDOUR_UI::meter_bridge_hiding));
+		meter_bridge->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::meter_bridge_hiding));
 	}
 	return 0;
 }
@@ -248,7 +248,7 @@ ARDOUR_UI::create_connection_editor ()
 {
 	if (connection_editor == 0) {
 		connection_editor = new ConnectionEditor ();
-		connection_editor->Hiding.connect (mem_fun(*this, &ARDOUR_UI::connection_editor_hiding));
+		connection_editor->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::connection_editor_hiding));
 	}
 
 	if (session) {
@@ -308,7 +308,7 @@ ARDOUR_UI::toggle_options_window ()
 {
 	if (option_editor == 0) {
 		option_editor = new OptionEditor (*this, *editor, *mixer);
-		option_editor->Hiding.connect(mem_fun(*this, &ARDOUR_UI::option_hiding));
+		option_editor->signal_unmap().connect(mem_fun(*this, &ARDOUR_UI::option_hiding));
 		option_editor->set_session (session);
 	} else if (option_editor->within_hiding()) {
 		return;
@@ -354,7 +354,7 @@ ARDOUR_UI::create_location_ui ()
 	if (location_ui == 0) {
 		location_ui = new LocationUI ();
 		location_ui->set_session (session);
-		location_ui->Hiding.connect (mem_fun(*this, &ARDOUR_UI::location_ui_hiding));
+		location_ui->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::location_ui_hiding));
 	} 
 	return 0;
 }
@@ -389,7 +389,7 @@ ARDOUR_UI::create_route_params ()
 	if (route_params == 0) {
 		route_params = new RouteParams_UI (*engine);
 		route_params->set_session (session);
-		route_params->Hiding.connect (mem_fun(*this, &ARDOUR_UI::route_params_hiding));
+		route_params->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::route_params_hiding));
 	}
 	return 0;
 }

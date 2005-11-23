@@ -1131,8 +1131,6 @@ MixerStrip::setup_comment_editor ()
 
 	comment_area.set_name ("MixerTrackCommentArea");
 	comment_area.set_editable (true);
-	comment_area.signal_focus_in_event().connect (ptr_fun (ARDOUR_UI::generic_focus_in_event));
-	comment_area.signal_focus_out_event().connect (ptr_fun (ARDOUR_UI::generic_focus_out_event));
 	  comment_area.changed.connect (mem_fun(*this, &MixerStrip::comment_edited));
 	// GTK2FIX
 	// comment_area.signal_button_release_event().connect_after (ptr_fun (do_not_propagate));

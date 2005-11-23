@@ -70,7 +70,7 @@ class OptionEditor : public ArdourDialog
 	void map_some_session_state (Gtk::CheckButton& button, bool (ARDOUR::Session::*get)() const);
 	gint wm_close (GdkEventAny *);
 	void just_close_win();
-	gint focus_out_event_handler (GdkEventFocus*, void (OptionEditor::*pmf)());
+	bool focus_out_event_handler (GdkEventFocus*, void (OptionEditor::*pmf)());
 
 	/* paths */
 

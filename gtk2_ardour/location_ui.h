@@ -124,8 +124,6 @@ class LocationEditRow  : public Gtk::HBox
 	void scms_toggled ();
 	void preemph_toggled ();
 
-	gint entry_focus_event (GdkEventFocus* ev);
-	
 	void end_changed (ARDOUR::Location *);
 	void start_changed (ARDOUR::Location *);
 	void name_changed (ARDOUR::Location *);

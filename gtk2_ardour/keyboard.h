@@ -33,9 +33,6 @@
 using std::vector;
 using std::string;
 
-class KeyboardTarget;
-class ArdourDialog;
-
 class Keyboard : public sigc::trackable, Stateful
 {
   public:
@@ -47,23 +44,11 @@ class Keyboard : public sigc::trackable, Stateful
 
 	typedef vector<uint32_t> State;
 	
-	void set_target (KeyboardTarget *);
-	void set_default_target (KeyboardTarget *);
-	void allow_focus (bool);
-
-	gint focus_in_handler (GdkEventFocus*);
-	gint focus_out_handler (GdkEventFocus*);
-
 	int  get_prefix(float&, bool& was_floating);
 	void start_prefix ();
 
 	static State  translate_key_name (const string&);
 	static string get_real_keyname (const string& name);
-
-	void register_target (KeyboardTarget *);
-
-	void set_current_dialog (ArdourDialog*);
-	void close_current_dialog ();
 
 	typedef uint32_t ModifierMask;
 
@@ -79,6 +64,9 @@ class Keyboard : public sigc::trackable, Stateful
 	static bool no_modifier_keys_pressed(GdkEventButton* ev) {
 		return (ev->state & RelevantModifierKeyMask) == 0;
 	}
+
+	bool leave_window (GdkEventCrossing *ev);
+	bool enter_window (GdkEventCrossing *ev);
 
 	static bool modifier_state_contains (guint state, ModifierMask);
 	static bool modifier_state_equals   (guint state, ModifierMask);
@@ -111,21 +99,15 @@ class Keyboard : public sigc::trackable, Stateful
 
 	bool   _queue_events;
 	bool   _flush_queue;
-	guint32 playback_ignore_count;
 
 	guint           snooper_id;
 	State           state;
-	KeyboardTarget* target;
-	KeyboardTarget* default_target;
-	bool            focus_allowed;
 	bool            collecting_prefix;
 	string          current_prefix;
 	int*            modifier_masks;
 	int             modifier_mask;
 	int             min_keycode;
 	int             max_keycode;
-	ArdourDialog*   current_dialog;
-	std::vector<ArdourDialog*> known_dialogs;
 
 	static guint     edit_but;
 	static guint     edit_mod;
@@ -136,16 +118,10 @@ class Keyboard : public sigc::trackable, Stateful
 	static gint _snooper (GtkWidget*, GdkEventKey*, gpointer);
 	gint snooper (GtkWidget*, GdkEventKey*);
 	
-	void maybe_unset_target (KeyboardTarget *);
 	void queue_event (GdkEventKey*);
-	void playback_queue ();
-	void clear_queue ();
 	void get_modifier_masks ();
 	void check_modifier_state ();
 	void clear_modifier_state ();
-	gint enter_window (GdkEventCrossing*, KeyboardTarget*);
-	gint leave_window (GdkEventCrossing*);
-	gint current_dialog_vanished (GdkEventAny*);
 
 	void check_meta_numlock (char keycode, guint mod, string modname);
 };

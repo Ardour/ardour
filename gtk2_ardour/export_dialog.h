@@ -135,7 +135,6 @@ class ExportDialog : public ArdourDialog
 	void export_cue_file (ARDOUR::Locations::LocationList& locations, const string& path);
 	void export_toc_file (ARDOUR::Locations::LocationList& locations, const string& path);
 	void do_export ();
-	gint change_focus_policy (GdkEventAny *, bool);
 	gint window_closed (GdkEventAny *ignored);
 
 	void track_selector_button_click ();

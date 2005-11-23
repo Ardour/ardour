@@ -412,9 +412,6 @@ OptionEditor::setup_path_options()
 
 	session_raid_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::raid_path_changed));
 
-	session_raid_entry.signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
-	session_raid_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::raid_path_changed));
-
 	label = manage(new Label(_("session RAID path")));
 	label->set_name ("OptionsLabel");
 	path_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
@@ -1402,7 +1399,6 @@ void
 OptionEditor::just_close_win()
 {
 	hide_all();
-	ARDOUR_UI::instance()->allow_focus(false);
 }
 
 void
@@ -1523,9 +1519,7 @@ OptionEditor::setup_click_editor ()
 	click_path_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::click_sound_changed));
 	click_emphasis_path_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::click_emphasis_sound_changed));
 
-	click_path_entry.signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
 	click_path_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
-	click_emphasis_path_entry.signal_focus_in_event().connect (mem_fun (Keyboard::the_keyboard(), &Keyboard::focus_in_handler));
 	click_emphasis_path_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
 
 	click_browse_button.set_name ("EditorGTKButton");
@@ -1606,11 +1600,11 @@ OptionEditor::connect_audition_editor ()
 	auditioner_gpm->show_all ();
 }
 
-gint
+bool
 OptionEditor::focus_out_event_handler (GdkEventFocus* ev, void (OptionEditor::*pmf)()) 
 {
 	(this->*pmf)();
-	return Keyboard::the_keyboard().focus_out_handler (ev);
+	return false;
 }
 
 void

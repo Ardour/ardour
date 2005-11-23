@@ -24,8 +24,6 @@
 #include <gtkmm/window.h>
 #include <gtkmm/dialog.h>
 
-#include "keyboard_target.h"
-
 namespace ARDOUR {
 	class Session;
 };
@@ -35,7 +33,7 @@ namespace ARDOUR {
  * same mechanism to declare its closing, and to have a common
  * method of connecting and disconnecting from a Session.
  */
-class ArdourDialog : public Gtk::Dialog, public KeyboardTarget
+class ArdourDialog : public Gtk::Dialog
 {
   public:
 	ArdourDialog (string name);

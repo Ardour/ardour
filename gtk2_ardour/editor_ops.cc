@@ -1766,9 +1766,7 @@ Editor::rename_region ()
 	/* recurse */
 
 	dialog.show_all ();
-	ARDOUR_UI::instance()->allow_focus (true);
 	Main::run ();
-	ARDOUR_UI::instance()->allow_focus (false);
 
 	if (region_renamed) {
 		(*selection->audio_regions.begin())->region.set_name (entry.get_text());

@@ -187,7 +187,6 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	void update_control_display (ControlUI* cui);
 	void control_port_toggled (ControlUI* cui);
 	void control_combo_changed (GdkEventAny* ignored, ControlUI* cui);
-	gint entry_focus_event (GdkEventFocus* ev);
 
 	void redirect_active_changed (ARDOUR::Redirect*, void*);
 

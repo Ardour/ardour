@@ -59,24 +59,8 @@ ARDOUR_UI::we_have_dependents ()
 void
 ARDOUR_UI::setup_keybindings ()
 {
-	/* install default bindings */
-
-	KeyboardTarget *defaults = new KeyboardTarget (editor->window(), X_("default"));
-
-	XMLNode* keynode = ARDOUR::Config->get_keys();
-
-	if (keynode != 0) {
-		defaults->set_binding_state (*keynode);
-		editor->set_binding_state (*keynode);
-		mixer->set_binding_state (*keynode);
-		meter_bridge->set_binding_state (*keynode);
-	} else {
-		error << _("keyboard_target: error setting binding state: invalid node") << endmsg;
-	}
-	
-	/* use the default keyboard target for now */
-
-	keyboard->set_default_target (defaults);
+	// GTK2FIX
+	editor->register_actions ();
 }
 
 void

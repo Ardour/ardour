@@ -261,17 +261,6 @@ PannerUI::~PannerUI ()
 }
 
 
-gint
-PannerUI::entry_focus_event (GdkEventFocus* ev)
-{
-	if (ev->in) {
-		ARDOUR_UI::instance()->allow_focus (true);
-	} else {
-		ARDOUR_UI::instance()->allow_focus (false);
-	}
-	return TRUE;
-}
-
 void
 PannerUI::panner_changed ()
 {
@@ -337,8 +326,6 @@ PannerUI::setup_pan ()
 			bc->set_name ("PanSlider");
 			bc->set_shadow_type (Gtk::SHADOW_NONE);
 			bc->set_style (BarController::Line);
-			bc->get_spin_button().signal_focus_in_event().connect (mem_fun(*this, &PannerUI::entry_focus_event));
-			bc->get_spin_button().signal_focus_out_event().connect (mem_fun(*this, &PannerUI::entry_focus_event));
 
 			bc->StartGesture.connect (bind (mem_fun (_io, &IO::start_pan_touch), (uint32_t) asz));
 			bc->StopGesture.connect (bind (mem_fun (_io, &IO::end_pan_touch), (uint32_t) asz));

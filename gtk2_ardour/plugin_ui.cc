@@ -553,9 +553,6 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 			control_ui->control->set_style (BarController::LeftToRight);
 			control_ui->control->set_use_parent (true);
 
-			control_ui->control->get_spin_button().signal_focus_in_event().connect (mem_fun(*this, &PluginUI::entry_focus_event));
-			control_ui->control->get_spin_button().signal_focus_out_event().connect (mem_fun(*this, &PluginUI::entry_focus_event));
-
 			control_ui->control->StartGesture.connect (bind (mem_fun(*this, &PluginUI::start_touch), control_ui));
 			control_ui->control->StopGesture.connect (bind (mem_fun(*this, &PluginUI::stop_touch), control_ui));
 			
@@ -768,17 +765,6 @@ PluginUIWindow::plugin_going_away (ARDOUR::Redirect* ignored)
 	
 	_pluginui->stop_updating();
 	delete_when_idle (this);
-}
-
-gint
-PluginUI::entry_focus_event (GdkEventFocus* ev)
-{
-	if (ev->in) {
-		ARDOUR_UI::instance()->allow_focus (true);
-	} else {
-		ARDOUR_UI::instance()->allow_focus (false);
-	}
-	return TRUE;
 }
 
 void

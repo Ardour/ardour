@@ -169,7 +169,6 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	hide_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::hide_click));
 
 	name_entry.signal_activate().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_activated));
-	name_entry.signal_focus_out_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_focus_out_handler));
 	name_entry.signal_button_press_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_press_handler));
 	name_entry.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_release_handler));
 	name_entry.signal_key_release_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_key_release_handler));
@@ -1109,13 +1108,6 @@ AudioTimeAxisView::name_entry_button_release_handler (GdkEventButton *ev)
 }
 
 gint
-AudioTimeAxisView::name_entry_focus_out_handler (GdkEventFocus* ev)
-{
-	name_entry_changed ();
-	return TRUE;
-}
-
-gint
 AudioTimeAxisView::name_entry_key_release_handler (GdkEventKey* ev)
 {
 	switch (ev->keyval) {
@@ -1143,8 +1135,6 @@ void
 AudioTimeAxisView::name_entry_changed ()
 {
 	string x;
-
-	ARDOUR_UI::generic_focus_out_event (0);
 
 	x = name_entry.get_text ();
 	

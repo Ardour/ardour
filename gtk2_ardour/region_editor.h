@@ -137,7 +137,6 @@ class AudioRegionEditor : public ArdourDialog
 	void fade_in_changed ();
 	void fade_out_changed ();
 
-	gint focus_change (GdkEventFocus *);
 	void activation ();
 
 	void name_entry_changed ();

@@ -706,8 +706,6 @@ Editor::Editor (AudioEngine& eng)
 
 	fade_context_menu.set_name ("ArdourContextMenu");
 
-	install_keybindings ();
-
 	set_title (_("ardour: editor"));
 	set_wmclass (_("ardour_editor"), "Ardour");
 
@@ -3813,9 +3811,6 @@ Editor::duplicate_dialog (bool dup_region)
 	entry.signal_activate().connect (bind (mem_fun (win, &ArdourDialog::stop), 0));
 	cancel_button.signal_clicked().connect (bind (mem_fun (win, &ArdourDialog::stop), 1));
 
-	entry.signal_focus_in_event().connect (sigc::ptr_fun (ARDOUR_UI::generic_focus_in_event));
-	entry.signal_focus_out_event().connect (sigc::ptr_fun (ARDOUR_UI::generic_focus_out_event));
-	
 	entry.set_text ("1");
 	set_size_request_to_display_given_text (entry, X_("12345678"), 20, 15);
 	entry.select_region (0, entry.get_text_length());
@@ -4069,7 +4064,6 @@ Editor::point_selection_changed ()
 void
 Editor::run_sub_event_loop ()
 {
-	Keyboard::the_keyboard().allow_focus (true);
 	sub_event_loop_status = 0;
 	Main::run ();
 }
@@ -4078,7 +4072,6 @@ void
 Editor::finish_sub_event_loop (int status)
 {
 	Main::quit ();
-	Keyboard::the_keyboard().allow_focus (false);
 	sub_event_loop_status = status;
 }
 

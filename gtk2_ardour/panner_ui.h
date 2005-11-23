@@ -108,8 +108,6 @@ class PannerUI : public Gtk::HBox
 	gint start_pan_touch (GdkEventButton*);
 	gint end_pan_touch (GdkEventButton*);
 
-	gint entry_focus_event (GdkEventFocus* ev);
-
 	gint pan_button_event (GdkEventButton*, uint32_t which);
 	Gtk::Menu* pan_menu;
 	Gtk::CheckMenuItem* bypass_menu_item;

@@ -27,8 +27,7 @@
 
 
 ArdourDialog::ArdourDialog (string name)
-	: Dialog (name), 
-	  KeyboardTarget (*this, name)
+	: Dialog (name)
 {
 	session = 0;
 	kbd_input = false;
@@ -46,25 +45,26 @@ bool
 ArdourDialog::on_enter_notify_event (GdkEventCrossing *ev)
 {
 	if (ev->detail != GDK_NOTIFY_INFERIOR) {
-		Keyboard::the_keyboard().set_current_dialog (this);
+		// GTK2FIX
+		//Keyboard::the_keyboard().set_current_dialog (this);
 	}
-	return FALSE;
+	return false;
 }
 
 bool
 ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
 {
 	if (ev->detail != GDK_NOTIFY_INFERIOR) {
-		Keyboard::the_keyboard().set_current_dialog (0);
+		// GTK2FIX
+		//Keyboard::the_keyboard().set_current_dialog (0);
 	}
-	return FALSE;
+	return false;
 }
 
 void
 ArdourDialog::on_unmap ()
 {
 	_within_hiding = true;
-	Hiding (); /* EMIT_SIGNAL */
 	_within_hiding = false;
 	Dialog::on_unmap ();
 }
@@ -79,12 +79,7 @@ void
 ArdourDialog::stop (int rr)
 {
 	if (hide_on_stop) {
-		Hiding (); /* EMIT_SIGNAL */
 		hide_all ();
-
-		if (kbd_input) {
-			ARDOUR_UI::instance()->allow_focus (false);
-		}
 	}
 
 	if (running) {
@@ -102,10 +97,6 @@ ArdourDialog::run ()
 {
 	show_all ();
 
-	if (kbd_input) {
-		ARDOUR_UI::instance()->allow_focus (true);
-	}
-
 	running = true;
 	switch (Dialog::run ()) {
 	case GTK_RESPONSE_ACCEPT:
@@ -121,10 +112,6 @@ ArdourDialog::run ()
 	}
 
 	hide_all ();
-
-	if (kbd_input) {
-		ARDOUR_UI::instance()->allow_focus (false);
-	}
 }
 
 void

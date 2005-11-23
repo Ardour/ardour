@@ -2551,14 +2551,6 @@ ARDOUR_UI::restore_state (string name)
 }
 
 void
-ARDOUR_UI::allow_focus (bool yn)
-{
-	if (keyboard) {
-		keyboard->allow_focus (yn);
-	}
-}
-
-void
 ARDOUR_UI::primary_clock_value_changed ()
 {
 	if (session) {
@@ -2630,20 +2622,6 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 		rec_button.set_state (STATE_NORMAL);
 		break;
 	}
-}
-
-gint
-ARDOUR_UI::generic_focus_in_event (GdkEventFocus *ev)
-{
-	ARDOUR_UI::instance()->allow_focus (true);
-	return FALSE;
-}
-
-gint
-ARDOUR_UI::generic_focus_out_event (GdkEventFocus *ev)
-{
-	ARDOUR_UI::instance()->allow_focus (false);
-	return FALSE;
 }
 
 gint
