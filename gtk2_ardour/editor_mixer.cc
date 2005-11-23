@@ -161,7 +161,7 @@ Editor::update_current_screen ()
 
 		if (_follow_playhead) {
 
-		  playhead_cursor->canvas_item->show();
+		  playhead_cursor->canvas_item.show();
 			if (frame != last_update_frame) {
 
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
@@ -184,7 +184,7 @@ Editor::update_current_screen ()
 			
 			if (frame != last_update_frame) {
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
-					playhead_cursor->canvas_item->hide();
+					playhead_cursor->canvas_item.hide();
 				} else {
 					playhead_cursor->set_position (frame);
 				}

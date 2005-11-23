@@ -26,11 +26,11 @@
 #include <cmath>
 
 #include <gtkmm.h>
-#include <libgnomecanvasmm/libgnomecanvasmm.h>
 
 #include <ardour/location.h>
 #include "enums.h"
 #include "simplerect.h"
+#include "canvas.h"
 
 namespace ARDOUR {
 	class Route;
@@ -42,7 +42,7 @@ namespace ARDOUR {
 }
 
 struct RecBoxInfo {
-        Gnome::Canvas::SimpleRect* rectangle;
+        ArdourCanvas::SimpleRect* rectangle;
 	jack_nframes_t start;
 	jack_nframes_t length;
 };
@@ -79,7 +79,7 @@ class StreamView : public sigc::trackable
 	void set_show_waveforms (bool yn);
 	void set_show_waveforms_recording (bool yn) { use_rec_regions = yn; }
 
-	Gnome::Canvas::Item* canvas_item() { return canvas_group; }
+	ArdourCanvas::Item* canvas_item() { return canvas_group; }
 
 	sigc::signal<void,AudioRegionView*> AudioRegionViewAdded;
 
@@ -111,8 +111,8 @@ class StreamView : public sigc::trackable
   private:
 	AudioTimeAxisView& _trackview;
 
-	Gnome::Canvas::Group* canvas_group;
-	Gnome::Canvas::SimpleRect* canvas_rect; /* frame around the whole thing */
+	ArdourCanvas::Group* canvas_group;
+	ArdourCanvas::SimpleRect* canvas_rect; /* frame around the whole thing */
 
 	typedef list<AudioRegionView* > AudioRegionViewList;
 	AudioRegionViewList region_views;

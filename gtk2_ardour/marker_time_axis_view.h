@@ -25,10 +25,10 @@
 
 #include <gtkmm.h>
 #include <libgnomecanvasmm/group.h>
-#include <libgnomecanvasmm/canvas.h>
 
 #include <ardour/location.h>
 #include "simplerect.h"
+#include "canvas.h"
 
 class PublicEditor;
 class MarkerTimeAxis;
@@ -75,7 +75,7 @@ class MarkerTimeAxisView : public sigc::trackable
 		/**
 		 *
 		 */
-		Gnome::Canvas::Item *canvas_item() { return canvas_group; }
+		ArdourCanvas::Item *canvas_item() { return canvas_group; }
 		
 		
 		//---------------------------------------------------------------------------------------//
@@ -226,8 +226,8 @@ class MarkerTimeAxisView : public sigc::trackable
 		/* the TimeAxisView that this object is acting as the view helper for */
 		MarkerTimeAxis& _trackview ;
 		
-		Gnome::Canvas::Group *canvas_group ;
-		Gnome::Canvas::SimpleRect *canvas_rect ; /* frame around the whole thing */
+		ArdourCanvas::Group *canvas_group ;
+		ArdourCanvas::SimpleRect *canvas_rect ; /* frame around the whole thing */
 
 		/** the current samples per unit */
 		double _samples_per_unit;

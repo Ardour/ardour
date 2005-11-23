@@ -40,7 +40,7 @@ using namespace Canvas;
 
 sigc::signal<void,CrossfadeView*> CrossfadeView::GoingAway;
 
-CrossfadeView::CrossfadeView (Gnome::Canvas::Group *parent, 
+CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent, 
 			      AudioTimeAxisView &tv, 
 			      Crossfade& xf, 
 			      double spu,

@@ -126,13 +126,13 @@ Editor::hide_measures ()
 	used_measure_lines.clear ();
 }
 
-Gnome::Canvas::Line *
+ArdourCanvas::Line *
 Editor::get_time_line ()
 {
-         Gnome::Canvas::Line *line;
+         ArdourCanvas::Line *line;
 
 	if (free_measure_lines.empty()) {
-	        line = new Gnome::Canvas::Line (*time_line_group);
+	        line = new ArdourCanvas::Line (*time_line_group);
 		// cerr << "measure line @ " << line << endl;
 		used_measure_lines.push_back (line);
 	} else {
@@ -153,7 +153,7 @@ Editor::draw_measures ()
 
 	TempoMap::BBTPointList::iterator i;
 	TempoMap::BBTPointList *all_bbt_points;
-	Gnome::Canvas::Line *line;
+	ArdourCanvas::Line *line;
 	gdouble xpos, last_xpos;
 	uint32_t cnt;
 	uint32_t color;
@@ -324,7 +324,7 @@ Editor::mouse_add_new_meter_event (jack_nframes_t frame)
 }
 
 void
-Editor::remove_tempo_marker (Gnome::Canvas::Item* item)
+Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 {
 	Marker* marker;
 	TempoMarker* tempo_marker;
@@ -411,7 +411,7 @@ Editor::edit_tempo_section (TempoSection* section)
 }
 
 void
-Editor::edit_tempo_marker (Gnome::Canvas::Item *item)
+Editor::edit_tempo_marker (ArdourCanvas::Item *item)
 {
 	Marker* marker;
 	TempoMarker* tempo_marker;
@@ -430,7 +430,7 @@ Editor::edit_tempo_marker (Gnome::Canvas::Item *item)
 }
 
 void
-Editor::edit_meter_marker (Gnome::Canvas::Item *item)
+Editor::edit_meter_marker (ArdourCanvas::Item *item)
 {
 	Marker* marker;
 	MeterMarker* meter_marker;
@@ -461,7 +461,7 @@ Editor::real_remove_tempo_marker (TempoSection *section)
 }
 
 void
-Editor::remove_meter_marker (Gnome::Canvas::Item* item)
+Editor::remove_meter_marker (ArdourCanvas::Item* item)
 {
 	Marker* marker;
 	MeterMarker* meter_marker;

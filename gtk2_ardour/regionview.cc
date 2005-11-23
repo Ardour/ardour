@@ -56,7 +56,7 @@ static const int32_t sync_mark_width = 9;
 
 sigc::signal<void,AudioRegionView*> AudioRegionView::AudioRegionViewGoingAway;
 
-AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisView &tv, 
+AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView &tv, 
 				  AudioRegion& r, 
 				  double spu, 
 				  double amplitude_above_axis,
@@ -70,7 +70,7 @@ AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisVie
 
 	  region (r)
 {
-        Gnome::Canvas::Points shape;
+        ArdourCanvas::Points shape;
 	XMLNode *node;
 
 	editor = 0;
@@ -101,7 +101,7 @@ AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisVie
 	gtk_object_set_data (GTK_OBJECT(name_highlight), "regionview", this);
 	gtk_object_set_data (GTK_OBJECT(name_text), "regionview", this);
 
-	//	shape = new Gnome::Canvas::Points ();
+	//	shape = new ArdourCanvas::Points ();
 
 	/* an equilateral triangle */
 
@@ -110,16 +110,16 @@ AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisVie
 	shape.push_back (Gnome::Art::Point (0, sync_mark_width - 1));
 	shape.push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
 
-	sync_mark =  new Gnome::Canvas::Polygon (*group);
+	sync_mark =  new ArdourCanvas::Polygon (*group);
 	sync_mark->property_points().set_value(shape);
 	sync_mark->set_property ("fill_color_rgba", fill_color);
 	sync_mark->hide();
 
-	fade_in_shape = new Gnome::Canvas::Polygon (*group);
+	fade_in_shape = new ArdourCanvas::Polygon (*group);
 	fade_in_shape->set_property ("fill_color_rgba", fade_color);
 	fade_in_shape->set_data ("regionview", this);
 	
-	fade_out_shape = new Gnome::Canvas::Polygon (*group);
+	fade_out_shape = new ArdourCanvas::Polygon (*group);
 	fade_out_shape->set_property ("fill_color_rgba", fade_color);
 	fade_out_shape->set_data ("regionview", this);
 	
@@ -130,7 +130,7 @@ AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisVie
 			UINT_TO_RGBA(fill_color,&r,&g,&b,&a);
 	
 
-	fade_in_handle = new Gnome::Canvas::SimpleRect (*group);
+	fade_in_handle = new ArdourCanvas::SimpleRect (*group);
 	fade_in_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,0));
 	fade_in_handle->set_property ("outline_pixels", 0);
 	fade_in_handle->set_property ("y1", 2.0);
@@ -138,7 +138,7 @@ AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisVie
 
 	fade_in_handle->set_data ("regionview", this);
 	
-	fade_out_handle = new Gnome::Canvas::SimpleRect (*group);
+	fade_out_handle = new ArdourCanvas::SimpleRect (*group);
 	fade_out_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,0));
 	fade_out_handle->set_property ("outline_pixels", 0);
 	fade_out_handle->set_property ("y1", 2.0);
@@ -151,7 +151,7 @@ AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisVie
 	foo += ':';
 	foo += "gain";
 
-	gain_line = new AudioRegionGainLine (foo, tv.session(), *this, &group, region.envelope(),
+	gain_line = new AudioRegionGainLine (foo, tv.session(), *this, *group, region.envelope(),
 					     PublicEditor::canvas_control_point_event,
 					     PublicEditor::canvas_line_event);
 
@@ -183,7 +183,7 @@ AudioRegionView::AudioRegionView (Gnome::Canvas::Group *parent, AudioTimeAxisVie
 	fade_in_shape->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
 
 	fade_in_handle->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
-	fade_out_shape->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_out_event)), fade_out_shape, this));
+	fade_out_shape->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_out_event), fade_out_shape, this));
 	fade_out_handle->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_out_handle_event), fade_out_handle, this));
 
 	set_colors ();
@@ -216,7 +216,7 @@ AudioRegionView::~AudioRegionView ()
 }
 
 gint
-AudioRegionView::_lock_toggle (Gnome::Canvas::Item* item, GdkEvent* ev, void* arg)
+AudioRegionView::_lock_toggle (ArdourCanvas::Item* item, GdkEvent* ev, void* arg)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
@@ -991,7 +991,7 @@ AudioRegionView::create_waves ()
 	}
 
 	if (create_zero_line) {
-		zero_line = new Gnome::Canvas::Line (*group);
+		zero_line = new ArdourCanvas::Line (*group);
 		zero_line->set_property ("x1", (gdouble) 1.0);
 		zero_line->set_property ("x2", (gdouble) (region.length() / samples_per_unit) - 1.0);
 		zero_line->set_property ("color_rgba", (guint) color_map[cZeroLine]);
@@ -1080,7 +1080,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		tmp_waves.clear ();
 		
 		if (!zero_line) {
-			zero_line = new Gnome::Canvas::Line (*group);
+			zero_line = new ArdourCanvas::Line (*group);
 			zero_line->set_property ("x1", (gdouble) 1.0);
 			zero_line->set_property ("x2", (gdouble) (region.length() / samples_per_unit) - 1.0);
 			zero_line->set_property ("color_rgba", (guint) color_map[cZeroLine]);
@@ -1096,7 +1096,7 @@ AudioRegionView::peaks_ready_handler (uint32_t which)
 }
 
 void
-AudioRegionView::add_gain_point_event (Gnome::Canvas::Item *item, GdkEvent *ev)
+AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 {
 	double x, y;
 
@@ -1140,7 +1140,7 @@ AudioRegionView::add_gain_point_event (Gnome::Canvas::Item *item, GdkEvent *ev)
 }
 
 void
-AudioRegionView::remove_gain_point_event (Gnome::Canvas::Item *item, GdkEvent *ev)
+AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 {
         ControlPoint *cp = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
 	region.envelope().erase (cp->model);

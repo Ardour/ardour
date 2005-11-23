@@ -217,7 +217,7 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 
 /*****/
 
-AutomationLine::AutomationLine (string name, TimeAxisView& tv, Gnome::Canvas::Group& parent, AutomationList& al)
+AutomationLine::AutomationLine (string name, TimeAxisView& tv, ArdourCanvas::Group& parent, AutomationList& al)
 	: trackview (tv),
 	  _name (name),
 	  alist (al),
@@ -231,11 +231,11 @@ AutomationLine::AutomationLine (string name, TimeAxisView& tv, Gnome::Canvas::Gr
 	terminal_points_can_slide = true;
 	_height = 0;
 
-	group = new Gnome::Canvas::Group (parent);
+	group = new ArdourCanvas::Group (parent);
 	group->set_property ("x", 0.0);
 	group->set_property ("y", 0.0);
 
-	line = new Gnome::Canvas::Line (*group);
+	line = new ArdourCanvas::Line (*group);
 	line->set_property ("width_pixels", (guint)1);
 
 	line->signal_event().connect (mem_fun (*this, &AutomationLine::event_handler));

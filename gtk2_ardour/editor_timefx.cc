@@ -149,7 +149,8 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 	current_timestretch->signal_delete_event().connect (mem_fun (current_timestretch, &TimeStretchDialog::delete_timestretch_in_progress));
 
 	if (pthread_create_and_store ("timestretch", &thread, 0, timestretch_thread, current_timestretch)) {
-		current_timestretch->close ();
+		// GTK2FIX
+	  //current_timestretch->close ();
 		error << _("timestretch cannot be started - thread creation error") << endmsg;
 		return -1;
 	}

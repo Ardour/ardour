@@ -47,7 +47,7 @@ sigc::signal<void,MarkerView*> MarkerView::GoingAway;
  * @param start the start time of this item
  * @param duration the duration of this item
  */
-MarkerView::MarkerView(Gnome::Canvas::Group *parent,
+MarkerView::MarkerView(ArdourCanvas::Group *parent,
 	TimeAxisView* tv,
 	ImageFrameView* marked,
 	double spu,
@@ -56,7 +56,7 @@ MarkerView::MarkerView(Gnome::Canvas::Group *parent,
 	std::string mark_id,
 	jack_nframes_t start,
 	jack_nframes_t duration)
-  : TimeAxisViewItem(mark_id, parent,*tv,spu,basic_color,start,duration)
+  : TimeAxisViewItem(mark_id, *parent,*tv,spu,basic_color,start,duration)
 {
 	mark_type_text = mark_type ;
 	marked_item = marked ;

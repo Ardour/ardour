@@ -34,15 +34,17 @@ using namespace std;
 using namespace ARDOUR;
 
 RedirectAutomationLine::RedirectAutomationLine (string name, Redirect& rd, uint32_t port, Session& s,
-						TimeAxisView& tv, Gnome::Canvas::Group& parent,
+						
+						TimeAxisView& tv, ArdourCanvas::Group& parent,
+						
 						AutomationList& l)
-
-	: AutomationLine (name, tv, parent, l)
+  
+        : AutomationLine (name, tv, parent, l),
 	  session (s),
 	  _redirect (rd),
 	  _port (port)
 {
-	set_verbose_cursor_uses_gain_mapping (false);
+        set_verbose_cursor_uses_gain_mapping (false);
 
 	PluginInsert *pi;
 	Plugin::ParameterDescriptor desc;

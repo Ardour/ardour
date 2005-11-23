@@ -27,9 +27,10 @@
 #include <sys/types.h>
 
 #include <gtkmm.h>
-#include <libgnomecanvasmm/libgnomecanvasmm.h>
+#include <libgnomecanvasmm/line.h>
 #include <sigc++/signal.h>
-
+#include "canvas.h"
+#include "simplerect.h"
 #include <pbd/undo.h>
 
 #include <ardour/automation_event.h>
@@ -77,7 +78,7 @@ class ControlPoint
 	void set_size (double);
 	void set_visible (bool);
 
-	Gnome::Canvas::SimpleRect* item;
+	ArdourCanvas::SimpleRect* item;
 	AutomationLine& line;
 	uint32_t view_index;
 	ARDOUR::AutomationList::iterator model;
@@ -97,7 +98,7 @@ class ControlPoint
 class AutomationLine : public sigc::trackable
 {
   public:
-        AutomationLine (string name, TimeAxisView&, Gnome::Canvas::Group&, ARDOUR::AutomationList&);
+        AutomationLine (string name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);
 	virtual ~AutomationLine ();
 
 	void queue_reset ();
@@ -137,9 +138,9 @@ class AutomationLine : public sigc::trackable
 
 	TimeAxisView& trackview;
 
-	Gnome::Canvas::Group& canvas_group() const { return *group; }
-	Gnome::Canvas::Item&  parent_group() const { return _parent_group; }
-	Gnome::Canvas::Item&  grab_item() const { return *line; }
+	ArdourCanvas::Group& canvas_group() const { return *group; }
+	ArdourCanvas::Item&  parent_group() const { return _parent_group; }
+	ArdourCanvas::Item&  grab_item() const { return *line; }
 
 	void show_selection();
 	void hide_selection ();
@@ -171,10 +172,10 @@ class AutomationLine : public sigc::trackable
 	bool    no_draw : 1;
 	bool    points_visible : 1;
 	
-	Gnome::Canvas::Group&  _parent_group;
-	Gnome::Canvas::Group*   group;
-	Gnome::Canvas::Line*   line; /* line */
-	Gnome::Canvas::Points  line_points; /* coordinates for canvas line */
+	ArdourCanvas::Group&  _parent_group;
+	ArdourCanvas::Group*   group;
+	ArdourCanvas::Line*   line; /* line */
+	ArdourCanvas::Points  line_points; /* coordinates for canvas line */
 	vector<ControlPoint*>  control_points; /* visible control points */
 
 	struct ALPoint {

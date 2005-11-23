@@ -54,7 +54,7 @@ Editor::handle_new_route (Route& route)
 		return;
 	}
 		
-	tv = new AudioTimeAxisView (*this, *session, route, &track_canvas);
+	tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
 
 	track_views.push_back (tv);
 

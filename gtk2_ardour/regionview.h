@@ -48,7 +48,7 @@ class AutomationTimeAxisView;
 class AudioRegionView : public TimeAxisViewItem
 {
   public:
-  AudioRegionView (Gnome::Canvas::Group *, 
+  AudioRegionView (ArdourCanvas::Group *, 
 		     AudioTimeAxisView&,
 		     ARDOUR::AudioRegion&,
 		     double initial_samples_per_unit,
@@ -91,8 +91,8 @@ class AudioRegionView : public TimeAxisViewItem
     void show_region_editor ();
     void hide_region_editor();
 
-    void add_gain_point_event (Gnome::Canvas::Item *item, GdkEvent *event);
-    void remove_gain_point_event (Gnome::Canvas::Item *item, GdkEvent *event);
+    void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
+    void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 
     AudioRegionGainLine* get_gain_line() const { return gain_line; }
 
@@ -124,13 +124,13 @@ class AudioRegionView : public TimeAxisViewItem
 
     vector<ArdourCanvas::WaveView *> waves; /* waveviews */
     vector<ArdourCanvas::WaveView *> tmp_waves; /* see ::create_waves()*/
-    Gnome::Canvas::Polygon* sync_mark; /* polgyon for sync position */
-    Gnome::Canvas::Text* no_wave_msg; /* text */
-    Gnome::Canvas::Line* zero_line; /* simpleline */
-    Gnome::Canvas::Polygon* fade_in_shape; /* polygon */
-    Gnome::Canvas::Polygon* fade_out_shape; /* polygon */
-    Gnome::Canvas::SimpleRect* fade_in_handle; /* simplerect */
-    Gnome::Canvas::SimpleRect* fade_out_handle; /* simplerect */
+    ArdourCanvas::Polygon* sync_mark; /* polgyon for sync position */
+    ArdourCanvas::Text* no_wave_msg; /* text */
+    ArdourCanvas::Line* zero_line; /* simpleline */
+    ArdourCanvas::Polygon* fade_in_shape; /* polygon */
+    ArdourCanvas::Polygon* fade_out_shape; /* polygon */
+    ArdourCanvas::SimpleRect* fade_in_handle; /* simplerect */
+    ArdourCanvas::SimpleRect* fade_out_handle; /* simplerect */
 
     AudioRegionGainLine* gain_line;
     AudioRegionEditor *editor;
@@ -165,7 +165,7 @@ class AudioRegionView : public TimeAxisViewItem
     void region_sync_changed ();
     void region_scale_amplitude_changed ();
 
-    static gint _lock_toggle (Gnome::Canvas::Item*, GdkEvent*, void*);
+    static gint _lock_toggle (ArdourCanvas::Item*, GdkEvent*, void*);
     void lock_toggle ();
 
     void create_waves ();

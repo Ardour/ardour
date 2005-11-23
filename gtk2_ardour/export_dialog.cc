@@ -60,7 +60,7 @@ static const gchar *sample_rates[] = {
 	0
 };
 
-static const gchar *src_qualities[] = {
+static const gchar *src_quality[] = {
 	N_("best"),
 	N_("fastest"),
 	N_("linear"),
@@ -1265,7 +1265,6 @@ ExportDialog::initiate_browse ()
 
 		file_selector->get_cancel_button()->signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), -1));
 		file_selector->get_ok_button()->signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), 1));
-		file_selector->signal_unmap_event().connect (bind (mem_fun(*this, &ExportDialog::change_focus_policy), false));
 	}
 	file_selector->show_all ();
 }

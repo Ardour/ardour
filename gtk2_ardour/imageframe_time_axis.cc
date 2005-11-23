@@ -56,7 +56,7 @@ using namespace Gtk ;
  * @param sess the current session
  * @param canvas the parent canvas item
  */
-ImageFrameTimeAxis::ImageFrameTimeAxis(std::string track_id, PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas)
+ImageFrameTimeAxis::ImageFrameTimeAxis(std::string track_id, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas)
 	: AxisView(sess),
 	  VisualTimeAxis(track_id, ed, sess, canvas)
 {
@@ -64,7 +64,7 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(std::string track_id, PublicEditor& ed, A
 	
 	//GTK2FIX -- how to get the group? is the canvas display really a group?
 	//selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), gnome_canvas_group_get_type (), NULL) ;
-	selection_group = new Gnome::Canvas::Group (GNOME_CANVAS_GROUP(canvas_display));
+	selection_group = new ArdourCanvas::Group (*canvas_display);
 	selection_group->hide();
 
 	// intialize our data items

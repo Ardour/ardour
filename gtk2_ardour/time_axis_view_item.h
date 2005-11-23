@@ -30,6 +30,7 @@
 
 #include "selectable.h"
 #include "simplerect.h"
+#include "canvas.h"
 
 class TimeAxisView;
 
@@ -223,22 +224,22 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
     /**
      * 
      */
-    Gnome::Canvas::Item* get_canvas_frame() ;
+    ArdourCanvas::Item* get_canvas_frame() ;
 
     /**
      * 
      */
-    Gnome::Canvas::Item* get_canvas_group();
+    ArdourCanvas::Item* get_canvas_group();
 
     /**
      * 
      */
-    Gnome::Canvas::Item* get_name_highlight();
+    ArdourCanvas::Item* get_name_highlight();
 
     /**
      * 
      */
-    Gnome::Canvas::Text* get_name_text();
+    ArdourCanvas::Text* get_name_text();
 
 
     /**
@@ -339,7 +340,7 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
      * @param start the start point of this item
      * @param duration the duration of this item
      */
-    TimeAxisViewItem(std::string it_name, Gnome::Canvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
+    TimeAxisViewItem(std::string it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
 		     jack_nframes_t start, jack_nframes_t duration, Visibility v = Visibility (0));
     
     /**
@@ -445,13 +446,13 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
     uint32_t lock_handle_color_g ;
     uint32_t lock_handle_color_b ;
     
-    Gnome::Canvas::Group*      group;
-    Gnome::Canvas::SimpleRect* vestigial_frame;
-    Gnome::Canvas::SimpleRect* frame;
-    Gnome::Canvas::Text*       name_text;
-    Gnome::Canvas::SimpleRect* name_highlight;
-    Gnome::Canvas::SimpleRect* frame_handle_start;
-    Gnome::Canvas::SimpleRect* frame_handle_end;
+    ArdourCanvas::Group*      group;
+    ArdourCanvas::SimpleRect* vestigial_frame;
+    ArdourCanvas::SimpleRect* frame;
+    ArdourCanvas::Text*       name_text;
+    ArdourCanvas::SimpleRect* name_highlight;
+    ArdourCanvas::SimpleRect* frame_handle_start;
+    ArdourCanvas::SimpleRect* frame_handle_end;
 
 }; /* class TimeAxisViewItem */
 

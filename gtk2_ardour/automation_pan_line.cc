@@ -32,7 +32,7 @@
 
 using namespace ARDOUR;
 
-AutomationPanLine::AutomationPanLine (string name, Session& s, TimeAxisView& tv, Gnome::Canvas::Group& parent, Curve& c)
+AutomationPanLine::AutomationPanLine (string name, Session& s, TimeAxisView& tv, ArdourCanvas::Group& parent, Curve& c)
 
 	: AutomationLine (name, tv, parent, c),
 	  session (s)

@@ -49,7 +49,7 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 	//canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display),
 	//			    gnome_canvas_group_get_type (),
 	//			    NULL);
-	canvas_group = new Gnome::Canvas::Group(GNOME_CANVAS_GROUP(_trackview.canvas_display));
+	canvas_group = new ArdourCanvas::Group(*_trackview.canvas_display);
 
 	//canvas_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_group),
 	//			   gnome_canvas_simplerect_get_type(),
@@ -61,8 +61,8 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 	//			   /* outline ends and bottom */
 	//			   "outline_what", (guint32) (0x1|0x2|0x8),
 	//			   "fill_color_rgba", stream_base_color,
-	//			   NULL);
-	canvas_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
+	//	]		   NULL);
+	canvas_rect = new ArdourCanvas::SimpleRect (*canvas_group);
 	canvas_rect->set_property ("x1", 0.0);
 	canvas_rect->set_property ("y1", 0.0);
 	canvas_rect->set_property ("x2", 1000000.0);
@@ -670,7 +670,7 @@ StreamView::setup_rec_box ()
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend = xstart;
 			
-			Gnome::Canvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
+			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
 			rec_rect->set_property ("x1", xstart);
 			rec_rect->set_property ("y1", 1.0);
 			rec_rect->set_property ("x2", xend);
@@ -857,7 +857,7 @@ StreamView::update_rec_regions ()
 						}
 
 						/* also update rect */
-						Gnome::Canvas::Item * rect = rec_rects[n].rectangle;
+						ArdourCanvas::Item * rect = rec_rects[n].rectangle;
 						gdouble xend = _trackview.editor.frame_to_pixel (region->position() + region->length());
 						rect->set_property ("x2", xend);
 					}
@@ -882,7 +882,7 @@ StreamView::update_rec_regions ()
 						}
 						
 						/* also hide rect */
-						Gnome::Canvas::Item * rect = rec_rects[n].rectangle;
+						ArdourCanvas::Item * rect = rec_rects[n].rectangle;
 						rect->hide();
 
 					}

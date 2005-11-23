@@ -746,7 +746,7 @@ PluginUI::control_port_toggled (ControlUI* cui)
 	}
 }
 
-bool
+void
 PluginUI::control_combo_changed (GdkEventAny* ignored, ControlUI* cui)
 {
 	if (!cui->ignore_change) {
@@ -755,7 +755,6 @@ PluginUI::control_combo_changed (GdkEventAny* ignored, ControlUI* cui)
 		insert.set_parameter (cui->port_index, mapping[value]);
 	}
 
-	return FALSE;
 }
 
 void
@@ -868,8 +867,8 @@ PlugUIBase::PlugUIBase (PluginInsert& pi)
 	bypass_button.signal_toggled().connect (mem_fun(*this, &PlugUIBase::bypass_toggled));
 }
 
-gint
-PlugUIBase::setting_selected(GdkEventAny* ignored)
+void
+PlugUIBase::setting_selected()
 {
 	if (combo.get_active_text().length() > 0) {
 		if (!plugin.load_preset(combo.get_active_text())) {
@@ -877,7 +876,6 @@ PlugUIBase::setting_selected(GdkEventAny* ignored)
 		}
 	}
 
-	return FALSE;
 }
 
 void

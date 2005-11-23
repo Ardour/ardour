@@ -30,6 +30,7 @@
 #include "editor.h"
 #include "marker.h"
 #include "selection.h"
+#include "simplerect.h"
 #include "editing.h"
 #include "gui_thread.h"
 
@@ -293,7 +294,7 @@ Editor::mouse_add_new_marker (jack_nframes_t where)
 }
 
 void
-Editor::remove_marker (Gnome::Canvas::Item& item, GdkEvent* event)
+Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent* event)
 {
 	Marker* marker;
 	bool is_start;
@@ -356,7 +357,7 @@ Editor::location_gone (Location *location)
 }
 
 void
-Editor::tm_marker_context_menu (GdkEventButton* ev, Gnome::Canvas::Item* item)
+Editor::tm_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 {
 	if (tm_marker_menu == 0) {
 		build_tm_marker_menu ();
@@ -369,7 +370,7 @@ Editor::tm_marker_context_menu (GdkEventButton* ev, Gnome::Canvas::Item* item)
 
 
 void
-Editor::marker_context_menu (GdkEventButton* ev, Gnome::Canvas::Item* item)
+Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 {
 	Marker * marker;
 	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
@@ -412,7 +413,7 @@ Editor::marker_context_menu (GdkEventButton* ev, Gnome::Canvas::Item* item)
 
 
 void
-Editor::new_transport_marker_context_menu (GdkEventButton* ev, Gnome::Canvas::Item* item)
+Editor::new_transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 {
 	if (new_transport_marker_menu == 0) {
 		build_new_transport_marker_menu ();
@@ -423,7 +424,7 @@ Editor::new_transport_marker_context_menu (GdkEventButton* ev, Gnome::Canvas::It
 }
 
 void
-Editor::transport_marker_context_menu (GdkEventButton* ev, Gnome::Canvas::Item* item)
+Editor::transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 {
 	if (transport_marker_menu == 0) {
 		build_transport_marker_menu ();

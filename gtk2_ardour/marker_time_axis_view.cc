@@ -54,9 +54,9 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 
 	//GTK2FIX -- how to get the group? is the canvas display really a group?
 	//canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display), gnome_canvas_group_get_type (), 0);
-	canvas_group = new Gnome::Canvas::Group (*_trackview.canvas_display);
+	canvas_group = new ArdourCanvas::Group (*_trackview.canvas_display);
 
-	canvas_rect =  new Gnome::Canvas::SimpleRect (*canvas_group);
+	canvas_rect =  new ArdourCanvas::SimpleRect (*canvas_group);
 	canvas_rect->set_property ("x1", 0.0);
 	canvas_rect->set_property ("y1", 0.0);
 	canvas_rect->set_property ("x2", 1000000.0);
@@ -64,7 +64,7 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	canvas_rect->set_property ("outline_color_rgba", color_map[cMarkerTrackOutline]);
 	canvas_rect->set_property ("fill_color_rgba", stream_base_color);
 		   
-	canvas_rect->signal_event().connect() (bind (mem_fun (editor, &PublicEditor::canvas_marker_time_axis_view_event), canvas_rect, &_trackview));
+	canvas_rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_time_axis_view_event), canvas_rect, &_trackview));
 
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
 

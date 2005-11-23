@@ -660,8 +660,8 @@ CrossfadeEditor::redraw ()
 
 	fade[current].normative_curve.get_vector (0, 1.0, vec, npoints);
 	
-	Gnome::Canvas::Points pts;
-	Gnome::Canvas::Points spts;
+	ArdourCanvas::Points pts;
+	ArdourCanvas::Points spts;
 
 	while (pts.size() < npoints) {
 		pts.push_back (Gnome::Art::Point (0,0));
@@ -729,7 +729,7 @@ CrossfadeEditor::redraw ()
 	fade[current].line->property_points() = pts;
 	fade[current].shading->property_points() = spts;
 
-	for (vector<Gnome::Canvas::WaveView*>::iterator i = fade[current].waves.begin(); i != fade[current].waves.end(); ++i) {
+	for (vector<ArdourCanvas::WaveView*>::iterator i = fade[current].waves.begin(); i != fade[current].waves.end(); ++i) {
 		(*i)->property_gain_src() = &fade[current].gain_curve;
 	}
 }

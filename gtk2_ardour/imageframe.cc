@@ -57,9 +57,9 @@ namespace
 namespace Glib
 {
 
-Gnome::Canvas::ImageFrame* wrap(GnomeCanvasImageFrame* object, bool take_copy)
+ArdourCanvas::ImageFrame* wrap(GnomeCanvasImageFrame* object, bool take_copy)
 {
-  return dynamic_cast<Gnome::Canvas::ImageFrame *> (Glib::wrap_auto ((GObject*)(object), take_copy));
+  return dynamic_cast<ArdourCanvas::ImageFrame *> (Glib::wrap_auto ((GObject*)(object), take_copy));
 }
 
 } /* namespace Glib */

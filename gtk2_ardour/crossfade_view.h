@@ -34,7 +34,7 @@ class AudioRegionView;
 
 struct CrossfadeView : public TimeAxisViewItem
 {
-    CrossfadeView (Gnome::Canvas::Group*, 
+    CrossfadeView (ArdourCanvas::Group*, 
 		   AudioTimeAxisView&,
 		   ARDOUR::Crossfade&,
 		   double initial_samples_per_unit, 
@@ -71,10 +71,10 @@ struct CrossfadeView : public TimeAxisViewItem
 
     double spu;
 
-    Gnome::Canvas::Item *overlap_rect;
-    Gnome::Canvas::Line *fade_in;
-    Gnome::Canvas::Line *fade_out;
-    Gnome::Canvas::Item *active_button;
+    ArdourCanvas::Item *overlap_rect;
+    ArdourCanvas::Line *fade_in;
+    ArdourCanvas::Line *fade_out;
+    ArdourCanvas::Item *active_button;
 
     void crossfade_changed (ARDOUR::Change);
     void active_changed ();

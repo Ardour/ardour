@@ -4,7 +4,7 @@
 #include "editor.h"
 #include "editing.h"
 #include "actions.h"
-
+#include "ardour_ui.h"
 #include "i18n.h"
 
 using namespace Gtk;

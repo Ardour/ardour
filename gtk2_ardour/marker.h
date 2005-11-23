@@ -24,9 +24,12 @@
 #include <string>
 #include <glib.h>
 #include <ardour/ardour.h>
-#include <libgnomecanvasmm/libgnomecanvasmm.h>
+#include <libgnomecanvasmm/group.h>
+#include <libgnomecanvasmm/text.h>
 #include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
+
+#include "canvas.h"
 
 namespace ARDOUR {
 	class TempoSection;
@@ -50,8 +53,8 @@ class Marker : public sigc::trackable
 		PunchOut
 	};
 
-	Marker (PublicEditor& editor, Gnome::Canvas::Group& parent, guint32 rgba, const string& text, Type, 
-		gint (*callback)(Gnome::Canvas::Item *, GdkEvent *, gpointer), jack_nframes_t frame = 0);
+	Marker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, Type, 
+		gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer), jack_nframes_t frame = 0);
 	virtual ~Marker ();
 
 	void set_position (jack_nframes_t);
@@ -66,10 +69,10 @@ class Marker : public sigc::trackable
   protected:
 	PublicEditor& editor;
 
-	Gnome::Canvas::Group *group;
-	Gnome::Canvas::Item *mark;
-	Gnome::Canvas::Text *text;
-	Gnome::Canvas::Points *points;
+	ArdourCanvas::Group *group;
+	ArdourCanvas::Item *mark;
+	ArdourCanvas::Text *text;
+	ArdourCanvas::Points *points;
 
 	double    unit_position;
 	jack_nframes_t frame_position;
@@ -82,8 +85,8 @@ class Marker : public sigc::trackable
 class TempoMarker : public Marker
 {
   public:
-        TempoMarker (PublicEditor& editor, Gnome::Canvas::Group& parent, guint32 rgba, const string& text, ARDOUR::TempoSection&, 
-		     gint (*callback)(Gnome::Canvas::Item *, GdkEvent *, gpointer));
+        TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, ARDOUR::TempoSection&, 
+		     gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer));
 	~TempoMarker ();
 
 	ARDOUR::TempoSection& tempo() const { return _tempo; }
@@ -95,8 +98,8 @@ class TempoMarker : public Marker
 class MeterMarker : public Marker
 {
   public:
-        MeterMarker (PublicEditor& editor, Gnome::Canvas::Group& parent, guint32 rgba, const string& text, ARDOUR::MeterSection&, 
-		     gint (*callback)(Gnome::Canvas::Item *, GdkEvent *, gpointer));
+        MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, ARDOUR::MeterSection&, 
+		     gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer));
 	~MeterMarker ();
 
 	ARDOUR::MeterSection& meter() const { return _meter; }

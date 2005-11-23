@@ -17,11 +17,11 @@
 using namespace std;
 using namespace ARDOUR;
 
-AudioRegionGainLine::AudioRegionGainLine (string name, Session& s, AudioRegionView& r, Gnome::Canvas::Item& parent,
+AudioRegionGainLine::AudioRegionGainLine (string name, Session& s, AudioRegionView& r, ArdourCanvas::Group& parent,
 					  Curve& c, 
-					  gint (*point_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer),
-					  gint (*line_callback)(Gnome::Canvas::Item*, GdkEvent*, gpointer))
-	: AutomationLine (name, r.get_time_axis_view(), parent, c, point_callback, line_callback),
+					  bool (*point_callback)(ArdourCanvas::Item*, GdkEvent*, gpointer),
+					  bool (*line_callback)(ArdourCanvas::Item*, GdkEvent*, gpointer))
+  : AutomationLine (name, r.get_time_axis_view(), parent, c),
 	  session (s),
 	  rv (r)
 {

@@ -61,7 +61,7 @@ const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6 ;
  * @param start the start point of this item
  * @param duration the duration of this item
  */
-TimeAxisViewItem::TimeAxisViewItem(std::string it_name, Gnome::Canvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
+TimeAxisViewItem::TimeAxisViewItem(std::string it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
 				   jack_nframes_t start, jack_nframes_t duration,
 				   Visibility visibility)
 	: trackview (tv)
@@ -87,9 +87,9 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, Gnome::Canvas::Group& pa
 		warning << "Time Axis Item Duration == 0" << endl ;
 	}
 
-	group = new Gnome::Canvas::Group (parent);
+	group = new ArdourCanvas::Group (parent);
 
-	vestigial_frame = new Gnome::Canvas::SimpleRect (*group);
+	vestigial_frame = new ArdourCanvas::SimpleRect (*group);
 	vestigial_frame->set_property ("x1", (double) 0.0);
 	vestigial_frame->set_property ("y1", (double) 1.0);
 	vestigial_frame->set_property ("x2", 2.0);
@@ -99,7 +99,7 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, Gnome::Canvas::Group& pa
 	vestigial_frame->hide ();
 
 	if (visibility & ShowFrame) {
-		frame = new Gnome::Canvas::SimpleRect (*group);
+		frame = new ArdourCanvas::SimpleRect (*group);
 		frame->set_property ("x1", (double) 0.0);
 		frame->set_property ("y1", (double) 1.0);
 		frame->set_property ("x2", (double) trackview.editor.frame_to_pixel(duration));
@@ -112,7 +112,7 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, Gnome::Canvas::Group& pa
 	}
 
 	if (visibility & ShowNameHighlight) {
-		name_highlight = new Gnome::Canvas::SimpleRect (*group);
+		name_highlight = new ArdourCanvas::SimpleRect (*group);
 		name_highlight->set_property ("x1", (double) 1.0);
 		name_highlight->set_property ("x2", (double) (trackview.editor.frame_to_pixel(item_duration)) - 1);
 		name_highlight->set_property ("y1", (double) (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE));
@@ -127,7 +127,7 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, Gnome::Canvas::Group& pa
 	}
 
 	if (visibility & ShowNameText) {
-		name_text = new Gnome::Canvas::Text (*group);
+		name_text = new ArdourCanvas::Text (*group);
 		name_text->set_property ("x", (double) TimeAxisViewItem::NAME_X_OFFSET);
 		name_text->set_property ("y", (double) trackview.height + 1.0 - TimeAxisViewItem::NAME_Y_OFFSET);
 		name_text->set_property ("font", NAME_FONT);
@@ -142,7 +142,7 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, Gnome::Canvas::Group& pa
 	/* create our grab handles used for trimming/duration etc */
 
 	if (visibility & ShowHandles) {
-		frame_handle_start = new Gnome::Canvas::SimpleRect (*group);
+		frame_handle_start = new ArdourCanvas::SimpleRect (*group);
 		frame_handle_start->set_property ("x1", (double) 0.0);
 		frame_handle_start->set_property ("x2", (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH);
 		frame_handle_start->set_property ("y1", (double) 1.0);
@@ -150,7 +150,7 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, Gnome::Canvas::Group& pa
 		frame_handle_start->set_property ("outline_color_rgba", color_map[cFrameHandleStartOutline]);
 		frame_handle_start->set_property ("fill_color_rgba", color_map[cFrameHandleStartFill]);
 		
-		frame_handle_end = new Gnome::Canvas::SimpleRect (*group);
+		frame_handle_end = new ArdourCanvas::SimpleRect (*group);
 		frame_handle_end->set_property ("x1", (double) (trackview.editor.frame_to_pixel(get_duration())) - (TimeAxisViewItem::GRAB_HANDLE_LENGTH));
 		frame_handle_end->set_property ("x2", (double) trackview.editor.frame_to_pixel(get_duration()));
 		frame_handle_end->set_property ("y1", (double) 1);
@@ -554,7 +554,7 @@ TimeAxisViewItem::set_color(Gdk::Color& base_color)
 /**
  * 
  */
-Gnome::Canvas::Item*
+ArdourCanvas::Item*
 TimeAxisViewItem::get_canvas_frame()
 {
 	return(frame) ;
@@ -563,7 +563,7 @@ TimeAxisViewItem::get_canvas_frame()
 /**
  * 
  */
-Gnome::Canvas::Item*
+ArdourCanvas::Item*
 TimeAxisViewItem::get_canvas_group()
 {
 	return(group) ;
@@ -572,7 +572,7 @@ TimeAxisViewItem::get_canvas_group()
 /**
  * 
  */
-Gnome::Canvas::Item*
+ArdourCanvas::Item*
 TimeAxisViewItem::get_name_highlight()
 {
 	return(name_highlight) ;
@@ -581,7 +581,7 @@ TimeAxisViewItem::get_name_highlight()
 /**
  * 
  */
-Gnome::Canvas::Text*
+ArdourCanvas::Text*
 TimeAxisViewItem::get_name_text()
 {
 	return(name_text) ;

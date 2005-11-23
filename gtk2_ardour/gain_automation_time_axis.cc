@@ -30,7 +30,7 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
-GainAutomationTimeAxisView::GainAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, Canvas& canvas, std::string n, ARDOUR::Curve& c)
+GainAutomationTimeAxisView::GainAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, ArdourCanvas::Canvas& canvas, std::string n, ARDOUR::Curve& c)
 
 	: AxisView (s),
 	  AutomationTimeAxisView (s, r, e, parent, canvas, n, X_("gain"), ""),
@@ -44,7 +44,7 @@ GainAutomationTimeAxisView::~GainAutomationTimeAxisView ()
 }
 
 void
-GainAutomationTimeAxisView::add_automation_event (Gnome::Canvas::Item* item, GdkEvent* event, jack_nframes_t when, double y)
+GainAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent* event, jack_nframes_t when, double y)
 {
 	double x = 0;
 

@@ -15,11 +15,11 @@ GhostRegion::GhostRegion (AutomationTimeAxisView& atv, double initial_pos)
   //			     "x", initial_pos,
   //			     "y", 0.0,
   //			     NULL);
-	group = new Gnome::Canvas::Group (*trackview.canvas_display);
+	group = new ArdourCanvas::Group (*trackview.canvas_display);
 	group->set_property ("x", initial_pos);
 	group->set_property ("y", 0.0);
 
-	base_rect = new Gnome::Canvas::SimpleRect (*group);
+	base_rect = new ArdourCanvas::SimpleRect (*group);
 	base_rect->set_property ("x1", (double) 0.0);
 	base_rect->set_property ("y1", (double) 0.0);
 	base_rect->set_property ("y2", (double) trackview.height);

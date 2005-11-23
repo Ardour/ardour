@@ -27,8 +27,8 @@
 
 #include "i18n.h"
 
-Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, const string& annotation, 
-		Type type, gint (*callback)(Gnome::Canvas::Item *, GdkEvent *, gpointer), jack_nframes_t frame)
+Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation, 
+		Type type, gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer), jack_nframes_t frame)
 
 	: editor (ed), _type(type)
 {
@@ -122,14 +122,12 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 
 	switch (type) {
 	case Mark:
-		points = new Gnome::Canvas::Points ();
+		points = new ArdourCanvas::Points ();
 
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 		points->push_back (Gnome::Art::Point (6.0, 0.0));
-
 		points->push_back (Gnome::Art::Point (6.0, 5.0));
 		points->push_back (Gnome::Art::Point (3.0, 10.0));		
-
 		points->push_back (Gnome::Art::Point (0.0, 5.0));		
 		points->push_back (Gnome::Art::Point (0.0, 0.0));		
 		
@@ -140,10 +138,9 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 	case Tempo:
 	case Meter:
 
-		points = new Gnome::Canvas::Points ();
+		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (3.0, 0.0));
 		points->push_back (Gnome::Art::Point (6.0, 5.0));		
-
 		points->push_back (Gnome::Art::Point (6.0, 10.0));  		
 		points->push_back (Gnome::Art::Point (0.0, 10.0));		
 		points->push_back (Gnome::Art::Point (0.0, 5.0)); 		
@@ -154,7 +151,7 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 		break;
 
 	case Start:
-	        points = new Gnome::Canvas::Points ();
+	        points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0)); 
 		points->push_back (Gnome::Art::Point (5.0, 0.0)); 		
 		points->push_back (Gnome::Art::Point (10.0, 5.0)); 		
@@ -167,7 +164,7 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 		break;
 
 	case End:
-		points = new Gnome::Canvas::Points ();
+		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (5.0, 0.0));
 		points->push_back (Gnome::Art::Point (10.0, 0.0));		
 		points->push_back (Gnome::Art::Point (10.0, 10.0));		
@@ -180,7 +177,7 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 		break;
 
 	case LoopStart:
-		points = new Gnome::Canvas::Points ();
+		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 		points->push_back (Gnome::Art::Point (4.0, 0.0));		
 		points->push_back (Gnome::Art::Point (4.0, 8.0));		
@@ -194,7 +191,7 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 		break;
 
 	case LoopEnd:
-		points = new Gnome::Canvas::Points ();
+		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (8.0,  0.0));
 		points->push_back (Gnome::Art::Point (8.0, 11.0));	
 		points->push_back (Gnome::Art::Point (0.0, 11.0));		
@@ -208,7 +205,7 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 		break;
 
 	case  PunchIn:
-		points = new Gnome::Canvas::Points ();
+		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 		points->push_back (Gnome::Art::Point (8.0, 0.0));		
 		points->push_back (Gnome::Art::Point (4.0, 4.0));	
@@ -221,7 +218,7 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 		break;
 		
 	case  PunchOut:
-		points = new Gnome::Canvas::Points ();
+		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 		points->push_back (Gnome::Art::Point (8.0, 0.0));		
 		points->push_back (Gnome::Art::Point (8.0, 11.0));		
@@ -246,14 +243,14 @@ Marker::Marker (PublicEditor& ed, Gnome::Canvas::Group& parent, guint32 rgba, co
 	group->set_property ("x", unit_position);
 	group->set_property ("y", 1.0);
 	// cerr << "set mark al points, nc = " << points->num_points << endl;
-	mark = new Gnome::Canvas::Polygon (*group);
+	mark = new ArdourCanvas::Polygon (*group);
 	mark->set_property ("points", points);
 	mark->set_property ("fill_color_rgba", rgba);
 	mark->set_property ("outline_color", Gdk::Color ("black"));
 
 	Pango::FontDescription font = get_font_for_style (N_("MarkerText"));
 
-	text = new Gnome::Canvas::Text (*group);
+	text = new ArdourCanvas::Text (*group);
 	text->set_property ("text", annotation.c_str());
 	text->set_property ("x", label_offset);
 	text->set_property ("y", 0.0);
@@ -314,9 +311,9 @@ Marker::set_color_rgba (uint32_t color)
 
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, Gnome::Canvas::Group& parent, guint32 rgba, const string& text, 
+TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, 
 			  ARDOUR::TempoSection& temp, 
-			  gint (*callback)(Gnome::Canvas::Item *, GdkEvent *, gpointer))
+			  gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer))
 	: Marker (editor, parent, rgba, text, Tempo, callback, 0),
 	  _tempo (temp)
 {
@@ -330,9 +327,9 @@ TempoMarker::~TempoMarker ()
 
 /***********************************************************************/
 
-MeterMarker::MeterMarker (PublicEditor& editor, Gnome::Canvas::Group& parent, guint32 rgba, const string& text, 
+MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, 
 			  ARDOUR::MeterSection& m, 
-			  gint (*callback)(Gnome::Canvas::Item *, GdkEvent *, gpointer))
+			  gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer))
 	: Marker (editor, parent, rgba, text, Meter, callback, 0),
 	  _meter (m)
 {

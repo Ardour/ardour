@@ -798,7 +798,7 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 void
 Editor::initialize_canvas ()
 {
-	Gnome::Canvas::init ();
+	ArdourCanvas::init ();
 
 	/* adjust sensitivity for "picking" items */
 
@@ -825,7 +825,7 @@ Editor::initialize_canvas ()
 
 	Pango::FontDescription font = get_font_for_style (N_("VerboseCanvasCursor"));
 
-	verbose_canvas_cursor = new Gnome::Canvas::Text (*track_canvas.root());
+	verbose_canvas_cursor = new ArdourCanvas::Text (*track_canvas.root());
 	verbose_canvas_cursor->set_property ("font_desc", font);
 	verbose_canvas_cursor->set_property ("anchor", GTK_ANCHOR_NW);
 	verbose_canvas_cursor->set_property ("fill_color_rgba", color_map[cVerboseCanvasCursor]);
@@ -834,45 +834,45 @@ Editor::initialize_canvas ()
 	
 	/* a group to hold time (measure) lines */
 	
-	time_line_group = new Gnome::Canvas::Group (*track_canvas.root(), 0.0, 0.0);
-	cursor_group = new Gnome::Canvas::Group (*track_canvas.root(), 0.0, 0.0);
+	time_line_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
+	cursor_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
 	
 	time_canvas.set_name ("EditorTimeCanvas");
 	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
 	
-	meter_group = new Gnome::Canvas::Group (*time_canvas.root(), 0.0, 0.0);
-	tempo_group = new Gnome::Canvas::Group (*time_canvas.root(), 0.0, 0.0);
-	marker_group = new Gnome::Canvas::Group (*time_canvas.root(), 0.0, timebar_height * 2.0);
-	range_marker_group = new Gnome::Canvas::Group (*time_canvas.root(), 0.0, timebar_height * 3.0);
-	transport_marker_group = new Gnome::Canvas::Group (*time_canvas.root(), 0.0, timebar_height * 4.0);
+	meter_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
+	tempo_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
+	marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 2.0);
+	range_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 3.0);
+	transport_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 4.0);
 	
-	tempo_bar = new Gnome::Canvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
 	tempo_bar->set_property ("fill_color_rgba", color_map[cTempoBar]);
 	tempo_bar->set_property ("outline_pixels", 0);
 	
-	meter_bar = new Gnome::Canvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	meter_bar = new ArdourCanvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
 	meter_bar->set_property ("fill_color_rgba", color_map[cMeterBar]);
 	meter_bar->set_property ("outline_pixels",0);
 	
-	marker_bar = new Gnome::Canvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
 	marker_bar->set_property ("fill_color_rgba", color_map[cMarkerBar]);
 	marker_bar->set_property ("outline_pixels", 0);
 	
-	range_marker_bar = new Gnome::Canvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
 	range_marker_bar->set_property ("fill_color_rgba", color_map[cRangeMarkerBar]);
 	range_marker_bar->set_property ("outline_pixels", 0);
 	
-	transport_marker_bar = new Gnome::Canvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
 	transport_marker_bar->set_property ("fill_color_rgba", color_map[cTransportMarkerBar]);
 	transport_marker_bar->set_property ("outline_pixels", 0);
 	
-	range_bar_drag_rect = new Gnome::Canvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
 	range_bar_drag_rect->set_property ("fill_color_rgba", color_map[cRangeDragBarRectFill]);
 	range_bar_drag_rect->set_property ("outline_color_rgba", color_map[cRangeDragBarRect]);
 	range_bar_drag_rect->set_property ("outline_pixels", 0);
 	range_bar_drag_rect->hide ();
 	
-	transport_bar_drag_rect = new Gnome::Canvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	transport_bar_drag_rect = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
 	transport_bar_drag_rect ->set_property ("fill_color_rgba", color_map[cTransportDragRectFill]);
 	transport_bar_drag_rect->set_property ("outline_color_rgba", color_map[cTransportDragRect]);
 	transport_bar_drag_rect->set_property ("outline_pixels", 0);
@@ -881,24 +881,24 @@ Editor::initialize_canvas ()
 	marker_drag_line_points->push_back(Gnome::Art::Point(0.0, 0.0));
 	marker_drag_line_points->push_back(Gnome::Art::Point(0.0, 0.0));
 
-	marker_drag_line = new Gnome::Canvas::Line (*track_canvas.root());
+	marker_drag_line = new ArdourCanvas::Line (*track_canvas.root());
 	marker_drag_line->set_property ("width_pixels", 1);
 	marker_drag_line->set_property("fill_color_rgba", color_map[cMarkerDragLine]);
 	marker_drag_line->set_property("points", marker_drag_line_points->gobj());
 	marker_drag_line->hide();
 
-	range_marker_drag_rect = new Gnome::Canvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
 	range_marker_drag_rect->set_property ("fill_color_rgba", color_map[cRangeDragRectFill]);
 	range_marker_drag_rect->set_property ("outline_color_rgba", color_map[cRangeDragRect]);
 	range_marker_drag_rect->hide ();
 	
-	transport_loop_range_rect = new Gnome::Canvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
+	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
 	transport_loop_range_rect->set_property ("fill_color_rgba", color_map[cTransportLoopRectFill]);
 	transport_loop_range_rect->set_property ("outline_color_rgba", color_map[cTransportLoopRect]);
 	transport_loop_range_rect->set_property ("outline_pixels", 1);
 	transport_loop_range_rect->hide();
 
-	transport_punch_range_rect = new Gnome::Canvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
+	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
 	transport_punch_range_rect->set_property ("fill_color_rgba", color_map[cTransportPunchRectFill]);
 	transport_punch_range_rect->set_property ("outline_color_rgba", color_map[cTransportPunchRect]);
 	transport_punch_range_rect->set_property ("outline_pixels", 0);
@@ -906,7 +906,7 @@ Editor::initialize_canvas ()
 	
 	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
 
-	transport_punchin_line = new Gnome::Canvas::Line (*time_line_group);
+	transport_punchin_line = new ArdourCanvas::Line (*time_line_group);
 	transport_punchin_line->set_property ("x1", 0.0);
 	transport_punchin_line->set_property ("y1", 0.0);
 	transport_punchin_line->set_property ("x2", 0.0);
@@ -916,7 +916,7 @@ Editor::initialize_canvas ()
 	transport_punchin_line->set_property ("outline_pixels", 1);
 	transport_punchin_line->hide ();
 	
-	transport_punchout_line  = new Gnome::Canvas::Line (*time_line_group);
+	transport_punchout_line  = new ArdourCanvas::Line (*time_line_group);
 	transport_punchout_line->set_property ("x1", 0.0);
 	transport_punchout_line->set_property ("y1", 0.0);
 	transport_punchout_line->set_property ("x2", 0.0);
@@ -926,7 +926,7 @@ Editor::initialize_canvas ()
 	transport_punchout_line->hide();
 	
 	// used to show zoom mode active zooming
-	zoom_rect = new Gnome::Canvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	zoom_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
 	zoom_rect->set_property ("fill_color_rgba", color_map[cZoomRectFill]);
 	zoom_rect->set_property ("outline_color_rgba", color_map[cZoomRect]);
 	zoom_rect->set_property ("outline_pixels", 1);
@@ -935,7 +935,7 @@ Editor::initialize_canvas ()
 	zoom_rect->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
 	
 	// used as rubberband rect
-	rubberband_rect = new Gnome::Canvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	rubberband_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
 	rubberband_rect->set_property ("outline_color_rgba", color_map[cRubberBandRect]);
 	rubberband_rect->set_property ("fill_color_rgba", (guint32) color_map[cRubberBandRectFill]);
 	rubberband_rect->set_property ("outline_pixels", 1);
@@ -952,29 +952,29 @@ Editor::initialize_canvas ()
 	tempo_line_points.push_back(Gnome::Art::Point(0, timebar_height));
 	tempo_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 	
-	tempo_line = new Gnome::Canvas::Line (*tempo_group, tempo_line_points);
+	tempo_line = new ArdourCanvas::Line (*tempo_group, tempo_line_points);
 	tempo_line->set_property ("width_pixels", 0);
 	tempo_line->set_property ("fill_color", Gdk::Color ("#000000"));
 
 	meter_line_points.push_back(Gnome::Art::Point (0, timebar_height));
 	meter_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 
-	meter_line = new Gnome::Canvas::Line (*meter_group, meter_line_points);
+	meter_line = new ArdourCanvas::Line (*meter_group, meter_line_points);
 	meter_line->set_property ("width_pixels", 0);
 	meter_line->set_property ("fill_color", Gdk::Color ("#000000"));
 
 	marker_line_points.push_back(Gnome::Art::Point (0, timebar_height));
 	marker_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 
-	marker_line =  new Gnome::Canvas::Line (*marker_group, marker_line_points);
+	marker_line =  new ArdourCanvas::Line (*marker_group, marker_line_points);
 	marker_line->set_property ("width_pixels", 0);
 	marker_line->set_property ("fill_color", Gdk::Color ("#000000"));
 	
-	range_marker_line =  new Gnome::Canvas::Line (*range_marker_group, marker_line_points);
+	range_marker_line =  new ArdourCanvas::Line (*range_marker_group, marker_line_points);
 	range_marker_line->set_property ("width_pixels", 0);
 	range_marker_line->set_property ("fill_color", Gdk::Color ("#000000"));
 
-	transport_marker_line =  new Gnome::Canvas::Line (*transport_marker_group, marker_line_points);
+	transport_marker_line =  new ArdourCanvas::Line (*transport_marker_group, marker_line_points);
 	transport_marker_line->set_property ("width_pixels", 0);
 	transport_marker_line->set_property ("fill_color", Gdk::Color ("#000000"));
 
@@ -1257,7 +1257,7 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 			strcpy (txt, _(txt1));
 			strcat (txt, _(txt2));
 			
-			first_action_message = new Gnome::Canvas::Text (*track_canvas.root());
+			first_action_message = new ArdourCanvas::Text (*track_canvas.root());
 			first_action_message->set_property ("font_desc", font);
 			first_action_message->set_property ("fill_color_rgba", color_map[cFirstActionMessage]);
 			first_action_message->set_property ("x", (gdouble) (canvas_width - pixel_width) / 2.0);
@@ -1767,7 +1767,7 @@ Editor::build_cursors ()
 }
 
 void
-Editor::popup_fade_context_menu (int button, int32_t time, Gnome::Canvas::Item* item, ItemType item_type)
+Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
 {
 	using namespace Menu_Helpers;
 	AudioRegionView* arv = static_cast<AudioRegionView*> (gtk_object_get_data (GTK_OBJECT(item), "regionview"));

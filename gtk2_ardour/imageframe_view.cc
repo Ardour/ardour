@@ -55,7 +55,7 @@ sigc::signal<void,ImageFrameView*> ImageFrameView::GoingAway;
  * @param num_channels the number of color channels within rgb_data
  */
 ImageFrameView::ImageFrameView(std::string item_id,
-	Gnome::Canvas::Group *parent,
+	ArdourCanvas::Group *parent,
 	ImageFrameTimeAxis* tv,
 	ImageFrameTimeAxisGroup* item_group,
 	double spu,
@@ -66,7 +66,7 @@ ImageFrameView::ImageFrameView(std::string item_id,
 	uint32_t width,
 	uint32_t height,
 	uint32_t num_channels)
-  : TimeAxisViewItem(item_id, parent, *tv, spu, basic_color, start, duration,
+  : TimeAxisViewItem(item_id, *parent, *tv, spu, basic_color, start, duration,
 		     TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
 						   TimeAxisViewItem::ShowNameHighlight|
 						   TimeAxisViewItem::ShowFrame|

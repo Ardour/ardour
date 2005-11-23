@@ -60,7 +60,7 @@ class ImageFrameView : public TimeAxisViewItem
 		 * @param num_channels the number of color channels within rgb_data
 		 */
 		ImageFrameView(std::string item_id,
-			 Gnome::Canvas::Group *parent,
+			 ArdourCanvas::Group *parent,
 			ImageFrameTimeAxis *tv,
 			ImageFrameTimeAxisGroup* group,
 			double spu,
