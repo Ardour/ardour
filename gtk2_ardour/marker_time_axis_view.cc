@@ -64,7 +64,7 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	canvas_rect->set_property ("outline_color_rgba", color_map[cMarkerTrackOutline]);
 	canvas_rect->set_property ("fill_color_rgba", stream_base_color);
 		   
-	canvas_rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_time_axis_view_event), canvas_rect, &_trackview));
+	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_marker_time_axis_view_event), canvas_rect, &_trackview));
 
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
 

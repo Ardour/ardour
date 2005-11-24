@@ -34,7 +34,7 @@ namespace ARDOUR {
  * AxisView defines the abstract base class for time-axis trackviews and routes.
  *
  */
-class AxisView : public sigc::trackable
+class AxisView : public virtual sigc::trackable
 {
   public:
 	/**

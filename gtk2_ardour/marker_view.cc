@@ -48,14 +48,14 @@ sigc::signal<void,MarkerView*> MarkerView::GoingAway;
  * @param duration the duration of this item
  */
 MarkerView::MarkerView(ArdourCanvas::Group *parent,
-	TimeAxisView* tv,
-	ImageFrameView* marked,
-	double spu,
-       Gdk::Color& basic_color,
-	std::string mark_type,
-	std::string mark_id,
-	jack_nframes_t start,
-	jack_nframes_t duration)
+		       TimeAxisView* tv,
+		       ImageFrameView* marked,
+		       double spu,
+		       Gdk::Color& basic_color,
+		       std::string mark_type,
+		       std::string mark_id,
+		       jack_nframes_t start,
+		       jack_nframes_t duration)
   : TimeAxisViewItem(mark_id, *parent,*tv,spu,basic_color,start,duration)
 {
 	mark_type_text = mark_type ;
@@ -66,9 +66,9 @@ MarkerView::MarkerView(ArdourCanvas::Group *parent,
 
 	// hook up our canvas events
 
-	frame_handle_start->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_markerview_start_handle_event), frame_handle_start, this));
-	frame_handle_end->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_markerview_end_handle_event), frame_handle_end, this));;
-	group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_markerview_item_view_event,	this), group, this));
+	frame_handle_start->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_start_handle_event), frame_handle_start, this));
+	frame_handle_end->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_end_handle_event), frame_handle_end, this));
+	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_item_view_event), group, this));
 	
 	set_position(start, this) ;
 	set_duration(duration, this) ;
