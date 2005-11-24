@@ -42,7 +42,6 @@ using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Editing;
-using namespace ActionManager;
 
 #define wave_cursor_width 43
 #define wave_cursor_height 61
@@ -304,7 +303,7 @@ Editor::region_list_selection_changed()
 		sensitive = false;
 	}
 	
-	for (vector<Glib::RefPtr<Gtk::Action> >::iterator i = region_list_selection_sensitive_actions.begin(); i != region_list_selection_sensitive_actions.end(); ++i) {
+	for (vector<Glib::RefPtr<Gtk::Action> >::iterator i = ActionManager::region_list_selection_sensitive_actions.begin(); i != ActionManager::region_list_selection_sensitive_actions.end(); ++i) {
 		(*i)->set_sensitive (sensitive);
 	}
 
@@ -357,18 +356,11 @@ Editor::region_list_clear ()
 void
 Editor::build_region_list_menu ()
 {
-	region_list_menu = dynamic_cast<Menu*>(ui_manager->get_widget ("/RegionListMenu"));
+	region_list_menu = dynamic_cast<Menu*>(ActionManager::get_widget ("/RegionListMenu"));
 					       
 	/* now grab specific menu items that we need */
 
-	toggle_full_region_list_action = ui_manager->get_action ("<Actions>/RegionList/rlShowAll");
-	
-	region_list_selection_sensitive_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlHide"));
-	region_list_selection_sensitive_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlAudition"));
-	region_list_selection_sensitive_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlRemove"));
-
-	session_sensitive_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlEmbedAudio"));
-	session_sensitive_actions.push_back (ui_manager->get_action ("<Actions>/RegionList/rlImportAudio"));
+	toggle_full_region_list_action = ActionManager::get_action ("<Actions>/RegionList/rlShowAll");
 }
 
 void

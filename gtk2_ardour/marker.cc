@@ -18,17 +18,18 @@
     $Id$
 */
 
+#include <sigc++/bind.h>
 #include <ardour/tempo.h>
 
 #include "marker.h"
 #include "public_editor.h"
-#include "canvas-simpleline.h"
 #include "utils.h"
+#include "canvas_impl.h"
 
 #include "i18n.h"
 
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation, 
-		Type type, gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer), jack_nframes_t frame)
+		Type type, jack_nframes_t frame, bool handle_events)
 
 	: editor (ed), _type(type)
 {
@@ -243,14 +244,14 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	group->set_property ("x", unit_position);
 	group->set_property ("y", 1.0);
 	// cerr << "set mark al points, nc = " << points->num_points << endl;
-	mark = new ArdourCanvas::Polygon (*group);
+	mark = new Polygon (*group);
 	mark->set_property ("points", points);
 	mark->set_property ("fill_color_rgba", rgba);
 	mark->set_property ("outline_color", Gdk::Color ("black"));
 
 	Pango::FontDescription font = get_font_for_style (N_("MarkerText"));
 
-	text = new ArdourCanvas::Text (*group);
+	text = new Text (*group);
 	text->set_property ("text", annotation.c_str());
 	text->set_property ("x", label_offset);
 	text->set_property ("y", 0.0);
@@ -258,15 +259,28 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	text->set_property ("anchor", Gtk::ANCHOR_NW);
 	text->set_property ("fill_color", Gdk::Color ("black"));
 
-	group->signal_event().connect() (bind (mem_fun (editor, &PublicEditor::reposition), group, this));
+	editor.ZoomChanged.connect (mem_fun (*this, &Marker::reposition));
+
+	mark->set_data ("marker", this);
+
+	if (handle_events) {
+		group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
+	}
+
 }
 
 Marker::~Marker ()
 {
-	/* destroying the group destroys its contents */
+	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete text;
 	delete mark;
 	delete points;
+}
+
+ArdourCanvas::Item&
+Marker::the_item() const
+{
+	return *mark;
 }
 
 void
@@ -312,13 +326,12 @@ Marker::set_color_rgba (uint32_t color)
 /***********************************************************************/
 
 TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, 
-			  ARDOUR::TempoSection& temp, 
-			  gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer))
-	: Marker (editor, parent, rgba, text, Tempo, callback, 0),
+			  ARDOUR::TempoSection& temp)
+	: Marker (editor, parent, rgba, text, Tempo, 0, false),
 	  _tempo (temp)
 {
 	set_position (_tempo.frame());
-	group->set_data ("tempo_marker", this);
+	group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), mark, this));
 }
 
 TempoMarker::~TempoMarker ()
@@ -328,15 +341,15 @@ TempoMarker::~TempoMarker ()
 /***********************************************************************/
 
 MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, 
-			  ARDOUR::MeterSection& m, 
-			  gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer))
-	: Marker (editor, parent, rgba, text, Meter, callback, 0),
+			  ARDOUR::MeterSection& m) 
+	: Marker (editor, parent, rgba, text, Meter, 0, false),
 	  _meter (m)
 {
 	set_position (_meter.frame());
-	gtk_object_set_data (GTK_OBJECT(group), "meter_marker", this);
+	group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_meter_marker_event), mark, this));
 }
 
 MeterMarker::~MeterMarker ()
 {
 }
+

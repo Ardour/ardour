@@ -40,6 +40,7 @@
 #include "utils.h"
 #include "logmeter.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 
 #include <ardour/session.h>
 #include <ardour/route.h>

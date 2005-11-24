@@ -8,6 +8,7 @@
 #include "i18n.h"
 
 using namespace Gtk;
+using namespace Glib;
 using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
@@ -16,8 +17,8 @@ using namespace Editing;
 void
 Editor::register_actions ()
 {
-
-	Glib::RefPtr<ActionGroup> editor_actions = ActionGroup::create (X_("Editor"));
+	RefPtr<Action> act;
+	RefPtr<ActionGroup> editor_actions = ActionGroup::create (X_("Editor"));
 
 	/* add named actions for the editor */
 
@@ -169,9 +170,12 @@ Editor::register_actions ()
 	RadioAction::Group sort_type_group;
 	RadioAction::Group sort_order_group;
 
-	ActionManager::register_action (rl_actions, X_("rlAudition"), _("Audition"), mem_fun(*this, &Editor::audition_region_from_region_list));
-	ActionManager::register_action (rl_actions, X_("rlHide"), _("Hide"), mem_fun(*this, &Editor::hide_region_from_region_list));
-	ActionManager::register_action (rl_actions, X_("rlRemove"), _("Remove"), mem_fun (*this, &Editor::remove_region_from_region_list));
+	act = ActionManager::register_action (rl_actions, X_("rlAudition"), _("Audition"), mem_fun(*this, &Editor::audition_region_from_region_list));
+	ActionManager::region_list_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (rl_actions, X_("rlHide"), _("Hide"), mem_fun(*this, &Editor::hide_region_from_region_list));
+	ActionManager::region_list_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (rl_actions, X_("rlRemove"), _("Remove"), mem_fun (*this, &Editor::remove_region_from_region_list));
+	ActionManager::region_list_selection_sensitive_actions.push_back (act);
 	ActionManager::register_action (rl_actions, X_("rlShowAll"), _("Show all"), mem_fun(*this, &Editor::toggle_full_region_list));
 
 	ActionManager::register_radio_action (rl_actions, sort_order_group, X_("SortAscending"),  _("Ascending"),
@@ -200,13 +204,13 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFilesystem"),  _("By Source Filesystem"),
 			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileFS));
 	
-	ActionManager::register_action (rl_actions, X_("rlEmbedAudio"), _("Embed audio (link)"), mem_fun(*this, &Editor::embed_audio));
-	ActionManager::register_action (rl_actions, X_("rlImportAudio"), _("Embed audio (link)"), bind (mem_fun(*this, &Editor::import_audio), false));
-
+	act = ActionManager::register_action (rl_actions, X_("rlEmbedAudio"), _("Embed audio (link)"), mem_fun(*this, &Editor::embed_audio));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (rl_actions, X_("rlImportAudio"), _("Embed audio (link)"), bind (mem_fun(*this, &Editor::import_audio), false));
+	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (mouse_mode_actions);
 	ActionManager::add_action_group (snap_actions);
 	ActionManager::add_action_group (editor_actions);
-
 }

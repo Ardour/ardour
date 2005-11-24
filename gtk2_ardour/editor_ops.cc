@@ -184,11 +184,11 @@ Do you really want to destroy %1 ?"),
 
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
-	prompter.chosen.connect (Gtk::Main::quit.slot());
+	prompter.chosen.connect (ptr_fun (Main::quit));
 	prompter.show_all ();
 
-	Gtk::Main::run ();
-
+	Main::run ();
+		
 	if (prompter.get_choice() != 0) {
 		return;
 	}
@@ -1462,7 +1462,7 @@ Editor::clear_locations ()
 void
 Editor::insert_region_list_drag (AudioRegion& region)
 {
-	double x, y;
+	int x, y;
 	double wx, wy;
 	double cx, cy;
 	TimeAxisView *tv;
@@ -1471,7 +1471,6 @@ Editor::insert_region_list_drag (AudioRegion& region)
 	Playlist *playlist;
 	
 	track_canvas.get_pointer (x, y);
-
 	track_canvas.window_to_world (x, y, wx, wy);
 
 	GdkEvent event;
@@ -1529,7 +1528,7 @@ Editor::insert_region_list_selection (float times)
 	
 	Glib::RefPtr<TreeSelection> selected = region_list_display.get_selection();
 	
-	if (selected.count_selected_rows() != 1) {
+	if (selected->count_selected_rows() != 1) {
 		return;
 	}
 	
@@ -2001,7 +2000,7 @@ Editor::reject_because_rate_differs (string path, SF_INFO& finfo, string action,
 			string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
 			choices);
 
-		rate_choice.chosen.connect (Main::quit.slot());
+		rate_choice.chosen.connect (ptr_fun (Main::quit));
 		rate_choice.show_all ();
 
 		Main::run ();
@@ -2602,7 +2601,7 @@ Editor::region_fill_selection ()
 
 	Glib::RefPtr<TreeSelection> selected = region_list_display.get_selection();
 
-	if (selected.count_selected_rows() != 1) {
+	if (selected->count_selected_rows() != 1) {
 		return;
 	}
 
@@ -3167,7 +3166,7 @@ Editor::paste (float times)
 void
 Editor::mouse_paste ()
 {
-	double x, y;
+	int x, y;
 	double wx, wy;
 	track_canvas.get_pointer (x, y);
 	track_canvas.window_to_world (x, y, wx, wy);
@@ -3216,11 +3215,11 @@ Editor::paste_internal (jack_nframes_t position, float times)
 void
 Editor::paste_named_selection (float times)
 {
-	TrackSelection::iterator i;
+	TrackSelection::iterator t;
 
 	Glib::RefPtr<TreeSelection> selected = named_selection_display.get_selection();
 
-	if (selected.count_selected_rows() == 0 || selection->tracks.empty()) {
+	if (selected->count_selected_rows() != 1 || selection->tracks.empty()) {
 		return;
 	}
 
@@ -3234,13 +3233,13 @@ Editor::paste_named_selection (float times)
 		
 	begin_reversible_command (_("paste chunk"));
 
-	for (i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+	for (t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
 		
 		AudioTimeAxisView* atv;
 		Playlist* pl;
 		AudioPlaylist* apl;
 
-		if ((atv = dynamic_cast<AudioTimeAxisView*> (*i)) == 0) {
+		if ((atv = dynamic_cast<AudioTimeAxisView*> (*t)) == 0) {
 			continue;
 		}
 
@@ -3432,16 +3431,17 @@ Editor::remove_last_capture ()
 
 		choices.push_back (_("Yes, destroy it."));
 		choices.push_back (_("No, do nothing."));
-
+		
 		Gtkmm2ext::Choice prompter (prompt, choices);
-		prompter.done.connect (Gtk::Main::quit.slot());
+		prompter.chosen.connect (ptr_fun (Main::quit));
 		prompter.show_all ();
 
-		Gtk::Main::run ();
-
+		Main::run ();
+		
 		if (prompter.get_choice() == 0) {
 			session->remove_last_capture ();
 		}
+
 	} else {
 		session->remove_last_capture();
 	}

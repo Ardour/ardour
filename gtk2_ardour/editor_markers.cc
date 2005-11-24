@@ -33,6 +33,7 @@
 #include "simplerect.h"
 #include "editing.h"
 #include "gui_thread.h"
+#include "simplerect.h"
 
 #include "i18n.h"
 
@@ -70,31 +71,30 @@ Editor::add_new_location (Location *location)
 	}
 
 	if (location->is_mark()) {
-		lam->start = new Marker (*this, *marker_group, color, 
-					 location->name(), Marker::Mark, PublicEditor::canvas_marker_event, location->start());
+		lam->start = new Marker (*this, *marker_group, color, location->name(), Marker::Mark, location->start());
 		lam->end   = 0;
 
 	} else if (location->is_auto_loop()) {
 		// transport marker
 		lam->start = new Marker (*this, *transport_marker_group, color, 
-					 location->name(), Marker::LoopStart, PublicEditor::canvas_marker_event, location->start());
+					 location->name(), Marker::LoopStart, location->start());
 		lam->end   = new Marker (*this, *transport_marker_group, color, 
-					 location->name(), Marker::LoopEnd, PublicEditor::canvas_marker_event, location->end());
+					 location->name(), Marker::LoopEnd, location->end());
 		
 	} else if (location->is_auto_punch()) {
 		// transport marker
 		lam->start = new Marker (*this, *transport_marker_group, color, 
-					 location->name(), Marker::PunchIn, PublicEditor::canvas_marker_event, location->start());
+					 location->name(), Marker::PunchIn, location->start());
 		lam->end   = new Marker (*this, *transport_marker_group, color, 
-					 location->name(), Marker::PunchOut, PublicEditor::canvas_marker_event, location->end());
+					 location->name(), Marker::PunchOut, location->end());
 		
 	} else {
 
 		// range marker
 		lam->start = new Marker (*this, *range_marker_group, color, 
-					 location->name(), Marker::Start, PublicEditor::canvas_marker_event, location->start());
+					 location->name(), Marker::Start, location->start());
 		lam->end   = new Marker (*this, *range_marker_group, color, 
-					 location->name(), Marker::End, PublicEditor::canvas_marker_event, location->end());
+					 location->name(), Marker::End, location->end());
 	}
 
 	if (location->is_hidden ()) {
@@ -299,7 +299,7 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent* event)
 	Marker* marker;
 	bool is_start;
 
-	if ((marker = item.get_data ("marker")) == 0) {
+	if ((marker = static_cast<Marker*> (item.get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}

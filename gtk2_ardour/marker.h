@@ -24,9 +24,6 @@
 #include <string>
 #include <glib.h>
 #include <ardour/ardour.h>
-#include <libgnomecanvasmm/group.h>
-#include <libgnomecanvasmm/text.h>
-#include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
 
 #include "canvas.h"
@@ -53,9 +50,13 @@ class Marker : public sigc::trackable
 		PunchOut
 	};
 
+
 	Marker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, Type, 
-		gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer), jack_nframes_t frame = 0);
+		jack_nframes_t frame = 0, bool handle_events = true);
+
 	virtual ~Marker ();
+
+	ArdourCanvas::Item& the_item() const;
 
 	void set_position (jack_nframes_t);
 	void set_name (const string&);
@@ -70,7 +71,7 @@ class Marker : public sigc::trackable
 	PublicEditor& editor;
 
 	ArdourCanvas::Group *group;
-	ArdourCanvas::Item *mark;
+	ArdourCanvas::Polygon *mark;
 	ArdourCanvas::Text *text;
 	ArdourCanvas::Points *points;
 
@@ -85,8 +86,7 @@ class Marker : public sigc::trackable
 class TempoMarker : public Marker
 {
   public:
-        TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, ARDOUR::TempoSection&, 
-		     gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer));
+        TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, ARDOUR::TempoSection&);
 	~TempoMarker ();
 
 	ARDOUR::TempoSection& tempo() const { return _tempo; }
@@ -98,8 +98,7 @@ class TempoMarker : public Marker
 class MeterMarker : public Marker
 {
   public:
-        MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, ARDOUR::MeterSection&, 
-		     gint (*callback)(ArdourCanvas::Item *, GdkEvent *, gpointer));
+        MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, ARDOUR::MeterSection&);
 	~MeterMarker ();
 
 	ARDOUR::MeterSection& meter() const { return _meter; }

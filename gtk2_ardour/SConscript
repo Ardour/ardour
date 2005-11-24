@@ -124,7 +124,6 @@ imageframe_time_axis_view.cc
 imageframe_view.cc
 io_selector.cc
 keyboard.cc
-keyboard_target.cc
 location_ui.cc
 main.cc
 marker.cc

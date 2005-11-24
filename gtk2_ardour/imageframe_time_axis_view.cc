@@ -58,7 +58,7 @@ ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 	canvas_rect.property_outline_color_rgba().set_value(color_map[cImageTrackOutline]);
 	canvas_rect.property_fill_color_rgba().set_value(stream_base_color);
 
-	canvas_rect.signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_imageframe_view_event), canvas_rect, &_trackview));
+	canvas_rect.signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_imageframe_view_event), (ArdourCanvas::Item*) &canvas_rect, &tv));
 
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
 

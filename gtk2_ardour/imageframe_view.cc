@@ -31,11 +31,13 @@
 #include "public_editor.h"
 #include "utils.h"
 #include "imageframe_view.h"
-#include "canvas-imageframe.h"
+#include "imageframe.h"
+#include "canvas_impl.h"
 #include "gui_thread.h"
 
 using namespace sigc ;
 using namespace ARDOUR ;
+using namespace Gtk;
 
 sigc::signal<void,ImageFrameView*> ImageFrameView::GoingAway;
 
@@ -90,23 +92,14 @@ ImageFrameView::ImageFrameView(std::string item_id,
 	
 	//calculate our image width based on the track height
 	double im_ratio = (double)width/(double)height ;
-	int im_width = (int)((double)(trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE) * im_ratio) ;
+	double im_width = ((double)(trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE) * im_ratio) ;
 	
-	imageframe = gnome_canvas_item_new(GNOME_CANVAS_GROUP(group),
-					   gnome_canvas_imageframe_get_type(),
-					   "pixbuf", pbuf,
-					   "x", (gdouble) 1.0,
-					   "y", (gdouble) 1.0,
-					   "anchor", GTK_ANCHOR_NW,
-					   "width", (gdouble) im_width,
-					   "height", (gdouble) (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE),
-					   NULL) ;
+	imageframe = new ImageFrame (*group, pbuf, 1.0, 1.0, ANCHOR_NW, im_width, (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE));
 
-	frame_handle_start->signal_event().connect() (bind (mem_fun (editor, &PublicEditor::canvas_imageframe_start_handle_event), frame_handle_start));
-	frame_handle_end->signal_event().connect() (bind (mem_fun (editor, &PublicEditor::canvas_imageframe_end_handle_event), frame_handle_end));
-	group->signal_event().connect() (bind (mem_fun (editor, &PublicEditor::canvas_imageframe_item_view_event, this);), group));
+	frame_handle_start->signal_event().connect (bind (mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_start_handle_event), frame_handle_start, this));
+	frame_handle_end->signal_event().connect (bind (mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_end_handle_event), frame_handle_end, this));
+	group->signal_event().connect (bind (mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_item_view_event), imageframe, this));
 
-	
 	frame_handle_start->raise_to_top();
 	frame_handle_end->raise_to_top();
 	
@@ -162,7 +155,7 @@ ImageFrameView::~ImageFrameView()
 
 	if(imageframe)
 	{
-		gtk_object_destroy(GTK_OBJECT(imageframe)) ;
+delete imageframe;
 		imageframe = 0 ;
 	}
 }
@@ -220,7 +213,7 @@ ImageFrameView::set_duration(jack_nframes_t dur, void* src)
 	if(ret)
 	{
 		/* handle setting the sizes of our canvas itesm based on the new duration */
-		gnome_canvas_item_set(imageframe, "drawwidth", (gdouble) trackview.editor.frame_to_pixel(get_duration()), NULL) ;
+		imageframe->property_drawwidth() = trackview.editor.frame_to_pixel(get_duration());
 	}
 	
 	return(ret) ;
@@ -267,13 +260,12 @@ ImageFrameView::set_height (gdouble h)
 	// set the image size
 	// @todo might have to re-get the image data, for a large height...hmmm.
 	double im_ratio = (double)image_data_width/(double)image_data_height ;
-	int im_width = (int)((double)(h - TimeAxisViewItem::NAME_Y_OFFSET) * im_ratio) ;
-	gnome_canvas_item_set(imageframe, "width", (gdouble)im_width, NULL) ;
-	gnome_canvas_item_set(imageframe, "height",(gdouble) (h - TimeAxisViewItem::NAME_Y_OFFSET), NULL) ;
+
+	imageframe->property_width() = (h - TimeAxisViewItem::NAME_Y_OFFSET) * im_ratio;
+	imageframe->property_height() = h - TimeAxisViewItem::NAME_Y_OFFSET;
 
 	frame->raise_to_top();
-	gnome_canvas_item_raise_to_top(imageframe) ;
-	//imageframe->raise_to_top();
+	imageframe->raise_to_top();
 	name_highlight->raise_to_top();
 	name_text->raise_to_top();
 	frame_handle_start->raise_to_top();

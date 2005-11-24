@@ -29,6 +29,9 @@ class ActionManager
 	static std::string unbound_string;  /* the key string returned if an action is not bound */
 	static Gtk::UIManager ui_manager;
 
+	static Gtk::Widget* get_widget (Glib::ustring name);
+	static Glib::RefPtr<Gtk::Action> get_action (Glib::ustring name);
+
 	static void add_action_group (Glib::RefPtr<Gtk::ActionGroup>);
 
 	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 

@@ -72,11 +72,11 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->beats_per_bar(), ms->note_divisor ());
 			metric_marks.push_back (new MeterMarker (*this, *meter_group, color_map[cMeterMarker], buf, 
-								 *(const_cast<MeterSection*>(ms)), PublicEditor::canvas_meter_marker_event));
+								 *(const_cast<MeterSection*>(ms))));
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());
 			metric_marks.push_back (new TempoMarker (*this, *tempo_group, color_map[cTempoMarker], buf, 
-								 *(const_cast<TempoSection*>(ts)), PublicEditor::canvas_tempo_marker_event));
+								 *(const_cast<TempoSection*>(ts))));
 		}
 		
 	}

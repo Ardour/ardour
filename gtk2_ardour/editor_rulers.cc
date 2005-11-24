@@ -599,18 +599,14 @@ Editor::update_ruler_visibility ()
 
 	double tbpos = 0.0;
 	double old_unit_pos ;
-	GtkArg args[1] ;
-	args[0].name = "y";
 	
 	if (ruler_shown[ruler_time_meter]) {
 		lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
 
-		gtk_object_get (GTK_OBJECT(meter_group), "y", &old_unit_pos);
+		old_unit_pos = meter_group->property_y();
 		if (tbpos != old_unit_pos) {
 			meter_group->move ( 0.0, tbpos - old_unit_pos);
 		}
-
-		//gnome_canvas_item_set (meter_group, "y", tbpos, NULL);
 		meter_group->show();
 		tbpos += timebar_height;
 		visible_timebars++;
@@ -625,7 +621,6 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			tempo_group->move(0.0, tbpos - old_unit_pos);
 		}
-		//gnome_canvas_item_set (tempo_group, "y", tbpos, NULL);
 		tempo_group->show();
 		tbpos += timebar_height;
 		visible_timebars++;
@@ -636,13 +631,10 @@ Editor::update_ruler_visibility ()
 	
 	if (ruler_shown[ruler_time_marker]) {
 		lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
-		gtk_object_getv (GTK_OBJECT(marker_group), 1, args) ;
-		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
-		gtk_object_get (GTK_OBJECT(marker_group), "y", &old_unit_pos);
+		old_unit_pos = marker_group->property_y();
 		if (tbpos != old_unit_pos) {
 			marker_group->move ( 0.0, tbpos - old_unit_pos);
 		}
-		//gnome_canvas_item_set (marker_group, "y", tbpos, NULL);
 		marker_group->show();
 		tbpos += timebar_height;
 		visible_timebars++;
@@ -653,12 +645,10 @@ Editor::update_ruler_visibility ()
 	
 	if (ruler_shown[ruler_time_range_marker]) {
 		lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
-		gtk_object_getv (GTK_OBJECT(range_marker_group), 1, args) ;
-		old_unit_pos = GTK_VALUE_DOUBLE (args[0]) ;
+		old_unit_pos = range_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
 			range_marker_group->move (0.0, tbpos - old_unit_pos);
 		}
-		//gnome_canvas_item_set (marker_group, "y", tbpos, NULL);
 		range_marker_group->show();
 		tbpos += timebar_height;
 		visible_timebars++;
@@ -669,11 +659,10 @@ Editor::update_ruler_visibility ()
 
 	if (ruler_shown[ruler_time_transport_marker]) {
 		lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
-		gtk_object_get (GTK_OBJECT(transport_marker_group), "y", &old_unit_pos);
+		old_unit_pos = transport_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
 			transport_marker_group->move ( 0.0, tbpos - old_unit_pos);
 		}
-		//gnome_canvas_item_set (marker_group, "y", tbpos, NULL);
 		transport_marker_group->show();
 		tbpos += timebar_height;
 		visible_timebars++;

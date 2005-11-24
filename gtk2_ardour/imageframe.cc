@@ -36,7 +36,7 @@ ImageFrame::ImageFrame(Group& parentx, ArtPixBuf* pbuf, double x, double y, Gtk:
 : Item(GNOME_CANVAS_ITEM(g_object_new(get_type(),0)))
 {
   item_construct(parentx);
-  set("x1",x1,"y1",y1,"x2",x2,"y2",y2,0);
+  set("pixbuf", pbuf, "x", x,"y", y,"width", w,"height", h, 0);
 }
 
 ImageFrame::ImageFrame(Group& parentx)
@@ -57,9 +57,9 @@ namespace
 namespace Glib
 {
 
-ArdourCanvas::ImageFrame* wrap(GnomeCanvasImageFrame* object, bool take_copy)
+Gnome::Canvas::ImageFrame* wrap(GnomeCanvasImageFrame* object, bool take_copy)
 {
-  return dynamic_cast<ArdourCanvas::ImageFrame *> (Glib::wrap_auto ((GObject*)(object), take_copy));
+    return dynamic_cast<Gnome::Canvas::ImageFrame *> (Glib::wrap_auto ((GObject*)(object), take_copy));
 }
 
 } /* namespace Glib */

@@ -163,3 +163,15 @@ ActionManager::add_action_group (RefPtr<ActionGroup> grp)
 {
 	ui_manager.insert_action_group (grp);
 }
+
+Widget*
+ActionManager::get_widget (ustring name)
+{
+	return ui_manager.get_widget (name);
+}
+
+RefPtr<Action>
+ActionManager::get_action (ustring name)
+{
+	return ui_manager.get_action (name);
+}

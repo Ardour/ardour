@@ -12,6 +12,8 @@ namespace Gnome {
 		class WaveView;
 		class Text;
 		class Line;
+		class Points;
+		class ImageFrame;
 	}
 }
 

@@ -27,6 +27,7 @@
 #include <sigc++/signal.h>
 #include <list>
 
+#include "canvas.h"
 #include "enums.h"
 #include "time_axis_view_item.h"
 #include "marker_view.h"
@@ -205,7 +206,7 @@ class ImageFrameView : public TimeAxisViewItem
 		// ------- Our canvas element -----------
 		
 		/** the CanvasImageFrame to display the image */
-		GnomeCanvasItem* imageframe ;
+		ArdourCanvas::ImageFrame* imageframe ;
   		
 } ; /* class ImageFrameView */
 
