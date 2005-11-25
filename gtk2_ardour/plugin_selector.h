@@ -79,8 +79,6 @@ class PluginSelector : public ArdourDialog
 	Glib::RefPtr<Gtk::TreeSelection> aselection;
 	Gtk::TreeView added_list;
 
-	void column_clicked (int column, GtkCList* clist);
-
 #ifdef VST_SUPPORT
 	// page 2
 	struct VstColumns : public Gtk::TreeModel::ColumnRecord {

@@ -425,6 +425,11 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	gint x, y;
 	float fx, fy;
 
+	if (layout == 0) {
+		layout = create_pango_layout ("");
+		layout->set_font_description (get_style()->get_font());
+	}
+
 	/* redraw the background */
 
 	get_window()->draw_rectangle (get_style()->get_bg_gc(get_state()),
@@ -438,7 +443,6 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 		for (Targets::iterator i = pucks.begin(); i != pucks.end(); ++i) {
 
 			Target* puck = i->second;
-			Pango::Layout layout = new Pango::Layout(get_window()->create_pango_layout());
 
 			if (puck->visible) {
 				/* redraw puck */
@@ -456,13 +460,10 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 						       x, y,
 						       8, 8,
 						       0, 360 * 64);
-				layout.set_text(puck->text);
-				//get_window()->draw_text (get_style()->get_font(),
-				//			get_style()->get_fg_gc(Gtk::STATE_NORMAL),
-				//			x + 6, y + 6,
-				//			puck->text,
-				//			puck->textlen);
-				// GTK2FIX : needs a pango layout
+
+				layout->set_text (puck->text);
+
+				get_window()->draw_layout (get_style()->get_fg_gc (STATE_NORMAL), x+6, y+6, layout);
 			}
 		}
 

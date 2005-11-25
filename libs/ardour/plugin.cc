@@ -265,10 +265,10 @@ Plugin::write_midi_feedback (MIDI::byte* buf, int32_t& bufsize)
 	return buf;
 }
 
-list<string>
+vector<string>
 Plugin::get_presets()
 {
-	list<string> labels;
+	vector<string> labels;
 	lrdf_uris* set_uris = lrdf_get_setting_uris(unique_id());
 
 	if (set_uris) {
@@ -281,7 +281,8 @@ Plugin::get_presets()
 		lrdf_free_uris(set_uris);
 	}
 
-	labels.unique();
+	// GTK2FIX find an equivalent way to do this with a vector (needed by GUI apis)
+	// labels.unique();
 
 	return labels;
 }

@@ -64,15 +64,15 @@ namespace Gtkmm2ext {
 	class PixmapButton;
 }
 
-class PlugUIBase : public sigc::trackable
+class PlugUIBase : public virtual sigc::trackable
 {
   public:
 	PlugUIBase (ARDOUR::PluginInsert&);
 	virtual ~PlugUIBase() {}
 
 	virtual gint get_preferred_height () = 0;
-	virtual void start_updating() = 0;
-	virtual void stop_updating() = 0;
+	virtual bool start_updating(GdkEventAny*) = 0;
+	virtual bool stop_updating(GdkEventAny*) = 0;
 
   protected:
 	ARDOUR::PluginInsert& insert;
@@ -94,8 +94,8 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	
 	gint get_preferred_height () { return prefheight; }
 
-	void start_updating();
-	void stop_updating();
+	bool start_updating(GdkEventAny*);
+	bool stop_updating(GdkEventAny*);
 
   private:
 	ARDOUR::AudioEngine &engine;
@@ -186,7 +186,7 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	void parameter_changed (uint32_t, float, ControlUI* cui);
 	void update_control_display (ControlUI* cui);
 	void control_port_toggled (ControlUI* cui);
-	void control_combo_changed (GdkEventAny* ignored, ControlUI* cui);
+	void control_combo_changed (ControlUI* cui);
 
 	void redirect_active_changed (ARDOUR::Redirect*, void*);
 
@@ -223,8 +223,8 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	~VSTPluginUI ();
 
 	gint get_preferred_height ();
-	void start_updating() {}
-	void stop_updating() {}
+	bool start_updating(GdkEventAny*) {}
+	bool stop_updating(GdkEventAny*) {}
 
 	int package (Gtk::Window&);
 

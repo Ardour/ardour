@@ -84,6 +84,7 @@ class Panner2d : public Gtk::DrawingArea
 	ARDOUR::Panner& panner;
 	Gtk::Menu* context_menu;
 	Gtk::CheckMenuItem* bypass_menu_item;
+	Glib::RefPtr<Pango::Layout> layout;
 
 	typedef std::map<int,Target *> Targets;
 	Targets targets;

@@ -30,14 +30,12 @@
 #include <ardour/plugin_state.h>
 #include <ardour/cycles.h>
 
-#include <list>
 #include <vector>
 #include <set>
 #include <map>
 
 using std::string;
 using std::vector;
-using std::list;
 using std::set;
 using std::map;
 
@@ -128,7 +126,7 @@ class Plugin : public Stateful, public sigc::trackable
 
 	virtual bool save_preset(string name) = 0;
 	virtual bool load_preset (const string preset_label);
-	virtual list<string> get_presets();
+	virtual std::vector<std::string> get_presets();
 
 	virtual bool has_editor() const = 0;
 

@@ -747,7 +747,7 @@ PluginUI::control_port_toggled (ControlUI* cui)
 }
 
 void
-PluginUI::control_combo_changed (GdkEventAny* ignored, ControlUI* cui)
+PluginUI::control_combo_changed (ControlUI* cui)
 {
 	if (!cui->ignore_change) {
 		string value = cui->combo->get_active_text();
@@ -762,7 +762,7 @@ PluginUIWindow::plugin_going_away (ARDOUR::Redirect* ignored)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PluginUIWindow::plugin_going_away), ignored));
 	
-	_pluginui->stop_updating();
+	_pluginui->stop_updating(0);
 	delete_when_idle (this);
 }
 
@@ -774,22 +774,24 @@ PluginUI::redirect_active_changed (Redirect* r, void* src)
 	bypass_button.set_active (!r->active());
 }
 
-void
-PluginUI::start_updating ()
+bool
+PluginUI::start_updating (GdkEventAny* ignored)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 		screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
 			(mem_fun(*this, &PluginUI::output_update));
 	}
+	return false;
 }
 
-void
-PluginUI::stop_updating ()
+bool
+PluginUI::stop_updating (GdkEventAny* ignored)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 	}
+	return false;
 }
 
 void
@@ -887,7 +889,7 @@ PlugUIBase::save_plugin_setting ()
 	prompter.show_all();
 
 	switch (prompter.run ()) {
-	case GTK_RESPONSE_ACCEPT:
+	case Gtk::RESPONSE_ACCEPT:
 
 		string name;
 
