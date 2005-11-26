@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export ARDOUR_GLADE_PATH=./glade
 
 if [ -x ./ardour.bin ] ; then 
     # scons executable
