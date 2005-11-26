@@ -206,7 +206,7 @@ executable = 'ardour.bin'
 
 ardour = gtkardour.Program(target = executable, source = gtkardour_files + extra_sources)
 mtest = gtkardour.Program(target = 'mtest', source = mtest_files)
-itest = gtkardour.Program(target = 'itest', source = itest_files)
+#itest = gtkardour.Program(target = 'itest', source = itest_files)
 
 Default(ardour)
 
@@ -222,6 +222,7 @@ if env['NLS']:
 
 env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour', ardour))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour_ui.rc'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour-menus.xml'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour'), 'splash.ppm'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/glade'), glade_files))
 

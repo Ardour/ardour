@@ -25,6 +25,8 @@
 
 #include <pbd/error.h>
 
+#include <ardour/ardour.h>
+
 #include "actions.h"
 
 using namespace std;
@@ -48,9 +50,11 @@ ActionManager::init ()
 	ui_manager = UIManager::create ();
 
 	try {
-		ui_manager->add_ui_from_file ("ardour-menus.xml");
+	  ui_manager->add_ui_from_file (ARDOUR::find_config_file("ardour-menus.xml"));
 	} catch (Glib::MarkupError& err) {
 		error << "badly formatted UI definition file" << endmsg;
+	} catch (...) {
+	  std::cerr << "ardour action xml file not found" << endl;
 	}
     
 }
