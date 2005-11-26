@@ -63,7 +63,7 @@ guint gtk_custom_hruler_get_type (void)
 				(GInstanceInitFunc) gtk_custom_hruler_init,
 			};
 		
-		hruler_type = g_type_register_static (GTK_TYPE_WIDGET, "GtkCustomHRuler",
+		hruler_type = g_type_register_static (gtk_custom_ruler_get_type(), "GtkCustomHRuler",
 						      &hruler_info, 0);
 	}
 	
