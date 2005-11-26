@@ -31,11 +31,12 @@ G_BEGIN_DECLS
 /* Wave viewer item for canvas.
  */
 
-#define GNOME_CANVAS_TYPE_CANVAS_WAVEVIEW            (gnome_canvas_waveview_get_type ())
-#define GNOME_CANVAS_WAVEVIEW(obj)                   (GTK_CHECK_CAST ((obj), GNOME_CANVAS_TYPE_CANVAS_WAVEVIEW, GnomeCanvasWaveView))
-#define GNOME_CANVAS_WAVEVIEW_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GNOME_CANVAS_TYPE_CANVAS_WAVEVIEW, GnomeCanvasWaveViewClass))
-#define GNOME_CANVAS_IS_CANVAS_WAVEVIEW(obj)         (GTK_CHECK_TYPE ((obj), GNOME_CANVAS_TYPE_CANVAS_WAVEVIEW))
-#define GNOME_CANVAS_IS_CANVAS_WAVEVIEW_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GNOME_CANVAS_TYPE_CANVAS_WAVEVIEW))
+#define GNOME_TYPE_CANVAS_WAVEVIEW            (gnome_canvas_waveview_get_type ())
+#define GNOME_CANVAS_WAVEVIEW(obj)            (GTK_CHECK_CAST ((obj), GNOME_TYPE_CANVAS_WAVEVIEW, GnomeCanvasWaveView))
+#define GNOME_CANVAS_WAVEVIEW_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GNOME_TYPE_CANVAS_WAVEVIEW, GnomeCanvasWaveViewClass))
+#define GNOME_IS_CANVAS_WAVEVIEW(obj)         (GTK_CHECK_TYPE ((obj), GNOME_TYPE_CANVAS_WAVEVIEW))
+#define GNOME_IS_CANVAS_WAVEVIEW_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GNOME_TYPE_CANVAS_WAVEVIEW))
+#define GNOME_CANVAS_WAVEVIEW_GET_CLASS(obj)  (GTK_CHECK_GET_CLASS ((obj), GNOME_TYPE_CANVAS_WAVEVIEW, GnomeCanvasWaveViewClass))
 
 typedef struct _GnomeCanvasWaveView            GnomeCanvasWaveView;
 typedef struct _GnomeCanvasWaveViewClass       GnomeCanvasWaveViewClass;
@@ -120,7 +121,7 @@ struct _GnomeCanvasWaveViewClass {
 	GnomeCanvasItemClass parent_class;
 };
 
-GtkType gnome_canvas_waveview_get_type (void);
+GType gnome_canvas_waveview_get_type (void) G_GNUC_CONST;
 
 G_END_DECLS
 
