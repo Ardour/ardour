@@ -81,7 +81,7 @@ const Glib::Class& SimpleLine_Class::init()
     //CppClassParent::CppObjectType::get_type();
 
     // Create the wrapper type, with the same class/instance size as the base type.
-    register_derived_type(gnome_canvas_line_get_type());
+    register_derived_type(gnome_canvas_simpleline_get_type());
 
     // Add derived versions of interfaces, if the C type implements any interfaces:
   }

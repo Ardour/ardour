@@ -51,6 +51,7 @@
 #include "plugin_selector.h"
 #include "route_redirect_selection.h"
 #include "mixer_ui.h"
+#include "actions.h"
 
 #include "plugin_ui.h"
 #include "send_ui.h"
@@ -358,45 +359,10 @@ RedirectBox::build_redirect_menu ()
 	selection_dependent_items.push_back (popup_act_grp->get_action("deactivate"));
 	selection_dependent_items.push_back (popup_act_grp->get_action("edit"));
 
-	popup_ui_mgr = Gtk::UIManager::create();
-	popup_ui_mgr->insert_action_group(popup_act_grp);
-
-	try
-	{
-		Glib::ustring ui_info = 
-			"<ui>"
-			"  <popup name='redirectmenu'>"
-			"    <menuitem action='newplugin'/>"
-			"    <menuitem action='newinsert'/>"
-			"    <menuitem action='newsend'/>"
-			"      <separator/>"
-			"    <menuitem action='clear'/>"
-			"      <separator/>"
-			"    <menuitem action='cut'/>"
-			"    <menuitem action='copy'/>"
-			"    <menuitem action='paste'/>"
-			"      <separator/>"
-			"    <menuitem action='rename'/>"
-			"      <separator/>"
-			"    <menuitem action='selectall'/>"
-			"    <menuitem action='deselectall'/>"
-			"      <separator/>"
-			"    <menuitem action='activate'/>"
-			"    <menuitem action='deactivate'/>"
-			"      <separator/>"
-			"    <menuitem action='activateall'/>"
-			"    <menuitem action='deactivateall'/>"
-			"      <separator/>"
-			"    <menuitem action='edit'/>"
-			"  </popup>"
-			"</ui>";
-		popup_ui_mgr->add_ui_from_string(ui_info);
-
-	} catch(const Glib::Error& ex) {
-		std::cerr << "building menus failed: " <<  ex.what();
-	}
+	//popup_ui_mgr = Gtk::UIManager::create();
+	//popup_ui_mgr->insert_action_group(popup_act_grp);
 	
-    redirect_menu = dynamic_cast<Gtk::Menu*>( popup_ui_mgr->get_widget("/redirectmenu") );
+    redirect_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/redirectmenu") );
     redirect_menu->signal_map_event().connect (mem_fun(*this, &RedirectBox::redirect_menu_map_handler));
     redirect_menu->set_name ("ArdourContextMenu");
     show_all_children();

@@ -31,8 +31,7 @@
 #include <libgnomecanvasmm/item.h>
 #include <libgnomecanvas/gnome-canvas-util.h>
 #include <libgnomecanvas/libgnomecanvas.h>
-#include <vector>
-
+#include "canvas-simpleline.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 typedef struct _GnomeCanvasSimpleLine GnomeCanvasSimpleLine;

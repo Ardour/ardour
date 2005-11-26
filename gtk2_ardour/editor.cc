@@ -827,7 +827,8 @@ Editor::initialize_canvas ()
 
 	verbose_canvas_cursor = new ArdourCanvas::Text (*track_canvas.root());
 	verbose_canvas_cursor->set_property ("font_desc", font);
-	verbose_canvas_cursor->set_property ("anchor", GTK_ANCHOR_NW);
+	// GTK2FIX
+	// verbose_canvas_cursor->set_property ("anchor", GTK_ANCHOR_NW);
 	verbose_canvas_cursor->set_property ("fill_color_rgba", color_map[cVerboseCanvasCursor]);
 	
 	verbose_cursor_visible = false;

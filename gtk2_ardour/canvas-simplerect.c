@@ -4,31 +4,34 @@
 
 #include "canvas-simplerect.h"
 #include "rgb_macros.h"
+#include "gettext.h"
+#define _(Text)  dgettext (PACKAGE,Text)
 
 enum {
-	ARG_0,
-	ARG_X1,
-	ARG_Y1,
-	ARG_X2,
-	ARG_Y2,
-	ARG_OUTLINE_PIXELS,
-	ARG_OUTLINE_WHAT,
-	ARG_FILL,
-	ARG_FILL_COLOR_RGBA,
-	ARG_OUTLINE_COLOR_RGBA,
-	ARG_DRAW
+	PROP_0,
+	PROP_X1,
+	PROP_Y1,
+	PROP_X2,
+	PROP_Y2,
+	PROP_OUTLINE_PIXELS,
+	PROP_OUTLINE_WHAT,
+	PROP_FILL,
+	PROP_FILL_COLOR_RGBA,
+	PROP_OUTLINE_COLOR_RGBA,
+	PROP_DRAW
 	
 };
 
-static void gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class);
-static void gnome_canvas_simplerect_init       (GnomeCanvasSimpleRect      *simplerect);
-static void gnome_canvas_simplerect_set_arg    (GtkObject              *object,
-					      GtkArg                 *arg,
-					      guint                   arg_id);
-static void gnome_canvas_simplerect_get_arg    (GtkObject              *object,
-					      GtkArg                 *arg,
-					      guint                   arg_id);
-
+static void  gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class);
+static void   gnome_canvas_simplerect_init       (GnomeCanvasSimpleRect      *simplerect);
+static void   gnome_canvas_simplerect_set_property  (GObject        *object,
+						     guint            prop_id,
+						     const GValue   *value,
+						     GParamSpec     *pspec);
+static void   gnome_canvas_simplerect_get_property  (GObject        *object,
+						     guint           prop_id,
+						     GValue         *value,
+						     GParamSpec     *pspec);
 static void   gnome_canvas_simplerect_update      (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags);
 static void   gnome_canvas_simplerect_bounds      (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2);
 static double gnome_canvas_simplerect_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item);
@@ -64,28 +67,120 @@ gnome_canvas_simplerect_get_type (void)
 static void
 gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 {
-	GtkObjectClass *object_class;
+	GObjectClass *object_class;
 	GnomeCanvasItemClass *item_class;
 
-	object_class = (GtkObjectClass *) class;
+	object_class = G_OBJECT_CLASS (class);
 	item_class = (GnomeCanvasItemClass *) class;
 
 	parent_class = gtk_type_class (gnome_canvas_item_get_type ());
 
-	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::x1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X1);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::y1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y1);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::x2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X2);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::y2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y2);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::fill", GTK_TYPE_BOOL, GTK_ARG_READWRITE, ARG_FILL);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::draw", GTK_TYPE_BOOL, GTK_ARG_READWRITE, ARG_DRAW);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::fill_color_rgba", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_FILL_COLOR_RGBA);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::outline_color_rgba", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_OUTLINE_COLOR_RGBA);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::outline_pixels", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_OUTLINE_PIXELS);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleRect::outline_what", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_OUTLINE_WHAT);
+	object_class->set_property = gnome_canvas_simplerect_set_property;
+	object_class->get_property = gnome_canvas_simplerect_get_property;
+	
+	g_object_class_install_property (object_class,
+					 PROP_X1,
+					 g_param_spec_double ("x1",
+							      _("x1"),
+							      _("x coordinate of upper left corner of rect"),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
+	g_object_class_install_property (object_class,
+					 PROP_Y1,
+					 g_param_spec_double ("y1",
+							      _("y1"),
+							      _("y coordinate of upper left corner of rect "),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
 
-	object_class->set_arg = gnome_canvas_simplerect_set_arg;
-	object_class->get_arg = gnome_canvas_simplerect_get_arg;
+	g_object_class_install_property (object_class,
+					 PROP_X2,
+					 g_param_spec_double ("x2",
+							      _("x2"),
+							      _("x coordinate of lower right corner of rect"),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
+	g_object_class_install_property (object_class,
+					 PROP_Y2,
+					 g_param_spec_double ("y2",
+							      _("y2"),
+							      _("y coordinate of lower right corner of rect "),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
 
+	g_object_class_install_property (object_class,
+					 PROP_OUTLINE_PIXELS,
+					 g_param_spec_uint ("outline_pixels",
+							      _("outline pixels"),
+							      _("width in pixels of outline"),
+							      0,
+							      G_MAXINT,
+							      0,
+							      G_PARAM_READWRITE));  
+	
+
+	g_object_class_install_property (object_class,
+					 PROP_OUTLINE_WHAT,
+					 g_param_spec_uint ("outline_what",
+							      _("outline what"),
+							      _("which boundaries to outline (mask)"),
+							      0,
+							      G_MAXINT,
+							      0,
+							      G_PARAM_READWRITE));  
+	
+
+
+	g_object_class_install_property (object_class,
+					 PROP_FILL,
+					 g_param_spec_boolean ("fill",
+							       _("fill"),
+							       _("fill rectangle"),
+							       TRUE,
+							       G_PARAM_READWRITE));  
+	
+	g_object_class_install_property (object_class,
+					 PROP_DRAW,
+					 g_param_spec_boolean ("draw",
+							       _("draw"),
+							       _("draw rectangle"),
+							       TRUE,
+							       G_PARAM_READWRITE));  
+	
+
+	g_object_class_install_property (object_class,
+					 PROP_OUTLINE_COLOR_RGBA,
+					 g_param_spec_uint ("outline_color_rgba",
+							      _("outline color rgba"),
+							      _("color of outline"),
+							      0,
+							      G_MAXINT,
+							      0,
+							      G_PARAM_READWRITE));  
+	
+
+	g_object_class_install_property (object_class,
+					 PROP_FILL_COLOR_RGBA,
+					 g_param_spec_uint ("fill_color_rgba",
+							      _("fill color rgba"),
+							      _("color of fill"),
+							      0,
+							      G_MAXINT,
+							      0,
+							      G_PARAM_READWRITE));  
+	
 	item_class->update = gnome_canvas_simplerect_update;
 	item_class->bounds = gnome_canvas_simplerect_bounds;
 	item_class->point = gnome_canvas_simplerect_point;
@@ -197,87 +292,89 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
  */
 
 static void
-gnome_canvas_simplerect_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_simplerect_set_property (GObject      *object,
+				      guint         prop_id,
+				      const GValue *value,
+				      GParamSpec   *pspec)
+
 {
-	GnomeCanvasItem *item;
 	GnomeCanvasSimpleRect *simplerect;
 	int update;
 	int bounds_changed;
 
-	item = GNOME_CANVAS_ITEM (object);
 	simplerect = GNOME_CANVAS_SIMPLERECT (object);
 
 	update = FALSE;
 	bounds_changed = FALSE;
 
-	switch (arg_id) {
-	case ARG_X1:
-	        if (simplerect->x1 != GTK_VALUE_DOUBLE (*arg)) {
-		        simplerect->x1 = GTK_VALUE_DOUBLE (*arg);
+	switch (prop_id) {
+	case PROP_X1:
+	        if (simplerect->x1 != g_value_get_double (value)) {
+		        simplerect->x1 = g_value_get_double (value);
 			bounds_changed = TRUE;
 		}
 		break;
 
-	case ARG_Y1:
-	        if (simplerect->y1 != GTK_VALUE_DOUBLE (*arg)) {
-		        simplerect->y1 = GTK_VALUE_DOUBLE (*arg);
+	case PROP_Y1:
+	        if (simplerect->y1 != g_value_get_double (value)) {
+		        simplerect->y1 = g_value_get_double (value);
 			bounds_changed = TRUE;
 		}
 		break;
 
-	case ARG_X2:
-	        if (simplerect->x2 != GTK_VALUE_DOUBLE (*arg)) {
-		        simplerect->x2 = GTK_VALUE_DOUBLE (*arg);
+	case PROP_X2:
+	        if (simplerect->x2 != g_value_get_double (value)) {
+		        simplerect->x2 = g_value_get_double (value);
 			bounds_changed = TRUE;
 		}
 		break;
 
-	case ARG_Y2:
-	        if (simplerect->y2 != GTK_VALUE_DOUBLE (*arg)) {
-		        simplerect->y2 = GTK_VALUE_DOUBLE (*arg);
+	case PROP_Y2:
+	        if (simplerect->y2 != g_value_get_double (value)) {
+		        simplerect->y2 = g_value_get_double (value);
 			bounds_changed = TRUE;
 		}
 		break;
 
-	case ARG_DRAW:
-	        if (simplerect->draw != GTK_VALUE_BOOL (*arg)) {
-		        simplerect->draw = GTK_VALUE_BOOL (*arg);
+	case PROP_DRAW:
+	        if (simplerect->draw != g_value_get_boolean (value)) {
+		        simplerect->draw = g_value_get_boolean (value);
 			update = TRUE;
 		}
 		break;
 
 
-	case ARG_FILL:
-	        if (simplerect->fill != GTK_VALUE_BOOL (*arg)) {
-		        simplerect->fill = GTK_VALUE_BOOL (*arg);
+	case PROP_FILL:
+	        if (simplerect->fill != g_value_get_boolean (value)) {
+		        simplerect->fill = g_value_get_boolean (value);
 			update = TRUE;
 		}
 		break;
 
-	case ARG_FILL_COLOR_RGBA:
-		if (simplerect->fill_color != GTK_VALUE_INT(*arg)) {
-			simplerect->fill_color = GTK_VALUE_INT(*arg);
+	case PROP_FILL_COLOR_RGBA:
+		if (simplerect->fill_color != g_value_get_uint(value)) {
+			simplerect->fill_color = g_value_get_uint(value);
 			update = TRUE;
 		}
 		break;
 
-	case ARG_OUTLINE_COLOR_RGBA:
-		if (simplerect->outline_color != GTK_VALUE_INT(*arg)) {
-			simplerect->outline_color = GTK_VALUE_INT(*arg);
+	case PROP_OUTLINE_COLOR_RGBA:
+		if (simplerect->outline_color != g_value_get_uint(value)) {
+			simplerect->outline_color = g_value_get_uint(value);
 			update = TRUE;
 		}
 		break;
 
-	case ARG_OUTLINE_PIXELS:
-		if (simplerect->outline_pixels != GTK_VALUE_INT(*arg)) {
-			simplerect->outline_pixels = GTK_VALUE_INT(*arg);
+	case PROP_OUTLINE_PIXELS:
+		if (simplerect->outline_pixels != g_value_get_uint(value)) {
+			simplerect->outline_pixels = g_value_get_uint(value);
 			update = TRUE;
 		}
 		break;
 
-	case ARG_OUTLINE_WHAT:
-		if (simplerect->outline_what != GTK_VALUE_INT(*arg)) {
-			simplerect->outline_what = GTK_VALUE_INT(*arg);
+	case PROP_OUTLINE_WHAT:
+		if (simplerect->outline_what != g_value_get_uint(value)) {
+			simplerect->outline_what = g_value_get_uint(value);
 			update = TRUE;
 		}
 		break;
@@ -289,53 +386,56 @@ gnome_canvas_simplerect_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 	simplerect->full_draw_on_update = update;
 
 	if (update || bounds_changed) {
-		gnome_canvas_item_request_update (item);
+		gnome_canvas_item_request_update (GNOME_CANVAS_ITEM(object));
 	}
 }
 
 static void
-gnome_canvas_simplerect_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_simplerect_get_property (GObject      *object,
+				      guint         prop_id,
+				      GValue       *value,
+				      GParamSpec   *pspec)
 {
-	GnomeCanvasSimpleRect *simplerect;
-
-	simplerect = GNOME_CANVAS_SIMPLERECT (object);
-
-	switch (arg_id) {
-	case ARG_X1:
-		GTK_VALUE_DOUBLE (*arg) = simplerect->x1;
+	GnomeCanvasSimpleRect *rect = GNOME_CANVAS_SIMPLERECT (object);
+	
+	switch (prop_id) {
+	case PROP_X1:
+		g_value_set_double (value, rect->x1);
 		break;
-	case ARG_Y1:
-		GTK_VALUE_DOUBLE (*arg) = simplerect->y1;
+	case PROP_X2:
+		g_value_set_double (value, rect->x2);
 		break;
-	case ARG_X2:
-		GTK_VALUE_DOUBLE (*arg) = simplerect->x2;
+	case PROP_Y1:
+		g_value_set_double (value, rect->y1);
 		break;
-	case ARG_Y2:
-		GTK_VALUE_DOUBLE (*arg) = simplerect->y2;
+	case PROP_Y2:
+		g_value_set_double (value, rect->y2);
 		break;
-	case ARG_DRAW:
-		GTK_VALUE_BOOL (*arg) = simplerect->draw;
+	case PROP_OUTLINE_WHAT:
+		g_value_set_uint (value, rect->outline_what);
 		break;
-	case ARG_FILL:
-		GTK_VALUE_BOOL (*arg) = simplerect->fill;
+	case PROP_FILL:
+		g_value_set_boolean (value, rect->fill);
 		break;
-	case ARG_FILL_COLOR_RGBA:
-		GTK_VALUE_INT (*arg) = simplerect->fill_color;
+	case PROP_OUTLINE_PIXELS:
+		g_value_set_uint (value, rect->outline_pixels);
 		break;
-	case ARG_OUTLINE_COLOR_RGBA:
-		GTK_VALUE_INT (*arg) = simplerect->outline_color;
+	case PROP_FILL_COLOR_RGBA:
+		g_value_set_uint (value, rect->fill_color);
 		break;
-	case ARG_OUTLINE_PIXELS:
-		GTK_VALUE_INT (*arg) = simplerect->outline_pixels;
+	case PROP_OUTLINE_COLOR_RGBA:
+		g_value_set_uint (value, rect->outline_color);
 		break;
-	case ARG_OUTLINE_WHAT:
-		GTK_VALUE_INT (*arg) = simplerect->outline_what;
+	case PROP_DRAW:
+		g_value_set_boolean (value, rect->draw);
 		break;
+		
 	default:
-		arg->type = GTK_TYPE_INVALID;
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
 	}
 }
+
 
 static void
 gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
