@@ -31,11 +31,12 @@ G_BEGIN_DECLS
 /* Wave viewer item for canvas.
  */
 
-#define GNOME_CANVAS_TYPE_CANVAS_SIMPLELINE            (gnome_canvas_simpleline_get_type ())
-#define GNOME_CANVAS_SIMPLELINE(obj)                   (GTK_CHECK_CAST ((obj), GNOME_CANVAS_TYPE_CANVAS_SIMPLELINE, GnomeCanvasSimpleLine))
-#define GNOME_CANVAS_SIMPLELINE_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GNOME_CANVAS_TYPE_CANVAS_SIMPLELINE, GnomeCanvasSimpleLineClass))
-#define GNOME_CANVAS_IS_CANVAS_SIMPLELINE(obj)         (GTK_CHECK_TYPE ((obj), GNOME_CANVAS_TYPE_CANVAS_SIMPLELINE))
-#define GNOME_CANVAS_IS_CANVAS_SIMPLELINE_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GNOME_CANVAS_TYPE_CANVAS_SIMPLELINE))
+#define GNOME_TYPE_CANVAS_SIMPLELINE                   (gnome_canvas_simpleline_get_type ())
+#define GNOME_CANVAS_SIMPLELINE(obj)                   (GTK_CHECK_CAST ((obj), GNOME_TYPE_CANVAS_SIMPLELINE, GnomeCanvasSimpleLine))
+#define GNOME_CANVAS_SIMPLELINE_CLASS(klass)           (GTK_CHECK_CLASS_CAST ((klass), GNOME_TYPE_CANVAS_SIMPLELINE, GnomeCanvasSimpleLineClass))
+#define GNOME_IS_CANVAS_SIMPLELINE(obj)         (GTK_CHECK_TYPE ((obj), GNOME_TYPE_CANVAS_SIMPLELINE))
+#define GNOME_IS_CANVAS_SIMPLELINE_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GNOME_TYPE_CANVAS_SIMPLELINE))
+#define GNOME_CANVAS_SIMPLELINE_GET_CLASS(obj)         (GTK_CHECK_GET_CLASS ((obj), GNOME_TYPE_CANVAS_SIMPLELINE, GnomeCanvasSimpleLineClass))
 
 typedef struct _GnomeCanvasSimpleLine            GnomeCanvasSimpleLine;
 typedef struct _GnomeCanvasSimpleLineClass       GnomeCanvasSimpleLineClass;
@@ -58,7 +59,7 @@ struct _GnomeCanvasSimpleLineClass {
 	GnomeCanvasItemClass parent_class;
 };
 
-GtkType gnome_canvas_simpleline_get_type (void);
+GType gnome_canvas_simpleline_get_type (void) G_GNUC_CONST;
 
 G_END_DECLS
 

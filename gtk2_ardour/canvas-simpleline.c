@@ -16,10 +16,14 @@ enum {
 	PROP_COLOR_RGBA
 };
 
-static void gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class);
-static void gnome_canvas_simpleline_init       (GnomeCanvasSimpleLine      *simpleline);
+static void gnome_canvas_simpleline_class_init   (GnomeCanvasSimpleLineClass *class);
+
+static void gnome_canvas_simpleline_init         (GnomeCanvasSimpleLine      *simpleline);
+
+static void gnome_canvas_simpleline_destroy      (GtkObject            *object);
+
 static void gnome_canvas_simpleline_set_property (GObject        *object,
-						  guint            prop_id,
+						  guint           prop_id,
 						  const GValue   *value,
 						  GParamSpec     *pspec);
 static void gnome_canvas_simpleline_get_property (GObject        *object,
@@ -27,33 +31,58 @@ static void gnome_canvas_simpleline_get_property (GObject        *object,
 						  GValue         *value,
 						  GParamSpec     *pspec);
 
-static void   gnome_canvas_simpleline_update      (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags);
-static void   gnome_canvas_simpleline_bounds      (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2);
-static double gnome_canvas_simpleline_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item);
-static void   gnome_canvas_simpleline_render (GnomeCanvasItem *item, GnomeCanvasBuf *buf);
-static void   gnome_canvas_simpleline_draw (GnomeCanvasItem *item, GdkDrawable *drawable, int x, int y, int w, int h);
+static void   gnome_canvas_simpleline_update     (GnomeCanvasItem *item,
+						  double          *affine,
+						  ArtSVP          *clip_path,
+						  int flags);
+
+static void   gnome_canvas_simpleline_bounds     (GnomeCanvasItem *item,
+						  double          *x1,
+						  double          *y1,
+						  double          *x2,
+						  double          *y2);
+
+static double gnome_canvas_simpleline_point      (GnomeCanvasItem  *item,
+						  double            x,
+						  double            y,
+						  int               cx,
+						  int               cy,
+						  GnomeCanvasItem **actual_item);
+
+static void   gnome_canvas_simpleline_render     (GnomeCanvasItem *item,
+						  GnomeCanvasBuf  *buf);
+
+static void   gnome_canvas_simpleline_draw       (GnomeCanvasItem *item,
+						  GdkDrawable     *drawable,
+						  int              x,
+						  int              y,
+						  int              w,
+						  int              h);
 
 static GnomeCanvasItemClass *parent_class;
 
 
-GtkType
+GType
 gnome_canvas_simpleline_get_type (void)
 {
-	static GtkType simpleline_type = 0;
+	static GType simpleline_type;
 
 	if (!simpleline_type) {
-		GtkTypeInfo simpleline_info = {
-			"GnomeCanvasSimpleLine",
-			sizeof (GnomeCanvasSimpleLine),
+		static const GTypeInfo object_info = {
 			sizeof (GnomeCanvasSimpleLineClass),
-			(GtkClassInitFunc) gnome_canvas_simpleline_class_init,
-			(GtkObjectInitFunc) gnome_canvas_simpleline_init,
-			NULL, /* reserved_1 */
-			NULL, /* reserved_2 */
-			(GtkClassInitFunc) NULL
+			(GBaseInitFunc) NULL,
+			(GBaseFinalizeFunc) NULL,
+			(GClassInitFunc) gnome_canvas_simpleline_class_init,
+			(GClassFinalizeFunc) NULL,
+			NULL,			/* class_data */
+			sizeof (GnomeCanvasSimpleLine),
+			0,			/* n_preallocs */
+			(GInstanceInitFunc) gnome_canvas_simpleline_init,
+			NULL			/* value_table */
 		};
 
-		simpleline_type = gtk_type_unique (gnome_canvas_item_get_type (), &simpleline_info);
+		simpleline_type = g_type_register_static (GNOME_TYPE_CANVAS_ITEM, "GnomeCanvasSimpleLine",
+							  &object_info, 0);
 	}
 
 	return simpleline_type;
@@ -62,18 +91,20 @@ gnome_canvas_simpleline_get_type (void)
 static void
 gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 {
-	GObjectClass *object_class;
+        GObjectClass *gobject_class;
+	GtkObjectClass *object_class;
 	GnomeCanvasItemClass *item_class;
 
-	object_class = G_OBJECT_CLASS (class);
+	gobject_class = (GObjectClass *) class;
+	object_class = (GtkObjectClass *) class;
 	item_class = (GnomeCanvasItemClass *) class;
 
-	parent_class = gtk_type_class (gnome_canvas_item_get_type ());
+	parent_class = g_type_class_peek_parent (class);
 
-	object_class->set_property = gnome_canvas_simpleline_set_property;
-	object_class->get_property = gnome_canvas_simpleline_get_property;
+	gobject_class->set_property = gnome_canvas_simpleline_set_property;
+	gobject_class->get_property = gnome_canvas_simpleline_get_property;
 	
-	g_object_class_install_property (object_class,
+	g_object_class_install_property (gobject_class,
 					 PROP_X1,
 					 g_param_spec_double ("x1",
 							      _("x1"),
@@ -83,7 +114,7 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 							      0.0,
 							      G_PARAM_READWRITE));  
 	
-	g_object_class_install_property (object_class,
+	g_object_class_install_property (gobject_class,
 					 PROP_Y1,
 					 g_param_spec_double ("y1",
 							      _("y1"),
@@ -94,7 +125,7 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 							      G_PARAM_READWRITE));  
 	
 
-	g_object_class_install_property (object_class,
+	g_object_class_install_property (gobject_class,
 					 PROP_X2,
 					 g_param_spec_double ("x2",
 							      _("x2"),
@@ -104,7 +135,7 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 							      0.0,
 							      G_PARAM_READWRITE));  
 	
-	g_object_class_install_property (object_class,
+	g_object_class_install_property (gobject_class,
 					 PROP_Y2,
 					 g_param_spec_double ("y2",
 							      _("y2"),
@@ -113,7 +144,7 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 							      G_MAXDOUBLE,
 							      0.0,
 							      G_PARAM_READWRITE));  
-	g_object_class_install_property (object_class,
+	g_object_class_install_property (gobject_class,
 					 PROP_COLOR_RGBA,
 					 g_param_spec_uint ("color_rgba",
 							    _("color rgba"),
@@ -123,6 +154,8 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 							    0,
 							    G_PARAM_READWRITE));  
 	
+	object_class->destroy = gnome_canvas_simpleline_destroy;
+
 	item_class->update = gnome_canvas_simpleline_update;
 	item_class->bounds = gnome_canvas_simpleline_bounds;
 	item_class->point = gnome_canvas_simpleline_point;
@@ -141,6 +174,20 @@ gnome_canvas_simpleline_init (GnomeCanvasSimpleLine *simpleline)
 	simpleline->horizontal = TRUE; /* reset in the _update() method */
 	// GTK2FIX
 	// GNOME_CANVAS_ITEM(simpleline)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
+}
+
+static void
+gnome_canvas_simpleline_destroy (GtkObject *object)
+{
+	GnomeCanvasSimpleLine *line;
+
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (GNOME_IS_CANVAS_LINE (object));
+
+	line = GNOME_CANVAS_SIMPLELINE (object);
+
+	if (GTK_OBJECT_CLASS (parent_class)->destroy)
+		(* GTK_OBJECT_CLASS (parent_class)->destroy) (object);
 }
 
 static void
@@ -203,6 +250,9 @@ gnome_canvas_simpleline_set_property (GObject      *object,
 	int update = FALSE;
 	int bounds_changed = FALSE;
 
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (GNOME_IS_CANVAS_SIMPLELINE (object));
+
 	simpleline = GNOME_CANVAS_SIMPLELINE (object);
 
 	switch (prop_id) {
@@ -255,8 +305,11 @@ gnome_canvas_simpleline_get_property (GObject      *object,
 				      GValue       *value,
 				      GParamSpec   *pspec)
 {
-	GnomeCanvasSimpleLine *line = GNOME_CANVAS_SIMPLELINE (object);
+        g_return_if_fail (object != NULL);
+        g_return_if_fail (GNOME_IS_CANVAS_SIMPLELINE (object));
 	
+	GnomeCanvasSimpleLine *line = GNOME_CANVAS_SIMPLELINE (object);
+
 	switch (prop_id) {
 	case PROP_X1:
 		g_value_set_double (value, line->x1);
