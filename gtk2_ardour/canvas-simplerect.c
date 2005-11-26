@@ -126,7 +126,7 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							      _("outline pixels"),
 							      _("width in pixels of outline"),
 							      0,
-							      G_MAXINT,
+							      G_MAXUINT,
 							      0,
 							      G_PARAM_READWRITE));  
 	
@@ -137,7 +137,7 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							      _("outline what"),
 							      _("which boundaries to outline (mask)"),
 							      0,
-							      G_MAXINT,
+							      G_MAXUINT,
 							      0,
 							      G_PARAM_READWRITE));  
 	
@@ -163,23 +163,23 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 	g_object_class_install_property (object_class,
 					 PROP_OUTLINE_COLOR_RGBA,
 					 g_param_spec_uint ("outline_color_rgba",
-							      _("outline color rgba"),
-							      _("color of outline"),
-							      0,
-							      G_MAXINT,
-							      0,
-							      G_PARAM_READWRITE));  
+							    _("outline color rgba"),
+							    _("color of outline"),
+							    0,
+							    G_MAXUINT,
+							    0,
+							    G_PARAM_READWRITE));  
 	
 
 	g_object_class_install_property (object_class,
 					 PROP_FILL_COLOR_RGBA,
 					 g_param_spec_uint ("fill_color_rgba",
-							      _("fill color rgba"),
-							      _("color of fill"),
-							      0,
-							      G_MAXINT,
-							      0,
-							      G_PARAM_READWRITE));  
+							    _("fill color rgba"),
+							    _("color of fill"),
+							    0,
+							    G_MAXUINT,
+							    0,
+							    G_PARAM_READWRITE));  
 	
 	item_class->update = gnome_canvas_simplerect_update;
 	item_class->bounds = gnome_canvas_simplerect_bounds;
@@ -299,13 +299,10 @@ gnome_canvas_simplerect_set_property (GObject      *object,
 
 {
 	GnomeCanvasSimpleRect *simplerect;
-	int update;
-	int bounds_changed;
+	int update = FALSE;
+	int bounds_changed = FALSE;
 
 	simplerect = GNOME_CANVAS_SIMPLERECT (object);
-
-	update = FALSE;
-	bounds_changed = FALSE;
 
 	switch (prop_id) {
 	case PROP_X1:

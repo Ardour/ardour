@@ -4,24 +4,28 @@
 
 #include "canvas-simpleline.h"
 #include "rgb_macros.h"
+#include "gettext.h"
+#define _(Text)  dgettext (PACKAGE,Text)
 
 enum {
-	ARG_0,
-	ARG_X1,
-	ARG_Y1,
-	ARG_X2,
-	ARG_Y2,
-	ARG_COLOR_RGBA
+	PROP_0,
+	PROP_X1,
+	PROP_Y1,
+	PROP_X2,
+	PROP_Y2,
+	PROP_COLOR_RGBA
 };
 
 static void gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class);
 static void gnome_canvas_simpleline_init       (GnomeCanvasSimpleLine      *simpleline);
-static void gnome_canvas_simpleline_set_arg    (GtkObject              *object,
-					      GtkArg                 *arg,
-					      guint                   arg_id);
-static void gnome_canvas_simpleline_get_arg    (GtkObject              *object,
-					      GtkArg                 *arg,
-					      guint                   arg_id);
+static void gnome_canvas_simpleline_set_property (GObject        *object,
+						  guint            prop_id,
+						  const GValue   *value,
+						  GParamSpec     *pspec);
+static void gnome_canvas_simpleline_get_property (GObject        *object,
+						  guint           prop_id,
+						  GValue         *value,
+						  GParamSpec     *pspec);
 
 static void   gnome_canvas_simpleline_update      (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags);
 static void   gnome_canvas_simpleline_bounds      (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2);
@@ -58,23 +62,67 @@ gnome_canvas_simpleline_get_type (void)
 static void
 gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 {
-	GtkObjectClass *object_class;
+	GObjectClass *object_class;
 	GnomeCanvasItemClass *item_class;
 
-	object_class = (GtkObjectClass *) class;
+	object_class = G_OBJECT_CLASS (class);
 	item_class = (GnomeCanvasItemClass *) class;
 
 	parent_class = gtk_type_class (gnome_canvas_item_get_type ());
 
-	gtk_object_add_arg_type ("GnomeCanvasSimpleLine::x1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X1);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleLine::y1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y1);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleLine::x2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X2);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleLine::y2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y2);
-	gtk_object_add_arg_type ("GnomeCanvasSimpleLine::color-rgba", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_COLOR_RGBA);
+	object_class->set_property = gnome_canvas_simpleline_set_property;
+	object_class->get_property = gnome_canvas_simpleline_get_property;
+	
+	g_object_class_install_property (object_class,
+					 PROP_X1,
+					 g_param_spec_double ("x1",
+							      _("x1"),
+							      _("x coordinate of upper left corner of rect"),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
+	g_object_class_install_property (object_class,
+					 PROP_Y1,
+					 g_param_spec_double ("y1",
+							      _("y1"),
+							      _("y coordinate of upper left corner of rect "),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
 
-	object_class->set_arg = gnome_canvas_simpleline_set_arg;
-	object_class->get_arg = gnome_canvas_simpleline_get_arg;
-
+	g_object_class_install_property (object_class,
+					 PROP_X2,
+					 g_param_spec_double ("x2",
+							      _("x2"),
+							      _("x coordinate of lower right corner of rect"),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
+	g_object_class_install_property (object_class,
+					 PROP_Y2,
+					 g_param_spec_double ("y2",
+							      _("y2"),
+							      _("y coordinate of lower right corner of rect "),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	g_object_class_install_property (object_class,
+					 PROP_COLOR_RGBA,
+					 g_param_spec_uint ("color_rgba",
+							    _("color rgba"),
+							    _("color of line"),
+							    0,
+							    G_MAXUINT,
+							    0,
+							    G_PARAM_READWRITE));  
+	
 	item_class->update = gnome_canvas_simpleline_update;
 	item_class->bounds = gnome_canvas_simpleline_bounds;
 	item_class->point = gnome_canvas_simpleline_point;
@@ -145,97 +193,88 @@ gnome_canvas_simpleline_reset_bounds (GnomeCanvasItem *item)
  */
 
 static void
-gnome_canvas_simpleline_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
-{
-	GnomeCanvasItem *item;
-	GnomeCanvasSimpleLine *simpleline;
-	int redraw;
-	int calc_bounds;
+gnome_canvas_simpleline_set_property (GObject      *object,
+				      guint         prop_id,
+				      const GValue *value,
+				      GParamSpec   *pspec)
 
-	item = GNOME_CANVAS_ITEM (object);
+{
+	GnomeCanvasSimpleLine *simpleline;
+	int update = FALSE;
+	int bounds_changed = FALSE;
+
 	simpleline = GNOME_CANVAS_SIMPLELINE (object);
 
-	redraw = FALSE;
-	calc_bounds = FALSE;
-
-	switch (arg_id) {
-	case ARG_X1:
-	        if (simpleline->x1 != GTK_VALUE_DOUBLE (*arg)) {
-		        simpleline->x1 = GTK_VALUE_DOUBLE (*arg);
-			calc_bounds = TRUE;
+	switch (prop_id) {
+	case PROP_X1:
+	        if (simpleline->x1 != g_value_get_double (value)) {
+		        simpleline->x1 = g_value_get_double (value);
+			bounds_changed = TRUE;
 		}
 		break;
 
-	case ARG_Y1:
-	        if (simpleline->y1 != GTK_VALUE_DOUBLE (*arg)) {
-		        simpleline->y1 = GTK_VALUE_DOUBLE (*arg);
-			calc_bounds = TRUE;
+	case PROP_Y1:
+	        if (simpleline->y1 != g_value_get_double (value)) {
+		        simpleline->y1 = g_value_get_double (value);
+			bounds_changed = TRUE;
 		}
 		break;
 
-	case ARG_X2:
-	        if (simpleline->x2 != GTK_VALUE_DOUBLE (*arg)) {
-		        simpleline->x2 = GTK_VALUE_DOUBLE (*arg);
-			calc_bounds = TRUE;
+	case PROP_X2:
+	        if (simpleline->x2 != g_value_get_double (value)) {
+		        simpleline->x2 = g_value_get_double (value);
+			bounds_changed = TRUE;
 		}
 		break;
 
-	case ARG_Y2:
-	        if (simpleline->y2 != GTK_VALUE_DOUBLE (*arg)) {
-		        simpleline->y2 = GTK_VALUE_DOUBLE (*arg);
-			calc_bounds = TRUE;
+	case PROP_Y2:
+	        if (simpleline->y2 != g_value_get_double (value)) {
+		        simpleline->y2 = g_value_get_double (value);
+			bounds_changed = TRUE;
 		}
 		break;
-
-	case ARG_COLOR_RGBA:
-		if (simpleline->color != GTK_VALUE_INT(*arg)) {
-			simpleline->color = GTK_VALUE_INT(*arg);
-			UINT_TO_RGBA (simpleline->color, &simpleline->r, &simpleline->g, &simpleline->b, &simpleline->a);
-			redraw = TRUE;
+		
+	case PROP_COLOR_RGBA:
+		if (simpleline->color != g_value_get_uint(value)) {
+		        simpleline->color = g_value_get_uint(value);
+		        update = TRUE;
 		}
 		break;
-
 	default:
 		break;
 	}
-	
-	if (calc_bounds) {
 
-		gnome_canvas_item_request_update (item);
-
-	} else if (redraw) {
-
-		int Ix1, Ix2, Iy1, Iy2;
-		gnome_canvas_simpleline_bounds_world (item, &Ix1, &Iy1, &Ix2, &Iy2);
-		gnome_canvas_request_redraw (item->canvas, Ix1, Iy1, Ix2, Iy2);
+	if (update || bounds_changed) {
+		gnome_canvas_item_request_update (GNOME_CANVAS_ITEM(object));
 	}
 }
 
 static void
-gnome_canvas_simpleline_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_simpleline_get_property (GObject      *object,
+				      guint         prop_id,
+				      GValue       *value,
+				      GParamSpec   *pspec)
 {
-	GnomeCanvasSimpleLine *simpleline;
-
-	simpleline = GNOME_CANVAS_SIMPLELINE (object);
-
-	switch (arg_id) {
-	case ARG_X1:
-		GTK_VALUE_DOUBLE (*arg) = simpleline->x1;
+	GnomeCanvasSimpleLine *line = GNOME_CANVAS_SIMPLELINE (object);
+	
+	switch (prop_id) {
+	case PROP_X1:
+		g_value_set_double (value, line->x1);
 		break;
-	case ARG_Y1:
-		GTK_VALUE_DOUBLE (*arg) = simpleline->y1;
+	case PROP_X2:
+		g_value_set_double (value, line->x2);
 		break;
-	case ARG_X2:
-		GTK_VALUE_DOUBLE (*arg) = simpleline->x2;
+	case PROP_Y1:
+		g_value_set_double (value, line->y1);
 		break;
-	case ARG_Y2:
-		GTK_VALUE_DOUBLE (*arg) = simpleline->y2;
+	case PROP_Y2:
+		g_value_set_double (value, line->y2);
 		break;
-	case ARG_COLOR_RGBA:
-		GTK_VALUE_INT (*arg) = simpleline->color;
+	case PROP_COLOR_RGBA:
+		g_value_set_uint (value, line->color);
 		break;
 	default:
-		arg->type = GTK_TYPE_INVALID;
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
 	}
 }
