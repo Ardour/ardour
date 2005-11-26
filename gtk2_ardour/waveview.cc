@@ -134,11 +134,11 @@ WaveView::create_cache ()
 
 Glib::PropertyProxy<void*> WaveView::property_data_src()
 {
-	return Glib::PropertyProxy<void*> (this, "data-src");
+	return Glib::PropertyProxy<void*> (this, "data_src");
 }
 Glib::PropertyProxy_ReadOnly<void*> WaveView::property_data_src() const
 {
-	return Glib::PropertyProxy_ReadOnly<void*> (this, "data-src");
+	return Glib::PropertyProxy_ReadOnly<void*> (this, "data_src");
 }
 Glib::PropertyProxy<uint32_t> WaveView::property_channel() 
 {
@@ -150,43 +150,43 @@ Glib::PropertyProxy_ReadOnly<uint32_t> WaveView::property_channel()  const
 }
 Glib::PropertyProxy<void*> WaveView::property_length_function()
 {
-	return Glib::PropertyProxy<void*> (this, "length-function");
+	return Glib::PropertyProxy<void*> (this, "length_function");
 }
 Glib::PropertyProxy_ReadOnly<void*> WaveView::property_length_function() const
 {
-	return Glib::PropertyProxy_ReadOnly<void*> (this, "length-function");
+	return Glib::PropertyProxy_ReadOnly<void*> (this, "length_function");
 }
 Glib::PropertyProxy<void*> WaveView::property_sourcefile_length_function()
 {
-	return Glib::PropertyProxy<void*> (this, "sourcefile-length-function");
+	return Glib::PropertyProxy<void*> (this, "sourcefile_length_function");
 }
 Glib::PropertyProxy_ReadOnly<void*> WaveView::property_sourcefile_length_function() const
 {
-	return Glib::PropertyProxy_ReadOnly<void*> (this, "sourcefile-length-function");
+	return Glib::PropertyProxy_ReadOnly<void*> (this, "sourcefile_length_function");
 }
 Glib::PropertyProxy<void*> WaveView::property_peak_function()
 {
-	return Glib::PropertyProxy<void*> (this, "peak-function");
+	return Glib::PropertyProxy<void*> (this, "peak_function");
 }
 Glib::PropertyProxy_ReadOnly<void*> WaveView::property_peak_function() const
 {
-	return Glib::PropertyProxy_ReadOnly<void*> (this, "peak-function");
+	return Glib::PropertyProxy_ReadOnly<void*> (this, "peak_function");
 }
 Glib::PropertyProxy<void*> WaveView::property_gain_function()
 {
-	return Glib::PropertyProxy<void*> (this, "gain-function");
+	return Glib::PropertyProxy<void*> (this, "gain_function");
 }
 Glib::PropertyProxy_ReadOnly<void*> WaveView::property_gain_function() const
 {
-	return Glib::PropertyProxy_ReadOnly<void*> (this, "gain-function");
+	return Glib::PropertyProxy_ReadOnly<void*> (this, "gain_function");
 }
 Glib::PropertyProxy<void*> WaveView::property_gain_src()
 {
-	return Glib::PropertyProxy<void*> (this, "gain-src");
+	return Glib::PropertyProxy<void*> (this, "gain_src");
 }
 Glib::PropertyProxy_ReadOnly<void*> WaveView::property_gain_src() const
 {
-	return Glib::PropertyProxy_ReadOnly<void*> (this, "gain-src");
+	return Glib::PropertyProxy_ReadOnly<void*> (this, "gain_src");
 }
 Glib::PropertyProxy<void*> WaveView::property_cache()
 {
@@ -198,27 +198,27 @@ Glib::PropertyProxy_ReadOnly<void*> WaveView::property_cache() const
 }
 Glib::PropertyProxy<bool> WaveView::property_cache_updater()
 {
-	return Glib::PropertyProxy<bool> (this, "cache-updater");
+	return Glib::PropertyProxy<bool> (this, "cache_updater");
 }
 Glib::PropertyProxy_ReadOnly<bool> WaveView::property_cache_updater() const
 {
-	return Glib::PropertyProxy_ReadOnly<bool> (this, "cache-updater");
+	return Glib::PropertyProxy_ReadOnly<bool> (this, "cache_updater");
 }
 Glib::PropertyProxy<double> WaveView::property_samples_per_unit()
 {
-	return Glib::PropertyProxy<double> (this, "samples-per-unit");
+	return Glib::PropertyProxy<double> (this, "samples_per_unit");
 }
 Glib::PropertyProxy_ReadOnly<double> WaveView::property_samples_per_unit() const
 {
-	return Glib::PropertyProxy_ReadOnly<double> (this, "samples-per-unit");
+	return Glib::PropertyProxy_ReadOnly<double> (this, "samples_per_unit");
 }
 Glib::PropertyProxy<double> WaveView::property_amplitude_above_axis()
 {
-	return Glib::PropertyProxy<double> (this, "amplitude-above-axis");
+	return Glib::PropertyProxy<double> (this, "amplitude_above_axis");
 }
 Glib::PropertyProxy_ReadOnly<double> WaveView::property_amplitude_above_axis() const
 {
-	return Glib::PropertyProxy_ReadOnly<double> (this, "amplitude-above-axis");
+	return Glib::PropertyProxy_ReadOnly<double> (this, "amplitude_above_axis");
 }
 Glib::PropertyProxy<double> WaveView::property_x()
 {
@@ -262,11 +262,11 @@ Glib::PropertyProxy_ReadOnly<gint> WaveView::property_rectified() const
 }
 Glib::PropertyProxy<guint> WaveView::property_region_start()
 {
-	return Glib::PropertyProxy<guint> (this, "region-start");
+	return Glib::PropertyProxy<guint> (this, "region_start");
 }
 Glib::PropertyProxy_ReadOnly<guint> WaveView::property_region_start() const
 {
-	return Glib::PropertyProxy_ReadOnly<guint> (this, "region-start");
+	return Glib::PropertyProxy_ReadOnly<guint> (this, "region_start");
 }
 
 } // namespace Canvas

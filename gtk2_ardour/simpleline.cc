@@ -137,12 +137,12 @@ GType SimpleLine::get_base_type()
 
 Glib::PropertyProxy<guint> SimpleLine::property_color_rgba() 
 {
-  return Glib::PropertyProxy<guint>(this, "color-rgba");
+  return Glib::PropertyProxy<guint>(this, "color_rgba");
 }
 
 Glib::PropertyProxy_ReadOnly<guint> SimpleLine::property_color_rgba() const
 {
-  return Glib::PropertyProxy_ReadOnly<guint>(this, "color-rgba");
+  return Glib::PropertyProxy_ReadOnly<guint>(this, "color_rgba");
 }
 
 Glib::PropertyProxy<double> SimpleLine::property_x1() 
