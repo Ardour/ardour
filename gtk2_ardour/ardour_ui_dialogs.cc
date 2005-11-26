@@ -247,12 +247,13 @@ int
 ARDOUR_UI::create_connection_editor ()
 {
 	if (connection_editor == 0) {
-		connection_editor = new ConnectionEditor ();
-		connection_editor->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::connection_editor_hiding));
+		// GTK2FIX
+		// connection_editor = new ConnectionEditor ();
+		// connection_editor->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::connection_editor_hiding));
 	}
 
 	if (session) {
-		connection_editor->set_session (session);
+		// connection_editor->set_session (session);
 	}
 
 	return 0;
@@ -265,6 +266,9 @@ ARDOUR_UI::toggle_connection_editor ()
 		return;
 	}
 
+	//GTK2FIX
+#if 0
+
 	if (connection_editor->within_hiding()) {
 		return;
 	}
@@ -275,12 +279,14 @@ ARDOUR_UI::toggle_connection_editor ()
 	} else {
 		connection_editor->hide_all();
 	}
+#endif
 }
 
 void
 ARDOUR_UI::connection_editor_hiding()
 {
-	connection_editor_check->set_active(false);
+	//GTK2FIX
+	// connection_editor_check->set_active(false);
 }
 
 void

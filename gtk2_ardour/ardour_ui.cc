@@ -56,6 +56,7 @@
 #include <ardour/port.h>
 #include <ardour/audio_track.h>
 
+#include "actions.h"
 #include "ardour_ui.h"
 #include "ardour_message.h"
 #include "public_editor.h"
@@ -830,11 +831,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	if (theArdourUI == 0) {
 		theArdourUI = this;
 	}
+
+	ActionManager::init ();
 	
 	m_new_session_dialog = 0;
 	m_new_session_dialog_ref = NewSessionDialogFactory::create();
-	m_new_session_dialog_ref->get_widget_derived(NewSessionDialogFactory::top_level_widget_name(),
-						     m_new_session_dialog);
+	m_new_session_dialog_ref->get_widget_derived (NewSessionDialogFactory::top_level_widget_name(), m_new_session_dialog);
 	editor = 0;
 	mixer = 0;
 	session = 0;
@@ -859,8 +861,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	last_configure_time.tv_sec = 0;
 	last_configure_time.tv_usec = 0;
 
-	ui_manager = UIManager::create ();
-
 	shuttle_grabbed = false;
 	shuttle_fract = 0.0;
 
@@ -874,10 +874,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	shuttle_actions->add (Action::create (X_("SetShuttleActionSprung"), _("Sprung")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Sprung));
 	shuttle_actions->add (Action::create (X_("SetShuttleActionWheel"), _("Wheel")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Wheel));
 	
-	ui_manager->insert_action_group (shuttle_actions);
+	ActionManager::add_action_group (shuttle_actions);
 
-	shuttle_style_menu = dynamic_cast<Menu*> (ui_manager->get_widget ("ShuttleStylePopup"));
-	shuttle_unit_menu = dynamic_cast<Menu*> (ui_manager->get_widget ("ShuttleUnitPopup"));
+	shuttle_style_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("ShuttleStylePopup"));
+	shuttle_unit_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("ShuttleUnitPopup"));
 	
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
@@ -934,7 +934,8 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	}
 
 	if (GTK_ARDOUR::show_key_actions) {
-		KeyboardTarget::show_all_actions ();
+		// GTK2FIX
+		// show_all_actions ();
 		exit (0);
 	}
 

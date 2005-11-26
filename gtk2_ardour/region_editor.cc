@@ -201,7 +201,7 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 
 	fade_in_length_spinner.set_digits (3);
 
-	fade_in_length_spinner.signal_activate().connect (mem_fun(*this, &AudioRegionEditor::activation));
+	// fade_in_length_spinner.signal_activate().connect (mem_fun(*this, &AudioRegionEditor::activation));
 
 	Gtkmm2ext::set_size_request_to_display_given_text (fade_in_length_spinner, "500g", 20, -1);
 
@@ -368,10 +368,11 @@ AudioRegionEditor::bpressed (GdkEventButton* ev, Gtk::SpinButton* but, void (Aud
 	case 3:
 		if (ev->type == GDK_BUTTON_PRESS) { /* no double clicks here */
 			if (!spin_arrow_grab) {
-				if ((ev->window == but->gobj()->panel)) {
-					spin_arrow_grab = true;
-					(this->*pmf)();
-				} 
+				// GTK2FIX probably nuke the region editor
+				// if ((ev->window == but->gobj()->panel)) {
+				// spin_arrow_grab = true;
+				// (this->*pmf)();
+				// } 
 			} 
 		} 
 		break;
@@ -618,7 +619,7 @@ AudioRegionEditor::bounds_changed (Change what_changed)
 void
 AudioRegionEditor::activation ()
 {
-	ARDOUR_UI::instance()->allow_focus (false);
+	
 }	
 
 void

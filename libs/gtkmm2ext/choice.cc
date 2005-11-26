@@ -65,8 +65,7 @@ void
 Choice::on_realize ()
 {
 	Gtk::Window::on_realize();
-	Glib::RefPtr<Gdk::Window> win (get_window());
-	win->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 }
 
 Choice::~Choice ()

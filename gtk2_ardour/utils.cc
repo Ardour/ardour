@@ -30,6 +30,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include "ardour_ui.h"
+#include "keyboard.h"
 #include "utils.h"
 #include "i18n.h"
 #include "rgb_macros.h"
@@ -315,9 +316,9 @@ get_canvas_points (string who, uint32_t npoints)
 }
 
 int
-channel_combo_get_channel_count (Gtk::Combo& combo)
+channel_combo_get_channel_count (Gtk::ComboBoxText& combo)
 {
-	string str = combo.get_entry()->get_text();
+	string str = combo.get_active_text();
 	int chns;
 
 	if (str == _("mono")) {
@@ -501,8 +502,3 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 	return (uint32_t) RGBA_TO_UINT(r,g,b,a);
 }
 
-void
-decorate (Gtk::Window& w, Gdk::WMDecoration d)
-{
-	w.get_window()->set_decorations (d);
-}

@@ -23,6 +23,8 @@
 #include <gtkmm/accelmap.h>
 #include <gtkmm/uimanager.h>
 
+#include <pbd/error.h>
+
 #include "actions.h"
 
 using namespace std;
@@ -37,8 +39,21 @@ vector<RefPtr<Gtk::Action> > ActionManager::track_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::plugin_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::jack_sensitive_actions;
+RefPtr<UIManager> ActionManager::ui_manager;
 string ActionManager::unbound_string = "--";
 
+void
+ActionManager::init ()
+{
+	ui_manager = UIManager::create ();
+
+	try {
+		ui_manager->add_ui_from_file ("ardour-menus.xml");
+	} catch (Glib::MarkupError& err) {
+		error << "badly formatted UI definition file" << endmsg;
+	}
+    
+}
 
 RefPtr<Action>
 ActionManager::register_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
@@ -129,7 +144,7 @@ ActionManager::lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
 void
 ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& keys, vector<AccelKey>& bindings)
 {
-	ListHandle<RefPtr<ActionGroup> > uim_groups = ui_manager.get_action_groups ();
+	ListHandle<RefPtr<ActionGroup> > uim_groups = ui_manager->get_action_groups ();
 	
 	for (ListHandle<RefPtr<ActionGroup> >::iterator g = uim_groups.begin(); g != uim_groups.end(); ++g) {
 		
@@ -148,7 +163,7 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 			bool known = lookup_entry (accel_path, key);
 			
 			if (known) {
-				keys.push_back (ui_manager.get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod())));
+				keys.push_back (ui_manager->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod())));
 			} else {
 				keys.push_back (unbound_string);
 			}
@@ -161,17 +176,17 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 void
 ActionManager::add_action_group (RefPtr<ActionGroup> grp)
 {
-	ui_manager.insert_action_group (grp);
+	ui_manager->insert_action_group (grp);
 }
 
 Widget*
 ActionManager::get_widget (ustring name)
 {
-	return ui_manager.get_widget (name);
+	return ui_manager->get_widget (name);
 }
 
 RefPtr<Action>
 ActionManager::get_action (ustring name)
 {
-	return ui_manager.get_action (name);
+	return ui_manager->get_action (name);
 }

@@ -167,12 +167,18 @@ Glib::PropertyProxy_ReadOnly<double> ImageFrame::property_drawwidth() const
 {
 	return Glib::PropertyProxy_ReadOnly<double> (this, "drawwidth");
 }
-
+Glib::PropertyProxy<double> ImageFrame::property_height()
+{
+	return Glib::PropertyProxy<double> (this, "height");
+}
+Glib::PropertyProxy_ReadOnly<double> ImageFrame::property_height() const
+{
+	return Glib::PropertyProxy_ReadOnly<double> (this, "height");
+}
 Glib::PropertyProxy<Gtk::AnchorType> ImageFrame::property_anchor() 
 {
   return Glib::PropertyProxy<Gtk::AnchorType>(this, "anchor");
 }
-
 Glib::PropertyProxy_ReadOnly<Gtk::AnchorType> ImageFrame::property_anchor() const
 {
   return Glib::PropertyProxy_ReadOnly<Gtk::AnchorType>(this, "anchor");

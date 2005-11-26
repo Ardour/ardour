@@ -1941,8 +1941,8 @@ Editor::update_marker_drag_item (Location *location)
 	double x2 = frame_to_pixel (location->end());
 
 	if (location->is_mark()) {
-	        marker_drag_line_points->front().set_x(x1);
-		marker_drag_line_points->back().set_x(x1);
+	        marker_drag_line_points.front().set_x(x1);
+		marker_drag_line_points.back().set_x(x1);
 		marker_drag_line->set_property ("points", marker_drag_line_points);
 	}
 	else {

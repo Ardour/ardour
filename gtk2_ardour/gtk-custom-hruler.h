@@ -34,14 +34,12 @@
 #include "gtk-custom-ruler.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+G_BEGIN_DECLS
 
 
-#define GTK_CUSTOM_HRULER(obj)          GTK_CHECK_CAST (obj, gtk_custom_hruler_get_type (), GtkCustomHRuler)
-#define GTK_CUSTOM_HRULER_CLASS(klass)  GTK_CHECK_CLASS_CAST (klass, gtk_custom_hruler_get_type (), GtkCustomHRulerClass)
-#define GTK_IS_CUSTOM_HRULER(obj)       GTK_CHECK_TYPE (obj, gtk_custom_hruler_get_type ())
+#define GTK_CUSTOM_HRULER(obj)          G_TYPE_CHECK_INSTANCE_CAST (obj, gtk_custom_hruler_get_type (), GtkCustomHRuler)
+#define GTK_CUSTOM_HRULER_CLASS(klass)  G_TYPE_CHECK_CLASS_CAST (klass, gtk_custom_hruler_get_type (), GtkCustomHRulerClass)
+#define GTK_IS_CUSTOM_HRULER(obj)       G_TYPE_CHECK_INSTANCE_TYPE (obj, gtk_custom_hruler_get_type ())
 
 
 typedef struct _GtkCustomHRuler       GtkCustomHRuler;
@@ -62,9 +60,7 @@ guint      gtk_custom_hruler_get_type (void);
 GtkWidget* gtk_custom_hruler_new      (void);
 
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+G_END_DECLS
 
 
 #endif /* __GTK_CUSTOM_HRULER_H__ */

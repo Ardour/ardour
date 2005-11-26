@@ -545,15 +545,15 @@ class Editor : public PublicEditor
 	void store_ruler_visibility ();
 	void restore_ruler_visibility ();
 	
-	static gint _metric_get_smpte (GtkCustomRulerMark **, gulong, gulong, gint);
-	static gint _metric_get_bbt (GtkCustomRulerMark **, gulong, gulong, gint);
-	static gint _metric_get_frames (GtkCustomRulerMark **, gulong, gulong, gint);
-	static gint _metric_get_minsec (GtkCustomRulerMark **, gulong, gulong, gint);
+	static gint _metric_get_smpte (GtkCustomRulerMark **, gdouble, gdouble, gint);
+	static gint _metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
+	static gint _metric_get_frames (GtkCustomRulerMark **, gdouble, gdouble, gint);
+	static gint _metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	
-	gint metric_get_smpte (GtkCustomRulerMark **, gulong, gulong, gint);
-	gint metric_get_bbt (GtkCustomRulerMark **, gulong, gulong, gint);
-	gint metric_get_frames (GtkCustomRulerMark **, gulong, gulong, gint);
-	gint metric_get_minsec (GtkCustomRulerMark **, gulong, gulong, gint);
+	gint metric_get_smpte (GtkCustomRulerMark **, gdouble, gdouble, gint);
+	gint metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
+	gint metric_get_frames (GtkCustomRulerMark **, gdouble, gdouble, gint);
+	gint metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
 
 	GtkWidget          *_smpte_ruler;
 	GtkWidget          *_bbt_ruler;
@@ -734,8 +734,6 @@ class Editor : public PublicEditor
 	bool region_list_display_key_release (GdkEventKey *);
 	bool region_list_display_button_press (GdkEventButton *);
 	bool region_list_display_button_release (GdkEventButton *);
-	bool region_list_display_enter_notify (GdkEventCrossing *);
-	bool region_list_display_leave_notify (GdkEventCrossing *);
 	void region_list_clear ();
 	void region_list_selection_mapover (sigc::slot<void,ARDOUR::Region&>);
 	void build_region_list_menu ();
@@ -1425,21 +1423,21 @@ class Editor : public PublicEditor
 	void drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event);
 	void end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event);
 
-	ArdourCanvas::SimpleRect*    range_bar_drag_rect;
-	ArdourCanvas::SimpleRect*      transport_bar_drag_rect;
-	ArdourCanvas::Line*      marker_drag_line;
-	ArdourCanvas::Points*    marker_drag_line_points;
-	ArdourCanvas::SimpleRect*      range_marker_drag_rect;
+	ArdourCanvas::SimpleRect*  range_bar_drag_rect;
+	ArdourCanvas::SimpleRect*  transport_bar_drag_rect;
+	ArdourCanvas::Line*        marker_drag_line;
+ 	ArdourCanvas::Points       marker_drag_line_points;
+	ArdourCanvas::SimpleRect*  range_marker_drag_rect;
 
 	void update_marker_drag_item (ARDOUR::Location *);
 	
-	ArdourCanvas::SimpleRect      *transport_bar_range_rect;
+	ArdourCanvas::SimpleRect     *transport_bar_range_rect;
 	ArdourCanvas::SimpleRect     *transport_bar_preroll_rect;
-	ArdourCanvas::SimpleRect      *transport_bar_postroll_rect;
+	ArdourCanvas::SimpleRect     *transport_bar_postroll_rect;
 	ArdourCanvas::SimpleRect     *transport_loop_range_rect;
-	ArdourCanvas::SimpleRect      *transport_punch_range_rect;
-	ArdourCanvas::Line           *transport_punchin_line;
-	ArdourCanvas::Line           *transport_punchout_line;
+	ArdourCanvas::SimpleRect     *transport_punch_range_rect;
+	ArdourCanvas::SimpleLine     *transport_punchin_line;
+	ArdourCanvas::SimpleLine     *transport_punchout_line;
 	ArdourCanvas::SimpleRect     *transport_preroll_rect;
 	ArdourCanvas::SimpleRect     *transport_postroll_rect;
 
@@ -1825,10 +1823,6 @@ class Editor : public PublicEditor
 	
 	typedef std::map<Editing::ColorID,std::string> ColorStyleMap;
 	void init_colormap ();
-
-	/* GTK2 stuff */
-
-	Glib::RefPtr<Gtk::UIManager> ui_manager;
 };
 
 #endif /* __ardour_editor_h__ */

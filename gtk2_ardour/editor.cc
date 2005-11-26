@@ -30,6 +30,10 @@
 
 #include <pbd/error.h>
 
+#include <gtkmm/image.h>
+#include <gdkmm/color.h>
+#include <gdkmm/bitmap.h>
+
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/utils.h>
@@ -40,16 +44,12 @@
 #include <ardour/location.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
-#include <ardour/session.h>
+#include <ardour/region.h>
 #include <ardour/session_route.h>
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
 
 #include "ardour_ui.h"
-#include "canvas-ruler.h"
-#include "canvas-simpleline.h"
-#include "canvas-simplerect.h"
-#include "canvas-waveview.h"
 #include "check_mark.h"
 #include "editor.h"
 #include "grouped_buttons.h"
@@ -60,6 +60,7 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "streamview.h"
+#include "simpleline.h"
 #include "time_axis_view.h"
 #include "utils.h"
 #include "crossfade_view.h"
@@ -67,6 +68,7 @@
 #include "public_editor.h"
 #include "crossfade_edit.h"
 #include "audio_time_axis.h"
+#include "canvas_impl.h"
 #include "gui_thread.h"
 
 #include "i18n.h"
@@ -366,9 +368,6 @@ Editor::Editor (AudioEngine& eng)
 	build_cursors ();
 	setup_toolbar ();
 
-	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
-	set_state (*node);
-
  	edit_cursor_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_cursor_clock_changed));
 	
 	time_canvas_vbox.pack_start (*minsec_ruler, false, false);
@@ -470,9 +469,9 @@ Editor::Editor (AudioEngine& eng)
 //	ARDOUR_UI::instance()->tooltips().set_tip (zoom_onetoone_button, _("Zoom in 1:1"));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to session"));
 
-	zoom_in_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(zoom_in_button_xpm)))));
-	zoom_out_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(zoom_out_button_xpm)))));
-	zoom_out_full_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(zoom_out_full_button_xpm)))));
+	zoom_in_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(zoom_in_button_xpm)))));
+	zoom_out_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(zoom_out_button_xpm)))));
+	zoom_out_full_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(zoom_out_full_button_xpm)))));
 //	zoom_onetoone_button.add (*(manage (new Gtk::Image (zoom_onetoone_button_xpm))));
 
 	
@@ -620,8 +619,6 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.signal_key_release_event().connect (mem_fun(*this, &Editor::region_list_display_key_release));
 	region_list_display.signal_button_press_event().connect (mem_fun(*this, &Editor::region_list_display_button_press));
 	region_list_display.signal_button_release_event().connect (mem_fun(*this, &Editor::region_list_display_button_release));
-	region_list_display.signal_enter_notify_event().connect (mem_fun(*this, &Editor::region_list_display_enter_notify));
-	region_list_display.signal_leave_notify_event().connect (mem_fun(*this, &Editor::region_list_display_leave_notify));
 	region_list_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::region_list_selection_changed));
 	// GTK2FIX
 	//region_list_display.unselect_row.connect (mem_fun(*this, &Editor::region_list_display_unselected));
@@ -688,6 +685,9 @@ Editor::Editor (AudioEngine& eng)
 
 	vpacker.pack_end (global_hpacker, true, true);
 	
+	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
+	set_state (*node);
+
 	_playlist_selector = new PlaylistSelector();
 	_playlist_selector->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
 
@@ -695,8 +695,8 @@ Editor::Editor (AudioEngine& eng)
 
 	/* nudge stuff */
 
-	nudge_forward_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(right_arrow_xpm)))));
-	nudge_backward_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(left_arrow_xpm)))));
+	nudge_forward_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(right_arrow_xpm)))));
+	nudge_backward_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(left_arrow_xpm)))));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge region/selection forwards"));
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge region/selection backwards"));
@@ -878,13 +878,13 @@ Editor::initialize_canvas ()
 	transport_bar_drag_rect->set_property ("outline_pixels", 0);
 	transport_bar_drag_rect->hide ();
 	
-	marker_drag_line_points->push_back(Gnome::Art::Point(0.0, 0.0));
-	marker_drag_line_points->push_back(Gnome::Art::Point(0.0, 0.0));
+	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
+	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
 
 	marker_drag_line = new ArdourCanvas::Line (*track_canvas.root());
 	marker_drag_line->set_property ("width_pixels", 1);
 	marker_drag_line->set_property("fill_color_rgba", color_map[cMarkerDragLine]);
-	marker_drag_line->set_property("points", marker_drag_line_points->gobj());
+	marker_drag_line->set_property("points", marker_drag_line_points);
 	marker_drag_line->hide();
 
 	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
@@ -906,7 +906,7 @@ Editor::initialize_canvas ()
 	
 	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
 
-	transport_punchin_line = new ArdourCanvas::Line (*time_line_group);
+	transport_punchin_line = new ArdourCanvas::SimpleLine (*time_line_group);
 	transport_punchin_line->set_property ("x1", 0.0);
 	transport_punchin_line->set_property ("y1", 0.0);
 	transport_punchin_line->set_property ("x2", 0.0);
@@ -916,7 +916,7 @@ Editor::initialize_canvas ()
 	transport_punchin_line->set_property ("outline_pixels", 1);
 	transport_punchin_line->hide ();
 	
-	transport_punchout_line  = new ArdourCanvas::Line (*time_line_group);
+	transport_punchout_line  = new ArdourCanvas::SimpleLine (*time_line_group);
 	transport_punchout_line->set_property ("x1", 0.0);
 	transport_punchout_line->set_property ("y1", 0.0);
 	transport_punchout_line->set_property ("x2", 0.0);
@@ -1188,19 +1188,19 @@ Editor::deferred_reposition_and_zoom (jack_nframes_t frame, double nfpu)
 void
 Editor::on_realize ()
 {
+	Window::on_realize ();
+
 	/* Even though we're not using acceleration, we want the
 	   labels to show up.
 	*/
-        Glib::RefPtr<Gdk::Pixmap> empty_pixmap = Gdk::Pixmap::create(get_window(), 1, 1, 1);
-	Glib::RefPtr<Gdk::Pixmap> empty_bitmap = Gdk::Pixmap::create(get_window(), 1, 1, 1);
-
 
 	track_context_menu.accelerate (*this->get_toplevel());
 	track_region_context_menu.accelerate (*this->get_toplevel());
 	
-	Window::on_realize ();
-
+        Glib::RefPtr<Gdk::Pixmap> empty_pixmap = Gdk::Pixmap::create(get_window(), 1, 1, 1);
+	Glib::RefPtr<Gdk::Pixmap> empty_bitmap = Gdk::Pixmap::create(get_window(), 1, 1, 1);
 	Gdk::Color white ("#ffffff" );
+
 	null_cursor = new Gdk::Cursor(empty_pixmap, empty_bitmap, white, white, 0, 0);
 }
 
@@ -1339,8 +1339,8 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 	if (playhead_cursor) playhead_cursor->set_length (canvas_alloc_height);
 
 	if (marker_drag_line) {
-		marker_drag_line_points->back().set_x(canvas_height);
-		// cerr << "set mlA points, nc = " << marker_drag_line_points->num_points << endl;
+		marker_drag_line_points.back().set_x(canvas_height);
+		// cerr << "set mlA points, nc = " << marker_drag_line_points.num_points << endl;
 		marker_drag_line->set_property("points", marker_drag_line_points);
 	}
 	if (range_marker_drag_rect) {
@@ -1711,28 +1711,25 @@ Editor::connect_to_session (Session *t)
 void
 Editor::build_cursors ()
 {
+	using namespace Gdk;
+
 	Gdk::Color fg ("#ff0000"); /* Red. */
 	Gdk::Color bg ("#0000ff"); /* Blue. */
 
 	{
-		Glib::RefPtr <Gdk::Pixmap> source, mask;
-		source = Gdk::Pixmap::create_from_data (source, hand_bits,
-							hand_width, hand_height, 1, fg, bg);
-		Gdk::Pixmap::create_from_data(mask, handmask_bits,
-					      handmask_width, handmask_height, 1, fg, bg);
+		RefPtr<Bitmap> source, mask;
+		source = Bitmap::create (hand_bits, hand_width, hand_height);
+		mask = Bitmap::create (handmask_bits, handmask_width, handmask_height);
 		grabber_cursor = new Gdk::Cursor (source, mask, fg, bg, hand_x_hot, hand_y_hot);
 	}
-
+	
 	Gdk::Color mbg ("#000000" ); /* Black */
 	Gdk::Color mfg ("#0000ff" ); /* Blue. */
 
 	{
-		Glib::RefPtr <Gdk::Pixmap> source, mask;
-		
-		Gdk::Pixmap::create_from_data (source, mag_bits,
-					       mag_width, mag_height, 1, fg, bg);
-		Gdk::Pixmap::create_from_data (mask, magmask_bits,
-					       mag_width, mag_height, 1, fg, bg);
+		RefPtr<Bitmap> source, mask;
+		source = Bitmap::create (mag_bits, mag_width, mag_height);
+		mask = Bitmap::create (magmask_bits, mag_width, mag_height);
 		zoom_cursor = new Gdk::Cursor (source, mask, mfg, mbg, mag_x_hot, mag_y_hot);
 	}
 
@@ -1740,21 +1737,17 @@ Editor::build_cursors ()
 	Gdk::Color ffg  ("#000000" );
 	
 	{
-		Glib::RefPtr <Gdk::Pixmap> source, mask;
+		RefPtr<Bitmap> source, mask;
 		
-		Gdk::Pixmap::create_from_data (source, fader_cursor_bits,
-					       fader_cursor_width, fader_cursor_height, 1, fg, bg);
-		Gdk::Pixmap::create_from_data (mask, fader_cursor_mask_bits,
-					       fader_cursor_width, fader_cursor_height, 1, fg, bg);
+		source = Bitmap::create (fader_cursor_bits, fader_cursor_width, fader_cursor_height);
+		mask = Bitmap::create (fader_cursor_mask_bits, fader_cursor_width, fader_cursor_height);
 		fader_cursor = new Gdk::Cursor (source, mask, ffg, fbg, fader_cursor_x_hot, fader_cursor_y_hot);
 	}
-
+	
 	{ 
-		Glib::RefPtr <Gdk::Pixmap> source, mask;
-		Gdk::Pixmap::create_from_data (source,speaker_cursor_bits,
-					       speaker_cursor_width, speaker_cursor_height, 1, fg, bg);
-		Gdk::Pixmap::create_from_data (mask, speaker_cursor_mask_bits,
-					       speaker_cursor_width, speaker_cursor_height, 1, fg, bg);
+		RefPtr<Bitmap> source, mask;
+		source = Bitmap::create (speaker_cursor_bits, speaker_cursor_width, speaker_cursor_height);
+		mask = Bitmap::create (speaker_cursor_mask_bits, speaker_cursor_width, speaker_cursor_height);
 		speaker_cursor = new Gdk::Cursor (source, mask, ffg, fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
 	}
 
@@ -4399,9 +4392,11 @@ Editor::playlist_deletion_dialog (Playlist* pl)
 		return -1;
 		break;
 	default:
-		/* keep the playlist */
-		return 1;
+		break;
 	}
+
+	/* keep the playlist */
+	return 1;
 }
 
 bool

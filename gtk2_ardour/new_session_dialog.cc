@@ -23,7 +23,7 @@
 #include "glade_path.h"
 
 const char* NewSessionDialogFactory::s_m_top_level_widget_name = X_("new_session_dialog");
-
+const char* NewSessionDialogFactory::top_level_widget_name() { return s_m_top_level_widget_name; }
 
 Glib::RefPtr<Gnome::Glade::Xml>
 NewSessionDialogFactory::create()

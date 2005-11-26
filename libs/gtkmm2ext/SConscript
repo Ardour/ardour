@@ -41,7 +41,6 @@ controller.cc
 dndtreeview.cc
 fastmeter.cc
 gtk_ui.cc
-gtkutils.cc
 hexentry.cc
 idle_adjustment.cc
 pix.cc

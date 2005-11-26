@@ -20,7 +20,9 @@
 
 #include <gtk/gtkpaned.h>
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/gtkutils.h>
+#include <gtkmm/widget.h>
+#include <gtkmm/window.h>
+#include <gtkmm/paned.h>
 #include <gtkmm/comboboxtext.h>
 
 #include "i18n.h"
@@ -29,11 +31,19 @@ using namespace std;
 
 void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *text,
-					    gint hpadding, gint vpadding)
+						   gint hpadding, gint vpadding)
 
 {
+	int height = 0;
+        int width = 0;
+
 	w.ensure_style ();
-	set_size_request_to_display_given_text(w, text, hpadding, vpadding);
+        w.create_pango_layout(text)->get_pixel_size (width, height);
+
+	height += vpadding;
+	width += hpadding;
+
+	w.set_size_request(width, height);
 }
 
 void
@@ -57,4 +67,10 @@ GdkWindow*
 Gtkmm2ext::get_paned_handle (Gtk::Paned& paned)
 {
 	return GTK_PANED(paned.gobj())->handle;
+}
+
+void
+Gtkmm2ext::set_decoration (Gtk::Window* win, Gdk::WMDecoration decor)
+{
+	win->get_window()->set_decorations (decor);
 }

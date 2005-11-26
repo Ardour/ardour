@@ -768,31 +768,31 @@ Editor::update_tempo_based_rulers ()
 /* Mark generation */
 
 gint
-Editor::_metric_get_smpte (GtkCustomRulerMark **marks, gulong lower, gulong upper, gint maxchars)
+Editor::_metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
 	return ruler_editor->metric_get_smpte (marks, lower, upper, maxchars);
 }
 
 gint
-Editor::_metric_get_bbt (GtkCustomRulerMark **marks, gulong lower, gulong upper, gint maxchars)
+Editor::_metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
 	return ruler_editor->metric_get_bbt (marks, lower, upper, maxchars);
 }
 
 gint
-Editor::_metric_get_frames (GtkCustomRulerMark **marks, gulong lower, gulong upper, gint maxchars)
+Editor::_metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
 	return ruler_editor->metric_get_frames (marks, lower, upper, maxchars);
 }
 
 gint
-Editor::_metric_get_minsec (GtkCustomRulerMark **marks, gulong lower, gulong upper, gint maxchars)
+Editor::_metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
 	return ruler_editor->metric_get_minsec (marks, lower, upper, maxchars);
 }
 
 gint
-Editor::metric_get_smpte (GtkCustomRulerMark **marks, gulong lower, gulong upper, gint maxchars)
+Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
 	jack_nframes_t range;
 	jack_nframes_t pos;
@@ -821,7 +821,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gulong lower, gulong upper
 		upper = upper + spacer - lower;
 		lower = 0;
 	}
-	range = upper - lower;
+	range = (jack_nframes_t) floor (upper - lower);
 
 	if (range < (2 * session->frames_per_smpte_frame())) { /* 0 - 2 frames */
 		show_bits = true;
@@ -900,8 +900,8 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gulong lower, gulong upper
 		nmarks = 1 + 24;
 	}
   
-	pos = lower;
-
+	pos = (jack_nframes_t) floor (lower);
+	
 	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);  
 	
 	if (show_bits) {
@@ -1028,7 +1028,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gulong lower, gulong upper
 
 
 gint
-Editor::metric_get_bbt (GtkCustomRulerMark **marks, gulong lower, gulong upper, gint maxchars)
+Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
         if (session == 0) {
                 return 0;
@@ -1059,6 +1059,8 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gulong lower, gulong upper, 
 	BBT_Time previous_beat;
 	BBT_Time next_beat;
 	jack_nframes_t next_beat_pos;
+	jack_nframes_t ilower = (jack_nframes_t) floor (lower);
+	jack_nframes_t iupper = (jack_nframes_t) floor (upper);
 
       	if ((desirable_marks = maxchars / 6) == 0) {
                return 0;
@@ -1085,11 +1087,11 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gulong lower, gulong upper, 
 
 	/* First find what a beat's distance is, so we can start plotting stuff before the beginning of the ruler */
 
-	session->bbt_time(lower,previous_beat);
+	session->bbt_time(ilower,previous_beat);
 	previous_beat.ticks = 0;
 	next_beat = previous_beat;
 
-	if (session->tempo_map().meter_at(lower).beats_per_bar() < (next_beat.beats + 1)) {
+	if (session->tempo_map().meter_at(ilower).beats_per_bar() < (next_beat.beats + 1)) {
 	       next_beat.bars += 1;
 	       next_beat.beats = 1;
 	} else {
@@ -1099,7 +1101,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gulong lower, gulong upper, 
 	frame_one_beats_worth = session->tempo_map().frame_time(next_beat) - session->tempo_map().frame_time(previous_beat);
 
 
-	zoomed_bbt_points = session->tempo_map().get_points((lower >= frame_one_beats_worth) ? lower - frame_one_beats_worth : 0, upper);
+	zoomed_bbt_points = session->tempo_map().get_points((ilower >= frame_one_beats_worth) ? ilower - frame_one_beats_worth : 0, iupper);
 
 	if (current_bbt_points == 0 || zoomed_bbt_points == 0 || zoomed_bbt_points->empty()) {
 		return 0;
@@ -1133,7 +1135,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gulong lower, gulong upper, 
 		bool i_am_accented = false;
 		bool we_need_ticks = false;
 	
-		position_of_helper = lower + (30 * Editor::get_current_zoom ());
+		position_of_helper = ilower + (30 * Editor::get_current_zoom ());
 
 		if (desirable_marks >= (beats * 2)) {
                		nmarks = (zoomed_beats * bbt_beat_subdivision) + 1;
@@ -1145,12 +1147,12 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gulong lower, gulong upper, 
 		*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
 
 		(*marks)[0].label = g_strdup(" ");
-		(*marks)[0].position = lower;
+		(*marks)[0].position = ilower;
 		(*marks)[0].style = GtkCustomRulerMarkMicro;
 		
 		for (n = 1, i = zoomed_bbt_points->begin(); i != zoomed_bbt_points->end() && n < nmarks; ++i) {
 		
-			if ((*i).frame <= lower && (bar_helper_on)) {
+			if ((*i).frame <= ilower && (bar_helper_on)) {
 			
 					snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
 					(*marks)[0].label = g_strdup (buf); 
@@ -1257,7 +1259,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gulong lower, gulong upper, 
 			snprintf (buf, sizeof(buf), "too many bars... (currently %" PRIu32 ")", zoomed_bars );
         		(*marks)[0].style = GtkCustomRulerMarkMajor;
         		(*marks)[0].label = g_strdup (buf);
-			(*marks)[0].position = lower;
+			(*marks)[0].position = ilower;
 		} else if (desirable_marks < (uint32_t) (nmarks = (gint) (zoomed_bars / 64))) {
 			*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
 			for (n = 0, i = zoomed_bbt_points->begin(); i != zoomed_bbt_points->end() && n < nmarks; i++) {
@@ -1352,10 +1354,12 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gulong lower, gulong upper, 
 }
 
 gint
-Editor::metric_get_frames (GtkCustomRulerMark **marks, gulong lower, gulong upper, gint maxchars)
+Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
 	jack_nframes_t mark_interval;
 	jack_nframes_t pos;
+	jack_nframes_t ilower = (jack_nframes_t) floor (lower);
+	jack_nframes_t iupper = (jack_nframes_t) floor (upper);
 	gchar buf[16];
 	gint nmarks;
 	gint n;
@@ -1364,7 +1368,7 @@ Editor::metric_get_frames (GtkCustomRulerMark **marks, gulong lower, gulong uppe
 		return 0;
 	}
 
-	mark_interval = (upper - lower) / 5;
+	mark_interval = (iupper - ilower) / 5;
 	if (mark_interval > session->frame_rate()) {
 		mark_interval -= mark_interval % session->frame_rate();
 	} else {
@@ -1372,7 +1376,7 @@ Editor::metric_get_frames (GtkCustomRulerMark **marks, gulong lower, gulong uppe
 	}
 	nmarks = 5;
 	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
-	for (n = 0, pos = lower; n < nmarks; pos += mark_interval, ++n) {
+	for (n = 0, pos = ilower; n < nmarks; pos += mark_interval, ++n) {
 		snprintf (buf, sizeof(buf), "%u", pos);
 		(*marks)[n].label = g_strdup (buf);
 		(*marks)[n].position = pos;
@@ -1415,7 +1419,7 @@ sample_to_clock_parts ( jack_nframes_t sample,
 }
 
 gint
-Editor::metric_get_minsec (GtkCustomRulerMark **marks, gulong lower, gulong upper, gint maxchars)
+Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
 	jack_nframes_t range;
 	jack_nframes_t fr;
@@ -1430,6 +1434,8 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gulong lower, gulong uppe
 	bool show_seconds = false;
 	bool show_minutes = false;
 	bool show_hours = false;
+	jack_nframes_t ilower = (jack_nframes_t) floor (lower);
+	jack_nframes_t iupper = (jack_nframes_t) floor (upper);
 
 	if (session == 0) {
 		return 0;
@@ -1444,7 +1450,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gulong lower, gulong uppe
 		upper = upper + spacer;
 		lower = 0;
 	}
-	range = upper - lower;
+	range = iupper - ilower;
 
 	if (range <  (fr / 50)) {
 		mark_interval =  fr / 100; /* show 1/100 seconds */
@@ -1517,7 +1523,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gulong lower, gulong uppe
 
 	nmarks = 1 + (range / mark_interval);
 	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
-	pos = ((lower + (mark_interval/2))/mark_interval) * mark_interval;
+	pos = ((ilower + (mark_interval/2))/mark_interval) * mark_interval;
 	
 	if (show_seconds) {
 		for (n = 0; n < nmarks; pos += mark_interval, ++n) {

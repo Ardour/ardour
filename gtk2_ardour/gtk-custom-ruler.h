@@ -33,15 +33,14 @@
 #include <gtk/gtkwidget.h>
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+G_BEGIN_DECLS
 
 #define GTK_TYPE_CUSTOM_RULER            (gtk_custom_ruler_get_type ())
-#define GTK_CUSTOM_RULER(obj)            (GTK_CHECK_CAST ((obj), GTK_TYPE_CUSTOM_RULER, GtkCustomRuler))
-#define GTK_CUSTOM_RULER_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GTK_TYPE_CUSTOM_RULER, GtkCustomRulerClass))
-#define GTK_IS_CUSTOM_RULER(obj)         (GTK_CHECK_TYPE ((obj), GTK_TYPE_CUSTOM_RULER))
-#define GTK_IS_CUSTOM_RULER_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GTK_TYPE_CUSTOM_RULER))
+#define GTK_CUSTOM_RULER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GTK_TYPE_CUSTOM_RULER, GtkCustomRuler))
+#define GTK_CUSTOM_RULER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GTK_TYPE_CUSTOM_RULER, GtkCustomRulerClass))
+#define GTK_IS_CUSTOM_RULER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GTK_TYPE_CUSTOM_RULER))
+#define GTK_IS_CUSTOM_RULER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GTK_TYPE_CUSTOM_RULER))
+#define GTK_CUSTOM_RULER_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_CUSTOM_RULER, GtkCustomRulerClass))
 
 typedef struct _GtkCustomRuler          GtkCustomRuler;
 typedef struct _GtkCustomRulerClass     GtkCustomRulerClass;
@@ -59,13 +58,13 @@ struct _GtkCustomRuler {
   gboolean show_position;
     
   /* The upper limit of the ruler (in points) */
-  gulong lower;
+  gdouble lower;
   /* The lower limit of the ruler */
-  gulong upper;
+  gdouble upper;
   /* The position of the mark on the ruler */
-  gulong position;
+  gdouble position;
   /* The maximum size of the ruler */
-  gulong max_size;
+  gdouble max_size;
 };
 
 struct _GtkCustomRulerClass {
@@ -83,29 +82,26 @@ typedef enum {
 
 struct _GtkCustomRulerMark {
   gchar                  *label;
-  gulong                  position;
+  gdouble                 position;
   GtkCustomRulerMarkStyle style;
 };
 
 struct _GtkCustomMetric {
   gfloat units_per_pixel;
-  gint (* get_marks) (GtkCustomRulerMark **marks, gulong lower, gulong upper, gint maxchars);
+  gint (* get_marks) (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars);
 };
 
 GtkType gtk_custom_ruler_get_type            (void);
 void    gtk_custom_ruler_set_metric          (GtkCustomRuler *ruler, GtkCustomMetric *metric);
 void    gtk_custom_ruler_set_range           (GtkCustomRuler *ruler,
-			                         gulong lower,
-			                         gulong upper,
-			                         gulong position,
-			                         gulong max_size);
+					      gdouble lower,
+					      gdouble upper,
+					      gdouble position,
+					      gdouble  max_size);
 void    gtk_custom_ruler_draw_ticks          (GtkCustomRuler *ruler);
 void    gtk_custom_ruler_draw_pos            (GtkCustomRuler *ruler);
 void    gtk_custom_ruler_set_show_position   (GtkCustomRuler *rule, gboolean yn);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
+G_END_DECLS
 
 #endif /* __GTK_CUSTOM_RULER_H__ */

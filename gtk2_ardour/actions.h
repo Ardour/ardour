@@ -18,6 +18,8 @@ class ActionManager
 	ActionManager() {}
 	virtual ~ActionManager () {}
 
+	static void init ();
+
 	static std::vector<Glib::RefPtr<Gtk::Action> > session_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > region_list_selection_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > region_selection_sensitive_actions;
@@ -27,7 +29,7 @@ class ActionManager
 	static std::vector<Glib::RefPtr<Gtk::Action> > jack_sensitive_actions;
 
 	static std::string unbound_string;  /* the key string returned if an action is not bound */
-	static Gtk::UIManager ui_manager;
+	static Glib::RefPtr<Gtk::UIManager> ui_manager;
 
 	static Gtk::Widget* get_widget (Glib::ustring name);
 	static Glib::RefPtr<Gtk::Action> get_action (Glib::ustring name);

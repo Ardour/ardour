@@ -727,7 +727,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int make_session_clean ();
 	bool filter_ardour_session_dirs (const Gtk::FileFilter::Info&);
 
-	Glib::RefPtr<Gtk::UIManager> ui_manager;
 	Glib::RefPtr<Gtk::ActionGroup> common_actions;
 };
 

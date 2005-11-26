@@ -24,18 +24,10 @@
 #include <gtkmm2ext/gtkutils.h>
 
 void
-set_size_request_to_display_given_text (Gtk::Widget &w,
-					const std::string& text,
-					gint hpadding,
-					gint vpadding)
+gtk_set_size_request_to_display_given_text (Gtk::Widget &w,
+					    const std::string& text,
+					    gint hpadding,
+					    gint vpadding)
 {
-	int height = 0;
-        int width = 0;
 
-        w.create_pango_layout(text)->get_pixel_size(width, height);
-
-	height += vpadding;
-	width += hpadding;
-
-	w.set_size_request(width, height);
 }

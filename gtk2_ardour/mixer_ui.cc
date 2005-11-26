@@ -159,7 +159,6 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	track_display.get_selection()->signal_changed().connect (mem_fun(*this, &Mixer_UI::track_display_selection_changed));
 	track_display_model->signal_rows_reordered().connect (mem_fun (*this, &Mixer_UI::track_display_reordered_proxy));
-	track_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::track_display_button_press));
 
 	group_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::group_display_button_press));
 	group_display.get_selection()->signal_changed().connect (mem_fun (*this, &Mixer_UI::group_display_selection_changed));

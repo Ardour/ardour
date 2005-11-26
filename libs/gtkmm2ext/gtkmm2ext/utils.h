@@ -23,9 +23,15 @@
 
 #include <vector>
 #include <string>
-#include <gtkmm/widget.h>
-#include <gtkmm/paned.h>
-#include <gtkmm/comboboxtext.h>
+
+#include <gdkmm/window.h> /* for WMDecoration */
+
+namespace Gtk {
+	class ComboBoxText;
+	class Widget;
+	class Window;
+	class Paned;
+}
 
 namespace Gtkmm2ext {
 	void init ();
@@ -42,6 +48,7 @@ namespace Gtkmm2ext {
 	}
 
 	GdkWindow* get_paned_handle (Gtk::Paned& paned);
+	void set_decoration (Gtk::Window* win, Gdk::WMDecoration decor);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

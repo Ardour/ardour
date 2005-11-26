@@ -37,6 +37,7 @@ class TearOff : public Gtk::HBox
 	Gtk::Window* tearoff_window() const { return own_window; }
 	bool torn_off() const;
 
+
   private:
 	Gtk::Widget&   contents;
 	Gtk::Window*   own_window;

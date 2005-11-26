@@ -111,7 +111,7 @@ private:
 public:
   WaveView(Group& parent);
 
-  static void* create_cache();
+  static GnomeCanvasWaveViewCache* create_cache();
 
   Glib::PropertyProxy<void*> property_data_src();
   Glib::PropertyProxy_ReadOnly<void*> property_data_src() const;

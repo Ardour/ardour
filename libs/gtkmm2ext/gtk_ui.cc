@@ -85,11 +85,6 @@ UI::UI (string name, int *argc, char ***argv, string rcfile)
 	errors->set_title (title);
 
 	errors->dismiss_button().set_name ("ErrorLogCloseButton");
-//	errors->realize();
-
-	Glib::RefPtr<Gdk::Window> win(errors->get_window());
-	win->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
-
 	errors->signal_delete_event().connect (bind (ptr_fun (just_hide_it), (Gtk::Window *) errors));
 
 	register_thread (pthread_self(), X_("GUI"));

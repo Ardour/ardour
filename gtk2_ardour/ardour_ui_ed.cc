@@ -277,7 +277,7 @@ ARDOUR_UI::install_actions ()
 void
 ARDOUR_UI::build_menu_bar ()
 {
-	menu_bar = dynamic_cast<MenuBar*> (ui_manager->get_widget (X_("/Main")));
+	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
 	menu_bar->set_name ("MainMenuBar");
 
 	wall_clock_box.add (wall_clock_label);

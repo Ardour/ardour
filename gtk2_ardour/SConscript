@@ -15,6 +15,7 @@ gtkardour = env.Copy()
 domain = 'gtk_ardour'
 
 gtkardour.Append(DOMAIN=domain, MAJOR=1,MINOR=0,MICRO=2)
+gtkardour.Append(CCFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkardour.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkardour.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 gtkardour.Append(CXXFLAGS="-DFLOWCANVAS_AA")
@@ -44,6 +45,7 @@ gtkardour.Merge ([
     libraries['soundtouch'],
     libraries['samplerate'],
     libraries['jack'],
+    libraries['glade2'],
     libraries['libglademm']
 ])
 

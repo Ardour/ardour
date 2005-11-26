@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <gtkmm2ext/tearoff.h>
+#include <gtkmm2ext/utils.h>
 
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -43,10 +44,6 @@ TearOff::TearOff (Gtk::Widget& c)
 	own_window = new Gtk::Window (Gtk::WINDOW_TOPLEVEL);
 	own_window->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::POINTER_MOTION_HINT_MASK);
 	own_window->set_resizable (false);
-//	own_window->realize ();
-
-	Glib::RefPtr<Gdk::Window> win (own_window->get_window());
-	win->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 	
 	VBox* box1;
 	box1 = manage (new VBox);
@@ -59,7 +56,8 @@ TearOff::TearOff (Gtk::Widget& c)
 	own_window->signal_button_release_event().connect (mem_fun (*this, &TearOff::window_button_release));
 	own_window->signal_motion_notify_event().connect (mem_fun (*this, &TearOff::window_motion));
 	own_window->signal_delete_event().connect (mem_fun (*this, &TearOff::window_delete_event));
-	
+	own_window->signal_realize().connect (bind (sigc::ptr_fun (Gtkmm2ext::set_decoration), own_window, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
+
 	tearoff_arrow.set_name ("TearOffArrow");
 	close_arrow.set_name ("TearOffArrow");
 

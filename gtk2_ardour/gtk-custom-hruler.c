@@ -46,22 +46,28 @@ static void gtk_custom_hruler_draw_pos (GtkCustomRuler * ruler);
 
 guint gtk_custom_hruler_get_type (void)
 {
-	static guint custom_hruler_type = 0;
-
-	if (!custom_hruler_type) {
-		static const GtkTypeInfo custom_hruler_info = {
-			"GtkCustomHRuler",
-			sizeof (GtkCustomHRuler),
-			sizeof (GtkCustomHRulerClass),
-			(GtkClassInitFunc) gtk_custom_hruler_class_init,
-			(GtkObjectInitFunc) gtk_custom_hruler_init,
-			/* reserved_1 */ NULL,
-			/* reserved_2 */ NULL,
-			(GtkClassInitFunc) NULL,
-		};
-		custom_hruler_type = gtk_type_unique (gtk_custom_ruler_get_type (), &custom_hruler_info);
+	static GType hruler_type = 0;
+	
+	if (!hruler_type)
+	{
+		static const GTypeInfo hruler_info =
+			{
+				sizeof (GtkCustomHRulerClass),
+				NULL,		/* base_init */
+				NULL,		/* base_finalize */
+				(GClassInitFunc) gtk_custom_hruler_class_init,
+				NULL,		/* class_finalize */
+				NULL,		/* class_data */
+				sizeof (GtkCustomHRuler),
+				0,		/* n_preallocs */
+				(GInstanceInitFunc) gtk_custom_hruler_init,
+			};
+		
+		hruler_type = g_type_register_static (GTK_TYPE_WIDGET, "GtkCustomHRuler",
+						      &hruler_info, 0);
 	}
-	return custom_hruler_type;
+	
+	return hruler_type;
 }
 
 static void

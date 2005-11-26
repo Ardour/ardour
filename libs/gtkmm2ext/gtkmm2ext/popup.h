@@ -42,6 +42,9 @@ class PopUp : public Gtk::Window, public Touchable
 
 	bool on_delete_event (GdkEventAny* );
 
+  protected:
+	void on_realize ();
+
   private:
 	Gtk::Label label;
 	std::string my_text;

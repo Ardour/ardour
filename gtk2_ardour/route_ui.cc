@@ -567,10 +567,9 @@ RouteUI::choose_color()
 	Gdk::Color color;
 	Gdk::Color current;
 
-	current.set_red ( _color.get_red()  / 65535.0);
-	current.set_green (_color.get_green() / 65535.0);
-	current.set_blue (_color.get_blue() / 65535.0);
-	//current[3] = 1.0;
+	current.set_red ( _color.get_red()  / 65535);
+	current.set_green (_color.get_green() / 65535);
+	current.set_blue (_color.get_blue() / 65535);
 
 	color = Gtkmm2ext::UI::instance()->get_color (_("ardour: color selection"), picked, &current);
 

@@ -17,10 +17,7 @@ class AudioRegionView;
 class AudioRegionGainLine : public AutomationLine
 {
   public:
-  AudioRegionGainLine (string name, ARDOUR::Session&, AudioRegionView&, ArdourCanvas::Group& parent,
-			     ARDOUR::Curve&, 
-		       bool (*point_callback)(ArdourCanvas::Item*, GdkEvent*, gpointer),
-		       bool (*line_callback)(ArdourCanvas::Item*, GdkEvent*, gpointer));
+  AudioRegionGainLine (string name, ARDOUR::Session&, AudioRegionView&, ArdourCanvas::Group& parent, ARDOUR::Curve&);
 	
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);

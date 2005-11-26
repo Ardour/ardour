@@ -23,8 +23,12 @@
 
 #include <string>
 
-void set_usize_to_display_given_text (Gtk::Widget& w,
-				      const std::string& text,
-				      gint hpadding = 0,
-				      gint vpadding = 0);
+namespace Gtk {
+	class Widget;
+}
+
+void gtk_set_size_request_to_display_given_text (Gtk::Widget& w,
+						 const std::string& text,
+						 gint hpadding = 0,
+						 gint vpadding = 0);
 #endif /* __gtkutils_h__ */

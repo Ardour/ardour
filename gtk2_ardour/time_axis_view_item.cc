@@ -28,6 +28,7 @@
 #include "time_axis_view.h"
 #include "simplerect.h"
 #include "utils.h"
+#include "canvas_impl.h"
 #include "rgb_macros.h"
 
 #include "i18n.h"

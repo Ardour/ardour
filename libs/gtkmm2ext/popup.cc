@@ -31,9 +31,6 @@ PopUp::PopUp (Gtk::WindowPosition pos, unsigned int showfor_msecs, bool doh)
 	: Window (WINDOW_POPUP)
 {
 
-	realize ();
-	Glib::RefPtr<Gdk::Window> win (get_window());
-	win->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	signal_button_press_event().connect(mem_fun(*this,&PopUp::button_click));
 	set_border_width (12);
@@ -48,6 +45,13 @@ PopUp::PopUp (Gtk::WindowPosition pos, unsigned int showfor_msecs, bool doh)
 
 PopUp::~PopUp ()
 {
+}
+
+void
+PopUp::on_realize ()
+{
+	Gtk::Window::on_realize();
+	get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 }
 
 gint

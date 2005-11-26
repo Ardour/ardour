@@ -98,8 +98,8 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView
 
 	create_waves ();
 
-	gtk_object_set_data (GTK_OBJECT(name_highlight), "regionview", this);
-	gtk_object_set_data (GTK_OBJECT(name_text), "regionview", this);
+	name_highlight->set_data ("regionview", this);
+	name_text->set_data ("regionview", this);
 
 	//	shape = new ArdourCanvas::Points ();
 
@@ -151,9 +151,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView
 	foo += ':';
 	foo += "gain";
 
-	gain_line = new AudioRegionGainLine (foo, tv.session(), *this, *group, region.envelope(),
-					     PublicEditor::canvas_control_point_event,
-					     PublicEditor::canvas_line_event);
+	gain_line = new AudioRegionGainLine (foo, tv.session(), *this, *group, region.envelope());
 
 	if (!(_flags & EnvelopeVisible)) {
 		gain_line->hide ();
@@ -178,13 +176,12 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView
 
 	region.StateChanged.connect (mem_fun(*this, &AudioRegionView::region_changed));
 
-	group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::UNC (PublicEditor::canvas_region_view_event)), group, this));
-	region_view_name_highlight->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_region_view_name_highlight_event), region_view_name_highlight, this));
-	fade_in_shape->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
-
-	fade_in_handle->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
-	fade_out_shape->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_out_event), fade_out_shape, this));
-	fade_out_handle->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_fade_out_handle_event), fade_out_handle, this));
+	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
+	name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
+	fade_in_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
+	fade_in_handle->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
+	fade_out_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_event), fade_out_shape, this));
+	fade_out_handle->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_handle_event), fade_out_handle, this));
 
 	set_colors ();
 
