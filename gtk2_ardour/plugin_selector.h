@@ -20,12 +20,10 @@
 #ifndef __ardour_plugin_selector_h__
 #define __ardour_plugin_selector_h__
 
-#include <gtkmm/notebook.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm2ext/selector.h>
-
-#include <ardour_dialog.h>
 
 namespace ARDOUR {
 	class Session;
@@ -33,11 +31,13 @@ namespace ARDOUR {
 	class Plugin;
 }
 
-class PluginSelector : public ArdourDialog 
+class PluginSelector : public Gtk::Dialog
 {
   public:
 	PluginSelector (ARDOUR::PluginManager *);
 	sigc::signal<void,ARDOUR::Plugin *> PluginCreated;
+
+	int run (); // XXX should we try not to overload the non-virtual Gtk::Dialog::run() ?
 
 	void set_session (ARDOUR::Session*);
 
@@ -118,12 +118,10 @@ class PluginSelector : public ArdourDialog
 	void row_clicked(GdkEventButton *);
 	void btn_add_clicked();
 	void btn_remove_clicked();
-	void btn_ok_clicked();
 	void btn_update_clicked();
 	void btn_apply_clicked();
-	void btn_cancel_clicked();
 	void use_plugin (ARDOUR::PluginInfo*);
-	gint wm_close(GdkEventAny* ev);
+	void cleanup ();
 };
 
 #endif // __ardour_plugin_selector_h__

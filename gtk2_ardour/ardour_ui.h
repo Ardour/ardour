@@ -205,7 +205,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
   protected:
 	friend class PublicEditor;
 
-	void toggle_metering ();
 	void toggle_clocking ();
 	void toggle_auto_play ();
 	void toggle_auto_input ();
@@ -329,9 +328,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void         start_clocking ();
 	void         stop_clocking ();
 
-	AudioClock               big_clock;
-	Gtk::Frame               big_clock_frame;
-	ArdourDialog*          big_clock_window;
+	void manage_window (Gtk::Window&);
+	
+	AudioClock   big_clock;
+	Gtk::Frame   big_clock_frame;
+	Gtk::Window* big_clock_window;
 
 	/* Transport Control */
 

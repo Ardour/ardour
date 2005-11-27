@@ -107,7 +107,8 @@ class RedirectBox : public Gtk::HBox
 
 	ModelColumns columns;
 	Glib::RefPtr<Gtk::ListStore> model;
-	Glib::RefPtr<Gtk::TreeSelection> selection;
+	
+	void selection_changed ();
 	
 	Gtk::EventBox	       redirect_eventbox;
 	Gtk::HBox              redirect_hpacker;
@@ -118,8 +119,6 @@ class RedirectBox : public Gtk::HBox
 
 	Width _width;
 	
-	sigc::connection newplug_connection;
-	
 	Gtk::Menu *send_action_menu;
 	void build_send_action_menu ();
 
@@ -129,7 +128,6 @@ class RedirectBox : public Gtk::HBox
 	Glib::RefPtr<Gtk::UIManager> popup_ui_mgr;
 	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp;
 	Gtk::Menu *redirect_menu;
-	vector<Glib::RefPtr<Gtk::Action> > selection_dependent_items;
 	gint redirect_menu_map_handler (GdkEventAny *ev);
 	Gtk::Menu * build_redirect_menu ();
 	void build_redirect_tooltip (Gtk::EventBox&, string);
@@ -147,15 +145,9 @@ class RedirectBox : public Gtk::HBox
 	void show_redirect_name (void*, ARDOUR::Redirect *);
 	void add_redirect_to_display (ARDOUR::Redirect *);
 
-	void show_plugin_selector ();
-
-
 	string redirect_name (ARDOUR::Redirect&);
 
-
 	void remove_redirect_gui (ARDOUR::Redirect *);
-
-	void disconnect_newplug();
 
 	void redirects_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	gint compute_redirect_sort_keys ();

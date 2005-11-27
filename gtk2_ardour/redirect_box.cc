@@ -64,11 +64,12 @@
 using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
+using namespace Glib;
 using namespace Gtkmm2ext;
 
 
-
-RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelector &plugsel, RouteRedirectSelection & rsel, bool owner_is_mixer)
+RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelector &plugsel, 
+			  RouteRedirectSelection & rsel, bool owner_is_mixer)
 	: _route(rt), 
 	  _session(sess), 
 	  _owner_is_mixer (owner_is_mixer), 
@@ -83,8 +84,11 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	redirect_drag_in_progress = false;
 	
 	model = ListStore::create(columns);
-	selection = redirect_display.get_selection();
+
+	RefPtr<TreeSelection> selection = redirect_display.get_selection();
 	selection->set_mode (Gtk::SELECTION_MULTIPLE);
+	selection->signal_changed().connect (mem_fun (*this, &RedirectBox::selection_changed));
+
 	redirect_display.set_model (model);
 	redirect_display.append_column (NULL, columns.text);
 	redirect_display.set_name ("MixerRedirectSelector");
@@ -113,7 +117,6 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button));
 
 	//redirect_display.signal_button_release_event().connect_after (ptr_fun (do_not_propagate));
-	//_plugin_selector.hide.connect(mem_fun(*this,&RedirectBox::disconnect_newplug));
 	set_stuff_from_route ();
 
 	/* start off as a passthru strip. we'll correct this, if necessary,
@@ -323,61 +326,62 @@ RedirectBox::redirect_button (GdkEventButton *ev)
 Menu *
 RedirectBox::build_redirect_menu ()
 {
-	popup_act_grp = Gtk::ActionGroup::create();
-	
+	popup_act_grp = Gtk::ActionGroup::create(X_("redirectmenu"));
+	Glib::RefPtr<Action> act;
+
 	/* new stuff */
+	ActionManager::register_action (popup_act_grp, X_("newplugin"), _("New Plugin ..."),  mem_fun(*this, &RedirectBox::choose_plugin));
+	ActionManager::register_action (popup_act_grp, X_("newinsert"), _("New Insert"),  mem_fun(*this, &RedirectBox::choose_insert));
+	ActionManager::register_action (popup_act_grp, X_("newsend"), _("New Send ..."),  mem_fun(*this, &RedirectBox::choose_send));
+	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear"),  mem_fun(*this, &RedirectBox::clear_redirects));
 
-	popup_act_grp->add (Gtk::Action::create("newplugin", _("New Plugin ...")), mem_fun(*this, &RedirectBox::choose_plugin));
-	popup_act_grp->add (Gtk::Action::create("newinsert", _("New Insert")), mem_fun(*this, &RedirectBox::choose_insert));
-	popup_act_grp->add (Gtk::Action::create("newsend", _("New Send ...")), mem_fun(*this, &RedirectBox::choose_send));
-	popup_act_grp->add (Gtk::Action::create("clear", _("Clear")), mem_fun(*this, &RedirectBox::clear_redirects));
-	
 	/* standard editing stuff */
-	
-	popup_act_grp->add (Gtk::Action::create("cut", _("Cut")), mem_fun(*this, &RedirectBox::cut_redirects));
-	popup_act_grp->add (Gtk::Action::create("copy", _("Copy")), mem_fun(*this, &RedirectBox::copy_redirects));
-	popup_act_grp->add (Gtk::Action::create("paste", _("Paste")), mem_fun(*this, &RedirectBox::paste_redirects));
-	popup_act_grp->add (Gtk::Action::create("rename", _("Rename")), mem_fun(*this, &RedirectBox::rename_redirects));
-	popup_act_grp->add (Gtk::Action::create("selectall", _("Select All")), mem_fun(*this, &RedirectBox::select_all_redirects));
-	popup_act_grp->add (Gtk::Action::create("deselectall", _("Deselect All")), mem_fun(*this, &RedirectBox::deselect_all_redirects));
-	
+	act = ActionManager::register_action (popup_act_grp, X_("cut"), _("Cut"),  mem_fun(*this, &RedirectBox::cut_redirects));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	act = ActionManager::register_action (popup_act_grp, X_("copy"), _("Copy"),  mem_fun(*this, &RedirectBox::copy_redirects));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	ActionManager::ActionManager::register_action (popup_act_grp, X_("paste"), _("Paste"),  mem_fun(*this, &RedirectBox::paste_redirects));
+	act = ActionManager::register_action (popup_act_grp, X_("rename"), _("Rename"),  mem_fun(*this, &RedirectBox::rename_redirects));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	ActionManager::register_action (popup_act_grp, X_("selectall"), _("Select All"),  mem_fun(*this, &RedirectBox::select_all_redirects));
+	ActionManager::register_action (popup_act_grp, X_("deselectall"), _("Deselect All"),  mem_fun(*this, &RedirectBox::deselect_all_redirects));
+		
 	/* activation */
-	
-	popup_act_grp->add (Gtk::Action::create("activate", _("Activate")), bind (mem_fun(*this, &RedirectBox::for_selected_redirects), &RedirectBox::activate_redirect));
-	popup_act_grp->add (Gtk::Action::create("deactivate", _("Deactivate")), bind (mem_fun(*this, &RedirectBox::for_selected_redirects), &RedirectBox::deactivate_redirect));
-	popup_act_grp->add (Gtk::Action::create("activateall", _("Activate All")), bind (mem_fun(*this, &RedirectBox::all_redirects_active), true));
-	popup_act_grp->add (Gtk::Action::create("deactivateall", _("Deactivate All")), bind (mem_fun(*this, &RedirectBox::all_redirects_active), false));
-	
-	/* show editors */
-	
-	popup_act_grp->add (Gtk::Action::create("edit", _("Edit")), bind (mem_fun(*this, &RedirectBox::for_selected_redirects), &RedirectBox::edit_redirect));
-	
-	selection_dependent_items.push_back (popup_act_grp->get_action("cut"));
-	selection_dependent_items.push_back (popup_act_grp->get_action("copy"));
-	selection_dependent_items.push_back (popup_act_grp->get_action("rename"));
-	selection_dependent_items.push_back (popup_act_grp->get_action("activate"));
-	selection_dependent_items.push_back (popup_act_grp->get_action("deactivate"));
-	selection_dependent_items.push_back (popup_act_grp->get_action("edit"));
+	act = ActionManager::register_action (popup_act_grp, X_("activate"), _("Activate"),  bind (mem_fun(*this, &RedirectBox::for_selected_redirects), &RedirectBox::activate_redirect));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	act = ActionManager::register_action (popup_act_grp, X_("deactivate"), _("Deactivate"),  bind (mem_fun(*this, &RedirectBox::for_selected_redirects), &RedirectBox::deactivate_redirect));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	ActionManager::register_action (popup_act_grp, X_("activate"), _("Activate"),  bind (mem_fun(*this, &RedirectBox::all_redirects_active),true));
+	ActionManager::register_action (popup_act_grp, X_("activate"), _("Activate"),  bind (mem_fun(*this, &RedirectBox::all_redirects_active), false));
 
-	//popup_ui_mgr = Gtk::UIManager::create();
-	//popup_ui_mgr->insert_action_group(popup_act_grp);
-	
-    redirect_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/redirectmenu") );
-    redirect_menu->signal_map_event().connect (mem_fun(*this, &RedirectBox::redirect_menu_map_handler));
-    redirect_menu->set_name ("ArdourContextMenu");
-    show_all_children();
-    return redirect_menu;
+	/* show editors */
+	act = ActionManager::register_action (popup_act_grp, X_("edit"), _("Edit"),  bind (mem_fun(*this, &RedirectBox::for_selected_redirects), &RedirectBox::edit_redirect));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+
+	ActionManager::add_action_group (popup_act_grp);
+
+	redirect_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/redirectmenu") );
+	redirect_menu->signal_map_event().connect (mem_fun(*this, &RedirectBox::redirect_menu_map_handler));
+	redirect_menu->set_name ("ArdourContextMenu");
+
+	show_all_children();
+
+	return redirect_menu;
+}
+
+void
+RedirectBox::selection_changed ()
+{
+	bool sensitive = (redirect_display.get_selection()->count_selected_rows()) ? true : false;
+
+	for (vector<Glib::RefPtr<Gtk::Action> >::iterator i = ActionManager::plugin_selection_sensitive_actions.begin(); i != ActionManager::plugin_selection_sensitive_actions.end(); ++i) {
+		(*i)->set_sensitive (sensitive);
+	}
 }
 
 gint
 RedirectBox::redirect_menu_map_handler (GdkEventAny *ev)
 {
-	bool sensitive = (redirect_display.get_selection()->count_selected_rows()) ? true : false;
-
-	for (vector<Glib::RefPtr<Gtk::Action> >::iterator i = selection_dependent_items.begin(); i != selection_dependent_items.end(); ++i) {
-		(*i)->set_sensitive (sensitive);
-	}
-
 	popup_act_grp->get_action("paste")->set_sensitive (!_rr_selection.redirects.empty());
 	return FALSE;
 }
@@ -397,7 +401,9 @@ RedirectBox::deselect_all_redirects ()
 void
 RedirectBox::choose_plugin ()
 {
-	show_plugin_selector();
+	sigc::connection newplug_connection = _plugin_selector.PluginCreated.connect (mem_fun(*this,&RedirectBox::insert_plugin_chosen));
+	_plugin_selector.run ();
+	newplug_connection.disconnect();
 }
 
 void
@@ -532,18 +538,6 @@ RedirectBox::send_io_finished (IOSelector::Result r, Redirect* redirect, IOSelec
 	}
 
 	delete_when_idle (ios);
-}
-
-void 
-RedirectBox::disconnect_newplug ()
-{
-    newplug_connection.disconnect();
-}
-void
-RedirectBox::show_plugin_selector ()
-{
-	newplug_connection = _plugin_selector.PluginCreated.connect (mem_fun(*this,&RedirectBox::insert_plugin_chosen));
-	_plugin_selector.show_all ();
 }
 
 void

@@ -28,7 +28,6 @@
 #include "ardour_ui.h"
 #include "connection_editor.h"
 #include "location_ui.h"
-#include "meter_bridge.h"
 #include "mixer_ui.h"
 #include "option_editor.h"
 #include "public_editor.h"
@@ -81,9 +80,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 	/* </CMT Additions> */
 	
 
-	if (session->n_diskstreams()) {
-		// meter_bridge_dialog_check->set_sensitive (true);
-	} else {
+	if (session->n_diskstreams() == 0) {
 		session->DiskStreamAdded.connect (mem_fun(*this, &ARDOUR_UI::diskstream_added));
 	}
 
@@ -178,10 +175,8 @@ ARDOUR_UI::unload_session ()
 	add_track_item->set_sensitive (false);
 	export_item->set_sensitive (false);
 	close_item->set_sensitive (false);
-	// meter_bridge_dialog_check->set_sensitive (false);
 	connection_editor_check->set_sensitive (false);
 	locations_dialog_check->set_sensitive (false);
-	// meter_bridge_dialog_check->set_active(false);
 	connection_editor_check->set_active(false);
 	locations_dialog_check->set_active(false);
 	route_params_check->set_sensitive (false);
@@ -282,14 +277,10 @@ ARDOUR_UI::big_clock_hiding()
 void
 ARDOUR_UI::toggle_big_clock_window ()
 {
-	if (big_clock_window->within_hiding()) {
-		return;
-	}
-
 	if (big_clock_window->is_visible()) {
-		big_clock_window->hide_all ();
+		big_clock_window->hide ();
 	} else {
-		big_clock_window->show_all ();
+		big_clock_window->present ();
 	}
 }
 
@@ -305,9 +296,9 @@ ARDOUR_UI::toggle_options_window ()
 	}
 
 	if (option_editor->is_visible()) {
-		option_editor->hide_all ();
+		option_editor->hide ();
 	} else {
-		option_editor->show_all ();
+		option_editor->present ();
 	}
 }
 
@@ -324,18 +315,6 @@ ARDOUR_UI::toggle_auto_input ()
 	toggle_some_session_state (auto_input_button,
 				   &Session::get_auto_input,
 				   &Session::set_auto_input);
-	
-	meter_bridge->clear_all_meters ();
-}
-
-void
-ARDOUR_UI::toggle_metering ()
-{
-#if 0
-	if (global_meter_button.get_active()) {
-		meter_bridge->toggle_metering ();
-	}
-#endif
 }
 
 int
@@ -361,9 +340,9 @@ ARDOUR_UI::toggle_location_window ()
 	}
 
 	if (location_ui->is_visible()) {
-		location_ui->hide_all();
+		location_ui->hide();
 	} else {
-		location_ui->show_all();
+		location_ui->present();
 	}
 }
 
@@ -396,9 +375,9 @@ ARDOUR_UI::toggle_route_params_window ()
 	}
 
 	if (route_params->is_visible ()) {
-		route_params->hide_all ();
+		route_params->hide ();
 	} else {
-		route_params->show_all ();
+		route_params->present ();
 	}
 }
 	

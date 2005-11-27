@@ -847,7 +847,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	connection_editor = 0;
 	add_route_dialog = 0;
 	route_params = 0;
-	meter_bridge = 0;
 	option_editor = 0;
 	location_ui = 0;
 	open_session_selector = 0;
@@ -1897,7 +1896,6 @@ restart JACK with more ports."));
 void
 ARDOUR_UI::diskstream_added (DiskStream* ds)
 {
-	// meter_bridge_dialog_check->set_sensitive (true);
 }
 
 void

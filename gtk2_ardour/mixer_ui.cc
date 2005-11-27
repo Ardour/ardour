@@ -167,8 +167,6 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	snapshot_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::snapshot_display_button_press));
 
 	_plugin_selector = new PluginSelector (PluginManager::the_manager());
-	_plugin_selector->signal_delete_event().connect (bind (ptr_fun (just_hide_it), 
-						     static_cast<Window *> (_plugin_selector)));
 
 	signal_configure_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 

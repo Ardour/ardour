@@ -65,8 +65,8 @@ class Keyboard : public sigc::trackable, Stateful
 		return (ev->state & RelevantModifierKeyMask) == 0;
 	}
 
-	bool leave_window (GdkEventCrossing *ev);
-	bool enter_window (GdkEventCrossing *ev);
+	bool leave_window (GdkEventCrossing *ev, Gtk::Window*);
+	bool enter_window (GdkEventCrossing *ev, Gtk::Window*);
 
 	static bool modifier_state_contains (guint state, ModifierMask);
 	static bool modifier_state_equals   (guint state, ModifierMask);

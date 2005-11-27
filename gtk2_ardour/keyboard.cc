@@ -657,7 +657,7 @@ Keyboard::get_modifier_masks ()
 }
 
 bool
-Keyboard::enter_window (GdkEventCrossing *ev)
+Keyboard::enter_window (GdkEventCrossing *ev, Gtk::Window* win)
 {
 	switch (ev->detail) {
 	case GDK_NOTIFY_INFERIOR:
@@ -674,7 +674,7 @@ Keyboard::enter_window (GdkEventCrossing *ev)
 }
 
 bool
-Keyboard::leave_window (GdkEventCrossing *ev)
+Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* win)
 {
 	switch (ev->detail) {
 	case GDK_NOTIFY_INFERIOR:

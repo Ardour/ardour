@@ -21,6 +21,7 @@
 #include <lrdf.h>
 
 #include <gtkmm/table.h>
+#include <gtkmm/stock.h>
 #include <gtkmm/button.h>
 #include <gtkmm/notebook.h>
 
@@ -35,14 +36,13 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace Gtk;
 
 PluginSelector::PluginSelector (PluginManager *mgr)
-	: ArdourDialog ("plugin selector")
+	: Dialog (_("ardour: plugins"), true, false)
 {
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginSelectorWindow");
-	set_title (_("ardour: plugins"));
-	set_modal(true);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	manager = mgr;
@@ -89,14 +89,9 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn_add, _("Add a plugin to the effect list"));
 	Gtk::Button *btn_remove = manage(new Gtk::Button(_("Remove")));
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn_remove, _("Remove a plugin from the effect list"));
-	Gtk::Button *btn_ok = manage(new Gtk::Button(_("OK")));
-	Gtk::Button *btn_cancel = manage(new Gtk::Button(_("Cancel")));
-
 	Gtk::Button *btn_update = manage(new Gtk::Button(_("Update")));
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn_update, _("Update available plugins"));
 
-	btn_ok->set_name("PluginSelectorButton");
-	btn_cancel->set_name("PluginSelectorButton");
 	btn_add->set_name("PluginSelectorButton");
 	btn_remove->set_name("PluginSelectorButton");
 	
@@ -109,9 +104,11 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	table->attach(*btn_update, 5, 6, 5, 6, Gtk::FILL, Gtk::FILL, 5, 5);
 
 	table->attach(added_list, 0, 7, 7, 9);
-	table->attach(*btn_ok, 1, 3, 9, 10, Gtk::FILL, Gtk::FILL, 5, 5);
-	table->attach(*btn_cancel, 3, 4, 9, 10, Gtk::FILL, Gtk::FILL, 5, 5);
-	add (*table);
+
+	add_button (Stock::OK, RESPONSE_ACCEPT);
+	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+
+	get_vbox()->pack_start (*table);
 
 	using namespace Gtk::Notebook_Helpers;
 	notebook.pages().push_back (TabElem (ladspa_display, _("LADSPA")));
@@ -142,10 +139,6 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	btn_update->signal_clicked().connect (mem_fun(*this, &PluginSelector::btn_update_clicked));
 	btn_add->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_add_clicked));
 	btn_remove->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_remove_clicked));
-	btn_ok->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_ok_clicked));
-	btn_cancel->signal_clicked().connect(mem_fun(*this,&PluginSelector::btn_cancel_clicked));
-	signal_delete_event().connect (mem_fun(*this, &PluginSelector::wm_close));
-
 }
 
 void
@@ -328,27 +321,6 @@ PluginSelector::btn_remove_clicked()
 	}
 }
 
-// Adds a plugin, and closes the window.
-void 
-PluginSelector::btn_ok_clicked()
-{
-	list<PluginInfo*>::iterator i;
-
-	for (i = added_plugins.begin(); i != added_plugins.end(); ++i){
-		use_plugin (*i);
-	}
-
-	hide();
-	added_plugins.clear();
-}
-
-void
-PluginSelector::btn_cancel_clicked()
-{
-	hide();
-	added_plugins.clear();
-}
-
 void
 PluginSelector::btn_update_clicked()
 {
@@ -356,9 +328,34 @@ PluginSelector::btn_update_clicked()
 	input_refiller ();
 }
 
-gint
-PluginSelector::wm_close(GdkEventAny* ev)
+int
+PluginSelector::run ()
 {
-	btn_cancel_clicked();
-	return TRUE;
+	ResponseType r;
+	list<PluginInfo*>::iterator i;
+
+	r = (ResponseType) Dialog::run ();
+
+	switch (r) {
+	case RESPONSE_ACCEPT:
+		for (i = added_plugins.begin(); i != added_plugins.end(); ++i){
+			use_plugin (*i);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	cleanup ();
+
+	return (int) r;
 }
+
+void
+PluginSelector::cleanup ()
+{
+	hide();
+	added_plugins.clear();
+}
+

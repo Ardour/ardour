@@ -66,11 +66,6 @@ ARDOUR_UI::setup_windows ()
 		return -1;
 	}
 
-	if (create_meter_bridge ()) {
-		error << _("UI: cannot setup meter_bridge") << endmsg;
-		return -1;
-	}
-
 	/* all other dialogs are created conditionally */
 
 	we_have_dependents ();
@@ -425,16 +420,24 @@ ARDOUR_UI::setup_clock ()
 {
 	ARDOUR_UI::Clock.connect (bind (mem_fun (big_clock, &AudioClock::set), false));
 	
-	big_clock_window = new ArdourDialog ("big clock window");
+	big_clock_window = new Gtk::Window (WINDOW_TOPLEVEL);
 	
 	big_clock_window->set_border_width (0);
 	big_clock_window->add  (big_clock);
 	big_clock_window->set_title (_("ardour: clock"));
 	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_MENU);
-
-	big_clock_window->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Gtk::Window*>(big_clock_window)));
-
+	big_clock_window->signal_realize().connect (bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 	big_clock_window->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::big_clock_hiding));
+
+	manage_window (*big_clock_window);
+}
+
+void
+ARDOUR_UI::manage_window (Window& win)
+{
+	win.signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), &win));
+	win.signal_enter_notify_event().connect (bind (mem_fun (Keyboard::the_keyboard(), &Keyboard::enter_window), &win));
+	win.signal_leave_notify_event().connect (bind (mem_fun (Keyboard::the_keyboard(), &Keyboard::leave_window), &win));
 }
 
 void
