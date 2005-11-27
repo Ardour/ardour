@@ -42,12 +42,11 @@ using namespace Gtk;
 using namespace ARDOUR;
 
 PlaylistSelector::PlaylistSelector ()
-	: ArdourDialog ("playlist selector"),
-	  close_button (_("close"))
+	: ArdourDialog ("playlist selector")
 {
 	rui = 0;
 	
-	set_position (Gtk::WIN_POS_MOUSE);
+	set_position (WIN_POS_MOUSE);
 	set_name ("PlaylistSelectorWindow");
 	set_title (_("ardour: playlists"));
 	set_modal(true);
@@ -59,16 +58,17 @@ PlaylistSelector::PlaylistSelector ()
 	tree.append_column (_("Playlists grouped by track"), columns.text);
 
 	scroller.add (tree);
-	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	close_button.signal_clicked().connect (mem_fun(*this, &PlaylistSelector::close_button_click));
+	// GTK2FIX do we need this stuff or is GTK applying some policy now?
+	//set_border_width (6);
+	// set_spacing (12);
 
-	vpacker.set_border_width (6);
-	vpacker.set_spacing (12);
-	vpacker.pack_start (scroller);
-	vpacker.pack_start (close_button, false, false);
+	get_vbox()->pack_start (scroller);
 
-	add (vpacker);
+	Button* b = add_button (_("close"), RESPONSE_CANCEL);
+	b->signal_clicked().connect (mem_fun(*this, &PlaylistSelector::close_button_click));
+
 }
 
 PlaylistSelector::~PlaylistSelector ()
@@ -108,7 +108,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 	this_ds = rui->get_diskstream();
 
-	Gtk::TreeModel::Row others = *(model->append ());
+	TreeModel::Row others = *(model->append ());
 
 	others[columns.text] = _("Other tracks");
 	others[columns.playlist] = 0;

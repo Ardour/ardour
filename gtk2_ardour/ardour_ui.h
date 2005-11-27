@@ -492,7 +492,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::MenuItem *export_item;
 	Gtk::MenuItem *close_item;
 
-	Gtk::CheckMenuItem *meter_bridge_dialog_check;
 	Gtk::CheckMenuItem *connection_editor_check;
 	Gtk::CheckMenuItem *route_params_check;
 	Gtk::CheckMenuItem *locations_dialog_check;
@@ -630,9 +629,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	PublicEditor     *editor;
 	int         create_editor ();
 
-	MeterBridge  *meter_bridge;
-	int          create_meter_bridge ();
-
 	RouteParams_UI *route_params;
 	int             create_route_params ();
 
@@ -642,7 +638,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	LocationUI *location_ui;
 	int         create_location_ui ();
 
-	void meter_bridge_hiding ();
 	void location_ui_hiding ();
 	void big_clock_hiding ();
 	void route_params_hiding ();

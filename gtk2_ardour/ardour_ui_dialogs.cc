@@ -228,22 +228,6 @@ ARDOUR_UI::unload_session ()
 }
 
 int
-ARDOUR_UI::create_meter_bridge ()
-{
-	if (meter_bridge == 0) {
-		meter_bridge = new MeterBridge ();
-		meter_bridge->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::meter_bridge_hiding));
-	}
-	return 0;
-}
-
-void
-ARDOUR_UI::meter_bridge_hiding()
-{
-	// meter_bridge_dialog_check->set_active(false);
-}
-
-int
 ARDOUR_UI::create_connection_editor ()
 {
 	if (connection_editor == 0) {

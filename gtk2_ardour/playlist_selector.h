@@ -49,9 +49,7 @@ class PlaylistSelector : public ArdourDialog
 	typedef std::map<ARDOUR::id_t,std::list<ARDOUR::Playlist*>*> DSPL_Map;
 
 	ARDOUR::Session* session;
-	Gtk::VBox vpacker;
 	Gtk::ScrolledWindow scroller;
-	Gtk::Button close_button;
 	DSPL_Map dspl_map;
 	RouteUI* rui;
 
