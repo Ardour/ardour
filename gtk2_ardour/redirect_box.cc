@@ -429,9 +429,6 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, IO& io)
 {
 	ArdourDialog dialog ("wierd plugin dialog");
 	Label label;
-	Button button (_("OK"));
-	VBox vpacker;
-	HBox button_box;
 
 	/* i hate this kind of code */
 
@@ -479,16 +476,9 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, IO& io)
 					 streams));
 	}
 
-	button_box.pack_start (button, false, true);
+	dialog.get_vbox()->pack_start (label);
+	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 
-	vpacker.set_spacing (12);
-	vpacker.set_border_width (12);
-	vpacker.pack_start (label);
-	vpacker.pack_start (button_box);
-
-	button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 0));
-
-	dialog.add (vpacker);
 	dialog.set_name (X_("PluginIODialog"));
 	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
@@ -705,25 +695,16 @@ RedirectBox::compute_redirect_sort_keys ()
 
 		ArdourDialog dialog ("wierd plugin dialog");
 		Label label;
-		Button button (_("OK"));
-		VBox vpacker;
-		HBox button_box;
 
 		label.set_text (_("\
 You cannot reorder this set of redirects\n\
 in that way because the inputs and\n\
 outputs do not work correctly."));
 
-		button_box.pack_start (button, false, true);
 		
-		vpacker.set_spacing (12);
-		vpacker.set_border_width (12);
-		vpacker.pack_start (label);
-		vpacker.pack_start (button_box);
-		
-		button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 0));
-		
-		dialog.add (vpacker);
+		dialog.get_vbox()->pack_start (label);
+		dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
+
 		dialog.set_name (X_("PluginIODialog"));
 		dialog.set_position (Gtk::WIN_POS_MOUSE);
 		dialog.set_modal (true);
@@ -825,47 +806,32 @@ RedirectBox::idle_delete_redirect (Redirect *redirect)
 void
 RedirectBox::rename_redirect (Redirect* redirect)
 {
-	ArdourDialog dialog ("rename redirect dialog");
+	ArdourDialog dialog (_("ardour: rename redirect"), true);
 	Entry  entry;
 	VBox   vbox;
 	HBox   hbox;
 	Button ok_button (_("OK"));
 	Button cancel_button (_("Cancel"));
 
-	dialog.set_title (_("ardour: rename redirect"));
 	dialog.set_name ("RedirectRenameWindow");
 	dialog.set_size_request (300, -1);
 	dialog.set_position (Gtk::WIN_POS_MOUSE);
-	dialog.set_modal (true);
 
-	vbox.set_border_width (12);
-	vbox.set_spacing (12);
-	vbox.pack_start (entry, false, false);
-	vbox.pack_start (hbox, false, false);
-	hbox.pack_start (ok_button);
-	hbox.pack_start (cancel_button);
+	dialog.add_action_widget (entry, RESPONSE_ACCEPT);
+	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
+	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	
-	dialog.add (vbox);
-
 	entry.set_name ("RedirectNameDisplay");
 	entry.set_text (redirect->name());
 	entry.select_region (0, -1);
 	entry.grab_focus ();
 
-	ok_button.set_name ("EditorGTKButton");
-	cancel_button.set_name ("EditorGTKButton");
-
-	entry.signal_activate().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
-	cancel_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), -1));
-	ok_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
-
-	/* recurse */
-	
-	dialog.set_keyboard_input (true);
-	dialog.run ();
-
-	if (dialog.run_status() == 1) {
+	switch (dialog.run ()) {
+	case RESPONSE_ACCEPT:
 		redirect->set_name (entry.get_text(), this);
+		break;
+	default:
+		break;
 	}
 }
 

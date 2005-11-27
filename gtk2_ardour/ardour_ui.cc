@@ -1098,24 +1098,16 @@ If you still wish to quit, please use the\n\n\
 int
 ARDOUR_UI::ask_about_saving_session (string what)
 {
-	ArdourDialog window ("saving dialog");
-	Gtk::VBox   packer;
+	ArdourDialog window (_("ardour: save session?"));
 	Gtk::Label  prompt_label;
-	Gtk::HBox   button_packer;
-
 	string msg;
 
 	msg = string_compose(_("Save and %1"), what);
-	
-	Gtk::Button save_button (msg);
-	save_button.set_name ("EditorGTKButton");
-
+	window.add_button (msg, RESPONSE_ACCEPT);
 	msg = string_compose(_("Just %1"), what);
-
-	Gtk::Button nosave_button (msg);
-	nosave_button.set_name ("EditorGTKButton");
-
+	window.add_button (msg, RESPONSE_REJECT);
 	msg = string_compose(_("Don't %1"), what);
+	window.add_button (msg, RESPONSE_REJECT);
 
 	Gtk::Button noquit_button (msg);
 	noquit_button.set_name ("EditorGTKButton");
@@ -1134,36 +1126,30 @@ ARDOUR_UI::ask_about_saving_session (string what)
 	prompt_label.set_text (prompt);
 	prompt_label.set_alignment (0.5, 0.5);
 	prompt_label.set_name (X_("PrompterLabel"));
-
-	save_button.signal_clicked().connect (bind(mem_fun(window,&ArdourDialog::stop), 1));
-	nosave_button.signal_clicked().connect (bind(mem_fun(window,&ArdourDialog::stop), 0));
-	noquit_button.signal_clicked().connect (bind(mem_fun(window,&ArdourDialog::stop), -1));
-
-	button_packer.set_spacing (10);
-	button_packer.pack_start (save_button);
-	button_packer.pack_start (nosave_button);
-	button_packer.pack_start (noquit_button);
 	
-	packer.set_spacing (10);
-	packer.set_border_width (10);
-	packer.pack_start (prompt_label);
-	packer.pack_start (button_packer);
+	window.get_vbox()->pack_start (prompt_label);
 
 	window.set_name (_("Prompter"));
-	window.set_title (_("ardour: save session?"));
 	window.set_position (Gtk::WIN_POS_MOUSE);
 	window.set_modal (true);
-	window.add (packer);
 	window.show_all ();
-	window.set_keyboard_input (true);
 
 	save_the_session = 0;
 
 	editor->ensure_float (window);
 
-	window.run ();
+	ResponseType r = (ResponseType) window.run();
 
-	return window.run_status();
+	window.hide ();
+
+	switch (r) {
+	case RESPONSE_ACCEPT:
+		return 0;
+	default:
+		break;
+	}
+
+	return -1;
 }
 	
 gint
@@ -1719,17 +1705,10 @@ ARDOUR_UI::build_session_selector ()
 {
 	session_selector_window = new ArdourDialog ("session selector");
 	
-	Gtk::VBox *vpacker = manage (new Gtk::VBox);
 	Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow);
-	Gtk::HBox *button_packer = manage (new Gtk::HBox);
-	Gtk::Button *cancel_button = manage (new Gtk::Button (_("cancel")));
-	Gtk::Button *rescan_button = manage (new Gtk::Button (_("rescan")));
 
-	button_packer->pack_start (*rescan_button);
-	button_packer->pack_start (*cancel_button);
-
-	vpacker->pack_start (*scroller);
-	vpacker->pack_start (*button_packer, false, false);
+	session_selector_window->add_button (Stock::OK, RESPONSE_ACCEPT);
+	session_selector_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
 
 	recent_session_model = TreeStore::create (recent_session_columns);
 	recent_session_display.set_model (recent_session_model);
@@ -1739,9 +1718,9 @@ ARDOUR_UI::build_session_selector ()
 	scroller->add (recent_session_display);
 	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	session_selector_window->add (*vpacker);
 	session_selector_window->set_name ("SessionSelectorWindow");
 	session_selector_window->set_size_request (200, 400);
+	session_selector_window->get_vbox()->pack_start (*scroller);
 }
 
 void
@@ -1755,13 +1734,13 @@ ARDOUR_UI::open_recent_session ()
 
 	redisplay_recent_sessions ();
 
-	session_selector_window->run ();
+	ResponseType r = (ResponseType) session_selector_window->run ();
 
+	session_selector_window->hide();
 
-	switch (session_selector_window->run_status()) {
-	case 0:
+	switch (r) {
+	case RESPONSE_ACCEPT:
 		break;
-
 	default:
 		return;
 	}
@@ -1775,11 +1754,9 @@ ARDOUR_UI::open_recent_session ()
 	Glib::ustring path = (*i)[recent_session_columns.fullpath];
 	Glib::ustring state = (*i)[recent_session_columns.visible_name];
 
-	session_selector_window->response (RESPONSE_ACCEPT);
 	_session_is_new = false;
 
 	load_session (path, state);
-
 }
 
 bool
@@ -2886,7 +2863,7 @@ require some unused files to continue to exist."));
 		return;
 	} 
 
-	ArdourDialog results ("cleanup results");
+	ArdourDialog results (_("ardour: cleanup"), true);
 	
 	struct CleanupResultsModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    CleanupResultsModelColumns() { 
@@ -2909,11 +2886,6 @@ require some unused files to continue to exist."));
 
 	Gtk::ScrolledWindow list_scroller;
 	Gtk::Label txt;
-	Gtk::Button ok_button (_("OK"));
-	Gtk::VBox vpacker;
-	
-	vpacker.set_border_width (10);
-	vpacker.set_spacing (10);
 
 	if (rep.space < 1048576.0f) {
 		if (removed > 1) {
@@ -2929,7 +2901,7 @@ require some unused files to continue to exist."));
 		}
 	}
 
-	vpacker.pack_start (txt, false, false);
+	results.get_vbox()->pack_start (txt, false, false);
 	
 	for (vector<string>::iterator i = rep.paths.begin(); i != rep.paths.end(); ++i) {
 		TreeModel::Row row = *(results_model->append());
@@ -2941,14 +2913,9 @@ require some unused files to continue to exist."));
 	list_scroller.set_size_request (-1, 250);
 	list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	
-	vpacker.pack_start (list_scroller, true, true);
-	vpacker.pack_start (ok_button, false, false);
-	
-	results.add (vpacker);
-	
+	results.get_vbox()->pack_start (list_scroller, true, true);
+	results.add_button (Stock::OK, RESPONSE_ACCEPT);
 	results.set_position (Gtk::WIN_POS_MOUSE);
-	results.set_title (_("ardour: cleanup"));
-	results.set_modal (true);
 
 	results.run ();
 }
@@ -2961,40 +2928,22 @@ ARDOUR_UI::cleanup ()
 		return;
 	}
 
-	ArdourDialog checker (X_("cleanup confirm dialog"));
+	ArdourDialog checker (_("ardour cleanup"));
 	Gtk::Label label (_("\
 Cleanup is a destructive operation.\n\
 ALL undo/redo information will be lost if you cleanup.\n\
 Unused audio files will be moved to a \"dead sounds\" location."));
-
-	Gtk::Button ok_button (_("Proceed with cleanup"));
-	Gtk::Button cancel_button (_("Cancel"));
-	Gtk::HBox   bbox;
-	Gtk::VBox   vbox;
-
-	bbox.set_border_width (6);
-	bbox.set_spacing (12);
-	bbox.pack_start (ok_button, true, false);
-	bbox.pack_start (cancel_button, true, false);
 	
-	vbox.set_border_width (6);
-	vbox.set_spacing (12);
-	vbox.pack_start (label, false, false);
-	vbox.pack_start (bbox, false, false);
-	
-	checker.add (vbox);
+	checker.get_vbox()->pack_start (label, false, false);
+	checker.add_button (Stock::OK, RESPONSE_ACCEPT);
+	checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+
 	checker.set_name (_("CleanupDialog"));
-	checker.set_title (_("ardour cleanup"));
 	checker.set_wmclass (_("ardour_cleanup"), "Ardour");
 	checker.set_position (Gtk::WIN_POS_MOUSE);
 
-	ok_button.signal_clicked().connect (bind (mem_fun (checker, &ArdourDialog::stop), 1));
-	cancel_button.signal_clicked().connect (bind (mem_fun (checker, &ArdourDialog::stop), 0));
-
-	checker.run ();
-
-	switch (checker.run_status()) {
-	case 0:
+	switch (checker.run()) {
+	case RESPONSE_ACCEPT:
 		break;
 	default:
 		return;
@@ -3056,10 +3005,16 @@ ARDOUR_UI::add_route ()
 		return;
 	}
 
-	add_route_dialog->run ();
+	ResponseType r = (ResponseType) add_route_dialog->run ();
+	
+	add_route_dialog->hide();
 
-	if (add_route_dialog->run_status()) {
+	switch (r) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
 		return;
+		break;
 	}
 
 	if ((count = add_route_dialog->count()) <= 0) {
@@ -3214,8 +3169,6 @@ int
 ARDOUR_UI::pending_state_dialog ()
 {
 	ArdourDialog dialog ("pending state dialog");
-	Button use_button (_("Recover from crash"));
-	Button cancel_button (_("Ignore crash data"));
 	Label  message (_("\
 This session appears to have been in\n\
 middle of recording when ardour or\n\
@@ -3224,28 +3177,18 @@ the computer was shutdown.\n\
 Ardour can recover any captured audio for\n\
 you, or it can ignore it. Please decide\n\
 what you would like to do.\n"));
-	HBox hpacker;
-	VBox vpacker;
 
-	vpacker.set_border_width (12);
-	vpacker.set_spacing (7);
-	vpacker.pack_start (message);
-	vpacker.pack_start (hpacker);
+	dialog.get_vbox()->pack_start (message);
+	dialog.add_button (_("Recover from crash"), RESPONSE_ACCEPT);
+	dialog.add_button (_("Ignore crash data"), RESPONSE_REJECT);
 
-	hpacker.set_spacing (7);
-	hpacker.pack_start (use_button);
-	hpacker.pack_start (cancel_button);
-	
-	use_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 0));
-	cancel_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
-
-	dialog.add (vpacker);
 	dialog.set_position (WIN_POS_CENTER);
 	dialog.show_all ();
 	
-	dialog.run ();
-
-	if (dialog.run_status () != 0) {
+	switch (dialog.run ()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
 		return 1;
 	}
 

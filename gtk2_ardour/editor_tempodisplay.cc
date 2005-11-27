@@ -243,14 +243,9 @@ Editor::mouse_add_new_tempo_event (jack_nframes_t frame)
 		return;
 	}
 
-
 	TempoMap& map(session->tempo_map());
 	TempoDialog tempo_dialog (map, frame, _("add"));
 	
-	tempo_dialog.bpm_entry.signal_activate().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.ok_button.signal_clicked().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), -1));
-
 	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	// GTK2FIX
 	// tempo_dialog.realize ();
@@ -258,26 +253,28 @@ Editor::mouse_add_new_tempo_event (jack_nframes_t frame)
 
 	ensure_float (tempo_dialog);
 
-	tempo_dialog.run();
-
-	if (tempo_dialog.run_status() == 0) {
-		
-		double bpm = 0;
-		BBT_Time requested;
-
-		bpm = tempo_dialog.get_bpm ();
-		bpm = max (0.01, bpm);
-
-		tempo_dialog.get_bbt_time (requested);
-
-		begin_reversible_command (_("add tempo mark"));
-		session->add_undo (map.get_memento());
-		map.add_tempo (Tempo (bpm), requested);
-		session->add_redo_no_execute (map.get_memento());
-		commit_reversible_command ();
-
-		map.dump (cerr);
+	switch (tempo_dialog.run()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
 	}
+
+	double bpm = 0;
+	BBT_Time requested;
+	
+	bpm = tempo_dialog.get_bpm ();
+	bpm = max (0.01, bpm);
+	
+	tempo_dialog.get_bbt_time (requested);
+	
+	begin_reversible_command (_("add tempo mark"));
+	session->add_undo (map.get_memento());
+	map.add_tempo (Tempo (bpm), requested);
+	session->add_redo_no_execute (map.get_memento());
+	commit_reversible_command ();
+	
+	map.dump (cerr);
 }
 
 void
@@ -291,9 +288,6 @@ Editor::mouse_add_new_meter_event (jack_nframes_t frame)
 	TempoMap& map(session->tempo_map());
 	MeterDialog meter_dialog (map, frame, _("add"));
 
-	meter_dialog.ok_button.signal_clicked().connect (bind (mem_fun (meter_dialog, &ArdourDialog::stop), 0));
-	meter_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (meter_dialog, &ArdourDialog::stop), -1));
-
 	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	// GTK2FIX
 	// meter_dialog.realize ();
@@ -301,26 +295,28 @@ Editor::mouse_add_new_meter_event (jack_nframes_t frame)
 
 	ensure_float (meter_dialog);
 	
-	meter_dialog.run ();
-	
-	if (meter_dialog.run_status() == 0) {
-		
-		double bpb = meter_dialog.get_bpb ();
-		bpb = max (1.0, bpb); // XXX is this a reasonable limit?
-
-		double note_type = meter_dialog.get_note_type ();
-		BBT_Time requested;
-
-		meter_dialog.get_bbt_time (requested);
-
-		begin_reversible_command (_("add meter mark"));
-		session->add_undo (map.get_memento());
-		map.add_meter (Meter (bpb, note_type), requested);
-		session->add_redo_no_execute (map.get_memento());
-		commit_reversible_command ();
-
-		map.dump (cerr);
+	switch (meter_dialog.run ()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
 	}
+
+	double bpb = meter_dialog.get_bpb ();
+	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
+	
+	double note_type = meter_dialog.get_note_type ();
+	BBT_Time requested;
+	
+	meter_dialog.get_bbt_time (requested);
+	
+	begin_reversible_command (_("add meter mark"));
+	session->add_undo (map.get_memento());
+	map.add_meter (Meter (bpb, note_type), requested);
+	session->add_redo_no_execute (map.get_memento());
+	commit_reversible_command ();
+	
+	map.dump (cerr);
 }
 
 void
@@ -349,9 +345,6 @@ Editor::edit_meter_section (MeterSection* section)
 {
 	MeterDialog meter_dialog (*section, _("done"));
 
-	meter_dialog.ok_button.signal_clicked().connect (bind (mem_fun (meter_dialog, &ArdourDialog::stop), 0));
-	meter_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (meter_dialog, &ArdourDialog::stop), -1));
-
 	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	// GTK2FIX
 	// meter_dialog.realize ();
@@ -359,31 +352,29 @@ Editor::edit_meter_section (MeterSection* section)
 
 	ensure_float (meter_dialog);
 
-	meter_dialog.run ();
-
-	if (meter_dialog.run_status() == 0) {
-
-		double bpb = meter_dialog.get_bpb ();
-		bpb = max (1.0, bpb); // XXX is this a reasonable limit?
-
-		double note_type = meter_dialog.get_note_type ();
-
-		begin_reversible_command (_("replace tempo mark"));
-		session->add_undo (session->tempo_map().get_memento());
-		session->tempo_map().replace_meter (*section, Meter (bpb, note_type));
-		session->add_redo_no_execute (session->tempo_map().get_memento());
-		commit_reversible_command ();
+	switch (meter_dialog.run()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
 	}
+
+	double bpb = meter_dialog.get_bpb ();
+	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
+	
+	double note_type = meter_dialog.get_note_type ();
+
+	begin_reversible_command (_("replace tempo mark"));
+	session->add_undo (session->tempo_map().get_memento());
+	session->tempo_map().replace_meter (*section, Meter (bpb, note_type));
+	session->add_redo_no_execute (session->tempo_map().get_memento());
+	commit_reversible_command ();
 }
 
 void
 Editor::edit_tempo_section (TempoSection* section)
 {
 	TempoDialog tempo_dialog (*section, _("done"));
-
-	tempo_dialog.bpm_entry.signal_activate().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.ok_button.signal_clicked().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), 0));
-	tempo_dialog.cancel_button.signal_clicked().connect (bind (mem_fun (tempo_dialog, &ArdourDialog::stop), -1));
 
 	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	// GTK2FIX
@@ -392,22 +383,24 @@ Editor::edit_tempo_section (TempoSection* section)
 
 	ensure_float (tempo_dialog);
 	
-	tempo_dialog.run ();
-
-	if (tempo_dialog.run_status() == 0) {
-
-		double bpm = tempo_dialog.get_bpm ();
-	        BBT_Time when;
-		tempo_dialog.get_bbt_time(when);
-		bpm = max (0.01, bpm);
-
-		begin_reversible_command (_("replace tempo mark"));
-		session->add_undo (session->tempo_map().get_memento());
-		session->tempo_map().replace_tempo (*section, Tempo (bpm));
-		session->tempo_map().move_tempo (*section, when);
-		session->add_redo_no_execute (session->tempo_map().get_memento());
-		commit_reversible_command ();
+	switch (tempo_dialog.run ()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
 	}
+
+	double bpm = tempo_dialog.get_bpm ();
+	BBT_Time when;
+	tempo_dialog.get_bbt_time(when);
+	bpm = max (0.01, bpm);
+	
+	begin_reversible_command (_("replace tempo mark"));
+	session->add_undo (session->tempo_map().get_memento());
+	session->tempo_map().replace_tempo (*section, Tempo (bpm));
+	session->tempo_map().move_tempo (*section, when);
+	session->add_redo_no_execute (session->tempo_map().get_memento());
+	commit_reversible_command ();
 }
 
 void

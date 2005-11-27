@@ -3759,49 +3759,27 @@ Editor::duplicate_dialog (bool dup_region)
 	ArdourDialog win ("duplicate dialog");
 	Entry  entry;
 	Label  label (_("Duplicate how many times?"));
-	HBox   hbox;
-	HBox   button_box;
-	Button ok_button (_("OK"));
-	Button cancel_button (_("Cancel"));
-	VBox   vbox;
 
-	button_box.set_spacing (7);
-	set_size_request_to_display_given_text (ok_button, _("Cancel"), 20, 15); // this is cancel on purpose
-	set_size_request_to_display_given_text (cancel_button, _("Cancel"), 20, 15);
-	button_box.pack_end (ok_button, false, false);
-	button_box.pack_end (cancel_button, false, false);
-	
-	hbox.set_spacing (5);
-	hbox.pack_start (label);
-	hbox.pack_start (entry, true, true);
-	
-	vbox.set_spacing (5);
-	vbox.set_border_width (5);
-	vbox.pack_start (hbox);
-	vbox.pack_start (button_box);
+	win.get_vbox()->pack_start (label);
+	win.add_action_widget (entry, RESPONSE_ACCEPT);
+	win.add_button (Stock::OK, RESPONSE_ACCEPT);
+	win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 
-	win.add (vbox);
 	win.set_position (Gtk::WIN_POS_MOUSE);
-	win.show_all ();
-
-	ok_button.signal_clicked().connect (bind (mem_fun (win, &ArdourDialog::stop), 0));
-	entry.signal_activate().connect (bind (mem_fun (win, &ArdourDialog::stop), 0));
-	cancel_button.signal_clicked().connect (bind (mem_fun (win, &ArdourDialog::stop), 1));
 
 	entry.set_text ("1");
 	set_size_request_to_display_given_text (entry, X_("12345678"), 20, 15);
 	entry.select_region (0, entry.get_text_length());
-
-	win.set_position (Gtk::WIN_POS_MOUSE);
-	// GTK2FIX
-	// win.realize ();
-	// win.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
-
 	entry.grab_focus ();
 
-	win.run ();
+        // GTK2FIX
+	// win.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 
-	if (win.run_status() != 0) {
+
+	switch (win.run ()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
 		return;
 	}
 
@@ -4286,17 +4264,18 @@ Editor::edit_xfade (Crossfade* xfade)
 		
 	ensure_float (cew);
 	
-	cew.ok_button.signal_clicked().connect (bind (mem_fun (cew, &ArdourDialog::stop), 1));
-	cew.cancel_button.signal_clicked().connect (bind (mem_fun (cew, &ArdourDialog::stop), 0));
 	// GTK2FIX
 	// cew.signal_delete_event().connect (mem_fun (cew, &ArdourDialog::wm_doi_event_stop));
 
-	cew.run ();
-	
-	if (cew.run_status() == 1) {
-		cew.apply ();
-		xfade->StateChanged (Change (~0));
+	switch (cew.run ()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
 	}
+	
+	cew.apply ();
+	xfade->StateChanged (Change (~0));
 }
 
 PlaylistSelector&
@@ -4331,56 +4310,30 @@ Editor::playlist_deletion_dialog (Playlist* pl)
 				 "If left alone, no audio files used by it will be cleaned.\n"
 				 "If deleted, audio files used by it alone by will cleaned."),
 			       pl->name()));
-	HBox   button_box;
-	Button del_button (_("Delete playlist"));
-	Button keep_button (_("Keep playlist"));
-	Button abort_button (_("Cancel cleanup"));
-	VBox   vbox;
 
-	button_box.set_spacing (7);
-	button_box.set_homogeneous (true);
-	button_box.pack_end (del_button, false, false);
-	button_box.pack_end (keep_button, false, false);
-	button_box.pack_end (abort_button, false, false);
-	
-	vbox.set_spacing (5);
-	vbox.set_border_width (5);
-	vbox.pack_start (label);
-	vbox.pack_start (button_box);
-
-	dialog.add (vbox);
 	dialog.set_position (Gtk::WIN_POS_CENTER);
-	dialog.show_all ();
+	dialog.get_vbox()->pack_start (label);
 
-	del_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 0));
-	keep_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 1));
-	abort_button.signal_clicked().connect (bind (mem_fun (dialog, &ArdourDialog::stop), 2));
+	dialog.add_button (_("Delete playlist"), RESPONSE_ACCEPT);
+	dialog.add_button (_("Keep playlist"), RESPONSE_CANCEL);
+	dialog.add_button (_("Cancel"), RESPONSE_CANCEL);
 
-	// GTK2FIX
-	// dialog.realize ();
-	// dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
-
-	dialog.run ();
-
-	switch (dialog.run_status()) {
-	case 1:
-		/* keep the playlist */
-		return 1;
-		break;
-	case 0:
+	switch (dialog.run ()) {
+	case RESPONSE_ACCEPT:
 		/* delete the playlist */
 		return 0;
 		break;
-	case 2:
-		/* abort cleanup */
-		return -1;
+
+	case RESPONSE_REJECT:
+		/* keep the playlist */
+		return 1;
 		break;
+
 	default:
 		break;
 	}
 
-	/* keep the playlist */
-	return 1;
+	return -1;
 }
 
 bool

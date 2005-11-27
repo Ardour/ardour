@@ -40,8 +40,6 @@ class ArdourMessage : public ArdourDialog
 	~ArdourMessage();
 
   private:
-	Gtk::VBox   packer;
-	Gtk::Button ok_button;
 	Gtk::Label  label;
 	
 };

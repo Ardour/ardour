@@ -1818,23 +1818,21 @@ Editor::audition_playlist_region_standalone (AudioRegion& region)
 void
 Editor::build_interthread_progress_window ()
 {
-	interthread_progress_window = new ArdourDialog (X_("interthread progress"));
+	interthread_progress_window = new ArdourDialog (X_("interthread progress"), true);
 
 	interthread_progress_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
 	
-	interthread_progress_vbox.set_border_width (10);
-	interthread_progress_vbox.set_spacing (5);
-	interthread_progress_vbox.pack_start (interthread_progress_label, false, false);
-	interthread_progress_vbox.pack_start (interthread_progress_bar,false, false);
-	interthread_progress_vbox.pack_start (interthread_cancel_button,false, false);
+	interthread_progress_window->get_vbox()->pack_start (interthread_progress_label, false, false);
+	interthread_progress_window->get_vbox()->pack_start (interthread_progress_bar,false, false);
+
+	// GTK2FIX: this button needs a modifiable label
+
+	Button* b = interthread_progress_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	b->signal_clicked().connect (mem_fun(*this, &Editor::interthread_cancel_clicked));
 
 	interthread_cancel_button.add (interthread_cancel_label);
 
-	interthread_cancel_button.signal_clicked().connect (mem_fun(*this, &Editor::interthread_cancel_clicked));
-	
-	interthread_progress_window->set_modal (true);
 	interthread_progress_window->set_default_size (200, 100);
-	interthread_progress_window->add (interthread_progress_vbox);
 }
 
 void

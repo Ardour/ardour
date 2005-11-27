@@ -47,7 +47,7 @@ using namespace Gtk;
 using namespace sigc;
 
 ConnectionEditor::ConnectionEditor ()
-	: ArdourDialog ("connection editor"),
+	: ArdourDialog (_("ardour: connections")),
 	  input_frame (_("Input Connections")),
 	  output_frame (_("Output Connections")),
 	  new_input_connection_button (_("New Input")),
@@ -193,11 +193,7 @@ ConnectionEditor::ConnectionEditor ()
 	main_vbox.pack_start (main_hbox);
 	main_vbox.pack_start (button_frame, false, false);
 
-	set_title (_("ardour: connections"));
-	add (main_vbox);
-
-	// GTK2FIX
-	// signal_delete_event.connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
+	get_vbox()->pack_start (main_vbox);
 	
 	clear_button.signal_clicked().connect (mem_fun(*this, &ConnectionEditor::clear));
 	add_port_button.signal_clicked().connect (mem_fun(*this, &ConnectionEditor::add_port));

@@ -36,16 +36,8 @@ namespace ARDOUR {
 class ArdourDialog : public Gtk::Dialog
 {
   public:
-	ArdourDialog (string name);
+	ArdourDialog (std::string title, bool modal = false);
 	~ArdourDialog();
-
-	bool within_hiding() const { return _within_hiding; }
-
-	void run ();
-	void stop (int);
-	void set_keyboard_input (bool yn);
-	void set_hide_on_stop (bool yn);
-	int  run_status();
 
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
@@ -60,15 +52,6 @@ class ArdourDialog : public Gtk::Dialog
 	virtual void session_gone () {
 		set_session (0);
 	}
-
-	void quit ();
-
-  private:
-	int  _run_status;
-	bool _within_hiding;
-	bool kbd_input;
-	bool running;
-	bool hide_on_stop;
 };
 
 #endif // __ardour_dialog_h__

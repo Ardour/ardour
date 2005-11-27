@@ -248,13 +248,8 @@ ARDOUR_UI::toggle_connection_editor ()
 	//GTK2FIX
 #if 0
 
-	if (connection_editor->within_hiding()) {
-		return;
-	}
-						      
-
 	if (connection_editor_check->get_active()){
-		connection_editor->show_all();
+		connection_editor->present();
 	} else {
 		connection_editor->hide_all();
 	}
@@ -291,9 +286,7 @@ ARDOUR_UI::toggle_options_window ()
 		option_editor = new OptionEditor (*this, *editor, *mixer);
 		option_editor->signal_unmap().connect(mem_fun(*this, &ARDOUR_UI::option_hiding));
 		option_editor->set_session (session);
-	} else if (option_editor->within_hiding()) {
-		return;
-	}
+	} 
 
 	if (option_editor->is_visible()) {
 		option_editor->hide ();
@@ -335,10 +328,6 @@ ARDOUR_UI::toggle_location_window ()
 		return;
 	}
 
-	if (location_ui->within_hiding()) {
-		return;
-	}
-
 	if (location_ui->is_visible()) {
 		location_ui->hide();
 	} else {
@@ -367,10 +356,6 @@ void
 ARDOUR_UI::toggle_route_params_window ()
 {
 	if (create_route_params ()) {
-		return;
-	}
-
-	if (route_params->within_hiding()) {
 		return;
 	}
 

@@ -19,7 +19,7 @@
 
 */
 
-#include <gtkmm2ext/utils.h>
+#include <gtkmm/stock.h>
 
 #include "ardour_message.h"
 #include "i18n.h"
@@ -27,37 +27,26 @@
 using namespace std;
 using namespace Gtk;
 
-
 ArdourMessage::ArdourMessage (Gtk::Window* parent, 
 			      string name, string msg, 
 			      bool grab_focus, bool auto_run)
-	: ArdourDialog (name),
-	  ok_button (_("OK"))
+	: ArdourDialog (name)
 {
-	set_keyboard_input (true);
-
 	label.set_text (msg);
 	label.set_alignment (0.5, 0.5);
 	label.set_name (X_("PrompterLabel"));
-	
-	ok_button.set_name ("EditorGTKButton");	
-	ok_button.signal_clicked().connect (bind (mem_fun(*this, &ArdourDialog::stop), 1));
-	
-	packer.set_spacing (10);
-	packer.set_border_width (10);
-	packer.pack_start (label);
-	packer.pack_start (ok_button);
+
+	get_vbox()->pack_start (label);
+
+	Button* ok_button = add_button (Stock::OK, RESPONSE_ACCEPT);
 	
 	set_name (X_("Prompter"));
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_modal (true);
-	add (packer);
-	show_all ();
-	
-	signal_realize().connect (bind (sigc::ptr_fun (Gtkmm2ext::set_decoration), this, Gdk::WMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH)));
+	set_type_hint (Gdk::WINDOW_TYPE_HINT_MENU);
 
 	if (grab_focus) {
-		ok_button.grab_focus ();
+		ok_button->grab_focus ();
 	}
 
 	if (parent) {

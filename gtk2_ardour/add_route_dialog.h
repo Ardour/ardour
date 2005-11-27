@@ -4,6 +4,7 @@
 #include <string>
 
 #include <gtkmm/entry.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
@@ -12,9 +13,7 @@
 
 #include <gtkmm2ext/click_box.h>
 
-#include "ardour_dialog.h"
-
-class AddRouteDialog : public ArdourDialog
+class AddRouteDialog : public Gtk::Dialog
 {
   public:
 	AddRouteDialog ();
@@ -24,9 +23,6 @@ class AddRouteDialog : public ArdourDialog
 	std::string name_template ();
 	int channels ();
 	int count ();
-
-	Gtk::Button ok_button;
-	Gtk::Button cancel_button;
 
   private:
 	Gtk::Entry name_template_entry;

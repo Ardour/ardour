@@ -71,7 +71,7 @@ CrossfadeEditor::Half::Half ()
 }
 
 CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double mxy)
-	: ArdourDialog (_("crossfade editor")),
+	: ArdourDialog (_("ardour: x-fade edit")),
 	  cancel_button (_("Cancel")),
 	  ok_button (_("OK")),
 	  xfade (xf),
@@ -98,10 +98,8 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 {
 	set_wmclass ("ardour_automationedit", "Ardour");
 	set_name ("CrossfadeEditWindow");
-	set_title (_("ardour: x-fade edit"));
 	set_position (Gtk::WIN_POS_MOUSE);
 
-	add (vpacker);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
 	RadioButtonGroup sel_but_group = select_in_button.get_group();
@@ -281,10 +279,8 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	curve_button_box.pack_start (*vpacker2, false, false, 12);
 	curve_button_box.pack_start (fade_in_table, false, false, 12);
 	
-	vpacker.set_border_width (12);
-	vpacker.set_spacing (5);
-	vpacker.pack_start (*canvas_frame, true, true);
-	vpacker.pack_start (curve_button_box, false, false);
+	get_vbox()->pack_start (*canvas_frame, true, true);
+	get_vbox()->pack_start (curve_button_box, false, false);
 
 	/* button to allow hackers to check the actual curve values */
 

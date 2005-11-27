@@ -1,5 +1,6 @@
 #include <cstdio> // for snprintf, grrr 
 
+#include <gtkmm/stock.h>
 #include <gtkmm2ext/utils.h>
 
 #include "tempo_dialog.h"
@@ -106,8 +107,6 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 
 	add (vpacker);
 	set_name ("MetricDialog");
-
-	set_keyboard_input(true);
 }
 
 double 
@@ -222,15 +221,6 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	note_frame.add (vspacer1);
 	bpb_frame.add (vspacer2);
 
-	button_box.set_border_width (10);
-	button_box.set_spacing (5);
-	button_box.set_homogeneous (true);
-	button_box.pack_start (ok_button); 
-	button_box.pack_start (cancel_button); 
-
-	vpacker.set_border_width (10);
-	vpacker.set_spacing (5);
-	
 	if (movable) {
 		snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
 		when_bar_entry.set_text (buf);
@@ -263,20 +253,18 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		vpacker.pack_start (when_frame, false, false);
 	}
 
-	vpacker.pack_start (bpb_frame, false, false);
-	vpacker.pack_start (note_frame, false, false);
-	vpacker.pack_start (button_box, false, false);
+	get_vbox()->pack_start (bpb_frame, false, false);
+	get_vbox()->pack_start (note_frame, false, false);
 	
 	bpb_frame.set_name ("MetricDialogFrame");
 	note_frame.set_name ("MetricDialogFrame");
 	bpb_entry.set_name ("MetricEntry");
-	ok_button.set_name ("MetricButton");
-	cancel_button.set_name ("MetricButton");
 
-	add (vpacker);
+	add_action_widget (bpb_entry, RESPONSE_ACCEPT);
+	add_button (Stock::OK, RESPONSE_ACCEPT);
+	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+
 	set_name ("MetricDialog");
-
-	set_keyboard_input(true);
 }
 
 double

@@ -26,15 +26,10 @@
 #include "ardour_ui.h"
 
 
-ArdourDialog::ArdourDialog (string name)
-	: Dialog (name)
+ArdourDialog::ArdourDialog (string title, bool modal)
+	: Dialog (title, modal)
 {
 	session = 0;
-	kbd_input = false;
-	running = false;
-	_run_status = 0;
-	_within_hiding = false;
-	hide_on_stop = true;
 }
 
 ArdourDialog::~ArdourDialog ()
@@ -64,64 +59,5 @@ ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
 void
 ArdourDialog::on_unmap ()
 {
-	_within_hiding = true;
-	_within_hiding = false;
 	Dialog::on_unmap ();
-}
-
-void
-ArdourDialog::set_hide_on_stop (bool yn)
-{
-	hide_on_stop = yn;
-}
-
-void
-ArdourDialog::stop (int rr)
-{
-	if (hide_on_stop) {
-		hide_all ();
-	}
-
-	if (running) {
-		if (rr == 0) {
-			response (GTK_RESPONSE_ACCEPT);
-		} else {
-			response (GTK_RESPONSE_CANCEL);
-		}
-		running = false;
-	}
-}
-
-void
-ArdourDialog::run ()
-{
-	show_all ();
-
-	running = true;
-	switch (Dialog::run ()) {
-	case GTK_RESPONSE_ACCEPT:
-		_run_status = 0;
-		break;
-		
-	case GTK_RESPONSE_DELETE_EVENT:
-		_run_status = -1;
-		break;
-
-	default:
-		_run_status = -1;
-	}
-
-	hide_all ();
-}
-
-void
-ArdourDialog::set_keyboard_input (bool yn)
-{
-	kbd_input = yn;
-}
-
-int
-ArdourDialog::run_status ()
-{
-	return _run_status;
 }

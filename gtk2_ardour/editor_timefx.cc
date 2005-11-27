@@ -57,8 +57,6 @@ Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
 	set_title (_("ardour: timestretch"));
 	set_name (N_("TimeStretchDialog"));
 
-	set_hide_on_stop (false);
-
 	add (packer);
 
 	packer.set_spacing (5);
@@ -85,7 +83,8 @@ Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
 	antialias_button.set_name (N_("TimeStretchButton"));
 	progress_bar.set_name (N_("TimeStretchProgress"));
 
-	action_button.signal_clicked().connect (bind (mem_fun(*this, &ArdourDialog::stop), 1));
+	// GTK2FIX
+	// action_button.signal_clicked().connect (bind (mem_fun(*this, &ArdourDialog::stop), 1));
 }
 
 gint
@@ -120,16 +119,16 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 	}
 
 	current_timestretch->progress_bar.set_fraction (0.0f);
-	current_timestretch->first_cancel = current_timestretch->cancel_button.signal_clicked().connect (bind (mem_fun (*current_timestretch, &ArdourDialog::stop), -1));
 	// GTK2FIX
+	// current_timestretch->first_cancel = current_timestretch->cancel_button.signal_clicked().connect (bind (mem_fun (*current_timestretch, &ArdourDialog::stop), -1));
 	// current_timestretch->first_delete = current_timestretch->signal_delete_event().connect (mem_fun (*current_timestretch, &ArdourDialog::wm_close_event));
 
-	current_timestretch->run ();
-
-	if (current_timestretch->run_status() != 1) {
-		// GTK2FIX
-		// current_timestretch->close ();
-		return 1; /* no error, but we did nothing */
+	switch (current_timestretch->run ()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		current_timestretch->hide ();
+		return 1;
 	}
 
 	current_timestretch->status = 0;
@@ -165,8 +164,7 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 
 	c.disconnect ();
 	
-	// GTK2FIX
-	// current_timestretch->close ();
+	current_timestretch->hide ();
 	return current_timestretch->status;
 }
 
