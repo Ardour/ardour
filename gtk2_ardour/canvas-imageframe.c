@@ -18,28 +18,36 @@
 #include "libart_lgpl/art_rgb_pixbuf_affine.h"
 #include "canvas-imageframe.h"
 #include <libgnomecanvas/gnome-canvas-util.h>
+#include "gettext.h"
+#define _(Text)  dgettext (PACKAGE,Text)
+
 //GTK2FIX
 //#include <libgnomecanvas/gnome-canvastypebuiltins.h>
 
 
 enum {
-	ARG_0,
-	ARG_PIXBUF,
-	ARG_X,
-	ARG_Y,
-	ARG_WIDTH,
-	ARG_HEIGHT,
-	ARG_DRAWWIDTH,
-	ARG_ANCHOR
+	PROP_0,
+	PROP_PIXBUF,
+	PROP_X,
+	PROP_Y,
+	PROP_WIDTH,
+	PROP_HEIGHT,
+	PROP_DRAWWIDTH,
+	PROP_ANCHOR
 };
 
 
 static void gnome_canvas_imageframe_class_init(GnomeCanvasImageFrameClass* class) ;
 static void gnome_canvas_imageframe_init(GnomeCanvasImageFrame* image) ;
 static void gnome_canvas_imageframe_destroy(GtkObject* object) ;
-static void gnome_canvas_imageframe_set_arg(GtkObject* object, GtkArg* arg, guint arg_id) ;
-static void gnome_canvas_imageframe_get_arg(GtkObject* object, GtkArg* arg, guint arg_id) ;
-
+static void gnome_canvas_imageframe_set_property(GObject* object,
+						 guint            prop_id,
+						 const GValue   *value,
+						 GParamSpec     *pspec);
+static void gnome_canvas_imageframe_get_property(GObject* object,
+						 guint           prop_id,
+						 GValue         *value,
+						 GParamSpec     *pspec);
 static void gnome_canvas_imageframe_update(GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags) ;
 static void gnome_canvas_imageframe_realize(GnomeCanvasItem *item) ;
 static void gnome_canvas_imageframe_unrealize(GnomeCanvasItem *item) ;
@@ -51,10 +59,10 @@ static void gnome_canvas_imageframe_render(GnomeCanvasItem *item, GnomeCanvasBuf
 static GnomeCanvasItemClass *parent_class;
 
 
-GtkType
+GType
 gnome_canvas_imageframe_get_type (void)
 {
-	static GtkType imageframe_type = 0;
+	static GType imageframe_type = 0;
 
 	if (!imageframe_type) {
 		GtkTypeInfo imageframe_info = {
@@ -77,25 +85,83 @@ gnome_canvas_imageframe_get_type (void)
 static void
 gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 {
+	GObjectClass *gobject_class;
 	GtkObjectClass *object_class;
 	GnomeCanvasItemClass *item_class;
 
+	gobject_class = (GObjectClass *) class;
 	object_class = (GtkObjectClass *) class;
 	item_class = (GnomeCanvasItemClass *) class;
 
 	parent_class = gtk_type_class (gnome_canvas_item_get_type ());
 
-	gtk_object_add_arg_type ("GnomeCanvasImageFrame::pixbuf", GTK_TYPE_BOXED, GTK_ARG_WRITABLE, ARG_PIXBUF);
-	gtk_object_add_arg_type ("GnomeCanvasImageFrame::x", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X);
-	gtk_object_add_arg_type ("GnomeCanvasImageFrame::y", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y);
-	gtk_object_add_arg_type ("GnomeCanvasImageFrame::width", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_WIDTH);
-	gtk_object_add_arg_type ("GnomeCanvasImageFrame::drawwidth", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_DRAWWIDTH);
-	gtk_object_add_arg_type ("GnomeCanvasImageFrame::height", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_HEIGHT);
-	gtk_object_add_arg_type ("GnomeCanvasImageFrame::anchor", GTK_TYPE_ANCHOR_TYPE, GTK_ARG_READWRITE, ARG_ANCHOR);
+	gobject_class->set_property = gnome_canvas_imageframe_set_property;
+	gobject_class->get_property = gnome_canvas_imageframe_get_property;
+
+	g_object_class_install_property (gobject_class,
+					 PROP_PIXBUF,
+					 g_param_spec_boxed ("pixbuf",
+							     _("pixbuf"),
+							     _("the pixbuf"),
+							     GDK_TYPE_PIXBUF,
+							     G_PARAM_WRITABLE)); 
+	g_object_class_install_property (gobject_class,
+					 PROP_X,
+					 g_param_spec_double ("x",
+							      _("x"),
+							      _("x coordinate of upper left corner of rect"),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
+	g_object_class_install_property (gobject_class,
+					 PROP_Y,
+					 g_param_spec_double ("y",
+							      _("y"),
+							      _("y coordinate of upper left corner of rect "),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	g_object_class_install_property (gobject_class,
+					 PROP_WIDTH,
+					 g_param_spec_double ("width",
+							      _("width"),
+							      _("the width"),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
+	g_object_class_install_property (gobject_class,
+					 PROP_DRAWWIDTH,
+					 g_param_spec_double ("drawwidth",
+							      _("drawwidth"),
+							      _("drawn width"),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	g_object_class_install_property (gobject_class,
+					 PROP_HEIGHT,
+					 g_param_spec_double ("height",
+							      _("height"),
+							      _("the height"),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	g_object_class_install_property (gobject_class,
+					 PROP_ANCHOR,
+					 g_param_spec_enum ("anchor",
+							    _("anchor"),
+							    _("the anchor"),
+							    GTK_TYPE_ANCHOR_TYPE,
+							    GTK_ANCHOR_NW,
+							    G_PARAM_READWRITE));  
 
 	object_class->destroy = gnome_canvas_imageframe_destroy;
-	object_class->set_arg = gnome_canvas_imageframe_set_arg;
-	object_class->get_arg = gnome_canvas_imageframe_get_arg;
 
 	item_class->update = gnome_canvas_imageframe_update;
 	item_class->realize = gnome_canvas_imageframe_realize;
@@ -207,7 +273,10 @@ get_bounds_item_relative (GnomeCanvasImageFrame *image, double *px1, double *py1
 }
 
 static void
-gnome_canvas_imageframe_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_imageframe_set_property (GObject *object,
+				      guint            prop_id,
+				      const GValue   *value,
+				      GParamSpec     *pspec)
 {
 	GnomeCanvasItem *item;
 	GnomeCanvasImageFrame *image;
@@ -220,43 +289,43 @@ gnome_canvas_imageframe_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 	update = FALSE;
 	calc_bounds = FALSE;
 
-	switch (arg_id) {
-	case ARG_PIXBUF:
-		if (item->canvas->aa && GTK_VALUE_BOXED (*arg)) {
+	switch (prop_id) {
+	case PROP_PIXBUF:
+		if (item->canvas->aa && g_value_get_boxed (value)) {
 			if (image->pixbuf != NULL)
 				art_pixbuf_free (image->pixbuf);
-			image->pixbuf = GTK_VALUE_BOXED (*arg);
+			image->pixbuf = g_value_get_boxed (value);
 		}
 		update = TRUE;
 		break;
 
-	case ARG_X:
-		image->x = GTK_VALUE_DOUBLE (*arg);
+	case PROP_X:
+		image->x = g_value_get_double (value);
 		update = TRUE;
 		break;
 
-	case ARG_Y:
-		image->y = GTK_VALUE_DOUBLE (*arg);
+	case PROP_Y:
+		image->y = g_value_get_double (value);
 		update = TRUE;
 		break;
 
-	case ARG_WIDTH:
-		image->width = fabs (GTK_VALUE_DOUBLE (*arg));
+	case PROP_WIDTH:
+		image->width = fabs (g_value_get_double (value));
 		update = TRUE;
 		break;
 
-	case ARG_HEIGHT:
-		image->height = fabs (GTK_VALUE_DOUBLE (*arg));
+	case PROP_HEIGHT:
+		image->height = fabs (g_value_get_double (value));
 		update = TRUE;
 		break;
 		
-	case ARG_DRAWWIDTH:
-		image->drawwidth = fabs (GTK_VALUE_DOUBLE (*arg));
+	case PROP_DRAWWIDTH:
+		image->drawwidth = fabs (g_value_get_double (value));
 		update = TRUE;
 		break;
 
-	case ARG_ANCHOR:
-		image->anchor = GTK_VALUE_ENUM (*arg);
+	case PROP_ANCHOR:
+		image->anchor = g_value_get_enum (value);
 		update = TRUE;
 		break;
 
@@ -269,40 +338,43 @@ gnome_canvas_imageframe_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 }
 
 static void
-gnome_canvas_imageframe_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_imageframe_get_property (GObject *object,
+				      guint            prop_id,
+				      GValue   *value,
+				      GParamSpec     *pspec)
 {
 	GnomeCanvasImageFrame *image;
 
 	image = GNOME_CANVAS_IMAGEFRAME (object);
 
-	switch (arg_id) {
+	switch (prop_id) {
 
-	case ARG_X:
-		GTK_VALUE_DOUBLE (*arg) = image->x;
+	case PROP_X:
+	        g_value_set_double (value, image->x);
 		break;
 
-	case ARG_Y:
-		GTK_VALUE_DOUBLE (*arg) = image->y;
+	case PROP_Y:
+	        g_value_set_double (value, image->y);
 		break;
 
-	case ARG_WIDTH:
-		GTK_VALUE_DOUBLE (*arg) = image->width;
+	case PROP_WIDTH:
+	        g_value_set_double (value, image->width);
 		break;
-
-	case ARG_HEIGHT:
-		GTK_VALUE_DOUBLE (*arg) = image->height;
+	  
+	case PROP_HEIGHT:
+                g_value_set_double (value, image->height);
 		break;
 		
-	case ARG_DRAWWIDTH:
-		GTK_VALUE_DOUBLE (*arg) = image->drawwidth;
+	case PROP_DRAWWIDTH:
+	        g_value_set_double (value, image->drawwidth);
 		break;
 
-	case ARG_ANCHOR:
-		GTK_VALUE_ENUM (*arg) = image->anchor;
+	case PROP_ANCHOR:
+	        g_value_set_enum (value, image->anchor);
 		break;
 
 	default:
-		arg->type = GTK_TYPE_INVALID;
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
 	}
 }

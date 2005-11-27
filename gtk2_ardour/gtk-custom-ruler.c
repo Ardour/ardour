@@ -72,7 +72,7 @@ static const GtkCustomMetric default_metric = {
 
 static GtkWidgetClass *parent_class;
 
-GtkType gtk_custom_ruler_get_type (void)
+GType gtk_custom_ruler_get_type (void)
 {
 	static GType ruler_type = 0;
 	
@@ -81,10 +81,10 @@ GtkType gtk_custom_ruler_get_type (void)
 		static const GTypeInfo ruler_info =
 			{
 				sizeof (GtkCustomRulerClass),
-				NULL,		/* base_init */
-				NULL,		/* base_finalize */
+				(GBaseInitFunc) NULL,		/* base_init */
+				(GBaseFinalizeFunc) NULL,		/* base_finalize */
 				(GClassInitFunc) gtk_custom_ruler_class_init,
-				NULL,		/* class_finalize */
+				(GClassFinalizeFunc) NULL,		/* class_finalize */
 				NULL,		/* class_data */
 				sizeof (GtkCustomRuler),
 				0,		/* n_preallocs */
@@ -104,7 +104,7 @@ gtk_custom_ruler_class_init (GtkCustomRulerClass * class)
 	GObjectClass   *gobject_class;
 	GtkWidgetClass *widget_class;
 	
-	gobject_class = G_OBJECT_CLASS (class);
+	gobject_class = (GObjectClass *) class;
 	widget_class = (GtkWidgetClass*) class;
 	
 	parent_class = g_type_class_peek_parent (class);
@@ -334,11 +334,11 @@ gtk_custom_ruler_get_range (GtkCustomRuler *ruler,
 void
 gtk_custom_ruler_draw_ticks (GtkCustomRuler * ruler)
 {
-    GtkCustomRulerClass *klass;
+        GtkCustomRulerClass *klass;
 	g_return_if_fail (ruler != NULL);
 	g_return_if_fail (GTK_IS_CUSTOM_RULER (ruler));
 
-	klass = GTK_CUSTOM_RULER_CLASS (GTK_OBJECT (ruler));
+       	klass = GTK_CUSTOM_RULER_CLASS (GTK_OBJECT_CLASS (ruler));
 	if (klass->draw_ticks)
 		klass->draw_ticks (ruler);
 }
@@ -350,7 +350,7 @@ gtk_custom_ruler_draw_pos (GtkCustomRuler * ruler)
     g_return_if_fail (ruler != NULL);
     g_return_if_fail (GTK_IS_CUSTOM_RULER (ruler));
     
-    klass = GTK_CUSTOM_RULER_CLASS (GTK_OBJECT (ruler));
+    klass = GTK_CUSTOM_RULER_CLASS (GTK_OBJECT_CLASS (ruler));
     if (klass->draw_pos && ruler->show_position)
 	    klass->draw_pos (ruler);
 }

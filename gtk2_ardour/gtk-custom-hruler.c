@@ -44,7 +44,7 @@ static gint gtk_custom_hruler_motion_notify (GtkWidget * widget, GdkEventMotion 
 static void gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler);
 static void gtk_custom_hruler_draw_pos (GtkCustomRuler * ruler);
 
-guint gtk_custom_hruler_get_type (void)
+GType gtk_custom_hruler_get_type (void)
 {
 	static GType hruler_type = 0;
 	

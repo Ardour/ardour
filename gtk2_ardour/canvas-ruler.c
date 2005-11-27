@@ -6,26 +6,27 @@
 #include "rgb_macros.h"
 
 enum {
-	ARG_0,
-	ARG_X1,
-	ARG_Y1,
-	ARG_X2,
-	ARG_Y2,
-	ARG_FRAMES_PER_UNIT,
-	ARG_FILL_COLOR,
-	ARG_TICK_COLOR
+	PROP_0,
+	PROP_X1,
+	PROP_Y1,
+	PROP_X2,
+	PROP_Y2,
+	PROP_FRAMES_PER_UNIT,
+	PROP_FILL_COLOR,
+	PROP_TICK_COLOR
 
 };
 
 static void gnome_canvas_ruler_class_init (GnomeCanvasRulerClass *class);
 static void gnome_canvas_ruler_init       (GnomeCanvasRuler      *ruler);
-static void gnome_canvas_ruler_set_arg    (GtkObject              *object,
-					      GtkArg                 *arg,
-					      guint                   arg_id);
-static void gnome_canvas_ruler_get_arg    (GtkObject              *object,
-					      GtkArg                 *arg,
-					      guint                   arg_id);
-
+static void gnome_canvas_ruler_set_arg    (GObject              *object,
+					   guint                   prop_id
+					   const GValue   *value,
+					   GParamSpec     *pspec);
+static void gnome_canvas_ruler_get_arg    (GObject              *object,
+					   guint                   prop_id
+					   GValue   *value,
+					   GParamSpec     *pspec);
 static void   gnome_canvas_ruler_update      (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags);
 static void   gnome_canvas_ruler_bounds      (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2);
 static double gnome_canvas_ruler_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item);
@@ -64,22 +65,87 @@ gnome_canvas_ruler_class_init (GnomeCanvasRulerClass *class)
 	GtkObjectClass *object_class;
 	GnomeCanvasItemClass *item_class;
 
-	object_class = (GtkObjectClass *) class;
+	object_class = G_OBJECT_CLASS  (class);
 	item_class = (GnomeCanvasItemClass *) class;
 
 	parent_class = gtk_type_class (gnome_canvas_item_get_type ());
 
-	gtk_object_add_arg_type ("GnomeCanvasRuler::x1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X1);
-	gtk_object_add_arg_type ("GnomeCanvasRuler::y1", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y1);
-	gtk_object_add_arg_type ("GnomeCanvasRuler::x2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_X2);
-	gtk_object_add_arg_type ("GnomeCanvasRuler::y2", GTK_TYPE_DOUBLE, GTK_ARG_READWRITE, ARG_Y2);
-	gtk_object_add_arg_type ("GnomeCanvasRuler::frames_per_unit", GTK_TYPE_LONG, GTK_ARG_READWRITE, ARG_FRAMES_PER_UNIT);
-	gtk_object_add_arg_type ("GnomeCanvasRuler::fill_color", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_FILL_COLOR);
-	gtk_object_add_arg_type ("GnomeCanvasRuler::tick_color", GTK_TYPE_INT, GTK_ARG_READWRITE, ARG_TICK_COLOR);
+	object_class->set_property = gnome_canvas_ruler_set_property;
+	object_class->get_property = gnome_canvas_ruler_get_property;
 
-	object_class->set_arg = gnome_canvas_ruler_set_arg;
-	object_class->get_arg = gnome_canvas_ruler_get_arg;
-
+	g_object_class_install_property (object_class,
+					 PROP_X1,
+					 g_param_spec_double ("x1",
+							      _("x1"),
+							      _("x coordinate of upper left corner of rect"),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
+	g_object_class_install_property (object_class,
+					 PROP_Y1,
+					 g_param_spec_double ("y1",
+							      _("y1"),
+							      _("y coordinate of upper left corner of rect "),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
+	
+	g_object_class_install_property (object_class,
+					 PROP_X2,
+					 g_param_spec_double ("x2",
+							      _("x2"),
+							      _("x coordinate of lower right corner of rect"),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
+	g_object_class_install_property (object_class,
+					 PROP_Y2,
+					 g_param_spec_double ("y2",
+							      _("y2"),
+							      _("y coordinate of lower right corner of rect "),
+							      -G_MAXDOUBLE,
+							      G_MAXDOUBLE,
+							      0.0,
+							      G_PARAM_READWRITE));  
+	
+	
+	g_object_class_install_property (object_class,
+					 PROP_FRAMES_PER_UNIT,
+					 g_param_spec_long ("frames_per_unit",
+							    _("frames_per_unit"),
+							    _("frames_per_unit of ruler"),
+							    -G_MAXLONG,
+							    G_MAXLONG,
+							    0,
+							    G_PARAM_READWRITE)); 
+	
+	
+	g_object_class_install_property (object_class,
+					 PROP_FILL_COLOR,
+					 g_param_spec_uint ("fill_color",
+							    _("fill color"),
+							    _("color of fill"),
+							    0,
+							    G_MAXINT,
+							    0,
+							    G_PARAM_READWRITE)); 
+	
+	
+	g_object_class_install_property (object_class,
+					 PROP_TICK_COLOR,
+					 g_param_spec_uint ("tick_color",
+							    _("tick color"),
+							    _("color of tick"),
+							    0,
+							    G_MAXINT,
+							    0,
+							    G_PARAM_READWRITE)); 
 	item_class->update = gnome_canvas_ruler_update;
 	item_class->bounds = gnome_canvas_ruler_bounds;
 	item_class->point = gnome_canvas_ruler_point;
@@ -136,7 +202,10 @@ gnome_canvas_ruler_reset_bounds (GnomeCanvasItem *item)
  */
 
 static void
-gnome_canvas_ruler_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_ruler_set_property (GObject *object,
+guint         prop_id,
+				      const GValue *value,
+				      GParamSpec   *pspec)
 {
 	GnomeCanvasItem *item;
 	GnomeCanvasRuler *ruler;
@@ -149,52 +218,52 @@ gnome_canvas_ruler_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 	redraw = FALSE;
 	calc_bounds = FALSE;
 
-	switch (arg_id) {
-	case ARG_X1:
-	        if (ruler->x1 != GTK_VALUE_DOUBLE (*arg)) {
-		        ruler->x1 = GTK_VALUE_DOUBLE (*arg);
+	switch (prop_id) {
+	case PROP_X1:
+	        if (ruler->x1 != g_value_get_double (value)) {
+		        ruler->x1 = g_value_get_double (value);
 			calc_bounds = TRUE;
 		}
 		break;
 
-	case ARG_Y1:
-	        if (ruler->y1 != GTK_VALUE_DOUBLE (*arg)) {
-		        ruler->y1 = GTK_VALUE_DOUBLE (*arg);
+	case PROP_Y1:
+	        if (ruler->y1 != g_value_get_double (value)) {
+		        ruler->y1 = g_value_get_double (value);
 			calc_bounds = TRUE;
 		}
 		break;
 
-	case ARG_X2:
-	        if (ruler->x2 != GTK_VALUE_DOUBLE (*arg)) {
-		        ruler->x2 = GTK_VALUE_DOUBLE (*arg);
+	case PROP_X2:
+	        if (ruler->x2 != g_value_get_double (value)) {
+		        ruler->x2 = g_value_get_double (value);
 			calc_bounds = TRUE;
 		}
 		break;
 
-	case ARG_Y2:
-	        if (ruler->y2 != GTK_VALUE_DOUBLE (*arg)) {
-		        ruler->y2 = GTK_VALUE_DOUBLE (*arg);
+	case PROP_Y2:
+	        if (ruler->y2 != g_value_get_double (value)) {
+		        ruler->y2 = g_value_get_double (value);
 			calc_bounds = TRUE;
 		}
 		break;
 
-	case ARG_FRAMES_PER_UNIT:
-		if (ruler->frames_per_unit != GTK_VALUE_LONG(*arg)) {
-			ruler->frames_per_unit = GTK_VALUE_LONG(*arg);
+	case PROP_FRAMES_PER_UNIT:
+		if (ruler->frames_per_unit != g_value_get_long(value)) {
+			ruler->frames_per_unit = g_value_get_long(value);
 			redraw = TRUE;
 		}
 		break;
 
-	case ARG_FILL_COLOR:
-		if (ruler->fill_color != GTK_VALUE_INT(*arg)) {
-			ruler->fill_color = GTK_VALUE_INT(*arg);
+	case PROP_FILL_COLOR:
+		if (ruler->fill_color != g_value_get_uint(value)) {
+			ruler->fill_color = g_value_get_uint(value);
 			redraw = TRUE;
 		}
 		break;
 
-	case ARG_TICK_COLOR:
-		if (ruler->tick_color != GTK_VALUE_INT(*arg)) {
-			ruler->tick_color = GTK_VALUE_INT(*arg);
+	case PROP_TICK_COLOR:
+		if (ruler->tick_color != g_value_get_uint(value)) {
+			ruler->tick_color = g_value_get_uint(value);
 			redraw = TRUE;
 		}
 		break;
@@ -214,33 +283,37 @@ gnome_canvas_ruler_set_arg (GtkObject *object, GtkArg *arg, guint arg_id)
 }
 
 static void
-gnome_canvas_ruler_get_arg (GtkObject *object, GtkArg *arg, guint arg_id)
+gnome_canvas_ruler_get_property (GObject *object,
+  guint         prop_id,
+				      GValue       *value,
+				      GParamSpec   *pspec)
+
 {
 	GnomeCanvasRuler *ruler;
 
 	ruler = GNOME_CANVAS_RULER (object);
 
-	switch (arg_id) {
-	case ARG_X1:
-		GTK_VALUE_DOUBLE (*arg) = ruler->x1;
+	switch (prop_id) {
+	case PROP_X1:
+	  g_value_set_double (value, ruler->x1);
 		break;
-	case ARG_Y1:
-		GTK_VALUE_DOUBLE (*arg) = ruler->y1;
+	case PROP_Y1:
+	  g_value_set_double (value, ruler->y1);
 		break;
-	case ARG_X2:
-		GTK_VALUE_DOUBLE (*arg) = ruler->x2;
+	case PROP_X2:
+	  g_value_set_double (value, ruler->x2);
 		break;
-	case ARG_Y2:
-		GTK_VALUE_DOUBLE (*arg) = ruler->y2;
+	case PROP_Y2:
+	  g_value_set_double (value, ruler->y2);
 		break;
-	case ARG_FRAMES_PER_UNIT:
-		GTK_VALUE_LONG (*arg) = ruler->frames_per_unit;
+	case PROP_FRAMES_PER_UNIT:
+	  g_value_set_long (value, ruler->frames_per_unit);
 		break;
-	case ARG_FILL_COLOR:
-		GTK_VALUE_INT (*arg) = ruler->fill_color;
+	case PROP_FILL_COLOR:
+	  g_value_set_uint (value, ruler->fill_color);
 		break;
-	case ARG_TICK_COLOR:
-		GTK_VALUE_INT (*arg) = ruler->tick_color;
+	case PROP_TICK_COLOR:
+	  g_value_set_uint (value, ruler->tick_color);
 		break;
 	default:
 		arg->type = GTK_TYPE_INVALID;

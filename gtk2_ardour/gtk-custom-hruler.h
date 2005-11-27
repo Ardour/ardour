@@ -56,7 +56,7 @@ struct _GtkCustomHRulerClass
 };
 
 
-guint      gtk_custom_hruler_get_type (void);
+GType      gtk_custom_hruler_get_type (void);
 GtkWidget* gtk_custom_hruler_new      (void);
 
 
