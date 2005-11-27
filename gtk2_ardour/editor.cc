@@ -952,29 +952,29 @@ Editor::initialize_canvas ()
 	
 	tempo_line = new ArdourCanvas::Line (*tempo_group, tempo_line_points);
 	tempo_line->set_property ("width_pixels", 0);
-	tempo_line->property_fill_color().set_value (0);;
+	tempo_line->property_fill_color().set_value ("#000000");
 
 	meter_line_points.push_back(Gnome::Art::Point (0, timebar_height));
 	meter_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 
 	meter_line = new ArdourCanvas::Line (*meter_group, meter_line_points);
 	meter_line->set_property ("width_pixels", 0);
-	meter_line->property_fill_color().set_value (0);;
+	meter_line->property_fill_color().set_value ("#000000");
 
 	marker_line_points.push_back(Gnome::Art::Point (0, timebar_height));
 	marker_line_points.push_back(Gnome::Art::Point(max_canvas_coordinate, timebar_height));
 
 	marker_line =  new ArdourCanvas::Line (*marker_group, marker_line_points);
 	marker_line->set_property ("width_pixels", 0);
-	marker_line->property_fill_color().set_value (0);;
+	marker_line->property_fill_color().set_value ("#000000");
 	
 	range_marker_line =  new ArdourCanvas::Line (*range_marker_group, marker_line_points);
 	range_marker_line->set_property ("width_pixels", 0);
-	range_marker_line->property_fill_color().set_value (0);;
+	range_marker_line->property_fill_color().set_value ("#000000");
 
 	transport_marker_line =  new ArdourCanvas::Line (*transport_marker_group, marker_line_points);
 	transport_marker_line->set_property ("width_pixels", 0);
-	transport_marker_line->property_fill_color().set_value (0);;
+	transport_marker_line->property_fill_color().set_value ("#000000");
 
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_loop_range_view), false));
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_punch_range_view), false));
