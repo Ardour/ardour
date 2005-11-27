@@ -44,14 +44,14 @@ Editor::Cursor::Cursor (Editor& ed, const string& color, bool (Editor::*callbck)
 
 	// cerr << "set cursor points, nc = " << points->num_points << endl;
 
-	canvas_item.property_points().set_value(points);
-	canvas_item.property_fill_color().set_value(color.c_str());
-	canvas_item.property_width_pixels().set_value(1);
-	canvas_item.property_first_arrowhead().set_value(TRUE);
-	canvas_item.property_last_arrowhead().set_value(TRUE);
-	canvas_item.property_arrow_shape_a().set_value(11.0);
-	canvas_item.property_arrow_shape_b().set_value(0.0);
-	canvas_item.property_arrow_shape_c().set_value(9.0);
+	canvas_item.property_points() = points;
+	canvas_item.property_fill_color() = color; //.c_str());
+	canvas_item.property_width_pixels() = 1;
+	canvas_item.property_first_arrowhead() = TRUE;
+	canvas_item.property_last_arrowhead() = TRUE;
+	canvas_item.property_arrow_shape_a() = 11.0;
+	canvas_item.property_arrow_shape_b() = 0.0;
+	canvas_item.property_arrow_shape_c() = 9.0;
 
 	// cerr << "cursor line @ " << canvas_item << endl;
 
@@ -91,7 +91,7 @@ Editor::Cursor::set_position (jack_nframes_t frame)
 	points.back().set_x(new_pos);
 
 	// cerr << "set cursor2 al points, nc = " << points->num_points << endl;
-	canvas_item.property_points().set_value(points);
+	canvas_item.property_points() = points;
 	canvas_item.raise_to_top();
 }
 
@@ -101,7 +101,7 @@ Editor::Cursor::set_length (double units)
 	length = units; 
 	points.back().set_x (points.front().get_y() + length);
 	// cerr << "set cursor3 al points, nc = " << points->num_points << endl;
-	canvas_item.property_points().set_value(points);
+	canvas_item.property_points() = points;
 }
 
 void 
@@ -110,5 +110,5 @@ Editor::Cursor::set_y_axis (double position)
         points.front().set_y (position);
 	points.back().set_x (position + length);
 	// cerr << "set cursor4 al points, nc = " << points->num_points << endl;
-	canvas_item.property_points().set_value(points);
+	canvas_item.property_points() = points;
 }

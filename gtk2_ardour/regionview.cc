@@ -111,7 +111,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView
 	shape.push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
 
 	sync_mark =  new ArdourCanvas::Polygon (*group);
-	sync_mark->property_points().set_value(shape);
+	sync_mark->property_points() = shape;
 	sync_mark->set_property ("fill_color_rgba", fill_color);
 	sync_mark->hide();
 
@@ -351,7 +351,7 @@ AudioRegionView::region_scale_amplitude_changed ()
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// force a reload of the cache
-		waves[n]->property_data_src().set_value(&region);
+		waves[n]->property_data_src() = &region;
 	}
 }
 
@@ -380,7 +380,7 @@ AudioRegionView::region_resized (Change what_changed)
 		reset_width_dependent_items (unit_length);
 		
 	 	for (uint32_t n = 0; n < waves.size(); ++n) {
- 			waves[n]->property_region_start().set_value(region.start());
+ 			waves[n]->property_region_start() = region.start();
  		}
 		
  		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -388,7 +388,7 @@ AudioRegionView::region_resized (Change what_changed)
  			(*i)->set_duration (unit_length);
 
  			for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
-				(*w)->property_region_start().set_value(region.start());
+				(*w)->property_region_start() = region.start();
  			}
  		}
 	}
@@ -435,9 +435,9 @@ AudioRegionView::region_muted ()
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (region.muted()) {
-			waves[n]->property_wave_color().set_value(color_map[cMutedWaveForm]);
+			waves[n]->property_wave_color() = color_map[cMutedWaveForm];
 		} else {
-			waves[n]->property_wave_color().set_value(color_map[cWaveForm]);
+			waves[n]->property_wave_color() = color_map[cWaveForm];
 		}
 	}
 }
@@ -515,8 +515,8 @@ AudioRegionView::set_height (gdouble height)
 		
 		gdouble yoff = n * (ht+1);
 		
-		waves[n]->property_height().set_value(ht);
-		waves[n]->property_y().set_value(yoff + 2);
+		waves[n]->property_height() = ht;
+		waves[n]->property_y() = yoff + 2;
 	}
 
 	if ((height/wcnt) < NAME_HIGHLIGHT_SIZE) {
@@ -634,7 +634,7 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 
 	(*points)[pi] = (*points)[0];
 	
-	fade_in_shape->property_points().set_value(*points);
+	fade_in_shape->property_points() = *points;
 	delete points;
 }
 
@@ -726,7 +726,7 @@ AudioRegionView::set_samples_per_unit (gdouble spu)
 	TimeAxisViewItem::set_samples_per_unit (spu);
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->property_samples_per_unit().set_value(spu);
+		waves[n]->property_samples_per_unit() = spu;
 	}
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -757,7 +757,7 @@ void
 AudioRegionView::set_amplitude_above_axis (gdouble spp)
 {
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->property_amplitude_above_axis().set_value(spp);
+		waves[n]->property_amplitude_above_axis() = spp;
 	}
 }
 
@@ -783,9 +783,9 @@ AudioRegionView::set_colors ()
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (region.muted()) {
-			waves[n]->property_wave_color().set_value(color_map[cMutedWaveForm]);
+			waves[n]->property_wave_color() = color_map[cMutedWaveForm];
 		} else {
-			waves[n]->property_wave_color().set_value(color_map[cWaveForm]);
+			waves[n]->property_wave_color() = color_map[cWaveForm];
 		}
 	}
 }
@@ -894,7 +894,7 @@ AudioRegionView::region_sync_changed ()
 			points[3].set_y(1);
 			
 			sync_mark->show();
-			sync_mark->property_points().set_value(points);
+			sync_mark->property_points() = points;
 
 		}
 	}
@@ -1014,20 +1014,20 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 
 	WaveView *wave = new WaveView(*group);
 
-	wave->property_data_src().set_value( (gpointer) &region);
-	wave->property_cache().set_value( wave_caches[which]);
-	wave->property_cache_updater().set_value( (gboolean) true);
-	wave->property_channel().set_value( (guint32) which);
-	wave->property_length_function().set_value( (gpointer) region_length_from_c);
-	wave->property_sourcefile_length_function().set_value((gpointer) sourcefile_length_from_c);
-	wave->property_peak_function().set_value( (gpointer) region_read_peaks_from_c);
-	wave->property_x().set_value( 0.0);
-	wave->property_y().set_value( yoff);
-	wave->property_height().set_value( (double) ht);
-	wave->property_samples_per_unit().set_value( samples_per_unit);
-	wave->property_amplitude_above_axis().set_value( _amplitude_above_axis);
-	wave->property_wave_color().set_value(region.muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm]);
-	wave->property_region_start().set_value(region.start());
+	wave->property_data_src() = (gpointer) &region;
+	wave->property_cache() =  wave_caches[which];
+	wave->property_cache_updater() = true;
+	wave->property_channel() =  which;
+	wave->property_length_function() = (gpointer) region_length_from_c;
+	wave->property_sourcefile_length_function() = (gpointer) sourcefile_length_from_c;
+	wave->property_peak_function() =  (gpointer) region_read_peaks_from_c;
+	wave->property_x() =  0.0;
+	wave->property_y() =  yoff;
+	wave->property_height() =  (double) ht;
+	wave->property_samples_per_unit() =  samples_per_unit;
+	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
+	wave->property_wave_color() = region.muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm];
+	wave->property_region_start() = region.start();
 // 	WaveView *wave = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
 // 						   gnome_canvas_waveview_get_type (),
 // 						   "data_src", (gpointer) &region,
@@ -1193,7 +1193,7 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 
 	if (yn != (bool) (_flags & WaveformRectified)) {
 		for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
-			(*wave)->property_rectified().set_value(yn);
+			(*wave)->property_rectified() = yn;
 		}
 
 		if (zero_line) {
@@ -1252,18 +1252,18 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 		
 		WaveView *wave = new WaveView(*ghost->group);
 
-		wave->property_data_src().set_value( &region);
-		wave->property_cache().set_value( wave_caches[n]);
-		wave->property_cache_updater().set_value(false);
-		wave->property_channel().set_value(n);
-		wave->property_length_function().set_value((gpointer)region_length_from_c);
-		wave->property_sourcefile_length_function().set_value((gpointer) sourcefile_length_from_c);
-		wave->property_peak_function().set_value( (gpointer) region_read_peaks_from_c);
-		wave->property_x().set_value( 0.0);
-		wave->property_samples_per_unit().set_value( samples_per_unit);
-		wave->property_amplitude_above_axis().set_value( _amplitude_above_axis);
-		wave->property_wave_color().set_value(color_map[cGhostTrackWave]);
-		wave->property_region_start().set_value(region.start());
+		wave->property_data_src() =  &region;
+		wave->property_cache() =  wave_caches[n];
+		wave->property_cache_updater() = false;
+		wave->property_channel() = n;
+		wave->property_length_function() = (gpointer)region_length_from_c;
+		wave->property_sourcefile_length_function() = (gpointer) sourcefile_length_from_c;
+		wave->property_peak_function() =  (gpointer) region_read_peaks_from_c;
+		wave->property_x() =  0.0;
+		wave->property_samples_per_unit() =  samples_per_unit;
+		wave->property_amplitude_above_axis() =  _amplitude_above_axis;
+		wave->property_wave_color() = color_map[cGhostTrackWave];
+		wave->property_region_start() = region.start();
 		// 		WaveView *wave = gnome_canvas_item_new (GNOME_CANVAS_GROUP(ghost->group),
 		// 							   gnome_canvas_waveview_get_type (),
 		// 							   "data_src", (gpointer) &region,
@@ -1356,7 +1356,7 @@ AudioRegionView::set_waveview_data_src()
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// TODO: something else to let it know the channel
-		waves[n]->property_data_src().set_value(&region);
+		waves[n]->property_data_src() = &region;
 	}
 	
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -1364,7 +1364,7 @@ AudioRegionView::set_waveview_data_src()
 		(*i)->set_duration (unit_length);
 		
 		for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
-			(*w)->property_data_src().set_value(&region);
+			(*w)->property_data_src() = &region;
 		}
 	}
 

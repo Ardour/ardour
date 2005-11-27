@@ -55,8 +55,8 @@ ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 	region_color = _trackview.color() ;
 	stream_base_color = color_map[cImageTrackBase] ;
 
-	canvas_rect.property_outline_color_rgba().set_value(color_map[cImageTrackOutline]);
-	canvas_rect.property_fill_color_rgba().set_value(stream_base_color);
+	canvas_rect.property_outline_color_rgba() = color_map[cImageTrackOutline];
+	canvas_rect.property_fill_color_rgba() = stream_base_color;
 
 	canvas_rect.signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_imageframe_view_event), (ArdourCanvas::Item*) &canvas_rect, &tv));
 
@@ -111,7 +111,7 @@ ImageFrameTimeAxisView::set_height (gdouble h)
 		return(-1) ;
 	}
 	
-	canvas_rect.property_y2().set_value(h) ;
+	canvas_rect.property_y2() = h ;
 
 
 	for(ImageFrameGroupList::const_iterator citer = imageframe_groups.begin(); citer != imageframe_groups.end(); ++citer)
@@ -132,8 +132,8 @@ int
 ImageFrameTimeAxisView::set_position (gdouble x, gdouble y)
 
 {
-	canvas_group.property_x().set_value(x);
-	canvas_group.property_y().set_value(y);
+	canvas_group.property_x() = x;
+	canvas_group.property_y() = y;
 
 	return 0;
 }

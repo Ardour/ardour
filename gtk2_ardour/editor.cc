@@ -912,7 +912,7 @@ Editor::initialize_canvas ()
 	transport_punchin_line->set_property ("y1", 0.0);
 	transport_punchin_line->set_property ("x2", 0.0);
 	transport_punchin_line->set_property ("y2", 0.0);
-	transport_punchin_line->property_color_rgba().set_value (color_map[cPunchInLine]);
+	transport_punchin_line->property_color_rgba() = color_map[cPunchInLine];
 	transport_punchin_line->hide ();
 	
 	transport_punchout_line  = new ArdourCanvas::SimpleLine (*time_line_group);
@@ -920,7 +920,7 @@ Editor::initialize_canvas ()
 	transport_punchout_line->set_property ("y1", 0.0);
 	transport_punchout_line->set_property ("x2", 0.0);
 	transport_punchout_line->set_property ("y2", 0.0);
-	transport_punchout_line->property_color_rgba().set_value (color_map[cPunchOutLine]);
+	transport_punchout_line->property_color_rgba() = color_map[cPunchOutLine];
 	transport_punchout_line->hide();
 	
 	// used to show zoom mode active zooming

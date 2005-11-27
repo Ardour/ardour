@@ -42,7 +42,7 @@ void
 GhostRegion::set_samples_per_unit (double spu)
 {
 	for (vector<WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
-		(*i)->property_samples_per_unit().set_value(spu);
+		(*i)->property_samples_per_unit() = spu;
 	}		
 }
 
@@ -64,8 +64,8 @@ GhostRegion::set_height ()
 	
 	for (n = 0, i = waves.begin(); i != waves.end(); ++i, ++n) {
 		gdouble yoff = n * ht;
-		(*i)->property_height().set_value(ht);
-		(*i)->property_y().set_value(yoff);
+		(*i)->property_height() = ht;
+		(*i)->property_y() = yoff;
 	}
 }
 

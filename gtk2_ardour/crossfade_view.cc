@@ -60,12 +60,12 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	_visible = true;
 
 	fade_in = new Line (*group);
-	fade_in->property_fill_color_rgba().set_value(color_map[cCrossfadeLine]);
-	fade_in->property_width_pixels().set_value(1);
+	fade_in->property_fill_color_rgba() = color_map[cCrossfadeLine];
+	fade_in->property_width_pixels() = 1;
 
 	fade_out = new Line (*group);
-	fade_out->property_fill_color_rgba().set_value(color_map[cCrossfadeLine]);
-	fade_out->property_width_pixels().set_value(1);
+	fade_out->property_fill_color_rgba() = color_map[cCrossfadeLine];
+	fade_out->property_width_pixels() = 1;
 	
 	set_height (get_time_axis_view().height);
 
@@ -191,7 +191,7 @@ CrossfadeView::redraw_curves ()
 		p.set_x(i);
 		p.set_y(2.0 + h - (h * vec[i]));
 	}
-	fade_in->property_points().set_value(*points);
+	fade_in->property_points() = *points;
 
 	crossfade.fade_out().get_vector (0, crossfade.length(), vec, npoints);
 	for (int i = 0, pci = 0; i < npoints; ++i) {
@@ -199,7 +199,7 @@ CrossfadeView::redraw_curves ()
 		p.set_x(i);
 		p.set_y(2.0 + h - (h * vec[i]));
 	}
-	fade_out->property_points().set_value(*points);
+	fade_out->property_points() = *points;
 
 	delete [] vec;
 
