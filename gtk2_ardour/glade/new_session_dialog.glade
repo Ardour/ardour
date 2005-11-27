@@ -272,10 +272,10 @@
 		      </child>
 
 		      <child>
-			<widget class="GtkCheckButton" id="CreateControlTrack">
+			<widget class="GtkCheckButton" id="CreateControlBus">
 			  <property name="visible">True</property>
 			  <property name="can_focus">True</property>
-			  <property name="label" translatable="yes">Create Control Track</property>
+			  <property name="label" translatable="yes">Create Control Bus</property>
 			  <property name="use_underline">True</property>
 			  <property name="relief">GTK_RELIEF_NORMAL</property>
 			  <property name="focus_on_click">True</property>
@@ -338,10 +338,10 @@
 		      </child>
 
 		      <child>
-			<widget class="GtkCheckButton" id="CreateMasterTrack">
+			<widget class="GtkCheckButton" id="CreateMasterBus">
 			  <property name="visible">True</property>
 			  <property name="can_focus">True</property>
-			  <property name="label" translatable="yes">Create Master Track</property>
+			  <property name="label" translatable="yes">Create Master Bus</property>
 			  <property name="use_underline">True</property>
 			  <property name="relief">GTK_RELIEF_NORMAL</property>
 			  <property name="focus_on_click">True</property>
@@ -369,7 +369,7 @@
 		  <child>
 		    <widget class="GtkLabel" id="label16">
 		      <property name="visible">True</property>
-		      <property name="label" translatable="yes">Track Connection Options</property>
+		      <property name="label" translatable="yes">Track/Bus connection options</property>
 		      <property name="use_underline">False</property>
 		      <property name="use_markup">False</property>
 		      <property name="justify">GTK_JUSTIFY_LEFT</property>
@@ -426,10 +426,10 @@
 				  <property name="spacing">0</property>
 
 				  <child>
-				    <widget class="GtkCheckButton" id="ConnectTrackInputs">
+				    <widget class="GtkCheckButton" id="ConnectInputs">
 				      <property name="visible">True</property>
 				      <property name="can_focus">True</property>
-				      <property name="label" translatable="yes">Automatically connect track inputs</property>
+				      <property name="label" translatable="yes">Automatically connect inputs</property>
 				      <property name="use_underline">True</property>
 				      <property name="relief">GTK_RELIEF_NORMAL</property>
 				      <property name="focus_on_click">True</property>
@@ -569,10 +569,10 @@
 				  <property name="spacing">0</property>
 
 				  <child>
-				    <widget class="GtkCheckButton" id="ConnectTrackOutputs">
+				    <widget class="GtkCheckButton" id="ConnectOutputs">
 				      <property name="visible">True</property>
 				      <property name="can_focus">True</property>
-				      <property name="label" translatable="yes">Automatically connect track outputs</property>
+				      <property name="label" translatable="yes">Automatically connect outputs</property>
 				      <property name="use_underline">True</property>
 				      <property name="relief">GTK_RELIEF_NORMAL</property>
 				      <property name="focus_on_click">True</property>
@@ -652,7 +652,7 @@
 				  <property name="spacing">0</property>
 
 				  <child>
-				    <widget class="GtkRadioButton" id="ConnectToMasterTrack">
+				    <widget class="GtkRadioButton" id="ConnectOutsToMaster">
 				      <property name="visible">True</property>
 				      <property name="can_focus">True</property>
 				      <property name="label" translatable="yes">Connect to Master Bus</property>
@@ -671,17 +671,17 @@
 				  </child>
 
 				  <child>
-				    <widget class="GtkRadioButton" id="ConnectToControlTrack">
+				    <widget class="GtkRadioButton" id="ConnectOutsToPhysical">
 				      <property name="visible">True</property>
 				      <property name="can_focus">True</property>
-				      <property name="label" translatable="yes">Connect to Control Bus</property>
+				      <property name="label" translatable="yes">Connect to physical outputs</property>
 				      <property name="use_underline">True</property>
 				      <property name="relief">GTK_RELIEF_NORMAL</property>
 				      <property name="focus_on_click">True</property>
 				      <property name="active">False</property>
 				      <property name="inconsistent">False</property>
 				      <property name="draw_indicator">True</property>
-				      <property name="group">ConnectToMasterTrack</property>
+				      <property name="group">ConnectOutsToMaster</property>
 				    </widget>
 				    <packing>
 				      <property name="padding">0</property>

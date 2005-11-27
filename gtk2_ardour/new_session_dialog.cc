@@ -38,14 +38,14 @@ NewSessionDialog::NewSessionDialog(BaseObjectType* cobject,
 {
 	// look up the widgets we care about.
 
-	xml->get_widget(X_("SessionName"), m_name);
-	xml->get_widget(X_("SessionFolder"), m_folder);
-	xml->get_widget(X_("SessionTemplate"), m_template);
+	xml->get_widget(X_("SessionNameEntry"), m_name);
+	xml->get_widget(X_("SessionFolderChooser"), m_folder);
+	xml->get_widget(X_("SessionTemplateChooser"), m_template);
 	
-	xml->get_widget(X_("CreateMasterTrack"), m_create_master_track);
+	xml->get_widget(X_("CreateMasterBus"), m_create_master_track);
 	xml->get_widget(X_("MasterChannelCount"), m_master_track_channel_count);
 	
-	xml->get_widget(X_("CreateControlTrack"), m_create_control_track);
+	xml->get_widget(X_("CreateControlBus"), m_create_control_track);
 	xml->get_widget(X_("ControlChannelCount"), m_control_track_channel_count);
 
 	xml->get_widget(X_("ConnectInputs"), m_connect_inputs);
