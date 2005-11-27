@@ -71,7 +71,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 
 	/* no frame around the xfade or overlap rects */
 
-	frame->set_property ("outline_what", 0);
+	frame->property_outline_what() = 0;
 
 	/* never show the vestigial frame */
 
@@ -216,9 +216,9 @@ void
 CrossfadeView::active_changed ()
 {
 	if (crossfade.active()) {
-		frame->set_property ("fill_color_rgba", color_map[cActiveCrossfade]);
+		frame->property_fill_color_rgba() = color_map[cActiveCrossfade];
 	} else {
-		frame->set_property ("fill_color_rgba", color_map[cInactiveCrossfade]);
+		frame->property_fill_color_rgba() = color_map[cInactiveCrossfade];
 	}
 
 	redraw_curves ();

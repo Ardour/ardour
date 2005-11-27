@@ -126,7 +126,7 @@ class AudioRegionView : public TimeAxisViewItem
     vector<ArdourCanvas::WaveView *> tmp_waves; /* see ::create_waves()*/
     ArdourCanvas::Polygon* sync_mark; /* polgyon for sync position */
     ArdourCanvas::Text* no_wave_msg; /* text */
-    ArdourCanvas::Line* zero_line; /* simpleline */
+    ArdourCanvas::SimpleLine* zero_line; /* simpleline */
     ArdourCanvas::Polygon* fade_in_shape; /* polygon */
     ArdourCanvas::Polygon* fade_out_shape; /* polygon */
     ArdourCanvas::SimpleRect* fade_in_handle; /* simplerect */

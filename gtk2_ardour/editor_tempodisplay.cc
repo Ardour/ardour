@@ -37,7 +37,7 @@
 
 #include "editor.h"
 #include "marker.h"
-#include "canvas-simpleline.h"
+#include "simpleline.h"
 #include "tempo_dialog.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
@@ -126,13 +126,13 @@ Editor::hide_measures ()
 	used_measure_lines.clear ();
 }
 
-ArdourCanvas::Line *
+ArdourCanvas::SimpleLine *
 Editor::get_time_line ()
 {
-         ArdourCanvas::Line *line;
+         ArdourCanvas::SimpleLine *line;
 
 	if (free_measure_lines.empty()) {
-	        line = new ArdourCanvas::Line (*time_line_group);
+	        line = new ArdourCanvas::SimpleLine (*time_line_group);
 		// cerr << "measure line @ " << line << endl;
 		used_measure_lines.push_back (line);
 	} else {
@@ -153,7 +153,7 @@ Editor::draw_measures ()
 
 	TempoMap::BBTPointList::iterator i;
 	TempoMap::BBTPointList *all_bbt_points;
-	ArdourCanvas::Line *line;
+	ArdourCanvas::SimpleLine *line;
 	gdouble xpos, last_xpos;
 	uint32_t cnt;
 	uint32_t color;
@@ -215,10 +215,10 @@ Editor::draw_measures ()
 
 			if (cnt == 0 || xpos - last_xpos > 4.0) {
 				line = get_time_line ();
-				line->set_property ("x1", xpos);
-				line->set_property ("x2", xpos);
-				line->set_property ("y2", (gdouble) canvas_height);
-				line->set_property ("color_rgba", color);
+				line->property_x1() = xpos;
+				line->property_x2() = xpos;
+				line->property_y2() = (gdouble) canvas_height;
+				line->property_color_rgba() = color;
 				line->raise_to_top();
 				line->show();
 				last_xpos = xpos;	

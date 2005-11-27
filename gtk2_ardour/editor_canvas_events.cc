@@ -75,8 +75,8 @@ bool
 Editor::track_canvas_motion (GdkEvent *ev)
 {
 	if (verbose_cursor_visible) {
-		verbose_canvas_cursor->set_property ("x", ev->motion.x + 20);
-		verbose_canvas_cursor->set_property ("y", ev->motion.y + 20);
+		verbose_canvas_cursor->property_x() = ev->motion.x + 20;
+		verbose_canvas_cursor->property_y() = ev->motion.y + 20;
 	}
 	return false;
 }

@@ -1171,7 +1171,9 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		
 	case GainLineItem:
 		if (mouse_mode == MouseGain) {
-			item->set_property ("fill_color_rgba", color_map[cEnteredGainLine]);
+			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
+			if (line)
+				line->property_fill_color_rgba() = color_map[cEnteredGainLine];
 			if (is_drawable()) {
 				track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
 			}
@@ -1181,7 +1183,11 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationLineItem:
 	case RedirectAutomationLineItem:
 	case PanAutomationLineItem:
-		item->set_property ("fill_color_rgba", color_map[cEnteredAutomationLine]);
+		{
+			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
+			if (line)
+				line->property_fill_color_rgba() = color_map[cEnteredAutomationLine];
+		}
 		if (is_drawable()) {
 			track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
 		}
@@ -1276,8 +1282,11 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
 		if (mouse_mode == MouseObject) {
-			item->set_property ("fill_color_rgba", 0);
-			item->set_property ("outline_pixels", 1);
+			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
+			if (rect) {
+				rect->property_fill_color_rgba() = 0;
+				rect->property_outline_pixels() = 1;
+			}
 		}
 		break;
 
@@ -1363,7 +1372,11 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case RedirectAutomationLineItem:
 	case PanAutomationLineItem:
 		al = reinterpret_cast<AutomationLine*> (gtk_object_get_data (GTK_OBJECT(item),"line"));
-		item->set_property ("fill_color_rgba", al->get_line_color());
+		{
+			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
+			if (line)
+				line->property_fill_color_rgba() = al->get_line_color();
+		}
 		if (is_drawable()) {
 			track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 		}
@@ -1407,8 +1420,13 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
 		rv = static_cast<AudioRegionView*>(gtk_object_get_data (GTK_OBJECT(item), "regionview"));
-		item->set_property ("fill_color_rgba", rv->get_fill_color());
-		item->set_property ("outline_pixels", 0);
+		{
+			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
+			if (rect) {
+				rect->property_fill_color_rgba() = rv->get_fill_color();
+				rect->property_outline_pixels() = 0;
+			}
+		}
 		break;
 
 	case AutomationTrackItem:
@@ -1943,11 +1961,11 @@ Editor::update_marker_drag_item (Location *location)
 	if (location->is_mark()) {
 	        marker_drag_line_points.front().set_x(x1);
 		marker_drag_line_points.back().set_x(x1);
-		marker_drag_line->set_property ("points", marker_drag_line_points);
+		marker_drag_line->property_points() = marker_drag_line_points;
 	}
 	else {
-		range_marker_drag_rect->set_property ("x1", x1);
-		range_marker_drag_rect->set_property ("x2", x2);
+		range_marker_drag_rect->property_x1() = x1;
+		range_marker_drag_rect->property_x2() = x2;
 	}
 }
 
@@ -4121,7 +4139,7 @@ Editor::drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	jack_nframes_t start = 0;
 	jack_nframes_t end = 0;
-	ArdourCanvas::Item* crect = (range_marker_op == CreateRangeMarker) ? range_bar_drag_rect: transport_bar_drag_rect;
+	ArdourCanvas::SimpleRect *crect = (range_marker_op == CreateRangeMarker) ? range_bar_drag_rect: transport_bar_drag_rect;
 	
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 		snap_to (drag_info.current_pointer_frame);
@@ -4176,8 +4194,8 @@ Editor::drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 
 		double x1 = frame_to_pixel (start);
 		double x2 = frame_to_pixel (end);
-		crect->set_property ("x1", x1);
-		crect->set_property ("x2", x2);
+		crect->property_x1() = x1;
+		crect->property_x2() = x2;
 
 		update_marker_drag_item (temp_location);
 	}
@@ -4314,10 +4332,10 @@ Editor::reposition_zoom_rect (jack_nframes_t start, jack_nframes_t end)
 	double x2 = frame_to_pixel (end);
 	double y2 = canvas_height - 2;
 
-	zoom_rect->set_property ("x1", x1);
-	zoom_rect->set_property ("y1", 1.0);
-	zoom_rect->set_property ("x2", x2);
-	zoom_rect->set_property ("y2", y2);
+	zoom_rect->property_x1() = x1;
+	zoom_rect->property_y1() = 1.0;
+	zoom_rect->property_x2() = x2;
+	zoom_rect->property_y2() = y2;
 }
 
 void

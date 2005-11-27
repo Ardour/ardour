@@ -1226,12 +1226,12 @@ class Editor : public PublicEditor
 
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
 	
-	typedef vector<ArdourCanvas::Line*> TimeLineList;
+	typedef vector<ArdourCanvas::SimpleLine*> TimeLineList;
 	TimeLineList free_measure_lines;
 	TimeLineList used_measure_lines;
 
 	ArdourCanvas::Group* time_line_group;
-	ArdourCanvas::Line* get_time_line ();
+	ArdourCanvas::SimpleLine* get_time_line ();
 	void hide_measures ();
 	void draw_measures ();
 	void draw_time_bars ();
@@ -1448,7 +1448,7 @@ class Editor : public PublicEditor
 
 	bool select_all_within (jack_nframes_t start, jack_nframes_t end, gdouble topy, gdouble boty, bool add);
 	
-	ArdourCanvas::Item   *rubberband_rect;
+	ArdourCanvas::SimpleRect   *rubberband_rect;
 	
 	/* mouse zoom process */
 
@@ -1456,7 +1456,7 @@ class Editor : public PublicEditor
 	void drag_mouse_zoom (ArdourCanvas::Item* item, GdkEvent* event);
 	void end_mouse_zoom (ArdourCanvas::Item* item, GdkEvent* event);
 
-	ArdourCanvas::Item   *zoom_rect;
+	ArdourCanvas::SimpleRect   *zoom_rect;
 	void reposition_zoom_rect (jack_nframes_t start, jack_nframes_t end);
 	
 	/* diskstream/route display management */

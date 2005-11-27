@@ -63,14 +63,14 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 	//			   "fill_color_rgba", stream_base_color,
 	//	]		   NULL);
 	canvas_rect = new ArdourCanvas::SimpleRect (*canvas_group);
-	canvas_rect->set_property ("x1", 0.0);
-	canvas_rect->set_property ("y1", 0.0);
-	canvas_rect->set_property ("x2", 1000000.0);
-	canvas_rect->set_property ("y2", (double) tv.height);
-	canvas_rect->set_property ("outline_color_rgba", color_map[cAudioTrackOutline]);
+	canvas_rect->property_x1() = 0.0;
+	canvas_rect->property_y1() = 0.0;
+	canvas_rect->property_x2() = 1000000.0;
+	canvas_rect->property_y2() = (double) tv.height;
+	canvas_rect->property_outline_color_rgba() = color_map[cAudioTrackOutline];
 	/* outline ends and bottom */
-	canvas_rect->set_property ("outline_what", (guint32) (0x1|0x2|0x8));
-	canvas_rect->set_property ("fill_color_rgba", stream_base_color);
+	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);
+	canvas_rect->property_fill_color_rgba() = stream_base_color;
 
 	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
 
@@ -109,8 +109,8 @@ int
 StreamView::set_position (gdouble x, gdouble y)
 
 {
-	canvas_group->set_property ("x", x);
-	canvas_group->set_property ("y", y);
+	canvas_group->property_x() = x;
+	canvas_group->property_y() = y;
 	return 0;
 }
 
@@ -166,8 +166,8 @@ StreamView::set_samples_per_unit (gdouble spp)
 		gdouble xstart = _trackview.editor.frame_to_pixel ( recbox.start );
 		gdouble xend = _trackview.editor.frame_to_pixel ( recbox.start + recbox.length );
 
-		recbox.rectangle->set_property ("x1", xstart);
-		recbox.rectangle->set_property ("x2", xend);
+		recbox.rectangle->property_x1() = xstart;
+		recbox.rectangle->property_x2() = xend;
 	}
 
 	return 0;
@@ -671,12 +671,12 @@ StreamView::setup_rec_box ()
 			gdouble xend = xstart;
 			
 			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
-			rec_rect->set_property ("x1", xstart);
-			rec_rect->set_property ("y1", 1.0);
-			rec_rect->set_property ("x2", xend);
-			rec_rect->set_property ("y2", (double) _trackview.height - 1);
-			rec_rect->set_property ("outline_color_rgba", color_map[cRecordingRectOutline]);
-			rec_rect->set_property ("fill_color_rgba",  color_map[cRecordingRectFill]);
+			rec_rect->property_x1() = xstart;
+			rec_rect->property_y1() = 1.0;
+			rec_rect->property_x2() = xend;
+			rec_rect->property_y2() = (double) _trackview.height - 1;
+			rec_rect->property_outline_color_rgba() = color_map[cRecordingRectOutline];
+			rec_rect->property_fill_color_rgba() =  color_map[cRecordingRectFill];
 			
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
@@ -763,8 +763,8 @@ StreamView::update_rec_box ()
 		gdouble xstart = _trackview.editor.frame_to_pixel ( rect.start );
 		gdouble xend = _trackview.editor.frame_to_pixel ( at );
 
-		rect.rectangle->set_property ("x1", xstart);
-		rect.rectangle->set_property ("x2", xend);
+		rect.rectangle->property_x1() = xstart;
+		rect.rectangle->property_x2() = xend;
 	}
 }
 
@@ -857,9 +857,9 @@ StreamView::update_rec_regions ()
 						}
 
 						/* also update rect */
-						ArdourCanvas::Item * rect = rec_rects[n].rectangle;
+						ArdourCanvas::SimpleRect * rect = rec_rects[n].rectangle;
 						gdouble xend = _trackview.editor.frame_to_pixel (region->position() + region->length());
-						rect->set_property ("x2", xend);
+						rect->property_x2() = xend;
 					}
 				}
 

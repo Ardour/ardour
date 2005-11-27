@@ -540,8 +540,8 @@ Editor::Editor (AudioEngine& eng)
 	/* use checkbox for the active column */
 
 	CellRendererToggle *active_cell = dynamic_cast<CellRendererToggle*>(edit_group_list.get_column_cell_renderer (0));
-	active_cell->set_property ("activatable", true);
-	active_cell->set_property ("radio", false);
+	active_cell->property_activatable() = true;
+	active_cell->property_radio() = false;
 
 	edit_group_list.set_name ("MixerGroupList");
 	//edit_group_list.set_shadow_type (Gtk::SHADOW_IN);
@@ -826,10 +826,10 @@ Editor::initialize_canvas ()
 	Pango::FontDescription font = get_font_for_style (N_("VerboseCanvasCursor"));
 
 	verbose_canvas_cursor = new ArdourCanvas::Text (*track_canvas.root());
-	verbose_canvas_cursor->set_property ("font_desc", font);
+	verbose_canvas_cursor->property_font_desc() = font;
 	// GTK2FIX
-	// verbose_canvas_cursor->set_property ("anchor", GTK_ANCHOR_NW);
-	verbose_canvas_cursor->set_property ("fill_color_rgba", color_map[cVerboseCanvasCursor]);
+	// verbose_canvas_cursor->property_anchor() = GTK_ANCHOR_NW;
+	verbose_canvas_cursor->property_fill_color_rgba() = color_map[cVerboseCanvasCursor];
 	
 	verbose_cursor_visible = false;
 	
@@ -848,95 +848,95 @@ Editor::initialize_canvas ()
 	transport_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 4.0);
 	
 	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	tempo_bar->set_property ("fill_color_rgba", color_map[cTempoBar]);
-	tempo_bar->set_property ("outline_pixels", 0);
+	tempo_bar->property_fill_color_rgba() = color_map[cTempoBar];
+	tempo_bar->property_outline_pixels() = 0;
 	
 	meter_bar = new ArdourCanvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	meter_bar->set_property ("fill_color_rgba", color_map[cMeterBar]);
-	meter_bar->set_property ("outline_pixels",0);
+	meter_bar->property_fill_color_rgba() = color_map[cMeterBar];
+	meter_bar->property_outline_pixels() = 0;
 	
 	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	marker_bar->set_property ("fill_color_rgba", color_map[cMarkerBar]);
-	marker_bar->set_property ("outline_pixels", 0);
+	marker_bar->property_fill_color_rgba() = color_map[cMarkerBar];
+	marker_bar->property_outline_pixels() = 0;
 	
 	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	range_marker_bar->set_property ("fill_color_rgba", color_map[cRangeMarkerBar]);
-	range_marker_bar->set_property ("outline_pixels", 0);
+	range_marker_bar->property_fill_color_rgba() = color_map[cRangeMarkerBar];
+	range_marker_bar->property_outline_pixels() = 0;
 	
 	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	transport_marker_bar->set_property ("fill_color_rgba", color_map[cTransportMarkerBar]);
-	transport_marker_bar->set_property ("outline_pixels", 0);
+	transport_marker_bar->property_fill_color_rgba() = color_map[cTransportMarkerBar];
+	transport_marker_bar->property_outline_pixels() = 0;
 	
 	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	range_bar_drag_rect->set_property ("fill_color_rgba", color_map[cRangeDragBarRectFill]);
-	range_bar_drag_rect->set_property ("outline_color_rgba", color_map[cRangeDragBarRect]);
-	range_bar_drag_rect->set_property ("outline_pixels", 0);
+	range_bar_drag_rect->property_fill_color_rgba() = color_map[cRangeDragBarRectFill];
+	range_bar_drag_rect->property_outline_color_rgba() = color_map[cRangeDragBarRect];
+	range_bar_drag_rect->property_outline_pixels() = 0;
 	range_bar_drag_rect->hide ();
 	
 	transport_bar_drag_rect = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	transport_bar_drag_rect ->set_property ("fill_color_rgba", color_map[cTransportDragRectFill]);
-	transport_bar_drag_rect->set_property ("outline_color_rgba", color_map[cTransportDragRect]);
-	transport_bar_drag_rect->set_property ("outline_pixels", 0);
+	transport_bar_drag_rect ->property_fill_color_rgba() = color_map[cTransportDragRectFill];
+	transport_bar_drag_rect->property_outline_color_rgba() = color_map[cTransportDragRect];
+	transport_bar_drag_rect->property_outline_pixels() = 0;
 	transport_bar_drag_rect->hide ();
 	
 	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
 	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
 
 	marker_drag_line = new ArdourCanvas::Line (*track_canvas.root());
-	marker_drag_line->set_property ("width_pixels", 1);
-	marker_drag_line->set_property("fill_color_rgba", color_map[cMarkerDragLine]);
-	marker_drag_line->set_property("points", marker_drag_line_points);
+	marker_drag_line->property_width_pixels() = 1;
+	marker_drag_line->property_fill_color_rgba() = color_map[cMarkerDragLine];
+	marker_drag_line->property_points() = marker_drag_line_points;
 	marker_drag_line->hide();
 
 	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	range_marker_drag_rect->set_property ("fill_color_rgba", color_map[cRangeDragRectFill]);
-	range_marker_drag_rect->set_property ("outline_color_rgba", color_map[cRangeDragRect]);
+	range_marker_drag_rect->property_fill_color_rgba() = color_map[cRangeDragRectFill];
+	range_marker_drag_rect->property_outline_color_rgba() = color_map[cRangeDragRect];
 	range_marker_drag_rect->hide ();
 	
 	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
-	transport_loop_range_rect->set_property ("fill_color_rgba", color_map[cTransportLoopRectFill]);
-	transport_loop_range_rect->set_property ("outline_color_rgba", color_map[cTransportLoopRect]);
-	transport_loop_range_rect->set_property ("outline_pixels", 1);
+	transport_loop_range_rect->property_fill_color_rgba() = color_map[cTransportLoopRectFill];
+	transport_loop_range_rect->property_outline_color_rgba() = color_map[cTransportLoopRect];
+	transport_loop_range_rect->property_outline_pixels() = 1;
 	transport_loop_range_rect->hide();
 
 	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
-	transport_punch_range_rect->set_property ("fill_color_rgba", color_map[cTransportPunchRectFill]);
-	transport_punch_range_rect->set_property ("outline_color_rgba", color_map[cTransportPunchRect]);
-	transport_punch_range_rect->set_property ("outline_pixels", 0);
+	transport_punch_range_rect->property_fill_color_rgba() = color_map[cTransportPunchRectFill];
+	transport_punch_range_rect->property_outline_color_rgba() = color_map[cTransportPunchRect];
+	transport_punch_range_rect->property_outline_pixels() = 0;
 	transport_punch_range_rect->hide();
 	
 	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
 
 	transport_punchin_line = new ArdourCanvas::SimpleLine (*time_line_group);
-	transport_punchin_line->set_property ("x1", 0.0);
-	transport_punchin_line->set_property ("y1", 0.0);
-	transport_punchin_line->set_property ("x2", 0.0);
-	transport_punchin_line->set_property ("y2", 0.0);
+	transport_punchin_line->property_x1() = 0.0;
+	transport_punchin_line->property_y1() = 0.0;
+	transport_punchin_line->property_x2() = 0.0;
+	transport_punchin_line->property_y2() = 0.0;
 	transport_punchin_line->property_color_rgba() = color_map[cPunchInLine];
 	transport_punchin_line->hide ();
 	
 	transport_punchout_line  = new ArdourCanvas::SimpleLine (*time_line_group);
-	transport_punchout_line->set_property ("x1", 0.0);
-	transport_punchout_line->set_property ("y1", 0.0);
-	transport_punchout_line->set_property ("x2", 0.0);
-	transport_punchout_line->set_property ("y2", 0.0);
+	transport_punchout_line->property_x1() = 0.0;
+	transport_punchout_line->property_y1() = 0.0;
+	transport_punchout_line->property_x2() = 0.0;
+	transport_punchout_line->property_y2() = 0.0;
 	transport_punchout_line->property_color_rgba() = color_map[cPunchOutLine];
 	transport_punchout_line->hide();
 	
 	// used to show zoom mode active zooming
 	zoom_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	zoom_rect->set_property ("fill_color_rgba", color_map[cZoomRectFill]);
-	zoom_rect->set_property ("outline_color_rgba", color_map[cZoomRect]);
-	zoom_rect->set_property ("outline_pixels", 1);
+	zoom_rect->property_fill_color_rgba() = color_map[cZoomRectFill];
+	zoom_rect->property_outline_color_rgba() = color_map[cZoomRect];
+	zoom_rect->property_outline_pixels() = 1;
 	zoom_rect->hide();
 	
 	zoom_rect->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
 	
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	rubberband_rect->set_property ("outline_color_rgba", color_map[cRubberBandRect]);
-	rubberband_rect->set_property ("fill_color_rgba", (guint32) color_map[cRubberBandRectFill]);
-	rubberband_rect->set_property ("outline_pixels", 1);
+	rubberband_rect->property_outline_color_rgba() = color_map[cRubberBandRect];
+	rubberband_rect->property_fill_color_rgba() = (guint32) color_map[cRubberBandRectFill];
+	rubberband_rect->property_outline_pixels() = 1;
 	rubberband_rect->hide();
 	
 	tempo_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
@@ -1242,18 +1242,18 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 			strcat (txt, _(txt2));
 			
 			first_action_message = new ArdourCanvas::Text (*track_canvas.root());
-			first_action_message->set_property ("font_desc", font);
-			first_action_message->set_property ("fill_color_rgba", color_map[cFirstActionMessage]);
-			first_action_message->set_property ("x", (gdouble) (canvas_width - pixel_width) / 2.0);
-			first_action_message->set_property ("y", (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height)));
-			first_action_message->set_property ("anchor", GTK_ANCHOR_NORTH_WEST);
-			first_action_message->set_property ("text", ustring (txt));
+			first_action_message->property_font_desc() = font;
+			first_action_message->property_fill_color_rgba() = color_map[cFirstActionMessage];
+			first_action_message->property_x() = (gdouble) (canvas_width - pixel_width) / 2.0;
+			first_action_message->property_y() = (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height));
+			first_action_message->property_anchor() = ANCHOR_NORTH_WEST;
+			first_action_message->property_text() = ustring (txt);
 			
 		} else {
 
 			/* center it */
-		        first_action_message->set_property ("x", (gdouble) (canvas_width - pixel_width) / 2.0),
-			first_action_message->set_property ("y", (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height)));
+			first_action_message->property_x() = (gdouble) (canvas_width - pixel_width) / 2.0;
+			first_action_message->property_y() = (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height));
 		}
 	}
 
@@ -1325,31 +1325,31 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 	if (marker_drag_line) {
 		marker_drag_line_points.back().set_x(canvas_height);
 		// cerr << "set mlA points, nc = " << marker_drag_line_points.num_points << endl;
-		marker_drag_line->set_property("points", marker_drag_line_points);
+		marker_drag_line->property_points() = marker_drag_line_points;
 	}
 	if (range_marker_drag_rect) {
-		range_marker_drag_rect->set_property("y1", 0.0);
-		range_marker_drag_rect->set_property("y2", (double) canvas_height);
+		range_marker_drag_rect->property_y1() = 0.0;
+		range_marker_drag_rect->property_y2() = (double) canvas_height;
 	}
 
 	if (transport_loop_range_rect) {
-		transport_loop_range_rect->set_property("y1", 0.0);
-		transport_loop_range_rect->set_property("y2", (double) canvas_height);
+		transport_loop_range_rect->property_y1() = 0.0;
+		transport_loop_range_rect->property_y2() = (double) canvas_height;
 	}
 
 	if (transport_punch_range_rect) {
-		transport_punch_range_rect->set_property("y1", 0.0);
-		transport_punch_range_rect->set_property("y2", (double) canvas_height);
+		transport_punch_range_rect->property_y1() = 0.0;
+		transport_punch_range_rect->property_y2() = (double) canvas_height;
 	}
 
 	if (transport_punchin_line) {
-		transport_punchin_line->set_property("y1", 0.0);
-		transport_punchin_line->set_property("y2", (double) canvas_height);
+		transport_punchin_line->property_y1() = 0.0;
+		transport_punchin_line->property_y2() = (double) canvas_height;
 	}
 
 	if (transport_punchout_line) {
-		transport_punchout_line->set_property("y1", 0.0);
-		transport_punchout_line->set_property("y2", (double) canvas_height);
+		transport_punchout_line->property_y1() = 0.0;
+		transport_punchout_line->property_y2() = (double) canvas_height;
 	}
 		
 	update_fixed_rulers ();
@@ -3818,15 +3818,15 @@ Editor::set_verbose_canvas_cursor (string txt, double x, double y)
 	/* XXX get origin of canvas relative to root window,
 	   add x and y and check compared to gdk_screen_{width,height}
 	*/
-	verbose_canvas_cursor->set_property("text", txt.c_str());
-	verbose_canvas_cursor->set_property("x", x);
-	verbose_canvas_cursor->set_property("y", y);
+	verbose_canvas_cursor->property_text() = txt.c_str();
+	verbose_canvas_cursor->property_x() = x;
+	verbose_canvas_cursor->property_y() = y;
 }
 
 void
 Editor::set_verbose_canvas_cursor_text (string txt)
 {
-	verbose_canvas_cursor->set_property("text", txt.c_str());
+	verbose_canvas_cursor->property_text() = txt.c_str();
 }
 
 void

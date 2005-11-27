@@ -112,15 +112,15 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView
 
 	sync_mark =  new ArdourCanvas::Polygon (*group);
 	sync_mark->property_points() = shape;
-	sync_mark->set_property ("fill_color_rgba", fill_color);
+	sync_mark->property_fill_color_rgba() = fill_color;
 	sync_mark->hide();
 
 	fade_in_shape = new ArdourCanvas::Polygon (*group);
-	fade_in_shape->set_property ("fill_color_rgba", fade_color);
+	fade_in_shape->property_fill_color_rgba() = fade_color;
 	fade_in_shape->set_data ("regionview", this);
 	
 	fade_out_shape = new ArdourCanvas::Polygon (*group);
-	fade_out_shape->set_property ("fill_color_rgba", fade_color);
+	fade_out_shape->property_fill_color_rgba() = fade_color;
 	fade_out_shape->set_data ("regionview", this);
 	
 
@@ -131,18 +131,18 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView
 	
 
 	fade_in_handle = new ArdourCanvas::SimpleRect (*group);
-	fade_in_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,0));
-	fade_in_handle->set_property ("outline_pixels", 0);
-	fade_in_handle->set_property ("y1", 2.0);
-	fade_in_handle->set_property ("y2", 7.0);
+	fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
+	fade_in_handle->property_outline_pixels() = 0;
+	fade_in_handle->property_y1() = 2.0;
+	fade_in_handle->property_y2() = 7.0;
 
 	fade_in_handle->set_data ("regionview", this);
 	
 	fade_out_handle = new ArdourCanvas::SimpleRect (*group);
-	fade_out_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,0));
-	fade_out_handle->set_property ("outline_pixels", 0);
-	fade_out_handle->set_property ("y1", 2.0);
-	fade_out_handle->set_property ("y2", 7.0);
+	fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
+	fade_out_handle->property_outline_pixels() = 0;
+	fade_out_handle->property_y1() = 2.0;
+	fade_out_handle->property_y2() = 7.0;
 
 	gtk_object_set_data (GTK_OBJECT(fade_out_handle), "regionview", this);
 	}
@@ -312,14 +312,14 @@ AudioRegionView::fade_in_active_changed ()
 
 	if (region.fade_in_active()) {
 		col = RGBA_TO_UINT(r,g,b,120);
-		fade_in_shape->set_property ("fill_color_rgba", col);
-		fade_in_shape->set_property ("width_pixels", 0);
-		fade_in_shape->set_property ("outline_color_rgba", RGBA_TO_UINT(r,g,b,0));
+		fade_in_shape->property_fill_color_rgba() = col;
+		fade_in_shape->property_width_pixels() = 0;
+		fade_in_shape->property_outline_color_rgba() = RGBA_TO_UINT(r,g,b,0);
 	} else { 
 		col = RGBA_TO_UINT(r,g,b,0);
-		fade_in_shape->set_property ("fill_color_rgba", col);
-		fade_in_shape->set_property ("width_pixels", 1);
-		fade_in_shape->set_property ("outline_color_rgba", RGBA_TO_UINT(r,g,b,255));
+		fade_in_shape->property_fill_color_rgba() = col;
+		fade_in_shape->property_width_pixels() = 1;
+		fade_in_shape->property_outline_color_rgba() = RGBA_TO_UINT(r,g,b,255);
 	}
 }
 
@@ -332,14 +332,14 @@ AudioRegionView::fade_out_active_changed ()
 
 	if (region.fade_out_active()) {
 		col = RGBA_TO_UINT(r,g,b,120);
-		fade_out_shape->set_property ("fill_color_rgba", col);
-		fade_out_shape->set_property ("width_pixels", 0);
-		fade_out_shape->set_property ("outline_color_rgba", RGBA_TO_UINT(r,g,b,0));
+		fade_out_shape->property_fill_color_rgba() = col;
+		fade_out_shape->property_width_pixels() = 0;
+		fade_out_shape->property_outline_color_rgba() = RGBA_TO_UINT(r,g,b,0);
 	} else { 
 		col = RGBA_TO_UINT(r,g,b,0);
-		fade_out_shape->set_property ("fill_color_rgba", col);
-		fade_out_shape->set_property ("width_pixels", 1);
-		fade_out_shape->set_property ("outline_color_rgba", RGBA_TO_UINT(r,g,b,255));
+		fade_out_shape->property_fill_color_rgba() = col;
+		fade_out_shape->property_width_pixels() = 1;
+		fade_out_shape->property_outline_color_rgba() = RGBA_TO_UINT(r,g,b,255);
 	}
 }
 
@@ -401,7 +401,7 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 	_pixel_width = pixel_width;
 
 	if (zero_line) {
-		zero_line->set_property ("x2", pixel_width - 1.0);
+		zero_line->property_x2() = pixel_width - 1.0;
 	}
 
 	if (pixel_width <= 6.0) {
@@ -543,8 +543,8 @@ AudioRegionView::manage_zero_line ()
 
 	if (_height >= 100) {
 		gdouble wave_midpoint = (_height - NAME_HIGHLIGHT_SIZE) / 2.0;
-		zero_line->set_property ("y1", wave_midpoint);
-		zero_line->set_property ("y2", wave_midpoint);
+		zero_line->property_y1() = wave_midpoint;
+		zero_line->property_y2() = wave_midpoint;
 		zero_line->show();
 	} else {
 		zero_line->hide();
@@ -591,8 +591,8 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 		handle_center = 3.0;
 	}
 	
-	fade_in_handle->set_property ("x1",  handle_center - 3.0);
-	fade_in_handle->set_property ("x2",  handle_center + 3.0);
+	fade_in_handle->property_x1() =  handle_center - 3.0;
+	fade_in_handle->property_x2() =  handle_center + 3.0;
 	
 	if (pwidth < 5) {
 		fade_in_shape->hide();
@@ -671,8 +671,8 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 		handle_center = 3.0;
 	}
 	
-	fade_out_handle->set_property ("x1",  handle_center - 3.0);
-	fade_out_handle->set_property ("x2",  handle_center + 3.0);
+	fade_out_handle->property_x1() =  handle_center - 3.0;
+	fade_out_handle->property_x2() =  handle_center + 3.0;
 
 	/* don't show shape if its too small */
 	
@@ -716,7 +716,7 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 
 	(*points)[pi] = (*points)[0];
 
-	fade_out_shape->set_property ("points", *points);
+	fade_out_shape->property_points() = *points;
 	delete points;
 }
 
@@ -779,7 +779,7 @@ AudioRegionView::set_colors ()
 	TimeAxisViewItem::set_colors ();
 	
 	gain_line->set_line_color (region.envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
-	sync_mark->set_property ("fill_color_rgba", fill_color);
+	sync_mark->property_fill_color_rgba() = fill_color;
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (region.muted()) {
@@ -988,10 +988,10 @@ AudioRegionView::create_waves ()
 	}
 
 	if (create_zero_line) {
-		zero_line = new ArdourCanvas::Line (*group);
-		zero_line->set_property ("x1", (gdouble) 1.0);
-		zero_line->set_property ("x2", (gdouble) (region.length() / samples_per_unit) - 1.0);
-		zero_line->set_property ("color_rgba", (guint) color_map[cZeroLine]);
+		zero_line = new ArdourCanvas::SimpleLine (*group);
+		zero_line->property_x1() = (gdouble) 1.0;
+		zero_line->property_x2() = (gdouble) (region.length() / samples_per_unit) - 1.0;
+		zero_line->property_color_rgba() = (guint) color_map[cZeroLine];
 		manage_zero_line ();
 	}
 }
@@ -1077,10 +1077,10 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		tmp_waves.clear ();
 		
 		if (!zero_line) {
-			zero_line = new ArdourCanvas::Line (*group);
-			zero_line->set_property ("x1", (gdouble) 1.0);
-			zero_line->set_property ("x2", (gdouble) (region.length() / samples_per_unit) - 1.0);
-			zero_line->set_property ("color_rgba", (guint) color_map[cZeroLine]);
+			zero_line = new ArdourCanvas::SimpleLine (*group);
+			zero_line->property_x1() = (gdouble) 1.0;
+			zero_line->property_x2() = (gdouble) (region.length() / samples_per_unit) - 1.0;
+			zero_line->property_color_rgba() = (guint) color_map[cZeroLine];
 			manage_zero_line ();
 		}
 	}
@@ -1325,8 +1325,8 @@ AudioRegionView::entered ()
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 	a=255;
 	
-	fade_in_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,a));
-	fade_out_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,a));
+	fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
+	fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
 }
 
 void
@@ -1338,8 +1338,8 @@ AudioRegionView::exited ()
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 	a=0;
 	
-	fade_in_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,a));
-	fade_out_handle->set_property ("fill_color_rgba", RGBA_TO_UINT(r,g,b,a));
+	fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
+	fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
 }
 
 void

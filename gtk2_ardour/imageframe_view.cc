@@ -271,11 +271,11 @@ ImageFrameView::set_height (gdouble h)
 	frame_handle_start->raise_to_top();
 	frame_handle_end->raise_to_top();
  
-	name_text->set_property ("y", h - TimeAxisViewItem::NAME_Y_OFFSET);
-	frame->set_property ("y2", h);
+	name_text->property_y() = h - TimeAxisViewItem::NAME_Y_OFFSET;
+	frame->property_y2() = h;
 
-	name_highlight->set_property ("y1", (gdouble) h - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
-	name_highlight->set_property ("y2", (gdouble) h - 1.0);
+	name_highlight->property_y1() = (gdouble) h - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
+	name_highlight->property_y2() = (gdouble) h - 1.0;
 }
 
 

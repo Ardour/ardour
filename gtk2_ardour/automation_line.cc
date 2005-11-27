@@ -129,7 +129,7 @@ ControlPoint::show()
 void
 ControlPoint::set_visible (bool yn)
 {
-	item->set_property ("draw", (gboolean) yn);
+	item->property_draw() = (gboolean) yn;
 }
 
 void
@@ -145,10 +145,10 @@ ControlPoint::show_color (bool entered, bool hide_too)
 {
 	if (entered) {
 		if (selected) {
-			item->set_property ("outline_color_rgba", color_map[cEnteredControlPointSelected]);
+			item->property_outline_color_rgba() = color_map[cEnteredControlPointSelected];
 			set_visible(true);
 		} else {
-			item->set_property ("outline_color_rgba", color_map[cEnteredControlPoint]);
+			item->property_outline_color_rgba() = color_map[cEnteredControlPoint];
 			if (hide_too) {
 				set_visible(false);
 			}
@@ -156,10 +156,10 @@ ControlPoint::show_color (bool entered, bool hide_too)
 
 	} else {
 		if (selected) {
-			item->set_property ("outline_color_rgba", color_map[cControlPointSelected]);
+			item->property_outline_color_rgba() = color_map[cControlPointSelected];
 			set_visible(true);
 		} else {
-			item->set_property ("outline_color_rgba", color_map[cControlPoint]);
+			item->property_outline_color_rgba() = color_map[cControlPoint];
 			if (hide_too) {
 				set_visible(false);
 			}
@@ -174,9 +174,9 @@ ControlPoint::set_size (double sz)
 
 #if 0	
 	if (_size > 6.0) {
-		item->set_property ("fill", (gboolean) TRUE);
+		item->property_fill() = (gboolean) TRUE;
 	} else {
-		item->set_property ("fill", (gboolean) FALSE);
+		item->property_fill() = (gboolean) FALSE;
 	}
 #endif
 
@@ -205,10 +205,10 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 		break;
 	}
 
-	item->set_property ("x1", x1);
-	item->set_property ("x2", x2);
-	item->set_property ("y1", y - half_size);
-	item->set_property ("y2", y + half_size);
+	item->property_x1() = x1;
+	item->property_x2() = x2;
+	item->property_y1() = y - half_size;
+	item->property_y2() = y + half_size;
 
 	_x = x;
 	_y = y;
@@ -232,11 +232,11 @@ AutomationLine::AutomationLine (string name, TimeAxisView& tv, ArdourCanvas::Gro
 	_height = 0;
 
 	group = new ArdourCanvas::Group (parent);
-	group->set_property ("x", 0.0);
-	group->set_property ("y", 0.0);
+	group->property_x() = 0.0;
+	group->property_y() = 0.0;
 
 	line = new ArdourCanvas::Line (*group);
-	line->set_property ("width_pixels", (guint)1);
+	line->property_width_pixels() = (guint)1;
 
 	line->signal_event().connect (mem_fun (*this, &AutomationLine::event_handler));
 
@@ -319,7 +319,7 @@ void
 AutomationLine::set_line_color (uint32_t color)
 {
 	_line_color = color;
-	line->set_property ("fill_color_rgba", color);
+	line->property_fill_color_rgba() = color;
 }
 
 void

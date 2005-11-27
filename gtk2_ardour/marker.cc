@@ -241,23 +241,23 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	unit_position -= shift;
 
 	group = &parent;
-	group->set_property ("x", unit_position);
-	group->set_property ("y", 1.0);
+	group->property_x() = unit_position;
+	group->property_y() = 1.0;
 	// cerr << "set mark al points, nc = " << points->num_points << endl;
 	mark = new Polygon (*group);
-	mark->set_property ("points", points);
-	mark->set_property ("fill_color_rgba", rgba);
-	mark->set_property ("outline_color", Gdk::Color ("black"));
+	mark->property_points() = *points;
+	mark->property_fill_color_rgba() = rgba;
+	mark->property_outline_color() = "black";
 
 	Pango::FontDescription font = get_font_for_style (N_("MarkerText"));
 
 	text = new Text (*group);
-	text->set_property ("text", annotation.c_str());
-	text->set_property ("x", label_offset);
-	text->set_property ("y", 0.0);
-	text->set_property ("fontdesc", font);
-	text->set_property ("anchor", Gtk::ANCHOR_NW);
-	text->set_property ("fill_color", Gdk::Color ("black"));
+	text->property_text() = annotation.c_str();
+	text->property_x() = label_offset;
+	text->property_y() = 0.0;
+	text->property_font_desc() = font;
+	text->property_anchor() = Gtk::ANCHOR_NW;
+	text->property_fill_color() = "black";
 
 	editor.ZoomChanged.connect (mem_fun (*this, &Marker::reposition));
 
@@ -286,7 +286,7 @@ Marker::the_item() const
 void
 Marker::set_name (const string& name)
 {
-	text->set_property ("text", name.c_str());
+	text->property_text() = name.c_str();
 }
 
 void
@@ -320,7 +320,7 @@ Marker::hide ()
 void
 Marker::set_color_rgba (uint32_t color)
 {
-	mark->set_property ("fill_color_rgba", color);
+	mark->property_fill_color_rgba() = color;
 }
 
 /***********************************************************************/

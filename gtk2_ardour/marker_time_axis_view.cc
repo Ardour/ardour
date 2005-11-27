@@ -57,12 +57,12 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	canvas_group = new ArdourCanvas::Group (*_trackview.canvas_display);
 
 	canvas_rect =  new ArdourCanvas::SimpleRect (*canvas_group);
-	canvas_rect->set_property ("x1", 0.0);
-	canvas_rect->set_property ("y1", 0.0);
-	canvas_rect->set_property ("x2", 1000000.0);
-	canvas_rect->set_property ("y2", (double)20);
-	canvas_rect->set_property ("outline_color_rgba", color_map[cMarkerTrackOutline]);
-	canvas_rect->set_property ("fill_color_rgba", stream_base_color);
+	canvas_rect->property_x1() = 0.0;
+	canvas_rect->property_y1() = 0.0;
+	canvas_rect->property_x2() = 1000000.0;
+	canvas_rect->property_y2() = (double)20;
+	canvas_rect->property_outline_color_rgba() = color_map[cMarkerTrackOutline];
+	canvas_rect->property_fill_color_rgba() = stream_base_color;
 		   
 	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_marker_time_axis_view_event), canvas_rect, &_trackview));
 
@@ -142,8 +142,8 @@ MarkerTimeAxisView::set_height(gdouble h)
 int
 MarkerTimeAxisView::set_position(gdouble x, gdouble y)
 {
-	canvas_group->set_property ("x", x);
-	canvas_group->set_property ("y", y);
+	canvas_group->property_x() = x;
+	canvas_group->property_y() = y;
 	return 0;
 }
 

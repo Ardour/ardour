@@ -850,8 +850,8 @@ Editor::update_loop_range_view (bool visibility)
 		double x1 = frame_to_pixel (tll->start());
 		double x2 = frame_to_pixel (tll->end());
 		
-		transport_loop_range_rect->set_property ("x1", x1);
-		transport_loop_range_rect->set_property ("x2", x2);
+		transport_loop_range_rect->property_x1() = x1;
+		transport_loop_range_rect->property_x2() = x2;
 		
 		if (visibility) {
 			transport_loop_range_rect->show();
@@ -876,8 +876,8 @@ Editor::update_punch_range_view (bool visibility)
 		double x1 = frame_to_pixel (tpl->start());
 		double x2 = frame_to_pixel (tpl->end());
 		
-		transport_punch_range_rect->set_property ("x1", x1);
-		transport_punch_range_rect->set_property ("x2", x2);
+		transport_punch_range_rect->property_x1() = x1;
+		transport_punch_range_rect->property_x2() = x2;
 		
 		if (visibility) {
 		        transport_punch_range_rect->show();

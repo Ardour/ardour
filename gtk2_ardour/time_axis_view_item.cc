@@ -91,22 +91,22 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, ArdourCanvas::Group& par
 	group = new ArdourCanvas::Group (parent);
 
 	vestigial_frame = new ArdourCanvas::SimpleRect (*group);
-	vestigial_frame->set_property ("x1", (double) 0.0);
-	vestigial_frame->set_property ("y1", (double) 1.0);
-	vestigial_frame->set_property ("x2", 2.0);
-	vestigial_frame->set_property ("y2", (double) trackview.height);
-	vestigial_frame->set_property ("outline_color_rgba", color_map[cVestigialFrameOutline]);
-	vestigial_frame->set_property ("fill_color_rgba", color_map[cVestigialFrameFill]);
+	vestigial_frame->property_x1() = (double) 0.0;
+	vestigial_frame->property_y1() = (double) 1.0;
+	vestigial_frame->property_x2() = 2.0;
+	vestigial_frame->property_y2() = (double) trackview.height;
+	vestigial_frame->property_outline_color_rgba() = color_map[cVestigialFrameOutline];
+	vestigial_frame->property_fill_color_rgba() = color_map[cVestigialFrameFill];
 	vestigial_frame->hide ();
 
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::SimpleRect (*group);
-		frame->set_property ("x1", (double) 0.0);
-		frame->set_property ("y1", (double) 1.0);
-		frame->set_property ("x2", (double) trackview.editor.frame_to_pixel(duration));
-		frame->set_property ("y2", (double) trackview.height);
-		frame->set_property ("outline_color_rgba", color_map[cTimeAxisFrameOutline]);
-		frame->set_property ("fill_color_rgba", color_map[cTimeAxisFrameFill]);
+		frame->property_x1() = (double) 0.0;
+		frame->property_y1() = (double) 1.0;
+		frame->property_x2() = (double) trackview.editor.frame_to_pixel(duration);
+		frame->property_y2() = (double) trackview.height;
+		frame->property_outline_color_rgba() = color_map[cTimeAxisFrameOutline];
+		frame->property_fill_color_rgba() = color_map[cTimeAxisFrameFill];
 
 	} else {
 		frame = 0;
@@ -114,12 +114,12 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, ArdourCanvas::Group& par
 
 	if (visibility & ShowNameHighlight) {
 		name_highlight = new ArdourCanvas::SimpleRect (*group);
-		name_highlight->set_property ("x1", (double) 1.0);
-		name_highlight->set_property ("x2", (double) (trackview.editor.frame_to_pixel(item_duration)) - 1);
-		name_highlight->set_property ("y1", (double) (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE));
-		name_highlight->set_property ("y2", (double) (trackview.height - 1));
-		name_highlight->set_property ("outline_color_rgba", color_map[cNameHighlightFill]);
-		name_highlight->set_property ("fill_color_rgba", color_map[cNameHighlightOutline]);
+		name_highlight->property_x1() = (double) 1.0;
+		name_highlight->property_x2() = (double) (trackview.editor.frame_to_pixel(item_duration)) - 1;
+		name_highlight->property_y1() = (double) (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
+		name_highlight->property_y2() = (double) (trackview.height - 1);
+		name_highlight->property_outline_color_rgba() = color_map[cNameHighlightFill];
+		name_highlight->property_fill_color_rgba() = color_map[cNameHighlightOutline];
 
 		name_highlight->set_data ("timeaxisviewitem", this);
 
@@ -129,10 +129,10 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, ArdourCanvas::Group& par
 
 	if (visibility & ShowNameText) {
 		name_text = new ArdourCanvas::Text (*group);
-		name_text->set_property ("x", (double) TimeAxisViewItem::NAME_X_OFFSET);
-		name_text->set_property ("y", (double) trackview.height + 1.0 - TimeAxisViewItem::NAME_Y_OFFSET);
-		name_text->set_property ("font", NAME_FONT);
-		name_text->set_property ("anchor", GTK_ANCHOR_NW);
+		name_text->property_x() = (double) TimeAxisViewItem::NAME_X_OFFSET;
+		name_text->property_y() = (double) trackview.height + 1.0 - TimeAxisViewItem::NAME_Y_OFFSET;
+		name_text->property_font_desc() = NAME_FONT;
+		name_text->property_anchor() = Gtk::ANCHOR_NW;
 
 		name_text->set_data ("timeaxisviewitem", this);
 		
@@ -144,20 +144,20 @@ TimeAxisViewItem::TimeAxisViewItem(std::string it_name, ArdourCanvas::Group& par
 
 	if (visibility & ShowHandles) {
 		frame_handle_start = new ArdourCanvas::SimpleRect (*group);
-		frame_handle_start->set_property ("x1", (double) 0.0);
-		frame_handle_start->set_property ("x2", (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH);
-		frame_handle_start->set_property ("y1", (double) 1.0);
-		frame_handle_start->set_property ("y2", (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH+1);
-		frame_handle_start->set_property ("outline_color_rgba", color_map[cFrameHandleStartOutline]);
-		frame_handle_start->set_property ("fill_color_rgba", color_map[cFrameHandleStartFill]);
+		frame_handle_start->property_x1() = (double) 0.0;
+		frame_handle_start->property_x2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH;
+		frame_handle_start->property_y1() = (double) 1.0;
+		frame_handle_start->property_y2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH+1;
+		frame_handle_start->property_outline_color_rgba() = color_map[cFrameHandleStartOutline];
+		frame_handle_start->property_fill_color_rgba() = color_map[cFrameHandleStartFill];
 		
 		frame_handle_end = new ArdourCanvas::SimpleRect (*group);
-		frame_handle_end->set_property ("x1", (double) (trackview.editor.frame_to_pixel(get_duration())) - (TimeAxisViewItem::GRAB_HANDLE_LENGTH));
-		frame_handle_end->set_property ("x2", (double) trackview.editor.frame_to_pixel(get_duration()));
-		frame_handle_end->set_property ("y1", (double) 1);
-		frame_handle_end->set_property ("y2", (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH + 1);
-		frame_handle_end->set_property ("outline_color_rgba", color_map[cFrameHandleEndOutline]);
-		frame_handle_end->set_property ("fill_color_rgba", color_map[cFrameHandleEndFill]);
+		frame_handle_end->property_x1() = (double) (trackview.editor.frame_to_pixel(get_duration())) - (TimeAxisViewItem::GRAB_HANDLE_LENGTH);
+		frame_handle_end->property_x2() = (double) trackview.editor.frame_to_pixel(get_duration());
+		frame_handle_end->property_y1() = (double) 1;
+		frame_handle_end->property_y2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH + 1;
+		frame_handle_end->property_outline_color_rgba() = color_map[cFrameHandleEndOutline];
+		frame_handle_end->property_fill_color_rgba() = color_map[cFrameHandleEndFill];
 
 	} else {
 		frame_handle_start = 0;
@@ -493,7 +493,7 @@ void
 TimeAxisViewItem::set_name_text(std::string new_name)
 {
 	if (name_text) {
-		name_text->set_property ("text", new_name.c_str());
+		name_text->property_text() = new_name.c_str();
 	}
 }
 
@@ -515,31 +515,31 @@ TimeAxisViewItem::set_height(double height)
 		}
 
 		if (height > NAME_HIGHLIGHT_SIZE) {
-			name_highlight->set_property ("y1", (double) height+1 - NAME_HIGHLIGHT_SIZE);
-			name_highlight->set_property ("y2", (double) height);
+			name_highlight->property_y1() = (double) height+1 - NAME_HIGHLIGHT_SIZE;
+			name_highlight->property_y2() = (double) height;
 		}
 		else {
 			/* it gets hidden now anyway */
-			name_highlight->set_property ("y1", (double) 1.0);
-			name_highlight->set_property ("y2", (double) height);
+			name_highlight->property_y1() = (double) 1.0;
+			name_highlight->property_y2() = (double) height;
 		}
 	}
 
 	if (name_text) {
-		name_text->set_property ("y", height+1 - NAME_Y_OFFSET);
+		name_text->property_y() = height+1 - NAME_Y_OFFSET;
 		if (height < NAME_HIGHLIGHT_THRESH) {
-			name_text->set_property ("fill_color_rgba",  fill_color) ;
+			name_text->property_fill_color_rgba() =  fill_color;
 		}
 		else {
-			name_text->set_property ("fill_color_rgba", label_color) ;
+			name_text->property_fill_color_rgba() = label_color;
 		}
 	}
 
 	if (frame) {
-		frame->set_property ("y2", height+1) ;
+		frame->property_y2() = height+1;
 	}
 
-	vestigial_frame->set_property ("y2", height+1) ;
+	vestigial_frame->property_y2() = height+1;
 }
 
 /**
@@ -697,16 +697,16 @@ TimeAxisViewItem::set_colors()
 		}
 
 		if (height < NAME_HIGHLIGHT_THRESH) {
-			name_text->set_property ("fill_color_rgba",  fill_color);
+			name_text->property_fill_color_rgba() =  fill_color;
 		}
 		else {
-			name_text->set_property ("fill_color_rgba", label_color);
+			name_text->property_fill_color_rgba() = label_color;
 		}
 	}
 
 	if (name_highlight) {
-		name_highlight->set_property ("fill_color_rgba", fill_color);
-		name_highlight->set_property ("outline_color_rgba", fill_color);
+		name_highlight->property_fill_color_rgba() = fill_color;
+		name_highlight->property_outline_color_rgba() = fill_color;
 	}
 	set_trim_handle_colors() ;
 }
@@ -722,10 +722,10 @@ TimeAxisViewItem::set_frame_color()
 		
 		if (_selected && should_show_selection) {
 			UINT_TO_RGBA(color_map[cSelectedFrameBase], &r, &g, &b, &a);
-			frame->set_property ("fill_color_rgba", RGBA_TO_UINT(r, g, b, fill_opacity));
+			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity);
 		} else {
 			UINT_TO_RGBA(color_map[cFrameBase], &r, &g, &b, &a);
-			frame->set_property ("fill_color_rgba", RGBA_TO_UINT(r, g, b, fill_opacity));
+			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity);
 		}
 	}
 }
@@ -739,11 +739,11 @@ TimeAxisViewItem::set_trim_handle_colors()
 {
 	if (frame_handle_start) {
 		if (position_locked) {
-			frame_handle_start->set_property ("fill_color_rgba", color_map[cTrimHandleLockedStart]);
-			frame_handle_end->set_property ("fill_color_rgba", color_map[cTrimHandleLockedEnd]);
+			frame_handle_start->property_fill_color_rgba() = color_map[cTrimHandleLockedStart];
+			frame_handle_end->property_fill_color_rgba() = color_map[cTrimHandleLockedEnd];
 		} else {
-			frame_handle_start->set_property ("fill_color_rgba", color_map[cTrimHandleStart]);
-			frame_handle_end->set_property ("fill_color_rgba", color_map[cTrimHandleEnd]);
+			frame_handle_start->property_fill_color_rgba() = color_map[cTrimHandleStart];
+			frame_handle_end->property_fill_color_rgba() = color_map[cTrimHandleEnd];
 		}
 	}
 }
@@ -808,12 +808,12 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				reset_name_width (pixel_width);
 			}
 
-			name_highlight->set_property ("x2", pixel_width - 1.0);
+			name_highlight->property_x2() = pixel_width - 1.0;
 		}
 
 		if (frame) {
 			frame->show();
-			frame->set_property ("x2", pixel_width);
+			frame->property_x2() = pixel_width;
 		}
 
 		if (frame_handle_start) {
@@ -822,9 +822,9 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				frame_handle_end->hide();
 			}
 			frame_handle_start->show();
-			frame_handle_end->set_property ("x1", pixel_width - (TimeAxisViewItem::GRAB_HANDLE_LENGTH));
+			frame_handle_end->property_x1() = pixel_width - (TimeAxisViewItem::GRAB_HANDLE_LENGTH);
 			frame_handle_end->show();
-			frame_handle_end->set_property ("x2", pixel_width);
+			frame_handle_end->property_x2() = pixel_width;
 		}
 	}
 }
