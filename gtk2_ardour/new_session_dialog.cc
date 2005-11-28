@@ -22,7 +22,7 @@
 #include "new_session_dialog.h"
 #include "glade_path.h"
 
-const char* NewSessionDialogFactory::s_m_top_level_widget_name = X_("new_session_dialog");
+const char* NewSessionDialogFactory::s_m_top_level_widget_name = X_("NewSessionDialog");
 const char* NewSessionDialogFactory::top_level_widget_name() { return s_m_top_level_widget_name; }
 
 Glib::RefPtr<Gnome::Glade::Xml>
@@ -42,11 +42,11 @@ NewSessionDialog::NewSessionDialog(BaseObjectType* cobject,
 	xml->get_widget(X_("SessionFolderChooser"), m_folder);
 	xml->get_widget(X_("SessionTemplateChooser"), m_template);
 	
-	xml->get_widget(X_("CreateMasterBus"), m_create_master_track);
-	xml->get_widget(X_("MasterChannelCount"), m_master_track_channel_count);
+	xml->get_widget(X_("CreateMasterBus"), m_create_master_bus);
+	xml->get_widget(X_("MasterChannelCount"), m_master_bus_channel_count);
 	
-	xml->get_widget(X_("CreateControlBus"), m_create_control_track);
-	xml->get_widget(X_("ControlChannelCount"), m_control_track_channel_count);
+	xml->get_widget(X_("CreateControlBus"), m_create_control_bus);
+	xml->get_widget(X_("ControlChannelCount"), m_control_bus_channel_count);
 
 	xml->get_widget(X_("ConnectInputs"), m_connect_inputs);
 	xml->get_widget(X_("LimitInputPorts"), m_limit_input_ports);
@@ -94,27 +94,27 @@ NewSessionDialog::session_template_name() const
 }
 
 bool
-NewSessionDialog::create_master_track() const
+NewSessionDialog::create_master_bus() const
 {
-	return m_create_master_track->get_active();
+	return m_create_master_bus->get_active();
 }
 
 int
 NewSessionDialog::master_channel_count() const
 {
-	return m_master_track_channel_count->get_value_as_int();
+	return m_master_bus_channel_count->get_value_as_int();
 }
 
 bool
-NewSessionDialog::create_control_track() const
+NewSessionDialog::create_control_bus() const
 {
-	return m_create_control_track->get_active();
+	return m_create_control_bus->get_active();
 }
 
 int
 NewSessionDialog::control_channel_count() const
 {
-	return m_control_track_channel_count->get_value_as_int();
+	return m_control_bus_channel_count->get_value_as_int();
 }
 
 bool

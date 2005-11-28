@@ -41,9 +41,5 @@ GladePath::path(const std::string& glade_file)
 
     full_path = ARDOUR::find_data_file(Glib::build_filename("glade",
                                                             glade_file));
-                                                                
-    // temporary debugging
-    std::cerr << "Path to glade file" << full_path << std::endl;
-    
     return full_path;
 }

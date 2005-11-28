@@ -26,7 +26,7 @@ Glib::RefPtr<Gnome::Glade::Xml>
 GladeFactory::create(const std::string& full_path_to_file,
 		     const Glib::ustring& toplevel_widget)
 {
-	try {
+  	try {
 		return Gnome::Glade::Xml::create(full_path_to_file,
 						 toplevel_widget,
 						 PACKAGE );

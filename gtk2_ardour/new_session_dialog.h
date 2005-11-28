@@ -57,10 +57,10 @@ public:
 
 	// advanced.
 
-	bool create_master_track() const;
-		int master_channel_count() const;
+	bool create_master_bus() const;
+	int master_channel_count() const;
 
-	bool create_control_track() const;
+	bool create_control_bus() const;
 	int control_channel_count() const;
 
 	bool connect_inputs() const;
@@ -88,11 +88,11 @@ protected:
 	Gtk::FileChooserButton* m_folder;
 	Gtk::FileChooserButton* m_template;
 	
-	Gtk::CheckButton* m_create_master_track;
-	Gtk::SpinButton* m_master_track_channel_count;
+	Gtk::CheckButton* m_create_master_bus;
+	Gtk::SpinButton* m_master_bus_channel_count;
        	
-	Gtk::CheckButton* m_create_control_track;
-	Gtk::SpinButton* m_control_track_channel_count;
+	Gtk::CheckButton* m_create_control_bus;
+	Gtk::SpinButton* m_control_bus_channel_count;
 
 	Gtk::CheckButton* m_connect_inputs;
 	Gtk::CheckButton* m_limit_input_ports;

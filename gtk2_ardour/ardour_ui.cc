@@ -2670,13 +2670,13 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 				Session::AutoConnectOption iconnect;
 				Session::AutoConnectOption oconnect;
 				
-				if (m_new_session_dialog->create_control_track()) {
+				if (m_new_session_dialog->create_control_bus()) {
 					cchns = (uint32_t) m_new_session_dialog->control_channel_count();
 				} else {
 					cchns = 0;
 				}
 				
-				if (m_new_session_dialog->create_master_track()) {
+				if (m_new_session_dialog->create_master_bus()) {
 					mchns = (uint32_t) m_new_session_dialog->master_channel_count();
 				} else {
 					mchns = 0;
