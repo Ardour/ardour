@@ -484,7 +484,7 @@ gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 	GnomeCanvasSimpleRect *simplerect;
 	unsigned char foo;
 
-	g_return_if_fail (clip_path != NULL);
+	g_return_if_fail (clip_path == NULL);
 
 	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
