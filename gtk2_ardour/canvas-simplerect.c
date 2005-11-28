@@ -94,6 +94,8 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 	gobject_class = (GObjectClass *) class;
 	object_class = (GtkObjectClass *) class;
 	item_class = (GnomeCanvasItemClass *) class;
+	
+	parent_class = g_type_class_peek_parent (class);
 
 	gobject_class->set_property = gnome_canvas_simplerect_set_property;
 	gobject_class->get_property = gnome_canvas_simplerect_get_property;
@@ -483,8 +485,6 @@ gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 {
 	GnomeCanvasSimpleRect *simplerect;
 	unsigned char foo;
-
-	g_return_if_fail (clip_path == NULL);
 
 	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
