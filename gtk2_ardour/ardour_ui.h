@@ -480,32 +480,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void build_menu_bar ();
 	void pack_toplevel_controls();
 
-	/* handles on the menu bar items that need to 
-	   be sensitive to whether or not we have
-	   a session loaded.
-	*/
-
-	Gtk::MenuItem *add_track_item;
-	Gtk::MenuItem *save_item;
-	Gtk::MenuItem *snapshot_item;
-	Gtk::MenuItem *save_as_item;
-	Gtk::MenuItem *save_template_item;
-	Gtk::MenuItem *export_item;
-	Gtk::MenuItem *close_item;
-
-	Gtk::CheckMenuItem *connection_editor_check;
-	Gtk::CheckMenuItem *route_params_check;
-	Gtk::CheckMenuItem *locations_dialog_check;
-	Gtk::CheckMenuItem *big_clock_check;
-	Gtk::CheckMenuItem *tempo_editor_check;
-	Gtk::CheckMenuItem *sfdb_check;
-	Gtk::CheckMenuItem *options_window_check;
-	
-	/* <CMT Additions> */
-	Gtk::MenuItem *image_compositor_item ;
-	/* </CMT Additions> */
-
-
 	Gtk::Label   wall_clock_label;
 	Gtk::EventBox wall_clock_box;
 	gint update_wall_clock ();

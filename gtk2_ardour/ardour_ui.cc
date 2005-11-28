@@ -866,18 +866,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	set_shuttle_units (Percentage);
 	set_shuttle_behaviour (Sprung);
 
-	Glib::RefPtr<ActionGroup> shuttle_actions = ActionGroup::create ("ShuttleActions");
-	
-	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Percentage));
-	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Semitones));
-	shuttle_actions->add (Action::create (X_("SetShuttleActionSprung"), _("Sprung")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Sprung));
-	shuttle_actions->add (Action::create (X_("SetShuttleActionWheel"), _("Wheel")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Wheel));
-	
-	ActionManager::add_action_group (shuttle_actions);
+	shuttle_style_menu = 0;
+	shuttle_unit_menu = 0;
 
-	shuttle_style_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("ShuttleStylePopup"));
-	shuttle_unit_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("ShuttleUnitPopup"));
-	
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
 
@@ -2209,10 +2200,8 @@ void
 ARDOUR_UI::engine_stopped ()
 {
 	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_stopped));
-
-	jack_disconnect_item->set_sensitive (false);
-	jack_reconnect_item->set_sensitive (true);
-	jack_bufsize_menu->set_sensitive (false);
+	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
 }
 
 
@@ -2220,10 +2209,8 @@ void
 ARDOUR_UI::engine_running ()
 {
 	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_running));
-
-	jack_disconnect_item->set_sensitive (true);
-	jack_reconnect_item->set_sensitive (false);
-	jack_bufsize_menu->set_sensitive (true);
+	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, true);
+	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, false);
 }
 
 void
@@ -2231,9 +2218,8 @@ ARDOUR_UI::engine_halted ()
 {
 	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_halted));
 
-	jack_disconnect_item->set_sensitive (false);
-	jack_reconnect_item->set_sensitive (true);
-	jack_bufsize_menu->set_sensitive (false);
+	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
 
 	update_sample_rate (0);
 

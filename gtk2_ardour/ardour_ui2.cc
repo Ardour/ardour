@@ -41,6 +41,7 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "audio_clock.h"
+#include "actions.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -692,12 +693,18 @@ ARDOUR_UI::shuttle_box_expose (GdkEventExpose* event)
 void
 ARDOUR_UI::shuttle_style_clicked ()
 {
+	if (shuttle_style_menu == 0) {
+		shuttle_style_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("ShuttleStylePopup"));
+	}
 	shuttle_style_menu->popup (1, 0);
 }
 
 void
 ARDOUR_UI::shuttle_unit_clicked ()
 {
+	if (shuttle_unit_menu == 0) {
+		shuttle_unit_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("ShuttleUnitPopup"));
+	}
 	shuttle_unit_menu->popup (1, 0);
 }
 

@@ -1,6 +1,71 @@
 <ui>
 
+    <popup name='ShuttleUnitsMenu'>
+       <menuitem action='SetShuttleUnitsSemitones'/>
+       <menuitem action='SetShuttleUnitsPercentage'/>
+    </popup>
+
+    <popup name='ShuttleStyleMenu'>
+       <menuitem action='SetShuttleActionSprung'/>
+       <menuitem action='SetShuttleActionWheel'/>
+    </popup>
+
+    <popup name='RegionListMenu'>
+       <menuitem action='rlAudition'/>
+       <menuitem action='rlHide'/>
+       <menuitem action='rlRemove'/>
+       <separator/>
+       <menuitem action='rlShowAll'/>
+       <separator/>
+        <menuitem action='rlImportAudio'/>
+        <menuitem action='rlEmbedAudio'/>
+    </popup>
+
     <menubar name='Main'>
+        <menu action='Session'>
+           <menuitem action='New'/>
+           <menuitem action='Open'/>
+           <menuitem action='Recent'/>
+           <menuitem action='Close'/>
+           <separator/>
+           <menuitem action='AddTrackBus'/>
+           <separator/>
+           <menu action='Export'>
+               <menuitem action='ExportSession'/>
+               <menuitem action='ExportRange'/>
+           </menu>
+           <separator/>
+           <menu name='Cleanup'>
+               <menuitem action='CleanupUnused'/>
+               <menuitem action='FlushWastebasket'/>
+           </menu>
+           <separator/>
+           <menuitem action='Quit'/>
+        </menu>
+        <menu name='JACK'>
+               <menuitem action='Disconnect'/>
+               <menuitem action='Connect'/>
+               <menu name='Latency'>
+                   <menuitem action='JACKLatency32'/>
+                   <menuitem action='JACKLatency64'/>
+                   <menuitem action='JACKLatency128'/>
+                   <menuitem action='JACKLatency256'/>
+                   <menuitem action='JACKLatency512'/>
+                   <menuitem action='JACKLatency1024'/>
+                   <menuitem action='JACKLatency2048'/>
+                   <menuitem action='JACKLatency4096'/>
+                   <menuitem action='JACKLatency8192'/>
+               </menu>
+        </menu>
+        <menu name='Windows'>
+               <menuitem action='GotoEditor'/>
+               <menuitem action='GotoMixer'/>
+               <menuitem action='ToggleOptionsEditor'/>
+               <menuitem action='ToggleAudioLibrary'/>
+               <menuitem action='ToggleConnections'/>
+               <menuitem action='ToggleLocations'/>
+               <menuitem action='ToggleBigClock'/>
+               <menuitem action='ToggleAbout'/>
+        </menu>
      </menubar>
-	
 </ui>

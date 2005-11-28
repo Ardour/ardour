@@ -27,6 +27,9 @@ class ActionManager
 	static std::vector<Glib::RefPtr<Gtk::Action> > plugin_selection_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > range_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > jack_sensitive_actions;
+	static std::vector<Glib::RefPtr<Gtk::Action> > jack_opposite_sensitive_actions;
+
+	static void set_sensitive (std::vector<Glib::RefPtr<Gtk::Action> >& actions, bool);
 
 	static std::string unbound_string;  /* the key string returned if an action is not bound */
 	static Glib::RefPtr<Gtk::UIManager> ui_manager;

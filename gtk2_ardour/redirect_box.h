@@ -83,6 +83,8 @@ class RedirectBox : public Gtk::HBox
 	sigc::signal<void,ARDOUR::Redirect *> RedirectSelected;
 	sigc::signal<void,ARDOUR::Redirect *> RedirectUnselected;
 	
+	static void register_actions();
+
   protected:
 	void set_stuff_from_route ();
 
@@ -125,8 +127,6 @@ class RedirectBox : public Gtk::HBox
 	void new_send ();
 	void show_send_controls ();
 
-	Glib::RefPtr<Gtk::UIManager> popup_ui_mgr;
-	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp;
 	Gtk::Menu *redirect_menu;
 	gint redirect_menu_map_handler (GdkEventAny *ev);
 	Gtk::Menu * build_redirect_menu ();
@@ -182,6 +182,25 @@ class RedirectBox : public Gtk::HBox
 
 	void wierd_plugin_dialog (ARDOUR::Plugin& p, uint32_t streams, ARDOUR::IO& io);
 
+	static RedirectBox* _current_redirect_box;
+	static bool enter_box (GdkEventCrossing*, RedirectBox*);
+	static bool leave_box (GdkEventCrossing*, RedirectBox*);
+
+	static void rb_choose_plugin ();
+	static void rb_choose_insert ();
+	static void rb_choose_send ();
+	static void rb_clear ();
+	static void rb_cut ();
+	static void rb_copy ();
+	static void rb_paste ();
+	static void rb_rename ();
+	static void rb_select_all ();
+	static void rb_deselect_all ();
+	static void rb_activate ();
+	static void rb_deactivate ();
+	static void rb_activate_all ();
+	static void rb_deactivate_all ();
+	static void rb_edit ();
 };
 
 #endif /* __ardour_gtk_redirect_box__ */

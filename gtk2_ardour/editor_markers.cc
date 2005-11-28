@@ -392,8 +392,8 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 			build_marker_menu ();
 		}
 
-		Menu_Helpers::MenuList & children = marker_menu->items();
-		// XXX: should really find this some other way
+		// GTK2FIX use action group sensitivity
+#ifdef GTK2FIX
 		if (children.size() >= 3) {
 			MenuItem * loopitem = &children[2];
 			if (loopitem) {
@@ -405,7 +405,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 				}
 			}
 		}
-		
+#endif		
 		marker_menu_item = item;
 		marker_menu->popup (1, ev->time);
 	}

@@ -58,8 +58,9 @@ ARDOUR_UI::we_have_dependents ()
 void
 ARDOUR_UI::setup_keybindings ()
 {
-	// GTK2FIX
+	install_actions ();
 	editor->register_actions ();
+	RedirectBox::register_actions ();
 }
 
 void

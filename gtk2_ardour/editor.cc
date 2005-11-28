@@ -1634,13 +1634,6 @@ Editor::connect_to_session (Session *t)
 	route_list_reordered ();
 	//route_list.thaw ();
 
-	if (embed_audio_item) {
-		embed_audio_item->set_sensitive (true);
-	} 
-	if (import_audio_item) {
-		import_audio_item->set_sensitive (true);
-	}
-
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
 	}
@@ -1858,16 +1851,20 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		if (!with_selection) {
 			if (region_edit_menu_split_item) {
 				if (clicked_regionview && clicked_regionview->region.covers (edit_cursor->current_frame)) {
-					region_edit_menu_split_item->set_sensitive (true);
+					// GTK2FIX find the action, change its sensitivity
+					// region_edit_menu_split_item->set_sensitive (true);
 				} else {
-					region_edit_menu_split_item->set_sensitive (false);
+					// GTK2FIX see above
+					// region_edit_menu_split_item->set_sensitive (false);
 				}
 			}
 			if (region_edit_menu_split_multichannel_item) {
 				if (clicked_regionview && clicked_regionview->region.n_channels() > 1) {
-					region_edit_menu_split_multichannel_item->set_sensitive (true);
+					// GTK2FIX find the action, change its sensitivity
+					// region_edit_menu_split_multichannel_item->set_sensitive (true);
 				} else {
-					region_edit_menu_split_multichannel_item->set_sensitive (false);
+					// GTK2FIX see above
+					// region_edit_menu_split_multichannel_item->set_sensitive (false);
 				}
 			}
 		}

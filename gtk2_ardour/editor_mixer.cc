@@ -288,14 +288,6 @@ Editor::session_going_away ()
 		current_bbt_points = 0;
 	}
 
-	if (embed_audio_item) {
-		embed_audio_item->set_sensitive (false);
-	} 
-
-	if (import_audio_item) {
-		import_audio_item->set_sensitive (false);
-	}
-
 	/* mixer strip will be deleted all by itself 
 	   when its route is deleted.
 	*/

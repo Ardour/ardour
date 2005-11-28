@@ -41,6 +41,7 @@ vector<RefPtr<Gtk::Action> > ActionManager::track_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::plugin_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::jack_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::jack_opposite_sensitive_actions;
 RefPtr<UIManager> ActionManager::ui_manager;
 string ActionManager::unbound_string = "--";
 
@@ -193,4 +194,12 @@ RefPtr<Action>
 ActionManager::get_action (ustring name)
 {
 	return ui_manager->get_action (name);
+}
+
+void 
+ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
+{
+	for (vector<RefPtr<Action> >::iterator i = actions.begin(); i != actions.end(); ++i) {
+		(*i)->set_sensitive (state);
+	}
 }

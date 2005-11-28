@@ -67,6 +67,8 @@ using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
 
+RedirectBox* RedirectBox::_current_redirect_box = 0;
+
 
 RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelector &plugsel, 
 			  RouteRedirectSelection & rsel, bool owner_is_mixer)
@@ -112,6 +114,9 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	show_all ();
 
 	_route.redirects_changed.connect (mem_fun(*this, &RedirectBox::redirects_changed));
+
+	redirect_eventbox.signal_enter_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::enter_box), this));
+	redirect_eventbox.signal_leave_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::leave_box), this));
 
 	redirect_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::redirect_button));
 	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button));
@@ -326,40 +331,6 @@ RedirectBox::redirect_button (GdkEventButton *ev)
 Menu *
 RedirectBox::build_redirect_menu ()
 {
-	popup_act_grp = Gtk::ActionGroup::create(X_("redirectmenu"));
-	Glib::RefPtr<Action> act;
-
-	/* new stuff */
-	ActionManager::register_action (popup_act_grp, X_("newplugin"), _("New Plugin ..."),  mem_fun(*this, &RedirectBox::choose_plugin));
-	ActionManager::register_action (popup_act_grp, X_("newinsert"), _("New Insert"),  mem_fun(*this, &RedirectBox::choose_insert));
-	ActionManager::register_action (popup_act_grp, X_("newsend"), _("New Send ..."),  mem_fun(*this, &RedirectBox::choose_send));
-	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear"),  mem_fun(*this, &RedirectBox::clear_redirects));
-
-	/* standard editing stuff */
-	act = ActionManager::register_action (popup_act_grp, X_("cut"), _("Cut"),  mem_fun(*this, &RedirectBox::cut_redirects));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
-	act = ActionManager::register_action (popup_act_grp, X_("copy"), _("Copy"),  mem_fun(*this, &RedirectBox::copy_redirects));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
-	ActionManager::ActionManager::register_action (popup_act_grp, X_("paste"), _("Paste"),  mem_fun(*this, &RedirectBox::paste_redirects));
-	act = ActionManager::register_action (popup_act_grp, X_("rename"), _("Rename"),  mem_fun(*this, &RedirectBox::rename_redirects));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
-	ActionManager::register_action (popup_act_grp, X_("selectall"), _("Select All"),  mem_fun(*this, &RedirectBox::select_all_redirects));
-	ActionManager::register_action (popup_act_grp, X_("deselectall"), _("Deselect All"),  mem_fun(*this, &RedirectBox::deselect_all_redirects));
-		
-	/* activation */
-	act = ActionManager::register_action (popup_act_grp, X_("activate"), _("Activate"),  bind (mem_fun(*this, &RedirectBox::for_selected_redirects), &RedirectBox::activate_redirect));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
-	act = ActionManager::register_action (popup_act_grp, X_("deactivate"), _("Deactivate"),  bind (mem_fun(*this, &RedirectBox::for_selected_redirects), &RedirectBox::deactivate_redirect));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
-	ActionManager::register_action (popup_act_grp, X_("activate"), _("Activate"),  bind (mem_fun(*this, &RedirectBox::all_redirects_active),true));
-	ActionManager::register_action (popup_act_grp, X_("activate"), _("Activate"),  bind (mem_fun(*this, &RedirectBox::all_redirects_active), false));
-
-	/* show editors */
-	act = ActionManager::register_action (popup_act_grp, X_("edit"), _("Edit"),  bind (mem_fun(*this, &RedirectBox::for_selected_redirects), &RedirectBox::edit_redirect));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
-
-	ActionManager::add_action_group (popup_act_grp);
-
 	redirect_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/redirectmenu") );
 	redirect_menu->signal_map_event().connect (mem_fun(*this, &RedirectBox::redirect_menu_map_handler));
 	redirect_menu->set_name ("ArdourContextMenu");
@@ -382,7 +353,8 @@ RedirectBox::selection_changed ()
 gint
 RedirectBox::redirect_menu_map_handler (GdkEventAny *ev)
 {
-	popup_act_grp->get_action("paste")->set_sensitive (!_rr_selection.redirects.empty());
+	// GTK2FIX
+	// popup_act_grp->get_action("paste")->set_sensitive (!_rr_selection.redirects.empty());
 	return FALSE;
 }
 
@@ -1094,4 +1066,215 @@ RedirectBox::edit_redirect (Redirect* redirect)
 	}
 }
 
+bool
+RedirectBox::enter_box (GdkEventCrossing *ev, RedirectBox* rb)
+{
+	switch (ev->detail) {
+	case GDK_NOTIFY_INFERIOR:
+		break;
+
+	case GDK_NOTIFY_VIRTUAL:
+		/* fallthru */
+
+	default:
+		_current_redirect_box = rb;
+	}
+
+	return false;
+}
+
+bool
+RedirectBox::leave_box (GdkEventCrossing *ev, RedirectBox* rb)
+{
+	switch (ev->detail) {
+	case GDK_NOTIFY_INFERIOR:
+		break;
+
+	case GDK_NOTIFY_VIRTUAL:
+		/* fallthru */
+	default:
+		_current_redirect_box = 0;
+	}
+
+	return false;
+}
+
+void
+RedirectBox::register_actions ()
+{
+	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp = Gtk::ActionGroup::create(X_("redirectmenu"));
+	Glib::RefPtr<Action> act;
+
+	/* new stuff */
+	ActionManager::register_action (popup_act_grp, X_("newplugin"), _("New Plugin ..."),  sigc::ptr_fun (RedirectBox::rb_choose_plugin));
+	ActionManager::register_action (popup_act_grp, X_("newinsert"), _("New Insert"),  sigc::ptr_fun (RedirectBox::rb_choose_insert));
+	ActionManager::register_action (popup_act_grp, X_("newsend"), _("New Send ..."),  sigc::ptr_fun (RedirectBox::rb_choose_send));
+	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear"),  sigc::ptr_fun (RedirectBox::rb_clear));
+
+	/* standard editing stuff */
+	act = ActionManager::register_action (popup_act_grp, X_("cut"), _("Cut"),  sigc::ptr_fun (RedirectBox::rb_cut));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	act = ActionManager::register_action (popup_act_grp, X_("copy"), _("Copy"),  sigc::ptr_fun (RedirectBox::rb_copy));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	ActionManager::ActionManager::register_action (popup_act_grp, X_("paste"), _("Paste"),  sigc::ptr_fun (RedirectBox::rb_paste));
+	act = ActionManager::register_action (popup_act_grp, X_("rename"), _("Rename"),  sigc::ptr_fun (RedirectBox::rb_rename));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	ActionManager::register_action (popup_act_grp, X_("selectall"), _("Select All"),  sigc::ptr_fun (RedirectBox::rb_select_all));
+	ActionManager::register_action (popup_act_grp, X_("deselectall"), _("Deselect All"),  sigc::ptr_fun (RedirectBox::rb_deselect_all));
+		
+	/* activation */
+	act = ActionManager::register_action (popup_act_grp, X_("activate"), _("Activate"),  sigc::ptr_fun (RedirectBox::rb_activate));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	act = ActionManager::register_action (popup_act_grp, X_("deactivate"), _("Deactivate"),  sigc::ptr_fun (RedirectBox::rb_deactivate));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	ActionManager::register_action (popup_act_grp, X_("activate_all"), _("Activate all"),  sigc::ptr_fun (RedirectBox::rb_activate_all));
+	ActionManager::register_action (popup_act_grp, X_("deactivate_all"), _("Deactivate all"),  sigc::ptr_fun (RedirectBox::rb_deactivate_all));
+
+	/* show editors */
+	act = ActionManager::register_action (popup_act_grp, X_("edit"), _("Edit"),  sigc::ptr_fun (RedirectBox::rb_edit));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+
+	ActionManager::add_action_group (popup_act_grp);
+}
+
+void
+RedirectBox::rb_choose_plugin ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+	_current_redirect_box->choose_plugin ();
+}
+
+void
+RedirectBox::rb_choose_insert ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+	_current_redirect_box->choose_insert ();
+}
+
+void
+RedirectBox::rb_choose_send ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+	_current_redirect_box->choose_send ();
+}
+
+void
+RedirectBox::rb_clear ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+
+	_current_redirect_box->clear_redirects ();
+}
+
+void
+RedirectBox::rb_cut ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+
+	_current_redirect_box->cut_redirects ();
+}
+
+void
+RedirectBox::rb_copy ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+	_current_redirect_box->copy_redirects ();
+}
+
+void
+RedirectBox::rb_paste ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+}
+
+void
+RedirectBox::rb_rename ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+	_current_redirect_box->rename_redirects ();
+}
+
+void
+RedirectBox::rb_select_all ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+
+	_current_redirect_box->select_all_redirects ();
+}
+
+void
+RedirectBox::rb_deselect_all ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+
+	_current_redirect_box->deselect_all_redirects ();
+}
+
+void
+RedirectBox::rb_activate ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+
+	_current_redirect_box->for_selected_redirects (&RedirectBox::activate_redirect);
+}
+
+void
+RedirectBox::rb_deactivate ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+	_current_redirect_box->for_selected_redirects (&RedirectBox::deactivate_redirect);
+}
+
+void
+RedirectBox::rb_activate_all ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+
+	_current_redirect_box->all_redirects_active (true);
+}
+
+void
+RedirectBox::rb_deactivate_all ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+	_current_redirect_box->all_redirects_active (false);
+}
+
+void
+RedirectBox::rb_edit ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+
+	_current_redirect_box->for_selected_redirects (&RedirectBox::edit_redirect);
+}
 

@@ -33,6 +33,7 @@
 #include "public_editor.h"
 #include "route_params_ui.h"
 #include "sfdb_ui.h"
+#include "actions.h"
 
 #include "i18n.h"
 
@@ -49,37 +50,11 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	/* sensitize menu bar options that are now valid */
 
-//	save_as_item->set_sensitive (true);
-	save_template_item->set_sensitive (true);
-	snapshot_item->set_sensitive (true);
-	save_item->set_sensitive (true);
-	add_track_item->set_sensitive (true);
-	export_item->set_sensitive (true);
-	close_item->set_sensitive (true);
-	locations_dialog_check->set_sensitive (true);
-	route_params_check->set_sensitive (true);
-	connection_editor_check->set_sensitive (true);
+	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, true);
 
-	cleanup_item->set_sensitive (true);
-
-	/* sensitize transport bar */
-
-	goto_start_button.set_sensitive (true);
-	goto_end_button.set_sensitive (true);
-	roll_button.set_sensitive (true);
-	stop_button.set_sensitive (true);
-	play_selection_button.set_sensitive (true);
 	rec_button.set_sensitive (true);
-	auto_loop_button.set_sensitive (true);
 	shuttle_box.set_sensitive (true);
 	
-	/* <CMT Additions> */
-	if (image_compositor_item) {
-		image_compositor_item->set_sensitive(true) ;
-	}
-	/* </CMT Additions> */
-	
-
 	if (session->n_diskstreams() == 0) {
 		session->DiskStreamAdded.connect (mem_fun(*this, &ARDOUR_UI::diskstream_added));
 	}
@@ -166,30 +141,9 @@ ARDOUR_UI::unload_session ()
 	point_one_second_connection.disconnect ();
 	point_zero_one_second_connection.disconnect();
 
-	/* desensitize menu bar options that are now invalid */
-
-//	save_as_item->set_sensitive (false);
-	save_template_item->set_sensitive (false);
-	snapshot_item->set_sensitive (false);
-	save_item->set_sensitive (false);
-	add_track_item->set_sensitive (false);
-	export_item->set_sensitive (false);
-	close_item->set_sensitive (false);
-	connection_editor_check->set_sensitive (false);
-	locations_dialog_check->set_sensitive (false);
-	connection_editor_check->set_active(false);
-	locations_dialog_check->set_active(false);
-	route_params_check->set_sensitive (false);
-
-	/* desensitize transport bar */
-
-	goto_start_button.set_sensitive (false);
-	goto_end_button.set_sensitive (false);
-	roll_button.set_sensitive (false);
-	stop_button.set_sensitive (false);
-	play_selection_button.set_sensitive (false);
+	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
+	
 	rec_button.set_sensitive (false);
-	auto_loop_button.set_sensitive (false);
 	shuttle_box.set_sensitive (false);
 
 	stop_blinking ();
@@ -266,7 +220,8 @@ ARDOUR_UI::connection_editor_hiding()
 void
 ARDOUR_UI::big_clock_hiding()
 {
-	big_clock_check->set_active(false);
+	// GTK2FIX
+	// big_clock_check->set_active(false);
 }
 
 void
@@ -298,7 +253,8 @@ ARDOUR_UI::toggle_options_window ()
 void
 ARDOUR_UI::option_hiding ()
 {
-	options_window_check->set_active(false);
+	// GTK2FIX
+	// options_window_check->set_active(false);
 }
 
 void
@@ -338,7 +294,8 @@ ARDOUR_UI::toggle_location_window ()
 void
 ARDOUR_UI::location_ui_hiding()
 {
-	locations_dialog_check->set_active(false);
+	// GTK2FIX
+	// locations_dialog_check->set_active(false);
 }
 
 int
@@ -369,18 +326,20 @@ ARDOUR_UI::toggle_route_params_window ()
 void
 ARDOUR_UI::route_params_hiding ()
 {
-	route_params_check->set_active (false);
+	// GTK2FIX
+	// route_params_check->set_active (false);
 }
 
 void
 ARDOUR_UI::toggle_sound_file_browser ()
 {
-	if (sfdb_check->get_active()) {
-		SoundFileBrowser sfdb(_("Sound File Browser"));
+	// GTK2FIX
+	// if (sfdb_check->get_active()) {
+	// SoundFileBrowser sfdb(_("Sound File Browser"));
 
-		sfdb_check->signal_toggled().connect (bind (mem_fun (sfdb, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
-		sfdb.run();
-		sfdb_check->set_active(false);
-	}
+	// sfdb_check->signal_toggled().connect (bind (mem_fun (sfdb, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
+	// sfdb.run();
+	// sfdb_check->set_active(false);
+	// }
 }
 

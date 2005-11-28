@@ -112,9 +112,10 @@ ARDOUR_UI::install_actions ()
 
 	Glib::RefPtr<ActionGroup> jack_actions = ActionGroup::create (X_("JACK"));
 
-	act = ActionManager::register_action (jack_actions, X_("JACKDisconnect"), _("Disconnect"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::disconnect_from_jack));
-	ActionManager::jack_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (jack_actions, X_("JACKReconnect"), _("Reconnect"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::reconnect_to_jack));
+	ActionManager::jack_opposite_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (jack_actions, X_("JACKDisconnect"), _("Disconnect"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::disconnect_from_jack));
 	ActionManager::jack_sensitive_actions.push_back (act);
 	
 	RadioAction::Group jack_latency_group;
@@ -268,7 +269,15 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack32"), _("toggle record enable track32"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 31U));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+	Glib::RefPtr<ActionGroup> shuttle_actions = ActionGroup::create ("ShuttleActions");
 	
+	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Percentage));
+	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Semitones));
+	shuttle_actions->add (Action::create (X_("SetShuttleActionSprung"), _("Sprung")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Sprung));
+	shuttle_actions->add (Action::create (X_("SetShuttleActionWheel"), _("Wheel")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Wheel));
+	
+	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (jack_actions);
 	ActionManager::add_action_group (main_actions);
 	ActionManager::add_action_group (common_actions);
