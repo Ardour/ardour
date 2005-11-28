@@ -105,7 +105,7 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool dummy_arg_to_force_s
 
 ControlPoint::~ControlPoint ()
 {
-	gtk_object_destroy (GTK_OBJECT(item));
+	delete item;
 }
 
 bool
@@ -246,8 +246,7 @@ AutomationLine::AutomationLine (string name, TimeAxisView& tv, ArdourCanvas::Gro
 AutomationLine::~AutomationLine ()
 {
 	vector_delete (&control_points);
-
-	gtk_object_destroy (GTK_OBJECT(group));
+	delete group;
 }
 
 bool

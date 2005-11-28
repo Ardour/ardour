@@ -261,6 +261,7 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 		
 		TreeModel::iterator i;
 		TreeModel::Children rows = region_list_model->children();
+		bool found_parent = false;
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
 
@@ -271,13 +272,14 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 				
 				if (region->source_equivalent (*r)) {
 					row = *(region_list_model->append ((*i).children()));
+					found_parent = true;
 					break;
 				}
 			}
 		}
 
-		if (i == rows.end()) {
-			TreeModel::Row row = *(region_list_model->append());
+		if (!found_parent) {
+			row = *(region_list_model->append());
 		}
 
 		
@@ -328,9 +330,9 @@ void
 Editor::redisplay_regions ()
 {
 	if (session) {
-		
+
 		region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
-		region_list_model.clear ();
+		region_list_model->clear ();
 
 		/* now add everything we have, via a temporary list used to help with
 		   sorting.

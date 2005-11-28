@@ -47,6 +47,7 @@
 #include "selection.h"
 #include "keyboard.h"
 #include "rgb_macros.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -142,15 +143,16 @@ TimeAxisView::~TimeAxisView()
 	}
 
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
-		gtk_object_destroy (GTK_OBJECT((*i)->rect));
-		gtk_object_destroy (GTK_OBJECT((*i)->start_trim));
-		gtk_object_destroy (GTK_OBJECT((*i)->end_trim));
+		delete (*i)->rect;
+		delete (*i)->start_trim;
+		delete (*i)->end_trim;
+
 	}
 
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
-		gtk_object_destroy (GTK_OBJECT((*i)->rect));
-		gtk_object_destroy (GTK_OBJECT((*i)->start_trim));
-		gtk_object_destroy (GTK_OBJECT((*i)->end_trim));
+		delete (*i)->rect;
+		delete (*i)->start_trim;
+		delete (*i)->end_trim;
 	}
 
 	if (selection_group) {
@@ -219,7 +221,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 			(*i)->canvas_display->show();
 		}
 		
-		if (GTK_OBJECT_FLAGS(GTK_OBJECT((*i)->canvas_display)) & GNOME_CANVAS_ITEM_VISIBLE) {
+		if (canvas_item_visible ((*i)->canvas_display)) {
 			++nth;
 			effective_height += (*i)->show_at (y + effective_height, nth, parent);
 		}
@@ -342,7 +344,7 @@ TimeAxisView::set_height (TrackHeight h)
 	height = (guint32) h;
 	controls_frame.set_size_request (-1, height);
 
- 	if (GTK_OBJECT_FLAGS(GTK_OBJECT(selection_group)) & GNOME_CANVAS_ITEM_VISIBLE) {
+ 	if (canvas_item_visible (selection_group)) {
 		/* resize the selection rect */
 		show_selection (editor.get_selection().time);
 	}
@@ -495,7 +497,7 @@ TimeAxisView::show_selection (TimeSelection& ts)
 		(*i)->show_selection (ts);
 	}
 
-	if (GTK_OBJECT_FLAGS(GTK_OBJECT(selection_group)) & GNOME_CANVAS_ITEM_VISIBLE) {
+	if (canvas_item_visible (selection_group)) {
 		while (!used_selection_rects.empty()) {
 			free_selection_rects.push_front (used_selection_rects.front());
 			used_selection_rects.pop_front();
@@ -522,28 +524,24 @@ TimeAxisView::show_selection (TimeSelection& ts)
 		x2 = (start + cnt - 1) / editor.get_current_zoom();
 		y2 = height;
 
-		gtk_object_set (GTK_OBJECT(rect->rect), 
-				"x1", x1,
-				"y1", 1.0,
-				"x2", x2,
-				"y2", y2,
-				NULL);
+		rect->rect->property_x1() = x1;
+		rect->rect->property_y1() = 1.0;
+		rect->rect->property_x2() = x2;
+		rect->rect->property_y2() = y2;
 		
 		// trim boxes are at the top for selections
 		
 		if (x2 > x1) {
-			gtk_object_set (GTK_OBJECT(rect->start_trim), 
-					"x1", x1,
-					"y1", 1.0,
-					"x2", x1 + trim_handle_size,
-					"y2", 1.0 + trim_handle_size,
-					NULL);
-			gtk_object_set (GTK_OBJECT(rect->end_trim), 
-					"x1", x2 - trim_handle_size,
-					"y1", 1.0,
-					"x2", x2,
-					"y2", 1.0 + trim_handle_size,
-					NULL);
+			rect->start_trim->property_x1() = x1;
+			rect->start_trim->property_y1() = 1.0;
+			rect->start_trim->property_x2() = x1 + trim_handle_size;
+			rect->start_trim->property_y2() = 1.0 + trim_handle_size;
+
+			rect->end_trim->property_x1() = x2 - trim_handle_size;
+			rect->end_trim->property_y1() = 1.0;
+			rect->end_trim->property_x2() = x2;
+			rect->end_trim->property_y2() = 1.0 + trim_handle_size;
+
 			rect->start_trim->show();
 			rect->end_trim->show();
 		} else {
@@ -569,7 +567,7 @@ TimeAxisView::reshow_selection (TimeSelection& ts)
 void
 TimeAxisView::hide_selection ()
 {
-	if (GTK_OBJECT_FLAGS(GTK_OBJECT(selection_group)) & GNOME_CANVAS_ITEM_VISIBLE) {
+	if (canvas_item_visible (selection_group)) {
 		while (!used_selection_rects.empty()) {
 			free_selection_rects.push_front (used_selection_rects.front());
 			used_selection_rects.pop_front();

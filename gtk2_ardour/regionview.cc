@@ -122,29 +122,28 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView
 	fade_out_shape = new ArdourCanvas::Polygon (*group);
 	fade_out_shape->property_fill_color_rgba() = fade_color;
 	fade_out_shape->set_data ("regionview", this);
-	
 
 
 	{
-			uint32_t r,g,b,a;
-			UINT_TO_RGBA(fill_color,&r,&g,&b,&a);
+		uint32_t r,g,b,a;
+		UINT_TO_RGBA(fill_color,&r,&g,&b,&a);
 	
 
-	fade_in_handle = new ArdourCanvas::SimpleRect (*group);
-	fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
-	fade_in_handle->property_outline_pixels() = 0;
-	fade_in_handle->property_y1() = 2.0;
-	fade_in_handle->property_y2() = 7.0;
-
-	fade_in_handle->set_data ("regionview", this);
-	
-	fade_out_handle = new ArdourCanvas::SimpleRect (*group);
-	fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
-	fade_out_handle->property_outline_pixels() = 0;
-	fade_out_handle->property_y1() = 2.0;
-	fade_out_handle->property_y2() = 7.0;
-
-	gtk_object_set_data (GTK_OBJECT(fade_out_handle), "regionview", this);
+		fade_in_handle = new ArdourCanvas::SimpleRect (*group);
+		fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
+		fade_in_handle->property_outline_pixels() = 0;
+		fade_in_handle->property_y1() = 2.0;
+		fade_in_handle->property_y2() = 7.0;
+		
+		fade_in_handle->set_data ("regionview", this);
+		
+		fade_out_handle = new ArdourCanvas::SimpleRect (*group);
+		fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
+		fade_out_handle->property_outline_pixels() = 0;
+		fade_out_handle->property_y1() = 2.0;
+		fade_out_handle->property_y2() = 7.0;
+		
+		fade_out_handle->set_data ("regionview", this);
 	}
 
 	string foo = region.name();
@@ -186,7 +185,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView
 	set_colors ();
 
 	/* XXX sync mark drag? */
-
 }
 
 AudioRegionView::~AudioRegionView ()

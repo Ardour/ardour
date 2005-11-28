@@ -34,6 +34,7 @@
 #include "utils.h"
 #include "i18n.h"
 #include "rgb_macros.h"
+#include "canvas_impl.h"
 
 using namespace std;
 using namespace Gtk;
@@ -502,3 +503,8 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 	return (uint32_t) RGBA_TO_UINT(r,g,b,a);
 }
 
+bool 
+canvas_item_visible (ArdourCanvas::Item* item)
+{
+	return (item->gobj()->object.flags & GNOME_CANVAS_ITEM_VISIBLE) ? true : false;
+}

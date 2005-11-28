@@ -23,6 +23,7 @@
 #include "crossfade_view.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
+#include "utils.h"
 
 using namespace ARDOUR;
 using namespace Editing;
@@ -94,7 +95,7 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 StreamView::~StreamView ()
 {
 	undisplay_diskstream ();
-	gtk_object_destroy (GTK_OBJECT(canvas_group));
+	delete canvas_group;
 }
 
 void
@@ -123,7 +124,7 @@ StreamView::set_height (gdouble h)
 		return -1;
 	}
 
-	gtk_object_set (GTK_OBJECT(canvas_rect), "y2", h, NULL);
+	canvas_rect->property_y2() = h;
 
 	for (AudioRegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_height (h);
@@ -135,7 +136,7 @@ StreamView::set_height (gdouble h)
 
 	for (vector<RecBoxInfo>::iterator i = rec_rects.begin(); i != rec_rects.end(); ++i) {
 		RecBoxInfo &recbox = (*i);
-		gtk_object_set (GTK_OBJECT( recbox.rectangle ), "y2", h - 1, NULL);
+		recbox.rectangle->property_y2() = h - 1.0;
 	}
 
 	return 0;
@@ -740,7 +741,7 @@ StreamView::setup_rec_box ()
 			/* transport stopped, clear boxes */
 			for (vector<RecBoxInfo>::iterator iter=rec_rects.begin(); iter != rec_rects.end(); ++iter) {
 				RecBoxInfo &rect = (*iter);
-				gtk_object_destroy (GTK_OBJECT(rect.rectangle));
+				delete rect.rectangle;
 			}
 			
 			rec_rects.clear();
@@ -829,7 +830,7 @@ StreamView::update_rec_regions ()
 			tmp = iter;
 			++tmp;
 
-			if ((GTK_OBJECT_FLAGS(GTK_OBJECT(rec_rects[n].rectangle)) & GNOME_CANVAS_ITEM_VISIBLE) == 0) {
+			if (!canvas_item_visible (rec_rects[n].rectangle)) {
 				/* rect already hidden, this region is done */
 				iter = tmp;
 				continue;

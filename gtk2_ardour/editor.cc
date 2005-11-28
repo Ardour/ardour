@@ -26,8 +26,6 @@
 
 #include <sigc++/bind.h>
 
-#include <libgnomecanvasmm/init.h>
-
 #include <pbd/error.h>
 
 #include <gtkmm/image.h>
@@ -60,7 +58,6 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "streamview.h"
-#include "simpleline.h"
 #include "time_axis_view.h"
 #include "utils.h"
 #include "crossfade_view.h"
@@ -85,9 +82,6 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
-/* XXX this is a hack. it ought to be the maximum value of an jack_nframes_t */
-
-const double max_canvas_coordinate = 100000000.0;
 const double Editor::timebar_height = 15.0;
 
 #include "editor_xpms"
@@ -796,186 +790,6 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 
 
 void
-Editor::initialize_canvas ()
-{
-	ArdourCanvas::init ();
-
-	/* adjust sensitivity for "picking" items */
-
-	// GNOME_CANVAS(track_canvas)->close_enough = 2;
-
-	track_canvas.signal_event().connect (bind (mem_fun (*this, &Editor::track_canvas_event), (ArdourCanvas::Item*) 0));
-	track_canvas.set_name ("EditorMainCanvas");
-	track_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
-	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
-	
-	/* set up drag-n-drop */
-	vector<Gtk::TargetEntry> target_table;
-	
-	target_table.push_back (TargetEntry ("STRING"));
-	target_table.push_back (TargetEntry ("text/plain"));
-	target_table.push_back (TargetEntry ("text/uri-list"));
-	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
-
-	// GTK2FIX
-	// track_canvas.drag_dest_set (target_table, DEST_DEFAULT_ALL, GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
-	// track_canvas.signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
-
-	/* stuff for the verbose canvas cursor */
-
-	Pango::FontDescription font = get_font_for_style (N_("VerboseCanvasCursor"));
-
-	verbose_canvas_cursor = new ArdourCanvas::Text (*track_canvas.root());
-	verbose_canvas_cursor->property_font_desc() = font;
-	// GTK2FIX
-	// verbose_canvas_cursor->property_anchor() = GTK_ANCHOR_NW;
-	verbose_canvas_cursor->property_fill_color_rgba() = color_map[cVerboseCanvasCursor];
-	
-	verbose_cursor_visible = false;
-	
-	/* a group to hold time (measure) lines */
-	
-	time_line_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
-	cursor_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
-	
-	time_canvas.set_name ("EditorTimeCanvas");
-	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
-	
-	meter_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
-	tempo_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
-	marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 2.0);
-	range_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 3.0);
-	transport_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 4.0);
-	
-	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	tempo_bar->property_fill_color_rgba() = color_map[cTempoBar];
-	tempo_bar->property_outline_pixels() = 0;
-	
-	meter_bar = new ArdourCanvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	meter_bar->property_fill_color_rgba() = color_map[cMeterBar];
-	meter_bar->property_outline_pixels() = 0;
-	
-	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	marker_bar->property_fill_color_rgba() = color_map[cMarkerBar];
-	marker_bar->property_outline_pixels() = 0;
-	
-	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	range_marker_bar->property_fill_color_rgba() = color_map[cRangeMarkerBar];
-	range_marker_bar->property_outline_pixels() = 0;
-	
-	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	transport_marker_bar->property_fill_color_rgba() = color_map[cTransportMarkerBar];
-	transport_marker_bar->property_outline_pixels() = 0;
-	
-	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	range_bar_drag_rect->property_fill_color_rgba() = color_map[cRangeDragBarRectFill];
-	range_bar_drag_rect->property_outline_color_rgba() = color_map[cRangeDragBarRect];
-	range_bar_drag_rect->property_outline_pixels() = 0;
-	range_bar_drag_rect->hide ();
-	
-	transport_bar_drag_rect = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
-	transport_bar_drag_rect ->property_fill_color_rgba() = color_map[cTransportDragRectFill];
-	transport_bar_drag_rect->property_outline_color_rgba() = color_map[cTransportDragRect];
-	transport_bar_drag_rect->property_outline_pixels() = 0;
-	transport_bar_drag_rect->hide ();
-	
-	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
-	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
-
-	marker_drag_line = new ArdourCanvas::Line (*track_canvas.root());
-	marker_drag_line->property_width_pixels() = 1;
-	marker_drag_line->property_fill_color_rgba() = color_map[cMarkerDragLine];
-	marker_drag_line->property_points() = marker_drag_line_points;
-	marker_drag_line->hide();
-
-	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	range_marker_drag_rect->property_fill_color_rgba() = color_map[cRangeDragRectFill];
-	range_marker_drag_rect->property_outline_color_rgba() = color_map[cRangeDragRect];
-	range_marker_drag_rect->hide ();
-	
-	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
-	transport_loop_range_rect->property_fill_color_rgba() = color_map[cTransportLoopRectFill];
-	transport_loop_range_rect->property_outline_color_rgba() = color_map[cTransportLoopRect];
-	transport_loop_range_rect->property_outline_pixels() = 1;
-	transport_loop_range_rect->hide();
-
-	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
-	transport_punch_range_rect->property_fill_color_rgba() = color_map[cTransportPunchRectFill];
-	transport_punch_range_rect->property_outline_color_rgba() = color_map[cTransportPunchRect];
-	transport_punch_range_rect->property_outline_pixels() = 0;
-	transport_punch_range_rect->hide();
-	
-	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
-
-	transport_punchin_line = new ArdourCanvas::SimpleLine (*time_line_group);
-	transport_punchin_line->property_x1() = 0.0;
-	transport_punchin_line->property_y1() = 0.0;
-	transport_punchin_line->property_x2() = 0.0;
-	transport_punchin_line->property_y2() = 0.0;
-	transport_punchin_line->property_color_rgba() = color_map[cPunchInLine];
-	transport_punchin_line->hide ();
-	
-	transport_punchout_line  = new ArdourCanvas::SimpleLine (*time_line_group);
-	transport_punchout_line->property_x1() = 0.0;
-	transport_punchout_line->property_y1() = 0.0;
-	transport_punchout_line->property_x2() = 0.0;
-	transport_punchout_line->property_y2() = 0.0;
-	transport_punchout_line->property_color_rgba() = color_map[cPunchOutLine];
-	transport_punchout_line->hide();
-	
-	// used to show zoom mode active zooming
-	zoom_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	zoom_rect->property_fill_color_rgba() = color_map[cZoomRectFill];
-	zoom_rect->property_outline_color_rgba() = color_map[cZoomRect];
-	zoom_rect->property_outline_pixels() = 1;
-	zoom_rect->hide();
-	
-	zoom_rect->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
-	
-	// used as rubberband rect
-	rubberband_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	rubberband_rect->property_outline_color_rgba() = color_map[cRubberBandRect];
-	rubberband_rect->property_fill_color_rgba() = (guint32) color_map[cRubberBandRectFill];
-	rubberband_rect->property_outline_pixels() = 1;
-	rubberband_rect->hide();
-	
-	tempo_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
-	meter_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
-	marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_marker_bar_event), marker_bar));
-	range_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
-	transport_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
-	
-	/* separator lines */
-	
-	tempo_line = new ArdourCanvas::SimpleLine (*tempo_group, 0, timebar_height, max_canvas_coordinate, timebar_height);
-	tempo_line->property_color_rgba() = RGBA_TO_UINT (0,0,0,255);
-
-	meter_line = new ArdourCanvas::SimpleLine (*meter_group, 0, timebar_height, max_canvas_coordinate, timebar_height);
-	meter_line->property_color_rgba() = RGBA_TO_UINT (0,0,0,255);
-
-	marker_line = new ArdourCanvas::SimpleLine (*marker_group, 0, timebar_height, max_canvas_coordinate, timebar_height);
-	marker_line->property_color_rgba() = RGBA_TO_UINT (0,0,0,255);
-	
-	range_marker_line = new ArdourCanvas::SimpleLine (*range_marker_group, 0, timebar_height, max_canvas_coordinate, timebar_height);
-	range_marker_line->property_color_rgba() = RGBA_TO_UINT (0,0,0,255);
-
-	transport_marker_line = new ArdourCanvas::SimpleLine (*transport_marker_group, 0, timebar_height, max_canvas_coordinate, timebar_height);
-	transport_marker_line->property_color_rgba() = RGBA_TO_UINT (0,0,0,255);
-
-	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_loop_range_view), false));
-	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_punch_range_view), false));
-	
-	double time_height = timebar_height * 5;
-	double time_width = FLT_MAX/frames_per_unit;
-	time_canvas.set_scroll_region(0.0, 0.0, time_width, time_height);
-	
-	edit_cursor = new Cursor (*this, "blue", &Editor::canvas_edit_cursor_event);
-	playhead_cursor = new Cursor (*this, "red", &Editor::canvas_playhead_cursor_event);
-	
-	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
-}
-
-void
 Editor::show_window ()
 {
 	show_all ();
@@ -1266,103 +1080,6 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 }
 
 void
-Editor::reset_scrolling_region (Gtk::Allocation* alloc)
-{
-	guint32 last_canvas_unit;
-	double height;
-	guint32 canvas_alloc_height, canvas_alloc_width;
-	TrackViewList::iterator i;
-	static bool first_time = true;
-
-	/* We need to make sure that the canvas always has its
-	   scrolling region set to larger of:
-
-	   - the size allocated for it (within the container its packed in)
-	   - the size required to see the entire session
-
-	   If we don't ensure at least the first of these, the canvas
-	   does some wierd and in my view unnecessary stuff to center
-	   itself within the allocated area, which causes bad, bad
-	   results.
-	   
-	   XXX GnomeCanvas has fixed this, and has an option to
-	   control the centering behaviour.
-	*/
-
-	last_canvas_unit = (guint32) ceil ((float) max_frames / frames_per_unit);
-
-	height = 0;
-
-	if (session) {
-		for (i = track_views.begin(); i != track_views.end(); ++i) {
-			if ((*i)->control_parent) {
-				height += (*i)->effective_height;
-				height += track_spacing;
-			}
-		}
-		
-		if (height) {
-			height -= track_spacing;
-		}
-	}
-
-	canvas_height = (guint32) height;
-	
-	if (alloc) {
-		canvas_alloc_height = alloc->get_height();
-		canvas_alloc_width = alloc->get_width();
-	} else {
-		canvas_alloc_height = track_canvas.get_height();
-		canvas_alloc_width = track_canvas.get_width();
-	}
-
-	canvas_height = max (canvas_height, canvas_alloc_height);
-	track_canvas.set_scroll_region ( 0.0, 0.0, max (last_canvas_unit, canvas_alloc_width), canvas_height);
-
-	if (edit_cursor) edit_cursor->set_length (canvas_alloc_height);
-	if (playhead_cursor) playhead_cursor->set_length (canvas_alloc_height);
-
-	if (marker_drag_line) {
-		marker_drag_line_points.back().set_x(canvas_height);
-		// cerr << "set mlA points, nc = " << marker_drag_line_points.num_points << endl;
-		marker_drag_line->property_points() = marker_drag_line_points;
-	}
-	if (range_marker_drag_rect) {
-		range_marker_drag_rect->property_y1() = 0.0;
-		range_marker_drag_rect->property_y2() = (double) canvas_height;
-	}
-
-	if (transport_loop_range_rect) {
-		transport_loop_range_rect->property_y1() = 0.0;
-		transport_loop_range_rect->property_y2() = (double) canvas_height;
-	}
-
-	if (transport_punch_range_rect) {
-		transport_punch_range_rect->property_y1() = 0.0;
-		transport_punch_range_rect->property_y2() = (double) canvas_height;
-	}
-
-	if (transport_punchin_line) {
-		transport_punchin_line->property_y1() = 0.0;
-		transport_punchin_line->property_y2() = (double) canvas_height;
-	}
-
-	if (transport_punchout_line) {
-		transport_punchout_line->property_y1() = 0.0;
-		transport_punchout_line->property_y2() = (double) canvas_height;
-	}
-		
-	update_fixed_rulers ();
-
-	if (is_visible() && first_time) {
-		tempo_map_changed (Change (0));
-		first_time = false;
-	} else {
-		redisplay_tempo ();
-	}
-}
-
-void
 Editor::queue_session_control_changed (Session::ControlType t)
 {
 	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &Editor::session_control_changed), t));
@@ -1626,7 +1343,7 @@ Editor::connect_to_session (Session *t)
 	redisplay_named_selections ();
 
 	//route_list.freeze (); GTK2FIX
-	route_display_model.clear ();
+	route_display_model->clear ();
 	session->foreach_route (this, &Editor::handle_new_route);
 	// route_list.select_all ();
 	// GTK2FIX
@@ -1740,7 +1457,7 @@ void
 Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
 {
 	using namespace Menu_Helpers;
-	AudioRegionView* arv = static_cast<AudioRegionView*> (gtk_object_get_data (GTK_OBJECT(item), "regionview"));
+	AudioRegionView* arv = static_cast<AudioRegionView*> (item->get_data ("regionview"));
 
 	if (arv == 0) {
 		fatal << _("programming error: fade in canvas item has no regionview data pointer!") << endmsg;

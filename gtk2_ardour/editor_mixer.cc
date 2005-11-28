@@ -263,9 +263,9 @@ Editor::session_going_away ()
 	/* rip everything out of the list displays */
 
 	region_list_clear (); // no clear() method in gtkmm 1.2 
-	route_display_model.clear ();
-	named_selection_model.clear ();
-	group_model.clear ();
+	route_display_model->clear ();
+	named_selection_model->clear ();
+	group_model->clear ();
 
 	edit_cursor_clock.set_session (0);
 	selection_start_clock.set_session (0);

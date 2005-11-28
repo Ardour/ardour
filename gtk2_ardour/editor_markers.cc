@@ -373,7 +373,7 @@ void
 Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 {
 	Marker * marker;
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (item->get_data("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -505,7 +505,7 @@ Editor::marker_menu_hide ()
 {
 	Marker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(marker_menu_item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -523,7 +523,7 @@ Editor::marker_menu_play_from ()
 {
 	Marker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(marker_menu_item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -553,7 +553,7 @@ Editor::marker_menu_set_playhead ()
 {
 	Marker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(marker_menu_item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -581,7 +581,7 @@ Editor::marker_menu_set_from_playhead ()
 {
 	Marker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(marker_menu_item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -609,7 +609,7 @@ Editor::marker_menu_set_from_selection ()
 {
 	Marker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(marker_menu_item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -647,7 +647,7 @@ Editor::marker_menu_loop_range ()
 {
 	Marker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(marker_menu_item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -674,7 +674,7 @@ Editor::marker_menu_edit ()
 	TempoMarker* tm;
 	Marker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(marker_menu_item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -697,7 +697,7 @@ Editor::marker_menu_remove ()
 	TempoMarker* tm;
 	Marker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(marker_menu_item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -716,7 +716,7 @@ Editor::marker_menu_rename ()
 {
 	Marker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(marker_menu_item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}

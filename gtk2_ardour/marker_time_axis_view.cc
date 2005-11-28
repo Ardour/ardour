@@ -95,13 +95,13 @@ MarkerTimeAxisView::~MarkerTimeAxisView()
 	
 	if(canvas_rect)
 	{
-		gtk_object_destroy(GTK_OBJECT(canvas_rect)) ;
+		delete canvas_rect;
 		canvas_rect = 0 ;
 	}
 	
 	if(canvas_group)
 	{
-		gtk_object_destroy(GTK_OBJECT(canvas_group)) ;
+		delete canvas_group;
 		canvas_group = 0 ;
 	}
 }
@@ -123,7 +123,7 @@ MarkerTimeAxisView::set_height(gdouble h)
 		return -1 ;
 	}
 	
-	gtk_object_set (GTK_OBJECT(canvas_rect), "y2", h, NULL);
+	canvas_rect->property_y2() = h;
 
 	for (MarkerViewList::iterator i = marker_view_list.begin(); i != marker_view_list.end(); ++i)
 	{

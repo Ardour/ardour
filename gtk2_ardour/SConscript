@@ -89,6 +89,7 @@ editing.cc
 editor.cc
 editor_actions.cc
 editor_audiotrack.cc
+editor_canvas.cc
 editor_canvas_events.cc
 editor_cursors.cc
 editor_edit_groups.cc

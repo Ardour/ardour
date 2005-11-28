@@ -333,8 +333,8 @@ ConnectionEditor::refill_connection_display ()
 	input_connection_display.set_model (Glib::RefPtr<TreeModel>(0));
 	output_connection_display.set_model (Glib::RefPtr<TreeModel>(0));
 
-	input_connection_model.clear();
-	output_connection_model.clear();
+	input_connection_model->clear();
+	output_connection_model->clear();
 
 	current_connection = 0;
 	

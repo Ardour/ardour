@@ -100,10 +100,9 @@ gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 
 	g_object_class_install_property (gobject_class,
 					 PROP_PIXBUF,
-					 g_param_spec_boxed ("pixbuf",
+					 g_param_spec_pointer ("pixbuf",
 							     _("pixbuf"),
 							     _("the pixbuf"),
-							     GDK_TYPE_PIXBUF,
 							     G_PARAM_WRITABLE)); 
 	g_object_class_install_property (gobject_class,
 					 PROP_X,
@@ -291,10 +290,10 @@ gnome_canvas_imageframe_set_property (GObject *object,
 
 	switch (prop_id) {
 	case PROP_PIXBUF:
-		if (item->canvas->aa && g_value_get_boxed (value)) {
+		if (item->canvas->aa && g_value_get_pointer (value)) {
 			if (image->pixbuf != NULL)
 				art_pixbuf_free (image->pixbuf);
-			image->pixbuf = g_value_get_boxed (value);
+			image->pixbuf = g_value_get_pointer (value);
 		}
 		update = TRUE;
 		break;

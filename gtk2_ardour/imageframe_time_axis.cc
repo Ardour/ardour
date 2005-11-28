@@ -116,21 +116,21 @@ ImageFrameTimeAxis::~ImageFrameTimeAxis ()
 	
 	for(list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i)
 	{
-		gtk_object_destroy (GTK_OBJECT((*i)->rect));
-		gtk_object_destroy (GTK_OBJECT((*i)->start_trim));
-		gtk_object_destroy (GTK_OBJECT((*i)->end_trim));
+		delete (*i)->rect;
+		delete (*i)->start_trim;
+		delete (*i)->end_trim;
 	}
 
 	for(list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i)
 	{
-		gtk_object_destroy (GTK_OBJECT((*i)->rect));
-		gtk_object_destroy (GTK_OBJECT((*i)->start_trim));
-		gtk_object_destroy (GTK_OBJECT((*i)->end_trim));
+		delete (*i)->rect;
+		delete (*i)->start_trim;
+		delete (*i)->end_trim;
 	}
 	
 	if (selection_group)
 	{
-		gtk_object_destroy (GTK_OBJECT (selection_group));
+		delete selection_group;
 		selection_group = 0 ;
 	}
 	

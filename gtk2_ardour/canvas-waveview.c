@@ -1,279 +1,272 @@
-/*
-    Copyright (C) 2000-2002 Paul Davis 
+ /*
+     Copyright (C) 2000-2002 Paul Davis 
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+     This program is free software; you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation; either version 2 of the License, or
+     (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
-*/
+     $Id$
+ */
 
-#include <stdio.h>
-#include <math.h>
-#include <libgnomecanvas/libgnomecanvas.h>
-#include <string.h>
-#include <limits.h>
+ #include <stdio.h>
+ #include <math.h>
+ #include <libgnomecanvas/libgnomecanvas.h>
+ #include <string.h>
+ #include <limits.h>
 
-#include <ardour/dB.h>
+ #include <ardour/dB.h>
 
-#include "canvas-waveview.h"
-#include "rgb_macros.h"
+ #include "canvas-waveview.h"
+ #include "rgb_macros.h"
 
-enum {
-	PROP_0,
-	PROP_DATA_SRC,
-	PROP_CHANNEL,
-	PROP_LENGTH_FUNCTION,
-	PROP_SOURCEFILE_LENGTH_FUNCTION,
-	PROP_PEAK_FUNCTION,
-	PROP_GAIN_FUNCTION,
-	PROP_GAIN_SRC,
-	PROP_CACHE,
-	PROP_CACHE_UPDATER,
-	PROP_SAMPLES_PER_UNIT,
-	PROP_AMPLITUDE_ABOVE_AXIS,
-	PROP_X,
-	PROP_Y,
-	PROP_HEIGHT,
-	PROP_WAVE_COLOR,
-	PROP_RECTIFIED,
-	PROP_REGION_START
-};
+ enum {
+	 PROP_0,
+	 PROP_DATA_SRC,
+	 PROP_CHANNEL,
+	 PROP_LENGTH_FUNCTION,
+	 PROP_SOURCEFILE_LENGTH_FUNCTION,
+	 PROP_PEAK_FUNCTION,
+	 PROP_GAIN_FUNCTION,
+	 PROP_GAIN_SRC,
+	 PROP_CACHE,
+	 PROP_CACHE_UPDATER,
+	 PROP_SAMPLES_PER_UNIT,
+	 PROP_AMPLITUDE_ABOVE_AXIS,
+	 PROP_X,
+	 PROP_Y,
+	 PROP_HEIGHT,
+	 PROP_WAVE_COLOR,
+	 PROP_RECTIFIED,
+	 PROP_REGION_START
+ };
 
-static void gnome_canvas_waveview_class_init     (GnomeCanvasWaveViewClass *class);
+ static void gnome_canvas_waveview_class_init     (GnomeCanvasWaveViewClass *class);
 
-static void gnome_canvas_waveview_init           (GnomeCanvasWaveView      *waveview);
+ static void gnome_canvas_waveview_init           (GnomeCanvasWaveView      *waveview);
 
-static void gnome_canvas_waveview_destroy        (GtkObject            *object);
+ static void gnome_canvas_waveview_destroy        (GtkObject            *object);
 
-static void gnome_canvas_waveview_set_property   (GObject        *object,
-						  guint           prop_id,
-						  const GValue   *value,
-						  GParamSpec     *pspec);
-static void gnome_canvas_waveview_get_property   (GObject        *object,
-						  guint           prop_id,
-						  GValue         *value,
-						  GParamSpec     *pspec);
+ static void gnome_canvas_waveview_set_property   (GObject        *object,
+						   guint           prop_id,
+						   const GValue   *value,
+						   GParamSpec     *pspec);
+ static void gnome_canvas_waveview_get_property   (GObject        *object,
+						   guint           prop_id,
+						   GValue         *value,
+						   GParamSpec     *pspec);
 
-static void   gnome_canvas_waveview_update       (GnomeCanvasItem *item,
-						  double          *affine,
-						  ArtSVP          *clip_path,
-						  int              flags);
+ static void   gnome_canvas_waveview_update       (GnomeCanvasItem *item,
+						   double          *affine,
+						   ArtSVP          *clip_path,
+						   int              flags);
 
-static void   gnome_canvas_waveview_bounds       (GnomeCanvasItem *item,
-						  double          *x1,
-						  double          *y1,
-						  double          *x2,
-						  double          *y2);
+ static void   gnome_canvas_waveview_bounds       (GnomeCanvasItem *item,
+						   double          *x1,
+						   double          *y1,
+						   double          *x2,
+						   double          *y2);
 
-static double gnome_canvas_waveview_point        (GnomeCanvasItem  *item,
-						  double            x,
-						  double            y,
-						  int               cx,
-						  int               cy,
-						  GnomeCanvasItem **actual_item);
+ static double gnome_canvas_waveview_point        (GnomeCanvasItem  *item,
+						   double            x,
+						   double            y,
+						   int               cx,
+						   int               cy,
+						   GnomeCanvasItem **actual_item);
 
-static void gnome_canvas_waveview_render         (GnomeCanvasItem *item,
-						  GnomeCanvasBuf  *buf);
+ static void gnome_canvas_waveview_render         (GnomeCanvasItem *item,
+						   GnomeCanvasBuf  *buf);
 
-static void gnome_canvas_waveview_draw           (GnomeCanvasItem *item,
-						  GdkDrawable     *drawable,
-						  int              x,
-						  int              y,
-						  int              w,
-						  int              h);
+ static void gnome_canvas_waveview_draw           (GnomeCanvasItem *item,
+						   GdkDrawable     *drawable,
+						   int              x,
+						   int              y,
+						   int              w,
+						   int              h);
 
-static void gnome_canvas_waveview_set_data_src   (GnomeCanvasWaveView *,
-						  void *);
+ static void gnome_canvas_waveview_set_data_src   (GnomeCanvasWaveView *,
+						   void *);
 
-static void gnome_canvas_waveview_set_channel    (GnomeCanvasWaveView *,
-						  guint32);
+ static void gnome_canvas_waveview_set_channel    (GnomeCanvasWaveView *,
+						   guint32);
 
-static gint32 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview,
-						  gulong               start_sample,
-						  gulong               end_sample);
+ static gint32 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview,
+						   gulong               start_sample,
+						   gulong               end_sample);
 
-static GnomeCanvasItemClass *parent_class;
+ static GnomeCanvasItemClass *parent_class;
 
-GType
-gnome_canvas_waveview_get_type (void)
-{
-	static GType waveview_type;
+ GType
+ gnome_canvas_waveview_get_type (void)
+ {
+	 static GType waveview_type;
 
-	if (!waveview_type) {
-		static const GTypeInfo object_info = {
-			sizeof (GnomeCanvasWaveViewClass),
-			(GBaseInitFunc) NULL,
-			(GBaseFinalizeFunc) NULL,
-			(GClassInitFunc) gnome_canvas_waveview_class_init,
-			(GClassFinalizeFunc) NULL,
-			NULL,			/* class_data */
-			sizeof (GnomeCanvasWaveView),
-			0,			/* n_preallocs */
-			(GInstanceInitFunc) gnome_canvas_waveview_init,
-			NULL			/* value_table */
-		};
+	 if (!waveview_type) {
+		 static const GTypeInfo object_info = {
+			 sizeof (GnomeCanvasWaveViewClass),
+			 (GBaseInitFunc) NULL,
+			 (GBaseFinalizeFunc) NULL,
+			 (GClassInitFunc) gnome_canvas_waveview_class_init,
+			 (GClassFinalizeFunc) NULL,
+			 NULL,			/* class_data */
+			 sizeof (GnomeCanvasWaveView),
+			 0,			/* n_preallocs */
+			 (GInstanceInitFunc) gnome_canvas_waveview_init,
+			 NULL			/* value_table */
+		 };
 
-		waveview_type = g_type_register_static (GNOME_TYPE_CANVAS_ITEM, "GnomeCanvasWaveView",
-							&object_info, 0);
-	}
+		 waveview_type = g_type_register_static (GNOME_TYPE_CANVAS_ITEM, "GnomeCanvasWaveView",
+							 &object_info, 0);
+	 }
 
-	return waveview_type;
-}
+	 return waveview_type;
+ }
 
-static void
-gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
-{
-        GObjectClass *gobject_class;
-	GtkObjectClass *object_class;
-	GnomeCanvasItemClass *item_class;
+ static void
+ gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
+ {
+	 GObjectClass *gobject_class;
+	 GtkObjectClass *object_class;
+	 GnomeCanvasItemClass *item_class;
 
-	gobject_class = (GObjectClass *) class;
-	object_class = (GtkObjectClass *) class;
-	item_class = (GnomeCanvasItemClass *) class;
+	 gobject_class = (GObjectClass *) class;
+	 object_class = (GtkObjectClass *) class;
+	 item_class = (GnomeCanvasItemClass *) class;
 
-	parent_class = g_type_class_peek_parent (class);
+	 parent_class = g_type_class_peek_parent (class);
 
-	gobject_class->set_property = gnome_canvas_waveview_set_property;
-	gobject_class->get_property = gnome_canvas_waveview_get_property;
-	
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_DATA_SRC,
-                 g_param_spec_boxed ("data_src", NULL, NULL,
-				     GTK_TYPE_POINTER,
+	 gobject_class->set_property = gnome_canvas_waveview_set_property;
+	 gobject_class->get_property = gnome_canvas_waveview_get_property;
+
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_DATA_SRC,
+		  g_param_spec_pointer ("data_src", NULL, NULL,
+					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_CHANNEL,
+		  g_param_spec_uint ("channel", NULL, NULL,
+				     0, G_MAXUINT, 0,
 				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_CHANNEL,
-                 g_param_spec_uint ("channel", NULL, NULL,
-				    0, G_MAXUINT, 0,
-				    (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	
-	g_object_class_install_property
-	        (gobject_class,
-	         PROP_LENGTH_FUNCTION,
-	         g_param_spec_boxed ("length_function", NULL, NULL,
-				     GTK_TYPE_POINTER,
-				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	
-	g_object_class_install_property
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_LENGTH_FUNCTION,
+		  g_param_spec_pointer ("length_function", NULL, NULL,
+					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
                 (gobject_class,
                  PROP_SOURCEFILE_LENGTH_FUNCTION,
-                 g_param_spec_boxed ("sourcefile_length_function", NULL, NULL,
-				     GTK_TYPE_POINTER,
-				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_PEAK_FUNCTION,
-                 g_param_spec_boxed ("peak_function", NULL, NULL,
-				     GTK_TYPE_POINTER,
-				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_GAIN_FUNCTION,
-                 g_param_spec_boxed ("gain_function", NULL, NULL,
-				     GTK_TYPE_POINTER,
-				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	
-	g_object_class_install_property
-                (gobject_class,
+                 g_param_spec_pointer ("sourcefile_length_function", NULL, NULL,
+				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_PEAK_FUNCTION,
+		  g_param_spec_pointer ("peak_function", NULL, NULL,
+					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_GAIN_FUNCTION,
+		  g_param_spec_pointer ("gain_function", NULL, NULL,
+					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
                  PROP_GAIN_SRC,
-                 g_param_spec_boxed ("gain_src", NULL, NULL,
-				     GTK_TYPE_POINTER,
-				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
+                 g_param_spec_pointer ("gain_src", NULL, NULL,
+				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
 	
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_CACHE,
-                 g_param_spec_boxed ("cache", NULL, NULL,
-				     GTK_TYPE_POINTER,
-				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_CACHE_UPDATER,
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_CACHE,
+		  g_param_spec_pointer ("cache", NULL, NULL,
+					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_CACHE_UPDATER,
                  g_param_spec_boolean ("cache_updater", NULL, NULL,
 				       FALSE,
 				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_SAMPLES_PER_UNIT,
-                 g_param_spec_double ("sample_per_unit", NULL, NULL,
-				      0.0, G_MAXDOUBLE, 0.0,
-				      (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_AMPLITUDE_ABOVE_AXIS,
-                 g_param_spec_double ("amplitude_above_axis", NULL, NULL,
-				      0.0, G_MAXDOUBLE, 0.0,
-				      (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_X,
-                 g_param_spec_double ("x", NULL, NULL,
-				      0.0, G_MAXDOUBLE, 0.0,
-				      (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_Y,
-                 g_param_spec_double ("y", NULL, NULL,
-				      0.0, G_MAXDOUBLE, 0.0,
-				      (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_HEIGHT,
-                 g_param_spec_double ("height", NULL, NULL,
-				      0.0, G_MAXDOUBLE, 0.0,
-				      (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-
-        g_object_class_install_property
-                (gobject_class,
-                 PROP_WAVE_COLOR,
-                 g_param_spec_uint ("wave_color", NULL, NULL,
-				    0, G_MAXUINT, 0,
-				    (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-
-	g_object_class_install_property
-                (gobject_class,
-                 PROP_RECTIFIED,
-                 g_param_spec_boolean ("rectified", NULL, NULL,
-				       FALSE,
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_SAMPLES_PER_UNIT,
+		  g_param_spec_double ("samples_per_unit", NULL, NULL,
+				       0.0, G_MAXDOUBLE, 0.0,
 				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-
-        g_object_class_install_property
-                (gobject_class,
-                 PROP_REGION_START,
-                 g_param_spec_uint ("region_start", NULL, NULL,
-				    0, G_MAXUINT, 0,
-				    (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-
-	object_class->destroy = gnome_canvas_waveview_destroy;
-
-	item_class->update = gnome_canvas_waveview_update;
-	item_class->bounds = gnome_canvas_waveview_bounds;
-	item_class->point = gnome_canvas_waveview_point;
-	item_class->render = gnome_canvas_waveview_render;
-	item_class->draw = gnome_canvas_waveview_draw;
-}
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_AMPLITUDE_ABOVE_AXIS,
+		  g_param_spec_double ("amplitude_above_axis", NULL, NULL,
+				       0.0, G_MAXDOUBLE, 0.0,
+				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_X,
+		  g_param_spec_double ("x", NULL, NULL,
+				       0.0, G_MAXDOUBLE, 0.0,
+				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_Y,
+		  g_param_spec_double ("y", NULL, NULL,
+				       0.0, G_MAXDOUBLE, 0.0,
+				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_HEIGHT,
+		  g_param_spec_double ("height", NULL, NULL,
+				       0.0, G_MAXDOUBLE, 0.0,
+				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_WAVE_COLOR,
+		  g_param_spec_uint ("wave_color", NULL, NULL,
+				     0, G_MAXUINT, 0,
+				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_RECTIFIED,
+		  g_param_spec_boolean ("rectified", NULL, NULL,
+					FALSE,
+					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_REGION_START,
+		  g_param_spec_uint ("region_start", NULL, NULL,
+				     0, G_MAXUINT, 0,
+				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 object_class->destroy = gnome_canvas_waveview_destroy;
+	 
+	 item_class->update = gnome_canvas_waveview_update;
+	 item_class->bounds = gnome_canvas_waveview_bounds;
+	 item_class->point = gnome_canvas_waveview_point;
+	 item_class->render = gnome_canvas_waveview_render;
+	 item_class->draw = gnome_canvas_waveview_draw;
+ }
 
 GnomeCanvasWaveViewCache*
 gnome_canvas_waveview_cache_new ()

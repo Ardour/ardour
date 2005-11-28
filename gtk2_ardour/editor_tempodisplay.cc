@@ -325,7 +325,7 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 	Marker* marker;
 	TempoMarker* tempo_marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -409,7 +409,7 @@ Editor::edit_tempo_marker (ArdourCanvas::Item *item)
 	Marker* marker;
 	TempoMarker* tempo_marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -428,7 +428,7 @@ Editor::edit_meter_marker (ArdourCanvas::Item *item)
 	Marker* marker;
 	MeterMarker* meter_marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -459,7 +459,7 @@ Editor::remove_meter_marker (ArdourCanvas::Item* item)
 	Marker* marker;
 	MeterMarker* meter_marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: meter marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}

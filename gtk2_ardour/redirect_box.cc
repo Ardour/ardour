@@ -508,7 +508,7 @@ RedirectBox::redirects_changed (void *src)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::redirects_changed), src));
 	
 	//redirect_display.freeze ();
-	model.clear ();
+	model->clear ();
 	redirect_active_connections.clear ();
 	redirect_name_connections.clear ();
 

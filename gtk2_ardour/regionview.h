@@ -48,15 +48,15 @@ class AutomationTimeAxisView;
 class AudioRegionView : public TimeAxisViewItem
 {
   public:
-  AudioRegionView (ArdourCanvas::Group *, 
-		     AudioTimeAxisView&,
-		     ARDOUR::AudioRegion&,
-		     double initial_samples_per_unit,
-		     double amplitude_above_axis,
-		     Gdk::Color& base_color,
-		     bool wait_for_waves);
-    ~AudioRegionView ();
-
+	AudioRegionView (ArdourCanvas::Group *, 
+			 AudioTimeAxisView&,
+			 ARDOUR::AudioRegion&,
+			 double initial_samples_per_unit,
+			 double amplitude_above_axis,
+			 Gdk::Color& base_color,
+			 bool wait_for_waves);
+	~AudioRegionView ();
+	
     ARDOUR::AudioRegion& region;  // ok, let 'em have it
     bool is_valid() const { return valid; }
     void set_valid (bool yn) { valid = yn; }

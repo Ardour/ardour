@@ -301,7 +301,7 @@ Mixer_UI::connect_to_session (Session* sess)
 	// GTK2FIX
 	// track_display_list.freeze ();
 
-	track_display_model.clear ();
+	track_display_model->clear ();
 
 	session->foreach_route (this, &Mixer_UI::add_strip);
 	
@@ -784,7 +784,7 @@ Mixer_UI::redisplay_snapshots ()
 		return;
 	}
 
-	snapshot_display_model.clear ();
+	snapshot_display_model->clear ();
 
 	for (vector<string*>::iterator i = states->begin(); i != states->end(); ++i) {
 		string statename = *(*i);

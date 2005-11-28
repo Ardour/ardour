@@ -28,6 +28,7 @@
 #include <libgnomecanvasmm/line.h>
 #include <gdkmm/types.h>
 #include "canvas.h"
+
 namespace Gtk {
 	class Window;
 	class ComboBoxText;
@@ -72,5 +73,7 @@ gint pane_handler (GdkEventButton*, Gtk::Paned*);
 uint32_t rgba_from_style (std::string style, uint32_t, uint32_t, uint32_t, uint32_t);
 
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
+
+bool canvas_item_visible (ArdourCanvas::Item* item);
 
 #endif /* __ardour_gtk_utils_h__ */

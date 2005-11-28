@@ -315,7 +315,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			
 		case AudioRegionViewNameHighlight:
 		case AudioRegionViewName:
-			if ((rv = reinterpret_cast<AudioRegionView *> (gtk_object_get_data(GTK_OBJECT(item), "regionview"))) != 0) {
+			if ((rv = reinterpret_cast<AudioRegionView *> (item->get_data ("regionview"))) != 0) {
 				set_selected_regionview_from_click (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift), true);
 			}
 			break;
@@ -323,7 +323,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		case GainAutomationControlPointItem:
 		case PanAutomationControlPointItem:
 		case RedirectAutomationControlPointItem:
-			if ((cp = reinterpret_cast<ControlPoint *> (gtk_object_get_data(GTK_OBJECT(item), "control_point"))) != 0) {
+			if ((cp = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) != 0) {
 				set_selected_control_point_from_click (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift), true);
 			}
 			break;
@@ -358,7 +358,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 		case AudioRegionViewNameHighlight:
 		case AudioRegionViewName:
-			rv = reinterpret_cast<AudioRegionView *> (gtk_object_get_data(GTK_OBJECT(item), "regionview"));
+			rv = reinterpret_cast<AudioRegionView *> (item->get_data ("regionview"));
 		default:
 			break;
 		}
@@ -1125,7 +1125,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	switch (item_type) {
 	case GainControlPointItem:
 		if (mouse_mode == MouseGain) {
-			cp = reinterpret_cast<ControlPoint*>(gtk_object_get_data (GTK_OBJECT(item), "control_point"));
+			cp = reinterpret_cast<ControlPoint*>(item->get_data ("control_point"));
 			cp->set_visible (true);
 
 			double at_x, at_y;
@@ -1149,7 +1149,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		cp = reinterpret_cast<ControlPoint*>(gtk_object_get_data (GTK_OBJECT(item), "control_point"));
+		cp = reinterpret_cast<ControlPoint*>(item->get_data ("control_point"));
 		cp->set_visible (true);
 		
 		double at_x, at_y;
@@ -1224,7 +1224,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		
 		/* when the name is not an active item, the entire name highlight is for trimming */
 
-		if (!reinterpret_cast<AudioRegionView *> (gtk_object_get_data(GTK_OBJECT(item), "regionview"))->name_active()) {
+		if (!reinterpret_cast<AudioRegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (mouse_mode == MouseObject && is_drawable()) {
 				track_canvas_scroller.get_window()->set_cursor (*trimmer_cursor);
 			}
@@ -1250,7 +1250,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			track_canvas_scroller.get_window()->set_cursor (*cursor);
 
 			AutomationTimeAxisView* atv;
-			if ((atv = static_cast<AutomationTimeAxisView*>(gtk_object_get_data(GTK_OBJECT(item), "trackview"))) != 0) {
+			if ((atv = static_cast<AutomationTimeAxisView*>(item->get_data ("trackview"))) != 0) {
 				clear_entered_track = false;
 				set_entered_track (atv);
 			}
@@ -1268,7 +1268,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case MarkerItem:
-		if ((marker = static_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
 		marker->set_color_rgba (color_map[cEnteredMarker]);
@@ -1337,7 +1337,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		cp = reinterpret_cast<ControlPoint*>(gtk_object_get_data (GTK_OBJECT(item), "control_point"));
+		cp = reinterpret_cast<ControlPoint*>(item->get_data ("control_point"));
 		if (cp->line.npoints() > 1) {
 			if (!cp->selected) {
 				cp->set_visible (false);
@@ -1371,7 +1371,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationLineItem:
 	case RedirectAutomationLineItem:
 	case PanAutomationLineItem:
-		al = reinterpret_cast<AutomationLine*> (gtk_object_get_data (GTK_OBJECT(item),"line"));
+		al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
 		{
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line)
@@ -1384,7 +1384,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case AudioRegionViewName:
 		/* see enter_handler() for notes */
-		if (!reinterpret_cast<AudioRegionView *> (gtk_object_get_data(GTK_OBJECT(item), "regionview"))->name_active()) {
+		if (!reinterpret_cast<AudioRegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (is_drawable() && mouse_mode == MouseObject) {
 				track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
 			}
@@ -1402,7 +1402,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 		
 	case MarkerItem:
-		if ((marker = static_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
 		loc = find_location_from_marker (marker, is_start);
@@ -1419,7 +1419,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
-		rv = static_cast<AudioRegionView*>(gtk_object_get_data (GTK_OBJECT(item), "regionview"));
+		rv = static_cast<AudioRegionView*>(item->get_data ("regionview"));
 		{
 			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
 			if (rect) {
@@ -1701,7 +1701,7 @@ Editor::start_fade_in_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab (event);
 
-	if ((drag_info.data = (gtk_object_get_data (GTK_OBJECT(item), "regionview"))) == 0) {
+	if ((drag_info.data = (item->get_data ("regionview"))) == 0) {
 		fatal << _("programming error: fade in canvas item has no regionview data pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -1791,7 +1791,7 @@ Editor::start_fade_out_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab (event);
 
-	if ((drag_info.data = (gtk_object_get_data (GTK_OBJECT(item), "regionview"))) == 0) {
+	if ((drag_info.data = (item->get_data ("regionview"))) == 0) {
 		fatal << _("programming error: fade out canvas item has no regionview data pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -1884,7 +1884,7 @@ Editor::start_cursor_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab (event);
 
-	if ((drag_info.data = (gtk_object_get_data (GTK_OBJECT(item), "cursor"))) == 0) {
+	if ((drag_info.data = (item->get_data ("cursor"))) == 0) {
 		fatal << _("programming error: cursor canvas item has no cursor data pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -1974,7 +1974,7 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	Marker* marker;
 
-	if ((marker = static_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+	if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -2112,7 +2112,7 @@ Editor::start_meter_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	Marker* marker;
 	MeterMarker* meter_marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: meter marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -2191,7 +2191,7 @@ Editor::start_tempo_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	Marker* marker;
 	TempoMarker* tempo_marker;
 
-	if ((marker = reinterpret_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "tempo_marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (item->get_data ("tempo_marker"))) == 0) {
 		fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -2272,7 +2272,7 @@ Editor::remove_gain_control_point (ArdourCanvas::Item*item, GdkEvent* event)
 {
 	ControlPoint* control_point;
 
-	if ((control_point = reinterpret_cast<ControlPoint *> (gtk_object_get_data (GTK_OBJECT(item), "control_point"))) == 0) {
+	if ((control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) == 0) {
 		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -2291,7 +2291,7 @@ Editor::remove_control_point (ArdourCanvas::Item*item, GdkEvent* event)
 {
 	ControlPoint* control_point;
 
-	if ((control_point = reinterpret_cast<ControlPoint *> (gtk_object_get_data (GTK_OBJECT(item), "control_point"))) == 0) {
+	if ((control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) == 0) {
 		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -2304,7 +2304,7 @@ Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	ControlPoint* control_point;
 	
-	if ((control_point = reinterpret_cast<ControlPoint *> (gtk_object_get_data (GTK_OBJECT(item), "control_point"))) == 0) {
+	if ((control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) == 0) {
 		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -2402,7 +2402,7 @@ Editor::start_line_grab_from_line (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	AutomationLine* al;
 	
-	if ((al = reinterpret_cast<AutomationLine*> (gtk_object_get_data (GTK_OBJECT(item), "line"))) == 0) {
+	if ((al = reinterpret_cast<AutomationLine*> (item->get_data ("line"))) == 0) {
 		fatal << _("programming error: line canvas item has no line pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -4089,7 +4089,7 @@ Editor::hide_marker (ArdourCanvas::Item* item, GdkEvent* event)
 	Marker* marker;
 	bool is_start;
 
-	if ((marker = static_cast<Marker *> (gtk_object_get_data (GTK_OBJECT(item), "marker"))) == 0) {
+	if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -4397,12 +4397,10 @@ Editor::drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		double x1 = frame_to_pixel (start);
 		double x2 = frame_to_pixel (end);
 		
-		gtk_object_set (GTK_OBJECT(rubberband_rect), 
-				"x1", x1,
-				"y1", y1,
-				"x2", x2,
-				"y2", y2,
-				NULL);
+		rubberband_rect->property_x1() = x1;
+		rubberband_rect->property_y1() = y1;
+		rubberband_rect->property_x2() = x2;
+		rubberband_rect->property_y2() = y2;
 
 		rubberband_rect->show();
 		rubberband_rect->raise_to_top();

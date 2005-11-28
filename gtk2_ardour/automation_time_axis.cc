@@ -300,7 +300,7 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 	controls_table.show_all ();
 
 	TimeAxisView::set_height (h);
-	gtk_object_set (GTK_OBJECT(base_rect), "y2", (double) h, NULL);
+	base_rect->property_y2() = h;
 
 	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
 		(*i)->set_height (h);

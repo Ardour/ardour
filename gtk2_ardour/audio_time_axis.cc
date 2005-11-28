@@ -500,12 +500,10 @@ AudioTimeAxisView::show_timestretch (jack_nframes_t start, jack_nframes_t end)
 	x2 = (end - 1) / editor.get_current_zoom();
 	y2 = height - 2;
 	
-	gtk_object_set (GTK_OBJECT(timestretch_rect), 
-			"x1", x1,
-			"y1", 1.0,
-			"x2", x2,
-			"y2", y2,
-			NULL);
+	timestretch_rect->property_x1() = x1;
+	timestretch_rect->property_y1() = 1.0;
+	timestretch_rect->property_x2() = x2;
+	timestretch_rect->property_y2() = y2;
 }
 
 void

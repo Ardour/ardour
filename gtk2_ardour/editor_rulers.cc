@@ -617,7 +617,7 @@ Editor::update_ruler_visibility ()
 	
 	if (ruler_shown[ruler_time_tempo]) {
 		lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
-		gtk_object_get (GTK_OBJECT(tempo_group), "y", &old_unit_pos);
+		old_unit_pos = tempo_group->property_y();
 		if (tbpos != old_unit_pos) {
 			tempo_group->move(0.0, tbpos - old_unit_pos);
 		}

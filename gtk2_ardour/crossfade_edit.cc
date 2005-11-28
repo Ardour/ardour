@@ -454,7 +454,7 @@ CrossfadeEditor::canvas_event (GdkEvent* event)
 
 CrossfadeEditor::Point::~Point()
 {
-	gtk_object_destroy (GTK_OBJECT(box));
+	delete box;
 }
 
 CrossfadeEditor::Point*

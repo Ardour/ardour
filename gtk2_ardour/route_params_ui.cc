@@ -364,7 +364,7 @@ RouteParams_UI::set_session (Session *sess)
 	// GTK2FIX
 	// route_select_list.freeze ();
 
-	route_display_model.clear();
+	route_display_model->clear();
 
 	if (session) {
 		session->foreach_route (this, &RouteParams_UI::add_route);
@@ -386,7 +386,7 @@ RouteParams_UI::session_gone ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &RouteParams_UI::session_gone));
 
-	route_display_model.clear();
+	route_display_model->clear();
 
 	cleanup_io_frames();
 	cleanup_pre_view();
