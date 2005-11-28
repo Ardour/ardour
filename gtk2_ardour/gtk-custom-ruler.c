@@ -334,25 +334,20 @@ gtk_custom_ruler_get_range (GtkCustomRuler *ruler,
 void
 gtk_custom_ruler_draw_ticks (GtkCustomRuler * ruler)
 {
-        GtkCustomRulerClass *klass;
-	g_return_if_fail (ruler != NULL);
-	g_return_if_fail (GTK_IS_CUSTOM_RULER (ruler));
+        g_return_if_fail (GTK_IS_CUSTOM_RULER (ruler));
 
-       	klass = GTK_CUSTOM_RULER_CLASS (GTK_OBJECT_CLASS (ruler));
-	if (klass->draw_ticks)
-		klass->draw_ticks (ruler);
+        if (GTK_CUSTOM_RULER_GET_CLASS (ruler)->draw_ticks)
+                GTK_CUSTOM_RULER_GET_CLASS (ruler)->draw_ticks (ruler);
+  
 }
 
 void
 gtk_custom_ruler_draw_pos (GtkCustomRuler * ruler)
 {
-    GtkCustomRulerClass *klass;
-    g_return_if_fail (ruler != NULL);
-    g_return_if_fail (GTK_IS_CUSTOM_RULER (ruler));
-    
-    klass = GTK_CUSTOM_RULER_CLASS (GTK_OBJECT_CLASS (ruler));
-    if (klass->draw_pos && ruler->show_position)
-	    klass->draw_pos (ruler);
+        g_return_if_fail (GTK_IS_CUSTOM_RULER (ruler));
+  
+        if (GTK_CUSTOM_RULER_GET_CLASS (ruler)->draw_pos && ruler->show_position)
+                GTK_CUSTOM_RULER_GET_CLASS (ruler)->draw_pos (ruler);
 }
 
 static void
