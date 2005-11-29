@@ -1,30 +1,32 @@
 <ui>
 
-    <menubar name='Main' action='null'>
-        <menu name='Session' action='null'>
+    <menubar name='Main' action='MainMenu'>
+        <menu name='Session' action='Session'>
            <menuitem action='New'/>
            <menuitem action='Open'/>
            <menuitem action='Recent'/>
            <menuitem action='Close'/>
+           <menuitem action='Snapshot'/>
+           <menuitem action='SaveTemplate'/>
            <separator/>
            <menuitem action='AddTrackBus'/>
            <separator/>
-           <menu name='Export' action='null'>
+           <menu name='Export' action='Export'>
                <menuitem action='ExportSession'/>
                <menuitem action='ExportRange'/>
            </menu>
            <separator/>
-           <menu name='Cleanup' action='null'>
+           <menu name='Cleanup' action='Cleanup'>
                <menuitem action='CleanupUnused'/>
                <menuitem action='FlushWastebasket'/>
            </menu>
            <separator/>
            <menuitem action='Quit'/>
         </menu>
-        <menu name='JACK' action='null'>
+        <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>
                <menuitem action='JACKReconnect'/>
-               <menu name='Latency' action='null'>
+               <menu name='Latency' action='Latency'>
                    <menuitem action='JACKLatency32'/>
                    <menuitem action='JACKLatency64'/>
                    <menuitem action='JACKLatency128'/>
@@ -36,7 +38,7 @@
                    <menuitem action='JACKLatency8192'/>
                </menu>
         </menu>
-        <menu name='Windows' action = 'null'>
+        <menu name='Windows' action = 'Windows'>
                <menuitem action='GotoEditor'/>
                <menuitem action='GotoMixer'/>
                <menuitem action='ToggleOptionsEditor'/>

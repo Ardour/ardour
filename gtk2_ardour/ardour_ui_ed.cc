@@ -63,12 +63,16 @@ ARDOUR_UI::install_actions ()
 	Glib::RefPtr<ActionGroup> main_actions = ActionGroup::create (X_("Main"));
 	Glib::RefPtr<Action> act;
 
-	act = ActionManager::ActionManager::register_action (main_actions, X_("New"), _("New"),  bind (mem_fun(*this, &ARDOUR_UI::new_session), false, string ()));
+	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
+	ActionManager::register_action (main_actions, X_("Export"), _("Export"));
+	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
+
+	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  bind (mem_fun(*this, &ARDOUR_UI::new_session), false, string ()));
 
 	cerr << "\n\n\n NEW has accel path " << act->get_accel_path() << endl;
 
-	ActionManager::ActionManager::register_action (main_actions, X_("Open"), _("Open"),  mem_fun(*this, &ARDOUR_UI::open_session));
-	ActionManager::ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  mem_fun(*this, &ARDOUR_UI::open_recent_session));
+	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  mem_fun(*this, &ARDOUR_UI::open_session));
+	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  mem_fun(*this, &ARDOUR_UI::open_recent_session));
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -94,7 +98,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Snapshot"), _("Snapshot"),  mem_fun(*this, &ARDOUR_UI::snapshot_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("Save Template..."), _("Save Template..."),  mem_fun(*this, &ARDOUR_UI::save_template));
+	act = ActionManager::register_action (main_actions, X_("SaveTemplate"), _("Save Template..."),  mem_fun(*this, &ARDOUR_UI::save_template));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("ExportSession"), _("Export session to audiofile..."),  mem_fun (*editor, &PublicEditor::export_session));
@@ -114,7 +118,9 @@ ARDOUR_UI::install_actions ()
 	/* JACK actions for controlling ... JACK */
 
 	Glib::RefPtr<ActionGroup> jack_actions = ActionGroup::create (X_("JACK"));
-
+	ActionManager::register_action (jack_actions, X_("JACK"), _("JACK"));
+	ActionManager::register_action (jack_actions, X_("Latency"), _("Latency"));
+	
 	act = ActionManager::register_action (jack_actions, X_("JACKReconnect"), _("Reconnect"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::reconnect_to_jack));
 	ActionManager::jack_opposite_sensitive_actions.push_back (act);
 
@@ -145,9 +151,9 @@ ARDOUR_UI::install_actions ()
 	/* these actions are intended to be shared across all windows */
 	
 	common_actions = ActionGroup::create (X_("Common"));
-
+	ActionManager::register_action (main_actions, X_("Windows"), _("Windows"));
 	ActionManager::register_action (common_actions, X_("Start-Prefix"), _("start prefix"), mem_fun(*this, &ARDOUR_UI::start_keyboard_prefix));
-	ActionManager::register_action (common_actions, X_("Quit"), _("quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
+	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
 
         /* windows visibility actions */
 
