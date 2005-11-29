@@ -482,14 +482,11 @@ ExportDialog::set_state()
 				if (nchns == 2) {
 					if (r % 2) {
 						rows[r][exp_cols.right] = true;
-//						master_selector.cell (r, 2).set_pixmap (check_pixmap, check_mask);
 					} else {
 						rows[r][exp_cols.left] = true;
-//						master_selector.cell (r, 1).set_pixmap (check_pixmap, check_mask);
 					}
 				} else {
 					rows[r][exp_cols.left] = true;
-//					master_selector.cell (r, 1).set_pixmap (check_pixmap, check_mask);
 				}
 			}
 

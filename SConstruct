@@ -7,6 +7,7 @@ import shutil
 import glob
 import errno
 import time
+from sets import Set
 import SCons.Node.FS
 
 SConsignFile()
@@ -34,7 +35,8 @@ opts.AddOptions(
     BoolOption('VST', 'Compile with support for VST', 0),
     BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('USE_SSE_EVERYWHERE', 'Ask the compiler to use x86/SSE instructions and also our hand-written x86/SSE optimizations when possible (off by default)', 0),
-    BoolOption('BUILD_SSE_OPTIMIZATIONS', 'Use our hand-written x86/SSE optimizations when possible (off by default)', 0)
+    BoolOption('BUILD_SSE_OPTIMIZATIONS', 'Use our hand-written x86/SSE optimizations when possible (off by default)', 0),
+    BoolOption('BUILD_VECLIB_OPTIMIZATIONS', 'Build with Apple Accelerate/vecLib optimizations when possible (off by default)', 0)
   )
 
 #----------------------------------------------------------------------
@@ -52,6 +54,10 @@ class LibraryInfo(Environment):
             self.Append (LIBPATH = other.get ('LIBPATH', []))	
             self.Append (CPPPATH = other.get('CPPPATH', []))
             self.Append (LINKFLAGS = other.get('LINKFLAGS', []))
+	self.Replace(LIBS = list(Set(self.get('LIBS', []))))
+	self.Replace(LIBPATH = list(Set(self.get('LIBPATH', []))))
+	self.Replace(CPPPATH = list(Set(self.get('CPPPATH',[]))))
+	#doing LINKFLAGS breaks -framework
 
 
 env = LibraryInfo (options = opts,
@@ -566,6 +572,12 @@ if config[config_arch] == 'apple':
         libraries['core'].Append (LIBPATH = [ '/opt/local/lib' ])
     if os.path.isdir('/opt/local/include'):
         libraries['core'].Append (CPPPATH = [ '/opt/local/include' ])
+
+    if env['BUILD_VECLIB_OPTIMIZATIONS'] == 1:
+        opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
+        debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
+        libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
+
 if config[config_cpu] == 'powerpc':
     #
     # Apple/PowerPC optimization options

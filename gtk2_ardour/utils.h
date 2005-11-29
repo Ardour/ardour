@@ -22,7 +22,6 @@
 #define __ardour_gtk_utils_h__
 
 #include <string>
-#include <vector>
 #include <cmath>
 #include <ardour/types.h>
 #include <libgnomecanvasmm/line.h>

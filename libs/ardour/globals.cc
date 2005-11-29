@@ -216,7 +216,7 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 
                 }
 
- #elif defined (__APPLE__)
+#elif defined (__APPLE__) && defined (BUILD_VECLIB_OPTIMIZATIONS)
                 long sysVersion = 0;
 
                 if (noErr != Gestalt(gestaltSystemVersion, &sysVersion))

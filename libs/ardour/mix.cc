@@ -114,7 +114,7 @@ mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nf
 	}
 }
 
-#if defined (__APPLE__)
+#if defined (__APPLE__) && defined (BUILD_VECLIB_OPTIMIZATIONS)
 #include <Accelerate/Accelerate.h>
 
 float
