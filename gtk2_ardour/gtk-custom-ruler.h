@@ -91,7 +91,7 @@ struct _GtkCustomMetric {
   gint (* get_marks) (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars);
 };
 
-GType gtk_custom_ruler_get_type            (void);
+GType   gtk_custom_ruler_get_type            (void);
 void    gtk_custom_ruler_set_metric          (GtkCustomRuler *ruler, GtkCustomMetric *metric);
 void    gtk_custom_ruler_set_range           (GtkCustomRuler *ruler,
 					      gdouble lower,
