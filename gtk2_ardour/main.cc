@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include <sigc++/bind.h>
+#include <gtkmm/settings.h>
 
 #include <pbd/error.h>
 #include <pbd/textreceiver.h>
@@ -184,6 +185,8 @@ catch_signals (void)
 	struct sigaction action;
 	pthread_t signal_thread_id;
 	sigset_t signals;
+
+	return 0;
 
 //	if (setpgid (0,0)) {
 	if (setsid ()) {
@@ -357,6 +360,10 @@ main (int argc, char *argv[])
 	}
 
 	gtk_rc_set_default_files (null_file_list);
+
+	// allow run-time rebinding of accels
+
+	Settings::get_default()->property_gtk_can_change_accels() = true;
 
 	cout << _("Ardour/GTK ") 
 	     << VERSIONSTRING

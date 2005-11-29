@@ -796,7 +796,8 @@ void
 Editor::show_window ()
 {
 	show_all ();
-	
+	present ();
+
 	/* now reset all audio_time_axis heights, because widgets might need
 	   to be re-hidden
 	*/
@@ -4096,10 +4097,4 @@ Editor::transport_punch_location()
 	} else {
 		return 0;
 	}
-}
-
-void 
-Editor::on_map ()
-{
-	// XXX remove me
 }

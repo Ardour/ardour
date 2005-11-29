@@ -307,7 +307,6 @@ class Editor : public PublicEditor
 	void map_position_change (jack_nframes_t);
 
 	void on_realize();
-	void on_map ();
 
   private:
 	

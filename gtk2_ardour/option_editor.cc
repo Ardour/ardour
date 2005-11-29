@@ -71,7 +71,7 @@ static vector<string> layer_mode_strings;
 static vector<string> xfade_model_strings;
 
 OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
-	: ArdourDialog ("option editor"),
+	: Dialog ("option editor"),
 	  ui (uip),
 	  editor (ed),
 	  mixer (mixui),
@@ -159,8 +159,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	layer_mode_label.set_name ("OptionsLabel");
 	xfade_model_label.set_name ("OptionsLabel");
 	
-	VBox *vbox = manage(new VBox);
-	add (*vbox);
+	VBox *vbox = get_vbox();
 	set_border_width (3);
 
 	vbox->set_spacing (4);
@@ -197,6 +196,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	}
 
 	set_session (0);
+	show_all_children();
 }
 
 void
@@ -1398,7 +1398,7 @@ OptionEditor::strip_width_clicked ()
 void
 OptionEditor::just_close_win()
 {
-	hide_all();
+	hide();
 }
 
 void

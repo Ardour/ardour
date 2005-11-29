@@ -52,6 +52,7 @@ ARDOUR_UI::shutdown ()
 void
 ARDOUR_UI::we_have_dependents ()
 {
+	cerr << "have dependents\n";
 	setup_keybindings ();
 }
 

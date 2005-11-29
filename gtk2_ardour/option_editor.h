@@ -46,7 +46,7 @@ class IOSelector;
 class GainMeter;
 class PannerUI;
 
-class OptionEditor : public ArdourDialog
+class OptionEditor : public Gtk::Dialog
 {
   public:
 	OptionEditor (ARDOUR_UI&, PublicEditor&, Mixer_UI&);
