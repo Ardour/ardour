@@ -333,13 +333,20 @@ ARDOUR_UI::route_params_hiding ()
 void
 ARDOUR_UI::toggle_sound_file_browser ()
 {
-	// GTK2FIX
-	// if (sfdb_check->get_active()) {
-	// SoundFileBrowser sfdb(_("Sound File Browser"));
+	/* This is called from the check menu item.  If checked on, open
+	 * a new SoundFileBrowser, and connect it's quit method to the
+	 * check menu item so if it is toggled off, it exits. If it exits
+	 * by itself, set the check menu item to false.
+	 * If this is called by checking off, don't do anything, the signals
+	 * should handle everything.  I expect this idiom to be useful for 
+	 * other Gtk::Dialog's as well.  --Taybin */
 
-	// sfdb_check->signal_toggled().connect (bind (mem_fun (sfdb, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
-	// sfdb.run();
-	// sfdb_check->set_active(false);
-	// }
+	//GTK2FIX
+	//if (sfdb_check->get_active()) {
+	//SoundFileBrowser sfdb(_("Sound File Browser"));
+	//sfdb_check->signal_toggled().connect (bind (mem_fun (sfdb, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
+	//sfdb.run();
+	//sfdb_check->set_active(false);
+	//}
 }
 
