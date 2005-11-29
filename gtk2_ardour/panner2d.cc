@@ -22,6 +22,9 @@
 #include <climits>
 #include <string.h>
 
+#include <gtkmm/menu.h>
+#include <gtkmm/checkmenuitem.h>
+
 #include <pbd/error.h>
 #include <ardour/panner.h>
 #include <gtkmm2ext/gtk_ui.h>

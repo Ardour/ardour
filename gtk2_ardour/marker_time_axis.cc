@@ -22,6 +22,8 @@
 
 #include <pbd/error.h>
 
+#include <gtkmm/menu.h>
+
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/session.h>
@@ -240,6 +242,7 @@ void
 MarkerTimeAxis::build_marker_menu()
 {
 	using namespace Menu_Helpers;
+	using Gtk::Menu;
 
 	marker_menu = manage(new Menu) ;
 	marker_menu->set_name ("ArdourContextMenu");

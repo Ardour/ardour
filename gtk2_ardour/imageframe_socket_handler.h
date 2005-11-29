@@ -22,7 +22,6 @@
 #define __ardour_gtk_imageframe_socket_handler_h__
 
 #include <string>
-#include <gtkmm.h>
 #include <list>
 #include "editor.h"
 #include "ardour_image_compositor_socket.h"

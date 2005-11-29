@@ -2,7 +2,6 @@
 #define __ardour_gtk_automation_pan_line_h__
 
 #include <ardour/ardour.h>
-#include <gtkmm.h>
 
 #include "canvas.h"
 #include "automation_line.h"

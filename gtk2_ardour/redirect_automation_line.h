@@ -22,7 +22,6 @@
 #define __ardour_gtk_redirect_automation_line_h__
 
 #include <ardour/ardour.h>
-#include <gtkmm.h>
 
 #include "automation_line.h"
 

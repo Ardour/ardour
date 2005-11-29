@@ -22,7 +22,10 @@
 #define __ardour_gtk_axis_view_h__
 
 #include <list>
-#include <gtkmm.h>
+
+#include <gtkmm/label.h>
+#include <gdkmm/color.h>
+
 #include <pbd/xml++.h>
 #include "prompter.h"
 

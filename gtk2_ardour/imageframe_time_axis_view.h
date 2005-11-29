@@ -24,8 +24,10 @@
 #include <list>
 #include <cmath>
 
+#include <gdkmm/color.h>
+
 #include <jack/jack.h>
-#include <gtkmm.h>
+
 #include <libgnomecanvasmm/libgnomecanvasmm.h>
 #include "canvas.h"
 #include "simplerect.h"

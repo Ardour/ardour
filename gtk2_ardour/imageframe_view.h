@@ -22,7 +22,7 @@
 #define __gtk_ardour_imageframe_view_h__
 
 #include <string>
-#include <gtkmm.h>
+#include <gdkmm/color.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <sigc++/signal.h>
 #include <list>

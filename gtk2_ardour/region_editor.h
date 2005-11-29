@@ -23,7 +23,19 @@
 
 #include <map>
 
-#include <gtkmm.h>
+#include <gtkmm/label.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/box.h>
+#include <gtkmm/togglebutton.h>
+#include <gtkmm/button.h>
+#include <gtkmm/arrow.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/table.h>
+#include <gtkmm/alignment.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/separator.h>
+#include <gtkmm/spinbutton.h>
+
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <sigc++/signal.h>
 

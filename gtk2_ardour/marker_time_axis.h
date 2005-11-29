@@ -22,7 +22,6 @@
 #define __ardour_marker_time_axis_h__
 
 #include <string>
-#include <gtkmm.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 
 #include "ardour_dialog.h"
@@ -34,6 +33,9 @@
 
 namespace ARDOUR {
 	class Session;
+}
+namespace ARDOUR {
+	class Menu;
 }
 
 class PublicEditor;

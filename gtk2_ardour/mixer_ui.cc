@@ -516,9 +516,11 @@ Mixer_UI::track_display_selection_changed ()
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if (selection->is_selected (i)) {
+			strip = (*i)[track_display_columns.strip];
 			strip->set_marked_for_display  (true);
 			show_strip (strip);
 		} else {
+			strip = (*i)[track_display_columns.strip];
 			strip->set_marked_for_display (false);
 			hide_strip (strip);
 		}

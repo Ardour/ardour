@@ -22,6 +22,12 @@
 #include "new_session_dialog.h"
 #include "glade_path.h"
 
+#include <gtkmm/entry.h>
+#include <gtkmm/filechooserbutton.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/radiobutton.h>
+
 const char* NewSessionDialogFactory::s_m_top_level_widget_name = X_("NewSessionDialog");
 const char* NewSessionDialogFactory::top_level_widget_name() { return s_m_top_level_widget_name; }
 

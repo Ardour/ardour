@@ -92,7 +92,7 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	selection->signal_changed().connect (mem_fun (*this, &RedirectBox::selection_changed));
 
 	redirect_display.set_model (model);
-	redirect_display.append_column (NULL, columns.text);
+	redirect_display.append_column ("WHY?", columns.text);
 	redirect_display.set_name ("MixerRedirectSelector");
 	redirect_display.set_headers_visible (false);
 	redirect_display.set_reorderable (true);

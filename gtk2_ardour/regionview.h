@@ -22,7 +22,7 @@
 #define __gtk_ardour_region_view_h__
 
 #include <vector>
-#include <gtkmm.h>
+
 #include <libgnomecanvasmm/libgnomecanvasmm.h>
 #include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>

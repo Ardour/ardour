@@ -22,10 +22,13 @@
 #define __gtk_ardour_marker_view_h__
 
 #include <string>
-#include <gtkmm.h>
 #include "time_axis_view_item.h"
 
 #include "canvas.h"
+
+namespace Gdk {
+	class Color;
+}
 
 class MarkerTimeAxisView ;
 class ImageFrameView ;

@@ -25,12 +25,14 @@
 #include <map>
 #include <cmath>
 
-#include <gtkmm.h>
-
 #include <ardour/location.h>
 #include "enums.h"
 #include "simplerect.h"
 #include "canvas.h"
+
+namespace Gdk {
+	class Color;
+}
 
 namespace ARDOUR {
 	class Route;

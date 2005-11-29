@@ -24,7 +24,12 @@
 #include <vector>
 #include <list>
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/table.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/label.h>
 
 #include <ardour/types.h>
 #include <ardour/region.h>
@@ -41,6 +46,10 @@ namespace ARDOUR {
 	class Session;
 	class RouteGroup;
 	class Playlist;
+}
+
+namespace Gtk {
+	class Menu;
 }
 
 class PublicEditor;

@@ -24,13 +24,24 @@
 #include <sys/types.h>
 #include <map>
 #include <string>
-#include <gtkmm.h>
+
+#include <glibmm/refptr.h>
+#include <gtkmm/drawingarea.h>
 
 using std::map;
 using std::string;
 
 namespace ARDOUR {
 	class Panner;
+}
+
+namespace Gtk {
+	class Menu;
+	class CheckMenuItem;
+}
+
+namespace Pango {
+	class Layout;
 }
 
 class Panner2d : public Gtk::DrawingArea

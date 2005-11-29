@@ -24,7 +24,18 @@
 #include <vector>
 
 #include <cmath>
-#include <gtkmm.h>
+
+#include <gtkmm/eventbox.h>
+#include <gtkmm/button.h>
+#include <gtkmm/box.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
+#include <gtkmm/togglebutton.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/textview.h>
+#include <gtkmm/adjustment.h>
+
 #include <gtkmm2ext/auto_spin.h>
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/click_box.h>
@@ -60,6 +71,10 @@ namespace ARDOUR {
 	class PortInsert;
 	class Connection;
 	class Plugin;
+}
+namespace Gtk {
+	class Window;
+	class Style;
 }
 
 class Mixer_UI;

@@ -22,7 +22,6 @@
 #define __gtk_ardour_crossfade_view_h__
 
 #include <vector>
-#include <gtkmm.h>
 #include <libgnomecanvasmm/libgnomecanvasmm.h>
 #include <sigc++/signal.h>
 #include <ardour/crossfade.h>

@@ -22,7 +22,15 @@
 #define __ardour_gtk_panner_ui_h__
 
 #include <vector>
-#include <gtkmm.h>
+
+#include <gtkmm/box.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/viewport.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/arrow.h>
+#include <gtkmm/togglebutton.h>
+#include <gtkmm/button.h>
+
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/click_box.h>
 
@@ -37,6 +45,11 @@ namespace ARDOUR {
 namespace Gtkmm2ext {
 	class FastMeter;
 	class BarController;
+}
+
+namespace Gtk {
+	class Menu;
+	class Menuitem;
 }
 
 class PannerUI : public Gtk::HBox

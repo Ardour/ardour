@@ -22,8 +22,7 @@
 #define __ardour_marker_time_axis_view_h__
 
 #include <list>
-
-#include <gtkmm.h>
+#include <gdkmm/color.h>
 #include <libgnomecanvasmm/group.h>
 
 #include <ardour/location.h>

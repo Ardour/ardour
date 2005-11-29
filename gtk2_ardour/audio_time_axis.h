@@ -21,7 +21,14 @@
 #ifndef __ardour_trackview_h__
 #define __ardour_trackview_h__
 
-#include <gtkmm.h>
+#include <gtkmm/table.h>
+#include <gtkmm/button.h>
+#include <gtkmm/box.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
+#include <gtkmm/radiomenuitem.h>
+#include <gtkmm/checkmenuitem.h>
+
 #include <gtkmm2ext/selector.h>
 #include <list>
 

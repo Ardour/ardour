@@ -3,7 +3,6 @@
 
 #include <ardour/ardour.h>
 #include <libgnomecanvasmm/libgnomecanvasmm.h>
-#include <gtkmm.h>
 
 #include "automation_line.h"
 

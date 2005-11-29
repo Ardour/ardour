@@ -23,7 +23,6 @@
 
 #include <list>
 
-#include <gtkmm.h>
 #include <pbd/xml++.h>
 #include <ardour/ardour.h>
 #include <ardour/route.h>
@@ -36,6 +35,12 @@ namespace Gtkmm2ext {
 
 namespace ARDOUR {
 	class AudioTrack;
+}
+
+namespace Gtk {
+	class Menu;
+	class CheckMenuItem;
+	class Widget;
 }
 
 class RouteUI : public virtual AxisView

@@ -22,7 +22,13 @@
 #define __ardour_meterbridgestrip_h__
 
 #include <sigc++/signal.h>
-#include <gtkmm.h>
+
+#include <gtkmm/box.h>
+#include <gtkmm/widget.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/label.h>
+#include <gtkmm/frame.h>
+
 #include <gtkmm2ext/fastmeter.h>
 
 namespace ARDOUR {

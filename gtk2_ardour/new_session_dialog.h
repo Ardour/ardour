@@ -24,7 +24,16 @@
 #define NEW_SESSION_DIALOG_H
 
 #include <string>
-#include <gtkmm.h>
+#include <gtkmm/dialog.h>
+#include <glibmm/refptr.h>
+
+namespace Gtk {
+	class Entry;
+	class FileChooserButton;
+	class SpinButton;
+	class CheckButton;
+	class RadioButton;
+}
 
 #include "glade_factory.h"
 

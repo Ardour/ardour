@@ -23,9 +23,17 @@
 
 #include <vector>
 
+#include <gtkmm/box.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/button.h>
+#include <gtkmm/table.h>
+#include <gtkmm/drawingarea.h>
+
+
 #include <ardour/types.h>
 
-#include <gtkmm.h>
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/click_box.h>
 
@@ -41,6 +49,9 @@ namespace Gtkmm2ext {
 	class FastMeter;
 	class BarController;
 	class Pix;
+}
+namespace Gtk {
+	class Menu;
 }
 
 class GainMeter : public Gtk::VBox

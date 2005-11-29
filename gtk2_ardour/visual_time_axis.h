@@ -21,7 +21,9 @@
 #ifndef __ardour_visual_time_axis_h__
 #define __ardour_visual_time_axis_h__
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+
 #include <gtkmm2ext/selector.h>
 
 #include "ardour_dialog.h"

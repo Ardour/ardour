@@ -333,7 +333,7 @@ Editor::Editor (AudioEngine& eng)
 	track_canvas_scroller.get_hadjustment()->set_upper (1200.0);
 	track_canvas_scroller.get_hadjustment()->set_step_increment (20.0);
 	track_canvas_scroller.get_hadjustment()->signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled));
-	
+
 	edit_vscrollbar.set_adjustment(*track_canvas_scroller.get_vadjustment());
 	edit_hscrollbar.set_adjustment(*track_canvas_scroller.get_hadjustment());
 
@@ -346,6 +346,9 @@ Editor::Editor (AudioEngine& eng)
 	time_canvas_scroller.set_hadjustment (*track_canvas_scroller.get_hadjustment());
 	time_canvas_scroller.set_name ("TimeCanvasScroller");
 
+	track_canvas_scroller.signal_map_event().connect (mem_fun (*this, &Editor::track_canvas_map_handler));
+	time_canvas_scroller.signal_map_event().connect (mem_fun (*this, &Editor::time_canvas_map_handler));
+	
 	edit_controls_vbox.set_spacing (track_spacing);
 	edit_controls_hbox.pack_start (edit_controls_vbox, true, true);
 	edit_controls_scroller.add (edit_controls_hbox);
@@ -1000,15 +1003,6 @@ Editor::on_realize ()
 	Gdk::Color white ("#ffffff" );
 
 	null_cursor = new Gdk::Cursor(empty_pixmap, empty_bitmap, white, white, 0, 0);
-}
-
-void
-Editor::on_map ()
-{
-	Window::on_map ();
-
-	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
-	time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
 }
 
 void
@@ -4102,4 +4096,10 @@ Editor::transport_punch_location()
 	} else {
 		return 0;
 	}
+}
+
+void 
+Editor::on_map ()
+{
+	// XXX remove me
 }

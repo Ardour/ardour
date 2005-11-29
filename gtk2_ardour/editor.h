@@ -682,6 +682,9 @@ class Editor : public PublicEditor
 	Gtk::ScrolledWindow  time_canvas_scroller;
 	Gtk::ScrolledWindow  edit_controls_scroller;
 
+	bool track_canvas_map_handler (GdkEventAny*);
+	bool time_canvas_map_handler (GdkEventAny*);
+
 	gint edit_controls_button_release (GdkEventButton*);
 	Gtk::Menu *edit_controls_left_menu;
 	Gtk::Menu *edit_controls_right_menu;

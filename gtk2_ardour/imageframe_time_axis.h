@@ -22,7 +22,7 @@
 #define __ardour_imageframe_time_axis_h__
 
 #include <list>
-#include <gtkmm.h>
+
 #include <libgnomecanvas/libgnomecanvas.h>
 
 #include "ardour_dialog.h"
@@ -34,6 +34,9 @@
 namespace ARDOUR
 {
 	class Session ;
+}
+namespace Gtk {
+	class Menu;
 }
 
 class PublicEditor ;

@@ -23,6 +23,8 @@
 
 #include <pbd/error.h>
 
+#include <gtkmm/menu.h>
+
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/gtk_ui.h>
 
@@ -44,9 +46,9 @@
 
 #include "i18n.h"
 
-using namespace ARDOUR ;
-using namespace sigc ;
-using namespace Gtk ;
+using namespace ARDOUR;
+using namespace sigc;
+using namespace Gtk;
 
 /**
  * Constructs a new ImageFrameTimeAxis.
@@ -245,6 +247,7 @@ void
 ImageFrameTimeAxis::build_display_menu()
 {
 	using namespace Menu_Helpers;
+	using Gtk::Menu;
 
 	/* get the size menu ready */
 
@@ -279,6 +282,7 @@ void
 ImageFrameTimeAxis::create_imageframe_menu()
 {
 	using namespace Menu_Helpers;
+	using Gtk::Menu;
 
 	imageframe_menu = manage(new Menu) ;
 	imageframe_menu->set_name ("ArdourContextMenu");

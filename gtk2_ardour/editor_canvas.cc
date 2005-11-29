@@ -355,3 +355,17 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 	}
 }
 
+bool
+Editor::track_canvas_map_handler (GdkEventAny* ev)
+{
+	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+	return false;
+}
+
+bool
+Editor::time_canvas_map_handler (GdkEventAny* ev)
+{
+	time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
+	return false;
+}
+
