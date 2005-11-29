@@ -182,7 +182,7 @@ gnome_canvas_simpleline_destroy (GtkObject *object)
 	GnomeCanvasSimpleLine *line;
 
 	g_return_if_fail (object != NULL);
-	g_return_if_fail (GNOME_IS_CANVAS_LINE (object));
+	g_return_if_fail (GNOME_IS_CANVAS_SIMPLELINE (object));
 
 	line = GNOME_CANVAS_SIMPLELINE (object);
 
