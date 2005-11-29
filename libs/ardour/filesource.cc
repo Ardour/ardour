@@ -77,6 +77,24 @@ char   FileSource::bwf_organization_code[4] = "las";
 char   FileSource::bwf_serial_number[13] = "000000000000";
 string FileSource::search_path;
 
+#undef WE_ARE_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
+#define WE_ARE_BIGENDIAN true
+#else
+#define WE_ARE_BIGENDIAN false
+#endif
+
+#define Swap_32(value)         \
+	(((((uint32_t)value)<<24) & 0xFF000000) | \
+	 ((((uint32_t)value)<< 8) & 0x00FF0000) | \
+	 ((((uint32_t)value)>> 8) & 0x0000FF00) | \
+	 ((((uint32_t)value)>>24) & 0x000000FF))
+
+#define Swap_16(value)         \
+	(((((uint16_t)value)>> 8) & 0x000000FF) | \
+	 ((((uint16_t)value)<< 8) & 0x0000FF00))
+
+
 void
 FileSource::set_search_path (string p)
 {
@@ -313,7 +331,8 @@ FileSource::discover_chunks (bool silent)
 	off64_t end;
 	off64_t offset;
 	char null_terminated_id[5];
-
+	bool doswap = false;
+	
 	if ((end = lseek (fd, 0, SEEK_END)) < 0) {
 		error << _("FileSource: cannot seek to end of file") << endmsg;
 		return -1;
@@ -324,7 +343,13 @@ FileSource::discover_chunks (bool silent)
 		return -1;
 	}
 
-	if (memcmp (rw.id, "RIFF", 4) || memcmp (rw.text, "WAVE", 4)) {
+ 	if (memcmp (rw.id, "RIFF", 4) == 0 && memcmp (rw.text, "WAVE", 4) == 0) {
+ 		header.bigendian = false;
+ 	}
+ 	else if (memcmp(rw.id, "RIFX", 4) == 0 && memcmp (rw.text, "WAVE", 4) == 0) {
+ 		header.bigendian = true;
+ 	}
+ 	else {
 		if (!silent) {
 			error << string_compose (_("FileSource %1: not a RIFF/WAVE file"), _path) << endmsg;
 		}
@@ -335,6 +360,14 @@ FileSource::discover_chunks (bool silent)
 
 	/* OK, its a RIFF/WAVE file. Find each chunk */
 
+	doswap = header.bigendian != WE_ARE_BIGENDIAN;
+	
+	if (doswap) {
+		swap_endian(rw);
+	}
+
+	
+	
 	memcpy (null_terminated_id, rw.id, 4);
 	chunk_info.push_back (ChunkInfo (null_terminated_id, rw.size, 0));
 
@@ -349,7 +382,39 @@ FileSource::discover_chunks (bool silent)
 			return -1;
 		}
 
+		if (doswap) {
+			swap_endian(this_chunk);
+		}
+
 		memcpy (null_terminated_id, this_chunk.id, 4);
+
+		/* do sanity check and possible correction to legacy ardour RIFF wavs
+		   created on big endian platforms. after swapping, the size field will not be
+		   in range for the fmt chunk
+		*/
+		if ((memcmp(null_terminated_id, "fmt ", 4) == 0 || memcmp(null_terminated_id, "bext", 4) == 0)
+		     && !header.bigendian && (this_chunk.size > 700 || this_chunk.size < 0))
+		{
+			warning << _("filesource: correcting mis-written RIFF file to become a RIFX: ") << name() << endmsg;
+			
+			memcpy (&rw.id, "RIFX", 4);
+			::pwrite64 (fd, &rw.id, 4, 0);
+			header.bigendian = true;
+			// fix wave chunk already read
+			swap_endian(rw);
+			
+			doswap = header.bigendian != WE_ARE_BIGENDIAN;
+
+			// now reset offset and continue the loop
+			// to reread all the chunks
+			chunk_info.clear();
+			memcpy (null_terminated_id, rw.id, 4);
+			chunk_info.push_back (ChunkInfo (null_terminated_id, rw.size, 0));
+			offset = sizeof (rw);
+			continue;
+		}
+				
+
 		if (end != 44)
 			if ((memcmp(null_terminated_id, "data", 4) == 0))
 				if ((this_chunk.size == 0) || (this_chunk.size > (end - offset)))
@@ -364,6 +429,44 @@ FileSource::discover_chunks (bool silent)
 
 	return 0;
 }
+
+void
+FileSource::swap_endian (GenericChunk & chunk) const
+{
+	chunk.size = Swap_32(chunk.size);
+}
+
+void
+FileSource::swap_endian (FMTChunk & chunk) const
+{
+	chunk.size = Swap_32(chunk.size);
+
+	chunk.formatTag = Swap_16(chunk.formatTag);
+	chunk.nChannels = Swap_16(chunk.nChannels);
+	chunk.nSamplesPerSec = Swap_32(chunk.nSamplesPerSec);
+	chunk.nAvgBytesPerSec = Swap_32(chunk.nAvgBytesPerSec);
+	chunk.nBlockAlign = Swap_16(chunk.nBlockAlign);
+	chunk.nBitsPerSample = Swap_16(chunk.nBitsPerSample);
+}
+
+void
+FileSource::swap_endian (BroadcastChunk & chunk) const
+{
+	chunk.size = Swap_32(chunk.size);
+
+ 	chunk.time_reference_low = Swap_32(chunk.time_reference_low);
+	chunk.time_reference_high = Swap_32(chunk.time_reference_high);
+	chunk.version = Swap_16(chunk.version);
+}
+
+void FileSource::swap_endian (Sample *buf, jack_nframes_t cnt) const
+{
+	for (jack_nframes_t n=0; n < cnt; ++n) {
+		uint32_t * tmp = (uint32_t *) &buf[n];
+		*tmp = Swap_32(*tmp);
+	}
+}
+
 
 FileSource::ChunkInfo*
 FileSource::lookup_chunk (string what)
@@ -380,8 +483,15 @@ int
 FileSource::fill_header (jack_nframes_t rate)
 {
 	/* RIFF/WAVE */
-	
-	memcpy (header.wave.id, "RIFF", 4);
+
+	if (WE_ARE_BIGENDIAN) {
+		memcpy (header.wave.id, "RIFX", 4);
+		header.bigendian = true;
+	}
+	else {
+		memcpy (header.wave.id, "RIFF", 4);
+		header.bigendian = false;
+	}
 	header.wave.size = 0; /* file size */
 	memcpy (header.wave.text, "WAVE", 4);
 
@@ -558,15 +668,25 @@ FileSource::read_header (bool silent)
 	/* we already have the chunk info, so just load up whatever we have */
 
 	ChunkInfo* info;
-
-	if ((info = lookup_chunk ("RIFF")) == 0) {
+	
+	if (header.bigendian == false && (info = lookup_chunk ("RIFF")) == 0) {
 		error << _("FileSource: can't find RIFF chunk info") << endmsg;
 		return -1;
 	}
-
+	else if (header.bigendian == true && (info = lookup_chunk ("RIFX")) == 0) {
+		error << _("FileSource: can't find RIFX chunk info") << endmsg;
+		return -1;
+	}
+	
+	
 	/* just fill this chunk/header ourselves, disk i/o is stupid */
 
-	memcpy (header.wave.id, "RIFF", 4);
+	if (header.bigendian) {
+		memcpy (header.wave.id, "RIFX", 4);
+	}
+	else {
+		memcpy (header.wave.id, "RIFF", 4);
+	}
 	header.wave.size = 0;
 	memcpy (header.wave.text, "WAVE", 4);
 
@@ -594,6 +714,10 @@ FileSource::read_header (bool silent)
 		return -1;
 	}
 
+	if (header.bigendian != WE_ARE_BIGENDIAN) {
+		swap_endian (header.format);
+	}
+	
 	if ((info = lookup_chunk ("data")) == 0) {
 		error << _("FileSource: can't find data chunk info") << endmsg;
 		return -1;
@@ -602,6 +726,10 @@ FileSource::read_header (bool silent)
 	if (::pread (fd, &header.data, sizeof (header.data), info->offset) != sizeof (header.data)) {
 		error << _("FileSource: can't read data chunk") << endmsg;
 		return -1;
+	}
+
+	if (header.bigendian != WE_ARE_BIGENDIAN) {
+		swap_endian (header.data);
 	}
 
 	return 0;
@@ -618,6 +746,10 @@ FileSource::read_broadcast_data (ChunkInfo& info)
 		return -1;
 	}
 
+	if (header.bigendian != WE_ARE_BIGENDIAN) {
+		swap_endian (header.bext);
+	}
+	
 	if (info.size > sizeof (header.bext)) {
 
 		coding_history_size = info.size - (sizeof (header.bext) - sizeof (GenericChunk));
@@ -722,8 +854,14 @@ FileSource::write_header()
 	/* write RIFF/WAVE boilerplate */
 
 	pos = 0;
+
+ 	WAVEChunk wchunk = header.wave;
+ 
+ 	if (header.bigendian != WE_ARE_BIGENDIAN) {
+ 		swap_endian(wchunk);
+ 	}
 	
-	if (::pwrite64 (fd, (char *) &header.wave, sizeof (header.wave), pos) != sizeof (header.wave)) {
+	if (::pwrite64 (fd, (char *) &wchunk, sizeof (wchunk), pos) != sizeof (wchunk)) {
 		error << string_compose(_("FileSource: cannot write WAVE chunk: %1"), strerror (errno)) << endmsg;
 		return -1;
 	}
@@ -734,7 +872,12 @@ FileSource::write_header()
 
 		/* write broadcast chunk data without copy history */
 
-		if (::pwrite64 (fd, (char *) &header.bext, sizeof (header.bext), pos) != sizeof (header.bext)) {
+		BroadcastChunk bchunk = header.bext;
+		if (header.bigendian != WE_ARE_BIGENDIAN) {
+			swap_endian (bchunk);
+		}
+		
+		if (::pwrite64 (fd, (char *) &bchunk, sizeof (bchunk), pos) != sizeof (bchunk)) {
 			return -1;
 		}
 
@@ -757,15 +900,24 @@ FileSource::write_header()
 	}
 
         /* write fmt and data chunks */
-
-	if (::pwrite64 (fd, (char *) &header.format, sizeof (header.format), pos) != sizeof (header.format)) {
+ 	FMTChunk fchunk = header.format;
+ 	if (header.bigendian != WE_ARE_BIGENDIAN) {
+ 		swap_endian (fchunk);
+ 	}
+ 	
+ 	if (::pwrite64 (fd, (char *) &fchunk, sizeof (fchunk), pos) != sizeof (fchunk)) {
 		error << string_compose(_("FileSource: cannot write format chunk: %1"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	pos += sizeof (header.format);
-	
-	if (::pwrite64 (fd, (char *) &header.data, sizeof (header.data), pos) != sizeof (header.data)) {
+
+ 	GenericChunk dchunk = header.data;
+ 	if (header.bigendian != WE_ARE_BIGENDIAN) {
+ 		swap_endian (dchunk);
+ 	}
+ 
+ 	if (::pwrite64 (fd, (char *) &dchunk, sizeof (dchunk), pos) != sizeof (dchunk)) {
 		error << string_compose(_("FileSource: cannot data chunk: %1"), strerror (errno)) << endmsg;
 		return -1;
 	}
@@ -820,6 +972,10 @@ FileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt
 		return 0;
 	}
 
+	if (header.bigendian != WE_ARE_BIGENDIAN) {
+		swap_endian(dst, cnt);
+	}
+	
 	_read_data_count = byte_cnt;
 		
 	return cnt;
@@ -1023,7 +1179,9 @@ FileSource::repair (string path, jack_nframes_t rate)
 	struct stat statbuf;
 	size_t i;
 	int ret = -1;
-
+	bool bigend = false;
+	bool doswap = false;
+	
 	if (stat (path.c_str(), &statbuf)) {
 		return -1;
 	}
@@ -1043,15 +1201,25 @@ FileSource::repair (string path, jack_nframes_t rate)
 		goto out;
 	}
 	
-	if (memcmp (&buf[0], "RIFF", 4) || memcmp (&buf[8], "WAVE", 4)) {
+	if (memcmp (&buf[0], "RIFF", 4) || memcmp (&buf[8], "WAVE", 4) || memcmp (&buf[0], "RIFX", 4)) {
 		/* no header. too dangerous to proceed */
 		goto out;
-		
 	} 
 
+	if (memcmp (&buf[0], "RIFX", 4)==0) {
+		bigend = true;
+	}
+
+	doswap = bigend != WE_ARE_BIGENDIAN;
+	
 	/* reset the size of the RIFF chunk header */
 
-	*((int32_t *)&buf[4]) = statbuf.st_size - 8;
+	if (doswap) {
+		*((int32_t *)&buf[4]) = Swap_32((int32_t)(statbuf.st_size - 8));
+	}
+	else {
+		*((int32_t *)&buf[4]) = statbuf.st_size - 8;
+	}
 
 	/* find data chunk and reset the size */
 
@@ -1064,18 +1232,36 @@ FileSource::repair (string path, jack_nframes_t rate)
 			FMTChunk fmt;
 
 			memcpy (&fmt, ptr, sizeof (fmt));
+			if (doswap) {
+				swap_endian(fmt);
+			}
+			
 			fmt.nSamplesPerSec = rate;
 			fmt.nAvgBytesPerSec = rate * 4;
 			
 			/* put it back */
+			if (doswap) {
+				swap_endian(fmt);
+			}
 
 			memcpy (ptr, &fmt, sizeof (fmt));
 			ptr += sizeof (fmt);
 			i += sizeof (fmt);
 
 		} else if (memcmp (ptr, "data", 4) == 0) {
+			GenericChunk dchunk;
+			memcpy(&dchunk, ptr, sizeof(dchunk));
 
-			*((int32_t *)&ptr[4]) = statbuf.st_size - i - 8;
+			if(doswap) {
+				swap_endian(dchunk);
+			}
+
+			dchunk.size = statbuf.st_size - i - 8;
+
+			if (doswap) {
+				swap_endian(dchunk);
+			}
+			memcpy (ptr, &dchunk, sizeof (dchunk));
 			break;
 
 		} else {

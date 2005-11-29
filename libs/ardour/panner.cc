@@ -41,6 +41,9 @@
 
 #include "i18n.h"
 
+#include <pbd/mathfix.h>
+
+
 using namespace std;
 using namespace ARDOUR;
 
@@ -778,8 +781,12 @@ Multi2dPanner::update ()
 		}
 		f += dsq[i] * dsq[i];
 	}
-	fr = 1.0f / sqrtf(f);
-	
+#ifdef __APPLE__
+	// terrible hack to support OSX < 10.3.9 builds
+	fr = (float) (1.0 / sqrt((double)f));
+#else
+	fr = 1.0 / sqrtf(f);
+#endif	
 	for (i = 0; i < nouts; ++i) {
 		parent.outputs[i].desired_pan = 1.0f - (dsq[i] * fr);
 	}

@@ -140,8 +140,9 @@ conf = Configure(ardour, custom_tests = {
 	'CheckJackRecomputeLatencies' : CheckJackRecomputeLatencies
 })
 
-if conf.CheckJackClientOpen():
-    ardour.Append(CXXFLAGS="-DHAVE_JACK_CLIENT_OPEN")
+#if conf.CheckJackClientOpen():
+# HACK BY JLC, not to be committed!
+ardour.Append(CXXFLAGS="-DHAVE_JACK_CLIENT_OPEN")
 
 if conf.CheckJackRecomputeLatencies():
     ardour.Append(CXXFLAGS="-DHAVE_JACK_RECOMPUTE_LATENCIES")

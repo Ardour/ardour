@@ -791,7 +791,7 @@ Source::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 		cnt -= frames_read;
 	}
 
-	if (::pwrite (peakfile, peakbuf, sizeof (PeakData) * peaki, first_peak_byte) != (ssize_t) sizeof (PeakData) * peaki) {
+	if (::pwrite (peakfile, peakbuf, sizeof (PeakData) * peaki, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaki)) {
 		error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
 		goto out;
 	}

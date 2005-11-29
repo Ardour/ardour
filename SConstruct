@@ -651,6 +651,14 @@ if env['VST']:
     env.Append(CCFLAGS="-DVST_SUPPORT")
 
 
+# check endianness
+if sys.byteorder == "big":
+    print "Host is big endian"
+    env.Append(CCFLAGS="-DWORDS_BIGENDIAN")
+else:
+    print "Host is little endian"
+
+
 #
 # everybody needs this
 #

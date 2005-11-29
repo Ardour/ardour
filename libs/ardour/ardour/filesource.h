@@ -133,6 +133,7 @@ class FileSource : public Source {
 	    GenericChunk            data;
 	    BroadcastChunk          bext;
 	    vector<string>          coding_history;
+	    bool                    bigendian;
 	} header;
 
 	int init (string, bool must_exist, jack_nframes_t);
@@ -156,6 +157,11 @@ class FileSource : public Source {
 	static string search_path;
 
 	int repair (string, jack_nframes_t);
+
+	void swap_endian (GenericChunk & chunk) const;
+	void swap_endian (FMTChunk & chunk) const;
+	void swap_endian (BroadcastChunk & chunk) const;
+	void swap_endian (Sample *buf, jack_nframes_t cnt) const;
 };
 
 }
