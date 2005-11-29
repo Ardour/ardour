@@ -66,6 +66,7 @@
 #include "crossfade_edit.h"
 #include "audio_time_axis.h"
 #include "canvas_impl.h"
+#include "actions.h"
 #include "gui_thread.h"
 
 #include "i18n.h"
@@ -679,6 +680,7 @@ Editor::Editor (AudioEngine& eng)
 	global_hpacker.pack_start (global_vpacker, true, true);
 
 	set_name ("EditorWindow");
+	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
 	vpacker.pack_end (global_hpacker, true, true);
 	

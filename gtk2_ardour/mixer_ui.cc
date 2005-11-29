@@ -21,6 +21,8 @@
 #include <algorithm>
 #include <sigc++/bind.h>
 
+#include <gtkmm/accelmap.h>
+
 #include <pbd/lockmonitor.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -38,12 +40,14 @@
 #include "ardour_ui.h"
 #include "prompter.h"
 #include "utils.h"
+#include "actions.h"
 #include "gui_thread.h"
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
+using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace sigc;
 
@@ -154,11 +158,13 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	set_title (_("ardour: mixer"));
 	set_wmclass (_("ardour_mixer"), "Ardour");
 
+	add_accel_group (ActionManager::ui_manager->get_accel_group());
+
 	signal_delete_event().connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window *>(this)));
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	track_display.get_selection()->signal_changed().connect (mem_fun(*this, &Mixer_UI::track_display_selection_changed));
-	track_display_model->signal_rows_reordered().connect (mem_fun (*this, &Mixer_UI::track_display_reordered_proxy));
+	reorder_connection = track_display_model->signal_rows_reordered().connect (mem_fun (*this, &Mixer_UI::track_display_reordered_proxy));
 
 	group_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::group_display_button_press));
 	group_display.get_selection()->signal_changed().connect (mem_fun (*this, &Mixer_UI::group_display_selection_changed));
@@ -206,7 +212,7 @@ Mixer_UI::add_strip (Route* route)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_strip), route));
 	
 	MixerStrip* strip;
-	
+
 	if (route->hidden()) {
 		return;
 	}
@@ -217,14 +223,18 @@ Mixer_UI::add_strip (Route* route)
 	strip->set_width (_strip_width);
 	show_strip (strip);
 
+	reorder_connection.block();
+	
 	TreeModel::Row row = *(track_display_model->append());
 	row[track_display_columns.text] = route->name();
 	row[track_display_columns.route] = route;
 	row[track_display_columns.strip] = strip;
 
-	if (strip->marked_for_display() || strip->packed()) {
-		track_display.get_selection()->select (row);
-	}
+	reorder_connection.unblock();
+	
+	// if (strip->marked_for_display() || strip->packed()) {
+	// track_display.get_selection()->select (row);
+        // }
 	
 	route->name_changed.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
 	strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
@@ -298,14 +308,11 @@ Mixer_UI::connect_to_session (Session* sess)
 	wintitle += session->name();
 	set_title (wintitle);
 
-	// GTK2FIX
-	// track_display_list.freeze ();
-
+	// GTK2FIX: do we really need to do this?
+	// track_display.set_model (RefPtr<TreeStore>(0));
 	track_display_model->clear ();
-
 	session->foreach_route (this, &Mixer_UI::add_strip);
-	
-	// track_display_list.thaw ();
+	// track_display.set_model (track_display_model);
 
 	session->going_away.connect (mem_fun(*this, &Mixer_UI::disconnect_from_session));
 	session->RouteAdded.connect (mem_fun(*this, &Mixer_UI::add_strip));
@@ -428,156 +435,161 @@ Mixer_UI::show_strip (MixerStrip* ms)
 		
 		if (ms->route().master() || ms->route().control()) {
 			out_packer.pack_start (*ms, false, false);
+			cerr << "Packed master strip @ " << ms << endl;
 		} else {
-			strip_packer.pack_start (*ms, false, false);
+			 strip_packer.pack_start (*ms, false, false);
+			 cerr << "Packed strip @ " << ms << endl;
 		}
 		ms->set_packed (true);
 		ms->show ();
 
-	}
-}
+	 }
+ }
 
-void
-Mixer_UI::hide_strip (MixerStrip* ms)
-{
-	if (ms->packed()) {
-		if (ms->route().master() || ms->route().control()) {
-			out_packer.remove (*ms);
-		} else {
-			strip_packer.remove (*ms);
-		}
-		ms->set_packed (false);
-	}
-}
+ void
+ Mixer_UI::hide_strip (MixerStrip* ms)
+ {
+	 if (ms->packed()) {
+		 if (ms->route().master() || ms->route().control()) {
+			 out_packer.remove (*ms);
+		 } else {
+			 strip_packer.remove (*ms);
+		 }
+		 ms->set_packed (false);
+	 }
+ }
 
-gint
-Mixer_UI::start_updating ()
-{
-	screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::update_strips));
-	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::fast_update_strips));
-	return 0;
-}
+ gint
+ Mixer_UI::start_updating ()
+ {
+	 screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::update_strips));
+	 fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::fast_update_strips));
+	 return 0;
+ }
 
-gint
-Mixer_UI::stop_updating ()
-{
-	screen_update_connection.disconnect();
-	fast_screen_update_connection.disconnect();
-	return 0;
-}
+ gint
+ Mixer_UI::stop_updating ()
+ {
+	 screen_update_connection.disconnect();
+	 fast_screen_update_connection.disconnect();
+	 return 0;
+ }
 
-void
-Mixer_UI::update_strips ()
-{
-	if (is_mapped () && session) {
-		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-			(*i)->update ();
-		}
-	}
-}
+ void
+ Mixer_UI::update_strips ()
+ {
+	 if (is_mapped () && session) {
+		 for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+			 (*i)->update ();
+		 }
+	 }
+ }
 
-void
-Mixer_UI::fast_update_strips ()
-{
-	if (is_mapped () && session) {
-		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-			(*i)->fast_update ();
-		}
-	}
-}
+ void
+ Mixer_UI::fast_update_strips ()
+ {
+	 if (is_mapped () && session) {
+		 for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+			 (*i)->fast_update ();
+		 }
+	 }
+ }
 
-void
-Mixer_UI::snapshot_display_selection_changed ()
-{
-	TreeModel::iterator i = snapshot_display.get_selection()->get_selected();
+ void
+ Mixer_UI::snapshot_display_selection_changed ()
+ {
+	 TreeModel::iterator i = snapshot_display.get_selection()->get_selected();
 
-	Glib::ustring snap_name = (*i)[snapshot_display_columns.real_name];
-	
-	if (session->snap_name() == snap_name) {
-		return;
-	}
-	
-	ARDOUR_UI::instance()->load_session(session->path(), string (snap_name));
-}
+	 Glib::ustring snap_name = (*i)[snapshot_display_columns.real_name];
 
-bool
-Mixer_UI::snapshot_display_button_press (GdkEventButton* ev)
-{
-	return false;
-}
+	 if (session->snap_name() == snap_name) {
+		 return;
+	 }
 
-void
-Mixer_UI::track_display_selection_changed ()
-{
-	MixerStrip* strip;
-	TreeModel::Children rows = track_display_model->children();
-	TreeModel::Children::iterator i;
-	Glib::RefPtr<TreeSelection> selection = track_display.get_selection();
+	 ARDOUR_UI::instance()->load_session(session->path(), string (snap_name));
+ }
 
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		if (selection->is_selected (i)) {
-			strip = (*i)[track_display_columns.strip];
-			strip->set_marked_for_display  (true);
-			show_strip (strip);
-		} else {
-			strip = (*i)[track_display_columns.strip];
-			strip->set_marked_for_display (false);
-			hide_strip (strip);
-		}
-	}
-	
-	track_display_reordered ();
-}
+ bool
+ Mixer_UI::snapshot_display_button_press (GdkEventButton* ev)
+ {
+	 return false;
+ }
 
-void
-Mixer_UI::select_strip_op (MixerStrip *strip, bool yn)
-{
-	TreeModel::Children rows = track_display_model->children();
-	TreeModel::Children::iterator i;
-	Glib::RefPtr<TreeSelection> selection = track_display.get_selection();
-	
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		if ((*i)[track_display_columns.strip] == strip) {
-			if (yn) {
-				selection->select (*i);
-			} else {
-				selection->unselect (*i);
-			}
-			break;
-		}
-	}
-}
+ void
+ Mixer_UI::track_display_selection_changed ()
+ {
+	 MixerStrip* strip;
+	 TreeModel::Children rows = track_display_model->children();
+	 TreeModel::Children::iterator i;
+	 Glib::RefPtr<TreeSelection> selection = track_display.get_selection();
 
-void
-Mixer_UI::unselect_strip_in_display (MixerStrip *strip)
-{
-	select_strip_op (strip, true);
-}
-void
-Mixer_UI::select_strip_in_display (MixerStrip *strip)
-{
-	select_strip_op (strip, false);
-}
+	 for (i = rows.begin(); i != rows.end(); ++i) {
+		 if (selection->is_selected (i)) {
+			 strip = (*i)[track_display_columns.strip];
+			 strip->set_marked_for_display  (true);
+			 show_strip (strip);
+		 } else {
+			 strip = (*i)[track_display_columns.strip];
+			 strip->set_marked_for_display (false);
+			 hide_strip (strip);
+		 }
+	 }
 
-void
-Mixer_UI::track_display_reordered_proxy (const TreeModel::Path& path, const TreeModel::iterator& i, int* n)
-{
-	track_display_reordered ();
-}
+	 track_display_reordered ();
+ }
 
-void
-Mixer_UI::track_display_reordered ()
-{
-	TreeModel::Children rows = track_display_model->children();
-	TreeModel::Children::iterator i;
-	long order;
-	
-	for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
-		MixerStrip* strip = (*i)[track_display_columns.strip];
+ void
+ Mixer_UI::select_strip_op (MixerStrip *strip, bool yn)
+ {
+	 TreeModel::Children rows = track_display_model->children();
+	 TreeModel::Children::iterator i;
+	 Glib::RefPtr<TreeSelection> selection = track_display.get_selection();
 
-		if (strip->marked_for_display()) {
-			strip->route().set_order_key (N_("signal"), order);
-			strip_packer.reorder_child (*strip, -1); /* put at end */
+	 for (i = rows.begin(); i != rows.end(); ++i) {
+		 if ((*i)[track_display_columns.strip] == strip) {
+			 if (yn) {
+				 selection->select (*i);
+			 } else {
+				 selection->unselect (*i);
+			 }
+			 break;
+		 }
+	 }
+ }
+
+ void
+ Mixer_UI::unselect_strip_in_display (MixerStrip *strip)
+ {
+	 select_strip_op (strip, true);
+ }
+ void
+ Mixer_UI::select_strip_in_display (MixerStrip *strip)
+ {
+	 select_strip_op (strip, false);
+ }
+
+ void
+ Mixer_UI::track_display_reordered_proxy (const TreeModel::Path& path, const TreeModel::iterator& i, int* n)
+ {
+	 track_display_reordered ();
+ }
+
+ void
+ Mixer_UI::track_display_reordered ()
+ {
+	 TreeModel::Children rows = track_display_model->children();
+	 TreeModel::Children::iterator i;
+	 long order;
+
+	 for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
+		 MixerStrip* strip = (*i)[track_display_columns.strip];
+
+		 if (strip->marked_for_display()) {
+			 strip->route().set_order_key (N_("signal"), order);
+			 if (strip->packed()) {
+				 cerr << "reorder strip @ " << strip << endl;
+				 strip_packer.reorder_child (*strip, -1); /* put at end */
+			 }
 		}
 	}
 }

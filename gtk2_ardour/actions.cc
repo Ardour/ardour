@@ -55,13 +55,8 @@ ActionManager::init ()
 	} catch (Glib::MarkupError& err) {
 		error << "badly formatted UI definition file" << endmsg;
 	} catch (...) {
-		cerr << "ardour action xml file not found" << endl;
+		error << "Ardour menu definition file not found" << endmsg;
 	}
-	
-	RefPtr<ActionGroup> grp = ActionGroup::create ("misc");
-	register_action (grp, "null", "relax");
-	
-	ui_manager->insert_action_group (grp);
 }
 
 RefPtr<Action>

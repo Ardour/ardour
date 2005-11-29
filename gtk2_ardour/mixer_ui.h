@@ -139,10 +139,11 @@ class Mixer_UI : public Gtk::Window
 
 	void track_display_selected (gint row, gint col, GdkEvent *ev);
 	void track_display_unselected (gint row, gint col, GdkEvent *ev);
-	void queue_track_display_reordered (gint row, gint col);
+	void track_name_changed (MixerStrip *);
+
 	void track_display_reordered_proxy (const Gtk::TreePath& path, const Gtk::TreeIter& i, int* n);
 	void track_display_reordered ();
-	void track_name_changed (MixerStrip *);
+	sigc::connection reorder_connection;
 
 	void group_selected (gint row, gint col, GdkEvent *ev);
 	void group_unselected (gint row, gint col, GdkEvent *ev);

@@ -23,6 +23,9 @@
 */
 
 #include <cstdio>
+
+#include <gtkmm/accelmap.h>
+
 #include <pbd/error.h>
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -32,7 +35,7 @@
 #include "i18n.h"
 
 using namespace sigc;
-
+using namespace Gtk;
 
 namespace ARDOUR {
 	class Session;
@@ -52,7 +55,6 @@ ARDOUR_UI::shutdown ()
 void
 ARDOUR_UI::we_have_dependents ()
 {
-	cerr << "have dependents\n";
 	setup_keybindings ();
 }
 
@@ -62,6 +64,12 @@ ARDOUR_UI::setup_keybindings ()
 	install_actions ();
 	editor->register_actions ();
 	RedirectBox::register_actions ();
+
+	try {
+		AccelMap::load (ARDOUR::find_config_file ("ardour.bindings"));
+	} catch (...) {
+		error << "ardour key bindings file not found" << endmsg;
+	}
 }
 
 void

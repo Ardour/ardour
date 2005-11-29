@@ -480,8 +480,20 @@ pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
 uint32_t
 rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 {
+	/* In GTK+2, styles aren't set up correctly if the widget is not
+	   attached to a toplevel window that has a screen pointer.
+	*/
+
+	static Gtk::Window* window = 0;
+
+	if (window == 0) {
+		window = new Window (WINDOW_TOPLEVEL);
+	}
+
 	Gtk::Label foo;
 	
+	window->add (foo);
+
 	foo.set_name (style);
 	foo.ensure_style ();
 	
@@ -499,6 +511,8 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 	} else {
 		warning << string_compose (_("missing RGBA style for \"%1\""), style) << endl;
 	}
+
+	window->remove ();
 	
 	return (uint32_t) RGBA_TO_UINT(r,g,b,a);
 }

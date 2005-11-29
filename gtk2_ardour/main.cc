@@ -186,8 +186,6 @@ catch_signals (void)
 	pthread_t signal_thread_id;
 	sigset_t signals;
 
-	return 0;
-
 //	if (setpgid (0,0)) {
 	if (setsid ()) {
 		warning << string_compose (_("cannot become new process group leader (%1)"), 
@@ -360,10 +358,6 @@ main (int argc, char *argv[])
 	}
 
 	gtk_rc_set_default_files (null_file_list);
-
-	// allow run-time rebinding of accels
-
-	Settings::get_default()->property_gtk_can_change_accels() = true;
 
 	cout << _("Ardour/GTK ") 
 	     << VERSIONSTRING
