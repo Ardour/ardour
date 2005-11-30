@@ -2647,6 +2647,13 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 			
 			std::string session_name = m_new_session_dialog->session_name();
 			std::string session_path = m_new_session_dialog->session_folder();
+			
+			/*
+			  XXX This is needed because session constructor wants a 
+			  non-existant path. hopefully this will be fixed at some point.
+			*/
+			session_path = Glib::build_filename(session_path, session_name);
+			
 			std::string template_name = m_new_session_dialog->session_template_name();
 			
 			if (m_new_session_dialog->use_session_template()) {
