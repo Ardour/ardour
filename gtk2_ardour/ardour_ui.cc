@@ -2811,7 +2811,7 @@ ARDOUR_UI::show ()
 	}
 
 	if (session && mixer) {
-		mixer->show_window ();
+		// mixer->show_window ();
 	}
 	
 	if (about) {

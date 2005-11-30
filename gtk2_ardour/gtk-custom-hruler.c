@@ -136,8 +136,13 @@ gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 	GdkFont *font;
 	gint i;
 	GtkCustomRulerMark *marks;
+	gint xthickness;
+	gint ythickness;
 	gint nmarks;
 	gint max_chars;
+	gint digit_offset;
+	PangoLayout *layout;
+	PangoRectangle logical_rect, ink_rect;
 
 	g_return_if_fail (ruler != NULL);
 	g_return_if_fail (GTK_IS_CUSTOM_HRULER (ruler));
@@ -151,6 +156,14 @@ gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 	bg_gc = widget->style->bg_gc[GTK_STATE_NORMAL];
 	font = gtk_style_get_font(widget->style);
 	
+	layout = gtk_widget_create_pango_layout (widget, "012456789");
+	pango_layout_get_extents (layout, &ink_rect, &logical_rect);
+
+	digit_offset = ink_rect.y;
+
+	xthickness = widget->style->xthickness;
+	ythickness = widget->style->ythickness;
+
 	gtk_paint_box (widget->style, ruler->backing_store,
 		       GTK_STATE_NORMAL, GTK_SHADOW_NONE,
 		       NULL, widget, "custom_hruler", 0, 0, widget->allocation.width, widget->allocation.height);
@@ -164,7 +177,7 @@ gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 	
 	/* we have to assume a fixed width font here */
 
-	max_chars = widget->allocation.width / gdk_string_width (font, "8");
+	max_chars = widget->allocation.width / 12; // XXX FIX ME: pixel with of the char `8'
 
 	nmarks = ruler->metric->get_marks (&marks, ruler->lower, ruler->upper, max_chars);
 
@@ -186,14 +199,28 @@ gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 			gdk_draw_line (ruler->backing_store, gc, pos, height, pos, height - 3);
 			break;
 		}
-
-		gdk_draw_string (ruler->backing_store, font, gc, pos + 2, font->ascent - 1, marks[i].label);
+		
+		pango_layout_set_text (layout, marks[i].label, -1);
+		pango_layout_get_extents (layout, &logical_rect, NULL);
+		
+		gtk_paint_layout (widget->style,
+				  ruler->backing_store,
+				  GTK_WIDGET_STATE (widget),
+				  FALSE,
+				  NULL,
+				  widget,
+				  "hruler",
+				  pos + 2, ythickness + PANGO_PIXELS (logical_rect.y - digit_offset),
+				  layout);
+		
 		g_free (marks[i].label);
 	}
 	
 	if (nmarks) {
 		g_free (marks);
 	}
+	
+	g_object_unref (layout);
 }
 
 static void
