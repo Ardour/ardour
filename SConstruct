@@ -54,10 +54,10 @@ class LibraryInfo(Environment):
             self.Append (LIBPATH = other.get ('LIBPATH', []))	
             self.Append (CPPPATH = other.get('CPPPATH', []))
             self.Append (LINKFLAGS = other.get('LINKFLAGS', []))
-	self.Replace(LIBS = list(Set(self.get('LIBS', []))))
 	self.Replace(LIBPATH = list(Set(self.get('LIBPATH', []))))
 	self.Replace(CPPPATH = list(Set(self.get('CPPPATH',[]))))
 	#doing LINKFLAGS breaks -framework
+        #doing LIBS break link order dependency
 
 
 env = LibraryInfo (options = opts,

@@ -20,6 +20,7 @@
 #ifndef __ardour_export_dialog_h__
 #define __ardour_export_dialog_h__
 
+#include <gtkmm/alignment.h>
 #include <gtkmm/box.h>
 #include <gtkmm/table.h>
 #include <gtkmm/frame.h>
@@ -80,22 +81,38 @@ class ExportDialog : public ArdourDialog
 	Gtk::Table  format_table;
 	Gtk::Frame  format_frame;
 
-	Gtk::Label  sample_rate_label;
-	Gtk::ComboBoxText sample_rate_combo;
-	Gtk::Label  src_quality_label;
-	Gtk::ComboBoxText src_quality_combo;
-	Gtk::Label  dither_type_label;
-	Gtk::ComboBoxText dither_type_combo;
-	Gtk::Label  cue_file_label;
-	Gtk::ComboBoxText cue_file_combo;
 	Gtk::Label  channel_count_label;
+	Gtk::Alignment channel_count_align;
 	Gtk::ComboBoxText channel_count_combo;
+
 	Gtk::Label  header_format_label;
+	Gtk::Alignment header_format_align;
 	Gtk::ComboBoxText header_format_combo;
+
 	Gtk::Label  bitdepth_format_label;
+	Gtk::Alignment bitdepth_format_align;
 	Gtk::ComboBoxText bitdepth_format_combo;
+
 	Gtk::Label  endian_format_label;
+	Gtk::Alignment endian_format_align;
 	Gtk::ComboBoxText endian_format_combo;
+	
+	Gtk::Label  sample_rate_label;
+	Gtk::Alignment sample_rate_align;
+	Gtk::ComboBoxText sample_rate_combo;
+
+	Gtk::Label  src_quality_label;
+	Gtk::Alignment src_quality_align;
+	Gtk::ComboBoxText src_quality_combo;
+
+	Gtk::Label  dither_type_label;
+	Gtk::Alignment dither_type_align;
+	Gtk::ComboBoxText dither_type_combo;
+
+	Gtk::Label  cue_file_label;
+	Gtk::Alignment cue_file_align;
+	Gtk::ComboBoxText cue_file_combo;
+	
 	Gtk::CheckButton cuefile_only_checkbox;
 
 	Gtk::Frame  file_frame;

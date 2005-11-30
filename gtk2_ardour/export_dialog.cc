@@ -95,14 +95,22 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	  editor (e),
 	  format_table (9, 2),
 	  format_frame (_("FORMAT")),
-	  sample_rate_label (_("SAMPLE RATE")),
-	  src_quality_label (_("CONVERSION QUALITY")),
-	  dither_type_label (_("DITHER TYPE")),
-	  cue_file_label (_("CD MARKER FILE TYPE")),
 	  channel_count_label (_("CHANNELS")),
 	  header_format_label (_("FILE TYPE")),
 	  bitdepth_format_label (_("SAMPLE FORMAT")),
 	  endian_format_label (_("SAMPLE ENDIANNESS")),
+	  sample_rate_label (_("SAMPLE RATE")),
+	  src_quality_label (_("CONVERSION QUALITY")),
+	  dither_type_label (_("DITHER TYPE")),
+	  cue_file_label (_("CD MARKER FILE TYPE")),
+	  channel_count_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  header_format_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  bitdepth_format_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  endian_format_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  sample_rate_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  src_quality_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  dither_type_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  cue_file_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
 	  cuefile_only_checkbox (_("EXPORT CD MARKER FILE ONLY")),
 	  file_frame (_("EXPORT TO FILE")),
 	  file_browse_button (_("Browse")),
@@ -311,29 +319,37 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	format_table.set_row_spacings (5);
 
 	if (!audio_region) {
-		format_table.attach (channel_count_label, 0, 1, 0, 1);
-		format_table.attach (channel_count_combo, 0, 1, 1, 2);
+		channel_count_align.add(channel_count_label);
+		format_table.attach (channel_count_align, 0, 1, 0, 1);
+		format_table.attach (channel_count_combo, 1, 2, 0, 1);
 	}
 
-	format_table.attach (header_format_label, 1, 2, 0, 1);
+	header_format_align.add(header_format_label);
+	format_table.attach (header_format_align, 0, 1, 1, 2);
 	format_table.attach (header_format_combo, 1, 2, 1, 2);
 
-	format_table.attach (bitdepth_format_label, 0, 1, 2, 3);
-	format_table.attach (bitdepth_format_combo, 0, 1, 3, 4);
+	bitdepth_format_align.add(bitdepth_format_label);
+	format_table.attach (bitdepth_format_align, 0, 1, 2, 3);
+	format_table.attach (bitdepth_format_combo, 1, 2, 2, 3);
 
-	format_table.attach (endian_format_label, 1, 2, 2, 3);
+	endian_format_align.add(endian_format_label);
+	format_table.attach (endian_format_align, 0, 1, 3, 4);
 	format_table.attach (endian_format_combo, 1, 2, 3, 4);
 
-	format_table.attach (sample_rate_label, 0, 1, 4, 5);
-	format_table.attach (sample_rate_combo, 0, 1, 5, 6);
+	sample_rate_align.add(sample_rate_label);
+	format_table.attach (sample_rate_align, 0, 1, 4, 5);
+	format_table.attach (sample_rate_combo, 1, 2, 4, 5);
 
-	format_table.attach (src_quality_label, 1, 2, 4, 5);
+	src_quality_align.add(src_quality_label);
+	format_table.attach (src_quality_align, 0, 1, 5, 6);
 	format_table.attach (src_quality_combo, 1, 2, 5, 6);
 
-	format_table.attach (dither_type_label, 0, 1, 6, 7);
-	format_table.attach (dither_type_combo, 0, 1, 7, 8);
+	dither_type_align.add(dither_type_label);
+	format_table.attach (dither_type_align, 0, 1, 6, 7);
+	format_table.attach (dither_type_combo, 1, 2, 6, 7);
 
-	format_table.attach (cue_file_label, 1, 2, 6, 7);
+	cue_file_align.add(cue_file_label);
+	format_table.attach (cue_file_align, 0, 1, 7, 8);
 	format_table.attach (cue_file_combo, 1, 2, 7, 8);
 	format_table.attach (cuefile_only_checkbox, 1, 2, 8, 9);
 
