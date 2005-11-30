@@ -40,6 +40,8 @@
 #include "i18n.h"
 
 using namespace Gtkmm2ext;
+using namespace Gtk;
+using namespace Glib;
 using std::map;
 
 pthread_t UI::gui_thread;
@@ -48,8 +50,8 @@ UI       *UI::theGtkUI = 0;
 UI::UI (string name, int *argc, char ***argv, string rcfile) 
 	: _ui_name (name)
 {
-	theMain = new Gtk::Main (argc, argv);
-	tips = new Gtk::Tooltips;
+	theMain = new Main (argc, argv);
+	tips = new Tooltips;
 
 	if (pthread_key_create (&thread_request_buffer_key, 0)) {
 		cerr << _("cannot create thread request buffer key") << endl;
@@ -73,8 +75,6 @@ UI::UI (string name, int *argc, char ***argv, string rcfile)
 		return;
 	}
 
-	load_rcfile (rcfile);
-
 	errors = new TextViewer (850,100);
 	errors->text().set_editable (false); 
 	errors->text().set_name ("ErrorText");
@@ -85,9 +85,11 @@ UI::UI (string name, int *argc, char ***argv, string rcfile)
 	errors->set_title (title);
 
 	errors->dismiss_button().set_name ("ErrorLogCloseButton");
-	errors->signal_delete_event().connect (bind (ptr_fun (just_hide_it), (Gtk::Window *) errors));
+	errors->signal_delete_event().connect (bind (ptr_fun (just_hide_it), (Window *) errors));
 
 	register_thread (pthread_self(), X_("GUI"));
+
+	load_rcfile (rcfile);
 
 	_ok = true;
 }
@@ -113,38 +115,76 @@ UI::load_rcfile (string path)
 		return -1;
 	}
 	
-	gtk_rc_parse (path.c_str());
+	RC rc (path.c_str());
 
-	Gtk::Label *a_widget1;
-	Gtk::Label *a_widget2;
-	Gtk::Label *a_widget3;
-	Gtk::Label *a_widget4;
+	/* have to pack widgets into a toplevel window so that styles will stick */
 
-	a_widget1 = new Gtk::Label;
-	a_widget2 = new Gtk::Label;
-	a_widget3 = new Gtk::Label;
-	a_widget4 = new Gtk::Label;
+	Window temp_window (WINDOW_TOPLEVEL);
+	HBox box;
+	Label a_widget1;
+	Label a_widget2;
+	Label a_widget3;
+	Label a_widget4;
+	RefPtr<Gtk::Style> style;
+	RefPtr<TextBuffer> buffer (errors->text().get_buffer());
 
-	a_widget1->set_name ("FatalMessage");
-	a_widget1->ensure_style ();
-	fatal_message_style = a_widget1->get_style();
+	box.pack_start (a_widget1);
+	box.pack_start (a_widget2);
+	box.pack_start (a_widget3);
+	box.pack_start (a_widget4);
 
-	a_widget2->set_name ("ErrorMessage");
-	a_widget2->ensure_style ();
-	error_message_style = a_widget2->get_style();
+	error_ptag = buffer->create_tag();
+	error_mtag = buffer->create_tag();
+	fatal_ptag = buffer->create_tag();
+	fatal_mtag = buffer->create_tag();
+	warning_ptag = buffer->create_tag();
+	warning_mtag = buffer->create_tag();
+	info_ptag = buffer->create_tag();
+	info_mtag = buffer->create_tag();
 
-	a_widget3->set_name ("WarningMessage");
-	a_widget3->ensure_style ();
-	warning_message_style = a_widget3->get_style();
+	a_widget1.set_name ("FatalMessage");
+	a_widget1.ensure_style ();
+	style = a_widget1.get_style();
 
-	a_widget4->set_name ("InfoMessage");
-	a_widget4->ensure_style ();
-	info_message_style = a_widget4->get_style();
+	fatal_ptag->property_font_desc().set_value(style->get_font());
+	fatal_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
+	fatal_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
+	fatal_mtag->property_font_desc().set_value(style->get_font());
+	fatal_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
+	fatal_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
 
-	delete a_widget1;
-	delete a_widget2;
-	delete a_widget3;
-	delete a_widget4;
+	a_widget2.set_name ("ErrorMessage");
+	a_widget2.ensure_style ();
+	style = a_widget2.get_style();
+
+	error_ptag->property_font_desc().set_value(style->get_font());
+	error_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
+	error_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
+	error_mtag->property_font_desc().set_value(style->get_font());
+	error_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
+	error_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
+
+	a_widget3.set_name ("WarningMessage");
+	a_widget3.ensure_style ();
+	style = a_widget3.get_style();
+
+	warning_ptag->property_font_desc().set_value(style->get_font());
+	warning_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
+	warning_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
+	warning_mtag->property_font_desc().set_value(style->get_font());
+	warning_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
+	warning_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
+
+	a_widget4.set_name ("InfoMessage");
+	a_widget4.ensure_style ();
+	style = a_widget4.get_style();
+
+	info_ptag->property_font_desc().set_value(style->get_font());
+	info_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
+	info_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
+	info_mtag->property_font_desc().set_value(style->get_font());
+	info_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
+	info_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
 
 	return 0;
 }
@@ -190,7 +230,7 @@ UI::quit ()
 void
 UI::do_quit ()
 {
-	Gtk::Main::quit();
+	Main::quit();
 }
 
 void
@@ -250,7 +290,7 @@ UI::call_slot_locked (sigc::slot<void> slot)
 }	
 
 void
-UI::set_tip (Gtk::Widget *w, const gchar *tip, const gchar *hlp)
+UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 {
 	Request *req = get_request (SetTip);
 
@@ -266,7 +306,7 @@ UI::set_tip (Gtk::Widget *w, const gchar *tip, const gchar *hlp)
 }
 
 void
-UI::set_state (Gtk::Widget *w, Gtk::StateType state)
+UI::set_state (Widget *w, StateType state)
 {
 	Request *req = get_request (StateChange);
 	
@@ -374,7 +414,7 @@ UI::setup_signal_pipe ()
 
 	if (pipe (signal_pipe)) {
 		error << "UI: cannot create error signal pipe ("
-		      << strerror (errno) << ")" 
+		      << std::strerror (errno) << ")" 
 		      << endmsg;
 
 		return -1;
@@ -383,7 +423,7 @@ UI::setup_signal_pipe ()
 	if (fcntl (signal_pipe[0], F_SETFL, O_NONBLOCK)) {
 		error << "UI: cannot set O_NONBLOCK on "
 			 "signal read pipe ("
-		      << strerror (errno) << ")"
+		      << std::strerror (errno) << ")"
 		      << endmsg;
 		return -1;
 	}
@@ -391,7 +431,7 @@ UI::setup_signal_pipe ()
 	if (fcntl (signal_pipe[1], F_SETFL, O_NONBLOCK)) {
 		error << "UI: cannot set O_NONBLOCK on "
 			 "signal write pipe ("
-		      << strerror (errno) 
+		      << std::strerror (errno) 
 		      << ")" 
 		      << endmsg;
 		return -1;
@@ -588,25 +628,29 @@ UI::receive (Transmitter::Channel chn, const char *str)
 void
 UI::process_error_message (Transmitter::Channel chn, const char *str)
 {
-	Glib::RefPtr<Gtk::Style> style;
+	RefPtr<Style> style;
+	RefPtr<TextBuffer::Tag> ptag;
+	RefPtr<TextBuffer::Tag> mtag;
 	char *prefix;
 	size_t prefix_len;
 	bool fatal_received = false;
 #ifndef OLD_STYLE_ERRORS
-	PopUp* popup = new PopUp (Gtk::WIN_POS_CENTER, 0, true);
+	PopUp* popup = new PopUp (WIN_POS_CENTER, 0, true);
 #endif
 
 	switch (chn) {
 	case Transmitter::Fatal:
 		prefix = "[FATAL]: ";
-		style = fatal_message_style;
+		ptag = fatal_ptag;
+		mtag = fatal_mtag;
 		prefix_len = 9;
 		fatal_received = true;
 		break;
 	case Transmitter::Error:
 #if OLD_STYLE_ERRORS
 		prefix = "[ERROR]: ";
-		style = error_message_style;
+		ptag = error_ptag;
+		mtag = error_mtag;
 		prefix_len = 9;
 #else
 		popup->set_name ("ErrorMessage");
@@ -618,7 +662,8 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 	case Transmitter::Info:
 #if OLD_STYLE_ERRORS	
 		prefix = "[INFO]: ";
-		style = info_message_style;
+		ptag = info_ptag;
+		mtag = info_mtag;
 		prefix_len = 8;
 #else
 		popup->set_name ("InfoMessage");
@@ -631,7 +676,8 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 	case Transmitter::Warning:
 #if OLD_STYLE_ERRORS
 		prefix = "[WARNING]: ";
-		style = warning_message_style;
+		ptag = warning_ptag;
+		mtag = warning_mtag;
 		prefix_len = 11;
 #else
 		popup->set_name ("WarningMessage");
@@ -652,7 +698,7 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 		handle_fatal (str);
 	} else {
 		
-		display_message (prefix, prefix_len, style, str);
+		display_message (prefix, prefix_len, ptag, mtag, str);
 		
 		if (!errors->is_visible()) {
 			toggle_errors();
@@ -666,7 +712,7 @@ void
 UI::toggle_errors ()
 {
 	if (!errors->is_visible()) {
-		errors->set_position (Gtk::WIN_POS_MOUSE);
+		errors->set_position (WIN_POS_MOUSE);
 		errors->show ();
 	} else {
 		errors->hide ();
@@ -674,22 +720,10 @@ UI::toggle_errors ()
 }
 
 void
-UI::display_message (const char *prefix, gint prefix_len, Glib::RefPtr<Gtk::Style> style, const char *msg)
+UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)
 {
-	Glib::RefPtr<Gtk::TextBuffer::Tag> ptag = Gtk::TextBuffer::Tag::create();
-	Glib::RefPtr<Gtk::TextBuffer::Tag> mtag = Gtk::TextBuffer::Tag::create();
+	RefPtr<TextBuffer> buffer (errors->text().get_buffer());
 
-	Pango::FontDescription pfont(style->get_font());
-	ptag->property_font_desc().set_value(pfont);
-	ptag->property_foreground_gdk().set_value(style->get_fg(Gtk::STATE_ACTIVE));
-	ptag->property_background_gdk().set_value(style->get_bg(Gtk::STATE_ACTIVE));
-
-	Pango::FontDescription mfont (style->get_font());
-	mtag->property_font_desc().set_value(mfont);
-	mtag->property_foreground_gdk().set_value(style->get_fg(Gtk::STATE_NORMAL));
-	mtag->property_background_gdk().set_value(style->get_bg(Gtk::STATE_NORMAL));
-
-	Glib::RefPtr<Gtk::TextBuffer> buffer (errors->text().get_buffer());
 	buffer->insert_with_tag(buffer->end(), prefix, ptag);
 	buffer->insert_with_tag(buffer->end(), msg, mtag);
 	buffer->insert_with_tag(buffer->end(), "\n", mtag);
@@ -700,10 +734,10 @@ UI::display_message (const char *prefix, gint prefix_len, Glib::RefPtr<Gtk::Styl
 void
 UI::handle_fatal (const char *message)
 {
-	Gtk::Window win (Gtk::WINDOW_POPUP);
-	Gtk::VBox packer;
-	Gtk::Label label (message);
-	Gtk::Button quit (_("Press To Exit"));
+	Window win (WINDOW_POPUP);
+	VBox packer;
+	Label label (message);
+	Button quit (_("Press To Exit"));
 
 	win.set_default_size (400, 100);
 	
@@ -712,7 +746,7 @@ UI::handle_fatal (const char *message)
 	title += ": Fatal Error";
 	win.set_title (title);
 
-	win.set_position (Gtk::WIN_POS_MOUSE);
+	win.set_position (WIN_POS_MOUSE);
 	win.add (packer);
 
 	packer.pack_start (label, true, true);
@@ -738,7 +772,7 @@ UI::popup_error (const char *text)
 		return;
 	}
 	
-	pup = new PopUp (Gtk::WIN_POS_MOUSE, 0, true);
+	pup = new PopUp (WIN_POS_MOUSE, 0, true);
 	pup->set_text (text);
 	pup->touch ();
 }
@@ -761,7 +795,7 @@ UI::flush_pending ()
 }
 
 bool
-UI::just_hide_it (GdkEventAny *ev, Gtk::Window *win)
+UI::just_hide_it (GdkEventAny *ev, Window *win)
 {
 	win->hide_all ();
 	return true;
@@ -772,7 +806,7 @@ UI::get_color (const string& prompt, bool& picked, Gdk::Color* initial)
 {
 	Gdk::Color color;
 
-	Gtk::ColorSelectionDialog color_dialog (prompt);
+	ColorSelectionDialog color_dialog (prompt);
 
 	color_dialog.set_modal (true);
 	color_dialog.get_cancel_button()->signal_clicked().connect (bind (mem_fun (*this, &UI::color_selection_done), false));
@@ -787,7 +821,7 @@ UI::get_color (const string& prompt, bool& picked, Gdk::Color* initial)
 	color_picked = false;
 	picked = false;
 
-	Gtk::Main::run();
+	Main::run();
 
 	color_dialog.hide_all ();
 
@@ -807,12 +841,12 @@ void
 UI::color_selection_done (bool status)
 {
 	color_picked = status;
-	Gtk::Main::quit ();
+	Main::quit ();
 }
 
 bool
 UI::color_selection_deleted (GdkEventAny *ev)
 {
-	Gtk::Main::quit ();
+	Main::quit ();
 	return true;
 }

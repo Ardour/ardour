@@ -102,7 +102,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	clear_map ();
 	select_connection.disconnect ();
 
-	model.clear ();
+	model->clear ();
 	
 	session->foreach_playlist (this, &PlaylistSelector::add_playlist_to_map);
 

@@ -73,7 +73,6 @@ class ExportDialog : public ArdourDialog
 	PublicEditor&    editor;
 	ARDOUR::Session* session;
 	ARDOUR::AudioRegion* audio_region;
-	Gtk::VBox   vpacker;
 	Gtk::VBox   track_vpacker;
 	Gtk::HBox   hpacker;
 	Gtk::HBox   button_box;

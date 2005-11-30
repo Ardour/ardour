@@ -79,19 +79,20 @@ Editor::Cursor::set_position (jack_nframes_t frame)
 
 	current_frame = frame;
 
-	if (new_pos == points.front().get_x()) {
+	if (new_pos != points.front().get_x()) {
 
-		/* change in position is not visible, so just raise it */
+		points.front().set_x (new_pos);
+		points.back().set_x (new_pos);
+		
+		cerr << "new cursor points = "
+		     << points.front().get_x() << ',' << points.front().get_y()
+		     << " .. "
+		     << points.back().get_x() << ',' << points.back().get_y()
+		     << endl;
+		
+		canvas_item.property_points() = points;
+	}
 
-		canvas_item.raise_to_top();
-		return;
-	} 
-
-	points.front().set_x(new_pos);
-	points.back().set_x(new_pos);
-
-	// cerr << "set cursor2 al points, nc = " << points->num_points << endl;
-	canvas_item.property_points() = points;
 	canvas_item.raise_to_top();
 }
 
@@ -99,8 +100,7 @@ void
 Editor::Cursor::set_length (double units)
 {
 	length = units; 
-	points.back().set_x (points.front().get_y() + length);
-	// cerr << "set cursor3 al points, nc = " << points->num_points << endl;
+	points.back().set_y (points.front().get_y() + length);
 	canvas_item.property_points() = points;
 }
 
@@ -108,7 +108,6 @@ void
 Editor::Cursor::set_y_axis (double position)
 {
         points.front().set_y (position);
-	points.back().set_x (position + length);
-	// cerr << "set cursor4 al points, nc = " << points->num_points << endl;
+	points.back().set_y (position + length);
 	canvas_item.property_points() = points;
 }

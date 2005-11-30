@@ -122,11 +122,6 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	set_name ("ExportWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	add (vpacker);
-
-	vpacker.set_border_width (10);
-	vpacker.set_spacing (10);
-
 	file_selector = 0;
 	spec.running = false;
 
@@ -172,7 +167,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	track_scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	master_scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-	vpacker.pack_start (file_frame, false, false);
+	get_vbox()->pack_start (file_frame, false, false);
 
 	hpacker.set_spacing (5);
 	hpacker.set_border_width (5);
@@ -196,13 +191,13 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 		hpacker.pack_start (track_vpacker);
 	}
 
-	vpacker.pack_start (hpacker);
+	get_vbox()->pack_start (hpacker);
 	
 	track_selector_button.set_name ("EditorGTKButton");
 	track_selector_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::track_selector_button_click));
 
-	vpacker.pack_start (button_box, false, false);
-	vpacker.pack_start (progress_bar, false, false);
+	get_vbox()->pack_start (button_box, false, false);
+	get_vbox()->pack_start (progress_bar, false, false);
 
 	Gtkmm2ext::set_size_request_to_display_given_text (file_entry, X_("Kg/quite/a/reasonable/size/for/files/i/think"), 5, 8);
 

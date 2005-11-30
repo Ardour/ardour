@@ -28,6 +28,7 @@
 #include <pthread.h>
 #include <gtkmm/widget.h>
 #include <gtkmm/style.h>
+#include <gtkmm/textbuffer.h>
 #include <gtkmm/main.h>
 #include <gtkmm/tooltips.h>
 #include <gdkmm/color.h>
@@ -103,7 +104,9 @@ class UI : public AbstractUI
   protected:
 	virtual void handle_fatal (const char *);
 	virtual void display_message (const char *prefix, gint prefix_len, 
-				      Glib::RefPtr<Gtk::Style> style, const char *msg);
+				      Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, 
+				      Glib::RefPtr<Gtk::TextBuffer::Tag> mtag, 
+				      const char *msg);
 
 	/* stuff to invoke member functions in another
 	   thread so that we can keep the GUI running.
@@ -160,13 +163,14 @@ class UI : public AbstractUI
 	Gtk::Main *theMain;
 	Gtk::Tooltips *tips;
 	TextViewer *errors;
-
-	/* error message display styles */
-
-	Glib::RefPtr<Gtk::Style> error_message_style;
-	Glib::RefPtr<Gtk::Style> info_message_style;
-	Glib::RefPtr<Gtk::Style> warning_message_style;
-	Glib::RefPtr<Gtk::Style> fatal_message_style;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> error_ptag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> error_mtag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> fatal_ptag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> fatal_mtag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> info_ptag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> info_mtag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> warning_ptag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> warning_mtag;
 
 	int signal_pipe[2];
 	PBD::Lock request_buffer_map_lock;
