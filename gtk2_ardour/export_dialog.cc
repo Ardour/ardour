@@ -19,12 +19,14 @@
 
 #include <unistd.h>
 #include <utility>
+#include <sys/stat.h>
 
 #include <fstream>
 
 #include <samplerate.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/xml++.h>
+#include <pbd/dirname.h>
 
 #include <gtkmm2ext/utils.h>
 #include <ardour/export.h>
@@ -39,6 +41,7 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "keyboard.h"
+#include "ardour_message.h"
 
 #include "i18n.h"
 
@@ -96,20 +99,20 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	  format_table (9, 2),
 	  format_frame (_("FORMAT")),
 	  channel_count_label (_("CHANNELS")),
-	  header_format_label (_("FILE TYPE")),
-	  bitdepth_format_label (_("SAMPLE FORMAT")),
-	  endian_format_label (_("SAMPLE ENDIANNESS")),
-	  sample_rate_label (_("SAMPLE RATE")),
-	  src_quality_label (_("CONVERSION QUALITY")),
-	  dither_type_label (_("DITHER TYPE")),
-	  cue_file_label (_("CD MARKER FILE TYPE")),
 	  channel_count_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  header_format_label (_("FILE TYPE")),
 	  header_format_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  bitdepth_format_label (_("SAMPLE FORMAT")),
 	  bitdepth_format_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  endian_format_label (_("SAMPLE ENDIANNESS")),
 	  endian_format_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  sample_rate_label (_("SAMPLE RATE")),
 	  sample_rate_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  src_quality_label (_("CONVERSION QUALITY")),
 	  src_quality_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  dither_type_label (_("DITHER TYPE")),
 	  dither_type_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  cue_file_label (_("CD MARKER FILE TYPE")),
 	  cue_file_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
 	  cuefile_only_checkbox (_("EXPORT CD MARKER FILE ONLY")),
 	  file_frame (_("EXPORT TO FILE")),
@@ -279,10 +282,10 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	longest_str[0] = 'g';
 	longest_str[1] = 'l';
 
-	Gtkmm2ext::set_size_request_to_display_given_text (header_format_combo, longest_str.c_str(), 5+FUDGE, 5);
+	//Gtkmm2ext::set_size_request_to_display_given_text (header_format_combo, longest_str.c_str(), 5+FUDGE, 5);
 
 	// TRANSLATORS: "slereg" is "stereo" with ascender and descender substituted
-	Gtkmm2ext::set_size_request_to_display_given_text (channel_count_combo, _("slereg"), 5+FUDGE, 5);
+	//Gtkmm2ext::set_size_request_to_display_given_text (channel_count_combo, _("slereg"), 5+FUDGE, 5);
 
 /*	header_format_combo.set_focus_on_click (true);
 	bitdepth_format_combo.set_focus_on_click (true);
@@ -313,7 +316,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 
 	cuefile_only_checkbox.set_name ("ExportCheckbox");
 
-	format_table.set_homogeneous (true);
+	format_table.set_homogeneous (false);
 	format_table.set_border_width (5);
 	format_table.set_col_spacings (5);
 	format_table.set_row_spacings (5);
@@ -351,10 +354,11 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	cue_file_align.add(cue_file_label);
 	format_table.attach (cue_file_align, 0, 1, 7, 8);
 	format_table.attach (cue_file_combo, 1, 2, 7, 8);
-	format_table.attach (cuefile_only_checkbox, 1, 2, 8, 9);
+	format_table.attach (cuefile_only_checkbox, 0, 2, 8, 9);
 
 
-	button_box.set_spacing (10);
+	button_box.set_border_width (6);
+	button_box.set_spacing (20);
 	button_box.set_homogeneous (true);
 
 	cancel_button.add (cancel_label);
@@ -895,9 +899,45 @@ ExportDialog::do_export_cd_markers (const string& path,const string& cuefile_typ
 void
 ExportDialog::do_export ()
 {
-	ok_button.set_sensitive(false);
-	save_state();
-
+  	// sanity check file name first
+  	string filepath = file_entry.get_text();
+ 	struct stat statbuf;
+  
+  	if (filepath.empty()) {
+  		// warning dialog
+ 		string txt = _("Please enter a valid filename.");
+		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
+		msg.run();
+ 		return;
+ 	}
+ 	
+ 	// check if file exists already and warn
+ 	if (stat (filepath.c_str(), &statbuf) == 0) {
+ 		if (S_ISDIR (statbuf.st_mode)) {
+ 			string txt = _("Please specify a complete filename for the audio file.");
+			MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
+			msg.run();
+ 			return;
+ 		}
+ 		else {
+ 			string txt = _("File already exists, do you want to overwrite it?");
+			MessageDialog msg (*this, txt, false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
+ 			//ArdourMessage msg (this, X_("exportoverwrite"), txt, true, false, Gtk::BUTTONS_YES_NO);
+ 			if ((ResponseType) msg.run() == Gtk::RESPONSE_NO) {
+ 				return;
+ 			}
+ 		}
+ 	}
+ 	
+ 	// directory needs to exist and be writable
+ 	string dirpath = PBD::dirname (filepath);
+ 	if (::access (dirpath.c_str(), W_OK) != 0) {
+ 		string txt = _("Cannot write file in: ") + dirpath;
+		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
+		msg.run();
+ 		return;
+  	}
+	
 	if (cue_file_combo.get_active_text () != _("None")) {
 		do_export_cd_markers (file_entry.get_text(), cue_file_combo.get_active_text ());
 	}
@@ -907,9 +947,12 @@ ExportDialog::do_export ()
 		return;
 	}
 
+	ok_button.set_sensitive(false);
+	save_state();
+       	
 	set_modal (true);
 	
-	spec.path = file_entry.get_text();
+	spec.path = filepath;
 	spec.progress = 0;
 	spec.running = true;
 	spec.stop = false;
@@ -1102,6 +1145,8 @@ ExportDialog::start_export ()
 		if ((last_slash = dir.find_last_of ('/')) != string::npos) {
 			dir = dir.substr (0, last_slash+1);
 		}
+
+		dir = dir + "export.wav";
 		
 		file_entry.set_text (dir);
 	}
@@ -1274,6 +1319,7 @@ ExportDialog::initiate_browse ()
 		file_selector->get_cancel_button()->signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), -1));
 		file_selector->get_ok_button()->signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), 1));
 	}
+	file_selector->set_filename (file_entry.get_text());
 	file_selector->show_all ();
 }
 
