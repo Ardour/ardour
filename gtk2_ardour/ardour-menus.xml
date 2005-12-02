@@ -1,4 +1,5 @@
 <ui>
+
     <menubar name='Main' action='MainMenu'>
         <menu name='Session' action='Session'>
            <menuitem action='New'/>
@@ -47,4 +48,30 @@
                <menuitem action='ToggleBigClock'/>
         </menu>
      </menubar>
+
+     <popup name='redirectmenu'>
+	 <menuitem action='newplugin'/>
+	 <menuitem action='newinsert'/>
+	 <menuitem action='newsend'/>
+	  <separator/>
+	 <menuitem action='clear'/>
+	  <separator/>
+	 <menuitem action='cut'/>
+	 <menuitem action='copy'/>
+	 <menuitem action='paste'/>
+	  <separator/>
+	 <menuitem action='rename'/>
+	  <separator/>
+	 <menuitem action='selectall'/>
+	 <menuitem action='deselectall'/>
+	  <separator/>
+	 <menuitem action='activate'/>
+	 <menuitem action='deactivate'/>
+	  <separator/>
+	 <menuitem action='activate_all'/>
+	 <menuitem action='deactivate_all'/>
+	  <separator/>
+	 <menuitem action='edit'/>
+      </popup>
+
 </ui>

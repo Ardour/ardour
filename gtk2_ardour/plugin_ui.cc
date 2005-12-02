@@ -75,7 +75,7 @@ PluginUIWindow::PluginUIWindow (AudioEngine &engine, PluginInsert& insert, bool 
 			VSTPluginUI* vpu = new VSTPluginUI (insert, *vp);
 			
 			_pluginui = vpu;
-			add (*vpu);
+			get_vbox()->add (*vpu);
 			vpu->package (*this);
 			
 		} else {
@@ -92,7 +92,7 @@ PluginUIWindow::PluginUIWindow (AudioEngine &engine, PluginInsert& insert, bool 
 		PluginUI*  pu  = new PluginUI (engine, insert, scrollable);
 		
 		_pluginui = pu;
-		add (*pu);
+		get_vbox()->add (*pu);
 		
 		signal_map_event().connect (mem_fun (*pu, &PluginUI::start_updating));
 		signal_unmap_event().connect (mem_fun (*pu, &PluginUI::stop_updating));
@@ -233,9 +233,6 @@ PluginUI::build (AudioEngine &engine)
 	frame->add (*box);
 	hpacker.pack_start(*frame, true, true);
 
-	box->set_border_width (5);
-	box->set_spacing (1);
-	
 	/* find all ports. build control elements for all appropriate control ports */
 
 	for (i = 0; i < plugin.parameter_count(); ++i) {

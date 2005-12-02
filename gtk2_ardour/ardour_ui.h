@@ -99,7 +99,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
   public:
 	ARDOUR_UI (int *argcp, char **argvp[], string rcfile);
 	~ARDOUR_UI();
-	
+
 	void show ();
 	bool shown() { return shown_flag; }
 	
@@ -699,5 +699,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Glib::RefPtr<Gtk::ActionGroup> common_actions;
 };
+
 
 #endif /* __ardour_gui_h__ */

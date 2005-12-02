@@ -31,7 +31,7 @@ namespace ARDOUR {
 	class Plugin;
 }
 
-class PluginSelector : public Gtk::Dialog
+class PluginSelector : public ArdourDialog
 {
   public:
 	PluginSelector (ARDOUR::PluginManager *);
@@ -44,9 +44,10 @@ class PluginSelector : public Gtk::Dialog
   private:
 	ARDOUR::Session* session;
 	Gtk::Notebook notebook;
+	Gtk::ScrolledWindow lscroller;
+	Gtk::ScrolledWindow vscroller;
 
 	// page 1
-	//Gtkmm2ext::Selector ladspa_display;
 	struct LadspaColumns : public Gtk::TreeModel::ColumnRecord {
 		LadspaColumns () {
 			add (name);
@@ -100,7 +101,6 @@ class PluginSelector : public Gtk::Dialog
 	static void _vst_refiller (void *);
 	void vst_refiller ();
 #endif	
-	//Gtkmm2ext::Selector o_selector;
 
 	ARDOUR::PluginInfo* i_selected_plug;
 
@@ -112,8 +112,7 @@ class PluginSelector : public Gtk::Dialog
 	list<ARDOUR::PluginInfo*> added_plugins;
 
 	static void _input_refiller (void *);
-	//static void _output_refiller (void *);
-
+	
 	void input_refiller ();
 	void row_clicked(GdkEventButton *);
 	void btn_add_clicked();

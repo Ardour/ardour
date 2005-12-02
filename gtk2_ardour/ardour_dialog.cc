@@ -26,8 +26,8 @@
 #include "ardour_ui.h"
 
 
-ArdourDialog::ArdourDialog (string title, bool modal)
-	: Dialog (title, modal)
+ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
+	: Dialog (title, modal, use_seperator)
 {
 	session = 0;
 }

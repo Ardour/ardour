@@ -5,32 +5,27 @@
 
 style "very_small_text"
 {
- 	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
-	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+	font ="sans-8"
 }
 
 style "small_text"
 {
- 	fontset="-*-helvetica-medium-r-normal-*-10-*-*-*-p-*-*-*"
-	font ="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*"
+	font ="sans-10"
 }
 
 style "small_bold_text"
 {
- 	fontset="-*-helvetica-bold-r-normal-*-10-*-*-*-p-*-*-*"
-	font ="-*-helvetica-bold-r-normal-*-*-100-*-*-p-*-*"
+ 	font="sans-bold-10"
 }
 
 style "medium_bold_text"
 {
- 	fontset="-*-helvetica-bold-r-normal-*-12-*-*-*-p-*-*-*"
-	font ="-*-helvetica-bold-r-normal-*-*-120-*-*-p-*-*"
+	font ="sans-bold-12"
 }
 
 style "medium_text"
 {
- 	fontset="-*-helvetica-medium-r-normal-*-12-*-*-*-p-*-*-*"
-	font ="-*-helvetica-medium-r-normal-*-*-120-*-*-p-*-*"
+ 	font="sans-12"
 }
 
 style "red_medium_text" = "medium_text"
@@ -43,52 +38,48 @@ style "red_medium_text" = "medium_text"
 
 style "large_text"
 {
- 	fontset="-*-helvetica-bold-r-normal-*-18-*-*-*-p-*-*-*"
-	font ="-*-helvetica-bold-r-normal-*-*-180-*-*-p-*-*"
+	font ="sans-18"
 }
 
 style "larger_bold_text"
 {
- 	fontset="-*-helvetica-bold-r-normal-*-14-*-*-*-p-*-*-*"
-	font ="-*-helvetica-bold-r-normal-*-*-140-*-*-p-*-*"
+	font ="sans-14"
 }
 
 style "plugin_name_text"
 {
-	fontset="-*-helvetica-bold-o-*-*-25-*-*-*-p-*-*-*"
-	font="-*-helvetica-bold-o-*-*-25-*-*-*-p-*-*-*"
+	font="sans-bold-25"
 	fg[NORMAL] = { 0.80, 0.80, 0.70 }
 }
 
 style "plugin_maker_text"
 {
-	fontset="-*-helvetica-bold-o-*-*-14-*-*-*-p-*-*-*"
-	font="-*-helvetica-bold-o-*-*-14-*-*-*-p-*-*-*"
+	font="sans-bold-14"
 	fg[NORMAL] = { 0.80, 0.80, 0.70 }
 }
 
 style "first_action_message" 
 {
-	font="-*-helvetica-medium-r-*-*-34-350-*-*-*-*-*-*"
-	fontset="-*-helvetica-medium-r-*-*-34-350-*-*-*-*-*-*"
+	font="mono-35"
+	fontset="mono-35"
 }
 
 style "verbose_canvas_cursor"
 {
-	font="-*-helvetica-medium-r-*-*-*-240-*-*-*-*-*-*"
-	fontset="-*-helvetica-medium-r-*-*-*-240-*-*-*-*-*-*"
+	font="sans-24"
+	fontset="sans-24"
 }
 
 style "marker_text" 
 {
-	font="-*-helvetica-medium-r-*-*-10-*-*-*-*-*-*-*"
-	fontset="-*-helvetica-medium-r-*-*-10-*-*-*-*-*-*-*"
+	font="sans-10"
+	fontset="sans-10"
 }
 
 style "time_axis_view_item_name"
 {
-	font="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*-1"
-	fontset="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*-1"
+	font="sans-10"
+	fontset="sans-10"
 }
 
 style "default_base" = "medium_text"
@@ -168,8 +159,8 @@ style "black_mackie_menu_bar" = "medium_bold_text"
 
 style "default_buttons_menus" = "default_base"
 {
-  fontset="-*-helvetica-medium-r-normal-*-12-*-*-*-p-*-*-*"
-  font ="-*-helvetica-medium-r-normal-*-*-120-*-*-p-*-*"
+  fontset="sans-12"
+  font ="sans-12"
   	
   fg[ACTIVE] = { 0, 0, 0 }
   
@@ -182,14 +173,14 @@ style "default_buttons_menus" = "default_base"
 
 style "very_small_button" = "default_buttons_menus"
 {
-	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
-	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+	fontset="sans-8"
+	font ="sans-8"
 }
 
 style "small_button" = "default_buttons_menus"
 {
-	fontset="-*-helvetica-medium-r-normal-*-10-*-*-*-p-*-*-*"
-	font ="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*"
+	fontset="sans-10"
+	font ="sans-10"
 }
 
 style "very_small_red_active_and_selected_button" = "very_small_button"
@@ -218,8 +209,8 @@ style "track_rec_enable_button" = "small_button"
 
 style "mixer_rec_enable_button" = "track_rec_enable_button"
 {
-	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
-	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+	fontset="sans-8"
+	font ="sans-8"
 }
 
 style "solo_button" = "small_button"
@@ -233,8 +224,8 @@ style "solo_button" = "small_button"
 
 style "mixer_solo_button" = "solo_button"
 {
-	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
-	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+	fontset="sans-8"
+	font ="sans-8"
 }
 
 
@@ -248,8 +239,8 @@ style "mute_button" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
-	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+	fontset="sans-8"
+	font ="sans-8"
 }
 
 style "track_loop_button" = "small_button"
@@ -270,8 +261,8 @@ style "mixer_red_active_button" = "very_small_button"
 
 style "time_button" = "default_buttons_menus"
 {
-	fontset="-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-*-*"
- 	font ="-*-helvetica-medium-r-normal-*-*-80-*-*-p-*-*"
+	fontset="sans-8"
+ 	font ="sans-8"
 }
 
 style "transport_button" = "very_small_button"
@@ -316,8 +307,8 @@ style "ardour_progressbars" = "default_buttons_menus"
 
 style "options_window"  = "default_base"
 {
-	fontset="-*-helvetica-bold-r-normal-*-12-*-*-*-p-*-*-*"
-	font ="-*-helvetica-bold-r-normal-*-*-120-*-*-p-*-*"
+	fontset="sans-bold-12"
+	font ="sans-bold-12"
 	fg[PRELIGHT] = { 0.80, 0.80, 0.70 }
 }
 
@@ -344,8 +335,8 @@ style "red_when_active" = "medium_text"
 
 style "xrun_warn"  
 {
-	font ="-*-helvetica-bold-r-normal-*-*-180-*-*-p-*-*"
- 	fontset="-*-helvetica-bold-r-normal-*-18-*-*-*-p-*-*-*"
+	font ="sans-bold-18"
+ 	fontset="sans-bold-18"
 
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 1.0 }
@@ -482,14 +473,14 @@ style "small_red_on_black_entry"  = "small_bold_text"
 
 style "big_clock_display" = "medium_entry"
 {
-	fontset = "-*-courier-bold-r-*-*-34-*-*-*-*-*-*-*"
-	font = "-*-courier-bold-r-*-*-34-*-*-*-*-*-*-*"
+	fontset = "sans-34"
+	font = "sans-34"
 }
 
 style "transport_clock_display"
 {
-	fontset = "-*-helvetica-bold-r-*-*-18-*-*-*-*-*-*-*"
-	font = "-*-helvetica-bold-r-*-*-18-*-*-*-*-*-*-*"
+	fontset = "sans-bold-18"
+	font = "sans-bold-18"
 	
 	fg[NORMAL] = { 0.66, 0.97, 0.18 }
 	fg[ACTIVE] = { 1.0, 0, 0.0 }
@@ -505,8 +496,8 @@ style "transport_clock_display"
 
 style "tempo_meter_clock_display"
 {
-	fontset = "-*-helvetica-bold-r-*-*-8-*-*-*-*-*-*-*"
-	font = "-*-helvetica-bold-r-*-*-8-*-*-*-*-*-*-*"
+	fontset = "sans-bold-8"
+	font = "sans-bold-8"
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
@@ -814,7 +805,7 @@ style "meter_metrics_strip" = "default_base"
 
 style "no_session_msg" 
 {
-	font = "-*-helvetica-medium-r-*-*-34-350-*-*-*-*-*-*"
+	font = "sans-34"
 }
 
 style "location_row_button" = "default_buttons_menus"

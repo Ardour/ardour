@@ -25,6 +25,7 @@
 #include <queue>
 #include <map>
 
+#include <setjmp.h>
 #include <pthread.h>
 #include <gtkmm/widget.h>
 #include <gtkmm/style.h>
@@ -77,6 +78,7 @@ class UI : public AbstractUI
 
 	/* Gtk-UI specific interfaces */
 
+	int  set_quit_context ();
 	void set_tip (Gtk::Widget *, const gchar *txt, const gchar *hlp = 0);
 	void set_state (Gtk::Widget *w, Gtk::StateType state);
 	void idle_add (int (*)(void *), void *);
@@ -191,6 +193,8 @@ class UI : public AbstractUI
 	void color_selection_done (bool status);
 	bool color_selection_deleted (GdkEventAny *);
 	bool color_picked;
+
+	jmp_buf quit_context;
 };
 
 template<class UI_CLASS> void *

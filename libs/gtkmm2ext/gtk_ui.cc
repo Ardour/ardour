@@ -230,7 +230,13 @@ UI::quit ()
 void
 UI::do_quit ()
 {
-	Main::quit();
+	longjmp (quit_context, 1);
+}
+
+int
+UI::set_quit_context()
+{
+	return setjmp (quit_context);
 }
 
 void

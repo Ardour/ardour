@@ -15,6 +15,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+    $Id$
+
 */
 
 #include <unistd.h>
@@ -98,26 +100,17 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	  editor (e),
 	  format_table (9, 2),
 	  format_frame (_("FORMAT")),
-	  channel_count_label (_("CHANNELS")),
-	  channel_count_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
-	  header_format_label (_("FILE TYPE")),
-	  header_format_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
-	  bitdepth_format_label (_("SAMPLE FORMAT")),
-	  bitdepth_format_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
-	  endian_format_label (_("SAMPLE ENDIANNESS")),
-	  endian_format_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
-	  sample_rate_label (_("SAMPLE RATE")),
-	  sample_rate_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
-	  src_quality_label (_("CONVERSION QUALITY")),
-	  src_quality_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
-	  dither_type_label (_("DITHER TYPE")),
-	  dither_type_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
-	  cue_file_label (_("CD MARKER FILE TYPE")),
-	  cue_file_align(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0),
+	  cue_file_label (_("CD MARKER FILE TYPE"), 1.0, 0.5),
+	  channel_count_label (_("CHANNELS"), 1.0, 0.5),
+	  header_format_label (_("FILE TYPE"), 1.0, 0.5),
+	  bitdepth_format_label (_("SAMPLE FORMAT"), 1.0, 0.5),
+	  endian_format_label (_("SAMPLE ENDIANNESS"), 1.0, 0.5),
+	  sample_rate_label (_("SAMPLE RATE"), 1.0, 0.5),
+	  src_quality_label (_("CONVERSION QUALITY"), 1.0, 0.5),
+	  dither_type_label (_("DITHER TYPE"), 1.0, 0.5),
 	  cuefile_only_checkbox (_("EXPORT CD MARKER FILE ONLY")),
 	  file_frame (_("EXPORT TO FILE")),
 	  file_browse_button (_("Browse")),
-	  ok_button (_("Export")),
 	  track_selector_button (_("Specific tracks ..."))
 {
 	guint32 n;
@@ -207,7 +200,6 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	track_selector_button.set_name ("EditorGTKButton");
 	track_selector_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::track_selector_button_click));
 
-	get_vbox()->pack_start (button_box, false, false);
 	get_vbox()->pack_start (progress_bar, false, false);
 
 	Gtkmm2ext::set_size_request_to_display_given_text (file_entry, X_("Kg/quite/a/reasonable/size/for/files/i/think"), 5, 8);
@@ -222,23 +214,33 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	file_frame.set_name (FRAME_NAME);
 
 	/* pop_strings needs to be created on the stack because set_popdown_strings()
-	 * takes a reference. */
+	   takes a reference. 
+	*/
+
 	vector<string> pop_strings = internationalize(sample_rates);
 	Gtkmm2ext::set_popdown_strings (sample_rate_combo, pop_strings);
-	pop_strings = internationalize(sample_rates);
+	sample_rate_combo.set_active_text (pop_strings.front());
+	pop_strings = internationalize(src_quality);
 	Gtkmm2ext::set_popdown_strings (src_quality_combo, pop_strings);
+	src_quality_combo.set_active_text (pop_strings.front());
 	pop_strings = internationalize(dither_types);
 	Gtkmm2ext::set_popdown_strings (dither_type_combo, pop_strings);
+	dither_type_combo.set_active_text (pop_strings.front());
 	pop_strings = internationalize(channel_strings);
 	Gtkmm2ext::set_popdown_strings (channel_count_combo, pop_strings);
+	channel_count_combo.set_active_text (pop_strings.front());
 	pop_strings = internationalize((const char **) sndfile_header_formats_strings);
 	Gtkmm2ext::set_popdown_strings (header_format_combo, pop_strings);
+	header_format_combo.set_active_text (pop_strings.front());
 	pop_strings = internationalize((const char **) sndfile_bitdepth_formats_strings);
 	Gtkmm2ext::set_popdown_strings (bitdepth_format_combo, pop_strings);
+	bitdepth_format_combo.set_active_text (pop_strings.front());
 	pop_strings = internationalize((const char **) sndfile_endian_formats_strings);
 	Gtkmm2ext::set_popdown_strings (endian_format_combo, pop_strings);
+	endian_format_combo.set_active_text (pop_strings.front());
 	pop_strings = internationalize(cue_file_types);
 	Gtkmm2ext::set_popdown_strings (cue_file_combo, pop_strings);
+	cue_file_combo.set_active_text (pop_strings.front());
 
 	/* this will re-sensitized as soon as a non RIFF/WAV
 	   header format is chosen.
@@ -322,57 +324,40 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	format_table.set_row_spacings (5);
 
 	if (!audio_region) {
-		channel_count_align.add(channel_count_label);
-		format_table.attach (channel_count_align, 0, 1, 0, 1);
+		format_table.attach (channel_count_label, 0, 1, 0, 1);
 		format_table.attach (channel_count_combo, 1, 2, 0, 1);
 	}
 
-	header_format_align.add(header_format_label);
-	format_table.attach (header_format_align, 0, 1, 1, 2);
+	format_table.attach (header_format_label, 0, 1, 1, 2);
 	format_table.attach (header_format_combo, 1, 2, 1, 2);
 
-	bitdepth_format_align.add(bitdepth_format_label);
-	format_table.attach (bitdepth_format_align, 0, 1, 2, 3);
+	format_table.attach (bitdepth_format_label, 0, 1, 2, 3);
 	format_table.attach (bitdepth_format_combo, 1, 2, 2, 3);
 
-	endian_format_align.add(endian_format_label);
-	format_table.attach (endian_format_align, 0, 1, 3, 4);
+	format_table.attach (endian_format_label, 0, 1, 3, 4);
 	format_table.attach (endian_format_combo, 1, 2, 3, 4);
 
-	sample_rate_align.add(sample_rate_label);
-	format_table.attach (sample_rate_align, 0, 1, 4, 5);
+	format_table.attach (sample_rate_label, 0, 1, 4, 5);
 	format_table.attach (sample_rate_combo, 1, 2, 4, 5);
 
-	src_quality_align.add(src_quality_label);
-	format_table.attach (src_quality_align, 0, 1, 5, 6);
+	format_table.attach (src_quality_label, 0, 1, 5, 6);
 	format_table.attach (src_quality_combo, 1, 2, 5, 6);
 
-	dither_type_align.add(dither_type_label);
-	format_table.attach (dither_type_align, 0, 1, 6, 7);
+	format_table.attach (dither_type_label, 0, 1, 6, 7);
 	format_table.attach (dither_type_combo, 1, 2, 6, 7);
 
-	cue_file_align.add(cue_file_label);
-	format_table.attach (cue_file_align, 0, 1, 7, 8);
+	format_table.attach (cue_file_label, 0, 1, 7, 8);
 	format_table.attach (cue_file_combo, 1, 2, 7, 8);
 	format_table.attach (cuefile_only_checkbox, 0, 2, 8, 9);
 
-
-	button_box.set_border_width (6);
-	button_box.set_spacing (20);
-	button_box.set_homogeneous (true);
-
-	cancel_button.add (cancel_label);
-
-	button_box.pack_start (ok_button, false, true);
-	button_box.pack_start (cancel_button, false, true);
-	
-	ok_button.set_name ("EditorGTKButton");
-	cancel_button.set_name ("EditorGTKButton");
 	file_entry.set_name ("ExportFileDisplay");
 
 	signal_delete_event().connect (mem_fun(*this, &ExportDialog::window_closed));
-	ok_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::do_export));
-	cancel_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::end_dialog));
+
+	ok_button = add_button (Stock::OK, RESPONSE_ACCEPT);
+	ok_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::do_export));
+	cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	cancel_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::end_dialog));
 	
 	file_browse_button.set_name ("EditorGTKButton");
 	file_browse_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::initiate_browse));
@@ -947,9 +932,9 @@ ExportDialog::do_export ()
 		return;
 	}
 
-	ok_button.set_sensitive(false);
+	ok_button->set_sensitive(false);
 	save_state();
-       	
+
 	set_modal (true);
 	
 	spec.path = filepath;
@@ -1123,7 +1108,7 @@ ExportDialog::end_dialog ()
 	}
 
 	set_modal (false);
-	ok_button.set_sensitive(true);
+	ok_button->set_sensitive(true);
 }
 
 void

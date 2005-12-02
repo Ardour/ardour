@@ -324,7 +324,7 @@ Editor::Editor (AudioEngine& eng)
 	initialize_canvas ();
 
 	track_canvas_scroller.add (track_canvas);
-	track_canvas_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
+	track_canvas_scroller.set_policy (POLICY_NEVER, POLICY_NEVER);
 	track_canvas_scroller.set_name ("TrackCanvasScroller");
 
 	track_canvas_scroller.get_vadjustment()->signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling));
@@ -343,7 +343,7 @@ Editor::Editor (AudioEngine& eng)
  	edit_hscrollbar.signal_size_allocate().connect (mem_fun(*this, &Editor::hscroll_slider_allocate));
 	
 	time_canvas_scroller.add (time_canvas);
-	time_canvas_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
+	time_canvas_scroller.set_policy (POLICY_NEVER, POLICY_NEVER);
 	time_canvas_scroller.set_hadjustment (*track_canvas_scroller.get_hadjustment());
 	time_canvas_scroller.set_name ("TimeCanvasScroller");
 
@@ -441,17 +441,14 @@ Editor::Editor (AudioEngine& eng)
 	edit_packer.set_homogeneous (false);
 	edit_packer.set_name ("EditorWindow");
 
-// 	edit_packer.attach (edit_hscroll_left_arrow_event,  0, 1, 0, 1,    Gtk::FILL,  0, 0, 0);
-// 	edit_packer.attach (edit_hscroll_slider,            1, 2, 0, 1,    Gtk::FILL|Gtk::EXPAND,  0, 0, 0);
-// 	edit_packer.attach (edit_hscroll_right_arrow_event, 2, 3, 0, 1,    Gtk::FILL,  0, 0, 0);
  	edit_packer.attach (edit_hscrollbar,            1, 2, 0, 1,    FILL|EXPAND,  FILL, 0, 0);
 
-	edit_packer.attach (time_button_event_box,               0, 1, 1, 2,    FILL, FILL, 0, 0);
+	edit_packer.attach (time_button_event_box,          0, 1, 1, 2,    FILL, FILL, 0, 0);
 	edit_packer.attach (time_canvas_event_box,          1, 2, 1, 2,    FILL|EXPAND, FILL, 0, 0);
 
-	edit_packer.attach (edit_controls_scroller,         0, 1, 2, 3,    FILL,                   FILL|EXPAND, 0, 0);
+	edit_packer.attach (edit_controls_scroller,         0, 1, 2, 3,    FILL,FILL, 0, 0);
 	edit_packer.attach (track_canvas_event_box,         1, 2, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
-	edit_packer.attach (edit_vscrollbar,                2, 3, 2, 3,    FILL,                   FILL|EXPAND, 0, 0);
+	edit_packer.attach (edit_vscrollbar,                2, 3, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
 
 	edit_frame.set_name ("BaseFrame");
 	edit_frame.set_shadow_type (SHADOW_IN);
@@ -462,37 +459,29 @@ Editor::Editor (AudioEngine& eng)
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom in"));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom out"));
 
-//	zoom_onetoone_button.set_name ("EditorTimeButton");
 	zoom_out_full_button.set_name ("EditorTimeButton");
-//	ARDOUR_UI::instance()->tooltips().set_tip (zoom_onetoone_button, _("Zoom in 1:1"));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to session"));
 
 	zoom_in_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(zoom_in_button_xpm)))));
 	zoom_out_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(zoom_out_button_xpm)))));
 	zoom_out_full_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(zoom_out_full_button_xpm)))));
-//	zoom_onetoone_button.add (*(manage (new Gtk::Image (zoom_onetoone_button_xpm))));
-
 	
 	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
 	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
 	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
-//	zoom_onetoone_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom), 1.0));
 	
 	zoom_indicator_box.pack_start (zoom_out_button, false, false);
 	zoom_indicator_box.pack_start (zoom_in_button, false, false);
  	zoom_indicator_box.pack_start (zoom_range_clock, false, false);	
-//	zoom_indicator_box.pack_start (zoom_onetoone_button, false, false);
 	zoom_indicator_box.pack_start (zoom_out_full_button, false, false);
 	
 	zoom_indicator_label.set_text (_("Zoom Span"));
 	zoom_indicator_label.set_name ("ToolBarLabel");
 
-
 	zoom_indicator_vbox.set_spacing (3);
 	zoom_indicator_vbox.set_border_width (3);
 	zoom_indicator_vbox.pack_start (zoom_indicator_label, false, false);
 	zoom_indicator_vbox.pack_start (zoom_indicator_box, false, false);
-
 
 	bottom_hbox.set_border_width (3);
 	bottom_hbox.set_spacing (3);
@@ -1008,73 +997,6 @@ Editor::on_realize ()
 	null_cursor = new Gdk::Cursor(empty_pixmap, empty_bitmap, white, white, 0, 0);
 }
 
-void
-Editor::track_canvas_allocate (Gtk::Allocation alloc)
-{
-	canvas_width = alloc.get_width();
-	canvas_height = alloc.get_height();
-
-	if (session == 0 && !ARDOUR_UI::instance()->will_create_new_session_automatically()) {
-
-		Pango::FontDescription font = get_font_for_style (N_("FirstActionMessage"));
-
-		const char *txt1 = _("Start a new session\n");
-		const char *txt2 = _("via Session menu");
-
-		/* this mess of code is here to find out how wide this text is and
-		   position the message in the center of the editor window. there
-		   are two lines, so we use the longer of the the lines to
-		   compute width, and multiply the height by 2.
-		*/
-			
-		int pixel_height;
-		int pixel_width;
-		
-		/* this is a dummy widget that exists so that we can get the
-		   style from the RC file. 
-		*/
-		
-		Label foo (_(txt2));
-		Glib::RefPtr<Pango::Layout> layout;
-		foo.set_name ("NoSessionMessage");
-		foo.ensure_style ();
-		
-		layout = foo.create_pango_layout (_(txt2));
-		layout->set_font_description (font);
-		layout->get_pixel_size (pixel_width, pixel_height);
-			
-		if (first_action_message == 0) {
-			
-			char txt[strlen(txt1)+strlen(txt2)+1];
-			
-			/* merge both lines */
-			
-			strcpy (txt, _(txt1));
-			strcat (txt, _(txt2));
-			
-			first_action_message = new ArdourCanvas::Text (*track_canvas.root());
-			first_action_message->property_font_desc() = font;
-			first_action_message->property_fill_color_rgba() = color_map[cFirstActionMessage];
-			first_action_message->property_x() = (gdouble) (canvas_width - pixel_width) / 2.0;
-			first_action_message->property_y() = (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height));
-			first_action_message->property_anchor() = ANCHOR_NORTH_WEST;
-			first_action_message->property_text() = ustring (txt);
-			
-		} else {
-
-			/* center it */
-			first_action_message->property_x() = (gdouble) (canvas_width - pixel_width) / 2.0;
-			first_action_message->property_y() = (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height));
-		}
-	}
-
-	zoom_range_clock.set ((jack_nframes_t) (canvas_width * frames_per_unit));
-	edit_cursor->set_position (edit_cursor->current_frame);
-	playhead_cursor->set_position (playhead_cursor->current_frame);
-	reset_scrolling_region (&alloc);
-	
-	Resized (); /* EMIT_SIGNAL */
-}
 
 void
 Editor::queue_session_control_changed (Session::ControlType t)

@@ -322,7 +322,7 @@ int
 main (int argc, char *argv[])
 {
 	ARDOUR::AudioEngine *engine;
-	char *null_file_list[] = { 0 };
+	vector<Glib::ustring> null_file_list;
 
 	gtk_set_locale ();
 
@@ -337,7 +337,6 @@ main (int argc, char *argv[])
 	text_receiver.listen_to (info);
 	text_receiver.listen_to (fatal);
 	text_receiver.listen_to (warning);
-	
 
 	if (parse_opts (argc, argv)) {
 		exit (1);
@@ -357,8 +356,8 @@ main (int argc, char *argv[])
 		unsetenv("GTK_RC_FILES");
 	}
 
-	gtk_rc_set_default_files (null_file_list);
-
+	RC::set_default_files (null_file_list);
+	
 	cout << _("Ardour/GTK ") 
 	     << VERSIONSTRING
 	     << _("\n   (built using ")
@@ -411,17 +410,13 @@ main (int argc, char *argv[])
 		engine = new ARDOUR::AudioEngine (jack_client_name);
 		ARDOUR::init (*engine, use_vst, try_hw_optimization, handler2);
 		ui->set_engine (*engine);
-	} 
-
-	catch (AudioEngine::NoBackendAvailable& err) {
+	} catch (AudioEngine::NoBackendAvailable& err) {
 		gui_jack_error ();
 		error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
 		return -1;
-	}
-	
-	catch (failed_constructor& err) {
+	} catch (failed_constructor& err) {
 		error << _("could not initialize Ardour.") << endmsg;
-		exit (1);
+		return -1;
 	} 
 
 	/* load session, if given */
@@ -484,9 +479,10 @@ To create it from the command line, start ardour as \"ardour --new %1"), path)
 		}
 	}
 
-	ui->run (text_receiver);
+	if (!ui->set_quit_context ()) {
+		ui->run (text_receiver);
+	}
 	
-	delete ui;
 	ui = 0;
 
   out:

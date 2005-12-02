@@ -30,14 +30,14 @@ using namespace Gtk;
 ArdourMessage::ArdourMessage (Gtk::Window* parent, 
 			      string name, string msg, 
 			      bool grab_focus, bool auto_run)
-	: ArdourDialog (name)
+	: ArdourDialog (name),
+	  label (msg, 0.5, 0.5)
 {
-	label.set_text (msg);
-	label.set_alignment (0.5, 0.5);
 	label.set_name (X_("PrompterLabel"));
+	label.show ();
 
 	get_vbox()->pack_start (label);
-
+	
 	Button* ok_button = add_button (Stock::OK, RESPONSE_ACCEPT);
 	
 	set_name (X_("Prompter"));

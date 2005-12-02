@@ -116,7 +116,7 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	_route.redirects_changed.connect (mem_fun(*this, &RedirectBox::redirects_changed));
 
 	redirect_eventbox.signal_enter_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::enter_box), this));
-	redirect_eventbox.signal_leave_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::leave_box), this));
+	//redirect_eventbox.signal_leave_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::leave_box), this));
 
 	redirect_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::redirect_button));
 	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button));
@@ -262,7 +262,9 @@ RedirectBox::redirect_button (GdkEventButton *ev)
 {
 	Redirect *redirect;
 	TreeModel::Row row = *(redirect_display.get_selection()->get_selected());
-	redirect = row[columns.redirect];
+
+	if (row)
+		redirect = row[columns.redirect];
 
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
@@ -374,6 +376,7 @@ void
 RedirectBox::choose_plugin ()
 {
 	sigc::connection newplug_connection = _plugin_selector.PluginCreated.connect (mem_fun(*this,&RedirectBox::insert_plugin_chosen));
+	_plugin_selector.show_all();
 	_plugin_selector.run ();
 	newplug_connection.disconnect();
 }

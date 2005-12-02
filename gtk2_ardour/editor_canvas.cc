@@ -21,6 +21,7 @@
 #include <libgnomecanvasmm/init.h>
 #include <jack/types.h>
 
+#include "ardour_ui.h"
 #include "editor.h"
 #include "waveview.h"
 #include "simplerect.h"
@@ -82,10 +83,10 @@ Editor::initialize_canvas ()
 {
 	ArdourCanvas::init ();
 	ardour_canvas_type_init ();
+	
+	/* don't try to center the canvas */
 
-	/* adjust sensitivity for "picking" items */
-
-	// GNOME_CANVAS(track_canvas)->close_enough = 2;
+	track_canvas.set_center_scroll_region (false);
 
 	track_canvas.signal_event().connect (bind (mem_fun (*this, &Editor::track_canvas_event), (ArdourCanvas::Item*) 0));
 	track_canvas.set_name ("EditorMainCanvas");
@@ -259,67 +260,92 @@ Editor::initialize_canvas ()
 }
 
 void
-Editor::reset_scrolling_region (Gtk::Allocation* alloc)
+Editor::track_canvas_allocate (Gtk::Allocation alloc)
 {
-	guint32 last_canvas_unit;
-	double height;
-	guint32 canvas_alloc_height, canvas_alloc_width;
-	TrackViewList::iterator i;
 	static bool first_time = true;
 
-	/* We need to make sure that the canvas always has its
-	   scrolling region set to larger of:
+	canvas_width = alloc.get_width();
+	canvas_height = alloc.get_height();
 
-	   - the size allocated for it (within the container its packed in)
-	   - the size required to see the entire session
+	if (session == 0 && !ARDOUR_UI::instance()->will_create_new_session_automatically()) {
 
-	   If we don't ensure at least the first of these, the canvas
-	   does some wierd and in my view unnecessary stuff to center
-	   itself within the allocated area, which causes bad, bad
-	   results.
-	   
-	   XXX GnomeCanvas has fixed this, and has an option to
-	   control the centering behaviour.
-	*/
+		Pango::FontDescription font = get_font_for_style (N_("FirstActionMessage"));
 
-	last_canvas_unit = (guint32) ceil ((float) max_frames / frames_per_unit);
+		cerr << "font for style = "
+		     << font.get_family() << ' '
+		     << font.get_size() << ' '
+		     << font.get_weight() << ' '
+		     << font.get_variant() << ' '
+		     << endmsg;
 
-	height = 0;
+		const char *txt1 = _("Start a new session\n");
+		const char *txt2 = _("via Session menu");
 
-	if (session) {
-		for (i = track_views.begin(); i != track_views.end(); ++i) {
-			if ((*i)->control_parent) {
-				height += (*i)->effective_height;
-				height += track_spacing;
-			}
-		}
+		/* this mess of code is here to find out how wide this text is and
+		   position the message in the center of the editor window. there
+		   are two lines, so we use the longer of the the lines to
+		   compute width, and multiply the height by 2.
+		*/
+			
+		int pixel_height;
+		int pixel_width;
 		
-		if (height) {
-			height -= track_spacing;
+		/* this is a dummy widget that exists so that we can get the
+		   style from the RC file. 
+		*/
+		
+		Label foo (_(txt2));
+		Glib::RefPtr<Pango::Layout> layout;
+
+		top_hbox.pack_start (foo);
+		foo.set_name ("FirstActionMessage");
+		foo.ensure_style ();
+
+		layout = foo.create_pango_layout (_(txt2));
+		layout->set_font_description (font);
+		layout->set_font_description (font);
+		layout->get_pixel_size (pixel_width, pixel_height);
+			
+		top_hbox.remove (foo);
+
+		if (first_action_message == 0) {
+			
+			char txt[strlen(txt1)+strlen(txt2)+1];
+			
+			/* merge both lines */
+			
+			strcpy (txt, _(txt1));
+			strcat (txt, _(txt2));
+			
+			first_action_message = new ArdourCanvas::Text (*track_canvas.root());
+			first_action_message->property_font_desc() = font;
+			first_action_message->property_fill_color_rgba() = color_map[cFirstActionMessage];
+			first_action_message->property_x() = (gdouble) (canvas_width - pixel_width) / 2.0;
+			first_action_message->property_y() = (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height));
+			first_action_message->property_anchor() = ANCHOR_NORTH_WEST;
+			first_action_message->property_text() = ustring (txt);
+			
+		} else {
+
+			/* center it */
+			first_action_message->property_x() = (gdouble) (canvas_width - pixel_width) / 2.0;
+			first_action_message->property_y() = (gdouble) (canvas_height/2.0) - (2.0 * (pixel_height));
 		}
 	}
 
-	canvas_height = (guint32) height;
-	
-	if (alloc) {
-		canvas_alloc_height = alloc->get_height();
-		canvas_alloc_width = alloc->get_width();
-	} else {
-		canvas_alloc_height = track_canvas.get_height();
-		canvas_alloc_width = track_canvas.get_width();
-	}
+	zoom_range_clock.set ((jack_nframes_t) (canvas_width * frames_per_unit));
+	edit_cursor->set_position (edit_cursor->current_frame);
+	playhead_cursor->set_position (playhead_cursor->current_frame);
+	reset_scrolling_region (&alloc);
 
-	canvas_height = max (canvas_height, canvas_alloc_height);
-	track_canvas.set_scroll_region ( 0.0, 0.0, max (last_canvas_unit, canvas_alloc_width), canvas_height);
-
-	if (edit_cursor) edit_cursor->set_length (canvas_alloc_height);
-	if (playhead_cursor) playhead_cursor->set_length (canvas_alloc_height);
+	if (edit_cursor) edit_cursor->set_length (canvas_height);
+	if (playhead_cursor) playhead_cursor->set_length (canvas_height);
 
 	if (marker_drag_line) {
 		marker_drag_line_points.back().set_x(canvas_height);
-		// cerr << "set mlA points, nc = " << marker_drag_line_points.num_points << endl;
 		marker_drag_line->property_points() = marker_drag_line_points;
 	}
+
 	if (range_marker_drag_rect) {
 		range_marker_drag_rect->property_y1() = 0.0;
 		range_marker_drag_rect->property_y2() = (double) canvas_height;
@@ -353,6 +379,65 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 	} else {
 		redisplay_tempo ();
 	}
+	
+	Resized (); /* EMIT_SIGNAL */
+}
+
+void
+Editor::reset_scrolling_region (Gtk::Allocation* alloc)
+{
+	guint32 last_canvas_unit;
+	double height;
+	guint32 canvas_alloc_height, canvas_alloc_width;
+	TrackViewList::iterator i;
+
+	/* We need to make sure that the canvas always has its
+	   scrolling region set to larger of:
+
+	   - the size allocated for it (within the container its packed in)
+	   - the size required to see the entire session
+
+	   If we don't ensure at least the first of these, the canvas
+	   does some wierd and in my view unnecessary stuff to center
+	   itself within the allocated area, which causes bad, bad
+	   results.
+	   
+	   XXX GnomeCanvas has fixed this, and has an option to
+	   control the centering behaviour.
+	*/
+
+#if 0
+	last_canvas_unit = (guint32) ceil ((float) max_frames / frames_per_unit);
+
+	height = 0;
+
+	if (session) {
+		for (i = track_views.begin(); i != track_views.end(); ++i) {
+			if ((*i)->control_parent) {
+				height += (*i)->effective_height;
+				height += track_spacing;
+			}
+		}
+		
+		if (height) {
+			height -= track_spacing;
+		}
+	}
+
+	canvas_height = (guint32) height;
+#endif
+	
+	if (alloc) {
+		canvas_alloc_height = alloc->get_height();
+		canvas_alloc_width = alloc->get_width();
+	} else {
+		canvas_alloc_height = track_canvas.get_height();
+		canvas_alloc_width = track_canvas.get_width();
+	}
+
+	canvas_height = 0;
+	canvas_height = max (canvas_height, canvas_alloc_height);
+	track_canvas.set_scroll_region ( 0.0, 0.0, max (last_canvas_unit, canvas_alloc_width), canvas_height);
 }
 
 bool

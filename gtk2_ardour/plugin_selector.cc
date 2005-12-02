@@ -39,7 +39,7 @@ using namespace ARDOUR;
 using namespace Gtk;
 
 PluginSelector::PluginSelector (PluginManager *mgr)
-	: Dialog (_("ardour: plugins"), true, false)
+	: ArdourDialog (_("ardour: plugins"), true, false)
 {
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginSelectorWindow");
@@ -58,6 +58,9 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	ladspa_display.append_column (_("# Outputs"), lcols.outs);
 	ladspa_display.set_headers_visible (true);
 	ladspa_display.set_reorderable (false);
+	lscroller.set_border_width(10);
+	lscroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	lscroller.add(ladspa_display);
 
 	amodel = Gtk::ListStore::create(acols);
 	added_list.set_model (amodel);
@@ -78,6 +81,9 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	vst_display.append_column (_("# Outputs"), vcols.outs);
 	vst_display.set_headers_visible (true);
 	vst_display.set_reorderable (false);
+	vscroller.set_border_width(10);
+	vscroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	vscroller.add(vst_display);
 
 	for (int i = 0; i <=2; i++) {
 		column = vst_display.get_column(i);
@@ -94,7 +100,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	btn_add->set_name("PluginSelectorButton");
 	btn_remove->set_name("PluginSelectorButton");
-	
+
 	Gtk::Table* table = manage(new Gtk::Table(7, 10));
 	table->set_size_request(750, 500);
 	table->attach(notebook, 0, 7, 0, 5);
@@ -111,10 +117,10 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	get_vbox()->pack_start (*table);
 
 	using namespace Gtk::Notebook_Helpers;
-	notebook.pages().push_back (TabElem (ladspa_display, _("LADSPA")));
+	notebook.pages().push_back (TabElem (lscroller, _("LADSPA")));
 #ifdef VST_SUPPORT
 	if (Config->get_use_vst()) {
-		notebook.pages().push_back (TabElem (vst_display, _("VST")));
+		notebook.pages().push_back (TabElem (vscroller, _("VST")));
 	}
 #endif
 
@@ -122,12 +128,6 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	//ladspa_display.set_name("PluginSelectorDisplay");
 	ladspa_display.set_name("PluginSelectorList");
 	added_list.set_name("PluginSelectorList");
-	
-	//ladspa_display.clist().column(0).set_auto_resize (false);
-	//ladspa_display.clist().column(0).set_width(470);
-
-	//ladspa_display.clist().column(1).set_auto_resize (true);
-	//o_selector.clist().column(0).set_auto_resize (true);
 
 	ladspa_display.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::row_clicked));
 #ifdef VST_SUPPORT
@@ -139,6 +139,8 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	btn_update->signal_clicked().connect (mem_fun(*this, &PluginSelector::btn_update_clicked));
 	btn_add->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_add_clicked));
 	btn_remove->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_remove_clicked));
+
+	input_refiller ();
 }
 
 void
@@ -163,16 +165,9 @@ PluginSelector::set_session (Session* s)
 void
 PluginSelector::_input_refiller (void *arg)
 {
+
 	((PluginSelector *) arg)->input_refiller ();
 }
-
-/*
-void
-PluginSelector::_output_refiller (void *arg)
-{
-	((PluginSelector *) arg)->output_refiller ();
-}
-*/
 
 int compare(const void *left, const void *right)
 {
@@ -182,17 +177,16 @@ int compare(const void *left, const void *right)
 void
 PluginSelector::input_refiller ()
 {
-	//const gchar *rowdata[4];
 	guint row;
 	list<PluginInfo *> &plugs = manager->ladspa_plugin_info ();
 	list<PluginInfo *>::iterator i;
 	char ibuf[16], obuf[16];
-	
+	lmodel->clear();
+#ifdef VST_SUPPORT
+	vmodel->clear();
+#endif
 	// Insert into GTK list
 	for (row = 0, i=plugs.begin(); i != plugs.end(); ++i, ++row) {
-		//rowdata[0] = (*i)->name.c_str();
-		//rowdata[1] = (*i)->category.c_str();
-
 		snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
 		snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
 		
@@ -202,12 +196,9 @@ PluginSelector::input_refiller ()
 		newrow[lcols.ins] = ibuf;
 		newrow[lcols.outs] = obuf;
 		newrow[lcols.plugin] = *i;
-		//clist.insert_row (row, rowdata);
-		//clist.rows().back().set_data (*i);
 	}
 
- 	//clist.set_sort_column (0);
- 	//clist.sort ();
+	lmodel->set_sort_column (0, Gtk::SORT_ASCENDING);
 }
 
 #ifdef VST_SUPPORT
@@ -228,8 +219,6 @@ PluginSelector::vst_refiller ()
 	
 	// Insert into GTK list
 	for (row = 0, i=plugs.begin(); i != plugs.end(); ++i, ++row) {
-		//rowdata[0] = (*i)->name.c_str();
-		//rowdata[1] = (*i)->category.c_str();
 
 		snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
 		snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
@@ -240,29 +229,9 @@ PluginSelector::vst_refiller ()
 		newrow[vcols.outs] = obuf;
 		newrow[vcols.plugin] = i;
 	}
-
- 	//clist.set_sort_column (0);
- 	//clist.sort ();
+	vmodel->set_sort_column (0, Gtk::SORT_ASCENDING);
 }
 #endif
-
-/*
-void
-PluginSelector::output_refiller ()
-{
-	const gchar *rowdata[2];
-	guint row;
-	list<PluginInfo*>::iterator i;
-	
-	// Insert into GTK list
-
-	for (row = 0, i = added_plugins.begin(); i != added_plugins.end(); ++i, ++row){
-		rowdata[0] = (*i)->name.c_str();
-		clist.insert_row (row, rowdata);
-		clist.rows().back().set_data (*i);
-	}
-}
-*/
 
 void
 PluginSelector::use_plugin (PluginInfo* pi)
@@ -316,7 +285,6 @@ PluginSelector::btn_remove_clicked()
 			row++;
 		}
 		added_plugins.erase(i);
-		//o_selector.rescan();
 		o_selected_plug = -1;
 	}
 }

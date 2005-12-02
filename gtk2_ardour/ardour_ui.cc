@@ -1087,7 +1087,7 @@ If you still wish to quit, please use the\n\n\
 		}
 	}
 
-	quit();
+	quit ();
 }
 
 int
@@ -1100,7 +1100,7 @@ ARDOUR_UI::ask_about_saving_session (string what)
 	msg = string_compose(_("Save and %1"), what);
 	window.add_button (msg, RESPONSE_ACCEPT);
 	msg = string_compose(_("Just %1"), what);
-	window.add_button (msg, RESPONSE_REJECT);
+	window.add_button (msg, RESPONSE_APPLY);
 	msg = string_compose(_("Don't %1"), what);
 	window.add_button (msg, RESPONSE_REJECT);
 
@@ -1138,7 +1138,9 @@ ARDOUR_UI::ask_about_saving_session (string what)
 	window.hide ();
 
 	switch (r) {
-	case RESPONSE_ACCEPT:
+	case RESPONSE_ACCEPT: // save and get out of here
+		return 1;
+	case RESPONSE_APPLY:  // get out of here
 		return 0;
 	default:
 		break;

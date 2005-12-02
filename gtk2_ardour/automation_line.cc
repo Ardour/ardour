@@ -237,6 +237,7 @@ AutomationLine::AutomationLine (string name, TimeAxisView& tv, ArdourCanvas::Gro
 
 	line = new ArdourCanvas::Line (*group);
 	line->property_width_pixels() = (guint)1;
+	line->set_data ("line", this);
 
 	line->signal_event().connect (mem_fun (*this, &AutomationLine::event_handler));
 
