@@ -202,3 +202,16 @@ ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
 		(*i)->set_sensitive (state);
 	}
 }
+
+void
+ActionManager::uncheck_toggleaction (const std::string& actionname)
+{
+        RefPtr<Action> act = get_action (actionname);
+	if (act) {
+	        RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+       		tact->set_active (false);
+	} else {
+		error << "Invalid action name: " << actionname << endmsg;
+	}
+}
+

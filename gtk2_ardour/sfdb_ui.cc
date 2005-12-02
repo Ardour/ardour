@@ -30,10 +30,12 @@
 
 SoundFileBrowser::SoundFileBrowser (std::string title)
 	:
-	Gtk::Dialog(title, false),
+	ArdourDialog(title),
 	chooser(Gtk::FILE_CHOOSER_ACTION_OPEN)
 {
 	get_vbox()->pack_start(chooser);
+
+	show_all();
 }
 
 SoundFileChooser::SoundFileChooser (std::string title)
@@ -42,6 +44,8 @@ SoundFileChooser::SoundFileChooser (std::string title)
 {
 	add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+
+	show_all();
 }
 
 SoundFileOmega::SoundFileOmega (std::string title)
@@ -59,6 +63,8 @@ SoundFileOmega::SoundFileOmega (std::string title)
 
 	embed_btn.signal_clicked().connect (mem_fun (*this, &SoundFileOmega::embed_clicked));
 	import_btn.signal_clicked().connect (mem_fun (*this, &SoundFileOmega::import_clicked));
+
+	show_all();
 }
 
 void

@@ -613,12 +613,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	LocationUI *location_ui;
 	int         create_location_ui ();
 
-	void location_ui_hiding ();
-	void big_clock_hiding ();
-	void route_params_hiding ();
-	void connection_editor_hiding ();
-	void option_hiding ();
-
 	/* Various options */
 
 	void toggle_recording_plugins ();

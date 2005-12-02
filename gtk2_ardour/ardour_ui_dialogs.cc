@@ -25,6 +25,7 @@
 
 #include <ardour/session.h>
 
+#include "actions.h"
 #include "ardour_ui.h"
 #include "connection_editor.h"
 #include "location_ui.h"
@@ -33,7 +34,6 @@
 #include "public_editor.h"
 #include "route_params_ui.h"
 #include "sfdb_ui.h"
-#include "actions.h"
 
 #include "i18n.h"
 
@@ -180,13 +180,12 @@ int
 ARDOUR_UI::create_connection_editor ()
 {
 	if (connection_editor == 0) {
-		// GTK2FIX
-		// connection_editor = new ConnectionEditor ();
-		// connection_editor->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::connection_editor_hiding));
+//		connection_editor = new ConnectionEditor ();
+//		connection_editor->signal_unmap().connect (sigc::bind (ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleConnections")));
 	}
 
 	if (session) {
-		// connection_editor->set_session (session);
+//		connection_editor->set_session (session);
 	}
 
 	return 0;
@@ -211,20 +210,6 @@ ARDOUR_UI::toggle_connection_editor ()
 }
 
 void
-ARDOUR_UI::connection_editor_hiding()
-{
-	//GTK2FIX
-	// connection_editor_check->set_active(false);
-}
-
-void
-ARDOUR_UI::big_clock_hiding()
-{
-	// GTK2FIX
-	// big_clock_check->set_active(false);
-}
-
-void
 ARDOUR_UI::toggle_big_clock_window ()
 {
 	if (big_clock_window->is_visible()) {
@@ -239,7 +224,7 @@ ARDOUR_UI::toggle_options_window ()
 {
 	if (option_editor == 0) {
 		option_editor = new OptionEditor (*this, *editor, *mixer);
-		option_editor->signal_unmap().connect(mem_fun(*this, &ARDOUR_UI::option_hiding));
+		option_editor->signal_unmap().connect(sigc::bind (ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleOptionsWindow")));
 		option_editor->set_session (session);
 	} 
 
@@ -248,13 +233,6 @@ ARDOUR_UI::toggle_options_window ()
 	} else {
 		option_editor->present ();
 	}
-}
-
-void
-ARDOUR_UI::option_hiding ()
-{
-	// GTK2FIX
-	// options_window_check->set_active(false);
 }
 
 void
@@ -272,8 +250,8 @@ ARDOUR_UI::create_location_ui ()
 	if (location_ui == 0) {
 		location_ui = new LocationUI ();
 		location_ui->set_session (session);
-		location_ui->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::location_ui_hiding));
-	} 
+		location_ui->signal_unmap().connect (sigc::bind (ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleLocations")));
+	}
 	return 0;
 }
 
@@ -291,20 +269,13 @@ ARDOUR_UI::toggle_location_window ()
 	}
 }
 
-void
-ARDOUR_UI::location_ui_hiding()
-{
-	// GTK2FIX
-	// locations_dialog_check->set_active(false);
-}
-
 int
 ARDOUR_UI::create_route_params ()
 {
 	if (route_params == 0) {
 		route_params = new RouteParams_UI (*engine);
 		route_params->set_session (session);
-		route_params->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::route_params_hiding));
+		route_params->signal_unmap().connect (sigc::bind(ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleInspector")));
 	}
 	return 0;
 }
@@ -324,29 +295,12 @@ ARDOUR_UI::toggle_route_params_window ()
 }
 	
 void
-ARDOUR_UI::route_params_hiding ()
-{
-	// GTK2FIX
-	// route_params_check->set_active (false);
-}
-
-void
 ARDOUR_UI::toggle_sound_file_browser ()
 {
-	/* This is called from the check menu item.  If checked on, open
-	 * a new SoundFileBrowser, and connect it's quit method to the
-	 * check menu item so if it is toggled off, it exits. If it exits
-	 * by itself, set the check menu item to false.
-	 * If this is called by checking off, don't do anything, the signals
-	 * should handle everything.  I expect this idiom to be useful for 
-	 * other Gtk::Dialog's as well.  --Taybin */
+	using namespace Glib;
 
-	//GTK2FIX
-	//if (sfdb_check->get_active()) {
-	//SoundFileBrowser sfdb(_("Sound File Browser"));
-	//sfdb_check->signal_toggled().connect (bind (mem_fun (sfdb, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
-	//sfdb.run();
-	//sfdb_check->set_active(false);
-	//}
+	SoundFileBrowser sfdb(_("Sound File Browser"));
+	sfdb.run();
+
+	ActionManager::uncheck_toggleaction(X_("<Actions>/Common/ToggleSoundFileBrowser"));
 }
-

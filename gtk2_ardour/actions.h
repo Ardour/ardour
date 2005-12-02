@@ -65,7 +65,8 @@ class ActionManager
 				     std::vector<std::string>& paths, 
 				     std::vector<std::string>& keys, 
 				     std::vector<Gtk::AccelKey>& bindings);
-	
+
+	static void uncheck_toggleaction (const std::string& actionname);
 };
 
 #endif /* __ardour_gtk_actions_h__ */

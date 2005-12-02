@@ -33,7 +33,9 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/filechooserwidget.h>
 
-class SoundFileBrowser : public Gtk::Dialog
+#include "ardour_dialog.h"
+
+class SoundFileBrowser : public ArdourDialog
 {
   public:
     SoundFileBrowser (std::string title);

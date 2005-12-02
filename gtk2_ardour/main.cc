@@ -57,10 +57,6 @@ using namespace GTK_ARDOUR;
 using namespace ARDOUR;
 using namespace sigc;
 
-Transmitter  error (Transmitter::Error);
-Transmitter  info (Transmitter::Info);
-Transmitter  fatal (Transmitter::Fatal);
-Transmitter  warning (Transmitter::Warning);
 TextReceiver text_receiver ("ardour");
 
 extern int curvetest (string);

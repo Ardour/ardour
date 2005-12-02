@@ -428,7 +428,7 @@ ARDOUR_UI::setup_clock ()
 	big_clock_window->set_title (_("ardour: clock"));
 	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_MENU);
 	big_clock_window->signal_realize().connect (bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
-	big_clock_window->signal_unmap().connect (mem_fun(*this, &ARDOUR_UI::big_clock_hiding));
+	big_clock_window->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
 
 	manage_window (*big_clock_window);
 }
