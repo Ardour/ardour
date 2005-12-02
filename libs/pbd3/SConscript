@@ -7,7 +7,7 @@ Import('env libraries')
 pbd3 = env.Copy()
 
 domain = 'libpbd'
-pbd3.Append(DOMAIN=domain,MAJOR=3,MINOR=0,MICRO=1)
+pbd3.Append(DOMAIN=domain,MAJOR=3,MINOR=1,MICRO=0)
 
 pbd3_files = Split("""
 basename.cc

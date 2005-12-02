@@ -28,6 +28,11 @@
 using std::string;
 using std::ios;
 
+Transmitter  error (Transmitter::Error);
+Transmitter  info (Transmitter::Info);
+Transmitter  fatal (Transmitter::Fatal);
+Transmitter  warning (Transmitter::Warning);
+
 Transmitter::Transmitter (Channel c)
 
 {
