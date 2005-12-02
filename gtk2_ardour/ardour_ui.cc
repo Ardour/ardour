@@ -1791,8 +1791,7 @@ ARDOUR_UI::open_session ()
 		
 		FileFilter filter_ardour;
 		filter_ardour.set_name (_("Ardour sessions"));
-		filter_ardour.add_custom (FILE_FILTER_FILENAME, mem_fun (*this, &ARDOUR_UI::filter_ardour_session_dirs));
-
+		filter_ardour.add_pattern("*.ardour");
 		open_session_selector->add_filter (filter_ardour);
   	}
 
