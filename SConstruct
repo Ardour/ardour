@@ -422,30 +422,39 @@ if env['SYSLIBS']:
 
     libraries['sigc2'] = LibraryInfo()
     libraries['sigc2'].ParseConfig('pkg-config --cflags --libs sigc++-2.0')
-
+    libraries['glibmm2'] = LibraryInfo()
+    libraries['glibmm2'].ParseConfig('pkg-config --cflags --libs glibmm-2.4')
+    libraries['gdkmm2'] = LibraryInfo()
+    libraries['gdkmm2'].ParseConfig ('pkg-config --cflags --libs gdkmm-2.4')
     libraries['gtkmm2'] = LibraryInfo()
-    libraries['gtkmm2'].ParseConfig ('pkg-config --cflags --libs gtkmm-2.0')
-    
+    libraries['gtkmm2'].ParseConfig ('pkg-config --cflags --libs gtkmm-2.4')
+    libraries['atkmm'] = LibraryInfo()
+    libraries['atkmm'].ParseConfig ('pkg-config --cflags --libs atkmm-1.6')
+    libraries['pangomm'] = LibraryInfo()
+    libraries['pangomm'].ParseConfig ('pkg-config --cflags --libs pangomm-1.4')
+    libraries['libgnomecanvasmm'] = LibraryInfo()
+    libraries['libgnomecanvasmm'].ParseConfig ('pkg-config --cflags --libs libgnomecanvasmm-2.6')
     libraries['libglademm'] = LibraryInfo()
     libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
-    
-    libraries['soundtouch'] = LibraryInfo(LIBS='SoundTouch')
 
+    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
+    libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
+                                          LIBPATH='#libs/soundtouch',
+                                          CPPPATH=['#libs', '#libs/soundtouch'])
     coredirs = [
         'templates'
     ]
 
     subdirs = [
-#	'libs/cassowary',
         'libs/pbd3',
         'libs/midi++2',
-        'libs/ardour',
-        'templates'
+        'libs/ardour'
         ]
 
     gtk_subdirs = [
+        'libs/flowcanvas',
         'libs/gtkmm2ext',
-        'gtk2_ardour',
+        'gtk2_ardour'
         ]
 
 else:

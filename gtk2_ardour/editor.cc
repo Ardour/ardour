@@ -1403,16 +1403,6 @@ void
 Editor::build_cursors ()
 {
 	using namespace Gdk;
-
-	Gdk::Color fg ("#ff0000"); /* Red. */
-	Gdk::Color bg ("#0000ff"); /* Blue. */
-
-	{
-		RefPtr<Bitmap> source, mask;
-		source = Bitmap::create (hand_bits, hand_width, hand_height);
-		mask = Bitmap::create (handmask_bits, handmask_width, handmask_height);
-		grabber_cursor = new Gdk::Cursor (source, mask, fg, bg, hand_x_hot, hand_y_hot);
-	}
 	
 	Gdk::Color mbg ("#000000" ); /* Black */
 	Gdk::Color mfg ("#0000ff" ); /* Blue. */
@@ -1442,12 +1432,13 @@ Editor::build_cursors ()
 		speaker_cursor = new Gdk::Cursor (source, mask, ffg, fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
 	}
 
-	cross_hair_cursor = new Gdk::Cursor (Gdk::CROSSHAIR);
-	trimmer_cursor =  new Gdk::Cursor (Gdk::SB_H_DOUBLE_ARROW);
-	selector_cursor = new Gdk::Cursor (Gdk::XTERM);
-	time_fx_cursor = new Gdk::Cursor (Gdk::SIZING);
-	wait_cursor = new Gdk::Cursor  (Gdk::WATCH);
-	timebar_cursor = new Gdk::Cursor(Gdk::LEFT_PTR);
+	grabber_cursor = new Gdk::Cursor (HAND2);
+	cross_hair_cursor = new Gdk::Cursor (CROSSHAIR);
+	trimmer_cursor =  new Gdk::Cursor (SB_H_DOUBLE_ARROW);
+	selector_cursor = new Gdk::Cursor (XTERM);
+	time_fx_cursor = new Gdk::Cursor (SIZING);
+	wait_cursor = new Gdk::Cursor  (WATCH);
+	timebar_cursor = new Gdk::Cursor(LEFT_PTR);
 }
 
 void
