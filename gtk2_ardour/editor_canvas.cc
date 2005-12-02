@@ -83,7 +83,7 @@ Editor::initialize_canvas ()
 {
 	ArdourCanvas::init ();
 	ardour_canvas_type_init ();
-	
+
 	/* don't try to center the canvas */
 
 	track_canvas.set_center_scroll_region (false);

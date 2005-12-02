@@ -65,14 +65,9 @@ AddRouteDialog::AddRouteDialog ()
 	hbrb->pack_start (bus_button, false, false);
 
 	set_popdown_strings (channel_combo, channel_combo_strings);
+	channel_combo.set_active_text (channel_combo_strings.front());
 	channel_combo.set_name (X_("ChannelCountSelector"));
 	
-	VBox *vbcc = manage (new VBox);
-
-	vbcc->set_spacing (6);
-	vbcc->pack_start (*(manage (new Label ("Channel configuration"))), false, false);
-	vbcc->pack_start (channel_combo, false, false);
-
 #if NOT_USEFUL_YET
 	HBox *hbnt = manage (new HBox);
 
@@ -80,22 +75,15 @@ AddRouteDialog::AddRouteDialog ()
 	hbnt->pack_start (name_template_entry, true, true);
 #endif
 
-	VBox* vb2 = manage (new VBox);
-
-	vb2->set_border_width (12);
-	vb2->set_spacing (6);
-	vb2->pack_start (*hbrb, false, false);
-	vb2->pack_start (*vbcc, false, false);
-#if NOT_USEFUL_YET
-	vb2->pack_start (*hbnt, false, false);
-#endif
-	
 	get_vbox()->pack_start (*hbrb, false, false);
-	get_vbox()->pack_start (*vbcc, false, false);
+	get_vbox()->pack_start (*(manage (new Label ("Channel configuration"))), false, false);
+	get_vbox()->pack_start (channel_combo, false, false);
 #if NOT_USEFUL_YET
 	get_vbox()->pack_start (*hbnt, false, false);
 #endif
-	
+
+	get_vbox()->show_all ();
+
 	add_button (Stock::OK, RESPONSE_ACCEPT);
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 }
