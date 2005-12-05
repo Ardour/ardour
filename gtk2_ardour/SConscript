@@ -222,7 +222,7 @@ if env['NLS']:
 
 
 env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour', ardour))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour_ui.rc'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour2_ui.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour-menus.xml'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour'), 'splash.ppm'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/glade'), glade_files))
@@ -232,7 +232,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       [ 'SConscript',
                                         'i18n.h', 'gettext.h',
                                         'editor_xpms', 'misc_xpms', 'transport_xpms',
-                                        'ardour_ui.rc', 'splash.ppm'
+                                        'ardour2_ui.rc', 'splash.ppm'
                                         ] +
                                       gtkardour_files + vst_files + glade_files +
                                       glob.glob('po/*.po') + glob.glob('*.h')))
