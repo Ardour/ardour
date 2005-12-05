@@ -462,9 +462,9 @@ Editor::Editor (AudioEngine& eng)
 	zoom_out_full_button.set_name ("EditorTimeButton");
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to session"));
 
-	zoom_in_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(zoom_in_button_xpm)))));
-	zoom_out_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(zoom_out_button_xpm)))));
-	zoom_out_full_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(zoom_out_full_button_xpm)))));
+	zoom_in_button.add (*(manage (new Gtk::Image (Stock::ZOOM_IN, ICON_SIZE_BUTTON))));
+	zoom_out_button.add (*(manage (new Gtk::Image (Stock::ZOOM_OUT, ICON_SIZE_BUTTON))));
+	zoom_out_full_button.add (*(manage (new Gtk::Image (Stock::ZOOM_FIT, ICON_SIZE_BUTTON))));
 	
 	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
 	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));

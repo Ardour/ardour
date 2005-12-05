@@ -475,8 +475,12 @@ To create it from the command line, start ardour as \"ardour --new %1"), path)
 		}
 	}
 
-	if (!ui->set_quit_context ()) {
+	try {
+
 		ui->run (text_receiver);
+
+	} catch (...) {
+
 	}
 	
 	ui = 0;

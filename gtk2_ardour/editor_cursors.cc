@@ -83,14 +83,21 @@ Editor::Cursor::set_position (jack_nframes_t frame)
 
 		points.front().set_x (new_pos);
 		points.back().set_x (new_pos);
+
+		canvas_item.property_points() = points;
+
+		ArdourCanvas::Points p = canvas_item.property_points();
 		
 		cerr << "new cursor points = "
 		     << points.front().get_x() << ',' << points.front().get_y()
 		     << " .. "
 		     << points.back().get_x() << ',' << points.back().get_y()
+		     << " vs. " << endl
+		     << p.front().get_x() << ',' << p.front().get_y()
+		     << " .. "
+		     << p.back().get_x() << ',' << p.back().get_y()
 		     << endl;
 		
-		canvas_item.property_points() = points;
 	}
 
 	canvas_item.raise_to_top();

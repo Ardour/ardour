@@ -805,7 +805,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  shuttle_units_button (_("% ")),
 	  shuttle_style_button (_("spring")),
-	  
+
 	  punch_in_button (_("punch\nin")),
 	  punch_out_button (_("punch\nout")),
 	  auto_return_button (_("auto\nreturn")),

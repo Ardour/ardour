@@ -50,6 +50,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace Gtkmm2ext;
 using namespace Gtk;
+using namespace Glib;
 using namespace sigc;
 
 int	
@@ -200,14 +201,83 @@ ARDOUR_UI::setup_transport ()
 						 static_cast<Gtk::Widget*> (&transport_frame), 1));
 
 
-	goto_start_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(start_xpm)))));
-	goto_end_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(end_xpm)))));
-	roll_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(arrow_xpm)))));
-	
-	stop_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(stop_xpm)))));
-	play_selection_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(play_selection_xpm)))));
-	rec_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(rec_xpm)))));
-	auto_loop_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(loop_xpm)))));
+	Widget* w;
+
+#ifdef THE_OLD
+	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(start_xpm)));
+	w->show();
+	goto_start_button.add (*w);
+	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(end_xpm)));
+	w->show();
+	goto_end_button.add (*w);
+	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(arrow_xpm)));
+	w->show();
+	roll_button.add (*w);
+	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(stop_xpm)));
+	w->show();
+	stop_button.add (*w);
+	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(play_selection_xpm)));
+	w->show();
+	play_selection_button.add (*w);
+	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(rec_xpm)));
+	w->show();
+	rec_button.add (*w);
+	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(loop_xpm)));
+	w->show();
+	auto_loop_button.add (*w);
+
+
+	stop_button.set_use_stock (false);
+	roll_button.set_use_stock (false);
+	rec_button.set_use_stock (false);
+	goto_start_button.set_use_stock (false);
+	goto_end_button.set_use_stock (false);
+	auto_loop_button.set_use_stock (false);
+#else
+	w = manage (new Image (Stock::MEDIA_PREVIOUS, ICON_SIZE_BUTTON));
+	w->show();
+	goto_start_button.add (*w);
+	w = manage (new Image (Stock::MEDIA_NEXT, ICON_SIZE_BUTTON));
+	w->show();
+	goto_end_button.add (*w);
+	w = manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON));
+	w->show();
+	roll_button.add (*w);
+	w = manage (new Image (Stock::MEDIA_STOP, ICON_SIZE_BUTTON));
+	w->show();
+	stop_button.add (*w);
+	w = manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON));
+	w->show();
+	play_selection_button.add (*w);
+	w = manage (new Image (Stock::MEDIA_RECORD, ICON_SIZE_BUTTON));
+	w->show();
+	rec_button.add (*w);
+	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(loop_xpm)));
+	w->show();
+	auto_loop_button.add (*w);
+
+	stop_button.set_use_stock (true);
+	roll_button.set_use_stock (true);
+	rec_button.set_use_stock (true);
+	goto_start_button.set_use_stock (true);
+	goto_end_button.set_use_stock (true);
+	auto_loop_button.set_use_stock (true);
+#endif
+
+	RefPtr<Action> act;
+
+	act = ActionManager::get_action (X_("<Actions>/Common/TransportStop"));
+	act->connect_proxy (stop_button);
+	act = ActionManager::get_action (X_("<Actions>/Common/TransportRoll"));
+	act->connect_proxy (roll_button);
+	act = ActionManager::get_action (X_("<Actions>/Common/TransportRecord"));
+	act->connect_proxy (rec_button);
+	act = ActionManager::get_action (X_("<Actions>/Common/TransportGotoStart"));
+	act->connect_proxy (goto_start_button);
+	act = ActionManager::get_action (X_("<Actions>/Common/TransportGotoEnd"));
+	act->connect_proxy (goto_end_button);
+	act = ActionManager::get_action (X_("<Actions>/Common/TransportLoop"));
+	act->connect_proxy (auto_loop_button);
 
 	ARDOUR_UI::instance()->tooltips().set_tip (roll_button, _("Play from playhead"));
 	ARDOUR_UI::instance()->tooltips().set_tip (stop_button, _("Stop playback"));
@@ -277,6 +347,8 @@ ARDOUR_UI::setup_transport ()
 	punch_in_button.set_events (punch_in_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	punch_out_button.set_events (punch_out_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
+#if 0	
+
 	goto_start_button.signal_clicked().connect (mem_fun(*this,&ARDOUR_UI::transport_goto_start));
 	goto_end_button.signal_clicked().connect (mem_fun(*this,&ARDOUR_UI::transport_goto_end));
 
@@ -286,6 +358,7 @@ ARDOUR_UI::setup_transport ()
 
 	stop_button.signal_button_release_event().connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_stop));
 	rec_button.signal_button_release_event().connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_record));
+#endif
 
 	shuttle_box.signal_button_press_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_press));
 	shuttle_box.signal_button_release_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_release));

@@ -185,6 +185,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (common_actions, X_("RemoveLastCapture"), _("remove last capture"), mem_fun(*this, &ARDOUR_UI::remove_last_capture));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("TransportStop"), _("transport stop"), mem_fun(*this, &ARDOUR_UI::transport_stop));
+	cerr << "Stop has path " << act->get_accel_path() << endl;
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("TransportStopAndForgetCapture"), _("transport stop and forget capture"), mem_fun(*this, &ARDOUR_UI::transport_stop_and_forget_capture));
 	ActionManager::session_sensitive_actions.push_back (act);

@@ -227,10 +227,17 @@ UI::quit ()
 	request (Quit);
 }
 
+static bool idle_quit ()
+{
+	cerr << "idle quit, level = " << Main::level() << endl;
+	Main::quit ();
+	return true;
+}
+
 void
 UI::do_quit ()
 {
-	longjmp (quit_context, 1);
+	Glib::signal_idle().connect (sigc::ptr_fun (idle_quit));
 }
 
 int
