@@ -1718,6 +1718,7 @@ ARDOUR_UI::build_session_selector ()
 	session_selector_window->set_name ("SessionSelectorWindow");
 	session_selector_window->set_size_request (200, 400);
 	session_selector_window->get_vbox()->pack_start (*scroller);
+	session_selector_window->show_all_children();
 }
 
 void
