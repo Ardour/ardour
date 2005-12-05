@@ -1703,9 +1703,9 @@ ARDOUR_UI::build_session_selector ()
 	session_selector_window = new ArdourDialog ("session selector");
 	
 	Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow);
-
-	session_selector_window->add_button (Stock::OK, RESPONSE_ACCEPT);
+	
 	session_selector_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	session_selector_window->add_button (Stock::OK, RESPONSE_ACCEPT);
 
 	recent_session_model = TreeStore::create (recent_session_columns);
 	recent_session_display.set_model (recent_session_model);

@@ -47,10 +47,10 @@ Prompter::init ()
 	set_name ("Prompter");
 
 	set_default_response (Gtk::RESPONSE_ACCEPT);
-
-	add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
+	
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-
+	add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
+	
 	entryLabel.set_line_wrap (true);
 	entryLabel.set_name ("PrompterLabel");
 

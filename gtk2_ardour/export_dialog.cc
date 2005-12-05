@@ -354,10 +354,10 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 
 	signal_delete_event().connect (mem_fun(*this, &ExportDialog::window_closed));
 
-	ok_button = add_button (Stock::OK, RESPONSE_ACCEPT);
-	ok_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::do_export));
 	cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	cancel_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::end_dialog));
+	ok_button = add_button (Stock::OK, RESPONSE_ACCEPT);
+	ok_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::do_export));
 	
 	file_browse_button.set_name ("EditorGTKButton");
 	file_browse_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::initiate_browse));
