@@ -277,16 +277,12 @@ PluginSelector::btn_add_clicked()
 void
 PluginSelector::btn_remove_clicked()
 {
-	if (o_selected_plug > -1){
-		gint row = 0;
-		list<PluginInfo*>::iterator i = added_plugins.begin();
-		while(row < o_selected_plug){
-			i++;
-			row++;
-		}
-		added_plugins.erase(i);
-		o_selected_plug = -1;
-	}
+	list<PluginInfo*>::iterator i;
+	Gtk::TreeModel::iterator iter = added_list.get_selection()->get_selected();
+	for (i = added_plugins.begin(); (*i) != (*iter)[acols.plugin]; ++i);
+
+	added_plugins.erase(i);	
+	amodel->erase(iter);
 }
 
 void

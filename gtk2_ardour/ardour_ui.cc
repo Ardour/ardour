@@ -1801,9 +1801,11 @@ ARDOUR_UI::open_session ()
 	case RESPONSE_OK:
 		break;
 	default:
+		open_session_selector->hide();
 		return;
 	}
 
+	open_session_selector->hide();
 	string session_path = open_session_selector->get_filename();
 	string path, name;
 	bool isnew;

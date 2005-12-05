@@ -98,13 +98,13 @@ style "default_base" = "medium_text"
   text[ACTIVE] = { 0.80, 0.80, 0.70 }	
   text[PRELIGHT] = { 0.80, 0.80, 0.70 }	
   text[INSENSITIVE] = { 0.80, 0.80, 0.70 }	
-  text[SELECTED] = { 0, 0, 0 }
+  text[SELECTED] = { 1.0, 1.0, 1.0 }
   
-  base[NORMAL] = { 0.00, 0.00, 0.00 }
-  base[ACTIVE] = { 0.00, 0.00, 0.00 }
-  base[PRELIGHT] = { 0.00, 0.00, 0.00 }
-  base[INSENSITIVE] = { 0.00, 0.00, 0.00 }
-  base[SELECTED] = { 0.00, 0.00, 0.00 }
+  base[ACTIVE]     = "#2f272f"
+  base[NORMAL]      =  "#1c1e21"
+  base[PRELIGHT]     = "#2f272f"
+  base[INSENSITIVE]  = "#4c5159"
+  base[SELECTED]     = "#2f272f"
 }
 
 style "base_frame"
