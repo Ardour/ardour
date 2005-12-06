@@ -156,10 +156,10 @@ Editor::route_display_selection_changed ()
 	for (i = rows.begin(); i != rows.end(); ++i) {
 	        tv = (*i)[route_display_columns.tv];
 		if (selection->is_selected (i)) {
-			tv->set_marked_for_display  (true);
+			tv->set_marked_for_display  (false);
 		} else {
 		        AudioTimeAxisView *atv;
-			tv->set_marked_for_display (false);
+			tv->set_marked_for_display (true);
 			if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
 			        if (current_mixer_strip && &(atv->route()) == &(current_mixer_strip->route())) {
 				        // this will hide the mixer strip

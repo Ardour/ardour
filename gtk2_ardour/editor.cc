@@ -532,11 +532,13 @@ Editor::Editor (AudioEngine& eng)
 
 	edit_group_list.set_name ("MixerGroupList");
 	//edit_group_list.set_shadow_type (Gtk::SHADOW_IN);
-	route_list.set_headers_visible (false);
-	edit_group_list.set_reorderable (false);
-	edit_group_list.set_size_request (75, -1);
+
 	edit_group_list.columns_autosize ();
 	edit_group_list.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
+	edit_group_list.set_reorderable (false);
+
+	edit_group_list.set_size_request (75, -1);
+	edit_group_list.set_headers_visible (true);
 
 	edit_group_list_scroller.add (edit_group_list);
 	edit_group_list_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -616,11 +618,14 @@ Editor::Editor (AudioEngine& eng)
 
 	named_selection_model = TreeStore::create (named_selection_columns);
 	named_selection_display.set_model (named_selection_model);
+	named_selection_display.append_column (_("Chunks"), named_selection_columns.text);
+	named_selection_display.set_size_request (100, -1);
 	named_selection_display.set_name ("RegionListDisplay");
+	
+	named_selection_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	named_selection_display.set_size_request (100, -1);
 	named_selection_display.set_headers_visible (true);
 	named_selection_display.set_headers_clickable (true);
-	named_selection_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	named_selection_display.signal_button_press_event().connect (mem_fun(*this, &Editor::named_selection_display_button_press));
 	named_selection_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::named_selection_display_selection_changed));
 

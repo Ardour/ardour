@@ -95,15 +95,22 @@ Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t off
 		clk = *i;
 		next = i;
 		++next;
-
+	
 		if (clk->start < start) {
 			internal_offset = 0;
 		} else {
 			internal_offset = clk->start - start;
 		}
 
+		if (nframes < internal_offset) {
+		         /* we've just located or something.. 
+			    effectively going backwards.
+			    lets get the flock out of here */
+		        break;
+		}
+
 		copy = min (clk->duration - clk->offset, nframes - internal_offset);
-		
+
 		memcpy (buf + internal_offset, &clk->data[clk->offset], copy * sizeof (Sample));
 
 		clk->offset += copy;
