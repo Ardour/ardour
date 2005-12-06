@@ -156,6 +156,9 @@ if conf.CheckCHeader('wordexp.h'):
 if conf.CheckCHeader('sys/vfs.h'):
     ardour.Append(CXXFLAGS="-DHAVE_SYS_VFS_H")
 
+if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
+    ardour.Append(LINKFLAGS="-framework CoreMIDI")
+
 ardour = conf.Finish ()
 
 ardour.Merge ([
