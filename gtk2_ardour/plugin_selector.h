@@ -46,6 +46,7 @@ class PluginSelector : public ArdourDialog
 	Gtk::Notebook notebook;
 	Gtk::ScrolledWindow lscroller;
 	Gtk::ScrolledWindow vscroller;
+	Gtk::ScrolledWindow ascroller;
 
 	// page 1
 	struct LadspaColumns : public Gtk::TreeModel::ColumnRecord {

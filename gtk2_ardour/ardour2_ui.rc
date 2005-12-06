@@ -440,7 +440,7 @@ style "big_clock_display" = "medium_entry"
 
 style "transport_clock_display"
 {
-	font_name = "sans bold 18"
+	font_name = "sans bold 14"
 	
 	fg[NORMAL] = { 0.66, 0.97, 0.18 }
 	fg[ACTIVE] = { 1.0, 0, 0.0 }

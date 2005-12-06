@@ -90,7 +90,9 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 		column->set_sort_column(i);
 	}
 #endif
-
+	ascroller.set_border_width(10);
+	ascroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	ascroller.add(added_list);
 	Gtk::Button *btn_add = manage(new Gtk::Button(_("Add")));
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn_add, _("Add a plugin to the effect list"));
 	Gtk::Button *btn_remove = manage(new Gtk::Button(_("Remove")));
@@ -109,7 +111,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	table->attach(*btn_remove, 3, 4, 5, 6, Gtk::FILL, Gtk::FILL, 5, 5);
 	table->attach(*btn_update, 5, 6, 5, 6, Gtk::FILL, Gtk::FILL, 5, 5);
 
-	table->attach(added_list, 0, 7, 7, 9);
+	table->attach(ascroller, 0, 7, 7, 9);
 
 	add_button (Stock::OK, RESPONSE_ACCEPT);
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
