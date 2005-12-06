@@ -32,17 +32,14 @@ using namespace Gtk;
 
 Editor::Cursor::Cursor (Editor& ed, const string& color, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
 	: editor (ed),
-	  points (2),
 	  canvas_item (*editor.cursor_group),
 	  length(1.0)
 {
 	
 	/* "randomly" initialize coords */
-
+	
 	points.push_back(Gnome::Art::Point(-9383839.0, 0.0));
 	points.push_back(Gnome::Art::Point(1.0, 0.0));
-
-	// cerr << "set cursor points, nc = " << points->num_points << endl;
 
 	canvas_item.property_points() = points;
 	canvas_item.property_fill_color() = color; //.c_str());
@@ -52,8 +49,6 @@ Editor::Cursor::Cursor (Editor& ed, const string& color, bool (Editor::*callbck)
 	canvas_item.property_arrow_shape_a() = 11.0;
 	canvas_item.property_arrow_shape_b() = 0.0;
 	canvas_item.property_arrow_shape_c() = 9.0;
-
-	// cerr << "cursor line @ " << canvas_item << endl;
 
 	canvas_item.set_data ("cursor", this);
 	canvas_item.signal_event().connect (bind (mem_fun (ed, callbck), &canvas_item));
@@ -87,17 +82,6 @@ Editor::Cursor::set_position (jack_nframes_t frame)
 		canvas_item.property_points() = points;
 
 		ArdourCanvas::Points p = canvas_item.property_points();
-		
-		cerr << "new cursor points = "
-		     << points.front().get_x() << ',' << points.front().get_y()
-		     << " .. "
-		     << points.back().get_x() << ',' << points.back().get_y()
-		     << " vs. " << endl
-		     << p.front().get_x() << ',' << p.front().get_y()
-		     << " .. "
-		     << p.back().get_x() << ',' << p.back().get_y()
-		     << endl;
-		
 	}
 
 	canvas_item.raise_to_top();

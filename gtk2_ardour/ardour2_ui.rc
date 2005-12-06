@@ -5,27 +5,27 @@
 
 style "very_small_text"
 {
- 	font_name = "helvetica 8"
+ 	font_name = "sans 8"
 }
 
 style "small_text"
 {
- 	font_name = "helvetica 8"
+ 	font_name = "sans 8"
 }
 
 style "small_bold_text"
 {
- 	font_name = "helvetica bold 8"
+ 	font_name = "sans bold 8"
 }
 
 style "medium_bold_text"
 {
- 	font_name = "helvetica bold 8"
+ 	font_name = "sans bold 8"
 }
 
 style "medium_text"
 {
- 	font_name = "helvetica 8"
+ 	font_name = "sans 8"
 }
 
 style "red_medium_text" = "medium_text"
@@ -38,46 +38,46 @@ style "red_medium_text" = "medium_text"
 
 style "large_text"
 {
- 	font_name = "helvetica 18"
+ 	font_name = "sans 18"
 }
 
 style "larger_bold_text"
 {
- 	font_name = "helvetica bold 14"
+ 	font_name = "sans bold 14"
 }
 
 style "plugin_name_text"
 {
-	font_name = "helvetica bold 25"
+	font_name = "sans bold 25"
 	fg[NORMAL] = { 0.80, 0.80, 0.70 }
 }
 
 style "plugin_maker_text"
 {
-	font_name = "helvetica bold 14"
+	font_name = "sans bold 14"
 	fg[NORMAL] = { 0.80, 0.80, 0.70 }
 }
 
 style "first_action_message" 
 {
-	font_name = "helvetica medium 34"
+	font_name = "sans medium 34"
 }
 
 style "verbose_canvas_cursor"
 {
-	font="-*-helvetica-medium-r-*-*-*-240-*-*-*-*-*-*"
-	fontset="-*-helvetica-medium-r-*-*-*-240-*-*-*-*-*-*"
+	font="-*-sans-medium-r-*-*-*-240-*-*-*-*-*-*"
+	fontset="-*-sans-medium-r-*-*-*-240-*-*-*-*-*-*"
 }
 
 style "marker_text" 
 {
-	font_name = "helvetica 8"
+	font_name = "sans 8"
 }
 
 style "time_axis_view_item_name"
 {
-	font="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*-1"
-	fontset="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*-1"
+	font="-*-sans-medium-r-normal-*-*-100-*-*-p-*-*-1"
+	fontset="-*-sans-medium-r-normal-*-*-100-*-*-p-*-*-1"
 }
 
 style "default_base" = "medium_text"
@@ -130,7 +130,7 @@ style "black_mackie_menu_bar" = "medium_bold_text"
 
 style "default_buttons_menus" = "default_base"
 {
-  font_name = "helvetica 8"
+  font_name = "sans 8"
   	
   fg[ACTIVE] = { 0, 0, 0 }
   
@@ -143,12 +143,12 @@ style "default_buttons_menus" = "default_base"
 
 style "very_small_button" = "default_buttons_menus"
 {
-	font_name = "helvetica 8"
+	font_name = "sans 8"
 }
 
 style "small_button" = "default_buttons_menus"
 {
-	font_name = "helvetica 8"
+	font_name = "sans 8"
 }
 
 style "very_small_red_active_and_selected_button" = "very_small_button"
@@ -177,7 +177,7 @@ style "track_rec_enable_button" = "small_button"
 
 style "mixer_rec_enable_button" = "track_rec_enable_button"
 {
-	font_name = "helvetica 8"
+	font_name = "sans 8"
 }
 
 style "solo_button" = "small_button"
@@ -191,7 +191,7 @@ style "solo_button" = "small_button"
 
 style "mixer_solo_button" = "solo_button"
 {
-	font_name = "helvetica 8"
+	font_name = "sans 8"
 }
 
 
@@ -205,7 +205,7 @@ style "mute_button" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "helvetica 8"
+	font_name = "sans 8"
 }
 
 style "track_loop_button" = "small_button"
@@ -226,7 +226,7 @@ style "mixer_red_active_button" = "very_small_button"
 
 style "time_button" = "default_buttons_menus"
 {
-	font_name = "helvetica 8"
+	font_name = "sans 8"
 }
 
 style "transport_button" = "very_small_button"
@@ -271,7 +271,7 @@ style "ardour_progressbars" = "default_buttons_menus"
 
 style "options_window"  = "default_base"
 {
-	font_name = "helvetica 8"
+	font_name = "sans 8"
 	fg[PRELIGHT] = { 0.80, 0.80, 0.70 }
 }
 
@@ -298,7 +298,7 @@ style "red_when_active" = "medium_text"
 
 style "xrun_warn"  
 {
-	font_name = "helvetica bold 18"
+	font_name = "sans bold 18"
 
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 1.0 }
@@ -440,7 +440,7 @@ style "big_clock_display" = "medium_entry"
 
 style "transport_clock_display"
 {
-	font_name = "helvetica bold 18"
+	font_name = "sans bold 18"
 	
 	fg[NORMAL] = { 0.66, 0.97, 0.18 }
 	fg[ACTIVE] = { 1.0, 0, 0.0 }
@@ -456,7 +456,7 @@ style "transport_clock_display"
 
 style "tempo_meter_clock_display"
 {
-	font_name = "helvetica 8"
+	font_name = "sans 8"
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
@@ -503,7 +503,7 @@ style "audio_bus_base"
 
 style "track_name_display"
 {
-	font = "-*-helvetica-medium-r-*-*-*-100-*-*-*-*-*-*"
+	font = "-*-sans-medium-r-*-*-*-100-*-*-*-*-*-*"
 	fg[NORMAL] = { 0.80, 0.80, 0.70 }
 	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
 
@@ -623,8 +623,8 @@ style "automation_track_controls_base"
 # Plugin Editors
 style "plugin_slider" 
 {
- 	fontset="-*-helvetica-medium-r-normal-*-10-*-*-*-p-*-*-*"
-	font ="-*-helvetica-medium-r-normal-*-*-100-*-*-p-*-*"
+ 	fontset="-*-sans-medium-r-normal-*-10-*-*-*-p-*-*-*"
+	font ="-*-sans-medium-r-normal-*-*-100-*-*-p-*-*"
 
 	fg[NORMAL] = { 0.45, 0.45, 0.45 }
 	fg[ACTIVE] = { 0.45, 0.45, 0.45 }
@@ -733,7 +733,7 @@ style "io_selector_port_list" = "medium_text"
 style "io_selector_notebook" = "default_base"
 {
 	fg[NORMAL] = { 0.98, 0.76, 0.14 }
-        font ="-*-helvetica-bold-r-normal-*-*-140-*-*-p-*-*"
+        font ="-*-sans-bold-r-normal-*-*-140-*-*-p-*-*"
 }
 
 style "tearoff_arrow" = "medium_bold_entry"
@@ -750,22 +750,22 @@ style "meter_metrics_strip" = "default_base"
 
 style "no_session_msg" 
 {
-	font = "-*-helvetica-medium-r-*-*-34-350-*-*-*-*-*-*"
+	font = "-*-sans-medium-r-*-*-34-350-*-*-*-*-*-*"
 }
 
 style "location_row_button" = "default_buttons_menus"
 {
-	font_name = "helvetica 10"
+	font_name = "sans 10"
 }
 
 style "location_rows_clock" = "default_clock_display"
 {
-	font_name = "helvetica 12"
+	font_name = "sans 12"
 }
 
 style "pan_slider" 
 {
- 	font_name = "helvetica 8"
+ 	font_name = "sans 8"
 
 	fg[NORMAL] = { 0.67, 0.23, 0.22 }
 	fg[ACTIVE] = { 0.67, 0.23, 0.22 }

@@ -928,8 +928,19 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	}
 
 	if (GTK_ARDOUR::show_key_actions) {
-		// GTK2FIX
-		// show_all_actions ();
+		vector<string> names;
+		vector<string> paths;
+		vector<string> keys;
+		vector<AccelKey> bindings;
+
+		ActionManager::get_all_actions (names, paths, keys, bindings);
+
+		vector<string>::iterator n;
+		vector<string>::iterator k;
+		for (n = names.begin(), k = keys.begin(); n != names.end(); ++n, ++k) {
+			cerr << "Action: " << (*n) << " bound to " << (*k) << endl;
+		}
+
 		exit (0);
 	}
 
@@ -1761,7 +1772,7 @@ bool
 ARDOUR_UI::filter_ardour_session_dirs (const FileFilter::Info& info) 
 {
 	struct stat statbuf;
-	
+
 	if (stat (info.filename.c_str(), &statbuf) != 0) {
 		return false;
 	}
@@ -1788,18 +1799,25 @@ ARDOUR_UI::open_session ()
 	/* popup selector window */
 
 	if (open_session_selector == 0) {
+
+		/* ardour sessions are folders */
+
 		open_session_selector = new Gtk::FileChooserDialog (_("open session"), FILE_CHOOSER_ACTION_OPEN);
 		open_session_selector->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-		open_session_selector->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
-		
-		FileFilter filter_ardour;
-		filter_ardour.set_name (_("Ardour sessions"));
-		filter_ardour.add_pattern("*.ardour");
-		open_session_selector->add_filter (filter_ardour);
+		open_session_selector->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
+
+		FileFilter session_filter;
+		session_filter.add_pattern ("*.ardour");
+		session_filter.set_name (_("Ardour sessions"));
+		open_session_selector->add_filter (session_filter);
+		open_session_selector->set_filter (session_filter);
   	}
 
-	switch (open_session_selector->run ()) {
-	case RESPONSE_OK:
+	int response = open_session_selector->run();
+	open_session_selector->hide ();
+
+	switch (response) {
+	case RESPONSE_ACCEPT:
 		break;
 	default:
 		open_session_selector->hide();
@@ -1924,34 +1942,6 @@ ARDOUR_UI::transport_goto_end ()
 			editor->reposition_x_origin (frame);
 		}
 	}
-}
-
-gint 
-ARDOUR_UI::mouse_transport_stop (GdkEventButton *ev)
-{
-
-
-	if (session) {
-			if (session->transport_stopped()) {
-			session->request_locate (session->last_transport_start());
-		} else {
-			if (session->get_auto_loop()) {
-				session->request_auto_loop (false);
-			}
-
-			Keyboard::ModifierMask mask = Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift);
-			session->request_stop (Keyboard::modifier_state_equals (ev->state, mask));
-			}
-	}
-
-	return TRUE;
-}
-
-gint
-ARDOUR_UI::mouse_transport_roll (GdkEventButton* ev)
-{
-	transport_roll ();
-	return TRUE;
 }
 
 void

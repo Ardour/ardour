@@ -215,6 +215,7 @@ ARDOUR_UI::toggle_big_clock_window ()
 	if (big_clock_window->is_visible()) {
 		big_clock_window->hide ();
 	} else {
+		big_clock_window->show_all ();
 		big_clock_window->present ();
 	}
 }

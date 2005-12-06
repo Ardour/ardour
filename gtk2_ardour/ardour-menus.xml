@@ -6,6 +6,8 @@
            <menuitem action='Open'/>
            <menuitem action='Recent'/>
            <menuitem action='Close'/>
+           <separator/>
+           <menuitem action='Save'/>
            <menuitem action='Snapshot'/>
            <menuitem action='SaveTemplate'/>
            <separator/>
@@ -22,6 +24,15 @@
            </menu>
            <separator/>
            <menuitem action='Quit'/>
+        </menu>
+        <menu name='Transport' action='JACK'>
+               <menuitem action='toggle-playback'/>
+               <menuitem action='TransportRoll'/>
+               <menuitem action='TransportStop'/>
+               <menuitem action='TransportForward'/>
+               <menuitem action='TransportRewind'/>
+               <menuitem action='TransportGotoStart'/>
+               <menuitem action='TransportGotoEnd'/>
         </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>

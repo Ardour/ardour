@@ -347,19 +347,6 @@ ARDOUR_UI::setup_transport ()
 	punch_in_button.set_events (punch_in_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	punch_out_button.set_events (punch_out_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
-#if 0	
-
-	goto_start_button.signal_clicked().connect (mem_fun(*this,&ARDOUR_UI::transport_goto_start));
-	goto_end_button.signal_clicked().connect (mem_fun(*this,&ARDOUR_UI::transport_goto_end));
-
-	roll_button.signal_button_release_event().connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_roll));
-	play_selection_button.signal_button_release_event().connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_play_selection));
-	auto_loop_button.signal_button_release_event().connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_loop));
-
-	stop_button.signal_button_release_event().connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_stop));
-	rec_button.signal_button_release_event().connect (mem_fun(*this,&ARDOUR_UI::mouse_transport_record));
-#endif
-
 	shuttle_box.signal_button_press_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_press));
 	shuttle_box.signal_button_release_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_release));
 	shuttle_box.signal_motion_notify_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_motion));

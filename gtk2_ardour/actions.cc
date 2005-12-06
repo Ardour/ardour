@@ -194,30 +194,27 @@ ActionManager::get_widget (ustring name)
 RefPtr<Action>
 ActionManager::get_action (ustring name)
 {
-	// ListHandle<RefPtr<ActionGroup> > uim_groups = ui_manager->get_action_groups ();
+	/* the C++ API for functions used here appears to be broken in
+	   gtkmm2.6, so we fall back to the C level.
+	*/
+
 	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
 	GList* node;
 	RefPtr<Action> act;
 
 	if (name.substr (0,9) != "<Actions>") {
-		cerr << "badly specified action name" << endl;
+		error << "badly specified action name: " << name << endmsg;
 		return act;
 	}
 
 	ustring::size_type last_slash = name.find_last_of ('/');
 	ustring group_name = name.substr (10, last_slash - 10);
-	cerr << "group name = " << group_name << endl;
 	ustring action_name = name.substr (last_slash+1);
-	cerr << "action name = " << action_name << endl;
-
-	cerr << "there are " << g_list_length (list) << " action roups\n";
 	
 	for (node = list; node; node = g_list_next (node)) {
 
 		GtkActionGroup* _ag = (GtkActionGroup*) node->data;
 		
-		cerr << "\tchecking in " << gtk_action_group_get_name (_ag) << endl;
-
 		if (group_name == gtk_action_group_get_name (_ag)) {
 
 			GtkAction* _act;

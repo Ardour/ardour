@@ -535,31 +535,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::Menu *diskstream_menu;
 	gint32 selected_dstream;
 	
-	gint mouse_transport_goto_start (GdkEventButton *) {
-		transport_goto_start (); return TRUE;
-	}
-	gint mouse_transport_goto_end (GdkEventButton *) {
-		transport_goto_end (); return TRUE;
-	}
-	gint mouse_transport_record (GdkEventButton *) {
-		transport_record (); return TRUE;
-	}
-	gint mouse_transport_forward (GdkEventButton *) {
-		transport_forward (0); return TRUE;
-	}
-	gint mouse_transport_rewind (GdkEventButton *) {
-		transport_rewind (0); return TRUE;
-	}
-	gint mouse_transport_loop (GdkEventButton *) {
-		transport_loop (); return TRUE;
-	}
-	gint mouse_transport_play_selection (GdkEventButton *) {
-		transport_play_selection (); return TRUE;
-	}
-
-	gint mouse_transport_roll (GdkEventButton *);
-	gint mouse_transport_stop (GdkEventButton *);
-
 	void set_transport_sensitivity (bool);
 
 	void remove_last_capture ();
