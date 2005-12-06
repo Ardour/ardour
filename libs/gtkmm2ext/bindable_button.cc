@@ -56,8 +56,6 @@ BindableToggleButton::BindableToggleButton(MIDI::Controllable *mc, const string 
 void
 BindableToggleButton::init_events ()
 {
-	signal_button_press_event().connect (mem_fun (*this, &BindableToggleButton::button_press));
-
 	prompter.signal_unmap_event().connect (mem_fun (*this, &BindableToggleButton::prompter_hiding));
 	
 	prompting = false;
@@ -92,20 +90,18 @@ BindableToggleButton::midi_learn()
 	}
 }
 
-
-gint
-BindableToggleButton::button_press (GdkEventButton *ev)
+bool
+BindableToggleButton::on_button_press_event (GdkEventButton *ev)
 {
-	
 	if ((ev->state & bind_statemask) && ev->button == bind_button) { 
 		midi_learn ();
-		return TRUE;
+		return true;
 	}
-
-	return FALSE;
+	
+	return false;
 }
 
-gint
+bool
 BindableToggleButton::prompter_hiding (GdkEventAny *ev)
 {
 	if (unprompting) {
@@ -115,7 +111,7 @@ BindableToggleButton::prompter_hiding (GdkEventAny *ev)
 		unprompting = false;
 	}
 	
-	return FALSE;
+	return false;
 }
 
 

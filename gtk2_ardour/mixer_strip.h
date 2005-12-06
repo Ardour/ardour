@@ -55,6 +55,7 @@
 #include "panner_ui.h"
 #include "enums.h"
 #include "redirect_box.h"
+#include "ardour_dialog.h"
 
 class MotionController;
 
@@ -152,9 +153,9 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	
 	Gtk::Button   name_button;
 
-	Gtk::Window*  comment_window;
-	Gtk::TextView comment_area;
-	Gtk::Button   comment_button;
+	ArdourDialog*  comment_window;
+	Gtk::TextView* comment_area;
+	Gtk::Button    comment_button;
 
 	void setup_comment_editor ();
 	void comment_button_clicked ();

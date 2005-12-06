@@ -144,6 +144,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	ignore_toggle = false;
 	ignore_speed_adjustment = false;
 	comment_window = 0;
+	comment_area = 0;
 
 	width_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(lr_xpm)))));
 	hide_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(small_x_xpm)))));
@@ -1113,32 +1114,48 @@ MixerStrip::comment_button_clicked ()
 
 	if (comment_window->is_visible()) {
 		comment_window->hide ();
-	} else {
-		comment_window->set_position (Gtk::WIN_POS_MOUSE);
-		comment_window->show_all ();
+		return;
+	} 
+
+	comment_window->set_position (Gtk::WIN_POS_MOUSE);
+	comment_window->show_all ();
+	comment_window->present();
+	
+	ResponseType response = (ResponseType) comment_window->run();
+	comment_window->hide ();
+
+	switch (response) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
 	}
+
+	string str =  comment_area->get_buffer()->get_text();
+	_route.set_comment (str, this);
+	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
+						   str.empty() ? _("click to add/edit comments") : str);
 }
 
 void
 MixerStrip::setup_comment_editor ()
 {
-	comment_window = new Window (WINDOW_TOPLEVEL);
+	string title;
+	title = _route.name();
+	title += _(": comment editor");
 
-	string str;
-	str = _route.name();
-	str += _(": comment editor");
-	comment_window->set_title (str);
+	comment_window = new ArdourDialog (title, false);
+	comment_area = manage (new TextView());
 
-	comment_area.set_name ("MixerTrackCommentArea");
-	comment_area.set_editable (true);
-	// GTK2FIX
-	// comment_area.changed.connect (mem_fun(*this, &MixerStrip::comment_edited));
-	// GTK2FIX
-	// comment_area.signal_button_release_event().connect_after (ptr_fun (do_not_propagate));
-	comment_area.show ();
+	comment_area->set_name ("MixerTrackCommentArea");
+	comment_area->set_editable (true);
+	comment_area->get_buffer()->set_text (_route.comment());
+	comment_area->set_size_request (200,100);
+	comment_area->show ();
 
-	comment_window->add (comment_area);
-	comment_window->signal_delete_event().connect (bind (ptr_fun (just_hide_it), comment_window));
+	comment_window->get_vbox()->pack_start (*comment_area);
+	comment_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	comment_window->add_button (Stock::OK, RESPONSE_ACCEPT);
 }
 
 void
@@ -1148,25 +1165,10 @@ MixerStrip::comment_changed (void *src)
 	
 	if (src != this) {
 		ignore_comment_edit = true;
-		// comment_area.freeze ();
-		//comment_area.get_buffer()->delete_text (0, -1);
-		//comment_area.set_point (0);
-		comment_area.get_buffer()->set_text (_route.comment());
-		// comment_area.thaw ();
+		if (comment_area) {
+			comment_area->get_buffer()->set_text (_route.comment());
+		}
 		ignore_comment_edit = false;
-	}
-}
-
-void
-MixerStrip::comment_edited ()
-{
-	ENSURE_GUI_THREAD(mem_fun(*this, &MixerStrip::comment_edited));
-	
-	if (!ignore_comment_edit) {
-		string str =  comment_area.get_buffer()->get_text();
-		_route.set_comment (str, this);
-		ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
-							   str.empty() ? _("click to add/edit comments") : str);
 	}
 }
 
@@ -1251,13 +1253,10 @@ MixerStrip::route_gui_changed (string what_changed, void* ignored)
 void
 MixerStrip::show_route_color ()
 {
-	Glib::RefPtr<Gtk::Style> style;
-
 	name_button.ensure_style ();
-	style = name_button.get_style()->copy();
+	Glib::RefPtr<Gtk::Style> style = name_button.get_style()->copy();
 	style->set_bg (Gtk::STATE_NORMAL, color());
 	name_button.set_style (style);
-	style->unreference();
 
 	route_active_changed ();
 }

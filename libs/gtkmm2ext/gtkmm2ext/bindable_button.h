@@ -64,12 +64,11 @@ class BindableToggleButton : public Gtk::ToggleButton
 	bool prompting, unprompting;
 	
 	void init_events ();
-	gint button_press (GdkEventButton *);
-	gint prompter_hiding (GdkEventAny *);
+	bool prompter_hiding (GdkEventAny *);
 	void midicontrol_prompt ();
 	void midicontrol_unprompt ();
 	
-
+	bool on_button_press_event (GdkEventButton *);
 };
 
 };

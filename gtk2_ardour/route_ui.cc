@@ -157,7 +157,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 
 	}
 
-	return stop_signal (*mute_button, "button-press-event");
+	return true;
 }
 
 gint
@@ -169,10 +169,9 @@ RouteUI::mute_release(GdkEventButton* ev)
 			// undo the last op
 			// because the press was the last undoable thing we did
 			_session.undo (1U);
-			stop_signal (*mute_button, "button-release-event");
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 gint

@@ -30,7 +30,6 @@ using namespace Gtkmm2ext;
 PopUp::PopUp (Gtk::WindowPosition pos, unsigned int showfor_msecs, bool doh)
 	: Window (WINDOW_POPUP)
 {
-
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	signal_button_press_event().connect(mem_fun(*this,&PopUp::button_click));
 	set_border_width (12);
