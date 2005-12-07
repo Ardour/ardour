@@ -19,9 +19,11 @@
 */
 
 #include <vector>
+
 #include <gtk/gtkaccelmap.h>
 #include <gtk/gtkuimanager.h>
 #include <gtk/gtkactiongroup.h>
+
 #include <gtkmm/accelmap.h>
 #include <gtkmm/uimanager.h>
 

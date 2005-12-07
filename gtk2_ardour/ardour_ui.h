@@ -71,7 +71,7 @@ class OptionEditor;
 class Mixer_UI;
 class ConnectionEditor;
 class RouteParams_UI;
-class SoundFileChooser;
+class SoundFileBrowser;
 class About;
 class AddRouteDialog;
 class NewSessionDialog;
@@ -602,7 +602,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void add_route_dialog_done (int status);
 
 	/* SoundFile Browser */
+	SoundFileBrowser *sfdb;
 	void toggle_sound_file_browser ();
+	int create_sound_file_browser ();
 	
 	/* Keyboard Handling */
 	

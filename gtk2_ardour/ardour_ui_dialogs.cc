@@ -38,6 +38,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace Glib;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
@@ -225,7 +226,7 @@ ARDOUR_UI::toggle_options_window ()
 {
 	if (option_editor == 0) {
 		option_editor = new OptionEditor (*this, *editor, *mixer);
-		option_editor->signal_unmap().connect(sigc::bind (ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleOptionsWindow")));
+		option_editor->signal_unmap().connect(sigc::bind (ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleOptionsEditor")));
 		option_editor->set_session (session);
 	} 
 
@@ -294,14 +295,33 @@ ARDOUR_UI::toggle_route_params_window ()
 		route_params->present ();
 	}
 }
+
+int
+ARDOUR_UI::create_sound_file_browser ()
+{
+	if (sfdb == 0) {
+		sfdb = new SoundFileBrowser (_("Sound File Browser"));
+		sfdb->set_session (session);
+		sfdb->signal_unmap().connect (sigc::bind(ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleSoundFileBrowser")));
+	}
+	return 0;
+}
 	
 void
 ARDOUR_UI::toggle_sound_file_browser ()
 {
-	using namespace Glib;
+	if (create_sound_file_browser()) {
+		return;
+	}
 
-	SoundFileBrowser sfdb(_("Sound File Browser"));
-	sfdb.run();
-
-	ActionManager::uncheck_toggleaction(X_("<Actions>/Common/ToggleSoundFileBrowser"));
+	RefPtr<Action> act = ActionManager::ui_manager->get_action (X_("<Actions>/Common/ToggleSoundFileBrowser"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+	
+		if (tact->get_active()) {
+			sfdb->present();
+		} else {
+			sfdb->hide ();
+		}
+	}
 }
