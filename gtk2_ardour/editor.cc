@@ -48,7 +48,6 @@
 #include <ardour/utils.h>
 
 #include "ardour_ui.h"
-#include "check_mark.h"
 #include "editor.h"
 #include "grouped_buttons.h"
 #include "keyboard.h"
@@ -145,14 +144,8 @@ Gdk::Cursor* Editor::zoom_cursor = 0;
 Gdk::Cursor* Editor::time_fx_cursor = 0;
 Gdk::Cursor* Editor::fader_cursor = 0;
 Gdk::Cursor* Editor::speaker_cursor = 0;
-Gdk::Cursor* Editor::null_cursor = 0;
 Gdk::Cursor* Editor::wait_cursor = 0;
 Gdk::Cursor* Editor::timebar_cursor = 0;
-
-GdkPixmap *Editor::check_pixmap = 0;
-GdkBitmap *Editor::check_mask = 0;
-GdkPixmap *Editor::empty_pixmap = 0;
-GdkBitmap *Editor::empty_mask = 0;
 
 Editor::Editor (AudioEngine& eng) 
 	: engine (eng),
@@ -218,13 +211,6 @@ Editor::Editor (AudioEngine& eng)
 	PublicEditor::_instance = this;
 
 	init_colormap ();
-
-	check_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL, 
-							      gtk_widget_get_colormap (GTK_WIDGET(edit_group_list.gobj())),
-							      &check_mask, NULL, (gchar **) check_xpm);
-	empty_pixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL, 
-							      gtk_widget_get_colormap (GTK_WIDGET(edit_group_list.gobj())),
-							      &empty_mask, NULL, (gchar **) empty_xpm);
 
 	session = 0;
 
@@ -994,12 +980,6 @@ Editor::on_realize ()
 
 	track_context_menu.accelerate (*this->get_toplevel());
 	track_region_context_menu.accelerate (*this->get_toplevel());
-	
-        Glib::RefPtr<Gdk::Pixmap> empty_pixmap = Gdk::Pixmap::create(get_window(), 1, 1, 1);
-	Glib::RefPtr<Gdk::Pixmap> empty_bitmap = Gdk::Pixmap::create(get_window(), 1, 1, 1);
-	Gdk::Color white ("#ffffff" );
-
-	null_cursor = new Gdk::Cursor(empty_pixmap, empty_bitmap, white, white, 0, 0);
 }
 
 

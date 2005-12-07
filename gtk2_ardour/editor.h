@@ -794,7 +794,6 @@ class Editor : public PublicEditor
 	static Gdk::Cursor* time_fx_cursor;
 	static Gdk::Cursor* fader_cursor;
 	static Gdk::Cursor* speaker_cursor;
-	static Gdk::Cursor* null_cursor;
 	static Gdk::Cursor* wait_cursor;
 	static Gdk::Cursor* timebar_cursor;
 
@@ -1527,11 +1526,6 @@ class Editor : public PublicEditor
 	void group_flags_changed (void*, ARDOUR::RouteGroup*);
 
 	Gtk::VBox           list_vpacker;
-
-	static GdkPixmap* check_pixmap;
-	static GdkBitmap* check_mask;
-	static GdkPixmap* empty_pixmap;
-	static GdkBitmap* empty_mask;
 
 	/* autoscrolling */
 
