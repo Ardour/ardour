@@ -26,16 +26,18 @@
 #include <gtkmm/style.h>
 
 using namespace Gtk;
+using namespace Gdk;
+using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace std;
 
-Glib::RefPtr<Gdk::Pixmap> FastMeter::v_pixmap;
-Glib::RefPtr<Gdk::Bitmap> FastMeter::v_mask;
+RefPtr<Pixmap> FastMeter::v_pixmap;
+RefPtr<Bitmap> FastMeter::v_mask;
 gint       FastMeter::v_pixheight = 0;
 gint       FastMeter::v_pixwidth = 0;
 
-Glib::RefPtr<Gdk::Pixmap> FastMeter::h_pixmap;
-Glib::RefPtr<Gdk::Bitmap> FastMeter::h_mask;
+RefPtr<Pixmap> FastMeter::h_pixmap;
+RefPtr<Bitmap> FastMeter::h_mask;
 gint       FastMeter::h_pixheight = 0;
 gint       FastMeter::h_pixwidth = 0;
 
@@ -48,7 +50,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
 	current_level = 0;
 	current_user_level = -100.0f;
 	
-	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
 	pixrect.set_x(0);
 	pixrect.set_y(0);
@@ -70,12 +72,26 @@ FastMeter::~FastMeter ()
 }
 
 void
+FastMeter::on_realize ()
+{
+	DrawingArea::on_realize();
+
+	RefPtr<Style> style = get_style();
+	Color black = style->get_black();
+
+	style->set_bg (STATE_NORMAL, black);
+	style->set_bg (STATE_ACTIVE, black);
+	style->set_bg (STATE_SELECTED, black);
+	style->set_bg (STATE_INSENSITIVE, black);
+}
+
+void
 FastMeter::set_vertical_xpm (const char **xpm)
 {
 	if (v_pixmap == 0) {
 		gint w, h;
 
-		v_pixmap = Gdk::Pixmap::create_from_xpm(Gdk::Colormap::get_system(), v_mask, xpm);
+		v_pixmap = Pixmap::create_from_xpm(Colormap::get_system(), v_mask, xpm);
 		v_pixmap->get_size(w, h);
 		
 		v_pixheight = h;
@@ -89,7 +105,7 @@ FastMeter::set_horizontal_xpm (const char **xpm)
 	if (h_pixmap == 0) {
 		gint w, h;
 		
-		h_pixmap = Gdk::Pixmap::create_from_xpm(Gdk::Colormap::get_system(), h_mask, xpm);
+		h_pixmap = Pixmap::create_from_xpm(Colormap::get_system(), h_mask, xpm);
 		h_pixmap->get_size(w, h);
 		
 		h_pixheight = h;
@@ -131,7 +147,7 @@ FastMeter::on_expose_event (GdkEventExpose* ev)
 bool
 FastMeter::vertical_expose (GdkEventExpose* ev)
 {
-	Gdk::Rectangle intersect;
+	Rectangle intersect;
 	gint top_of_meter;
 	bool blit = false;
 	bool intersecting = false;
@@ -139,12 +155,12 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	top_of_meter = (gint) floor (v_pixheight * current_level);
 	pixrect.set_height(top_of_meter);
 
-        intersect = pixrect.intersect(Glib::wrap(&ev->area), intersecting);
+        intersect = pixrect.intersect(wrap(&ev->area), intersecting);
         if (intersecting) {
 		/* draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		 */
 
-		Glib::RefPtr<Gdk::Window> win(get_window());
+		RefPtr<Gdk::Window> win(get_window());
 		win->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap, 
 				   intersect.get_x(), v_pixheight - top_of_meter,
 				   intersect.get_x(), v_pixheight - top_of_meter,
@@ -156,7 +172,7 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	/* draw peak bar */
 		
 	if (hold_state) {
-		Glib::RefPtr<Gdk::Window> win(get_window());
+		RefPtr<Gdk::Window> win(get_window());
 		win->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap,
 				   intersect.get_x(), v_pixheight - (gint) floor (v_pixheight * current_peak),
 				   intersect.get_x(), v_pixheight - (gint) floor (v_pixheight * current_peak),
@@ -169,19 +185,19 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 bool
 FastMeter::horizontal_expose (GdkEventExpose* ev)
 {
-	Gdk::Rectangle intersect;
+	Rectangle intersect;
 	bool intersecting = false;
 	gint right_of_meter;
 
 	right_of_meter = (gint) floor (h_pixwidth * current_level);
 	pixrect.set_width(right_of_meter);
 
-	intersect = pixrect.intersect(Glib::wrap(&ev->area), intersecting);
+	intersect = pixrect.intersect(wrap(&ev->area), intersecting);
 	if (intersecting) {
 		/* draw the part of the meter image that we need. 
 		 */
 
-		Glib::RefPtr<Gdk::Window> win(get_window());
+		RefPtr<Gdk::Window> win(get_window());
 		win->draw_drawable(get_style()->get_fg_gc(get_state()), h_pixmap,
 				   intersect.get_x(), intersect.get_y(),
 				   intersect.get_x(), intersect.get_y(),
@@ -191,7 +207,7 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 	/* draw peak bar */
 		
 	if (hold_state) {
-		Glib::RefPtr<Gdk::Window> win(get_window());
+		RefPtr<Gdk::Window> win(get_window());
 		win->draw_drawable(get_style()->get_fg_gc(get_state()), h_pixmap,
 			      right_of_meter, intersect.get_y(),
 			      right_of_meter, intersect.get_y(),

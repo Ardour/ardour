@@ -374,8 +374,8 @@ class Editor : public PublicEditor
 
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 
-	Gtk::HPaned   canvas_region_list_pane;
-	Gtk::HPaned   track_list_canvas_pane;
+	Gtk::Notebook the_notebook;
+	Gtk::HPaned   edit_pane;
 
 	Gtk::EventBox meter_base;
 	Gtk::HBox     meter_box;
@@ -674,8 +674,8 @@ class Editor : public PublicEditor
 	gint hscroll_right_arrow_button_press (GdkEventButton *);
 	gint hscroll_right_arrow_button_release (GdkEventButton *);
 	
-	guint32             canvas_width;
-	guint32             canvas_height;
+	double canvas_width;
+	double canvas_height;
 
 	Gtk::ScrolledWindow  track_canvas_scroller;
 	Gtk::ScrolledWindow  time_canvas_scroller;
@@ -765,7 +765,6 @@ class Editor : public PublicEditor
 	NamedSelectionDisplayModelColumns named_selection_columns;
 	Glib::RefPtr<Gtk::TreeStore>     named_selection_model;
 
-	Gtk::VPaned         region_selection_vpane;
 	Gtk::TreeView          named_selection_display;
 	Gtk::ScrolledWindow named_selection_scroller;
 
@@ -1403,10 +1402,6 @@ class Editor : public PublicEditor
 	void region_selection_op (void (ARDOUR::Region::*pmf)(bool), bool);
 
 	bool audio_region_selection_covers (jack_nframes_t where);
-
-	Gtk::VPaned  route_group_vpane;
-	Gtk::Frame   route_list_frame;
-	Gtk::Frame   edit_group_list_frame;
 
 	/* transport range select process */
 	enum RangeMarkerOp {

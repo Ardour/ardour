@@ -147,7 +147,6 @@ Editor::hscroll_slider_button_release (GdkEventButton *ev)
 	
 	return TRUE;
 
-	
 	start = (gint) floor (bar_max * ((double) leftmost_frame / session->current_end_frame()));
 	width = (gint) floor (bar_max * ((canvas_width * frames_per_unit) / session->current_end_frame()));
 

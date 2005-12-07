@@ -217,7 +217,7 @@ Editor::draw_measures ()
 				line = get_time_line ();
 				line->property_x1() = xpos;
 				line->property_x2() = xpos;
-				line->property_y2() = (gdouble) canvas_height;
+				line->property_y2() = canvas_height;
 				line->property_color_rgba() = color;
 				line->raise_to_top();
 				line->show();

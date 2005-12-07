@@ -52,7 +52,8 @@ class FastMeter : public Gtk::DrawingArea {
   protected:
 	bool on_expose_event (GdkEventExpose*);
 	void on_size_request (GtkRequisition*);
-	
+	void on_realize ();
+
   private:  
 	static Glib::RefPtr<Gdk::Pixmap> h_pixmap;
 	static Glib::RefPtr<Gdk::Bitmap> h_mask;

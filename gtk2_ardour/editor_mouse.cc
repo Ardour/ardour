@@ -3651,7 +3651,6 @@ Editor::drag_selection (ArdourCanvas::Item* item, GdkEvent* event)
 		break;
 	}
 	
-	
 	if (event->button.x >= track_canvas_scroller.get_hadjustment()->get_value() + canvas_width) {
 		start_canvas_autoscroll (1);
 	}
@@ -4183,7 +4182,6 @@ Editor::drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 		} 
 		break;		
 	}
-	
 	
 	if (event->button.x >= track_canvas_scroller.get_hadjustment()->get_value() + canvas_width) {
 		start_canvas_autoscroll (1);

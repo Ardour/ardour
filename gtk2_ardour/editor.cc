@@ -551,19 +551,6 @@ Editor::Editor (AudioEngine& eng)
 	edit_group_vbox.pack_start (edit_group_list_button, false, false);
 	edit_group_vbox.pack_start (edit_group_list_scroller, true, true);
 	
-	route_list_frame.set_name ("BaseFrame");
-	route_list_frame.set_shadow_type (Gtk::SHADOW_IN);
-	route_list_frame.add (route_list_scroller);
-
-	edit_group_list_frame.set_name ("BaseFrame");
-	edit_group_list_frame.set_shadow_type (Gtk::SHADOW_IN);
-	edit_group_list_frame.add (edit_group_vbox);
-
-	route_group_vpane.add1 (route_list_frame);
-	route_group_vpane.add2 (edit_group_list_frame);
-
-	list_vpacker.pack_start (route_group_vpane, true, true);
-
 	region_list_model = TreeStore::create (region_list_columns);
 	region_list_sort_model = TreeModelSort::create (region_list_model);
 	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
@@ -615,44 +602,21 @@ Editor::Editor (AudioEngine& eng)
 	named_selection_display.signal_button_press_event().connect (mem_fun(*this, &Editor::named_selection_display_button_press));
 	named_selection_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::named_selection_display_selection_changed));
 
-	region_selection_vpane.pack1 (region_list_scroller, true, true);
-	region_selection_vpane.pack2 (named_selection_scroller, true, true);
+	the_notebook.append_page (route_list_scroller, _("Tracks/Busses"));
+	the_notebook.append_page (edit_group_vbox, _("Edit Groups"));
+	the_notebook.append_page (region_list_scroller, _("Regions"));
+	the_notebook.append_page (named_selection_scroller, _("Chunks"));
+	the_notebook.set_show_tabs (true);
 
-	canvas_region_list_pane.pack1 (edit_frame, true, true);
-	canvas_region_list_pane.pack2 (region_selection_vpane, true, true);
+	edit_pane.pack1 (edit_frame, true, true);
+	edit_pane.pack2 (the_notebook, true, true);
 
-	track_list_canvas_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
-									    static_cast<Gtk::Paned*> (&track_list_canvas_pane)));
-	canvas_region_list_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
-								    static_cast<Gtk::Paned*> (&canvas_region_list_pane)));
-	route_group_vpane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
-							      static_cast<Gtk::Paned*> (&route_group_vpane)));
-	region_selection_vpane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler),
-								   static_cast<Gtk::Paned*> (&region_selection_vpane)));
-	
-	track_list_canvas_pane.pack1 (list_vpacker, true, true);
-	track_list_canvas_pane.pack2 (canvas_region_list_pane, true, true);
-
-	/* provide special pane-handle event handling for easy "hide" action */
-
-	/* 0: collapse to show left/upper child
-	   1: collapse to show right/lower child
-	*/
-
-	route_group_vpane.set_data ("collapse-direction", (gpointer) 0);
-	region_selection_vpane.set_data ("collapse-direction", (gpointer) 0);
-	canvas_region_list_pane.set_data ("collapse-direction", (gpointer) 0);
-	track_list_canvas_pane.set_data ("collapse-direction", (gpointer) 1);
-
-	route_group_vpane.signal_button_release_event().connect (bind (sigc::ptr_fun (pane_handler), static_cast<Paned*> (&route_group_vpane)));
-	region_selection_vpane.signal_button_release_event().connect (bind (sigc::ptr_fun (pane_handler), static_cast<Paned*> (&region_selection_vpane)));
-	canvas_region_list_pane.signal_button_release_event().connect (bind (sigc::ptr_fun (pane_handler), static_cast<Paned*> (&canvas_region_list_pane)));
-	track_list_canvas_pane.signal_button_release_event().connect (bind (sigc::ptr_fun (pane_handler), static_cast<Paned*> (&track_list_canvas_pane)));
+	edit_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Gtk::Paned*> (&edit_pane)));
 
 	top_hbox.pack_start (toolbar_frame, true, true);
 
 	HBox *hbox = manage (new HBox);
-	hbox->pack_start (track_list_canvas_pane, true, true);
+	hbox->pack_start (edit_pane, true, true);
 
 	global_vpacker.pack_start (top_hbox, false, false);
 	global_vpacker.pack_start (*hbox, true, true);
@@ -817,7 +781,7 @@ Editor::set_frames_per_unit (double fpu)
 
 	// convert fpu to frame count
 
-	frames = (jack_nframes_t) (fpu * canvas_width);
+	frames = (jack_nframes_t) floor (fpu * canvas_width);
 	
 	/* don't allow zooms that fit more than the maximum number
 	   of frames into an 800 pixel wide space.
@@ -907,15 +871,14 @@ Editor::zoom_adjustment_changed ()
 		return;
 	}
 
-	double fpu = (double) zoom_range_clock.current_duration() / (double) canvas_width;
+	double fpu = zoom_range_clock.current_duration() / canvas_width;
 
 	if (fpu < 1.0) {
 		fpu = 1.0;
-		zoom_range_clock.set ((jack_nframes_t) (fpu * canvas_width));
-	}
-	else if (fpu > session->current_end_frame() / (double) canvas_width) {
-		fpu = session->current_end_frame() / (double) canvas_width;
-		zoom_range_clock.set ((jack_nframes_t) (fpu * canvas_width));
+		zoom_range_clock.set ((jack_nframes_t) floor (fpu * canvas_width));
+	} else if (fpu > session->current_end_frame() / canvas_width) {
+		fpu = session->current_end_frame() / canvas_width;
+		zoom_range_clock.set ((jack_nframes_t) floor (fpu * canvas_width));
 	}
 	
 	temporal_zoom (fpu);
@@ -1065,13 +1028,13 @@ Editor::map_position_change (jack_nframes_t frame)
 void
 Editor::center_screen (jack_nframes_t frame)
 {
-	float page = canvas_width * frames_per_unit;
+	double page = canvas_width * frames_per_unit;
 
 	/* if we're off the page, then scroll.
 	 */
 	
 	if (frame < leftmost_frame || frame >= leftmost_frame + page) {
-		center_screen_internal (frame,page);
+		center_screen_internal (frame, page);
 	}
 }
 
@@ -2180,14 +2143,8 @@ Editor::get_state ()
 		geometry->add_property("x_off", string(buf));
 		snprintf(buf, sizeof(buf), "%d", yoff);
 		geometry->add_property("y_off", string(buf));
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&canvas_region_list_pane)->gobj()));
-		geometry->add_property("canvas_region_list_pane_pos", string(buf));
-		snprintf(buf,sizeof(buf), "%d", gtk_paned_get_position (static_cast<Paned*>(&track_list_canvas_pane)->gobj()));
-		geometry->add_property("track_list_canvas_pane_pos", string(buf));
-		snprintf(buf,sizeof(buf), "%d", gtk_paned_get_position (static_cast<Paned*>(&region_selection_vpane)->gobj()));
-		geometry->add_property("region_selection_pane_pos", string(buf));
-		snprintf(buf,sizeof(buf), "%d", gtk_paned_get_position (static_cast<Paned*>(&route_group_vpane)->gobj()));
-		geometry->add_property("route_group_pane_pos", string(buf));
+		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
+		geometry->add_property("edit_pane_pos", string(buf));
 
 		node->add_child_nocopy (*geometry);
 	}
@@ -3738,72 +3695,21 @@ Editor::pane_allocation_handler (Gtk::Allocation &alloc, Gtk::Paned* which)
 		height = atoi(geometry->property("y_size")->value());
 	}
 
-	if (which == static_cast<Gtk::Paned*> (&track_list_canvas_pane)) {
+	if (which == static_cast<Gtk::Paned*> (&edit_pane)) {
 
 		if (done[0]) {
 			return;
 		}
 
-		if (!geometry || (prop = geometry->property("track_list_canvas_pane_pos")) == 0) {
+		if (!geometry || (prop = geometry->property ("edit_pane_pos")) == 0) {
 			pos = 75;
 			snprintf (buf, sizeof(buf), "%d", pos);
 		} else {
 			pos = atoi (prop->value());
 		}
 
-		if ((done[0] = GTK_WIDGET(track_list_canvas_pane.gobj())->allocation.width > pos)) {
-			track_list_canvas_pane.set_position (pos);
-		}
-
-	} else if (which == static_cast<Gtk::Paned*> (&canvas_region_list_pane)) {
-
-		if (done[1]) {
-			return;
-		}
-
-		if (!geometry || (prop = geometry->property("canvas_region_list_pane_pos")) == 0) {
-			pos = width - (95 * 2);
-			snprintf (buf, sizeof(buf), "%d", pos);
-		} else {
-			pos = atoi (prop->value());
-		}
-
-		if ((done[1] = GTK_WIDGET(canvas_region_list_pane.gobj())->allocation.width > pos)) {
-			canvas_region_list_pane.set_position (pos);
-		}
-
-	} else if (which == static_cast<Gtk::Paned*> (&route_group_vpane)) {
-
-		if (done[2]) {
-			return;
-		}
-
-		if (!geometry || (prop = geometry->property("route_group_pane_pos")) == 0) {
-			pos = width - (95 * 2);
-			snprintf (buf, sizeof(buf), "%d", pos);
-		} else {
-			pos = atoi (prop->value());
-		}
-
-		if ((done[2] = GTK_WIDGET(route_group_vpane.gobj())->allocation.height > pos)) {
-			route_group_vpane.set_position (pos);
-		}
-
-	} else if (which == static_cast<Gtk::Paned*> (&region_selection_vpane)) {
-
-		if (done[3]) {
-			return;
-		}
-
-		if (!geometry || (prop = geometry->property("region_selection_pane_pos")) == 0) {
-			pos = width - (95 * 2);
-			snprintf (buf, sizeof(buf), "%d", pos);
-		} else {
-			pos = atoi (prop->value());
-		}
-
-		if ((done[3] = GTK_WIDGET(region_selection_vpane.gobj())->allocation.height > pos)) { 
-			region_selection_vpane.set_position (pos);
+		if ((done[0] = GTK_WIDGET(edit_pane.gobj())->allocation.width > pos)) {
+			edit_pane.set_position (pos);
 		}
 	}
 }
