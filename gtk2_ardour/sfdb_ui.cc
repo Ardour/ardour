@@ -23,10 +23,13 @@
 #include <gtkmm/stock.h>
 
 #include <ardour/audio_library.h>
+#include <ardour/sndfile_helpers.h>
 
 #include "sfdb_ui.h"
 
 #include "i18n.h"
+
+std::string length2string (const int32_t frames, const int32_t sample_rate);
 
 SoundFileBox::SoundFileBox (ARDOUR::Session* session)
 	:
@@ -47,57 +50,95 @@ SoundFileBox::SoundFileBox (ARDOUR::Session* session)
 	pack_start (border_frame);
 	set_border_width (4);
 
-        path_box.set_spacing (4);
-        path_box.pack_start (path, false, false);
-        path_box.pack_start (path_entry, true, true);
+	path_box.set_spacing (4);
+	path_box.pack_start (path, false, false);
+	path_box.pack_start (path_entry, true, true);
 
-        main_box.set_border_width (4);
+	main_box.set_border_width (4);
 
-        main_box.pack_start(label, false, false);
-        main_box.pack_start(path_box, false, false);
-        main_box.pack_start(length, false, false);
-        main_box.pack_start(format, false, false);
-        main_box.pack_start(channels, false, false);
-        main_box.pack_start(samplerate, false, false);
-        main_box.pack_start(field_view, true, true);
-        main_box.pack_start(top_box, false, false);
-        main_box.pack_start(bottom_box, false, false);
+	main_box.pack_start(label, false, false);
+	main_box.pack_start(path_box, false, false);
+	main_box.pack_start(length, false, false);
+	main_box.pack_start(format, false, false);
+	main_box.pack_start(channels, false, false);
+	main_box.pack_start(samplerate, false, false);
+	main_box.pack_start(field_view, true, true);
+	main_box.pack_start(top_box, false, false);
+	main_box.pack_start(bottom_box, false, false);
 
-        field_view.set_size_request(200, 150);
-        top_box.set_homogeneous(true);
-        top_box.pack_start(add_field_btn);
-        top_box.pack_start(remove_field_btn);
+	field_view.set_size_request(200, 150);
+	top_box.set_homogeneous(true);
+	top_box.pack_start(add_field_btn);
+	top_box.pack_start(remove_field_btn);
 
-        remove_field_btn.set_sensitive(false);
+	remove_field_btn.set_sensitive(false);
 
-        bottom_box.set_homogeneous(true);
-        bottom_box.pack_start(play_btn);
-        bottom_box.pack_start(stop_btn);
+	bottom_box.set_homogeneous(true);
+	bottom_box.pack_start(play_btn);
+	bottom_box.pack_start(stop_btn);
 
-        play_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::play_btn_clicked));
-        stop_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::stop_btn_clicked));
+	play_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::play_btn_clicked));
+	stop_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::stop_btn_clicked));
 
-        if (!session) {
-                play_btn.set_sensitive(false);
-        } else {
-                session->AuditionActive.connect(mem_fun (*this, &SoundFileBox::audition_status_changed));
-        }
+	if (!session) {
+		play_btn.set_sensitive(false);
+	} else {
+		session->AuditionActive.connect(mem_fun (*this, &SoundFileBox::audition_status_changed));
+	}
 
-        add_field_btn.signal_clicked().connect
-                        (mem_fun (*this, &SoundFileBox::add_field_clicked));
-        remove_field_btn.signal_clicked().connect
-                        (mem_fun (*this, &SoundFileBox::remove_field_clicked));
+	add_field_btn.signal_clicked().connect
+	                (mem_fun (*this, &SoundFileBox::add_field_clicked));
+	remove_field_btn.signal_clicked().connect
+	                (mem_fun (*this, &SoundFileBox::remove_field_clicked));
 
-        field_view.get_selection()->signal_changed().connect (mem_fun (*this, &SoundFileBox::field_selected));
+	field_view.get_selection()->signal_changed().connect (mem_fun (*this, &SoundFileBox::field_selected));
 	ARDOUR::Library->fields_changed.connect (mem_fun (*this, &SoundFileBox::setup_fields));
 
-        show_all();
-        stop_btn.hide();
+	show_all();
+	stop_btn.hide();
 }
 
 int
 SoundFileBox::setup_labels (string filename) 
-{return 0;}
+{
+    SNDFILE *sf;
+
+    if ((sf = sf_open ((char *) filename.c_str(), SFM_READ, &sf_info)) < 0) {
+        error << string_compose(_("file \"%1\" could not be opened"), filename) << endmsg;
+        return -1;
+    }
+
+    if (sf_info.frames == 0 && sf_info.channels == 0 &&
+		sf_info.samplerate == 0 && sf_info.format == 0 &&
+	   	sf_info.sections == 0) {
+		/* .. ok, its not a sound file */
+	    error << string_compose(_("file \"%1\" appears not to be an audio file"), filename) << endmsg;
+	    return -1;
+	}
+
+	label.set_alignment (0.0f, 0.0f);
+    label.set_text ("Label: " + ARDOUR::Library->get_label(filename));
+
+	path.set_text ("Path: ");
+	path_entry.set_text (filename);
+	path_entry.set_position (-1);
+
+	length.set_alignment (0.0f, 0.0f);
+	length.set_text (string_compose("Length: %1", length2string(sf_info.frames, sf_info.samplerate)));
+
+	format.set_alignment (0.0f, 0.0f);
+	format.set_text (string_compose("Format: %1, %2", 
+				sndfile_major_format(sf_info.format),
+				sndfile_minor_format(sf_info.format)));
+
+	channels.set_alignment (0.0f, 0.0f);
+	channels.set_text (string_compose("Channels: %1", sf_info.channels));
+
+	samplerate.set_alignment (0.0f, 0.0f);
+	samplerate.set_text (string_compose("Samplerate: %1", sf_info.samplerate));
+
+	return 0;
+}
 
 void
 SoundFileBox::setup_fields ()
@@ -129,7 +170,9 @@ SoundFileBox::field_selected ()
 
 bool
 SoundFileBox::update (std::string filename)
-{return true;}
+{
+	return true;
+}
 
 SoundFileBrowser::SoundFileBrowser (std::string title)
 	:
@@ -190,5 +233,24 @@ void
 SoundFileOmega::import_clicked ()
 {
 	Imported (chooser.get_filenames(), split_check.get_active());
+}
+
+std::string
+length2string (const int32_t frames, const int32_t sample_rate)
+{
+    int secs = (int) (frames / (float) sample_rate);
+    int hrs =  secs / 3600;
+    secs -= (hrs * 3600);
+    int mins = secs / 60;
+    secs -= (mins * 60);
+
+    int total_secs = (hrs * 3600) + (mins * 60) + secs;
+    int frames_remaining = frames - (total_secs * sample_rate);
+    float fractional_secs = (float) frames_remaining / sample_rate;
+
+    char duration_str[32];
+    sprintf (duration_str, "%02d:%02d:%05.2f", hrs, mins, (float) secs + fractional_secs);
+
+    return duration_str;
 }
 
