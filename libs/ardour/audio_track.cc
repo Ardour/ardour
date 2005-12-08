@@ -227,6 +227,11 @@ AudioTrack::set_record_enable (bool yn, void *src)
 	} else {
 		set_meter_point (_saved_meter_point, this);
 	}
+
+	if (_session.get_midi_feedback()) {
+		_midi_rec_enable_control.send_feedback (record_enabled());
+	}
+
 }
 
 void
