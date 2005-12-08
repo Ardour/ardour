@@ -65,8 +65,7 @@ style "first_action_message"
 
 style "verbose_canvas_cursor"
 {
-	font="-*-sans-medium-r-*-*-*-240-*-*-*-*-*-*"
-	fontset="-*-sans-medium-r-*-*-*-240-*-*-*-*-*-*"
+	font_name = "sans bold 24"
 }
 
 style "marker_text" 
@@ -76,8 +75,7 @@ style "marker_text"
 
 style "time_axis_view_item_name"
 {
-	font="-*-sans-medium-r-normal-*-*-100-*-*-p-*-*-1"
-	fontset="-*-sans-medium-r-normal-*-*-100-*-*-p-*-*-1"
+	font_name = "sans medium 10"
 }
 
 style "default_base" = "medium_text"
@@ -485,7 +483,7 @@ style "editor_time_ruler" = "small_text"
 
 style "audio_track_base" = "default_base"
 {
-  font = "-*-courier-medium-r-*-*-*-100-*-*-*-*-*-*"
+  font_name = "sans medium 10"
   fg[NORMAL] = { 0.80, 0.80, 0.70 }	
   bg[NORMAL] = { 0.18, 0.18, 0.22 }
   bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
@@ -496,14 +494,14 @@ style "audio_track_base" = "default_base"
 
 style "audio_bus_base"
 {
-  font = "-*-courier-medium-r-*-*-*-100-*-*-*-*-*-*"
+  font_name = "sans medium 10"
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
   bg[NORMAL] = {0, 0.36, 0.40 }	
 }
 
 style "track_name_display"
 {
-	font = "-*-sans-medium-r-*-*-*-100-*-*-*-*-*-*"
+	font_name = "sans medium 10"
 	fg[NORMAL] = { 0.80, 0.80, 0.70 }
 	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
 
@@ -598,7 +596,7 @@ style "track_controls_inactive"
 	bg[SELECTED] =    { 0.60, 0.60, 0.66 }
 	bg[PRELIGHT] =    { 0.60, 0.60, 0.66 }
 
-	font = "-*-courier-medium-r-*-*-*-100-*-*-*-*-*-*"
+	font_name = "sans medium 10"
 	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
 }
 
@@ -623,8 +621,7 @@ style "automation_track_controls_base"
 # Plugin Editors
 style "plugin_slider" 
 {
- 	fontset="-*-sans-medium-r-normal-*-10-*-*-*-p-*-*-*"
-	font ="-*-sans-medium-r-normal-*-*-100-*-*-p-*-*"
+	font_name ="sans medium 10"
 
 	fg[NORMAL] = { 0.45, 0.45, 0.45 }
 	fg[ACTIVE] = { 0.45, 0.45, 0.45 }
@@ -733,7 +730,7 @@ style "io_selector_port_list" = "medium_text"
 style "io_selector_notebook" = "default_base"
 {
 	fg[NORMAL] = { 0.98, 0.76, 0.14 }
-        font ="-*-sans-bold-r-normal-*-*-140-*-*-p-*-*"
+        font_name ="sans bold 14"
 }
 
 style "tearoff_arrow" = "medium_bold_entry"
@@ -744,13 +741,8 @@ style "tearoff_arrow" = "medium_bold_entry"
 
 style "meter_metrics_strip" = "default_base"
 {
-	font = "-*-courier-medium-r-*-*-*-100-*-*-*-*-*-*"
+	font = "sans medium 10"
 	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
-}
-
-style "no_session_msg" 
-{
-	font = "-*-sans-medium-r-*-*-34-350-*-*-*-*-*-*"
 }
 
 style "location_row_button" = "default_buttons_menus"
@@ -1119,7 +1111,6 @@ widget "*PluginLoadButton" style "small_button"
 widget "*PluginLoadButton*" style "small_button"
 widget "*FaderMetricsStrip" style "meter_metrics_strip"
 widget "*MeterMetricsStrip" style "meter_metrics_strip"
-widget "*NoSessionMessage" style "no_session_msg"
 widget "*MetricDialogFrame" style "base_frame"
 widget "*MetricEntry" style "medium_bold_entry"
 widget "*MetricButton" style "default_buttons_menus"

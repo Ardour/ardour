@@ -111,8 +111,7 @@ Editor::initialize_canvas ()
 
 	verbose_canvas_cursor = new ArdourCanvas::Text (*track_canvas.root());
 	verbose_canvas_cursor->property_font_desc() = font;
-	// GTK2FIX
-	// verbose_canvas_cursor->property_anchor() = GTK_ANCHOR_NW;
+	verbose_canvas_cursor->property_anchor() = ANCHOR_NW;
 	verbose_canvas_cursor->property_fill_color_rgba() = color_map[cVerboseCanvasCursor];
 	
 	verbose_cursor_visible = false;
@@ -126,7 +125,7 @@ Editor::initialize_canvas ()
 	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
 	
 	meter_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
-	tempo_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
+	tempo_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height);
 	marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 2.0);
 	range_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 3.0);
 	transport_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 4.0);

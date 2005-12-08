@@ -47,7 +47,7 @@ struct MeterDialog : public ArdourDialog
 {
     Gtk::Entry   bpb_entry;
     Gtk::ComboBoxText note_types;
-    vector<const gchar *> strings;
+    vector<string> strings;
     Gtk::Frame   note_frame;
     Gtk::Frame   bpb_frame;
     Gtk::VBox    vpacker;

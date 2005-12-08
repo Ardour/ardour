@@ -506,7 +506,12 @@ gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 	UINT_TO_RGBA (simplerect->outline_color, &simplerect->outline_r, &simplerect->outline_g, &simplerect->outline_b, &foo);
 }
 
-#define SIMPLERECT_FAST_RENDERER
+// this can be useful for debugging/understanding how the canvas redraws
+// stuff.
+
+#undef HARLEQUIN_DEBUGGING
+
+#undef SIMPLERECT_FAST_RENDERER
 #ifdef SIMPLERECT_FAST_RENDERER
 
 static void
@@ -528,15 +533,13 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 
 	if (buf->is_bg) {
 
-		// this can be useful for debugging/understanding how the canvas redraws
-		// stuff.
-
-		// gint randr, randg, randb;
-		// randr = random() % 255;
-		// randg = random() % 255;
-		// randb = random() % 255;
-		// PAINT_BOX(buf, randr, randg, randb, 255, buf->rect.x0, buf->rect.y0, buf->rect.x1, buf->rect.y1);
-
+#ifdef HARLEQUIN_DEBUGGING
+		gint randr, randg, randb;
+		randr = random() % 255;
+		randg = random() % 255;
+		randb = random() % 255;
+		PAINT_BOX(buf, randr, randg, randb, 255, buf->rect.x0, buf->rect.y0, buf->rect.x1, buf->rect.y1);
+#endif
 		gnome_canvas_buf_ensure_buf (buf);
 		buf->is_bg = FALSE;
 	}
@@ -562,16 +565,18 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 		
 		// this can be useful for debugging/understanding how the canvas redraws
 		// stuff.
-		
-		// gint randr, randg, randb;
-		// randr = random() % 255;
-		// randg = random() % 255;
-		// randb = random() % 255;
-		// PAINT_BOX(buf, randr, randg, randb, simplerect->fill_a, begin, sy, end, ey);
-		
+
+#ifdef HARLEQUIN_DEBUGGING
+		gint randr, randg, randb;
+		randr = random() % 255;
+		randg = random() % 255;
+		randb = random() % 255;
+		PAINT_BOX(buf, randr, randg, randb, simplerect->fill_a, begin, sy, end, ey);
+#else		
 		FAST_PAINT_BOX (buf, simplerect->fill_r, simplerect->fill_g, simplerect->fill_b, simplerect->fill_a, 
 				intersection.x0, intersection.y0,
 				intersection.x1, intersection.y1);
+#endif
 	 	
 	}
 
@@ -618,15 +623,13 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 
 	if (buf->is_bg) {
 
-		// this can be useful for debugging/understanding how the canvas redraws
-		// stuff.
-
-		// gint randr, randg, randb;
-		// randr = random() % 255;
-		// randg = random() % 255;
-		// randb = random() % 255;
-		// PAINT_BOX(buf, randr, randg, randb, 255, buf->rect.x0, buf->rect.y0, buf->rect.x1, buf->rect.y1);
-
+#ifdef HARLEQUIN_DEBUGGING
+		gint randr, randg, randb;
+		randr = random() % 255;
+		randg = random() % 255;
+		randb = random() % 255;
+		PAINT_BOX(buf, randr, randg, randb, 255, buf->rect.x0, buf->rect.y0, buf->rect.x1, buf->rect.y1);
+#endif
 		gnome_canvas_buf_ensure_buf (buf);
 		buf->is_bg = FALSE;
 	}
@@ -643,16 +646,15 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 
 	if (simplerect->fill) {
 		
-		// this can be useful for debugging/understanding how the canvas redraws
-		// stuff.
-		
-		// gint randr, randg, randb;
-		// randr = random() % 255;
-		// randg = random() % 255;
-		// randb = random() % 255;
-		// PAINT_BOX(buf, randr, randg, randb, simplerect->fill_a, begin, sy, end, ey);
-		
+#ifdef HARLEQUIN_DEBUGGING
+		gint randr, randg, randb;
+		randr = random() % 255;
+		randg = random() % 255;
+		randb = random() % 255;
+		PAINT_BOX(buf, randr, randg, randb, simplerect->fill_a, begin, sy, end, ey);
+#else		
 		PAINT_BOX(buf, simplerect->fill_r, simplerect->fill_g, simplerect->fill_b, simplerect->fill_a, begin, sy, end, ey);
+#endif
 	}
 
 	for (i = 0; i < simplerect->outline_pixels; ++i) {

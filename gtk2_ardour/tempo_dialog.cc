@@ -56,15 +56,6 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 
 	bpm_frame.add (vspacer1);
 
-	button_box.set_border_width (10);
-	button_box.set_spacing (5);
-	button_box.set_homogeneous (true);
-	button_box.pack_start (ok_button); 
-	button_box.pack_start (cancel_button); 
-
-	vpacker.set_border_width (10);
-	vpacker.set_spacing (5);
-
 	if (movable) {
 		snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
 		when_bar_entry.set_text (buf);
@@ -94,18 +85,20 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 		when_frame.set_name ("MetricDialogFrame");
 		when_frame.add (when_table);
 
-		vpacker.pack_start (when_frame, false, false);
+		get_vbox()->pack_start (when_frame, false, false);
 	}
-
-	vpacker.pack_start (bpm_frame, false, false);
-	vpacker.pack_start (button_box, false, false);
 
 	bpm_frame.set_name ("MetricDialogFrame");
 	bpm_entry.set_name ("MetricEntry");
-	ok_button.set_name ("MetricButton");
-	cancel_button.set_name ("MetricButton");
 
-	add (vpacker);
+	get_vbox()->pack_start (bpm_frame, false, false);
+	
+	add_button (Stock::OK, RESPONSE_ACCEPT);
+	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+
+	get_vbox()->show_all();
+	bpm_entry.show();
+
 	set_name ("MetricDialog");
 }
 
@@ -175,8 +168,6 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	bpb_entry.select_region (0, -1);
 	Gtkmm2ext::set_size_request_to_display_given_text (bpb_entry, "999999g", 5, 5);
 
-	vector<string> strings;
-	
 	strings.push_back (_("whole (1)"));
 	strings.push_back (_("second (2)"));
 	strings.push_back (_("third (3)"));
@@ -250,7 +241,7 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		when_frame.set_name ("MetricDialogFrame");
 		when_frame.add (when_table);
 		
-		vpacker.pack_start (when_frame, false, false);
+		get_vbox()->pack_start (when_frame, false, false);
 	}
 
 	get_vbox()->pack_start (bpb_frame, false, false);
@@ -260,9 +251,11 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	note_frame.set_name ("MetricDialogFrame");
 	bpb_entry.set_name ("MetricEntry");
 
-	add_action_widget (bpb_entry, RESPONSE_ACCEPT);
 	add_button (Stock::OK, RESPONSE_ACCEPT);
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+
+	get_vbox()->show_all ();
+	bpb_entry.show ();
 
 	set_name ("MetricDialog");
 }
@@ -283,7 +276,7 @@ double
 MeterDialog::get_note_type ()
 {
 	double note_type = 0;
-	vector<const gchar *>::iterator i;
+	vector<string>::iterator i;
 	string text = note_types.get_active_text();
 	
 	for (i = strings.begin(); i != strings.end(); ++i) {

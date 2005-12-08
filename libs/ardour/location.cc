@@ -69,7 +69,7 @@ Location::set_start (jack_nframes_t s)
 		if (_start != s) {
 			_start = s;
 			_end = s;
-			 changed(this); /* EMIT SIGNAL */
+			start_changed(this); /* EMIT SIGNAL */
 		}
 		return 0;
 	}
@@ -80,9 +80,10 @@ Location::set_start (jack_nframes_t s)
 
 	if (s != _start) {
 		_start = s; 
-		 start_changed(this); /* EMIT SIGNAL */
+		start_changed(this); /* EMIT SIGNAL */
 	}
-		return 0;
+
+	return 0;
 }
 
 int
@@ -92,7 +93,7 @@ Location::set_end (jack_nframes_t e)
 		if (_start != e) {
 			_start = e;
 			_end = e;
-			 changed(this); /* EMIT SIGNAL */
+			end_changed(this); /* EMIT SIGNAL */
 		}
 		return 0;
 	}
@@ -117,10 +118,14 @@ Location::set (jack_nframes_t start, jack_nframes_t end)
 		return -1;
 	}
 	
-	if (_start != start || _end != end) {
+	if (_start != start) {
 		_start = start;
+		start_changed(this); /* EMIT SIGNAL */
+	}
+
+	if (_end != end) {
 		_end = end;
-		 changed(this); /* EMIT SIGNAL */
+		end_changed(this); /* EMIT SIGNAL */
 	}
 	return 0;
 }
@@ -467,8 +472,6 @@ Locations::add (Location *loc, bool make_current)
 		LockMonitor lm (lock, __LINE__, __FILE__);
 		locations.push_back (loc);
 
-		loc->changed.connect (mem_fun (*this, &Locations::location_changed));
-
 		if (make_current) {
 			current_location = loc;
 		}
@@ -525,7 +528,7 @@ Locations::remove (Location *loc)
 }
 
 void
-Locations::location_changed (Location* ignored)
+Locations::location_changed (Location* loc)
 {
 	save_state (X_("location changed"));
 	changed (); /* EMIT SIGNAL */

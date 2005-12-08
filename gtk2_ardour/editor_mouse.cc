@@ -2191,7 +2191,7 @@ Editor::start_tempo_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	Marker* marker;
 	TempoMarker* tempo_marker;
 
-	if ((marker = reinterpret_cast<Marker *> (item->get_data ("tempo_marker"))) == 0) {
+	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
@@ -4213,8 +4213,7 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 	if (!drag_info.first_move) {
 		drag_range_markerbar_op (item, event);
 
-		switch (range_marker_op)
-		{
+		switch (range_marker_op) {
 		case CreateRangeMarker:
 			begin_reversible_command (_("new range marker"));
 			session->add_undo (session->locations()->get_memento());

@@ -240,10 +240,8 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	unit_position -= shift;
 
-	group = &parent;
-	group->property_x() = unit_position;
-	group->property_y() = 1.0;
-	// cerr << "set mark al points, nc = " << points->num_points << endl;
+	group = new Group (parent, unit_position, 1.0);
+
 	mark = new Polygon (*group);
 	mark->property_points() = *points;
 	mark->property_fill_color_rgba() = rgba;

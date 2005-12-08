@@ -34,6 +34,7 @@
 #include <ardour/session.h>
 #include <ardour/tempo.h>
 #include <gtkmm2ext/doi.h>
+#include <gtkmm2ext/utils.h>
 
 #include "editor.h"
 #include "marker.h"
@@ -48,6 +49,7 @@ using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace Editing;
 
 void
@@ -247,9 +249,7 @@ Editor::mouse_add_new_tempo_event (jack_nframes_t frame)
 	TempoDialog tempo_dialog (map, frame, _("add"));
 	
 	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
-	// GTK2FIX
-	// tempo_dialog.realize ();
-	// tempo_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	tempo_dialog.signal_realize().connect (bind (sigc::ptr_fun (set_decoration), &tempo_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 
 	ensure_float (tempo_dialog);
 
@@ -289,9 +289,7 @@ Editor::mouse_add_new_meter_event (jack_nframes_t frame)
 	MeterDialog meter_dialog (map, frame, _("add"));
 
 	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
-	// GTK2FIX
-	// meter_dialog.realize ();
-	// meter_dialog.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	meter_dialog.signal_realize().connect (bind (sigc::ptr_fun (set_decoration), &meter_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 
 	ensure_float (meter_dialog);
 	

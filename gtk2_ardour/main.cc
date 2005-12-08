@@ -267,25 +267,10 @@ show_ui_callback (void *arg)
 	return FALSE;
 }
 
-gint
-jack_fooey (GdkEventAny* ignored)
-{
-	Main::quit ();
-	return FALSE;
-}
-
-void
-jack_foobar ()
-{
-	Main::quit ();
-}
-
 void
 gui_jack_error ()
 {
-	Window win (Gtk::WINDOW_POPUP);
-	VBox   vpacker;
-	Button ok (_("OK"));
+	ArdourDialog win (_("ardour: unplugged"));
 	Label label (_("Ardour could not connect to JACK.\n\
 There are several possible reasons:\n\
 \n\
@@ -294,24 +279,16 @@ There are several possible reasons:\n\
 3) There is already another client called \"ardour\".\n\
 \n\
 Please consider the possibilities, and perhaps (re)start JACK."));
-
-	vpacker.set_spacing (12);
-	vpacker.pack_start (label);
-	vpacker.pack_start (ok, false, false);
 	
-	win.set_title (_("ardour: unplugged"));
-	win.set_border_width (7);
-	win.add (vpacker);
+	win.get_vbox()->pack_start (label);
+	win.add_button (Stock::OK, RESPONSE_ACCEPT);
+	
 	win.show_all ();
-	win.signal_delete_event().connect (sigc::ptr_fun (jack_fooey));
-	win.add_events (Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK);
 	win.set_position (Gtk::WIN_POS_CENTER);
 
-	ok.signal_clicked().connect (sigc::ptr_fun (jack_foobar));
-	
-	ok.grab_focus ();
+	/* we just don't care about the result */
 
-	Main::run ();
+	win.run ();
 }
 
 int
@@ -475,14 +452,7 @@ To create it from the command line, start ardour as \"ardour --new %1"), path)
 		}
 	}
 
-	try {
-
-		ui->run (text_receiver);
-
-	} catch (...) {
-
-	}
-	
+	ui->run (text_receiver);
 	ui = 0;
 
   out:

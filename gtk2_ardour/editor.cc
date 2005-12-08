@@ -608,8 +608,10 @@ Editor::Editor (AudioEngine& eng)
 	the_notebook.append_page (named_selection_scroller, _("Chunks"));
 	the_notebook.set_show_tabs (true);
 
+	TearOff *notebook_tearoff = manage (new TearOff (the_notebook));
+
 	edit_pane.pack1 (edit_frame, true, true);
-	edit_pane.pack2 (the_notebook, true, true);
+	edit_pane.pack2 (*notebook_tearoff, true, true);
 
 	edit_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Gtk::Paned*> (&edit_pane)));
 
