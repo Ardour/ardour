@@ -21,7 +21,7 @@
 #ifndef __coreaudio_source_h__ 
 #define __coreaudio_source_h__
 
-#include <AudioToolbox/AudioFile.h>
+#include <AudioToolbox/ExtendedAudioFile.h>
 
 #include <ardour/source.h>
 
@@ -33,7 +33,7 @@ class CoreAudioSource : public Source {
 	CoreAudioSource (const XMLNode&);
 	~CoreAudioSource ();
 
-	jack_nframes_t length() const { return _info.frames; }
+	jack_nframes_t length() const { return _length; }
 	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
 	void           mark_for_remove() {} // we never remove external sndfiles 
 	string         peak_path(string audio_path);
@@ -45,7 +45,9 @@ class CoreAudioSource : public Source {
   private:
 	static string peak_dir;
 
-	AudioFileID sf;
+	ExtAudioFileRef*  af_ref;
+	uint16_t n_channels;
+
 	uint16_t channel;
 	mutable float *tmpbuf;
 	mutable jack_nframes_t tmpbufsize;

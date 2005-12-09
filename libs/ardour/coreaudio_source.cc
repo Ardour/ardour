@@ -61,7 +61,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	tmpbuf = 0;
 	tmpbufsize = 0;
-	sf = 0;
+	af_ref = 0;
 
 	_name = idstr;
 
@@ -79,25 +79,32 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 	if (err) {
 		throw failed_constructor();
 	}
-	err = AudioFileOpen (ref, fsCurPerm, 0, sf);
+	err = ExtAudioFileOpen (ref, af_ref);
 	if (err) {
 		throw failed_constructor();
 	}
 	
-	if (channel >= _info.channels) {
-		error << string_compose(_("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number"), _info.channels, channel) << endmsg;
-		sf_close (sf);
-		sf = 0;
+	if (channel >= n_channels) {
+		error << string_compose(_("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number"), n_channels, channel) << endmsg;
+		ExtAudioFileDispose(af_ref);
 		throw failed_constructor();
 	}
 
-	_length = _info.frames;
+	int64_t ca_frames;
+	size_t prop_size = sizeof(ca_frames);
+
+	err = ExtAudioFileGetProperty(af_ref, kExtAudioFileProperty_FileLengthFrames,
+			sizeof(ca_frames), &ca_frames);
+	if (err) {
+		throw failed_constructor();
+	}
+	_length = ca_frames;
+
 	_path = file;
 
 	if (build_peak) {
 		if (initialize_peakfile (false, file)) {
-			sf_close (sf);
-			sf = 0;
+			ExtAudioFileDispose(af_ref);
 			throw failed_constructor ();
 		}
 	}
@@ -108,8 +115,8 @@ CoreAudioSource::~CoreAudioSource ()
 {
 	 GoingAway (this); /* EMIT SIGNAL */
 
-	if (sf) {
-		sf_close (sf);
+	if (af_ref) {
+		ExtAudioFileDispose(af_ref);
 	}
 
 	if (tmpbuf) {
@@ -130,20 +137,20 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) co
 	float *ptr;
 	uint32_t real_cnt;
 
-	if (sf_seek (sf, (off_t) start, SEEK_SET) < 0) {
-		char errbuf[256];
-		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << string_compose(_("CoreAudioSource: could not seek to frame %1 within %2 (%3)"), start, _name.substr (1), errbuf) << endmsg;
+	OSStatus err = ExtAudioFileSeek(af_ref, start);
+	if (err) {
+		error << string_compose(_("CoreAudioSource: could not seek to frame %1 within %2"), start, _name.substr (1)) << endmsg;
 		return 0;
 	}
 
-	if (_info.channels == 1) {
-		jack_nframes_t ret = sf_read_float (sf, dst, cnt);
+	if (n_channels == 1) {
+		uint32_t ioNumber = cnt;
+		err = ExtAudioFileRead(af_ref, &ioNumber, dst);
 		_read_data_count = cnt * sizeof(float);
-		return ret;
+		return ioNumber;
 	}
 
-	real_cnt = cnt * _info.channels;
+	real_cnt = cnt * n_channels;
 
 	{
 		LockMonitor lm (_tmpbuf_lock, __LINE__, __FILE__);
@@ -157,15 +164,16 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) co
 			tmpbuf = new float[tmpbufsize];
 		}
 		
-		nread = sf_read_float (sf, tmpbuf, real_cnt);
+		nread = real_cnt;
+		err = ExtAudioFileRead(af_ext, &nread, tmpbuf);
 		ptr = tmpbuf + channel;
-		nread /= _info.channels;
+		nread /= n_channels;
 		
 		/* stride through the interleaved data */
 		
 		for (int32_t n = 0; n < nread; ++n) {
 			dst[n] = *ptr;
-			ptr += _info.channels;
+			ptr += n_channels;
 		}
 	}
 

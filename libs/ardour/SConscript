@@ -87,6 +87,7 @@ mix.cc
 arch_specific_objects = [ ]
 
 vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
+coreaudio_files = [ 'coreaudio_source.cc' ]
 extra_sources = [ ]
 
 if ardour['VST']:
@@ -159,6 +160,10 @@ if conf.CheckCHeader('sys/vfs.h'):
 if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
     ardour.Append(LINKFLAGS="-framework CoreMIDI")
 
+if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h'):
+	ardour.Append(LINKFLAGS="-framework AudioToolbox")
+	#extra_sources += coreaudio_files
+
 ardour = conf.Finish ()
 
 ardour.Merge ([
@@ -201,9 +206,9 @@ else:
 Default(libardour)
 
 if env['NLS']:
-	i18n (ardour, ardour_files + vst_files, env)
+	i18n (ardour, ardour_files + vst_files + coreaudio_files, env)
 	      
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions.s' ] +
-				     ardour_files + vst_files + 
+				     ardour_files + vst_files + coreaudio_files +
 				     glob.glob('po/*.po') + glob.glob('ardour/*.h')))
