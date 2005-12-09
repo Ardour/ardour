@@ -76,7 +76,10 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	  editor (ed),
 	  mixer (mixui),
 
-	  path_table (9, 2),
+	  /* Paths */
+	  path_table (11, 2),
+	  sfdb_paths(ListStore::create(sfdb_path_columns)),
+	  sfdb_path_view(sfdb_paths),
 
 	  /* Fades */
 
@@ -421,6 +424,13 @@ OptionEditor::setup_path_options()
 	label->set_name ("OptionsLabel");
 	path_table.attach (*label, 0, 1, 1, 2, FILL|EXPAND, FILL);
 	path_table.attach (native_format_combo, 1, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
+
+	label = manage(new Label(_("Soundfile Search Paths")));
+	label->set_name("OptionsLabel");
+	path_table.attach(*label, 0, 1, 2, 3, FILL|EXPAND, FILL);
+	path_table.attach(sfdb_path_view, 1, 3, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
+
+	sfdb_path_view.append_column(_("Paths"), sfdb_path_columns.paths);
 
 	vector<string> nfstrings = internationalize (native_format_strings);
 
