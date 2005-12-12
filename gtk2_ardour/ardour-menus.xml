@@ -85,4 +85,15 @@
 	 <menuitem action='edit'/>
       </popup>
 
+     <popup name='ShuttleUnitPopup'>
+	 <menuitem action='SetShuttleUnitsPercentage'/>
+	 <menuitem action='SetShuttleUnitsSemitones'/>
+     </popup>
+
+     <popup name='ShuttleStylePopup'>
+	 <menuitem action='SetShuttleActionSprung'/>
+	 <menuitem action='SetShuttleActionWheel'/>
+     </popup>
+
+
 </ui>
