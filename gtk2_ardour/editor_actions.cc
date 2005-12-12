@@ -89,8 +89,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, "set-playhead", _("set playhead"), mem_fun(*this, &Editor::kbd_set_playhead_cursor));
 	ActionManager::register_action (editor_actions, "set-edit-cursor", _("set edit cursor"), mem_fun(*this, &Editor::kbd_set_edit_cursor));
 
-	ActionManager::register_action (editor_actions, "set-undo", _("set undo"), bind (mem_fun(*this, &Editor::undo), 1U));
-	ActionManager::register_action (editor_actions, "set-redo", _("set redo"), bind (mem_fun(*this, &Editor::redo), 1U));
+	ActionManager::register_action (editor_actions, "undo", _("undo"), bind (mem_fun(*this, &Editor::undo), 1U));
+	ActionManager::register_action (editor_actions, "redo", _("redo"), bind (mem_fun(*this, &Editor::redo), 1U));
 
 	ActionManager::register_action (editor_actions, "export-session", _("export session"), mem_fun(*this, &Editor::export_session));
 	ActionManager::register_action (editor_actions, "export-range", _("export range"), mem_fun(*this, &Editor::export_selection));

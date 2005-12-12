@@ -155,7 +155,7 @@ Editor::route_display_selection_changed ()
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 	        tv = (*i)[route_display_columns.tv];
-		if (selection->is_selected (i)) {
+		if (!selection->is_selected (i)) {
 			tv->set_marked_for_display  (false);
 		} else {
 		        AudioTimeAxisView *atv;
@@ -225,7 +225,7 @@ Editor::route_list_reordered ()
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 	long order;
-int n;
+	int n;
 	
         for (n = 0, order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
 	        TimeAxisView *tv = (*i)[route_display_columns.tv];
@@ -250,7 +250,8 @@ int n;
 		n++;
 		
 	}
-	edit_controls_scroller.queue_resize ();
+
+	// controls_layout.queue_resize ();
 	reset_scrolling_region ();
 	return FALSE;
 }

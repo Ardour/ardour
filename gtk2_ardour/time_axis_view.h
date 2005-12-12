@@ -199,19 +199,19 @@ class TimeAxisView : public virtual AxisView
 	string controls_base_unselected_name;
 	string controls_base_selected_name;
 
-	/**
-	 * Handle mouse press on our LHS control name entry.
-	 *
-	 * @param ev the event
-	 */
-	virtual bool name_entry_button_press (GdkEventButton *ev);
+	bool name_entry_button_press (GdkEventButton *ev);
+	bool name_entry_button_release (GdkEventButton *ev);
+	bool name_entry_key_release (GdkEventKey *ev);
+	void name_entry_activated ();
+	sigc::connection name_entry_key_timeout;
+	bool name_entry_key_timed_out ();
+	guint32 last_name_entry_key_press_event;
+	
+	/* derived classes can override these */
 
-	/**
-	 * Handle mouse relaese on our LHS control name entry.
-	 * 
-	 *@ param ev the event
-	 */
-	virtual bool name_entry_button_release (GdkEventButton *ev);
+	virtual void name_entry_changed ();
+	virtual bool name_entry_focus_in (GdkEventFocus *ev);
+	virtual bool name_entry_focus_out (GdkEventFocus *ev);
 
 	/**
 	 * Handle mouse relaese on our LHS control name ebox.

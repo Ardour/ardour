@@ -511,6 +511,13 @@ style "track_name_display"
 	bg[ACTIVE] = { 0.26, 0.26, 0.26 }
 }
 
+style "active_track_name_display"
+{
+	font_name = "sans medium 10"
+	text[NORMAL] = { 0.26, 0.26, 0.26 }
+	base[NORMAL] = { 0.89, 0.89, 0.89 }
+}
+
 style "track_separator"
 {
 	bg[NORMAL] = { 0.40, 0.40, 0.40 }
@@ -993,6 +1000,8 @@ widget "*TrackEditIndicator6*" style "edit_group_3"
 widget "*TrackEditIndicator7*" style "edit_group_3"
 widget "*EditorTrackNameDisplay" style "track_name_display"
 widget "*EditorTrackNameDisplay*" style "track_name_display"
+widget "*EditorActiveTrackNameDisplay" style "active_track_name_display"
+widget "*EditorActiveTrackNameDisplay*" style "active_track_name_display"
 widget "*EditorRegionList" style "region_list_display"
 widget "*CrossfadeEditAuditionButton" style "red_when_active"
 widget "*CrossfadeEditAuditionButton*" style "red_when_active"

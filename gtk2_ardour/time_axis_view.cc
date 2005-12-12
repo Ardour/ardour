@@ -78,6 +78,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	effective_height = 0;
 	parent = rent;
 	_has_state = false;
+	last_name_entry_key_press_event = 0;
 
 	/*
 	  Create the standard LHS Controls
@@ -88,7 +89,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	name_entry.set_name ("EditorTrackNameDisplay");
 	name_entry.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::name_entry_button_release));
 	name_entry.signal_button_press_event().connect (mem_fun (*this, &TimeAxisView::name_entry_button_press));
-	
+	name_entry.signal_key_release_event().connect (mem_fun (*this, &TimeAxisView::name_entry_key_release));
+	name_entry.signal_activate().connect (mem_fun(*this, &TimeAxisView::name_entry_activated));
+	name_entry.signal_focus_in_event().connect (mem_fun (*this, &TimeAxisView::name_entry_focus_in));
+	name_entry.signal_focus_out_event().connect (mem_fun (*this, &TimeAxisView::name_entry_focus_out));
 	Gtkmm2ext::set_size_request_to_display_given_text (name_entry, N_("gTortnam"), 10, 10); // just represents a short name
 
 	name_label.set_name ("TrackLabel");
@@ -353,6 +357,86 @@ TimeAxisView::set_height (TrackHeight h)
 //		(*i)->set_height (h);
 //	}
 
+}
+
+bool
+TimeAxisView::name_entry_key_release (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+	case GDK_Tab:
+	case GDK_Up:
+	case GDK_Down:
+		name_entry_changed ();
+		return true;
+
+	default:
+		break;
+	}
+
+#ifdef TIMEOUT_NAME_EDIT	
+	/* adapt the timeout to reflect the user's typing speed */
+
+	guint32 name_entry_timeout;
+
+	if (last_name_entry_key_press_event) {
+		/* timeout is 1/2 second or 5 times their current inter-char typing speed */
+		name_entry_timeout = std::max (500U, (5 * (ev->time - last_name_entry_key_press_event)));
+	} else {
+		/* start with a 1 second timeout */
+		name_entry_timeout = 1000;
+	}
+
+	last_name_entry_key_press_event = ev->time;
+
+	/* wait 1 seconds and if no more keys are pressed, act as if they pressed enter */
+
+	name_entry_key_timeout.disconnect();
+	name_entry_key_timeout = Glib::signal_timeout().connect (mem_fun (*this, &TimeAxisView::name_entry_key_timed_out), name_entry_timeout);
+#endif
+
+	return false;
+}
+
+bool
+TimeAxisView::name_entry_focus_in (GdkEventFocus* ev)
+{
+	name_entry.select_region (0, -1);
+	name_entry.set_name ("EditorActiveTrackNameDisplay");
+	return false;
+}
+
+bool
+TimeAxisView::name_entry_focus_out (GdkEventFocus* ev)
+{
+	/* clean up */
+
+	last_name_entry_key_press_event = 0;
+	name_entry_key_timeout.disconnect ();
+	name_entry.set_name ("EditorTrackNameDisplay");
+	
+	/* do the real stuff */
+
+	name_entry_changed ();
+
+	return false;
+}
+
+bool
+TimeAxisView::name_entry_key_timed_out ()
+{
+	name_entry_activated();
+	return false;
+}
+
+void
+TimeAxisView::name_entry_activated ()
+{
+	controls_ebox.grab_focus();
+}
+
+void
+TimeAxisView::name_entry_changed ()
+{
 }
 
 bool

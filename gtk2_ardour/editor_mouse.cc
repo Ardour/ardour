@@ -242,7 +242,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	ignore_mouse_mode_toggle = false;
 
 	if (is_drawable()) {
-	        track_canvas_scroller.get_window()->set_cursor(*current_canvas_cursor);
+	        track_canvas.get_window()->set_cursor(*current_canvas_cursor);
 	}
 }
 
@@ -1141,7 +1141,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			show_verbose_canvas_cursor ();
 
 			if (is_drawable()) {
-			        track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
+			        track_canvas.get_window()->set_cursor (*fader_cursor);
 			}
 		}
 		break;
@@ -1165,7 +1165,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		show_verbose_canvas_cursor ();
 		
 		if (is_drawable()) {
-		        track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
+		        track_canvas.get_window()->set_cursor (*fader_cursor);
 		}
 		break;
 		
@@ -1175,7 +1175,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			if (line)
 				line->property_fill_color_rgba() = color_map[cEnteredGainLine];
 			if (is_drawable()) {
-				track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
+				track_canvas.get_window()->set_cursor (*fader_cursor);
 			}
 		}
 		break;
@@ -1189,13 +1189,13 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 				line->property_fill_color_rgba() = color_map[cEnteredAutomationLine];
 		}
 		if (is_drawable()) {
-			track_canvas_scroller.get_window()->set_cursor (*fader_cursor);
+			track_canvas.get_window()->set_cursor (*fader_cursor);
 		}
 		break;
 		
 	case AudioRegionViewNameHighlight:
 		if (is_drawable() && mouse_mode == MouseObject) {
-			track_canvas_scroller.get_window()->set_cursor (*trimmer_cursor);
+			track_canvas.get_window()->set_cursor (*trimmer_cursor);
 		}
 		break;
 
@@ -1209,14 +1209,14 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	/* </CMT Additions> */
 
 		if (is_drawable()) {
-			track_canvas_scroller.get_window()->set_cursor (*trimmer_cursor);
+			track_canvas.get_window()->set_cursor (*trimmer_cursor);
 		}
 		break;
 
 	case EditCursorItem:
 	case PlayheadCursorItem:
 		if (is_drawable()) {
-			track_canvas_scroller.get_window()->set_cursor (*grabber_cursor);
+			track_canvas.get_window()->set_cursor (*grabber_cursor);
 		}
 		break;
 
@@ -1226,7 +1226,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 		if (!reinterpret_cast<AudioRegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (mouse_mode == MouseObject && is_drawable()) {
-				track_canvas_scroller.get_window()->set_cursor (*trimmer_cursor);
+				track_canvas.get_window()->set_cursor (*trimmer_cursor);
 			}
 		} 
 		break;
@@ -1247,7 +1247,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 				break;
 			}
 
-			track_canvas_scroller.get_window()->set_cursor (*cursor);
+			track_canvas.get_window()->set_cursor (*cursor);
 
 			AutomationTimeAxisView* atv;
 			if ((atv = static_cast<AutomationTimeAxisView*>(item->get_data ("trackview"))) != 0) {
@@ -1263,7 +1263,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MeterBarItem:
 	case TempoBarItem:
 		if (is_drawable()) {
-			time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
+			time_canvas.get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 
@@ -1276,7 +1276,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MeterMarkerItem:
 	case TempoMarkerItem:
 		if (is_drawable()) {
-			time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
+			time_canvas.get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 	case FadeInHandleItem:
@@ -1345,7 +1345,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		
 		if (is_drawable()) {
-			track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 		}
 
 		hide_verbose_canvas_cursor ();
@@ -1363,7 +1363,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MarkerViewHandleEndItem:
 	/* </CMT Additions> */
 		if (is_drawable()) {
-			track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 		}
 		break;
 
@@ -1378,7 +1378,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 				line->property_fill_color_rgba() = al->get_line_color();
 		}
 		if (is_drawable()) {
-			track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 		}
 		break;
 
@@ -1386,7 +1386,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		/* see enter_handler() for notes */
 		if (!reinterpret_cast<AudioRegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (is_drawable() && mouse_mode == MouseObject) {
-				track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+				track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 			}
 		}
 		break;
@@ -1397,7 +1397,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case TempoBarItem:
 	case MarkerBarItem:
 		if (is_drawable()) {
-			time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
+			time_canvas.get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 		
@@ -1412,7 +1412,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case TempoMarkerItem:
 		
 		if (is_drawable()) {
-			time_canvas_scroller.get_window()->set_cursor (*timebar_cursor);
+			time_canvas.get_window()->set_cursor (*timebar_cursor);
 		}
 
 		break;
@@ -1431,7 +1431,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case AutomationTrackItem:
 		if (is_drawable()) {
-			track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 			clear_entered_track = true;
 			Glib::signal_idle().connect (mem_fun(*this, &Editor::left_automation_track));
 		}
@@ -3651,7 +3651,7 @@ Editor::drag_selection (ArdourCanvas::Item* item, GdkEvent* event)
 		break;
 	}
 	
-	if (event->button.x >= track_canvas_scroller.get_hadjustment()->get_value() + canvas_width) {
+	if (event->button.x >= horizontal_adjustment.get_value() + canvas_width) {
 		start_canvas_autoscroll (1);
 	}
 
@@ -4183,7 +4183,7 @@ Editor::drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 		break;		
 	}
 	
-	if (event->button.x >= track_canvas_scroller.get_hadjustment()->get_value() + canvas_width) {
+	if (event->button.x >= horizontal_adjustment.get_value() + canvas_width) {
 		start_canvas_autoscroll (1);
 	}
 	

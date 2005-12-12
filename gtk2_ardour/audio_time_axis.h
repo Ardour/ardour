@@ -178,11 +178,8 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 
 	void take_name_changed (void *);
 	void route_name_changed (void *);
-	void name_entry_activated ();
 	void name_entry_changed ();
-	gint name_entry_key_release_handler (GdkEventKey*);
-	gint name_entry_button_release_handler (GdkEventButton*);
-	gint name_entry_button_press_handler (GdkEventButton*);
+
 	void on_area_realize ();
 
 	virtual void label_view ();

@@ -150,12 +150,12 @@ class AudioClock : public Gtk::HBox
 
 	void on_realize ();
 	
-	gint field_motion_notify_event (GdkEventMotion *ev, Field);
-	gint field_button_press_event (GdkEventButton *ev, Field);
-	gint field_button_release_event (GdkEventButton *ev, Field);
-	gint field_key_release_event (GdkEventKey *, Field);
-	gint field_focus_in_event (GdkEventFocus *, Field);
-	gint field_focus_out_event (GdkEventFocus *, Field);
+	bool field_motion_notify_event (GdkEventMotion *ev, Field);
+	bool field_button_press_event (GdkEventButton *ev, Field);
+	bool field_button_release_event (GdkEventButton *ev, Field);
+	bool field_key_release_event (GdkEventKey *, Field);
+	bool field_focus_in_event (GdkEventFocus *, Field);
+	bool field_focus_out_event (GdkEventFocus *, Field);
 
 	void set_smpte (jack_nframes_t, bool);
 	void set_bbt (jack_nframes_t, bool);

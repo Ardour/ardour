@@ -435,14 +435,11 @@ Mixer_UI::show_strip (MixerStrip* ms)
 		
 		if (ms->route().master() || ms->route().control()) {
 			out_packer.pack_start (*ms, false, false);
-			cerr << "Packed master strip @ " << ms << endl;
 		} else {
-			 strip_packer.pack_start (*ms, false, false);
-			 cerr << "Packed strip @ " << ms << endl;
+			strip_packer.pack_start (*ms, false, false);
 		}
 		ms->set_packed (true);
 		ms->show ();
-
 	 }
  }
 

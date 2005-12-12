@@ -94,8 +94,10 @@ Editor::connect_to_image_compositor()
 void
 Editor::scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)
 {
-	jack_nframes_t offset = static_cast<jack_nframes_t>(frames_per_unit * (edit_hscroll_slider_width/2)) ;
-	
+	// GTK2FIX
+	//jack_nframes_t offset = static_cast<jack_nframes_t>(frames_per_unit * (edit_hscroll_slider_width/2)) ;
+	jack_nframes_t offset = 0;
+
 	jack_nframes_t x_pos = 0 ;
 	if(item->get_position() < offset)
 	{

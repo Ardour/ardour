@@ -730,8 +730,6 @@ Editor::marker_menu_rename ()
 	
 	Dialog dialog;
 	Entry  entry;
-	Button ok_button (_("OK"));
-	Button cancel_button (_("Cancel"));
 	
 	if (loc->is_mark()) {
 		dialog.set_title (_("ardour: rename mark"));
@@ -744,35 +742,24 @@ Editor::marker_menu_rename ()
 	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 
-	dialog.get_vbox()->set_border_width (10);
-	dialog.get_vbox()->pack_start (entry);
-	dialog.get_action_area()->pack_start (ok_button);
-	dialog.get_action_area()->pack_start (cancel_button);
+	dialog.add_action_widget (entry, RESPONSE_ACCEPT);
+	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
+	dialog.add_button (Stock::CANCEL, RESPONSE_ACCEPT);
 
 	entry.set_text (loc->name());
 	entry.set_name ("MarkerNameDisplay");
-	ok_button.set_name ("EditorGTKButton");
-	cancel_button.set_name ("EditorGTKButton");
-
-	entry.signal_activate().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
-	cancel_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), -1));
-	ok_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
-	dialog.signal_delete_event().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop_on_delete), -1));
 
 	dialog.show_all ();
 	entry.grab_focus ();
 
-	run_sub_event_loop ();
-
-	if (sub_event_loop_status == 1) {
-
-		Location* l;
-		bool is_start;
-
-		if ((l = find_location_from_marker (marker, is_start)) != 0) {
-			l->set_name (entry.get_text());
-		}
+	switch (dialog.run ()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
 	}
+
+	loc->set_name (entry.get_text());
 }
 
 gint

@@ -94,33 +94,6 @@ Editor::export_region ()
 	dialog->start_export();
 }
 
-void
-Editor::write_a_region ()
-{
-	if (clicked_regionview == 0) {
-		return;
-	}
-
-	FileSelection file_selector;
-
-	file_selector.get_selection_entry()->signal_activate().connect (sigc::bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
-	file_selector.get_cancel_button()->signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), -1));
-	file_selector.get_ok_button()->signal_clicked().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop), 1));
-	file_selector.signal_delete_event().connect (bind (mem_fun(*this, &Editor::finish_sub_event_loop_on_delete), -1));
-
-	file_selector.show_all();
-
-	run_sub_event_loop ();
-	
-	if (sub_event_loop_status == 1) {
-		string path = file_selector.get_filename();
-		printf ("got region: %s\n", path.c_str());
-		if (path.length()) {
-			write_region (path, clicked_regionview->region);
-		} 
-	}
-}
-
 int
 Editor::write_region_selection (AudioRegionSelection& regions)
 {

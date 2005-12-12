@@ -116,20 +116,6 @@ ImageFrameTimeAxis::~ImageFrameTimeAxis ()
 		image_action_menu = 0 ;
 	}
 	
-	for(list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i)
-	{
-		delete (*i)->rect;
-		delete (*i)->start_trim;
-		delete (*i)->end_trim;
-	}
-
-	for(list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i)
-	{
-		delete (*i)->rect;
-		delete (*i)->start_trim;
-		delete (*i)->end_trim;
-	}
-	
 	if (selection_group)
 	{
 		delete selection_group;

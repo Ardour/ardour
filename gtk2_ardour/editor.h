@@ -638,48 +638,20 @@ class Editor : public PublicEditor
 	Gtk::Frame          edit_frame;
 	Gtk::VScrollbar     edit_vscrollbar;
 
-	/* the horizontal scroller works in a rather different way
-	   than a regular scrollbar, since its used for
-	   zoom control/indication as well. But more importantly,
-	   its different components (slider, left arrow, right arrow) 
-	   have to be packed separately into the edit_packer.
-	*/
+	Gtk::Adjustment     vertical_adjustment;
+	Gtk::Adjustment     horizontal_adjustment;
+
+	Gtk::Layout         controls_layout;
 
 	Gtk::HScrollbar     edit_hscrollbar;
-	Gtk::DrawingArea    edit_hscroll_slider;
-	Gtk::Arrow          edit_hscroll_left_arrow;
-	Gtk::Arrow          edit_hscroll_right_arrow;
-	Gtk::EventBox       edit_hscroll_left_arrow_event;
-	Gtk::EventBox       edit_hscroll_right_arrow_event;
-	gint                edit_hscroll_slider_width;
-	gint                edit_hscroll_slider_height;
-	static const gint   edit_hscroll_edge_width = 3;
 	bool                edit_hscroll_dragging;
-	double              edit_hscroll_drag_last;
 	
-	void hscroll_slider_allocate (Gtk::Allocation &);
-	gint hscroll_slider_expose (GdkEventExpose*);
-	gint hscroll_slider_button_press (GdkEventButton*);
-	gint hscroll_slider_button_release (GdkEventButton*);
-	gint hscroll_slider_motion (GdkEventMotion*);
+	bool hscrollbar_button_press (GdkEventButton*);
+	bool hscrollbar_button_release (GdkEventButton*);
+	void hscrollbar_allocate (Gtk::Allocation &alloc);
 
-	gint hscroll_trough_expose (GdkEventExpose*);
-	gint hscroll_trough_button_press (GdkEventButton*);
-	gint hscroll_trough_button_release (GdkEventButton*);
-
-	void update_hscroller ();
-
-	gint hscroll_left_arrow_button_press (GdkEventButton *);
-	gint hscroll_left_arrow_button_release (GdkEventButton *);
-	gint hscroll_right_arrow_button_press (GdkEventButton *);
-	gint hscroll_right_arrow_button_release (GdkEventButton *);
-	
 	double canvas_width;
 	double canvas_height;
-
-	Gtk::ScrolledWindow  track_canvas_scroller;
-	Gtk::ScrolledWindow  time_canvas_scroller;
-	Gtk::ScrolledWindow  edit_controls_scroller;
 
 	bool track_canvas_map_handler (GdkEventAny*);
 	bool time_canvas_map_handler (GdkEventAny*);
@@ -1134,9 +1106,6 @@ class Editor : public PublicEditor
 
 	/* Canvas event handlers */
 
-	// FIXED FOR GTK2
-
-
 	bool canvas_control_point_event (GdkEvent* event,ArdourCanvas::Item*, ControlPoint*);
 	bool canvas_line_event (GdkEvent* event,ArdourCanvas::Item*, AutomationLine*);
 	bool canvas_selection_rect_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*);
@@ -1208,13 +1177,6 @@ class Editor : public PublicEditor
 	void reset_scrolling_region (Gtk::Allocation* alloc = 0);
 	void scroll_canvas ();
 
-        /* sub-event loop handling */
-
-        int32_t sub_event_loop_status;
-        void run_sub_event_loop ();
-        void finish_sub_event_loop (int status);
-        gint finish_sub_event_loop_on_delete (GdkEventAny*, int32_t status);
-	
 	/* display control */
 	
 	bool _show_measures;
@@ -1586,10 +1548,9 @@ class Editor : public PublicEditor
 	ExportDialog *export_dialog;
 	void export_range (jack_nframes_t start, jack_nframes_t end);
 
-	int write_region_selection(AudioRegionSelection&);
+	int  write_region_selection(AudioRegionSelection&);
 	bool write_region (string path, ARDOUR::AudioRegion&);
 	void export_region ();
-	void write_a_region ();
 	void bounce_region_selection ();
 	void bounce_range_selection ();
 	void external_edit_region ();
@@ -1808,6 +1769,8 @@ class Editor : public PublicEditor
 	
 	typedef std::map<Editing::ColorID,std::string> ColorStyleMap;
 	void init_colormap ();
+
+	bool on_key_press_event (GdkEventKey*);
 };
 
 #endif /* __ardour_editor_h__ */

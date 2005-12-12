@@ -34,10 +34,14 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 	Glib::RefPtr<Gdk::Window> evw = track_canvas.get_window()->get_pointer (x, y, mask);
 	bool doit = false;
 
+	cerr << "editor keyboard driver\n";
+
 	if (use_track_canvas && track_canvas_event_box.get_window()->get_pointer(x, y, mask) != 0) {
+		cerr << "in track canvas\n";
 		doit = true;
 
 	} else if (use_time_canvas && time_canvas_event_box.get_window()->get_pointer(x, y, mask)!= 0) {
+		cerr << "in time canvas\n";
 		doit = true;
 	}
 

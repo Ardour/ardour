@@ -520,7 +520,7 @@ Editor::update_ruler_visibility ()
 
 	lab_children.clear();
 
-	// leave the last one (the time_canvas_scroller) intact
+	// leave the last one (the time_canvas) intact
 	while (ruler_children.size() > 1) {
 		ruler_children.pop_front();
 	}

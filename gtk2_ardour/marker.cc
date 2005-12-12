@@ -246,6 +246,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	mark->property_points() = *points;
 	mark->property_fill_color_rgba() = rgba;
 	mark->property_outline_color() = "black";
+	mark->property_width_pixels() = 1;
 
 	Pango::FontDescription font = get_font_for_style (N_("MarkerText"));
 

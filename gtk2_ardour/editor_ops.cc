@@ -973,8 +973,7 @@ Editor::scroll_tracks_down ()
 		cnt = (int) floor (prefix);
 	}
 
-	Gtk::Adjustment *adj = track_canvas_scroller.get_vadjustment();
-	adj->set_value (adj->get_value() + (cnt * adj->get_page_size()));
+	vertical_adjustment.set_value (vertical_adjustment.get_value() + (cnt * vertical_adjustment.get_page_size()));
 }
 
 void
@@ -990,8 +989,7 @@ Editor::scroll_tracks_up ()
 		cnt = (int) floor (prefix);
 	}
 
-	Gtk::Adjustment *adj = track_canvas_scroller.get_vadjustment();
-	adj->set_value (adj->get_value() - (cnt * adj->get_page_size()));
+	vertical_adjustment.set_value (vertical_adjustment.get_value() - (cnt * vertical_adjustment.get_page_size()));
 }
 
 void
@@ -2101,7 +2099,7 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 		}
 	}
 
-	track_canvas_scroller.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
 
 	/* make the proper number of channels in the region */
@@ -2149,7 +2147,7 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 	}
 
   out:
-	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 }
 
 void
@@ -2287,7 +2285,7 @@ Editor::insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jac
 		return;
 	}
 
-	track_canvas_scroller.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
 
 	/* make the proper number of channels in the region */
@@ -2330,7 +2328,7 @@ Editor::insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jac
 	}
 
   out:
-	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 	return;
 }
 
@@ -2918,7 +2916,7 @@ Editor::freeze_route ()
 
 	pthread_create (&itt.thread, 0, _freeze_thread, this);
 
-	track_canvas_scroller.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
@@ -2927,7 +2925,7 @@ Editor::freeze_route ()
 	interthread_progress_connection.disconnect ();
 	interthread_progress_window->hide_all ();
 	current_interthread_info = 0;
-	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 }
 
 void
@@ -3458,7 +3456,7 @@ Editor::normalize_region ()
 
 	begin_reversible_command (_("normalize"));
 
-	track_canvas_scroller.get_window()->set_cursor (*wait_cursor);
+	track_canvas.get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
 	for (AudioRegionSelection::iterator r = selection->audio_regions.begin(); r != selection->audio_regions.end(); ++r) {
@@ -3468,7 +3466,7 @@ Editor::normalize_region ()
 	}
 
 	commit_reversible_command ();
-	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 }
 
 
@@ -3515,7 +3513,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 
 	begin_reversible_command (command);
 
-	track_canvas_scroller.get_window()->set_cursor (*wait_cursor);
+	track_canvas.get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
 	for (AudioRegionSelection::iterator r = selection->audio_regions.begin(); r != selection->audio_regions.end(); ) {
@@ -3544,7 +3542,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 	selection->audio_regions.clear ();
 
   out:
-	track_canvas_scroller.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 }
 
 void

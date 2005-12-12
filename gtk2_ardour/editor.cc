@@ -147,6 +147,66 @@ Gdk::Cursor* Editor::speaker_cursor = 0;
 Gdk::Cursor* Editor::wait_cursor = 0;
 Gdk::Cursor* Editor::timebar_cursor = 0;
 
+bool
+Editor::on_key_press_event (GdkEventKey* ev)
+{
+	GtkWindow* win = gobj();
+
+	/* This exists to allow us to override the way GTK handles
+	   key events. The normal sequence is:
+
+	   a) event is delivered to a GtkWindow
+	   b) accelerators/mnemonics are activated
+	   c) if (b) didn't handle the event, propagate to
+	       the focus widget and/or focus chain
+
+	   The problem with this is that if the accelerators include
+	   keys without modifiers, such as the space bar or the 
+	   letter "e", then pressing the key while typing into
+	   a text entry widget results in the accelerator being
+	   activated, instead of the desired letter appearing
+	   in the text entry.
+
+	   There is no good way of fixing this, but this
+	   represents a compromise. The idea is that 
+	   key events involving modifiers (not Shift)
+	   get routed into the activation pathway first, then
+	   get propagated to the focus widget if necessary.
+	   
+	   If the key event doesn't involve modifiers,
+	   we deliver to the focus widget first, thus allowing
+	   it to get "normal text" without interference
+	   from acceleration.
+
+	   Of course, this can also be problematic: if there
+	   is a widget with focus, then it will swallow
+	   all "normal text" accelerators.
+	*/
+
+	if (ev->state & ~Gdk::SHIFT_MASK) {
+		/* modifiers in effect, accelerate first */
+		if (!gtk_window_activate_key (win, ev)) {
+			return gtk_window_propagate_key_event (win, ev);
+		} else {
+			return true;
+		} 
+	}
+	
+	/* no modifiers, propagate first */
+	
+	if (!gtk_window_propagate_key_event (win, ev)) {
+		return gtk_window_activate_key (win, ev);
+	} 
+
+	return true;
+}
+
+void
+show_me_the_size (Requisition* r, const char* what)
+{
+	cerr << "size of " << what << " = " << r->width << " x " << r->height << endl;
+}
+
 Editor::Editor (AudioEngine& eng) 
 	: engine (eng),
 
@@ -163,8 +223,13 @@ Editor::Editor (AudioEngine& eng)
 	  transport_mark_label (_("Loop/Punch Ranges")),
 
 	  edit_packer (3, 3, false),
-	  edit_hscroll_left_arrow (Gtk::ARROW_LEFT, Gtk::SHADOW_OUT),
-	  edit_hscroll_right_arrow (Gtk::ARROW_RIGHT, Gtk::SHADOW_OUT),
+
+	  /* the values here don't matter: layout widgets
+	     reset them as needed.
+	  */
+
+	  vertical_adjustment (0.0, 0.0, 400.0, 10),
+	  horizontal_adjustment (0.0, 0.0, 1200.0, 20),
 
 	  /* tool bar related */
 
@@ -262,6 +327,7 @@ Editor::Editor (AudioEngine& eng)
 	_xfade_visibility = true;
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
+	edit_hscroll_dragging = false;
 	edit_group_list_menu = 0;
 	route_list_menu = 0;
 	region_list_menu = 0;
@@ -277,7 +343,6 @@ Editor::Editor (AudioEngine& eng)
 	region_edit_menu_split_item = 0;
 	temp_location = 0;
 	region_edit_menu_split_multichannel_item = 0;
-	edit_hscroll_dragging = false;
 	leftmost_frame = 0;
 	ignore_mouse_mode_toggle = false;
 	current_stepping_trackview = 0;
@@ -309,45 +374,30 @@ Editor::Editor (AudioEngine& eng)
 	initialize_rulers ();
 	initialize_canvas ();
 
-	track_canvas_scroller.add (track_canvas);
-	track_canvas_scroller.set_policy (POLICY_NEVER, POLICY_NEVER);
-	track_canvas_scroller.set_name ("TrackCanvasScroller");
-
-	track_canvas_scroller.get_vadjustment()->signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling));
-	track_canvas_scroller.get_vadjustment()->set_step_increment (10.0);
-
-	track_canvas_scroller.get_hadjustment()->set_lower (0.0);
-	track_canvas_scroller.get_hadjustment()->set_upper (1200.0);
-	track_canvas_scroller.get_hadjustment()->set_step_increment (20.0);
-	track_canvas_scroller.get_hadjustment()->signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled));
-
-	edit_vscrollbar.set_adjustment(*track_canvas_scroller.get_vadjustment());
-	edit_hscrollbar.set_adjustment(*track_canvas_scroller.get_hadjustment());
-
- 	edit_hscrollbar.signal_button_press_event().connect (mem_fun(*this, &Editor::hscroll_slider_button_press));
- 	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscroll_slider_button_release));
- 	edit_hscrollbar.signal_size_allocate().connect (mem_fun(*this, &Editor::hscroll_slider_allocate));
-	
-	time_canvas_scroller.add (time_canvas);
-	time_canvas_scroller.set_policy (POLICY_NEVER, POLICY_NEVER);
-	time_canvas_scroller.set_hadjustment (*track_canvas_scroller.get_hadjustment());
-	time_canvas_scroller.set_name ("TimeCanvasScroller");
-
-	track_canvas_scroller.signal_map_event().connect (mem_fun (*this, &Editor::track_canvas_map_handler));
-	time_canvas_scroller.signal_map_event().connect (mem_fun (*this, &Editor::time_canvas_map_handler));
-	
 	edit_controls_vbox.set_spacing (track_spacing);
-	edit_controls_hbox.pack_start (edit_controls_vbox, true, true);
-	edit_controls_scroller.add (edit_controls_hbox);
-	edit_controls_scroller.set_name ("EditControlsBase");
-	edit_controls_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
+	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled));
+	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling));
+	
+	track_canvas.set_hadjustment (horizontal_adjustment);
+	track_canvas.set_vadjustment (vertical_adjustment);
+	time_canvas.set_hadjustment (horizontal_adjustment);
 
-	Viewport* viewport = static_cast<Viewport*> (edit_controls_scroller.get_child());
+	track_canvas.signal_map_event().connect (mem_fun (*this, &Editor::track_canvas_map_handler));
+	time_canvas.signal_map_event().connect (mem_fun (*this, &Editor::time_canvas_map_handler));
+	
+	// edit_controls_hbox.pack_start (edit_controls_vbox, true, true);
+	controls_layout.add (edit_controls_vbox);
+	controls_layout.set_name ("EditControlsBase");
+	
+	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+	controls_layout.signal_button_release_event().connect (mem_fun(*this, &Editor::edit_controls_button_release));
 
-	viewport->set_shadow_type (Gtk::SHADOW_NONE);
-	viewport->set_name ("EditControlsBase");
-	viewport->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
-	viewport->signal_button_release_event().connect (mem_fun(*this, &Editor::edit_controls_button_release));
+	edit_vscrollbar.set_adjustment (vertical_adjustment);
+	edit_hscrollbar.set_adjustment (horizontal_adjustment);
+
+ 	edit_hscrollbar.signal_button_press_event().connect (mem_fun(*this, &Editor::hscrollbar_button_press));
+ 	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscrollbar_button_release));
+ 	edit_hscrollbar.signal_size_allocate().connect (mem_fun(*this, &Editor::hscrollbar_allocate));
 
 	build_cursors ();
 	setup_toolbar ();
@@ -358,7 +408,7 @@ Editor::Editor (AudioEngine& eng)
 	time_canvas_vbox.pack_start (*smpte_ruler, false, false);
 	time_canvas_vbox.pack_start (*frames_ruler, false, false);
 	time_canvas_vbox.pack_start (*bbt_ruler, false, false);
-	time_canvas_vbox.pack_start (time_canvas_scroller, true, true);
+	time_canvas_vbox.pack_start (time_canvas, true, true);
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
 
 	bbt_label.set_name ("EditorTimeButton");
@@ -416,25 +466,24 @@ Editor::Editor (AudioEngine& eng)
 	   for the canvas areas.
 	*/
 
-	track_canvas_event_box.add (track_canvas_scroller);
+	track_canvas_event_box.add (track_canvas);
 
 	time_canvas_event_box.add (time_canvas_vbox);
 	time_canvas_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
-
 	
 	edit_packer.set_col_spacings (0);
 	edit_packer.set_row_spacings (0);
 	edit_packer.set_homogeneous (false);
 	edit_packer.set_name ("EditorWindow");
 
- 	edit_packer.attach (edit_hscrollbar,            1, 2, 0, 1,    FILL|EXPAND,  FILL, 0, 0);
+ 	edit_packer.attach (edit_hscrollbar,         1, 2, 0, 1,    FILL|EXPAND,  FILL, 0, 0);
 
-	edit_packer.attach (time_button_event_box,          0, 1, 1, 2,    FILL, FILL, 0, 0);
-	edit_packer.attach (time_canvas_event_box,          1, 2, 1, 2,    FILL|EXPAND, FILL, 0, 0);
+	edit_packer.attach (time_button_event_box,   0, 1, 1, 2,    FILL,        FILL, 0, 0);
+	edit_packer.attach (time_canvas_event_box,   1, 2, 1, 2,    FILL|EXPAND, FILL, 0, 0);
 
-	edit_packer.attach (edit_controls_scroller,         0, 1, 2, 3,    FILL,FILL, 0, 0);
-	edit_packer.attach (track_canvas_event_box,         1, 2, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
-	edit_packer.attach (edit_vscrollbar,                2, 3, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
+	edit_packer.attach (controls_layout,         0, 1, 2, 3,    FILL,        FILL, 0, 0);
+	edit_packer.attach (track_canvas_event_box,  1, 2, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	edit_packer.attach (edit_vscrollbar,         2, 3, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
 
 	edit_frame.set_name ("BaseFrame");
 	edit_frame.set_shadow_type (SHADOW_IN);
@@ -761,9 +810,9 @@ Editor::show_window ()
 void
 Editor::tie_vertical_scrolling ()
 {
-	edit_controls_scroller.get_vadjustment()->set_value (track_canvas_scroller.get_vadjustment()->get_value());
+	double y1 = vertical_adjustment.get_value();
+	controls_layout.get_vadjustment()->set_value (y1);
 
-	float y1 = track_canvas_scroller.get_vadjustment()->get_value();
 	playhead_cursor->set_y_axis(y1);
 	edit_cursor->set_y_axis(y1);
 }
@@ -804,12 +853,11 @@ Editor::set_frames_per_unit (double fpu)
 	*/
 	
 	if (session) {
-		track_canvas_scroller.get_hadjustment()->set_upper (session->current_end_frame() / frames_per_unit);
+		horizontal_adjustment.set_upper (session->current_end_frame() / frames_per_unit);
 	}
 	
 	if (!no_zoom_repos_update) {
-		track_canvas_scroller.get_hadjustment()->set_value (leftmost_frame/frames_per_unit);
-		update_hscroller ();
+		horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
 		update_fixed_rulers ();
 		tempo_map_changed (Change (0));
 	}
@@ -849,10 +897,10 @@ Editor::reposition_x_origin (jack_nframes_t frame)
 	if (frame != leftmost_frame) {
 		leftmost_frame = frame;
 		double pixel = frame_to_pixel (frame);
-		if (pixel >= track_canvas_scroller.get_hadjustment()->get_upper()) {
-			track_canvas_scroller.get_hadjustment()->set_upper (frame_to_pixel (frame + (current_page_frames())));
+		if (pixel >= horizontal_adjustment.get_upper()) {
+			horizontal_adjustment.set_upper (frame_to_pixel (frame + (current_page_frames())));
 		}
-		track_canvas_scroller.get_hadjustment()->set_value (frame/frames_per_unit);
+		horizontal_adjustment.set_value (frame/frames_per_unit);
 		XOriginChanged (); /* EMIT_SIGNAL */
 	}
 }
@@ -889,14 +937,8 @@ Editor::zoom_adjustment_changed ()
 void 
 Editor::canvas_horizontally_scrolled ()
 {
-	/* XXX note the potential loss of accuracy here caused by
-	   adjustments being 32bit floats with only a 24 bit mantissa,
-	   whereas jack_nframes_t is at least a 32 bit uint32_teger.
-	*/
+	leftmost_frame = (jack_nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 	
-	leftmost_frame = (jack_nframes_t) floor (track_canvas_scroller.get_hadjustment()->get_value() * frames_per_unit);
-	
-	update_hscroller ();
 	update_fixed_rulers ();
 	
 	if (!edit_hscroll_dragging) {
@@ -1060,11 +1102,9 @@ Editor::handle_new_duration ()
 	reset_scrolling_region ();
 
 	if (session) {
-		track_canvas_scroller.get_hadjustment()->set_upper (session->current_end_frame() / frames_per_unit);
-		track_canvas_scroller.get_hadjustment()->set_value (leftmost_frame/frames_per_unit);
+		horizontal_adjustment.set_upper (session->current_end_frame() / frames_per_unit);
+		horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
 	}
-	
-	update_hscroller ();
 }
 
 void
@@ -1231,10 +1271,9 @@ Editor::connect_to_session (Session *t)
 
 	leftmost_frame = 0;
 	
-	track_canvas_scroller.get_hadjustment()->set_upper (session->current_end_frame() / frames_per_unit);
-	track_canvas_scroller.get_hadjustment()->set_value (0);
+	horizontal_adjustment.set_upper (session->current_end_frame() / frames_per_unit);
+	horizontal_adjustment.set_value (0);
 
-	update_hscroller ();
 	restore_ruler_visibility ();
 	tempo_map_changed (Change (0));
 
@@ -2047,8 +2086,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	set_default_size(width, height);
-	// GTK2FIX
-	// set_position(x, y-yoff);
+	move (x, y-yoff);
 
 	if ((prop = node.property ("zoom-focus"))) {
 		set_zoom_focus ((ZoomFocus) atoi (prop->value()));
@@ -3584,27 +3622,6 @@ Editor::point_selection_changed ()
 	}
 }
 
-void
-Editor::run_sub_event_loop ()
-{
-	sub_event_loop_status = 0;
-	Main::run ();
-}
-
-void
-Editor::finish_sub_event_loop (int status)
-{
-	Main::quit ();
-	sub_event_loop_status = status;
-}
-
-gint
-Editor::finish_sub_event_loop_on_delete (GdkEventAny *ignored, int32_t status)
-{
-	finish_sub_event_loop (status);
-	return TRUE;
-}
-
 gint
 Editor::mouse_select_button_release (GdkEventButton* ev)
 {
@@ -3816,7 +3833,7 @@ void
 Editor::end_location_changed (Location* location)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::end_location_changed), location));
-	track_canvas_scroller.get_hadjustment()->set_upper (location->end() / frames_per_unit);
+	horizontal_adjustment.set_upper (location->end() / frames_per_unit);
 }
 
 int

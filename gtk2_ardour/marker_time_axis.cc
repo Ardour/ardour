@@ -92,27 +92,7 @@ MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Canvas&
  */
 MarkerTimeAxis::~MarkerTimeAxis()
 {
-	 GoingAway() ; /* EMIT_SIGNAL */
-
-	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i)
-	{
-		delete (*i)->rect;
-		delete (*i)->start_trim;
-		delete (*i)->end_trim;
-	}
-
-	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i)
-	{
-		delete (*i)->rect;
-		delete (*i)->start_trim;
-		delete (*i)->end_trim;
-	}
-	
-	if(selection_group)
-	{
-		delete selection_group;
-		selection_group = 0 ;
-	}
+	GoingAway() ; /* EMIT_SIGNAL */
 
 	// destroy the view helper
 	// this handles removing and destroying individual marker items

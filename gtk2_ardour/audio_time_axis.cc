@@ -168,11 +168,6 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	visual_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::visual_click));
 	hide_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::hide_click));
 
-	name_entry.signal_activate().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_activated));
-	name_entry.signal_button_press_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_press_handler));
-	name_entry.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_button_release_handler));
-	name_entry.signal_key_release_event().connect (mem_fun(*this, &AudioTimeAxisView::name_entry_key_release_handler));
-	
 	if (is_audio_track()) {
 		controls_table.attach (*rec_enable_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	}
@@ -1088,45 +1083,6 @@ AudioTimeAxisView::playlist () const
 	} else {
 		return 0; 
 	}
-}
-
-gint 
-AudioTimeAxisView::name_entry_button_press_handler (GdkEventButton *ev)
-{
-	if (ev->button == 3) {
-		return stop_signal (name_entry, "button_press_event");
-	}
-	return FALSE;
-}
-
-gint 
-AudioTimeAxisView::name_entry_button_release_handler (GdkEventButton *ev)
-{
-	return FALSE;
-}
-
-gint
-AudioTimeAxisView::name_entry_key_release_handler (GdkEventKey* ev)
-{
-	switch (ev->keyval) {
-	case GDK_Tab:
-	case GDK_Up:
-	case GDK_Down:
-		name_entry_changed ();
-		return TRUE;
-
-	default:
-		return FALSE;
-	}
-}
-
-void
-AudioTimeAxisView::name_entry_activated ()
-{
-	/* this should drop focus from the entry,
-	   and cause a call to name_entry_changed()
-	*/
-	controls_ebox.grab_focus();
 }
 
 void
