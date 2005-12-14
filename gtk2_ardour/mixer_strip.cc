@@ -365,8 +365,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	_route.comment_changed.connect (mem_fun(*this, &MixerStrip::comment_changed));
 	_route.gui_changed.connect (mem_fun(*this, &MixerStrip::route_gui_changed));
 
-	input_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::input_press));
-	output_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::output_press));
+	input_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::input_press), false);
+	output_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::output_press), false);
 
 	rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
 	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press));
@@ -374,21 +374,21 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press));
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release));
 
-	gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event));
-	gain_automation_style_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event));
-	pan_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event));
-	pan_automation_style_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event));
+	gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event), false);
+	gain_automation_style_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event), false);
+	pan_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event), false);
+	pan_automation_style_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event), false);
 
-	gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event));
-	gain_automation_state_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event));
-	pan_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event));
-	pan_automation_state_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event));
+	gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event), false);
+	gain_automation_state_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event), false);
+	pan_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event), false);
+	pan_automation_state_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event), false);
 
 	polarity_button.signal_toggled().connect (mem_fun(*this, &MixerStrip::polarity_toggled));
 
-	name_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::name_button_button_release));
+	name_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::name_button_button_release), false);
 
-	group_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::select_mix_group));
+	group_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::select_mix_group), false);
 
 	_width = (Width) -1;
 	set_stuff_from_route ();
