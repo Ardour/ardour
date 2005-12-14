@@ -142,8 +142,6 @@ class IOSelectorWindow : public ArdourDialog
   private:
 	IOSelector _selector;
 
-	Gtk::VBox vbox;
-
 	/* overall operation buttons */
 
 	Gtk::Button ok_button;

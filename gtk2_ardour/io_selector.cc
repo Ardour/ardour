@@ -83,8 +83,8 @@ IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can
 		
 	button_box.pack_start (ok_button);
 
-	vbox.pack_start (_selector);
-	vbox.pack_start (button_box, false, false);
+	get_vbox()->pack_start (_selector);
+	get_vbox()->pack_start (button_box, false, false);
 
 	ok_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::accept));
 	cancel_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::cancel));
@@ -92,7 +92,6 @@ IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can
 
 	set_title (title);
 	set_position (WIN_POS_MOUSE);
-	add (vbox);
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }
@@ -406,6 +405,12 @@ IOSelector::display_ports ()
 			ScrolledWindow *scroller;
 			string really_short_name;
 			
+			if (for_input) {
+				port = io.input (n);
+			} else {
+				port = io.output (n);
+			}
+			
 			/* we know there is '/' because we put it there */
 
 			really_short_name = port->short_name();
@@ -476,7 +481,7 @@ IOSelector::display_ports ()
 
 			/* handle button events on the column header and within the treeview itself */
 
-			col->get_widget()->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_column_button_release), tview));
+			//col->get_widget()->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_column_button_release), tview));
 			tview->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::connection_button_release), tview));		
 		}
 
