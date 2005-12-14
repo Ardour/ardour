@@ -340,7 +340,7 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
      * @param start the start point of this item
      * @param duration the duration of this item
      */
-    TimeAxisViewItem(std::string it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
+    TimeAxisViewItem(ARDOUR::stringcr_t it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
 		     jack_nframes_t start, jack_nframes_t duration, Visibility v = Visibility (0));
     
     /**
