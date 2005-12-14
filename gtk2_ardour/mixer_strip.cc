@@ -365,7 +365,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	_route.comment_changed.connect (mem_fun(*this, &MixerStrip::comment_changed));
 	_route.gui_changed.connect (mem_fun(*this, &MixerStrip::route_gui_changed));
 
-	input_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::input_press));
+	input_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::input_press));
 	output_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::output_press));
 
 	rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
@@ -628,7 +628,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 	citems.push_back (SeparatorElem());
 
 	_session.foreach_connection (this, &MixerStrip::add_connection_to_input_menu);
-
+	cerr << "input_press() called" << endl;
 	input_menu.popup (1, ev->time);
 
 	return TRUE;
