@@ -192,7 +192,7 @@ class TimeAxisView : public virtual AxisView
 
 	/* call this on the parent */
 
-	virtual XMLNode* get_child_xml_node (std::string childname) { return 0; }
+	virtual XMLNode* get_child_xml_node (ARDOUR::stringcr_t childname) { return 0; }
 
   protected:
 

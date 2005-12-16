@@ -17,7 +17,7 @@
 using namespace std;
 using namespace ARDOUR;
 
-AudioRegionGainLine::AudioRegionGainLine (string name, Session& s, AudioRegionView& r, ArdourCanvas::Group& parent, Curve& c)
+AudioRegionGainLine::AudioRegionGainLine (stringcr_t name, Session& s, AudioRegionView& r, ArdourCanvas::Group& parent, Curve& c)
   : AutomationLine (name, r.get_time_axis_view(), parent, c),
 	  session (s),
 	  rv (r)

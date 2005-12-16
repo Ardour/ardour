@@ -1118,7 +1118,7 @@ Editor::temporal_zoom_session ()
 }
 
 void
-Editor::temporal_zoom_by_frame (jack_nframes_t start, jack_nframes_t end, string op)
+Editor::temporal_zoom_by_frame (jack_nframes_t start, jack_nframes_t end, stringcr_t op)
 {
 	if (!session) return;
 
@@ -1970,7 +1970,7 @@ Editor::do_import (vector<string> paths, bool split, bool as_tracks)
 }
 
 int
-Editor::reject_because_rate_differs (string path, SF_INFO& finfo, string action, bool multiple_pending)
+Editor::reject_because_rate_differs (stringcr_t path, SF_INFO& finfo, stringcr_t action, bool multiple_pending)
 {
 	if (!session) {
 		return 1;
@@ -2260,7 +2260,7 @@ Editor::do_insert_sndfile (vector<string> paths, bool split, jack_nframes_t pos)
 }
 
 void
-Editor::insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jack_nframes_t& pos, bool prompt)
+Editor::insert_sndfile_into (stringcr_t path, bool multi, AudioTimeAxisView* tv, jack_nframes_t& pos, bool prompt)
 {
 	SndFileSource *source = 0; /* keep g++ quiet */
 	AudioRegion::SourceList sources;

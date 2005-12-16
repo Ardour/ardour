@@ -56,7 +56,7 @@ sigc::signal<void,ImageFrameView*> ImageFrameView::GoingAway;
  * @param height the width of the origianl rgb_data image data
  * @param num_channels the number of color channels within rgb_data
  */
-ImageFrameView::ImageFrameView(std::string item_id,
+ImageFrameView::ImageFrameView(stringcr_t item_id,
 	ArdourCanvas::Group *parent,
 	ImageFrameTimeAxis* tv,
 	ImageFrameTimeAxisGroup* item_group,
@@ -307,7 +307,7 @@ ImageFrameView::add_marker_view_item(MarkerView* item, void* src)
  * @return the removed marker item
  */
 MarkerView*
-ImageFrameView::remove_named_marker_view_item(std::string markerId, void* src)
+ImageFrameView::remove_named_marker_view_item(stringcr_t markerId, void* src)
 {
 	MarkerView* mv = 0 ;
 	MarkerViewList::iterator i = marker_view_list.begin() ;
@@ -359,11 +359,11 @@ ImageFrameView::remove_marker_view_item(MarkerView* mv, void* src)
  * @param markId the id/name of the item to search for
  */
 bool
-ImageFrameView::has_marker_view_item(std::string mname)
+ImageFrameView::has_marker_view_item(stringcr_t mname)
 {
 	bool result = false ;
 	
-	for (MarkerViewList::iterator ci = marker_view_list.begin(); ci != marker_view_list.end(); ++ci)
+	for (MarkerViewList::const_iterator ci = marker_view_list.begin(); ci != marker_view_list.end(); ++ci)
 	{
 		if (((MarkerView*)*ci)->get_item_name() == mname)
 		{

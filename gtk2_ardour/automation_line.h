@@ -97,7 +97,7 @@ class ControlPoint
 class AutomationLine : public sigc::trackable
 {
   public:
-        AutomationLine (string name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);
+        AutomationLine (ARDOUR::stringcr_t name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);
 	virtual ~AutomationLine ();
 
 	void queue_reset ();

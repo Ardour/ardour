@@ -106,9 +106,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void show_splash ();
 	void hide_splash ();
 	
-	int load_session (string path, string snapshot, string* mix_template = 0);
+	int load_session (ARDOUR::stringcr_t path, ARDOUR::stringcr_t snapshot, string* mix_template = 0);
 	bool session_loaded;
-	int build_session (string path, string snapshot, 
+	int build_session (ARDOUR::stringcr_t path, ARDOUR::stringcr_t snapshot, 
 			   uint32_t ctl_chns, 
 			   uint32_t master_chns,
 			   ARDOUR::Session::AutoConnectOption input_connect,
@@ -129,12 +129,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	}
 
 	void new_session(bool startup = false, std::string path = string());
-	gint cmdline_new_session (std::string path);
+	gint cmdline_new_session (string path);
 	int  unload_session ();
 	void close_session() { unload_session(); }
 
 	int  save_state_canfail (string state_name = "");
-	void save_state (string state_name = "");
+	void save_state (ARDOUR::stringcr_t state_name = "");
 	void restore_state (string state_name = "");
 
 	static double gain_to_slider_position (ARDOUR::gain_t g);
@@ -286,7 +286,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void shutdown ();
 
 	void finish();
-	int  ask_about_saving_session (string why);
+	int  ask_about_saving_session (ARDOUR::stringcr_t why);
 	gint ask_about_save_deleted (GdkEventAny*);
 	void save_session_choice_made (int);
 	int  save_the_session;
@@ -630,7 +630,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::MenuItem *cleanup_item;
 
-	void display_cleanup_results (ARDOUR::Session::cleanup_report& rep, const gchar* list_title, string msg);
+	void display_cleanup_results (ARDOUR::Session::cleanup_report& rep, const gchar* list_title, ARDOUR::stringcr_t msg);
 	void cleanup ();
 	void flush_trash ();
 

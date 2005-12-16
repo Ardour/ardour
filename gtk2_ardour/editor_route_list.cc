@@ -85,7 +85,7 @@ Editor::handle_new_route (Route& route)
 }
 
 void
-Editor::handle_gui_changes (string what, void *src)
+Editor::handle_gui_changes (stringcr_t what, void *src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_gui_changes), what, src));
 	

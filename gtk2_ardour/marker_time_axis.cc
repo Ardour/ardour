@@ -57,7 +57,7 @@ using namespace Gtk;
  * @param name the name/id of this time axis
  * @param tav the associated track view that this MarkerTimeAxis is marking up
  */
-MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas, std::string name, TimeAxisView* tav)
+MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas, stringcr_t name, TimeAxisView* tav)
 	: AxisView(sess),
 	  VisualTimeAxis(name, ed, sess, canvas)
 {

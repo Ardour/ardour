@@ -226,7 +226,7 @@ ARDOUR_UI::toggle_options_window ()
 {
 	if (option_editor == 0) {
 		option_editor = new OptionEditor (*this, *editor, *mixer);
-		option_editor->signal_unmap().connect(sigc::bind (ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleOptionsEditor")));
+		option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleOptionsEditor")));
 		option_editor->set_session (session);
 	} 
 
@@ -252,7 +252,7 @@ ARDOUR_UI::create_location_ui ()
 	if (location_ui == 0) {
 		location_ui = new LocationUI ();
 		location_ui->set_session (session);
-		location_ui->signal_unmap().connect (sigc::bind (ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleLocations")));
+		location_ui->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleLocations")));
 	}
 	return 0;
 }
@@ -277,7 +277,7 @@ ARDOUR_UI::create_route_params ()
 	if (route_params == 0) {
 		route_params = new RouteParams_UI (*engine);
 		route_params->set_session (session);
-		route_params->signal_unmap().connect (sigc::bind(ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleInspector")));
+		route_params->signal_unmap().connect (sigc::bind(sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleInspector")));
 	}
 	return 0;
 }
@@ -302,7 +302,7 @@ ARDOUR_UI::create_sound_file_browser ()
 	if (sfdb == 0) {
 		sfdb = new SoundFileBrowser (_("Sound File Browser"));
 		sfdb->set_session (session);
-		sfdb->signal_unmap().connect (sigc::bind(ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleSoundFileBrowser")));
+		sfdb->signal_unmap().connect (sigc::bind(sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleSoundFileBrowser")));
 	}
 	return 0;
 }

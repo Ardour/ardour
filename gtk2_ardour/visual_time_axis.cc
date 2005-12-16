@@ -83,7 +83,7 @@ static const gchar* small_x_xpm[] = {
  * @param sess the current session
  * @param canvas the parent canvas object
  */
-VisualTimeAxis::VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas)
+VisualTimeAxis::VisualTimeAxis(stringcr_t name, PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas)
 	: AxisView(sess),
 	  TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas),
 	  visual_button (_("v")),
@@ -141,7 +141,7 @@ VisualTimeAxis::~VisualTimeAxis()
 // Name/Id Accessors/Mutators
 
 void
-VisualTimeAxis::set_time_axis_name(std::string name, void* src)
+VisualTimeAxis::set_time_axis_name(stringcr_t name, void* src)
 {
 	std::string old_name = time_axis_name ;
 	
@@ -249,15 +249,15 @@ VisualTimeAxis::choose_time_axis_color()
 	bool picked ;
 	Gdk::Color color ;
 	gdouble current[4] ;
-	Gdk::Color* current_color ;
+	Gdk::Color current_color ;
 	
 	current[0] = _color.get_red() / 65535.0 ;
 	current[1] = _color.get_green() / 65535.0 ;
 	current[2] = _color.get_blue() / 65535.0 ;
 	current[3] = 1.0 ;
 
-	current_color->set_rgb_p (current[0],current[1],current[2]);
-	color = Gtkmm2ext::UI::instance()->get_color(_("ardour: color selection"),picked, current_color) ;
+	current_color.set_rgb_p (current[0],current[1],current[2]);
+	color = Gtkmm2ext::UI::instance()->get_color(_("ardour: color selection"),picked, &current_color) ;
 	
 	if (picked)
 	{

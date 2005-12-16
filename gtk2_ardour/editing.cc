@@ -19,7 +19,7 @@ namespace Editing {
 #undef SNAPTYPE
 #define SNAPTYPE(s) if (!strcmp(type, #s)) {return s;}
 SnapType
-str2snaptype (string str) {
+str2snaptype (ARDOUR::stringcr_t str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return SnapToBar;
@@ -31,7 +31,7 @@ str2snaptype (string str) {
 #undef SNAPMODE
 #define SNAPMODE(s) if (!strcmp(type, #s)) {return s;}
 SnapMode
-str2snapmode (string str) {
+str2snapmode (ARDOUR::stringcr_t str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return SnapNormal;
@@ -43,7 +43,7 @@ str2snapmode (string str) {
 #undef REGIONLISTSORTTYPE
 #define REGIONLISTSORTTYPE(s) if (!strcmp(type, #s)) {return s;}
 RegionListSortType
-str2regionlistsorttype (string str) {
+str2regionlistsorttype (ARDOUR::stringcr_t str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return ByName;
@@ -55,7 +55,7 @@ str2regionlistsorttype (string str) {
 #undef MOUSEMODE
 #define MOUSEMODE(s) if (!strcmp(type, #s)) {return s;}
 MouseMode
-str2mousemode (string str) {
+str2mousemode (ARDOUR::stringcr_t str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return MouseObject;
@@ -67,7 +67,7 @@ str2mousemode (string str) {
 #undef ZOOMFOCUS
 #define ZOOMFOCUS(s) if (!strcmp(type, #s)) {return s;}
 ZoomFocus
-str2zoomfocus (string str) {
+str2zoomfocus (ARDOUR::stringcr_t str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return ZoomFocusPlayhead;
@@ -79,7 +79,7 @@ str2zoomfocus (string str) {
 #undef DISPLAYCONTROL
 #define DISPLAYCONTROL(s) if (!strcmp(type, #s)) {return s;}
 DisplayControl
-str2displaycontrol (string str) {
+str2displaycontrol (ARDOUR::stringcr_t str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return FollowPlayhead;
@@ -91,7 +91,7 @@ str2displaycontrol (string str) {
 #undef COLORID
 #define COLORID(s) if (!strcmp(type, #s)) {return s;}
 ColorID
-str2color_id (string str) {
+str2color_id (ARDOUR::stringcr_t str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return cFrameHandleEndOutline;

@@ -48,7 +48,7 @@ using namespace Gtk;
 /* <CMT Additions file="editor.cc"> */
 
 void
-Editor::add_imageframe_time_axis(std::string track_name, void* src)
+Editor::add_imageframe_time_axis(ARDOUR::stringcr_t track_name, void* src)
 {
 	// check for duplicate name
 	if(get_named_time_axis(track_name))
@@ -112,7 +112,7 @@ Editor::scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)
 }
 
 void
-Editor::add_imageframe_marker_time_axis(std::string track_name, TimeAxisView* marked_track, void* src)
+Editor::add_imageframe_marker_time_axis(ARDOUR::stringcr_t track_name, TimeAxisView* marked_track, void* src)
 {
 	// Can we only bind 2 data Items?
 	// @todo we really want to bind the src attribute too, for the moment tracks can only be added remotely,
@@ -153,11 +153,11 @@ Editor::popup_marker_time_axis_edit_menu(int button, int32_t time, ArdourCanvas:
 }
 
 TimeAxisView*
-Editor::get_named_time_axis(std::string name)
+Editor::get_named_time_axis(ARDOUR::stringcr_t name)
 {
 	TimeAxisView* tav = 0 ;
 	
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i)
+	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i)
 	{
 		if (((TimeAxisView*)*i)->name() == name)
 		{
@@ -1095,7 +1095,7 @@ Editor::markerview_end_handle_end_trim (ArdourCanvas::Item* item, GdkEvent* even
 /* <CMT Additions file="editor_route_list.cc"> */
 
 void
-Editor::handle_new_imageframe_time_axis_view(std::string track_name, void* src)
+Editor::handle_new_imageframe_time_axis_view(ARDOUR::stringcr_t track_name, void* src)
 {
 	ImageFrameTimeAxis* iftav ;
 	iftav = new ImageFrameTimeAxis(track_name, *this, *session, track_canvas) ;
@@ -1113,7 +1113,7 @@ Editor::handle_new_imageframe_time_axis_view(std::string track_name, void* src)
 }
 
 void
-Editor::handle_new_imageframe_marker_time_axis_view(std::string track_name, TimeAxisView* marked_track)
+Editor::handle_new_imageframe_marker_time_axis_view(ARDOUR::stringcr_t track_name, TimeAxisView* marked_track)
 {
 	MarkerTimeAxis* mta = new MarkerTimeAxis (*this, *this->current_session(), track_canvas, track_name, marked_track) ;
 	((ImageFrameTimeAxis*)marked_track)->add_marker_time_axis(mta, this) ;

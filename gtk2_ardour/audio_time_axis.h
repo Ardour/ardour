@@ -123,7 +123,7 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	list<TimeAxisView*>get_child_list();
 
 	void set_state (const XMLNode&);
-	XMLNode* get_child_xml_node (std::string childname);
+	XMLNode* get_child_xml_node (ARDOUR::stringcr_t childname);
 
   private:
 	friend class StreamView;

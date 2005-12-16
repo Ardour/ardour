@@ -85,7 +85,7 @@ class VisualTimeAxis : public TimeAxisView
 		 * @param name the new name of this TimeAxis
 		 * @param src the identity of the object that initiated the change
 		 */
-		virtual void set_time_axis_name(std::string name, void* src) ;
+		virtual void set_time_axis_name(ARDOUR::stringcr_t name, void* src) ;
 
 		
 		//---------------------------------------------------------------------------------------//
@@ -114,7 +114,7 @@ class VisualTimeAxis : public TimeAxisView
 		/**
 		 * Emitted when we have changed the gui, and what we have shanged
 		 */
-		sigc::signal<void,string,void*> gui_changed ;
+		sigc::signal<void,ARDOUR::stringcr_t,void*> gui_changed ;
 		
 		/**
 		 * Emitted when this Visual Time Axis has been removed
@@ -123,12 +123,12 @@ class VisualTimeAxis : public TimeAxisView
 		 * the destructor, this allows us to capture the source of the deletion
 		 * event
 		 */
-		sigc::signal<void,std::string,void*> VisualTimeAxisRemoved ;
+		sigc::signal<void,ARDOUR::stringcr_t,void*> VisualTimeAxisRemoved ;
 		
 		/**
 		 * Emitted when we have changed the name of this TimeAxis
 		 */
-		sigc::signal<void,std::string,std::string,void*> NameChanged ;
+		sigc::signal<void,ARDOUR::stringcr_t,ARDOUR::stringcr_t,void*> NameChanged ;
 
 		/**
 		 * Emitted when this time axis has been selected for removal
@@ -146,7 +146,7 @@ class VisualTimeAxis : public TimeAxisView
 		 * @param sess the current session
 		 * @param canvas the parent canvas object
 		 */
-		VisualTimeAxis(std::string name, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
+		VisualTimeAxis(ARDOUR::stringcr_t name, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
 		
 		
 		//---------------------------------------------------------------------------------------//

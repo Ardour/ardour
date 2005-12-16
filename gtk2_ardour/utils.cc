@@ -105,7 +105,7 @@ short_version (string orig, string::size_type target_length)
 }
 
 string
-fit_to_pixels (string str, int pixel_width, string font)
+fit_to_pixels (ARDOUR::stringcr_t str, int pixel_width, ARDOUR::stringcr_t font)
 {
 	Label foo;
 	int width;

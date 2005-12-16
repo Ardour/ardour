@@ -141,11 +141,11 @@ class Editor : public PublicEditor
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () { return mouse_mode; }
 
-	void add_imageframe_time_axis(std::string track_name, void*) ;
-	void add_imageframe_marker_time_axis(std::string track_name, TimeAxisView* marked_track, void*) ;
+	void add_imageframe_time_axis(ARDOUR::stringcr_t track_name, void*) ;
+	void add_imageframe_marker_time_axis(ARDOUR::stringcr_t track_name, TimeAxisView* marked_track, void*) ;
 	void connect_to_image_compositor() ;
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
-	TimeAxisView* get_named_time_axis(std::string name) ;
+	TimeAxisView* get_named_time_axis(ARDOUR::stringcr_t name) ;
 	/* </CMT Additions> */
 
 	void consider_auditioning (ARDOUR::Region&);
@@ -485,8 +485,8 @@ class Editor : public PublicEditor
 	
 	bool track_canvas_motion (GdkEvent*);
 
-	void set_verbose_canvas_cursor (string, double x, double y);
-	void set_verbose_canvas_cursor_text (string);
+	void set_verbose_canvas_cursor (ARDOUR::stringcr_t, double x, double y);
+	void set_verbose_canvas_cursor_text (ARDOUR::stringcr_t);
 	void show_verbose_canvas_cursor();
 	void hide_verbose_canvas_cursor();
 
@@ -742,7 +742,7 @@ class Editor : public PublicEditor
 
 	void name_selection();
 	void named_selection_name_chosen ();
-	void create_named_selection (string);
+	void create_named_selection (ARDOUR::stringcr_t);
 	void paste_named_selection (float times);
 
 	void handle_new_named_selection ();
@@ -894,7 +894,7 @@ class Editor : public PublicEditor
 	void temporal_zoom_selection ();
 	void temporal_zoom_session ();
 	void temporal_zoom (gdouble scale);
-	void temporal_zoom_by_frame (jack_nframes_t start, jack_nframes_t end, string op);
+	void temporal_zoom_by_frame (jack_nframes_t start, jack_nframes_t end, ARDOUR::stringcr_t op);
 	void temporal_zoom_to_frame (bool coarser, jack_nframes_t frame);
 
 	void amplitude_zoom (gdouble scale);
@@ -905,14 +905,14 @@ class Editor : public PublicEditor
 
 	void insert_sndfile (bool as_tracks);
 	void embed_audio ();    // inserts into region list
-	int  reject_because_rate_differs (string path, SF_INFO& finfo, string action, bool multiple_pending);
+	int  reject_because_rate_differs (ARDOUR::stringcr_t path, SF_INFO& finfo, ARDOUR::stringcr_t action, bool multiple_pending);
 
 	void do_embed_sndfiles (vector<string> paths, bool split);
 	void embed_sndfile (string path, bool split, bool multiple_files, bool& check_sr);
 
 	void do_insert_sndfile (vector<string> path, bool multi, jack_nframes_t frame);
 	void insert_paths_as_new_tracks (std::vector<std::string> paths, bool multi); // inserts files as new tracks
-	void insert_sndfile_into (string path, bool multi, AudioTimeAxisView* tv, jack_nframes_t& frame, bool prompt=true);
+	void insert_sndfile_into (ARDOUR::stringcr_t path, bool multi, AudioTimeAxisView* tv, jack_nframes_t& frame, bool prompt=true);
 	static void* _insert_sndfile_thread (void*);
 	void*  insert_sndfile_thread (void*);
 
@@ -999,11 +999,11 @@ class Editor : public PublicEditor
 	Editing::SnapMode snap_mode;
 	double snap_threshold;
 
-	void soundfile_chosen_for_insert (string selection, bool split_channels);
-	void soundfile_chosen_for_embed (string selection, bool split_channels);
-	void soundfile_chosen_for_import (string selection, bool split_channels);
+	void soundfile_chosen_for_insert (ARDOUR::stringcr_t selection, bool split_channels);
+	void soundfile_chosen_for_embed (ARDOUR::stringcr_t selection, bool split_channels);
+	void soundfile_chosen_for_import (ARDOUR::stringcr_t selection, bool split_channels);
 
-	void handle_gui_changes (string, void *);
+	void handle_gui_changes (ARDOUR::stringcr_t, void *);
 
 	void    hide_all_tracks (bool with_select);
 
@@ -1572,11 +1572,11 @@ class Editor : public PublicEditor
 	UndoHistory visual_history;
 	UndoCommand current_visual_command;
 
-	void begin_reversible_visual_command (string cmd_name);
+	void begin_reversible_visual_command (ARDOUR::stringcr_t cmd_name);
 	void commit_reversible_visual_command ();
 
 	void update_title ();	
-	void update_title_s (string snapshot_name);
+	void update_title_s (ARDOUR::stringcr_t snapshot_name);
 
 	struct State {
 	    Selection* selection;
@@ -1676,8 +1676,8 @@ class Editor : public PublicEditor
 	bool _xfade_visibility;
 	
 	/* <CMT Additions> */
-	void handle_new_imageframe_time_axis_view(std::string track_name, void* src) ;
-	void handle_new_imageframe_marker_time_axis_view(std::string track_name, TimeAxisView* marked_track) ;
+	void handle_new_imageframe_time_axis_view(ARDOUR::stringcr_t track_name, void* src) ;
+	void handle_new_imageframe_marker_time_axis_view(ARDOUR::stringcr_t track_name, TimeAxisView* marked_track) ;
 
 	void start_imageframe_grab(ArdourCanvas::Item*, GdkEvent*) ;
 	void start_markerview_grab(ArdourCanvas::Item*, GdkEvent*) ;

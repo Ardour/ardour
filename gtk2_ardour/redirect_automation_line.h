@@ -35,7 +35,7 @@ class TimeAxisView;
 class RedirectAutomationLine : public AutomationLine
 {
   public:
-	RedirectAutomationLine (string name, ARDOUR::Redirect&, uint32_t port, ARDOUR::Session&, TimeAxisView&, 
+	RedirectAutomationLine (ARDOUR::stringcr_t name, ARDOUR::Redirect&, uint32_t port, ARDOUR::Session&, TimeAxisView&, 
 				ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
 	
 	uint32_t port() const { return _port; }

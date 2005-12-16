@@ -35,9 +35,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 				PublicEditor&,
 				TimeAxisView& parent,
 				ArdourCanvas::Canvas& canvas,
-				std::string name, /* translatable */
-				std::string state_name, /* not translatable */
-				std::string plug_name = "");
+				ARDOUR::stringcr_t name, /* translatable */
+				ARDOUR::stringcr_t state_name, /* not translatable */
+				ARDOUR::stringcr_t plug_name = "");
 
 	~AutomationTimeAxisView();
 	

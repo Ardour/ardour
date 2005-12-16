@@ -28,6 +28,7 @@
 
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <jack/jack.h>
+#include <ardour/types.h>
 #include "imageframe_time_axis_view.h"
 
 class PublicEditor ;
@@ -53,7 +54,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 * @param iftav the parent ImageFrameTimeAxis of this view helper
 		 * @param group_id the unique name/id of this group
 		 */
-		ImageFrameTimeAxisGroup(ImageFrameTimeAxisView& iftav, std::string group_id) ;
+		ImageFrameTimeAxisGroup(ImageFrameTimeAxisView& iftav, ARDOUR::stringcr_t group_id) ;
 		
 		/**
 		 * Destructor
@@ -72,7 +73,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 * @param new_name the new name of this group
 		 * @param src the identity of the object that initiated the change
 		 */
-		void set_group_name(std::string new_name, void* src) ;
+		void set_group_name(ARDOUR::stringcr_t new_name, void* src) ;
 
 		/**
 		 * Returns the id of this group
@@ -138,7 +139,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 * @param num_channels the number of channles within the rgb_data
 		 * @param src the identity of the object that initiated the change
 		 */
-		ImageFrameView* add_imageframe_item(std::string item_id, jack_nframes_t start, jack_nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src) ;
+		ImageFrameView* add_imageframe_item(ARDOUR::stringcr_t item_id, jack_nframes_t start, jack_nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src) ;
 		
 		/**
 		 * Returns the named ImageFrameView or 0 if the named view does not exist on this view helper
@@ -146,7 +147,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 * @param item_id the unique id of the item to search for
 		 * @return the named ImageFrameView, or 0 if it is not held upon this view
 		 */
-		ImageFrameView* get_named_imageframe_item(std::string item_id) ;
+		ImageFrameView* get_named_imageframe_item(ARDOUR::stringcr_t item_id) ;
 		
 		/**
 		 * Removes the currently selected ImageFrameView
@@ -163,7 +164,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @see add_imageframe_view
 		 */
-		ImageFrameView* remove_named_imageframe_item(std::string item_id, void* src) ;
+		ImageFrameView* remove_named_imageframe_item(ARDOUR::stringcr_t item_id, void* src) ;
 		
 		/**
 		 * Removes ifv from the list of ImageFrameViews upon this TimeAxis.
@@ -253,7 +254,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		sigc::signal<void, ImageFrameView*, void*> ImageFrameAdded ;
 		
 		/** Emitted when an ImageFrameView is removed from this group */
-		sigc::signal<void, std::string&, std::string&, std::string&, void*> ImageFrameRemoved ;
+		sigc::signal<void, ARDOUR::stringcr_t, ARDOUR::stringcr_t, ARDOUR::stringcr_t, void*> ImageFrameRemoved ;
 		
 	protected:
 

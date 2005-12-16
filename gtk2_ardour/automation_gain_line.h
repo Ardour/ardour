@@ -15,7 +15,7 @@ class TimeAxisView;
 class AutomationGainLine : public AutomationLine
 {
   public:
-  AutomationGainLine (string name, ARDOUR::Session&, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::Curve&);
+	AutomationGainLine (ARDOUR::stringcr_t name, ARDOUR::Session&, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::Curve&);
 	
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);

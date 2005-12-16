@@ -1108,7 +1108,7 @@ Editor::handle_new_duration ()
 }
 
 void
-Editor::update_title_s (string snap_name)
+Editor::update_title_s (stringcr_t snap_name)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::update_title_s), snap_name));
 	
@@ -3419,7 +3419,7 @@ Editor::hide_verbose_canvas_cursor ()
 }
 
 void
-Editor::set_verbose_canvas_cursor (string txt, double x, double y)
+Editor::set_verbose_canvas_cursor (stringcr_t txt, double x, double y)
 {
 	/* XXX get origin of canvas relative to root window,
 	   add x and y and check compared to gdk_screen_{width,height}
@@ -3430,7 +3430,7 @@ Editor::set_verbose_canvas_cursor (string txt, double x, double y)
 }
 
 void
-Editor::set_verbose_canvas_cursor_text (string txt)
+Editor::set_verbose_canvas_cursor_text (stringcr_t txt)
 {
 	verbose_canvas_cursor->property_text() = txt.c_str();
 }

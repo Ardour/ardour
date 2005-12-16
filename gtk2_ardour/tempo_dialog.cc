@@ -12,7 +12,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
 
-TempoDialog::TempoDialog (TempoMap& map, jack_nframes_t frame, string action)
+TempoDialog::TempoDialog (TempoMap& map, jack_nframes_t frame, stringcr_t action)
 	: ArdourDialog ("tempo dialog"),
 	  bpm_frame (_("Beats per minute")),
 	  ok_button (action),
@@ -29,7 +29,7 @@ TempoDialog::TempoDialog (TempoMap& map, jack_nframes_t frame, string action)
 	init (when, tempo.beats_per_minute(), true);
 }
 
-TempoDialog::TempoDialog (TempoSection& section, string action)
+TempoDialog::TempoDialog (TempoSection& section, stringcr_t action)
 	: ArdourDialog ("tempo dialog"),
 	  bpm_frame (_("Beats per minute")),
 	  ok_button (action),
@@ -129,7 +129,7 @@ TempoDialog::get_bbt_time (BBT_Time& requested)
 }
 
 
-MeterDialog::MeterDialog (TempoMap& map, jack_nframes_t frame, string action)
+MeterDialog::MeterDialog (TempoMap& map, jack_nframes_t frame, stringcr_t action)
 	: ArdourDialog ("meter dialog"),
 	  note_frame (_("Meter denominator")),
 	  bpb_frame (_("Beats per bar")),
@@ -147,7 +147,7 @@ MeterDialog::MeterDialog (TempoMap& map, jack_nframes_t frame, string action)
 	init (when, meter.beats_per_bar(), meter.note_divisor(), true);
 }
 
-MeterDialog::MeterDialog (MeterSection& section, string action)
+MeterDialog::MeterDialog (MeterSection& section, stringcr_t action)
 	: ArdourDialog ("meter dialog"),
 	  note_frame (_("Meter denominator")),
 	  bpb_frame (_("Beats per bar")),

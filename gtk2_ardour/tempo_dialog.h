@@ -33,8 +33,8 @@ struct TempoDialog : public ArdourDialog
     Gtk::Frame   when_frame;
     char buf[64];
     
-    TempoDialog (ARDOUR::TempoMap&, jack_nframes_t, string action);
-    TempoDialog (ARDOUR::TempoSection&, string action);
+    TempoDialog (ARDOUR::TempoMap&, jack_nframes_t, ARDOUR::stringcr_t action);
+    TempoDialog (ARDOUR::TempoSection&, ARDOUR::stringcr_t action);
 
     double get_bpm ();
     bool   get_bbt_time (ARDOUR::BBT_Time&);
@@ -64,8 +64,8 @@ struct MeterDialog : public ArdourDialog
     Gtk::Frame   when_frame;
     char buf[64];
     
-    MeterDialog (ARDOUR::TempoMap&, jack_nframes_t, string action);
-    MeterDialog (ARDOUR::MeterSection&, string action);
+    MeterDialog (ARDOUR::TempoMap&, jack_nframes_t, ARDOUR::stringcr_t action);
+    MeterDialog (ARDOUR::MeterSection&, ARDOUR::stringcr_t action);
 
     double get_bpb ();
     double get_note_type ();

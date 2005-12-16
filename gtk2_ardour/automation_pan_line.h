@@ -15,7 +15,7 @@ class TimeAxisView;
 class AutomationPanLine : public AutomationLine
 {
   public:
-	AutomationPanLine (string name, ARDOUR::Session&, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::Curve&);
+	AutomationPanLine (ARDOUR::stringcr_t name, ARDOUR::Session&, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::Curve&);
 	
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);

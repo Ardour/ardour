@@ -35,8 +35,8 @@ static const gchar * small_x_xpm[] = {
 "           "};
 
 AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& rent, 
-						ArdourCanvas::Canvas& canvas, std::string nom, 
-						std::string state_name, std::string nomparent)
+						ArdourCanvas::Canvas& canvas, stringcr_t nom, 
+						stringcr_t state_name, stringcr_t nomparent)
 
 	: AxisView (s), 
 	  TimeAxisView (s, e, &rent, canvas),
