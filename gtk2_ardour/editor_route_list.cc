@@ -227,8 +227,8 @@ Editor::route_list_reordered ()
 	long order;
 	int n;
 	
-        for (n = 0, order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
-	        TimeAxisView *tv = (*i)[route_display_columns.tv];
+	for (n = 0, order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
+		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		AudioTimeAxisView* at; 
 		if (!ignore_route_list_reorder) {
 			

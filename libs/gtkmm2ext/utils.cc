@@ -35,10 +35,10 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *
 
 {
 	int height = 0;
-        int width = 0;
+	int width = 0;
 
 	w.ensure_style ();
-        w.create_pango_layout(text)->get_pixel_size (width, height);
+	w.create_pango_layout(text)->get_pixel_size (width, height);
 
 	height += vpadding;
 	width += hpadding;

@@ -161,10 +161,10 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press));
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release));
 	rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
- 	edit_group_button.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::edit_click));
+ 	edit_group_button.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::edit_click), false);
 	playlist_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::playlist_click));
 	automation_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::automation_click));
-	size_button.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::size_click));
+	size_button.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::size_click), false);
 	visual_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::visual_click));
 	hide_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::hide_click));
 

@@ -642,6 +642,7 @@ class Editor : public PublicEditor
 	Gtk::Adjustment     horizontal_adjustment;
 
 	Gtk::Layout         controls_layout;
+	void set_layout_width(Gtk::Requisition *);
 
 	Gtk::HScrollbar     edit_hscrollbar;
 	bool                edit_hscroll_dragging;

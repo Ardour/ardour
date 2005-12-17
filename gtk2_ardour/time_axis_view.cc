@@ -185,7 +185,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
 	gdouble ix1, ix2, iy1, iy2;
 	effective_height = 0;
-
+	
 	if (control_parent) {
 		control_parent->reorder_child (controls_frame, nth);
 	} else {
@@ -193,10 +193,9 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 		parent->pack_start (controls_frame, false, false);
 		parent->reorder_child (controls_frame, nth);
 	}
-
 	controls_frame.show ();
 	controls_ebox.show ();
-
+	
 	/* the coordinates used here are in the system of the
 	   item's parent ...
 	*/

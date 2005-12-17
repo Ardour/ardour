@@ -388,6 +388,7 @@ Editor::Editor (AudioEngine& eng)
 	// edit_controls_hbox.pack_start (edit_controls_vbox, true, true);
 	controls_layout.add (edit_controls_vbox);
 	controls_layout.set_name ("EditControlsBase");
+	controls_layout.signal_size_request().connect (mem_fun(*this, &Editor::set_layout_width), false);
 	
 	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	controls_layout.signal_button_release_event().connect (mem_fun(*this, &Editor::edit_controls_button_release));
@@ -476,12 +477,12 @@ Editor::Editor (AudioEngine& eng)
 	edit_packer.set_homogeneous (false);
 	edit_packer.set_name ("EditorWindow");
 
- 	edit_packer.attach (edit_hscrollbar,         1, 2, 0, 1,    FILL|EXPAND,  FILL, 0, 0);
+	edit_packer.attach (edit_hscrollbar,         1, 2, 0, 1,    FILL|EXPAND,  FILL, 0, 0);
 
 	edit_packer.attach (time_button_event_box,   0, 1, 1, 2,    FILL,        FILL, 0, 0);
 	edit_packer.attach (time_canvas_event_box,   1, 2, 1, 2,    FILL|EXPAND, FILL, 0, 0);
 
-	edit_packer.attach (controls_layout,         0, 1, 2, 3,    FILL,        FILL, 0, 0);
+	edit_packer.attach (controls_layout,         0, 1, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
 	edit_packer.attach (track_canvas_event_box,  1, 2, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 	edit_packer.attach (edit_vscrollbar,         2, 3, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
 
@@ -3922,4 +3923,13 @@ Editor::transport_punch_location()
 	} else {
 		return 0;
 	}
+}
+
+void
+Editor::set_layout_width(Gtk::Requisition *r)
+{
+	edit_controls_vbox.check_resize();
+	int w = edit_controls_vbox.get_width();
+	cerr << "set_layout_width() called w = " << w << endl;
+	controls_layout.set_size_request (w, -1);
 }
