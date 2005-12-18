@@ -657,6 +657,8 @@ Editor::Editor (AudioEngine& eng)
 	the_notebook.append_page (edit_group_vbox, _("Edit Groups"));
 	the_notebook.append_page (named_selection_scroller, _("Chunks"));
 	the_notebook.set_show_tabs (true);
+	the_notebook.set_scrollable (true);
+	the_notebook.popup_enable ();
 
 	TearOff *notebook_tearoff = manage (new TearOff (the_notebook));
 
