@@ -110,11 +110,6 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	redirect_eventbox.add (redirect_scroller);
 	pack_start (redirect_eventbox, true, true);
 
-	redirect_scroller.show ();
-	redirect_display.show ();
-	redirect_eventbox.show ();
-	show_all ();
-
 	_route.redirects_changed.connect (mem_fun(*this, &RedirectBox::redirects_changed));
 
 	redirect_eventbox.signal_enter_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::enter_box), this));

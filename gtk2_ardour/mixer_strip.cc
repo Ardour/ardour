@@ -259,13 +259,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 		ARDOUR_UI::instance()->tooltips().set_tip (speed_spinner, _("varispeed"));
 
-		speed_spinner.show ();
-		speed_frame.show  ();
-
 		button_table.attach (speed_frame, 0, 2, 6, 7);
 		button_table.attach (*rec_enable_button, 0, 2, 7, 8);
 	}
-	
+
 	name_button.add (name_label);
 	name_button.set_name ("MixerNameButton");
 	Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
@@ -299,14 +296,14 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 	whvbox->pack_start (width_hide_box, true, true);
 
-	global_vpacker.pack_start (*whvbox, false, false);
-	global_vpacker.pack_start (button_table, false, false);
+	global_vpacker.pack_start (*whvbox, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (pre_redirect_box, true, true);
-	global_vpacker.pack_start (gpm, false, false);
+	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (post_redirect_box, true, true);
-	global_vpacker.pack_start (panners, false, false);
-	global_vpacker.pack_start (output_button, false, false);
-	global_vpacker.pack_start (comment_button, false, false);
+	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (comment_button, Gtk::PACK_SHRINK);
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -318,30 +315,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 	_selected = true;
 	set_selected (false);
-
-	whvbox->show_all ();
-	name_label.show ();
-	group_label.show();
-	input_label.show ();
-	output_label.show ();
-	pre_redirect_box.show_all ();
-	post_redirect_box.show_all ();
-	button_table.show ();
-	comment_button.show ();
-	name_button.show ();
-	input_button.show ();
-	group_button.show ();
-	output_button.show ();
-	rec_enable_button->show ();
-	solo_button->show ();
-	mute_button->show ();
-	gain_automation_style_button.show ();
-	gain_automation_state_button.show ();
-	pan_automation_style_button.show ();
-	pan_automation_state_button.show ();
-	polarity_button.show ();
-	global_vpacker.show ();
-	global_frame.show ();
 
 	_packed = false;
 	_embedded = false;

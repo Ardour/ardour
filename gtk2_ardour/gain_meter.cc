@@ -108,7 +108,6 @@ GainMeter::GainMeter (IO& io, Session& s)
 	}
 
 	gain_display.set_print_func (_gain_printer, this);
-	set_size_request_to_display_given_text (gain_display, "-86.0", 2, 2);
 
 	gain_unit_button.add (gain_unit_label);
 	gain_unit_button.set_name ("MixerStripGainUnitButton");
@@ -151,46 +150,41 @@ GainMeter::GainMeter (IO& io, Session& s)
 
 		top_table.attach (meter_point_button, 1, 2, 0, 1);
 	}
-
 	gain_display_box.set_spacing (2);
+	set_size_request_to_display_given_text (gain_display_frame, "-86.0", 2, 2);
 	gain_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	gain_display_frame.set_name ("BaseFrame");
 	gain_display_frame.add (gain_display);
-	gain_display_box.pack_start (gain_display_frame, false, false);
+	gain_display_box.pack_start (gain_display_frame,  Gtk::PACK_SHRINK);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
-	set_size_request_to_display_given_text (peak_display, "-86.0", 2, 2);
 	peak_display.add (peak_display_label);
+	set_size_request_to_display_given_text (peak_display_frame, "-86.0", 2, 2);
 	peak_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	peak_display_frame.set_name ("BaseFrame");
 	peak_display_frame.add (peak_display);
 	max_peak = minus_infinity();
 	peak_display_label.set_text (_("-inf"));
-	
-	gain_display_box.pack_start (peak_display_frame, false, false);
 
+	gain_display_box.pack_end (peak_display_frame,  Gtk::PACK_SHRINK);
 
 	meter_metric_area.set_size_request (18, -1);
 	meter_metric_area.set_name ("MeterMetricsStrip");
 
-	meter_packer.show ();
-	gain_slider->show_all ();
-
 	meter_packer.set_spacing (2);
 	fader_box.set_spacing (2);
 
-	fader_box.pack_start (*gain_slider, false, false);
+	fader_box.pack_start (*gain_slider,  Gtk::PACK_SHRINK);
 
 	hbox.set_spacing (4);
-	hbox.pack_start (fader_box, false, false);
-	hbox.pack_start (meter_packer, false, false);
+	hbox.pack_start (fader_box,  Gtk::PACK_SHRINK);
+	hbox.pack_start (meter_packer,  Gtk::PACK_SHRINK);
 
 	set_spacing (4);
-	pack_start (top_table, false, false);
-	pack_start (gain_display_box, false, false);
-	pack_start (hbox, false, false);
-
-	show_all ();
+	pack_start (top_table,  Gtk::PACK_SHRINK);
+	/* here's the culprit  gain display box*/
+	pack_start (gain_display_box,  Gtk::PACK_SHRINK);
+	pack_start (hbox,  Gtk::PACK_SHRINK);
 
 	_io.gain_changed.connect (mem_fun(*this, &GainMeter::gain_changed));
 
@@ -402,7 +396,7 @@ GainMeter::setup_meters ()
 	}
 
 	if (_width == Wide) {
-		meter_packer.pack_start (meter_metric_area, false, false);
+	        meter_packer.pack_start (meter_metric_area, Gtk::PACK_SHRINK);
 		meter_metric_area.show_all ();
 	}
 
@@ -426,7 +420,7 @@ GainMeter::setup_meters ()
 			meters[n].meter->signal_button_release_event().connect (bind (mem_fun(*this, &GainMeter::meter_button_release), n));
 		}
 
-		meter_packer.pack_start (*meters[n].meter, false, false);
+		meter_packer.pack_start (*meters[n].meter, Gtk::PACK_SHRINK);
 		meters[n].meter->show_all ();
 		meters[n].packed = true;
 	}

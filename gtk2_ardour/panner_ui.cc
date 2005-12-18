@@ -137,12 +137,10 @@ PannerUI::PannerUI (IO& io, Session& s)
 	panning_down_arrow.set_name (X_("PanScrollerArrow"));
 
 	pan_vbox.set_spacing (4);
-	pan_vbox.pack_start (panning_viewport, false, false);
-	pan_vbox.pack_start (panning_link_box, false, false);
+	pan_vbox.pack_start (panning_viewport, Gtk::PACK_SHRINK);
+	pan_vbox.pack_start (panning_link_box, Gtk::PACK_SHRINK);
 
 	pack_start (pan_vbox, true, false);
-	pan_vbox.show_all ();
-	show ();
 
 	panner = 0;
 

@@ -174,7 +174,7 @@ class Source : public Stateful, public sigc::trackable
   private:
 	ARDOUR::id_t _id;
 	
-	bool Source::file_changed (string path);
+	bool file_changed (string path);
 };
 
 }

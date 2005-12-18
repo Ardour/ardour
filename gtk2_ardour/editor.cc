@@ -652,9 +652,9 @@ Editor::Editor (AudioEngine& eng)
 	named_selection_display.signal_button_press_event().connect (mem_fun(*this, &Editor::named_selection_display_button_press));
 	named_selection_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::named_selection_display_selection_changed));
 
-	the_notebook.append_page (route_list_scroller, _("Tracks/Busses"));
+       	the_notebook.append_page (region_list_scroller, _("Regions"));
+       	the_notebook.append_page (route_list_scroller, _("Tracks/Busses"));
 	the_notebook.append_page (edit_group_vbox, _("Edit Groups"));
-	the_notebook.append_page (region_list_scroller, _("Regions"));
 	the_notebook.append_page (named_selection_scroller, _("Chunks"));
 	the_notebook.set_show_tabs (true);
 
