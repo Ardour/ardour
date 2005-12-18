@@ -815,7 +815,7 @@ UI::just_hide_it (GdkEventAny *ev, Window *win)
 }
 
 Gdk::Color
-UI::get_color (const string& prompt, bool& picked, Gdk::Color* initial)
+UI::get_color (const string& prompt, bool& picked, const Gdk::Color* initial)
 {
 	Gdk::Color color;
 

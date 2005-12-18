@@ -92,7 +92,7 @@ class UI : public AbstractUI
 		Glib::signal_idle().connect (bind (slot (&UI::idle_delete<T>), obj));
 	}
 
-	Gdk::Color get_color (const string& prompt, bool& picked, Gdk::Color *initial = 0);
+	Gdk::Color get_color (const string& prompt, bool& picked, const Gdk::Color *initial = 0);
 
 	/* starting is sent just before we enter the main loop,
 	   stopping just after we return from it (at the top level)
