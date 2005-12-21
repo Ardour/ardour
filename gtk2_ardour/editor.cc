@@ -389,6 +389,7 @@ Editor::Editor (AudioEngine& eng)
 	controls_layout.add (edit_controls_vbox);
 	controls_layout.set_name ("EditControlsBase");
 	controls_layout.signal_size_request().connect (mem_fun(*this, &Editor::set_layout_width), false);
+	controls_layout.signal_expose_event().connect (mem_fun(*this, &Editor::layout_expose), false);
 	
 	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	controls_layout.signal_button_release_event().connect (mem_fun(*this, &Editor::edit_controls_button_release));
@@ -3933,5 +3934,13 @@ Editor::set_layout_width(Gtk::Requisition *r)
 	edit_controls_vbox.check_resize();
 	int w = edit_controls_vbox.get_width();
 	cerr << "set_layout_width() called w = " << w << endl;
+	
 	controls_layout.set_size_request (w, -1);
+}
+
+bool
+Editor::layout_expose (GdkEventExpose* ex)
+{
+	cerr << "layout_expose() called" << endl;
+	return TRUE;
 }

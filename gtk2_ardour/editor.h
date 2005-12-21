@@ -643,6 +643,7 @@ class Editor : public PublicEditor
 
 	Gtk::Layout         controls_layout;
 	void set_layout_width(Gtk::Requisition *);
+	bool Editor::layout_expose (GdkEventExpose* ex);
 
 	Gtk::HScrollbar     edit_hscrollbar;
 	bool                edit_hscroll_dragging;

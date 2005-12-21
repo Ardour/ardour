@@ -5,7 +5,7 @@
 
 style "very_small_text"
 {
- 	font_name = "sans 8"
+ 	font_name = "sans 6"
 }
 
 style "small_text"
@@ -141,7 +141,7 @@ style "default_buttons_menus" = "default_base"
 
 style "very_small_button" = "default_buttons_menus"
 {
-	font_name = "sans 8"
+	font_name = "sans 7"
 }
 
 style "small_button" = "default_buttons_menus"
@@ -175,7 +175,7 @@ style "track_rec_enable_button" = "small_button"
 
 style "mixer_rec_enable_button" = "track_rec_enable_button"
 {
-	font_name = "sans 8"
+	font_name = "sans 7"
 }
 
 style "solo_button" = "small_button"
@@ -189,7 +189,7 @@ style "solo_button" = "small_button"
 
 style "mixer_solo_button" = "solo_button"
 {
-	font_name = "sans 8"
+	font_name = "sans 7"
 }
 
 
@@ -203,7 +203,7 @@ style "mute_button" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "sans 8"
+	font_name = "sans 7"
 }
 
 style "track_loop_button" = "small_button"
@@ -483,7 +483,7 @@ style "editor_time_ruler" = "small_text"
 
 style "audio_track_base" = "default_base"
 {
-  font_name = "sans medium 10"
+  font_name = "sans medium 8"
   fg[NORMAL] = { 0.80, 0.80, 0.70 }	
   bg[NORMAL] = { 0.18, 0.18, 0.22 }
   bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
@@ -494,14 +494,14 @@ style "audio_track_base" = "default_base"
 
 style "audio_bus_base"
 {
-  font_name = "sans medium 10"
+  font_name = "sans medium 8"
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
   bg[NORMAL] = {0, 0.36, 0.40 }	
 }
 
 style "track_name_display"
 {
-	font_name = "sans medium 10"
+	font_name = "sans medium 8"
 	fg[NORMAL] = { 0.80, 0.80, 0.70 }
 	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
 
@@ -513,7 +513,7 @@ style "track_name_display"
 
 style "active_track_name_display"
 {
-	font_name = "sans medium 10"
+	font_name = "sans medium 8"
 	text[NORMAL] = { 0.26, 0.26, 0.26 }
 	base[NORMAL] = { 0.89, 0.89, 0.89 }
 }
