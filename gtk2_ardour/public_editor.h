@@ -128,6 +128,7 @@ class PublicEditor : public Gtk::Window, public Stateful {
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> XOriginChanged;
 	sigc::signal<void> Resized;
+	sigc::signal<void> Realized;
 
 	// FIXED FOR GTK2
 

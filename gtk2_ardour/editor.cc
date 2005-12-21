@@ -193,10 +193,11 @@ Editor::on_key_press_event (GdkEventKey* ev)
 	}
 	
 	/* no modifiers, propagate first */
-	
+
 	if (!gtk_window_propagate_key_event (win, ev)) {
 		return gtk_window_activate_key (win, ev);
 	} 
+
 
 	return true;
 }
@@ -679,7 +680,9 @@ Editor::Editor (AudioEngine& eng)
 	global_hpacker.pack_start (global_vpacker, true, true);
 
 	set_name ("EditorWindow");
+	cerr << "Adding accel group " << ActionManager::ui_manager->get_accel_group()->gobj() << endl;
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
+	cerr << "... done\n";
 
 	vpacker.pack_end (global_hpacker, true, true);
 	
@@ -984,15 +987,8 @@ void
 Editor::on_realize ()
 {
 	Window::on_realize ();
-
-	/* Even though we're not using acceleration, we want the
-	   labels to show up.
-	*/
-
-	track_context_menu.accelerate (*this->get_toplevel());
-	track_region_context_menu.accelerate (*this->get_toplevel());
+	Realized ();
 }
-
 
 void
 Editor::queue_session_control_changed (Session::ControlType t)

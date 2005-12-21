@@ -1616,14 +1616,6 @@ Editor::play_selected_region ()
 }
 
 void
-Editor::toggle_loop_playback ()
-{
-	if (session) {
-		session->request_auto_loop (true);
-	}
-}
-
-void
 Editor::loop_selected_region ()
 {
 	if (!selection->audio_regions.empty()) {

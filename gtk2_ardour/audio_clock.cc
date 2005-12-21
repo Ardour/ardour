@@ -110,8 +110,8 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 		meter_label->set_name ("BBTMeterLabel");
 		tempo_label->set_name ("BBTTempoLabel");
 
-		tempo_meter_box.pack_start (*meter_label, false, false);
-		tempo_meter_box.pack_start (*tempo_label, false, false);
+		tempo_meter_box.pack_start (*meter_label, true, true);
+		tempo_meter_box.pack_start (*tempo_label, true, true);
 
 		bbt_packer.pack_start (tempo_meter_box, false, false, 5);
 	} else {

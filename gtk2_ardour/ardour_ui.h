@@ -53,8 +53,8 @@
 #include <gtkmm/menubar.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/pix.h>
 #include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/stateful_button.h>
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 
@@ -339,7 +339,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void detach_tearoff (Gtk::Box* parent, Gtk::Widget* contents);
 	void reattach_tearoff (Gtk::Box* parent, Gtk::Widget* contents, int32_t order);
 
-	Gtkmm2ext::TearOff*       transport_tearoff;
+	Gtkmm2ext::TearOff*      transport_tearoff;
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_tearoff_hbox;
 	Gtk::HBox                transport_hbox;
@@ -355,11 +355,16 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::HBox                primary_clock_hbox;
 	Gtk::HBox                secondary_clock_hbox;
 
-	Gtk::Button goto_start_button;
-	Gtk::Button goto_end_button;
-	Gtk::Button rewind_button;
-	Gtk::Button forward_button;
-	Gtk::Button stop_button;
+	Gtkmm2ext::StatefulButton roll_button;
+	Gtkmm2ext::StatefulButton stop_button;
+	Gtkmm2ext::StatefulButton rewind_button;
+	Gtkmm2ext::StatefulButton forward_button;
+	Gtkmm2ext::StatefulButton goto_start_button;
+	Gtkmm2ext::StatefulButton goto_end_button;
+	Gtkmm2ext::StatefulButton auto_loop_button;
+	Gtkmm2ext::StatefulButton play_selection_button;
+
+	Gtkmm2ext::StatefulButton rec_button;
 
 	enum ShuttleBehaviour {
 		Sprung,
@@ -371,17 +376,17 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		Semitones
 	};
 
-	Gtk::DrawingArea shuttle_box;
-	Gtk::EventBox    speed_display_box;
-	Gtk::Label       speed_display_label;
-	Gtk::Button      shuttle_units_button;
-	Gtk::Button      shuttle_style_button;
-	Gtk::Menu*       shuttle_unit_menu;
-	Gtk::Menu*       shuttle_style_menu;
-	ShuttleBehaviour shuttle_behaviour;
-	ShuttleUnits     shuttle_units;
+	Gtk::DrawingArea  shuttle_box;
+	Gtk::EventBox     speed_display_box;
+	Gtk::Label        speed_display_label;
+	Gtk::Button       shuttle_units_button;
+	Gtk::ComboBoxText shuttle_style_button;
+	Gtk::Menu*        shuttle_unit_menu;
+	Gtk::Menu*        shuttle_style_menu;
+	ShuttleBehaviour  shuttle_behaviour;
+	ShuttleUnits      shuttle_units;
 
-	void shuttle_style_clicked ();
+	void shuttle_style_changed();
 	void shuttle_unit_clicked ();
 	void set_shuttle_behaviour (ShuttleBehaviour);
 	void set_shuttle_units (ShuttleUnits);
@@ -397,11 +402,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool   shuttle_grabbed;
 	double shuttle_fract;
 
-	Gtk::ToggleButton auto_loop_button;
-	Gtk::ToggleButton play_selection_button;
-	Gtk::ToggleButton roll_button;
-
-	Gtk::ToggleButton rec_button;
 	Gtk::ToggleButton punch_in_button;
 	Gtk::ToggleButton punch_out_button;
 	Gtk::ToggleButton auto_return_button;
@@ -474,7 +474,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	/* menu bar and associated stuff */
 
 	Gtk::MenuBar* menu_bar;
-	Gtk::Fixed    menu_bar_base;
+	Gtk::EventBox menu_bar_base;
 	Gtk::HBox     menu_hbox;
 
 	void build_menu_bar ();
@@ -669,6 +669,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool filter_ardour_session_dirs (const Gtk::FileFilter::Info&);
 
 	Glib::RefPtr<Gtk::ActionGroup> common_actions;
+
+	void editor_realized ();
 };
 
 

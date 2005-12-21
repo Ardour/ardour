@@ -55,11 +55,6 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, "nudge-backward", _("nudge backward"), bind (mem_fun(*this, &Editor::nudge_backward), false));
 	ActionManager::register_action (editor_actions, "nudge-next-backward", _("nudge next backward"), bind (mem_fun(*this, &Editor::nudge_backward), true));
 
-	ActionManager::register_action (editor_actions, "toggle-playback", _("toggle playback"), bind (mem_fun(*this, &Editor::toggle_playback), false));
-	ActionManager::register_action (editor_actions, "toggle-playback-forget-capture", _("toggle playback forget capture"), bind (mem_fun(*this, &Editor::toggle_playback), true));
-
-	ActionManager::register_action (editor_actions, "toggle-loop-playback", _("toggle loop playback"), mem_fun(*this, &Editor::toggle_loop_playback));
-	
 	ActionManager::register_action (editor_actions, "temporal-zoom-out", _("temporal zoom out"), bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
 	ActionManager::register_action (editor_actions, "temporal-zoom-in", _("temporal zoom in"), bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
 	ActionManager::register_action (editor_actions, "zoom-to-session", _("zoom to session"), mem_fun(*this, &Editor::temporal_zoom_session));

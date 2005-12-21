@@ -53,6 +53,7 @@ ARDOUR_UI::create_editor ()
 	}
 
 	editor->DisplayControlChanged.connect (mem_fun(*this, &ARDOUR_UI::editor_display_control_changed));
+	editor->Realized.connect (mem_fun (*this, &ARDOUR_UI::editor_realized));
 
 	return 0;
 }
@@ -170,12 +171,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_splash));
 	
-	act = ActionManager::register_action (common_actions, X_("ToggleAutoLoop"), _("toggle auto loop"), mem_fun(*this, &ARDOUR_UI::toggle_session_auto_loop));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TogglePunchIn"), _("toggle punch in"), mem_fun(*this, &ARDOUR_UI::toggle_session_punch_in));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("NewSession"), _("new session"), bind (mem_fun(*this, &ARDOUR_UI::new_session), false, string()));
-	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("add audio track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("AddAudioBus"), _("add audio bus"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_bus), 1, 1));
@@ -184,32 +179,72 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("RemoveLastCapture"), _("remove last capture"), mem_fun(*this, &ARDOUR_UI::remove_last_capture));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportStop"), _("stop"), mem_fun(*this, &ARDOUR_UI::transport_stop));
+
+	Glib::RefPtr<ActionGroup> transport_actions = ActionGroup::create (X_("Transport"));
+
+	/* do-nothing action for the "transport" menu bar item */
+
+	ActionManager::register_action (transport_actions, X_("Transport"), _("Transport"));
+
+	/* these two are not used by key bindings, instead use ToggleRoll for that. these two do show up in
+	   menus and via button proxies.
+	*/
+	
+	act = ActionManager::register_action (transport_actions, X_("Stop"), _("stop"), mem_fun(*this, &ARDOUR_UI::transport_stop));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportStopAndForgetCapture"), _("stop and forget capture"), mem_fun(*this, &ARDOUR_UI::transport_stop_and_forget_capture));
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("Roll"), _("roll"), mem_fun(*this, &ARDOUR_UI::transport_roll));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportRoll"), _("roll"), mem_fun(*this, &ARDOUR_UI::transport_roll));
+	ActionManager::transport_sensitive_actions.push_back (act);
+
+	ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("start/stop"), bind (mem_fun (*editor, &PublicEditor::toggle_playback), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportLoop"), _("loop"), mem_fun(*this, &ARDOUR_UI::transport_loop));
+	ActionManager::transport_sensitive_actions.push_back (act);
+	ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("stop + forget capture"), bind (mem_fun(*editor, &PublicEditor::toggle_playback), true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportRecord"), _("enable record"), mem_fun(*this, &ARDOUR_UI::transport_record));
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("Loop"), _("play loop range"), mem_fun(*this, &ARDOUR_UI::toggle_session_auto_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportRewind"), _("rewind"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 0));
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("PlaySelection"), _("play selection"), mem_fun(*this, &ARDOUR_UI::transport_play_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportRewindSlow"), _("rewind (slow)"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), -1));
+	ActionManager::transport_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (transport_actions, X_("Record"), _("enable record"), mem_fun(*this, &ARDOUR_UI::transport_record));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportRewindFast"), _("rewind (fast)"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 1));
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("Rewind"), _("rewind"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 0));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportForward"), _("forward"), bind (mem_fun(*this, &ARDOUR_UI::transport_forward), 0));
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("RewindSlow"), _("rewind (slow)"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), -1));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportForwardSlow"), _("forward (slow)"), bind (mem_fun(*this, &ARDOUR_UI::transport_forward), -1));
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("RewindFast"), _("rewind (fast)"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 1));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportForwardFast"), _("forward (fast)"), bind (mem_fun(*this, &ARDOUR_UI::transport_forward), 1));
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("Forward"), _("forward"), bind (mem_fun(*this, &ARDOUR_UI::transport_forward), 0));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportGotoStart"), _("goto start"), mem_fun(*this, &ARDOUR_UI::transport_goto_start));
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("ForwardSlow"), _("forward (slow)"), bind (mem_fun(*this, &ARDOUR_UI::transport_forward), -1));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("TransportGotoEnd"), _("goto end"), mem_fun(*this, &ARDOUR_UI::transport_goto_end));
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("ForwardFast"), _("forward (fast)"), bind (mem_fun(*this, &ARDOUR_UI::transport_forward), 1));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("GotoStart"), _("goto start"), mem_fun(*this, &ARDOUR_UI::transport_goto_start));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("GotoEnd"), _("goto end"), mem_fun(*this, &ARDOUR_UI::transport_goto_end));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchIn"), _("punch in"), mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchOut"), _("punch out"), mem_fun(*this, &ARDOUR_UI::toggle_punch_out));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (common_actions, X_("SendAllMidiFeedback"), _("send all midi feedback"), mem_fun(*this, &ARDOUR_UI::send_all_midi_feedback));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack1"), _("toggle record enable track1"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  0U));
@@ -281,11 +316,10 @@ ARDOUR_UI::install_actions ()
 	
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Percentage));
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Semitones));
-	shuttle_actions->add (Action::create (X_("SetShuttleActionSprung"), _("Sprung")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Sprung));
-	shuttle_actions->add (Action::create (X_("SetShuttleActionWheel"), _("Wheel")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_behaviour), Wheel));
 	
 	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (jack_actions);
+	ActionManager::add_action_group (transport_actions);
 	ActionManager::add_action_group (main_actions);
 	ActionManager::add_action_group (common_actions);
 }

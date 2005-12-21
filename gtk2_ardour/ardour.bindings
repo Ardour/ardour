@@ -1,15 +1,19 @@
 ; this file is an automated accelerator map dump
 
+(gtk_accel_path "<Actions>/Editor/set-playhead" "p")
+
 (gtk_accel_path "<Actions>/Common/Quit" "<Control>q")
 (gtk_accel_path "<Actions>/Common/Save" "<Control>s")
-(gtk_accel_path "<Actions>/Common/TransportForward" "Right")
-(gtk_accel_path "<Actions>/Common/TransportRewind" "Left")
-(gtk_accel_path "<Actions>/Common/TransportRecord" "R")
-(gtk_accel_path "<Actions>/Common/TransportGotoStart" "<Control>a")
-(gtk_accel_path "<Actions>/Common/TransportGotoEnd" "<Control>e")
 
-(gtk_accel_path "<Actions>/Editor/toggle-playback" "space")
-(gtk_accel_path "<Actions>/Editor/set-playhead" "p")
+(gtk_accel_path "<Actions>/Transport/ToggleRoll" "space")
+(gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<Control>space")
+(gtk_accel_path "<Actions>/Transport/Forward" "Right")
+(gtk_accel_path "<Actions>/Transport/Rewind" "Left")
+(gtk_accel_path "<Actions>/Transport/Record" "R")
+(gtk_accel_path "<Actions>/Transport/loop" "l")
+(gtk_accel_path "<Actions>/Transport/GotoStart" "<Control>a")
+(gtk_accel_path "<Actions>/Transport/GotoEnd" "<Control>e")
+
 (gtk_accel_path "<Actions>/Editor/set-edit-cursor" "e")
 (gtk_accel_path "<Actions>/Editor/undo" "<Control>z")
 (gtk_accel_path "<Actions>/Editor/redo" "<Control>r")

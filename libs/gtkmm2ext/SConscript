@@ -49,6 +49,7 @@ popup.cc
 prompter.cc
 selector.cc
 slider_controller.cc
+stateful_button.cc
 tearoff.cc
 textviewer.cc
 utils.cc

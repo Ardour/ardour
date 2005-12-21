@@ -25,14 +25,19 @@
            <separator/>
            <menuitem action='Quit'/>
         </menu>
-        <menu name='Transport' action='JACK'>
-               <menuitem action='toggle-playback'/>
-               <menuitem action='TransportRoll'/>
-               <menuitem action='TransportStop'/>
-               <menuitem action='TransportForward'/>
-               <menuitem action='TransportRewind'/>
-               <menuitem action='TransportGotoStart'/>
-               <menuitem action='TransportGotoEnd'/>
+        <menu name='Transport' action='Transport'>
+               <menuitem action='ToggleRoll'/>
+               <menuitem action='ToggleRollForgetCapture'/>
+               <menuitem action='Loop'/>
+               <menuitem action='PlaySelection'/>
+               <menuitem action='Forward'/>
+               <menuitem action='Rewind'/>
+               <menuitem action='GotoStart'/>
+               <menuitem action='GotoEnd'/>
+               <separator/>
+               <menuitem action='TogglePunchIn'/>
+               <menuitem action='TogglePunchOut'/>
+               <menuitem action='set-playhead'/>
         </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>
@@ -89,11 +94,5 @@
 	 <menuitem action='SetShuttleUnitsPercentage'/>
 	 <menuitem action='SetShuttleUnitsSemitones'/>
      </popup>
-
-     <popup name='ShuttleStylePopup'>
-	 <menuitem action='SetShuttleActionSprung'/>
-	 <menuitem action='SetShuttleActionWheel'/>
-     </popup>
-
 
 </ui>

@@ -26,6 +26,7 @@ class ActionManager
 	static std::vector<Glib::RefPtr<Gtk::Action> > track_selection_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > plugin_selection_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > range_sensitive_actions;
+	static std::vector<Glib::RefPtr<Gtk::Action> > transport_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > jack_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > jack_opposite_sensitive_actions;
 

@@ -804,7 +804,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	  /* transport */
 
 	  shuttle_units_button (_("% ")),
-	  shuttle_style_button (_("spring")),
 
 	  punch_in_button (_("punch\nin")),
 	  punch_out_button (_("punch\nout")),
@@ -2568,19 +2567,18 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	switch (session->record_status()) {
 	case Session::Enabled:
 		if (onoff) {
-			rec_button.set_state (STATE_ACTIVE);
+			rec_button.set_state (1);
 		} else {
-			rec_button.set_state (STATE_NORMAL);
+			rec_button.set_state (0);
 		}
 		break;
 
 	case Session::Recording:
-		rec_button.set_state (STATE_ACTIVE);
+		rec_button.set_state (2);
 		break;
 
 	default:
-		rec_button.set_active (false);
-		rec_button.set_state (STATE_NORMAL);
+		rec_button.set_state (0);
 		break;
 	}
 }

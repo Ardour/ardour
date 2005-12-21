@@ -85,10 +85,8 @@ ARDOUR_UI::setup_windows ()
 	return 0;
 }
 
-
 void
 ARDOUR_UI::setup_adjustables ()
-
 {
 	adjuster_table.set_homogeneous (true);
 
@@ -119,11 +117,35 @@ ARDOUR_UI::setup_adjustables ()
 	adjuster_table.attach (*mmc_id_button, 2, 3, 1, 2, FILL, FILL, 5, 5);
 }
 
-#include "transport_xpms"
+static const gchar * loop_xpm[] = {
+"19 19 3 1",
+" 	c None",
+".	c #000000",
+"+	c #FFFFFF",
+"       ...         ",
+"       .+..        ",
+"       .++..       ",
+"     ...+++....    ",
+"   ...++++++++...  ",
+"  ..+++.+++..+++.. ",
+" ..++...++.....++..",
+" .++.. .+..   ..++.",
+" .+..  ...     ..+.",
+" .+.            .+.",
+" .+..     ...  ..+.",
+" .++..   ..+. ..++.",
+" ..++.....++...++..",
+"  ..+++..+++.+++.. ",
+"   ...++++++++...  ",
+"     ....+++...    ",
+"        ..++.      ",
+"         ..+.      ",
+"          ...      "};
 
 void
 ARDOUR_UI::transport_stopped ()
 {
+	stop_button.set_active (true);
 	roll_button.set_active (false);
 	play_selection_button.set_active (false);
 	auto_loop_button.set_active (false);
@@ -139,6 +161,8 @@ static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
 void
 ARDOUR_UI::transport_rolling ()
 {
+	stop_button.set_active (false);
+
 	if (session->get_play_range()) {
 
 		play_selection_button.set_active (true);
@@ -167,6 +191,7 @@ ARDOUR_UI::transport_rolling ()
 void
 ARDOUR_UI::transport_rewinding ()
 {
+	stop_button.set_active (false);
 	roll_button.set_active (true);
 	play_selection_button.set_active (false);
 	auto_loop_button.set_active (false);
@@ -175,6 +200,7 @@ ARDOUR_UI::transport_rewinding ()
 void
 ARDOUR_UI::transport_forwarding ()
 {
+	stop_button.set_active (false);
 	roll_button.set_active (true);
 	play_selection_button.set_active (false);
 	auto_loop_button.set_active (false);
@@ -191,49 +217,44 @@ ARDOUR_UI::setup_transport ()
 	transport_base.set_name ("TransportBase");
 	transport_base.add (transport_hbox);
 
-	transport_frame.set_shadow_type (Gtk::SHADOW_OUT);
+	transport_frame.set_shadow_type (SHADOW_OUT);
 	transport_frame.set_name ("BaseFrame");
 	transport_frame.add (transport_base);
 
-	transport_tearoff->Detach.connect (bind (mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Gtk::Box*>(&top_packer), 
-						 static_cast<Gtk::Widget*>(&transport_frame)));
-	transport_tearoff->Attach.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Gtk::Box*> (&top_packer), 
-						 static_cast<Gtk::Widget*> (&transport_frame), 1));
+	transport_tearoff->Detach.connect (bind (mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer), 
+						 static_cast<Widget*>(&transport_frame)));
+	transport_tearoff->Attach.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer), 
+						 static_cast<Widget*> (&transport_frame), 1));
 
+	vector<Gdk::Color> colors;
+	Gdk::Color c;
 
+	/* record button has 3 color states, so we set 2 extra here */
+
+	c.set_rgb_p (0.91, 0.68, 0.68);
+	colors.push_back (c);
+	c.set_rgb_p (1, 0, 0);
+	colors.push_back (c);
+	rec_button.set_colors (colors);
+
+	colors.clear ();
+
+	/* other buttons get 2 color states, so add one here */
+
+	c.set_rgb_p (0.66, 0.97, 0.18);
+	colors.push_back (c);
+
+	stop_button.set_colors (colors);
+	roll_button.set_colors (colors);
+	auto_loop_button.set_colors (colors);
+	play_selection_button.set_colors (colors);
+	goto_start_button.set_colors (colors);
+	goto_end_button.set_colors (colors);
+	
 	Widget* w;
 
-#ifdef THE_OLD
-	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(start_xpm)));
-	w->show();
-	goto_start_button.add (*w);
-	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(end_xpm)));
-	w->show();
-	goto_end_button.add (*w);
-	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(arrow_xpm)));
-	w->show();
-	roll_button.add (*w);
-	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(stop_xpm)));
-	w->show();
-	stop_button.add (*w);
-	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(play_selection_xpm)));
-	w->show();
-	play_selection_button.add (*w);
-	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(rec_xpm)));
-	w->show();
-	rec_button.add (*w);
-	w = manage (new Image (Gdk::Pixbuf::create_from_xpm_data(loop_xpm)));
-	w->show();
-	auto_loop_button.add (*w);
+	stop_button.set_active (true);
 
-
-	stop_button.set_use_stock (false);
-	roll_button.set_use_stock (false);
-	rec_button.set_use_stock (false);
-	goto_start_button.set_use_stock (false);
-	goto_end_button.set_use_stock (false);
-	auto_loop_button.set_use_stock (false);
-#else
 	w = manage (new Image (Stock::MEDIA_PREVIOUS, ICON_SIZE_BUTTON));
 	w->show();
 	goto_start_button.add (*w);
@@ -256,28 +277,22 @@ ARDOUR_UI::setup_transport ()
 	w->show();
 	auto_loop_button.add (*w);
 
-	stop_button.set_use_stock (true);
-	roll_button.set_use_stock (true);
-	rec_button.set_use_stock (true);
-	goto_start_button.set_use_stock (true);
-	goto_end_button.set_use_stock (true);
-	auto_loop_button.set_use_stock (true);
-#endif
-
 	RefPtr<Action> act;
 
-	act = ActionManager::get_action (X_("<Actions>/Common/TransportStop"));
+	act = ActionManager::get_action (X_("<Actions>/Transport/Stop"));
 	act->connect_proxy (stop_button);
-	act = ActionManager::get_action (X_("<Actions>/Common/TransportRoll"));
+	act = ActionManager::get_action (X_("<Actions>/Transport/Roll"));
 	act->connect_proxy (roll_button);
-	act = ActionManager::get_action (X_("<Actions>/Common/TransportRecord"));
+	act = ActionManager::get_action (X_("<Actions>/Transport/Record"));
 	act->connect_proxy (rec_button);
-	act = ActionManager::get_action (X_("<Actions>/Common/TransportGotoStart"));
+	act = ActionManager::get_action (X_("<Actions>/Transport/GotoStart"));
 	act->connect_proxy (goto_start_button);
-	act = ActionManager::get_action (X_("<Actions>/Common/TransportGotoEnd"));
+	act = ActionManager::get_action (X_("<Actions>/Transport/GotoEnd"));
 	act->connect_proxy (goto_end_button);
-	act = ActionManager::get_action (X_("<Actions>/Common/TransportLoop"));
+	act = ActionManager::get_action (X_("<Actions>/Transport/Loop"));
 	act->connect_proxy (auto_loop_button);
+	act = ActionManager::get_action (X_("<Actions>/Transport/PlaySelection"));
+	act->connect_proxy (play_selection_button);
 
 	ARDOUR_UI::instance()->tooltips().set_tip (roll_button, _("Play from playhead"));
 	ARDOUR_UI::instance()->tooltips().set_tip (stop_button, _("Stop playback"));
@@ -294,7 +309,6 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (follow_button, _("Enable/Disable follow playhead"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_box, _("Shuttle speed control"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
-	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_style_button, _("Select sprung or wheel behaviour"));
 	ARDOUR_UI::instance()->tooltips().set_tip (speed_display_box, _("Current transport speed"));
 	
 	shuttle_box.set_flags (CAN_FOCUS);
@@ -317,20 +331,20 @@ ARDOUR_UI::setup_transport ()
 	click_button.set_name ("TransportButton");
 	follow_button.set_name ("TransportButton");
 	
-	goto_start_button.unset_flags (Gtk::CAN_FOCUS);
-	goto_end_button.unset_flags (Gtk::CAN_FOCUS);
-	roll_button.unset_flags (Gtk::CAN_FOCUS);
-	stop_button.unset_flags (Gtk::CAN_FOCUS);
-	play_selection_button.unset_flags (Gtk::CAN_FOCUS);
-	rec_button.unset_flags (Gtk::CAN_FOCUS);
-	auto_loop_button.unset_flags (Gtk::CAN_FOCUS);
-	auto_return_button.unset_flags (Gtk::CAN_FOCUS);
-	auto_play_button.unset_flags (Gtk::CAN_FOCUS);
-	auto_input_button.unset_flags (Gtk::CAN_FOCUS);
-	punch_out_button.unset_flags (Gtk::CAN_FOCUS);
-	punch_in_button.unset_flags (Gtk::CAN_FOCUS);
-	click_button.unset_flags (Gtk::CAN_FOCUS);
-	follow_button.unset_flags (Gtk::CAN_FOCUS);
+	goto_start_button.unset_flags (CAN_FOCUS);
+	goto_end_button.unset_flags (CAN_FOCUS);
+	roll_button.unset_flags (CAN_FOCUS);
+	stop_button.unset_flags (CAN_FOCUS);
+	play_selection_button.unset_flags (CAN_FOCUS);
+	rec_button.unset_flags (CAN_FOCUS);
+	auto_loop_button.unset_flags (CAN_FOCUS);
+	auto_return_button.unset_flags (CAN_FOCUS);
+	auto_play_button.unset_flags (CAN_FOCUS);
+	auto_input_button.unset_flags (CAN_FOCUS);
+	punch_out_button.unset_flags (CAN_FOCUS);
+	punch_in_button.unset_flags (CAN_FOCUS);
+	click_button.unset_flags (CAN_FOCUS);
+	follow_button.unset_flags (CAN_FOCUS);
 	
 	goto_start_button.set_events (goto_start_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	goto_end_button.set_events (goto_end_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
@@ -376,11 +390,11 @@ ARDOUR_UI::setup_transport ()
 	punch_in_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_in));
 	punch_out_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_out));
 
-	preroll_button.unset_flags (Gtk::CAN_FOCUS);
+	preroll_button.unset_flags (CAN_FOCUS);
 	preroll_button.set_events (preroll_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	preroll_button.set_name ("TransportButton");
 
-	postroll_button.unset_flags (Gtk::CAN_FOCUS);
+	postroll_button.unset_flags (CAN_FOCUS);
 	postroll_button.set_events (postroll_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	postroll_button.set_name ("TransportButton");
 
@@ -406,28 +420,32 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff_hbox.pack_start (goto_start_button, false, false);
 	transport_tearoff_hbox.pack_start (goto_end_button, false, false);
 
-	Gtk::Frame* sframe = manage (new Frame);
-	Gtk::VBox*  svbox = manage (new VBox);
-	Gtk::HBox*  shbox = manage (new HBox);
+	Frame* sframe = manage (new Frame);
+	VBox*  svbox = manage (new VBox);
+	HBox*  shbox = manage (new HBox);
 
-	sframe->set_shadow_type (Gtk::SHADOW_IN);
+	sframe->set_shadow_type (SHADOW_IN);
 	sframe->add (shuttle_box);
 
 	shuttle_box.set_name (X_("ShuttleControl"));
 
 	speed_display_box.add (speed_display_label);
-	set_size_request_to_display_given_text (speed_display_box, _("stopped"), 2, 2);
 	speed_display_box.set_name (X_("ShuttleDisplay"));
 
 	shuttle_units_button.set_name (X_("ShuttleButton"));
 	shuttle_units_button.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::shuttle_unit_clicked));
 	
 	shuttle_style_button.set_name (X_("ShuttleButton"));
-	shuttle_style_button.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::shuttle_style_clicked));
 
-	Gtk::Frame* sdframe = manage (new Frame);
+	vector<string> shuttle_strings;
+	shuttle_strings.push_back (_("sprung"));
+	shuttle_strings.push_back (_("wheel"));
+	set_popdown_strings (shuttle_style_button, shuttle_strings);
+	shuttle_style_button.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::shuttle_style_changed));
 
-	sdframe->set_shadow_type (Gtk::SHADOW_IN);
+	Frame* sdframe = manage (new Frame);
+
+	sdframe->set_shadow_type (SHADOW_IN);
 	sdframe->add (speed_display_box);
 
 	shbox->pack_start (*sdframe, false, false);
@@ -478,7 +496,7 @@ ARDOUR_UI::setup_clock ()
 {
 	ARDOUR_UI::Clock.connect (bind (mem_fun (big_clock, &AudioClock::set), false));
 	
-	big_clock_window = new Gtk::Window (WINDOW_TOPLEVEL);
+	big_clock_window = new Window (WINDOW_TOPLEVEL);
 	
 	big_clock_window->set_border_width (0);
 	big_clock_window->add  (big_clock);
@@ -499,14 +517,14 @@ ARDOUR_UI::manage_window (Window& win)
 }
 
 void
-ARDOUR_UI::detach_tearoff (Gtk::Box* b, Gtk::Widget* w)
+ARDOUR_UI::detach_tearoff (Box* b, Widget* w)
 {
 	editor->ensure_float (*transport_tearoff->tearoff_window());
 	b->remove (*w);
 }
 
 void
-ARDOUR_UI::reattach_tearoff (Gtk::Box* b, Gtk::Widget* w, int32_t n)
+ARDOUR_UI::reattach_tearoff (Box* b, Widget* w, int32_t n)
 {
 	b->pack_start (*w);
 	b->reorder_child (*w, n);
@@ -560,13 +578,13 @@ ARDOUR_UI::solo_blink (bool onoff)
 	
 	if (session->soloing()) {
 		if (onoff) {
-			solo_alert_button.set_state (Gtk::STATE_ACTIVE);
+			solo_alert_button.set_state (STATE_ACTIVE);
 		} else {
-			solo_alert_button.set_state (Gtk::STATE_NORMAL);
+			solo_alert_button.set_state (STATE_NORMAL);
 		}
 	} else {
 		solo_alert_button.set_active (false);
-		solo_alert_button.set_state (Gtk::STATE_NORMAL);
+		solo_alert_button.set_state (STATE_NORMAL);
 	}
 }
 
@@ -579,13 +597,13 @@ ARDOUR_UI::audition_blink (bool onoff)
 	
 	if (session->is_auditioning()) {
 		if (onoff) {
-			auditioning_alert_button.set_state (Gtk::STATE_ACTIVE);
+			auditioning_alert_button.set_state (STATE_ACTIVE);
 		} else {
-			auditioning_alert_button.set_state (Gtk::STATE_NORMAL);
+			auditioning_alert_button.set_state (STATE_NORMAL);
 		}
 	} else {
 		auditioning_alert_button.set_active (false);
-		auditioning_alert_button.set_state (Gtk::STATE_NORMAL);
+		auditioning_alert_button.set_state (STATE_NORMAL);
 	}
 }
 
@@ -748,15 +766,6 @@ ARDOUR_UI::shuttle_box_expose (GdkEventExpose* event)
 }
 
 void
-ARDOUR_UI::shuttle_style_clicked ()
-{
-	if (shuttle_style_menu == 0) {
-		shuttle_style_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("/ShuttleStylePopup"));
-	}
-	shuttle_style_menu->popup (1, 0);
-}
-
-void
 ARDOUR_UI::shuttle_unit_clicked ()
 {
 	if (shuttle_unit_menu == 0) {
@@ -770,20 +779,33 @@ ARDOUR_UI::set_shuttle_units (ShuttleUnits u)
 {
 	switch ((shuttle_units = u)) {
 	case Percentage:
-		static_cast<Gtk::Label*>(shuttle_units_button.get_child())->set_text ("% ");
+		static_cast<Label*>(shuttle_units_button.get_child())->set_text ("% ");
 		break;
 	case Semitones:
-		static_cast<Gtk::Label*>(shuttle_units_button.get_child())->set_text (_("st"));
+		static_cast<Label*>(shuttle_units_button.get_child())->set_text (_("st"));
 		break;
 	}
 }
+
+void
+ARDOUR_UI::shuttle_style_changed ()
+{
+	ustring str = shuttle_style_button.get_active_text ();
+
+	if (str == _("sprung")) {
+		set_shuttle_behaviour (Sprung);
+	} else if (str == _("wheel")) {
+		set_shuttle_behaviour (Wheel);
+	}
+}
+
 
 void
 ARDOUR_UI::set_shuttle_behaviour (ShuttleBehaviour b)
 {
 	switch ((shuttle_behaviour = b)) {
 	case Sprung:
-		static_cast<Gtk::Label*>(shuttle_style_button.get_child())->set_text (_("sprung"));
+		shuttle_style_button.set_active_text (_("sprung"));
 		shuttle_fract = 0.0;
 		shuttle_box.queue_draw ();
 		if (session) {
@@ -794,7 +816,7 @@ ARDOUR_UI::set_shuttle_behaviour (ShuttleBehaviour b)
 		}
 		break;
 	case Wheel:
-		static_cast<Gtk::Label*>(shuttle_style_button.get_child())->set_text (_("wheel"));
+		shuttle_style_button.set_active_text (_("wheel"));
 		break;
 	}
 }
@@ -829,12 +851,16 @@ ARDOUR_UI::update_speed_display ()
 void
 ARDOUR_UI::set_transport_sensitivity (bool yn)
 {
-	goto_start_button.set_sensitive (yn);
-	goto_end_button.set_sensitive (yn);
-	roll_button.set_sensitive (yn);
-	stop_button.set_sensitive (yn);
-	play_selection_button.set_sensitive (yn);
-	rec_button.set_sensitive (yn);
-	auto_loop_button.set_sensitive (yn);
+	ActionManager::set_sensitive (ActionManager::transport_sensitive_actions, yn);
 	shuttle_box.set_sensitive (yn);
+}
+
+void
+ARDOUR_UI::editor_realized ()
+{
+	set_size_request_to_display_given_text (speed_display_box, _("stopped"), 2, 2);
+	/* XXX: this should really be saved in instant.xml or something similar and restored from there */
+	shuttle_style_button.set_active_text (_("sprung"));
+	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
+	set_size_request_to_display_given_text (shuttle_style_button, _("sprung"), 2+FUDGE, 10);
 }

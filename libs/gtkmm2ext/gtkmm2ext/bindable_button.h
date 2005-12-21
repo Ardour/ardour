@@ -21,7 +21,7 @@
 #ifndef __pbd_gtkmm_bindable_button_h__
 #define __pbd_gtkmm_bindable_button_h__
 
-#include <gtkmm.h>
+#include <gtkmm2ext/stateful_button.h>
 #include <gtkmm2ext/popup.h>
 
 

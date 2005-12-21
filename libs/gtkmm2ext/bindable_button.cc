@@ -32,8 +32,7 @@ using namespace Gtkmm2ext;
 using namespace std;
 
 BindableToggleButton::BindableToggleButton (MIDI::Controllable *mc)
-	: ToggleButton (),
-	  prompter (Gtk::WIN_POS_MOUSE, 30000, false),
+	: prompter (Gtk::WIN_POS_MOUSE, 30000, false),
 	  midi_control (mc),
 	  bind_button (2),
 	  bind_statemask (Gdk::CONTROL_MASK)

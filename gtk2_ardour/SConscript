@@ -231,7 +231,7 @@ env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/glad
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       [ 'SConscript',
                                         'i18n.h', 'gettext.h',
-                                        'editor_xpms', 'misc_xpms', 'transport_xpms',
+                                        'editor_xpms', 'misc_xpms', 
                                         'ardour2_ui.rc', 'splash.ppm'
                                         ] +
                                       gtkardour_files + vst_files + glade_files +
