@@ -35,30 +35,30 @@ class ActionManager
 	static std::string unbound_string;  /* the key string returned if an action is not bound */
 	static Glib::RefPtr<Gtk::UIManager> ui_manager;
 
-	static Gtk::Widget* get_widget (Glib::ustring name);
-	static Glib::RefPtr<Gtk::Action> get_action (Glib::ustring name);
+	static Gtk::Widget* get_widget (const char * name);
+	static Glib::RefPtr<Gtk::Action> get_action (const char * name);
 
 	static void add_action_group (Glib::RefPtr<Gtk::ActionGroup>);
 
 	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-						   std::string name, std::string label);
+						   const char * name, const char * label);
 	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-						   std::string name, std::string label, sigc::slot<void> sl, 
+						   const char * name, const char * label, sigc::slot<void> sl, 
 						   guint key, Gdk::ModifierType mods);
 	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-						   std::string name, std::string label, sigc::slot<void> sl);
+						   const char * name, const char * label, sigc::slot<void> sl);
 	
 	static Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group, 
-							 std::string name, std::string label, sigc::slot<void> sl, 
+							 const char * name, const char * label, sigc::slot<void> sl, 
 							 guint key, Gdk::ModifierType mods);
 	static Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group, 
-							 std::string name, std::string label, sigc::slot<void> sl);
+							 const char * name, const char * label, sigc::slot<void> sl);
 	
 	static Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-							  std::string name, std::string label, sigc::slot<void> sl, 
+							  const char * name, const char * label, sigc::slot<void> sl, 
 							  guint key, Gdk::ModifierType mods);
 	static Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-							  std::string name, std::string label, sigc::slot<void> sl);
+							  const char * name, const char * label, sigc::slot<void> sl);
 
 	static bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key);
 
@@ -67,7 +67,7 @@ class ActionManager
 				     std::vector<std::string>& keys, 
 				     std::vector<Gtk::AccelKey>& bindings);
 
-	static void uncheck_toggleaction (const std::string& actionname);
+	static void uncheck_toggleaction (const char * actionname);
 };
 
 #endif /* __ardour_gtk_actions_h__ */

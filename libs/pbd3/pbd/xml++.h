@@ -92,15 +92,17 @@ public:
   XMLNode *add_content(const string & = string());
 
   const XMLNodeList & children(const string & = string()) const;
-  XMLNode *add_child(const string &);
+  XMLNode *add_child(const char *);
   XMLNode *add_child_copy(const XMLNode&);
   void     add_child_nocopy (XMLNode&);
 
   const XMLPropertyList & properties() const { return _proplist; };
-  XMLProperty *property(const string &);
-  const XMLProperty *property(const string &n) const
+  XMLProperty *property(const char * );
+  const XMLProperty *property(const char * n) const
 	{ return ((XMLNode *) this)->property(n); };
-  XMLProperty *add_property(const string &, const string & = string());
+  XMLProperty *add_property(const char *, const string &);
+  XMLProperty *add_property(const char *, const char * = "");
+
   void remove_property(const string &);
 
   /** Remove all nodes with the name passed to remove_nodes */

@@ -191,7 +191,7 @@ XMLNode::XMLNode(const XMLNode& from)
 
     props = from.properties();
     for (curprop = props.begin(); curprop != props.end(); curprop++)
-		add_property((*curprop)->name(), (*curprop)->value());
+	add_property((*curprop)->name().c_str(), (*curprop)->value());
 
     nodes = from.children();
     for (curnode = nodes.begin(); curnode != nodes.end(); curnode++)
@@ -244,7 +244,7 @@ XMLNode::children(const string & n) const
 }
 
 XMLNode *
-XMLNode::add_child(const string & n)
+XMLNode::add_child(const char * n)
 {
 	return add_child_copy(XMLNode (n));
 }
@@ -266,33 +266,42 @@ XMLNode::add_child_copy(const XMLNode& n)
 XMLNode *
 XMLNode::add_content(const string & c)
 {
-    return add_child_copy(XMLNode (string(), c));
+	return add_child_copy(XMLNode (string(), c));
 }
 
 XMLProperty *
-XMLNode::property(const string & n)
+XMLNode::property(const char * n)
 {
-    if (_propmap.find(n) == _propmap.end())
+	string ns(n);
+	if (_propmap.find(ns) == _propmap.end())
 		return 0;
-    return _propmap[n];
+	return _propmap[ns];
 }
 
 XMLProperty *
-XMLNode::add_property(const string & n, const string & v)
+XMLNode::add_property(const char * n, const string & v)
 {
-	if(_propmap.find(n) != _propmap.end()){
-		remove_property(n);
+	string ns(n);
+	if(_propmap.find(ns) != _propmap.end()){
+		remove_property(ns);
 	}
 
-    XMLProperty *tmp = new XMLProperty(n, v);
+	XMLProperty *tmp = new XMLProperty(ns, v);
 
-    if (!tmp)
+	if (!tmp)
 		return 0;
 
-    _propmap[tmp->name()] = tmp;
-    _proplist.insert(_proplist.end(), tmp);
+	_propmap[tmp->name()] = tmp;
+	_proplist.insert(_proplist.end(), tmp);
 
-    return tmp;
+	return tmp;
+}
+
+XMLProperty *
+XMLNode::add_property(const char * n, const char * v)
+{
+	string vs(v);
+	return add_property(n, vs);
 }
 
 void 
@@ -357,17 +366,14 @@ readnode(xmlNodePtr node)
 
     if (node->name)
 		name = (char *) node->name;
-    else
-		name = string();
 
     tmp = new XMLNode(name);
 
     for (attr = node->properties; attr; attr = attr->next) {
-		name = (char *) attr->name;
 		content = "";
 		if (attr->children)
 		    content = (char *) attr->children->content;
-		tmp->add_property(name, content);
+		tmp->add_property((char *) attr->name, content);
     }
 
     if (node->content)

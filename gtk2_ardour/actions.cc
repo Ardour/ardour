@@ -65,7 +65,7 @@ ActionManager::init ()
 }
 
 RefPtr<Action>
-ActionManager::register_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
+ActionManager::register_action (RefPtr<ActionGroup> group, const char * name, const char * label, slot<void> sl, guint key, Gdk::ModifierType mods)
 {
 	RefPtr<Action> act = register_action (group, name, label, sl);
 	AccelMap::add_entry (act->get_accel_path(), key, mods);
@@ -74,7 +74,7 @@ ActionManager::register_action (RefPtr<ActionGroup> group, string name, string l
 }
 
 RefPtr<Action>
-ActionManager::register_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
+ActionManager::register_action (RefPtr<ActionGroup> group, const char * name, const char * label, slot<void> sl)
 {
 	RefPtr<Action> act = register_action (group, name, label);
 	group->add (act, sl);
@@ -83,7 +83,7 @@ ActionManager::register_action (RefPtr<ActionGroup> group, string name, string l
 }
 
 RefPtr<Action>
-ActionManager::register_action (RefPtr<ActionGroup> group, string name, string label)
+ActionManager::register_action (RefPtr<ActionGroup> group, const char * name, const char * label)
 {
 	RefPtr<Action> act;
 
@@ -95,7 +95,7 @@ ActionManager::register_action (RefPtr<ActionGroup> group, string name, string l
 
 
 RefPtr<Action>
-ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
+ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, const char * name, const char * label, slot<void> sl, guint key, Gdk::ModifierType mods)
 {
 	RefPtr<Action> act = register_radio_action (group, rgroup, name, label, sl);
 	AccelMap::add_entry (act->get_accel_path(), key, mods);
@@ -104,7 +104,7 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Gr
 }
 
 RefPtr<Action>
-ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, string name, string label, slot<void> sl)
+ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, const char * name, const char * label, slot<void> sl)
 {
 	RefPtr<Action> act;
 
@@ -116,7 +116,7 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Gr
 
 
 RefPtr<Action>
-ActionManager::register_toggle_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl, guint key, Gdk::ModifierType mods)
+ActionManager::register_toggle_action (RefPtr<ActionGroup> group, const char * name, const char * label, slot<void> sl, guint key, Gdk::ModifierType mods)
 {
 	RefPtr<Action> act = register_toggle_action (group,name, label, sl);
 	AccelMap::add_entry (act->get_accel_path(), key, mods);
@@ -125,7 +125,7 @@ ActionManager::register_toggle_action (RefPtr<ActionGroup> group, string name, s
 }
 
 RefPtr<Action>
-ActionManager::register_toggle_action (RefPtr<ActionGroup> group, string name, string label, slot<void> sl)
+ActionManager::register_toggle_action (RefPtr<ActionGroup> group, const char * name, const char * label, slot<void> sl)
 {
 	RefPtr<Action> act;
 
@@ -189,18 +189,19 @@ ActionManager::add_action_group (RefPtr<ActionGroup> grp)
 }
 
 Widget*
-ActionManager::get_widget (ustring name)
+ActionManager::get_widget (const char * name)
 {
 	return ui_manager->get_widget (name);
 }
 
 RefPtr<Action>
-ActionManager::get_action (ustring name)
+ActionManager::get_action (const char * _name)
 {
 	/* the C++ API for functions used here appears to be broken in
 	   gtkmm2.6, so we fall back to the C level.
 	*/
 
+	ustring name(_name);
 	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
 	GList* node;
 	RefPtr<Action> act;
@@ -241,7 +242,7 @@ ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
 }
 
 void
-ActionManager::uncheck_toggleaction (const std::string& actionname)
+ActionManager::uncheck_toggleaction (const char * actionname)
 {
         RefPtr<Action> act = get_action (actionname);
 	if (act) {
