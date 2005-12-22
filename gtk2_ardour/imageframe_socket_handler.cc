@@ -294,7 +294,7 @@ ImageFrameSocketHandler::get_socket_descriptor()
  * @param src the identity of the object that initiated the change
  */
 void
-ImageFrameSocketHandler::send_imageframe_time_axis_removed(stringcr_t track_id, void* src)
+ImageFrameSocketHandler::send_imageframe_time_axis_removed(const string & track_id, void* src)
 {
 	if(this == src || src == 0)
 	{
@@ -329,7 +329,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_removed(stringcr_t track_id, 
  * @param time_axis the time axis that has changed
  */
 void
-ImageFrameSocketHandler::send_imageframe_time_axis_renamed(stringcr_t new_id, stringcr_t old_id, void* src, ImageFrameTimeAxis* time_axis)
+ImageFrameSocketHandler::send_imageframe_time_axis_renamed(const string & new_id, const string & old_id, void* src, ImageFrameTimeAxis* time_axis)
 {
 	// ENSURE_GUI_THREAD(SigC::bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed), new_id, old_id, src, time_axis));
 	
@@ -371,7 +371,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_renamed(stringcr_t new_id, st
  * @param src the identity of the object that initiated the change
  */
 void
-ImageFrameSocketHandler::send_marker_time_axis_removed(stringcr_t track_id, void* src)
+ImageFrameSocketHandler::send_marker_time_axis_removed(const string & track_id, void* src)
 {
 	if(this == src || src == 0)
 	{
@@ -406,7 +406,7 @@ ImageFrameSocketHandler::send_marker_time_axis_removed(stringcr_t track_id, void
  * @param time_axis the time axis that has changed
  */
 void
-ImageFrameSocketHandler::send_marker_time_axis_renamed(stringcr_t new_id, stringcr_t old_id, void* src, MarkerTimeAxis* time_axis)
+ImageFrameSocketHandler::send_marker_time_axis_renamed(const string & new_id, const string & old_id, void* src, MarkerTimeAxis* time_axis)
 {
 	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_marker_time_axis_renamed), new_id, old_id, src, time_axis));
 	
@@ -449,7 +449,7 @@ ImageFrameSocketHandler::send_marker_time_axis_renamed(stringcr_t new_id, string
  * @param group the group that has changed
  */
 void
-ImageFrameSocketHandler::send_imageframe_time_axis_group_removed(stringcr_t group_id, void* src, ImageFrameTimeAxisGroup* group)
+ImageFrameSocketHandler::send_imageframe_time_axis_group_removed(const string & group_id, void* src, ImageFrameTimeAxisGroup* group)
 {
 	if(this == src || src == 0)
 	{
@@ -489,7 +489,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_group_removed(stringcr_t grou
  * @param group the group that has changed
  */
 void
-ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed(stringcr_t new_id, stringcr_t old_id, void* src, ImageFrameTimeAxisGroup* group)
+ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed(const string & new_id, const string & old_id, void* src, ImageFrameTimeAxisGroup* group)
 {
 	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed), new_id, old_id, src, group));
 	
@@ -608,7 +608,7 @@ ImageFrameSocketHandler::send_imageframe_view_duration_change(jack_nframes_t dur
  * @param item the renamed item
  */
 void
-ImageFrameSocketHandler::send_imageframe_view_renamed(stringcr_t new_id, stringcr_t old_id, void* src, ImageFrameView* item)
+ImageFrameSocketHandler::send_imageframe_view_renamed(const string & new_id, const string & old_id, void* src, ImageFrameView* item)
 {
 	if(this == src || src == 0)
 	{
@@ -643,7 +643,7 @@ ImageFrameSocketHandler::send_imageframe_view_renamed(stringcr_t new_id, stringc
  * @param item the removed item
  */
 void
-ImageFrameSocketHandler::send_imageframe_view_removed(stringcr_t item_id, void* src, ImageFrameView* item)
+ImageFrameSocketHandler::send_imageframe_view_removed(const string & item_id, void* src, ImageFrameView* item)
 {
 	if(this == src || src == 0)
 	{
@@ -756,7 +756,7 @@ ImageFrameSocketHandler::send_marker_view_duration_change(jack_nframes_t dur, vo
  * @param item the MarkerView which has been renamed
  */
 void
-ImageFrameSocketHandler::send_marker_view_renamed(stringcr_t new_id, stringcr_t old_id, void* src, MarkerView* item)
+ImageFrameSocketHandler::send_marker_view_renamed(const string & new_id, const string & old_id, void* src, MarkerView* item)
 {
 	if(this == src || src == 0)
 	{
@@ -792,7 +792,7 @@ ImageFrameSocketHandler::send_marker_view_renamed(stringcr_t new_id, stringcr_t 
  * @param item the MarkerView which has been removed
  */
 void
-ImageFrameSocketHandler::send_marker_view_removed(stringcr_t item_id, void* src, MarkerView* item) 
+ImageFrameSocketHandler::send_marker_view_removed(const string & item_id, void* src, MarkerView* item) 
 {
 	if(this == src || src == 0)
 	{
@@ -2239,7 +2239,7 @@ ImageFrameSocketHandler::compose_marker_item_desc(MarkerView* mv, std::ostringst
  * @return the described item on success, 0 otherwise
  */
 ImageFrameView*
-ImageFrameSocketHandler::get_imageframe_view_from_desc(stringcr_t track_id, stringcr_t group_id, stringcr_t item_id, int& errcode, std::string& errmsg)
+ImageFrameSocketHandler::get_imageframe_view_from_desc(const string & track_id, const string & group_id, const string & item_id, int& errcode, std::string& errmsg)
 {
 	ImageFrameView* item = 0 ;
 	
@@ -2294,7 +2294,7 @@ ImageFrameSocketHandler::get_imageframe_view_from_desc(stringcr_t track_id, stri
  * @return the return value of the socket call
  */
 int
-ImageFrameSocketHandler::send_message(stringcr_t msg)
+ImageFrameSocketHandler::send_message(const string & msg)
 {
 	//std::cout << "Sending Message [" << msg << "]\n" ;
 	int retcode = ::send(theArdourToCompositorSocket, msg.c_str(), msg.length(), MSG_NOSIGNAL) ;

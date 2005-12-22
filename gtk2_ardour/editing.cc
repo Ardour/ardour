@@ -19,7 +19,7 @@ namespace Editing {
 #undef SNAPTYPE
 #define SNAPTYPE(s) if (!strcmp(type, #s)) {return s;}
 SnapType
-str2snaptype (ARDOUR::stringcr_t str) {
+str2snaptype (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return SnapToBar;
@@ -31,7 +31,7 @@ str2snaptype (ARDOUR::stringcr_t str) {
 #undef SNAPMODE
 #define SNAPMODE(s) if (!strcmp(type, #s)) {return s;}
 SnapMode
-str2snapmode (ARDOUR::stringcr_t str) {
+str2snapmode (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return SnapNormal;
@@ -43,7 +43,7 @@ str2snapmode (ARDOUR::stringcr_t str) {
 #undef REGIONLISTSORTTYPE
 #define REGIONLISTSORTTYPE(s) if (!strcmp(type, #s)) {return s;}
 RegionListSortType
-str2regionlistsorttype (ARDOUR::stringcr_t str) {
+str2regionlistsorttype (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return ByName;
@@ -55,7 +55,7 @@ str2regionlistsorttype (ARDOUR::stringcr_t str) {
 #undef MOUSEMODE
 #define MOUSEMODE(s) if (!strcmp(type, #s)) {return s;}
 MouseMode
-str2mousemode (ARDOUR::stringcr_t str) {
+str2mousemode (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return MouseObject;
@@ -67,7 +67,7 @@ str2mousemode (ARDOUR::stringcr_t str) {
 #undef ZOOMFOCUS
 #define ZOOMFOCUS(s) if (!strcmp(type, #s)) {return s;}
 ZoomFocus
-str2zoomfocus (ARDOUR::stringcr_t str) {
+str2zoomfocus (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return ZoomFocusPlayhead;
@@ -79,7 +79,7 @@ str2zoomfocus (ARDOUR::stringcr_t str) {
 #undef DISPLAYCONTROL
 #define DISPLAYCONTROL(s) if (!strcmp(type, #s)) {return s;}
 DisplayControl
-str2displaycontrol (ARDOUR::stringcr_t str) {
+str2displaycontrol (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return FollowPlayhead;
@@ -91,7 +91,7 @@ str2displaycontrol (ARDOUR::stringcr_t str) {
 #undef COLORID
 #define COLORID(s) if (!strcmp(type, #s)) {return s;}
 ColorID
-str2color_id (ARDOUR::stringcr_t str) {
+str2color_id (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
 	return cFrameHandleEndOutline;

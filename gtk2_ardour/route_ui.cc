@@ -601,7 +601,7 @@ RouteUI::ensure_xml_node ()
 }
 
 XMLNode*
-RouteUI::get_child_xml_node (stringcr_t childname)
+RouteUI::get_child_xml_node (const string & childname)
 {
 	XMLNode* child;
 

@@ -30,7 +30,7 @@ static const char *snaptypestrs[] = {
 	#include "editing_syms.h"
 };
 inline const char* enum2str(SnapType m) {return snaptypestrs[m];}
-SnapType str2snaptype(ARDOUR::stringcr_t);
+SnapType str2snaptype(const std::string &);
 
 #undef SNAPTYPE
 #define SNAPTYPE(a) /*empty*/
@@ -48,7 +48,7 @@ static const char *snapmodestrs[] = {
 	#include "editing_syms.h"
 };
 inline const char* enum2str(SnapMode m) {return snapmodestrs[m];}
-SnapMode str2snapmode(ARDOUR::stringcr_t);
+SnapMode str2snapmode(const std::string &);
 
 #undef SNAPMODE
 #define SNAPMODE(a) /*empty*/
@@ -66,7 +66,7 @@ static const char *regionlistsorttypestrs[] = {
 	#include "editing_syms.h"
 };
 inline const char* enum2str(RegionListSortType m) {return regionlistsorttypestrs[m];}
-RegionListSortType str2regionlistsorttype(ARDOUR::stringcr_t);
+RegionListSortType str2regionlistsorttype(const std::string &);
 
 #undef REGIONLISTSORTTYPE
 #define REGIONLISTSORTTYPE(a) /*empty*/
@@ -84,7 +84,7 @@ static const char *mousemodestrs[] = {
 	#include "editing_syms.h"
 };
 inline const char* enum2str(MouseMode m) {return mousemodestrs[m];}
-MouseMode str2mousemode(ARDOUR::stringcr_t);
+MouseMode str2mousemode(const std::string &);
 
 #undef MOUSEMODE
 #define MOUSEMODE(a) /*empty*/
@@ -102,7 +102,7 @@ static const char *zoomfocusstrs[] = {
 	#include "editing_syms.h"
 };
 inline const char* enum2str(ZoomFocus m) {return zoomfocusstrs[m];}
-ZoomFocus str2zoomfocus(ARDOUR::stringcr_t);
+ZoomFocus str2zoomfocus(const std::string &);
 
 #undef ZOOMFOCUS
 #define ZOOMFOCUS(a) /*empty*/
@@ -120,7 +120,7 @@ static const char *displaycontrolstrs[] = {
 	#include "editing_syms.h"
 };
 inline const char* enum2str(DisplayControl m) {return displaycontrolstrs[m];}
-DisplayControl str2displaycontrol (ARDOUR::stringcr_t);
+DisplayControl str2displaycontrol (const std::string &);
 
 #undef DISPLAYCONTROL
 #define DISPLAYCONTROL(a) /*empty*/
@@ -137,7 +137,7 @@ static const char *color_id_strs[] = {
 	#include "editing_syms.h"
 };
 inline const char* enum2str(ColorID m) {return color_id_strs[m];}
-ColorID str2color_id (ARDOUR::stringcr_t);
+ColorID str2color_id (const std::string &);
 
 #undef COLORID
 #define COLORID(a) /*empty*/

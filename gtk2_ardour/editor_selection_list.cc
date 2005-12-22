@@ -130,7 +130,7 @@ Editor::named_selection_name_chosen ()
 }
 
 void
-Editor::create_named_selection (stringcr_t name)
+Editor::create_named_selection (const string & name)
 {
 	if (session == 0) {
 		return;

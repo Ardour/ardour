@@ -1102,7 +1102,7 @@ If you still wish to quit, please use the\n\n\
 }
 
 int
-ARDOUR_UI::ask_about_saving_session (stringcr_t what)
+ARDOUR_UI::ask_about_saving_session (const string & what)
 {
 	ArdourDialog window (_("ardour: save session?"));
 	Gtk::Label  prompt_label;
@@ -2476,7 +2476,7 @@ ARDOUR_UI::snapshot_session ()
 }
 
 void
-ARDOUR_UI::save_state (stringcr_t name)
+ARDOUR_UI::save_state (const string & name)
 {
 	(void) save_state_canfail (name);
 }
@@ -2708,7 +2708,7 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 }
 
 int
-ARDOUR_UI::load_session (stringcr_t path, stringcr_t snap_name, string* mix_template)
+ARDOUR_UI::load_session (const string & path, const string & snap_name, string* mix_template)
 {
 	Session *new_session;
 	int x;
@@ -2760,7 +2760,7 @@ ARDOUR_UI::make_session_clean ()
 }
 
 int
-ARDOUR_UI::build_session (stringcr_t path, stringcr_t snap_name, 
+ARDOUR_UI::build_session (const string & path, const string & snap_name, 
 			  uint32_t control_channels,
 			  uint32_t master_channels, 
 			  Session::AutoConnectOption input_connect,
@@ -2837,7 +2837,7 @@ ARDOUR_UI::hide_splash ()
 }
 
 void
-ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* list_title, stringcr_t msg)
+ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* list_title, const string & msg)
 {
 	size_t removed;
 

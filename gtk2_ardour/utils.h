@@ -51,7 +51,7 @@ slider_position_to_gain (double pos)
 }
 
 std::string short_version (std::string, std::string::size_type target_length);
-std::string fit_to_pixels (ARDOUR::stringcr_t, int pixel_width, ARDOUR::stringcr_t font);
+std::string fit_to_pixels (const std::string &, int pixel_width, const std::string & font);
 
 int    atoi (const std::string&);
 double atof (const std::string&);

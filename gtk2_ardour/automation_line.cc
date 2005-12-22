@@ -217,7 +217,7 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 
 /*****/
 
-AutomationLine::AutomationLine (stringcr_t name, TimeAxisView& tv, ArdourCanvas::Group& parent, AutomationList& al)
+AutomationLine::AutomationLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, AutomationList& al)
 	: trackview (tv),
 	  _name (name),
 	  alist (al),

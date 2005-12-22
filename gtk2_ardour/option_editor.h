@@ -225,8 +225,8 @@ class OptionEditor : public Gtk::Dialog
 	void setup_click_editor ();
 	void clear_click_editor ();
 
-	void click_chosen (ARDOUR::stringcr_t paths);
-	void click_emphasis_chosen (ARDOUR::stringcr_t paths);
+	void click_chosen (const string & paths);
+	void click_emphasis_chosen (const string & paths);
 
 	void click_browse_clicked ();
 	void click_emphasis_browse_clicked ();

@@ -33,7 +33,7 @@
 using namespace std;
 using namespace ARDOUR;
 
-RedirectAutomationLine::RedirectAutomationLine (stringcr_t name, Redirect& rd, uint32_t port, Session& s,
+RedirectAutomationLine::RedirectAutomationLine (const string & name, Redirect& rd, uint32_t port, Session& s,
 						
 						TimeAxisView& tv, ArdourCanvas::Group& parent,
 						

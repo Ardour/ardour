@@ -1937,7 +1937,7 @@ AudioTimeAxisView::route_active_changed ()
 }
 
 XMLNode* 
-AudioTimeAxisView::get_child_xml_node (stringcr_t childname)
+AudioTimeAxisView::get_child_xml_node (const string & childname)
 {
 	return RouteUI::get_child_xml_node (childname);
 }

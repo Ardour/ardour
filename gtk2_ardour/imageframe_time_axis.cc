@@ -58,7 +58,7 @@ using namespace Gtk;
  * @param sess the current session
  * @param canvas the parent canvas item
  */
-ImageFrameTimeAxis::ImageFrameTimeAxis(stringcr_t track_id, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas)
+ImageFrameTimeAxis::ImageFrameTimeAxis(const string & track_id, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas)
 	: AxisView(sess),
 	  VisualTimeAxis(track_id, ed, sess, canvas)
 {
@@ -351,7 +351,7 @@ ImageFrameTimeAxis::add_marker_time_axis(MarkerTimeAxis* marker_track, void* src
  * @return the named markerTimeAxis, or 0 if the named MarkerTimeAxis is not associated with this ImageFrameTimeAxis
  */
 MarkerTimeAxis*
-ImageFrameTimeAxis::get_named_marker_time_axis(stringcr_t track_id)
+ImageFrameTimeAxis::get_named_marker_time_axis(const string & track_id)
 {
 	MarkerTimeAxis* mta =  0 ;
 	
@@ -374,7 +374,7 @@ ImageFrameTimeAxis::get_named_marker_time_axis(stringcr_t track_id)
  * @return the removed MarkerTimeAxis
  */
 MarkerTimeAxis*
-ImageFrameTimeAxis::remove_named_marker_time_axis(stringcr_t track_id, void* src)
+ImageFrameTimeAxis::remove_named_marker_time_axis(const string & track_id, void* src)
 {
 	MarkerTimeAxis* mta = 0 ;
 	

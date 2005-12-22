@@ -45,7 +45,7 @@ using namespace ARDOUR ;
  * @param iftav the parent ImageFrameTimeAxis of this view helper
  * @param group_id the unique name/id of this group
  */
-ImageFrameTimeAxisGroup::ImageFrameTimeAxisGroup(ImageFrameTimeAxisView& iftav, stringcr_t group_id)
+ImageFrameTimeAxisGroup::ImageFrameTimeAxisGroup(ImageFrameTimeAxisView& iftav, const string & group_id)
 	: _view_helper(iftav), _group_id(group_id)
 {
 	selected_imageframe_item = 0 ;
@@ -89,7 +89,7 @@ ImageFrameTimeAxisGroup::~ImageFrameTimeAxisGroup()
  * @param src the identity of the object that initiated the change
  */
 void
-ImageFrameTimeAxisGroup::set_group_name(stringcr_t new_name, void* src)
+ImageFrameTimeAxisGroup::set_group_name(const string & new_name, void* src)
 {
 	if(_group_id != new_name)
 	{
@@ -195,7 +195,7 @@ ImageFrameTimeAxisGroup::apply_item_color(Gdk::Color& color)
  * @param src the identity of the object that initiated the change
  */
 ImageFrameView*
-ImageFrameTimeAxisGroup::add_imageframe_item(stringcr_t frame_id, jack_nframes_t start, jack_nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src)
+ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, jack_nframes_t start, jack_nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src)
 {
 	ImageFrameView* ifv = 0 ;
 	
@@ -233,7 +233,7 @@ ImageFrameTimeAxisGroup::add_imageframe_item(stringcr_t frame_id, jack_nframes_t
  * @return the named ImageFrameView, or 0 if it is not held upon this view
  */
 ImageFrameView*
-ImageFrameTimeAxisGroup::get_named_imageframe_item(stringcr_t frame_id)
+ImageFrameTimeAxisGroup::get_named_imageframe_item(const string & frame_id)
 {
 	ImageFrameView* ifv =  0 ;
 	
@@ -293,7 +293,7 @@ ImageFrameTimeAxisGroup::remove_selected_imageframe_item(void* src)
  * @see add_imageframe_view
  */
 ImageFrameView*
-ImageFrameTimeAxisGroup::remove_named_imageframe_item(stringcr_t frame_id, void* src)
+ImageFrameTimeAxisGroup::remove_named_imageframe_item(const string & frame_id, void* src)
 {
 	ImageFrameView* removed = 0 ;
 	

@@ -32,7 +32,7 @@
 using namespace std;
 using namespace ARDOUR;
 
-AutomationGainLine::AutomationGainLine (stringcr_t name, Session& s, TimeAxisView& tv, ArdourCanvas::Group& parent, Curve& c)
+AutomationGainLine::AutomationGainLine (const string & name, Session& s, TimeAxisView& tv, ArdourCanvas::Group& parent, Curve& c)
 
 	: AutomationLine (name, tv, parent, c),
 	  session (s)

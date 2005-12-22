@@ -78,7 +78,7 @@ class RouteUI : public virtual AxisView
 	XMLNode *xml_node;
 	void ensure_xml_node ();
 
-	XMLNode* get_child_xml_node (ARDOUR::stringcr_t childname);
+	XMLNode* get_child_xml_node (const string & childname);
 	
 	gint mute_press(GdkEventButton*);
 	gint mute_release(GdkEventButton*);

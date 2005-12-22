@@ -43,7 +43,6 @@ namespace ARDOUR {
 	typedef float                       gain_t;
 	typedef uint32_t                    layer_t;
 	typedef uint64_t                    id_t;
-	typedef const std::string &	    stringcr_t;
 
 	enum IOChange {
 		NoChange = 0,

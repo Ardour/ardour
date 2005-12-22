@@ -83,7 +83,7 @@ static const gchar* small_x_xpm[] = {
  * @param sess the current session
  * @param canvas the parent canvas object
  */
-VisualTimeAxis::VisualTimeAxis(stringcr_t name, PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas)
+VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas)
 	: AxisView(sess),
 	  TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas),
 	  visual_button (_("v")),
@@ -141,7 +141,7 @@ VisualTimeAxis::~VisualTimeAxis()
 // Name/Id Accessors/Mutators
 
 void
-VisualTimeAxis::set_time_axis_name(stringcr_t name, void* src)
+VisualTimeAxis::set_time_axis_name(const string & name, void* src)
 {
 	std::string old_name = time_axis_name ;
 	

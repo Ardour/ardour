@@ -60,7 +60,7 @@ class ImageFrameView : public TimeAxisViewItem
 		 * @param height the width of the origianl rgb_data image data
 		 * @param num_channels the number of color channels within rgb_data
 		 */
-		ImageFrameView(ARDOUR::stringcr_t item_id,
+		ImageFrameView(const std::string & item_id,
 			 ArdourCanvas::Group *parent,
 			ImageFrameTimeAxis *tv,
 			ImageFrameTimeAxisGroup* group,
@@ -150,7 +150,7 @@ class ImageFrameView : public TimeAxisViewItem
 		 * @param src the identity of the object that initiated the change
 		 * @return the removed marker item
 		 */
-		MarkerView* remove_named_marker_view_item(ARDOUR::stringcr_t markId, void* src) ;
+		MarkerView* remove_named_marker_view_item(const std::string & markId, void* src) ;
 		
 		/**
 		 * Removes item from the list of marker views assocaited with this item
@@ -167,7 +167,7 @@ class ImageFrameView : public TimeAxisViewItem
 		 *
 		 * @param markId the id/name of the item to search for
 		 */
-		bool has_marker_view_item(ARDOUR::stringcr_t markId) ;
+		bool has_marker_view_item(const std::string & markId) ;
 
 		
 		//---------------------------------------------------------------------------------//

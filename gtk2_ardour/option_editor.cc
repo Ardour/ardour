@@ -1295,7 +1295,7 @@ OptionEditor::click_browse_clicked ()
 }
 
 void
-OptionEditor::click_chosen (stringcr_t path)
+OptionEditor::click_chosen (const string & path)
 {
 	click_path_entry.set_text (path);
 	click_sound_changed ();
@@ -1314,7 +1314,7 @@ OptionEditor::click_emphasis_browse_clicked ()
 }
 
 void
-OptionEditor::click_emphasis_chosen (stringcr_t path)
+OptionEditor::click_emphasis_chosen (const string & path)
 {	
 	click_emphasis_path_entry.set_text (path);
 	click_emphasis_sound_changed ();

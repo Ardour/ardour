@@ -17,7 +17,7 @@ class GainAutomationTimeAxisView : public AutomationTimeAxisView
 				    PublicEditor&,
 				    TimeAxisView& parent_axis,
 				    ArdourCanvas::Canvas& canvas,
-				    ARDOUR::stringcr_t name,
+				    const string & name,
 				    ARDOUR::Curve&);
 	
 	~GainAutomationTimeAxisView();
