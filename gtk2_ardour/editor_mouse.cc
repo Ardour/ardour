@@ -3740,8 +3740,6 @@ Editor::start_trim (ArdourCanvas::Item* item, GdkEvent* event)
 		show_verbose_time_cursor(drag_info.current_pointer_frame, 10);	
 		break;
 	}
-	
-	flush_track_canvas ();
 }
 
 void
@@ -3991,8 +3989,6 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		/* no mouse movement */
 		point_trim (event);
 	}
-	
-	flush_track_canvas ();
 }
 
 void

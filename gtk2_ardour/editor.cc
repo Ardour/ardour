@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1152,8 +1152,6 @@ Editor::connect_to_session (Session *t)
 	if (first_action_message) {
 	        first_action_message->hide();
 	}
-
-	flush_track_canvas();
 
 	update_title ();
 
@@ -2976,19 +2974,6 @@ Editor::commit_reversible_command ()
 		UndoAction ua = get_memento();
 		session->commit_reversible_command (&ua);
 	}
-}
-
-void
-Editor::flush_track_canvas ()
-{
-	/* I don't think this is necessary, and only causes more problems.
-	   I'm commenting it out
-	   and if the imageframe folks don't have any issues, we can take
-	   out this method entirely
-	*/
-	
-	//gnome_canvas_update_now (GNOME_CANVAS(track_canvas));
-	//gtk_main_iteration ();
 }
 
 void

@@ -633,8 +633,6 @@ Editor::imageframe_start_handle_op(ArdourCanvas::Item* item, GdkEvent* event)
 		drag_info.motion_callback = &Editor::imageframe_start_handle_trim_motion ;
 		drag_info.finished_callback = &Editor::imageframe_start_handle_end_trim ;
 		
-		flush_track_canvas() ;
-		
 		start_grab(event) ;
 		
 		show_verbose_time_cursor(ifv->get_position(), 10) ;
@@ -664,8 +662,6 @@ Editor::imageframe_end_handle_op(ArdourCanvas::Item* item, GdkEvent* event)
 		drag_info.cumulative_x_drag = 0 ;
 		drag_info.motion_callback = &Editor::imageframe_end_handle_trim_motion ;
 		drag_info.finished_callback = &Editor::imageframe_end_handle_end_trim ;
-
-		flush_track_canvas() ;
 
 		start_grab(event, trimmer_cursor) ;
 
@@ -760,8 +756,6 @@ Editor::imageframe_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* eve
 		ifv->set_position((jack_nframes_t) (temp - drag_info.cumulative_x_drag), this) ;
 		ifv->set_duration((jack_nframes_t) drag_info.cumulative_x_drag, this) ;
 	}
-
-	flush_track_canvas() ;
 }
 
 void
@@ -840,8 +834,6 @@ Editor::imageframe_end_handle_end_trim (ArdourCanvas::Item* item, GdkEvent* even
 			ifv->set_duration(new_duration, this) ;
 		}
 	}
-
-	flush_track_canvas ();
 }
 
 
@@ -865,8 +857,6 @@ Editor::markerview_item_start_handle_op(ArdourCanvas::Item* item, GdkEvent* even
 	drag_info.motion_callback = &Editor::markerview_start_handle_trim_motion ;
  	drag_info.finished_callback = &Editor::markerview_start_handle_end_trim ;
 
- 	flush_track_canvas() ;
-
 	start_grab(event, trimmer_cursor) ;
 }
 
@@ -889,8 +879,6 @@ Editor::markerview_item_end_handle_op(ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.motion_callback = &Editor::markerview_end_handle_trim_motion ;
  	drag_info.finished_callback = &Editor::markerview_end_handle_end_trim ;
 	
- 	flush_track_canvas () ;
-
 	start_grab(event, trimmer_cursor) ;
 }
 
@@ -985,8 +973,6 @@ Editor::markerview_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* eve
 		mv->set_position((jack_nframes_t) (temp - drag_info.cumulative_x_drag), this) ;
 		mv->set_duration((jack_nframes_t) drag_info.cumulative_x_drag, this) ;
 	}
-
-	flush_track_canvas() ;
 }
 
 void
@@ -1079,8 +1065,6 @@ Editor::markerview_end_handle_end_trim (ArdourCanvas::Item* item, GdkEvent* even
 		jack_nframes_t new_duration = (jack_nframes_t)drag_info.cumulative_x_drag ;
 		mv->set_duration(new_duration, this) ;
 	}
-
-	flush_track_canvas() ;
 }
 
 

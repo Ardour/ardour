@@ -1001,13 +1001,14 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	uint32_t nchans = atv.get_diskstream()->n_channels();
 	uint32_t n;
 	uint32_t nwaves = std::min (nchans, region.n_channels());
-	
 	gdouble ht;
+
 	if (trackview.height < NAME_HIGHLIGHT_SIZE) {
 		ht = ((trackview.height) / (double) nchans);
 	} else {
 		ht = ((trackview.height - NAME_HIGHLIGHT_SIZE) / (double) nchans);
 	}
+
 	gdouble yoff = which * ht;
 
 	WaveView *wave = new WaveView(*group);
@@ -1026,24 +1027,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 	wave->property_wave_color() = region.muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm];
 	wave->property_region_start() = region.start();
-// 	WaveView *wave = gnome_canvas_item_new (GNOME_CANVAS_GROUP(group),
-// 						   gnome_canvas_waveview_get_type (),
-// 						   "data_src", (gpointer) &region,
-// 						   "cache", wave_caches[which],
-// 						   "cache_updater", (gboolean) true,
-// 						   "channel", (guint32) which,
-// 						   "length_function", (gpointer) region_length_from_c,
-// 						   "sourcefile_length_function",(gpointer) sourcefile_length_from_c,
-// 						   "peak_function", (gpointer) region_read_peaks_from_c,
-// 						   "x", 0.0,
-// 						   "y", yoff,
-// 						   "height", (double) ht,
-// 						   "samples_per_unit", samples_per_unit,
-// 						   "amplitude_above_axis", _amplitude_above_axis,
-// 						   "wave_color", (guint32) (region.muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm]),
-// 						   "region_start",(guint32) region.start(),
-// 						   NULL);
-	
+
 	if (!(_flags & WaveformVisible)) {
 		wave->hide();
 	}
@@ -1262,23 +1246,7 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 		wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 		wave->property_wave_color() = color_map[cGhostTrackWave];
 		wave->property_region_start() = region.start();
-		// 		WaveView *wave = gnome_canvas_item_new (GNOME_CANVAS_GROUP(ghost->group),
-		// 							   gnome_canvas_waveview_get_type (),
-		// 							   "data_src", (gpointer) &region,
-		// 							   "cache", wave_caches[n],
-		// 							   "cache_updater", (gboolean) false,
-		// 							   "channel", (guint32) n,
-		// 							   "length_function", (gpointer) region_length_from_c,
-		// 							   "sourcefile_length_function",(gpointer) sourcefile_length_from_c,
-		// 							   "peak_function", (gpointer) region_read_peaks_from_c,
-		// 							   "x", 0.0,
-		// 							   "samples_per_unit", samples_per_unit,
-		// 							   "amplitude_above_axis", _amplitude_above_axis,
-		// 							   "wave_color", color_map[cGhostTrackWave],
-		// 							   "region_start", (guint32) region.start(),
-		// 							   NULL);
 
-		
 		ghost->waves.push_back(wave);
 	}
 

@@ -329,8 +329,6 @@ gnome_canvas_waveview_destroy (GtkObject *object)
 
 	waveview = GNOME_CANVAS_WAVEVIEW (object);
 
-	gnome_canvas_waveview_cache_destroy (waveview->cache);
-
 	if (GTK_OBJECT_CLASS (parent_class)->destroy)
 		(* GTK_OBJECT_CLASS (parent_class)->destroy) (object);
 }
