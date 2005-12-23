@@ -321,7 +321,7 @@ Editor::Editor (AudioEngine& eng)
 	ignore_route_list_reorder = false;
 	verbose_cursor_on = true;
 	route_removal = false;
-	track_spacing = 0;
+	track_spacing = 2;
 	show_automatic_regions_in_region_list = true;
 	have_pending_keyboard_selection = false;
 	_follow_playhead = true;
@@ -386,11 +386,12 @@ Editor::Editor (AudioEngine& eng)
 	track_canvas.signal_map_event().connect (mem_fun (*this, &Editor::track_canvas_map_handler));
 	time_canvas.signal_map_event().connect (mem_fun (*this, &Editor::time_canvas_map_handler));
 	
-	// edit_controls_hbox.pack_start (edit_controls_vbox, true, true);
 	controls_layout.add (edit_controls_vbox);
 	controls_layout.set_name ("EditControlsBase");
+	controls_layout.add_events (Gdk::SCROLL_MASK);
 	controls_layout.signal_size_request().connect (mem_fun(*this, &Editor::set_layout_width), false);
-	controls_layout.signal_expose_event().connect (mem_fun(*this, &Editor::layout_expose), false);
+	controls_layout.signal_expose_event().connect (mem_fun(*this, &Editor::control_layout_expose), false);
+	controls_layout.signal_scroll_event().connect (mem_fun(*this, &Editor::control_layout_scroll), false);
 	
 	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	controls_layout.signal_button_release_event().connect (mem_fun(*this, &Editor::edit_controls_button_release));
@@ -3920,8 +3921,29 @@ Editor::set_layout_width(Gtk::Requisition *r)
 }
 
 bool
-Editor::layout_expose (GdkEventExpose* ex)
+Editor::control_layout_expose (GdkEventExpose* ex)
 {
-	cerr << "layout_expose() called" << endl;
-	return TRUE;
+	cerr << "control layout_expose() called" << endl;
+	return true;
+}
+
+bool
+Editor::control_layout_scroll (GdkEventScroll* ev)
+{
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		scroll_tracks_up_line ();
+		return true;
+		break;
+
+	case GDK_SCROLL_DOWN:
+		scroll_tracks_down_line ();
+		return true;
+		
+	default:
+		/* no left/right handling yet */
+		break;
+	}
+
+	return false;
 }

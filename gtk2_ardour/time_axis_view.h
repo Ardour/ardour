@@ -218,7 +218,8 @@ class TimeAxisView : public virtual AxisView
 	 * 
 	 *@ param ev the event
 	 */
-	virtual gint controls_ebox_button_release (GdkEventButton *ev);
+	virtual bool controls_ebox_button_release (GdkEventButton *ev);
+	virtual bool controls_ebox_scroll (GdkEventScroll *ev);
 
 	/**
 	 * Displays the standard LHS control menu at when.

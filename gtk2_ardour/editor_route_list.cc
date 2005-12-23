@@ -224,10 +224,11 @@ Editor::route_list_reordered ()
 {
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
-	long order;
+	uint32_t position;
+	uint32_t order;
 	int n;
 	
-	for (n = 0, order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
+	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		AudioTimeAxisView* at; 
 		if (!ignore_route_list_reorder) {
@@ -237,12 +238,12 @@ Editor::route_list_reordered ()
 				*/
 			
 			if ((at = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
-				at->route().set_order_key (N_("editor"), order);
+				at->route().set_order_key (N_("editor"), position);
 			}
 		}
 		if (tv->marked_for_display()) {
-			order += tv->show_at (order, n, &edit_controls_vbox);
-			order += track_spacing;
+			position += tv->show_at (position, n, &edit_controls_vbox);
+			position += track_spacing;
 		} else {
 			tv->hide ();
 		}
@@ -251,7 +252,7 @@ Editor::route_list_reordered ()
 		
 	}
 
-	// controls_layout.queue_resize ();
+	controls_layout.queue_resize ();
 	reset_scrolling_region ();
 	return FALSE;
 }

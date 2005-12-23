@@ -626,11 +626,6 @@ ARDOUR_UI::shuttle_box_button_press (GdkEventButton* ev)
 	case 3:
 		return TRUE;
 		break;
-
-	case 4:
-		break;
-	case 5:
-		break;
 	}
 
 	return TRUE;

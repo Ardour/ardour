@@ -52,6 +52,7 @@
 #include "i18n.h"
 
 using namespace Gtk;
+using namespace Gdk;
 using namespace sigc; 
 using namespace ARDOUR;
 using namespace Editing;
@@ -125,11 +126,12 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_ebox.add (controls_vbox);
-	controls_ebox.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	controls_ebox.set_flags (Gtk::CAN_FOCUS);
+	controls_ebox.add_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|SCROLL_MASK);
+	controls_ebox.set_flags (CAN_FOCUS);
 
 	controls_ebox.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
-	
+	controls_ebox.signal_scroll_event().connect (mem_fun (*this, &TimeAxisView::controls_ebox_scroll));
+
 	controls_lhs_pad.set_name ("TimeAxisViewControlsPadding");
 	controls_hbox.pack_start (controls_lhs_pad,false,false);
 	controls_hbox.pack_start (controls_ebox,true,true);
@@ -137,7 +139,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	controls_frame.add (controls_hbox);
 	controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
-	controls_frame.set_shadow_type (Gtk::SHADOW_OUT);
+	controls_frame.set_shadow_type (Gtk::SHADOW_IN);
 }
 
 TimeAxisView::~TimeAxisView()
@@ -233,9 +235,37 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	return effective_height;
 }
 
-gint
+bool
+TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
+{
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+			step_height (true);
+			return true;
+		}
+		break;
+		
+	case GDK_SCROLL_DOWN:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+			step_height (false);
+			return true;
+		}
+		break;
+
+	default:
+		/* no handling for left/right, yet */
+		break;
+	}
+
+	return false;
+}
+
+bool
 TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 {
+	cerr << "controls ebox button release button " << ev->button << endl;
+
 	switch (ev->button) {
 	case 1:
 		selection_click (ev);
@@ -244,27 +274,9 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 	case 3:
 		popup_display_menu (ev->time);
 		break;
-
-	case 4:
-		if (Keyboard::no_modifier_keys_pressed (ev)) {
-			editor.scroll_tracks_up_line ();
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
-			step_height (true);
-		}
-		break;
-
-	case 5:
-		if (Keyboard::no_modifier_keys_pressed (ev)) {
-			editor.scroll_tracks_down_line ();
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
-			step_height (false);
-		}
-		break;
-		
-
 	}
 
-	return TRUE;
+	return true;
 }
 
 void
