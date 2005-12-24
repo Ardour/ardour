@@ -70,8 +70,8 @@ class GainMeter : public Gtk::VBox
 	void set_width (Width);
 	void setup_meters ();
 
-	void set_meter_strip_name (string name);
-	void set_fader_name (string name);
+	void set_meter_strip_name (const char * name);
+	void set_fader_name (const char * name);
 
   private:
 	ARDOUR::IO& _io;

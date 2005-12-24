@@ -548,13 +548,13 @@ GainMeter::gain_changed (void *src)
 }
 
 void
-GainMeter::set_meter_strip_name (string name)
+GainMeter::set_meter_strip_name (const char * name)
 {
 	meter_metric_area.set_name (name);
 }
 
 void
-GainMeter::set_fader_name (string name)
+GainMeter::set_fader_name (const char * name)
 {
 	gain_slider->set_name (name);
 }

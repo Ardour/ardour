@@ -77,7 +77,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @return true if the connection was a succees
 		 *         false otherwise
 		 */
-		bool connect(std::string hostIp, int32_t port) ;
+		bool connect(const char * hostIp, int32_t port) ;
 		
 		/**
 		 * Closes the connection to th Image Compositor

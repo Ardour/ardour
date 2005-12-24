@@ -75,9 +75,9 @@ Editor::connect_to_image_compositor()
 	}
 
 	// XXX should really put this somewhere safe
-	std::string host_ip = "127.0.0.1" ;
+	const char * host_ip = "127.0.0.1" ;
 	
-	bool retcode = image_socket_listener->connect(host_ip,ardourvis::DEFAULT_PORT) ;
+	bool retcode = image_socket_listener->connect(host_ip, ardourvis::DEFAULT_PORT) ;
 	
 	if(retcode == false)
 	{

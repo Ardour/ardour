@@ -185,7 +185,7 @@ ImageFrameSocketHandler::image_socket_callback(void *arg, int32_t fd, GdkInputCo
  *         false otherwise
  */
 bool
-ImageFrameSocketHandler::connect(std::string hostIp, int32_t port)
+ImageFrameSocketHandler::connect(const char * hostIp, int32_t port)
 {
 	if (is_connected())
 	{
@@ -205,7 +205,7 @@ ImageFrameSocketHandler::connect(std::string hostIp, int32_t port)
 	sockaddr_in m_addr ;
 	m_addr.sin_family = AF_INET ;
 	m_addr.sin_port = htons(port) ;
-	m_addr.sin_addr.s_addr = inet_addr(hostIp.c_str()) ;
+	m_addr.sin_addr.s_addr = inet_addr(hostIp) ;
 	
 	int status = ::connect(theArdourToCompositorSocket, (sockaddr *) &m_addr, sizeof(m_addr)) ;
 	
