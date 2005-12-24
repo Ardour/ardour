@@ -284,15 +284,7 @@ IOSelector::rescan ()
 
 	/* get relevant current JACK ports */
 
-	ports = session.engine().get_ports ("", JACK_DEFAULT_AUDIO_TYPE, for_input?JackPortIsOutput:JackPortIsInput);
-
-	if (ports == 0) {
-		return;
-	}
-
-	/* get relevant current JACK ports */
-
-	ports = session.engine().get_ports ("", JACK_DEFAULT_AUDIO_TYPE, for_input?JackPortIsOutput:JackPortIsInput);
+	ports = session.engine().get_ports ("", JACK_DEFAULT_AUDIO_TYPE, for_input ? JackPortIsOutput : JackPortIsInput);
 
 	if (ports == 0) {
 		return;
@@ -312,7 +304,7 @@ IOSelector::rescan ()
 
 		pos = str.find (':');
 
-		newpair.first = str.substr (0, pos); 
+		newpair.first = str.substr (0, pos);
 		portname = str.substr (pos+1);
 
 		result = portmap.insert (newpair);
@@ -402,7 +394,7 @@ IOSelector::display_ports ()
 		for (uint32_t n = 0; n < limit; ++n) {
 			
 			TreeView* tview;
-			ScrolledWindow *scroller;
+			//ScrolledWindow *scroller;
 			string really_short_name;
 			
 			if (for_input) {
@@ -430,15 +422,16 @@ IOSelector::display_ports ()
 			tview->set_headers_visible (true);
 			tview->set_name ("IOSelectorPortList");
 			
-			scroller = manage (new ScrolledWindow);
+			port_box.pack_start (*tview);
+			//scroller = manage (new ScrolledWindow);
 			
-			scroller->add (*tview);
-			scroller->set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+			//scroller->add (*tview);
+			//scroller->set_policy (POLICY_NEVER, POLICY_NEVER);
 			
 			port_displays.insert (port_displays.end(), tview);
-			port_box.pack_start (*scroller);
+			//port_box.pack_start (*scroller);
 			
-			scroller->set_size_request (-1, 75);
+			//scroller->set_size_request (-1, 75);
 			
 			/* now fill the clist with the current connections */
 			
@@ -449,6 +442,7 @@ IOSelector::display_ports ()
 				for (uint32_t c = 0; connections[c]; ++c) {
 					TreeModel::Row row = *(port_model->append());
 					row[port_display_columns.displayed_name] = connections[c];
+					row[port_display_columns.full_name] = connections[c];
 				}
 			}
 			
@@ -478,11 +472,11 @@ IOSelector::display_ports ()
 			TreeViewColumn* col = tview->get_column (0);
 			
 			col->set_clickable (true);
-
+			//col->set_widget(0);
 			/* handle button events on the column header and within the treeview itself */
 
 			//col->get_widget()->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_column_button_release), tview));
-			tview->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::connection_button_release), tview));		
+			tview->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::connection_button_release), tview));
 		}
 
 		port_box.show_all ();
@@ -629,7 +623,7 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 	   between the named port and the port represented by the treeview.
 	*/
 
-	TreeIter iter;
+	Gtk::TreeModel::iterator iter;
 	TreeModel::Path path;
 	TreeViewColumn* column;
 	int cellx;
@@ -640,20 +634,22 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 	if (ev->button != 1) {
 		return false;
 	}
-
+	
 	if (!(Keyboard::is_delete_event (ev))) {
-		return false;
+		//return false;
 	}
 
 	if (!treeview->get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
 	}
-
-	if ((iter = treeview->get_model()->get_iter (path))) {
+	cerr << "path = " << path.to_string() << endl;
+	
+	if ((iter = treeview->get_model()->get_iter (path.to_string()))) {
 
 		/* path is valid */
-		
 		ustring connected_port_name = (*iter)[port_display_columns.full_name];
+		cerr << "selected row displayed_name: " << (*iter)[port_display_columns.displayed_name] << endl;
+		cerr << "selected row string was " << connected_port_name << endl;
 		Port *port = reinterpret_cast<Port *> (treeview->get_data (_("port")));
 		
 		if (for_input) {
@@ -668,13 +664,14 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 	return true;
 }
 
-gint
-IOSelector::port_column_button_release (GdkEventButton *event, TreeView* treeview)
+int
+IOSelector::port_column_button_release (GdkEventButton* event, TreeView* treeview)
 {
 	/* this handles button release on the button at the top of a single-column
 	   treeview (representing a port)
 	*/
-
+	cerr << "IOSelector::port_column_button_release() called" << endl;
+	
 	if (Keyboard::is_delete_event (event)) {
 		Port* port;
 		{

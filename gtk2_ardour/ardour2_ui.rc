@@ -737,7 +737,7 @@ style "io_selector_port_list" = "medium_text"
 style "io_selector_notebook" = "default_base"
 {
 	fg[NORMAL] = { 0.98, 0.76, 0.14 }
-        font_name ="sans bold 14"
+        font_name ="sans bold 8"
 }
 
 style "tearoff_arrow" = "medium_bold_entry"
