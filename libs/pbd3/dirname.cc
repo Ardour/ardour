@@ -23,7 +23,7 @@ PBD::dirname (const char *path)
 	len = (size_t) (slash - path);
 	ret = (char *) malloc (sizeof (char) * (len + 1));
 
-	snprintf (ret, len, "%*s", len, path);
+	snprintf (ret, len, "%*s", (int)len, path);
 	return ret;
 }
 

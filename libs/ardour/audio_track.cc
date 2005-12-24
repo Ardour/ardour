@@ -860,7 +860,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	uint32_t n = 1;
 
-	while (n < (ULONG_MAX-1)) {
+	while (n < (UINT_MAX-1)) {
 	 
 		string candidate;
 		
@@ -875,7 +875,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	} 
 
-	if (n == (ULONG_MAX-1)) {
+	if (n == (UINT_MAX-1)) {
 	  error << string_compose (X_("There Are too many frozen versions of playlist \"%1\""
 	  		    " to create another one"), _freeze_record.playlist->name())
 	       << endmsg;

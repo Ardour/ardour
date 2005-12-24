@@ -1566,7 +1566,7 @@ Session::new_audio_track (int input_channels, int output_channels)
 		}
 		n++;
 
-	} while (n < (ULONG_MAX-1));
+	} while (n < (UINT_MAX-1));
 
 	if (input_auto_connect & AutoConnectPhysical) {
 		nphysical_in = n_physical_inputs;
@@ -1673,7 +1673,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 		}
 		n++;
 
-	} while (n < (ULONG_MAX-1));
+	} while (n < (UINT_MAX-1));
 
 	try {
 		bus = new Route (*this, bus_name, -1, -1, -1, -1);
@@ -2153,7 +2153,7 @@ Session::new_region_name (string old)
 
 	}
 
-	while (number < (ULONG_MAX-1)) {
+	while (number < (UINT_MAX-1)) {
 
 		AudioRegionList::const_iterator i;
 		string sbuf;
@@ -2174,7 +2174,7 @@ Session::new_region_name (string old)
 		}
 	}
 
-	if (number != (ULONG_MAX-1)) {
+	if (number != (UINT_MAX-1)) {
 		return buf;
 	} 
 
