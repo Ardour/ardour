@@ -139,7 +139,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	controls_frame.add (controls_hbox);
 	controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
-	controls_frame.set_shadow_type (Gtk::SHADOW_IN);
+	controls_frame.set_shadow_type (Gtk::SHADOW_OUT);
 }
 
 TimeAxisView::~TimeAxisView()
@@ -357,7 +357,7 @@ void
 TimeAxisView::set_height (TrackHeight h)
 {
 	height = (guint32) h;
-	controls_frame.set_size_request (-1, height);
+	controls_frame.set_size_request (-1, height+2);
 
  	if (canvas_item_visible (selection_group)) {
 		/* resize the selection rect */

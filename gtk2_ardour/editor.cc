@@ -365,7 +365,6 @@ Editor::Editor (AudioEngine& eng)
 	range_marker_drag_rect = 0;
 	marker_drag_line = 0;
 	
-	mouse_mode = MouseZoom; /* force change in next call */
 	set_mouse_mode (MouseObject, true);
 
 	frames_per_unit = 2048; /* too early to use set_frames_per_unit */
@@ -375,7 +374,7 @@ Editor::Editor (AudioEngine& eng)
 	initialize_rulers ();
 	initialize_canvas ();
 
-	edit_controls_vbox.set_spacing (track_spacing);
+	edit_controls_vbox.set_spacing (0);
 	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled));
 	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling));
 	
@@ -389,8 +388,6 @@ Editor::Editor (AudioEngine& eng)
 	controls_layout.add (edit_controls_vbox);
 	controls_layout.set_name ("EditControlsBase");
 	controls_layout.add_events (Gdk::SCROLL_MASK);
-	controls_layout.signal_size_request().connect (mem_fun(*this, &Editor::set_layout_width), false);
-	controls_layout.signal_expose_event().connect (mem_fun(*this, &Editor::control_layout_expose), false);
 	controls_layout.signal_scroll_event().connect (mem_fun(*this, &Editor::control_layout_scroll), false);
 	
 	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
@@ -820,7 +817,6 @@ Editor::tie_vertical_scrolling ()
 {
 	double y1 = vertical_adjustment.get_value();
 	controls_layout.get_vadjustment()->set_value (y1);
-
 	playhead_cursor->set_y_axis(y1);
 	edit_cursor->set_y_axis(y1);
 }
@@ -3908,23 +3904,6 @@ Editor::transport_punch_location()
 	} else {
 		return 0;
 	}
-}
-
-void
-Editor::set_layout_width(Gtk::Requisition *r)
-{
-	edit_controls_vbox.check_resize();
-	int w = edit_controls_vbox.get_width();
-	cerr << "set_layout_width() called w = " << w << endl;
-	
-	controls_layout.set_size_request (w, -1);
-}
-
-bool
-Editor::control_layout_expose (GdkEventExpose* ex)
-{
-	cerr << "control layout_expose() called" << endl;
-	return true;
 }
 
 bool

@@ -642,8 +642,6 @@ class Editor : public PublicEditor
 	Gtk::Adjustment     horizontal_adjustment;
 
 	Gtk::Layout         controls_layout;
-	void set_layout_width(Gtk::Requisition *);
-	bool Editor::control_layout_expose (GdkEventExpose* ev);
 	bool Editor::control_layout_scroll (GdkEventScroll* ev);
 
 	Gtk::HScrollbar     edit_hscrollbar;
@@ -1149,6 +1147,7 @@ class Editor : public PublicEditor
 	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_edit_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool track_canvas_scroll (GdkEventScroll* event);
 
 	bool track_canvas_button_press_event (GdkEventButton *);
 	bool track_canvas_button_release_event (GdkEventButton *);

@@ -238,7 +238,7 @@ Editor::route_list_reordered ()
 				*/
 			
 			if ((at = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
-				at->route().set_order_key (N_("editor"), position);
+				at->route().set_order_key (N_("editor"), order);
 			}
 		}
 		if (tv->marked_for_display()) {

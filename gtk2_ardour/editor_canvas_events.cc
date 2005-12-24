@@ -45,9 +45,34 @@ using namespace ARDOUR;
 using namespace Gtk;
 
 bool
+Editor::track_canvas_scroll (GdkEventScroll* ev)
+{
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		scroll_tracks_up_line ();
+		return true;
+		break;
+
+	case GDK_SCROLL_DOWN:
+		scroll_tracks_down_line ();
+		return true;
+		
+	default:
+		/* no left/right handling yet */
+		break;
+	}
+
+	return false;
+}
+
+bool
 Editor::track_canvas_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
 	gint x, y;
+
+	/* this is the handler for events that are not handled by
+	   items.
+	*/
 
 	switch (event->type) {
 	case GDK_MOTION_NOTIFY:
@@ -62,6 +87,10 @@ Editor::track_canvas_event (GdkEvent *event, ArdourCanvas::Item* item)
 			button_release_handler (item, event, NoItem);
 			break;
 		}
+		break;
+
+	case GDK_SCROLL:
+		track_canvas_scroll (&event->scroll);
 		break;
 
 	default:

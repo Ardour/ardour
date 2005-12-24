@@ -304,7 +304,7 @@ main (int argc, char *argv[])
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
-	catch_signals ();
+	// catch_signals ();
 
 	text_receiver.listen_to (error);
 	text_receiver.listen_to (info);

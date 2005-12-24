@@ -90,7 +90,7 @@ Editor::initialize_canvas ()
 
 	track_canvas.signal_event().connect (bind (mem_fun (*this, &Editor::track_canvas_event), (ArdourCanvas::Item*) 0));
 	track_canvas.set_name ("EditorMainCanvas");
-	track_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
+	track_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
 	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
 	
 	/* set up drag-n-drop */
@@ -357,10 +357,11 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 	double pos;
-	
+
         for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
 	        TimeAxisView *tv = (*i)[route_display_columns.tv];
 		pos += tv->effective_height;
+		pos += track_spacing;
 	}
 
 	RefPtr<Gdk::Screen> screen = get_screen();
@@ -369,13 +370,19 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 		screen = Gdk::Screen::get_default();
 	}
 
-	edit_controls_hbox.set_size_request (-1, min ((gint) pos, (screen->get_height() - 400)));
-	edit_controls_vbox.set_size_request (-1, min ((gint) pos, (screen->get_height() - 400)));
 	double last_canvas_unit = ceil ((double) max_frames / frames_per_unit);
 	track_canvas.set_scroll_region (0.0, 0.0, max (last_canvas_unit, canvas_width), pos);
 
 	// XXX what is the correct height value for the time canvas ? this overstates it
 	time_canvas.set_scroll_region ( 0.0, 0.0, max (last_canvas_unit, canvas_width), canvas_height);
+
+	/* never let the width of the controls area shrink horizontally */
+
+	edit_controls_vbox.check_resize();
+	int w = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
+
+	controls_layout.set_size_request (w, min ((gint) pos, (screen->get_height() - 400)));
+	controls_layout.set_size (w, (gint) pos);
 }
 
 bool
