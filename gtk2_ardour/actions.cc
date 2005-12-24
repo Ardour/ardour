@@ -78,7 +78,9 @@ ActionManager::register_action (RefPtr<ActionGroup> group, const char * name, co
 RefPtr<Action>
 ActionManager::register_action (RefPtr<ActionGroup> group, const char * name, const char * label, slot<void> sl)
 {
-	RefPtr<Action> act = register_action (group, name, label);
+	RefPtr<Action> act;
+
+	act = Action::create (name, label);
 	group->add (act, sl);
 
 	return act;
