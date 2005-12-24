@@ -39,20 +39,14 @@ ArdourDialog::~ArdourDialog ()
 bool
 ArdourDialog::on_enter_notify_event (GdkEventCrossing *ev)
 {
-	if (ev->detail != GDK_NOTIFY_INFERIOR) {
-		// GTK2FIX
-		//Keyboard::the_keyboard().set_current_dialog (this);
-	}
+	Keyboard::the_keyboard().enter_window (ev, this);
 	return false;
 }
 
 bool
 ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
 {
-	if (ev->detail != GDK_NOTIFY_INFERIOR) {
-		// GTK2FIX
-		//Keyboard::the_keyboard().set_current_dialog (0);
-	}
+	Keyboard::the_keyboard().leave_window (ev, this);
 	return false;
 }
 

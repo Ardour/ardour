@@ -47,6 +47,8 @@ vector<RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::jack_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::jack_opposite_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::transport_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::edit_cursor_in_region_sensitive_actions;
+
 RefPtr<UIManager> ActionManager::ui_manager;
 string ActionManager::unbound_string = "--";
 

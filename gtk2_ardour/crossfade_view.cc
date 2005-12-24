@@ -77,7 +77,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 
 	vestigial_frame->hide();
 	show_vestigial = false;
-
+	
 	// GTK2FIX
 	// group->signal_event.connect (bind (mem_fun (tv.editor, &PublicEditor::canvas_crossfade_view_event), group, this));
 	

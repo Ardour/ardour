@@ -539,9 +539,6 @@ Editor::Editor (AudioEngine& eng)
 	// GTK2FIX
 	// route_display_model->set_sort_func (0, mem_fun (*this, &Editor::route_list_compare_func));
 
-	// GTK2FIX
-	//route_list.set_shadow_type (Gtk::SHADOW_IN);
-
 	route_list_scroller.add (route_list);
 	route_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
@@ -586,18 +583,9 @@ Editor::Editor (AudioEngine& eng)
 	TreeModel::Row row = *(group_model->append());
 	row[group_columns.is_active] = false;
 	row[group_columns.text] = (_("-all-"));
+	row[group_columns.routegroup] = 0;
 	edit_group_list.get_selection()->select (row);
-/* GTK2FIX is set_data(0) setting the is_active to false here?
-	list<string> stupid_list;
 
-	stupid_list.push_back ("*");
-	stupid_list.push_back (_("-all-"));
-
-	edit_group_list.rows().push_back (stupid_list);
-	edit_group_list.rows().back().set_data (0);
-	edit_group_list.rows().back().select();
-	
-*/
 	edit_group_vbox.pack_start (edit_group_list_button, false, false);
 	edit_group_vbox.pack_start (edit_group_list_scroller, true, true);
 	
@@ -1246,14 +1234,18 @@ Editor::connect_to_session (Session *t)
 	redisplay_regions ();
 	redisplay_named_selections ();
 
-	//route_list.freeze (); GTK2FIX
+	// GTK2FIX
+	// route_list.set_model (Glib::RefPtr<TreeModel>(0));
 	route_display_model->clear ();
+
 	session->foreach_route (this, &Editor::handle_new_route);
 	// route_list.select_all ();
 	// GTK2FIX
 	//route_list.sort ();
+
 	route_list_reordered ();
-	//route_list.thaw ();
+
+	// route_list.set_model (route_display_model);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
@@ -1462,11 +1454,9 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		if (!with_selection) {
 			if (region_edit_menu_split_item) {
 				if (clicked_regionview && clicked_regionview->region.covers (edit_cursor->current_frame)) {
-					// GTK2FIX find the action, change its sensitivity
-					// region_edit_menu_split_item->set_sensitive (true);
+					ActionManager::set_sensitive (ActionManager::edit_cursor_in_region_sensitive_actions, true);
 				} else {
-					// GTK2FIX see above
-					// region_edit_menu_split_item->set_sensitive (false);
+					ActionManager::set_sensitive (ActionManager::edit_cursor_in_region_sensitive_actions, false);
 				}
 			}
 			if (region_edit_menu_split_multichannel_item) {

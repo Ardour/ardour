@@ -11,11 +11,53 @@
 (gtk_accel_path "<Actions>/Transport/Rewind" "Left")
 (gtk_accel_path "<Actions>/Transport/Record" "R")
 (gtk_accel_path "<Actions>/Transport/loop" "l")
-(gtk_accel_path "<Actions>/Transport/GotoStart" "<Control>a")
-(gtk_accel_path "<Actions>/Transport/GotoEnd" "<Control>e")
+(gtk_accel_path "<Actions>/Transport/GotoStart" "Home")
+(gtk_accel_path "<Actions>/Transport/GotoEnd" "End")
 
 (gtk_accel_path "<Actions>/Editor/set-edit-cursor" "e")
+(gtk_accel_path "<Actions>/Editor/cut" "<Control>x")
+(gtk_accel_path "<Actions>/Editor/copy" "<Control>c")
+(gtk_accel_path "<Actions>/Editor/paste" "<Control>v")
 (gtk_accel_path "<Actions>/Editor/undo" "<Control>z")
 (gtk_accel_path "<Actions>/Editor/redo" "<Control>r")
+(gtk_accel_path "<Actions>/Editor/scroll-tracks-down" "Page_Down")
+(gtk_accel_path "<Actions>/Editor/scroll-tracks-up" "Page_Up")
+(gtk_accel_path "<Actions>/Editor/step-tracks-down" "Down")
+(gtk_accel_path "<Actions>/Editor/step-tracks-up" "Up")
+(gtk_accel_path "<Actions>/Editor/playhead-to-edit" "Return")
+(gtk_accel_path "<Actions>/Editor/edit-to-playhead" "<Alt>Return")
+
+(gtk_accel_path "<Actions>/Editor/temporal-zoom-in" "minus")
+(gtk_accel_path "<Actions>/Editor/temporal-zoom-out" "equal")
+
+(gtk_accel_path "<Actions>/Editor/align-regions-sync-relative" "a")
+(gtk_accel_path "<Actions>/Editor/align-regions-sync" "<meta>a")
+(gtk_accel_path "<Actions>/Editor/align-regions-end" "<meta><control>a")
+(gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<control>a")
+
+(gtk_accel_path "<Actions>/Editor/brush-at-mouse" "<control>b")
+(gtk_accel_path "<Actions>/Editor/audition-at-mouse" "period")
+
+(gtk_accel_path "<Actions>/Editor/playhead-to-next-region-start" "Tab")
+(gtk_accel_path "<Actions>/Editor/playhead-to-next-region-end" "<Control>Tab")
+
+(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-start" "quoteleft")
+(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-end" "<control>quoteleft")
+
+(gtk_accel_path "<Actions>/Editor/edit-cursor-to-previous-region-start" "bracketleft")
+(gtk_accel_path "<Actions>/Editor/edit-cursor-to-previous-region-end" "<Control>bracketleft")
+
+(gtk_accel_path "<Actions>/Editor/edit-cursor-to-next-region-start" "bracketright")
+(gtk_accel_path "<Actions>/Editor/edit-cursor-to-next-region-end" "<Control>bracketright")
+
+(gtk_accel_path "<Actions>/Editor/edit-cursor-to-previous-region-sync" "quoteright")
+(gtk_accel_path "<Actions>/Editor/edit-cursor-to-next-region-sync" "semicolon")
+
+(gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-start" "F1")
+(gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-end" "F2")
+
+(gtk_accel_path "<Actions>/Editor/jump-forward-to-mark" "KP_Right")
+(gtk_accel_path "<Actions>/Editor/jump-backward-to-mark" "KP_Left")
+(gtk_accel_path "<Actions>/Editor/add-location-from-playhead" "KP_Enter")
 
 

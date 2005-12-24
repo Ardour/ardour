@@ -37,8 +37,70 @@
                <separator/>
                <menuitem action='TogglePunchIn'/>
                <menuitem action='TogglePunchOut'/>
+               <separator/> 
+               <menuitem action='jump-forward-to-mark'/>
+               <menuitem action='jump-backward-to-mark'/>
+               <menuitem action='add-location-from-playhead'/>
+               <separator/> 
+               <menuitem action='playhead-to-next-region-start'/>
+               <menuitem action='playhead-to-next-region-end'/>
+               <menuitem action='playhead-to-previous-region-start'/>
+               <menuitem action='playhead-to-previous-region-end'/>
+               <menuitem action='playhead-to-next-region-sync'/>
+               <menuitem action='playhead-to-previous-region-sync'/>
+               <menuitem action='center-playhead'/>
+               <menuitem action='playhead-to-edit'/>
+               <separator/>       
+               <menuitem action='playhead-to-range-start'/>
+               <menuitem action='playhead-to-range-end'/>
+               <separator/> 
                <menuitem action='set-playhead'/>
-        </menu>
+               <menuitem action='audition-at-mouse'/>
+               <menuitem action='brush-at-mouse'/>
+       </menu>
+       <menu name='Edit' action='Edit'>
+               <menuitem action='undo'/>
+               <menuitem action='redo'/>
+               <menuitem action='editor-cut'/>
+               <menuitem action='editor-copy'/>
+               <menuitem action='editor-paste'/>
+               <separator/>
+               <menuitem action='extend-range-to-start-of-region'/>
+               <menuitem action='extend-range-to-end-of-region'/>
+               <separator/>       
+               <menuitem action='edit-cursor-to-next-region-start'/>
+               <menuitem action='edit-cursor-to-next-region-end'/>
+               <menuitem action='edit-cursor-to-previous-region-start'/>
+               <menuitem action='edit-cursor-to-previous-region-end'/>
+               <menuitem action='edit-cursor-to-next-region-sync'/>
+               <menuitem action='edit-cursor-to-previous-region-sync'/>
+               <menuitem action='center-edit-cursor'/>
+               <menuitem action='edit-to-playhead'/>
+               <separator/>       
+               <menuitem action='edit-cursor-to-range-start'/>
+               <menuitem action='edit-cursor-to-range-end'/>
+        </menu>         
+        <menu name='View' action = 'View'>
+               <menuitem action='temporal-zoom-in'/>
+               <menuitem action='temporal-zoom-out'/>
+               <menuitem action='zoom-to-session'/>
+               <menu name='ZoomFocus' action='ZoomFocus'>
+                   <menuitem action='zoom-focus-left'/>
+                   <menuitem action='zoom-focus-right'/>
+                   <menuitem action='zoom-focus-center'/>
+                   <menuitem action='zoom-focus-playhead'/>
+                   <menuitem action='zoom-focus-edit'/>
+               </menu>
+               <menu name='SnapTo' action='SnapTo'>
+                   <menuitem action='snap-to-beat'/>
+                   <menuitem action='snap-to-bar'/>
+               </menu>
+               <menuitem action='scroll-tracks-down'/>
+               <menuitem action='scroll-tracks-up'/>
+               <menuitem action='scroll-tracks-down'/>
+               <menuitem action='step-tracks-up'/>
+               <menuitem action='step-tracks-down'/>
+         </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>
                <menuitem action='JACKReconnect'/>

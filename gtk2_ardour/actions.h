@@ -29,6 +29,7 @@ class ActionManager
 	static std::vector<Glib::RefPtr<Gtk::Action> > transport_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > jack_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > jack_opposite_sensitive_actions;
+	static std::vector<Glib::RefPtr<Gtk::Action> > edit_cursor_in_region_sensitive_actions;
 
 	static void set_sensitive (std::vector<Glib::RefPtr<Gtk::Action> >& actions, bool);
 
