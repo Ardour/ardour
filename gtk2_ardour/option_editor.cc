@@ -78,6 +78,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* Paths */
 	  path_table (11, 2),
+	  sfdb_path_columns(),
 	  sfdb_paths(ListStore::create(sfdb_path_columns)),
 	  sfdb_path_view(sfdb_paths),
 

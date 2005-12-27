@@ -80,9 +80,6 @@ class OptionEditor : public Gtk::Dialog
 
 	Gtk::ComboBoxText       native_format_combo;
 
-	Glib::RefPtr<Gtk::ListStore> sfdb_paths;
-	Gtk::TreeView sfdb_path_view;
-
 	struct SoundFilePathColumns : public Gtk::TreeModel::ColumnRecord
 	{
 	  public:
@@ -91,6 +88,8 @@ class OptionEditor : public Gtk::Dialog
 		SoundFilePathColumns() { add (paths); }
 	};
 	SoundFilePathColumns sfdb_path_columns;
+	Glib::RefPtr<Gtk::ListStore> sfdb_paths;
+	Gtk::TreeView sfdb_path_view;
 
 	void setup_path_options();
 	void add_session_paths ();
