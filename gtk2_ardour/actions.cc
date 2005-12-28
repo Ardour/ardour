@@ -228,7 +228,7 @@ ActionManager::get_action (const char * _name)
 			GtkAction* _act;
 			
 			if ((_act = gtk_action_group_get_action (_ag, action_name.c_str())) != 0) {
-				act = Glib::wrap (_act);
+				act = Glib::wrap (_act, true);
 				break;
 			}
 		}
