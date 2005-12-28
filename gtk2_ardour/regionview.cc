@@ -698,17 +698,17 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 	double xdelta = pwidth/npoints;
 
 	for (pi = 0, pc = 0; pc < npoints; ++pc) {
-		(*points)[pi] = _pixel_width - 1 - pwidth + (pc*xdelta);
-		(*points)[pi++] = 2 + (h - (curve[pc] * h));
+		(*points)[pi].set_x(_pixel_width - 1 - pwidth + (pc*xdelta));
+		(*points)[pi++].set_y(2 + (h - (curve[pc] * h)));
 	}
 	
 	/* fold back */
 
-	(*points)[pi] = _pixel_width;
-	(*points)[pi++] = h;
+	(*points)[pi].set_x(_pixel_width);
+	(*points)[pi++].set_y(h);
 
-	(*points)[pi] = _pixel_width;
-	(*points)[pi++] = 2;
+	(*points)[pi].set_x(_pixel_width);
+	(*points)[pi++].set_y(2);
 
 	/* connect the dots ... */
 
