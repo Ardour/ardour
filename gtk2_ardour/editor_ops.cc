@@ -1458,9 +1458,8 @@ Editor::clear_locations ()
 /* INSERT/REPLACE */
 
 void
-Editor::insert_region_list_drag (AudioRegion& region)
+Editor::insert_region_list_drag (AudioRegion& region, int x, int y)
 {
-	int x, y;
 	double wx, wy;
 	double cx, cy;
 	TimeAxisView *tv;
@@ -1468,7 +1467,6 @@ Editor::insert_region_list_drag (AudioRegion& region)
 	AudioTimeAxisView *atv = 0;
 	Playlist *playlist;
 	
-	track_canvas.get_pointer (x, y);
 	track_canvas.window_to_world (x, y, wx, wy);
 
 	GdkEvent event;

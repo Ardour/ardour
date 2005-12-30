@@ -902,7 +902,7 @@ class Editor : public PublicEditor
 	void amplitude_zoom (gdouble scale);
 	void amplitude_zoom_step (bool in);
 
-	void insert_region_list_drag (ARDOUR::AudioRegion&);
+	void insert_region_list_drag (ARDOUR::AudioRegion&, int x, int y);
 	void insert_region_list_selection (float times);
 
 	void insert_sndfile (bool as_tracks);
@@ -1546,6 +1546,20 @@ class Editor : public PublicEditor
 						       guint               info,
 						       guint               time);
 
+
+	void  drop_paths  (const Glib::RefPtr<Gdk::DragContext>& context,
+			   gint                x,
+			   gint                y,
+			   const Gtk::SelectionData& data,
+			   guint               info,
+			   guint               time);
+
+	void  drop_regions  (const Glib::RefPtr<Gdk::DragContext>& context,
+			     gint                x,
+			     gint                y,
+			     const Gtk::SelectionData& data,
+			     guint               info,
+			     guint               time);
 
 	/* audio export */
 

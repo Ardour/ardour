@@ -21,6 +21,8 @@
 #include <libgnomecanvasmm/init.h>
 #include <jack/types.h>
 
+#include <ardour/audioregion.h>
+
 #include "ardour_ui.h"
 #include "editor.h"
 #include "waveview.h"
@@ -95,9 +97,12 @@ Editor::initialize_canvas ()
 	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
 	
 	/* set up drag-n-drop */
+
 	vector<TargetEntry> target_table;
 	
-	target_table.push_back (TargetEntry ("STRING"));
+	// Drag-N-Drop from the region list can generate this target
+	target_table.push_back (TargetEntry ("regions"));
+
 	target_table.push_back (TargetEntry ("text/plain"));
 	target_table.push_back (TargetEntry ("text/uri-list"));
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
@@ -405,6 +410,19 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 					 const SelectionData& data,
 					 guint info, guint time)
 {
+	if (data.get_target() == "regions") {
+		drop_regions (context, x, y, data, info, time);
+	} else {
+		drop_paths (context, x, y, data, info, time);
+	}
+}
+
+void
+Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
+		    int x, int y, 
+		    const SelectionData& data,
+		    guint info, guint time)
+{
 	TimeAxisView* tvp;
 	AudioTimeAxisView* tv;
 	double cy;
@@ -457,3 +475,23 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 	context->drag_finish (true, false, time);
 }
 
+void
+Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
+		      int x, int y, 
+		      const SelectionData& data,
+		      guint info, guint time)
+{
+	const DnDTreeView::SerializedObjectPointers* sr = reinterpret_cast<const DnDTreeView::SerializedObjectPointers*> (data.get_data());
+
+	for (uint32_t i = 0; i < sr->cnt; ++i) {
+
+		Region* r = reinterpret_cast<Region*> (sr->ptr[i]);
+		AudioRegion* ar;
+
+		if ((ar = dynamic_cast<AudioRegion*>(r)) != 0) {
+			insert_region_list_drag (*ar, x, y);
+		}
+	}
+
+	context->drag_finish (true, false, time);
+}

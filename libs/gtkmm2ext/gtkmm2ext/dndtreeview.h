@@ -16,6 +16,19 @@ class DnDTreeView : public Gtk::TreeView
   public:
 	DnDTreeView ();
 	~DnDTreeView() {}
+
+	/* this is the structure pointed to if add_object_drag() is called
+	   and a drop happens on a destination which has declared itself
+	   willing to accept a target of the type named in the call
+	   to add_object_drag().
+	*/
+	
+	struct SerializedObjectPointers {
+	    uint32_t size;
+	    uint32_t cnt;
+	    char     type[32];
+	    void*    ptr[0];
+	};
 	
 	void add_drop_targets (std::list<Gtk::TargetEntry>&);
 	void add_object_drag (int column, std::string type_name);
@@ -50,13 +63,6 @@ class DnDTreeView : public Gtk::TreeView
 	std::list<Gtk::TargetEntry> draggable;
 	Gdk::DragAction             suggested_action;
 	int                         data_column;
-	
-	struct SerializedObjectPointers {
-	    uint32_t size;
-	    uint32_t cnt;
-	    char     type[32];
-	    void*    ptr[0];
-	};
 	
 	SerializedObjectPointers* serialize_pointers (Glib::RefPtr<Gtk::TreeModel> m, 
 						      Gtk::TreeSelection::ListHandle_Path*,
