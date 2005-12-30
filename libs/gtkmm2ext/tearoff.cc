@@ -44,6 +44,7 @@ TearOff::TearOff (Gtk::Widget& c)
 	own_window = new Gtk::Window (Gtk::WINDOW_TOPLEVEL);
 	own_window->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::POINTER_MOTION_HINT_MASK);
 	own_window->set_resizable (false);
+	own_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_TOOLBAR);
 	
 	VBox* box1;
 	box1 = manage (new VBox);
