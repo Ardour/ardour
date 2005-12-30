@@ -95,16 +95,15 @@ Editor::initialize_canvas ()
 	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
 	
 	/* set up drag-n-drop */
-	vector<Gtk::TargetEntry> target_table;
+	vector<TargetEntry> target_table;
 	
 	target_table.push_back (TargetEntry ("STRING"));
 	target_table.push_back (TargetEntry ("text/plain"));
 	target_table.push_back (TargetEntry ("text/uri-list"));
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
-	// GTK2FIX
-	// track_canvas.drag_dest_set (target_table, DEST_DEFAULT_ALL, GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
-	// track_canvas.signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
+	track_canvas.drag_dest_set (target_table);
+	track_canvas.signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
 
 	/* stuff for the verbose canvas cursor */
 
@@ -424,8 +423,8 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 	double wx;
 	double wy;
 
-	track_canvas.c2w( x, y, wx, wy);
-
+	track_canvas.window_to_world ( x, y, wx, wy);
+	
 	ev.type = GDK_BUTTON_RELEASE;
 	ev.button.x = wx;
 	ev.button.y = wy;
