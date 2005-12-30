@@ -148,12 +148,9 @@ class LocationUI : public ArdourDialog
 	void set_session (ARDOUR::Session *);
 
   private:
-
-
-	ARDOUR::LocationStack          *locations;
-
+	ARDOUR::LocationStack* locations;
+        
 	void session_gone();
-
 
 	Gtk::VBox  location_vpacker;
 	Gtk::HBox  location_hpacker;
@@ -197,6 +194,9 @@ class LocationUI : public ArdourDialog
 	void location_removed (ARDOUR::Location *);
 	void location_added (ARDOUR::Location *);
 	void map_locations (ARDOUR::Locations::LocationList&);
+
+  protected:
+	bool on_delete_event (GdkEventAny*);
 };
 
 #endif // __ardour_location_ui_h__

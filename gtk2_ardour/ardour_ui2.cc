@@ -279,19 +279,19 @@ ARDOUR_UI::setup_transport ()
 
 	RefPtr<Action> act;
 
-	act = ActionManager::get_action (X_("<Actions>/Transport/Stop"));
+	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	act->connect_proxy (stop_button);
-	act = ActionManager::get_action (X_("<Actions>/Transport/Roll"));
+	act = ActionManager::get_action (X_("Transport"), X_("Roll"));
 	act->connect_proxy (roll_button);
-	act = ActionManager::get_action (X_("<Actions>/Transport/Record"));
+	act = ActionManager::get_action (X_("Transport"), X_("Record"));
 	act->connect_proxy (rec_button);
-	act = ActionManager::get_action (X_("<Actions>/Transport/GotoStart"));
+	act = ActionManager::get_action (X_("Transport"), X_("GotoStart"));
 	act->connect_proxy (goto_start_button);
-	act = ActionManager::get_action (X_("<Actions>/Transport/GotoEnd"));
+	act = ActionManager::get_action (X_("Transport"), X_("GotoEnd"));
 	act->connect_proxy (goto_end_button);
-	act = ActionManager::get_action (X_("<Actions>/Transport/Loop"));
+	act = ActionManager::get_action (X_("Transport"), X_("Loop"));
 	act->connect_proxy (auto_loop_button);
-	act = ActionManager::get_action (X_("<Actions>/Transport/PlaySelection"));
+	act = ActionManager::get_action (X_("Transport"), X_("PlaySelection"));
 	act->connect_proxy (play_selection_button);
 
 	ARDOUR_UI::instance()->tooltips().set_tip (roll_button, _("Play from playhead"));

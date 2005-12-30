@@ -831,10 +831,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 		theArdourUI = this;
 	}
 
-	// allow run-time rebinding of accels
-
-	Settings::get_default()->property_gtk_can_change_accels() = true;
-
 	ActionManager::init ();
 	
 	m_new_session_dialog = 0;

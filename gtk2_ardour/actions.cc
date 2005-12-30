@@ -19,6 +19,7 @@
 */
 
 #include <vector>
+#include <string.h>
 
 #include <gtk/gtkaccelmap.h>
 #include <gtk/gtkuimanager.h>
@@ -32,6 +33,7 @@
 #include <ardour/ardour.h>
 
 #include "actions.h"
+#include "i18n.h"
 
 using namespace std;
 using namespace Gtk;
@@ -199,35 +201,25 @@ ActionManager::get_widget (const char * name)
 }
 
 RefPtr<Action>
-ActionManager::get_action (const char * _name)
+ActionManager::get_action (const char* group_name, const char* action_name)
 {
 	/* the C++ API for functions used here appears to be broken in
 	   gtkmm2.6, so we fall back to the C level.
 	*/
 
-	ustring name(_name);
 	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
 	GList* node;
 	RefPtr<Action> act;
 
-	if (name.substr (0,9) != "<Actions>") {
-		error << "badly specified action name: " << name << endmsg;
-		return act;
-	}
-
-	ustring::size_type last_slash = name.find_last_of ('/');
-	ustring group_name = name.substr (10, last_slash - 10);
-	ustring action_name = name.substr (last_slash+1);
-	
 	for (node = list; node; node = g_list_next (node)) {
 
 		GtkActionGroup* _ag = (GtkActionGroup*) node->data;
 		
-		if (group_name == gtk_action_group_get_name (_ag)) {
-
+		if (strcmp (group_name,  gtk_action_group_get_name (_ag)) == 0) {
+			
 			GtkAction* _act;
 			
-			if ((_act = gtk_action_group_get_action (_ag, action_name.c_str())) != 0) {
+			if ((_act = gtk_action_group_get_action (_ag, action_name)) != 0) {
 				act = Glib::wrap (_act, true);
 				break;
 			}
@@ -246,14 +238,33 @@ ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
 }
 
 void
-ActionManager::uncheck_toggleaction (const char * actionname)
+ActionManager::uncheck_toggleaction (const char * name)
 {
-        RefPtr<Action> act = get_action (actionname);
+	char *last_slash = strrchr (name, '/');
+
+	if (last_slash == 0) {
+		fatal << string_compose (_("programmer error: %1 %2"), X_("illegal toggle action name"), name) << endmsg;
+		/*NOTREACHED*/
+		return;
+	}
+
+	/* 10 = strlen ("<Actions>/") */
+	size_t len = last_slash - (name + 10);
+
+	char* group_name = new char[len+1];
+	memcpy (group_name, name + 10, len);
+	group_name[len] = '\0';
+
+	char* action_name = last_slash + 1;
+
+        RefPtr<Action> act = get_action (group_name, action_name);
 	if (act) {
 	        RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
        		tact->set_active (false);
 	} else {
-		error << "Invalid action name: " << actionname << endmsg;
+		error << "Unknown action name: " << name << endmsg;
 	}
+
+	delete [] group_name;
 }
 

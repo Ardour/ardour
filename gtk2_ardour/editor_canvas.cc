@@ -36,6 +36,7 @@
 #include "rgb_macros.h"
 #include "utils.h"
 #include "time_axis_view.h"
+#include "audio_time_axis.h"
 
 #include "i18n.h"
 
@@ -397,5 +398,63 @@ Editor::time_canvas_map_handler (GdkEventAny* ev)
 {
 	time_canvas.get_window()->set_cursor (*timebar_cursor);
 	return false;
+}
+
+void  
+Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context,
+					 int x, int y, 
+					 const SelectionData& data,
+					 guint info, guint time)
+{
+	TimeAxisView* tvp;
+	AudioTimeAxisView* tv;
+	double cy;
+	vector<string> paths;
+	string spath;
+	GdkEvent ev;
+	jack_nframes_t frame;
+
+	if (convert_drop_to_paths (paths, context, x, y, data, info, time)) {
+		goto out;
+	}
+
+	/* D-n-D coordinates are window-relative, so convert to "world" coordinates
+	 */
+
+	double wx;
+	double wy;
+
+	track_canvas.c2w( x, y, wx, wy);
+
+	ev.type = GDK_BUTTON_RELEASE;
+	ev.button.x = wx;
+	ev.button.y = wy;
+
+	frame = event_frame (&ev, 0, &cy);
+
+	snap_to (frame);
+
+	if ((tvp = trackview_by_y_position (cy)) == 0) {
+
+		/* drop onto canvas background: create a new track */
+
+		insert_paths_as_new_tracks (paths, false);
+
+		
+	} else if ((tv = dynamic_cast<AudioTimeAxisView*>(tvp)) != 0) {
+
+		/* check that its an audio track, not a bus */
+
+		if (tv->get_diskstream()) {
+
+			for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
+				insert_sndfile_into (*p, true, tv, frame);
+			}
+		}
+
+	}
+
+  out:
+	context->drag_finish (true, false, time);
 }
 

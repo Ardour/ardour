@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <iostream>
 
 #include <gtkmm2ext/dndtreeview.h>
 
@@ -13,12 +14,23 @@ DnDTreeView::DnDTreeView ()
 	: TreeView ()
 {
 	draggable.push_back (TargetEntry ("GTK_TREE_MODEL_ROW", TARGET_SAME_WIDGET));
-	
+	data_column = -1;
+
 	enable_model_drag_source (draggable);
 	enable_model_drag_dest (draggable);
-	
-	suggested_action = Gdk::DragAction (0);
+
+ 	suggested_action = Gdk::DragAction (0);
 }
+
+void
+DnDTreeView::add_drop_targets (list<TargetEntry>& targets)
+{
+	for (list<TargetEntry>::iterator i = targets.begin(); i != targets.end(); ++i) {
+		draggable.push_back (*i);
+	}
+	enable_model_drag_source (draggable);
+	enable_model_drag_dest (draggable);
+}	
 
 void
 DnDTreeView::add_object_drag (int column, string type_name)
@@ -57,11 +69,13 @@ DnDTreeView::serialize_pointers (RefPtr<TreeModel> model, TreeSelection::ListHan
 void
 DnDTreeView::on_drag_data_get(const RefPtr<DragContext>& context, SelectionData& selection_data, guint info, guint time)
 {
+	cerr << "DnDTreeview::drag_data_get, target = " << selection_data.get_target() << endl;
+
 	if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
 		
 		TreeView::on_drag_data_get (context, selection_data, info, time);
 		
-	} else {
+	} else if (data_column >= 0) {
 		
 		Gtk::TreeSelection::ListHandle_Path selection = get_selection()->get_selected_rows ();
 		SerializedObjectPointers* sr = serialize_pointers (get_model(), &selection, selection_data.get_target());
@@ -73,20 +87,23 @@ DnDTreeView::on_drag_data_get(const RefPtr<DragContext>& context, SelectionData&
 void 
 DnDTreeView::on_drag_data_received(const RefPtr<DragContext>& context, int x, int y, const SelectionData& selection_data, guint info, guint time)
 {
-	if (suggested_action) {
-		/* this is a drag motion callback. just update the status to
-		   say that we are still dragging, and that's it.
-		*/
-		suggested_action = Gdk::DragAction (0);
-		TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
-		return;
-	}
-	
+	cerr << "DnDTreeview::drag_data_received @ " << x << ',' << y << " target = " << selection_data.get_target() << endl;
+
+ 	if (suggested_action) {
+ 		/* this is a drag motion callback. just update the status to
+ 		   say that we are still dragging, and that's it.
+ 		*/
+ 		suggested_action = Gdk::DragAction (0);
+ 		TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
+ 		return;
+ 	}
+
 	if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
 		
 		TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
 		
-	} else {
+	} else if (data_column >= 0) {
+
 		/* object D-n-D */
 		
 		const SerializedObjectPointers* sr = reinterpret_cast<const SerializedObjectPointers *>(selection_data.get_data());
@@ -94,9 +111,9 @@ DnDTreeView::on_drag_data_received(const RefPtr<DragContext>& context, int x, in
 		if (sr) {
 			signal_object_drop (sr->type, sr->cnt, const_cast<void**>(sr->ptr));
 		}
-		
-		context->drag_finish (true, false, time);
-		
+
+	} else {
+		/* some kind of target type added by the app, which will be handled by a signal handler */
 	}
 }
 

@@ -41,6 +41,7 @@
 using namespace sigc;
 using namespace ARDOUR;
 using namespace Gtk;
+using namespace Glib;
 using namespace Editing;
 
 #define wave_cursor_width 43
@@ -345,7 +346,7 @@ Editor::redisplay_regions ()
 			add_audio_region_to_region_display (*r);
 		}
 		
-		region_list_display.set_model (region_list_sort_model);
+		region_list_display.set_model (region_list_model);
 	}
 }
 
@@ -362,7 +363,7 @@ Editor::build_region_list_menu ()
 					       
 	/* now grab specific menu items that we need */
 
-	toggle_full_region_list_action = ActionManager::get_action ("<Actions>/RegionList/rlShowAll");
+	toggle_full_region_list_action = ActionManager::get_action (X_("RegionList"), X_("rlShowAll"));
 }
 
 void
@@ -646,7 +647,7 @@ Editor::reset_region_list_sort_type (RegionListSortType type)
 			break;
 		}
 			
-		region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
+		// region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
 	}
 }
 
@@ -656,7 +657,7 @@ Editor::reset_region_list_sort_direction (bool up)
 	// GTK2FIX
 	//region_list_display.set_sort_type (up ? GTK_SORT_ASCENDING : GTK_SORT_DESCENDING);
 	/* reset to force resort */
-	region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
+	// region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
 }
 
 void
@@ -710,18 +711,15 @@ Editor::remove_region_from_region_list ()
 }
 
 void  
-Editor::region_list_display_drag_data_received  (GdkDragContext     *context,
-						 gint                x,
-						 gint                y,
-						 GtkSelectionData   *data,
-						 guint               info,
-						 guint               time)
+Editor::region_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& context,
+						int x, int y, 
+						const SelectionData& data,
+						guint info, guint time)
 {
 	vector<string> paths;
 
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
 		do_embed_sndfiles (paths, false);
+		context->drag_finish (true, false, time);
 	}
-
-	gtk_drag_finish (context, TRUE, FALSE, time);
 }

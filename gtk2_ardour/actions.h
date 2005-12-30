@@ -37,7 +37,7 @@ class ActionManager
 	static Glib::RefPtr<Gtk::UIManager> ui_manager;
 
 	static Gtk::Widget* get_widget (const char * name);
-	static Glib::RefPtr<Gtk::Action> get_action (const char * name);
+	static Glib::RefPtr<Gtk::Action> get_action (const char* group, const char* name);
 
 	static void add_action_group (Glib::RefPtr<Gtk::ActionGroup>);
 

@@ -207,7 +207,7 @@ executable = 'ardour.bin'
 
 ardour = gtkardour.Program(target = executable, source = gtkardour_files + extra_sources)
 mtest = gtkardour.Program(target = 'mtest', source = mtest_files)
-#itest = gtkardour.Program(target = 'itest', source = itest_files)
+itest = gtkardour.Program(target = 'itest', source = itest_files)
 
 Default(ardour)
 

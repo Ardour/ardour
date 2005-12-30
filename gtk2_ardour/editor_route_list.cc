@@ -64,7 +64,7 @@ Editor::handle_new_route (Route& route)
 	ignore_route_list_reorder = true;
 	
 	if (tv->marked_for_display()) {
-	        route_list.get_selection()->select (row);
+	        route_list_display.get_selection()->select (row);
 	}
 
 	if ((atv = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
@@ -151,7 +151,7 @@ Editor::route_display_selection_changed ()
 	TimeAxisView *tv;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
-	Glib::RefPtr<TreeSelection> selection = route_list.get_selection();
+	Glib::RefPtr<TreeSelection> selection = route_list_display.get_selection();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 	        tv = (*i)[route_display_columns.tv];
@@ -177,7 +177,7 @@ Editor::unselect_strip_in_display (TimeAxisView& tv)
 {
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
-	Glib::RefPtr<TreeSelection> selection = route_list.get_selection();
+	Glib::RefPtr<TreeSelection> selection = route_list_display.get_selection();
 	
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[route_display_columns.tv] == &tv) { 
@@ -191,7 +191,7 @@ Editor::select_strip_in_display (TimeAxisView* tv)
 {
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
-	Glib::RefPtr<TreeSelection> selection = route_list.get_selection();
+	Glib::RefPtr<TreeSelection> selection = route_list_display.get_selection();
 	
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[route_display_columns.tv] == tv) { 
@@ -272,14 +272,14 @@ Editor::hide_all_tracks (bool with_select)
 		TimeAxisView *tv = row[route_display_columns.tv];
 		
 		if (with_select) {
-			route_list.get_selection()->unselect (i);
+			route_list_display.get_selection()->unselect (i);
 		} else {
 		        tv->set_marked_for_display (false);
 			tv->hide();
 		
 		}
 	}
-	//route_list.thaw ();
+	//route_list_display.thaw ();
 	reset_scrolling_region ();
 }
 
@@ -328,7 +328,7 @@ Editor::select_all_routes ()
 	TreeModel::Children::iterator i;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		route_list.get_selection()->select (i);
+		route_list_display.get_selection()->select (i);
 	}
 }
 
@@ -345,7 +345,7 @@ Editor::select_all_audiotracks ()
 
 		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
 			if (atv->is_audio_track()) {
-			        route_list.get_selection()->select (i);
+			        route_list_display.get_selection()->select (i);
 
 			}
 		}
@@ -366,7 +366,7 @@ Editor::unselect_all_audiotracks ()
 
 		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
 			if (atv->is_audio_track()) {
-			        route_list.get_selection()->unselect (i);
+			        route_list_display.get_selection()->unselect (i);
 
 			}
 		}
@@ -387,7 +387,7 @@ Editor::select_all_audiobus ()
 
 		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
 			if (!atv->is_audio_track()) {
-			        route_list.get_selection()->select (i);
+			        route_list_display.get_selection()->select (i);
 
 			}
 		}
@@ -408,7 +408,7 @@ Editor::unselect_all_audiobus ()
 
 		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
 			if (!atv->is_audio_track()) {
-			        route_list.get_selection()->unselect (i);
+			        route_list_display.get_selection()->unselect (i);
 
 			}
 		}

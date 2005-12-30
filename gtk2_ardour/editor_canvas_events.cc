@@ -147,7 +147,7 @@ bool
 Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
 {
 	gint ret = FALSE;
-	
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -444,7 +444,7 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 	if ((atv = dynamic_cast<AudioTimeAxisView*>(&tv)) != 0) {
 
 		if (atv->is_audio_track()) {
-
+			
 			AudioPlaylist* pl = atv->get_diskstream()->playlist();
 			Playlist::RegionList* rl = pl->regions_at (event_frame (event));
 
@@ -459,7 +459,7 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 				delete rl;
 
 				return canvas_region_view_event (event, arv->get_canvas_group(), arv);
-			}
+			} 
 		}
 	}
 

@@ -575,14 +575,11 @@ LocationUI::LocationUI ()
 	set_wmclass(_("ardour_locations"), "Ardour");
 
 	set_name ("LocationWindow");
-	signal_delete_event().connect (bind (ptr_fun (just_hide_it), static_cast<Window*>(this)));
 
-	add (location_hpacker);
-
+	get_vbox()->pack_start (location_hpacker);
 
 	location_vpacker.set_border_width (10);
 	location_vpacker.set_spacing (5);
-
 
 	location_vpacker.pack_start (loop_edit_row, false, false);
 	location_vpacker.pack_start (punch_edit_row, false, false);
@@ -857,7 +854,13 @@ LocationUI::session_gone()
 
 	punch_edit_row.set_session (0);
 	punch_edit_row.set_location (0);
-	
-	ArdourDialog::session_gone();
+
+	ArdourDialog::session_gone ();
 }
 
+bool
+LocationUI::on_delete_event (GdkEventAny* ev)
+{
+	hide ();
+	return true;
+}

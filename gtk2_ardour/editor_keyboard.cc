@@ -28,7 +28,7 @@ void
 Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, bool use_time_canvas, bool can_select)
 {
 	gint x, y;
-	double dx, dy;
+	double worldx, worldy;
 	GdkEvent ev;
 	Gdk::ModifierType mask;
 	Glib::RefPtr<Gdk::Window> evw = track_canvas.get_window()->get_pointer (x, y, mask);
@@ -46,10 +46,11 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 			selection->set (entered_regionview);
 		}
 
-		track_canvas.c2w(x, y, dx, dy);
+		track_canvas.window_to_world (x, y, worldx, worldy);
+
 		ev.type = GDK_BUTTON_PRESS;
-		ev.button.x = dx;
-		ev.button.y = dy;
+		ev.button.x = worldx;
+		ev.button.y = worldy;
 		ev.button.state = 0;  /* XXX correct? */
 
 		theslot (&ev);

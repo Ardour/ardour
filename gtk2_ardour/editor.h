@@ -40,6 +40,7 @@
 
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/dndtreeview.h>
 
 #include <ardour/stateful.h>
 #include <ardour/session.h>
@@ -688,7 +689,7 @@ class Editor : public PublicEditor
 	};
 	    
 	RegionListDisplayModelColumns    region_list_columns;
-	Gtk::TreeView                    region_list_display;
+	Gtkmm2ext::DnDTreeView           region_list_display;
 	Glib::RefPtr<Gtk::TreeStore>     region_list_model;
 	Glib::RefPtr<Gtk::TreeModelSort> region_list_sort_model;
 	Glib::RefPtr<Gtk::Action>        toggle_full_region_list_action;
@@ -738,8 +739,8 @@ class Editor : public PublicEditor
 	NamedSelectionDisplayModelColumns named_selection_columns;
 	Glib::RefPtr<Gtk::TreeStore>     named_selection_model;
 
-	Gtk::TreeView          named_selection_display;
-	Gtk::ScrolledWindow named_selection_scroller;
+	Gtkmm2ext::DnDTreeView named_selection_display;
+	Gtk::ScrolledWindow    named_selection_scroller;
 
 	void name_selection();
 	void named_selection_name_chosen ();
@@ -1435,9 +1436,9 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::TreeSelection> route_display_selection;
 
 	gint route_list_compare_func (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
-	Gtk::TreeView          route_list; //GTK2FIX rename to route_display
-	Gtk::ScrolledWindow route_list_scroller;
-	Gtk::Menu          *route_list_menu;
+	Gtkmm2ext::DnDTreeView  route_list_display; 
+	Gtk::ScrolledWindow     route_list_scroller;
+	Gtk::Menu*              route_list_menu;
 
 	void route_list_column_click ();
 	void build_route_list_menu ();
@@ -1465,12 +1466,12 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::ListStore> group_model;
 	Glib::RefPtr<Gtk::TreeSelection> group_selection;
 
-	Gtk::Button         edit_group_list_button;
-	Gtk::Label          edit_group_list_button_label;
-	Gtk::TreeView       edit_group_list;
-	Gtk::ScrolledWindow edit_group_list_scroller;
-	Gtk::Menu          *edit_group_list_menu;
-	Gtk::VBox           edit_group_vbox;
+	Gtk::Button            edit_group_list_button;
+	Gtk::Label             edit_group_list_button_label;
+	Gtkmm2ext::DnDTreeView edit_group_display;
+	Gtk::ScrolledWindow    edit_group_list_scroller;
+	Gtk::Menu*             edit_group_list_menu;
+	Gtk::VBox              edit_group_vbox;
 
 	void edit_group_list_column_click (gint);
 	void build_edit_group_list_menu ();
@@ -1524,27 +1525,28 @@ class Editor : public PublicEditor
 	/* Drag-n-Drop */
 
 	int convert_drop_to_paths (std::vector<std::string>& paths,
-				   GdkDragContext     *context,
+				   const Glib::RefPtr<Gdk::DragContext>& context,
 				   gint                x,
 				   gint                y,
-				   GtkSelectionData   *data,
+				   const Gtk::SelectionData& data,
 				   guint               info,
 				   guint               time);
 
-	void  track_canvas_drag_data_received  (GdkDragContext     *context,
+	void  track_canvas_drag_data_received  (const Glib::RefPtr<Gdk::DragContext>& context,
 						gint                x,
 						gint                y,
-						GtkSelectionData   *data,
+						const Gtk::SelectionData& data,
 						guint               info,
 						guint               time);
-
-	void  region_list_display_drag_data_received  (GdkDragContext     *context,
+	
+	void  region_list_display_drag_data_received  (const Glib::RefPtr<Gdk::DragContext>& context,
 						       gint                x,
 						       gint                y,
-						       GtkSelectionData   *data,
+						       const Gtk::SelectionData& data,
 						       guint               info,
 						       guint               time);
-	
+
+
 	/* audio export */
 
 	ExportDialog *export_dialog;

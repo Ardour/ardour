@@ -31,6 +31,7 @@
 #include "public_editor.h"
 #include "regionview.h"
 #include "utils.h"
+#include "canvas_impl.h"
 
 using namespace sigc;
 using namespace ARDOUR;
@@ -78,8 +79,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	vestigial_frame->hide();
 	show_vestigial = false;
 	
-	// GTK2FIX
-	// group->signal_event.connect (bind (mem_fun (tv.editor, &PublicEditor::canvas_crossfade_view_event), group, this));
+	group->signal_event().connect (bind (mem_fun (tv.editor, &PublicEditor::canvas_crossfade_view_event), group, this));
 	
 	crossfade_changed (Change (~0));
 

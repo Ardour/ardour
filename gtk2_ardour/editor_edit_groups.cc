@@ -82,7 +82,7 @@ Editor::select_all_edit_groups ()
 
         Gtk::TreeModel::Children children = group_model->children();
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-	        edit_group_list.get_selection()->select (iter);
+	        edit_group_display.get_selection()->select (iter);
 	}
 }
 
@@ -126,7 +126,7 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 	int cellx;
 	int celly;
 	
-	if (!edit_group_list.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+	if (!edit_group_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
 	}
 
@@ -135,10 +135,10 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 	case 1:
 
 		if (Keyboard::is_edit_event (ev)) {
-			// RouteGroup* group = (RouteGroup *) edit_group_list.row(row).get_data ();
+			// RouteGroup* group = (RouteGroup *) edit_group_display.row(row).get_data ();
 			// edit_route_group (group);
 
-			return stop_signal (edit_group_list, "button_press_event");
+			return stop_signal (edit_group_display, "button_press_event");
 
 		} else {
 			/* allow regular select to occur */
@@ -157,7 +157,7 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 		break;
 	}
       
-	return stop_signal (edit_group_list, "button_press_event");
+	return stop_signal (edit_group_display, "button_press_event");
 }
 
 void
@@ -165,7 +165,7 @@ Editor::edit_group_selection_changed ()
 {
 	TreeModel::iterator i;
 	TreeModel::Children rows = group_model->children();
-	Glib::RefPtr<TreeSelection> selection = edit_group_list.get_selection();
+	Glib::RefPtr<TreeSelection> selection = edit_group_display.get_selection();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		RouteGroup* group;
@@ -212,12 +212,12 @@ Editor::group_flags_changed (void* src, RouteGroup* group)
 		// select row
 	}
 
-	CList_Helpers::RowIterator ri = edit_group_list.rows().find_data (group);
+	CList_Helpers::RowIterator ri = edit_group_display.rows().find_data (group);
 
 	if (group->is_active()) {
-		edit_group_list.cell (ri->get_row_num(),0).set_pixmap (check_pixmap, check_mask);
+		edit_group_display.cell (ri->get_row_num(),0).set_pixmap (check_pixmap, check_mask);
 	} else {
-		edit_group_list.cell (ri->get_row_num(),0).set_pixmap (empty_pixmap, empty_mask);
+		edit_group_display.cell (ri->get_row_num(),0).set_pixmap (empty_pixmap, empty_mask);
 	}
   */
 }

@@ -17,6 +17,7 @@ class DnDTreeView : public Gtk::TreeView
 	DnDTreeView ();
 	~DnDTreeView() {}
 	
+	void add_drop_targets (std::list<Gtk::TargetEntry>&);
 	void add_object_drag (int column, std::string type_name);
 	sigc::signal<void,std::string,uint32_t,void**> signal_object_drop;
 	

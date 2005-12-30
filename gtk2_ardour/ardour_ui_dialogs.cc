@@ -180,14 +180,16 @@ ARDOUR_UI::unload_session ()
 int
 ARDOUR_UI::create_connection_editor ()
 {
+#if 0
 	if (connection_editor == 0) {
-//		connection_editor = new ConnectionEditor ();
-//		connection_editor->signal_unmap().connect (sigc::bind (ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleConnections")));
+		connection_editor = new ConnectionEditor ();
+		connection_editor->signal_unmap().connect (sigc::bind (ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleConnections")));
 	}
 
 	if (session) {
-//		connection_editor->set_session (session);
+		connection_editor->set_session (session);
 	}
+#endif
 
 	return 0;
 }
@@ -199,13 +201,17 @@ ARDOUR_UI::toggle_connection_editor ()
 		return;
 	}
 
-	//GTK2FIX
 #if 0
-
-	if (connection_editor_check->get_active()){
-		connection_editor->present();
-	} else {
-		connection_editor->hide_all();
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleConnections"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+	
+		if (tact->get_active()) {
+			connection_editor->show_all ();
+			connection_editor->present ();
+		} else {
+			connection_editor->hide ();
+		} 
 	}
 #endif
 }
@@ -213,11 +219,16 @@ ARDOUR_UI::toggle_connection_editor ()
 void
 ARDOUR_UI::toggle_big_clock_window ()
 {
-	if (big_clock_window->is_visible()) {
-		big_clock_window->hide ();
-	} else {
-		big_clock_window->show_all ();
-		big_clock_window->present ();
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleBigClock"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+	
+		if (tact->get_active()) {
+			big_clock_window->show_all ();
+			big_clock_window->present ();
+		} else {
+			big_clock_window->hide ();
+		} 
 	}
 }
 
@@ -230,10 +241,16 @@ ARDOUR_UI::toggle_options_window ()
 		option_editor->set_session (session);
 	} 
 
-	if (option_editor->is_visible()) {
-		option_editor->hide ();
-	} else {
-		option_editor->present ();
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleOptionsEditor"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+	
+		if (tact->get_active()) {
+			option_editor->show_all ();
+			option_editor->present ();
+		} else {
+			option_editor->hide ();
+		} 
 	}
 }
 
@@ -264,10 +281,16 @@ ARDOUR_UI::toggle_location_window ()
 		return;
 	}
 
-	if (location_ui->is_visible()) {
-		location_ui->hide();
-	} else {
-		location_ui->present();
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleLocations"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+	
+		if (tact->get_active()) {
+			location_ui->show_all ();
+			location_ui->present ();
+		} else {
+			location_ui->hide ();
+		} 
 	}
 }
 
@@ -289,10 +312,16 @@ ARDOUR_UI::toggle_route_params_window ()
 		return;
 	}
 
-	if (route_params->is_visible ()) {
-		route_params->hide ();
-	} else {
-		route_params->present ();
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleInspector"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+	
+		if (tact->get_active()) {
+			route_params->show_all ();
+			route_params->present ();
+		} else {
+			route_params->hide ();
+		} 
 	}
 }
 
@@ -314,7 +343,7 @@ ARDOUR_UI::toggle_sound_file_browser ()
 		return;
 	}
 
-	RefPtr<Action> act = ActionManager::ui_manager->get_action (X_("<Actions>/Common/ToggleSoundFileBrowser"));
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleSoundFileBrowser"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 	

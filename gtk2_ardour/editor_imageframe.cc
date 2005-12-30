@@ -1090,7 +1090,7 @@ Editor::handle_new_imageframe_time_axis_view(const string & track_name, void* sr
 
 	row[route_display_columns.text] = iftav->name();
 	row[route_display_columns.tv] = iftav;
-	route_list.get_selection()->select (row);
+	route_list_display.get_selection()->select (row);
 
 	iftav->GoingAway.connect(bind(mem_fun(*this, &Editor::remove_route), (TimeAxisView*)iftav)) ;
 	iftav->gui_changed.connect(mem_fun(*this, &Editor::handle_gui_changes)) ;
@@ -1107,7 +1107,7 @@ Editor::handle_new_imageframe_marker_time_axis_view(const string & track_name, T
 
 	row[route_display_columns.text] = mta->name();
 	row[route_display_columns.tv] = mta;
-	route_list.get_selection()->select (row);
+	route_list_display.get_selection()->select (row);
 
 	mta->GoingAway.connect(bind(mem_fun(*this, &Editor::remove_route), (TimeAxisView*)mta)) ;
  }

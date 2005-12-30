@@ -53,6 +53,10 @@ UI::UI (string name, int *argc, char ***argv, string rcfile)
 	theMain = new Main (argc, argv);
 	tips = new Tooltips;
 
+	// allow run-time rebinding of accels
+
+	Settings::get_default()->property_gtk_can_change_accels() = true;
+
 	if (pthread_key_create (&thread_request_buffer_key, 0)) {
 		cerr << _("cannot create thread request buffer key") << endl;
 		throw failed_constructor();

@@ -523,27 +523,27 @@ Editor::Editor (AudioEngine& eng)
 	bottom_hbox.set_spacing (3);
 
 	route_display_model = ListStore::create(route_display_columns);
-	route_list.set_model (route_display_model);
-	route_list.append_column (_("Tracks"), route_display_columns.text);
-	route_list.set_name ("TrackListDisplay");
-	route_list.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
-	route_list.set_reorderable (true);
+	route_list_display.set_model (route_display_model);
+	route_list_display.append_column (_("Tracks"), route_display_columns.text);
+	route_list_display.set_name ("TrackListDisplay");
+	route_list_display.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
+	route_list_display.set_reorderable (true);
 	
-	route_list.set_size_request (75,-1);
-	route_list.set_headers_visible (true);
-	route_list.set_headers_clickable (true);
+	route_list_display.set_size_request (75,-1);
+	route_list_display.set_headers_visible (true);
+	route_list_display.set_headers_clickable (true);
 
 	// GTK2FIX
-	// route_list.signal_rows_reordered().connect (mem_fun (*this, &Editor::queue_route_list_reordered));
+	// route_list_display.signal_rows_reordered().connect (mem_fun (*this, &Editor::queue_route_list_reordered));
 
 	// GTK2FIX
 	// route_display_model->set_sort_func (0, mem_fun (*this, &Editor::route_list_compare_func));
 
-	route_list_scroller.add (route_list);
+	route_list_scroller.add (route_list_display);
 	route_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	route_list.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::route_display_selection_changed));
-	route_list.signal_columns_changed().connect (mem_fun(*this, &Editor::route_list_column_click));
+	route_list_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::route_display_selection_changed));
+	route_list_display.signal_columns_changed().connect (mem_fun(*this, &Editor::route_list_column_click));
 
 	edit_group_list_button_label.set_text (_("Edit Groups"));
 	edit_group_list_button_label.set_name ("EditGroupTitleButton");
@@ -551,69 +551,70 @@ Editor::Editor (AudioEngine& eng)
 	edit_group_list_button.set_name ("EditGroupTitleButton");
 
 	group_model = ListStore::create(group_columns);
-	edit_group_list.set_model (group_model);
-	edit_group_list.append_column (_("active"), group_columns.is_active);
-	edit_group_list.append_column (_("groupname"), group_columns.text);
-	edit_group_list.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	edit_group_list.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	edit_group_display.set_model (group_model);
+	edit_group_display.append_column (_("active"), group_columns.is_active);
+	edit_group_display.append_column (_("groupname"), group_columns.text);
+	edit_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
+	edit_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 
 	/* use checkbox for the active column */
 
-	CellRendererToggle *active_cell = dynamic_cast<CellRendererToggle*>(edit_group_list.get_column_cell_renderer (0));
+	CellRendererToggle *active_cell = dynamic_cast<CellRendererToggle*>(edit_group_display.get_column_cell_renderer (0));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
-	edit_group_list.set_name ("MixerGroupList");
-	//edit_group_list.set_shadow_type (Gtk::SHADOW_IN);
+	edit_group_display.set_name ("MixerGroupList");
+	//edit_group_display.set_shadow_type (Gtk::SHADOW_IN);
 
-	edit_group_list.columns_autosize ();
-	edit_group_list.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
-	edit_group_list.set_reorderable (false);
+	edit_group_display.columns_autosize ();
+	edit_group_display.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
+	edit_group_display.set_reorderable (false);
 
-	edit_group_list.set_size_request (75, -1);
-	edit_group_list.set_headers_visible (true);
+	edit_group_display.set_size_request (75, -1);
+	edit_group_display.set_headers_visible (true);
 
-	edit_group_list_scroller.add (edit_group_list);
+	edit_group_list_scroller.add (edit_group_display);
 	edit_group_list_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 	edit_group_list_button.signal_clicked().connect (mem_fun(*this, &Editor::edit_group_list_button_clicked));
-	edit_group_list.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event));
-	edit_group_list.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::edit_group_selection_changed));
+	edit_group_display.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event));
+	edit_group_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::edit_group_selection_changed));
 	
 	TreeModel::Row row = *(group_model->append());
 	row[group_columns.is_active] = false;
 	row[group_columns.text] = (_("-all-"));
 	row[group_columns.routegroup] = 0;
-	edit_group_list.get_selection()->select (row);
+	edit_group_display.get_selection()->select (row);
 
 	edit_group_vbox.pack_start (edit_group_list_button, false, false);
 	edit_group_vbox.pack_start (edit_group_list_scroller, true, true);
 	
-	region_list_model = TreeStore::create (region_list_columns);
-	region_list_sort_model = TreeModelSort::create (region_list_model);
-	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
-
-	region_list_display.set_model (region_list_sort_model);
-	region_list_display.append_column (_("Regions"), region_list_columns.name);
-	region_list_display.set_reorderable (true);
 	region_list_display.set_size_request (100, -1);
-	region_list_display.set_data ("editor", this);
-	region_list_display.set_flags (Gtk::CAN_FOCUS);
 	region_list_display.set_name ("RegionListDisplay");
 
-	region_list_scroller.add (region_list_display);
-	region_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	region_list_model = TreeStore::create (region_list_columns);
+	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
 
+	region_list_display.set_model (region_list_model);
+	region_list_display.append_column (_("Regions"), region_list_columns.name);
+	region_list_display.set_reorderable (true);
+	region_list_display.get_selection()->set_mode (SELECTION_SINGLE);
+	region_list_display.add_object_drag (region_list_columns.region.index(), "regions");
+
+	/* setup DnD handling */
+	
 	list<Gtk::TargetEntry> region_list_target_table;
 	
 	region_list_target_table.push_back (TargetEntry ("STRING"));
 	region_list_target_table.push_back (TargetEntry ("text/plain"));
 	region_list_target_table.push_back (TargetEntry ("text/uri-list"));
 	region_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
+	
+	region_list_display.add_drop_targets (region_list_target_table);
+	region_list_display.signal_drag_data_received().connect (mem_fun(*this, &Editor::region_list_display_drag_data_received));
 
-	// GTK2FIX
-	// region_list_display.drag_dest_set (region_list_target_table, DEST_DEFAULT_ALL, GdkDragAction (Gdk::ACTION_COPY|Gdk::ACTION_MOVE));
-	// region_list_display.signal_drag_data_received().connect (mem_fun(*this, &Editor::region_list_display_drag_data_received));
+	region_list_scroller.add (region_list_display);
+	region_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	region_list_display.signal_key_press_event().connect (mem_fun(*this, &Editor::region_list_display_key_press));
 	region_list_display.signal_key_release_event().connect (mem_fun(*this, &Editor::region_list_display_key_release));
@@ -666,9 +667,7 @@ Editor::Editor (AudioEngine& eng)
 	global_hpacker.pack_start (global_vpacker, true, true);
 
 	set_name ("EditorWindow");
-	cerr << "Adding accel group " << ActionManager::ui_manager->get_accel_group()->gobj() << endl;
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
-	cerr << "... done\n";
 
 	vpacker.pack_end (global_hpacker, true, true);
 	
@@ -1235,17 +1234,17 @@ Editor::connect_to_session (Session *t)
 	redisplay_named_selections ();
 
 	// GTK2FIX
-	// route_list.set_model (Glib::RefPtr<TreeModel>(0));
+	// route_list_display.set_model (Glib::RefPtr<TreeModel>(0));
 	route_display_model->clear ();
 
 	session->foreach_route (this, &Editor::handle_new_route);
-	// route_list.select_all ();
+	// route_list_display.select_all ();
 	// GTK2FIX
-	//route_list.sort ();
+	//route_list_display.sort ();
 
 	route_list_reordered ();
 
-	// route_list.set_model (route_display_model);
+	// route_list_display.set_model (route_display_model);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
@@ -1279,7 +1278,7 @@ Editor::connect_to_session (Session *t)
 	        TreeModel::Children rows = route_display_model->children();
 		TreeModel::Children::iterator i;
 	
-		//route_list.freeze ();
+		//route_list_display.freeze ();
 		
 		for (i = rows.begin(); i != rows.end(); ++i) {
 		  TimeAxisView *tv =  (*i)[route_display_columns.tv];
@@ -1287,13 +1286,13 @@ Editor::connect_to_session (Session *t)
 
 			if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
 				if (atv->route().master()) {
-					route_list.get_selection()->unselect (i);
+					route_list_display.get_selection()->unselect (i);
 					//(*i)->unselect ();
 				}
 			}
 		}
 
-		//route_list.thaw ();
+		//route_list_display.thaw ();
 	}
 }
 
@@ -2762,130 +2761,85 @@ Editor::stop_canvas_autoscroll ()
 
 int
 Editor::convert_drop_to_paths (vector<string>& paths, 
-			       GdkDragContext     *context,
+			       const RefPtr<Gdk::DragContext>& context,
 			       gint                x,
 			       gint                y,
-			       GtkSelectionData   *data,
+			       const SelectionData& data,
 			       guint               info,
 			       guint               time)			       
 
 {	
-	string spath;
-	char *path;
-	int state;
-	gchar *tname = gdk_atom_name (data->type);
-
-	if (session == 0 || strcmp (tname, "text/plain") != 0) {
+	if (session == 0) {
 		return -1;
 	}
 
-	/* Parse the "uri-list" format that Nautilus provides, 
-	   where each pathname is delimited by \r\n
-	*/
+	vector<ustring> uris = data.get_uris();
 
-	path = (char *) data->data;
-	state = 0;
-
-	for (int n = 0; n < data->length; ++n) {
-
-		switch (state) {
-		case 0:
-			if (path[n] == '\r') {
-				state = 1;
-			} else {
-				spath += path[n];
-			}
-			break;
-		case 1:
-			if (path[n] == '\n') {
-				paths.push_back (spath);
-				spath = "";
-				state = 0;
-			} else {
-				warning << _("incorrectly formatted URI list, ignored")
-					<< endmsg;
-				return -1;
-			}
-			break;
-		}
-	}
-
-	/* nautilus and presumably some other file managers prefix even text/plain with file:// */
+	if (uris.empty()) {
 		
-	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
+		/* This is seriously fucked up. Nautilus doesn't say that its URI lists
+		   are actually URI lists. So do it by hand.
+		*/
 
-		// cerr << "dropped text was " << *p << endl;
+		if (data.get_target() != "text/plain") {
+			return -1;
+		}
+  
+		/* Parse the "uri-list" format that Nautilus provides, 
+		   where each pathname is delimited by \r\n
+		*/
+	
+		cerr << "by hand parsing of URI list\n";
+	
+		const char* p = data.get_text().c_str();
+		const char* q;
 
-		url_decode (*p);
+		while (p)
+		{
+			if (*p != '#')
+			{
+				while (g_ascii_isspace (*p))
+					p++;
+				
+				q = p;
+				while (*q && (*q != '\n') && (*q != '\r'))
+					q++;
+				
+				if (q > p)
+				{
+					q--;
+					while (q > p && g_ascii_isspace (*q))
+						q--;
+					
+					if (q > p)
+					{
+						uris.push_back (ustring (p, q - p + 1));
+					}
+				}
+			}
+			p = strchr (p, '\n');
+			if (p)
+				p++;
+		}
 
-		// cerr << "decoded was " << *p << endl;
+		cerr << "end result = " << uris.size() << endl;
 
-		if ((*p).substr (0,7) == "file://") {
-			(*p) = (*p).substr (7);
+		if (uris.empty()) {
+			return -1;
 		}
 	}
 	
-	return 0;
-}
-
-void  
-Editor::track_canvas_drag_data_received  (GdkDragContext     *context,
-					  gint                x,
-					  gint                y,
-					  GtkSelectionData   *data,
-					  guint               info,
-					  guint               time)
-{
-	TimeAxisView* tvp;
-	AudioTimeAxisView* tv;
-	double cy;
-	vector<string> paths;
-	string spath;
-	GdkEvent ev;
-	jack_nframes_t frame;
-
-	if (convert_drop_to_paths (paths, context, x, y, data, info, time)) {
-		goto out;
-	}
-
-	/* D-n-D coordinates are window-relative, so convert to "world" coordinates
-	 */
-
-	double wx;
-	double wy;
-
-	track_canvas.c2w( x, y, wx, wy);
-
-	ev.type = GDK_BUTTON_RELEASE;
-	ev.button.x = wx;
-	ev.button.y = wy;
-
-	frame = event_frame (&ev, 0, &cy);
-
-	snap_to (frame);
-
-	if ((tvp = trackview_by_y_position (cy)) == 0) {
-
-		/* drop onto canvas background: create a new track */
-
-		insert_paths_as_new_tracks (paths, false);
-
-		
-	} else if ((tv = dynamic_cast<AudioTimeAxisView*>(tvp)) != 0) {
-
-		/* check that its an audio track, not a bus */
-
-		if (tv->get_diskstream()) {
-
-			for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
-				insert_sndfile_into (*p, true, tv, frame);
-			}
+	for (vector<ustring>::iterator i = uris.begin(); i != uris.end(); ++i) {
+		cerr << "looking at " << (*i) << endl;
+		if ((*i).substr (0,7) == "file://") {
+			string p = *i;
+			url_decode (p);
+			cerr << "adding " << p << endl;
+			paths.push_back (p.substr (7));
 		}
-
 	}
 
-  out:
-	gtk_drag_finish (context, TRUE, FALSE, time);
+	return 0;
 }
 
 void
