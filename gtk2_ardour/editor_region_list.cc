@@ -298,21 +298,27 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 void
 Editor::region_list_selection_changed() 
 {
-	bool sensitive;
+	bool selected;
 
 	if (region_list_display.get_selection()->count_selected_rows() > 0) {
-		sensitive = true;
+		selected = true;
 	} else {
-		sensitive = false;
+		selected = false;
 	}
 	
-	for (vector<Glib::RefPtr<Gtk::Action> >::iterator i = ActionManager::region_list_selection_sensitive_actions.begin(); i != ActionManager::region_list_selection_sensitive_actions.end(); ++i) {
-		(*i)->set_sensitive (sensitive);
+	if (selected) {
+		TreeView::Selection::ListHandle_Path rows = region_list_display.get_selection()->get_selected_rows ();
+		TreeView::Selection::ListHandle_Path::iterator i = rows.begin();
+		TreeIter iter;
+
+		/* just set the first selected region (in fact, the selection model might be SINGLE, which
+		   means there can only be one.
+		*/
+		
+		if ((iter = region_list_model->get_iter (*i))) {
+			set_selected_regionview_from_region_list (*((*iter)[region_list_columns.region]), false);
+		}
 	}
-
-	// GTK2FIX
-	// set_selected_regionview_from_region_list (*region, false);
-
 }
 
 void
@@ -384,6 +390,22 @@ Editor::toggle_full_region_list ()
 	}
 }
 
+void
+Editor::show_region_list_display_context_menu (int button, int time)
+{
+	if (region_list_menu == 0) {
+		build_region_list_menu ();
+	}
+
+	if (region_list_display.get_selection()->count_selected_rows() > 0) {
+		ActionManager::set_sensitive (ActionManager::region_list_selection_sensitive_actions, true);
+	} else {
+		ActionManager::set_sensitive (ActionManager::region_list_selection_sensitive_actions, false);
+	}
+
+	region_list_menu->popup (button, time);
+}
+
 bool
 Editor::region_list_display_key_press (GdkEventKey* ev)
 {
@@ -415,6 +437,8 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 	int cellx;
 	int celly;
 
+	cerr << "RL button press\n";
+
 	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = region_list_model->get_iter (path))) {
 			region = (*iter)[region_list_columns.region];
@@ -431,10 +455,7 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		if (region_list_menu == 0) {
-			build_region_list_menu ();
-		}
-		region_list_menu->popup (ev->button, ev->time);
+		show_region_list_display_context_menu (ev->button, ev->time);
 		return true;
 	}
 
@@ -471,6 +492,8 @@ Editor::region_list_display_button_release (GdkEventButton *ev)
 	int cellx;
 	int celly;
 	Region* region;
+
+	cerr << "RL button release\n";
 
 	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = region_list_model->get_iter (path))) {
@@ -604,60 +627,14 @@ Editor::reset_region_list_sort_type (RegionListSortType type)
 {
 	if (type != region_list_sort_type) {
 		region_list_sort_type = type;
-
-		switch (type) {
-		case ByName:
-			region_list_display.get_column (0)->set_title (_("Regions/name"));
-			break;
-			
-		case ByLength:
-			region_list_display.get_column (0)->set_title (_("Regions/length"));
-			break;
-			
-		case ByPosition:
-			region_list_display.get_column (0)->set_title (_("Regions/position"));
-			break;
-			
-		case ByTimestamp:
-			region_list_display.get_column (0)->set_title (_("Regions/creation"));
-			break;
-			
-		case ByStartInFile:
-			region_list_display.get_column (0)->set_title (_("Regions/start"));
-			break;
-			
-		case ByEndInFile:
-			region_list_display.get_column (0)->set_title (_("Regions/end"));
-			break;
-			
-		case BySourceFileName:
-			region_list_display.get_column (0)->set_title (_("Regions/file name"));
-			break;
-			
-		case BySourceFileLength:
-			region_list_display.get_column (0)->set_title (_("Regions/file size"));
-			break;
-			
-		case BySourceFileCreationDate:
-			region_list_display.get_column (0)->set_title (_("Regions/file date"));
-			break;
-			
-		case BySourceFileFS:
-			region_list_display.get_column (0)->set_title (_("Regions/file system"));
-			break;
-		}
-			
-		// region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
+		region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
 	}
 }
 
 void
 Editor::reset_region_list_sort_direction (bool up)
 {
-	// GTK2FIX
-	//region_list_display.set_sort_type (up ? GTK_SORT_ASCENDING : GTK_SORT_DESCENDING);
-	/* reset to force resort */
-	// region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
+	// region_list_display.set_sort_type (up ? GTK_SORT_ASCENDING : GTK_SORT_DESCENDING);
 }
 
 void

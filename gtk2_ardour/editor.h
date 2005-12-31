@@ -707,6 +707,7 @@ class Editor : public PublicEditor
 	void region_list_clear ();
 	void region_list_selection_mapover (sigc::slot<void,ARDOUR::Region&>);
 	void build_region_list_menu ();
+	void show_region_list_display_context_menu (int button, int time);
 
 	Gtk::CheckMenuItem* toggle_auto_regions_item;
 	Gtk::CheckMenuItem* toggle_full_region_list_item;

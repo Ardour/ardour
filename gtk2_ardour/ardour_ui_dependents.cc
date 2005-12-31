@@ -62,7 +62,6 @@ void
 ARDOUR_UI::setup_keybindings ()
 {
 	install_actions ();
-	editor->register_actions ();
 	RedirectBox::register_actions ();
 
 	try {

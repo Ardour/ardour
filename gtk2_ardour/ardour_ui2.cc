@@ -53,6 +53,16 @@ using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
 
+
+static const gchar *psync_strings[] = {
+	N_("Internal"),
+	N_("Slave to MTC"),
+	N_("Sync with JACK"),
+	0
+};
+
+static vector<string> positional_sync_strings;
+
 int	
 ARDOUR_UI::setup_windows ()
 {
@@ -293,6 +303,8 @@ ARDOUR_UI::setup_transport ()
 	act->connect_proxy (auto_loop_button);
 	act = ActionManager::get_action (X_("Transport"), X_("PlaySelection"));
 	act->connect_proxy (play_selection_button);
+	act = ActionManager::get_action (X_("Transport"), X_("ToggleTimeMaster"));
+	act->connect_proxy (time_master_button);
 
 	ARDOUR_UI::instance()->tooltips().set_tip (roll_button, _("Play from playhead"));
 	ARDOUR_UI::instance()->tooltips().set_tip (stop_button, _("Stop playback"));
@@ -306,7 +318,7 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	ARDOUR_UI::instance()->tooltips().set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 	ARDOUR_UI::instance()->tooltips().set_tip (click_button, _("Enable/Disable audio click"));
-	ARDOUR_UI::instance()->tooltips().set_tip (follow_button, _("Enable/Disable follow playhead"));
+	ARDOUR_UI::instance()->tooltips().set_tip (time_master_button, _("Does Ardour control the time?"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_box, _("Shuttle speed control"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
 	ARDOUR_UI::instance()->tooltips().set_tip (speed_display_box, _("Current transport speed"));
@@ -329,8 +341,8 @@ ARDOUR_UI::setup_transport ()
 	punch_in_button.set_name ("TransportButton");
 	punch_out_button.set_name ("TransportButton");
 	click_button.set_name ("TransportButton");
-	follow_button.set_name ("TransportButton");
-	
+	time_master_button.set_name ("TransportButton");
+
 	goto_start_button.unset_flags (CAN_FOCUS);
 	goto_end_button.unset_flags (CAN_FOCUS);
 	roll_button.unset_flags (CAN_FOCUS);
@@ -344,7 +356,7 @@ ARDOUR_UI::setup_transport ()
 	punch_out_button.unset_flags (CAN_FOCUS);
 	punch_in_button.unset_flags (CAN_FOCUS);
 	click_button.unset_flags (CAN_FOCUS);
-	follow_button.unset_flags (CAN_FOCUS);
+	time_master_button.unset_flags (CAN_FOCUS);
 	
 	goto_start_button.set_events (goto_start_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	goto_end_button.set_events (goto_end_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
@@ -357,9 +369,9 @@ ARDOUR_UI::setup_transport ()
 	auto_play_button.set_events (auto_play_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	auto_input_button.set_events (auto_input_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	click_button.set_events (click_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	follow_button.set_events (click_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	punch_in_button.set_events (punch_in_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	punch_out_button.set_events (punch_out_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
+	time_master_button.set_events (punch_out_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	shuttle_box.signal_button_press_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_press));
 	shuttle_box.signal_button_release_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_release));
@@ -386,7 +398,6 @@ ARDOUR_UI::setup_transport ()
 	auto_play_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_play));
 	auto_input_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_input));
 	click_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_click));
-	follow_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_follow));
 	punch_in_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_in));
 	punch_out_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_out));
 
@@ -448,6 +459,12 @@ ARDOUR_UI::setup_transport ()
 	sdframe->set_shadow_type (SHADOW_IN);
 	sdframe->add (speed_display_box);
 
+	positional_sync_strings = internationalize (psync_strings);
+
+	set_popdown_strings (sync_option_combo, positional_sync_strings);
+	sync_option_combo.set_active_text (positional_sync_strings.front());
+	sync_option_combo.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::sync_option_changed));
+
 	shbox->pack_start (*sdframe, false, false);
 	shbox->pack_start (shuttle_units_button, true, true);
 	shbox->pack_start (shuttle_style_button, false, false);
@@ -466,21 +483,19 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff_hbox.pack_start (primary_clock, false, false, 5);
 	transport_tearoff_hbox.pack_start (secondary_clock, false, false, 5);
 
+	transport_tearoff_hbox.pack_start (sync_option_combo, false, false);
+	transport_tearoff_hbox.pack_start (time_master_button, false, false);
+	transport_tearoff_hbox.pack_start (punch_in_button, false, false);
 	transport_tearoff_hbox.pack_start (punch_in_button, false, false);
 	transport_tearoff_hbox.pack_start (punch_out_button, false, false);
 	transport_tearoff_hbox.pack_start (auto_input_button, false, false);
 	transport_tearoff_hbox.pack_start (auto_return_button, false, false);
 	transport_tearoff_hbox.pack_start (auto_play_button, false, false);
 	transport_tearoff_hbox.pack_start (click_button, false, false);
-	transport_tearoff_hbox.pack_start (follow_button, false, false);
 	
 	/* desensitize */
 
 	set_transport_sensitivity (false);
-
-	/* catch up with editor state */
-
-	follow_changed ();
 
 //	transport_tearoff_hbox.pack_start (preroll_button, false, false);
 //	transport_tearoff_hbox.pack_start (preroll_clock, false, false);
@@ -858,4 +873,24 @@ ARDOUR_UI::editor_realized ()
 	shuttle_style_button.set_active_text (_("sprung"));
 	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
 	set_size_request_to_display_given_text (shuttle_style_button, _("sprung"), 2+FUDGE, 10);
+}
+
+void
+ARDOUR_UI::sync_option_changed ()
+{
+	string which;
+
+	if (session == 0) {
+		return;
+	}
+
+	which = sync_option_combo.get_active_text();
+
+	if (which == positional_sync_strings[Session::None]) {
+		session->request_slave_source (Session::None);
+	} else if (which == positional_sync_strings[Session::MTC]) {
+		session->request_slave_source (Session::MTC);
+	} else if (which == positional_sync_strings[Session::JACK]) {
+		session->request_slave_source (Session::JACK);
+	} 
 }

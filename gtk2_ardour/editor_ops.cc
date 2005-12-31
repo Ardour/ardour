@@ -3384,12 +3384,6 @@ Editor::toggle_xfades_active ()
 }
 
 void
-Editor::toggle_follow_playhead ()
-{
-	set_follow_playhead (!_follow_playhead);
-}
-
-void
 Editor::set_xfade_visibility (bool yn)
 {
 	

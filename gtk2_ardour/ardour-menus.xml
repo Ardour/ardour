@@ -57,6 +57,8 @@
                <menuitem action='set-playhead'/>
                <menuitem action='audition-at-mouse'/>
                <menuitem action='brush-at-mouse'/>
+               <separator/> 
+               <menuitem action='ToggleFollowPlayhead'/>
        </menu>
        <menu name='Edit' action='Edit'>
                <menuitem action='undo'/>
@@ -125,6 +127,37 @@
                <menuitem action='ToggleLocations'/>
                <menuitem action='ToggleBigClock'/>
         </menu>
+        <menu name='Options' action='Options'>
+               <menuitem action='SendMTC'/>
+               <menuitem action='SendMMC'/>
+               <menuitem action='UseMMC'/>
+               <menuitem action='SendMIDIfeedback'/>
+               <menuitem action='UseMIDIcontrol'/>
+               <separator/>
+               <menuitem action='AutoConnectNewTrackInputsToHardware'/>
+               <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
+               <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
+               <menuitem action='ManuallyConnectNewTrackOutputs'/>
+               <separator/>
+               <menuitem action='UseHardwareMonitoring'/>
+               <menuitem action='UseSoftwareMonitoring'/>
+               <menuitem action='UseExternalMonitoring'/>
+               <separator/>
+               <menuitem action='StopPluginsWithTransport'/>
+               <menuitem action='RunPluginsWhileRecording'/>
+               <separator/>
+               <menuitem action='VerifyRemoveLastCapture'/>
+               <menuitem action='StopRecordingOnXrun'/>
+               <menuitem action='StopTransportAtEndOfSession'/>
+               <menuitem action='GainReduceFastTransport'/>
+               <separator/>
+               <menuitem action='LatchedSolo'/>
+               <menuitem action='SoloInPlace'/>
+               <menuitem action='SoloViaBus'/>
+               <separator/>
+               <menuitem action='AutomaticallyCreateCrossfades'/>
+               <menuitem action='UnmuteNewFullCrossfades'/>
+         </menu>
      </menubar>
 
      <popup name='redirectmenu'>
@@ -157,4 +190,29 @@
 	 <menuitem action='SetShuttleUnitsSemitones'/>
      </popup>
 
+     <popup name='RegionListMenu'>
+         <menuitem action='rlAudition'/>
+         <menuitem action='rlHide'/>
+         <menuitem action='rlRemove'/>
+	  <separator/>
+         <menuitem action='rlShowAll'/>
+         <menu name='Sort' action='RegionListSort'>
+               <menuitem action='SortAscending'/>
+               <menuitem action='SortDescending'/>
+       	       <separator/>
+               <menuitem action='SortByRegionName'/>
+               <menuitem action='SortByRegionLength'/>
+               <menuitem action='SortByRegionPosition'/>
+               <menuitem action='SortByRegionTimestamp'/>
+               <menuitem action='SortByRegionStartinFile'/>
+               <menuitem action='SortByRegionEndinFile'/>
+               <menuitem action='SortBySourceFileName'/>
+               <menuitem action='SortBySourceFileLength'/>
+               <menuitem action='SortBySourceFileCreationDate'/>
+               <menuitem action='SortBySourceFilesystem'/>
+         </menu>
+         <separator/>
+         <menuitem action='rlEmbedAudio'/>
+         <menuitem action='rlImportAudio'/>
+     </popup>
 </ui>

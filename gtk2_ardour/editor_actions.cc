@@ -21,7 +21,7 @@ Editor::register_actions ()
 	RefPtr<ActionGroup> editor_actions = ActionGroup::create (X_("Editor"));
 	
 	/* non-operative menu items for menu bar */
-
+-
 	ActionManager::register_action (editor_actions, X_("Edit"), _("Edit"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("ZoomFocus"));
@@ -192,7 +192,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "extend-range-to-start-of-region", _("extend range to start of region"), bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "toggle-follow-playhead", _("toggle follow playhead"), (mem_fun(*this, &Editor::toggle_follow_playhead)));
+	act = ActionManager::register_toggle_action (editor_actions, "ToggleFollowPlayhead", _("follow playhead"), (mem_fun(*this, &Editor::toggle_follow_playhead)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "remove-last-capture", _("remove last capture"), (mem_fun(*this, &Editor::remove_last_capture)));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -254,6 +254,9 @@ Editor::register_actions ()
 	RadioAction::Group sort_type_group;
 	RadioAction::Group sort_order_group;
 
+	/* the region list popup menu */
+	ActionManager::register_action (rl_actions, X_("RegionListSort"), _("Sort"));
+
 	act = ActionManager::register_action (rl_actions, X_("rlAudition"), _("Audition"), mem_fun(*this, &Editor::audition_region_from_region_list));
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (rl_actions, X_("rlHide"), _("Hide"), mem_fun(*this, &Editor::hide_region_from_region_list));
@@ -292,6 +295,14 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (rl_actions, X_("rlImportAudio"), _("Embed audio (link)"), bind (mem_fun(*this, &Editor::import_audio), false));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+#ifdef NEW_ACTIONS
+
+	ToggleWaveformVisibility;
+	ToggleWaveformsWhileRecording;
+	ToggleMeasureVisibility;
+
+#endif
 
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (zoom_actions);

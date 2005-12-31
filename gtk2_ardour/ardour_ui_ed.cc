@@ -52,7 +52,6 @@ ARDOUR_UI::create_editor ()
 		return -1;
 	}
 
-	editor->DisplayControlChanged.connect (mem_fun(*this, &ARDOUR_UI::editor_display_control_changed));
 	editor->Realized.connect (mem_fun (*this, &ARDOUR_UI::editor_realized));
 
 	return 0;
@@ -64,9 +63,15 @@ ARDOUR_UI::install_actions ()
 	Glib::RefPtr<ActionGroup> main_actions = ActionGroup::create (X_("Main"));
 	Glib::RefPtr<Action> act;
 
+	/* menus + submenus that need action items */
+
 	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
 	ActionManager::register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
+	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
+	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
+
+	/* the real actions */
 
 	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  bind (mem_fun(*this, &ARDOUR_UI::new_session), false, string ()));
 
@@ -159,7 +164,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (common_actions, X_("GotoEditor"), _("Editor"),  mem_fun(*this, &ARDOUR_UI::goto_editor_window));
 	ActionManager::register_action (common_actions, X_("GotoMixer"), _("Mixer"),  mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleSoundFileBrowser"), _("Sound File Browser"), mem_fun(*this, &ARDOUR_UI::toggle_sound_file_browser));
-	ActionManager::ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Options Editor"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
+	ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Options Editor"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleAudioLibrary"), _("Audio Library"), mem_fun(*this, &ARDOUR_UI::toggle_sound_file_browser));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Track/Bus Inspector"), mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -245,6 +250,14 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
+	/* XXX the newline in the displayed name of this action is really wrong, but its because we want the button
+	   that proxies for this action to be more compact. It would be nice to find a way to override the action
+	   name appearance on the button.
+	*/
+
+	act = ActionManager::register_action (transport_actions, X_("ToggleTimeMaster"), _("time\nmaster"), mem_fun(*this, &ARDOUR_UI::toggle_time_master));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (common_actions, X_("SendAllMidiFeedback"), _("send all midi feedback"), mem_fun(*this, &ARDOUR_UI::send_all_midi_feedback));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack1"), _("toggle record enable track1"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  0U));
@@ -316,8 +329,79 @@ ARDOUR_UI::install_actions ()
 	
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Percentage));
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Semitones));
+
+	Glib::RefPtr<ActionGroup> option_actions = ActionGroup::create ("options");
+
+	act = ActionManager::register_toggle_action (option_actions, X_("SendMTC"), _("Send MTC"), mem_fun (*this, &ARDOUR_UI::toggle_send_mtc));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("SendMMC"), _("Send MMC"), mem_fun (*this, &ARDOUR_UI::toggle_send_mtc));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("UseMMC"), _("Send MMC"), mem_fun (*this, &ARDOUR_UI::toggle_use_mmc));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("SendMIDIfeedback"), _("Send MIDI feedback"), mem_fun (*this, &ARDOUR_UI::toggle_send_midi_feedback));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("UseMIDIcontrol"), _("Use MIDI control"), mem_fun (*this, &ARDOUR_UI::toggle_use_midi_control));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (option_actions, X_("AutoConnectNewTrackInputsToHardware"), _("Connect newtrack inputs to hardware"), mem_fun (*this, &ARDOUR_UI::toggle_AutoConnectNewTrackInputsToHardware));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	RadioAction::Group connect_outputs_group;
+
+	act = ActionManager::register_radio_action (option_actions, connect_outputs_group, X_("AutoConnectNewTrackOutputsToHardware"), _("Connect new track outputs to hardware"), mem_fun (*this, &ARDOUR_UI::toggle_AutoConnectNewTrackOutputsToHardware));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, connect_outputs_group, X_("AutoConnectNewTrackOutputsToMaster"), _("Connect new track outputs to master"), mem_fun (*this, &ARDOUR_UI::toggle_AutoConnectNewTrackOutputsToMaster));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, connect_outputs_group, X_("ManuallyConnectNewTrackOutputs"), _("Manually connect new track outputs"), mem_fun (*this, &ARDOUR_UI::toggle_ManuallyConnectNewTrackOutputs));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	RadioAction::Group monitoring_group;
+
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("Hardware monitoring"), mem_fun (*this, &ARDOUR_UI::toggle_UseHardwareMonitoring));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Software monitoring"), mem_fun (*this, &ARDOUR_UI::toggle_UseSoftwareMonitoring));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("External monitoring"), mem_fun (*this, &ARDOUR_UI::toggle_UseExternalMonitoring));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("RunPluginsWhileRecording"), _("Run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_RunPluginsWhileRecording));
+	ActionManager::session_sensitive_actions.push_back (act);
+	
+	act = ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("StopRecordingOnXrun"), _("Stop recording on xrun"), mem_fun (*this, &ARDOUR_UI::toggle_StopRecordingOnXrun));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("StopTransportAtEndOfSession"), _("Stop transport at session end"), mem_fun (*this, &ARDOUR_UI::toggle_StopTransportAtEndOfSession));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("GainReduceFastTransport"), _("-12dB gain reduce ffwd/rewind"), mem_fun (*this, &ARDOUR_UI::toggle_GainReduceFastTransport));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	RadioAction::Group solo_group;
+
+	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloInPlace"), _("Solo in-place"), mem_fun (*this, &ARDOUR_UI::toggle_SoloViaBus));
+	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloViaBus"), _("Solo via bus"), mem_fun (*this, &ARDOUR_UI::toggle_SoloViaBus));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (option_actions, X_("AutomaticallyCreateCrossfades"), _("Automatically create crossfades"), mem_fun (*this, &ARDOUR_UI::toggle_AutomaticallyCreateCrossfades));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (option_actions, X_("UnmuteNewFullCrossfades"), _("Unmute new full crossfades"), mem_fun (*this, &ARDOUR_UI::toggle_UnmuteNewFullCrossfades));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+#ifdef NEW_ACTIONS
+	act = ActionManager::register_action (option_actions, X_("SetRegionLayerMode", _("SetRegionLayerMode"), mem_fun (*this, &ARDOUR_UI::toggle_SetRegionLayerMode)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (option_actions, X_("SetCrossfadeModel", _("SetCrossfadeModel"), mem_fun (*this, &ARDOUR_UI::toggle_SetCrossfadeModel)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	
+#endif	
 	
 	ActionManager::add_action_group (shuttle_actions);
+	ActionManager::add_action_group (option_actions);
 	ActionManager::add_action_group (jack_actions);
 	ActionManager::add_action_group (transport_actions);
 	ActionManager::add_action_group (main_actions);
@@ -364,17 +448,5 @@ ARDOUR_UI::build_menu_bar ()
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
-}
-
-void
-ARDOUR_UI::editor_display_control_changed (Editing::DisplayControl c)
-{
-	switch (c) {
-	case Editing::FollowPlayhead:
-		follow_button.set_active (editor->follow_playhead ());
-		break;
-	default:
-		break;
-	}
 }
 

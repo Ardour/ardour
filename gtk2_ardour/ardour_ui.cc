@@ -803,6 +803,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  /* transport */
 
+	  time_master_button (_("time\nmaster")),
+
 	  shuttle_units_button (_("% ")),
 
 	  punch_in_button (_("punch\nin")),
@@ -811,7 +813,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	  auto_play_button (_("auto\nplay")),
 	  auto_input_button (_("auto\ninput")),
 	  click_button (_("click")),
-	  follow_button (_("follow\nPH")),
 	  auditioning_alert_button (_("AUDITIONING")),
 	  solo_alert_button (_("SOLO")),
 	  shown_flag (false)
@@ -1367,34 +1368,6 @@ ARDOUR_UI::toggle_click ()
 	toggle_some_session_state (click_button,
 				   &Session::get_clicking,
 				   &Session::set_clicking);
-}
-
-void
-ARDOUR_UI::follow_changed ()
-{
-	bool x;
-
-	if (!editor) {
-		return;
-	}
-
-	if (follow_button.get_active() != (x = editor->follow_playhead())) {
-		follow_button.set_active (x);
-	}
-}
-
-void
-ARDOUR_UI::toggle_follow ()
-{
-	bool x;
-
-	if (!editor) {
-		return;
-	}
-
-	if (editor->follow_playhead() != (x = follow_button.get_active())) {
-		editor->set_follow_playhead (x);
-	}
 }
 
 void

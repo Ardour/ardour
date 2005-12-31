@@ -69,8 +69,6 @@ DnDTreeView::serialize_pointers (RefPtr<TreeModel> model, TreeSelection::ListHan
 void
 DnDTreeView::on_drag_data_get(const RefPtr<DragContext>& context, SelectionData& selection_data, guint info, guint time)
 {
-	cerr << "DnDTreeview::drag_data_get, target = " << selection_data.get_target() << endl;
-
 	if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
 		
 		TreeView::on_drag_data_get (context, selection_data, info, time);
@@ -87,8 +85,6 @@ DnDTreeView::on_drag_data_get(const RefPtr<DragContext>& context, SelectionData&
 void 
 DnDTreeView::on_drag_data_received(const RefPtr<DragContext>& context, int x, int y, const SelectionData& selection_data, guint info, guint time)
 {
-	cerr << "DnDTreeview::drag_data_received @ " << x << ',' << y << " target = " << selection_data.get_target() << endl;
-
  	if (suggested_action) {
  		/* this is a drag motion callback. just update the status to
  		   say that we are still dragging, and that's it.

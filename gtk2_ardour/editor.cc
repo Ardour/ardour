@@ -525,6 +525,7 @@ Editor::Editor (AudioEngine& eng)
 	route_display_model = ListStore::create(route_display_columns);
 	route_list_display.set_model (route_display_model);
 	route_list_display.append_column (_("Tracks"), route_display_columns.text);
+	route_list_display.set_headers_visible (false);
 	route_list_display.set_name ("TrackListDisplay");
 	route_list_display.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
 	route_list_display.set_reorderable (true);
@@ -556,6 +557,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_group_display.append_column (_("groupname"), group_columns.text);
 	edit_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	edit_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	edit_group_display.set_headers_visible (false);
 
 	/* use checkbox for the active column */
 
@@ -593,11 +595,12 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.set_name ("RegionListDisplay");
 
 	region_list_model = TreeStore::create (region_list_columns);
-	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
-
-	region_list_display.set_model (region_list_model);
+	region_list_sort_model = TreeModelSort::create (region_list_model);
+	region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
+	
+	region_list_display.set_model (region_list_sort_model);
 	region_list_display.append_column (_("Regions"), region_list_columns.name);
-	region_list_display.set_reorderable (true);
+	region_list_display.set_headers_visible (false);
 	region_list_display.get_selection()->set_mode (SELECTION_SINGLE);
 	region_list_display.add_object_drag (region_list_columns.region.index(), "regions");
 
@@ -618,12 +621,10 @@ Editor::Editor (AudioEngine& eng)
 
 	region_list_display.signal_key_press_event().connect (mem_fun(*this, &Editor::region_list_display_key_press));
 	region_list_display.signal_key_release_event().connect (mem_fun(*this, &Editor::region_list_display_key_release));
-	region_list_display.signal_button_press_event().connect (mem_fun(*this, &Editor::region_list_display_button_press));
+	region_list_display.signal_button_press_event().connect (mem_fun(*this, &Editor::region_list_display_button_press), false);
 	region_list_display.signal_button_release_event().connect (mem_fun(*this, &Editor::region_list_display_button_release));
 	region_list_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::region_list_selection_changed));
-	// GTK2FIX
-	//region_list_display.unselect_row.connect (mem_fun(*this, &Editor::region_list_display_unselected));
-	//region_list_display.signal_columns_changed().connect (mem_fun(*this, &Editor::region_list_column_click));
+	// region_list_display.signal_popup_menu().connect (bind (mem_fun (*this, &Editor::show_region_list_display_context_menu), 1, 0));
 	
 	named_selection_scroller.add (named_selection_display);
 	named_selection_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -631,6 +632,7 @@ Editor::Editor (AudioEngine& eng)
 	named_selection_model = TreeStore::create (named_selection_columns);
 	named_selection_display.set_model (named_selection_model);
 	named_selection_display.append_column (_("Chunks"), named_selection_columns.text);
+	named_selection_display.set_headers_visible (false);
 	named_selection_display.set_size_request (100, -1);
 	named_selection_display.set_name ("RegionListDisplay");
 	
@@ -670,6 +672,10 @@ Editor::Editor (AudioEngine& eng)
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
 	vpacker.pack_end (global_hpacker, true, true);
+
+	/* register actions now so that set_state() can find them and set toggles/checks etc */
+	
+	register_actions ();
 	
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node);
@@ -2108,8 +2114,13 @@ Editor::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("follow-playhead"))) {
 		bool yn = (prop->value() == "yes");
-		_follow_playhead = !yn;
-		set_follow_playhead (yn);
+		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleFollowPlayhead"));
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			/* do it twice to force the change */
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
 	}
 
 	if ((prop = node.property ("xfades-visible"))) {
@@ -2789,8 +2800,6 @@ Editor::convert_drop_to_paths (vector<string>& paths,
 		   where each pathname is delimited by \r\n
 		*/
 	
-		cerr << "by hand parsing of URI list\n";
-	
 		const char* p = data.get_text().c_str();
 		const char* q;
 
@@ -2822,15 +2831,12 @@ Editor::convert_drop_to_paths (vector<string>& paths,
 				p++;
 		}
 
-		cerr << "end result = " << uris.size() << endl;
-
 		if (uris.empty()) {
 			return -1;
 		}
 	}
 	
 	for (vector<ustring>::iterator i = uris.begin(); i != uris.end(); ++i) {
-		cerr << "looking at " << (*i) << endl;
 		if ((*i).substr (0,7) == "file://") {
 			string p = *i;
 			url_decode (p);
@@ -3689,6 +3695,16 @@ Editor::set_show_measures (bool yn)
 		}
 		DisplayControlChanged (ShowMeasures);
 		instant_save ();
+	}
+}
+
+void
+Editor::toggle_follow_playhead ()
+{
+	RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleFollowPlayhead"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+		set_follow_playhead (tact->get_active());
 	}
 }
 

@@ -68,6 +68,7 @@ ardour_ui_dependents.cc
 ardour_ui_dialogs.cc
 ardour_ui_ed.cc
 ardour_ui_mixer.cc
+ardour_ui_options.cc
 audio_clock.cc
 audio_time_axis.cc
 automation_gain_line.cc

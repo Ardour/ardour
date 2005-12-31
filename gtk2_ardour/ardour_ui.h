@@ -212,7 +212,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_punch_out ();
 	void toggle_auto_return ();
 	void toggle_click ();
-	void toggle_follow ();
 
 	void toggle_session_auto_loop ();
 	void toggle_session_punch_in ();
@@ -366,6 +365,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtkmm2ext::StatefulButton rec_button;
 
+	Gtk::ToggleButton time_master_button;
+	Gtk::ComboBoxText sync_option_combo;
+
+	void sync_option_changed ();
+	void toggle_time_master ();
+
 	enum ShuttleBehaviour {
 		Sprung,
 		Wheel
@@ -408,14 +413,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::ToggleButton auto_play_button;
 	Gtk::ToggleButton auto_input_button;
 	Gtk::ToggleButton click_button;
-	Gtk::ToggleButton follow_button;
 	Gtk::ToggleButton auditioning_alert_button;
 	Gtk::ToggleButton solo_alert_button;
 
 	Gtk::VBox alert_box;
 	
-	void follow_changed ();
-
 	void solo_blink (bool);
 	void audition_blink (bool);
 
@@ -671,6 +673,31 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Glib::RefPtr<Gtk::ActionGroup> common_actions;
 
 	void editor_realized ();
+
+	void toggle_session_state (const char* group, const char* action, void (ARDOUR::Session::*set)(bool));
+	void toggle_send_midi_feedback ();
+	void toggle_use_mmc ();
+	void toggle_send_mmc ();
+	void toggle_use_midi_control();
+	void toggle_send_mtc ();
+
+	void toggle_AutoConnectNewTrackInputsToHardware();
+	void toggle_AutoConnectNewTrackOutputsToHardware();
+	void toggle_AutoConnectNewTrackOutputsToMaster();
+	void toggle_ManuallyConnectNewTrackOutputs();
+	void toggle_UseHardwareMonitoring();
+	void toggle_UseSoftwareMonitoring();
+	void toggle_UseExternalMonitoring();
+	void toggle_StopPluginsWithTransport();
+	void toggle_RunPluginsWhileRecording();
+	void toggle_VerifyRemoveLastCapture();
+	void toggle_StopRecordingOnXrun();
+	void toggle_StopTransportAtEndOfSession();
+	void toggle_GainReduceFastTransport();
+	void toggle_LatchedSolo();
+	void toggle_SoloViaBus();
+	void toggle_AutomaticallyCreateCrossfades();
+	void toggle_UnmuteNewFullCrossfades();
 };
 
 
