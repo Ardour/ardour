@@ -236,7 +236,9 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 
 	} else if (region->whole_file()) {
 
-		TreeModel::Row row = *(region_list_model->append());
+		row = *(region_list_model->append());
+		set_color(c, 65535, 0, 0);
+		row[region_list_columns.color_] = c;
 
 		if (region->source().name()[0] == '/') { // external file
 
@@ -275,8 +277,6 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 			if (r && r->whole_file()) {
 				if (region->source_equivalent (*r)) {
 					row = *(region_list_model->append ((*i).children()));
-					set_color(c, 65535, 0, 0);
-					row[region_list_columns.color_] = c;
 					found_parent = true;
 					break;
 				}
