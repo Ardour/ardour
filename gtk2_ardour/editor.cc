@@ -595,10 +595,10 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.set_name ("RegionListDisplay");
 
 	region_list_model = TreeStore::create (region_list_columns);
-
+	region_list_sort_model = TreeModelSort::create (region_list_model);
 	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
 
-	region_list_display.set_model (region_list_model);
+	region_list_display.set_model (region_list_sort_model);
 	CellRendererText* renderer = Gtk::manage( new Gtk::CellRendererText() );
 	region_list_display.append_column (_("Regions"), *renderer);
 	
@@ -658,7 +658,8 @@ Editor::Editor (AudioEngine& eng)
 	the_notebook.set_scrollable (true);
 	the_notebook.popup_enable ();
 
-	TearOff *notebook_tearoff = manage (new TearOff (the_notebook));
+	TearOff *notebook_tearoff = manage (new TearOff (the_notebook, true));
+	notebook_tearoff->tearoff_window().set_size_request (200, 400);
 
 	edit_pane.pack1 (edit_frame, true, true);
 	edit_pane.pack2 (*notebook_tearoff, true, true);
@@ -2475,9 +2476,9 @@ Editor::setup_toolbar ()
 	mouse_mode_tearoff->set_name ("MouseModeBase");
 
 	mouse_mode_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Gtk::Box*>(&toolbar_hbox), 
-						  mouse_mode_tearoff->tearoff_window()));
+						  &mouse_mode_tearoff->tearoff_window()));
 	mouse_mode_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Gtk::Box*> (&toolbar_hbox), 
-						  mouse_mode_tearoff->tearoff_window(), 1));
+						  &mouse_mode_tearoff->tearoff_window(), 1));
 
 	mouse_move_button.set_name ("MouseModeButton");
 	mouse_select_button.set_name ("MouseModeButton");
@@ -2663,9 +2664,9 @@ Editor::setup_toolbar ()
 	tools_tearoff->set_name ("MouseModeBase");
 
 	tools_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Gtk::Box*>(&toolbar_hbox), 
-					     tools_tearoff->tearoff_window()));
+					     &tools_tearoff->tearoff_window()));
 	tools_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Gtk::Box*> (&toolbar_hbox), 
-					     tools_tearoff->tearoff_window(), 0));
+					     &tools_tearoff->tearoff_window(), 0));
 
 
 	toolbar_hbox.set_spacing (8);

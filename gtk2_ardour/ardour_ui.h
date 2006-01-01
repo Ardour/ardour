@@ -396,6 +396,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_shuttle_behaviour (ShuttleBehaviour);
 	void set_shuttle_units (ShuttleUnits);
 	void update_speed_display ();
+	float last_speed_displayed;
 
 	gint shuttle_box_button_press (GdkEventButton*);
 	gint shuttle_box_button_release (GdkEventButton*);

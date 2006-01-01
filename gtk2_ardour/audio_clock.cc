@@ -327,7 +327,11 @@ AudioClock::on_realize ()
 
 	case Frames:
 		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "4294967296", 0, 2);
+		break;
 
+	case Off:
+		break;
+		
 	}
 }
 

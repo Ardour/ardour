@@ -534,7 +534,7 @@ ARDOUR_UI::manage_window (Window& win)
 void
 ARDOUR_UI::detach_tearoff (Box* b, Widget* w)
 {
-	editor->ensure_float (*transport_tearoff->tearoff_window());
+	editor->ensure_float (transport_tearoff->tearoff_window());
 	b->remove (*w);
 }
 
@@ -835,26 +835,34 @@ void
 ARDOUR_UI::update_speed_display ()
 {
 	if (!session) {
-		speed_display_label.set_text (_("stopped"));
+		if (last_speed_displayed != 0) {
+			speed_display_label.set_text (_("stopped"));
+			last_speed_displayed = 0;
+		}
 		return;
 	}
 
 	char buf[32];
 	float x = session->transport_speed ();
 
-	if (x != 0) {
-		if (shuttle_units == Percentage) {
-			snprintf (buf, sizeof (buf), "%.4f", x);
-		} else {
-			if (x < 0) {
-				snprintf (buf, sizeof (buf), "< %.1f", 12.0 * fast_log2 (-x));
+	if (x != last_speed_displayed) {
+
+		if (x != 0) {
+			if (shuttle_units == Percentage) {
+				snprintf (buf, sizeof (buf), "%.4f", x);
 			} else {
-				snprintf (buf, sizeof (buf), "> %.1f", 12.0 * fast_log2 (x));
+				if (x < 0) {
+					snprintf (buf, sizeof (buf), "< %.1f", 12.0 * fast_log2 (-x));
+				} else {
+					snprintf (buf, sizeof (buf), "> %.1f", 12.0 * fast_log2 (x));
+				}
 			}
+			speed_display_label.set_text (buf);
+		} else {
+			speed_display_label.set_text (_("stopped"));
 		}
-		speed_display_label.set_text (buf);
-	} else {
-		speed_display_label.set_text (_("stopped"));
+
+		last_speed_displayed = x;
 	}
 }	
 	
