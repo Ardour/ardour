@@ -101,7 +101,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	group_display_scroller.add (group_display);
 	group_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	snapshot_display_model = ListStore::create (group_display_columns);
+	snapshot_display_model = ListStore::create (snapshot_display_columns);
 	snapshot_display.set_model (snapshot_display_model);
 	snapshot_display.append_column (X_("mixgroups"), snapshot_display_columns.visible_name);
 	snapshot_display.set_name ("MixerSnapshotDisplayList");
@@ -799,7 +799,7 @@ Mixer_UI::redisplay_snapshots ()
 
 	for (vector<string*>::iterator i = states->begin(); i != states->end(); ++i) {
 		string statename = *(*i);
-		TreeModel::Row row = *(snapshot_display_model->append());
+		const TreeModel::Row & row = *snapshot_display_model->append();
 		row[snapshot_display_columns.visible_name] = statename;
 		row[snapshot_display_columns.real_name] = statename;
 	}
