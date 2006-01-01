@@ -524,3 +524,11 @@ canvas_item_visible (ArdourCanvas::Item* item)
 {
 	return (item->gobj()->object.flags & GNOME_CANVAS_ITEM_VISIBLE) ? true : false;
 }
+
+void
+set_color (Gdk::Color& c, gint r, gint g, gint b)
+{
+	c.set_red(65535);
+	c.set_green(0);
+	c.set_blue(0);
+}

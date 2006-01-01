@@ -35,6 +35,7 @@
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "actions.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -209,6 +210,7 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 {
 	string str;
 	TreeModel::Row row;
+	Gdk::Color c;
 
 	if (!show_automatic_regions_in_region_list && region->automatic()) {
 		return;
@@ -241,6 +243,7 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 			if (region->whole_file()) {
 				str = ".../";
 				str += PBD::basename_nosuffix (region->source().name());
+				
 			} else {
 				str = region->name();
 			}
@@ -270,9 +273,10 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 			AudioRegion* r = dynamic_cast<AudioRegion*>(rr);
 
 			if (r && r->whole_file()) {
-				
 				if (region->source_equivalent (*r)) {
 					row = *(region_list_model->append ((*i).children()));
+					set_color(c, 65535, 0, 0);
+					row[region_list_columns.color_] = c;
 					found_parent = true;
 					break;
 				}
@@ -700,3 +704,4 @@ Editor::region_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& 
 		context->drag_finish (true, false, time);
 	}
 }
+

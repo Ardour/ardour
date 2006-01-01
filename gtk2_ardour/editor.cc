@@ -595,12 +595,19 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.set_name ("RegionListDisplay");
 
 	region_list_model = TreeStore::create (region_list_columns);
-	region_list_sort_model = TreeModelSort::create (region_list_model);
-	region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
+
+	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
+
+	region_list_display.set_model (region_list_model);
+	CellRendererText* renderer = Gtk::manage( new Gtk::CellRendererText() );
+	region_list_display.append_column (_("Regions"), *renderer);
 	
-	region_list_display.set_model (region_list_sort_model);
-	region_list_display.append_column (_("Regions"), region_list_columns.name);
-	region_list_display.set_headers_visible (false);
+	TreeViewColumn* tv_col = region_list_display.get_column(0);
+	tv_col->add_attribute(renderer->property_text(), region_list_columns.name);
+	tv_col->add_attribute(renderer->property_foreground_gdk(), region_list_columns.color_);
+	
+	region_list_display.set_reorderable (true);
+
 	region_list_display.get_selection()->set_mode (SELECTION_SINGLE);
 	region_list_display.add_object_drag (region_list_columns.region.index(), "regions");
 

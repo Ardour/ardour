@@ -75,4 +75,6 @@ void decorate (Gtk::Window& w, Gdk::WMDecoration d);
 
 bool canvas_item_visible (ArdourCanvas::Item* item);
 
+void set_color (Gdk::Color&, gint, gint, gint);
+
 #endif /* __ardour_gtk_utils_h__ */

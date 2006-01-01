@@ -33,6 +33,7 @@
 
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
 
 #include "utils.h"
 #include "ardour_message.h"
@@ -47,6 +48,7 @@ using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace Gtkmm2ext;
 
 IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can_cancel)
 	: ArdourDialog ("i/o selector"),
@@ -472,10 +474,10 @@ IOSelector::display_ports ()
 			TreeViewColumn* col = tview->get_column (0);
 			
 			col->set_clickable (true);
-			//col->set_widget(0);
+			//set_treeview_header_as_default_label(col);
 			/* handle button events on the column header and within the treeview itself */
 
-			//col->get_widget()->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_column_button_release), tview));
+			//col->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_column_button_release), tview));
 			tview->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::connection_button_release), tview));
 		}
 
@@ -664,7 +666,7 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 	return true;
 }
 
-int
+gint
 IOSelector::port_column_button_release (GdkEventButton* event, TreeView* treeview)
 {
 	/* this handles button release on the button at the top of a single-column

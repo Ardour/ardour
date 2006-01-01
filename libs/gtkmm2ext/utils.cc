@@ -19,6 +19,8 @@
 */
 
 #include <gtk/gtkpaned.h>
+#include <gtk/gtk.h>
+
 #include <gtkmm2ext/utils.h>
 #include <gtkmm/widget.h>
 #include <gtkmm/window.h>
@@ -73,4 +75,9 @@ void
 Gtkmm2ext::set_decoration (Gtk::Window* win, Gdk::WMDecoration decor)
 {
 	win->get_window()->set_decorations (decor);
+}
+
+void Gtkmm2ext::set_treeview_header_as_default_label(Gtk::TreeViewColumn* c)
+{
+	gtk_tree_view_column_set_widget( c->gobj(), GTK_WIDGET(0) );
 }

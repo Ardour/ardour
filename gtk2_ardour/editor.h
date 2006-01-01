@@ -683,9 +683,11 @@ class Editor : public PublicEditor
 	    RegionListDisplayModelColumns() {
 		    add (name);
 		    add (region);
+		    add (color_);
 	    }
 	    Gtk::TreeModelColumn<Glib::ustring> name;
 	    Gtk::TreeModelColumn<ARDOUR::Region*> region;
+		Gtk::TreeModelColumn<Gdk::Color> color_;
 	};
 	    
 	RegionListDisplayModelColumns    region_list_columns;
