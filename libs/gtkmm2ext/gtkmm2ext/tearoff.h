@@ -21,26 +21,28 @@
 #ifndef __gtkmm2ext_tearoff_h__
 #define __gtkmm2ext_tearoff_h__
 
-#include <gtkmm.h>
+#include <gtkmm/window.h>
+#include <gtkmm/arrow.h>
+#include <gtkmm/box.h>
+#include <gtkmm/eventbox.h>
 
 namespace Gtkmm2ext {
 
 class TearOff : public Gtk::HBox
 {
   public:
-	TearOff (Gtk::Widget& contents);
+	TearOff (Gtk::Widget& contents, bool allow_resize = false);
 	virtual ~TearOff ();
 
 	sigc::signal<void> Detach;
 	sigc::signal<void> Attach;
 
-	Gtk::Window* tearoff_window() const { return own_window; }
+	Gtk::Window& tearoff_window() { return own_window; }
 	bool torn_off() const;
-
 
   private:
 	Gtk::Widget&   contents;
-	Gtk::Window*   own_window;
+	Gtk::Window    own_window;
 	Gtk::Arrow     tearoff_arrow;
 	Gtk::Arrow     close_arrow;
 	Gtk::HBox      window_box;
