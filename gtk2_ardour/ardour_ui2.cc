@@ -61,7 +61,7 @@ static const gchar *psync_strings[] = {
 	0
 };
 
-static vector<string> positional_sync_strings;
+static vector<const char *> positional_sync_strings;
 
 int	
 ARDOUR_UI::setup_windows ()
@@ -485,7 +485,6 @@ ARDOUR_UI::setup_transport ()
 
 	transport_tearoff_hbox.pack_start (sync_option_combo, false, false);
 	transport_tearoff_hbox.pack_start (time_master_button, false, false);
-	transport_tearoff_hbox.pack_start (punch_in_button, false, false);
 	transport_tearoff_hbox.pack_start (punch_in_button, false, false);
 	transport_tearoff_hbox.pack_start (punch_out_button, false, false);
 	transport_tearoff_hbox.pack_start (auto_input_button, false, false);
