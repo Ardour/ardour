@@ -61,7 +61,7 @@ static const gchar *psync_strings[] = {
 	0
 };
 
-static vector<const char *> positional_sync_strings;
+static vector<string> positional_sync_strings;
 
 int	
 ARDOUR_UI::setup_windows ()
