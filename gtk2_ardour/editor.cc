@@ -595,10 +595,10 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.set_name ("RegionListDisplay");
 
 	region_list_model = TreeStore::create (region_list_columns);
-	region_list_sort_model = TreeModelSort::create (region_list_model);
 	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
+	region_list_model->set_sort_column (0, SORT_ASCENDING);
 
-	region_list_display.set_model (region_list_sort_model);
+	region_list_display.set_model (region_list_model);
 	CellRendererText* renderer = Gtk::manage( new Gtk::CellRendererText() );
 	region_list_display.append_column (_("Regions"), *renderer);
 	

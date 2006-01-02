@@ -441,8 +441,6 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 	int cellx;
 	int celly;
 
-	cerr << "RL button press\n";
-
 	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = region_list_model->get_iter (path))) {
 			region = (*iter)[region_list_columns.region];
@@ -496,8 +494,6 @@ Editor::region_list_display_button_release (GdkEventButton *ev)
 	int cellx;
 	int celly;
 	Region* region;
-
-	cerr << "RL button release\n";
 
 	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = region_list_model->get_iter (path))) {
@@ -631,14 +627,14 @@ Editor::reset_region_list_sort_type (RegionListSortType type)
 {
 	if (type != region_list_sort_type) {
 		region_list_sort_type = type;
-		region_list_sort_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
+		region_list_model->set_sort_func (0, (mem_fun (*this, &Editor::region_list_sorter)));
 	}
 }
 
 void
 Editor::reset_region_list_sort_direction (bool up)
 {
-	// region_list_display.set_sort_type (up ? GTK_SORT_ASCENDING : GTK_SORT_DESCENDING);
+	region_list_model->set_sort_column (0, up ? SORT_ASCENDING : SORT_DESCENDING);
 }
 
 void

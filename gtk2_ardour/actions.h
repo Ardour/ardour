@@ -49,10 +49,10 @@ class ActionManager
 	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 
 						   const char * name, const char * label, sigc::slot<void> sl);
 	
-	static Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group, 
+	static Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&, 
 							 const char * name, const char * label, sigc::slot<void> sl, 
 							 guint key, Gdk::ModifierType mods);
-	static Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group, 
+	static Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&, 
 							 const char * name, const char * label, sigc::slot<void> sl);
 	
 	static Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group, 

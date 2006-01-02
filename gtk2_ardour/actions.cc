@@ -101,7 +101,7 @@ ActionManager::register_action (RefPtr<ActionGroup> group, const char * name, co
 
 
 RefPtr<Action>
-ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, const char * name, const char * label, slot<void> sl, guint key, Gdk::ModifierType mods)
+ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group& rgroup, const char * name, const char * label, slot<void> sl, guint key, Gdk::ModifierType mods)
 {
 	RefPtr<Action> act = register_radio_action (group, rgroup, name, label, sl);
 	AccelMap::add_entry (act->get_accel_path(), key, mods);
@@ -110,7 +110,7 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Gr
 }
 
 RefPtr<Action>
-ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group rgroup, const char * name, const char * label, slot<void> sl)
+ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group& rgroup, const char * name, const char * label, slot<void> sl)
 {
 	RefPtr<Action> act;
 
