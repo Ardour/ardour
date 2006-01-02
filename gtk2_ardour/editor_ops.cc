@@ -1468,6 +1468,8 @@ Editor::insert_region_list_drag (AudioRegion& region, int x, int y)
 	Playlist *playlist;
 	
 	track_canvas.window_to_world (x, y, wx, wy);
+	wx += horizontal_adjustment.get_value();
+	wy += vertical_adjustment.get_value();
 
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
@@ -3154,8 +3156,12 @@ Editor::mouse_paste ()
 {
 	int x, y;
 	double wx, wy;
+
 	track_canvas.get_pointer (x, y);
 	track_canvas.window_to_world (x, y, wx, wy);
+	wx += horizontal_adjustment.get_value();
+	wy += vertical_adjustment.get_value();
+
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
 	event.button.x = wx;

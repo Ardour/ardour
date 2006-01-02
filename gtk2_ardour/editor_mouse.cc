@@ -103,7 +103,7 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy)
 	   position is negative (as can be the case with motion events in particular),
 	   the frame location is always positive.
 	*/
-
+	
 	return pixel_to_frame (*pcx);
 }
 
@@ -1483,6 +1483,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 
 	drag_info.current_pointer_frame = event_frame (event, &drag_info.current_pointer_x,
 						       &drag_info.current_pointer_y);
+
 	if (drag_info.item) {
 		/* item != 0 is the best test i can think of for 
 		   dragging.

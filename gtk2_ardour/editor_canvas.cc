@@ -441,7 +441,9 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	double wx;
 	double wy;
 
-	track_canvas.window_to_world ( x, y, wx, wy);
+	track_canvas.window_to_world (x, y, wx, wy);
+	wx += horizontal_adjustment.get_value();
+	wy += vertical_adjustment.get_value();
 	
 	ev.type = GDK_BUTTON_RELEASE;
 	ev.button.x = wx;

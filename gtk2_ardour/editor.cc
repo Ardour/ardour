@@ -537,8 +537,8 @@ Editor::Editor (AudioEngine& eng)
 	// GTK2FIX
 	// route_list_display.signal_rows_reordered().connect (mem_fun (*this, &Editor::queue_route_list_reordered));
 
-	// GTK2FIX
-	// route_display_model->set_sort_func (0, mem_fun (*this, &Editor::route_list_compare_func));
+	route_display_model->set_sort_func (0, mem_fun (*this, &Editor::route_list_compare_func));
+	route_display_model->set_sort_column (0, SORT_ASCENDING);
 
 	route_list_scroller.add (route_list_display);
 	route_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
