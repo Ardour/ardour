@@ -615,7 +615,6 @@ Editor::Editor (AudioEngine& eng)
 	
 	list<Gtk::TargetEntry> region_list_target_table;
 	
-	region_list_target_table.push_back (TargetEntry ("STRING"));
 	region_list_target_table.push_back (TargetEntry ("text/plain"));
 	region_list_target_table.push_back (TargetEntry ("text/uri-list"));
 	region_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
@@ -624,7 +623,7 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.signal_drag_data_received().connect (mem_fun(*this, &Editor::region_list_display_drag_data_received));
 
 	region_list_scroller.add (region_list_display);
-	region_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	region_list_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
 	region_list_display.signal_key_press_event().connect (mem_fun(*this, &Editor::region_list_display_key_press));
 	region_list_display.signal_key_release_event().connect (mem_fun(*this, &Editor::region_list_display_key_release));
@@ -634,7 +633,7 @@ Editor::Editor (AudioEngine& eng)
 	// region_list_display.signal_popup_menu().connect (bind (mem_fun (*this, &Editor::show_region_list_display_context_menu), 1, 0));
 	
 	named_selection_scroller.add (named_selection_display);
-	named_selection_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	named_selection_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
 	named_selection_model = TreeStore::create (named_selection_columns);
 	named_selection_display.set_model (named_selection_model);

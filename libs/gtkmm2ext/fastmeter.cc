@@ -52,19 +52,19 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
 	
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
-	pixrect.set_x(0);
-	pixrect.set_y(0);
+	pixrect.x = 0;
+	pixrect.y = 0;
 
 	if (orientation == Vertical) {
-		pixrect.set_width(min (v_pixwidth, (gint) dimen));
-		pixrect.set_height(v_pixheight);
+		pixrect.width = min (v_pixwidth, (gint) dimen);
+		pixrect.height = v_pixheight;
 	} else {
-		pixrect.set_width(h_pixwidth);
-		pixrect.set_height(min (h_pixheight, (gint) dimen));
+		pixrect.width = h_pixwidth;
+		pixrect.height = min (h_pixheight, (gint) dimen);
 	}
 
-	request_width = pixrect.get_width();
-	request_height= pixrect.get_height();
+	request_width = pixrect.width;
+	request_height= pixrect.height;
 }
 
 FastMeter::~FastMeter ()
@@ -147,26 +147,21 @@ FastMeter::on_expose_event (GdkEventExpose* ev)
 bool
 FastMeter::vertical_expose (GdkEventExpose* ev)
 {
-	Rectangle intersect;
 	gint top_of_meter;
-	bool blit = false;
-	bool intersecting = false;
+	GdkRectangle intersection;
 
 	top_of_meter = (gint) floor (v_pixheight * current_level);
-	pixrect.set_height(top_of_meter);
+	pixrect.height = top_of_meter;
 
-        intersect = pixrect.intersect(wrap(&ev->area), intersecting);
-        if (intersecting) {
+        if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
 		/* draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		 */
 
 		RefPtr<Gdk::Window> win(get_window());
 		win->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap, 
-				   intersect.get_x(), v_pixheight - top_of_meter,
-				   intersect.get_x(), v_pixheight - top_of_meter,
-				   intersect.get_width(), intersect.get_height());
-		
-		blit = true;
+				   intersection.x, v_pixheight - top_of_meter,
+				   intersection.x, v_pixheight - top_of_meter,
+				   intersection.width, intersection.height);
 	}
 
 	/* draw peak bar */
@@ -174,9 +169,9 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	if (hold_state) {
 		RefPtr<Gdk::Window> win(get_window());
 		win->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap,
-				   intersect.get_x(), v_pixheight - (gint) floor (v_pixheight * current_peak),
-				   intersect.get_x(), v_pixheight - (gint) floor (v_pixheight * current_peak),
-				   intersect.get_width(), 3);
+				   intersection.x, v_pixheight - (gint) floor (v_pixheight * current_peak),
+				   intersection.x, v_pixheight - (gint) floor (v_pixheight * current_peak),
+				   intersection.width, 3);
 	}
 
 	return true;
@@ -185,23 +180,22 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 bool
 FastMeter::horizontal_expose (GdkEventExpose* ev)
 {
-	Rectangle intersect;
-	bool intersecting = false;
+	GdkRectangle intersection;
 	gint right_of_meter;
 
 	right_of_meter = (gint) floor (h_pixwidth * current_level);
-	pixrect.set_width(right_of_meter);
+	pixrect.width = right_of_meter;
 
-	intersect = pixrect.intersect(wrap(&ev->area), intersecting);
-	if (intersecting) {
+	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
+
 		/* draw the part of the meter image that we need. 
 		 */
 
 		RefPtr<Gdk::Window> win(get_window());
 		win->draw_drawable(get_style()->get_fg_gc(get_state()), h_pixmap,
-				   intersect.get_x(), intersect.get_y(),
-				   intersect.get_x(), intersect.get_y(),
-				   intersect.get_width(), intersect.get_height());
+				   intersection.x, intersection.y,
+				   intersection.x, intersection.y,
+				   intersection.width, intersection.height);
 	}
 
 	/* draw peak bar */
@@ -209,9 +203,9 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 	if (hold_state) {
 		RefPtr<Gdk::Window> win(get_window());
 		win->draw_drawable(get_style()->get_fg_gc(get_state()), h_pixmap,
-			      right_of_meter, intersect.get_y(),
-			      right_of_meter, intersect.get_y(),
-			      3, intersect.get_height());
+				   right_of_meter, intersection.y,
+				   right_of_meter, intersection.y,
+				   3, intersection.height);
 	}
 
 	return true;

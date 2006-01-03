@@ -67,7 +67,7 @@ class FastMeter : public Gtk::DrawingArea {
 
 	Orientation orientation;
 	Glib::RefPtr<Gdk::Pixmap> backing;
-	Gdk::Rectangle pixrect;
+	GdkRectangle pixrect;
 	gint request_width;
 	gint request_height;
 	unsigned long hold_cnt;

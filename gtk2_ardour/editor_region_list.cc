@@ -493,7 +493,7 @@ Editor::region_list_display_button_release (GdkEventButton *ev)
 	TreeViewColumn* column;
 	int cellx;
 	int celly;
-	Region* region;
+	Region* region = 0;
 
 	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = region_list_model->get_iter (path))) {
@@ -501,22 +501,9 @@ Editor::region_list_display_button_release (GdkEventButton *ev)
 		}
 	}
 
-	if (Keyboard::is_delete_event (ev)) {
+	if (region && Keyboard::is_delete_event (ev)) {
 		session->remove_region_from_region_list (*region);
 		return true;
-	}
-
-	switch (ev->button) {
-	case 1:
-		return false;
-		break;
-
-	case 3:
-		return false;
-		break;
-
-	default:
-		break;
 	}
 
 	return false;
@@ -546,7 +533,7 @@ Editor::consider_auditioning (Region& region)
 int
 Editor::region_list_sorter (TreeModel::iterator a, TreeModel::iterator b)
 {
-	int cmp;
+	int cmp = 0;
 
 	Region* r1 = (*a)[region_list_columns.region];
 	Region* r2 = (*b)[region_list_columns.region];
