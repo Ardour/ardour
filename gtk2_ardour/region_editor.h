@@ -74,8 +74,6 @@ class AudioRegionEditor : public ArdourDialog
 	Gtk::ToggleButton opaque_button;
 	Gtk::ToggleButton envelope_active_button;
 	Gtk::ToggleButton envelope_view_button;
-	Gtk::Label        envelope_active_button_label;
-	Gtk::Label        envelope_view_button_label;
 
 	Gtk::Button       raise_button;
 	Gtk::Arrow        raise_arrow;
@@ -87,9 +85,7 @@ class AudioRegionEditor : public ArdourDialog
 	Gtk::HBox         layer_hbox;
 
 	Gtk::ToggleButton  audition_button;
-	Gtk::Label         audition_label;
 
-	Gtk::VBox  upper_vbox;
 	Gtk::HBox  lower_hbox;
 	
 	Gtk::Table time_table;
@@ -148,6 +144,7 @@ class AudioRegionEditor : public ArdourDialog
 	void fade_out_length_adjustment_changed ();
 	void fade_in_changed ();
 	void fade_out_changed ();
+	void audition_state_changed (bool);
 
 	void activation ();
 

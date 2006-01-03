@@ -28,6 +28,7 @@
 #include "regionview.h"
 #include "ardour_ui.h"
 #include "utils.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -44,10 +45,12 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	  lock_button (_("lock")),
 	  mute_button (_("mute")),
 	  opaque_button (_("opaque")),
+	  envelope_active_button(_("active")),
+	  envelope_view_button(_("visible")),
 	  raise_arrow (Gtk::ARROW_UP, Gtk::SHADOW_OUT),
 	  lower_arrow (Gtk::ARROW_DOWN, Gtk::SHADOW_OUT),
 	  layer_label (_("Layer")),
-	  audition_label (_("play")),
+	  audition_button (_("play")),
 	  time_table (3, 2),
 	  start_clock ("AudioRegionEditorClock", true),
 	  end_clock ("AudioRegionEditorClock", true),
@@ -90,8 +93,6 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	layer_hbox.pack_start (raise_button, false, false);
 	layer_hbox.pack_start (lower_button, false, false);
 #endif
-
-	audition_button.add (audition_label);
 
 	mute_button.set_name ("AudioRegionEditorToggleButton");
 	opaque_button.set_name ("AudioRegionEditorToggleButton");
@@ -170,11 +171,6 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	time_table.attach (length_clock, 1, 2, 2, 3, Gtk::FILL, Gtk::FILL);
 
 	envelope_label.set_name ("AudioRegionEditorLabel");
-
-	envelope_active_button_label.set_text (_("active"));
-	envelope_active_button.add (envelope_active_button_label);
-	envelope_view_button_label.set_text (_("visible"));
-	envelope_view_button.add (envelope_view_button_label);
 
 	envelope_loop_table.set_border_width (5);
 	envelope_loop_table.set_row_spacings (2);
@@ -256,11 +252,10 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	lower_hbox.pack_start (fade_in_table, true, true);
 	lower_hbox.pack_start (fade_out_table, true, true);
 
-	upper_vbox.pack_start (top_row_hbox, true, true);
-	upper_vbox.pack_start (sep3, false, false);
-	upper_vbox.pack_start (lower_hbox, true, true);
+	get_vbox()->pack_start (top_row_hbox, true, true);
+	get_vbox()->pack_start (sep3, false, false);
+	get_vbox()->pack_start (lower_hbox, true, true);
 
-	add (upper_vbox);
 	set_name ("AudioRegionEditorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
@@ -269,6 +264,8 @@ AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView
 	string title = _("ardour: region ");
 	title += _region.name();
 	set_title (title);
+
+	show_all();
 
 	name_changed ();
 	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged));
@@ -450,6 +447,7 @@ AudioRegionEditor::connect_editor_events ()
 	opaque_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::opaque_button_clicked));
 	raise_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::raise_button_clicked));
 	lower_button.signal_clicked().connect (mem_fun(*this, &AudioRegionEditor::lower_button_clicked));
+	_session.AuditionActive.connect (mem_fun(*this, &AudioRegionEditor::audition_state_changed));
 }
 
 void
@@ -720,3 +718,14 @@ AudioRegionEditor::fade_in_active_changed ()
 		fade_in_active_button.set_active (x);
 	}
 }
+
+void
+AudioRegionEditor::audition_state_changed (bool yn)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &AudioRegionEditor::audition_state_changed), yn));
+
+	if (!yn) {
+		audition_button.set_active (false);
+	}
+}
+
