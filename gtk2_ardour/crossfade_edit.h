@@ -31,8 +31,8 @@ class CrossfadeEditor : public ArdourDialog
     /* these are public so that a caller/subclass can make them do the right thing.
      */
     
-    Gtk::Button cancel_button;
-    Gtk::Button ok_button;
+    Gtk::Button* cancel_button;
+    Gtk::Button* ok_button;
 
     struct PresetPoint {
 	double x;
@@ -106,7 +106,7 @@ class CrossfadeEditor : public ArdourDialog
     vector<Gtk::Button*> fade_out_buttons;
     vector<Gtk::Button*> fade_in_buttons;
 
-    Gtk::HBox action_box;
+    //Gtk::HBox action_box;
 
     Gtk::VBox vpacker2;
 

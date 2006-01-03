@@ -72,8 +72,8 @@ CrossfadeEditor::Half::Half ()
 
 CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double mxy)
 	: ArdourDialog (_("ardour: x-fade edit")),
-	  cancel_button (_("Cancel")),
-	  ok_button (_("OK")),
+	  //cancel_button (_("Cancel")),
+	  //ok_button (_("OK")),
 	  xfade (xf),
 	  session (s),
 	  clear_button (_("Clear")),
@@ -106,6 +106,12 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	select_out_button.set_group (sel_but_group);
 	select_out_button.set_mode (false);
 	select_in_button.set_mode (false);
+
+	get_action_area()->set_layout(BUTTONBOX_SPREAD);
+	get_action_area()->pack_start(clear_button);
+	get_action_area()->pack_start(revert_button);
+	cancel_button = add_button ("Cancel", RESPONSE_CANCEL);
+	ok_button = add_button ("OK", RESPONSE_ACCEPT);
 
 	if (fade_in_presets == 0) {
 		build_presets ();
@@ -227,8 +233,8 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 
 	clear_button.set_name ("CrossfadeEditButton");
 	revert_button.set_name ("CrossfadeEditButton");
-	ok_button.set_name ("CrossfadeEditButton");
-	cancel_button.set_name ("CrossfadeEditButton");
+	ok_button->set_name ("CrossfadeEditButton");
+	cancel_button->set_name ("CrossfadeEditButton");
 	preroll_button.set_name ("CrossfadeEditButton");
 	postroll_button.set_name ("CrossfadeEditButton");
 	audition_both_button.set_name ("CrossfadeEditAuditionButton");
@@ -245,20 +251,20 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	audition_left_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_left_toggled));
 	audition_left_dry_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_left_dry_toggled));
 
-	action_box.set_border_width (7);
-	action_box.set_spacing (5);
-	action_box.set_homogeneous (false);
-	action_box.pack_end (cancel_button, false, false);
-	action_box.pack_end (ok_button, false, false);
-	action_box.pack_end (revert_button, false, false);
-	action_box.pack_end (clear_button, false, false);
+	//action_box.set_border_width (7);
+	//action_box.set_spacing (5);
+	//action_box.set_homogeneous (false);
+	//action_box.pack_end (*cancel_button, false, false);
+	//action_box.pack_end (*ok_button, false, false);
+	//action_box.pack_end (*revert_button, false, false);
+	//action_box.pack_end (*clear_button, false, false);
 
-	Frame* edit_frame = manage (new Frame (_("Edit")));
-	edit_frame->set_name (X_("CrossfadeEditFrame"));
-	edit_frame->add (action_box);
+	//Frame* edit_frame = manage (new Frame (_("Edit")));
+	//edit_frame->set_name (X_("CrossfadeEditFrame"));
+	//edit_frame->add (action_box);
 
-	Gtk::HBox* action_center_box = manage (new HBox);
-	action_center_box->pack_start (*edit_frame, true, false);
+	//Gtk::HBox* action_center_box = manage (new HBox);
+	//action_center_box->pack_start (*edit_frame, true, false);
 
 	roll_box.pack_start (preroll_button, false, false);
 	roll_box.pack_start (postroll_button, false, false);
@@ -272,7 +278,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	vpacker2->set_spacing (7);
 	vpacker2->pack_start (*acbox, false, false);
 	vpacker2->pack_start (*rcenter_box, false, false);
-	vpacker2->pack_start (*action_center_box, false, false);
+	//vpacker2->pack_start (*action_center_box, false, false);
 
 	curve_button_box.set_spacing (7);
 	curve_button_box.pack_start (fade_out_table, false, false, 12);
@@ -299,6 +305,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	xfade.StateChanged.connect (mem_fun(*this, &CrossfadeEditor::xfade_changed));
 
 	session.AuditionActive.connect (mem_fun(*this, &CrossfadeEditor::audition_state_changed));
+	show_all_children();
 }
 
 CrossfadeEditor::~CrossfadeEditor()
