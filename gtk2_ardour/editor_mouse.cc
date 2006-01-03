@@ -2676,7 +2676,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	if ((pointer_y_span = (drag_info.last_trackview->order - tv->order)) != 0) {
 
 		int32_t children = 0, numtracks = 0;
-		bitset <512> tracks (0x00);
+		// XXX hard coding track limit, oh my, so very very bad
+		bitset <1024> tracks (0x00);
 		/* get a bitmask representing the visible tracks */
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {

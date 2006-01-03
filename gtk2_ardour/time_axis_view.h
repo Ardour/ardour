@@ -75,12 +75,12 @@ class TimeAxisView : public virtual AxisView
 		   valued so that there is a precise
 		   middle.
 		*/
-		Largest = 301,
-		Large = 201,
-		Larger = 101,
-		Normal = 51,
-		Smaller = 31,
-		Small = 21
+		Largest = 307,
+		Large = 207,
+		Larger = 107,
+		Normal = 57,
+		Smaller = 37,
+		Small = 27
 	};
 
 	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
@@ -89,7 +89,7 @@ class TimeAxisView : public virtual AxisView
 	/* public data: XXX create accessor/mutators for these ?? */
 
 	PublicEditor& editor;
-
+	
 	guint32 height;  /* in canvas units */
 	guint32 effective_height;  /* in canvas units */
 	double  y_position;
@@ -293,6 +293,8 @@ class TimeAxisView : public virtual AxisView
 
 	bool _hidden;
 	bool _has_state;
+
+	void check_height (Gdk::Rectangle&);
 
 }; /* class TimeAxisView */
 

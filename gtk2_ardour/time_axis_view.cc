@@ -130,7 +130,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.set_flags (CAN_FOCUS);
 
 	controls_ebox.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
-	controls_ebox.signal_scroll_event().connect (mem_fun (*this, &TimeAxisView::controls_ebox_scroll));
+	controls_ebox.signal_scroll_event().connect (mem_fun (*this, &TimeAxisView::controls_ebox_scroll), true);
 
 	controls_lhs_pad.set_name ("TimeAxisViewControlsPadding");
 	controls_hbox.pack_start (controls_lhs_pad,false,false);
@@ -140,6 +140,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_frame.add (controls_hbox);
 	controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_frame.set_shadow_type (Gtk::SHADOW_OUT);
+
 }
 
 TimeAxisView::~TimeAxisView()
@@ -264,8 +265,6 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 bool
 TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 {
-	cerr << "controls ebox button release button " << ev->button << endl;
-
 	switch (ev->button) {
 	case 1:
 		selection_click (ev);
@@ -352,22 +351,16 @@ TimeAxisView::step_height (bool bigger)
 	}
 }
 
-
 void
 TimeAxisView::set_height (TrackHeight h)
 {
-	height = (guint32) h;
-	controls_frame.set_size_request (-1, height+2);
+	height = (gint32) h;
+	controls_frame.set_size_request (-1, height);
 
  	if (canvas_item_visible (selection_group)) {
 		/* resize the selection rect */
 		show_selection (editor.get_selection().time);
 	}
-
-//	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
-//		(*i)->set_height (h);
-//	}
-
 }
 
 bool
@@ -875,3 +868,7 @@ TimeAxisView::reset_height()
 	}
 }
 	
+void
+TimeAxisView::check_height (Gdk::Rectangle& r)
+{
+}

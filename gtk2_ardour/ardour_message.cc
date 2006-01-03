@@ -31,9 +31,10 @@ ArdourMessage::ArdourMessage (Gtk::Window* parent,
 			      string name, string msg, 
 			      bool grab_focus, bool auto_run)
 	: ArdourDialog (name),
-	  label (msg, 0.5, 0.5)
+	  label (msg)
 {
 	label.set_name (X_("PrompterLabel"));
+	label.set_justify (JUSTIFY_CENTER);
 	label.show ();
 
 	get_vbox()->pack_start (label);

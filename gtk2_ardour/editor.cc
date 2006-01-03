@@ -321,7 +321,7 @@ Editor::Editor (AudioEngine& eng)
 	ignore_route_list_reorder = false;
 	verbose_cursor_on = true;
 	route_removal = false;
-	track_spacing = 2;
+	track_spacing = 0;
 	show_automatic_regions_in_region_list = true;
 	have_pending_keyboard_selection = false;
 	_follow_playhead = true;
