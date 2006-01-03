@@ -1396,6 +1396,13 @@ style "cCrossfadeEditorBase"
 }
 widget "*cCrossfadeEditorBase" style "cCrossfadeEditorBase"
 
+style "cCrossfadeEditorLine"
+{
+fg[NORMAL] = { 0, 0, 0  }
+fg[ACTIVE] = { 1.0, 0, 0 }
+}
+widget "*cCrossfadeEditorLine" style "cCrossfadeEditorLine"
+
 style "cSelectedCrossfadeEditorLine"
 {
 	fg[NORMAL] = { 0, 0.86, 0.86  }
