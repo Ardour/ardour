@@ -106,8 +106,6 @@ class CrossfadeEditor : public ArdourDialog
     vector<Gtk::Button*> fade_out_buttons;
     vector<Gtk::Button*> fade_in_buttons;
 
-    //Gtk::HBox action_box;
-
     Gtk::VBox vpacker2;
 
     Gtk::Button clear_button;
