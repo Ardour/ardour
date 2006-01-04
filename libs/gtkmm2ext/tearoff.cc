@@ -85,7 +85,6 @@ TearOff::tearoff_click (GdkEventButton* ev)
 	own_window.set_name (get_name());
 	close_event_box.set_name (get_name());
 	own_window.show_all ();
-//	own_window.realize ();
 	hide ();
 	Detach ();
 	return TRUE;

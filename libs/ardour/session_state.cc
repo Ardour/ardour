@@ -1810,7 +1810,7 @@ Session::load_sources (const XMLNode& node)
 Source *
 Session::XMLSourceFactory (const XMLNode& node)
 {
-	Source *src;
+	Source *src = 0;
 
 	if (node.name() != "Source") {
 		return 0;

@@ -426,7 +426,7 @@ LadspaPlugin::set_state(const XMLNode& node)
 	LocaleGuard lg (X_("POSIX"));
 
 	if (node.name() != state_node_name()) {
-		error << _("Bad node send to LadspaPlugin::set_state") << endmsg;
+		error << _("Bad node sent to LadspaPlugin::set_state") << endmsg;
 		return -1;
 	}
 

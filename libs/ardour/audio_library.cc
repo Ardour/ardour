@@ -20,9 +20,14 @@
 */
 
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
+#include <cerrno>
 #include <iostream>
 #include <sstream>
 #include <cctype>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fts.h>
 
 #include <lrdf.h>
 
@@ -38,22 +43,12 @@
 using namespace std;
 using namespace ARDOUR;
 
-namespace std {
-struct UriSorter {
-	bool operator() (string a, string b) const { 
-		return cmp_nocase(Library->get_label(a), Library->get_label(b)) == -1; 
-	}
-}; 
-};
-
-static char* GROUP = "http://ardour.org/ontology/Group";
 static char* SOUNDFILE = "http://ardour.org/ontology/Soundfile";
-static char* hasFile = "http://ardour.org/ontology/hasFile";
-static char* memberOf = "http://ardour.org/ontology/memberOf";
-static char* subGroupOf = "http://ardour.org/ontology/subGroupOf";
 
 AudioLibrary::AudioLibrary ()
 {
+//	sfdb_paths.push_back("/Users/taybin/sounds");
+
 	src = "file:" + Config->get_user_ardour_path() + "sfdb";
 
 	// workaround for possible bug in raptor that crashes when saving to a
@@ -64,7 +59,7 @@ AudioLibrary::AudioLibrary ()
 
 	lrdf_statement pattern;
 
-	pattern.subject = GROUP;
+	pattern.subject = SOUNDFILE;
 	pattern.predicate = RDF_TYPE;
 	pattern.object = RDFS_CLASS;
 	pattern.object_type = lrdf_uri;
@@ -78,6 +73,8 @@ AudioLibrary::AudioLibrary ()
 	} 
 
 	lrdf_free_statements(matches);
+
+	scan_paths();
 }
 
 AudioLibrary::~AudioLibrary ()
@@ -87,8 +84,6 @@ AudioLibrary::~AudioLibrary ()
 void
 AudioLibrary::initialize_db ()
 {
-	// define ardour:Group
-	lrdf_add_triple(src.c_str(), GROUP, RDF_TYPE, RDFS_CLASS, lrdf_uri);
 	// define ardour:Soundfile
 	lrdf_add_triple(src.c_str(), SOUNDFILE, RDF_TYPE, RDFS_CLASS, lrdf_uri);
 
@@ -107,148 +102,23 @@ AudioLibrary::save_changes ()
 	}
 }
 
-string
-AudioLibrary::add_group (string group, string parent_uri)
-{
-	string local_group(string_compose("file:sfbd/group/%1", get_uid()));
-
-	lrdf_add_triple(src.c_str(), local_group.c_str(), 
-					RDFS_BASE "label", group.c_str(), lrdf_literal);
-
-	if (parent_uri == ""){
-		lrdf_add_triple(src.c_str(), local_group.c_str(), 
-						subGroupOf, GROUP, lrdf_uri);
-	} else {
-		lrdf_add_triple(src.c_str(), local_group.c_str(), 
-						subGroupOf, parent_uri.c_str(), lrdf_uri);
-	}
-
-	 added_group(local_group, parent_uri); /* EMIT SIGNAL */
-
-	return local_group;
-}
-
 void
-AudioLibrary::remove_group (string uri)
+AudioLibrary::add_member (string member)
 {
-	list<string> items;
-	list<string>::iterator i;
-
-	get_members(items, uri);
-	for (i = items.begin(); i != items.end(); ++i) {
-		remove_member(*i);
-	}
-	
-	items.clear();
-	
-	get_groups(items, uri);
-	for (i = items.begin(); i != items.end(); ++i) {
-		remove_group(*i);
-	}
-
-	lrdf_remove_uri_matches(uri.c_str());
-
-	 removed_group(uri); /* EMIT SIGNAL */
-}
-
-void
-AudioLibrary::get_groups (list<string>& groups, string parent_uri)
-{
-	lrdf_statement pattern;
-
-	pattern.subject = 0;
-	pattern.predicate = subGroupOf;
-	if (parent_uri == ""){
-		pattern.object = strdup(GROUP);
-	} else {
-		pattern.object = strdup(parent_uri.c_str());
-	}
-
-	lrdf_statement* matches = lrdf_matches(&pattern);
-
-	lrdf_statement* current = matches;
-	while (current != 0) {
-		groups.push_back(current->subject);
-		current = current->next;
-	}
-
-	lrdf_free_statements(matches);
-	free (pattern.object);
-
-	UriSorter cmp;
-	groups.sort(cmp);
-	groups.unique();
-}
-
-string
-AudioLibrary::add_member (string member, string parent_uri)
-{
-	string local_member(string_compose("file:sfdb/soundfile/%1", get_uid()));
 	string file_uri(string_compose("file:%1", member));
 
-	lrdf_add_triple(src.c_str(), local_member.c_str(), RDF_TYPE, 
+	lrdf_add_triple(src.c_str(), file_uri.c_str(), RDF_TYPE, 
 			SOUNDFILE, lrdf_uri);
-	lrdf_add_triple(src.c_str(), local_member.c_str(), hasFile,
-					file_uri.c_str(), lrdf_uri);
-
-	string::size_type size = member.find_last_of('/');
-	string label = member.substr(++size);
-
-	lrdf_add_triple(src.c_str(), local_member.c_str(), RDFS_BASE "label", 
-			label.c_str(), lrdf_literal);
-
-	if (parent_uri == ""){
-		lrdf_add_triple(src.c_str(), local_member.c_str(), memberOf,
-				GROUP, lrdf_uri);
-	} else {
-		lrdf_add_triple(src.c_str(), local_member.c_str(), memberOf, 
-			parent_uri.c_str(), lrdf_uri);
-	}
-
-	added_member (local_member, parent_uri); /* EMIT SIGNAL */
-
-	return local_member;
 }
 
 void
 AudioLibrary::remove_member (string uri)
 {
 	lrdf_remove_uri_matches (uri.c_str());
-
-	 removed_member(uri); /* EMIT SIGNAL */
 }
 
 void
-AudioLibrary::get_members (list<string>& members, string parent_uri)
-{
-	lrdf_statement pattern;
-
-	pattern.subject = 0;
-	pattern.predicate = memberOf;
-	if (parent_uri == ""){
-		pattern.object = strdup(GROUP);
-	} else {
-		pattern.object = strdup(parent_uri.c_str());
-	}
-
-	lrdf_statement* matches = lrdf_matches(&pattern);
-
-	lrdf_statement* current = matches;
-	while (current != 0) {
-		members.push_back(current->subject);
-		current = current->next;
-	}
-
-	lrdf_free_statements(matches);
-	free (pattern.object);
-
-	UriSorter cmp;
-	members.sort(cmp);
-	members.unique();
-}
-
-void
-AudioLibrary::search_members_and (list<string>& members, 
+AudioLibrary::search_members_and (vector<string>& members, 
 								  const map<string,string>& fields)
 {
 	lrdf_statement **head;
@@ -275,9 +145,7 @@ AudioLibrary::search_members_and (list<string>& members,
 		}
 		lrdf_free_uris(ulist);
 
-		UriSorter cmp;
-		members.sort(cmp);
-		members.unique();
+		compact_vector(members);
 	}
 
 	// memory clean up
@@ -292,7 +160,7 @@ AudioLibrary::search_members_and (list<string>& members,
 }
 
 void
-AudioLibrary::search_members_or (list<string>& members, 
+AudioLibrary::search_members_or (vector<string>& members, 
 								 const map<string,string>& fields)
 {
 	map<string,string>::const_iterator i;
@@ -318,31 +186,7 @@ AudioLibrary::search_members_or (list<string>& members,
 		lrdf_free_statements (old);
 	}
 
-	UriSorter cmp;
-	members.sort(cmp);
-	members.unique();
-}
-
-string
-AudioLibrary::get_member_filename (string uri)
-{
-	lrdf_statement pattern;
-	pattern.subject = strdup(uri.c_str());
-	pattern.predicate = hasFile;
-	pattern.object = 0;
-	pattern.object_type = lrdf_uri;
-	
-	lrdf_statement* matches = lrdf_matches(&pattern);
-	if (matches) {
-		string file = matches->object;
-		lrdf_free_statements(matches);
-
-		string::size_type pos = file.find(":");
-		return file.substr(++pos);
-	} else {
-		warning << _("Could not find member filename") << endmsg;
-		return "-Unknown-";
-	}
+	compact_vector(members);
 }
 
 void
@@ -371,11 +215,11 @@ AudioLibrary::add_field (string name)
 
 	set_label (local_field, name);
 	
-	 fields_changed(); /* EMIT SIGNAL */
+	fields_changed(); /* EMIT SIGNAL */
 }
 
 void
-AudioLibrary::get_fields (list<string>& fields)
+AudioLibrary::get_fields (vector<string>& fields)
 {
 	lrdf_statement pattern;
 
@@ -395,15 +239,14 @@ AudioLibrary::get_fields (list<string>& fields)
 
 	lrdf_free_statements(matches);
 
-	fields.sort();
-	fields.unique();
+	compact_vector(fields);
 }
 
 void
 AudioLibrary::remove_field (string name)
 {
 	lrdf_remove_uri_matches(field_uri(name).c_str());
-	 fields_changed (); /* EMIT SIGNAL */
+	fields_changed (); /* EMIT SIGNAL */
 }
 
 string 
@@ -501,3 +344,89 @@ AudioLibrary::set_label (string uri, string label)
 			label.c_str(), lrdf_literal);
 }
 
+void
+AudioLibrary::compact_vector(vector<string>& vec)
+{
+    sort(vec.begin(), vec.end());
+    unique(vec.begin(), vec.end());
+}
+
+void 
+AudioLibrary::set_paths (vector<string> paths)
+{
+	sfdb_paths = paths;
+}
+
+vector<string> 
+AudioLibrary::get_paths ()
+{
+	return sfdb_paths;
+}
+
+void
+AudioLibrary::scan_paths ()
+{
+	if (sfdb_paths.size() < 1) {
+		return;
+	}
+
+	vector<char *> pathv(sfdb_paths.size());
+	unsigned int i;
+	for (i = 0; i < sfdb_paths.size(); ++i) {
+		pathv[i] = new char[sfdb_paths[i].length() +1];
+		sfdb_paths[i].copy(pathv[i], string::npos);
+		pathv[i][sfdb_paths[i].length()] = 0;
+	}
+	pathv[i] = 0;
+
+	FTS* ft = fts_open(&pathv[0], FTS_LOGICAL|FTS_NOSTAT|FTS_PHYSICAL|FTS_XDEV, 0);
+	if (errno) {
+		error << strerror(errno) << endmsg;
+		return;
+	}
+
+	lrdf_statement s;
+	s.predicate = RDF_TYPE;
+	s.object = SOUNDFILE;
+	s.object_type = lrdf_uri;
+	string filename;
+	while (FTSENT* file = fts_read(ft)) {
+		if ((file->fts_info & FTS_F) && (safe_file_extension(file->fts_name))) {
+			filename = "file:";
+			filename.append(file->fts_accpath);
+			s.subject = strdup(filename.c_str());
+			if (lrdf_exists_match(&s)) {
+				continue;
+			} else {
+				add_member(file->fts_accpath);
+				cout << file->fts_accpath << endl;
+			}
+			free(s.subject);
+		}
+	}
+	fts_close(ft);
+
+	for (i = 0; i < pathv.size(); ++i) {
+		delete[] pathv[i];
+	}
+
+	save_changes();
+}
+
+bool
+AudioLibrary::safe_file_extension(string file)
+{
+	return !(file.rfind(".wav") == string::npos &&
+        file.rfind(".aiff")== string::npos &&
+        file.rfind(".aif") == string::npos &&
+        file.rfind(".snd") == string::npos &&
+        file.rfind(".au")  == string::npos &&
+        file.rfind(".raw") == string::npos &&
+        file.rfind(".sf")  == string::npos &&
+        file.rfind(".cdr") == string::npos &&
+        file.rfind(".smp") == string::npos &&
+        file.rfind(".maud")== string::npos &&
+        file.rfind(".vwe") == string::npos &&
+        file.rfind(".paf") == string::npos &&
+        file.rfind(".voc") == string::npos);
+}
