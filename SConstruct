@@ -57,7 +57,7 @@ class LibraryInfo(Environment):
 	self.Replace(LIBPATH = list(Set(self.get('LIBPATH', []))))
 	self.Replace(CPPPATH = list(Set(self.get('CPPPATH',[]))))
 	#doing LINKFLAGS breaks -framework
-        #doing LIBS break link order dependency
+    #doing LIBS break link order dependency
 
 
 env = LibraryInfo (options = opts,
@@ -386,7 +386,7 @@ libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomeca
 libraries['glade2'] = LibraryInfo()
 libraries['glade2'].ParseConfig ('pkg-config --cflags --libs libglade-2.0')
 
-libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
+#libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
 
 libraries['ardour'] = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')
 libraries['midi++2'] = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++2', CPPPATH='#libs/midi++2')
@@ -437,7 +437,7 @@ if env['SYSLIBS']:
     libraries['libglademm'] = LibraryInfo()
     libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
 
-    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
+#    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
@@ -452,7 +452,7 @@ if env['SYSLIBS']:
         ]
 
     gtk_subdirs = [
-        'libs/flowcanvas',
+#        'libs/flowcanvas',
         'libs/gtkmm2ext',
         'gtk2_ardour'
         ]
@@ -506,11 +506,11 @@ else:
 	'libs/gtkmm2/atk',
 	'libs/gtkmm2/gdk',
 	'libs/gtkmm2/gtk',
-        'libs/libglademm',
+    'libs/libglademm',
 	'libs/libgnomecanvasmm',
-	'libs/flowcanvas',
-        'libs/gtkmm2ext',
-        'gtk2_ardour'
+#	'libs/flowcanvas',
+    'libs/gtkmm2ext',
+    'gtk2_ardour'
         ]
 
 opts.Save('scache.conf', env)
@@ -573,15 +573,7 @@ config_kernel = 2;
 config_os = 3;
 config = config_guess.split ("-")
 
-#
-# on OS X darwinports puts things in /opt/local by default
-#
 if config[config_arch] == 'apple':
-    if os.path.isdir('/opt/local/lib'):
-        libraries['core'].Append (LIBPATH = [ '/opt/local/lib' ])
-    if os.path.isdir('/opt/local/include'):
-        libraries['core'].Append (CPPPATH = [ '/opt/local/include' ])
-
     if env['BUILD_VECLIB_OPTIMIZATIONS'] == 1:
         opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
         debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
