@@ -5,7 +5,7 @@ export ARDOUR_GLADE_PATH=./glade
 if [ -x ./ardour.bin ] ; then 
     # scons executable
     export LD_LIBRARY_PATH=../libs/ardour
-    exec ./ardour.bin --novst --display=localhost:0.0 $*
+    exec ./ardour.bin --novst $*
 else 
     # autofoo/make executable
     export LD_LIBRARY_PATH=../libs/ardour
