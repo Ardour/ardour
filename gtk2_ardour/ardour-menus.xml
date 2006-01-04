@@ -122,10 +122,12 @@
                <menuitem action='GotoEditor'/>
                <menuitem action='GotoMixer'/>
                <menuitem action='ToggleOptionsEditor'/>
-               <menuitem action='ToggleAudioLibrary'/>
+               <menuitem action='ToggleSoundFileBrowser'/>
                <menuitem action='ToggleConnections'/>
                <menuitem action='ToggleLocations'/>
                <menuitem action='ToggleBigClock'/>
+			    <separator/>
+			   <menuitem action='About'/>
         </menu>
         <menu name='Options' action='Options'>
                <menuitem action='SendMTC'/>

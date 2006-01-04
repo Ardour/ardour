@@ -100,7 +100,7 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 		switch (c) {
 		case 0:
 			break;
-
+		
 		case 'v':
 			just_version = true;
 			break;

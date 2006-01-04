@@ -408,7 +408,7 @@ OptionEditor::setup_path_options()
 {
 	Gtk::Label* label;
 
-	path_table.set_homogeneous (true);
+	path_table.set_homogeneous (false);
 	path_table.set_border_width (12);
 	path_table.set_row_spacings (5);
 
@@ -432,6 +432,7 @@ OptionEditor::setup_path_options()
 	path_table.attach(sfdb_path_view, 1, 3, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
 
 	sfdb_path_view.append_column(_("Paths"), sfdb_path_columns.paths);
+	sfdb_path_view.set_size_request(-1, 100);
 
 	vector<string> nfstrings = internationalize (native_format_strings);
 

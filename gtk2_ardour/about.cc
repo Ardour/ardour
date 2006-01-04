@@ -159,6 +159,8 @@ About::About ()
 	: paypal_pixmap (paypal_xpm)
 #endif
 {
+	set_type_hint(Gdk::WINDOW_TYPE_HINT_SPLASHSCREEN);
+
 	string path;
 	string t;
 

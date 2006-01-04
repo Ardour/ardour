@@ -3677,8 +3677,6 @@ Editor::detach_tearoff (Gtk::Box* b, Gtk::Window* w)
 	    mouse_mode_tearoff->torn_off()) {
 		top_hbox.remove (toolbar_frame);
 	}
-	
-	ensure_float (*w);
 }
 
 void

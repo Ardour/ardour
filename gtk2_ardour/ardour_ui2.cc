@@ -533,7 +533,7 @@ ARDOUR_UI::manage_window (Window& win)
 void
 ARDOUR_UI::detach_tearoff (Box* b, Widget* w)
 {
-	editor->ensure_float (transport_tearoff->tearoff_window());
+//	editor->ensure_float (transport_tearoff->tearoff_window());
 	b->remove (*w);
 }
 

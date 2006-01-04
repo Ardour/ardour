@@ -76,6 +76,9 @@ ARDOUR_UI::connect_to_session (Session *s)
 		option_editor->set_session (s);
 	}
 
+	if (sfdb) {
+		sfdb->set_session (s);
+	}
 
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::transport_rec_enable_blink));
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::solo_blink));
@@ -348,9 +351,11 @@ ARDOUR_UI::toggle_sound_file_browser ()
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 	
 		if (tact->get_active()) {
+			sfdb->show_all();
 			sfdb->present();
 		} else {
 			sfdb->hide ();
 		}
 	}
 }
+

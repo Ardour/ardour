@@ -47,12 +47,15 @@
 class SoundFileBox : public Gtk::VBox
 {
   public:
-    SoundFileBox (ARDOUR::Session* session);
+    SoundFileBox ();
     virtual ~SoundFileBox () {};
 
     bool update (std::string filename);
+	void set_session (ARDOUR::Session* s);
 
   protected:
+	ARDOUR::Session* _session;
+
     struct LabelModelColumns : public Gtk::TreeModel::ColumnRecord
     {
     public:
@@ -111,6 +114,7 @@ class SoundFileBrowser : public ArdourDialog
     SoundFileBrowser (std::string title);
     virtual ~SoundFileBrowser () {}; 
 
+	virtual void set_session (ARDOUR::Session*);
   protected:
     Gtk::FileChooserWidget chooser;
     SoundFileBox preview;

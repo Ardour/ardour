@@ -165,7 +165,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (common_actions, X_("GotoMixer"), _("Mixer"),  mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleSoundFileBrowser"), _("Sound File Browser"), mem_fun(*this, &ARDOUR_UI::toggle_sound_file_browser));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Options Editor"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleAudioLibrary"), _("Audio Library"), mem_fun(*this, &ARDOUR_UI::toggle_sound_file_browser));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Track/Bus Inspector"), mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleConnections"), _("Connections"), mem_fun(*this, &ARDOUR_UI::toggle_connection_editor));

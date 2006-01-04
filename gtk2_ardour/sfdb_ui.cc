@@ -31,8 +31,9 @@
 
 std::string length2string (const int32_t frames, const int32_t sample_rate);
 
-SoundFileBox::SoundFileBox (ARDOUR::Session* session)
+SoundFileBox::SoundFileBox ()
 	:
+	_session(0),
 	current_pid(0),
 	fields(Gtk::ListStore::create(label_columns)),
 	main_box (false, 3),
@@ -80,12 +81,6 @@ SoundFileBox::SoundFileBox (ARDOUR::Session* session)
 	play_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::play_btn_clicked));
 	stop_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::stop_btn_clicked));
 
-	if (!session) {
-		play_btn.set_sensitive(false);
-	} else {
-		session->AuditionActive.connect(mem_fun (*this, &SoundFileBox::audition_status_changed));
-	}
-
 	add_field_btn.signal_clicked().connect
 	                (mem_fun (*this, &SoundFileBox::add_field_clicked));
 	remove_field_btn.signal_clicked().connect
@@ -96,6 +91,18 @@ SoundFileBox::SoundFileBox (ARDOUR::Session* session)
 
 	show_all();
 	stop_btn.hide();
+}
+
+void
+SoundFileBox::set_session(ARDOUR::Session* s)
+{
+	_session = s;
+
+    if (!_session) {
+		play_btn.set_sensitive(false);
+	} else {
+		_session->AuditionActive.connect(mem_fun (*this, &SoundFileBox::audition_status_changed));
+	}
 }
 
 int
@@ -177,15 +184,18 @@ SoundFileBox::update (std::string filename)
 SoundFileBrowser::SoundFileBrowser (std::string title)
 	:
 	ArdourDialog(title),
-	chooser(Gtk::FILE_CHOOSER_ACTION_OPEN),
-	preview(session)
+	chooser(Gtk::FILE_CHOOSER_ACTION_OPEN)
 {
 	get_vbox()->pack_start(chooser);
 	chooser.set_preview_widget(preview);
 
 	chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
+}
 
-	show_all();
+void
+SoundFileBrowser::set_session (ARDOUR::Session* s)
+{
+	preview.set_session(s);
 }
 
 void
@@ -200,8 +210,6 @@ SoundFileChooser::SoundFileChooser (std::string title)
 {
 	add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-
-	show_all();
 }
 
 SoundFileOmega::SoundFileOmega (std::string title)
@@ -219,8 +227,6 @@ SoundFileOmega::SoundFileOmega (std::string title)
 
 	embed_btn.signal_clicked().connect (mem_fun (*this, &SoundFileOmega::embed_clicked));
 	import_btn.signal_clicked().connect (mem_fun (*this, &SoundFileOmega::import_clicked));
-
-	show_all();
 }
 
 void

@@ -30,6 +30,8 @@ ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	: Dialog (title, modal, use_seperator)
 {
 	session = 0;
+
+	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 }
 
 ArdourDialog::~ArdourDialog ()
