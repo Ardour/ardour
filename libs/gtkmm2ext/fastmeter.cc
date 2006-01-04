@@ -157,21 +157,19 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 		/* draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		 */
 
-		RefPtr<Gdk::Window> win(get_window());
-		win->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap, 
-				   intersection.x, v_pixheight - top_of_meter,
-				   intersection.x, v_pixheight - top_of_meter,
-				   intersection.width, intersection.height);
+		get_window()->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap, 
+					    intersection.x, v_pixheight - top_of_meter,
+					    intersection.x, v_pixheight - top_of_meter,
+					    intersection.width, intersection.height);
 	}
 
 	/* draw peak bar */
 		
 	if (hold_state) {
-		RefPtr<Gdk::Window> win(get_window());
-		win->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap,
-				   intersection.x, v_pixheight - (gint) floor (v_pixheight * current_peak),
-				   intersection.x, v_pixheight - (gint) floor (v_pixheight * current_peak),
-				   intersection.width, 3);
+		get_window()->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap,
+					    intersection.x, v_pixheight - (gint) floor (v_pixheight * current_peak),
+					    intersection.x, v_pixheight - (gint) floor (v_pixheight * current_peak),
+					    intersection.width, 3);
 	}
 
 	return true;
@@ -191,21 +189,19 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 		/* draw the part of the meter image that we need. 
 		 */
 
-		RefPtr<Gdk::Window> win(get_window());
-		win->draw_drawable(get_style()->get_fg_gc(get_state()), h_pixmap,
-				   intersection.x, intersection.y,
-				   intersection.x, intersection.y,
-				   intersection.width, intersection.height);
+		get_window()->draw_drawable(get_style()->get_fg_gc(get_state()), h_pixmap,
+					    intersection.x, intersection.y,
+					    intersection.x, intersection.y,
+					    intersection.width, intersection.height);
 	}
-
+	
 	/* draw peak bar */
-		
+	
 	if (hold_state) {
-		RefPtr<Gdk::Window> win(get_window());
-		win->draw_drawable(get_style()->get_fg_gc(get_state()), h_pixmap,
-				   right_of_meter, intersection.y,
-				   right_of_meter, intersection.y,
-				   3, intersection.height);
+		get_window()->draw_drawable(get_style()->get_fg_gc(get_state()), h_pixmap,
+					    right_of_meter, intersection.y,
+					    right_of_meter, intersection.y,
+					    3, intersection.height);
 	}
 
 	return true;

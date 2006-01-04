@@ -373,21 +373,30 @@ Editor::build_region_list_menu ()
 					       
 	/* now grab specific menu items that we need */
 
-	toggle_full_region_list_action = ActionManager::get_action (X_("RegionList"), X_("rlShowAll"));
+	Glib::RefPtr<Action> act;
+
+	act = ActionManager::get_action (X_("RegionList"), X_("rlShowAll"));
+	if (act) {
+		toggle_full_region_list_action = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	}
+
+	act = ActionManager::get_action (X_("RegionList"), X_("rlShowAuto"));
+	if (act) {
+		toggle_show_auto_regions_action = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	}
 }
 
 void
 Editor::toggle_show_auto_regions ()
 {
-	//show_automatic_regions_in_region_list = toggle_auto_regions_item->get_active();
-	show_automatic_regions_in_region_list = true;
+	show_automatic_regions_in_region_list = toggle_show_auto_regions_action->get_active();
 	redisplay_regions ();
 }
 
 void
 Editor::toggle_full_region_list ()
 {
-	if (toggle_full_region_list_item->get_active()) {
+	if (toggle_full_region_list_action->get_active()) {
 		region_list_display.expand_all ();
 	} else {
 		region_list_display.collapse_all ();

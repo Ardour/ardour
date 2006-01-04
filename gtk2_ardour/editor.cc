@@ -339,8 +339,6 @@ Editor::Editor (AudioEngine& eng)
 	new_transport_marker_menu = 0;
 	editor_mixer_strip_width = Wide;
 	repos_zoom_queued = false;
-	import_audio_item = 0;
-	embed_audio_item = 0;
 	region_edit_menu_split_item = 0;
 	temp_location = 0;
 	region_edit_menu_split_multichannel_item = 0;

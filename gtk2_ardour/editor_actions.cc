@@ -263,7 +263,8 @@ Editor::register_actions ()
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (rl_actions, X_("rlRemove"), _("Remove"), mem_fun (*this, &Editor::remove_region_from_region_list));
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
-	ActionManager::register_action (rl_actions, X_("rlShowAll"), _("Show all"), mem_fun(*this, &Editor::toggle_full_region_list));
+	ActionManager::register_toggle_action (rl_actions, X_("rlShowAll"), _("Show all"), mem_fun(*this, &Editor::toggle_full_region_list));
+	ActionManager::register_toggle_action (rl_actions, X_("rlShowAuto"), _("Show automatic regions"), mem_fun(*this, &Editor::toggle_show_auto_regions));
 
 	ActionManager::register_radio_action (rl_actions, sort_order_group, X_("SortAscending"),  _("Ascending"),
 			       bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), true));

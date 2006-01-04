@@ -693,8 +693,8 @@ class Editor : public PublicEditor
 	RegionListDisplayModelColumns    region_list_columns;
 	Gtkmm2ext::DnDTreeView           region_list_display;
 	Glib::RefPtr<Gtk::TreeStore>     region_list_model;
-	Glib::RefPtr<Gtk::TreeModelSort> region_list_sort_model;
-	Glib::RefPtr<Gtk::Action>        toggle_full_region_list_action;
+	Glib::RefPtr<Gtk::ToggleAction>  toggle_full_region_list_action;
+	Glib::RefPtr<Gtk::ToggleAction>  toggle_show_auto_regions_action;
 
 	void region_list_selection_changed ();
 
@@ -710,12 +710,6 @@ class Editor : public PublicEditor
 	void region_list_selection_mapover (sigc::slot<void,ARDOUR::Region&>);
 	void build_region_list_menu ();
 	void show_region_list_display_context_menu (int button, int time);
-
-	Gtk::CheckMenuItem* toggle_auto_regions_item;
-	Gtk::CheckMenuItem* toggle_full_region_list_item;
-
-	Gtk::MenuItem* import_audio_item;
-	Gtk::MenuItem* embed_audio_item;
 
 	bool show_automatic_regions_in_region_list;
 	Editing::RegionListSortType region_list_sort_type;
