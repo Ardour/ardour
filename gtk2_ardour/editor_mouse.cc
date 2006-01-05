@@ -287,6 +287,8 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 {
 	jack_nframes_t where = event_frame (event, 0, 0);
 
+	track_canvas.grab_focus();
+
 	if (session && session->actively_recording()) {
 		return TRUE;
 	}

@@ -95,7 +95,8 @@ Editor::initialize_canvas ()
 	track_canvas.set_name ("EditorMainCanvas");
 	track_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
 	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
-	
+	track_canvas.set_flags (CAN_FOCUS);
+
 	/* set up drag-n-drop */
 
 	vector<TargetEntry> target_table;
@@ -128,6 +129,7 @@ Editor::initialize_canvas ()
 	
 	time_canvas.set_name ("EditorTimeCanvas");
 	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
+	time_canvas.set_flags (CAN_FOCUS);
 	
 	meter_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
 	tempo_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height);

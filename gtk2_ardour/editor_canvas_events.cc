@@ -80,6 +80,10 @@ Editor::track_canvas_event (GdkEvent *event, ArdourCanvas::Item* item)
 		track_canvas.get_pointer (x, y);
 		return track_canvas_motion (event);
 
+	case GDK_BUTTON_PRESS:
+		track_canvas.grab_focus();
+		break;
+
 	case GDK_BUTTON_RELEASE:
 		switch (event->button.button) {
 		case 4:
@@ -90,6 +94,7 @@ Editor::track_canvas_event (GdkEvent *event, ArdourCanvas::Item* item)
 		break;
 
 	case GDK_SCROLL:
+		track_canvas.grab_focus();
 		track_canvas_scroll (&event->scroll);
 		break;
 

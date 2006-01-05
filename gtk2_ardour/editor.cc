@@ -319,6 +319,7 @@ Editor::Editor (AudioEngine& eng)
 	show_gain_after_trim = false;
 	no_zoom_repos_update = false;
 	ignore_route_list_reorder = false;
+	no_route_list_redisplay = false;
 	verbose_cursor_on = true;
 	route_removal = false;
 	track_spacing = 0;
@@ -496,9 +497,9 @@ Editor::Editor (AudioEngine& eng)
 	zoom_out_full_button.set_name ("EditorTimeButton");
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to session"));
 
-	zoom_in_button.add (*(manage (new Gtk::Image (Stock::ZOOM_IN, ICON_SIZE_BUTTON))));
-	zoom_out_button.add (*(manage (new Gtk::Image (Stock::ZOOM_OUT, ICON_SIZE_BUTTON))));
-	zoom_out_full_button.add (*(manage (new Gtk::Image (Stock::ZOOM_FIT, ICON_SIZE_BUTTON))));
+	zoom_in_button.add (*(manage (new Image (Stock::ZOOM_IN, ICON_SIZE_BUTTON))));
+	zoom_out_button.add (*(manage (new Image (Stock::ZOOM_OUT, ICON_SIZE_BUTTON))));
+	zoom_out_full_button.add (*(manage (new Image (Stock::ZOOM_FIT, ICON_SIZE_BUTTON))));
 	
 	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
 	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
@@ -525,24 +526,18 @@ Editor::Editor (AudioEngine& eng)
 	route_list_display.append_column (_("Tracks"), route_display_columns.text);
 	route_list_display.set_headers_visible (false);
 	route_list_display.set_name ("TrackListDisplay");
-	route_list_display.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
+	route_list_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	route_list_display.set_reorderable (true);
-	
 	route_list_display.set_size_request (75,-1);
-	route_list_display.set_headers_visible (true);
-	route_list_display.set_headers_clickable (true);
 
-	// GTK2FIX
-	// route_list_display.signal_rows_reordered().connect (mem_fun (*this, &Editor::queue_route_list_reordered));
-
+	route_display_model->signal_rows_reordered().connect (mem_fun (*this, &Editor::route_list_reordered));
 	route_display_model->set_sort_func (0, mem_fun (*this, &Editor::route_list_compare_func));
 	route_display_model->set_sort_column (0, SORT_ASCENDING);
 
 	route_list_scroller.add (route_list_display);
-	route_list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	route_list_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
 	route_list_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::route_display_selection_changed));
-	route_list_display.signal_columns_changed().connect (mem_fun(*this, &Editor::route_list_column_click));
 
 	edit_group_list_button_label.set_text (_("Edit Groups"));
 	edit_group_list_button_label.set_name ("EditGroupTitleButton");
@@ -564,17 +559,14 @@ Editor::Editor (AudioEngine& eng)
 	active_cell->property_radio() = false;
 
 	edit_group_display.set_name ("MixerGroupList");
-	//edit_group_display.set_shadow_type (Gtk::SHADOW_IN);
-
 	edit_group_display.columns_autosize ();
-	edit_group_display.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
+	edit_group_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	edit_group_display.set_reorderable (false);
 
 	edit_group_display.set_size_request (75, -1);
-	edit_group_display.set_headers_visible (true);
 
 	edit_group_list_scroller.add (edit_group_display);
-	edit_group_list_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	edit_group_list_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
 	edit_group_list_button.signal_clicked().connect (mem_fun(*this, &Editor::edit_group_list_button_clicked));
 	edit_group_display.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event));
@@ -597,8 +589,11 @@ Editor::Editor (AudioEngine& eng)
 	region_list_model->set_sort_column (0, SORT_ASCENDING);
 
 	region_list_display.set_model (region_list_model);
-	CellRendererText* renderer = Gtk::manage( new Gtk::CellRendererText() );
+	CellRendererText* renderer = manage( new CellRendererText() );
 	region_list_display.append_column (_("Regions"), *renderer);
+	region_list_display.set_headers_visible (false);
+
+	region_list_display.get_selection()->set_select_function (mem_fun (*this, &Editor::region_list_selection_filter));
 	
 	TreeViewColumn* tv_col = region_list_display.get_column(0);
 	tv_col->add_attribute(renderer->property_text(), region_list_columns.name);
@@ -606,12 +601,12 @@ Editor::Editor (AudioEngine& eng)
 	
 	region_list_display.set_reorderable (true);
 
-	region_list_display.get_selection()->set_mode (SELECTION_SINGLE);
+	region_list_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	region_list_display.add_object_drag (region_list_columns.region.index(), "regions");
 
 	/* setup DnD handling */
 	
-	list<Gtk::TargetEntry> region_list_target_table;
+	list<TargetEntry> region_list_target_table;
 	
 	region_list_target_table.push_back (TargetEntry ("text/plain"));
 	region_list_target_table.push_back (TargetEntry ("text/uri-list"));
@@ -640,15 +635,29 @@ Editor::Editor (AudioEngine& eng)
 	named_selection_display.set_size_request (100, -1);
 	named_selection_display.set_name ("RegionListDisplay");
 	
-	named_selection_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
+	named_selection_display.get_selection()->set_mode (SELECTION_SINGLE);
 	named_selection_display.set_size_request (100, -1);
-	named_selection_display.set_headers_visible (true);
-	named_selection_display.set_headers_clickable (true);
-	named_selection_display.signal_button_press_event().connect (mem_fun(*this, &Editor::named_selection_display_button_press));
+	named_selection_display.signal_button_press_event().connect (mem_fun(*this, &Editor::named_selection_display_button_press), false);
 	named_selection_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::named_selection_display_selection_changed));
+
+	/* SNAPSHOTS */
+
+	snapshot_display_model = ListStore::create (snapshot_display_columns);
+	snapshot_display.set_model (snapshot_display_model);
+	snapshot_display.append_column (X_("snapshot"), snapshot_display_columns.visible_name);
+	snapshot_display.set_name ("SnapshotDisplayList");
+	snapshot_display.set_size_request (75, -1);
+	snapshot_display.set_headers_visible (false);
+	snapshot_display.set_reorderable (false);
+	snapshot_display_scroller.add (snapshot_display);
+	snapshot_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
+	snapshot_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::snapshot_display_selection_changed));
+	snapshot_display.signal_button_press_event().connect (mem_fun (*this, &Editor::snapshot_display_button_press), false);
 
        	the_notebook.append_page (region_list_scroller, _("Regions"));
        	the_notebook.append_page (route_list_scroller, _("Tracks/Busses"));
+	the_notebook.append_page (snapshot_display_scroller, _("Snapshots"));
 	the_notebook.append_page (edit_group_vbox, _("Edit Groups"));
 	the_notebook.append_page (named_selection_scroller, _("Chunks"));
 	the_notebook.set_show_tabs (true);
@@ -661,7 +670,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_pane.pack1 (edit_frame, true, true);
 	edit_pane.pack2 (*notebook_tearoff, true, true);
 
-	edit_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Gtk::Paned*> (&edit_pane)));
+	edit_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
 
 	top_hbox.pack_start (toolbar_frame, true, true);
 
@@ -692,8 +701,8 @@ Editor::Editor (AudioEngine& eng)
 
 	/* nudge stuff */
 
-	nudge_forward_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(right_arrow_xpm)))));
-	nudge_backward_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(left_arrow_xpm)))));
+	nudge_forward_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(right_arrow_xpm)))));
+	nudge_backward_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(left_arrow_xpm)))));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge region/selection forwards"));
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge region/selection backwards"));
@@ -1230,7 +1239,7 @@ Editor::connect_to_session (Session *t)
 	update_punch_range_view (true);
 	
 	session->ControlChanged.connect (mem_fun(*this, &Editor::queue_session_control_changed));
-
+	session->StateSaved.connect (mem_fun(*this, &Editor::session_state_saved));
 	
 	refresh_location_display ();
 	session->locations()->added.connect (mem_fun(*this, &Editor::add_new_location));
@@ -1243,19 +1252,13 @@ Editor::connect_to_session (Session *t)
 
 	redisplay_regions ();
 	redisplay_named_selections ();
+	redisplay_snapshots ();
 
-	// GTK2FIX
-	// route_list_display.set_model (Glib::RefPtr<TreeModel>(0));
 	route_display_model->clear ();
-
+	no_route_list_redisplay = true;
 	session->foreach_route (this, &Editor::handle_new_route);
-	// route_list_display.select_all ();
-	// GTK2FIX
-	//route_list_display.sort ();
-
-	route_list_reordered ();
-
-	// route_list_display.set_model (route_display_model);
+	no_route_list_redisplay = false;
+	route_list_display.get_selection()->select_all ();
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
@@ -2472,9 +2475,9 @@ Editor::setup_toolbar ()
 	mouse_mode_tearoff = manage (new TearOff (mouse_mode_button_table));
 	mouse_mode_tearoff->set_name ("MouseModeBase");
 
-	mouse_mode_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Gtk::Box*>(&toolbar_hbox), 
+	mouse_mode_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
 						  &mouse_mode_tearoff->tearoff_window()));
-	mouse_mode_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Gtk::Box*> (&toolbar_hbox), 
+	mouse_mode_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox), 
 						  &mouse_mode_tearoff->tearoff_window(), 1));
 
 	mouse_move_button.set_name ("MouseModeButton");
@@ -2491,12 +2494,12 @@ Editor::setup_toolbar ()
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("stretch/shrink regions"));
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("listen to specific regions"));
 
-	mouse_move_button.unset_flags (Gtk::CAN_FOCUS);
-	mouse_select_button.unset_flags (Gtk::CAN_FOCUS);
-	mouse_gain_button.unset_flags (Gtk::CAN_FOCUS);
-	mouse_zoom_button.unset_flags (Gtk::CAN_FOCUS);
-	mouse_timefx_button.unset_flags (Gtk::CAN_FOCUS);
-	mouse_audition_button.unset_flags (Gtk::CAN_FOCUS);
+	mouse_move_button.unset_flags (CAN_FOCUS);
+	mouse_select_button.unset_flags (CAN_FOCUS);
+	mouse_gain_button.unset_flags (CAN_FOCUS);
+	mouse_zoom_button.unset_flags (CAN_FOCUS);
+	mouse_timefx_button.unset_flags (CAN_FOCUS);
+	mouse_audition_button.unset_flags (CAN_FOCUS);
 
 	mouse_select_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
 	mouse_select_button.signal_button_release_event().connect (mem_fun(*this, &Editor::mouse_select_button_release));
@@ -2660,9 +2663,9 @@ Editor::setup_toolbar ()
 	tools_tearoff = new TearOff (*hbox);
 	tools_tearoff->set_name ("MouseModeBase");
 
-	tools_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Gtk::Box*>(&toolbar_hbox), 
+	tools_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
 					     &tools_tearoff->tearoff_window()));
-	tools_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Gtk::Box*> (&toolbar_hbox), 
+	tools_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox), 
 					     &tools_tearoff->tearoff_window(), 0));
 
 
@@ -2675,7 +2678,7 @@ Editor::setup_toolbar ()
 	toolbar_base.set_name ("ToolBarBase");
 	toolbar_base.add (toolbar_hbox);
 
-	toolbar_frame.set_shadow_type (Gtk::SHADOW_OUT);
+	toolbar_frame.set_shadow_type (SHADOW_OUT);
 	toolbar_frame.set_name ("BaseFrame");
 	toolbar_frame.add (toolbar_base);
 }
@@ -3308,7 +3311,7 @@ Editor::duplicate_dialog (bool dup_region)
 	win.add_button (Stock::OK, RESPONSE_ACCEPT);
 	win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 
-	win.set_position (Gtk::WIN_POS_MOUSE);
+	win.set_position (WIN_POS_MOUSE);
 
 	entry.set_text ("1");
 	set_size_request_to_display_given_text (entry, X_("12345678"), 20, 15);
@@ -3629,7 +3632,7 @@ Editor::ensure_float (Window& win)
 }
 
 void 
-Editor::pane_allocation_handler (Gtk::Allocation &alloc, Gtk::Paned* which)
+Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 {
 	/* recover or initialize pane positions. do this here rather than earlier because
 	   we don't want the positions to change the child allocations, which they seem to do.
@@ -3651,7 +3654,7 @@ Editor::pane_allocation_handler (Gtk::Allocation &alloc, Gtk::Paned* which)
 		height = atoi(geometry->property("y_size")->value());
 	}
 
-	if (which == static_cast<Gtk::Paned*> (&edit_pane)) {
+	if (which == static_cast<Paned*> (&edit_pane)) {
 
 		if (done[0]) {
 			return;
@@ -3671,7 +3674,7 @@ Editor::pane_allocation_handler (Gtk::Allocation &alloc, Gtk::Paned* which)
 }
 
 void
-Editor::detach_tearoff (Gtk::Box* b, Gtk::Window* w)
+Editor::detach_tearoff (Box* b, Window* w)
 {
 	if (tools_tearoff->torn_off() && 
 	    mouse_mode_tearoff->torn_off()) {
@@ -3680,7 +3683,7 @@ Editor::detach_tearoff (Gtk::Box* b, Gtk::Window* w)
 }
 
 void
-Editor::reattach_tearoff (Gtk::Box* b, Gtk::Window* w, int32_t n)
+Editor::reattach_tearoff (Box* b, Window* w, int32_t n)
 {
 	if (toolbar_frame.get_parent() == 0) {
 		top_hbox.pack_end (toolbar_frame);
@@ -3790,7 +3793,7 @@ Editor::playlist_deletion_dialog (Playlist* pl)
 				 "If deleted, audio files used by it alone by will cleaned."),
 			       pl->name()));
 
-	dialog.set_position (Gtk::WIN_POS_CENTER);
+	dialog.set_position (WIN_POS_CENTER);
 	dialog.get_vbox()->pack_start (label);
 
 	dialog.add_button (_("Delete playlist"), RESPONSE_ACCEPT);
@@ -3889,3 +3892,67 @@ Editor::control_layout_scroll (GdkEventScroll* ev)
 
 	return false;
 }
+
+void
+Editor::snapshot_display_selection_changed ()
+{
+	if (snapshot_display.get_selection()->count_selected_rows() > 0) {
+
+		TreeModel::iterator i = snapshot_display.get_selection()->get_selected();
+		
+		cerr << "snapshot selected\n";
+
+		Glib::ustring snap_name = (*i)[snapshot_display_columns.real_name];
+
+		cerr << "name is " << snap_name << endl;
+
+		if (snap_name.length() == 0) {
+			return;
+		}
+		
+		if (session->snap_name() == snap_name) {
+			return;
+		}
+		
+		ARDOUR_UI::instance()->load_session(session->path(), string (snap_name));
+	}
+}
+
+bool
+Editor::snapshot_display_button_press (GdkEventButton* ev)
+{
+	 return false;
+}
+
+void
+Editor::redisplay_snapshots ()
+{
+	if (session == 0) {
+		return;
+	}
+
+	vector<string*>* states;
+
+	if ((states = session->possible_states()) == 0) {
+		return;
+	}
+
+	snapshot_display_model->clear ();
+
+	for (vector<string*>::iterator i = states->begin(); i != states->end(); ++i) {
+		string statename = *(*i);
+		TreeModel::Row row = *(snapshot_display_model->append());
+		row[snapshot_display_columns.visible_name] = statename;
+		row[snapshot_display_columns.real_name] = statename;
+	}
+
+	delete states;
+}
+
+void
+Editor::session_state_saved (string snap_name)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::session_state_saved), snap_name));
+	redisplay_snapshots ();
+}
+

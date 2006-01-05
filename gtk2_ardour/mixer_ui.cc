@@ -101,15 +101,6 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	group_display_scroller.add (group_display);
 	group_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	snapshot_display_model = ListStore::create (snapshot_display_columns);
-	snapshot_display.set_model (snapshot_display_model);
-	snapshot_display.append_column (X_("mixgroups"), snapshot_display_columns.visible_name);
-	snapshot_display.set_name ("MixerSnapshotDisplayList");
-	snapshot_display.set_size_request (75, -1);
-	snapshot_display.set_reorderable (true);
-	snapshot_display_scroller.add (snapshot_display);
-	snapshot_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-
 	group_display_vbox.pack_start (group_display_button, false, false);
 	group_display_vbox.pack_start (group_display_scroller, true, true);
 
@@ -122,10 +113,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	group_display_frame.add (group_display_vbox);
 
 	rhs_pane1.add1 (track_display_frame);
-	rhs_pane1.add2 (rhs_pane2);
-
-	rhs_pane2.add1 (group_display_frame);
-	rhs_pane2.add2 (snapshot_display_scroller);
+	rhs_pane1.add2 (group_display_frame);
 
 	list_vpacker.pack_start (rhs_pane1, true, true);
 
@@ -137,18 +125,14 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	rhs_pane1.signal_size_allocate().connect (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 
 							static_cast<Gtk::Paned*> (&rhs_pane1)));
-	rhs_pane2.signal_size_allocate().connect (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 
-							static_cast<Gtk::Paned*> (&rhs_pane2)));
 	list_hpane.signal_size_allocate().connect (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 
 							 static_cast<Gtk::Paned*> (&list_hpane)));
 	
 
 	rhs_pane1.set_data ("collapse-direction", (gpointer) 0);
-	rhs_pane2.set_data ("collapse-direction", (gpointer) 0);
 	list_hpane.set_data ("collapse-direction", (gpointer) 1);
 
 	rhs_pane1.signal_button_release_event().connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane1)));
-	rhs_pane2.signal_button_release_event().connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane2)));
 	list_hpane.signal_button_release_event().connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&list_hpane)));
 	
 	global_vpacker.pack_start (list_hpane, true, true);
@@ -168,9 +152,6 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	group_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::group_display_button_press));
 	group_display.get_selection()->signal_changed().connect (mem_fun (*this, &Mixer_UI::group_display_selection_changed));
-
-	snapshot_display.get_selection()->signal_changed().connect (mem_fun(*this, &Mixer_UI::snapshot_display_selection_changed));
-	snapshot_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::snapshot_display_button_press));
 
 	_plugin_selector = new PluginSelector (PluginManager::the_manager());
 
@@ -275,7 +256,7 @@ Mixer_UI::follow_strip_selection ()
 	}
 }
 
-gint
+bool
 Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 {
 	if (ev->button == 1) {
@@ -296,7 +277,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 		}
 	}
 
-	return TRUE;
+	return true;
 }
 
 void
@@ -319,9 +300,6 @@ Mixer_UI::connect_to_session (Session* sess)
 	session->mix_group_added.connect (mem_fun(*this, &Mixer_UI::add_mix_group));
 
 	session->foreach_mix_group(this, &Mixer_UI::add_mix_group);
-	
-	session->StateSaved.connect (mem_fun(*this, &Mixer_UI::session_state_saved));
-	redisplay_snapshots ();
 	
 	_plugin_selector->set_session (session);
 
@@ -490,26 +468,6 @@ Mixer_UI::show_strip (MixerStrip* ms)
 			 (*i)->fast_update ();
 		 }
 	 }
- }
-
- void
- Mixer_UI::snapshot_display_selection_changed ()
- {
-	 TreeModel::iterator i = snapshot_display.get_selection()->get_selected();
-
-	 Glib::ustring snap_name = (*i)[snapshot_display_columns.real_name];
-
-	 if (session->snap_name() == snap_name) {
-		 return;
-	 }
-
-	 ARDOUR_UI::instance()->load_session(session->path(), string (snap_name));
- }
-
- bool
- Mixer_UI::snapshot_display_button_press (GdkEventButton* ev)
- {
-	 return false;
  }
 
  void
@@ -783,48 +741,17 @@ Mixer_UI::add_mix_group (RouteGroup* group)
 	group->FlagsChanged.connect (bind (mem_fun(*this, &Mixer_UI::group_flags_changed), group));
 }
 
-void
-Mixer_UI::redisplay_snapshots ()
-{
-	if (session == 0) {
-		return;
-	}
-
-	vector<string*>* states;
-	if ((states = session->possible_states()) == 0) {
-		return;
-	}
-
-	snapshot_display_model->clear ();
-
-	for (vector<string*>::iterator i = states->begin(); i != states->end(); ++i) {
-		string statename = *(*i);
-		const TreeModel::Row & row = *snapshot_display_model->append();
-		row[snapshot_display_columns.visible_name] = statename;
-		row[snapshot_display_columns.real_name] = statename;
-	}
-
-	delete states;
-}
-
-void
-Mixer_UI::session_state_saved (string snap_name)
-{
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Mixer_UI::session_state_saved), snap_name));
-	redisplay_snapshots ();
-}
-
-gint
+bool
 Mixer_UI::strip_scroller_button_release (GdkEventButton* ev)
 {
 	using namespace Menu_Helpers;
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		ARDOUR_UI::instance()->add_route();
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 void
@@ -909,8 +836,6 @@ Mixer_UI::get_state (void)
 
 		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane1)->gobj()));
 		geometry->add_property(X_("mixer_rhs_pane1_pos"), string(buf));
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane2)->gobj()));
-		geometry->add_property(X_("mixer_rhs_pane2_pos"), string(buf));
 		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&list_hpane)->gobj()));
 		geometry->add_property(X_("mixer_list_hpane_pos"), string(buf));
 
@@ -957,23 +882,6 @@ Mixer_UI::pane_allocation_handler (Allocation& alloc, Gtk::Paned* which)
 
 		if ((done[0] = GTK_WIDGET(rhs_pane1.gobj())->allocation.height > pos)) {
 			rhs_pane1.set_position (pos);
-		}
-
-	} else if (which == static_cast<Gtk::Paned*> (&rhs_pane2)) {
-
-		if (done[1]) {
-			return;
-		}
-
-		if (!geometry || (prop = geometry->property("mixer_rhs_pane2_pos")) == 0) {
-			pos = height / 3;
-			snprintf (buf, sizeof(buf), "%d", pos);
-		} else {
-			pos = atoi (prop->value());
-		}
-
-		if ((done[1] = GTK_WIDGET(rhs_pane2.gobj())->allocation.height > pos)) {
-			rhs_pane2.set_position (pos);
 		}
 
 	} else if (which == static_cast<Gtk::Paned*> (&list_hpane)) {

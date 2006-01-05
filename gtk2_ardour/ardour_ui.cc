@@ -501,7 +501,7 @@ ARDOUR_UI::every_point_one_seconds ()
 	timersub (&now, &last_peak_grab, &diff);
 
 	if ((diff.tv_usec + (diff.tv_sec * 1000000)) >= engine->usecs_per_cycle()) {
-		IO::GrabPeakPower(); /* EMIT_SIGNAL */
+		// IO::GrabPeakPower(); /* EMIT_SIGNAL */
 		last_peak_grab = now;
 	} 
 

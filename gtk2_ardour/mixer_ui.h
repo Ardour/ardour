@@ -92,12 +92,10 @@ class Mixer_UI : public Gtk::Window
 	Gtk::Button              group_display_button;
 	Gtk::ScrolledWindow      track_display_scroller;
 	Gtk::ScrolledWindow      group_display_scroller;
-	Gtk::ScrolledWindow      snapshot_display_scroller;
 	Gtk::VBox		 group_display_vbox;
 	Gtk::Frame 		 track_display_frame;
 	Gtk::Frame		 group_display_frame;
 	Gtk::VPaned		 rhs_pane1;
-	Gtk::VPaned		 rhs_pane2;
 	Gtk::HBox                strip_packer;
 	Gtk::HBox                out_packer;
 	Gtk::HPaned		 list_hpane;
@@ -106,7 +104,7 @@ class Mixer_UI : public Gtk::Window
 	
 	list<MixerStrip *> strips;
 
-	gint strip_scroller_button_release (GdkEventButton*);
+	bool strip_scroller_button_release (GdkEventButton*);
 
 	void add_strip (ARDOUR::Route*);
 	void remove_strip (MixerStrip *);
@@ -190,39 +188,22 @@ class Mixer_UI : public Gtk::Window
 	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*> group;
 	};
 
-	struct SnapshotDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    SnapshotDisplayModelColumns() { 
-		    add (visible_name);
-		    add (real_name);
-	    }
-	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
-	    Gtk::TreeModelColumn<Glib::ustring> real_name;
-	};
-
 	TrackDisplayModelColumns    track_display_columns;
 	GroupDisplayModelColumns    group_display_columns;
-	SnapshotDisplayModelColumns snapshot_display_columns;
 
 	Gtk::TreeView track_display;
 	Gtk::TreeView group_display;
-	Gtk::TreeView snapshot_display;
 
 	Glib::RefPtr<Gtk::ListStore> track_display_model;
 	Glib::RefPtr<Gtk::ListStore> group_display_model;
-	Glib::RefPtr<Gtk::ListStore> snapshot_display_model;
 
 	bool track_display_button_press (GdkEventButton*);
 	bool group_display_button_press (GdkEventButton*);
-	bool snapshot_display_button_press (GdkEventButton*);
 
 	void track_display_selection_changed ();
 	void group_display_selection_changed ();
-	void snapshot_display_selection_changed ();
 
-	void       redisplay_snapshots();
-	void       session_state_saved (string);
-
-	gint strip_button_release_event (GdkEventButton*, MixerStrip*);
+	bool strip_button_release_event (GdkEventButton*, MixerStrip*);
 
 	RouteRedirectSelection _selection;
 

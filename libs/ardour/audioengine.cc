@@ -398,8 +398,6 @@ void
 AudioEngine::set_session (Session *s)
 {
 	if (!session) {
-		s->set_block_size (jack_get_buffer_size (_jack));
-		s->set_frame_rate (jack_get_sample_rate (_jack));
 		session = s;
 	}
 }

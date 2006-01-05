@@ -13,7 +13,7 @@ namespace ARDOUR {
 typedef uint32_t state_id_t;
 
 
- class StateManager : virtual public sigc::trackable
+class StateManager : public sigc::trackable
 {
   public:
 	struct State {

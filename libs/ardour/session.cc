@@ -375,6 +375,7 @@ Session::~Session ()
 		delete _click_io;
 	}
 
+
 	if (auditioner) {
 		delete auditioner;
 	}
@@ -561,6 +562,9 @@ Session::when_engine_running ()
 	/* we don't want to run execute this again */
 
 	first_time_running.disconnect ();
+
+	set_block_size (_engine.frames_per_cycle());
+	set_frame_rate (_engine.frame_rate());
 
 	/* every time we reconnect, recompute worst case output latencies */
 
@@ -1309,45 +1313,31 @@ Session::set_frame_rate (jack_nframes_t frames_per_second)
 void
 Session::set_block_size (jack_nframes_t nframes)
 {
-	/** \fn void Session::set_block_size(jack_nframes_t)
-		the AudioEngine object that calls this guarantees 
-		that it will not be called while we are also in
-		::process(). Its also fine to do things that block
-		here.
+	/* the AudioEngine guarantees 
+	   that it will not be called while we are also in
+	   ::process(). It is therefore fine to do things that block
+	   here.
 	*/
 
 	{ 
 		LockMonitor lm (route_lock, __LINE__, __FILE__);
-		
+		vector<Sample*>::iterator i;
+		uint32_t np;
+			
 		current_block_size = nframes;
-
-		for (vector<Sample*>::iterator i = _passthru_buffers.begin(); i != _passthru_buffers.end(); ++i) {
-			free(*i);
-
-			Sample *buf;
-#ifdef NO_POSIX_MEMALIGN
-			buf = (Sample *) malloc(current_block_size * sizeof(Sample));
-#else
-			posix_memalign((void **)&buf,16,current_block_size * 4);
-#endif			
-			*i = buf;
-
-			memset (*i, 0, sizeof (Sample) * current_block_size);
+		
+		for (np = 0, i = _passthru_buffers.begin(); i != _passthru_buffers.end(); ++i, ++np) {
+			free (*i);
 		}
 
 		for (vector<Sample*>::iterator i = _silent_buffers.begin(); i != _silent_buffers.end(); ++i) {
-			free(*i);
-
-			Sample *buf;
-#ifdef NO_POSIX_MEMALIGN
-			buf =  (Sample *) malloc(current_block_size * sizeof(Sample));
-#else
-			posix_memalign((void **)&buf,16,current_block_size * 4);
-#endif			
-			*i = buf;
-			
-			memset (*i, 0, sizeof (Sample) * current_block_size);
+			free (*i);
 		}
+
+		_passthru_buffers.clear ();
+		_silent_buffers.clear ();
+
+		ensure_passthru_buffers (np);
 
 		if (_gain_automation_buffer) {
 			delete [] _gain_automation_buffer;

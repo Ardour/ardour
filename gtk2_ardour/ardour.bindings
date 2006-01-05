@@ -1,25 +1,26 @@
-; this file is an automated accelerator map dump
-
-(gtk_accel_path "<Actions>/Editor/set-playhead" "p")
-
-(gtk_accel_path "<Actions>/Common/Quit" "<Control>q")
-(gtk_accel_path "<Actions>/Common/Save" "<Control>s")
+; this file is NOT an automated accelerator map dump
 
 (gtk_accel_path "<Actions>/Transport/ToggleRoll" "space")
 (gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<Control>space")
-(gtk_accel_path "<Actions>/Transport/Forward" "Right")
-(gtk_accel_path "<Actions>/Transport/Rewind" "Left")
-(gtk_accel_path "<Actions>/Transport/Record" "R")
-(gtk_accel_path "<Actions>/Transport/loop" "l")
+(gtk_accel_path "<Actions>/Transport/Forward" "<control>Right")
+(gtk_accel_path "<Actions>/Transport/Rewind" "<control>Left")
 (gtk_accel_path "<Actions>/Transport/GotoStart" "Home")
 (gtk_accel_path "<Actions>/Transport/GotoEnd" "End")
 
+(gtk_accel_path "<Actions>/Editor/align-regions-sync-relative" "a")
 (gtk_accel_path "<Actions>/Editor/set-edit-cursor" "e")
-(gtk_accel_path "<Actions>/Editor/cut" "<Control>x")
+(gtk_accel_path "<Actions>/Transport/loop" "l")
+(gtk_accel_path "<Actions>/Editor/set-playhead" "p")
+(gtk_accel_path "<Actions>/Transport/Record" "R")
+
 (gtk_accel_path "<Actions>/Editor/copy" "<Control>c")
-(gtk_accel_path "<Actions>/Editor/paste" "<Control>v")
-(gtk_accel_path "<Actions>/Editor/undo" "<Control>z")
+(gtk_accel_path "<Actions>/Common/Quit" "<Control>q")
 (gtk_accel_path "<Actions>/Editor/redo" "<Control>r")
+(gtk_accel_path "<Actions>/Common/Save" "<Control>s")
+(gtk_accel_path "<Actions>/Editor/paste" "<Control>v")
+(gtk_accel_path "<Actions>/Editor/cut" "<Control>x")
+(gtk_accel_path "<Actions>/Editor/undo" "<Control>z")
+
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-down" "Page_Down")
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-up" "Page_Up")
 (gtk_accel_path "<Actions>/Editor/step-tracks-down" "Down")
@@ -30,7 +31,6 @@
 (gtk_accel_path "<Actions>/Editor/temporal-zoom-in" "minus")
 (gtk_accel_path "<Actions>/Editor/temporal-zoom-out" "equal")
 
-(gtk_accel_path "<Actions>/Editor/align-regions-sync-relative" "a")
 (gtk_accel_path "<Actions>/Editor/align-regions-sync" "<meta>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-end" "<meta><control>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<control>a")
@@ -56,8 +56,8 @@
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-start" "F1")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-end" "F2")
 
-(gtk_accel_path "<Actions>/Editor/jump-forward-to-mark" "KP_Right")
-(gtk_accel_path "<Actions>/Editor/jump-backward-to-mark" "KP_Left")
+(gtk_accel_path "<Actions>/Editor/jump-forward-to-mark" "<control>KP_Right")
+(gtk_accel_path "<Actions>/Editor/jump-backward-to-mark" "<control>KP_Left")
 (gtk_accel_path "<Actions>/Editor/add-location-from-playhead" "KP_Enter")
 
 

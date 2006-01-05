@@ -697,6 +697,7 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::ToggleAction>  toggle_show_auto_regions_action;
 
 	void region_list_selection_changed ();
+	bool region_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 
 	Gtk::Menu          *region_list_menu;
 	Gtk::ScrolledWindow region_list_scroller;
@@ -721,6 +722,26 @@ class Editor : public PublicEditor
 	void toggle_show_auto_regions ();
 
 	int region_list_sorter (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
+
+	/* snapshots */
+
+	Gtk::ScrolledWindow      snapshot_display_scroller;
+	struct SnapshotDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    SnapshotDisplayModelColumns() { 
+		    add (visible_name);
+		    add (real_name);
+	    }
+	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
+	    Gtk::TreeModelColumn<Glib::ustring> real_name;
+	};
+
+	SnapshotDisplayModelColumns snapshot_display_columns;
+	Glib::RefPtr<Gtk::ListStore> snapshot_display_model;
+	Gtk::TreeView snapshot_display;
+
+	bool snapshot_display_button_press (GdkEventButton*);
+	void snapshot_display_selection_changed ();
+	void redisplay_snapshots();
 
 	/* named selections */
 
@@ -1008,8 +1029,9 @@ class Editor : public PublicEditor
 
 	void route_display_selection_changed ();
 	void redisplay_route_list();
-	gint route_list_reordered ();
+	void route_list_reordered (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* what);
 	bool ignore_route_list_reorder;
+	bool no_route_list_redisplay;
 	void queue_route_list_reordered ();
 
 	struct DragInfo {
@@ -1786,6 +1808,8 @@ class Editor : public PublicEditor
 	void init_colormap ();
 
 	bool on_key_press_event (GdkEventKey*);
+
+	void session_state_saved (string);
 };
 
 #endif /* __ardour_editor_h__ */

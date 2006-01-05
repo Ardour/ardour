@@ -63,7 +63,7 @@ Editor::handle_new_route (Route& route)
 
 	ignore_route_list_reorder = true;
 	
-	if (tv->marked_for_display()) {
+	if (!no_route_list_redisplay && tv->marked_for_display()) {
 	        route_list_display.get_selection()->select (row);
 	}
 
@@ -90,7 +90,7 @@ Editor::handle_gui_changes (const string & what, void *src)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_gui_changes), what, src));
 	
 	if (what == "track_height") {
-		route_list_reordered ();
+		redisplay_route_list ();
 	}
 }
 
@@ -147,7 +147,6 @@ Editor::route_name_changed (TimeAxisView *tv)
 void
 Editor::route_display_selection_changed ()
 {
-
 	TimeAxisView *tv;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
@@ -155,6 +154,7 @@ Editor::route_display_selection_changed ()
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 	        tv = (*i)[route_display_columns.tv];
+
 		if (!selection->is_selected (i)) {
 			tv->set_marked_for_display  (false);
 		} else {
@@ -169,7 +169,7 @@ Editor::route_display_selection_changed ()
 		}
 	}
 	
-	route_list_reordered ();
+	redisplay_route_list ();
 }
 
 void
@@ -201,41 +201,33 @@ Editor::select_strip_in_display (TimeAxisView* tv)
 }
 
 void
-Editor::queue_route_list_reordered ()
-
+Editor::route_list_reordered (const TreeModel::Path& path,const TreeModel::iterator& iter,int* what)
 {
-	/* the problem here is that we are called *before* the
-	   list has been reordered. so just queue up
-	   the actual re-drawer to happen once the re-ordering
-	   is complete.
-	*/
-
-        Glib::signal_idle().connect (mem_fun(*this, &Editor::route_list_reordered));
+	redisplay_route_list ();
 }
 
 void
 Editor::redisplay_route_list ()
-{
-	route_list_reordered ();
-}
-
-gint
-Editor::route_list_reordered ()
 {
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 	uint32_t position;
 	uint32_t order;
 	int n;
-	
+
+	if (no_route_list_redisplay) {
+		return;
+	}
+
 	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		AudioTimeAxisView* at; 
+
 		if (!ignore_route_list_reorder) {
 			
-				/* this reorder is caused by user action, so reassign sort order keys
-				   to tracks.
-				*/
+			/* this reorder is caused by user action, so reassign sort order keys
+			   to tracks.
+			*/
 			
 			if ((at = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
 				at->route().set_order_key (N_("editor"), order);
@@ -254,7 +246,6 @@ Editor::route_list_reordered ()
 
 	controls_layout.queue_resize ();
 	reset_scrolling_region ();
-	return FALSE;
 }
 
 void
@@ -281,16 +272,6 @@ Editor::hide_all_tracks (bool with_select)
 	}
 	//route_list_display.thaw ();
 	reset_scrolling_region ();
-}
-
-void
-Editor::route_list_column_click ()
-{
-	if (route_list_menu == 0) {
-		build_route_list_menu ();
-	}
-
-	route_list_menu->popup (0, 0);
 }
 
 void
