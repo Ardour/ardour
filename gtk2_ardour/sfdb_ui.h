@@ -50,8 +50,8 @@ class SoundFileBox : public Gtk::VBox
     SoundFileBox ();
     virtual ~SoundFileBox () {};
 
-    bool update (std::string filename);
 	void set_session (ARDOUR::Session* s);
+    bool setup_labels (std::string filename);
 
   protected:
 	ARDOUR::Session* _session;
@@ -71,9 +71,6 @@ class SoundFileBox : public Gtk::VBox
 
     pid_t current_pid;
 
-    Gtk::Label label;
-    Gtk::Label path;
-    Gtk::Entry path_entry;
     Gtk::Label length;
     Gtk::Label format;
     Gtk::Label channels;
@@ -96,7 +93,6 @@ class SoundFileBox : public Gtk::VBox
     Gtk::Button remove_field_btn;
 
  //   void fields_refiller (Gtk::CList &clist);
-    int setup_labels (std::string filename);
     void setup_fields ();
 
     void play_btn_clicked ();

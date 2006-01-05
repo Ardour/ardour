@@ -19,6 +19,8 @@
 
 */
 
+#include <sndfile.h>
+
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
 
@@ -51,14 +53,8 @@ SoundFileBox::SoundFileBox ()
 	pack_start (border_frame);
 	set_border_width (4);
 
-	path_box.set_spacing (4);
-	path_box.pack_start (path, false, false);
-	path_box.pack_start (path_entry, true, true);
-
 	main_box.set_border_width (4);
 
-	main_box.pack_start(label, false, false);
-	main_box.pack_start(path_box, false, false);
 	main_box.pack_start(length, false, false);
 	main_box.pack_start(format, false, false);
 	main_box.pack_start(channels, false, false);
@@ -105,30 +101,25 @@ SoundFileBox::set_session(ARDOUR::Session* s)
 	}
 }
 
-int
+bool
 SoundFileBox::setup_labels (string filename) 
 {
     SNDFILE *sf;
 
+	sf_info.format = 0; // libsndfile says to clear this before sf_open().
+
     if ((sf = sf_open ((char *) filename.c_str(), SFM_READ, &sf_info)) < 0) {
-        error << string_compose(_("file \"%1\" could not be opened"), filename) << endmsg;
-        return -1;
+        return false;
     }
+
+	sf_close (sf);
 
     if (sf_info.frames == 0 && sf_info.channels == 0 &&
 		sf_info.samplerate == 0 && sf_info.format == 0 &&
 	   	sf_info.sections == 0) {
 		/* .. ok, its not a sound file */
-	    error << string_compose(_("file \"%1\" appears not to be an audio file"), filename) << endmsg;
-	    return -1;
+	    return false;
 	}
-
-	label.set_alignment (0.0f, 0.0f);
-    label.set_text ("Label: " + ARDOUR::Library->get_label(filename));
-
-	path.set_text ("Path: ");
-	path_entry.set_text (filename);
-	path_entry.set_position (-1);
 
 	length.set_alignment (0.0f, 0.0f);
 	length.set_text (string_compose("Length: %1", length2string(sf_info.frames, sf_info.samplerate)));
@@ -144,7 +135,7 @@ SoundFileBox::setup_labels (string filename)
 	samplerate.set_alignment (0.0f, 0.0f);
 	samplerate.set_text (string_compose("Samplerate: %1", sf_info.samplerate));
 
-	return 0;
+	return true;
 }
 
 void
@@ -175,12 +166,6 @@ void
 SoundFileBox::field_selected ()
 {}
 
-bool
-SoundFileBox::update (std::string filename)
-{
-	return true;
-}
-
 SoundFileBrowser::SoundFileBrowser (std::string title)
 	:
 	ArdourDialog(title),
@@ -201,7 +186,7 @@ SoundFileBrowser::set_session (ARDOUR::Session* s)
 void
 SoundFileBrowser::update_preview ()
 {
-	chooser.set_preview_widget_active(preview.update(chooser.get_filename()));
+	chooser.set_preview_widget_active(preview.setup_labels(chooser.get_filename()));
 }
 
 SoundFileChooser::SoundFileChooser (std::string title)
@@ -210,6 +195,8 @@ SoundFileChooser::SoundFileChooser (std::string title)
 {
 	add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+
+	show_all ();
 }
 
 SoundFileOmega::SoundFileOmega (std::string title)
@@ -227,6 +214,8 @@ SoundFileOmega::SoundFileOmega (std::string title)
 
 	embed_btn.signal_clicked().connect (mem_fun (*this, &SoundFileOmega::embed_clicked));
 	import_btn.signal_clicked().connect (mem_fun (*this, &SoundFileOmega::import_clicked));
+
+	show_all ();
 }
 
 void

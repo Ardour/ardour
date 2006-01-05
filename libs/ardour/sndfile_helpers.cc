@@ -1,5 +1,7 @@
 #include <map>
 
+#include <sndfile.h>
+
 #include <ardour/sndfile_helpers.h>
 
 #include "i18n.h"

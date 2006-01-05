@@ -2,7 +2,6 @@
 #define __sndfile_helpers_h__
 
 #include <string>
-#include <sndfile.h>
 
 using std::string;
 
