@@ -2358,7 +2358,8 @@ IO::MIDIGainControl::send_feedback (gain_t gain)
 		if (get_control_info (ch, ev, additional)) {
 			data.controller_number = additional;
 			data.value = val;
-
+			last_written = val;
+			
 			io._session.send_midi_message (get_port(), ev, ch, data);
 		}
 		//send_midi_feedback (gain_to_midi (gain));

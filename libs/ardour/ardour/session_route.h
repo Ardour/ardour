@@ -35,7 +35,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route&))
 	RouteList public_order;
 
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		public_order = routes;
 	}
 
@@ -53,7 +53,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route*))
 	RouteList public_order;
 
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		public_order = routes;
 	}
 
@@ -72,7 +72,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route&, A), A arg1)
 	RouteList public_order;
 
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		public_order = routes;
 	}
 

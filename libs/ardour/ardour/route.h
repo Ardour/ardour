@@ -140,14 +140,14 @@ class Route : public IO
 	void flush_redirects ();
 
 	template<class T> void foreach_redirect (T *obj, void (T::*func)(Redirect *)) {
-		LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			(obj->*func) (*i);
 		}
 	}
 
 	Redirect *nth_redirect (uint32_t n) {
-		LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
 		RedirectList::iterator i;
 		for (i = _redirects.begin(); i != _redirects.end() && n; ++i, --n);
 		if (i == _redirects.end()) {
@@ -288,7 +288,7 @@ class Route : public IO
 	jack_nframes_t           _roll_delay;
 	jack_nframes_t           _own_latency;
 	RedirectList             _redirects;
-	PBD::NonBlockingLock      redirect_lock;
+	PBD::NonBlockingRWLock      redirect_lock;
 	IO                      *_control_outs;
 	PBD::NonBlockingLock      control_outs_lock;
 	RouteGroup              *_edit_group;

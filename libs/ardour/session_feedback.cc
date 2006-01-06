@@ -124,7 +124,7 @@ Session::feedback_thread_work ()
 
 	if (active_feedback) {
 		/* XXX use Config->feedback_interval_usecs()*/;
-		timeout = 250;
+		timeout = max (5, (int) Config->get_midi_feedback_interval_ms());
 	} else {
 		timeout = -1;
 	}
@@ -162,7 +162,7 @@ Session::feedback_thread_work ()
 					switch ((FeedbackRequest::Type) req) {
 					
 					case FeedbackRequest::Start:
-						timeout = 250;
+						timeout = max (5, (int) Config->get_midi_feedback_interval_ms());
 						active_feedback++;
 						break;
 						
@@ -193,7 +193,7 @@ Session::feedback_thread_work ()
 			}
 		}
 		
-		if (!active_feedback) {
+		if (!active_feedback || transport_stopped()) {
 			continue;
 		}
 
@@ -224,7 +224,7 @@ Session::feedback_generic_midi_function ()
 	MIDI::byte* end = buf;
 
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			end = (*i)->write_midi_feedback (end, bsize);
@@ -236,9 +236,10 @@ Session::feedback_generic_midi_function ()
 		return 0;
 	} 
 	
-	// cerr << "MIDI feedback: write " << (int32_t) (end - buf) << " of " << buf << " to midi port\n";
-
 	deliver_midi (_midi_port, buf, (int32_t) (end - buf));
+
+	//cerr << "MIDI feedback: wrote " << (int32_t) (end - buf) << " to midi port\n";
+		
 
 	return 0;
 }

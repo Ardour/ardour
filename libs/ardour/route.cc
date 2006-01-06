@@ -314,7 +314,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (with_redirects) {
-		TentativeLockMonitor rm (redirect_lock, __LINE__, __FILE__);
+		TentativeRWLockMonitor rm (redirect_lock, false, __LINE__, __FILE__);
 		if (rm.locked()) {
 			if (mute_gain > 0 || !_mute_affects_pre_fader) {
 				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
@@ -428,7 +428,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				}
 			}
 			
-			if (apply_gain_automation) {
+			if (apply_gain_automation && _session.transport_rolling()) {
 				_effective_gain = gab[nframes-1];
 			}
 			
@@ -483,7 +483,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 
 	if (post_fader_work) {
 
-		TentativeLockMonitor rm (redirect_lock, __LINE__, __FILE__);
+		TentativeRWLockMonitor rm (redirect_lock, false, __LINE__, __FILE__);
 		if (rm.locked()) {
 			if (mute_gain > 0 || !_mute_affects_post_fader) {
 				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
@@ -755,7 +755,7 @@ Route::add_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 	}
 
 	{
-		LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
 
 		PluginInsert* pi;
 		PortInsert* porti;
@@ -816,7 +816,7 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 	}
 
 	{
-		LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
 
 		RedirectList::iterator existing_end = _redirects.end();
 		--existing_end;
@@ -861,7 +861,7 @@ Route::clear_redirects (void *src)
 	}
 
 	{
-		LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
 
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			delete *i;
@@ -891,7 +891,7 @@ Route::remove_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 	redirect_max_outs = 0;
 
 	{
-		LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
 		RedirectList::iterator i;
 		bool removed = false;
 
@@ -970,7 +970,7 @@ Route::remove_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 int
 Route::reset_plugin_counts (uint32_t* lpc)
 {
-	LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
 	return _reset_plugin_counts (lpc);
 }
 
@@ -1140,7 +1140,7 @@ Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_st
 	RedirectList to_be_deleted;
 
 	{
-		LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
 		RedirectList::iterator tmp;
 		RedirectList the_copy;
 
@@ -1219,7 +1219,7 @@ Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_st
 void
 Route::all_redirects_flip ()
 {
-	LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
 
 	if (_redirects.empty()) {
 		return;
@@ -1235,7 +1235,7 @@ Route::all_redirects_flip ()
 void
 Route::all_redirects_active (bool state)
 {
-	LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (redirect_lock, false,  __LINE__, __FILE__);
 
 	if (_redirects.empty()) {
 		return;
@@ -1257,7 +1257,7 @@ Route::sort_redirects (uint32_t* err_streams)
 {
 	{
 		RedirectSorter comparator;
-		LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
 		uint32_t old_rmo = redirect_max_outs;
 
 		/* the sweet power of C++ ... */
@@ -1736,7 +1736,7 @@ Route::silence (jack_nframes_t nframes, jack_nframes_t offset)
 		}
 
 		{ 
-			TentativeLockMonitor lm (redirect_lock, __LINE__, __FILE__);
+			TentativeRWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
 			
 			if (lm.locked()) {
 				for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
@@ -1935,12 +1935,13 @@ Route::transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_re
 {
 	jack_nframes_t now = _session.transport_frame();
 
-	if (!did_locate) {
-		automation_snapshot (now);
-	}
-
 	{
-		LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
+
+		if (!did_locate) {
+			automation_snapshot (now);
+		}
+
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			
 			if (Config->get_plugins_stop_with_transport() && can_flush_redirects) {
@@ -2014,7 +2015,7 @@ Route::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes
 	}
 
 	apply_gain_automation = false;
-
+	
 	if (n_inputs()) {
 		passthru (start_frame, end_frame, nframes, offset, 0, false);
 	} else {
@@ -2053,8 +2054,15 @@ int
 Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, int declick,
 	     bool can_record, bool rec_monitors_input)
 {
-	automation_snapshot (_session.transport_frame());
-
+	{
+		TentativeRWLockMonitor lm(redirect_lock, false, __LINE__, __FILE__);
+		if (lm.locked()) {
+			// automation snapshot can also be called from the non-rt context
+			// and it uses the redirect list, so we take the lock out here
+			automation_snapshot (_session.transport_frame());
+		}
+	}
+		
 	if ((n_outputs() == 0 && _redirects.empty()) || n_inputs() == 0 || !_active) {
 		silence (nframes, offset);
 		return 0;
@@ -2067,12 +2075,13 @@ Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t 
 	}
 
 	_silent = false;
+
 	apply_gain_automation = false;
 
 	{ 
 		TentativeLockMonitor am (automation_lock, __LINE__, __FILE__);
 		
-		if (am.locked()) {
+		if (am.locked() && _session.transport_rolling()) {
 			
 			jack_nframes_t start_frame = end_frame - nframes;
 			
@@ -2162,7 +2171,7 @@ Route::send_all_midi_feedback ()
 	if (_session.get_midi_feedback()) {
 
 		{
-			LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+			RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
 			for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 				(*i)->send_all_midi_feedback ();
 			}
@@ -2182,7 +2191,7 @@ Route::write_midi_feedback (MIDI::byte* buf, int32_t& bufsize)
 	buf = _midi_mute_control.write_feedback (buf, bufsize, _muted);
 
 	{
-		LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			buf = (*i)->write_midi_feedback (buf, bufsize);
 		}
@@ -2198,7 +2207,7 @@ Route::flush_redirects ()
 	   this is called from the RT audio thread.
 	*/
 
-	LockMonitor lm (redirect_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
 
 	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 		(*i)->deactivate ();
@@ -2333,7 +2342,8 @@ Route::MIDIToggleControl::send_feedback (bool value)
 		if (get_control_info (ch, ev, additional)) {
 			data.controller_number = additional;
 			data.value = val;
-
+			last_written = value;
+			
 			route._session.send_midi_message (get_port(), ev, ch, data);
 		}
 	}

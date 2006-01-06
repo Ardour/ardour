@@ -342,12 +342,6 @@ Session::process_event (Event* ev)
 	case Event::PunchIn:
 		// cerr << "PunchIN at " << transport_frame() << endl;
 		if (punch_in && record_status() == Enabled) {
-			{
-				LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
-				for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
-					(*i)->punch_in();
-				}
-			}
 			enable_record ();
 		}
 		remove = false;

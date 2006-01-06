@@ -305,7 +305,6 @@ class DiskStream : public Stateful, public sigc::trackable
 	id_t              _id;
 
 	atomic_t                 _record_enabled;
-	bool                      rec_monitoring_off_for_roll;
 	AudioPlaylist*           _playlist;
 	double                   _visible_speed;
 	double                   _actual_speed;

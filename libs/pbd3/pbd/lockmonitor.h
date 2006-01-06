@@ -57,6 +57,31 @@ class NonBlockingLock : public Lock {
 	int unlock() { return pthread_mutex_unlock (&_mutex); }
 };
 
+class RWLock {	
+  public:
+	RWLock() { pthread_rwlock_init (&_mutex, 0); } 
+	virtual ~RWLock() { pthread_rwlock_destroy(&_mutex); }
+
+	virtual int write_lock () { return pthread_rwlock_wrlock (&_mutex); }
+	virtual int read_lock () { return pthread_rwlock_rdlock (&_mutex); }
+	virtual int unlock() { return pthread_rwlock_unlock (&_mutex); }
+
+	pthread_rwlock_t *mutex() { return &_mutex; }
+
+  protected:
+	pthread_rwlock_t _mutex;
+};
+
+class NonBlockingRWLock : public RWLock {	
+  public:
+	NonBlockingRWLock() {}
+	~NonBlockingRWLock(){}
+	
+	int write_trylock () { return pthread_rwlock_trywrlock (&_mutex); }
+	int read_trylock () { return pthread_rwlock_tryrdlock (&_mutex); }
+};
+
+
 class LockMonitor 
 {
   public:
@@ -188,6 +213,112 @@ class SpinLockMonitor
 	const char * file;
 #endif
 };
+
+
+class RWLockMonitor 
+{
+  public:
+	RWLockMonitor (RWLock& lck, bool write, unsigned long l, const char *f) 
+		: lock (lck)
+#ifdef DEBUG_LOCK_MONITOR
+		, line (l), file (f) 
+#endif
+		{
+
+#ifdef DEBUG_LOCK_MONITOR
+			unsigned long long when;
+			when = get_cycles();
+			cerr << when << " lock " << &lock << " at " << line << " in " << file << endl;
+#endif
+			if (write) {
+				lock.write_lock ();
+			} else {
+				lock.read_lock ();
+			}
+#ifdef DEBUG_LOCK_MONITOR
+			when = get_cycles();
+			cerr << '\t' << when 
+			     << " locked: " 
+			     << &lock << " at " 
+			     << line << " in " << file << endl;
+#endif
+		}
+	
+	~RWLockMonitor () {
+		lock.unlock ();
+#ifdef DEBUG_LOCK_MONITOR
+		unsigned long long when;
+		when = get_cycles();
+		cerr << '\t' << when << ' ' 
+		     << " UNLOCKED "
+		     << &lock << " at " 
+		     << line << " in " << file << endl;
+#endif
+	}
+  private:
+	RWLock& lock;
+#ifdef DEBUG_LOCK_MONITOR
+	unsigned long line;
+	const char * file;
+#endif
+};
+
+class TentativeRWLockMonitor 
+{
+  public:
+	TentativeRWLockMonitor (NonBlockingRWLock& lck, bool write, unsigned long l, const char *f) 
+		: lock (lck)
+#ifdef DEBUG_LOCK_MONITOR
+		, line (l), file (f) 
+#endif
+		{
+
+#ifdef DEBUG_LOCK_MONITOR
+			unsigned long long when;
+			when = get_cycles();
+			cerr << when << " tentative lock " << &lock << " at " << line << " in " << file << endl;
+#endif
+			if (write) {
+				_locked = (lock.write_trylock() == 0);
+			} else {
+				_locked = (lock.read_trylock() == 0);
+			}
+
+#ifdef DEBUG_LOCK_MONITOR
+			when = get_cycles();
+			cerr << '\t' << when << ' ' 
+			     << _locked 
+			     << " lock: " 
+			     << &lock << " at " 
+			     << line << " in " << file << endl;
+#endif
+		}
+
+	~TentativeRWLockMonitor () {
+		if (_locked) {
+			lock.unlock ();
+#ifdef DEBUG_LOCK_MONITOR
+			unsigned long long when;
+			when = get_cycles();
+			cerr << '\t' << when << ' ' 
+			     << " UNLOCKED "
+			     << &lock << " at " 
+			     << line << " in " << file << endl;
+#endif
+		}
+	}
+	
+	bool locked() { return _locked; }
+
+  private:
+	NonBlockingRWLock& lock;
+	bool _locked;
+#ifdef DEBUG_LOCK_MONITOR
+	unsigned long line;
+	const char * file;
+#endif
+};
+
 
 } /* namespace */
 

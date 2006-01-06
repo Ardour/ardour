@@ -1753,6 +1753,9 @@ void
 OptionEditor::hw_monitor_clicked ()
 {
 	Config->set_use_hardware_monitoring (hw_monitor_button.get_active());
+	if (session) {
+		session->reset_input_monitor_state ();
+	}
 }
 
 void

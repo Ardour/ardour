@@ -192,14 +192,18 @@ Session::realtime_stop (bool abort)
 	disable_record ();
 
 	reset_slave_state ();
-
+		
 	_transport_speed = 0;
+
 	transport_sub_state = (auto_return ? AutoReturning : 0);
 }
 
 void
 Session::butler_transport_work ()
 {
+	RWLockMonitor rm (route_lock, false, __LINE__, __FILE__);
+	RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+		
 	if (post_transport_work & PostTransportCurveRealloc) {
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			(*i)->curve_reallocate();
@@ -253,7 +257,7 @@ Session::butler_transport_work ()
 void
 Session::non_realtime_set_speed ()
 {
-	LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
 
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->non_realtime_set_speed ();
@@ -263,7 +267,7 @@ Session::non_realtime_set_speed ()
 void
 Session::non_realtime_overwrite ()
 {
-	LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
 
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->pending_overwrite) {
@@ -448,7 +452,7 @@ Session::set_auto_loop (bool yn)
 {
 	/* Called from event-handling context */
 	
-	if (actively_recording() || _locations.auto_loop_location() == 0) {
+	if ((actively_recording() && yn) || _locations.auto_loop_location() == 0) {
 		return;
 	}
 	
@@ -603,18 +607,51 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 
 	} else {
 
-		/* XXX i don't know where else to put this. something has to clear the
-		   current clicks, and without deadlocking. clear_clicks() takes
-		   the route lock which would deadlock in this context.
-		*/
+		/* this is functionally what clear_clicks() does but with a tentative lock */
 
-		for (Clicks::iterator i = clicks.begin(); i != clicks.end(); ++i) {
-			delete *i;
-		}
+		TentativeRWLockMonitor clickm (click_lock, true, __LINE__, __FILE__);
+	
+		if (clickm.locked()) {
+			
+			for (Clicks::iterator i = clicks.begin(); i != clicks.end(); ++i) {
+				delete *i;
+			}
 		
-		clicks.clear ();
+			clicks.clear ();
+		}
 	}
 
+	if (with_roll) {
+		/* switch from input if we're going to roll */
+		if (Config->get_use_hardware_monitoring()) {
+			/* Even though this is called from RT context we are using
+			   a non-tentative rwlock here,  because the action must occur.
+			   The rarity and short potential lock duration makes this "OK"
+			*/
+			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				if ((*i)->record_enabled ()) {
+					cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
+					(*i)->monitor_input (!auto_input);
+				}
+			}
+		}
+	} else {
+		/* otherwise we're going to stop, so do the opposite */
+		if (Config->get_use_hardware_monitoring()) {
+			/* Even though this is called from RT context we are using
+			   a non-tentative rwlock here,  because the action must occur.
+			   The rarity and short potential lock duration makes this "OK"
+			*/
+			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				if ((*i)->record_enabled ()) {
+					cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
+					(*i)->monitor_input (true);
+				}
+			}
+		}
+	}
 
 	/* cancel autoloop if transport pos outside of loop range */
 	if (auto_loop) {
@@ -644,6 +681,21 @@ Session::set_transport_speed (float speed, bool abort)
 
 	if (transport_rolling() && speed == 0.0) {
 
+		if (Config->get_use_hardware_monitoring())
+		{
+			/* Even though this is called from RT context we are using
+			   a non-tentative rwlock here,  because the action must occur.
+			   The rarity and short potential lock duration makes this "OK"
+			*/
+			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				if ((*i)->record_enabled ()) {
+					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
+					(*i)->monitor_input (true);	
+				}
+			}
+		}
+
 		if (synced_to_jack ()) {
 			_engine.transport_stop ();
 		} else {
@@ -651,6 +703,20 @@ Session::set_transport_speed (float speed, bool abort)
 		}
 
 	} else if (transport_stopped() && speed == 1.0) {
+
+		if (Config->get_use_hardware_monitoring()) {
+			/* Even though this is called from RT context we are using
+			   a non-tentative rwlock here,  because the action must occur.
+			   The rarity and short potential lock duration makes this "OK"
+			*/
+			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				if (auto_input && (*i)->record_enabled ()) {
+					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
+					(*i)->monitor_input (false);	
+				}
+			}
+		}
 
 		if (synced_to_jack()) {
 			_engine.transport_start ();
@@ -690,7 +756,7 @@ Session::set_transport_speed (float speed, bool abort)
 		
 		_last_transport_speed = _transport_speed;
 		_transport_speed = speed;
-
+		
 		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
 				post_transport_work = PostTransportWork (post_transport_work | PostTransportSpeed);
@@ -1102,8 +1168,8 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		return;
 	}
 
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
-	LockMonitor lm2 (diskstream_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+	RWLockMonitor lm2 (diskstream_lock, false, __LINE__, __FILE__);
 	_worst_track_latency = 0;
 
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {

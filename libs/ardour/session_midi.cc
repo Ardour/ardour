@@ -51,7 +51,7 @@ using namespace MIDI;
 MachineControl::CommandSignature MMC_CommandSignature;
 MachineControl::ResponseSignature MMC_ResponseSignature;
 
-MultiAllocSingleReleasePool Session::MIDIRequest::pool ("midi", sizeof (Session::MIDIRequest), 256);
+MultiAllocSingleReleasePool Session::MIDIRequest::pool ("midi", sizeof (Session::MIDIRequest), 1024);
 
 int
 Session::use_config_midi_ports ()
@@ -110,7 +110,7 @@ Session::set_midi_control (bool yn)
 	poke_midi_thread ();
 
 	if (_midi_port) {
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			(*i)->reset_midi_control (_midi_port, midi_control);
 		}
@@ -478,7 +478,7 @@ Session::send_all_midi_feedback ()
 {
 	if (midi_feedback) {
 		// send out current state of all routes
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			(*i)->send_all_midi_feedback ();
 		}

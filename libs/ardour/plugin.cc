@@ -162,7 +162,8 @@ Plugin::MIDIPortControl::send_feedback (float value)
 		if (get_control_info (ch, ev, additional)) {
 			data.controller_number = additional;
 			data.value = val;
-
+			last_written = val;
+			
 			plugin.session().send_midi_message (get_port(), ev, ch, data);
 		}
 	}

@@ -1344,7 +1344,7 @@ Session::state(bool full_state)
 	child = node->add_child ("DiskStreams");
 
 	{ 
-		LockMonitor dl (diskstream_lock, __LINE__, __FILE__);
+		RWLockMonitor dl (diskstream_lock, false, __LINE__, __FILE__);
 		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if (!(*i)->hidden()) {
 				child->add_child_nocopy ((*i)->get_state());
@@ -1366,7 +1366,7 @@ Session::state(bool full_state)
 
 	child = node->add_child ("Routes");
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		
 		RoutePublicOrderSorter cmp;
 		RouteList public_order(routes);
@@ -2313,7 +2313,7 @@ Session::load_route_groups (const XMLNode& node, bool edit)
 void
 Session::swap_configuration(Configuration** new_config)
 {
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, true, __LINE__, __FILE__); // jlc - WHY?
 	Configuration* tmp = *new_config;
 	*new_config = Config;
 	Config = tmp;
@@ -2323,7 +2323,7 @@ Session::swap_configuration(Configuration** new_config)
 void
 Session::copy_configuration(Configuration* new_config)
 {
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, true, __LINE__, __FILE__);
 	new_config = new Configuration(*Config);
 }
 
@@ -2474,7 +2474,7 @@ Session::GlobalRouteBooleanState
 Session::get_global_route_boolean (bool (Route::*method)(void) const)
 {
 	GlobalRouteBooleanState s;
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -2494,7 +2494,7 @@ Session::GlobalRouteMeterState
 Session::get_global_route_metering ()
 {
 	GlobalRouteMeterState s;
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 		if (!(*i)->hidden()) {

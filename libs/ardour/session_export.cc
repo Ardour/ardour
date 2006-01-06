@@ -485,7 +485,7 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 	/* take everyone out of awrite to avoid disasters */
 
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			(*i)->protect_automation ();
 		}
@@ -494,7 +494,7 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 	/* get everyone to the right position */
 
 	{
-		LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
 		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if ((*i)-> seek (spec.start_frame, true)) {
 				error << string_compose (_("%1: cannot seek to %2 for export"),

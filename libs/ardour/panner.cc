@@ -109,7 +109,8 @@ StreamPanner::MIDIControl::send_feedback (pan_t value)
 		if (get_control_info (ch, ev, additional)) {
 			data.controller_number = additional;
 			data.value = val;
-
+			last_written = val;
+			
 			sp.get_parent().session().send_midi_message (get_port(), ev, ch, data);
 		}
 

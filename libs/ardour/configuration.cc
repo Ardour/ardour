@@ -207,6 +207,11 @@ Configuration::state (bool user_only)
 		node->add_child_nocopy(option_node("disk-choice-space-threshold", string(buf)));
 	}
 
+	if (!user_only || midi_feedback_interval_ms_is_user) {
+		snprintf(buf, sizeof(buf), "%" PRIu32, midi_feedback_interval_ms);
+		node->add_child_nocopy(option_node("midi-feedback-interval-ms", string(buf)));
+	}
+
 	if (!user_only || mute_affects_pre_fader_is_user) {
 		node->add_child_nocopy(option_node("mute-affects-pre-fader", mute_affects_pre_fader?"yes":"no"));
 	}
@@ -422,6 +427,8 @@ Configuration::set_state (const XMLNode& root)
 					if (sscanf (option_value.c_str(), "%f", &v) == 1) {
 						set_quieten_at_speed (v);
 					}
+				} else if (option_name == "midi-feedback-interval-ms") {
+					set_midi_feedback_interval_ms (atoi (option_value.c_str()));
 				}
 			}
 			
@@ -472,13 +479,15 @@ Configuration::set_defaults ()
 	stop_recording_on_xrun = false;
 	verify_remove_last_capture = true;
 	stop_at_session_end = true;
-	seamless_looping = false;
+	seamless_looping = true;
 	auto_xfade = true;
 	no_new_session_dialog = false;
 	timecode_source_is_synced = true;
 	use_vst = true; /* if we build with VST_SUPPORT, otherwise no effect */
 	quieten_at_speed = true;
 
+	midi_feedback_interval_ms = 100;
+	
 	// this is about 5 minutes at 48kHz, 4 bytes/sample
 	disk_choice_space_threshold = 57600000;
 
@@ -514,6 +523,7 @@ Configuration::set_defaults ()
 	no_new_session_dialog_is_user = false;
 	timecode_source_is_synced_is_user = false;
 	quieten_at_speed_is_user = false;
+	midi_feedback_interval_ms_is_user = false;
 }
 
 Configuration::MidiPortDescriptor::MidiPortDescriptor (const XMLNode& node)
@@ -829,6 +839,21 @@ Configuration::set_midi_port_name (string name)
 	midi_port_name = name;
 	if (user_configuration) {
 		midi_port_name_is_user = true;
+	}
+}
+
+uint32_t
+Configuration::get_midi_feedback_interval_ms ()
+{
+	return midi_feedback_interval_ms;
+}
+
+void
+Configuration::set_midi_feedback_interval_ms (uint32_t val)
+{
+	midi_feedback_interval_ms = val;
+	if (user_configuration) {
+		midi_feedback_interval_ms_is_user = true;
 	}
 }
 

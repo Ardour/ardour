@@ -280,11 +280,13 @@ Session::process_with_events (jack_nframes_t nframes)
 	end_frame = _transport_frame + nframes;
 
 	{
-		TentativeLockMonitor rm (route_lock, __LINE__, __FILE__);
+		TentativeRWLockMonitor rm (route_lock, false, __LINE__, __FILE__);
+		TentativeRWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+	
 		Event* this_event;
 		Events::iterator the_next_one;
 
-		if (!rm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
+		if (!rm.locked() || !dsm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
 			no_roll (nframes, 0);
 			return;
 		}
@@ -543,9 +545,11 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 		if (slave_state == Waiting) {
 
 			// cerr << "waiting at " << slave_transport_frame << endl;
-
-			if (slave_transport_frame >= slave_wait_end) {
+			TentativeRWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+				
+			if (dsm.locked() && slave_transport_frame >= slave_wait_end) {
 				// cerr << "\tstart at " << _transport_frame << endl;
+
 				slave_state = Running;
 
 				bool ok = true;
@@ -662,7 +666,13 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 		*/
 
 		bool need_butler;
+		
+		TentativeRWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+		if (!dsm.locked()) {
+			goto noroll;
+		}
 
+		
 		prepare_diskstreams ();
 		silent_process_routes (nframes, offset);
 		commit_diskstreams (nframes, need_butler);
@@ -708,9 +718,10 @@ Session::process_without_events (jack_nframes_t nframes)
 	long frames_moved;
 	
 	{
-		TentativeLockMonitor rm (route_lock, __LINE__, __FILE__);
+		TentativeRWLockMonitor rm (route_lock, false, __LINE__, __FILE__);
+		TentativeRWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
 
-		if (!rm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
+		if (!rm.locked() || !dsm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
 			no_roll (nframes, 0);
 			return;
 		}
@@ -779,7 +790,7 @@ Session::process_without_events (jack_nframes_t nframes)
 void
 Session::process_audition (jack_nframes_t nframes)
 {
-	TentativeLockMonitor rm (route_lock, __LINE__, __FILE__);
+	TentativeRWLockMonitor rm (route_lock, false, __LINE__, __FILE__);
 	Event* ev;
 
 	if (rm.locked()) {

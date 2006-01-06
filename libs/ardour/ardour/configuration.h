@@ -117,6 +117,9 @@ class Configuration : public Stateful
 
 	string get_midi_port_name();
 	void   set_midi_port_name(string);
+
+	uint32_t get_midi_feedback_interval_ms();
+	void set_midi_feedback_interval_ms (uint32_t);
 	
 	bool get_use_hardware_monitoring();
 	void set_use_hardware_monitoring(bool);
@@ -238,6 +241,8 @@ class Configuration : public Stateful
 	bool          use_vst; /* always per-user */
 	bool          quieten_at_speed;
 	bool          quieten_at_speed_is_user;
+	uint32_t      midi_feedback_interval_ms;
+	bool          midi_feedback_interval_ms_is_user;
 
 	XMLNode *key_node;
 	bool     user_configuration;

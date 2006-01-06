@@ -128,7 +128,6 @@ DiskStream::init (Flag f)
 	_alignment_style = ExistingMaterial;
 	_persistent_alignment_style = ExistingMaterial;
 	first_input_change = true;
-	rec_monitoring_off_for_roll = false;
 	_playlist = 0;
 	i_am_the_modifier = 0;
 	atomic_set (&_record_enabled, 0);
@@ -735,16 +734,6 @@ DiskStream::process (jack_nframes_t transport_frame, jack_nframes_t nframes, jac
 	if (can_record && !_last_capture_regions.empty()) {
 		_last_capture_regions.clear ();
 	}
-	
-	if (rec_nframes) {
-
-		if (Config->get_use_hardware_monitoring() && re && rec_monitoring_off_for_roll && rec_monitors_input) {
-			for (c = channels.begin(); c != channels.end(); ++c) {
-				(*c).source->ensure_monitor_input (true);
-			}
-			rec_monitoring_off_for_roll = false;
-		}
-	}
 
 	if (nominally_recording || rec_nframes) {
 
@@ -806,6 +795,7 @@ DiskStream::process (jack_nframes_t transport_frame, jack_nframes_t nframes, jac
 			playback_distance = nframes;
 
 		} else {
+
 
 			/* we can't use the capture buffer as the playback buffer, because
 			   we recorded only a part of the current process' cycle data
@@ -1685,24 +1675,6 @@ DiskStream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture
 void
 DiskStream::finish_capture (bool rec_monitors_input)
 {
-	if (Config->get_use_hardware_monitoring() && record_enabled()) {
-		if (rec_monitors_input) {
-			if (rec_monitoring_off_for_roll) {
-				for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-					(*chan).source->ensure_monitor_input (true);
-				}
-				rec_monitoring_off_for_roll = false;
-			}
-		} else {
-			if (!rec_monitoring_off_for_roll) {
-				for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-					(*chan).source->ensure_monitor_input (false);
-				}
-				rec_monitoring_off_for_roll = true;
-			}
-		}
-	}
-
 	was_recording = false;
 	
 	if (capture_captured == 0) {
@@ -1732,6 +1704,8 @@ DiskStream::finish_capture (bool rec_monitors_input)
 void
 DiskStream::set_record_enabled (bool yn, void* src)
 {
+        bool rolling = _session.transport_speed() != 0.0f;
+
 	if (!recordable() || !_session.record_enabling_legal()) {
 		return;
 	}
@@ -1765,10 +1739,10 @@ DiskStream::set_record_enabled (bool yn, void* src)
 		if (yn) {
 			atomic_set (&_record_enabled, 1);
 			capturing_sources.clear ();
-			if (Config->get_use_hardware_monitoring()) {
+			if (Config->get_use_hardware_monitoring())  {
 				for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 					if ((*chan).source) {
-						(*chan).source->request_monitor_input (true);
+						(*chan).source->request_monitor_input (!(_session.get_auto_input() && rolling));
 					}
 					capturing_sources.push_back ((*chan).write_source);
 				}

@@ -541,7 +541,7 @@ Session::set_worst_io_latencies (bool take_lock)
 	}
 
 	if (take_lock) {
-		route_lock.lock ();
+		route_lock.read_lock ();
 	}
 	
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
@@ -933,10 +933,50 @@ Session::set_auto_input (bool yn)
 {
 	if (auto_input != yn) {
 		auto_input = yn;
+		
+		if (Config->get_use_hardware_monitoring() && transport_rolling()) {
+			/* auto-input only makes a difference if we're rolling */
+
+			/* Even though this can called from RT context we are using
+			   a non-tentative rwlock here,  because the action must occur.
+			   The rarity and short potential lock duration makes this "OK"
+			*/
+			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				if ((*i)->record_enabled ()) {
+					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
+					(*i)->monitor_input (!auto_input);   
+				}
+			}
+		}
+
 		set_dirty();
 		ControlChanged (AutoInput);
 	}
 }
+
+void
+Session::reset_input_monitor_state ()
+{
+	if (transport_rolling()) {
+		RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			if ((*i)->record_enabled ()) {
+				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
+				(*i)->monitor_input (Config->get_use_hardware_monitoring() && !auto_input);
+			}
+		}
+	} else {
+		RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			if ((*i)->record_enabled ()) {
+				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
+				(*i)->monitor_input (Config->get_use_hardware_monitoring());
+			}
+		}
+	}
+}
+
 
 void
 Session::set_input_auto_connect (bool yn)
@@ -1192,6 +1232,22 @@ Session::enable_record ()
 		atomic_set (&_record_status, Recording);
 		_last_record_location = _transport_frame;
 		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordStrobe);
+
+		if (Config->get_use_hardware_monitoring() && auto_input) {
+			/* Even though this can be called from RT context we are using
+			   a non-tentative rwlock here,  because the action must occur.
+			   The rarity and short potential lock duration makes this "OK"
+			*/
+			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			
+			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				if ((*i)->record_enabled ()) {
+					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
+					(*i)->monitor_input (true);   
+				}
+			}
+		}
+
 		RecordEnabled ();
 	}
 }
@@ -1202,8 +1258,25 @@ Session::disable_record ()
 	if (atomic_read (&_record_status) != Disabled) {
 		atomic_set (&_record_status, Disabled);
 		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordExit);
+
+		if (Config->get_use_hardware_monitoring() && auto_input) {
+			/* Even though this can be called from RT context we are using
+			   a non-tentative rwlock here,  because the action must occur.
+			   The rarity and short potential lock duration makes this "OK"
+			*/
+			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			
+			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				if ((*i)->record_enabled ()) {
+					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
+					(*i)->monitor_input (false);   
+				}
+			}
+		}
+		
 		RecordDisabled ();
 		remove_pending_capture_state ();
+
 	}
 }
 
@@ -1211,6 +1284,21 @@ void
 Session::step_back_from_record ()
 {
 	atomic_set (&_record_status, Enabled);
+
+	if (Config->get_use_hardware_monitoring()) {
+		/* Even though this can be called from RT context we are using
+		   a non-tentative rwlock here,  because the action must occur.
+		   The rarity and short potential lock duration makes this "OK"
+		*/
+		RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+		
+		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		        if (auto_input && (*i)->record_enabled ()) {
+			        //cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
+		                (*i)->monitor_input (false);   
+			}
+		}
+	}
 }
 
 void
@@ -1320,7 +1408,8 @@ Session::set_block_size (jack_nframes_t nframes)
 	*/
 
 	{ 
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+		RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
 		vector<Sample*>::iterator i;
 		uint32_t np;
 			
@@ -1381,7 +1470,8 @@ Session::set_default_fade (float steepness, float fade_msecs)
 	default_fade_steepness = steepness;
 
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		// jlc, WTF is this!
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		AudioRegion::set_default_fade (steepness, fade_frames);
 	}
 
@@ -1532,7 +1622,7 @@ Session::new_audio_track (int input_channels, int output_channels)
 	/* count existing audio tracks */
 
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			if (dynamic_cast<AudioTrack*>(*i) != 0) {
 				if (!(*i)->hidden()) {
@@ -1646,7 +1736,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 	/* count existing audio busses */
 
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			if (dynamic_cast<AudioTrack*>(*i) == 0) {
 				if (!(*i)->hidden()) {
@@ -1729,7 +1819,7 @@ void
 Session::add_route (Route* route)
 {
 	{ 
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, true, __LINE__, __FILE__);
 		routes.push_front (route);
 		resort_routes(0);
 	}
@@ -1756,8 +1846,11 @@ Session::add_route (Route* route)
 void
 Session::add_diskstream (DiskStream* dstream)
 {
+	/* need to do this in case we're rolling at the time, to prevent false underruns */
+	dstream->do_refill(0, 0);
+	
 	{ 
-		LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (diskstream_lock, true, __LINE__, __FILE__);
 		diskstreams.push_back (dstream);
 	}
 
@@ -1785,7 +1878,7 @@ void
 Session::remove_route (Route& route)
 {
 	{ 	
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (route_lock, true, __LINE__, __FILE__);
 		routes.remove (&route);
 		
 		/* deleting the master out seems like a dumb
@@ -1813,7 +1906,7 @@ Session::remove_route (Route& route)
 	}
 
 	{
-		LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (diskstream_lock, true, __LINE__, __FILE__);
 
 		AudioTrack* at;
 
@@ -1849,7 +1942,7 @@ Session::route_solo_changed (void* src, Route* route)
 		return;
 	}
 	
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 	bool is_track;
 	
 	is_track = (dynamic_cast<AudioTrack*>(route) != 0);
@@ -2045,14 +2138,14 @@ Session::catch_up_on_solo ()
 	   basis, but needs the global overview that only the session
 	   has.
 	*/
-        LockMonitor lm (route_lock, __LINE__, __FILE__);
+        RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 	update_route_solo_state();
 }	
 		
 Route *
 Session::route_by_name (string name)
 {
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 		if ((*i)->name() == name) {
@@ -2094,7 +2187,7 @@ Session::find_current_end ()
 DiskStream *
 Session::diskstream_by_name (string name)
 {
-	LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
 
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->name() == name) {
@@ -2108,7 +2201,7 @@ Session::diskstream_by_name (string name)
 DiskStream *
 Session::diskstream_by_id (id_t id)
 {
-	LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
 
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->id() == id) {
@@ -2433,6 +2526,8 @@ Session::remove_last_capture ()
 {
 	list<Region*> r;
 
+	RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
+	
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		list<Region*>& l = (*i)->last_capture_regions();
 		
@@ -2830,19 +2925,13 @@ Session::old_peak_path_from_audio_path (string audio_path)
 void
 Session::set_all_solo (bool yn)
 {
-	/* XXX this copy is not safe: the Routes within the list
-	   can still be deleted after the Route lock is released.
-	*/
-
-	RouteList copy;
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
-		copy = routes;
-	}
-
-	for (RouteList::iterator i = copy.begin(); i != copy.end(); ++i) {
-		if (!(*i)->hidden()) {
-			(*i)->set_solo (yn, this);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+		
+		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+			if (!(*i)->hidden()) {
+				(*i)->set_solo (yn, this);
+			}
 		}
 	}
 
@@ -2852,15 +2941,13 @@ Session::set_all_solo (bool yn)
 void
 Session::set_all_mute (bool yn)
 {
-	RouteList copy;
 	{
-		LockMonitor lm (route_lock, __LINE__, __FILE__);
-		copy = routes;
-	}
-
-	for (RouteList::iterator i = copy.begin(); i != copy.end(); ++i) {
-		if (!(*i)->hidden()) {
-			(*i)->set_mute (yn, this);
+		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+		
+		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+			if (!(*i)->hidden()) {
+				(*i)->set_mute (yn, this);
+			}
 		}
 	}
 
@@ -2870,7 +2957,7 @@ Session::set_all_mute (bool yn)
 uint32_t
 Session::n_diskstreams () const
 {
-	LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
 	uint32_t n = 0;
 
 	for (DiskStreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
@@ -2884,7 +2971,7 @@ Session::n_diskstreams () const
 void 
 Session::foreach_diskstream (void (DiskStream::*func)(void)) 
 {
-	LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if (!(*i)->hidden()) {
 			((*i)->*func)();
@@ -2903,8 +2990,8 @@ Session::graph_reordered ()
 		return;
 	}
 
-	LockMonitor lm1 (route_lock, __LINE__, __FILE__);
-	LockMonitor lm2 (diskstream_lock, __LINE__, __FILE__);
+	RWLockMonitor lm1 (route_lock, true, __LINE__, __FILE__);
+	RWLockMonitor lm2 (diskstream_lock, false, __LINE__, __FILE__);
 
 	resort_routes (0);
 
@@ -2932,7 +3019,7 @@ Session::record_enable_all ()
 void
 Session::record_enable_change_all (bool yn)
 {
-	LockMonitor lm1 (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm1 (route_lock, false, __LINE__, __FILE__);
 	
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 		AudioTrack* at;
@@ -3181,8 +3268,9 @@ Session::remove_named_selection (NamedSelection* named_selection)
 void
 Session::reset_native_file_format ()
 {
-	LockMonitor lm1 (route_lock, __LINE__, __FILE__);
-	LockMonitor lm2 (diskstream_lock, __LINE__, __FILE__);
+	// jlc - WHY take routelock?
+	//RWLockMonitor lm1 (route_lock, true, __LINE__, __FILE__);
+	RWLockMonitor lm2 (diskstream_lock, false, __LINE__, __FILE__);
 
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->reset_write_sources (false);
@@ -3192,7 +3280,7 @@ Session::reset_native_file_format ()
 bool
 Session::route_name_unique (string n) const
 {
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 	
 	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
 		if ((*i)->name() == n) {
@@ -3269,7 +3357,7 @@ Session::add_instant_xml (XMLNode& node, const std::string& dir)
 int
 Session::freeze (InterThreadInfo& itt)
 {
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 
@@ -3438,7 +3526,7 @@ uint32_t
 Session::ntracks () const
 {
 	uint32_t n = 0;
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 
 	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
 		if (dynamic_cast<AudioTrack*> (*i)) {
@@ -3453,7 +3541,7 @@ uint32_t
 Session::nbusses () const
 {
 	uint32_t n = 0;
-	LockMonitor lm (route_lock, __LINE__, __FILE__);
+	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
 
 	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
 		if (dynamic_cast<AudioTrack*> (*i) == 0) {

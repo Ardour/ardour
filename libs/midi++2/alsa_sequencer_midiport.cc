@@ -83,13 +83,15 @@ int ALSA_SequencerMidiPort::write (byte *msg, size_t msglen)
 {
 	TR_FN ();
 	int R;
+	int totwritten = 0;
 	snd_midi_event_reset_encode (encoder);
 	int nwritten = snd_midi_event_encode (encoder, msg, msglen, &SEv);
 	TR_VAL (nwritten);
-	if (0 < nwritten) {
+	while (0 < nwritten) {
 		if (0 <= (R = snd_seq_event_output (seq, &SEv))  &&
 		    0 <= (R = snd_seq_drain_output (seq))) {
 			bytes_written += nwritten;
+			totwritten += nwritten;
 			if (output_parser) {
 				output_parser->raw_preparse (*output_parser, msg, nwritten);
 				for (int i = 0; i < nwritten; i++) {
@@ -97,13 +99,23 @@ int ALSA_SequencerMidiPort::write (byte *msg, size_t msglen)
 				}
 				output_parser->raw_postparse (*output_parser, msg, nwritten);
 			}
-			return nwritten;
 		} else {
 			TR_VAL(R);
 			return R;
 		}
-	} else
-		return nwritten;
+
+		msglen -= nwritten;
+		msg += nwritten;
+		if (msglen > 0) {
+			nwritten = snd_midi_event_encode (encoder, msg, msglen, &SEv);
+			TR_VAL(nwritten);
+		}
+		else {
+			break;
+		}
+	}
+
+	return totwritten;
 }
 
 int ALSA_SequencerMidiPort::read (byte *buf, size_t max)

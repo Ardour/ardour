@@ -273,7 +273,7 @@ class Session : public sigc::trackable, public Stateful
 	typedef list<DiskStream *> DiskStreamList;
 
 	Session::DiskStreamList disk_streams() const {
-		LockMonitor lm (diskstream_lock, __LINE__, __FILE__);
+		RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
 		return diskstreams; /* XXX yes, force a copy */
 	}
 
@@ -283,7 +283,7 @@ class Session : public sigc::trackable, public Stateful
 	typedef slist<Route *> RouteList;
 
 	RouteList get_routes() const {
-		LockMonitor rlock (route_lock, __LINE__, __FILE__);
+		RWLockMonitor rlock (route_lock, false, __LINE__, __FILE__);
 		return routes; /* XXX yes, force a copy */
 	}
 
@@ -410,6 +410,7 @@ class Session : public sigc::trackable, public Stateful
 	void set_auto_play (bool yn);
 	void set_auto_return (bool yn);
 	void set_auto_input (bool yn);
+	void reset_input_monitor_state ();
 	void set_input_auto_connect (bool yn);
 	void set_output_auto_connect (AutoConnectOption);
 	void set_punch_in (bool yn);
@@ -993,7 +994,7 @@ class Session : public sigc::trackable, public Stateful
 	Location*                end_location;
 	Slave                  *_slave;
 	SlaveSource             _slave_type;
-	float                   _transport_speed;
+	volatile float          _transport_speed;
 	volatile float          _desired_transport_speed;
 	float                   _last_transport_speed;
 	jack_nframes_t          _last_slave_transport_frame;
@@ -1473,7 +1474,7 @@ class Session : public sigc::trackable, public Stateful
 	/* disk-streams */
 
 	DiskStreamList  diskstreams; 
-	mutable PBD::Lock diskstream_lock;
+	mutable PBD::NonBlockingRWLock diskstream_lock;
 	uint32_t dstream_buffer_size;
 	void add_diskstream (DiskStream*);
 	int  load_diskstreams (const XMLNode&);
@@ -1481,7 +1482,7 @@ class Session : public sigc::trackable, public Stateful
 	/* routes stuff */
 
 	RouteList       routes;
-	mutable PBD::NonBlockingLock route_lock;
+	mutable PBD::NonBlockingRWLock route_lock;
 	void   add_route (Route*);
 
 	int load_routes (const XMLNode&);
@@ -1685,6 +1686,7 @@ class Session : public sigc::trackable, public Stateful
 	Sample*         click_emphasis_data;
 	jack_nframes_t  click_length;
 	jack_nframes_t  click_emphasis_length;
+	mutable PBD::NonBlockingRWLock click_lock;
 
 	static const Sample         default_click[];
 	static const jack_nframes_t default_click_length;

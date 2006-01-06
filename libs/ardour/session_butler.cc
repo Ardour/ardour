@@ -254,6 +254,8 @@ Session::butler_thread_work ()
 
 		gettimeofday (&begin, 0);
 
+		RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+		
 		for (i = diskstreams.begin(); !transport_work_requested() && butler_should_run && i != diskstreams.end(); ++i) {
 			
 			// cerr << "rah fondr " << (*i)->io()->name () << endl;
@@ -394,7 +396,7 @@ Session::overwrite_some_buffers (DiskStream* ds)
 
 	} else {
 
-		LockMonitor dm (diskstream_lock, __LINE__, __FILE__);
+		RWLockMonitor dm (diskstream_lock, false, __LINE__, __FILE__);
 		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			(*i)->set_pending_overwrite (true);
 		}
