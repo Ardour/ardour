@@ -69,12 +69,12 @@ int channel_combo_get_channel_count (Gtk::ComboBoxText& combo);
 Pango::FontDescription get_font_for_style (std::string widgetname);
 
 gint pane_handler (GdkEventButton*, Gtk::Paned*);
-uint32_t rgba_from_style (std::string style, uint32_t, uint32_t, uint32_t, uint32_t);
+uint32_t rgba_from_style (std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string = "fg", int = Gtk::STATE_NORMAL, bool = true);
 
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
 
 bool canvas_item_visible (ArdourCanvas::Item* item);
 
-void set_color (Gdk::Color&, gint, gint, gint);
+void set_color (Gdk::Color&, int);
 
 #endif /* __ardour_gtk_utils_h__ */

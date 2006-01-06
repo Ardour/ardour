@@ -40,6 +40,7 @@ class StatefulButton : public Gtk::Button
 	void set_active (bool yn) {
 		set_state (yn ? 1 : 0);
 	}
+	
 
   protected:
 	std::vector<Gdk::Color> colors;

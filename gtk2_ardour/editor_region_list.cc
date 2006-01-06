@@ -112,7 +112,7 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 	} else if (region->whole_file()) {
 
 		row = *(region_list_model->append());
-		set_color(c, 65535, 0, 0);
+		set_color(c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
 		row[region_list_columns.color_] = c;
 
 		if (region->source().name()[0] == '/') { // external file

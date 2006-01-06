@@ -156,6 +156,7 @@ void
 ARDOUR_UI::transport_stopped ()
 {
 	stop_button.set_active (true);
+	
 	roll_button.set_active (false);
 	play_selection_button.set_active (false);
 	auto_loop_button.set_active (false);
@@ -172,7 +173,6 @@ void
 ARDOUR_UI::transport_rolling ()
 {
 	stop_button.set_active (false);
-
 	if (session->get_play_range()) {
 
 		play_selection_button.set_active (true);
@@ -201,7 +201,7 @@ ARDOUR_UI::transport_rolling ()
 void
 ARDOUR_UI::transport_rewinding ()
 {
-	stop_button.set_active (false);
+	stop_button.set_active(false);
 	roll_button.set_active (true);
 	play_selection_button.set_active (false);
 	auto_loop_button.set_active (false);
@@ -236,22 +236,37 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff->Attach.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer), 
 						 static_cast<Widget*> (&transport_frame), 1));
 
+	shuttle_box.set_name ("TransportButton");
+	goto_start_button.set_name ("TransportButton");
+	goto_end_button.set_name ("TransportButton");
+	roll_button.set_name ("TransportButton");
+	stop_button.set_name ("TransportButton");
+	play_selection_button.set_name ("TransportButton");
+	rec_button.set_name ("TransportRecButton");
+	auto_loop_button.set_name ("TransportButton");
+	auto_return_button.set_name ("TransportButton");
+	auto_play_button.set_name ("TransportButton");
+	auto_input_button.set_name ("TransportButton");
+	punch_in_button.set_name ("TransportButton");
+	punch_out_button.set_name ("TransportButton");
+	click_button.set_name ("TransportButton");
+	time_master_button.set_name ("TransportButton");
+
 	vector<Gdk::Color> colors;
 	Gdk::Color c;
 
 	/* record button has 3 color states, so we set 2 extra here */
-
-	c.set_rgb_p (0.91, 0.68, 0.68);
+	set_color(c, rgba_from_style ("TransportRecButton", 0xff, 0, 0, 0, "bg", Gtk::STATE_PRELIGHT, false ));
 	colors.push_back (c);
-	c.set_rgb_p (1, 0, 0);
+	
+	set_color(c, rgba_from_style ("TransportRecButton", 0xff, 0, 0, 0, "bg", Gtk::STATE_ACTIVE, false ));
 	colors.push_back (c);
+	
 	rec_button.set_colors (colors);
-
 	colors.clear ();
-
+	
 	/* other buttons get 2 color states, so add one here */
-
-	c.set_rgb_p (0.66, 0.97, 0.18);
+	set_color(c, rgba_from_style ("TransportButton", 0x7f, 0xff, 0x7f, 0, "bg", Gtk::STATE_ACTIVE, false ));
 	colors.push_back (c);
 
 	stop_button.set_colors (colors);
@@ -326,22 +341,6 @@ ARDOUR_UI::setup_transport ()
 	shuttle_box.set_flags (CAN_FOCUS);
 	shuttle_box.set_events (shuttle_box.get_events() | Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK);
 	shuttle_box.set_size_request (100, 15);
-
-	shuttle_box.set_name ("TransportButton");
-	goto_start_button.set_name ("TransportButton");
-	goto_end_button.set_name ("TransportButton");
-	roll_button.set_name ("TransportButton");
-	stop_button.set_name ("TransportButton");
-	play_selection_button.set_name ("TransportButton");
-	rec_button.set_name ("TransportRecButton");
-	auto_loop_button.set_name ("TransportButton");
-	auto_return_button.set_name ("TransportButton");
-	auto_play_button.set_name ("TransportButton");
-	auto_input_button.set_name ("TransportButton");
-	punch_in_button.set_name ("TransportButton");
-	punch_out_button.set_name ("TransportButton");
-	click_button.set_name ("TransportButton");
-	time_master_button.set_name ("TransportButton");
 
 	goto_start_button.unset_flags (CAN_FOCUS);
 	goto_end_button.unset_flags (CAN_FOCUS);

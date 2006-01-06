@@ -49,13 +49,13 @@ style "larger_bold_text"
 style "plugin_name_text"
 {
 	font_name = "sans bold 25"
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 }
 
 style "plugin_maker_text"
 {
 	font_name = "sans bold 14"
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 }
 
 style "first_action_message" 
@@ -80,11 +80,11 @@ style "time_axis_view_item_name"
 
 style "default_base" = "medium_text"
 {
-  fg[NORMAL] = { 0.80, 0.80, 0.70 }	
-  fg[ACTIVE] = { 0.80, 0.80, 0.70 }	
-  fg[PRELIGHT] = { 0.98, 0.76, 0.14 }
-  fg[INSENSITIVE] = { 0.80, 0.80, 0.70 }	
-  fg[SELECTED] = { 0.80, 0.80, 0.70 }	
+  fg[NORMAL] = { 0.80, 0.80, 0.80 }	
+  fg[ACTIVE] = { 0.80, 0.80, 0.80 }	
+  fg[PRELIGHT] = { 0.50, 1.0, 1.0 }
+  fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }	
+  fg[SELECTED] = { 0.80, 0.80, 0.80 }	
   
   bg[NORMAL] = { 0.40, 0.40, 0.40 }
   bg[ACTIVE] = { 0.40, 0.40, 0.40 }
@@ -92,22 +92,22 @@ style "default_base" = "medium_text"
   bg[INSENSITIVE] = { 0.10, 0.10, 0.10 }
   bg[SELECTED] = { 0, 0.40, 0.60 }
   
-  text[NORMAL] = { 0.80, 0.80, 0.70 }	
-  text[ACTIVE] = { 0.80, 0.80, 0.70 }	
-  text[PRELIGHT] = { 0.80, 0.80, 0.70 }	
-  text[INSENSITIVE] = { 0.80, 0.80, 0.70 }	
+  text[NORMAL] = { 0.80, 0.80, 0.80 }	
+  text[ACTIVE] = { 0.80, 0.80, 0.80 }	
+  text[PRELIGHT] = { 0.80, 0.80, 0.80 }	
+  text[INSENSITIVE] = { 0.80, 0.80, 0.80}	
   text[SELECTED] = { 1.0, 1.0, 1.0 }
   
   base[ACTIVE]     = "#2f272f"
   base[NORMAL]      =  "#1c1e21"
-  base[PRELIGHT]     = "#2f272f"
+  base[PRELIGHT]     = { 0.20, 0.20, 0.20 }
   base[INSENSITIVE]  = "#4c5159"
-  base[SELECTED]     = "#2f272f"
+  base[SELECTED]     = { 0.25, 0.25, 0.25 }
 }
 
 style "base_frame"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	bg[NORMAL] = { 0.40, 0.40, 0.40 }
 }
 
@@ -133,10 +133,10 @@ style "default_buttons_menus" = "default_base"
   fg[ACTIVE] = { 0, 0, 0 }
   
   bg[NORMAL] = { 0.35, 0.35, 0.35 }
-  bg[ACTIVE] = { 0.98, 0.76, 0.14 }
-  bg[PRELIGHT] = { 0.25, 0.25, 0.25 }
-  bg[INSENSITIVE] = { 0.10, 0.10, 0.10 }
-  bg[SELECTED] = { 0.06, 0.06, 0.06 }	
+  bg[ACTIVE] = { 0.50, 1.0, 1.0 }
+  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
+  bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
+  bg[SELECTED] = { 0.20, 0.20, 0.20 }	
 }
 
 style "very_small_button" = "default_buttons_menus"
@@ -227,16 +227,15 @@ style "time_button" = "default_buttons_menus"
 	font_name = "sans 8"
 }
 
-style "transport_button" = "very_small_button"
+style "transport_button"
 {
-	bg[ACTIVE] = { 0.66, 0.97, 0.18 }
-	bg[SELECTED] = { 1.0, 0.04, 0.04 }
+	bg[ACTIVE] = { 0.50, 1.0, 0.50 }
 }
 
-style "transport_rec_button" = "very_small_button"
+style "transport_rec_button"
 {
-	bg[ACTIVE] = { 0.82, 0.02, 0.02 }
-	bg[SELECTED] = { 1.0, 0.04, 0.04 }
+	bg[ACTIVE] = { 1.0, 0, 0 }
+	bg[PRELIGHT] = { 0.91, 0.68, 0.68 }		#blinking rec button color
 }
 
 style "shuttle_control" = "very_small_text"
@@ -250,14 +249,14 @@ style "shuttle_control" = "very_small_text"
 	bg[NORMAL] = { 0.31, 0.31, 0.31 }
 	bg[PRELIGHT] = { 0.31, 0.31, 0.31 }
 	bg[INSENSITIVE] = { 0.31, 0.31, 0.31 }
-	bg[ACTIVE] = { 0.66, 0.97, 0.18 }
+	bg[ACTIVE] = { 0.50, 1.0, 0.50 }
 	bg[SELECTED] = { 1.0, 0.04, 0.04 }
 }
 
 style "ardour_adjusters" = "default_buttons_menus"
 {
 	bg[NORMAL] = { 0.60, 0.60, 0.60 }
-	bg[PRELIGHT] = { 0.80, 0.80, 0.70 }
+	bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
 	bg[ACTIVE] = { 0.06, 0.06, 0.06 }
 }
 
@@ -270,14 +269,14 @@ style "ardour_progressbars" = "default_buttons_menus"
 style "options_window"  = "default_base"
 {
 	font_name = "sans 8"
-	fg[PRELIGHT] = { 0.80, 0.80, 0.70 }
+	fg[PRELIGHT] = { 0.80, 0.80, 0.80 }
 }
 
 style "option_entry"  = "default_base"
 {
-	fg[NORMAL] = { 0.98, 0.76, 0.14 }
-	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
-	fg[INSENSITIVE] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.50, 1.0, 1.0 }
+	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
+	fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
 	
 	base[INSENSITIVE] = { 0.12, 0.12, 0.12 }
 	
@@ -287,10 +286,10 @@ style "option_entry"  = "default_base"
 
 style "red_when_active" = "medium_text"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	bg[NORMAL] = { 0.31, 0.31, 0.31 }
 
-	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
+	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
 	bg[ACTIVE] = { 1.0, 0, 0}
 }
 
@@ -320,7 +319,7 @@ style "menu_bar_base"
 style "fatal_message" = "medium_text"
 {
    fg[ACTIVE] = { 1.0, 0, 1.0 }
-   fg[NORMAL] = { 0.80, 0.80, 0.70 }
+   fg[NORMAL] = { 0.80, 0.80, 0.80 }
    bg[ACTIVE] = { 0,0,0 }
    bg[NORMAL] = { 0,0,0 }
    base[ACTIVE] = { 0,0,0 }
@@ -330,7 +329,7 @@ style "fatal_message" = "medium_text"
 style "error_message" = "medium_text"
 {
    fg[ACTIVE] = { 1.0, 0, 0 }
-   fg[NORMAL] = { 0.80, 0.80, 0.70 }
+   fg[NORMAL] = { 0.80, 0.80, 0.80 }
    bg[ACTIVE] = { 0,0,0 }
    bg[NORMAL] = { 0,0,0 }
    base[ACTIVE] = { 0,0,0 }
@@ -340,7 +339,7 @@ style "error_message" = "medium_text"
 style "info_message" = "medium_text"
 {
    fg[ACTIVE] = { 1.0, 0, 0 }
-   fg[NORMAL] = { 0.80, 0.80, 0.70 }
+   fg[NORMAL] = { 0.80, 0.80, 0.80 }
    bg[ACTIVE] = { 0,0,0 }
    bg[NORMAL] = { 0,0,0 }
    base[ACTIVE] = { 0,0,0 }
@@ -350,7 +349,7 @@ style "info_message" = "medium_text"
 style "warning_message" = "medium_text"
 {
    fg[ACTIVE] = { 0.30,0.30, 1.0 }
-   fg[NORMAL] = { 0.80, 0.80, 0.70 }
+   fg[NORMAL] = { 0.80, 0.80, 0.80 }
    bg[ACTIVE] = { 0, 0, 0 }
    bg[NORMAL] = { 0, 0, 0 }
    base[ACTIVE] = { 0, 0, 0 }
@@ -359,9 +358,9 @@ style "warning_message" = "medium_text"
 
 style "medium_entry" = "medium_text"
 {
-	fg[NORMAL] = { 0.98, 0.76, 0.14 }
-	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
-	fg[SELECTED] = { 0.66, 0.97, 0.18 }
+	fg[NORMAL] = { 0.50, 1.0, 1.0 }
+	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
+	fg[SELECTED] = { 0.50, 1.0, 0.50 }
 	
 	bg[NORMAL] = { 0.40, 0.40, 0.40 }
 	
@@ -372,7 +371,7 @@ style "medium_entry" = "medium_text"
 
 style "medium_entry_noselection_fg" = "medium_entry"
 {
-	fg[SELECTED] = { 0.98, 0.76, 0.14 }
+	fg[SELECTED] = { 0.50, 1.0, 1.0 }
 }
 
 style "medium_entry_noselection_bg" = "medium_entry"
@@ -382,8 +381,8 @@ style "medium_entry_noselection_bg" = "medium_entry"
 
 style "medium_bold_entry"  = "medium_bold_text"
 {
-	fg[NORMAL] = { 0.98, 0.76, 0.14 }
-	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
+	fg[NORMAL] = { 0.50, 1.0, 1.0 }
+	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
 	
 	bg[NORMAL] = { 0.40, 0.40, 0.40 }
 	
@@ -395,8 +394,8 @@ style "medium_bold_entry"  = "medium_bold_text"
 
 style "small_entry" = "small_text"
 {
-	fg[NORMAL] = { 0.98, 0.76, 0.14 }
-	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
+	fg[NORMAL] = { 0.50, 1.0, 1.0 }
+	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
 	bg[NORMAL] = { 0.0, 0.0, 0.0 }
 	base[NORMAL] = { 0, 0, 0 }
 	base[ACTIVE] = { 0, 0, 0 }
@@ -411,8 +410,8 @@ style "red_active_small_entry" = "small_entry"
 
 style "small_bold_entry" = "small_bold_text"
 {
-	fg[NORMAL] = { 0.98, 0.76, 0.14 }
-	fg[ACTIVE] = { 0.98, 0.76, 0.14 }
+	fg[NORMAL] = { 0.50, 1.0, 1.0 }
+	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
 	
 	bg[NORMAL] = { 0.40, 0.40, 0.40 }
 	
@@ -440,7 +439,7 @@ style "transport_clock_display"
 {
 	font_name = "sans bold 14"
 	
-	fg[NORMAL] = { 0.66, 0.97, 0.18 }
+	fg[NORMAL] = { 0.50, 1.0, 0.50 }
 	fg[ACTIVE] = { 1.0, 0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
 	fg[PRELIGHT] = { 1.0, 0, 0.0 }
@@ -466,7 +465,7 @@ style "tempo_meter_clock_display"
 
 style "default_clock_display" = "medium text"
 {
-	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+	fg[NORMAL] = { 0.50, 1.0, 0.50 }
 	fg[ACTIVE] = { 1.0, 0.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
 	base[NORMAL] = { 0, 0, 0 }
@@ -477,14 +476,14 @@ style "default_clock_display" = "medium text"
 
 style "editor_time_ruler" = "small_text"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	bg[NORMAL] = { 0.09, 0.09, 0.09 }
 }
 
 style "audio_track_base" = "default_base"
 {
   font_name = "sans medium 8"
-  fg[NORMAL] = { 0.80, 0.80, 0.70 }	
+  fg[NORMAL] = { 0.80, 0.80, 0.80 }	
   bg[NORMAL] = { 0.18, 0.18, 0.22 }
   bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
   bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
@@ -502,8 +501,8 @@ style "audio_bus_base"
 style "track_name_display"
 {
 	font_name = "sans medium 8"
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
-	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
+	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
 
 	base[NORMAL] = { 0.06, 0.06, 0.06 }
 	base[ACTIVE] = { 0.26, 0.26, 0.26 }
@@ -574,16 +573,16 @@ style "edit_group_3"
 
 style "region_list_display" = "small_bold_text"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
-	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
-	fg[SELECTED] = { 0.98, 0.76, 0.14 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
+	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
+	fg[SELECTED] = { 0.50, 1.0, 1.0 }
 	bg[NORMAL] = { 0, 0, 0 }
 	bg[ACTIVE] = { 0, 0, 0 }
 	bg[SELECTED] = { 0, 0, 0 }
 	base[NORMAL] = { 0, 0, 0 }
  	base[ACTIVE] = { 0, 1, 0 }
  	base[INSENSITIVE] = { 0, 0, 0 }
- 	base[SELECTED] = { 0.80, 0.80, 0.70 }
+ 	base[SELECTED] = { 0.80, 0.80, 0.80 }
 }
 
 style "main_canvas_area"
@@ -636,18 +635,18 @@ style "plugin_slider"
 	fg[SELECTED] = { 0.45, 0.45, 0.45 }
 	fg[PRELIGHT] = { 0.45, 0.45, 0.45 }
 
-	text[NORMAL] = { 0.80, 0.80, 0.70 }
-	text[ACTIVE] = { 0.80, 0.80, 0.70 }
-	text[INSENSITIVE] = { 0.80, 0.80, 0.70 }
-	text[SELECTED] = { 0.80, 0.80, 0.70 }
-	text[PRELIGHT] = { 0.80, 0.80, 0.70 }
+	text[NORMAL] = { 0.80, 0.80, 0.80 }
+	text[ACTIVE] = { 0.80, 0.80, 0.80 }
+	text[INSENSITIVE] = { 0.80, 0.80, 0.80 }
+	text[SELECTED] = { 0.80, 0.80, 0.80 }
+	text[PRELIGHT] = { 0.80, 0.80, 0.80 }
 }
 
 style "track_list_display" = "small_bold_text"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
-	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
-	fg[SELECTED] = { 0.98, 0.76, 0.14 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
+	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
+	fg[SELECTED] = { 0.50, 1.0, 1.0 }
 	bg[NORMAL] = { 0, 0, 0 }
 	bg[ACTIVE] = { 0, 0, 0 }
 	bg[SELECTED] = { 0, 0, 0 }
@@ -676,8 +675,8 @@ style "wall_clock" = "medium_bold_text"
 
 style "paler_red_when_active" = "medium_text"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
-	fg[PRELIGHT] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
+	fg[PRELIGHT] = { 0.80, 0.80, 0.80 }
 	bg[NORMAL] = { 0.31, 0.31, 0.31 }
 	bg[PRELIGHT] = { 0.31, 0.31, 0.31 }
 
@@ -711,17 +710,17 @@ style "selected_strip_frame"
 
 style "flashing_alert" = "very_small_text"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	bg[NORMAL] = { 0.31, 0.31, 0.31 }
 
-	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
+	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
 	bg[ACTIVE] = { 1.0, 0, 0}
 }
 
 style "selected_io_selector_port_list" = "medium_text"
 {
-	fg[NORMAL] = { 0.98, 0.76, 0.14 }
-	fg[SELECTED] = { 0.98, 0.76, 0.14 }
+	fg[NORMAL] = { 0.50, 1.0, 1.0 }
+	fg[SELECTED] = { 0.50, 1.0, 1.0 }
 	base[NORMAL] = { 0, 0, 0 }
 	base[SELECTED] = { 0, 0, 0 }
 }
@@ -736,14 +735,16 @@ style "io_selector_port_list" = "medium_text"
 
 style "io_selector_notebook" = "default_base"
 {
-	fg[NORMAL] = { 0.98, 0.76, 0.14 }
+	fg[NORMAL] = { 0.50, 1.0, 1.0 }
         font_name ="sans bold 8"
 }
 
 style "tearoff_arrow" = "medium_bold_entry"
 {
-	bg[NORMAL] = { 0.80, 0.80, 0.70 }
-	bg[PRELIGHT] = { 0.98, 0.76, 0.14 }
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
+	fg[PRELIGHT] = { 0.80, 0.80, 0.80 }
+	bg[NORMAL] = { 0.80, 0.80, 0.80 }
+	bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
 }
 
 style "meter_metrics_strip" = "default_base"
@@ -783,6 +784,11 @@ style "pan_slider"
 	text[INSENSITIVE] = { 0.85, 0.92, 0.98 }
 	text[SELECTED] = { 0.85, 0.92, 0.98 }
 	text[PRELIGHT] = { 0.85, 0.92, 0.98 }
+}
+
+style "region_list_whole_file"
+{
+	fg[NORMAL] = { 1.0, 0, 0 }
 }
 
 #---------------------------------------------------------------
@@ -1179,6 +1185,7 @@ widget "*PanningLinkDirectionButton" style "very_small_button"
 widget "*PanningLinkDirectionButton.*" style "very_small_button"
 widget "*ChannelCountSelector" style "medium_bold_entry"
 widget "*ChannelCountSelector.GtkArrow" style "default_buttons_menus"
+widget "*RegionListWholeFile" style "region_list_whole_file"
 
 class "GtkWidget" style "default_base"
 class "GtkScrollbar" style "ardour_adjusters"
@@ -1206,7 +1213,7 @@ widget "*cWaveForm" style "cWaveForm"
 style "cMutedWaveForm" 
 {
       fg[NORMAL] = { 0.35, 0.35, 0.35 }
-      #fg[NORMAL] = { 0.80, 0.80, 0.70 }
+      #fg[NORMAL] = { 0.80, 0.80, 0.80 }
       fg[ACTIVE] = { 1.0, 0, 0 }
 }
 widget "*cMutedWaveForm" style "cMutedWaveForm"
@@ -1251,35 +1258,35 @@ widget "*cAudioBusBase" style "cAudioBusBase"
 
 style "cTempoBar"
 {
-	fg[NORMAL] = { 0.64, 0.64, 0.62 }
+	fg[NORMAL] = { 0.64, 0.64, 0.66 }
         fg[ACTIVE] = { 1.0, 0, 0 }
 }
 widget "*TempoBar" style "cTempoBar"
 
 style "cMeterBar"
 {
-	fg[NORMAL] = { 0.75, 0.75, 0.73 }
+	fg[NORMAL] = { 0.75, 0.75, 0.80 }
         fg[ACTIVE] = { 1.0, 0, 0 }
 }
 widget "*cMeterBar" style "cMeterBar"
 
 style "cMarkerBar"
 {
-	fg[NORMAL] = { 0.54, 0.54, 0.52 }
+	fg[NORMAL] = { 0.54, 0.54, 0.56 }
         fg[ACTIVE] = { 1.0, 0, 0 }
 }
 widget "*cMarkerBar" style "cMarkerBar"
 
 style "cRangeMarkerBar"
 {
-	fg[NORMAL] = { 0.48, 0.48, 0.46 }
+	fg[NORMAL] = { 0.48, 0.48, 0.50 }
         fg[ACTIVE] = { 1.0, 0, 0 }
 }
 widget "*cRangeMarkerBar" style "cRangeMarkerBar"
 
 style "cTransportMarkerBar"
 {
-	fg[NORMAL] = { 0.40, 0.40, 0.38  }
+	fg[NORMAL] = { 0.40, 0.40, 0.42  }
         fg[ACTIVE] = { 1.0, 0, 0 }
 }
 widget "*cTransportMarkerBar" style "cTransportMarkerBar"

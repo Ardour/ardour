@@ -39,6 +39,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace sigc;
+using namespace Glib;
 
 string
 short_version (string orig, string::size_type target_length)
@@ -480,7 +481,7 @@ pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
 	return FALSE;
 }
 uint32_t
-rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a)
+rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, string attr, int state, bool rgba)
 {
 	/* In GTK+2, styles aren't set up correctly if the widget is not
 	   attached to a toplevel window that has a screen pointer.
@@ -502,21 +503,39 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 	GtkRcStyle* waverc = foo.get_style()->gobj()->rc_style;
 
 	if (waverc) {
-		r = waverc->fg[Gtk::STATE_NORMAL].red / 257;
-		g = waverc->fg[Gtk::STATE_NORMAL].green / 257;
-		b = waverc->fg[Gtk::STATE_NORMAL].blue / 257;
-
-		/* what a hack ... "a" is for "active" */
-
-		a = waverc->fg[GTK_STATE_ACTIVE].red / 257; 
-
+		if (attr == "fg") {
+			r = waverc->fg[state].red / 257;
+			g = waverc->fg[state].green / 257;
+			b = waverc->fg[state].blue / 257;
+			/* what a hack ... "a" is for "active" */
+			if (state == Gtk::STATE_NORMAL && rgba) {
+				a = waverc->fg[GTK_STATE_ACTIVE].red / 257;
+			}
+		} else if (attr == "bg") {
+			r = g = b = 0;
+			r = waverc->bg[state].red / 257;
+			g = waverc->bg[state].green / 257;
+			b = waverc->bg[state].blue / 257;
+		} else if (attr == "base") {
+			r = waverc->base[state].red / 257;
+			g = waverc->base[state].green / 257;
+			b = waverc->base[state].blue / 257;
+		} else if (attr == "text") {
+			r = waverc->text[state].red / 257;
+			g = waverc->text[state].green / 257;
+			b = waverc->text[state].blue / 257;
+		}
 	} else {
 		warning << string_compose (_("missing RGBA style for \"%1\""), style) << endl;
 	}
 
 	window->remove ();
 	
-	return (uint32_t) RGBA_TO_UINT(r,g,b,a);
+	if (state == Gtk::STATE_NORMAL && rgba) {
+		return (uint32_t) RGBA_TO_UINT(r,g,b,a);
+	} else {
+		return (uint32_t) RGB_TO_UINT(r,g,b);
+	}
 }
 
 bool 
@@ -526,9 +545,7 @@ canvas_item_visible (ArdourCanvas::Item* item)
 }
 
 void
-set_color (Gdk::Color& c, gint r, gint g, gint b)
+set_color (Gdk::Color& c, int rgb)
 {
-	c.set_red(65535);
-	c.set_green(0);
-	c.set_blue(0);
+	c.set_rgb((rgb >> 16)*256, ((rgb & 0xff00) >> 8)*256, (rgb & 0xff)*256);
 }
