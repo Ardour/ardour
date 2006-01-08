@@ -257,8 +257,8 @@ Configuration::state (bool user_only)
 	if (!user_only || plugins_stop_with_transport_is_user) {
 		node->add_child_nocopy(option_node("plugins-stop-with-transport", plugins_stop_with_transport?"yes":"no"));
 	}
-	if (!user_only || no_sw_monitoring_is_user) {
-		node->add_child_nocopy(option_node("no-sw-monitoring", no_sw_monitoring?"yes":"no"));
+	if (!user_only || use_sw_monitoring_is_user) {
+		node->add_child_nocopy(option_node("use-sw-monitoring", use_sw_monitoring?"yes":"no"));
 	}
 	if (!user_only || stop_recording_on_xrun_is_user) {
 		node->add_child_nocopy(option_node("stop-recording-on-xrun", stop_recording_on_xrun?"yes":"no"));
@@ -400,8 +400,10 @@ Configuration::set_state (const XMLNode& root)
 					set_trace_midi_output (option_value == "yes");
 				} else if (option_name == "plugins-stop-with-transport") {
 					set_plugins_stop_with_transport (option_value == "yes");
-				} else if (option_name == "no-sw-monitoring") {
-					set_no_sw_monitoring (option_value == "yes");
+				} else if (option_name == "use-sw-monitoring") {
+					set_use_sw_monitoring (option_value == "yes");
+				} else if (option_name == "no-sw-monitoring") {     /* DEPRECATED */
+					set_use_sw_monitoring (option_value != "yes");
 				} else if (option_name == "stop-recording-on-xrun") {
 					set_stop_recording_on_xrun (option_value == "yes");
 				} else if (option_name == "verify-remove-last-capture") {
@@ -475,7 +477,7 @@ Configuration::set_defaults ()
 	trace_midi_input = false;
 	trace_midi_output = false;
 	plugins_stop_with_transport = false;
-	no_sw_monitoring = false;
+	use_sw_monitoring = true;
 	stop_recording_on_xrun = false;
 	verify_remove_last_capture = true;
 	stop_at_session_end = true;
@@ -514,7 +516,7 @@ Configuration::set_defaults ()
 	trace_midi_input_is_user = false;
 	trace_midi_output_is_user = false;
 	plugins_stop_with_transport_is_user = false;
-	no_sw_monitoring_is_user = false;
+	use_sw_monitoring_is_user = false;
 	stop_recording_on_xrun_is_user = false;
 	verify_remove_last_capture_is_user = false;
 	stop_at_session_end_is_user = false;
@@ -948,17 +950,17 @@ Configuration::set_plugins_stop_with_transport (bool yn)
 }
 
 bool
-Configuration::get_no_sw_monitoring ()
+Configuration::get_use_sw_monitoring ()
 {
-	return no_sw_monitoring;
+	return use_sw_monitoring;
 }
 
 void
-Configuration::set_no_sw_monitoring (bool yn)
+Configuration::set_use_sw_monitoring (bool yn)
 {
-	no_sw_monitoring = yn;
+	use_sw_monitoring = yn;
 	if (user_configuration) {
-		no_sw_monitoring_is_user = true;
+		use_sw_monitoring_is_user = true;
 	}
 }
 

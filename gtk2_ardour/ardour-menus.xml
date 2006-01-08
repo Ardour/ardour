@@ -81,11 +81,13 @@
                <separator/>       
                <menuitem action='edit-cursor-to-range-start'/>
                <menuitem action='edit-cursor-to-range-end'/>
+               <separator/>
+               <menuitem action='crop'/>
+               <menuitem action='duplicate-region'/>
+               <menuitem action='insert-region'/>
+               <menuitem action='normalize-region'/>
         </menu>         
         <menu name='View' action = 'View'>
-               <menuitem action='temporal-zoom-in'/>
-               <menuitem action='temporal-zoom-out'/>
-               <menuitem action='zoom-to-session'/>
                <menu name='ZoomFocus' action='ZoomFocus'>
                    <menuitem action='zoom-focus-left'/>
                    <menuitem action='zoom-focus-right'/>
@@ -97,11 +99,36 @@
                    <menuitem action='snap-to-beat'/>
                    <menuitem action='snap-to-bar'/>
                </menu>
+               <menu name='MeterFalloff' action='MeterFalloff'>
+                    <menuitem action='MeterFalloffOff'/>
+                    <menuitem action='MeterFalloffSlowest'/>
+                    <menuitem action='MeterFalloffSlow'/>
+                    <menuitem action='MeterFalloffMedium'/>
+                    <menuitem action='MeterFalloffFast'/>
+                    <menuitem action='MeterFalloffFaster'/>
+                    <menuitem action='MeterFalloffFastest'/>
+               </menu>
+               <menu name='MeterHold' action='MeterHold'>
+                   <menuitem action='MeterHoldOff'/>
+                   <menuitem action='MeterHoldShort'/>
+                   <menuitem action='MeterHoldMedium'/>
+                   <menuitem action='MeterHoldLong'/>
+               </menu>
+
+               <separator/>
+
+               <menuitem action='temporal-zoom-in'/>
+               <menuitem action='temporal-zoom-out'/>
+               <menuitem action='zoom-to-session'/>
                <menuitem action='scroll-tracks-down'/>
                <menuitem action='scroll-tracks-up'/>
                <menuitem action='scroll-tracks-down'/>
                <menuitem action='step-tracks-up'/>
                <menuitem action='step-tracks-down'/>
+   	       <separator/>
+               <menuitem action='ToggleWaveformVisibility'/>
+               <menuitem action='ToggleWaveformsWhileRecording'/>
+               <menuitem action='ToggleMeasureVisibility'/>
          </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>
@@ -130,20 +157,28 @@
 			   <menuitem action='About'/>
         </menu>
         <menu name='Options' action='Options'>
+               <menu action='Autoconnect'>
+                   <menuitem action='AutoConnectNewTrackInputsToHardware'/>
+                   <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
+                   <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
+                   <menuitem action='ManuallyConnectNewTrackOutputs'/>
+               </menu>
+               <menu action='Monitoring'>
+                   <menuitem action='UseHardwareMonitoring'/>
+                   <menuitem action='UseSoftwareMonitoring'/>
+                   <menuitem action='UseExternalMonitoring'/>
+               </menu>
+               <menu action='Solo'>
+                   <menuitem action='LatchedSolo'/>
+                   <menuitem action='SoloInPlace'/>
+                   <menuitem action='SoloViaBus'/>
+               </menu>
+               <separator/>
                <menuitem action='SendMTC'/>
                <menuitem action='SendMMC'/>
                <menuitem action='UseMMC'/>
                <menuitem action='SendMIDIfeedback'/>
                <menuitem action='UseMIDIcontrol'/>
-               <separator/>
-               <menuitem action='AutoConnectNewTrackInputsToHardware'/>
-               <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
-               <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
-               <menuitem action='ManuallyConnectNewTrackOutputs'/>
-               <separator/>
-               <menuitem action='UseHardwareMonitoring'/>
-               <menuitem action='UseSoftwareMonitoring'/>
-               <menuitem action='UseExternalMonitoring'/>
                <separator/>
                <menuitem action='StopPluginsWithTransport'/>
                <menuitem action='RunPluginsWhileRecording'/>
@@ -152,10 +187,6 @@
                <menuitem action='StopRecordingOnXrun'/>
                <menuitem action='StopTransportAtEndOfSession'/>
                <menuitem action='GainReduceFastTransport'/>
-               <separator/>
-               <menuitem action='LatchedSolo'/>
-               <menuitem action='SoloInPlace'/>
-               <menuitem action='SoloViaBus'/>
                <separator/>
                <menuitem action='AutomaticallyCreateCrossfades'/>
                <menuitem action='UnmuteNewFullCrossfades'/>

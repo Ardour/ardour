@@ -79,6 +79,7 @@ void
 Editor::undo (uint32_t n)
 {
 	if (session) {
+		cerr << "Undo " << n << " operations\n";
 		session->undo (n);
 	}
 }
@@ -90,6 +91,23 @@ Editor::redo (uint32_t n)
 		session->redo (n);
 	}
 }
+
+void
+Editor::set_meter_hold (int32_t cnt)
+{
+	if (session) {
+		session->set_meter_hold (cnt);
+	}
+}
+
+void
+Editor::set_meter_falloff (float val)
+{
+	if (session) {
+		session->set_meter_falloff (val);
+	}
+}
+
 
 int
 Editor::ensure_cursor (jack_nframes_t *pos)

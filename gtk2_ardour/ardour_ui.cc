@@ -654,18 +654,6 @@ ARDOUR_UI::update_wall_clock ()
 }
 
 void
-ARDOUR_UI::toggle_recording_plugins ()
-{
-	/* XXX use toggle_some_session_state */
-
-	if (session == 0) {
-		return;
-	}
-
-	session->set_recording_plugins (!session->get_recording_plugins());
-}
-	
-void
 ARDOUR_UI::toggle_auto_play ()
 
 {
@@ -735,7 +723,6 @@ ARDOUR_UI::toggle_punch_in ()
 
 void
 ARDOUR_UI::map_button_state ()
-
 {
 	map_some_session_state (auto_return_button,
 				&Session::get_auto_return);
@@ -749,91 +736,6 @@ ARDOUR_UI::map_button_state ()
 				&Session::get_punch_out);
 	map_some_session_state (click_button,
 				&Session::get_clicking);
-}
-
-void
-ARDOUR_UI::queue_map_control_change (Session::ControlType t)
-{
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::map_control_change), t));
-}
-
-void
-ARDOUR_UI::map_control_change (Session::ControlType t)
-{
-	switch (t) {
-	case Session::AutoPlay:
-		map_some_session_state (auto_play_button, &Session::get_auto_play);
-		break;
-
-	case Session::AutoLoop:
-		break;
-
-	case Session::AutoReturn:
-		map_some_session_state (auto_return_button, &Session::get_auto_return);
-		break;
-
-	case Session::AutoInput:
-		map_some_session_state (auto_input_button, &Session::get_auto_input);
-		break;
-
-	case Session::PunchOut:
-		map_some_session_state (punch_in_button, &Session::get_punch_out);
-		break;
-
-	case Session::PunchIn:
-		map_some_session_state (punch_in_button, &Session::get_punch_in);
-		break;
-
-	case Session::Clicking:
-		map_some_session_state (click_button, &Session::get_clicking);
-		break;
-
-	case Session::SlaveType:
-//		map_some_session_state (mtc_slave_button, &Session::get_mtc_slave);
-		break;
-
-	case Session::SendMTC:
-//		map_some_session_state (send_mtc_button, &Session::get_send_mtc);
-		break;
-
-	case Session::SendMMC:
-//		map_some_session_state (send_mmc_button, &Session::get_send_mmc);
-		break;
-
-	case Session::MMCControl:       
-//		map_some_session_state (mmc_control_button, &Session::get_mmc_control);
-		break;
-
-	case Session::MidiFeedback:       
-//		map_some_session_state (mmc_control_button, &Session::get_mmc_control);
-		break;
-	case Session::MidiControl:       
-//		map_some_session_state (mmc_control_button, &Session::get_mmc_control);
-		break;
-		
-	case Session::Live:
-		break;
-
-	case Session::RecordingPlugins:
-		break;
-
-	case Session::CrossFadesActive:
-		break;
-		
-	case Session::EditingMode:
-		break;
-
-	case Session::PlayRange:
-		break;
-
-	case Session::AlignChoice:
-		/* don't care, this is handled by the options editor */
-		break;
-	case Session::SeamlessLoop:
-		/* don't care, this is handled by the options editor */
-		break;
-	       
-	}
 }
 
 void

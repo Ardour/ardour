@@ -204,7 +204,7 @@ Session::feedback_thread_work ()
 			tmp = i;
 			++tmp;
 			
-			if ((*i)) {
+			if ((*i) ()) {
 				feedback_functions.erase (i);
 			}
 			

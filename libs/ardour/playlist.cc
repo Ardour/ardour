@@ -223,8 +223,6 @@ Playlist::init (bool hide)
 	layer_op_counter = 0;
 	freeze_length = 0;
 
-	// _session.LayerModelChanged.connect (slot (*this, &Playlist::relayer));
-
 	Modified.connect (mem_fun (*this, &Playlist::mark_session_dirty));
 }
 

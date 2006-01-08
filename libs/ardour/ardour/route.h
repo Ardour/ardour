@@ -245,6 +245,10 @@ class Route : public IO
 
 	void protect_automation ();
 	
+	void set_remote_control_id (uint32_t id);
+	uint32_t remote_control_id () const;
+	sigc::signal<void> RemoteControlIDChanged;
+
   protected:
 	friend class Session;
 
@@ -317,6 +321,7 @@ class Route : public IO
 
 	state_id_t _current_state_id;
 	uint32_t redirect_max_outs;
+	uint32_t _remote_control_id;
 
 	uint32_t pans_required() const;
 	uint32_t n_process_buffers ();

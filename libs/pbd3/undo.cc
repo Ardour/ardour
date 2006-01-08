@@ -77,6 +77,7 @@ UndoCommand::clear ()
 void
 UndoCommand::undo ()
 {
+	cerr << "There are " << undo_actions.size() << " actions to undo\n";
 	for (list<UndoAction>::reverse_iterator i = undo_actions.rbegin(); i != undo_actions.rend(); ++i) {
 		(*i)();
 	}
@@ -99,12 +100,14 @@ UndoHistory::add (UndoCommand uc)
 void
 UndoHistory::undo (unsigned int n)
 {
+	cerr << "Undo history undoing " << n << " with a list of " << UndoList.size() << endl;
 	while (n--) {
 		if (UndoList.size() == 0) {
 			return;
 		}
 		UndoCommand uc = UndoList.back ();
 		UndoList.pop_back ();
+		cerr << "undoing command called " << uc.name() << endl;
 		uc.undo ();
 		RedoList.push_back (uc);
 	}

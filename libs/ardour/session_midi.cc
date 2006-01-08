@@ -803,19 +803,14 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 {
 	if (mmc_control) {
 
-		/* don't take route or diskstream lock: if using dynamic punch,
-		   this could cause a dropout. XXX is that really OK?
-		   or should we queue a rec-enable request?
-		*/
-
-		size_t n;
 		RouteList::iterator i;
-
-		for (n = 0, i = routes.begin(); i != routes.end(); ++i) {
+		RWLockMonitor (route_lock, false, __LINE__, __FILE__);
+		
+		for (i = routes.begin(); i != routes.end(); ++i) {
 			AudioTrack *at;
 
 			if ((at = dynamic_cast<AudioTrack*>(*i)) != 0) {
-				if (n++ == trk) {
+				if (trk == at->remote_control_id()) {
 					at->set_record_enable (enabled, &mmc);
 					break;
 				}
@@ -1468,7 +1463,7 @@ Session::midi_thread_work ()
 				tmp = i;
 				++tmp;
 				
-				if (!(*i)) {
+				if (!(*i)()) {
 					midi_timeouts.erase (i);
 				}
 				

@@ -669,7 +669,7 @@ Editor::Editor (AudioEngine& eng)
 
 	edit_pane.pack1 (edit_frame, true, true);
 	edit_pane.pack2 (*notebook_tearoff, true, true);
-
+	
 	edit_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
 
 	top_hbox.pack_start (toolbar_frame, true, true);
@@ -2605,23 +2605,35 @@ Editor::setup_toolbar ()
 
 	selection_start_clock_label.set_text (_("Start:"));
 	selection_end_clock_label.set_text (_("End:"));
-	edit_cursor_clock_label.set_text (_("Edit:"));
+	edit_cursor_clock_label.set_text (_("Edit"));
 
-	toolbar_selection_clock_table.set_border_width (5);
-	toolbar_selection_clock_table.set_col_spacings (2);
-	toolbar_selection_clock_table.set_homogeneous (false);
+	/* the zoom in/out buttons are generally taller than the clocks, so
+	   put all the toolbar clocks into a size group with one of the 
+	   buttons to make them all equal height.
 
-//	toolbar_selection_clock_table.attach (selection_start_clock_label, 0, 1, 0, 1, 0, 0, 0, 0);
-//	toolbar_selection_clock_table.attach (selection_end_clock_label, 1, 2, 0, 1, 0, 0, 0, 0);
-	toolbar_selection_clock_table.attach (edit_cursor_clock_label, 2, 3, 0, 1, FILL, FILL, 0, 0);
+	   this also applies to the various toolbar combos
+	*/
 
-//	toolbar_selection_clock_table.attach (selection_start_clock, 0, 1, 1, 2, 0, 0);
-//	toolbar_selection_clock_table.attach (selection_end_clock, 1, 2, 1, 2, 0, 0);
-	toolbar_selection_clock_table.attach (edit_cursor_clock, 2, 3, 1, 2, FILL, FILL);
+	RefPtr<SizeGroup> toolbar_clock_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
+	toolbar_clock_size_group->add_widget (zoom_out_button);
+	toolbar_clock_size_group->add_widget (edit_cursor_clock);
+	toolbar_clock_size_group->add_widget (zoom_range_clock);
+	toolbar_clock_size_group->add_widget (nudge_clock);
+	toolbar_clock_size_group->add_widget (edit_mode_selector);
+	toolbar_clock_size_group->add_widget (snap_type_selector);
+	toolbar_clock_size_group->add_widget (snap_mode_selector);
+	toolbar_clock_size_group->add_widget (zoom_focus_selector);
 
+	HBox* edit_clock_hbox = manage (new HBox());
+	VBox* edit_clock_vbox = manage (new VBox());
 
-//	toolbar_clock_vbox.set_spacing (2);
-//	toolbar_clock_vbox.set_border_width (10);
+	edit_clock_hbox->pack_start (edit_cursor_clock, false, false);
+
+	edit_clock_vbox->set_spacing (3);
+	edit_clock_vbox->set_border_width (3);
+	edit_clock_vbox->pack_start (edit_cursor_clock_label, false, false);
+	edit_clock_vbox->pack_start (*edit_clock_hbox, false, false);
+
 	/* the editor/mixer button will be enabled at session connect */
 
 	editor_mixer_button.set_active(false);
@@ -2630,7 +2642,7 @@ Editor::setup_toolbar ()
 	HBox* hbox = new HBox;
 
 	hbox->pack_start (editor_mixer_button, false, false);
-	hbox->pack_start (toolbar_selection_clock_table, false, false);
+	hbox->pack_start (*edit_clock_vbox, false, false);
 	hbox->pack_start (zoom_indicator_vbox, false, false); 
 	hbox->pack_start (zoom_focus_box, false, false);
 	hbox->pack_start (snap_type_box, false, false);
@@ -3643,7 +3655,7 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 	char buf[32];
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	int width, height;
-	static int32_t done[4] = { 0, 0, 0, 0 };
+	static int32_t done;
 	XMLNode* geometry;
 
 	if ((geometry = find_named_node (*node, "geometry")) == 0) {
@@ -3656,18 +3668,19 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 
 	if (which == static_cast<Paned*> (&edit_pane)) {
 
-		if (done[0]) {
+		if (done) {
 			return;
 		}
 
 		if (!geometry || (prop = geometry->property ("edit_pane_pos")) == 0) {
-			pos = 75;
+			/* initial allocation is 90% to canvas, 10% to notebook */
+			pos = (int) floor (alloc.get_width() * 0.90f);
 			snprintf (buf, sizeof(buf), "%d", pos);
 		} else {
 			pos = atoi (prop->value());
 		}
-
-		if ((done[0] = GTK_WIDGET(edit_pane.gobj())->allocation.width > pos)) {
+		
+		if ((done = GTK_WIDGET(edit_pane.gobj())->allocation.width > pos)) {
 			edit_pane.set_position (pos);
 		}
 	}

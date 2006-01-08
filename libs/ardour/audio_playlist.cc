@@ -576,7 +576,6 @@ AudioPlaylist::state_factory (std::string why) const
 	for (Crossfades::const_iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
 		state->crossfade_states.push_back ((*i)->get_memento());
 	}
-
 	return state;
 }
 
@@ -592,13 +591,13 @@ AudioPlaylist::restore_state (StateManager::State& state)
 		regions = apstate->regions;
 
 		for (list<UndoAction>::iterator s = apstate->region_states.begin(); s != apstate->region_states.end(); ++s) {
-		  *s;
+			(*s) ();
 		}
 
 		_crossfades = apstate->crossfades;
 		
 		for (list<UndoAction>::iterator s = apstate->crossfade_states.begin(); s != apstate->crossfade_states.end(); ++s) {
-		  *s;
+			(*s) ();
 		}
 
 		in_set_state = false;
@@ -611,7 +610,7 @@ AudioPlaylist::restore_state (StateManager::State& state)
 UndoAction
 AudioPlaylist::get_memento () const
 {
-  return sigc::bind (mem_fun (*(const_cast<AudioPlaylist*> (this)), &StateManager::use_state), _current_state_id);
+	return sigc::bind (mem_fun (*(const_cast<AudioPlaylist*> (this)), &StateManager::use_state), _current_state_id);
 }
 
 void

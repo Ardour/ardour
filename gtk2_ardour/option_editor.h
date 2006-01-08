@@ -65,28 +65,22 @@ class OptionEditor : public Gtk::Dialog
 
 	/* Generic */
 
-	void session_control_changed (ARDOUR::Session::ControlType);
-	void queue_session_control_changed (ARDOUR::Session::ControlType);
-	void map_some_session_state (Gtk::CheckButton& button, bool (ARDOUR::Session::*get)() const);
 	gint wm_close (GdkEventAny *);
-	void just_close_win();
 	bool focus_out_event_handler (GdkEventFocus*, void (OptionEditor::*pmf)());
 
 	/* paths */
 
 	Gtk::Table		path_table;
-
 	Gtk::Entry              session_raid_entry;
-
 	Gtk::ComboBoxText       native_format_combo;
 
-	struct SoundFilePathColumns : public Gtk::TreeModel::ColumnRecord
-	{
-	  public:
-	    Gtk::TreeModelColumn<std::string> paths;
-
-		SoundFilePathColumns() { add (paths); }
+	struct SoundFilePathColumns : public Gtk::TreeModel::ColumnRecord {
+	    public:
+                 SoundFilePathColumns() { add (paths); }
+                 Gtk::TreeModelColumn<std::string> paths;
+	         	    
 	};
+
 	SoundFilePathColumns sfdb_path_columns;
 	Glib::RefPtr<Gtk::ListStore> sfdb_paths;
 	Gtk::TreeView sfdb_path_view;
@@ -98,8 +92,6 @@ class OptionEditor : public Gtk::Dialog
 	void raid_path_changed ();
 
 	/* fades */
-
-	// Gtk::Table		fade_table;
 
 	Gtk::VBox        fade_packer;
 	Gtk::CheckButton auto_xfade_button;
@@ -118,57 +110,17 @@ class OptionEditor : public Gtk::Dialog
 	void setup_fade_options();
 	void short_xfade_adjustment_changed ();
 
-	/* solo */
-
-	Gtk::VBox        solo_packer;
-	Gtk::CheckButton solo_latched_button;
-	Gtk::CheckButton solo_via_bus_button;
-
-	void solo_latched_clicked();
-	void solo_via_bus_clicked ();
-	
-	void setup_solo_options();
-
-	/* display */
-
-	Gtk::VBox        display_packer;
-	Gtk::CheckButton show_waveforms_button;
-	Gtk::CheckButton show_waveforms_recording_button;
-	Gtk::CheckButton mixer_strip_width_button;
-	Gtk::CheckButton show_measures_button;
-	Gtk::CheckButton follow_playhead_button;
-	Gtk::ComboBoxText meter_hold_combo;
-	Gtk::ComboBoxText meter_falloff_combo;
-
-	void setup_display_options();
-	void show_waveforms_clicked ();
-	void show_waveforms_recording_clicked ();
-	void show_measures_clicked ();
-	void strip_width_clicked ();
-	void follow_playhead_clicked ();
-	void meter_hold_chosen ();
-	void meter_falloff_chosen ();
-	
-	void display_control_changed (Editing::DisplayControl);
-
 	/* Sync */
 
 	Gtk::VBox sync_packer;
 
-	Gtk::CheckButton send_mtc_button;
-	Gtk::CheckButton send_mmc_button;
-	Gtk::CheckButton jack_time_master_button;
 	Gtk::ComboBoxText slave_type_combo;
 	Gtk::ComboBoxText smpte_fps_combo;
 	AudioClock smpte_offset_clock;
 	Gtk::CheckButton smpte_offset_negative_button;
 
 	void setup_sync_options ();
-	gint send_mtc_toggled (GdkEventButton*, Gtk::CheckButton*);
 
-	void slave_type_chosen ();
-	void jack_time_master_clicked ();
-	void jack_transport_master_clicked ();
 	void smpte_fps_chosen ();
 	void smpte_offset_chosen ();
 	void smpte_offset_negative_clicked ();
@@ -176,26 +128,18 @@ class OptionEditor : public Gtk::Dialog
 	/* MIDI */
 
 	Gtk::VBox  midi_packer;
-	Gtk::CheckButton midi_feedback_button;
-	Gtk::CheckButton midi_control_button;
-	Gtk::CheckButton mmc_control_button;
 
 	Gtk::RadioButton::Group mtc_button_group;
 	Gtk::RadioButton::Group mmc_button_group;
 	Gtk::RadioButton::Group midi_button_group;
 
-	void send_mmc_toggled (Gtk::CheckButton*);
-	void mmc_control_toggled (Gtk::CheckButton*);
-	void midi_control_toggled (Gtk::CheckButton*);
-	void midi_feedback_toggled (Gtk::CheckButton*);
-
 	gint port_online_toggled (GdkEventButton*,MIDI::Port*,Gtk::ToggleButton*);
 	gint port_trace_in_toggled (GdkEventButton*,MIDI::Port*,Gtk::ToggleButton*);
 	gint port_trace_out_toggled (GdkEventButton*,MIDI::Port*,Gtk::ToggleButton*);
 	
-	gint mmc_port_chosen (GdkEventButton*,MIDI::Port*,Gtk::RadioButton*);
-	gint mtc_port_chosen (GdkEventButton*,MIDI::Port*,Gtk::RadioButton*);
-	gint midi_port_chosen (GdkEventButton*,MIDI::Port*,Gtk::RadioButton*);
+	bool mmc_port_chosen (GdkEventButton*,MIDI::Port*,Gtk::RadioButton*);
+	bool mtc_port_chosen (GdkEventButton*,MIDI::Port*,Gtk::RadioButton*);
+	bool midi_port_chosen (GdkEventButton*,MIDI::Port*,Gtk::RadioButton*);
 
 	void map_port_online (MIDI::Port*, Gtk::ToggleButton*);
 
@@ -263,42 +207,6 @@ class OptionEditor : public Gtk::Dialog
 	void snap_modifier_chosen ();
 	void edit_button_changed ();
 	void delete_button_changed ();
-
-	/* Miscellany */
-
-	Gtk::VBox misc_packer;
-
-	Gtk::CheckButton auto_connect_inputs_button;
-
-	Gtk::RadioButton auto_connect_output_physical_button;
-	Gtk::RadioButton auto_connect_output_master_button;
-	Gtk::RadioButton auto_connect_output_manual_button;
-	Gtk::RadioButton::Group auto_connect_output_button_group;
-
-	Gtk::CheckButton hw_monitor_button;
-	Gtk::CheckButton sw_monitor_button;
-	Gtk::CheckButton plugins_stop_button;
-	Gtk::CheckButton plugins_on_rec_button;
-	Gtk::CheckButton verify_remove_last_capture_button;
-	Gtk::CheckButton stop_rec_on_xrun_button;
-	Gtk::CheckButton stop_at_end_button;
-	Gtk::CheckButton debug_keyboard_button;
-	Gtk::CheckButton speed_quieten_button;
-
-	void setup_misc_options ();
-	void plugins_stop_with_transport_clicked ();
-	void verify_remove_last_capture_clicked ();
-	void plugins_on_while_recording_clicked ();
-	void auto_connect_inputs_clicked ();
-	void auto_connect_output_physical_clicked ();
-	void auto_connect_output_master_clicked ();
-	void auto_connect_output_manual_clicked ();
-	void hw_monitor_clicked ();
-	void sw_monitor_clicked ();
-	void stop_rec_on_xrun_clicked ();
-	void stop_at_end_clicked ();
-	void debug_keyboard_clicked ();
-	void speed_quieten_clicked ();
 
 	void fixup_combo_size (Gtk::ComboBoxText&, std::vector<std::string>& strings);
 };

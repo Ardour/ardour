@@ -124,6 +124,9 @@ class Configuration : public Stateful
 	bool get_use_hardware_monitoring();
 	void set_use_hardware_monitoring(bool);
 
+	bool get_use_sw_monitoring();
+	void set_use_sw_monitoring(bool);
+
 	bool get_jack_time_master();
 	void set_jack_time_master(bool);
 
@@ -132,9 +135,6 @@ class Configuration : public Stateful
 
 	bool get_plugins_stop_with_transport();
 	void set_plugins_stop_with_transport(bool);
-
-	bool get_no_sw_monitoring();
-	void set_no_sw_monitoring(bool);
 
 	bool get_stop_recording_on_xrun();
 	void set_stop_recording_on_xrun(bool);
@@ -220,12 +220,12 @@ class Configuration : public Stateful
 	bool          trace_midi_output_is_user;
 	bool          plugins_stop_with_transport;
 	bool          plugins_stop_with_transport_is_user;
-	bool          no_sw_monitoring;
-	bool          no_sw_monitoring_is_user;
+	bool          use_sw_monitoring;
+	bool          use_sw_monitoring_is_user;
 	bool          stop_recording_on_xrun;
 	bool          stop_recording_on_xrun_is_user;
-	bool		  verify_remove_last_capture;
-	bool		  verify_remove_last_capture_is_user;
+	bool	      verify_remove_last_capture;
+	bool	      verify_remove_last_capture_is_user;
 	bool          stop_at_session_end;
 	bool          stop_at_session_end_is_user;
 	bool          seamless_looping;

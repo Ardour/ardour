@@ -470,7 +470,7 @@ StreamView::redisplay_diskstream ()
 		if (!(*i)->is_valid()) {
 			delete *i;
 			region_views.erase (i);
-		}
+		} 
 
 		i = tmp;
 	}

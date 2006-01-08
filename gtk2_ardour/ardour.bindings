@@ -8,18 +8,23 @@
 (gtk_accel_path "<Actions>/Transport/GotoEnd" "End")
 
 (gtk_accel_path "<Actions>/Editor/align-regions-sync-relative" "a")
+(gtk_accel_path "<Actions>/Editor/crop" "c")
+(gtk_accel_path "<Actions>/Editor/duplicate-region" "d")
 (gtk_accel_path "<Actions>/Editor/set-edit-cursor" "e")
+(gtk_accel_path "<Actions>/Editor/insert-region" "i")
+(gtk_accel_path "<Actions>/Editor/normalize-region" "n")
 (gtk_accel_path "<Actions>/Transport/loop" "l")
 (gtk_accel_path "<Actions>/Editor/set-playhead" "p")
-(gtk_accel_path "<Actions>/Transport/Record" "R")
+(gtk_accel_path "<Actions>/Transport/Record" "<shift>r")
 
-(gtk_accel_path "<Actions>/Editor/copy" "<Control>c")
+(gtk_accel_path "<Actions>/Editor/editor-copy" "<Control>c")
 (gtk_accel_path "<Actions>/Common/Quit" "<Control>q")
 (gtk_accel_path "<Actions>/Editor/redo" "<Control>r")
 (gtk_accel_path "<Actions>/Common/Save" "<Control>s")
-(gtk_accel_path "<Actions>/Editor/paste" "<Control>v")
-(gtk_accel_path "<Actions>/Editor/cut" "<Control>x")
+(gtk_accel_path "<Actions>/Editor/editor-paste" "<Control>v")
+(gtk_accel_path "<Actions>/Editor/editor-cut" "<Control>x")
 (gtk_accel_path "<Actions>/Editor/undo" "<Control>z")
+
 
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-down" "Page_Down")
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-up" "Page_Up")

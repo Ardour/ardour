@@ -54,6 +54,7 @@ RouteUI::RouteUI (ARDOUR::Route& rt, ARDOUR::Session& sess, const char* m_name,
 	xml_node = 0;
 	mute_menu = 0;
 	solo_menu = 0;
+	remote_control_menu = 0;
 	ignore_toggle = false;
 	wait_for_release = false;
 	route_active_menu_item = 0;
@@ -405,6 +406,58 @@ RouteUI::update_rec_display ()
 		if (rec_enable_button->get_state() != Gtk::STATE_NORMAL) {
 			rec_enable_button->set_state (Gtk::STATE_NORMAL);
 		}
+	}
+}
+
+void
+RouteUI::build_remote_control_menu ()
+{
+	remote_control_menu = manage (new Menu);
+	refresh_remote_control_menu ();
+}
+
+void
+RouteUI::refresh_remote_control_menu ()
+{
+	using namespace Menu_Helpers;
+
+	RadioMenuItem::Group rc_group;
+	CheckMenuItem* rc_active;
+	uint32_t limit = _session.ntracks();
+	char buf[32];
+
+	MenuList& rc_items = remote_control_menu->items();
+	rc_items.clear ();
+
+	/* note that this menu list starts at zero, not 1, because zero
+	   is a valid, if useless, ID.
+	*/
+
+	limit += 4; /* leave some breathing room */
+	
+	for (uint32_t i = 0; i < limit; ++i) {
+		snprintf (buf, sizeof (buf), "%u", i);
+		rc_items.push_back (RadioMenuElem (rc_group, buf));
+		rc_active = dynamic_cast<RadioMenuItem*>(&rc_items.back());
+		if (_route.remote_control_id() == i) {
+			rc_active = dynamic_cast<CheckMenuItem*> (&rc_items.back());
+			rc_active->set_active ();
+		}
+		rc_active->signal_activate().connect (bind (mem_fun (*this, &RouteUI::set_remote_control_id), i, rc_active));
+	}
+}
+
+void
+RouteUI::set_remote_control_id (uint32_t id, CheckMenuItem* item)
+{
+	/* this is called when the radio menu item is toggled, and so 
+	   is actually invoked twice per menu selection. we only
+	   care about the invocation for the item that was being
+	   marked active.
+	*/
+
+	if (item->get_active()) {
+		_route.set_remote_control_id (id);
 	}
 }
 
@@ -840,3 +893,4 @@ RouteUI::map_frozen ()
 		}
 	}
 }
+

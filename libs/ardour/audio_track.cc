@@ -322,6 +322,24 @@ AudioTrack::set_state (const XMLNode& node)
 		}
 	}
 
+
+	XMLNodeList nlist;
+	XMLNodeConstIterator niter;
+	XMLNode *child;
+
+	nlist = node.children();
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
+		child = *niter;
+
+		if (child->name() == X_("remote_control")) {
+			if ((prop = child->property (X_("id"))) != 0) {
+				int32_t x;
+				sscanf (prop->value().c_str(), "%d", &x);
+				set_remote_control_id (x);
+			}
+		}
+	}
+
 	pending_state = const_cast<XMLNode*> (&node);
 
 	_session.StateReady.connect (mem_fun (*this, &AudioTrack::set_state_part_two));
@@ -393,7 +411,11 @@ AudioTrack::get_state()
 		set_midi_node_info (child, ev, chn, additional);
 	}
 
-	
+	XMLNode* remote_control_node = new XMLNode (X_("remote_control"));
+	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
+	remote_control_node->add_property (X_("id"), buf);
+	root.add_child_nocopy (*remote_control_node);
+
 	return root;
 }
 
@@ -519,17 +541,17 @@ AudioTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nf
 	} else {
 
 		if (_session.get_auto_input()) {
-			if (Config->get_no_sw_monitoring()) {
-				send_silence = true;
-			} else {
+			if (Config->get_use_sw_monitoring()) {
 				send_silence = false;
+			} else {
+				send_silence = true;
 			}
 		} else {
 			if (diskstream->record_enabled()) {
-				if (Config->get_no_sw_monitoring()) {
-					send_silence = true;
-				} else {
+				if (Config->get_use_sw_monitoring()) {
 					send_silence = false;
+				} else {
+					send_silence = true;
 				}
 			} else {
 				send_silence = true;

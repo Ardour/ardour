@@ -21,10 +21,15 @@ Editor::register_actions ()
 	RefPtr<ActionGroup> editor_actions = ActionGroup::create (X_("Editor"));
 	
 	/* non-operative menu items for menu bar */
--
+
 	ActionManager::register_action (editor_actions, X_("Edit"), _("Edit"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("ZoomFocus"));
+	ActionManager::register_action (editor_actions, X_("MeterHold"), _("Meter hold"));
+	ActionManager::register_action (editor_actions, X_("MeterFalloff"), _("Meter falloff"));
+	ActionManager::register_action (editor_actions, X_("Solo"), _("Solo"));
+	ActionManager::register_action (editor_actions, X_("Monitoring"), _("Monitoring"));
+	ActionManager::register_action (editor_actions, X_("Autoconnect"), _("Autoconnect"));
 
 	/* add named actions for the editor */
 
@@ -165,7 +170,7 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "normalize-region", _("normalize region"), mem_fun(*this, &Editor::normalize_region));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "editor-crop", _("editor crop"), mem_fun(*this, &Editor::crop_region_to_selection));
+	act = ActionManager::register_action (editor_actions, "crop", _("crop"), mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "insert-chunk", _("insert chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -199,8 +204,6 @@ Editor::register_actions ()
 
 	Glib::RefPtr<ActionGroup> zoom_actions = ActionGroup::create (X_("Zoom"));
 	RadioAction::Group zoom_group;
-
-	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("Zoom focus"));
 
 	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-left", _("zoom focus left"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusLeft));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -297,13 +300,30 @@ Editor::register_actions ()
 	act = ActionManager::register_action (rl_actions, X_("rlImportAudio"), _("Embed audio (link)"), bind (mem_fun(*this, &Editor::import_audio), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-#ifdef NEW_ACTIONS
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformVisibility"), _("show waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("show waveforms while recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("show measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
 
-	ToggleWaveformVisibility;
-	ToggleWaveformsWhileRecording;
-	ToggleMeasureVisibility;
+	RadioAction::Group meter_falloff_group;
+	RadioAction::Group meter_hold_group;
 
-#endif
+	/*
+	    Slowest = 6.6dB/sec falloff at update rate of 40ms
+	    Slow    = 6.8dB/sec falloff at update rate of 40ms
+	*/
+
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffOff"), _("off"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.0f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlowest"), _("slowest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.266f)); 
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlow"), _("slow"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.342f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffMedium"), _("medium"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.7f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFast"), _("fast"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1.1f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFaster"), _("faster"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1.5f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFastest"), _("fastest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 2.5f));
+
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldOff"), _("off"), bind (mem_fun (*this, &Editor::set_meter_hold), 0));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldShort"), _("short"), bind (mem_fun (*this, &Editor::set_meter_hold), 40));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldMedium"), _("medium"), bind (mem_fun (*this, &Editor::set_meter_hold), 100));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldLong"), _("long"), bind (mem_fun (*this, &Editor::set_meter_hold), 200));
 
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (zoom_actions);
@@ -311,3 +331,34 @@ Editor::register_actions ()
 	ActionManager::add_action_group (snap_actions);
 	ActionManager::add_action_group (editor_actions);
 }
+
+void
+Editor::toggle_waveform_visibility ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		set_show_waveforms (tact->get_active());
+	}
+}
+
+void
+Editor::toggle_waveforms_while_recording ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		set_show_waveforms_recording (tact->get_active());
+	}
+}
+
+void
+Editor::toggle_measure_visibility ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		set_show_measures (tact->get_active());
+	}
+}
+

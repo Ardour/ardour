@@ -1244,7 +1244,7 @@ MixerStrip::build_route_ops_menu ()
 {
 	using namespace Menu_Helpers;
 
-	route_ops_menu = new Menu;
+	route_ops_menu = manage (new Menu);
 	route_ops_menu->set_name ("ArdourContextMenu");
 
 	MenuList& items = route_ops_menu->items();
@@ -1254,6 +1254,11 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	route_active_menu_item->set_active (_route.active());
+
+	build_remote_control_menu ();
+	
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
@@ -1274,6 +1279,8 @@ MixerStrip::list_route_operations ()
 	if (route_ops_menu == 0) {
 		build_route_ops_menu ();
 	}
+	
+	refresh_remote_control_menu();
 
 	route_ops_menu->popup (1, 0);
 }

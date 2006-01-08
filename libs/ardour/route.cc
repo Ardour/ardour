@@ -86,6 +86,7 @@ Route::init ()
 	_have_internal_generator = false;
 	_declickable = false;
 	_pending_declick = true;
+	_remote_control_id = 0;
 
 	_edit_group = 0;
 	_mix_group = 0;
@@ -116,6 +117,21 @@ Route::~Route ()
 	if (_control_outs) {
 		delete _control_outs;
 	}
+}
+
+void
+Route::set_remote_control_id (uint32_t id)
+{
+	if (id != _remote_control_id) {
+		_remote_control_id = id;
+		RemoteControlIDChanged ();
+	}
+}
+
+uint32_t
+Route::remote_control_id() const
+{
+	return _remote_control_id;
 }
 
 long
@@ -213,7 +229,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	IO *co;
 	bool mute_audible;
 	bool solo_audible;
-	bool no_monitor = (Config->get_use_hardware_monitoring() || Config->get_no_sw_monitoring ());
+	bool no_monitor = (Config->get_use_hardware_monitoring() || !Config->get_use_sw_monitoring ());
 	gain_t* gab = _session.gain_automation_buffer();
 
 	declick = _pending_declick;
@@ -406,7 +422,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 
 		 // AND software monitoring required
 
-		 !Config->get_no_sw_monitoring())) { 
+		 Config->get_use_sw_monitoring())) { 
 		
 		if (apply_gain_automation) {
 			

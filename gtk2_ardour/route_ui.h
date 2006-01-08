@@ -74,6 +74,7 @@ class RouteUI : public virtual AxisView
 	
 	Gtk::Menu* mute_menu;
 	Gtk::Menu* solo_menu;
+	Gtk::Menu* remote_control_menu;
 
 	XMLNode *xml_node;
 	void ensure_xml_node ();
@@ -92,6 +93,8 @@ class RouteUI : public virtual AxisView
 	void session_rec_enable_changed();
 
 	void build_solo_menu (void);
+	void build_remote_control_menu (void);
+	void refresh_remote_control_menu ();
 
 	void solo_safe_toggle (void*, Gtk::CheckMenuItem*);
 	void toggle_solo_safe (Gtk::CheckMenuItem*);
@@ -123,8 +126,6 @@ class RouteUI : public virtual AxisView
 	virtual void name_changed (void *src);
 	void route_removed ();
 
-	static gint okay_gplusplus_cannot_do_complex_templates (RouteUI *rui);
-
 	Gtk::CheckMenuItem *route_active_menu_item;
 	void toggle_route_active ();
 	virtual void route_active_changed ();
@@ -136,6 +137,8 @@ class RouteUI : public virtual AxisView
 	void update_mute_display ();
 	void update_solo_display ();
 	virtual void map_frozen ();
+
+	void set_remote_control_id (uint32_t id, Gtk::CheckMenuItem* item);
 
 	void reversibly_apply_route_boolean (string name, void (ARDOUR::Route::*func)(bool, void*), bool, void *);
 	void reversibly_apply_audio_track_boolean (string name, void (ARDOUR::AudioTrack::*func)(bool, void*), bool, void *);

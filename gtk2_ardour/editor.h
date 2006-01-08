@@ -278,6 +278,13 @@ class Editor : public PublicEditor
 	void toggle_follow_playhead ();
 	bool follow_playhead() const { return _follow_playhead; }
 
+	void toggle_waveform_visibility ();
+	void toggle_waveforms_while_recording ();
+	void toggle_measure_visibility ();
+
+	void set_meter_falloff (float);
+	void set_meter_hold (int32_t);
+
 	/* xfades */
 
 	void toggle_xfades_active();

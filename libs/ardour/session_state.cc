@@ -177,7 +177,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_edit_mode = Slide;
 	pending_edit_mode = _edit_mode;
 	_play_range = false;
-	align_style = ExistingMaterial;
 	_control_out = 0;
 	_master_out = 0;
 	input_auto_connect = AutoConnectOption (0);
@@ -988,16 +987,6 @@ Session::load_options (const XMLNode& node)
 		}
 	}
 
-	if ((child = find_named_node (node, "align-style")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			if (prop->value() == "capture") {
-				set_align_style (CaptureTime);
-			} else {
-				set_align_style (ExistingMaterial);
-			}
-		}
-	}
-
 	if ((child = find_named_node (node, "layer-model")) != 0) {
 		if ((prop = child->property ("val")) != 0) {
 			if (prop->value() == X_("LaterHigher")) {
@@ -1196,9 +1185,6 @@ Session::get_options () const
 
 	child = opthead->add_child ("solo-model");
 	child->add_property ("val", _solo_model == SoloBus ? "SoloBus" : "InverseMute");
-
-	child = opthead->add_child ("align-style");
-	child->add_property ("val", (align_style == ExistingMaterial ? "existing" : "capture"));
 
 	child = opthead->add_child ("layer-model");
 	switch (layer_model) {
@@ -1450,6 +1436,7 @@ Session::set_state (const XMLNode& node)
 	XMLNodeList nlist;
 	XMLNode* child;
 	const XMLProperty* prop;
+	int ret = -1;
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
 	
@@ -1457,6 +1444,8 @@ Session::set_state (const XMLNode& node)
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
 		return -1;
 	}
+
+	StateManager::set_allow_save (false);
 
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value ();
@@ -1483,7 +1472,6 @@ Session::set_state (const XMLNode& node)
 	*/
 
 	if (use_config_midi_ports ()) {
-		return -1;
 	}
 
 	if ((child = find_named_node (node, "Path")) != 0) {
@@ -1500,63 +1488,61 @@ Session::set_state (const XMLNode& node)
 
 	if ((child = find_named_node (node, "Options")) == 0) {
 		error << _("Session: XML state has no options section") << endmsg;
-		return -1;
 	} else if (load_options (*child)) {
-		return -1;
 	}
 
 	if ((child = find_named_node (node, "Sources")) == 0) {
 		error << _("Session: XML state has no sources section") << endmsg;
-		return -1;
+		goto out;
 	} else if (load_sources (*child)) {
-		return -1;
+		goto out;
 	}
 
 	if ((child = find_named_node (node, "Regions")) == 0) {
 		error << _("Session: XML state has no Regions section") << endmsg;
-		return -1;
+		goto out;
 	} else if (load_regions (*child)) {
-		return -1;
+		goto out;
 	}
 
 	if ((child = find_named_node (node, "Playlists")) == 0) {
 		error << _("Session: XML state has no playlists section") << endmsg;
-		return -1;
+		goto out;
 	} else if (load_playlists (*child)) {
-		return -1;
+		goto out;
 	}
 
 	if ((child = find_named_node (node, "UnusedPlaylists")) == 0) {
 		// this is OK
 	} else if (load_unused_playlists (*child)) {
-		return -1;
+		goto out;
 	}
 	
 	if ((child = find_named_node (node, "NamedSelections")) != 0) {
 		if (load_named_selections (*child)) {
-			return -1;
+			goto out;
 		}
 	}
 
 	if ((child = find_named_node (node, "DiskStreams")) == 0) {
 		error << _("Session: XML state has no diskstreams section") << endmsg;
-		return -1;
+		goto out;
 	} else if (load_diskstreams (*child)) {
-		return -1;
+		goto out;
 	}
 
 	if ((child = find_named_node (node, "Connections")) == 0) {
 		error << _("Session: XML state has no connections section") << endmsg;
-		return -1;
+		goto out;
 	} else if (load_connections (*child)) {
-		return -1;
+		goto out;
 	}
 
 	if ((child = find_named_node (node, "Locations")) == 0) {
 		error << _("Session: XML state has no locations section") << endmsg;
-		return -1;
+		goto out;
 	} else if (_locations.set_state (*child)) {
-		return -1;
+		goto out;
 	}
 
 	Location* location;
@@ -1579,30 +1565,30 @@ Session::set_state (const XMLNode& node)
 
 	if ((child = find_named_node (node, "EditGroups")) == 0) {
 		error << _("Session: XML state has no edit groups section") << endmsg;
-		return -1;
+		goto out;
 	} else if (load_edit_groups (*child)) {
-		return -1;
+		goto out;
 	}
 
 	if ((child = find_named_node (node, "MixGroups")) == 0) {
 		error << _("Session: XML state has no mix groups section") << endmsg;
-		return -1;
+		goto out;
 	} else if (load_mix_groups (*child)) {
-		return -1;
+		goto out;
 	}
 
 	if ((child = find_named_node (node, "TempoMap")) == 0) {
 		error << _("Session: XML state has no Tempo Map section") << endmsg;
-		return -1;
+		goto out;
 	} else if (_tempo_map->set_state (*child)) {
-		return -1;
+		goto out;
 	}
 
 	if ((child = find_named_node (node, "Routes")) == 0) {
 		error << _("Session: XML state has no routes section") << endmsg;
-		return -1;
+		goto out;
 	} else if (load_routes (*child)) {
-		return -1;
+		goto out;
 	}
 
 	if ((child = find_named_node (node, "Click")) == 0) {
@@ -1621,13 +1607,20 @@ Session::set_state (const XMLNode& node)
 
 	_state_of_the_state = Clean;
 
+	StateManager::set_allow_save (true);
+
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
 
-	return 0;
+	ret = 0;
+
+  out:
+	/* yes, doing it twice doesn't hurt and makes the code easier */
+	StateManager::set_allow_save (true);
+	return ret;
 }
 
 int

@@ -80,6 +80,8 @@ ARDOUR_UI::connect_to_session (Session *s)
 		sfdb->set_session (s);
 	}
 
+	setup_options ();
+
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::transport_rec_enable_blink));
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::solo_blink));
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::audition_blink));
@@ -89,7 +91,6 @@ ARDOUR_UI::connect_to_session (Session *s)
 	*/
 
 	session->TransportStateChange.connect (mem_fun(*this, &ARDOUR_UI::queue_transport_change));
-	session->ControlChanged.connect (mem_fun(*this, &ARDOUR_UI::queue_map_control_change));
 
 	/* alert the user to these things happening */
 

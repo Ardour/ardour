@@ -53,16 +53,6 @@ using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
 
-
-static const gchar *psync_strings[] = {
-	N_("Internal"),
-	N_("Slave to MTC"),
-	N_("Sync with JACK"),
-	0
-};
-
-static vector<string> positional_sync_strings;
-
 int	
 ARDOUR_UI::setup_windows ()
 {
@@ -391,7 +381,7 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (primary_clock, _("Primary clock"));
 	ARDOUR_UI::instance()->tooltips().set_tip (secondary_clock, _("secondary clock"));
 
-	/* options */
+	/* options: XXX these should all be actions with the buttons as proxies */
 
 	auto_return_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_return));
 	auto_play_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_play));
@@ -458,9 +448,7 @@ ARDOUR_UI::setup_transport ()
 	sdframe->set_shadow_type (SHADOW_IN);
 	sdframe->add (speed_display_box);
 
-	positional_sync_strings = internationalize (psync_strings);
-
-	set_popdown_strings (sync_option_combo, positional_sync_strings);
+	mtc_port_changed ();
 	sync_option_combo.set_active_text (positional_sync_strings.front());
 	sync_option_combo.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::sync_option_changed));
 

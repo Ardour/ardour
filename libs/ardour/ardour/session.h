@@ -391,7 +391,8 @@ class Session : public sigc::trackable, public Stateful
 		PunchOut,
 		SendMTC,
 		MMCControl,
-		Live,
+		SoloLatch,
+		SoloingModel,
 		RecordingPlugins,
 		CrossFadesActive,
 		SendMMC,
@@ -399,7 +400,8 @@ class Session : public sigc::trackable, public Stateful
 		Clicking,
 		EditingMode,
 		PlayRange,
-		AlignChoice,
+		LayeringModel,
+		CrossfadingModel,
 		SeamlessLoop,
 		MidiFeedback,
 		MidiControl
@@ -440,7 +442,7 @@ class Session : public sigc::trackable, public Stateful
 	bool get_recording_plugins () const { return recording_plugins; }
 	bool get_crossfades_active () const { return crossfades_active; }
 
-	AutoConnectOption get_input_auto_connect () const { return input_auto_connect; }
+	bool get_input_auto_connect () const;
 	AutoConnectOption get_output_auto_connect () const { return output_auto_connect; }
 
 	enum LayerModel {
@@ -452,13 +454,8 @@ class Session : public sigc::trackable, public Stateful
 	void set_layer_model (LayerModel);
 	LayerModel get_layer_model () const { return layer_model; }
 
-	sigc::signal<void> LayerModelChanged;
-
 	void set_xfade_model (CrossfadeModel);
 	CrossfadeModel get_xfade_model () const { return xfade_model; }
-
-	void set_align_style (AlignStyle);
-	AlignStyle get_align_style () const { return align_style; }
 
 	void add_event (jack_nframes_t action_frame, Event::Type type, jack_nframes_t target_frame = 0);
 	void remove_event (jack_nframes_t frame, Event::Type type);
@@ -1718,8 +1715,6 @@ class Session : public sigc::trackable, public Stateful
 
 	AutoConnectOption input_auto_connect;
 	AutoConnectOption output_auto_connect;
-
-	AlignStyle align_style;
 
 	gain_t* _gain_automation_buffer;
 	pan_t** _pan_automation_buffer;

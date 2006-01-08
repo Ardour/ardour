@@ -566,13 +566,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void connect_dependents_to_session (ARDOUR::Session *);
 	void we_have_dependents ();
 	void setup_keybindings ();
-
+	void setup_options ();
+	
 	guint32  last_key_press_time;
 
 	void snapshot_session ();
 
-	void map_control_change (ARDOUR::Session::ControlType);
-	void queue_map_control_change (ARDOUR::Session::ControlType);
 	void map_record_state ();
 	void queue_map_record_state ();
 
@@ -590,10 +589,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	LocationUI *location_ui;
 	int         create_location_ui ();
-
-	/* Various options */
-
-	void toggle_recording_plugins ();
 
 	/* Options window */
 	
@@ -675,7 +670,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void editor_realized ();
 
-	void toggle_session_state (const char* group, const char* action, void (ARDOUR::Session::*set)(bool));
+	std::vector<std::string> positional_sync_strings;
+
+	void toggle_config_state (const char* group, const char* action, void (ARDOUR::Configuration::*set)(bool));
+	void toggle_session_state (const char* group, const char* action, void (ARDOUR::Session::*set)(bool), bool (ARDOUR::Session::*get)(void) const);
+	void toggle_session_state (const char* group, const char* action, sigc::slot<void> theSlot);
 	void toggle_send_midi_feedback ();
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
@@ -699,6 +698,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_SoloViaBus();
 	void toggle_AutomaticallyCreateCrossfades();
 	void toggle_UnmuteNewFullCrossfades();
+
+	void mtc_port_changed ();
+	void map_some_session_state (const char* group, const char* action, bool (ARDOUR::Session::*get)() const);
+	void queue_session_control_changed (ARDOUR::Session::ControlType t);
+	void session_control_changed (ARDOUR::Session::ControlType t);
 };
 
 

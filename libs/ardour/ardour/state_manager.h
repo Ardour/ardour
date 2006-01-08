@@ -3,6 +3,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 #include <sigc++/signal.h>
 
@@ -35,7 +36,14 @@ class StateManager : public sigc::trackable
 
 	state_id_t _current_state_id;
 
+	static void set_allow_save (bool);
+	static bool allow_save ();
+
   protected:
+	static bool _allow_save;
+	typedef std::pair<StateManager*,std::string> DeferredSave;
+	static std::vector<DeferredSave> deferred;
+
 	StateMap   states;
 
 	virtual Change   restore_state (State&) = 0;

@@ -376,7 +376,7 @@ AudioRegion::restore_state (StateManager::State& sstate)
 UndoAction
 AudioRegion::get_memento() const
 {
-  return sigc::bind (mem_fun (*(const_cast<AudioRegion *> (this)), &StateManager::use_state), _current_state_id);
+	return sigc::bind (mem_fun (*(const_cast<AudioRegion *> (this)), &StateManager::use_state), _current_state_id);
 }
 
 bool

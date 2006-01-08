@@ -989,6 +989,12 @@ Session::set_input_auto_connect (bool yn)
 	set_dirty ();
 }
 
+bool
+Session::get_input_auto_connect () const
+{
+	return (input_auto_connect & AutoConnectPhysical);
+}
+
 void
 Session::set_output_auto_connect (AutoConnectOption aco)
 {
@@ -1715,6 +1721,8 @@ Session::new_audio_track (int input_channels, int output_channels)
 		track->diskstream_changed.connect (mem_fun (this, &Session::resort_routes));
 
 		add_route (track);
+
+		track->set_remote_control_id (ntracks());
 	}
 
 	catch (failed_constructor &err) {
@@ -2031,8 +2039,11 @@ Session::route_solo_changed (void* src, Route* route)
 void
 Session::set_solo_latched (bool yn)
 {
-	_solo_latched = yn;
-	set_dirty ();
+	if (yn != _solo_latched) {
+		_solo_latched = yn;
+		set_dirty ();
+		ControlChanged (SoloLatch);
+	}
 }
 
 void
@@ -3305,21 +3316,13 @@ Session::n_playlists () const
 }
 
 void
-Session::set_align_style (AlignStyle style)
-{
-	align_style = style;
-
-	foreach_diskstream (&DiskStream::set_capture_offset);
-
-	set_dirty ();
-	ControlChanged (AlignChoice);
-}
-
-void
 Session::set_solo_model (SoloModel sm)
 {
-	_solo_model = sm;
-	set_dirty ();
+	if (sm != _solo_model) {
+		_solo_model = sm;
+		ControlChanged (SoloingModel);
+		set_dirty ();
+	}
 }
 
 void
@@ -3555,15 +3558,20 @@ Session::nbusses () const
 void
 Session::set_layer_model (LayerModel lm)
 {
-	layer_model = lm;
-	LayerModelChanged (); /* EMIT SIGNAL */
-	set_dirty ();
+	if (lm != layer_model) {
+		layer_model = lm;
+		set_dirty ();
+		ControlChanged (LayeringModel);
+	}
 }
 
 void
 Session::set_xfade_model (CrossfadeModel xm)
 {
-	xfade_model = xm;
-	set_dirty ();
+	if (xm != xfade_model) {
+		xfade_model = xm;
+		set_dirty ();
+		ControlChanged (CrossfadingModel);
+	}
 }
 

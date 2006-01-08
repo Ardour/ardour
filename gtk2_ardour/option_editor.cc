@@ -45,14 +45,6 @@ using namespace Editing;
 using namespace Gtkmm2ext;
 using namespace std;
 
-static const gchar *psync_strings[] = {
-	N_("Internal"),
-	N_("Slave to MTC"),
-	N_("Sync with JACK"),
-	N_("never used but stops crashes"),
-	0
-};
-
 static const gchar *lmode_strings[] = {
 	N_("Later regions are higher"),
 	N_("Most recently added/moved/trimmed regions are higher"),
@@ -91,32 +83,13 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	  short_xfade_adjustment (0, 1.0, 500.0, 5.0, 100.0),
 	  short_xfade_slider (short_xfade_adjustment),
 
-	  /* solo */
-	  solo_latched_button (_("Latched solo")),
-	  solo_via_bus_button (_("Solo via bus")),
-
-	  /* display */
-
-	  show_waveforms_button (_("Show waveforms")),
-	  show_waveforms_recording_button (_("Show waveforms while recording")),
-	  mixer_strip_width_button (_("Narrow mixer strips")),
-	  show_measures_button (_("Show measure lines")),
-	  follow_playhead_button (_("Follow playhead")),
-	  
 	  /* Sync */
 
-	  send_mtc_button (_("Send MTC")),
-	  send_mmc_button (_("Send MMC")),
-	  jack_time_master_button (_("JACK time master")),
 	  smpte_offset_clock (X_("SMPTEOffsetClock"), true, true),
 	  smpte_offset_negative_button (_("SMPTE offset is negative")),
 
 	  /* MIDI */
 
-	  midi_feedback_button (_("Send MIDI parameter feedback")),
-	  midi_control_button (_("MIDI parameter control")),
-	  mmc_control_button (_("MMC control")),
-	  
 	  /* Click */
 
 	  click_table (2, 3),
@@ -129,23 +102,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	  delete_button_adjustment (3, 1, 5),
 	  delete_button_spin (delete_button_adjustment),
 	  edit_button_adjustment (3, 1, 5),
-	  edit_button_spin (edit_button_adjustment),
-
-	  /* Misc */
-
-	  auto_connect_inputs_button (_("Auto-connect new track inputs to hardware")),
-	  auto_connect_output_physical_button (_("Auto-connect new track outputs to hardware")),
-	  auto_connect_output_master_button (_("Auto-connect new track outputs to master bus")),
-	  auto_connect_output_manual_button (_("Manually connect new track outputs")),
-	  hw_monitor_button(_("Use Hardware Monitoring")),
-	  sw_monitor_button(_("Use Software Monitoring")),
-	  plugins_stop_button (_("Stop plugins with transport")),
-	  plugins_on_rec_button (_("Run plugins while recording")),
-	  verify_remove_last_capture_button (_("Verify remove last capture")),
-	  stop_rec_on_xrun_button (_("Stop recording on xrun")),
-	  stop_at_end_button (_("Stop transport at end of session")),
-	  debug_keyboard_button (_("Debug keyboard events")),
-	  speed_quieten_button (_("-12dB gain reduction for ffwd/rew"))
+	  edit_button_spin (edit_button_adjustment)
 	  
 {
 	using namespace Notebook_Helpers;
@@ -178,21 +135,15 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	setup_sync_options();
 	setup_path_options();
 	setup_fade_options ();
-	setup_solo_options ();
-	setup_display_options ();
-	setup_misc_options ();
 	setup_keyboard_options ();
 	setup_auditioner_editor ();
 
-	notebook.pages().push_back (TabElem (misc_packer, _("Misc")));
 	notebook.pages().push_back (TabElem (sync_packer, _("Sync")));
 	notebook.pages().push_back (TabElem (path_table, _("Paths/Files")));
-	notebook.pages().push_back (TabElem (display_packer, _("Display")));
 	notebook.pages().push_back (TabElem (keyboard_mouse_table, _("Kbd/Mouse")));
 	notebook.pages().push_back (TabElem (click_packer, _("Click")));
 	notebook.pages().push_back (TabElem (audition_packer, _("Audition")));
 	notebook.pages().push_back (TabElem (fade_packer, _("Layers & Fades")));
-	notebook.pages().push_back (TabElem (solo_packer, _("Solo")));
 
 	if (!MIDI::Manager::instance()->get_midi_ports().empty()) {
 		setup_midi_options ();
@@ -213,26 +164,11 @@ OptionEditor::set_session (Session *s)
 	click_emphasis_path_entry.set_text ("");
 	session_raid_entry.set_text ("");
 
-	send_mtc_button.set_sensitive (false);
-	send_mmc_button.set_sensitive (false);
-	midi_feedback_button.set_sensitive (false);
-	midi_control_button.set_sensitive (false);
-	mmc_control_button.set_sensitive (false);
 	click_path_entry.set_sensitive (false);
 	click_emphasis_path_entry.set_sensitive (false);
 	session_raid_entry.set_sensitive (false);
-	plugins_on_rec_button.set_sensitive (false);
-	verify_remove_last_capture_button.set_sensitive (false);
-	slave_type_combo.set_sensitive (false);
-	solo_latched_button.set_sensitive (false);
-	solo_via_bus_button.set_sensitive (false);
+
 	smpte_fps_combo.set_sensitive (false);
-	meter_hold_combo.set_sensitive (false);
-	meter_falloff_combo.set_sensitive (false);
-	auto_connect_inputs_button.set_sensitive (false);
-	auto_connect_output_physical_button.set_sensitive (false);
-	auto_connect_output_master_button.set_sensitive (false);
-	auto_connect_output_manual_button.set_sensitive (false);
 	layer_mode_combo.set_sensitive (false);
 	short_xfade_slider.set_sensitive (false);
 	smpte_offset_negative_button.set_sensitive (false);
@@ -243,26 +179,11 @@ OptionEditor::set_session (Session *s)
 		return;
 	}
 
-	send_mtc_button.set_sensitive (true);
-	send_mmc_button.set_sensitive (true);
-	midi_feedback_button.set_sensitive (true);
-	midi_control_button.set_sensitive (true);
-	mmc_control_button.set_sensitive (true);
+
 	click_path_entry.set_sensitive (true);
 	click_emphasis_path_entry.set_sensitive (true);
 	session_raid_entry.set_sensitive (true);
-	plugins_on_rec_button.set_sensitive (true);
-	verify_remove_last_capture_button.set_sensitive (true);
-	slave_type_combo.set_sensitive (true);
-	solo_latched_button.set_sensitive (true);
-	solo_via_bus_button.set_sensitive (true);
 	smpte_fps_combo.set_sensitive (true);
-	meter_hold_combo.set_sensitive (true);
-	meter_falloff_combo.set_sensitive (true);
-	auto_connect_inputs_button.set_sensitive (true);
-	auto_connect_output_physical_button.set_sensitive (true);
-	auto_connect_output_master_button.set_sensitive (true);
-	auto_connect_output_manual_button.set_sensitive (true);
 	layer_mode_combo.set_sensitive (true);
 	short_xfade_slider.set_sensitive (true);
 	smpte_offset_negative_button.set_sensitive (true);
@@ -289,14 +210,6 @@ OptionEditor::set_session (Session *s)
 	smpte_offset_clock.set (s->smpte_offset (), true);
 
 	smpte_offset_negative_button.set_active (session->smpte_offset_negative());
-	send_mtc_button.set_active (session->get_send_mtc());
-
-	/* MIDI I/O */
-
-	send_mmc_button.set_active (session->get_send_mmc());
-	midi_control_button.set_active (session->get_midi_control());
-	midi_feedback_button.set_active (session->get_midi_feedback());
-	mmc_control_button.set_active (session->get_mmc_control());
 
 	/* set up port assignments */
 
@@ -320,77 +233,15 @@ OptionEditor::set_session (Session *s)
 		}
 	}
 
-	auto_connect_inputs_button.set_active (session->get_input_auto_connect());
-
-	Session::AutoConnectOption oac = session->get_output_auto_connect();
-	if (oac & Session::AutoConnectPhysical) {
-		auto_connect_output_physical_button.set_active (true);
-	} else if (oac & Session::AutoConnectMaster) {
-		auto_connect_output_master_button.set_active (true);
-	} else {
-		auto_connect_output_manual_button.set_active (true);
-	}
-
 	setup_click_editor ();
 	connect_audition_editor ();
-
-	plugins_on_rec_button.set_active (session->get_recording_plugins ());
-	verify_remove_last_capture_button.set_active (Config->get_verify_remove_last_capture());
 
 	layer_mode_combo.set_active_text (layer_mode_strings[session->get_layer_model()]);
 	xfade_model_combo.set_active_text (xfade_model_strings[session->get_xfade_model()]);
 
 	short_xfade_adjustment.set_value ((Crossfade::short_xfade_length() / (float) session->frame_rate()) * 1000.0);
 
-	xfade_active_button.set_active (session->get_crossfades_active());
-	solo_latched_button.set_active (session->solo_latched());
-	solo_via_bus_button.set_active (session->solo_model() == Session::SoloBus);
-	
 	add_session_paths ();
-
-	vector<string> dumb;
-	dumb.push_back (positional_sync_strings[Session::None]);
-	dumb.push_back (positional_sync_strings[Session::JACK]);
-	if (session->mtc_port()) {
-		dumb.push_back (positional_sync_strings[Session::MTC]);
-	} 
-	set_popdown_strings (slave_type_combo, dumb);
-
-	// meter stuff
-	if (session->meter_falloff() == 0.0f) {
-		meter_falloff_combo.set_active_text (_("Off"));
-	} else if (session->meter_falloff() <= 0.3f) {
-		meter_falloff_combo.set_active_text (_("Slowest"));
-	} else if (session->meter_falloff() <= 0.4f) {
-		meter_falloff_combo.set_active_text (_("Slow"));
-	} else if (session->meter_falloff() <= 0.8f) {
-		meter_falloff_combo.set_active_text (_("Medium"));
-	} else if (session->meter_falloff() <= 1.4f) {
-		meter_falloff_combo.set_active_text (_("Fast"));
-	} else if (session->meter_falloff() <= 2.0f) {
-		meter_falloff_combo.set_active_text (_("Faster"));
-	} else {
-		meter_falloff_combo.set_active_text (_("Fastest"));
-	}
-
-	switch ((int) floor (session->meter_hold())) {
-	case 0:
-		meter_hold_combo.set_active_text (_("Off"));
-		break;
-	case 40:
-		meter_hold_combo.set_active_text (_("Short"));
-		break;
-	case 100:
-		meter_hold_combo.set_active_text (_("Medium"));
-		break;
-	case 200:
-		meter_hold_combo.set_active_text (_("Long"));
-		break;
-	}
-	
-	session_control_changed (Session::SlaveType);
-	session_control_changed (Session::AlignChoice);
-	session->ControlChanged.connect (mem_fun(*this, &OptionEditor::queue_session_control_changed));
 }
 
 OptionEditor::~OptionEditor ()
@@ -609,235 +460,10 @@ OptionEditor::xfade_active_clicked ()
 }
 
 void
-OptionEditor::setup_solo_options ()
-{
-	Gtk::HBox* hbox;
-
-	solo_via_bus_button.set_name ("OptionEditorToggleButton");
-	solo_latched_button.set_name ("OptionEditorToggleButton");
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (12);
-	hbox->pack_start (solo_via_bus_button, false, false);
-	solo_packer.pack_start (*hbox, false, false);
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (12);
-	hbox->pack_start (solo_latched_button, false, false);
-	solo_packer.pack_start (*hbox, false, false);
-
-	solo_via_bus_button.signal_clicked().connect 
-		(mem_fun(*this, &OptionEditor::solo_via_bus_clicked));
-	solo_latched_button.signal_clicked().connect 
-		(mem_fun(*this, &OptionEditor::solo_latched_clicked));
-
-	solo_packer.show_all ();
-}
-
-void
-OptionEditor::solo_via_bus_clicked ()
-{
-	if (!session) {
-		return;
-	}
-
-	if (solo_via_bus_button.get_active()) {
-		session->set_solo_model (Session::SoloBus);
-	} else {
-		session->set_solo_model (Session::InverseMute);
-	}
-}
-
-void
-OptionEditor::solo_latched_clicked ()
-{
-	if (!session) {
-		return;
-	}
-
-	bool x = solo_latched_button.get_active();
-
-	if (x != session->solo_latched()) {
-		session->set_solo_latched (x);
-	}
-}
-
-void
-OptionEditor::setup_display_options ()
-{
-	HBox* hbox;
-	vector<string> dumb;
-
-	display_packer.set_border_width (12);
-	display_packer.set_spacing (5);
-
-	show_waveforms_button.set_name ("OptionEditorToggleButton");
-	show_waveforms_recording_button.set_name ("OptionEditorToggleButton");
-	show_measures_button.set_name ("OptionEditorToggleButton");
-	follow_playhead_button.set_name ("OptionEditorToggleButton");
-	mixer_strip_width_button.set_name ("OptionEditorToggleButton");
-
-	mixer_strip_width_button.set_active (mixer.get_strip_width() == Narrow);
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (8);
-	hbox->pack_start (show_waveforms_button, false, false);
-	display_packer.pack_start (*hbox, false, false);
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (8);
-	hbox->pack_start (show_waveforms_recording_button, false, false);
-	display_packer.pack_start (*hbox, false, false);
-	
-	hbox = manage (new HBox);
-	hbox->set_border_width (8);
-	hbox->pack_start (show_measures_button, false, false);
-	display_packer.pack_start (*hbox, false, false);
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (8);
-	hbox->pack_start (mixer_strip_width_button, false, false);
-	display_packer.pack_start (*hbox, false, false);
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (8);
-	hbox->pack_start (follow_playhead_button, false, false);
-	display_packer.pack_start (*hbox, false, false);
-
-	Label *meter_hold_label = manage (new Label (_("Meter Peak Hold")));
-	meter_hold_label->set_name ("OptionsLabel");
-	dumb.clear ();
-	dumb.push_back (_("Off"));
-	dumb.push_back (_("Short"));
-	dumb.push_back (_("Medium"));
-	dumb.push_back (_("Long"));
-	set_popdown_strings (meter_hold_combo, dumb);
-	meter_hold_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::meter_hold_chosen));
-	hbox = manage (new HBox);
-	hbox->set_border_width (8);
-	hbox->set_spacing (8);
-	hbox->pack_start (*meter_hold_label, false, false);
-	hbox->pack_start (meter_hold_combo, false, false);
-	display_packer.pack_start (*hbox, false, false);
-
-	Label *meter_falloff_label = manage (new Label (_("Meter Falloff")));
-	meter_falloff_label->set_name ("OptionsLabel");
-	dumb.clear ();
-	dumb.push_back (_("Off"));
-	dumb.push_back (_("Slowest"));
-	dumb.push_back (_("Slow"));
-	dumb.push_back (_("Medium"));
-	dumb.push_back (_("Fast"));
-	dumb.push_back (_("Faster"));
-	dumb.push_back (_("Fastest"));
-	set_popdown_strings (meter_falloff_combo, dumb);
-	meter_falloff_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::meter_falloff_chosen));
-	hbox = manage (new HBox);
-	hbox->set_border_width (8);
-	hbox->set_spacing (8);
-	hbox->pack_start (*meter_falloff_label, false, false);
-	hbox->pack_start (meter_falloff_combo, false, false);
-	display_packer.pack_start (*hbox, false, false);
-	
-	
-	show_waveforms_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::show_waveforms_clicked));
-	show_waveforms_recording_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::show_waveforms_recording_clicked));
-	show_measures_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::show_measures_clicked));
-	mixer_strip_width_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::strip_width_clicked));
-	follow_playhead_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::follow_playhead_clicked));
-
-	editor.DisplayControlChanged.connect (mem_fun(*this, &OptionEditor::display_control_changed));
-
-	show_measures_button.set_active (editor.show_measures());
-	show_waveforms_button.set_active (editor.show_waveforms());
-	show_waveforms_recording_button.set_active (editor.show_waveforms_recording());
-	follow_playhead_button.set_active (editor.follow_playhead());
-}
-
-void
-OptionEditor::meter_hold_chosen ()
-{
-	if (session) {
-		string str = meter_hold_combo.get_active_text();
-		
-		if (str == _("Off")) {
-			session->set_meter_hold (0);
-		} else if (str == _("Short")) {
-			session->set_meter_hold (40);
-		} else if (str == _("Medium")) {
-			session->set_meter_hold (100);
-		} else if (str == _("Long")) {
-			session->set_meter_hold (200);
-		}
-	}
-}
-
-void
-OptionEditor::meter_falloff_chosen ()
-{
-	if (session) {
-		string str = meter_falloff_combo.get_active_text();
-		
-		if (str == _("Off")) {
-			session->set_meter_falloff (0.0f);
-		} else if (str == _("Slowest")) {
-			session->set_meter_falloff (0.266f); // 6.6 dB/sec falloff at update rate of 40 ms
-		} else if (str == _("Slow")) {
-			session->set_meter_falloff (0.342f); // 8.6 dB/sec falloff at update rate of 40 ms
-		} else if (str == _("Medium")) {
-			session->set_meter_falloff  (0.7f);
-		} else if (str == _("Fast")) {
-			session->set_meter_falloff (1.1f);
-		} else if (str == _("Faster")) {
-			session->set_meter_falloff (1.5f);
-		} else if (str == _("Fastest")) {
-			session->set_meter_falloff (2.5f);
-		}
-	}
-}
-
-void
-OptionEditor::display_control_changed (Editing::DisplayControl dc)
-{
-	ToggleButton* button = 0;
-	bool val = true;
-
-	switch (dc) {
-	case ShowMeasures:
-		val = editor.show_measures ();
-		button = &show_measures_button;
-		break;
-	case ShowWaveforms:
-		val = editor.show_waveforms ();
-		button = &show_waveforms_button;
-		break;
-	case ShowWaveformsRecording:
-		val = editor.show_waveforms_recording ();
-		button = &show_waveforms_recording_button;
-		break;
-	case FollowPlayhead:
-		val = editor.follow_playhead ();
-		button = &follow_playhead_button;
-		break;
-	}
-
-	if (button->get_active() != val) {
-		button->set_active (val);
-	}
-}
-
-void
 OptionEditor::setup_sync_options ()
 {
-	Label *slave_type_label = manage (new Label (_("Positional Sync")));
 	HBox* hbox;
 	vector<string> dumb;
-
-	slave_type_label->set_name("OptionsLabel");
-	positional_sync_strings = internationalize (psync_strings);
-
-	slave_type_combo.set_name ("OptionsEntry");
-	slave_type_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::slave_type_chosen));
 
 	dumb.clear ();
 	dumb.push_back (X_("24 FPS"));
@@ -851,31 +477,9 @@ OptionEditor::setup_sync_options ()
 	smpte_offset_clock.set_mode (AudioClock::SMPTE);
 	smpte_offset_clock.ValueChanged.connect (mem_fun(*this, &OptionEditor::smpte_offset_chosen));
 	
-	send_mtc_button.set_name ("OptionEditorToggleButton");
-	jack_time_master_button.set_name ("OptionEditorToggleButton");
 	smpte_offset_negative_button.set_name ("OptionEditorToggleButton");
 
-	send_mtc_button.unset_flags (Gtk::CAN_FOCUS);
-	jack_time_master_button.unset_flags (Gtk::CAN_FOCUS);
 	smpte_offset_negative_button.unset_flags (Gtk::CAN_FOCUS);
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (5);
-	hbox->set_spacing (10);
-	hbox->pack_start (*slave_type_label, false, false);
-	hbox->pack_start (slave_type_combo, false, false);
-
-	sync_packer.pack_start (*hbox, false, false);
-	
-	hbox = manage (new HBox);
-	hbox->set_border_width (5);
-	hbox->pack_start (send_mtc_button, false, false);
-	sync_packer.pack_start (*hbox, false, false);
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (5);
-	hbox->pack_start (jack_time_master_button, false, false);
-	sync_packer.pack_start (*hbox, false, false);
 
 	Label *smpte_fps_label = manage (new Label (_("SMPTE Frames/second")));
 	Label *smpte_offset_label = manage (new Label (_("SMPTE Offset")));
@@ -899,10 +503,6 @@ OptionEditor::setup_sync_options ()
 
 	sync_packer.pack_start (*hbox, false, false);
 
-	jack_time_master_button.set_active (Config->get_jack_time_master());
-
-	send_mtc_button.signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::send_mtc_toggled), &send_mtc_button));
-	jack_time_master_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::jack_time_master_clicked));
 	smpte_offset_negative_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::smpte_offset_negative_clicked));
 }
 
@@ -1061,46 +661,9 @@ OptionEditor::setup_midi_options ()
 	hbox->set_border_width (6);
 	hbox->pack_start (*table, true, false);
 	midi_packer.pack_start (*hbox, false, false);
-	
-	VBox* mmcbuttonbox = manage (new VBox);
-
-	mmc_control_button.set_name ("OptionEditorToggleButton");
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (6);
-	hbox->pack_start (mmc_control_button, false, false, 36);
-	mmcbuttonbox->pack_start (*hbox, false, false);
-
-	midi_control_button.set_name ("OptionEditorToggleButton");
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (6);
-	hbox->pack_start (midi_control_button, false, false, 36);
-	mmcbuttonbox->pack_start (*hbox, false, false);
-
-	send_mmc_button.set_name ("OptionEditorToggleButton");
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (6);
-	hbox->pack_start (send_mmc_button, false, false, 36);
-	mmcbuttonbox->pack_start (*hbox, false, false);
-	
-	midi_feedback_button.set_name ("OptionEditorToggleButton");
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (6);
-	hbox->pack_start (midi_feedback_button, false, false, 36);
-	mmcbuttonbox->pack_start (*hbox, false, false);
-
-	midi_packer.pack_start (*mmcbuttonbox, false, false);
-
-	mmc_control_button.signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mmc_control_toggled), &mmc_control_button));
-	midi_control_button.signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::midi_control_toggled), &midi_control_button));
-	send_mmc_button.signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::send_mmc_toggled), &send_mmc_button));
-	midi_feedback_button.signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::midi_feedback_toggled), &midi_feedback_button));
 }
 
-gint
+bool
 OptionEditor::mtc_port_chosen (GdkEventButton* ev, MIDI::Port *port, Gtk::RadioButton* rb) 
 {
 	if (session) {
@@ -1111,26 +674,14 @@ OptionEditor::mtc_port_chosen (GdkEventButton* ev, MIDI::Port *port, Gtk::RadioB
 			} else {
 				session->set_mtc_port ("");
 			}
-
-			/* update sync options to reflect MTC port availability */
-
-			vector<string> dumb;
-			dumb.push_back (positional_sync_strings[Session::None]);
-			dumb.push_back (positional_sync_strings[Session::JACK]);
-
-			if (session->mtc_port()) {
-				dumb.push_back (positional_sync_strings[Session::MTC]);
-			}
-			set_popdown_strings (slave_type_combo, dumb);
-
 			rb->set_active (true);
 		}
 	}
-
-	return stop_signal (*rb, "button_press_event");
+	
+	return false;
 }
 
-gint
+bool
 OptionEditor::mmc_port_chosen (GdkEventButton* ev, MIDI::Port* port, Gtk::RadioButton* rb)
 {
 	if (session) {
@@ -1144,10 +695,10 @@ OptionEditor::mmc_port_chosen (GdkEventButton* ev, MIDI::Port* port, Gtk::RadioB
 			rb->set_active (true);
 		}
 	}
-	return stop_signal (*rb, "button_press_event");
+	return false;
 }
 
-gint
+bool
 OptionEditor::midi_port_chosen (GdkEventButton* ev, MIDI::Port* port, Gtk::RadioButton* rb)
 {
 	if (session) {
@@ -1161,7 +712,7 @@ OptionEditor::midi_port_chosen (GdkEventButton* ev, MIDI::Port* port, Gtk::Radio
 			rb->set_active (true);
 		}
 	}
-	return stop_signal (*rb, "button_press_event");
+	return false;
 }
 
 gint
@@ -1207,47 +758,6 @@ OptionEditor::port_trace_out_toggled (GdkEventButton* ev,MIDI::Port* port, Toggl
 	return stop_signal (*tb, "button_press_event");
 }
 
-gint
-OptionEditor::send_mtc_toggled (GdkEventButton *ev, CheckButton *button)
-{
-	if (session) {
-		session->set_send_mtc (!button->get_active());
-	}
-	return stop_signal (*button, "button_press_event");
-}
-
-void
-OptionEditor::send_mmc_toggled (CheckButton *button)
-{
-	if (session) {
-		session->set_send_mmc (button->get_active());
-	}
-}
-
-void
-OptionEditor::mmc_control_toggled (CheckButton *button)
-{
-	if (session) {
-		session->set_mmc_control (button->get_active());
-	}
-}
-
-void
-OptionEditor::midi_control_toggled (CheckButton *button)
-{
-	if (session) {
-		session->set_midi_control (button->get_active());
-	}
-}
-
-void
-OptionEditor::midi_feedback_toggled (CheckButton *button)
-{
-	if (session) {
-		session->set_midi_feedback (button->get_active());
-	}
-}
-
 void
 OptionEditor::save ()
 {
@@ -1260,20 +770,8 @@ gint
 OptionEditor::wm_close (GdkEventAny *ev)
 {
 	save ();
-	just_close_win();
+	hide ();
 	return TRUE;
-}
-
-void
-OptionEditor::jack_time_master_clicked ()
-{
-	bool yn = jack_time_master_button.get_active();
-
-	Config->set_jack_time_master (yn);
-
-	if (session) {
-		session->engine().reset_timebase ();
-	}
 }
 
 void
@@ -1377,96 +875,6 @@ OptionEditor::click_emphasis_sound_changed ()
 }
 
 void
-OptionEditor::show_waveforms_clicked ()
-{
-	editor.set_show_waveforms (show_waveforms_button.get_active());
-}
-
-void
-OptionEditor::show_waveforms_recording_clicked ()
-{
-	editor.set_show_waveforms_recording (show_waveforms_recording_button.get_active());
-}
-
-void
-OptionEditor::show_measures_clicked ()
-{
-	editor.set_show_measures (show_measures_button.get_active());
-}
-
-void
-OptionEditor::follow_playhead_clicked ()
-{
-	editor.set_follow_playhead (follow_playhead_button.get_active());
-}
-
-void
-OptionEditor::strip_width_clicked ()
-{
-	mixer.set_strip_width (mixer_strip_width_button.get_active() ? Narrow : Wide);
-}
-
-
-void
-OptionEditor::just_close_win()
-{
-	hide();
-}
-
-void
-OptionEditor::queue_session_control_changed (Session::ControlType t)
-{
-	ui.call_slot (bind (mem_fun(*this, &OptionEditor::session_control_changed), t));
-}
-
-void
-OptionEditor::session_control_changed (Session::ControlType t)
-{
-	switch (t) {
-	case Session::SlaveType:
-		switch (session->slave_source()) {
-		case Session::None:
-			slave_type_combo.set_active_text (positional_sync_strings[Session::None]);
-			break;
-		case Session::MTC:
-			slave_type_combo.set_active_text (positional_sync_strings[Session::MTC]);
-			break;
-		case Session::JACK:
-			slave_type_combo.set_active_text (positional_sync_strings[Session::JACK]);
-			break;
-		default:
-			slave_type_combo.set_active_text (_("--unknown--"));
-			break;
-		}
-		
-		break;
-
-	case Session::SendMTC:
-		map_some_session_state (send_mtc_button, &Session::get_send_mtc);
-		break;
-
-	case Session::SendMMC:
-		map_some_session_state (send_mmc_button, &Session::get_send_mmc);
-		break;
-
-	case Session::MMCControl:       
-		map_some_session_state (mmc_control_button, &Session::get_mmc_control);
-		break;
-
-	case Session::MidiFeedback:       
-		map_some_session_state (midi_feedback_button, &Session::get_midi_feedback);
-		break;
-
-	case Session::MidiControl:       
-		 map_some_session_state (midi_control_button, &Session::get_midi_control);
-		break;
-	
-	default:
-		break;
-	}
-}
-
-void
 OptionEditor::native_format_chosen ()
 {
 	string which;
@@ -1481,26 +889,6 @@ OptionEditor::native_format_chosen ()
 		Config->set_native_format_is_bwf (use_bwf);
 		session->reset_native_file_format ();
 	}
-}
-
-void
-OptionEditor::slave_type_chosen ()
-{
-	string which;
-
-	if (session == 0) {
-		return;
-	}
-
-	which = slave_type_combo.get_active_text();
-
-	if (which == positional_sync_strings[Session::None]) {
-		session->request_slave_source (Session::None);
-	} else if (which == positional_sync_strings[Session::MTC]) {
-		session->request_slave_source (Session::MTC);
-	} else if (which == positional_sync_strings[Session::JACK]) {
-		session->request_slave_source (Session::JACK);
-	} 
 }
 
 void
@@ -1619,183 +1007,6 @@ OptionEditor::focus_out_event_handler (GdkEventFocus* ev, void (OptionEditor::*p
 	return false;
 }
 
-void
-OptionEditor::setup_misc_options()
-{
-	Gtk::Table* table = manage (new Table (4, 2));	
-	table->set_homogeneous (true);
-
-	misc_packer.set_border_width (8);
-	misc_packer.set_spacing (3);
-	misc_packer.pack_start (*table, true, true);
-
-	table->attach (hw_monitor_button, 0, 1, 0, 1, Gtk::FILL, FILL, 8, 0);
-	table->attach (sw_monitor_button, 0, 1, 1, 2, Gtk::FILL, FILL, 8, 0);
-	table->attach (plugins_stop_button, 0, 1, 2, 3, Gtk::FILL, FILL, 8, 0);
-	table->attach (plugins_on_rec_button, 0, 1, 3, 4, Gtk::FILL, FILL, 8, 0);
-	table->attach (verify_remove_last_capture_button, 0, 1, 4, 5, Gtk::FILL, FILL, 8, 0);
-
-	table->attach (stop_rec_on_xrun_button, 1, 2, 0, 1, Gtk::FILL, FILL, 8, 0);
-	table->attach (stop_at_end_button, 1, 2, 1, 2, Gtk::FILL, FILL, 8, 0);
-	table->attach (debug_keyboard_button, 1, 2, 2, 3, Gtk::FILL, FILL, 8, 0);
-	table->attach (speed_quieten_button, 1, 2, 3, 4, Gtk::FILL, FILL, 8, 0);
-
-	Gtk::VBox* connect_box = manage (new VBox);
-	connect_box->set_spacing (3);
-	connect_box->set_border_width (8);
-
-	auto_connect_output_button_group = auto_connect_output_master_button.get_group();
-	auto_connect_output_manual_button.set_group (auto_connect_output_button_group);
-	auto_connect_output_physical_button.set_group (auto_connect_output_button_group);
-
-	Gtk::HBox* useless_box = manage (new HBox);
-	useless_box->pack_start (auto_connect_inputs_button, false, false);
-	connect_box->pack_start (*useless_box, false, false);
-	connect_box->pack_start (auto_connect_output_master_button, false, false);
-	connect_box->pack_start (auto_connect_output_physical_button, false, false);
-	connect_box->pack_start (auto_connect_output_manual_button, false, false);
-
-	misc_packer.pack_start (*connect_box, false, false);
-	
-	hw_monitor_button.set_name ("OptionEditorToggleButton");
-	sw_monitor_button.set_name ("OptionEditorToggleButton");
-	plugins_stop_button.set_name ("OptionEditorToggleButton");
-	plugins_on_rec_button.set_name ("OptionEditorToggleButton");
-	verify_remove_last_capture_button.set_name ("OptionEditorToggleButton");
-	auto_connect_inputs_button.set_name ("OptionEditorToggleButton");
-	auto_connect_output_physical_button.set_name ("OptionEditorToggleButton");
-	auto_connect_output_master_button.set_name ("OptionEditorToggleButton");
-	auto_connect_output_manual_button.set_name ("OptionEditorToggleButton");
-	stop_rec_on_xrun_button.set_name ("OptionEditorToggleButton");
-	stop_at_end_button.set_name ("OptionEditorToggleButton");
-	debug_keyboard_button.set_name ("OptionEditorToggleButton");
-	speed_quieten_button.set_name ("OptionEditorToggleButton");
-
-	hw_monitor_button.set_active (Config->get_use_hardware_monitoring());
-	sw_monitor_button.set_active (!Config->get_no_sw_monitoring());
-	plugins_stop_button.set_active (Config->get_plugins_stop_with_transport());
-	stop_rec_on_xrun_button.set_active (Config->get_stop_recording_on_xrun());
-	stop_at_end_button.set_active (Config->get_stop_at_session_end());
-	debug_keyboard_button.set_active (false);
-	speed_quieten_button.set_active (Config->get_quieten_at_speed() != 1.0f);
-
-	hw_monitor_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::hw_monitor_clicked));
-	sw_monitor_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::sw_monitor_clicked));
-	plugins_stop_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::plugins_stop_with_transport_clicked));
-	plugins_on_rec_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::plugins_on_while_recording_clicked));
-	verify_remove_last_capture_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::verify_remove_last_capture_clicked));
-	auto_connect_inputs_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::auto_connect_inputs_clicked));
-	auto_connect_output_physical_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::auto_connect_output_physical_clicked));
-	auto_connect_output_master_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::auto_connect_output_master_clicked));
-	auto_connect_output_manual_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::auto_connect_output_manual_clicked));
-	stop_rec_on_xrun_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::stop_rec_on_xrun_clicked));
-	stop_at_end_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::stop_at_end_clicked));
-	debug_keyboard_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::debug_keyboard_clicked));
-	speed_quieten_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::speed_quieten_clicked));
-}
-
-void
-OptionEditor::speed_quieten_clicked ()
-{
-	if (speed_quieten_button.get_active()) {
-		Config->set_quieten_at_speed (0.251189); // -12dB reduction for ffwd or rewind
-	} else {
-		Config->set_quieten_at_speed (1.0); /* no change */
-	}
-}
-
-void
-OptionEditor::debug_keyboard_clicked ()
-{
-	extern bool debug_keyboard;
-	debug_keyboard = debug_keyboard_button.get_active ();
-}
-
-void
-OptionEditor::auto_connect_inputs_clicked ()
-{
-	if (session) {
-		session->set_input_auto_connect (auto_connect_inputs_button.get_active());
-	}
-}
-
-void
-OptionEditor::auto_connect_output_master_clicked ()
-{
-	if (session) {
-		if (auto_connect_output_master_button.get_active()) {
-			session->set_output_auto_connect (Session::AutoConnectMaster);
-		} 
-	}
-}
-
-void
-OptionEditor::auto_connect_output_physical_clicked ()
-{
-	if (session) {
-		if (auto_connect_output_physical_button.get_active()) {
-			session->set_output_auto_connect (Session::AutoConnectPhysical);
-		} 
-	}
-}
-
-void
-OptionEditor::auto_connect_output_manual_clicked ()
-{
-	if (session) {
-		if (auto_connect_output_manual_button.get_active()) {
-			session->set_output_auto_connect (Session::AutoConnectOption (0));
-		} 
-	}
-}
-
-void
-OptionEditor::hw_monitor_clicked ()
-{
-	Config->set_use_hardware_monitoring (hw_monitor_button.get_active());
-	if (session) {
-		session->reset_input_monitor_state ();
-	}
-}
-
-void
-OptionEditor::sw_monitor_clicked ()
-{
-	Config->set_no_sw_monitoring (!sw_monitor_button.get_active());
-}
-
-void
-OptionEditor::plugins_stop_with_transport_clicked ()
-{
-	Config->set_plugins_stop_with_transport (plugins_stop_button.get_active());
-}
-
-void
-OptionEditor::plugins_on_while_recording_clicked ()
-{
-	if (session) {
-		session->set_recording_plugins (plugins_on_rec_button.get_active());
-	}
-}
-
-void
-OptionEditor::verify_remove_last_capture_clicked ()
-{
-	Config->set_verify_remove_last_capture(verify_remove_last_capture_button.get_active());
-}
-
-void
-OptionEditor::stop_rec_on_xrun_clicked ()
-{
-	Config->set_stop_recording_on_xrun (stop_rec_on_xrun_button.get_active());
-}
-
-void
-OptionEditor::stop_at_end_clicked ()
-{
-	Config->set_stop_at_session_end (stop_at_end_button.get_active());
-}
-						  
 static const struct {
     const char *name;
     guint   modifier;
@@ -1986,13 +1197,5 @@ OptionEditor::fixup_combo_size (Gtk::ComboBoxText& combo, vector<string>& string
 	const guint32 FUDGE = 10; // Combo's are stupid - they steal space from the entry for the button
 
 	set_size_request_to_display_given_text (combo, maxstring.c_str(), 10 + FUDGE, 10);
-}
-
-void
-OptionEditor::map_some_session_state (CheckButton& button, bool (Session::*get)() const)
-{
-	if (session) {
-		button.set_active ((session->*get)());
-	}
 }
 

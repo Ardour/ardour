@@ -3244,8 +3244,9 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			}
 
 			rv->get_time_axis_view().reveal_dependent_views (*rv);
+
+			/* no need to add an undo here, we did that when we added this playlist to motion_frozen playlists */
 			
-			session->add_undo (rv->region.playlist()->get_memento());
 			rv->region.set_position (where, (void *) this);
 		}
 	}
