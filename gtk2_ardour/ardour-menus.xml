@@ -34,9 +34,6 @@
                <menuitem action='Rewind'/>
                <menuitem action='GotoStart'/>
                <menuitem action='GotoEnd'/>
-               <separator/>
-               <menuitem action='TogglePunchIn'/>
-               <menuitem action='TogglePunchOut'/>
                <separator/> 
                <menuitem action='jump-forward-to-mark'/>
                <menuitem action='jump-backward-to-mark'/>
@@ -58,8 +55,6 @@
                <menuitem action='audition-at-mouse'/>
                <menuitem action='brush-at-mouse'/>
                <separator/> 
-               <menuitem action='ToggleFollowPlayhead'/>
-               <separator/> 
                <menu action='TransportOptions'>
                     <menuitem action='ToggleTimeMaster'/>
                     <menuitem action='TogglePunchIn'/>
@@ -68,6 +63,7 @@
                     <menuitem action='ToggleAutoPlay'/>
                     <menuitem action='ToggleAutoReturn'/>
                     <menuitem action='ToggleClick'/>
+                    <menuitem action='ToggleFollowPlayhead'/>
                </menu>
        </menu>
        <menu name='Edit' action='Edit'>

@@ -79,7 +79,6 @@ void
 Editor::undo (uint32_t n)
 {
 	if (session) {
-		cerr << "Undo " << n << " operations\n";
 		session->undo (n);
 	}
 }
@@ -3286,12 +3285,21 @@ Editor::duplicate_some_regions (AudioRegionSelection& regions, float times)
 	for (AudioRegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 		Region& r ((*i)->region);
+
+		TimeAxisView& tv = (*i)->get_time_axis_view();
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&tv);
+		sigc::connection c = atv->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 		
  		playlist = (*i)->region.playlist();
 		session->add_undo (playlist->get_memento());
 		playlist->duplicate (r, r.last_frame(), times);
 		session->add_redo_no_execute (playlist->get_memento());
 
+		c.disconnect ();
+	}
+		
+	if (latest_regionview) {
+		selection->set (latest_regionview);
 	}
 
 	commit_reversible_command ();

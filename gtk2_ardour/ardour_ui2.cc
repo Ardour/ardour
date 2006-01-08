@@ -323,44 +323,15 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	ARDOUR_UI::instance()->tooltips().set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 	ARDOUR_UI::instance()->tooltips().set_tip (click_button, _("Enable/Disable audio click"));
+	ARDOUR_UI::instance()->tooltips().set_tip (sync_option_combo, _("Positional sync source"));
 	ARDOUR_UI::instance()->tooltips().set_tip (time_master_button, _("Does Ardour control the time?"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_box, _("Shuttle speed control"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
 	ARDOUR_UI::instance()->tooltips().set_tip (speed_display_box, _("Current transport speed"));
 	
 	shuttle_box.set_flags (CAN_FOCUS);
-	shuttle_box.set_events (shuttle_box.get_events() | Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK);
+	shuttle_box.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK);
 	shuttle_box.set_size_request (100, 15);
-
-	goto_start_button.unset_flags (CAN_FOCUS);
-	goto_end_button.unset_flags (CAN_FOCUS);
-	roll_button.unset_flags (CAN_FOCUS);
-	stop_button.unset_flags (CAN_FOCUS);
-	play_selection_button.unset_flags (CAN_FOCUS);
-	rec_button.unset_flags (CAN_FOCUS);
-	auto_loop_button.unset_flags (CAN_FOCUS);
-	auto_return_button.unset_flags (CAN_FOCUS);
-	auto_play_button.unset_flags (CAN_FOCUS);
-	auto_input_button.unset_flags (CAN_FOCUS);
-	punch_out_button.unset_flags (CAN_FOCUS);
-	punch_in_button.unset_flags (CAN_FOCUS);
-	click_button.unset_flags (CAN_FOCUS);
-	time_master_button.unset_flags (CAN_FOCUS);
-	
-	goto_start_button.set_events (goto_start_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	goto_end_button.set_events (goto_end_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	roll_button.set_events (roll_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	stop_button.set_events (stop_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	play_selection_button.set_events (play_selection_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	rec_button.set_events (rec_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	auto_loop_button.set_events (auto_loop_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	auto_return_button.set_events (auto_return_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	auto_play_button.set_events (auto_play_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	auto_input_button.set_events (auto_input_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	click_button.set_events (click_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	punch_in_button.set_events (punch_in_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	punch_out_button.set_events (punch_out_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
-	time_master_button.set_events (punch_out_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	shuttle_box.signal_button_press_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_press));
 	shuttle_box.signal_button_release_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_release));

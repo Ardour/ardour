@@ -36,6 +36,9 @@
 (gtk_accel_path "<Actions>/Editor/temporal-zoom-in" "minus")
 (gtk_accel_path "<Actions>/Editor/temporal-zoom-out" "equal")
 
+(gtk_accel_path "<Actions>/Editor/extend-range-to-start-of-region" "leftanglebracket")
+(gtk_accel_path "<Actions>/Editor/extend-range-to-end-of-region" "rightanglebracket")
+
 (gtk_accel_path "<Actions>/Editor/align-regions-sync" "<meta>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-end" "<meta><control>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<control>a")
