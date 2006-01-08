@@ -687,22 +687,6 @@ ARDOUR_UI::mmc_device_id_adjusted ()
 #endif
 }
 
-void
-ARDOUR_UI::map_some_session_state (ToggleButton& button,
-				   bool (Session::*get)() const)
-	
-{
-	bool x;
-
-	if (session == 0) {
-		return;
-	}
-	
-	if (button.get_active() != (x = (session->*get)())) {
-		button.set_active (x);
-	}
-}
-
 gint
 ARDOUR_UI::session_menu (GdkEventButton *ev)
 {
