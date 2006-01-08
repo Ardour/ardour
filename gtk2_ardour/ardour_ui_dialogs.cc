@@ -110,8 +110,6 @@ ARDOUR_UI::connect_to_session (Session *s)
 	/* Clocks are on by default after we are connected to a session, so show that here.
 	*/
 	
-	map_button_state ();
-
 	connect_dependents_to_session (s);
 	
 	start_clocking ();
@@ -256,15 +254,6 @@ ARDOUR_UI::toggle_options_window ()
 			option_editor->hide ();
 		} 
 	}
-}
-
-void
-ARDOUR_UI::toggle_auto_input ()
-
-{
-	toggle_some_session_state (auto_input_button,
-				   &Session::get_auto_input,
-				   &Session::set_auto_input);
 }
 
 int

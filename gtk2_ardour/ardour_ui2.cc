@@ -381,14 +381,12 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (primary_clock, _("Primary clock"));
 	ARDOUR_UI::instance()->tooltips().set_tip (secondary_clock, _("secondary clock"));
 
-	/* options: XXX these should all be actions with the buttons as proxies */
-
-	auto_return_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_return));
-	auto_play_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_play));
-	auto_input_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_auto_input));
-	click_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_click));
-	punch_in_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_in));
-	punch_out_button.signal_toggled().connect (mem_fun(*this,&ARDOUR_UI::toggle_punch_out));
+	ActionManager::get_action ("Transport", "ToggleAutoReturn")->connect_proxy (auto_return_button);
+	ActionManager::get_action ("Transport", "ToggleAutoPlay")->connect_proxy (auto_play_button);
+	ActionManager::get_action ("Transport", "ToggleAutoInput")->connect_proxy (auto_input_button);
+	ActionManager::get_action ("Transport", "ToggleClick")->connect_proxy (click_button);
+	ActionManager::get_action ("Transport", "TogglePunchIn")->connect_proxy (punch_in_button);
+	ActionManager::get_action ("Transport", "TogglePunchOut")->connect_proxy (punch_out_button);
 
 	preroll_button.unset_flags (CAN_FOCUS);
 	preroll_button.set_events (preroll_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,6 +55,10 @@ class AudioTrack : public Route
 	int set_diskstream (DiskStream&, void *);
 	int use_diskstream (string name);
 	int use_diskstream (id_t id);
+
+	bool destructive() const { return _destructive; }
+	void set_destructive (bool yn);
+	sigc::signal<void> DestructiveChanged;
 
 	jack_nframes_t update_total_latency();
 	void set_latency_delay (jack_nframes_t);
@@ -155,6 +159,8 @@ class AudioTrack : public Route
 	};
 
 	MIDIRecEnableControl _midi_rec_enable_control;
+
+	bool _destructive;
 };
 
 }; /* namespace ARDOUR*/

@@ -686,7 +686,7 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void,Source *> SourceAdded;
 	sigc::signal<void,Source *> SourceRemoved;
 
-	FileSource *create_file_source (ARDOUR::DiskStream&, int32_t chan);
+	FileSource *create_file_source (ARDOUR::DiskStream&, int32_t chan, bool destructive);
 	Source *get_source (ARDOUR::id_t);
 
 	/* playlist management */

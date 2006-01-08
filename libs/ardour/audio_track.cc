@@ -1096,3 +1096,15 @@ AudioTrack::MIDIRecEnableControl::write_feedback (MIDI::byte* buf, int32_t& bufs
 
 	return buf;
 }
+
+void
+AudioTrack::set_destructive (bool yn)
+{
+	if (diskstream) {
+		if (_destructive != yn) {
+			diskstream->set_destructive (yn);
+			_destructive = yn;
+			DestructiveChanged();
+		}
+	}
+}

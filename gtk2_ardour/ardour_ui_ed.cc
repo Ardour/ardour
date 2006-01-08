@@ -70,6 +70,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
+	ActionManager::register_action (main_actions, X_("TransportOptions"), _("Options"));
 
 	/* the real actions */
 
@@ -242,19 +243,31 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchIn"), _("punch in"), mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchOut"), _("punch out"), mem_fun(*this, &ARDOUR_UI::toggle_punch_out));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::transport_sensitive_actions.push_back (act);
-
-	/* XXX the newline in the displayed name of this action is really wrong, but its because we want the button
-	   that proxies for this action to be more compact. It would be nice to find a way to override the action
-	   name appearance on the button.
+	/* XXX the newline in the displayed names of these action is really wrong, but its because we want the button
+	   that proxies for these action to be more compact. It would be nice to find a way to override the action
+	   name appearance on the buttons.
 	*/
 
-	act = ActionManager::register_action (transport_actions, X_("ToggleTimeMaster"), _("time\nmaster"), mem_fun(*this, &ARDOUR_UI::toggle_time_master));
+	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchIn"), _("punch\nin"), mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchOut"), _("punch\nout"), mem_fun(*this, &ARDOUR_UI::toggle_punch_out));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleClick"), _("click"), mem_fun(*this, &ARDOUR_UI::toggle_click));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleAutoInput"), _("auto\ninput"), mem_fun(*this, &ARDOUR_UI::toggle_auto_input));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleAutoPlay"), _("auto\nplay"), mem_fun(*this, &ARDOUR_UI::toggle_auto_play));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleAutoReturn"), _("auto\nreturn"), mem_fun(*this, &ARDOUR_UI::toggle_auto_return));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("time\nmaster"), mem_fun(*this, &ARDOUR_UI::toggle_time_master));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (common_actions, X_("SendAllMidiFeedback"), _("send all midi feedback"), mem_fun(*this, &ARDOUR_UI::send_all_midi_feedback));
@@ -390,6 +403,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (option_actions, X_("UnmuteNewFullCrossfades"), _("Unmute new full crossfades"), mem_fun (*this, &ARDOUR_UI::toggle_UnmuteNewFullCrossfades));
 	ActionManager::session_sensitive_actions.push_back (act);
+
 
 #ifdef NEW_ACTIONS
 	act = ActionManager::register_action (option_actions, X_("SetRegionLayerMode", _("SetRegionLayerMode"), mem_fun (*this, &ARDOUR_UI::toggle_SetRegionLayerMode)));

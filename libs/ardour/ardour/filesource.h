@@ -72,7 +72,7 @@ class FileSource : public Source {
 	
 	static void set_search_path (string);
 
-  private:
+  protected:
 	int            fd;
 	string        _path;
 	bool           remove_at_unref;

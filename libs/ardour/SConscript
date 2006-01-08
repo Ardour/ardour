@@ -35,6 +35,7 @@ crossfade.cc
 curve.cc
 cycle_timer.cc
 default_click.cc
+destructive_filesource.cc
 diskstream.cc
 filesource.cc
 gain.cc

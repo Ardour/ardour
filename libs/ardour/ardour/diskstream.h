@@ -60,7 +60,8 @@ class DiskStream : public Stateful, public sigc::trackable
   public:
 	enum Flag {
 		Recordable = 0x1,
-		Hidden = 0x2
+		Hidden = 0x2,
+		Destructive = 0x4
 	};
 
 	DiskStream (Session &, const string& name, Flag f = Recordable);
@@ -92,6 +93,9 @@ class DiskStream : public Stateful, public sigc::trackable
 
 	bool hidden() const { return _flags & Hidden; }
 	bool recordable() const { return _flags & Recordable; }
+	bool destructive() const { return _flags & Destructive; }
+
+	void set_destructive (bool yn);
 
 	jack_nframes_t roll_delay() const { return _roll_delay; }
 	void set_roll_delay (jack_nframes_t);
@@ -150,11 +154,6 @@ class DiskStream : public Stateful, public sigc::trackable
 
 	AudioPlaylist *playlist () { return _playlist; }
 
-	FileSource *fades_source (uint32_t n=0) {
-		if (n < channels.size())
-			return channels[n].fades_source;
-		return 0;
-	}
 	FileSource *write_source (uint32_t n=0) {
 		if (n < channels.size())
 			return channels[n].write_source;
@@ -245,7 +244,7 @@ class DiskStream : public Stateful, public sigc::trackable
 	void set_block_size (jack_nframes_t);
 	int  internal_playback_seek (jack_nframes_t distance);
 	int  can_internal_playback_seek (jack_nframes_t distance);
-	void reset_write_sources (bool);
+	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
 
 	uint32_t read_data_count() const { return _read_data_count; }

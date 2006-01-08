@@ -299,14 +299,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void engine_stopped ();
 	void engine_running ();
 
-	void map_some_session_state (Gtk::ToggleButton& button,
-				     bool (ARDOUR::Session::*get)() const);
-
-	void toggle_some_session_state (Gtk::ToggleButton& button,
-				     bool (ARDOUR::Session::*get)() const,
-				     void (ARDOUR::Session::*set)(bool));
-	void map_button_state ();
-
 	void clear_meters ();
 
 	static gint _blink  (void *);

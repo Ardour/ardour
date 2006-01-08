@@ -135,6 +135,58 @@ ARDOUR_UI::toggle_ManuallyConnectNewTrackOutputs()
 }
 
 void
+ARDOUR_UI::toggle_auto_input ()
+{
+	toggle_session_state ("Transport", "ToggleAutoInput", &Session::set_auto_input, &Session::get_auto_input);
+}
+
+void
+ARDOUR_UI::toggle_auto_play ()
+{
+	toggle_session_state ("Transport", "ToggleAutoPlay", &Session::set_auto_play, &Session::get_auto_play);
+}
+
+void
+ARDOUR_UI::toggle_auto_return ()
+{
+	toggle_session_state ("Transport", "ToggleAutoReturn", &Session::set_auto_return, &Session::get_auto_return);
+}
+
+void
+ARDOUR_UI::toggle_click ()
+{
+	toggle_session_state ("Transport", "ToggleClick", &Session::set_clicking, &Session::get_clicking);
+}
+
+void
+ARDOUR_UI::toggle_session_auto_loop ()
+{
+	if (session) {
+		if (session->get_auto_loop()) {
+			if (session->transport_rolling()) {
+				transport_roll();
+			} else {
+				session->request_auto_loop (false);
+			}
+		} else {
+			session->request_auto_loop (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::toggle_punch_in ()
+{
+	toggle_session_state ("Transport", "TogglePunchIn", &Session::set_punch_in, &Session::get_punch_in);
+}
+
+void
+ARDOUR_UI::toggle_punch_out ()
+{
+	toggle_session_state ("Transport", "TogglePunchOut", &Session::set_punch_out, &Session::get_punch_out);
+}
+
+void
 ARDOUR_UI::toggle_UseHardwareMonitoring()
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "UseSoftwareMonitoring");
@@ -313,6 +365,12 @@ ARDOUR_UI::setup_options ()
 	session_control_changed (Session::SoloingModel);
 	session_control_changed (Session::LayeringModel);
 	session_control_changed (Session::CrossfadingModel);
+	session_control_changed (Session::PunchOut);
+	session_control_changed (Session::PunchIn);
+	session_control_changed (Session::AutoPlay);
+	session_control_changed (Session::AutoReturn);
+	session_control_changed (Session::AutoInput);
+	session_control_changed (Session::Clicking);
 
 	session->ControlChanged.connect (mem_fun (*this, &ARDOUR_UI::queue_session_control_changed));
 }
@@ -406,34 +464,31 @@ ARDOUR_UI::session_control_changed (Session::ControlType t)
 		break;
 
 		
-        // BUTTON STATE: fix me in the future to use actions
-
-
 	case Session::AutoPlay:
-		map_some_session_state (auto_play_button, &Session::get_auto_play);
+		map_some_session_state ("Transport", "ToggleAutoPlay", &Session::get_auto_play);
 		break;
 
 	case Session::AutoLoop:
 		break;
 
 	case Session::AutoReturn:
-		map_some_session_state (auto_return_button, &Session::get_auto_return);
+		map_some_session_state ("Transport", "ToggleAutoReturn", &Session::get_auto_return);
 		break;
 
 	case Session::AutoInput:
-		map_some_session_state (auto_input_button, &Session::get_auto_input);
+		map_some_session_state ("Transport", "ToggleAutoInput", &Session::get_auto_input);
 		break;
 
 	case Session::PunchOut:
-		map_some_session_state (punch_in_button, &Session::get_punch_out);
+		map_some_session_state ("Transport", "TogglePunchOut", &Session::get_punch_out);
 		break;
 
 	case Session::PunchIn:
-		map_some_session_state (punch_in_button, &Session::get_punch_in);
+		map_some_session_state ("Transport", "TogglePunchIn", &Session::get_punch_in);
 		break;
 
 	case Session::Clicking:
-		map_some_session_state (click_button, &Session::get_clicking);
+		map_some_session_state ("Transport", "ToggleClick", &Session::get_clicking);
 		break;
 
 	default:

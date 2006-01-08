@@ -42,6 +42,7 @@
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
 #include <ardour/filesource.h>
+#include <ardour/destructive_filesource.h>
 #include <ardour/send.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/cycle_timer.h>
@@ -99,7 +100,6 @@ DiskStream::init_channel (ChannelInfo &chan)
 	chan.capture_wrap_buffer = 0;
 	chan.speed_buffer = 0;
 	chan.peak_power = 0.0f;
-	chan.fades_source = 0;
 	chan.write_source = 0;
 	chan.source = 0;
 	chan.current_capture_buffer = 0;
@@ -1060,8 +1060,12 @@ DiskStream::seek (jack_nframes_t frame, bool complete_refill)
 	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
 		(*chan).playback_buf->reset ();
 		(*chan).capture_buf->reset ();
+		if (destructive()) {
+			DestructiveFileSource* dfs = dynamic_cast<DestructiveFileSource*> ((*chan).write_source);
+			dfs->seek (frame);
+		}
 	}
-
+	
 	playback_sample = frame;
 	file_frame = frame;
 
@@ -1775,6 +1779,10 @@ DiskStream::get_state ()
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
+	if (destructive()) {
+		node->add_property ("destructive", "true");
+	}
+
 	snprintf (buf, sizeof(buf), "%zd", channels.size());
 	node->add_property ("channels", buf);
 
@@ -1847,6 +1855,12 @@ DiskStream::set_state (const XMLNode& node)
 	
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value();
+	} 
+
+	if ((prop = node.property ("destructive")) != 0) {
+		if (prop->value() == "true") {
+			_flags |= Destructive;
+		}
 	} 
 
 	if (deprecated_io_node) {
@@ -1966,7 +1980,7 @@ DiskStream::use_new_write_source (uint32_t n)
 	}
 
 	try {
-		if ((chan.write_source = _session.create_file_source (*this, n)) == 0) {
+		if ((chan.write_source = _session.create_file_source (*this, n, destructive())) == 0) {
 			throw failed_constructor();
 		}
 	} 
@@ -1983,12 +1997,16 @@ DiskStream::use_new_write_source (uint32_t n)
 }
 
 void
-DiskStream::reset_write_sources (bool mark_write_complete)
+DiskStream::reset_write_sources (bool mark_write_complete, bool force)
 {
 	ChannelList::iterator chan;
 	uint32_t n;
 
 	if (!recordable()) {
+		return;
+	}
+	
+	if (!force && destructive()) {
 		return;
 	}
 
@@ -2309,4 +2327,17 @@ void
 DiskStream::set_roll_delay (jack_nframes_t nframes)
 {
 	_roll_delay = nframes;
+}
+
+void
+DiskStream::set_destructive (bool yn)
+{
+	if (yn != destructive()) {
+		reset_write_sources (true, true);
+		if (yn) {
+			_flags |= Destructive;
+		} else {
+			_flags &= ~Destructive;
+		}
+	}
 }

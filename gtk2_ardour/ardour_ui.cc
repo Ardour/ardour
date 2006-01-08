@@ -652,92 +652,6 @@ ARDOUR_UI::update_wall_clock ()
 
 	return TRUE;
 }
-
-void
-ARDOUR_UI::toggle_auto_play ()
-
-{
-	toggle_some_session_state (auto_play_button,
-				   &Session::get_auto_play,
-				   &Session::set_auto_play);
-}
-
-void
-ARDOUR_UI::toggle_auto_return ()
-
-{
-	toggle_some_session_state (auto_return_button,
-				   &Session::get_auto_return,
-				   &Session::set_auto_return);
-}
-
-void
-ARDOUR_UI::toggle_click ()
-{
-	toggle_some_session_state (click_button,
-				   &Session::get_clicking,
-				   &Session::set_clicking);
-}
-
-void
-ARDOUR_UI::toggle_session_auto_loop ()
-{
-	if (session) {
-		if (session->get_auto_loop()) {
-			if (session->transport_rolling()) {
-				transport_roll();
-			}
-			else {
-				session->request_auto_loop (false);
-			}
-		}
-		else {
-			session->request_auto_loop (true);
-		}
-	}
-}
-
-void
-ARDOUR_UI::toggle_session_punch_in ()
-{
-	if (session) {
-		session->set_punch_in (!session->get_punch_in());
-	}
-}
-
-void
-ARDOUR_UI::toggle_punch_out ()
-{
-	toggle_some_session_state (punch_out_button,
-				   &Session::get_punch_out,
-				   &Session::set_punch_out);
-}
-
-void
-ARDOUR_UI::toggle_punch_in ()
-{
-	toggle_some_session_state (punch_in_button,
-				   &Session::get_punch_in,
-				   &Session::set_punch_in);
-}
-
-void
-ARDOUR_UI::map_button_state ()
-{
-	map_some_session_state (auto_return_button,
-				&Session::get_auto_return);
-	map_some_session_state (auto_play_button,
-				&Session::get_auto_play);
-	map_some_session_state (auto_input_button,
-				&Session::get_auto_input);
-	map_some_session_state (punch_in_button,
-				&Session::get_punch_in);
-	map_some_session_state (punch_out_button,
-				&Session::get_punch_out);
-	map_some_session_state (click_button,
-				&Session::get_clicking);
-}
-
 void
 ARDOUR_UI::control_methods_adjusted ()
 
@@ -788,38 +702,6 @@ ARDOUR_UI::map_some_session_state (ToggleButton& button,
 		button.set_active (x);
 	}
 }
-
-void
-ARDOUR_UI::toggle_some_session_state (ToggleButton& button,
-				      bool (Session::*get)() const,
-				      void (Session::*set)(bool))
-
-{
-	bool button_state;
-	bool session_state;
-
-	if (session == 0) {
-		return;
-	}
-
-	button_state = button.get_active ();
-	session_state = (session->*get)();
-
-	if (button_state != session_state) {
-		(session->*set) (button_state);
-#if 0
-	
-		/* check that it worked, and reverse
-		   the button state if it didn't
-		*/
-
-		if ((session->*get)() != button_state) {
-			button->set_active (!button_state);
-		}
-#endif
-
-	}
-}	
 
 gint
 ARDOUR_UI::session_menu (GdkEventButton *ev)

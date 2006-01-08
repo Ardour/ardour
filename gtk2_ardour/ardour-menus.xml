@@ -59,6 +59,16 @@
                <menuitem action='brush-at-mouse'/>
                <separator/> 
                <menuitem action='ToggleFollowPlayhead'/>
+               <separator/> 
+               <menu action='TransportOptions'>
+                    <menuitem action='ToggleTimeMaster'/>
+                    <menuitem action='TogglePunchIn'/>
+                    <menuitem action='TogglePunchOut'/>
+                    <menuitem action='ToggleAutoInput'/>
+                    <menuitem action='ToggleAutoPlay'/>
+                    <menuitem action='ToggleAutoReturn'/>
+                    <menuitem action='ToggleClick'/>
+               </menu>
        </menu>
        <menu name='Edit' action='Edit'>
                <menuitem action='undo'/>

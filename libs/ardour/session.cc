@@ -48,6 +48,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/source.h>
 #include <ardour/filesource.h>
+#include <ardour/destructive_filesource.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/auditioner.h>
 #include <ardour/recent_sessions.h>
@@ -2619,7 +2620,7 @@ Session::get_source (ARDOUR::id_t id)
 }
 
 FileSource *
-Session::create_file_source (DiskStream& ds, int32_t chan)
+Session::create_file_source (DiskStream& ds, int32_t chan, bool destructive)
 {
 	string spath;
 	uint32_t cnt;
@@ -2693,7 +2694,11 @@ Session::create_file_source (DiskStream& ds, int32_t chan)
 
 	/* this might throw failed_constructor(), which is OK */
 
-	return new FileSource (spath, frame_rate());
+	if (destructive) {
+		return new DestructiveFileSource (spath, frame_rate());
+	} else {
+		return new FileSource (spath, frame_rate());
+	}
 }
 
 /* Playlist management */
