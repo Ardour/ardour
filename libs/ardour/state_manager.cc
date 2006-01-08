@@ -7,7 +7,7 @@ using namespace ARDOUR;
 using namespace std;
 
 bool StateManager::_allow_save = true;
-vector<StateManager::DeferredSave> StateManager::deferred;
+set<StateManager*> StateManager::deferred;
 
 StateManager::StateManager ()
 {
@@ -19,16 +19,21 @@ StateManager::~StateManager()
 }
 
 void
-StateManager::set_allow_save (bool yn)
+StateManager::prohibit_save ()
 {
-	_allow_save = yn;
+	_allow_save = false;
+}
 
-	if (yn) {
-		for (vector<DeferredSave>::iterator x = deferred.begin(); x != deferred.end(); ++x) {
-			(*x).first->save_state ((*x).second);
+void
+StateManager::allow_save (const char* why, bool do_save)
+{
+	_allow_save = true;
+	if (do_save) {
+		for (set<StateManager*>::iterator x = deferred.begin(); x != deferred.end(); ++x) {
+			(*x)->save_state (why);
 		}
-		deferred.clear ();
 	}
+	deferred.clear ();
 }
 
 void
@@ -69,7 +74,7 @@ void
 StateManager::save_state (std::string why)
 {
 	if (!_allow_save) {
-		deferred.push_back (DeferredSave (this, why));
+		deferred.insert (this);
 		return;
 	}
 

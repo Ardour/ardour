@@ -1445,7 +1445,7 @@ Session::set_state (const XMLNode& node)
 		return -1;
 	}
 
-	StateManager::set_allow_save (false);
+	StateManager::prohibit_save ();
 
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value ();
@@ -1607,7 +1607,7 @@ Session::set_state (const XMLNode& node)
 
 	_state_of_the_state = Clean;
 
-	StateManager::set_allow_save (true);
+	StateManager::allow_save (_("initial state"), true);
 
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
@@ -1615,11 +1615,11 @@ Session::set_state (const XMLNode& node)
 		state_was_pending = false;
 	}
 
-	ret = 0;
+	return 0;
 
   out:
-	/* yes, doing it twice doesn't hurt and makes the code easier */
-	StateManager::set_allow_save (true);
+	/* we failed, re-enable state saving but don't actually save internal state */
+	StateManager::allow_save (X_("ignored"), false);
 	return ret;
 }
 

@@ -3279,10 +3279,13 @@ void
 Editor::duplicate_some_regions (AudioRegionSelection& regions, float times)
 {
 	Playlist *playlist; 
-	
+	AudioRegionSelection sel = regions; // clear (below) will clear the argument list
+		
 	begin_reversible_command (_("duplicate region"));
 
-	for (AudioRegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+	selection->clear_audio_regions ();
+
+	for (AudioRegionSelection::iterator i = sel.begin(); i != sel.end(); ++i) {
 
 		Region& r ((*i)->region);
 
@@ -3296,11 +3299,12 @@ Editor::duplicate_some_regions (AudioRegionSelection& regions, float times)
 		session->add_redo_no_execute (playlist->get_memento());
 
 		c.disconnect ();
+
+		if (latest_regionview) {
+			selection->add (latest_regionview);
+		}
 	}
 		
-	if (latest_regionview) {
-		selection->set (latest_regionview);
-	}
 
 	commit_reversible_command ();
 }

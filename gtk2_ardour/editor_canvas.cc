@@ -383,13 +383,41 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 	// XXX what is the correct height value for the time canvas ? this overstates it
 	time_canvas.set_scroll_region ( 0.0, 0.0, max (last_canvas_unit, canvas_width), canvas_height);
 
+	controls_layout.queue_resize();
+
+}
+
+void
+Editor::controls_layout_size_request (Requisition* req)
+{
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator i;
+	double pos;
+
+        for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
+	        TimeAxisView *tv = (*i)[route_display_columns.tv];
+		pos += tv->effective_height;
+		pos += track_spacing;
+	}
+
+	RefPtr<Gdk::Screen> screen = get_screen();
+
+	if (!screen) {
+		screen = Gdk::Screen::get_default();
+	}
+
 	/* never let the width of the controls area shrink horizontally */
 
 	edit_controls_vbox.check_resize();
-	int w = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
 
-	controls_layout.set_size_request (w, min ((gint) pos, (screen->get_height() - 400)));
-	controls_layout.set_size (w, (gint) pos);
+	req->width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
+	req->height = min ((gint) pos, (screen->get_height() - 400));
+
+	/* this one is important: it determines how big the layout thinks it really is, as 
+	   opposed to what it displays on the screen
+	*/
+
+	controls_layout.set_size (req->width, (gint) pos);
 }
 
 bool

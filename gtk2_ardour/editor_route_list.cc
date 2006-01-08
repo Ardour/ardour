@@ -81,7 +81,6 @@ Editor::handle_new_route (Route& route)
 	tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	
 	editor_mixer_button.set_sensitive(true);
-	
 }
 
 void

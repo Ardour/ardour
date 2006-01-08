@@ -233,7 +233,6 @@ UI::quit ()
 
 static bool idle_quit ()
 {
-	cerr << "idle quit, level = " << Main::level() << endl;
 	Main::quit ();
 	return true;
 }

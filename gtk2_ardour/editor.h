@@ -651,6 +651,7 @@ class Editor : public PublicEditor
 
 	Gtk::Layout         controls_layout;
 	bool Editor::control_layout_scroll (GdkEventScroll* ev);
+	void controls_layout_size_request (Gtk::Requisition*);
 
 	Gtk::HScrollbar     edit_hscrollbar;
 	bool                edit_hscroll_dragging;

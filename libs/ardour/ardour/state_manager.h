@@ -3,7 +3,7 @@
 
 #include <list>
 #include <string>
-#include <vector>
+#include <set>
 
 #include <sigc++/signal.h>
 
@@ -12,7 +12,6 @@
 namespace ARDOUR {
 
 typedef uint32_t state_id_t;
-
 
 class StateManager : public sigc::trackable
 {
@@ -36,13 +35,12 @@ class StateManager : public sigc::trackable
 
 	state_id_t _current_state_id;
 
-	static void set_allow_save (bool);
-	static bool allow_save ();
+	static void prohibit_save ();
+	static void allow_save (const char* why, bool dosave);
 
   protected:
 	static bool _allow_save;
-	typedef std::pair<StateManager*,std::string> DeferredSave;
-	static std::vector<DeferredSave> deferred;
+	static std::set<StateManager*> deferred;
 
 	StateMap   states;
 
