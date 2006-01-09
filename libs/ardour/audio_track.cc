@@ -688,7 +688,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 			}
 		}
 
-		process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || _session.get_recording_plugins()), declick, (_meter_point != MeterInput));
+		process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !_session.get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
 		
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */

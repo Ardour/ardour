@@ -240,9 +240,9 @@ ARDOUR_UI::toggle_StopPluginsWithTransport()
 	toggle_config_state ("options", "StopPluginsWithTransport", &Configuration::set_plugins_stop_with_transport);
 }
 void
-ARDOUR_UI::toggle_RunPluginsWhileRecording()
+ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording()
 {
-	toggle_session_state ("options", "RunPluginsWhileRecording", &Session::set_recording_plugins, &Session::get_recording_plugins);
+	toggle_session_state ("options", "DoNotRunPluginsWhileRecording", &Session::set_do_not_record_plugins, &Session::get_do_not_record_plugins);
 }
 
 void
@@ -438,7 +438,7 @@ ARDOUR_UI::session_control_changed (Session::ControlType t)
 		break;
 
 	case Session::RecordingPlugins:
-		map_some_session_state ("options", "RunPluginsWhileRecording", &Session::get_recording_plugins);
+		map_some_session_state ("options", "DoNotRunPluginsWhileRecording", &Session::get_do_not_record_plugins);
 		break;
 
 	case Session::CrossFadesActive:

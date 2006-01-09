@@ -230,7 +230,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	/* default configuration */
 
-	recording_plugins = false;
+	do_not_record_plugins = false;
 	over_length_short = 2;
 	over_length_long = 10;
 	send_midi_timecode = false;
@@ -971,9 +971,15 @@ Session::load_options (const XMLNode& node)
 			set_midi_feedback (prop->value() == "yes");
 		}
 	}
+	// Legacy support for <recording-plugins>
 	if ((child = find_named_node (node, "recording-plugins")) != 0) {
 		if ((prop = child->property ("val")) != 0) {
-			set_recording_plugins (prop->value() == "yes");
+			set_do_not_record_plugins (prop->value() == "no");
+		}
+	}
+	if ((child = find_named_node (node, "do-not-record-plugins")) != 0) {
+		if ((prop = child->property ("val")) != 0) {
+			set_do_not_record_plugins (prop->value() == "yes");
 		}
 	}
 	if ((child = find_named_node (node, "crossfades-active")) != 0) {
@@ -1166,8 +1172,8 @@ Session::get_options () const
 	child->add_property ("val", get_midi_control () ? "yes" : "no");
 	child = opthead->add_child ("midi-feedback");
 	child->add_property ("val", get_midi_feedback () ? "yes" : "no");
-	child = opthead->add_child ("recording-plugins");
-	child->add_property ("val", get_recording_plugins () ? "yes" : "no");
+	child = opthead->add_child ("do-not-record-plugins");
+	child->add_property ("val", get_do_not_record_plugins () ? "yes" : "no");
 	child = opthead->add_child ("auto-crossfade");
 	child->add_property ("val", get_crossfades_active () ? "yes" : "no");
 	child = opthead->add_child ("audible-click");

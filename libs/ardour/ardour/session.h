@@ -422,7 +422,7 @@ class Session : public sigc::trackable, public Stateful
 	void set_mmc_control (bool yn);
 	void set_midi_feedback (bool yn);
 	void set_midi_control (bool yn);
-	void set_recording_plugins (bool yn);
+	void set_do_not_record_plugins (bool yn);
 	void set_crossfades_active (bool yn);
 	void set_seamless_loop (bool yn);
 
@@ -439,7 +439,7 @@ class Session : public sigc::trackable, public Stateful
 	bool get_mmc_control () const;
 	bool get_midi_feedback () const;
 	bool get_midi_control () const;
-	bool get_recording_plugins () const { return recording_plugins; }
+	bool get_do_not_record_plugins () const { return do_not_record_plugins; }
 	bool get_crossfades_active () const { return crossfades_active; }
 
 	bool get_input_auto_connect () const;
@@ -1092,7 +1092,7 @@ class Session : public sigc::trackable, public Stateful
 	MIDI::Port*             _midi_port;
 	string                  _path;
 	string                  _name;
-	bool                     recording_plugins;
+	bool                     do_not_record_plugins;
 
 	/* toggles */
 

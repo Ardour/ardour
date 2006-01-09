@@ -920,10 +920,10 @@ Session::set_crossfades_active (bool yn)
 }
 
 void
-Session::set_recording_plugins (bool yn)
+Session::set_do_not_record_plugins (bool yn)
 {
-	if (recording_plugins != yn) {
-		recording_plugins = yn; 
+	if (do_not_record_plugins != yn) {
+		do_not_record_plugins = yn; 
 		set_dirty ();
 		ControlChanged (RecordingPlugins); 
 	}

@@ -681,7 +681,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_UseSoftwareMonitoring();
 	void toggle_UseExternalMonitoring();
 	void toggle_StopPluginsWithTransport();
-	void toggle_RunPluginsWhileRecording();
+	void toggle_DoNotRunPluginsWhileRecording();
 	void toggle_VerifyRemoveLastCapture();
 	void toggle_StopRecordingOnXrun();
 	void toggle_StopTransportAtEndOfSession();
