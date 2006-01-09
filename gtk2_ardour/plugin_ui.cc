@@ -290,6 +290,19 @@ PluginUI::build (AudioEngine &engine)
 
 			} else if (cui->display) {
 
+				output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1, 
+						     FILL|EXPAND, FILL);
+				
+ 				// TODO: The meters should be divided into multiple rows 
+				
+				if (++output_col == output_cols) {
+					output_cols ++;
+					output_table.resize (output_rows, output_cols);
+				}
+				
+				/* old code, which divides meters into
+				 * columns first, rows later. New code divides into one row
+				 
 				if (output_row == output_rows) {
 					output_row = 0;
 					if (++output_col == output_cols) {
@@ -302,6 +315,7 @@ PluginUI::build (AudioEngine &engine)
 						     FILL|EXPAND, FILL);
  
 				output_row++;
+				*/
 			}
 				
 			/* HACK: ideally the preferred height would be queried from
@@ -588,6 +602,7 @@ control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &Pl
 		control_ui->display = manage (new EventBox);
 		control_ui->display->set_name ("ParameterValueDisplay");
 
+		// TODO: This label should be rotated 90 degrees CCW
 		control_ui->display_label = manage (new Label);
 		control_ui->display_label->set_name ("ParameterValueDisplay");
 
@@ -602,7 +617,7 @@ control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &Pl
 		MeterInfo * info = new MeterInfo(port_index);
  		control_ui->meterinfo = info;
 		
-		info->meter = new FastMeter (100, 5, FastMeter::Horizontal);
+		info->meter = new FastMeter (5, 100, FastMeter::Vertical);
 
 		info->min_unbound = desc.min_unbound;
 		info->max_unbound = desc.max_unbound;
@@ -611,12 +626,16 @@ control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &Pl
 		info->max = desc.upper;
 
 		control_ui->vbox = manage (new VBox);
-
- 		control_ui->vbox->pack_start (control_ui->label, false, false);
- 		control_ui->vbox->pack_start (*info->meter, false, false);
+		control_ui->hbox = manage (new HBox);
 		
- 		control_ui->pack_start (*control_ui->vbox, false, false);
- 		control_ui->pack_start (*control_ui->display, false, false);
+		control_ui->hbox->pack_start (control_ui->label, false, false);
+ 		control_ui->hbox->pack_start (*info->meter, false, false);
+
+ 		control_ui->vbox->pack_start (*control_ui->hbox, false, false);
+		
+ 		control_ui->vbox->pack_start (*control_ui->display, false, false);
+
+		control_ui->pack_start (*control_ui->vbox);
 
 		control_ui->meterinfo->meter->show_all();
 		control_ui->meterinfo->packed = true;

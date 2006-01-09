@@ -142,8 +142,8 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	
 	static const int32_t initial_button_rows = 6;
 	static const int32_t initial_button_cols = 1;
-	static const int32_t initial_output_rows = 8;
-	static const int32_t initial_output_cols = 1;
+	static const int32_t initial_output_rows = 1;
+	static const int32_t initial_output_cols = 4;
 
 	struct ControlUI : public Gtk::HBox {
 
@@ -168,7 +168,8 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	    Gtk::EventBox *display;
 	    Gtk::Label*    display_label;
 
-	    Gtk::VBox  *    vbox;
+		Gtk::HBox  *    hbox;
+		Gtk::VBox  *    vbox;
 	    MeterInfo  *    meterinfo;
 
 	    ControlUI ();
