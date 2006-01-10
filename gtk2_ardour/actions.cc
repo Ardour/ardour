@@ -60,7 +60,7 @@ ActionManager::init ()
 	ui_manager = UIManager::create ();
 
 	try {
-		ui_manager->add_ui_from_file (ARDOUR::find_config_file("ardour-menus.xml"));
+		ui_manager->add_ui_from_file (ARDOUR::find_config_file("ardour.menus"));
 	} catch (Glib::MarkupError& err) {
 		error << "badly formatted UI definition file" << endmsg;
 	} catch (...) {
