@@ -41,19 +41,7 @@ using namespace ARDOUR;
 using namespace Gtk;
 
 void
-Editor::edit_group_list_column_click (gint col)
-
-{
-	if (edit_group_list_menu == 0) {
-		build_edit_group_list_menu ();
-	}
-
-	edit_group_list_menu->popup (0, 0);
-}
-
-void
 Editor::build_edit_group_list_menu ()
-
 {
 	using namespace Gtk::Menu_Helpers;
 
@@ -61,34 +49,33 @@ Editor::build_edit_group_list_menu ()
 	edit_group_list_menu->set_name ("ArdourContextMenu");
 	MenuList& items = edit_group_list_menu->items();
 
-	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Editor::select_all_edit_groups)));
-	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Editor::unselect_all_edit_groups)));
+	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Editor::activate_all_edit_groups)));
+	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &Editor::disable_all_edit_groups)));
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Add group"), mem_fun(*this, &Editor::new_edit_group)));
+	
 }
 
 void
-Editor::unselect_all_edit_groups ()
-
+Editor::activate_all_edit_groups ()
 {
-}
-
-void
-Editor::select_all_edit_groups ()
-
-{
- 
-	/* XXX potential race with remove_track(), but the select operation
-	   cannot be done with the track_lock held.
-	*/
-
         Gtk::TreeModel::Children children = group_model->children();
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-	        edit_group_display.get_selection()->select (iter);
+	        (*iter)[group_columns.is_active] = true;
+	}
+}
+
+void
+Editor::disable_all_edit_groups ()
+{
+        Gtk::TreeModel::Children children = group_model->children();
+	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+	        (*iter)[group_columns.is_active] = false;
 	}
 }
 
 void
 Editor::new_edit_group ()
-
 {
 	if (session == 0) {
 		return;
@@ -104,7 +91,7 @@ Editor::new_edit_group ()
 	case GTK_RESPONSE_ACCEPT:
 	        prompter.get_result (result);
 		if (result.length()) {
-		  session->add_edit_group (result);
+			session->add_edit_group (result);
 		}
 		break;
 	}
@@ -119,84 +106,97 @@ Editor::edit_group_list_button_clicked ()
 gint
 Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 {
+	if (Keyboard::is_context_menu_event (ev)) {
+		if (edit_group_list_menu == 0) {
+			build_edit_group_list_menu ();
+		}
+		edit_group_list_menu->popup (1, 0);
+		return true;
+	}
+
+
         RouteGroup* group;
 	TreeIter iter;
 	TreeModel::Path path;
 	TreeViewColumn* column;
 	int cellx;
 	int celly;
-	
+
 	if (!edit_group_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
 	}
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
-	  
-	case 1:
-
+	case 2:
 		if (Keyboard::is_edit_event (ev)) {
-			// RouteGroup* group = (RouteGroup *) edit_group_display.row(row).get_data ();
-			// edit_route_group (group);
+			if ((iter = group_model->get_iter (path))) {
+				if ((group = (*iter)[group_columns.routegroup]) != 0) {
+					// edit_route_group (group);
+					return true;
+				}
+			}
+			
+		} 
+		break;
 
-			return stop_signal (edit_group_display, "button_press_event");
-
-		} else {
-			/* allow regular select to occur */
-			return FALSE;
+	case 1:
+		if ((iter = group_model->get_iter (path))) {
+			bool visible = (*iter)[group_columns.is_visible];
+			(*iter)[group_columns.is_visible] = !visible;
+			return true;
 		}
 		break;
 
 	case 0:
 		if ((iter = group_model->get_iter (path))) {
-			/* path points to a valid node */
-			
-		        if ((group = (*iter)[group_columns.routegroup]) != 0) {
-				group->set_active (!group->is_active (), this);
-			}
+			bool active = (*iter)[group_columns.is_active];
+			(*iter)[group_columns.is_active] = !active;
+			return true;
 		}
 		break;
+		
+	default:
+		break;
 	}
-      
-	return stop_signal (edit_group_display, "button_press_event");
-}
+	
+	return false;
+ }
 
-void
-Editor::edit_group_selection_changed ()
+void 
+Editor::edit_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
 {
-	TreeModel::iterator i;
-	TreeModel::Children rows = group_model->children();
-	Glib::RefPtr<TreeSelection> selection = edit_group_display.get_selection();
+	RouteGroup* group;
 
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		RouteGroup* group;
+	if ((group = (*iter)[group_columns.routegroup]) == 0) {
+		return;
+	}
 
-		group = (*i)[group_columns.routegroup];
-
-		if (selection->is_selected (i)) {
-		  for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
-		    if ((*j)->edit_group() == group) {
-		      select_strip_in_display (*j);
-		    }
-		  }
-		} else {
-		  for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
-		    if ((*j)->edit_group() == group) {
-		      unselect_strip_in_display (**j);
-		    }
-		  }
+	if ((*iter)[group_columns.is_visible]) {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->edit_group() == group) {
+				show_track_in_display (**j);
+			}
+		}
+	} else {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->edit_group() == group) {
+				hide_track_in_display (**j);
+			}
 		}
 	}
+
+	bool active = (*iter)[group_columns.is_active];
+	group->set_active (active, this);
 }
 
 void
 Editor::add_edit_group (RouteGroup* group)
-
 {
-        
         ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::add_edit_group), group));
 
 	TreeModel::Row row = *(group_model->append());
 	row[group_columns.is_active] = group->is_active();
+	row[group_columns.is_visible] = true;
 	row[group_columns.text] = group->name();
 	row[group_columns.routegroup] = group;
 
@@ -206,20 +206,14 @@ Editor::add_edit_group (RouteGroup* group)
 void
 Editor::group_flags_changed (void* src, RouteGroup* group)
 {
-  /* GTK2FIX not needed in gtk2?
+        ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::group_flags_changed), src, group));
 
-	if (src != this) {
-		// select row
+        Gtk::TreeModel::Children children = group_model->children();
+	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+		if (group == (*iter)[group_columns.routegroup]) {
+			(*iter)[group_columns.is_active] = group->is_active();
+		}
 	}
-
-	CList_Helpers::RowIterator ri = edit_group_display.rows().find_data (group);
-
-	if (group->is_active()) {
-		edit_group_display.cell (ri->get_row_num(),0).set_pixmap (check_pixmap, check_mask);
-	} else {
-		edit_group_display.cell (ri->get_row_num(),0).set_pixmap (empty_pixmap, empty_mask);
-	}
-  */
 }
 
 

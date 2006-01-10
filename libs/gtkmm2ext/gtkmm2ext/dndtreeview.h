@@ -51,11 +51,7 @@ class DnDTreeView : public Gtk::TreeView
 		suggested_action = context->get_suggested_action();
 		return TreeView::on_drag_motion (context, x, y, time);
 	}
-	bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time) {
-		suggested_action = Gdk::DragAction (0);
-		return TreeView::on_drag_drop (context, x, y, time);
-	}
-	
+	bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
 	void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time);
 	void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time);
 

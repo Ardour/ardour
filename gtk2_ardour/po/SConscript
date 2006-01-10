@@ -45,3 +45,7 @@ for lang in languages[:]:
     modir = (os.path.join (install_prefix, 'share/locale/' + lang + '/LC_MESSAGES/'))
     moname = domain + '.mo'
     env.Alias('install', env.InstallAs (os.path.join (modir, moname), lang + '.mo'))
+
+env.Alias ('tarball', env.Distribute (env['DISTTREE'],
+                                      [ 'SConscript' ] +
+                                      glob.glob('*.po')))

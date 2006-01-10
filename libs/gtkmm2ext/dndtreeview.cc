@@ -70,7 +70,7 @@ void
 DnDTreeView::on_drag_data_get(const RefPtr<DragContext>& context, SelectionData& selection_data, guint info, guint time)
 {
 	if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
-		
+
 		TreeView::on_drag_data_get (context, selection_data, info, time);
 		
 	} else if (data_column >= 0) {
@@ -113,4 +113,10 @@ DnDTreeView::on_drag_data_received(const RefPtr<DragContext>& context, int x, in
 	}
 }
 
+bool 
+DnDTreeView::on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time)
+{
+	suggested_action = Gdk::DragAction (0);
+	return TreeView::on_drag_drop (context, x, y, time);
+}
 

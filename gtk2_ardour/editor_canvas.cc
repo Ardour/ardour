@@ -367,8 +367,10 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 
         for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
 	        TimeAxisView *tv = (*i)[route_display_columns.tv];
-		pos += tv->effective_height;
-		pos += track_spacing;
+		if (tv != 0) {
+			pos += tv->effective_height;
+			pos += track_spacing;
+		}
 	}
 
 	RefPtr<Gdk::Screen> screen = get_screen();
@@ -396,8 +398,10 @@ Editor::controls_layout_size_request (Requisition* req)
 
         for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
 	        TimeAxisView *tv = (*i)[route_display_columns.tv];
-		pos += tv->effective_height;
-		pos += track_spacing;
+		if (tv != 0) {
+			pos += tv->effective_height;
+			pos += track_spacing;
+		}
 	}
 
 	RefPtr<Gdk::Screen> screen = get_screen();

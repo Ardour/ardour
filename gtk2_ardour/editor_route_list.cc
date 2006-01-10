@@ -29,6 +29,7 @@
 #include "gui_thread.h"
 
 #include <ardour/route.h>
+#include <ardour/audio_track.h>
 
 #include "i18n.h"
 
@@ -48,25 +49,53 @@ Editor::handle_new_route (Route& route)
 {
 	TimeAxisView *tv;
 	AudioTimeAxisView *atv;
-	TreeModel::Row row = *(route_display_model->append());
+	TreeModel::Row parent;
+	TreeModel::Row row;
 
 	if (route.hidden()) {
 		return;
 	}
-		
+	
 	tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
 
-	track_views.push_back (tv);
+#if 0
+	if (route_display_model->children().size() == 0) {
+		
+                /* set up basic entries */
+
+		TreeModel::Row row;
+		
+		row = *(route_display_model->append());  // path = "0"
+		row[route_display_columns.text] = _("Busses");
+		row[route_display_columns.tv] = 0;
+		row = *(route_display_model->append());  // path = "1"
+		row[route_display_columns.text] = _("Tracks");
+		row[route_display_columns.tv] = 0;
+
+	}
+
+	if (dynamic_cast<AudioTrack*>(&route) != 0) {
+		TreeModel::iterator iter = route_display_model->get_iter ("1");  // audio tracks 
+		parent = *iter;
+	} else {
+		TreeModel::iterator iter = route_display_model->get_iter ("0");  // busses
+		parent = *iter;
+	}
+	
+
+	row = *(route_display_model->append (parent.children()));
+#else 
+	row = *(route_display_model->append ());
+#endif
 
 	row[route_display_columns.text] = route.name();
+	row[route_display_columns.visible] = tv->marked_for_display();
 	row[route_display_columns.tv] = tv;
+		
+	track_views.push_back (tv);
 
 	ignore_route_list_reorder = true;
 	
-	if (!no_route_list_redisplay && tv->marked_for_display()) {
-	        route_list_display.get_selection()->select (row);
-	}
-
 	if ((atv = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
 		/* added a new fresh one at the end */
 		if (atv->route().order_key(N_("editor")) == -1) {
@@ -144,35 +173,29 @@ Editor::route_name_changed (TimeAxisView *tv)
 }
 
 void
-Editor::route_display_selection_changed ()
+Editor::hide_track_in_display (TimeAxisView& tv)
 {
-	TimeAxisView *tv;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 	Glib::RefPtr<TreeSelection> selection = route_list_display.get_selection();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-	        tv = (*i)[route_display_columns.tv];
-
-		if (!selection->is_selected (i)) {
-			tv->set_marked_for_display  (false);
-		} else {
-		        AudioTimeAxisView *atv;
-			tv->set_marked_for_display (true);
-			if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
-			        if (current_mixer_strip && &(atv->route()) == &(current_mixer_strip->route())) {
-				        // this will hide the mixer strip
-				        set_selected_mixer_strip(*atv);
-				}
-			}
+		if ((*i)[route_display_columns.tv] == &tv) { 
+			(*i)[route_display_columns.visible] = false;
+			break;
 		}
 	}
-	
-	redisplay_route_list ();
+
+	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&tv);
+
+	if (atv && current_mixer_strip && &(atv->route()) == &(current_mixer_strip->route())) {
+		// this will hide the mixer strip
+		set_selected_mixer_strip (tv);
+	}
 }
 
 void
-Editor::unselect_strip_in_display (TimeAxisView& tv)
+Editor::show_track_in_display (TimeAxisView& tv)
 {
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
@@ -180,21 +203,9 @@ Editor::unselect_strip_in_display (TimeAxisView& tv)
 	
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[route_display_columns.tv] == &tv) { 
-		       selection->unselect (*i);
-		}
-	}
-}
-
-void
-Editor::select_strip_in_display (TimeAxisView* tv)
-{
-	TreeModel::Children rows = route_display_model->children();
-	TreeModel::Children::iterator i;
-	Glib::RefPtr<TreeSelection> selection = route_list_display.get_selection();
-	
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		if ((*i)[route_display_columns.tv] == tv) { 
-		       selection->select (*i);
+			(*i)[route_display_columns.visible] = true;
+			tv.set_marked_for_display (true);
+			break;
 		}
 	}
 }
@@ -218,9 +229,14 @@ Editor::redisplay_route_list ()
 		return;
 	}
 
-	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
+	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		AudioTimeAxisView* at; 
+
+		if (tv == 0) {
+			// just a "title" row
+			continue;
+		}
 
 		if (!ignore_route_list_reorder) {
 			
@@ -230,9 +246,14 @@ Editor::redisplay_route_list ()
 			
 			if ((at = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
 				at->route().set_order_key (N_("editor"), order);
+				++order;
 			}
 		}
-		if (tv->marked_for_display()) {
+
+		bool visible = (*i)[route_display_columns.visible];
+
+		if (visible) {
+			tv->set_marked_for_display (false);
 			position += tv->show_at (position, n, &edit_controls_vbox);
 			position += track_spacing;
 		} else {
@@ -243,7 +264,6 @@ Editor::redisplay_route_list ()
 		
 	}
 
-	controls_layout.queue_resize ();
 	reset_scrolling_region ();
 }
 
@@ -253,23 +273,27 @@ Editor::hide_all_tracks (bool with_select)
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 
-	// GTK2FIX
-	// track_display_list.freeze ();
-	
+	no_route_list_redisplay = true;
+
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		
 		TreeModel::Row row = (*i);
 		TimeAxisView *tv = row[route_display_columns.tv];
-		
-		if (with_select) {
-			route_list_display.get_selection()->unselect (i);
-		} else {
-		        tv->set_marked_for_display (false);
-			tv->hide();
-		
+
+		if (tv == 0) {
+			continue;
 		}
+		
+		row[route_display_columns.visible] = false;
 	}
-	//route_list_display.thaw ();
+
+	no_route_list_redisplay = false;
+	redisplay_route_list ();
+
+	/* XXX this seems like a hack and half, but its not clear where to put this
+	   otherwise.
+	*/
+
 	reset_scrolling_region ();
 }
 
@@ -279,146 +303,212 @@ Editor::build_route_list_menu ()
         using namespace Menu_Helpers;
 	using namespace Gtk;
 
-
 	route_list_menu = new Menu;
 	
 	MenuList& items = route_list_menu->items();
 	route_list_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Editor::select_all_routes)));
-	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Editor::unselect_all_routes)));
-	items.push_back (MenuElem (_("Show All AbstractTracks"), mem_fun(*this, &Editor::select_all_audiotracks)));
-	items.push_back (MenuElem (_("Hide All AbstractTracks"), mem_fun(*this, &Editor::unselect_all_audiotracks)));
-	items.push_back (MenuElem (_("Show All AudioBus"), mem_fun(*this, &Editor::select_all_audiobus)));
-	items.push_back (MenuElem (_("Hide All AudioBus"), mem_fun(*this, &Editor::unselect_all_audiobus)));
+	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Editor::show_all_routes)));
+	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Editor::hide_all_routes)));
+	items.push_back (MenuElem (_("Show All Audio Tracks"), mem_fun(*this, &Editor::show_all_audiotracks)));
+	items.push_back (MenuElem (_("Hide All Audio Tracks"), mem_fun(*this, &Editor::hide_all_audiotracks)));
+	items.push_back (MenuElem (_("Show All Audio Busses"), mem_fun(*this, &Editor::show_all_audiobus)));
+	items.push_back (MenuElem (_("Hide All Audio Busses"), mem_fun(*this, &Editor::hide_all_audiobus)));
 
 }
 
 void
-Editor::unselect_all_routes ()
-{
-	hide_all_tracks (true);
-}
-
-void
-Editor::select_all_routes ()
-
+Editor::set_all_tracks_visibility (bool yn)
 {
         TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 
+	no_route_list_redisplay = true;
+
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		route_list_display.get_selection()->select (i);
+
+		TreeModel::Row row = (*i);
+		TimeAxisView* tv = row[route_display_columns.tv];
+
+		if (tv == 0) {
+			continue;
+		}
+		
+		(*i)[route_display_columns.visible] = yn;
 	}
+
+	no_route_list_redisplay = false;
+	redisplay_route_list ();
 }
 
 void
-Editor::select_all_audiotracks () 
+Editor::set_all_audio_visibility (int tracks, bool yn) 
 {
         TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 
+	no_route_list_redisplay = true;
+
 	for (i = rows.begin(); i != rows.end(); ++i) {
-	TreeModel::Row row = (*i);
-	        TimeAxisView* tv = row[route_display_columns.tv];
+		TreeModel::Row row = (*i);
+		TimeAxisView* tv = row[route_display_columns.tv];
 		AudioTimeAxisView* atv;
 
-		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
-			if (atv->is_audio_track()) {
-			        route_list_display.get_selection()->select (i);
+		if (tv == 0) {
+			continue;
+		}
 
+		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
+			switch (tracks) {
+			case 0:
+				(*i)[route_display_columns.visible] = yn;
+				break;
+
+			case 1:
+				if (atv->is_audio_track()) {
+					(*i)[route_display_columns.visible] = yn;
+				}
+				break;
+				
+			case 2:
+				if (!atv->is_audio_track()) {
+					(*i)[route_display_columns.visible] = yn;
+				}
+				break;
 			}
 		}
 	}
 
+	no_route_list_redisplay = false;
+	redisplay_route_list ();
 }
 
 void
-Editor::unselect_all_audiotracks () 
+Editor::hide_all_routes ()
 {
-        TreeModel::Children rows = route_display_model->children();
-	TreeModel::Children::iterator i;
-
-	for (i = rows.begin(); i != rows.end(); ++i) {
-	        TreeModel::Row row = (*i);
-	        TimeAxisView *tv = row[route_display_columns.tv];
-		AudioTimeAxisView* atv;
-
-		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
-			if (atv->is_audio_track()) {
-			        route_list_display.get_selection()->unselect (i);
-
-			}
-		}
-	}
-
+	set_all_tracks_visibility (false);
 }
 
 void
-Editor::select_all_audiobus () 
+Editor::show_all_routes ()
 {
-        TreeModel::Children rows = route_display_model->children();
-	TreeModel::Children::iterator i;
-
-	for (i = rows.begin(); i != rows.end(); ++i) {
-	        TreeModel::Row row = (*i);
-	        TimeAxisView* tv = row[route_display_columns.tv];
-		AudioTimeAxisView* atv;
-
-		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
-			if (!atv->is_audio_track()) {
-			        route_list_display.get_selection()->select (i);
-
-			}
-		}
-	}
-
+	set_all_tracks_visibility (true);
 }
 
 void
-Editor::unselect_all_audiobus () 
+Editor::show_all_audiobus ()
 {
-        TreeModel::Children rows = route_display_model->children();
-	TreeModel::Children::iterator i;
+	set_all_audio_visibility (2, true);
+}
+void
+Editor::hide_all_audiobus ()
+{
+	set_all_audio_visibility (2, false);
+}
 
-	for (i = rows.begin(); i != rows.end(); ++i) {
-	        TreeModel::Row row = (*i);
-	        TimeAxisView* tv = row[route_display_columns.tv];
-		AudioTimeAxisView* atv;
+void
+Editor::show_all_audiotracks()
+{
+	set_all_audio_visibility (1, true);
+}
+void
+Editor::hide_all_audiotracks ()
+{
+	set_all_audio_visibility (1, false);
+}
 
-		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
-			if (!atv->is_audio_track()) {
-			        route_list_display.get_selection()->unselect (i);
+bool
+Editor::route_list_display_button_press (GdkEventButton* ev)
+{
+	if (Keyboard::is_context_menu_event (ev)) {
+		show_route_list_menu ();
+		return true;
+	}
 
+	TreeIter iter;
+	TreeModel::Path path;
+	TreeViewColumn* column;
+	int cellx;
+	int celly;
+	
+	if (!route_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+		return false;
+	}
+
+	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
+	case 0:
+		if ((iter = route_display_model->get_iter (path))) {
+			TimeAxisView* tv = (*iter)[route_display_columns.tv];
+			if (tv) {
+				bool visible = (*iter)[route_display_columns.visible];
+				(*iter)[route_display_columns.visible] = !visible;
 			}
 		}
+		return true;
+
+	case 1:
+		/* allow normal processing to occur */
+		return false;
+
+	default:
+		break;
 	}
 
+	return false;
 }
 
-gint
-Editor::route_list_compare_func (TreeModel::iterator a, TreeModel::iterator b)
+void
+Editor::show_route_list_menu()
 {
-	TimeAxisView *tv1;
-	TimeAxisView *tv2;
-	AudioTimeAxisView *atv1;
-	AudioTimeAxisView *atv2;
-	Route* ra;
-	Route* rb;
-
-	tv1 = (*a)[route_display_columns.tv];
-	tv2 = (*b)[route_display_columns.tv];
-
-	if ((atv1 = dynamic_cast<AudioTimeAxisView*>(tv1)) == 0 ||
-	    (atv2 = dynamic_cast<AudioTimeAxisView*>(tv2)) == 0) {
-		return FALSE;
+	if (route_list_menu == 0) {
+		build_route_list_menu ();
 	}
 
-	ra = &atv1->route();
-	rb = &atv2->route();
-
-	/* use of ">" forces the correct sort order */
-
-	return ra->order_key ("editor") > rb->order_key ("editor");
+	route_list_menu->popup (1, 0);
 }
 
+bool
+Editor::route_list_selection_filter (const Glib::RefPtr<TreeModel>& model, const TreeModel::Path& path, bool yn)
+{
+	return true;
+}
+
+struct EditorOrderRouteSorter {
+    bool operator() (Route* a, Route* b) {
+	    /* use of ">" forces the correct sort order */
+	    return a->order_key ("editor") > b->order_key ("editor");
+    }
+};
+
+void
+Editor::initial_route_list_display ()
+{
+	Session::RouteList routes = session->get_routes();
+	EditorOrderRouteSorter sorter;
+
+	routes.sort (sorter);
+	
+	no_route_list_redisplay = true;
+
+	route_display_model->clear ();
+
+	for (Session::RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		handle_new_route (**i);
+	}
+
+	no_route_list_redisplay = false;
+
+	redisplay_route_list ();
+}
+
+void
+Editor::route_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
+{
+	redisplay_route_list ();
+}
+
+void
+Editor::route_list_delete (const Gtk::TreeModel::Path& path)
+{
+	redisplay_route_list ();
+}

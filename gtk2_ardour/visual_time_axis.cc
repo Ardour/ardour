@@ -222,7 +222,7 @@ VisualTimeAxis::visual_click()
 void
 VisualTimeAxis::hide_click()
 {
-	editor.unselect_strip_in_display (*this);
+	editor.hide_track_in_display (*this);
 }
 
 

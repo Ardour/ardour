@@ -16,3 +16,14 @@ if os.path.exists ('CVS'):
     Default([sigc2_config_h,libsigc2])
 else:
     Default([libsigc2])
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'NEWS', 'README', 'AUTHORS', 'ChangeLog',
+                                       'configure', 'Makefile.am', 'SConscript',
+                                       'sigc++/Makefile.am', 
+                                       'sigc++config.h',
+                                       ] + sigc2_files +
+                                     glob.glob('sigc++/*.h') +
+                                     glob.glob('sigc++/functors/*.h') + glob.glob('sigc++/adaptors/lambda/*.h') +
+                                     glob.glob('sigc++/adaptors/*.h')
+                                     ))

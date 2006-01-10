@@ -1120,7 +1120,7 @@ AudioTimeAxisView::visual_click ()
 void
 AudioTimeAxisView::hide_click ()
 {
-	editor.unselect_strip_in_display (*this);
+	editor.hide_track_in_display (*this);
 }
 
 Region*

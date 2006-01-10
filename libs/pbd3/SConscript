@@ -42,3 +42,6 @@ pbd3.VersionBuild(['version.cc','pbd/version.h'], 'SConscript')
 
 libpbd3 = pbd3.StaticLibrary('pbd', pbd3_files)
 Default(libpbd3)
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript' ] + pbd3_files + glob.glob('pbd/*.h')))

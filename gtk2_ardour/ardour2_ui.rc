@@ -644,12 +644,11 @@ style "plugin_slider"
 
 style "track_list_display" = "small_bold_text"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.80 }
-	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
-	fg[SELECTED] = { 0.50, 1.0, 1.0 }
-	bg[NORMAL] = { 0, 0, 0 }
-	bg[ACTIVE] = { 0, 0, 0 }
-	bg[SELECTED] = { 0, 0, 0 }
+	text[NORMAL] = { 0.80, 0.80, 0.80 }
+ 	text[ACTIVE] = { 0.3, 0.3, 0.3 }
+ 	text[INSENSITIVE] = { 0, 0, 0 }
+ 	text[SELECTED] = { 0.8, 0.8, 0.8 }
+
 	base[NORMAL] = { 0, 0, 0 }
  	base[ACTIVE] = { 0, 0, 0 }
  	base[INSENSITIVE] = { 0, 0, 0 }
@@ -1045,6 +1044,7 @@ widget "*PluginUIClickBox*" style "medium_bold_entry"
 widget "*PluginSlider" style "plugin_slider"
 widget "*TrackListDisplay" style "track_list_display"
 widget "*TrackListDisplay.*" style "small_bold_text"
+widget "*EditGroupList" style "track_list_display"
 widget "*RegionListDisplay" style "small_bold_entry"
 widget "*RegionListDisplay.*" style "small_bold_text"
 widget "*MixerRedirectSelector" style "small_bold_entry"

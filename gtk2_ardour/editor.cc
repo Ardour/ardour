@@ -522,66 +522,74 @@ Editor::Editor (AudioEngine& eng)
 	bottom_hbox.set_border_width (3);
 	bottom_hbox.set_spacing (3);
 
-	route_display_model = ListStore::create(route_display_columns);
+	route_display_model = TreeStore::create(route_display_columns);
 	route_list_display.set_model (route_display_model);
-	route_list_display.append_column (_("Tracks"), route_display_columns.text);
-	route_list_display.set_headers_visible (false);
+	route_list_display.append_column (_("Visible"), route_display_columns.visible);
+	route_list_display.append_column (_("Name"), route_display_columns.text);
+	route_list_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
+	route_list_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	route_list_display.set_headers_visible (true);
 	route_list_display.set_name ("TrackListDisplay");
-	route_list_display.get_selection()->set_mode (SELECTION_MULTIPLE);
+	route_list_display.get_selection()->set_mode (SELECTION_NONE);
 	route_list_display.set_reorderable (true);
 	route_list_display.set_size_request (75,-1);
 
-	route_display_model->signal_rows_reordered().connect (mem_fun (*this, &Editor::route_list_reordered));
-	route_display_model->set_sort_func (0, mem_fun (*this, &Editor::route_list_compare_func));
-	route_display_model->set_sort_column (0, SORT_ASCENDING);
+	CellRendererToggle* route_list_visible_cell = dynamic_cast<CellRendererToggle*>(route_list_display.get_column_cell_renderer (0));
+	route_list_visible_cell->property_activatable() = true;
+	route_list_visible_cell->property_radio() = false;
+	
+	route_display_model->signal_row_deleted().connect (mem_fun (*this, &Editor::route_list_delete));
+	route_display_model->signal_row_changed().connect (mem_fun (*this, &Editor::route_list_change));
+
+	route_list_display.signal_button_press_event().connect (mem_fun (*this, &Editor::route_list_display_button_press), false);
 
 	route_list_scroller.add (route_list_display);
 	route_list_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
-	route_list_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::route_display_selection_changed));
-
-	edit_group_list_button_label.set_text (_("Edit Groups"));
-	edit_group_list_button_label.set_name ("EditGroupTitleButton");
-	edit_group_list_button.add (edit_group_list_button_label);
-	edit_group_list_button.set_name ("EditGroupTitleButton");
-
 	group_model = ListStore::create(group_columns);
 	edit_group_display.set_model (group_model);
-	edit_group_display.append_column (_("active"), group_columns.is_active);
-	edit_group_display.append_column (_("groupname"), group_columns.text);
+	edit_group_display.append_column (_("Active"), group_columns.is_active);
+	edit_group_display.append_column (_("Visible"), group_columns.is_visible);
+	edit_group_display.append_column (_("Name"), group_columns.text);
 	edit_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	edit_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	edit_group_display.set_headers_visible (false);
+	edit_group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	edit_group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
+	edit_group_display.set_headers_visible (true);
 
-	/* use checkbox for the active column */
+	/* use checkbox for the active + visible columns */
 
-	CellRendererToggle *active_cell = dynamic_cast<CellRendererToggle*>(edit_group_display.get_column_cell_renderer (0));
+	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(edit_group_display.get_column_cell_renderer (0));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
-	edit_group_display.set_name ("MixerGroupList");
-	edit_group_display.columns_autosize ();
-	edit_group_display.get_selection()->set_mode (SELECTION_MULTIPLE);
+	active_cell = dynamic_cast<CellRendererToggle*>(edit_group_display.get_column_cell_renderer (1));
+	active_cell->property_activatable() = true;
+	active_cell->property_radio() = false;
+
+	edit_group_display.set_name ("EditGroupList");
+
+	group_model->signal_row_changed().connect (mem_fun (*this, &Editor::edit_group_row_change));
+
+	edit_group_display.set_name ("EditGroupList");
+	edit_group_display.get_selection()->set_mode (SELECTION_NONE);
 	edit_group_display.set_reorderable (false);
 
 	edit_group_display.set_size_request (75, -1);
 
-	edit_group_list_scroller.add (edit_group_display);
-	edit_group_list_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
+	edit_group_display_scroller.add (edit_group_display);
+	edit_group_display_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	edit_group_list_button.signal_clicked().connect (mem_fun(*this, &Editor::edit_group_list_button_clicked));
-	edit_group_display.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event));
-	edit_group_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::edit_group_selection_changed));
-	
-	TreeModel::Row row = *(group_model->append());
-	row[group_columns.is_active] = false;
-	row[group_columns.text] = (_("-all-"));
-	row[group_columns.routegroup] = 0;
-	edit_group_display.get_selection()->select (row);
+	edit_group_display.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event), false);
 
-	edit_group_vbox.pack_start (edit_group_list_button, false, false);
-	edit_group_vbox.pack_start (edit_group_list_scroller, true, true);
-	
+	{
+		TreeModel::Row row;
+		row = *(group_model->append());
+		row[group_columns.is_active] = false;
+		row[group_columns.is_visible] = true;
+		row[group_columns.text] = (_("-all-"));
+		row[group_columns.routegroup] = 0;
+	}
+
 	region_list_display.set_size_request (100, -1);
 	region_list_display.set_name ("RegionListDisplay");
 
@@ -600,8 +608,6 @@ Editor::Editor (AudioEngine& eng)
 	tv_col->add_attribute(renderer->property_text(), region_list_columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), region_list_columns.color_);
 	
-	region_list_display.set_reorderable (true);
-
 	region_list_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	region_list_display.add_object_drag (region_list_columns.region.index(), "regions");
 
@@ -659,7 +665,7 @@ Editor::Editor (AudioEngine& eng)
        	the_notebook.append_page (region_list_scroller, _("Regions"));
        	the_notebook.append_page (route_list_scroller, _("Tracks/Busses"));
 	the_notebook.append_page (snapshot_display_scroller, _("Snapshots"));
-	the_notebook.append_page (edit_group_vbox, _("Edit Groups"));
+	the_notebook.append_page (edit_group_display_scroller, _("Edit Groups"));
 	the_notebook.append_page (named_selection_scroller, _("Chunks"));
 	the_notebook.set_show_tabs (true);
 	the_notebook.set_scrollable (true);
@@ -1255,11 +1261,7 @@ Editor::connect_to_session (Session *t)
 	redisplay_named_selections ();
 	redisplay_snapshots ();
 
-	route_display_model->clear ();
-	no_route_list_redisplay = true;
-	session->foreach_route (this, &Editor::handle_new_route);
-	no_route_list_redisplay = false;
-	route_list_display.get_selection()->select_all ();
+	initial_route_list_display ();
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
@@ -1293,21 +1295,21 @@ Editor::connect_to_session (Session *t)
 	        TreeModel::Children rows = route_display_model->children();
 		TreeModel::Children::iterator i;
 	
-		//route_list_display.freeze ();
+		no_route_list_redisplay = true;
 		
 		for (i = rows.begin(); i != rows.end(); ++i) {
-		  TimeAxisView *tv =  (*i)[route_display_columns.tv];
+			TimeAxisView *tv =  (*i)[route_display_columns.tv];
 			AudioTimeAxisView *atv;
-
+			
 			if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
 				if (atv->route().master()) {
 					route_list_display.get_selection()->unselect (i);
-					//(*i)->unselect ();
 				}
 			}
 		}
-
-		//route_list_display.thaw ();
+		
+		no_route_list_redisplay = false;
+		redisplay_route_list ();
 	}
 }
 
