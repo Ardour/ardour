@@ -602,8 +602,8 @@ control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &Pl
 		control_ui->display = manage (new EventBox);
 		control_ui->display->set_name ("ParameterValueDisplay");
 
-		// TODO: This label should be rotated 90 degrees CCW
 		control_ui->display_label = manage (new Label);
+
 		control_ui->display_label->set_name ("ParameterValueDisplay");
 
 		control_ui->display->add (*control_ui->display_label);
@@ -628,6 +628,7 @@ control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &Pl
 		control_ui->vbox = manage (new VBox);
 		control_ui->hbox = manage (new HBox);
 		
+		control_ui->label.set_angle(90);
 		control_ui->hbox->pack_start (control_ui->label, false, false);
  		control_ui->hbox->pack_start (*info->meter, false, false);
 
