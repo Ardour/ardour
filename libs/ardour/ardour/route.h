@@ -57,9 +57,9 @@ enum mute_type {
 
 class Route : public IO
 {
-  private:
-	typedef list<Redirect *> RedirectList;
+  protected:
 
+        typedef list<Redirect *> RedirectList;
   public:
 
 	enum Flag {

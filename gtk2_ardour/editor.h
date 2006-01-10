@@ -1454,7 +1454,7 @@ class Editor : public PublicEditor
 	};
 
 	RouteDisplayModelColumns         route_display_columns;
-	Glib::RefPtr<Gtk::TreeStore>     route_display_model;
+	Glib::RefPtr<Gtk::ListStore>     route_display_model;
 	Glib::RefPtr<Gtk::TreeSelection> route_display_selection;
 
 	gint route_list_compare_func (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);

@@ -522,7 +522,7 @@ Editor::Editor (AudioEngine& eng)
 	bottom_hbox.set_border_width (3);
 	bottom_hbox.set_spacing (3);
 
-	route_display_model = TreeStore::create(route_display_columns);
+	route_display_model = ListStore::create(route_display_columns);
 	route_list_display.set_model (route_display_model);
 	route_list_display.append_column (_("Visible"), route_display_columns.visible);
 	route_list_display.append_column (_("Name"), route_display_columns.text);
