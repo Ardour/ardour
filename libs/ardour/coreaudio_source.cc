@@ -86,15 +86,14 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 	
 	if (channel >= n_channels) {
 		error << string_compose(_("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number"), n_channels, channel) << endmsg;
-		ExtAudioFileDispose(af_ref);
+		ExtAudioFileDispose(*af_ref);
 		throw failed_constructor();
 	}
 
 	int64_t ca_frames;
 	size_t prop_size = sizeof(ca_frames);
 
-	err = ExtAudioFileGetProperty(af_ref, kExtAudioFileProperty_FileLengthFrames,
-			sizeof(ca_frames), &ca_frames);
+	err = ExtAudioFileGetProperty(*af_ref, kExtAudioFileProperty_FileLengthFrames, prop_size, &ca_frames);
 	if (err) {
 		throw failed_constructor();
 	}
@@ -104,7 +103,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	if (build_peak) {
 		if (initialize_peakfile (false, file)) {
-			ExtAudioFileDispose(af_ref);
+			ExtAudioFileDispose(*af_ref);
 			throw failed_constructor ();
 		}
 	}
@@ -116,7 +115,7 @@ CoreAudioSource::~CoreAudioSource ()
 	 GoingAway (this); /* EMIT SIGNAL */
 
 	if (af_ref) {
-		ExtAudioFileDispose(af_ref);
+		ExtAudioFileDispose(*af_ref);
 	}
 
 	if (tmpbuf) {
@@ -137,7 +136,7 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) co
 	float *ptr;
 	uint32_t real_cnt;
 
-	OSStatus err = ExtAudioFileSeek(af_ref, start);
+	OSStatus err = ExtAudioFileSeek(*af_ref, start);
 	if (err) {
 		error << string_compose(_("CoreAudioSource: could not seek to frame %1 within %2"), start, _name.substr (1)) << endmsg;
 		return 0;
@@ -145,7 +144,7 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) co
 
 	if (n_channels == 1) {
 		uint32_t ioNumber = cnt;
-		err = ExtAudioFileRead(af_ref, &ioNumber, dst);
+		err = ExtAudioFileRead(*af_ref, &ioNumber, dst);
 		_read_data_count = cnt * sizeof(float);
 		return ioNumber;
 	}
@@ -165,7 +164,7 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) co
 		}
 		
 		nread = real_cnt;
-		err = ExtAudioFileRead(af_ext, &nread, tmpbuf);
+		err = ExtAudioFileRead(*af_ref, &nread, tmpbuf);
 		ptr = tmpbuf + channel;
 		nread /= n_channels;
 		

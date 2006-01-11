@@ -55,6 +55,7 @@ class SoundFileBox : public Gtk::VBox
 
   protected:
 	ARDOUR::Session* _session;
+	std::string path;
 
     struct LabelModelColumns : public Gtk::TreeModel::ColumnRecord
     {
@@ -92,7 +93,6 @@ class SoundFileBox : public Gtk::VBox
     Gtk::Button add_field_btn;
     Gtk::Button remove_field_btn;
 
- //   void fields_refiller (Gtk::CList &clist);
     void setup_fields ();
 
     void play_btn_clicked ();

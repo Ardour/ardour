@@ -19,17 +19,26 @@
 
 */
 
+#include <map>
+
 #include <sndfile.h>
+
+#include <pbd/basename.h>
 
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
 
 #include <ardour/audio_library.h>
+#include <ardour/audioregion.h>
 #include <ardour/sndfile_helpers.h>
+#include <ardour/sndfilesource.h>
 
 #include "sfdb_ui.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
+
+using namespace ARDOUR;
 
 std::string length2string (const int32_t frames, const int32_t sample_rate);
 
@@ -64,6 +73,9 @@ SoundFileBox::SoundFileBox ()
 	main_box.pack_start(bottom_box, false, false);
 
 	field_view.set_size_request(200, 150);
+	field_view.append_column (_("Field"), label_columns.field);
+	field_view.append_column_editable (_("Value"), label_columns.data);
+
 	top_box.set_homogeneous(true);
 	top_box.pack_start(add_field_btn);
 	top_box.pack_start(remove_field_btn);
@@ -83,14 +95,14 @@ SoundFileBox::SoundFileBox ()
 	                (mem_fun (*this, &SoundFileBox::remove_field_clicked));
 
 	field_view.get_selection()->signal_changed().connect (mem_fun (*this, &SoundFileBox::field_selected));
-	ARDOUR::Library->fields_changed.connect (mem_fun (*this, &SoundFileBox::setup_fields));
+	Library->fields_changed.connect (mem_fun (*this, &SoundFileBox::setup_fields));
 
 	show_all();
 	stop_btn.hide();
 }
 
 void
-SoundFileBox::set_session(ARDOUR::Session* s)
+SoundFileBox::set_session(Session* s)
 {
 	_session = s;
 
@@ -104,6 +116,8 @@ SoundFileBox::set_session(ARDOUR::Session* s)
 bool
 SoundFileBox::setup_labels (string filename) 
 {
+	path = filename;
+
     SNDFILE *sf;
 
 	sf_info.format = 0; // libsndfile says to clear this before sf_open().
@@ -117,7 +131,7 @@ SoundFileBox::setup_labels (string filename)
     if (sf_info.frames == 0 && sf_info.channels == 0 &&
 		sf_info.samplerate == 0 && sf_info.format == 0 &&
 	   	sf_info.sections == 0) {
-		/* .. ok, its not a sound file */
+		/* .. ok, it's not a sound file */
 	    return false;
 	}
 
@@ -135,20 +149,88 @@ SoundFileBox::setup_labels (string filename)
 	samplerate.set_alignment (0.0f, 0.0f);
 	samplerate.set_text (string_compose("Samplerate: %1", sf_info.samplerate));
 
+	setup_fields ();
+
 	return true;
 }
 
 void
 SoundFileBox::setup_fields ()
-{}
+{
+	ENSURE_GUI_THREAD(mem_fun (*this, &SoundFileBox::setup_fields));
+
+	vector<string> field_list;
+	Library->get_fields(field_list);
+
+	vector<string>::iterator i;
+	Gtk::TreeModel::iterator iter;
+	Gtk::TreeModel::Row row;
+	for (i = field_list.begin(); i != field_list.end(); ++i) {
+		string value = Library->get_field(path, *i);
+		iter = fields->append();
+		row = *iter;
+
+		row[label_columns.field] = *i;
+		row[label_columns.data]  = value;
+	}
+}
 
 void
 SoundFileBox::play_btn_clicked ()
-{}
+{
+	if (!_session) {
+		return;
+	}
+
+	_session->cancel_audition();
+
+	if (access(path.c_str(), R_OK)) {
+		warning << string_compose(_("Could not read file: %1 (%2)."), path, strerror(errno)) << endmsg;
+		return;
+	}
+
+	static std::map<string, AudioRegion*> region_cache;
+
+	if (region_cache.find (path) == region_cache.end()) {
+		AudioRegion::SourceList srclist;
+		SndFileSource* sfs;
+
+		for (int n = 0; n < sf_info.channels; ++n) {
+			try {
+				sfs = new SndFileSource(path+":"+string_compose("%1", n), false);
+				srclist.push_back(sfs);
+
+			} catch (failed_constructor& err) {
+				error << _("Could not access soundfile: ") << path << endmsg;
+				return;
+			}
+		}
+
+		if (srclist.empty()) {
+			return;
+		}
+
+		string result;
+		_session->region_name (result, PBD::basename(srclist[0]->name()), false);
+		AudioRegion* a_region = new AudioRegion(srclist, 0, srclist[0]->length(), result, 0, Region::DefaultFlags, false);
+		region_cache[path] = a_region;
+	}
+
+	play_btn.hide();
+	stop_btn.show();
+
+	_session->audition_region(*region_cache[path]);
+}
 
 void
 SoundFileBox::stop_btn_clicked ()
-{}
+{
+	if (_session) {
+		_session->cancel_audition();
+		play_btn.show();
+		stop_btn.hide();
+	}
+}
 
 void
 SoundFileBox::add_field_clicked ()
@@ -159,8 +241,14 @@ SoundFileBox::remove_field_clicked ()
 {}
 
 void
-SoundFileBox::audition_status_changed (bool state)
-{}
+SoundFileBox::audition_status_changed (bool active)
+{
+    ENSURE_GUI_THREAD(bind (mem_fun (*this, &SoundFileBox::audition_status_changed), active));
+
+	if (!active) {
+		stop_btn_clicked ();
+	}
+}
 
 void
 SoundFileBox::field_selected ()
@@ -178,7 +266,7 @@ SoundFileBrowser::SoundFileBrowser (std::string title)
 }
 
 void
-SoundFileBrowser::set_session (ARDOUR::Session* s)
+SoundFileBrowser::set_session (Session* s)
 {
 	preview.set_session(s);
 }

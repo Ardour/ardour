@@ -349,7 +349,7 @@ env.Append (BUILDERS = {'Tarball' : tarball_bld})
 
 libraries = { }
 
-libraries['core'] = LibraryInfo (CPPPATH = [ '#libs'])
+libraries['core'] = LibraryInfo (CCFLAGS = '-Ilibs')
 
 libraries['sndfile'] = LibraryInfo()
 libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
@@ -662,15 +662,6 @@ env.Append(CCFLAGS="-Wall")
 
 if env['VST']:
     env.Append(CCFLAGS="-DVST_SUPPORT")
-
-
-# check endianness
-if sys.byteorder == "big":
-    print "Host is big endian"
-    env.Append(CCFLAGS="-DWORDS_BIGENDIAN")
-else:
-    print "Host is little endian"
-
 
 #
 # everybody needs this

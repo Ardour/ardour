@@ -78,7 +78,7 @@ char   FileSource::bwf_serial_number[13] = "000000000000";
 string FileSource::search_path;
 
 #undef WE_ARE_BIGENDIAN
-#ifdef WORDS_BIGENDIAN
+#ifdef __BIG_ENDIAN__
 #define WE_ARE_BIGENDIAN true
 #else
 #define WE_ARE_BIGENDIAN false
