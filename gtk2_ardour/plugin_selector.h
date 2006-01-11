@@ -95,7 +95,7 @@ class PluginSelector : public ArdourDialog
 		Gtk::TreeModelColumn<std::string> outs;
 	    Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
 	};
-	LadspaColumns vcols;
+	VstColumns vcols;
 	Glib::RefPtr<Gtk::ListStore> vmodel;
 	Glib::RefPtr<Gtk::TreeSelection> vselection;
 	Gtk::TreeView vst_display;

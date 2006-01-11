@@ -86,7 +86,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	vscroller.add(vst_display);
 
 	for (int i = 0; i <=2; i++) {
-		column = vst_display.get_column(i);
+		Gtk::TreeView::Column* column = vst_display.get_column(i);
 		column->set_sort_column(i);
 	}
 #endif
