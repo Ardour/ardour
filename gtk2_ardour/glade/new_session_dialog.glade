@@ -16,7 +16,6 @@
   <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
   <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <property name="focus_on_map">True</property>
-  <property name="urgency_hint">False</property>
   <property name="has_separator">True</property>
 
   <child internal-child="vbox">
@@ -169,7 +168,6 @@
 	      <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
 	      <property name="local_only">True</property>
 	      <property name="show_hidden">False</property>
-	      <property name="do_overwrite_confirmation">False</property>
 	      <property name="width_chars">-1</property>
 	    </widget>
 	    <packing>
@@ -211,7 +209,6 @@
 	      <property name="action">GTK_FILE_CHOOSER_ACTION_OPEN</property>
 	      <property name="local_only">True</property>
 	      <property name="show_hidden">False</property>
-	      <property name="do_overwrite_confirmation">False</property>
 	      <property name="width_chars">-1</property>
 	    </widget>
 	    <packing>
