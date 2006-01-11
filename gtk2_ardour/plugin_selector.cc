@@ -229,7 +229,7 @@ PluginSelector::vst_refiller ()
 		newrow[vcols.name] = (*i)->name.c_str();
 		newrow[vcols.ins] = ibuf;
 		newrow[vcols.outs] = obuf;
-		newrow[vcols.plugin] = i;
+		newrow[vcols.plugin] = *i;
 	}
 	vmodel->set_sort_column (0, Gtk::SORT_ASCENDING);
 }
