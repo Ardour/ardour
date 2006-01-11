@@ -9,3 +9,10 @@ pangomm.Merge([libraries['glibmm2'], libraries['pango'], libraries['sigc2']])
 
 libpangomm = pangomm.StaticLibrary('pangomm', pangomm_files)
 Default(libpangomm)
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'pangomm.h'] + 
+				     pangomm_files + 
+				     glob.glob('pangomm/*.h') +
+				     glob.glob('pangomm/private/*.h')
+				     ))

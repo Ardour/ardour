@@ -12,3 +12,10 @@ libglademm.Merge([libraries['gtk2'], libraries['glade2'], libraries['sigc2'], li
 libglade = libglademm.StaticLibrary('libglademm', libglademm_files)
 
 Default(libglade)
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'libglademmconfig.h', 'libglademm.h'] +
+				     libglademm_files + 
+				     glob.glob('libglademm/*.h') +
+				     glob.glob('libglademm/private/*.h')
+				     ))

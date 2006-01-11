@@ -8,3 +8,10 @@ gnomecanvasmm.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2']
 
 libgnomecanvasmm = gnomecanvasmm.StaticLibrary('libgnomecanvasmm', gnomecanvasmm_files)
 Default(libgnomecanvasmm)
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'libgnomecanvasmmconfig.h', 'libgnomecanvasmm.h'] +
+				     gnomecanvasmm_files + 
+				     glob.glob('libgnomecanvasmm/*.h') +
+				     glob.glob('libgnomecanvasmm/private/*.h')
+				     ))

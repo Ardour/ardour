@@ -8,3 +8,10 @@ atkmm.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'] ])
 
 libatkmm = atkmm.StaticLibrary('atkmm', atkmm_files)
 Default(libatkmm)
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'atkmm.h'] + 
+				     atkmm_files + 
+				     glob.glob('atkmm/*.h') +
+				     glob.glob('atkmm/private/*.h')
+				     ))

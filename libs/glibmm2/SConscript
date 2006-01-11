@@ -12,8 +12,20 @@ glibmm2.Append(CXXFLAGS='-DHAVE_CONFIG_H')
 glibmm2.Append(CXXFLAGS='-DG_DISABLE_DEPRECATED')
 glibmm2.Append(CXXFLAGS='-DG_LOG_DOMAIN=\\\"glibmm\\\"')
 
-glibmm2_configure_script = glibmm2.Command ('configure', 'configure.ac', 'cd libs/glibmm2; ./autogen.sh; cd -', ENV=os.environ)
-glibmm2_config_h = glibmm2.Command('glibmmconfig.h', [glibmm2_configure_script, 'glibmmconfig.h.in'], 'cd libs/glibmm2; ./configure; cd -', ENV=os.environ)
-
 libglibmm2 = glibmm2.StaticLibrary('glibmm2', glibmm2_files)
-Default([glibmm2_config_h, libglibmm2])
+
+if os.path.exists ('CVS'):
+   glibmm2_configure_script = glibmm2.Command ('configure', 'configure.ac', 'cd libs/glibmm2; ./autogen.sh; cd -', ENV=os.environ)
+   glibmm2_config_h = glibmm2.Command('glibmmconfig.h', [glibmm2_configure_script, 'glibmmconfig.h.in'], 'cd libs/glibmm2; ./configure; cd -', ENV=os.environ)
+   Default([glibmm2_config_h, libglibmm2])
+else:
+   Default([libglibmm2])
+
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'glibmm.h','glibmmconfig.h'] +
+				     glibmm2_files + 
+				     glob.glob('glibmm/*.h') +
+				     glob.glob('glibmm/private/*.h')
+				     ))
+

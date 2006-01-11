@@ -8,3 +8,10 @@ gdkmm2.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'], libra
 
 libgdkmm2 = gdkmm2.StaticLibrary('gdkmm2', gdkmm2_files)
 Default(libgdkmm2)
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'gdkmmconfig.h', 'gdkmm.h'] + 
+				     gdkmm2_files + 
+				     glob.glob('gdkmm/*.h') +
+				     glob.glob('gdkmm/private/*.h')
+				     ))
