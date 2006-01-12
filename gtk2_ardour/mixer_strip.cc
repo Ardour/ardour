@@ -1368,7 +1368,7 @@ MixerStrip::hide_clicked ()
 	if (_embedded) {
 		 Hiding(); /* EMIT_SIGNAL */
 	} else {
-		_mixer.unselect_strip_in_display (this);
+		_mixer.hide_strip (this);
 	}
 }
 

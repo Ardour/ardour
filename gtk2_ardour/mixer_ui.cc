@@ -30,6 +30,7 @@
 
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
+#include <ardour/audio_track.h>
 #include <ardour/session_route.h>
 #include <ardour/diskstream.h>
 #include <ardour/plugin_manager.h>
@@ -57,6 +58,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 {
 	_strip_width = Wide;
 	track_menu = 0;
+	no_track_list_redisplay = false;
 
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	set_state (*node);
@@ -73,12 +75,24 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	track_display_model = ListStore::create (track_display_columns);
 	track_display.set_model (track_display_model);
 	track_display.append_column (_("Strips"), track_display_columns.text);
+	track_display.append_column (_("Visible"), track_display_columns.visible);
+	track_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
+	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	track_display.set_name (X_("MixerTrackDisplayList"));
-	track_display.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
+	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
 	track_display.set_reorderable (true);
-	track_display.set_size_request (75, -1);
+	track_display.set_size_request (100, -1);
 	track_display.set_headers_visible (true);
-	track_display.set_headers_clickable (true);
+
+	track_display_model->signal_row_deleted().connect (mem_fun (*this, &Mixer_UI::track_list_delete));
+	track_display_model->signal_row_changed().connect (mem_fun (*this, &Mixer_UI::track_list_change));
+
+	CellRendererToggle* track_list_visible_cell = dynamic_cast<CellRendererToggle*>(track_display.get_column_cell_renderer (1));
+	track_list_visible_cell->property_activatable() = true;
+	track_list_visible_cell->property_radio() = false;
+
+	track_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::track_display_button_press), false);
+
 	track_display_scroller.add (track_display);
 	track_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
@@ -147,9 +161,6 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	signal_delete_event().connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window *>(this)));
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	track_display.get_selection()->signal_changed().connect (mem_fun(*this, &Mixer_UI::track_display_selection_changed));
-	reorder_connection = track_display_model->signal_rows_reordered().connect (mem_fun (*this, &Mixer_UI::track_display_reordered_proxy));
-
 	group_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::group_display_button_press));
 	group_display.get_selection()->signal_changed().connect (mem_fun (*this, &Mixer_UI::group_display_selection_changed));
 
@@ -204,19 +215,17 @@ Mixer_UI::add_strip (Route* route)
 	strip->set_width (_strip_width);
 	show_strip (strip);
 
-	reorder_connection.block();
-	
 	TreeModel::Row row = *(track_display_model->append());
 	row[track_display_columns.text] = route->name();
+
+	if (strip->route().master() || strip->route().control()) {
+		row[track_display_columns.visible] = true;
+	} else {
+		row[track_display_columns.visible] = (strip->marked_for_display() || strip->packed());
+	}
 	row[track_display_columns.route] = route;
 	row[track_display_columns.strip] = strip;
 
-	reorder_connection.unblock();
-	
-	// if (strip->marked_for_display() || strip->packed()) {
-	// track_display.get_selection()->select (row);
-        // }
-	
 	route->name_changed.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
 	strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
 
@@ -289,11 +298,7 @@ Mixer_UI::connect_to_session (Session* sess)
 	wintitle += session->name();
 	set_title (wintitle);
 
-	// GTK2FIX: do we really need to do this?
-	// track_display.set_model (RefPtr<TreeStore>(0));
-	track_display_model->clear ();
-	session->foreach_route (this, &Mixer_UI::add_strip);
-	// track_display.set_model (track_display_model);
+	initial_track_display ();
 
 	session->going_away.connect (mem_fun(*this, &Mixer_UI::disconnect_from_session));
 	session->RouteAdded.connect (mem_fun(*this, &Mixer_UI::add_strip));
@@ -314,123 +319,37 @@ Mixer_UI::disconnect_from_session ()
 	group_display_model->clear ();
 	set_title (_("ardour: mixer"));
 	stop_updating ();
-	hide_all_strips (false);
-}
-
-void
-Mixer_UI::hide_all_strips (bool with_select)
-{
-	TreeModel::Children rows = track_display_model->children();
-	TreeModel::Children::iterator i;
-
-	// GTK2FIX
-	// track_display_list.freeze ();
-	
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		
-		TreeModel::Row row = (*i);
-		MixerStrip* ms = row[track_display_columns.strip];
-		
-		if (with_select) {
-			track_display.get_selection()->unselect (i);
-		} else {
-			hide_strip (ms);
-		}
-	}
-
-	// track_display_list.thaw ();
-}
-
-void
-Mixer_UI::unselect_all_strips ()
-{
-	hide_all_strips (false);
-}
-
-void
-Mixer_UI::select_all_strips ()
-{
-	TreeModel::Children rows = track_display_model->children();
-	TreeModel::Children::iterator i;
-
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		track_display.get_selection()->select (i);
-	}
-}
-
-void
-Mixer_UI::strip_select_op (bool audiotrack, bool select)
-{
-	MixerStrip* ms;
-	TreeModel::Children rows = track_display_model->children();
-	TreeModel::Children::iterator i;
-
-	// GTK2FIX
-	// track_display_list.freeze ();
-	
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		ms = (*i)[track_display_columns.strip];
-
-		if (ms->is_audio_track() == audiotrack) {
-			if (select) {
-				track_display.get_selection()->select (i);
-			} else {
-				track_display.get_selection()->unselect (i);
-			}
-		}
-	}
-	
-	// track_display_list.thaw ();	
-}
-
-void
-Mixer_UI::select_all_audiotrack_strips ()
-{
-	strip_select_op (true, true);
-}
-void
-Mixer_UI::unselect_all_audiotrack_strips ()
-{
-	strip_select_op (true, false);
-}
-
-void
-Mixer_UI::select_all_audiobus_strips ()
-{
-	strip_select_op (false, true);
-}
-
-void
-Mixer_UI::unselect_all_audiobus_strips ()
-{
-	strip_select_op (false, false);
 }
 
 void
 Mixer_UI::show_strip (MixerStrip* ms)
 {
-	if (!ms->packed()) {
-		
-		if (ms->route().master() || ms->route().control()) {
-			out_packer.pack_start (*ms, false, false);
-		} else {
-			strip_packer.pack_start (*ms, false, false);
-		}
-		ms->set_packed (true);
-		ms->show ();
-	 }
- }
+        TreeModel::Children rows = track_display_model->children();
+	TreeModel::Children::iterator i;
 
- void
- Mixer_UI::hide_strip (MixerStrip* ms)
- {
-	 if (ms->packed()) {
-		 if (ms->route().master() || ms->route().control()) {
-			 out_packer.remove (*ms);
-		 } else {
-			 strip_packer.remove (*ms);
-		 }
-		 ms->set_packed (false);
+	for (i = rows.begin(); i != rows.end(); ++i) {
+
+		MixerStrip* strip = (*i)[track_display_columns.strip];
+		if (strip == ms) {
+			(*i)[track_display_columns.visible] = true;
+			break;
+		}
+	}
+}
+
+void
+Mixer_UI::hide_strip (MixerStrip* ms)
+{
+        TreeModel::Children rows = track_display_model->children();
+	TreeModel::Children::iterator i;
+	
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		
+		MixerStrip* strip = (*i)[track_display_columns.strip];
+		if (strip == ms) {
+			(*i)[track_display_columns.visible] = false;
+			break;
+		}
 	 }
  }
 
@@ -470,94 +389,259 @@ Mixer_UI::show_strip (MixerStrip* ms)
 	 }
  }
 
- void
- Mixer_UI::track_display_selection_changed ()
- {
-	 MixerStrip* strip;
-	 TreeModel::Children rows = track_display_model->children();
-	 TreeModel::Children::iterator i;
-	 Glib::RefPtr<TreeSelection> selection = track_display.get_selection();
+void
+Mixer_UI::set_all_strips_visibility (bool yn)
+{
+        TreeModel::Children rows = track_display_model->children();
+	TreeModel::Children::iterator i;
 
-	 for (i = rows.begin(); i != rows.end(); ++i) {
-		 if (selection->is_selected (i)) {
-			 strip = (*i)[track_display_columns.strip];
-			 strip->set_marked_for_display  (true);
-			 show_strip (strip);
-		 } else {
-			 strip = (*i)[track_display_columns.strip];
-			 strip->set_marked_for_display (false);
-			 hide_strip (strip);
-		 }
-	 }
+	no_track_list_redisplay = true;
 
-	 track_display_reordered ();
- }
+	for (i = rows.begin(); i != rows.end(); ++i) {
 
- void
- Mixer_UI::select_strip_op (MixerStrip *strip, bool yn)
- {
-	 TreeModel::Children rows = track_display_model->children();
-	 TreeModel::Children::iterator i;
-	 Glib::RefPtr<TreeSelection> selection = track_display.get_selection();
+		TreeModel::Row row = (*i);
+		MixerStrip* strip = row[track_display_columns.strip];
+		
+		if (strip == 0) {
+			continue;
+		}
+		
+		if (strip->route().master() || strip->route().control()) {
+			continue;
+		}
 
-	 for (i = rows.begin(); i != rows.end(); ++i) {
-		 if ((*i)[track_display_columns.strip] == strip) {
-			 if (yn) {
-				 selection->select (*i);
-			 } else {
-				 selection->unselect (*i);
-			 }
-			 break;
-		 }
-	 }
- }
+		(*i)[track_display_columns.visible] = yn;
+	}
 
- void
- Mixer_UI::unselect_strip_in_display (MixerStrip *strip)
- {
-	 select_strip_op (strip, true);
- }
- void
- Mixer_UI::select_strip_in_display (MixerStrip *strip)
- {
-	 select_strip_op (strip, false);
- }
+	no_track_list_redisplay = false;
+	redisplay_track_list ();
+}
 
- void
- Mixer_UI::track_display_reordered_proxy (const TreeModel::Path& path, const TreeModel::iterator& i, int* n)
- {
-	 track_display_reordered ();
- }
 
- void
- Mixer_UI::track_display_reordered ()
- {
-	 TreeModel::Children rows = track_display_model->children();
-	 TreeModel::Children::iterator i;
-	 long order;
+void
+Mixer_UI::set_all_audio_visibility (int tracks, bool yn) 
+{
+        TreeModel::Children rows = track_display_model->children();
+	TreeModel::Children::iterator i;
 
-	 for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
-		 MixerStrip* strip = (*i)[track_display_columns.strip];
+	no_track_list_redisplay = true;
 
-		 if (strip->marked_for_display()) {
-			 strip->route().set_order_key (N_("signal"), order);
-			 if (strip->packed()) {
-				 cerr << "reorder strip @ " << strip << endl;
-				 strip_packer.reorder_child (*strip, -1); /* put at end */
-			 }
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		TreeModel::Row row = (*i);
+		MixerStrip* strip = row[track_display_columns.strip];
+
+		if (strip == 0) {
+			continue;
+		}
+
+		if (strip->route().master() || strip->route().control()) {
+			continue;
+		}
+
+		AudioTrack* at = dynamic_cast<AudioTrack*> (&strip->route());
+
+		switch (tracks) {
+		case 0:
+			(*i)[track_display_columns.visible] = yn;
+			break;
+			
+		case 1:
+			if (at) { /* track */
+				(*i)[track_display_columns.visible] = yn;
+			}
+			break;
+			
+		case 2:
+			if (!at) { /* bus */
+				(*i)[track_display_columns.visible] = yn;
+			}
+			break;
+		}
+	}
+
+	no_track_list_redisplay = false;
+	redisplay_track_list ();
+}
+
+void
+Mixer_UI::hide_all_routes ()
+{
+	set_all_strips_visibility (false);
+}
+
+void
+Mixer_UI::show_all_routes ()
+{
+	set_all_strips_visibility (true);
+}
+
+void
+Mixer_UI::show_all_audiobus ()
+{
+	set_all_audio_visibility (2, true);
+}
+void
+Mixer_UI::hide_all_audiobus ()
+{
+	set_all_audio_visibility (2, false);
+}
+
+void
+Mixer_UI::show_all_audiotracks()
+{
+	set_all_audio_visibility (1, true);
+}
+void
+Mixer_UI::hide_all_audiotracks ()
+{
+	set_all_audio_visibility (1, false);
+}
+
+void
+Mixer_UI::track_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
+{
+	redisplay_track_list ();
+}
+
+void
+Mixer_UI::track_list_delete (const Gtk::TreeModel::Path& path)
+{
+	redisplay_track_list ();
+}
+
+void
+Mixer_UI::redisplay_track_list ()
+{
+	TreeModel::Children rows = track_display_model->children();
+	TreeModel::Children::iterator i;
+	long order;
+
+	if (no_track_list_redisplay) {
+		return;
+	}
+
+	for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
+		MixerStrip* strip = (*i)[track_display_columns.strip];
+
+		bool visible = (*i)[track_display_columns.visible];
+
+		if (visible) {
+			strip->set_marked_for_display (true);
+			strip->route().set_order_key (N_("signal"), order);
+
+			if (strip->packed()) {
+
+				if (strip->route().master() || strip->route().control()) {
+					out_packer.reorder_child (*strip, -1);
+				} else {
+					strip_packer.reorder_child (*strip, -1); /* put at end */
+				}
+
+			} else {
+
+				if (strip->route().master() || strip->route().control()) {
+					out_packer.pack_start (*strip, false, false);
+				} else {
+					strip_packer.pack_start (*strip, false, false);
+				}
+				strip->set_packed (true);
+				strip->show ();
+			}
+
+		} else {
+
+			if (strip->route().master() || strip->route().control()) {
+				/* do nothing, these cannot be hidden */
+			} else {
+				strip_packer.remove (*strip);
+				strip->set_packed (false);
+			}
 		}
 	}
 }
 
+struct SignalOrderRouteSorter {
+    bool operator() (Route* a, Route* b) {
+	    /* use of ">" forces the correct sort order */
+	    return a->order_key ("signal") > b->order_key ("signal");
+    }
+};
+
 void
-Mixer_UI::track_column_click (gint col)
+Mixer_UI::initial_track_display ()
+{
+	Session::RouteList routes = session->get_routes();
+	SignalOrderRouteSorter sorter;
+
+	routes.sort (sorter);
+	
+	no_track_list_redisplay = true;
+
+	track_display_model->clear ();
+
+	for (Session::RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		add_strip (*i);
+	}
+
+	no_track_list_redisplay = false;
+
+	redisplay_track_list ();
+}
+
+void
+Mixer_UI::show_track_list_menu ()
 {
 	if (track_menu == 0) {
 		build_track_menu ();
 	}
 
-	track_menu->popup (0, 0);
+	track_menu->popup (1, 0);
 }
+
+bool
+Mixer_UI::track_display_button_press (GdkEventButton* ev)
+{
+	if (Keyboard::is_context_menu_event (ev)) {
+		show_track_list_menu ();
+		return true;
+	}
+
+	TreeIter iter;
+	TreeModel::Path path;
+	TreeViewColumn* column;
+	int cellx;
+	int celly;
+	
+	if (!track_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+		return false;
+	}
+
+	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
+	case 0:
+		/* allow normal processing to occur */
+		return false;
+
+	case 1: /* visibility */
+
+		if ((iter = track_display_model->get_iter (path))) {
+			MixerStrip* strip = (*iter)[track_display_columns.strip];
+			if (strip) {
+
+				if (!strip->route().master() && !strip->route().control()) {
+					bool visible = (*iter)[track_display_columns.visible];
+					(*iter)[track_display_columns.visible] = !visible;
+				}
+			}
+		}
+		return true;
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
 
 void
 Mixer_UI::build_track_menu ()
@@ -568,14 +652,13 @@ Mixer_UI::build_track_menu ()
 	track_menu = new Menu;
 	track_menu->set_name ("ArdourContextMenu");
 	MenuList& items = track_menu->items();
-	track_menu->set_name ("ArdourContextMenu");
 	
-	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Mixer_UI::select_all_strips)));
-	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Mixer_UI::unselect_all_strips)));
-	items.push_back (MenuElem (_("Show All AudioTrack MixerStrips"), mem_fun(*this, &Mixer_UI::select_all_audiotrack_strips)));
-	items.push_back (MenuElem (_("Hide All AudioTrack MixerStrips"), mem_fun(*this, &Mixer_UI::unselect_all_audiotrack_strips)));
-	items.push_back (MenuElem (_("Show All AudioBus MixerStrips"), mem_fun(*this, &Mixer_UI::select_all_audiobus_strips)));
-	items.push_back (MenuElem (_("Hide All AudioBus MixerStrips"), mem_fun(*this, &Mixer_UI::unselect_all_audiobus_strips)));
+	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Mixer_UI::show_all_routes)));
+	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Mixer_UI::hide_all_routes)));
+	items.push_back (MenuElem (_("Show All Audio Tracks"), mem_fun(*this, &Mixer_UI::show_all_audiotracks)));
+	items.push_back (MenuElem (_("Hide All Audio Tracks"), mem_fun(*this, &Mixer_UI::hide_all_audiotracks)));
+	items.push_back (MenuElem (_("Show All Audio Busses"), mem_fun(*this, &Mixer_UI::show_all_audiobus)));
+	items.push_back (MenuElem (_("Hide All Audio Busses"), mem_fun(*this, &Mixer_UI::hide_all_audiobus)));
 
 }
 
@@ -615,15 +698,6 @@ Mixer_UI::new_mix_group ()
 		break;
 	}
 }
-
-// GTK2FIX
-//void
-//Mixer_UI::group_display_button_clicked ()
-//{
-//	if (session) {
-//		new_mix_group ();
-//	}
-//}
 
 bool
 Mixer_UI::group_display_button_press (GdkEventButton* ev)
@@ -686,7 +760,7 @@ Mixer_UI::group_display_selection_changed ()
 		}
 	}
 
-	track_display_reordered ();
+	redisplay_track_list ();
 }
 
 void
@@ -694,35 +768,14 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::group_flags_changed), src, group));
 	
-	if (src != this) {
-		// select row
-	}
-
+	TreeModel::iterator i;
 	TreeModel::Children rows = group_display_model->children();
-	TreeModel::Children::iterator gi;
-	TreeModel::Children::iterator ti;
-
-	for (gi = rows.begin(); gi != rows.end(); ++gi) {
-		if ((*gi)[group_display_columns.group] == group) {
+	Glib::RefPtr<TreeSelection> selection = group_display.get_selection();
+	
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		if ((*i)[group_display_columns.group] == group) {
+			(*i)[group_display_columns.visible] = group->is_hidden ();
 			break;
-		}
-	}
-
-	if (gi == rows.end()) {
-		return;
-	}
-		
-	rows = track_display_model->children();
-
-	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		if ((*i)->route().mix_group() == group) {
-			if (group->is_hidden ()) {
-				unselect_strip_in_display(*i);
-				group_display.get_selection()->unselect (*gi);
-			} else {
-				select_strip_in_display(*i);
-				group_display.get_selection()->select (*gi);
-			}
 		}
 	}
 }
@@ -735,6 +788,7 @@ Mixer_UI::add_mix_group (RouteGroup* group)
 
 	TreeModel::Row row = *(group_display_model->append());
 	row[group_display_columns.active] = group->is_active();
+	row[group_display_columns.visible] = true;
 	row[group_display_columns.text] = group->name();
 	row[group_display_columns.group] = group;
 

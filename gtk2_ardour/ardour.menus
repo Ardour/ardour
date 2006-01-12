@@ -84,6 +84,7 @@
                <menuitem action='edit-cursor-to-previous-region-sync'/>
                <menuitem action='center-edit-cursor'/>
                <menuitem action='edit-to-playhead'/>
+               <menuitem action='set-edit-cursor'/>
                <separator/>       
                <menuitem action='edit-cursor-to-range-start'/>
                <menuitem action='edit-cursor-to-range-end'/>

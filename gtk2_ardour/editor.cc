@@ -532,7 +532,7 @@ Editor::Editor (AudioEngine& eng)
 	route_list_display.set_name ("TrackListDisplay");
 	route_list_display.get_selection()->set_mode (SELECTION_NONE);
 	route_list_display.set_reorderable (true);
-	route_list_display.set_size_request (75,-1);
+	route_list_display.set_size_request (100,-1);
 
 	CellRendererToggle* route_list_visible_cell = dynamic_cast<CellRendererToggle*>(route_list_display.get_column_cell_renderer (0));
 	route_list_visible_cell->property_activatable() = true;

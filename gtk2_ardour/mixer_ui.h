@@ -72,6 +72,8 @@ class Mixer_UI : public Gtk::Window
 	int set_state (const XMLNode& );
 
 	void show_window ();
+	void show_strip (MixerStrip *);
+	void hide_strip (MixerStrip *);
 
 	void ensure_float (Gtk::Window&);
 
@@ -109,9 +111,6 @@ class Mixer_UI : public Gtk::Window
 	void add_strip (ARDOUR::Route*);
 	void remove_strip (MixerStrip *);
 
-	void show_strip (MixerStrip *);
-	void hide_strip (MixerStrip *);
-
 	void hide_all_strips (bool with_select);
 	void unselect_all_strips();
 	void select_all_strips ();
@@ -135,13 +134,27 @@ class Mixer_UI : public Gtk::Window
 	sigc::connection fast_screen_update_connection;
 	void fast_update_strips ();
 
-	void track_display_selected (gint row, gint col, GdkEvent *ev);
-	void track_display_unselected (gint row, gint col, GdkEvent *ev);
 	void track_name_changed (MixerStrip *);
 
-	void track_display_reordered_proxy (const Gtk::TreePath& path, const Gtk::TreeIter& i, int* n);
-	void track_display_reordered ();
-	sigc::connection reorder_connection;
+	void redisplay_track_list ();
+	bool no_track_list_redisplay;
+	bool track_display_button_press (GdkEventButton*);
+	
+	void track_list_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
+	void track_list_delete (const Gtk::TreeModel::Path&);
+
+	void initial_track_display ();
+	void show_track_list_menu ();
+
+	void set_all_strips_visibility (bool yn);
+	void set_all_audio_visibility (int tracks, bool yn);
+	
+	void hide_all_routes ();
+	void show_all_routes ();
+	void show_all_audiobus ();
+	void hide_all_audiobus ();
+	void show_all_audiotracks();
+	void hide_all_audiotracks ();
 
 	void group_selected (gint row, gint col, GdkEvent *ev);
 	void group_unselected (gint row, gint col, GdkEvent *ev);
@@ -157,21 +170,18 @@ class Mixer_UI : public Gtk::Window
 
 	void strip_name_changed (void *src, MixerStrip *);
 
-	static GdkPixmap *check_pixmap;
-	static GdkBitmap *check_mask;
-	static GdkPixmap *empty_pixmap;
-	static GdkBitmap *empty_mask;
-
 	void group_flags_changed (void *src, ARDOUR::RouteGroup *);
 
 	/* various treeviews */
 	
 	struct TrackDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    TrackDisplayModelColumns() { 
+	    TrackDisplayModelColumns () {
 		    add (text);
+		    add (visible);
 		    add (route);
 		    add (strip);
 	    }
+	    Gtk::TreeModelColumn<bool>           visible;
 	    Gtk::TreeModelColumn<Glib::ustring>  text;
 	    Gtk::TreeModelColumn<ARDOUR::Route*> route;
 	    Gtk::TreeModelColumn<MixerStrip*>    strip;
@@ -180,10 +190,12 @@ class Mixer_UI : public Gtk::Window
 	struct GroupDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    GroupDisplayModelColumns() { 
 		    add (active);
+		    add (visible);
 		    add (text);
 		    add (group);
 	    }
 	    Gtk::TreeModelColumn<bool>                active;
+	    Gtk::TreeModelColumn<bool>  visible;
 	    Gtk::TreeModelColumn<Glib::ustring>       text;
 	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*> group;
 	};
@@ -197,10 +209,7 @@ class Mixer_UI : public Gtk::Window
 	Glib::RefPtr<Gtk::ListStore> track_display_model;
 	Glib::RefPtr<Gtk::ListStore> group_display_model;
 
-	bool track_display_button_press (GdkEventButton*);
 	bool group_display_button_press (GdkEventButton*);
-
-	void track_display_selection_changed ();
 	void group_display_selection_changed ();
 
 	bool strip_button_release_event (GdkEventButton*, MixerStrip*);
