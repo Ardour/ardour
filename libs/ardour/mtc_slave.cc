@@ -113,10 +113,11 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 		/* We received the last quarter frame 7 quarter frames (1.75 mtc
 		   frames) after the instance when the contents of the mtc quarter
 		   frames were decided. Add time to compensate for the elapsed 1.75
-		   frames 
+		   frames.
+		   Also compensate for audio latency. 
 		*/
 
-		mtc_frame += (long) (1.75 * session.frames_per_smpte_frame());
+		mtc_frame += (long) (1.75 * session.frames_per_smpte_frame()) + session.worst_output_latency();
 		
 		if (first_mtc_frame == 0) {
 			first_mtc_frame = mtc_frame;

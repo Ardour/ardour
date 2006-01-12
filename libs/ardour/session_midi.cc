@@ -910,6 +910,9 @@ Session::send_full_time_code ()
 		}
 	}
 
+	// Compensate for audio latency
+	outbound_mtc_smpte_frame += _worst_output_latency;
+
 	next_quarter_frame_to_send = 0;
 
 	// Sync slave to the same smpte time as we are on (except if negative, see above)
@@ -1007,6 +1010,8 @@ Session::send_midi_time_code ()
 				smpte_increment( transmitting_smpte_time );        
 				// Re-calculate timing of first quarter frame
 				smpte_to_sample( transmitting_smpte_time, outbound_mtc_smpte_frame, true /* use_offset */, false );
+				// Compensate for audio latency
+				outbound_mtc_smpte_frame += _worst_output_latency;
 			}
 		}
 	}
