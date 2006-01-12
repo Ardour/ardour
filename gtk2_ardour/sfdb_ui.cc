@@ -20,6 +20,7 @@
 */
 
 #include <map>
+#include <errno.h>
 
 #include <sndfile.h>
 
