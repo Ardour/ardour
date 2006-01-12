@@ -21,9 +21,9 @@
 #ifndef __coreaudio_source_h__ 
 #define __coreaudio_source_h__
 
-#include <AudioToolbox/ExtendedAudioFile.h>
-
 #include <ardour/source.h>
+
+#include <AudioToolbox/ExtendedAudioFile.h>
 
 namespace ARDOUR {
 

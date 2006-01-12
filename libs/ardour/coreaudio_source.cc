@@ -75,7 +75,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	/* note that we temporarily truncated _id at the colon */
 	FSRef* ref;
-	OSStatus err = FSPathMakeRef (file.c_str(), ref, 0);
+	OSStatus err = FSPathMakeRef ((UInt8*)file.c_str(), ref, 0);
 	if (err) {
 		throw failed_constructor();
 	}
@@ -93,7 +93,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 	int64_t ca_frames;
 	size_t prop_size = sizeof(ca_frames);
 
-	err = ExtAudioFileGetProperty(*af_ref, kExtAudioFileProperty_FileLengthFrames, prop_size, &ca_frames);
+	err = ExtAudioFileGetProperty(*af_ref, kExtAudioFileProperty_FileLengthFrames, &prop_size, &ca_frames);
 	if (err) {
 		throw failed_constructor();
 	}
@@ -132,7 +132,7 @@ CoreAudioSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_
 jack_nframes_t
 CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
 {
-	int32_t nread;
+	uint32_t nread;
 	float *ptr;
 	uint32_t real_cnt;
 
@@ -142,9 +142,19 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) co
 		return 0;
 	}
 
+	AudioBufferList abl;
+	AudioBuffer ab;
+
+	abl.mNumberBuffers = 1;
+	abl.mBuffers[0] = ab;
+	ab.mNumberChannels = n_channels;
+	ab.mDataByteSize = cnt;
+	ab.mData = dst;
+
+
 	if (n_channels == 1) {
 		uint32_t ioNumber = cnt;
-		err = ExtAudioFileRead(*af_ref, &ioNumber, dst);
+		err = ExtAudioFileRead(*af_ref, (UInt32*)&ioNumber, &abl);
 		_read_data_count = cnt * sizeof(float);
 		return ioNumber;
 	}
@@ -164,13 +174,13 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) co
 		}
 		
 		nread = real_cnt;
-		err = ExtAudioFileRead(*af_ref, &nread, tmpbuf);
+		err = ExtAudioFileRead(*af_ref, (UInt32*)&nread, tmpbuf);
 		ptr = tmpbuf + channel;
 		nread /= n_channels;
 		
 		/* stride through the interleaved data */
 		
-		for (int32_t n = 0; n < nread; ++n) {
+		for (uint32_t n = 0; n < nread; ++n) {
 			dst[n] = *ptr;
 			ptr += n_channels;
 		}
