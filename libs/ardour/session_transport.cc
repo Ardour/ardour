@@ -631,7 +631,7 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
 			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
-					cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
+					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (!auto_input);
 				}
 			}
@@ -646,7 +646,7 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
 			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
-					cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
+					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (true);
 				}
 			}
