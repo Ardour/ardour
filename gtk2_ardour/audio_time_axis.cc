@@ -29,50 +29,51 @@
 
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
+#include <pbd/whitespace.h>
 
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/bindable_button.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/selector.h>
+#include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/utils.h>
 
-#include <ardour/session.h>
-#include <ardour/session_playlist.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/diskstream.h>
-#include <ardour/utils.h>
-#include <ardour/playlist.h>
-#include <ardour/ladspa_plugin.h>
 #include <ardour/insert.h>
+#include <ardour/ladspa_plugin.h>
 #include <ardour/location.h>
 #include <ardour/panner.h>
+#include <ardour/playlist.h>
+#include <ardour/session.h>
+#include <ardour/session_playlist.h>
+#include <ardour/utils.h>
 
 #include "ardour_ui.h"
-#include "public_editor.h"
 #include "audio_time_axis.h"
-#include "streamview.h"
-#include "simplerect.h"
-#include "playlist_selector.h"
-#include "plugin_selector.h"
-#include "plugin_ui.h"
-#include "regionview.h"
 #include "automation_gain_line.h"
 #include "automation_pan_line.h"
 #include "automation_time_axis.h"
-#include "redirect_automation_time_axis.h"
-#include "gain_automation_time_axis.h"
-#include "pan_automation_time_axis.h"
-#include "redirect_automation_line.h"
-#include "selection.h"
-#include "point_selection.h"
-#include "enums.h"
-#include "utils.h"
-#include "keyboard.h"
-#include "rgb_macros.h"
-#include "prompter.h"
-#include "crossfade_view.h"
-#include "gui_thread.h"
 #include "canvas_impl.h"
+#include "crossfade_view.h"
+#include "enums.h"
+#include "gain_automation_time_axis.h"
+#include "gui_thread.h"
+#include "keyboard.h"
+#include "pan_automation_time_axis.h"
+#include "playlist_selector.h"
+#include "plugin_selector.h"
+#include "plugin_ui.h"
+#include "point_selection.h"
+#include "prompter.h"
+#include "public_editor.h"
+#include "redirect_automation_line.h"
+#include "redirect_automation_time_axis.h"
+#include "regionview.h"
+#include "rgb_macros.h"
+#include "selection.h"
+#include "simplerect.h"
+#include "streamview.h"
+#include "utils.h"
 
 #include <ardour/audio_track.h>
 
@@ -834,7 +835,7 @@ AudioTimeAxisView::rename_current_playlist ()
 	prompter.set_initial_text (pl->name());
 
 	switch (prompter.run ()) {
-	case GTK_RESPONSE_ACCEPT:
+	case Gtk::RESPONSE_ACCEPT:
 		prompter.get_result (name);
 		pl->set_name (name);
 		break;
@@ -873,7 +874,7 @@ AudioTimeAxisView::use_copy_playlist ()
 	prompter.show_all ();
 
 	switch (prompter.run ()) {
-	case GTK_RESPONSE_ACCEPT:
+	case Gtk::RESPONSE_ACCEPT:
 		prompter.get_result (name);
 		ds->use_copy_playlist ();
 		pl = ds->playlist();
@@ -903,7 +904,7 @@ AudioTimeAxisView::use_new_playlist ()
 	prompter.set_initial_text (new_name);
 	
 	switch (prompter.run ()) {
-	case GTK_RESPONSE_ACCEPT:
+	case Gtk::RESPONSE_ACCEPT:
 		prompter.get_result (name);
 		ds->use_new_playlist ();
 		pl = ds->playlist();

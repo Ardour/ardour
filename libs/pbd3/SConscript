@@ -7,13 +7,12 @@ Import('env libraries')
 pbd3 = env.Copy()
 
 domain = 'libpbd'
-pbd3.Append(DOMAIN=domain,MAJOR=3,MINOR=1,MICRO=0)
+pbd3.Append(DOMAIN=domain,MAJOR=3,MINOR=2,MICRO=0)
 
 pbd3_files = Split("""
 basename.cc
 dirname.cc
 dmalloc.cc
-ftw.cc
 mountpoint.cc
 pathscanner.cc
 pool.cc
@@ -25,6 +24,7 @@ transmitter.cc
 undo.cc
 unescape.cc
 version.cc
+whitespace.cc
 xml++.cc
 """)
 

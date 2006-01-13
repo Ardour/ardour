@@ -658,7 +658,7 @@ ConnectionEditor::new_connection (bool for_input)
 	prompter.done.connect (Gtk::Main::quit.slot());
 
 	switch (prompter.run()) {
-	case GTK_RESPONSE_ACCEPT:
+	case Gtk::RESPONSE_ACCEPT:
 		prompter.get_result (name);
 		push_at_front = true;
 		if (name.length()) {

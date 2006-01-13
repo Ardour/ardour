@@ -31,8 +31,6 @@
 
 #include <pbd/error.h>
 #include <pbd/textreceiver.h>
-#include <pbd/platform.h>
-#include <pbd/platform_factory.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/pthread_utils.h>
 

@@ -20,6 +20,8 @@
 
 #include <string>
 
+#include <pbd/whitespace.h>
+
 #include <gtkmm/stock.h>
 #include <gtkmm2ext/prompter.h>
 
@@ -74,8 +76,10 @@ Prompter::change_labels (string okstr, string cancelstr)
 }
 
 void
-Prompter::get_result (string &str)
-
+Prompter::get_result (string &str, bool strip)
 {
 	str = entry.get_text ();
+	if (strip) {
+		strip_whitespace_edges (str);
+	}
 }

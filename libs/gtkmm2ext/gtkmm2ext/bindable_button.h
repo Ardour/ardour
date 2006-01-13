@@ -21,14 +21,14 @@
 #ifndef __pbd_gtkmm_bindable_button_h__
 #define __pbd_gtkmm_bindable_button_h__
 
+#include <string>
+
 #include <gtkmm2ext/stateful_button.h>
 #include <gtkmm2ext/popup.h>
-
 
 namespace MIDI {
 	class Controllable;
 }
-
 
 namespace Gtkmm2ext {
 
@@ -41,7 +41,7 @@ class BindableToggleButton : public Gtk::ToggleButton
 	//- You won't be able
 	//- to add a widget in this button since it already has a {\class Gtk_Label}
 	//- in it.
-	explicit BindableToggleButton(MIDI::Controllable *, const string &label);
+	explicit BindableToggleButton(MIDI::Controllable *, const std::string &label);
 
 	virtual ~BindableToggleButton() {}
 	

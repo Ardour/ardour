@@ -112,7 +112,7 @@ Editor::name_selection ()
 	p.show_all ();
 
 	switch (p.run ()) {
-	case GTK_RESPONSE_ACCEPT:
+	case Gtk::RESPONSE_ACCEPT:
 	  string name;
 		p.get_result (name);
 		if (name.length()) {

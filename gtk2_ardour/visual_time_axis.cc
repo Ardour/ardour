@@ -26,6 +26,7 @@
 
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
+#include <pbd/whitespace.h>
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
@@ -361,7 +362,7 @@ VisualTimeAxis::start_time_axis_rename()
 	name_prompter->show_all() ;
 
 	switch (name_prompter->run ()) {
-	case GTK_RESPONSE_ACCEPT:
+	case Gtk::RESPONSE_ACCEPT:
 	  string result;
 	  name_prompter->get_result (result);
 	  if (editor.get_named_time_axis(result) != 0) {

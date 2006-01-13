@@ -55,7 +55,6 @@ std::string fit_to_pixels (const std::string &, int pixel_width, const std::stri
 
 int    atoi (const std::string&);
 double atof (const std::string&);
-void   strip_whitespace_edges (std::string& str);
 void   url_decode (std::string&);
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void   allow_keyboard_focus (bool);

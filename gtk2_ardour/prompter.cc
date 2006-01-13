@@ -19,9 +19,6 @@
 */
 
 #include "prompter.h"
-#include "ardour_ui.h"
-
-using namespace sigc;
 
 ArdourPrompter::ArdourPrompter (bool modal)
 	: Gtkmm2ext::Prompter (modal)

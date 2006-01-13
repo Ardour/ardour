@@ -740,10 +740,9 @@ RouteUI::route_rename ()
 
 	switch (name_prompter.run ()) {
 
-	case GTK_RESPONSE_ACCEPT:
-	        name_prompter.get_result (result);
-	        if (result.length()) {
-		        strip_whitespace_edges (result);
+	case Gtk::RESPONSE_ACCEPT:
+        name_prompter.get_result (result);
+        if (result.length()) {
 			_route.set_name (result, this);
 		}	
 		break;

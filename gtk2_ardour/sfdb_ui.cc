@@ -20,7 +20,7 @@
 */
 
 #include <map>
-#include <errno.h>
+#include <cerrno>
 
 #include <sndfile.h>
 
@@ -34,8 +34,9 @@
 #include <ardour/sndfile_helpers.h>
 #include <ardour/sndfilesource.h>
 
-#include "sfdb_ui.h"
 #include "gui_thread.h"
+#include "prompter.h"
+#include "sfdb_ui.h"
 
 #include "i18n.h"
 
@@ -235,7 +236,24 @@ SoundFileBox::stop_btn_clicked ()
 
 void
 SoundFileBox::add_field_clicked ()
-{}
+{
+    ArdourPrompter prompter (true);
+    string name;
+
+    prompter.set_prompt (_("Name for field"));
+
+    switch (prompter.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			cout << name << endl;
+	        prompter.get_result (name);
+			Library->add_field (name);
+			Library->save_changes ();
+	        break;
+
+	    default:
+	        break;
+    }
+}
 
 void
 SoundFileBox::remove_field_clicked ()
