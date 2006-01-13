@@ -89,7 +89,7 @@ Editor::new_edit_group ()
 
 	switch (prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
-	        prompter.get_result (result);
+	    prompter.get_result (result);
 		if (result.length()) {
 			session->add_edit_group (result);
 		}

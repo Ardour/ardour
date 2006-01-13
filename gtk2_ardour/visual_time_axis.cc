@@ -91,7 +91,6 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
 	  size_button (_("h"))
 {
 	time_axis_name = name ;
-	name_prompter = 0 ;
 	_color = unique_random_color() ;
 	_marked_for_display = true;
 	
@@ -130,11 +129,6 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
  */
 VisualTimeAxis::~VisualTimeAxis()
 {
-	if(name_prompter)
-	{
-		delete name_prompter ;
-		name_prompter = 0 ;
-	}
 }
 
 
@@ -350,33 +344,25 @@ VisualTimeAxis::idle_remove_this_time_axis(VisualTimeAxis* ta, void* src)
 void
 VisualTimeAxis::start_time_axis_rename()
 {
-	if(name_prompter)
-	{
-		delete name_prompter ;
-		name_prompter = 0 ;
-	}
+	ArdourPrompter name_prompter;
 
-	name_prompter = new ArdourPrompter() ;
+	name_prompter.set_prompt (_("new name: ")) ;
+	name_prompter.show_all() ;
 
-	name_prompter->set_prompt (_("new name: ")) ;
-	name_prompter->show_all() ;
-
-	switch (name_prompter->run ()) {
+	switch (name_prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
 	  string result;
-	  name_prompter->get_result (result);
-	  if (editor.get_named_time_axis(result) != 0) {
-	    ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
-	    return ;
-	  }
+	  name_prompter.get_result (result);
+	  if (result.length()) {
+		  if (editor.get_named_time_axis(result) != 0) {
+		    ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
+		    return ;
+		  }
 	  
-	  set_time_axis_name(result, this) ;
+		  set_time_axis_name(result, this) ;
+	  }
 	}
-	delete name_prompter ;
-	name_prompter = 0 ;
 	label_view() ;
-
-
 }
 
 /**

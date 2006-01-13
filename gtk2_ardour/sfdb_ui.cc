@@ -74,6 +74,7 @@ SoundFileBox::SoundFileBox ()
 	main_box.pack_start(top_box, false, false);
 	main_box.pack_start(bottom_box, false, false);
 
+	field_view.set_model (fields);
 	field_view.set_size_request(200, 150);
 	field_view.append_column (_("Field"), label_columns.field);
 	field_view.append_column_editable (_("Value"), label_columns.data);
@@ -161,6 +162,8 @@ SoundFileBox::setup_fields ()
 {
 	ENSURE_GUI_THREAD(mem_fun (*this, &SoundFileBox::setup_fields));
 
+	fields->clear ();
+
 	vector<string> field_list;
 	Library->get_fields(field_list);
 
@@ -168,12 +171,15 @@ SoundFileBox::setup_fields ()
 	Gtk::TreeModel::iterator iter;
 	Gtk::TreeModel::Row row;
 	for (i = field_list.begin(); i != field_list.end(); ++i) {
-		string value = Library->get_field(path, *i);
-		iter = fields->append();
-		row = *iter;
+		if (!(*i == _("channels") || *i == _("samplerate") ||
+			*i == _("resolution") || *i == _("format"))) {
+			iter = fields->append();
+			row = *iter;
 
-		row[label_columns.field] = *i;
-		row[label_columns.data]  = value;
+			string value = Library->get_field(path, *i);
+			row[label_columns.field] = *i;
+			row[label_columns.data]  = value;
+		}
 	}
 }
 
@@ -244,10 +250,11 @@ SoundFileBox::add_field_clicked ()
 
     switch (prompter.run ()) {
 		case Gtk::RESPONSE_ACCEPT:
-			cout << name << endl;
 	        prompter.get_result (name);
-			Library->add_field (name);
-			Library->save_changes ();
+			if (name.length()) {
+				Library->add_field (name);
+				Library->save_changes ();
+			}
 	        break;
 
 	    default:

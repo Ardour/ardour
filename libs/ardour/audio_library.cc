@@ -88,10 +88,10 @@ AudioLibrary::initialize_db ()
 	lrdf_add_triple(src.c_str(), SOUNDFILE, RDF_TYPE, RDFS_CLASS, lrdf_uri);
 
 	// add intergral fields
-	add_field("channels");
-	add_field("samplerate");
-	add_field("resolution");
-	add_field("format");
+	add_field(_("channels"));
+	add_field(_("samplerate"));
+	add_field(_("resolution"));
+	add_field(_("format"));
 }
 
 void

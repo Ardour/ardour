@@ -243,10 +243,6 @@ class VisualTimeAxis : public TimeAxisView
 		/** the name of this TimeAxis object */
 		std::string time_axis_name ;
 		
-		/** used to get a new name for this TimeAxis */
-		ArdourPrompter* name_prompter ;
-		
-		
 		//---------------------------------------------------------------------------------------//
 		// Super class methods not handled by VisualTimeAxis
 		

@@ -837,7 +837,9 @@ AudioTimeAxisView::rename_current_playlist ()
 	switch (prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
 		prompter.get_result (name);
-		pl->set_name (name);
+		if (name.length()) {
+			pl->set_name (name);
+		}
 		break;
 
 	default:
@@ -876,9 +878,11 @@ AudioTimeAxisView::use_copy_playlist ()
 	switch (prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
 		prompter.get_result (name);
-		ds->use_copy_playlist ();
-		pl = ds->playlist();
-		pl->set_name (name);
+		if (name.length()) {
+			ds->use_copy_playlist ();
+			pl = ds->playlist();
+			pl->set_name (name);
+		}
 		break;
 
 	default:
@@ -906,9 +910,11 @@ AudioTimeAxisView::use_new_playlist ()
 	switch (prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
 		prompter.get_result (name);
-		ds->use_new_playlist ();
-		pl = ds->playlist();
-		pl->set_name (name);
+		if (name.length()) {
+			ds->use_new_playlist ();
+			pl = ds->playlist();
+			pl->set_name (name);
+		}
 		break;
 
 	default:

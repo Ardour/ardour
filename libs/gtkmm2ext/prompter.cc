@@ -45,6 +45,7 @@ Prompter::Prompter (bool modal)
 void
 Prompter::init ()
 {
+	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("Prompter");
 
