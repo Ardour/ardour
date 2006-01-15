@@ -71,7 +71,6 @@ MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Canvas&
 	selection_group->hide();
 
 	// intialize our data items
-	name_prompter = 0 ;
 	marker_menu = 0 ;
 
 	y_position = -1 ;

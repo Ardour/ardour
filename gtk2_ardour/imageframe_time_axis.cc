@@ -72,7 +72,6 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(const string & track_id, PublicEditor& ed
 	// intialize our data items
 	_marked_for_display = true;
 	y_position = -1 ;
-	name_prompter = 0 ;
 
 	/* create our new image frame view */
 	view = new ImageFrameTimeAxisView(*this) ;
