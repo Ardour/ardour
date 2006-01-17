@@ -69,9 +69,6 @@ class RedirectBox : public Gtk::HBox
 
 	void set_width (Width);
 
-	void set_title (const std::string & title);
-	void set_title_shown (bool flag);
-	
 	void update();
 
 	void select_all_redirects ();
@@ -99,18 +96,24 @@ class RedirectBox : public Gtk::HBox
 	RouteRedirectSelection  & _rr_selection;
 	
 	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
-		ModelColumns () {
-			add (text);
+	    ModelColumns () {
+		    add (text);
 		    add (redirect);
-		}
-	    Gtk::TreeModelColumn<std::string> text;
-	    Gtk::TreeModelColumn<ARDOUR::Redirect*>   redirect;
+		    add (color);
+	    }
+	    Gtk::TreeModelColumn<std::string>       text;
+	    Gtk::TreeModelColumn<ARDOUR::Redirect*> redirect;
+	    Gtk::TreeModelColumn<Gdk::Color>        color;
 	};
 
 	ModelColumns columns;
 	Glib::RefPtr<Gtk::ListStore> model;
 	
 	void selection_changed ();
+
+	static bool get_colors;
+	static Gdk::Color* active_redirect_color;
+	static Gdk::Color* inactive_redirect_color;
 	
 	Gtk::EventBox	       redirect_eventbox;
 	Gtk::HBox              redirect_hpacker;
@@ -139,18 +142,22 @@ class RedirectBox : public Gtk::HBox
 	void choose_plugin ();
 	void insert_plugin_chosen (ARDOUR::Plugin *);
 
-	gint redirect_button (GdkEventButton *);
-	void redirects_changed (void *);
+	bool no_redirect_redisplay;
+	bool ignore_delete;
+
+	bool redirect_button_press_event (GdkEventButton *);
+	void redisplay_redirects (void* src);
 	void show_redirect_active (ARDOUR::Redirect *, void *);
 	void show_redirect_name (void*, ARDOUR::Redirect *);
 	void add_redirect_to_display (ARDOUR::Redirect *);
+	void row_deleted (const Gtk::TreeModel::Path& path);
 
 	string redirect_name (ARDOUR::Redirect&);
 
 	void remove_redirect_gui (ARDOUR::Redirect *);
 
 	void redirects_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
-	gint compute_redirect_sort_keys ();
+	void compute_redirect_sort_keys ();
 	vector<sigc::connection> redirect_active_connections;
 	vector<sigc::connection> redirect_name_connections;
 	
@@ -169,6 +176,8 @@ class RedirectBox : public Gtk::HBox
 	void for_selected_redirects (void (RedirectBox::*pmf)(ARDOUR::Redirect*));
 	void get_selected_redirects (vector<ARDOUR::Redirect*>&);
 
+	static Glib::RefPtr<Gtk::Action> paste_action;
+	void paste_redirect_list (std::list<ARDOUR::Redirect*>& redirects);
 	
 	void activate_redirect (ARDOUR::Redirect*);
 	void deactivate_redirect (ARDOUR::Redirect*);

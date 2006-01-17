@@ -217,11 +217,6 @@ RouteParams_UI::setup_redirect_boxes()
 		pre_redirect_box = new RedirectBox(PreFader, *session, *_route, *_plugin_selector, _rr_selection);
 		post_redirect_box = new RedirectBox(PostFader, *session, *_route, *_plugin_selector, _rr_selection);
 
-		pre_redirect_box->set_title(_("Pre Redirects"));
-		pre_redirect_box->set_title_shown (true);
-		post_redirect_box->set_title(_("Post Redirects"));
-		post_redirect_box->set_title_shown (true);
-
 	        pre_redir_hpane.add1 (*pre_redirect_box);
 		post_redir_hpane.add1 (*post_redirect_box);
 

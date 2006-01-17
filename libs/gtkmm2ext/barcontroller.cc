@@ -54,6 +54,8 @@ BarController::BarController (Gtk::Adjustment& adj,
 	with_text = true;
 	use_parent = false;
 
+	layout = darea.create_pango_layout("");
+
 	set_shadow_type (SHADOW_NONE);
 
 	initial_value = adjustment.get_value ();
@@ -308,10 +310,10 @@ BarController::expose (GdkEventExpose* event)
 
 		win->draw_rectangle (get_style()->get_bg_gc (get_state()),
 				    false,
-				    0, 0, darea.get_width(), darea.get_height());
+				    0, 0, darea.get_width() - 1, darea.get_height() - 1);
 
 		/* draw active box */
-		
+
 		win->draw_rectangle (get_style()->get_fg_gc (get_state()),
 				    true,
 				    1 + x1,
@@ -347,11 +349,25 @@ BarController::expose (GdkEventExpose* event)
 		label_callback (buf, 64);
 
 		if (buf[0] != '\0') {
-    			int width = 0, height;
-			darea.create_pango_layout(buf)->get_pixel_size(width, height);
-			darea.set_size_request(width + 2, -1);
+
+			int width;
+			int height;
+			
+			layout->set_text (buf);
+			layout->get_pixel_size(width, height);			
+			
+			int xpos;
+
+			xpos = max (3, 1 + (x2 - (width/2)));
+			xpos = min (darea.get_width() - width - 3, xpos);
+			
+			win->draw_layout (get_style()->get_text_gc (get_state()),
+					  xpos,
+					  (darea.get_height()/2) - (height/2),
+					  layout);
 		}
 	}
+
 	return TRUE;
 }
 

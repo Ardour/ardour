@@ -51,6 +51,7 @@ using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace sigc;
+using namespace std;
 
 Mixer_UI::Mixer_UI (AudioEngine& eng)
 	: Window (Gtk::WINDOW_TOPLEVEL),
@@ -146,8 +147,8 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	rhs_pane1.set_data ("collapse-direction", (gpointer) 0);
 	list_hpane.set_data ("collapse-direction", (gpointer) 1);
 
-	rhs_pane1.signal_button_release_event().connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane1)));
-	list_hpane.signal_button_release_event().connect (bind (ptr_fun (pane_handler), static_cast<Paned*>(&list_hpane)));
+	rhs_pane1.signal_button_release_event().connect (bind (sigc::ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane1)));
+	list_hpane.signal_button_release_event().connect (bind (sigc::ptr_fun (pane_handler), static_cast<Paned*>(&list_hpane)));
 	
 	global_vpacker.pack_start (list_hpane, true, true);
 
@@ -158,7 +159,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
-	signal_delete_event().connect (bind (ptr_fun (just_hide_it), static_cast<Gtk::Window *>(this)));
+	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Gtk::Window *>(this)));
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	group_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::group_display_button_press));
@@ -215,25 +216,22 @@ Mixer_UI::add_strip (Route* route)
 	strip->set_width (_strip_width);
 	show_strip (strip);
 
+	no_track_list_redisplay = true;
+
 	TreeModel::Row row = *(track_display_model->append());
 	row[track_display_columns.text] = route->name();
 
-	if (strip->route().master() || strip->route().control()) {
-		row[track_display_columns.visible] = true;
-	} else {
-		row[track_display_columns.visible] = (strip->marked_for_display() || strip->packed());
-	}
+	row[track_display_columns.visible] = true;
 	row[track_display_columns.route] = route;
 	row[track_display_columns.strip] = strip;
+
+	no_track_list_redisplay = false;
+	redisplay_track_list ();
 
 	route->name_changed.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
 	strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
 
 	strip->signal_button_release_event().connect (bind (mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
-
-//	if (width() < gdk_screen_width()) {
-//		set_size_request (width() + (_strip_width == Wide ? 75 : 50), height());
-//	}
 }
 
 void
@@ -523,6 +521,12 @@ Mixer_UI::redisplay_track_list ()
 	for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
 		MixerStrip* strip = (*i)[track_display_columns.strip];
 
+		if (strip == 0) {
+			cerr << "row with text = " << (*i)[track_display_columns.text] << " has no strip\n";
+			/* we're in the middle of changing a row, don't worry */
+			continue;
+		}
+
 		bool visible = (*i)[track_display_columns.visible];
 
 		if (visible) {
@@ -545,7 +549,7 @@ Mixer_UI::redisplay_track_list ()
 					strip_packer.pack_start (*strip, false, false);
 				}
 				strip->set_packed (true);
-				strip->show ();
+				strip->show_all ();
 			}
 
 		} else {
@@ -824,12 +828,13 @@ Mixer_UI::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
 	XMLNode* geometry;
-	int x, y, width, height, xoff, yoff;
+	Gdk::Geometry g;
+	int x, y, xoff, yoff;
 	
 	if ((geometry = find_named_node (node, "geometry")) == 0) {
 
-		width = default_width;
-		height = default_height;
+		g.base_width = default_width;
+		g.base_height = default_height;
 		x = 1;
 		y = 1;
 		xoff = 0;
@@ -837,17 +842,17 @@ Mixer_UI::set_state (const XMLNode& node)
 
 	} else {
 
-		width = atoi(geometry->property("x_size")->value().c_str());
-		height = atoi(geometry->property("y_size")->value().c_str());
+		g.base_width = atoi(geometry->property("x_size")->value().c_str());
+		g.base_height = atoi(geometry->property("y_size")->value().c_str());
 		x = atoi(geometry->property("x_pos")->value().c_str());
 		y = atoi(geometry->property("y_pos")->value().c_str());
 		xoff = atoi(geometry->property("x_off")->value().c_str());
 		yoff = atoi(geometry->property("y_off")->value().c_str());
 	}
-		
-	set_default_size(width, height);
-	// GTK2FIX
-	// set_uposition(x, y-yoff);
+
+	set_geometry_hints (global_vpacker, g, Gdk::HINT_BASE_SIZE);
+	set_default_size(g.base_width, g.base_height);
+	move (x, y);
 
 	if ((prop = node.property ("narrow-strips"))) {
 		if (prop->value() == "yes") {

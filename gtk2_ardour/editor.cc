@@ -598,13 +598,13 @@ Editor::Editor (AudioEngine& eng)
 	region_list_model->set_sort_column (0, SORT_ASCENDING);
 
 	region_list_display.set_model (region_list_model);
-	CellRendererText* renderer = manage( new CellRendererText() );
-	region_list_display.append_column (_("Regions"), *renderer);
+	region_list_display.append_column (_("Regions"), region_list_columns.name);
 	region_list_display.set_headers_visible (false);
 
 	region_list_display.get_selection()->set_select_function (mem_fun (*this, &Editor::region_list_selection_filter));
 	
 	TreeViewColumn* tv_col = region_list_display.get_column(0);
+	CellRendererText* renderer = dynamic_cast<CellRendererText*>(region_list_display.get_column_cell_renderer (0));
 	tv_col->add_attribute(renderer->property_text(), region_list_columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), region_list_columns.color_);
 	
@@ -2065,12 +2065,13 @@ Editor::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
 	XMLNode* geometry;
-	int x, y, width, height, xoff, yoff;
+	int x, y, xoff, yoff;
+	Gdk::Geometry g;
 
 	if ((geometry = find_named_node (node, "geometry")) == 0) {
 
-		width = default_width;
-		height = default_height;
+		g.base_width = default_width;
+		g.base_height = default_height;
 		x = 1;
 		y = 1;
 		xoff = 0;
@@ -2078,16 +2079,17 @@ Editor::set_state (const XMLNode& node)
 
 	} else {
 
-		width = atoi(geometry->property("x_size")->value());
-		height = atoi(geometry->property("y_size")->value());
+		g.base_width = atoi(geometry->property("x_size")->value());
+		g.base_height = atoi(geometry->property("y_size")->value());
 		x = atoi(geometry->property("x_pos")->value());
 		y = atoi(geometry->property("y_pos")->value());
 		xoff = atoi(geometry->property("x_off")->value());
 		yoff = atoi(geometry->property("y_off")->value());
 	}
 
-	set_default_size(width, height);
-	move (x, y-yoff);
+	set_geometry_hints (vpacker, g, Gdk::HINT_BASE_SIZE);
+	set_default_size (g.base_width, g.base_height);
+	move (x, y);
 
 	if ((prop = node.property ("zoom-focus"))) {
 		set_zoom_focus ((ZoomFocus) atoi (prop->value()));
@@ -3333,9 +3335,6 @@ Editor::duplicate_dialog (bool dup_region)
 	entry.select_region (0, entry.get_text_length());
 	entry.grab_focus ();
 
-        // GTK2FIX
-	// win.get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
-
 
 	switch (win.run ()) {
 	case RESPONSE_ACCEPT:
@@ -3762,9 +3761,6 @@ Editor::edit_xfade (Crossfade* xfade)
 		
 	ensure_float (cew);
 	
-	// GTK2FIX
-	// cew.signal_delete_event().connect (mem_fun (cew, &ArdourDialog::wm_doi_event_stop));
-
 	switch (cew.run ()) {
 	case RESPONSE_ACCEPT:
 		break;

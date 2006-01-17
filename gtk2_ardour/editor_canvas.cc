@@ -373,12 +373,6 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 		}
 	}
 
-	RefPtr<Gdk::Screen> screen = get_screen();
-
-	if (!screen) {
-		screen = Gdk::Screen::get_default();
-	}
-
 	double last_canvas_unit = ceil ((double) max_frames / frames_per_unit);
 	track_canvas.set_scroll_region (0.0, 0.0, max (last_canvas_unit, canvas_width), pos);
 

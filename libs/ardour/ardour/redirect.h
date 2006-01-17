@@ -74,7 +74,7 @@ class Redirect : public IO
 	virtual uint32_t natural_input_streams () const { return n_inputs(); }
 
 	uint32_t sort_key() const { return _sort_key; }
-	void set_sort_key (uint32_t sk,void *src) { _sort_key = sk; sort_key_changed (this, src); }
+	void set_sort_key (uint32_t key);
 
 	Placement placement() const { return _placement; }
 	void set_placement (Placement, void *src);
@@ -87,7 +87,6 @@ class Redirect : public IO
 	virtual void set_block_size (jack_nframes_t nframes) {}
 
 	sigc::signal<void,Redirect*,void*> active_changed;
-	sigc::signal<void,Redirect*,void*> sort_key_changed;
 	sigc::signal<void,Redirect*,void*> placement_changed;
 	sigc::signal<void,Redirect*,bool>  AutomationPlaybackChanged;
 	sigc::signal<void,Redirect*,uint32_t> AutomationChanged;

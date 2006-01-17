@@ -253,7 +253,7 @@ Editor::redisplay_route_list ()
 		bool visible = (*i)[route_display_columns.visible];
 
 		if (visible) {
-			tv->set_marked_for_display (false);
+			tv->set_marked_for_display (true);
 			position += tv->show_at (position, n, &edit_controls_vbox);
 			position += track_spacing;
 		} else {

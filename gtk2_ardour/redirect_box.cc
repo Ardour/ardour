@@ -68,7 +68,10 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 
 RedirectBox* RedirectBox::_current_redirect_box = 0;
-
+RefPtr<Action> RedirectBox::paste_action;
+bool RedirectBox::get_colors = true;
+Gdk::Color* RedirectBox::active_redirect_color;
+Gdk::Color* RedirectBox::inactive_redirect_color;
 
 RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelector &plugsel, 
 			  RouteRedirectSelection & rsel, bool owner_is_mixer)
@@ -78,13 +81,22 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	  _placement(pcmnt), 
 	  _plugin_selector(plugsel),
 	  _rr_selection(rsel)
-	  //redirect_display (1)
 {
+	if (get_colors) {
+		active_redirect_color = new Gdk::Color;
+		inactive_redirect_color = new Gdk::Color;
+		set_color (*active_redirect_color, rgba_from_style ("RedirectSelector", 0xff, 0, 0, 0, "fg", Gtk::STATE_ACTIVE, false ));
+		set_color (*inactive_redirect_color, rgba_from_style ("RedirectSelector", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
+		get_colors = false;
+	}
+
 	_width = Wide;
 	redirect_menu = 0;
 	send_action_menu = 0;
 	redirect_drag_in_progress = false;
-	
+	no_redirect_redisplay = false;
+	ignore_delete = false;
+
 	model = ListStore::create(columns);
 
 	RefPtr<TreeSelection> selection = redirect_display.get_selection();
@@ -92,8 +104,8 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	selection->signal_changed().connect (mem_fun (*this, &RedirectBox::selection_changed));
 
 	redirect_display.set_model (model);
-	redirect_display.append_column ("WHY?", columns.text);
-	redirect_display.set_name ("MixerRedirectSelector");
+	redirect_display.append_column (X_("notshown"), columns.text);
+	redirect_display.set_name ("RedirectSelector");
 	redirect_display.set_headers_visible (false);
 	redirect_display.set_reorderable (true);
 	redirect_display.set_size_request (-1, 48);
@@ -102,73 +114,61 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	redirect_display.add_object_drag (columns.redirect.index(), "redirects");
 	redirect_display.signal_object_drop.connect (mem_fun (*this, &RedirectBox::object_drop));
 
-	// Does this adequately replace the drag start/stop signal handlers?
-	model->signal_rows_reordered().connect (mem_fun (*this, &RedirectBox::redirects_reordered));
+	TreeViewColumn* name_col = redirect_display.get_column(0);
+	CellRendererText* renderer = dynamic_cast<CellRendererText*>(redirect_display.get_column_cell_renderer (0));
+	name_col->add_attribute(renderer->property_foreground_gdk(), columns.color);
+
 	redirect_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	
+	model->signal_row_deleted().connect (mem_fun (*this, &RedirectBox::row_deleted));
 
 	redirect_scroller.add (redirect_display);
 	redirect_eventbox.add (redirect_scroller);
+
 	pack_start (redirect_eventbox, true, true);
 
-	_route.redirects_changed.connect (mem_fun(*this, &RedirectBox::redirects_changed));
+	_route.redirects_changed.connect (mem_fun(*this, &RedirectBox::redisplay_redirects));
 
 	redirect_eventbox.signal_enter_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::enter_box), this));
-	//redirect_eventbox.signal_leave_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::leave_box), this));
 
-	redirect_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::redirect_button));
-	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button));
-
-	//redirect_display.signal_button_release_event().connect_after (ptr_fun (do_not_propagate));
-	set_stuff_from_route ();
+	redirect_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::redirect_button_press_event), false);
+	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button_press_event));
 
 	/* start off as a passthru strip. we'll correct this, if necessary,
 	   in update_diskstream_display().
 	*/
 
-	//set_name ("AudioTrackStripBase");
-
 	/* now force an update of all the various elements */
 
-	redirects_changed (0);
-
-	//add_events (Gdk::BUTTON_RELEASE_MASK);
+	redisplay_redirects (0);
 }
 
 RedirectBox::~RedirectBox ()
 {
-//	GoingAway(); /* EMIT_SIGNAL */
-
 }
 
 void
 RedirectBox::object_drop (string type, uint32_t cnt, void** ptr)
 {
-	if (type != "redirects") {
+	if (type != "redirects" || cnt == 0 || ptr == 0) {
 		return;
 	}
-}
 
-void
-RedirectBox::set_stuff_from_route ()
-{
-}
+	/* do something with the dropped redirects */
 
-void
-RedirectBox::set_title (const std::string & title)
-{
-	redirect_display.get_column(0)->set_title (title);
-}
+	list<Redirect*> redirects;
 
-void
-RedirectBox::set_title_shown (bool flag)
-{
+	for (uint32_t n = 0; n < cnt; ++n) {
+		redirects.push_back ((Redirect*) ptr[n]);
+	}
+	
+	paste_redirect_list (redirects);
 }
-
 
 void
 RedirectBox::update()
 {
-	redirects_changed(0);
+	redisplay_redirects (0);
 }
 
 
@@ -180,9 +180,8 @@ RedirectBox::set_width (Width w)
 	}
 	_width = w;
 
-	redirects_changed(0);
+	redisplay_redirects (0);
 }
-
 
 void
 RedirectBox::remove_redirect_gui (Redirect *redirect)
@@ -239,6 +238,8 @@ RedirectBox::show_redirect_menu (gint arg)
 		redirect_menu = build_redirect_menu ();
 	}
 
+	paste_action->set_sensitive (!_rr_selection.redirects.empty());
+
 	redirect_menu->popup (1, 0);
 }
 
@@ -254,84 +255,58 @@ RedirectBox::redirect_drag_end (GdkDragContext *context)
 	redirect_drag_in_progress = false;
 }
 
-gint
-RedirectBox::redirect_button (GdkEventButton *ev)
+bool
+RedirectBox::redirect_button_press_event (GdkEventButton *ev)
 {
-	Redirect *redirect;
-	TreeModel::Row row = *(redirect_display.get_selection()->get_selected());
+	TreeIter iter;
+	TreeModel::Path path;
+	TreeViewColumn* column;
+	int cellx;
+	int celly;
+	Redirect* redirect = 0;
+	int ret = false;
+	bool selected = false;
 
-	if (row)
-		redirect = row[columns.redirect];
-
-	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-		if (ev->button == 3) {
-			show_redirect_menu (0); // Handle the context-click menu here as well
-			return TRUE;
+	if (redirect_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+		if ((iter = model->get_iter (path))) {
+			redirect = (*iter)[columns.redirect];
+			selected = redirect_display.get_selection()->is_selected (iter);
 		}
-		else
-			return FALSE;
-
-	case GDK_2BUTTON_PRESS:
-		if (ev->state != 0) {
-			return FALSE;
-		}
-		/* might be edit event, see below */
-		break;
-
-	case GDK_BUTTON_RELEASE:
-		break;
-
-	default:
-		/* shouldn't be here, but gcc complains */
-		return FALSE;
+		
 	}
-
+	
 	if (redirect && Keyboard::is_delete_event (ev)) {
 		
 		Glib::signal_idle().connect (bind (mem_fun(*this, &RedirectBox::idle_delete_redirect), redirect));
-		return TRUE;
-
-	} else if (redirect && (Keyboard::is_edit_event (ev) || ev->type == GDK_2BUTTON_PRESS)) {
+		ret = true;
+		
+	} else if (redirect && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS && ev->state == 0))) {
 		
 		if (_session.engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
 			edit_redirect (redirect);
 		}
-		return TRUE;
-
+		ret = true;
+		
 	} else if (Keyboard::is_context_menu_event (ev)) {
+
 		show_redirect_menu(0);
-		return TRUE; //stop_signal (*clist, "button-release-event");
+		ret = true;
 
-	} else {
-		switch (ev->button) {
-		case 1:
-			return FALSE;
-			break;
+	} else if (redirect && ev->button == 2 && ev->state == 0) {
+		
+		redirect->set_active (!redirect->active(), this);
+		ret = true;
 
-		case 2:
-			if (redirect) {
-				redirect->set_active (!redirect->active(), this);
-			}
-			break;
+	} 
 
-		case 3:
-			break;
-
-		default:
-			return FALSE;
-		}
-	}
-
-	return TRUE;
+	return ret;
 }
 
 Menu *
 RedirectBox::build_redirect_menu ()
 {
 	redirect_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/redirectmenu") );
-	redirect_menu->signal_map_event().connect (mem_fun(*this, &RedirectBox::redirect_menu_map_handler));
 	redirect_menu->set_name ("ArdourContextMenu");
 
 	show_all_children();
@@ -347,14 +322,6 @@ RedirectBox::selection_changed ()
 	for (vector<Glib::RefPtr<Gtk::Action> >::iterator i = ActionManager::plugin_selection_sensitive_actions.begin(); i != ActionManager::plugin_selection_sensitive_actions.end(); ++i) {
 		(*i)->set_sensitive (sensitive);
 	}
-}
-
-gint
-RedirectBox::redirect_menu_map_handler (GdkEventAny *ev)
-{
-	// GTK2FIX
-	// popup_act_grp->get_action("paste")->set_sensitive (!_rr_selection.redirects.empty());
-	return FALSE;
 }
 
 void
@@ -503,12 +470,18 @@ RedirectBox::send_io_finished (IOSelector::Result r, Redirect* redirect, IOSelec
 }
 
 void
-RedirectBox::redirects_changed (void *src)
+RedirectBox::redisplay_redirects (void *src)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::redirects_changed), src));
-	
-	//redirect_display.freeze ();
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::redisplay_redirects), src));
+
+	if (no_redirect_redisplay) {
+		return;
+	}
+
+	ignore_delete = true;
 	model->clear ();
+	ignore_delete = false;
+
 	redirect_active_connections.clear ();
 	redirect_name_connections.clear ();
 
@@ -522,7 +495,6 @@ RedirectBox::redirects_changed (void *src)
 		build_redirect_tooltip(redirect_eventbox, _("Post-fader inserts, sends & plugins:"));
 		break;
 	}
-	//redirect_display.thaw ();
 }
 
 void
@@ -631,23 +603,21 @@ RedirectBox::show_redirect_active (Redirect *redirect, void *src)
 	(*iter)[columns.text] = redirect_name (*redirect);
 
 	if (redirect->active()) {
-		redirect_display.get_selection()->select (iter);
+		(*iter)[columns.color] = *active_redirect_color;
 	} else {
-		redirect_display.get_selection()->unselect (iter);
+		(*iter)[columns.color] = *inactive_redirect_color;
 	}
 }
 
 void
-RedirectBox::redirects_reordered (const TreeModel::Path& path,const TreeModel::iterator& iter ,int* hmm)
+RedirectBox::row_deleted (const Gtk::TreeModel::Path& path)
 {
-	/* this is called before the reorder has been done, so just queue
-	   something for idle time.
-	*/
-
-	Glib::signal_idle().connect (mem_fun(*this, &RedirectBox::compute_redirect_sort_keys));
+	if (!ignore_delete) {
+		compute_redirect_sort_keys ();
+	}
 }
 
-gint
+void
 RedirectBox::compute_redirect_sort_keys ()
 {
 	uint32_t sort_key = 0;
@@ -655,13 +625,13 @@ RedirectBox::compute_redirect_sort_keys ()
 
 	for (Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
 		Redirect *redirect = (*iter)[columns.redirect];
-		redirect->set_sort_key (sort_key, this);
+		redirect->set_sort_key (sort_key);
 		sort_key++;
 	}
 
 	if (_route.sort_redirects ()) {
 
-		redirects_changed (0);
+		redisplay_redirects (0);
 
 		/* now tell them about the problem */
 
@@ -673,7 +643,6 @@ You cannot reorder this set of redirects\n\
 in that way because the inputs and\n\
 outputs do not work correctly."));
 
-		
 		dialog.get_vbox()->pack_start (label);
 		dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 
@@ -682,14 +651,8 @@ outputs do not work correctly."));
 		dialog.set_modal (true);
 		dialog.show_all ();
 
-		// GTK2FIX
-		//dialog.realize();
-		//dialog.get_window()->set_decorations (Gdk::WMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
-		
 		dialog.run ();
 	}
-
-	return FALSE;
 }
 
 void
@@ -842,19 +805,24 @@ RedirectBox::paste_redirects ()
 		return;
 	}
 
-	RedirectSelection& sel (_rr_selection.redirects);
-	list<Redirect*> others;
+	paste_redirect_list (_rr_selection.redirects);
+}
 
-	for (list<Redirect*>::iterator i = sel.begin(); i != sel.end(); ++i) {
+void
+RedirectBox::paste_redirect_list (list<Redirect*>& redirects)
+{
+	list<Redirect*> copies;
+
+	for (list<Redirect*>::iterator i = redirects.begin(); i != redirects.end(); ++i) {
 
 		Redirect* copy = Redirect::clone (**i);
 
 		copy->set_placement (_placement, this);
-		others.push_back (copy);
+		copies.push_back (copy);
 	}
 
-	if (_route.add_redirects (others, this)) {
-		for (list<Redirect*>::iterator i = others.begin(); i != others.end(); ++i) {
+	if (_route.add_redirects (copies, this)) {
+		for (list<Redirect*>::iterator i = copies.begin(); i != copies.end(); ++i) {
 			delete *i;
 		}
 
@@ -1083,22 +1051,6 @@ RedirectBox::enter_box (GdkEventCrossing *ev, RedirectBox* rb)
 	return false;
 }
 
-bool
-RedirectBox::leave_box (GdkEventCrossing *ev, RedirectBox* rb)
-{
-	switch (ev->detail) {
-	case GDK_NOTIFY_INFERIOR:
-		break;
-
-	case GDK_NOTIFY_VIRTUAL:
-		/* fallthru */
-	default:
-		_current_redirect_box = 0;
-	}
-
-	return false;
-}
-
 void
 RedirectBox::register_actions ()
 {
@@ -1116,7 +1068,7 @@ RedirectBox::register_actions ()
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 	act = ActionManager::register_action (popup_act_grp, X_("copy"), _("Copy"),  sigc::ptr_fun (RedirectBox::rb_copy));
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
-	ActionManager::ActionManager::register_action (popup_act_grp, X_("paste"), _("Paste"),  sigc::ptr_fun (RedirectBox::rb_paste));
+	paste_action = ActionManager::register_action (popup_act_grp, X_("paste"), _("Paste"),  sigc::ptr_fun (RedirectBox::rb_paste));
 	act = ActionManager::register_action (popup_act_grp, X_("rename"), _("Rename"),  sigc::ptr_fun (RedirectBox::rb_rename));
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 	ActionManager::register_action (popup_act_grp, X_("selectall"), _("Select All"),  sigc::ptr_fun (RedirectBox::rb_select_all));
@@ -1199,6 +1151,8 @@ RedirectBox::rb_paste ()
 	if (_current_redirect_box == 0) {
 		return;
 	}
+
+	_current_redirect_box->paste_redirects ();
 }
 
 void

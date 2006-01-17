@@ -47,5 +47,5 @@ for lang in languages[:]:
     env.Alias('install', env.InstallAs (os.path.join (modir, moname), lang + '.mo'))
 
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],
-                                      [ 'SConscript' ] +
+                                      [ 'SConscript', 'gtk_ardour.pot' ] +
                                       glob.glob('*.po')))

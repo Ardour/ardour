@@ -627,13 +627,26 @@ style "automation_track_controls_base"
 # Plugin Editors
 style "plugin_slider" 
 {
-	font_name ="sans medium 10"
+	font_name ="sans bold 10"
 
-	fg[NORMAL] = { 0.45, 0.45, 0.45 }
-	fg[ACTIVE] = { 0.45, 0.45, 0.45 }
-	fg[INSENSITIVE] = {0.0, 0.0, 0.0 } # matches default_base
-	fg[SELECTED] = { 0.45, 0.45, 0.45 }
-	fg[PRELIGHT] = { 0.45, 0.45, 0.45 }
+	# the slider itself. the inactive part is INSENSITIVE,
+	# the active part is something else.
+
+	fg[NORMAL] = { 0.37, 0.43, 0.52 }
+	fg[ACTIVE] = { 0.37, 0.43, 0.52 }
+	fg[INSENSITIVE] = {0.40, 0.40, 0.40 } # matches default_base
+	fg[SELECTED] = { 0.37, 0.43, 0.52 }
+	fg[PRELIGHT] = { 0.37, 0.43, 0.52 }
+
+	# draws the outer rectangle around the slider
+
+	bg[NORMAL] = { 0.80, 0.80, 0.80 }
+	bg[ACTIVE] = { 0.80, 0.80, 0.80 }
+	bg[INSENSITIVE] = {0.80, 0.80, 0.80 }
+	bg[SELECTED] = { 0.80, 0.80, 0.80 }
+	bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
+
+	# the numeric display
 
 	text[NORMAL] = { 0.80, 0.80, 0.80 }
 	text[ACTIVE] = { 0.80, 0.80, 0.80 }
@@ -653,6 +666,25 @@ style "track_list_display" = "small_bold_text"
  	base[ACTIVE] = { 0, 0, 0 }
  	base[INSENSITIVE] = { 0, 0, 0 }
  	base[SELECTED] = { 0, 0, 0 }
+}
+
+style "redirect_list_display" = "small_bold_text"
+{
+	text[NORMAL] = { 0.80, 0.80, 0.80 }
+ 	text[ACTIVE] = { 0.0, 0.0, 0.9 }
+ 	text[INSENSITIVE] = { 0, 0, 0 }
+ 	text[SELECTED] = { 0.9, 0.0, 0.0 }
+
+	base[NORMAL] = { 0, 0, 0 }
+ 	base[ACTIVE] = { 0, 0, 0 }
+ 	base[INSENSITIVE] = { 0, 0, 0 }
+ 	base[SELECTED] = { 0, 0, 0 }
+
+	# these two are explicitly used by the cell renderer for the
+        # text
+
+	fg[NORMAL] = { 0.2, 0.2, 0.2 }  # used for inactive
+	fg[ACTIVE] = { 0.0, 0.5, 0.5 }  # used for active
 }
 
 # MixerPanZone:
@@ -789,6 +821,7 @@ style "region_list_whole_file"
 {
 	fg[NORMAL] = { 1.0, 0, 0 }
 }
+
 
 #---------------------------------------------------------------
 widget "*FirstActionMessage" style "first_action_message"
@@ -1047,8 +1080,8 @@ widget "*TrackListDisplay.*" style "small_bold_text"
 widget "*EditGroupList" style "track_list_display"
 widget "*RegionListDisplay" style "small_bold_entry"
 widget "*RegionListDisplay.*" style "small_bold_text"
-widget "*MixerRedirectSelector" style "small_bold_entry"
-widget "*MixerRedirectSelector.*" style "small_bold_text"
+widget "*RedirectSelector" style "redirect_list_display"
+widget "*RedirectSelector.*" style "redirect_list_display"
 widget "*MixerTrackNameArea" style "default_base"
 widget "*MixerTrackCommentArea" style "option_entry"
 widget "*MixerPanZone" style "pan_zone"

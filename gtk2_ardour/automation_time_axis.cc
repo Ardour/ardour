@@ -435,7 +435,6 @@ AutomationTimeAxisView::hide_clicked ()
 	hide ();
 }
 
-
 void
 AutomationTimeAxisView::build_display_menu ()
 {

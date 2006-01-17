@@ -101,8 +101,6 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	ARDOUR::AudioEngine &engine;
 	Gtk::HBox settings_box;
 	Gtk::HBox hpacker;
-	Gtk::VBox info_vbox;
-	Gtk::EventBox name_ebox;
 	
 	Gtk::Table button_table;
 	Gtk::Table output_table;
@@ -111,9 +109,6 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Adjustment hAdjustment;
 	Gtk::Adjustment vAdjustment;
 	Gtk::Viewport scroller_view;
-	Gtk::Label nameinfo_label;
-	Gtk::Label paraminfo_label;
-	Gtk::Label makerinfo_label;
 	Gtk::Menu* automation_menu;
 
 	bool setting_name_status;

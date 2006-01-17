@@ -135,7 +135,10 @@ PluginUI::PluginUI (AudioEngine &engine, PluginInsert& pi, bool scrollable)
 
 	HBox* constraint_hbox = manage (new HBox);
 	HBox* smaller_hbox = manage (new HBox);
+	Label* combo_label = manage (new Label (_("<span size=\"large\" weight=\"bold\">Presets</span>")));
+	combo_label->set_use_markup (true);
 
+	smaller_hbox->pack_start (*combo_label, false, false, 10);
 	smaller_hbox->pack_start (combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 
@@ -143,12 +146,6 @@ PluginUI::PluginUI (AudioEngine &engine, PluginInsert& pi, bool scrollable)
 	constraint_hbox->pack_start (*smaller_hbox, true, false);
 	constraint_hbox->pack_end (bypass_button, false, false);
 
-//	name_ebox.add (*text_hbox);
-//	info_vbox.pack_start (name_ebox, false, false);
-//	info_vbox.pack_start (makerinfo_label, false, false);
-//	info_vbox.pack_start (paraminfo_label, false, false, 5);
-
-//	settings_box.pack_start (info_vbox, false, false, 10);
 	settings_box.pack_end (*constraint_hbox, false, false);
 
 	pack_start (settings_box, false, false);
@@ -165,9 +162,6 @@ PluginUI::PluginUI (AudioEngine &engine, PluginInsert& pi, bool scrollable)
 	}
 	else {
 		pack_start (hpacker, false, false);
-
-		// this is a hack to get the theme right
-		name_ebox.set_name ("PluginNameBox");
 	}
 
 	insert.active_changed.connect (mem_fun(*this, &PluginUI::redirect_active_changed));
@@ -228,6 +222,9 @@ PluginUI::build (AudioEngine &engine)
 	hpacker.pack_start(*bt_frame, true, true);
 
 	box = manage (new VBox);
+	box->set_border_width (5);
+	box->set_spacing (1);
+
 	frame = manage (new Frame);
 	frame->set_name ("BaseFrame");
 	frame->add (*box);
@@ -348,42 +345,6 @@ PluginUI::build (AudioEngine &engine)
 
 	output_update ();
 
-	string pname = plugin.name();
-	
-	if (pname.length() > 24) {
-		pname = pname.substr (0, 24);
-		pname += "...";
-		ARDOUR_UI::instance()->tooltips().set_tip(name_ebox, plugin.name());
-	}
-
-	
-	nameinfo_label.set_text (pname);
-	nameinfo_label.set_name ("PluginNameInfo");
-	nameinfo_label.set_alignment (0.0, 0.0);
-
-	string maker = plugin.maker();
-	string::size_type email_pos;
-
-	if ((email_pos = maker.find_first_of ('<')) != string::npos) {
-		maker = maker.substr (0, email_pos - 1);
-	}
-
-	if (maker.length() > 32) {
-		maker = maker.substr (0, 32);
-		maker += " ...";
-	}
-
-	makerinfo_label.set_text (maker);
-	makerinfo_label.set_name ("PluginMakerInfo");
-	makerinfo_label.set_alignment (0.0, 0.0);
-	
-	snprintf (info, sizeof(info),"[ %u %s | %u %s ]",
-		  n_ins, ngettext(_("in"), _("ins"), n_ins),
-		  n_outs, ngettext(_("out"), _("outs"), n_outs));
-	paraminfo_label.set_text (info);
-	paraminfo_label.set_name ("PluginParameterInfo");
-	paraminfo_label.set_alignment (0.0, 0.0);
-
 	output_table.show_all ();
 	button_table.show_all ();
 }
@@ -397,7 +358,7 @@ PluginUI::ControlUI::ControlUI ()
 
 	/* don't fix the height, it messes up the bar controllers */
 
-	set_size_request_to_display_given_text (automate_button, X_("longenuff"), 2, -1);
+	set_size_request_to_display_given_text (automate_button, X_("longenuff"), 2, 2);
 
 	ignore_change = 0;
 	display = 0;
@@ -552,14 +513,11 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			control_ui->clickbox->set_print_func (integer_printer, 0);
 		} else {
-//			control_ui->control = new HSliderController (ARDOUR_UI::instance()->plugin_ui_slider_pix(),
-//								     control_ui->adjustment,
-//								     mcontrol);
-
 			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &PluginUI::print_parameter), (uint32_t) port_index);
 
 			control_ui->control = new BarController (*control_ui->adjustment, mcontrol, pslot);
-			control_ui->control->set_size_request (200, 15);
+			// should really match the height of the text in the automation button+label
+			control_ui->control->set_size_request (200, 22);
 			control_ui->control->set_name (X_("PluginSlider"));
 			control_ui->control->set_style (BarController::LeftToRight);
 			control_ui->control->set_use_parent (true);
@@ -588,7 +546,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 		}
 
 		control_ui->pack_start (control_ui->automate_button, false, false);
-control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &PluginUI::control_adjustment_changed), control_ui));
+		control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &PluginUI::control_adjustment_changed), control_ui));
 		control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &PluginUI::astate_clicked), control_ui, (uint32_t) port_index));
 
 		automation_state_changed (control_ui);

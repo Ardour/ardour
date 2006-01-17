@@ -82,6 +82,12 @@ Redirect::clone (const Redirect& other)
 }
 
 void
+Redirect::set_sort_key (uint32_t key)
+{
+	_sort_key = key;
+}
+	
+void
 Redirect::set_placement (Placement p, void *src)
 {
 	if (_placement != p) {

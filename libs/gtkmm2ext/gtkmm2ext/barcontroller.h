@@ -73,6 +73,7 @@ class BarController : public Gtk::Frame
 	Gtkmm2ext::PopUp     prompter;
 	MIDI::Controllable* midi_control;
 	sigc::slot<void,char*,unsigned int> label_callback;
+	Glib::RefPtr<Pango::Layout> layout;
 	Style              _style;
 	bool                grabbed;
 	bool                switching;
