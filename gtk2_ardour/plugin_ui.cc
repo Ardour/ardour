@@ -565,7 +565,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 		control_ui->display_label->set_name ("ParameterValueDisplay");
 
 		control_ui->display->add (*control_ui->display_label);
-		Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->display, "g999999", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->display, "-99,99", 2, 2);
 
 		control_ui->display->show_all ();
 
