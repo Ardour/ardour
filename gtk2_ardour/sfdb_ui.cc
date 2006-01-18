@@ -264,7 +264,19 @@ SoundFileBox::add_field_clicked ()
 
 void
 SoundFileBox::remove_field_clicked ()
-{}
+{
+	field_view.get_selection()->selected_foreach_iter(mem_fun(*this, &SoundFileBox::delete_row));
+
+	Library->save_changes ();
+}
+
+void
+SoundFileBox::delete_row (const Gtk::TreeModel::iterator& iter)
+{
+	Gtk::TreeModel::Row row = *iter;
+
+	Library->remove_field(row[label_columns.field]);
+}
 
 void
 SoundFileBox::audition_status_changed (bool active)
@@ -278,7 +290,13 @@ SoundFileBox::audition_status_changed (bool active)
 
 void
 SoundFileBox::field_selected ()
-{}
+{
+	if (field_view.get_selection()->count_selected_rows()) {
+		remove_field_btn.set_sensitive(true);
+	} else {
+		remove_field_btn.set_sensitive(false);
+	}
+}
 
 SoundFileBrowser::SoundFileBrowser (std::string title)
 	:
