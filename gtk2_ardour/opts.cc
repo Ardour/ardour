@@ -37,6 +37,7 @@ bool GTK_ARDOUR::use_vst = true;
 bool GTK_ARDOUR::new_session = false;
 char* GTK_ARDOUR::curvetest_file = 0;
 bool GTK_ARDOUR::try_hw_optimization = false;
+bool GTK_ARDOUR::use_gtk_theme = false;
 
 using namespace GTK_ARDOUR;
 
@@ -56,6 +57,7 @@ print_help (const char *execname)
 #endif
 	     << _("  [session-name]                   Name of session to load\n")
 	     << _("  -C, --curvetest filename         Curve algorithm debugger\n")
+	     << _("  -g, --gtktheme                   Allow GTK to load a theme\n")
 		;
 	return 1;
 
@@ -65,7 +67,7 @@ int
 GTK_ARDOUR::parse_opts (int argc, char *argv[])
 
 {
-	const char *optstring = "U:hbvVnoc:C:N:";
+	const char *optstring = "U:hbvVnoc:C:N:g";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (execname == 0) {
@@ -84,6 +86,7 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 		{ "new", 1, 0, 'N' },
 		{ "use-hw-optimizations", 0, 0, 'o' },
 		{ "curvetest", 1, 0, 'C' },
+		{ "gtktheme", 0, 0, 'g' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -111,6 +114,10 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 			break;
 		case 'b':
 			show_key_actions = true;
+			break;
+
+		case 'g':
+			use_gtk_theme = true;
 			break;
 
 		case 'n':

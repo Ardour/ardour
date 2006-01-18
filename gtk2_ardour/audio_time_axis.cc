@@ -80,7 +80,6 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-//using namespace sigc;
 using namespace LADSPA;
 using namespace Gtk;
 using namespace Editing;
@@ -587,7 +586,7 @@ AudioTimeAxisView::set_state (const XMLNode& node)
 void
 AudioTimeAxisView::set_height (TrackHeight h)
 {
-	bool height_changed = (h != (TrackHeight)height);
+	bool height_changed = (h != height_style);
 
 	TimeAxisView::set_height (h);
 
@@ -595,31 +594,36 @@ AudioTimeAxisView::set_height (TrackHeight h)
 
 	view->set_height ((double) height);
 
-	switch (height) {
+	switch (height_style) {
 	case Largest:
 		xml_node->add_property ("track_height", "largest");
-		controls_table.show_all ();
-		name_label.hide ();
+		show_name_entry ();
+		hide_name_label ();
+		controls_table.show_all();
 		break;
 	case Large:
 		xml_node->add_property ("track_height", "large");
-		controls_table.show_all ();
-		name_label.hide ();
+		show_name_entry ();
+		hide_name_label ();
+		controls_table.show_all();
 		break;
 	case Larger:
 		xml_node->add_property ("track_height", "larger");
-		controls_table.show_all ();
-		name_label.hide ();
+		show_name_entry ();
+		hide_name_label ();
+		controls_table.show_all();
 		break;
 	case Normal:
 		xml_node->add_property ("track_height", "normal");
-		controls_table.show_all ();
-		name_label.hide ();
+		show_name_entry ();
+		hide_name_label ();
+		controls_table.show_all();
 		break;
 	case Smaller:
 		xml_node->add_property ("track_height", "smaller");
 		controls_table.show_all ();
-		name_label.hide ();
+		show_name_entry ();
+		hide_name_label ();
 		edit_group_button.hide ();
 		hide_button.hide ();
 		visual_button.hide ();
@@ -631,9 +635,9 @@ AudioTimeAxisView::set_height (TrackHeight h)
 		xml_node->add_property ("track_height", "small");
 		controls_table.hide_all ();
 		controls_table.show ();
+		hide_name_entry ();
+		show_name_label ();
 		name_label.set_text (_route.name());
-		name_label.show ();
-		name_hbox.show ();
 		break;
 	}
 

@@ -60,11 +60,24 @@ using namespace ArdourCanvas;
 
 const double trim_handle_size = 6.0; /* pixels */
 
+uint32_t TimeAxisView::hLargest = 0;
+uint32_t TimeAxisView::hLarge = 0;
+uint32_t TimeAxisView::hLarger = 0;
+uint32_t TimeAxisView::hNormal = 0;
+uint32_t TimeAxisView::hSmaller = 0;
+uint32_t TimeAxisView::hSmall = 0;
+bool TimeAxisView::need_size_info = true;
+
 TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& canvas) 
 	: AxisView (sess), 
 	  editor (ed),
 	  controls_table (2, 9)
 {
+	if (need_size_info) {
+		compute_controls_size_info ();
+		need_size_info = false;
+	}
+
 	canvas_display = new Group (*canvas.root(), 0.0, 0.0);
 	
 	selection_group = new Group (*canvas_display);
@@ -80,6 +93,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	parent = rent;
 	_has_state = false;
 	last_name_entry_key_press_event = 0;
+	name_packing = NamePackingBits (0);
 
 	/*
 	  Create the standard LHS Controls
@@ -99,27 +113,20 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_name ("TrackLabel");
 	name_label.set_alignment (0.0, 0.5);
 
-	// name_hbox.set_border_width (2);
-	// name_hbox.set_spacing (5);
-
 	/* typically, either name_label OR name_entry are visible,
 	   but not both. its up to derived classes to show/hide them as they
 	   wish.
 	*/
 
-	name_hbox.pack_start (name_label, true, true);
-	name_hbox.pack_start (name_entry, true, true);
 	name_hbox.show ();
 
 	controls_table.set_border_width (2);
 	controls_table.set_row_spacings (0);
 	controls_table.set_col_spacings (0);
 	controls_table.set_homogeneous (true);
-	controls_table.show ();
 
 	controls_table.attach (name_hbox, 0, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-
-	controls_table.show ();
+	controls_table.show_all ();
 
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
@@ -140,7 +147,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_frame.add (controls_hbox);
 	controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_frame.set_shadow_type (Gtk::SHADOW_OUT);
-
 }
 
 TimeAxisView::~TimeAxisView()
@@ -175,11 +181,6 @@ TimeAxisView::~TimeAxisView()
 	if (display_menu) {
 		delete display_menu;
 		display_menu = 0;
-	}
-
-	if (size_menu) {
-		delete size_menu;
-		size_menu = 0;
 	}
 }
 
@@ -325,36 +326,43 @@ TimeAxisView::hide ()
 void
 TimeAxisView::step_height (bool bigger)
 {
-	switch (height) {
-	case Largest:
-		if (!bigger) set_height (Large);
-		break;
-	case Large:
-		if (bigger) set_height (Largest);
-		else set_height (Larger);
-		break;
-	case Larger:
-		if (bigger) set_height (Large);
-		else set_height (Normal);
-		break;
-	case Normal:
-		if (bigger) set_height (Larger);
-		else set_height (Smaller);
-		break;
-	case Smaller:
-		if (bigger) set_height (Normal);
-		else set_height (Small);
-		break;
-	case Small:
-		if (bigger) set_height (Smaller);
-		break;
-	}
+ 	switch (height) {
+ 	case Largest:
+  		if (!bigger) set_height (Large);
+ 		break;
+ 	case Large:
+  		if (bigger) set_height (Largest);
+  		else set_height (Larger);
+ 		break;
+ 	case Larger:
+  		if (bigger) set_height (Large);
+  		else set_height (Normal);
+ 		break;
+ 	case Normal:
+  		if (bigger) set_height (Larger);
+  		else set_height (Smaller);
+ 		break;
+ 	case Smaller:
+  		if (bigger) set_height (Normal);
+  		else set_height (Small);
+ 		break;
+ 	case Small:
+  		if (bigger) set_height (Smaller);
+ 		break;
+  	}
 }
 
 void
 TimeAxisView::set_height (TrackHeight h)
 {
-	height = (gint32) h;
+	height_style = h;
+	set_height_pixels (height_to_pixels (h));
+}
+
+void
+TimeAxisView::set_height_pixels (uint32_t h)
+{
+	height = h;
 	controls_frame.set_size_request (-1, height);
 
  	if (canvas_item_visible (selection_group)) {
@@ -534,7 +542,7 @@ TimeAxisView::build_size_menu ()
 	items.push_back (MenuElem (_("Large"), bind (mem_fun (*this, &TimeAxisView::set_height), Large)));
 	items.push_back (MenuElem (_("Larger"), bind (mem_fun (*this, &TimeAxisView::set_height), Larger)));
 	items.push_back (MenuElem (_("Normal"), bind (mem_fun (*this, &TimeAxisView::set_height), Normal)));
-	items.push_back (MenuElem (_("Smaller"), bind (mem_fun (*this, &TimeAxisView::set_height), Smaller)));
+	items.push_back (MenuElem (_("Smaller"), bind (mem_fun (*this, &TimeAxisView::set_height),Smaller)));
 	items.push_back (MenuElem (_("Small"), bind (mem_fun (*this, &TimeAxisView::set_height), Small)));
 }
 
@@ -861,14 +869,135 @@ TimeAxisView::set_state (const XMLNode& node)
 void
 TimeAxisView::reset_height()
 {
-	set_height ((TrackHeight) height);
+	set_height_pixels (height);
 
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->set_height ((TrackHeight)(*i)->height);
 	}
 }
 	
-void
-TimeAxisView::check_height (Gdk::Rectangle& r)
+uint32_t
+TimeAxisView::height_to_pixels (TrackHeight h)
 {
+	switch (h) {
+	case Largest:
+		return hLargest;
+	case Large:
+		return hLarge;
+	case Larger:
+		return hLarger;
+	case Normal:
+		return hNormal;
+	case Smaller:
+		return hSmaller;
+	case Small:
+		return hSmall;
+	}
+	
+	// what is wrong with gcc ?
+	
+	return hNormal;
+}
+			
+void
+TimeAxisView::compute_controls_size_info ()
+{
+	Gtk::Window window (Gtk::WINDOW_TOPLEVEL);
+	Gtk::Table two_row_table (2, 9);
+	Gtk::Table one_row_table (1, 9);
+	Button* buttons[5];
+
+	window.add (one_row_table);
+
+	one_row_table.set_border_width (2);
+	one_row_table.set_row_spacings (0);
+	one_row_table.set_col_spacings (0);
+	one_row_table.set_homogeneous (true);
+
+	two_row_table.set_border_width (2);
+	two_row_table.set_row_spacings (0);
+	two_row_table.set_col_spacings (0);
+	two_row_table.set_homogeneous (true);
+
+	for (int i = 0; i < 5; ++i) {
+		buttons[i] = manage (new Button (X_("f")));
+		buttons[i]->set_name ("TrackMuteButton");
+	}
+
+	Gtk::Requisition req;
+
+	one_row_table.attach (*buttons[0], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	
+	one_row_table.show_all ();
+	one_row_table.size_request (req);
+
+	// height required to show 1 row of buttons
+
+	hSmaller = req.height + 3;
+
+	window.remove ();
+	window.add (two_row_table);
+
+	two_row_table.attach (*buttons[1], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	two_row_table.attach (*buttons[2], 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	two_row_table.attach (*buttons[3], 8, 9, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	two_row_table.attach (*buttons[4], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+
+	two_row_table.show_all ();
+	two_row_table.size_request (req);
+
+	// height required to show all normal buttons
+
+	hNormal = req.height + 3;
+
+	// these heights are all just larger than normal. no more 
+	// elements are visible (yet).
+
+	hLarger = hNormal + 50;
+	hLarge = hNormal + 150;
+	hLargest = hNormal + 250;
+
+	// height required to show track name
+
+	hSmall = 27;
+}
+
+void
+TimeAxisView::show_name_label ()
+{
+	if (!(name_packing & NameLabelPacked)) {
+		name_hbox.pack_start (name_label, true, true);
+		name_packing = NamePackingBits (name_packing | NameLabelPacked);
+		name_hbox.show ();
+		name_label.show ();
+	}
+}
+
+void
+TimeAxisView::show_name_entry ()
+{
+	if (!(name_packing & NameEntryPacked)) {
+		name_hbox.pack_start (name_entry, true, true);
+		name_packing = NamePackingBits (name_packing | NameEntryPacked);
+		name_hbox.show ();
+		name_entry.show ();
+	}
+}
+
+void
+TimeAxisView::hide_name_label ()
+{
+	if (name_packing & NameLabelPacked) {
+		name_hbox.remove (name_label);
+		name_packing = NamePackingBits (name_packing & ~NameLabelPacked);
+	}
+}
+
+void
+TimeAxisView::hide_name_entry ()
+{
+	if (name_packing & NameEntryPacked) {
+		name_hbox.remove (name_entry);
+		name_packing = NamePackingBits (name_packing & ~NameEntryPacked);
+	}
 }

@@ -97,7 +97,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 	   life easier and remove them.
 	*/
 
-	name_hbox.remove (name_entry);
+	hide_name_entry();
 
 	/* move the name label over a bit */
 
@@ -326,7 +326,8 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 			controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		}
 		controls_table.show_all ();
-		name_label.show ();
+		hide_name_entry ();
+		show_name_label ();
 		break;
 
 	case Large:
@@ -343,7 +344,8 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 			controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		}
 		controls_table.show_all ();
-		name_label.show ();
+		hide_name_entry ();
+		show_name_label ();
 		break;
 
 	case Larger:
@@ -360,7 +362,8 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 			controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		}
 		controls_table.show_all ();
-		name_label.show ();
+		hide_name_entry ();
+		show_name_label ();
 		break;
 
 	case Normal:
@@ -378,7 +381,8 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 			controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		}
 		controls_table.show_all ();
-		name_label.show ();
+		hide_name_entry ();
+		show_name_label ();
 		break;
 
 	case Smaller:
@@ -392,6 +396,8 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 		}
 		controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		controls_table.hide_all ();
+		hide_name_entry ();
+		show_name_label ();
 		name_hbox.show_all ();
 		controls_table.show ();
 		break;
@@ -407,6 +413,8 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 		} 
 		controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		controls_table.hide_all ();
+		hide_name_entry ();
+		show_name_label ();
 		name_hbox.show_all ();
 		controls_table.show ();
 		break;

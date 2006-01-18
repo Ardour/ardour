@@ -111,8 +111,6 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Viewport scroller_view;
 	Gtk::Menu* automation_menu;
 
-	bool setting_name_status;
-
 	gint prefheight;
 	bool is_scrollable;
 

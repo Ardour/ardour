@@ -177,22 +177,22 @@ VisualTimeAxis::set_height(TrackHeight h)
 		case Larger:
 		case Normal:
 		{
-			name_label.hide() ;
-			name_entry.show() ;
+			hide_name_label ();
+			show_name_entry ();
 			other_button_hbox.show_all() ;
 			break;
 		}
 		case Smaller:
 		{
-			name_label.hide() ;
-			name_entry.show() ;
+			hide_name_label ();
+			show_name_entry ();
 			other_button_hbox.hide_all() ;
 			break;
 		}
 		case Small:
 		{
-			name_label.show() ;
-			name_entry.hide() ;
+			hide_name_entry ();
+			show_name_label ();
 			other_button_hbox.hide_all() ;
 		}
 		break;

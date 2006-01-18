@@ -126,10 +126,9 @@ style "black_mackie_menu_bar" = "medium_bold_text"
       bg[NORMAL] = { 0, 0, 0 }
 }
 
-style "default_buttons_menus" = "default_base"
+style "default_buttons_menus" = "small_button"
 {
   font_name = "sans 8"
-  	
   fg[ACTIVE] = { 0, 0, 0 }
   
   bg[NORMAL] = { 0.35, 0.35, 0.35 }
@@ -146,7 +145,6 @@ style "very_small_button" = "default_buttons_menus"
 
 style "small_button" = "default_buttons_menus"
 {
-	font_name = "sans 8"
 }
 
 style "very_small_red_active_and_selected_button" = "very_small_button"

@@ -69,19 +69,30 @@ class Selectable;
  */
 class TimeAxisView : public virtual AxisView
 {
+  private:
+	enum NamePackingBits {
+		NameLabelPacked = 0x1,
+		NameEntryPacked = 0x2
+	};
+
   public:
 	enum TrackHeight { 
-                /* canvas units. they need to be odd
-		   valued so that there is a precise
-		   middle.
-		*/
-		Largest = 307,
-		Large = 207,
-		Larger = 107,
-		Normal = 57,
-		Smaller = 37,
-		Small = 27
+		Largest,
+		Large,
+		Larger,
+		Normal,
+		Smaller,
+		Small
 	};
+	
+	static uint32_t hLargest;
+	static uint32_t hLarge;
+	static uint32_t hLarger;
+	static uint32_t hNormal;
+	static uint32_t hSmaller;
+	static uint32_t hSmall;
+
+	static uint32_t height_to_pixels (TrackHeight);
 
 	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
@@ -90,11 +101,11 @@ class TimeAxisView : public virtual AxisView
 
 	PublicEditor& editor;
 	
-	guint32 height;  /* in canvas units */
-	guint32 effective_height;  /* in canvas units */
+	TrackHeight height_style; 
+	uint32_t height;  /* in canvas units */
+	uint32_t effective_height;  /* in canvas units */
 	double  y_position;
 	int     order;
-
 	
 	ArdourCanvas::Group   *canvas_display;
  	Gtk::VBox       *control_parent;
@@ -109,6 +120,11 @@ class TimeAxisView : public virtual AxisView
 	Gtk::HBox     name_hbox;
 	Gtk::Frame    name_frame;
  	Gtk::Entry    name_entry;
+
+	void hide_name_label ();
+	void hide_name_entry ();
+	void show_name_label ();
+	void show_name_entry ();
 
 	/**
 	 * Display this TrackView as the nth component of the parent box, at y.
@@ -137,15 +153,11 @@ class TimeAxisView : public virtual AxisView
 	virtual void entered () {}
 	virtual void exited () {}
 
-	/**
-	 * Sets the height of this TrackView to one of ths TrackHeghts
-	 *
-	 * @param h the TrackHeight value to set
-	 */
 	virtual void set_height (TrackHeight h);
 	void reset_height();
+
 	/**
-	 * Steps through the defined TrackHeights for this TrackView.
+	 * Steps through the defined heights for this TrackView.
 	 * Sets bigger to true to step up in size, set to fals eot step smaller.
 	 *
 	 * @param bigger true if stepping should increase in size, false otherwise
@@ -242,13 +254,13 @@ class TimeAxisView : public virtual AxisView
 	virtual bool handle_display_menu_map_event (GdkEventAny *ev) { return false; }
 
 	/**
-	 * Build the standard LHS control size menu for the default TrackHeight options.
+	 * Build the standard LHS control size menu for the default heights options.
 	 *
 	 */
 	virtual void build_size_menu();
 
 	/**
-	 * Displays the standard LHS controls size menu for the TrackHeight.
+	 * Displays the standard LHS controls size menu for the track heights
 	 *
 	 * @parem when the popup activation time
 	 */
@@ -293,8 +305,12 @@ class TimeAxisView : public virtual AxisView
 
 	bool _hidden;
 	bool _has_state;
+	NamePackingBits name_packing;
 
-	void check_height (Gdk::Rectangle&);
+	static void compute_controls_size_info ();
+	static bool need_size_info;
+
+	void set_height_pixels (uint32_t h);
 
 }; /* class TimeAxisView */
 

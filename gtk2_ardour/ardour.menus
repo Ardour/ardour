@@ -93,6 +93,11 @@
                <menuitem action='duplicate-region'/>
                <menuitem action='insert-region'/>
                <menuitem action='normalize-region'/>
+	       <separator/>
+	       <menuitem action="nudge-forward"/>
+	       <menuitem action="nudge-next-forward"/>
+	       <menuitem action="nudge-backward"/>
+	       <menuitem action="nudge-next-backward"/>
         </menu>         
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>

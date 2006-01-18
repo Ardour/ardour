@@ -36,6 +36,7 @@ extern bool   use_vst;
 extern bool   new_session;
 extern char*  curvetest_file;
 extern bool   try_hw_optimization;
+extern bool   use_gtk_theme;
 
 extern int32_t parse_opts (int argc, char *argv[]);
 

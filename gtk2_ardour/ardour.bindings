@@ -17,6 +17,14 @@
 (gtk_accel_path "<Actions>/Editor/set-playhead" "p")
 (gtk_accel_path "<Actions>/Transport/Record" "<shift>r")
 
+(gtk_accel_path "<Actions>/Editor/nudge-forward" "KP_Add")
+(gtk_accel_path "<Actions>/Editor/nudge-next-forward" "<control>KP_Add")
+(gtk_accel_path "<Actions>/Editor/nudge-backward" "KP_Subtract")
+(gtk_accel_path "<Actions>/Editor/nudge-next-backward" "<control>KP_Subtract")
+
+(gtk-accel_path "<Actions>/Common/GotoEditor" "<Alt>e")
+(gtk-accel_path "<Actions>/Common/GotoMixer" "<Alt>m")
+
 (gtk_accel_path "<Actions>/Editor/editor-copy" "<Control>c")
 (gtk_accel_path "<Actions>/Common/Quit" "<Control>q")
 (gtk_accel_path "<Actions>/Editor/redo" "<Control>r")
@@ -24,7 +32,6 @@
 (gtk_accel_path "<Actions>/Editor/editor-paste" "<Control>v")
 (gtk_accel_path "<Actions>/Editor/editor-cut" "<Control>x")
 (gtk_accel_path "<Actions>/Editor/undo" "<Control>z")
-
 
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-down" "Page_Down")
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-up" "Page_Up")

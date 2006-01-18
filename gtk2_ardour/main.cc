@@ -317,17 +317,21 @@ main (int argc, char *argv[])
 		return curvetest (curvetest_file);
 	}
 
-	/* desktop standard themes: just say no! */
+	
+	if (!use_gtk_theme) {
 
-	if (getenv("GTK_RC_FILES")) {
-		unsetenv("GTK_RC_FILES");
+		/* desktop standard themes: just say no! */
+
+		if (getenv("GTK_RC_FILES")) {
+			unsetenv("GTK_RC_FILES");
+		}
+		
+		if (getenv("GTK2_RC_FILES")) {
+			unsetenv("GTK_RC_FILES");
+		}
+
+		RC::set_default_files (null_file_list);
 	}
-
-	if (getenv("GTK2_RC_FILES")) {
-		unsetenv("GTK_RC_FILES");
-	}
-
-	RC::set_default_files (null_file_list);
 	
 	cout << _("Ardour/GTK ") 
 	     << VERSIONSTRING
