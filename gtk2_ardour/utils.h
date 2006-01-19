@@ -64,7 +64,6 @@ unsigned char* xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h);
 
 ArdourCanvas::Points* get_canvas_points (std::string who, uint32_t npoints);
 
-int channel_combo_get_channel_count (Gtk::ComboBoxText& combo);
 Pango::FontDescription get_font_for_style (std::string widgetname);
 
 gint pane_handler (GdkEventButton*, Gtk::Paned*);

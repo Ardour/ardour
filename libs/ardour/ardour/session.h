@@ -526,7 +526,7 @@ class Session : public sigc::trackable, public Stateful
 	/* fundamental operations. duh. */
 
 
-	AudioTrack *new_audio_track (int input_channels, int output_channels);
+	AudioTrack *new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal);
 
 	Route *new_audio_route (int input_channels, int output_channels);
 

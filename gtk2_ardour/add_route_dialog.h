@@ -11,7 +11,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/comboboxtext.h>
 
-#include <gtkmm2ext/click_box.h>
+#include <ardour/types.h>
 
 class AddRouteDialog : public Gtk::Dialog
 {
@@ -23,6 +23,7 @@ class AddRouteDialog : public Gtk::Dialog
 	std::string name_template ();
 	int channels ();
 	int count ();
+	ARDOUR::TrackMode mode();
 
   private:
 	Gtk::Entry name_template_entry;
@@ -31,6 +32,9 @@ class AddRouteDialog : public Gtk::Dialog
 	Gtk::Adjustment routes_adjustment;
 	Gtk::SpinButton routes_spinner;
 	Gtk::ComboBoxText channel_combo;
+	Gtk::ComboBoxText track_mode_combo;
+
+	void track_type_chosen ();
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */

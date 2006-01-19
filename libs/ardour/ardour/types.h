@@ -92,6 +92,11 @@ namespace ARDOUR {
 		MeterPostFader
 	};
 
+	enum TrackMode {
+		Normal,
+		Destructive
+	};
+
 	enum smpte_wrap_t {
 		smpte_wrap_none = 0,
 		smpte_wrap_frames,

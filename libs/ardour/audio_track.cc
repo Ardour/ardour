@@ -41,7 +41,7 @@ using namespace std;
 //using namespace sigc;
 using namespace ARDOUR;
 
-AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag)
+AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Route (sess, name, 1, -1, -1, -1, flag),
 	  diskstream (0),
 	  _midi_rec_enable_control (*this, _session.midi_port())
@@ -54,13 +54,18 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag)
 		dflags = DiskStream::Flag (dflags | DiskStream::Recordable);
 	}
 
+	if (mode == Destructive) {
+		dflags = DiskStream::Flag (dflags | DiskStream::Destructive);
+	} 
+
 	DiskStream* ds = new DiskStream (_session, name, dflags);
-	
-	set_diskstream (*ds, this);
 	
 	_declickable = true;
 	_freeze_record.state = NoFreeze;
 	_saved_meter_point = _meter_point;
+	_mode = mode;
+
+	set_diskstream (*ds, this);
 
 	// we do this even though Route already did it in it's init
 	reset_midi_control (_session.midi_port(), _session.get_midi_control());
@@ -149,6 +154,7 @@ AudioTrack::set_diskstream (DiskStream& ds, void *src)
 
 	diskstream = &ds.ref();
 	diskstream->set_io (*this);
+	diskstream->set_destructive (_mode == Destructive);
 
 	if (diskstream->deprecated_io_node) {
 
@@ -267,6 +273,19 @@ AudioTrack::set_state (const XMLNode& node)
 
 	if (Route::set_state (node)) {
 		return -1;
+	}
+
+	if ((prop = node.property (X_("mode"))) != 0) {
+		if (prop->value() == X_("normal")) {
+			_mode = Normal;
+		} else if (prop->value() == X_("destructive")) {
+			_mode = Destructive;
+		} else {
+			warning << string_compose ("unknown audio track mode \"%1\" seen and ignored", prop->value()) << endmsg;
+			_mode = Normal;
+		}
+	} else {
+		_mode = Normal;
 	}
 
 	midi_kids = node.children ("MIDI");
@@ -415,6 +434,15 @@ AudioTrack::get_state()
 	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
 	remote_control_node->add_property (X_("id"), buf);
 	root.add_child_nocopy (*remote_control_node);
+
+	switch (_mode) {
+	case Normal:
+		root.add_property (X_("mode"), X_("normal"));
+		break;
+	case Destructive:
+		root.add_property (X_("mode"), X_("destructive"));
+		break;
+	}
 
 	return root;
 }
@@ -1098,13 +1126,13 @@ AudioTrack::MIDIRecEnableControl::write_feedback (MIDI::byte* buf, int32_t& bufs
 }
 
 void
-AudioTrack::set_destructive (bool yn)
+AudioTrack::set_mode (TrackMode m)
 {
 	if (diskstream) {
-		if (_destructive != yn) {
-			diskstream->set_destructive (yn);
-			_destructive = yn;
-			DestructiveChanged();
+		if (_mode != m) {
+			_mode = m;
+			diskstream->set_destructive (m == Destructive);
+			ModeChanged();
 		}
 	}
 }

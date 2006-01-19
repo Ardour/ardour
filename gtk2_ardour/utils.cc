@@ -291,23 +291,6 @@ get_canvas_points (string who, uint32_t npoints)
 	return new ArdourCanvas::Points (npoints);
 }
 
-int
-channel_combo_get_channel_count (Gtk::ComboBoxText& combo)
-{
-	string str = combo.get_active_text();
-	int chns;
-
-	if (str == _("mono")) {
-		return 1;
-	} else if (str == _("stereo")) {
-		return 2;
-	} else if ((chns = atoi (str)) != 0) {
-		return chns;
-	} else {
-		return 0;
-	}
-}
-
 static int32_t 
 int_from_hex (char hic, char loc) 
 {

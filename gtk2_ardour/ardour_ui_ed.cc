@@ -176,7 +176,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_splash));
 	
-	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("add audio track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1));
+	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("add audio track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1, ARDOUR::Normal));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("AddAudioBus"), _("add audio bus"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_bus), 1, 1));
 	ActionManager::session_sensitive_actions.push_back (act);

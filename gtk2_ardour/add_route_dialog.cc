@@ -22,7 +22,8 @@
 #include <cmath>
 
 #include <sigc++/bind.h>
-
+#include <gtkmm/stock.h>
+#include <pbd/error.h>
 #include <gtkmm2ext/utils.h>
 
 #include "utils.h"
@@ -34,7 +35,26 @@ using namespace Gtkmm2ext;
 using namespace sigc;
 using namespace std;
 
-extern std::vector<string> channel_combo_strings;
+static const char* channel_setup_names[] = {
+	"mono",
+	"stereo",
+	"3 channels",
+	"4 channels",
+	"5 channels",
+	"8 channels",
+	"manual setup",
+	0
+};
+
+static const char* track_mode_names[] = {
+	"normal",
+	"tape",
+	0
+};
+
+static vector<string> channel_combo_strings;
+static vector<string> track_mode_strings;
+
 
 AddRouteDialog::AddRouteDialog ()
 	: Dialog (_("ardour: add track/bus")),
@@ -43,6 +63,15 @@ AddRouteDialog::AddRouteDialog ()
 	  routes_adjustment (1, 1, 32, 1, 4),
 	  routes_spinner (routes_adjustment)
 {
+	if (channel_combo_strings.empty()) {
+		channel_combo_strings = internationalize (channel_setup_names);
+	}
+
+	if (track_mode_strings.empty()) {
+		track_mode_strings = internationalize (track_mode_names);
+	}
+
+
 	set_name ("AddRouteDialog");
 	set_wmclass (X_("ardour_add_track_bus"), "Ardour");
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -65,8 +94,15 @@ AddRouteDialog::AddRouteDialog ()
 	hbrb->pack_start (bus_button, false, false);
 
 	set_popdown_strings (channel_combo, channel_combo_strings);
+	set_popdown_strings (track_mode_combo, track_mode_strings);
 	channel_combo.set_active_text (channel_combo_strings.front());
 	channel_combo.set_name (X_("ChannelCountSelector"));
+
+	track_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
+	bus_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
+
+	track_mode_combo.set_active_text (track_mode_strings.front());
+	track_mode_combo.set_name (X_("ChannelCountSelector"));
 	
 #if NOT_USEFUL_YET
 	HBox *hbnt = manage (new HBox);
@@ -78,6 +114,7 @@ AddRouteDialog::AddRouteDialog ()
 	get_vbox()->pack_start (*hbrb, false, false);
 	get_vbox()->pack_start (*(manage (new Label ("Channel configuration"))), false, false);
 	get_vbox()->pack_start (channel_combo, false, false);
+	get_vbox()->pack_start (track_mode_combo, false, false, 10);
 #if NOT_USEFUL_YET
 	get_vbox()->pack_start (*hbnt, false, false);
 #endif
@@ -90,6 +127,16 @@ AddRouteDialog::AddRouteDialog ()
 
 AddRouteDialog::~AddRouteDialog ()
 {
+}
+
+void
+AddRouteDialog::track_type_chosen ()
+{
+	if (track_button.get_active()) {
+		track_mode_combo.set_sensitive (true);
+	} else {
+		track_mode_combo.set_sensitive (true);
+	}
 }
 
 bool
@@ -110,8 +157,37 @@ AddRouteDialog::count ()
 	return (int) floor (routes_adjustment.get_value ());
 }
 
+ARDOUR::TrackMode
+AddRouteDialog::mode ()
+{
+	Glib::ustring str = track_mode_combo.get_active_text();
+	if (str == _("normal")) {
+		return ARDOUR::Normal;
+	} else if (str == _("tape")) {
+		return ARDOUR::Destructive;
+	} else {
+		fatal << string_compose (X_("programming error: unknown track mode in add route dialog combo = %1"), str)
+		      << endmsg;
+		/*NOTREACHED*/
+	}
+	/* keep gcc happy */
+	return ARDOUR::Normal;
+}
+
 int
 AddRouteDialog::channels ()
 {
-	return channel_combo_get_channel_count (channel_combo);
+	string str = channel_combo.get_active_text();
+	int chns;
+
+	if (str == _("mono")) {
+		return 1;
+	} else if (str == _("stereo")) {
+		return 2;
+	} else if ((chns = atoi (str)) != 0) {
+		return chns;
+	} else {
+		return 0;
+	}
 }
+

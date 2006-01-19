@@ -87,19 +87,6 @@ sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void,jack_nframes_t> ARDOUR_UI::Clock;
 
-static const char* channel_setup_names[] = {
-	"mono",
-	"stereo",
-	"3 channels",
-	"4 channels",
-	"5 channels",
-	"8 channels",
-	"manual setup",
-	0
-};
-
-vector<string> channel_combo_strings;
-
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	: Gtkmm2ext::UI ("ardour", argcp, argvp, rcfile),
@@ -203,8 +190,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	ARDOUR::Session::AskAboutPendingState.connect (mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
 
-	channel_combo_strings = internationalize (channel_setup_names);
-	
 	/* have to wait for AudioEngine and Configuration before proceeding */
 }
 
@@ -903,7 +888,7 @@ ARDOUR_UI::session_add_midi_track ()
 }
 
 void
-ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels)
+ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode)
 {
 	Route* route;
 
@@ -914,7 +899,7 @@ ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t o
 
 	try { 
 		if (disk) {
-			if ((route = session->new_audio_track (input_channels, output_channels)) == 0) {
+			if ((route = session->new_audio_track (input_channels, output_channels, mode)) == 0) {
 				error << _("could not create new audio track") << endmsg;
 			}
 		} else {
@@ -2086,7 +2071,7 @@ ARDOUR_UI::add_route ()
 
 	while (count) {
 		if (track) {
-			session_add_audio_track (input_chan, output_chan);
+			session_add_audio_track (input_chan, output_chan, add_route_dialog->mode());
 		} else {
 			session_add_audio_bus (input_chan, output_chan);
 		}

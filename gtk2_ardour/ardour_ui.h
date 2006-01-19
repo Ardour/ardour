@@ -188,12 +188,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void add_route ();
 	
-	void session_add_audio_track (int input_channels, int32_t output_channels) {
-		session_add_audio_route (true, input_channels, output_channels);
+	void session_add_audio_track (int input_channels, int32_t output_channels, ARDOUR::TrackMode mode) {
+		session_add_audio_route (true, input_channels, output_channels, mode);
 	}
 
 	void session_add_audio_bus (int input_channels, int32_t output_channels) {
-		session_add_audio_route (false, input_channels, output_channels);
+		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal);
 	}
 
 	void session_add_midi_track ();
@@ -523,7 +523,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void save_template ();
 
 
-	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels);
+	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode);
 
 	void add_diskstream_to_menu (ARDOUR::DiskStream&);
 	void diskstream_selected (gint32);

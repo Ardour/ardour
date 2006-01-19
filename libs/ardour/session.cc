@@ -1623,7 +1623,7 @@ Session::resort_routes (void* src)
 }
 
 AudioTrack*
-Session::new_audio_track (int input_channels, int output_channels)
+Session::new_audio_track (int input_channels, int output_channels, TrackMode mode)
 {
 	AudioTrack *track;
 	char track_name[32];
@@ -1675,7 +1675,7 @@ Session::new_audio_track (int input_channels, int output_channels)
 	}
 
 	try {
-		track = new AudioTrack (*this, track_name);
+		track = new AudioTrack (*this, track_name, Route::Flag (0), mode);
 
 		if (track->ensure_io (input_channels, output_channels, false, this)) {
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),

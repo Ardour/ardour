@@ -32,7 +32,7 @@ class AudioPlaylist;
 class AudioTrack : public Route
 {
   public:
-	AudioTrack (Session&, string name, Route::Flag f = Route::Flag (0));
+	AudioTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
 	AudioTrack (Session&, const XMLNode&);
 	~AudioTrack ();
 	
@@ -56,9 +56,9 @@ class AudioTrack : public Route
 	int use_diskstream (string name);
 	int use_diskstream (id_t id);
 
-	bool destructive() const { return _destructive; }
-	void set_destructive (bool yn);
-	sigc::signal<void> DestructiveChanged;
+	TrackMode mode() const { return _mode; }
+	void set_mode (TrackMode m);
+	sigc::signal<void> ModeChanged;
 
 	jack_nframes_t update_total_latency();
 	void set_latency_delay (jack_nframes_t);
@@ -99,6 +99,7 @@ class AudioTrack : public Route
   protected:
 	DiskStream *diskstream;
 	MeterPoint _saved_meter_point;
+	TrackMode _mode;
 
 	void passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 			       jack_nframes_t nframes, jack_nframes_t offset, int declick,
