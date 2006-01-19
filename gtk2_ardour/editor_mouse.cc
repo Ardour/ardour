@@ -2533,6 +2533,9 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	vector<AudioRegionView*> new_regionviews;
 
+	set<Playlist*> affected_playlists;
+	pair<set<Playlist*>::iterator,bool> insert_result;
+	
 	for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
 		AudioRegionView* rv;
 
@@ -2540,8 +2543,12 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 		Playlist* to_playlist = rv->region.playlist();
 		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&rv->get_time_axis_view());
+
+		insert_result = affected_playlists.insert (to_playlist);
+		if (insert_result.second) {
+			session->add_undo (to_playlist->get_memento ());
+		}
 		
-		session->add_undo (to_playlist->get_memento ());
 		latest_regionview = 0;
 
 		sigc::connection c = atv->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
@@ -2597,7 +2604,7 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
 
-	begin_reversible_command (_("copy region(s)"));
+	//begin_reversible_command (_("copy region(s)"));
 }
 
 void
@@ -3213,7 +3220,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	} else {
 
 		/* motion within a single track */
-
+		
 		for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
 
 			rv = (*i);
@@ -3713,6 +3720,8 @@ Editor::start_trim (ArdourCanvas::Item* item, GdkEvent* event)
 	jack_nframes_t region_start = (jack_nframes_t) (clicked_regionview->region.position() / speed);
 	jack_nframes_t region_end = (jack_nframes_t) (clicked_regionview->region.last_frame() / speed);
 	jack_nframes_t region_length = (jack_nframes_t) (clicked_regionview->region.length() / speed);
+
+	motion_frozen_playlists.clear();
 	
 	//drag_info.item = clicked_regionview->get_name_highlight();
 	drag_info.item = item;
@@ -3763,6 +3772,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_trackview;
 	AudioTimeAxisView* tv = dynamic_cast<AudioTimeAxisView*>(tvp);
+	pair<set<Playlist*>::iterator,bool> insert_result;
 
 	if (tv && tv->is_audio_track()) {
 		speed = tv->get_diskstream()->speed();
@@ -3803,7 +3813,12 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
 			(*i)->region.freeze ();
 			(*i)->temporarily_hide_envelope ();
-			session->add_undo ((*i)->region.playlist()->get_memento());
+
+			Playlist * pl = (*i)->region.playlist();
+			insert_result = motion_frozen_playlists.insert (pl);
+			if (insert_result.second) {
+				session->add_undo (pl->get_memento());
+			}
 		}
 	}
 
@@ -3989,6 +4004,14 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				thaw_region_after_trim (**i);
 			}
 		}
+		
+		for (set<Playlist*>::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
+			//(*p)->thaw ();
+			session->add_redo_no_execute ((*p)->get_memento());
+		}
+		
+		motion_frozen_playlists.clear ();
+
 		commit_reversible_command();
 	} else {
 		/* no mouse movement */

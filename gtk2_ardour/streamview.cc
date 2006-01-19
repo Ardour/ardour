@@ -305,6 +305,7 @@ StreamView::remove_rec_region (Region *r)
 void
 StreamView::undisplay_diskstream ()
 {
+	
 	for (AudioRegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		delete *i;
 	}
@@ -446,6 +447,7 @@ StreamView::redisplay_diskstream ()
 	list<AudioRegionView *>::iterator i, tmp;
 	list<CrossfadeView*>::iterator xi, tmpx;
 
+	
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
 	}

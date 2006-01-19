@@ -165,7 +165,7 @@ class Crossfade : public Stateful, public StateManager
 	static Sample* crossfade_buffer_out;
 	static Sample* crossfade_buffer_in;
 
-	void initialize ();
+	void initialize (bool savestate=true);
 	int  compute (ARDOUR::AudioRegion&, ARDOUR::AudioRegion&, CrossfadeModel);
 	bool update (bool force);
 

@@ -1756,6 +1756,12 @@ Route::silence (jack_nframes_t nframes, jack_nframes_t offset)
 			
 			if (lm.locked()) {
 				for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+					PluginInsert* pi;
+					if (!_active && (pi = dynamic_cast<PluginInsert*> (*i)) != 0) {
+						// skip plugins, they don't need anything when we're not active
+						continue;
+					}
+
 					(*i)->silence (nframes, offset);
 				}
 

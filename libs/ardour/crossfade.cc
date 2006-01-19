@@ -146,17 +146,19 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 		      << endmsg;
 		throw failed_constructor();
 	}
-
+	
 	if ((_out = dynamic_cast<AudioRegion*> (r)) == 0) {
 		throw failed_constructor();
 	}
 
 	_length = 0;
-	initialize();
+	initialize(false);
 	
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
+
+	save_state ("initial");
 }
 
 Crossfade::~Crossfade ()
@@ -167,7 +169,7 @@ Crossfade::~Crossfade ()
 }
 
 void
-Crossfade::initialize ()
+Crossfade::initialize (bool savestate)
 {
 	_in_update = false;
 	
@@ -198,8 +200,10 @@ Crossfade::initialize ()
 //	_out->StateChanged.connect (slot (*this, &Crossfade::member_changed));
 
 	overlap_type = _in->coverage (_out->position(), _out->last_frame());
-	
-	save_state ("initial");
+
+	if (savestate) {
+		save_state ("initial");
+	}
 }	
 
 int

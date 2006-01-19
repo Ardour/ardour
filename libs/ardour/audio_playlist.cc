@@ -787,7 +787,7 @@ AudioPlaylist::destroy_region (Region* region)
 void
 AudioPlaylist::crossfade_changed (Change ignored)
 {
-	if (in_flush) {
+	if (in_flush || in_set_state) {
 		return;
 	}
 
@@ -798,6 +798,7 @@ AudioPlaylist::crossfade_changed (Change ignored)
 	*/
 
 	maybe_save_state (_("xfade change"));
+
 	notify_modified ();
 }
 
@@ -847,7 +848,7 @@ AudioPlaylist::region_changed (Change what_changed, Region* region)
 
 	maybe_save_state (_("region modified"));
 
-	if (parent_wants_notify || (what_changed & our_interests)) {
+	if ((parent_wants_notify || (what_changed & our_interests))) {
 		notify_modified ();
 	}
 
