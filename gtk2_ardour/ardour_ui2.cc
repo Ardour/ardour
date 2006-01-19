@@ -225,7 +225,11 @@ ARDOUR_UI::setup_transport ()
 						 static_cast<Widget*>(&transport_frame)));
 	transport_tearoff->Attach.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer), 
 						 static_cast<Widget*> (&transport_frame), 1));
-
+	transport_tearoff->Hidden.connect (bind (mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer), 
+						 static_cast<Widget*>(&transport_frame)));
+	transport_tearoff->Visible.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer), 
+						  static_cast<Widget*> (&transport_frame), 1));
+	
 	shuttle_box.set_name ("TransportButton");
 	goto_start_button.set_name ("TransportButton");
 	goto_end_button.set_name ("TransportButton");
@@ -856,4 +860,26 @@ ARDOUR_UI::sync_option_changed ()
 	} else if (which == positional_sync_strings[Session::JACK]) {
 		session->request_slave_source (Session::JACK);
 	} 
+}
+
+void
+ARDOUR_UI::maximise_editing_space ()
+{
+	if (!editor) {
+		return;
+	}
+
+	transport_tearoff->set_visible (false);
+	editor->maximise_editing_space ();
+}
+
+void
+ARDOUR_UI::restore_editing_space ()
+{
+	if (!editor) {
+		return;
+	}
+
+	transport_tearoff->set_visible (true);
+	editor->restore_editing_space ();
 }

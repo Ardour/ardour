@@ -35,6 +35,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	  close_arrow (ARROW_UP, SHADOW_OUT)
 {
 	dragging = false;
+	_visible = true;
 
 	tearoff_event_box.add (tearoff_arrow);
 	tearoff_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
@@ -75,6 +76,27 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 
 TearOff::~TearOff ()
 {
+}
+
+void
+TearOff::set_visible (bool yn)
+{
+	/* don't change visibility if torn off */
+
+	if (own_window.is_visible()) {
+		return;
+	}
+
+	if (_visible != yn) {
+		_visible = yn;
+		if (yn) {
+			show_all();
+			Visible ();
+		} else {
+			hide ();
+			Hidden ();
+		}
+	}
 }
 
 gint

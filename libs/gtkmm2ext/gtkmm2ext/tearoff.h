@@ -34,8 +34,12 @@ class TearOff : public Gtk::HBox
 	TearOff (Gtk::Widget& contents, bool allow_resize = false);
 	virtual ~TearOff ();
 
+	void set_visible (bool yn);
+
 	sigc::signal<void> Detach;
 	sigc::signal<void> Attach;
+	sigc::signal<void> Visible;
+	sigc::signal<void> Hidden;
 
 	Gtk::Window& tearoff_window() { return own_window; }
 	bool torn_off() const;
@@ -51,6 +55,7 @@ class TearOff : public Gtk::HBox
 	double         drag_x;
 	double         drag_y;
 	bool           dragging;
+	bool          _visible;
 
 	gint tearoff_click (GdkEventButton*);
 	gint close_click (GdkEventButton*);

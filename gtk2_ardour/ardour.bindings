@@ -70,6 +70,7 @@
 
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-start" "F1")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-end" "F2")
+(gtk_accel_path "<Actions>/Common/ToggleMaximalEditor" "F11")
 
 (gtk_accel_path "<Actions>/Editor/jump-forward-to-mark" "<control>KP_Right")
 (gtk_accel_path "<Actions>/Editor/jump-backward-to-mark" "<control>KP_Left")

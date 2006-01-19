@@ -150,6 +150,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_connection_editor ();
 	void toggle_route_params_window ();
 	void toggle_tempo_window ();
+	void toggle_editing_space();
 
 	gint32 select_diskstream (GdkEventButton *ev);
 
@@ -201,6 +202,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_engine (ARDOUR::AudioEngine&);
 
 	gint exit_on_main_window_close (GdkEventAny *);
+
+	void maximise_editing_space ();
+	void restore_editing_space ();
 
   protected:
 	friend class PublicEditor;

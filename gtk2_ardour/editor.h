@@ -310,6 +310,9 @@ class Editor : public PublicEditor
 
 	void reposition_x_origin (jack_nframes_t sample);
 
+	void maximise_editing_space();
+	void restore_editing_space();
+
   protected:
 	void map_transport_state ();
 	void map_position_change (jack_nframes_t);
@@ -380,6 +383,7 @@ class Editor : public PublicEditor
 	Editing::MouseMode mouse_mode;
 	void      mouse_insert (GdkEventButton *);
 
+	int  pre_maximal_pane_position;
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 
 	Gtk::Notebook the_notebook;

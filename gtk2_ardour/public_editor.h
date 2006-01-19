@@ -122,6 +122,8 @@ class PublicEditor : public Gtk::Window, public Stateful {
 	virtual void prepare_for_cleanup () = 0;
 	virtual void reposition_x_origin (jack_nframes_t frame) = 0;
 	virtual void remove_last_capture () = 0;
+	virtual void maximise_editing_space() = 0;
+	virtual void restore_editing_space() = 0;
 
 	sigc::signal<void,Editing::DisplayControl> DisplayControlChanged;
 	sigc::signal<void> ZoomFocusChanged;

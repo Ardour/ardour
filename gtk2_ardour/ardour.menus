@@ -158,6 +158,8 @@
                </menu>
         </menu>
         <menu name='Windows' action = 'Windows'>
+	       <menuitem action='ToggleMaximalEditor'/>
+	       <separator/>
                <menuitem action='GotoEditor'/>
                <menuitem action='GotoMixer'/>
                <menuitem action='ToggleOptionsEditor'/>
@@ -165,8 +167,8 @@
                <menuitem action='ToggleConnections'/>
                <menuitem action='ToggleLocations'/>
                <menuitem action='ToggleBigClock'/>
-			    <separator/>
-			   <menuitem action='About'/>
+   	       <separator/>
+	       <menuitem action='About'/>
         </menu>
         <menu name='Options' action='Options'>
                <menu action='Autoconnect'>

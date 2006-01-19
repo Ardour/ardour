@@ -187,6 +187,20 @@ ARDOUR_UI::toggle_punch_out ()
 }
 
 void
+ARDOUR_UI::toggle_editing_space()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMaximalEditor");
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		if (tact->get_active()) {
+			maximise_editing_space ();
+		} else {
+			restore_editing_space ();
+		}
+	}
+}
+
+void
 ARDOUR_UI::toggle_UseHardwareMonitoring()
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "UseSoftwareMonitoring");

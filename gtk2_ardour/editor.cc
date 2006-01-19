@@ -2484,6 +2484,10 @@ Editor::setup_toolbar ()
 						  &mouse_mode_tearoff->tearoff_window()));
 	mouse_mode_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox), 
 						  &mouse_mode_tearoff->tearoff_window(), 1));
+	mouse_mode_tearoff->Hidden.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
+						  &mouse_mode_tearoff->tearoff_window()));
+	mouse_mode_tearoff->Visible.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox), 
+						   &mouse_mode_tearoff->tearoff_window(), 1));
 
 	mouse_move_button.set_name ("MouseModeButton");
 	mouse_select_button.set_name ("MouseModeButton");
@@ -2684,7 +2688,10 @@ Editor::setup_toolbar ()
 					     &tools_tearoff->tearoff_window()));
 	tools_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox), 
 					     &tools_tearoff->tearoff_window(), 0));
-
+	tools_tearoff->Hidden.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
+					     &tools_tearoff->tearoff_window()));
+	tools_tearoff->Visible.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox), 
+					      &tools_tearoff->tearoff_window(), 0));
 
 	toolbar_hbox.set_spacing (8);
 	toolbar_hbox.set_border_width (2);
@@ -3684,6 +3691,7 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 		
 		if ((done = GTK_WIDGET(edit_pane.gobj())->allocation.width > pos)) {
 			edit_pane.set_position (pos);
+			pre_maximal_pane_position = pos;
 		}
 	}
 }
@@ -3968,3 +3976,20 @@ Editor::session_state_saved (string snap_name)
 	redisplay_snapshots ();
 }
 
+void
+Editor::maximise_editing_space ()
+{
+	mouse_mode_tearoff->set_visible (false);
+	tools_tearoff->set_visible (false);
+
+	pre_maximal_pane_position = edit_pane.get_position();
+	edit_pane.set_position (edit_pane.get_width());
+}
+
+void
+Editor::restore_editing_space ()
+{
+	mouse_mode_tearoff->set_visible (true);
+	tools_tearoff->set_visible (true);
+	edit_pane.set_position (pre_maximal_pane_position);
+}
