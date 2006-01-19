@@ -1249,21 +1249,30 @@ Session::enable_record ()
 			
 			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
-					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (true);   
 				}
 			}
 		}
 
-		RecordEnabled ();
+		RecordStateChanged ();
 	}
 }
 
 void
-Session::disable_record ()
+Session::disable_record (bool force)
 {
-	if (atomic_read (&_record_status) != Disabled) {
-		atomic_set (&_record_status, Disabled);
+	RecordState rs;
+
+	if ((rs = (RecordState) atomic_read (&_record_status)) != Disabled) {
+
+		if (!Config->get_latched_record_enable () || force) {
+			atomic_set (&_record_status, Disabled);
+		} else {
+			if (rs == Recording) {
+				atomic_set (&_record_status, Enabled);
+			}
+		}
+
 		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordExit);
 
 		if (Config->get_use_hardware_monitoring() && auto_input) {
@@ -1275,15 +1284,13 @@ Session::disable_record ()
 			
 			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
-					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (false);   
 				}
 			}
 		}
 		
-		RecordDisabled ();
+		RecordStateChanged (); /* emit signal */
 		remove_pending_capture_state ();
-
 	}
 }
 
@@ -1321,7 +1328,7 @@ Session::maybe_enable_record ()
 		} 
 	} else {
 		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordPause);
-		RecordEnabled (); /* EMIT SIGNAL */
+		RecordStateChanged (); /* EMIT SIGNAL */
 	}
 
 	set_dirty();

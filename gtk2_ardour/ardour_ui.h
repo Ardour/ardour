@@ -690,6 +690,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_SoloViaBus();
 	void toggle_AutomaticallyCreateCrossfades();
 	void toggle_UnmuteNewFullCrossfades();
+	void toggle_LatchedRecordEnable ();
 
 	void mtc_port_changed ();
 	void map_some_session_state (const char* group, const char* action, bool (ARDOUR::Session::*get)() const);

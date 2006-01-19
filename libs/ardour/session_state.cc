@@ -1242,7 +1242,6 @@ Session::get_template()
 	
 	disable_record ();
 
-	cerr << "STart get template\n";
 	return state(false);
 }
 

@@ -239,6 +239,13 @@ ARDOUR_UI::toggle_StopPluginsWithTransport()
 {
 	toggle_config_state ("options", "StopPluginsWithTransport", &Configuration::set_plugins_stop_with_transport);
 }
+
+void
+ARDOUR_UI::toggle_LatchedRecordEnable()
+{
+	toggle_config_state ("options", "LatchedRecordEnable", &Configuration::set_latched_record_enable);
+}
+
 void
 ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording()
 {

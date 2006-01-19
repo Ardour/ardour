@@ -623,7 +623,7 @@ Session::mmc_record_strobe (MIDI::MachineControl &mmc)
 		
 		save_state ("", true);
 		atomic_set (&_record_status, Enabled);
-		RecordEnabled (); /* EMIT SIGNAL */
+		RecordStateChanged (); /* EMIT SIGNAL */
 		
 		request_transport_speed (1.0);
 

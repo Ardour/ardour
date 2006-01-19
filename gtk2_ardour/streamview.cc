@@ -82,8 +82,7 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 		_trackview.audio_track()->diskstream_changed.connect (mem_fun (*this, &StreamView::diskstream_changed));
 		_trackview.session().TransportStateChange.connect (mem_fun (*this, &StreamView::transport_changed));
 		_trackview.get_diskstream()->record_enable_changed.connect (mem_fun (*this, &StreamView::rec_enable_changed));
-		_trackview.session().RecordEnabled.connect (mem_fun (*this, &StreamView::sess_rec_enable_changed));
-		_trackview.session().RecordDisabled.connect (mem_fun (*this, &StreamView::sess_rec_enable_changed));
+		_trackview.session().RecordStateChanged.connect (mem_fun (*this, &StreamView::sess_rec_enable_changed));
 	} 
 
 	rec_updating = false;

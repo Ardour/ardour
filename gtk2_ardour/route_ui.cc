@@ -76,8 +76,7 @@ RouteUI::RouteUI (ARDOUR::Route& rt, ARDOUR::Session& sess, const char* m_name,
 
 		get_diskstream()->record_enable_changed.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
 
-		_session.RecordEnabled.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
-		_session.RecordDisabled.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
+		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
 		rec_enable_button = manage (new BindableToggleButton (& at->midi_rec_enable_control(), r_name ));
 		rec_enable_button->set_bind_button_state (2, GDK_CONTROL_MASK);

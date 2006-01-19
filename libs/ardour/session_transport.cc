@@ -386,8 +386,18 @@ Session::non_realtime_stop (bool abort)
 	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
 	if (did_record) {
-		atomic_set (&_record_status, Disabled);
-		RecordDisabled (); /* EMIT SIGNAL */
+
+		/* XXX its a little odd that we're doing this here
+		   when realtime_stop(), which has already executed,
+		   will have done this.
+		*/
+
+		if (!Config->get_latched_record_enable()) {
+			atomic_set (&_record_status, Disabled);
+		} else {
+			atomic_set (&_record_status, Enabled);
+		}
+		RecordStateChanged (); /* emit signal */
 	}
 	
 	if ((post_transport_work & PostTransportLocate) && get_record_enabled()) {

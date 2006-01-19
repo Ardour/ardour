@@ -1052,7 +1052,7 @@ ARDOUR_UI::transport_record ()
 			break;
 		case Session::Recording:
 		case Session::Enabled:
-			session->disable_record ();
+			session->disable_record (true);
 		}
 	}
 }

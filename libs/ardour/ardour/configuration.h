@@ -64,6 +64,9 @@ class Configuration : public Stateful
 	XMLNode * get_keys() const;
 	void set_keys(XMLNode *);
 
+	void set_latched_record_enable (bool yn);
+	bool get_latched_record_enable();
+
 	void set_use_vst (bool yn);
 	bool get_use_vst();
 
@@ -243,6 +246,8 @@ class Configuration : public Stateful
 	bool          quieten_at_speed_is_user;
 	uint32_t      midi_feedback_interval_ms;
 	bool          midi_feedback_interval_ms_is_user;
+	bool          latched_record_enable;
+	bool          latched_record_enable_is_user;
 
 	XMLNode *key_node;
 	bool     user_configuration;

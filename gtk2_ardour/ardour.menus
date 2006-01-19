@@ -194,6 +194,7 @@
                <separator/>
                <menuitem action='StopPluginsWithTransport'/>
                <menuitem action='DoNotRunPluginsWhileRecording'/>
+               <menuitem action='LatchedRecordEnable'/>
                <separator/>
                <menuitem action='VerifyRemoveLastCapture'/>
                <menuitem action='StopRecordingOnXrun'/>
