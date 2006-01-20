@@ -169,12 +169,12 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	hide_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::hide_click));
 
 	if (is_audio_track()) {
-		controls_table.attach (*rec_enable_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	}
-	controls_table.attach (*mute_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	controls_table.attach (*solo_button, 8, 9, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::FILL|Gtk::EXPAND, 0, 0);
 
-	controls_table.attach (edit_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (edit_group_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
 	ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 	ARDOUR_UI::instance()->tooltips().set_tip(*solo_button,_("Solo"));
@@ -194,7 +194,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	controls_table.attach (automation_button, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	if (is_audio_track()) {
-		controls_table.attach (playlist_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	}
 

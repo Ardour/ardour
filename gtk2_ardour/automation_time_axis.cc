@@ -131,9 +131,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 		plugname->set_alignment (1.0, 0.5);
 		name_label.set_name (X_("TrackParameterName"));
 		controls_table.remove (name_hbox);
-		controls_table.attach (*plugname, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		plugname_packed = true;
-		controls_table.attach (name_hbox, 1, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (name_hbox, 1, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	} else {
 		plugname = 0;
 		plugname_packed = false;
@@ -152,8 +152,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 	controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.attach (height_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
-	controls_table.attach (auto_button, 7, 9, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	controls_table.attach (clear_button, 7, 9, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (auto_button, 6, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (clear_button, 6, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	
 	controls_table.show_all ();
 
@@ -319,11 +319,11 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 				controls_table.remove (*plugname);
 				plugname_packed = false;
 			}
-			controls_table.attach (*plugname, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 			plugname_packed = true;
-			controls_table.attach (name_hbox, 1, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.attach (name_hbox, 1, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		} else {
-			controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		}
 		controls_table.show_all ();
 		hide_name_entry ();
@@ -338,10 +338,10 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 				controls_table.remove (*plugname);
 				plugname_packed = false;
 			}
-			controls_table.attach (*plugname, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 			plugname_packed = true;
 		} else {
-			controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		}
 		controls_table.show_all ();
 		hide_name_entry ();
@@ -356,10 +356,10 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 				controls_table.remove (*plugname);
 				plugname_packed = false;
 			}
-			controls_table.attach (*plugname, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 			plugname_packed = true;
 		} else {
-			controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		}
 		controls_table.show_all ();
 		hide_name_entry ();
@@ -374,11 +374,11 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 				controls_table.remove (*plugname);
 				plugname_packed = false;
 			}
-			controls_table.attach (*plugname, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 			plugname_packed = true;
-			controls_table.attach (name_hbox, 1, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.attach (name_hbox, 1, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		} else {
-			controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		}
 		controls_table.show_all ();
 		hide_name_entry ();
@@ -394,7 +394,7 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 				plugname_packed = false;
 			}
 		}
-		controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		controls_table.hide_all ();
 		hide_name_entry ();
 		show_name_label ();
@@ -411,7 +411,7 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 				plugname_packed = false;
 			}
 		} 
-		controls_table.attach (name_hbox, 1, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		controls_table.hide_all ();
 		hide_name_entry ();
 		show_name_label ();

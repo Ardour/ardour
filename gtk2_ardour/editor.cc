@@ -675,7 +675,7 @@ Editor::Editor (AudioEngine& eng)
 	notebook_tearoff->tearoff_window().set_size_request (200, 400);
 
 	edit_pane.pack1 (edit_frame, true, true);
-	edit_pane.pack2 (*notebook_tearoff, true, true);
+	edit_pane.pack2 (*notebook_tearoff, false, true);
 	
 	edit_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
 
@@ -2872,7 +2872,6 @@ Editor::convert_drop_to_paths (vector<string>& paths,
 		if ((*i).substr (0,7) == "file://") {
 			string p = *i;
 			url_decode (p);
-			cerr << "adding " << p << endl;
 			paths.push_back (p.substr (7));
 		}
 	}
@@ -3920,11 +3919,7 @@ Editor::snapshot_display_selection_changed ()
 
 		TreeModel::iterator i = snapshot_display.get_selection()->get_selected();
 		
-		cerr << "snapshot selected\n";
-
 		Glib::ustring snap_name = (*i)[snapshot_display_columns.real_name];
-
-		cerr << "name is " << snap_name << endl;
 
 		if (snap_name.length() == 0) {
 			return;
@@ -3984,6 +3979,8 @@ Editor::maximise_editing_space ()
 
 	pre_maximal_pane_position = edit_pane.get_position();
 	edit_pane.set_position (edit_pane.get_width());
+
+	fullscreen();
 }
 
 void
@@ -3992,4 +3989,6 @@ Editor::restore_editing_space ()
 	mouse_mode_tearoff->set_visible (true);
 	tools_tearoff->set_visible (true);
 	edit_pane.set_position (pre_maximal_pane_position);
+
+	unfullscreen();
 }

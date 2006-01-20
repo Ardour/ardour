@@ -71,7 +71,7 @@ bool TimeAxisView::need_size_info = true;
 TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& canvas) 
 	: AxisView (sess), 
 	  editor (ed),
-	  controls_table (2, 9)
+	  controls_table (2, 8)
 {
 	if (need_size_info) {
 		compute_controls_size_info ();
@@ -125,7 +125,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_col_spacings (0);
 	controls_table.set_homogeneous (true);
 
-	controls_table.attach (name_hbox, 0, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (name_hbox, 0, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.show_all ();
 
 	controls_vbox.pack_start (controls_table, false, false);
@@ -903,8 +903,8 @@ void
 TimeAxisView::compute_controls_size_info ()
 {
 	Gtk::Window window (Gtk::WINDOW_TOPLEVEL);
-	Gtk::Table two_row_table (2, 9);
-	Gtk::Table one_row_table (1, 9);
+	Gtk::Table two_row_table (2, 8);
+	Gtk::Table one_row_table (1, 8);
 	Button* buttons[5];
 
 	window.add (one_row_table);
@@ -938,10 +938,10 @@ TimeAxisView::compute_controls_size_info ()
 	window.remove ();
 	window.add (two_row_table);
 
-	two_row_table.attach (*buttons[1], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	two_row_table.attach (*buttons[2], 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	two_row_table.attach (*buttons[3], 8, 9, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	two_row_table.attach (*buttons[4], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	two_row_table.attach (*buttons[1], 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	two_row_table.attach (*buttons[2], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	two_row_table.attach (*buttons[3], 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	two_row_table.attach (*buttons[4], 8, 9, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
 	two_row_table.show_all ();
 	two_row_table.size_request (req);
