@@ -235,9 +235,15 @@ PluginUI::build (AudioEngine &engine)
 	for (i = 0; i < plugin.parameter_count(); ++i) {
 
 		if (plugin.parameter_is_control (i)) {
+			
+			/* Don't show latency control ports */
+
+			if (plugin.describe_parameter (i) == X_("latency")) {
+				continue;
+			}
 
 			ControlUI* cui;
-				
+	
 			/* if we are scrollable, just use one long column */
 
 			if (!is_scrollable) {
@@ -254,12 +260,6 @@ PluginUI::build (AudioEngine &engine)
 
 					x = 0;
 				}
-			}
-
-			/* Don't show latency control ports */
-
-			if (plugin.describe_parameter (i) == X_("latency")) {
-				continue;
 			}
 
 			if ((cui = build_control_ui (engine, i, plugin.get_nth_midi_control (i))) == 0) {
