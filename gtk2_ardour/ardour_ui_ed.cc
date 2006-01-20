@@ -71,7 +71,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
 	ActionManager::register_action (main_actions, X_("TransportOptions"), _("Options"));
-
+        ActionManager::register_action (main_actions, X_("Help"), _("Help"));
+	ActionManager::register_action (main_actions, X_("KeyMouse Actions"), _("KeyMouse Actions"));
 	/* the real actions */
 
 	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  bind (mem_fun(*this, &ARDOUR_UI::new_session), false, string ()));

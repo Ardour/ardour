@@ -159,7 +159,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	case Start:
 	        points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0)); 		
-		points->push_back (Gnome::Art::Point (7.0, 7.0)); 		
+		points->push_back (Gnome::Art::Point (6.5, 6.5)); 		
 		points->push_back (Gnome::Art::Point (0.0, 13.0)); 		
 		points->push_back (Gnome::Art::Point (0.0, 0.0));	
 
@@ -169,10 +169,10 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	case End:
 		points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (7.0, 7.0));
+		points->push_back (Gnome::Art::Point (6.5, 6.5));
 		points->push_back (Gnome::Art::Point (13.0, 0.0));		
 		points->push_back (Gnome::Art::Point (13.0, 13.0));			
-		points->push_back (Gnome::Art::Point (7.0, 7.0));		
+		points->push_back (Gnome::Art::Point (6.5, 6.5));		
 		
 		shift = 13;
 		label_offset = 6.0;
@@ -182,8 +182,8 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	case LoopStart:
 		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0));	
-		points->push_back (Gnome::Art::Point (12.0, 12.0));		
-		points->push_back (Gnome::Art::Point (0.0, 12.0));		
+		points->push_back (Gnome::Art::Point (13.0, 13.0));		
+		points->push_back (Gnome::Art::Point (0.0, 13.0));		
 		points->push_back (Gnome::Art::Point (0.0, 0.0));		
 		
 		shift = 0;
@@ -192,12 +192,12 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	case LoopEnd:
 		points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (12.0,  0.0));
-		points->push_back (Gnome::Art::Point (12.0, 12.0));	
-		points->push_back (Gnome::Art::Point (0.0, 12.0));		
-		points->push_back (Gnome::Art::Point (12.0, 0.0));
+		points->push_back (Gnome::Art::Point (13.0,  0.0));
+		points->push_back (Gnome::Art::Point (13.0, 13.0));	
+		points->push_back (Gnome::Art::Point (0.0, 13.0));		
+		points->push_back (Gnome::Art::Point (13.0, 0.0));
 		
-		shift = 12;
+		shift = 13;
 		label_offset = 0.0;
 		annotate_left = true;
 		break;
@@ -205,12 +205,12 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	case  PunchIn:
 		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
-		points->push_back (Gnome::Art::Point (12.0, 0.0));		
-		points->push_back (Gnome::Art::Point (0.0, 12.0));	
+		points->push_back (Gnome::Art::Point (13.0, 0.0));		
+		points->push_back (Gnome::Art::Point (0.0, 13.0));	
 		points->push_back (Gnome::Art::Point (0.0, 0.0));	
 
 		shift = 0;
-		label_offset = 12.0;
+		label_offset = 13.0;
 		break;
 		
 	case  PunchOut:
@@ -220,7 +220,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 		points->push_back (Gnome::Art::Point (12.0, 12.0));		
 		points->push_back (Gnome::Art::Point (0.0, 0.0));		
 
-		shift = 12;
+		shift = 13;
 		label_offset = 0.0;
 		annotate_left = true;
 		break;

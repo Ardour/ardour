@@ -50,11 +50,6 @@
                <separator/>       
                <menuitem action='playhead-to-range-start'/>
                <menuitem action='playhead-to-range-end'/>
-               <separator/> 
-               <menuitem action='set-playhead'/>
-               <menuitem action='audition-at-mouse'/>
-               <menuitem action='brush-at-mouse'/>
-               <separator/> 
                <menu action='TransportOptions'>
                     <menuitem action='ToggleTimeMaster'/>
                     <menuitem action='TogglePunchIn'/>
@@ -84,7 +79,6 @@
                <menuitem action='edit-cursor-to-previous-region-sync'/>
                <menuitem action='center-edit-cursor'/>
                <menuitem action='edit-to-playhead'/>
-               <menuitem action='set-edit-cursor'/>
                <separator/>       
                <menuitem action='edit-cursor-to-range-start'/>
                <menuitem action='edit-cursor-to-range-end'/>
@@ -206,6 +200,15 @@
                <menuitem action='AutomaticallyCreateCrossfades'/>
                <menuitem action='UnmuteNewFullCrossfades'/>
          </menu>
+	 <menu name='Help' action='Help'>
+	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
+	       		<menuitem action='audition-at-mouse'/>
+               		<menuitem action='brush-at-mouse'/>
+               		<menuitem action='set-edit-cursor'/>
+              	 	<menuitem action='set-playhead'/>
+	       		<menuitem action='split-region'/>
+               </menu>
+	</menu>
      </menubar>
 
      <popup name='redirectmenu'>

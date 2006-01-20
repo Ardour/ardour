@@ -139,10 +139,16 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "align-regions-sync-relative", _("align regions sync relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint));
 	ActionManager::session_sensitive_actions.push_back (act);
 	
-	act = ActionManager::register_action (editor_actions, "set-playhead", _("set playhead"), mem_fun(*this, &Editor::kbd_set_playhead_cursor));
-	ActionManager::session_sensitive_actions.push_back (act);
+        act = ActionManager::register_action (editor_actions, "audition-at-mouse", _("audition at mouse"), mem_fun(*this, &Editor::kbd_audition));
+        ActionManager::session_sensitive_actions.push_back (act);
+        act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("brush at mouse"), mem_fun(*this, &Editor::kbd_brush));
+        ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-edit-cursor", _("set edit cursor"), mem_fun(*this, &Editor::kbd_set_edit_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "set-playhead", _("set playhead"), mem_fun(*this, &Editor::kbd_set_playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "split-region", _("split region"), mem_fun(*this, &Editor::kbd_split));
+        ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "undo", _("undo"), bind (mem_fun(*this, &Editor::undo), 1U));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -177,13 +183,6 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "split-at-edit-cursor", _("split at edit cursor"), mem_fun(*this, &Editor::split_region));
 	ActionManager::edit_cursor_in_region_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "split-at-mouse", _("split at mouse"), mem_fun(*this, &Editor::kbd_split));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("brush at mouse"), mem_fun(*this, &Editor::kbd_brush));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "audition-at-mouse", _("audition at mouse"), mem_fun(*this, &Editor::kbd_audition));
-	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "start-range", _("start range"), mem_fun(*this, &Editor::keyboard_selection_begin));
 	ActionManager::session_sensitive_actions.push_back (act);
