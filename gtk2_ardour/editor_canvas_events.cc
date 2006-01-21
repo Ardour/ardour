@@ -47,16 +47,67 @@ using namespace Gtk;
 bool
 Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
+	int x, y;
+	double wx, wy;
+	
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
+	  if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+	    //if (ev->state == GDK_CONTROL_MASK) {
+	      /* XXX 
+	       the ev->x will be out of step with the canvas
+	       if we're in mid zoom, so we have to get the damn mouse 
+	       pointer again
+	      */
+	        track_canvas.get_pointer (x, y);
+		track_canvas.window_to_world (x, y, wx, wy);
+		wx += horizontal_adjustment.get_value();
+		wy += vertical_adjustment.get_value();
+		
+		GdkEvent event;
+		event.type = GDK_BUTTON_RELEASE;
+		event.button.x = wx;
+		event.button.y = wy;
+		
+		jack_nframes_t where = event_frame (&event, 0, 0);
+		temporal_zoom_to_frame (true, where);
+		return true;
+	  } else {
 		scroll_tracks_up_line ();
 		return true;
-		break;
-
+	  }
+	  break;
 	case GDK_SCROLL_DOWN:
+	  if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+	    //if (ev->state == GDK_CONTROL_MASK) {
+	        track_canvas.get_pointer (x, y);
+		track_canvas.window_to_world (x, y, wx, wy);
+		wx += horizontal_adjustment.get_value();
+		wy += vertical_adjustment.get_value();
+		
+		GdkEvent event;
+		event.type = GDK_BUTTON_RELEASE;
+		event.button.x = wx;
+		event.button.y = wy;
+		
+		jack_nframes_t where = event_frame (&event, 0, 0);
+	        temporal_zoom_to_frame (false, where);
+		return true;
+	  } else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+	        if (clicked_trackview) {
+		  if (!current_stepping_trackview) {
+		    step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
+		    current_stepping_trackview = clicked_trackview;
+		  }
+		  gettimeofday (&last_track_height_step_timestamp, 0);
+		  current_stepping_trackview->step_height (true);
+		}
+		return true;
+	  } else {
 		scroll_tracks_down_line ();
 		return true;
-		
+	  }
+	  break;	
 	default:
 		/* no left/right handling yet */
 		break;

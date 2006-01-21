@@ -875,24 +875,15 @@ AudioRegionView::region_sync_changed ()
 
 			Points points;
 			
-			points = sync_mark->property_points().get_value();
+			//points = sync_mark->property_points().get_value();
 			
 			double offset = sync_offset / samples_per_unit;
-			
-			points[0].set_x(offset - ((sync_mark_width-1)/2));
-			points[0].set_y(1);
-			
-			points[1].set_x(offset + (sync_mark_width-1)/2);
-			points[1].set_y(1);
-			
-			points[2].set_x(offset);
-			points[2].set_y(sync_mark_width - 1);
-			
-			points[3].set_x(offset - ((sync_mark_width-1)/2));
-			points[3].set_y(1);
-			
+			points.push_back (Gnome::Art::Point (offset - ((sync_mark_width-1)/2), 1));
+			points.push_back (Gnome::Art::Point (offset + ((sync_mark_width-1)/2), 1));
+			points.push_back (Gnome::Art::Point (offset, sync_mark_width - 1));
+			points.push_back (Gnome::Art::Point (offset - ((sync_mark_width-1)/2), 1));	
+			sync_mark->property_points().set_value (points);
 			sync_mark->show();
-			sync_mark->property_points() = points;
 
 		}
 	}

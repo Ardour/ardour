@@ -870,7 +870,7 @@ Editor::set_frames_per_unit (double fpu)
 	   which will do the same updates.
 	*/
 	
-	if (session) {
+	if (session && !no_zoom_repos_update) {
 		horizontal_adjustment.set_upper (session->current_end_frame() / frames_per_unit);
 	}
 	
