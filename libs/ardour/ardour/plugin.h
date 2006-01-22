@@ -54,13 +54,15 @@ class PluginInfo {
 	PluginInfo () { };
 	PluginInfo (const PluginInfo &o)
 		: name(o.name), n_inputs(o.n_inputs), n_outputs(o.n_outputs),
-		path (o.path), index(o.index) {}
+		unique_id(o.unique_id), path (o.path), index(o.index) {}
 	~PluginInfo () { };
 	string name;
 	string category;
 	uint32_t n_inputs;
 	uint32_t n_outputs;
 	Type type;
+
+	long unique_id;
 
   private:
 	friend class PluginManager;
@@ -185,7 +187,7 @@ class Plugin : public Stateful, public sigc::trackable
 
 /* this is actually defined in plugin_manager.cc */
 
-Plugin * find_plugin(ARDOUR::Session&, string name, PluginInfo::Type);
+Plugin * find_plugin(ARDOUR::Session&, string name, long unique_id, PluginInfo::Type);
 
 } // namespace ARDOUR
  

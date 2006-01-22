@@ -258,6 +258,7 @@ PluginManager::ladspa_discover (string path)
 		info->n_inputs = 0;
 		info->n_outputs = 0;
 		info->type = PluginInfo::LADSPA;
+		info->unique_id = descriptor->UniqueID;
 		
 		for (uint32_t n=0; n < descriptor->PortCount; ++n) {
 			if ( LADSPA_IS_PORT_AUDIO (descriptor->PortDescriptors[n]) ) {
@@ -326,7 +327,7 @@ PluginManager::load (Session& session, PluginInfo *info)
 }
 
 Plugin *
-ARDOUR::find_plugin(Session& session, string name, PluginInfo::Type type)
+ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::Type type)
 {
 	PluginManager *mgr = PluginManager::the_manager();
 	list<PluginInfo *>::iterator i;
@@ -338,11 +339,13 @@ ARDOUR::find_plugin(Session& session, string name, PluginInfo::Type type)
 		break;
 	case PluginInfo::VST:
 		plugs = &mgr->vst_plugin_info();
+		unique_id = 0; // VST plugins don't have a unique id.
 		break;
 	}
 
 	for (i = plugs->begin(); i != plugs->end(); ++i) {
-		if ((*i)->name == name) {	
+		if ((name == ""     || (*i)->name == name) &&
+			(unique_id == 0 || (*i)->unique_id == unique_id)) {	
 			return mgr->load (session, *i);
 		}
 	}
