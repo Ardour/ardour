@@ -205,6 +205,7 @@
 	       		<menuitem action='audition-at-mouse'/>
                		<menuitem action='brush-at-mouse'/>
                		<menuitem action='set-edit-cursor'/>
+               		<menuitem action='mute-unmute-region'/>
               	 	<menuitem action='set-playhead'/>
 	       		<menuitem action='split-region'/>
 	       		<menuitem action='set-region-sync-position'/>

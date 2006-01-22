@@ -1186,6 +1186,7 @@ class Editor : public PublicEditor
 	void kbd_driver (sigc::slot<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
 	void kbd_set_playhead_cursor ();
 	void kbd_set_edit_cursor ();
+	void kbd_mute_unmute_region ();
 	void kbd_split ();
 	void kbd_set_sync_position ();
 	void kbd_align (ARDOUR::RegionPoint);

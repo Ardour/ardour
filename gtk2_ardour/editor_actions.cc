@@ -144,6 +144,7 @@ Editor::register_actions ()
         act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("brush at mouse"), mem_fun(*this, &Editor::kbd_brush));
         ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-edit-cursor", _("set edit cursor"), mem_fun(*this, &Editor::kbd_set_edit_cursor));
+	act = ActionManager::register_action (editor_actions, "mute-unmute-region", _("mute/unmute region"), mem_fun(*this, &Editor::kbd_mute_unmute_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-playhead", _("set playhead"), mem_fun(*this, &Editor::kbd_set_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);

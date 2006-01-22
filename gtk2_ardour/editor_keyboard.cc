@@ -94,6 +94,13 @@ Editor::kbd_split ()
 	kbd_driver (mem_fun(*this, &Editor::kbd_do_split), true, true, false);
 }
 
+void
+Editor::kbd_mute_unmute_region ()
+{
+	if (entered_regionview) {
+	       entered_regionview->region.set_muted (!entered_regionview->region.muted());
+	}
+}
 
 void
 Editor::kbd_set_sync_position ()
