@@ -1187,12 +1187,14 @@ class Editor : public PublicEditor
 	void kbd_set_playhead_cursor ();
 	void kbd_set_edit_cursor ();
 	void kbd_split ();
+	void kbd_set_sync_position ();
 	void kbd_align (ARDOUR::RegionPoint);
 	void kbd_align_relative (ARDOUR::RegionPoint);
 	void kbd_brush ();
 	void kbd_audition ();
 
 	void kbd_do_split (GdkEvent*);
+	void kbd_do_set_sync_position (GdkEvent* ev);
 	void kbd_do_align (GdkEvent*, ARDOUR::RegionPoint);
 	void kbd_do_align_relative (GdkEvent*, ARDOUR::RegionPoint);
 	void kbd_do_brush (GdkEvent*);

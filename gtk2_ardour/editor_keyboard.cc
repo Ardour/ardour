@@ -94,6 +94,24 @@ Editor::kbd_split ()
 	kbd_driver (mem_fun(*this, &Editor::kbd_do_split), true, true, false);
 }
 
+
+void
+Editor::kbd_set_sync_position ()
+{
+	kbd_driver (mem_fun(*this, &Editor::kbd_do_set_sync_position), true, true, false);
+}
+
+void
+Editor::kbd_do_set_sync_position (GdkEvent* ev)
+{
+        jack_nframes_t where = event_frame (ev);
+	snap_to (where);
+
+	if (entered_regionview) {
+	        entered_regionview->region.set_sync_position (where);
+	}
+}
+
 void
 Editor::kbd_do_align (GdkEvent* ev, ARDOUR::RegionPoint what)
 {

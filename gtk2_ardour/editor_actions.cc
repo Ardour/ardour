@@ -149,6 +149,8 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "split-region", _("split region"), mem_fun(*this, &Editor::kbd_split));
         ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "set-region-sync-position", _("set region sync position"), mem_fun(*this, &Editor::kbd_set_sync_position));
+        ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "undo", _("undo"), bind (mem_fun(*this, &Editor::undo), 1U));
 	ActionManager::session_sensitive_actions.push_back (act);

@@ -207,6 +207,7 @@
                		<menuitem action='set-edit-cursor'/>
               	 	<menuitem action='set-playhead'/>
 	       		<menuitem action='split-region'/>
+	       		<menuitem action='set-region-sync-position'/>
                </menu>
 	</menu>
      </menubar>

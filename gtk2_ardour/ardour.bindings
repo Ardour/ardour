@@ -12,6 +12,7 @@
 (gtk_accel_path "<Actions>/Editor/duplicate-region" "d")
 (gtk_accel_path "<Actions>/Editor/set-edit-cursor" "e")
 (gtk_accel_path "<Actions>/Editor/split-region" "s")
+(gtk_accel_path "<Actions>/Editor/set-region-sync-position" "v")
 (gtk_accel_path "<Actions>/Editor/insert-region" "i")
 (gtk_accel_path "<Actions>/Editor/normalize-region" "n")
 (gtk_accel_path "<Actions>/Transport/loop" "l")
