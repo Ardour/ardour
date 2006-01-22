@@ -71,27 +71,29 @@
                <menuitem action='extend-range-to-start-of-region'/>
                <menuitem action='extend-range-to-end-of-region'/>
                <separator/>       
-               <menuitem action='edit-cursor-to-next-region-start'/>
-               <menuitem action='edit-cursor-to-next-region-end'/>
-               <menuitem action='edit-cursor-to-previous-region-start'/>
-               <menuitem action='edit-cursor-to-previous-region-end'/>
-               <menuitem action='edit-cursor-to-next-region-sync'/>
-               <menuitem action='edit-cursor-to-previous-region-sync'/>
-               <menuitem action='center-edit-cursor'/>
-               <menuitem action='edit-to-playhead'/>
-               <separator/>       
-               <menuitem action='edit-cursor-to-range-start'/>
-               <menuitem action='edit-cursor-to-range-end'/>
-               <separator/>
-               <menuitem action='crop'/>
-               <menuitem action='duplicate-region'/>
-               <menuitem action='insert-region'/>
-               <menuitem action='normalize-region'/>
-	       <separator/>
-	       <menuitem action="nudge-forward"/>
-	       <menuitem action="nudge-next-forward"/>
-	       <menuitem action="nudge-backward"/>
-	       <menuitem action="nudge-next-backward"/>
+			   <menu action='EditCursorMovementOptions'>
+	               <menuitem action='edit-cursor-to-next-region-start'/>
+    	           <menuitem action='edit-cursor-to-next-region-end'/>
+        	       <menuitem action='edit-cursor-to-previous-region-start'/>
+            	   <menuitem action='edit-cursor-to-previous-region-end'/>
+	               <menuitem action='edit-cursor-to-next-region-sync'/>
+    	           <menuitem action='edit-cursor-to-previous-region-sync'/>
+        	       <menuitem action='center-edit-cursor'/>
+            	   <menuitem action='edit-to-playhead'/>
+    	           <menuitem action='edit-cursor-to-range-start'/>
+	               <menuitem action='edit-cursor-to-range-end'/>
+			   </menu>
+			   <menu action='RegionEditOps'>
+                   <menuitem action='crop'/>
+                   <menuitem action='duplicate-region'/>
+                   <menuitem action='insert-region'/>
+               	   <menuitem action='normalize-region'/>
+                   <separator/>       
+	               <menuitem action="nudge-forward"/>
+         	       <menuitem action="nudge-next-forward"/>
+	               <menuitem action="nudge-backward"/>
+        	       <menuitem action="nudge-next-backward"/>
+			   </menu>
         </menu>         
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>
