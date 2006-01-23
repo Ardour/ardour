@@ -19,10 +19,13 @@
 */
 
 #include <ardour/audioregion.h>
+#include <ardour/playlist.h>
 
 #include "editor.h"
 #include "regionview.h"
 #include "selection.h"
+
+#include "i18n.h"
 
 void
 Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, bool use_time_canvas, bool can_select)
@@ -98,7 +101,13 @@ void
 Editor::kbd_mute_unmute_region ()
 {
 	if (entered_regionview) {
-	       entered_regionview->region.set_muted (!entered_regionview->region.muted());
+		begin_reversible_command (_("mute region"));
+		session->add_undo (entered_regionview->region.playlist()->get_memento());
+		
+	    entered_regionview->region.set_muted (!entered_regionview->region.muted());
+		
+		session->add_redo_no_execute (entered_regionview->region.playlist()->get_memento());
+		commit_reversible_command();
 	}
 }
 
@@ -111,11 +120,11 @@ Editor::kbd_set_sync_position ()
 void
 Editor::kbd_do_set_sync_position (GdkEvent* ev)
 {
-        jack_nframes_t where = event_frame (ev);
+    jack_nframes_t where = event_frame (ev);
 	snap_to (where);
 
 	if (entered_regionview) {
-	  set_a_regions_sync_positon (entered_regionview->region, where);
+	  set_a_regions_sync_position (entered_regionview->region, where);
 	}
 }
 
