@@ -528,7 +528,8 @@ Editor::build_transport_marker_menu ()
 	items.push_back (MenuElem (_("Set from range"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
-
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Select all in Range"), mem_fun(*this, &Editor::marker_menu_select_all_from_range)));
 }
 
 void

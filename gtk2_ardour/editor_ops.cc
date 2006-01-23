@@ -1276,13 +1276,13 @@ Editor::select_all_within (jack_nframes_t start, jack_nframes_t end, double top,
 		}
 		(*iter)->get_selectables (start, end, top, bot, touched);
 	}
-
+	begin_reversible_command (_("select all within"));
 	if (add) {
 		selection->add (touched);
 	} else {
 		selection->set (touched);
 	}
-
+	commit_reversible_command ();
 	return !touched.empty();
 }
 
