@@ -2707,7 +2707,22 @@ Editor::region_fill_selection ()
 	
 	commit_reversible_command ();			
 }
-	
+
+void
+Editor::set_a_regions_sync_position (Region& region, jack_nframes_t position)
+{
+
+	if (!region.covers (position)) {
+	  error << _("Programming error. that region doesn't cover that position") << __FILE__ << " +" << __LINE__ << endmsg;
+		return;
+	}
+	begin_reversible_command (_("set region sync position"));
+	session->add_undo (region.playlist()->get_memento());
+	region.set_sync_position (position);
+	session->add_redo_no_execute (region.playlist()->get_memento());
+	commit_reversible_command ();
+}
+
 void
 Editor::set_region_sync_from_edit_cursor ()
 {

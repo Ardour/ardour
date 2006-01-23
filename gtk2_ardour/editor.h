@@ -864,6 +864,7 @@ class Editor : public PublicEditor
 	void split_region_at (jack_nframes_t);
 	void split_regions_at (jack_nframes_t, AudioRegionSelection&);
 	void crop_region_to_selection ();
+	void set_a_regions_sync_position (ARDOUR::Region&, jack_nframes_t);
 	void set_region_sync_from_edit_cursor ();
 	void remove_region_sync();
 	void align_selection (ARDOUR::RegionPoint, jack_nframes_t position);

@@ -115,7 +115,7 @@ Editor::kbd_do_set_sync_position (GdkEvent* ev)
 	snap_to (where);
 
 	if (entered_regionview) {
-	        entered_regionview->region.set_sync_position (where);
+	  set_a_regions_sync_positon (entered_regionview->region, where);
 	}
 }
 
