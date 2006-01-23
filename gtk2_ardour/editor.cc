@@ -1878,6 +1878,11 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	select_items.push_back (MenuElem (_("Select loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
 	select_items.push_back (MenuElem (_("Select punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
 	select_items.push_back (SeparatorElem());
+	select_items.push_back (MenuElem (_("Select all after edit cursor"), bind (mem_fun(*this, &Editor::select_all_after_cursor), edit_cursor, true)));
+	select_items.push_back (MenuElem (_("Select all before edit cursor"), bind (mem_fun(*this, &Editor::select_all_after_cursor), edit_cursor, false)));
+	select_items.push_back (MenuElem (_("Select all after playhead"), bind (mem_fun(*this, &Editor::select_all_after_cursor), playhead_cursor, true)));
+	select_items.push_back (MenuElem (_("Select all before playhead"), bind (mem_fun(*this, &Editor::select_all_after_cursor), playhead_cursor, false)));
+	select_items.push_back (SeparatorElem());
 
 	edit_items.push_back (MenuElem (_("Select"), *select_menu));
 
@@ -1962,6 +1967,11 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	select_items.push_back (SeparatorElem());
 	select_items.push_back (MenuElem (_("Select loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
 	select_items.push_back (MenuElem (_("Select punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
+	select_items.push_back (SeparatorElem());
+	select_items.push_back (MenuElem (_("Select all after edit cursor"), bind (mem_fun(*this, &Editor::select_all_after_cursor), edit_cursor, true)));
+	select_items.push_back (MenuElem (_("Select all before edit cursor"), bind (mem_fun(*this, &Editor::select_all_after_cursor), edit_cursor, false)));
+	select_items.push_back (MenuElem (_("Select all after playhead"), bind (mem_fun(*this, &Editor::select_all_after_cursor), playhead_cursor, true)));
+	select_items.push_back (MenuElem (_("Select all before playhead"), bind (mem_fun(*this, &Editor::select_all_after_cursor), playhead_cursor, false)));
 	select_items.push_back (SeparatorElem());
 
 	edit_items.push_back (MenuElem (_("Select"), *select_menu));

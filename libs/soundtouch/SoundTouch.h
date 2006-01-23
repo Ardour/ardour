@@ -159,7 +159,7 @@ public:
     static const char *getVersionString();
 
     /// Get SoundTouch library version Id
-    static uint SoundTouch::getVersionId();
+    static uint getVersionId();
 
     /// Sets new rate control value. Normal rate = 1.0, smaller values
     /// represent slower rate, larger faster rates.

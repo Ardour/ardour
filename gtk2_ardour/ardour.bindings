@@ -13,6 +13,7 @@
 (gtk_accel_path "<Actions>/Editor/set-edit-cursor" "e")
 (gtk_accel_path "<Actions>/Editor/split-region" "s")
 (gtk_accel_path "<Actions>/Editor/set-region-sync-position" "v")
+(gtk_accel_path "<Actions>/Editor/mute-unmute-region" "m")
 (gtk_accel_path "<Actions>/Editor/insert-region" "i")
 (gtk_accel_path "<Actions>/Editor/normalize-region" "n")
 (gtk_accel_path "<Actions>/Transport/loop" "l")
@@ -45,12 +46,20 @@
 (gtk_accel_path "<Actions>/Editor/temporal-zoom-in" "minus")
 (gtk_accel_path "<Actions>/Editor/temporal-zoom-out" "equal")
 
+(gtk_accel_path "<Actions>/Editor/select-all" "<control>a")
+(gtk_accel_path "<Actions>/Editor/select-all-after-edit-cursor" "<Control>e")
+(gtk_accel_path "<Actions>/Editor/select-all-before-edit-cursor" "<shift><control>e")
+(gtk_accel_path "<Actions>/Editor/select-all-after-playhead" "<Control>p")
+(gtk_accel_path "<Actions>/Editor/select-all-before-playhead" "<shift><control>p")
+(gtk_accel_path "<Actions>/Editor/select-all-in-punch-range" "<Control>d")
+(gtk_accel_path "<Actions>/Editor/select-all-in-loop-range" "<Control>l")
+
 (gtk_accel_path "<Actions>/Editor/extend-range-to-start-of-region" "leftanglebracket")
 (gtk_accel_path "<Actions>/Editor/extend-range-to-end-of-region" "rightanglebracket")
 
 (gtk_accel_path "<Actions>/Editor/align-regions-sync" "<meta>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-end" "<meta><control>a")
-(gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<control>a")
+(gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<shift>a")
 
 (gtk_accel_path "<Actions>/Editor/brush-at-mouse" "<control>b")
 (gtk_accel_path "<Actions>/Editor/audition-at-mouse" "period")

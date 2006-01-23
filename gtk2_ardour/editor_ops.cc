@@ -1306,8 +1306,45 @@ Editor::set_selection_from_loop()
 	if ((location = session->locations()->auto_loop_location()) == 0)  {
 		return;
 	}
-
 	set_selection_from_range (*location);
+}
+
+void
+Editor::select_all_from_punch()
+{
+	Location* location;
+	list<Selectable *> touched;
+	if ((location = session->locations()->auto_punch_location()) == 0)  {
+		return;
+	}
+
+	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+		if ((*iter)->hidden()) {
+			continue;
+		}
+		(*iter)->get_selectables (location->start(), location->end(), 0, DBL_MAX, touched);
+	}
+		selection->set (touched);
+
+}
+
+void
+Editor::select_all_from_loop()
+{
+	Location* location;
+	list<Selectable *> touched;
+
+	if ((location = session->locations()->auto_loop_location()) == 0)  {
+		return;
+	}
+	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+		if ((*iter)->hidden()) {
+			continue;
+		}
+		(*iter)->get_selectables (location->start(), location->end(), 0, DBL_MAX, touched);
+	}
+		selection->set (touched);
+
 }
 
 void
@@ -1320,6 +1357,29 @@ Editor::set_selection_from_range (Location& range)
 	begin_reversible_command (_("set selection from range"));
 	selection->set (0, range.start(), range.end());
 	commit_reversible_command ();
+}
+
+void
+Editor::select_all_after_cursor (Cursor *cursor, bool after)
+{
+        jack_nframes_t start;
+	jack_nframes_t end;
+	list<Selectable *> touched;
+
+	if (after) {
+	  start = cursor->current_frame ;
+	  end = session->current_end_frame();
+	} else {
+	  start = 0;
+	  end = cursor->current_frame ;
+	}
+	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+		if ((*iter)->hidden()) {
+			continue;
+		}
+		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
+	}
+	selection->set (touched);
 }
 
 void
@@ -2654,7 +2714,6 @@ Editor::set_region_sync_from_edit_cursor ()
 	}
 
 	Region& region (clicked_regionview->region);
-
 	begin_reversible_command (_("set sync from edit cursor"));
 	session->add_undo (region.playlist()->get_memento());
 	region.set_sync_position (edit_cursor->current_frame);

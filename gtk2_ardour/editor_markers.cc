@@ -386,10 +386,13 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 		}
 		marker_menu_item = item;
 		transport_marker_menu->popup (1, ev->time);
-	}
-	else {
+	} else {
 		if (marker_menu == 0) {
+		  if (loc->is_mark()) {
 			build_marker_menu ();
+		  } else {
+		        build_range_marker_menu ();
+		  }
 		}
 
 		// GTK2FIX use action group sensitivity
@@ -453,6 +456,33 @@ Editor::build_marker_menu ()
 	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::marker_menu_rename)));
 	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::marker_menu_remove)));
+
+}
+
+void
+Editor::build_range_marker_menu ()
+{
+	using namespace Menu_Helpers;
+
+	marker_menu = new Menu;
+	MenuList& items = marker_menu->items();
+	marker_menu->set_name ("ArdourContextMenu");
+
+	items.push_back (MenuElem (_("Locate to"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Play from"), mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Loop range"), mem_fun(*this, &Editor::marker_menu_loop_range)));
+	items.push_back (MenuElem (_("Set from playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Set from range"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
+
+	items.push_back (SeparatorElem());
+
+	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::marker_menu_rename)));
+	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
+	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::marker_menu_remove)));
+
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Select all in Range"), mem_fun(*this, &Editor::marker_menu_select_all_from_range)));
+
 }
 
 void
@@ -498,6 +528,7 @@ Editor::build_transport_marker_menu ()
 	items.push_back (MenuElem (_("Set from range"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
+
 }
 
 void
@@ -516,6 +547,25 @@ Editor::marker_menu_hide ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 		l->set_hidden (true, this);
 	}
+}
+
+void
+Editor::marker_menu_select_all_from_range ()
+{
+	Marker* marker;
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+	Location* l;
+	bool is_start;
+
+	if ((l = find_location_from_marker (marker, is_start)) != 0) {
+
+	        select_all_within (l->start(), l->end(), 0,  DBL_MAX, false);
+	}
+	  
 }
 
 void
