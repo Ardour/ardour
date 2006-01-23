@@ -1324,7 +1324,9 @@ Editor::select_all_from_punch()
 		}
 		(*iter)->get_selectables (location->start(), location->end(), 0, DBL_MAX, touched);
 	}
-		selection->set (touched);
+	begin_reversible_command (_("select all from punch"));
+	selection->set (touched);
+	commit_reversible_command ();
 
 }
 
@@ -1343,7 +1345,9 @@ Editor::select_all_from_loop()
 		}
 		(*iter)->get_selectables (location->start(), location->end(), 0, DBL_MAX, touched);
 	}
-		selection->set (touched);
+	begin_reversible_command (_("select all from loop"));
+	selection->set (touched);
+	commit_reversible_command ();
 
 }
 
@@ -1367,9 +1371,11 @@ Editor::select_all_after_cursor (Cursor *cursor, bool after)
 	list<Selectable *> touched;
 
 	if (after) {
+	  begin_reversible_command (_("select all after cursor"));
 	  start = cursor->current_frame ;
 	  end = session->current_end_frame();
 	} else {
+	  begin_reversible_command (_("select all before cursor"));
 	  start = 0;
 	  end = cursor->current_frame ;
 	}
@@ -1380,6 +1386,7 @@ Editor::select_all_after_cursor (Cursor *cursor, bool after)
 		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
 	}
 	selection->set (touched);
+	commit_reversible_command ();
 }
 
 void
