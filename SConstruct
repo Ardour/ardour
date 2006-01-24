@@ -702,9 +702,11 @@ Export('env install_prefix final_prefix config_prefix final_config_prefix librar
 conf = env.Configure ()
 
 if conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Versions/A/Headers/CoreAudio.h'):
-    subst_dict['%JACK_BACKEND%'] = "coreaudio:Built-in Audio:in"
+    subst_dict['%JACK_INPUT%'] = "coreaudio:Built-in Audio:in"
+    subst_dict['%JACK_OUTPUT%'] = "coreaudio:Built-in Audio:out"
 else:
-    subst_dict['%JACK_BACKEND%'] = "alsa_pcm:playback_"
+    subst_dict['%JACK_INPUT%'] = "alsa_pcm:playback_"
+    subst_dict['%JACK_OUTPUT%'] = "alsa_pcm:capture_"
 
 # posix_memalign available
 if not conf.CheckFunc('posix_memalign'):

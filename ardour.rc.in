@@ -22,8 +22,8 @@
     <Option name="auto-xfade" value="yes"/>
     <Option name="no-new-session-dialog" value="yes"/>
     <Option name="timecode-source-is-synced" value="yes"/>
-    <Option name="auditioner-left-out" value="%JACK_BACKEND%1"/>
-    <Option name="auditioner-right-out" value="%JACK_BACKEND%2"/>
+    <Option name="auditioner-left-out" value="%JACK_INPUT%1"/>
+    <Option name="auditioner-right-out" value="%JACK_INPUT%2"/>
     <Option name="quieten-at-speed" value="1.000000"/>
     <Option name="use-vst" value="yes"/>
   </Config>
