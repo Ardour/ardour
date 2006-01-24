@@ -768,6 +768,8 @@ PluginInsert::set_state(const XMLNode& node)
 		warning << string_compose(_("XML node describing a port automation is missing the `%1' information"), port_automation_node_name) << endmsg;
 	}
 	
+	// The name of the PluginInsert comes from the plugin, nothing else
+	set_name(plugin->get_info().name,this);
 	
 	return 0;
 }
