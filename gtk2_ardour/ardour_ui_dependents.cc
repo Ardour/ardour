@@ -63,9 +63,15 @@ ARDOUR_UI::setup_keybindings ()
 {
 	install_actions ();
 	RedirectBox::register_actions ();
+	
+	std::string key_binding_file = Glib::getenv(X_("ARDOUR_BINDINGS"));
 
+	if(!Glib::file_test(key_binding_file, Glib::FILE_TEST_EXISTS)) key_binding_file = ARDOUR::find_config_file("ardour.bindings");
+
+	std::cout << "Loading key binding file " << key_binding_file << std::endl;
+	
 	try {
-		AccelMap::load (ARDOUR::find_config_file ("ardour.bindings"));
+		AccelMap::load (key_binding_file);
 	} catch (...) {
 		error << "ardour key bindings file not found" << endmsg;
 	}

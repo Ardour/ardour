@@ -1,6 +1,11 @@
 #!/bin/sh
 
+#export G_DEBUG=fatal_criticals
+export ARDOUR_RC=../ardour.rc
 export ARDOUR_GLADE_PATH=./glade
+export ARDOUR_UI=./ardour.menus
+export ARDOUR_UI_RC=./ardour2_ui.rc
+export ARDOUR_BINDINGS=./ardour.bindings
 
 if [ -x ./ardour.bin ] ; then 
     # scons executable

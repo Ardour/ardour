@@ -324,6 +324,7 @@ Editor::Editor (AudioEngine& eng)
 	route_removal = false;
 	track_spacing = 0;
 	show_automatic_regions_in_region_list = true;
+	region_list_sort_type = (Editing::RegionListSortType) 0; 
 	have_pending_keyboard_selection = false;
 	_follow_playhead = true;
 	_xfade_visibility = true;
@@ -2151,9 +2152,9 @@ Editor::set_state (const XMLNode& node)
 		_xfade_visibility = !yn;
 		set_xfade_visibility (yn);
 	}
-
+	
 	if ((prop = node.property ("region-list-sort-type"))) {
-		region_list_sort_type = (Editing::RegionListSortType) -1; /* force change */
+		region_list_sort_type = (Editing::RegionListSortType) -1; // force change 
 		reset_region_list_sort_type(str2regionlistsorttype(prop->value()));
 	}
 

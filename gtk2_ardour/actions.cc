@@ -58,9 +58,15 @@ void
 ActionManager::init ()
 {
 	ui_manager = UIManager::create ();
+	
+	std::string ui_file = Glib::getenv(X_("ARDOUR_UI"));
+    
+        if(!Glib::file_test(ui_file, Glib::FILE_TEST_EXISTS)) ui_file = ARDOUR::find_config_file("ardour.menus");
 
+	std::cout << "Loading UI definition file " << ui_file << std::endl;
+	
 	try {
-		ui_manager->add_ui_from_file (ARDOUR::find_config_file("ardour.menus"));
+		ui_manager->add_ui_from_file (ui_file);
 	} catch (Glib::MarkupError& err) {
 		error << "badly formatted UI definition file" << endmsg;
 	} catch (...) {
