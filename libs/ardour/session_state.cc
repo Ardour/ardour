@@ -505,33 +505,7 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 	
 	if (mix_template) {
 		if (new_session){
-
-			string lookfor = "^";
-			lookfor += *mix_template;
-			lookfor += _template_suffix;
-			lookfor += '$';
-
-			PathScanner scanner;
-			string tpath = template_path();
-			string in_path;
-			string out_path;
-
-			vector<string*>* result= scanner (tpath, lookfor, false, true);
-
-			if (result == 0) {
-				error << string_compose (_("Could not find a template called %1 in %2"), *mix_template, tpath)
-				      << endmsg;
-				*mix_template = "";
-			}
-
-			if (result->size() == 0) {
-				delete result;
-				error << string_compose (_("Could not find a template called %1 in %2"), *mix_template, tpath)
-				      << endmsg;
-				*mix_template = "";
-			}
-
-			in_path = *(result->front());
+			std::string in_path = *mix_template;
 
 			ifstream in(in_path.c_str());
 			
