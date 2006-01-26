@@ -776,6 +776,8 @@ Route::add_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 		PluginInsert* pi;
 		PortInsert* porti;
 
+		uint32_t potential_max_streams = 0;
+
 		if ((pi = dynamic_cast<PluginInsert*>(redirect)) != 0) {
 			pi->set_count (1);
 
@@ -783,6 +785,8 @@ Route::add_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 				/* instrument plugin */
 				_have_internal_generator = true;
 			}
+
+			potential_max_streams = max(pi->input_streams(), pi->output_streams());
 
 		} else if ((porti = dynamic_cast<PortInsert*>(redirect)) != 0) {
 
@@ -799,6 +803,14 @@ Route::add_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 			*/
 
 			porti->ensure_io (n_outputs (), n_inputs(), false, this);
+		}
+
+		// Ensure peak vector sizes before the plugin is activated
+		while (_peak_power.size() < potential_max_streams) {
+			_peak_power.push_back(0);
+		}
+		while (_stored_peak_power.size() < potential_max_streams) {
+			_stored_peak_power.push_back(0);
 		}
 
 		_redirects.push_back (redirect);
@@ -837,12 +849,26 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 		RedirectList::iterator existing_end = _redirects.end();
 		--existing_end;
 
+		uint32_t potential_max_streams = 0;
+
 		for (RedirectList::const_iterator i = others.begin(); i != others.end(); ++i) {
 			
 			PluginInsert* pi;
 			
 			if ((pi = dynamic_cast<PluginInsert*>(*i)) != 0) {
 				pi->set_count (1);
+				
+				uint32_t m = max(pi->input_streams(), pi->output_streams());
+				if (m > potential_max_streams)
+					potential_max_streams = m;
+			}
+
+			// Ensure peak vector sizes before the plugin is activated
+			while (_peak_power.size() < potential_max_streams) {
+				_peak_power.push_back(0);
+			}
+			while (_stored_peak_power.size() < potential_max_streams) {
+				_stored_peak_power.push_back(0);
 			}
 
 			_redirects.push_back (*i);
