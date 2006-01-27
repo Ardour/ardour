@@ -432,6 +432,13 @@ ARDOUR_UI::build_menu_bar ()
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
 	menu_bar->set_name ("MainMenuBar");
 
+	/*
+	 * This is needed because this property does not get installed
+	 * until the Menu GObject class is registered, which happens
+	 * when the first menu instance is created.
+	 */
+	Gtk::Settings::get_default()->property_gtk_can_change_accels() = true;	
+	
 	wall_clock_box.add (wall_clock_label);
 	wall_clock_box.set_name ("WallClock");
 	wall_clock_label.set_name ("WallClock");
