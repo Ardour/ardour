@@ -49,6 +49,10 @@ class ClickBox : public Gtk::DrawingArea, public AutoSpin
 	void (*print_func) (char buf[32], Gtk::Adjustment &, void *);
 	void *print_arg;
 
+	Glib::RefPtr<Pango::Layout> layout;
+	int twidth;
+	int theight;
+
 	void set_label ();
 	bool button_press_handler (GdkEventButton *);
 	bool button_release_handler (GdkEventButton *);

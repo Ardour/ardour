@@ -287,6 +287,7 @@ gnome_canvas_simpleline_set_property (GObject      *object,
 	case PROP_COLOR_RGBA:
 		if (simpleline->color != g_value_get_uint(value)) {
 		        simpleline->color = g_value_get_uint(value);
+			UINT_TO_RGBA (simpleline->color, &simpleline->r, &simpleline->g, &simpleline->b, &simpleline->a);
 		        update = TRUE;
 		}
 		break;
@@ -377,8 +378,8 @@ gnome_canvas_simpleline_render (GnomeCanvasItem *item,
 		buf->is_bg = FALSE;
 	}
 
-	// begin = MAX(simpleline->bbox_ulx,buf->rect.x0);
-	// end = MIN(simpleline->bbox_lrx,buf->rect.x1);
+	//begin = MAX(simpleline->bbox_ulx,buf->rect.x0);
+	//end = MIN(simpleline->bbox_lrx,buf->rect.x1);
 	
 	begin = simpleline->bbox_ulx;
 	end = simpleline->bbox_lrx;
@@ -388,7 +389,7 @@ gnome_canvas_simpleline_render (GnomeCanvasItem *item,
 			PAINT_HORIZA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a, 
 				     begin, end, simpleline->bbox_uly);
 		} else {
-			PAINT_VERTA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a, 
+			PAINT_VERTA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
 				    begin, simpleline->bbox_uly, simpleline->bbox_lry);
 		}
 	}

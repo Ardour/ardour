@@ -1709,7 +1709,7 @@ widget "*cTempoMarker" style "cTempoMarker"
 
 style "cMeasureLineBeat"
 {
-	fg[NORMAL] = { 0.51, 0.59, 0.51 }
+	fg[NORMAL] = { 0.51, 0.59, 0.87 }
         fg[ACTIVE] = { 0.98, 0, 0 }
 }
 widget "*cMeasureLineBeat" style "cMeasureLineBeat"

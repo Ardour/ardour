@@ -73,7 +73,7 @@ AudioFilter::finish (AudioRegion& region, AudioRegion::SourceList& nsrcs)
 	now = localtime (&xnow);
 
 	for (AudioRegion::SourceList::iterator si = nsrcs.begin(); si != nsrcs.end(); ++si) {
-		dynamic_cast<FileSource*>((*si))->update_header (session.transport_frame(), *now, xnow);
+		dynamic_cast<FileSource*>((*si))->update_header (region.position(), *now, xnow);
 	}
 
 	/* create a new region */

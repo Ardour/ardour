@@ -135,7 +135,6 @@ Editor::get_time_line ()
 
 	if (free_measure_lines.empty()) {
 	        line = new ArdourCanvas::SimpleLine (*time_line_group);
-		// cerr << "measure line @ " << line << endl;
 		used_measure_lines.push_back (line);
 	} else {
 		line = free_measure_lines.front();
@@ -182,7 +181,7 @@ Editor::draw_measures ()
 			break;
 
 		case TempoMap::Beat:
-			xpos = p.frame / (gdouble) frames_per_unit;
+			xpos = frame_to_unit (p.frame);
 			if (last_beat < xpos) {
 				beat_spacing = xpos - last_beat;
 			}
@@ -199,8 +198,8 @@ Editor::draw_measures ()
 			break;
 
 		case TempoMap::Beat:
-			xpos = p.frame / (gdouble) frames_per_unit;
-
+			xpos = frame_to_unit (p.frame);
+			
 			if (p.beat == 1) {
 				color = color_map[cMeasureLineBeat];
 			} else {
@@ -214,12 +213,12 @@ Editor::draw_measures ()
 					break;
 				}
 			}
-
+			
 			if (cnt == 0 || xpos - last_xpos > 4.0) {
 				line = get_time_line ();
 				line->property_x1() = xpos;
 				line->property_x2() = xpos;
-				line->property_y2() = canvas_height;
+				line->property_y2() = 1000;
 				line->property_color_rgba() = color;
 				line->raise_to_top();
 				line->show();

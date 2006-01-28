@@ -485,10 +485,48 @@ MachineControl::write_track_record_ready (byte *msg, size_t len)
 	   bit 3: aux track a
 	   bit 4: aux track b
 
+	   the format of the message (its an MMC Masked Write) is:
+	   
+	   0x41      Command Code
+	   <count>   byte count of following data
+	   <name>    byte value of the field being written
+	   <byte #>  byte number of target byte in the 
+	   bitmap being written to
+	   <mask>    ones in the mask indicate which bits will be changed
+	   <data>    new data for the byte being written
+	   
+	   by the time this code is executing, msg[0] is the
+	   byte number of the target byte. if its zero, we
+	   are writing to a special byte in the standard
+	   track bitmap, in which the first 5 bits are
+	   special. hence the bits for tracks 1 + 2 are bits
+	   5 and 6 of the first byte of the track
+	   bitmap. so:
+	   
+	   change track 1:  msg[0] = 0;       << first byte of track bitmap 
+	                    msg[1] = 0100000; << binary: bit 5 set
+	
+	   change track 2:  msg[0] = 0;       << first byte of track bitmap
+	                    msg[1] = 1000000; << binary: bit 6 set
+	
+	   change track 3:  msg[0] = 1;       << second byte of track bitmap
+	                    msg[1] = 0000001; << binary: bit 0 set
+	
+	   the (msg[0] * 7) - 5 computation is an attempt to
+	   extract the value of the first track: ie. the one
+	   that would be indicated by bit 0 being set.
+		
+           so, if msg[0] = 0, msg[1] = 0100000 (binary),
+	   what happens is that base_track = -5, but by the
+	   time we check the correct bit, n = 5, and so the
+	   computed track for the status change is 0 (first
+	   track).
+
+           if msg[0] = 1, then the base track for any change is 2 (the third track), and so on.
 	*/
 
 	/* XXX check needed to make sure we don't go outside the
-	   support number of tracks.
+	   supported number of tracks.
 	*/
 
 	base_track = (msg[0] * 7) - 5;

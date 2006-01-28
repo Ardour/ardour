@@ -51,6 +51,7 @@ typedef off_t off64_t;
 #endif
 
 #include <errno.h>
+#include <cmath>
 
 #include <pbd/error.h>
 #include <ardour/destructive_filesource.h>
@@ -60,9 +61,19 @@ typedef off_t off64_t;
 using namespace std;
 using namespace ARDOUR;
 
+gain_t* DestructiveFileSource::out_coefficient = 0;
+gain_t* DestructiveFileSource::in_coefficient = 0;
+jack_nframes_t DestructiveFileSource::xfade_frames = 64;
+
 DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, bool repair_first)
 	: FileSource (path, rate, repair_first)
 {
+	if (out_coefficient == 0) {
+		setup_standard_crossfades (rate);
+	}
+
+	xfade_buf = new Sample[xfade_frames];
+
 	_capture_start = false;
 	_capture_end = false;
 }
@@ -70,17 +81,42 @@ DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, 
 DestructiveFileSource::DestructiveFileSource (const XMLNode& node, jack_nframes_t rate)
 	: FileSource (node, rate)
 {
+	if (out_coefficient == 0) {
+		setup_standard_crossfades (rate);
+	}
+
+	xfade_buf = new Sample[xfade_frames];
+
 	_capture_start = false;
 	_capture_end = false;
 }
 
 DestructiveFileSource::~DestructiveFileSource()
 {
+	delete xfade_buf;
+}
+
+void
+DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
+{
+	xfade_frames = (jack_nframes_t) floor ((/*Config->get_destructive_crossfade_msecs()*/ 64 / 1000.0) * rate);
+
+	out_coefficient = new gain_t[xfade_frames];
+	in_coefficient = new gain_t[xfade_frames];
+
+	for (jack_nframes_t n = 0; n < xfade_frames; ++n) {
+
+		/* XXXX THIS IS NOT THE RIGHT XFADE CURVE: USE A PROPER VOLUMETRIC EQUAL POWER CURVE */
+
+		out_coefficient[n] = n/(gain_t) xfade_frames;
+		in_coefficient[n] = 1.0 - out_coefficient[n];
+	}
 }
 
 int
 DestructiveFileSource::seek (jack_nframes_t frame)
 {
+	file_pos = data_offset + (sizeof (Sample) * frame);
 	return 0;
 }
 
@@ -104,23 +140,103 @@ DestructiveFileSource::clear_capture_marks ()
 }	
 
 jack_nframes_t
+DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int dir)
+{
+	jack_nframes_t xfade = min (xfade_frames, cnt);
+	jack_nframes_t xfade_bytes = xfade * sizeof (Sample);
+	
+	if (::pread64 (fd, (char *) xfade_buf, xfade_bytes, file_pos) != (off64_t) xfade_bytes) {
+		error << string_compose(_("FileSource: \"%1\" bad read (%2)"), _path, strerror (errno)) << endmsg;
+		return 0;
+	}
+
+	if (xfade == xfade_frames) {
+
+		/* use the standard xfade curve */
+		
+		if (dir) {
+
+			/* fade new material in */
+
+			for (jack_nframes_t n = 0; n < xfade; ++n) {
+				xfade_buf[n] = (xfade_buf[n] * out_coefficient[n]) + (data[n] * in_coefficient[n]);
+			}
+		} else {
+
+			/* fade new material out */
+			
+			
+			for (jack_nframes_t n = 0; n < xfade; ++n) {
+				xfade_buf[n] = (xfade_buf[n] * in_coefficient[n]) + (data[n] * out_coefficient[n]);
+			}
+		}
+
+
+	} else {
+
+		/* short xfade, compute custom curve */
+
+		for (jack_nframes_t n = 0; n < xfade; ++n) {
+			xfade_buf[n] = (xfade_buf[n] * out_coefficient[n]) + (data[n] * in_coefficient[n]);
+		}
+	}
+	
+	if (::pwrite64 (fd, (char *) xfade_buf, xfade, file_pos) != (off64_t) xfade_bytes) {
+		error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+		return 0;
+	}
+
+	/* don't advance file_pos here; if the write fails, we want it left where it was before the overall
+	   write, not in the middle of it.
+	*/
+	
+	if (xfade < cnt) {
+		jack_nframes_t remaining = (cnt - xfade);
+		int32_t bytes = remaining * sizeof (Sample);
+
+		if (::pwrite64 (fd, (char *) data + remaining, bytes, file_pos) != (off64_t) bytes) {
+			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+			return 0;
+		}
+	}
+
+	file_pos += cnt;
+
+	return cnt;
+}
+
+jack_nframes_t
 DestructiveFileSource::write (Sample* data, jack_nframes_t cnt)
 {
 	{
 		LockMonitor lm (_lock, __LINE__, __FILE__);
 		
 		int32_t byte_cnt = cnt * sizeof (Sample);
-		int32_t byte_pos = data_offset + (_length * sizeof (Sample));
 		jack_nframes_t oldlen;
 
-		if (::pwrite64 (fd, (char *) data, byte_cnt, byte_pos) != (off64_t) byte_cnt) {
-			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
-			return 0;
+		if (_capture_start) {
+			_capture_start = false;
+			if (crossfade (data, cnt, 1) != cnt) {
+				return 0;
+			}
+		} else if (_capture_end) {
+			_capture_end = false;
+			if (crossfade (data, cnt, 0) != cnt) {
+				return 0;
+			}
+		} else {
+			if (::pwrite64 (fd, (char *) data, byte_cnt, file_pos) != (off64_t) byte_cnt) {
+				error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+				return 0;
+			}
 		}
 
-		oldlen = _length;
-		_length += cnt;
+		oldlen = file_pos;
+		if (file_pos + cnt > _length) {
+			_length += cnt;
+		}
 		_write_data_count = byte_cnt;
+		file_pos += byte_cnt;
 
 		if (_build_peakfiles) {
 			PeakBuildRecord *pbr = 0;

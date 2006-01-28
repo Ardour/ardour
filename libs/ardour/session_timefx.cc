@@ -149,7 +149,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 	xnow = localtime (&now);
 
 	for (it = sources.begin(); it != sources.end(); ++it) {
-		dynamic_cast<FileSource*>(*it)->update_header (0, *xnow, now);
+		dynamic_cast<FileSource*>(*it)->update_header (tsr.region->position(), *xnow, now);
 	}
 
 	region_name = tsr.region->name() + X_(".t");

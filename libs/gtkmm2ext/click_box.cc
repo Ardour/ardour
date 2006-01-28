@@ -34,6 +34,9 @@ ClickBox::ClickBox (Gtk::Adjustment *adjp, const string &name, bool round_to_ste
 {
 	print_func = default_printer;
 	print_arg = 0;
+	layout = create_pango_layout ("");
+	twidth = 0;
+	theight = 0;
 
 	set_name (name);
 	add_events (Gdk::BUTTON_RELEASE_MASK|
@@ -85,6 +88,17 @@ ClickBox::default_printer (char buf[32], Gtk::Adjustment &adj,
 void
 ClickBox::set_label ()
 {
+	if (!print_func) {
+		return;
+	}
+
+	char buf[32];
+
+	print_func (buf, get_adjustment(), print_arg);
+
+	layout->set_text (buf);
+	layout->get_pixel_size (twidth, theight);
+
 	queue_draw ();
 }
 
@@ -102,21 +116,27 @@ ClickBox::on_expose_event (GdkEventExpose *ev)
 
 	if (print_func) {
 
-		char buf[32];
-
 		Glib::RefPtr<Gtk::Style> style (get_style());
+		Glib::RefPtr<Gdk::GC> fg_gc (style->get_fg_gc (Gtk::STATE_NORMAL));
+		Glib::RefPtr<Gdk::GC> bg_gc (style->get_bg_gc (Gtk::STATE_NORMAL));
+		Glib::RefPtr<Gdk::Window> win (get_window());
+		
+		GdkRectangle base_rect;
+		GdkRectangle draw_rect;
+		gint x, y, width, height, depth;
+		
+		win->get_geometry (x, y, width, height, depth);
+		
+		base_rect.width = width;
+		base_rect.height = height;
+		base_rect.x = 0;
+		base_rect.y = 0;
+		
+		gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
+		win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 
-		print_func (buf, get_adjustment(), print_arg);
-
-		Glib::RefPtr <Gdk::Window> win (get_window());
-		win->draw_rectangle (style->get_bg_gc(get_state()),
-				     TRUE, 0, 0, -1, -1);
-
-		{
-			int width = 0;
-			int height = 0;
-			create_pango_layout(buf)->get_pixel_size(width, height);
-			set_size_request(width, height);
+		if (twidth && theight) {
+			win->draw_layout (fg_gc, width - (twidth + 2), (height - theight) + 2, layout);
 		}
 	}
 

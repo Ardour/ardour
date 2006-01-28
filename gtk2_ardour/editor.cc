@@ -2121,19 +2121,37 @@ Editor::set_state (const XMLNode& node)
 	if ((prop = node.property ("show-waveforms"))) {
 		bool yn = (prop->value() == "yes");
 		_show_waveforms = !yn;
-		set_show_waveforms (yn);
+		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			/* do it twice to force the change */
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
 	}
 
 	if ((prop = node.property ("show-waveforms-recording"))) {
 		bool yn = (prop->value() == "yes");
 		_show_waveforms_recording = !yn;
-		set_show_waveforms_recording (yn);
+		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformsWhileRecording"));
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			/* do it twice to force the change */
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
 	}
 	
 	if ((prop = node.property ("show-measures"))) {
 		bool yn = (prop->value() == "yes");
 		_show_measures = !yn;
-		set_show_measures (yn);
+		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			/* do it twice to force the change */
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
 	}
 
 	if ((prop = node.property ("follow-playhead"))) {

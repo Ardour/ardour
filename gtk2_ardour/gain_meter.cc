@@ -223,11 +223,9 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	/* XXX optimize this so that it doesn't do it all everytime */
 
 	double fraction;
-
 	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
 	Glib::RefPtr<Gdk::GC> fg_gc (meter_metric_area.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::GC> bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
-	Pango::FontDescription font (meter_metric_area.get_style()->get_font());
 	gint x, y, width, height, depth;
 	gint pos;
 	int  db_points[] = { -50, -10, -3, 0, 6 };
@@ -235,6 +233,8 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	char buf[32];
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
+	int theight;
+	int twidth;
 
 	win->get_geometry (x, y, width, height, depth);
 	
@@ -246,18 +246,22 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
 	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 
+	Glib::RefPtr<Pango::Layout> layout = meter_metric_area.create_pango_layout("");
+
 	for (i = 0; i < sizeof (db_points)/sizeof (db_points[0]); ++i) {
+
 		fraction = log_meter (db_points[i]);
 		pos = height - (gint) floor (height * fraction);
 
 		snprintf (buf, sizeof (buf), "%d", db_points[i]);
 
-		Glib::RefPtr<Pango::Layout> Layout = meter_metric_area.create_pango_layout(buf);
-		// GTK2FIX - how to get twidth, ascent
-		win->draw_layout(fg_gc, width /* - twidth */, pos /*  + ascent */, Layout);
+		layout->set_text (buf);
+		layout->get_pixel_size (twidth, theight);
+
+		win->draw_layout (fg_gc, width - twidth, pos + theight, layout);
 	}
 
-	return TRUE;
+	return true;
 }
 
 GainMeter::~GainMeter ()
@@ -281,7 +285,6 @@ GainMeter::update_meters ()
 	uint32_t n;
 	float peak;
 	char buf[32];
-
 	
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
                 if ((*i).packed) {

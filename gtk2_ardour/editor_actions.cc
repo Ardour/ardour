@@ -324,8 +324,8 @@ Editor::register_actions ()
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformVisibility"), _("show waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("show waveforms while recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
-	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("show measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
-
+	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("show measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
+	
 	RadioAction::Group meter_falloff_group;
 	RadioAction::Group meter_hold_group;
 
@@ -377,7 +377,7 @@ Editor::toggle_waveforms_while_recording ()
 void
 Editor::toggle_measure_visibility ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		set_show_measures (tact->get_active());

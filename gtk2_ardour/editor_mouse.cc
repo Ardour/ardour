@@ -94,6 +94,11 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy)
 	case GDK_LEAVE_NOTIFY:
 		track_canvas.w2c(event->crossing.x, event->crossing.y, *pcx, *pcy);
 		break;
+	case GDK_KEY_PRESS:
+	case GDK_KEY_RELEASE:
+		cerr << "here\n";
+		// track_canvas.w2c(event->key.x, event->key.y, *pcx, *pcy);
+		break;
 	default:
 		warning << string_compose (_("Editor::event_frame() used on unhandled event type %1"), event->type) << endmsg;
 		break;

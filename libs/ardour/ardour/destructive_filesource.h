@@ -43,8 +43,18 @@ class DestructiveFileSource : public FileSource {
 	jack_nframes_t write (Sample *src, jack_nframes_t cnt);
 
   private:
-	bool _capture_start;
-	bool _capture_end;
+	static jack_nframes_t xfade_frames;
+	static gain_t* out_coefficient;
+	static gain_t* in_coefficient;
+	static void setup_standard_crossfades (jack_nframes_t sample_rate);
+
+	bool          _capture_start;
+	bool          _capture_end;
+	jack_nframes_t file_pos;
+	Sample*        xfade_buf;
+
+	jack_nframes_t crossfade (Sample* data, jack_nframes_t cnt, int dir);
+
 };
 
 }
