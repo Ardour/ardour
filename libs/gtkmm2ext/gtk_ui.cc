@@ -522,6 +522,7 @@ UI::do_request (Request* req)
 	case ErrorMessage:
 		process_error_message (req->chn, req->msg);
 		free (const_cast<char*>(req->msg)); /* it was strdup'ed */
+		req->msg = 0; /* don't free it again in the destructor */
 		break;
 		
 	case Quit:
@@ -594,7 +595,7 @@ UI::send_request (Request *req)
 			abort ();
 		}
 		
-		// cerr << "thread " << pthread_self() << " sent request " << req << " type = " << req->type << endl;
+		cerr << "thread " << pthread_self() << " sent request " << req << " type = " << req->type << endl;
 		rbuf->increment_write_ptr (1);
 		write (signal_pipe[1], &c, 1);
 	}

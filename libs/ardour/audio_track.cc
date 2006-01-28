@@ -33,12 +33,9 @@
 #include <ardour/panner.h>
 #include <ardour/utils.h>
 
-
-
 #include "i18n.h"
 
 using namespace std;
-//using namespace sigc;
 using namespace ARDOUR;
 
 AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
@@ -56,7 +53,10 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 
 	if (mode == Destructive) {
 		dflags = DiskStream::Flag (dflags | DiskStream::Destructive);
-	} 
+		cerr << "Creating a new audio track, destructive mode\n";
+	} else {
+		cerr << "Creating a new audio track, NOT destructive mode\n";
+	}
 
 	DiskStream* ds = new DiskStream (_session, name, dflags);
 	

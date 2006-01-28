@@ -1062,7 +1062,9 @@ DiskStream::seek (jack_nframes_t frame, bool complete_refill)
 		(*chan).capture_buf->reset ();
 		if (destructive()) {
 			DestructiveFileSource* dfs = dynamic_cast<DestructiveFileSource*> ((*chan).write_source);
-			dfs->seek (frame);
+			if (dfs) {
+				dfs->seek (frame);
+			}
 		}
 	}
 	
@@ -2007,7 +2009,20 @@ DiskStream::reset_write_sources (bool mark_write_complete, bool force)
 	}
 	
 	if (!force && destructive()) {
-		return;
+
+		/* make sure we always have enough sources for the current channel count */
+
+		for (chan = channels.begin(), n = 0; chan != channels.end(); ++chan, ++n) {
+			if ((*chan).write_source == 0) {
+				break;
+			}
+		}
+
+		if (chan == channels.end()) {
+			return;
+		}
+
+		/* some channels do not have a write source */
 	}
 
 	capturing_sources.clear ();
