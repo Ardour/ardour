@@ -67,18 +67,19 @@
                <menuitem action='editor-cut'/>
                <menuitem action='editor-copy'/>
                <menuitem action='editor-paste'/>
-	       <separator/>
-               <menuitem action='select-all'/>
-               <menuitem action='select-all-after-edit-cursor'/>
-               <menuitem action='select-all-before-edit-cursor'/>
-               <menuitem action='select-all-after-playhead'/>
-               <menuitem action='select-all-before-playhead'/>
-               <menuitem action='select-all-in-punch-range'/>
-               <menuitem action='select-all-in-loop-range'/>
-               <separator/>
+               <separator/>       
                <menuitem action='extend-range-to-start-of-region'/>
                <menuitem action='extend-range-to-end-of-region'/>
-               <separator/>       
+		       <separator/>
+               <menu action="EditSelectRegionOptions">
+                   <menuitem action='select-all'/>
+                   <menuitem action='select-all-after-edit-cursor'/>
+                   <menuitem action='select-all-before-edit-cursor'/>
+                   <menuitem action='select-all-after-playhead'/>
+                   <menuitem action='select-all-before-playhead'/>
+                   <menuitem action='select-all-in-punch-range'/>
+                   <menuitem action='select-all-in-loop-range'/>
+               </menu>
 			   <menu action='EditCursorMovementOptions'>
 	               <menuitem action='edit-cursor-to-next-region-start'/>
     	           <menuitem action='edit-cursor-to-next-region-end'/>

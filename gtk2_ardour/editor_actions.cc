@@ -23,8 +23,9 @@ Editor::register_actions ()
 	/* non-operative menu items for menu bar */
 
 	ActionManager::register_action (editor_actions, X_("Edit"), _("Edit"));
+	ActionManager::register_action (editor_actions, X_("EditSelectRegionOptions"), _("Select regions"));
 	ActionManager::register_action (editor_actions, X_("EditCursorMovementOptions"), _("Move edit cursor"));
-	ActionManager::register_action (editor_actions, X_("RegionEditOps"), _("Region"));
+	ActionManager::register_action (editor_actions, X_("RegionEditOps"), _("Region operations"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("ZoomFocus"));
 	ActionManager::register_action (editor_actions, X_("MeterHold"), _("Meter hold"));

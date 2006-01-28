@@ -65,12 +65,20 @@ ActionManager::init ()
 
 	std::cout << "Loading UI definition file " << ui_file << std::endl;
 	
+	bool loaded = false;
+	
 	try {
 		ui_manager->add_ui_from_file (ui_file);
+		loaded = true;
 	} catch (Glib::MarkupError& err) {
 		error << "badly formatted UI definition file" << endmsg;
 	} catch (...) {
 		error << "Ardour menu definition file not found" << endmsg;
+	}
+
+	if (!loaded) {
+		error << "ardour will not work without a valid ardour.menus file" << endmsg;
+		exit(1);
 	}
 }
 
