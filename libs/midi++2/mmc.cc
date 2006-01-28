@@ -512,7 +512,7 @@ MachineControl::write_track_record_ready (byte *msg, size_t len)
 	   change track 3:  msg[0] = 1;       << second byte of track bitmap
 	                    msg[1] = 0000001; << binary: bit 0 set
 	
-	   the (msg[0] * 7) - 5 computation is an attempt to
+	   the (msg[0] * 8) - 6 computation is an attempt to
 	   extract the value of the first track: ie. the one
 	   that would be indicated by bit 0 being set.
 		
@@ -529,7 +529,11 @@ MachineControl::write_track_record_ready (byte *msg, size_t len)
 	   supported number of tracks.
 	*/
 
-	base_track = (msg[0] * 7) - 5;
+	if (msg[0] == 0) {
+		base_track = -5;
+	} else {
+		base_track = (msg[0] * 8) - 6;
+	}
 
 	for (n = 0; n < 7; n++) {
 		if (msg[1] & (1<<n)) {
