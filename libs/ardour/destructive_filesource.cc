@@ -52,6 +52,7 @@ typedef off_t off64_t;
 
 #include <errno.h>
 #include <cmath>
+#include <fcntl.h>
 
 #include <pbd/error.h>
 #include <ardour/destructive_filesource.h>
@@ -108,22 +109,24 @@ DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
 
 		/* XXXX THIS IS NOT THE RIGHT XFADE CURVE: USE A PROPER VOLUMETRIC EQUAL POWER CURVE */
 
-		out_coefficient[n] = n/(gain_t) xfade_frames;
-		in_coefficient[n] = 1.0 - out_coefficient[n];
+		in_coefficient[n] = n/(gain_t) (xfade_frames-1); /* 0 .. 1 */
+		out_coefficient[n] = 1.0 - in_coefficient[n];    /* 1 .. 0 */
 	}
 }
 
 int
 DestructiveFileSource::seek (jack_nframes_t frame)
 {
-	file_pos = data_offset + (sizeof (Sample) * frame);
+//	file_pos = data_offset + (sizeof (Sample) * frame);
+	cerr << _name << " Seek to " << frame << " = " << data_offset + (sizeof (Sample) * frame) << endl;
 	return 0;
 }
 
 void
-DestructiveFileSource::mark_capture_start ()
+DestructiveFileSource::mark_capture_start (jack_nframes_t pos)
 {
 	_capture_start = true;
+	capture_start_frame = pos;
 }
 
 void
@@ -140,67 +143,97 @@ DestructiveFileSource::clear_capture_marks ()
 }	
 
 jack_nframes_t
-DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int dir)
+DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 {
 	jack_nframes_t xfade = min (xfade_frames, cnt);
 	jack_nframes_t xfade_bytes = xfade * sizeof (Sample);
-	
-	if (::pread64 (fd, (char *) xfade_buf, xfade_bytes, file_pos) != (off64_t) xfade_bytes) {
-		error << string_compose(_("FileSource: \"%1\" bad read (%2)"), _path, strerror (errno)) << endmsg;
-		return 0;
-	}
+	jack_nframes_t nofade = cnt - xfade;
+	jack_nframes_t nofade_bytes = nofade * sizeof (Sample);
+	Sample* fade_data = 0;
+	off_t fade_position = 0;
 
-	if (xfade == xfade_frames) {
-
-		/* use the standard xfade curve */
-		
-		if (dir) {
-
-			/* fade new material in */
-
-			for (jack_nframes_t n = 0; n < xfade; ++n) {
-				xfade_buf[n] = (xfade_buf[n] * out_coefficient[n]) + (data[n] * in_coefficient[n]);
-			}
-		} else {
-
-			/* fade new material out */
-			
-			
-			for (jack_nframes_t n = 0; n < xfade; ++n) {
-				xfade_buf[n] = (xfade_buf[n] * in_coefficient[n]) + (data[n] * out_coefficient[n]);
-			}
-		}
-
-
+	if (fade_in) {
+		fade_position = file_pos;
+		fade_data = data;
 	} else {
+		fade_position = file_pos + nofade_bytes;
+		fade_data = data + nofade;
+	}
 
-		/* short xfade, compute custom curve */
+	if (::pread64 (fd, (char *) xfade_buf, xfade_bytes, fade_position) != (off64_t) xfade_bytes) {
+		if (errno == EAGAIN) {
+			/* no data there, so no xfade */
 
-		for (jack_nframes_t n = 0; n < xfade; ++n) {
-			xfade_buf[n] = (xfade_buf[n] * out_coefficient[n]) + (data[n] * in_coefficient[n]);
+			xfade = 0;
+			xfade_bytes = 0;
+			nofade = cnt;
+			nofade_bytes = nofade * sizeof (Sample);
+
+		} else {
+			error << string_compose(_("FileSource: \"%1\" bad read (%2: %3)"), _path, errno, strerror (errno)) << endmsg;
+			return 0;
 		}
 	}
-	
-	if (::pwrite64 (fd, (char *) xfade_buf, xfade, file_pos) != (off64_t) xfade_bytes) {
-		error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
-		return 0;
-	}
 
-	/* don't advance file_pos here; if the write fails, we want it left where it was before the overall
-	   write, not in the middle of it.
-	*/
-	
-	if (xfade < cnt) {
-		jack_nframes_t remaining = (cnt - xfade);
-		int32_t bytes = remaining * sizeof (Sample);
-
-		if (::pwrite64 (fd, (char *) data + remaining, bytes, file_pos) != (off64_t) bytes) {
+	if (nofade && !fade_in) {
+		cerr << "write " << nofade_bytes << " of prefade OUT data to " << file_pos << " .. " << file_pos + nofade_bytes << endl;
+		if (::pwrite64 (fd, (char *) data, nofade_bytes, file_pos) != (off64_t) nofade_bytes) {
 			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
 	}
 
-	file_pos += cnt;
+	if (xfade == xfade_frames) {
+
+		jack_nframes_t n;
+
+		/* use the standard xfade curve */
+		
+		if (fade_in) {
+
+			/* fade new material in */
+			
+			for (n = 0; n < xfade; ++n) {
+				xfade_buf[n] = (xfade_buf[n] * out_coefficient[n]) + (fade_data[n] * in_coefficient[n]);
+			}
+
+		} else {
+
+
+			/* fade new material out */
+			
+			for (n = 0; n < xfade; ++n) {
+				xfade_buf[n] = (xfade_buf[n] * in_coefficient[n]) + (fade_data[n] * out_coefficient[n]);
+			}
+		}
+
+	} else if (xfade) {
+
+		/* short xfade, compute custom curve */
+
+		/* XXX COMPUTE THE CURVE, DAMMIT! */
+
+		for (jack_nframes_t n = 0; n < xfade; ++n) {
+			xfade_buf[n] = (xfade_buf[n] * out_coefficient[n]) + (fade_data[n] * in_coefficient[n]);
+		}
+	}
+
+	if (xfade) {
+		cerr << "write " << xfade_bytes << " of xfade  data to " << fade_position << " .. " << fade_position + xfade_bytes << endl;
+		if (::pwrite64 (fd, (char *) xfade_buf, xfade_bytes, fade_position) != (off64_t) xfade_bytes) {
+			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+			return 0;
+		}
+	}
+	
+	if (fade_in && nofade) {
+		cerr << "write " << nofade_bytes << " of postfade IN  data to " << file_pos + xfade_bytes << " .. " 
+		     << file_pos + xfade_bytes + nofade_bytes << endl;
+		if (::pwrite64 (fd, (char *) (data + xfade), nofade_bytes, file_pos + xfade_bytes) != (off64_t) nofade_bytes) {
+			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+			return 0;
+		}
+	}
 
 	return cnt;
 }
@@ -208,6 +241,8 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int dir)
 jack_nframes_t
 DestructiveFileSource::write (Sample* data, jack_nframes_t cnt)
 {
+	cerr << _name << ": write " << cnt << " to " << file_pos << " start ? " << _capture_start << " end ? " << _capture_end << endl;
+
 	{
 		LockMonitor lm (_lock, __LINE__, __FILE__);
 		
@@ -216,11 +251,21 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt)
 
 		if (_capture_start) {
 			_capture_start = false;
+			_capture_end = false;
+
+			/* move to the correct location place */
+			file_pos = data_offset + (capture_start_frame * sizeof (Sample));
+
+			cerr << "First byte of capture will be at " << file_pos << endl;
+			
 			if (crossfade (data, cnt, 1) != cnt) {
 				return 0;
 			}
+
 		} else if (_capture_end) {
+			_capture_start = false;
 			_capture_end = false;
+
 			if (crossfade (data, cnt, 0) != cnt) {
 				return 0;
 			}
@@ -231,12 +276,14 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt)
 			}
 		}
 
-		oldlen = file_pos;
+		oldlen = _length;
 		if (file_pos + cnt > _length) {
 			_length += cnt;
 		}
 		_write_data_count = byte_cnt;
 		file_pos += byte_cnt;
+
+		cerr << "at end of write, file_pos = " << file_pos << endl;
 
 		if (_build_peakfiles) {
 			PeakBuildRecord *pbr = 0;
@@ -269,3 +316,8 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt)
 	return cnt;
 }
 
+jack_nframes_t
+DestructiveFileSource::last_capture_start_frame () const
+{
+	return capture_start_frame;
+}

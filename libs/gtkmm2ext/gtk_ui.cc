@@ -595,7 +595,7 @@ UI::send_request (Request *req)
 			abort ();
 		}
 		
-		cerr << "thread " << pthread_self() << " sent request " << req << " type = " << req->type << endl;
+		// cerr << "thread " << pthread_self() << " sent request " << req << " type = " << req->type << endl;
 		rbuf->increment_write_ptr (1);
 		write (signal_pipe[1], &c, 1);
 	}

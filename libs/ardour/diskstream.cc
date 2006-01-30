@@ -614,6 +614,13 @@ DiskStream::check_record_status (jack_nframes_t transport_frame, jack_nframes_t 
 			
 		}
 
+		if (_flags & Recordable) {
+			cerr << "START RECORD @ " << capture_start_frame << " = " << capture_start_frame * sizeof (Sample) << endl;
+			for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+				(*chan).write_source->mark_capture_start (capture_start_frame);
+			}
+		}
+
 	} else if (!record_enabled() || !can_record) {
 		
 		/* stop recording */
@@ -1060,11 +1067,8 @@ DiskStream::seek (jack_nframes_t frame, bool complete_refill)
 	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
 		(*chan).playback_buf->reset ();
 		(*chan).capture_buf->reset ();
-		if (destructive()) {
-			DestructiveFileSource* dfs = dynamic_cast<DestructiveFileSource*> ((*chan).write_source);
-			if (dfs) {
-				dfs->seek (frame);
-			}
+		if ((*chan).write_source) {
+			(*chan).write_source->seek (frame);
 		}
 	}
 	
@@ -1616,7 +1620,7 @@ DiskStream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture
 	*/
 
 	try {
-		region = new AudioRegion (srcs, 0, total_capture, 
+		region = new AudioRegion (srcs, channels[0].write_source->last_capture_start_frame(), total_capture, 
 					  region_name_from_path (channels[0].write_source->name()), 
 					  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile));
 
@@ -1635,7 +1639,7 @@ DiskStream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture
 	_session.add_undo (_playlist->get_memento());
 	_playlist->freeze ();
 		
-	for (buffer_position = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+	for (buffer_position = channels[0].write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
 		string region_name;
 		_session.region_name (region_name, _name, false);
@@ -1682,6 +1686,13 @@ void
 DiskStream::finish_capture (bool rec_monitors_input)
 {
 	was_recording = false;
+	
+	if (_flags & Recordable) {
+		cerr << "STOP CAPTURE\n";
+		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+			(*chan).write_source->mark_capture_end ();
+		}
+	}
 	
 	if (capture_captured == 0) {
 		return;

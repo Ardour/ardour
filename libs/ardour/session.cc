@@ -1320,6 +1320,10 @@ Session::maybe_enable_record ()
 {
 	atomic_set (&_record_status, Enabled);
 
+	/* XXX this save should really happen in another thread. its needed so that
+	   pending capture state can be recovered if we crash.
+	*/
+
 	save_state ("", true);
 
 	if (_transport_speed) {

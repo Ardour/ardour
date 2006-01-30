@@ -36,7 +36,8 @@ class DestructiveFileSource : public FileSource {
 	~DestructiveFileSource ();
 
 	int  seek (jack_nframes_t frame);
-	void mark_capture_start ();
+	jack_nframes_t last_capture_start_frame() const;
+	void mark_capture_start (jack_nframes_t);
 	void mark_capture_end ();
 	void clear_capture_marks();
 
@@ -50,6 +51,7 @@ class DestructiveFileSource : public FileSource {
 
 	bool          _capture_start;
 	bool          _capture_end;
+	jack_nframes_t capture_start_frame;
 	jack_nframes_t file_pos;
 	Sample*        xfade_buf;
 

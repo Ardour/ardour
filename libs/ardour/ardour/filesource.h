@@ -56,6 +56,12 @@ class FileSource : public Source {
 	string         old_peak_path(string audio_path);
 	string         path() const { return _path; }
 
+	virtual int            seek (jack_nframes_t frame) {return 0; }
+	virtual jack_nframes_t last_capture_start_frame() const { return 0; }
+	virtual void           mark_capture_start (jack_nframes_t) {}
+	virtual void           mark_capture_end () {}
+	virtual void           clear_capture_marks() {}
+
 	int update_header (jack_nframes_t when, struct tm&, time_t);
 
 	int move_to_trash (const string trash_dir_name);
