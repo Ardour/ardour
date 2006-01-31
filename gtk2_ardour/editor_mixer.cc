@@ -26,13 +26,18 @@
 #include "ardour_ui.h"
 #include "selection.h"
 #include "audio_time_axis.h"
+#include "actions.h"
 
 #include "i18n.h"
 
 void
 Editor::editor_mixer_button_toggled ()
 {
-	show_editor_mixer (editor_mixer_button.get_active());
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
+	if (act) {
+		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
+		show_editor_mixer (tact->get_active());
+	}
 }
 
 void
@@ -230,7 +235,12 @@ Editor::current_mixer_strip_hidden ()
 			}
 		}
 	}
-	global_hpacker.remove (*current_mixer_strip);
+
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
+	if (act) {
+		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
+		tact->set_active (false);
+	}
 }
 
 void

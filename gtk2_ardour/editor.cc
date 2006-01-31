@@ -234,8 +234,6 @@ Editor::Editor (AudioEngine& eng)
 
 	  /* tool bar related */
 
- 	  editor_mixer_button (_("editor\nmixer")),
-
 	  selection_start_clock (X_("SelectionStartClock"), true),
 	  selection_end_clock (X_("SelectionEndClock"), true),
 	  edit_cursor_clock (X_("EditCursorClock"), true),
@@ -1194,9 +1192,6 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
 	session->foreach_edit_group(this, &Editor::add_edit_group);
-
-	editor_mixer_button.signal_toggled().connect (mem_fun(*this, &Editor::editor_mixer_button_toggled));
-	editor_mixer_button.set_name (X_("EditorMixerButton"));
 
 	edit_cursor_clock.set_session (session);
 	selection_start_clock.set_session (session);
@@ -2185,8 +2180,18 @@ Editor::set_state (const XMLNode& node)
 		set_mouse_mode (MouseObject, true);
 	}
 
-	if ((prop = node.property ("editor-mixer-button"))) {
-		editor_mixer_button.set_active(prop->value() == "yes");
+	if ((prop = node.property ("show-editor-mixer"))) {
+
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
+		if (act) {
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+			bool yn = (prop->value() == X_("yes"));
+
+			/* do it twice to force the change */
+			
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
 	}
 
 	return 0;
@@ -2242,8 +2247,15 @@ Editor::get_state ()
 	node->add_property ("xfades-visible", _xfade_visibility ? "yes" : "no");
 	node->add_property ("region-list-sort-type", enum2str(region_list_sort_type));
 	node->add_property ("mouse-mode", enum2str(mouse_mode));
-	node->add_property ("editor-mixer-button", editor_mixer_button.get_active() ? "yes" : "no");
 	
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		node->add_property (X_("show-editor-mixer"), tact->get_active() ? "yes" : "no");
+	} else {
+		cerr << "no show editor mixer action\n";
+	}
+
 	return *node;
 }
 
@@ -2672,14 +2684,8 @@ Editor::setup_toolbar ()
 	edit_clock_vbox->pack_start (edit_cursor_clock_label, false, false);
 	edit_clock_vbox->pack_start (*edit_clock_hbox, false, false);
 
-	/* the editor/mixer button will be enabled at session connect */
-
-	editor_mixer_button.set_active(false);
-	editor_mixer_button.set_sensitive(false);
-
 	HBox* hbox = new HBox;
 
-	hbox->pack_start (editor_mixer_button, false, false);
 	hbox->pack_start (*edit_clock_vbox, false, false);
 	hbox->pack_start (zoom_indicator_vbox, false, false); 
 	hbox->pack_start (zoom_focus_box, false, false);

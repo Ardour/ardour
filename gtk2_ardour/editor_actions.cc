@@ -36,6 +36,9 @@ Editor::register_actions ()
 
 	/* add named actions for the editor */
 
+	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("show editor mixer"), mem_fun (*this, &Editor::editor_mixer_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (editor_actions, "toggle-xfades-active", _("toggle xfades active"), mem_fun(*this, &Editor::toggle_xfades_active));
 	ActionManager::session_sensitive_actions.push_back (act);
 
