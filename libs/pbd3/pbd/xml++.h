@@ -47,7 +47,7 @@ public:
 
   bool initialized() const { return _initialized; };
   XMLNode *root() const { return _root; };
-  XMLNode *set_root(XMLNode *n) { return _root = n; };
+  XMLNode *set_root(XMLNode *n) { _initialized = true; return _root = n; };
 
   const string & filename() const { return _filename; };
   const string & set_filename(const string &fn) { return _filename = fn; };
