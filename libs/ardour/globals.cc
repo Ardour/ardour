@@ -1,6 +1,5 @@
 /*
     Copyright (C) 2000 Paul Davis 
-    Copyright (C) 2005 Sampo Savolainen
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
