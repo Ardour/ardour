@@ -195,12 +195,23 @@ env['BUILDERS']['SharedAsmObject'] = Builder (action = '$CXX -c -fPIC $SOURCE -o
 					      single_source = 1)
 
 if env['DEVBUILD'] == 1:
-	if env['BUILD_SSE_OPTIMIZATIONS'] == 1:
-		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+	if env['FPU_OPTIMIZATION']:
+		if env['DIST_TARGET'] == "i386":
+			arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+		if env['DIST_TARGET'] == "i686":
+			arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+		if env['DIST_TARGET'] == "x86_64":
+			arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
+			
 	libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
 else:
-	if env['BUILD_SSE_OPTIMIZATIONS'] == 1:
-		arch_specific_objects = env.StaticObject(target='sse_functions',source='sse_functions.s')
+	if env['FPU_OPTIMIZATION']:
+		if env['DIST_TARGET'] == "i386":
+			arch_specific_objects = env.StaticObject(target='sse_functions',source='sse_functions.s')
+		if env['DIST_TARGET'] == "i686":
+			arch_specific_objects = env.StaticObject(target='sse_functions',source='sse_functions.s')
+		if env['DIST_TARGET'] == "x86_64":
+			arch_specific_objects = env.StaticObject(target='sse_functions_64bit',source='sse_functions_64bit.s')
 
 	libardour = ardour.StaticLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
 

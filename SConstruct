@@ -23,20 +23,17 @@ subst_dict = { }
 
 opts = Options('scache.conf')
 opts.AddOptions(
-    BoolOption('ALTIVEC', 'Compile using Altivec instructions', 0),
   ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     BoolOption('DEVBUILD', 'Use shared libardour (developers only)', 0),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
-    BoolOption('NOARCH', 'Do not use architecture-specific compilation flags', 0),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('VST', 'Compile with support for VST', 0),
     BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
-    BoolOption('USE_SSE_EVERYWHERE', 'Ask the compiler to use x86/SSE instructions and also our hand-written x86/SSE optimizations when possible (off by default)', 0),
-    BoolOption('BUILD_SSE_OPTIMIZATIONS', 'Use our hand-written x86/SSE optimizations when possible (off by default)', 0),
-    BoolOption('BUILD_VECLIB_OPTIMIZATIONS', 'Build with Apple Accelerate/vecLib optimizations when possible (off by default)', 0)
+    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'i386', allowed_values=('none', 'tiger', 'panther', 'i686', 'x86_64', 'i386'), ignorecase=2),
+    BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1)
   )
 
 #----------------------------------------------------------------------
@@ -574,7 +571,7 @@ config_os = 3;
 config = config_guess.split ("-")
 
 if config[config_arch] == 'apple':
-    if env['BUILD_VECLIB_OPTIMIZATIONS'] == 1:
+    if env['FPU_OPTIMIZATION']:
         opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
         debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
         libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
@@ -585,21 +582,20 @@ if config[config_cpu] == 'powerpc':
     #
     # -mcpu=7450 does not reliably work with gcc 3.*
     #
-    if env['NOARCH'] == 0:
-        if env['ALTIVEC'] == 1:
-	    if config[config_arch] == 'apple':
-                opt_flags.extend ([ "-mcpu=7450", "-faltivec"])
-            else:
-	        opt_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"]) 
-	else:
-            opt_flags.extend([ "-mcpu=750", "-mmultiple" ])
-        opt_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
+    if env['DIST_TARGET'] == 'panther' or env['DIST_TARGET'] == 'tiger':
+        if config[config_arch] == 'apple':
+            opt_flags.extend ([ "-mcpu=7450", "-faltivec"])
+        else:
+            opt_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"]) 
+    else:
+        opt_flags.extend([ "-mcpu=750", "-mmultiple" ])
+    opt_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
 
 elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_64", config[config_cpu]) != None)):
 
     build_host_supports_sse = 0
     
-    if env['NOARCH'] == 0:
+    if env['DIST_TARGET'] != 'none':
 
         debug_flags.append ("-DARCH_X86")
         opt_flags.append ("-DARCH_X86")
@@ -612,7 +608,7 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
             if "mmx" in x86_flags:
                 opt_flags.append ("-mmmx")
             if "sse" in x86_flags:
-	        build_host_supports_sse = 1
+                build_host_supports_sse = 1
             if "3dnow" in x86_flags:
                 opt_flags.append ("-m3dnow")
 
@@ -621,17 +617,20 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
             elif config[config_cpu] == "i686":
                 opt_flags.append ("-march=i686")
 
-        if env['USE_SSE_EVERYWHERE'] == 1:
-                opt_flags.extend (["-msse", "-mfpmath=sse"])
-                debug_flags.extend (["-msse", "-mfpmath=sse"])
-                if build_host_supports_sse != 1:
-                    print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
+        if (env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64'):
+            opt_flags.extend (["-msse", "-mfpmath=sse"])
+            debug_flags.extend (["-msse", "-mfpmath=sse"])
+            if build_host_supports_sse != 1:
+                print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
 
-        if env['BUILD_SSE_OPTIMIZATIONS'] == 1:
-                opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-                debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-                if build_host_supports_sse != 1:
-                    print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
+        if env['FPU_OPTIMIZATION']:
+            opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+            debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+            if env['DIST_TARGET'] == 'x86_64':
+                opt_flags.append ("-DUSE_X86_64_ASM")
+                debug_flags.append ("-DUSE_X86_64_ASM")			
+            if build_host_supports_sse != 1:
+                print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
                     
 # end of processor-specific section
 

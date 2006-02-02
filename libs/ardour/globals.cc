@@ -192,6 +192,7 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 	
 		unsigned int use_sse = 0;
 
+#ifndef USE_X86_64_ASM
 		asm volatile (
 				 "mov $1, %%eax\n"
 				 "pushl %%ebx\n"
@@ -202,7 +203,21 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 		 	     : "=m" (use_sse)
 	   		     : 
  	    		 : "%eax", "%ecx", "%edx", "memory");
+#else
 
+		asm volatile (
+				 "movq $1, %%rax\n"
+				 "pushq %%rbx\n"
+				 "cpuid\n"
+				 "popq %%rbx\n"
+				 "andq $33554432, %%rdx\n"
+				 "movq %%rdx, %0\n"
+		 	     : "=m" (use_sse)
+	   		     : 
+ 	    		 : "%rax", "%rcx", "%rdx", "memory");
+
+#endif /* USE_X86_64_ASM */
+		
 		if (use_sse) {
 			cerr << "Enabling SSE optimized routines" << endl;
 	
