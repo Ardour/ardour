@@ -618,7 +618,7 @@ OptionEditor::setup_midi_options ()
 
 		}
 		table->attach (*rb, 4, 5, n+2, n+3, FILL|EXPAND, FILL);
-		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
+		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
 
 		if (Config->get_mtc_port_name() == i->first) {
 			rb->set_active (true);
@@ -633,7 +633,7 @@ OptionEditor::setup_midi_options ()
 			rb->set_group (mmc_button_group);
 		}
 		table->attach (*rb, 6, 7, n+2, n+3, FILL|EXPAND, FILL);
-		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb));
+		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb));
 
 		if (Config->get_mmc_port_name() == i->first) {
 			rb->set_active (true);
@@ -648,7 +648,7 @@ OptionEditor::setup_midi_options ()
 			rb->set_group (midi_button_group);
 		}
 		table->attach (*rb, 8, 9, n+2, n+3, FILL|EXPAND, FILL);
-		rb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb));
+		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb));
 
 		if (Config->get_midi_port_name() == i->first) {
 			rb->set_active (true);
@@ -665,11 +665,12 @@ OptionEditor::setup_midi_options ()
 	midi_packer.pack_start (*hbox, false, false);
 }
 
-bool
-OptionEditor::mtc_port_chosen (GdkEventButton* ev, MIDI::Port *port, Gtk::RadioButton* rb) 
+void
+OptionEditor::mtc_port_chosen (MIDI::Port *port, Gtk::RadioButton* rb) 
 {
 	if (session) {
-		if (!rb->get_active()) {
+		if (rb->get_active()) {
+			cerr << "Activating MTC port " << port->name() << endl;
 			if (port) {
 				session->set_mtc_port (port->name());
 				Config->set_mtc_port_name (port->name());
@@ -679,15 +680,14 @@ OptionEditor::mtc_port_chosen (GdkEventButton* ev, MIDI::Port *port, Gtk::RadioB
 			rb->set_active (true);
 		}
 	}
-	
-	return false;
 }
 
-bool
-OptionEditor::mmc_port_chosen (GdkEventButton* ev, MIDI::Port* port, Gtk::RadioButton* rb)
+void
+OptionEditor::mmc_port_chosen (MIDI::Port* port, Gtk::RadioButton* rb)
 {
 	if (session) {
-		if (!rb->get_active()) {
+		if (rb->get_active()) {
+			cerr << "Activating MMC port " << port->name() << endl;
 			if (port) {
 				session->set_mmc_port (port->name());
 				Config->set_mtc_port_name (port->name());
@@ -697,14 +697,14 @@ OptionEditor::mmc_port_chosen (GdkEventButton* ev, MIDI::Port* port, Gtk::RadioB
 			rb->set_active (true);
 		}
 	}
-	return false;
 }
 
-bool
-OptionEditor::midi_port_chosen (GdkEventButton* ev, MIDI::Port* port, Gtk::RadioButton* rb)
+void
+OptionEditor::midi_port_chosen (MIDI::Port* port, Gtk::RadioButton* rb)
 {
 	if (session) {
-		if (!rb->get_active()) {
+		if (rb->get_active()) {
+			cerr << "Activating MIDI port " << port->name() << endl;
 			if (port) {
 				session->set_midi_port (port->name());
 				Config->set_midi_port_name (port->name());
@@ -714,7 +714,6 @@ OptionEditor::midi_port_chosen (GdkEventButton* ev, MIDI::Port* port, Gtk::Radio
 			rb->set_active (true);
 		}
 	}
-	return false;
 }
 
 gint

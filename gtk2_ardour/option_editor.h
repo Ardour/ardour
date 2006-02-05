@@ -137,9 +137,9 @@ class OptionEditor : public Gtk::Dialog
 	gint port_trace_in_toggled (GdkEventButton*,MIDI::Port*,Gtk::ToggleButton*);
 	gint port_trace_out_toggled (GdkEventButton*,MIDI::Port*,Gtk::ToggleButton*);
 	
-	bool mmc_port_chosen (GdkEventButton*,MIDI::Port*,Gtk::RadioButton*);
-	bool mtc_port_chosen (GdkEventButton*,MIDI::Port*,Gtk::RadioButton*);
-	bool midi_port_chosen (GdkEventButton*,MIDI::Port*,Gtk::RadioButton*);
+	void mmc_port_chosen (MIDI::Port*,Gtk::RadioButton*);
+	void mtc_port_chosen (MIDI::Port*,Gtk::RadioButton*);
+	void midi_port_chosen (MIDI::Port*,Gtk::RadioButton*);
 
 	void map_port_online (MIDI::Port*, Gtk::ToggleButton*);
 
