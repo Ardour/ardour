@@ -165,8 +165,8 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_toggle_action (common_actions, X_("ToggleMaximalEditor"), _("maximise editor space"), mem_fun (*this, &ARDOUR_UI::toggle_editing_space));
 
-	ActionManager::register_action (common_actions, X_("GotoEditor"), _("Editor"),  mem_fun(*this, &ARDOUR_UI::goto_editor_window));
-	ActionManager::register_action (common_actions, X_("GotoMixer"), _("Mixer"),  mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
+	ActionManager::register_action (common_actions, X_("goto-editor"), _("show editor"),  mem_fun(*this, &ARDOUR_UI::goto_editor_window));
+	ActionManager::register_action (common_actions, X_("goto-mixer"), _("show mixer"),  mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleSoundFileBrowser"), _("Sound File Browser"), mem_fun(*this, &ARDOUR_UI::toggle_sound_file_browser));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Options Editor"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Track/Bus Inspector"), mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));

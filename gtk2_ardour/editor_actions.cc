@@ -24,8 +24,10 @@ Editor::register_actions ()
 
 	ActionManager::register_action (editor_actions, X_("Edit"), _("Edit"));
 	ActionManager::register_action (editor_actions, X_("EditSelectRegionOptions"), _("Select regions"));
+	ActionManager::register_action (editor_actions, X_("EditSelectRangeOptions"), _("Select range operations"));
 	ActionManager::register_action (editor_actions, X_("EditCursorMovementOptions"), _("Move edit cursor"));
 	ActionManager::register_action (editor_actions, X_("RegionEditOps"), _("Region operations"));
+	ActionManager::register_action (editor_actions, X_("Tools"), _("Tools"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("ZoomFocus"));
 	ActionManager::register_action (editor_actions, X_("MeterHold"), _("Meter hold"));
@@ -189,6 +191,9 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "editor-cut", _("Cut"), mem_fun(*this, &Editor::cut));
 	ActionManager::session_sensitive_actions.push_back (act);
+	/* Note: for now, editor-delete does the exact same thing as editor-cut */
+	act = ActionManager::register_action (editor_actions, "editor-delete", _("Delete"), mem_fun(*this, &Editor::cut));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "editor-copy", _("Copy"), mem_fun(*this, &Editor::copy));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "editor-paste", _("Paste"), mem_fun(*this, &Editor::keyboard_paste));
@@ -245,11 +250,11 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionGroup::create (X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
 
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("set mouse mode object"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseObject, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("set mouse mode range"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseRange, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("set mouse mode gain"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseGain, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("set mouse mode zoom"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("set mouse mode timefx"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("_object tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseObject, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("_range tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseRange, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("_gain tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseGain, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("_zoom tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("_timefx tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
 
 	Glib::RefPtr<ActionGroup> snap_actions = ActionGroup::create (X_("Snap"));
 	RadioAction::Group snap_choice_group;

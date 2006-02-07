@@ -1,7 +1,7 @@
 ; this file is NOT an automated accelerator map dump
 
 (gtk_accel_path "<Actions>/Transport/ToggleRoll" "space")
-(gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<Control>space")
+(gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<control>space")
 (gtk_accel_path "<Actions>/Transport/Forward" "<control>Right")
 (gtk_accel_path "<Actions>/Transport/Rewind" "<control>Left")
 (gtk_accel_path "<Actions>/Transport/GotoStart" "Home")
@@ -11,31 +11,43 @@
 (gtk_accel_path "<Actions>/Editor/crop" "c")
 (gtk_accel_path "<Actions>/Editor/duplicate-region" "d")
 (gtk_accel_path "<Actions>/Editor/set-edit-cursor" "e")
-(gtk_accel_path "<Actions>/Editor/show-editor-mixer" "<shift>e")
+(gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-gain" "g")
 (gtk_accel_path "<Actions>/Editor/split-region" "s")
 (gtk_accel_path "<Actions>/Editor/set-region-sync-position" "v")
 (gtk_accel_path "<Actions>/Editor/mute-unmute-region" "m")
 (gtk_accel_path "<Actions>/Editor/insert-region" "i")
 (gtk_accel_path "<Actions>/Editor/normalize-region" "n")
+(gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-object" "o")
 (gtk_accel_path "<Actions>/Transport/loop" "l")
 (gtk_accel_path "<Actions>/Editor/set-playhead" "p")
+(gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-range" "r")
+(gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-timefx" "t")
+(gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-zoom" "z")
+
 (gtk_accel_path "<Actions>/Transport/Record" "<shift>r")
+
 
 (gtk_accel_path "<Actions>/Editor/nudge-forward" "KP_Add")
 (gtk_accel_path "<Actions>/Editor/nudge-next-forward" "<control>KP_Add")
 (gtk_accel_path "<Actions>/Editor/nudge-backward" "KP_Subtract")
 (gtk_accel_path "<Actions>/Editor/nudge-next-backward" "<control>KP_Subtract")
 
-(gtk-accel_path "<Actions>/Common/GotoEditor" "<Alt>e")
-(gtk-accel_path "<Actions>/Common/GotoMixer" "<Alt>m")
+(gtk_accel_path "<Actions>/Editor/show-editor-mixer" "<shift>e")
 
-(gtk_accel_path "<Actions>/Editor/editor-copy" "<Control>c")
-(gtk_accel_path "<Actions>/Common/Quit" "<Control>q")
-(gtk_accel_path "<Actions>/Editor/redo" "<Control>r")
-(gtk_accel_path "<Actions>/Common/Save" "<Control>s")
-(gtk_accel_path "<Actions>/Editor/editor-paste" "<Control>v")
-(gtk_accel_path "<Actions>/Editor/editor-cut" "<Control>x")
-(gtk_accel_path "<Actions>/Editor/undo" "<Control>z")
+(gtk_accel_path "<Actions>/Common/goto-editor" "<alt>e")
+(gtk_accel_path "<Actions>/Common/goto-mixer" "<alt>m")
+(gtk-accel_path "<Actions>/Common/ToggleSoundFileBrowser" "<alt>f")
+(gtk-accel_path "<Actions>/Common/ToggleLocations" "<alt>l")
+(gtk-accel_path "<Actions>/Common/ToggleBigClock" "<alt>b")
+
+(gtk_accel_path "<Actions>/Editor/editor-copy" "<control>c")
+(gtk_accel_path "<Actions>/Common/Quit" "<control>q")
+(gtk_accel_path "<Actions>/Editor/redo" "<control>r")
+(gtk_accel_path "<Actions>/Common/Save" "<control>s")
+(gtk_accel_path "<Actions>/Editor/editor-paste" "<control>v")
+(gtk_accel_path "<Actions>/Editor/editor-cut" "<control>x")
+(gtk_accel_path "<Actions>/Editor/editor-delete" "Delete")
+(gtk_accel_path "<Actions>/Editor/undo" "<control>z")
 
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-down" "Page_Down")
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-up" "Page_Up")
@@ -86,6 +98,12 @@
 
 (gtk_accel_path "<Actions>/Editor/jump-forward-to-mark" "<control>KP_Right")
 (gtk_accel_path "<Actions>/Editor/jump-backward-to-mark" "<control>KP_Left")
+
+(gtk_accel_path "<Actions>/Editor/start-range" "<control>KP_Down")
+(gtk_accel_path "<Actions>/Editor/finish-range" "<control>KP_Up")
+(gtk_accel_path "<Actions>/Editor/finish-add-range" "<shift><control>KP_Up")
+
+
 (gtk_accel_path "<Actions>/Editor/add-location-from-playhead" "KP_Enter")
 
 

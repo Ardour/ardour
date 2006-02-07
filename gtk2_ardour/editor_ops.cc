@@ -2940,7 +2940,7 @@ Editor::trim_region_from_edit_cursor ()
 
 	begin_reversible_command (_("trim to edit"));
 	session->add_undo (region.playlist()->get_memento());
-	region.trim_end( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
+	region.trim_front ( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
 	session->add_redo_no_execute (region.playlist()->get_memento());
 	commit_reversible_command ();
 }

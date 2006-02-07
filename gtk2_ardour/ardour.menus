@@ -65,12 +65,17 @@
                <menuitem action='undo'/>
                <menuitem action='redo'/>
                <menuitem action='editor-cut'/>
+               <menuitem action='editor-delete'/>
                <menuitem action='editor-copy'/>
                <menuitem action='editor-paste'/>
                <separator/>       
-               <menuitem action='extend-range-to-start-of-region'/>
-               <menuitem action='extend-range-to-end-of-region'/>
-		       <separator/>
+               <menu action="EditSelectRangeOptions">
+                   <menuitem action='extend-range-to-start-of-region'/>
+                   <menuitem action='extend-range-to-end-of-region'/>
+                   <menuitem action='start-range'/>
+                   <menuitem action='finish-range'/>
+                   <menuitem action='finish-add-range'/>
+               </menu>
                <menu action="EditSelectRegionOptions">
                    <menuitem action='select-all'/>
                    <menuitem action='select-all-after-edit-cursor'/>
@@ -80,29 +85,29 @@
                    <menuitem action='select-all-in-punch-range'/>
                    <menuitem action='select-all-in-loop-range'/>
                </menu>
-			   <menu action='EditCursorMovementOptions'>
-	               <menuitem action='edit-cursor-to-next-region-start'/>
+	       <menu action='EditCursorMovementOptions'>
+                   <menuitem action='edit-cursor-to-next-region-start'/>
     	           <menuitem action='edit-cursor-to-next-region-end'/>
-        	       <menuitem action='edit-cursor-to-previous-region-start'/>
+       	           <menuitem action='edit-cursor-to-previous-region-start'/>
             	   <menuitem action='edit-cursor-to-previous-region-end'/>
-	               <menuitem action='edit-cursor-to-next-region-sync'/>
+	           <menuitem action='edit-cursor-to-next-region-sync'/>
     	           <menuitem action='edit-cursor-to-previous-region-sync'/>
-        	       <menuitem action='center-edit-cursor'/>
+        	   <menuitem action='center-edit-cursor'/>
             	   <menuitem action='edit-to-playhead'/>
     	           <menuitem action='edit-cursor-to-range-start'/>
-	               <menuitem action='edit-cursor-to-range-end'/>
-			   </menu>
-			   <menu action='RegionEditOps'>
+	           <menuitem action='edit-cursor-to-range-end'/>
+	       </menu>
+	       <menu action='RegionEditOps'>
                    <menuitem action='crop'/>
                    <menuitem action='duplicate-region'/>
                    <menuitem action='insert-region'/>
                	   <menuitem action='normalize-region'/>
                    <separator/>       
-	               <menuitem action="nudge-forward"/>
-         	       <menuitem action="nudge-next-forward"/>
-	               <menuitem action="nudge-backward"/>
-        	       <menuitem action="nudge-next-backward"/>
-			   </menu>
+	           <menuitem action="nudge-forward"/>
+         	   <menuitem action="nudge-next-forward"/>
+	           <menuitem action="nudge-backward"/>
+        	   <menuitem action="nudge-next-backward"/>
+	       </menu>
         </menu>         
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>
@@ -167,8 +172,8 @@
         <menu name='Windows' action = 'Windows'>
 	       <menuitem action='ToggleMaximalEditor'/>
 	       <separator/>
-               <menuitem action='GotoEditor'/>
-               <menuitem action='GotoMixer'/>
+               <menuitem action='goto-editor'/>
+               <menuitem action='goto-mixer'/>
                <menuitem action='ToggleOptionsEditor'/>
                <menuitem action='ToggleSoundFileBrowser'/>
                <menuitem action='ToggleConnections'/>
@@ -222,6 +227,12 @@
               	 	<menuitem action='set-playhead'/>
 	       		<menuitem action='split-region'/>
 	       		<menuitem action='set-region-sync-position'/>
+			<separator/>
+			<menuitem action='set-mouse-mode-object'/>
+			<menuitem action='set-mouse-mode-range'/>
+			<menuitem action='set-mouse-mode-gain'/>
+			<menuitem action='set-mouse-mode-zoom'/>
+			<menuitem action='set-mouse-mode-timefx'/>
                </menu>
 	</menu>
      </menubar>

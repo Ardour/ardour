@@ -880,8 +880,14 @@ Editor::set_frames_per_unit (double fpu)
 	}
 
 	if (mouse_mode == MouseRange && selection->time.start () != selection->time.end_frame ()) {
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			(*i)->reshow_selection (selection->time);
+		if (!selection->tracks.empty()) {
+			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+				(*i)->reshow_selection (selection->time);
+			}
+		} else {
+			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+				(*i)->reshow_selection (selection->time);
+			}
 		}
 	}
 
@@ -2252,8 +2258,6 @@ Editor::get_state ()
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		node->add_property (X_("show-editor-mixer"), tact->get_active() ? "yes" : "no");
-	} else {
-		cerr << "no show editor mixer action\n";
 	}
 
 	return *node;

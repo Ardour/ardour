@@ -616,8 +616,8 @@ TimeAxisView::show_selection (TimeSelection& ts)
 
 		rect = get_selection_rect ((*i).id);
 		
-		x1 = start / editor.get_current_zoom();
-		x2 = (start + cnt - 1) / editor.get_current_zoom();
+		x1 = editor.frame_to_unit (start);
+		x2 = editor.frame_to_unit (start + cnt - 1);
 		y2 = height;
 
 		rect->rect->property_x1() = x1;
@@ -653,6 +653,8 @@ TimeAxisView::show_selection (TimeSelection& ts)
 void
 TimeAxisView::reshow_selection (TimeSelection& ts)
 {
+	cerr << name() << ": reshow selection" << endl;
+
 	show_selection (ts);
 
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
