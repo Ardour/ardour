@@ -32,7 +32,7 @@ opts.AddOptions(
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('VST', 'Compile with support for VST', 0),
     BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
-    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'i386', allowed_values=('none', 'tiger', 'panther', 'i686', 'x86_64', 'i386'), ignorecase=2),
+    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'tiger', 'panther', 'none' ), ignorecase=2),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1)
   )
 
@@ -570,13 +570,40 @@ config_kernel = 2;
 config_os = 3;
 config = config_guess.split ("-")
 
-if config[config_arch] == 'apple':
+# Autodetect
+if env['DIST_TARGET'] == 'auto':
+    if config[config_arch] == 'apple':
+        # The [.] matches to the dot after the major version, "." would match any character
+        if re.search ("darwin[0-7][.]", config[config_kernel]) != None:
+            env['DIST_TARGET'] = 'panther';
+        else:
+            env['DIST_TARGET'] = 'tiger';
+    else:
+        if re.search ("x86_64", config[config_cpu]) != None:
+            env['DIST_TARGET'] = 'x86_64';
+        elif re.search("i[0-5]86", config[config_cpu]) != None:
+            env['DIST_TARGET'] = 'i386';
+        else:
+            env['DIST_TARGET'] = 'i686';
+    print "\n*******************************"
+    print "detected DIST_TARGET = " + env['DIST_TARGET']
+    print "*******************************\n"
+
+
+if config[config_arch] == 'apple' and env['DIST_TARGET'] != 'none':
+    ## Are these lines supposed to be in ardour2?
+    if os.path.isdir('/opt/local/lib'):
+        libraries['core'].Append (LIBPATH = [ '/opt/local/lib' ])
+    if os.path.isdir('/opt/local/include'):
+        libraries['core'].Append (CPPPATH = [ '/opt/local/include' ])
+
+
     if env['FPU_OPTIMIZATION']:
         opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
         debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
         libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
 
-if config[config_cpu] == 'powerpc':
+if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
     #
     # Apple/PowerPC optimization options
     #
@@ -591,16 +618,16 @@ if config[config_cpu] == 'powerpc':
         opt_flags.extend([ "-mcpu=750", "-mmultiple" ])
     opt_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
 
-elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_64", config[config_cpu]) != None)):
+elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_64", config[config_cpu]) != None)) and env['DIST_TARGET'] != 'none':
 
     build_host_supports_sse = 0
     
-    if env['DIST_TARGET'] != 'none':
+    debug_flags.append ("-DARCH_X86")
+    opt_flags.append ("-DARCH_X86")
 
-        debug_flags.append ("-DARCH_X86")
-        opt_flags.append ("-DARCH_X86")
+    if config[config_kernel] == 'linux' :
 
-        if config[config_kernel] == 'linux' :
+        if env['DIST_TARGET'] != 'i386': 
 
             flag_line = os.popen ("cat /proc/cpuinfo | grep '^flags'").read()[:-1]
             x86_flags = flag_line.split (": ")[1:][0].split (' ')
@@ -617,20 +644,19 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
             elif config[config_cpu] == "i686":
                 opt_flags.append ("-march=i686")
 
-        if (env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64'):
-            opt_flags.extend (["-msse", "-mfpmath=sse"])
-            debug_flags.extend (["-msse", "-mfpmath=sse"])
-            if build_host_supports_sse != 1:
-                print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
 
-        if env['FPU_OPTIMIZATION']:
-            opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-            debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-            if env['DIST_TARGET'] == 'x86_64':
-                opt_flags.append ("-DUSE_X86_64_ASM")
-                debug_flags.append ("-DUSE_X86_64_ASM")			
-            if build_host_supports_sse != 1:
-                print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
+    if ((env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64')) and build_host_supports_sse:
+        opt_flags.extend (["-msse", "-mfpmath=sse"])
+        debug_flags.extend (["-msse", "-mfpmath=sse"])
+
+    if env['FPU_OPTIMIZATION']:
+        opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+        debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+        if env['DIST_TARGET'] == 'x86_64':
+            opt_flags.append ("-DUSE_X86_64_ASM")
+            debug_flags.append ("-DUSE_X86_64_ASM")			
+        if build_host_supports_sse != 1:
+            print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
                     
 # end of processor-specific section
 
