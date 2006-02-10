@@ -42,7 +42,7 @@
 
 using namespace ARDOUR;
 
-#define BLOCKSIZE 2048U
+#define BLOCKSIZE 4096U
 
 int
 Session::import_audiofile (import_status& status)
@@ -53,6 +53,7 @@ Session::import_audiofile (import_status& status)
 	SF_INFO info;
 	float *data = 0;
 	Sample **channel_data = 0;
+	char * workbuf = 0;
 	long nfiles = 0;
 	long n;
 	string basepath;
@@ -147,7 +148,8 @@ Session::import_audiofile (import_status& status)
 	
 	data = new float[BLOCKSIZE * info.channels];
 	channel_data = new Sample * [ info.channels ];
-
+	workbuf = new char[BLOCKSIZE * 4];
+	
 	for (n = 0; n < info.channels; ++n) {
 		channel_data[n] = new Sample[BLOCKSIZE];
 	}
@@ -178,7 +180,7 @@ Session::import_audiofile (import_status& status)
 		/* flush to disk */
 
 		for (chn = 0; chn < info.channels; ++chn) {
-			newfiles[chn]->write (channel_data[chn], nread);
+			newfiles[chn]->write (channel_data[chn], nread, workbuf);
 		}
 
 		so_far += nread;
@@ -245,7 +247,10 @@ Session::import_audiofile (import_status& status)
 	if (data) {
 		delete [] data;
 	}
-
+	if (workbuf) {
+		delete [] workbuf;
+	}
+	
 	if (channel_data) {
 		for (n = 0; n < info.channels; ++n) {
 			delete [] channel_data[n];

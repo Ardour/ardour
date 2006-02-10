@@ -104,13 +104,13 @@ class AudioRegion : public Region
 	jack_nframes_t read_peaks (PeakData *buf, jack_nframes_t npeaks, jack_nframes_t offset, jack_nframes_t cnt, uint32_t chan_n=0, double samples_per_unit= 1.0) const;
 
 	virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
-					float *gain_buffer, jack_nframes_t position, jack_nframes_t cnt, 
+					float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
 					uint32_t chan_n = 0,
 					jack_nframes_t read_frames = 0,
 					jack_nframes_t skip_frames = 0) const;
 
 	jack_nframes_t master_read_at (Sample *buf, Sample *mixdown_buffer, 
-				       float *gain_buffer, jack_nframes_t position, jack_nframes_t cnt, uint32_t chan_n=0) const;
+				       float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, uint32_t chan_n=0) const;
 
 
 	XMLNode& state (bool);
@@ -199,7 +199,7 @@ class AudioRegion : public Region
 	void rename_after_first_edit ();
 
 	jack_nframes_t _read_at (const SourceList&, Sample *buf, Sample *mixdown_buffer, 
-				 float *gain_buffer, jack_nframes_t position, jack_nframes_t cnt, 
+				 float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
 				 uint32_t chan_n = 0,
 				 jack_nframes_t read_frames = 0,
 				 jack_nframes_t skip_frames = 0) const;

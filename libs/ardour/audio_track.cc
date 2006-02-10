@@ -768,7 +768,7 @@ AudioTrack::set_name (string str, void *src)
 }
 
 int
-AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
+AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
 {
 	gain_t  gain_automation[nframes];
 	gain_t  gain_buffer[nframes];
@@ -781,7 +781,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 	
 	RWLockMonitor rlock (redirect_lock, false, __LINE__, __FILE__);
 		
-	if (diskstream->playlist()->read (buffers[0], mix_buffer, gain_buffer, start, nframes) != nframes) {
+	if (diskstream->playlist()->read (buffers[0], mix_buffer, gain_buffer, workbuf, start, nframes) != nframes) {
 		return -1;
 	}
 
@@ -791,7 +791,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 	++bi;
 	for (; bi != buffers.end(); ++bi, ++n) {
 		if (n < diskstream->n_channels()) {
-			if (diskstream->playlist()->read ((*bi), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
+			if (diskstream->playlist()->read ((*bi), mix_buffer, gain_buffer, workbuf, start, nframes, n) != nframes) {
 				return -1;
 			}
 			b = (*bi);

@@ -33,7 +33,7 @@ PixScroller::PixScroller (Adjustment& a, Pix& pix)
 	: adj (a)
 {
 	dragging = false;
-	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
+	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 
 	adj.signal_value_changed().connect (mem_fun (*this, &PixScroller::adjustment_changed));
 	default_value = adj.get_value();

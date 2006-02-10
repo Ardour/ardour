@@ -362,10 +362,10 @@ class DiskStream : public Stateful, public sigc::trackable
 
 	/* the two central butler operations */
 
-	int do_flush (bool force = false);
-	int do_refill (Sample *mixdown_buffer, float *gain_buffer);
+	int do_flush (char * workbuf, bool force = false);
+	int do_refill (Sample *mixdown_buffer, float *gain_buffer, char *workbuf);
 
-	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, jack_nframes_t& start, jack_nframes_t cnt, 
+	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, char * workbuf, jack_nframes_t& start, jack_nframes_t cnt, 
 		  ChannelInfo& channel_info, int channel, bool reversed);
 
 	uint32_t i_am_the_modifier;

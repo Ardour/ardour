@@ -992,6 +992,7 @@ DiskStream::overwrite_existing_buffers ()
 {
  	Sample* mixdown_buffer;
  	float* gain_buffer;
+	char * workbuf;
  	int ret = -1;
 	bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
 
@@ -1002,7 +1003,8 @@ DiskStream::overwrite_existing_buffers ()
 	
  	mixdown_buffer = new Sample[size];
  	gain_buffer = new float[size];
- 
+	workbuf = new char[size*4];
+	
 	/* reduce size so that we can fill the buffer correctly. */
 	size--;
 	
@@ -1027,7 +1029,7 @@ DiskStream::overwrite_existing_buffers ()
 		
 		jack_nframes_t to_read = size - overwrite_offset;
 
-		if (read ((*chan).playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, 
+		if (read ((*chan).playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, workbuf,
 			  start, to_read, *chan, n, reversed)) {
 			error << string_compose(_("DiskStream %1: when refilling, cannot read %2 from playlist at frame %3"),
 					 _id, size, playback_sample) << endmsg;
@@ -1038,7 +1040,7 @@ DiskStream::overwrite_existing_buffers ()
 
 			cnt -= to_read;
 		
-			if (read ((*chan).playback_buf->buffer(), mixdown_buffer, gain_buffer, 
+			if (read ((*chan).playback_buf->buffer(), mixdown_buffer, gain_buffer, workbuf,
 				  start, cnt, *chan, n, reversed)) {
 				error << string_compose(_("DiskStream %1: when refilling, cannot read %2 from playlist at frame %3"),
 						 _id, size, playback_sample) << endmsg;
@@ -1053,6 +1055,7 @@ DiskStream::overwrite_existing_buffers ()
 	pending_overwrite = false;
  	delete [] gain_buffer;
  	delete [] mixdown_buffer;
+	delete [] workbuf;
  	return ret;
 }
 
@@ -1076,9 +1079,9 @@ DiskStream::seek (jack_nframes_t frame, bool complete_refill)
 	file_frame = frame;
 
 	if (complete_refill) {
-		while ((ret = do_refill (0, 0)) > 0);
+		while ((ret = do_refill (0, 0, 0)) > 0);
 	} else {
-		ret = do_refill (0, 0);
+		ret = do_refill (0, 0, 0);
 	}
 
 	return ret;
@@ -1113,8 +1116,7 @@ DiskStream::internal_playback_seek (jack_nframes_t distance)
 }
 
 int
-DiskStream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, jack_nframes_t& start, jack_nframes_t cnt, 
-
+DiskStream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, char * workbuf, jack_nframes_t& start, jack_nframes_t cnt, 
 		  ChannelInfo& channel_info, int channel, bool reversed)
 {
 	jack_nframes_t this_read = 0;
@@ -1171,7 +1173,7 @@ DiskStream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, jack_
 
 		this_read = min(cnt,this_read);
 
-		if (_playlist->read (buf+offset, mixdown_buffer, gain_buffer, start, this_read, channel) != this_read) {
+		if (_playlist->read (buf+offset, mixdown_buffer, gain_buffer, workbuf, start, this_read, channel) != this_read) {
 			error << string_compose(_("DiskStream %1: cannot read %2 from playlist at frame %3"), _id, this_read, 
 					 start) << endmsg;
 			return -1;
@@ -1205,13 +1207,14 @@ DiskStream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, jack_
 }
 
 int
-DiskStream::do_refill (Sample* mixdown_buffer, float* gain_buffer)
+DiskStream::do_refill (Sample* mixdown_buffer, float* gain_buffer, char * workbuf)
 {
 	int32_t ret = 0;
 	jack_nframes_t to_read;
 	RingBufferNPT<Sample>::rw_vector vector;
 	bool free_mixdown;
 	bool free_gain;
+	bool free_workbuf;
 	bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
 	jack_nframes_t total_space;
 	jack_nframes_t zero_fill;
@@ -1346,6 +1349,13 @@ DiskStream::do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		free_gain = false;
 	}
 
+	if (workbuf == 0) {
+		workbuf = new char[disk_io_chunk_frames * 4];
+		free_workbuf = true;
+	} else {
+		free_workbuf = false;
+	}
+	
 	jack_nframes_t file_frame_tmp = 0;
 
 	for (chan_n = 0, i = channels.begin(); i != channels.end(); ++i, ++chan_n) {
@@ -1378,7 +1388,7 @@ DiskStream::do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 		if (to_read) {
 
-			if (read (buf1, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan, chan_n, reversed)) {
+			if (read (buf1, mixdown_buffer, gain_buffer, workbuf, file_frame_tmp, to_read, chan, chan_n, reversed)) {
 				ret = -1;
 				goto out;
 			}
@@ -1396,7 +1406,7 @@ DiskStream::do_refill (Sample* mixdown_buffer, float* gain_buffer)
 			   so read some or all of vector.len[1] as well.
 			*/
 
-			if (read (buf2, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan, chan_n, reversed)) {
+			if (read (buf2, mixdown_buffer, gain_buffer, workbuf, file_frame_tmp, to_read, chan, chan_n, reversed)) {
 				ret = -1;
 				goto out;
 			}
@@ -1419,12 +1429,15 @@ DiskStream::do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	if (free_gain) {
 		delete [] gain_buffer;
 	}
+	if (free_workbuf) {
+		delete [] workbuf;
+	}
 
 	return ret;
 }	
 
 int
-DiskStream::do_flush (bool force_flush)
+DiskStream::do_flush (char * workbuf, bool force_flush)
 {
 	uint32_t to_write;
 	int32_t ret = 0;
@@ -1470,7 +1483,7 @@ DiskStream::do_flush (bool force_flush)
 
 		to_write = min (disk_io_chunk_frames, (jack_nframes_t) vector.len[0]);
 	
-		if ((!(*chan).write_source) || (*chan).write_source->write (vector.buf[0], to_write) != to_write) {
+		if ((!(*chan).write_source) || (*chan).write_source->write (vector.buf[0], to_write, workbuf) != to_write) {
 			error << string_compose(_("DiskStream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
 		}
@@ -1486,7 +1499,7 @@ DiskStream::do_flush (bool force_flush)
 		
 			to_write = min ((jack_nframes_t)(disk_io_chunk_frames - to_write), (jack_nframes_t) vector.len[1]);
 		
-			if ((*chan).write_source->write (vector.buf[1], to_write) != to_write) {
+			if ((*chan).write_source->write (vector.buf[1], to_write, workbuf) != to_write) {
 				error << string_compose(_("DiskStream %1: cannot write to disk"), _id) << endmsg;
 				return -1;
 			}
@@ -1539,7 +1552,7 @@ DiskStream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture
 	*/
 
 	while (more_work && !err) {
-		switch (do_flush (true)) {
+		switch (do_flush ( _session.conversion_buffer(Session::TransportContext), true)) {
 		case 0:
 			more_work = false;
 			break;

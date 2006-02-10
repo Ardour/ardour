@@ -174,6 +174,8 @@ Session::butler_thread_work ()
 
 	butler_mixdown_buffer = new Sample[DiskStream::disk_io_frames()];
 	butler_gain_buffer = new gain_t[DiskStream::disk_io_frames()];
+	// this buffer is used for temp conversion purposes in filesources
+	char * conv_buffer = conversion_buffer(ButlerContext);
 
 	while (true) {
 
@@ -260,7 +262,7 @@ Session::butler_thread_work ()
 			
 			// cerr << "rah fondr " << (*i)->io()->name () << endl;
 
-			switch ((*i)->do_refill (butler_mixdown_buffer, butler_gain_buffer)) {
+			switch ((*i)->do_refill (butler_mixdown_buffer, butler_gain_buffer, conv_buffer)) {
 			case 0:
 				bytes += (*i)->read_data_count();
 				break;
@@ -303,7 +305,7 @@ Session::butler_thread_work ()
 			
 			// cerr << "write behind for " << (*i)->name () << endl;
 			
-			switch ((*i)->do_flush ()) {
+			switch ((*i)->do_flush (conv_buffer)) {
 			case 0:
 				bytes += (*i)->write_data_count();
 				break;

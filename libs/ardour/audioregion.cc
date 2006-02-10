@@ -462,22 +462,22 @@ AudioRegion::read_peaks (PeakData *buf, jack_nframes_t npeaks, jack_nframes_t of
 }
 
 jack_nframes_t
-AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, jack_nframes_t position, 
+AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, char * workbuf, jack_nframes_t position, 
 		      jack_nframes_t cnt, 
 		      uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
 {
-	return _read_at (sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames);
+	return _read_at (sources, buf, mixdown_buffer, gain_buffer, workbuf, position, cnt, chan_n, read_frames, skip_frames);
 }
 
 jack_nframes_t
-AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, jack_nframes_t position, 
+AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, char * workbuf, jack_nframes_t position, 
 			     jack_nframes_t cnt, uint32_t chan_n) const
 {
-	return _read_at (master_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0);
+	return _read_at (master_sources, buf, mixdown_buffer, gain_buffer, workbuf, position, cnt, chan_n, 0, 0);
 }
 
 jack_nframes_t
-AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buffer, float *gain_buffer, 
+AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buffer, float *gain_buffer, char * workbuf,
 		       jack_nframes_t position, jack_nframes_t cnt, 
 		       uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
 {
@@ -522,7 +522,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 
 	_read_data_count = 0;
 
-	if (srcs[chan_n]->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
+	if (srcs[chan_n]->read (mixdown_buffer, _start + internal_offset, to_read, workbuf) != to_read) {
 		return 0; /* "read nothing" */
 	}
 
@@ -1204,7 +1204,7 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 		
 		if (spec.channels == 1) {
 
-			if (sources.front()->read (spec.dataF, _start + spec.pos, to_read) != to_read) {
+			if (sources.front()->read (spec.dataF, _start + spec.pos, to_read, 0) != to_read) {
 				goto out;
 			}
 
@@ -1214,7 +1214,7 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 
 			for (uint32_t chan = 0; chan < spec.channels; ++chan) {
 				
-				if (sources[chan]->read (buf, _start + spec.pos, to_read) != to_read) {
+				if (sources[chan]->read (buf, _start + spec.pos, to_read, 0) != to_read) {
 					goto out;
 				}
 				
@@ -1276,6 +1276,7 @@ AudioRegion::normalize_to (float target_dB)
 {
 	const jack_nframes_t blocksize = 256 * 1048;
 	Sample buf[blocksize];
+	char workbuf[blocksize * 4];
 	jack_nframes_t fpos;
 	jack_nframes_t fend;
 	jack_nframes_t to_read;
@@ -1304,7 +1305,7 @@ AudioRegion::normalize_to (float target_dB)
 
 			/* read it in */
 
-			if (source (n).read (buf, fpos, to_read) != to_read) {
+			if (source (n).read (buf, fpos, to_read, workbuf) != to_read) {
 				return;
 			}
 			

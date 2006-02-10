@@ -50,6 +50,7 @@ location.cc
 mtc_slave.cc
 named_selection.cc
 panner.cc
+pcm_utils.cc
 playlist.cc
 playlist_factory.cc
 plugin.cc

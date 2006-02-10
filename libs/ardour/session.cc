@@ -389,6 +389,10 @@ Session::~Session ()
 		free(*i);
 	}
 
+	for (map<RunContext,char*>::iterator i = _conversion_buffers.begin(); i != _conversion_buffers.end(); ++i) {
+		delete [] (i->second);
+	}
+	
 #undef TRACK_DESTRUCTION
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete named selections\n";
@@ -1867,7 +1871,7 @@ void
 Session::add_diskstream (DiskStream* dstream)
 {
 	/* need to do this in case we're rolling at the time, to prevent false underruns */
-	dstream->do_refill(0, 0);
+	dstream->do_refill(0, 0, 0);
 	
 	{ 
 		RWLockMonitor lm (diskstream_lock, true, __LINE__, __FILE__);
@@ -3408,6 +3412,7 @@ Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_
 	jack_nframes_t this_chunk;
 	jack_nframes_t to_do;
 	vector<Sample*> buffers;
+	char *  workbuf = 0;
 	const jack_nframes_t chunk_size = (256 * 1024)/4;
 
 	atomic_set (&processing_prohibited, 1);
@@ -3470,18 +3475,20 @@ Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_
 #endif			
 		buffers.push_back (b);
 	}
+
+	workbuf = new char[chunk_size * 4];
 	
 	while (to_do && !itt.cancel) {
 		
 		this_chunk = min (to_do, chunk_size);
 		
-		if (track.export_stuff (buffers, nchans, start, this_chunk)) {
+		if (track.export_stuff (buffers, workbuf, nchans, start, this_chunk)) {
 			goto out;
 		}
 
 		uint32_t n = 0;
 		for (vector<Source*>::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
-			if ((*src)->write (buffers[n], this_chunk) != this_chunk) {
+			if ((*src)->write (buffers[n], this_chunk, workbuf) != this_chunk) {
 				goto out;
 			}
 		}
@@ -3525,6 +3532,10 @@ Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_
 		free(*i);
 	}
 
+	if (workbuf) {
+		delete [] workbuf;
+	}
+	
 	atomic_set (&processing_prohibited, 0);
 
 	itt.done = true;

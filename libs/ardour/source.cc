@@ -419,7 +419,8 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 	int ret = -1;
 	PeakData* staging = 0;
 	Sample* raw_staging = 0;
-
+	char * workbuf = 0;
+	
 	expected_peaks = (cnt / (double) frames_per_peak);
 	scale = npeaks/expected_peaks;
 
@@ -456,8 +457,9 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 		*/
 
 		Sample* raw_staging = new Sample[cnt];
+		workbuf = new char[cnt*4];
 		
-		if (read_unlocked (raw_staging, start, cnt) != cnt) {
+		if (read_unlocked (raw_staging, start, cnt, workbuf) != cnt) {
 			error << _("cannot read sample data for unscaled peak computation") << endmsg;
 			return -1;
 		}
@@ -468,7 +470,7 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 		}
 
 		delete [] raw_staging;
-		
+		delete [] workbuf;
 		return 0;
 	}
 
@@ -615,7 +617,8 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 		jack_nframes_t nvisual_peaks = 0;
 		jack_nframes_t chunksize = (jack_nframes_t) min (cnt, (jack_nframes_t) 4096);
 		raw_staging = new Sample[chunksize];
-
+		workbuf = new char[chunksize *4];
+		
 		jack_nframes_t frame_pos = start;
 		double pixel_pos = floor (frame_pos / samples_per_visual_peak);
 		double next_pixel_pos = ceil (frame_pos / samples_per_visual_peak);
@@ -630,7 +633,7 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 				
 				to_read = min (chunksize, (_length - current_frame));
 				
-				if ((frames_read = read_unlocked (raw_staging, current_frame, to_read)) < 0) {
+				if ((frames_read = read_unlocked (raw_staging, current_frame, to_read, workbuf)) < 0) {
 					error << string_compose(_("Source[%1]: peak read - cannot read %2 samples at offset %3")
 							 , _name, to_read, current_frame) 
 					      << endmsg;
@@ -674,6 +677,10 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 		delete [] raw_staging;
 	}
 
+	if (workbuf) {
+		delete [] workbuf;
+	}
+	
 	return ret;
 }
 
@@ -743,6 +750,7 @@ Source::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 	Sample xmin, xmax;
 	uint32_t  peaki;
 	PeakData* peakbuf;
+	char * workbuf = 0;
 	jack_nframes_t frames_read;
 	jack_nframes_t frames_to_read;
 	off_t first_peak_byte;
@@ -762,11 +770,13 @@ Source::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 	peakbuf = new PeakData[(cnt/frames_per_peak)+1];
 	peaki = 0;
 
+	workbuf = new char[max(frames_per_peak, cnt) * 4];
+	
 	while (cnt) {
 
 		frames_to_read = min (frames_per_peak, cnt);
 
-		if ((frames_read = read_unlocked (buf, current_frame, frames_to_read)) != frames_to_read) {
+		if ((frames_read = read_unlocked (buf, current_frame, frames_to_read, workbuf)) != frames_to_read) {
 			error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
 			goto out;
 		}
@@ -800,6 +810,8 @@ Source::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 
   out:
 	delete [] peakbuf;
+	if (workbuf)
+		delete [] workbuf;
 	return ret;
 }
 

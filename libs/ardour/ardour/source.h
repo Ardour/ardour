@@ -64,11 +64,11 @@ class Source : public Stateful, public sigc::trackable
 		return _length;
 	}
 
-	virtual jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const {
+	virtual jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const {
 		return 0;
 	}
 
-	virtual jack_nframes_t write (Sample *src, jack_nframes_t cnt) {
+	virtual jack_nframes_t write (Sample *src, jack_nframes_t cnt, char * workbuf) {
 		return 0;
 	}
 
@@ -134,7 +134,7 @@ class Source : public Stateful, public sigc::trackable
 	void build_peaks_from_scratch ();
 
 	int  do_build_peak (jack_nframes_t, jack_nframes_t);
-	virtual jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const = 0;
+	virtual jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const = 0;
 	virtual string peak_path(string audio_path) = 0;
 	virtual string old_peak_path(string audio_path) = 0;
 

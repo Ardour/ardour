@@ -923,6 +923,15 @@ class Session : public sigc::trackable, public Stateful
 	gain_t* gain_automation_buffer () const { return _gain_automation_buffer; }
 	pan_t** pan_automation_buffer() const { return _pan_automation_buffer; }
 
+	/* buffers for conversion */
+	enum RunContext {
+		ButlerContext = 0,
+		TransportContext,
+		ExportContext
+	};
+	
+	char *  conversion_buffer(RunContext context) { return _conversion_buffers[context]; }
+	
 	/* VST support */
 
 	static long vst_callback (AEffect* effect,
@@ -998,6 +1007,7 @@ class Session : public sigc::trackable, public Stateful
 	jack_nframes_t           last_stop_frame;
 	vector<Sample *>        _passthru_buffers;
 	vector<Sample *>        _silent_buffers;
+	map<RunContext,char*> _conversion_buffers;
 	jack_nframes_t           current_block_size;
 	jack_nframes_t          _worst_output_latency;
 	jack_nframes_t          _worst_input_latency;

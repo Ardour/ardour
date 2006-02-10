@@ -122,13 +122,13 @@ SndFileSource::~SndFileSource ()
 }
 
 jack_nframes_t
-SndFileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
+SndFileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {
-	return read (dst, start, cnt);
+	return read (dst, start, cnt, workbuf);
 }
 
 jack_nframes_t
-SndFileSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
+SndFileSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {
 	int32_t nread;
 	float *ptr;

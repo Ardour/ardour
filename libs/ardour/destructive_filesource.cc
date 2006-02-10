@@ -66,8 +66,8 @@ gain_t* DestructiveFileSource::out_coefficient = 0;
 gain_t* DestructiveFileSource::in_coefficient = 0;
 jack_nframes_t DestructiveFileSource::xfade_frames = 64;
 
-DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, bool repair_first)
-	: FileSource (path, rate, repair_first)
+DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, bool repair_first, SampleFormat samp_format)
+	: FileSource (path, rate, repair_first, samp_format)
 {
 	if (out_coefficient == 0) {
 		setup_standard_crossfades (rate);
@@ -118,7 +118,7 @@ int
 DestructiveFileSource::seek (jack_nframes_t frame)
 {
 //	file_pos = data_offset + (sizeof (Sample) * frame);
-	cerr << _name << " Seek to " << frame << " = " << data_offset + (sizeof (Sample) * frame) << endl;
+	cerr << _name << " Seek to " << frame << " = " << data_offset + (_sample_size * frame) << endl;
 	return 0;
 }
 
@@ -143,41 +143,37 @@ DestructiveFileSource::clear_capture_marks ()
 }	
 
 jack_nframes_t
-DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
+DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in, char * workbuf)
 {
 	jack_nframes_t xfade = min (xfade_frames, cnt);
-	jack_nframes_t xfade_bytes = xfade * sizeof (Sample);
 	jack_nframes_t nofade = cnt - xfade;
-	jack_nframes_t nofade_bytes = nofade * sizeof (Sample);
 	Sample* fade_data = 0;
-	off_t fade_position = 0;
-
+	off_t fade_position = 0; // in frames
+	ssize_t retval;
+	
 	if (fade_in) {
 		fade_position = file_pos;
 		fade_data = data;
 	} else {
-		fade_position = file_pos + nofade_bytes;
+		fade_position = file_pos + nofade;
 		fade_data = data + nofade;
 	}
 
-	if (::pread64 (fd, (char *) xfade_buf, xfade_bytes, fade_position) != (off64_t) xfade_bytes) {
-		if (errno == EAGAIN) {
+	if ((retval = file_read (xfade_buf, fade_position, xfade, workbuf)) != (ssize_t) xfade) {
+		if (retval < 0 && errno == EAGAIN) {
 			/* no data there, so no xfade */
 
 			xfade = 0;
-			xfade_bytes = 0;
 			nofade = cnt;
-			nofade_bytes = nofade * sizeof (Sample);
-
 		} else {
 			error << string_compose(_("FileSource: \"%1\" bad read (%2: %3)"), _path, errno, strerror (errno)) << endmsg;
 			return 0;
 		}
 	}
-
+	
 	if (nofade && !fade_in) {
-		cerr << "write " << nofade_bytes << " of prefade OUT data to " << file_pos << " .. " << file_pos + nofade_bytes << endl;
-		if (::pwrite64 (fd, (char *) data, nofade_bytes, file_pos) != (off64_t) nofade_bytes) {
+		cerr << "write " << nofade << " frames of prefade OUT data to " << file_pos << " .. " << file_pos + nofade << endl;
+		if (file_write (data, file_pos, nofade, workbuf) != (ssize_t) nofade) {
 			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
@@ -219,17 +215,18 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 	}
 
 	if (xfade) {
-		cerr << "write " << xfade_bytes << " of xfade  data to " << fade_position << " .. " << fade_position + xfade_bytes << endl;
-		if (::pwrite64 (fd, (char *) xfade_buf, xfade_bytes, fade_position) != (off64_t) xfade_bytes) {
+		cerr << "write " << xfade << " frames of xfade  data to " << fade_position << " .. " << fade_position + xfade << endl;
+
+		if (file_write (xfade_buf, fade_position, xfade, workbuf) != (ssize_t) xfade) {
 			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
 	}
 	
 	if (fade_in && nofade) {
-		cerr << "write " << nofade_bytes << " of postfade IN  data to " << file_pos + xfade_bytes << " .. " 
-		     << file_pos + xfade_bytes + nofade_bytes << endl;
-		if (::pwrite64 (fd, (char *) (data + xfade), nofade_bytes, file_pos + xfade_bytes) != (off64_t) nofade_bytes) {
+		cerr << "write " << nofade << " frames of postfade IN  data to " << file_pos + xfade << " .. " 
+		     << file_pos + xfade + nofade << endl;
+		if (file_write (data + xfade, file_pos + xfade, nofade, workbuf) != (ssize_t) nofade) {
 			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
@@ -239,14 +236,13 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 }
 
 jack_nframes_t
-DestructiveFileSource::write (Sample* data, jack_nframes_t cnt)
+DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 {
 	cerr << _name << ": write " << cnt << " to " << file_pos << " start ? " << _capture_start << " end ? " << _capture_end << endl;
 
 	{
 		LockMonitor lm (_lock, __LINE__, __FILE__);
 		
-		int32_t byte_cnt = cnt * sizeof (Sample);
 		jack_nframes_t oldlen;
 
 		if (_capture_start) {
@@ -254,11 +250,12 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt)
 			_capture_end = false;
 
 			/* move to the correct location place */
-			file_pos = data_offset + (capture_start_frame * sizeof (Sample));
-
-			cerr << "First byte of capture will be at " << file_pos << endl;
+			//file_pos = data_offset + (capture_start_frame * sizeof (Sample));
+			file_pos = capture_start_frame;
 			
-			if (crossfade (data, cnt, 1) != cnt) {
+			cerr << "First frame of capture will be at " << file_pos << endl;
+			
+			if (crossfade (data, cnt, 1, workbuf) != cnt) {
 				return 0;
 			}
 
@@ -266,12 +263,11 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt)
 			_capture_start = false;
 			_capture_end = false;
 
-			if (crossfade (data, cnt, 0) != cnt) {
+			if (crossfade (data, cnt, 0, workbuf) != cnt) {
 				return 0;
 			}
 		} else {
-			if (::pwrite64 (fd, (char *) data, byte_cnt, file_pos) != (off64_t) byte_cnt) {
-				error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+			if (file_write(data, file_pos, cnt, workbuf) != (ssize_t) cnt) {
 				return 0;
 			}
 		}
@@ -280,8 +276,7 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt)
 		if (file_pos + cnt > _length) {
 			_length += cnt;
 		}
-		_write_data_count = byte_cnt;
-		file_pos += byte_cnt;
+		file_pos += cnt;
 
 		cerr << "at end of write, file_pos = " << file_pos << endl;
 

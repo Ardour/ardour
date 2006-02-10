@@ -141,7 +141,7 @@ class Region : public Stateful, public StateManager
 	}
 
 	virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
-					float *gain_buffer, jack_nframes_t position, jack_nframes_t cnt, 
+					float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
 					uint32_t chan_n = 0,
 					jack_nframes_t read_frames = 0,
 					jack_nframes_t skip_frames = 0) const = 0;

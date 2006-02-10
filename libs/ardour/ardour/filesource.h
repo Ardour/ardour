@@ -44,13 +44,19 @@ namespace ARDOUR {
 
 class FileSource : public Source {
   public:
-	FileSource (string path, jack_nframes_t rate, bool repair_first = false);
+	enum SampleFormat
+	{
+		FormatFloat = 0,
+		FormatInt24
+	};
+		
+	FileSource (string path, jack_nframes_t rate, bool repair_first = false, SampleFormat samp_format=FormatFloat);
 	FileSource (const XMLNode&, jack_nframes_t rate);
 	~FileSource ();
 
 	jack_nframes_t length() const { return _length; }
-	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
-	jack_nframes_t write (Sample *src, jack_nframes_t cnt);
+	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
+	jack_nframes_t write (Sample *src, jack_nframes_t cnt, char * workbuf);
 	void           mark_for_remove();
 	string         peak_path(string audio_path);
 	string         old_peak_path(string audio_path);
@@ -85,7 +91,9 @@ class FileSource : public Source {
 	bool           is_bwf;
 	off64_t        data_offset;
 	string        _take_id;
-
+	SampleFormat  _sample_format;
+	int           _sample_size;
+	
 	static char bwf_country_code[3];
 	static char bwf_organization_code[4];
 	static char bwf_serial_number[13];
@@ -143,8 +151,27 @@ class FileSource : public Source {
 	} header;
 
 	int init (string, bool must_exist, jack_nframes_t);
-	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
+	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 
+	ssize_t file_write (Sample *src, jack_nframes_t framepos, jack_nframes_t cnt, char * workbuf) {
+		switch (_sample_format) {
+		case FormatInt24: return write_pcm_24(src, framepos, cnt, workbuf);
+		default: return write_float(src, framepos, cnt, workbuf);
+		};
+	}
+	
+	ssize_t file_read  (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const  {
+		switch (_sample_format) {
+		case FormatInt24: return read_pcm_24(dst, start, cnt, workbuf);
+		default: return read_float(dst, start, cnt, workbuf);
+		};
+	}
+	
+	ssize_t write_float(Sample *src, jack_nframes_t framepos, jack_nframes_t cnt, char * workbuf);
+	ssize_t read_float (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
+        ssize_t write_pcm_24(Sample *src, jack_nframes_t framepos, jack_nframes_t cnt, char * workbuf);
+	ssize_t read_pcm_24 (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
+	
 	int discover_chunks (bool silent);
 	ChunkInfo* lookup_chunk (string name);
 

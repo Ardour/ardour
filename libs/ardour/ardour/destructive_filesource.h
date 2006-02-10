@@ -31,7 +31,7 @@ namespace ARDOUR {
 
 class DestructiveFileSource : public FileSource {
   public:
-	DestructiveFileSource (std::string path, jack_nframes_t rate, bool repair_first = false);
+	DestructiveFileSource (std::string path, jack_nframes_t rate, bool repair_first = false, SampleFormat samp_format=FormatInt24);
 	DestructiveFileSource (const XMLNode&, jack_nframes_t rate);
 	~DestructiveFileSource ();
 
@@ -41,7 +41,7 @@ class DestructiveFileSource : public FileSource {
 	void mark_capture_end ();
 	void clear_capture_marks();
 
-	jack_nframes_t write (Sample *src, jack_nframes_t cnt);
+	jack_nframes_t write (Sample *src, jack_nframes_t cnt, char * workbuf);
 
   private:
 	static jack_nframes_t xfade_frames;
@@ -52,10 +52,10 @@ class DestructiveFileSource : public FileSource {
 	bool          _capture_start;
 	bool          _capture_end;
 	jack_nframes_t capture_start_frame;
-	jack_nframes_t file_pos;
+	jack_nframes_t file_pos; // unit is frames
 	Sample*        xfade_buf;
 
-	jack_nframes_t crossfade (Sample* data, jack_nframes_t cnt, int dir);
+	jack_nframes_t crossfade (Sample* data, jack_nframes_t cnt, int dir, char * workbuf);
 
 };
 

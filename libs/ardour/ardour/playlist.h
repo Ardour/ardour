@@ -53,7 +53,7 @@ class Playlist : public Stateful, public StateManager {
 	Playlist (const Playlist&, string name, bool hidden = false);
 	Playlist (const Playlist&, jack_nframes_t start, jack_nframes_t cnt, string name, bool hidden = false);
 
-	virtual jack_nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0) = 0;
+	virtual jack_nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, char * workbuf, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0) = 0;
 	virtual void clear (bool with_delete = false, bool with_save = true);
 	virtual void dump () const;
 	virtual UndoAction get_memento() const = 0;

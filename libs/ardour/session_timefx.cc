@@ -93,6 +93,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		for (uint32_t i = 0; i < sources.size(); ++i) {
 			gain_t gain_buffer[bufsize];
 			Sample buffer[bufsize];
+			char   workbuf[bufsize*4];
 			jack_nframes_t pos = 0;
 			jack_nframes_t this_read = 0;
 
@@ -106,7 +107,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 				   not the ones currently in use, in case it's already been 
 				   subject to timefx.  */
 
-				if ((this_read = tsr.region->master_read_at (buffer, buffer, gain_buffer, pos + tsr.region->position(), this_time)) != this_time) {
+				if ((this_read = tsr.region->master_read_at (buffer, buffer, gain_buffer, workbuf, pos + tsr.region->position(), this_time)) != this_time) {
 					error << string_compose (_("tempoize: error reading data from %1"), sources[i]->name()) << endmsg;
 					goto out;
 				}
@@ -119,7 +120,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 				st.putSamples (buffer, this_read);
 			
 				while ((this_read = st.receiveSamples (buffer, bufsize)) > 0 && tsr.running) {
-					if (sources[i]->write (buffer, this_read) != this_read) {
+					if (sources[i]->write (buffer, this_read, workbuf) != this_read) {
 						error << string_compose (_("error writing tempo-adjusted data to %1"), sources[i]->name()) << endmsg;
 						goto out;
 					}
@@ -131,7 +132,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 			}
 		
 			while (tsr.running && (this_read = st.receiveSamples (buffer, bufsize)) > 0) {
-				if (sources[i]->write (buffer, this_read) != this_read) {
+				if (sources[i]->write (buffer, this_read, workbuf) != this_read) {
 					error << string_compose (_("error writing tempo-adjusted data to %1"), sources[i]->name()) << endmsg;
 					goto out;
 				}

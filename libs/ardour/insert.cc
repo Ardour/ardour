@@ -599,7 +599,7 @@ PluginInsert::state (bool full)
 	node->add_property("id", string(buf));
 	if (_plugins[0]->state_node_name() == "ladspa") {
 		char buf[32];
-		snprintf (buf, 31, "%d", _plugins[0]->get_info().unique_id); 
+		snprintf (buf, 31, "%ld", _plugins[0]->get_info().unique_id); 
 		node->add_property("unique-id", string(buf));
 	}
 	node->add_property("count", string_compose("%1", _plugins.size()));

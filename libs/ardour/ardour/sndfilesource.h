@@ -34,7 +34,7 @@ class SndFileSource : public Source {
 	~SndFileSource ();
 
 	jack_nframes_t length() const { return _info.frames; }
-	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
+	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 	void           mark_for_remove() {} // we never remove external sndfiles 
 	string         peak_path(string audio_path);
 	string         old_peak_path(string audio_path);
@@ -54,7 +54,7 @@ class SndFileSource : public Source {
 	string  _path;
 
 	void init (const string &str, bool build_peak);
-	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
+	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 };
 
 }; /* namespace EDL */

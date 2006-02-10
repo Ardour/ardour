@@ -190,6 +190,10 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	pending_abort = false;
 	layer_model = MoveAddHigher;
 	xfade_model = ShortCrossfade;
+
+	/* allocate conversion buffers */
+	_conversion_buffers[ButlerContext] = new char[DiskStream::disk_io_frames() * 4];
+	_conversion_buffers[TransportContext] = new char[DiskStream::disk_io_frames() * 4];
 	
 	/* default short fade = 15ms */
 

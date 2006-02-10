@@ -63,7 +63,7 @@ class AudioTrack : public Route
 	jack_nframes_t update_total_latency();
 	void set_latency_delay (jack_nframes_t);
 	
-	int export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t end_frame);
+	int export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t end_frame);
 
 	sigc::signal<void,void*> diskstream_changed;
 

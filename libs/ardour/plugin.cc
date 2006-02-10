@@ -273,7 +273,7 @@ Plugin::get_presets()
 	lrdf_uris* set_uris = lrdf_get_setting_uris(unique_id());
 
 	if (set_uris) {
-		for (uint32_t i = 0; i < set_uris->count; ++i) {
+		for (uint32_t i = 0; i < (uint32_t) set_uris->count; ++i) {
 			if (char* label = lrdf_get_label(set_uris->items[i])) {
 				labels.push_back(label);
 				presets[label] = set_uris->items[i];
@@ -294,10 +294,10 @@ Plugin::load_preset(const string preset_label)
 	lrdf_defaults* defs = lrdf_get_setting_values(presets[preset_label].c_str());
 
 	if (defs) {
-		for (uint32_t i = 0; i < defs->count; ++i) {
+		for (uint32_t i = 0; i < (uint32_t) defs->count; ++i) {
 			// The defs->items[i].pid < defs->count check is to work around 
 			// a bug in liblrdf that saves invalid values into the presets file.
-			if (((uint32_t) defs->items[i].pid < defs->count) && parameter_is_input (defs->items[i].pid)) {
+			if (((uint32_t) defs->items[i].pid < (uint32_t) defs->count) && parameter_is_input (defs->items[i].pid)) {
 				set_parameter(defs->items[i].pid, defs->items[i].value);
 			}
 		}

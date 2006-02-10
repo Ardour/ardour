@@ -139,7 +139,7 @@ struct RegionSortByLayer {
 };
 
 jack_nframes_t
-AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, jack_nframes_t start,
+AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, char * workbuf, jack_nframes_t start,
 		     jack_nframes_t cnt, unsigned chan_n)
 {
 	jack_nframes_t ret = cnt;
@@ -209,13 +209,13 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ja
 		vector<Crossfade*>& x (relevant_xfades[*l]);
 
 		for (vector<Region*>::iterator i = r.begin(); i != r.end(); ++i) {
-			(*i)->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n, read_frames, skip_frames);
+			(*i)->read_at (buf, mixdown_buffer, gain_buffer, workbuf, start, cnt, chan_n, read_frames, skip_frames);
 			_read_data_count += (*i)->read_data_count();
 		}
 		
 		for (vector<Crossfade*>::iterator i = x.begin(); i != x.end(); ++i) {
 			
-			(*i)->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n);
+			(*i)->read_at (buf, mixdown_buffer, gain_buffer, workbuf, start, cnt, chan_n);
 
 			/* don't JACK up _read_data_count, since its the same data as we just
 			   read from the regions, and the OS should handle that for us.

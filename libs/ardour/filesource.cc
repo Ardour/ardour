@@ -65,6 +65,7 @@
 #include <ardour/filesource.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
+#include <ardour/pcm_utils.h>
 
 #include "i18n.h"
 
@@ -101,10 +102,16 @@ FileSource::set_search_path (string p)
 	search_path = p;
 }
 
-FileSource::FileSource (string pathstr, jack_nframes_t rate, bool repair_first)
+FileSource::FileSource (string pathstr, jack_nframes_t rate, bool repair_first, SampleFormat samp_format)
 {
 	/* constructor used when the file cannot already exist or might be damaged */
-
+	_sample_format = samp_format;
+	if (samp_format == FormatInt24) {
+		_sample_size = 3;
+	} else {
+		_sample_size = sizeof(float);
+	}
+	
 	if (repair_first && repair (pathstr, rate)) {
 		throw failed_constructor ();
 	}
@@ -119,6 +126,9 @@ FileSource::FileSource (string pathstr, jack_nframes_t rate, bool repair_first)
 FileSource::FileSource (const XMLNode& node, jack_nframes_t rate) 
 	: Source (node)
 {
+	_sample_format = FormatFloat;
+	_sample_size = sizeof(float);
+
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
@@ -558,12 +568,19 @@ FileSource::fill_header (jack_nframes_t rate)
 	memcpy (header.format.id, "fmt ", 4);
 	header.format.size = sizeof (FMTChunk) - sizeof (GenericChunk);
 
-	header.format.formatTag = 3; /* little-endian IEEE float format */
+	if (_sample_format == FormatInt24) {
+		header.format.formatTag = 1; // PCM
+		header.format.nBlockAlign = 3;
+		header.format.nBitsPerSample = 24;
+	}
+	else {
+		header.format.formatTag = 3; /* little-endian IEEE float format */
+		header.format.nBlockAlign = 4;
+		header.format.nBitsPerSample = 32;
+	}
 	header.format.nChannels = 1; /* mono */
 	header.format.nSamplesPerSec = rate;
 	header.format.nAvgBytesPerSec = rate * sizeof (Sample);
-	header.format.nBlockAlign = 4;
-	header.format.nBitsPerSample = 32;
 	
 	/* DATA */
 
@@ -788,9 +805,18 @@ FileSource::read_broadcast_data (ChunkInfo& info)
 int
 FileSource::check_header (jack_nframes_t rate, bool silent)
 {
-	if (header.format.formatTag != 3) { /* IEEE float */
+	if (header.format.formatTag == 1 && header.format.nBitsPerSample == 24) {
+		// 24 bit PCM
+		_sample_format = FormatInt24;
+		_sample_size = 3;
+	} else if (header.format.formatTag == 3) {
+		/* IEEE float */		
+		_sample_format = FormatFloat;
+		_sample_size = 4;
+	}
+	else {
 		if (!silent) {
-			error << string_compose(_("FileSource \"%1\" does not use floating point format.\n"   
+			error << string_compose(_("FileSource \"%1\" does not use valid sample format.\n"   
 					   "This is probably a programming error."), _path) << endmsg;
 		}
 		return -1;
@@ -932,73 +958,38 @@ FileSource::mark_for_remove ()
 }
 
 jack_nframes_t
-FileSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
+FileSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {
 	LockMonitor lm (_lock, __LINE__, __FILE__);
-	return read_unlocked (dst, start, cnt);
+	return read_unlocked (dst, start, cnt, workbuf);
 }
 
 jack_nframes_t
-FileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
+FileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {
-	int32_t byte_cnt;
-	int nread;
-
-	byte_cnt = cnt * sizeof (Sample);
-
-	if ((nread = pread (fd, (char *) dst, byte_cnt, data_offset + (start * sizeof (Sample)))) != (off64_t) byte_cnt) {
-		
-		cerr << "FileSource: \""
-		     << _path
-		     << "\" bad read at frame "
-		     << start
-		     << ", of "
-		     << cnt
-		     << " (bytes="
-		     << byte_cnt
-		     << ") frames [length = " << _length 
-		     << " eor = " << start + cnt << "] ("
-		     << strerror (errno)
-		     << ") (read "
-		     << nread / sizeof (Sample)
-		     << " (bytes=" <<nread
-		     << ")) pos was"
-		     << data_offset
-		     << '+'
-		     << start << '*' << sizeof(Sample)
-		     << " = " << data_offset + (start * sizeof(Sample))
-		     << endl;
-		
+	
+	if (file_read(dst, start, cnt, workbuf) != (ssize_t) cnt) {
 		return 0;
 	}
-
-	if (header.bigendian != WE_ARE_BIGENDIAN) {
-		swap_endian(dst, cnt);
-	}
 	
-	_read_data_count = byte_cnt;
-		
 	return cnt;
 }
 
 jack_nframes_t
-FileSource::write (Sample *data, jack_nframes_t cnt)
+FileSource::write (Sample *data, jack_nframes_t cnt, char * workbuf)
 {
 	{
 		LockMonitor lm (_lock, __LINE__, __FILE__);
 		
-		int32_t byte_cnt = cnt * sizeof (Sample);
-		int32_t byte_pos = data_offset + (_length * sizeof (Sample));
 		jack_nframes_t oldlen;
-
-		if (::pwrite64 (fd, (char *) data, byte_cnt, byte_pos) != (off64_t) byte_cnt) {
-			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+		int32_t frame_pos = _length;
+		
+		if (file_write(data, frame_pos, cnt, workbuf) != (ssize_t) cnt) {
 			return 0;
 		}
 
 		oldlen = _length;
 		_length += cnt;
-		_write_data_count = byte_cnt;
 
 		if (_build_peakfiles) {
 			PeakBuildRecord *pbr = 0;
@@ -1030,6 +1021,152 @@ FileSource::write (Sample *data, jack_nframes_t cnt)
 
 	return cnt;
 }
+
+ssize_t
+FileSource::write_float(Sample *data, jack_nframes_t framepos, jack_nframes_t cnt, char * workbuf)
+{
+	int32_t byte_cnt = cnt * _sample_size;
+	int32_t byte_pos = data_offset + (framepos * _sample_size);
+	ssize_t retval;
+	
+	if ((retval = ::pwrite64 (fd, (char *) data, byte_cnt, byte_pos)) != (ssize_t) byte_cnt) {
+		error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+		if (retval > 0) {
+			return retval / _sample_size;
+		}
+		else {
+			return retval;
+		}
+	}
+
+	_write_data_count = byte_cnt;
+	
+	return cnt;
+}
+
+ssize_t
+FileSource::read_float (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
+{
+	ssize_t nread;
+	ssize_t byte_cnt = (ssize_t) cnt * sizeof (Sample);
+	
+	if ((nread = pread (fd, (char *) dst, byte_cnt, data_offset + (start * _sample_size))) != byte_cnt) {
+		
+		cerr << "FileSource: \""
+		     << _path
+		     << "\" bad read at frame "
+		     << start
+		     << ", of "
+		     << cnt
+		     << " (bytes="
+		     << byte_cnt
+		     << ") frames [length = " << _length 
+		     << " eor = " << start + cnt << "] ("
+		     << strerror (errno)
+		     << ") (read "
+		     << nread / sizeof (Sample)
+		     << " (bytes=" <<nread
+		     << ")) pos was"
+		     << data_offset
+		     << '+'
+		     << start << '*' << sizeof(Sample)
+		     << " = " << data_offset + (start * sizeof(Sample))
+		     << endl;
+		
+		if (nread > 0) {
+			return nread / _sample_size;
+		}
+		else {
+			return nread;
+		}
+	}
+
+	if (header.bigendian != WE_ARE_BIGENDIAN) {
+		swap_endian(dst, cnt);
+	}
+	
+	_read_data_count = byte_cnt;
+
+	return cnt;
+}
+
+ssize_t
+FileSource::write_pcm_24(Sample *data, jack_nframes_t framepos, jack_nframes_t cnt, char * workbuf)
+{
+	int32_t byte_cnt = cnt * _sample_size;
+	int32_t byte_pos = data_offset + (framepos * _sample_size);
+	ssize_t retval;
+	
+	// convert to int24
+	if (header.bigendian) {
+		pcm_f2bet_clip_array (data, workbuf, cnt);
+	} else {
+		pcm_f2let_clip_array (data, workbuf, cnt);
+	}
+	
+	if ((retval = ::pwrite64 (fd, (char *) workbuf, byte_cnt, byte_pos)) != (ssize_t) byte_cnt) {
+		error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+		if (retval > 0) {
+			return retval / _sample_size;
+		}
+		else {
+			return retval;
+		}
+	}
+
+	return (ssize_t) cnt;
+}
+
+ssize_t
+FileSource::read_pcm_24 (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
+{
+	ssize_t nread;
+	ssize_t byte_cnt = (ssize_t) cnt * _sample_size;
+
+	if ((nread = pread (fd, (char *) workbuf, byte_cnt, data_offset + (start * _sample_size))) != byte_cnt) {
+		
+		cerr << "FileSource: \""
+		     << _path
+		     << "\" bad 24bit read at frame "
+		     << start
+		     << ", of "
+		     << cnt
+		     << " (bytes="
+		     << byte_cnt
+		     << ") frames [length = " << _length 
+		     << " eor = " << start + cnt << "] ("
+		     << strerror (errno)
+		     << ") (read "
+		     << nread / sizeof (Sample)
+		     << " (bytes=" <<nread
+		     << ")) pos was"
+		     << data_offset
+		     << '+'
+		     << start << '*' << sizeof(Sample)
+		     << " = " << data_offset + (start * sizeof(Sample))
+		     << endl;
+
+		if (nread > 0) {
+			return nread / _sample_size;
+		}
+		else {
+			return nread;
+		}
+	}
+
+	// convert from 24bit->float
+	
+	if (header.bigendian) {
+		pcm_bet2f_array (workbuf, cnt, dst);
+	} else {
+		pcm_let2f_array (workbuf, cnt, dst);
+	}
+	
+	_read_data_count = byte_cnt;
+
+	return (ssize_t) cnt;
+}
+
 
 bool
 FileSource::is_empty (string path)
