@@ -21,6 +21,7 @@
 #include "ardour/port.h"
 
 using namespace ARDOUR;
+using namespace std;
 
 Port::Port (jack_port_t *p) 
 	: port (p)

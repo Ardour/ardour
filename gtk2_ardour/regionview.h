@@ -52,11 +52,12 @@ class AudioRegionView : public TimeAxisViewItem
 			 AudioTimeAxisView&,
 			 ARDOUR::AudioRegion&,
 			 double initial_samples_per_unit,
-			 double amplitude_above_axis,
-			 Gdk::Color& base_color,
-			 bool wait_for_waves);
+			 Gdk::Color& basic_color);
+
 	~AudioRegionView ();
 	
+	virtual void init (double amplitude_above_axis, Gdk::Color& base_color, bool wait_for_waves);
+    
     ARDOUR::AudioRegion& region;  // ok, let 'em have it
     bool is_valid() const { return valid; }
     void set_valid (bool yn) { valid = yn; }
@@ -115,7 +116,20 @@ class AudioRegionView : public TimeAxisViewItem
     virtual void entered ();
     virtual void exited ();
 
-  private:
+  protected:
+
+    /* this constructor allows derived types
+       to specify their visibility requirements
+       to the TimeAxisViewItem parent class
+    */
+    
+    AudioRegionView (ArdourCanvas::Group *, 
+		     AudioTimeAxisView&,
+		     ARDOUR::AudioRegion&,
+		     double initial_samples_per_unit,
+		     Gdk::Color& basic_color,
+		     TimeAxisViewItem::Visibility);
+    
     enum Flags {
 	    EnvelopeVisible = 0x1,
 	    WaveformVisible = 0x4,
@@ -178,7 +192,7 @@ class AudioRegionView : public TimeAxisViewItem
 
     void set_colors ();
     void compute_colors (Gdk::Color&);
-    void set_frame_color ();
+    virtual void set_frame_color ();
     void reset_width_dependent_items (double pixel_width);
     void set_waveview_data_src();
 

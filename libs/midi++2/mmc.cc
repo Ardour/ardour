@@ -475,7 +475,7 @@ MachineControl::write_track_record_ready (byte *msg, size_t len)
 
 {
 	size_t n;
-	size_t base_track;
+	ssize_t base_track;
 
 	/* Bits 0-4 of the first byte are for special tracks:
 

@@ -56,19 +56,25 @@ static const int32_t sync_mark_width = 9;
 
 sigc::signal<void,AudioRegionView*> AudioRegionView::AudioRegionViewGoingAway;
 
-AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView &tv, 
-				  AudioRegion& r, 
-				  double spu, 
-				  double amplitude_above_axis,
-				  Gdk::Color& basic_color,
-				  bool wfw)
-
+AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView &tv, AudioRegion& r, double spu,
+				  Gdk::Color& basic_color)
 	: TimeAxisViewItem (r.name(), *parent, tv, spu, basic_color, r.position(), r.length(),
 			    TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
 				                          TimeAxisViewItem::ShowNameHighlight|
 							  TimeAxisViewItem::ShowFrame)),
-
 	  region (r)
+{
+}
+
+AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView &tv, AudioRegion& r, double spu, 
+				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
+	: TimeAxisViewItem (r.name(), *parent, tv, spu, basic_color, r.position(), r.length(), visibility),
+	  region (r)
+{
+}
+
+void
+AudioRegionView::init (double amplitude_above_axis, Gdk::Color& basic_color, bool wfw)
 {
         ArdourCanvas::Points shape;
 	XMLNode *node;
@@ -150,7 +156,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView
 	foo += ':';
 	foo += "gain";
 
-	gain_line = new AudioRegionGainLine (foo, tv.session(), *this, *group, region.envelope());
+	gain_line = new AudioRegionGainLine (foo, trackview.session(), *this, *group, region.envelope());
 
 	if (!(_flags & EnvelopeVisible)) {
 		gain_line->hide ();
@@ -197,7 +203,7 @@ AudioRegionView::~AudioRegionView ()
 		gnome_canvas_waveview_cache_destroy (*cache);
 	}
 
-	/* all waveviews will be destroyed when the group is destroyed */
+	/* all waveviews etc will be destroyed when the group is destroyed */
 
 	for (vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
 		delete *g;
@@ -207,7 +213,9 @@ AudioRegionView::~AudioRegionView ()
 		delete editor;
 	}
 
-	delete gain_line;
+	if (gain_line) {
+		delete gain_line;
+	}
 }
 
 gint
@@ -402,16 +410,18 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 		zero_line->property_x2() = pixel_width - 1.0;
 	}
 
-	if (pixel_width <= 6.0) {
-		fade_in_handle->hide();
-		fade_out_handle->hide();
-	} else {
-		if (_height < 5.0) {
+	if (fade_in_handle) {
+		if (pixel_width <= 6.0) {
 			fade_in_handle->hide();
 			fade_out_handle->hide();
 		} else {
-			fade_in_handle->show();
-			fade_out_handle->show();
+			if (_height < 5.0) {
+				fade_in_handle->hide();
+				fade_out_handle->hide();
+			} else {
+				fade_in_handle->show();
+				fade_out_handle->show();
+			}
 		}
 	}
 
@@ -517,19 +527,23 @@ AudioRegionView::set_height (gdouble height)
 		waves[n]->property_y() = yoff + 2;
 	}
 
-	if ((height/wcnt) < NAME_HIGHLIGHT_SIZE) {
-		gain_line->hide ();
-	} else {
-		if (_flags & EnvelopeVisible) {
-			gain_line->show ();
+	if (gain_line) {
+		if ((height/wcnt) < NAME_HIGHLIGHT_SIZE) {
+			gain_line->hide ();
+		} else {
+			if (_flags & EnvelopeVisible) {
+				gain_line->show ();
+			}
 		}
+		gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE));
 	}
 
 	manage_zero_line ();
-	gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE));
 	reset_fade_shapes ();
-
-	name_text->raise_to_top();
+	
+	if (name_text) {
+		name_text->raise_to_top();
+	}
 }
 
 void
@@ -565,6 +579,10 @@ AudioRegionView::reset_fade_in_shape ()
 void
 AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 {
+	if (fade_in_handle == 0) {
+		return;
+	}
+
 	/* smallest size for a fade is 64 frames */
 
 	width = std::max ((jack_nframes_t) 64, width);
@@ -645,6 +663,10 @@ AudioRegionView::reset_fade_out_shape ()
 void
 AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 {	
+	if (fade_out_handle == 0) {
+		return;
+	}
+
 	/* smallest size for a fade is 64 frames */
 
 	width = std::max ((jack_nframes_t) 64, width);
@@ -732,7 +754,9 @@ AudioRegionView::set_samples_per_unit (gdouble spu)
 		(*i)->set_duration (region.length() / samples_per_unit);
 	}
 
-	gain_line->reset ();
+	if (gain_line) {
+		gain_line->reset ();
+	}
 	reset_fade_shapes ();
 	region_sync_changed ();
 }
@@ -776,8 +800,13 @@ AudioRegionView::set_colors ()
 {
 	TimeAxisViewItem::set_colors ();
 	
-	gain_line->set_line_color (region.envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
-	sync_mark->property_fill_color_rgba() = fill_color;
+	if (gain_line) {
+		gain_line->set_line_color (region.envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
+	}
+
+	if (sync_mark) {
+		sync_mark->property_fill_color_rgba() = fill_color;
+	}
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (region.muted()) {
@@ -846,6 +875,10 @@ AudioRegionView::region_renamed ()
 void
 AudioRegionView::region_sync_changed ()
 {
+	if (sync_mark == 0) {
+		return;
+	}
+
 	int sync_dir;
 	jack_nframes_t sync_offset;
 
@@ -911,13 +944,15 @@ AudioRegionView::set_waveform_visible (bool yn)
 void
 AudioRegionView::temporarily_hide_envelope ()
 {
-	gain_line->hide ();
+	if (gain_line) {
+		gain_line->hide ();
+	}
 }
 
 void
 AudioRegionView::unhide_envelope ()
 {
-	if (_flags & EnvelopeVisible) {
+	if (gain_line && (_flags & EnvelopeVisible)) {
 		gain_line->show ();
 	}
 }
@@ -925,7 +960,7 @@ AudioRegionView::unhide_envelope ()
 void
 AudioRegionView::set_envelope_visible (bool yn)
 {
-	if ((_flags & EnvelopeVisible) != yn) {
+	if (gain_line && ((_flags & EnvelopeVisible) != yn)) {
 		if (yn) {
 			gain_line->show ();
 			_flags |= EnvelopeVisible;
@@ -1068,6 +1103,10 @@ AudioRegionView::peaks_ready_handler (uint32_t which)
 void
 AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 {
+	if (gain_line == 0) {
+		return;
+	}
+
 	double x, y;
 
 	/* don't create points that can't be seen */
@@ -1274,7 +1313,7 @@ AudioRegionView::get_fill_color ()
 void
 AudioRegionView::entered ()
 {
-	if (_flags & EnvelopeVisible) {
+	if (gain_line && _flags & EnvelopeVisible) {
 		gain_line->show_all_control_points ();
 	}
 
@@ -1282,27 +1321,35 @@ AudioRegionView::entered ()
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 	a=255;
 	
-	fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
-	fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
+	if (fade_in_handle) {
+		fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
+		fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
+	}
 }
 
 void
 AudioRegionView::exited ()
 {
-	gain_line->hide_all_but_selected_control_points ();
+	if (gain_line) {
+		gain_line->hide_all_but_selected_control_points ();
+	}
 	
 	uint32_t r,g,b,a;
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 	a=0;
 	
-	fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
-	fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
+	if (fade_in_handle) {
+		fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
+		fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
+	}
 }
 
 void
 AudioRegionView::envelope_active_changed ()
 {
-	gain_line->set_line_color (region.envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
+	if (gain_line) {
+		gain_line->set_line_color (region.envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
+	}
 }
 
 void

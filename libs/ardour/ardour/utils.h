@@ -29,13 +29,11 @@
 
 class XMLNode;
 
-using std::ostream;
-
 void elapsed_time_to_str (char *buf, uint32_t seconds);
-string legalize_for_path (std::string str);
-ostream& operator<< (ostream& o, const ARDOUR::BBT_Time& bbt);
+std::string legalize_for_path (std::string str);
+std::ostream& operator<< (std::ostream& o, const ARDOUR::BBT_Time& bbt);
 XMLNode* find_named_node (const XMLNode& node, std::string name);
-string placement_as_string (ARDOUR::Placement);
+std::string placement_as_string (ARDOUR::Placement);
 
 static inline float f_max(float x, float a) {
 	x -= a;
@@ -48,12 +46,12 @@ static inline float f_max(float x, float a) {
 
 int cmp_nocase (const std::string& s, const std::string& s2);
 
-int tokenize_fullpath (string fullpath, string& path, string& name);
+int tokenize_fullpath (std::string fullpath, std::string& path, std::string& name);
 
-int touch_file(string path);
+int touch_file(std::string path);
 
 uint32_t long get_uid();
 
-string region_name_from_path (string path);
+std::string region_name_from_path (std::string path);
 
 #endif /* __ardour_utils_h__ */

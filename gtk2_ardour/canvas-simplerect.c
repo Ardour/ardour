@@ -573,9 +573,9 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 		randb = random() % 255;
 		PAINT_BOX(buf, randr, randg, randb, simplerect->fill_a, begin, sy, end, ey);
 #else		
-		FAST_PAINT_BOX (buf, simplerect->fill_r, simplerect->fill_g, simplerect->fill_b, simplerect->fill_a, 
-				intersection.x0, intersection.y0,
-				intersection.x1, intersection.y1);
+		PAINT_BOX (buf, simplerect->fill_r, simplerect->fill_g, simplerect->fill_b, simplerect->fill_a, 
+			   intersection.x0, intersection.y0,
+			   intersection.x1, intersection.y1);
 #endif
 	 	
 	}

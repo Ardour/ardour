@@ -1701,7 +1701,6 @@ DiskStream::finish_capture (bool rec_monitors_input)
 	was_recording = false;
 	
 	if (_flags & Recordable) {
-		cerr << "STOP CAPTURE\n";
 		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 			(*chan).write_source->mark_capture_end ();
 		}

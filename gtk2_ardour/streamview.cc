@@ -13,6 +13,7 @@
 
 #include "streamview.h"
 #include "regionview.h"
+#include "taperegionview.h"
 #include "audio_time_axis.h"
 #include "canvas-waveview.h"
 #include "canvas-simplerect.h"
@@ -46,31 +47,15 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 
 	/* set_position() will position the group */
 
-	//GTK2FIX -- how to get the group? is the canvas display really a group?
-	//canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display),
-	//			    gnome_canvas_group_get_type (),
-	//			    NULL);
 	canvas_group = new ArdourCanvas::Group(*_trackview.canvas_display);
 
-	//canvas_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_group),
-	//			   gnome_canvas_simplerect_get_type(),
-	//			   "x1", 0.0,
-	//			   "y1", 0.0,
-	//			   "x2", 1000000.0,
-	//			   "y2", (double) tv.height,
-	//			   "outline_color_rgba", color_map[cAudioTrackOutline],
-	//			   /* outline ends and bottom */
-	//			   "outline_what", (guint32) (0x1|0x2|0x8),
-	//			   "fill_color_rgba", stream_base_color,
-	//	]		   NULL);
 	canvas_rect = new ArdourCanvas::SimpleRect (*canvas_group);
 	canvas_rect->property_x1() = 0.0;
 	canvas_rect->property_y1() = 0.0;
 	canvas_rect->property_x2() = 1000000.0;
 	canvas_rect->property_y2() = (double) tv.height;
 	canvas_rect->property_outline_color_rgba() = color_map[cAudioTrackOutline];
-	/* outline ends and bottom */
-	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);
+	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
 
 	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
@@ -222,15 +207,19 @@ StreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 			return;
 		}
 	}
+	
+	switch (_trackview.audio_track()->mode()) {
+	case Normal:
+		region_view = new AudioRegionView (canvas_group, _trackview, *region, 
+						   _samples_per_unit, region_color);
+		break;
+	case Destructive:
+		region_view = new TapeAudioRegionView (canvas_group, _trackview, *region, 
+						       _samples_per_unit, region_color);
+		break;
+	}
 
-	region_view = new AudioRegionView (canvas_group,
-					   _trackview,
-					   *region,
-					   _samples_per_unit,
-					   _amplitude_above_axis, 
-					   region_color, 
-					   wait_for_waves);
-
+	region_view->init (_amplitude_above_axis, region_color, wait_for_waves);
 	region_views.push_front (region_view);
 	
 	/* follow global waveform setting */

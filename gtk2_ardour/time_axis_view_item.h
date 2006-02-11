@@ -326,7 +326,10 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
 	    ShowFrame = 0x1,
 	    ShowNameHighlight = 0x2,
 	    ShowNameText = 0x4,
-	    ShowHandles = 0x8
+	    ShowHandles = 0x8,
+	    HideFrameLR = 0x10,
+	    HideFrameTB = 0x20,
+	    FullWidthNameHighlight = 0x40
     };
 
     /**
@@ -453,6 +456,8 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
     ArdourCanvas::SimpleRect* name_highlight;
     ArdourCanvas::SimpleRect* frame_handle_start;
     ArdourCanvas::SimpleRect* frame_handle_end;
+
+    Visibility visibility;
 
 }; /* class TimeAxisViewItem */
 

@@ -243,10 +243,11 @@ class Session : public sigc::trackable, public Stateful
 	bool dirty() const { return _state_of_the_state & Dirty; }
 	sigc::signal<void> DirtyChanged;
 
-	string sound_dir () const;
-	string peak_dir () const;
-	string dead_sound_dir () const;
-	string automation_dir () const;
+	std::string sound_dir () const;
+	std::string tape_dir () const;
+	std::string peak_dir () const;
+	std::string dead_sound_dir () const;
+	std::string automation_dir () const;
 
 	static string template_path ();
 	static string template_dir ();
@@ -1618,10 +1619,11 @@ class Session : public sigc::trackable, public Stateful
 	PBD::Lock space_lock;
 
 	static const char* sound_dir_name;
+	static const char* tape_dir_name;
 	static const char* dead_sound_dir_name;
 	static const char* peak_dir_name;
 
-	string discover_best_sound_dir ();
+	string discover_best_sound_dir (bool destructive = false);
 	int ensure_sound_dir (string, string&);
 	void refresh_disk_space ();
 

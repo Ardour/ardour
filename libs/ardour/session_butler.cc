@@ -193,7 +193,7 @@ Session::butler_thread_work ()
 			      << endmsg;
 			break;
 		}
-		
+
 		if (pfd[0].revents & ~POLLIN) {
 			error << _("Error on butler thread request pipe") << endmsg;
 			break;
@@ -242,9 +242,9 @@ Session::butler_thread_work ()
 			}
 		}
 	
-//		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
-//			cerr << "BEFORE " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
-//		}
+		for (i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			// cerr << "BEFORE " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
+		}
 
 		if (transport_work_requested()) {
 			butler_transport_work ();

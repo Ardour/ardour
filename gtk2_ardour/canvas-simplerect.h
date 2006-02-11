@@ -48,9 +48,9 @@ struct _GnomeCanvasSimpleRect
     gboolean     fill;
     gboolean     draw;
     gboolean     full_draw_on_update;
-    uint32_t fill_color;
-    uint32_t outline_color;
-    uint32_t outline_pixels;
+    uint32_t     fill_color;
+    uint32_t     outline_color;
+    uint32_t     outline_pixels;
 
     /* cached values set during update/used during render */
 

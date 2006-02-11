@@ -102,24 +102,24 @@ class AudioEngine : public sigc::trackable
 		virtual const char *what() const throw() { return "could not connect to engine backend"; }
 	};
 
-	Port *register_audio_input_port (const string& portname);
-	Port *register_audio_output_port (const string& portname);
+	Port *register_audio_input_port (const std::string& portname);
+	Port *register_audio_output_port (const std::string& portname);
 	int   unregister_port (Port *);
 	
-	int connect (const string& source, const string& destination);
-	int disconnect (const string& source, const string& destination);
+	int connect (const std::string& source, const std::string& destination);
+	int disconnect (const std::string& source, const std::string& destination);
 	int disconnect (Port *);
 	
-	const char ** get_ports (const string& port_name_pattern, const string& type_name_pattern, uint32_t flags);
+	const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
 
 	uint32_t n_physical_outputs () const;
 	uint32_t n_physical_inputs () const;
 
-	string get_nth_physical_output (uint32_t n) {
+	std::string get_nth_physical_output (uint32_t n) {
 		return get_nth_physical (n, JackPortIsInput);
 	}
 
-	string get_nth_physical_input (uint32_t n) {
+	std::string get_nth_physical_input (uint32_t n) {
 		return get_nth_physical (n, JackPortIsOutput);
 	}
 
@@ -130,7 +130,7 @@ class AudioEngine : public sigc::trackable
 	   the return value
 	*/
 
-	Port *get_port_by_name (const string& name, bool keep = true);
+	Port *get_port_by_name (const std::string& name, bool keep = true);
 
 	enum TransportState {
 		TransportStopped = JackTransportStopped,
@@ -215,7 +215,7 @@ class AudioEngine : public sigc::trackable
 	PortConnections port_connections;
 	void   remove_connections_for (Port*);
 
-	string get_nth_physical (uint32_t which, int flags);
+	std::string get_nth_physical (uint32_t which, int flags);
 
 	static int  _xrun_callback (void *arg);
 	static int  _graph_order_callback (void *arg);

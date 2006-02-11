@@ -53,15 +53,15 @@ class Port : public sigc::trackable {
 		silent = false;
 	}
 
-	string name() { 
+	std::string name() { 
 		return _name;
 	}
 
-	string short_name() { 
+	std::string short_name() { 
 		return jack_port_short_name (port);
 	}
 	
-	int set_name (string str);
+	int set_name (std::string str);
 
 	JackPortFlags flags() const {
 		return _flags;
@@ -79,7 +79,7 @@ class Port : public sigc::trackable {
 		return jack_port_connected (port);
 	}
 	
-	bool connected_to (const string& portname) const {
+	bool connected_to (const std::string& portname) const {
 		return jack_port_connected_to (port, portname.c_str());
 	}
 
@@ -191,8 +191,8 @@ class Port : public sigc::trackable {
 	*/
 
 	JackPortFlags _flags;
-	string        _type;
-	string        _name;
+	std::string   _type;
+	std::string   _name;
 
 	bool           last_monitor : 1;
 	bool           silent : 1;

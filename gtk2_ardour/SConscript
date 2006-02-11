@@ -163,6 +163,7 @@ selection.cc
 sfdb_ui.cc
 send_ui.cc
 streamview.cc
+taperegionview.cc
 tempo_dialog.cc
 time_axis_view.cc
 time_axis_view_item.cc

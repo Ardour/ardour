@@ -64,7 +64,7 @@ const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6 ;
  */
 TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
 				   jack_nframes_t start, jack_nframes_t duration,
-				   Visibility visibility)
+				   Visibility vis)
 	: trackview (tv)
 {
 	if (!have_name_font) {
@@ -83,6 +83,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 	max_item_duration = ARDOUR::max_frames;
 	min_item_duration = 0 ;
 	show_vestigial = true;
+	visibility = vis;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl ;
@@ -108,14 +109,33 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		frame->property_outline_color_rgba() = color_map[cTimeAxisFrameOutline];
 		frame->property_fill_color_rgba() = color_map[cTimeAxisFrameFill];
 
+		/* by default draw all 4 edges */
+
+		uint32_t outline_what = 0x1|0x2|0x4|0x8;
+
+		if (visibility & HideFrameLR) {
+			outline_what &= ~(0x1 | 0x2);
+		}
+
+		if (visibility & HideFrameTB) {
+			outline_what &= ~(0x4 | 0x8);
+		}
+
+		frame->property_outline_what() = outline_what;
+		    
 	} else {
 		frame = 0;
 	}
 
 	if (visibility & ShowNameHighlight) {
 		name_highlight = new ArdourCanvas::SimpleRect (*group);
-		name_highlight->property_x1() = (double) 1.0;
-		name_highlight->property_x2() = (double) (trackview.editor.frame_to_pixel(item_duration)) - 1;
+		if (visibility & FullWidthNameHighlight) {
+			name_highlight->property_x1() = (double) 0.0;
+			name_highlight->property_x2() = (double) (trackview.editor.frame_to_pixel(item_duration));
+		} else {
+			name_highlight->property_x1() = (double) 1.0;
+			name_highlight->property_x2() = (double) (trackview.editor.frame_to_pixel(item_duration)) - 1;
+		}
 		name_highlight->property_y1() = (double) (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
 		name_highlight->property_y2() = (double) (trackview.height - 1);
 		name_highlight->property_outline_color_rgba() = color_map[cNameHighlightFill];
@@ -508,10 +528,14 @@ TimeAxisViewItem::set_height(double height)
 	if (name_highlight) {
 		if (height < NAME_HIGHLIGHT_THRESH) {
 			name_highlight->hide();
-			name_text->hide();
+			if (name_text) {
+				name_text->hide();
+			}
 		} else {
 			name_highlight->show();
-			name_text->show();
+			if (name_text) {
+				name_text->show();
+			}
 		}
 
 		if (height > NAME_HIGHLIGHT_SIZE) {
@@ -567,7 +591,7 @@ TimeAxisViewItem::get_canvas_frame()
 ArdourCanvas::Item*
 TimeAxisViewItem::get_canvas_group()
 {
-	return(group) ;
+	return (group) ;
 }
 
 /**
@@ -576,7 +600,7 @@ TimeAxisViewItem::get_canvas_group()
 ArdourCanvas::Item*
 TimeAxisViewItem::get_name_highlight()
 {
-	return(name_highlight) ;
+	return (name_highlight) ;
 }
 
 /**
@@ -585,7 +609,7 @@ TimeAxisViewItem::get_name_highlight()
 ArdourCanvas::Text*
 TimeAxisViewItem::get_name_text()
 {
-	return(name_text) ;
+	return (name_text) ;
 }
 
 /**
@@ -780,7 +804,9 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 		if (name_highlight) {
 			name_highlight->hide();
-			name_text->hide();
+			if (name_text) {
+				name_text->hide();
+			}
 		}
 
 		if (frame) {
@@ -801,14 +827,23 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 			if (height < NAME_HIGHLIGHT_THRESH) {
 				name_highlight->hide();
-				name_text->hide();
+				if (name_text) {
+					name_text->hide();
+				}
 			} else {
 				name_highlight->show();
-				name_text->show();
-				reset_name_width (pixel_width);
+				if (name_text) {
+					name_text->show();
+					reset_name_width (pixel_width);
+				}
 			}
 
-			name_highlight->property_x2() = pixel_width - 1.0;
+			if (visibility & FullWidthNameHighlight) {
+				name_highlight->property_x2() = pixel_width;
+			} else {
+				name_highlight->property_x2() = pixel_width - 1.0;
+			}
+
 		}
 
 		if (frame) {

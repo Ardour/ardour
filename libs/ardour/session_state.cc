@@ -486,6 +486,15 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 		}
 	}
 
+	dir = tape_dir ();
+
+	if (mkdir (dir.c_str(), 0755) < 0) {
+		if (errno != EEXIST) {
+			error << string_compose(_("Session: cannot create session tape dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			return -1;
+		}
+	}
+
 	dir = dead_sound_dir ();
 
 	if (mkdir (dir.c_str(), 0755) < 0) {
@@ -1956,10 +1965,16 @@ Session::ensure_sound_dir (string path, string& result)
 }	
 
 string
-Session::discover_best_sound_dir ()
+Session::discover_best_sound_dir (bool destructive)
 {
 	vector<space_and_path>::iterator i;
 	string result;
+
+	/* destructive files all go into the same place */
+
+	if (destructive) {
+		return tape_dir();
+	}
 
 	/* handle common case without system calls */
 
@@ -1968,7 +1983,7 @@ Session::discover_best_sound_dir ()
 	}
 
 	/* OK, here's the algorithm we're following here:
-
+	   
 	We want to select which directory to use for 
 	the next file source to be created. Ideally,
 	we'd like to use a round-robin process so as to
@@ -2170,6 +2185,21 @@ Session::sound_dir () const
 {
 	string res = _path;
 	res += sound_dir_name;
+	res += '/';
+	return res;
+}
+
+string
+Session::tape_dir () const
+{
+	string res = Config->get_tape_dir();
+
+	if (!res.empty()) {
+		return res;
+	}
+
+	res = _path;
+	res += tape_dir_name;
 	res += '/';
 	return res;
 }

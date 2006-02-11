@@ -76,6 +76,7 @@ const char* Session::_template_suffix = X_(".template");
 const char* Session::_statefile_suffix = X_(".ardour");
 const char* Session::_pending_suffix = X_(".pending");
 const char* Session::sound_dir_name = X_("sounds");
+const char* Session::tape_dir_name = X_("tapes");
 const char* Session::peak_dir_name = X_("peaks");
 const char* Session::dead_sound_dir_name = X_("dead_sounds");
 
@@ -2658,7 +2659,12 @@ Session::create_file_source (DiskStream& ds, int32_t chan, bool destructive)
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
 			spath = (*i).path;
-			spath += sound_dir_name;
+
+			if (destructive) {
+				spath += tape_dir_name;
+			} else {
+				spath += sound_dir_name;
+			}
 			spath += '/';
 			spath += legalized;
 

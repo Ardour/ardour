@@ -294,6 +294,11 @@ Configuration::state (bool user_only)
 	if (!user_only || latched_record_enable_is_user) {
 		node->add_child_nocopy(option_node("latched-record-enable", latched_record_enable?"yes":"no"));
 	}
+	if (!user_only || tape_dir_is_user) {
+		if (!tape_dir.empty()) {
+			node->add_child_nocopy(option_node("tape-dir", tape_dir));
+		}
+	}
 
 	/* use-vst is always per-user */
 	node->add_child_nocopy (option_node ("use-vst", use_vst?"yes":"no"));
@@ -436,6 +441,8 @@ Configuration::set_state (const XMLNode& root)
 					set_midi_feedback_interval_ms (atoi (option_value.c_str()));
 				} else if (option_name == "latched-record-enable") {
 					set_latched_record_enable (option_value == "yes");
+				} else if (option_name == "tape-dir") {
+					set_tape_dir (option_value);
 				}
 			}
 			
@@ -492,6 +499,7 @@ Configuration::set_defaults ()
 	timecode_source_is_synced = true;
 	use_vst = true; /* if we build with VST_SUPPORT, otherwise no effect */
 	quieten_at_speed = true;
+	tape_dir = "";
 
 	midi_feedback_interval_ms = 100;
 	
@@ -532,6 +540,7 @@ Configuration::set_defaults ()
 	quieten_at_speed_is_user = false;
 	midi_feedback_interval_ms_is_user = false;
 	latched_record_enable_is_user = false;
+	tape_dir_is_user = false;
 }
 
 Configuration::MidiPortDescriptor::MidiPortDescriptor (const XMLNode& node)
@@ -1150,4 +1159,16 @@ bool
 Configuration::get_latched_record_enable ()
 {
 	return latched_record_enable;
+}
+
+string
+Configuration::get_tape_dir () 
+{
+	return tape_dir;
+}
+
+void
+Configuration::set_tape_dir (string path)
+{
+	tape_dir = path;
 }

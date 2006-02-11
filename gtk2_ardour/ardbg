@@ -8,11 +8,11 @@ export ARDOUR_BINDINGS=./ardour.bindings
 
 if [ -x ./ardour.bin ] ; then 
     # scons executable
-    export LD_LIBRARY_PATH=../libs/ardour
+    export LD_LIBRARY_PATH=../libs/ardour:$LD_LIBRARY_PATH
     exec gdb ./ardour.bin
 else 
     # autofoo/make executable
-    export LD_LIBRARY_PATH=../libs/ardour/.libs
+    export LD_LIBRARY_PATH=../libs/ardour/.libs:$LD_LIBRARY_PATH
     exec gdb ./ardour
 fi
 

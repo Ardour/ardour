@@ -186,7 +186,6 @@ PluginUI::build (AudioEngine &engine)
 	Frame* frame;
 	Frame* bt_frame;
 	VBox* box;
-	char info[32];
 	int output_row, output_col;
 	int button_row, button_col;
 	int output_rows, output_cols;

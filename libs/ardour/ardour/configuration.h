@@ -29,8 +29,6 @@
 #include <ardour/types.h>
 #include <ardour/stateful.h>
 
-using std::string;
-
 class XMLNode;
 
 namespace ARDOUR {
@@ -42,21 +40,21 @@ class Configuration : public Stateful
 	virtual ~Configuration();
 
 	struct MidiPortDescriptor {
-	    string tag;
-	    string device;
-	    string type;
-	    string mode;
+	    std::string tag;
+	    std::string device;
+	    std::string type;
+	    std::string mode;
 
 	    MidiPortDescriptor (const XMLNode&);
 	    XMLNode& get_state();
 	};
 
-	std::map<string,MidiPortDescriptor *> midi_ports;
+	std::map<std::string,MidiPortDescriptor *> midi_ports;
 
 	int load_state ();
 	int save_state ();
 
-	XMLNode& option_node (const string &, const string &);
+	XMLNode& option_node (const std::string &, const std::string &);
 	
 	int set_state (const XMLNode&);
 	XMLNode& get_state (void);
@@ -76,8 +74,8 @@ class Configuration : public Stateful
 	bool get_trace_midi_output ();
 	void set_trace_midi_output (bool);
 
-	string get_raid_path();
-	void set_raid_path(string);
+	std::string get_raid_path();
+	void set_raid_path(std::string);
 
 	uint32_t get_minimum_disk_io(); 
 	void set_minimum_disk_io(uint32_t);
@@ -88,11 +86,11 @@ class Configuration : public Stateful
 	bool does_hiding_groups_deactivates_groups();
 	void set_hiding_groups_deactivates_groups(bool);
 
-	string get_auditioner_output_left();
-	void set_auditioner_output_left(string);
+	std::string get_auditioner_output_left();
+	void set_auditioner_output_left(std::string);
 
-	string get_auditioner_output_right();
-	void set_auditioner_output_right(string);
+	std::string get_auditioner_output_right();
+	void set_auditioner_output_right(std::string);
 
 	bool get_mute_affects_pre_fader();
 	void set_mute_affects_pre_fader (bool);
@@ -112,14 +110,14 @@ class Configuration : public Stateful
 	uint32_t get_disk_choice_space_threshold();
 	void set_disk_choice_space_threshold (uint32_t);
 
-	string get_mmc_port_name();
-	void   set_mmc_port_name(string);
+	std::string get_mmc_port_name();
+	void   set_mmc_port_name(std::string);
 
-	string get_mtc_port_name();
-	void   set_mtc_port_name(string);
-
-	string get_midi_port_name();
-	void   set_midi_port_name(string);
+	std::string get_mtc_port_name();
+	void   set_mtc_port_name(std::string);
+	
+	std::string get_midi_port_name();
+	void   set_midi_port_name(std::string);
 
 	uint32_t get_midi_feedback_interval_ms();
 	void set_midi_feedback_interval_ms (uint32_t);
@@ -163,25 +161,28 @@ class Configuration : public Stateful
 	bool get_timecode_source_is_synced ();
 	void set_timecode_source_is_synced (bool);
 
-	string get_user_ardour_path ();
-	string get_system_ardour_path ();
+	std::string get_user_ardour_path ();
+	std::string get_system_ardour_path ();
 
 	gain_t get_quieten_at_speed ();
 	void  set_quieten_at_speed (gain_t);
+
+	std::string get_tape_dir ();
+	void   set_tape_dir (std::string);
 	
   private:
 	void   set_defaults ();
-	string get_system_path();
-	string get_user_path();
+	std::string get_system_path();
+	std::string get_user_path();
 
 	/* this is subject to wordexp, so we need
 	   to keep the original (user-entered) form
 	   around. e.g. ~/blah-> /home/foo/blah
 	*/
 	
-	string raid_path;
+	std::string raid_path;
 	bool   raid_path_is_user;
-	string orig_raid_path;
+	std::string orig_raid_path;
 
 	uint32_t minimum_disk_io_bytes;
 	bool          minimum_disk_io_bytes_is_user;
@@ -189,9 +190,9 @@ class Configuration : public Stateful
 	bool          track_buffer_seconds_is_user;
 	bool          hiding_groups_deactivates_groups;
 	bool          hiding_groups_deactivates_groups_is_user;
-	string        auditioner_output_left;
+	std::string   auditioner_output_left;
 	bool          auditioner_output_left_is_user;
-	string        auditioner_output_right;
+	std::string   auditioner_output_right;
 	bool          auditioner_output_right_is_user;
 	bool	      mute_affects_pre_fader;
 	bool          mute_affects_pre_fader_is_user;
@@ -205,11 +206,11 @@ class Configuration : public Stateful
 	bool          solo_latch_is_user;
 	uint32_t disk_choice_space_threshold;
 	bool          disk_choice_space_threshold_is_user;
-	string        mtc_port_name;
+	std::string   mtc_port_name;
 	bool          mtc_port_name_is_user;
-	string        mmc_port_name;
+	std::string   mmc_port_name;
 	bool          mmc_port_name_is_user;
-	string        midi_port_name;
+	std::string   midi_port_name;
 	bool          midi_port_name_is_user;
 	bool          use_hardware_monitoring;
 	bool          use_hardware_monitoring_is_user;
@@ -248,6 +249,8 @@ class Configuration : public Stateful
 	bool          midi_feedback_interval_ms_is_user;
 	bool          latched_record_enable;
 	bool          latched_record_enable_is_user;
+	std::string   tape_dir;
+	bool          tape_dir_is_user;
 
 	XMLNode *key_node;
 	bool     user_configuration;

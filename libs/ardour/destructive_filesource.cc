@@ -117,8 +117,6 @@ DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
 int
 DestructiveFileSource::seek (jack_nframes_t frame)
 {
-//	file_pos = data_offset + (sizeof (Sample) * frame);
-	cerr << _name << " Seek to " << frame << " = " << data_offset + (_sample_size * frame) << endl;
 	return 0;
 }
 
