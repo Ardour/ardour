@@ -391,12 +391,12 @@ VSTPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in_
 	int32_t i;
 
 	for (i = 0; i < (int32_t) _plugin->numInputs; ++i) {
-		ins[i] = bufs[min((uint32_t) in_index,maxbuf)] + offset;
+		ins[i] = bufs[min((uint32_t) in_index,maxbuf - 1)] + offset;
 		in_index++;
 	}
 
 	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
-		outs[i] = bufs[min((uint32_t) out_index,maxbuf)] + offset;
+		outs[i] = bufs[min((uint32_t) out_index,maxbuf - 1)] + offset;
 
 		/* unbelievably, several VST plugins still rely on Cubase
 		   behaviour and do not silence the buffer in processReplacing 

@@ -609,14 +609,14 @@ LadspaPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, int32_t& i
 	while (port_index < parameter_count()) {
 		if (LADSPA_IS_PORT_AUDIO (port_descriptor(port_index))) {
 			if (LADSPA_IS_PORT_INPUT (port_descriptor(port_index))) {
-				connect_port (port_index, bufs[min((uint32_t) in_index,nbufs)] + offset);
+				connect_port (port_index, bufs[min((uint32_t) in_index,nbufs - 1)] + offset);
 				//cerr << this << ' ' << name() << " @ " << offset << " inport " << in_index << " = buf " 
 				//     << min((uint32_t)in_index,nbufs) << " = " << &bufs[min((uint32_t)in_index,nbufs)][offset] << endl;
 				in_index++;
 
 
 			} else if (LADSPA_IS_PORT_OUTPUT (port_descriptor (port_index))) {
-				connect_port (port_index, bufs[min((uint32_t) out_index,nbufs)] + offset);
+				connect_port (port_index, bufs[min((uint32_t) out_index,nbufs - 1)] + offset);
 				// cerr << this << ' ' << name() << " @ " << offset << " outport " << out_index << " = buf " 
 				//     << min((uint32_t)out_index,nbufs) << " = " << &bufs[min((uint32_t)out_index,nbufs)][offset] << endl;
 				out_index++;
