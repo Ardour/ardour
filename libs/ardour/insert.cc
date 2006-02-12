@@ -320,14 +320,14 @@ void
 PluginInsert::automation_snapshot (jack_nframes_t now)
 {
 	map<uint32_t,AutomationList*>::iterator li;
-
+	
 	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
 		
-		AutomationList& alist (*((*li).second));
-		if (alist.automation_write ()) {
+		AutomationList *alist = ((*li).second);
+		if (alist != 0 && alist->automation_write ()) {
 			
 			float val = _plugins[0]->get_parameter ((*li).first);
-			alist.rt_add (now, val);
+			alist->rt_add (now, val);
 			last_automation_snapshot = now;
 		}
 	}
