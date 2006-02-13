@@ -368,7 +368,7 @@ IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nfram
 		return;
 	}
 	
-	if (_panner->bypassed()) {
+	if (_panner->bypassed() || _panner->empty()) {
 		deliver_output_no_pan (bufs, nbufs, nframes, offset);
 		return;
 	}
