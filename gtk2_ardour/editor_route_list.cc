@@ -91,7 +91,7 @@ Editor::handle_new_route (Route& route)
 	row[route_display_columns.text] = route.name();
 	row[route_display_columns.visible] = tv->marked_for_display();
 	row[route_display_columns.tv] = tv;
-		
+	
 	track_views.push_back (tv);
 
 	ignore_route_list_reorder = true;
@@ -224,7 +224,7 @@ Editor::redisplay_route_list ()
 	uint32_t position;
 	uint32_t order;
 	int n;
-
+	
 	if (no_route_list_redisplay) {
 		return;
 	}
@@ -476,7 +476,7 @@ Editor::route_list_selection_filter (const Glib::RefPtr<TreeModel>& model, const
 struct EditorOrderRouteSorter {
     bool operator() (Route* a, Route* b) {
 	    /* use of ">" forces the correct sort order */
-	    return a->order_key ("editor") > b->order_key ("editor");
+	    return a->order_key ("editor") < b->order_key ("editor");
     }
 };
 

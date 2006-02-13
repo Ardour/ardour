@@ -567,7 +567,7 @@ Mixer_UI::redisplay_track_list ()
 struct SignalOrderRouteSorter {
     bool operator() (Route* a, Route* b) {
 	    /* use of ">" forces the correct sort order */
-	    return a->order_key ("signal") > b->order_key ("signal");
+	    return a->order_key ("signal") < b->order_key ("signal");
     }
 };
 
