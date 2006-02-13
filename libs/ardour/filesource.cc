@@ -580,7 +580,7 @@ FileSource::fill_header (jack_nframes_t rate)
 	}
 	header.format.nChannels = 1; /* mono */
 	header.format.nSamplesPerSec = rate;
-	header.format.nAvgBytesPerSec = rate * sizeof (Sample);
+	header.format.nAvgBytesPerSec = rate * _sample_size;
 	
 	/* DATA */
 

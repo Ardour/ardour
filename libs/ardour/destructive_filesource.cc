@@ -158,13 +158,14 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 	}
 
 	if ((retval = file_read (xfade_buf, fade_position, xfade, workbuf)) != (ssize_t) xfade) {
-		if (retval < 0 && errno == EAGAIN) {
-			/* no data there, so no xfade */
+		if (retval >= 0 && errno == EAGAIN) {
+			/* XXX - can we really trust that errno is meaningful here?  yes POSIX, i'm talking to you.
+			/* short or no data there */
 
-			xfade = 0;
-			nofade = cnt;
+			xfade = retval;
+			nofade = cnt - xfade;
 		} else {
-			error << string_compose(_("FileSource: \"%1\" bad read (%2: %3)"), _path, errno, strerror (errno)) << endmsg;
+			error << string_compose(_("DestructiveFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"), _path, retval, errno, strerror (errno), xfade) << endmsg;
 			return 0;
 		}
 	}
@@ -172,7 +173,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 	if (nofade && !fade_in) {
 		cerr << "write " << nofade << " frames of prefade OUT data to " << file_pos << " .. " << file_pos + nofade << endl;
 		if (file_write (data, file_pos, nofade, workbuf) != (ssize_t) nofade) {
-			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
 	}
@@ -216,7 +217,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 		cerr << "write " << xfade << " frames of xfade  data to " << fade_position << " .. " << fade_position + xfade << endl;
 
 		if (file_write (xfade_buf, fade_position, xfade, workbuf) != (ssize_t) xfade) {
-			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
 	}
@@ -225,7 +226,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 		cerr << "write " << nofade << " frames of postfade IN  data to " << file_pos + xfade << " .. " 
 		     << file_pos + xfade + nofade << endl;
 		if (file_write (data + xfade, file_pos + xfade, nofade, workbuf) != (ssize_t) nofade) {
-			error << string_compose(_("FileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
+			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
 	}
