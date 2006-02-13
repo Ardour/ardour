@@ -111,7 +111,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 	*/
 	
 	connect_dependents_to_session (s);
-	
+
 	start_clocking ();
 	start_blinking ();
 

@@ -95,14 +95,14 @@ Editor::show_editor_mixer (bool yn)
 		}
 		
 		if (current_mixer_strip->get_parent() == 0) {
-
 			current_mixer_strip->set_embedded (true);
 			current_mixer_strip->Hiding.connect (mem_fun(*this, &Editor::current_mixer_strip_hidden));
 			current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::current_mixer_strip_removed));
 			current_mixer_strip->set_width (editor_mixer_strip_width);
 			
 			global_hpacker.pack_start (*current_mixer_strip, Gtk::PACK_SHRINK );
-			global_hpacker.reorder_child (*current_mixer_strip, 0);
+ 			global_hpacker.reorder_child (*current_mixer_strip, 0);
+
 			current_mixer_strip->show_all ();
 		}
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,20 +72,6 @@ FastMeter::~FastMeter ()
 }
 
 void
-FastMeter::on_realize ()
-{
-	DrawingArea::on_realize();
-
-	RefPtr<Style> style = get_style();
-	Color black = style->get_black();
-
-	style->set_bg (STATE_NORMAL, black);
-	style->set_bg (STATE_ACTIVE, black);
-	style->set_bg (STATE_SELECTED, black);
-	style->set_bg (STATE_INSENSITIVE, black);
-}
-
-void
 FastMeter::set_vertical_xpm (const char **xpm)
 {
 	if (v_pixmap == 0) {
@@ -149,14 +135,27 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 {
 	gint top_of_meter;
 	GdkRectangle intersection;
+	GdkRectangle background;
 
 	top_of_meter = (gint) floor (v_pixheight * current_level);
 	pixrect.height = top_of_meter;
 
-        if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
+	background.x = 0;
+	background.y = 0;
+	background.width = pixrect.width;
+	background.height = v_pixheight - top_of_meter;
+
+        if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
+		get_window()->draw_rectangle (get_style()->get_black_gc(), true, 
+					      intersection.x, intersection.y,
+					      intersection.width, intersection.height);
+	}
+	
+	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
+		
 		/* draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		 */
-
+		
 		get_window()->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap, 
 					    intersection.x, v_pixheight - top_of_meter,
 					    intersection.x, v_pixheight - top_of_meter,

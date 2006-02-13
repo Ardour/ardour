@@ -181,8 +181,8 @@ GainMeter::GainMeter (IO& io, Session& s)
 	hbox.pack_start (meter_packer,  Gtk::PACK_SHRINK);
 
 	set_spacing (4);
+
 	pack_start (top_table,  Gtk::PACK_SHRINK);
-	/* here's the culprit  gain display box*/
 	pack_start (gain_display_box,  Gtk::PACK_SHRINK);
 	pack_start (hbox,  Gtk::PACK_SHRINK);
 

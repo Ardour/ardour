@@ -2080,6 +2080,7 @@ Editor::set_state (const XMLNode& node)
 	int x, y, xoff, yoff;
 	Gdk::Geometry g;
 
+
 	if ((geometry = find_named_node (node, "geometry")) == 0) {
 
 		g.base_width = default_width;
@@ -2117,6 +2118,15 @@ Editor::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("snap-mode"))) {
 		set_snap_mode ((SnapMode) atoi (prop->value()));
+	}
+
+	if ((prop = node.property ("mouse-mode"))) {
+		MouseMode m = str2mousemode(prop->value());
+		mouse_mode = MouseMode ((int) m + 1); /* lie, force mode switch */
+		set_mouse_mode (m, true);
+	} else {
+		mouse_mode = MouseGain; /* lie, to force the mode switch */
+		set_mouse_mode (MouseObject, true);
 	}
 
 	if ((prop = node.property ("show-waveforms"))) {
@@ -2166,24 +2176,16 @@ Editor::set_state (const XMLNode& node)
 		}
 	}
 
-	if ((prop = node.property ("xfades-visible"))) {
-		bool yn = (prop->value() == "yes");
-		_xfade_visibility = !yn;
-		set_xfade_visibility (yn);
-	}
-	
+
 	if ((prop = node.property ("region-list-sort-type"))) {
 		region_list_sort_type = (Editing::RegionListSortType) -1; // force change 
 		reset_region_list_sort_type(str2regionlistsorttype(prop->value()));
 	}
 
-	if ((prop = node.property ("mouse-mode"))) {
-		MouseMode m = str2mousemode(prop->value());
-		mouse_mode = MouseMode ((int) m + 1); /* lie, force mode switch */
-		set_mouse_mode (m, true);
-	} else {
-		mouse_mode = MouseGain; /* lie, to force the mode switch */
-		set_mouse_mode (MouseObject, true);
+	if ((prop = node.property ("xfades-visible"))) {
+		bool yn = (prop->value() == "yes");
+		_xfade_visibility = !yn;
+		set_xfade_visibility (yn);
 	}
 
 	if ((prop = node.property ("show-editor-mixer"))) {

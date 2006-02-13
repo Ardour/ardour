@@ -96,9 +96,9 @@ PixScroller::on_expose_event (GdkEventExpose* ev)
 	if (gdk_rectangle_intersect (sliderrect.gobj(), &ev->area, &intersect)) {
 		Glib::RefPtr<Gdk::GC> gc(get_style()->get_fg_gc(get_state()));
 		Glib::RefPtr<Gdk::Bitmap> mask (slider_mask);
-// Do these have a gtk2 equivalent?
-//		Gdk::GCValues values;
-//		gc->get_values(values);
+
+		GdkGCValues values;
+		gdk_gc_get_values(gc->gobj(), &values);
 		gc->set_clip_origin (sliderrect.get_x(), sliderrect.get_y());
 		gc->set_clip_mask (mask);
 		win->draw_drawable (gc, slider, 
@@ -108,9 +108,8 @@ PixScroller::on_expose_event (GdkEventExpose* ev)
 				 intersect.y, 
 				 intersect.width,
 				 intersect.height);
-//		gc->set_clip_origin(values.clip_x_origin, values.clip_y_origin);
-//		Gdk::Bitmap i_hate_gdk (values.clip_mask);
-//		gc->set_clip_mask (i_hate_gdk);
+		gc->set_clip_origin (values.clip_x_origin, values.clip_y_origin);
+		gdk_gc_set_clip_mask (gc->gobj(), values.clip_mask);
 	}
 
 
