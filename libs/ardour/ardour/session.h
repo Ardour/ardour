@@ -260,6 +260,7 @@ class Session : public sigc::trackable, public Stateful
 
 	vector<Sample*>& get_passthru_buffers() { return _passthru_buffers; }
 	vector<Sample*>& get_silent_buffers (uint32_t howmany);
+	vector<Sample*>& get_send_buffers () { return _send_buffers; }
 
 	DiskStream    *diskstream_by_id (id_t id);
 	DiskStream    *diskstream_by_name (string name);
@@ -1008,7 +1009,8 @@ class Session : public sigc::trackable, public Stateful
 	jack_nframes_t           last_stop_frame;
 	vector<Sample *>        _passthru_buffers;
 	vector<Sample *>        _silent_buffers;
-	map<RunContext,char*> _conversion_buffers;
+	vector<Sample *>        _send_buffers;
+	map<RunContext,char*>   _conversion_buffers;
 	jack_nframes_t           current_block_size;
 	jack_nframes_t          _worst_output_latency;
 	jack_nframes_t          _worst_input_latency;

@@ -390,6 +390,10 @@ Session::~Session ()
 		free(*i);
 	}
 
+ 	for (vector<Sample*>::iterator i = _send_buffers.begin(); i != _send_buffers.end(); ++i) {
+ 		free(*i);
+ 	}
+
 	for (map<RunContext,char*>::iterator i = _conversion_buffers.begin(); i != _conversion_buffers.end(); ++i) {
 		delete [] (i->second);
 	}
@@ -1451,6 +1455,21 @@ Session::set_block_size (jack_nframes_t nframes)
 
 		ensure_passthru_buffers (np);
 
+		for (vector<Sample*>::iterator i = _send_buffers.begin(); i != _send_buffers.end(); ++i) {
+			free(*i);
+
+			Sample *buf;
+#ifdef NO_POSIX_MEMALIGN
+			buf = (Sample *) malloc(current_block_size * sizeof(Sample));
+#else
+			posix_memalign((void **)&buf,16,current_block_size * 4);
+#endif			
+			*i = buf;
+
+			memset (*i, 0, sizeof (Sample) * current_block_size);
+		}
+
+		
 		if (_gain_automation_buffer) {
 			delete [] _gain_automation_buffer;
 		}
@@ -3232,6 +3251,16 @@ Session::ensure_passthru_buffers (uint32_t howmany)
 		memset (p, 0, sizeof (Sample) * current_block_size);
 		_silent_buffers.push_back (p);
 
+		*p = 0;
+		
+#ifdef NO_POSIX_MEMALIGN
+		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
+#else
+		posix_memalign((void **)&p,16,current_block_size * 4);
+#endif			
+		memset (p, 0, sizeof (Sample) * current_block_size);
+		_send_buffers.push_back (p);
+		
 	}
 	allocate_pan_automation_buffers (current_block_size, howmany, false);
 }

@@ -107,7 +107,17 @@ Send::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_
 {
 	if (active()) {
 
-		IO::deliver_output (bufs, nbufs, nframes, offset);
+		// we have to copy the input, because IO::deliver_output may alter the buffers
+		// in-place, which a send must never do.
+
+		vector<Sample*>& sendbufs = _session.get_send_buffers();
+
+		for (size_t i=0; i < nbufs; ++i) {
+			memcpy (sendbufs[i], bufs[i], sizeof (Sample) * nframes);
+		}
+		
+		
+		IO::deliver_output (sendbufs, nbufs, nframes, offset);
 
 		if (_metering) {
 			uint32_t n;
@@ -122,7 +132,7 @@ Send::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_
 			} else {
 
 				for (n = 0; n < no; ++n) {
-					_peak_power[n] = Session::compute_peak (output(n)->get_buffer(nframes+offset) + offset, nframes, _peak_power[n]) * _gain;
+					_peak_power[n] = Session::compute_peak (output(n)->get_buffer(nframes) + offset, nframes, _peak_power[n]);
 				}
 			}
 		}

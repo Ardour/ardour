@@ -162,7 +162,8 @@ IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 	Sample *buffer;
 	double fractional_shift;
 	double fractional_pos;
-
+	gain_t polscale = invert_polarity ? -1.0f : 1.0f;
+	
 	fractional_shift = -1.0/declick;
 
 	if (target < initial) {
@@ -178,16 +179,9 @@ IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 		buffer = bufs[n];
 		fractional_pos = 1.0;
 
-		if (invert_polarity) {
-			for (jack_nframes_t nx = 0; nx < declick; ++nx) {
-				buffer[nx] *= -(initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
-				fractional_pos += fractional_shift;
-			}
-		} else {
-			for (jack_nframes_t nx = 0; nx < declick; ++nx) {
-				buffer[nx] *= (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
-				fractional_pos += fractional_shift;
-			}
+		for (jack_nframes_t nx = 0; nx < declick; ++nx) {
+			buffer[nx] *= polscale * (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
+			fractional_pos += fractional_shift;
 		}
 		
 		/* now ensure the rest of the buffer has the target value
@@ -381,7 +375,8 @@ IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nfram
 
 
 	gain_t dg;
-
+	gain_t pangain = _gain;
+	
 	{
 		TentativeLockMonitor dm (declick_lock, __LINE__, __FILE__);
 		
@@ -395,14 +390,15 @@ IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nfram
 	if (dg != _gain) {
 		apply_declick (bufs, nbufs, nframes, _gain, dg, false);
 		_gain = dg;
+		pangain = 1.0f;
 	} 
 
 	/* simple, non-automation panning to outputs */
 
 	if (_session.transport_speed() > 1.5f || _session.transport_speed() < -1.5f) {
-		pan (bufs, nbufs, nframes, offset, _gain * speed_quietning);
+		pan (bufs, nbufs, nframes, offset, pangain * speed_quietning);
 	} else {
-		pan (bufs, nbufs, nframes, offset, _gain);
+		pan (bufs, nbufs, nframes, offset, pangain);
 	}
 }
 
