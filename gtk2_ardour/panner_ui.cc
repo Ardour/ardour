@@ -557,7 +557,7 @@ PannerUI::pan_value_changed (uint32_t which)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &PannerUI::pan_value_changed), which));
 							   
-	if (which < _io.panner().size()) {
+	if (_io.n_outputs() > 1 && which < _io.panner().size()) {
 		float xpos;
 		float val = pan_adjustments[which]->get_value ();
 
