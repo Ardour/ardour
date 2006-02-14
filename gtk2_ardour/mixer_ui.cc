@@ -99,22 +99,36 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	group_display_model = ListStore::create (group_display_columns);
 	group_display.set_model (group_display_model);
-	group_display.append_column (_("active"), group_display_columns.active);
 	group_display.append_column (_("groupname"), group_display_columns.text);
+	group_display.append_column (_("active"), group_display_columns.active);
 	group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	group_display.set_name ("MixerGroupList");
+	group_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
+	group_display.set_reorderable (true);
+      	group_display.set_size_request (150, -1);
+	group_display.set_headers_visible (true);
+       	group_display.set_headers_clickable (false);
 
 	/* use checkbox for the active column */
 
-	CellRendererToggle *active_cell = dynamic_cast<CellRendererToggle*>(group_display.get_column_cell_renderer (0));
+	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(group_display.get_column_cell_renderer (1));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
-	
-	group_display.set_name ("MixerGroupList");
-	group_display.set_reorderable (true);
-	group_display.set_size_request (true);
+
+	group_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::group_display_button_press), false);
+	group_display.get_selection()->signal_changed().connect (mem_fun (*this, &Mixer_UI::group_display_selection_changed));
+
 	group_display_scroller.add (group_display);
 	group_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
+	group_display_button_label.set_name ("NewMixGroupLabel");
+	group_display_button_label.set_text (_("New Mix Group"));
+	group_display_button.add (group_display_button_label);
+	group_display_button.set_name ("NewMixGroup");
+       	ARDOUR_UI::instance()->tooltips().set_tip (group_display_button, _("add a new mix group"));
+	group_display_button.signal_clicked().connect (mem_fun (*this, &Mixer_UI::new_mix_group));
+
 
 	group_display_vbox.pack_start (group_display_button, false, false);
 	group_display_vbox.pack_start (group_display_scroller, true, true);
@@ -161,9 +175,6 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Gtk::Window *>(this)));
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-
-	group_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::group_display_button_press));
-	group_display.get_selection()->signal_changed().connect (mem_fun (*this, &Mixer_UI::group_display_selection_changed));
 
 	_plugin_selector = new PluginSelector (PluginManager::the_manager());
 
@@ -720,17 +731,6 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 	
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
 	case 0:
-		/* active column click */
-		
-		if ((iter = group_display_model->get_iter (path))) {
-			/* path points to a valid node */
-			if ((group = (*iter)[group_display_columns.group]) != 0) {
-				group->set_active (!group->is_active (), this);
-			}
-		}
-		break;
-
-	case 1:
 		if (Keyboard::is_edit_event (ev)) {
 			// RouteGroup* group = (RouteGroup *) group_display.row(row).get_data ();
 			// edit_mix_group (group);
@@ -740,6 +740,19 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 			return false;
 		}
 		break;
+
+	case 1:
+		/* active column click */
+		
+		if ((iter = group_display_model->get_iter (path))) {
+			/* path points to a valid node */
+			if ((group = (*iter)[group_display_columns.group]) != 0) {
+				group->set_active (!group->is_active (), this);
+				(*iter)[group_display_columns.active] = group->is_active ();
+			}
+		}
+		break;
+
 	}
 		
 	return true;
