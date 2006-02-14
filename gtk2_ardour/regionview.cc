@@ -190,6 +190,8 @@ AudioRegionView::init (double amplitude_above_axis, Gdk::Color& basic_color, boo
 
 	set_colors ();
 
+	ColorChanged.connect (mem_fun (*this, &AudioRegionView::color_handler));
+
 	/* XXX sync mark drag? */
 }
 
@@ -1374,4 +1376,30 @@ AudioRegionView::set_waveview_data_src()
 
 }
 
+void
+AudioRegionView::color_handler (ColorID id, uint32_t val)
+{
+	switch (id) {
+	case cMutedWaveForm:
+	case cWaveForm:
+		set_colors ();
+		break;
 
+	case cGainLineInactive:
+	case cGainLine:
+		envelope_active_changed();
+		break;
+		
+	case cZeroLine:
+		if (zero_line) {
+			zero_line->property_color_rgba() = (guint) color_map[cZeroLine];
+		}
+		break;
+
+	case cGhostTrackWave:
+		break;
+
+	default:
+		break;
+	}
+}

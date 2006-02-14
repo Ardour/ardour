@@ -13,7 +13,6 @@
 #define MOUSEMODE(a) /*empty*/
 #define ZOOMFOCUS(a) /*empty*/
 #define DISPLAYCONTROL(a) /*empty*/
-#define COLORID(a) /*empty*/
 
 namespace Editing {
 
@@ -125,23 +124,6 @@ DisplayControl str2displaycontrol (const std::string &);
 #undef DISPLAYCONTROL
 #define DISPLAYCONTROL(a) /*empty*/
 
-#undef COLORID
-#define COLORID(a) a,
-enum ColorID {
-	 #include "editing_syms.h"
-};
-
-#undef COLORID
-#define COLORID(s) #s,
-static const char *color_id_strs[] = {
-	#include "editing_syms.h"
-};
-inline const char* enum2str(ColorID m) {return color_id_strs[m];}
-ColorID str2color_id (const std::string &);
-
-#undef COLORID
-#define COLORID(a) /*empty*/
-
 /////////////////////
 // These don't need their state saved. yet...
 enum CutCopyOp {
@@ -155,16 +137,6 @@ enum XFadeType {
 	Post,
 	At
 };
-
-struct Color {
-    char r;
-    char g;
-    char b;
-    char a;
-};
-
-typedef std::map<Editing::ColorID,int> ColorMap;
-extern ColorMap color_map;
 
 } // namespace Editing
 

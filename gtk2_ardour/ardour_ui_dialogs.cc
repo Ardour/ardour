@@ -34,6 +34,7 @@
 #include "public_editor.h"
 #include "route_params_ui.h"
 #include "sfdb_ui.h"
+#include "color_manager.h"
 
 #include "i18n.h"
 
@@ -283,6 +284,22 @@ ARDOUR_UI::toggle_location_window ()
 			location_ui->present ();
 		} else {
 			location_ui->hide ();
+		} 
+	}
+}
+
+void
+ARDOUR_UI::toggle_color_manager ()
+{
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleColorManager"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+	
+		if (tact->get_active()) {
+			color_manager->show_all ();
+			color_manager->present ();
+		} else {
+			color_manager->hide ();
 		} 
 	}
 }

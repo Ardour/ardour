@@ -33,6 +33,7 @@
 #include "enums.h"
 #include "waveview.h"
 #include "canvas.h"
+#include "color.h"
 
 namespace ARDOUR {
 	class AudioRegion;
@@ -198,6 +199,8 @@ class AudioRegionView : public TimeAxisViewItem
 
     vector<GnomeCanvasWaveViewCache*> wave_caches;
     vector<GhostRegion*> ghosts;
+    
+    void color_handler (ColorID, uint32_t);
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

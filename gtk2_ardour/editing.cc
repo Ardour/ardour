@@ -87,18 +87,4 @@ str2displaycontrol (const string & str) {
 #undef DISPLAYCONTROL
 #define DISPLAYCONTROL(a) /*empty*/
 
-// COLORID
-#undef COLORID
-#define COLORID(s) if (!strcmp(type, #s)) {return s;}
-ColorID
-str2color_id (const string & str) {
-	const char* type = str.c_str();
-	#include "editing_syms.h"
-	return cFrameHandleEndOutline;
-}
-#undef COLORID
-#define COLORID(a) /*empty*/
-
-ColorMap color_map;
-
 } // namespace Editing

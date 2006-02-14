@@ -29,6 +29,7 @@
 #include "enums.h"
 #include "simplerect.h"
 #include "canvas.h"
+#include "color.h"
 
 namespace Gdk {
 	class Color;
@@ -166,6 +167,8 @@ class StreamView : public sigc::trackable
 	
 	Gdk::Color region_color;
 	uint32_t stream_base_color;
+
+	void color_handler (ColorID, uint32_t);
 
 	vector<sigc::connection> playlist_connections;
 	sigc::connection playlist_change_connection;

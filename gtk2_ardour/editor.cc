@@ -274,8 +274,6 @@ Editor::Editor (AudioEngine& eng)
 
 	PublicEditor::_instance = this;
 
-	init_colormap ();
-
 	session = 0;
 
 	selection = new Selection;
@@ -3898,18 +3896,6 @@ Editor::prepare_for_cleanup ()
 
 	selection->clear_audio_regions ();
 	selection->clear_playlists ();
-}
-
-void
-Editor::init_colormap ()
-{
-	for (size_t x = 0; x < sizeof (color_id_strs) / sizeof (color_id_strs[0]); ++x) {
-		pair<ColorID,int> newpair;
-		
-		newpair.first = (ColorID) x;
-		newpair.second = rgba_from_style (enum2str (newpair.first), 0, 0, 0, 255);
-		color_map.insert (newpair);
-	}
 }
 
 Location*

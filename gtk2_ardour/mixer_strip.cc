@@ -280,8 +280,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 							_route.comment());
 	comment_button.signal_clicked().connect (mem_fun(*this, &MixerStrip::comment_button_clicked));
 	
-	global_vpacker.set_border_width (4);
-	global_vpacker.set_spacing (4);
+	global_vpacker.set_border_width (0);
+	global_vpacker.set_spacing (0);
 
 	Gtk::VBox *whvbox = manage (new Gtk::VBox);
 

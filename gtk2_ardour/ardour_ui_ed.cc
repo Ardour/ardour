@@ -178,6 +178,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleBigClock"), _("Big Clock"), mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_splash));
+	act = ActionManager::register_toggle_action (common_actions, X_("ToggleColorManager"), _("Colors"), mem_fun(*this, &ARDOUR_UI::toggle_color_manager));
 	
 	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("add audio track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1, ARDOUR::Normal));
 	ActionManager::session_sensitive_actions.push_back (act);

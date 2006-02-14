@@ -25,6 +25,7 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "utils.h"
+#include "color.h"
 
 using namespace ARDOUR;
 using namespace Editing;
@@ -74,6 +75,8 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 	rec_active = false;
 	use_rec_regions = tv.editor.show_waveforms_recording ();
 	last_rec_peak_frame = 0;
+
+	ColorChanged.connect (mem_fun (*this, &StreamView::color_handler));
 }
 
 StreamView::~StreamView ()
@@ -916,5 +919,28 @@ StreamView::reveal_xfades_involving (AudioRegionView& rv)
 		if ((*i)->crossfade.involves (rv.region) && (*i)->visible()) {
 			(*i)->show ();
 		}
+	}
+}
+
+void
+StreamView::color_handler (ColorID id, uint32_t val)
+{
+	switch (id) {
+	case cAudioTrackBase:
+		if (_trackview.is_audio_track()) {
+			canvas_rect->property_fill_color_rgba() = val;
+		} 
+		break;
+	case cAudioBusBase:
+		if (!_trackview.is_audio_track()) {
+			canvas_rect->property_fill_color_rgba() = val;
+		}
+		break;
+	case cAudioTrackOutline:
+		canvas_rect->property_outline_color_rgba() = val;
+		break;
+
+	default:
+		break;
 	}
 }

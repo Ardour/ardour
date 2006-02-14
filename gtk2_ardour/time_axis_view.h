@@ -39,6 +39,7 @@
 #include "enums.h"
 #include "editing.h"
 #include "canvas.h"
+#include "color.h"
 
 namespace ARDOUR {
 	class Session;
@@ -311,6 +312,7 @@ class TimeAxisView : public virtual AxisView
 	static bool need_size_info;
 
 	void set_height_pixels (uint32_t h);
+	void color_handler (ColorID, uint32_t);
 
 }; /* class TimeAxisView */
 

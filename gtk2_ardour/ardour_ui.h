@@ -76,6 +76,7 @@ class About;
 class AddRouteDialog;
 class NewSessionDialog;
 class LocationUI;
+class ColorManager;
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -146,6 +147,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Mixer_UI* the_mixer() { return mixer; }
 	
 	void toggle_location_window ();
+	void toggle_color_manager ();
 	void toggle_big_clock_window ();
 	void toggle_connection_editor ();
 	void toggle_route_params_window ();
@@ -585,6 +587,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	LocationUI *location_ui;
 	int         create_location_ui ();
+
+	ColorManager* color_manager;
 
 	/* Options window */
 	

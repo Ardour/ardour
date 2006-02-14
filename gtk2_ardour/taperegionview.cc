@@ -98,6 +98,8 @@ TapeAudioRegionView::init (double amplitude_above_axis, Gdk::Color& basic_color,
 	/* no events, no state changes */
 
 	set_colors ();
+
+	// ColorChanged.connect (mem_fun (*this, &AudioRegionView::color_handler));
 }
 
 TapeAudioRegionView::~TapeAudioRegionView()

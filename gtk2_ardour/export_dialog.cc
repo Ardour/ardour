@@ -250,8 +250,6 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 
 	/* determine longest strings at runtime */
 
-	const guint32 FUDGE = 10; // Combo's are stupid - they steal space from the entry for the button
-
 	maxlen = 0;
 	const char *longest = "gl";
 	string longest_str;

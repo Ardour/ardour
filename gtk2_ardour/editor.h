@@ -1836,9 +1836,6 @@ class Editor : public PublicEditor
 	void toggle_gain_envelope_visibility ();
 	void toggle_gain_envelope_active ();
 	
-	typedef std::map<Editing::ColorID,std::string> ColorStyleMap;
-	void init_colormap ();
-
 	bool on_key_press_event (GdkEventKey*);
 
 	void session_state_saved (string);

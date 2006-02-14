@@ -261,6 +261,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	}
 
 	editor.ZoomChanged.connect (mem_fun(*this, &AudioTimeAxisView::reset_samples_per_unit));
+	ColorChanged.connect (mem_fun (*this, &AudioTimeAxisView::color_handler));
 }
 
 AudioTimeAxisView::~AudioTimeAxisView ()
@@ -1951,4 +1952,19 @@ XMLNode*
 AudioTimeAxisView::get_child_xml_node (const string & childname)
 {
 	return RouteUI::get_child_xml_node (childname);
+}
+
+void
+AudioTimeAxisView::color_handler (ColorID id, uint32_t val)
+{
+	switch (id) {
+	case cTimeStretchOutline:
+		timestretch_rect->property_outline_color_rgba() = val;
+		break;
+	case cTimeStretchFill:
+		timestretch_rect->property_fill_color_rgba() = val;
+		break;
+	default:
+		break;
+	}
 }

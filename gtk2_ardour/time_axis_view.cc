@@ -147,6 +147,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_frame.add (controls_hbox);
 	controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_frame.set_shadow_type (Gtk::SHADOW_OUT);
+
+	ColorChanged.connect (mem_fun (*this, &TimeAxisView::color_handler));
 }
 
 TimeAxisView::~TimeAxisView()
@@ -1001,5 +1003,26 @@ TimeAxisView::hide_name_entry ()
 	if (name_packing & NameEntryPacked) {
 		name_hbox.remove (name_entry);
 		name_packing = NamePackingBits (name_packing & ~NameEntryPacked);
+	}
+}
+
+void
+TimeAxisView::color_handler (ColorID id, uint32_t val)
+{
+	switch (id) {
+	case cSelectionRectFill:
+		break;
+	case cSelectionRectOutline:
+		break;
+	case cSelectionStartFill:
+		break;
+	case cSelectionStartOutline:
+		break;
+	case cSelectionEndFill:
+		break;
+	case cSelectionEndOutline:
+		break;
+	default:
+		break;
 	}
 }

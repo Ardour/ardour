@@ -72,6 +72,7 @@
 #include "utils.h"
 #include "gui_thread.h"
 #include "meter_xpms.h"
+#include "color_manager.h"
 
 #include "i18n.h"
 
@@ -141,7 +142,17 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	}
 
 	ActionManager::init ();
-	
+
+	/* load colors */
+
+	color_manager = new ColorManager();
+
+	std::string color_file = Glib::getenv(X_("ARDOUR_COLORS"));
+	if(!Glib::file_test(color_file, Glib::FILE_TEST_EXISTS)) {
+		color_file = ARDOUR::find_config_file("ardour.colors");
+	}
+	color_manager->load (color_file);
+
 	m_new_session_dialog = 0;
 	m_new_session_dialog_ref = NewSessionDialogFactory::create();
 	m_new_session_dialog_ref->get_widget_derived (NewSessionDialogFactory::top_level_widget_name(), m_new_session_dialog);

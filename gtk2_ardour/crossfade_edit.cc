@@ -47,6 +47,7 @@
 #include "canvas_impl.h"
 #include "simplerect.h"
 #include "waveview.h"
+#include "color.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -128,7 +129,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	toplevel->property_x2() =  10.0;
 	toplevel->property_y2() =  10.0;
 	toplevel->property_fill() =  true;
-	toplevel->property_fill_color_rgba() =  (guint32) color_map[cCrossfadeEditorBase];
+	toplevel->property_fill_color_rgba() = color_map[cCrossfadeEditorBase];
 	toplevel->property_outline_pixels() =  0;
 	toplevel->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
 	

@@ -40,6 +40,7 @@
 #include "enums.h"
 #include "time_axis_view.h"
 #include "canvas.h"
+#include "color.h"
 
 namespace ALSA {
 	class MultiChannelDevice;
@@ -311,6 +312,8 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	void add_ghost_to_redirect (AudioRegionView*, AutomationTimeAxisView*);
 
 	void map_frozen ();
+
+	void color_handler (ColorID, uint32_t);
 };
 
 #endif /* __ardour_trackview_h__ */
