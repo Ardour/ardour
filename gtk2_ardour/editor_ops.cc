@@ -1380,7 +1380,7 @@ Editor::select_all_selectables_using_punch()
 void
 Editor::select_all_selectables_using_loop()
 {
-	Location* location = session->locations()->auto_punch_location();
+	Location* location = session->locations()->auto_loop_location();
 	list<Selectable *> touched;
 
 	if (location == 0 || (location->end() - location->start() <= 1))  {

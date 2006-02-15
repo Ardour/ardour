@@ -61,10 +61,10 @@
 (gtk_accel_path "<Actions>/Editor/temporal-zoom-out" "equal")
 
 (gtk_accel_path "<Actions>/Editor/select-all" "<control>a")
-(gtk_accel_path "<Actions>/Editor/select-all-after-edit-cursor" "<Control>e")
-(gtk_accel_path "<Actions>/Editor/select-all-before-edit-cursor" "<shift><control>e")
-(gtk_accel_path "<Actions>/Editor/select-all-after-playhead" "<Control>p")
-(gtk_accel_path "<Actions>/Editor/select-all-before-playhead" "<shift><control>p")
+(gtk_accel_path "<Actions>/Editor/select-all-after-edit-cursor" "<shift><Control>e")
+(gtk_accel_path "<Actions>/Editor/select-all-before-edit-cursor" "<control>e")
+(gtk_accel_path "<Actions>/Editor/select-all-after-playhead" "<shift><Control>p")
+(gtk_accel_path "<Actions>/Editor/select-all-before-playhead" "<control>p")
 (gtk_accel_path "<Actions>/Editor/select-all-in-punch-range" "<Control>d")
 (gtk_accel_path "<Actions>/Editor/select-all-in-loop-range" "<Control>l")
 

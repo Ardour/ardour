@@ -1828,21 +1828,22 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
 	items.push_back (MenuElem (_("Loop range"), mem_fun(*this, &Editor::set_route_loop_selection)));
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Separate range to track"), mem_fun(*this, &Editor::separate_region_from_selection)));
+	items.push_back (MenuElem (_("Separate range to region list"), mem_fun(*this, &Editor::new_region_from_selection)));
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Select all in range"), mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Set range to loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
+	items.push_back (MenuElem (_("Set range to punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Crop region to range"), mem_fun(*this, &Editor::crop_region_to_selection)));
+	items.push_back (MenuElem (_("Fill range with region"), mem_fun(*this, &Editor::region_fill_selection)));
+	items.push_back (MenuElem (_("Duplicate range"), bind (mem_fun(*this, &Editor::duplicate_dialog), false)));
 	items.push_back (MenuElem (_("Create chunk from range"), mem_fun(*this, &Editor::name_selection)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Create Region"), mem_fun(*this, &Editor::new_region_from_selection)));
-	items.push_back (MenuElem (_("Separate Region"), mem_fun(*this, &Editor::separate_region_from_selection)));
-	items.push_back (MenuElem (_("Crop Region to range"), mem_fun(*this, &Editor::crop_region_to_selection)));
 	items.push_back (MenuElem (_("Bounce range"), mem_fun(*this, &Editor::bounce_range_selection)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Duplicate"), bind (mem_fun(*this, &Editor::duplicate_dialog), false)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Export"), mem_fun(*this, &Editor::export_selection)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Fill range w/Region"), mem_fun(*this, &Editor::region_fill_selection)));
-	
+	items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_selection)));
+
 	edit_items.push_back (MenuElem (_("Range"), *selection_menu));
 	edit_items.push_back (SeparatorElem());
 }
@@ -1874,11 +1875,11 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	
 	select_items.push_back (MenuElem (_("Select All in track"), bind (mem_fun(*this, &Editor::select_all_in_track), false)));
 	select_items.push_back (MenuElem (_("Select All"), bind (mem_fun(*this, &Editor::select_all), false)));
-	select_items.push_back (MenuElem (_("Invert in track"), mem_fun(*this, &Editor::invert_selection_in_track)));
-	select_items.push_back (MenuElem (_("Invert"), mem_fun(*this, &Editor::invert_selection)));
+	select_items.push_back (MenuElem (_("Invert selection in track"), mem_fun(*this, &Editor::invert_selection_in_track)));
+	select_items.push_back (MenuElem (_("Invert selection"), mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
-	select_items.push_back (MenuElem (_("Select loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
-	select_items.push_back (MenuElem (_("Select punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
+	select_items.push_back (MenuElem (_("Set range to loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
+	select_items.push_back (MenuElem (_("Set range to punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
 	select_items.push_back (SeparatorElem());
 	select_items.push_back (MenuElem (_("Select all after edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, true)));
 	select_items.push_back (MenuElem (_("Select all before edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, false)));
@@ -1907,11 +1908,6 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	cutnpaste_items.push_back (SeparatorElem());
 
 	cutnpaste_items.push_back (MenuElem (_("Insert chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f)));
-
-	cutnpaste_items.push_back (SeparatorElem());
-
-	cutnpaste_items.push_back (MenuElem (_("New Region from range"), mem_fun(*this, &Editor::new_region_from_selection)));
-	cutnpaste_items.push_back (MenuElem (_("Separate Range"), mem_fun(*this, &Editor::separate_region_from_selection)));
 
 	edit_items.push_back (MenuElem (_("Edit"), *cutnpaste_menu));
 
@@ -1964,17 +1960,13 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	
 	select_items.push_back (MenuElem (_("Select All in track"), bind (mem_fun(*this, &Editor::select_all_in_track), false)));
 	select_items.push_back (MenuElem (_("Select All"), bind (mem_fun(*this, &Editor::select_all), false)));
-	select_items.push_back (MenuElem (_("Invert in track"), mem_fun(*this, &Editor::invert_selection_in_track)));
-	select_items.push_back (MenuElem (_("Invert"), mem_fun(*this, &Editor::invert_selection)));
-	select_items.push_back (SeparatorElem());
-	select_items.push_back (MenuElem (_("Select loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
-	select_items.push_back (MenuElem (_("Select punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
+	select_items.push_back (MenuElem (_("Invert selection in track"), mem_fun(*this, &Editor::invert_selection_in_track)));
+	select_items.push_back (MenuElem (_("Invert selection"), mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
 	select_items.push_back (MenuElem (_("Select all after edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, true)));
 	select_items.push_back (MenuElem (_("Select all before edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, false)));
 	select_items.push_back (MenuElem (_("Select all after playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
 	select_items.push_back (MenuElem (_("Select all before playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
-	select_items.push_back (SeparatorElem());
 
 	edit_items.push_back (MenuElem (_("Select"), *select_menu));
 
