@@ -1228,13 +1228,13 @@ Editor::select_all (bool add)
 		}
 		(*iter)->get_selectables (0, max_frames, 0, DBL_MAX, touched);
 	}
-
+	begin_reversible_command (_("select all"));
 	if (add) {
 		selection->add (touched);
 	} else {
 		selection->set (touched);
 	}
-
+	commit_reversible_command ();
 }
 
 void
@@ -1310,11 +1310,58 @@ Editor::set_selection_from_loop()
 }
 
 void
-Editor::select_all_from_punch()
+Editor::set_selection_from_range (Location& loc)
 {
-	Location* location;
+        if (clicked_trackview == 0) {
+		return;
+	}
+	
+	begin_reversible_command (_("set selection from range"));
+	selection->set (0, loc.start(), loc.end());
+	commit_reversible_command ();
+}
+
+void
+Editor::select_all_selectables_using_time_selection ()
+{
+
 	list<Selectable *> touched;
-	if ((location = session->locations()->auto_punch_location()) == 0)  {
+
+	if (clicked_trackview == 0) {
+		return;
+	}
+
+	if (selection->time.empty()) {
+		return;
+	}
+
+	jack_nframes_t start = selection->time[clicked_selection].start;
+	jack_nframes_t end = selection->time[clicked_selection].end;
+
+	if (end - start < 1)  {
+		return;
+	}
+
+	for (TrackViewList::iterator iter = selection->tracks.begin(); iter != selection->tracks.end(); ++iter) {
+		if ((*iter)->hidden()) {
+			continue;
+		}
+		(*iter)->get_selectables (start, end - 1, 0, DBL_MAX, touched);
+	}
+	begin_reversible_command (_("select all from range"));
+	selection->set (touched);
+	commit_reversible_command ();
+
+}
+
+
+void
+Editor::select_all_selectables_using_punch()
+{
+	Location* location = session->locations()->auto_punch_location();
+	list<Selectable *> touched;
+
+	if (location == 0 || (location->end() - location->start() <= 1))  {
 		return;
 	}
 
@@ -1322,7 +1369,7 @@ Editor::select_all_from_punch()
 		if ((*iter)->hidden()) {
 			continue;
 		}
-		(*iter)->get_selectables (location->start(), location->end(), 0, DBL_MAX, touched);
+		(*iter)->get_selectables (location->start(), location->end() - 1, 0, DBL_MAX, touched);
 	}
 	begin_reversible_command (_("select all from punch"));
 	selection->set (touched);
@@ -1331,19 +1378,20 @@ Editor::select_all_from_punch()
 }
 
 void
-Editor::select_all_from_loop()
+Editor::select_all_selectables_using_loop()
 {
-	Location* location;
+	Location* location = session->locations()->auto_punch_location();
 	list<Selectable *> touched;
 
-	if ((location = session->locations()->auto_loop_location()) == 0)  {
+	if (location == 0 || (location->end() - location->start() <= 1))  {
 		return;
 	}
+
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}
-		(*iter)->get_selectables (location->start(), location->end(), 0, DBL_MAX, touched);
+		(*iter)->get_selectables (location->start(), location->end() - 1, 0, DBL_MAX, touched);
 	}
 	begin_reversible_command (_("select all from loop"));
 	selection->set (touched);
@@ -1352,19 +1400,7 @@ Editor::select_all_from_loop()
 }
 
 void
-Editor::set_selection_from_range (Location& range)
-{
-	if (clicked_trackview == 0) {
-		return;
-	}
-	
-	begin_reversible_command (_("set selection from range"));
-	selection->set (0, range.start(), range.end());
-	commit_reversible_command ();
-}
-
-void
-Editor::select_all_after_cursor (Cursor *cursor, bool after)
+Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
 {
         jack_nframes_t start;
 	jack_nframes_t end;
@@ -1375,9 +1411,13 @@ Editor::select_all_after_cursor (Cursor *cursor, bool after)
 	  start = cursor->current_frame ;
 	  end = session->current_end_frame();
 	} else {
-	  begin_reversible_command (_("select all before cursor"));
-	  start = 0;
-	  end = cursor->current_frame ;
+	  if (cursor->current_frame > 0) {
+	    begin_reversible_command (_("select all before cursor"));
+	    start = 0;
+	    end = cursor->current_frame - 1;
+	  } else {
+	    return;
+	  }
 	}
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {

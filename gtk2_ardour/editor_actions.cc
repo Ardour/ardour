@@ -84,19 +84,19 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "select-all", _("select all"), bind (mem_fun(*this, &Editor::select_all), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-all-after-edit-cursor", _("select all after edit cursor"), bind (mem_fun(*this, &Editor::select_all_after_cursor), edit_cursor, true));
+	act = ActionManager::register_action (editor_actions, "select-all-after-edit-cursor", _("select all after edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-all-before-edit-cursor", _("select all before edit cursor"), bind (mem_fun(*this, &Editor::select_all_after_cursor), edit_cursor, false));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "select-all-after-playhead", _("select all after playhead"), bind (mem_fun(*this, &Editor::select_all_after_cursor), playhead_cursor, true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-all-before-playhead", _("select all before playhead"), bind (mem_fun(*this, &Editor::select_all_after_cursor), playhead_cursor, false));
+	act = ActionManager::register_action (editor_actions, "select-all-before-edit-cursor", _("select all before edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-       	act = ActionManager::register_action (editor_actions, "select-all-in-punch-range", _("select all in punch range"), mem_fun(*this, &Editor::select_all_from_punch));
+	act = ActionManager::register_action (editor_actions, "select-all-after-playhead", _("select all after playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true));
 	ActionManager::session_sensitive_actions.push_back (act);
-       	act = ActionManager::register_action (editor_actions, "select-all-in-loop-range", _("select all in loop range"), mem_fun(*this, &Editor::select_all_from_loop));
+	act = ActionManager::register_action (editor_actions, "select-all-before-playhead", _("select all before playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+       	act = ActionManager::register_action (editor_actions, "select-all-in-punch-range", _("select all in punch range"), mem_fun(*this, &Editor::select_all_selectables_using_punch));
+	ActionManager::session_sensitive_actions.push_back (act);
+       	act = ActionManager::register_action (editor_actions, "select-all-in-loop-range", _("select all in loop range"), mem_fun(*this, &Editor::select_all_selectables_using_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "jump-forward-to-mark", _("jump forward to mark"), mem_fun(*this, &Editor::jump_forward_to_mark));

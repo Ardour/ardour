@@ -635,7 +635,7 @@ class Editor : public PublicEditor
 	void    cursor_to_region_point (Cursor*, ARDOUR::RegionPoint, int32_t dir);
 	void    cursor_to_selection_start (Cursor *);
 	void    cursor_to_selection_end   (Cursor *);
-	void    select_all_after_cursor (Cursor *, bool);
+	void    select_all_selectables_using_cursor (Cursor *, bool);
 
 	ARDOUR::Region* find_next_region (jack_nframes_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
 
@@ -1004,8 +1004,9 @@ class Editor : public PublicEditor
 	void cursor_align (bool playhead_to_edit);
 
 	void remove_last_capture ();
-	void select_all_from_loop();
-	void select_all_from_punch();
+	void select_all_selectables_using_time_selection ();
+	void select_all_selectables_using_loop();
+	void select_all_selectables_using_punch();
 	void set_selection_from_range (ARDOUR::Location&);
 	void set_selection_from_punch ();
 	void set_selection_from_loop ();
@@ -1251,7 +1252,7 @@ class Editor : public PublicEditor
 	void marker_menu_rename ();
 	void marker_menu_hide ();
 	void marker_menu_loop_range ();
-	void marker_menu_select_all_from_range ();
+	void marker_menu_select_all_selectables_using_range ();
 	void marker_menu_play_from ();
 	void marker_menu_set_playhead ();
 	void marker_menu_set_from_playhead ();

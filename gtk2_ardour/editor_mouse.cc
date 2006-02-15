@@ -191,13 +191,10 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 
 	} else {
 
-		/* in range mode, hide object (region) selection, and show the 
-		   range selection.
+		/* 
+		   in range mode,show the range selection.
 		*/
 
-		for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-			(*i)->set_should_show_selection (false);
-		}
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 			if ((*i)->selected()) {
 				(*i)->show_selection (selection->time);

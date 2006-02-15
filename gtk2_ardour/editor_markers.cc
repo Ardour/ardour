@@ -481,7 +481,7 @@ Editor::build_range_marker_menu ()
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::marker_menu_remove)));
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Select all in Range"), mem_fun(*this, &Editor::marker_menu_select_all_from_range)));
+	items.push_back (MenuElem (_("Select all in Range"), mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
 
 }
 
@@ -529,7 +529,7 @@ Editor::build_transport_marker_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Select all in Range"), mem_fun(*this, &Editor::marker_menu_select_all_from_range)));
+	items.push_back (MenuElem (_("Select all in Range"), mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
 }
 
 void
@@ -551,7 +551,7 @@ Editor::marker_menu_hide ()
 }
 
 void
-Editor::marker_menu_select_all_from_range ()
+Editor::marker_menu_select_all_selectables_using_range ()
 {
 	Marker* marker;
 
@@ -559,11 +559,11 @@ Editor::marker_menu_select_all_from_range ()
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
+
 	Location* l;
 	bool is_start;
 
-	if ((l = find_location_from_marker (marker, is_start)) != 0) {
-
+	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
 	        select_all_within (l->start(), l->end(), 0,  DBL_MAX, false);
 	}
 	  
