@@ -363,6 +363,7 @@ RouteUI::route_rec_enable_changed (void *src)
 void
 RouteUI::session_rec_enable_changed ()
 {
+	cerr << this << " for " << _route.name() << " SREC\n";
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_rec_display));
 }
 

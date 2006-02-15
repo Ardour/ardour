@@ -39,6 +39,7 @@
 (gtk-accel_path "<Actions>/Common/ToggleSoundFileBrowser" "<alt>f")
 (gtk-accel_path "<Actions>/Common/ToggleLocations" "<alt>l")
 (gtk-accel_path "<Actions>/Common/ToggleBigClock" "<alt>b")
+(gtk-accel_path "<Actions>/Common/ToggleColorManagerF" "<alt>c")
 
 (gtk_accel_path "<Actions>/Editor/editor-copy" "<control>c")
 (gtk_accel_path "<Actions>/Common/Quit" "<control>q")
