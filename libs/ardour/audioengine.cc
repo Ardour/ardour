@@ -80,7 +80,7 @@ _thread_init_callback (void *arg)
 	   knows about it.
 	*/
 
-	PBD::ThreadCreated (pthread_self(), X_("Audioengine"));
+	PBD::ThreadCreatedWithRequestSize (pthread_self(), X_("Audioengine"), 4096);
 
 #ifdef VST_SUPPORT
 	if (Config->get_use_vst()) {

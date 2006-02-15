@@ -21,6 +21,7 @@
 #include <map>
 #include <iostream>
 #include <string>
+#include <stdint.h>
 
 #include <pbd/pthread_utils.h>
 
@@ -34,6 +35,7 @@ static pthread_mutex_t thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
 
 namespace PBD {
    sigc::signal<void,pthread_t,std::string> ThreadCreated;
+   sigc::signal<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
 using namespace PBD;

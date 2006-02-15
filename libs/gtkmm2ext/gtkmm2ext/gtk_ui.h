@@ -70,7 +70,9 @@ class UI : public AbstractUI
 	void call_slot_locked (sigc::slot<void>);
 	void touch_display (Touchable *);
 	void receive (Transmitter::Channel, const char *);
+
 	void register_thread (pthread_t, string);
+	void register_thread_with_request_count (pthread_t, string, uint32_t num_requests);
 
 	bool caller_is_gui_thread () { 
 		return pthread_equal (gui_thread, pthread_self());

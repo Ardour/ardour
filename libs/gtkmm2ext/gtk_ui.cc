@@ -31,6 +31,7 @@
 #include <pbd/touchable.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/stacktrace.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/textviewer.h>
@@ -59,6 +60,7 @@ UI::UI (string name, int *argc, char ***argv, string rcfile)
 	}
 
 	PBD::ThreadCreated.connect (mem_fun (*this, &UI::register_thread));
+	PBD::ThreadCreatedWithRequestSize.connect (mem_fun (*this, &UI::register_thread_with_request_count));
 
 	_ok = false;
 	_active = false;
@@ -370,7 +372,13 @@ UI::timeout_add (unsigned int timeout, int (*func)(void *), void *arg)
 void
 UI::register_thread (pthread_t thread_id, string name)
 {
-	RingBufferNPT<Request>* b = new RingBufferNPT<Request> (128);
+	register_thread_with_request_count (thread_id, name, 256);
+}
+
+void
+UI::register_thread_with_request_count (pthread_t thread_id, string name, uint32_t num_requests)
+{
+	RingBufferNPT<Request>* b = new RingBufferNPT<Request> (num_requests);
 
 	{
 		PBD::LockMonitor lm (request_buffer_map_lock, __LINE__, __FILE__);

@@ -16,6 +16,7 @@ std::string pthread_name ();
 
 namespace PBD {
   extern sigc::signal<void,pthread_t,std::string> ThreadCreated;
+  extern sigc::signal<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
 #endif /* __pbd_pthread_utils__ */

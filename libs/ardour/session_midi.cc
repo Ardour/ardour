@@ -1272,7 +1272,7 @@ Session::midi_thread_work ()
 	bool restart;
 	vector<MIDI::Port*> ports;
 
-	PBD::ThreadCreated (pthread_self(), X_("MIDI"));
+	PBD::ThreadCreatedWithRequestSize (pthread_self(), X_("MIDI"), 2048);
 
 	memset (&rtparam, 0, sizeof (rtparam));
 	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
