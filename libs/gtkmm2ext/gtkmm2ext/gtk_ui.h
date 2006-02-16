@@ -25,6 +25,7 @@
 #include <queue>
 #include <map>
 
+#include <stdint.h>
 #include <setjmp.h>
 #include <pthread.h>
 #include <gtkmm/widget.h>
