@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <string>
+#include <stdint.h>
 
 #include <sigc++/sigc++.h>
 
