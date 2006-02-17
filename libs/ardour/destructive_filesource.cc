@@ -96,6 +96,8 @@ DestructiveFileSource::DestructiveFileSource (const XMLNode& node, jack_nframes_
 
 DestructiveFileSource::~DestructiveFileSource()
 {
+	delete [] out_coefficient;
+	delete [] in_coefficient;
 	delete xfade_buf;
 }
 
@@ -148,9 +150,10 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 	jack_nframes_t xfade = min (xfade_frames, cnt);
 	jack_nframes_t nofade = cnt - xfade;
 	Sample* fade_data = 0;
-	off_t fade_position = 0; // in frames
+	jack_nframes_t fade_position = 0; // in frames
 	ssize_t retval;
-	
+	jack_nframes_t file_cnt;
+
 	if (fade_in) {
 		fade_position = file_pos;
 		fade_data = data;
@@ -159,15 +162,41 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 		fade_data = data + nofade;
 	}
 
-	if ((retval = file_read (xfade_buf, fade_position, xfade, workbuf)) != (ssize_t) xfade) {
-		if (retval >= 0 && errno == EAGAIN) {
-			/* XXX - can we really trust that errno is meaningful here?  yes POSIX, i'm talking to you.
-			 * short or no data there */
-			memset (xfade_buf, 0, xfade * sizeof(Sample));
-		} else {
-			error << string_compose(_("DestructiveFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"), _path, retval, errno, strerror (errno), xfade) << endmsg;
-			return 0;
+	if (fade_position > _length) {
+		
+		/* read starts beyond end of data, just memset to zero */
+		
+		file_cnt = 0;
+
+	} else if (fade_position + xfade > _length) {
+		
+		/* read ends beyond end of data, read some, memset the rest */
+		
+		file_cnt = _length - fade_position;
+
+	} else {
+		
+		/* read is entirely within data */
+
+		file_cnt = xfade;
+	}
+
+	if (file_cnt) {
+		if ((retval = file_read (xfade_buf, fade_position, xfade, workbuf)) != (ssize_t) xfade) {
+			if (retval >= 0 && errno == EAGAIN) {
+				/* XXX - can we really trust that errno is meaningful here?  yes POSIX, i'm talking to you.
+				 * short or no data there */
+				memset (xfade_buf, 0, xfade * sizeof(Sample));
+			} else {
+				error << string_compose(_("DestructiveFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"), _path, retval, errno, strerror (errno), xfade) << endmsg;
+				return 0;
+			}
 		}
+	} 
+
+	if (file_cnt != xfade) {
+		jack_nframes_t delta = xfade - file_cnt;
+		memset (xfade_buf+file_cnt, 0, sizeof (Sample) * delta);
 	}
 	
 	if (nofade && !fade_in) {
