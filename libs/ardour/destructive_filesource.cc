@@ -77,6 +77,7 @@ DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, 
 
 	_capture_start = false;
 	_capture_end = false;
+	file_pos = 0;
 }
 
 DestructiveFileSource::DestructiveFileSource (const XMLNode& node, jack_nframes_t rate)
@@ -90,6 +91,7 @@ DestructiveFileSource::DestructiveFileSource (const XMLNode& node, jack_nframes_
 
 	_capture_start = false;
 	_capture_end = false;
+	file_pos = 0;
 }
 
 DestructiveFileSource::~DestructiveFileSource()
@@ -160,10 +162,8 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 	if ((retval = file_read (xfade_buf, fade_position, xfade, workbuf)) != (ssize_t) xfade) {
 		if (retval >= 0 && errno == EAGAIN) {
 			/* XXX - can we really trust that errno is meaningful here?  yes POSIX, i'm talking to you.
-			/* short or no data there */
-
-			xfade = retval;
-			nofade = cnt - xfade;
+			 * short or no data there */
+			memset (xfade_buf, 0, xfade * sizeof(Sample));
 		} else {
 			error << string_compose(_("DestructiveFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"), _path, retval, errno, strerror (errno), xfade) << endmsg;
 			return 0;
@@ -244,12 +244,40 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 		
 		jack_nframes_t oldlen;
 
-		if (_capture_start) {
+		if (_capture_start && _capture_end) {
 			_capture_start = false;
 			_capture_end = false;
 
 			/* move to the correct location place */
-			//file_pos = data_offset + (capture_start_frame * sizeof (Sample));
+			file_pos = capture_start_frame;
+			
+			cerr << "First frame of capture will be at " << file_pos << "  and last at: " << file_pos + cnt << endl;
+
+			// split cnt in half
+			jack_nframes_t subcnt = cnt / 2;
+			jack_nframes_t ofilepos = file_pos;
+			
+			// fade in
+			if (crossfade (data, subcnt, 1, workbuf) != subcnt) {
+				return 0;
+			}
+
+			file_pos += subcnt;
+			Sample * tmpdata = data + subcnt;
+			
+			// fade out
+			subcnt = cnt - subcnt;
+			if (crossfade (tmpdata, subcnt, 0, workbuf) != subcnt) {
+				return 0;
+			}
+
+			file_pos = ofilepos; // adjusted below
+		}
+		else if (_capture_start) {
+			_capture_start = false;
+			_capture_end = false;
+
+			/* move to the correct location place */
 			file_pos = capture_start_frame;
 			
 			cerr << "First frame of capture will be at " << file_pos << endl;

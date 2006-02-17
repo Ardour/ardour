@@ -268,6 +268,18 @@ class DiskStream : public Stateful, public sigc::trackable
 
 	~DiskStream();
 
+	enum TransitionType {
+		CaptureStart = 0,
+		CaptureEnd
+	};
+	
+	struct CaptureTransition {
+
+		TransitionType   type;
+		// the start or end file frame pos
+		jack_nframes_t   capture_val;
+	};
+	
 	struct ChannelInfo {
 
 		Sample     *playback_wrap_buffer;
@@ -292,9 +304,14 @@ class DiskStream : public Stateful, public sigc::trackable
 
 		RingBufferNPT<Sample>::rw_vector playback_vector;
 		RingBufferNPT<Sample>::rw_vector capture_vector;
+
+		RingBufferNPT<CaptureTransition> * capture_transition_buf;
+		// the following are used in the butler thread only
+		jack_nframes_t                     curr_capture_cnt;
 	};
 
 	typedef vector<ChannelInfo> ChannelList;
+
 
 	string            _name;
 	ARDOUR::Session&  _session;

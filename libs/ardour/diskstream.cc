@@ -104,10 +104,13 @@ DiskStream::init_channel (ChannelInfo &chan)
 	chan.source = 0;
 	chan.current_capture_buffer = 0;
 	chan.current_playback_buffer = 0;
+	chan.curr_capture_cnt = 0;
 	
 	chan.playback_buf = new RingBufferNPT<Sample> (_session.diskstream_buffer_size());
 	chan.capture_buf = new RingBufferNPT<Sample> (_session.diskstream_buffer_size());
-
+	chan.capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
+	
+	
 	/* touch the ringbuffer buffers, which will cause
 	   them to be mapped into locked physical RAM if
 	   we're running with mlockall(). this doesn't do
@@ -115,6 +118,7 @@ DiskStream::init_channel (ChannelInfo &chan)
 	*/
 	memset (chan.playback_buf->buffer(), 0, sizeof (Sample) * chan.playback_buf->bufsize());
 	memset (chan.capture_buf->buffer(), 0, sizeof (Sample) * chan.capture_buf->bufsize());
+	memset (chan.capture_transition_buf->buffer(), 0, sizeof (CaptureTransition) * chan.capture_transition_buf->bufsize());
 }
 
 
@@ -196,7 +200,8 @@ DiskStream::destroy_channel (ChannelInfo &chan)
 	
 	delete chan.playback_buf;
 	delete chan.capture_buf;
-
+	delete chan.capture_transition_buf;
+	
 	chan.playback_buf = 0;
 	chan.capture_buf = 0;
 }
@@ -615,10 +620,23 @@ DiskStream::check_record_status (jack_nframes_t transport_frame, jack_nframes_t 
 		}
 
 		if (_flags & Recordable) {
-			cerr << "START RECORD @ " << capture_start_frame << " = " << capture_start_frame * sizeof (Sample) << endl;
+			cerr << "START RECORD @ " << capture_start_frame << endl;
+
 			for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-				(*chan).write_source->mark_capture_start (capture_start_frame);
-			}
+				
+				RingBufferNPT<CaptureTransition>::rw_vector transvec;
+				(*chan).capture_transition_buf->get_write_vector(&transvec);
+				
+				if (transvec.len[0] > 0) {
+					transvec.buf[0]->type = CaptureStart;
+					transvec.buf[0]->capture_val = capture_start_frame;
+					(*chan).capture_transition_buf->increment_write_ptr(1);
+				}
+				else {
+					// bad!
+					cerr << "capture_transition_buf is full on rec start!  inconceivable!" << endl;
+				}
+ 			}
 		}
 
 	} else if (!record_enabled() || !can_record) {
@@ -1442,6 +1460,7 @@ DiskStream::do_flush (char * workbuf, bool force_flush)
 	uint32_t to_write;
 	int32_t ret = 0;
 	RingBufferNPT<Sample>::rw_vector vector;
+	RingBufferNPT<CaptureTransition>::rw_vector transvec;
 	jack_nframes_t total;
 	
 	/* important note: this function will write *AT MOST* 
@@ -1462,10 +1481,12 @@ DiskStream::do_flush (char * workbuf, bool force_flush)
 
 		total = vector.len[0] + vector.len[1];
 
+		
 		if (total == 0 || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
 			goto out;
 		}
 
+		
 		/* if there are 2+ chunks of disk i/o possible for
 		   this track, let the caller know so that it can arrange
 		   for us to be called again, ASAP.
@@ -1482,15 +1503,86 @@ DiskStream::do_flush (char * workbuf, bool force_flush)
 		} 
 
 		to_write = min (disk_io_chunk_frames, (jack_nframes_t) vector.len[0]);
-	
+		
+		
+		// check the transition buffer when recording destructive
+		// important that we get this after the capture buf
+
+		if (destructive()) {
+			(*chan).capture_transition_buf->get_read_vector(&transvec);
+			size_t transcount = transvec.len[0] + transvec.len[1];
+			bool have_start = false;
+			size_t ti;
+
+			for (ti=0; ti < transcount; ++ti) {
+				CaptureTransition & captrans = (ti < transvec.len[0]) ? transvec.buf[0][ti] : transvec.buf[1][ti-transvec.len[0]];
+				
+				if (captrans.type == CaptureStart) {
+					// by definition, the first data we got above represents the given capture pos
+					cerr << "DS " << name() << "  got CaptureStart at " << captrans.capture_val << endl;
+
+					(*chan).write_source->mark_capture_start (captrans.capture_val);
+					
+					(*chan).curr_capture_cnt = 0;
+
+					have_start = true;
+				}
+				else if (captrans.type == CaptureEnd) {
+
+					// capture end, the capture_val represents total frames in capture
+
+					if (captrans.capture_val <= (*chan).curr_capture_cnt + to_write) {
+
+						cerr << "DS " << name() << "  got CaptureEnd with " << captrans.capture_val << endl;
+						// shorten to make the write a perfect fit
+						uint32_t nto_write = (captrans.capture_val - (*chan).curr_capture_cnt); 
+						if (have_start) {
+							// starts and ends within same chunk we're processing
+							cerr << "Starts and ends within same chunk: adjusting to_write from: "
+							     << to_write << " to: " << nto_write << endl;
+						}
+						else {
+							cerr << "Ends within chunk: adjusting to_write to: "
+							     << to_write << " to: " << nto_write << endl;
+						}
+
+						if (nto_write < to_write) {
+							ret = 1; // should we?
+						}
+						to_write = nto_write;
+
+						(*chan).write_source->mark_capture_end ();
+						
+						// increment past this transition, but go no further
+						++ti;
+						break;
+					}
+					else {
+						// actually ends just beyond this chunk, so force more work
+						cerr << "DS " << name() << " got CaptureEnd beyond our chunk, cnt of: "
+						     << captrans.capture_val << "  leaving on queue" << endl;
+						ret = 1;
+						break;
+					}
+				}
+			}
+
+			if (ti > 0) {
+				(*chan).capture_transition_buf->increment_read_ptr(ti);
+			}
+		}
+
+
+		
 		if ((!(*chan).write_source) || (*chan).write_source->write (vector.buf[0], to_write, workbuf) != to_write) {
 			error << string_compose(_("DiskStream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
 		}
 
 		(*chan).capture_buf->increment_read_ptr (to_write);
-
-		if ((to_write == vector.len[0]) && (total > to_write) && (to_write < disk_io_chunk_frames)) {
+		(*chan).curr_capture_cnt += to_write;
+		
+		if ((to_write == vector.len[0]) && (total > to_write) && (to_write < disk_io_chunk_frames) && !destructive()) {
 		
 			/* we wrote all of vector.len[0] but it wasn't an entire
 			   disk_io_chunk_frames of data, so arrange for some part 
@@ -1507,6 +1599,7 @@ DiskStream::do_flush (char * workbuf, bool force_flush)
 			_write_data_count += (*chan).write_source->write_data_count();
 	
 			(*chan).capture_buf->increment_read_ptr (to_write);
+			(*chan).curr_capture_cnt += to_write;
 		}
 	}
 
@@ -1700,16 +1793,31 @@ DiskStream::finish_capture (bool rec_monitors_input)
 {
 	was_recording = false;
 	
-	if (_flags & Recordable) {
-		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-			(*chan).write_source->mark_capture_end ();
-		}
-	}
-	
 	if (capture_captured == 0) {
 		return;
 	}
-		
+
+	if ((_flags & Recordable) && destructive()) {
+		cerr << "RECORD END @ " << capture_start_frame + capture_captured << endl;
+		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+			
+			RingBufferNPT<CaptureTransition>::rw_vector transvec;
+			(*chan).capture_transition_buf->get_write_vector(&transvec);
+			
+			
+			if (transvec.len[0] > 0) {
+				transvec.buf[0]->type = CaptureEnd;
+				transvec.buf[0]->capture_val = capture_captured;
+				(*chan).capture_transition_buf->increment_write_ptr(1);
+			}
+			else {
+				// bad!
+				cerr << "capture_transition_buf is full when stopping record!  inconceivable!" << endl;
+			}
+		}
+	}
+	
+	
 	CaptureInfo* ci = new CaptureInfo;
 	
 	ci->start =  capture_start_frame;

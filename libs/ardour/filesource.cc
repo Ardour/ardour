@@ -1125,7 +1125,7 @@ FileSource::read_pcm_24 (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, 
 
 	if ((nread = pread (fd, (char *) workbuf, byte_cnt, data_offset + (start * _sample_size))) != byte_cnt) {
 		
-		cerr << "FileSource: \""
+		cerr << "May be OK - FileSource: \""
 		     << _path
 		     << "\" bad 24bit read at frame "
 		     << start
