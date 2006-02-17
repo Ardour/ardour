@@ -406,7 +406,17 @@ DiskStream::use_new_playlist ()
 
 	if ((playlist = new AudioPlaylist (_session, newname, hidden())) != 0) {
 		playlist->set_orig_diskstream_id (id());
-		return use_playlist (playlist);
+
+		if (use_playlist (playlist)) {
+			return -1;
+		}
+
+		if (destructive()) {
+			setup_destructive_playlist ();
+		}
+
+		return 0;
+
 	} else { 
 		return -1;
 	}
@@ -431,6 +441,25 @@ DiskStream::use_copy_playlist ()
 	} else { 
 		return -1;
 	}
+}
+
+void
+DiskStream::setup_destructive_playlist ()
+{
+	AudioRegion::SourceList srcs;
+
+	/* make sure we have sources for every channel */
+
+	reset_write_sources (true);
+
+	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+		srcs.push_back ((*chan).write_source);
+	}
+
+	/* a single full-sized region */
+
+	AudioRegion* region = new AudioRegion (srcs, 0, max_frames, _name);
+	_playlist->add_region (*region, 0);		
 }
 
 void
@@ -1719,61 +1748,77 @@ DiskStream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture
 		}
 	}
 
-	/* Register a new region with the Session that
-	   describes the entire source. Do this first
-	   so that any sub-regions will obviously be
-	   children of this one (later!)
-	*/
+	/* destructive tracks have a single, never changing region */
 
-	try {
-		region = new AudioRegion (srcs, channels[0].write_source->last_capture_start_frame(), total_capture, 
-					  region_name_from_path (channels[0].write_source->name()), 
-					  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile));
+	if (destructive()) {
 
-		region->special_set_position (capture_info.front()->start);
-	}
-	
-	catch (failed_constructor& err) {
-		error << string_compose(_("%1: could not create region for complete audio file"), _name) << endmsg;
-		/* XXX what now? */
-	}
-
-	_last_capture_regions.push_back (region);
-
-	// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
-
-	_session.add_undo (_playlist->get_memento());
-	_playlist->freeze ();
+		/* send a signal that any UI can pick up to do the right thing. there is 
+		   a small problem here in that a UI may need the peak data to be ready
+		   for the data that was recorded and this isn't interlocked with that
+		   process. this problem is deferred to the UI.
+		 */
 		
-	for (buffer_position = channels[0].write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+		_playlist->Modified();
 
-		string region_name;
-		_session.region_name (region_name, _name, false);
+	} else {
 
-		// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
-
+		/* Register a new region with the Session that
+		   describes the entire source. Do this first
+		   so that any sub-regions will obviously be
+		   children of this one (later!)
+		*/
+		
 		try {
-			region = new AudioRegion (srcs, buffer_position, (*ci)->frames, region_name);
+			region = new AudioRegion (srcs, channels[0].write_source->last_capture_start_frame(), total_capture, 
+						  region_name_from_path (channels[0].write_source->name()), 
+						  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile));
+			
+			region->special_set_position (capture_info.front()->start);
 		}
+		
 		
 		catch (failed_constructor& err) {
-			error << _("DiskStream: could not create region for captured audio!") << endmsg;
-			continue; /* XXX is this OK? */
+			error << string_compose(_("%1: could not create region for complete audio file"), _name) << endmsg;
+			/* XXX what now? */
+		}
+		
+		_last_capture_regions.push_back (region);
+
+		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
+		
+		_session.add_undo (_playlist->get_memento());
+		_playlist->freeze ();
+		
+		for (buffer_position = channels[0].write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+			
+			string region_name;
+			_session.region_name (region_name, _name, false);
+			
+			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
+			
+			try {
+				region = new AudioRegion (srcs, buffer_position, (*ci)->frames, region_name);
+			}
+			
+			catch (failed_constructor& err) {
+				error << _("DiskStream: could not create region for captured audio!") << endmsg;
+				continue; /* XXX is this OK? */
+			}
+			
+			_last_capture_regions.push_back (region);
+			
+			// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
+			
+			i_am_the_modifier++;
+			_playlist->add_region (*region, (*ci)->start);
+			i_am_the_modifier--;
+			
+			buffer_position += (*ci)->frames;
 		}
 
-		_last_capture_regions.push_back (region);
-		
-		// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
-
-		i_am_the_modifier++;
-		_playlist->add_region (*region, (*ci)->start);
-		i_am_the_modifier--;
-
-		buffer_position += (*ci)->frames;
+		_playlist->thaw ();
+		_session.add_redo_no_execute (_playlist->get_memento());
 	}
-
-	_playlist->thaw ();
-	_session.add_redo_no_execute (_playlist->get_memento());
 
 	mark_write_completed = true;
 
@@ -1812,7 +1857,7 @@ DiskStream::finish_capture (bool rec_monitors_input)
 			}
 			else {
 				// bad!
-				cerr << "capture_transition_buf is full when stopping record!  inconceivable!" << endl;
+				fatal << string_compose (_("programmer error: %1"), X_("capture_transition_buf is full when stopping record!  inconceivable!")) << endmsg;
 			}
 		}
 	}
@@ -2159,7 +2204,7 @@ DiskStream::reset_write_sources (bool mark_write_complete, bool force)
 	capturing_sources.clear ();
 	
 	for (chan = channels.begin(), n = 0; chan != channels.end(); ++chan, ++n) {
-		if (mark_write_complete) {
+		if ((*chan).write_source && mark_write_complete) {
 			(*chan).write_source->mark_streaming_write_completed ();
 		}
 		use_new_write_source (n);

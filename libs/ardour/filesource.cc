@@ -967,9 +967,36 @@ FileSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * 
 jack_nframes_t
 FileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {
-	
-	if (file_read(dst, start, cnt, workbuf) != (ssize_t) cnt) {
-		return 0;
+	jack_nframes_t file_cnt;
+
+	if (start > _length) {
+
+		/* read starts beyond end of data, just memset to zero */
+		
+		file_cnt = 0;
+
+	} else if (start + cnt > _length) {
+		
+		/* read ends beyond end of data, read some, memset the rest */
+		
+		file_cnt = _length - start;
+
+	} else {
+		
+		/* read is entirely within data */
+
+		file_cnt = cnt;
+	}
+
+	if (file_cnt) {
+		if (file_read(dst, start, file_cnt, workbuf) != (ssize_t) cnt) {
+			return 0;
+		}
+	}
+
+	if (file_cnt != cnt) {
+		jack_nframes_t delta = cnt - file_cnt;
+		memset (dst+file_cnt, 0, sizeof (Sample) * delta);
 	}
 	
 	return cnt;
