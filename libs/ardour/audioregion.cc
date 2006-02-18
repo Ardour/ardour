@@ -123,7 +123,6 @@ AudioRegion::AudioRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t
 	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		sources.push_back (*i);
 		master_sources.push_back (*i);
-
 		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 	}
 

@@ -43,6 +43,8 @@ class DestructiveFileSource : public FileSource {
 
 	jack_nframes_t write (Sample *src, jack_nframes_t cnt, char * workbuf);
 
+	XMLNode& get_state ();
+
   private:
 	static jack_nframes_t xfade_frames;
 	static gain_t* out_coefficient;

@@ -62,6 +62,7 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/source.h>
 #include <ardour/filesource.h>
+#include <ardour/destructive_filesource.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/auditioner.h>
@@ -1801,8 +1802,13 @@ Session::XMLSourceFactory (const XMLNode& node)
 		return 0;
 	}
 
+
 	try {
-		src = new FileSource (node, frame_rate());
+		if (node.property (X_("destructive")) != 0) {
+			src = new DestructiveFileSource (node, frame_rate());
+		} else {
+			src = new FileSource (node, frame_rate());
+		}
 	}
 	
 	catch (failed_constructor& err) {

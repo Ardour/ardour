@@ -73,6 +73,10 @@ DiskStream::DiskStream (Session &sess, const string &name, Flag flag)
 	use_new_playlist ();
 	in_set_state = false;
 
+	if (destructive()) {
+		setup_destructive_playlist ();
+	}
+
 	DiskStreamCreated (this); /* EMIT SIGNAL */
 }
 	
@@ -89,6 +93,10 @@ DiskStream::DiskStream (Session& sess, const XMLNode& node)
 	}
 
 	in_set_state = false;
+
+	if (destructive()) {
+		use_destructive_playlist ();
+	}
 
 	DiskStreamCreated (this); /* EMIT SIGNAL */
 }
@@ -406,17 +414,7 @@ DiskStream::use_new_playlist ()
 
 	if ((playlist = new AudioPlaylist (_session, newname, hidden())) != 0) {
 		playlist->set_orig_diskstream_id (id());
-
-		if (use_playlist (playlist)) {
-			return -1;
-		}
-
-		if (destructive()) {
-			setup_destructive_playlist ();
-		}
-
-		return 0;
-
+		return use_playlist (playlist);
 	} else { 
 		return -1;
 	}
@@ -460,6 +458,22 @@ DiskStream::setup_destructive_playlist ()
 
 	AudioRegion* region = new AudioRegion (srcs, 0, max_frames, _name);
 	_playlist->add_region (*region, 0);		
+}
+
+void
+DiskStream::use_destructive_playlist ()
+{
+	/* use the sources associated with the single full-extent region */
+
+	AudioRegion* region = dynamic_cast<AudioRegion*> (_playlist->regions_at (0)->front());
+	uint32_t n;
+	ChannelList::iterator chan;
+
+	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
+		(*chan).write_source = dynamic_cast<FileSource*>(&region->source (n));
+	}
+
+	/* the source list will never be reset for a destructive track */
 }
 
 void
@@ -2122,7 +2136,8 @@ DiskStream::set_state (const XMLNode& node)
 
 	capturing_sources.clear ();
 
-	if (recordable()) {
+	if (recordable() && !destructive()) {
+		/* destructive diskstreams get their sources set up elsewhere */
 		reset_write_sources (false);
 	}
 		
@@ -2168,6 +2183,8 @@ DiskStream::use_new_write_source (uint32_t n)
 		chan.write_source = 0;
 		return -1;
 	}
+
+	cerr << _name << " using a new source " << chan.write_source << " for channel " << n << endl;
 
 	chan.write_source->use ();
 

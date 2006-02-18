@@ -989,7 +989,7 @@ FileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt
 	}
 
 	if (file_cnt) {
-		if (file_read(dst, start, file_cnt, workbuf) != (ssize_t) cnt) {
+		if (file_read(dst, start, file_cnt, workbuf) != (ssize_t) file_cnt) {
 			return 0;
 		}
 	}

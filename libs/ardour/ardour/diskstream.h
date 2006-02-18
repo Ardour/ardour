@@ -439,6 +439,7 @@ class DiskStream : public Stateful, public sigc::trackable
 	void check_record_status (jack_nframes_t transport_frame, jack_nframes_t nframes, bool can_record);
 	void set_align_style_from_io();
 	void setup_destructive_playlist ();
+	void use_destructive_playlist ();
 };
 
 }; /* namespace ARDOUR */
