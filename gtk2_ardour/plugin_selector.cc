@@ -323,5 +323,6 @@ PluginSelector::cleanup ()
 {
 	hide();
 	added_plugins.clear();
+	amodel->clear();
 }
 
