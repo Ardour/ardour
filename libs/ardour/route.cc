@@ -444,7 +444,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				}
 			}
 			
-			if (apply_gain_automation && _session.transport_rolling()) {
+			if (apply_gain_automation && _session.transport_rolling() && nframes > 0) {
 				_effective_gain = gab[nframes-1];
 			}
 			

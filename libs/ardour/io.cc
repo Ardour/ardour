@@ -163,6 +163,8 @@ IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 	double fractional_shift;
 	double fractional_pos;
 	gain_t polscale = invert_polarity ? -1.0f : 1.0f;
+
+	if (nframes == 0) return;
 	
 	fractional_shift = -1.0/declick;
 

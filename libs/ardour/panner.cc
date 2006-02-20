@@ -613,7 +613,8 @@ EqualPowerStereoPanner::distribute_automated (Sample* src, Sample** obufs,
 
 	/* store effective pan position. do this even if we are muted */
 
-	effective_x = buffers[0][nframes-1];
+	if (nframes > 0) 
+		effective_x = buffers[0][nframes-1];
 
 	if (_muted) {
 		return;
