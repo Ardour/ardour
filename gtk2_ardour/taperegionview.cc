@@ -32,6 +32,7 @@
 
 #include "taperegionview.h"
 #include "audio_time_axis.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -100,10 +101,45 @@ TapeAudioRegionView::init (double amplitude_above_axis, Gdk::Color& basic_color,
 	set_colors ();
 
 	// ColorChanged.connect (mem_fun (*this, &AudioRegionView::color_handler));
+
+	/* every time the wave data changes and peaks are ready, redraw */
+
+	for (uint32_t n = 0; n < region.n_channels(); ++n) {
+		region.source(n).PeaksReady.connect (bind (mem_fun(*this, &TapeAudioRegionView::update), n));
+	}
+	
 }
 
 TapeAudioRegionView::~TapeAudioRegionView()
 {
+}
+
+void
+TapeAudioRegionView::update (uint32_t n)
+{
+	/* check that all waves are build and ready */
+
+	if (!tmp_waves.empty()) {
+		return;
+	}
+
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &TapeAudioRegionView::update), n));
+
+	cerr << "peaks ready for channel " << n << endl;
+
+	cerr << "tmp waves size = " << tmp_waves.size() << " waves size = " << waves.size() << endl;
+
+	for (uint32_t x = 0; x < waves.size(); ++x) {
+		cerr << "waves[" << x << "] = " << waves[x] << endl;
+	}
+
+	for (vector<WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
+		cerr << "iterator[" << distance (i, waves.begin()) << "] = " << (*i) << endl;
+	}
+
+	/* this triggers a cache invalidation and redraw in the waveview */
+
+	waves[n]->property_data_src() = &region;
 }
 
 void

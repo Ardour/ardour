@@ -264,7 +264,7 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 	{
 		LockMonitor lm (_lock, __LINE__, __FILE__);
 		
-		jack_nframes_t oldlen;
+		jack_nframes_t old_file_pos;
 
 		if (_capture_start && _capture_end) {
 			_capture_start = false;
@@ -321,7 +321,7 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 			}
 		}
 
-		oldlen = _length;
+		old_file_pos = file_pos;
 		if (file_pos + cnt > _length) {
 			_length = file_pos + cnt;
 		}
@@ -336,7 +336,7 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 				pbr = pending_peak_builds.back();
 			}
 			
-			if (pbr && pbr->frame + pbr->cnt == oldlen) {
+			if (pbr && pbr->frame + pbr->cnt == old_file_pos) {
 				
 				/* the last PBR extended to the start of the current write,
 				   so just extend it again.
@@ -344,14 +344,12 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 
 				pbr->cnt += cnt;
 			} else {
-				pending_peak_builds.push_back (new PeakBuildRecord (oldlen, cnt));
+				pending_peak_builds.push_back (new PeakBuildRecord (old_file_pos, cnt));
 			}
 			
 			_peaks_built = false;
 		}
-
 	}
-
 
 	if (_build_peakfiles) {
 		queue_for_peaks (*this);

@@ -1020,7 +1020,7 @@ FileSource::write (Sample *data, jack_nframes_t cnt, char * workbuf)
 
 		if (_build_peakfiles) {
 			PeakBuildRecord *pbr = 0;
-			
+
 			if (pending_peak_builds.size()) {
 				pbr = pending_peak_builds.back();
 			}

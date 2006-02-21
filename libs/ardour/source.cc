@@ -700,7 +700,6 @@ Source::build_peaks ()
 		pending_peak_builds.clear ();
 	}
 		
-
 #ifdef DEBUG_PEAK_BUILD
 	cerr << "build peaks with " << pending_peak_builds.size() << " requests pending\n";
 #endif		

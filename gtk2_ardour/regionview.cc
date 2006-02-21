@@ -1067,7 +1067,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	*/
 
 	if (which < nchans) {
-		tmp_waves[which] = (wave);
+		tmp_waves[which] = wave;
 	} else {
 		/* n-channel track, >n-channel source */
 	}
@@ -1080,11 +1080,31 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		}
 	}
 	
-	if (n == nwaves) {
+	cerr << "wave ready, n = " << n << " nwaves = " << nwaves << " new wave = " << wave 
+	     << " tmp[" << which << "] = " << tmp_waves[which] << endl;
+	
+	if (n == nwaves && waves.empty()) {
 		/* all waves are ready */
 		tmp_waves.resize(nwaves);
+
+
+		for (uint32_t x = 0; x < tmp_waves.size(); ++x) {
+			cerr << "tmp_waves[" << x << "] = " << tmp_waves[x] << endl;
+		}
+
 		waves = tmp_waves;
 		tmp_waves.clear ();
+
+		cerr << "all waves ready, copied over ...\n";
+
+		for (uint32_t x = 0; x < waves.size(); ++x) {
+			cerr << "waves[" << x << "] = " << waves[x] << endl;
+		}
+		
+		for (vector<WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
+			cerr << "iterator[" << distance (i, waves.begin()) << "] = " << (*i) << endl;
+		}
+		cerr << "--------\n";
 		
 		if (!zero_line) {
 			zero_line = new ArdourCanvas::SimpleLine (*group);
@@ -1094,6 +1114,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 			manage_zero_line ();
 		}
 	}
+	cerr << "done that time\n";
 }
 
 void

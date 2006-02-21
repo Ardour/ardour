@@ -39,6 +39,7 @@ class TapeAudioRegionView : public AudioRegionView
 	void init (double amplitude_above_axis, Gdk::Color& base_color, bool wait_for_waves);
 
 	void set_frame_color ();
+	void update (uint32_t n);
 };
 
 #endif /* __gtk_ardour_tape_audio_region_view_h__ */
