@@ -1036,7 +1036,7 @@ CrossfadeEditor::make_waves (AudioRegion& region, WhichFade which)
 		
 		gdouble yoff = n * ht;
 		
-		if (region.source(n).peaks_ready (bind (mem_fun(*this, &CrossfadeEditor::peaks_ready), &region, which))) {
+		if (region.source(n).peaks_ready (bind (mem_fun(*this, &CrossfadeEditor::peaks_ready), &region, which), peaks_ready_connection)) {
 			
 			WaveView* waveview = new WaveView (*(canvas->root()));
 
@@ -1071,7 +1071,7 @@ CrossfadeEditor::peaks_ready (AudioRegion* r, WhichFade which)
 	   will be ready by the time we want them. but our API forces us
 	   to provide this, so ..
 	*/
-
+	peaks_ready_connection.disconnect ();
 	make_waves (*r, which);
 }
 

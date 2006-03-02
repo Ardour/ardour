@@ -305,7 +305,7 @@ void Source::clear_queue_for_peaks ()
 
 
 bool
-Source::peaks_ready (sigc::slot<void> the_slot) const
+Source::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) const
 {
 	bool ret;
 	LockMonitor lm (_lock, __LINE__, __FILE__);
@@ -315,7 +315,7 @@ Source::peaks_ready (sigc::slot<void> the_slot) const
 	*/
 
 	if (!(ret = _peaks_built)) {
-		PeaksReady.connect (the_slot);
+		conn = PeaksReady.connect (the_slot);
 	}
 
 	return ret;

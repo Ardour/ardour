@@ -90,7 +90,7 @@ class Source : public Stateful, public sigc::trackable
 
  	int  read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start, jack_nframes_t cnt, double samples_per_unit) const;
  	int  build_peaks ();
-	bool peaks_ready (sigc::slot<void>) const;
+	bool peaks_ready (sigc::slot<void>, sigc::connection&) const;
 
 	static sigc::signal<void,Source*> SourceCreated;
 	       

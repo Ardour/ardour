@@ -161,6 +161,7 @@ class AudioRegionView : public TimeAxisViewItem
     double _height;
     bool    in_destructor;
     bool    wait_for_waves;
+    sigc::connection peaks_ready_connection;
 
     void reset_fade_shapes ();
     void reset_fade_in_shape ();

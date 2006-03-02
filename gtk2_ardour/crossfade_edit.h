@@ -160,6 +160,8 @@ class CrossfadeEditor : public ArdourDialog
     
     void set (const ARDOUR::Curve& alist, WhichFade);
 
+    sigc::connection peaks_ready_connection;
+
     void make_waves (ARDOUR::AudioRegion&, WhichFade);
     void peaks_ready (ARDOUR::AudioRegion* r, WhichFade);
     

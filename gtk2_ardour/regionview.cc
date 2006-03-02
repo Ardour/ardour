@@ -1003,7 +1003,7 @@ AudioRegionView::create_waves ()
 		wave_caches.push_back (WaveView::create_cache ());
 
 		if (wait_for_waves) {
-			if (region.source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n))) {
+			if (region.source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), peaks_ready_connection)) {
 				create_one_wave (n, true);
 			} else {
 				create_zero_line = false;
@@ -1080,32 +1080,13 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		}
 	}
 	
-	cerr << "wave ready, n = " << n << " nwaves = " << nwaves << " new wave = " << wave 
-	     << " tmp[" << which << "] = " << tmp_waves[which] << endl;
-	
 	if (n == nwaves && waves.empty()) {
 		/* all waves are ready */
 		tmp_waves.resize(nwaves);
 
-
-		for (uint32_t x = 0; x < tmp_waves.size(); ++x) {
-			cerr << "tmp_waves[" << x << "] = " << tmp_waves[x] << endl;
-		}
-
 		waves = tmp_waves;
 		tmp_waves.clear ();
 
-		cerr << "all waves ready, copied over ...\n";
-
-		for (uint32_t x = 0; x < waves.size(); ++x) {
-			cerr << "waves[" << x << "] = " << waves[x] << endl;
-		}
-		
-		for (vector<WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
-			cerr << "iterator[" << distance (i, waves.begin()) << "] = " << (*i) << endl;
-		}
-		cerr << "--------\n";
-		
 		if (!zero_line) {
 			zero_line = new ArdourCanvas::SimpleLine (*group);
 			zero_line->property_x1() = (gdouble) 1.0;
@@ -1114,12 +1095,12 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 			manage_zero_line ();
 		}
 	}
-	cerr << "done that time\n";
 }
 
 void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
+	peaks_ready_connection.disconnect ();
 	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
 }
 
