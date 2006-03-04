@@ -151,6 +151,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	if(!Glib::file_test(color_file, Glib::FILE_TEST_EXISTS)) {
 		color_file = ARDOUR::find_config_file("ardour.colors");
 	}
+
+	cerr << "Loading UI color configuration file " << color_file << endl;
+	
 	color_manager->load (color_file);
 
 	m_new_session_dialog = 0;

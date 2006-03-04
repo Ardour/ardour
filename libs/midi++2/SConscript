@@ -44,7 +44,11 @@ midi2.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 
 midi2.VersionBuild(['version.cc','midi++/version.h'], 'SConscript')
 
-libmidi2 = midi2.StaticLibrary('midi++', [ sources, sysdep_src ])
+if env['DEVBUILD']:
+	libmidi2 = midi2.SharedLibrary('midi++', [ sources, sysdep_src ])
+else:
+	libmidi2 = midi2.StaticLibrary('midi++', [ sources, sysdep_src ])
+
 Default(libmidi2)
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],

@@ -43,7 +43,11 @@ pbd3.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 
 pbd3.VersionBuild(['version.cc','pbd/version.h'], 'SConscript')
 
-libpbd3 = pbd3.StaticLibrary('pbd', pbd3_files)
+if env['DEVBUILD']:
+	libpbd3 = pbd3.SharedLibrary('pbd', pbd3_files)
+else:
+	libpbd3 = pbd3.StaticLibrary('pbd', pbd3_files)
+
 Default(libpbd3)
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],

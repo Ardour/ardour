@@ -327,7 +327,7 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 		}
 		file_pos += cnt;
 		
-		cerr << this << ' ' << _name << " at end of write, file_pos = " << file_pos << " length = " << ((int) &_length - (int) this) << ' ' << &_length << ' ' << _length << endl;
+		//cerr << this << ' ' << _name << " at end of write, file_pos = " << file_pos << " length = " << ((int) &_length - (int) this) << ' ' << &_length << ' ' << _length << endl;
 
 		if (_build_peakfiles) {
 			PeakBuildRecord *pbr = 0;

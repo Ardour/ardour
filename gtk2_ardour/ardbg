@@ -1,18 +1,3 @@
 #!/bin/sh
-
-export ARDOUR_RC=../ardour.rc
-export ARDOUR_GLADE_PATH=./glade
-export ARDOUR_UI=./ardour.menus
-export ARDOUR_UI_RC=./ardour2_ui.rc
-export ARDOUR_BINDINGS=./ardour.bindings
-
-if [ -x ./ardour.bin ] ; then 
-    # scons executable
-    export LD_LIBRARY_PATH=../libs/ardour:$LD_LIBRARY_PATH
-    exec gdb ./ardour.bin
-else 
-    # autofoo/make executable
-    export LD_LIBRARY_PATH=../libs/ardour/.libs:$LD_LIBRARY_PATH
-    exec gdb ./ardour
-fi
-
+source ardev_common.sh
+exec gdb ./ardour.bin

@@ -439,6 +439,7 @@ if env['SYSLIBS']:
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
     coredirs = [
+	'libs/soundtouch',
         'templates'
     ]
 

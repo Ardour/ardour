@@ -61,7 +61,10 @@ gtkmm2ext.VersionBuild(['version.cc','gtkmm2ext/version.h'], 'SConscript')
 gtkmm2ext.Append(CCFLAGS="-D_REENTRANT")
 gtkmm2ext.Append(CCFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 
-libgtkmm2ext = gtkmm2ext.StaticLibrary('gtkmm2ext', gtkmm2ext_files)
+if env['DEVBUILD']:
+	libgtkmm2ext = gtkmm2ext.SharedLibrary('gtkmm2ext', gtkmm2ext_files)
+else:
+	libgtkmm2ext = gtkmm2ext.StaticLibrary('gtkmm2ext', gtkmm2ext_files)
 
 Default(libgtkmm2ext)
 

@@ -1,9 +1,3 @@
 #!/bin/sh
-
-export ARDOUR_GLADE_PATH=./glade
-export ARDOUR_UI=./ardour.menus
-export ARDOUR_UI_RC=./ardour2_ui.rc
-export ARDOUR_BINDINGS=./ardour.bindings
-
-export LD_LIBRARY_PATH=../libs/ardour:$LD_LIBRARY_PATH
+source ardev_common.sh
 exec valgrind --num-callers=12 --tool=memcheck ./ardour.bin --novst $*

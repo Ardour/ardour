@@ -9,7 +9,7 @@ glibmm2 = env.Copy()
 glibmm2.Merge([libraries['sigc2'], libraries['glib2']])
 
 glibmm2.Append(CXXFLAGS='-DHAVE_CONFIG_H')
-glibmm2.Append(CXXFLAGS='-DG_DISABLE_DEPRECATED')
+#glibmm2.Append(CXXFLAGS='-DG_DISABLE_DEPRECATED')
 glibmm2.Append(CXXFLAGS='-DG_LOG_DOMAIN=\\\"glibmm\\\"')
 
 libglibmm2 = glibmm2.StaticLibrary('glibmm2', glibmm2_files)
