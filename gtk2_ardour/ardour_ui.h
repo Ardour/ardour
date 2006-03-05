@@ -587,6 +587,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	LocationUI *location_ui;
 	int         create_location_ui ();
+	void        handle_locations_change (ARDOUR::Location*);
 
 	ColorManager* color_manager;
 

@@ -10,6 +10,7 @@ using std::string;
 
 #define SNDFILE_HEADER_FORMATS 7
 extern const char * const sndfile_header_formats_strings[SNDFILE_HEADER_FORMATS+1];
+extern const char * const sndfile_file_endings_strings[SNDFILE_HEADER_FORMATS+1];
 
 extern int sndfile_header_formats[SNDFILE_HEADER_FORMATS];
 
@@ -26,6 +27,7 @@ extern int sndfile_endian_formats[SNDFILE_ENDIAN_FORMATS];
 int sndfile_bitdepth_format_from_string(string);
 int sndfile_header_format_from_string(string);
 int sndfile_endian_format_from_string(string);
+string sndfile_file_ending_from_string(string);
 
 int sndfile_data_width (int format);
 

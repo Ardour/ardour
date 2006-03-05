@@ -16,7 +16,7 @@ RouteGroup::apply (void (AudioTrack::*func)(T, void *), T val, void *src)
 		}
 	}
 }
-
+ 
 } /* namespace ARDOUR */
 
 #endif /* __ardour_route_group_specialized_h__ */

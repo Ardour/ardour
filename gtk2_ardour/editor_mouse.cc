@@ -314,21 +314,21 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 		switch (item_type) {
 		case RegionItem:
-			set_selected_regionview_from_click (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift), true);
+			set_selected_regionview_from_click (Keyboard::selection_type (event->button.state), true);
 			break;
 			
 		case AudioRegionViewNameHighlight:
 		case AudioRegionViewName:
-			if ((rv = reinterpret_cast<AudioRegionView *> (item->get_data ("regionview"))) != 0) {
-				set_selected_regionview_from_click (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift), true);
+			if ((rv = static_cast<AudioRegionView *> (item->get_data ("regionview"))) != 0) {
+				set_selected_regionview_from_click (Keyboard::selection_type (event->button.state), true);
 			}
 			break;
 			
 		case GainAutomationControlPointItem:
 		case PanAutomationControlPointItem:
 		case RedirectAutomationControlPointItem:
-			if ((cp = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) != 0) {
-				set_selected_control_point_from_click (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift), true);
+			if ((cp = static_cast<ControlPoint *> (item->get_data ("control_point"))) != 0) {
+				set_selected_control_point_from_click (Keyboard::selection_type (event->button.state), true);
 			}
 			break;
 
@@ -357,7 +357,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		case StreamItem:
 		case RegionItem:
 		case AutomationTrackItem:
-			set_selected_track_from_click (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift), true, true);
+			set_selected_track_from_click (Keyboard::selection_type (event->button.state), true, true);
 			break;
 
 		case AudioRegionViewNameHighlight:
@@ -409,11 +409,19 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				return TRUE;
 
 			case TempoMarkerItem:
-				start_tempo_marker_grab (item, event);
+				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
+					start_tempo_marker_copy_grab (item, event);
+				} else {
+					start_tempo_marker_grab (item, event);
+				}
 				return TRUE;
 
 			case MeterMarkerItem:
-				start_meter_marker_grab (item, event);
+				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
+					start_meter_marker_copy_grab (item, event);
+				} else {
+					start_meter_marker_grab (item, event);
+				}
 				return TRUE;
 
 			case TempoBarItem:
@@ -2143,6 +2151,39 @@ Editor::start_meter_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 }
 
 void
+Editor::start_meter_marker_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	Marker* marker;
+	MeterMarker* meter_marker;
+
+	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: meter marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	meter_marker = dynamic_cast<MeterMarker*> (marker);
+	
+	// create a dummy marker for visual representation of moving the copy.
+	// The actual copying is not done before we reach the finish callback.
+	char name[64];
+	snprintf (name, sizeof(name), "%g/%g", meter_marker->meter().beats_per_bar(), meter_marker->meter().note_divisor ());
+	MeterMarker* new_marker = new MeterMarker(*this, *meter_group, color_map[cMeterMarker], name, 
+						  *new MeterSection(meter_marker->meter()));
+
+	drag_info.item = &new_marker->the_item();
+	drag_info.copy = true;
+	drag_info.data = new_marker;
+	drag_info.motion_callback = &Editor::meter_marker_drag_motion_callback;
+	drag_info.finished_callback = &Editor::meter_marker_drag_finished_callback;
+
+	start_grab (event);
+
+	drag_info.pointer_frame_offset = drag_info.grab_frame - meter_marker->meter().frame();	
+
+	show_verbose_time_cursor (drag_info.current_pointer_frame, 10);
+}
+
+void
 Editor::meter_marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	MeterMarker* marker = (MeterMarker *) drag_info.data;
@@ -2175,7 +2216,7 @@ Editor::meter_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 {
 	if (drag_info.first_move) return;
 
-	meter_marker_drag_motion_callback (item, event);
+	meter_marker_drag_motion_callback (drag_info.item, event);
 	
 	MeterMarker* marker = (MeterMarker *) drag_info.data;
 	BBT_Time when;
@@ -2183,11 +2224,23 @@ Editor::meter_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 	TempoMap& map (session->tempo_map());
 	map.bbt_time (drag_info.last_pointer_frame, when);
 	
-	begin_reversible_command (_("move meter mark"));
-	session->add_undo (map.get_memento());
-	map.move_meter (marker->meter(), when);
-	session->add_redo_no_execute (map.get_memento());
-	commit_reversible_command ();
+	if (drag_info.copy == true) {
+		begin_reversible_command (_("copy meter mark"));
+		session->add_undo (map.get_memento());
+		map.add_meter (marker->meter(), when);
+		session->add_redo_no_execute (map.get_memento());
+		commit_reversible_command ();
+		
+		// delete the dummy marker we used for visual representation of copying.
+		// a new visual marker will show up automatically.
+		delete marker;
+	} else {
+		begin_reversible_command (_("move meter mark"));
+		session->add_undo (map.get_memento());
+		map.move_meter (marker->meter(), when);
+		session->add_redo_no_execute (map.get_memento());
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -2220,6 +2273,42 @@ Editor::start_tempo_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	start_grab (event);
 
 	drag_info.pointer_frame_offset = drag_info.grab_frame - tempo_marker->tempo().frame();	
+	show_verbose_time_cursor (drag_info.current_pointer_frame, 10);
+}
+
+void
+Editor::start_tempo_marker_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	Marker* marker;
+	TempoMarker* tempo_marker;
+
+	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	if ((tempo_marker = dynamic_cast<TempoMarker *> (marker)) == 0) {
+		fatal << _("programming error: marker for tempo is not a tempo marker!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	// create a dummy marker for visual representation of moving the copy.
+	// The actual copying is not done before we reach the finish callback.
+	char name[64];
+	snprintf (name, sizeof (name), "%.2f", tempo_marker->tempo().beats_per_minute());
+	TempoMarker* new_marker = new TempoMarker(*this, *tempo_group, color_map[cTempoMarker], name, 
+						  *new TempoSection(tempo_marker->tempo()));
+
+	drag_info.item = &new_marker->the_item();
+	drag_info.copy = true;
+	drag_info.data = new_marker;
+	drag_info.motion_callback = &Editor::tempo_marker_drag_motion_callback;
+	drag_info.finished_callback = &Editor::tempo_marker_drag_finished_callback;
+
+	start_grab (event);
+
+	drag_info.pointer_frame_offset = drag_info.grab_frame - tempo_marker->tempo().frame();
+
 	show_verbose_time_cursor (drag_info.current_pointer_frame, 10);
 }
 
@@ -2257,7 +2346,7 @@ Editor::tempo_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 {
 	if (drag_info.first_move) return;
 	
-	tempo_marker_drag_motion_callback (item, event);
+	tempo_marker_drag_motion_callback (drag_info.item, event);
 	
 	TempoMarker* marker = (TempoMarker *) drag_info.data;
 	BBT_Time when;
@@ -2265,11 +2354,23 @@ Editor::tempo_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 	TempoMap& map (session->tempo_map());
 	map.bbt_time (drag_info.last_pointer_frame, when);
 	
-	begin_reversible_command (_("move tempo mark"));
-	session->add_undo (map.get_memento());
-	map.move_tempo (marker->tempo(), when);
-	session->add_redo_no_execute (map.get_memento());
-	commit_reversible_command ();
+	if (drag_info.copy == true) {
+		begin_reversible_command (_("copy tempo mark"));
+		session->add_undo (map.get_memento());
+		map.add_tempo (marker->tempo(), when);
+		session->add_redo_no_execute (map.get_memento());
+		commit_reversible_command ();
+		
+		// delete the dummy marker we used for visual representation of copying.
+		// a new visual marker will show up automatically.
+		delete marker;
+	} else {
+		begin_reversible_command (_("move tempo mark"));
+		session->add_undo (map.get_memento());
+		map.move_tempo (marker->tempo(), when);
+		session->add_redo_no_execute (map.get_memento());
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -4243,7 +4344,7 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 		case CreateRangeMarker:
 			begin_reversible_command (_("new range marker"));
 			session->add_undo (session->locations()->get_memento());
-			newloc = new Location(temp_location->start(), temp_location->end(), "unnamed");
+			newloc = new Location(temp_location->start(), temp_location->end(), "unnamed", Location::IsRangeMarker);
 			session->locations()->add (newloc, true);
 			session->add_redo_no_execute (session->locations()->get_memento());
 			commit_reversible_command ();
@@ -4453,15 +4554,15 @@ Editor::end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 
 
-		bool add = Keyboard::modifier_state_contains (event->button.state, Keyboard::Shift);
+		Selection::Operation op = Keyboard::selection_type (event->button.state);
 		bool commit;
 
 		begin_reversible_command (_("select regions"));
 
 		if (drag_info.grab_frame < drag_info.last_pointer_frame) {
-			commit = select_all_within (drag_info.grab_frame, drag_info.last_pointer_frame, y1, y2, add);
+			commit = select_all_within (drag_info.grab_frame, drag_info.last_pointer_frame, y1, y2, op);
 		} else {
-			commit = select_all_within (drag_info.last_pointer_frame, drag_info.grab_frame, y1, y2, add);
+			commit = select_all_within (drag_info.last_pointer_frame, drag_info.grab_frame, y1, y2, op);
 		}		
 
 		if (commit) {

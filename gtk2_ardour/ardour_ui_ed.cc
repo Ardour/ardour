@@ -110,8 +110,13 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("ExportSession"), _("Export session to audiofile..."),  mem_fun (*editor, &PublicEditor::export_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("ExportRange"), _("Export range to audiofile..."),  mem_fun (*editor, &PublicEditor::export_selection));
+	act = ActionManager::register_action (main_actions, X_("ExportSelection"), _("Export selection to audiofile..."),  mem_fun (*editor, &PublicEditor::export_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::time_selection_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (main_actions, X_("ExportRangeMarkers"), _("Export range markers to audiofile..."),  mem_fun (*editor, &PublicEditor::export_range_markers));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::range_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -475,4 +480,3 @@ ARDOUR_UI::build_menu_bar ()
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
 }
-

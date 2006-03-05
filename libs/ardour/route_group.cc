@@ -28,6 +28,7 @@
 #include <pbd/error.h>
 
 #include <ardour/route_group.h>
+#include <ardour/audio_track.h>
 #include <ardour/diskstream.h>
 #include <ardour/configuration.h>
 
@@ -182,3 +183,15 @@ RouteGroup::set_hidden (bool yn, void *src)
 	}
 	 FlagsChanged (src); /* EMIT SIGNAL */
 }
+
+void
+RouteGroup::audio_track_group (set<AudioTrack*>& ats) 
+{	
+	for (list<Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
+		AudioTrack* at = dynamic_cast<AudioTrack*>(*i);
+		if (at) {
+			ats.insert (at);
+		}
+	}
+}
+

@@ -82,7 +82,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "edit-cursor-to-range-end", _("edit cursor to range end"), bind (mem_fun(*this, &Editor::cursor_to_selection_end), edit_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "select-all", _("select all"), bind (mem_fun(*this, &Editor::select_all), false));
+	act = ActionManager::register_action (editor_actions, "select-all", _("select all"), bind (mem_fun(*this, &Editor::select_all), Selection::Set));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "select-all-after-edit-cursor", _("select all after edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, true));
 	ActionManager::session_sensitive_actions.push_back (act);

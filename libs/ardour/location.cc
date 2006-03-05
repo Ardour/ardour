@@ -719,3 +719,16 @@ Locations::get_memento () const
 {
   return sigc::bind (mem_fun (*(const_cast<Locations*> (this)), &StateManager::use_state), _current_state_id);
 }
+
+uint32_t
+Locations::num_range_markers () const
+{
+	uint32_t cnt = 0;
+	LockMonitor lm (lock, __LINE__, __FILE__);
+	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+		if ((*i)->is_range_marker()) {
+			++cnt;
+		}
+	}
+	return cnt;
+}

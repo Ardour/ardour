@@ -49,15 +49,17 @@ namespace ARDOUR {
 class ExportDialog : public ArdourDialog
 {
   public:
-	ExportDialog (PublicEditor&, ARDOUR::AudioRegion* r = 0);
+	ExportDialog (PublicEditor&);
 	~ExportDialog ();
 
 	void connect_to_session (ARDOUR::Session*);
-	void set_range (jack_nframes_t start, jack_nframes_t end);
+	virtual void set_range (jack_nframes_t start, jack_nframes_t end);
 	void start_export ();
 
   protected:
-	struct ExportModelColumns : public Gtk::TreeModel::ColumnRecord
+	ARDOUR::AudioExportSpecification spec;
+
+    struct ExportModelColumns : public Gtk::TreeModel::ColumnRecord
 	{
 	public:
 	  Gtk::TreeModelColumn<std::string>	output;
@@ -69,11 +71,41 @@ class ExportDialog : public ArdourDialog
 	};
 
 	ExportModelColumns exp_cols;
+	
+	// These methods are intended to be used in constructors of subclasses
+	void do_not_allow_track_and_master_selection();
+	void do_not_allow_channel_count_selection();
+	void do_not_allow_export_cd_markers(); 
+	
+	// Checks the given filename for validity when export gets started.
+	// Export will interrupt when this method returns 'false'.
+	// Method is responsible for informing user.
+	virtual bool is_filepath_valid(string &filepath);
 
+	// Gets called from within do_export. Is responsible for exporting the
+	// audio data. spec has already been filled with user input before calling
+	// this method. The dialog will be closed after this function exited.
+	virtual void export_audio_data() = 0;
+	
+	// reads the user input and fills spec with the according values
+	// filepath: complete path to the target file, including filename
+	void initSpec(string &filepath);
+
+	void set_progress_fraction(double progress) {
+			progress_bar.set_fraction (progress); }
+	
+	ARDOUR::Session& getSession() { return *session; };
+	string get_selected_header_format() {
+		return header_format_combo.get_active_text(); };
+	string get_selected_file_name() { return file_entry.get_text(); };
+	
   private:
 	PublicEditor&    editor;
 	ARDOUR::Session* session;
-	ARDOUR::AudioRegion* audio_region;
+    bool	track_and_master_selection_allowed;
+  	bool	channel_count_selection_allowed;
+  	bool	export_cd_markers_allowed;
+    
 	Gtk::VBox   track_vpacker;
 	Gtk::HBox   hpacker;
 
@@ -123,10 +155,10 @@ class ExportDialog : public ArdourDialog
 	Gtk::TreeView  master_selector;
 	Glib::RefPtr<Gtk::ListStore> master_list;
 	Gtk::FileSelection *file_selector;
-	ARDOUR::AudioExportSpecification spec;
 
 	static void *_thread (void *arg);
-	gint progress_timeout ();
+	// sets the export progress in the progress bar
+	virtual gint progress_timeout ();
 	sigc::connection progress_connection;
 	void build_window ();
 	void end_dialog();
@@ -137,8 +169,9 @@ class ExportDialog : public ArdourDialog
 	void cue_file_type_chosen();
 
 	void fill_lists();
+	void write_track_and_master_selection_to_spec();
 
-      	void do_export_cd_markers (const string& path, const string& cuefile_type);
+    void do_export_cd_markers (const string& path, const string& cuefile_type);
 	void export_cue_file (ARDOUR::Locations::LocationList& locations, const string& path);
 	void export_toc_file (ARDOUR::Locations::LocationList& locations, const string& path);
 	void do_export ();
@@ -151,10 +184,6 @@ class ExportDialog : public ArdourDialog
 
 	void set_state();
 	void save_state();
-
-	static void* _export_region_thread (void *);
-	void export_region ();
 };
 
 #endif // __ardour_export_dialog_h__
-

@@ -832,6 +832,11 @@ AudioTimeAxisView::rename_current_playlist ()
 	AudioPlaylist *pl;
 	DiskStream *ds;
 
+	/* neither conditions are supposed to be true at this
+	   time, but to leave the design flexible, allow
+	   them to be in the future without causing crashes
+	*/
+
 	if (((ds = get_diskstream()) == 0) ||((pl = ds->playlist()) == 0)) {
 		return;
 	}
@@ -853,21 +858,16 @@ AudioTimeAxisView::rename_current_playlist ()
 }
 
 void
-AudioTimeAxisView::playlist_selected (AudioPlaylist *pl)
-{
-	DiskStream *ds;
-
-	if ((ds = get_diskstream()) != 0) {
-		ds->use_playlist (pl);
-	}
-}
-
-void
 AudioTimeAxisView::use_copy_playlist ()
 {
 	AudioPlaylist *pl;
 	DiskStream *ds;
 	string name;
+
+	/* neither conditions are supposed to be true at this
+	   time, but to leave the design flexible, allow
+	   them to be in the future without causing crashes
+	*/
 
 	if (((ds = get_diskstream()) == 0) || ((pl = ds->playlist()) == 0)) {
 		return;
@@ -901,6 +901,11 @@ AudioTimeAxisView::use_new_playlist ()
 	AudioPlaylist *pl;
 	DiskStream *ds;
 	string name;
+
+	/* neither conditions are supposed to be true at this
+	   time, but to leave the design flexible, allow
+	   them to be in the future without causing crashes
+	*/
 
 	if (((ds = get_diskstream()) == 0) || ((pl = ds->playlist()) == 0)) {
 		return;
@@ -1003,14 +1008,18 @@ AudioTimeAxisView::selection_click (GdkEventButton* ev)
 {
 	PublicEditor::TrackViewList* tracks = editor.get_valid_views (this, _route.edit_group());
 
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::Shift)) {
-		if (editor.get_selection().selected (this)) {
-			editor.get_selection().remove (*tracks);
-		} else {
-			editor.get_selection().add (*tracks);
-		}
-	} else {
+	switch (Keyboard::selection_type (ev->state)) {
+	case Selection::Toggle:
+		editor.get_selection().toggle (*tracks);
+		break;
+		
+	case Selection::Set:
 		editor.get_selection().set (*tracks);
+		break;
+
+	case Selection::Extend:
+		/* not defined yet */
+		break;
 	}
 
 	delete tracks;

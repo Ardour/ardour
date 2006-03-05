@@ -215,8 +215,8 @@ class Editor : public PublicEditor
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 
 	void play_selection ();
-	void select_all_in_track (bool add);
-	void select_all (bool add);
+	void select_all_in_track (Selection::Operation op);
+	void select_all (Selection::Operation op);
 	void invert_selection_in_track ();
 	void invert_selection ();
 
@@ -442,11 +442,19 @@ class Editor : public PublicEditor
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
+	void mapover_audio_tracks (sigc::slot<void,AudioTimeAxisView&> sl);
+
+	/* functions to be passed to mapover_audio_tracks(), possibly with sigc::bind()-supplied arguments */
+
+	void track_set_selected_regionview_from_click (AudioTimeAxisView&, AudioRegionView*, vector<AudioRegionView*>*);
+
+	/* end */
+
 	void catch_vanishing_audio_regionview (AudioRegionView *);
-	void set_selected_control_point_from_click (bool add = false, bool with_undo = true, bool no_remove=false);
-	void set_selected_track_from_click (bool add = false, bool with_undo = true, bool no_remove=false);
-	void set_selected_regionview_from_click (bool add = false, bool no_track_remove=false);
-	void set_selected_regionview_from_region_list (ARDOUR::Region& region, bool add = false);
+	void set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
+	void set_selected_track_from_click (Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
+	void set_selected_regionview_from_click (Selection::Operation op = Selection::Set, bool no_track_remove=false);
+	void set_selected_regionview_from_region_list (ARDOUR::Region& region, Selection::Operation op = Selection::Set);
 	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, ARDOUR::Region*);
 	void collect_new_region_view (AudioRegionView *);
 
@@ -1121,7 +1129,9 @@ class Editor : public PublicEditor
 	void start_line_grab_from_line (ArdourCanvas::Item*, GdkEvent*);
 	void start_line_grab (AutomationLine *, GdkEvent*);
 	void start_tempo_marker_grab (ArdourCanvas::Item*, GdkEvent*);
+	void start_tempo_marker_copy_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_meter_marker_grab (ArdourCanvas::Item*, GdkEvent*);
+	void start_meter_marker_copy_grab (ArdourCanvas::Item*, GdkEvent*);
 
 	void region_view_item_click (AudioRegionView&, GdkEventButton*);
 
@@ -1440,7 +1450,7 @@ class Editor : public PublicEditor
 	void drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
 	void end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
 
-	bool select_all_within (jack_nframes_t start, jack_nframes_t end, gdouble topy, gdouble boty, bool add);
+	bool select_all_within (jack_nframes_t start, jack_nframes_t end, gdouble topy, gdouble boty, Selection::Operation op);
 	
 	ArdourCanvas::SimpleRect   *rubberband_rect;
 	
@@ -1616,7 +1626,10 @@ class Editor : public PublicEditor
 	/* audio export */
 
 	ExportDialog *export_dialog;
+	ExportDialog *export_range_markers_dialog;
+	
 	void export_range (jack_nframes_t start, jack_nframes_t end);
+	void export_range_markers ();
 
 	int  write_region_selection(AudioRegionSelection&);
 	bool write_region (string path, ARDOUR::AudioRegion&);

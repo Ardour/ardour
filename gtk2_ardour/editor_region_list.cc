@@ -195,7 +195,7 @@ Editor::region_list_selection_changed()
 		*/
 		
 		if ((iter = region_list_model->get_iter (*i))) {
-			set_selected_regionview_from_region_list (*((*iter)[region_list_columns.region]), false);
+			set_selected_regionview_from_region_list (*((*iter)[region_list_columns.region]), Selection::Set);
 		}
 	}
 }

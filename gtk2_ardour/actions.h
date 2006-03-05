@@ -22,9 +22,15 @@ class ActionManager
 
 	static std::vector<Glib::RefPtr<Gtk::Action> > session_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > region_list_selection_sensitive_actions;
+	static std::vector<Glib::RefPtr<Gtk::Action> > plugin_selection_sensitive_actions;
+
 	static std::vector<Glib::RefPtr<Gtk::Action> > region_selection_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > track_selection_sensitive_actions;
-	static std::vector<Glib::RefPtr<Gtk::Action> > plugin_selection_sensitive_actions;
+	static std::vector<Glib::RefPtr<Gtk::Action> > point_selection_sensitive_actions;
+	static std::vector<Glib::RefPtr<Gtk::Action> > time_selection_sensitive_actions;
+	static std::vector<Glib::RefPtr<Gtk::Action> > line_selection_sensitive_actions;
+	static std::vector<Glib::RefPtr<Gtk::Action> > playlist_selection_sensitive_actions;
+
 	static std::vector<Glib::RefPtr<Gtk::Action> > range_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > transport_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > jack_sensitive_actions;

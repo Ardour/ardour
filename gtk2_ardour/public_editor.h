@@ -94,6 +94,7 @@ class PublicEditor : public Gtk::Window, public Stateful {
 	virtual bool show_measures () const = 0;
 	virtual void export_session() = 0;
 	virtual void export_selection() = 0;
+	virtual void export_range_markers() = 0;
 	virtual void register_actions() = 0;
 	virtual void add_toplevel_controls (Gtk::Container&) = 0;
 	virtual void      set_zoom_focus (Editing::ZoomFocus) = 0;
@@ -172,4 +173,4 @@ class PublicEditor : public Gtk::Window, public Stateful {
 	static PublicEditor* _instance;
 };
 
-#endif // __gtk_ardour_public_editor_h__ 
+#endif // __gtk_ardour_public_editor_h__

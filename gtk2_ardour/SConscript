@@ -61,7 +61,6 @@ about.cc
 actions.cc
 add_route_dialog.cc
 ardour_dialog.cc
-ardour_message.cc
 ardour_ui.cc
 ardour_ui2.cc
 ardour_ui_dependents.cc
@@ -113,6 +112,9 @@ editor_selection_list.cc
 editor_tempodisplay.cc
 editor_timefx.cc
 export_dialog.cc
+export_session_dialog.cc
+export_region_dialog.cc
+export_range_markers_dialog.cc
 gain_automation_time_axis.cc
 gain_meter.cc
 ghostregion.cc

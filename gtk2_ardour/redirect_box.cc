@@ -23,6 +23,8 @@
 
 #include <sigc++/bind.h>
 
+#include <gtkmm/messagedialog.h>
+
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
@@ -44,7 +46,6 @@
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"
-#include "ardour_message.h"
 #include "public_editor.h"
 #include "redirect_box.h"
 #include "keyboard.h"
@@ -318,10 +319,7 @@ void
 RedirectBox::selection_changed ()
 {
 	bool sensitive = (redirect_display.get_selection()->count_selected_rows()) ? true : false;
-
-	for (vector<Glib::RefPtr<Gtk::Action> >::iterator i = ActionManager::plugin_selection_sensitive_actions.begin(); i != ActionManager::plugin_selection_sensitive_actions.end(); ++i) {
-		(*i)->set_sensitive (sensitive);
-	}
+	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
 }
 
 void
@@ -830,7 +828,8 @@ RedirectBox::paste_redirect_list (list<Redirect*>& redirects)
 			"Copying the set of redirects on the clipboard failed,\n\
 probably because the I/O configuration of the plugins\n\
 could not match the configuration of this track.");
-		ArdourMessage am (0, X_("bad redirect copy dialog"), msg);
+		MessageDialog am (msg);
+		am.run ();
 	}
 }
 
@@ -877,7 +876,8 @@ RedirectBox::clone_redirects ()
 "Copying the set of redirects on the clipboard failed,\n\
 probably because the I/O configuration of the plugins\n\
 could not match the configuration of this track.");
-			ArdourMessage am (0, X_("bad redirect copy dialog"), msg);
+			MessageDialog am (msg);
+			am.run ();
 		}
 	}
 }
@@ -1011,7 +1011,8 @@ RedirectBox::edit_redirect (Redirect* redirect)
 		} else if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
 			
 			if (!_session.engine().connected()) {
-				ArdourMessage msg (NULL, "nojackdialog", _("Not connected to JACK - no I/O changes are possible"));
+				MessageDialog msg ( _("Not connected to JACK - no I/O changes are possible"));
+				msg.run ();
 				return;
 			}
 

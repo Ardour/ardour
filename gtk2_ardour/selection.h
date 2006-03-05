@@ -21,6 +21,8 @@
 #ifndef __ardour_gtk_selection_h__
 #define __ardour_gtk_selection_h__
 
+#include <vector>
+
 #include <sigc++/signal.h>
 
 #include "time_selection.h"
@@ -35,12 +37,26 @@ class TimeAxisView;
 class AudioRegionView;
 class Selectable;
 
+namespace ARDOUR {
+	class Region;
+	class AudioRegion;
+	class Playlist;
+	class Redirect;
+	class AutomationList;
+}
+
 class Selection : public sigc::trackable 
 {
   public:
 	enum SelectionType {
 		Object = 0x1,
 		Range = 0x2
+	};
+
+	enum Operation {
+		Set,
+		Toggle,
+		Extend
 	};
 
 	TrackSelection       tracks;
@@ -88,6 +104,16 @@ class Selection : public sigc::trackable
 	void set (ARDOUR::Redirect*);
 	void set (AutomationSelectable*);
 
+	void toggle (TimeAxisView*);
+	void toggle (const list<TimeAxisView*>&);
+	void toggle (AudioRegionView*);
+	void toggle (std::vector<AudioRegionView*>&);
+	long toggle (jack_nframes_t, jack_nframes_t);
+	void toggle (ARDOUR::AutomationList*);
+	void toggle (ARDOUR::Playlist*);
+	void toggle (const list<ARDOUR::Playlist*>&);
+	void toggle (ARDOUR::Redirect*);
+
 	void add (TimeAxisView*);
 	void add (const list<TimeAxisView*>&);
 	void add (AudioRegionView*);
@@ -97,7 +123,7 @@ class Selection : public sigc::trackable
 	void add (ARDOUR::Playlist*);
 	void add (const list<ARDOUR::Playlist*>&);
 	void add (ARDOUR::Redirect*);
-
+	
 	void remove (TimeAxisView*);
 	void remove (const list<TimeAxisView*>&);
 	void remove (AudioRegionView*);
@@ -126,7 +152,7 @@ class Selection : public sigc::trackable
   private:
 	uint32_t next_time_id;
 
-	void add (vector<AutomationSelectable*>&);
+	void add (std::vector<AutomationSelectable*>&);
 };
 
 bool operator==(const Selection& a, const Selection& b);

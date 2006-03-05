@@ -227,7 +227,6 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	void playlist_modified ();
 
 	void add_playlist_to_playlist_menu (ARDOUR::Playlist*);
-	void playlist_selected (ARDOUR::AudioPlaylist*);
 	void use_new_playlist ();
 	void use_copy_playlist ();
 	void clear_playlist ();

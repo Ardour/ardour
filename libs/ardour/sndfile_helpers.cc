@@ -1,12 +1,13 @@
 #include <map>
+#include <vector>
 
 #include <sndfile.h>
-
 #include <ardour/sndfile_helpers.h>
 
 #include "i18n.h"
 
 using std::map;
+using namespace std;
 
 const char * const sndfile_header_formats_strings[SNDFILE_HEADER_FORMATS+1] = {
 	N_("WAV"),
@@ -16,6 +17,17 @@ const char * const sndfile_header_formats_strings[SNDFILE_HEADER_FORMATS+1] = {
 	N_("AU (Sun/NeXT)"),
 	N_("IRCAM"),
 	N_("W64 (64 bit WAV)"),
+	0
+};
+
+const char* const sndfile_file_endings_strings[SNDFILE_HEADER_FORMATS+1] = {
+	N_(".wav"),
+	N_(".aiff"),
+	N_(".raw"),
+	N_(".paf"),
+	N_(".au"),
+	N_(".ircam"),
+	N_(".w64"),
 	0
 };
 
@@ -88,6 +100,23 @@ sndfile_endian_format_from_string (string str)
 		}
 	}
 	return -1;
+}
+
+string
+sndfile_file_ending_from_string (string str)
+{
+	static vector<string> file_endings;
+
+	if (file_endings.empty()) {
+		file_endings = internationalize((const char **) sndfile_file_endings_strings);
+	}
+
+	for (int n = 0; sndfile_header_formats_strings[n]; ++n) {
+		if (str == sndfile_header_formats_strings[n]) {
+			return file_endings[n];
+		}
+	}
+	return 0;
 }
 
 int

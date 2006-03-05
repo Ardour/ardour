@@ -42,9 +42,14 @@ using namespace sigc;
 
 vector<RefPtr<Gtk::Action> > ActionManager::session_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::plugin_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::region_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::track_selection_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::plugin_selection_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::point_selection_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::time_selection_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::line_selection_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::playlist_selection_sensitive_actions;
+
 vector<RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::jack_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::jack_opposite_sensitive_actions;

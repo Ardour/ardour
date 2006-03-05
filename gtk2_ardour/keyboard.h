@@ -30,6 +30,8 @@
 #include <ardour/types.h>
 #include <ardour/stateful.h>
 
+#include "selection.h"
+
 using std::vector;
 using std::string;
 
@@ -70,6 +72,8 @@ class Keyboard : public sigc::trackable, Stateful
 
 	static bool modifier_state_contains (guint state, ModifierMask);
 	static bool modifier_state_equals   (guint state, ModifierMask);
+
+	static Selection::Operation selection_type (guint state);
 
 	static bool no_modifiers_active (guint state);
 

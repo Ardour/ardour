@@ -30,10 +30,10 @@
 #include "editor.h"
 #include "marker.h"
 #include "selection.h"
-#include "simplerect.h"
 #include "editing.h"
 #include "gui_thread.h"
 #include "simplerect.h"
+#include "actions.h"
 
 #include "i18n.h"
 
@@ -564,7 +564,7 @@ Editor::marker_menu_select_all_selectables_using_range ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-	        select_all_within (l->start(), l->end(), 0,  DBL_MAX, false);
+	        select_all_within (l->start(), l->end(), 0,  DBL_MAX, Selection::Set);
 	}
 	  
 }

@@ -43,10 +43,10 @@ Editor::keyboard_selection_finish (bool add)
 {
 	if (session && have_pending_keyboard_selection) {
 		begin_reversible_command (_("keyboard selection"));
-		if (!add) {
-			selection->set (0, pending_keyboard_selection_start, session->audible_frame());
-		} else {
+		if (add) {
 			selection->add (pending_keyboard_selection_start, session->audible_frame());
+		} else {
+			selection->set (0, pending_keyboard_selection_start, session->audible_frame());
 		}
 		commit_reversible_command ();
 		have_pending_keyboard_selection = false;

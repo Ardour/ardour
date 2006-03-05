@@ -784,7 +784,8 @@ LocationUI::add_new_range()
 {
 	if (session) {
 		jack_nframes_t where = session->audible_frame();
-		Location *location = new Location (where, where, "unnamed");
+		Location *location = new Location (where, where, "unnamed", 
+											Location::IsRangeMarker);
 		session->begin_reversible_command (_("add range marker"));
 		session->add_undo (session->locations()->get_memento());
 		session->locations()->add (location, true);

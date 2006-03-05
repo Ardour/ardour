@@ -28,6 +28,8 @@
 
 #include <iostream>
 
+#include <gtkmm/messagedialog.h>
+
 #include <pbd/error.h>
 #include <pbd/compose.h>
 #include <pbd/basename.h>
@@ -58,7 +60,6 @@
 
 #include "actions.h"
 #include "ardour_ui.h"
-#include "ardour_message.h"
 #include "public_editor.h"
 #include "audio_clock.h"
 #include "keyboard.h"
@@ -219,7 +220,8 @@ because it has no input connections.\n\
 You would be wasting space recording silence."),
 			      ds->name());
 
-	ArdourMessage message (editor, X_("cannotrecord"), msg);
+	MessageDialog message (*editor, msg);
+	message.run ();
 }
 
 void
@@ -402,11 +404,12 @@ ARDOUR_UI::finish()
 			/* use the default name */
 			if (save_state_canfail ("")) {
 				/* failed - don't quit */
-				ArdourMessage (editor, X_("badsave dialog"),
+				MessageDialog msg (*editor, 
 					       _("\
 Ardour was unable to save your session.\n\n\
 If you still wish to quit, please use the\n\n\
 \"Just quit\" option."));
+				msg.run ();
 				return;
 			}
 			break;
@@ -936,11 +939,12 @@ ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t o
 	}
 
 	catch (...) {
-		ArdourMessage msg (editor, X_("noport dialog"),
+		MessageDialog msg (*editor, 
 				   _("There are insufficient JACK ports available\n\
 to create a new track or bus.\n\
 You should save Ardour, exit and\n\
 restart JACK with more ports."));
+		msg.run ();
 	}
 }
 
@@ -1044,7 +1048,8 @@ ARDOUR_UI::transport_record ()
 		case Session::Disabled:
 			if (session->ntracks() == 0) {
 				string txt = _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu.");
-				ArdourMessage msg (editor, X_("cannotrecenable"), txt);
+				MessageDialog msg (*editor, txt);
+				msg.run ();
 				return;
 			}
 			session->maybe_enable_record ();
@@ -1278,12 +1283,13 @@ ARDOUR_UI::engine_halted ()
 
 	update_sample_rate (0);
 
-	ArdourMessage msg (editor, X_("halted"),
+	MessageDialog msg (*editor, 
 			   _("\
 JACK has either been shutdown or it\n\
 disconnected Ardour because Ardour\n\
 was not fast enough. You can save the\n\
 session and/or try to reconnect to JACK ."));
+	msg.run ();
 }
 
 int32_t
@@ -1781,9 +1787,10 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 	/* if it already exists, we must have write access */
 
 	if (::access (path.c_str(), F_OK) == 0 && ::access (path.c_str(), W_OK)) {
-		ArdourMessage msg (editor, X_("noaccess dialog"), _("\
+		MessageDialog msg (*editor, _("\
 You do not have write access to this session.\n\
 This prevents the session from being loaded."));
+		msg.run ();
 		return -1;
 	}
 
@@ -1901,12 +1908,13 @@ ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* l
 	removed = rep.paths.size();
 
 	if (removed == 0) {
-		ArdourMessage msg (editor, X_("cleanupresults"),
+		MessageDialog msg (*editor, X_("cleanupresults"),
 				   _("\
 No audio files were ready for cleanup\n\n\
 If this seems suprising, check for any existing\n\
 snapshots. These may still include regions that\n\
 require some unused files to continue to exist."));
+		msg.run ();
 		return;
 	} 
 
@@ -2150,8 +2158,9 @@ ARDOUR_UI::halt_on_xrun_message ()
 {
 	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::halt_on_xrun_message));
 
-	ArdourMessage msg (editor, X_("haltonxrun"),
+	MessageDialog msg (*editor,
 			   _("Recording was stopped because your system could not keep up."));
+	msg.run ();
 }
 
 void 
@@ -2173,12 +2182,13 @@ ARDOUR_UI::disk_overrun_handler ()
 
 	if (!have_disk_overrun_displayed) {
 		have_disk_overrun_displayed = true;
-		ArdourMessage msg (editor, X_("diskrate dialog"), _("\
+		MessageDialog msg (*editor, X_("diskrate dialog"), _("\
 The disk system on your computer\n\
 was not able to keep up with Ardour.\n\
 \n\
 Specifically, it failed to write data to disk\n\
 quickly enough to keep up with recording.\n"));
+		msg.run ();
 		have_disk_overrun_displayed = false;
 	}
 }
@@ -2190,12 +2200,13 @@ ARDOUR_UI::disk_underrun_handler ()
 
 	if (!have_disk_underrun_displayed) {
 		have_disk_underrun_displayed = true;
-		ArdourMessage msg (editor, X_("diskrate2 dialog"),
+		MessageDialog msg (*editor,
 			(_("The disk system on your computer\n\
 was not able to keep up with Ardour.\n\
 \n\
 Specifically, it failed to read data from disk\n\
 quickly enough to keep up with playback.\n")));
+		msg.run ();
 		have_disk_underrun_displayed = false;
 	} 
 }
@@ -2248,8 +2259,8 @@ ARDOUR_UI::disconnect_from_jack ()
 {
 	if (engine) {
 		if( engine->disconnect_from_jack ()) {
-			ArdourMessage msg (editor, X_("nojack dialog"),
-					   _("Could not disconnect from JACK"));
+			MessageDialog msg (*editor, _("Could not disconnect from JACK"));
+			msg.run ();
 		}
 
 		update_sample_rate (0);
@@ -2261,8 +2272,8 @@ ARDOUR_UI::reconnect_to_jack ()
 {
 	if (engine) {
 		if (engine->reconnect_to_jack ()) {
-			ArdourMessage msg (editor, X_("nojack dialog"),
-					   _("Could not reconnect to JACK"));
+			MessageDialog msg (*editor,  _("Could not reconnect to JACK"));
+			msg.run ();
 		}
 
 		update_sample_rate (0);

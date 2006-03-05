@@ -15,7 +15,8 @@
            <separator/>
            <menu name='Export' action='Export'>
                <menuitem action='ExportSession'/>
-               <menuitem action='ExportRange'/>
+               <menuitem action='ExportSelection'/>
+               <menuitem action='ExportRangeMarkers'/>
            </menu>
            <separator/>
            <menu name='Cleanup' action='Cleanup'>

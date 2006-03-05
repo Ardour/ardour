@@ -791,3 +791,14 @@ Keyboard::modifier_state_equals (guint state, ModifierMask mask)
 	return (state & RelevantModifierKeyMask) == (guint) mask;
 }
 
+Selection::Operation
+Keyboard::selection_type (guint state)
+{
+	if (modifier_state_equals (state, Shift)) {
+		return Selection::Extend;
+	} else if (modifier_state_equals (state, Control)) {
+		return Selection::Toggle;
+	} else {
+		return Selection::Set;
+	}
+}

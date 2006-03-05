@@ -20,14 +20,18 @@
 
 #include <unistd.h>
 #include <climits>
-#include "export_dialog.h"
+
+#include <gtkmm/messagedialog.h>
+
+#include "export_session_dialog.h"
+#include "export_region_dialog.h"
+#include "export_range_markers_dialog.h"
 #include "editor.h"
 #include "public_editor.h"
 #include "selection.h"
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
 #include "regionview.h"
-#include "ardour_message.h"
 
 #include <pbd/pthread_utils.h>
 #include <ardour/types.h>
@@ -57,12 +61,12 @@ Editor::export_selection ()
 {
 	if (session) {
 		if (selection->time.empty()) {
-			ArdourMessage message (this, X_("norange"), _("There is no range to export.\n\nSelect a range using the range mouse mode"));
+			MessageDialog message (*this, _("There is no selection to export.\n\nSelect a selection using the range mouse mode"));
+			message.run ();
 			return;
 		}
 
-		export_range (selection->time.front().start, 
-			      selection->time.front().end);
+		export_range (selection->time.front().start, selection->time.front().end);
 	}
 }
 
@@ -71,7 +75,7 @@ Editor::export_range (jack_nframes_t start, jack_nframes_t end)
 {
 	if (session) {
 		if (export_dialog == 0) {
-			export_dialog = new ExportDialog (*this);
+			export_dialog = new ExportSessionDialog (*this);
 		}
 		
 		export_dialog->connect_to_session (session);
@@ -87,12 +91,35 @@ Editor::export_region ()
 		return;
 	}
 
-	ExportDialog* dialog = new ExportDialog (*this, &clicked_regionview->region);
+	ExportDialog* dialog = new ExportRegionDialog (*this, &clicked_regionview->region);
 		
 	dialog->connect_to_session (session);
-	dialog->set_range (0, clicked_regionview->region.length());
+	dialog->set_range (
+		clicked_regionview->region.first_frame(), 
+		clicked_regionview->region.last_frame());
 	dialog->start_export();
 }
+
+void
+Editor::export_range_markers ()
+{
+	if (session) {
+
+		if (session->locations()->num_range_markers() == 0) {
+			MessageDialog message (*this, _("There are no ranges to export.\n\nCreate 1 or more ranges by dragging the mouse in the range bar"));
+			message.run ();
+			return;
+		}
+		
+
+		if (export_range_markers_dialog == 0) {
+			export_range_markers_dialog = new ExportRangeMarkersDialog(*this);
+		}
+		
+		export_range_markers_dialog->connect_to_session (session);
+		export_range_markers_dialog->start_export();
+	}
+}	
 
 int
 Editor::write_region_selection (AudioRegionSelection& regions)

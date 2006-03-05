@@ -26,7 +26,6 @@
 #include <fstream>
 
 #include <samplerate.h>
-#include <pbd/pthread_utils.h>
 #include <pbd/xml++.h>
 #include <pbd/dirname.h>
 
@@ -43,7 +42,6 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "keyboard.h"
-#include "ardour_message.h"
 
 #include "i18n.h"
 
@@ -95,7 +93,7 @@ static const gchar* cue_file_types[] = {
 	0
 };
 
-ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
+ExportDialog::ExportDialog(PublicEditor& e)
 	: ArdourDialog ("export dialog"),
 	  editor (e),
 	  format_table (9, 2),
@@ -117,9 +115,10 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	guint32 len;
 	guint32 maxlen;
 
-	audio_region = r;
-
 	session = 0;
+	track_and_master_selection_allowed = true;
+	channel_count_selection_allowed = true;
+	export_cd_markers_allowed = true;
 	
 	set_title (_("ardour: export"));
 	set_wmclass (_("ardour_export"), "Ardour");
@@ -177,23 +176,18 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	hpacker.set_border_width (5);
 	hpacker.pack_start (format_frame, false, false);
 
-	if (!audio_region) {
+	master_scroll.add (master_selector);
+	track_scroll.add (track_selector);
 
-		master_scroll.add (master_selector);
-		track_scroll.add (track_selector);
-
-		master_scroll.set_size_request (220, 100);
-		track_scroll.set_size_request (220, 100);
-
+	master_scroll.set_size_request (220, 100);
+	track_scroll.set_size_request (220, 100);
 		
-		
-		/* we may hide some of these later */
-		track_vpacker.pack_start (master_scroll);
-		track_vpacker.pack_start (track_scroll);
-		track_vpacker.pack_start (track_selector_button, Gtk::PACK_EXPAND_PADDING);
+	/* we may hide some of these later */
+	track_vpacker.pack_start (master_scroll);
+	track_vpacker.pack_start (track_scroll);
+	track_vpacker.pack_start (track_selector_button, Gtk::PACK_EXPAND_PADDING);
 
-		hpacker.pack_start (track_vpacker);
-	}
+	hpacker.pack_start (track_vpacker);
 
 	get_vbox()->pack_start (hpacker);
 	
@@ -251,7 +245,7 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	/* determine longest strings at runtime */
 
 	maxlen = 0;
-	const char *longest = "gl";
+	const char *longest = X_("gl"); /* translators: one ascender, one descender */
 	string longest_str;
 
 	for (n = 0; n < SNDFILE_HEADER_FORMATS; ++n) {
@@ -321,11 +315,9 @@ ExportDialog::ExportDialog(PublicEditor& e, AudioRegion* r)
 	format_table.set_col_spacings (5);
 	format_table.set_row_spacings (5);
 
-	if (!audio_region) {
-		format_table.attach (channel_count_label, 0, 1, 0, 1);
-		format_table.attach (channel_count_combo, 1, 2, 0, 1);
-	}
-
+	format_table.attach (channel_count_label, 0, 1, 0, 1);
+	format_table.attach (channel_count_combo, 1, 2, 0, 1);
+	
 	format_table.attach (header_format_label, 0, 1, 1, 2);
 	format_table.attach (header_format_combo, 1, 2, 1, 2);
 
@@ -372,6 +364,30 @@ ExportDialog::~ExportDialog()
 	if (file_selector) {
 		delete file_selector;
 	}
+}
+
+void
+ExportDialog::do_not_allow_track_and_master_selection()
+{
+	track_and_master_selection_allowed = false;
+	track_vpacker.set_no_show_all();
+}
+
+void
+ExportDialog::do_not_allow_channel_count_selection()
+{
+	channel_count_selection_allowed = false;
+	channel_count_combo.set_no_show_all();
+	channel_count_label.set_no_show_all();
+}
+
+void
+ExportDialog::do_not_allow_export_cd_markers()
+{
+	export_cd_markers_allowed = false;
+	cue_file_label.set_no_show_all();
+	cue_file_combo.set_no_show_all();
+	cuefile_only_checkbox.set_no_show_all();
 }
 
 void
@@ -571,33 +587,13 @@ ExportDialog::set_range (jack_nframes_t start, jack_nframes_t end)
 {
 	spec.start_frame = start;
 	spec.end_frame = end;
-
-	if (!audio_region) {
-		// XXX: this is a hack until we figure out what is really wrong
-		session->request_locate (spec.start_frame, false);
-	}
 }
 
 gint
 ExportDialog::progress_timeout ()
 {
-	progress_bar.set_fraction (spec.progress/100);
+	progress_bar.set_fraction (spec.progress);
 	return TRUE;
-}
-
-void*
-ExportDialog::_export_region_thread (void *arg)
-{
-	PBD::ThreadCreated (pthread_self(), X_("Export Region"));
-
-	static_cast<ExportDialog*>(arg)->export_region ();
-	return 0;
-}
-
-void
-ExportDialog::export_region ()
-{
-	audio_region->exportme (*session, spec);
 }
 
 void
@@ -625,8 +621,11 @@ struct LocationSortByStart {
 void
 ExportDialog::export_toc_file (Locations::LocationList& locations, const string& path)
 {
+	if(!export_cd_markers_allowed){
+		return;
+	}
 	
-        string filepath = path + ".toc";
+    string filepath = path + ".toc";
 	ofstream out (filepath.c_str());
 	long unsigned int last_end_time = spec.start_frame, last_start_time = spec.start_frame;
 	int numtracks = 0;
@@ -748,7 +747,11 @@ ExportDialog::export_toc_file (Locations::LocationList& locations, const string&
 void
 ExportDialog::export_cue_file (Locations::LocationList& locations, const string& path)
 {
-        string filepath = path + ".cue";
+	if(!export_cd_markers_allowed){
+		return;
+	}
+	
+    string filepath = path + ".cue";
 	ofstream out (filepath.c_str());
 	gchar buf[18];
 	long unsigned int last_track_end = spec.start_frame;
@@ -867,7 +870,7 @@ ExportDialog::export_cue_file (Locations::LocationList& locations, const string&
 	}
 	
 }
-
+	
 void
 ExportDialog::do_export_cd_markers (const string& path,const string& cuefile_type)
 {
@@ -882,52 +885,21 @@ ExportDialog::do_export_cd_markers (const string& path,const string& cuefile_typ
 void
 ExportDialog::do_export ()
 {
-  	// sanity check file name first
-  	string filepath = file_entry.get_text();
- 	struct stat statbuf;
-  
-  	if (filepath.empty()) {
-  		// warning dialog
- 		string txt = _("Please enter a valid filename.");
-		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
-		msg.run();
- 		return;
- 	}
+	string filepath = file_entry.get_text();
  	
- 	// check if file exists already and warn
- 	if (stat (filepath.c_str(), &statbuf) == 0) {
- 		if (S_ISDIR (statbuf.st_mode)) {
- 			string txt = _("Please specify a complete filename for the audio file.");
-			MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
-			msg.run();
- 			return;
- 		}
- 		else {
- 			string txt = _("File already exists, do you want to overwrite it?");
-			MessageDialog msg (*this, txt, false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
- 			//ArdourMessage msg (this, X_("exportoverwrite"), txt, true, false, Gtk::BUTTONS_YES_NO);
- 			if ((ResponseType) msg.run() == Gtk::RESPONSE_NO) {
- 				return;
- 			}
- 		}
- 	}
- 	
- 	// directory needs to exist and be writable
- 	string dirpath = PBD::dirname (filepath);
- 	if (::access (dirpath.c_str(), W_OK) != 0) {
- 		string txt = _("Cannot write file in: ") + dirpath;
-		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
-		msg.run();
- 		return;
-  	}
-	
-	if (cue_file_combo.get_active_text () != _("None")) {
-		do_export_cd_markers (file_entry.get_text(), cue_file_combo.get_active_text ());
+	if(!is_filepath_valid(filepath)){
+		return;
 	}
 
-	if (cuefile_only_checkbox.get_active()) {
-		end_dialog ();
-		return;
+	if (export_cd_markers_allowed) {
+		if (cue_file_combo.get_active_text () != _("None")) {
+			do_export_cd_markers (file_entry.get_text(), cue_file_combo.get_active_text ());
+		}
+
+		if (cuefile_only_checkbox.get_active()) {
+			end_dialog ();
+			return;
+		}
 	}
 
 	ok_button->set_sensitive(false);
@@ -935,148 +907,15 @@ ExportDialog::do_export ()
 
 	set_modal (true);
 	
-	spec.path = filepath;
-	spec.progress = 0;
-	spec.running = true;
-	spec.stop = false;
-	spec.port_map.clear();
+	// read user input into spec
+	initSpec(filepath);
 	
-	if (channel_count_combo.get_active_text() == _("mono")) {
-		spec.channels = 1;
-	} else {
-		spec.channels = 2;
-	}
-
-	spec.format = 0;
-
-	spec.format |= sndfile_header_format_from_string (header_format_combo.get_active_text ());
-	
-	if ((spec.format & SF_FORMAT_WAV) == 0) {
-		/* RIFF/WAV specifies endianess */
-		spec.format |= sndfile_endian_format_from_string (endian_format_combo.get_active_text ());
-	}
-
-	spec.format |= sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());
-
-	string sr_str = sample_rate_combo.get_active_text();
-	if (sr_str == N_("22.05kHz")) {
-		spec.sample_rate = 22050;
-	} else if (sr_str == N_("44.1kHz")) {
-		spec.sample_rate = 44100;
-	} else if (sr_str == N_("48kHz")) {
-		spec.sample_rate = 48000;
-	} else if (sr_str == N_("88.2kHz")) {
-		spec.sample_rate = 88200;
-	} else if (sr_str == N_("96kHz")) {
-		spec.sample_rate = 96000;
-	} else if (sr_str == N_("192kHz")) {
-		spec.sample_rate = 192000;
-	} else {
-		spec.sample_rate = session->frame_rate();
-	}
-	
-	string src_str = src_quality_combo.get_active_text();
-	if (src_str == _("fastest")) {
-		spec.src_quality = SRC_ZERO_ORDER_HOLD;
-	} else if (src_str == _("linear")) {
-		spec.src_quality = SRC_LINEAR;
-	} else if (src_str == _("better")) {
-		spec.src_quality = SRC_SINC_FASTEST;
-	} else if (src_str == _("intermediate")) {
-		spec.src_quality = SRC_SINC_MEDIUM_QUALITY;
-	} else {
-		spec.src_quality = SRC_SINC_BEST_QUALITY;
-	}
-
-	string dither_str = dither_type_combo.get_active_text();
-	if (dither_str == _("None")) {
-		spec.dither_type = GDitherNone;
-	} else if (dither_str == _("Rectangular")) {
-		spec.dither_type = GDitherRect;
-	} else if (dither_str == _("Triangular")) {
-		spec.dither_type = GDitherTri;
-	} else {
-		spec.dither_type = GDitherShaped;
-	} 
-
-	if (!audio_region) {
-
-		uint32_t chan=0;
-		Port *last_port = 0;
-		
-		TreeModel::Children rows = master_selector.get_model()->children();
-		TreeModel::Children::iterator ri;
-		TreeModel::Row row;
-		for (ri = rows.begin(); ri != rows.end(); ++ri) {
-			row = *ri;
-			Port* port = row[exp_cols.port];
-			
-			if (last_port != port) {
-				chan = 0;
-			}
-			
-			if (row[exp_cols.left]) {
-				spec.port_map[0].push_back (std::pair<Port*,uint32_t>(port, chan));
-			} 
-			
-			if (spec.channels == 2) {
-				if (row[exp_cols.right]) {
-					spec.port_map[1].push_back (std::pair<Port*,uint32_t>(port, chan));
-				}
-			}
-		}
-
-		chan = 0;
-
-		rows = track_selector.get_model()->children();
-		for (ri = rows.begin(); ri != rows.end(); ++ri) {
-			row = *ri;
-			
-			Port* port = row[exp_cols.port];
-			
-			if (last_port != port) {
-				chan = 0;
-			}
-			
-			if (row[exp_cols.left]) {
-				spec.port_map[0].push_back (std::pair<Port*,uint32_t>(port, chan));
-			} 
-			
-			if (spec.channels == 2) {
-				if (row[exp_cols.right]) {
-					spec.port_map[1].push_back (std::pair<Port*,uint32_t>(port, chan));
-				}
-				
-			}
-			
-			last_port = port;
-			++chan;
-		}
-	}
-
 	progress_connection = Glib::signal_timeout().connect (mem_fun(*this, &ExportDialog::progress_timeout), 100);
 	cancel_label.set_text (_("Stop Export"));
 
-	if (!audio_region) {
-		if (session->start_audio_export (spec)) {
-			goto out;
-		}
-	} else {
-		pthread_t thr;
-		pthread_create_and_store ("region export", &thr, 0, ExportDialog::_export_region_thread, this);
-	}
-
-	gtk_main_iteration ();
-	while (spec.running) {
-		if (gtk_events_pending()) {
-			gtk_main_iteration ();
-		} else {
-			usleep (10000);
-		}
-	}
+	export_audio_data();
 	
-  out:
-	progress_connection.disconnect ();
+  	progress_connection.disconnect ();
 	end_dialog ();
 }
 	
@@ -1116,7 +955,7 @@ ExportDialog::start_export ()
 		return;
 	}
 
-	/* If it the filename hasn't been set before, use the
+	/* If the filename hasn't been set before, use the
 	   directory above the current session as a default
 	   location for the export.  
 	*/
@@ -1286,12 +1125,191 @@ ExportDialog::fill_lists ()
 	}
 }
 
+
+bool
+ExportDialog::is_filepath_valid(string &filepath)
+{
+  	// sanity check file name first
+
+  	struct stat statbuf;
+  
+  	if (filepath.empty()) {
+ 		string txt = _("Please enter a valid filename.");
+		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
+		msg.run();
+ 		return false;
+ 	}
+ 	
+ 	// check if file exists already and warn
+
+ 	if (stat (filepath.c_str(), &statbuf) == 0) {
+ 		if (S_ISDIR (statbuf.st_mode)) {
+ 			string txt = _("Please specify a complete filename for the audio file.");
+			MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
+			msg.run();
+ 			return false;
+ 		}
+ 		else {
+ 			string txt = _("File already exists, do you want to overwrite it?");
+			MessageDialog msg (*this, txt, false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
+ 			if ((ResponseType) msg.run() == Gtk::RESPONSE_NO) {
+ 				return false;
+ 			}
+ 		}
+ 	}
+ 	
+ 	// directory needs to exist and be writable
+
+ 	string dirpath = PBD::dirname (filepath);
+ 	if (::access (dirpath.c_str(), W_OK) != 0) {
+ 		string txt = _("Cannot write file in: ") + dirpath;
+		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
+		msg.run();
+ 		return false;
+  	}
+	
+	return true;
+}
+
+void
+ExportDialog::initSpec(string &filepath)
+{
+	spec.path = filepath;
+	spec.progress = 0;
+	spec.running = true;
+	spec.stop = false;
+	spec.port_map.clear();
+	
+	if (channel_count_combo.get_active_text() == _("mono")) {
+		spec.channels = 1;
+	} else {
+		spec.channels = 2;
+	}
+
+	spec.format = 0;
+
+	spec.format |= sndfile_header_format_from_string (header_format_combo.get_active_text ());
+	
+	if ((spec.format & SF_FORMAT_WAV) == 0) {
+		/* RIFF/WAV specifies endianess */
+		spec.format |= sndfile_endian_format_from_string (endian_format_combo.get_active_text ());
+	}
+
+	spec.format |= sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());
+
+	string sr_str = sample_rate_combo.get_active_text();
+	if (sr_str == N_("22.05kHz")) {
+		spec.sample_rate = 22050;
+	} else if (sr_str == N_("44.1kHz")) {
+		spec.sample_rate = 44100;
+	} else if (sr_str == N_("48kHz")) {
+		spec.sample_rate = 48000;
+	} else if (sr_str == N_("88.2kHz")) {
+		spec.sample_rate = 88200;
+	} else if (sr_str == N_("96kHz")) {
+		spec.sample_rate = 96000;
+	} else if (sr_str == N_("192kHz")) {
+		spec.sample_rate = 192000;
+	} else {
+		spec.sample_rate = session->frame_rate();
+	}
+	
+	string src_str = src_quality_combo.get_active_text();
+	if (src_str == _("fastest")) {
+		spec.src_quality = SRC_ZERO_ORDER_HOLD;
+	} else if (src_str == _("linear")) {
+		spec.src_quality = SRC_LINEAR;
+	} else if (src_str == _("better")) {
+		spec.src_quality = SRC_SINC_FASTEST;
+	} else if (src_str == _("intermediate")) {
+		spec.src_quality = SRC_SINC_MEDIUM_QUALITY;
+	} else {
+		spec.src_quality = SRC_SINC_BEST_QUALITY;
+	}
+
+	string dither_str = dither_type_combo.get_active_text();
+	if (dither_str == _("None")) {
+		spec.dither_type = GDitherNone;
+	} else if (dither_str == _("Rectangular")) {
+		spec.dither_type = GDitherRect;
+	} else if (dither_str == _("Triangular")) {
+		spec.dither_type = GDitherTri;
+	} else {
+		spec.dither_type = GDitherShaped;
+	} 
+
+	write_track_and_master_selection_to_spec();
+}
+
+
+void
+ExportDialog::write_track_and_master_selection_to_spec()
+{
+	if(!track_and_master_selection_allowed){
+		return;
+	}
+
+	uint32_t chan=0;
+	Port *last_port = 0;
+		
+	TreeModel::Children rows = master_selector.get_model()->children();
+	TreeModel::Children::iterator ri;
+	TreeModel::Row row;
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		row = *ri;
+		Port* port = row[exp_cols.port];
+		
+		if (last_port != port) {
+			chan = 0;
+		}
+		
+		if (row[exp_cols.left]) {
+			spec.port_map[0].push_back (std::pair<Port*,uint32_t>(port, chan));
+		} 
+		
+		if (spec.channels == 2) {
+			if (row[exp_cols.right]) {
+				spec.port_map[1].push_back (std::pair<Port*,uint32_t>(port, chan));
+			}
+		}
+	}
+	
+	chan = 0;
+	rows = track_selector.get_model()->children();
+
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		row = *ri;
+		
+		Port* port = row[exp_cols.port];
+		
+		if (last_port != port) {
+			chan = 0;
+		}
+		
+		if (row[exp_cols.left]) {
+			spec.port_map[0].push_back (std::pair<Port*,uint32_t>(port, chan));
+		} 
+		
+		if (spec.channels == 2) {
+			if (row[exp_cols.right]) {
+				spec.port_map[1].push_back (std::pair<Port*,uint32_t>(port, chan));
+			}
+			
+		}
+		
+		last_port = port;
+		++chan;
+	}
+}
+
+
 gint
 ExportDialog::window_closed (GdkEventAny *ignored)
 {
 	end_dialog ();
 	return TRUE;
 }
+
 void
 ExportDialog::initiate_browse ()
 {

@@ -1873,8 +1873,8 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& select_items = select_menu->items();
 	select_menu->set_name ("ArdourContextMenu");
 	
-	select_items.push_back (MenuElem (_("Select All in track"), bind (mem_fun(*this, &Editor::select_all_in_track), false)));
-	select_items.push_back (MenuElem (_("Select All"), bind (mem_fun(*this, &Editor::select_all), false)));
+	select_items.push_back (MenuElem (_("Select All in track"), bind (mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
+	select_items.push_back (MenuElem (_("Select All"), bind (mem_fun(*this, &Editor::select_all), Selection::Set)));
 	select_items.push_back (MenuElem (_("Invert selection in track"), mem_fun(*this, &Editor::invert_selection_in_track)));
 	select_items.push_back (MenuElem (_("Invert selection"), mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
@@ -1958,8 +1958,8 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& select_items = select_menu->items();
 	select_menu->set_name ("ArdourContextMenu");
 	
-	select_items.push_back (MenuElem (_("Select All in track"), bind (mem_fun(*this, &Editor::select_all_in_track), false)));
-	select_items.push_back (MenuElem (_("Select All"), bind (mem_fun(*this, &Editor::select_all), false)));
+	select_items.push_back (MenuElem (_("Select All in track"), bind (mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
+	select_items.push_back (MenuElem (_("Select All"), bind (mem_fun(*this, &Editor::select_all), Selection::Set)));
 	select_items.push_back (MenuElem (_("Invert selection in track"), mem_fun(*this, &Editor::invert_selection_in_track)));
 	select_items.push_back (MenuElem (_("Invert selection"), mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
@@ -2988,7 +2988,7 @@ Editor::commit_reversible_command ()
 }
 
 void
-Editor::set_selected_track_from_click (bool add, bool with_undo, bool no_remove)
+Editor::set_selected_track_from_click (Selection::Operation op, bool with_undo, bool no_remove)
 {
 	if (!clicked_trackview) {
 		return;
@@ -2997,25 +2997,29 @@ Editor::set_selected_track_from_click (bool add, bool with_undo, bool no_remove)
 	if (with_undo) {
 		begin_reversible_command (_("set selected trackview"));
 	}
-
-	if (add) {
-		
+	
+	switch (op) {
+	case Selection::Toggle:
 		if (selection->selected (clicked_trackview)) {
 			if (!no_remove) {
 				selection->remove (clicked_trackview);
 			}
 		} else {
-			selection->add (clicked_trackview);
+			selection->toggle (clicked_trackview);
 		}
-		
-	} else {
-
+		break;
+	case Selection::Set:
 		if (selection->selected (clicked_trackview) && selection->tracks.size() == 1) {
 			/* no commit necessary */
 			return;
 		} 
 
 		selection->set (clicked_trackview);
+		break;
+		
+	case Selection::Extend:
+		/* not defined yet */
+		break;
 	}
 	
 	if (with_undo) {
@@ -3024,7 +3028,7 @@ Editor::set_selected_track_from_click (bool add, bool with_undo, bool no_remove)
 }
 
 void
-Editor::set_selected_control_point_from_click (bool add, bool with_undo, bool no_remove)
+Editor::set_selected_control_point_from_click (Selection::Operation op, bool with_undo, bool no_remove)
 {
 	if (!clicked_control_point) {
 		return;
@@ -3034,94 +3038,123 @@ Editor::set_selected_control_point_from_click (bool add, bool with_undo, bool no
 		begin_reversible_command (_("set selected control point"));
 	}
 
-	if (add) {
-		
-	} else {
-
+	switch (op) {
+	case Selection::Set:
+		break;
+	case Selection::Toggle:
+		break;
+	case Selection::Extend:
+		break;
 	}
-	
 	if (with_undo) {
 		commit_reversible_command ();
 	}
 }
 
 void
-Editor::set_selected_regionview_from_click (bool add, bool no_track_remove)
+Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&> sl)
 {
+	set<AudioTimeAxisView*> relevant_tracks;
+
+	/* step one: get all selected tracks and all tracks in the relevant edit groups */
+
+	for (TrackSelection::iterator ti = selection->tracks.begin(); ti != selection->tracks.end(); ++ti) {
+
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&clicked_regionview->get_time_axis_view());
+
+		if (!atv) {
+			continue;
+		}
+
+		RouteGroup* group = atv->route().edit_group();
+
+		if (group && group->is_active()) {
+			
+			/* active group for this track, loop over all tracks and get every member of the group */
+
+			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+				
+				AudioTimeAxisView* tatv;
+				
+				if ((tatv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
+					
+					if (tatv->route().edit_group() == group) {
+						relevant_tracks.insert (tatv);
+					}
+				}
+			}
+
+		} else {
+
+			/* no active group, or no group */
+
+			relevant_tracks.insert (atv);
+		}
+
+	}
+
+	/* step two: apply operation to each track */
+	
+	for (set<AudioTimeAxisView*>::iterator ati = relevant_tracks.begin(); ati != relevant_tracks.end(); ++ati) {
+		sl (**ati);
+	}
+}
+
+void
+Editor::track_set_selected_regionview_from_click (AudioTimeAxisView& atv, AudioRegionView* basis, vector<AudioRegionView*>* all_equivs)
+{
+	AudioPlaylist* pl;
+	vector<AudioRegion*> results;
+	AudioRegionView* marv;
+	DiskStream* ds;
+	
+	if ((ds = atv.get_diskstream()) == 0) {
+		/* bus */
+		return;
+	}
+	
+	if ((pl = ds->playlist()) != 0) {
+		pl->get_equivalent_regions (basis->region, results);
+	}
+	
+	for (vector<AudioRegion*>::iterator ir = results.begin(); ir != results.end(); ++ir) {
+		if ((marv = atv.view->find_view (**ir)) != 0) {
+			all_equivs->push_back (marv);
+		}
+	}
+}
+
+void
+Editor::set_selected_regionview_from_click (Selection::Operation op, bool no_track_remove)
+{
+	vector<AudioRegionView*> all_equivalent_regions;
+
 	if (!clicked_regionview) {
 		return;
 	}
 
-	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&clicked_regionview->get_time_axis_view());
-
-	if (!atv) {
-		return;
-	}
-
-	RouteGroup* group = atv->route().edit_group();
-	vector<AudioRegionView*> all_equivalent_regions;
-	
-	if (group && group->is_active()) {
-
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-
-			AudioTimeAxisView* tatv;
-
-			if ((tatv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
-
-				if (tatv->route().edit_group() != group) {
-					continue;
-				}
-			
-				AudioPlaylist* pl;
-				vector<AudioRegion*> results;
-				AudioRegionView* marv;
-				DiskStream* ds;
-				
-				if ((ds = tatv->get_diskstream()) == 0) {
-					/* bus */
-					continue;
-				}
-				
-				if ((pl = ds->playlist()) != 0) {
-					pl->get_equivalent_regions (clicked_regionview->region, 
-								    results);
-				}
-				
-				for (vector<AudioRegion*>::iterator ir = results.begin(); ir != results.end(); ++ir) {
-					if ((marv = tatv->view->find_view (**ir)) != 0) {
-						all_equivalent_regions.push_back (marv);
-					}
-				}
-				
-			}
-		}
-
-	} else {
-
-		all_equivalent_regions.push_back (clicked_regionview);
-
-	}
+	mapover_audio_tracks (bind (mem_fun (*this, &Editor::track_set_selected_regionview_from_click), 
+				    clicked_regionview, &all_equivalent_regions));
 	
 	begin_reversible_command (_("set selected regionview"));
-	
-	if (add) {
 
+	switch (op) {
+	case Selection::Toggle:
 		if (clicked_regionview->get_selected()) {
-			if (group && group->is_active() && selection->audio_regions.size() > 1) {
+			if (/* group && group->is_active() && */ selection->audio_regions.size() > 1) {
 				/* reduce selection down to just the one clicked */
 				selection->set (clicked_regionview);
 			} else {
 				selection->remove (clicked_regionview);
 			}
 		} else {
-			selection->add (all_equivalent_regions);
+			selection->toggle (all_equivalent_regions);
 		}
 
-		set_selected_track_from_click (add, false, no_track_remove);
-		
-	} else {
+		set_selected_track_from_click (op, false, no_track_remove);
+		break;
 
+	case Selection::Set:
 		// karsten wiese suggested these two lines to make
 		// a selected region rise to the top. but this
 		// leads to a mismatch between actual layering
@@ -3137,15 +3170,20 @@ Editor::set_selected_regionview_from_click (bool add, bool no_track_remove)
 		} else {
 			
 			selection->set (all_equivalent_regions);
-			set_selected_track_from_click (add, false, false);
+			set_selected_track_from_click (op, false, false);
 		}
+		break;
+
+	case Selection::Extend:
+		/* not defined yet */
+		break;
 	}
 
 	commit_reversible_command () ;
 }
 
 void
-Editor::set_selected_regionview_from_region_list (Region& r, bool add)
+Editor::set_selected_regionview_from_region_list (Region& r, Selection::Operation op)
 {
 	vector<AudioRegionView*> all_equivalent_regions;
 	AudioRegion* region;
@@ -3185,13 +3223,16 @@ Editor::set_selected_regionview_from_region_list (Region& r, bool add)
 	
 	begin_reversible_command (_("set selected regions"));
 	
-	if (add) {
-
-		selection->add (all_equivalent_regions);
-		
-	} else {
-
+	switch (op) {
+	case Selection::Toggle:
+		selection->toggle (all_equivalent_regions);
+		break;
+	case Selection::Set:
 		selection->set (all_equivalent_regions);
+		break;
+	case Selection::Extend:
+		/* not defined yet */
+		break;
 	}
 
 	commit_reversible_command () ;
@@ -3596,6 +3637,12 @@ Editor::time_selection_changed ()
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 			(*i)->show_selection (selection->time);
 		}
+	}
+
+	if (selection->time.empty()) {
+		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, false);
+	} else {
+		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
 	}
 }
 

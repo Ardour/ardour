@@ -53,6 +53,24 @@ ARDOUR_UI::connect_to_session (Session *s)
 	/* sensitize menu bar options that are now valid */
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, true);
+	
+	if (session->locations()->num_range_markers()) {
+		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, true);
+	} else {
+		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, false);
+	}
+
+	/* there are never any selections on startup */
+
+	ActionManager::set_sensitive (ActionManager::region_selection_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::line_selection_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::point_selection_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::playlist_selection_sensitive_actions, false);
+
+	session->locations()->added.connect (mem_fun (*this, &ARDOUR_UI::handle_locations_change));
+	session->locations()->removed.connect (mem_fun (*this, &ARDOUR_UI::handle_locations_change));
 
 	rec_button.set_sensitive (true);
 	shuttle_box.set_sensitive (true);
@@ -366,3 +384,14 @@ ARDOUR_UI::toggle_sound_file_browser ()
 	}
 }
 
+void
+ARDOUR_UI::handle_locations_change (Location* ignored)
+{
+	if (session) {
+		if (session->locations()->num_range_markers()) {
+			ActionManager::set_sensitive (ActionManager::range_sensitive_actions, true);
+		} else {
+			ActionManager::set_sensitive (ActionManager::range_sensitive_actions, false);
+		}
+	}
+}

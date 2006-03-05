@@ -22,6 +22,7 @@
 #define __ardour_route_group_h__
 
 #include <list>
+#include <set>
 #include <string>
 #include <stdint.h>
 #include <sigc++/signal.h>
@@ -83,6 +84,10 @@ class RouteGroup : public Stateful, public sigc::trackable {
     /* to use these, #include <ardour/route_group_specialized.h> */
 
     template<class T> void apply (void (AudioTrack::*func)(T, void *), T val, void *src);
+
+    /* fills at_set with all members of the group that are AudioTracks */
+
+    void audio_track_group (std::set<AudioTrack*>& at_set);
 
     void clear () {
 	    routes.clear ();

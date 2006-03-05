@@ -407,7 +407,7 @@ pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
 
 			/* already collapsed: restore it (note that this is cast from a pointer value to int, which is tricky on 64bit */
 			
-			pane->set_position ((gint64) pane->get_data ("rpos"));
+			pane->set_position ((intptr_t) pane->get_data ("rpos"));
 
 		} else {	
 
@@ -419,7 +419,7 @@ pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
 
 			/* collapse to show the relevant child in full */
 			
-			collapse_direction = (gint64) pane->get_data ("collapse-direction");
+			collapse_direction = (intptr_t) pane->get_data ("collapse-direction");
 
 			if (collapse_direction) {
 				pane->set_position (1);

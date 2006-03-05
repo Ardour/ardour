@@ -1200,7 +1200,7 @@ Editor::temporal_zoom_to_frame (bool coarser, jack_nframes_t frame)
 }
 
 void
-Editor::select_all_in_track (bool add)
+Editor::select_all_in_track (Selection::Operation op)
 {
 	list<Selectable *> touched;
 
@@ -1210,15 +1210,21 @@ Editor::select_all_in_track (bool add)
 	
 	clicked_trackview->get_selectables (0, max_frames, 0, DBL_MAX, touched);
 
-	if (add) {
+	switch (op) {
+	case Selection::Toggle:
 		selection->add (touched);
-	} else {
+		break;
+	case Selection::Set:
 		selection->set (touched);
+		break;
+	case Selection::Extend:
+		/* not defined yet */
+		break;
 	}
 }
 
 void
-Editor::select_all (bool add)
+Editor::select_all (Selection::Operation op)
 {
 	list<Selectable *> touched;
 	
@@ -1229,10 +1235,16 @@ Editor::select_all (bool add)
 		(*iter)->get_selectables (0, max_frames, 0, DBL_MAX, touched);
 	}
 	begin_reversible_command (_("select all"));
-	if (add) {
+	switch (op) {
+	case Selection::Toggle:
 		selection->add (touched);
-	} else {
+		break;
+	case Selection::Set:
 		selection->set (touched);
+		break;
+	case Selection::Extend:
+		/* not defined yet */
+		break;
 	}
 	commit_reversible_command ();
 }
@@ -1266,7 +1278,7 @@ Editor::invert_selection ()
 }
 
 bool
-Editor::select_all_within (jack_nframes_t start, jack_nframes_t end, double top, double bot, bool add)
+Editor::select_all_within (jack_nframes_t start, jack_nframes_t end, double top, double bot, Selection::Operation op)
 {
 	list<Selectable *> touched;
 	
@@ -1277,10 +1289,16 @@ Editor::select_all_within (jack_nframes_t start, jack_nframes_t end, double top,
 		(*iter)->get_selectables (start, end, top, bot, touched);
 	}
 	begin_reversible_command (_("select all within"));
-	if (add) {
+	switch (op) {
+	case Selection::Toggle:
 		selection->add (touched);
-	} else {
+		break;
+	case Selection::Set:
 		selection->set (touched);
+		break;
+	case Selection::Extend:
+		/* not defined yet */
+		break;
 	}
 	commit_reversible_command ();
 	return !touched.empty();

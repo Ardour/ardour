@@ -21,6 +21,8 @@
 #include <map>
 #include <vector>
 
+#include <gtkmm/messagedialog.h>
+
 #include <pbd/lockmonitor.h>
 
 #include <ardour/io.h>
@@ -36,7 +38,6 @@
 #include <gtkmm2ext/utils.h>
 
 #include "utils.h"
-#include "ardour_message.h"
 #include "io_selector.h"
 #include "keyboard.h"
 #include "gui_thread.h"
@@ -557,7 +558,8 @@ IOSelector::add_port ()
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
-			ArdourMessage msg (0,  X_("noport dialog"), _("There are no more JACK ports available."));
+			MessageDialog msg (0,  _("There are no more JACK ports available."));
+			msg.run ();
 		}
 
 		if (io.input_maximum() >= 0 && io.input_maximum() <= (int) io.n_inputs()) {
@@ -575,8 +577,8 @@ IOSelector::add_port ()
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
-			ArdourMessage msg (0, X_("noport dialog"),
-					   _("There are no more JACK ports available."));
+			MessageDialog msg (0, _("There are no more JACK ports available."));
+			msg.run ();
 		}
 
 		if (io.output_maximum() >= 0 && io.output_maximum() <= (int) io.n_outputs()) {

@@ -46,7 +46,6 @@
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"
-#include "ardour_message.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
@@ -528,8 +527,9 @@ MixerStrip::output_press (GdkEventButton *ev)
 	using namespace Menu_Helpers;
 
 	if (!_session.engine().connected()) {
-		ArdourMessage msg (NULL, "nojackdialog", _("Not connected to JACK - no I/O changes are possible"));
-		return TRUE;
+		MessageDialog msg (_("Not connected to JACK - no I/O changes are possible"));
+		msg.run ();
+		return true;
 	}
 
 	MenuList& citems = output_menu.items();
@@ -586,8 +586,9 @@ MixerStrip::input_press (GdkEventButton *ev)
 	citems.clear();
 
 	if (!_session.engine().connected()) {
-		ArdourMessage msg (NULL, "nojackdialog", _("Not connected to JACK - no I/O changes are possible"));
-		return TRUE;
+		MessageDialog msg (_("Not connected to JACK - no I/O changes are possible"));
+		msg.run ();
+		return true;
 	}
 
 #if ADVANCED_ROUTE_DISKSTREAM_CONNECTIVITY
