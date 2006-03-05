@@ -821,10 +821,8 @@ PortInsertWindow::PortInsertWindow (Session& sess, PortInsert& pi, bool can_canc
 	}
 	button_box.pack_start (ok_button);
 
-	vbox.pack_start (_portinsertui);
-	vbox.pack_start (button_box, false, false);
-
-	add (vbox);
+	get_vbox()->pack_start (_portinsertui);
+	get_vbox()->pack_start (button_box, false, false);
 
 	ok_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::accept));
 	cancel_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::cancel));

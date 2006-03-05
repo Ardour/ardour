@@ -108,7 +108,7 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, Route& rt, PluginSelec
 	redirect_display.set_name ("RedirectSelector");
 	redirect_display.set_headers_visible (false);
 	redirect_display.set_reorderable (true);
-	redirect_display.set_size_request (-1, 48);
+	redirect_display.set_size_request (-1, -1);
 	redirect_display.get_column(0)->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	redirect_display.get_column(0)->set_fixed_width(48);
 	redirect_display.add_object_drag (columns.redirect.index(), "redirects");
