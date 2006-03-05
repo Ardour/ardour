@@ -650,7 +650,7 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
         opt_flags.extend (["-msse", "-mfpmath=sse"])
         debug_flags.extend (["-msse", "-mfpmath=sse"])
 
-    if env['FPU_OPTIMIZATION']:
+    if env['FPU_OPTIMIZATION'] and build_host_supports_sse:
         opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if env['DIST_TARGET'] == 'x86_64':
