@@ -23,7 +23,6 @@
 #include <cerrno>
 
 #include <sndfile.h>
-#include <cerrno>
 
 #include <pbd/basename.h>
 
