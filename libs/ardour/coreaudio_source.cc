@@ -79,14 +79,18 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 	if (err) {
 		throw failed_constructor();
 	}
-	err = ExtAudioFileOpen (ref, af_ref);
+	err = AudioFileOpen (ref, 0, fsRdPerm, &af);
 	if (err) {
 		throw failed_constructor();
 	}
 	
+	/* XXX get value for n_channels */
+	UInt32 size = sizeof(AudioStreamBasicDescription);
+	memset (_info, 0, size);
+	
 	if (channel >= n_channels) {
 		error << string_compose(_("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number"), n_channels, channel) << endmsg;
-		ExtAudioFileDispose(*af_ref);
+		AudioFileClose(af);
 		throw failed_constructor();
 	}
 
@@ -103,7 +107,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	if (build_peak) {
 		if (initialize_peakfile (false, file)) {
-			ExtAudioFileDispose(*af_ref);
+			AudioFileClose(af);
 			throw failed_constructor ();
 		}
 	}
@@ -143,20 +147,16 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) co
 	}
 
 	AudioBufferList abl;
-	AudioBuffer ab;
-
 	abl.mNumberBuffers = 1;
-	abl.mBuffers[0] = ab;
-	ab.mNumberChannels = n_channels;
-	ab.mDataByteSize = cnt;
-	ab.mData = dst;
-
+	abl.mBuffers[0].mNumberChannels = n_channels;
 
 	if (n_channels == 1) {
-		uint32_t ioNumber = cnt;
-		err = ExtAudioFileRead(*af_ref, (UInt32*)&ioNumber, &abl);
+		abl.mBuffers[0].mDataByteSize = cnt * sizeof(float);
+		abl.mBuffers[0].mData = dst;
+		nread = cnt;
+		err = ExtAudioFileRead(*af_ref, (UInt32*)&nread, &abl);
 		_read_data_count = cnt * sizeof(float);
-		return ioNumber;
+		return nread;
 	}
 
 	real_cnt = cnt * n_channels;

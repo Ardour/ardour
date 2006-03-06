@@ -23,7 +23,7 @@
 
 #include <ardour/source.h>
 
-#include <AudioToolbox/ExtendedAudioFile.h>
+#include <AudioToolbox/AudioFile.h>
 
 namespace ARDOUR {
 
@@ -45,8 +45,8 @@ class CoreAudioSource : public Source {
   private:
 	static string peak_dir;
 
-	ExtAudioFileRef*  af_ref;
-	uint16_t n_channels;
+	AudioFileID af;
+	AudioStreamBasicDescription _info;
 
 	uint16_t channel;
 	mutable float *tmpbuf;
