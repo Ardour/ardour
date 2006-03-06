@@ -571,6 +571,8 @@ config_kernel = 2;
 config_os = 3;
 config = config_guess.split ("-")
 
+print "system triple: " + config_guess
+
 # Autodetect
 if env['DIST_TARGET'] == 'auto':
     if config[config_arch] == 'apple':
@@ -590,19 +592,6 @@ if env['DIST_TARGET'] == 'auto':
     print "detected DIST_TARGET = " + env['DIST_TARGET']
     print "*******************************\n"
 
-
-if config[config_arch] == 'apple' and env['DIST_TARGET'] != 'none':
-    ## Are these lines supposed to be in ardour2?
-    if os.path.isdir('/opt/local/lib'):
-        libraries['core'].Append (LIBPATH = [ '/opt/local/lib' ])
-    if os.path.isdir('/opt/local/include'):
-        libraries['core'].Append (CPPPATH = [ '/opt/local/include' ])
-
-
-    if env['FPU_OPTIMIZATION']:
-        opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
-        debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
-        libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
 
 if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
     #
@@ -645,21 +634,26 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
             elif config[config_cpu] == "i686":
                 opt_flags.append ("-march=i686")
 
-
     if ((env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64')) and build_host_supports_sse:
         opt_flags.extend (["-msse", "-mfpmath=sse"])
         debug_flags.extend (["-msse", "-mfpmath=sse"])
+# end of processor-specific section
 
-    if env['FPU_OPTIMIZATION'] and build_host_supports_sse:
+# optimization section
+if env['FPU_OPTIMIZATION']:
+    if env['DIST_TARGET'] == 'tiger':
+        opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
+        debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
+        libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
+    elif env['DIST_TARGET'] == 'i686' or env['DIST_TARGET'] == 'x86_64':
         opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if env['DIST_TARGET'] == 'x86_64':
             opt_flags.append ("-DUSE_X86_64_ASM")
-            debug_flags.append ("-DUSE_X86_64_ASM")			
+            debug_flags.append ("-DUSE_X86_64_ASM")
         if build_host_supports_sse != 1:
             print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
-                    
-# end of processor-specific section
+# end optimization section
 
 #
 # ARCH="..." overrides all 
