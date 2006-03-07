@@ -28,7 +28,7 @@
 
 #include <jack/jack.h>
 
-#include <libgnomecanvasmm/libgnomecanvasmm.h>
+#include <libgnomecanvasmm.h>
 #include "canvas.h"
 #include "simplerect.h"
 

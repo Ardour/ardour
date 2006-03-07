@@ -24,7 +24,7 @@
 #include <string>
 #include <climits>
 
-#include <libgnomecanvasmm/libgnomecanvasmm.h>
+#include <libgnomecanvasmm.h>
 
 #include <pbd/error.h>
 

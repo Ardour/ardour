@@ -23,7 +23,7 @@
 
 #include <vector>
 #include <sigc++/signal.h>
-#include <libgnomecanvasmm/libgnomecanvasmm.h>
+#include <libgnomecanvasmm.h>
 #include "canvas.h"
 #include "simplerect.h"
 

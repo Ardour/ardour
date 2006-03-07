@@ -24,7 +24,7 @@
 #include <string>
 #include <list>
 
-#include <libgnomecanvasmm/libgnomecanvasmm.h>
+#include <libgnomecanvasmm.h>
 #include <libgnomecanvasmm/canvas.h>
 #include <libgnomecanvasmm/item.h>
 

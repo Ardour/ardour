@@ -23,7 +23,7 @@
 
 #include <vector>
 
-#include <libgnomecanvasmm/libgnomecanvasmm.h>
+#include <libgnomecanvasmm.h>
 #include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
 #include <ardour/region.h>

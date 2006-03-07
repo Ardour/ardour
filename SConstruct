@@ -435,11 +435,10 @@ if env['SYSLIBS']:
     libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
 
 #    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
-    libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
-                                          LIBPATH='#libs/soundtouch',
-                                          CPPPATH=['#libs', '#libs/soundtouch'])
+    libraries['soundtouch'] = LibraryInfo()
+    libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs soundtouch-1.0')
+
     coredirs = [
-	'libs/soundtouch',
         'templates'
     ]
 

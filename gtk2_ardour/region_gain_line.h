@@ -2,7 +2,7 @@
 #define __ardour_gtk_region_gain_line_h__
 
 #include <ardour/ardour.h>
-#include <libgnomecanvasmm/libgnomecanvasmm.h>
+#include <libgnomecanvasmm.h>
 
 #include "automation_line.h"
 
