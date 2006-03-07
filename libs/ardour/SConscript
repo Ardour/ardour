@@ -164,7 +164,7 @@ if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Core
 
 if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h'):
 	ardour.Append(LINKFLAGS="-framework AudioToolbox")
-	#extra_sources += coreaudio_files
+	extra_sources += coreaudio_files
 
 ardour = conf.Finish ()
 

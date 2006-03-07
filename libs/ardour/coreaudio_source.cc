@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2006 Paul Davis 
+	Written by Taybin Rutkin
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,7 +16,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <string>
@@ -40,7 +40,7 @@ CoreAudioSource::CoreAudioSource (const XMLNode& node)
 	}
 
 	init (_name, true);
-	SourceCreated (this); /* EMIT SIGNAL */
+	 SourceCreated (this); /* EMIT SIGNAL */
 }
 
 CoreAudioSource::CoreAudioSource (const string& idstr, bool build_peak)
@@ -61,7 +61,8 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	tmpbuf = 0;
 	tmpbufsize = 0;
-	af_ref = 0;
+	af = 0;
+	OSStatus err = noErr;
 
 	_name = idstr;
 
@@ -73,32 +74,33 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 		file = idstr.substr (0, pos);
 	}
 
+
 	/* note that we temporarily truncated _id at the colon */
 	FSRef* ref;
-	OSStatus err = FSPathMakeRef ((UInt8*)file.c_str(), ref, 0);
-	if (err) {
+	err = FSPathMakeRef ((UInt8*)file.c_str(), ref, 0);
+	if (err != noErr) {
 		throw failed_constructor();
 	}
-	err = AudioFileOpen (ref, 0, fsRdPerm, &af);
-	if (err) {
+
+	err = ExtAudioFileOpen (ref, &af);
+	if (err != noErr) {
 		throw failed_constructor();
 	}
-	
-	/* XXX get value for n_channels */
-	UInt32 size = sizeof(AudioStreamBasicDescription);
-	memset (_info, 0, size);
-	
+
+	/* TODO get channels */
+	n_channels = 0;
+
 	if (channel >= n_channels) {
 		error << string_compose(_("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number"), n_channels, channel) << endmsg;
-		AudioFileClose(af);
+		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
 
 	int64_t ca_frames;
 	size_t prop_size = sizeof(ca_frames);
 
-	err = ExtAudioFileGetProperty(*af_ref, kExtAudioFileProperty_FileLengthFrames, &prop_size, &ca_frames);
-	if (err) {
+	err = ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &prop_size, &ca_frames);
+	if (err != noErr) {
 		throw failed_constructor();
 	}
 	_length = ca_frames;
@@ -107,7 +109,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	if (build_peak) {
 		if (initialize_peakfile (false, file)) {
-			AudioFileClose(af);
+			ExtAudioFileDispose (af);
 			throw failed_constructor ();
 		}
 	}
@@ -118,8 +120,8 @@ CoreAudioSource::~CoreAudioSource ()
 {
 	 GoingAway (this); /* EMIT SIGNAL */
 
-	if (af_ref) {
-		ExtAudioFileDispose(*af_ref);
+	if (af) {
+		ExtAudioFileDispose (af);
 	}
 
 	if (tmpbuf) {
@@ -128,35 +130,38 @@ CoreAudioSource::~CoreAudioSource ()
 }
 
 jack_nframes_t
-CoreAudioSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
+CoreAudioSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {
-	return read (dst, start, cnt);
+	return read (dst, start, cnt, workbuf);
 }
 
 jack_nframes_t
-CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
+CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {
-	uint32_t nread;
+	int32_t nread;
 	float *ptr;
 	uint32_t real_cnt;
+	OSStatus err = noErr;
 
-	OSStatus err = ExtAudioFileSeek(*af_ref, start);
-	if (err) {
-		error << string_compose(_("CoreAudioSource: could not seek to frame %1 within %2"), start, _name.substr (1)) << endmsg;
+	err = ExtAudioFileSeek(af, start);
+	if (err != noErr) {
+		error << string_compose(_("CoreAudioSource: could not seek to frame %1 within %2 (%3)"), start, _name.substr (1), err) << endmsg;
 		return 0;
 	}
 
+	AudioBuffer ab;
+	ab.mNumberChannels = n_channels;
+	ab.mDataByteSize = cnt;
+	ab.mData = dst;
+
 	AudioBufferList abl;
 	abl.mNumberBuffers = 1;
-	abl.mBuffers[0].mNumberChannels = n_channels;
+	abl.mBuffers[1] = ab;
 
 	if (n_channels == 1) {
-		abl.mBuffers[0].mDataByteSize = cnt * sizeof(float);
-		abl.mBuffers[0].mData = dst;
-		nread = cnt;
-		err = ExtAudioFileRead(*af_ref, (UInt32*)&nread, &abl);
+		err = ExtAudioFileRead(af, (UInt32*) &cnt, &abl);
 		_read_data_count = cnt * sizeof(float);
-		return nread;
+		return cnt;
 	}
 
 	real_cnt = cnt * n_channels;
@@ -172,15 +177,17 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) co
 			tmpbufsize = real_cnt;
 			tmpbuf = new float[tmpbufsize];
 		}
+		ab.mDataByteSize = real_cnt;
+		ab.mData = tmpbuf;
 		
-		nread = real_cnt;
-		err = ExtAudioFileRead(*af_ref, (UInt32*)&nread, tmpbuf);
+		err = ExtAudioFileRead(af, (UInt32*) &real_cnt, &abl);
+//		nread = sf_read_float (af, tmpbuf, real_cnt);
 		ptr = tmpbuf + channel;
 		nread /= n_channels;
 		
 		/* stride through the interleaved data */
 		
-		for (uint32_t n = 0; n < nread; ++n) {
+		for (int32_t n = 0; n < nread; ++n) {
 			dst[n] = *ptr;
 			ptr += n_channels;
 		}
@@ -188,7 +195,7 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) co
 
 	_read_data_count = cnt * sizeof(float);
 		
-	return nread;
+	return real_cnt;
 }
 
 string
@@ -218,3 +225,4 @@ CoreAudioSource::old_peak_path (string audio_path)
 {
 	return peak_path (audio_path);
 }
+

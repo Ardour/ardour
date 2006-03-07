@@ -15,15 +15,13 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __coreaudio_source_h__ 
 #define __coreaudio_source_h__
 
 #include <ardour/source.h>
-
-#include <AudioToolbox/AudioFile.h>
+#include <AudioToolbox/ExtendedAudioFile.h>
 
 namespace ARDOUR {
 
@@ -34,7 +32,7 @@ class CoreAudioSource : public Source {
 	~CoreAudioSource ();
 
 	jack_nframes_t length() const { return _length; }
-	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
+	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 	void           mark_for_remove() {} // we never remove external sndfiles 
 	string         peak_path(string audio_path);
 	string         old_peak_path(string audio_path);
@@ -45,17 +43,16 @@ class CoreAudioSource : public Source {
   private:
 	static string peak_dir;
 
-	AudioFileID af;
-	AudioStreamBasicDescription _info;
-
+	ExtAudioFileRef af;
 	uint16_t channel;
+	uint16_t n_channels;
 	mutable float *tmpbuf;
 	mutable jack_nframes_t tmpbufsize;
 	mutable PBD::Lock _tmpbuf_lock;
 	string  _path;
 
 	void init (const string &str, bool build_peak);
-	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
+	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 };
 
 }; /* namespace ARDOUR */
