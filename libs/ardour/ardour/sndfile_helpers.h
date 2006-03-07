@@ -35,4 +35,13 @@ int sndfile_data_width (int format);
 string sndfile_major_format(int);
 string sndfile_minor_format(int);
 
+struct SoundFileInfo {
+	float    samplerate;
+	uint16_t channels;
+	int64_t length;
+	std::string format_name;
+};
+
+bool get_soundfile_info (string path, SoundFileInfo& _info);
+
 #endif /* __sndfile_helpers_h__ */
