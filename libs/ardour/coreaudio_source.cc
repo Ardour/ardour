@@ -1,6 +1,5 @@
 /*
     Copyright (C) 2006 Paul Davis 
-	Written by Taybin Rutkin
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -84,11 +83,20 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	err = ExtAudioFileOpen (ref, &af);
 	if (err != noErr) {
+		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
 
-	/* TODO get channels */
-	n_channels = 0;
+	AudioStreamBasicDescription absd;
+	memset(&absd, 0, sizeof(absd));
+	size_t absd_size = sizeof(absd);
+	err = ExtAudioFileGetProperty(af,
+			kExtAudioFileProperty_FileDataFormat, &absd_size, &absd);
+	if (err != noErr) {
+		ExtAudioFileDispose (af);
+		throw failed_constructor();
+	}
+	n_channels = absd.mChannelsPerFrame;
 
 	if (channel >= n_channels) {
 		error << string_compose(_("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number"), n_channels, channel) << endmsg;
@@ -101,6 +109,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	err = ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &prop_size, &ca_frames);
 	if (err != noErr) {
+		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
 	_length = ca_frames;
@@ -138,9 +147,6 @@ CoreAudioSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_
 jack_nframes_t
 CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {
-	int32_t nread;
-	float *ptr;
-	uint32_t real_cnt;
 	OSStatus err = noErr;
 
 	err = ExtAudioFileSeek(af, start);
@@ -164,7 +170,7 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, ch
 		return cnt;
 	}
 
-	real_cnt = cnt * n_channels;
+	uint32_t real_cnt = cnt * n_channels;
 
 	{
 		LockMonitor lm (_tmpbuf_lock, __LINE__, __FILE__);
@@ -177,17 +183,17 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, ch
 			tmpbufsize = real_cnt;
 			tmpbuf = new float[tmpbufsize];
 		}
+
 		ab.mDataByteSize = real_cnt;
 		ab.mData = tmpbuf;
 		
 		err = ExtAudioFileRead(af, (UInt32*) &real_cnt, &abl);
-//		nread = sf_read_float (af, tmpbuf, real_cnt);
-		ptr = tmpbuf + channel;
-		nread /= n_channels;
+		float *ptr = tmpbuf + channel;
+		real_cnt /= n_channels;
 		
 		/* stride through the interleaved data */
 		
-		for (int32_t n = 0; n < nread; ++n) {
+		for (uint32_t n = 0; n < real_cnt; ++n) {
 			dst[n] = *ptr;
 			ptr += n_channels;
 		}
@@ -212,7 +218,7 @@ CoreAudioSource::peak_path (string audio_path)
 	stat (mp.c_str(), &stat_mount);
 
 	char buf[32];
-	snprintf (buf, sizeof (buf), "%ld-%ld-%d.peak", stat_mount.st_ino, stat_file.st_ino, channel);
+	snprintf (buf, sizeof (buf), "%u-%u-%d.peak", stat_mount.st_ino, stat_file.st_ino, channel);
 
 	string res = peak_dir;
 	res += buf;
