@@ -406,6 +406,10 @@ DiskStream::use_new_playlist ()
 	string newname;
 	AudioPlaylist* playlist;
 
+	if (!in_set_state && destructive()) {
+		return 0;
+	}
+
 	if (_playlist) {
 		newname = Playlist::bump_name (_playlist->name(), _session);
 	} else {
@@ -423,6 +427,10 @@ DiskStream::use_new_playlist ()
 int
 DiskStream::use_copy_playlist ()
 {
+	if (destructive()) {
+		return 0;
+	}
+
 	if (_playlist == 0) {
 		error << string_compose(_("DiskStream %1: there is no existing playlist to make a copy of!"), _name) << endmsg;
 		return -1;
@@ -663,8 +671,6 @@ DiskStream::check_record_status (jack_nframes_t transport_frame, jack_nframes_t 
 		}
 
 		if (_flags & Recordable) {
-			cerr << "START RECORD @ " << capture_start_frame << endl;
-
 			for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 				
 				RingBufferNPT<CaptureTransition>::rw_vector transvec;
@@ -677,7 +683,8 @@ DiskStream::check_record_status (jack_nframes_t transport_frame, jack_nframes_t 
 				}
 				else {
 					// bad!
-					cerr << "capture_transition_buf is full on rec start!  inconceivable!" << endl;
+					fatal << X_("programming error: capture_transition_buf is full on rec start!  inconceivable!") 
+					      << endmsg;
 				}
  			}
 		}
@@ -1562,10 +1569,8 @@ DiskStream::do_flush (char * workbuf, bool force_flush)
 				
 				if (captrans.type == CaptureStart) {
 					// by definition, the first data we got above represents the given capture pos
-					cerr << "DS " << name() << "  got CaptureStart at " << captrans.capture_val << endl;
 
 					(*chan).write_source->mark_capture_start (captrans.capture_val);
-					
 					(*chan).curr_capture_cnt = 0;
 
 					have_start = true;
@@ -1576,18 +1581,8 @@ DiskStream::do_flush (char * workbuf, bool force_flush)
 
 					if (captrans.capture_val <= (*chan).curr_capture_cnt + to_write) {
 
-						cerr << "DS " << name() << "  got CaptureEnd with " << captrans.capture_val << endl;
 						// shorten to make the write a perfect fit
 						uint32_t nto_write = (captrans.capture_val - (*chan).curr_capture_cnt); 
-						if (have_start) {
-							// starts and ends within same chunk we're processing
-							cerr << "Starts and ends within same chunk: adjusting to_write from: "
-							     << to_write << " to: " << nto_write << endl;
-						}
-						else {
-							cerr << "Ends within chunk: adjusting to_write to: "
-							     << to_write << " to: " << nto_write << endl;
-						}
 
 						if (nto_write < to_write) {
 							ret = 1; // should we?
@@ -1602,8 +1597,6 @@ DiskStream::do_flush (char * workbuf, bool force_flush)
 					}
 					else {
 						// actually ends just beyond this chunk, so force more work
-						cerr << "DS " << name() << " got CaptureEnd beyond our chunk, cnt of: "
-						     << captrans.capture_val << "  leaving on queue" << endl;
 						ret = 1;
 						break;
 					}
@@ -1856,8 +1849,7 @@ DiskStream::finish_capture (bool rec_monitors_input)
 		return;
 	}
 
-	if ((_flags & Recordable) && destructive()) {
-		cerr << "RECORD END @ " << capture_start_frame + capture_captured << endl;
+	if (recordable() && destructive()) {
 		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 			
 			RingBufferNPT<CaptureTransition>::rw_vector transvec;
@@ -1971,10 +1963,6 @@ DiskStream::get_state ()
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	if (destructive()) {
-		node->add_property ("destructive", "true");
-	}
-
 	snprintf (buf, sizeof(buf), "%zd", channels.size());
 	node->add_property ("channels", buf);
 
@@ -2047,12 +2035,6 @@ DiskStream::set_state (const XMLNode& node)
 	
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value();
-	} 
-
-	if ((prop = node.property ("destructive")) != 0) {
-		if (prop->value() == "true") {
-			_flags |= Destructive;
-		}
 	} 
 
 	if (deprecated_io_node) {
@@ -2129,17 +2111,14 @@ DiskStream::set_state (const XMLNode& node)
 
 	in_set_state = false;
 
-	/* now that we're all done with playlist+channel set up,
-	   go ahead and create write sources.
-	*/
-
+	/* make sure this is clear before we do anything else */
 
 	capturing_sources.clear ();
 
-	if (recordable() && !destructive()) {
-		/* destructive diskstreams get their sources set up elsewhere */
-		reset_write_sources (false);
-	}
+	/* write sources are handled elsewhere; 
+  	      for destructive tracks: in {setup,use}_destructive_playlist()
+	      for non-destructive: when we handle the input set up of the IO that owns this DS
+	*/
 		
 	in_set_state = false;
 
@@ -2183,8 +2162,6 @@ DiskStream::use_new_write_source (uint32_t n)
 		chan.write_source = 0;
 		return -1;
 	}
-
-	cerr << _name << " using a new source " << chan.write_source << " for channel " << n << endl;
 
 	chan.write_source->use ();
 

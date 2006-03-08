@@ -1195,7 +1195,7 @@ Editor::connect_to_session (Session *t)
 
 	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
-	session->foreach_edit_group(this, &Editor::add_edit_group);
+	session->foreach_edit_group (mem_fun (*this, &Editor::add_edit_group));
 
 	edit_cursor_clock.set_session (session);
 	selection_start_clock.set_session (session);

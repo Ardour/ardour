@@ -192,9 +192,8 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	virtual void label_view ();
 
 	Gtk::Menu edit_group_menu;
-	Gtk::RadioMenuItem::Group edit_group_menu_radio_group;
 
-	void add_edit_group_menu_item (ARDOUR::RouteGroup *);
+	void add_edit_group_menu_item (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
 	void set_edit_group_from_menu (ARDOUR::RouteGroup *);
 
 	void reset_samples_per_unit ();

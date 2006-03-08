@@ -231,7 +231,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	bool ignore_comment_edit;
 
 	void set_mix_group (ARDOUR::RouteGroup *);
-	void add_mix_group_to_menu (ARDOUR::RouteGroup *);
+	void add_mix_group_to_menu (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
 	gint select_mix_group (GdkEventButton *);
 	void mix_group_changed (void *);
 

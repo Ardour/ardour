@@ -1155,12 +1155,12 @@ MixerStrip::set_mix_group (RouteGroup *rg)
 }
 
 void
-MixerStrip::add_mix_group_to_menu (RouteGroup *rg)
+MixerStrip::add_mix_group_to_menu (RouteGroup *rg, RadioMenuItem::Group* group)
 {
 	using namespace Menu_Helpers;
 
 	MenuList& items = group_menu->items();
-	items.push_back (MenuElem (rg->name(), bind (mem_fun(*this, &MixerStrip::set_mix_group), rg)));
+	items.push_back (RadioMenuElem (*group, rg->name(), bind (mem_fun(*this, &MixerStrip::set_mix_group), rg)));
 }
 
 gint
@@ -1171,9 +1171,11 @@ MixerStrip::select_mix_group (GdkEventButton *ev)
 	group_menu = new Menu;
 	group_menu->set_name ("ArdourContextMenu");
 	MenuList& items = group_menu->items();
+	RadioMenuItem::Group group;
+	
+	items.push_back (RadioMenuElem (group, _("no group"), bind (mem_fun(*this, &MixerStrip::set_mix_group), (RouteGroup *) 0)));
 
-	items.push_back (MenuElem (_("no group"), bind (mem_fun(*this, &MixerStrip::set_mix_group), (RouteGroup *) 0)));
-	_session.foreach_mix_group (this, &MixerStrip::add_mix_group_to_menu);
+	_session.foreach_mix_group (bind (mem_fun (*this, &MixerStrip::add_mix_group_to_menu), &group));
 
 	group_menu->popup (ev->button, 0);
 	return stop_signal (group_button, "button_press_event");

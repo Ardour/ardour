@@ -193,9 +193,8 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	controls_table.attach (size_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.attach (automation_button, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
-	if (is_audio_track()) {
+	if (is_audio_track() && audio_track()->mode() == ARDOUR::Normal) {
 		controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-
 	}
 
 	/* remove focus from the buttons */
@@ -338,29 +337,30 @@ AudioTimeAxisView::edit_click (GdkEventButton *ev)
 	using namespace Menu_Helpers;
 
 	MenuList& items = edit_group_menu.items ();
+	RadioMenuItem::Group group;
 
 	items.clear ();
-	items.push_back (RadioMenuElem (edit_group_menu_radio_group, _("No group"), 
-				   bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), (RouteGroup *) 0)));
+	items.push_back (RadioMenuElem (group, _("No group"), 
+					bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), (RouteGroup *) 0)));
 	
 	if (_route.edit_group() == 0) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
-
-	_session.foreach_edit_group (this, &AudioTimeAxisView::add_edit_group_menu_item);
+	
+	_session.foreach_edit_group (bind (mem_fun (*this, &AudioTimeAxisView::add_edit_group_menu_item), &group));
 	edit_group_menu.popup (ev->button, ev->time);
 
 	return FALSE;
 }
 
 void
-AudioTimeAxisView::add_edit_group_menu_item (RouteGroup *eg)
+AudioTimeAxisView::add_edit_group_menu_item (RouteGroup *eg, RadioMenuItem::Group* group)
 {
 	using namespace Menu_Helpers;
 
 	MenuList &items = edit_group_menu.items();
-	items.push_back (RadioMenuElem (edit_group_menu_radio_group,
-					eg->name(), bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), eg)));
+
+	items.push_back (RadioMenuElem (*group, eg->name(), bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), eg)));
 	if (_route.edit_group() == eg) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
@@ -832,12 +832,7 @@ AudioTimeAxisView::rename_current_playlist ()
 	AudioPlaylist *pl;
 	DiskStream *ds;
 
-	/* neither conditions are supposed to be true at this
-	   time, but to leave the design flexible, allow
-	   them to be in the future without causing crashes
-	*/
-
-	if (((ds = get_diskstream()) == 0) ||((pl = ds->playlist()) == 0)) {
+	if (((ds = get_diskstream()) == 0) || ds->destructive() || ((pl = ds->playlist()) == 0)) {
 		return;
 	}
 
@@ -864,12 +859,7 @@ AudioTimeAxisView::use_copy_playlist (bool prompt)
 	DiskStream *ds;
 	string name;
 
-	/* neither conditions are supposed to be true at this
-	   time, but to leave the design flexible, allow
-	   them to be in the future without causing crashes
-	*/
-
-	if (((ds = get_diskstream()) == 0) || ((pl = ds->playlist()) == 0)) {
+	if (((ds = get_diskstream()) == 0) || ds->destructive() || ((pl = ds->playlist()) == 0)) {
 		return;
 	}
 	
@@ -906,13 +896,8 @@ AudioTimeAxisView::use_new_playlist (bool prompt)
 	AudioPlaylist *pl;
 	DiskStream *ds;
 	string name;
-	
-	/* neither conditions are supposed to be true at this
-	   time, but to leave the design flexible, allow
-	   them to be in the future without causing crashes
-	*/
-	
-	if (((ds = get_diskstream()) == 0) || ((pl = ds->playlist()) == 0)) {
+
+	if (((ds = get_diskstream()) == 0) || ds->destructive() || ((pl = ds->playlist()) == 0)) {
 		return;
 	}
 	

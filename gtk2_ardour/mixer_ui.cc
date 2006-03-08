@@ -313,7 +313,7 @@ Mixer_UI::connect_to_session (Session* sess)
 	session->RouteAdded.connect (mem_fun(*this, &Mixer_UI::add_strip));
 	session->mix_group_added.connect (mem_fun(*this, &Mixer_UI::add_mix_group));
 
-	session->foreach_mix_group(this, &Mixer_UI::add_mix_group);
+	session->foreach_mix_group (mem_fun (*this, &Mixer_UI::add_mix_group));
 	
 	_plugin_selector->set_session (session);
 

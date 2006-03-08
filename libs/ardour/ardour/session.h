@@ -511,17 +511,15 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void,RouteGroup*> edit_group_added;
 	sigc::signal<void,RouteGroup*> mix_group_added;
 
-	template<class T> void foreach_edit_group (T *obj, void (T::*func)(RouteGroup *)) {
-		list<RouteGroup *>::iterator i;
-		for (i = edit_groups.begin(); i != edit_groups.end(); i++) {
-			(obj->*func)(*i);
+	void foreach_edit_group (sigc::slot<void,RouteGroup*> sl) {
+		for (list<RouteGroup *>::iterator i = edit_groups.begin(); i != edit_groups.end(); i++) {
+			sl (*i);
 		}
 	}
 
-	template<class T> void foreach_mix_group (T *obj, void (T::*func)(RouteGroup *)) {
-		list<RouteGroup *>::iterator i;
-		for (i = mix_groups.begin(); i != mix_groups.end(); i++) {
-			(obj->*func)(*i);
+	void foreach_mix_group (sigc::slot<void,RouteGroup*> sl) {
+		for (list<RouteGroup *>::iterator i = mix_groups.begin(); i != mix_groups.end(); i++) {
+			sl (*i);
 		}
 	}
 
