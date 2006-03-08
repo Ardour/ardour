@@ -341,9 +341,8 @@ IOSelector::rescan ()
 			row[port_display_columns.full_name] = s->second;
 		}
 
-		display->get_selection()->signal_changed().connect 
-			(bind (mem_fun(*this, &IOSelector::port_selection_changed), display));
-		
+		//display->get_selection()->signal_changed().connect (bind (mem_fun(*this, &IOSelector::port_selection_changed), display));
+		display->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_selection_changed), display));
 		Label *tab_label = manage (new Label);
 
 		tab_label->set_name ("IOSelectorNotebookTab");
@@ -358,7 +357,7 @@ IOSelector::rescan ()
 	}
 
 	notebook.set_current_page (current_page);
-	notebook.signal_show().connect (bind (mem_fun (notebook, &Notebook::set_current_page), current_page));
+	//notebook.signal_show().connect (bind (mem_fun (notebook, &Notebook::set_current_page), current_page));
 	selector_box.show_all ();
 }	
 
@@ -426,15 +425,7 @@ IOSelector::display_ports ()
 			tview->set_name ("IOSelectorPortList");
 			
 			port_box.pack_start (*tview);
-			//scroller = manage (new ScrolledWindow);
-			
-			//scroller->add (*tview);
-			//scroller->set_policy (POLICY_NEVER, POLICY_NEVER);
-			
 			port_displays.insert (port_displays.end(), tview);
-			//port_box.pack_start (*scroller);
-			
-			//scroller->set_size_request (-1, 75);
 			
 			/* now fill the clist with the current connections */
 			
@@ -475,7 +466,7 @@ IOSelector::display_ports ()
 			TreeViewColumn* col = tview->get_column (0);
 			
 			col->set_clickable (true);
-			//set_treeview_header_as_default_label(col);
+			
 			/* handle button events on the column header and within the treeview itself */
 
 			//col->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_column_button_release), tview));
@@ -508,18 +499,18 @@ IOSelector::display_ports ()
 	}
 }
 
-void
-IOSelector::port_selection_changed (TreeView* treeview)
+bool
+IOSelector::port_selection_changed (GdkEventButton *ev, TreeView* treeview)
 {
 	TreeModel::iterator i = treeview->get_selection()->get_selected();
 	int status;
 
 	if (!i) {
-		return;
+		return 0;
 	}
 
 	if (selected_port == 0) {
-		return;
+		return 0;
 	}
 
 	ustring other_port_name = (*i)[port_display_columns.full_name];
@@ -536,6 +527,9 @@ IOSelector::port_selection_changed (TreeView* treeview)
 	if (status == 0) {
 		select_next_treeview ();
 	}
+	
+	treeview->get_selection()->unselect_all();
+	return 0;
 }
 
 void
