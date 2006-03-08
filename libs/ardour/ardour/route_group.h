@@ -69,9 +69,15 @@ class RouteGroup : public Stateful, public sigc::trackable {
 
     int remove (Route *);
 
+    void apply (void (Route::*func)(void *), void *src) {
+	    for (list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
+		    ((*i)->*func)(src);
+	    }
+    }
+
     template<class T> void apply (void (Route::*func)(T, void *), T val, void *src) {
 	    for (list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
-		    ((*i)->*func)(val, this);
+		    ((*i)->*func)(val, src);
 	    }
     }
 

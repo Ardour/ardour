@@ -177,7 +177,6 @@ Editor::hide_track_in_display (TimeAxisView& tv)
 {
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
-	Glib::RefPtr<TreeSelection> selection = route_list_display.get_selection();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[route_display_columns.tv] == &tv) { 
@@ -199,7 +198,6 @@ Editor::show_track_in_display (TimeAxisView& tv)
 {
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
-	Glib::RefPtr<TreeSelection> selection = route_list_display.get_selection();
 	
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[route_display_columns.tv] == &tv) { 

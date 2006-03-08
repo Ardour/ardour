@@ -568,9 +568,9 @@ Editor::Editor (AudioEngine& eng)
 	group_model->signal_row_changed().connect (mem_fun (*this, &Editor::edit_group_row_change));
 
 	edit_group_display.set_name ("EditGroupList");
-	edit_group_display.get_selection()->set_mode (SELECTION_NONE);
+	edit_group_display.get_selection()->set_mode (SELECTION_SINGLE);
 	edit_group_display.set_reorderable (false);
-
+	edit_group_display.set_rules_hint (true);
 	edit_group_display.set_size_request (75, -1);
 
 	edit_group_display_scroller.add (edit_group_display);
@@ -578,14 +578,19 @@ Editor::Editor (AudioEngine& eng)
 
 	edit_group_display.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event), false);
 
-	{
-		TreeModel::Row row;
-		row = *(group_model->append());
-		row[group_columns.is_active] = false;
-		row[group_columns.is_visible] = true;
-		row[group_columns.text] = (_("-all-"));
-		row[group_columns.routegroup] = 0;
-	}
+	VBox* edit_group_display_packer = manage (new VBox());
+	HButtonBox* edit_group_display_button_box = manage (new HButtonBox());
+	Button* edit_group_add_button = manage (new Button ("+"));
+	Button* edit_group_remove_button = manage (new Button("-"));
+
+	edit_group_add_button->signal_clicked().connect (mem_fun (*this, &Editor::new_edit_group));
+	edit_group_remove_button->signal_clicked().connect (mem_fun (*this, &Editor::remove_selected_edit_group));
+	
+	edit_group_display_button_box->pack_start (*edit_group_add_button);
+	edit_group_display_button_box->pack_start (*edit_group_remove_button);
+
+	edit_group_display_packer->pack_start (edit_group_display_scroller, true, true);
+	edit_group_display_packer->pack_start (*edit_group_display_button_box, false, false);
 
 	region_list_display.set_size_request (100, -1);
 	region_list_display.set_name ("RegionListDisplay");
@@ -662,7 +667,7 @@ Editor::Editor (AudioEngine& eng)
        	the_notebook.append_page (region_list_scroller, _("Regions"));
        	the_notebook.append_page (route_list_scroller, _("Tracks/Busses"));
 	the_notebook.append_page (snapshot_display_scroller, _("Snapshots"));
-	the_notebook.append_page (edit_group_display_scroller, _("Edit Groups"));
+	the_notebook.append_page (*edit_group_display_packer, _("Edit Groups"));
 	the_notebook.append_page (named_selection_scroller, _("Chunks"));
 	the_notebook.set_show_tabs (true);
 	the_notebook.set_scrollable (true);
@@ -1030,12 +1035,6 @@ Editor::session_control_changed (Session::ControlType t)
 }
 
 void
-Editor::fake_add_edit_group (RouteGroup *group)
-{
-	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &Editor::add_edit_group), group));
-}
-
-void
 Editor::fake_handle_new_audio_region (AudioRegion *region)
 {
 	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &Editor::handle_new_audio_region), region));
@@ -1182,7 +1181,8 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->AudioRegionAdded.connect (mem_fun(*this, &Editor::fake_handle_new_audio_region)));
 	session_connections.push_back (session->AudioRegionRemoved.connect (mem_fun(*this, &Editor::fake_handle_audio_region_removed)));
 	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::fake_handle_new_duration)));
-	session_connections.push_back (session->edit_group_added.connect (mem_fun(*this, &Editor::fake_add_edit_group)));
+	session_connections.push_back (session->edit_group_added.connect (mem_fun(*this, &Editor::add_edit_group)));
+	session_connections.push_back (session->edit_group_removed.connect (mem_fun(*this, &Editor::edit_groups_changed)));
 	session_connections.push_back (session->NamedSelectionAdded.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
 	session_connections.push_back (session->NamedSelectionRemoved.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
 	session_connections.push_back (session->DirtyChanged.connect (mem_fun(*this, &Editor::update_title)));
@@ -1195,7 +1195,7 @@ Editor::connect_to_session (Session *t)
 
 	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
-	session->foreach_edit_group (mem_fun (*this, &Editor::add_edit_group));
+	edit_groups_changed ();
 
 	edit_cursor_clock.set_session (session);
 	selection_start_clock.set_session (session);

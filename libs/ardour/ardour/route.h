@@ -127,9 +127,11 @@ class Route : public IO
 	bool phase_invert() const { return _phase_invert; }
 	
 	void       set_edit_group (RouteGroup *, void *);
+	void       drop_edit_group (void *);
 	RouteGroup *edit_group () { return _edit_group; }
 
 	void       set_mix_group (RouteGroup *, void *);
+	void       drop_mix_group (void *);
 	RouteGroup *mix_group () { return _mix_group; }
 
 	virtual void  set_meter_point (MeterPoint, void *src);

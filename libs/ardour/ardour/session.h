@@ -505,11 +505,16 @@ class Session : public sigc::trackable, public Stateful
 	RouteGroup* add_edit_group (string);
 	RouteGroup* add_mix_group (string);
 
+	void remove_edit_group (RouteGroup&);
+	void remove_mix_group (RouteGroup&);
+
 	RouteGroup *mix_group_by_name (string);
 	RouteGroup *edit_group_by_name (string);
 
 	sigc::signal<void,RouteGroup*> edit_group_added;
 	sigc::signal<void,RouteGroup*> mix_group_added;
+	sigc::signal<void> edit_group_removed;
+	sigc::signal<void> mix_group_removed;
 
 	void foreach_edit_group (sigc::slot<void,RouteGroup*> sl) {
 		for (list<RouteGroup *>::iterator i = edit_groups.begin(); i != edit_groups.end(); i++) {

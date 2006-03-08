@@ -98,6 +98,31 @@ Editor::new_edit_group ()
 }
 
 void
+Editor::remove_selected_edit_group ()
+{
+	Glib::RefPtr<TreeSelection> selection = edit_group_display.get_selection();
+	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();
+
+	if (rows.empty()) {
+		return;
+	}
+
+	TreeView::Selection::ListHandle_Path::iterator i = rows.begin();
+	TreeIter iter;
+	
+	/* selection mode is single, so rows.begin() is it */
+
+	if ((iter = group_model->get_iter (*i))) {
+
+		RouteGroup* rg = (*iter)[group_columns.routegroup];
+
+		if (rg) {
+			session->remove_edit_group (*rg);
+		}
+	}
+}
+
+void
 Editor::edit_group_list_button_clicked ()
 {
 	new_edit_group ();
@@ -201,6 +226,29 @@ Editor::add_edit_group (RouteGroup* group)
 	row[group_columns.routegroup] = group;
 
 	group->FlagsChanged.connect (bind (mem_fun(*this, &Editor::group_flags_changed), group));
+}
+
+void
+Editor::edit_groups_changed ()
+{
+	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::edit_groups_changed));
+
+	/* just rebuild the while thing */
+
+	edit_group_display.set_model (Glib::RefPtr<TreeModel>(0));
+	group_model->clear ();
+
+	{
+		TreeModel::Row row;
+		row = *(group_model->append());
+		row[group_columns.is_active] = false;
+		row[group_columns.is_visible] = true;
+		row[group_columns.text] = (_("-all-"));
+		row[group_columns.routegroup] = 0;
+	}
+
+	session->foreach_edit_group (mem_fun (*this, &Editor::add_edit_group));
+	edit_group_display.set_model (group_model);
 }
 
 void

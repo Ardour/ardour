@@ -2415,6 +2415,34 @@ Session::add_mix_group (string name)
 	return rg;
 }
 
+void
+Session::remove_edit_group (RouteGroup& rg)
+{
+	list<RouteGroup*>::iterator i;
+
+	if ((i = find (edit_groups.begin(), edit_groups.end(), &rg)) != edit_groups.end()) {
+		(*i)->apply (&Route::drop_edit_group, this);
+		edit_groups.erase (i);
+		edit_group_removed (); /* EMIT SIGNAL */
+	}
+
+	delete &rg;
+}
+
+void
+Session::remove_mix_group (RouteGroup& rg)
+{
+	list<RouteGroup*>::iterator i;
+
+	if ((i = find (mix_groups.begin(), mix_groups.end(), &rg)) != mix_groups.end()) {
+		(*i)->apply (&Route::drop_mix_group, this);
+		mix_groups.erase (i);
+		mix_group_removed (); /* EMIT SIGNAL */
+	}
+
+	delete &rg;
+}
+
 RouteGroup *
 Session::mix_group_by_name (string name)
 {

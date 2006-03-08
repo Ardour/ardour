@@ -1833,16 +1833,27 @@ void
 Route::set_edit_group (RouteGroup *eg, void *src)
 
 {
+	if (eg == _edit_group) {
+		return;
+	}
+
 	if (_edit_group) {
 		_edit_group->remove (this);
 	}
 
-	if ((_edit_group = eg)) {
+	if ((_edit_group = eg) != 0) {
 		_edit_group->add (this);
 	}
 
 	_session.set_dirty ();
+	edit_group_changed (src); /* EMIT SIGNAL */
+}
 
+void
+Route::drop_edit_group (void *src)
+{
+	_edit_group = 0;
+	_session.set_dirty ();
 	edit_group_changed (src); /* EMIT SIGNAL */
 }
 
@@ -1850,16 +1861,27 @@ void
 Route::set_mix_group (RouteGroup *mg, void *src)
 
 {
+	if (mg == _mix_group) {
+		return;
+	}
+
 	if (_mix_group) {
 		_mix_group->remove (this);
 	}
 
-	if ((_mix_group = mg)) {
+	if ((_mix_group = mg) != 0) {
 		_mix_group->add (this);
 	}
 
 	_session.set_dirty ();
-	
+	mix_group_changed (src); /* EMIT SIGNAL */
+}
+
+void
+Route::drop_mix_group (void *src)
+{
+	_mix_group = 0;
+	_session.set_dirty ();
 	mix_group_changed (src); /* EMIT SIGNAL */
 }
 

@@ -1521,7 +1521,10 @@ class Editor : public PublicEditor
 	gint edit_group_list_button_press_event (GdkEventButton* ev);
 	void edit_group_selection_changed ();
 	void fake_add_edit_group (ARDOUR::RouteGroup* group);
+	void fake_remove_edit_group (ARDOUR::RouteGroup* group);
 	void add_edit_group (ARDOUR::RouteGroup* group);
+	void remove_selected_edit_group ();
+	void edit_groups_changed ();
 	void group_flags_changed (void*, ARDOUR::RouteGroup*);
 
 	Gtk::VBox           list_vpacker;
