@@ -2964,7 +2964,8 @@ Editor::restore_state (State *state)
 
 	*selection = *state->selection;
 	time_selection_changed ();
-	region_selection_changed ();
+	cerr << "RS: RSC\n";
+	region_selection_changed ();   
 
 	/* XXX other selection change handlers? */
 }
@@ -3052,7 +3053,7 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool wit
 }
 
 void
-Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&> sl)
+Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl)
 {
 	set<AudioTimeAxisView*> relevant_tracks;
 
@@ -3060,7 +3061,7 @@ Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&> sl)
 
 	for (TrackSelection::iterator ti = selection->tracks.begin(); ti != selection->tracks.end(); ++ti) {
 
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&clicked_regionview->get_time_axis_view());
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*ti);
 
 		if (!atv) {
 			continue;
@@ -3094,14 +3095,17 @@ Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&> sl)
 	}
 
 	/* step two: apply operation to each track */
+
+	uint32_t sz = relevant_tracks.size();
 	
 	for (set<AudioTimeAxisView*>::iterator ati = relevant_tracks.begin(); ati != relevant_tracks.end(); ++ati) {
-		sl (**ati);
+		sl (**ati, sz);
 	}
 }
 
 void
-Editor::track_set_selected_regionview_from_click (AudioTimeAxisView& atv, AudioRegionView* basis, vector<AudioRegionView*>* all_equivs)
+Editor::mapped_set_selected_regionview_from_click (AudioTimeAxisView& atv, uint32_t ignored, 
+						  AudioRegionView* basis, vector<AudioRegionView*>* all_equivs)
 {
 	AudioPlaylist* pl;
 	vector<AudioRegion*> results;
@@ -3127,19 +3131,26 @@ Editor::track_set_selected_regionview_from_click (AudioTimeAxisView& atv, AudioR
 void
 Editor::set_selected_regionview_from_click (Selection::Operation op, bool no_track_remove)
 {
+	cerr << "In SSRfC\n";
+
 	vector<AudioRegionView*> all_equivalent_regions;
 
 	if (!clicked_regionview) {
 		return;
 	}
 
-	mapover_audio_tracks (bind (mem_fun (*this, &Editor::track_set_selected_regionview_from_click), 
+	mapover_audio_tracks (bind (mem_fun (*this, &Editor::mapped_set_selected_regionview_from_click), 
 				    clicked_regionview, &all_equivalent_regions));
 	
+
+	cerr << "mapover done\n";
+
 	begin_reversible_command (_("set selected regionview"));
 
 	switch (op) {
 	case Selection::Toggle:
+		selection->toggle (clicked_regionview);
+#if 0
 		if (clicked_regionview->get_selected()) {
 			if (/* group && group->is_active() && */ selection->audio_regions.size() > 1) {
 				/* reduce selection down to just the one clicked */
@@ -3148,9 +3159,9 @@ Editor::set_selected_regionview_from_click (Selection::Operation op, bool no_tra
 				selection->remove (clicked_regionview);
 			}
 		} else {
-			selection->toggle (all_equivalent_regions);
+			selection->add (all_equivalent_regions);
 		}
-
+#endif
 		set_selected_track_from_click (op, false, no_track_remove);
 		break;
 
@@ -3178,6 +3189,7 @@ Editor::set_selected_regionview_from_click (Selection::Operation op, bool no_tra
 		/* not defined yet */
 		break;
 	}
+	cerr << "case done\n";
 
 	commit_reversible_command () ;
 }
@@ -3225,7 +3237,8 @@ Editor::set_selected_regionview_from_region_list (Region& r, Selection::Operatio
 	
 	switch (op) {
 	case Selection::Toggle:
-		selection->toggle (all_equivalent_regions);
+		/* XXX this is not correct */
+		selection->add (all_equivalent_regions);
 		break;
 	case Selection::Set:
 		selection->set (all_equivalent_regions);
@@ -4059,4 +4072,46 @@ Editor::restore_editing_space ()
 	edit_pane.set_position (pre_maximal_pane_position);
 
 	unfullscreen();
+}
+
+void 
+Editor::new_playlists ()
+{
+	begin_reversible_command (_("new playlists"));
+	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_use_new_playlist));
+	commit_reversible_command ();
+}
+
+void
+Editor::copy_playlists ()
+{
+	begin_reversible_command (_("copy playlists"));
+	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_use_copy_playlist));
+	commit_reversible_command ();
+}
+
+void 
+Editor::clear_playlists ()
+{
+	begin_reversible_command (_("clear playlists"));
+	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_clear_playlist));
+	commit_reversible_command ();
+}
+
+void 
+Editor::mapped_use_new_playlist (AudioTimeAxisView& atv, uint32_t sz)
+{
+	atv.use_new_playlist (sz > 1 ? false : true);
+}
+
+void
+Editor::mapped_use_copy_playlist (AudioTimeAxisView& atv, uint32_t sz)
+{
+	atv.use_copy_playlist (sz > 1 ? false : true);
+}
+
+void 
+Editor::mapped_clear_playlist (AudioTimeAxisView& atv, uint32_t sz)
+{
+	atv.clear_playlist ();
 }

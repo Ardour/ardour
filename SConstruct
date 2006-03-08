@@ -7,6 +7,7 @@ import shutil
 import glob
 import errno
 import time
+import platform
 from sets import Set
 import SCons.Node.FS
 

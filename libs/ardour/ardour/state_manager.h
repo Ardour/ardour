@@ -40,7 +40,7 @@ class StateManager : public sigc::trackable
 
   protected:
 	static bool _allow_save;
-	static std::set<StateManager*> deferred;
+	static sigc::signal<void,const char*> SaveAllowed;
 
 	StateMap   states;
 

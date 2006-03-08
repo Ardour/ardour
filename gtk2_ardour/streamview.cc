@@ -535,6 +535,7 @@ StreamView::set_selected_regionviews (AudioRegionSelection& regions)
 {
 	bool selected;
 
+	cerr << _trackview.name() << " (selected = " << regions.size() << ")" << endl;
 	for (list<AudioRegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		
 		selected = false;
@@ -545,6 +546,7 @@ StreamView::set_selected_regionviews (AudioRegionSelection& regions)
 			}
 		}
 		
+		cerr << "\tregion " << (*i)->region.name() << " selected = " << selected << endl;
 		(*i)->set_selected (selected, this);
 	}
 }

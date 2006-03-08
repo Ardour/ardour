@@ -152,94 +152,65 @@ Selection::clear_lines ()
 void
 Selection::toggle (Redirect* r)
 {
-	if (find (redirects.begin(), redirects.end(), r) == redirects.end()) {
+	RedirectSelection::iterator i;
+
+	if ((i = find (redirects.begin(), redirects.end(), r)) == redirects.end()) {
 		redirects.push_back (r);
-		RedirectsChanged();
+	} else {
+		redirects.erase (i);
 	}
+	RedirectsChanged();
+
 }
 
 void
 Selection::toggle (Playlist* pl)
 {
-	if (find (playlists.begin(), playlists.end(), pl) == playlists.end()) {
+	PlaylistSelection::iterator i;
+
+	if ((i = find (playlists.begin(), playlists.end(), pl)) == playlists.end()) {
 		pl->ref ();
 		playlists.push_back(pl);
-		PlaylistsChanged ();
+	} else {
+		playlists.erase (i);
 	}
-}
 
-void
-Selection::toggle (const list<Playlist*>& pllist)
-{
-	bool changed = false;
-
-	for (list<Playlist*>::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
-		if (find (playlists.begin(), playlists.end(), (*i)) == playlists.end()) {
-			(*i)->ref ();
-			playlists.push_back (*i);
-			changed = true;
-		}
-	}
-	
-	if (changed) {
-		PlaylistsChanged ();
-	}
-}
-
-void
-Selection::toggle (const list<TimeAxisView*>& track_list)
-{
-	bool changed = false;
-
-	for (list<TimeAxisView*>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
-		if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
-			void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-			(*i)->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), (*i)));
-			tracks.push_back (*i);
-			changed = true;
-		}
-	}
-	
-	if (changed) {
-		TracksChanged ();
-	}
+	PlaylistsChanged ();
 }
 
 void
 Selection::toggle (TimeAxisView* track)
 {
-	if (find (tracks.begin(), tracks.end(), track) == tracks.end()) {
+	TrackSelection::iterator i;
+	
+	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
 		track->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), track));
 		tracks.push_back (track);
-		TracksChanged();
+	} else {
+		tracks.erase (i);
 	}
+
+	TracksChanged();
 }
 
 void
 Selection::toggle (AudioRegionView* r)
 {
-	if (find (audio_regions.begin(), audio_regions.end(), r) == audio_regions.end()) {
+	AudioRegionSelection::iterator i;
+
+	cerr << "about to toggle a regionview\n";
+
+	if ((i = find (audio_regions.begin(), audio_regions.end(), r)) == audio_regions.end()) {
 		audio_regions.add (r);
-		RegionsChanged ();
-	}
-}
-
-void
-Selection::toggle (vector<AudioRegionView*>& v)
-{
-	bool changed = false;
-
-	for (vector<AudioRegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
-		if (find (audio_regions.begin(), audio_regions.end(), (*i)) == audio_regions.end()) {
-			audio_regions.add ((*i));
-			changed = true;
-		}
+		cerr << "\tadded\n";
+	} else {
+		audio_regions.erase (i);
+		cerr << "\tremoved\n";
 	}
 
-	if (changed) {
-		RegionsChanged ();
-	}
+	RegionsChanged ();
+	cerr << "done\n";
 }
 
 long

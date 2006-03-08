@@ -103,6 +103,9 @@ class PublicEditor : public Gtk::Window, public Stateful {
 	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void route_name_changed (TimeAxisView *) = 0;
 	virtual void clear_playlist (ARDOUR::Playlist&) = 0;
+	virtual void new_playlists () = 0;
+	virtual void copy_playlists () = 0;
+	virtual void clear_playlists () = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView& tv) = 0;
 	virtual void set_follow_playhead (bool yn) = 0;

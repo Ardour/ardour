@@ -7,7 +7,7 @@ using namespace ARDOUR;
 using namespace std;
 
 bool StateManager::_allow_save = true;
-set<StateManager*> StateManager::deferred;
+sigc::signal<void,const char*> StateManager::SaveAllowed;
 
 StateManager::StateManager ()
 {
@@ -29,11 +29,9 @@ StateManager::allow_save (const char* why, bool do_save)
 {
 	_allow_save = true;
 	if (do_save) {
-		for (set<StateManager*>::iterator x = deferred.begin(); x != deferred.end(); ++x) {
-			(*x)->save_state (why);
-		}
+		SaveAllowed (why);
+		SaveAllowed.slots().erase (SaveAllowed.slots().begin(), SaveAllowed.slots().end());
 	}
-	deferred.clear ();
 }
 
 void
@@ -74,7 +72,7 @@ void
 StateManager::save_state (std::string why)
 {
 	if (!_allow_save) {
-		deferred.insert (this);
+		SaveAllowed.connect (mem_fun (*this, &StateManager::save_state));
 		return;
 	}
 

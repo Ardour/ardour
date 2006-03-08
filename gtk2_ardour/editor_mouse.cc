@@ -292,7 +292,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 	track_canvas.grab_focus();
 
 	if (session && session->actively_recording()) {
-		return TRUE;
+		return true;
 	}
 
 	/* in object/audition/timefx mode, any button press sets
@@ -375,7 +375,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 	     Keyboard::is_edit_event (&event->button))) {
 		
 		/* handled by button release */
-		return TRUE;
+		return true;
 	}
 
 	switch (event->button.button) {
@@ -397,7 +397,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			case EditCursorItem:
 			case PlayheadCursorItem:
 				start_cursor_grab (item, event);
-				return TRUE;
+				return true;
 
 			case MarkerItem:
 				if (Keyboard::modifier_state_equals (event->button.state, 
@@ -406,7 +406,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				} else {
 					start_marker_grab (item, event);
 				}
-				return TRUE;
+				return true;
 
 			case TempoMarkerItem:
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
@@ -414,7 +414,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				} else {
 					start_tempo_marker_grab (item, event);
 				}
-				return TRUE;
+				return true;
 
 			case MeterMarkerItem:
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
@@ -422,21 +422,21 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				} else {
 					start_meter_marker_grab (item, event);
 				}
-				return TRUE;
+				return true;
 
 			case TempoBarItem:
-				return TRUE;
+				return true;
 
 			case MeterBarItem:
-				return TRUE;
+				return true;
 				
 			case RangeMarkerBarItem:
 				start_range_markerbar_op (item, event, CreateRangeMarker); 
-				return TRUE;
+				return true;
 				break;
 			case TransportMarkerBarItem:
 				start_range_markerbar_op (item, event, CreateTransportMarker); 
-				return TRUE;
+				return true;
 				break;
 
 			default:
@@ -474,7 +474,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			default:
 				start_selection_op (item, event, CreateSelection);
 			}
-			return TRUE;
+			return true;
 			break;
 			
 		case MouseObject:
@@ -489,11 +489,11 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				switch (item_type) {
 				case FadeInHandleItem:
 					start_fade_in_grab (item, event);
-					return TRUE;
+					return true;
 					
 				case FadeOutHandleItem:
 					start_fade_out_grab (item, event);
-					return TRUE;
+					return true;
 
 				case RegionItem:
 					if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
@@ -507,27 +507,27 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					
 				case AudioRegionViewNameHighlight:
 					start_trim (item, event);
-					return TRUE;
+					return true;
 					break;
 					
 				case AudioRegionViewName:
 					/* rename happens on edit clicks */
 						start_trim (clicked_regionview->get_name_highlight(), event);
-						return TRUE;
+						return true;
 					break;
 
 				case GainAutomationControlPointItem:
 				case PanAutomationControlPointItem:
 				case RedirectAutomationControlPointItem:
 					start_control_point_grab (item, event);
-					return TRUE;
+					return true;
 					break;
 					
 				case GainAutomationLineItem:
 				case PanAutomationLineItem:
 				case RedirectAutomationLineItem:
 					start_line_grab_from_line (item, event);
-					return TRUE;
+					return true;
 					break;
 
 				case StreamItem:
@@ -538,19 +538,19 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				/* <CMT Additions> */
 				case ImageFrameHandleStartItem:
 					imageframe_start_handle_op(item, event) ;
-					return(TRUE) ;
+					return(true) ;
 					break ;
 				case ImageFrameHandleEndItem:
 					imageframe_end_handle_op(item, event) ;
-					return(TRUE) ;
+					return(true) ;
 					break ;
 				case MarkerViewHandleStartItem:
 					markerview_item_start_handle_op(item, event) ;
-					return(TRUE) ;
+					return(true) ;
 					break ;
 				case MarkerViewHandleEndItem:
 					markerview_item_end_handle_op(item, event) ;
-					return(TRUE) ;
+					return(true) ;
 					break ;
 				/* </CMT Additions> */
 				
@@ -567,7 +567,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					break;
 				}
 			}
-			return TRUE;
+			return true;
 			break;
 			
 		case MouseGain:
@@ -578,23 +578,23 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 			case GainControlPointItem:
 				start_control_point_grab (item, event);
-				return TRUE;
+				return true;
 				
 			case GainLineItem:
 				start_line_grab_from_line (item, event);
-				return TRUE;
+				return true;
 
 			case GainAutomationControlPointItem:
 			case PanAutomationControlPointItem:
 			case RedirectAutomationControlPointItem:
 				start_control_point_grab (item, event);
-				return TRUE;
+				return true;
 				break;
 
 			default:
 				break;
 			}
-			return TRUE;
+			return true;
 			break;
 
 			switch (item_type) {
@@ -619,7 +619,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			default:
 				break;
 			}
-			return TRUE;
+			return true;
 			break;
 
 		case MouseZoom:
@@ -627,7 +627,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				start_mouse_zoom (item, event);
 			}
 
-			return TRUE;
+			return true;
 			break;
 
 		case MouseTimeFX:
@@ -662,7 +662,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				case PanAutomationControlPointItem:
 				case RedirectAutomationControlPointItem:
 					start_control_point_grab (item, event);
-					return TRUE;
+					return true;
 					break;
 					
 				default:
@@ -674,12 +674,12 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			switch (item_type) {
 			case AudioRegionViewNameHighlight:
 				start_trim (item, event);
-				return TRUE;
+				return true;
 				break;
 				
 			case AudioRegionViewName:
 				start_trim (clicked_regionview->get_name_highlight(), event);
-				return TRUE;
+				return true;
 				break;
 				
 			default:
@@ -692,7 +692,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			if (event->type == GDK_BUTTON_PRESS) {
 				/* relax till release */
 			}
-			return TRUE;
+			return true;
 			break;
 					
 				
@@ -702,7 +702,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			} else {
 				temporal_zoom_to_frame (true, event_frame(event));
 			}
-			return TRUE;
+			return true;
 			break;
 
 		default:
@@ -789,7 +789,8 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		break;
 
 	}
-	return FALSE;
+
+	return false;
 }
 
 bool
@@ -800,7 +801,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	/* no action if we're recording */
 						
 	if (session && session->actively_recording()) {
-		return TRUE;
+		return true;
 	}
 
 	/* first, see if we're finishing a drag ... */
@@ -808,7 +809,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	if (drag_info.item) {
 		if (end_grab (item, event)) {
 			/* grab dragged, so do nothing else */
-			return TRUE;
+			return true;
 		}
 	}
 	
@@ -837,7 +838,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		default:
 			break;
 		}
-		return TRUE;
+		return true;
 	}
 
 	/* context menu events get handled here */
@@ -920,7 +921,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 			}
 
-			return TRUE;
+			return true;
 		}
 	}
 
@@ -964,7 +965,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		default:
 			break;
 		}
-		return TRUE;
+		return true;
 	}
 
 	switch (event->button.button) {
@@ -981,25 +982,25 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case RedirectAutomationLineItem:
 		case StartSelectionTrimItem:
 		case EndSelectionTrimItem:
-			return TRUE;
+			return true;
 
 		case MarkerBarItem:
 			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 				snap_to (where, 0, true);
 			}
 			mouse_add_new_marker (where);
-			return TRUE;
+			return true;
 
 		case TempoBarItem:
 			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 				snap_to (where);
 			}
 			mouse_add_new_tempo_event (where);
-			return TRUE;
+			return true;
 			
 		case MeterBarItem:
 			mouse_add_new_meter_event (pixel_to_frame (event->button.x));
-			return TRUE;
+			return true;
 			break;
 
 		default:
@@ -1015,7 +1016,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					 event,
 					 where,
 					 event->button.y);
-				return TRUE;
+				return true;
 				break;
 
 			default:
@@ -1027,13 +1028,13 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case RegionItem:
 				clicked_regionview->add_gain_point_event (item, event);
-				return TRUE;
+				return true;
 				break;
 				
 			case AutomationTrackItem:
 				dynamic_cast<AutomationTimeAxisView*>(clicked_trackview)->
 					add_automation_event (item, event, where, event->button.y);
-				return TRUE;
+				return true;
 				break;
 			default:
 				break;
@@ -1055,7 +1056,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		}
 
-		return TRUE;
+		return true;
 		break;
 
 
@@ -1072,7 +1073,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				} else {
 					// Button2 click is unused
 				}
-				return TRUE;
+				return true;
 				
 				break;
 				
@@ -1084,7 +1085,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case MouseRange:
 			
 			// x_style_paste (where, 1.0);
-			return TRUE;
+			return true;
 			break;
 			
 		default:
@@ -1099,7 +1100,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	default:
 		break;
 	}
-	return FALSE;
+	return false;
 }
 
 void
@@ -1137,7 +1138,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	switch (item_type) {
 	case GainControlPointItem:
 		if (mouse_mode == MouseGain) {
-			cp = reinterpret_cast<ControlPoint*>(item->get_data ("control_point"));
+			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
 			cp->set_visible (true);
 
 			double at_x, at_y;
@@ -1161,7 +1162,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		cp = reinterpret_cast<ControlPoint*>(item->get_data ("control_point"));
+		cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
 		cp->set_visible (true);
 		
 		double at_x, at_y;
@@ -1331,7 +1332,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 	}
 
-	return FALSE;
+	return false;
 }
 
 bool
@@ -1453,7 +1454,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 	}
 
-	return FALSE;
+	return false;
 }
 
 gint
@@ -1463,7 +1464,7 @@ Editor::left_automation_track ()
 		set_entered_track (0);
 		clear_entered_track = false;
 	}
-	return FALSE;
+	return false;
 }
 
 bool
@@ -1490,7 +1491,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 
 	if (session && session->actively_recording()) {
 		/* Sorry. no dragging stuff around while we record */
-		return TRUE;
+		return true;
 	}
 
 	drag_info.current_pointer_frame = event_frame (event, &drag_info.current_pointer_x,
@@ -1500,10 +1501,9 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		/* item != 0 is the best test i can think of for 
 		   dragging.
 		*/
-		if (!drag_info.move_threshold_passsed)
-		{
+		if (!drag_info.move_threshold_passsed) {
 			drag_info.move_threshold_passsed = (abs ((int) (drag_info.current_pointer_x - drag_info.grab_x)) > 4);
-
+			
 			// and change the initial grab loc/frame if this drag info wants us to
 			if (drag_info.want_move_threshold && drag_info.move_threshold_passsed) {
 				drag_info.grab_frame = drag_info.current_pointer_frame;
@@ -1573,10 +1573,10 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 
   handled:
 	track_canvas_motion (event);
-	return TRUE;
+	return true;
 	
   not_handled:
-	return FALSE;
+	return false;
 }
 
 void
@@ -2631,40 +2631,40 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	/* this is committed in the grab finished callback. */
 
 	begin_reversible_command (_("Drag region copy"));
-				
+
 	/* duplicate the region(s) */
-
+	
 	vector<AudioRegionView*> new_regionviews;
-
+	
 	set<Playlist*> affected_playlists;
 	pair<set<Playlist*>::iterator,bool> insert_result;
 	
 	for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
 		AudioRegionView* rv;
-
+		
 		rv = (*i);
-
+		
 		Playlist* to_playlist = rv->region.playlist();
 		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&rv->get_time_axis_view());
-
+		
 		insert_result = affected_playlists.insert (to_playlist);
 		if (insert_result.second) {
 			session->add_undo (to_playlist->get_memento ());
 		}
 		
 		latest_regionview = 0;
-
+		
 		sigc::connection c = atv->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 		
 		/* create a new region with the same name.
 		 */
-
+		
 		AudioRegion* newregion = new AudioRegion (rv->region);
-
+		
 		/* if the original region was locked, we don't care */
-
+		
 		newregion->set_locked (false);
-
+		
 		to_playlist->add_region (*newregion, (jack_nframes_t) (rv->region.position() * atv->get_diskstream()->speed()));
 		
 		c.disconnect ();
@@ -2672,20 +2672,22 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		if (latest_regionview) {
 			new_regionviews.push_back (latest_regionview);
 		}
-		
 	}
-
+	
 	if (new_regionviews.empty()) {
 		return;
 	}
-
+	
 	/* reset selection to new regionviews */
-
+	
 	selection->set (new_regionviews);
-
-	drag_info.item = new_regionviews.front()->get_canvas_group ();
-	drag_info.copy = true;
+	
+	/* reset drag_info data to reflect the fact that we are dragging the copies */
+	
 	drag_info.data = new_regionviews.front();
+	drag_info.item = new_regionviews.front()->get_canvas_group ();
+	
+	drag_info.copy = true;
 	drag_info.motion_callback = &Editor::region_drag_motion_callback;
 	drag_info.finished_callback = &Editor::region_drag_finished_callback;
 
@@ -3036,8 +3038,9 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	************************************************************/
 
 	pair<set<Playlist*>::iterator,bool> insert_result;
+	const list<AudioRegionView*>& layered_regions = selection->audio_regions.by_layer();
 
-	for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
+	for (list<AudioRegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
 	    
 		AudioRegionView* rv;
 		rv = (*i);
@@ -4598,7 +4601,7 @@ Editor::mouse_rename_region (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 		break;
 	}
-	return TRUE;
+	return true;
 }
 
 void
@@ -4712,7 +4715,7 @@ Editor::track_height_step_timeout ()
 	
 	if (delta.tv_sec * 1000000 + delta.tv_usec > 250000) { /* milliseconds */
 		current_stepping_trackview = 0;
-		return FALSE;
+		return false;
 	}
-	return TRUE;
+	return true;
 }

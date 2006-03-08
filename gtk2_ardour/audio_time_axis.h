@@ -126,6 +126,12 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	void set_state (const XMLNode&);
 	XMLNode* get_child_xml_node (const string & childname);
 
+	/* the editor calls these when mapping an operation across multiple tracks */
+
+	void use_new_playlist (bool prompt);
+	void use_copy_playlist (bool prompt);
+	void clear_playlist ();
+
   private:
 	friend class StreamView;
 	friend class AudioRegionView;
@@ -227,9 +233,6 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	void playlist_modified ();
 
 	void add_playlist_to_playlist_menu (ARDOUR::Playlist*);
-	void use_new_playlist ();
-	void use_copy_playlist ();
-	void clear_playlist ();
 	void rename_current_playlist ();
 
 	/* automation stuff */

@@ -858,7 +858,7 @@ AudioTimeAxisView::rename_current_playlist ()
 }
 
 void
-AudioTimeAxisView::use_copy_playlist ()
+AudioTimeAxisView::use_copy_playlist (bool prompt)
 {
 	AudioPlaylist *pl;
 	DiskStream *ds;
@@ -873,64 +873,74 @@ AudioTimeAxisView::use_copy_playlist ()
 		return;
 	}
 	
-	ArdourPrompter prompter (true);
-	string new_name = Playlist::bump_name (pl->name(), _session);
-	
-	prompter.set_prompt (_("Name for playlist"));
-	prompter.set_initial_text (new_name);
-	prompter.show_all ();
+	name = Playlist::bump_name (pl->name(), _session);
 
-	switch (prompter.run ()) {
-	case Gtk::RESPONSE_ACCEPT:
-		prompter.get_result (name);
-		if (name.length()) {
-			ds->use_copy_playlist ();
-			pl = ds->playlist();
-			pl->set_name (name);
+	if (prompt) {
+
+		ArdourPrompter prompter (true);
+		
+		prompter.set_prompt (_("Name for playlist"));
+		prompter.set_initial_text (name);
+		prompter.show_all ();
+		
+		switch (prompter.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			prompter.get_result (name);
+			break;
+			
+		default:
+			return;
 		}
-		break;
+	}
 
-	default:
-		break;
+	if (name.length()) {
+		ds->use_copy_playlist ();
+		pl = ds->playlist();
+		pl->set_name (name);
 	}
 }
 
 void
-AudioTimeAxisView::use_new_playlist ()
+AudioTimeAxisView::use_new_playlist (bool prompt)
 {
 	AudioPlaylist *pl;
 	DiskStream *ds;
 	string name;
-
+	
 	/* neither conditions are supposed to be true at this
 	   time, but to leave the design flexible, allow
 	   them to be in the future without causing crashes
 	*/
-
+	
 	if (((ds = get_diskstream()) == 0) || ((pl = ds->playlist()) == 0)) {
 		return;
 	}
-
-	ArdourPrompter prompter (true);
-	string new_name = Playlist::bump_name (pl->name(), _session);
-
-	prompter.set_prompt (_("Name for playlist"));
-	prompter.set_initial_text (new_name);
 	
-	switch (prompter.run ()) {
-	case Gtk::RESPONSE_ACCEPT:
-		prompter.get_result (name);
-		if (name.length()) {
-			ds->use_new_playlist ();
-			pl = ds->playlist();
-			pl->set_name (name);
-		}
-		break;
+	name = Playlist::bump_name (pl->name(), _session);
 
-	default:
-		break;
+	if (prompt) {
+		
+		ArdourPrompter prompter (true);
+		
+		prompter.set_prompt (_("Name for playlist"));
+		prompter.set_initial_text (name);
+		
+		switch (prompter.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			prompter.get_result (name);
+			break;
+			
+		default:
+			return;
+		}
 	}
-}	
+
+	if (name.length()) {
+		ds->use_new_playlist ();
+		pl = ds->playlist();
+		pl->set_name (name);
+	}
+}
 
 void
 AudioTimeAxisView::clear_playlist ()
@@ -1010,7 +1020,8 @@ AudioTimeAxisView::selection_click (GdkEventButton* ev)
 
 	switch (Keyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
-		editor.get_selection().toggle (*tracks);
+		/* XXX this is not right */
+		editor.get_selection().add (*tracks);
 		break;
 		
 	case Selection::Set:
@@ -1855,10 +1866,10 @@ AudioTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &AudioTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
-	playlist_items.push_back (MenuElem (_("New"), mem_fun(*this, &AudioTimeAxisView::use_new_playlist)));
-	playlist_items.push_back (MenuElem (_("New Copy"), mem_fun(*this, &AudioTimeAxisView::use_copy_playlist)));
+	playlist_items.push_back (MenuElem (_("New"), mem_fun(editor, &PublicEditor::new_playlists)));
+	playlist_items.push_back (MenuElem (_("New Copy"), mem_fun(editor, &PublicEditor::copy_playlists)));
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Clear Current"), mem_fun(*this, &AudioTimeAxisView::clear_playlist)));
+	playlist_items.push_back (MenuElem (_("Clear Current"), mem_fun(editor, &PublicEditor::clear_playlists)));
 	playlist_items.push_back (SeparatorElem());
 	playlist_items.push_back (MenuElem(_("Select"), mem_fun(*this, &AudioTimeAxisView::show_playlist_selector)));
 
