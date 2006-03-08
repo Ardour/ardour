@@ -22,8 +22,6 @@
 #include <map>
 #include <cerrno>
 
-#include <sndfile.h>
-
 #include <pbd/basename.h>
 
 #include <gtkmm/box.h>
@@ -42,7 +40,7 @@
 
 using namespace ARDOUR;
 
-std::string length2string (const int32_t frames, const int32_t sample_rate);
+std::string length2string (const int32_t frames, const float sample_rate);
 
 SoundFileBox::SoundFileBox ()
 	:
@@ -121,30 +119,15 @@ SoundFileBox::setup_labels (string filename)
 {
 	path = filename;
 
-    SNDFILE *sf;
-
-	sf_info.format = 0; // libsndfile says to clear this before sf_open().
-
-    if ((sf = sf_open ((char *) filename.c_str(), SFM_READ, &sf_info)) < 0) {
-        return false;
-    }
-
-	sf_close (sf);
-
-    if (sf_info.frames == 0 && sf_info.channels == 0 &&
-		sf_info.samplerate == 0 && sf_info.format == 0 &&
-	   	sf_info.sections == 0) {
-		/* .. ok, it's not a sound file */
-	    return false;
+	if(!get_soundfile_info (filename, sf_info)) {
+		return false;
 	}
 
 	length.set_alignment (0.0f, 0.0f);
-	length.set_text (string_compose("Length: %1", length2string(sf_info.frames, sf_info.samplerate)));
+	length.set_text (string_compose("Length: %1", length2string(sf_info.length, sf_info.samplerate)));
 
 	format.set_alignment (0.0f, 0.0f);
-	format.set_text (string_compose("Format: %1, %2", 
-				sndfile_major_format(sf_info.format),
-				sndfile_minor_format(sf_info.format)));
+	format.set_text (sf_info.format_name);
 
 	channels.set_alignment (0.0f, 0.0f);
 	channels.set_text (string_compose("Channels: %1", sf_info.channels));
@@ -363,9 +346,9 @@ SoundFileOmega::import_clicked ()
 }
 
 std::string
-length2string (const int32_t frames, const int32_t sample_rate)
+length2string (const int32_t frames, const float sample_rate)
 {
-    int secs = (int) (frames / (float) sample_rate);
+    int secs = (int) (frames / sample_rate);
     int hrs =  secs / 3600;
     secs -= (hrs * 3600);
     int mins = secs / 60;

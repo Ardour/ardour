@@ -25,8 +25,6 @@
 #include <string>
 #include <map>
 
-#include <sndfile.h>
-
 #include <pbd/error.h>
 #include <pbd/basename.h>
 #include <pbd/pthread_utils.h>
@@ -2104,7 +2102,7 @@ Editor::do_import (vector<string> paths, bool split, bool as_tracks)
 }
 
 int
-Editor::reject_because_rate_differs (const string & path, SF_INFO& finfo, const string & action, bool multiple_pending)
+Editor::reject_because_rate_differs (const string & path, SoundFileInfo& finfo, const string & action, bool multiple_pending)
 {
 	if (!session) {
 		return 1;
@@ -2185,8 +2183,7 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 	AudioRegion::SourceList sources;
 	string idspec;
 	string linked_path;
-	SNDFILE *sf;
-	SF_INFO finfo;
+	SoundFileInfo finfo;
 
 	/* lets see if we can link it into the session */
 	
@@ -2204,18 +2201,11 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 		path = linked_path;
 	}
 
-	memset (&finfo, 0, sizeof(finfo));
-
 	/* note that we temporarily truncated _id at the colon */
-	
-	if ((sf = sf_open (path.c_str(), SFM_READ, &finfo)) == 0) {
-		char errbuf[256];
-		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << string_compose(_("Editor: cannot open file \"%1\" (%2)"), selection, errbuf) << endmsg;
+	if (!get_soundfile_info (path, finfo)) {
+		error << string_compose(_("Editor: cannot open file \"%1\""), selection ) << endmsg;
 		return;
 	}
-	sf_close (sf);
-	sf = 0;
 	
 	if (check_sample_rate) {
 		switch (reject_because_rate_differs (path, finfo, "Embed", multiple_files)) {
@@ -2319,8 +2309,7 @@ Editor::insert_sndfile (bool as_tracks)
 void
 Editor::insert_paths_as_new_tracks (vector<string> paths, bool split)
 {
-	SNDFILE *sf;
-	SF_INFO finfo;
+	SoundFileInfo finfo;
 	bool multiple_files;
 	bool check_sample_rate = true;
 
@@ -2328,17 +2317,11 @@ Editor::insert_paths_as_new_tracks (vector<string> paths, bool split)
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
 		
-		memset (&finfo, 0, sizeof(finfo));
-		
-		if ((sf = sf_open ((*p).c_str(), SFM_READ, &finfo)) == 0) {
+		if (!get_soundfile_info((*p), finfo)) {
 			char errbuf[256];
-			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-			error << string_compose(_("Editor: cannot open file \"%1\" (%2)"), (*p), errbuf) << endmsg;
+			error << string_compose(_("Editor: cannot open file \"%1\""), (*p)) << endmsg;
 			continue;
 		}
-		
-		sf_close (sf);
-		sf = 0;
 		
 		/* add a new track */
 		
@@ -2399,21 +2382,15 @@ Editor::insert_sndfile_into (const string & path, bool multi, AudioTimeAxisView*
 	SndFileSource *source = 0; /* keep g++ quiet */
 	AudioRegion::SourceList sources;
 	string idspec;
-	SNDFILE *sf;
-	SF_INFO finfo;
-
-	memset (&finfo, 0, sizeof(finfo));
+	SoundFileInfo finfo;
 
 	/* note that we temporarily truncated _id at the colon */
 	
-	if ((sf = sf_open (path.c_str(), SFM_READ, &finfo)) == 0) {
+	if (!get_soundfile_info (path, finfo)) {
 		char errbuf[256];
-		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << string_compose(_("Editor: cannot open file \"%1\" (%2)"), path, errbuf) << endmsg;
+		error << string_compose(_("Editor: cannot open file \"%1\" (%2)"), path) << endmsg;
 		return;
 	}
-	sf_close (sf);
-	sf = 0;
 	
 	if (prompt && (reject_because_rate_differs (path, finfo, "Insert", false) != 0)) {
 		return;

@@ -25,8 +25,6 @@
 #include <string>
 #include <vector>
 
-#include <sndfile.h>
-
 #include <sigc++/signal.h>
 
 #include <gtkmm/box.h>
@@ -41,6 +39,7 @@
 #include <gtkmm/treeview.h>
 
 #include <ardour/session.h>
+#include <ardour/sndfile_helpers.h>
 
 #include "ardour_dialog.h"
 
@@ -68,7 +67,7 @@ class SoundFileBox : public Gtk::VBox
 
     LabelModelColumns label_columns;
     
-    SF_INFO sf_info;
+    SoundFileInfo sf_info;
 
     pid_t current_pid;
 
