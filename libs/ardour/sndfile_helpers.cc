@@ -221,18 +221,18 @@ get_soundfile_info (string path, SoundFileInfo& _info)
 {
 #ifdef HAVE_COREAUDIO
 	OSStatus err = noErr;
-    FSRef* ref; 
+    FSRef ref; 
 	ExtAudioFileRef af = 0;
 	size_t size;
     CFStringRef name;
 
-    err = FSPathMakeRef ((UInt8*)path.c_str(), ref, 0);
+    err = FSPathMakeRef ((UInt8*)path.c_str(), &ref, 0);
 	if (err != noErr) {
         ExtAudioFileDispose (af);
 		goto libsndfile;
 	}
 
-	err = ExtAudioFileOpen(ref, &af);
+	err = ExtAudioFileOpen(&ref, &af);
 	if (err != noErr) {
         ExtAudioFileDispose (af);
 		goto libsndfile;

@@ -75,13 +75,13 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 
 	/* note that we temporarily truncated _id at the colon */
-	FSRef* ref;
-	err = FSPathMakeRef ((UInt8*)file.c_str(), ref, 0);
+	FSRef ref;
+	err = FSPathMakeRef ((UInt8*)file.c_str(), &ref, 0);
 	if (err != noErr) {
 		throw failed_constructor();
 	}
 
-	err = ExtAudioFileOpen (ref, &af);
+	err = ExtAudioFileOpen (&ref, &af);
 	if (err != noErr) {
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
