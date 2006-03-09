@@ -38,155 +38,155 @@ Editor::register_actions ()
 
 	/* add named actions for the editor */
 
-	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("show editor mixer"), mem_fun (*this, &Editor::editor_mixer_button_toggled));
+	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "toggle-xfades-active", _("toggle xfades active"), mem_fun(*this, &Editor::toggle_xfades_active));
+	act = ActionManager::register_action (editor_actions, "toggle-xfades-active", _("Toggle Xfades Active"), mem_fun(*this, &Editor::toggle_xfades_active));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-start", _("playhead to next region start"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (Start)));
+	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-start", _("Playhead to Next Region Start"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (Start)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-end", _("playhead to next region end"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (End)));
+	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-end", _("Playhead to Next Region End"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (End)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-sync", _("playhead to next region sync"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (SyncPoint)));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "playhead-to-previous-region-start", _("playhead to previous region start"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (Start)));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "playhead-to-previous-region-end", _("playhead to previous region end"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (End)));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "playhead-to-previous-region-sync", _("playhead to previous region sync"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (SyncPoint)));
+	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-sync", _("Playhead to Next Region Sync"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (SyncPoint)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "edit-cursor-to-next-region-start", _("edit cursor to next region start"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (Start)));
+	act = ActionManager::register_action (editor_actions, "playhead-to-previous-region-start", _("Playhead to Previous Region Start"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (Start)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "edit-cursor-to-next-region-end", _("edit cursor to next region end"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (End)));
+	act = ActionManager::register_action (editor_actions, "playhead-to-previous-region-end", _("Playhead to Previous Region End"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (End)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "edit-cursor-to-next-region-sync", _("edit cursor to next region sync"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (SyncPoint)));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "edit-cursor-to-previous-region-start", _("edit cursor to previous region start"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (Start)));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "edit-cursor-to-previous-region-end", _("edit cursor to previous region end"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (End)));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "edit-cursor-to-previous-region-sync", _("edit cursor to previous region sync"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (SyncPoint)));
+	act = ActionManager::register_action (editor_actions, "playhead-to-previous-region-sync", _("Playhead to Previous Region Sync"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), playhead_cursor, RegionPoint (SyncPoint)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "playhead-to-range-start", _("playhead to range start"), bind (mem_fun(*this, &Editor::cursor_to_selection_start), playhead_cursor));
+	act = ActionManager::register_action (editor_actions, "edit-cursor-to-next-region-start", _("Edit Cursor to Next Region Start"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (Start)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "playhead-to-range-end", _("playhead to range end"), bind (mem_fun(*this, &Editor::cursor_to_selection_end), playhead_cursor));
+	act = ActionManager::register_action (editor_actions, "edit-cursor-to-next-region-end", _("Edit Cursor to Next Region End"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (End)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "edit-cursor-to-next-region-sync", _("Edit Cursor to Next Region Sync"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), edit_cursor, RegionPoint (SyncPoint)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "edit-cursor-to-range-start", _("edit cursor to range start"), bind (mem_fun(*this, &Editor::cursor_to_selection_start), edit_cursor));
+	act = ActionManager::register_action (editor_actions, "edit-cursor-to-previous-region-start", _("Edit Cursor to Previous Region Start"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (Start)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "edit-cursor-to-range-end", _("edit cursor to range end"), bind (mem_fun(*this, &Editor::cursor_to_selection_end), edit_cursor));
+	act = ActionManager::register_action (editor_actions, "edit-cursor-to-previous-region-end", _("Edit Cursor to Previous Region End"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (End)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "edit-cursor-to-previous-region-sync", _("Edit Cursor to Previous Region Sync"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_point), edit_cursor, RegionPoint (SyncPoint)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "playhead-to-range-start", _("Playhead to Range Start"), bind (mem_fun(*this, &Editor::cursor_to_selection_start), playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "playhead-to-range-end", _("Playhead to Range End"), bind (mem_fun(*this, &Editor::cursor_to_selection_end), playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "edit-cursor-to-range-start", _("Edit Cursor to Range Start"), bind (mem_fun(*this, &Editor::cursor_to_selection_start), edit_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "edit-cursor-to-range-end", _("Edit Cursor to Range End"), bind (mem_fun(*this, &Editor::cursor_to_selection_end), edit_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "select-all", _("select all"), bind (mem_fun(*this, &Editor::select_all), Selection::Set));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-all-after-edit-cursor", _("select all after edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, true));
+	act = ActionManager::register_action (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-all-before-edit-cursor", _("select all before edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, false));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "select-all-after-playhead", _("select all after playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-all-before-playhead", _("select all before playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false));
+	act = ActionManager::register_action (editor_actions, "select-all-before-edit-cursor", _("Select All Before Edit Cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-       	act = ActionManager::register_action (editor_actions, "select-all-in-punch-range", _("select all in punch range"), mem_fun(*this, &Editor::select_all_selectables_using_punch));
+	act = ActionManager::register_action (editor_actions, "select-all-after-playhead", _("Select All After Playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true));
 	ActionManager::session_sensitive_actions.push_back (act);
-       	act = ActionManager::register_action (editor_actions, "select-all-in-loop-range", _("select all in loop range"), mem_fun(*this, &Editor::select_all_selectables_using_loop));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "jump-forward-to-mark", _("jump forward to mark"), mem_fun(*this, &Editor::jump_forward_to_mark));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "jump-backward-to-mark", _("jump backward to mark"), mem_fun(*this, &Editor::jump_backward_to_mark));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "add-location-from-playhead", _("add location from playhead"), mem_fun(*this, &Editor::add_location_from_playhead_cursor));
+	act = ActionManager::register_action (editor_actions, "select-all-before-playhead", _("Select All Before Playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "nudge-forward", _("nudge forward"), bind (mem_fun(*this, &Editor::nudge_forward), false));
+       	act = ActionManager::register_action (editor_actions, "select-all-in-punch-range", _("Select All in Punch Range"), mem_fun(*this, &Editor::select_all_selectables_using_punch));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "nudge-next-forward", _("nudge next forward"), bind (mem_fun(*this, &Editor::nudge_forward), true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "nudge-backward", _("nudge backward"), bind (mem_fun(*this, &Editor::nudge_backward), false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "nudge-next-backward", _("nudge next backward"), bind (mem_fun(*this, &Editor::nudge_backward), true));
+       	act = ActionManager::register_action (editor_actions, "select-all-in-loop-range", _("Select All in Loop Range"), mem_fun(*this, &Editor::select_all_selectables_using_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "temporal-zoom-out", _("zoom out"), bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
+	act = ActionManager::register_action (editor_actions, "jump-forward-to-mark", _("Jump Forward to Mark"), mem_fun(*this, &Editor::jump_forward_to_mark));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "temporal-zoom-in", _("zoom in"), bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
+	act = ActionManager::register_action (editor_actions, "jump-backward-to-mark", _("Jump Backward to Mark"), mem_fun(*this, &Editor::jump_backward_to_mark));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "zoom-to-session", _("zoom to session"), mem_fun(*this, &Editor::temporal_zoom_session));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "scroll-tracks-up", _("scroll tracks up"), mem_fun(*this, &Editor::scroll_tracks_up));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "scroll-tracks-down", _("scroll tracks down"), mem_fun(*this, &Editor::scroll_tracks_down));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "step-tracks-up", _("step tracks up"), mem_fun(*this, &Editor::scroll_tracks_up_line));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "step-tracks-down", _("step tracks down"), mem_fun(*this, &Editor::scroll_tracks_down_line));
+	act = ActionManager::register_action (editor_actions, "add-location-from-playhead", _("Add Location from Playhead"), mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "scroll-backward", _("scroll backward"), bind (mem_fun(*this, &Editor::scroll_backward), 0.8f));
+	act = ActionManager::register_action (editor_actions, "nudge-forward", _("Nudge Forward"), bind (mem_fun(*this, &Editor::nudge_forward), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "scroll-forward", _("scroll forward"), bind (mem_fun(*this, &Editor::scroll_forward), 0.8f));
+	act = ActionManager::register_action (editor_actions, "nudge-next-forward", _("Nudge Next Forward"), bind (mem_fun(*this, &Editor::nudge_forward), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "nudge-backward", _("Nudge Backward"), bind (mem_fun(*this, &Editor::nudge_backward), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "nudge-next-backward", _("Nudge Next Backward"), bind (mem_fun(*this, &Editor::nudge_backward), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "temporal-zoom-out", _("Zoom Out"), bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "temporal-zoom-in", _("Zoom In"), bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "zoom-to-session", _("Zoom to Session"), mem_fun(*this, &Editor::temporal_zoom_session));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "scroll-tracks-up", _("Scroll Tracks Up"), mem_fun(*this, &Editor::scroll_tracks_up));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "scroll-tracks-down", _("Scroll Tracks Down"), mem_fun(*this, &Editor::scroll_tracks_down));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "step-tracks-up", _("Step Tracks Up"), mem_fun(*this, &Editor::scroll_tracks_up_line));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "step-tracks-down", _("Step Tracks Down"), mem_fun(*this, &Editor::scroll_tracks_down_line));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "scroll-backward", _("Scroll Backward"), bind (mem_fun(*this, &Editor::scroll_backward), 0.8f));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "scroll-forward", _("Scroll Forward"), bind (mem_fun(*this, &Editor::scroll_forward), 0.8f));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "goto", _("goto"), mem_fun(*this, &Editor::goto_frame));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "center-playhead", _("center playhead"), mem_fun(*this, &Editor::center_playhead));
+	act = ActionManager::register_action (editor_actions, "center-playhead", _("Center Playhead"), mem_fun(*this, &Editor::center_playhead));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "center-edit-cursor", _("center edit cursor"), mem_fun(*this, &Editor::center_edit_cursor));
+	act = ActionManager::register_action (editor_actions, "center-edit-cursor", _("Center Edit Cursor"), mem_fun(*this, &Editor::center_edit_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "playhead-forward", _("playhead forward"), mem_fun(*this, &Editor::playhead_forward));
+	act = ActionManager::register_action (editor_actions, "playhead-forward", _("Playhead Forward"), mem_fun(*this, &Editor::playhead_forward));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "playhead-backward", _("playhead backward"), mem_fun(*this, &Editor::playhead_backward));
+	act = ActionManager::register_action (editor_actions, "playhead-backward", _("Playhead Backward"), mem_fun(*this, &Editor::playhead_backward));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "playhead-to-edit", _("playhead to edit"), bind (mem_fun(*this, &Editor::cursor_align), true));
+	act = ActionManager::register_action (editor_actions, "playhead-to-edit", _("Playhead to Edit"), bind (mem_fun(*this, &Editor::cursor_align), true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "edit-to-playhead", _("edit to playhead"), bind (mem_fun(*this, &Editor::cursor_align), false));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "align-regions-start", _("align regions start"), bind (mem_fun(*this, &Editor::align), ARDOUR::Start));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "align-regions-start-relative", _("align regions start relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::Start));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "align-regions-end", _("align regions end"), bind (mem_fun(*this, &Editor::align), ARDOUR::End));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "align-regions-end-relative", _("align regions end relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::End));
+	act = ActionManager::register_action (editor_actions, "edit-to-playhead", _("Edit to Playhead"), bind (mem_fun(*this, &Editor::cursor_align), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "align-regions-sync", _("align regions sync"), bind (mem_fun(*this, &Editor::align), ARDOUR::SyncPoint));
+	act = ActionManager::register_action (editor_actions, "align-regions-start", _("Align Regions Start"), bind (mem_fun(*this, &Editor::align), ARDOUR::Start));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "align-regions-sync-relative", _("align regions sync relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint));
+	act = ActionManager::register_action (editor_actions, "align-regions-start-relative", _("Align Regions Start Relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::Start));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "align-regions-end", _("Align Regions End"), bind (mem_fun(*this, &Editor::align), ARDOUR::End));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "align-regions-end-relative", _("Align Regions End Relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::End));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "align-regions-sync", _("Align Regions Sync"), bind (mem_fun(*this, &Editor::align), ARDOUR::SyncPoint));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "align-regions-sync-relative", _("Align Regions Sync Relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint));
 	ActionManager::session_sensitive_actions.push_back (act);
 	
-        act = ActionManager::register_action (editor_actions, "audition-at-mouse", _("audition at mouse"), mem_fun(*this, &Editor::kbd_audition));
+        act = ActionManager::register_action (editor_actions, "audition-at-mouse", _("Audition at Mouse"), mem_fun(*this, &Editor::kbd_audition));
         ActionManager::session_sensitive_actions.push_back (act);
-        act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("brush at mouse"), mem_fun(*this, &Editor::kbd_brush));
+        act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("Brush at Mouse"), mem_fun(*this, &Editor::kbd_brush));
         ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "set-edit-cursor", _("set edit cursor"), mem_fun(*this, &Editor::kbd_set_edit_cursor));
+	act = ActionManager::register_action (editor_actions, "set-edit-cursor", _("Set Edit Cursor"), mem_fun(*this, &Editor::kbd_set_edit_cursor));
         ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "mute-unmute-region", _("mute/unmute region"), mem_fun(*this, &Editor::kbd_mute_unmute_region));
+	act = ActionManager::register_action (editor_actions, "mute-unmute-region", _("Mute/Unmute Region"), mem_fun(*this, &Editor::kbd_mute_unmute_region));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "set-playhead", _("set playhead"), mem_fun(*this, &Editor::kbd_set_playhead_cursor));
+	act = ActionManager::register_action (editor_actions, "set-playhead", _("Set Playhead"), mem_fun(*this, &Editor::kbd_set_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "split-region", _("split region"), mem_fun(*this, &Editor::kbd_split));
+	act = ActionManager::register_action (editor_actions, "split-region", _("Split Region"), mem_fun(*this, &Editor::kbd_split));
         ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "set-region-sync-position", _("set region sync position"), mem_fun(*this, &Editor::kbd_set_sync_position));
+	act = ActionManager::register_action (editor_actions, "set-region-sync-position", _("Set Region Sync Position"), mem_fun(*this, &Editor::kbd_set_sync_position));
         ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "undo", _("undo"), bind (mem_fun(*this, &Editor::undo), 1U));
+	act = ActionManager::register_action (editor_actions, "undo", _("Undo"), bind (mem_fun(*this, &Editor::undo), 1U));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "redo", _("redo"), bind (mem_fun(*this, &Editor::redo), 1U));
+	act = ActionManager::register_action (editor_actions, "redo", _("Redo"), bind (mem_fun(*this, &Editor::redo), 1U));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "export-session", _("export session"), mem_fun(*this, &Editor::export_session));
+	act = ActionManager::register_action (editor_actions, "export-session", _("Export Session"), mem_fun(*this, &Editor::export_session));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "export-range", _("export range"), mem_fun(*this, &Editor::export_selection));
+	act = ActionManager::register_action (editor_actions, "export-range", _("Export Range"), mem_fun(*this, &Editor::export_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "editor-cut", _("Cut"), mem_fun(*this, &Editor::cut));
@@ -198,89 +198,89 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "editor-paste", _("Paste"), mem_fun(*this, &Editor::keyboard_paste));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "duplicate-region", _("duplicate region"), mem_fun(*this, &Editor::keyboard_duplicate_region));
+	act = ActionManager::register_action (editor_actions, "duplicate-region", _("Duplicate Region"), mem_fun(*this, &Editor::keyboard_duplicate_region));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "duplicate-range", _("duplicate range"), mem_fun(*this, &Editor::keyboard_duplicate_selection));
+	act = ActionManager::register_action (editor_actions, "duplicate-range", _("Duplicate Range"), mem_fun(*this, &Editor::keyboard_duplicate_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "insert-region", _("insert region"), mem_fun(*this, &Editor::keyboard_insert_region_list_selection));
+	act = ActionManager::register_action (editor_actions, "insert-region", _("Insert Region"), mem_fun(*this, &Editor::keyboard_insert_region_list_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "reverse-region", _("reverse region"), mem_fun(*this, &Editor::reverse_region));
+	act = ActionManager::register_action (editor_actions, "reverse-region", _("Reverse Region"), mem_fun(*this, &Editor::reverse_region));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "normalize-region", _("normalize region"), mem_fun(*this, &Editor::normalize_region));
+	act = ActionManager::register_action (editor_actions, "normalize-region", _("Normalize Region"), mem_fun(*this, &Editor::normalize_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "crop", _("crop"), mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "insert-chunk", _("insert chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f));
+	act = ActionManager::register_action (editor_actions, "insert-chunk", _("Insert Chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "split-at-edit-cursor", _("split at edit cursor"), mem_fun(*this, &Editor::split_region));
+	act = ActionManager::register_action (editor_actions, "split-at-edit-cursor", _("Split at edit cursor"), mem_fun(*this, &Editor::split_region));
 	ActionManager::edit_cursor_in_region_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "start-range", _("start range"), mem_fun(*this, &Editor::keyboard_selection_begin));
+	act = ActionManager::register_action (editor_actions, "start-range", _("Start Range"), mem_fun(*this, &Editor::keyboard_selection_begin));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "finish-range", _("finish range"), bind (mem_fun(*this, &Editor::keyboard_selection_finish), false));
+	act = ActionManager::register_action (editor_actions, "finish-range", _("Finish Range"), bind (mem_fun(*this, &Editor::keyboard_selection_finish), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "finish-add-range", _("finish add range"), bind (mem_fun(*this, &Editor::keyboard_selection_finish), true));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "extend-range-to-end-of-region", _("extend range to end of region"), bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "extend-range-to-start-of-region", _("extend range to start of region"), bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false));
+	act = ActionManager::register_action (editor_actions, "finish-add-range", _("Finish add Range"), bind (mem_fun(*this, &Editor::keyboard_selection_finish), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (editor_actions, "ToggleFollowPlayhead", _("follow playhead"), (mem_fun(*this, &Editor::toggle_follow_playhead)));
+	act = ActionManager::register_action (editor_actions, "extend-range-to-end-of-region", _("Extend Range to End of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "remove-last-capture", _("remove last capture"), (mem_fun(*this, &Editor::remove_last_capture)));
+	act = ActionManager::register_action (editor_actions, "extend-range-to-start-of-region", _("Extend Range to Start of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (editor_actions, "ToggleFollowPlayhead", _("Follow Playhead"), (mem_fun(*this, &Editor::toggle_follow_playhead)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "remove-last-capture", _("Remove Last Capture"), (mem_fun(*this, &Editor::remove_last_capture)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	Glib::RefPtr<ActionGroup> zoom_actions = ActionGroup::create (X_("Zoom"));
 	RadioAction::Group zoom_group;
 
-	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-left", _("zoom focus left"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusLeft));
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusLeft));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-right", _("zoom focus right"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusRight));
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusRight));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-center", _("zoom focus center"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusCenter));
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusCenter));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-playhead", _("zoom focus playhead"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusPlayhead));
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusPlayhead));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-edit", _("zoom focus edit"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusEdit));
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusEdit));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionGroup::create (X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
 
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("_object tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseObject, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("_range tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseRange, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("_gain tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseGain, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("_zoom tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("_timefx tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseObject, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseRange, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseGain, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Timefx Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
 
 	Glib::RefPtr<ActionGroup> snap_actions = ActionGroup::create (X_("Snap"));
 	RadioAction::Group snap_choice_group;
 
 	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap To"));
 
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-frame"), _("snap to frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToFrame)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-cd-frame"), _("snap to cd frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToCDFrame)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-frame"), _("snap to smpte frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTEFrame)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-seconds"), _("snap to smpte seconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTESeconds)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-minutes"), _("snap to smpte minutes"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTEMinutes)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-seconds"), _("snap to seconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSeconds)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-minutes"), _("snap to minutes"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToMinutes)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("snap to thirtyseconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAThirtysecondBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("snap to asixteenthbeat"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToASixteenthBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-eighths"), _("snap to eighths"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAEighthBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-quarters"), _("snap to quarters"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAQuarterBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirds"), _("snap to thirds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAThirdBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-beat"), _("snap to beat"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-bar"), _("snap to bar"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToBar)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-mark"), _("snap to mark"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToMark)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-edit-cursor"), _("snap to edit cursor"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToEditCursor)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-start"), _("snap to region start"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionStart)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-end"), _("snap to region end"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionEnd)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-sync"), _("snap to region sync"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionSync)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-boundary"), _("snap to region boundary"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionBoundary)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-frame"), _("Snap to frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToFrame)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-cd-frame"), _("Snap to cd frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToCDFrame)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-frame"), _("Snap to SMPTE frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTEFrame)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-seconds"), _("Snap to SMPTE seconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTESeconds)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-minutes"), _("Snap to SMPTE minutes"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTEMinutes)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-seconds"), _("Snap to seconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSeconds)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-minutes"), _("Snap to minutes"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToMinutes)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("Snap to thirtyseconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAThirtysecondBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("Snap to asixteenthbeat"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToASixteenthBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-eighths"), _("Snap to eighths"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAEighthBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-quarters"), _("Snap to quarters"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAQuarterBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirds"), _("Snap to thirds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAThirdBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-beat"), _("Snap to beat"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-bar"), _("Snap to bar"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToBar)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-mark"), _("Snap to mark"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToMark)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-edit-cursor"), _("Snap to edit cursor"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToEditCursor)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-start"), _("Snap to region start"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionStart)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-end"), _("Snap to region end"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionEnd)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-sync"), _("Snap to region sync"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionSync)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-boundary"), _("Snap to region boundary"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionBoundary)));
 
 	/* REGION LIST */
 
@@ -331,9 +331,9 @@ Editor::register_actions ()
 	act = ActionManager::register_action (rl_actions, X_("rlImportAudio"), _("Embed audio (link)"), bind (mem_fun(*this, &Editor::import_audio), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformVisibility"), _("show waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
-	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("show waveforms while recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
-	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("show measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformVisibility"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
+	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
 	
 	RadioAction::Group meter_falloff_group;
 	RadioAction::Group meter_hold_group;
@@ -343,18 +343,18 @@ Editor::register_actions ()
 	    Slow    = 6.8dB/sec falloff at update rate of 40ms
 	*/
 
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffOff"), _("off"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.0f));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlowest"), _("slowest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.266f)); 
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlow"), _("slow"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.342f));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffMedium"), _("medium"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.7f));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFast"), _("fast"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1.1f));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFaster"), _("faster"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1.5f));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFastest"), _("fastest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 2.5f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffOff"), _("Off"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.0f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlowest"), _("Slowest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.266f)); 
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlow"), _("Slow"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.342f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffMedium"), _("Medium"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.7f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFast"), _("Fast"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1.1f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFaster"), _("Faster"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1.5f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFastest"), _("Fastest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 2.5f));
 
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldOff"), _("off"), bind (mem_fun (*this, &Editor::set_meter_hold), 0));
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldShort"), _("short"), bind (mem_fun (*this, &Editor::set_meter_hold), 40));
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldMedium"), _("medium"), bind (mem_fun (*this, &Editor::set_meter_hold), 100));
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldLong"), _("long"), bind (mem_fun (*this, &Editor::set_meter_hold), 200));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldOff"), _("Off"), bind (mem_fun (*this, &Editor::set_meter_hold), 0));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldShort"), _("Short"), bind (mem_fun (*this, &Editor::set_meter_hold), 40));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldMedium"), _("Medium"), bind (mem_fun (*this, &Editor::set_meter_hold), 100));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldLong"), _("Long"), bind (mem_fun (*this, &Editor::set_meter_hold), 200));
 
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (zoom_actions);
