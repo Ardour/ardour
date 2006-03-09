@@ -2398,7 +2398,7 @@ Session::auto_save()
 RouteGroup *
 Session::add_edit_group (string name)
 {
-	RouteGroup* rg = new RouteGroup (name);
+	RouteGroup* rg = new RouteGroup (*this, name);
 	edit_groups.push_back (rg);
 	edit_group_added (rg); /* EMIT SIGNAL */
 	set_dirty();
@@ -2408,7 +2408,7 @@ Session::add_edit_group (string name)
 RouteGroup *
 Session::add_mix_group (string name)
 {
-	RouteGroup* rg = new RouteGroup (name, RouteGroup::Relative);
+	RouteGroup* rg = new RouteGroup (*this, name, RouteGroup::Relative);
 	mix_groups.push_back (rg);
 	mix_group_added (rg); /* EMIT SIGNAL */
 	set_dirty();

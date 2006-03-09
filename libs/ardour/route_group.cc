@@ -34,13 +34,28 @@
 
 using namespace ARDOUR;
 using namespace sigc;
+using namespace std;
+
+RouteGroup::RouteGroup (Session& s, const string &n, Flag f)
+	: _session (s), _name (n), _flags (f) 
+{
+}
+
+void
+RouteGroup::set_name (string str)
+{
+	_name = str;
+	_session.set_dirty ();
+	FlagsChanged (0); /* EMIT SIGNAL */
+}
 
 int
 RouteGroup::add (Route *r)
 {
 	routes.push_back (r);
 	r->GoingAway.connect (sigc::bind (mem_fun (*this, &RouteGroup::remove_when_going_away), r));
-	 changed (); /* EMIT SIGNAL */
+	_session.set_dirty ();
+	changed (); /* EMIT SIGNAL */
 	return 0;
 }
 
@@ -57,7 +72,8 @@ RouteGroup::remove (Route *r)
 
 	if ((i = find (routes.begin(), routes.end(), r)) != routes.end()) {
 		routes.erase (i);
-		 changed (); /* EMIT SIGNAL */
+		_session.set_dirty ();
+		changed (); /* EMIT SIGNAL */
 		return 0;
 	}
 	return -1;
@@ -145,7 +161,8 @@ RouteGroup::set_active (bool yn, void *src)
 	} else {
 		_flags &= ~Active;
 	}
-	 FlagsChanged (src); /* EMIT SIGNAL */
+	_session.set_dirty ();
+	FlagsChanged (src); /* EMIT SIGNAL */
 }
 
 void
@@ -160,7 +177,8 @@ RouteGroup::set_relative (bool yn, void *src)
 	} else {
 		_flags &= ~Relative;
 	}
-	 FlagsChanged (src); /* EMIT SIGNAL */
+	_session.set_dirty ();
+	FlagsChanged (src); /* EMIT SIGNAL */
 }
 
 void
@@ -181,7 +199,8 @@ RouteGroup::set_hidden (bool yn, void *src)
 			_flags |= Active;
 		}
 	}
-	 FlagsChanged (src); /* EMIT SIGNAL */
+	_session.set_dirty ();
+	FlagsChanged (src); /* EMIT SIGNAL */
 }
 
 void

@@ -93,6 +93,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void fast_update ();
 	void set_embedded (bool);
 
+	ARDOUR::RouteGroup* mix_group() const;
+
   protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);

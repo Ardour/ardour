@@ -102,6 +102,8 @@ class Mixer_UI : public Gtk::Window
 	Gtk::HBox                out_packer;
 	Gtk::HPaned		 list_hpane;
 
+	bool on_key_press_event (GdkEventKey*);
+
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 	
 	list<MixerStrip *> strips;
@@ -156,11 +158,21 @@ class Mixer_UI : public Gtk::Window
 	void show_all_audiotracks();
 	void hide_all_audiotracks ();
 
+	Gtk::Menu* mix_group_context_menu;
+	bool in_group_row_change;
+
 	void group_selected (gint row, gint col, GdkEvent *ev);
 	void group_unselected (gint row, gint col, GdkEvent *ev);
 	void group_display_active_clicked();
 	void new_mix_group ();
+	void remove_selected_mix_group ();
+	void build_mix_group_context_menu ();
+	void activate_all_mix_groups ();
+	void disable_all_mix_groups ();
 	void add_mix_group (ARDOUR::RouteGroup *);
+	void mix_groups_changed ();
+	void mix_group_name_edit (const Glib::ustring&, const Glib::ustring&);
+	void mix_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter);
 
 	Gtk::Menu *track_menu;
 	void track_column_click (gint);
@@ -200,14 +212,14 @@ class Mixer_UI : public Gtk::Window
 	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*> group;
 	};
 
-	TrackDisplayModelColumns    track_display_columns;
-	GroupDisplayModelColumns    group_display_columns;
+	TrackDisplayModelColumns    track_columns;
+	GroupDisplayModelColumns    group_columns;
 
 	Gtk::TreeView track_display;
 	Gtk::TreeView group_display;
 
-	Glib::RefPtr<Gtk::ListStore> track_display_model;
-	Glib::RefPtr<Gtk::ListStore> group_display_model;
+	Glib::RefPtr<Gtk::ListStore> track_model;
+	Glib::RefPtr<Gtk::ListStore> group_model;
 
 	bool group_display_button_press (GdkEventButton*);
 	void group_display_selection_changed ();

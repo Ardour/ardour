@@ -1514,6 +1514,7 @@ class Editor : public PublicEditor
 	void activate_all_edit_groups ();
 	void disable_all_edit_groups ();
 
+	bool in_edit_group_row_change;
 	void edit_group_row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	
 	void new_edit_group ();

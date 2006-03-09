@@ -1440,3 +1440,9 @@ MixerStrip::route_active_changed ()
 		gpm.set_fader_name ("AudioBusFader");
 	}
 }
+
+RouteGroup*
+MixerStrip::mix_group() const
+{
+	return _route.mix_group();
+}

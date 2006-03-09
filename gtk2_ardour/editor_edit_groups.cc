@@ -192,6 +192,10 @@ Editor::edit_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeM
 {
 	RouteGroup* group;
 
+	if (in_edit_group_row_change) {
+		return;
+	}
+
 	if ((group = (*iter)[group_columns.routegroup]) == 0) {
 		return;
 	}
@@ -212,6 +216,15 @@ Editor::edit_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeM
 
 	bool active = (*iter)[group_columns.is_active];
 	group->set_active (active, this);
+
+
+	string name = (*iter)[group_columns.text];
+
+	cerr << "Row change, name = " << name << endl;
+
+	if (name != group->name()) {
+		group->set_name (name);
+	}
 }
 
 void
@@ -221,7 +234,7 @@ Editor::add_edit_group (RouteGroup* group)
 
 	TreeModel::Row row = *(group_model->append());
 	row[group_columns.is_active] = group->is_active();
-	row[group_columns.is_visible] = true;
+	row[group_columns.is_visible] = !group->is_hidden();
 	row[group_columns.text] = group->name();
 	row[group_columns.routegroup] = group;
 
@@ -256,12 +269,18 @@ Editor::group_flags_changed (void* src, RouteGroup* group)
 {
         ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::group_flags_changed), src, group));
 
+	in_edit_group_row_change = true;
+
         Gtk::TreeModel::Children children = group_model->children();
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
 		if (group == (*iter)[group_columns.routegroup]) {
 			(*iter)[group_columns.is_active] = group->is_active();
+			(*iter)[group_columns.is_visible] = !group->is_hidden();
+			(*iter)[group_columns.text] = group->name();
 		}
 	}
+
+	in_edit_group_row_change = false;
 }
 
 

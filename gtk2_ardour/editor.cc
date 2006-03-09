@@ -147,61 +147,6 @@ Gdk::Cursor* Editor::speaker_cursor = 0;
 Gdk::Cursor* Editor::wait_cursor = 0;
 Gdk::Cursor* Editor::timebar_cursor = 0;
 
-bool
-Editor::on_key_press_event (GdkEventKey* ev)
-{
-	GtkWindow* win = gobj();
-
-	/* This exists to allow us to override the way GTK handles
-	   key events. The normal sequence is:
-
-	   a) event is delivered to a GtkWindow
-	   b) accelerators/mnemonics are activated
-	   c) if (b) didn't handle the event, propagate to
-	       the focus widget and/or focus chain
-
-	   The problem with this is that if the accelerators include
-	   keys without modifiers, such as the space bar or the 
-	   letter "e", then pressing the key while typing into
-	   a text entry widget results in the accelerator being
-	   activated, instead of the desired letter appearing
-	   in the text entry.
-
-	   There is no good way of fixing this, but this
-	   represents a compromise. The idea is that 
-	   key events involving modifiers (not Shift)
-	   get routed into the activation pathway first, then
-	   get propagated to the focus widget if necessary.
-	   
-	   If the key event doesn't involve modifiers,
-	   we deliver to the focus widget first, thus allowing
-	   it to get "normal text" without interference
-	   from acceleration.
-
-	   Of course, this can also be problematic: if there
-	   is a widget with focus, then it will swallow
-	   all "normal text" accelerators.
-	*/
-
-	if (ev->state & ~Gdk::SHIFT_MASK) {
-		/* modifiers in effect, accelerate first */
-		if (!gtk_window_activate_key (win, ev)) {
-			return gtk_window_propagate_key_event (win, ev);
-		} else {
-			return true;
-		} 
-	}
-	
-	/* no modifiers, propagate first */
-
-	if (!gtk_window_propagate_key_event (win, ev)) {
-		return gtk_window_activate_key (win, ev);
-	} 
-
-
-	return true;
-}
-
 void
 show_me_the_size (Requisition* r, const char* what)
 {
@@ -348,6 +293,7 @@ Editor::Editor (AudioEngine& eng)
 	clear_entered_track = false;
 	_new_regionviews_show_envelope = false;
 	current_timestretch = 0;
+	in_edit_group_row_change = false;
 
 	edit_cursor = 0;
 	playhead_cursor = 0;
@@ -563,6 +509,11 @@ Editor::Editor (AudioEngine& eng)
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
+	/* name is directly editable */
+
+	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(edit_group_display.get_column_cell_renderer (2));
+	name_cell->property_editable() = true;
+
 	edit_group_display.set_name ("EditGroupList");
 
 	group_model->signal_row_changed().connect (mem_fun (*this, &Editor::edit_group_row_change));
@@ -580,8 +531,9 @@ Editor::Editor (AudioEngine& eng)
 
 	VBox* edit_group_display_packer = manage (new VBox());
 	HButtonBox* edit_group_display_button_box = manage (new HButtonBox());
-	Button* edit_group_add_button = manage (new Button ("+"));
-	Button* edit_group_remove_button = manage (new Button("-"));
+	edit_group_display_button_box->set_homogeneous (true);
+	Button* edit_group_add_button = manage (new Button (Stock::ADD));
+	Button* edit_group_remove_button = manage (new Button(Stock::REMOVE));
 
 	edit_group_add_button->signal_clicked().connect (mem_fun (*this, &Editor::new_edit_group));
 	edit_group_remove_button->signal_clicked().connect (mem_fun (*this, &Editor::remove_selected_edit_group));
@@ -4115,3 +4067,10 @@ Editor::mapped_clear_playlist (AudioTimeAxisView& atv, uint32_t sz)
 {
 	atv.clear_playlist ();
 }
+
+bool
+Editor::on_key_press_event (GdkEventKey* ev)
+{
+	return key_press_focus_accelerator_handler (*this, ev);
+}
+

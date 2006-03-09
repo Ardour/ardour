@@ -36,6 +36,7 @@ namespace ARDOUR {
 
 class Route;
 class AudioTrack;
+class Session;
 
 class RouteGroup : public Stateful, public sigc::trackable {
   public:
@@ -45,25 +46,25 @@ class RouteGroup : public Stateful, public sigc::trackable {
 	    Hidden = 0x4,
     };
 
-    RouteGroup(const string &n, Flag f = Flag(0)) : _name (n), _flags (f) {}
+    RouteGroup (Session& s, const string &n, Flag f = Flag(0));
 
     const string& name() { return _name; }
+    void set_name (std::string str);
 
     bool is_active () const { return _flags & Active; }
     bool is_relative () const { return _flags & Relative; }
     bool is_hidden () const { return _flags & Hidden; }
     bool empty() const {return routes.empty();}
 
-	gain_t get_max_factor(gain_t factor);
-	gain_t get_min_factor(gain_t factor);
-
+    gain_t get_max_factor(gain_t factor);
+    gain_t get_min_factor(gain_t factor);
+    
     int size() { return routes.size();}
     ARDOUR::Route * first () const { return *routes.begin();}
 
     void set_active (bool yn, void *src);
     void set_relative (bool yn, void *src);
     void set_hidden (bool yn, void *src);
-
 
     int add (Route *);
 
@@ -110,6 +111,7 @@ class RouteGroup : public Stateful, public sigc::trackable {
     int set_state (const XMLNode&);
 
  private:
+    Session& _session;
     list<Route *> routes;
     string _name;
     uint32_t _flags;

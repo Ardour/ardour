@@ -506,3 +506,59 @@ set_color (Gdk::Color& c, int rgb)
 {
 	c.set_rgb((rgb >> 16)*256, ((rgb & 0xff00) >> 8)*256, (rgb & 0xff)*256);
 }
+
+bool
+key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
+{
+	GtkWindow* win = window.gobj();
+
+	/* This exists to allow us to override the way GTK handles
+	   key events. The normal sequence is:
+
+	   a) event is delivered to a GtkWindow
+	   b) accelerators/mnemonics are activated
+	   c) if (b) didn't handle the event, propagate to
+	       the focus widget and/or focus chain
+
+	   The problem with this is that if the accelerators include
+	   keys without modifiers, such as the space bar or the 
+	   letter "e", then pressing the key while typing into
+	   a text entry widget results in the accelerator being
+	   activated, instead of the desired letter appearing
+	   in the text entry.
+
+	   There is no good way of fixing this, but this
+	   represents a compromise. The idea is that 
+	   key events involving modifiers (not Shift)
+	   get routed into the activation pathway first, then
+	   get propagated to the focus widget if necessary.
+	   
+	   If the key event doesn't involve modifiers,
+	   we deliver to the focus widget first, thus allowing
+	   it to get "normal text" without interference
+	   from acceleration.
+
+	   Of course, this can also be problematic: if there
+	   is a widget with focus, then it will swallow
+	   all "normal text" accelerators.
+	*/
+
+	if (ev->state & ~Gdk::SHIFT_MASK) {
+		/* modifiers in effect, accelerate first */
+		if (!gtk_window_activate_key (win, ev)) {
+			return gtk_window_propagate_key_event (win, ev);
+		} else {
+			return true;
+		} 
+	}
+	
+	/* no modifiers, propagate first */
+
+	if (!gtk_window_propagate_key_event (win, ev)) {
+		return gtk_window_activate_key (win, ev);
+	} 
+
+
+	return true;
+}
+
