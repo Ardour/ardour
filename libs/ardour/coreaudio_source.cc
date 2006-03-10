@@ -17,6 +17,8 @@
 
 */
 
+#include <pbd/error.h>
+
 #include <ardour/coreaudio_source.h>
 
 #include "i18n.h"
@@ -65,11 +67,13 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 	FSRef ref;
 	err = FSPathMakeRef ((UInt8*)file.c_str(), &ref, 0);
 	if (err != noErr) {
+		error << err << endmsg;
 		throw failed_constructor();
 	}
 
 	err = ExtAudioFileOpen (&ref, &af);
 	if (err != noErr) {
+		error << err << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
@@ -80,6 +84,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 	err = ExtAudioFileGetProperty(af,
 			kExtAudioFileProperty_FileDataFormat, &absd_size, &absd);
 	if (err != noErr) {
+		error << err << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
@@ -87,6 +92,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	if (channel >= n_channels) {
 		error << string_compose(_("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number"), n_channels, channel) << endmsg;
+		error << err << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
@@ -96,6 +102,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	err = ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &prop_size, &ca_frames);
 	if (err != noErr) {
+		error << err << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
@@ -105,6 +112,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	if (build_peak) {
 		if (initialize_peakfile (false, file)) {
+			error << "initialize peakfile failed" << endmsg;
 			ExtAudioFileDispose (af);
 			throw failed_constructor ();
 		}
@@ -135,14 +143,11 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, ch
 		return 0;
 	}
 
-	AudioBuffer ab;
-	ab.mNumberChannels = n_channels;
-	ab.mDataByteSize = cnt;
-	ab.mData = dst;
-
 	AudioBufferList abl;
 	abl.mNumberBuffers = 1;
-	abl.mBuffers[1] = ab;
+	abl.mBuffers[0].mNumberChannels = n_channels;
+	abl.mBuffers[0].mDataByteSize = cnt;
+	abl.mBuffers[0].mData = dst;
 
 	if (n_channels == 1) {
 		err = ExtAudioFileRead(af, (UInt32*) &cnt, &abl);
@@ -164,8 +169,8 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, ch
 			tmpbuf = new float[tmpbufsize];
 		}
 
-		ab.mDataByteSize = real_cnt;
-		ab.mData = tmpbuf;
+		abl.mBuffers[0].mDataByteSize = real_cnt;
+		abl.mBuffers[0].mData = tmpbuf;
 		
 		err = ExtAudioFileRead(af, (UInt32*) &real_cnt, &abl);
 		float *ptr = tmpbuf + channel;
