@@ -58,8 +58,7 @@ class ExternalSource : public Source {
 	uint16_t channel;
 	string  _path;
 
-	virtual void init (const string &str, bool build_peak) = 0;
-	virtual jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
+	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 };
 
 }; /* namespace ARDOUR */

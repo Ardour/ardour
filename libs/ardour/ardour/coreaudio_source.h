@@ -42,7 +42,6 @@ class CoreAudioSource : public ExternalSource {
 	mutable PBD::Lock _tmpbuf_lock;
 
 	void init (const string &str, bool build_peak);
-	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 };
 
 }; /* namespace ARDOUR */

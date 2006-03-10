@@ -90,17 +90,62 @@ ExternalSource::old_peak_path (string audio_path)
 	return peak_path (audio_path);
 }
 
+#ifdef HAVE_COREAUDIO
+
+ExternalSource*
+ExternalSource::create (const XMLNode& node)
+{
+	ExternalSource* es = 0;
+
+	try {
+		es = new CoreAudioSource (node);
+	} 
+	
+	catch (failed_constructor& err) {
+		es = new SndFileSource (node);
+	}
+
+	es = new SndFileSource (node);
+
+	return es;
+}
+
+#else
+
 ExternalSource*
 ExternalSource::create (const XMLNode& node)
 {
 	return new SndFileSource (node);
 }
 
+#endif // HAVE_COREAUDIO
+
+#ifdef HAVE_COREAUDIO
+ExternalSource*
+ExternalSource::create (const string& idstr, bool build_peak)
+{
+	ExternalSource* es = 0;
+
+	try {
+		es = new CoreAudioSource (idstr, build_peak);
+	}
+
+	catch (failed_constructor& err) {
+		es = new SndFileSource (idstr, build_peak);
+	}
+
+	return es;
+}
+
+#else
+
 ExternalSource*
 ExternalSource::create (const string& idstr, bool build_peak)
 {
 	return new SndFileSource (idstr, build_peak);
 }
+
+#endif // HAVE_COREAUDIO
 
 #ifdef HAVE_COREAUDIO
 std::string 
