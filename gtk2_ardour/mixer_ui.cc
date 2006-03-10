@@ -163,11 +163,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	mix_group_display_button_box->pack_start (*mix_group_remove_button, false, false);
 
 	group_display_vbox.pack_start (group_display_scroller, true, true);
-
-	HBox* hconstraint = manage (new HBox());
-	hconstraint->pack_start (*mix_group_display_button_box, false, false);
-
-	group_display_vbox.pack_start (*hconstraint, false, false);
+	group_display_vbox.pack_start (*mix_group_display_button_box, false, false);
 
 	track_display_frame.set_name("BaseFrame");
 	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -1001,8 +997,9 @@ Mixer_UI::add_mix_group (RouteGroup* group)
 	group->FlagsChanged.connect (bind (mem_fun(*this, &Mixer_UI::group_flags_changed), group));
 	
 	if (focus) {
-		group_display.set_cursor (group_model->get_path (row));
-		group_display.grab_focus ();
+		TreeViewColumn* col = group_display.get_column (0);
+		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (0));
+		group_display.set_cursor (group_model->get_path (row), *col, *name_cell, true);
 	}
 }
 

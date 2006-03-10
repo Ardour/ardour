@@ -544,6 +544,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	*/
 
 	if (ev->state & ~Gdk::SHIFT_MASK) {
+		
 		/* modifiers in effect, accelerate first */
 		if (!gtk_window_activate_key (win, ev)) {
 			return gtk_window_propagate_key_event (win, ev);

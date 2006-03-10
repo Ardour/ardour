@@ -229,8 +229,9 @@ Editor::add_edit_group (RouteGroup* group)
 	group->FlagsChanged.connect (bind (mem_fun(*this, &Editor::group_flags_changed), group));
 
 	if (focus) {
-		edit_group_display.set_cursor (group_model->get_path (row));
-		edit_group_display.grab_focus ();
+		TreeViewColumn* col = edit_group_display.get_column (0);
+		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(edit_group_display.get_column_cell_renderer (0));
+		edit_group_display.set_cursor (group_model->get_path (row), *col, *name_cell, true);
 	}
 }
 
