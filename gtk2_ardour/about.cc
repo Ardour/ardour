@@ -164,7 +164,7 @@ About::About ()
 	string path;
 	string t;
 
-	path = find_data_file ("splash.ppm");
+	path = find_data_file ("splash.ppm", "pixmaps");
 
 	Glib::RefPtr<Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file (path);
 

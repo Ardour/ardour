@@ -48,7 +48,7 @@ namespace ARDOUR {
 	int init (AudioEngine&, bool with_vst, bool try_optimization, void (*sighandler)(int,siginfo_t*,void*) = 0);
 	int cleanup ();
 	std::string find_config_file (std::string name);
-	std::string find_data_file (std::string name);
+	std::string find_data_file (std::string name, std::string subdir = "" );
 
 	const layer_t max_layer = UCHAR_MAX;
 

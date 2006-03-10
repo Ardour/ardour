@@ -299,7 +299,7 @@ ARDOUR::new_change ()
 }
 
 static string
-find_file (string name, string dir)
+find_file (string name, string dir, string subdir = "")
 {
 	string path;
 
@@ -317,8 +317,12 @@ find_file (string name, string dir)
 
 		mkdir (path.c_str(), 0755);
 
+		if (subdir.length()) {
+			path += subdir + "/";
+		}
+		
 		path += name;
-
+		cerr << path << endl;
 		if (access (path.c_str(), R_OK) == 0) {
 			return path;
 		}
@@ -328,6 +332,11 @@ find_file (string name, string dir)
 
 	path = dir;
 	path += "/ardour/";
+	
+	if (subdir.length()) {
+		path += subdir + "/";
+	}
+	
 	path += name;
 	
 	if (access (path.c_str(), R_OK) == 0) {
@@ -349,14 +358,14 @@ ARDOUR::find_config_file (string name)
 }
 
 string
-ARDOUR::find_data_file (string name)
+ARDOUR::find_data_file (string name, string subdir)
 {
 	char* envvar;
 	if ((envvar = getenv("ARDOUR_DATA_PATH")) == 0) {
 		envvar = DATA_DIR;
 	}
 
-	return find_file (name, envvar);
+	return find_file (name, envvar, subdir);
 }
 
 ARDOUR::LocaleGuard::LocaleGuard (const char* str)

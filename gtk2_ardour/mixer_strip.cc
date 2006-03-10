@@ -66,27 +66,10 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 /* XPM */
-static const gchar * small_x_xpm[] = {
-"11 11 2 1",
-" 	c None",
-".	c #cccc99",
-"           ",
-"           ",
-"  .     .  ",
-"   .   .   ",
-"    . .    ",
-"     .     ",
-"    . .    ",
-"   .   .   ",
-"  .     .  ",
-"           ",
-"           "};
-
-/* XPM */
 static const gchar * lr_xpm[] = {
 "11 11 2 1",
 " 	c None",
-".	c #cccc99",
+".	c #cccccc",
 "           ",
 "           ",
 "   .   .   ",
@@ -145,8 +128,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	comment_window = 0;
 	comment_area = 0;
 
-	width_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(lr_xpm)))));
-	hide_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(small_x_xpm)))));
+	std::string small_x_xpm_file = find_data_file("small_x.xpm", "pixmaps");
+	std::string lr_xpm_file = find_data_file("lr.xpm", "pixmaps");
+	width_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_file(lr_xpm_file)))));
+	hide_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_file(small_x_xpm_file)))));
 
 
 	input_label.set_text (_("INPUT"));
