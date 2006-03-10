@@ -257,26 +257,26 @@ ARDOUR_UI::install_actions ()
 	   name appearance on the buttons.
 	*/
 
-	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchIn"), _("Punch\Nin"), mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
+	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchIn"), _("Punch\nin"), mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchOut"), _("Punch\Nout"), mem_fun(*this, &ARDOUR_UI::toggle_punch_out));
+	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchOut"), _("Punch\nout"), mem_fun(*this, &ARDOUR_UI::toggle_punch_out));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleClick"), _("Click"), mem_fun(*this, &ARDOUR_UI::toggle_click));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleAutoInput"), _("Auto\Ninput"), mem_fun(*this, &ARDOUR_UI::toggle_auto_input));
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleAutoInput"), _("Auto\ninput"), mem_fun(*this, &ARDOUR_UI::toggle_auto_input));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleAutoPlay"), _("Auto\Nplay"), mem_fun(*this, &ARDOUR_UI::toggle_auto_play));
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleAutoPlay"), _("Auto\nplay"), mem_fun(*this, &ARDOUR_UI::toggle_auto_play));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleAutoReturn"), _("Auto\Nreturn"), mem_fun(*this, &ARDOUR_UI::toggle_auto_return));
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleAutoReturn"), _("Auto\nreturn"), mem_fun(*this, &ARDOUR_UI::toggle_auto_return));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("Time\Nmaster"), mem_fun(*this, &ARDOUR_UI::toggle_time_master));
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("Time\nmaster"), mem_fun(*this, &ARDOUR_UI::toggle_time_master));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (common_actions, X_("SendAllMidiFeedback"), _("Send All Midi Feedback"), mem_fun(*this, &ARDOUR_UI::send_all_midi_feedback));
