@@ -491,28 +491,29 @@ Editor::Editor (AudioEngine& eng)
 
 	group_model = ListStore::create(group_columns);
 	edit_group_display.set_model (group_model);
+	edit_group_display.append_column (_("Name"), group_columns.text);
 	edit_group_display.append_column (_("Active"), group_columns.is_active);
 	edit_group_display.append_column (_("Visible"), group_columns.is_visible);
-	edit_group_display.append_column (_("Name"), group_columns.text);
 	edit_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	edit_group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	edit_group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
 	edit_group_display.set_headers_visible (true);
 
+	/* name is directly editable */
+
+	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(edit_group_display.get_column_cell_renderer (0));
+	name_cell->property_editable() = true;
+	name_cell->signal_edited().connect (mem_fun (*this, &Editor::edit_group_name_edit));
+
 	/* use checkbox for the active + visible columns */
 
-	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(edit_group_display.get_column_cell_renderer (0));
+	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(edit_group_display.get_column_cell_renderer (1));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
 	active_cell = dynamic_cast<CellRendererToggle*>(edit_group_display.get_column_cell_renderer (1));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
-
-	/* name is directly editable */
-
-	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(edit_group_display.get_column_cell_renderer (2));
-	name_cell->property_editable() = true;
 
 	edit_group_display.set_name ("EditGroupList");
 
@@ -532,8 +533,19 @@ Editor::Editor (AudioEngine& eng)
 	VBox* edit_group_display_packer = manage (new VBox());
 	HButtonBox* edit_group_display_button_box = manage (new HButtonBox());
 	edit_group_display_button_box->set_homogeneous (true);
-	Button* edit_group_add_button = manage (new Button (Stock::ADD));
-	Button* edit_group_remove_button = manage (new Button(Stock::REMOVE));
+
+	Button* edit_group_add_button = manage (new Button ());
+	Button* edit_group_remove_button = manage (new Button ());
+
+	Widget* w;
+
+	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
+	w->show();
+	edit_group_add_button->add (*w);
+
+	w = manage (new Image (Stock::REMOVE, ICON_SIZE_BUTTON));
+	w->show();
+	edit_group_remove_button->add (*w);
 
 	edit_group_add_button->signal_clicked().connect (mem_fun (*this, &Editor::new_edit_group));
 	edit_group_remove_button->signal_clicked().connect (mem_fun (*this, &Editor::remove_selected_edit_group));

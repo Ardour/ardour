@@ -360,7 +360,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 	name_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::name_button_button_release), false);
 
-	group_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::select_mix_group), false);
+	group_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::select_mix_group), false);
 
 	_width = (Width) -1;
 	set_stuff_from_route ();
@@ -1147,11 +1147,8 @@ MixerStrip::comment_changed (void *src)
 
 void
 MixerStrip::set_mix_group (RouteGroup *rg)
-
 {
 	_route.set_mix_group (rg, this);
-	delete group_menu;
-	group_menu = 0;
 }
 
 void
@@ -1160,25 +1157,34 @@ MixerStrip::add_mix_group_to_menu (RouteGroup *rg, RadioMenuItem::Group* group)
 	using namespace Menu_Helpers;
 
 	MenuList& items = group_menu->items();
+
 	items.push_back (RadioMenuElem (*group, rg->name(), bind (mem_fun(*this, &MixerStrip::set_mix_group), rg)));
+
+	if (_route.mix_group() == rg) {
+		static_cast<RadioMenuItem*>(&items.back())->set_active ();
+	}
 }
 
-gint
+bool
 MixerStrip::select_mix_group (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
 
-	group_menu = new Menu;
+	if (group_menu == 0) {
+		group_menu = new Menu;
+	} 
 	group_menu->set_name ("ArdourContextMenu");
 	MenuList& items = group_menu->items();
 	RadioMenuItem::Group group;
-	
+
+	items.clear ();
 	items.push_back (RadioMenuElem (group, _("no group"), bind (mem_fun(*this, &MixerStrip::set_mix_group), (RouteGroup *) 0)));
 
 	_session.foreach_mix_group (bind (mem_fun (*this, &MixerStrip::add_mix_group_to_menu), &group));
+	
+	group_menu->popup (1, 0);
 
-	group_menu->popup (ev->button, 0);
-	return stop_signal (group_button, "button_press_event");
+	return true;
 }	
 
 void

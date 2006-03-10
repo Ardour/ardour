@@ -1516,7 +1516,7 @@ class Editor : public PublicEditor
 
 	bool in_edit_group_row_change;
 	void edit_group_row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
-	
+	void edit_group_name_edit (const Glib::ustring&, const Glib::ustring&);
 	void new_edit_group ();
 	void edit_group_list_button_clicked ();
 	gint edit_group_list_button_press_event (GdkEventButton* ev);

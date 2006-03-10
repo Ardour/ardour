@@ -77,24 +77,7 @@ Editor::disable_all_edit_groups ()
 void
 Editor::new_edit_group ()
 {
-	if (session == 0) {
-		return;
-	}
-
-	ArdourPrompter prompter;
-	string result;
-
-	prompter.set_prompt (_("Name for new edit group"));
-	prompter.show_all ();
-
-	switch (prompter.run ()) {
-	case Gtk::RESPONSE_ACCEPT:
-	    prompter.get_result (result);
-		if (result.length()) {
-			session->add_edit_group (result);
-		}
-		break;
-	}
+	session->add_edit_group ("");
 }
 
 void
@@ -152,7 +135,7 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 	}
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
-	case 2:
+	case 0:
 		if (Keyboard::is_edit_event (ev)) {
 			if ((iter = group_model->get_iter (path))) {
 				if ((group = (*iter)[group_columns.routegroup]) != 0) {
@@ -172,7 +155,7 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 		}
 		break;
 
-	case 0:
+	case 2:
 		if ((iter = group_model->get_iter (path))) {
 			bool active = (*iter)[group_columns.is_active];
 			(*iter)[group_columns.is_active] = !active;
@@ -220,8 +203,6 @@ Editor::edit_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeM
 
 	string name = (*iter)[group_columns.text];
 
-	cerr << "Row change, name = " << name << endl;
-
 	if (name != group->name()) {
 		group->set_name (name);
 	}
@@ -231,14 +212,26 @@ void
 Editor::add_edit_group (RouteGroup* group)
 {
         ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::add_edit_group), group));
+	bool focus = false;
 
 	TreeModel::Row row = *(group_model->append());
 	row[group_columns.is_active] = group->is_active();
 	row[group_columns.is_visible] = !group->is_hidden();
-	row[group_columns.text] = group->name();
+
 	row[group_columns.routegroup] = group;
+	if (!group->name().empty()) {
+		row[group_columns.text] = group->name();
+	} else {
+		row[group_columns.text] = _("unnamed");
+		focus = true;
+	}
 
 	group->FlagsChanged.connect (bind (mem_fun(*this, &Editor::group_flags_changed), group));
+
+	if (focus) {
+		edit_group_display.set_cursor (group_model->get_path (row));
+		edit_group_display.grab_focus ();
+	}
 }
 
 void
@@ -283,4 +276,20 @@ Editor::group_flags_changed (void* src, RouteGroup* group)
 	in_edit_group_row_change = false;
 }
 
-
+void
+Editor::edit_group_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+{
+	RouteGroup* group;
+	TreeIter iter;
+	
+	if ((iter = group_model->get_iter (path))) {
+	
+		if ((group = (*iter)[group_columns.routegroup]) == 0) {
+			return;
+		}
+		
+		if (new_text != group->name()) {
+			group->set_name (new_text);
+		}
+	}
+}

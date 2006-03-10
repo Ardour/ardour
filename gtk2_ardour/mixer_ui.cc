@@ -142,17 +142,32 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	HButtonBox* mix_group_display_button_box = manage (new HButtonBox());
 	mix_group_display_button_box->set_homogeneous (true);
-	Button* mix_group_add_button = manage (new Button (Stock::ADD));
-	Button* mix_group_remove_button = manage (new Button (Stock::REMOVE));
+
+	Button* mix_group_add_button = manage (new Button ());
+	Button* mix_group_remove_button = manage (new Button ());
+
+	Widget* w;
+
+	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
+	w->show();
+	mix_group_add_button->add (*w);
+
+	w = manage (new Image (Stock::REMOVE, ICON_SIZE_BUTTON));
+	w->show();
+	mix_group_remove_button->add (*w);
 
 	mix_group_add_button->signal_clicked().connect (mem_fun (*this, &Mixer_UI::new_mix_group));
 	mix_group_remove_button->signal_clicked().connect (mem_fun (*this, &Mixer_UI::remove_selected_mix_group));
 
-	mix_group_display_button_box->pack_start (*mix_group_add_button);
-	mix_group_display_button_box->pack_start (*mix_group_remove_button);
+	mix_group_display_button_box->pack_start (*mix_group_add_button, false, false);
+	mix_group_display_button_box->pack_start (*mix_group_remove_button, false, false);
 
 	group_display_vbox.pack_start (group_display_scroller, true, true);
-	group_display_vbox.pack_start (*mix_group_display_button_box, false, false);
+
+	HBox* hconstraint = manage (new HBox());
+	hconstraint->pack_start (*mix_group_display_button_box, false, false);
+
+	group_display_vbox.pack_start (*hconstraint, false, false);
 
 	track_display_frame.set_name("BaseFrame");
 	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -853,7 +868,7 @@ Mixer_UI::new_mix_group ()
 		break;
 	}
 #else 
-	session->add_mix_group ("unnamed");
+	session->add_mix_group ("");
 #endif
 
 }
@@ -970,14 +985,25 @@ Mixer_UI::add_mix_group (RouteGroup* group)
 
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_mix_group), group));
+	bool focus = false;
 
 	TreeModel::Row row = *(group_model->append());
 	row[group_columns.active] = group->is_active();
 	row[group_columns.visible] = true;
-	row[group_columns.text] = group->name();
 	row[group_columns.group] = group;
+	if (!group->name().empty()) {
+		row[group_columns.text] = group->name();
+	} else {
+		row[group_columns.text] = _("unnamed");
+		focus = true;
+	}
 
 	group->FlagsChanged.connect (bind (mem_fun(*this, &Mixer_UI::group_flags_changed), group));
+	
+	if (focus) {
+		group_display.set_cursor (group_model->get_path (row));
+		group_display.grab_focus ();
+	}
 }
 
 bool
