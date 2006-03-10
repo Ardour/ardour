@@ -142,14 +142,14 @@ static const char* authors[] = {
 };
 
 static const char* translators[] = {
-	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>"),
-	N_("German:\n\tKarsten Petersen <kapet@kapet.de>"),
-	N_("Italian:\n\tFilippo Pappalardo <filippo@email.it>"),
-	N_("Portuguese:\n\tRui Nuno Capela <rncbc@rncbc.org>"),
+	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n"),
+	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\n"),
+	N_("Italian:\n\tFilippo Pappalardo <filippo@email.it>\n"),
+	N_("Portuguese:\n\tRui Nuno Capela <rncbc@rncbc.org>\n"),
 	N_("Brazilian Portuguese:\n\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\
-\n\tChris Ross <chris@tebibyte.org>"),
-	N_("Spanish:\n\t Alex Krohn <alexkrohn@fastmail.fm>"),
-	N_("Russian:\n\t Igor Blinov <pitstop@nm.ru>"),
+\n\tChris Ross <chris@tebibyte.org>\n"),
+	N_("Spanish:\n\t Alex Krohn <alexkrohn@fastmail.fm>\n"),
+	N_("Russian:\n\t Igor Blinov <pitstop@nm.ru>\n"),
 	0
 };
 

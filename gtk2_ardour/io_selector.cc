@@ -466,10 +466,9 @@ IOSelector::display_ports ()
 			TreeViewColumn* col = tview->get_column (0);
 			
 			col->set_clickable (true);
-			
-			/* handle button events on the column header and within the treeview itself */
 
-			//col->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_column_button_release), tview));
+			/* handle button events on the column header and within the treeview itself */
+			col->signal_clicked().connect (bind (mem_fun(*this, &IOSelector::select_treeview), tview));
 			tview->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::connection_button_release), tview));
 		}
 
@@ -646,8 +645,6 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 
 		/* path is valid */
 		ustring connected_port_name = (*iter)[port_display_columns.full_name];
-		cerr << "selected row displayed_name: " << (*iter)[port_display_columns.displayed_name] << endl;
-		cerr << "selected row string was " << connected_port_name << endl;
 		Port *port = reinterpret_cast<Port *> (treeview->get_data (_("port")));
 		
 		if (for_input) {
