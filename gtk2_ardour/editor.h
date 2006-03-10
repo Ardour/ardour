@@ -45,7 +45,7 @@
 #include <ardour/tempo.h>
 #include <ardour/location.h>
 #include <ardour/region.h>
-#include <ardour/sndfile_helpers.h>
+#include <ardour/externalsource.h>
 
 #include "audio_clock.h"
 #include "gtk-custom-ruler.h"
@@ -954,7 +954,7 @@ class Editor : public PublicEditor
 
 	void insert_sndfile (bool as_tracks);
 	void embed_audio ();    // inserts into region list
-	int  reject_because_rate_differs (const string & path, SoundFileInfo& finfo, const string & action, bool multiple_pending);
+	int  reject_because_rate_differs (const string & path, ARDOUR::SoundFileInfo& finfo, const string & action, bool multiple_pending);
 
 	void do_embed_sndfiles (vector<string> paths, bool split);
 	void embed_sndfile (string path, bool split, bool multiple_files, bool& check_sr);

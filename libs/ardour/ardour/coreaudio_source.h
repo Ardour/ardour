@@ -20,36 +20,26 @@
 #ifndef __coreaudio_source_h__ 
 #define __coreaudio_source_h__
 
-#include <ardour/source.h>
+#include <ardour/externalsource.h>
 #include <AudioToolbox/ExtendedAudioFile.h>
 
 namespace ARDOUR {
 
-class CoreAudioSource : public Source {
+class CoreAudioSource : public ExternalSource {
   public:
 	CoreAudioSource (const string& path_plus_channel, bool build_peak = true);
 	CoreAudioSource (const XMLNode&);
 	~CoreAudioSource ();
 
-	jack_nframes_t length() const { return _length; }
 	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
-	void           mark_for_remove() {} // we never remove external sndfiles 
-	string         peak_path(string audio_path);
-	string         old_peak_path(string audio_path);
-	string         path() const { return _path; }
-
-	static void set_peak_dir (string dir) { peak_dir = dir; }
 
   private:
-	static string peak_dir;
-
 	ExtAudioFileRef af;
-	uint16_t channel;
 	uint16_t n_channels;
+
 	mutable float *tmpbuf;
 	mutable jack_nframes_t tmpbufsize;
 	mutable PBD::Lock _tmpbuf_lock;
-	string  _path;
 
 	void init (const string &str, bool build_peak);
 	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;

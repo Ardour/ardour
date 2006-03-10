@@ -282,7 +282,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 int
 Session::second_stage_init (bool new_session)
 {
-	SndFileSource::set_peak_dir (peak_dir());
+	ExternalSource::set_peak_dir (peak_dir());
 
 	if (!new_session) {
 		if (load_state (_current_snapshot_name)) {
@@ -1802,7 +1802,6 @@ Session::XMLSourceFactory (const XMLNode& node)
 		return 0;
 	}
 
-
 	try {
 		if (node.property (X_("destructive")) != 0) {
 			src = new DestructiveFileSource (node, frame_rate());
@@ -1814,7 +1813,7 @@ Session::XMLSourceFactory (const XMLNode& node)
 	catch (failed_constructor& err) {
 
 		try {
-			src = new SndFileSource (node);
+			src = ExternalSource::create (node);
 		}
 
 		catch (failed_constructor& err) {
@@ -2946,11 +2945,11 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 	for (SourceList::iterator i = sources.begin(); i != sources.end(); ++i) {
 		FileSource* fs;
-		SndFileSource* sfs;
+		ExternalSource* sfs;
 		
 		if ((fs = dynamic_cast<FileSource*> ((*i).second)) != 0) {
 			all_sources.insert (fs->path());
-		} else if ((sfs = dynamic_cast<SndFileSource*> ((*i).second)) != 0) {
+		} else if ((sfs = dynamic_cast<ExternalSource*> ((*i).second)) != 0) {
 			all_sources.insert (sfs->path());
 		} 
 	}

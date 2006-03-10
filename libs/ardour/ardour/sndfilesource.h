@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,46 +18,38 @@
     $Id$
 */
 
-#ifndef __playlist_snd_file_buffer_h__ 
-#define __playlist_snd_file_buffer_h__
+#ifndef __sndfile_source_h__ 
+#define __sndfile_source_h__
 
 #include <sndfile.h>
 
-#include <ardour/source.h>
+#include <ardour/externalsource.h>
 
 namespace ARDOUR {
 
-class SndFileSource : public Source {
+class SndFileSource : public ExternalSource {
   public:
 	SndFileSource (const string& path_plus_channel, bool build_peak = true);
 	SndFileSource (const XMLNode&);
 	~SndFileSource ();
 
-	jack_nframes_t length() const { return _info.frames; }
-	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
-	void           mark_for_remove() {} // we never remove external sndfiles 
-	string         peak_path(string audio_path);
-	string         old_peak_path(string audio_path);
-	string         path() const { return _path; }
+    jack_nframes_t length() const { return _info.frames; } 
 
-	static void set_peak_dir (string dir) { peak_dir = dir; }
+	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 
   private:
-	static string peak_dir;
-
 	SNDFILE *sf;
 	SF_INFO _info;
-	uint16_t channel;
+
 	mutable float *tmpbuf;
 	mutable jack_nframes_t tmpbufsize;
 	mutable PBD::Lock _tmpbuf_lock;
-	string  _path;
 
 	void init (const string &str, bool build_peak);
 	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 };
 
-}; /* namespace EDL */
+}; /* namespace ARDOUR */
 
-#endif /* __playlist_snd_file_buffer_h__ */
+#endif /* __sndfile_source_h__ */
 

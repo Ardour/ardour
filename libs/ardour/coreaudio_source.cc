@@ -17,33 +17,21 @@
 
 */
 
-#include <string>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/time.h>
-
-#include <pbd/mountpoint.h>
 #include <ardour/coreaudio_source.h>
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 
-string CoreAudioSource::peak_dir = "";
-
 CoreAudioSource::CoreAudioSource (const XMLNode& node)
-	: Source (node)
+	: ExternalSource (node)
 {
-	if (set_state (node)) {
-		throw failed_constructor();
-	}
-
 	init (_name, true);
-	 SourceCreated (this); /* EMIT SIGNAL */
+	SourceCreated (this); /* EMIT SIGNAL */
 }
 
 CoreAudioSource::CoreAudioSource (const string& idstr, bool build_peak)
-	: Source(build_peak)
+	: ExternalSource(idstr, build_peak)
 {
 	init (idstr, build_peak);
 
@@ -72,7 +60,6 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 		channel = atoi (idstr.substr (pos+1).c_str());
 		file = idstr.substr (0, pos);
 	}
-
 
 	/* note that we temporarily truncated _id at the colon */
 	FSRef ref;
@@ -125,9 +112,8 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 }
 
 CoreAudioSource::~CoreAudioSource ()
-
 {
-	 GoingAway (this); /* EMIT SIGNAL */
+	GoingAway (this); /* EMIT SIGNAL */
 
 	if (af) {
 		ExtAudioFileDispose (af);
@@ -136,12 +122,6 @@ CoreAudioSource::~CoreAudioSource ()
 	if (tmpbuf) {
 		delete [] tmpbuf;
 	}
-}
-
-jack_nframes_t
-CoreAudioSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
-{
-	return read (dst, start, cnt, workbuf);
 }
 
 jack_nframes_t
@@ -202,33 +182,5 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, ch
 	_read_data_count = cnt * sizeof(float);
 		
 	return real_cnt;
-}
-
-string
-CoreAudioSource::peak_path (string audio_path)
-{
-	/* XXX hardly bombproof! fix me */
-
-	struct stat stat_file;
-	struct stat stat_mount;
-
-	string mp = mountpoint (audio_path);
-
-	stat (audio_path.c_str(), &stat_file);
-	stat (mp.c_str(), &stat_mount);
-
-	char buf[32];
-	snprintf (buf, sizeof (buf), "%u-%u-%d.peak", stat_mount.st_ino, stat_file.st_ino, channel);
-
-	string res = peak_dir;
-	res += buf;
-
-	return res;
-}
-
-string
-CoreAudioSource::old_peak_path (string audio_path)
-{
-	return peak_path (audio_path);
 }
 

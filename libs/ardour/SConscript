@@ -37,6 +37,7 @@ cycle_timer.cc
 default_click.cc
 destructive_filesource.cc
 diskstream.cc
+externalsource.cc
 filesource.cc
 gain.cc
 gdither.cc

@@ -29,8 +29,7 @@
 
 #include <ardour/audio_library.h>
 #include <ardour/audioregion.h>
-#include <ardour/sndfile_helpers.h>
-#include <ardour/sndfilesource.h>
+#include <ardour/externalsource.h>
 
 #include "gui_thread.h"
 #include "prompter.h"
@@ -119,7 +118,8 @@ SoundFileBox::setup_labels (string filename)
 {
 	path = filename;
 
-	if(!get_soundfile_info (filename, sf_info)) {
+	string error_msg;
+	if(!ExternalSource::get_soundfile_info (filename, sf_info, error_msg)) {
 		return false;
 	}
 
@@ -184,11 +184,11 @@ SoundFileBox::play_btn_clicked ()
 
 	if (region_cache.find (path) == region_cache.end()) {
 		AudioRegion::SourceList srclist;
-		SndFileSource* sfs;
+		ExternalSource* sfs;
 
 		for (int n = 0; n < sf_info.channels; ++n) {
 			try {
-				sfs = new SndFileSource(path+":"+string_compose("%1", n), false);
+				sfs = ExternalSource::create (path+":"+string_compose("%1", n), false);
 				srclist.push_back(sfs);
 
 			} catch (failed_constructor& err) {

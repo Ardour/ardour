@@ -27,7 +27,6 @@
 
 #include <ardour/playlist.h>
 #include <ardour/audioregion.h>
-#include <ardour/sndfilesource.h>
 #include <ardour/diskstream.h>
 
 #include "streamview.h"

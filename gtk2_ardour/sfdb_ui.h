@@ -39,7 +39,7 @@
 #include <gtkmm/treeview.h>
 
 #include <ardour/session.h>
-#include <ardour/sndfile_helpers.h>
+#include <ardour/externalsource.h>
 
 #include "ardour_dialog.h"
 
@@ -67,7 +67,7 @@ class SoundFileBox : public Gtk::VBox
 
     LabelModelColumns label_columns;
     
-    SoundFileInfo sf_info;
+	ARDOUR::SoundFileInfo sf_info;
 
     pid_t current_pid;
 

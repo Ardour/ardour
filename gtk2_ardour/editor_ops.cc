@@ -38,7 +38,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/diskstream.h>
 #include <ardour/filesource.h>
-#include <ardour/sndfilesource.h>
+#include <ardour/externalsource.h>
 #include <ardour/utils.h>
 #include <ardour/location.h>
 #include <ardour/named_selection.h>
@@ -2179,7 +2179,7 @@ Editor::do_embed_sndfiles (vector<string> paths, bool split)
 void
 Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check_sample_rate)
 {
-	SndFileSource *source = 0; /* keep g++ quiet */
+	ExternalSource *source = 0; /* keep g++ quiet */
 	AudioRegion::SourceList sources;
 	string idspec;
 	string linked_path;
@@ -2202,8 +2202,9 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 	}
 
 	/* note that we temporarily truncated _id at the colon */
-	if (!get_soundfile_info (path, finfo)) {
-		error << string_compose(_("Editor: cannot open file \"%1\""), selection ) << endmsg;
+	string error_msg;
+	if (!ExternalSource::get_soundfile_info (path, finfo, error_msg)) {
+		error << string_compose(_("Editor: cannot open file \"%1\", (%2)"), selection, error_msg ) << endmsg;
 		return;
 	}
 	
@@ -2234,7 +2235,7 @@ Editor::embed_sndfile (string path, bool split, bool multiple_files, bool& check
 		idspec += string_compose(":%1", n);
 		
 		try {
-			source = new SndFileSource (idspec.c_str());
+			source = ExternalSource::create (idspec.c_str());
 			sources.push_back(source);
 		} 
 
@@ -2312,14 +2313,14 @@ Editor::insert_paths_as_new_tracks (vector<string> paths, bool split)
 	SoundFileInfo finfo;
 	bool multiple_files;
 	bool check_sample_rate = true;
+	string error_msg;
 
 	multiple_files = paths.size() > 1;	
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
 		
-		if (!get_soundfile_info((*p), finfo)) {
-			char errbuf[256];
-			error << string_compose(_("Editor: cannot open file \"%1\""), (*p)) << endmsg;
+		if (!ExternalSource::get_soundfile_info((*p), finfo, error_msg)) {
+			error << string_compose(_("Editor: cannot open file \"%1\" (%2)"), (*p), error_msg) << endmsg;
 			continue;
 		}
 		
@@ -2379,16 +2380,16 @@ Editor::do_insert_sndfile (vector<string> paths, bool split, jack_nframes_t pos)
 void
 Editor::insert_sndfile_into (const string & path, bool multi, AudioTimeAxisView* tv, jack_nframes_t& pos, bool prompt)
 {
-	SndFileSource *source = 0; /* keep g++ quiet */
+	ExternalSource *source = 0; /* keep g++ quiet */
 	AudioRegion::SourceList sources;
 	string idspec;
 	SoundFileInfo finfo;
+	string error_msg;
 
 	/* note that we temporarily truncated _id at the colon */
 	
-	if (!get_soundfile_info (path, finfo)) {
-		char errbuf[256];
-		error << string_compose(_("Editor: cannot open file \"%1\" (%2)"), path) << endmsg;
+	if (!ExternalSource::get_soundfile_info (path, finfo, error_msg)) {
+		error << string_compose(_("Editor: cannot open file \"%1\" (%2)"), path, error_msg) << endmsg;
 		return;
 	}
 	
@@ -2407,7 +2408,7 @@ Editor::insert_sndfile_into (const string & path, bool multi, AudioTimeAxisView*
 		idspec += string_compose(":%1", n);
 
 		try {
-			source = new SndFileSource (idspec.c_str());
+			source = ExternalSource::create (idspec.c_str());
 			sources.push_back(source);
 		} 
 

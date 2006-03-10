@@ -34,8 +34,6 @@
 #include <pbd/pthread_utils.h>
 
 #include <ardour/source.h>
-#include <ardour/filesource.h>
-#include <ardour/sndfilesource.h>
 
 #include "i18n.h"
 
