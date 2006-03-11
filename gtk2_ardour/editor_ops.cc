@@ -398,7 +398,7 @@ Editor::nudge_backward (bool next)
 		if (playhead_cursor->current_frame > distance) {
 			session->request_locate (playhead_cursor->current_frame - distance);
 		} else {
-			session->request_locate (0);
+			session->goto_start();
 		}
 	}
 }
@@ -464,7 +464,7 @@ Editor::nudge_backward_capture_offset ()
 void
 Editor::move_to_start ()
 {
-	session->request_locate (0);
+	session->goto_start ();
 }
 
 void
@@ -1528,7 +1528,7 @@ Editor::jump_backward_to_mark ()
 	if (location) {
 		session->request_locate (location->start(), session->transport_rolling());
 	} else {
-		session->request_locate (0);
+		session->goto_start ();
 	}
 }
 
@@ -1732,7 +1732,7 @@ Editor::toggle_playback (bool with_abort)
 void
 Editor::play_from_start ()
 {
-	session->request_locate (0, true);
+	session->request_locate (session->current_start_frame(), true);
 }
 
 void

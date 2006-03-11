@@ -245,6 +245,9 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (transport_actions, X_("ForwardFast"), _("Forward (Fast)"), bind (mem_fun(*this, &ARDOUR_UI::transport_forward), 1));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("GotoZero"), _("Goto Zero"), mem_fun(*this, &ARDOUR_UI::transport_goto_zero));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("GotoStart"), _("Goto Start"), mem_fun(*this, &ARDOUR_UI::transport_goto_start));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);

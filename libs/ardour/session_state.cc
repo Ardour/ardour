@@ -126,6 +126,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_transport_frame = 0;
 	last_stop_frame = 0;
 	end_location = new Location (0, 0, _("end"), Location::Flags ((Location::IsMark|Location::IsEnd)));
+	start_location = new Location (0, 0, _("start"), Location::Flags ((Location::IsMark|Location::IsStart)));
 	_end_location_is_free = true;
 	atomic_set (&_record_status, Disabled);
 	auto_play = false;
@@ -560,11 +561,14 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 
 	if (new_session) {
 
-		/* set an initial end point */
+		/* set initial start + end point */
+
+		start_location->set_end (0);
+		_locations.add (start_location);
 
 		end_location->set_end (initial_length);
 		_locations.add (end_location);
-
+		
 		_state_of_the_state = Clean;
 
 		if (save_state (_current_snapshot_name)) {
@@ -1551,7 +1555,15 @@ Session::set_state (const XMLNode& node)
 	if ((location = _locations.end_location()) == 0) {
 		_locations.add (end_location);
 	} else {
+		delete end_location;
 		end_location = location;
+	}
+
+	if ((location = _locations.start_location()) == 0) {
+		_locations.add (start_location);
+	} else {
+		delete start_location;
+		start_location = location;
 	}
 
 	_locations.save_state (_("initial state"));

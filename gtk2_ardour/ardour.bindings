@@ -4,6 +4,7 @@
 (gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<control>space")
 (gtk_accel_path "<Actions>/Transport/Forward" "<control>Right")
 (gtk_accel_path "<Actions>/Transport/Rewind" "<control>Left")
+(gtk_accel_path "<Actions>/Transport/GotoZero" "KP_Insert")
 (gtk_accel_path "<Actions>/Transport/GotoStart" "Home")
 (gtk_accel_path "<Actions>/Transport/GotoEnd" "End")
 

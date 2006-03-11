@@ -353,7 +353,7 @@ class Session : public sigc::trackable, public Stateful
 	void request_auto_loop (bool yn);
 	jack_nframes_t  last_transport_start() const { return _last_roll_location; }
 	void goto_end ()   { request_locate (end_location->start(), false);}
-	void goto_start () { request_locate (0, false); }
+	void goto_start () { request_locate (start_location->start(), false); }
 	void use_rf_shuttle_speed ();
 	void request_transport_speed (float speed);
 	void request_overwrite_buffer (DiskStream*);
@@ -366,6 +366,7 @@ class Session : public sigc::trackable, public Stateful
 	int remove_region_from_region_list (Region&);
 
 	jack_nframes_t current_end_frame() const { return end_location->start(); }
+	jack_nframes_t current_start_frame() const { return start_location->start(); }
 	jack_nframes_t frame_rate() const   { return _current_frame_rate; }
 	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
 	jack_nframes_t frames_per_hour() const { return _frames_per_hour; }
@@ -1002,6 +1003,7 @@ class Session : public sigc::trackable, public Stateful
 	atomic_t                _record_status;
 	jack_nframes_t          _transport_frame;
 	Location*                end_location;
+	Location*                start_location;
 	Slave                  *_slave;
 	SlaveSource             _slave_type;
 	volatile float          _transport_speed;

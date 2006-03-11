@@ -975,6 +975,23 @@ void
 ARDOUR_UI::transport_goto_start ()
 {
 	if (session) {
+		session->goto_start();
+
+		
+		/* force displayed area in editor to start no matter
+		   what "follow playhead" setting is.
+		*/
+		
+		if (editor) {
+			editor->reposition_x_origin (session->current_start_frame());
+		}
+	}
+}
+
+void
+ARDOUR_UI::transport_goto_zero ()
+{
+	if (session) {
 		session->request_locate (0);
 
 		

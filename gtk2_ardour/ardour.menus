@@ -33,8 +33,11 @@
                <menuitem action='PlaySelection'/>
                <menuitem action='Forward'/>
                <menuitem action='Rewind'/>
+               <menuitem action='GotoZero'/>
                <menuitem action='GotoStart'/>
                <menuitem action='GotoEnd'/>
+	       <separator/>
+               <menuitem action='Record'/>
                <separator/> 
                <menuitem action='jump-forward-to-mark'/>
                <menuitem action='jump-backward-to-mark'/>

@@ -51,7 +51,8 @@ class Location : public Stateful, public sigc::trackable
 		IsHidden = 0x8,
 		IsCDMarker = 0x10,
 		IsEnd = 0x20,
-		IsRangeMarker = 0x40
+		IsRangeMarker = 0x40,
+		IsStart = 0x80
 	};
 
 	Location (jack_nframes_t sample_start,
@@ -89,6 +90,7 @@ class Location : public Stateful, public sigc::trackable
 	void set_hidden (bool yn, void *src);
 	void set_cd (bool yn, void *src);
 	void set_is_end (bool yn, void* src);
+	void set_is_start (bool yn, void* src);
 
 	bool is_auto_punch ()  { return _flags & IsAutoPunch; }
 	bool is_auto_loop () { return _flags & IsAutoLoop; }
@@ -96,6 +98,7 @@ class Location : public Stateful, public sigc::trackable
 	bool is_hidden () { return _flags & IsHidden; }
 	bool is_cd_marker () { return _flags & IsCDMarker; }
 	bool is_end() { return _flags & IsEnd; }
+	bool is_start() { return _flags & IsStart; }
 	bool is_range_marker() { return _flags & IsRangeMarker; }
 
 	sigc::signal<void,Location*> name_changed;
@@ -146,6 +149,7 @@ class Locations : public Stateful, public StateManager
 	Location* auto_loop_location () const;
 	Location* auto_punch_location () const;
 	Location* end_location() const;
+	Location* start_location() const;
 
 	uint32_t num_range_markers() const;
 

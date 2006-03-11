@@ -155,6 +155,14 @@ Location::set_is_end (bool yn, void *src)
 }
 
 void
+Location::set_is_start (bool yn, void *src)
+{
+	if (set_flag_internal (yn, IsStart)) {
+		 FlagsChanged (this, src); /* EMIT SIGNAL */
+	}
+}
+
+void
 Location::set_auto_punch (bool yn, void *src) 
 {
 	if (is_mark() || _start == _end) {
@@ -653,6 +661,17 @@ Locations::end_location () const
 {
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_end()) {
+			return const_cast<Location*> (*i);
+		}
+	}
+	return 0;
+}	
+
+Location*
+Locations::start_location () const
+{
+	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+		if ((*i)->is_start()) {
 			return const_cast<Location*> (*i);
 		}
 	}
