@@ -404,7 +404,7 @@ Locations::clear ()
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 			tmp = i;
 			++tmp;
-			if (!(*i)->is_end()) {
+			if (!(*i)->is_end() && !(*i)->is_start()) {
 				locations.erase (i);
 			}
 			i = tmp;
@@ -431,7 +431,7 @@ Locations::clear_markers ()
 			tmp = i;
 			++tmp;
 
-			if ((*i)->is_mark() && !(*i)->is_end()) {
+			if ((*i)->is_mark() && !(*i)->is_end() && !(*i)->is_start()) {
 				locations.erase (i);
 			}
 
@@ -502,7 +502,7 @@ Locations::remove (Location *loc)
 	bool was_current = false;
 	LocationList::iterator i;
 
-	if (loc->is_end()) {
+	if (loc->is_end() || loc->is_start()) {
 		return;
 	}
 
