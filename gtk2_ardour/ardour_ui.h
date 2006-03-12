@@ -388,11 +388,16 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::Menu*        shuttle_style_menu;
 	ShuttleBehaviour  shuttle_behaviour;
 	ShuttleUnits      shuttle_units;
+	float             shuttle_max_speed;
+	Gtk::Menu*        shuttle_context_menu;
 
+	void build_shuttle_context_menu ();
+	void show_shuttle_context_menu ();
 	void shuttle_style_changed();
 	void shuttle_unit_clicked ();
 	void set_shuttle_behaviour (ShuttleBehaviour);
 	void set_shuttle_units (ShuttleUnits);
+	void set_shuttle_max_speed (float);
 	void update_speed_display ();
 	float last_speed_displayed;
 

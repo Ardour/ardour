@@ -65,6 +65,7 @@ using namespace ARDOUR;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
+#ifdef VARISPEED_IN_MIXER_STRIP
 static void 
 speed_printer (char buf[32], Gtk::Adjustment& adj, void* arg)
 {
@@ -76,6 +77,7 @@ speed_printer (char buf[32], Gtk::Adjustment& adj, void* arg)
 		snprintf (buf, 32, "%.3f", val);
 	}
 }
+#endif 
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	: AxisView(sess),
@@ -85,7 +87,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	  post_redirect_box (PostFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
 	  gpm (_route, sess),
 	  panners (_route, sess),
-	  button_table (8, 2),
+	  button_table (7, 2),
 	  gain_automation_style_button (""),
 	  gain_automation_state_button (""),
 	  pan_automation_style_button (""),
@@ -157,6 +159,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	polarity_button.unset_flags (Gtk::CAN_FOCUS);
 
 	button_table.set_homogeneous (true);
+	button_table.set_spacings (0);
 
 	button_table.attach (name_button, 0, 2, 0, 1);
 	button_table.attach (group_button, 0, 2, 1, 2);
@@ -214,6 +217,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 		at->FreezeChange.connect (mem_fun(*this, &MixerStrip::map_frozen));
 
+#ifdef VARISPEED_IN_MIXER_STRIP
 		speed_adjustment.signal_value_changed().connect (mem_fun(*this, &MixerStrip::speed_adjustment_changed));
 		
 		speed_frame.set_name ("BaseFrame");
@@ -225,7 +229,9 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 		ARDOUR_UI::instance()->tooltips().set_tip (speed_spinner, _("varispeed"));
 
 		button_table.attach (speed_frame, 0, 2, 6, 7);
-		button_table.attach (*rec_enable_button, 0, 2, 7, 8);
+#endif /* VARISPEED_IN_MIXER_STRIP */
+
+		button_table.attach (*rec_enable_button, 0, 2, 6, 7);
 	}
 
 	name_button.add (name_label);
@@ -264,7 +270,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	global_vpacker.pack_start (*whvbox, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (pre_redirect_box, true, true);
-	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK, 4);
 	global_vpacker.pack_start (post_redirect_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);

@@ -894,7 +894,6 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 
 
 jack_nframes_t
-
 TempoMap::round_to_bar (jack_nframes_t fr, int dir)
 {
 	LockMonitor lm (lock, __LINE__, __FILE__);
@@ -903,7 +902,6 @@ TempoMap::round_to_bar (jack_nframes_t fr, int dir)
 
 
 jack_nframes_t
-
 TempoMap::round_to_beat (jack_nframes_t fr, int dir)
 {
 	LockMonitor lm (lock, __LINE__, __FILE__);

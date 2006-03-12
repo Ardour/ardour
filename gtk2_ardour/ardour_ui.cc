@@ -177,6 +177,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	shuttle_grabbed = false;
 	shuttle_fract = 0.0;
+	shuttle_max_speed = 8.0f;
 
 	set_shuttle_units (Percentage);
 	set_shuttle_behaviour (Sprung);

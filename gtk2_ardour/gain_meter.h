@@ -22,6 +22,7 @@
 #define __ardour_gtk_gain_meter_h__
 
 #include <vector>
+#include <map>
 
 #include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
@@ -95,6 +96,9 @@ class GainMeter : public Gtk::VBox
         Gtk::Label                   meter_point_label;
 	Gtk::Table                   top_table;
 	Width                       _width;
+
+	static std::map<std::string,Glib::RefPtr<Gdk::Pixmap> > metric_pixmaps;
+	static Glib::RefPtr<Gdk::Pixmap> render_metrics (Gtk::Widget&);
 
 	gint meter_metrics_expose (GdkEventExpose *);
 

@@ -52,10 +52,12 @@ using namespace ARDOUR;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
+using namespace std;
 
 sigc::signal<void> GainMeter::ResetAllPeakDisplays;
 sigc::signal<void,RouteGroup*> GainMeter::ResetGroupPeakDisplays;
 Pix* GainMeter::slider_pix = 0;
+map<string,Glib::RefPtr<Gdk::Pixmap> > GainMeter::metric_pixmaps;
 
 int
 GainMeter::setup_slider_pix ()
@@ -72,6 +74,12 @@ GainMeter::setup_slider_pix ()
 
 	slider_pix->ref ();
 	return 0;
+}
+
+void
+was_pressed ()
+{
+	cerr << "was pressed\n";
 }
 
 GainMeter::GainMeter (IO& io, Session& s)
@@ -113,6 +121,8 @@ GainMeter::GainMeter (IO& io, Session& s)
 	gain_unit_button.set_name ("MixerStripGainUnitButton");
 	gain_unit_label.set_name ("MixerStripGainUnitButton");
 
+	gain_unit_button.signal_clicked().connect (ptr_fun (was_pressed));
+
 	top_table.set_col_spacings (2);
 	top_table.set_homogeneous (true);
 	top_table.attach (gain_unit_button, 0, 1, 0, 1);
@@ -120,6 +130,7 @@ GainMeter::GainMeter (IO& io, Session& s)
 	Route* r;
 
 	if ((r = dynamic_cast<Route*> (&_io)) != 0) {
+
 		r->meter_change.connect (mem_fun(*this, &GainMeter::meter_changed));
 		meter_point_button.add (meter_point_label);
 		meter_point_button.set_name ("MixerStripMeterPreButton");
@@ -168,17 +179,14 @@ GainMeter::GainMeter (IO& io, Session& s)
 
 	gain_display_box.pack_end (peak_display_frame,  Gtk::PACK_SHRINK);
 
-	meter_metric_area.set_size_request (18, -1);
+	meter_metric_area.set_size_request (25, -1);
 	meter_metric_area.set_name ("MeterMetricsStrip");
 
 	meter_packer.set_spacing (2);
-	fader_box.set_spacing (2);
-
-	fader_box.pack_start (*gain_slider,  Gtk::PACK_SHRINK);
 
 	hbox.set_spacing (4);
-	hbox.pack_start (fader_box,  Gtk::PACK_SHRINK);
-	hbox.pack_start (meter_packer,  Gtk::PACK_SHRINK);
+	hbox.pack_start (*gain_slider, false, false, 2);
+	hbox.pack_start (meter_packer, true, false);
 
 	set_spacing (4);
 
@@ -217,24 +225,54 @@ GainMeter::set_width (Width w)
 	setup_meters ();
 }
 
+Glib::RefPtr<Gdk::Pixmap>
+GainMeter::render_metrics (Gtk::Widget& w)
+{
+	Glib::RefPtr<Gdk::Window> win (w.get_window());
+	Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
+	gint x, y, width, height, depth;
+	int  db_points[] = { -50, -40, -20, -30, -10, -3, 0, 4 };
+	char buf[32];
+	int theight;
+	int twidth;
+
+	win->get_geometry (x, y, width, height, depth);
+	
+	Glib::RefPtr<Gdk::Pixmap> pixmap = Gdk::Pixmap::create (win, width, height);
+
+	metric_pixmaps[w.get_name()] = pixmap;
+
+	pixmap->draw_rectangle (bg_gc, true, 0, 0, width, height);
+
+	Glib::RefPtr<Pango::Layout> layout = w.create_pango_layout("");
+
+	for (uint32_t i = 0; i < sizeof (db_points)/sizeof (db_points[0]); ++i) {
+
+		float fraction = log_meter (db_points[i]);
+		gint pos = height - (gint) floor (height * fraction);
+
+		snprintf (buf, sizeof (buf), "%d", abs (db_points[i]));
+
+		layout->set_text (buf);
+		layout->get_pixel_size (twidth, theight);
+
+		pixmap->draw_line (fg_gc, 0, pos, 4, pos);
+		pixmap->draw_layout (fg_gc, 6, pos - (theight/2), layout);
+	}
+
+	return pixmap;
+}
+
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
-	/* XXX optimize this so that it doesn't do it all everytime */
-
-	double fraction;
 	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
 	Glib::RefPtr<Gdk::GC> fg_gc (meter_metric_area.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::GC> bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
-	gint x, y, width, height, depth;
-	gint pos;
-	int  db_points[] = { -50, -10, -3, 0, 6 };
-	uint32_t i;
-	char buf[32];
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
-	int theight;
-	int twidth;
+	gint x, y, width, height, depth;
 
 	win->get_geometry (x, y, width, height, depth);
 	
@@ -243,30 +281,24 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	base_rect.x = 0;
 	base_rect.y = 0;
 
-	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
-	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	Glib::RefPtr<Gdk::Pixmap> pixmap;
+	std::map<string,Glib::RefPtr<Gdk::Pixmap> >::iterator i = metric_pixmaps.find (meter_metric_area.get_name());
 
-	Glib::RefPtr<Pango::Layout> layout = meter_metric_area.create_pango_layout("");
-
-	for (i = 0; i < sizeof (db_points)/sizeof (db_points[0]); ++i) {
-
-		fraction = log_meter (db_points[i]);
-		pos = height - (gint) floor (height * fraction);
-
-		snprintf (buf, sizeof (buf), "%d", db_points[i]);
-
-		layout->set_text (buf);
-		layout->get_pixel_size (twidth, theight);
-
-		win->draw_layout (fg_gc, width - twidth, pos + theight, layout);
+	if (i == metric_pixmaps.end()) {
+		pixmap = render_metrics (meter_metric_area);
+	} else {
+		pixmap = i->second;
 	}
 
+	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
+	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	win->draw_drawable (bg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	
 	return true;
 }
 
 GainMeter::~GainMeter ()
 {
-
 	if (meter_menu) {
 		delete meter_menu;
 	}
@@ -398,11 +430,6 @@ GainMeter::setup_meters ()
 		return;
 	}
 
-	if (_width == Wide) {
-	        meter_packer.pack_start (meter_metric_area, Gtk::PACK_SHRINK);
-		meter_metric_area.show_all ();
-	}
-
 	if (nmeters <= 2) {
 		width = regular_meter_width;
 	} else {
@@ -426,6 +453,11 @@ GainMeter::setup_meters ()
 		meter_packer.pack_start (*meters[n].meter, Gtk::PACK_SHRINK);
 		meters[n].meter->show_all ();
 		meters[n].packed = true;
+	}
+
+	if (_width == Wide) {
+	        meter_packer.pack_start (meter_metric_area, Gtk::PACK_SHRINK);
+		meter_metric_area.show_all ();
 	}
 }	
 
@@ -596,6 +628,8 @@ GainMeter::meter_press(GdkEventButton* ev)
 
 	wait_for_release = false;
 
+	cerr << "meter point button press\n";
+
 	if ((_route = dynamic_cast<Route*>(&_io)) == 0) {
 		return FALSE;
 	}
@@ -647,21 +681,22 @@ GainMeter::meter_press(GdkEventButton* ev)
 		}
 	}
 
-	return stop_signal (meter_point_button, "button-press-event");
+	return true;
 
 }
 
 gint
 GainMeter::meter_release(GdkEventButton* ev)
 {
+	cerr << "meter point button release\n";
+
 	if(!ignore_toggle){
 		if (wait_for_release){
 			wait_for_release = false;
 			set_meter_point (*(dynamic_cast<Route*>(&_io)), old_meter_point);
-			stop_signal (meter_point_button, "button-release-event");
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 void

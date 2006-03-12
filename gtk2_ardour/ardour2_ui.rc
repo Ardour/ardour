@@ -480,8 +480,8 @@ style "editor_time_ruler" = "small_text"
 
 style "audio_track_base" = "default_base"
 {
-  font_name = "sans medium 8"
-  fg[NORMAL] = { 0.80, 0.80, 0.80 }	
+  font_name = "sans 6"
+  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   bg[NORMAL] = { 0.18, 0.18, 0.22 }
   bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
   bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
@@ -491,7 +491,8 @@ style "audio_track_base" = "default_base"
 
 style "audio_bus_base"
 {
-  font_name = "sans medium 8"
+  font_name = "sans 6"
+  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
   bg[NORMAL] = {0, 0.36, 0.40 }	
 }
@@ -778,8 +779,8 @@ style "tearoff_arrow" = "medium_bold_entry"
 
 style "meter_metrics_strip" = "default_base"
 {
-	font = "sans medium 10"
-	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+	font_name = "sans 4"
+	fg[NORMAL] = { 1.0, 0.8, 0.2 }	
 }
 
 style "location_row_button" = "default_buttons_menus"

@@ -56,8 +56,6 @@ using namespace sigc;
 int	
 ARDOUR_UI::setup_windows ()
 {
-	using namespace Menu_Helpers;
-
 	if (create_editor ()) {
 		error << _("UI: cannot setup editor") << endmsg;
 		return -1;
@@ -556,12 +554,73 @@ ARDOUR_UI::audition_blink (bool onoff)
 	}
 }
 
+void
+ARDOUR_UI::build_shuttle_context_menu ()
+{
+	using namespace Menu_Helpers;
+
+	shuttle_context_menu = new Menu();
+	MenuList& items = shuttle_context_menu->items();
+
+	Menu* speed_menu = manage (new Menu());
+	MenuList& speed_items = speed_menu->items();
+
+	RadioMenuItem::Group group;
+
+	speed_items.push_back (RadioMenuElem (group, "8", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 8.0f)));
+	if (shuttle_max_speed == 8.0) {
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+	}
+	speed_items.push_back (RadioMenuElem (group, "6", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 6.0f)));
+	if (shuttle_max_speed == 6.0) {
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+	}
+	speed_items.push_back (RadioMenuElem (group, "4", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 4.0f)));
+	if (shuttle_max_speed == 4.0) {
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+	}
+	speed_items.push_back (RadioMenuElem (group, "3", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 3.0f)));
+	if (shuttle_max_speed == 3.0) {
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+	}
+	speed_items.push_back (RadioMenuElem (group, "2", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 2.0f)));
+	if (shuttle_max_speed == 2.0) {
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+	}
+	speed_items.push_back (RadioMenuElem (group, "1.5", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 1.5f)));
+	if (shuttle_max_speed == 1.5) {
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+	}
+
+	items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
+}
+
+void
+ARDOUR_UI::show_shuttle_context_menu ()
+{
+	if (shuttle_context_menu == 0) {
+		build_shuttle_context_menu ();
+	}
+
+	shuttle_context_menu->popup (1, 0);
+}
+
+void
+ARDOUR_UI::set_shuttle_max_speed (float speed)
+{
+	shuttle_max_speed = speed;
+}
 
 gint
 ARDOUR_UI::shuttle_box_button_press (GdkEventButton* ev)
 {
 	if (!session) {
-		return TRUE;
+		return true;
+	}
+
+	if (Keyboard::is_context_menu_event (ev)) {
+		show_shuttle_context_menu ();
+		return true;
 	}
 
 	switch (ev->button) {
@@ -573,20 +632,20 @@ ARDOUR_UI::shuttle_box_button_press (GdkEventButton* ev)
 
 	case 2:
 	case 3:
-		return TRUE;
+		return true;
 		break;
 	}
 
-	return TRUE;
+	return true;
 }
 
 gint
 ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 {
 	if (!session) {
-		return TRUE;
+		return true;
 	}
-
+	
 	switch (ev->button) {
 	case 1:
 		mouse_shuttle (ev->x, true);
@@ -597,7 +656,7 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 			session->request_transport_speed (1.0);
 			shuttle_box.queue_draw ();
 		}
-		return TRUE;
+		return true;
 
 	case 2:
 		if (session->transport_rolling()) {
@@ -607,10 +666,10 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 			shuttle_fract = 0;
 		}
 		shuttle_box.queue_draw ();
-		return TRUE;
+		return true;
 
 	case 3:
-		return TRUE;
+		return true;
 		
 	case 4:
 		shuttle_fract += 0.005;
@@ -622,14 +681,14 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 
 	use_shuttle_fract (true);
 
-	return TRUE;
+	return true;
 }
 
 gint
 ARDOUR_UI::shuttle_box_motion (GdkEventMotion* ev)
 {
 	if (!session || !shuttle_grabbed) {
-		return TRUE;
+		return true;
 	}
 
 	return mouse_shuttle (ev->x, false);
@@ -649,7 +708,7 @@ ARDOUR_UI::mouse_shuttle (double x, bool force)
 
 	shuttle_fract = distance / half_width;
 	use_shuttle_fract (force);
-	return TRUE;
+	return true;
 }
 
 void
@@ -679,7 +738,7 @@ ARDOUR_UI::use_shuttle_fract (bool force)
 		fract = -fract;
 	}
 
-	session->request_transport_speed (8.0 * fract); // Formula A2
+	session->request_transport_speed (shuttle_max_speed * fract); // Formula A2
 	shuttle_box.queue_draw ();
 }
 
@@ -706,7 +765,7 @@ ARDOUR_UI::shuttle_box_expose (GdkEventExpose* event)
 			0,
 			x,
 			shuttle_box.get_height());
-	return TRUE;
+	return true;
 }
 
 void
