@@ -33,7 +33,7 @@ opts.AddOptions(
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('VST', 'Compile with support for VST', 0),
     BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
-    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'tiger', 'panther', 'none' ), ignorecase=2),
+    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1)
   )
 
@@ -229,17 +229,17 @@ def version_builder (target, source, env):
    try:
       o = file (target[0].get_path(), 'w')
       o.write (text)
-      o.close ();
+      o.close ()
    except IOError:
       print "Could not open", target[0].get_path(), " for writing\n"
       sys.exit (-1)
 
-   text  = "#ifndef __" + env['DOMAIN'] + "_version_h__\n";
-   text += "#define __" + env['DOMAIN'] + "_version_h__\n";
+   text  = "#ifndef __" + env['DOMAIN'] + "_version_h__\n"
+   text += "#define __" + env['DOMAIN'] + "_version_h__\n"
    text += "extern int " + env['DOMAIN'] + "_major_version;\n"
    text += "extern int " + env['DOMAIN'] + "_minor_version;\n"
    text += "extern int " + env['DOMAIN'] + "_micro_version;\n"
-   text += "#endif /* __" + env['DOMAIN'] + "_version_h__ */\n";
+   text += "#endif /* __" + env['DOMAIN'] + "_version_h__ */\n"
 
    try:
       o = file (target[1].get_path(), 'w')
@@ -285,7 +285,7 @@ def versioned_builder(target,source,env):
         print "No SConscript CVS update info found - versioned executable cannot be built"
         return -1
 
-    tag = time.strftime ('%Y%M%d%H%m', time.strptime (last_date));
+    tag = time.strftime ('%Y%M%d%H%m', time.strptime (last_date))
     print "The current build ID is " + tag
 
     tagged_executable = source[0].get_path() + '-' + tag
@@ -321,7 +321,7 @@ def distcopy (target, source, env):
     cmd += " ".join ([ "'%s'" % quoted for quoted in all_files])
     cmd += ' | (cd ' + treedir + ' && tar xf -)'
     p = os.popen (cmd)
-    return p.close ();
+    return p.close ()
 
 def tarballer (target, source, env):            
     cmd = 'tar -jcf ' + str (target[0]) +  ' ' + str(source[0]) + "  --exclude '*~'"
@@ -545,10 +545,10 @@ config_prefix = '$DESTDIR' + final_config_prefix
 
 conf = Configure (env)
 
-have_cxx = conf.TryAction (Action (env['CXX'] + ' --version'));
+have_cxx = conf.TryAction (Action (env['CXX'] + ' --version'))
 if have_cxx[0] != 1:
     print "This system has no functional C++ compiler. You cannot build Ardour from source without one."
-    exit (1);
+    exit (1)
 else:
     print "Congratulations, you have a functioning C++ compiler."
     
@@ -565,10 +565,10 @@ debug_flags = [ '-g' ]
 
 config_guess = os.popen("tools/config.guess").read()[:-1]
 
-config_cpu = 0;
-config_arch = 1;
-config_kernel = 2;
-config_os = 3;
+config_cpu = 0
+config_arch = 1
+config_kernel = 2
+config_os = 3
 config = config_guess.split ("-")
 
 print "system triple: " + config_guess
@@ -578,16 +578,18 @@ if env['DIST_TARGET'] == 'auto':
     if config[config_arch] == 'apple':
         # The [.] matches to the dot after the major version, "." would match any character
         if re.search ("darwin[0-7][.]", config[config_kernel]) != None:
-            env['DIST_TARGET'] = 'panther';
+            env['DIST_TARGET'] = 'panther'
         else:
-            env['DIST_TARGET'] = 'tiger';
+            env['DIST_TARGET'] = 'tiger'
     else:
         if re.search ("x86_64", config[config_cpu]) != None:
-            env['DIST_TARGET'] = 'x86_64';
+            env['DIST_TARGET'] = 'x86_64'
         elif re.search("i[0-5]86", config[config_cpu]) != None:
-            env['DIST_TARGET'] = 'i386';
+            env['DIST_TARGET'] = 'i386'
+        elif re.search("powerpc", config[config_cpu]) != None:
+            env['DIST_TARGET'] = 'powerpc'
         else:
-            env['DIST_TARGET'] = 'i686';
+            env['DIST_TARGET'] = 'i686'
     print "\n*******************************"
     print "detected DIST_TARGET = " + env['DIST_TARGET']
     print "*******************************\n"
