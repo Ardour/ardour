@@ -53,6 +53,7 @@ class AnalysisWindow : public ArdourDialog
 	  
 	  void track_list_row_changed(const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter);
 
+	  void analyze ();
 
   private:
 	  

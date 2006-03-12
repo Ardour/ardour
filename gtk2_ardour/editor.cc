@@ -1590,7 +1590,7 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 }
 
 void
-Editor::show_analysis_window()
+Editor::analyze_region_selection()
 {
 	if (analysis_window == 0) {
 		analysis_window = new AnalysisWindow();
@@ -1601,8 +1601,32 @@ Editor::show_analysis_window()
 		analysis_window->show_all();
 	}
 
+	analysis_window->set_regionmode();
+	analysis_window->analyze();
+	
 	analysis_window->present();
 }
+
+void
+Editor::analyze_range_selection()
+{
+	if (analysis_window == 0) {
+		analysis_window = new AnalysisWindow();
+
+		if (session != 0)
+			analysis_window->set_session(session);
+
+		analysis_window->show_all();
+	}
+
+	analysis_window->set_rangemode();
+	analysis_window->analyze();
+	
+	analysis_window->present();
+}
+
+
+
 
 Menu*
 Editor::build_track_selection_context_menu (jack_nframes_t ignored)
@@ -1705,6 +1729,7 @@ Editor::add_region_context_items (StreamView* sv, Region* region, Menu_Helpers::
 	items.push_back (MenuElem (_("Audition"), mem_fun(*this, &Editor::audition_selected_region)));
 	items.push_back (MenuElem (_("Export"), mem_fun(*this, &Editor::export_region)));
 	items.push_back (MenuElem (_("Bounce"), mem_fun(*this, &Editor::bounce_region_selection)));
+	items.push_back (MenuElem (_("Analyze region"), mem_fun(*this, &Editor::analyze_region_selection)));
 	items.push_back (SeparatorElem());
 
 	/* XXX hopefully this nonsense will go away with SigC++ 2.X, where the compiler
@@ -1812,7 +1837,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
 	items.push_back (MenuElem (_("Loop range"), mem_fun(*this, &Editor::set_route_loop_selection)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Analyze range"), mem_fun(*this, &Editor::show_analysis_window)));
+	items.push_back (MenuElem (_("Analyze range"), mem_fun(*this, &Editor::analyze_range_selection)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Separate range to track"), mem_fun(*this, &Editor::separate_region_from_selection)));
 	items.push_back (MenuElem (_("Separate range to region list"), mem_fun(*this, &Editor::new_region_from_selection)));

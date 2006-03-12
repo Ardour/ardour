@@ -201,6 +201,12 @@ AnalysisWindow::clear_tracklist()
 }
 
 void
+AnalysisWindow::analyze()
+{
+	analyze_data(&refresh_button);
+}
+
+void
 AnalysisWindow::analyze_data (Gtk::Button *button)
 {
 	track_list_ready = false;

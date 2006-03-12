@@ -227,7 +227,8 @@ class Editor : public PublicEditor
 	bool show_measures () const { return _show_measures; }
 
 	/* analysis window */
-	void show_analysis_window();
+	void analyze_region_selection();
+	void analyze_range_selection();
 
 	/* export */
 
