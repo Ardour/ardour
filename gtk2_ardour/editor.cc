@@ -67,6 +67,7 @@
 #include "canvas_impl.h"
 #include "actions.h"
 #include "gui_thread.h"
+#include "analysis_window.h"
 
 #include "i18n.h"
 
@@ -251,6 +252,7 @@ Editor::Editor (AudioEngine& eng)
 	canvas_height = 0;
 	autoscroll_timeout_tag = -1;
 	interthread_progress_window = 0;
+	analysis_window = 0;
 	current_interthread_info = 0;
 	_show_measures = true;
 	_show_waveforms = true;
@@ -1168,6 +1170,9 @@ Editor::connect_to_session (Session *t)
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
 
+	if (analysis_window != 0)
+		analysis_window->set_session (session);
+
 	switch (session->get_edit_mode()) {
 	case Splice:
 		edit_mode_selector.set_active_text (edit_mode_strings[splice_index]);
@@ -1584,6 +1589,21 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 	return &track_crossfade_context_menu;
 }
 
+void
+Editor::show_analysis_window()
+{
+	if (analysis_window == 0) {
+		analysis_window = new AnalysisWindow();
+
+		if (session != 0)
+			analysis_window->set_session(session);
+
+		analysis_window->show_all();
+	}
+
+	analysis_window->present();
+}
+
 Menu*
 Editor::build_track_selection_context_menu (jack_nframes_t ignored)
 {
@@ -1792,8 +1812,11 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
 	items.push_back (MenuElem (_("Loop range"), mem_fun(*this, &Editor::set_route_loop_selection)));
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Analyze range"), mem_fun(*this, &Editor::show_analysis_window)));
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Separate range to track"), mem_fun(*this, &Editor::separate_region_from_selection)));
 	items.push_back (MenuElem (_("Separate range to region list"), mem_fun(*this, &Editor::new_region_from_selection)));
+	
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Select all in range"), mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
 	items.push_back (SeparatorElem());

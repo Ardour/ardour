@@ -361,6 +361,9 @@ libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
 libraries['samplerate'] = LibraryInfo()
 libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
 
+libraries['fftw3f'] = LibraryInfo()
+libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
+
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
 

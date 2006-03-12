@@ -44,6 +44,7 @@ gtkardour.Merge ([
     libraries['xml'],
     libraries['soundtouch'],
     libraries['samplerate'],
+	libraries['fftw3f'],
     libraries['jack'],
     libraries['glade2'],
     libraries['libglademm']
@@ -175,6 +176,9 @@ utils.cc
 version.cc
 visual_time_axis.cc
 waveview.cc
+analysis_window.cc
+fft_graph.cc
+fft_result.cc
 """)
 
 glade_files=glob.glob('glade/*.glade')
