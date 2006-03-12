@@ -131,11 +131,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	using namespace Gtk::Menu_Helpers;
 
 	Gtkmm2ext::init();
-
-	/* actually, its already loaded, but ... */
-
-	cerr << "Loading UI configuration file " << rcfile << endl;
-
+	
 	about = 0;
 
 	if (theArdourUI == 0) {
@@ -148,12 +144,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	color_manager = new ColorManager();
 
-	std::string color_file = Glib::getenv(X_("ARDOUR_COLORS"));
-	if(!Glib::file_test(color_file, Glib::FILE_TEST_EXISTS)) {
-		color_file = ARDOUR::find_config_file("ardour.colors");
-	}
-
-	cerr << "Loading UI color configuration file " << color_file << endl;
+	std::string color_file = ARDOUR::find_config_file("ardour.colors");
 	
 	color_manager->load (color_file);
 
@@ -374,8 +365,8 @@ ARDOUR_UI::save_ardour_state ()
 		session->add_instant_xml(enode, session->path());
 		session->add_instant_xml(mnode, session->path());
 	} else {
-		Config->add_instant_xml(enode, Config->get_user_ardour_path());
-		Config->add_instant_xml(mnode, Config->get_user_ardour_path());
+		Config->add_instant_xml(enode, get_user_ardour_path());
+		Config->add_instant_xml(mnode, get_user_ardour_path());
 	}
 }
 
@@ -2130,7 +2121,7 @@ ARDOUR_UI::mixer_settings () const
 	if (session) {
 		node = session->instant_xml(X_("Mixer"), session->path());
 	} else {
-		node = Config->instant_xml(X_("Mixer"), Config->get_user_ardour_path());
+		node = Config->instant_xml(X_("Mixer"), get_user_ardour_path());
 	}
 
 	if (!node) {
@@ -2148,7 +2139,7 @@ ARDOUR_UI::editor_settings () const
 	if (session) {
 		node = session->instant_xml(X_("Editor"), session->path());
 	} else {
-		node = Config->instant_xml(X_("Editor"), Config->get_user_ardour_path());
+		node = Config->instant_xml(X_("Editor"), get_user_ardour_path());
 	}
 
 	if (!node) {

@@ -727,8 +727,9 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 		default:
 			
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Alt))) {
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::Shift))) {
 				scroll_backward (0.6f);
+				return true;
 			}
 			else if (Keyboard::no_modifier_keys_pressed (&event->button)) {
 				scroll_tracks_up_line ();
@@ -763,8 +764,9 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 		default:
 
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Alt))) {
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::Shift))) {
 				scroll_forward (0.6f);
+				return true;
 			}
 			else if (Keyboard::no_modifier_keys_pressed (&event->button)) {
 				scroll_tracks_down_line ();

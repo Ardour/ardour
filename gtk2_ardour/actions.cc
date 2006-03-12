@@ -64,12 +64,8 @@ ActionManager::init ()
 {
 	ui_manager = UIManager::create ();
 	
-	std::string ui_file = Glib::getenv(X_("ARDOUR_UI"));
-    
-        if(!Glib::file_test(ui_file, Glib::FILE_TEST_EXISTS)) ui_file = ARDOUR::find_config_file("ardour.menus");
+	std::string ui_file = ARDOUR::find_config_file("ardour.menus");
 
-	std::cout << "Loading UI definition file " << ui_file << std::endl;
-	
 	bool loaded = false;
 	
 	try {

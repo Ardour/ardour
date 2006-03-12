@@ -34,7 +34,7 @@ using namespace ARDOUR;
 int
 ARDOUR::read_recent_sessions (RecentSessions& rs)
 {
-	string path = Config->get_user_ardour_path();
+	string path = get_user_ardour_path();
 	path += "/recent";
 
 	ifstream recent (path.c_str());
@@ -82,7 +82,7 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 int
 ARDOUR::write_recent_sessions (RecentSessions& rs)
 {
-	string path = Config->get_user_ardour_path();
+	string path = get_user_ardour_path();
 	path += "/recent";
 
 	ofstream recent (path.c_str());

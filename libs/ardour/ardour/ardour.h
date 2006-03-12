@@ -47,6 +47,11 @@ namespace ARDOUR {
 
 	int init (AudioEngine&, bool with_vst, bool try_optimization, void (*sighandler)(int,siginfo_t*,void*) = 0);
 	int cleanup ();
+
+	
+	std::string get_user_ardour_path ();
+	std::string get_system_ardour_path ();
+
 	std::string find_config_file (std::string name);
 	std::string find_data_file (std::string name, std::string subdir = "" );
 

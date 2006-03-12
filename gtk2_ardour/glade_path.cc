@@ -31,15 +31,8 @@
 std::string
 GladePath::path(const std::string& glade_file)
 {
-    std::string user_glade_dir = Glib::getenv(X_("ARDOUR_GLADE_PATH"));
     std::string full_path;
-    
-    if(!user_glade_dir.empty()) {
-        full_path = Glib::build_filename(user_glade_dir, glade_file);
-        if(Glib::file_test(full_path, Glib::FILE_TEST_EXISTS)) return full_path;
-    }
-
-    full_path = ARDOUR::find_data_file(Glib::build_filename("glade",
-                                                            glade_file));
+   
+    full_path = ARDOUR::find_data_file(glade_file, "glade");
     return full_path;
 }

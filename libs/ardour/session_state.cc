@@ -2241,7 +2241,7 @@ Session::automation_dir () const
 string
 Session::template_dir ()
 {
-	string path = Config->get_user_ardour_path();
+	string path = get_user_ardour_path();
 	path += "templates/";
 
 	return path;
@@ -2252,11 +2252,11 @@ Session::template_path ()
 {
 	string path;
 
-	path += Config->get_user_ardour_path();
+	path += get_user_ardour_path();
 	if (path[path.length()-1] != ':') {
 		path += ':';
 	}
-	path += Config->get_system_ardour_path();
+	path += get_system_ardour_path();
 
 	vector<string> split_path;
 	
@@ -2654,7 +2654,7 @@ Session::get_template_list (list<string> &template_names)
 int
 Session::read_favorite_dirs (FavoriteDirs & favs)
 {
-	string path = Config->get_user_ardour_path();
+	string path = get_user_ardour_path();
 	path += "/favorite_dirs";
 
 	ifstream fav (path.c_str());
@@ -2689,7 +2689,7 @@ Session::read_favorite_dirs (FavoriteDirs & favs)
 int
 Session::write_favorite_dirs (FavoriteDirs & favs)
 {
-	string path = Config->get_user_ardour_path();
+	string path = get_user_ardour_path();
 	path += "/favorite_dirs";
 
 	ofstream fav (path.c_str());

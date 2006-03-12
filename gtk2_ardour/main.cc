@@ -239,18 +239,13 @@ string
 which_ui_rcfile ()
 {
 	string rcfile;
-	char* envvar;
-
-	if ((envvar = getenv("ARDOUR_UI_RC")) == 0) {
-		rcfile = find_config_file ("ardour2_ui.rc");
 	
-		if (rcfile.length() == 0) {
-			warning << _("Without a UI style file, ardour will look strange.\n Please set ARDOUR_UI_RC to point to a valid UI style file") << endmsg;
-		}
-	} else {
-		rcfile = envvar;
+	rcfile = find_config_file ("ardour2_ui.rc");
+	
+	if (rcfile.length() == 0) {
+		warning << _("Without a UI style file, ardour will look strange.\n Please set ARDOUR_UI_RC to point to a valid UI style file") << endmsg;
 	}
-	
+
 	return rcfile;
 }
 

@@ -49,11 +49,11 @@ AudioLibrary::AudioLibrary ()
 {
 //	sfdb_paths.push_back("/Users/taybin/sounds");
 
-	src = "file:" + Config->get_user_ardour_path() + "sfdb";
+	src = "file:" + get_user_ardour_path() + "sfdb";
 
 	// workaround for possible bug in raptor that crashes when saving to a
 	// non-existant file.
-	touch_file(Config->get_user_ardour_path() + "sfdb");
+	touch_file(get_user_ardour_path() + "sfdb");
 
 	lrdf_read_file(src.c_str());
 

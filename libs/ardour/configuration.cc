@@ -59,24 +59,12 @@ Configuration::~Configuration ()
 string
 Configuration::get_user_path()
 {
-	char *envvar;
-
-	if ((envvar = getenv ("ARDOUR_RC")) != 0) {
-		return envvar;
-	}
-
 	return find_config_file ("ardour.rc");
 }
 
 string
 Configuration::get_system_path()
 {
-	char* envvar;
-
-	if ((envvar = getenv ("ARDOUR_SYSTEM_RC")) != 0) {
-		return envvar;
-	}
-
 	return find_config_file ("ardour_system.rc");
 }
 
@@ -92,9 +80,7 @@ Configuration::load_state ()
 	if (rcfile.length()) {
 
 		XMLTree tree;
-
-		cerr << "Loading system configuration file " << rcfile << endl;
-
+		
 		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("Ardour: cannot read system configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
@@ -117,9 +103,7 @@ Configuration::load_state ()
 	if (rcfile.length()) {
 
 		XMLTree tree;
-
-		cerr << "Loading user configuration file " << rcfile << endl;
-
+		
 		if (!tree.read (rcfile)) {
 			error << string_compose(_("Ardour: cannot read configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
@@ -140,28 +124,12 @@ Configuration::save_state()
 {
 	XMLTree tree;
 	string rcfile;
-	char *envvar;
 
 	/* Note: this only writes the per-user file, and therefore
 	   only saves variables marked as user-set or modified
 	*/
 
-	if ((envvar = getenv ("ARDOUR_RC")) != 0) {
-		if (strlen (envvar) == 0) {
-			return -1;
-		}
-		rcfile = envvar;
-	} else {
-
-		if ((envvar = getenv ("HOME")) == 0) {
-			return -1;
-		}
-		if (strlen (envvar) == 0) {
-			return -1;
-		}
-		rcfile = envvar;
-		rcfile += "/.ardour/ardour.rc";
-	}
+	rcfile = find_config_file("ardour.rc");
 
 	if (rcfile.length()) {
 		tree.set_root (&state (true));
@@ -1052,41 +1020,6 @@ Configuration::set_auto_xfade (bool yn)
 	if (user_configuration) {
 		auto_xfade_is_user = true;
 	}
-}
-
-string
-Configuration::get_user_ardour_path ()
-{
-	string path;
-	char* envvar;
-	
-	if ((envvar = getenv ("HOME")) == 0 || strlen (envvar) == 0) {
-		return "/";
-	}
-		
-	path = envvar;
-	path += "/.ardour/";
-	
-	return path;
-}
-
-string
-Configuration::get_system_ardour_path ()
-{
-	string path;
-	char* envvar;
-
-	if ((envvar = getenv ("ARDOUR_DATA_PATH")) != 0) {
-		path += envvar;
-		if (path[path.length()-1] != ':') {
-			path += ':';
-		}
-	}
-
-	path += DATA_DIR;
-	path += "/ardour/";
-	
-	return path;
 }
 
 bool 

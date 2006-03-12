@@ -161,9 +161,6 @@ class Configuration : public Stateful
 	bool get_timecode_source_is_synced ();
 	void set_timecode_source_is_synced (bool);
 
-	std::string get_user_ardour_path ();
-	std::string get_system_ardour_path ();
-
 	gain_t get_quieten_at_speed ();
 	void  set_quieten_at_speed (gain_t);
 

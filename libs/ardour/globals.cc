@@ -32,6 +32,7 @@
 #include <lrdf.h>
 
 #include <pbd/error.h>
+#include <pbd/strsplit.h>
 
 #include <midi++/port.h>
 #include <midi++/port_request.h>
@@ -298,37 +299,72 @@ ARDOUR::new_change ()
 	return c;
 }
 
+string
+ARDOUR::get_user_ardour_path ()
+{
+	string path;
+	char* envvar;
+	
+	if ((envvar = getenv ("HOME")) == 0 || strlen (envvar) == 0) {
+		return "/";
+	}
+		
+	path = envvar;
+	path += "/.ardour/";
+	
+	return path;
+}
+
+string
+ARDOUR::get_system_ardour_path ()
+{
+	string path;
+
+	path += DATA_DIR;
+	path += "/ardour/";
+	
+	return path;
+}
+
 static string
 find_file (string name, string dir, string subdir = "")
 {
 	string path;
+	char* envvar = getenv("ARDOUR_PATH");
 
-	/* stop A: ~/.ardour/... */
+	/* stop A: any directory in ARDOUR_PATH */
+	
+	if (envvar != 0) {
 
-	path = getenv ("HOME");
-
-	if (path.length()) {
+		vector<string> split_path;
+	
+		split (envvar, split_path, ':');
 		
-		path += "/.ardour/";
-
-		/* try to ensure that the directory exists.
-		   failure doesn't mean much here.
-		*/
-
-		mkdir (path.c_str(), 0755);
-
-		if (subdir.length()) {
-			path += subdir + "/";
-		}
-		
-		path += name;
-		if (access (path.c_str(), R_OK) == 0) {
-			return path;
+		for (vector<string>::iterator i = split_path.begin(); i != split_path.end(); ++i) {
+			path = *i;
+			path += "/" + name;
+			if (access (path.c_str(), R_OK) == 0) {
+				cerr << "Using file " << path << " found in ARDOUR_PATH." << endl;
+				return path;
+			}
 		}
 	}
 
-	/* stop B: dir/... */
+	/* stop B: ~/.ardour/ */
 
+	path = get_user_ardour_path();
+		
+	if (subdir.length()) {
+		path += subdir + "/";
+	}
+		
+	path += name;
+	if (access (path.c_str(), R_OK) == 0) {
+		return path;
+	}
+
+	/* C: dir/... */
+	
 	path = dir;
 	path += "/ardour/";
 	
