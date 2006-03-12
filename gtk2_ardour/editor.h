@@ -102,6 +102,7 @@ class AutomationSelection;
 class MixerStrip;
 class StreamView;
 class ControlPoint;
+class AnalysisWindow;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -224,6 +225,9 @@ class Editor : public PublicEditor
 
 	void set_show_measures (bool yn);
 	bool show_measures () const { return _show_measures; }
+
+	/* analysis window */
+	void show_analysis_window();
 
 	/* export */
 
@@ -977,6 +981,7 @@ class Editor : public PublicEditor
 	void interthread_cancel_clicked ();
 	void build_interthread_progress_window ();
 	ARDOUR::InterThreadInfo* current_interthread_info;
+	AnalysisWindow* analysis_window;
 
 	/* import specific info */
 
