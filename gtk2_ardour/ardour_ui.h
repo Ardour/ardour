@@ -706,6 +706,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void map_some_session_state (const char* group, const char* action, bool (ARDOUR::Session::*get)() const);
 	void queue_session_control_changed (ARDOUR::Session::ControlType t);
 	void session_control_changed (ARDOUR::Session::ControlType t);
+	
 };
 
 

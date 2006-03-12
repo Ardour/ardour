@@ -65,23 +65,6 @@ using namespace ARDOUR;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-/* XPM */
-static const gchar * lr_xpm[] = {
-"11 11 2 1",
-" 	c None",
-".	c #cccccc",
-"           ",
-"           ",
-"   .   .   ",
-"  .     .  ",
-" .       . ",
-"...........",
-" .       . ",
-"  .     .  ",
-"   .   .   ",
-"           ",
-"           "};
-
 static void 
 speed_printer (char buf[32], Gtk::Adjustment& adj, void* arg)
 {
@@ -128,10 +111,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	comment_window = 0;
 	comment_area = 0;
 
-	std::string small_x_xpm_file = find_data_file("small_x.xpm", "pixmaps");
-	std::string lr_xpm_file = find_data_file("lr.xpm", "pixmaps");
-	width_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_file(lr_xpm_file)))));
-	hide_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_file(small_x_xpm_file)))));
+	width_button.add (*(manage (new Gtk::Image (get_xpm("lr.xpm")))));
+	hide_button.add (*(manage (new Gtk::Image (get_xpm("small_x.xpm")))));
 
 
 	input_label.set_text (_("INPUT"));

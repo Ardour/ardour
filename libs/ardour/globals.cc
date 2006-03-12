@@ -322,7 +322,6 @@ find_file (string name, string dir, string subdir = "")
 		}
 		
 		path += name;
-		cerr << path << endl;
 		if (access (path.c_str(), R_OK) == 0) {
 			return path;
 		}

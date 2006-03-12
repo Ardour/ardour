@@ -77,4 +77,7 @@ void set_color (Gdk::Color&, int);
 
 bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
 
+Glib::RefPtr<Gdk::Pixbuf> get_xpm(std::string);
+static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;
+
 #endif /* __ardour_gtk_utils_h__ */

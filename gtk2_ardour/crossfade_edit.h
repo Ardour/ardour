@@ -43,9 +43,9 @@ class CrossfadeEditor : public ArdourDialog
     };
 
     struct Preset : public list<PresetPoint> {
-	const gchar** xpm;
+	string xpm;
 	
-	Preset (const gchar** x)
+	Preset (string x)
 		: xpm (x) {}
     };
 

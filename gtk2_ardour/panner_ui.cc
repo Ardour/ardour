@@ -45,42 +45,6 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 
-/* XPM */
-static const gchar * forwdblarrow_xpm[] = {
-"20 11 3 1",
-" 	c None",
-".	c #000000",
-"+	c #FFFFFF",
-"              ..    ",
-"              .+.   ",
-"              .++.  ",
-" ..............+++. ",
-" .+++++++++++++++++.",
-" ...................",
-" .+++++++++++++++++.",
-" ..............+++. ",
-"              .++.  ",
-"              .+.   ",
-"              ..    "};
-
-/* XPM */
-static const gchar * revdblarrow_xpm[] = {
-"20 11 3 1",
-" 	c None",
-".	c #000000",
-"+	c #FFFFFF",
-"              ..    ",
-"              .+.   ",
-"              .++.  ",
-" ..............+++. ",
-" .+++++++++++++++++.",
-" ...................",
-" .+++++++++++++++++.",
-"  .+++..............",
-"   .++.             ",
-"    .+.             ",
-"     ..             "};
-
 
 PannerUI::PannerUI (IO& io, Session& s)
 	: _io (io),
@@ -117,7 +81,7 @@ PannerUI::PannerUI (IO& io, Session& s)
 	   we need a pixmap in the button just to get started.
 	*/
 
-	panning_link_direction_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(forwdblarrow_xpm)))));
+	panning_link_direction_button.add (*(manage (new Image (get_xpm("forwardblarrow.xpm")))));
 
 	panning_link_direction_button.signal_clicked().connect
 		(mem_fun(*this, &PannerUI::panning_link_direction_clicked));
@@ -200,10 +164,10 @@ PannerUI::update_pan_linkage ()
 
 	switch (_io.panner().link_direction()) {
 	case Panner::SameDirection:
-	        panning_link_direction_button.set_image (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data (forwdblarrow_xpm)))));
+	        panning_link_direction_button.set_image (*(manage (new Image (get_xpm ("forwardblarrow.xpm")))));
 		break;
 	default:
-	        panning_link_direction_button.set_image (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data (revdblarrow_xpm)))));
+	        panning_link_direction_button.set_image (*(manage (new Image (get_xpm("revdblarrow.xpm")))));
 		break;
 	}
 }

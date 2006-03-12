@@ -28,6 +28,7 @@
 #include <gtk/gtkpaned.h>
 
 #include <gtkmm2ext/utils.h>
+#include <ardour/ardour.h>
 
 #include "ardour_ui.h"
 #include "keyboard.h"
@@ -563,3 +564,12 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	return true;
 }
 
+Glib::RefPtr<Gdk::Pixbuf>	
+get_xpm (std::string name)
+{
+	if (!xpm_map[name]) {
+		xpm_map[name] = Gdk::Pixbuf::create_from_file (ARDOUR::find_data_file(name, "pixmaps"));
+	}
+		
+	return (xpm_map[name]);
+}

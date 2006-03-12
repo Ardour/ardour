@@ -674,8 +674,8 @@ Editor::Editor (AudioEngine& eng)
 
 	/* nudge stuff */
 
-	nudge_forward_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(right_arrow_xpm)))));
-	nudge_backward_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(left_arrow_xpm)))));
+	nudge_forward_button.add (*(manage (new Image (get_xpm("right_arrow.xpm")))));
+	nudge_backward_button.add (*(manage (new Image (get_xpm("left_arrow.xpm")))));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge region/selection forwards"));
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge region/selection backwards"));
