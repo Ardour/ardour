@@ -727,7 +727,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 		default:
 			
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::Shift))) {
+			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Alt))) {
 				scroll_backward (0.6f);
 				return true;
 			}
@@ -764,7 +764,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 		default:
 
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::Shift))) {
+			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Alt))) {
 				scroll_forward (0.6f);
 				return true;
 			}
