@@ -51,6 +51,7 @@ gtkardour.Merge ([
 
 if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Merge ([libraries['fftw3f']])
+	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
 
 if gtkardour['VST']:
     gtkardour.Merge ([ libraries['fst']])
