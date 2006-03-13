@@ -67,7 +67,10 @@
 #include "canvas_impl.h"
 #include "actions.h"
 #include "gui_thread.h"
+
+#ifdef FFT_ANALYSIS
 #include "analysis_window.h"
+#endif
 
 #include "i18n.h"
 
@@ -252,7 +255,11 @@ Editor::Editor (AudioEngine& eng)
 	canvas_height = 0;
 	autoscroll_timeout_tag = -1;
 	interthread_progress_window = 0;
+
+#ifdef FFT_ANALYSIS
 	analysis_window = 0;
+#endif
+
 	current_interthread_info = 0;
 	_show_measures = true;
 	_show_waveforms = true;
@@ -1170,8 +1177,10 @@ Editor::connect_to_session (Session *t)
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
 
+#ifdef FFT_ANALYSIS
 	if (analysis_window != 0)
 		analysis_window->set_session (session);
+#endif
 
 	switch (session->get_edit_mode()) {
 	case Splice:
@@ -1589,6 +1598,7 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 	return &track_crossfade_context_menu;
 }
 
+#ifdef FFT_ANALYSIS
 void
 Editor::analyze_region_selection()
 {
@@ -1624,7 +1634,7 @@ Editor::analyze_range_selection()
 	
 	analysis_window->present();
 }
-
+#endif /* FFT_ANALYSIS */
 
 
 
@@ -1729,7 +1739,11 @@ Editor::add_region_context_items (StreamView* sv, Region* region, Menu_Helpers::
 	items.push_back (MenuElem (_("Audition"), mem_fun(*this, &Editor::audition_selected_region)));
 	items.push_back (MenuElem (_("Export"), mem_fun(*this, &Editor::export_region)));
 	items.push_back (MenuElem (_("Bounce"), mem_fun(*this, &Editor::bounce_region_selection)));
+
+#ifdef FFT_ANALYSIS
 	items.push_back (MenuElem (_("Analyze region"), mem_fun(*this, &Editor::analyze_region_selection)));
+#endif
+
 	items.push_back (SeparatorElem());
 
 	/* XXX hopefully this nonsense will go away with SigC++ 2.X, where the compiler
@@ -1836,8 +1850,12 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 
 	items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
 	items.push_back (MenuElem (_("Loop range"), mem_fun(*this, &Editor::set_route_loop_selection)));
+
+#ifdef FFT_ANALYSIS
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Analyze range"), mem_fun(*this, &Editor::analyze_range_selection)));
+#endif
+	
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Separate range to track"), mem_fun(*this, &Editor::separate_region_from_selection)));
 	items.push_back (MenuElem (_("Separate range to region list"), mem_fun(*this, &Editor::new_region_from_selection)));

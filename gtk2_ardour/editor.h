@@ -102,7 +102,9 @@ class AutomationSelection;
 class MixerStrip;
 class StreamView;
 class ControlPoint;
+#ifdef FFT_ANALYSIS
 class AnalysisWindow;
+#endif
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -226,9 +228,11 @@ class Editor : public PublicEditor
 	void set_show_measures (bool yn);
 	bool show_measures () const { return _show_measures; }
 
+#ifdef FFT_ANALYSIS
 	/* analysis window */
 	void analyze_region_selection();
 	void analyze_range_selection();
+#endif
 
 	/* export */
 
@@ -982,7 +986,10 @@ class Editor : public PublicEditor
 	void interthread_cancel_clicked ();
 	void build_interthread_progress_window ();
 	ARDOUR::InterThreadInfo* current_interthread_info;
+
+#ifdef FFT_ANALYSIS
 	AnalysisWindow* analysis_window;
+#endif
 
 	/* import specific info */
 

@@ -34,7 +34,8 @@ opts.AddOptions(
     BoolOption('VST', 'Compile with support for VST', 0),
     BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
-    BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1)
+    BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
+	BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0)
   )
 
 #----------------------------------------------------------------------
@@ -361,8 +362,9 @@ libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
 libraries['samplerate'] = LibraryInfo()
 libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
 
-libraries['fftw3f'] = LibraryInfo()
-libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
+if env['FFT_ANALYSIS']: 
+	libraries['fftw3f'] = LibraryInfo()
+	libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
 
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
