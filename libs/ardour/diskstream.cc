@@ -603,7 +603,7 @@ DiskStream::check_record_status (jack_nframes_t transport_frame, jack_nframes_t 
 	}
 
 	/* change state */
-	
+
 	/* if per-track or global rec-enable turned on while the other was already on, we've started recording */
 
 	if ((change & track_rec_enabled) && record_enabled() && (!(change & global_rec_enabled) && can_record) || 
@@ -692,7 +692,7 @@ DiskStream::check_record_status (jack_nframes_t transport_frame, jack_nframes_t 
 	} else if (!record_enabled() || !can_record) {
 		
 		/* stop recording */
-		
+
 		last_recordable_frame = transport_frame + _capture_offset;
 		
 		if (_alignment_style == ExistingMaterial) {
@@ -1608,8 +1608,6 @@ DiskStream::do_flush (char * workbuf, bool force_flush)
 			}
 		}
 
-
-		
 		if ((!(*chan).write_source) || (*chan).write_source->write (vector.buf[0], to_write, workbuf) != to_write) {
 			error << string_compose(_("DiskStream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
@@ -1963,6 +1961,9 @@ DiskStream::get_state ()
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
+	snprintf (buf, sizeof(buf), "0x%x", _flags);
+	node->add_property ("flags", buf);
+
 	snprintf (buf, sizeof(buf), "%zd", channels.size());
 	node->add_property ("channels", buf);
 
@@ -2045,6 +2046,10 @@ DiskStream::set_state (const XMLNode& node)
 		if ((prop = node.property ("id")) != 0) {
 			sscanf (prop->value().c_str(), "%" PRIu64, &_id);
 		}
+	}
+
+	if ((prop = node.property ("_flags")) != 0) {
+		_flags = atoi (prop->value().c_str());
 	}
 
 	if ((prop = node.property ("channels")) != 0) {

@@ -64,6 +64,8 @@ class Source : public Stateful, public sigc::trackable
 		return _length;
 	}
 
+	virtual jack_nframes_t available_peaks (double zoom) const;
+
 	virtual jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const {
 		return 0;
 	}

@@ -512,6 +512,14 @@ bool
 key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 {
 	GtkWindow* win = window.gobj();
+	GtkWidget* focus = gtk_window_get_focus (win);
+	bool special_handling_of_unmodified_accelerators = false;
+
+	if (focus) {
+		if (GTK_IS_ENTRY(focus)) {
+			special_handling_of_unmodified_accelerators = true;
+		}
+	} 
 
 	/* This exists to allow us to override the way GTK handles
 	   key events. The normal sequence is:
@@ -544,9 +552,17 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	   all "normal text" accelerators.
 	*/
 
-	if (ev->state & ~Gdk::SHIFT_MASK) {
-		
-		/* modifiers in effect, accelerate first */
+	if (!special_handling_of_unmodified_accelerators ||
+	    ev->state & (Gdk::MOD1_MASK|
+			 Gdk::MOD2_MASK|
+			 Gdk::MOD3_MASK|
+			 Gdk::MOD4_MASK|
+			 Gdk::MOD5_MASK|
+			 Gdk::CONTROL_MASK|
+			 Gdk::LOCK_MASK)) {
+
+		/* no special handling or modifiers in effect: accelerate first */
+
 		if (!gtk_window_activate_key (win, ev)) {
 			return gtk_window_propagate_key_event (win, ev);
 		} else {
@@ -555,7 +571,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	}
 	
 	/* no modifiers, propagate first */
-
+	
 	if (!gtk_window_propagate_key_event (win, ev)) {
 		return gtk_window_activate_key (win, ev);
 	} 

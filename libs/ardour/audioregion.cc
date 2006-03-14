@@ -1397,9 +1397,9 @@ uint32_t region_length_from_c (void *arg)
 	return ((AudioRegion *) arg)->length();
 }
 
-uint32_t sourcefile_length_from_c (void *arg)
+uint32_t sourcefile_length_from_c (void *arg, double zoom_factor)
 {
-	return ( (AudioRegion *) arg)->source().length() ;
+	return ( (AudioRegion *) arg)->source().available_peaks (zoom_factor) ;
 }
 
 } /* extern "C" */

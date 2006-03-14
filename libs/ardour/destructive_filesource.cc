@@ -69,6 +69,7 @@ jack_nframes_t DestructiveFileSource::xfade_frames = 64;
 DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, bool repair_first, SampleFormat samp_format)
 	: FileSource (path, rate, repair_first, samp_format)
 {
+	cerr << "DESTRUCTO DISK STREAM, " << _name << endl;
 	if (out_coefficient == 0) {
 		setup_standard_crossfades (rate);
 	}
@@ -83,6 +84,7 @@ DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, 
 DestructiveFileSource::DestructiveFileSource (const XMLNode& node, jack_nframes_t rate)
 	: FileSource (node, rate)
 {
+	cerr << "from XML, DESTRUCTO DISK STREAM, " << _name << endl;
 	if (out_coefficient == 0) {
 		setup_standard_crossfades (rate);
 	}
@@ -259,8 +261,6 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 jack_nframes_t
 DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 {
-	cerr << _name << ": write " << cnt << " to " << file_pos << " start ? " << _capture_start << " end ? " << _capture_end << endl;
-
 	{
 		LockMonitor lm (_lock, __LINE__, __FILE__);
 		
@@ -273,8 +273,6 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 			/* move to the correct location place */
 			file_pos = capture_start_frame;
 			
-			cerr << "First frame of capture will be at " << file_pos << "  and last at: " << file_pos + cnt << endl;
-
 			// split cnt in half
 			jack_nframes_t subcnt = cnt / 2;
 			jack_nframes_t ofilepos = file_pos;
@@ -302,8 +300,6 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 			/* move to the correct location place */
 			file_pos = capture_start_frame;
 			
-			cerr << "First frame of capture will be at " << file_pos << endl;
-			
 			if (crossfade (data, cnt, 1, workbuf) != cnt) {
 				return 0;
 			}
@@ -327,8 +323,6 @@ DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 		}
 		file_pos += cnt;
 		
-		//cerr << this << ' ' << _name << " at end of write, file_pos = " << file_pos << " length = " << ((int) &_length - (int) this) << ' ' << &_length << ' ' << _length << endl;
-
 		if (_build_peakfiles) {
 			PeakBuildRecord *pbr = 0;
 			

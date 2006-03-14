@@ -535,7 +535,7 @@ StreamView::set_selected_regionviews (AudioRegionSelection& regions)
 {
 	bool selected;
 
-	cerr << _trackview.name() << " (selected = " << regions.size() << ")" << endl;
+	// cerr << _trackview.name() << " (selected = " << regions.size() << ")" << endl;
 	for (list<AudioRegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		
 		selected = false;
@@ -546,7 +546,7 @@ StreamView::set_selected_regionviews (AudioRegionSelection& regions)
 			}
 		}
 		
-		cerr << "\tregion " << (*i)->region.name() << " selected = " << selected << endl;
+		// cerr << "\tregion " << (*i)->region.name() << " selected = " << selected << endl;
 		(*i)->set_selected (selected, this);
 	}
 }
@@ -618,11 +618,12 @@ StreamView::setup_rec_box ()
 
 		// cerr << "\trolling\n";
 
-		if (!rec_active
-		    && _trackview.session().record_status() == Session::Recording
-		    && _trackview.get_diskstream()->record_enabled()) {
+		if (!rec_active && 
+		    _trackview.session().record_status() == Session::Recording && 
+		    _trackview.get_diskstream()->record_enabled()) {
 
-			if (use_rec_regions && rec_regions.size() == rec_rects.size()) {
+			if (_trackview.audio_track()->mode() == Normal && use_rec_regions && rec_regions.size() == rec_rects.size()) {
+
 				/* add a new region, but don't bother if they set use_rec_regions mid-record */
 
 				AudioRegion::SourceList sources;
@@ -664,7 +665,17 @@ StreamView::setup_rec_box ()
 			DiskStream& ds = at->disk_stream();
 			jack_nframes_t frame_pos = ds.current_capture_start ();
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
-			gdouble xend = xstart;
+			gdouble xend;
+
+			switch (_trackview.audio_track()->mode()) {
+			case Normal:
+				xend = xstart;
+				break;
+
+			case Destructive:
+				xend = xstart + 2;
+				break;
+			}
 			
 			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
 			rec_rect->property_x1() = xstart;
@@ -749,21 +760,32 @@ StreamView::setup_rec_box ()
 void
 StreamView::update_rec_box ()
 {
-	/* only update the last box */
 	if (rec_active && rec_rects.size() > 0) {
+		/* only update the last box */
 		RecBoxInfo & rect = rec_rects.back();
 		jack_nframes_t at = _trackview.get_diskstream()->current_capture_end();
+		double xstart;
+		double xend;
 		
-		rect.length = at - rect.start;
-
-		gdouble xstart = _trackview.editor.frame_to_pixel ( rect.start );
-		gdouble xend = _trackview.editor.frame_to_pixel ( at );
-
+		switch (_trackview.audio_track()->mode()) {
+		case Normal:
+			rect.length = at - rect.start;
+			xstart = _trackview.editor.frame_to_pixel (rect.start);
+			xend = _trackview.editor.frame_to_pixel (at);
+			break;
+			
+		case Destructive:
+			rect.length = 2;
+			xstart = _trackview.editor.frame_to_pixel (at);
+			xend = xstart + 2;
+			break;
+		}
+		
 		rect.rectangle->property_x1() = xstart;
 		rect.rectangle->property_x2() = xend;
 	}
 }
-
+	
 AudioRegionView*
 StreamView::find_view (const AudioRegion& region)
 {

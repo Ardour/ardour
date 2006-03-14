@@ -391,12 +391,12 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 
 	/* but make sure it doesn't extend beyond the end of the source material */
 
-	rf3 = (gulong) (waveview->sourcefile_length_function (waveview->data_src)) + 1;
+	rf3 = (gulong) (waveview->sourcefile_length_function (waveview->data_src, waveview->samples_per_unit)) + 1;
 	rf3 -= new_cache_start;
 
 #if DEBUG_CACHE
 	fprintf (stderr, "\n\nAVAILABLE FRAMES = %lu of %lu, start = %lu, sstart = %lu, cstart = %lu\n", 
-		 rf3, waveview->sourcefile_length_function (waveview->data_src),
+		 rf3, waveview->sourcefile_length_function (waveview->data_src, waveview->samples_per_unit),
 		 waveview->region_start, start_sample, new_cache_start);
 #endif
 

@@ -545,19 +545,21 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 				tnp = min ((_length/frames_per_peak - current_stored_peak), (jack_nframes_t) expected_peaks);
 				to_read = min (chunksize, tnp);
 				
+				off_t fend = lseek (peakfile, 0, SEEK_END);
+				
 				if ((nread = ::pread (peakfile, staging, sizeof (PeakData) * to_read, start_byte))
 				    != sizeof (PeakData) * to_read) {
 					cerr << "Source["
 					     << _name
 					     << "]: cannot read peak data from peakfile ("
-					     << nread 
+					     << (nread / sizeof(PeakData))
 					     << " peaks instead of "
 					     << to_read
 					     << ") ("
 					     << strerror (errno)
 					     << ')'
 					     << " at start_byte = " << start_byte 
-					     << " _length = " << _length
+					     << " _length = " << _length << " versus len = " << fend
 					     << " expected maxpeaks = " << (_length - current_frame)/frames_per_peak
 					     << " npeaks was " << npeaks
 					     << endl;
@@ -699,7 +701,7 @@ Source::build_peaks ()
 	}
 		
 #ifdef DEBUG_PEAK_BUILD
-	cerr << "build peaks with " << pending_peak_builds.size() << " requests pending\n";
+	cerr << "build peaks with " << copy.size() << " requests pending\n";
 #endif		
 
 	for (list<PeakBuildRecord *>::iterator i = copy.begin(); i != copy.end(); ++i) {
@@ -732,6 +734,7 @@ Source::build_peaks ()
 		}
 
 		if (pr_signal) {
+			off_t fend = lseek (peakfile, 0, SEEK_END);
 			PeaksReady (); /* EMIT SIGNAL */
 		}
 	}
@@ -848,4 +851,18 @@ void
 Source::release ()
 {
 	if (_use_cnt) --_use_cnt;
+}
+
+jack_nframes_t
+Source::available_peaks (double zoom_factor) const
+{
+	if (zoom_factor < frames_per_peak) {
+		return length(); // peak data will come from the audio file
+	} 
+	
+	/* peak data comes from peakfile */
+
+	LockMonitor lm (_lock, __LINE__, __FILE__);
+	off_t end = lseek (peakfile, 0, SEEK_END);
+	return (end/sizeof(PeakData)) * frames_per_peak;
 }

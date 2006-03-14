@@ -76,7 +76,7 @@ struct _GnomeCanvasWaveView
     guint32 channel;
 	void (*peak_function)(void*,gulong,gulong,gulong,gpointer,guint32,double);
     gulong (*length_function)(void *);
-    gulong (*sourcefile_length_function)(void*);
+    gulong (*sourcefile_length_function)(void*,double);
     void (*gain_curve_function)(void *arg, double start, double end, float* vector, guint32 veclen);
     void *gain_src;
 
