@@ -17,7 +17,7 @@ class Pix
 	int refcnt;
         bool generated;
 	std::vector<std::string *> *files;
-	std::vector<const char **>   data;
+	std::vector<const char* const*>   data;
 	bool from_files;
 	int pixmap_count;
 	int last_pixmap;
@@ -29,21 +29,21 @@ class Pix
 
         Pix (const std::string &dirpath, const std::string &regexp, 
 	     bool homogenous = true);
-	Pix (std::vector<const char **> xpm_data, bool homogenous = true);
+	Pix (std::vector<const char* const*> xpm_data, bool homogenous = true);
         virtual ~Pix();
 
 	friend  Pix *get_pix (const std::string &dirpath, 
 			      const std::string &regexp,
 			      bool homogenous);
 	friend  Pix *get_pix (std::string name, 
-			      std::vector<const char **> xpm_data,
+			      std::vector<const char* const*> xpm_data,
 			      bool homogenous);
 	friend  void finish_pix (Pix *);
 
   public:      
 	Pix (bool homogenous = true);
 
-        void generate ();
+        void generate (Glib::RefPtr<Gdk::Drawable>&);
 	int n_pixmaps() { return pixmap_count; }
 	int max_pixmap() { return last_pixmap; }
 	bool homogenous () { return _homegenous; }

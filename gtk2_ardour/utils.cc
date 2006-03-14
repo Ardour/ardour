@@ -20,6 +20,8 @@
 
 #include <cstdlib>
 #include <cctype>
+#include <fstream>
+#include <sys/stat.h>
 #include <libart_lgpl/art_misc.h>
 #include <gtkmm/window.h>
 #include <gtkmm/combo.h>
@@ -589,3 +591,4 @@ get_xpm (std::string name)
 		
 	return (xpm_map[name]);
 }
+

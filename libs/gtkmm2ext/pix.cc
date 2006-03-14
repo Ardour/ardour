@@ -57,7 +57,7 @@ Pix::Pix (bool homog)
 	_homegenous = homog;
 }
 
-Pix::Pix (vector<const char **> xpm_data, bool homog)
+Pix::Pix (vector<const char* const*> xpm_data, bool homog)
 {
 	if (xpm_data.size() == 0) {
 		throw failed_constructor();
@@ -132,24 +132,22 @@ Pix::~Pix ()
 }
 
 void
-Pix::generate ()
-
+Pix::generate (Glib::RefPtr<Gdk::Drawable>& drawable)
 {
 	if (generated) {
 		return;
 	}
 
 	for (int i = 0; i < pixmap_count; i++) {
+
+		Gdk::Color transparent;
+
 		if (from_files) {
-			pixmaps[i] = Gdk::Pixmap::create_from_xpm (get_bogus_drawable(), Gdk::Colormap::get_system(),
-								bitmaps[i], Gdk::Color(), *(*files)[i]);
+			pixmaps[i] = Gdk::Pixmap::create_from_xpm(drawable, bitmaps[i], transparent, *(*files)[i]);
 		} else {
-			gchar **xpm;
-			xpm = const_cast<gchar **> (data[i]);
-			
-			pixmaps[i] = Gdk::Pixmap::create_from_xpm(Gdk::Colormap::get_system(), 
-								bitmaps[i], Gdk::Color(), xpm);
+			pixmaps[i] = Gdk::Pixmap::create_from_xpm(drawable, Gdk::Colormap::get_system(), bitmaps[i], Gdk::Color(), data[i]);
 		}
+
 			
 		int w, h;
 		pixmaps[i]->get_size(w, h);
@@ -161,7 +159,7 @@ Pix::generate ()
 }
 
 Pix *
-Gtkmm2ext::get_pix (string name, vector<const char **> xpm_data, bool homog)
+Gtkmm2ext::get_pix (string name, vector<const char* const*> xpm_data, bool homog)
 {
 	Pix *ret = 0;
 	Pix::PixCache::iterator iter;

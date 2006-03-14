@@ -230,8 +230,21 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	keyboard = new Keyboard;
  	install_keybindings ();
 
-	FastMeter::set_vertical_xpm (ARDOUR::find_data_file("v_meter_strip.xpm", "pixmaps"));
-	FastMeter::set_horizontal_xpm (ARDOUR::find_data_file("h_meter_strip.xpm", "pixmaps"));
+	string meter_path;
+
+	meter_path = ARDOUR::find_data_file("v_meter_strip.xpm", "pixmaps");
+	if (meter_path.empty()) {
+		error << _("no vertical meter strip image found") << endmsg;
+		exit (1);
+	}
+ 	FastMeter::set_vertical_xpm (meter_path);
+
+	meter_path = ARDOUR::find_data_file("h_meter_strip.xpm", "pixmaps");
+	if (meter_path.empty()) {
+		error << _("no horizontal meter strip image found") << endmsg;
+		exit (1);
+	}
+ 	FastMeter::set_horizontal_xpm (meter_path);
 
 	if (setup_windows ()) {
 		throw failed_constructor ();

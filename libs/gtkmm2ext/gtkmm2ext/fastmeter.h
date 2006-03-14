@@ -46,14 +46,17 @@ class FastMeter : public Gtk::DrawingArea {
 	long hold_count() { return hold_cnt; }
 	void set_hold_count (long);
 	
-	static void set_horizontal_xpm (const std::string&);
-	static void set_vertical_xpm (const std::string&);
+	static void set_horizontal_xpm (std::string);
+	static void set_vertical_xpm (std::string);
 	
   protected:
 	bool on_expose_event (GdkEventExpose*);
 	void on_size_request (GtkRequisition*);
+	void on_realize ();
 
   private:  
+	static std::string h_image_path;
+	static std::string v_image_path;
 	static Glib::RefPtr<Gdk::Pixmap> h_pixmap;
 	static Glib::RefPtr<Gdk::Bitmap> h_mask;
 	static gint h_pixheight;

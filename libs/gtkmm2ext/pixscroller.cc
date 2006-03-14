@@ -29,8 +29,9 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-PixScroller::PixScroller (Adjustment& a, Pix& pix)
-	: adj (a)
+PixScroller::PixScroller (Adjustment& a, Pix& p)
+	: adj (a),
+	  pix (p)
 {
 	dragging = false;
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
@@ -38,7 +39,16 @@ PixScroller::PixScroller (Adjustment& a, Pix& pix)
 	adj.signal_value_changed().connect (mem_fun (*this, &PixScroller::adjustment_changed));
 	default_value = adj.get_value();
 
-	pix.generate ();
+}
+
+void
+PixScroller::on_realize ()
+{
+	DrawingArea::on_realize ();
+
+	Glib::RefPtr<Gdk::Drawable> drawable = Glib::RefPtr<Gdk::Window>::cast_dynamic (get_window());
+
+	pix.generate (drawable);
 
 	rail = *(pix.pixmap (0));
 	rail_mask = *(pix.shape_mask (0));
@@ -61,6 +71,8 @@ PixScroller::PixScroller (Adjustment& a, Pix& pix)
 
 	sliderrect.set_y((int) rint ((overall_height - sliderrect.get_height()) * (adj.get_upper() - adj.get_value())));
 	railrect.set_x((sliderrect.get_width() / 2) - 2);
+
+	set_size_request (sliderrect.get_width(), overall_height);
 }
 
 void

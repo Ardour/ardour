@@ -43,8 +43,6 @@ SliderController::SliderController (Pix *pixset,
 	  bind_statemask (Gdk::CONTROL_MASK)
 
 {			  
-	pixset->generate ();
-
 	signal_button_press_event().connect (mem_fun (this, &SliderController::button_press));
 	spin.set_name ("SliderControllerValue");
 	spin.set_size_request (70,-1); // should be based on font size somehow

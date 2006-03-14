@@ -83,15 +83,3 @@ void Gtkmm2ext::set_treeview_header_as_default_label(Gtk::TreeViewColumn* c)
 	gtk_tree_view_column_set_widget( c->gobj(), GTK_WIDGET(0) );
 }
 
-Glib::RefPtr<Gdk::Drawable>
-Gtkmm2ext::get_bogus_drawable()
-{
-	static Gtk::Button* button = 0;
-
-	if (button == 0) {
-		button = new Gtk::Button ("blah"); //bogus button to extract a Gdk::Drawable from
-		}
-		static Glib::RefPtr<Gdk::Drawable> drawable = button->get_window();
-	return drawable;
-}
-

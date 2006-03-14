@@ -20,11 +20,14 @@ class PixScroller : public Gtk::DrawingArea
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_size_request (GtkRequisition*);
-	
+	void on_realize ();
+
   protected:
 	Gtk::Adjustment& adj;
 
   private:
+	Pix& pix;
+
 	Glib::RefPtr<Gdk::Pixmap> rail;
 	Glib::RefPtr<Gdk::Pixmap> slider;
 	Glib::RefPtr<Gdk::Bitmap> rail_mask;

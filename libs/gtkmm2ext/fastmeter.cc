@@ -32,6 +32,8 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace std;
 
+string FastMeter::v_image_path;
+string FastMeter::h_image_path;
 RefPtr<Pixmap> FastMeter::v_pixmap;
 RefPtr<Bitmap> FastMeter::v_mask;
 gint       FastMeter::v_pixheight = 0;
@@ -56,16 +58,8 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
 	pixrect.x = 0;
 	pixrect.y = 0;
 
-	if (orientation == Vertical) {
-		pixrect.width = min (v_pixwidth, (gint) dimen);
-		pixrect.height = v_pixheight;
-	} else {
-		pixrect.width = h_pixwidth;
-		pixrect.height = min (h_pixheight, (gint) dimen);
-	}
-
-	request_width = pixrect.width;
-	request_height= pixrect.height;
+	request_width  = dimen;
+	request_height = dimen;
 }
 
 FastMeter::~FastMeter ()
@@ -73,31 +67,57 @@ FastMeter::~FastMeter ()
 }
 
 void
-FastMeter::set_vertical_xpm (const std::string& xpm_file)
+FastMeter::on_realize ()
 {
-	if (v_pixmap == 0) {
-		gint w, h;
+	DrawingArea::on_realize ();
 
-		v_pixmap = Pixmap::create_from_xpm(get_bogus_drawable(), Colormap::get_system(), v_mask, Gdk::Color(), xpm_file);
+	Glib::RefPtr<Gdk::Drawable> drawable = Glib::RefPtr<Gdk::Window>::cast_dynamic (get_window());
+	Gdk::Color transparent;
+
+	if (!v_image_path.empty() && v_pixmap == 0) {
+		gint w, h;
+		
+		v_pixmap = Pixmap::create_from_xpm (drawable, Colormap::get_system(), v_mask, transparent, v_image_path);
 		v_pixmap->get_size(w, h);
 		
 		v_pixheight = h;
 		v_pixwidth = w;
 	}
-}
 
-void
-FastMeter::set_horizontal_xpm (const std::string& xpm_file)
-{
-	if (h_pixmap == 0) {
+	if (!h_image_path.empty() && h_pixmap == 0) {
 		gint w, h;
 		
-		h_pixmap = Pixmap::create_from_xpm(get_bogus_drawable(), Colormap::get_system(), h_mask, Gdk::Color(), xpm_file);
+		h_pixmap = Pixmap::create_from_xpm (drawable, Colormap::get_system(), h_mask, transparent, h_image_path);
 		h_pixmap->get_size(w, h);
 		
 		h_pixheight = h;
 		h_pixwidth = w;
 	}
+
+	if (orientation == Vertical) {
+		pixrect.width = min (v_pixwidth, request_width);
+		pixrect.height = v_pixheight;
+	} else {
+		pixrect.width = h_pixwidth;
+		pixrect.height = min (h_pixheight, request_height);
+	}
+
+	request_width = pixrect.width;
+	request_height= pixrect.height;
+
+	set_size_request (request_width, request_height);
+}
+
+void
+FastMeter::set_vertical_xpm (std::string path)
+{
+	v_image_path = path;
+}
+
+void
+FastMeter::set_horizontal_xpm (std::string path)
+{
+	h_image_path = path;
 }
 
 void
