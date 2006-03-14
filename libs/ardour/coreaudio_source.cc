@@ -23,6 +23,8 @@
 
 #include "i18n.h"
 
+#include <AudioToolbox/AudioFormat.h>
+
 using namespace ARDOUR;
 
 CoreAudioSource::CoreAudioSource (const XMLNode& node)
@@ -67,32 +69,28 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 	FSRef ref;
 	err = FSPathMakeRef ((UInt8*)file.c_str(), &ref, 0);
 	if (err != noErr) {
-		error << err << endmsg;
 		throw failed_constructor();
 	}
 
 	err = ExtAudioFileOpen (&ref, &af);
 	if (err != noErr) {
-		error << err << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
 
-	AudioStreamBasicDescription absd;
-	memset(&absd, 0, sizeof(absd));
-	size_t absd_size = sizeof(absd);
+	AudioStreamBasicDescription file_asbd;
+	memset(&file_asbd, 0, sizeof(file_asbd));
+	size_t asbd_size = sizeof(file_asbd);
 	err = ExtAudioFileGetProperty(af,
-			kExtAudioFileProperty_FileDataFormat, &absd_size, &absd);
+			kExtAudioFileProperty_FileDataFormat, &asbd_size, &file_asbd);
 	if (err != noErr) {
-		error << err << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
-	n_channels = absd.mChannelsPerFrame;
+	n_channels = file_asbd.mChannelsPerFrame;
 
 	if (channel >= n_channels) {
 		error << string_compose(_("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number"), n_channels, channel) << endmsg;
-		error << err << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
@@ -102,7 +100,6 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 
 	err = ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &prop_size, &ca_frames);
 	if (err != noErr) {
-		error << err << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
@@ -116,6 +113,24 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 			ExtAudioFileDispose (af);
 			throw failed_constructor ();
 		}
+	}
+	
+	AudioStreamBasicDescription client_asbd;
+	memset(&client_asbd, 0, sizeof(client_asbd));
+	client_asbd.mFormatID = kAudioFormatLinearPCM;
+	client_asbd.mFormatFlags = kLinearPCMFormatFlagIsFloat;
+	client_asbd.mSampleRate = file_asbd.mSampleRate;
+
+	err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &asbd_size, &client_asbd);
+	if (err != noErr) {
+		ExtAudioFileDispose (af);
+		throw failed_constructor ();
+	}
+
+	err = ExtAudioFileSetProperty (af, kExtAudioFileProperty_ClientDataFormat, asbd_size, &client_asbd);
+	if (err != noErr) {
+		ExtAudioFileDispose (af);
+		throw failed_constructor ();
 	}
 }
 
@@ -146,7 +161,7 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, ch
 	AudioBufferList abl;
 	abl.mNumberBuffers = 1;
 	abl.mBuffers[0].mNumberChannels = n_channels;
-	abl.mBuffers[0].mDataByteSize = cnt;
+	abl.mBuffers[0].mDataByteSize = cnt * sizeof(Sample);
 	abl.mBuffers[0].mData = dst;
 
 	if (n_channels == 1) {
@@ -169,7 +184,7 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, ch
 			tmpbuf = new float[tmpbufsize];
 		}
 
-		abl.mBuffers[0].mDataByteSize = real_cnt;
+		abl.mBuffers[0].mDataByteSize = real_cnt * sizeof(Sample);
 		abl.mBuffers[0].mData = tmpbuf;
 		
 		err = ExtAudioFileRead(af, (UInt32*) &real_cnt, &abl);
