@@ -1,5 +1,5 @@
 /* XPM */
-static const char * vslider_rail_xpm[] = {
+static char * vslider_rail_xpm[] = {
 "3 200 4 1",
 " 	c None",
 ".	c #000000",

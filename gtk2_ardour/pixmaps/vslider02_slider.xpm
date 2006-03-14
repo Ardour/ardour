@@ -1,5 +1,5 @@
 /* XPM */
-static const char * vslider_slider_xpm[] = {
+static char * vslider02_slider_xpm[] = {
 "15 32 176 2",
 "  	c None",
 ". 	c #999991",

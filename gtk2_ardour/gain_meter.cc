@@ -62,12 +62,7 @@ map<string,Glib::RefPtr<Gdk::Pixmap> > GainMeter::metric_pixmaps;
 int
 GainMeter::setup_slider_pix ()
 {
-	vector<const char **> xpms;
-
-	xpms.push_back (vslider_rail_xpm);
-	xpms.push_back (vslider_slider_xpm);
-
-	if ((slider_pix = get_pix ("sliders", xpms, false)) == 0) {
+	if ((slider_pix = get_pix (ARDOUR::find_data_file("pixmaps"), "vslider02", false)) == 0) {
 		error << _("Cannot create slider pixmaps") << endmsg;
 		return -1;
 	}
