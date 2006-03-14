@@ -2048,8 +2048,8 @@ DiskStream::set_state (const XMLNode& node)
 		}
 	}
 
-	if ((prop = node.property ("_flags")) != 0) {
-		_flags = atoi (prop->value().c_str());
+	if ((prop = node.property ("flags")) != 0) {
+		_flags = strtol (prop->value().c_str(), 0, 0);
 	}
 
 	if ((prop = node.property ("channels")) != 0) {

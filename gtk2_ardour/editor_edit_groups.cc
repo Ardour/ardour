@@ -242,7 +242,6 @@ Editor::edit_groups_changed ()
 
 	/* just rebuild the while thing */
 
-	edit_group_display.set_model (Glib::RefPtr<TreeModel>(0));
 	group_model->clear ();
 
 	{
@@ -255,7 +254,6 @@ Editor::edit_groups_changed ()
 	}
 
 	session->foreach_edit_group (mem_fun (*this, &Editor::add_edit_group));
-	edit_group_display.set_model (group_model);
 }
 
 void

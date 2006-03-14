@@ -828,7 +828,6 @@ Mixer_UI::mix_groups_changed ()
 
 	/* just rebuild the while thing */
 
-	group_display.set_model (Glib::RefPtr<TreeModel>(0));
 	group_model->clear ();
 
 	{
@@ -841,32 +840,12 @@ Mixer_UI::mix_groups_changed ()
 	}
 
 	session->foreach_mix_group (mem_fun (*this, &Mixer_UI::add_mix_group));
-	group_display.set_model (group_model);
 }
-
 
 void
 Mixer_UI::new_mix_group ()
 {
-#if 0
-	ArdourPrompter prompter;
-	string result;
-
-	prompter.set_prompt (_("Name for new mix group"));
-	prompter.show_all ();
-	
-	switch (prompter.run ()) {
-	case Gtk::RESPONSE_ACCEPT:
-		prompter.get_result (result);
-		if (result.length()) {
-			session->add_mix_group (result);
-		}	
-		break;
-	}
-#else 
 	session->add_mix_group ("");
-#endif
-
 }
 
 void
