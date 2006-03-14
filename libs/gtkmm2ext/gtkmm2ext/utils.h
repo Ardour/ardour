@@ -51,6 +51,7 @@ namespace Gtkmm2ext {
 	GdkWindow* get_paned_handle (Gtk::Paned& paned);
 	void set_decoration (Gtk::Window* win, Gdk::WMDecoration decor);
 	void set_treeview_header_as_default_label(Gtk::TreeViewColumn *c);
+	Glib::RefPtr<Gdk::Drawable> get_bogus_drawable();
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

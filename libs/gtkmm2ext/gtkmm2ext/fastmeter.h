@@ -46,8 +46,8 @@ class FastMeter : public Gtk::DrawingArea {
 	long hold_count() { return hold_cnt; }
 	void set_hold_count (long);
 	
-	static void set_horizontal_xpm (const char **xpm);
-	static void set_vertical_xpm (const char **xpm);
+	static void set_horizontal_xpm (const std::string&);
+	static void set_vertical_xpm (const std::string&);
 	
   protected:
 	bool on_expose_event (GdkEventExpose*);

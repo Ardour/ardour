@@ -72,7 +72,6 @@
 #include "about.h"
 #include "utils.h"
 #include "gui_thread.h"
-#include "meter_xpms.h"
 #include "color_manager.h"
 
 #include "i18n.h"
@@ -231,8 +230,8 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	keyboard = new Keyboard;
  	install_keybindings ();
 
-	FastMeter::set_vertical_xpm (v_meter_strip_xpm);
-	FastMeter::set_horizontal_xpm (h_meter_strip_xpm);
+	FastMeter::set_vertical_xpm (ARDOUR::find_data_file("v_meter_strip.xpm", "pixmaps"));
+	FastMeter::set_horizontal_xpm (ARDOUR::find_data_file("h_meter_strip.xpm", "pixmaps"));
 
 	if (setup_windows ()) {
 		throw failed_constructor ();

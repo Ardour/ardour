@@ -46,7 +46,6 @@
 #include <ardour/route.h>
 
 #include "i18n.h"
-#include "misc_xpms"
 
 using namespace ARDOUR;
 using namespace Gtkmm2ext;

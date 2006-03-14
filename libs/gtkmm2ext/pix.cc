@@ -19,8 +19,7 @@
 */
 
 #include <algorithm>
-#include <iostream>
-#include <gtkmm/window.h>
+
 #include <gdkmm.h>
 #include <gdkmm/pixmap.h>
 
@@ -35,6 +34,7 @@
 */
 
 #include <gtkmm2ext/pix.h>
+#include <gtkmm2ext/utils.h>
 
 namespace std
 {
@@ -141,16 +141,8 @@ Pix::generate ()
 
 	for (int i = 0; i < pixmap_count; i++) {
 		if (from_files) {
-			static Gtk::Button* button = 0;
-			static const Gdk::Color color;
-
-			if (button == 0) {
-				button = new Gtk::Button ("blah"); //bogus button to extract a Gdk::Drawable from
-			}
-			const Glib::RefPtr<const Gdk::Drawable> drawable = button->get_window();
-			
-			pixmaps[i] = Gdk::Pixmap::create_from_xpm (drawable, Gdk::Colormap::get_system(),
-								bitmaps[i], color, *(*files)[i]);
+			pixmaps[i] = Gdk::Pixmap::create_from_xpm (get_bogus_drawable(), Gdk::Colormap::get_system(),
+								bitmaps[i], Gdk::Color(), *(*files)[i]);
 		} else {
 			gchar **xpm;
 			xpm = const_cast<gchar **> (data[i]);

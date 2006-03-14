@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <gdkmm/rectangle.h>
 #include <gtkmm2ext/fastmeter.h>
+#include <gtkmm2ext/utils.h>
 #include <gtkmm/style.h>
 
 using namespace Gtk;
@@ -72,12 +73,12 @@ FastMeter::~FastMeter ()
 }
 
 void
-FastMeter::set_vertical_xpm (const char **xpm)
+FastMeter::set_vertical_xpm (const std::string& xpm_file)
 {
 	if (v_pixmap == 0) {
 		gint w, h;
 
-		v_pixmap = Pixmap::create_from_xpm(Colormap::get_system(), v_mask, xpm);
+		v_pixmap = Pixmap::create_from_xpm(get_bogus_drawable(), Colormap::get_system(), v_mask, Gdk::Color(), xpm_file);
 		v_pixmap->get_size(w, h);
 		
 		v_pixheight = h;
@@ -86,12 +87,12 @@ FastMeter::set_vertical_xpm (const char **xpm)
 }
 
 void
-FastMeter::set_horizontal_xpm (const char **xpm)
+FastMeter::set_horizontal_xpm (const std::string& xpm_file)
 {
 	if (h_pixmap == 0) {
 		gint w, h;
 		
-		h_pixmap = Pixmap::create_from_xpm(Colormap::get_system(), h_mask, xpm);
+		h_pixmap = Pixmap::create_from_xpm(get_bogus_drawable(), Colormap::get_system(), h_mask, Gdk::Color(), xpm_file);
 		h_pixmap->get_size(w, h);
 		
 		h_pixheight = h;
