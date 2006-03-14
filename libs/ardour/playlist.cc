@@ -98,6 +98,10 @@ Playlist::Playlist (const Playlist& other, string namestr, bool hide)
 {
 	init (hide);
 
+	_edit_mode = other._edit_mode;
+	_splicing  = other._splicing;
+	_nudging   = other._nudging;
+	
 	other.copy_regions (regions);
 
 	for (list<Region*>::iterator x = regions.begin(); x != regions.end(); ++x) {

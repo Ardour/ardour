@@ -161,6 +161,28 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	save_state ("initial");
 }
 
+Crossfade::Crossfade (const Crossfade &orig, ARDOUR::AudioRegion *newin, ARDOUR::AudioRegion *newout)
+	: _fade_in(orig._fade_in),
+	  _fade_out(orig._fade_out)
+{
+	// Signals?
+
+	_active 			= orig._active;
+	_in_update 			= orig._in_update;
+	overlap_type 		= orig.overlap_type;
+	_length 			= orig._length;
+	_position 			= orig._position;
+	_anchor_point 		= orig._anchor_point;
+	_follow_overlap 	= orig._follow_overlap;
+	_fixed 				= orig._fixed;
+	_follow_overlap 	= orig._follow_overlap;
+	_short_xfade_length = orig._short_xfade_length;
+	
+	_in = newin;
+	_out = newout;
+	
+}
+
 Crossfade::~Crossfade ()
 {
 	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {

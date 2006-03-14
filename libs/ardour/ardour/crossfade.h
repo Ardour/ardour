@@ -73,6 +73,11 @@ class Crossfade : public Stateful, public StateManager
 	
 	Crossfade (ARDOUR::AudioRegion& in, ARDOUR::AudioRegion& out, CrossfadeModel, bool active);
 
+
+	/* copy constructor to copy a crossfade with new regions. used (for example)
+	   when a playlist copy is made */
+	Crossfade (const Crossfade &, ARDOUR::AudioRegion *, ARDOUR::AudioRegion *);
+	
 	/* the usual XML constructor */
 
 	Crossfade (const ARDOUR::Playlist&, XMLNode&);

@@ -72,6 +72,47 @@ AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, string name, bool hidd
 {
 	save_state (_("initial state"));
 
+	list<Region*>::const_iterator in_o  = other.regions.begin();
+	list<Region*>::iterator in_n = regions.begin();
+
+	while (in_o != other.regions.end()) {
+		AudioRegion *ar = dynamic_cast<AudioRegion *>( (*in_o) );
+
+		// We look only for crossfades which begin with the current region, so we don't get doubles
+		for (list<Crossfade *>::const_iterator xfades = other._crossfades.begin(); xfades != other._crossfades.end(); ++xfades) {
+			if ( &(*xfades)->in() == ar) {
+				// We found one! Now copy it!
+
+				list<Region*>::const_iterator out_o = other.regions.begin();
+				list<Region*>::const_iterator out_n = regions.begin();
+
+				while (out_o != other.regions.end()) {
+					
+					AudioRegion *ar2 = dynamic_cast<AudioRegion *>( (*out_o) );
+					
+					if ( &(*xfades)->out() == ar2) {
+						AudioRegion *in  = dynamic_cast<AudioRegion*>( (*in_n) );
+						AudioRegion *out = dynamic_cast<AudioRegion*>( (*out_n) );
+						Crossfade *new_fade = new Crossfade( *(*xfades), in, out);
+						add_crossfade(*new_fade);
+						cerr << "Here we go!" << endl;
+						break;
+					}
+					
+					out_o++;
+					out_n++;
+				}
+//				cerr << "HUH!? second region in the crossfade not found!" << endl;
+			}
+		}
+
+		
+		
+
+		in_o++;
+		in_n++;
+	}
+
 	if (!hidden) {
 		PlaylistCreated (this); /* EMIT SIGNAL */
 	}
