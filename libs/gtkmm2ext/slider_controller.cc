@@ -24,18 +24,19 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/slider_controller.h>
-#include <gtkmm2ext/pix.h>
+#include <gtkmm2ext/pixscroller.h>
 
 #include "i18n.h"
 
 using namespace Gtkmm2ext;
 
-SliderController::SliderController (Pix *pixset,
+SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
+				    Glib::RefPtr<Gdk::Pixbuf> rail,
 				    Gtk::Adjustment *adj,
 				    MIDI::Controllable *mc,
 				    bool with_numeric)
 
-	: PixScroller (*adj, *pixset),
+	: PixScroller (*adj, slide, rail),
 	  spin (*adj, 0, 2),
 	  prompter (Gtk::WIN_POS_MOUSE, 30000, false),
 	  midi_control (mc),
@@ -148,12 +149,13 @@ SliderController::midicontrol_unprompt ()
 }
 
 
-VSliderController::VSliderController (Pix *pixset,
+VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
+				      Glib::RefPtr<Gdk::Pixbuf> rail,
 				      Gtk::Adjustment *adj,
 				      MIDI::Controllable *mcontrol,
 				      bool with_numeric)
 
-	: SliderController (pixset, adj, mcontrol, with_numeric)
+	: SliderController (slide, rail, adj, mcontrol, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);
@@ -164,12 +166,13 @@ VSliderController::VSliderController (Pix *pixset,
 	}
 }
 
-HSliderController::HSliderController (Pix *pixset,
+HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
+				      Glib::RefPtr<Gdk::Pixbuf> rail,
 				      Gtk::Adjustment *adj,
 				      MIDI::Controllable *mcontrol,
 				      bool with_numeric)
 	
-	: SliderController (pixset, adj, mcontrol, with_numeric)
+	: SliderController (slide, rail, adj, mcontrol, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);

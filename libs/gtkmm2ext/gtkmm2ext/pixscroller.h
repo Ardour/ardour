@@ -5,33 +5,27 @@
 #include <gtkmm/adjustment.h>
 #include <gdkmm.h>
 
-#include <gtkmm2ext/pix.h>
-
 namespace Gtkmm2ext {
 
 class PixScroller : public Gtk::DrawingArea
 {
   public:
-	PixScroller(Gtk::Adjustment& adjustment, Pix&);
+	PixScroller(Gtk::Adjustment& adjustment, 
+		    Glib::RefPtr<Gdk::Pixbuf> slider,
+		    Glib::RefPtr<Gdk::Pixbuf> rail);
 
-	
 	bool on_expose_event (GdkEventExpose*);
 	bool on_motion_notify_event (GdkEventMotion*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_size_request (GtkRequisition*);
-	void on_realize ();
 
   protected:
 	Gtk::Adjustment& adj;
 
   private:
-	Pix& pix;
-
-	Glib::RefPtr<Gdk::Pixmap> rail;
-	Glib::RefPtr<Gdk::Pixmap> slider;
-	Glib::RefPtr<Gdk::Bitmap> rail_mask;
-	Glib::RefPtr<Gdk::Bitmap> slider_mask;
+	Glib::RefPtr<Gdk::Pixbuf> rail;
+	Glib::RefPtr<Gdk::Pixbuf> slider;
 	Gdk::Rectangle sliderrect;
 	Gdk::Rectangle railrect;
 	GdkWindow* grab_window;

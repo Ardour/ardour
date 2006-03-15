@@ -49,7 +49,6 @@ namespace ARDOUR {
 namespace Gtkmm2ext {
 	class FastMeter;
 	class BarController;
-	class Pix;
 }
 namespace Gtk {
 	class Menu;
@@ -161,7 +160,8 @@ class GainMeter : public Gtk::VBox
 	static sigc::signal<void> ResetAllPeakDisplays;
 	static sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
 
-	static Gtkmm2ext::Pix* slider_pix;
+	static Glib::RefPtr<Gdk::Pixbuf> slider;
+	static Glib::RefPtr<Gdk::Pixbuf> rail;
 	static int setup_slider_pix ();
 };
 

@@ -740,7 +740,7 @@ FileSource::read_header (bool silent)
 		return -1;
 	}
 
-	if (::pread (fd, &header.data, sizeof (header.data), info->offset) != sizeof (header.data)) {
+	if (::pread64 (fd, &header.data, sizeof (header.data), info->offset) != sizeof (header.data)) {
 		error << _("FileSource: can't read data chunk") << endmsg;
 		return -1;
 	}
@@ -757,7 +757,7 @@ FileSource::read_broadcast_data (ChunkInfo& info)
 {
 	int32_t coding_history_size;
 
-	if (::pread (fd, (char *) &header.bext, sizeof (header.bext), info.offset + sizeof (GenericChunk)) != sizeof (header.bext)) {
+	if (::pread64 (fd, (char *) &header.bext, sizeof (header.bext), info.offset + sizeof (GenericChunk)) != sizeof (header.bext)) {
 		error << string_compose(_("FileSource: cannot read Broadcast Wave data from existing audio file \"%1\" (%2)"),
 				 _path, strerror (errno)) << endmsg;
 		return -1;
@@ -773,7 +773,7 @@ FileSource::read_broadcast_data (ChunkInfo& info)
 		
 		char data[coding_history_size];
 		
-		if (::pread (fd, data, coding_history_size, info.offset + sizeof (BroadcastChunk)) != coding_history_size) {
+		if (::pread64 (fd, data, coding_history_size, info.offset + sizeof (BroadcastChunk)) != coding_history_size) {
 			error << string_compose(_("FileSource: cannot read Broadcast Wave coding history from audio file \"%1\" (%2)"),
 					 _path, strerror (errno)) << endmsg;
 			return -1;
@@ -1076,9 +1076,20 @@ FileSource::read_float (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, c
 {
 	ssize_t nread;
 	ssize_t byte_cnt = (ssize_t) cnt * sizeof (Sample);
+	int readfd;
+
+	/* open, read, close */
+
+	if ((readfd = open64 (_path.c_str(), O_RDONLY)) < 0) {
+		error << string_compose(_("FileSource: could not open \"%1\": (%2)"), _path, strerror (errno)) << endmsg;
+		return 0;
+	}
 	
-	if ((nread = pread (fd, (char *) dst, byte_cnt, data_offset + (start * _sample_size))) != byte_cnt) {
-		
+	nread = ::pread64 (readfd, (char *) dst, byte_cnt, data_offset + (start * _sample_size));
+	close (readfd);
+
+	if (nread != byte_cnt) {
+
 		cerr << "FileSource: \""
 		     << _path
 		     << "\" bad read at frame "
@@ -1102,8 +1113,7 @@ FileSource::read_float (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, c
 		
 		if (nread > 0) {
 			return nread / _sample_size;
-		}
-		else {
+		} else {
 			return nread;
 		}
 	}
@@ -1149,9 +1159,20 @@ FileSource::read_pcm_24 (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, 
 {
 	ssize_t nread;
 	ssize_t byte_cnt = (ssize_t) cnt * _sample_size;
+	int readfd;
 
-	if ((nread = pread (fd, (char *) workbuf, byte_cnt, data_offset + (start * _sample_size))) != byte_cnt) {
-		
+	/* open, read, close */
+
+	if ((readfd = open64 (_path.c_str(), O_RDONLY)) < 0) {
+		error << string_compose(_("FileSource: could not open \"%1\": (%2)"), _path, strerror (errno)) << endmsg;
+		return 0;
+	}
+
+	nread = ::pread64 (readfd, (char *) workbuf, byte_cnt, data_offset + (start * _sample_size));
+	close (readfd);
+
+	if (nread != byte_cnt) {
+
 		cerr << "May be OK - FileSource: \""
 		     << _path
 		     << "\" bad 24bit read at frame "

@@ -36,7 +36,6 @@
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
 #include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/pix.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/fastmeter.h>

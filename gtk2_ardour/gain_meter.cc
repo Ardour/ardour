@@ -28,7 +28,6 @@
 #include <ardour/dB.h>
 
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/pix.h>
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/barcontroller.h>
@@ -55,18 +54,27 @@ using namespace std;
 
 sigc::signal<void> GainMeter::ResetAllPeakDisplays;
 sigc::signal<void,RouteGroup*> GainMeter::ResetGroupPeakDisplays;
-Pix* GainMeter::slider_pix = 0;
+Glib::RefPtr<Gdk::Pixbuf> GainMeter::slider;
+Glib::RefPtr<Gdk::Pixbuf> GainMeter::rail;
 map<string,Glib::RefPtr<Gdk::Pixmap> > GainMeter::metric_pixmaps;
 
 int
 GainMeter::setup_slider_pix ()
 {
-	if ((slider_pix = get_pix (ARDOUR::find_data_file("pixmaps"), "vslider02", false)) == 0) {
-		error << _("Cannot create slider pixmaps") << endmsg;
+	string path = ARDOUR::find_data_file("vslider02_slider.xpm", "pixmaps");
+	if (path.empty()) {
+		error << _("cannot find images for fader slider") << endmsg;
 		return -1;
 	}
+	slider = Gdk::Pixbuf::create_from_file (path);
 
-	slider_pix->ref ();
+	path = ARDOUR::find_data_file("vslider02_rail.xpm", "pixmaps");
+	if (path.empty()) {
+		error << _("cannot find images for fader rail") << endmsg;
+		return -1;
+	}
+	rail = Gdk::Pixbuf::create_from_file (path);
+
 	return 0;
 }
 
@@ -95,14 +103,14 @@ GainMeter::GainMeter (IO& io, Session& s)
 	  top_table (1, 2)
 	
 {
-	if (slider_pix == 0) {
+	if (slider == 0) {
 		setup_slider_pix ();
 	}
 
 	ignore_toggle = false;
 	meter_menu = 0;
 	
-	gain_slider = manage (new VSliderController (slider_pix,
+	gain_slider = manage (new VSliderController (slider, rail,
 						     &gain_adjustment,
 						     & _io.midi_gain_control(),
 						     false));

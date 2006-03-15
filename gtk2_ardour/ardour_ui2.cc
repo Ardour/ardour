@@ -29,7 +29,6 @@
 #include <pbd/error.h>
 #include <pbd/basename.h>
 #include <pbd/fastlog.h>
-#include <gtkmm2ext/pix.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/tearoff.h>

@@ -22,7 +22,7 @@
 #define __gtkmm2ext_fastmeter_h__
 
 #include <gtkmm/drawingarea.h>
-#include <gdkmm/pixmap.h>
+#include <gdkmm/pixbuf.h>
 
 namespace Gtkmm2ext {
 
@@ -52,23 +52,19 @@ class FastMeter : public Gtk::DrawingArea {
   protected:
 	bool on_expose_event (GdkEventExpose*);
 	void on_size_request (GtkRequisition*);
-	void on_realize ();
 
   private:  
 	static std::string h_image_path;
 	static std::string v_image_path;
-	static Glib::RefPtr<Gdk::Pixmap> h_pixmap;
-	static Glib::RefPtr<Gdk::Bitmap> h_mask;
+	static Glib::RefPtr<Gdk::Pixbuf> h_pixbuf;
 	static gint h_pixheight;
 	static gint h_pixwidth;
 
-	static Glib::RefPtr<Gdk::Pixmap> v_pixmap;
-	static Glib::RefPtr<Gdk::Bitmap> v_mask;
+	static Glib::RefPtr<Gdk::Pixbuf> v_pixbuf;
 	static gint v_pixheight;
 	static gint v_pixwidth;
 
 	Orientation orientation;
-	Glib::RefPtr<Gdk::Pixmap> backing;
 	GdkRectangle pixrect;
 	gint request_width;
 	gint request_height;

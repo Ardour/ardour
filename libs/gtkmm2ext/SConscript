@@ -43,7 +43,6 @@ fastmeter.cc
 gtk_ui.cc
 hexentry.cc
 idle_adjustment.cc
-pix.cc
 pixscroller.cc
 popup.cc
 prompter.cc

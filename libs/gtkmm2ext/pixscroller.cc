@@ -29,9 +29,12 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-PixScroller::PixScroller (Adjustment& a, Pix& p)
+PixScroller::PixScroller (Adjustment& a, 
+			  Glib::RefPtr<Gdk::Pixbuf> s,
+			  Glib::RefPtr<Gdk::Pixbuf> r)
 	: adj (a),
-	  pix (p)
+	  rail (r),
+	  slider (s)
 {
 	dragging = false;
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
@@ -39,30 +42,10 @@ PixScroller::PixScroller (Adjustment& a, Pix& p)
 	adj.signal_value_changed().connect (mem_fun (*this, &PixScroller::adjustment_changed));
 	default_value = adj.get_value();
 
-}
-
-void
-PixScroller::on_realize ()
-{
-	DrawingArea::on_realize ();
-
-	Glib::RefPtr<Gdk::Drawable> drawable = Glib::RefPtr<Gdk::Window>::cast_dynamic (get_window());
-
-	pix.generate (drawable);
-
-	rail = *(pix.pixmap (0));
-	rail_mask = *(pix.shape_mask (0));
-	slider = *(pix.pixmap (1));
-	slider_mask = *(pix.shape_mask (1));
-
-	int w, h;
-
-	slider->get_size (w, h);
-	sliderrect.set_width(w);
-	sliderrect.set_height(h);
-	rail->get_size (w, h);
-	railrect.set_width(w);
-	railrect.set_height(h);
+	sliderrect.set_width(slider->get_width());
+	sliderrect.set_height(slider->get_height());
+	railrect.set_width(rail->get_width());
+	railrect.set_height(rail->get_height());
 
 	railrect.set_y(sliderrect.get_height() / 2);
 	sliderrect.set_x(0);
@@ -71,8 +54,6 @@ PixScroller::on_realize ()
 
 	sliderrect.set_y((int) rint ((overall_height - sliderrect.get_height()) * (adj.get_upper() - adj.get_value())));
 	railrect.set_x((sliderrect.get_width() / 2) - 2);
-
-	set_size_request (sliderrect.get_width(), overall_height);
 }
 
 void
@@ -96,32 +77,34 @@ PixScroller::on_expose_event (GdkEventExpose* ev)
 
 	if (gdk_rectangle_intersect (railrect.gobj(), &ev->area, &intersect)) {
 		Glib::RefPtr<Gdk::GC> gc(get_style()->get_bg_gc(get_state()));
-		win->draw_drawable (gc, rail, 
-				 intersect.x - railrect.get_x(),
-				 intersect.y - railrect.get_y(),
-				 intersect.x, 
-				 intersect.y, 
-				 intersect.width,
-				 intersect.height);
+		win->draw_pixbuf (gc, rail, 
+				  intersect.x - railrect.get_x(),
+				  intersect.y - railrect.get_y(),
+				  intersect.x, 
+				  intersect.y, 
+				  intersect.width,
+				  intersect.height,
+				  Gdk::RGB_DITHER_NONE, 0, 0);
 	}
 	
 	if (gdk_rectangle_intersect (sliderrect.gobj(), &ev->area, &intersect)) {
 		Glib::RefPtr<Gdk::GC> gc(get_style()->get_fg_gc(get_state()));
-		Glib::RefPtr<Gdk::Bitmap> mask (slider_mask);
+		// Glib::RefPtr<Gdk::Bitmap> mask (slider_mask);
 
 		GdkGCValues values;
 		gdk_gc_get_values(gc->gobj(), &values);
 		gc->set_clip_origin (sliderrect.get_x(), sliderrect.get_y());
-		gc->set_clip_mask (mask);
-		win->draw_drawable (gc, slider, 
-				 intersect.x - sliderrect.get_x(),
-				 intersect.y - sliderrect.get_y(),
-				 intersect.x, 
-				 intersect.y, 
-				 intersect.width,
-				 intersect.height);
+		// gc->set_clip_mask (mask);
+		win->draw_pixbuf (gc, slider, 
+				  intersect.x - sliderrect.get_x(),
+				  intersect.y - sliderrect.get_y(),
+				  intersect.x, 
+				  intersect.y, 
+				  intersect.width,
+				  intersect.height,
+				  Gdk::RGB_DITHER_NONE, 0, 0);
 		gc->set_clip_origin (values.clip_x_origin, values.clip_y_origin);
-		gdk_gc_set_clip_mask (gc->gobj(), values.clip_mask);
+		// gdk_gc_set_clip_mask (gc->gobj(), values.clip_mask);
 	}
 
 

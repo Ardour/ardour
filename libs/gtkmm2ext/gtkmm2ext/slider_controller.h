@@ -37,7 +37,8 @@ namespace Gtkmm2ext {
 class SliderController : public Gtkmm2ext::PixScroller
 {
   public:
-	SliderController (Gtkmm2ext::Pix* pixset,
+	SliderController (Glib::RefPtr<Gdk::Pixbuf> slider,
+			  Glib::RefPtr<Gdk::Pixbuf> rail,
 			  Gtk::Adjustment* adj,
 			  MIDI::Controllable*,
 			  bool with_numeric = true);
@@ -57,6 +58,8 @@ class SliderController : public Gtkmm2ext::PixScroller
 	Gtk::SpinButton & get_spin_button () { return spin; }
 	
   protected:
+	Glib::RefPtr<Gdk::Pixbuf> slider;
+	Glib::RefPtr<Gdk::Pixbuf> rail;
 	Gtk::SpinButton     spin;
 	Gtk::Frame          spin_frame;
 	Gtk::HBox           spin_hbox;
@@ -77,7 +80,8 @@ class SliderController : public Gtkmm2ext::PixScroller
 class VSliderController : public SliderController
 {
   public:
-	VSliderController (Gtkmm2ext::Pix *pixset,
+	VSliderController (Glib::RefPtr<Gdk::Pixbuf> slider,
+			   Glib::RefPtr<Gdk::Pixbuf> rail,
 			   Gtk::Adjustment *adj,
 			   MIDI::Controllable *,
 			   bool with_numeric = true);
@@ -86,7 +90,8 @@ class VSliderController : public SliderController
 class HSliderController : public SliderController
 {
   public:
-	HSliderController (Gtkmm2ext::Pix *pixset,
+	HSliderController (Glib::RefPtr<Gdk::Pixbuf> slider,
+			   Glib::RefPtr<Gdk::Pixbuf> rail,
 			   Gtk::Adjustment *adj,
 			   MIDI::Controllable *,
 			   bool with_numeric = true);

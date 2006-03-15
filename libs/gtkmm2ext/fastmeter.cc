@@ -34,13 +34,11 @@ using namespace std;
 
 string FastMeter::v_image_path;
 string FastMeter::h_image_path;
-RefPtr<Pixmap> FastMeter::v_pixmap;
-RefPtr<Bitmap> FastMeter::v_mask;
+RefPtr<Pixbuf> FastMeter::v_pixbuf;
 gint       FastMeter::v_pixheight = 0;
 gint       FastMeter::v_pixwidth = 0;
 
-RefPtr<Pixmap> FastMeter::h_pixmap;
-RefPtr<Bitmap> FastMeter::h_mask;
+RefPtr<Pixbuf> FastMeter::h_pixbuf;
 gint       FastMeter::h_pixheight = 0;
 gint       FastMeter::h_pixwidth = 0;
 
@@ -58,54 +56,32 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
 	pixrect.x = 0;
 	pixrect.y = 0;
 
-	request_width  = dimen;
-	request_height = dimen;
-}
-
-FastMeter::~FastMeter ()
-{
-}
-
-void
-FastMeter::on_realize ()
-{
-	DrawingArea::on_realize ();
-
-	Glib::RefPtr<Gdk::Drawable> drawable = Glib::RefPtr<Gdk::Window>::cast_dynamic (get_window());
-	Gdk::Color transparent;
-
-	if (!v_image_path.empty() && v_pixmap == 0) {
-		gint w, h;
-		
-		v_pixmap = Pixmap::create_from_xpm (drawable, Colormap::get_system(), v_mask, transparent, v_image_path);
-		v_pixmap->get_size(w, h);
-		
-		v_pixheight = h;
-		v_pixwidth = w;
+	if (!v_image_path.empty() && v_pixbuf == 0) {
+		v_pixbuf = Pixbuf::create_from_file (v_image_path);
+		v_pixheight = v_pixbuf->get_height();
+		v_pixwidth = v_pixbuf->get_width();
 	}
 
-	if (!h_image_path.empty() && h_pixmap == 0) {
-		gint w, h;
-		
-		h_pixmap = Pixmap::create_from_xpm (drawable, Colormap::get_system(), h_mask, transparent, h_image_path);
-		h_pixmap->get_size(w, h);
-		
-		h_pixheight = h;
-		h_pixwidth = w;
+	if (!h_image_path.empty() && h_pixbuf == 0) {
+		h_pixbuf = Pixbuf::create_from_file (h_image_path);
+		h_pixheight = h_pixbuf->get_height();
+		h_pixwidth = h_pixbuf->get_width();
 	}
 
 	if (orientation == Vertical) {
-		pixrect.width = min (v_pixwidth, request_width);
+		pixrect.width = min (v_pixwidth, (gint) dimen);
 		pixrect.height = v_pixheight;
 	} else {
 		pixrect.width = h_pixwidth;
-		pixrect.height = min (h_pixheight, request_height);
+		pixrect.height = min (h_pixheight, (gint) dimen);
 	}
 
 	request_width = pixrect.width;
 	request_height= pixrect.height;
+}
 
-	set_size_request (request_width, request_height);
+FastMeter::~FastMeter ()
+{
 }
 
 void
@@ -177,19 +153,21 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 		/* draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		 */
 		
-		get_window()->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap, 
-					    intersection.x, v_pixheight - top_of_meter,
-					    intersection.x, v_pixheight - top_of_meter,
-					    intersection.width, intersection.height);
+		get_window()->draw_pixbuf(get_style()->get_fg_gc(get_state()), v_pixbuf, 
+					  intersection.x, v_pixheight - top_of_meter,
+					  intersection.x, v_pixheight - top_of_meter,
+					  intersection.width, intersection.height,
+					  Gdk::RGB_DITHER_NONE, 0, 0);
 	}
 
 	/* draw peak bar */
 		
 	if (hold_state) {
-		get_window()->draw_drawable(get_style()->get_fg_gc(get_state()), v_pixmap,
-					    intersection.x, v_pixheight - (gint) floor (v_pixheight * current_peak),
-					    intersection.x, v_pixheight - (gint) floor (v_pixheight * current_peak),
-					    intersection.width, 3);
+		get_window()->draw_pixbuf (get_style()->get_fg_gc(get_state()), v_pixbuf,
+					   intersection.x, v_pixheight - (gint) floor (v_pixheight * current_peak),
+					   intersection.x, v_pixheight - (gint) floor (v_pixheight * current_peak),
+					   intersection.width, 3,
+					   Gdk::RGB_DITHER_NONE, 0, 0);
 	}
 
 	return true;
@@ -209,19 +187,23 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 		/* draw the part of the meter image that we need. 
 		 */
 
-		get_window()->draw_drawable(get_style()->get_fg_gc(get_state()), h_pixmap,
-					    intersection.x, intersection.y,
-					    intersection.x, intersection.y,
-					    intersection.width, intersection.height);
+		get_window()->draw_pixbuf (get_style()->get_fg_gc(get_state()), h_pixbuf,
+					   intersection.x, intersection.y,
+					   intersection.x, intersection.y,
+					   intersection.width, intersection.height,
+					   Gdk::RGB_DITHER_NONE, 0, 0);
+
 	}
 	
 	/* draw peak bar */
 	
 	if (hold_state) {
-		get_window()->draw_drawable(get_style()->get_fg_gc(get_state()), h_pixmap,
-					    right_of_meter, intersection.y,
-					    right_of_meter, intersection.y,
-					    3, intersection.height);
+		get_window()->draw_pixbuf (get_style()->get_fg_gc(get_state()), h_pixbuf,
+					   right_of_meter, intersection.y,
+					   right_of_meter, intersection.y,
+					   3, intersection.height,
+					   Gdk::RGB_DITHER_NONE, 0, 0);
+
 	}
 
 	return true;
