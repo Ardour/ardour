@@ -11,28 +11,13 @@
 #include "automation_selectable.h"
 #include "point_selection.h"
 #include "canvas_impl.h"
+#include "utils.h"
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Editing;
-
-static const gchar * small_x_xpm[] = {
-"11 11 2 1",
-" 	c None",
-".	c #000000",
-"           ",
-"           ",
-"  .     .  ",
-"   .   .   ",
-"    . .    ",
-"     .     ",
-"    . .    ",
-"   .   .   ",
-"  .     .  ",
-"           ",
-"           "};
 
 AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& rent, 
 						ArdourCanvas::Canvas& canvas, const string & nom, 
@@ -79,7 +64,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 	base_rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_automation_track_event),
 						 base_rect, this));
 
-	hide_button.add (*(manage (new Gtk::Image (Gdk::Pixbuf::create_from_xpm_data(small_x_xpm)))));
+	hide_button.add (*(manage (new Gtk::Image (get_xpm("small_x.xpm")))));
 
 	height_button.set_name ("TrackSizeButton");
 	auto_button.set_name ("TrackVisualButton");

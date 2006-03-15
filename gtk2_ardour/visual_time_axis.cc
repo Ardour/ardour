@@ -57,24 +57,6 @@
 using namespace ARDOUR;
 using namespace sigc;
 using namespace Gtk;
-
-//XXX should really have a common home...
-static const gchar* small_x_xpm[] = {
-	"11 11 2 1",
-	" 	c None",
-	".	c #000000",
-	"           ",
-	"           ",
-	"  .     .  ",
-	"   .   .   ",
-	"    . .    ",
-	"     .     ",
-	"    . .    ",
-	"   .   .   ",
-	"  .     .  ",
-	"           ",
-	"           "};
-
 	
 /**
  * Abstract Constructor for base visual time axis classes
@@ -102,8 +84,7 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
 	size_button.set_name("TrackSizeButton") ;
 	visual_button.set_name("TrackVisualButton") ;
 	hide_button.set_name("TrackRemoveButton") ;
-	Glib::RefPtr<Gdk::Pixbuf> small_x_pixbuf = Gdk::Pixbuf::create_from_xpm_data(small_x_xpm);
-	hide_button.add(*(Gtk::manage(new Gtk::Image(small_x_pixbuf)))) ;
+	hide_button.add(*(Gtk::manage(new Gtk::Image(get_xpm("small_x.xpm")))));
 	size_button.signal_button_release_event().connect (mem_fun (*this, &VisualTimeAxis::size_click)) ;
 	visual_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::visual_click)) ;
 	hide_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::hide_click)) ;

@@ -84,21 +84,6 @@ using namespace LADSPA;
 using namespace Gtk;
 using namespace Editing;
 
-static const gchar * small_x_xpm[] = {
-"11 11 2 1",
-" 	c None",
-".	c #000000",
-"           ",
-"           ",
-"  .     .  ",
-"   .   .   ",
-"    . .    ",
-"     .     ",
-"    . .    ",
-"   .   .   ",
-"  .     .  ",
-"           ",
-"           "};
 
 AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt, Canvas& canvas)
 	: AxisView(sess),
@@ -148,7 +133,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	visual_button.set_name ("TrackVisualButton");
 	hide_button.set_name ("TrackRemoveButton");
 
-	hide_button.add (*(manage (new Image (Gdk::Pixbuf::create_from_xpm_data(small_x_xpm)))));
+	hide_button.add (*(manage (new Image (get_xpm("small_x.xpm")))));
 	
 	_route.mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
 	_route.solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
