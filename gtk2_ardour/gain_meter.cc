@@ -132,10 +132,10 @@ GainMeter::GainMeter (IO& io, Session& s)
 
 	gain_unit_button.signal_clicked().connect (ptr_fun (was_pressed));
 
-	meter_point_button.signal_button_press_event().connect (mem_fun (*this, &GainMeter::meter_press));
-	meter_point_button.signal_button_release_event().connect (mem_fun (*this, &GainMeter::meter_release));
-	g_signal_connect (meter_point_button.gobj(), "button-press-event", (void (*)()) was_button, 0);
-	g_signal_connect (meter_point_button.gobj(), "button-release-event", (void (*)()) was_button, 0);
+	meter_point_button.signal_button_press_event().connect (mem_fun (*this, &GainMeter::meter_press), false);
+	meter_point_button.signal_button_release_event().connect (mem_fun (*this, &GainMeter::meter_release), false);
+	//g_signal_connect (meter_point_button.gobj(), "button-press-event", (void (*)()) was_button, 0);
+	//g_signal_connect (meter_point_button.gobj(), "button-release-event", (void (*)()) was_button, 0);
 	
 
 	top_table.set_col_spacings (2);
