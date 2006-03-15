@@ -78,19 +78,6 @@ GainMeter::setup_slider_pix ()
 	return 0;
 }
 
-void
-was_pressed ()
-{
-	cerr << "was pressed\n";
-}
-
-bool
-was_button (GdkEventButton* ev)
-{
-	cerr << "Bp/R: " << ev->type << endl;
-	return false;
-}
-
 GainMeter::GainMeter (IO& io, Session& s)
 	: _io (io),
 	  _session (s),
@@ -130,12 +117,8 @@ GainMeter::GainMeter (IO& io, Session& s)
 	gain_unit_button.set_name ("MixerStripGainUnitButton");
 	gain_unit_label.set_name ("MixerStripGainUnitButton");
 
-	gain_unit_button.signal_clicked().connect (ptr_fun (was_pressed));
-
 	meter_point_button.signal_button_press_event().connect (mem_fun (*this, &GainMeter::meter_press), false);
 	meter_point_button.signal_button_release_event().connect (mem_fun (*this, &GainMeter::meter_release), false);
-	//g_signal_connect (meter_point_button.gobj(), "button-press-event", (void (*)()) was_button, 0);
-	//g_signal_connect (meter_point_button.gobj(), "button-release-event", (void (*)()) was_button, 0);
 	
 
 	top_table.set_col_spacings (2);
@@ -641,8 +624,6 @@ GainMeter::meter_press(GdkEventButton* ev)
 
 	wait_for_release = false;
 
-	cerr << "meter point button press\n";
-
 	if ((_route = dynamic_cast<Route*>(&_io)) == 0) {
 		return FALSE;
 	}
@@ -701,7 +682,6 @@ GainMeter::meter_press(GdkEventButton* ev)
 gint
 GainMeter::meter_release(GdkEventButton* ev)
 {
-	cerr << "meter point button release\n";
 
 	if(!ignore_toggle){
 		if (wait_for_release){
