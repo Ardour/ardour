@@ -98,15 +98,32 @@ Playlist::Playlist (const Playlist& other, string namestr, bool hide)
 {
 	init (hide);
 
-	_edit_mode = other._edit_mode;
+	RegionList tmp;
+	other.copy_regions (tmp);
+	
+	in_set_state = true;
+
+	for (list<Region*>::iterator x = tmp.begin(); x != tmp.end(); ++x) {
+		add_region_internal( (*x), (*x)->position() );
+	}
+
+	in_set_state = false;
+
 	_splicing  = other._splicing;
 	_nudging   = other._nudging;
-	
-	other.copy_regions (regions);
+	_edit_mode = other._edit_mode;
 
-	for (list<Region*>::iterator x = regions.begin(); x != regions.end(); ++x) {
-		(*x)->set_playlist (this);
-	}
+	in_set_state = false;
+	in_flush = false;
+	in_partition = false;
+	subcnt = 0;
+	_read_data_count = 0;
+	_frozen = other._frozen;
+	save_on_thaw = false;
+	
+	layer_op_counter = other.layer_op_counter;
+	freeze_length = other.freeze_length;
+	
 }
 
 Playlist::Playlist (const Playlist& other, jack_nframes_t start, jack_nframes_t cnt, string str, bool hide)
@@ -413,8 +430,10 @@ Playlist::flush_notifications ()
 	}
 
 	if (n || pending_modified) {
-		possibly_splice ();
-		relayer ();
+		if (!in_set_state) {
+			possibly_splice ();
+			relayer ();
+		}
 		pending_modified = false;
 		Modified (); /* EMIT SIGNAL */
 	}
@@ -1330,9 +1349,13 @@ Playlist::set_state (const XMLNode& node)
 
 			add_region (*region, region->position(), 1.0, false);
 
+			// So that layer_op ordering doesn't get screwed up
+			region->set_last_layer_op( region->layer());
+
 		} 			
 	}
 
+	
  	/* update dependents, which was not done during add_region_internal 
 	   due to in_set_state being true 
 	*/
@@ -1340,7 +1363,7 @@ Playlist::set_state (const XMLNode& node)
 	for (RegionList::iterator r = regions.begin(); r != regions.end(); ++r) {
 		check_dependents (**r, false);
 	}
-
+	
 	in_set_state = false;
 
 	return 0;

@@ -95,7 +95,6 @@ AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, string name, bool hidd
 						AudioRegion *out = dynamic_cast<AudioRegion*>( (*out_n) );
 						Crossfade *new_fade = new Crossfade( *(*xfades), in, out);
 						add_crossfade(*new_fade);
-						cerr << "Here we go!" << endl;
 						break;
 					}
 					
@@ -105,9 +104,6 @@ AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, string name, bool hidd
 //				cerr << "HUH!? second region in the crossfade not found!" << endl;
 			}
 		}
-
-		
-		
 
 		in_o++;
 		in_n++;
