@@ -666,14 +666,21 @@ StreamView::setup_rec_box ()
 			jack_nframes_t frame_pos = ds.current_capture_start ();
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend;
+			uint32_t fill_color;
 
 			switch (_trackview.audio_track()->mode()) {
 			case Normal:
 				xend = xstart;
+				fill_color = color_map[cRecordingRectFill];
 				break;
 
 			case Destructive:
 				xend = xstart + 2;
+				fill_color = color_map[cRecordingRectFill];
+				/* make the recording rect translucent to allow
+				   the user to see the peak data coming in, etc.
+				*/
+				fill_color = UINT_RGBA_CHANGE_A (fill_color, 120);
 				break;
 			}
 			
@@ -683,7 +690,7 @@ StreamView::setup_rec_box ()
 			rec_rect->property_x2() = xend;
 			rec_rect->property_y2() = (double) _trackview.height - 1;
 			rec_rect->property_outline_color_rgba() = color_map[cRecordingRectOutline];
-			rec_rect->property_fill_color_rgba() =  color_map[cRecordingRectFill];
+			rec_rect->property_fill_color_rgba() = fill_color;
 			
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
@@ -776,8 +783,8 @@ StreamView::update_rec_box ()
 			
 		case Destructive:
 			rect.length = 2;
-			xstart = _trackview.editor.frame_to_pixel (at);
-			xend = xstart + 2;
+			xstart = _trackview.editor.frame_to_pixel (_trackview.get_diskstream()->current_capture_start());
+			xend = _trackview.editor.frame_to_pixel (at);
 			break;
 		}
 		
