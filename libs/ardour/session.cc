@@ -1881,6 +1881,11 @@ Session::add_route (Route* route)
 		_control_out = route;
 	}
 
+	AudioTrack* at = dynamic_cast<AudioTrack*>(route);
+	if (at && at->mode() == Destructive) {
+		destructive_index++;
+	}
+
 	set_dirty();
 	save_state (_current_snapshot_name);
 
@@ -2601,7 +2606,7 @@ void
 Session::add_source (Source* source)
 {
 	pair<SourceList::key_type, SourceList::mapped_type> entry;
-	
+
 	{
 		LockMonitor lm (source_lock, __LINE__, __FILE__);
 		entry.first = source->id();
@@ -2654,8 +2659,109 @@ Session::get_source (ARDOUR::id_t id)
 	return source;
 }
 
-FileSource *
-Session::create_file_source (DiskStream& ds, int32_t chan, bool destructive)
+string
+Session::peak_path_from_audio_path (string audio_path)
+{
+	/* XXX hardly bombproof! fix me */
+
+	string res;
+
+	res = PBD::dirname (audio_path);
+	res = PBD::dirname (res);
+	res += '/';
+	res += peak_dir_name;
+	res += '/';
+	res += PBD::basename_nosuffix (audio_path);
+	res += ".peak";
+
+	return res;
+}
+
+string
+Session::change_audio_path_by_name (string path, string oldname, string newname, bool destructive)
+{
+	string look_for;
+	string old_basename = basename_nosuffix (oldname);
+	string new_legalized = legalize_for_path (newname);
+
+	/* note: we know (or assume) the old path is already valid */
+
+	if (destructive) {
+		
+		/* destructive file sources have a name of the form:
+
+		    /path/to/Tnnnn-NAME(%[LR])?.wav
+		  
+		    the task here is to replace NAME with the new name.
+		*/
+		
+		/* find last slash */
+
+		string dir;
+		string prefix;
+		string::size_type slash;
+		string::size_type dash;
+
+		if ((slash = path.find_last_of ('/')) == string::npos) {
+			return "";
+		}
+
+		dir = path.substr (0, slash+1);
+
+		/* '-' is not a legal character for the NAME part of the path */
+
+		if ((dash = path.find_last_of ('-')) == string::npos) {
+			return "";
+		}
+
+		prefix = path.substr (slash+1, dash-(slash+1));
+
+		path = dir;
+		path += prefix;
+		path += '-';
+		path += new_legalized;
+		path += ".wav";  /* XXX gag me with a spoon */
+		
+	} else {
+		
+		/* non-destructive file sources have a name of the form:
+
+		    /path/to/NAME-nnnnn(%[LR])?.wav
+		  
+		    the task here is to replace NAME with the new name.
+		*/
+		
+		/* find last slash */
+
+		string dir;
+		string suffix;
+		string::size_type slash;
+		string::size_type dash;
+
+		if ((slash = path.find_last_of ('/')) == string::npos) {
+			return "";
+		}
+
+		dir = path.substr (0, slash+1);
+
+		/* '-' is not a legal character for the NAME part of the path */
+
+		if ((dash = path.find_last_of ('-')) == string::npos) {
+			return "";
+		}
+
+		suffix = path.substr (dash);
+
+		path = dir;
+		path += new_legalized;
+		path += suffix;
+	}
+
+	return path;
+}
+
+string
+Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool destructive)
 {
 	string spath;
 	uint32_t cnt;
@@ -2664,56 +2770,74 @@ Session::create_file_source (DiskStream& ds, int32_t chan, bool destructive)
 	string legalized;
 
 	buf[0] = '\0';
-	legalized = legalize_for_path (ds.name());
+	legalized = legalize_for_path (name);
 
 	/* find a "version" of the file name that doesn't exist in
 	   any of the possible directories.
 	*/
 	
-	for (cnt = 1; cnt <= limit; ++cnt) {
-
+	for (cnt = (destructive ? destructive_index + 1 : 1); cnt <= limit; ++cnt) {
+		
 		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
-
+		
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-
+			
 			spath = (*i).path;
-
+			
 			if (destructive) {
 				spath += tape_dir_name;
 			} else {
 				spath += sound_dir_name;
 			}
-			spath += '/';
-			spath += legalized;
-
-			if (ds.n_channels() < 2) {
-				snprintf (buf, sizeof(buf), "%s-%u.wav", spath.c_str(), cnt);
-			} else if (ds.n_channels() == 2) {
-				if (chan == 0) {
-					snprintf (buf, sizeof(buf), "%s-%u%%L.wav", spath.c_str(), cnt);
+			
+			if (destructive) {
+				if (nchan < 2) {
+					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
+				} else if (nchan == 2) {
+					if (nchan == 0) {
+						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%L.wav", spath.c_str(), cnt, legalized.c_str());
+					} else {
+						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%R.wav", spath.c_str(), cnt, legalized.c_str());
+					}
+				} else if (nchan < 26) {
+					snprintf (buf, sizeof(buf), "%s/T%04d-%s%%%c.wav", spath.c_str(), cnt, legalized.c_str(), 'a' + chan);
 				} else {
-					snprintf (buf, sizeof(buf), "%s-%u%%R.wav", spath.c_str(), cnt);
+					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
 				}
-			} else if (ds.n_channels() < 26) {
-				snprintf (buf, sizeof(buf), "%s-%u%%%c.wav", spath.c_str(), cnt, 'a' + chan);
 			} else {
-				snprintf (buf, sizeof(buf), "%s-%u.wav", spath.c_str(), cnt);
+				
+				spath += '/';
+				spath += legalized;
+					
+				if (nchan < 2) {
+					snprintf (buf, sizeof(buf), "%s-%u.wav", spath.c_str(), cnt);
+				} else if (nchan == 2) {
+					if (chan == 0) {
+						snprintf (buf, sizeof(buf), "%s-%u%%L.wav", spath.c_str(), cnt);
+					} else {
+						snprintf (buf, sizeof(buf), "%s-%u%%R.wav", spath.c_str(), cnt);
+					}
+				} else if (nchan < 26) {
+					snprintf (buf, sizeof(buf), "%s-%u%%%c.wav", spath.c_str(), cnt, 'a' + chan);
+				} else {
+					snprintf (buf, sizeof(buf), "%s-%u.wav", spath.c_str(), cnt);
+				}
 			}
 
 			if (access (buf, F_OK) == 0) {
 				existing++;
 			}
 		}
-
+			
 		if (existing == 0) {
 			break;
 		}
-	}
 
-	if (cnt > limit) {
-		error << string_compose(_("There are already %1 recordings for %2, which I consider too many."), limit, ds.name()) << endmsg;
-		throw failed_constructor();
+		if (cnt > limit) {
+			error << string_compose(_("There are already %1 recordings for %2, which I consider too many."), limit, name) << endmsg;
+			throw failed_constructor();
+		}
 	}
 
 	/* we now have a unique name for the file, but figure out where to
@@ -2722,7 +2846,11 @@ Session::create_file_source (DiskStream& ds, int32_t chan, bool destructive)
 
 	string foo = buf;
 
-	spath = discover_best_sound_dir ();
+	if (destructive) {
+		spath = tape_dir ();
+	} else {
+		spath = discover_best_sound_dir ();
+	}
 
 	string::size_type pos = foo.find_last_of ('/');
 	
@@ -2731,6 +2859,14 @@ Session::create_file_source (DiskStream& ds, int32_t chan, bool destructive)
 	} else {
 		spath += foo.substr (pos + 1);
 	}
+
+	return spath;
+}
+
+FileSource *
+Session::create_file_source (DiskStream& ds, int32_t chan, bool destructive)
+{
+	string spath = audio_path_from_name (ds.name(), ds.n_channels(), chan, destructive);
 
 	/* this might throw failed_constructor(), which is OK */
 
@@ -2942,40 +3078,6 @@ Session::is_auditioning () const
 	} else {
 		return false;
 	}
-}
-
-
-string
-Session::peak_path_from_audio_path (string audio_path)
-{
-	/* XXX hardly bombproof! fix me */
-
-	string res;
-
-	res = PBD::dirname (audio_path);
-	res = PBD::dirname (res);
-	res += '/';
-	res += peak_dir_name;
-	res += '/';
-	res += PBD::basename_nosuffix (audio_path);
-	res += ".peak";
-
-	return res;
-}
-
-string
-Session::old_peak_path_from_audio_path (string audio_path)
-{
-	/* This is a hangover from when audio and peak files
-	   lived in the same directory. We need it to to 
-	   be able to open old sessions.
-	*/
-
-	/* XXX hardly bombproof! fix me */
-
- 	string res = audio_path.substr (0, audio_path.find_last_of ('.'));
-  	res += ".peak";
-  	return res;
 }
 
 void

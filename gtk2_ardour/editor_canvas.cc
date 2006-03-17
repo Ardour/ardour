@@ -130,6 +130,7 @@ Editor::initialize_canvas ()
 	time_canvas.set_name ("EditorTimeCanvas");
 	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
 	time_canvas.set_flags (CAN_FOCUS);
+	time_canvas.set_center_scroll_region (false);
 	
 	meter_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
 	tempo_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height);

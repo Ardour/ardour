@@ -427,20 +427,18 @@ Editor::Editor (AudioEngine& eng)
 	edit_packer.set_col_spacings (0);
 	edit_packer.set_row_spacings (0);
 	edit_packer.set_homogeneous (false);
+	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
+	
+	edit_packer.attach (edit_vscrollbar,         0, 1, 1, 3,    FILL,        FILL|EXPAND, 0, 0);
 
-	edit_packer.attach (edit_hscrollbar,         1, 2, 0, 1,    FILL|EXPAND,  FILL, 0, 0);
+	edit_packer.attach (time_button_event_box,   1, 2, 0, 1,    FILL,        FILL, 0, 0);
+	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 
-	edit_packer.attach (time_button_event_box,   0, 1, 1, 2,    FILL,        FILL, 0, 0);
-	edit_packer.attach (time_canvas_event_box,   1, 2, 1, 2,    FILL|EXPAND, FILL, 0, 0);
+	edit_packer.attach (controls_layout,         1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
+	edit_packer.attach (track_canvas_event_box,  2, 3, 1, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
-	edit_packer.attach (controls_layout,         0, 1, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
-	edit_packer.attach (track_canvas_event_box,  1, 2, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
-	edit_packer.attach (edit_vscrollbar,         2, 3, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
-
-	edit_frame.set_name ("BaseFrame");
-	edit_frame.set_shadow_type (SHADOW_IN);
-	edit_frame.add (edit_packer);
+	edit_packer.attach (edit_hscrollbar,         2, 3, 2, 3,    FILL|EXPAND,  FILL, 0, 0);
 
 	zoom_in_button.set_name ("EditorTimeButton");
 	zoom_out_button.set_name ("EditorTimeButton");
@@ -637,20 +635,31 @@ Editor::Editor (AudioEngine& eng)
 	snapshot_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::snapshot_display_selection_changed));
 	snapshot_display.signal_button_press_event().connect (mem_fun (*this, &Editor::snapshot_display_button_press), false);
 
-       	the_notebook.append_page (region_list_scroller, _("Regions"));
-       	the_notebook.append_page (route_list_scroller, _("Tracks/Busses"));
-	the_notebook.append_page (snapshot_display_scroller, _("Snapshots"));
-	the_notebook.append_page (*edit_group_display_packer, _("Edit Groups"));
-	the_notebook.append_page (named_selection_scroller, _("Chunks"));
+	Gtk::Label* nlabel;
+
+	nlabel = manage (new Label (_("Regions")));
+	nlabel->set_angle (-90);
+       	the_notebook.append_page (region_list_scroller, *nlabel);
+	nlabel = manage (new Label (_("Tracks/Busses")));
+	nlabel->set_angle (-90);
+       	the_notebook.append_page (route_list_scroller, *nlabel);
+	nlabel = manage (new Label (_("Snapshots")));
+	nlabel->set_angle (-90);
+	the_notebook.append_page (snapshot_display_scroller, *nlabel);
+	nlabel = manage (new Label (_("Edit Groups")));
+	nlabel->set_angle (-90);
+	the_notebook.append_page (*edit_group_display_packer, *nlabel);
+	nlabel = manage (new Label (_("Chunks")));
+	nlabel->set_angle (-90);
+	the_notebook.append_page (named_selection_scroller, *nlabel);
+
 	the_notebook.set_show_tabs (true);
 	the_notebook.set_scrollable (true);
 	the_notebook.popup_enable ();
+	the_notebook.set_tab_pos (Gtk::POS_RIGHT);
 
-	TearOff *notebook_tearoff = manage (new TearOff (the_notebook, true));
-	notebook_tearoff->tearoff_window().set_size_request (200, 400);
-
-	edit_pane.pack1 (edit_frame, true, true);
-	edit_pane.pack2 (*notebook_tearoff, false, true);
+	edit_pane.pack1 (edit_packer, true, true);
+	edit_pane.pack2 (the_notebook, false, true);
 	
 	edit_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
 

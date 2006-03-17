@@ -253,8 +253,9 @@ class Session : public sigc::trackable, public Stateful
 	static string template_dir ();
 	static void get_template_list (list<string>&);
 	
+	static string change_audio_path_by_name (string oldpath, string oldname, string newname, bool destructive);
 	static string peak_path_from_audio_path (string);
-	static string old_peak_path_from_audio_path (string);
+	string audio_path_from_name (string, uint32_t nchans, uint32_t chan, bool destructive);
 
 	void process (jack_nframes_t nframes);
 
@@ -1498,6 +1499,7 @@ class Session : public sigc::trackable, public Stateful
 	RouteList       routes;
 	mutable PBD::NonBlockingRWLock route_lock;
 	void   add_route (Route*);
+	uint32_t destructive_index;
 
 	int load_routes (const XMLNode&);
 	Route* XMLRouteFactory (const XMLNode&);

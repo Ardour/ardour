@@ -188,6 +188,7 @@ fft_result.cc
 """)
 
 glade_files=glob.glob('glade/*.glade')
+pixmap_files=glob.glob('pixmaps/*.xpm')
 
 intl_files = gtkardour_files + glade_files + glob.glob('*.h')
 
@@ -244,19 +245,20 @@ env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour'
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour2_ui.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour.colors'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour'), 'splash.ppm'))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/pixmaps'), pixmap_files))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/glade'), glade_files))
 
 #dist
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       [ 'SConscript',
                                         'i18n.h', 'gettext.h',
-                                        'editor_xpms', 'misc_xpms',
-                                        'crossfade_xpms.h', 'meter_xpms.h',
                                         'ardour2_ui.rc', 'splash.ppm',
-                                        'ardour.menus', 'ardour.bindings'
+                                        'ardour.menus', 'ardour.bindings', 'ardour.colors',
+					'editor_xpms'
                                         ] +
-                                      gtkardour_files + vst_files + glade_files +
+                                      gtkardour_files + vst_files + glade_files + pixmap_files +
                                       glob.glob('po/*.po') + glob.glob('*.h')))
 
 # generate a prototype full-featured ardour_ui.rc file

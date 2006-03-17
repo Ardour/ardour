@@ -87,7 +87,7 @@ SndFileSource::init (const string& idstr, bool build_peak)
 	_path = file;
 
 	if (build_peak) {
-		if (initialize_peakfile (false, file)) {
+		if (initialize_peakfile (false, _path)) {
 			sf_close (sf);
 			sf = 0;
 			throw failed_constructor ();

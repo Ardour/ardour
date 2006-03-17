@@ -54,12 +54,15 @@ class FileSource : public Source {
 	FileSource (const XMLNode&, jack_nframes_t rate);
 	~FileSource ();
 
+	int set_name (std::string str, bool destructive);
+
+	void set_allow_remove_if_empty (bool yn);
+
 	jack_nframes_t length() const { return _length; }
 	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 	jack_nframes_t write (Sample *src, jack_nframes_t cnt, char * workbuf);
 	void           mark_for_remove();
 	string         peak_path(string audio_path);
-	string         old_peak_path(string audio_path);
 	string         path() const { return _path; }
 
 	virtual int            seek (jack_nframes_t frame) {return 0; }
@@ -93,7 +96,8 @@ class FileSource : public Source {
 	string        _take_id;
 	SampleFormat  _sample_format;
 	int           _sample_size;
-	
+	bool           allow_remove_if_empty;
+
 	static char bwf_country_code[3];
 	static char bwf_organization_code[4];
 	static char bwf_serial_number[13];

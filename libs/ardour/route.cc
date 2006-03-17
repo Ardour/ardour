@@ -622,6 +622,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			if (_session.transport_speed() > 1.5f || _session.transport_speed() < -1.5f) {
 				pan (bufs, nbufs, nframes, offset, speed_quietning); 
 			} else {
+				// cerr << "panner state = " << _panner->automation_state() << endl;
 				if (!_panner->empty() &&
 				    (_panner->automation_state() & Play ||
 				     ((_panner->automation_state() & Touch) && !_panner->touching()))) {

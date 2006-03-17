@@ -59,7 +59,6 @@ Source::Source (bool announce)
 	_use_cnt = 0;
 	_peaks_built = false;
 	next_peak_clear_should_notify = true;
-	peakfile = -1;
 	_timestamp = 0;
 	_read_data_count = 0;
 	_write_data_count = 0;
@@ -70,7 +69,6 @@ Source::Source (const XMLNode& node)
 	_use_cnt = 0;
 	_peaks_built = false;
 	next_peak_clear_should_notify = true;
-	peakfile = -1;
 	_timestamp = 0;
 	_read_data_count = 0;
 	_write_data_count = 0;
@@ -82,9 +80,6 @@ Source::Source (const XMLNode& node)
 
 Source::~Source ()
 {
-	if (peakfile >= 0) {
-		close (peakfile);
-	}
 }
 
 XMLNode&
@@ -320,6 +315,25 @@ Source::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) const
 }
 
 int
+Source::rename_peakfile (string newpath)
+{
+	/* caller must hold _lock */
+
+	string oldpath = peakpath;
+
+	if (access (oldpath.c_str(), F_OK) == 0) {
+		if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
+			error << string_compose (_("cannot rename peakfile for %1 from %2 to %3 (%4)"), _name, oldpath, newpath, strerror (errno)) << endmsg;
+			return -1;
+		}
+	}
+
+	peakpath = newpath;
+
+	return 0;
+}
+
+int
 Source::initialize_peakfile (bool newfile, string audio_path)
 {
 	struct stat statbuf;
@@ -344,33 +358,6 @@ Source::initialize_peakfile (bool newfile, string audio_path)
 				return -1;
 			}
 
-			/* older sessions stored peaks in the same directory
-			   as the audio. so check there as well.
-			*/
-			
-			string oldpeakpath = old_peak_path (audio_path);
-			
-			if (stat (oldpeakpath.c_str(), &statbuf)) {
-				
-				if (errno == ENOENT) {
-
-					statbuf.st_size = 0;
-
-				} else {
-					
-					/* it exists in the audio dir , but there is some kind of error */
-					
-					error << string_compose(_("Source: cannot stat peakfile \"%1\" or \"%2\""), peakpath, oldpeakpath) << endmsg;
-					return -1;
-				}
-				
-			} else {
-
-				/* we found it in the sound dir, where they lived once upon a time, in a land ... etc. */
-
-				peakpath = oldpeakpath;
-			}
-
 		} else {
 			
 			/* we found it in the peaks dir */
@@ -389,11 +376,6 @@ Source::initialize_peakfile (bool newfile, string audio_path)
 				_peaks_built = true;
 			}
 		}
-	}
-
-	if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
-		error << string_compose(_("Source: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
-		return -1;
 	}
 
 	if (!newfile && !_peaks_built && _build_missing_peakfiles && _build_peakfiles) {
@@ -418,7 +400,8 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 	PeakData* staging = 0;
 	Sample* raw_staging = 0;
 	char * workbuf = 0;
-	
+	int peakfile = -1;
+
 	expected_peaks = (cnt / (double) frames_per_peak);
 	scale = npeaks/expected_peaks;
 
@@ -474,11 +457,21 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 
 	if (scale == 1.0) {
 
-		// cerr << "DIRECT PEAKS\n";
-		
 		off_t first_peak_byte = (start / frames_per_peak) * sizeof (PeakData);
 
-		if ((nread = ::pread (peakfile, peaks, sizeof (PeakData)* npeaks, first_peak_byte)) != sizeof (PeakData) * npeaks) {
+		/* open, read, close */
+
+		if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
+			error << string_compose(_("Source: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+			return -1;
+		}
+
+		// cerr << "DIRECT PEAKS\n";
+		
+		nread = ::pread (peakfile, peaks, sizeof (PeakData)* npeaks, first_peak_byte);
+		close (peakfile);
+
+		if (nread != sizeof (PeakData) * npeaks) {
 			cerr << "Source["
 			     << _name
 			     << "]: cannot read peaks from peakfile! (read only " 
@@ -536,6 +529,13 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 		/* handle the case where the initial visual peak is on a pixel boundary */
 
 		current_stored_peak = min (current_stored_peak, stored_peak_before_next_visual_peak);
+
+		/* open ... close during out: handling */
+
+		if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
+			error << string_compose(_("Source: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+			return 0;
+		}
 
 		while (nvisual_peaks < npeaks) {
 
@@ -669,6 +669,10 @@ Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start
 	}
 
   out:
+	if (peakfile >= 0) {
+		close (peakfile);
+	}
+
 	if (staging) {
 		delete [] staging;
 	} 
@@ -734,7 +738,6 @@ Source::build_peaks ()
 		}
 
 		if (pr_signal) {
-			off_t fend = lseek (peakfile, 0, SEEK_END);
 			PeaksReady (); /* EMIT SIGNAL */
 		}
 	}
@@ -754,6 +757,7 @@ Source::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 	jack_nframes_t frames_read;
 	jack_nframes_t frames_to_read;
 	off_t first_peak_byte;
+	int peakfile = -1;
 	int ret = -1;
 
 #ifdef DEBUG_PEAK_BUILD
@@ -771,6 +775,11 @@ Source::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 	peaki = 0;
 
 	workbuf = new char[max(frames_per_peak, cnt) * 4];
+	
+	if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
+		error << string_compose(_("Source: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+		return -1;
+	}
 	
 	while (cnt) {
 
@@ -810,6 +819,9 @@ Source::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 
   out:
 	delete [] peakbuf;
+	if (peakfile >= 0) {
+		close (peakfile);
+	}
 	if (workbuf)
 		delete [] workbuf;
 	return ret;
@@ -856,13 +868,27 @@ Source::release ()
 jack_nframes_t
 Source::available_peaks (double zoom_factor) const
 {
+	int peakfile;
+	off_t end;
+
 	if (zoom_factor < frames_per_peak) {
 		return length(); // peak data will come from the audio file
 	} 
 	
 	/* peak data comes from peakfile */
 
-	LockMonitor lm (_lock, __LINE__, __FILE__);
-	off_t end = lseek (peakfile, 0, SEEK_END);
+	if ((peakfile = ::open (peakpath.c_str(), O_RDONLY)) < 0) {
+		error << string_compose(_("Source: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+		return 0;
+	}
+
+	{ 
+		LockMonitor lm (_lock, __LINE__, __FILE__);
+		end = lseek (peakfile, 0, SEEK_END);
+	}
+
+	close (peakfile);
+
 	return (end/sizeof(PeakData)) * frames_per_peak;
 }
+

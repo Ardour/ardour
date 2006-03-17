@@ -69,6 +69,9 @@ DiskStream::DiskStream (Session &sess, const string &name, Flag flag)
 	/* prevent any write sources from being created */
 
 	in_set_state = true;
+	
+	
+
 	init (flag);
 	use_new_playlist ();
 	in_set_state = false;
@@ -472,13 +475,27 @@ void
 DiskStream::use_destructive_playlist ()
 {
 	/* use the sources associated with the single full-extent region */
+	
+	Playlist::RegionList* rl = _playlist->regions_at (0);
 
-	AudioRegion* region = dynamic_cast<AudioRegion*> (_playlist->regions_at (0)->front());
+	if (rl->empty()) {
+		throw failed_constructor();
+	}
+
+	AudioRegion* region = dynamic_cast<AudioRegion*> (rl->front());
+
+	if (region == 0) {
+		throw failed_constructor();
+	}
+
+	delete rl;
+
 	uint32_t n;
 	ChannelList::iterator chan;
 
 	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
 		(*chan).write_source = dynamic_cast<FileSource*>(&region->source (n));
+		(*chan).write_source->set_allow_remove_if_empty (false);
 	}
 
 	/* the source list will never be reset for a destructive track */
@@ -491,7 +508,7 @@ DiskStream::set_io (IO& io)
 	set_align_style_from_io ();
 }
 
-void
+int
 DiskStream::set_name (string str, void *src)
 {
 	if (str != _name) {
@@ -499,12 +516,14 @@ DiskStream::set_name (string str, void *src)
 		_name = str;
 		
 		if (!in_set_state && recordable()) {
-
-			/* open new capture files so that they have the correct name */
-
-			reset_write_sources (false);
+			/* rename existing capture files so that they have the correct name */
+			return rename_write_sources ();
+		} else {
+			return -1;
 		}
 	}
+
+	return 0;
 }
 
 void
@@ -2097,8 +2116,12 @@ DiskStream::set_state (const XMLNode& node)
 		if (!had_playlist) {
 			_playlist->set_orig_diskstream_id (_id);
 		}
-
-		if (capture_pending_node) {
+		
+		if (!destructive() && capture_pending_node) {
+			/* destructive streams have one and only one source per channel,
+			   and so they never end up in pending capture in any useful
+			   sense.
+			*/
 			use_pending_capture_data (*capture_pending_node);
 		}
 
@@ -2170,6 +2193,10 @@ DiskStream::use_new_write_source (uint32_t n)
 
 	chan.write_source->use ();
 
+	/* do not remove destructive files even if they are empty */
+
+	chan.write_source->set_allow_remove_if_empty (!destructive());
+
 	return 0;
 }
 
@@ -2211,6 +2238,22 @@ DiskStream::reset_write_sources (bool mark_write_complete, bool force)
 			capturing_sources.push_back ((*chan).write_source);
 		}
 	}
+}
+
+int
+DiskStream::rename_write_sources ()
+{
+	ChannelList::iterator chan;
+	uint32_t n;
+
+	for (chan = channels.begin(), n = 0; chan != channels.end(); ++chan, ++n) {
+		if ((*chan).write_source != 0) {
+			(*chan).write_source->set_name (_name, destructive());
+			/* XXX what to do if one of them fails ? */
+		}
+	}
+
+	return 0;
 }
 
 void

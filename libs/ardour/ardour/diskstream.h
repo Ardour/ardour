@@ -100,7 +100,7 @@ class DiskStream : public Stateful, public sigc::trackable
 	jack_nframes_t roll_delay() const { return _roll_delay; }
 	void set_roll_delay (jack_nframes_t);
 
-	void set_name (string str, void* src);
+	int set_name (string str, void* src);
 
 	string input_source (uint32_t n=0) const {
 		if (n < channels.size()) {
@@ -244,6 +244,7 @@ class DiskStream : public Stateful, public sigc::trackable
 	void set_block_size (jack_nframes_t);
 	int  internal_playback_seek (jack_nframes_t distance);
 	int  can_internal_playback_seek (jack_nframes_t distance);
+	int  rename_write_sources ();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
 

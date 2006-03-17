@@ -56,6 +56,7 @@ class Source : public Stateful, public sigc::trackable
 	virtual ~Source ();
 
 	const string& name() const { return _name; }
+
 	ARDOUR::id_t  id() const   { return _id; }
 
 	/* returns the number of items in this `source' */
@@ -103,9 +104,10 @@ class Source : public Stateful, public sigc::trackable
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-
 	static int  start_peak_thread ();
 	static void stop_peak_thread ();
+
+	int rename_peakfile (std::string newpath);
 
 	static void set_build_missing_peakfiles (bool yn) {
 		_build_missing_peakfiles = yn;
@@ -125,7 +127,6 @@ class Source : public Stateful, public sigc::trackable
 	jack_nframes_t    _length;
 	bool               next_peak_clear_should_notify;
 	string             peakpath;
-	int                peakfile; /* fd */
 	time_t            _timestamp;
 	string            _captured_for;
 
@@ -138,7 +139,6 @@ class Source : public Stateful, public sigc::trackable
 	int  do_build_peak (jack_nframes_t, jack_nframes_t);
 	virtual jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const = 0;
 	virtual string peak_path(string audio_path) = 0;
-	virtual string old_peak_path(string audio_path) = 0;
 
 	static pthread_t peak_thread;
 	static bool      have_peak_thread;

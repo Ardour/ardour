@@ -84,12 +84,6 @@ ExternalSource::peak_path (string audio_path)
 	return res;
 }
 
-string
-ExternalSource::old_peak_path (string audio_path)
-{
-	return peak_path (audio_path);
-}
-
 #ifdef HAVE_COREAUDIO
 
 ExternalSource*

@@ -755,13 +755,23 @@ AudioTrack::toggle_monitor_input ()
 int
 AudioTrack::set_name (string str, void *src)
 {
+	int ret;
+
 	if (record_enabled() && _session.actively_recording()) {
 		/* this messes things up if done while recording */
 		return -1;
 	}
 
-	diskstream->set_name (str, src);
-	return IO::set_name (str, src);
+	if (diskstream->set_name (str, src)) {
+		return -1;
+	}
+
+	/* save state so that the statefile fully reflects any filename changes */
+
+	if ((ret = IO::set_name (str, src)) == 0) {
+		_session.save_state ("");
+	}
+	return ret;
 }
 
 int

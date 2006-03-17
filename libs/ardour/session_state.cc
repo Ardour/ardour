@@ -192,6 +192,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	pending_abort = false;
 	layer_model = MoveAddHigher;
 	xfade_model = ShortCrossfade;
+	destructive_index = 0;
 
 	/* allocate conversion buffers */
 	_conversion_buffers[ButlerContext] = new char[DiskStream::disk_io_frames() * 4];
@@ -401,13 +402,32 @@ Session::setup_raid_path (string path)
 
 	if (colons == 0) {
 
-		/* no multiple search path, just one directory (common case) */
+		/* no multiple search path, just one location (common case) */
 
 		sp.path = path;
 		sp.blocks = 0;
 		session_dirs.push_back (sp);
+
+		string fspath;
+
+		/* sounds dir */
+
+		fspath += sp.path;
+		if (fspath[fspath.length()-1] != '/') {
+			fspath += '/';
+		}
+		fspath += sound_dir_name;
+		fspath += ':';
+
+		/* tape dir */
+
+		fspath += sp.path;
+		if (fspath[fspath.length()-1] != '/') {
+			fspath += '/';
+		}
+		fspath += tape_dir_name;
 		
-		FileSource::set_search_path (path + sound_dir_name);
+		FileSource::set_search_path (fspath);
 
 		return;
 	}
@@ -418,6 +438,9 @@ Session::setup_raid_path (string path)
 		
 		sp.blocks = 0;
 		sp.path = remaining.substr (0, colon);
+		session_dirs.push_back (sp);
+
+		/* add sounds to file search path */
 
 		fspath += sp.path;
 		if (fspath[fspath.length()-1] != '/') {
@@ -426,7 +449,14 @@ Session::setup_raid_path (string path)
 		fspath += sound_dir_name;
 		fspath += ':';
 
-		session_dirs.push_back (sp);
+		/* add tape dir to file search path */
+
+		fspath += sp.path;
+		if (fspath[fspath.length()-1] != '/') {
+			fspath += '/';
+		}
+		fspath += tape_dir_name;
+		fspath += ':';
 
 		remaining = remaining.substr (colon+1);
 	}
@@ -436,11 +466,19 @@ Session::setup_raid_path (string path)
 		sp.blocks = 0;
 		sp.path = remaining;
 
+		fspath += ':';
 		fspath += sp.path;
 		if (fspath[fspath.length()-1] != '/') {
 			fspath += '/';
 		}
 		fspath += sound_dir_name;
+		fspath += ':';
+
+		fspath += sp.path;
+		if (fspath[fspath.length()-1] != '/') {
+			fspath += '/';
+		}
+		fspath += tape_dir_name;
 
 		session_dirs.push_back (sp);
 	}
@@ -681,7 +719,7 @@ Session::save_state (string snapshot_name, bool pending)
 	if (!pending) {
 
 		bool was_dirty = dirty();
-		
+
 		_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 		
 		if (was_dirty) {
@@ -1298,10 +1336,18 @@ Session::state(bool full_state)
 			/* Don't save information about FileSources that are empty */
 			
 			FileSource* fs;
-			
+
 			if ((fs = dynamic_cast<FileSource*> ((*siter).second)) != 0) {
-				if (fs->length() == 0) {
-					continue;
+				DestructiveFileSource* dfs = dynamic_cast<DestructiveFileSource*> (fs);
+
+				/* destructive file sources are OK if they are empty, because
+				   we will re-use them every time.
+				*/
+
+				if (!dfs) {
+					if (fs->length() == 0) {
+						continue;
+					}
 				}
 			}
 			

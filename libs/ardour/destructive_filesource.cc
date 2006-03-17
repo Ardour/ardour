@@ -69,7 +69,6 @@ jack_nframes_t DestructiveFileSource::xfade_frames = 64;
 DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, bool repair_first, SampleFormat samp_format)
 	: FileSource (path, rate, repair_first, samp_format)
 {
-	cerr << "DESTRUCTO DISK STREAM, " << _name << endl;
 	if (out_coefficient == 0) {
 		setup_standard_crossfades (rate);
 	}
@@ -84,7 +83,6 @@ DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, 
 DestructiveFileSource::DestructiveFileSource (const XMLNode& node, jack_nframes_t rate)
 	: FileSource (node, rate)
 {
-	cerr << "from XML, DESTRUCTO DISK STREAM, " << _name << endl;
 	if (out_coefficient == 0) {
 		setup_standard_crossfades (rate);
 	}

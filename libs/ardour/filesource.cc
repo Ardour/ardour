@@ -165,6 +165,7 @@ FileSource::init (string pathstr, bool must_exist, jack_nframes_t rate)
 	fd = -1;
 	remove_at_unref = false;
 	next_peak_clear_should_notify = false;
+	allow_remove_if_empty = true;
 
 	if (pathstr[0] != '/') {
 
@@ -300,7 +301,7 @@ FileSource::init (string pathstr, bool must_exist, jack_nframes_t rate)
 	}
 	
 	if ((ret = initialize_peakfile (new_file, _path))) {
-		error << string_compose (_("FileSource: cannot initialize peakfile for %1"), _path) << endmsg;
+		error << string_compose (_("FileSource: cannot initialize peakfile for %1 as %2"), _path, peakpath) << endmsg;
 	}
 
   out:
@@ -325,13 +326,48 @@ FileSource::~FileSource ()
 	
 	if (fd >= 0) {
 
-		if (remove_at_unref || is_empty (_path)) {
+		if (remove_at_unref || (is_empty (_path) && allow_remove_if_empty)) {
 			unlink (_path.c_str());
 			unlink (peakpath.c_str());
 		}
 
 		close (fd);
 	} 
+}
+
+void
+FileSource::set_allow_remove_if_empty (bool yn)
+{
+	allow_remove_if_empty = yn;
+}
+
+int
+FileSource::set_name (string newname, bool destructive)
+{
+	LockMonitor lm (_lock, __LINE__, __FILE__);
+	string oldpath = _path;
+	string newpath = Session::change_audio_path_by_name (oldpath, _name, newname, destructive);
+
+	if (newpath.empty()) {
+		error << string_compose (_("programming error: %1"), "cannot generate a changed audio path") << endmsg;
+		return -1;
+	}
+
+	if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
+		error << string_compose (_("cannot rename audio file for %1 to %2"), _name, newpath) << endmsg;
+		return -1;
+	}
+
+	_name = basename (newpath);
+	_path = newpath;
+
+	return rename_peakfile (peak_path (_path));
+}
+
+string
+FileSource::peak_path (string audio_path)
+{
+	return Session::peak_path_from_audio_path (audio_path);
 }
 
 int
@@ -1230,9 +1266,9 @@ FileSource::is_empty (string path)
 	   less than 1msec at typical sample rates.  
 	*/
 
-	/* NOTE: 700 bytes is the size of a BWF header structure *plus* our minimal coding history */
+	/* NOTE: 698 bytes is the size of a BWF header structure *plus* our minimal coding history */
 
-	return (statbuf.st_size == 0 || statbuf.st_size == wave_header_size || statbuf.st_size == 700);
+	return (statbuf.st_size == 0 || statbuf.st_size == wave_header_size || statbuf.st_size == 698);
 }
 
 void
@@ -1246,18 +1282,6 @@ FileSource::mark_streaming_write_completed ()
 		_peaks_built = true;
 		 PeaksReady (); /* EMIT SIGNAL */
 	}
-}
-
-string
-FileSource::peak_path(string audio_path)
-{
-	return Session::peak_path_from_audio_path (audio_path);
-}
-
-string
-FileSource::old_peak_path(string audio_path)
-{
-	return Session::old_peak_path_from_audio_path (audio_path);
 }
 
 void
@@ -1470,3 +1494,4 @@ FileSource::repair (string path, jack_nframes_t rate)
 	fclose (in);
 	return ret;
 }
+
