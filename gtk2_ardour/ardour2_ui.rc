@@ -674,9 +674,9 @@ style "redirect_list_display"
 
 	font_name = "sans 7"
 	text[NORMAL] = { 0.80, 0.80, 0.80 }
- 	text[ACTIVE] = { 0.0, 0.0, 0.9 }
+ 	text[ACTIVE] = { 0.5, 0.5, 0.9 }
  	text[INSENSITIVE] = { 0, 0, 0 }
- 	text[SELECTED] = { 0.9, 0.0, 0.0 }
+ 	text[SELECTED] = { 0.9, 0.3, 0.3 }
 
 	base[NORMAL] = { 0, 0, 0 }
  	base[ACTIVE] = { 0, 0, 0 }
@@ -686,8 +686,8 @@ style "redirect_list_display"
 	# these two are explicitly used by the cell renderer for the
         # text
 
-	fg[NORMAL] = { 0.2, 0.2, 0.2 }  # used for inactive
-	fg[ACTIVE] = { 0.0, 0.5, 0.5 }  # used for active
+	fg[NORMAL] = { 0.5, 0.5, 0.5 }  # used for inactive
+	fg[ACTIVE] = { 0.5, 1.0, 1.0 }  # used for active
 }
 
 # MixerPanZone:
@@ -822,7 +822,7 @@ style "pan_slider"
 
 style "region_list_whole_file"
 {
-	fg[NORMAL] = { 1.0, 0, 0 }
+	fg[NORMAL] = { 0.4, 0.4, 0.9 }
 }
 
 
