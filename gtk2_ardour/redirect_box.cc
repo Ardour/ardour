@@ -741,33 +741,24 @@ RedirectBox::idle_delete_redirect (Redirect *redirect)
 void
 RedirectBox::rename_redirect (Redirect* redirect)
 {
-	ArdourDialog dialog (_("ardour: rename redirect"), true);
-	Entry  entry;
-	VBox   vbox;
-	HBox   hbox;
-	Button ok_button (_("OK"));
-	Button cancel_button (_("Cancel"));
+	ArdourPrompter name_prompter (true);
+	string result;
+	name_prompter.set_prompt (_("rename redirect"));
+	name_prompter.set_initial_text (redirect->name());
+	name_prompter.show_all ();
 
-	dialog.set_name ("RedirectRenameWindow");
-	dialog.set_size_request (300, -1);
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
+	switch (name_prompter.run ()) {
 
-	dialog.add_action_widget (entry, RESPONSE_ACCEPT);
-	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
-	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	
-	entry.set_name ("RedirectNameDisplay");
-	entry.set_text (redirect->name());
-	entry.select_region (0, -1);
-	entry.grab_focus ();
-
-	switch (dialog.run ()) {
-	case RESPONSE_ACCEPT:
-		redirect->set_name (entry.get_text(), this);
-		break;
-	default:
+	case Gtk::RESPONSE_ACCEPT:
+        name_prompter.get_result (result);
+        if (result.length()) {
+			redirect->set_name (result, this);
+		}	
 		break;
 	}
+
+	return;
+  
 }
 
 void

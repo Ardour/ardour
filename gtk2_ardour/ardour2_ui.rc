@@ -667,8 +667,12 @@ style "track_list_display" = "small_bold_text"
  	base[SELECTED] = { 0, 0, 0 }
 }
 
-style "redirect_list_display" = "small_bold_text"
+style "redirect_list_display"
 {
+	GtkTreeView::horizontal-separator = 0
+	GtkTreeView::vertical-separator = 0
+
+	font_name = "sans 7"
 	text[NORMAL] = { 0.80, 0.80, 0.80 }
  	text[ACTIVE] = { 0.0, 0.0, 0.9 }
  	text[INSENSITIVE] = { 0, 0, 0 }
