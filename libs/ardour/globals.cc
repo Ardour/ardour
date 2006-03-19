@@ -311,7 +311,11 @@ ARDOUR::get_user_ardour_path ()
 		
 	path = envvar;
 	path += "/.ardour/";
-	
+
+	/* create it if necessary */
+
+	mkdir (path.c_str (), 0755);
+
 	return path;
 }
 

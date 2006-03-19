@@ -60,11 +60,9 @@ requirement.
 	   - see ftp://ftp.gnome.org/pub/GNOME/MIRRORS.html
 	      and then follow to sources/libart_lgpl
 	    
-       glib 1.2   (http://www.gtk.org)
-           glib-1.2.8 (included with most distributions)
+       Glib 2.6   (http://www.gtk.org)
 
-       GTK+ 1.2   (http://www.gtk.org)
-	gtk+-1.2.8 (included with most distributions)
+       GTK+ 2.6   (http://www.gtk.org)
 
        libglade2 (http://www.gnome.org/)
 	unsure of minimum version. XXX todo.
