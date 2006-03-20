@@ -151,6 +151,7 @@ class Crossfade : public Stateful, public StateManager
 
   private:
 	friend struct CrossfadeComparePtr;
+	friend class AudioPlaylist;
 
 	static jack_nframes_t _short_xfade_length;
 

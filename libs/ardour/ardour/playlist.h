@@ -233,6 +233,9 @@ class Playlist : public Stateful, public StateManager {
 	void splice_locked ();
 	void splice_unlocked ();
 
+
+	virtual void finalize_split_region (Region *original, Region *left, Region *right) {}
+	
 	virtual void check_dependents (Region& region, bool norefresh) {}
 	virtual void refresh_dependents (Region& region) {}
 	virtual void remove_dependents (Region& region) {}

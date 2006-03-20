@@ -345,6 +345,27 @@ AudioPlaylist::refresh_dependents (Region& r)
 }
 
 void
+AudioPlaylist::finalize_split_region (Region *o, Region *l, Region *r)
+{
+	AudioRegion *orig  = dynamic_cast<AudioRegion*>(o);
+	AudioRegion *left  = dynamic_cast<AudioRegion*>(l);
+	AudioRegion *right = dynamic_cast<AudioRegion*>(r);
+
+	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end(); ++x) {
+		Crossfades::iterator tmp;
+
+		if ((*x)->_in == orig) {
+			(*x)->_in = left;
+		}
+
+		if ((*x)->_out == orig) {
+			(*x)->_out = right;
+		}
+		
+	}
+}
+
+void
 AudioPlaylist::check_dependents (Region& r, bool norefresh)
 {
 	AudioRegion* other;

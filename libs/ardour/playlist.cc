@@ -996,6 +996,8 @@ Playlist::split_region (Region& region, jack_nframes_t playlist_position)
 	before = playlist_position - region.position();
 	after = region.length() - before;
 	
+	in_set_state = true;
+	
 	_session.region_name (before_name, region.name(), false);
 	left = createRegion (region, 0, before, before_name, region.layer(), Region::Flag (region.flags()|Region::LeftOfSplit));
 
@@ -1005,6 +1007,10 @@ Playlist::split_region (Region& region, jack_nframes_t playlist_position)
 	add_region_internal (left, region.position(), true);
 	add_region_internal (right, region.position() + before);
 
+	finalize_split_region (&region, left, right);
+	
+	in_set_state = false;
+	
 	maybe_save_state (_("split"));
 }
 

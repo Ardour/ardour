@@ -93,6 +93,8 @@ class AudioPlaylist : public ARDOUR::Playlist
 	/* playlist "callbacks" */
 	void notify_crossfade_added (Crossfade *);
 	void flush_notifications ();
+
+		void finalize_split_region (Region *orig, Region *left, Region *right);
 	
         void refresh_dependents (Region& region);
         void check_dependents (Region& region, bool norefresh);
