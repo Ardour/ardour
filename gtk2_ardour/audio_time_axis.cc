@@ -701,6 +701,8 @@ AudioTimeAxisView::build_display_menu ()
 	items.push_back (MenuElem (_("Show all crossfades"), mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
 	items.push_back (SeparatorElem());
 
+	build_remote_control_menu ();
+	items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
 
 	automation_action_menu = manage (new Menu);
 	MenuList& automation_items = automation_action_menu->items();
