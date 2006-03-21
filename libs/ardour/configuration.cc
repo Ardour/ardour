@@ -265,7 +265,7 @@ Configuration::state (bool user_only)
 	}
 	if (!user_only || destructive_xfade_msecs_is_user) {
 		snprintf(buf, sizeof(buf), "%" PRIu32, destructive_xfade_msecs);
-		node->add_child_nocopy(option_node("destructive_xfade_msecs", string(buf)));
+		node->add_child_nocopy(option_node("destructive-xfade-msecs", string(buf)));
 	}
 
 	/* use-vst is always per-user */
@@ -409,7 +409,7 @@ Configuration::set_state (const XMLNode& root)
 					set_midi_feedback_interval_ms (atoi (option_value.c_str()));
 				} else if (option_name == "latched-record-enable") {
 					set_latched_record_enable (option_value == "yes");
-				} else if (option_name == "destructive_xfade_msecs") {
+				} else if (option_name == "destructive-xfade-msecs") {
 					uint32_t v;
 					if (sscanf (option_value.c_str(), "%u", &v) == 1) {
 						set_destructive_xfade_msecs (v);
@@ -1107,6 +1107,11 @@ void
 Configuration::set_destructive_xfade_msecs (uint32_t msecs, jack_nframes_t rate)
 {
 	destructive_xfade_msecs = msecs;
+
+	if (user_configuration) {
+		destructive_xfade_msecs_is_user = true;
+	}
+
 	if (rate) {
 		DestructiveFileSource::setup_standard_crossfades (rate);
 	}

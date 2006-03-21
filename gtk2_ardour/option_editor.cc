@@ -65,7 +65,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  short_xfade_adjustment (0, 1.0, 500.0, 5.0, 100.0),
 	  short_xfade_slider (short_xfade_adjustment),
-	  destructo_xfade_adjustment (0, 1.0, 500.0, 5.0, 100.0),
+	  destructo_xfade_adjustment (1.0, 1.0, 500.0, 1.0, 100.0),
 	  destructo_xfade_slider (destructo_xfade_adjustment),
 
 	  /* Sync */
@@ -94,6 +94,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	click_io_selector = 0;
 	auditioner_io_selector = 0;
+	session = 0;
 
 	set_default_size (300, 300);
 	set_title (_("ardour: options editor"));
@@ -328,6 +329,11 @@ OptionEditor::setup_fade_options ()
 	fade_packer.pack_start (*hbox, false, false);
 	
 	destructo_xfade_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::destructo_xfade_adjustment_changed));
+
+	short_xfade_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+	destructo_xfade_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+
+	destructo_xfade_adjustment.set_value (Config->get_destructive_xfade_msecs());
 
 	fade_packer.show_all ();
 }
