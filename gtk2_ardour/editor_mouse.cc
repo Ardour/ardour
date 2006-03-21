@@ -2112,10 +2112,20 @@ Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	
 	Marker* marker = (Marker *) drag_info.data;
 	bool is_start;
+
+
+
+	begin_reversible_command ( _("move marker") );
+	session->add_undo( session->locations()->get_memento() );
+	
 	Location * location = find_location_from_marker (marker, is_start);
+	
 	if (location) {
 		location->set (drag_info.copied_location->start(), drag_info.copied_location->end());
 	}
+
+	session->add_redo_no_execute( session->locations()->get_memento() );
+	commit_reversible_command ();
 	
 	marker_drag_line->hide();
 	range_marker_drag_rect->hide();

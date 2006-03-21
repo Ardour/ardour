@@ -1250,7 +1250,16 @@ TempoMap::set_state (const XMLNode& node)
 
 		in_set_state = false;
 	}
+	
+	/* This state needs to be saved. This string will never be a part of the 
+	   object's history though, because the allow_save flag is false during 
+	   session load. This state will eventually be tagged "initial state", 
+	   by a call to StateManager::allow_save from Session::set_state.
 
+	   If this state is not saved, there is no way to reach it through undo actions.
+	*/
+	save_state(_("load XML data"));
+	
 	send_state_changed (Change (0));
 
 	return 0;
@@ -1287,7 +1296,24 @@ TempoMap::restore_state (StateManager::State& state)
 
 	TempoMapState* tmstate = dynamic_cast<TempoMapState*> (&state);
 
-	metrics = tmstate->metrics;
+	/* We can't just set the metrics pointer to the address of the metrics list 
+	   stored in the state, cause this would ruin this state for restoring in
+	   the future. If they have the same address, they are the same list.
+	   Thus we need to copy all the elements from the state metrics list to the 
+	   current metrics list.
+	*/
+	metrics->clear();
+	for (Metrics::iterator i = tmstate->metrics->begin(); i != tmstate->metrics->end(); ++i) {
+		TempoSection *ts;
+		MeterSection *ms;
+		
+		if ((ts = dynamic_cast<TempoSection*>(*i)) != 0) {
+			metrics->push_back (new TempoSection (*ts));
+		} else if ((ms = dynamic_cast<MeterSection*>(*i)) != 0) {
+			metrics->push_back (new MeterSection (*ms));
+		}
+	}
+	
 	last_bbt_valid = false;
 
 	return Change (0);

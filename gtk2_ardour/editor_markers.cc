@@ -810,7 +810,13 @@ Editor::marker_menu_rename ()
 		return;
 	}
 
+	begin_reversible_command ( _("rename marker") );
+	session->add_undo( session->locations()->get_memento() );
+
 	loc->set_name (entry.get_text());
+	
+	session->add_redo_no_execute( session->locations()->get_memento() );
+	commit_reversible_command ();
 }
 
 gint
