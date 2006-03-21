@@ -199,10 +199,9 @@ Do you really want to destroy %1 ?"),
 
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
-	prompter.chosen.connect (ptr_fun (Main::quit));
-	prompter.show_all ();
-
-	Main::run ();
+	if (prompter.run () != RESPONSE_ACCEPT) {
+		return;
+	}
 		
 	if (prompter.get_choice() != 0) {
 		return;
@@ -2128,10 +2127,16 @@ Editor::reject_because_rate_differs (const string & path, SoundFileInfo& finfo, 
 			string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
 			choices);
 
-		rate_choice.chosen.connect (ptr_fun (Main::quit));
-		rate_choice.show_all ();
+		int response = rate_choice.run();
 
-		Main::run ();
+		switch (response) {
+		case RESPONSE_ACCEPT:
+			break;
+		default:
+			/* stop all that might come after this */
+			return -2;
+			break;
+		}
 
 		switch (rate_choice.get_choice()) {
 		case 0: /* do it anyway */
@@ -3546,13 +3551,11 @@ Editor::remove_last_capture ()
 		choices.push_back (_("No, do nothing."));
 		
 		Gtkmm2ext::Choice prompter (prompt, choices);
-		prompter.chosen.connect (ptr_fun (Main::quit));
-		prompter.show_all ();
-
-		Main::run ();
 		
-		if (prompter.get_choice() == 0) {
-			session->remove_last_capture ();
+		if (prompter.run () == RESPONSE_ACCEPT) {
+			if (prompter.get_choice() == 0) {
+				session->remove_last_capture ();
+			}
 		}
 
 	} else {

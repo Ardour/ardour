@@ -703,13 +703,12 @@ RouteUI::remove_this_route ()
 
 	Choice prompter (prompt, choices);
 
-	prompter.chosen.connect(sigc::ptr_fun(Gtk::Main::quit));
 	prompter.show_all ();
 
-	Gtk::Main::run ();
-
-	if (prompter.get_choice() == 0) {
-	  Glib::signal_idle().connect (bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));
+	if (prompter.run () == RESPONSE_ACCEPT) {
+		if (prompter.get_choice() == 0) {
+			Glib::signal_idle().connect (bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));
+		}
 	}
 }
 

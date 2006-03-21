@@ -18,6 +18,7 @@
     $Id$
 */
 
+#include <gtkmm/label.h>
 #include <gtkmm2ext/choice.h>
 
 using namespace std;
@@ -25,39 +26,27 @@ using namespace Gtkmm2ext;
 using namespace sigc;
 using namespace Gtk;
 
-Choice::Choice (string prompt,
-		vector<string> choices)
-	: Gtk::Window (WINDOW_TOPLEVEL),
-	  prompt_label (prompt)
+Choice::Choice (string prompt, vector<string> choices)
 {
 	int n;
 	vector<string>::iterator i;
 
 	set_position (Gtk::WIN_POS_CENTER);
 	set_name ("ChoiceWindow");
-	add (packer);
-	
-	packer.set_spacing (10);
-	packer.set_border_width (10);
-	packer.pack_start (prompt_label);
-	packer.pack_start (button_packer);
-	prompt_label.set_name ("ChoicePrompt");
+
+	Label* label = manage (new Label (prompt));
+	label->show ();
+
+	get_vbox()->pack_start (*label);
 	
 	for (n = 0, i = choices.begin(); i != choices.end(); ++i, ++n) {
-		Button *button = manage (new Gtk::Button (*i));
-		button->set_name ("ChoiceButton");
 
-		button_packer.set_spacing (5);
-		button_packer.set_homogeneous (true);
-		button_packer.pack_start (*button, false, true);
+		Button* button;
 
-		button->signal_clicked().connect (bind (mem_fun (*this, &Choice::_choice_made), n));
-		buttons.push_back (button);
+		button = add_button (*i, RESPONSE_ACCEPT);
+		button->signal_button_release_event().connect (bind (mem_fun (*this, &Choice::choice_made), n), false);
 	}
 
-	signal_delete_event().connect(mem_fun(*this, &Choice::closed));
-
-	packer.show_all ();
 	which_choice = -1;
 }
 
@@ -72,21 +61,12 @@ Choice::~Choice ()
 {
 }
 
-void
-Choice::_choice_made (int nbutton)
+bool
+Choice::choice_made (GdkEventButton* ev, int nbutton)
 {
 	which_choice = nbutton;
-	choice_made (which_choice);
-	chosen ();
-}
-
-gint
-Choice::closed (GdkEventAny *ev)
-{
-	which_choice = -1;
-	choice_made (which_choice);
-	chosen ();
-	return TRUE;
+	response (RESPONSE_ACCEPT);
+	return true;
 }
 
 int

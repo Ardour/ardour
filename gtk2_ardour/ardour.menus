@@ -308,7 +308,6 @@
                <menuitem action='SortBySourceFilesystem'/>
          </menu>
          <separator/>
-         <menuitem action='rlEmbedAudio'/>
-         <menuitem action='rlImportAudio'/>
+         <menuitem action='addExternalRegion'/>
      </popup>
 </ui>

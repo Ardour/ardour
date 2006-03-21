@@ -900,16 +900,12 @@ RedirectBox::clear_redirects()
 
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
-	prompter.chosen.connect(sigc::ptr_fun(Gtk::Main::quit));
-	prompter.show_all ();
-
-	Gtk::Main::run ();
-
-	if (prompter.get_choice() == 0) {
-		_route.clear_redirects (this);
+	if (prompter.run () == RESPONSE_ACCEPT) {
+		if (prompter.get_choice() == 0) {
+			_route.clear_redirects (this);
+		}
 	}
 }
-
 
 void
 RedirectBox::edit_redirect (Redirect* redirect)

@@ -340,9 +340,7 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFilesystem"),  _("By Source Filesystem"),
 			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileFS));
 	
-	act = ActionManager::register_action (rl_actions, X_("rlEmbedAudio"), _("Embed audio (link)"), mem_fun(*this, &Editor::embed_audio));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (rl_actions, X_("rlImportAudio"), _("Embed audio (link)"), bind (mem_fun(*this, &Editor::import_audio), false));
+	act = ActionManager::register_action (rl_actions, X_("addExternalAudio"), _("Embed audio (link)"), mem_fun(*this, &Editor::embed_audio));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformVisibility"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
