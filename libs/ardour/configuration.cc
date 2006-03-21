@@ -31,6 +31,7 @@
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
 #include <ardour/diskstream.h>
+#include <ardour/destructive_filesource.h>
 
 #include "i18n.h"
 
@@ -262,10 +263,9 @@ Configuration::state (bool user_only)
 	if (!user_only || latched_record_enable_is_user) {
 		node->add_child_nocopy(option_node("latched-record-enable", latched_record_enable?"yes":"no"));
 	}
-	if (!user_only || tape_dir_is_user) {
-		if (!tape_dir.empty()) {
-			node->add_child_nocopy(option_node("tape-dir", tape_dir));
-		}
+	if (!user_only || destructive_xfade_msecs_is_user) {
+		snprintf(buf, sizeof(buf), "%" PRIu32, destructive_xfade_msecs);
+		node->add_child_nocopy(option_node("destructive_xfade_msecs", string(buf)));
 	}
 
 	/* use-vst is always per-user */
@@ -409,8 +409,11 @@ Configuration::set_state (const XMLNode& root)
 					set_midi_feedback_interval_ms (atoi (option_value.c_str()));
 				} else if (option_name == "latched-record-enable") {
 					set_latched_record_enable (option_value == "yes");
-				} else if (option_name == "tape-dir") {
-					set_tape_dir (option_value);
+				} else if (option_name == "destructive_xfade_msecs") {
+					uint32_t v;
+					if (sscanf (option_value.c_str(), "%u", &v) == 1) {
+						set_destructive_xfade_msecs (v);
+					}
 				}
 			}
 			
@@ -467,7 +470,7 @@ Configuration::set_defaults ()
 	timecode_source_is_synced = true;
 	use_vst = true; /* if we build with VST_SUPPORT, otherwise no effect */
 	quieten_at_speed = true;
-	tape_dir = "";
+	destructive_xfade_msecs = 2;
 
 	midi_feedback_interval_ms = 100;
 	
@@ -508,7 +511,7 @@ Configuration::set_defaults ()
 	quieten_at_speed_is_user = false;
 	midi_feedback_interval_ms_is_user = false;
 	latched_record_enable_is_user = false;
-	tape_dir_is_user = false;
+	destructive_xfade_msecs_is_user = false;
 }
 
 Configuration::MidiPortDescriptor::MidiPortDescriptor (const XMLNode& node)
@@ -1094,14 +1097,17 @@ Configuration::get_latched_record_enable ()
 	return latched_record_enable;
 }
 
-string
-Configuration::get_tape_dir () 
+uint32_t 
+Configuration::get_destructive_xfade_msecs ()
 {
-	return tape_dir;
+	return destructive_xfade_msecs;
 }
 
 void
-Configuration::set_tape_dir (string path)
+Configuration::set_destructive_xfade_msecs (uint32_t msecs, jack_nframes_t rate)
 {
-	tape_dir = path;
+	destructive_xfade_msecs = msecs;
+	if (rate) {
+		DestructiveFileSource::setup_standard_crossfades (rate);
+	}
 }

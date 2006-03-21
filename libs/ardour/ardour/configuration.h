@@ -164,8 +164,8 @@ class Configuration : public Stateful
 	gain_t get_quieten_at_speed ();
 	void  set_quieten_at_speed (gain_t);
 
-	std::string get_tape_dir ();
-	void   set_tape_dir (std::string);
+	uint32_t get_destructive_xfade_msecs ();
+	void set_destructive_xfade_msecs (uint32_t, jack_nframes_t sample_rate = 0);
 	
   private:
 	void   set_defaults ();
@@ -246,8 +246,8 @@ class Configuration : public Stateful
 	bool          midi_feedback_interval_ms_is_user;
 	bool          latched_record_enable;
 	bool          latched_record_enable_is_user;
-	std::string   tape_dir;
-	bool          tape_dir_is_user;
+	uint32_t      destructive_xfade_msecs;
+	bool          destructive_xfade_msecs_is_user;
 
 	XMLNode *key_node;
 	bool     user_configuration;

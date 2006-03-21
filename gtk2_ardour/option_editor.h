@@ -94,21 +94,14 @@ class OptionEditor : public Gtk::Dialog
 	/* fades */
 
 	Gtk::VBox        fade_packer;
-	Gtk::CheckButton auto_xfade_button;
-	Gtk::CheckButton xfade_active_button;
-	Gtk::Label       layer_mode_label;
-	Gtk::ComboBoxText layer_mode_combo;
-	Gtk::Label       xfade_model_label;
-	Gtk::ComboBoxText xfade_model_combo;
 	Gtk::Adjustment  short_xfade_adjustment;
 	Gtk::HScale      short_xfade_slider;
+	Gtk::Adjustment  destructo_xfade_adjustment;
+	Gtk::HScale      destructo_xfade_slider;
 
-	void auto_xfade_clicked ();
-	void xfade_active_clicked ();
-	void layer_mode_chosen ();
-	void xfade_model_chosen ();
 	void setup_fade_options();
 	void short_xfade_adjustment_changed ();
+	void destructo_xfade_adjustment_changed ();
 
 	/* Sync */
 

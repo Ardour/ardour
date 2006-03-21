@@ -135,7 +135,6 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Gr
 	return act;
 }
 
-
 RefPtr<Action>
 ActionManager::register_toggle_action (RefPtr<ActionGroup> group, const char * name, const char * label, slot<void> sl, guint key, Gdk::ModifierType mods)
 {

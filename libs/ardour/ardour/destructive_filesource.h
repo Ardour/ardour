@@ -45,11 +45,12 @@ class DestructiveFileSource : public FileSource {
 
 	XMLNode& get_state ();
 
+	static void setup_standard_crossfades (jack_nframes_t sample_rate);
+
   private:
 	static jack_nframes_t xfade_frames;
 	static gain_t* out_coefficient;
 	static gain_t* in_coefficient;
-	static void setup_standard_crossfades (jack_nframes_t sample_rate);
 
 	bool          _capture_start;
 	bool          _capture_end;

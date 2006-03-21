@@ -3529,26 +3529,6 @@ Editor::nudge_track (bool use_edit_cursor, bool forwards)
 }
 
 void
-Editor::toggle_xfades_active ()
-{
-	if (session) {
-		session->set_crossfades_active (!session->get_crossfades_active());
-	}
-}
-
-void
-Editor::set_xfade_visibility (bool yn)
-{
-	
-}
-
-void
-Editor::toggle_xfade_visibility ()
-{
-	set_xfade_visibility (!xfade_visibility());
-}
-
-void
 Editor::remove_last_capture ()
 {
 	vector<string> choices;

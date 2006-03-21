@@ -102,7 +102,15 @@ DestructiveFileSource::~DestructiveFileSource()
 void
 DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
 {
-	xfade_frames = (jack_nframes_t) floor ((/*Config->get_destructive_crossfade_msecs()*/ 64 / 1000.0) * rate);
+	xfade_frames = (jack_nframes_t) floor ((Config->get_destructive_xfade_msecs () / 1000.0) * rate);
+
+	if (out_coefficient) {
+		delete [] out_coefficient;
+	}
+
+	if (in_coefficient) {
+		delete [] in_coefficient;
+	}
 
 	out_coefficient = new gain_t[xfade_frames];
 	in_coefficient = new gain_t[xfade_frames];

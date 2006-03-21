@@ -33,15 +33,29 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("MeterHold"), _("Meter hold"));
 	ActionManager::register_action (editor_actions, X_("MeterFalloff"), _("Meter falloff"));
 	ActionManager::register_action (editor_actions, X_("Solo"), _("Solo"));
+	ActionManager::register_action (editor_actions, X_("Crossfades"), _("Crossfades"));
 	ActionManager::register_action (editor_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_actions, X_("Autoconnect"), _("Autoconnect"));
+	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
 
 	/* add named actions for the editor */
+
 
 	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "toggle-xfades-active", _("Toggle Xfades Active"), mem_fun(*this, &Editor::toggle_xfades_active));
+	RadioAction::Group crossfade_model_group;
+
+	act = ActionManager::register_radio_action (editor_actions, crossfade_model_group, "CrossfadesFull", _("Span Entire Overlap"), bind (mem_fun(*this, &Editor::set_crossfade_model), FullCrossfade));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (editor_actions, crossfade_model_group, "CrossfadesShort", _("Short"), bind (mem_fun(*this, &Editor::set_crossfade_model), ShortCrossfade));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (editor_actions, "toggle-xfades-active", _("Active"), mem_fun(*this, &Editor::toggle_xfades_active));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (editor_actions, "toggle-xfades-visible", _("Visible"), mem_fun(*this, &Editor::toggle_xfade_visibility));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (editor_actions, "toggle-auto-xfades", _("Created Automatically"), mem_fun(*this, &Editor::toggle_auto_xfade));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-start", _("Playhead to Next Region Start"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (Start)));
@@ -228,7 +242,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "extend-range-to-start-of-region", _("Extend Range to Start of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (editor_actions, "ToggleFollowPlayhead", _("Follow Playhead"), (mem_fun(*this, &Editor::toggle_follow_playhead)));
+	act = ActionManager::register_toggle_action (editor_actions, "toggle-follow-playhead", _("Follow Playhead"), (mem_fun(*this, &Editor::toggle_follow_playhead)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "remove-last-capture", _("Remove Last Capture"), (mem_fun(*this, &Editor::remove_last_capture)));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -356,6 +370,12 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldMedium"), _("Medium"), bind (mem_fun (*this, &Editor::set_meter_hold), 100));
 	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldLong"), _("Long"), bind (mem_fun (*this, &Editor::set_meter_hold), 200));
 
+	RadioAction::Group layer_model_group;
+
+	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerLaterHigher"), _("Later is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::LaterHigher));
+	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerMoveAddHigher"), _("Most Recently Moved/Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::MoveAddHigher));
+	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerAddHigher"), _("Most Recently Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::AddHigher));
+
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (zoom_actions);
 	ActionManager::add_action_group (mouse_mode_actions);
@@ -393,3 +413,93 @@ Editor::toggle_measure_visibility ()
 	}
 }
 
+void
+Editor::toggle_auto_xfade ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-auto-xfades"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		Config->set_auto_xfade (tact->get_active());
+	}
+}
+
+void
+Editor::toggle_xfades_active ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-xfades-active"));
+	if (session && act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		session->set_crossfades_active (tact->get_active());
+	}
+}
+
+void
+Editor::toggle_xfade_visibility ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-xfades-visible"));
+	if (session && act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		// set_xfade_visibility (tact->get_active());
+	}
+}
+
+void
+Editor::set_layer_model (Session::LayerModel model)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<Action> act;
+
+	if (session) {
+		switch (model) {
+		case Session::LaterHigher:
+			act = ActionManager::get_action (X_("Editor"), X_("LayerLaterHigher"));
+			break;
+		case Session::MoveAddHigher:
+			act = ActionManager::get_action (X_("Editor"), X_("LayerMoveAddHigher"));
+			break;
+		case Session::AddHigher:
+			act = ActionManager::get_action (X_("Editor"), X_("LayerAddHigher"));
+			break;
+		}
+		
+		if (act) {
+			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+			if (ract && ract->get_active()) {
+				session->set_layer_model (model);
+			}
+		}
+	}
+}
+
+void
+Editor::set_crossfade_model (CrossfadeModel model)
+{
+	RefPtr<Action> act;
+
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	if (session) {
+		switch (model) {
+		case FullCrossfade:
+			act = ActionManager::get_action (X_("Editor"), X_("CrossfadesFull"));
+			break;
+		case ShortCrossfade:
+			act = ActionManager::get_action (X_("Editor"), X_("CrossfadesShort"));
+			break;
+		}
+		
+		if (act) {
+			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+			if (ract && ract->get_active()) {
+				session->set_xfade_model (model);
+			}
+		}
+	}
+}

@@ -300,10 +300,17 @@ class Editor : public PublicEditor
 
 	/* xfades */
 
-	void toggle_xfades_active();
+	void toggle_auto_xfade ();
+	void toggle_xfades_active ();
 	void toggle_xfade_visibility ();
-	void set_xfade_visibility (bool yn);
 	bool xfade_visibility() const { return _xfade_visibility; }
+	void update_crossfade_model ();
+	void set_crossfade_model (ARDOUR::CrossfadeModel);
+
+	/* layers */
+
+	void set_layer_model (ARDOUR::Session::LayerModel);
+	void update_layering_model ();
 
 	/* redirect shared ops menu. caller must free returned menu */
 

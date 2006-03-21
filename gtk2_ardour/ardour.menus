@@ -62,7 +62,7 @@
                     <menuitem action='ToggleAutoPlay'/>
                     <menuitem action='ToggleAutoReturn'/>
                     <menuitem action='ToggleClick'/>
-                    <menuitem action='ToggleFollowPlayhead'/>
+                    <menuitem action='toggle-follow-playhead'/>
                </menu>
        </menu>
        <menu name='Edit' action='Edit'>
@@ -203,6 +203,19 @@
                    <menuitem action='LatchedSolo'/>
                    <menuitem action='SoloInPlace'/>
                    <menuitem action='SoloViaBus'/>
+               </menu>
+	       <menu action='Crossfades'>
+		   <menuitem action='toggle-xfades-active'/>
+		   <menuitem action='toggle-xfades-visible'/>
+		   <menuitem action='toggle-auto-xfades'/>
+		   <separator/>
+		   <menuitem action='CrossfadesFull'/>
+		   <menuitem action='CrossfadesShort'/>
+	       </menu>
+	       <menu action='Layering'>
+		   <menuitem action='LayerLaterHigher'/>
+		   <menuitem action='LayerMoveAddHigher'/>
+		   <menuitem action='LayerAddHigher'/>
                </menu>
                <separator/>
                <menuitem action='SendMTC'/>

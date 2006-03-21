@@ -212,6 +212,8 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 
 	for (list<Preset*>::iterator i = fade_out_presets->begin(); i != fade_out_presets->end(); ++i) {
 
+		cerr << "looking for xpm " << (*i)->xpm << endl;
+
 		pxmap = manage (new Image (get_xpm((*i)->xpm)));
 		pbutton = manage (new Button);
 		pbutton->add (*pxmap);

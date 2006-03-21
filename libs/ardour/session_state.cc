@@ -2255,13 +2255,7 @@ Session::sound_dir () const
 string
 Session::tape_dir () const
 {
-	string res = Config->get_tape_dir();
-
-	if (!res.empty()) {
-		return res;
-	}
-
-	res = _path;
+	string res = _path;
 	res += tape_dir_name;
 	res += '/';
 	return res;

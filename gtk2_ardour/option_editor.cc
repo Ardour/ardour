@@ -47,22 +47,7 @@ using namespace Editing;
 using namespace Gtkmm2ext;
 using namespace std;
 
-static const gchar *lmode_strings[] = {
-	N_("Later regions are higher"),
-	N_("Most recently added/moved/trimmed regions are higher"),
-	N_("Most recently added regions are higher"),
-	0
-};
-
-static const gchar *xfl_strings[] = {
-	N_("Span entire region overlap"),
-	N_("Short fades at the start of the overlap"),
-	0
-};
-
 static vector<string> positional_sync_strings;
-static vector<string> layer_mode_strings;
-static vector<string> xfade_model_strings;
 
 OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	: Dialog ("option editor"),
@@ -78,12 +63,10 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* Fades */
 
-	  auto_xfade_button (_("Automatically create crossfades")),
-	  xfade_active_button (_("New full-overlap crossfades are unmuted")),
-	  layer_mode_label (_("Region layering mode")),
-	  xfade_model_label (_("Crossfade model")),
 	  short_xfade_adjustment (0, 1.0, 500.0, 5.0, 100.0),
 	  short_xfade_slider (short_xfade_adjustment),
+	  destructo_xfade_adjustment (0, 1.0, 500.0, 5.0, 100.0),
+	  destructo_xfade_slider (destructo_xfade_adjustment),
 
 	  /* Sync */
 
@@ -118,9 +101,6 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	set_name ("OptionsWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-	
-	layer_mode_label.set_name ("OptionsLabel");
-	xfade_model_label.set_name ("OptionsLabel");
 	
 	VBox *vbox = get_vbox();
 	set_border_width (3);
@@ -171,7 +151,6 @@ OptionEditor::set_session (Session *s)
 	session_raid_entry.set_sensitive (false);
 
 	smpte_fps_combo.set_sensitive (false);
-	layer_mode_combo.set_sensitive (false);
 	short_xfade_slider.set_sensitive (false);
 	smpte_offset_negative_button.set_sensitive (false);
 
@@ -186,7 +165,6 @@ OptionEditor::set_session (Session *s)
 	click_emphasis_path_entry.set_sensitive (true);
 	session_raid_entry.set_sensitive (true);
 	smpte_fps_combo.set_sensitive (true);
-	layer_mode_combo.set_sensitive (true);
 	short_xfade_slider.set_sensitive (true);
 	smpte_offset_negative_button.set_sensitive (true);
 
@@ -237,9 +215,6 @@ OptionEditor::set_session (Session *s)
 
 	setup_click_editor ();
 	connect_audition_editor ();
-
-	layer_mode_combo.set_active_text (layer_mode_strings[session->get_layer_model()]);
-	xfade_model_combo.set_active_text (xfade_model_strings[session->get_xfade_model()]);
 
 	short_xfade_adjustment.set_value ((Crossfade::short_xfade_length() / (float) session->frame_rate()) * 1000.0);
 
@@ -329,74 +304,30 @@ void
 OptionEditor::setup_fade_options ()
 {
 	Gtk::HBox* hbox;
-	vector<string> dumb;
 	
-	auto_xfade_button.set_name ("OptionEditorToggleButton");
-	xfade_active_button.set_name ("OptionEditorToggleButton");
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (12);
-	hbox->pack_start (auto_xfade_button, false, false);
-	fade_packer.pack_start (*hbox, false, false);
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (12);
-	hbox->pack_start (xfade_active_button, false, false);
-	fade_packer.pack_start (*hbox, false, false);
-
-	layer_mode_strings = internationalize (lmode_strings);
-
-	dumb.push_back (lmode_strings[Session::LaterHigher]);
-	dumb.push_back (lmode_strings[Session::MoveAddHigher]);
-	dumb.push_back (lmode_strings[Session::AddHigher]);
-	set_popdown_strings (layer_mode_combo, dumb);
-
-	layer_mode_combo.signal_changed ().connect (mem_fun(*this, &OptionEditor::layer_mode_chosen));
-
-	fixup_combo_size (layer_mode_combo, layer_mode_strings);
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (5);
-	hbox->set_spacing (10);
-	hbox->pack_start (layer_mode_label, false, false);
-	hbox->pack_start (layer_mode_combo, false, false);
-	fade_packer.pack_start (*hbox, false, false);
-
-	xfade_model_strings = internationalize (xfl_strings);
-
-	dumb.clear ();
-	dumb.push_back (xfade_model_strings[FullCrossfade]);
-	dumb.push_back (xfade_model_strings[ShortCrossfade]);
-	set_popdown_strings (xfade_model_combo, dumb);
-
-	xfade_model_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::xfade_model_chosen));
-
-	fixup_combo_size (xfade_model_combo, xfade_model_strings);
-
-	hbox = manage (new HBox);
-	hbox->set_border_width (5);
-	hbox->set_spacing (10);
-	hbox->pack_start (xfade_model_label, false, false);
-	hbox->pack_start (xfade_model_combo, false, false);
-	fade_packer.pack_start (*hbox, false, false);
-
-	auto_xfade_button.set_active (Config->get_auto_xfade());
-	/* xfade and layer mode active requires session */
-
-	auto_xfade_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::auto_xfade_clicked));
-	xfade_active_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::xfade_active_clicked));
-	
-	Label* short_xfade_label = manage (new Label (_("Short crossfade length (msecs)")));
-	short_xfade_label->set_name ("OptionsLabel");
+	Label* label = manage (new Label (_("Short crossfade length (msecs)")));
+	label->set_name ("OptionsLabel");
 	
 	hbox = manage (new HBox);
 	hbox->set_border_width (5);
 	hbox->set_spacing (10);
-	hbox->pack_start (*short_xfade_label, false, false);
+	hbox->pack_start (*label, false, false);
 	hbox->pack_start (short_xfade_slider, true, true);
 	fade_packer.pack_start (*hbox, false, false);
 
 	short_xfade_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::short_xfade_adjustment_changed));
+
+	label = manage (new Label (_("Destructive crossfade length (msecs)")));
+	label->set_name ("OptionsLabel");
+	
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (*label, false, false);
+	hbox->pack_start (destructo_xfade_slider, true, true);
+	fade_packer.pack_start (*hbox, false, false);
+	
+	destructo_xfade_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::destructo_xfade_adjustment_changed));
 
 	fade_packer.show_all ();
 }
@@ -414,50 +345,16 @@ OptionEditor::short_xfade_adjustment_changed ()
 }
 
 void
-OptionEditor::layer_mode_chosen ()
+OptionEditor::destructo_xfade_adjustment_changed ()
 {
-	if (!session) {
-		return;
-	}
+	float val = destructo_xfade_adjustment.get_value();
 
-	string which = layer_mode_combo.get_active_text ();
-
-	if (which == layer_mode_strings[Session::LaterHigher]) {
-		session->set_layer_model (Session::LaterHigher);
-	} else if (which == layer_mode_strings[Session::MoveAddHigher]) {
-		session->set_layer_model (Session::MoveAddHigher);
-	} else if (which == layer_mode_strings[Session::AddHigher]) {
-		session->set_layer_model (Session::AddHigher);
-	}
-}
-
-void
-OptionEditor::xfade_model_chosen ()
-{
-	if (!session) {
-		return;
-	}
-
-	string which = xfade_model_combo.get_active_text ();
-
-	if (which == xfade_model_strings[FullCrossfade]) {
-		session->set_xfade_model (FullCrossfade);
-	} else if (which == xfade_model_strings[ShortCrossfade]) {
-		session->set_xfade_model (ShortCrossfade);
-	}
-}
-
-void
-OptionEditor::auto_xfade_clicked ()
-{
-	Config->set_auto_xfade (auto_xfade_button.get_active());
-}
-
-void
-OptionEditor::xfade_active_clicked ()
-{
+	/* val is in msecs */
+	
 	if (session) {
-		session->set_crossfades_active (xfade_active_button.get_active());
+		Config->set_destructive_xfade_msecs ((uint32_t) floor (val), session->frame_rate());
+	} else {
+		Config->set_destructive_xfade_msecs ((uint32_t) floor (val), 0);
 	}
 }
 

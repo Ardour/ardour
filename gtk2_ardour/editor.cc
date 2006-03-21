@@ -1000,7 +1000,7 @@ Editor::queue_session_control_changed (Session::ControlType t)
 void
 Editor::session_control_changed (Session::ControlType t)
 {
-	// right now we're only tracking the loop and punch state
+	// right now we're only tracking some state here 
 
 	switch (t) {
 	case Session::AutoLoop:
@@ -1009,6 +1009,10 @@ Editor::session_control_changed (Session::ControlType t)
 	case Session::PunchIn:
 	case Session::PunchOut:
 		update_punch_range_view (true);
+		break;
+
+	case Session::LayeringModel:
+		update_layering_model ();
 		break;
 
 	default:
@@ -1241,6 +1245,32 @@ Editor::connect_to_session (Session *t)
 	session->locations()->changed.connect (mem_fun(*this, &Editor::refresh_location_display));
 	session->locations()->StateChanged.connect (mem_fun(*this, &Editor::refresh_location_display_s));
 	session->locations()->end_location()->changed.connect (mem_fun(*this, &Editor::end_location_changed));
+
+	bool yn;
+	RefPtr<Action> act;
+
+	act = ActionManager::get_action (X_("Editor"), X_("toggle-xfades-active"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+		/* do it twice to force the change */
+		yn = session->get_crossfades_active();
+		tact->set_active (!yn);
+		tact->set_active (yn);
+	}
+
+	act = ActionManager::get_action (X_("Editor"), X_("toggle-auto-xfades"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+		/* do it twice to force the change */
+		yn = Config->get_auto_xfade ();
+		tact->set_active (!yn);
+		tact->set_active (yn);
+	}
+
+	/* xfade visibility state set from editor::set_state() */
+	
+	update_crossfade_model ();
+	update_layering_model ();
 
 	reset_scrolling_region ();
 
@@ -2198,7 +2228,7 @@ Editor::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("follow-playhead"))) {
 		bool yn = (prop->value() == "yes");
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleFollowPlayhead"));
+		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
 		if (act) {
 			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 			/* do it twice to force the change */
@@ -2216,7 +2246,7 @@ Editor::set_state (const XMLNode& node)
 	if ((prop = node.property ("xfades-visible"))) {
 		bool yn = (prop->value() == "yes");
 		_xfade_visibility = !yn;
-		set_xfade_visibility (yn);
+		// set_xfade_visibility (yn);
 	}
 
 	if ((prop = node.property ("show-editor-mixer"))) {
@@ -3003,7 +3033,6 @@ Editor::restore_state (State *state)
 
 	*selection = *state->selection;
 	time_selection_changed ();
-	cerr << "RS: RSC\n";
 	region_selection_changed ();   
 
 	/* XXX other selection change handlers? */
@@ -3861,7 +3890,7 @@ Editor::set_show_measures (bool yn)
 void
 Editor::toggle_follow_playhead ()
 {
-	RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleFollowPlayhead"));
+	RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 		set_follow_playhead (tact->get_active());
@@ -4159,5 +4188,53 @@ bool
 Editor::on_key_press_event (GdkEventKey* ev)
 {
 	return key_press_focus_accelerator_handler (*this, ev);
+}
+
+void
+Editor::update_layering_model ()
+{
+	RefPtr<Action> act;
+
+	switch (session->get_layer_model()) {
+	case Session::LaterHigher:
+		act = ActionManager::get_action (X_("Editor"), X_("LayerLaterHigher"));
+		break;
+	case Session::MoveAddHigher:
+		act = ActionManager::get_action (X_("Editor"), X_("LayerMoveAddHigher"));
+		break;
+	case Session::AddHigher:
+		act = ActionManager::get_action (X_("Editor"), X_("LayerAddHigher"));
+		break;
+	}
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
+	}
+}
+
+
+void
+Editor::update_crossfade_model ()
+{
+	RefPtr<Action> act;
+
+	switch (session->get_xfade_model()) {
+	case FullCrossfade:
+		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesFull"));
+		break;
+	case ShortCrossfade:
+		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesShort"));
+		break;
+	}
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
+	}
 }
 
