@@ -189,6 +189,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 {
 	ExternalSource *source = 0; /* keep g++ quiet */
 	AudioRegion::SourceList sources;
+	AudioRegion* region;
 	string idspec;
 	string linked_path;
 	SoundFileInfo finfo;
@@ -285,8 +286,8 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 	region_name = PBD::basename_nosuffix (path);
 	region_name += "-0";
 	
-	AudioRegion* region = new AudioRegion (sources, 0, sources[0]->length(), region_name, 0,
-					       Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External));
+	region = new AudioRegion (sources, 0, sources[0]->length(), region_name, 0,
+				  Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External));
 	
 	input_chan = finfo.channels;
 
