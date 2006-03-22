@@ -539,6 +539,9 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		
 		solo_audible = solo_gain > 0;
 		mute_audible = dmg > 0 || !_mute_affects_control_outs;
+
+		cerr << _name << " have control outs, solo audible = " << solo_audible << " mute audible = " << mute_audible
+		     << endl;
 		
 		if ( // silent anyway
 

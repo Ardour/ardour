@@ -121,15 +121,22 @@ Editor::do_embed (vector<Glib::ustring> paths, bool split, ImportMode mode, Audi
 {
 	bool multiple_files = paths.size() > 1;
 	bool check_sample_rate = true;
+	vector<Glib::ustring>::iterator i;
 	
-	for (vector<Glib::ustring>::iterator i = paths.begin(); i != paths.end(); ++i) {
-		embed_sndfile (*i, split, multiple_files, check_sample_rate, mode, track, pos, prompt);
+	for (i = paths.begin(); i != paths.end(); ++i) {
+		int ret = embed_sndfile (*i, split, multiple_files, check_sample_rate, mode, track, pos, prompt);
+
+		if (ret < -1) {
+			break;
+		}
 	}
 
-	session->save_state ("");
+	if (i == paths.end()) {
+		session->save_state ("");
+	}
 }
 
-void
+int
 Editor::import_sndfile (Glib::ustring path, ImportMode mode, AudioTrack* track, jack_nframes_t& pos)
 {
 	interthread_progress_window->set_title (string_compose (_("ardour: importing %1"), path));
@@ -173,9 +180,10 @@ Editor::import_sndfile (Glib::ustring path, ImportMode mode, AudioTrack* track, 
 	}
 
 	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	return 0;
 }
 
-void
+int
 Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool& check_sample_rate, ImportMode mode, 
 		       AudioTrack* track, jack_nframes_t& pos, bool prompt)
 {
@@ -185,6 +193,8 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 	string linked_path;
 	SoundFileInfo finfo;
 	string region_name;
+	uint32_t input_chan;
+	uint32_t output_chan;
 
 	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
@@ -211,28 +221,43 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 
 	if (!ExternalSource::get_soundfile_info (path, finfo, error_msg)) {
 		error << string_compose(_("Editor: cannot open file \"%1\", (%2)"), selection, error_msg ) << endmsg;
-		return;
+		return 0;
 	}
 	
-	if (check_sample_rate) {
-		switch (reject_because_rate_differs (path, finfo, "Embed", multiple_files)) {
-		case 0:
+	if (check_sample_rate  && (finfo.samplerate != (int) session->frame_rate())) {
+		vector<string> choices;
+		
+		choices.push_back (_("Embed it anyway"));
+		
+		if (multiple_files) {
+			choices.push_back (_("Don't embed it"));
+			choices.push_back (_("Embed all without questions"));
+			choices.push_back (_("Cancel entire import"));
+		} else {
+			choices.push_back (_("Cancel"));
+		}
+		
+		Gtkmm2ext::Choice rate_choice (
+			string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
+			choices, false);
+		
+		switch (rate_choice.run()) {
+		case 0: /* do it */
 			break;
-		case 1:
-			return;
-		case -1:
+		case 1: /* don't import this one */
+			return -1;
+		case 2: /* do it, and the rest without asking */
 			check_sample_rate = false;
 			break;
-			
-		case -2:
+		case 3: /* stop a multi-file import */
 		default:
-			return;
+			return -2;
 		}
 	}
-
+	
 	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
-
+	
 	/* make the proper number of channels in the region */
 
 	for (int n = 0; n < finfo.channels; ++n)
@@ -244,27 +269,26 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 			source = ExternalSource::create (idspec.c_str());
 			sources.push_back(source);
 		} 
-
-		catch (failed_constructor& err) {
-			error << string_compose(_("could not open %1"), path) << endmsg;
-			goto out;
-		}
-
-		ARDOUR_UI::instance()->flush_pending ();
+		
+		 catch (failed_constructor& err) {
+			 error << string_compose(_("could not open %1"), path) << endmsg;
+			 goto out;
+		 }
+		
+		 ARDOUR_UI::instance()->flush_pending ();
 	}
-
+	
 	if (sources.empty()) {
 		goto out;
 	}
-
+	
 	region_name = PBD::basename_nosuffix (path);
 	region_name += "-0";
 	
 	AudioRegion* region = new AudioRegion (sources, 0, sources[0]->length(), region_name, 0,
 					       Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External));
 	
-	uint32_t input_chan = finfo.channels;
-	uint32_t output_chan;
+	input_chan = finfo.channels;
 
 	if (session->get_output_auto_connect() & Session::AutoConnectMaster) {
 		output_chan = (session->master_out() ? session->master_out()->n_inputs() : input_chan);
@@ -273,18 +297,19 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 	}
 	
 	finish_bringing_in_audio (*region, input_chan, output_chan, track, pos, mode);
-
+	
   out:
 	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	return 0;
 }
 
 int
-Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32_t out_chans, AudioTrack* track, jack_nframes_t& pos, ImportMode mode)
-{
-	switch (mode) {
-	case ImportAsRegion:
-		/* relax, its been done */
-		break;
+ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32_t out_chans, AudioTrack* track, jack_nframes_t& pos, ImportMode mode)
+ {
+	 switch (mode) {
+	 case ImportAsRegion:
+		 /* relax, its been done */
+		 break;
 		
 	case ImportToTrack:
 		if (track) {
@@ -306,49 +331,6 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 		AudioRegion* copy = new AudioRegion (region);
 		at->disk_stream().playlist()->add_region (*copy, pos);
 		break;
-	}
-
-	return 0;
-}
-
-int
-Editor::reject_because_rate_differs (Glib::ustring path, SoundFileInfo& finfo, const string & action, bool multiple_pending)
-{
-	if (!session) {
-		return 1;
-	}
-
-	if (finfo.samplerate != (int) session->frame_rate()) {
-		vector<string> choices;
-
-		choices.push_back (string_compose (_("%1 it anyway"), action));
-
-		if (multiple_pending) {
-			/* XXX assumptions about sentence structure
-			   here for translators. Sorry.
-			*/
-			choices.push_back (string_compose (_("Don't %1 it"), action));
-			choices.push_back (string_compose (_("%1 all without questions"), action));
-			choices.push_back (_("Cancel entire import"));
-		} else {
-			choices.push_back (_("Cancel"));
-		}
-
-		Gtkmm2ext::Choice rate_choice (
-			string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
-			choices, false);
-
-		switch (rate_choice.run()) {
-		case 0: /* do it anyway */
-			return 0;
-		case 1: /* don't import this one */
-			return 1;
-		case 2: /* do the rest without asking */
-			return -1;
-		case 3: /* stop a multi-file import */
-		default:
-			return -2;
-		}
 	}
 
 	return 0;

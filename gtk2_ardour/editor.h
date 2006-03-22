@@ -972,11 +972,10 @@ class Editor : public PublicEditor
 	void bring_in_external_audio (Editing::ImportMode mode, ARDOUR::AudioTrack*, jack_nframes_t& pos, bool prompt);
 	void do_import (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, jack_nframes_t&, bool);
 	void do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, jack_nframes_t&, bool);
-	void import_sndfile (Glib::ustring path, Editing::ImportMode mode, ARDOUR::AudioTrack* track, jack_nframes_t& pos);
-	void embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
+	int  import_sndfile (Glib::ustring path, Editing::ImportMode mode, ARDOUR::AudioTrack* track, jack_nframes_t& pos);
+	int  embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
 			    ARDOUR::AudioTrack* track, jack_nframes_t& pos, bool prompt);
 	int finish_bringing_in_audio (ARDOUR::AudioRegion& region, uint32_t, uint32_t, ARDOUR::AudioTrack* track, jack_nframes_t& pos, Editing::ImportMode mode);
-	int  reject_because_rate_differs (Glib::ustring path, ARDOUR::SoundFileInfo& finfo, const string & action, bool multiple_pending);
 
 	/* generic interthread progress window */
 	
