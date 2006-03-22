@@ -640,13 +640,17 @@ class Session : public sigc::trackable, public Stateful
 	/* source management */
 
 	struct import_status : public InterThreadInfo {
-		string doing_what;
-
-		/* control info */
-		bool multichan;
-		bool sample_convert;
-		volatile bool freeze;
-		string pathname;
+	    string doing_what;
+	    
+	    /* control info */
+	    bool multichan;
+	    bool sample_convert;
+	    volatile bool freeze;
+	    string pathname;
+	    
+	    /* result */
+	    std::vector<AudioRegion*> new_regions;
+	    
 	};
 
 	int import_audiofile (import_status&);

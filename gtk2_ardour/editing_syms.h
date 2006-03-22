@@ -53,3 +53,7 @@ DISPLAYCONTROL(FollowPlayhead)
 DISPLAYCONTROL(ShowMeasures)
 DISPLAYCONTROL(ShowWaveforms)
 DISPLAYCONTROL(ShowWaveformsRecording)
+
+IMPORTMODE(ImportAsRegion)
+IMPORTMODE(ImportAsTrack)
+IMPORTMODE(ImportToTrack)

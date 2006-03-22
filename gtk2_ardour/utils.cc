@@ -592,3 +592,21 @@ get_xpm (std::string name)
 	return (xpm_map[name]);
 }
 
+string
+length2string (const int32_t frames, const float sample_rate)
+{
+    int secs = (int) (frames / sample_rate);
+    int hrs =  secs / 3600;
+    secs -= (hrs * 3600);
+    int mins = secs / 60;
+    secs -= (mins * 60);
+
+    int total_secs = (hrs * 3600) + (mins * 60) + secs;
+    int frames_remaining = frames - (total_secs * sample_rate);
+    float fractional_secs = (float) frames_remaining / sample_rate;
+
+    char duration_str[32];
+    sprintf (duration_str, "%02d:%02d:%05.2f", hrs, mins, (float) secs + fractional_secs);
+
+    return duration_str;
+}

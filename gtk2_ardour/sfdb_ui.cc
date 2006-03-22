@@ -22,10 +22,12 @@
 #include <map>
 #include <cerrno>
 
-#include <pbd/basename.h>
-
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
+
+#include <pbd/basename.h>
+
+#include <gtkmm2ext/utils.h>
 
 #include <ardour/audio_library.h>
 #include <ardour/audioregion.h>
@@ -34,12 +36,14 @@
 #include "gui_thread.h"
 #include "prompter.h"
 #include "sfdb_ui.h"
+#include "utils.h"
 
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace std;
 
-std::string length2string (const int32_t frames, const float sample_rate);
+string length2string (const int32_t frames, const float sample_rate);
 
 SoundFileBox::SoundFileBox ()
 	:
@@ -264,8 +268,8 @@ SoundFileBox::delete_row (const Gtk::TreeModel::iterator& iter)
 void
 SoundFileBox::audition_status_changed (bool active)
 {
-    ENSURE_GUI_THREAD(bind (mem_fun (*this, &SoundFileBox::audition_status_changed), active));
-
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &SoundFileBox::audition_status_changed), active));
+	
 	if (!active) {
 		stop_btn_clicked ();
 	}
@@ -281,13 +285,13 @@ SoundFileBox::field_selected ()
 	}
 }
 
-SoundFileBrowser::SoundFileBrowser (std::string title)
-	:
-	ArdourDialog(title),
-	chooser(Gtk::FILE_CHOOSER_ACTION_OPEN)
+SoundFileBrowser::SoundFileBrowser (string title)
+	: ArdourDialog (title, false),
+	  chooser (Gtk::FILE_CHOOSER_ACTION_OPEN)
 {
 	get_vbox()->pack_start(chooser);
 	chooser.set_preview_widget(preview);
+	chooser.set_select_multiple (true);
 
 	chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
 }
@@ -304,63 +308,117 @@ SoundFileBrowser::update_preview ()
 	chooser.set_preview_widget_active(preview.setup_labels(chooser.get_filename()));
 }
 
-SoundFileChooser::SoundFileChooser (std::string title)
+SoundFileChooser::SoundFileChooser (string title)
 	:
 	SoundFileBrowser(title)
 {
 	add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-
 	show_all ();
 }
 
-SoundFileOmega::SoundFileOmega (std::string title)
-	:
-	SoundFileBrowser(title),
-	embed_btn (_("Embed")),
-	import_btn (_("Import")),
-	split_check (_("Split Channels"))
+static const char *import_mode_strings[] = {
+	X_("Add to Region list"),
+	X_("Add as new Track(s)"),
+	X_("Add to selected Track(s)"),
+	0
+};
+
+vector<string> SoundFileOmega::mode_strings;
+
+SoundFileOmega::SoundFileOmega (string title)
+	: SoundFileBrowser (title),
+	  split_check (_("Split Channels"))
 {
-	get_action_area()->pack_start(embed_btn);
-	get_action_area()->pack_start(import_btn);
+	if (mode_strings.empty()) {
+		mode_strings = internationalize (import_mode_strings);
+	}
+
+	add_button (_("Embed"), ResponseEmbed);
+	add_button (_("Import"), ResponseImport);
 	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CLOSE);
 
-	chooser.set_extra_widget(split_check);
+	Gtk::HBox *box = manage (new Gtk::HBox());
 
-	embed_btn.signal_clicked().connect (mem_fun (*this, &SoundFileOmega::embed_clicked));
-	import_btn.signal_clicked().connect (mem_fun (*this, &SoundFileOmega::import_clicked));
+	Gtkmm2ext::set_popdown_strings (mode_combo, mode_strings);
 
+	set_mode (Editing::ImportAsRegion);
+
+	box->pack_start (split_check);
+	box->pack_start (mode_combo);
+
+	mode_combo.signal_changed().connect (mem_fun (*this, &SoundFileOmega::mode_changed));
+
+	chooser.set_extra_widget (*box);
+	
 	show_all ();
 }
 
-void
-SoundFileOmega::embed_clicked ()
+bool
+SoundFileOmega::get_split ()
 {
-	Embedded (chooser.get_filenames(), split_check.get_active());
+	return split_check.get_active();
+}
+
+vector<Glib::ustring>
+SoundFileOmega::get_paths ()
+{
+	return chooser.get_filenames();
 }
 
 void
-SoundFileOmega::import_clicked ()
+SoundFileOmega::set_mode (Editing::ImportMode mode)
 {
-	Imported (chooser.get_filenames(), split_check.get_active());
+	mode_combo.set_active_text (mode_strings[(int)mode]);
+
+	switch (mode) {
+	case Editing::ImportAsRegion:
+		split_check.set_sensitive (true);
+		break;
+	case Editing::ImportAsTrack:
+		split_check.set_sensitive (true);
+		break;
+	case Editing::ImportToTrack:
+		split_check.set_sensitive (false);
+		break;
+	}
 }
 
-std::string
-length2string (const int32_t frames, const float sample_rate)
+Editing::ImportMode
+SoundFileOmega::get_mode ()
 {
-    int secs = (int) (frames / sample_rate);
-    int hrs =  secs / 3600;
-    secs -= (hrs * 3600);
-    int mins = secs / 60;
-    secs -= (mins * 60);
+	vector<string>::iterator i;
+	uint32_t n;
+	string str = mode_combo.get_active_text ();
 
-    int total_secs = (hrs * 3600) + (mins * 60) + secs;
-    int frames_remaining = frames - (total_secs * sample_rate);
-    float fractional_secs = (float) frames_remaining / sample_rate;
+	for (n = 0, i = mode_strings.begin (); i != mode_strings.end(); ++i, ++n) {
+		if (str == (*i)) {
+			break;
+		}
+	}
 
-    char duration_str[32];
-    sprintf (duration_str, "%02d:%02d:%05.2f", hrs, mins, (float) secs + fractional_secs);
+	if (i == mode_strings.end()) {
+		fatal << string_compose (_("programming error: %1"), X_("unknown import mode string")) << endmsg;
+		/*NOTREACHED*/
+	}
 
-    return duration_str;
+	return (Editing::ImportMode) (n);
 }
 
+void
+SoundFileOmega::mode_changed ()
+{
+	Editing::ImportMode mode = get_mode();
+
+	switch (mode) {
+	case Editing::ImportAsRegion:
+		split_check.set_sensitive (true);
+		break;
+	case Editing::ImportAsTrack:
+		split_check.set_sensitive (true);
+		break;
+	case Editing::ImportToTrack:
+		split_check.set_sensitive (false);
+		break;
+	}
+}

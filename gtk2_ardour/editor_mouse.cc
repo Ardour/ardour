@@ -333,6 +333,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 
 		case StreamItem:
+			set_selected_track_from_click (Keyboard::selection_type (event->button.state), true, true);
 			break;
 
 		case AutomationTrackItem:

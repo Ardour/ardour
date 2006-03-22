@@ -26,28 +26,30 @@ using namespace Gtkmm2ext;
 using namespace sigc;
 using namespace Gtk;
 
-Choice::Choice (string prompt, vector<string> choices)
+Choice::Choice (string prompt, vector<string> choices, bool center)
 {
 	int n;
 	vector<string>::iterator i;
+	
+	if (center) {
+		set_position (Gtk::WIN_POS_CENTER);
+	} else {
+		set_position (Gtk::WIN_POS_MOUSE);
+	}
 
-	set_position (Gtk::WIN_POS_CENTER);
 	set_name ("ChoiceWindow");
 
 	Label* label = manage (new Label (prompt));
 	label->show ();
 
+	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (*label);
 	
+	set_has_separator (false);
+
 	for (n = 0, i = choices.begin(); i != choices.end(); ++i, ++n) {
-
-		Button* button;
-
-		button = add_button (*i, RESPONSE_ACCEPT);
-		button->signal_button_release_event().connect (bind (mem_fun (*this, &Choice::choice_made), n), false);
+		add_button (*i, n);
 	}
-
-	which_choice = -1;
 }
 
 void
@@ -59,18 +61,4 @@ Choice::on_realize ()
 
 Choice::~Choice ()
 {
-}
-
-bool
-Choice::choice_made (GdkEventButton* ev, int nbutton)
-{
-	which_choice = nbutton;
-	response (RESPONSE_ACCEPT);
-	return true;
-}
-
-int
-Choice::get_choice ()
-{
-	return which_choice;
 }

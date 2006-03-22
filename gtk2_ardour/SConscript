@@ -93,6 +93,7 @@ default_keys.cc
 editing.cc
 editor.cc
 editor_actions.cc
+editor_audio_import.cc
 editor_audiotrack.cc
 editor_canvas.cc
 editor_canvas_events.cc

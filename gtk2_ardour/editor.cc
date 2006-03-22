@@ -1982,14 +1982,9 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 
 	/* Adding new material */
 	
-	Menu *import_menu = manage (new Menu());
-	MenuList& import_items = import_menu->items();
-	import_menu->set_name ("ArdourContextMenu");
-	
-	import_items.push_back (MenuElem (_("Insert Region"), bind (mem_fun(*this, &Editor::insert_region_list_selection), 1.0f)));
-	import_items.push_back (MenuElem (_("Insert external sndfile"), bind (mem_fun(*this, &Editor::insert_sndfile), false)));
-
-	edit_items.push_back (MenuElem (_("Import"), *import_menu));
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Insert Selected Region"), bind (mem_fun(*this, &Editor::insert_region_list_selection), 1.0f)));
+	edit_items.push_back (MenuElem (_("Insert Existing Audio"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack)));
 
 	/* Nudge track */
 
@@ -2905,7 +2900,7 @@ Editor::stop_canvas_autoscroll ()
 }
 
 int
-Editor::convert_drop_to_paths (vector<string>& paths, 
+Editor::convert_drop_to_paths (vector<ustring>& paths, 
 			       const RefPtr<Gdk::DragContext>& context,
 			       gint                x,
 			       gint                y,
@@ -3445,21 +3440,14 @@ Editor::edit_menu_map_handler (GdkEventAny* ev)
 	import_menu->set_name ("ArdourContextMenu");
 	MenuList& import_items = import_menu->items();
 	
-	import_items.push_back (MenuElem (_("... as new track"), bind (mem_fun(*this, &Editor::import_audio), true)));
-	import_items.push_back (MenuElem (_("... as new region"), bind (mem_fun(*this, &Editor::import_audio), false)));
-
-	Menu* embed_menu = manage (new Menu());
-	embed_menu->set_name ("ArdourContextMenu");
-	MenuList& embed_items = embed_menu->items();
-
-	embed_items.push_back (MenuElem (_("... as new track"), bind (mem_fun(*this, &Editor::insert_sndfile), true)));
-	embed_items.push_back (MenuElem (_("... as new region"), mem_fun(*this, &Editor::embed_audio)));
+	import_items.push_back (MenuElem (_("... as new track"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsTrack)));
+	import_items.push_back (MenuElem (_("... as new region"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion)));
 
 	edit_items.push_back (MenuElem (_("Import audio (copy)"), *import_menu));
-	edit_items.push_back (MenuElem (_("Embed audio (link)"), *embed_menu));
 	edit_items.push_back (SeparatorElem());
 
 	edit_items.push_back (MenuElem (_("Remove last capture"), mem_fun(*this, &Editor::remove_last_capture)));
+
 	if (!session->have_captured()) {
 		edit_items.back().set_sensitive (false);
 	}

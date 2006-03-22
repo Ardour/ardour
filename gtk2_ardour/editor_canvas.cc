@@ -455,7 +455,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	TimeAxisView* tvp;
 	AudioTimeAxisView* tv;
 	double cy;
-	vector<string> paths;
+	vector<ustring> paths;
 	string spath;
 	GdkEvent ev;
 	jack_nframes_t frame;
@@ -484,22 +484,18 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 
 	if ((tvp = trackview_by_y_position (cy)) == 0) {
 
-		/* drop onto canvas background: create a new track */
+		/* drop onto canvas background: create new tracks */
 
-		insert_paths_as_new_tracks (paths, false);
-
+		jack_nframes_t pos = 0;
+		do_embed (paths, false, ImportAsTrack, 0, pos, false);
 		
 	} else if ((tv = dynamic_cast<AudioTimeAxisView*>(tvp)) != 0) {
 
 		/* check that its an audio track, not a bus */
-
+		
 		if (tv->get_diskstream()) {
-
-			for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
-				insert_sndfile_into (*p, true, tv, frame);
-			}
+			do_embed (paths, false, ImportToTrack, tv->audio_track(), frame, true);
 		}
-
 	}
 
   out:

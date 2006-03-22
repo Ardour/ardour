@@ -10,17 +10,11 @@ namespace Gtkmm2ext {
 class Choice : public Gtk::Dialog
 {
   public:
-	Choice (std::string prompt, std::vector<std::string> choices);
+	Choice (std::string prompt, std::vector<std::string> choices, bool center = true);
 	virtual ~Choice ();
-
-	int get_choice ();
 
   protected:
 	void on_realize ();
-	
-  private:
-	int  which_choice;
-	bool choice_made (GdkEventButton* ev, int nbutton);
 };
 
 } /* namespace */

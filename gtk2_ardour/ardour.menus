@@ -11,7 +11,13 @@
            <menuitem action='Snapshot'/>
            <menuitem action='SaveTemplate'/>
            <separator/>
-           <menuitem action='AddTrackBus'/>
+           <menuitem action='AddTrackBus'/>	
+           <separator/>
+           <menu action='addExistingAudioFiles'>
+	       <menuitem action='addExternalAudioAsRegion'/>	       
+	       <menuitem action='addExternalAudioAsTrack'/>	       
+	       <menuitem action='addExternalAudioToTrack'/>	       
+           </menu>
            <separator/>
            <menu name='Export' action='Export'>
                <menuitem action='ExportSession'/>
@@ -308,6 +314,6 @@
                <menuitem action='SortBySourceFilesystem'/>
          </menu>
          <separator/>
-         <menuitem action='addExternalRegion'/>
+         <menuitem action='addExternalAudioToRegionList'/>	       
      </popup>
 </ui>

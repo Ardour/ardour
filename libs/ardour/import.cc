@@ -61,11 +61,12 @@ Session::import_audiofile (import_status& status)
 	jack_nframes_t so_far;
 	char buf[PATH_MAX+1];
 	int ret = -1;
-	vector<AudioRegion *> new_regions;
 	vector<string> new_paths;
 	struct tm* now;
 	string tmp_convert_file;
 	
+	status.new_regions.clear ();
+
 	if ((in = sf_open (status.pathname.c_str(), SFM_READ, &info)) == 0) {
 		error << string_compose(_("Import: cannot open input sound file \"%1\""), status.pathname) << endmsg;
 		return -1;
@@ -214,7 +215,7 @@ Session::import_audiofile (import_status& status)
 		AudioRegion *r = new AudioRegion (sources, 0, newfiles[0]->length(), region_name_from_path (PBD::basename(basepath)),
 					0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile));
 		
-		new_regions.push_back (r);
+		status.new_regions.push_back (r);
 
 	} else {
 		for (n = 0; n < nfiles && !status.cancel; ++n) {
@@ -230,7 +231,7 @@ Session::import_audiofile (import_status& status)
 			AudioRegion *r = new AudioRegion (*newfiles[n], 0, newfiles[n]->length(), region_name_from_path (PBD::basename (newfiles[n]->name())),
 						0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile | AudioRegion::Import));
 
-			new_regions.push_back (r);
+			status.new_regions.push_back (r);
 		}
 	}
 	
@@ -259,7 +260,7 @@ Session::import_audiofile (import_status& status)
 	}
 
 	if (status.cancel) {
-		for (vector<AudioRegion *>::iterator i = new_regions.begin(); i != new_regions.end(); ++i) {
+		for (vector<AudioRegion *>::iterator i = status.new_regions.begin(); i != status.new_regions.end(); ++i) {
 			delete *i;
 		}
 

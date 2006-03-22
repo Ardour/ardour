@@ -574,10 +574,11 @@ Editor::region_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& 
 						const SelectionData& data,
 						guint info, guint time)
 {
-	vector<string> paths;
+	vector<ustring> paths;
 
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
-		do_embed_sndfiles (paths, false);
+		jack_nframes_t pos = 0;
+		do_embed (paths, false, ImportAsRegion, 0, pos, true);
 		context->drag_finish (true, false, time);
 	}
 }

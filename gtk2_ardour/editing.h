@@ -13,6 +13,7 @@
 #define MOUSEMODE(a) /*empty*/
 #define ZOOMFOCUS(a) /*empty*/
 #define DISPLAYCONTROL(a) /*empty*/
+#define IMPORTMODE(a) /*empty*/
 
 namespace Editing {
 
@@ -123,6 +124,24 @@ DisplayControl str2displaycontrol (const std::string &);
 
 #undef DISPLAYCONTROL
 #define DISPLAYCONTROL(a) /*empty*/
+
+// IMPORTMODE
+#undef IMPORTMODE
+#define IMPORTMODE(a) a,
+enum ImportMode {
+	#include "editing_syms.h"
+};
+
+#undef IMPORTMODE
+#define IMPORTMODE(s) #s,
+static const char *importmodestrs[] = {
+	#include "editing_syms.h"
+};
+inline const char* enum2str(ImportMode m) {return importmodestrs[m];}
+ImportMode str2importmode (const std::string &);
+
+#undef IMPORTMODE
+#define IMPORTMODE(a) /*empty*/
 
 /////////////////////
 // These don't need their state saved. yet...

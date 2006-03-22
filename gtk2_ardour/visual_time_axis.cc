@@ -279,14 +279,12 @@ VisualTimeAxis::remove_this_time_axis(void* src)
 
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
-	if (prompter.run () == RESPONSE_ACCEPT) {
-		if (prompter.get_choice() == 0) {
-			/*
-			  defer to idle loop, otherwise we'll delete this object
-			  while we're still inside this function ...
-			*/
-			Glib::signal_idle().connect(bind(sigc::ptr_fun(&VisualTimeAxis::idle_remove_this_time_axis), this, src));
-		}
+	if (prompter.run () == 0) {
+		/*
+		  defer to idle loop, otherwise we'll delete this object
+		  while we're still inside this function ...
+		*/
+		Glib::signal_idle().connect(bind(sigc::ptr_fun(&VisualTimeAxis::idle_remove_this_time_axis), this, src));
 	}
 }
 

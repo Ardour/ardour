@@ -26,8 +26,6 @@
 #include <pbd/pthread_utils.h>
 
 using std::string;
-using std::cerr;
-using std::endl;
 
 typedef std::map<string,pthread_t> ThreadMap;
 static ThreadMap all_threads;

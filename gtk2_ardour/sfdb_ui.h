@@ -33,6 +33,7 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/filechooserwidget.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
@@ -42,6 +43,7 @@
 #include <ardour/externalsource.h>
 
 #include "ardour_dialog.h"
+#include "editing.h"
 
 class SoundFileBox : public Gtk::VBox
 {
@@ -110,7 +112,8 @@ class SoundFileBrowser : public ArdourDialog
     SoundFileBrowser (std::string title);
     virtual ~SoundFileBrowser () {}; 
 
-	virtual void set_session (ARDOUR::Session*);
+    virtual void set_session (ARDOUR::Session*);
+
   protected:
     Gtk::FileChooserWidget chooser;
     SoundFileBox preview;
@@ -133,16 +136,27 @@ class SoundFileOmega : public SoundFileBrowser
     SoundFileOmega (std::string title);
     virtual ~SoundFileOmega () {};
 
-    sigc::signal<void, std::vector<std::string>, bool> Embedded;
-    sigc::signal<void, std::vector<std::string>, bool> Imported;
+    /* these are returned by the Dialog::run() method. note
+       that builtin GTK responses are all negative, leaving
+       positive values for application-defined responses.
+    */
+
+    const static int ResponseImport = 1;
+    const static int ResponseEmbed = 2;
+
+    std::vector<Glib::ustring> get_paths ();
+    bool get_split ();
+
+    void set_mode (Editing::ImportMode);
+    Editing::ImportMode get_mode ();
 
   protected:
-    Gtk::Button embed_btn;
-    Gtk::Button import_btn;
-    Gtk::CheckButton split_check;
+    Gtk::CheckButton  split_check;
+    Gtk::ComboBoxText mode_combo;
 
-    void embed_clicked ();
-    void import_clicked ();
+    void mode_changed ();
+
+    static std::vector<std::string> mode_strings;
 };
 
 #endif // __ardour_sfdb_ui_h__

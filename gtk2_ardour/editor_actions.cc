@@ -37,6 +37,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_actions, X_("Autoconnect"), _("Autoconnect"));
 	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
+	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Add Existing Audio"));
 
 	/* add named actions for the editor */
 
@@ -339,8 +340,17 @@ Editor::register_actions ()
 			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileCreationDate));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFilesystem"),  _("By Source Filesystem"),
 			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileFS));
-	
-	act = ActionManager::register_action (rl_actions, X_("addExternalAudio"), _("Embed audio (link)"), mem_fun(*this, &Editor::embed_audio));
+
+
+	/* the next two are duplicate items with different names for use in two different contexts */
+
+	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Add External Audio"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, X_("addExternalAudioAsRegion"), _("as Region(s)"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, X_("addExternalAudioAsTrack"), _("as Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsTrack));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToTrack"), _("to Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformVisibility"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));

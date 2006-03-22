@@ -967,18 +967,16 @@ class Editor : public PublicEditor
 	void insert_region_list_drag (ARDOUR::AudioRegion&, int x, int y);
 	void insert_region_list_selection (float times);
 
-	void insert_sndfile (bool as_tracks);
-	void embed_audio ();    // inserts into region list
-	int  reject_because_rate_differs (const string & path, ARDOUR::SoundFileInfo& finfo, const string & action, bool multiple_pending);
+	void add_external_audio_action (Editing::ImportMode);
 
-	void do_embed_sndfiles (vector<string> paths, bool split);
-	void embed_sndfile (string path, bool split, bool multiple_files, bool& check_sr);
-
-	void do_insert_sndfile (vector<string> path, bool multi, jack_nframes_t frame);
-	void insert_paths_as_new_tracks (std::vector<std::string> paths, bool multi); // inserts files as new tracks
-	void insert_sndfile_into (const string & path, bool multi, AudioTimeAxisView* tv, jack_nframes_t& frame, bool prompt=true);
-	static void* _insert_sndfile_thread (void*);
-	void*  insert_sndfile_thread (void*);
+	void bring_in_external_audio (Editing::ImportMode mode, ARDOUR::AudioTrack*, jack_nframes_t& pos, bool prompt);
+	void do_import (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, jack_nframes_t&, bool);
+	void do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, jack_nframes_t&, bool);
+	void import_sndfile (Glib::ustring path, Editing::ImportMode mode, ARDOUR::AudioTrack* track, jack_nframes_t& pos);
+	void embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
+			    ARDOUR::AudioTrack* track, jack_nframes_t& pos, bool prompt);
+	int finish_bringing_in_audio (ARDOUR::AudioRegion& region, uint32_t, uint32_t, ARDOUR::AudioTrack* track, jack_nframes_t& pos, Editing::ImportMode mode);
+	int  reject_because_rate_differs (Glib::ustring path, ARDOUR::SoundFileInfo& finfo, const string & action, bool multiple_pending);
 
 	/* generic interthread progress window */
 	
@@ -1003,8 +1001,6 @@ class Editor : public PublicEditor
 	gint import_progress_timeout (void *);
 	static void *_import_thread (void *);
 	void* import_thread ();
-	void catch_new_audio_region (ARDOUR::AudioRegion*);
-	ARDOUR::AudioRegion* last_audio_region;
 
 	/* to support this ... */
 
@@ -1586,7 +1582,7 @@ class Editor : public PublicEditor
 
 	/* Drag-n-Drop */
 
-	int convert_drop_to_paths (std::vector<std::string>& paths,
+	int convert_drop_to_paths (std::vector<Glib::ustring>& paths,
 				   const Glib::RefPtr<Gdk::DragContext>& context,
 				   gint                x,
 				   gint                y,
