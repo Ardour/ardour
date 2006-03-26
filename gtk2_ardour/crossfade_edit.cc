@@ -980,7 +980,7 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 		}
 		
 		for (list<Point*>::iterator i = fade[Out].points.begin(); i != fade[Out].points.end(); ++i) {
-			(*i)->box->hide();
+			(*i)->box->show();
 		}
 
 		for (vector<Button*>::iterator i = fade_out_buttons.begin(); i != fade_out_buttons.end(); ++i) {
