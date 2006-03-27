@@ -389,6 +389,7 @@ string
 ARDOUR::find_config_file (string name)
 {
 	char* envvar;
+
 	if ((envvar = getenv("ARDOUR_CONFIG_PATH")) == 0) {
 		envvar = CONFIG_DIR;
 	}

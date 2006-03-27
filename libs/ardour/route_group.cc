@@ -190,12 +190,12 @@ RouteGroup::set_hidden (bool yn, void *src)
 	}
 	if (yn) {
 		_flags |= Hidden;
-		if (Config->does_hiding_groups_deactivates_groups()) {
+		if (Config->get_hiding_groups_deactivates_groups()) {
 			_flags &= ~Active;
 		}
 	} else {
          	_flags &= ~Hidden;
-		if (Config->does_hiding_groups_deactivates_groups()) {
+		if (Config->get_hiding_groups_deactivates_groups()) {
 			_flags |= Active;
 		}
 	}

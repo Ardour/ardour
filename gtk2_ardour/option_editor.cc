@@ -24,6 +24,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/auditioner.h>
+#include <ardour/destructive_filesource.h>
 #include <ardour/crossfade.h>
 #include <midi++/manager.h>
 #include <gtkmm2ext/stop_signal.h>
@@ -357,11 +358,11 @@ OptionEditor::destructo_xfade_adjustment_changed ()
 
 	/* val is in msecs */
 	
+	Config->set_destructive_xfade_msecs ((uint32_t) floor (val));
+
 	if (session) {
-		Config->set_destructive_xfade_msecs ((uint32_t) floor (val), session->frame_rate());
-	} else {
-		Config->set_destructive_xfade_msecs ((uint32_t) floor (val), 0);
-	}
+		DestructiveFileSource::setup_standard_crossfades (session->frame_rate());
+	} 
 }
 
 void

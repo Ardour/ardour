@@ -69,7 +69,7 @@ Session::start_butler_thread ()
 {
 	/* size is in Samples, not bytes */
 
-	dstream_buffer_size = (uint32_t) floor (Config->get_track_buffer() * (float) frame_rate());
+	dstream_buffer_size = (uint32_t) floor (Config->get_track_buffer_seconds() * (float) frame_rate());
 
 	Crossfade::set_buffer_size (dstream_buffer_size);
 

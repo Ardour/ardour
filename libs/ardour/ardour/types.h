@@ -242,6 +242,11 @@ namespace ARDOUR {
 	    volatile float progress;
 	    pthread_t      thread;
 	};
+
+	enum SampleFormat {
+		FormatFloat = 0,
+		FormatInt24
+	};
 };
 
 

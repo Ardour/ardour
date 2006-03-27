@@ -30,6 +30,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#ifdef HAVE_WORDEXP
+#include <wordexp.h>
+#endif
+
 #include <pbd/error.h>
 #include <pbd/xml++.h>
 #include <ardour/utils.h>
@@ -222,3 +226,34 @@ region_name_from_path (string path)
 
 	return path;
 }	
+
+string
+path_expand (string path)
+{
+#ifdef HAVE_WORDEXP
+	/* Handle tilde and environment variable expansion in session path */
+	string ret = path;
+
+	wordexp_t expansion;
+	switch (wordexp (path.c_str(), &expansion, WRDE_NOCMD|WRDE_UNDEF)) {
+	case 0:
+		break;
+	default:
+		error << string_compose (_("illegal or badly-formed string used for path (%1)"), path) << endmsg;
+		goto out;
+	}
+
+	if (expansion.we_wordc > 1) {
+		error << string_compose (_("path (%1) is ambiguous"), path) << endmsg;
+		goto out;
+	}
+
+	ret = expansion.we_wordv[0];
+  out:
+	wordfree (&expansion);
+	return ret;
+
+#else 
+	return path;
+#endif
+}

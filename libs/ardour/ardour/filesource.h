@@ -44,12 +44,6 @@ namespace ARDOUR {
 
 class FileSource : public Source {
   public:
-	enum SampleFormat
-	{
-		FormatFloat = 0,
-		FormatInt24
-	};
-		
 	FileSource (string path, jack_nframes_t rate, bool repair_first = false, SampleFormat samp_format=FormatFloat);
 	FileSource (const XMLNode&, jack_nframes_t rate);
 	~FileSource ();
