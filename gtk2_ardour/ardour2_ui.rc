@@ -141,6 +141,8 @@ style "default_buttons_menus"
 style "very_small_button" = "default_buttons_menus"
 {
 	font_name = "sans 7"
+	xthickness = 0
+	ythickness = 0
 }
 
 style "small_button" = "default_buttons_menus"
@@ -174,6 +176,8 @@ style "track_rec_enable_button" = "small_button"
 style "mixer_rec_enable_button" = "track_rec_enable_button"
 {
 	font_name = "sans 7"
+	xthickness = 0
+	ythickness = 0
 }
 
 style "solo_button" = "small_button"
@@ -188,6 +192,8 @@ style "solo_button" = "small_button"
 style "mixer_solo_button" = "solo_button"
 {
 	font_name = "sans 7"
+	xthickness = 0
+	ythickness = 0
 }
 
 
@@ -202,6 +208,8 @@ style "mute_button" = "small_button"
 style "mixer_mute_button" = "mute_button"
 {
 	font_name = "sans 7"
+	xthickness = 0
+	ythickness = 0
 }
 
 style "track_loop_button" = "small_button"
@@ -828,7 +836,7 @@ style "region_list_whole_file"
 style "ardour_button" ="default_buttons_menus"
 {
 	xthickness = 0
-	ythickness = 2
+	ythickness = 1
 }
 
 #---------------------------------------------------------------

@@ -125,7 +125,6 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	set_name ("ExportWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	file_selector = 0;
 	spec.running = false;
 
 	file_entry.set_name ("ExportFileNameEntry");
@@ -350,7 +349,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	ok_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::do_export));
 	
 	file_browse_button.set_name ("EditorGTKButton");
-	file_browse_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::initiate_browse));
+	file_browse_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::browse));
 
 	channel_count_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::channels_chosen));
 	bitdepth_format_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::bitdepth_chosen));
@@ -361,9 +360,6 @@ ExportDialog::ExportDialog(PublicEditor& e)
 
 ExportDialog::~ExportDialog()
 {
-	if (file_selector) {
-		delete file_selector;
-	}
 }
 
 void
@@ -940,10 +936,6 @@ ExportDialog::end_dialog ()
 
 	hide_all ();
 
-	if (file_selector) {
-		file_selector->hide_all ();
-	}
-
 	set_modal (false);
 	ok_button->set_sensitive(true);
 }
@@ -1311,31 +1303,23 @@ ExportDialog::window_closed (GdkEventAny *ignored)
 }
 
 void
-ExportDialog::initiate_browse ()
+ExportDialog::browse ()
 {
-	if (file_selector == 0) {
-		file_selector = new FileSelection;
-		file_selector->set_modal (true);
+	FileChooserDialog dialog("Export to file", FILE_CHOOSER_ACTION_SAVE);
+	dialog.set_transient_for(*this);
+	dialog.set_filename (file_entry.get_text());
 
-		file_selector->get_cancel_button()->signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), -1));
-		file_selector->get_ok_button()->signal_clicked().connect (bind (mem_fun(*this, &ExportDialog::finish_browse), 1));
-	}
-	file_selector->set_filename (file_entry.get_text());
-	file_selector->show_all ();
-}
+	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+  
+	int result = dialog.run();
 
-void
-ExportDialog::finish_browse (int status)
-{
-	if (file_selector) {
-		if (status > 0) {
-			string result = file_selector->get_filename();
-			
-			if (result.length()) {
-				file_entry.set_text (result);
-			}
+	if (result == Gtk::RESPONSE_OK) {
+		string filename = dialog.get_filename();
+	
+		if (filename.length()) {
+			file_entry.set_text (filename);
 		}
-		file_selector->hide_all();
 	}
 }
 

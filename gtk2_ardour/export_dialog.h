@@ -154,7 +154,6 @@ class ExportDialog : public ArdourDialog
 	Glib::RefPtr<Gtk::ListStore> track_list;
 	Gtk::TreeView  master_selector;
 	Glib::RefPtr<Gtk::ListStore> master_list;
-	Gtk::FileSelection *file_selector;
 
 	static void *_thread (void *arg);
 	// sets the export progress in the progress bar
@@ -179,8 +178,7 @@ class ExportDialog : public ArdourDialog
 
 	void track_selector_button_click ();
 
-	void initiate_browse ();
-	void finish_browse (int status);
+	void browse ();
 
 	void set_state();
 	void save_state();
