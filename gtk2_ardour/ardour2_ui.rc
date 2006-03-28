@@ -374,7 +374,7 @@ style "medium_entry_noselection_fg" = "medium_entry"
 
 style "medium_entry_noselection_bg" = "medium_entry"
 {
-	bg[SELECTED] = { 0, 0, 0 }
+	bg[SELECTED] = { 0.50, 1.0, 1.0 }
 }
 
 style "medium_bold_entry"  = "medium_bold_text"
@@ -825,6 +825,11 @@ style "region_list_whole_file"
 	fg[NORMAL] = { 0.4, 0.4, 0.9 }
 }
 
+style "ardour_button" ="default_buttons_menus"
+{
+	xthickness = 0
+	ythickness = 2
+}
 
 #---------------------------------------------------------------
 widget "*FirstActionMessage" style "first_action_message"
@@ -1167,7 +1172,7 @@ widget "*RegionListWholeFile" style "region_list_whole_file"
 class "GtkWidget" style "default_base"
 class "GtkScrollbar" style "ardour_adjusters"
 class "GtkLabel" style "default_buttons_menus"
-class "GtkButton" style "default_buttons_menus"
+class "GtkButton" style "ardour_button"
 class "GtkArrow" style "tearoff_arrow"
 class "GtkProgressBar" style "ardour_progressbars"
 

@@ -310,7 +310,7 @@ ARDOUR::get_user_ardour_path ()
 	}
 		
 	path = envvar;
-	path += "/.ardour/";
+	path += "/.ardour2/";
 
 	/* create it if necessary */
 
@@ -325,7 +325,7 @@ ARDOUR::get_system_ardour_path ()
 	string path;
 
 	path += DATA_DIR;
-	path += "/ardour/";
+	path += "/ardour2/";
 	
 	return path;
 }
@@ -370,7 +370,7 @@ find_file (string name, string dir, string subdir = "")
 	/* C: dir/... */
 	
 	path = dir;
-	path += "/ardour/";
+	path += "/ardour2/";
 	
 	if (subdir.length()) {
 		path += subdir + "/";
