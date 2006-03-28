@@ -271,6 +271,10 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	
 	blink_timeout_tag = -1;
 
+	/* the global configuration object is now valid */
+
+	use_config ();
+
 	/* this being a GUI and all, we want peakfiles */
 
 	FileSource::set_build_peakfiles (true);
@@ -2325,4 +2329,107 @@ ARDOUR_UI::cmdline_new_session (string path)
 
 	_will_create_new_session_automatically = false; /* done it */
 	return FALSE; /* don't call it again */
+}
+
+void
+ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
+{
+	Glib::RefPtr<Action> act;
+	
+	switch (hf) {
+	case BWF:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatBWF"));
+		break;
+	case WAVE:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatWAVE"));
+		break;
+	case WAVE64:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatWAVE64"));
+		break;
+	case iXML:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatiXML"));
+		break;
+	case RF64:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatRF64"));
+		break;
+	}
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active() && Config->get_native_file_header_format() != hf) {
+			Config->set_native_file_header_format (hf);
+			if (session) {
+				session->reset_native_file_format ();
+			}
+		}
+	}
+}
+
+void
+ARDOUR_UI::set_native_file_data_format (SampleFormat sf)
+{
+	Glib::RefPtr<Action> act;
+	
+	switch (sf) {
+	case FormatFloat:
+		act = ActionManager::get_action (X_("options"), X_("FileDataFormatFloat"));
+		break;
+	case FormatInt24:
+		act = ActionManager::get_action (X_("options"), X_("FileDataFormat24bit"));
+		break;
+	}
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+
+		if (ract && ract->get_active() && Config->get_native_file_data_format() != sf) {
+			Config->set_native_file_data_format (sf);
+			if (session) {
+				session->reset_native_file_format ();
+			}
+		}
+	}
+}
+
+void
+ARDOUR_UI::use_config ()
+{
+	Glib::RefPtr<Action> act;
+
+	switch (Config->get_native_file_data_format ()) {
+	case FormatFloat:
+		act = ActionManager::get_action (X_("options"), X_("FileDataFormatFloat"));
+		break;
+	case FormatInt24:
+		act = ActionManager::get_action (X_("options"), X_("FileDataFormat24bit"));
+		break;
+	}
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+		ract->set_active ();
+	}	
+
+	switch (Config->get_native_file_header_format ()) {
+	case BWF:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatBWF"));
+		break;
+	case WAVE:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatWAVE"));
+		break;
+	case WAVE64:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatWAVE64"));
+		break;
+	case iXML:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatiXML"));
+		break;
+	case RF64:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatRF64"));
+		break;
+	}
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+		ract->set_active ();
+	}	
 }

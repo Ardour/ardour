@@ -265,7 +265,14 @@ FileSource::init (string pathstr, bool must_exist, jack_nframes_t rate)
 	
 	if (new_file) {
 
-		is_bwf = Config->get_native_format_is_bwf ();
+		switch (Config->get_native_file_header_format()) {
+		case BWF:
+			is_bwf = true;
+			break;
+		default:
+			is_bwf = false;
+			break;
+		}
 
 		if (fill_header (rate)) {
 			error << string_compose (_("FileSource: cannot write header in %1"), _path) << endmsg;

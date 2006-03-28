@@ -986,12 +986,10 @@ AudioRegionView::create_waves ()
 
 	uint32_t nchans = atv.get_diskstream()->n_channels();
 	
-//	if (wait_for_waves) {
-		/* in tmp_waves, set up null pointers for each channel so the vector is allocated */
-		for (uint32_t n = 0; n < nchans; ++n) {
-			tmp_waves.push_back (0);
-		}
-//	}
+	/* in tmp_waves, set up null pointers for each channel so the vector is allocated */
+	for (uint32_t n = 0; n < nchans; ++n) {
+		tmp_waves.push_back (0);
+	}
 	
 	for (uint32_t n = 0; n < nchans; ++n) {
 		
@@ -1099,8 +1097,12 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
-	peaks_ready_connection.disconnect ();
 	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
+
+	if (!waves.empty()) {
+		/* all waves created, don't hook into peaks ready anymore */
+		peaks_ready_connection.disconnect ();		
+	}
 }
 
 void

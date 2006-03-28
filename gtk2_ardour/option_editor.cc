@@ -227,12 +227,6 @@ OptionEditor::~OptionEditor ()
 {
 }
 
-static const gchar *native_format_strings[] = {
-	N_("Broadcast WAVE/floating point"),
-	N_("WAVE/floating point"),
-	0
-};
-
 void
 OptionEditor::setup_path_options()
 {
@@ -251,11 +245,6 @@ OptionEditor::setup_path_options()
 	path_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
 	path_table.attach (session_raid_entry, 1, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 
-	label = manage(new Label(_("Native Format")));
-	label->set_name ("OptionsLabel");
-	path_table.attach (*label, 0, 1, 1, 2, FILL|EXPAND, FILL);
-	path_table.attach (native_format_combo, 1, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
-
 	label = manage(new Label(_("Soundfile Search Paths")));
 	label->set_name("OptionsLabel");
 	path_table.attach(*label, 0, 1, 2, 3, FILL|EXPAND, FILL);
@@ -264,19 +253,6 @@ OptionEditor::setup_path_options()
 	sfdb_path_view.append_column(_("Paths"), sfdb_path_columns.paths);
 	sfdb_path_view.set_size_request(-1, 100);
 
-	vector<string> nfstrings = internationalize (native_format_strings);
-
-	set_popdown_strings (native_format_combo, nfstrings);
-	native_format_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::native_format_chosen));
-
-	fixup_combo_size (native_format_combo, nfstrings);
-
-	if (Config->get_native_format_is_bwf()) {
-		native_format_combo.set_active_text (native_format_strings[0]);
-	} else {
-		native_format_combo.set_active_text (native_format_strings[1]);
-	}
-	
 	path_table.show_all();
 }
 
@@ -776,23 +752,6 @@ OptionEditor::click_emphasis_sound_changed ()
 				session->set_click_emphasis_sound (path);
 			}
 		}
-	}
-}
-
-void
-OptionEditor::native_format_chosen ()
-{
-	string which;
-
-	if (session == 0) {
-		return;
-	}
-
-	bool use_bwf = (native_format_combo.get_active_text() == native_format_strings[0]);
-
-	if (use_bwf != Config->get_native_format_is_bwf()) {
-		Config->set_native_format_is_bwf (use_bwf);
-		session->reset_native_file_format ();
 	}
 }
 

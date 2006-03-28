@@ -392,7 +392,7 @@ ARDOUR_UI::setup_options ()
 	session_control_changed (Session::AutoReturn);
 	session_control_changed (Session::AutoInput);
 	session_control_changed (Session::Clicking);
-
+	
 	session->ControlChanged.connect (mem_fun (*this, &ARDOUR_UI::queue_session_control_changed));
 }
 

@@ -134,7 +134,7 @@ Session::import_audiofile (import_status& status)
 
 			
 		try { 
-			newfiles[n] = new FileSource (buf, frame_rate());
+			newfiles[n] = new FileSource (buf, frame_rate(), false, Config->get_native_file_data_format());
 		}
 
 		catch (failed_constructor& err) {

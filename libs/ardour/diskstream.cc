@@ -69,16 +69,11 @@ DiskStream::DiskStream (Session &sess, const string &name, Flag flag)
 	/* prevent any write sources from being created */
 
 	in_set_state = true;
-	
-	
 
 	init (flag);
 	use_new_playlist ();
-	in_set_state = false;
 
-	if (destructive()) {
-		setup_destructive_playlist ();
-	}
+	in_set_state = false;
 
 	DiskStreamCreated (this); /* EMIT SIGNAL */
 }
@@ -457,9 +452,7 @@ DiskStream::setup_destructive_playlist ()
 {
 	AudioRegion::SourceList srcs;
 
-	/* make sure we have sources for every channel */
-
-	reset_write_sources (true);
+	cerr << "setting up destructive playlist with " << channels.size() << " channels\n";
 
 	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 		srcs.push_back ((*chan).write_source);
@@ -2143,9 +2136,8 @@ DiskStream::set_state (const XMLNode& node)
 
 	capturing_sources.clear ();
 
-	/* write sources are handled elsewhere; 
-  	      for destructive tracks: in {setup,use}_destructive_playlist()
-	      for non-destructive: when we handle the input set up of the IO that owns this DS
+	/* write sources are handled when we handle the input set 
+	   up of the IO that owns this DS (::non_realtime_input_change())
 	*/
 		
 	in_set_state = false;
@@ -2210,32 +2202,35 @@ DiskStream::reset_write_sources (bool mark_write_complete, bool force)
 		return;
 	}
 	
-	if (!force && destructive()) {
-
-		/* make sure we always have enough sources for the current channel count */
-
-		for (chan = channels.begin(), n = 0; chan != channels.end(); ++chan, ++n) {
-			if ((*chan).write_source == 0) {
-				break;
-			}
-		}
-
-		if (chan == channels.end()) {
-			return;
-		}
-
-		/* some channels do not have a write source */
-	}
-
 	capturing_sources.clear ();
 	
 	for (chan = channels.begin(), n = 0; chan != channels.end(); ++chan, ++n) {
-		if ((*chan).write_source && mark_write_complete) {
-			(*chan).write_source->mark_streaming_write_completed ();
+		if (!destructive()) {
+
+			if ((*chan).write_source && mark_write_complete) {
+				(*chan).write_source->mark_streaming_write_completed ();
+			}
+			use_new_write_source (n);
+
+			if (record_enabled()) {
+				capturing_sources.push_back ((*chan).write_source);
+			}
+
+		} else {
+			if ((*chan).write_source == 0) {
+				use_new_write_source (n);
+			}
 		}
-		use_new_write_source (n);
-		if (record_enabled()) {
-			capturing_sources.push_back ((*chan).write_source);
+	}
+
+	if (destructive()) {
+
+		/* we now have all our write sources set up, so create the
+		   playlist's single region.
+		*/
+
+		if (_playlist->empty()) {
+			setup_destructive_playlist ();
 		}
 	}
 }
@@ -2490,7 +2485,7 @@ DiskStream::use_pending_capture_data (XMLNode& node)
 			}
 
 			try {
-				fs = new FileSource (prop->value(), _session.frame_rate(), true);
+				fs = new FileSource (prop->value(), _session.frame_rate(), true, Config->get_native_file_data_format());
 			}
 
 			catch (failed_constructor& err) {

@@ -72,7 +72,11 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
 	ActionManager::register_action (main_actions, X_("TransportOptions"), _("Options"));
         ActionManager::register_action (main_actions, X_("Help"), _("Help"));
-	ActionManager::register_action (main_actions, X_("KeyMouse Actions"), _("KeyMouse Actions"));
+ 	ActionManager::register_action (main_actions, X_("KeyMouse Actions"), _("KeyMouse Actions"));
+	ActionManager::register_action (main_actions, X_("AudioFileFormat"), _("Audio File Format"));
+	ActionManager::register_action (main_actions, X_("AudioFileFormatHeader"), _("Header"));
+	ActionManager::register_action (main_actions, X_("AudioFileFormatData"), _("Data"));
+
 	/* the real actions */
 
 	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  bind (mem_fun(*this, &ARDOUR_UI::new_session), false, string ()));
@@ -369,6 +373,19 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_toggle_action (option_actions, X_("AutoConnectNewTrackInputsToHardware"), _("Connect newtrack inputs to hardware"), mem_fun (*this, &ARDOUR_UI::toggle_AutoConnectNewTrackInputsToHardware));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+	RadioAction::Group file_header_group;
+
+	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatBWF"), X_("Broadcast WAVE"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::BWF));
+	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatWAVE"), X_("WAVE"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::WAVE));
+	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatWAVE64"), X_("WAVE-64"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::WAVE64));
+	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatiXML"), X_("iXML"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::iXML));
+	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatRF64"), X_("RF64"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::RF64));
+
+	RadioAction::Group file_data_group;
+
+	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormatFloat"), X_("32-bit floating point"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatFloat));
+	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat24bit"), X_("24-bit signed integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt24));
 
 	RadioAction::Group connect_outputs_group;
 

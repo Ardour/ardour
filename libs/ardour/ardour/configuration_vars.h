@@ -1,5 +1,5 @@
 #ifdef __APPLE__
-CONFIG_VARIABLE(std::string, auditioner_output_left, "auditioner-output-left"  "coreaudio:Built-in Audio:in1")
+CONFIG_VARIABLE(std::string, auditioner_output_left, "auditioner-output-left",  "coreaudio:Built-in Audio:in1")
 CONFIG_VARIABLE(std::string, auditioner_output_right, "auditioner-output-right", "coreaudio:Built-in Audio:in2")
 #else
 CONFIG_VARIABLE(std::string, auditioner_output_left, "auditioner-output-left", "alsa_pcm:playback_1")
@@ -19,7 +19,6 @@ CONFIG_VARIABLE(bool, mute_affects_main_outs, "mute-affects-main-outs", true)
 CONFIG_VARIABLE(bool, solo_latch, "solo-latch", true)
 CONFIG_VARIABLE(bool, use_hardware_monitoring, "use-hardware-monitoring", true)
 CONFIG_VARIABLE(bool, jack_time_master, "jack-time-master", true)
-CONFIG_VARIABLE(bool, native_format_is_bwf, "native-format-is-bwf", true)
 CONFIG_VARIABLE(bool, trace_midi_input, "trace-midi-input", false)
 CONFIG_VARIABLE(bool, trace_midi_output, "trace-midi-output", false)
 CONFIG_VARIABLE(bool, plugins_stop_with_transport, "plugins-stop-with-transport", false)
@@ -37,6 +36,8 @@ CONFIG_VARIABLE(bool, quieten_at_speed, "quieten-at-speed", true)
 CONFIG_VARIABLE(uint32_t, midi_feedback_interval_ms,  "midi-feedback-interval-ms", 100)
 CONFIG_VARIABLE(uint32_t, disk_choice_space_threshold,  "disk-choice-space-threshold", 57600000)
 CONFIG_VARIABLE(uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 2)
+CONFIG_VARIABLE(SampleFormat, native_file_data_format,  "native-file-data-format", ARDOUR::FormatFloat)
+CONFIG_VARIABLE(HeaderFormat, native_file_header_format,  "native-file-header-format", ARDOUR::WAVE)
 
 /* these variables have custom set() methods */
 

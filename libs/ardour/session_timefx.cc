@@ -80,7 +80,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		}
 
 		try {
-			sources.push_back(new FileSource (path, frame_rate()));
+			sources.push_back(new FileSource (path, frame_rate(), false, Config->get_native_file_data_format()));
 		} catch (failed_constructor& err) {
 			error << string_compose (_("tempoize: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
 			goto out;

@@ -47,7 +47,7 @@ AudioFilter::make_new_sources (AudioRegion& region, AudioRegion::SourceList& nsr
 		}
 
 		try {
-			nsrcs.push_back (new FileSource (path, session.frame_rate()));
+			nsrcs.push_back (new FileSource (path, session.frame_rate(), false, Config->get_native_file_data_format()));
 		} 
 
 		catch (failed_constructor& err) {

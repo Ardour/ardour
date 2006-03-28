@@ -208,6 +208,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void maximise_editing_space ();
 	void restore_editing_space ();
 
+	void set_native_file_header_format (ARDOUR::HeaderFormat sf);
+	void set_native_file_data_format (ARDOUR::SampleFormat sf);
+
   protected:
 	friend class PublicEditor;
 
@@ -304,6 +307,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void engine_halted ();
 	void engine_stopped ();
 	void engine_running ();
+
+	void use_config ();
 
 	void clear_meters ();
 

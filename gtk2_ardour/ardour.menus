@@ -194,6 +194,16 @@
 	       <menuitem action='About'/>
         </menu>
         <menu name='Options' action='Options'>
+	       <menu action='AudioFileFormat'>
+                   <menu action='AudioFileFormatData'>
+		        <menuitem action='FileDataFormatFloat'/>
+		        <menuitem action='FileDataFormat24bit'/>
+		   </menu>
+                   <menu action='AudioFileFormatHeader'>
+		        <menuitem action='FileHeaderFormatBWF'/>
+		        <menuitem action='FileHeaderFormatWAVE'/>
+		   </menu>
+               </menu>
                <menu action='Autoconnect'>
                    <menuitem action='AutoConnectNewTrackInputsToHardware'/>
                    <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
@@ -214,6 +224,7 @@
 		   <menuitem action='toggle-xfades-active'/>
 		   <menuitem action='toggle-xfades-visible'/>
 		   <menuitem action='toggle-auto-xfades'/>
+                   <menuitem action='UnmuteNewFullCrossfades'/>
 		   <separator/>
 		   <menuitem action='CrossfadesFull'/>
 		   <menuitem action='CrossfadesShort'/>
@@ -238,9 +249,6 @@
                <menuitem action='StopRecordingOnXrun'/>
                <menuitem action='StopTransportAtEndOfSession'/>
                <menuitem action='GainReduceFastTransport'/>
-               <separator/>
-               <menuitem action='AutomaticallyCreateCrossfades'/>
-               <menuitem action='UnmuteNewFullCrossfades'/>
          </menu>
 	 <menu name='Help' action='Help'>
 	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>

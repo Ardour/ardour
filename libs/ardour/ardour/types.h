@@ -25,6 +25,8 @@
 #define __STDC_FORMAT_MACROS /* PRI<foo>; C++ requires explicit requesting of these */
 #endif
 
+#include <istream>
+
 #include <inttypes.h>
 #include <jack/types.h>
 #include <map>
@@ -247,8 +249,20 @@ namespace ARDOUR {
 		FormatFloat = 0,
 		FormatInt24
 	};
+
+
+	enum HeaderFormat {
+		BWF,
+		WAVE,
+		WAVE64,
+		iXML,
+		RF64
+	};
+
 };
 
+std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat sf);
+std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat sf);
 
 static inline jack_nframes_t
 session_frame_to_track_frame (jack_nframes_t session_frame, double speed)

@@ -103,7 +103,7 @@ TapeAudioRegionView::init (double amplitude_above_axis, Gdk::Color& basic_color,
 
 	/* every time the wave data changes and peaks are ready, redraw */
 
-
+	
 	for (uint32_t n = 0; n < region.n_channels(); ++n) {
 		region.source(n).PeaksReady.connect (bind (mem_fun(*this, &TapeAudioRegionView::update), n));
 	}
@@ -117,6 +117,8 @@ TapeAudioRegionView::~TapeAudioRegionView()
 void
 TapeAudioRegionView::update (uint32_t n)
 {
+	cerr << "new peaks ready for channel " << n << endl;
+
 	/* check that all waves are build and ready */
 
 	if (!tmp_waves.empty()) {

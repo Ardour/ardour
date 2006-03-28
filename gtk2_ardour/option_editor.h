@@ -72,7 +72,6 @@ class OptionEditor : public Gtk::Dialog
 
 	Gtk::Table		path_table;
 	Gtk::Entry              session_raid_entry;
-	Gtk::ComboBoxText       native_format_combo;
 
 	struct SoundFilePathColumns : public Gtk::TreeModel::ColumnRecord {
 	    public:
@@ -88,7 +87,6 @@ class OptionEditor : public Gtk::Dialog
 	void setup_path_options();
 	void add_session_paths ();
 	void remove_session_paths ();
-	void native_format_chosen ();
 	void raid_path_changed ();
 
 	/* fades */

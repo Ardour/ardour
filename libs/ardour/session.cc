@@ -2795,7 +2795,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 				if (nchan < 2) {
 					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
 				} else if (nchan == 2) {
-					if (nchan == 0) {
+					if (chan == 0) {
 						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%L.wav", spath.c_str(), cnt, legalized.c_str());
 					} else {
 						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%R.wav", spath.c_str(), cnt, legalized.c_str());
@@ -2871,9 +2871,9 @@ Session::create_file_source (DiskStream& ds, int32_t chan, bool destructive)
 	/* this might throw failed_constructor(), which is OK */
 
 	if (destructive) {
-		return new DestructiveFileSource (spath, frame_rate());
+		return new DestructiveFileSource (spath, frame_rate(), false, Config->get_native_file_data_format());
 	} else {
-		return new FileSource (spath, frame_rate());
+		return new FileSource (spath, frame_rate(), false, Config->get_native_file_data_format());
 	}
 }
 
@@ -3585,7 +3585,7 @@ Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_
 		}
 		
 		try {
-			fsource = new FileSource (buf, frame_rate());
+			fsource = new FileSource (buf, frame_rate(), false, Config->get_native_file_data_format());
 		}
 		
 		catch (failed_constructor& err) {

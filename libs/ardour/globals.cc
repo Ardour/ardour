@@ -501,3 +501,18 @@ ARDOUR::coverage (jack_nframes_t sa, jack_nframes_t ea,
 	return OverlapNone;
 }
 
+/* not sure where to put these */
+
+std::istream& operator>>(std::istream& o, HeaderFormat hf) {
+	int val;
+	o >> val;
+	hf = (HeaderFormat) val;
+	return o;
+}
+
+std::istream& operator>>(std::istream& o, SampleFormat sf) {
+	int val;
+	o >> val;
+	sf = (SampleFormat) val;
+	return o;
+}

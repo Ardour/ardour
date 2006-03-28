@@ -318,22 +318,6 @@ main (int argc, char *argv[])
 	if (curvetest_file) {
 		return curvetest (curvetest_file);
 	}
-
-	
-	if (!use_gtk_theme) {
-
-		/* desktop standard themes: just say no! */
-
-		if (getenv("GTK_RC_FILES")) {
-			unsetenv("GTK_RC_FILES");
-		}
-		
-		if (getenv("GTK2_RC_FILES")) {
-			unsetenv("GTK_RC_FILES");
-		}
-
-		RC::set_default_files (null_file_list);
-	}
 	
 	cout << _("Ardour/GTK ") 
 	     << VERSIONSTRING
