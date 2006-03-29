@@ -1417,7 +1417,7 @@ FileSource::repair (string path, jack_nframes_t rate)
 		goto out;
 	}
 	
-	if (memcmp (&buf[0], "RIFF", 4) || memcmp (&buf[8], "WAVE", 4) || memcmp (&buf[0], "RIFX", 4)) {
+	if ((memcmp (&buf[0], "RIFF", 4) && memcmp (&buf[0], "RIFX", 4)) || memcmp (&buf[8], "WAVE", 4)) {
 		/* no header. too dangerous to proceed */
 		goto out;
 	} 

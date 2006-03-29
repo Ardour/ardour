@@ -637,7 +637,7 @@ void
 Session::mmc_record_exit (MIDI::MachineControl &mmc)
 {
 	if (mmc_control) {
-		disable_record ();
+		disable_record (false);
 	}
 }
 

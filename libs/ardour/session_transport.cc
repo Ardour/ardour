@@ -189,7 +189,7 @@ Session::realtime_stop (bool abort)
 	_clear_event_type (Event::RangeStop);
 	_clear_event_type (Event::RangeLocate);
 
-	disable_record ();
+	disable_record (true);
 
 	reset_slave_state ();
 		
@@ -282,9 +282,9 @@ Session::non_realtime_stop (bool abort)
 	struct tm* now;
 	time_t     xnow;
 	bool       did_record;
-
+	
 	did_record = false;
-
+	
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->get_captured_frames () != 0) {
 			did_record = true;
@@ -405,8 +405,12 @@ Session::non_realtime_stop (bool abort)
 		save_state ("", true);
 	}
 
-	/* save the current state of things if appropriate */
+        /* always try to get rid of this */
+
+        remove_pending_capture_state ();
 	
+	/* save the current state of things if appropriate */
+
 	if (did_record) {
 		save_state (_current_snapshot_name);
 	}
@@ -835,7 +839,7 @@ Session::start_transport ()
 		break;
 
 	case Recording:
-		disable_record ();
+		disable_record (false);
 		break;
 
 	default:

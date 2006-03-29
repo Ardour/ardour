@@ -320,7 +320,7 @@ class Session : public sigc::trackable, public Stateful
 
 	bool record_enabling_legal () const;
 	void maybe_enable_record ();
-	void disable_record (bool force = false);
+	void disable_record (bool rt_context, bool force = false);
 	void step_back_from_record ();
 	
 	sigc::signal<void> going_away;

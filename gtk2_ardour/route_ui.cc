@@ -249,24 +249,23 @@ RouteUI::solo_press(GdkEventButton* ev)
 		}
 	}
 
-	return stop_signal (*solo_button, "button-press-event");
+	return true;
 }
 
 gint
 RouteUI::solo_release(GdkEventButton* ev)
 {
-	if(!ignore_toggle){
-		if (wait_for_release){
+	if (!ignore_toggle) {
+		if (wait_for_release) {
 			wait_for_release = false;
 			// undo the last op
 			// because the press was the last undoable thing we did
 
 			_session.undo (1U);
-
-			stop_signal (*solo_button, "button-release-event");
 		}
 	}
-	return TRUE;
+
+	return true;
 }
 
 gint

@@ -508,7 +508,7 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 	/* make sure we are actually rolling */
 
 	if (get_record_enabled()) {
-		disable_record ();
+		disable_record (false);
 	}
 
 	_exporting = true;

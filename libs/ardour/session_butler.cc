@@ -214,6 +214,7 @@ Session::butler_thread_work ()
 						
 					case ButlerRequest::Wake:
 						break;
+
 					case ButlerRequest::Run:
 						butler_should_run = true;
 						break;

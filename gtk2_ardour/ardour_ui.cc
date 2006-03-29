@@ -2269,14 +2269,11 @@ what you would like to do.\n"));
 	
 	switch (dialog.run ()) {
 	case RESPONSE_ACCEPT:
-		break;
-	default:
 		return 1;
+	default:
+		return 0;
 	}
-
-	return 0;
 }
-	
 	
 void
 ARDOUR_UI::disconnect_from_jack ()

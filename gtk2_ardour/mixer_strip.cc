@@ -313,10 +313,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	output_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::output_press), false);
 
 	rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
-	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press));
-	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release));
-	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press));
-	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release));
+	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
+	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release), false);
+	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
+	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release), false);
 
 	gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event), false);
 	gain_automation_style_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event), false);

@@ -1268,7 +1268,7 @@ Session::enable_record ()
 }
 
 void
-Session::disable_record (bool force)
+Session::disable_record (bool rt_context, bool force)
 {
 	RecordState rs;
 
@@ -1299,7 +1299,10 @@ Session::disable_record (bool force)
 		}
 		
 		RecordStateChanged (); /* emit signal */
-		remove_pending_capture_state ();
+
+		if (!rt_context) {
+			remove_pending_capture_state ();
+		}
 	}
 }
 

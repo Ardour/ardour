@@ -452,8 +452,6 @@ DiskStream::setup_destructive_playlist ()
 {
 	AudioRegion::SourceList srcs;
 
-	cerr << "setting up destructive playlist with " << channels.size() << " channels\n";
-
 	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 		srcs.push_back ((*chan).write_source);
 	}
