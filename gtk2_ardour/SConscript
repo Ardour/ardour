@@ -243,13 +243,13 @@ if env['NLS']:
 
 
 env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour', ardour))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour2_ui.rc'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour.menus'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour.colors'))
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour'), 'splash.ppm'))
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/pixmaps'), pixmap_files))
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/glade'), glade_files))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui.rc'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.colors'))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 'splash.ppm'))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/glade'), glade_files))
 
 #dist
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],

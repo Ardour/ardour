@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-03-12 11:01-0500\n"
+"POT-Creation-Date: 2006-03-29 14:24-0500\n"
 "PO-Revision-Date: 2004-02-13 00:35+0300\n"
 "Last-Translator: Igor Blinov pitstop@nm.ru\n"
 "Language-Team: Russian\n"
@@ -14,65 +14,53 @@ msgstr ""
 "Content-Type: text/plain; charset=koi8-r\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libs/gtkmm2ext/barcontroller.cc:416 libs/gtkmm2ext/bindable_button.cc:136
-#: libs/gtkmm2ext/controller.cc:50 libs/gtkmm2ext/slider_controller.cc:141
+#: libs/gtkmm2ext/barcontroller.cc:405 libs/gtkmm2ext/bindable_button.cc:131
+#: libs/gtkmm2ext/controller.cc:50 libs/gtkmm2ext/slider_controller.cc:132
 msgid "operate MIDI controller now"
 msgstr "включить MIDI-контроллер"
 
-#: libs/gtkmm2ext/gtk_ui.cc:55
+#: libs/gtkmm2ext/gtk_ui.cc:58
 msgid "cannot create thread request buffer key"
 msgstr ""
 
-#: libs/gtkmm2ext/gtk_ui.cc:356 libs/gtkmm2ext/gtk_ui.cc:523
+#: libs/gtkmm2ext/gtk_ui.cc:403 libs/gtkmm2ext/gtk_ui.cc:599
 msgid "programming error: "
 msgstr ""
 
-#: libs/gtkmm2ext/gtk_ui.cc:688
+#: libs/gtkmm2ext/gtk_ui.cc:761
 msgid "Press To Exit"
 msgstr ""
 
-#: libs/gtkmm2ext/mwc.cc:33 libs/gtkmm2ext/popup_selector.cc:34
-#: libs/gtkmm2ext/prompter.cc:32
-msgid "OK"
-msgstr "ОК"
-
-#: libs/gtkmm2ext/newsavedialog.cc:26
-msgid "Location:"
-msgstr "Путь:"
-
-#: libs/gtkmm2ext/newsavedialog.cc:27 libs/gtkmm2ext/newsavedialog.cc:265
-msgid "Browse ..."
-msgstr "Обзор ..."
-
-#: libs/gtkmm2ext/newsavedialog.cc:28 libs/gtkmm2ext/newsavedialog.cc:61
-#: libs/gtkmm2ext/prompter.cc:33
-msgid "Cancel"
-msgstr "Отмена"
-
-#: libs/gtkmm2ext/newsavedialog.cc:30
-msgid "New folder"
-msgstr "Новая папка"
-
-#: libs/gtkmm2ext/newsavedialog.cc:31
-msgid "Add to favorites"
-msgstr "Добавить в избранное"
-
-#: libs/gtkmm2ext/newsavedialog.cc:32
-msgid "Remove from favorites"
-msgstr "Исключить из избранного"
-
-#: libs/gtkmm2ext/newsavedialog.cc:33
-msgid "Show Hidden"
-msgstr "Показывать скрытые файлы"
-
-#: libs/gtkmm2ext/newsavedialog.cc:53 libs/gtkmm2ext/newsavedialog.cc:269
-msgid "Hide browser"
-msgstr "Скрыть область обзора"
-
-#: libs/gtkmm2ext/popup_selector.cc:33 libs/gtkmm2ext/textviewer.cc:34
+#: libs/gtkmm2ext/textviewer.cc:34
 msgid "Close"
 msgstr "Закрыть"
 
-#: libs/gtkmm2ext/popup_selector.cc:35
-msgid "Rescan"
-msgstr "Обновить"
+#~ msgid "OK"
+#~ msgstr "ОК"
+
+#~ msgid "Location:"
+#~ msgstr "Путь:"
+
+#~ msgid "Browse ..."
+#~ msgstr "Обзор ..."
+
+#~ msgid "Cancel"
+#~ msgstr "Отмена"
+
+#~ msgid "New folder"
+#~ msgstr "Новая папка"
+
+#~ msgid "Add to favorites"
+#~ msgstr "Добавить в избранное"
+
+#~ msgid "Remove from favorites"
+#~ msgstr "Исключить из избранного"
+
+#~ msgid "Show Hidden"
+#~ msgstr "Показывать скрытые файлы"
+
+#~ msgid "Hide browser"
+#~ msgstr "Скрыть область обзора"
+
+#~ msgid "Rescan"
+#~ msgstr "Обновить"

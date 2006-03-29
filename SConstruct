@@ -745,8 +745,8 @@ env = conf.Finish()
 
 rcbuild = env.SubstInFile ('ardour.rc','ardour.rc.in', SUBST_DICT = subst_dict)
 
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour_system.rc'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour'), 'ardour.rc'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour_system.rc'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.rc'))
 
 Default (rcbuild)
 

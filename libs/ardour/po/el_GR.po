@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 0.664.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-09-19 18:09-0400\n"
+"POT-Creation-Date: 2006-03-29 14:24-0500\n"
 "PO-Revision-Date: 2003-05-21 12:50+0500\n"
 "Last-Translator: Muadibas\n"
 "Language-Team: Hellenic(Greek)\n"
@@ -15,24 +15,38 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libs/ardour/audio_library.cc:106
+#: libs/ardour/audio_library.cc:91
+msgid "channels"
+msgstr ""
+
+#: libs/ardour/audio_library.cc:92
+#, fuzzy
+msgid "samplerate"
+msgstr "ξεχωριστό"
+
+#: libs/ardour/audio_library.cc:93
+msgid "resolution"
+msgstr ""
+
+#: libs/ardour/audio_library.cc:94
+#, fuzzy
+msgid "format"
+msgstr "float"
+
+#: libs/ardour/audio_library.cc:101
 msgid "Could not open %1.  Audio Library not saved"
 msgstr "Δεν μπόρεσα να ανοίξω το %1.  Η Audio Library δεν αποθηκεύθηκε"
 
-#: libs/ardour/audio_library.cc:348
-msgid "Could not find member filename"
-msgstr "Δεν ευρέθη το αρχείο μέλους"
-
 #: libs/ardour/audio_playlist.cc:52 libs/ardour/audio_playlist.cc:62
-#: libs/ardour/audio_playlist.cc:73 libs/ardour/audio_playlist.cc:83
+#: libs/ardour/audio_playlist.cc:73 libs/ardour/audio_playlist.cc:120
 #: libs/ardour/insert.cc:76 libs/ardour/insert.cc:95 libs/ardour/insert.cc:120
-#: libs/ardour/insert.cc:816 libs/ardour/insert.cc:824 libs/ardour/send.cc:38
+#: libs/ardour/insert.cc:838 libs/ardour/insert.cc:846 libs/ardour/send.cc:38
 #: libs/ardour/send.cc:52 libs/ardour/send.cc:61
-#: libs/ardour/session_state.cc:1578
+#: libs/ardour/session_state.cc:1615 libs/ardour/session_state.cc:1661
 msgid "initial state"
 msgstr "πρωταρχική κατάσταση"
 
-#: libs/ardour/audio_playlist.cc:237 libs/ardour/audio_playlist.cc:692
+#: libs/ardour/audio_playlist.cc:274 libs/ardour/audio_playlist.cc:749
 msgid ""
 "programming error: non-audio Region passed to remove_overlap in audio "
 "playlist"
@@ -40,55 +54,51 @@ msgstr ""
 "σφάλμα προγραμματισμού: μη-ηχητική Περιοχή πέρασε σε remove_overlap στην "
 "audio playlist"
 
-#: libs/ardour/audio_playlist.cc:324
+#: libs/ardour/audio_playlist.cc:382
 msgid ""
 "programming error: non-audio Region tested for overlap in audio playlist"
 msgstr ""
 "σφάλμα προγραμματισμού: μη-ηχητική Περιοχή ελέγχθη για υπερπήδηση(overlap) "
 "στην λίστα αναπαρ/γής του ήχου"
 
-#: libs/ardour/audio_playlist.cc:476
-msgid "could not create crossfade object in playlist %1"
-msgstr "δεν έγινε δημιουργία αντικειμένου crossfade στη λίστα αναπαρ/γής%1"
-
-#: libs/ardour/audio_playlist.cc:801
+#: libs/ardour/audio_playlist.cc:858
 msgid "xfade change"
 msgstr "αλλαγή xfade"
 
-#: libs/ardour/audio_playlist.cc:849
+#: libs/ardour/audio_playlist.cc:907
 msgid "region modified"
 msgstr "η περιοχή μετεβλήθη"
 
-#: libs/ardour/audio_track.cc:116 libs/ardour/io.cc:1704
-#: libs/ardour/io.cc:1814
+#: libs/ardour/audio_track.cc:121 libs/ardour/io.cc:1701
+#: libs/ardour/io.cc:1811
 msgid "Unknown connection \"%1\" listed for input of %2"
 msgstr "Άγνωστη σύνδεση \"%1\" στη λίστα εισόδου του %2"
 
-#: libs/ardour/audio_track.cc:118 libs/ardour/io.cc:1706
-#: libs/ardour/io.cc:1816
+#: libs/ardour/audio_track.cc:123 libs/ardour/io.cc:1703
+#: libs/ardour/io.cc:1813
 #, fuzzy
 msgid "in 1"
 msgstr "in %lu"
 
-#: libs/ardour/audio_track.cc:119 libs/ardour/io.cc:1707
-#: libs/ardour/io.cc:1817
+#: libs/ardour/audio_track.cc:124 libs/ardour/io.cc:1704
+#: libs/ardour/io.cc:1814
 msgid "No input connections available as a replacement"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:123 libs/ardour/io.cc:1711
-#: libs/ardour/io.cc:1821
+#: libs/ardour/audio_track.cc:128 libs/ardour/io.cc:1708
+#: libs/ardour/io.cc:1818
 msgid "Connection %1 was not available - \"in 1\" used instead"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:132 libs/ardour/io.cc:1830
+#: libs/ardour/audio_track.cc:137 libs/ardour/io.cc:1827
 msgid "improper input channel list in XML node (%1)"
 msgstr "ακατάλληλη λίστα καναλιών εισόδου στον κόμβο XML (%1)"
 
-#: libs/ardour/audio_track.cc:176 libs/ardour/audio_track.cc:189
+#: libs/ardour/audio_track.cc:182 libs/ardour/audio_track.cc:195
 msgid "AudioTrack: diskstream \"%1\" not known by session"
 msgstr "AudioTrack: το diskstream \"%1\" είναι μή αναγνωρίσιμο από τη συνεδρία"
 
-#: libs/ardour/audio_track.cc:287
+#: libs/ardour/audio_track.cc:311
 #, fuzzy
 msgid ""
 "MIDI rec_enable control specification for %1 is incomplete, so it has been "
@@ -97,87 +107,82 @@ msgstr ""
 "Η προδιαγραφή ελέγχου του MIDI gain για το %1 είναι ημιτελής, με αποτέλεσμα "
 "να αγνοηθεί"
 
-#: libs/ardour/audio_track.cc:299
+#: libs/ardour/audio_track.cc:323
 msgid "programming error: AudioTrack given state without diskstream!"
 msgstr ""
 "σφάλμα προγραμματισμού: εδόθη κατάσταση στην AudioTrack δίχως diskstream!"
-
-#: libs/ardour/audio_track.cc:871
-msgid ""
-"There are too many frozen versions of playlist \"%1\" to create another one"
-msgstr "Πάρα πολλές εκδόσεις λίστας αναπαρ/γής \"%1\" για τη δημιουργία άλλης"
 
 #: libs/ardour/audioengine.cc:139
 msgid "cannot activate JACK client"
 msgstr "Ο JACK δεν μπορεί να ενεργοποιηθεί"
 
-#: libs/ardour/audioengine.cc:434
+#: libs/ardour/audioengine.cc:432
 msgid "register audio input port called before engine was started"
 msgstr "η register audio input port εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:465
+#: libs/ardour/audioengine.cc:463
 msgid "register audio output port called before engine was started"
 msgstr "η register audio output port εκλήθη πρίν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:526
+#: libs/ardour/audioengine.cc:524
 msgid "connect called before engine was started"
 msgstr "η σύνδεση εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:542
+#: libs/ardour/audioengine.cc:540
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:555 libs/ardour/audioengine.cc:584
+#: libs/ardour/audioengine.cc:553 libs/ardour/audioengine.cc:582
 msgid "disconnect called before engine was started"
 msgstr "η αποσύνδεση εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:642
+#: libs/ardour/audioengine.cc:640
 msgid "get_port_by_name() called before engine was started"
 msgstr "η ρουτίνα get_port_by_name() εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:675
+#: libs/ardour/audioengine.cc:673
 msgid "get_ports called before engine was started"
 msgstr "η ρουτίνα get_ports εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:750
+#: libs/ardour/audioengine.cc:748
 msgid "get_nth_physical called before engine was started"
 msgstr "η ρουτίνα get_nth_physical εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:778
+#: libs/ardour/audioengine.cc:776
 #, fuzzy
 msgid "get_port_total_latency() called with no JACK client connection"
 msgstr "η ρουτίνα get_port_total_latency() εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:784
+#: libs/ardour/audioengine.cc:782
 msgid "get_port_total_latency() called before engine was started"
 msgstr "η ρουτίνα get_port_total_latency() εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:908
+#: libs/ardour/audioengine.cc:906
 msgid "Unable to connect to JACK server"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:911
+#: libs/ardour/audioengine.cc:909
 msgid "Could not connect to JACK server as  \"%1\""
 msgstr ""
 
-#: libs/ardour/audioengine.cc:916
+#: libs/ardour/audioengine.cc:914
 msgid "JACK server started"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:950
+#: libs/ardour/audioengine.cc:948
 msgid "cannot shutdown connection to JACK"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:975
+#: libs/ardour/audioengine.cc:973
 msgid "failed to connect to JACK"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:991
+#: libs/ardour/audioengine.cc:989
 #, fuzzy
 msgid "could not reregister %1"
 msgstr "Σφάλμα: δεν μπόρεσα να γράψω %1"
 
-#: libs/ardour/audioengine.cc:1048
+#: libs/ardour/audioengine.cc:1046
 msgid "could not reconnect %1 and %2 (err = %3)"
 msgstr ""
 
@@ -191,7 +196,7 @@ msgstr ""
 msgid "audiofilter: error creating new audio file %1 (%2)"
 msgstr "audiofilter: σφάλμα στη δημιουργία νέου audio file %1 (%2)"
 
-#: libs/ardour/audioregion.cc:848 libs/ardour/audioregion.cc:910
+#: libs/ardour/audioregion.cc:847 libs/ardour/audioregion.cc:909
 #, fuzzy
 msgid "fade in change"
 msgstr "αλλαγή xfade"
@@ -206,7 +211,7 @@ msgstr "εξομαλύνθηκε στα %.2fdB"
 msgid "envelope change"
 msgstr "αλλαγή ενεργού"
 
-#: libs/ardour/automation_event.cc:64 libs/ardour/location.cc:331
+#: libs/ardour/automation_event.cc:64 libs/ardour/location.cc:344
 #: libs/ardour/tempo.cc:225
 msgid "initial"
 msgstr "πρωταρχικό"
@@ -240,7 +245,7 @@ msgid "event adjusted"
 msgstr "συμβάν ρυθμίστηκε"
 
 #: libs/ardour/automation_event.cc:628 libs/ardour/automation_event.cc:733
-#: libs/ardour/panner.cc:1031
+#: libs/ardour/panner.cc:1040
 msgid "programming error:"
 msgstr "σφάλμα προγραμματισμού:"
 
@@ -252,7 +257,7 @@ msgstr "κοπή/αντιγραφή/εκκαθάριση"
 msgid "copy"
 msgstr "αντιγραφή"
 
-#: libs/ardour/automation_event.cc:1143 libs/ardour/playlist.cc:918
+#: libs/ardour/automation_event.cc:1143 libs/ardour/playlist.cc:939
 msgid "paste"
 msgstr "επικόλληση"
 
@@ -270,61 +275,44 @@ msgstr ""
 "λίστα αυτοματισμού: καμία y-συντεταγμένη αποθηκευμένη για σημείο ελέγχου (το "
 "σημείο αγνοήθηκε)"
 
-#: libs/ardour/configuration.cc:99
+#: libs/ardour/configuration.cc:77
+#, fuzzy
+msgid "loading system configuration file %1"
+msgstr ""
+"Ardour: δεν μπορώ να διαβάσω το αρχείο διαρρυθμίσεως του συστήματος \"%1\""
+
+#: libs/ardour/configuration.cc:80
 msgid "Ardour: cannot read system configuration file \"%1\""
 msgstr ""
 "Ardour: δεν μπορώ να διαβάσω το αρχείο διαρρυθμίσεως του συστήματος \"%1\""
 
-#: libs/ardour/configuration.cc:104
+#: libs/ardour/configuration.cc:85
 msgid "Ardour: system configuration file \"%1\" not loaded successfully."
 msgstr ""
 "Ardour: το αρχείο διαρρυθμίσεως του συστήματος \"%1\" δεν φορτώθηκε επιτυχώς."
 
-#: libs/ardour/configuration.cc:124
+#: libs/ardour/configuration.cc:102
+#, fuzzy
+msgid "loading user configuration file %1"
+msgstr "Ardour: αρχείο διαρρυθμίσεως μή αναγνώσιμο \"%1\""
+
+#: libs/ardour/configuration.cc:105
 msgid "Ardour: cannot read configuration file \"%1\""
 msgstr "Ardour: αρχείο διαρρυθμίσεως μή αναγνώσιμο \"%1\""
 
-#: libs/ardour/configuration.cc:130
-msgid "Ardour: configuration file \"%1\" not loaded successfully."
+#: libs/ardour/configuration.cc:110
+#, fuzzy
+msgid "Ardour: user configuration file \"%1\" not loaded successfully."
 msgstr "Ardour: αρχείο διαρρυθμίσεως \"%1\" δεν φορτώθηκε επιτυχώς."
 
-#: libs/ardour/configuration.cc:169
-msgid "Config file not saved"
+#: libs/ardour/configuration.cc:134
+#, fuzzy
+msgid "Config file %1 not saved"
 msgstr "Αρχείο διαρρυθμίσεως δεν αποθηκεύθηκε"
 
-#: libs/ardour/configuration.cc:332
+#: libs/ardour/configuration.cc:205
 msgid "ill-formed MIDI port specification in ardour rcfile (ignored)"
 msgstr "κακοσχηματισμένος καθορισμός MIDI θύρας στο ardour rcfile (αγνοήθηκε)"
-
-#: libs/ardour/configuration.cc:447 libs/ardour/configuration.cc:448
-#: libs/ardour/configuration.cc:449 libs/ardour/globals.cc:106
-#: libs/ardour/globals.cc:110 libs/ardour/globals.cc:114
-msgid "default"
-msgstr "προκαθορισμένο"
-
-#: libs/ardour/configuration.cc:451
-msgid "coreaudio:Built-in Audio:in1"
-msgstr ""
-
-#: libs/ardour/configuration.cc:452
-msgid "coreaudio:Built-in Audio:in2"
-msgstr ""
-
-#: libs/ardour/configuration.cc:454
-msgid "alsa_pcm:playback_1"
-msgstr "alsa_pcm:playback_1"
-
-#: libs/ardour/configuration.cc:455
-msgid "alsa_pcm:playback_2"
-msgstr "alsa_pcm:playback_2"
-
-#: libs/ardour/configuration.cc:592
-msgid "illegal or badly-formed string used for RAID path"
-msgstr "παράνομη ή κακοσχηματισμένη γραμμή για το μονοπάτι RAID"
-
-#: libs/ardour/configuration.cc:597
-msgid "RAID search path is ambiguous"
-msgstr "Το μονοπάτι αναζήτησης του RAID είναι αμφίβολο"
 
 #: libs/ardour/connection.cc:183
 msgid "Node for Connection has no \"name\" property"
@@ -334,11 +322,11 @@ msgstr "Κόμβος προς Σύνδεση δεν έχει \"όνομα\" ιδ
 msgid "Node for Connection has no \"connections\" property"
 msgstr "Κόμβος προς Σύνδεση δεν έχει \"συνδέσεις\" ιδιότητα"
 
-#: libs/ardour/connection.cc:227 libs/ardour/io.cc:1890
+#: libs/ardour/connection.cc:227 libs/ardour/io.cc:1887
 msgid "IO: badly formed string in XML node for inputs \"%1\""
 msgstr "IO: κακοφτιαγμένη γραμμή στον XML κόμβο για εισόδους \"%1\""
 
-#: libs/ardour/connection.cc:232 libs/ardour/io.cc:1895
+#: libs/ardour/connection.cc:232 libs/ardour/io.cc:1892
 msgid "bad input string in XML node \"%1\""
 msgstr "κακή γραμμή εισόδου στον XML κόμβο \"%1\""
 
@@ -362,17 +350,17 @@ msgstr "Crossfade: χωρίς \"αριστερή\" περιοχή στην κα�
 msgid "Crossfade: no \"out\" region %1 found in playlist %2"
 msgstr "Crossfade: αριστερή περιοχή  %1 δεν ευρέθη στη λίστα αναπαρ/γής %2"
 
-#: libs/ardour/crossfade.cc:458
+#: libs/ardour/crossfade.cc:484
 msgid "active changed"
 msgstr "αλλαγή ενεργού"
 
-#: libs/ardour/crossfade.cc:707
+#: libs/ardour/crossfade.cc:733
 #, fuzzy
 msgid "old-style crossfade information - no position information"
 msgstr "Ο κόμβος XML για την Τοποθεσία δεν έχει πληροφορίες ενάρξεως"
 
-#: libs/ardour/curve.cc:112 libs/ardour/insert.cc:451
-#: libs/ardour/session.cc:2295 libs/ardour/session.cc:2347
+#: libs/ardour/curve.cc:112 libs/ardour/insert.cc:454
+#: libs/ardour/session.cc:2433 libs/ardour/session.cc:2485
 msgid "programming error: "
 msgstr "σφάλμα προγραμματισμού: "
 
@@ -388,87 +376,103 @@ msgstr "CycleTimer::get_mhz(): δεν ευρέθη το cpu MHz στο /proc/cpu
 msgid "cannot locate cpu MHz in /proc/cpuinfo"
 msgstr "δεν ευρέθη το cpu MHz στο /proc/cpuinfo"
 
-#: libs/ardour/diskstream.cc:327
+#: libs/ardour/destructive_filesource.cc:197
+msgid "DestructiveFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"
+msgstr ""
+
+#: libs/ardour/destructive_filesource.cc:210
+#: libs/ardour/destructive_filesource.cc:252
+#: libs/ardour/destructive_filesource.cc:259
+#, fuzzy
+msgid "DestructiveFileSource: \"%1\" bad write (%2)"
+msgstr "FileSource: \"%1\" κακή εγγραφή (%2)"
+
+#: libs/ardour/diskstream.cc:337
 msgid "DiskStream: Session doesn't know about a Playlist called \"%1\""
 msgstr ""
 "DiskStream: Η Συνεδρία δεν γνωρίζει για την λίστα Αναπαρ/γής με όνομα \"%1\""
 
-#: libs/ardour/diskstream.cc:332
+#: libs/ardour/diskstream.cc:342
 msgid "DiskStream: Playlist \"%1\" isn't an audio playlist"
 msgstr "DiskStream: Η Λίστα \"%1\" δεν είναι ηχητική λίστα αναπαρ/γής"
 
-#: libs/ardour/diskstream.cc:415
+#: libs/ardour/diskstream.cc:433
 msgid "DiskStream %1: there is no existing playlist to make a copy of!"
 msgstr "DiskStream %1: δεν υπάρχει λίστα αναπαρ/γής για να γίνει αντιγραφή!"
 
-#: libs/ardour/diskstream.cc:1035 libs/ardour/diskstream.cc:1046
+#: libs/ardour/diskstream.cc:1112 libs/ardour/diskstream.cc:1123
 msgid "DiskStream %1: when refilling, cannot read %2 from playlist at frame %3"
 msgstr ""
 "DiskStream %1: κατα την αναγόμωση, δεν μπόρεσα να διαβάσω %2 από τη λίστα "
 "αναπαρ/γής στο frame %3"
 
-#: libs/ardour/diskstream.cc:1175
+#: libs/ardour/diskstream.cc:1255
 msgid "DiskStream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 "DiskStream %1: δεν μπόρεσα να διαβάσω %2 από τη λίστα αναπαρ/γής στο frame %3"
 
-#: libs/ardour/diskstream.cc:1474 libs/ardour/diskstream.cc:1490
+#: libs/ardour/diskstream.cc:1622 libs/ardour/diskstream.cc:1639
 msgid "DiskStream %1: cannot write to disk"
 msgstr "DiskStream %1: δεν μπορώ να γράψω στο δίσκο"
 
-#: libs/ardour/diskstream.cc:1549
+#: libs/ardour/diskstream.cc:1699
 msgid "DiskStream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 "DiskStream \"%1\": δεν γίνεται να απορριφθούν δειγματοληψίες στο δίσκο!"
 
-#: libs/ardour/diskstream.cc:1631
+#: libs/ardour/diskstream.cc:1796
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: δεν μπόρεσα να δημιουργήσω περιοχή για ολόκληρο audio file"
 
-#: libs/ardour/diskstream.cc:1654
+#: libs/ardour/diskstream.cc:1819
 msgid "DiskStream: could not create region for captured audio!"
 msgstr "DiskStream: δεν μπόρεσα να δημιουργήσω περιοχή για δειγματοληψίες!"
 
-#: libs/ardour/diskstream.cc:1976
+#: libs/ardour/diskstream.cc:1874
+#, fuzzy
+msgid "programmer error: %1"
+msgstr "σφάλμα προγραμματισμού: %1"
+
+#: libs/ardour/diskstream.cc:2154
 #, fuzzy
 msgid "DiskStream: channel %1 out of range"
 msgstr "DiskStream: κανάλι εκτός διαστήματος"
 
-#: libs/ardour/diskstream.cc:2001
+#: libs/ardour/diskstream.cc:2179
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 νέα δειγματοληψία δεν εκκινήθη σωστά"
 
-#: libs/ardour/diskstream.cc:2194
+#: libs/ardour/diskstream.cc:2412
 msgid "Location \"%1\" not valid for track loop (start >= end)"
 msgstr "Η Τοποθεσία \"%1\" δεν είναι ικανή για track loop (αρχή >= τέλος)"
 
-#: libs/ardour/diskstream.cc:2272
+#: libs/ardour/diskstream.cc:2490
 #, fuzzy
 msgid "%1: cannot restore pending capture source file %2"
 msgstr "Εισαγωγή: δεν μπορώ να ανοίξω το εισαγμένο αρχείο ήχου \"%1\""
 
-#: libs/ardour/diskstream.cc:2294
+#: libs/ardour/diskstream.cc:2512
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr ""
 
-#: libs/ardour/diskstream.cc:2310
+#: libs/ardour/diskstream.cc:2528
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
 
-#: libs/ardour/diskstream.cc:2322
+#: libs/ardour/diskstream.cc:2540
 #, fuzzy
 msgid "%1: cannot create region from pending capture sources"
 msgstr "%1: δεν μπόρεσα να δημιουργήσω περιοχή για ολόκληρο audio file"
 
-#: libs/ardour/filesource.cc:146
+#: libs/ardour/filesource.cc:175
 msgid "FileSource: search path not set"
 msgstr "FileSource: μονοπάτι αναζητήσεως δεν ετέθη"
 
-#: libs/ardour/filesource.cc:161
+#: libs/ardour/filesource.cc:190
 msgid "FileSource: \"%1\" not found when searching %2 using %3"
 msgstr "FileSource: \"%1\" δεν ευρέθη όταν αναζητείτο %2 χρησιμοποιώντας %3"
 
-#: libs/ardour/filesource.cc:167
+#: libs/ardour/filesource.cc:196
 msgid ""
 "FileSource: \"%1\" is ambigous when searching %2\n"
 "\t"
@@ -476,94 +480,114 @@ msgstr ""
 "FileSource: \"%1\" είναι αμφίβολο κατά την αναζήτηση του %2\n"
 "\t"
 
-#: libs/ardour/filesource.cc:202
+#: libs/ardour/filesource.cc:231
 msgid "Filesource: cannot find required file (%1): %2"
 msgstr "Filesource: δεν ευρέθη το απαιτούμενο αρχείο (%1): %2"
 
-#: libs/ardour/filesource.cc:210
+#: libs/ardour/filesource.cc:239
 msgid "Filesource: cannot check for existing file (%1): %2"
 msgstr "Filesource: δεν μπορώ να ελέγξω για το υπάρχον αρχείο (%1): %2"
 
-#: libs/ardour/filesource.cc:216
+#: libs/ardour/filesource.cc:245 libs/ardour/filesource.cc:1127
+#: libs/ardour/filesource.cc:1210
 msgid "FileSource: could not open \"%1\": (%2)"
 msgstr "FileSource: δεν μπόρεσα να ανοίξω \"%1\": (%2)"
 
-#: libs/ardour/filesource.cc:242
+#: libs/ardour/filesource.cc:278
 msgid "FileSource: cannot write header in %1"
 msgstr "FileSource: δεν μπορώ να γράψω επικεφαλίδα στο %1"
 
-#: libs/ardour/filesource.cc:257
+#: libs/ardour/filesource.cc:293
 msgid "FileSource: cannot locate chunks in %1"
 msgstr "FileSource: δεν μπορώ να ανιχνεύσω κομμάτια στο %1"
 
-#: libs/ardour/filesource.cc:262
+#: libs/ardour/filesource.cc:298
 msgid "FileSource: cannot read header in %1"
 msgstr "FileSource: δεν μπορώ να διαβάσω επικεφαλίδα στο %1"
 
-#: libs/ardour/filesource.cc:267
+#: libs/ardour/filesource.cc:303
 msgid "FileSource: cannot check header in %1"
 msgstr "FileSource: δεν μπορώ να ελέγξω επικεφαλίδα στο %1"
 
-#: libs/ardour/filesource.cc:275
-msgid "FileSource: cannot initialize peakfile for %1"
+#: libs/ardour/filesource.cc:311
+#, fuzzy
+msgid "FileSource: cannot initialize peakfile for %1 as %2"
 msgstr "FileSource: δεν μπορώ να εκκινήσω το peakfile για %1"
 
-#: libs/ardour/filesource.cc:318
+#: libs/ardour/filesource.cc:359 libs/ardour/insert.cc:525
+msgid "programming error: %1"
+msgstr "σφάλμα προγραμματισμού: %1"
+
+#: libs/ardour/filesource.cc:364
+#, fuzzy
+msgid "cannot rename audio file for %1 to %2"
+msgstr "δεν μπορώ να μετονομάσω την πηγή του audio file από %1 σε %2 (%3)"
+
+#: libs/ardour/filesource.cc:390
 msgid "FileSource: cannot seek to end of file"
 msgstr "FileSource: δεν μπορώ να ανιχνεύσω το τέλος του αρχείου"
 
-#: libs/ardour/filesource.cc:323
+#: libs/ardour/filesource.cc:395
 msgid "FileSource: cannot read RIFF/WAVE chunk from file"
 msgstr "FileSource: δεν μπορώ να διαβάσω κομμάτι RIFF/WAVE από το αρχείο"
 
-#: libs/ardour/filesource.cc:329
+#: libs/ardour/filesource.cc:407
 msgid "FileSource %1: not a RIFF/WAVE file"
 msgstr "FileSource %1: δεν είναι RIFF/WAVE αρχείο"
 
-#: libs/ardour/filesource.cc:348
+#: libs/ardour/filesource.cc:434
 msgid "FileSource: can't read a chunk"
 msgstr "FileSource: δεν μπορώ να διαβάσω κομμάτι"
 
-#: libs/ardour/filesource.cc:404
+#: libs/ardour/filesource.cc:451
+msgid "filesource: correcting mis-written RIFF file to become a RIFX: "
+msgstr ""
+
+#: libs/ardour/filesource.cc:567
 msgid "FileSource: cannot get user information for BWF header (%1)"
 msgstr ""
 "FileSource: δεν μπορώ να βρώ πληροφορίες χρήστη για επικεφαλίδα BWF (%1)"
 
-#: libs/ardour/filesource.cc:408
+#: libs/ardour/filesource.cc:571
 msgid "FileSource: cannot get host information for BWF header (%1)"
 msgstr ""
 "FileSource: δεν μπορώ να βρώ πληροφορίες οικοδεσπότη(host) για επικεφαλίδα "
 "BWF (%1)"
 
-#: libs/ardour/filesource.cc:546
+#: libs/ardour/filesource.cc:716
 msgid "FileSource[%1]: cannot update data size: %2"
 msgstr "FileSource[%1]: δεν μπορώ να ανανεώσω το μέγεθος δεδομένων: %2"
 
-#: libs/ardour/filesource.cc:563
+#: libs/ardour/filesource.cc:733
 msgid "FileSource: can't find RIFF chunk info"
 msgstr "FileSource: δεν ευρέθησαν πληροφορίες για RIFF κομμάτι"
 
-#: libs/ardour/filesource.cc:578
+#: libs/ardour/filesource.cc:737
+#, fuzzy
+msgid "FileSource: can't find RIFX chunk info"
+msgstr "FileSource: δεν ευρέθησαν πληροφορίες για RIFF κομμάτι"
+
+#: libs/ardour/filesource.cc:758
 msgid "FileSource: can't read RIFF chunk"
 msgstr "FileSource: δεν μπορώ να διαβάσω RIFF κομμάτι"
 
-#: libs/ardour/filesource.cc:588
+#: libs/ardour/filesource.cc:768
 msgid "FileSource: can't find format chunk info"
 msgstr "FileSource: δεν ευρέθησαν πληροφορίες για το κομμάτι φορμαρίσματος"
 
-#: libs/ardour/filesource.cc:593
+#: libs/ardour/filesource.cc:773
 msgid "FileSource: can't read format chunk"
 msgstr "FileSource: δεν μπορώ να διαβάσω το κομμάτι φορμαρίσματος"
 
-#: libs/ardour/filesource.cc:598
+#: libs/ardour/filesource.cc:782
 msgid "FileSource: can't find data chunk info"
 msgstr "FileSource: δεν μπορώ να βρώ πληροφορίες για το κομμάτι δεδομένων"
 
-#: libs/ardour/filesource.cc:603
+#: libs/ardour/filesource.cc:787
 msgid "FileSource: can't read data chunk"
 msgstr "FileSource: δεν μπορώ να διαβάσω το κομμάτι δεδομένων"
 
-#: libs/ardour/filesource.cc:616
+#: libs/ardour/filesource.cc:804
 msgid ""
 "FileSource: cannot read Broadcast Wave data from existing audio file \"%1"
 "\" (%2)"
@@ -571,7 +595,7 @@ msgstr ""
 "FileSource: δεν μπορώ να διαβάσω δεδομένα Broadcast Wave από το υπάρχον "
 "αρχείο \"%1\" (%2)"
 
-#: libs/ardour/filesource.cc:628
+#: libs/ardour/filesource.cc:820
 msgid ""
 "FileSource: cannot read Broadcast Wave coding history from audio file \"%1"
 "\" (%2)"
@@ -579,142 +603,144 @@ msgstr ""
 "FileSource: δεν μπορώ να διαβάσω το ιστορικό του κώδικα Broadcast Wave από "
 "το αρχείο \"%1\" (%2)"
 
-#: libs/ardour/filesource.cc:661
+#: libs/ardour/filesource.cc:862
+#, fuzzy
 msgid ""
-"FileSource \"%1\" does not use floating point format.\n"
+"FileSource \"%1\" does not use valid sample format.\n"
 "This is probably a programming error."
 msgstr ""
 "FileSource \"%1\" δεν χρησιμοποιεί format μεταβλητής υποδιαστολής.\n"
 "Αυτό πιθανόν να είναι σφάλμα προγραμματισμού."
 
-#: libs/ardour/filesource.cc:700
+#: libs/ardour/filesource.cc:901
 msgid "FileSource \"%1\" has no \"data\" chunk"
 msgstr "FileSource \"%1\" δεν έχει \"data\" κομμάτι"
 
-#: libs/ardour/filesource.cc:705
+#: libs/ardour/filesource.cc:906
 msgid "%1: data length in header (%2) differs from implicit size in file (%3)"
 msgstr ""
 "%1: το μέγεθος δεδομένων της επικεφαλίδας (%2) διαφέρει από το δεδηλωμένο "
 "μέγεθος στο αρχείο (%3)"
 
-#: libs/ardour/filesource.cc:710
+#: libs/ardour/filesource.cc:911
 msgid "\"%1\" has a sample rate of %2 instead of %3 as used by this session"
 msgstr ""
 "\"%1\" έχει ρυθμό δειγματοληψίας %2 αντί του %3 όπως στην παρούσα συνεδρία"
 
-#: libs/ardour/filesource.cc:727
+#: libs/ardour/filesource.cc:934
 msgid "FileSource: cannot write WAVE chunk: %1"
 msgstr "FileSource: δεν μπορώ να γράψω WAVE κομμάτι: %1"
 
-#: libs/ardour/filesource.cc:762
+#: libs/ardour/filesource.cc:978
 msgid "FileSource: cannot write format chunk: %1"
 msgstr "FileSource: δεν μπορώ να γράψω format κομμάτι: %1"
 
-#: libs/ardour/filesource.cc:769
+#: libs/ardour/filesource.cc:990
 msgid "FileSource: cannot data chunk: %1"
 msgstr "FileSource: cδεν μπορώ να γράψω κομμάτι δεδομένων: %1"
 
-#: libs/ardour/filesource.cc:839
+#: libs/ardour/filesource.cc:1103 libs/ardour/filesource.cc:1188
 msgid "FileSource: \"%1\" bad write (%2)"
 msgstr "FileSource: \"%1\" κακή εγγραφή (%2)"
 
-#: libs/ardour/filesource.cc:963 libs/ardour/session_state.cc:2979
+#: libs/ardour/filesource.cc:1335 libs/ardour/session_state.cc:3070
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr "Υπάρχουν ήδη 1000 αρχεία με ονόματα όπως %1; μη-συνεχές versioning"
 
-#: libs/ardour/filesource.cc:977 libs/ardour/session_state.cc:2993
+#: libs/ardour/filesource.cc:1349 libs/ardour/session_state.cc:3084
 msgid "cannot rename audio file source from %1 to %2 (%3)"
 msgstr "δεν μπορώ να μετονομάσω την πηγή του audio file από %1 σε %2 (%3)"
 
-#: libs/ardour/filesource.cc:984 libs/ardour/session_state.cc:3008
+#: libs/ardour/filesource.cc:1356 libs/ardour/session_state.cc:3099
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr "δεν μπορώ να απαλοίψω το peakfile %1 για %2 (%3)"
 
-#: libs/ardour/globals.cc:78
+#: libs/ardour/globals.cc:82
 msgid "no MIDI ports specified: no MMC or MTC control possible"
 msgstr "καμία MIDI θύρα δεν επελέχθη: έλεγχος MMC ή MTC αδύνατος"
 
-#: libs/ardour/globals.cc:93
+#: libs/ardour/globals.cc:97
 msgid "MIDI port specifications for \"%1\" are not understandable."
 msgstr "Οι προδιαγραφές της θύρας MIDI για το \"%1\" δεν είναι κατανοητές."
 
-#: libs/ardour/globals.cc:142
+#: libs/ardour/globals.cc:110 libs/ardour/globals.cc:114
+#: libs/ardour/globals.cc:118
+msgid "default"
+msgstr "προκαθορισμένο"
+
+#: libs/ardour/globals.cc:146
 msgid "No MMC control (MIDI port \"%1\" not available)"
 msgstr "Χωρίς έλεγχο MMC (θύρα MIDI \"%1\" μη διαθέσιμη)"
 
-#: libs/ardour/globals.cc:148
+#: libs/ardour/globals.cc:152
 msgid "No MTC support (MIDI port \"%1\" not available)"
 msgstr "Χωρίς έλεγχο MTC (θύρα MIDI \"%1\" μη διαθέσιμη)"
 
-#: libs/ardour/globals.cc:153
+#: libs/ardour/globals.cc:157
 #, fuzzy
 msgid "No MIDI parameter support (MIDI port \"%1\" not available)"
 msgstr "Χωρίς έλεγχο MTC (θύρα MIDI \"%1\" μη διαθέσιμη)"
 
-#: libs/ardour/import.cc:69
+#: libs/ardour/import.cc:71
 msgid "Import: cannot open input sound file \"%1\""
 msgstr "Εισαγωγή: δεν μπορώ να ανοίξω το εισαγμένο αρχείο ήχου \"%1\""
 
-#: libs/ardour/import.cc:74
+#: libs/ardour/import.cc:76
 msgid "resampling audio"
 msgstr "επανά-ληψη(resampling) ήχου"
 
-#: libs/ardour/import.cc:78
+#: libs/ardour/import.cc:80
 msgid "Import: cannot open converted sound file \"%1\""
 msgstr "Εισαγωγή: δεν μπορώ να ανοίξω το τροποποιημένο αρχείο ήχου \"%1\""
 
-#: libs/ardour/import.cc:83
+#: libs/ardour/import.cc:85
 msgid "Import: error while resampling sound file \"%1\""
 msgstr "Εισαγωγή: σφάλμα κατά την τροποποίηση αρχείου \"%1\""
 
-#: libs/ardour/import.cc:139
+#: libs/ardour/import.cc:141
 msgid "Session::import_audiofile: cannot open new file source for channel %1"
 msgstr ""
 "Συνεδρία::εισαγωγή_αρχείου: δεν μπορώ να ανοίξω νέα πηγή αρχείου για το "
 "κανάλι %1"
 
-#: libs/ardour/import.cc:157
+#: libs/ardour/import.cc:160
 msgid "converting audio"
 msgstr "μετατροπή ήχου"
 
-#: libs/ardour/import.cc:189
+#: libs/ardour/import.cc:192
 msgid "building region"
 msgstr "χτίσιμο περιοχής"
 
-#: libs/ardour/import.cc:191
+#: libs/ardour/import.cc:194
 msgid "building regions"
 msgstr "χτίσιμο περιοχών"
 
-#: libs/ardour/import.cc:312
+#: libs/ardour/import.cc:318
 msgid "Import: could not open temp file: %1"
 msgstr "Εισαγωγή: δεν μπόρεσα να ανοίξω το temp αρχείο: %1"
 
-#: libs/ardour/import.cc:321
+#: libs/ardour/import.cc:327
 msgid "Import: src_new() failed : %1"
 msgstr "Εισαγωγή: src_new() απέτυχε : %1"
 
-#: libs/ardour/import.cc:349
+#: libs/ardour/import.cc:355
 msgid "Import: %1"
 msgstr "Εισαγωγή: %1"
 
-#: libs/ardour/insert.cc:522
-msgid "programming error: %1"
-msgstr "σφάλμα προγραμματισμού: %1"
-
-#: libs/ardour/insert.cc:635 libs/ardour/insert.cc:913
+#: libs/ardour/insert.cc:644 libs/ardour/insert.cc:935
 msgid "XML node describing insert is missing the `type' field"
 msgstr "Στον κόμβο XML που περιγράφει το insert λείπει το πεδίο `type'"
 
-#: libs/ardour/insert.cc:644
+#: libs/ardour/insert.cc:653
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr "άγνωστος τύπος plugin %1 στην κατάσταση εισαχθέντων plugins"
 
-#: libs/ardour/insert.cc:651
+#: libs/ardour/insert.cc:665
 msgid "XML node describing insert is missing the `id' field"
 msgstr "Στον κόμβο XML που περιγράφει το insert λείπει το πεδίο `id'"
 
-#: libs/ardour/insert.cc:658
+#: libs/ardour/insert.cc:678
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
@@ -722,170 +748,170 @@ msgstr ""
 "Ευρέθη μια αναφορά σε plugin (\"%1\") που είναι άγνωστο.\n"
 "Ίσως έχει διαγραφεί ή μετακινηθεί από την τελευταία του χρήση."
 
-#: libs/ardour/insert.cc:696 libs/ardour/insert.cc:930
+#: libs/ardour/insert.cc:716 libs/ardour/insert.cc:952
 msgid "XML node describing insert is missing a Redirect node"
 msgstr "Στον κόμβο XML που περιγράφει το insert λείπει ένας κόμβος Redirect"
 
-#: libs/ardour/insert.cc:701
+#: libs/ardour/insert.cc:721
 msgid "XML node describing a plugin insert is missing the `%1' information"
 msgstr ""
 "Στον κόμβο XML που περιγράφει ένα plugin insert λείπουν οι πληροφορίες `%1' "
 
-#: libs/ardour/insert.cc:725
+#: libs/ardour/insert.cc:745
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr "PluginInsert: Auto: χωρίς αριθμό θύρας ladspa"
 
-#: libs/ardour/insert.cc:732
+#: libs/ardour/insert.cc:752
 msgid "PluginInsert: Auto: port id out of range"
 msgstr "PluginInsert: Auto: το id θύρας είναι εκτός πεδίου"
 
-#: libs/ardour/insert.cc:748
+#: libs/ardour/insert.cc:768
 msgid "XML node describing a port automation is missing the `%1' information"
 msgstr ""
 "Στον κόμβο XML που περιγράφει έναν αυτοματισμό θύρας λείπουν οι πληροφορίες `"
 "%1' "
 
-#: libs/ardour/insert.cc:832
+#: libs/ardour/insert.cc:854
 msgid "PortInsert: cannot add input port"
 msgstr "PortInsert: δεν μπορεί να προστεθει θύρα εισόδου"
 
-#: libs/ardour/insert.cc:837
+#: libs/ardour/insert.cc:859
 msgid "PortInsert: cannot add output port"
 msgstr "PortInsert: δεν μπορεί να προστεθεί θύρα εξόδου"
 
-#: libs/ardour/insert.cc:918
+#: libs/ardour/insert.cc:940
 msgid "non-port insert XML used for port plugin insert"
 msgstr "εισαγωγή μη-θύρας XML για χρήση σε εισαγωγή  plugin θύρας"
 
-#: libs/ardour/io.cc:588
+#: libs/ardour/io.cc:585
 msgid "IO: cannot disconnect input port %1 from %2"
 msgstr "IO: δεν μπορει να αποσυνδεθεί η θύρα εισόδου %1 από %2"
 
-#: libs/ardour/io.cc:656
+#: libs/ardour/io.cc:653
 msgid "IO: cannot disconnect output port %1 from %2"
 msgstr "IO: δεν μπορεί να αποσυνδεθεί η θύρα εξόδου %1 από %2"
 
-#: libs/ardour/io.cc:797 libs/ardour/io.cc:1141 libs/ardour/io.cc:1266
+#: libs/ardour/io.cc:794 libs/ardour/io.cc:1138 libs/ardour/io.cc:1263
 #, c-format
 msgid "%s/out"
 msgstr "%s/out"
 
-#: libs/ardour/io.cc:799 libs/ardour/io.cc:1143 libs/ardour/io.cc:1268
-#: libs/ardour/io.cc:2807
+#: libs/ardour/io.cc:796 libs/ardour/io.cc:1140 libs/ardour/io.cc:1265
+#: libs/ardour/io.cc:2805
 #, c-format
 msgid "%s/out %u"
 msgstr "%s/out %u"
 
-#: libs/ardour/io.cc:803 libs/ardour/io.cc:1148 libs/ardour/io.cc:1272
+#: libs/ardour/io.cc:800 libs/ardour/io.cc:1145 libs/ardour/io.cc:1269
 msgid "IO: cannot register output port %1"
 msgstr "IO: δεν μπορει να καταχώρηθεί η θύρα εξόδου %1"
 
-#: libs/ardour/io.cc:898 libs/ardour/io.cc:1001 libs/ardour/io.cc:1107
+#: libs/ardour/io.cc:895 libs/ardour/io.cc:998 libs/ardour/io.cc:1104
 #, c-format
 msgid "%s/in"
 msgstr "%s/in"
 
-#: libs/ardour/io.cc:900 libs/ardour/io.cc:1004 libs/ardour/io.cc:1110
-#: libs/ardour/io.cc:2777
+#: libs/ardour/io.cc:897 libs/ardour/io.cc:1001 libs/ardour/io.cc:1107
+#: libs/ardour/io.cc:2775
 #, c-format
 msgid "%s/in %u"
 msgstr "%s/in %u"
 
-#: libs/ardour/io.cc:904 libs/ardour/io.cc:1010 libs/ardour/io.cc:1115
+#: libs/ardour/io.cc:901 libs/ardour/io.cc:1007 libs/ardour/io.cc:1112
 msgid "IO: cannot register input port %1"
 msgstr "IO: δεν μπορεί να καταχώρηθεί η θύρα εισόδου %1"
 
-#: libs/ardour/io.cc:1529
+#: libs/ardour/io.cc:1526
 msgid "IO::connecting_became_legal() called without a pending state node"
 msgstr ""
 "IO::connecting_became_legal() εκλήθη χωρίς κόμβο καταστάσεως εν αναμονή"
 
-#: libs/ardour/io.cc:1552
+#: libs/ardour/io.cc:1549
 msgid "IO::ports_became_legal() called without a pending state node"
 msgstr "IO::ports_became_legal() εκλήθη χωρίς κόμβο καταστάσεως εν αναμονή"
 
-#: libs/ardour/io.cc:1582
+#: libs/ardour/io.cc:1579
 msgid "incorrect XML node \"%1\" passed to IO object"
 msgstr "μη-σωστός κόμβος XML \"%1\" πέρασε στο IO αντικείμενο"
 
-#: libs/ardour/io.cc:1637
+#: libs/ardour/io.cc:1634
 msgid ""
 "MIDI gain control specification for %1 is incomplete, so it has been ignored"
 msgstr ""
 "Η προδιαγραφή ελέγχου του MIDI gain για το %1 είναι ημιτελής, με αποτέλεσμα "
 "να αγνοηθεί"
 
-#: libs/ardour/io.cc:1727 libs/ardour/io.cc:1839
+#: libs/ardour/io.cc:1724 libs/ardour/io.cc:1836
 msgid "Unknown connection \"%1\" listed for output of %2"
 msgstr "Άγνωστη σύνδεση \"%1\" καταχωρήθη για την έξοδο του %2"
 
-#: libs/ardour/io.cc:1729 libs/ardour/io.cc:1841
+#: libs/ardour/io.cc:1726 libs/ardour/io.cc:1838
 #, fuzzy
 msgid "out 1"
 msgstr "out %lu"
 
-#: libs/ardour/io.cc:1730 libs/ardour/io.cc:1842
+#: libs/ardour/io.cc:1727 libs/ardour/io.cc:1839
 msgid "No output connections available as a replacement"
 msgstr ""
 
-#: libs/ardour/io.cc:1734 libs/ardour/io.cc:1846
+#: libs/ardour/io.cc:1731 libs/ardour/io.cc:1843
 msgid "Connection %1 was not available - \"out 1\" used instead"
 msgstr ""
 
-#: libs/ardour/io.cc:1748
+#: libs/ardour/io.cc:1745
 msgid "%1: cannot create I/O ports"
 msgstr "%1: θύρες I/O δεν μπορούν να δημιουργηθούν"
 
-#: libs/ardour/io.cc:1855
+#: libs/ardour/io.cc:1852
 msgid "improper output channel list in XML node (%1)"
 msgstr "ασαφής λίστα καναλιών εξόδου στον κόμβο XML (%1)"
 
-#: libs/ardour/io.cc:1940
+#: libs/ardour/io.cc:1937
 msgid "IO: badly formed string in XML node for outputs \"%1\""
 msgstr "IO: δύσμορφη γραμμή στον κόμβο XML για τις εξόδους \"%1\""
 
-#: libs/ardour/io.cc:1945
+#: libs/ardour/io.cc:1942
 msgid "IO: bad output string in XML node \"%1\""
 msgstr "IO: κακή γραμμή εξόδουστον κόμβο XML \"%1\""
 
-#: libs/ardour/io.cc:2483
+#: libs/ardour/io.cc:2481
 msgid "%1: could not open automation event file \"%2\""
 msgstr "%1: δεν μπόρεσα να ανοίξω το αρχείο συμβάντων αυτοματισμού \"%2\""
 
-#: libs/ardour/io.cc:2522
+#: libs/ardour/io.cc:2520
 msgid "%1: cannot open automation event file \"%2\""
 msgstr "%1: δεν μπορώ να ανοίξω το αρχείο συμβάντων αυτοματισμού \"%2\""
 
-#: libs/ardour/io.cc:2537
+#: libs/ardour/io.cc:2535
 msgid "badly formed version number in automation event file \"%1\""
 msgstr "δύσμορφος αριθμός εκδόσεως στο αρχείο συμβάντων αυτοματισμού \"%1\""
 
-#: libs/ardour/io.cc:2541
+#: libs/ardour/io.cc:2539
 msgid "no version information in automation event file \"%1\""
 msgstr ""
 "δεν υπάρχουν πληροφορίες περί εκδόσεων στο αρχείο συμβάντων αυτοματισμού \"%1"
 "\""
 
-#: libs/ardour/io.cc:2546
+#: libs/ardour/io.cc:2544
 msgid "mismatched automation event file version (%1)"
 msgstr "αταίριαστη έκδοση αρχείου συμβάντων αυτοματισμού (%1)"
 
-#: libs/ardour/io.cc:2554
+#: libs/ardour/io.cc:2552
 msgid "badly formatted automation event record at line %1 of %2 (ignored)"
 msgstr ""
 "κακώς φορμαρισμένη καταγραφή συμβάντων αυτοματισμού στη γραμμή %1 of %2 "
 "(αγνοήθηκε)"
 
-#: libs/ardour/io.cc:2574
+#: libs/ardour/io.cc:2572
 msgid "dubious automation event found (and ignored)"
 msgstr "αβέβαιο συμβάν αυτοματισμού ευρέθηκε (και αγνοήθηκε)"
 
-#: libs/ardour/io.cc:2578 libs/ardour/panner.cc:433
-#: libs/ardour/redirect.cc:142
+#: libs/ardour/io.cc:2576 libs/ardour/panner.cc:437
+#: libs/ardour/redirect.cc:148
 msgid "loaded from disk"
 msgstr "φορτώθηκε από το δίσκο"
 
-#: libs/ardour/io.cc:2749
+#: libs/ardour/io.cc:2747
 msgid "automation write/touch"
 msgstr "αυτοματισμός εγγραφή/αφή(write/touch)"
 
@@ -913,7 +939,8 @@ msgstr ""
 "άκυρες"
 
 #: libs/ardour/ladspa_plugin.cc:429
-msgid "Bad node send to LadspaPlugin::set_state"
+#, fuzzy
+msgid "Bad node sent to LadspaPlugin::set_state"
 msgstr "Κακή αποστολή κόμβου εστάλη στο LadspaPlugin::set_state"
 
 #: libs/ardour/ladspa_plugin.cc:442
@@ -932,57 +959,57 @@ msgstr ""
 "Ο καθορισμός ελέγχου LADSPA LadspaPlugin για MIDI για την θύρα %1 είναι "
 "ημιτελής, έτσι αγνοήθηκε."
 
-#: libs/ardour/location.cc:255
+#: libs/ardour/location.cc:268
 msgid "incorrect XML node passed to Location::set_state"
 msgstr "λανθασμένος κόμβος XML πέρασε στην Τοποθεσία::set_state"
 
-#: libs/ardour/location.cc:262
+#: libs/ardour/location.cc:275
 msgid "XML node for Location has no name information"
 msgstr "Ο κόμβος XML για την Τοποθεσία δεν έχει πληροφορίες ονόματος"
 
-#: libs/ardour/location.cc:269
+#: libs/ardour/location.cc:282
 msgid "XML node for Location has no start information"
 msgstr "Ο κόμβος XML για την Τοποθεσία δεν έχει πληροφορίες ενάρξεως"
 
-#: libs/ardour/location.cc:280
+#: libs/ardour/location.cc:293
 msgid "XML node for Location has no end information"
 msgstr "Ο κόμβος XML για την Τοποθεσία δεν έχει πληροφορίες τέλους"
 
-#: libs/ardour/location.cc:289
+#: libs/ardour/location.cc:302
 msgid "XML node for Location has no flags information"
 msgstr "Ο κόμβος XML για την Τοποθεσία δεν έχει πληροφορίες για σημαίες(flags)"
 
-#: libs/ardour/location.cc:377
+#: libs/ardour/location.cc:390
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr ""
 "Τοποθεσίες: απόπειρα να χρησιμοποιηθεί άγνωστη τοποθεσία σαν επιλεγμένη "
 "τοποθεσία"
 
-#: libs/ardour/location.cc:404 libs/ardour/playlist.cc:1151
+#: libs/ardour/location.cc:417 libs/ardour/playlist.cc:1178
 msgid "clear"
 msgstr "εκκαθάριση"
 
-#: libs/ardour/location.cc:429
+#: libs/ardour/location.cc:442
 msgid "clear markers"
 msgstr "εκκαθάριση στιγμάτων"
 
-#: libs/ardour/location.cc:457
+#: libs/ardour/location.cc:470
 msgid "clear ranges"
 msgstr "εκκαθάριση διαστημάτων"
 
-#: libs/ardour/location.cc:477
+#: libs/ardour/location.cc:488
 msgid "add"
 msgstr "πρόσθεση"
 
-#: libs/ardour/location.cc:515
+#: libs/ardour/location.cc:526
 msgid "remove"
 msgstr "απαλοιφή"
 
-#: libs/ardour/location.cc:555
+#: libs/ardour/location.cc:566
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "λανθασμένο XML mode πέρασε στις Τοποθεσίες::set_state"
 
-#: libs/ardour/mtc_slave.cc:194
+#: libs/ardour/mtc_slave.cc:195
 msgid "MTC Slave: atomic read of current time failed, sleeping!"
 msgstr ""
 "MTC Slave: ατομική ανάγνωση του τρέχοντος χρόνου απέτυχε, πίσω για ύπνο!"
@@ -995,119 +1022,119 @@ msgstr "Το κομμάτι %1 χρησιμοποιεί άγνωστη λίστ�
 msgid "Chunk %1 contains misformed playlist information"
 msgstr "Το κομμάτι %1 περιέχει δύσμορφες πληροφορίες για τη λίστα αναπαρ/γής"
 
-#: libs/ardour/panner.cc:251
+#: libs/ardour/panner.cc:255
 #, fuzzy
 msgid "MIDI pan control specification is incomplete, so it has been ignored"
 msgstr ""
 "Η προδιαγραφή ελέγχου του MIDI gain για το %1 είναι ημιτελής, με αποτέλεσμα "
 "να αγνοηθεί"
 
-#: libs/ardour/panner.cc:356
+#: libs/ardour/panner.cc:360
 msgid "automation write pass"
 msgstr "πέρασμα εγγραφής αυτοματισμού"
 
-#: libs/ardour/panner.cc:396
+#: libs/ardour/panner.cc:400
 #, c-format
 msgid "error writing pan automation file (%s)"
 msgstr "σφάλμα στην εγγραφή του pan στο αρχείο αυτοματισμού (%s)"
 
-#: libs/ardour/panner.cc:424
+#: libs/ardour/panner.cc:428
 msgid ""
 "badly formatted pan automation event record at line %1 of %2 (ignored) [%3]"
 msgstr ""
 "δύσμορφη εγγραφή συμβάντος pan αυτοματισμού στη γραμμή %1 of %2 (αγνοήθηκε) "
 "[%3]"
 
-#: libs/ardour/panner.cc:934
+#: libs/ardour/panner.cc:943
 msgid "badly-formed positional data for Multi2dPanner - ignored"
 msgstr "δύσμορφα δεδομένα θέσεως για το Multi2dPanner - αγνοήθηκε"
 
-#: libs/ardour/panner.cc:1227
+#: libs/ardour/panner.cc:1236
 msgid "cannot open pan automation file \"%1\" for saving (%s)"
 msgstr ""
 "δεν μπορώ να ανοίξω αρχείο αυτοματισμού του pan \"%1\" για αποθήκευση (%s)"
 
-#: libs/ardour/panner.cc:1263
+#: libs/ardour/panner.cc:1272
 msgid "cannot open pan automation file %1 (%2)"
 msgstr "δεν μπορώ να ανοίξω αρχείο αυτοματισμού του pan %1 (%2)"
 
-#: libs/ardour/panner.cc:1276
+#: libs/ardour/panner.cc:1285
 msgid "badly formed version number in pan automation event file \"%1\""
 msgstr ""
 "δύσμορφος αριθμός εκδόσεως στο αρχείο συμβάντων αυτοματισμού του pan \"%1\""
 
-#: libs/ardour/panner.cc:1280
+#: libs/ardour/panner.cc:1289
 msgid ""
 "no version information in pan automation event file \"%1\" (first line = %2)"
 msgstr ""
 "καμία πληροφορία εκδόσεως στο αρχείο συμβάντων αυτοματισμού του pan \"%1"
 "\" (πρώτη γραμμή = %2)"
 
-#: libs/ardour/panner.cc:1286
+#: libs/ardour/panner.cc:1295
 msgid "mismatched pan automation event file version (%1)"
 msgstr "αταίριαστη έκδοση αρχείου συμβάντων αυτοματισμού για το pan (%1)"
 
-#: libs/ardour/panner.cc:1300
+#: libs/ardour/panner.cc:1309
 msgid "too many panner states found in pan automation file %1"
 msgstr ""
 "πάρα πολλές καταστάσεις panner ευρέθησαν στο αρχείο των αυτοματισμών pan %1"
 
-#: libs/ardour/panner.cc:1441
+#: libs/ardour/panner.cc:1450
 msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
 msgstr "Άγνωστο plugin για panner \"%1\" ευρέθη στην κατάσταση pan - αγνοήθηκε"
 
-#: libs/ardour/panner.cc:1447
+#: libs/ardour/panner.cc:1456
 msgid "panner plugin node has no type information!"
 msgstr "ο κόμβος για τα plugin του panner δεν  έχει πληροφορίες τύπου!"
 
-#: libs/ardour/playlist.cc:234
+#: libs/ardour/playlist.cc:253
 msgid "playlist const copy constructor called"
 msgstr "λίστα αναπαρ/γής const εκλήθη από κατασκευαστή αντιγράφου"
 
-#: libs/ardour/playlist.cc:240
+#: libs/ardour/playlist.cc:259
 msgid "playlist non-const copy constructor called"
 msgstr "λίστα αναπαρ/γής non-const εκλήθη από κατασκευαστή αντιγράφου"
 
-#: libs/ardour/playlist.cc:478
+#: libs/ardour/playlist.cc:499
 msgid "add region"
 msgstr "πρόσθεση περιοχής"
 
-#: libs/ardour/playlist.cc:533
+#: libs/ardour/playlist.cc:554
 msgid "replace region"
 msgstr "αντικατάσταση περιοχής"
 
-#: libs/ardour/playlist.cc:546
+#: libs/ardour/playlist.cc:567
 msgid "remove region"
 msgstr "απαλοιφή περιοχής"
 
-#: libs/ardour/playlist.cc:593
+#: libs/ardour/playlist.cc:614
 msgid "separate"
 msgstr "ξεχωριστό"
 
-#: libs/ardour/playlist.cc:857
+#: libs/ardour/playlist.cc:878
 msgid "cut"
 msgstr "κοπή"
 
-#: libs/ardour/playlist.cc:947
+#: libs/ardour/playlist.cc:968
 msgid "duplicate"
 msgstr "αντιγραφή"
 
-#: libs/ardour/playlist.cc:987
+#: libs/ardour/playlist.cc:1014
 msgid "split"
 msgstr "διαχωρισμός"
 
-#: libs/ardour/playlist.cc:1064
+#: libs/ardour/playlist.cc:1091
 msgid "%1: bounds changed received for region (%2)not in playlist"
 msgstr ""
 "%1: τα αλλαγμένα όρια που ελήφθησαν για την περιοχή (%2)δεν είναι στη λίστα "
 "αναπαρ/γής"
 
-#: libs/ardour/playlist.cc:1325
+#: libs/ardour/playlist.cc:1352
 #, fuzzy
 msgid "Playlist: cannot create region from state file"
 msgstr "Playlist: δεν μπορώ να δημιουργήσω Περιοχή από αρχείο καταστάσεως"
 
-#: libs/ardour/playlist.cc:1681
+#: libs/ardour/playlist.cc:1712
 msgid "nudged"
 msgstr "νυχθέν"
 
@@ -1123,15 +1150,15 @@ msgid ""
 msgstr ""
 "σφάλμα προγραμματισμού: Playlist::copyPlaylist με άγνωστο τύπο Playlist"
 
-#: libs/ardour/plugin.cc:325
+#: libs/ardour/plugin.cc:327
 msgid "Could not locate HOME.  Preset not saved."
 msgstr "Δεν μπόρεσα να βρώ το HOME.  Προ-ρύθμιση δεν αποθηκεύθηκε."
 
-#: libs/ardour/plugin.cc:335 libs/ardour/plugin.cc:341
+#: libs/ardour/plugin.cc:337 libs/ardour/plugin.cc:343
 msgid "Could not create %1.  Preset not saved. (%2)"
 msgstr "Δεν μπόρεσα να δημιουργήσω το %1.  Προ-ρύθμιση δεν αποθηκεύθηκε. (%2)"
 
-#: libs/ardour/plugin.cc:346
+#: libs/ardour/plugin.cc:348
 msgid "Error saving presets file %1."
 msgstr "Σφάλμα στην αποθήκευση αρχείου προ-ρυθμίσεων %1."
 
@@ -1147,27 +1174,27 @@ msgstr "LADSPA: δεν μπορώ να φορτώσω το module \"%1\" (%2)"
 msgid "LADSPA: module \"%1\" has no descriptor function."
 msgstr "LADSPA: το module \"%1\" δεν έχει λειτουργία περιγραφής."
 
-#: libs/ardour/plugin_manager.cc:296
+#: libs/ardour/plugin_manager.cc:297
 msgid "VST: cannot load module from \"%1\""
 msgstr "VST: δεν μπορώ να φορτώσω module από \"%1\""
 
-#: libs/ardour/plugin_manager.cc:301
+#: libs/ardour/plugin_manager.cc:302
 msgid "You asked ardour to not use any VST plugins"
 msgstr ""
 
-#: libs/ardour/plugin_manager.cc:304
+#: libs/ardour/plugin_manager.cc:305
 msgid "This version of ardour has no support for VST plugins"
 msgstr "Η παρούσα έκδοση του ardour δεν υποστηρίζει VST plugins"
 
-#: libs/ardour/plugin_manager.cc:311
+#: libs/ardour/plugin_manager.cc:312
 msgid "LADSPA: cannot load module from \"%1\""
 msgstr "LADSPA: δεν μπορώ να φορτώσω module από \"%1\""
 
-#: libs/ardour/plugin_manager.cc:368 libs/ardour/plugin_manager.cc:380
+#: libs/ardour/plugin_manager.cc:371 libs/ardour/plugin_manager.cc:383
 msgid "Unknown"
 msgstr "Άγνωστο"
 
-#: libs/ardour/plugin_manager.cc:458
+#: libs/ardour/plugin_manager.cc:461
 msgid ""
 "VST plugin %1 does not support processReplacing, and so cannot be used in "
 "ardour at this time"
@@ -1175,7 +1202,7 @@ msgstr ""
 "Το VST plugin %1 δεν υποστηρίζει processReplacing, και έτσι δεν μπορεί να "
 "χρησιμοποιηθεί στον ardour αυτή τη φορά"
 
-#: libs/ardour/recent_sessions.cc:52
+#: libs/ardour/recent_sessions.cc:44
 msgid "cannot open recent session file %1 (%2)"
 msgstr "δεν μπορώ να ανοίξω το πρόσφατο αρχείο συνεδρίας %1 (%2)"
 
@@ -1183,64 +1210,64 @@ msgstr "δεν μπορώ να ανοίξω το πρόσφατο αρχείο �
 msgid "programming error: unknown Redirect type in Redirect::Clone!\n"
 msgstr "σφάλμα προγραμματισμού: άγνωστος τύπος Redirect στο Redirect::Clone!\n"
 
-#: libs/ardour/redirect.cc:96 libs/ardour/utils.cc:195
+#: libs/ardour/redirect.cc:102 libs/ardour/utils.cc:199
 msgid "pre"
 msgstr "pre"
 
-#: libs/ardour/redirect.cc:98 libs/ardour/utils.cc:198
+#: libs/ardour/redirect.cc:104 libs/ardour/utils.cc:202
 msgid "post"
 msgstr "post"
 
-#: libs/ardour/redirect.cc:101
+#: libs/ardour/redirect.cc:107
 msgid "Redirect: unknown placement string \"%1\" (ignored)"
 msgstr "Redirect: άγνωστη γραμμή τοποθετήσεως \"%1\" (αγνοήθηκε)"
 
-#: libs/ardour/redirect.cc:119
+#: libs/ardour/redirect.cc:125
 msgid "%1: cannot open %2 to load automation data (%3)"
 msgstr "%1: δεν μπορώ να ανοίξω %2 για ανάκληση δεδομένων αυτοματισμού (%3)"
 
-#: libs/ardour/redirect.cc:148
+#: libs/ardour/redirect.cc:154
 msgid "%1: cannot load automation data from %2"
 msgstr "%1: δεν μπορούν να ανακληθούν δεδομένα αυτοματισμού από %2"
 
-#: libs/ardour/redirect.cc:169
+#: libs/ardour/redirect.cc:175
 msgid "%1: cannot open %2 to store automation data (%3)"
 msgstr "%1: δεν μπορώ να ανοίξω %2 για αποθήκευση δεδομένων αυτοματισμού (%3)"
 
-#: libs/ardour/redirect.cc:188 libs/ardour/redirect.cc:195
+#: libs/ardour/redirect.cc:194 libs/ardour/redirect.cc:201
 msgid "%1: could not save automation state to %2"
 msgstr "%1: δεν μπόρεσα να αποθηκεύσω την κατάσταση αυτοματισμού στο %2"
 
-#: libs/ardour/redirect.cc:240
+#: libs/ardour/redirect.cc:246
 msgid "Could not get state from Redirect (%1).  Problem with save_automation"
 msgstr ""
 "Δεν μπόρεσα να πάρω κατάσταση από το Redirect (%1).  Πρόβλημα με την "
 "αποθήκευση_αυτοματισμού"
 
-#: libs/ardour/redirect.cc:290
+#: libs/ardour/redirect.cc:296
 msgid "incorrect XML node \"%1\" passed to Redirect object"
 msgstr "λανθασμένος κόμβος XML \"%1\" πέρασε στο αντικείμενο Redirect"
 
-#: libs/ardour/redirect.cc:312
+#: libs/ardour/redirect.cc:318
 msgid "%1: Automation node has no path property"
 msgstr "%1: Ο Κόμβος αυτοματισμού δεν έχει ορισμένο path"
 
-#: libs/ardour/redirect.cc:337
+#: libs/ardour/redirect.cc:343
 msgid "XML node describing an IO is missing an IO node"
 msgstr "Στον κόμβο XML που περιγράφει I/O λείπει ένας κόμβος IO"
 
-#: libs/ardour/redirect.cc:342
+#: libs/ardour/redirect.cc:348
 msgid "XML node describing a redirect is missing the `active' field"
 msgstr ""
 "Στον κόμβο XML που περιγράφει ένα redirect λείπει το πεδίο `ενεργό'(active)"
 
-#: libs/ardour/redirect.cc:352
+#: libs/ardour/redirect.cc:358
 msgid "XML node describing a redirect is missing the `placement' field"
 msgstr ""
 "Στον κόμβο XML που περιγράφει ένα redirect λείπει το πεδίο "
 "`τοποθέτηση'(placement)"
 
-#: libs/ardour/redirect.cc:461
+#: libs/ardour/redirect.cc:467
 msgid "active_changed"
 msgstr "αλλαγή_ενεργού"
 
@@ -1253,58 +1280,58 @@ msgid "Session: XMLNode describing a Region is incomplete (no name)"
 msgstr ""
 "Συνεδρία: XMLΚόμβος που περιγράφει Περιοχή είναι ημιτελής (χωρίς όνομα)"
 
-#: libs/ardour/route.cc:79 libs/ardour/session.cc:1417
-#: libs/ardour/session.cc:1423 libs/ardour/session.cc:2765
+#: libs/ardour/route.cc:79 libs/ardour/session.cc:1542
+#: libs/ardour/session.cc:1548 libs/ardour/session.cc:3045
 msgid "signal"
 msgstr "σήμα"
 
-#: libs/ardour/route.cc:1387
+#: libs/ardour/route.cc:1433
 msgid "Could not get state of route.  Problem with save_automation"
 msgstr ""
 "Δεν μπόρεσα να πάρω κατάσταση διαδρομής.  Πρόβλημα με αποθήκευση_αυτοματισμού"
 
-#: libs/ardour/route.cc:1439
+#: libs/ardour/route.cc:1485
 msgid "Send construction failed"
 msgstr "Αποστολή κατασκευής απέτυχε"
 
-#: libs/ardour/route.cc:1461
+#: libs/ardour/route.cc:1507
 msgid "unknown Insert type \"%1\"; ignored"
 msgstr "άγνωστος τύπος Λήψης(Insert) \"%1\"... αγνοήθηκε"
 
-#: libs/ardour/route.cc:1467
+#: libs/ardour/route.cc:1513
 msgid "Insert XML node has no type property"
 msgstr "Εισηχθέντας κόμβος XML δεν έχει στοιχεία τύπου"
 
-#: libs/ardour/route.cc:1472
+#: libs/ardour/route.cc:1518
 msgid "insert could not be created. Ignored."
 msgstr "εισαγωγή δεν μπόρεσε να δημιουργηθεί. Αγνοήθηκε."
 
-#: libs/ardour/route.cc:1490
+#: libs/ardour/route.cc:1536
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Κακός κόμβος εστάλη στο Route::set_state() [%1]"
 
-#: libs/ardour/route.cc:1549
+#: libs/ardour/route.cc:1595
 msgid "Route %1: unknown edit group \"%2 in saved state (ignored)"
 msgstr ""
 "Route %1: άγνωστη ομάδα επεξεργασίας \"%2 στην αποθηκευμένη κατάσταση "
 "(αγνοήθηκε)"
 
-#: libs/ardour/route.cc:1565 libs/ardour/route.cc:1569
+#: libs/ardour/route.cc:1611 libs/ardour/route.cc:1615
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 "δύσμορφη γραμμή κλειδιού ταξινομήσεως στο αρχείο καταστάσεως ! [%1] ... "
 "αγνοήθηκε."
 
-#: libs/ardour/route.cc:1650 libs/ardour/route.cc:1771
+#: libs/ardour/route.cc:1696 libs/ardour/route.cc:1823
 msgid "[control]"
 msgstr "[έλεγχος]"
 
-#: libs/ardour/route.cc:1670
+#: libs/ardour/route.cc:1716
 msgid "Route %1: unknown mix group \"%2 in saved state (ignored)"
 msgstr ""
 "Route %1: άγνωστη ομάδα μίξεως \"%2 στην αποθηκευμένη κατάσταση (αγνοήθηκε)"
 
-#: libs/ardour/route.cc:1699 libs/ardour/route.cc:1707
+#: libs/ardour/route.cc:1745 libs/ardour/route.cc:1753
 #, fuzzy
 msgid ""
 "MIDI mute control specification for %1 is incomplete, so it has been ignored"
@@ -1316,156 +1343,156 @@ msgstr ""
 msgid "XML node describing a send is missing a Redirect node"
 msgstr "Στον κόμβο XML όπου περιγράφεται ένα send λείπει ένας κόμβος Redirect"
 
-#: libs/ardour/session.cc:97
+#: libs/ardour/session.cc:99
 #, fuzzy
 msgid "Could not resolve path: %1 (%2)"
 msgstr "Source: δεν μπορώ να ανοίξω το peakpath \"%1\" (%2)"
 
-#: libs/ardour/session.cc:109
+#: libs/ardour/session.cc:111
 msgid "cannot check session path %1 (%2)"
 msgstr "δεν μπορώ να ελέγξω το μονοπάτι συνεδρίας %1 (%2)"
 
-#: libs/ardour/session.cc:139
+#: libs/ardour/session.cc:141
 msgid "cannot check statefile %1 (%2)"
 msgstr "δεν μπορώ να ελέγξω το αρχείο κατάστασεως %1 (%2)"
 
-#: libs/ardour/session.cc:175
+#: libs/ardour/session.cc:177
 msgid "%1 is not an Ardour snapshot file"
 msgstr "Το %1 δεν έιναι αρχείο-στιγμιότυπο του Ardour"
 
-#: libs/ardour/session.cc:192
+#: libs/ardour/session.cc:194
 msgid "cannot determine current working directory (%1)"
 msgstr "δεν μπορώ να καθορίσω τον τρέχοντα ενεργό φάκελο(directory) (%1)"
 
-#: libs/ardour/session.cc:209
+#: libs/ardour/session.cc:211
 msgid "unknown file type for session %1"
 msgstr "άγνωστος τύπος αρχείου για την συνεδρία %1"
 
-#: libs/ardour/session.cc:314
+#: libs/ardour/session.cc:316
 msgid "monitor"
 msgstr "monitor"
 
-#: libs/ardour/session.cc:321
+#: libs/ardour/session.cc:323
 msgid "master"
 msgstr "master"
 
-#: libs/ardour/session.cc:594
+#: libs/ardour/session.cc:608
 msgid "could not setup Click I/O"
 msgstr "Δεν μπόρεσα να διαμορφώσω το I/O του Μετρονόμου(click)"
 
-#: libs/ardour/session.cc:615
+#: libs/ardour/session.cc:629
 msgid "cannot setup Click I/O"
 msgstr "Δεν μπορώ να διαμορφώσω το I/O του Μετρονόμου(click)"
 
-#: libs/ardour/session.cc:637
+#: libs/ardour/session.cc:651
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr "δεν μπορώ να δημιουργήσω τον Ακροατή: καμία ακρόαση περιοχών δυνατή"
 
-#: libs/ardour/session.cc:649
+#: libs/ardour/session.cc:663
 #, fuzzy, c-format
 msgid "out %<PRIu32>"
 msgstr "out %lu"
 
-#: libs/ardour/session.cc:661
+#: libs/ardour/session.cc:675
 #, c-format
 msgid "in %<PRIu32>"
 msgstr ""
 
-#: libs/ardour/session.cc:675
+#: libs/ardour/session.cc:689
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr ""
 
-#: libs/ardour/session.cc:689
+#: libs/ardour/session.cc:703
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr ""
 
-#: libs/ardour/session.cc:722
+#: libs/ardour/session.cc:736
 msgid "cannot setup master inputs"
 msgstr "δεν μπορώ να διαμορφώσω τις master εισόδους"
 
-#: libs/ardour/session.cc:730
+#: libs/ardour/session.cc:744
 msgid "cannot setup master outputs"
 msgstr "δεν μπορώ να διαμορφώσω τις master εξόδους"
 
-#: libs/ardour/session.cc:741
+#: libs/ardour/session.cc:755
 #, fuzzy
 msgid "Master Out"
 msgstr "master"
 
-#: libs/ardour/session.cc:807
+#: libs/ardour/session.cc:821
 msgid "cannot setup control inputs"
 msgstr "δεν μπορώ να διαμορφώσω τις εισόδους ελέγχου"
 
-#: libs/ardour/session.cc:815
+#: libs/ardour/session.cc:829
 msgid "cannot set up master outputs"
 msgstr "δεν μπορώ να διαμορφώσω τις εξόδους ελέγχου"
 
-#: libs/ardour/session.cc:1041
+#: libs/ardour/session.cc:1101
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
 "Συνεδρία: δεν μπορείτε να χρησιμοποιήσετε αυτήν την τοποθεσία για auto punch "
 "(αρχή <= τέλος)"
 
-#: libs/ardour/session.cc:1120
+#: libs/ardour/session.cc:1180
 msgid "Session: you can't use a mark for auto loop"
 msgstr "Συνεδρία: δεν μπορείτε να χρησιμοποιήσετε στίγμα για auto loop"
 
-#: libs/ardour/session.cc:1435
+#: libs/ardour/session.cc:1560
 msgid "feedback loop setup between %1 and %2"
 msgstr "διαμόρφωση feedback loop ανάμεσα σε %1 και %2"
 
-#: libs/ardour/session.cc:1587 libs/ardour/session.cc:1682
+#: libs/ardour/session.cc:1712 libs/ardour/session.cc:1809
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "δεν μπορώ να διαμορφώσω %1 in/%2 out διάταξη για νέο κανάλι ήχου"
 
-#: libs/ardour/session.cc:1641
+#: libs/ardour/session.cc:1768
 msgid "Session: could not create new audio track."
 msgstr "Συνεδρία: δεν μπόρεσα να δημιουργήσω νέο κανάλι ήχου."
 
-#: libs/ardour/session.cc:1731
+#: libs/ardour/session.cc:1858
 msgid "Session: could not create new route."
 msgstr "Συνεδρία: δεν μπόρεσα να δημιουργήσω διαδρομή."
 
-#: libs/ardour/session.cc:2181
+#: libs/ardour/session.cc:2319
 msgid "cannot create new name for region \"%1\""
 msgstr "δεν μπορώ να δημιουργήσω νέο όνομα για την περιοχή \"%1\""
 
-#: libs/ardour/session.cc:2246
+#: libs/ardour/session.cc:2384
 msgid "too many regions with names like %1"
 msgstr "πάρα πολλές περιοχές με ονόματα σαν %1"
 
-#: libs/ardour/session.cc:2578
+#: libs/ardour/session.cc:2841
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Υπάρχουν ήδη %1 εγγραφές για %2, τις οποίες θεωρώ πάρα πολλές."
 
-#: libs/ardour/session.cc:2972
+#: libs/ardour/session.cc:3210
 msgid "programming error: unknown type of Insert created!"
 msgstr "σφάλμα προγραμματισμού: άγνωστος τύπος Εισόδου εδημιουργήθη!"
 
-#: libs/ardour/session.cc:2978
+#: libs/ardour/session.cc:3216
 msgid "programming error: unknown type of Redirect created!"
 msgstr "σφάλμα προγραμματισμού: άγνωστος τύπος Redirect εδημιουργήθη!"
 
-#: libs/ardour/session.cc:3001
+#: libs/ardour/session.cc:3239
 msgid "programming error: unknown type of Insert deleted!"
 msgstr "σφάλμα προγραμματισμού: άγνωστος τύπος of Insert διεγράφη!"
 
-#: libs/ardour/session.cc:3007
+#: libs/ardour/session.cc:3245
 msgid "programming error: unknown type of Redirect deleted!"
 msgstr "σφάλμα προγραμματισμού: άγνωστος τύπος of Redirect διεγράφη!"
 
-#: libs/ardour/session.cc:3344
+#: libs/ardour/session.cc:3586
 msgid "too many bounced versions of playlist \"%1\""
 msgstr "πάρα πολλές bounced εκδόσεις της Playlist \"%1\""
 
-#: libs/ardour/session.cc:3353
+#: libs/ardour/session.cc:3595
 msgid "cannot create new audio file \"%1\" for %2"
 msgstr "δεν μπορώ να δημιουργήσω νέο αρχείο ήχου \"%1\" για %2"
 
-#: libs/ardour/session_butler.cc:81 libs/ardour/session_midi.cc:1203
-#: libs/ardour/source.cc:240
+#: libs/ardour/session_butler.cc:81 libs/ardour/session_midi.cc:1204
+#: libs/ardour/source.cc:233
 msgid "Cannot create transport request signal pipe (%1)"
 msgstr "Δεν μπορώ να δημιουργήσω transport request signal pipe (%1)"
 
@@ -1478,41 +1505,41 @@ msgstr "UI: δεν μπορώ να θέσω O_NONBLOCK στο signal read pipe (
 msgid "Session: could not create butler thread"
 msgstr "Συνεδρία: δεν μπόρεσα να δημιουργήσω δέσμη με τον butler"
 
-#: libs/ardour/session_butler.cc:189
+#: libs/ardour/session_butler.cc:191
 msgid "poll on butler request pipe failed (%1)"
 msgstr ""
 
-#: libs/ardour/session_butler.cc:196
+#: libs/ardour/session_butler.cc:198
 #, fuzzy
 msgid "Error on butler thread request pipe"
 msgstr "Σφάλμα στο transport thread request pipe"
 
-#: libs/ardour/session_butler.cc:237
+#: libs/ardour/session_butler.cc:240
 #, fuzzy
 msgid "Error reading from butler request pipe"
 msgstr "Σφάλμα στην ανάγνωση από transport request pipe"
 
-#: libs/ardour/session_butler.cc:272
+#: libs/ardour/session_butler.cc:277
 msgid "Butler read ahead failure on dstream %1"
 msgstr "Αποτυχία προανάγνωσης Butler στο dstream %1"
 
-#: libs/ardour/session_butler.cc:316
+#: libs/ardour/session_butler.cc:321
 msgid "Butler write-behind failure on dstream %1"
 msgstr "Αποτυχία οπισθεγγραφής Butler στο dstream %1"
 
-#: libs/ardour/session_click.cc:148
+#: libs/ardour/session_click.cc:157
 msgid "cannot open click soundfile %1 (%2)"
 msgstr "δεν μπορώ να ανοίξω τοsoundfile μετρονόμου%1 (%2)"
 
-#: libs/ardour/session_click.cc:157
+#: libs/ardour/session_click.cc:166
 msgid "cannot read data from click soundfile"
 msgstr "δεν μπορώ να διαβάσω δεδομένα από το soundfile μετρονόμου"
 
-#: libs/ardour/session_click.cc:182
+#: libs/ardour/session_click.cc:191
 msgid "cannot open click emphasis soundfile %1 (%2)"
 msgstr "δεν μπορώ να ανοίξω το soundfile εμφάσεως μετρονόμου %1 (%2)"
 
-#: libs/ardour/session_click.cc:190
+#: libs/ardour/session_click.cc:199
 msgid "cannot read data from click emphasis soundfile"
 msgstr "δεν μπορώ να διαβάσω δεδομένα από το soundfile εμφάσεως μετρονόμου"
 
@@ -1522,7 +1549,7 @@ msgstr ""
 "Συνεδρία: δεν γίνεται να υπάρχουν δύο συμβάντα του τύπου %1 στο ίδιο frame (%"
 "2)."
 
-#: libs/ardour/session_events.cc:428
+#: libs/ardour/session_events.cc:422
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr ""
 "Σφάλμα προγραμματισμού: παράνομος τύπος συμβάντος στο process_event (%1)"
@@ -1570,11 +1597,11 @@ msgstr "%1: δεν μπορώ να αναζητήσω στο %2 για εξαγ�
 msgid "cannot create feedback request pipe (%1)"
 msgstr "Δεν μπορώ να δημιουργήσω transport request signal pipe (%1)"
 
-#: libs/ardour/session_feedback.cc:58 libs/ardour/session_midi.cc:1208
+#: libs/ardour/session_feedback.cc:58 libs/ardour/session_midi.cc:1209
 msgid "UI: cannot set O_NONBLOCK on signal read pipe (%1)"
 msgstr "UI: δεν μπορώ να θέσω O_NONBLOCK στο signal read pipe (%1)"
 
-#: libs/ardour/session_feedback.cc:63 libs/ardour/session_midi.cc:1213
+#: libs/ardour/session_feedback.cc:63 libs/ardour/session_midi.cc:1214
 msgid "UI: cannot set O_NONBLOCK on signal write pipe (%1)"
 msgstr "UI: δεν μπορώ να θέσω O_NONBLOCK στο signal write pipe (%1)"
 
@@ -1598,47 +1625,47 @@ msgstr "Σφάλμα στο transport thread request pipe"
 msgid "Error reading from feedback request pipe"
 msgstr "Σφάλμα στην ανάγνωση από transport request pipe"
 
-#: libs/ardour/session_midi.cc:188
+#: libs/ardour/session_midi.cc:189
 msgid "Ardour is slaved to MTC - port cannot be reset"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:203
+#: libs/ardour/session_midi.cc:204
 msgid "unknown port %1 requested for MTC"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:561
+#: libs/ardour/session_midi.cc:562
 msgid "Error reading from MIDI port %1"
 msgstr "Σφάλμα στην ανάγνωση της θύρας MIDI %1"
 
-#: libs/ardour/session_midi.cc:936
+#: libs/ardour/session_midi.cc:935
 msgid "Session: could not send full MIDI time code"
 msgstr "Συνεδρία: δεν μπόρεσα να στείλω ολόκληρο MIDI time code"
 
-#: libs/ardour/session_midi.cc:995
+#: libs/ardour/session_midi.cc:994
 msgid "Session: cannot send quarter-frame MTC message (%1)"
 msgstr "Συνεδρία: δεν μπορώ να στείλω τέταρτο-frame MTC μήνυμα (%1)"
 
-#: libs/ardour/session_midi.cc:1101
+#: libs/ardour/session_midi.cc:1102
 msgid "MMC: cannot send command %1%2%3"
 msgstr "MMC: δεν μπορώ να στείλω την εντολή %1%2%3"
 
-#: libs/ardour/session_midi.cc:1218
+#: libs/ardour/session_midi.cc:1219
 msgid "Session: could not create transport thread"
 msgstr "Συνεδρία: δεν μπόρεσα να δημιουργήσω δέσμη με transport"
 
-#: libs/ardour/session_midi.cc:1247
+#: libs/ardour/session_midi.cc:1248
 msgid "cannot send signal to midi thread! (%1)"
 msgstr "δεν μπορώ να στείλω σήμα στη δέσμη midi! (%1)"
 
-#: libs/ardour/session_midi.cc:1342
+#: libs/ardour/session_midi.cc:1343
 msgid "MIDI thread poll failed (%1)"
 msgstr "Αίτηση δέσμης MIDI απέτυχε (%1)"
 
-#: libs/ardour/session_midi.cc:1354
+#: libs/ardour/session_midi.cc:1355
 msgid "Error on transport thread request pipe"
 msgstr "Σφάλμα στο transport thread request pipe"
 
-#: libs/ardour/session_midi.cc:1381
+#: libs/ardour/session_midi.cc:1382
 msgid "Error reading from transport request pipe"
 msgstr "Σφάλμα στην ανάγνωση από transport request pipe"
 
@@ -1646,221 +1673,226 @@ msgstr "Σφάλμα στην ανάγνωση από transport request pipe"
 msgid "Session: error in no roll for %1"
 msgstr "Συνεδρία: σφάλμα στο no roll για %1"
 
-#: libs/ardour/session_state.cc:99
+#: libs/ardour/session_state.cc:100
 #, fuzzy
 msgid "Could not use path %1 (%s)"
 msgstr "Source: δεν μπορώ να ανοίξω το peakpath \"%1\" (%2)"
 
-#: libs/ardour/session_state.cc:127
+#: libs/ardour/session_state.cc:128
 msgid "end"
 msgstr "τέλος"
 
-#: libs/ardour/session_state.cc:461
+#: libs/ardour/session_state.cc:129
+#, fuzzy
+msgid "start"
+msgstr "ξεχωριστό"
+
+#: libs/ardour/session_state.cc:504
 msgid "Session: cannot create session dir \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο συνεδρίας \"%1\" (%2)"
 
-#: libs/ardour/session_state.cc:472
+#: libs/ardour/session_state.cc:515
 #, fuzzy
 msgid "Session: cannot create session peakfile dir \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο συνεδρίας \"%1\" (%2)"
 
-#: libs/ardour/session_state.cc:481
+#: libs/ardour/session_state.cc:524
 msgid "Session: cannot create session sounds dir \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο ήχων συνεδρίας \"%1\" (%2)"
 
-#: libs/ardour/session_state.cc:490
+#: libs/ardour/session_state.cc:533
+#, fuzzy
+msgid "Session: cannot create session tape dir \"%1\" (%2)"
+msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο συνεδρίας \"%1\" (%2)"
+
+#: libs/ardour/session_state.cc:542
 msgid "Session: cannot create session dead sounds dir \"%1\" (%2)"
 msgstr ""
 "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο 'νεκρών' ήχων συνεδρίας \"%1\" (%2)"
 
-#: libs/ardour/session_state.cc:499
+#: libs/ardour/session_state.cc:551
 msgid "Session: cannot create session automation dir \"%1\" (%2)"
 msgstr ""
 "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο αυτοματισμών της συνεδρίας \"%1"
 "\" (%2)"
 
-#: libs/ardour/session_state.cc:523 libs/ardour/session_state.cc:530
-#, fuzzy
-msgid "Could not find a template called %1 in %2"
-msgstr "Δεν μπόρεσα να ανοίξω προσχέδιο μίξεως %1 για ανάγνωση"
-
-#: libs/ardour/session_state.cc:556
+#: libs/ardour/session_state.cc:582
 msgid "Could not open %1 for writing mix template"
 msgstr "Δεν μπόρεσα να ανοίξω %1 για γράψιμο του προσχεδίου μίξεως"
 
-#: libs/ardour/session_state.cc:562
+#: libs/ardour/session_state.cc:588
 msgid "Could not open mix template %1 for reading"
 msgstr "Δεν μπόρεσα να ανοίξω προσχέδιο μίξεως %1 για ανάγνωση"
 
-#: libs/ardour/session_state.cc:569
+#: libs/ardour/session_state.cc:595
 msgid "Session already exists.  Not overwriting"
 msgstr "Η Συνεδρία ήδη υπάρχει.  Ακύρωση overwriting"
 
-#: libs/ardour/session_state.cc:609
+#: libs/ardour/session_state.cc:638
 msgid "Session: could not load diskstream via XML state"
 msgstr "Συνεδρία: δεν μπόρεσα να φορτώσω diskstream μέσω καταστάσεως XML"
 
-#: libs/ardour/session_state.cc:658
+#: libs/ardour/session_state.cc:687
 msgid "could not backup old state file, current state not saved."
 msgstr ""
 "δεν μπόρεσα να διασώσω το παλαιό αρχείο καταστάσεως, η τρέχουσα κατάσταση "
 "δεν αποθηκεύτηκε."
 
-#: libs/ardour/session_state.cc:671
+#: libs/ardour/session_state.cc:700
 msgid "state could not be saved to %1"
 msgstr "η κατάσταση δεν μπορούσε να σωθεί στο %1"
 
-#: libs/ardour/session_state.cc:678
+#: libs/ardour/session_state.cc:707
 #, fuzzy
 msgid "could not remove corrupt state file %1"
 msgstr "Δεν μπόρεσα να αναλύσω το αρχείο rdf: %1"
 
-#: libs/ardour/session_state.cc:682
+#: libs/ardour/session_state.cc:711
 #, fuzzy
 msgid "could not restore state file from backup %1"
 msgstr "Σφάλμα: δεν μπόρεσα να γράψω %1"
 
-#: libs/ardour/session_state.cc:751
+#: libs/ardour/session_state.cc:780
 msgid "%1: session state information file \"%2\" doesn't exist!"
 msgstr "%1: το αρχείο πληροφοριών καταστάσεως συνεδρίας \"%2\" δεν υπάρχει!"
 
-#: libs/ardour/session_state.cc:762
+#: libs/ardour/session_state.cc:791
 msgid "Could not understand ardour file %1"
 msgstr "Δεν μπόρεσα να κατανοήσω το ardour αρχείο %1"
 
-#: libs/ardour/session_state.cc:1457
+#: libs/ardour/session_state.cc:1487
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr ""
 "σφάλμα προγραμματισμού: Συνεδρία: λανθασμένος κόμβος XML εστάλη στην "
 "set_state()"
 
-#: libs/ardour/session_state.cc:1502
+#: libs/ardour/session_state.cc:1533
 msgid "Session: XML state has no options section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα επιλογών(options)"
 
-#: libs/ardour/session_state.cc:1509
+#: libs/ardour/session_state.cc:1538
 msgid "Session: XML state has no sources section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα πηγών"
 
-#: libs/ardour/session_state.cc:1516
+#: libs/ardour/session_state.cc:1545
 msgid "Session: XML state has no Regions section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα Περιοχών"
 
-#: libs/ardour/session_state.cc:1523
+#: libs/ardour/session_state.cc:1552
 msgid "Session: XML state has no playlists section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα playlists"
 
-#: libs/ardour/session_state.cc:1542
+#: libs/ardour/session_state.cc:1571
 msgid "Session: XML state has no diskstreams section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα diskstreams"
 
-#: libs/ardour/session_state.cc:1549
+#: libs/ardour/session_state.cc:1578
 msgid "Session: XML state has no connections section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα συνδέσεων"
 
-#: libs/ardour/session_state.cc:1556
+#: libs/ardour/session_state.cc:1585
 msgid "Session: XML state has no locations section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα τοποθεσιών"
 
-#: libs/ardour/session_state.cc:1581
+#: libs/ardour/session_state.cc:1618
 msgid "Session: XML state has no edit groups section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα επεξερ/σίας ομάδων"
 
-#: libs/ardour/session_state.cc:1588
+#: libs/ardour/session_state.cc:1625
 msgid "Session: XML state has no mix groups section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα μίξεως ομάδων"
 
-#: libs/ardour/session_state.cc:1595
+#: libs/ardour/session_state.cc:1632
 msgid "Session: XML state has no Tempo Map section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα Tempo Map"
 
-#: libs/ardour/session_state.cc:1602
+#: libs/ardour/session_state.cc:1639
 msgid "Session: XML state has no routes section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα διαδρομών"
 
-#: libs/ardour/session_state.cc:1609
+#: libs/ardour/session_state.cc:1646
 msgid "Session: XML state has no click section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα μετρονόμου"
 
-#: libs/ardour/session_state.cc:1647
+#: libs/ardour/session_state.cc:1691
 msgid "Session: cannot create Route from XML description."
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω Διαδρομή από XML περιγραφή."
 
-#: libs/ardour/session_state.cc:1685
+#: libs/ardour/session_state.cc:1729
 msgid "Session: cannot create Region from XML description."
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω Περιοχή από XML περιγραφή."
 
-#: libs/ardour/session_state.cc:1713
+#: libs/ardour/session_state.cc:1757
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr ""
 "Συνεδρία: Ο XMLΚόμβος που περιγράφει AudioΠεριοχή είναι ημιτελής (δίχως πηγή)"
 
-#: libs/ardour/session_state.cc:1721 libs/ardour/session_state.cc:1735
+#: libs/ardour/session_state.cc:1765 libs/ardour/session_state.cc:1779
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr ""
 "Συνεδρία: Ο XMLΚόμβος που περιγράφει AudioΠεριοχή αναφέρει άγνωστο id πηγής ="
 "%1"
 
-#: libs/ardour/session_state.cc:1803
+#: libs/ardour/session_state.cc:1847
 msgid "Session: cannot create Source from XML description."
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω Πηγή από XML περιγραφή."
 
-#: libs/ardour/session_state.cc:1830
+#: libs/ardour/session_state.cc:1878
 msgid "Found a sound file that cannot be used by Ardour. See the progammers."
 msgstr ""
 "Βρήκα ένα sound file που δεν μπορεί να χρησιμοποιηθεί από τον Ardour. "
 "Επικοινωνήστε με τους προγραμματιστές."
 
-#: libs/ardour/session_state.cc:1855
+#: libs/ardour/session_state.cc:1903
 msgid "Could not create mix templates directory \"%1\" (%2)"
 msgstr "Δεν μπόρεσα να δημιουργήσω φάκελο προσχεδίων μίξεως \"%1\" (%2)"
 
-#: libs/ardour/session_state.cc:1869
+#: libs/ardour/session_state.cc:1917
 msgid "Template \"%1\" already exists - new version not created"
 msgstr "Το προσχέδιο \"%1\" ήδη υπάρχει - νέα έκδοση δεν δημιουργήθηκε"
 
-#: libs/ardour/session_state.cc:1876
+#: libs/ardour/session_state.cc:1924
 msgid "mix template not saved"
 msgstr "προσχέδιο μίξεως δεν αποθηκεύτηκε"
 
-#: libs/ardour/session_state.cc:1936
+#: libs/ardour/session_state.cc:1984
 msgid "cannot create session directory \"%1\"; ignored"
 msgstr "δεν μπορώ να δημιουργήσω φάκελο συνεδρίας \"%1\"; αγνοήθηκε"
 
-#: libs/ardour/session_state.cc:1949
+#: libs/ardour/session_state.cc:1997
 msgid "cannot create sounds directory \"%1\"; ignored"
 msgstr "δεν μπορώ να δημιουργήσω τον φάκελο 'sounds' \"%1\"; αγνοήθηκε"
 
-#: libs/ardour/session_state.cc:1960
+#: libs/ardour/session_state.cc:2008
 msgid "cannot create dead sounds directory \"%1\"; ignored"
 msgstr "δεν μπορώ να δημιουργήσω τον φάκελο 'dead sounds' \"%1\"; αγνοήθηκε"
 
-#: libs/ardour/session_state.cc:1971
+#: libs/ardour/session_state.cc:2019
 #, fuzzy
 msgid "cannot create peak file directory \"%1\"; ignored"
 msgstr "δεν μπορώ να δημιουργήσω φάκελο συνεδρίας \"%1\"; αγνοήθηκε"
 
-#: libs/ardour/session_state.cc:2104 libs/ardour/session_state.cc:2125
+#: libs/ardour/session_state.cc:2158 libs/ardour/session_state.cc:2179
 msgid "Session: cannot create Playlist from XML description."
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω την Playlist από την XML περιγραφή."
 
-#: libs/ardour/session_state.cc:2164
+#: libs/ardour/session_state.cc:2218
 msgid "Session: cannot create Named Selection from XML description."
 msgstr ""
 "Συνεδρία: δεν μπορώ να δημιουργήσω την ονομασμένη επιλογή από την XML "
 "περιγραφή."
 
-#: libs/ardour/session_state.cc:2269
+#: libs/ardour/session_state.cc:2332
 msgid "Unknown node \"%1\" found in Connections list from state file"
 msgstr ""
 "Άγνωστος κόμβος \"%1\" ευρέθη στη λίστα 'Συνδέσεις' από το αρχείο καταστάσεως"
 
-#: libs/ardour/session_state.cc:3081
+#: libs/ardour/session_state.cc:3172
 msgid "cannot remove dead sound file %1 (%2)"
 msgstr "δεν μπορώ να απαλοίψω το 'νεκρο' ηχο-αρχείο %1 (%2)"
 
-#: libs/ardour/session_time.cc:735
+#: libs/ardour/session_time.cc:736
 msgid "Unknown JACK transport state %1 in sync callback"
 msgstr "Άγνωστη κατάσταση του JACK transport %1 στην ανάκληση sync"
 
@@ -1873,15 +1905,15 @@ msgstr ""
 msgid "tempoize: error creating new audio file %1 (%2)"
 msgstr "tempoize: σφάλμα στη δημιουργία νέου αρχείου ήχου %1 (%2)"
 
-#: libs/ardour/session_timefx.cc:110
+#: libs/ardour/session_timefx.cc:111
 msgid "tempoize: error reading data from %1"
 msgstr "tempoize: σφάλμα στην ανάγνωση δεδομένων από %1"
 
-#: libs/ardour/session_timefx.cc:123 libs/ardour/session_timefx.cc:135
+#: libs/ardour/session_timefx.cc:124 libs/ardour/session_timefx.cc:136
 msgid "error writing tempo-adjusted data to %1"
 msgstr "σφάλμα στην εγγραφή χρονο-ρυθμισμένων δεδομένων στο %1"
 
-#: libs/ardour/session_timefx.cc:141
+#: libs/ardour/session_timefx.cc:142
 msgid "timefx code failure. please notify ardour-developers."
 msgstr ""
 "αποτυχία κώδικα timefx. παρακαλώ ειδοποιήστε τους προγραμματιστές του ardour."
@@ -1890,7 +1922,7 @@ msgstr ""
 msgid "Cannot loop - no loop range defined"
 msgstr "Δεν γίνεται loop - κανένα διάστημα loop δεν προσδιορίστηκε"
 
-#: libs/ardour/session_transport.cc:458
+#: libs/ardour/session_transport.cc:476
 msgid ""
 "Seamless looping cannot be supported while Ardour is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -1899,7 +1931,7 @@ msgstr ""
 "transport.\n"
 "Συνιστούμε την αλλαγή των διαμορφωμένων ρυθμίσεων"
 
-#: libs/ardour/session_transport.cc:664
+#: libs/ardour/session_transport.cc:744
 msgid ""
 "Global varispeed cannot be supported while Ardour is connected to JACK "
 "transport control"
@@ -1907,78 +1939,106 @@ msgstr ""
 "Η Global varispeed δεν μπορεί να υποστηριχθεί ενώ ο Ardour είναι "
 "συνδεδεμένος με τον JACK transport control"
 
-#: libs/ardour/session_transport.cc:860
+#: libs/ardour/session_transport.cc:940
 msgid "please stop the transport before adjusting slave settings"
 msgstr ""
 "παρακαλώ σταματήστε το transport πριν την ρύθμιση των  επιλογων εξαρτήσεως"
 
-#: libs/ardour/session_transport.cc:900
+#: libs/ardour/session_transport.cc:980
 msgid "No MTC port defined: MTC slaving is impossible."
 msgstr ""
 "Καμμία θύρα MTC δεν προσδιορίστηκε: η εξάρτηση του MTC (slaving) είναι "
 "αδύνατη."
 
-#: libs/ardour/sndfile_helpers.cc:10
+#: libs/ardour/sndfile_helpers.cc:13
 msgid "WAV"
 msgstr "WAV"
 
-#: libs/ardour/sndfile_helpers.cc:11
+#: libs/ardour/sndfile_helpers.cc:14
 msgid "AIFF"
 msgstr "AIFF"
 
-#: libs/ardour/sndfile_helpers.cc:12
+#: libs/ardour/sndfile_helpers.cc:15
 msgid "raw (no header)"
 msgstr "raw (no header)"
 
-#: libs/ardour/sndfile_helpers.cc:13
+#: libs/ardour/sndfile_helpers.cc:16
 msgid "PAF (Ensoniq Paris)"
 msgstr "PAF (Ensoniq Paris)"
 
-#: libs/ardour/sndfile_helpers.cc:14
+#: libs/ardour/sndfile_helpers.cc:17
 msgid "AU (Sun/NeXT)"
 msgstr "AU (Sun/NeXT)"
 
-#: libs/ardour/sndfile_helpers.cc:15
+#: libs/ardour/sndfile_helpers.cc:18
 msgid "IRCAM"
 msgstr "IRCAM"
 
-#: libs/ardour/sndfile_helpers.cc:16
+#: libs/ardour/sndfile_helpers.cc:19
 msgid "W64 (64 bit WAV)"
 msgstr "W64 (64 bit WAV)"
 
-#: libs/ardour/sndfile_helpers.cc:31
+#: libs/ardour/sndfile_helpers.cc:24
+msgid ".wav"
+msgstr ""
+
+#: libs/ardour/sndfile_helpers.cc:25
+msgid ".aiff"
+msgstr ""
+
+#: libs/ardour/sndfile_helpers.cc:26
+msgid ".raw"
+msgstr ""
+
+#: libs/ardour/sndfile_helpers.cc:27
+msgid ".paf"
+msgstr ""
+
+#: libs/ardour/sndfile_helpers.cc:28
+msgid ".au"
+msgstr ""
+
+#: libs/ardour/sndfile_helpers.cc:29
+msgid ".ircam"
+msgstr ""
+
+#: libs/ardour/sndfile_helpers.cc:30
+msgid ".w64"
+msgstr ""
+
+#: libs/ardour/sndfile_helpers.cc:45
 msgid "16 bit"
 msgstr "16 bit"
 
-#: libs/ardour/sndfile_helpers.cc:32
+#: libs/ardour/sndfile_helpers.cc:46
 msgid "24 bit"
 msgstr "24 bit"
 
-#: libs/ardour/sndfile_helpers.cc:33
+#: libs/ardour/sndfile_helpers.cc:47
 msgid "32 bit"
 msgstr "32 bit"
 
-#: libs/ardour/sndfile_helpers.cc:34
+#: libs/ardour/sndfile_helpers.cc:48
 msgid "8 bit"
 msgstr "8 bit"
 
-#: libs/ardour/sndfile_helpers.cc:35
+#: libs/ardour/sndfile_helpers.cc:49
 msgid "float"
 msgstr "float"
 
-#: libs/ardour/sndfile_helpers.cc:48
+#: libs/ardour/sndfile_helpers.cc:62
 msgid "Little-endian (Intel)"
 msgstr "Little-endian (Intel)"
 
-#: libs/ardour/sndfile_helpers.cc:49
+#: libs/ardour/sndfile_helpers.cc:63
 msgid "Big-endian (Mac)"
 msgstr "Big-endian (Mac)"
 
-#: libs/ardour/sndfilesource.cc:87
+#: libs/ardour/sndfilesource.cc:75
 msgid "SndFileSource: cannot open file \"%1\" (%2)"
 msgstr "SndFileSource: δεν μπορώ να ανοίξω το αρχείο \"%1\" (%2)"
 
-#: libs/ardour/sndfilesource.cc:92
+#: libs/ardour/sndfilesource.cc:80
 msgid ""
 "SndFileSource: file only contains %1 channels; %2 is invalid as a channel "
 "number"
@@ -1986,76 +2046,78 @@ msgstr ""
 "SndFileSource: το αρχείο περιέχει μόνο %1 κανάλια; %2 δεν έχει αξία σαν "
 "κανάλι number"
 
-#: libs/ardour/sndfilesource.cc:140
+#: libs/ardour/sndfilesource.cc:122
 msgid "SndFileSource: could not seek to frame %1 within %2 (%3)"
 msgstr "SndFileSource: δεν μπορούσα να αναζητήσω στο frame %1 μέσα στο %2 (%3)"
 
-#: libs/ardour/source.cc:168
+#: libs/ardour/source.cc:161
 msgid "poll on peak request pipe failed (%1)"
 msgstr ""
 
-#: libs/ardour/source.cc:175
+#: libs/ardour/source.cc:168
 #, fuzzy
 msgid "Error on peak thread request pipe"
 msgstr "Σφάλμα στο transport thread request pipe"
 
-#: libs/ardour/source.cc:208
+#: libs/ardour/source.cc:201
 #, fuzzy
 msgid "Error reading from peak request pipe"
 msgstr "Σφάλμα στην ανάγνωση από transport request pipe"
 
-#: libs/ardour/source.cc:245 libs/ardour/source.cc:250
+#: libs/ardour/source.cc:238 libs/ardour/source.cc:243
 #, fuzzy
 msgid "UI: cannot set O_NONBLOCK on peak request pipe (%1)"
 msgstr "UI: δεν μπορώ να θέσω O_NONBLOCK στο signal read pipe (%1)"
 
-#: libs/ardour/source.cc:255
+#: libs/ardour/source.cc:248
 msgid "Source: could not create peak thread"
 msgstr "Source: δεν μπόρεσα να δημιουργήσω peak δέσμη"
 
-#: libs/ardour/source.cc:345
+#: libs/ardour/source.cc:326
+#, fuzzy
+msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
+msgstr "δεν μπορώ να απαλοίψω το peakfile %1 για %2 (%3)"
+
+#: libs/ardour/source.cc:357
 msgid "Source: cannot stat peakfile \"%1\""
 msgstr "Source: δεν μπορώ να μετρήσω το αυτοστιγμεί peakfile \"%1\""
 
-#: libs/ardour/source.cc:365
-#, fuzzy
-msgid "Source: cannot stat peakfile \"%1\" or \"%2\""
-msgstr "Source: δεν μπορώ να μετρήσω το αυτοστιγμεί peakfile \"%1\""
-
-#: libs/ardour/source.cc:397
-msgid "Source: cannot open peakpath \"%1\" (%2)"
-msgstr "Source: δεν μπορώ να ανοίξω το peakpath \"%1\" (%2)"
-
-#: libs/ardour/source.cc:461
+#: libs/ardour/source.cc:444
 msgid "cannot read sample data for unscaled peak computation"
 msgstr ""
 "δεν μπορώ να διαβάσω δεδομένα δείγματος για υπολογισμό μη-κλιμακώτου peak"
 
-#: libs/ardour/source.cc:634
+#: libs/ardour/source.cc:465 libs/ardour/source.cc:536
+#: libs/ardour/source.cc:780 libs/ardour/source.cc:881
+msgid "Source: cannot open peakpath \"%1\" (%2)"
+msgstr "Source: δεν μπορώ να ανοίξω το peakpath \"%1\" (%2)"
+
+#: libs/ardour/source.cc:637
 msgid "Source[%1]: peak read - cannot read %2 samples at offset %3"
 msgstr ""
 "Source[%1]: ανάγνωση peak - δεν μπορώ να διαβάσω %2 δείγματα στην αρχή"
 "(offset) %3"
 
-#: libs/ardour/source.cc:770
+#: libs/ardour/source.cc:789
 msgid "%1: could not write read raw data for peak computation (%2)"
 msgstr ""
 "%1: δεν μπορεσα να γράψω ανεγνωσμένα raw δεδομένα για τον υπολογισμό του "
 "peak (%2)"
 
-#: libs/ardour/source.cc:795
+#: libs/ardour/source.cc:814
 msgid "%1: could not write peak file data (%2)"
 msgstr "%1: δεν μπόρεσα να γράψω δεδομένα του αρχείου peak (%2)"
 
-#: libs/ardour/state_manager.cc:26
+#: libs/ardour/state_manager.cc:46
 #, fuzzy
 msgid "cleared history"
 msgstr "εκκαθαρίσθη"
 
-#: libs/ardour/state_manager.cc:39
+#: libs/ardour/state_manager.cc:59
+#, fuzzy
 msgid ""
 "programming error: illegal state ID (%1) passed to StateManager::set_state() "
-"(range = 0-%3)"
+"(range = 0-%2)"
 msgstr ""
 "σφάλμα προγραμματισμού: αθέμιτη κατάσταση ID (%1) πέρασε στον StateManager::"
 "set_state() (range = 0-%3)"
@@ -2148,10 +2210,24 @@ msgstr "σφάλμα προγραμματισμού: κανένας τομέας
 msgid "programming error: unhandled MetricSection type"
 msgstr "σφάλμα προγραμματισμού: αχείριστος τύπος MetricSection"
 
-#: libs/ardour/tempo.cc:1227 libs/ardour/tempo.cc:1239
+#: libs/ardour/tempo.cc:1225 libs/ardour/tempo.cc:1237
 msgid "Tempo map: could not set new state, restoring old one."
 msgstr ""
 "Χάρτης ρυθμών: δεν μπόρεσα να θέσω νέα κατάσταση, επιστροφή προηγούμενης."
+
+#: libs/ardour/tempo.cc:1261
+msgid "load XML data"
+msgstr ""
+
+#: libs/ardour/utils.cc:242
+#, fuzzy
+msgid "illegal or badly-formed string used for path (%1)"
+msgstr "παράνομη ή κακοσχηματισμένη γραμμή για το μονοπάτι RAID"
+
+#: libs/ardour/utils.cc:247
+#, fuzzy
+msgid "path (%1) is ambiguous"
+msgstr "Το μονοπάτι αναζήτησης του RAID είναι αμφίβολο"
 
 #: libs/ardour/vst_plugin.cc:186
 msgid "cannot create VST chunk directory: %1"
@@ -2173,6 +2249,46 @@ msgstr "Κακός κόμβος εστάλη στο VSTPlugin::set_state"
 msgid "no support for presets using chunks at this time"
 msgstr ""
 "καμμία υποστήριξη αυτή τη στιγμή για ρυθμίσεις που χρησιμοποιούν κομμάτια"
+
+#: libs/ardour/coreaudio_source.cc:93
+#, fuzzy
+msgid ""
+"CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel "
+"number"
+msgstr ""
+"SndFileSource: το αρχείο περιέχει μόνο %1 κανάλια; %2 δεν έχει αξία σαν "
+"κανάλι number"
+
+#: libs/ardour/coreaudio_source.cc:157
+#, fuzzy
+msgid "CoreAudioSource: could not seek to frame %1 within %2 (%3)"
+msgstr "SndFileSource: δεν μπορούσα να αναζητήσω στο frame %1 μέσα στο %2 (%3)"
+
+#~ msgid "Could not find member filename"
+#~ msgstr "Δεν ευρέθη το αρχείο μέλους"
+
+#~ msgid "could not create crossfade object in playlist %1"
+#~ msgstr "δεν έγινε δημιουργία αντικειμένου crossfade στη λίστα αναπαρ/γής%1"
+
+#~ msgid ""
+#~ "There are too many frozen versions of playlist \"%1\" to create another "
+#~ "one"
+#~ msgstr ""
+#~ "Πάρα πολλές εκδόσεις λίστας αναπαρ/γής \"%1\" για τη δημιουργία άλλης"
+
+#~ msgid "alsa_pcm:playback_1"
+#~ msgstr "alsa_pcm:playback_1"
+
+#~ msgid "alsa_pcm:playback_2"
+#~ msgstr "alsa_pcm:playback_2"
+
+#, fuzzy
+#~ msgid "Could not find a template called %1 in %2"
+#~ msgstr "Δεν μπόρεσα να ανοίξω προσχέδιο μίξεως %1 για ανάγνωση"
+
+#, fuzzy
+#~ msgid "Source: cannot stat peakfile \"%1\" or \"%2\""
+#~ msgstr "Source: δεν μπορώ να μετρήσω το αυτοστιγμεί peakfile \"%1\""
 
 #~ msgid "Transport: error polling extra MIDI port #1 (revents =%1%2%3"
 #~ msgstr ""

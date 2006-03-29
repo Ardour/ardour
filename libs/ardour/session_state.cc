@@ -765,11 +765,8 @@ Session::load_state (string snapshot_name)
 		/* there is pending state from a crashed capture attempt */
 
 		if (AskAboutPendingState()) {
-			cerr << "use pending state\n";
 			state_was_pending = true;
-		} else {
-			cerr << "do not use pending state\n";
-		}
+		} 
 	} 
 
 	if (!state_was_pending) {

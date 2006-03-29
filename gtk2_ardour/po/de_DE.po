@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-09-19 18:09-0400\n"
+"POT-Creation-Date: 2006-03-29 14:24-0500\n"
 "PO-Revision-Date: 2003-05-11 17:36+0200\n"
 "Last-Translator: Karsten Petersen <kapet@kapet.de>\n"
 "Language-Team: Deutsch <de@li.org>\n"
@@ -17,298 +17,272 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: KBabel 0.9.6\n"
 
-#: gtk_ardour/about.cc:134
+#: about.cc:119
+msgid "Paul Davis"
+msgstr ""
+
+#: about.cc:120
+#, fuzzy
+msgid "Jesse Chappell"
+msgstr "bestmöglich"
+
+#: about.cc:121
+msgid "Taybin Rutkin"
+msgstr ""
+
+#: about.cc:122
 msgid "Marcus Andersson"
 msgstr ""
 
-#: gtk_ardour/about.cc:135
+#: about.cc:123
 msgid "Jeremy Hall"
 msgstr ""
 
-#: gtk_ardour/about.cc:136
+#: about.cc:124
 msgid "Steve Harris"
 msgstr ""
 
-#: gtk_ardour/about.cc:137
+#: about.cc:125
 msgid "Tim Mayberry"
 msgstr ""
 
-#: gtk_ardour/about.cc:138
+#: about.cc:126
 msgid "Mark Stewart"
 msgstr ""
 
-#: gtk_ardour/about.cc:139
+#: about.cc:127
 msgid "Sam Chessman"
 msgstr ""
 
-#: gtk_ardour/about.cc:140
+#: about.cc:128
 msgid "Jack O'Quin"
 msgstr ""
 
-#: gtk_ardour/about.cc:141
+#: about.cc:129
 msgid "Matt Krai"
 msgstr ""
 
-#: gtk_ardour/about.cc:142
+#: about.cc:130
 msgid "Ben Bell"
 msgstr ""
 
-#: gtk_ardour/about.cc:143
+#: about.cc:131
 msgid "Gerard van Dongen"
 msgstr ""
 
-#: gtk_ardour/about.cc:144
+#: about.cc:132
 msgid "Thomas Charbonnel"
 msgstr ""
 
-#: gtk_ardour/about.cc:145
+#: about.cc:133
 msgid "Nick Mainsbridge"
 msgstr ""
 
-#: gtk_ardour/about.cc:146
+#: about.cc:134
 msgid "Colin Law"
 msgstr ""
 
-#: gtk_ardour/about.cc:147
+#: about.cc:135
 msgid "Sampo Savolainen"
 msgstr ""
 
-#: gtk_ardour/about.cc:148
+#: about.cc:136
 msgid "Joshua Leach"
 msgstr ""
 
-#: gtk_ardour/about.cc:149
+#: about.cc:137
 msgid "Rob Holland"
 msgstr ""
 
-#: gtk_ardour/about.cc:150
+#: about.cc:138
 msgid "Per Sigmond"
 msgstr ""
 
-#: gtk_ardour/about.cc:151
+#: about.cc:139
 msgid "Doug Mclain"
 msgstr ""
 
-#: gtk_ardour/about.cc:156
+#: about.cc:140
+msgid "Petter Sundlöf"
+msgstr ""
+
+#: about.cc:145
 msgid ""
 "French:\n"
-"\tAlain Fréhel <alain.frehel@free.fr>"
+"\tAlain Fréhel <alain.frehel@free.fr>\n"
 msgstr ""
 
-#: gtk_ardour/about.cc:157
+#: about.cc:146
 msgid ""
 "German:\n"
-"\tKarsten Petersen <kapet@kapet.de>"
+"\tKarsten Petersen <kapet@kapet.de>\n"
 msgstr ""
 
-#: gtk_ardour/about.cc:158
+#: about.cc:147
 msgid ""
 "Italian:\n"
-"\tFilippo Pappalardo <filippo@email.it>"
+"\tFilippo Pappalardo <filippo@email.it>\n"
 msgstr ""
 
-#: gtk_ardour/about.cc:159
+#: about.cc:148
 msgid ""
 "Portuguese:\n"
-"\tRui Nuno Capela <rncbc@rncbc.org>"
+"\tRui Nuno Capela <rncbc@rncbc.org>\n"
 msgstr ""
 
-#: gtk_ardour/about.cc:160
+#: about.cc:149
 msgid ""
 "Brazilian Portuguese:\n"
 "\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
-"\tChris Ross <chris@tebibyte.org>"
+"\tChris Ross <chris@tebibyte.org>\n"
 msgstr ""
 
-#: gtk_ardour/about.cc:162
+#: about.cc:151
 msgid ""
 "Spanish:\n"
-"\t Alex Krohn <alexkrohn@fastmail.fm>"
+"\t Alex Krohn <alexkrohn@fastmail.fm>\n"
 msgstr ""
 
-#: gtk_ardour/about.cc:163
+#: about.cc:152
 msgid ""
 "Russian:\n"
-"\t Igor Blinov <pitstop@nm.ru>"
+"\t Igor Blinov <pitstop@nm.ru>\n"
 msgstr ""
 
-#: gtk_ardour/about.cc:181
+#: about.cc:180
+msgid "Copyright (C) 1999-2005 Paul Davis\n"
+msgstr ""
+
+#: about.cc:181
 msgid ""
-"Copyright (C) 1999-2005 Paul Davis\n"
 "Ardour comes with ABSOLUTELY NO WARRANTY\n"
 "This is free software, and you are welcome to redistribute it\n"
 "under certain conditions; see the file COPYING for details.\n"
 msgstr ""
 
-#: gtk_ardour/about.cc:188
+#: about.cc:187
 msgid ""
-"Ardour: %1\n"
+"%1\n"
 "(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"
 msgstr ""
 
-#: gtk_ardour/about.cc:206
-msgid ""
-"Primary author:\n"
-"\tPaul Davis\n"
-"\n"
-"Major developers:\n"
-"\tJesse Chappell\n"
-"\tTaybin Rutkin\n"
-"Contributors:\n"
-"\t"
+#: actions.cc:260
+msgid "programmer error: %1 %2"
 msgstr ""
 
-#: gtk_ardour/about.cc:243
-msgid "Authors"
-msgstr ""
-
-#: gtk_ardour/about.cc:244
-#, fuzzy
-msgid "Translators"
-msgstr "dreieckig"
-
-#: gtk_ardour/about.cc:361
-msgid "cannot open splash image file \"%1\""
-msgstr ""
-
-#: gtk_ardour/add_route_dialog.cc:40 gtk_ardour/ardour_message.cc:33
-#: gtk_ardour/ardour_ui.cc:2984 gtk_ardour/connection_editor.cc:81
-#: gtk_ardour/crossfade_edit.cc:73 gtk_ardour/editor.cc:3977
-#: gtk_ardour/editor_markers.cc:732 gtk_ardour/editor_ops.cc:1737
-#: gtk_ardour/io_selector.cc:54 gtk_ardour/io_selector.cc:784
-#: gtk_ardour/main.cc:291 gtk_ardour/plugin_selector.cc:85
-#: gtk_ardour/redirect_box.cc:480 gtk_ardour/redirect_box.cc:777
-#: gtk_ardour/redirect_box.cc:900
-msgid "OK"
-msgstr ""
-
-#: gtk_ardour/add_route_dialog.cc:41 gtk_ardour/add_route_dialog.cc:92
-#: gtk_ardour/add_route_dialog.cc:93 gtk_ardour/ardour_ui.cc:3046
-#: gtk_ardour/connection_editor.cc:55 gtk_ardour/crossfade_edit.cc:72
-#: gtk_ardour/editor.cc:3978 gtk_ardour/editor.cc:3982
-#: gtk_ardour/editor.cc:3983 gtk_ardour/editor_markers.cc:733
-#: gtk_ardour/editor_ops.cc:1738 gtk_ardour/editor_ops.cc:2000
-#: gtk_ardour/editor_timefx.cc:52 gtk_ardour/export_dialog.cc:1129
-#: gtk_ardour/io_selector.cc:55 gtk_ardour/io_selector.cc:785
-#: gtk_ardour/library_ui.cc:722 gtk_ardour/plugin_selector.cc:86
-#: gtk_ardour/redirect_box.cc:901 gtk_ardour/redirect_box.cc:1072
-#: gtk_ardour/tempo_dialog.cc:16 gtk_ardour/tempo_dialog.cc:33
-#: gtk_ardour/tempo_dialog.cc:143 gtk_ardour/tempo_dialog.cc:161
-msgid "Cancel"
-msgstr "Abbrechen"
-
-#: gtk_ardour/add_route_dialog.cc:42 gtk_ardour/editor.cc:94
-msgid "Tracks"
-msgstr "Spuren"
-
-#: gtk_ardour/add_route_dialog.cc:43
-msgid "Busses"
-msgstr ""
-
-#: gtk_ardour/add_route_dialog.cc:48
+#: add_route_dialog.cc:60
 #, fuzzy
 msgid "ardour: add track/bus"
 msgstr "Ardour: Editor"
 
-#: gtk_ardour/add_route_dialog.cc:66 gtk_ardour/plugin_selector.cc:81
+#. path = "1"
+#: add_route_dialog.cc:61 editor_route_list.cc:72
+msgid "Tracks"
+msgstr "Spuren"
+
+#. path = "0"
+#: add_route_dialog.cc:62 editor_route_list.cc:69
+msgid "Busses"
+msgstr ""
+
+#: add_route_dialog.cc:91 plugin_selector.cc:96
 msgid "Add"
 msgstr "Hinzufügen"
 
-#: gtk_ardour/add_route_dialog.cc:86
+#: add_route_dialog.cc:110
 #, fuzzy
 msgid "Name (template)"
 msgstr "Name für Mixer-Voreinstellung"
 
-#: gtk_ardour/ardour_ui.cc:798
+#: add_route_dialog.cc:164
+#, fuzzy
+msgid "normal"
+msgstr "Ardour: Region"
+
+#: add_route_dialog.cc:166
+#, fuzzy
+msgid "tape"
+msgstr "Anfang"
+
+#. default is to use all
+#: add_route_dialog.cc:183 export_dialog.cc:85 export_dialog.cc:484
+#: export_dialog.cc:1053 export_dialog.cc:1175
+msgid "mono"
+msgstr ""
+
+#: add_route_dialog.cc:185 export_dialog.cc:84
+msgid "stereo"
+msgstr ""
+
+#. preroll stuff
+#: ardour_ui.cc:105
 msgid ""
 "pre\n"
 "roll"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:799
+#: ardour_ui.cc:106
 msgid ""
 "post\n"
 "roll"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:807
+#. transport
+#: ardour_ui.cc:114
+#, fuzzy
+msgid ""
+"time\n"
+"master"
+msgstr "Ardour: Mixer"
+
+#: ardour_ui.cc:116
 msgid "% "
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:808
-#, fuzzy
-msgid "spring"
-msgstr "Importieren"
-
-#: gtk_ardour/ardour_ui.cc:810
+#: ardour_ui.cc:118
 msgid ""
 "punch\n"
 "in"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:811
+#: ardour_ui.cc:119
 msgid ""
 "punch\n"
 "out"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:812
+#: ardour_ui.cc:120
 msgid ""
 "auto\n"
 "return"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:813
+#: ardour_ui.cc:121
 msgid ""
 "auto\n"
 "play"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:814
+#: ardour_ui.cc:122
 #, fuzzy
 msgid ""
 "auto\n"
 "input"
 msgstr "Port hinzufügen"
 
-#: gtk_ardour/ardour_ui.cc:815
+#: ardour_ui.cc:123
 msgid "click"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:816
-msgid ""
-"follow\n"
-"PH"
-msgstr ""
-
-#: gtk_ardour/ardour_ui.cc:817
+#: ardour_ui.cc:124
 msgid "AUDITIONING"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:818
+#: ardour_ui.cc:125
 msgid "SOLO"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:870
-#, fuzzy
-msgid "Percentage"
-msgstr "Zurücksetzen"
-
-#: gtk_ardour/ardour_ui.cc:872
-#, fuzzy
-msgid "Semitones"
-msgstr "Sitzung"
-
-#: gtk_ardour/ardour_ui.cc:875
-#, fuzzy
-msgid "Sprung"
-msgstr "Sortieren"
-
-#: gtk_ardour/ardour_ui.cc:877
-msgid "Wheel"
-msgstr ""
-
-#: gtk_ardour/ardour_ui.cc:902
+#: ardour_ui.cc:206
 msgid ""
 "You cannot record-enable\n"
 "track %1\n"
@@ -316,11 +290,19 @@ msgid ""
 "You would be wasting space recording silence."
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:1073
+#: ardour_ui.cc:236
+msgid "no vertical meter strip image found"
+msgstr ""
+
+#: ardour_ui.cc:243
+msgid "no horizontal meter strip image found"
+msgstr ""
+
+#: ardour_ui.cc:406
 msgid "quit"
 msgstr "Verlassen"
 
-#: gtk_ardour/ardour_ui.cc:1082
+#: ardour_ui.cc:415
 msgid ""
 "Ardour was unable to save your session.\n"
 "\n"
@@ -329,29 +311,33 @@ msgid ""
 "\"Just quit\" option."
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:1107
+#: ardour_ui.cc:434
+msgid "ardour: save session?"
+msgstr "Ardour: Sitzung speichern?"
+
+#: ardour_ui.cc:438
 msgid "Save and %1"
 msgstr "Speichern und %1"
 
-#: gtk_ardour/ardour_ui.cc:1112
+#: ardour_ui.cc:440
 msgid "Just %1"
 msgstr "Nur %1"
 
-#: gtk_ardour/ardour_ui.cc:1117
+#: ardour_ui.cc:442
 msgid "Don't %1"
 msgstr "Ohne %1"
 
-#: gtk_ardour/ardour_ui.cc:1126
+#: ardour_ui.cc:452
 #, fuzzy
 msgid "session"
 msgstr "Sitzung"
 
-#: gtk_ardour/ardour_ui.cc:1128
+#: ardour_ui.cc:454
 #, fuzzy
 msgid "snapshot"
 msgstr "Schnappschuß"
 
-#: gtk_ardour/ardour_ui.cc:1130
+#: ardour_ui.cc:456
 #, fuzzy
 msgid ""
 "The %1\n"
@@ -371,87 +357,86 @@ msgstr ""
 "\n"
 "Was wollen Sie machen?"
 
-#: gtk_ardour/ardour_ui.cc:1151
+#: ardour_ui.cc:465
 msgid "Prompter"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:1152
-msgid "ardour: save session?"
-msgstr "Ardour: Sitzung speichern?"
-
-#: gtk_ardour/ardour_ui.cc:1219
+#: ardour_ui.cc:538
 #, fuzzy, c-format
 msgid "disconnected"
 msgstr "Trennen"
 
-#: gtk_ardour/ardour_ui.cc:1226
+#: ardour_ui.cc:545
 #, c-format
 msgid "SR: %.1f kHz / %4.1f msecs"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:1230
+#: ardour_ui.cc:549
 #, c-format
 msgid "SR: %u kHz / %4.1f msecs"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:1243
+#: ardour_ui.cc:562
 #, fuzzy, c-format
 msgid "DSP Load: %.1f%%"
 msgstr "Auslastung der CPU: %.1f%%"
 
-#: gtk_ardour/ardour_ui.cc:1253
+#: ardour_ui.cc:572
 #, c-format
 msgid "Disk r:%5.1f w:%5.1f MB/s"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:1267
+#: ardour_ui.cc:586
 #, c-format
 msgid "Buffers p:%<PRIu32>%% c:%<PRIu32>%%"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:1294
+#: ardour_ui.cc:613
 msgid "space: 24hrs+"
 msgstr "Platz: >24 Stunden"
 
-#: gtk_ardour/ardour_ui.cc:1324
+#: ardour_ui.cc:643
 #, c-format
 msgid "space: %02dh:%02dm:%02ds"
 msgstr "Platz: %02dh:%02dm:%02ds"
 
-#: gtk_ardour/ardour_ui.cc:1575
+#: ardour_ui.cc:682
 msgid "programming error: impossible control method"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:1800
-msgid "cancel"
-msgstr "Abbrechen"
+#: ardour_ui.cc:790
+#, fuzzy
+msgid "Recent Sessions"
+msgstr "Sitzung"
 
-#: gtk_ardour/ardour_ui.cc:1801
-msgid "rescan"
-msgstr "Auffrischen"
-
-#: gtk_ardour/ardour_ui.cc:1842
+#. ardour sessions are folders
+#: ardour_ui.cc:872
 #, fuzzy
 msgid "open session"
 msgstr "Sitzung"
 
-#: gtk_ardour/ardour_ui.cc:1897
+#: ardour_ui.cc:878
+#, fuzzy
+msgid "Ardour sessions"
+msgstr "Ardour: Neue Sitzung"
+
+#: ardour_ui.cc:911
 msgid "Patience is a virtue.\n"
 msgstr "Geduld ist eine Tugend.\n"
 
-#: gtk_ardour/ardour_ui.cc:1906
+#: ardour_ui.cc:920
 msgid "You cannot add a track without a session already loaded."
 msgstr "Sie können erst eine Spur hinzufügen, wenn eine Sitzung geladen wurde."
 
-#: gtk_ardour/ardour_ui.cc:1913
+#: ardour_ui.cc:927
 msgid "could not create new audio track"
 msgstr "Konnte neue Spur nicht erstellen."
 
-#: gtk_ardour/ardour_ui.cc:1917
+#: ardour_ui.cc:931
 msgid "could not create new audio bus"
 msgstr "Konnte neuen Audiokanal nicht erstellen."
 
-#: gtk_ardour/ardour_ui.cc:1936
+#: ardour_ui.cc:950
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -459,14 +444,14 @@ msgid ""
 "restart JACK with more ports."
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:2071
+#: ardour_ui.cc:1074
 msgid ""
 "Please create 1 or more track\n"
 "before trying to record.\n"
 "Check the Session menu."
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:2312
+#: ardour_ui.cc:1311
 #, fuzzy
 msgid ""
 "JACK has either been shutdown or it\n"
@@ -479,61 +464,54 @@ msgstr ""
 "schnell genug war. Sie sollten die Sitzung\n"
 "speichern und JACK sowie Ardour neu starten."
 
-#: gtk_ardour/ardour_ui.cc:2328
+#: ardour_ui.cc:1328
 msgid "Unable to create all required ports"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:2336
+#: ardour_ui.cc:1336
 #, fuzzy
 msgid "Unable to start the session running"
 msgstr "An den Anfang der Sitzung springen"
 
-#: gtk_ardour/ardour_ui.cc:2472
+#: ardour_ui.cc:1472
 msgid "No Stream"
 msgstr "Kein Datenstrom"
 
-#: gtk_ardour/ardour_ui.cc:2499 gtk_ardour/ardour_ui.cc:2518
+#: ardour_ui.cc:1499 ardour_ui.cc:1518
 msgid "none"
 msgstr "keine"
 
-#: gtk_ardour/ardour_ui.cc:2508 gtk_ardour/ardour_ui.cc:2527
-#: gtk_ardour/automation_time_axis.cc:189
-#: gtk_ardour/automation_time_axis.cc:218
-#: gtk_ardour/automation_time_axis.cc:458 gtk_ardour/mixer_strip.cc:211
-#: gtk_ardour/mixer_strip.cc:223 gtk_ardour/mixer_strip.cc:947
-#: gtk_ardour/plugin_ui.cc:416 gtk_ardour/plugin_ui.cc:659
+#: ardour_ui.cc:1508 ardour_ui.cc:1527 automation_time_axis.cc:183
+#: automation_time_axis.cc:212 automation_time_axis.cc:459 mixer_strip.cc:180
+#: mixer_strip.cc:192 mixer_strip.cc:888 plugin_ui.cc:390 plugin_ui.cc:633
 msgid "off"
 msgstr "aus"
 
-#: gtk_ardour/ardour_ui.cc:2548
+#: ardour_ui.cc:1549
 msgid "Name for snapshot"
 msgstr "Name für Schnappschuß"
 
-#: gtk_ardour/ardour_ui.cc:2716 gtk_ardour/new_session_dialog.cc:294
+#: ardour_ui.cc:1695
 msgid "Name for mix template:"
 msgstr "Name für Mixer-Voreinstellung"
 
-#: gtk_ardour/ardour_ui.cc:2717
+#: ardour_ui.cc:1696
 #, fuzzy
 msgid "-template"
 msgstr "Voreinstellung"
 
-#: gtk_ardour/ardour_ui.cc:2760
-msgid "Session %1 already exists at %2"
-msgstr ""
-
-#: gtk_ardour/ardour_ui.cc:2832
+#: ardour_ui.cc:1814
 msgid ""
 "You do not have write access to this session.\n"
 "This prevents the session from being loaded."
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:2844 gtk_ardour/ardour_ui.cc:2897
+#: ardour_ui.cc:1827 ardour_ui.cc:1880
 #, fuzzy
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "Sitzung \"%1\" konnte nicht geladen werden."
 
-#: gtk_ardour/ardour_ui.cc:2966
+#: ardour_ui.cc:1936
 msgid ""
 "No audio files were ready for cleanup\n"
 "\n"
@@ -542,50 +520,46 @@ msgid ""
 "require some unused files to continue to exist."
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:2995 gtk_ardour/ardour_ui.cc:3001
-msgid "files"
-msgstr ""
-
-#: gtk_ardour/ardour_ui.cc:2997 gtk_ardour/ardour_ui.cc:3003
-msgid "file"
-msgstr ""
-
-#: gtk_ardour/ardour_ui.cc:3026
+#: ardour_ui.cc:1945
 #, fuzzy
 msgid "ardour: cleanup"
 msgstr "Ardour: Uhr"
 
-#: gtk_ardour/ardour_ui.cc:3040
+#: ardour_ui.cc:1971 ardour_ui.cc:1977
+msgid "files"
+msgstr ""
+
+#: ardour_ui.cc:1973 ardour_ui.cc:1979
+msgid "file"
+msgstr ""
+
+#: ardour_ui.cc:2010
+#, fuzzy
+msgid "ardour cleanup"
+msgstr "Ardour: Uhr"
+
+#: ardour_ui.cc:2011
 msgid ""
 "Cleanup is a destructive operation.\n"
 "ALL undo/redo information will be lost if you cleanup.\n"
 "Unused audio files will be moved to a \"dead sounds\" location."
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:3045
-msgid "Proceed with cleanup"
-msgstr ""
-
-#: gtk_ardour/ardour_ui.cc:3061
+#: ardour_ui.cc:2020
 #, fuzzy
 msgid "CleanupDialog"
 msgstr "leeren"
 
-#: gtk_ardour/ardour_ui.cc:3062
-#, fuzzy
-msgid "ardour cleanup"
-msgstr "Ardour: Uhr"
-
-#: gtk_ardour/ardour_ui.cc:3063
+#: ardour_ui.cc:2021
 #, fuzzy
 msgid "ardour_cleanup"
 msgstr "Ardour: Uhr"
 
-#: gtk_ardour/ardour_ui.cc:3086
+#: ardour_ui.cc:2040
 msgid "cleaned files"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:3087
+#: ardour_ui.cc:2041
 msgid ""
 "The following %1 %2 were not in use.\n"
 "The next time you flush the wastebasket\n"
@@ -593,21 +567,21 @@ msgid ""
 "of disk space"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:3110
+#: ardour_ui.cc:2064
 #, fuzzy
 msgid "deleted file"
 msgstr "entfernen"
 
-#: gtk_ardour/ardour_ui.cc:3111
+#: ardour_ui.cc:2065
 msgid ""
 "The following %1 file%2 were deleted, releasing %3 %4bytes of disk space"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:3226
+#: ardour_ui.cc:2186
 msgid "Recording was stopped because your system could not keep up."
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:3248
+#: ardour_ui.cc:2209
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with Ardour.\n"
@@ -616,7 +590,7 @@ msgid ""
 "quickly enough to keep up with recording.\n"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:3266
+#: ardour_ui.cc:2228
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with Ardour.\n"
@@ -625,15 +599,7 @@ msgid ""
 "quickly enough to keep up with playback.\n"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:3291
-msgid "Recover from crash"
-msgstr ""
-
-#: gtk_ardour/ardour_ui.cc:3292
-msgid "Ignore crash data"
-msgstr ""
-
-#: gtk_ardour/ardour_ui.cc:3293
+#: ardour_ui.cc:2254
 msgid ""
 "This session appears to have been in\n"
 "middle of recording when ardour or\n"
@@ -644,2070 +610,3385 @@ msgid ""
 "what you would like to do.\n"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:3338
+#: ardour_ui.cc:2264
+msgid "Recover from crash"
+msgstr ""
+
+#: ardour_ui.cc:2265
+msgid "Ignore crash data"
+msgstr ""
+
+#: ardour_ui.cc:2283
 msgid "Could not disconnect from JACK"
 msgstr ""
 
-#: gtk_ardour/ardour_ui.cc:3351
+#: ardour_ui.cc:2296
 msgid "Could not reconnect to JACK"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:60
+#: ardour_ui2.cc:59
 msgid "UI: cannot setup editor"
 msgstr "Der Editor konnte nicht initialisiert werden."
 
-#: gtk_ardour/ardour_ui2.cc:65
+#: ardour_ui2.cc:64
 msgid "UI: cannot setup mixer"
 msgstr "Der Mixer konnte nicht initialisiert werden."
 
-#: gtk_ardour/ardour_ui2.cc:70
-msgid "UI: cannot setup meter_bridge"
-msgstr ""
-
-#: gtk_ardour/ardour_ui2.cc:98
+#: ardour_ui2.cc:90
 msgid "MMC + Local"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:99
+#: ardour_ui2.cc:91
 msgid "MMC"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:100
+#: ardour_ui2.cc:92
 msgid "Local"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:117
+#: ardour_ui2.cc:109
 msgid "MMC ID"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:215
+#: ardour_ui2.cc:290
 msgid "Play from playhead"
 msgstr "Wiedergabe ab Playhead"
 
-#: gtk_ardour/ardour_ui2.cc:216
+#: ardour_ui2.cc:291
 msgid "Stop playback"
 msgstr "Wiedergabe anhalten"
 
-#: gtk_ardour/ardour_ui2.cc:217
+#: ardour_ui2.cc:292
 #, fuzzy
 msgid "Play range/selection"
 msgstr "Auswahl wiedergeben"
 
-#: gtk_ardour/ardour_ui2.cc:218
+#: ardour_ui2.cc:293
 msgid "Go to start of session"
 msgstr "An den Anfang der Sitzung springen"
 
-#: gtk_ardour/ardour_ui2.cc:219
+#: ardour_ui2.cc:294
 msgid "Go to end of session"
 msgstr "Ans Ende der Sitzung springen"
 
-#: gtk_ardour/ardour_ui2.cc:220
+#: ardour_ui2.cc:295
 #, fuzzy
 msgid "Play loop range"
 msgstr "Bereich"
 
-#: gtk_ardour/ardour_ui2.cc:221
+#: ardour_ui2.cc:296
 msgid "Return to last playback start when stopped"
 msgstr "Bei Stopp zum Wiedergabeanfang springen"
 
-#: gtk_ardour/ardour_ui2.cc:222
+#: ardour_ui2.cc:297
 msgid "Start playback after any locate"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:223
+#: ardour_ui2.cc:298
 msgid "Be sensible about input monitoring"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:224
+#: ardour_ui2.cc:299
 msgid "Start recording at auto-punch start"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:225
+#: ardour_ui2.cc:300
 msgid "Stop recording at auto-punch end"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:226
+#: ardour_ui2.cc:301
 msgid "Enable/Disable audio click"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:227
-#, fuzzy
-msgid "Enable/Disable follow playhead"
-msgstr "Wiedergabeschleife an/abschalten"
+#: ardour_ui2.cc:302
+msgid "Positional sync source"
+msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:228
+#: ardour_ui2.cc:303
+msgid "Does Ardour control the time?"
+msgstr ""
+
+#: ardour_ui2.cc:304
 msgid "Shuttle speed control"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:229
+#: ardour_ui2.cc:305
 #, c-format
 msgid "Select semitones or %%-age for speed display"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:230
-msgid "Select sprung or wheel behaviour"
-msgstr ""
-
-#: gtk_ardour/ardour_ui2.cc:231
+#: ardour_ui2.cc:306
 msgid "Current transport speed"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:312
+#: ardour_ui2.cc:328
 #, fuzzy
 msgid "Primary clock"
 msgstr "Ardour: Uhr"
 
-#: gtk_ardour/ardour_ui2.cc:313
+#: ardour_ui2.cc:329
 msgid "secondary clock"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:365 gtk_ardour/ardour_ui2.cc:751
-#: gtk_ardour/ardour_ui2.cc:770
-msgid "stopped"
+#. XXX: this should really be saved in instant.xml or something similar and restored from there
+#. Combo's are stupid - they steal space from the entry for the button
+#: ardour_ui2.cc:386 ardour_ui2.cc:797 ardour_ui2.cc:810 ardour_ui2.cc:873
+#: ardour_ui2.cc:875
+msgid "sprung"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:431
+#: ardour_ui2.cc:387 ardour_ui2.cc:799 ardour_ui2.cc:821
+msgid "wheel"
+msgstr ""
+
+#: ardour_ui2.cc:449
 msgid "ardour: clock"
 msgstr "Ardour: Uhr"
 
-#: gtk_ardour/ardour_ui2.cc:721
+#: ardour_ui2.cc:594
+msgid "Maximum speed"
+msgstr ""
+
+#: ardour_ui2.cc:787
 #, fuzzy
 msgid "st"
 msgstr "bestmöglich"
 
-#: gtk_ardour/ardour_ui2.cc:731
-msgid "sprung"
+#: ardour_ui2.cc:831 ardour_ui2.cc:854 ardour_ui2.cc:871
+msgid "stopped"
 msgstr ""
 
-#: gtk_ardour/ardour_ui2.cc:742
-msgid "wheel"
-msgstr ""
-
-#: gtk_ardour/ardour_ui_dependents.cc:74
-msgid "keyboard_target: error setting binding state: invalid node"
-msgstr ""
-
-#: gtk_ardour/ardour_ui_dialogs.cc:158
+#: ardour_ui_dialogs.cc:152
 #, fuzzy
 msgid "close session"
 msgstr "Bitte mittels des \"Sitzung\"-Menüs\n"
 
-#: gtk_ardour/ardour_ui_ed.cc:75 gtk_ardour/audio_time_axis.cc:1895
+#: ardour_ui_dialogs.cc:360 ardour_ui_ed.cc:179
 #, fuzzy
-msgid "New"
-msgstr "Neu..."
+msgid "Sound File Browser"
+msgstr "Ardour: Audio Bibliothek"
 
-#: gtk_ardour/ardour_ui_ed.cc:76
-#, fuzzy
-msgid "Open"
-msgstr "Öffnen..."
+#. menus + submenus that need action items
+#: ardour_ui_ed.cc:68
+msgid "Session"
+msgstr "Sitzung"
 
-#: gtk_ardour/ardour_ui_ed.cc:77
-#, fuzzy
-msgid "Recent"
-msgstr "Zurücksetzen"
-
-#: gtk_ardour/ardour_ui_ed.cc:78 gtk_ardour/connection_editor.cc:54
-#: gtk_ardour/io_selector.cc:54 gtk_ardour/io_selector.cc:784
-msgid "Close"
-msgstr "Schließen"
-
-#: gtk_ardour/ardour_ui_ed.cc:84 gtk_ardour/route_params_ui.cc:488
-#, fuzzy
-msgid "Add Track/Bus"
-msgstr "MIDI Spur(en) hinzufügen"
-
-#: gtk_ardour/ardour_ui_ed.cc:99
-#, fuzzy
-msgid "Connect"
-msgstr "Verbindungen"
-
-#: gtk_ardour/ardour_ui_ed.cc:100
-msgid "Image Compositor"
-msgstr ""
-
-#: gtk_ardour/ardour_ui_ed.cc:114
-msgid "Save"
-msgstr "Speichern"
-
-#: gtk_ardour/ardour_ui_ed.cc:118
-msgid "Snapshot"
-msgstr "Schnappschuß"
-
-#: gtk_ardour/ardour_ui_ed.cc:126
-msgid "Save Template..."
-msgstr "Speichern als Voreinstellung..."
-
-#: gtk_ardour/ardour_ui_ed.cc:133
-msgid "Export session to audiofile..."
-msgstr "Export als Audio-Datei..."
-
-#: gtk_ardour/ardour_ui_ed.cc:134
-#, fuzzy
-msgid "Export range to audiofile..."
-msgstr "Export als Audio-Datei..."
-
-#: gtk_ardour/ardour_ui_ed.cc:137 gtk_ardour/editor.cc:2312
-#: gtk_ardour/editor.cc:2430 gtk_ardour/export_dialog.cc:118
-#: gtk_ardour/export_dialog.cc:1223 gtk_ardour/export_dialog.cc:1227
+#: ardour_ui_ed.cc:69 ardour_ui_ed.cc:125 editor.cc:1779 export_dialog.cc:1057
+#: export_dialog.cc:1061
 msgid "Export"
 msgstr "Exportieren"
 
-#: gtk_ardour/ardour_ui_ed.cc:146
-msgid "Cleanup unused sources"
-msgstr ""
-
-#: gtk_ardour/ardour_ui_ed.cc:147
-msgid "Flush wastebasket"
-msgstr ""
-
-#: gtk_ardour/ardour_ui_ed.cc:149
+#: ardour_ui_ed.cc:70
 #, fuzzy
 msgid "Cleanup"
 msgstr "leeren"
 
-#: gtk_ardour/ardour_ui_ed.cc:154
-msgid "Quit"
-msgstr "Beenden"
+#: ardour_ui_ed.cc:71 option_editor.cc:125
+msgid "Sync"
+msgstr ""
 
-#: gtk_ardour/ardour_ui_ed.cc:156
-msgid "Session"
-msgstr "Sitzung"
+#: ardour_ui_ed.cc:72 ardour_ui_ed.cc:73
+#, fuzzy
+msgid "Options"
+msgstr "Geschwindigkeitseditor"
 
-#: gtk_ardour/ardour_ui_ed.cc:162 gtk_ardour/crossfade_edit.cc:287
-#: gtk_ardour/editor.cc:2242 gtk_ardour/editor.cc:2499
-#: gtk_ardour/editor_markers.cc:466 gtk_ardour/mixer_strip.cc:570
-#: gtk_ardour/mixer_strip.cc:629 gtk_ardour/redirect_box.cc:412
-msgid "Edit"
-msgstr "Bearbeiten"
+#: ardour_ui_ed.cc:74
+msgid "Help"
+msgstr ""
 
-#: gtk_ardour/ardour_ui_ed.cc:171 gtk_ardour/mixer_strip.cc:572
-#: gtk_ardour/mixer_strip.cc:631
-msgid "Disconnect"
-msgstr "Trennen"
+#: ardour_ui_ed.cc:75
+msgid "KeyMouse Actions"
+msgstr ""
 
-#: gtk_ardour/ardour_ui_ed.cc:174
+#: ardour_ui_ed.cc:76
+#, fuzzy
+msgid "Audio File Format"
+msgstr "Ardour: Audio Bibliothek"
+
+#: ardour_ui_ed.cc:77
+#, fuzzy
+msgid "Header"
+msgstr "Verbergen"
+
+#: ardour_ui_ed.cc:78
+msgid "Data"
+msgstr ""
+
+#. the real actions
+#: ardour_ui_ed.cc:82 audio_time_axis.cc:1841
+#, fuzzy
+msgid "New"
+msgstr "Neu..."
+
+#: ardour_ui_ed.cc:84
+#, fuzzy
+msgid "Open"
+msgstr "Öffnen..."
+
+#: ardour_ui_ed.cc:85
+#, fuzzy
+msgid "Recent"
+msgstr "Zurücksetzen"
+
+#: ardour_ui_ed.cc:86 io_selector.cc:57 io_selector.cc:791
+msgid "Close"
+msgstr "Schließen"
+
+#: ardour_ui_ed.cc:89 route_params_ui.cc:512
+#, fuzzy
+msgid "Add Track/Bus"
+msgstr "MIDI Spur(en) hinzufügen"
+
+#: ardour_ui_ed.cc:100
+#, fuzzy
+msgid "Connect"
+msgstr "Verbindungen"
+
+#. </CMT Additions>
+#: ardour_ui_ed.cc:108
+msgid "Snapshot"
+msgstr "Schnappschuß"
+
+#: ardour_ui_ed.cc:111
+msgid "Save Template..."
+msgstr "Speichern als Voreinstellung..."
+
+#: ardour_ui_ed.cc:114
+msgid "Export session to audiofile..."
+msgstr "Export als Audio-Datei..."
+
+#: ardour_ui_ed.cc:117
+#, fuzzy
+msgid "Export selection to audiofile..."
+msgstr "Export als Audio-Datei..."
+
+#: ardour_ui_ed.cc:121
+#, fuzzy
+msgid "Export range markers to audiofile..."
+msgstr "Export als Audio-Datei..."
+
+#: ardour_ui_ed.cc:128
+msgid "Cleanup unused sources"
+msgstr ""
+
+#: ardour_ui_ed.cc:130
+msgid "Flush wastebasket"
+msgstr ""
+
+#: ardour_ui_ed.cc:136 ardour_ui_options.cc:354 ardour_ui_options.cc:363
+#: ardour_ui_options.cc:435
+msgid "JACK"
+msgstr ""
+
+#: ardour_ui_ed.cc:137
+msgid "Latency"
+msgstr ""
+
+#: ardour_ui_ed.cc:139
 #, fuzzy
 msgid "Reconnect"
 msgstr "Verbindungen"
 
-#: gtk_ardour/ardour_ui_ed.cc:192
-msgid "Latency"
+#: ardour_ui_ed.cc:142 mixer_strip.cc:513 mixer_strip.cc:573
+msgid "Disconnect"
+msgstr "Trennen"
+
+#: ardour_ui_ed.cc:169
+msgid "Windows"
+msgstr "Fenster"
+
+#: ardour_ui_ed.cc:170
+msgid "start prefix"
 msgstr ""
 
-#: gtk_ardour/ardour_ui_ed.cc:195
-msgid "JACK"
+#: ardour_ui_ed.cc:171
+msgid "Quit"
+msgstr "Beenden"
+
+#. windows visibility actions
+#: ardour_ui_ed.cc:175
+msgid "Maximise Editor Space"
 msgstr ""
 
-#: gtk_ardour/ardour_ui_ed.cc:205
-msgid "Editor"
-msgstr ""
+#: ardour_ui_ed.cc:177
+#, fuzzy
+msgid "Show Editor"
+msgstr "Geschwindigkeitseditor"
 
-#: gtk_ardour/ardour_ui_ed.cc:206
-msgid "Mixer"
+#: ardour_ui_ed.cc:178
+#, fuzzy
+msgid "Show Mixer"
 msgstr "Mixer"
 
-#: gtk_ardour/ardour_ui_ed.cc:212
+#: ardour_ui_ed.cc:180
 #, fuzzy
 msgid "Options Editor"
 msgstr "Geschwindigkeitseditor"
 
-#: gtk_ardour/ardour_ui_ed.cc:219
-#, fuzzy
-msgid "Audio Library"
-msgstr "Ardour: Audio Bibliothek"
-
-#: gtk_ardour/ardour_ui_ed.cc:225
+#: ardour_ui_ed.cc:181
 msgid "Track/Bus Inspector"
 msgstr ""
 
-#: gtk_ardour/ardour_ui_ed.cc:232
+#: ardour_ui_ed.cc:183
 msgid "Connections"
 msgstr "Verbindungen"
 
-#: gtk_ardour/ardour_ui_ed.cc:240
-msgid "Meter Bridge"
-msgstr ""
-
-#: gtk_ardour/ardour_ui_ed.cc:248
+#: ardour_ui_ed.cc:185
 msgid "Locations"
 msgstr "Stellen"
 
-#: gtk_ardour/ardour_ui_ed.cc:255
+#: ardour_ui_ed.cc:187
 msgid "Big Clock"
 msgstr "Große Uhr"
 
-#: gtk_ardour/ardour_ui_ed.cc:261
+#: ardour_ui_ed.cc:189
 msgid "About"
 msgstr ""
 
-#: gtk_ardour/ardour_ui_ed.cc:264
-msgid "Windows"
-msgstr "Fenster"
+#: ardour_ui_ed.cc:190
+#, fuzzy
+msgid "Colors"
+msgstr "solo"
 
-#: gtk_ardour/audio_clock.cc:1640 gtk_ardour/editor.cc:203
+#: ardour_ui_ed.cc:192
+#, fuzzy
+msgid "Add Audio Track"
+msgstr "MIDI Spur(en) hinzufügen"
+
+#: ardour_ui_ed.cc:194
+msgid "Add Audio Bus"
+msgstr ""
+
+#: ardour_ui_ed.cc:196
+msgid "Save"
+msgstr "Speichern"
+
+#: ardour_ui_ed.cc:198 editor_actions.cc:248
+#, fuzzy
+msgid "Remove Last Capture"
+msgstr "Synchronisationspunkt entfernen"
+
+#. do-nothing action for the "transport" menu bar item
+#: ardour_ui_ed.cc:205
+#, fuzzy
+msgid "Transport"
+msgstr "dreieckig"
+
+#. these two are not used by key bindings, instead use ToggleRoll for that. these two do show up in
+#. menus and via button proxies.
+#.
+#: ardour_ui_ed.cc:211 sfdb_ui.cc:57
+#, fuzzy
+msgid "Stop"
+msgstr "Stop"
+
+#: ardour_ui_ed.cc:214
+msgid "Roll"
+msgstr ""
+
+#: ardour_ui_ed.cc:218
+#, fuzzy
+msgid "Start/Stop"
+msgstr "Anfang:"
+
+#: ardour_ui_ed.cc:221
+msgid "Stop + Forget Capture"
+msgstr ""
+
+#: ardour_ui_ed.cc:224
+#, fuzzy
+msgid "Play Loop Range"
+msgstr "Bereich"
+
+#: ardour_ui_ed.cc:227
+#, fuzzy
+msgid "Play Selection"
+msgstr "Wiedergabe der ausgewählten Region"
+
+#: ardour_ui_ed.cc:231
+#, fuzzy
+msgid "Enable Record"
+msgstr "Wiederherstellen"
+
+#: ardour_ui_ed.cc:234
+#, fuzzy
+msgid "Rewind"
+msgstr "Suchen"
+
+#: ardour_ui_ed.cc:237
+msgid "Rewind (Slow)"
+msgstr ""
+
+#: ardour_ui_ed.cc:240
+msgid "Rewind (Fast)"
+msgstr ""
+
+#: ardour_ui_ed.cc:243
+msgid "Forward"
+msgstr ""
+
+#: ardour_ui_ed.cc:246
+msgid "Forward (Slow)"
+msgstr ""
+
+#: ardour_ui_ed.cc:249
+msgid "Forward (Fast)"
+msgstr ""
+
+#: ardour_ui_ed.cc:252
+msgid "Goto Zero"
+msgstr ""
+
+#: ardour_ui_ed.cc:255
+#, fuzzy
+msgid "Goto Start"
+msgstr "Anfang:"
+
+#: ardour_ui_ed.cc:258
+msgid "Goto End"
+msgstr ""
+
+#. XXX the newline in the displayed names of these action is really wrong, but its because we want the button
+#. that proxies for these action to be more compact. It would be nice to find a way to override the action
+#. name appearance on the buttons.
+#.
+#: ardour_ui_ed.cc:267
+msgid ""
+"Punch\n"
+"in"
+msgstr ""
+
+#: ardour_ui_ed.cc:270
+msgid ""
+"Punch\n"
+"out"
+msgstr ""
+
+#: ardour_ui_ed.cc:273 option_editor.cc:128
+msgid "Click"
+msgstr ""
+
+#: ardour_ui_ed.cc:276
+#, fuzzy
+msgid ""
+"Auto\n"
+"input"
+msgstr "Port hinzufügen"
+
+#: ardour_ui_ed.cc:279
+msgid ""
+"Auto\n"
+"play"
+msgstr ""
+
+#: ardour_ui_ed.cc:282
+msgid ""
+"Auto\n"
+"return"
+msgstr ""
+
+#: ardour_ui_ed.cc:286
+msgid ""
+"Time\n"
+"master"
+msgstr ""
+
+#: ardour_ui_ed.cc:289
+msgid "Send All Midi Feedback"
+msgstr ""
+
+#: ardour_ui_ed.cc:291
+msgid "Toggle Record Enable Track1"
+msgstr ""
+
+#: ardour_ui_ed.cc:293
+msgid "Toggle Record Enable Track2"
+msgstr ""
+
+#: ardour_ui_ed.cc:295
+msgid "Toggle Record Enable Track3"
+msgstr ""
+
+#: ardour_ui_ed.cc:297
+msgid "Toggle Record Enable Track4"
+msgstr ""
+
+#: ardour_ui_ed.cc:299
+msgid "Toggle Record Enable Track5"
+msgstr ""
+
+#: ardour_ui_ed.cc:301
+msgid "Toggle Record Enable Track6"
+msgstr ""
+
+#: ardour_ui_ed.cc:303
+msgid "Toggle Record Enable Track7"
+msgstr ""
+
+#: ardour_ui_ed.cc:305
+msgid "Toggle Record Enable Track8"
+msgstr ""
+
+#: ardour_ui_ed.cc:307
+msgid "Toggle Record Enable Track9"
+msgstr ""
+
+#: ardour_ui_ed.cc:309
+msgid "Toggle Record Enable Track10"
+msgstr ""
+
+#: ardour_ui_ed.cc:311
+msgid "Toggle Record Enable Track11"
+msgstr ""
+
+#: ardour_ui_ed.cc:313
+msgid "Toggle Record Enable Track12"
+msgstr ""
+
+#: ardour_ui_ed.cc:315
+msgid "Toggle Record Enable Track13"
+msgstr ""
+
+#: ardour_ui_ed.cc:317
+msgid "Toggle Record Enable Track14"
+msgstr ""
+
+#: ardour_ui_ed.cc:319
+msgid "Toggle Record Enable Track15"
+msgstr ""
+
+#: ardour_ui_ed.cc:321
+msgid "Toggle Record Enable Track16"
+msgstr ""
+
+#: ardour_ui_ed.cc:323
+msgid "Toggle Record Enable Track17"
+msgstr ""
+
+#: ardour_ui_ed.cc:325
+msgid "Toggle Record Enable Track18"
+msgstr ""
+
+#: ardour_ui_ed.cc:327
+msgid "Toggle Record Enable Track19"
+msgstr ""
+
+#: ardour_ui_ed.cc:329
+msgid "Toggle Record Enable Track20"
+msgstr ""
+
+#: ardour_ui_ed.cc:331
+msgid "Toggle Record Enable Track21"
+msgstr ""
+
+#: ardour_ui_ed.cc:333
+msgid "Toggle Record Enable Track22"
+msgstr ""
+
+#: ardour_ui_ed.cc:335
+msgid "Toggle Record Enable Track23"
+msgstr ""
+
+#: ardour_ui_ed.cc:337
+msgid "Toggle Record Enable Track24"
+msgstr ""
+
+#: ardour_ui_ed.cc:339
+msgid "Toggle Record Enable Track25"
+msgstr ""
+
+#: ardour_ui_ed.cc:341
+msgid "Toggle Record Enable Track26"
+msgstr ""
+
+#: ardour_ui_ed.cc:343
+msgid "Toggle Record Enable Track27"
+msgstr ""
+
+#: ardour_ui_ed.cc:345
+msgid "Toggle Record Enable Track28"
+msgstr ""
+
+#: ardour_ui_ed.cc:347
+msgid "Toggle Record Enable Track29"
+msgstr ""
+
+#: ardour_ui_ed.cc:349
+msgid "Toggle Record Enable Track30"
+msgstr ""
+
+#: ardour_ui_ed.cc:351
+msgid "Toggle Record Enable Track31"
+msgstr ""
+
+#: ardour_ui_ed.cc:353
+msgid "Toggle Record Enable Track32"
+msgstr ""
+
+#: ardour_ui_ed.cc:358
+#, fuzzy
+msgid "Percentage"
+msgstr "Zurücksetzen"
+
+#: ardour_ui_ed.cc:359
+#, fuzzy
+msgid "Semitones"
+msgstr "Sitzung"
+
+#: ardour_ui_ed.cc:363
+msgid "Send MTC"
+msgstr "MTC senden"
+
+#: ardour_ui_ed.cc:365
+msgid "Send MMC"
+msgstr "MMC senden"
+
+#: ardour_ui_ed.cc:367
+#, fuzzy
+msgid "Use MMC"
+msgstr "MMC senden"
+
+#: ardour_ui_ed.cc:369
+msgid "Send MIDI feedback"
+msgstr ""
+
+#: ardour_ui_ed.cc:371
+msgid "Use MIDI control"
+msgstr ""
+
+#: ardour_ui_ed.cc:374
+msgid "Connect newtrack inputs to hardware"
+msgstr ""
+
+#: ardour_ui_ed.cc:392
+msgid "Connect new track outputs to hardware"
+msgstr ""
+
+#: ardour_ui_ed.cc:394
+msgid "Connect new track outputs to master"
+msgstr ""
+
+#: ardour_ui_ed.cc:396
+msgid "Manually connect new track outputs"
+msgstr ""
+
+#: ardour_ui_ed.cc:401
+msgid "Hardware monitoring"
+msgstr ""
+
+#: ardour_ui_ed.cc:403
+msgid "Software monitoring"
+msgstr ""
+
+#: ardour_ui_ed.cc:405
+msgid "External monitoring"
+msgstr ""
+
+#: ardour_ui_ed.cc:408
+msgid "Stop plugins with transport"
+msgstr ""
+
+#: ardour_ui_ed.cc:410
+#, fuzzy
+msgid "Do not run plugins while recording"
+msgstr "Wellenform zeigen"
+
+#: ardour_ui_ed.cc:413
+msgid "Rec-enable stays engaged at stop"
+msgstr ""
+
+#: ardour_ui_ed.cc:415
+#, fuzzy
+msgid "Verify remove last capture"
+msgstr "Synchronisationspunkt entfernen"
+
+#: ardour_ui_ed.cc:417
+msgid "Stop recording on xrun"
+msgstr ""
+
+#: ardour_ui_ed.cc:419
+#, fuzzy
+msgid "Stop transport at session end"
+msgstr "Ans Ende der Sitzung springen"
+
+#: ardour_ui_ed.cc:421
+msgid "-12dB gain reduce ffwd/rewind"
+msgstr ""
+
+#: ardour_ui_ed.cc:424
+msgid "Latched solo"
+msgstr ""
+
+#: ardour_ui_ed.cc:429
+#, fuzzy
+msgid "Solo in-place"
+msgstr "solo"
+
+#: ardour_ui_ed.cc:430
+msgid "Solo via bus"
+msgstr ""
+
+#: ardour_ui_ed.cc:433
+msgid "Automatically create crossfades"
+msgstr ""
+
+#: ardour_ui_ed.cc:435
+msgid "Unmute new full crossfades"
+msgstr ""
+
+#: ardour_ui_ed.cc:440
+#, fuzzy
+msgid "SetRegionLayerMode"
+msgstr "Regionen"
+
+#: ardour_ui_ed.cc:442
+#, fuzzy
+msgid "SetCrossfadeModel"
+msgstr "Ardour: Editor"
+
+#: ardour_ui_options.cc:352 ardour_ui_options.cc:362 ardour_ui_options.cc:429
+#, fuzzy
+msgid "Internal"
+msgstr "mittelmäßig"
+
+#: ardour_ui_options.cc:353 ardour_ui_options.cc:432
+msgid "MTC"
+msgstr ""
+
+#: audio_clock.cc:1657 editor.cc:167
 msgid "SMPTE"
 msgstr ""
 
-#: gtk_ardour/audio_clock.cc:1641 gtk_ardour/editor.cc:202
-#: gtk_ardour/editor_rulers.cc:359
+#: audio_clock.cc:1658 editor.cc:166 editor_rulers.cc:359
 msgid "Bars:Beats"
 msgstr ""
 
-#: gtk_ardour/audio_clock.cc:1642
+#: audio_clock.cc:1659
 msgid "Minutes:Seconds"
 msgstr "Minuten:Sekunden"
 
-#: gtk_ardour/audio_clock.cc:1643
+#: audio_clock.cc:1660
 msgid "Audio Frames"
 msgstr ""
 
-#: gtk_ardour/audio_clock.cc:1644 gtk_ardour/option_editor.cc:356
-#: gtk_ardour/option_editor.cc:373 gtk_ardour/option_editor.cc:713
-#: gtk_ardour/option_editor.cc:733 gtk_ardour/option_editor.cc:774
-#: gtk_ardour/option_editor.cc:794
+#.
+#. Slowest = 6.6dB/sec falloff at update rate of 40ms
+#. Slow    = 6.8dB/sec falloff at update rate of 40ms
+#.
+#: audio_clock.cc:1661 editor_actions.cc:368 editor_actions.cc:376
 msgid "Off"
 msgstr "Aus"
 
-#: gtk_ardour/audio_clock.cc:1646
+#: audio_clock.cc:1663
 msgid "Mode"
 msgstr "Modus"
 
-#: gtk_ardour/audio_time_axis.cc:104 gtk_ardour/mixer_strip.cc:523
+#: audio_time_axis.cc:90 mixer_strip.cc:463
 msgid "m"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:104 gtk_ardour/mixer_strip.cc:524
+#: audio_time_axis.cc:90 mixer_strip.cc:464
 msgid "s"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:104
+#: audio_time_axis.cc:90
 msgid "r"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:108
+#: audio_time_axis.cc:94
 msgid "g"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:109
+#. group
+#: audio_time_axis.cc:95
 msgid "p"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:110 gtk_ardour/automation_time_axis.cc:44
-#: gtk_ardour/visual_time_axis.cc:90
+#: audio_time_axis.cc:96 automation_time_axis.cc:31 visual_time_axis.cc:73
 msgid "h"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:111
+#. height
+#: audio_time_axis.cc:97
 msgid "a"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:112 gtk_ardour/visual_time_axis.cc:89
+#: audio_time_axis.cc:98 visual_time_axis.cc:72
 msgid "v"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:185
+#: audio_time_axis.cc:164
 #, fuzzy
 msgid "Record"
 msgstr "Wiederherstellen"
 
-#: gtk_ardour/audio_time_axis.cc:186 gtk_ardour/option_editor.cc:191
+#: audio_time_axis.cc:165 editor_actions.cc:35
 #, fuzzy
 msgid "Solo"
 msgstr "solo"
 
-#: gtk_ardour/audio_time_axis.cc:187 gtk_ardour/editor.cc:2236
-#: gtk_ardour/editor.cc:2330 gtk_ardour/panner_ui.cc:433
+#: audio_time_axis.cc:166 editor.cc:1703 editor.cc:1802 panner_ui.cc:385
 #, fuzzy
 msgid "Mute"
 msgstr "mute"
 
-#: gtk_ardour/audio_time_axis.cc:188
+#: audio_time_axis.cc:167
 #, fuzzy
 msgid "Edit Group"
 msgstr "Mix Gruppen"
 
-#: gtk_ardour/audio_time_axis.cc:189 gtk_ardour/visual_time_axis.cc:110
+#: audio_time_axis.cc:168 visual_time_axis.cc:91
 #, fuzzy
 msgid "Display Height"
 msgstr "Anzeige"
 
-#: gtk_ardour/audio_time_axis.cc:190
+#: audio_time_axis.cc:169
 #, fuzzy
 msgid "Playlist"
 msgstr "Wiedergabe"
 
-#: gtk_ardour/audio_time_axis.cc:191 gtk_ardour/audio_time_axis.cc:752
+#: audio_time_axis.cc:170 audio_time_axis.cc:734
 #, fuzzy
 msgid "Automation"
 msgstr "Stellen"
 
-#: gtk_ardour/audio_time_axis.cc:192 gtk_ardour/visual_time_axis.cc:111
+#: audio_time_axis.cc:171 visual_time_axis.cc:92
 msgid "Visual options"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:193 gtk_ardour/visual_time_axis.cc:112
+#: audio_time_axis.cc:172 visual_time_axis.cc:93
 msgid "Hide this track"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:349
+#: audio_time_axis.cc:328
 #, fuzzy
 msgid "No group"
 msgstr "keine Gruppe"
 
-#: gtk_ardour/audio_time_axis.cc:715 gtk_ardour/automation_time_axis.cc:447
-#: gtk_ardour/imageframe_time_axis.cc:265 gtk_ardour/marker_time_axis.cc:229
+#: audio_time_axis.cc:695 automation_time_axis.cc:448
+#: imageframe_time_axis.cc:256 marker_time_axis.cc:210
 #, fuzzy
 msgid "Height"
 msgstr "Rechts"
 
-#: gtk_ardour/audio_time_axis.cc:716 gtk_ardour/imageframe_time_axis.cc:266
-#: gtk_ardour/marker_time_axis.cc:230
+#: audio_time_axis.cc:696 color_manager.cc:40 imageframe_time_axis.cc:257
+#: marker_time_axis.cc:211
 #, fuzzy
 msgid "Color"
 msgstr "solo"
 
-#: gtk_ardour/audio_time_axis.cc:720
+#: audio_time_axis.cc:700
 msgid "Hide all crossfades"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:721
+#: audio_time_axis.cc:701
 msgid "Show all crossfades"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:729
+#: audio_time_axis.cc:705 mixer_strip.cc:1242
+#, fuzzy
+msgid "Remote Control ID"
+msgstr "Synchronisationspunkt entfernen"
+
+#: audio_time_axis.cc:711
 #, fuzzy
 msgid "show all automation"
 msgstr "Stellen"
 
-#: gtk_ardour/audio_time_axis.cc:732
+#: audio_time_axis.cc:714
 #, fuzzy
 msgid "show existing automation"
 msgstr "Stellen"
 
-#: gtk_ardour/audio_time_axis.cc:735
+#: audio_time_axis.cc:717
 #, fuzzy
 msgid "hide all automation"
 msgstr "Stellen"
 
-#: gtk_ardour/audio_time_axis.cc:740 gtk_ardour/audio_time_axis.cc:1204
-#: gtk_ardour/editor.cc:234
+#: audio_time_axis.cc:722 audio_time_axis.cc:1154 editor.cc:197
 msgid "gain"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:745 gtk_ardour/audio_time_axis.cc:1244
+#: audio_time_axis.cc:727 audio_time_axis.cc:1194
 msgid "pan"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:750 gtk_ardour/redirect_box.cc:388
+#: audio_time_axis.cc:732
 msgid "Plugins"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:758 gtk_ardour/option_editor.cc:95
+#: audio_time_axis.cc:740
 #, fuzzy
 msgid "Show waveforms"
 msgstr "Wellenform zeigen"
 
-#: gtk_ardour/audio_time_axis.cc:766
+#: audio_time_axis.cc:748
 msgid "Traditional"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:769
+#: audio_time_axis.cc:751
 msgid "Rectified"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:772
+#: audio_time_axis.cc:754
 #, fuzzy
 msgid "Waveform"
 msgstr "Wellenform zeigen"
 
-#: gtk_ardour/audio_time_axis.cc:782
+#: audio_time_axis.cc:764
 msgid "align with existing material"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:787
+#: audio_time_axis.cc:769
 msgid "align with capture time"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:793
+#: audio_time_axis.cc:775
 msgid "Alignment"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:799 gtk_ardour/mixer_strip.cc:1288
+#: audio_time_axis.cc:781 editor.cc:502 editor_actions.cc:55
+#: mixer_strip.cc:1235
 msgid "Active"
 msgstr "Aktiv"
 
-#: gtk_ardour/audio_time_axis.cc:804 gtk_ardour/editor.cc:2386
-#: gtk_ardour/editor_markers.cc:454 gtk_ardour/editor_markers.cc:467
-#: gtk_ardour/editor_region_list.cc:400 gtk_ardour/imageframe_time_axis.cc:269
-#: gtk_ardour/location_ui.cc:56 gtk_ardour/marker_time_axis.cc:233
-#: gtk_ardour/mixer_strip.cc:1293 gtk_ardour/plugin_selector.cc:83
+#: audio_time_axis.cc:786 editor.cc:1858 editor_actions.cc:313
+#: editor_markers.cc:458 editor_markers.cc:481 editor_markers.cc:498
+#: imageframe_time_axis.cc:260 location_ui.cc:56 marker_time_axis.cc:214
+#: mixer_strip.cc:1245 plugin_selector.cc:98
 msgid "Remove"
 msgstr "Entfernen"
 
-#: gtk_ardour/audio_time_axis.cc:843 gtk_ardour/audio_time_axis.cc:880
-#: gtk_ardour/audio_time_axis.cc:911
+#: audio_time_axis.cc:826 audio_time_axis.cc:859 audio_time_axis.cc:897
 #, fuzzy
 msgid "Name for playlist"
 msgstr "Name für Schnappschuß"
 
-#: gtk_ardour/audio_time_axis.cc:1168 gtk_ardour/visual_time_axis.cc:433
+#: audio_time_axis.cc:1113 visual_time_axis.cc:380
 msgid "a track already exists with that name"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:1449 gtk_ardour/editor.cc:2001
-#: gtk_ardour/editor_ops.cc:2251 gtk_ardour/selection.cc:539
+#: audio_time_axis.cc:1397 editor.cc:1426 selection.cc:622
 msgid "programming error: "
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:1889
+#: audio_time_axis.cc:1835
 msgid "Current: %1"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:1892 gtk_ardour/editor_markers.cc:452
-#: gtk_ardour/imageframe_time_axis.cc:258 gtk_ardour/marker_time_axis.cc:226
-#: gtk_ardour/mixer_strip.cc:1286 gtk_ardour/redirect_box.cc:377
+#: audio_time_axis.cc:1838 editor_markers.cc:456 editor_markers.cc:479
+#: imageframe_time_axis.cc:249 marker_time_axis.cc:207 mixer_strip.cc:1233
+#: redirect_box.cc:1060
 msgid "Rename"
 msgstr "Umbenennen"
 
-#: gtk_ardour/audio_time_axis.cc:1896
+#: audio_time_axis.cc:1842
 #, fuzzy
 msgid "New Copy"
 msgstr "Kopieren"
 
-#: gtk_ardour/audio_time_axis.cc:1898
+#: audio_time_axis.cc:1844
 msgid "Clear Current"
 msgstr ""
 
-#: gtk_ardour/audio_time_axis.cc:1900 gtk_ardour/editor.cc:2472
-#: gtk_ardour/editor.cc:2557
+#: audio_time_axis.cc:1846 editor.cc:1959 editor.cc:2035
 msgid "Select"
 msgstr "Auswahl"
 
-#: gtk_ardour/automation_line.cc:904
+#: automation_line.cc:883
 #, fuzzy
 msgid "automation event move"
 msgstr "Stellen"
 
-#: gtk_ardour/automation_line.cc:906
+#: automation_line.cc:885
 #, fuzzy
 msgid "automation range drag"
 msgstr "Stellen"
 
-#: gtk_ardour/automation_line.cc:1035 gtk_ardour/region_gain_line.cc:64
+#: automation_line.cc:1014 region_gain_line.cc:61
 #, fuzzy
 msgid "remove control point"
 msgstr "Synchronisationspunkt entfernen"
 
-#: gtk_ardour/automation_time_axis.cc:45 gtk_ardour/editor_ops.cc:3010
+#: automation_time_axis.cc:32 editor_ops.cc:2653
 msgid "clear"
 msgstr "leeren"
 
-#: gtk_ardour/automation_time_axis.cc:80
+#: automation_time_axis.cc:74
 msgid "track height"
 msgstr ""
 
-#: gtk_ardour/automation_time_axis.cc:81
+#: automation_time_axis.cc:75
 #, fuzzy
 msgid "automation state"
 msgstr "Stellen"
 
-#: gtk_ardour/automation_time_axis.cc:82
+#: automation_time_axis.cc:76
 #, fuzzy
 msgid "clear track"
 msgstr "Verbindungen löschen"
 
-#: gtk_ardour/automation_time_axis.cc:83
+#: automation_time_axis.cc:77
 #, fuzzy
 msgid "hide track"
 msgstr "Stille einfügen"
 
-#: gtk_ardour/automation_time_axis.cc:191
-#: gtk_ardour/automation_time_axis.cc:229
-#: gtk_ardour/automation_time_axis.cc:462 gtk_ardour/mixer_strip.cc:213
-#: gtk_ardour/mixer_strip.cc:225 gtk_ardour/plugin_ui.cc:419
-#: gtk_ardour/plugin_ui.cc:661 gtk_ardour/region_editor.cc:50
+#: automation_time_axis.cc:185 automation_time_axis.cc:223
+#: automation_time_axis.cc:463 mixer_strip.cc:182 mixer_strip.cc:194
+#: plugin_ui.cc:393 plugin_ui.cc:635 region_editor.cc:53
 msgid "play"
 msgstr ""
 
-#: gtk_ardour/automation_time_axis.cc:193
-#: gtk_ardour/automation_time_axis.cc:240
-#: gtk_ardour/automation_time_axis.cc:466 gtk_ardour/mixer_strip.cc:215
-#: gtk_ardour/mixer_strip.cc:227 gtk_ardour/plugin_ui.cc:422
-#: gtk_ardour/plugin_ui.cc:663
+#: automation_time_axis.cc:187 automation_time_axis.cc:234
+#: automation_time_axis.cc:467 mixer_strip.cc:184 mixer_strip.cc:196
+#: plugin_ui.cc:396 plugin_ui.cc:637
 msgid "write"
 msgstr ""
 
-#: gtk_ardour/automation_time_axis.cc:195
-#: gtk_ardour/automation_time_axis.cc:251
-#: gtk_ardour/automation_time_axis.cc:470 gtk_ardour/mixer_strip.cc:217
-#: gtk_ardour/mixer_strip.cc:229 gtk_ardour/mixer_strip.cc:953
-#: gtk_ardour/plugin_ui.cc:425 gtk_ardour/plugin_ui.cc:665
+#: automation_time_axis.cc:189 automation_time_axis.cc:245
+#: automation_time_axis.cc:471 mixer_strip.cc:186 mixer_strip.cc:198
+#: mixer_strip.cc:894 plugin_ui.cc:399 plugin_ui.cc:639
 msgid "touch"
 msgstr ""
 
-#: gtk_ardour/automation_time_axis.cc:262 gtk_ardour/option_editor.cc:274
-#: gtk_ardour/option_editor.cc:280 gtk_ardour/plugin_ui.cc:428
+#: automation_time_axis.cc:256 option_editor.cc:182 option_editor.cc:188
+#: plugin_ui.cc:402
 msgid "???"
 msgstr ""
 
-#: gtk_ardour/automation_time_axis.cc:276
+#: automation_time_axis.cc:270
 #, fuzzy
 msgid "clear automation"
 msgstr "Verbindungen löschen"
 
-#: gtk_ardour/automation_time_axis.cc:449 gtk_ardour/editor_markers.cc:453
-#: gtk_ardour/editor_markers.cc:499 gtk_ardour/editor_region_list.cc:398
+#: automation_time_axis.cc:450 editor_actions.cc:311 editor_markers.cc:457
+#: editor_markers.cc:480 editor_markers.cc:530
 msgid "Hide"
 msgstr "Verbergen"
 
-#: gtk_ardour/automation_time_axis.cc:451 gtk_ardour/connection_editor.cc:52
-#: gtk_ardour/crossfade_edit.cc:76 gtk_ardour/redirect_box.cc:364
+#: automation_time_axis.cc:452 crossfade_edit.cc:76 redirect_box.cc:1052
 msgid "Clear"
 msgstr "leeren"
 
-#: gtk_ardour/automation_time_axis.cc:474
+#: automation_time_axis.cc:475
 #, fuzzy
 msgid "State"
 msgstr "Anfang"
 
-#: gtk_ardour/connection_editor.cc:47 gtk_ardour/new_session_dialog.cc:49
-msgid "Input Connections"
-msgstr "Verbindungen der Eingänge"
-
-#: gtk_ardour/connection_editor.cc:48 gtk_ardour/new_session_dialog.cc:48
-msgid "Output Connections"
-msgstr "Verbindungen der Ausgänge"
-
-#: gtk_ardour/connection_editor.cc:49
-#, fuzzy
-msgid "New Input"
-msgstr "Neuer Eingang"
-
-#: gtk_ardour/connection_editor.cc:50
-#, fuzzy
-msgid "New Output"
-msgstr "Neuer Ausgang"
-
-#: gtk_ardour/connection_editor.cc:51
-#, fuzzy
-msgid "Delete"
-msgstr "entfernen"
-
-#: gtk_ardour/connection_editor.cc:53 gtk_ardour/connection_editor.cc:96
-#, fuzzy
-msgid "Add Port"
-msgstr "Port hinzufügen"
-
-#: gtk_ardour/connection_editor.cc:56 gtk_ardour/connection_editor.cc:105
-#: gtk_ardour/io_selector.cc:56 gtk_ardour/io_selector.cc:786
-#, fuzzy
-msgid "Rescan"
-msgstr "Auffrischen"
-
-#: gtk_ardour/connection_editor.cc:101
-#, fuzzy
-msgid "Available Ports"
-msgstr "Verfügbare Verbindungen"
-
-#: gtk_ardour/connection_editor.cc:183
-msgid "ardour: connections"
-msgstr "Ardour: Verbindungen"
-
-#: gtk_ardour/connection_editor.cc:513
-#, c-format
-msgid "in %d"
+#: canvas-imageframe.c:104
+msgid "pixbuf"
 msgstr ""
 
-#: gtk_ardour/connection_editor.cc:644
-msgid "Name for new connection:"
-msgstr "Name für neue Verbindung:"
+#: canvas-imageframe.c:105
+msgid "the pixbuf"
+msgstr ""
 
-#: gtk_ardour/crossfade_edit.cc:71
+#: canvas-imageframe.c:110
+msgid "x"
+msgstr ""
+
+#: canvas-imageframe.c:111 canvas-simpleline.c:111 canvas-simplerect.c:107
+msgid "x coordinate of upper left corner of rect"
+msgstr ""
+
+#: canvas-imageframe.c:120
+msgid "y"
+msgstr ""
+
+#: canvas-imageframe.c:121 canvas-simpleline.c:121 canvas-simplerect.c:117
+msgid "y coordinate of upper left corner of rect "
+msgstr ""
+
+#: canvas-imageframe.c:129
+msgid "width"
+msgstr ""
+
+#: canvas-imageframe.c:130
+msgid "the width"
+msgstr ""
+
+#: canvas-imageframe.c:139
+msgid "drawwidth"
+msgstr ""
+
+#: canvas-imageframe.c:140
+msgid "drawn width"
+msgstr ""
+
+#: canvas-imageframe.c:148
 #, fuzzy
-msgid "crossfade editor"
-msgstr "Ardour: Editor"
+msgid "height"
+msgstr "Rechts"
 
-#: gtk_ardour/crossfade_edit.cc:77 gtk_ardour/panner_ui.cc:449
+#: canvas-imageframe.c:149
 #, fuzzy
-msgid "Reset"
-msgstr "bestmöglich"
+msgid "the height"
+msgstr "Rechts"
 
-#: gtk_ardour/crossfade_edit.cc:78
-msgid "Fade"
+#: canvas-imageframe.c:157
+msgid "anchor"
 msgstr ""
 
-#: gtk_ardour/crossfade_edit.cc:79
-msgid "Out (dry)"
+#: canvas-imageframe.c:158
+msgid "the anchor"
 msgstr ""
 
-#: gtk_ardour/crossfade_edit.cc:80
+#: canvas-simpleline.c:110 canvas-simplerect.c:106
+msgid "x1"
+msgstr ""
+
+#: canvas-simpleline.c:120 canvas-simplerect.c:116
+msgid "y1"
+msgstr ""
+
+#: canvas-simpleline.c:131 canvas-simplerect.c:127
+msgid "x2"
+msgstr ""
+
+#: canvas-simpleline.c:132 canvas-simplerect.c:128
+msgid "x coordinate of lower right corner of rect"
+msgstr ""
+
+#: canvas-simpleline.c:141 canvas-simplerect.c:137
+msgid "y2"
+msgstr ""
+
+#: canvas-simpleline.c:142 canvas-simplerect.c:138
+msgid "y coordinate of lower right corner of rect "
+msgstr ""
+
+#: canvas-simpleline.c:150
+msgid "color rgba"
+msgstr ""
+
+#: canvas-simpleline.c:151
+msgid "color of line"
+msgstr ""
+
+#: canvas-simplerect.c:148
+msgid "outline pixels"
+msgstr ""
+
+#: canvas-simplerect.c:149
+msgid "width in pixels of outline"
+msgstr ""
+
+#: canvas-simplerect.c:159
+msgid "outline what"
+msgstr ""
+
+#: canvas-simplerect.c:160
+msgid "which boundaries to outline (mask)"
+msgstr ""
+
+#: canvas-simplerect.c:171
+msgid "fill"
+msgstr ""
+
+#: canvas-simplerect.c:172
 #, fuzzy
-msgid "Out"
-msgstr "Ausgänge"
+msgid "fill rectangle"
+msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/crossfade_edit.cc:81
-msgid "In (dry)"
+#: canvas-simplerect.c:179
+msgid "draw"
 msgstr ""
 
-#: gtk_ardour/crossfade_edit.cc:82
-msgid "In"
+#: canvas-simplerect.c:180
+#, fuzzy
+msgid "draw rectangle"
+msgstr "Bereich"
+
+#: canvas-simplerect.c:188
+msgid "outline color rgba"
 msgstr ""
 
-#: gtk_ardour/crossfade_edit.cc:84
-msgid "With Pre-roll"
+#: canvas-simplerect.c:189
+msgid "color of outline"
 msgstr ""
 
-#: gtk_ardour/crossfade_edit.cc:85
-msgid "With Post-roll"
+#: canvas-simplerect.c:199
+msgid "fill color rgba"
 msgstr ""
 
-#: gtk_ardour/crossfade_edit.cc:93
-msgid "Fade In"
+#: canvas-simplerect.c:200
+msgid "color of fill"
 msgstr ""
 
-#: gtk_ardour/crossfade_edit.cc:94
-msgid "Fade Out"
+#: color_manager.cc:39
+#, fuzzy
+msgid "Object"
+msgstr "Objekt"
+
+#: color_manager.cc:77
+msgid "cannot open color definition file %1: %2"
 msgstr ""
 
-#: gtk_ardour/crossfade_edit.cc:98
+#: crossfade_edit.cc:73
 #, fuzzy
 msgid "ardour: x-fade edit"
 msgstr "Ardour: Editor"
 
-#: gtk_ardour/crossfade_edit.cc:198 gtk_ardour/editor.cc:2311
-#: gtk_ardour/editor_region_list.cc:396 gtk_ardour/option_editor.cc:189
+#: crossfade_edit.cc:77 panner_ui.cc:401
+#, fuzzy
+msgid "Reset"
+msgstr "bestmöglich"
+
+#: crossfade_edit.cc:78
+msgid "Fade"
+msgstr ""
+
+#: crossfade_edit.cc:79
+msgid "Out (dry)"
+msgstr ""
+
+#: crossfade_edit.cc:80
+#, fuzzy
+msgid "Out"
+msgstr "Ausgänge"
+
+#: crossfade_edit.cc:81
+msgid "In (dry)"
+msgstr ""
+
+#: crossfade_edit.cc:82
+msgid "In"
+msgstr ""
+
+#: crossfade_edit.cc:84
+msgid "With Pre-roll"
+msgstr ""
+
+#: crossfade_edit.cc:85
+msgid "With Post-roll"
+msgstr ""
+
+#: crossfade_edit.cc:93
+msgid "Fade In"
+msgstr ""
+
+#: crossfade_edit.cc:94
+msgid "Fade Out"
+msgstr ""
+
+#: crossfade_edit.cc:170 editor.cc:1778 editor_actions.cc:309
+#: option_editor.cc:129
 msgid "Audition"
 msgstr ""
 
-#: gtk_ardour/editor.cc:103 gtk_ardour/editor_region_list.cc:804
-#, fuzzy
-msgid "Regions/name"
-msgstr "Regionen"
-
-#: gtk_ardour/editor.cc:108
-msgid "Chunks"
-msgstr "Stücke"
-
-#: gtk_ardour/editor.cc:116 gtk_ardour/editor.cc:4079
+#: editor.cc:97 editor.cc:3553
 msgid "Slide"
 msgstr ""
 
-#: gtk_ardour/editor.cc:117 gtk_ardour/editor.cc:4077
+#: editor.cc:98 editor.cc:3551
 msgid "Splice"
 msgstr ""
 
-#: gtk_ardour/editor.cc:122 gtk_ardour/editor.cc:4136
-#: gtk_ardour/export_dialog.cc:82 gtk_ardour/export_dialog.cc:96
-#: gtk_ardour/export_dialog.cc:912 gtk_ardour/export_dialog.cc:977
+#: editor.cc:103 editor.cc:3608 export_dialog.cc:76 export_dialog.cc:90
+#: export_dialog.cc:891 export_dialog.cc:1223
 msgid "None"
 msgstr "Nichts"
 
-#: gtk_ardour/editor.cc:123 gtk_ardour/editor.cc:4124
+#: editor.cc:104 editor.cc:3596
 msgid "CD Frames"
 msgstr ""
 
-#: gtk_ardour/editor.cc:124 gtk_ardour/editor.cc:4126
+#: editor.cc:105 editor.cc:3598
 msgid "SMPTE Frames"
 msgstr ""
 
-#: gtk_ardour/editor.cc:125 gtk_ardour/editor.cc:4128
+#: editor.cc:106 editor.cc:3600
 msgid "SMPTE Seconds"
 msgstr ""
 
-#: gtk_ardour/editor.cc:126 gtk_ardour/editor.cc:4130
+#: editor.cc:107 editor.cc:3602
 msgid "SMPTE Minutes"
 msgstr ""
 
-#: gtk_ardour/editor.cc:127 gtk_ardour/editor.cc:4132
+#: editor.cc:108 editor.cc:3604
 #, fuzzy
 msgid "Seconds"
 msgstr "Minuten:Sekunden"
 
-#: gtk_ardour/editor.cc:128 gtk_ardour/editor.cc:4134
+#: editor.cc:109 editor.cc:3606
 #, fuzzy
 msgid "Minutes"
 msgstr "mute"
 
-#: gtk_ardour/editor.cc:129 gtk_ardour/editor.cc:4106
+#: editor.cc:110 editor.cc:3578
 msgid "Beats/32"
 msgstr ""
 
-#: gtk_ardour/editor.cc:130 gtk_ardour/editor.cc:4104
+#: editor.cc:111 editor.cc:3576
 msgid "Beats/16"
 msgstr ""
 
-#: gtk_ardour/editor.cc:131 gtk_ardour/editor.cc:4102
+#: editor.cc:112 editor.cc:3574
 msgid "Beats/8"
 msgstr ""
 
-#: gtk_ardour/editor.cc:132 gtk_ardour/editor.cc:4100
+#: editor.cc:113 editor.cc:3572
 msgid "Beats/4"
 msgstr ""
 
-#: gtk_ardour/editor.cc:133 gtk_ardour/editor.cc:4098
+#: editor.cc:114 editor.cc:3570
 msgid "Beats/3"
 msgstr ""
 
-#: gtk_ardour/editor.cc:134 gtk_ardour/editor.cc:4108
+#: editor.cc:115 editor.cc:3580
 msgid "Beats"
 msgstr ""
 
-#: gtk_ardour/editor.cc:135 gtk_ardour/editor.cc:4110
+#: editor.cc:116 editor.cc:3582
 msgid "Bars"
 msgstr ""
 
-#: gtk_ardour/editor.cc:136 gtk_ardour/editor.cc:4112
+#: editor.cc:117 editor.cc:3584
 msgid "Marks"
 msgstr ""
 
-#: gtk_ardour/editor.cc:137 gtk_ardour/editor.cc:156 gtk_ardour/editor.cc:4114
-#: gtk_ardour/editor.cc:4182
+#: editor.cc:118 editor.cc:137 editor.cc:3586 editor.cc:3652
 msgid "Edit Cursor"
 msgstr ""
 
-#: gtk_ardour/editor.cc:138 gtk_ardour/editor.cc:4116
+#: editor.cc:119 editor.cc:3588
 #, fuzzy
 msgid "Region starts"
 msgstr "Regionen"
 
-#: gtk_ardour/editor.cc:139 gtk_ardour/editor.cc:4118
+#: editor.cc:120 editor.cc:3590
 #, fuzzy
 msgid "Region ends"
 msgstr "Regionen"
 
-#: gtk_ardour/editor.cc:140 gtk_ardour/editor.cc:4122
+#: editor.cc:121 editor.cc:3594
 #, fuzzy
 msgid "Region syncs"
 msgstr "Regionen"
 
-#: gtk_ardour/editor.cc:141 gtk_ardour/editor.cc:4120
+#: editor.cc:122 editor.cc:3592
 #, fuzzy
 msgid "Region bounds"
 msgstr "Regionen"
 
-#: gtk_ardour/editor.cc:146 gtk_ardour/editor.cc:4153
-#: gtk_ardour/time_axis_view.cc:449
+#: editor.cc:127 editor.cc:3625 time_axis_view.cc:546
 msgid "Normal"
 msgstr ""
 
-#: gtk_ardour/editor.cc:147 gtk_ardour/editor.cc:4155
+#: editor.cc:128 editor.cc:3627
 #, fuzzy
 msgid "Magnetic"
 msgstr "generisch"
 
-#: gtk_ardour/editor.cc:152 gtk_ardour/editor.cc:4174
-#: gtk_ardour/export_dialog.cc:1232 gtk_ardour/export_dialog.cc:1237
+#: editor.cc:133 editor.cc:3644 export_dialog.cc:138 export_dialog.cc:154
+#: export_dialog.cc:1066 export_dialog.cc:1070
 msgid "Left"
 msgstr "Links"
 
-#: gtk_ardour/editor.cc:153 gtk_ardour/editor.cc:4176
-#: gtk_ardour/export_dialog.cc:1233 gtk_ardour/export_dialog.cc:1238
+#: editor.cc:134 editor.cc:3646 export_dialog.cc:139 export_dialog.cc:155
 msgid "Right"
 msgstr "Rechts"
 
-#: gtk_ardour/editor.cc:154 gtk_ardour/editor.cc:4178
+#: editor.cc:135 editor.cc:3648
 msgid "Center"
 msgstr "Mitte"
 
-#: gtk_ardour/editor.cc:155 gtk_ardour/editor.cc:4180
+#: editor.cc:136 editor.cc:3650
 msgid "Playhead"
 msgstr ""
 
-#: gtk_ardour/editor.cc:201
+#. time display buttons
+#: editor.cc:165
 msgid "Mins:Secs"
 msgstr "Min:Sek"
 
-#: gtk_ardour/editor.cc:204 gtk_ardour/editor_rulers.cc:353
+#: editor.cc:168 editor_rulers.cc:353
 msgid "Frames"
 msgstr ""
 
-#: gtk_ardour/editor.cc:205 gtk_ardour/editor_rulers.cc:373
+#: editor.cc:169 editor_rulers.cc:373
 msgid "Tempo"
 msgstr ""
 
-#: gtk_ardour/editor.cc:206 gtk_ardour/editor_rulers.cc:367
+#: editor.cc:170 editor_rulers.cc:367
 msgid "Meter"
 msgstr ""
 
-#: gtk_ardour/editor.cc:207 gtk_ardour/editor_rulers.cc:379
+#: editor.cc:171 editor_rulers.cc:379
 #, fuzzy
 msgid "Location Markers"
 msgstr "Stellen"
 
-#: gtk_ardour/editor.cc:208 gtk_ardour/editor_rulers.cc:385
+#: editor.cc:172 editor_rulers.cc:385
 msgid "Range Markers"
 msgstr ""
 
-#: gtk_ardour/editor.cc:209 gtk_ardour/editor_rulers.cc:391
+#: editor.cc:173 editor_rulers.cc:391
 msgid "Loop/Punch Ranges"
 msgstr ""
 
-#: gtk_ardour/editor.cc:221
-#, fuzzy
-msgid ""
-"editor\n"
-"mixer"
-msgstr "Ardour: Mixer"
-
-#: gtk_ardour/editor.cc:232
+#: editor.cc:195
 msgid "range"
 msgstr "Bereich"
 
-#: gtk_ardour/editor.cc:233
+#: editor.cc:196
 msgid "object"
 msgstr "Objekt"
 
-#: gtk_ardour/editor.cc:235
+#: editor.cc:198
 msgid "zoom"
 msgstr ""
 
-#: gtk_ardour/editor.cc:236
+#: editor.cc:199
 msgid "timefx"
 msgstr ""
 
-#: gtk_ardour/editor.cc:237
+#: editor.cc:200
 msgid "listen"
 msgstr ""
 
-#: gtk_ardour/editor.cc:239
+#: editor.cc:202
 msgid "mode"
 msgstr "Modus"
 
-#: gtk_ardour/editor.cc:240
+#: editor.cc:203
 msgid "automation"
 msgstr ""
 
-#: gtk_ardour/editor.cc:242
+#: editor.cc:205
 msgid "Edit Mode"
 msgstr "Bearbeitungs Modus"
 
-#: gtk_ardour/editor.cc:243
+#: editor.cc:206 editor_actions.cc:277
 msgid "Snap To"
 msgstr ""
 
-#: gtk_ardour/editor.cc:244
+#: editor.cc:207
 #, fuzzy
 msgid "Snap Mode"
 msgstr "Modus"
 
-#: gtk_ardour/editor.cc:245
+#: editor.cc:208
 #, fuzzy
 msgid "Zoom Focus"
 msgstr "Verkleinern"
 
-#: gtk_ardour/editor.cc:256 gtk_ardour/editor.cc:2364
-#: gtk_ardour/editor.cc:2524 gtk_ardour/editor.cc:2579
+#. </CMT Additions>
+#. nudge
+#: editor.cc:216 editor.cc:1836 editor.cc:2001 editor.cc:2057
 msgid "Nudge"
 msgstr ""
 
-#: gtk_ardour/editor.cc:511
+#: editor.cc:445
 msgid "Zoom in"
 msgstr "Vergrößern"
 
-#: gtk_ardour/editor.cc:512
+#: editor.cc:446
 msgid "Zoom out"
 msgstr "Verkleinern"
 
-#: gtk_ardour/editor.cc:517
+#: editor.cc:449
 #, fuzzy
 msgid "Zoom to session"
 msgstr "Vergrößern auf Auswahl"
 
-#: gtk_ardour/editor.cc:536
+#: editor.cc:464
 #, fuzzy
 msgid "Zoom Span"
 msgstr "Vergrößern"
 
-#: gtk_ardour/editor.cc:566
+#: editor.cc:477 editor.cc:503 editor_actions.cc:57 mixer_ui.cc:81
+msgid "Visible"
+msgstr ""
+
+#: editor.cc:478 editor.cc:501
+#, fuzzy
+msgid "Name"
+msgstr "Umbenennen"
+
+#: editor.cc:574 editor.cc:640
+#, fuzzy
+msgid "Regions"
+msgstr "Regionen"
+
+#: editor.cc:613 editor.cc:652
+msgid "Chunks"
+msgstr "Stücke"
+
+#: editor.cc:643
+#, fuzzy
+msgid "Tracks/Busses"
+msgstr "MIDI Spur(en) hinzufügen"
+
+#: editor.cc:646
+msgid "Snapshots"
+msgstr "Schnapschüsse"
+
+#: editor.cc:649
 msgid "Edit Groups"
 msgstr ""
 
-#: gtk_ardour/editor.cc:591 gtk_ardour/mixer_ui.cc:142
-msgid "-all-"
-msgstr "-alle-"
-
-#: gtk_ardour/editor.cc:718
+#: editor.cc:698
 msgid "Nudge region/selection forwards"
 msgstr ""
 
-#: gtk_ardour/editor.cc:719
+#: editor.cc:699
 msgid "Nudge region/selection backwards"
 msgstr ""
 
-#: gtk_ardour/editor.cc:728 gtk_ardour/editor_mixer.cc:308
+#: editor.cc:706 editor_mixer.cc:306
 msgid "ardour: editor"
 msgstr "Ardour: Editor"
 
-#: gtk_ardour/editor.cc:729
+#: editor.cc:707
 #, fuzzy
 msgid "ardour_editor"
 msgstr "Ardour: Editor"
 
-#: gtk_ardour/editor.cc:846
-msgid "VerboseCanvasCursor"
-msgstr ""
-
-#: gtk_ardour/editor.cc:1405
-msgid "FirstActionMessage"
-msgstr ""
-
-#: gtk_ardour/editor.cc:1407
-#, fuzzy
-msgid "Start a new session\n"
-msgstr "Bitte mittels des \"Sitzung\"-Menüs\n"
-
-#: gtk_ardour/editor.cc:1408
-msgid "via Session menu"
-msgstr "eine Sitzung laden oder eine neue erstellen!"
-
-#: gtk_ardour/editor.cc:1703
+#: editor.cc:1125
 msgid "ardour: editor: "
 msgstr "Ardour: Editor: "
 
-#: gtk_ardour/editor.cc:1787 gtk_ardour/editor.cc:1796
-#: gtk_ardour/editor_markers.cc:797
+#. force name
+#: editor.cc:1210 editor.cc:1219 editor_markers.cc:842
 msgid "Loop"
 msgstr "Schleife"
 
-#: gtk_ardour/editor.cc:1801 gtk_ardour/editor.cc:1810
-#: gtk_ardour/editor_markers.cc:823
+#. force name
+#: editor.cc:1224 editor.cc:1233 editor_markers.cc:868
 msgid "Punch"
 msgstr ""
 
-#: gtk_ardour/editor.cc:1957 gtk_ardour/editor_mouse.cc:1688
+#: editor.cc:1382 editor_mouse.cc:1721
 msgid "programming error: fade in canvas item has no regionview data pointer!"
 msgstr ""
 
-#: gtk_ardour/editor.cc:1969 gtk_ardour/editor.cc:1986
-#: gtk_ardour/redirect_box.cc:401
+#: editor.cc:1394 editor.cc:1411 redirect_box.cc:1068
 #, fuzzy
 msgid "Deactivate"
 msgstr "Alles deaktivieren"
 
-#: gtk_ardour/editor.cc:1971 gtk_ardour/editor.cc:1988
-#: gtk_ardour/redirect_box.cc:398
+#. activation
+#: editor.cc:1396 editor.cc:1413 redirect_box.cc:1066
 #, fuzzy
 msgid "Activate"
 msgstr "Aktiv"
 
-#: gtk_ardour/editor.cc:1976 gtk_ardour/editor.cc:1993
+#: editor.cc:1401 editor.cc:1418
 msgid "Linear"
 msgstr ""
 
-#: gtk_ardour/editor.cc:1977 gtk_ardour/editor.cc:1994
-#: gtk_ardour/option_editor.cc:358 gtk_ardour/option_editor.cc:734
-#: gtk_ardour/option_editor.cc:796
+#: editor.cc:1402 editor.cc:1419 editor_actions.cc:369
 #, fuzzy
 msgid "Slowest"
 msgstr "Alle zeigen"
 
-#: gtk_ardour/editor.cc:1978 gtk_ardour/editor.cc:1995
-#: gtk_ardour/option_editor.cc:360 gtk_ardour/option_editor.cc:735
-#: gtk_ardour/option_editor.cc:798
+#: editor.cc:1403 editor.cc:1420 editor_actions.cc:370
 #, fuzzy
 msgid "Slow"
 msgstr "solo"
 
-#: gtk_ardour/editor.cc:1979 gtk_ardour/editor.cc:1996
-#: gtk_ardour/option_editor.cc:364 gtk_ardour/option_editor.cc:737
-#: gtk_ardour/option_editor.cc:802
+#: editor.cc:1404 editor.cc:1421 editor_actions.cc:372
 #, fuzzy
 msgid "Fast"
 msgstr "Einfügen"
 
-#: gtk_ardour/editor.cc:1980 gtk_ardour/editor.cc:1997
-#: gtk_ardour/option_editor.cc:368 gtk_ardour/option_editor.cc:739
-#: gtk_ardour/option_editor.cc:806
+#: editor.cc:1405 editor.cc:1422 editor_actions.cc:374
 #, fuzzy
 msgid "Fastest"
 msgstr "schnellstmöglich"
 
-#: gtk_ardour/editor.cc:2105 gtk_ardour/editor.cc:2113
+#: editor.cc:1532 editor.cc:1540
 msgid "Freeze"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2109
+#: editor.cc:1536
 msgid "Unfreeze"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2238 gtk_ardour/editor.cc:2328
+#: editor.cc:1705 editor.cc:1800
 #, fuzzy
 msgid "Unmute"
 msgstr "mute"
 
-#: gtk_ardour/editor.cc:2247
+#. non-operative menu items for menu bar
+#. show editors
+#: editor.cc:1709 editor.cc:1981 editor.cc:2720 editor_actions.cc:25
+#: editor_markers.cc:497 mixer_strip.cc:511 mixer_strip.cc:571
+#: redirect_box.cc:1074
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: editor.cc:1714
 msgid "Convert to short"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2249
+#: editor.cc:1716
 msgid "Convert to full"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2260
+#: editor.cc:1727
 #, fuzzy
 msgid "Crossfade"
 msgstr "Ardour: Editor"
 
-#: gtk_ardour/editor.cc:2303
+#: editor.cc:1770
 msgid "Popup region editor"
 msgstr "Regionen Editor öffnen"
 
-#: gtk_ardour/editor.cc:2304
+#: editor.cc:1771
 #, fuzzy
 msgid "Raise to top layer"
 msgstr "Region ganz nach oben"
 
-#: gtk_ardour/editor.cc:2305
+#: editor.cc:1772
 #, fuzzy
 msgid "Lower to bottom layer"
 msgstr "Region ganz nach unten"
 
-#: gtk_ardour/editor.cc:2307
+#: editor.cc:1774
 msgid "Define sync point"
 msgstr "Synchronisationspunkt definieren"
 
-#: gtk_ardour/editor.cc:2308
+#: editor.cc:1775
 msgid "Remove sync point"
 msgstr "Synchronisationspunkt entfernen"
 
-#: gtk_ardour/editor.cc:2313
+#: editor.cc:1780
 #, fuzzy
 msgid "Bounce"
 msgstr "Bereich"
 
-#: gtk_ardour/editor.cc:2323
+#: editor.cc:1783
+#, fuzzy
+msgid "Analyze region"
+msgstr "Wiedergabe der Region"
+
+#: editor.cc:1795
 #, fuzzy
 msgid "Lock"
 msgstr "OK"
 
-#: gtk_ardour/editor.cc:2324
+#: editor.cc:1796
 #, fuzzy
 msgid "Unlock"
 msgstr "Rückgängig"
 
-#: gtk_ardour/editor.cc:2334
+#: editor.cc:1806
 #, fuzzy
 msgid "Original position"
 msgstr "Regionen"
 
-#: gtk_ardour/editor.cc:2340
+#: editor.cc:1812
 msgid "Toggle envelope visibility"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2341
+#: editor.cc:1813
 msgid "Toggle envelope active"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2345
+#: editor.cc:1817
 #, fuzzy
 msgid "DeNormalize"
 msgstr "Ardour: Region"
 
-#: gtk_ardour/editor.cc:2347
+#: editor.cc:1819
 #, fuzzy
 msgid "Normalize"
 msgstr "Ardour: Region"
 
-#: gtk_ardour/editor.cc:2350
+#: editor.cc:1822
 #, fuzzy
 msgid "Reverse"
 msgstr "Entfernen"
 
-#: gtk_ardour/editor.cc:2359
+#: editor.cc:1831
 msgid "Nudge fwd"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2360
+#: editor.cc:1832
 msgid "Nudge bwd"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2361
+#: editor.cc:1833
 msgid "Nudge fwd by capture offset"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2362
+#: editor.cc:1834
 msgid "Nudge bwd by capture offset"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2371
+#: editor.cc:1843
 msgid "Start to edit cursor"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2372
+#: editor.cc:1844
 msgid "Edit cursor to end"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2374
+#: editor.cc:1846
 msgid "Trim"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2377
+#: editor.cc:1849
 msgid "Split"
 msgstr "Teilen"
 
-#: gtk_ardour/editor.cc:2380
+#: editor.cc:1852
 #, fuzzy
 msgid "Make mono regions"
 msgstr "Name für Region:"
 
-#: gtk_ardour/editor.cc:2383 gtk_ardour/editor.cc:2428
+#: editor.cc:1855
 msgid "Duplicate"
 msgstr "Duplizieren"
 
-#: gtk_ardour/editor.cc:2384
+#: editor.cc:1856
 #, fuzzy
 msgid "Fill Track"
 msgstr "Spur"
 
-#: gtk_ardour/editor.cc:2388
+#: editor.cc:1860
 msgid "Destroy"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2418
+#: editor.cc:1890
 #, fuzzy
 msgid "Play range"
 msgstr "Bereich"
 
-#: gtk_ardour/editor.cc:2419 gtk_ardour/editor_markers.cc:446
+#: editor.cc:1891 editor_markers.cc:450 editor_markers.cc:473
 #, fuzzy
 msgid "Loop range"
 msgstr "Bereich"
 
-#: gtk_ardour/editor.cc:2421
+#: editor.cc:1895
+#, fuzzy
+msgid "Analyze range"
+msgstr "Bereich"
+
+#: editor.cc:1899
+#, fuzzy
+msgid "Separate range to track"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor.cc:1900
+#, fuzzy
+msgid "Separate range to region list"
+msgstr "Auswahl zu Schleife machen"
+
+#: editor.cc:1903
+#, fuzzy
+msgid "Select all in range"
+msgstr "Auswahl"
+
+#: editor.cc:1905 editor.cc:1950
+#, fuzzy
+msgid "Set range to loop range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor.cc:1906 editor.cc:1951
+#, fuzzy
+msgid "Set range to punch range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor.cc:1908
+#, fuzzy
+msgid "Crop region to range"
+msgstr "Regionen Editor öffnen"
+
+#: editor.cc:1909
+#, fuzzy
+msgid "Fill range with region"
+msgstr "Region erstellen"
+
+#: editor.cc:1910
+#, fuzzy
+msgid "Duplicate range"
+msgstr "Duplizieren"
+
+#: editor.cc:1911
 #, fuzzy
 msgid "Create chunk from range"
 msgstr "Auswahl zu Abschnitt machen"
 
-#: gtk_ardour/editor.cc:2423
-msgid "Create Region"
-msgstr "Region erstellen"
-
-#: gtk_ardour/editor.cc:2424
-msgid "Separate Region"
-msgstr ""
-
-#: gtk_ardour/editor.cc:2425
-#, fuzzy
-msgid "Crop Region to range"
-msgstr "Regionen Editor öffnen"
-
-#: gtk_ardour/editor.cc:2426
+#: editor.cc:1913
 #, fuzzy
 msgid "Bounce range"
 msgstr "Bereich"
 
-#: gtk_ardour/editor.cc:2432
+#: editor.cc:1914
 #, fuzzy
-msgid "Fill range w/Region"
-msgstr "Region erstellen"
+msgid "Export range"
+msgstr "Name für Region:"
 
-#: gtk_ardour/editor.cc:2434
+#: editor.cc:1916
 #, fuzzy
 msgid "Range"
 msgstr "Bereich"
 
-#: gtk_ardour/editor.cc:2449 gtk_ardour/editor.cc:2538
+#: editor.cc:1931 editor.cc:2015
 #, fuzzy
 msgid "Play from edit cursor"
 msgstr "Wiedergabe ab Cursor"
 
-#: gtk_ardour/editor.cc:2450 gtk_ardour/editor.cc:2539
+#: editor.cc:1932 editor.cc:2016
 msgid "Play from start"
 msgstr "Wiedergabe ab Anfang"
 
-#: gtk_ardour/editor.cc:2451
+#: editor.cc:1933
 #, fuzzy
 msgid "Play region"
 msgstr "Wiedergabe der Region"
 
-#: gtk_ardour/editor.cc:2453
+#: editor.cc:1935
 #, fuzzy
 msgid "Loop Region"
 msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor.cc:2455 gtk_ardour/editor.cc:2540
-#: gtk_ardour/library_ui.cc:972
+#: editor.cc:1937 editor.cc:2017 sfdb_ui.cc:56
 msgid "Play"
 msgstr "Wiedergabe"
 
-#: gtk_ardour/editor.cc:2463 gtk_ardour/editor.cc:2548
+#: editor.cc:1945 editor.cc:2025
 #, fuzzy
 msgid "Select All in track"
 msgstr "Auswahl"
 
-#: gtk_ardour/editor.cc:2464 gtk_ardour/editor.cc:2549
+#: editor.cc:1946 editor.cc:2026 redirect_box.cc:1062
 #, fuzzy
 msgid "Select All"
 msgstr "Auswahl"
 
-#: gtk_ardour/editor.cc:2465 gtk_ardour/editor.cc:2550
+#: editor.cc:1947 editor.cc:2027
 #, fuzzy
-msgid "Invert in track"
+msgid "Invert selection in track"
 msgstr "Stille einfügen"
 
-#: gtk_ardour/editor.cc:2466 gtk_ardour/editor.cc:2551
-msgid "Invert"
-msgstr ""
-
-#: gtk_ardour/editor.cc:2468 gtk_ardour/editor.cc:2553
+#: editor.cc:1948 editor.cc:2028
 #, fuzzy
-msgid "Select loop range"
-msgstr "Ausgewählten Bereich wiedergeben"
+msgid "Invert selection"
+msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor.cc:2469 gtk_ardour/editor.cc:2554
+#: editor.cc:1953 editor.cc:2030
 #, fuzzy
-msgid "Select punch range"
-msgstr "Ausgewählten Bereich wiedergeben"
+msgid "Select all after edit cursor"
+msgstr "Wiedergabe ab Cursor"
 
-#: gtk_ardour/editor.cc:2480 gtk_ardour/editor.cc:2565
-#: gtk_ardour/editor.cc:3916 gtk_ardour/redirect_box.cc:369
+#: editor.cc:1954 editor.cc:2031
+#, fuzzy
+msgid "Select all before edit cursor"
+msgstr "Wiedergabe ab Cursor"
+
+#: editor.cc:1955 editor.cc:2032
+#, fuzzy
+msgid "Select all after playhead"
+msgstr "Wiedergabe ab Playhead"
+
+#: editor.cc:1956 editor.cc:2033
+#, fuzzy
+msgid "Select all before playhead"
+msgstr "Wiedergabe ab Playhead"
+
+#. standard editing stuff
+#: editor.cc:1967 editor.cc:2043 editor.cc:3420 editor_actions.cc:207
+#: redirect_box.cc:1055
 msgid "Cut"
 msgstr "Ausschneiden"
 
-#: gtk_ardour/editor.cc:2481 gtk_ardour/editor.cc:2566
-#: gtk_ardour/editor.cc:3918 gtk_ardour/redirect_box.cc:371
+#: editor.cc:1968 editor.cc:2044 editor.cc:3422 editor_actions.cc:212
+#: redirect_box.cc:1057
 msgid "Copy"
 msgstr "Kopieren"
 
-#: gtk_ardour/editor.cc:2482
+#: editor.cc:1969
 #, fuzzy
 msgid "Paste at edit cursor"
 msgstr "Wiedergabe ab Cursor"
 
-#: gtk_ardour/editor.cc:2483
+#: editor.cc:1970
 msgid "Paste at mouse"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2487 gtk_ardour/editor.cc:3923
+#: editor.cc:1974 editor.cc:3427
 msgid "Align"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2488 gtk_ardour/editor.cc:3925
+#: editor.cc:1975 editor.cc:3429
 msgid "Align Relative"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2492
+#: editor.cc:1979
 msgid "Insert chunk"
 msgstr "Abschnitt einfügen"
 
-#: gtk_ardour/editor.cc:2496
-msgid "New Region from range"
-msgstr ""
-
-#: gtk_ardour/editor.cc:2497
+#: editor.cc:1986
 #, fuzzy
-msgid "Separate Range"
-msgstr "Ausgewählten Bereich wiedergeben"
+msgid "Insert Selected Region"
+msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor.cc:2507
-msgid "Insert Region"
+#: editor.cc:1987
+msgid "Insert Existing Audio"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2508
-msgid "Insert external sndfile"
-msgstr ""
-
-#: gtk_ardour/editor.cc:2510 gtk_ardour/library_ui.cc:1438
-msgid "Import"
-msgstr "Importieren"
-
-#: gtk_ardour/editor.cc:2519 gtk_ardour/editor.cc:2574
+#: editor.cc:1996 editor.cc:2052
 msgid "Nudge entire track fwd"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2520 gtk_ardour/editor.cc:2575
+#: editor.cc:1997 editor.cc:2053
 msgid "Nudge track after edit cursor fwd"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2521 gtk_ardour/editor.cc:2576
+#: editor.cc:1998 editor.cc:2054
 msgid "Nudge entire track bwd"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2522 gtk_ardour/editor.cc:2577
+#: editor.cc:1999 editor.cc:2055
 msgid "Nudge track after edit cursor bwd"
 msgstr ""
 
-#: gtk_ardour/editor.cc:2567 gtk_ardour/editor.cc:3920
-#: gtk_ardour/redirect_box.cc:373
+#: editor.cc:2045 editor.cc:3424 editor_actions.cc:214 redirect_box.cc:1059
 msgid "Paste"
 msgstr "Einfügen"
 
-#: gtk_ardour/editor.cc:2632 gtk_ardour/editor.cc:2645
-#: gtk_ardour/editor_markers.cc:287 gtk_ardour/location_ui.cc:799
+#: editor.cc:2110 editor.cc:2123 editor_markers.cc:288 location_ui.cc:773
 msgid "add marker"
 msgstr ""
 
-#: gtk_ardour/editor.cc:3084
+#: editor.cc:2602
 msgid "select/move objects"
 msgstr ""
 
-#: gtk_ardour/editor.cc:3085
+#: editor.cc:2603
 #, fuzzy
 msgid "select/move ranges"
 msgstr "Ausgewählten Bereich wiedergeben"
 
-#: gtk_ardour/editor.cc:3086
+#: editor.cc:2604
 msgid "draw gain automation"
 msgstr ""
 
-#: gtk_ardour/editor.cc:3087
+#: editor.cc:2605
 #, fuzzy
 msgid "select zoom range"
 msgstr "Ausgewählten Bereich wiedergeben"
 
-#: gtk_ardour/editor.cc:3088
+#: editor.cc:2606
 msgid "stretch/shrink regions"
 msgstr ""
 
-#: gtk_ardour/editor.cc:3089
+#: editor.cc:2607
 #, fuzzy
 msgid "listen to specific regions"
 msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor.cc:3213
+#: editor.cc:2718
 msgid "Start:"
 msgstr "Anfang:"
 
-#: gtk_ardour/editor.cc:3214
+#: editor.cc:2719
 msgid "End:"
 msgstr "Ende:"
 
-#: gtk_ardour/editor.cc:3215
-msgid "Edit:"
-msgstr "Bearbeiten:"
-
-#: gtk_ardour/editor.cc:3429
-msgid "incorrectly formatted URI list, ignored"
-msgstr ""
-
-#: gtk_ardour/editor.cc:3611
+#: editor.cc:3062
 #, fuzzy
 msgid "set selected trackview"
 msgstr "Stille einfügen"
 
-#: gtk_ardour/editor.cc:3647
+#: editor.cc:3102
 #, fuzzy
 msgid "set selected control point"
 msgstr "Synchronisationspunkt entfernen"
 
-#: gtk_ardour/editor.cc:3719
+#: editor.cc:3211
 #, fuzzy
 msgid "set selected regionview"
 msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor.cc:3799 gtk_ardour/editor.cc:3835
+#: editor.cc:3299 editor.cc:3339
 #, fuzzy
 msgid "set selected regions"
 msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor.cc:3891
+#: editor.cc:3395 editor_actions.cc:197
 msgid "Undo"
 msgstr "Rückgängig"
 
-#: gtk_ardour/editor.cc:3893
+#: editor.cc:3397
 msgid "Undo (%1)"
 msgstr "Rückgängig (%1)"
 
-#: gtk_ardour/editor.cc:3903
+#: editor.cc:3407 editor_actions.cc:199
 msgid "Redo"
 msgstr "Wiederherstellen"
 
-#: gtk_ardour/editor.cc:3905
+#: editor.cc:3409
 msgid "Redo (%1)"
 msgstr "Wiederherstellen (%1)"
 
-#: gtk_ardour/editor.cc:3939 gtk_ardour/editor.cc:3946
+#: editor.cc:3443
 msgid "... as new track"
 msgstr ""
 
-#: gtk_ardour/editor.cc:3940 gtk_ardour/editor.cc:3947
+#: editor.cc:3444
 #, fuzzy
 msgid "... as new region"
 msgstr "Ardour: Region"
 
-#: gtk_ardour/editor.cc:3949 gtk_ardour/editor_region_list.cc:452
+#: editor.cc:3446
 #, fuzzy
 msgid "Import audio (copy)"
 msgstr "Audio Importieren"
 
-#: gtk_ardour/editor.cc:3950 gtk_ardour/editor_region_list.cc:457
-msgid "Embed audio (link)"
-msgstr ""
-
-#: gtk_ardour/editor.cc:3953
+#: editor.cc:3449
 #, fuzzy
 msgid "Remove last capture"
 msgstr "Synchronisationspunkt entfernen"
 
-#: gtk_ardour/editor.cc:3974
+#: editor.cc:3473
 msgid "Duplicate how many times?"
 msgstr "Wie häufig duplizieren?"
 
-#: gtk_ardour/editor.cc:4550
+#: editor.cc:3959
 msgid ""
 "Playlist %1 is currently unused.\n"
 "If left alone, no audio files used by it will be cleaned.\n"
 "If deleted, audio files used by it alone by will cleaned."
 msgstr ""
 
-#: gtk_ardour/editor.cc:4555
+#: editor.cc:3967
 #, fuzzy
 msgid "Delete playlist"
 msgstr "Name für Schnappschuß"
 
-#: gtk_ardour/editor.cc:4556
+#: editor.cc:3968
 #, fuzzy
 msgid "Keep playlist"
 msgstr "Name für Schnappschuß"
 
-#: gtk_ardour/editor.cc:4557
-#, fuzzy
-msgid "Cancel cleanup"
-msgstr "leeren"
+#: editor.cc:3969 editor_audio_import.cc:238 editor_ops.cc:1863
+#: editor_timefx.cc:52 export_dialog.cc:969 io_selector.cc:58
+#: io_selector.cc:792 redirect_box.cc:899 tempo_dialog.cc:19
+#: tempo_dialog.cc:36 tempo_dialog.cc:137 tempo_dialog.cc:155
+msgid "Cancel"
+msgstr "Abbrechen"
 
-#: gtk_ardour/editor_canvas_events.cc:691 gtk_ardour/editor_mouse.cc:2258
-#: gtk_ardour/editor_mouse.cc:2277 gtk_ardour/editor_mouse.cc:2290
+#: editor.cc:4136
+#, fuzzy
+msgid "new playlists"
+msgstr "Name für Schnappschuß"
+
+#: editor.cc:4144
+#, fuzzy
+msgid "copy playlists"
+msgstr "Name für Schnappschuß"
+
+#: editor.cc:4152
+#, fuzzy
+msgid "clear playlists"
+msgstr "Name für Schnappschuß"
+
+#: editor_actions.cc:26
+#, fuzzy
+msgid "Select regions"
+msgstr "Auswahl zu Schleife machen"
+
+#: editor_actions.cc:27
+#, fuzzy
+msgid "Select range operations"
+msgstr "Auswahl zu Schleife machen"
+
+#: editor_actions.cc:28
+#, fuzzy
+msgid "Move edit cursor"
+msgstr "Wiedergabe ab Cursor"
+
+#: editor_actions.cc:29
+#, fuzzy
+msgid "Region operations"
+msgstr "Regionen"
+
+#: editor_actions.cc:30
+msgid "Tools"
+msgstr ""
+
+#: editor_actions.cc:31
+msgid "View"
+msgstr ""
+
+#: editor_actions.cc:32
+#, fuzzy
+msgid "ZoomFocus"
+msgstr "Verkleinern"
+
+#: editor_actions.cc:33
+msgid "Meter hold"
+msgstr ""
+
+#: editor_actions.cc:34
+msgid "Meter falloff"
+msgstr ""
+
+#: editor_actions.cc:36
+#, fuzzy
+msgid "Crossfades"
+msgstr "Ardour: Editor"
+
+#: editor_actions.cc:37
+msgid "Monitoring"
+msgstr ""
+
+#: editor_actions.cc:38
+#, fuzzy
+msgid "Autoconnect"
+msgstr "Verbindungen"
+
+#: editor_actions.cc:39
+#, fuzzy
+msgid "Layering"
+msgstr "Schicht"
+
+#: editor_actions.cc:40
+msgid "Add Existing Audio"
+msgstr ""
+
+#. add named actions for the editor
+#: editor_actions.cc:45
+#, fuzzy
+msgid "Show Editor Mixer"
+msgstr "Ardour: Mixer"
+
+#: editor_actions.cc:50
+#, fuzzy
+msgid "Span Entire Overlap"
+msgstr "Region eine Ebene nach oben"
+
+#: editor_actions.cc:52 editor_actions.cc:377
+#, fuzzy
+msgid "Short"
+msgstr "Anschluß"
+
+#: editor_actions.cc:59
+msgid "Created Automatically"
+msgstr ""
+
+#: editor_actions.cc:62
+msgid "Playhead to Next Region Start"
+msgstr ""
+
+#: editor_actions.cc:64
+msgid "Playhead to Next Region End"
+msgstr ""
+
+#: editor_actions.cc:66
+msgid "Playhead to Next Region Sync"
+msgstr ""
+
+#: editor_actions.cc:69
+msgid "Playhead to Previous Region Start"
+msgstr ""
+
+#: editor_actions.cc:71
+msgid "Playhead to Previous Region End"
+msgstr ""
+
+#: editor_actions.cc:73
+msgid "Playhead to Previous Region Sync"
+msgstr ""
+
+#: editor_actions.cc:76
+msgid "Edit Cursor to Next Region Start"
+msgstr ""
+
+#: editor_actions.cc:78
+msgid "Edit Cursor to Next Region End"
+msgstr ""
+
+#: editor_actions.cc:80
+msgid "Edit Cursor to Next Region Sync"
+msgstr ""
+
+#: editor_actions.cc:83
+msgid "Edit Cursor to Previous Region Start"
+msgstr ""
+
+#: editor_actions.cc:85
+msgid "Edit Cursor to Previous Region End"
+msgstr ""
+
+#: editor_actions.cc:87
+msgid "Edit Cursor to Previous Region Sync"
+msgstr ""
+
+#: editor_actions.cc:90
+msgid "Playhead to Range Start"
+msgstr ""
+
+#: editor_actions.cc:92
+#, fuzzy
+msgid "Playhead to Range End"
+msgstr "Bereich"
+
+#: editor_actions.cc:95
+msgid "Edit Cursor to Range Start"
+msgstr ""
+
+#: editor_actions.cc:97
+msgid "Edit Cursor to Range End"
+msgstr ""
+
+#: editor_actions.cc:100 editor_ops.cc:1230
+#, fuzzy
+msgid "select all"
+msgstr "Auswahl"
+
+#: editor_actions.cc:102
+#, fuzzy
+msgid "Select All After Edit Cursor"
+msgstr "Wiedergabe ab Cursor"
+
+#: editor_actions.cc:104
+msgid "Select All Before Edit Cursor"
+msgstr ""
+
+#: editor_actions.cc:107
+#, fuzzy
+msgid "Select All After Playhead"
+msgstr "Wiedergabe ab Playhead"
+
+#: editor_actions.cc:109
+#, fuzzy
+msgid "Select All Before Playhead"
+msgstr "Wiedergabe ab Playhead"
+
+#: editor_actions.cc:112
+#, fuzzy
+msgid "Select All in Punch Range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor_actions.cc:114
+#, fuzzy
+msgid "Select All in Loop Range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor_actions.cc:117
+msgid "Jump Forward to Mark"
+msgstr ""
+
+#: editor_actions.cc:119
+msgid "Jump Backward to Mark"
+msgstr ""
+
+#: editor_actions.cc:121
+#, fuzzy
+msgid "Add Location from Playhead"
+msgstr "Wiedergabe ab Playhead"
+
+#: editor_actions.cc:124
+msgid "Nudge Forward"
+msgstr ""
+
+#: editor_actions.cc:126
+msgid "Nudge Next Forward"
+msgstr ""
+
+#: editor_actions.cc:128
+#, fuzzy
+msgid "Nudge Backward"
+msgstr "Stille einfügen"
+
+#: editor_actions.cc:130
+#, fuzzy
+msgid "Nudge Next Backward"
+msgstr "Stille einfügen"
+
+#: editor_actions.cc:133
+#, fuzzy
+msgid "Zoom Out"
+msgstr "Verkleinern"
+
+#: editor_actions.cc:135
+#, fuzzy
+msgid "Zoom In"
+msgstr "Vergrößern"
+
+#: editor_actions.cc:137
+#, fuzzy
+msgid "Zoom to Session"
+msgstr "Vergrößern auf Auswahl"
+
+#: editor_actions.cc:140
+#, fuzzy
+msgid "Scroll Tracks Up"
+msgstr "Spur"
+
+#: editor_actions.cc:142
+msgid "Scroll Tracks Down"
+msgstr ""
+
+#: editor_actions.cc:144
+#, fuzzy
+msgid "Step Tracks Up"
+msgstr "Stille einfügen"
+
+#: editor_actions.cc:146
+msgid "Step Tracks Down"
+msgstr ""
+
+#: editor_actions.cc:149
+msgid "Scroll Backward"
+msgstr ""
+
+#: editor_actions.cc:151
+msgid "Scroll Forward"
+msgstr ""
+
+#: editor_actions.cc:153
+msgid "goto"
+msgstr ""
+
+#: editor_actions.cc:155
+#, fuzzy
+msgid "Center Playhead"
+msgstr "Wiedergabe ab Playhead"
+
+#: editor_actions.cc:157
+#, fuzzy
+msgid "Center Edit Cursor"
+msgstr "Wiedergabe ab Cursor"
+
+#: editor_actions.cc:159
+msgid "Playhead Forward"
+msgstr ""
+
+#: editor_actions.cc:161
+msgid "Playhead Backward"
+msgstr ""
+
+#: editor_actions.cc:163
+msgid "Playhead to Edit"
+msgstr ""
+
+#: editor_actions.cc:165
+#, fuzzy
+msgid "Edit to Playhead"
+msgstr "Wiedergabe ab Playhead"
+
+#: editor_actions.cc:168
+#, fuzzy
+msgid "Align Regions Start"
+msgstr "Regionen"
+
+#: editor_actions.cc:170
+#, fuzzy
+msgid "Align Regions Start Relative"
+msgstr "nach Anfang der Region in der Datei"
+
+#: editor_actions.cc:172
+#, fuzzy
+msgid "Align Regions End"
+msgstr "Ardour: Region"
+
+#: editor_actions.cc:174
+msgid "Align Regions End Relative"
+msgstr ""
+
+#: editor_actions.cc:177
+#, fuzzy
+msgid "Align Regions Sync"
+msgstr "Ardour: Region"
+
+#: editor_actions.cc:179
+msgid "Align Regions Sync Relative"
+msgstr ""
+
+#: editor_actions.cc:182
+msgid "Audition at Mouse"
+msgstr ""
+
+#: editor_actions.cc:184
+msgid "Brush at Mouse"
+msgstr ""
+
+#: editor_actions.cc:186
+#, fuzzy
+msgid "Set Edit Cursor"
+msgstr "Wiedergabe ab Cursor"
+
+#: editor_actions.cc:188
+#, fuzzy
+msgid "Mute/Unmute Region"
+msgstr "Region erstellen"
+
+#: editor_actions.cc:190
+#, fuzzy
+msgid "Set Playhead"
+msgstr "Wiedergabe ab Playhead"
+
+#: editor_actions.cc:192
+#, fuzzy
+msgid "Split Region"
+msgstr "Auswahl zu Schleife machen"
+
+#: editor_actions.cc:194
+#, fuzzy
+msgid "Set Region Sync Position"
+msgstr "nach Zeitstempel der Region"
+
+#: editor_actions.cc:202
+#, fuzzy
+msgid "Export Session"
+msgstr "Name für Region:"
+
+#: editor_actions.cc:204
+#, fuzzy
+msgid "Export Range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#. Note: for now, editor-delete does the exact same thing as editor-cut
+#: editor_actions.cc:210
+#, fuzzy
+msgid "Delete"
+msgstr "entfernen"
+
+#: editor_actions.cc:216
+#, fuzzy
+msgid "Duplicate Region"
+msgstr "Auswahl zu Schleife machen"
+
+#: editor_actions.cc:218
+#, fuzzy
+msgid "Duplicate Range"
+msgstr "Duplizieren"
+
+#: editor_actions.cc:220
+msgid "Insert Region"
+msgstr ""
+
+#: editor_actions.cc:222
+#, fuzzy
+msgid "Reverse Region"
+msgstr "Name für Region:"
+
+#: editor_actions.cc:224
+#, fuzzy
+msgid "Normalize Region"
+msgstr "Ardour: Region"
+
+#: editor_actions.cc:226
+#, fuzzy
+msgid "crop"
+msgstr "Kopieren"
+
+#: editor_actions.cc:228
+#, fuzzy
+msgid "Insert Chunk"
+msgstr "Abschnitt einfügen"
+
+#: editor_actions.cc:231
+#, fuzzy
+msgid "Split at edit cursor"
+msgstr "Wiedergabe ab Cursor"
+
+#: editor_actions.cc:234
+#, fuzzy
+msgid "Start Range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor_actions.cc:236
+msgid "Finish Range"
+msgstr ""
+
+#: editor_actions.cc:238
+msgid "Finish add Range"
+msgstr ""
+
+#: editor_actions.cc:241
+msgid "Extend Range to End of Region"
+msgstr ""
+
+#: editor_actions.cc:243
+#, fuzzy
+msgid "Extend Range to Start of Region"
+msgstr "An den Anfang der Sitzung springen"
+
+#: editor_actions.cc:246
+#, fuzzy
+msgid "Follow Playhead"
+msgstr "Wiedergabe ab Playhead"
+
+#: editor_actions.cc:254
+#, fuzzy
+msgid "Zoom Focus Left"
+msgstr "Verkleinern"
+
+#: editor_actions.cc:256
+#, fuzzy
+msgid "Zoom Focus Right"
+msgstr "Verkleinern"
+
+#: editor_actions.cc:258
+#, fuzzy
+msgid "Zoom Focus Center"
+msgstr "Verkleinern"
+
+#: editor_actions.cc:260
+#, fuzzy
+msgid "Zoom Focus Playhead"
+msgstr "Verkleinern"
+
+#: editor_actions.cc:262
+#, fuzzy
+msgid "Zoom Focus Edit"
+msgstr "Verkleinern"
+
+#: editor_actions.cc:268
+msgid "Object Tool"
+msgstr ""
+
+#: editor_actions.cc:269
+#, fuzzy
+msgid "Range Tool"
+msgstr "Bereich"
+
+#: editor_actions.cc:270
+msgid "Gain Tool"
+msgstr ""
+
+#: editor_actions.cc:271
+#, fuzzy
+msgid "Zoom Tool"
+msgstr "Verkleinern"
+
+#: editor_actions.cc:272
+msgid "Timefx Tool"
+msgstr ""
+
+#: editor_actions.cc:279
+#, fuzzy
+msgid "Snap to frame"
+msgstr "Modus"
+
+#: editor_actions.cc:280
+#, fuzzy
+msgid "Snap to cd frame"
+msgstr "Modus"
+
+#: editor_actions.cc:281
+msgid "Snap to SMPTE frame"
+msgstr ""
+
+#: editor_actions.cc:282
+msgid "Snap to SMPTE seconds"
+msgstr ""
+
+#: editor_actions.cc:283
+msgid "Snap to SMPTE minutes"
+msgstr ""
+
+#: editor_actions.cc:284
+#, fuzzy
+msgid "Snap to seconds"
+msgstr "Minuten:Sekunden"
+
+#: editor_actions.cc:285
+msgid "Snap to minutes"
+msgstr ""
+
+#: editor_actions.cc:286
+msgid "Snap to thirtyseconds"
+msgstr ""
+
+#: editor_actions.cc:287
+msgid "Snap to asixteenthbeat"
+msgstr ""
+
+#: editor_actions.cc:288
+msgid "Snap to eighths"
+msgstr ""
+
+#: editor_actions.cc:289
+msgid "Snap to quarters"
+msgstr ""
+
+#: editor_actions.cc:290
+#, fuzzy
+msgid "Snap to thirds"
+msgstr "Modus"
+
+#: editor_actions.cc:291
+#, fuzzy
+msgid "Snap to beat"
+msgstr "Modus"
+
+#: editor_actions.cc:292
+#, fuzzy
+msgid "Snap to bar"
+msgstr "Modus"
+
+#: editor_actions.cc:293
+#, fuzzy
+msgid "Snap to mark"
+msgstr "Ardour: Region umbenennen"
+
+#: editor_actions.cc:294
+#, fuzzy
+msgid "Snap to edit cursor"
+msgstr "Wiedergabe ab Cursor"
+
+#: editor_actions.cc:295
+#, fuzzy
+msgid "Snap to region start"
+msgstr "Regionen"
+
+#: editor_actions.cc:296
+#, fuzzy
+msgid "Snap to region end"
+msgstr "Regionen"
+
+#: editor_actions.cc:297
+#, fuzzy
+msgid "Snap to region sync"
+msgstr "Regionen"
+
+#: editor_actions.cc:298
+#, fuzzy
+msgid "Snap to region boundary"
+msgstr "Regionen"
+
+#. the region list popup menu
+#: editor_actions.cc:307
+#, fuzzy
+msgid "Sort"
+msgstr "Anschluß"
+
+#: editor_actions.cc:315
+msgid "Show all"
+msgstr "Alle zeigen"
+
+#: editor_actions.cc:316
+#, fuzzy
+msgid "Show automatic regions"
+msgstr "Stellen"
+
+#: editor_actions.cc:318
+msgid "Ascending"
+msgstr "aufsteigend"
+
+#: editor_actions.cc:320
+msgid "Descending"
+msgstr "absteigend"
+
+#: editor_actions.cc:323
+msgid "By Region Name"
+msgstr "nach Name der Region"
+
+#: editor_actions.cc:325
+msgid "By Region Length"
+msgstr "nach Länge der Region"
+
+#: editor_actions.cc:327
+#, fuzzy
+msgid "By Region Position"
+msgstr "nach Zeitstempel der Region"
+
+#: editor_actions.cc:329
+msgid "By Region Timestamp"
+msgstr "nach Zeitstempel der Region"
+
+#: editor_actions.cc:331
+msgid "By Region Start in File"
+msgstr "nach Anfang der Region in der Datei"
+
+#: editor_actions.cc:333
+msgid "By Region End in File"
+msgstr "nach Ende der Region in der Datei"
+
+#: editor_actions.cc:335
+msgid "By Source File Name"
+msgstr "nach Namen der Quelldatei"
+
+#: editor_actions.cc:337
+msgid "By Source File Length"
+msgstr "nach Länge der Quelldatei"
+
+#: editor_actions.cc:339
+msgid "By Source File Creation Date"
+msgstr "nach Erstellungsdatum der Quelldatei"
+
+#: editor_actions.cc:341
+msgid "By Source Filesystem"
+msgstr "nach Dateisystem der Quelle"
+
+#. the next two are duplicate items with different names for use in two different contexts
+#: editor_actions.cc:347
+#, fuzzy
+msgid "Add External Audio"
+msgstr "Ardour: Region"
+
+#: editor_actions.cc:349
+#, fuzzy
+msgid "as Region(s)"
+msgstr "Ardour: Region"
+
+#: editor_actions.cc:351
+#, fuzzy
+msgid "as Tracks"
+msgstr "Spuren"
+
+#: editor_actions.cc:353
+#, fuzzy
+msgid "to Tracks"
+msgstr "Spuren"
+
+#: editor_actions.cc:356
+#, fuzzy
+msgid "Show Waveforms"
+msgstr "Wellenform zeigen"
+
+#: editor_actions.cc:357
+#, fuzzy
+msgid "Show Waveforms While Recording"
+msgstr "Wellenform zeigen"
+
+#: editor_actions.cc:358
+msgid "Show Measures"
+msgstr ""
+
+#: editor_actions.cc:371 editor_actions.cc:378
+msgid "Medium"
+msgstr ""
+
+#: editor_actions.cc:373
+#, fuzzy
+msgid "Faster"
+msgstr "Einfügen"
+
+#: editor_actions.cc:379
+msgid "Long"
+msgstr ""
+
+#: editor_actions.cc:383
+#, fuzzy
+msgid "Later is Higher"
+msgstr "Region eine Ebene nach unten"
+
+#: editor_actions.cc:384
+#, fuzzy
+msgid "Most Recently Moved/Added is Higher"
+msgstr "Region eine Ebene nach unten"
+
+#: editor_actions.cc:385
+#, fuzzy
+msgid "Most Recently Added is Higher"
+msgstr "Region eine Ebene nach unten"
+
+#: editor_audio_import.cc:72
+#, fuzzy
+msgid "You can't import or embed an audiofile until you have a session loaded."
+msgstr ""
+"Sie können keine Audio-Daten importieren, solange keine Sitzung geladen ist."
+
+#: editor_audio_import.cc:77
+#, fuzzy
+msgid "Add existing audio to session"
+msgstr "Stellen"
+
+#: editor_audio_import.cc:142
+#, fuzzy
+msgid "ardour: importing %1"
+msgstr "Ardour: Exportieren"
+
+#: editor_audio_import.cc:146
+msgid "Cancel Import"
+msgstr "Importieren Abbrechen"
+
+#: editor_audio_import.cc:224
+msgid "Editor: cannot open file \"%1\", (%2)"
+msgstr ""
+
+#: editor_audio_import.cc:231
+msgid "Embed it anyway"
+msgstr ""
+
+#: editor_audio_import.cc:234
+#, fuzzy
+msgid "Don't embed it"
+msgstr "Ohne %1"
+
+#: editor_audio_import.cc:235
+msgid "Embed all without questions"
+msgstr ""
+
+#: editor_audio_import.cc:236
+#, fuzzy
+msgid "Cancel entire import"
+msgstr "Importieren Abbrechen"
+
+#: editor_audio_import.cc:242
+msgid ""
+"%1\n"
+"This audiofile's sample rate doesn't match the session sample rate!"
+msgstr ""
+
+#: editor_audio_import.cc:275
+msgid "could not open %1"
+msgstr "Konnte \"%s\" nicht öffnen."
+
+#: editor_audio_import.cc:320
+#, fuzzy
+msgid "insert sndfile"
+msgstr "Stille einfügen"
+
+#. stuff for the verbose canvas cursor
+#: editor_canvas.cc:116
+msgid "VerboseCanvasCursor"
+msgstr ""
+
+#: editor_canvas.cc:287
+#, fuzzy
+msgid "Start a new session\n"
+msgstr "Bitte mittels des \"Sitzung\"-Menüs\n"
+
+#: editor_canvas.cc:287
+msgid "via Session menu"
+msgstr "eine Sitzung laden oder eine neue erstellen!"
+
+#: editor_canvas.cc:290
+msgid "FirstActionMessage"
+msgstr ""
+
+#: editor_edit_groups.cc:52 mixer_ui.cc:740
+#, fuzzy
+msgid "Activate All"
+msgstr "Aktiv"
+
+#: editor_edit_groups.cc:53 mixer_ui.cc:741
+#, fuzzy
+msgid "Disable All"
+msgstr "Trennen"
+
+#: editor_edit_groups.cc:55 mixer_ui.cc:743
+#, fuzzy
+msgid "Add group"
+msgstr "keine Gruppe"
+
+#: editor_edit_groups.cc:225 mixer_ui.cc:972
+#, fuzzy
+msgid "unnamed"
+msgstr "Umbenennen"
+
+#: editor_edit_groups.cc:252 mixer_ui.cc:838
+msgid "-all-"
+msgstr "-alle-"
+
+#: editor_export_audio.cc:64
+msgid ""
+"There is no selection to export.\n"
+"\n"
+"Select a selection using the range mouse mode"
+msgstr ""
+
+#: editor_export_audio.cc:109
+msgid ""
+"There are no ranges to export.\n"
+"\n"
+"Create 1 or more ranges by dragging the mouse in the range bar"
+msgstr ""
+
+#: editor_imageframe.cc:624 editor_imageframe.cc:654
+msgid "programming error: no ImageFrameView selected"
+msgstr ""
+
+#: editor_imageframe.cc:847 editor_imageframe.cc:869
+msgid "programming error: no MarkerView selected"
+msgstr ""
+
+#: editor_keyboard.cc:104
+#, fuzzy
+msgid "mute region"
+msgstr "Name für Region:"
+
+#: editor_keys.cc:45
+#, fuzzy
+msgid "keyboard selection"
+msgstr "Auswahl zu Abschnitt machen"
+
+#: editor_markers.cc:303 editor_markers.cc:377 editor_markers.cc:541
+#: editor_markers.cc:559 editor_markers.cc:578 editor_markers.cc:608
+#: editor_markers.cc:636 editor_markers.cc:664 editor_markers.cc:702
+#: editor_markers.cc:729 editor_markers.cc:752 editor_markers.cc:771
+#: editor_mouse.cc:1994 editor_mouse.cc:4235
+msgid "programming error: marker canvas item has no marker object pointer!"
+msgstr ""
+
+#: editor_markers.cc:327 location_ui.cc:655
+msgid "remove marker"
+msgstr ""
+
+#: editor_markers.cc:448 editor_markers.cc:471 editor_markers.cc:525
+#, fuzzy
+msgid "Locate to"
+msgstr "Stellen"
+
+#: editor_markers.cc:449 editor_markers.cc:472 editor_markers.cc:526
+#, fuzzy
+msgid "Play from"
+msgstr "Wiedergabe ab Anfang"
+
+#: editor_markers.cc:451 editor_markers.cc:474 editor_markers.cc:527
+#, fuzzy
+msgid "Set from playhead"
+msgstr "Wiedergabe ab Playhead"
+
+#: editor_markers.cc:452 editor_markers.cc:475 editor_markers.cc:528
+#, fuzzy
+msgid "Set from range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor_markers.cc:484 editor_markers.cc:532
+#, fuzzy
+msgid "Select all in Range"
+msgstr "Auswahl"
+
+#: editor_markers.cc:510
+#, fuzzy
+msgid "Set Loop Range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor_markers.cc:511
+msgid "Set Punch Range"
+msgstr ""
+
+#: editor_markers.cc:786
+#, fuzzy
+msgid "ardour: rename mark"
+msgstr "Ardour: Region umbenennen"
+
+#: editor_markers.cc:788
+#, fuzzy
+msgid "ardour: rename range"
+msgstr "Ardour: Region umbenennen"
+
+#: editor_markers.cc:813
+#, fuzzy
+msgid "rename marker"
+msgstr "Feld entfernen"
+
+#: editor_markers.cc:837
+#, fuzzy
+msgid "set loop range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor_markers.cc:863
+#, fuzzy
+msgid "set punch range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor_mouse.cc:103
+msgid "Editor::event_frame() used on unhandled event type %1"
+msgstr ""
+
+#: editor_mouse.cc:1589
+msgid "programming error: start_grab called without drag item"
+msgstr ""
+
+#: editor_mouse.cc:1793
+msgid "change fade in length"
+msgstr ""
+
+#: editor_mouse.cc:1811
+msgid "programming error: fade out canvas item has no regionview data pointer!"
+msgstr ""
+
+#: editor_mouse.cc:1885
+#, fuzzy
+msgid "change fade out length"
+msgstr "Ardour: Editor"
+
+#: editor_mouse.cc:1904
+msgid "programming error: cursor canvas item has no cursor data pointer!"
+msgstr ""
+
+#: editor_mouse.cc:2119
+#, fuzzy
+msgid "move marker"
+msgstr "Feld entfernen"
+
+#: editor_mouse.cc:2142 editor_mouse.cc:2173 editor_tempodisplay.cc:461
+msgid ""
+"programming error: meter marker canvas item has no marker object pointer!"
+msgstr ""
+
+#: editor_mouse.cc:2241
+#, fuzzy
+msgid "copy meter mark"
+msgstr "Ardour: Region umbenennen"
+
+#: editor_mouse.cc:2251
+msgid "move meter mark"
+msgstr ""
+
+#: editor_mouse.cc:2266 editor_mouse.cc:2299 editor_tempodisplay.cc:327
+#: editor_tempodisplay.cc:411 editor_tempodisplay.cc:430
+msgid ""
+"programming error: tempo marker canvas item has no marker object pointer!"
+msgstr ""
+
+#: editor_mouse.cc:2271 editor_mouse.cc:2304 editor_tempodisplay.cc:332
+#: editor_tempodisplay.cc:416
+msgid "programming error: marker for tempo is not a tempo marker!"
+msgstr ""
+
+#: editor_mouse.cc:2371
+#, fuzzy
+msgid "copy tempo mark"
+msgstr "Ardour: Region umbenennen"
+
+#: editor_mouse.cc:2381
+msgid "move tempo mark"
+msgstr ""
+
+#: editor_mouse.cc:2395 editor_mouse.cc:2414 editor_mouse.cc:2427
 msgid ""
 "programming error: control point canvas item has no control point object "
 "pointer!"
 msgstr ""
 
-#: gtk_ardour/editor_canvas_events.cc:717
-msgid "programming error: line canvas item has no line object pointer!"
-msgstr ""
-
-#: gtk_ardour/editor_canvas_events.cc:744
-#: gtk_ardour/editor_canvas_events.cc:784
-#: gtk_ardour/editor_canvas_events.cc:823
-msgid "programming error: no \"rect\" pointer associated with selection item"
-msgstr ""
-
-#: gtk_ardour/editor_edit_groups.cc:62 gtk_ardour/editor_route_list.cc:298
-#: gtk_ardour/mixer_ui.cc:670
-msgid "Show All"
-msgstr "Alles zeigen"
-
-#: gtk_ardour/editor_edit_groups.cc:63 gtk_ardour/editor_route_list.cc:299
-#: gtk_ardour/mixer_ui.cc:671
-msgid "Hide All"
-msgstr "Alle verstecken"
-
-#: gtk_ardour/editor_edit_groups.cc:98
-msgid "Name for new edit group"
-msgstr ""
-
-#: gtk_ardour/editor_export_audio.cc:60
-msgid ""
-"There is no range to export.\n"
-"\n"
-"Select a range using the range mouse mode"
-msgstr ""
-
-#: gtk_ardour/editor_imageframe.cc:675 gtk_ardour/editor_imageframe.cc:707
-msgid "programming error: no ImageFrameView selected"
-msgstr ""
-
-#: gtk_ardour/editor_imageframe.cc:906 gtk_ardour/editor_imageframe.cc:930
-msgid "programming error: no MarkerView selected"
-msgstr ""
-
-#: gtk_ardour/editor_keys.cc:187
-#, fuzzy
-msgid "keyboard selection"
-msgstr "Auswahl zu Abschnitt machen"
-
-#: gtk_ardour/editor_markers.cc:302 gtk_ardour/editor_markers.cc:376
-#: gtk_ardour/editor_markers.cc:508 gtk_ardour/editor_markers.cc:526
-#: gtk_ardour/editor_markers.cc:556 gtk_ardour/editor_markers.cc:584
-#: gtk_ardour/editor_markers.cc:612 gtk_ardour/editor_markers.cc:650
-#: gtk_ardour/editor_markers.cc:677 gtk_ardour/editor_markers.cc:700
-#: gtk_ardour/editor_markers.cc:719 gtk_ardour/editor_mouse.cc:1960
-#: gtk_ardour/editor_mouse.cc:4075
-msgid "programming error: marker canvas item has no marker object pointer!"
-msgstr ""
-
-#: gtk_ardour/editor_markers.cc:326 gtk_ardour/location_ui.cc:681
-msgid "remove marker"
-msgstr ""
-
-#: gtk_ardour/editor_markers.cc:444 gtk_ardour/editor_markers.cc:494
-#, fuzzy
-msgid "Locate to"
-msgstr "Stellen"
-
-#: gtk_ardour/editor_markers.cc:445 gtk_ardour/editor_markers.cc:495
-#, fuzzy
-msgid "Play from"
-msgstr "Wiedergabe ab Anfang"
-
-#: gtk_ardour/editor_markers.cc:447 gtk_ardour/editor_markers.cc:496
-#, fuzzy
-msgid "Set from playhead"
-msgstr "Wiedergabe ab Playhead"
-
-#: gtk_ardour/editor_markers.cc:448 gtk_ardour/editor_markers.cc:497
-#, fuzzy
-msgid "Set from range"
-msgstr "Ausgewählten Bereich wiedergeben"
-
-#: gtk_ardour/editor_markers.cc:479
-#, fuzzy
-msgid "Set Loop Range"
-msgstr "Ausgewählten Bereich wiedergeben"
-
-#: gtk_ardour/editor_markers.cc:480
-msgid "Set Punch Range"
-msgstr ""
-
-#: gtk_ardour/editor_markers.cc:736
-#, fuzzy
-msgid "ardour: rename mark"
-msgstr "Ardour: Region umbenennen"
-
-#: gtk_ardour/editor_markers.cc:738
-#, fuzzy
-msgid "ardour: rename range"
-msgstr "Ardour: Region umbenennen"
-
-#: gtk_ardour/editor_markers.cc:792
-#, fuzzy
-msgid "set loop range"
-msgstr "Ausgewählten Bereich wiedergeben"
-
-#: gtk_ardour/editor_markers.cc:818
-#, fuzzy
-msgid "set punch range"
-msgstr "Ausgewählten Bereich wiedergeben"
-
-#: gtk_ardour/editor_mouse.cc:99
-msgid "Editor::event_frame() used on unhandled event type %1"
-msgstr ""
-
-#: gtk_ardour/editor_mouse.cc:1555
-msgid "programming error: start_grab called without drag item"
-msgstr ""
-
-#: gtk_ardour/editor_mouse.cc:1760
-msgid "change fade in length"
-msgstr ""
-
-#: gtk_ardour/editor_mouse.cc:1778
-msgid "programming error: fade out canvas item has no regionview data pointer!"
-msgstr ""
-
-#: gtk_ardour/editor_mouse.cc:1852
-#, fuzzy
-msgid "change fade out length"
-msgstr "Ardour: Editor"
-
-#: gtk_ardour/editor_mouse.cc:1871
-msgid "programming error: cursor canvas item has no cursor data pointer!"
-msgstr ""
-
-#: gtk_ardour/editor_mouse.cc:2098 gtk_ardour/editor_tempodisplay.cc:470
-msgid ""
-"programming error: meter marker canvas item has no marker object pointer!"
-msgstr ""
-
-#: gtk_ardour/editor_mouse.cc:2163
-msgid "move meter mark"
-msgstr ""
-
-#: gtk_ardour/editor_mouse.cc:2177 gtk_ardour/editor_tempodisplay.cc:335
-#: gtk_ardour/editor_tempodisplay.cc:420 gtk_ardour/editor_tempodisplay.cc:439
-msgid ""
-"programming error: tempo marker canvas item has no marker object pointer!"
-msgstr ""
-
-#: gtk_ardour/editor_mouse.cc:2182 gtk_ardour/editor_tempodisplay.cc:340
-#: gtk_ardour/editor_tempodisplay.cc:425
-msgid "programming error: marker for tempo is not a tempo marker!"
-msgstr ""
-
-#: gtk_ardour/editor_mouse.cc:2245
-msgid "move tempo mark"
-msgstr ""
-
-#: gtk_ardour/editor_mouse.cc:2388
+#: editor_mouse.cc:2525
 msgid "programming error: line canvas item has no line pointer!"
 msgstr ""
 
-#: gtk_ardour/editor_mouse.cc:2497
+#: editor_mouse.cc:2634
 #, fuzzy
 msgid "move region(s)"
 msgstr "Name für Region:"
 
-#: gtk_ardour/editor_mouse.cc:2509
+#. this is committed in the grab finished callback.
+#: editor_mouse.cc:2646
 msgid "Drag region copy"
 msgstr ""
 
-#: gtk_ardour/editor_mouse.cc:2579
-#, fuzzy
-msgid "copy region(s)"
-msgstr "Ardour: Region"
-
-#: gtk_ardour/editor_mouse.cc:2612
+#: editor_mouse.cc:2758
 #, fuzzy
 msgid "Drag region brush"
 msgstr "Ardour: Region"
 
-#: gtk_ardour/editor_mouse.cc:3425
+#. A selection grab currently creates two undo/redo operations, one for
+#. creating the new region and another for moving it.
+#.
+#: editor_mouse.cc:3574
 #, fuzzy
 msgid "selection grab"
 msgstr "Auswahl"
 
-#: gtk_ardour/editor_mouse.cc:3571
+#: editor_mouse.cc:3720
 #, fuzzy
 msgid "range selection"
 msgstr "Auswahl wiedergeben"
 
-#: gtk_ardour/editor_mouse.cc:3587
+#: editor_mouse.cc:3736
 #, fuzzy
 msgid "trim selection start"
 msgstr "Auswahl zu Abschnitt machen"
 
-#: gtk_ardour/editor_mouse.cc:3603
+#: editor_mouse.cc:3752
 #, fuzzy
 msgid "trim selection end"
 msgstr "Auswahl zu Abschnitt machen"
 
-#: gtk_ardour/editor_mouse.cc:3620
+#: editor_mouse.cc:3769
 #, fuzzy
 msgid "move selection"
 msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor_mouse.cc:3995
+#: editor_mouse.cc:4155
 msgid "Start point trim"
 msgstr ""
 
-#: gtk_ardour/editor_mouse.cc:4023
+#: editor_mouse.cc:4183
 msgid "End point trim"
 msgstr ""
 
-#: gtk_ardour/editor_mouse.cc:4062
+#: editor_mouse.cc:4222
 #, fuzzy
 msgid "trimmed region"
 msgstr "Ardour: Region"
 
-#: gtk_ardour/editor_mouse.cc:4203
+#: editor_mouse.cc:4361
 #, fuzzy
 msgid "new range marker"
 msgstr "Ardour: Region umbenennen"
 
-#: gtk_ardour/editor_mouse.cc:4422
+#: editor_mouse.cc:4576
 #, fuzzy
 msgid "select regions"
 msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor_mouse.cc:4451
+#: editor_mouse.cc:4605
 msgid "Name for region:"
 msgstr "Name für Region:"
 
-#: gtk_ardour/editor_mouse.cc:4517
+#: editor_mouse.cc:4667
 #, fuzzy
 msgid "timestretch"
 msgstr "Ardour: Mixer"
 
-#: gtk_ardour/editor_ops.cc:117
+#: editor_ops.cc:131
 #, fuzzy
 msgid "split"
 msgstr "Teilen"
 
-#: gtk_ardour/editor_ops.cc:153
+#: editor_ops.cc:167
 #, fuzzy
 msgid "remove region"
 msgstr "Name für Region:"
 
-#: gtk_ardour/editor_ops.cc:172
+#: editor_ops.cc:186
 msgid ""
 " This is destructive, will possibly delete audio files\n"
 "It cannot be undone\n"
 "Do you really want to destroy %1 ?"
 msgstr ""
 
-#: gtk_ardour/editor_ops.cc:176
+#: editor_ops.cc:190
 #, fuzzy
 msgid "these regions"
 msgstr "Name für Region:"
 
-#: gtk_ardour/editor_ops.cc:176
+#: editor_ops.cc:190
 #, fuzzy
 msgid "this region"
 msgstr "Name für Region:"
 
-#: gtk_ardour/editor_ops.cc:179
+#: editor_ops.cc:193
 #, fuzzy
 msgid "Yes, destroy them."
 msgstr "Ja, entfernen."
 
-#: gtk_ardour/editor_ops.cc:181 gtk_ardour/editor_ops.cc:3434
+#: editor_ops.cc:195 editor_ops.cc:3069
 #, fuzzy
 msgid "Yes, destroy it."
 msgstr "Ja, entfernen."
 
-#: gtk_ardour/editor_ops.cc:184 gtk_ardour/editor_ops.cc:3435
-#: gtk_ardour/route_ui.cc:658 gtk_ardour/visual_time_axis.cc:300
+#: editor_ops.cc:198 editor_ops.cc:3070 route_ui.cc:701
+#: visual_time_axis.cc:278
 msgid "No, do nothing."
 msgstr "Nein, nichts machen."
 
-#: gtk_ardour/editor_ops.cc:279 gtk_ardour/editor_ops.cc:307
+#: editor_ops.cc:288 editor_ops.cc:316
 #, fuzzy
 msgid "extend selection"
 msgstr "Auswahl zu Abschnitt machen"
 
-#: gtk_ardour/editor_ops.cc:323 gtk_ardour/editor_ops.cc:357
-#: gtk_ardour/editor_ops.cc:401 gtk_ardour/editor_ops.cc:427
+#: editor_ops.cc:332 editor_ops.cc:366 editor_ops.cc:410 editor_ops.cc:436
 msgid "nudge forward"
 msgstr ""
 
-#: gtk_ardour/editor_ops.cc:491
+#: editor_ops.cc:500
 msgid "build_region_boundary_cache called with snap_type = %1"
 msgstr ""
 
-#: gtk_ardour/editor_ops.cc:1305
+#: editor_ops.cc:1284
+#, fuzzy
+msgid "select all within"
+msgstr "Auswahl"
+
+#: editor_ops.cc:1330
 #, fuzzy
 msgid "set selection from range"
 msgstr "Ausgewählten Bereich wiedergeben"
 
-#: gtk_ardour/editor_ops.cc:1421
+#: editor_ops.cc:1362
+#, fuzzy
+msgid "select all from range"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: editor_ops.cc:1385
+#, fuzzy
+msgid "select all from punch"
+msgstr "Auswahl"
+
+#: editor_ops.cc:1407
+#, fuzzy
+msgid "select all from loop"
+msgstr "Auswahl"
+
+#: editor_ops.cc:1421
+#, fuzzy
+msgid "select all after cursor"
+msgstr "Wiedergabe ab Cursor"
+
+#: editor_ops.cc:1426
+#, fuzzy
+msgid "select all before cursor"
+msgstr "Wiedergabe ab Cursor"
+
+#: editor_ops.cc:1554
 msgid "clear markers"
 msgstr ""
 
-#: gtk_ardour/editor_ops.cc:1433
+#: editor_ops.cc:1566
 #, fuzzy
 msgid "clear ranges"
 msgstr "Verbindungen löschen"
 
-#: gtk_ardour/editor_ops.cc:1452
+#: editor_ops.cc:1585
 #, fuzzy
 msgid "clear locations"
 msgstr "Verbindungen löschen"
 
-#: gtk_ardour/editor_ops.cc:1503
+#: editor_ops.cc:1635
 #, fuzzy
 msgid "insert dragged region"
 msgstr "Ardour: Region"
 
-#: gtk_ardour/editor_ops.cc:1538
+#: editor_ops.cc:1671
 #, fuzzy
 msgid "insert region"
 msgstr "Name für Region:"
 
-#: gtk_ardour/editor_ops.cc:1744
+#: editor_ops.cc:1862 io_selector.cc:57 io_selector.cc:791
+msgid "OK"
+msgstr ""
+
+#: editor_ops.cc:1869
 msgid "ardour: rename region"
 msgstr "Ardour: Region umbenennen"
 
-#: gtk_ardour/editor_ops.cc:1891
-msgid "You can't import an audiofile until you have a session loaded."
-msgstr ""
-"Sie können keine Audio-Daten importieren, solange keine Sitzung geladen ist."
-
-#: gtk_ardour/editor_ops.cc:1901
-#, fuzzy
-msgid "Import selected as tracks"
-msgstr "Auswahl importieren"
-
-#: gtk_ardour/editor_ops.cc:1904
-#, fuzzy
-msgid "Import selected to region list"
-msgstr "Auswahl zu Schleife machen"
-
-#: gtk_ardour/editor_ops.cc:1933
-msgid "ardour: audio import in progress"
-msgstr "Ardour: Audio Import in Arbeit"
-
-#: gtk_ardour/editor_ops.cc:1937
-msgid "Cancel Import"
-msgstr "Importieren Abbrechen"
-
-#: gtk_ardour/editor_ops.cc:1944
-#, fuzzy
-msgid "ardour: importing %1"
-msgstr "Ardour: Exportieren"
-
-#: gtk_ardour/editor_ops.cc:1990
-msgid "%1 it anyway"
-msgstr ""
-
-#: gtk_ardour/editor_ops.cc:1996
-#, fuzzy
-msgid "Don't %1 it"
-msgstr "Ohne %1"
-
-#: gtk_ardour/editor_ops.cc:1997
-msgid "%1 all without questions"
-msgstr ""
-
-#: gtk_ardour/editor_ops.cc:1998
-#, fuzzy
-msgid "Cancel entire import"
-msgstr "Importieren Abbrechen"
-
-#: gtk_ardour/editor_ops.cc:2004
-msgid ""
-"%1\n"
-"This audiofile's sample rate doesn't match the session sample rate!"
-msgstr ""
-
-#: gtk_ardour/editor_ops.cc:2032
-#, fuzzy
-msgid "You can't embed an audiofile until you have a session loaded."
-msgstr ""
-"Sie können keine Audio-Daten importieren, solange keine Sitzung geladen ist."
-
-#: gtk_ardour/editor_ops.cc:2039
-#, fuzzy
-msgid "Add to External Region list"
-msgstr "Ardour: Region"
-
-#: gtk_ardour/editor_ops.cc:2090 gtk_ardour/editor_ops.cc:2210
-#: gtk_ardour/editor_ops.cc:2286
-msgid "Editor: cannot open file \"%1\" (%2)"
-msgstr ""
-
-#: gtk_ardour/editor_ops.cc:2128 gtk_ardour/editor_ops.cc:2312
-msgid "could not open %1"
-msgstr "Konnte \"%s\" nicht öffnen."
-
-#: gtk_ardour/editor_ops.cc:2171
-#, fuzzy
-msgid "Insert selected as new tracks"
-msgstr "Stille einfügen"
-
-#: gtk_ardour/editor_ops.cc:2186
-#, fuzzy
-msgid "Insert selected"
-msgstr "Stille einfügen"
-
-#: gtk_ardour/editor_ops.cc:2327
-#, fuzzy
-msgid "insert sndfile"
-msgstr "Stille einfügen"
-
-#: gtk_ardour/editor_ops.cc:2464
+#: editor_ops.cc:2092
 #, fuzzy
 msgid "separate"
 msgstr "Ausgewählten Bereich wiedergeben"
 
-#: gtk_ardour/editor_ops.cc:2528
+#: editor_ops.cc:2156
 #, fuzzy
 msgid "trim to selection"
 msgstr "Auswahl zu Abschnitt machen"
 
-#: gtk_ardour/editor_ops.cc:2568
+#: editor_ops.cc:2196
 msgid "region fill"
 msgstr ""
 
-#: gtk_ardour/editor_ops.cc:2626
+#: editor_ops.cc:2255
 #, fuzzy
 msgid "fill selection"
 msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor_ops.cc:2650
+#: editor_ops.cc:2276
+msgid "Programming error. that region doesn't cover that position"
+msgstr ""
+
+#: editor_ops.cc:2279
+#, fuzzy
+msgid "set region sync position"
+msgstr "Regionen"
+
+#: editor_ops.cc:2294
 msgid "Place the edit cursor at the desired sync point"
 msgstr ""
 "Positionieren sie den Arbeits-Cursor am gewünschten Synchronisationspunkt"
 
-#: gtk_ardour/editor_ops.cc:2656
+#: editor_ops.cc:2299
 #, fuzzy
 msgid "set sync from edit cursor"
 msgstr "Wiedergabe ab Cursor"
 
-#: gtk_ardour/editor_ops.cc:2668
+#: editor_ops.cc:2311
 #, fuzzy
 msgid "remove sync"
 msgstr "Synchronisationspunkt entfernen"
 
-#: gtk_ardour/editor_ops.cc:2682
+#: editor_ops.cc:2325
 #, fuzzy
 msgid "naturalize"
 msgstr "Ardour: Region"
 
-#: gtk_ardour/editor_ops.cc:2746
+#: editor_ops.cc:2389
 msgid "align selection (relative)"
 msgstr ""
 
-#: gtk_ardour/editor_ops.cc:2774
+#: editor_ops.cc:2417
 #, fuzzy
 msgid "align selection"
 msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor_ops.cc:2786
+#: editor_ops.cc:2429
 #, fuzzy
 msgid "align region"
 msgstr "Ardour: Region"
 
-#: gtk_ardour/editor_ops.cc:2833 gtk_ardour/editor_ops.cc:2858
+#: editor_ops.cc:2476 editor_ops.cc:2501
 msgid "trim to edit"
 msgstr ""
 
-#: gtk_ardour/editor_ops.cc:2909
+#: editor_ops.cc:2552
 #, fuzzy
 msgid "ardour: freeze"
 msgstr "Ardour: "
 
-#: gtk_ardour/editor_ops.cc:2914
+#: editor_ops.cc:2557
 #, fuzzy
 msgid "Cancel Freeze"
 msgstr "Abbrechen"
 
-#: gtk_ardour/editor_ops.cc:2951
+#: editor_ops.cc:2594
 #, fuzzy
 msgid "bounce range"
 msgstr "Bereich"
 
-#: gtk_ardour/editor_ops.cc:3004
+#: editor_ops.cc:2647
 #, fuzzy
 msgid "cut"
 msgstr "Ausschneiden"
 
-#: gtk_ardour/editor_ops.cc:3007
+#: editor_ops.cc:2650
 #, fuzzy
 msgid "copy"
 msgstr "Kopieren"
 
-#: gtk_ardour/editor_ops.cc:3020
+#: editor_ops.cc:2663
 #, fuzzy
 msgid " objects"
 msgstr "Objekt"
 
-#: gtk_ardour/editor_ops.cc:3046
+#: editor_ops.cc:2689
 #, fuzzy
 msgid " range"
 msgstr "Bereich"
 
-#: gtk_ardour/editor_ops.cc:3201
+#: editor_ops.cc:2846
 #, fuzzy
 msgid "paste"
 msgstr "Einfügen"
 
-#: gtk_ardour/editor_ops.cc:3236
+#: editor_ops.cc:2884
 #, fuzzy
 msgid "paste chunk"
 msgstr "Abschnitt erzeugen:"
 
-#: gtk_ardour/editor_ops.cc:3276
+#. clear (below) will clear the argument list
+#: editor_ops.cc:2925
 #, fuzzy
 msgid "duplicate region"
 msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor_ops.cc:3309
+#: editor_ops.cc:2970
 #, fuzzy
 msgid "duplicate selection"
 msgstr "Auswahl zu Schleife machen"
 
-#: gtk_ardour/editor_ops.cc:3349
+#: editor_ops.cc:3010
 #, fuzzy
 msgid "clear playlist"
 msgstr "Name für Schnappschuß"
 
-#: gtk_ardour/editor_ops.cc:3378
+#: editor_ops.cc:3039
 #, fuzzy
 msgid "nudge track"
 msgstr "Stille einfügen"
 
-#: gtk_ardour/editor_ops.cc:3431
+#: editor_ops.cc:3066
 #, fuzzy
 msgid ""
 "Do you really want to destroy the last capture?\n"
@@ -2716,864 +3997,748 @@ msgstr ""
 "Wollen Sie wirklich die Spur \"%1\" löschen?\n"
 "(Kann nicht rückgängig gemacht werden!)"
 
-#: gtk_ardour/editor_ops.cc:3463
+#: editor_ops.cc:3094
 #, fuzzy
 msgid "normalize"
 msgstr "Ardour: Region"
 
-#: gtk_ardour/editor_ops.cc:3510
+#: editor_ops.cc:3141
 #, fuzzy
 msgid "reverse regions"
 msgstr "Name für Region:"
 
-#: gtk_ardour/editor_region_list.cc:223
+#: editor_region_list.cc:93 editor_region_list.cc:98 editor_region_list.cc:101
+#: location_ui.cc:55
 #, fuzzy
-msgid "hidden"
+msgid "Hidden"
 msgstr "Verbergen"
 
-#: gtk_ardour/editor_region_list.cc:408
-msgid "Show all"
-msgstr "Alle zeigen"
-
-#: gtk_ardour/editor_region_list.cc:417
-msgid "Ascending"
-msgstr "aufsteigend"
-
-#: gtk_ardour/editor_region_list.cc:419
-msgid "Descending"
-msgstr "absteigend"
-
-#: gtk_ardour/editor_region_list.cc:423
-msgid "By Region Name"
-msgstr "nach Name der Region"
-
-#: gtk_ardour/editor_region_list.cc:425
-msgid "By Region Length"
-msgstr "nach Länge der Region"
-
-#: gtk_ardour/editor_region_list.cc:427
-#, fuzzy
-msgid "By Region Position"
-msgstr "nach Zeitstempel der Region"
-
-#: gtk_ardour/editor_region_list.cc:429
-msgid "By Region Timestamp"
-msgstr "nach Zeitstempel der Region"
-
-#: gtk_ardour/editor_region_list.cc:431
-msgid "By Region Start in File"
-msgstr "nach Anfang der Region in der Datei"
-
-#: gtk_ardour/editor_region_list.cc:433
-msgid "By Region End in File"
-msgstr "nach Ende der Region in der Datei"
-
-#: gtk_ardour/editor_region_list.cc:435
-msgid "By Source File Name"
-msgstr "nach Namen der Quelldatei"
-
-#: gtk_ardour/editor_region_list.cc:437
-msgid "By Source File Length"
-msgstr "nach Länge der Quelldatei"
-
-#: gtk_ardour/editor_region_list.cc:439
-msgid "By Source File Creation Date"
-msgstr "nach Erstellungsdatum der Quelldatei"
-
-#: gtk_ardour/editor_region_list.cc:441
-msgid "By Source Filesystem"
-msgstr "nach Dateisystem der Quelle"
-
-#: gtk_ardour/editor_region_list.cc:444
-msgid "Sorting"
-msgstr "Sortieren"
-
-#: gtk_ardour/editor_region_list.cc:808
-#, fuzzy
-msgid "Regions/length"
-msgstr "nach Länge der Region"
-
-#: gtk_ardour/editor_region_list.cc:812
-#, fuzzy
-msgid "Regions/position"
-msgstr "Regionen"
-
-#: gtk_ardour/editor_region_list.cc:816
-#, fuzzy
-msgid "Regions/creation"
-msgstr "Regionen"
-
-#: gtk_ardour/editor_region_list.cc:820
-#, fuzzy
-msgid "Regions/start"
-msgstr "Regionen"
-
-#: gtk_ardour/editor_region_list.cc:824
-#, fuzzy
-msgid "Regions/end"
-msgstr "Regionen"
-
-#: gtk_ardour/editor_region_list.cc:828
-#, fuzzy
-msgid "Regions/file name"
-msgstr "nach Name der Region"
-
-#: gtk_ardour/editor_region_list.cc:832
-msgid "Regions/file size"
-msgstr ""
-
-#: gtk_ardour/editor_region_list.cc:836
-msgid "Regions/file date"
-msgstr ""
-
-#: gtk_ardour/editor_region_list.cc:840
-msgid "Regions/file system"
-msgstr ""
-
-#: gtk_ardour/editor_route_list.cc:72 gtk_ardour/editor_route_list.cc:73
-#: gtk_ardour/editor_route_list.cc:231
+#. added a new fresh one at the end
+#: editor_route_list.cc:101 editor_route_list.cc:102 editor_route_list.cc:246
 msgid "editor"
 msgstr ""
 
-#: gtk_ardour/editor_route_list.cc:300
-msgid "Show All AbstractTracks"
+#: editor_route_list.cc:309 mixer_ui.cc:703
+msgid "Show All"
+msgstr "Alles zeigen"
+
+#: editor_route_list.cc:310 mixer_ui.cc:704
+msgid "Hide All"
+msgstr "Alle verstecken"
+
+#: editor_route_list.cc:311 mixer_ui.cc:705
+#, fuzzy
+msgid "Show All Audio Tracks"
+msgstr "Auswahl"
+
+#: editor_route_list.cc:312 mixer_ui.cc:706
+#, fuzzy
+msgid "Hide All Audio Tracks"
+msgstr "Auswahl"
+
+#: editor_route_list.cc:313 mixer_ui.cc:707
+msgid "Show All Audio Busses"
 msgstr ""
 
-#: gtk_ardour/editor_route_list.cc:301
-msgid "Hide All AbstractTracks"
+#: editor_route_list.cc:314 mixer_ui.cc:708
+msgid "Hide All Audio Busses"
 msgstr ""
 
-#: gtk_ardour/editor_route_list.cc:302
-msgid "Show All AudioBus"
-msgstr ""
-
-#: gtk_ardour/editor_route_list.cc:303
-msgid "Hide All AudioBus"
-msgstr ""
-
-#: gtk_ardour/editor_rulers.cc:311
+#: editor_rulers.cc:311
 #, fuzzy
 msgid "New location marker"
 msgstr "Stellen"
 
-#: gtk_ardour/editor_rulers.cc:312
+#: editor_rulers.cc:312
 #, fuzzy
 msgid "Clear all locations"
 msgstr "Verbindungen löschen"
 
-#: gtk_ardour/editor_rulers.cc:317
+#. ruler_items.push_back (MenuElem (_("New Range")));
+#: editor_rulers.cc:317
 #, fuzzy
 msgid "Clear all ranges"
 msgstr "Verbindungen löschen"
 
-#: gtk_ardour/editor_rulers.cc:326
+#: editor_rulers.cc:326
 msgid "New Tempo"
 msgstr ""
 
-#: gtk_ardour/editor_rulers.cc:327
+#: editor_rulers.cc:327
 #, fuzzy
 msgid "Clear tempo"
 msgstr "leeren"
 
-#: gtk_ardour/editor_rulers.cc:332
+#: editor_rulers.cc:332
 msgid "New Meter"
 msgstr ""
 
-#: gtk_ardour/editor_rulers.cc:333
+#: editor_rulers.cc:333
 #, fuzzy
 msgid "Clear meter"
 msgstr "leeren"
 
-#: gtk_ardour/editor_rulers.cc:341
+#: editor_rulers.cc:341
 #, fuzzy
 msgid "Min:Secs"
 msgstr "Min:Sek"
 
-#: gtk_ardour/editor_selection_list.cc:117
+#: editor_selection_list.cc:110
 msgid "name for chunk:"
 msgstr "Name für Abschnitt:"
 
-#: gtk_ardour/editor_selection_list.cc:119
+#: editor_selection_list.cc:111
 msgid "Create chunk"
 msgstr "Abschnitt erzeugen:"
 
-#: gtk_ardour/editor_selection_list.cc:119
+#: editor_selection_list.cc:111
 msgid "Forget it"
 msgstr "Abbrechen"
 
-#: gtk_ardour/editor_tempodisplay.cc:252 gtk_ardour/editor_tempodisplay.cc:295
+#: editor_tempodisplay.cc:249 editor_tempodisplay.cc:289
 #, fuzzy
 msgid "add"
 msgstr "Hinzufügen"
 
-#: gtk_ardour/editor_tempodisplay.cc:276
+#: editor_tempodisplay.cc:271
 #, fuzzy
 msgid "add tempo mark"
 msgstr "Ardour: Region umbenennen"
 
-#: gtk_ardour/editor_tempodisplay.cc:318
+#: editor_tempodisplay.cc:311
 #, fuzzy
 msgid "add meter mark"
 msgstr "Ardour: Region umbenennen"
 
-#: gtk_ardour/editor_tempodisplay.cc:352 gtk_ardour/editor_tempodisplay.cc:383
+#: editor_tempodisplay.cc:344 editor_tempodisplay.cc:375
 #, fuzzy
 msgid "done"
 msgstr "keine"
 
-#: gtk_ardour/editor_tempodisplay.cc:372 gtk_ardour/editor_tempodisplay.cc:404
+#: editor_tempodisplay.cc:365 editor_tempodisplay.cc:396
 msgid "replace tempo mark"
 msgstr ""
 
-#: gtk_ardour/editor_tempodisplay.cc:444 gtk_ardour/editor_tempodisplay.cc:475
+#: editor_tempodisplay.cc:435 editor_tempodisplay.cc:466
 msgid "programming error: marker for meter is not a meter marker!"
 msgstr ""
 
-#: gtk_ardour/editor_tempodisplay.cc:454 gtk_ardour/editor_tempodisplay.cc:487
+#: editor_tempodisplay.cc:445 editor_tempodisplay.cc:478
 #, fuzzy
 msgid "remove tempo mark"
 msgstr "Ja, entfernen."
 
-#: gtk_ardour/editor_timefx.cc:50
+#: editor_timefx.cc:50
 msgid "Quick but Ugly"
 msgstr ""
 
-#: gtk_ardour/editor_timefx.cc:51
+#: editor_timefx.cc:51
 msgid "Skip Anti-aliasing"
 msgstr ""
 
-#: gtk_ardour/editor_timefx.cc:53
+#: editor_timefx.cc:53
 msgid "Stretch/Shrink it"
 msgstr ""
 
-#: gtk_ardour/editor_timefx.cc:57
+#: editor_timefx.cc:57
 #, fuzzy
 msgid "ardour: timestretch"
 msgstr "Ardour: Mixer"
 
-#: gtk_ardour/editor_timefx.cc:58
+#: editor_timefx.cc:58
 msgid "TimeStretchDialog"
 msgstr ""
 
-#: gtk_ardour/editor_timefx.cc:82 gtk_ardour/editor_timefx.cc:83
-#: gtk_ardour/editor_timefx.cc:84 gtk_ardour/editor_timefx.cc:85
+#: editor_timefx.cc:80 editor_timefx.cc:81 editor_timefx.cc:82
+#: editor_timefx.cc:83
 msgid "TimeStretchButton"
 msgstr ""
 
-#: gtk_ardour/editor_timefx.cc:86
+#: editor_timefx.cc:84
 msgid "TimeStretchProgress"
 msgstr ""
 
-#: gtk_ardour/editor_timefx.cc:151
+#. GTK2FIX
+#. current_timestretch->close ();
+#: editor_timefx.cc:153
 msgid "timestretch cannot be started - thread creation error"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:63 gtk_ardour/export_dialog.cc:410
-#: gtk_ardour/export_dialog.cc:947 gtk_ardour/export_dialog.cc:1189
+#: export_dialog.cc:57 export_dialog.cc:397 export_dialog.cc:1025
+#: export_dialog.cc:1193
 msgid "22.05kHz"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:64 gtk_ardour/export_dialog.cc:413
-#: gtk_ardour/export_dialog.cc:428 gtk_ardour/export_dialog.cc:949
-#: gtk_ardour/export_dialog.cc:1191
+#: export_dialog.cc:58 export_dialog.cc:400 export_dialog.cc:415
+#: export_dialog.cc:1027 export_dialog.cc:1195
 msgid "44.1kHz"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:65 gtk_ardour/export_dialog.cc:416
-#: gtk_ardour/export_dialog.cc:951 gtk_ardour/export_dialog.cc:1193
+#: export_dialog.cc:59 export_dialog.cc:403 export_dialog.cc:1029
+#: export_dialog.cc:1197
 msgid "48kHz"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:66 gtk_ardour/export_dialog.cc:419
-#: gtk_ardour/export_dialog.cc:953 gtk_ardour/export_dialog.cc:1195
+#: export_dialog.cc:60 export_dialog.cc:406 export_dialog.cc:1031
+#: export_dialog.cc:1199
 msgid "88.2kHz"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:67 gtk_ardour/export_dialog.cc:422
-#: gtk_ardour/export_dialog.cc:955 gtk_ardour/export_dialog.cc:1197
+#: export_dialog.cc:61 export_dialog.cc:409 export_dialog.cc:1033
+#: export_dialog.cc:1201
 msgid "96kHz"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:68 gtk_ardour/export_dialog.cc:425
-#: gtk_ardour/export_dialog.cc:957 gtk_ardour/export_dialog.cc:1199
+#: export_dialog.cc:62 export_dialog.cc:412 export_dialog.cc:1035
+#: export_dialog.cc:1203
 msgid "192kHz"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:73
+#: export_dialog.cc:67
 msgid "best"
 msgstr "bestmöglich"
 
-#: gtk_ardour/export_dialog.cc:74 gtk_ardour/export_dialog.cc:964
+#: export_dialog.cc:68 export_dialog.cc:1210
 msgid "fastest"
 msgstr "schnellstmöglich"
 
-#: gtk_ardour/export_dialog.cc:75 gtk_ardour/export_dialog.cc:966
+#: export_dialog.cc:69 export_dialog.cc:1212
 msgid "linear"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:76 gtk_ardour/export_dialog.cc:968
+#: export_dialog.cc:70 export_dialog.cc:1214
 msgid "better"
 msgstr "besser"
 
-#: gtk_ardour/export_dialog.cc:77 gtk_ardour/export_dialog.cc:970
+#: export_dialog.cc:71 export_dialog.cc:1216
 msgid "intermediate"
 msgstr "mittelmäßig"
 
-#: gtk_ardour/export_dialog.cc:83 gtk_ardour/export_dialog.cc:979
+#: export_dialog.cc:77 export_dialog.cc:1225
 msgid "Rectangular"
 msgstr "rechteckig"
 
-#: gtk_ardour/export_dialog.cc:84
+#: export_dialog.cc:78
 msgid "Shaped Noise"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:85 gtk_ardour/export_dialog.cc:981
+#: export_dialog.cc:79 export_dialog.cc:1227
 msgid "Triangular"
 msgstr "dreieckig"
 
-#: gtk_ardour/export_dialog.cc:90 gtk_ardour/utils.cc:336
-msgid "stereo"
-msgstr ""
-
-#: gtk_ardour/export_dialog.cc:91 gtk_ardour/export_dialog.cc:497
-#: gtk_ardour/export_dialog.cc:929 gtk_ardour/export_dialog.cc:1219
-#: gtk_ardour/utils.cc:334
-msgid "mono"
-msgstr ""
-
-#: gtk_ardour/export_dialog.cc:97
+#: export_dialog.cc:91
 msgid "CUE"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:98
+#: export_dialog.cc:92
 msgid "TOC"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:106
+#: export_dialog.cc:100
 msgid "FORMAT"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:107
-msgid "SAMPLE RATE"
-msgstr ""
-
-#: gtk_ardour/export_dialog.cc:108
-msgid "CONVERSION QUALITY"
-msgstr ""
-
-#: gtk_ardour/export_dialog.cc:109
-msgid "DITHER TYPE"
-msgstr ""
-
-#: gtk_ardour/export_dialog.cc:110
+#: export_dialog.cc:101
 msgid "CD MARKER FILE TYPE"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:111
+#: export_dialog.cc:102
 msgid "CHANNELS"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:112
+#: export_dialog.cc:103
 msgid "FILE TYPE"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:113
+#: export_dialog.cc:104
 msgid "SAMPLE FORMAT"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:114
+#: export_dialog.cc:105
 msgid "SAMPLE ENDIANNESS"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:115
+#: export_dialog.cc:106
+msgid "SAMPLE RATE"
+msgstr ""
+
+#: export_dialog.cc:107
+msgid "CONVERSION QUALITY"
+msgstr ""
+
+#: export_dialog.cc:108
+msgid "DITHER TYPE"
+msgstr ""
+
+#: export_dialog.cc:109
 msgid "EXPORT CD MARKER FILE ONLY"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:116
+#: export_dialog.cc:110
 msgid "EXPORT TO FILE"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:117 gtk_ardour/option_editor.cc:118
-#: gtk_ardour/option_editor.cc:119
+#: export_dialog.cc:111 option_editor.cc:82 option_editor.cc:83
 msgid "Browse"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:119
+#: export_dialog.cc:112
 msgid "Specific tracks ..."
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:131
+#: export_dialog.cc:123
 msgid "ardour: export"
 msgstr "Ardour: Exportieren"
 
-#: gtk_ardour/export_dialog.cc:132
+#: export_dialog.cc:124
 #, fuzzy
 msgid "ardour_export"
 msgstr "Ardour: Exportieren"
 
-#: gtk_ardour/export_dialog.cc:156
+#: export_dialog.cc:137 export_dialog.cc:153
 #, fuzzy
 msgid "Output"
 msgstr "Ausgänge"
 
-#: gtk_ardour/export_dialog.cc:168 gtk_ardour/mixer_strip.cc:626
-msgid "Track"
-msgstr "Spur"
-
-#: gtk_ardour/export_dialog.cc:287
-msgid "slereg"
-msgstr ""
-
-#: gtk_ardour/export_dialog.cc:658
+#: export_dialog.cc:631
 #, fuzzy
 msgid "Editor: cannot open \"%1\" as export file for CD toc file"
 msgstr ""
 "Editor: Kann \"%1\" nicht öffnen um CD Track Markierungen zu exportieren."
 
-#: gtk_ardour/export_dialog.cc:780
+#: export_dialog.cc:757
 #, fuzzy
 msgid "Editor: cannot open \"%1\" as export file for CD cue file"
 msgstr ""
 "Editor: Kann \"%1\" nicht öffnen um CD Track Markierungen zu exportieren."
 
-#: gtk_ardour/export_dialog.cc:799
+#: export_dialog.cc:776
 msgid "WAV"
 msgstr ""
 
-#: gtk_ardour/export_dialog.cc:1051
+#: export_dialog.cc:910
 msgid "Stop Export"
 msgstr "Export Abbrechen"
 
-#: gtk_ardour/gain_automation_time_axis.cc:60
+#: export_dialog.cc:1129
+msgid "Please enter a valid filename."
+msgstr ""
+
+#: export_dialog.cc:1139
+msgid "Please specify a complete filename for the audio file."
+msgstr ""
+
+#: export_dialog.cc:1145
+msgid "File already exists, do you want to overwrite it?"
+msgstr ""
+
+#: export_dialog.cc:1157 export_range_markers_dialog.cc:154
+msgid "Cannot write file in: "
+msgstr ""
+
+#. warning dialog
+#: export_range_markers_dialog.cc:136
+msgid "Please enter a valid target directory."
+msgstr ""
+
+#: export_range_markers_dialog.cc:144
+msgid ""
+"Please select an existing target directory. Files\n"
+"are not allowed!"
+msgstr ""
+
+#: gain_automation_time_axis.cc:61
 #, fuzzy
 msgid "add gain automation event"
 msgstr "Stellen"
 
-#: gtk_ardour/gain_meter.cc:68
-msgid "Cannot create slider pixmaps"
+#: gain_meter.cc:66
+msgid "cannot find images for fader slider"
 msgstr ""
 
-#: gtk_ardour/gain_meter.cc:83
+#: gain_meter.cc:73
+msgid "cannot find images for fader rail"
+msgstr ""
+
+#: gain_meter.cc:88
 msgid "dbFS"
 msgstr ""
 
-#: gtk_ardour/gain_meter.cc:84 gtk_ardour/gain_meter.cc:134
-#: gtk_ardour/gain_meter.cc:728
+#: gain_meter.cc:89 gain_meter.cc:143 gain_meter.cc:728
 msgid "pre"
 msgstr ""
 
-#: gtk_ardour/gain_meter.cc:130 gtk_ardour/gain_meter.cc:724
+#: gain_meter.cc:139 gain_meter.cc:724
 #, fuzzy
 msgid "input"
 msgstr "%1 Eingang"
 
-#: gtk_ardour/gain_meter.cc:138 gtk_ardour/gain_meter.cc:732
+#: gain_meter.cc:147 gain_meter.cc:732
 #, fuzzy
 msgid "post"
 msgstr "Anschluß"
 
-#: gtk_ardour/gain_meter.cc:146
+#. TRANSLATORS: this string should be longest of the strings
+#. used to describe meter points. In english, its "input".
+#.
+#: gain_meter.cc:155
 msgid "tupni"
 msgstr ""
 
-#: gtk_ardour/gain_meter.cc:167 gtk_ardour/gain_meter.cc:470
-#: gtk_ardour/gain_meter.cc:492 gtk_ardour/gain_meter.cc:537
+#: gain_meter.cc:174 gain_meter.cc:482 gain_meter.cc:504 gain_meter.cc:549
 msgid "-inf"
 msgstr ""
 
-#: gtk_ardour/imageframe_socket_handler.cc:127
+#: glade/new_session_dialog.glade.h:1
+#, fuzzy
+msgid "<b>Advanced</b>"
+msgstr "Feld hinzufügen..."
+
+#: glade/new_session_dialog.glade.h:2
+msgid "<b>Input</b>"
+msgstr ""
+
+#: glade/new_session_dialog.glade.h:3
+#, fuzzy
+msgid "<b>Output</b>"
+msgstr "Ausgänge"
+
+#: glade/new_session_dialog.glade.h:4
+#, fuzzy
+msgid "Automatically connect inputs"
+msgstr "Verfügbare Verbindungen"
+
+#: glade/new_session_dialog.glade.h:5
+#, fuzzy
+msgid "Automatically connect outputs"
+msgstr "Verfügbare Verbindungen"
+
+#: glade/new_session_dialog.glade.h:6
+#, fuzzy
+msgid "Channel Count"
+msgstr "Importieren Abbrechen"
+
+#: glade/new_session_dialog.glade.h:7
+msgid "Connect to Master Bus"
+msgstr ""
+
+#: glade/new_session_dialog.glade.h:8
+msgid "Connect to physical outputs"
+msgstr ""
+
+#: glade/new_session_dialog.glade.h:9
+msgid "Create Control Bus"
+msgstr ""
+
+#: glade/new_session_dialog.glade.h:10
+msgid "Create Master Bus"
+msgstr ""
+
+#: glade/new_session_dialog.glade.h:11
+#, fuzzy
+msgid "Port limit"
+msgstr "Abbrechen"
+
+#: glade/new_session_dialog.glade.h:12
+#, fuzzy
+msgid "Select A File"
+msgstr "Auswahl"
+
+#: glade/new_session_dialog.glade.h:13
+msgid "Track/Bus connection options"
+msgstr ""
+
+#: gtk-custom-ruler.c:126
+#, fuzzy
+msgid "Lower"
+msgstr "Schicht"
+
+#: gtk-custom-ruler.c:127
+#, fuzzy
+msgid "Lower limit of ruler"
+msgstr "Region ganz nach unten"
+
+#: gtk-custom-ruler.c:136
+msgid "Upper"
+msgstr ""
+
+#: gtk-custom-ruler.c:137
+msgid "Upper limit of ruler"
+msgstr ""
+
+#: gtk-custom-ruler.c:146
+#, fuzzy
+msgid "Position"
+msgstr "Stellen"
+
+#: gtk-custom-ruler.c:147
+msgid "Position of mark on the ruler"
+msgstr ""
+
+#: gtk-custom-ruler.c:156
+msgid "Max Size"
+msgstr ""
+
+#: gtk-custom-ruler.c:157
+msgid "Maximum size of the ruler"
+msgstr ""
+
+#: gtk-custom-ruler.c:166
+#, fuzzy
+msgid "Show Position"
+msgstr "nach Zeitstempel der Region"
+
+#: gtk-custom-ruler.c:167
+msgid "Draw current ruler position"
+msgstr ""
+
+#. end-of-file, other end closed or shutdown?
+#: imageframe_socket_handler.cc:126
 msgid "Image Compositor Socket has been shutdown/closed"
 msgstr ""
 
-#: gtk_ardour/imageframe_time_axis.cc:295
+#: imageframe_time_axis.cc:287
 #, fuzzy
 msgid "0.5 seconds"
 msgstr "Minuten:Sekunden"
 
-#: gtk_ardour/imageframe_time_axis.cc:296 gtk_ardour/marker_time_axis.cc:259
+#: imageframe_time_axis.cc:288 marker_time_axis.cc:241
 #, fuzzy
 msgid "1 seconds"
 msgstr "Minuten:Sekunden"
 
-#: gtk_ardour/imageframe_time_axis.cc:297 gtk_ardour/marker_time_axis.cc:260
+#: imageframe_time_axis.cc:289 marker_time_axis.cc:242
 #, fuzzy
 msgid "1.5 seconds"
 msgstr "Minuten:Sekunden"
 
-#: gtk_ardour/imageframe_time_axis.cc:298 gtk_ardour/marker_time_axis.cc:261
+#: imageframe_time_axis.cc:290 marker_time_axis.cc:243
 #, fuzzy
 msgid "2 seconds"
 msgstr "Minuten:Sekunden"
 
-#: gtk_ardour/imageframe_time_axis.cc:299 gtk_ardour/marker_time_axis.cc:262
+#: imageframe_time_axis.cc:291 marker_time_axis.cc:244
 #, fuzzy
 msgid "2.5 seconds"
 msgstr "Minuten:Sekunden"
 
-#: gtk_ardour/imageframe_time_axis.cc:300 gtk_ardour/marker_time_axis.cc:263
+#: imageframe_time_axis.cc:292 marker_time_axis.cc:245
 #, fuzzy
 msgid "3 seconds"
 msgstr "Minuten:Sekunden"
 
-#: gtk_ardour/imageframe_time_axis.cc:305 gtk_ardour/marker_time_axis.cc:268
+#. duration_items.push_back(SeparatorElem()) ;
+#. duration_items.push_back(MenuElem (_("custom"), mem_fun(*this, &ImageFrameTimeAxis::set_marker_duration_custom))) ;
+#: imageframe_time_axis.cc:297 marker_time_axis.cc:250
 #, fuzzy
 msgid "Duration (sec)"
 msgstr "Ardour: Region"
 
-#: gtk_ardour/imageframe_time_axis.cc:310
+#: imageframe_time_axis.cc:302
 #, fuzzy
 msgid "Remove Frame"
 msgstr "Feld entfernen"
 
-#: gtk_ardour/imageframe_time_axis.cc:313
+#: imageframe_time_axis.cc:305
 msgid "Image Frame"
 msgstr ""
 
-#: gtk_ardour/imageframe_time_axis.cc:314 gtk_ardour/marker_time_axis.cc:274
+#: imageframe_time_axis.cc:306 marker_time_axis.cc:256
 #, fuzzy
 msgid "Rename Track"
 msgstr "Umbenennen"
 
-#: gtk_ardour/io_selector.cc:64
+#: io_selector.cc:59 io_selector.cc:793
+#, fuzzy
+msgid "Rescan"
+msgstr "Auffrischen"
+
+#: io_selector.cc:67
 msgid "%1 input"
 msgstr "%1 Eingang"
 
-#: gtk_ardour/io_selector.cc:66
+#: io_selector.cc:69
 msgid "%1 output"
 msgstr "%1 Ausgang"
 
-#: gtk_ardour/io_selector.cc:141 gtk_ardour/route_params_ui.cc:103
+#: io_selector.cc:141 route_params_ui.cc:106
 #, fuzzy
 msgid "Inputs"
 msgstr "Eingänge"
 
-#: gtk_ardour/io_selector.cc:141 gtk_ardour/route_params_ui.cc:104
+#: io_selector.cc:141 route_params_ui.cc:107
 #, fuzzy
 msgid "Outputs"
 msgstr "Ausgänge"
 
-#: gtk_ardour/io_selector.cc:142
+#: io_selector.cc:142
 #, fuzzy
 msgid "Add Input"
 msgstr "Port hinzufügen"
 
-#: gtk_ardour/io_selector.cc:142
+#: io_selector.cc:142
 #, fuzzy
 msgid "Add Output"
 msgstr "%1 Ausgang"
 
-#: gtk_ardour/io_selector.cc:143
+#: io_selector.cc:143
 #, fuzzy
 msgid "Remove Input"
 msgstr "Synchronisationspunkt entfernen"
 
-#: gtk_ardour/io_selector.cc:143
+#: io_selector.cc:143
 #, fuzzy
 msgid "Remove Output"
 msgstr "Ausgänge"
 
-#: gtk_ardour/io_selector.cc:144
+#: io_selector.cc:144
 #, fuzzy
 msgid "Disconnect All"
 msgstr "Trennen"
 
-#: gtk_ardour/io_selector.cc:158
+#: io_selector.cc:158
 msgid "Available connections"
 msgstr "Verfügbare Verbindungen"
 
-#: gtk_ardour/io_selector.cc:424 gtk_ardour/io_selector.cc:636
-#: gtk_ardour/io_selector.cc:688 gtk_ardour/io_selector.cc:724
-msgid "port"
-msgstr "Anschluß"
-
-#: gtk_ardour/io_selector.cc:568 gtk_ardour/io_selector.cc:587
+#: io_selector.cc:554 io_selector.cc:573
 msgid "There are no more JACK ports available."
 msgstr ""
 
-#: gtk_ardour/io_selector.cc:790
+#: io_selector.cc:648 io_selector.cc:675 io_selector.cc:728
+msgid "port"
+msgstr "Anschluß"
+
+#: io_selector.cc:797
 msgid "ardour: "
 msgstr "Ardour: "
 
-#: gtk_ardour/keyboard.cc:419
+#: keyboard.cc:297
 msgid "KeyboardTarget: keyname \"%1\" is unknown."
 msgstr ""
 
-#: gtk_ardour/keyboard.cc:645
+#: keyboard.cc:523
 msgid ""
 "Your system is completely broken - NumLock uses \"%1\"as its modifier. This "
 "is madness - see the man page for xmodmap to find out how to fix this."
 msgstr ""
 
-#: gtk_ardour/keyboard.cc:653
+#: keyboard.cc:531
 msgid ""
 "Your system generates \"%1\" when the NumLock key is pressed. This can cause "
 "problems when editing so Ardour will use %2 to mean Meta rather than %1"
 msgstr ""
 
-#: gtk_ardour/keyboard.cc:714
+#: keyboard.cc:592
 msgid "You have %1 keys bound to \"mod1\""
 msgstr ""
 
-#: gtk_ardour/keyboard.cc:729
+#: keyboard.cc:607
 msgid "You have %1 keys bound to \"mod2\""
 msgstr ""
 
-#: gtk_ardour/keyboard.cc:744
+#: keyboard.cc:622
 msgid "You have %1 keys bound to \"mod3\""
 msgstr ""
 
-#: gtk_ardour/keyboard.cc:759
+#: keyboard.cc:637
 msgid "You have %1 keys bound to \"mod4\""
 msgstr ""
 
-#: gtk_ardour/keyboard.cc:774
+#: keyboard.cc:652
 msgid "You have %1 keys bound to \"mod5\""
 msgstr ""
 
-#: gtk_ardour/keyboard_target.cc:72
-msgid "KeyboardTarget: empty string passed to add_binding."
-msgstr ""
-
-#: gtk_ardour/keyboard_target.cc:78
-msgid "KeyboardTarget: no translation found for \"%1\""
-msgstr ""
-
-#: gtk_ardour/keyboard_target.cc:83
-msgid "KeyboardTarget: unknown action \"%1\""
-msgstr ""
-
-#: gtk_ardour/keyboard_target.cc:248
-msgid "misformed binding node - ignored"
-msgstr ""
-
-#: gtk_ardour/library_ui.cc:62
-#, fuzzy
-msgid "Soundfile Library"
-msgstr "Ardour: Audio Bibliothek"
-
-#: gtk_ardour/library_ui.cc:63
-#, fuzzy
-msgid "Filesystem"
-msgstr "nach Dateisystem der Quelle"
-
-#: gtk_ardour/library_ui.cc:66
-msgid "Split Channels"
-msgstr ""
-
-#: gtk_ardour/library_ui.cc:69
-#, fuzzy
-msgid "ardour: soundfile selector"
-msgstr "Ardour: Farbe auswählen"
-
-#: gtk_ardour/library_ui.cc:430
-msgid "Add to Library..."
-msgstr "Zu Bibliothek hinzufügen..."
-
-#: gtk_ardour/library_ui.cc:431
-msgid "Remove..."
-msgstr "Entfernen..."
-
-#: gtk_ardour/library_ui.cc:432
-msgid "Find..."
-msgstr "Suchen..."
-
-#: gtk_ardour/library_ui.cc:433
-msgid "Add Folder"
-msgstr "Verzeichnis hinzufügen"
-
-#: gtk_ardour/library_ui.cc:434
-msgid "Add audio file or directory"
-msgstr "Audio-Datei oder -Verzeichnis hinzufügen"
-
-#: gtk_ardour/library_ui.cc:713
-#, fuzzy
-msgid "Importing"
-msgstr "Importieren"
-
-#: gtk_ardour/library_ui.cc:748
-msgid "%1 not added to database"
-msgstr ""
-
-#: gtk_ardour/library_ui.cc:767
-msgid "Folder name:"
-msgstr "Verzeichnisname:"
-
-#: gtk_ardour/library_ui.cc:838
-#, fuzzy
-msgid "Should not be reached"
-msgstr "Datei \"%1\" konnte nicht geöffnet werden."
-
-#: gtk_ardour/library_ui.cc:940 gtk_ardour/library_ui.cc:1096
-msgid "file \"%1\" could not be opened"
-msgstr "Datei \"%1\" konnte nicht geöffnet werden."
-
-#: gtk_ardour/library_ui.cc:956
-msgid "Field"
-msgstr "Feld"
-
-#: gtk_ardour/library_ui.cc:957
-msgid "Value"
-msgstr "Wert"
-
-#: gtk_ardour/library_ui.cc:973
-#, fuzzy
-msgid "Stop"
-msgstr "Stop"
-
-#: gtk_ardour/library_ui.cc:974
-msgid "Add Field..."
-msgstr "Feld hinzufügen..."
-
-#: gtk_ardour/library_ui.cc:975
-msgid "Remove Field"
-msgstr "Feld entfernen"
-
-#: gtk_ardour/library_ui.cc:979
-msgid "Soundfile Info"
-msgstr ""
-
-#: gtk_ardour/library_ui.cc:1106
-msgid "file \"%1\" appears not to be an audio file"
-msgstr ""
-
-#: gtk_ardour/library_ui.cc:1159
-msgid "Could not read file: %1 (%2)."
-msgstr ""
-
-#: gtk_ardour/library_ui.cc:1177
-msgid "Could not access soundfile: "
-msgstr ""
-
-#: gtk_ardour/library_ui.cc:1222
-msgid "Field name:"
-msgstr "Feldname:"
-
-#: gtk_ardour/library_ui.cc:1275 gtk_ardour/library_ui.cc:1367
-msgid "Field value:"
-msgstr "Wert des Feldes:"
-
-#: gtk_ardour/library_ui.cc:1295
-msgid "Find"
-msgstr "Suchen"
-
-#: gtk_ardour/library_ui.cc:1296
-msgid "AND"
-msgstr "UND"
-
-#: gtk_ardour/library_ui.cc:1297
-msgid "OR"
-msgstr "ODER"
-
-#: gtk_ardour/library_ui.cc:1300
-msgid "ardour: locate soundfiles"
-msgstr ""
-
-#: gtk_ardour/library_ui.cc:1426
-msgid "Results"
-msgstr "Ergebnisse"
-
-#: gtk_ardour/library_ui.cc:1427
-msgid "Uris"
-msgstr ""
-
-#: gtk_ardour/library_ui.cc:1439
-msgid "Create multi-channel region"
-msgstr "Region mit mehreren Kanälen erstellen"
-
-#: gtk_ardour/library_ui.cc:1442
-msgid "Ardour: Search Results"
-msgstr "Ardour: Suchergebnisse"
-
-#: gtk_ardour/location_ui.cc:47 gtk_ardour/location_ui.cc:50
+#: location_ui.cc:47 location_ui.cc:50
 #, fuzzy
 msgid "Set"
 msgstr "Auswahl"
 
-#: gtk_ardour/location_ui.cc:48 gtk_ardour/location_ui.cc:51
+#: location_ui.cc:48 location_ui.cc:51
 msgid "Go"
 msgstr ""
 
-#: gtk_ardour/location_ui.cc:54
+#: location_ui.cc:54
 msgid "CD"
 msgstr "CD"
 
-#: gtk_ardour/location_ui.cc:55
-#, fuzzy
-msgid "Hidden"
-msgstr "Verbergen"
-
-#: gtk_ardour/location_ui.cc:57
+#: location_ui.cc:57
 msgid "SCMS"
 msgstr ""
 
-#: gtk_ardour/location_ui.cc:58
+#: location_ui.cc:58
 msgid "Pre-Emphasis"
 msgstr ""
 
-#: gtk_ardour/location_ui.cc:592
+#: location_ui.cc:569
 #, fuzzy
 msgid "Add New Location"
 msgstr "Stellen"
 
-#: gtk_ardour/location_ui.cc:593
+#: location_ui.cc:570
 msgid "Add New Range"
 msgstr ""
 
-#: gtk_ardour/location_ui.cc:597
+#: location_ui.cc:574
 msgid "ardour: locations"
 msgstr ""
 
-#: gtk_ardour/location_ui.cc:598
+#: location_ui.cc:575
 #, fuzzy
 msgid "ardour_locations"
 msgstr "Ardour: Verbindungen"
 
-#: gtk_ardour/location_ui.cc:629
+#: location_ui.cc:603
 #, fuzzy
 msgid "Location (CD Index) Markers"
 msgstr "Stellen"
 
-#: gtk_ardour/location_ui.cc:649
+#: location_ui.cc:623
 msgid "Range (CD Track) Markers"
 msgstr ""
 
-#: gtk_ardour/location_ui.cc:814
+#: location_ui.cc:789
 #, fuzzy
 msgid "add range marker"
 msgstr "Ardour: Region umbenennen"
 
-#: gtk_ardour/main.cc:76
+#: main.cc:71
 msgid "ardour is killing itself for a clean exit\n"
 msgstr ""
 
-#: gtk_ardour/main.cc:85
+#: main.cc:80
 msgid "stopping user interface\n"
 msgstr ""
 
-#: gtk_ardour/main.cc:104
+#. XXX its doubtful that snprintf() is async-safe
+#: main.cc:99
 #, c-format
 msgid "%d(%d): received signal %d\n"
 msgstr ""
 
-#: gtk_ardour/main.cc:190
+#: main.cc:185
 msgid "cannot become new process group leader (%1)"
 msgstr ""
 
-#: gtk_ardour/main.cc:217
+#: main.cc:212
 msgid "cannot setup signal handling for %1"
 msgstr ""
 
-#: gtk_ardour/main.cc:228
+#: main.cc:223
 msgid "cannot set default signal mask (%1)"
 msgstr ""
 
-#: gtk_ardour/main.cc:253
+#: main.cc:253
 msgid ""
 "Without a UI style file, ardour will look strange.\n"
-" Please set ARDOUR_UI_RC to point to a valid UI style file"
+" Please set ARDOUR2_UI_RC to point to a valid UI style file"
 msgstr ""
 
-#: gtk_ardour/main.cc:292
+#: main.cc:273
+#, fuzzy
+msgid "ardour: unplugged"
+msgstr "Ardour: Plugins"
+
+#: main.cc:274
 msgid ""
 "Ardour could not connect to JACK.\n"
 "There are several possible reasons:\n"
@@ -3585,73 +4750,69 @@ msgid ""
 "Please consider the possibilities, and perhaps (re)start JACK."
 msgstr ""
 
-#: gtk_ardour/main.cc:305
-#, fuzzy
-msgid "ardour: unplugged"
-msgstr "Ardour: Plugins"
-
-#: gtk_ardour/main.cc:363
+#: main.cc:322
 msgid "Ardour/GTK "
 msgstr ""
 
-#: gtk_ardour/main.cc:365
+#: main.cc:324
 msgid ""
 "\n"
 "   (built using "
 msgstr ""
 
-#: gtk_ardour/main.cc:369
+#: main.cc:328
 msgid " with libardour "
 msgstr ""
 
-#: gtk_ardour/main.cc:374
+#: main.cc:333
 msgid " and GCC version "
 msgstr ""
 
-#: gtk_ardour/main.cc:384
+#: main.cc:343
 msgid "Copyright (C) 1999-2005 Paul Davis"
 msgstr ""
 
-#: gtk_ardour/main.cc:385
+#: main.cc:344
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker"
 msgstr ""
 
-#: gtk_ardour/main.cc:387
+#: main.cc:346
 msgid "Ardour comes with ABSOLUTELY NO WARRANTY"
 msgstr "Achtung: Es gibt zu Ardour KEINERLEI Gewährleistung!"
 
-#: gtk_ardour/main.cc:388
+#: main.cc:347
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr ""
 
-#: gtk_ardour/main.cc:389
+#: main.cc:348
 msgid "This is free software, and you are welcome to redistribute it "
 msgstr "Dies ist freie Software und Sie dürfen sie gerne weiterverbreiten,"
 
-#: gtk_ardour/main.cc:390
+#: main.cc:349
 #, fuzzy
 msgid "under certain conditions; see the source for copying conditions."
 msgstr "solange Sie sich an die Spielregeln aus der Datei COPYING halten."
 
-#: gtk_ardour/main.cc:399
+#: main.cc:358
 msgid "could not create ARDOUR GUI"
 msgstr ""
 
-#: gtk_ardour/main.cc:419
+#: main.cc:376
 msgid "Could not connect to JACK server as  \"%1\""
 msgstr ""
 
-#: gtk_ardour/main.cc:424
+#: main.cc:379
 msgid "could not initialize Ardour."
 msgstr ""
 
-#: gtk_ardour/main.cc:435
+#: main.cc:390
 msgid "could not load command line session \"%1\""
 msgstr ""
 
-#: gtk_ardour/main.cc:455
+#. it wasn't new, but we require a new session
+#: main.cc:410
 msgid ""
 "\n"
 "\n"
@@ -3659,7 +4820,7 @@ msgid ""
 "To avoid this message, start ardour as \"ardour %1"
 msgstr ""
 
-#: gtk_ardour/main.cc:466
+#: main.cc:421
 msgid ""
 "\n"
 "\n"
@@ -3667,673 +4828,332 @@ msgid ""
 "To create it from the command line, start ardour as \"ardour --new %1"
 msgstr ""
 
-#: gtk_ardour/marker.cc:354
+#: marker.cc:244
 #, fuzzy
 msgid "MarkerText"
 msgstr "Schicht"
 
-#: gtk_ardour/marker_time_axis.cc:271
+#: marker_time_axis.cc:253
 #, fuzzy
 msgid "Remove Marker"
 msgstr "Feld entfernen"
 
-#: gtk_ardour/marker_time_axis.cc:273
+#: marker_time_axis.cc:255
 #, fuzzy
 msgid "Marker"
 msgstr "Schicht"
 
-#: gtk_ardour/meter_bridge.cc:74
+#: meter_bridge.cc:77
 msgid "ardour: meter bridge"
 msgstr ""
 
-#: gtk_ardour/meter_bridge.cc:75
+#: meter_bridge.cc:78
 msgid "ardour_meter_bridge"
 msgstr ""
 
-#: gtk_ardour/meter_bridge_strip.cc:79 gtk_ardour/meter_bridge_strip.cc:93
+#: meter_bridge_strip.cc:79 meter_bridge_strip.cc:93
 #, c-format
 msgid "# of %u-sample overs"
 msgstr ""
 
-#: gtk_ardour/meter_bridge_strip.cc:219
+#: meter_bridge_strip.cc:221
 msgid "New name for meter:"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:117 gtk_ardour/mixer_strip.cc:507
-#: gtk_ardour/region_editor.cc:45
+#: mixer_strip.cc:84 mixer_strip.cc:447 region_editor.cc:46
 msgid "mute"
 msgstr "mute"
 
-#: gtk_ardour/mixer_strip.cc:117 gtk_ardour/mixer_strip.cc:508
+#: mixer_strip.cc:84 mixer_strip.cc:448
 msgid "solo"
 msgstr "solo"
 
-#: gtk_ardour/mixer_strip.cc:117 gtk_ardour/mixer_strip.cc:506
+#: mixer_strip.cc:84 mixer_strip.cc:446
 msgid "RECORD"
 msgstr "AUFNAHME"
 
-#: gtk_ardour/mixer_strip.cc:128 gtk_ardour/mixer_strip.cc:514
+#: mixer_strip.cc:95 mixer_strip.cc:454
 msgid "polarity"
 msgstr "Polarität"
 
-#: gtk_ardour/mixer_strip.cc:129 gtk_ardour/mixer_strip.cc:509
+#: mixer_strip.cc:96 mixer_strip.cc:449
 msgid "comments"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:152 gtk_ardour/mixer_strip.cc:810
+#: mixer_strip.cc:120 mixer_strip.cc:751
 msgid "INPUT"
 msgstr "EINGANG"
 
-#: gtk_ardour/mixer_strip.cc:157 gtk_ardour/mixer_strip.cc:831
+#: mixer_strip.cc:125 mixer_strip.cc:772
 msgid "OUTPUT"
 msgstr "AUSGANG"
 
-#: gtk_ardour/mixer_strip.cc:173
+#: mixer_strip.cc:141
 #, fuzzy
 msgid "Pan automation mode"
 msgstr "Stellen"
 
-#: gtk_ardour/mixer_strip.cc:174
+#: mixer_strip.cc:142
 #, fuzzy
 msgid "Gain automation mode"
 msgstr "Stellen"
 
-#: gtk_ardour/mixer_strip.cc:176
+#: mixer_strip.cc:144
 #, fuzzy
 msgid "Pan automation type"
 msgstr "Stellen"
 
-#: gtk_ardour/mixer_strip.cc:177
+#: mixer_strip.cc:145
 #, fuzzy
 msgid "Gain automation type"
 msgstr "Stellen"
 
-#: gtk_ardour/mixer_strip.cc:220 gtk_ardour/mixer_strip.cc:232
-#: gtk_ardour/mixer_strip.cc:979
+#: mixer_strip.cc:189 mixer_strip.cc:201 mixer_strip.cc:920
 #, fuzzy
 msgid "trim"
 msgstr "Streifen"
 
-#: gtk_ardour/mixer_strip.cc:221 gtk_ardour/mixer_strip.cc:233
-#: gtk_ardour/mixer_strip.cc:983
+#. XXX it might different in different languages
+#: mixer_strip.cc:190 mixer_strip.cc:202 mixer_strip.cc:924
 msgid "abs"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:240
+#: mixer_strip.cc:209
 #, fuzzy
 msgid "gain automation mode"
 msgstr "Stellen"
 
-#: gtk_ardour/mixer_strip.cc:241
+#: mixer_strip.cc:210
 #, fuzzy
 msgid "pan automation mode"
 msgstr "Stellen"
 
-#: gtk_ardour/mixer_strip.cc:242
+#: mixer_strip.cc:211
 #, fuzzy
 msgid "gain automation state"
 msgstr "Stellen"
 
-#: gtk_ardour/mixer_strip.cc:243
+#: mixer_strip.cc:212
 #, fuzzy
 msgid "pan automation state"
 msgstr "Stellen"
 
-#: gtk_ardour/mixer_strip.cc:259
+#: mixer_strip.cc:229
 msgid "varispeed"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:281 gtk_ardour/mixer_strip.cc:1174
+#: mixer_strip.cc:250 mixer_strip.cc:1082
 msgid "click to add/edit comments"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:463
+#: mixer_strip.cc:403
 msgid "unknown strip width \"%1\" in XML GUI information"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:522
+#: mixer_strip.cc:462
 msgid "REC"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:525
+#: mixer_strip.cc:465
 #, fuzzy
 msgid "cmt"
 msgstr "Ausschneiden"
 
-#: gtk_ardour/mixer_strip.cc:530
+#: mixer_strip.cc:470
 msgid "pol"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:562 gtk_ardour/mixer_strip.cc:620
-#: gtk_ardour/redirect_box.cc:1180
+#: mixer_strip.cc:502 mixer_strip.cc:561 redirect_box.cc:1001
 msgid "Not connected to JACK - no I/O changes are possible"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:651 gtk_ardour/mixer_strip.cc:667
+#: mixer_strip.cc:568
+msgid "Track"
+msgstr "Spur"
+
+#: mixer_strip.cc:592 mixer_strip.cc:608
 msgid "could not register new ports required for that connection"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:813
+#: mixer_strip.cc:754
 msgid "IN"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:834
+#: mixer_strip.cc:775
 msgid "OUT"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:950
+#: mixer_strip.cc:891
 msgid "aplay"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:956
+#: mixer_strip.cc:897
 msgid "awrite"
 msgstr ""
 
-#: gtk_ardour/mixer_strip.cc:1134
+#: mixer_strip.cc:1090
 #, fuzzy
 msgid ": comment editor"
 msgstr "Der Editor konnte nicht initialisiert werden."
 
-#: gtk_ardour/mixer_strip.cc:1205 gtk_ardour/mixer_strip.cc:1224
+#: mixer_strip.cc:1153 mixer_strip.cc:1174
 msgid "no group"
 msgstr "keine Gruppe"
 
-#: gtk_ardour/mixer_strip.cc:1227
+#: mixer_strip.cc:1177
 msgid "~G"
 msgstr ""
 
-#: gtk_ardour/mixer_ui.cc:52
+#: mixer_ui.cc:80
 msgid "Strips"
 msgstr "Streifen"
 
-#: gtk_ardour/mixer_ui.cc:56
-msgid "Snapshots"
-msgstr "Schnapschüsse"
-
-#: gtk_ardour/mixer_ui.cc:61
-msgid "***"
+#: mixer_ui.cc:104
+msgid "groupname"
 msgstr ""
 
-#: gtk_ardour/mixer_ui.cc:62 gtk_ardour/tempo_dialog.cc:17
-#: gtk_ardour/tempo_dialog.cc:34 gtk_ardour/tempo_dialog.cc:144
-#: gtk_ardour/tempo_dialog.cc:162
-msgid "Bar"
+#: mixer_ui.cc:105 region_editor.cc:48 region_editor.cc:191
+#: region_editor.cc:225
+msgid "active"
 msgstr ""
 
-#: gtk_ardour/mixer_ui.cc:121
-msgid "Mix Groups"
-msgstr "Mix Gruppen"
+#: mixer_ui.cc:106 region_editor.cc:49
+msgid "visible"
+msgstr ""
 
-#: gtk_ardour/mixer_ui.cc:191 gtk_ardour/mixer_ui.cc:373
+#: mixer_ui.cc:203 mixer_ui.cc:362
 msgid "ardour: mixer"
 msgstr "Ardour: Mixer"
 
-#: gtk_ardour/mixer_ui.cc:192
+#: mixer_ui.cc:204
 #, fuzzy
 msgid "ardour_mixer"
 msgstr "Ardour: Mixer"
 
-#: gtk_ardour/mixer_ui.cc:342
+#: mixer_ui.cc:338
 msgid "ardour: mixer: "
 msgstr "Ardour: Mixer: "
 
-#: gtk_ardour/mixer_ui.cc:641
+#: mixer_ui.cc:577
 msgid "signal"
 msgstr "Signal"
 
-#: gtk_ardour/mixer_ui.cc:672
-msgid "Show All AudioTrack MixerStrips"
-msgstr ""
-
-#: gtk_ardour/mixer_ui.cc:673
-msgid "Hide All AudioTrack MixerStrips"
-msgstr ""
-
-#: gtk_ardour/mixer_ui.cc:674
-msgid "Show All AudioBus MixerStrips"
-msgstr ""
-
-#: gtk_ardour/mixer_ui.cc:675
-msgid "Hide All AudioBus MixerStrips"
-msgstr ""
-
-#: gtk_ardour/mixer_ui.cc:687
+#: mixer_ui.cc:727
 msgid "track display list item for renamed strip not found!"
 msgstr ""
 
-#: gtk_ardour/mixer_ui.cc:700
-msgid "Name for new mix group"
-msgstr "Name für neue Mix Gruppe"
-
-#: gtk_ardour/new_session_dialog.cc:39
-#, fuzzy
-msgid "Session name:"
-msgstr "Name der Sitzung"
-
-#: gtk_ardour/new_session_dialog.cc:39
-#, fuzzy
-msgid "Create"
-msgstr "Abschnitt erzeugen:"
-
-#: gtk_ardour/new_session_dialog.cc:40
-msgid "use control outs"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:41
-msgid "use master outs"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:42
-msgid "automatically connect track inputs to physical ports"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:43
-msgid "automatically connect track outputs to master outs"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:44
-msgid "automatically connect track outputs to physical ports"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:45
-msgid "manually connect track outputs"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:50
-#, fuzzy
-msgid "Advanced..."
-msgstr "Feld hinzufügen..."
-
-#: gtk_ardour/new_session_dialog.cc:52
-#, fuzzy
-msgid "show again"
-msgstr "Stellen"
-
-#: gtk_ardour/new_session_dialog.cc:55
-msgid "Hardware Inputs: use"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:56
-msgid "Hardware Outputs: use"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:62
-#, fuzzy
-msgid "new session setup"
-msgstr "Name der Sitzung"
-
-#: gtk_ardour/new_session_dialog.cc:63
-#, fuzzy
-msgid "ardour_new_session"
-msgstr "Ardour: Neue Sitzung"
-
-#: gtk_ardour/new_session_dialog.cc:72
-msgid "This session will playback and record at %1 Hz"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:74
-msgid ""
-"This rate is set by JACK and cannot be changed.\n"
-"If you want to use a different sample rate\n"
-"please exit and restart JACK"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:155
-#, fuzzy
-msgid "Session template"
-msgstr "Name der Sitzung"
-
-#: gtk_ardour/new_session_dialog.cc:177 gtk_ardour/tempo_dialog.cc:20
-#: gtk_ardour/tempo_dialog.cc:37 gtk_ardour/tempo_dialog.cc:146
-#: gtk_ardour/tempo_dialog.cc:164
-#, fuzzy
-msgid "Location"
-msgstr "Stellen"
-
-#: gtk_ardour/new_session_dialog.cc:178
-msgid "Configuration"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:269
-msgid "blank"
-msgstr "leer"
-
-#: gtk_ardour/new_session_dialog.cc:328
-msgid "No template - create tracks/busses manually"
-msgstr ""
-
-#: gtk_ardour/new_session_dialog.cc:337
-#, fuzzy
-msgid "No template"
-msgstr "Voreinstellung"
-
-#: gtk_ardour/option_editor.cc:48
-#, fuzzy
-msgid "Internal"
-msgstr "mittelmäßig"
-
-#: gtk_ardour/option_editor.cc:49
-#, fuzzy
-msgid "Slave to MTC"
-msgstr "MTC senden"
-
-#: gtk_ardour/option_editor.cc:50
-msgid "Sync with JACK"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:51
-msgid "never used but stops crashes"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:56
-#, fuzzy
-msgid "Later regions are higher"
-msgstr "Region eine Ebene nach unten"
-
-#: gtk_ardour/option_editor.cc:57
-msgid "Most recently added/moved/trimmed regions are higher"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:58
-#, fuzzy
-msgid "Most recently added regions are higher"
-msgstr "Region eine Ebene nach unten"
-
-#: gtk_ardour/option_editor.cc:63
-#, fuzzy
-msgid "Span entire region overlap"
-msgstr "Region eine Ebene nach oben"
-
-#: gtk_ardour/option_editor.cc:64
-msgid "Short fades at the start of the overlap"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:82
-msgid "Automatically create crossfades"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:83
-msgid "New full-overlap crossfades are unmuted"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:84
-#, fuzzy
-msgid "Region layering mode"
-msgstr "Regionen"
-
-#: gtk_ardour/option_editor.cc:85
-msgid "Crossfade model"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:90
-msgid "Latched solo"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:91
-msgid "Solo via bus"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:96
-#, fuzzy
-msgid "Show waveforms while recording"
-msgstr "Wellenform zeigen"
-
-#: gtk_ardour/option_editor.cc:97
-#, fuzzy
-msgid "Narrow mixer strips"
-msgstr "schmale Mixerstreifen"
-
-#: gtk_ardour/option_editor.cc:98
-msgid "Show measure lines"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:99
-#, fuzzy
-msgid "Follow playhead"
-msgstr "Wiedergabe ab Playhead"
-
-#: gtk_ardour/option_editor.cc:103
-msgid "Send MTC"
-msgstr "MTC senden"
-
-#: gtk_ardour/option_editor.cc:104
-msgid "Send MMC"
-msgstr "MMC senden"
-
-#: gtk_ardour/option_editor.cc:105
-msgid "JACK time master"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:107
+#: option_editor.cc:75
 msgid "SMPTE offset is negative"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:111
-msgid "Send MIDI parameter feedback"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:112
-msgid "MIDI parameter control"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:113
-msgid "MMC control"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:131
-msgid "Auto-connect new track inputs to hardware"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:132
-msgid "Auto-connect new track outputs to hardware"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:133
-msgid "Auto-connect new track outputs to master bus"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:134
-msgid "Manually connect new track outputs"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:135
-msgid "Use Hardware Monitoring"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:136
-msgid "Use Software Monitoring"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:137
-msgid "Stop plugins with transport"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:138
-msgid "Run plugins while recording"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:139
-#, fuzzy
-msgid "Verify remove last capture"
-msgstr "Synchronisationspunkt entfernen"
-
-#: gtk_ardour/option_editor.cc:140
-msgid "Stop recording on xrun"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:141
-#, fuzzy
-msgid "Stop transport at end of session"
-msgstr "Ans Ende der Sitzung springen"
-
-#: gtk_ardour/option_editor.cc:142
-msgid "Debug keyboard events"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:143
-msgid "-12dB gain reduction for ffwd/rew"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:152
+#: option_editor.cc:101
 #, fuzzy
 msgid "ardour: options editor"
 msgstr "Ardour: Einstellungen"
 
-#: gtk_ardour/option_editor.cc:153
+#: option_editor.cc:102
 #, fuzzy
 msgid "ardour_option_editor"
 msgstr "Ardour: Einstellungen"
 
-#: gtk_ardour/option_editor.cc:183
-#, fuzzy
-msgid "Misc"
-msgstr "Min:Sek"
-
-#: gtk_ardour/option_editor.cc:184
-msgid "Sync"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:185
+#: option_editor.cc:126
 msgid "Paths/Files"
 msgstr "Pfade- und Dateinamen"
 
-#: gtk_ardour/option_editor.cc:186
-msgid "Display"
-msgstr "Anzeige"
-
-#: gtk_ardour/option_editor.cc:187
+#: option_editor.cc:127
 msgid "Kbd/Mouse"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:188
-msgid "Click"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:190
+#: option_editor.cc:130
 msgid "Layers & Fades"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:195
+#: option_editor.cc:134
 msgid "MIDI"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:268
+#: option_editor.cc:176
 msgid "24 FPS"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:270
+#: option_editor.cc:178
 msgid "25 FPS"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:272
+#: option_editor.cc:180
 msgid "30 FPS"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:278
+#: option_editor.cc:186
 msgid "30 FPS drop"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:362 gtk_ardour/option_editor.cc:379
-#: gtk_ardour/option_editor.cc:715 gtk_ardour/option_editor.cc:736
-#: gtk_ardour/option_editor.cc:778 gtk_ardour/option_editor.cc:800
-msgid "Medium"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:366 gtk_ardour/option_editor.cc:738
-#: gtk_ardour/option_editor.cc:804
-#, fuzzy
-msgid "Faster"
-msgstr "Einfügen"
-
-#: gtk_ardour/option_editor.cc:376 gtk_ardour/option_editor.cc:714
-#: gtk_ardour/option_editor.cc:776
-#, fuzzy
-msgid "Short"
-msgstr "Anschluß"
-
-#: gtk_ardour/option_editor.cc:382 gtk_ardour/option_editor.cc:716
-#: gtk_ardour/option_editor.cc:780
-msgid "Long"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:396
-msgid "Broadcast WAVE/floating point"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:397
-msgid "WAVE/floating point"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:417
+#: option_editor.cc:243
 msgid "session RAID path"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:422
-msgid "Native Format"
-msgstr ""
+#: option_editor.cc:248
+#, fuzzy
+msgid "Soundfile Search Paths"
+msgstr "Ardour: Audio Bibliothek"
 
-#: gtk_ardour/option_editor.cc:454 gtk_ardour/option_editor.cc:460
-#: gtk_ardour/option_editor.cc:1382 gtk_ardour/option_editor.cc:1409
+#: option_editor.cc:253
+#, fuzzy
+msgid "Paths"
+msgstr "Pfade- und Dateinamen"
+
+#: option_editor.cc:267 option_editor.cc:273 option_editor.cc:722
+#: option_editor.cc:749
 #, fuzzy
 msgid "internal"
 msgstr "mittelmäßig"
 
-#: gtk_ardour/option_editor.cc:537
+#: option_editor.cc:286
 msgid "Short crossfade length (msecs)"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:710
-msgid "Meter Peak Hold"
+#: option_editor.cc:298
+msgid "Destructive crossfade length (msecs)"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:730
-msgid "Meter Falloff"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:847
-msgid "Positional Sync"
-msgstr ""
-
-#: gtk_ardour/option_editor.cc:902
+#: option_editor.cc:366
 msgid "SMPTE Frames/second"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:903
+#: option_editor.cc:367
 msgid "SMPTE Offset"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:1006 gtk_ardour/option_editor.cc:1013
-#: gtk_ardour/option_editor.cc:1016 gtk_ardour/option_editor.cc:1211
+#: option_editor.cc:461 option_editor.cc:468 option_editor.cc:471
+#: option_editor.cc:617
 #, fuzzy
 msgid "online"
 msgstr "Verbindungen"
 
-#: gtk_ardour/option_editor.cc:1013 gtk_ardour/option_editor.cc:1014
-#: gtk_ardour/option_editor.cc:1208
+#. remember, we have to handle the i18n case where the relative
+#. lengths of the strings in language N is different than in english.
+#.
+#: option_editor.cc:468 option_editor.cc:469 option_editor.cc:614
 msgid "offline"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:1319
-msgid "Use as click"
+#: option_editor.cc:669
+msgid "Choose Click"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:1344
-msgid "Use as click emphasis"
+#: option_editor.cc:688
+msgid "Choose Click Emphasis"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:1478
-msgid "--unknown--"
-msgstr "--unbekannt--"
-
-#: gtk_ardour/option_editor.cc:1595
+#: option_editor.cc:802
 msgid "Click audio file"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:1601
+#: option_editor.cc:808
 msgid "Click emphasis audiofile"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:1638
+#: option_editor.cc:845
 msgid ""
 "The auditioner is a dedicated mixer strip used\n"
 "for listening to specific regions outside the context\n"
@@ -4341,37 +5161,37 @@ msgid ""
 "other mixer strip."
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:1887
+#: option_editor.cc:918
 #, fuzzy
 msgid "Edit using"
 msgstr "Mix Gruppen"
 
-#: gtk_ardour/option_editor.cc:1894 gtk_ardour/option_editor.cc:1924
+#: option_editor.cc:925 option_editor.cc:952
 msgid "+ button"
 msgstr ""
 
-#: gtk_ardour/option_editor.cc:1917
+#: option_editor.cc:945
 #, fuzzy
 msgid "Delete using"
 msgstr "Messungen"
 
-#: gtk_ardour/option_editor.cc:1947
+#: option_editor.cc:972
 msgid "Ignore snap using"
 msgstr ""
 
-#: gtk_ardour/opts.cc:46
+#: opts.cc:47
 msgid "Usage: "
 msgstr "Aufruf:"
 
-#: gtk_ardour/opts.cc:47
+#: opts.cc:48
 msgid "  -v, --version                    Show version information\n"
 msgstr "  -v, --version                    Versionsinformation ausgeben\n"
 
-#: gtk_ardour/opts.cc:48
+#: opts.cc:49
 msgid "  -h, --help                       Print this message\n"
 msgstr "  -h, --help                       Diese Hinweise\n"
 
-#: gtk_ardour/opts.cc:49
+#: opts.cc:50
 msgid ""
 "  -b, --bindings                   Print all possible keyboard binding "
 "names\n"
@@ -4379,278 +5199,223 @@ msgstr ""
 "  -b, --bindings                   Alle möglichen Tastenzuweisungsnamen "
 "ausgeben\n"
 
-#: gtk_ardour/opts.cc:50
+#: opts.cc:51
 #, fuzzy
 msgid "  -n, --show-splash                Show splash screen\n"
 msgstr "  -h, --help                       Diese Hinweise\n"
 
-#: gtk_ardour/opts.cc:51
+#: opts.cc:52
 #, fuzzy
 msgid ""
 "  -c, --name  name                 Use a specific jack client name, default "
 "is ardour\n"
 msgstr "  -U, --ui-rcfile=FILENAME         Dateiname für UI Einstellungen\n"
 
-#: gtk_ardour/opts.cc:52
+#: opts.cc:53
 #, fuzzy
 msgid ""
 "  -N, --new session-name           Create a new session from the command "
 "line\n"
 msgstr "  [session-name]                   Name der zu ladenden Sitzung\n"
 
-#: gtk_ardour/opts.cc:53
+#: opts.cc:54
 msgid ""
 "  -o, --use-hw-optimizations        Try to use h/w specific optimizations\n"
 msgstr ""
 
-#: gtk_ardour/opts.cc:55
+#: opts.cc:56
 #, fuzzy
 msgid "  -V, --novst                      Do not use VST support\n"
 msgstr "  -h, --help                       Diese Hinweise\n"
 
-#: gtk_ardour/opts.cc:57
+#: opts.cc:58
 msgid "  [session-name]                   Name of session to load\n"
 msgstr "  [session-name]                   Name der zu ladenden Sitzung\n"
 
-#: gtk_ardour/opts.cc:58
+#: opts.cc:59
 msgid "  -C, --curvetest filename         Curve algorithm debugger\n"
 msgstr ""
 
-#: gtk_ardour/pan_automation_time_axis.cc:58
+#: opts.cc:60
+#, fuzzy
+msgid "  -g, --gtktheme                   Allow GTK to load a theme\n"
+msgstr "  -h, --help                       Diese Hinweise\n"
+
+#: pan_automation_time_axis.cc:59
 msgid "You can't graphically edit panning of more than stream"
 msgstr ""
 
-#: gtk_ardour/pan_automation_time_axis.cc:78
+#: pan_automation_time_axis.cc:79
 #, fuzzy
 msgid "add pan automation event"
 msgstr "Stellen"
 
-#: gtk_ardour/panner2d.cc:581 gtk_ardour/panner_ui.cc:441
+#: panner2d.cc:588 panner_ui.cc:393
 msgid "Bypass"
 msgstr ""
 
-#: gtk_ardour/panner_ui.cc:90 gtk_ardour/panner_ui.cc:222
+#: panner_ui.cc:57 panner_ui.cc:187
 #, fuzzy
 msgid "link"
 msgstr "leer"
 
-#: gtk_ardour/panner_ui.cc:103
+#: panner_ui.cc:70
 msgid "panning link control"
 msgstr ""
 
-#: gtk_ardour/panner_ui.cc:105
+#: panner_ui.cc:72
 msgid "panning link direction"
 msgstr ""
 
-#: gtk_ardour/panner_ui.cc:232
+#: panner_ui.cc:197
 msgid "L"
 msgstr ""
 
-#: gtk_ardour/panner_ui.cc:344
+#: panner_ui.cc:296
 #, c-format
 msgid "panner for channel %u"
 msgstr ""
 
-#: gtk_ardour/panner_ui.cc:451
+#: panner_ui.cc:403
 #, fuzzy
 msgid "Reset all"
 msgstr "bestmöglich"
 
-#: gtk_ardour/playlist_selector.cc:46
-msgid "Playlists grouped by track"
-msgstr ""
-
-#: gtk_ardour/playlist_selector.cc:53
-#, fuzzy
-msgid "close"
-msgstr "Schließen"
-
-#: gtk_ardour/playlist_selector.cc:59
+#: playlist_selector.cc:51
 #, fuzzy
 msgid "ardour: playlists"
 msgstr "Ardour: Plugins"
 
-#: gtk_ardour/playlist_selector.cc:104
+#: playlist_selector.cc:58
+msgid "Playlists grouped by track"
+msgstr ""
+
+#: playlist_selector.cc:69
+#, fuzzy
+msgid "close"
+msgstr "Schließen"
+
+#: playlist_selector.cc:97
 #, fuzzy
 msgid "ardour: playlist for "
 msgstr "Ardour: Editor: "
 
-#: gtk_ardour/playlist_selector.cc:122
+#: playlist_selector.cc:113
 #, fuzzy
 msgid "Other tracks"
 msgstr "Stille einfügen"
 
-#: gtk_ardour/playlist_selector.cc:138
+#: playlist_selector.cc:129
 msgid "unassigned"
 msgstr ""
 
-#: gtk_ardour/plugin_selector.cc:41
-msgid "Available LADSPA plugins"
-msgstr "Verfügbare LADSPA Plugins"
-
-#: gtk_ardour/plugin_selector.cc:42
-msgid "Type"
-msgstr "Typ"
-
-#: gtk_ardour/plugin_selector.cc:43 gtk_ardour/plugin_selector.cc:51
-msgid "# Inputs"
-msgstr "Eingänge"
-
-#: gtk_ardour/plugin_selector.cc:44 gtk_ardour/plugin_selector.cc:52
-msgid "# Outputs"
-msgstr "Ausgänge"
-
-#: gtk_ardour/plugin_selector.cc:50
-#, fuzzy
-msgid "Available VST plugins"
-msgstr "Verfügbare LADSPA Plugins"
-
-#: gtk_ardour/plugin_selector.cc:58
-msgid "To be added"
-msgstr "hinzuzufügen"
-
-#: gtk_ardour/plugin_selector.cc:72
+#: plugin_selector.cc:42
 msgid "ardour: plugins"
 msgstr "Ardour: Plugins"
 
-#: gtk_ardour/plugin_selector.cc:82
+#: plugin_selector.cc:55
+msgid "Available LADSPA plugins"
+msgstr "Verfügbare LADSPA Plugins"
+
+#: plugin_selector.cc:56
+msgid "Type"
+msgstr "Typ"
+
+#: plugin_selector.cc:57 plugin_selector.cc:80
+msgid "# Inputs"
+msgstr "Eingänge"
+
+#: plugin_selector.cc:58 plugin_selector.cc:81
+msgid "# Outputs"
+msgstr "Ausgänge"
+
+#: plugin_selector.cc:67
+msgid "To be added"
+msgstr "hinzuzufügen"
+
+#: plugin_selector.cc:79
+#, fuzzy
+msgid "Available plugins"
+msgstr "Verfügbare LADSPA Plugins"
+
+#: plugin_selector.cc:97
 msgid "Add a plugin to the effect list"
 msgstr "Plugin zur Effektliste hinzufügen"
 
-#: gtk_ardour/plugin_selector.cc:84
+#: plugin_selector.cc:99
 msgid "Remove a plugin from the effect list"
 msgstr "Plugin aus der Effektliste entfernen"
 
-#: gtk_ardour/plugin_selector.cc:88
+#: plugin_selector.cc:100
 msgid "Update"
 msgstr "Auffrischen"
 
-#: gtk_ardour/plugin_selector.cc:89
+#: plugin_selector.cc:101
 msgid "Update available plugins"
 msgstr "Verfügbare Plugins auffrischen"
 
-#: gtk_ardour/plugin_selector.cc:110
+#: plugin_selector.cc:122
 msgid "LADSPA"
 msgstr ""
 
-#: gtk_ardour/plugin_selector.cc:113
+#: plugin_selector.cc:125
 msgid "VST"
 msgstr ""
 
-#: gtk_ardour/plugin_ui.cc:83
+#: plugin_ui.cc:83
 msgid ""
 "unknown type of editor-supplying plugin (note: no VST support in this "
 "version of ardour)"
 msgstr ""
 
-#: gtk_ardour/plugin_ui.cc:269
+#: plugin_ui.cc:138
+msgid "<span size=\"large\" weight=\"bold\">Presets</span>"
+msgstr ""
+
+#: plugin_ui.cc:265
 msgid "Plugin Editor: could not build control element for port %1"
 msgstr ""
 
-#: gtk_ardour/plugin_ui.cc:367
-msgid "in"
-msgstr ""
-
-#: gtk_ardour/plugin_ui.cc:367
-msgid "ins"
-msgstr ""
-
-#: gtk_ardour/plugin_ui.cc:368
-msgid "out"
-msgstr ""
-
-#: gtk_ardour/plugin_ui.cc:368
-msgid "outs"
-msgstr ""
-
-#: gtk_ardour/plugin_ui.cc:382
+#: plugin_ui.cc:356
 #, fuzzy
 msgid "automation control"
 msgstr "Stellen"
 
-#: gtk_ardour/plugin_ui.cc:869
+#: plugin_ui.cc:831
 #, fuzzy
 msgid "save"
 msgstr "Speichern"
 
-#: gtk_ardour/plugin_ui.cc:870
+#: plugin_ui.cc:832
 msgid "bypass"
 msgstr ""
 
-#: gtk_ardour/plugin_ui.cc:892
+#: plugin_ui.cc:851
 msgid "Plugin preset %1 not found"
 msgstr ""
 
-#: gtk_ardour/plugin_ui.cc:903
+#: plugin_ui.cc:861
 msgid "Name for plugin settings:"
 msgstr "Name für Plugineinstellungen:"
 
-#: gtk_ardour/redirect_automation_line.cc:53
+#: redirect_automation_line.cc:53
 msgid "redirect automation created for non-plugin"
 msgstr ""
 
-#: gtk_ardour/redirect_automation_time_axis.cc:92
+#: redirect_automation_time_axis.cc:93
 #, fuzzy
 msgid "add automation event to "
 msgstr "Stellen"
 
-#: gtk_ardour/redirect_box.cc:213
+#: redirect_box.cc:221
 msgid "New send"
 msgstr ""
 
-#: gtk_ardour/redirect_box.cc:214
+#: redirect_box.cc:222
 msgid "Show send controls"
 msgstr ""
 
-#: gtk_ardour/redirect_box.cc:360
-msgid "New Plugin ..."
-msgstr ""
-
-#: gtk_ardour/redirect_box.cc:361
-#, fuzzy
-msgid "New Insert"
-msgstr "Neuer Eingang"
-
-#: gtk_ardour/redirect_box.cc:362
-msgid "New Send ..."
-msgstr ""
-
-#: gtk_ardour/redirect_box.cc:380
-#, fuzzy
-msgid "Select all"
-msgstr "Auswahl"
-
-#: gtk_ardour/redirect_box.cc:381
-#, fuzzy
-msgid "Deselect all"
-msgstr "Auswahl"
-
-#: gtk_ardour/redirect_box.cc:389
-#, fuzzy
-msgid "Inserts"
-msgstr "Stille einfügen"
-
-#: gtk_ardour/redirect_box.cc:390
-#, fuzzy
-msgid "Sends"
-msgstr "Minuten:Sekunden"
-
-#: gtk_ardour/redirect_box.cc:393
-#, fuzzy
-msgid "Select all ..."
-msgstr "Auswahl"
-
-#: gtk_ardour/redirect_box.cc:406
-#, fuzzy
-msgid "Activate All"
-msgstr "Aktiv"
-
-#: gtk_ardour/redirect_box.cc:407
-#, fuzzy
-msgid "Deactivate All"
-msgstr "Alles deaktivieren"
-
-#: gtk_ardour/redirect_box.cc:488
+#: redirect_box.cc:376
 msgid ""
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
@@ -4661,7 +5426,7 @@ msgid ""
 "part of the signal."
 msgstr ""
 
-#: gtk_ardour/redirect_box.cc:500
+#: redirect_box.cc:388
 msgid ""
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
@@ -4673,7 +5438,7 @@ msgid ""
 "support this type of configuration."
 msgstr ""
 
-#: gtk_ardour/redirect_box.cc:513
+#: redirect_box.cc:401
 msgid ""
 "You attempted to add a plugin (%1).\n"
 "\n"
@@ -4686,34 +5451,34 @@ msgid ""
 "Ardour does not understand what to do in such situations.\n"
 msgstr ""
 
-#: gtk_ardour/redirect_box.cc:616
+#: redirect_box.cc:492
 msgid "Pre-fader inserts, sends & plugins:"
 msgstr ""
 
-#: gtk_ardour/redirect_box.cc:619
+#: redirect_box.cc:495
 msgid "Post-fader inserts, sends & plugins:"
 msgstr ""
 
-#: gtk_ardour/redirect_box.cc:781
+#: redirect_box.cc:641
 msgid ""
 "You cannot reorder this set of redirects\n"
 "in that way because the inputs and\n"
 "outputs do not work correctly."
 msgstr ""
 
-#: gtk_ardour/redirect_box.cc:903
+#: redirect_box.cc:746
 #, fuzzy
-msgid "ardour: rename redirect"
+msgid "rename redirect"
 msgstr "Ardour: Region umbenennen"
 
-#: gtk_ardour/redirect_box.cc:992 gtk_ardour/redirect_box.cc:1043
+#: redirect_box.cc:821 redirect_box.cc:869
 msgid ""
 "Copying the set of redirects on the clipboard failed,\n"
 "probably because the I/O configuration of the plugins\n"
 "could not match the configuration of this track."
 msgstr ""
 
-#: gtk_ardour/redirect_box.cc:1064
+#: redirect_box.cc:891
 #, fuzzy
 msgid ""
 "Do you really want to remove all redirects from this track?\n"
@@ -4722,7 +5487,7 @@ msgstr ""
 "Wollen Sie wirklich die Spur \"%1\" löschen?\n"
 "(Kann nicht rückgängig gemacht werden!)"
 
-#: gtk_ardour/redirect_box.cc:1067
+#: redirect_box.cc:894
 #, fuzzy
 msgid ""
 "Do you really want to remove all redirects from this bus?\n"
@@ -4731,233 +5496,248 @@ msgstr ""
 "Wollen Sie wirklich die Spur \"%1\" löschen?\n"
 "(Kann nicht rückgängig gemacht werden!)"
 
-#: gtk_ardour/redirect_box.cc:1071
+#: redirect_box.cc:898
 #, fuzzy
 msgid "Yes, remove them all"
 msgstr "Ja, entfernen."
 
-#: gtk_ardour/redirect_box.cc:1114
+#: redirect_box.cc:935
 #, fuzzy
 msgid "ardour: %1"
 msgstr "Ardour: "
 
-#: gtk_ardour/redirect_box.cc:1156
+#: redirect_box.cc:977
 #, fuzzy
 msgid "ardour: %1: %2 (by %3)"
 msgstr "Ardour: "
 
-#: gtk_ardour/region_editor.cc:43
+#. new stuff
+#: redirect_box.cc:1049
+msgid "New Plugin ..."
+msgstr ""
+
+#: redirect_box.cc:1050
+#, fuzzy
+msgid "New Insert"
+msgstr "Neuer Eingang"
+
+#: redirect_box.cc:1051
+msgid "New Send ..."
+msgstr ""
+
+#: redirect_box.cc:1063
+#, fuzzy
+msgid "Deselect All"
+msgstr "Auswahl"
+
+#: redirect_box.cc:1070
+#, fuzzy
+msgid "Activate all"
+msgstr "Aktiv"
+
+#: redirect_box.cc:1071
+#, fuzzy
+msgid "Deactivate all"
+msgstr "Alles deaktivieren"
+
+#: region_editor.cc:44
 msgid "NAME:"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:44
+#: region_editor.cc:45
 msgid "lock"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:46
+#: region_editor.cc:47
 msgid "opaque"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:49
+#: region_editor.cc:52
 msgid "Layer"
 msgstr "Schicht"
 
-#: gtk_ardour/region_editor.cc:57
+#: region_editor.cc:60
 msgid "ENVELOPE"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:108
+#: region_editor.cc:106
 #, fuzzy
 msgid "mute this region"
 msgstr "Name für Region:"
 
-#: gtk_ardour/region_editor.cc:109
+#: region_editor.cc:107
 msgid "regions underneath this one cannot be heard"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:110
+#: region_editor.cc:108
 msgid "prevent any changes to this region"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:111
+#: region_editor.cc:109
 msgid "use the gain envelope during playback"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:112
+#: region_editor.cc:110
 msgid "show the gain envelope"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:113
+#: region_editor.cc:111
 msgid "use fade in curve during playback"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:114
+#: region_editor.cc:112
 msgid "use fade out curve during playback"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:115
+#: region_editor.cc:113
 msgid "audition this region"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:148
+#: region_editor.cc:146
 msgid "START:"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:150
+#: region_editor.cc:148
 msgid "END:"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:152
+#: region_editor.cc:150
 msgid "LENGTH:"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:177 gtk_ardour/region_editor.cc:198
-#: gtk_ardour/region_editor.cc:234
-msgid "active"
-msgstr ""
-
-#: gtk_ardour/region_editor.cc:179
-msgid "visible"
-msgstr ""
-
-#: gtk_ardour/region_editor.cc:197
+#: region_editor.cc:190
 msgid "FADE IN"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:199 gtk_ardour/region_editor.cc:235
+#: region_editor.cc:192 region_editor.cc:226
 msgid "msecs"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:233
+#: region_editor.cc:224
 msgid "FADE OUT"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:276
+#: region_editor.cc:264
 msgid "ardour: region "
 msgstr "Ardour: Region"
 
-#: gtk_ardour/region_editor.cc:410
+#: region_editor.cc:401
 msgid "fade in edit"
 msgstr ""
 
-#: gtk_ardour/region_editor.cc:422
+#: region_editor.cc:413
 #, fuzzy
 msgid "fade out edit"
 msgstr "Ardour: Editor"
 
-#: gtk_ardour/regionview.cc:1169
+#: regionview.cc:1140
 #, fuzzy
 msgid "add gain control point"
 msgstr "Synchronisationspunkt entfernen"
 
-#: gtk_ardour/route_params_ui.cc:58
+#: route_params_ui.cc:88
 msgid "Tracks/Buses"
 msgstr ""
 
-#: gtk_ardour/route_params_ui.cc:59
-msgid "Pre Redirects"
-msgstr ""
-
-#: gtk_ardour/route_params_ui.cc:60
-msgid "Post Redirects"
-msgstr ""
-
-#: gtk_ardour/route_params_ui.cc:105
+#: route_params_ui.cc:108
 msgid "Pre-fader Redirects"
 msgstr ""
 
-#: gtk_ardour/route_params_ui.cc:106
+#: route_params_ui.cc:109
 msgid "Post-fader Redirects"
 msgstr ""
 
-#: gtk_ardour/route_params_ui.cc:138
+#: route_params_ui.cc:141
 #, fuzzy
 msgid "ardour: track/bus inspector"
 msgstr "Ardour: Editor"
 
-#: gtk_ardour/route_params_ui.cc:139
+#: route_params_ui.cc:142
 #, fuzzy
 msgid "ardour_route_parameters"
 msgstr "Ardour: Route"
 
-#: gtk_ardour/route_params_ui.cc:189
+#: route_params_ui.cc:199
 msgid "route display list item for renamed route not found!"
 msgstr ""
 
-#: gtk_ardour/route_params_ui.cc:448
+#: route_params_ui.cc:451
 msgid "NO TRACK"
 msgstr ""
 
-#: gtk_ardour/route_params_ui.cc:669
+#: route_params_ui.cc:693
 #, fuzzy
 msgid "ardour: track/bus inspector: "
 msgstr "Ardour: Editor"
 
-#: gtk_ardour/route_params_ui.cc:673
+#: route_params_ui.cc:697
 msgid "No Route Selected"
 msgstr "Keine Route ausgewählt"
 
-#: gtk_ardour/route_params_ui.cc:674
+#: route_params_ui.cc:698
 #, fuzzy
 msgid "ardour: track/bus/inspector: no route selected"
 msgstr "Ardour: Route: keine Route ausgewählt"
 
-#: gtk_ardour/route_ui.cc:134
+#. ctrl-shift-click applies change to all routes
+#: route_ui.cc:133
 #, fuzzy
 msgid "mute change"
 msgstr "Bereich"
 
-#: gtk_ardour/route_ui.cc:210 gtk_ardour/route_ui.cc:220
+#. ctrl-shift-click applies change to all routes
+#. ctrl-alt-click: exclusively solo this track, not a toggle */
+#: route_ui.cc:208 route_ui.cc:218
 #, fuzzy
 msgid "solo change"
 msgstr "Bereich"
 
-#: gtk_ardour/route_ui.cc:284
+#: route_ui.cc:281
 msgid "rec-enable change"
 msgstr ""
 
-#: gtk_ardour/route_ui.cc:423
+#: route_ui.cc:472
 #, fuzzy
 msgid "Solo-safe"
 msgstr "solo"
 
-#: gtk_ardour/route_ui.cc:431 gtk_ardour/route_ui.cc:474
+#: route_ui.cc:480 route_ui.cc:523
 msgid "MIDI Bind"
 msgstr ""
 
-#: gtk_ardour/route_ui.cc:445
+#: route_ui.cc:494
 msgid "Pre Fader"
 msgstr ""
 
-#: gtk_ardour/route_ui.cc:452
+#: route_ui.cc:501
 msgid "Post Fader"
 msgstr ""
 
-#: gtk_ardour/route_ui.cc:459
+#: route_ui.cc:508
 msgid "Control Outs"
 msgstr ""
 
-#: gtk_ardour/route_ui.cc:466
+#: route_ui.cc:515
 msgid "Main Outs"
 msgstr ""
 
-#: gtk_ardour/route_ui.cc:503
+#: route_ui.cc:552
 msgid "mix group solo  change"
 msgstr ""
 
-#: gtk_ardour/route_ui.cc:537
+#: route_ui.cc:586
 msgid "mix group mute change"
 msgstr ""
 
-#: gtk_ardour/route_ui.cc:553
+#: route_ui.cc:602
 msgid "mix group rec-enable change"
 msgstr ""
 
-#: gtk_ardour/route_ui.cc:576 gtk_ardour/visual_time_axis.cc:258
+#: route_ui.cc:619 visual_time_axis.cc:236
 msgid "ardour: color selection"
 msgstr "Ardour: Farbe auswählen"
 
-#: gtk_ardour/route_ui.cc:652
+#: route_ui.cc:695
 #, fuzzy
 msgid ""
 "Do you really want to remove track \"%1\" ?\n"
@@ -4967,148 +5747,227 @@ msgstr ""
 "Wollen Sie wirklich die Spur \"%1\" löschen?\n"
 "(Kann nicht rückgängig gemacht werden!)"
 
-#: gtk_ardour/route_ui.cc:654
+#: route_ui.cc:697
 msgid ""
 "Do you really want to remove bus \"%1\" ?\n"
 "(cannot be undone)"
 msgstr ""
 
-#: gtk_ardour/route_ui.cc:657 gtk_ardour/visual_time_axis.cc:299
+#: route_ui.cc:700 visual_time_axis.cc:277
 msgid "Yes, remove it."
 msgstr "Ja, entfernen."
 
-#: gtk_ardour/route_ui.cc:691 gtk_ardour/visual_time_axis.cc:358
+#: route_ui.cc:730 visual_time_axis.cc:324
 msgid "new name: "
 msgstr "Neuer Name: "
 
-#: gtk_ardour/tempo_dialog.cc:14 gtk_ardour/tempo_dialog.cc:31
+#: sfdb_ui.cc:58
+msgid "Add Field..."
+msgstr "Feld hinzufügen..."
+
+#: sfdb_ui.cc:59
+msgid "Remove Field"
+msgstr "Feld entfernen"
+
+#: sfdb_ui.cc:62
+msgid "Soundfile Info"
+msgstr ""
+
+#: sfdb_ui.cc:80
+msgid "Field"
+msgstr "Feld"
+
+#: sfdb_ui.cc:81
+msgid "Value"
+msgstr "Wert"
+
+#: sfdb_ui.cc:161
+#, fuzzy
+msgid "channels"
+msgstr "Abbrechen"
+
+#: sfdb_ui.cc:161
+#, fuzzy
+msgid "samplerate"
+msgstr "Ausgewählten Bereich wiedergeben"
+
+#: sfdb_ui.cc:162
+#, fuzzy
+msgid "resolution"
+msgstr "Auswahl wiedergeben"
+
+#: sfdb_ui.cc:162
+#, fuzzy
+msgid "format"
+msgstr "Anschluß"
+
+#: sfdb_ui.cc:183
+msgid "Could not read file: %1 (%2)."
+msgstr ""
+
+#: sfdb_ui.cc:199
+msgid "Could not access soundfile: "
+msgstr ""
+
+#: sfdb_ui.cc:236
+#, fuzzy
+msgid "Name for field"
+msgstr "Name für Region:"
+
+#: sfdb_ui.cc:331
+msgid "Split Channels"
+msgstr ""
+
+#: sfdb_ui.cc:337
+msgid "Embed"
+msgstr ""
+
+#: sfdb_ui.cc:338
+msgid "Import"
+msgstr "Importieren"
+
+#: sfdb_ui.cc:401
+msgid "programming error: %1"
+msgstr ""
+
+#: tempo_dialog.cc:17 tempo_dialog.cc:34
 msgid "Beats per minute"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:18 gtk_ardour/tempo_dialog.cc:35
-#: gtk_ardour/tempo_dialog.cc:145 gtk_ardour/tempo_dialog.cc:163
+#: tempo_dialog.cc:20 tempo_dialog.cc:37 tempo_dialog.cc:138
+#: tempo_dialog.cc:156
+msgid "Bar"
+msgstr ""
+
+#: tempo_dialog.cc:21 tempo_dialog.cc:38 tempo_dialog.cc:139
+#: tempo_dialog.cc:157
 msgid "Beat"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:140 gtk_ardour/tempo_dialog.cc:158
+#: tempo_dialog.cc:23 tempo_dialog.cc:40 tempo_dialog.cc:140
+#: tempo_dialog.cc:158
+#, fuzzy
+msgid "Location"
+msgstr "Stellen"
+
+#: tempo_dialog.cc:134 tempo_dialog.cc:152
 msgid "Meter denominator"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:141 gtk_ardour/tempo_dialog.cc:159
+#: tempo_dialog.cc:135 tempo_dialog.cc:153
 msgid "Beats per bar"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:178 gtk_ardour/tempo_dialog.cc:189
+#: tempo_dialog.cc:171 tempo_dialog.cc:182
 msgid "whole (1)"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:179 gtk_ardour/tempo_dialog.cc:191
+#: tempo_dialog.cc:172 tempo_dialog.cc:184
 msgid "second (2)"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:180 gtk_ardour/tempo_dialog.cc:193
+#: tempo_dialog.cc:173 tempo_dialog.cc:186
 msgid "third (3)"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:181 gtk_ardour/tempo_dialog.cc:195
-#: gtk_ardour/tempo_dialog.cc:203
+#: tempo_dialog.cc:174 tempo_dialog.cc:188 tempo_dialog.cc:196
 msgid "quarter (4)"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:182 gtk_ardour/tempo_dialog.cc:197
+#: tempo_dialog.cc:175 tempo_dialog.cc:190
 msgid "eighth (8)"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:183 gtk_ardour/tempo_dialog.cc:199
+#: tempo_dialog.cc:176 tempo_dialog.cc:192
 msgid "sixteenth (16)"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:184 gtk_ardour/tempo_dialog.cc:201
+#: tempo_dialog.cc:177 tempo_dialog.cc:194
 msgid "thirty-second (32)"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:301
+#: tempo_dialog.cc:285
 msgid "garbaged note type entry (%1)"
 msgstr ""
 
-#: gtk_ardour/tempo_dialog.cc:311
+#: tempo_dialog.cc:295
 msgid "incomprehensible note type entry (%1)"
 msgstr ""
 
-#: gtk_ardour/time_axis_view.cc:95
+#: time_axis_view.cc:111
 msgid "gTortnam"
 msgstr ""
 
-#: gtk_ardour/time_axis_view.cc:446
+#: time_axis_view.cc:543
 msgid "Largest"
 msgstr ""
 
-#: gtk_ardour/time_axis_view.cc:447
+#: time_axis_view.cc:544
 #, fuzzy
 msgid "Large"
 msgstr "Schicht"
 
-#: gtk_ardour/time_axis_view.cc:448
+#: time_axis_view.cc:545
 #, fuzzy
 msgid "Larger"
 msgstr "Schicht"
 
-#: gtk_ardour/time_axis_view.cc:450
+#: time_axis_view.cc:547
 msgid "Smaller"
 msgstr ""
 
-#: gtk_ardour/time_axis_view.cc:451
+#: time_axis_view.cc:548
 #, fuzzy
 msgid "Small"
 msgstr "Alle zeigen"
 
-#: gtk_ardour/time_axis_view.cc:785
+#: time_axis_view.cc:864
 msgid "unknown track height name \"%1\" in XML GUI information"
 msgstr ""
 
-#: gtk_ardour/time_axis_view_item.cc:69
+#: time_axis_view_item.cc:71
 msgid "TimeAxisViewItemName"
 msgstr ""
 
-#: gtk_ardour/time_axis_view_item.cc:258
+#: time_axis_view_item.cc:271
 msgid "new duration %1 frames is out of bounds for %2"
 msgstr ""
 
-#: gtk_ardour/time_selection.cc:40
+#: time_selection.cc:40
 msgid "programming error: request for non-existent audio range (%1)!"
 msgstr ""
 
-#: gtk_ardour/utils.cc:57
+#: utils.cc:64
 msgid ""
 "\"\n"
 "\t ,<.>/?:;'[{}]~`!@#$%^&*()_-+="
 msgstr ""
 
-#: gtk_ardour/utils.cc:66
+#: utils.cc:73
 msgid "aeiou"
 msgstr ""
 
-#: gtk_ardour/utils.cc:75
+#: utils.cc:82
 msgid "AEIOU"
 msgstr ""
 
-#: gtk_ardour/utils.cc:84
+#: utils.cc:91
 msgid "bcdfghjklmnpqrtvwxyz"
 msgstr ""
 
-#: gtk_ardour/utils.cc:93
+#: utils.cc:100
 msgid "BCDFGHJKLMNPQRTVWXYZ"
 msgstr ""
 
-#: gtk_ardour/utils.cc:222 gtk_ardour/utils.cc:265
+#: utils.cc:191 utils.cc:234
 msgid "bad XPM header %1"
 msgstr ""
 
-#: gtk_ardour/utils.cc:516
+#: utils.cc:489
 msgid "missing RGBA style for \"%1\""
 msgstr ""
 
-#: gtk_ardour/visual_time_axis.cc:297
+#: visual_time_axis.cc:275
 msgid ""
 "Do you really want to remove track \"%1\" ?\n"
 "(cannot be undone)"
@@ -5116,9 +5975,236 @@ msgstr ""
 "Wollen Sie wirklich die Spur \"%1\" löschen?\n"
 "(Kann nicht rückgängig gemacht werden!)"
 
-#: gtk_ardour/visual_time_axis.cc:385
+#: visual_time_axis.cc:333
 msgid "A track already exists with that name"
 msgstr ""
+
+#, fuzzy
+#~ msgid "spring"
+#~ msgstr "Importieren"
+
+#, fuzzy
+#~ msgid "Sprung"
+#~ msgstr "Sortieren"
+
+#~ msgid "rescan"
+#~ msgstr "Auffrischen"
+
+#, fuzzy
+#~ msgid "Enable/Disable follow playhead"
+#~ msgstr "Wiedergabeschleife an/abschalten"
+
+#~ msgid "Input Connections"
+#~ msgstr "Verbindungen der Eingänge"
+
+#~ msgid "Output Connections"
+#~ msgstr "Verbindungen der Ausgänge"
+
+#, fuzzy
+#~ msgid "New Input"
+#~ msgstr "Neuer Eingang"
+
+#, fuzzy
+#~ msgid "New Output"
+#~ msgstr "Neuer Ausgang"
+
+#, fuzzy
+#~ msgid "Add Port"
+#~ msgstr "Port hinzufügen"
+
+#, fuzzy
+#~ msgid "Available Ports"
+#~ msgstr "Verfügbare Verbindungen"
+
+#~ msgid "ardour: connections"
+#~ msgstr "Ardour: Verbindungen"
+
+#~ msgid "Name for new connection:"
+#~ msgstr "Name für neue Verbindung:"
+
+#, fuzzy
+#~ msgid "crossfade editor"
+#~ msgstr "Ardour: Editor"
+
+#, fuzzy
+#~ msgid "Regions/name"
+#~ msgstr "Regionen"
+
+#~ msgid "Edit:"
+#~ msgstr "Bearbeiten:"
+
+#, fuzzy
+#~ msgid "Cancel cleanup"
+#~ msgstr "leeren"
+
+#, fuzzy
+#~ msgid "Import selected as tracks"
+#~ msgstr "Auswahl importieren"
+
+#~ msgid "ardour: audio import in progress"
+#~ msgstr "Ardour: Audio Import in Arbeit"
+
+#, fuzzy
+#~ msgid "You can't embed an audiofile until you have a session loaded."
+#~ msgstr ""
+#~ "Sie können keine Audio-Daten importieren, solange keine Sitzung geladen "
+#~ "ist."
+
+#, fuzzy
+#~ msgid "Insert selected as new tracks"
+#~ msgstr "Stille einfügen"
+
+#, fuzzy
+#~ msgid "Insert selected"
+#~ msgstr "Stille einfügen"
+
+#, fuzzy
+#~ msgid "hidden"
+#~ msgstr "Verbergen"
+
+#~ msgid "Sorting"
+#~ msgstr "Sortieren"
+
+#, fuzzy
+#~ msgid "Regions/length"
+#~ msgstr "nach Länge der Region"
+
+#, fuzzy
+#~ msgid "Regions/start"
+#~ msgstr "Regionen"
+
+#, fuzzy
+#~ msgid "Regions/end"
+#~ msgstr "Regionen"
+
+#, fuzzy
+#~ msgid "Regions/file name"
+#~ msgstr "nach Name der Region"
+
+#, fuzzy
+#~ msgid "Filesystem"
+#~ msgstr "nach Dateisystem der Quelle"
+
+#, fuzzy
+#~ msgid "ardour: soundfile selector"
+#~ msgstr "Ardour: Farbe auswählen"
+
+#~ msgid "Add to Library..."
+#~ msgstr "Zu Bibliothek hinzufügen..."
+
+#~ msgid "Remove..."
+#~ msgstr "Entfernen..."
+
+#~ msgid "Find..."
+#~ msgstr "Suchen..."
+
+#~ msgid "Add Folder"
+#~ msgstr "Verzeichnis hinzufügen"
+
+#~ msgid "Add audio file or directory"
+#~ msgstr "Audio-Datei oder -Verzeichnis hinzufügen"
+
+#, fuzzy
+#~ msgid "Importing"
+#~ msgstr "Importieren"
+
+#~ msgid "Folder name:"
+#~ msgstr "Verzeichnisname:"
+
+#, fuzzy
+#~ msgid "Should not be reached"
+#~ msgstr "Datei \"%1\" konnte nicht geöffnet werden."
+
+#~ msgid "file \"%1\" could not be opened"
+#~ msgstr "Datei \"%1\" konnte nicht geöffnet werden."
+
+#~ msgid "Field name:"
+#~ msgstr "Feldname:"
+
+#~ msgid "Field value:"
+#~ msgstr "Wert des Feldes:"
+
+#~ msgid "AND"
+#~ msgstr "UND"
+
+#~ msgid "OR"
+#~ msgstr "ODER"
+
+#~ msgid "Results"
+#~ msgstr "Ergebnisse"
+
+#~ msgid "Create multi-channel region"
+#~ msgstr "Region mit mehreren Kanälen erstellen"
+
+#~ msgid "Ardour: Search Results"
+#~ msgstr "Ardour: Suchergebnisse"
+
+#~ msgid "Mix Groups"
+#~ msgstr "Mix Gruppen"
+
+#~ msgid "Name for new mix group"
+#~ msgstr "Name für neue Mix Gruppe"
+
+#, fuzzy
+#~ msgid "Session name:"
+#~ msgstr "Name der Sitzung"
+
+#, fuzzy
+#~ msgid "Create"
+#~ msgstr "Abschnitt erzeugen:"
+
+#, fuzzy
+#~ msgid "show again"
+#~ msgstr "Stellen"
+
+#, fuzzy
+#~ msgid "new session setup"
+#~ msgstr "Name der Sitzung"
+
+#, fuzzy
+#~ msgid "Session template"
+#~ msgstr "Name der Sitzung"
+
+#~ msgid "blank"
+#~ msgstr "leer"
+
+#, fuzzy
+#~ msgid "No template"
+#~ msgstr "Voreinstellung"
+
+#, fuzzy
+#~ msgid "Slave to MTC"
+#~ msgstr "MTC senden"
+
+#, fuzzy
+#~ msgid "Narrow mixer strips"
+#~ msgstr "schmale Mixerstreifen"
+
+#, fuzzy
+#~ msgid "Misc"
+#~ msgstr "Min:Sek"
+
+#~ msgid "Display"
+#~ msgstr "Anzeige"
+
+#~ msgid "--unknown--"
+#~ msgstr "--unbekannt--"
+
+#, fuzzy
+#~ msgid "Select all"
+#~ msgstr "Auswahl"
+
+#, fuzzy
+#~ msgid "Inserts"
+#~ msgstr "Stille einfügen"
+
+#, fuzzy
+#~ msgid "Sends"
+#~ msgstr "Minuten:Sekunden"
+
+#, fuzzy
+#~ msgid "Select all ..."
+#~ msgstr "Auswahl"
 
 #, fuzzy
 #~ msgid "Seamless Looping"
@@ -5165,15 +6251,8 @@ msgstr ""
 #~ msgstr "Bearbeitungs Modus"
 
 #, fuzzy
-#~ msgid "Export region"
-#~ msgstr "Name für Region:"
-
-#, fuzzy
 #~ msgid "Bounce region"
 #~ msgstr "Bereich"
-
-#~ msgid "Play selected region"
-#~ msgstr "Wiedergabe der ausgewählten Region"
 
 #~ msgid "clear connections"
 #~ msgstr "Verbindungen löschen"
