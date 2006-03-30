@@ -141,8 +141,8 @@ style "default_buttons_menus"
 style "very_small_button" = "default_buttons_menus"
 {
 	font_name = "sans 7"
-	xthickness = 0
 	ythickness = 0
+	xthickness = 0
 }
 
 style "small_button" = "default_buttons_menus"
@@ -194,6 +194,7 @@ style "mixer_solo_button" = "solo_button"
 	font_name = "sans 7"
 	xthickness = 0
 	ythickness = 0
+
 }
 
 
@@ -372,12 +373,12 @@ style "medium_entry" = "medium_text"
 	
 	base[NORMAL] = { 0, 0, 0 }
 	base[ACTIVE] = { 0, 0, 0 }
-	base[SELECTED] = { 0, 0, 0 }
+	base[SELECTED] = { 0.5, 0.5, 1.0 }
 }
 
 style "medium_entry_noselection_fg" = "medium_entry"
 {
-	fg[SELECTED] = { 0.50, 1.0, 1.0 }
+	fg[SELECTED] = { 0.50, 1.0, 0.50 }
 }
 
 style "medium_entry_noselection_bg" = "medium_entry"
@@ -851,7 +852,7 @@ widget "*ExportHeader" style "small_bold_text"
 widget "*ExportFileDisplay" style "medium_entry"
 widget "*ExportFormatDisplay" style "medium_entry"
 widget "*ExportCheckbox" style "small_entry"
-widget "*ExportTrackSelector" style "medium_entry_noselection_bg"
+widget "*ExportTrackSelector*" style "medium_entry_noselection_bg"
 widget "*EditModeSelector" style "medium_bold_entry"
 widget "*SnapTypeSelector" style "medium_bold_entry"
 widget "*SnapModeSelector" style "medium_bold_entry"
