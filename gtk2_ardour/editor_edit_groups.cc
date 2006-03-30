@@ -149,20 +149,20 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 
 	case 1:
 		if ((iter = group_model->get_iter (path))) {
-			bool visible = (*iter)[group_columns.is_visible];
-			(*iter)[group_columns.is_visible] = !visible;
-			return true;
-		}
-		break;
-
-	case 2:
-		if ((iter = group_model->get_iter (path))) {
 			bool active = (*iter)[group_columns.is_active];
 			(*iter)[group_columns.is_active] = !active;
 			return true;
 		}
 		break;
 		
+	case 2:
+		if ((iter = group_model->get_iter (path))) {
+			bool visible = (*iter)[group_columns.is_visible];
+			(*iter)[group_columns.is_visible] = !visible;
+			return true;
+		}
+		break;
+
 	default:
 		break;
 	}

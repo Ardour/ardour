@@ -87,12 +87,11 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	  post_redirect_box (PostFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
 	  gpm (_route, sess),
 	  panners (_route, sess),
-	  button_table (7, 2),
+	  button_table (6, 2),
 	  gain_automation_style_button (""),
 	  gain_automation_state_button (""),
 	  pan_automation_style_button (""),
 	  pan_automation_state_button (""),
-	  polarity_button (_("polarity")),
 	  comment_button (_("comments")),
 	  speed_adjustment (1.0, 0.001, 4.0, 0.001, 0.1),
 	  speed_spinner (&speed_adjustment, "MixerStripSpeedBase", true)
@@ -136,7 +135,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	gain_automation_state_button.set_name ("MixerAutomationPlaybackButton");
 	pan_automation_style_button.set_name ("MixerAutomationModeButton");
 	pan_automation_state_button.set_name ("MixerAutomationPlaybackButton");
-	polarity_button.set_name ("MixerPhaseInvertButton");
 
 	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_state_button, _("Pan automation mode"));
 	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_state_button, _("Gain automation mode"));
@@ -156,7 +154,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 	pan_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
-	polarity_button.unset_flags (Gtk::CAN_FOCUS);
 
 	button_table.set_homogeneous (true);
 	button_table.set_spacings (0);
@@ -165,15 +162,11 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	button_table.attach (group_button, 0, 2, 1, 2);
 	button_table.attach (input_button, 0, 2, 2, 3);
 
-	button_table.attach (polarity_button, 0, 2, 3, 4);
+	button_table.attach (*solo_button, 0, 1, 3, 4);
+	button_table.attach (*mute_button, 1, 2, 3, 4);
 
-	button_table.attach (*solo_button, 0, 1, 4, 5);
-	button_table.attach (*mute_button, 1, 2, 4, 5);
-
-	// button_table.attach (gain_automation_style_button, 0, 1, 5, 6);
-	button_table.attach (gain_automation_state_button, 0, 1, 5, 6);
-	// button_table.attach (pan_automation_style_button, 0, 1, 6, 7);
-	button_table.attach (pan_automation_state_button, 1, 2, 5, 6);
+	button_table.attach (gain_automation_state_button, 0, 1, 4, 5);
+	button_table.attach (pan_automation_state_button, 1, 2, 4, 5);
 
 	using namespace Menu_Helpers;
 	
@@ -228,10 +221,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 		ARDOUR_UI::instance()->tooltips().set_tip (speed_spinner, _("varispeed"));
 
-		button_table.attach (speed_frame, 0, 2, 6, 7);
+		button_table.attach (speed_frame, 0, 2, 5, 6);
 #endif /* VARISPEED_IN_MIXER_STRIP */
 
-		button_table.attach (*rec_enable_button, 0, 2, 6, 7);
+		button_table.attach (*rec_enable_button, 0, 2, 5, 6);
 	}
 
 	name_button.add (name_label);
@@ -328,8 +321,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	pan_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event), false);
 	pan_automation_state_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event), false);
 
-	polarity_button.signal_toggled().connect (mem_fun(*this, &MixerStrip::polarity_toggled));
-
 	name_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::name_button_button_release), false);
 
 	group_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::select_mix_group), false);
@@ -361,10 +352,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	if (is_audio_track()) {
 		speed_changed ();
 	}
-
-	/* XXX hack: no phase invert changed signal */
-
-	polarity_button.set_active (_route.phase_invert());
 
 	update_diskstream_display ();
 	update_input_display ();
@@ -451,7 +438,6 @@ MixerStrip::set_width (Width w)
 		static_cast<Gtk::Label*> (gain_automation_state_button.get_child())->set_text (astate_string(_route.gain_automation_curve().automation_state()));
 		static_cast<Gtk::Label*> (pan_automation_style_button.get_child())->set_text (astyle_string(_route.panner().automation_style()));
 		static_cast<Gtk::Label*> (pan_automation_state_button.get_child())->set_text (astate_string(_route.panner().automation_state()));
-		static_cast<Gtk::Label*> (polarity_button.get_child())->set_text (_("polarity"));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		break;
 
@@ -467,7 +453,6 @@ MixerStrip::set_width (Width w)
 		static_cast<Gtk::Label*> (gain_automation_state_button.get_child())->set_text (short_astate_string(_route.gain_automation_curve().automation_state()));
 		static_cast<Gtk::Label*> (pan_automation_style_button.get_child())->set_text (short_astyle_string(_route.panner().automation_style()));
 		static_cast<Gtk::Label*> (pan_automation_state_button.get_child())->set_text (short_astate_string(_route.panner().automation_state()));
-		static_cast<Gtk::Label*> (polarity_button.get_child())->set_text (_("pol"));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
 		break;
 	}
@@ -1180,16 +1165,6 @@ MixerStrip::mix_group_changed (void *ignored)
 	}
 }
 
-void
-MixerStrip::polarity_toggled ()
-{
-	bool x;
-
-	if ((x = polarity_button.get_active()) != _route.phase_invert()) {
-		_route.set_phase_invert (x, this);
-	}
-}
-
 
 void 
 MixerStrip::route_gui_changed (string what_changed, void* ignored)
@@ -1228,9 +1203,13 @@ MixerStrip::build_route_ops_menu ()
 	
 	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteUI::route_rename)));
 	items.push_back (SeparatorElem());
-	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
+	items.push_back (CheckMenuElem (_("Active"), mem_fun (*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	route_active_menu_item->set_active (_route.active());
+	items.push_back (SeparatorElem());
+	items.push_back (CheckMenuElem (_("Invert Polarity"), mem_fun (*this, &RouteUI::toggle_polarity)));
+	polarity_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
+	polarity_menu_item->set_active (_route.phase_invert());
 
 	build_remote_control_menu ();
 	

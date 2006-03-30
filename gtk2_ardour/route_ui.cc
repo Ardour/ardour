@@ -774,6 +774,27 @@ RouteUI::route_active_changed ()
 }
 
 void
+RouteUI::toggle_polarity ()
+{
+	if (polarity_menu_item) {
+
+		bool x;
+
+		ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::toggle_polarity));
+		
+		if ((x = polarity_menu_item->get_active()) != _route.phase_invert()) {
+			_route.set_phase_invert (x, this);
+		}
+	}
+}
+
+void
+RouteUI::polarity_changed ()
+{
+	/* no signal for this yet */
+}
+
+void
 RouteUI::solo_safe_toggle(void* src, Gtk::CheckMenuItem* check)
 {
 	bool yn = _route.solo_safe ();

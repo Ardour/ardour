@@ -130,6 +130,10 @@ class RouteUI : public virtual AxisView
 	void toggle_route_active ();
 	virtual void route_active_changed ();
 
+	Gtk::CheckMenuItem *polarity_menu_item;
+	void toggle_polarity ();
+	virtual void polarity_changed ();
+
 	void disconnect_input ();
 	void disconnect_output ();
 

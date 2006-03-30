@@ -146,8 +146,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Menu pan_astate_menu;
 	Gtk::Menu pan_astyle_menu;
 
-	Gtk::ToggleButton polarity_button;
-
 	sigc::connection newplug_connection;
     
 	gint    mark_update_safe ();
@@ -237,7 +235,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	bool select_mix_group (GdkEventButton *);
 	void mix_group_changed (void *);
 
-	void polarity_toggled ();
 
 	IOSelectorWindow *input_selector;
 	IOSelectorWindow *output_selector;
