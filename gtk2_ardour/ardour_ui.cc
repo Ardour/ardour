@@ -29,6 +29,7 @@
 #include <iostream>
 
 #include <gtkmm/messagedialog.h>
+#include <gtkmm/accelmap.h>
 
 #include <pbd/error.h>
 #include <pbd/compose.h>
@@ -384,6 +385,10 @@ ARDOUR_UI::save_ardour_state ()
 		Config->add_instant_xml(enode, get_user_ardour_path());
 		Config->add_instant_xml(mnode, get_user_ardour_path());
 	}
+
+	/* keybindings */
+
+	AccelMap::save ("ardour.saved_bindings");
 }
 
 void
@@ -789,6 +794,9 @@ ARDOUR_UI::build_session_selector ()
 	recent_session_display.set_model (recent_session_model);
 	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
 	recent_session_display.set_headers_visible (false);
+	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
+
+	recent_session_display.signal_row_activated().connect (mem_fun (*this, &ARDOUR_UI::recent_session_row_activated));
 
 	scroller->add (recent_session_display);
 	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -797,6 +805,12 @@ ARDOUR_UI::build_session_selector ()
 	session_selector_window->set_size_request (200, 400);
 	session_selector_window->get_vbox()->pack_start (*scroller);
 	session_selector_window->show_all_children();
+}
+
+void
+ARDOUR_UI::recent_session_row_activated (const TreePath& path, TreeViewColumn* col)
+{
+	session_selector_window->response (RESPONSE_ACCEPT);
 }
 
 void

@@ -72,8 +72,8 @@
 (gtk_accel_path "<Actions>/Editor/extend-range-to-start-of-region" "leftanglebracket")
 (gtk_accel_path "<Actions>/Editor/extend-range-to-end-of-region" "rightanglebracket")
 
-(gtk_accel_path "<Actions>/Editor/align-regions-sync" "<meta>a")
-(gtk_accel_path "<Actions>/Editor/align-regions-end" "<meta><control>a")
+(gtk_accel_path "<Actions>/Editor/align-regions-sync" "<mod2>a")
+(gtk_accel_path "<Actions>/Editor/align-regions-end" "<mod2><control>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<shift>a")
 
 (gtk_accel_path "<Actions>/Editor/brush-at-mouse" "<control>b")
@@ -82,8 +82,8 @@
 (gtk_accel_path "<Actions>/Editor/playhead-to-next-region-start" "Tab")
 (gtk_accel_path "<Actions>/Editor/playhead-to-next-region-end" "<Control>Tab")
 
-(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-start" "quoteleft")
-(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-end" "<control>quoteleft")
+(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-start" "grave")
+(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-end" "<control>grave")
 
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-previous-region-start" "bracketleft")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-previous-region-end" "<Control>bracketleft")
@@ -91,7 +91,7 @@
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-next-region-start" "bracketright")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-next-region-end" "<Control>bracketright")
 
-(gtk_accel_path "<Actions>/Editor/edit-cursor-to-previous-region-sync" "quoteright")
+(gtk_accel_path "<Actions>/Editor/edit-cursor-to-previous-region-sync" "apostrophe")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-next-region-sync" "semicolon")
 
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-start" "F1")

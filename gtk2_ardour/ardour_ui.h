@@ -475,6 +475,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void build_session_selector();
 	void recent_session_selection_changed ();
 	void redisplay_recent_sessions();
+	void recent_session_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
 
 	struct RecentSessionsSorter {
 	    bool operator() (std::pair<string,string> a, std::pair<string,string> b) const {
