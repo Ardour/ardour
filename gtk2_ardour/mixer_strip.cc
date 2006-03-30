@@ -1206,12 +1206,12 @@ MixerStrip::route_gui_changed (string what_changed, void* ignored)
 void
 MixerStrip::show_route_color ()
 {
-	//name_button.ensure_style ();
-	int val = RC::get_style(group_button)->get_ythickness(); //grab the ythickness from any other button in the strip
+	name_button.ensure_style ();
+	//int val = RC::get_style(group_button)->get_ythickness(); //grab the ythickness from any other button in the strip
 	Glib::RefPtr<Gtk::Style> style = name_button.get_style()->copy();
 	//Glib::RefPtr<Gtk::Style> style = RC::get_style(group_button)->copy();
 	style->set_bg (Gtk::STATE_NORMAL, color());
-	style->set_ythickness(val);
+	//style->set_ythickness(val);
 	name_button.set_style (style);
 	//name_button.get_style()->set_bg (Gtk::STATE_NORMAL, color());
 	
