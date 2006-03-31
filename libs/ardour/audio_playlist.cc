@@ -351,17 +351,36 @@ AudioPlaylist::finalize_split_region (Region *o, Region *l, Region *r)
 	AudioRegion *left  = dynamic_cast<AudioRegion*>(l);
 	AudioRegion *right = dynamic_cast<AudioRegion*>(r);
 
-	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end(); ++x) {
+	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end();) {
 		Crossfades::iterator tmp;
+		tmp = x;
+		++tmp;
 
+		Crossfade *fade = 0;
+		
 		if ((*x)->_in == orig) {
-			(*x)->_in = left;
-		}
-
-		if ((*x)->_out == orig) {
-			(*x)->_out = right;
+			if (! (*x)->covers(right->position())) {
+				fade = new Crossfade( *(*x), left, (*x)->_out);
+			} else {
+				// Overlap, the crossfade is copied on the left side of the right region instead
+				fade = new Crossfade( *(*x), right, (*x)->_out);
+			}
 		}
 		
+		if ((*x)->_out == orig) {
+			if (! (*x)->covers(right->position())) {
+				fade = new Crossfade( *(*x), (*x)->_in, right);
+			} else {
+				// Overlap, the crossfade is copied on the right side of the left region instead
+				fade = new Crossfade( *(*x), (*x)->_in, left);
+			}
+		}
+		
+		if (fade) {
+			_crossfades.remove( (*x) );
+			add_crossfade (*fade);
+		}
+		x = tmp;
 	}
 }
 

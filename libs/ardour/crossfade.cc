@@ -165,11 +165,8 @@ Crossfade::Crossfade (const Crossfade &orig, ARDOUR::AudioRegion *newin, ARDOUR:
 	: _fade_in(orig._fade_in),
 	  _fade_out(orig._fade_out)
 {
-	// Signals?
-
 	_active 			= orig._active;
 	_in_update 			= orig._in_update;
-	overlap_type 		= orig.overlap_type;
 	_length 			= orig._length;
 	_position 			= orig._position;
 	_anchor_point 		= orig._anchor_point;
@@ -180,8 +177,19 @@ Crossfade::Crossfade (const Crossfade &orig, ARDOUR::AudioRegion *newin, ARDOUR:
 	
 	_in = newin;
 	_out = newout;
+
+	// copied from Crossfade::initialize()
+	_in_update = false;
 	
+	_out->suspend_fade_out ();
+	_in->suspend_fade_in ();
+
+	overlap_type = _in->coverage (_out->position(), _out->last_frame());
+
+	// Let's make sure the fade isn't too long
+	set_length(_length);
 }
+
 
 Crossfade::~Crossfade ()
 {
