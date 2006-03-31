@@ -117,8 +117,6 @@ TapeAudioRegionView::~TapeAudioRegionView()
 void
 TapeAudioRegionView::update (uint32_t n)
 {
-	cerr << "new peaks ready for channel " << n << endl;
-
 	/* check that all waves are build and ready */
 
 	if (!tmp_waves.empty()) {

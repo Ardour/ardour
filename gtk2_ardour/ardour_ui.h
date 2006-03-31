@@ -576,7 +576,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void connect_dependents_to_session (ARDOUR::Session *);
 	void we_have_dependents ();
 	void setup_keybindings ();
-	void setup_options ();
+	void setup_session_options ();
+	void setup_config_options ();
 	
 	guint32  last_key_press_time;
 
@@ -623,7 +624,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	/* Keymap handling */
 
-	void install_keybindings ();
 	Glib::RefPtr<Gtk::ActionGroup> get_common_actions();
 	void install_actions ();
 	void test_binding_action (const char *);

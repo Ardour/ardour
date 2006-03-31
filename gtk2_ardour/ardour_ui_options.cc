@@ -35,6 +35,31 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 
 void
+ARDOUR_UI::setup_config_options ()
+{
+	struct { 
+	    char* name;
+	    bool (Configuration::*method)(void) const;
+	} options[] = {
+		{ "ToggleTimeMaster", &Configuration::get_jack_time_master },
+		{ "StopPluginsWithTransport", &Configuration::get_plugins_stop_with_transport },
+		{ "LatchedRecordEnable", &Configuration::get_latched_record_enable },
+		{ "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture },
+		{ "StopRecordingOnXrun", &Configuration::get_stop_recording_on_xrun },
+		{ "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end },
+		{ 0, 0 }
+	};
+	
+	for (uint32_t n = 0; options[n].name; ++n) {
+		Glib::RefPtr<Action> act = ActionManager::get_action ("options", options[n].name);
+		if (act) {
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+			tact->set_active ((Config->*(options[n].method))());
+		}
+	}
+}
+
+void
 ARDOUR_UI::toggle_time_master ()
 {
 	toggle_config_state ("Transport", "ToggleTimeMaster", &Configuration::set_jack_time_master);
@@ -370,7 +395,7 @@ ARDOUR_UI::mtc_port_changed ()
 }
 
 void
-ARDOUR_UI::setup_options ()
+ARDOUR_UI::setup_session_options ()
 {
 	mtc_port_changed ();
 

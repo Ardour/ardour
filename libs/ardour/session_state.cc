@@ -155,6 +155,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_solo_model = InverseMute;
 	solo_update_disabled = false;
 	currently_soloing = false;
+	_have_captured = false;
 	_worst_output_latency = 0;
 	_worst_input_latency = 0;
 	_worst_track_latency = 0;
@@ -183,7 +184,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_master_out = 0;
 	input_auto_connect = AutoConnectOption (0);
 	output_auto_connect = AutoConnectOption (0);
-	_have_captured = false;
 	waiting_to_start = false;
 	_exporting = false;
 	_gain_automation_buffer = 0;
@@ -1023,6 +1023,12 @@ Session::load_options (const XMLNode& node)
 		}
 	}
 
+	if ((child = find_named_node (node, "end-marker-is-free")) != 0) {
+		if ((prop = child->property ("val")) != 0) {
+			_end_location_is_free = (prop->value() == "yes");
+		}
+	}
+
 	if ((child = find_named_node (node, "layer-model")) != 0) {
 		if ((prop = child->property ("val")) != 0) {
 			if (prop->value() == X_("LaterHigher")) {
@@ -1208,6 +1214,8 @@ Session::get_options () const
 	child->add_property ("val", get_crossfades_active () ? "yes" : "no");
 	child = opthead->add_child ("audible-click");
 	child->add_property ("val", get_clicking () ? "yes" : "no");
+	child = opthead->add_child ("end-marker-is-free");
+	child->add_property ("val", _end_location_is_free ? "yes" : "no");
 
 	if (click_sound.length()) {
 		child = opthead->add_child ("click-sound");

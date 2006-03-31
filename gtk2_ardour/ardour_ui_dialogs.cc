@@ -99,7 +99,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 		sfdb->set_session (s);
 	}
 
-	setup_options ();
+	setup_session_options ();
 
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::transport_rec_enable_blink));
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::solo_blink));

@@ -399,26 +399,21 @@ ARDOUR_UI::install_actions ()
 	RadioAction::Group monitoring_group;
 
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("Hardware monitoring"), mem_fun (*this, &ARDOUR_UI::toggle_UseHardwareMonitoring));
-	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Software monitoring"), mem_fun (*this, &ARDOUR_UI::toggle_UseSoftwareMonitoring));
-	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("External monitoring"), mem_fun (*this, &ARDOUR_UI::toggle_UseExternalMonitoring));
-	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
-	ActionManager::session_sensitive_actions.push_back (act);
+	/* Configuration object options (i.e. not session specific) */
 
+	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
+	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
+	ActionManager::register_toggle_action (option_actions, X_("StopRecordingOnXrun"), _("Stop recording on xrun"), mem_fun (*this, &ARDOUR_UI::toggle_StopRecordingOnXrun));
+	ActionManager::register_toggle_action (option_actions, X_("StopTransportAtEndOfSession"), _("Stop transport at session end"), mem_fun (*this, &ARDOUR_UI::toggle_StopTransportAtEndOfSession));
+	ActionManager::register_toggle_action (option_actions, X_("GainReduceFastTransport"), _("-12dB gain reduce ffwd/rewind"), mem_fun (*this, &ARDOUR_UI::toggle_GainReduceFastTransport));
 	ActionManager::register_toggle_action (option_actions, X_("LatchedRecordEnable"), _("Rec-enable stays engaged at stop"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedRecordEnable));
+
+	/* session options */
 	
-	act = ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (option_actions, X_("StopRecordingOnXrun"), _("Stop recording on xrun"), mem_fun (*this, &ARDOUR_UI::toggle_StopRecordingOnXrun));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (option_actions, X_("StopTransportAtEndOfSession"), _("Stop transport at session end"), mem_fun (*this, &ARDOUR_UI::toggle_StopTransportAtEndOfSession));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (option_actions, X_("GainReduceFastTransport"), _("-12dB gain reduce ffwd/rewind"), mem_fun (*this, &ARDOUR_UI::toggle_GainReduceFastTransport));
+	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
@@ -427,6 +422,7 @@ ARDOUR_UI::install_actions ()
 	RadioAction::Group solo_group;
 
 	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloInPlace"), _("Solo in-place"), mem_fun (*this, &ARDOUR_UI::toggle_SoloViaBus));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloViaBus"), _("Solo via bus"), mem_fun (*this, &ARDOUR_UI::toggle_SoloViaBus));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -435,21 +431,16 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (option_actions, X_("UnmuteNewFullCrossfades"), _("Unmute new full crossfades"), mem_fun (*this, &ARDOUR_UI::toggle_UnmuteNewFullCrossfades));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-
-#ifdef NEW_ACTIONS
-	act = ActionManager::register_action (option_actions, X_("SetRegionLayerMode", _("SetRegionLayerMode"), mem_fun (*this, &ARDOUR_UI::toggle_SetRegionLayerMode)));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (option_actions, X_("SetCrossfadeModel", _("SetCrossfadeModel"), mem_fun (*this, &ARDOUR_UI::toggle_SetCrossfadeModel)));
-	ActionManager::session_sensitive_actions.push_back (act);
-	
-#endif	
-	
 	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (option_actions);
 	ActionManager::add_action_group (jack_actions);
 	ActionManager::add_action_group (transport_actions);
 	ActionManager::add_action_group (main_actions);
 	ActionManager::add_action_group (common_actions);
+
+	/* initialize state of non-session dependent options */
+	
+	setup_config_options ();
 }
 
 void

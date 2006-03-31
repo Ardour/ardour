@@ -133,7 +133,7 @@ main (int argc, char* argv[])
 	other_uimanager->insert_action_group (copy_actions (shared_actions));
 
 	other_window.add_accel_group (accels);
-	window.add_accel_group (accels);
+	// window.add_accel_group (accels);
 
 	Gtk::MenuBar* m;
 

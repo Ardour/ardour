@@ -228,7 +228,6 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	_tooltips.enable();
 
 	keyboard = new Keyboard;
- 	install_keybindings ();
 
 	string meter_path;
 

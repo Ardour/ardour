@@ -165,21 +165,10 @@ Session::realtime_stop (bool abort)
 		decrement_transport_position (_worst_output_latency);
 #endif
 
-		if (_transport_frame > current_end_frame()) {
-			
-			/* first capture resets end location; later captures can only extend the length */
+		/* the duration change is not guaranteed to have happened, but is likely */
 
-			if (_end_location_is_free) {
-				end_location->set_end (_transport_frame);
-				_end_location_is_free = false;
-			} else if (_transport_frame > end_location->start()) {
-				end_location->set_end (_transport_frame);
-			}
-
-			post_transport_work = PostTransportWork (post_transport_work | PostTransportDuration);
-		}
+		post_transport_work = PostTransportWork (post_transport_work | PostTransportDuration);
 	}
-
 
 	if (abort) {
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportAbort);
@@ -307,21 +296,34 @@ Session::non_realtime_stop (bool abort)
 
 	if (did_record) {
 		begin_reversible_command ("capture");
-
+		
 		Location* loc = _locations.end_location();
+		bool change_end = false;
 
-		if (loc && !_have_captured) {
-				
-			/* first capture.
-			   
-			   note: later captures that extend the session length get
-			   handled because of playlist length changes.
-			*/
+		if (_transport_frame < loc->end()) {
+
+			/* stopped recording before current end */
+
+			if (_end_location_is_free) {
+
+				/* first capture for this session, move end back to where we are */
+
+				change_end = true;
+			} 
+
+		} else if (_transport_frame > loc->end()) {
 			
-		  add_undo (sigc::retype_return<void>(sigc::bind (mem_fun (*loc, &Location::set_end), loc->end())));
-		  add_redo (sigc::retype_return<void>(sigc::bind (mem_fun (*loc, &Location::set_end), _transport_frame)));
+			/* stopped recording after the current end, extend it */
+
+			change_end = true;
+		}
+		
+		if (change_end) {
+			add_undo (sigc::retype_return<void>(sigc::bind (mem_fun (*loc, &Location::set_end), loc->end())));
+			add_redo (sigc::retype_return<void>(sigc::bind (mem_fun (*loc, &Location::set_end), _transport_frame)));
 		}
 
+		_end_location_is_free = false;
 		_have_captured = true;
 	}
 
@@ -718,6 +720,10 @@ Session::set_transport_speed (float speed, bool abort)
 
 	} else if (transport_stopped() && speed == 1.0) {
 
+		if (Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
+			return;
+		}
+
 		if (Config->get_use_hardware_monitoring()) {
 			/* Even though this is called from RT context we are using
 			   a non-tentative rwlock here,  because the action must occur.
@@ -739,6 +745,10 @@ Session::set_transport_speed (float speed, bool abort)
 		}
 
 	} else {
+
+		if (Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
+			return;
+		}
 
 		if ((synced_to_jack()) && speed != 0.0 && speed != 1.0) {
 			warning << _("Global varispeed cannot be supported while Ardour is connected to JACK transport control")
