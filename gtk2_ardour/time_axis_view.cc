@@ -910,15 +910,17 @@ TimeAxisView::compute_controls_size_info ()
 	Gtk::Table two_row_table (2, 8);
 	Gtk::Table one_row_table (1, 8);
 	Button* buttons[5];
+	const int border_width = 2;
+	const int extra_height = (2 * border_width) + 2; // 2 pixels for the controls frame
 
 	window.add (one_row_table);
 
-	one_row_table.set_border_width (2);
+	one_row_table.set_border_width (border_width);
 	one_row_table.set_row_spacings (0);
 	one_row_table.set_col_spacings (0);
 	one_row_table.set_homogeneous (true);
 
-	two_row_table.set_border_width (2);
+	two_row_table.set_border_width (border_width);
 	two_row_table.set_row_spacings (0);
 	two_row_table.set_col_spacings (0);
 	two_row_table.set_homogeneous (true);
@@ -935,9 +937,10 @@ TimeAxisView::compute_controls_size_info ()
 	one_row_table.show_all ();
 	one_row_table.size_request (req);
 
+
 	// height required to show 1 row of buttons
 
-	hSmaller = req.height + 3;
+	hSmaller = req.height + extra_height;
 
 	window.remove ();
 	window.add (two_row_table);
@@ -950,9 +953,9 @@ TimeAxisView::compute_controls_size_info ()
 	two_row_table.show_all ();
 	two_row_table.size_request (req);
 
-	// height required to show all normal buttons
+	// height required to show all normal buttons 
 
-	hNormal = req.height + 3;
+	hNormal = req.height + extra_height;
 
 	// these heights are all just larger than normal. no more 
 	// elements are visible (yet).
