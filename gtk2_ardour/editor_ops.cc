@@ -1123,7 +1123,7 @@ void
 Editor::temporal_zoom_session ()
 {
 	if (session) {
-		temporal_zoom_by_frame (0, session->current_end_frame(), "zoom to session");
+		temporal_zoom_by_frame (session->current_start_frame(), session->current_end_frame(), "zoom to session");
 	}
 }
 
