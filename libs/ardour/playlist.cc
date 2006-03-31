@@ -998,9 +998,21 @@ Playlist::split_region (Region& region, jack_nframes_t playlist_position)
 
 	_session.region_name (after_name, region.name(), false);
 	right = createRegion (region, before, after, after_name, region.layer(), Region::Flag (region.flags()|Region::RightOfSplit));
-	
+
 	add_region_internal (left, region.position(), true);
 	add_region_internal (right, region.position() + before);
+	
+	uint64_t orig_layer_op = region.last_layer_op();
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		if ((*i)->last_layer_op() > orig_layer_op) {
+			(*i)->set_last_layer_op( (*i)->last_layer_op() + 1 );
+		}
+	}
+	
+	left->set_last_layer_op ( orig_layer_op );
+	right->set_last_layer_op ( orig_layer_op + 1);
+
+	layer_op_counter++;
 
 	finalize_split_region (&region, left, right);
 	
