@@ -1193,6 +1193,60 @@ Editor::temporal_zoom_to_frame (bool coarser, jack_nframes_t frame)
 }
 
 void
+Editor::add_location_from_selection ()
+{
+	if (selection->time.empty()) {
+		return;
+	}
+
+	if (session == 0 || clicked_trackview == 0) {
+		return;
+	}
+
+	jack_nframes_t start = selection->time[clicked_selection].start;
+	jack_nframes_t end = selection->time[clicked_selection].end;
+
+	Location *location = new Location (start, end, "selection");
+
+	session->begin_reversible_command (_("add marker"));
+	session->add_undo (session->locations()->get_memento());
+	session->locations()->add (location, true);
+	session->add_redo_no_execute (session->locations()->get_memento());
+	session->commit_reversible_command ();
+}
+
+void
+Editor::add_location_from_playhead_cursor ()
+{
+	jack_nframes_t where = session->audible_frame();
+	
+	Location *location = new Location (where, where, "mark", Location::IsMark);
+	session->begin_reversible_command (_("add marker"));
+	session->add_undo (session->locations()->get_memento());
+	session->locations()->add (location, true);
+	session->add_redo_no_execute (session->locations()->get_memento());
+	session->commit_reversible_command ();
+}
+
+void
+Editor::add_location_from_audio_region ()
+{
+	if (selection->audio_regions.empty()) {
+		return;
+	}
+
+	AudioRegionView* rv = *(selection->audio_regions.begin());
+	Region& region = rv->region;
+	
+	Location *location = new Location (region.position(), region.last_frame(), region.name());
+	session->begin_reversible_command (_("add marker"));
+	session->add_undo (session->locations()->get_memento());
+	session->locations()->add (location, true);
+	session->add_redo_no_execute (session->locations()->get_memento());
+	session->commit_reversible_command ();
+}
+
+void
 Editor::select_all_in_track (Selection::Operation op)
 {
 	list<Selectable *> touched;
@@ -1298,6 +1352,23 @@ Editor::select_all_within (jack_nframes_t start, jack_nframes_t end, double top,
 }
 
 void
+Editor::set_selection_from_audio_region ()
+{
+	if (selection->audio_regions.empty()) {
+		return;
+	}
+
+	AudioRegionView* rv = *(selection->audio_regions.begin());
+	Region& region = rv->region;
+	
+	begin_reversible_command (_("set selection from region"));
+	selection->set (0, region.position(), region.last_frame());
+	commit_reversible_command ();
+
+	set_mouse_mode (Editing::MouseRange, false);
+}
+
+void
 Editor::set_selection_from_punch()
 {
 	Location* location;
@@ -1330,6 +1401,8 @@ Editor::set_selection_from_range (Location& loc)
 	begin_reversible_command (_("set selection from range"));
 	selection->set (0, loc.start(), loc.end());
 	commit_reversible_command ();
+
+	set_mouse_mode (Editing::MouseRange, false);
 }
 
 void

@@ -1822,6 +1822,13 @@ Editor::add_region_context_items (StreamView* sv, Region* region, Menu_Helpers::
 	items.push_back (MenuElem (_("Reverse"), mem_fun(*this, &Editor::reverse_region)));
 	items.push_back (SeparatorElem());
 
+
+	/* range related stuff */
+
+	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_audio_region)));
+	items.push_back (MenuElem (_("Set Range"), mem_fun (*this, &Editor::set_selection_from_audio_region)));
+	items.push_back (SeparatorElem());
+			 
 	/* Nudge region */
 
 	Menu *nudge_menu = manage (new Menu());
@@ -2090,43 +2097,6 @@ Editor::set_snap_mode (SnapMode mode)
 
 	instant_save ();
 }
-
-void
-Editor::add_location_from_selection ()
-{
-	if (selection->time.empty()) {
-		return;
-	}
-
-	if (session == 0 || clicked_trackview == 0) {
-		return;
-	}
-
-	jack_nframes_t start = selection->time[clicked_selection].start;
-	jack_nframes_t end = selection->time[clicked_selection].end;
-
-	Location *location = new Location (start, end, "selection");
-
-	session->begin_reversible_command (_("add marker"));
-	session->add_undo (session->locations()->get_memento());
-	session->locations()->add (location, true);
-	session->add_redo_no_execute (session->locations()->get_memento());
-	session->commit_reversible_command ();
-}
-
-void
-Editor::add_location_from_playhead_cursor ()
-{
-	jack_nframes_t where = session->audible_frame();
-	
-	Location *location = new Location (where, where, "mark", Location::IsMark);
-	session->begin_reversible_command (_("add marker"));
-	session->add_undo (session->locations()->get_memento());
-	session->locations()->add (location, true);
-	session->add_redo_no_execute (session->locations()->get_memento());
-	session->commit_reversible_command ();
-}
-
 
 int
 Editor::set_state (const XMLNode& node)

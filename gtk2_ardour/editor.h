@@ -1039,7 +1039,9 @@ class Editor : public PublicEditor
 	void set_selection_from_range (ARDOUR::Location&);
 	void set_selection_from_punch ();
 	void set_selection_from_loop ();
+	void set_selection_from_audio_region ();
 
+	void add_location_from_audio_region ();
 	void add_location_from_selection ();
 	void set_route_loop_selection ();
 
