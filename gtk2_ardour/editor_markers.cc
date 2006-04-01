@@ -457,9 +457,9 @@ Editor::build_marker_menu ()
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::marker_menu_rename)));
-	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
-	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::marker_menu_remove)));
+	items.push_back (MenuElem (_("Rename mark"), mem_fun(*this, &Editor::marker_menu_rename)));
+	items.push_back (MenuElem (_("Hide mark"), mem_fun(*this, &Editor::marker_menu_hide)));
+	items.push_back (MenuElem (_("Remove mark"), mem_fun(*this, &Editor::marker_menu_remove)));
 
 }
 
@@ -513,8 +513,8 @@ Editor::build_new_transport_marker_menu ()
 	MenuList& items = new_transport_marker_menu->items();
 	new_transport_marker_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Set Loop Range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_loop)));
-	items.push_back (MenuElem (_("Set Punch Range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_punch)));
+	items.push_back (MenuElem (_("Set loop range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_loop)));
+	items.push_back (MenuElem (_("Set punch range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_punch)));
 
 	new_transport_marker_menu->signal_unmap_event().connect ( mem_fun(*this, &Editor::new_transport_marker_menu_popdown)); 
 }
@@ -528,13 +528,14 @@ Editor::build_transport_marker_menu ()
 	MenuList& items = transport_marker_menu->items();
 	transport_marker_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Locate to"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from"), mem_fun(*this, &Editor::marker_menu_play_from)));
-	items.push_back (MenuElem (_("Set from playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
-	items.push_back (MenuElem (_("Set from range"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
+	items.push_back (MenuElem (_("Locate to range mark"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Play from range mark"), mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Set range mark from playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Set range mark from range"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
+	items.push_back (MenuElem (_("Hide range"), mem_fun(*this, &Editor::marker_menu_hide)));
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Separate regions from range"), mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
 	items.push_back (MenuElem (_("Select all in Range"), mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
 }
 
