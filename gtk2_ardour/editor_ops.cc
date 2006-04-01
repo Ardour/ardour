@@ -1514,6 +1514,36 @@ Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
 }
 
 void
+Editor::select_all_selectables_between_cursors (Cursor *cursor, Cursor *other_cursor)
+{
+        jack_nframes_t start;
+	jack_nframes_t end;
+	list<Selectable *> touched;
+	bool  other_cursor_is_first = cursor->current_frame > other_cursor->current_frame;
+	if (cursor->current_frame == other_cursor->current_frame) {
+	  return;
+	}
+	begin_reversible_command (_("select all between cursors"));
+	if ( other_cursor_is_first) {
+	    start = other_cursor->current_frame;
+	    end = cursor->current_frame - 1;
+
+	} else {
+	    start = cursor->current_frame;
+	    end = other_cursor->current_frame - 1;
+	}
+
+	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+		if ((*iter)->hidden()) {
+			continue;
+		}
+		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
+	}
+	selection->set (touched);
+	commit_reversible_command ();
+}
+
+void
 Editor::amplitude_zoom_step (bool in)
 {
 	gdouble zoom = 1.0;
@@ -2175,6 +2205,53 @@ Editor::separate_region_from_selection ()
 						playlist->partition ((jack_nframes_t)((*t).start * speed), (jack_nframes_t)((*t).end * speed), true);
 					}
 
+					if (doing_undo) session->add_redo_no_execute (playlist->get_memento());
+				}
+			}
+		}
+	}
+
+	if (doing_undo)	commit_reversible_command ();
+}
+
+void
+Editor::separate_regions_using_location (Location& loc)
+{
+	bool doing_undo = false;
+
+	if (loc.is_mark()) {
+		return;
+	}
+
+	Playlist *playlist;
+
+	/* XXX i'm unsure as to whether this should operate on selected tracks only 
+	   or the entire enchillada. uncomment the below line to correct the behaviour 
+	   (currently set for all tracks)
+	*/
+
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {	
+	//for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+
+		AudioTimeAxisView* atv;
+
+		if ((atv = dynamic_cast<AudioTimeAxisView*> ((*i))) != 0) {
+
+			if (atv->is_audio_track()) {
+					
+				if ((playlist = atv->playlist()) != 0) {
+					if (!doing_undo) {
+						begin_reversible_command (_("separate"));
+						doing_undo = true;
+					}
+					if (doing_undo) session->add_undo ((playlist)->get_memento());
+			
+					/* XXX need to consider musical time selections here at some point */
+
+					double speed = atv->get_diskstream()->speed();
+
+
+					playlist->partition ((jack_nframes_t)(loc.start() * speed), (jack_nframes_t)(loc.end() * speed), true);
 					if (doing_undo) session->add_redo_no_execute (playlist->get_memento());
 				}
 			}

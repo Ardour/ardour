@@ -66,6 +66,7 @@
 (gtk_accel_path "<Actions>/Editor/select-all-before-edit-cursor" "<control>e")
 (gtk_accel_path "<Actions>/Editor/select-all-after-playhead" "<shift><Control>p")
 (gtk_accel_path "<Actions>/Editor/select-all-before-playhead" "<control>p")
+(gtk_accel_path "<Actions>/Editor/select-all-between-cursors" "u")
 (gtk_accel_path "<Actions>/Editor/select-all-in-punch-range" "<Control>d")
 (gtk_accel_path "<Actions>/Editor/select-all-in-loop-range" "<Control>l")
 

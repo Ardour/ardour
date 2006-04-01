@@ -92,6 +92,7 @@
                    <menuitem action='select-all-before-edit-cursor'/>
                    <menuitem action='select-all-after-playhead'/>
                    <menuitem action='select-all-before-playhead'/>
+                   <menuitem action='select-all-between-cursors'/>
                    <menuitem action='select-all-in-punch-range'/>
                    <menuitem action='select-all-in-loop-range'/>
                </menu>

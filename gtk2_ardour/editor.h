@@ -168,6 +168,7 @@ class Editor : public PublicEditor
 
 	void new_region_from_selection ();
 	void separate_region_from_selection ();
+	void separate_regions_using_location (ARDOUR::Location&);
 	void toggle_playback (bool with_abort);
 
 	/* undo related */
@@ -667,6 +668,7 @@ class Editor : public PublicEditor
 	void    cursor_to_selection_start (Cursor *);
 	void    cursor_to_selection_end   (Cursor *);
 	void    select_all_selectables_using_cursor (Cursor *, bool);
+	void    select_all_selectables_between_cursors (Cursor *, Cursor *);
 
 	ARDOUR::Region* find_next_region (jack_nframes_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
 
@@ -1256,6 +1258,7 @@ class Editor : public PublicEditor
 	void marker_menu_hide ();
 	void marker_menu_loop_range ();
 	void marker_menu_select_all_selectables_using_range ();
+	void marker_menu_separate_regions_using_location ();
 	void marker_menu_play_from ();
 	void marker_menu_set_playhead ();
 	void marker_menu_set_from_playhead ();
@@ -1277,6 +1280,7 @@ class Editor : public PublicEditor
 
 	Gtk::Menu* tm_marker_menu;
 	Gtk::Menu* marker_menu;
+	Gtk::Menu* range_marker_menu;
 	Gtk::Menu* transport_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;
 	ArdourCanvas::Item* marker_menu_item;
