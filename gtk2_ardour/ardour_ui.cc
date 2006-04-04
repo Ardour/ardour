@@ -1261,14 +1261,6 @@ ARDOUR_UI::map_transport_state ()
 }
 
 void
-ARDOUR_UI::send_all_midi_feedback ()
-{
-	if (session) {
-		session->send_all_midi_feedback();
-	}
-}
-
-void
 ARDOUR_UI::allow_local_only ()
 {
 

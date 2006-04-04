@@ -165,6 +165,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	butler_mixdown_buffer = 0;
 	butler_gain_buffer = 0;
 	auditioner = 0;
+	generic_midi_control_protocol = 0;
 	mmc_control = false;
 	midi_feedback = false;
 	midi_control = true;
@@ -301,6 +302,8 @@ Session::second_stage_init (bool new_session)
 		return -1;
 	}
 
+	initialize_control();
+	
 	if (init_feedback ()) {
 		return -1;
 	}
@@ -344,7 +347,8 @@ Session::second_stage_init (bool new_session)
 	_engine.transport_locate (0);
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
-	send_all_midi_feedback();
+
+	// XXX need to poke the feedback thread to send full state
 
 	if (new_session) {
 		_end_location_is_free = true;

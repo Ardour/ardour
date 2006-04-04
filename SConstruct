@@ -389,6 +389,8 @@ libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomeca
 libraries['glade2'] = LibraryInfo()
 libraries['glade2'].ParseConfig ('pkg-config --cflags --libs libglade-2.0')
 
+libraries['usb'] = LibraryInfo (LIBS='usb')
+
 #libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
 
 libraries['ardour'] = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')

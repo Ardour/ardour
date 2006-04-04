@@ -24,6 +24,7 @@ gtkardour.Append(POTFILE=domain + '.pot')
 
 gtkardour.Merge ([
     libraries['ardour'],
+    libraries['usb'],
     libraries['gtkmm2ext'],
 #    libraries['flowcanvas'],
     libraries['midi++2'],

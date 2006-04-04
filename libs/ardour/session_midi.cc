@@ -40,6 +40,7 @@
 #include <ardour/diskstream.h>
 #include <ardour/slave.h>
 #include <ardour/cycles.h>
+#include <ardour/generic_midi_control_protocol.h>
 
 #include "i18n.h"
 
@@ -164,6 +165,24 @@ Session::set_send_mmc (bool yn)
 	set_dirty();
 
 	ControlChanged (SendMMC); /* EMIT SIGNAL */
+}
+
+void
+Session::set_midi_feedback (bool yn)
+{
+	if (generic_midi_control_protocol) {
+		if (yn) {
+			generic_midi_control_protocol->set_send (ControlProtocol::SendRoute);
+		} else {
+			generic_midi_control_protocol->set_send (ControlProtocol::SendWhat (0));
+		}
+	}
+}
+
+bool
+Session::get_midi_feedback () const
+{
+	return generic_midi_control_protocol && generic_midi_control_protocol->active();
 }
 
 bool
@@ -308,6 +327,10 @@ Session::set_midi_port (string port_tag)
 	}
 
 	_midi_port = port;
+	
+	if (generic_midi_control_protocol) {
+		generic_midi_control_protocol->set_port (port);
+	}
 
 	Config->set_midi_port_name (port_tag);
 
@@ -447,42 +470,6 @@ Session::get_trace_midi_output(MIDI::Port *port)
 
 	return false;
 
-}
-
-
-void
-Session::set_midi_feedback (bool yn)
-{
-	if (_midi_port == 0) {
-		return;
-	}
-	
-	midi_feedback = yn;
-	set_dirty();
-
-	if (yn) {
-		/* make sure the feedback thread is alive */
-		start_feedback ();
-	} else {
-		/* maybe put the feedback thread to sleep */
-		stop_feedback ();
-	}
-
-	ControlChanged (MidiFeedback); /* EMIT SIGNAL */
-
-	send_all_midi_feedback ();
-}
-
-void
-Session::send_all_midi_feedback ()
-{
-	if (midi_feedback) {
-		// send out current state of all routes
-		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			(*i)->send_all_midi_feedback ();
-		}
-	}
 }
 
 void
@@ -1483,14 +1470,7 @@ Session::get_mmc_control () const
 {
 	return mmc_control;
 }
-bool
-Session::get_midi_feedback () const
-{
-	/* since this a "write" function we have to check the port as well 
-	   as the control toggle.
-	*/
-	return _midi_port && midi_feedback;
-}
+
 bool
 Session::get_midi_control () const
 {

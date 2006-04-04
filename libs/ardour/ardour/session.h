@@ -22,12 +22,7 @@
 #define __ardour_session_h__
 
 #include <string>
-#if __GNUC__ >= 3
-#include <ext/slist>
-using __gnu_cxx::slist;
-#else
-#include <slist.h>
-#endif
+#include <list>
 #include <map>
 #include <vector>
 #include <set>
@@ -84,6 +79,8 @@ class AudioRegion;
 class Region;
 class Playlist;
 class VSTPlugin;
+class ControlProtocol;
+class GenericMidiControlProtocol;
 
 struct AudioExportSpecification;
 struct RouteGroup;
@@ -283,7 +280,7 @@ class Session : public sigc::trackable, public Stateful
 	void foreach_diskstream (void (DiskStream::*func)(void));
 	template<class T> void foreach_diskstream (T *obj, void (T::*func)(DiskStream&));
 
-	typedef slist<Route *> RouteList;
+	typedef list<Route *> RouteList;
 
 	RouteList get_routes() const {
 		RWLockMonitor rlock (route_lock, false, __LINE__, __FILE__);
@@ -303,6 +300,7 @@ class Session : public sigc::trackable, public Stateful
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
 
 	Route *route_by_name (string);
+	Route *route_by_remote_id (uint32_t id);
 
 	bool route_name_unique (string) const;
 
@@ -407,7 +405,9 @@ class Session : public sigc::trackable, public Stateful
 		CrossfadingModel,
 		SeamlessLoop,
 		MidiFeedback,
-		MidiControl
+		MidiControl,
+		TranzportControl,
+		Feedback
 	};
 
 	sigc::signal<void,ControlType> ControlChanged;
@@ -428,6 +428,7 @@ class Session : public sigc::trackable, public Stateful
 	void set_do_not_record_plugins (bool yn);
 	void set_crossfades_active (bool yn);
 	void set_seamless_loop (bool yn);
+	void set_feedback (bool yn);
 
 	bool get_auto_play () const { return auto_play; }
 	bool get_auto_input () const { return auto_input; }
@@ -444,6 +445,8 @@ class Session : public sigc::trackable, public Stateful
 	bool get_midi_control () const;
 	bool get_do_not_record_plugins () const { return do_not_record_plugins; }
 	bool get_crossfades_active () const { return crossfades_active; }
+	bool get_feedback() const;
+	bool get_tranzport_control() const;
 
 	bool get_input_auto_connect () const;
 	AutoConnectOption get_output_auto_connect () const { return output_auto_connect; }
@@ -815,7 +818,6 @@ class Session : public sigc::trackable, public Stateful
 	bool get_trace_midi_output(MIDI::Port *port = 0);
 	
 	void send_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t, MIDI::EventTwoBytes);
-	void send_all_midi_feedback ();
 
 	void deliver_midi (MIDI::Port*, MIDI::byte*, int32_t size);
 
@@ -1133,9 +1135,9 @@ class Session : public sigc::trackable, public Stateful
 	bool send_mtc;
 	bool send_mmc;
 	bool mmc_control;
-	bool midi_feedback;
 	bool midi_control;
-	
+	bool midi_feedback;
+
 	RingBuffer<Event*> pending_events;
 
 	void hookup_io ();
@@ -1598,9 +1600,9 @@ class Session : public sigc::trackable, public Stateful
 
 	/* INSERT AND SEND MANAGEMENT */
 	
-	slist<PortInsert *>   _port_inserts;
-	slist<PluginInsert *> _plugin_inserts;
-	slist<Send *>         _sends;
+	list<PortInsert *>   _port_inserts;
+	list<PluginInsert *> _plugin_inserts;
+	list<Send *>         _sends;
 	uint32_t          send_cnt;
 	uint32_t          insert_cnt;
 
@@ -1768,6 +1770,12 @@ class Session : public sigc::trackable, public Stateful
 
 	LayerModel layer_model;
 	CrossfadeModel xfade_model;
+
+	/* control protocols */
+
+	vector<ControlProtocol*> control_protocols;
+	GenericMidiControlProtocol* generic_midi_control_protocol;
+	void initialize_control ();
 };
 
 }; /* namespace ARDOUR */

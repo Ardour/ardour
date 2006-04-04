@@ -315,6 +315,7 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	void map_frozen ();
 
 	void color_handler (ColorID, uint32_t);
+	bool select_me (GdkEventButton*);
 };
 
 #endif /* __ardour_trackview_h__ */

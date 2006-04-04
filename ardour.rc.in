@@ -26,6 +26,7 @@
     <Option name="auditioner-right-out" value="%JACK_INPUT%2"/>
     <Option name="quieten-at-speed" value="1.000000"/>
     <Option name="use-vst" value="yes"/>
+    <Option name="use-tranzport" value="yes"/>
   </Config>
   <extra>
     <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>

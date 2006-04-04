@@ -336,7 +336,7 @@ find_file (string name, string dir, string subdir = "")
 	string path;
 	char* envvar = getenv("ARDOUR_PATH");
 
-	/* stop A: any directory in ARDOUR_PATH */
+	/* 1st attempt: any directory in ARDOUR_PATH */
 	
 	if (envvar != 0) {
 
@@ -354,7 +354,7 @@ find_file (string name, string dir, string subdir = "")
 		}
 	}
 
-	/* stop B: ~/.ardour/ */
+	/* 2nd attempt: ~/.ardour/ */
 
 	path = get_user_ardour_path();
 		
@@ -367,7 +367,7 @@ find_file (string name, string dir, string subdir = "")
 		return path;
 	}
 
-	/* C: dir/... */
+	/* 3rd attempt: dir/... */
 	
 	path = dir;
 	path += "/ardour2/";

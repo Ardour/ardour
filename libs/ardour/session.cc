@@ -767,7 +767,7 @@ Session::when_engine_running ()
 
 	insert_cnt = 0;
 	
-	for (slist<PortInsert*>::iterator i = _port_inserts.begin(); i != _port_inserts.end(); ++i) {
+	for (list<PortInsert*>::iterator i = _port_inserts.begin(); i != _port_inserts.end(); ++i) {
 		uint32_t id;
 
 		if (sscanf ((*i)->name().c_str(), "%*s %u", &id) == 1) {
@@ -779,7 +779,7 @@ Session::when_engine_running ()
 
 	send_cnt = 0;
 
-	for (slist<Send*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
+	for (list<Send*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
 		uint32_t id;
 		
 		if (sscanf ((*i)->name().c_str(), "%*s %u", &id) == 1) {
@@ -2204,6 +2204,20 @@ Session::route_by_name (string name)
 
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 		if ((*i)->name() == name) {
+			return* i;
+		}
+	}
+
+	return 0;
+}
+
+Route *
+Session::route_by_remote_id (uint32_t id)
+{
+	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+
+	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		if ((*i)->remote_control_id() == id) {
 			return* i;
 		}
 	}

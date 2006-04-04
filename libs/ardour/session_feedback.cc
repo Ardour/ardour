@@ -37,6 +37,7 @@
 #include <ardour/session.h>
 #include <ardour/audio_track.h>
 #include <ardour/diskstream.h>
+#include <ardour/control_protocol.h>
 
 #include "i18n.h"
 
@@ -65,11 +66,6 @@ Session::init_feedback ()
 	}
 
 	active_feedback = 0;
-	midi_feedback = false;
-
-	/* add possible feedback functions here */
-	
-	feedback_functions.push_back (mem_fun (*this, &Session::feedback_generic_midi_function));
 
 	if (pthread_create_and_store ("feedback", &feedback_thread, 0, _feedback_thread_work, this)) {
 		error << _("Session: could not create feedback thread") << endmsg;
@@ -99,6 +95,28 @@ Session::stop_feedback ()
 }
 
 void
+Session::set_feedback (bool yn)
+{
+	set_dirty();
+
+	if (yn) {
+		/* make sure the feedback thread is alive */
+		start_feedback ();
+	} else {
+		/* maybe put the feedback thread to sleep */
+		stop_feedback ();
+	}
+
+	ControlChanged (Feedback); /* EMIT SIGNAL */
+}
+
+bool
+Session::get_feedback() const
+{
+	return active_feedback > 0;
+}
+
+void
 Session::terminate_feedback ()
 {
 	void* status;
@@ -123,8 +141,7 @@ Session::feedback_thread_work ()
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
 	if (active_feedback) {
-		/* XXX use Config->feedback_interval_usecs()*/;
-		timeout = max (5, (int) Config->get_midi_feedback_interval_ms());
+		timeout = max (5, (int) Config->get_feedback_interval_ms());
 	} else {
 		timeout = -1;
 	}
@@ -162,7 +179,7 @@ Session::feedback_thread_work ()
 					switch ((FeedbackRequest::Type) req) {
 					
 					case FeedbackRequest::Start:
-						timeout = max (5, (int) Config->get_midi_feedback_interval_ms());
+						timeout = max (5, (int) Config->get_feedback_interval_ms());
 						active_feedback++;
 						break;
 						
@@ -197,50 +214,29 @@ Session::feedback_thread_work ()
 			continue;
 		}
 
-		for (list<FeedbackFunctionPtr>::iterator i = feedback_functions.begin(); i != feedback_functions.end(); ) {
-			
-			list<FeedbackFunctionPtr>::iterator tmp;
-			
-			tmp = i;
-			++tmp;
-			
-			if ((*i) ()) {
-				feedback_functions.erase (i);
+		bool send = false;
+
+		for (vector<ControlProtocol*>::iterator i = control_protocols.begin(); i != control_protocols.end(); ++i) {
+			if ((*i)->send()) {
+				send = true;
+				break;
 			}
-			
-			i = tmp;
+		}
+		
+		if (send) {
+
+			RouteList routes = get_routes(); /* copies the routes */
+
+			for (vector<ControlProtocol*>::iterator i = control_protocols.begin(); i != control_protocols.end(); ++i) {
+				if ((*i)->send_route_feedback ()) {
+					(*i)->send_route_feedback (routes);
+				}
+				(*i)->send_global_feedback ();
+			} 
 		}
 	}
 	
 	return 0;
 }
 
-int
-Session::feedback_generic_midi_function ()
-{
-	const int32_t bufsize = 16 * 1024;
-	int32_t bsize = bufsize;
-	MIDI::byte* buf = new MIDI::byte[bufsize];
-	MIDI::byte* end = buf;
-
-	{
-		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
-		
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			end = (*i)->write_midi_feedback (end, bsize);
-		}
-	}
-
-	if (end == buf) {
-		delete [] buf;
-		return 0;
-	} 
-	
-	deliver_midi (_midi_port, buf, (int32_t) (end - buf));
-
-	//cerr << "MIDI feedback: wrote " << (int32_t) (end - buf) << " to midi port\n";
-		
-
-	return 0;
-}
 	

@@ -33,11 +33,12 @@ CONFIG_VARIABLE(bool, timecode_source_is_synced, "timecode-source-is-synced", tr
 CONFIG_VARIABLE(bool, latched_record_enable, "latched-record-enable", false)
 CONFIG_VARIABLE(bool, use_vst, "use-vst", true)
 CONFIG_VARIABLE(bool, quieten_at_speed, "quieten-at-speed", true)
-CONFIG_VARIABLE(uint32_t, midi_feedback_interval_ms,  "midi-feedback-interval-ms", 100)
+CONFIG_VARIABLE(uint32_t, feedback_interval_ms,  "feedback-interval-ms", 100)
 CONFIG_VARIABLE(uint32_t, disk_choice_space_threshold,  "disk-choice-space-threshold", 57600000)
 CONFIG_VARIABLE(uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 2)
 CONFIG_VARIABLE(SampleFormat, native_file_data_format,  "native-file-data-format", ARDOUR::FormatFloat)
 CONFIG_VARIABLE(HeaderFormat, native_file_header_format,  "native-file-header-format", ARDOUR::WAVE)
+CONFIG_VARIABLE(bool, use_tranzport,  "use-tranzport", false)
 
 /* these variables have custom set() methods */
 

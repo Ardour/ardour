@@ -286,8 +286,6 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("Time\nmaster"), mem_fun(*this, &ARDOUR_UI::toggle_time_master));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (common_actions, X_("SendAllMidiFeedback"), _("Send All Midi Feedback"), mem_fun(*this, &ARDOUR_UI::send_all_midi_feedback));
-	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack1"), _("Toggle Record Enable Track1"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  0U));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack2"), _("Toggle Record Enable Track2"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  1U));

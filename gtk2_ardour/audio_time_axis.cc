@@ -141,6 +141,15 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 
 	_route.panner().Changed.connect (mem_fun(*this, &AudioTimeAxisView::update_pans));
 
+	solo_button->signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
+	mute_button->signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
+	rec_enable_button->signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
+	playlist_button.signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
+	automation_button.signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
+	size_button.signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
+	visual_button.signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
+	hide_button.signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
+
 	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
 	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
@@ -1959,4 +1968,11 @@ AudioTimeAxisView::color_handler (ColorID id, uint32_t val)
 	default:
 		break;
 	}
+}
+
+bool
+AudioTimeAxisView::select_me (GdkEventButton* ev)
+{
+	editor.get_selection().add (this);
+	return false;
 }

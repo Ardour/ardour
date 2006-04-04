@@ -1394,10 +1394,6 @@ Editor::set_selection_from_loop()
 void
 Editor::set_selection_from_range (Location& loc)
 {
-        if (clicked_trackview == 0) {
-		return;
-	}
-	
 	begin_reversible_command (_("set selection from range"));
 	selection->set (0, loc.start(), loc.end());
 	commit_reversible_command ();
@@ -1408,12 +1404,7 @@ Editor::set_selection_from_range (Location& loc)
 void
 Editor::select_all_selectables_using_time_selection ()
 {
-
 	list<Selectable *> touched;
-
-	if (clicked_trackview == 0) {
-		return;
-	}
 
 	if (selection->time.empty()) {
 		return;
@@ -1432,10 +1423,10 @@ Editor::select_all_selectables_using_time_selection ()
 		}
 		(*iter)->get_selectables (start, end - 1, 0, DBL_MAX, touched);
 	}
+
 	begin_reversible_command (_("select all from range"));
 	selection->set (touched);
 	commit_reversible_command ();
-
 }
 
 
@@ -1491,18 +1482,19 @@ Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
 	list<Selectable *> touched;
 
 	if (after) {
-	  begin_reversible_command (_("select all after cursor"));
-	  start = cursor->current_frame ;
-	  end = session->current_end_frame();
+		begin_reversible_command (_("select all after cursor"));
+		start = cursor->current_frame ;
+		end = session->current_end_frame();
 	} else {
-	  if (cursor->current_frame > 0) {
-	    begin_reversible_command (_("select all before cursor"));
-	    start = 0;
-	    end = cursor->current_frame - 1;
-	  } else {
-	    return;
-	  }
+		if (cursor->current_frame > 0) {
+			begin_reversible_command (_("select all before cursor"));
+			start = 0;
+			end = cursor->current_frame - 1;
+		} else {
+			return;
+		}
 	}
+
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
@@ -1520,19 +1512,21 @@ Editor::select_all_selectables_between_cursors (Cursor *cursor, Cursor *other_cu
 	jack_nframes_t end;
 	list<Selectable *> touched;
 	bool  other_cursor_is_first = cursor->current_frame > other_cursor->current_frame;
+
 	if (cursor->current_frame == other_cursor->current_frame) {
-	  return;
+		return;
 	}
+
 	begin_reversible_command (_("select all between cursors"));
-	if ( other_cursor_is_first) {
-	    start = other_cursor->current_frame;
-	    end = cursor->current_frame - 1;
-
+	if (other_cursor_is_first) {
+		start = other_cursor->current_frame;
+		end = cursor->current_frame - 1;
+		
 	} else {
-	    start = cursor->current_frame;
-	    end = other_cursor->current_frame - 1;
+		start = cursor->current_frame;
+		end = other_cursor->current_frame - 1;
 	}
-
+	
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
