@@ -2345,15 +2345,14 @@ Session::region_name (string& result, string base, bool newlevel) const
 		} else {
 			string::size_type pos;
 
-			if ((pos = base.find_last_of ('-')) == string::npos) {
-				pos = base.find_last_of ('.');
-			}
+			pos = base.find_last_of ('.');
 
 			/* pos may be npos, but then we just use entire base */
 
 			subbase = base.substr (0, pos);
+
 		}
-		
+
 		bool name_taken = true;
 		
 		{
@@ -2385,7 +2384,6 @@ Session::region_name (string& result, string base, bool newlevel) const
 			/*NOTREACHED*/
 		}
 	}
-
 	return 0;
 }	
 

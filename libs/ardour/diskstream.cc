@@ -1807,7 +1807,7 @@ DiskStream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture
 		for (buffer_position = channels[0].write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 			
 			string region_name;
-			_session.region_name (region_name, _name, false);
+			_session.region_name (region_name, channels[0].write_source->name(), false);
 			
 			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
 			
