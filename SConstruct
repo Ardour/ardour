@@ -518,6 +518,11 @@ else:
     'gtk2_ardour'
         ]
 
+surface_subdirs = [
+    'libs/surfaces/tranzport',
+    'libs/surfaces/generic_midi'
+    ]
+
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
 
@@ -791,7 +796,7 @@ env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 for subdir in coredirs:
     SConscript (subdir + '/SConscript')
 
-for sublistdir in [subdirs, gtk_subdirs]:
+for sublistdir in [subdirs, gtk_subdirs, surface_subdirs]:
 	for subdir in sublistdir:
 	        SConscript (subdir + '/SConscript')
 

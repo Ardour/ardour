@@ -40,7 +40,6 @@
 #include <ardour/diskstream.h>
 #include <ardour/slave.h>
 #include <ardour/cycles.h>
-#include <ardour/generic_midi_control_protocol.h>
 
 #include "i18n.h"
 
@@ -170,19 +169,12 @@ Session::set_send_mmc (bool yn)
 void
 Session::set_midi_feedback (bool yn)
 {
-	if (generic_midi_control_protocol) {
-		if (yn) {
-			generic_midi_control_protocol->set_send (ControlProtocol::SendRoute);
-		} else {
-			generic_midi_control_protocol->set_send (ControlProtocol::SendWhat (0));
-		}
-	}
 }
 
 bool
 Session::get_midi_feedback () const
 {
-	return generic_midi_control_protocol && generic_midi_control_protocol->active();
+	return false;
 }
 
 bool
@@ -328,9 +320,9 @@ Session::set_midi_port (string port_tag)
 
 	_midi_port = port;
 	
-	if (generic_midi_control_protocol) {
-		generic_midi_control_protocol->set_port (port);
-	}
+	/* XXX need something to forward this to control protocols ? or just
+	   use the signal below 
+	*/
 
 	Config->set_midi_port_name (port_tag);
 

@@ -361,7 +361,6 @@ Session::~Session ()
 	
 	terminate_butler_thread ();
 	terminate_midi_thread ();
-	terminate_feedback ();
 	
 	if (click_data && click_data != default_click) {
 		delete [] click_data;

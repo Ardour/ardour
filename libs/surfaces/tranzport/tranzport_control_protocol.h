@@ -69,6 +69,7 @@ class TranzportControlProtocol : public ControlProtocol {
 	usb_dev_handle* udev;
 	Route*          current_route;
 	uint32_t        current_track_id;
+	uint8_t         lcd_screen[2][20];
 
 	bool     last_negative;
 	uint32_t last_hrs;
@@ -78,8 +79,8 @@ class TranzportControlProtocol : public ControlProtocol {
 	jack_nframes_t last_where;
 
 	int open ();
-	int read ();
-	int write (uint8_t* cmd);
+	int read (uint32_t timeout_override = 0);
+	int write (uint8_t* cmd, uint32_t timeout_override = 0);
 	int close ();
 
 	int open_core (struct usb_device*);
@@ -90,7 +91,11 @@ class TranzportControlProtocol : public ControlProtocol {
 	int  light_on (LightID);
 	int  light_off (LightID);
 
+	void flush_lcd ();
+	void write_clock (const uint8_t* label);
+
 	void show_current_track ();
+	void show_transport_time ();
 
 	static void* _thread_work (void* arg);
 	void* thread_work ();

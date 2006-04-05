@@ -1,6 +1,7 @@
-#include <ardour/generic_midi_control_protocol.h>
 #include <ardour/route.h>
 #include <ardour/session.h>
+
+#include "generic_midi_control_protocol.h"
 
 using namespace ARDOUR;
 

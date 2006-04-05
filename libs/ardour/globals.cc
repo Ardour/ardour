@@ -46,6 +46,7 @@
 #include <ardour/source.h>
 #include <ardour/utils.h>
 #include <ardour/session.h>
+#include <ardour/control_protocol_manager.h>
 
 #include <ardour/mix.h>
 
@@ -70,7 +71,6 @@ Change ARDOUR::LengthChanged = ARDOUR::new_change ();
 Change ARDOUR::PositionChanged = ARDOUR::new_change ();
 Change ARDOUR::NameChanged = ARDOUR::new_change ();
 Change ARDOUR::BoundsChanged = Change (0); // see init(), below
-
 
 static int 
 setup_midi ()
@@ -265,6 +265,10 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 
 	/* singleton - first object is "it" */
 	new PluginManager (engine);
+	
+	/* singleton - first object is "it" */
+	new ControlProtocolManager ();
+	ControlProtocolManager::instance().discover_control_protocols (Session::control_protocol_path());
 	
 	BoundsChanged = Change (StartChanged|PositionChanged|LengthChanged);
 

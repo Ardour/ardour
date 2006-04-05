@@ -25,7 +25,7 @@
 
 #include <pbd/pthread_utils.h>
 
-using std::string;
+using namespace std;
 
 typedef std::map<string,pthread_t> ThreadMap;
 static ThreadMap all_threads;
@@ -42,6 +42,8 @@ int
 pthread_create_and_store (string name, pthread_t  *thread, pthread_attr_t *attr, void * (*start_routine)(void *), void * arg)
 {
 	int ret;
+
+	cerr << "Creating thread " << name << endl;
 
 	if ((ret = pthread_create (thread, attr, start_routine, arg)) == 0) {
 		std::pair<string,pthread_t> newpair;

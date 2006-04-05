@@ -79,8 +79,7 @@ class AudioRegion;
 class Region;
 class Playlist;
 class VSTPlugin;
-class ControlProtocol;
-class GenericMidiControlProtocol;
+class ControlProtocolManager;
 
 struct AudioExportSpecification;
 struct RouteGroup;
@@ -246,6 +245,8 @@ class Session : public sigc::trackable, public Stateful
 	std::string dead_sound_dir () const;
 	std::string automation_dir () const;
 
+	static string suffixed_search_path (std::string suffix);
+	static string control_protocol_path ();
 	static string template_path ();
 	static string template_dir ();
 	static void get_template_list (list<string>&);
@@ -428,7 +429,6 @@ class Session : public sigc::trackable, public Stateful
 	void set_do_not_record_plugins (bool yn);
 	void set_crossfades_active (bool yn);
 	void set_seamless_loop (bool yn);
-	void set_feedback (bool yn);
 
 	bool get_auto_play () const { return auto_play; }
 	bool get_auto_input () const { return auto_input; }
@@ -445,8 +445,6 @@ class Session : public sigc::trackable, public Stateful
 	bool get_midi_control () const;
 	bool get_do_not_record_plugins () const { return do_not_record_plugins; }
 	bool get_crossfades_active () const { return crossfades_active; }
-	bool get_feedback() const;
-	bool get_tranzport_control() const;
 
 	bool get_input_auto_connect () const;
 	AutoConnectOption get_output_auto_connect () const { return output_auto_connect; }
@@ -1136,7 +1134,6 @@ class Session : public sigc::trackable, public Stateful
 	bool send_mmc;
 	bool mmc_control;
 	bool midi_control;
-	bool midi_feedback;
 
 	RingBuffer<Event*> pending_events;
 
@@ -1362,31 +1359,6 @@ class Session : public sigc::trackable, public Stateful
 	void send_midi_time_code_in_another_thread ();
 	void send_time_code_in_another_thread (bool full);
 	void send_mmc_in_another_thread (MIDI::MachineControl::Command, jack_nframes_t frame = 0);
-
-	/* Feedback */
-
-	typedef sigc::slot<int> FeedbackFunctionPtr;
-	static void* _feedback_thread_work (void *);
-	void* feedback_thread_work ();
-	int feedback_generic_midi_function ();
-	std::list<FeedbackFunctionPtr> feedback_functions;
-	int active_feedback;
-	int feedback_request_pipe[2];
-	pthread_t feedback_thread;
-
-	struct FeedbackRequest {
-	    enum Type {
-		    Start,
-		    Stop,
-		    Quit
-	    };
-	};
-
-	int init_feedback();
-	int start_feedback ();
-	int stop_feedback ();
-	void terminate_feedback ();
-	int  poke_feedback (FeedbackRequest::Type);
 
 	jack_nframes_t adjust_apparent_position (jack_nframes_t frames);
 	
@@ -1770,12 +1742,6 @@ class Session : public sigc::trackable, public Stateful
 
 	LayerModel layer_model;
 	CrossfadeModel xfade_model;
-
-	/* control protocols */
-
-	vector<ControlProtocol*> control_protocols;
-	GenericMidiControlProtocol* generic_midi_control_protocol;
-	void initialize_control ();
 };
 
 }; /* namespace ARDOUR */

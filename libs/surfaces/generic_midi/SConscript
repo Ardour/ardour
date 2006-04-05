@@ -1,0 +1,51 @@
+# -*- python -*-
+
+import os
+import glob
+
+Import('env final_prefix install_prefix final_config_prefix libraries i18n')
+
+genericmidi = env.Copy()
+
+#
+# this defines the version number of libardour_genericmidi
+# 
+
+domain = 'ardour_genericmidi'
+
+genericmidi.Append(DOMAIN = domain, MAJOR = 1, MINOR = 0, MICRO = 0)
+genericmidi.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
+genericmidi.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+genericmidi.Append(PACKAGE = domain)
+genericmidi.Append(POTFILE = domain + '.pot')
+
+genericmidi_files=Split("""
+interface.cc
+generic_midi_control_protocol.cc
+""")
+
+genericmidi.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+genericmidi.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
+genericmidi.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
+genericmidi.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+
+genericmidi.Merge ([
+	     libraries['usb'],
+	     libraries['ardour'],
+	     libraries['sigc2'],
+	     libraries['pbd3'],
+	     libraries['midi++2'],
+	     libraries['xml']
+	     ])
+
+libardour_genericmidi = genericmidi.SharedLibrary('ardour_genericmidi', genericmidi_files)
+
+Default(libardour_genericmidi)
+
+if env['NLS']:
+	i18n (genericmidi, genericmidi_files, env)
+	      
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+				     [ 'SConscript', 'i18n.h', 'gettext.h' ] +
+				     genericmidi_files + 
+				     glob.glob('po/*.po') + glob.glob('*.h')))

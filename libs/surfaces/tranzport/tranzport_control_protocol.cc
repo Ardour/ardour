@@ -1,10 +1,12 @@
 #include <iostream>
+#include <sys/time.h>
 
 #include <pbd/pthread_utils.h>
 
-#include <ardour/tranzport_control_protocol.h>
 #include <ardour/route.h>
 #include <ardour/session.h>
+
+#include "tranzport_control_protocol.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -22,11 +24,14 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	current_route = 0;
 	current_track_id = 0;
 	last_where = max_frames;
+	memset (next_screen, ' ', sizeof (next_screen));
+	memset (current_screen, ' ', sizeof (current_screen));
 }
 
 TranzportControlProtocol::~TranzportControlProtocol ()
 {
 	if (udev) {
+		lcd_clear ();
 		pthread_cancel_one (thread);
 		close ();
 	}
@@ -39,7 +44,13 @@ TranzportControlProtocol::init ()
 		return -1;
 	}
 
-	pthread_create_and_store (X_("Tranzport"), &thread, 0, _thread_work, this);
+	/* outbound thread */
+
+	init_thread ();
+
+	/* inbound thread */
+	
+	pthread_create_and_store (X_("tranzport monitor"), &thread, 0, _thread_work, this);
 
 	return 0;
 }
@@ -58,16 +69,24 @@ TranzportControlProtocol::send_route_feedback (list<Route*>& routes)
 void
 TranzportControlProtocol::send_global_feedback ()
 {
-	jack_nframes_t where = session.transport_frame();
+	show_transport_time ();
 
+	flush_lcd ();
+}
+
+void
+TranzportControlProtocol::show_transport_time ()
+{
+	jack_nframes_t where = session.transport_frame();
+	
 	if (where != last_where) {
 
-		char clock_label[16];
+		uint8_t label[12];
 		SMPTE_Time smpte;
-		char* ptr = clock_label;
+		char* ptr = (char *) label;
 
 		session.smpte_time (where, smpte);
-		memset (clock_label, ' ', sizeof (clock_label));
+		memset (label, ' ', sizeof (label));
 		
 		if (smpte.negative) {
 			sprintf (ptr, "-%02ld:", smpte.hours);
@@ -85,12 +104,55 @@ TranzportControlProtocol::send_global_feedback ()
 		sprintf (ptr, "%02ld", smpte.frames);
 		ptr += 2;
 		
-		lcd_write (7, &clock_label[0]);
-		lcd_write (8, &clock_label[4]);
-		lcd_write (9, &clock_label[8]);
+		write_clock (label);
 
 		last_where = where;
 	}
+}
+
+void
+TranzportControlProtocol::write_clock (const uint8_t* label)
+{
+	memcpy (&next_screen[1][8], &label[0]);
+	memcpy (&next_screen[1][12], &label[4]);
+	memcpy (&next_screen[1][16], &label[8]);
+}
+
+void
+TranzportControlProtocol::flush_lcd ()
+{
+	if (memcmp (&next_screen[0][0], &current_screen[0][0], 4)) {
+		lcd_write (0, &next_screen[0][0]);
+	}
+	if (memcmp (&next_screen[0][4], &current_screen[0][4], 4)) {
+		lcd_write (1, &next_screen[0][0]);
+	}
+	if (memcmp (&next_screen[0][8], &current_screen[0][8], 4)) {
+		lcd_write (2, &next_screen[0][0]);
+	}
+	if (memcmp (&next_screen[0][12], &current_screen[0][12], 4)) {
+		lcd_write (3, &next_screen[0][0]);
+	}
+	if (memcmp (&next_screen[0][16], &current_screen[0][16], 4)) {
+		lcd_write (4, &next_screen[0][0]);
+	}
+	if (memcmp (&next_screen[1][0], &current_screen[1][0], 4)) {
+		lcd_write (5, &next_screen[0][0]);
+	}
+	if (memcmp (&next_screen[1][4], &current_screen[1][4], 4)) {
+		lcd_write (6, &next_screen[0][0]);
+	}
+	if (memcmp (&next_screen[1][8], &current_screen[1][8], 4)) {
+		lcd_write (7, &next_screen[0][0]);
+	}
+	if (memcmp (&next_screen[1][12], &current_screen[1][12], 4)) {
+		lcd_write (8, &next_screen[0][0]);
+	}
+	if (memcmp (&next_screen[1][16], &current_screen[1][16], 4)) {
+		lcd_write (9, &next_screen[0][0]);
+	}
+
+	memcpy (current_screen, next_screen, sizeof (current_screen));
 }
 
 void*
@@ -102,7 +164,7 @@ TranzportControlProtocol::_thread_work (void* arg)
 void*
 TranzportControlProtocol::thread_work ()
 {
-	cerr << "tranzport thread here, sending message to LCD\n";
+	PBD::ThreadCreated (pthread_self(), X_("tranzport monitor"));
 
 	while (true) {
 		if (read()) {
@@ -138,7 +200,6 @@ TranzportControlProtocol::thread_work ()
 
 	while (true) {
 		if (read ()) {
-			cerr << "Tranzport command received\n";
 			break;
 		}
 	}
@@ -156,19 +217,13 @@ TranzportControlProtocol::open ()
 	usb_find_busses();
 	usb_find_devices();
 
-	cerr << "checking busses\n";
-	
 	for (bus = usb_busses; bus; bus = bus->next) {
 
-		cerr << "checking devices\n";
-
 		for(dev = bus->devices; dev; dev = dev->next) {
-			cerr << "Checking " << dev->descriptor.idVendor << '/' << dev->descriptor.idProduct << endl;
 			if (dev->descriptor.idVendor != VENDORID)
 				continue;
 			if (dev->descriptor.idProduct != PRODUCTID)
 				continue;
-			cerr << "Open this one" << endl;
 			return open_core (dev);
 		}
 	}
@@ -218,14 +273,20 @@ TranzportControlProtocol::close ()
 }
 	
 int
-TranzportControlProtocol::write (uint8_t* cmd)
+TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 {
 	int val;
-	val = usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, timeout);
+	struct timeval tv1, tv2, tv_diff;
+
+	gettimeofday (&tv1, 0);
+	val = usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, timeout_override ? timeout_override : timeout);
+	gettimeofday (&tv2, 0);
 	if (val < 0)
 		return val;
 	if (val != 8)
 		return -1;
+	timersub (&tv2, &tv1, &tv_diff);
+	cerr << "time to write command = " << tv_diff.tv_sec << '.' << tv_diff.tv_usec << endl;
 	return 0;
 
 }	
@@ -263,7 +324,15 @@ TranzportControlProtocol::lcd_write (uint8_t cell, const char* text)
 	cmd[6] = text[3];
 	cmd[7] = 0x00;
 
-	return write (cmd);
+	int index = cell%4;
+	cell /= 4;
+
+	current_screen[cell][index] = text[0];
+	current_screen[cell][index+1] = text[1];
+	current_screen[cell][index+2] = text[2];
+	current_screen[cell][index+3] = text[3];
+
+	return write (cmd, 500);
 }
 
 int
@@ -280,7 +349,7 @@ TranzportControlProtocol::light_on (LightID light)
 	cmd[6] = 0x00;
 	cmd[7] = 0x00;
 
-	return write (cmd);
+	return write (cmd, 500);
 }
 
 int
@@ -297,27 +366,29 @@ TranzportControlProtocol::light_off (LightID light)
 	cmd[6] = 0x00;
 	cmd[7] = 0x00;
 
-	return write (cmd);
+	return write (cmd, 500);
 }
 
 int
-TranzportControlProtocol::read ()
+TranzportControlProtocol::read (uint32_t timeout_override)
 {
 	uint8_t buf[8];
 	int val;
 
 	memset(buf, 0, 8);
-	val = usb_interrupt_read(udev, READ_ENDPOINT, (char*) buf, 8, timeout);
+  again:
+	val = usb_interrupt_read(udev, READ_ENDPOINT, (char*) buf, 8, timeout_override ? timeout_override : timeout);
 	if (val < 0) {
-		cerr << "Tranzport read error, val = " << val << endl;
 		return val;
 	}
 	if (val != 8) {
-		cerr << "Tranzport short read, val = " << val << endl;
+		if (val == 0) {
+			goto again;
+		}
 		return -1;
 	}
 
-	/*printf("read: %02x %02x %02x %02x %02x %02x %02x %02x\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);*/
+	/* printf("read: %02x %02x %02x %02x %02x %02x %02x %02x\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);*/
 
 	uint32_t this_button_mask;
 	uint32_t button_changes;

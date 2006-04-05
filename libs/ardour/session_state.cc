@@ -81,6 +81,7 @@
 #include <ardour/location.h>
 #include <ardour/audioregion.h>
 #include <ardour/crossfade.h>
+#include <ardour/control_protocol_manager.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -165,9 +166,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	butler_mixdown_buffer = 0;
 	butler_gain_buffer = 0;
 	auditioner = 0;
-	generic_midi_control_protocol = 0;
 	mmc_control = false;
-	midi_feedback = false;
 	midi_control = true;
 	mmc = 0;
 	post_transport_work = PostTransportWork (0);
@@ -302,12 +301,6 @@ Session::second_stage_init (bool new_session)
 		return -1;
 	}
 
-	initialize_control();
-	
-	if (init_feedback ()) {
-		return -1;
-	}
-
 	if (state_tree) {
 		if (set_state (*state_tree->root())) {
 			return -1;
@@ -348,7 +341,7 @@ Session::second_stage_init (bool new_session)
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
 
-	// XXX need to poke the feedback thread to send full state
+	ControlProtocolManager::instance().startup (*this);
 
 	if (new_session) {
 		_end_location_is_free = true;
@@ -2300,7 +2293,7 @@ Session::template_dir ()
 }
 
 string
-Session::template_path ()
+Session::suffixed_search_path (string suffix)
 {
 	string path;
 
@@ -2317,7 +2310,8 @@ Session::template_path ()
 
 	for (vector<string>::iterator i = split_path.begin(); i != split_path.end(); ++i) {
 		path += *i;
-		path += "templates/";
+		path += suffix;
+		path += '/';
 		
 		if (distance (i, split_path.end()) != 1) {
 			path += ':';
@@ -2325,6 +2319,18 @@ Session::template_path ()
 	}
 		
 	return path;
+}
+
+string
+Session::template_path ()
+{
+	return suffixed_search_path (X_("templates"));
+}
+
+string
+Session::control_protocol_path ()
+{
+	return suffixed_search_path (X_("surfaces"));
 }
 
 int

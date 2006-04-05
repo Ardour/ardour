@@ -32,6 +32,7 @@ automation_event.cc
 configuration.cc
 connection.cc
 control_protocol.cc
+control_protocol_manager.cc
 crossfade.cc
 curve.cc
 cycle_timer.cc
@@ -42,7 +43,6 @@ externalsource.cc
 filesource.cc
 gain.cc
 gdither.cc
-generic_midi_control_protocol.cc
 globals.cc
 import.cc
 insert.cc
@@ -69,10 +69,8 @@ send.cc
 session.cc
 session_butler.cc
 session_click.cc
-session_control.cc
 session_events.cc
 session_export.cc
-session_feedback.cc
 session_midi.cc
 session_process.cc
 session_state.cc
@@ -85,7 +83,6 @@ source.cc
 state_manager.cc
 stateful.cc
 tempo.cc
-tranzport_control_protocol.cc
 utils.cc
 version.cc
 mix.cc
