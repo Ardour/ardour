@@ -1,6 +1,8 @@
 #ifndef ardour_tranzport_control_protocol_h
 #define ardour_tranzport_control_protocol_h
 
+#include <vector>
+
 #include <pthread.h>
 #include <usb.h>
 #include <ardour/control_protocol.h>
@@ -69,7 +71,11 @@ class TranzportControlProtocol : public ControlProtocol {
 	usb_dev_handle* udev;
 	Route*          current_route;
 	uint32_t        current_track_id;
-	uint8_t         lcd_screen[2][20];
+	char            current_screen[2][20];
+	char            next_screen[2][20];
+	bool            lights[7];
+
+	std::vector<sigc::connection> track_connections;
 
 	bool     last_negative;
 	uint32_t last_hrs;
@@ -96,6 +102,10 @@ class TranzportControlProtocol : public ControlProtocol {
 
 	void show_current_track ();
 	void show_transport_time ();
+
+	void track_solo_changed (void*);
+	void track_rec_changed (void*);
+	void track_mute_changed (void*);
 
 	static void* _thread_work (void* arg);
 	void* thread_work ();

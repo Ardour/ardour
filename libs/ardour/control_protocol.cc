@@ -152,7 +152,7 @@ ControlProtocol::thread_work ()
 
 
 	if (active_thread) {
-		timeout = max (5, (int) Config->get_feedback_interval_ms());
+		timeout = 10; // max (5, (int) Config->get_feedback_interval_ms());
 	} else {
 		timeout = -1;
 	}
@@ -189,7 +189,7 @@ ControlProtocol::thread_work ()
 					switch ((ThreadRequest::Type) req) {
 					
 					case ThreadRequest::Start:
-						timeout = max (5, (int) Config->get_feedback_interval_ms());
+						timeout = 10; // max (5, (int) Config->get_feedback_interval_ms());
 						active_thread++;
 						break;
 						
@@ -224,15 +224,13 @@ ControlProtocol::thread_work ()
 			continue;
 		}
 
-		cerr << ".\n";
-
 		if (send()) {
 			
-			list<Route*> routes = session.get_routes(); /* copies the routes */
+			// list<Route*> routes = session.get_routes(); /* copies the routes */
 			
-			if (send_route_feedback ()) {
-				send_route_feedback (routes);
-			}
+			// if (send_route_feedback ()) {
+			//send_route_feedback (routes);
+			// }
 
 			send_global_feedback ();
 		}

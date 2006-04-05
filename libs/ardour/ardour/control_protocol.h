@@ -10,7 +10,7 @@ namespace ARDOUR {
 class Route;
 class Session;
 
-class ControlProtocol : sigc::trackable {
+class ControlProtocol : public sigc::trackable {
   public:
 	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol();
