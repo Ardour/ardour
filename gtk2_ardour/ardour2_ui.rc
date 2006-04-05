@@ -80,6 +80,8 @@ style "time_axis_view_item_name"
 
 style "default_base" = "medium_text"
 {
+  GtkWidget::cursor_color =  {1.0, 1.0, 1.0 }
+  
   fg[NORMAL] = { 0.80, 0.80, 0.80 }	
   fg[ACTIVE] = { 0.80, 0.80, 0.80 }	
   fg[PRELIGHT] = { 0.50, 1.0, 1.0 }
@@ -131,9 +133,9 @@ style "default_buttons_menus"
   font_name = "sans 8"
   fg[ACTIVE] = { 0, 0, 0 }
   
-  bg[NORMAL] = { 0.35, 0.35, 0.35 }
+  bg[NORMAL] = { 0.25, 0.25, 0.25 }
   bg[ACTIVE] = { 0.50, 1.0, 1.0 }
-  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
+  bg[PRELIGHT] = { 0.15, 0.15, 0.15 }
   bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
   bg[SELECTED] = { 0.20, 0.20, 0.20 }	
 }
@@ -837,7 +839,7 @@ style "region_list_whole_file"
 style "ardour_button" ="default_buttons_menus"
 {
 	xthickness = 0
-	ythickness = 1
+	ythickness = 2
 }
 
 #---------------------------------------------------------------
