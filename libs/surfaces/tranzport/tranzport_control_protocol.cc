@@ -258,8 +258,8 @@ TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 void
 TranzportControlProtocol::lcd_clear ()
 {
-	print (0, 0, "          ");
-	print (1, 0, "          ");
+	print (0, 0, "                    ");
+	print (1, 0, "                    ");
 }
 
 int
@@ -1106,7 +1106,7 @@ TranzportControlProtocol::show_wheel_mode ()
 		break;
 
 	case WheelPan:
-		print (1, 0, _("Wh: pan"));
+		print (1, 0, _("Wh: pan "));
 		break;
 
 	case WheelMaster:
@@ -1121,7 +1121,8 @@ TranzportControlProtocol::print (int row, int col, const char *text)
 	int cell;
 	uint32_t left = strlen (text);
 	char tmp[5];
-
+	int base_col;
+	
 	if (row < 0 || row > 1) {
 		return;
 	}
@@ -1132,40 +1133,44 @@ TranzportControlProtocol::print (int row, int col, const char *text)
 
 	while (left) {
 
-		if (left && left < 4) {
-			memset (tmp, ' ', 4);
-			memcpy (tmp, text, left);
-			tmp[4] = '\0';
-			text = tmp;
-		}
-
 		if (col >= 0 && col < 4) {
 			cell = 0;
+			base_col = 0;
 		} else if (col >= 4 && col < 8) {
 			cell = 1;
-			
+			base_col = 4;
 		} else if (col >= 8 && col < 12) {
 			cell = 2;
-			
+			base_col = 8;
 		} else if (col >= 12 && col < 16) {
 			cell = 3;
-			
+			base_col = 12;
 		} else if (col >= 16 && col < 20) {
 			cell = 4;
-			
+			base_col = 16;
 		} else {
 			return;
 		}
+
+		int offset = col % 4;
+
+		/* copy current cell contents into tmp */
+
+		memcpy (tmp, &current_screen[row][base_col], 4);
+
+		/* overwrite with new text */
+
+		uint32_t tocopy = min ((4U - offset), left);
+
+		memcpy (tmp+offset, text, tocopy);
 		
 		cell += (row * 5);
 
-		lcd_write (row, col, cell, text);
+		lcd_write (row, base_col, cell, tmp);
 		
-		int shift = min (4U, left);
-
-		text += shift;
-		left -= shift;
-		col  += 4;
+		text += tocopy;
+		left -= tocopy;
+		col  += tocopy;
 	}
 }	
 
