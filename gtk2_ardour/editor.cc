@@ -46,6 +46,7 @@
 #include <ardour/session_route.h>
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
+#include <ardour/control_protocol.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -712,6 +713,12 @@ Editor::Editor (AudioEngine& eng)
 
 	signal_configure_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	signal_delete_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::exit_on_main_window_close));
+
+	/* allow external control surfaces/protocols to do various things */
+
+	ControlProtocol::ZoomToSession.connect (mem_fun (*this, &Editor::temporal_zoom_session));
+	ControlProtocol::ZoomIn.connect (bind (mem_fun (*this, &Editor::temporal_zoom_step), false));
+	ControlProtocol::ZoomOut.connect (bind (mem_fun (*this, &Editor::temporal_zoom_step), true));
 
 	constructed = true;
 	instant_save ();

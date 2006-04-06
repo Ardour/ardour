@@ -1,4 +1,6 @@
 #include <iostream>
+#include <algorithm>
+
 #include <sys/time.h>
 
 #include <pbd/pthread_utils.h>
@@ -7,6 +9,7 @@
 #include <ardour/audio_track.h>
 #include <ardour/session.h>
 #include <ardour/location.h>
+#include <ardour/dB.h>
 
 #include "tranzport_control_protocol.h"
 
@@ -27,13 +30,17 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	current_route = 0;
 	current_track_id = 0;
 	last_where = max_frames;
+	wheel_mode = WheelGain;
+	timerclear (&last_wheel_motion);
+	last_wheel_dir = 1;
 
-	memset (next_screen, ' ', sizeof (next_screen));
-	memset (current_screen, ' ', sizeof (current_screen));
+	memset (current_screen, 0, sizeof (current_screen));
 
 	for (uint32_t i = 0; i < sizeof(lights)/sizeof(lights[0]); ++i) {
 		lights[i] = false;
 	}
+
+	session.RecordStateChanged.connect (mem_fun (*this, &TranzportControlProtocol::record_status_changed));
 }
 
 TranzportControlProtocol::~TranzportControlProtocol ()
@@ -77,6 +84,10 @@ TranzportControlProtocol::send_route_feedback (list<Route*>& routes)
 void
 TranzportControlProtocol::send_global_feedback ()
 {
+	if (_device_status == STATUS_OFFLINE) {
+		return;
+	}
+
 	show_transport_time ();
 
 	if (session.soloing()) {
@@ -84,8 +95,6 @@ TranzportControlProtocol::send_global_feedback ()
 	} else {
 		light_off (LightAnysolo);
 	}
-
-	flush_lcd ();
 }
 
 void
@@ -95,90 +104,29 @@ TranzportControlProtocol::show_transport_time ()
 	
 	if (where != last_where) {
 
-		uint8_t label[12];
+		char buf[5];
 		SMPTE_Time smpte;
-		char* ptr = (char *) label;
 
 		session.smpte_time (where, smpte);
-		memset (label, ' ', sizeof (label));
 		
 		if (smpte.negative) {
-			sprintf (ptr, "-%02ld:", smpte.hours);
+			sprintf (buf, "-%02ld:", smpte.hours);
 		} else {
-			sprintf (ptr, " %02ld:", smpte.hours);
+			sprintf (buf, " %02ld:", smpte.hours);
 		}
-		ptr += 4;
+		print (1, 8, buf);
 
-		sprintf (ptr, "%02ld:", smpte.minutes);
-		ptr += 3;
+		sprintf (buf, "%02ld:", smpte.minutes);
+		print (1, 12, buf);
 
-		sprintf (ptr, "%02ld:", smpte.seconds);
-		ptr += 3;
+		sprintf (buf, "%02ld:", smpte.seconds);
+		print (1, 15, buf);
 
-		sprintf (ptr, "%02ld", smpte.frames);
-		ptr += 2;
-		
-		write_clock (label);
+		sprintf (buf, "%02ld", smpte.frames);
+		print (1, 18, buf);
 
 		last_where = where;
 	}
-}
-
-void
-TranzportControlProtocol::write_clock (const uint8_t* label)
-{
-	memcpy (&next_screen[1][8], &label[0], 4);
-	memcpy (&next_screen[1][12], &label[4], 4);
-	memcpy (&next_screen[1][16], &label[8], 4);
-}
-
-void
-TranzportControlProtocol::flush_lcd ()
-{
-	if (memcmp (&next_screen[0][0], &current_screen[0][0], 4)) {
-		cerr << "diff 1\n";
-		lcd_write (0, &next_screen[0][0]);
-	}
-	if (memcmp (&next_screen[0][4], &current_screen[0][4], 4)) {
-		cerr << "diff 2\n";
-		lcd_write (1, &next_screen[0][4]);
-	}
-	if (memcmp (&next_screen[0][8], &current_screen[0][8], 4)) {
-		cerr << "diff 3\n";
-		lcd_write (2, &next_screen[0][8]);
-	}
-	if (memcmp (&next_screen[0][12], &current_screen[0][12], 4)) {
-		cerr << "diff 4\n";
-		lcd_write (3, &next_screen[0][12]);
-	}
-	if (memcmp (&next_screen[0][16], &current_screen[0][16], 4)) {
-		cerr << "diff 5\n";
-		lcd_write (4, &next_screen[0][16]);
-	}
-	if (memcmp (&next_screen[1][0], &current_screen[1][0], 4)) {
-		cerr << "diff 6\n";
-		lcd_write (5, &next_screen[1][0]);
-	}
-	if (memcmp (&next_screen[1][4], &current_screen[1][4], 4)) {
-		cerr << "diff 7\n";
-		lcd_write (6, &next_screen[1][4]);
-	}
-	if (memcmp (&next_screen[1][8], &current_screen[1][8], 4)) {
-		cerr << "diff 8\n";
-		lcd_write (7, &next_screen[1][8]);
-	}
-	if (memcmp (&next_screen[1][12], &current_screen[1][12], 4)) {
-		cerr << "diff 9\n";
-		lcd_write (8, &next_screen[1][12]);
-	}
-	if (memcmp (&next_screen[1][16], &current_screen[1][16], 4)) {
-		cerr << "diff 10\n";
-		lcd_write (9, &next_screen[1][16]);
-	}
-
-	/* copy the current state into the next state */
-
-	memcpy (next_screen, current_screen, sizeof (current_screen));
 }
 
 void*
@@ -192,20 +140,22 @@ TranzportControlProtocol::thread_work ()
 {
 	PBD::ThreadCreated (pthread_self(), X_("tranzport monitor"));
 
+	/* wait for the device to go online */
+
 	while (true) {
 		if (read()) {
 			return 0;
 		}
 		switch (_device_status) {
 		case STATUS_OFFLINE:
-			cerr << "offline\n";
+			cerr << "tranzport offline\n";
 			break;
 		case STATUS_ONLINE:
 		case 0:
-			cerr << "online\n";
+			cerr << "tranzport online\n";
 			break;
 		default:
-			cerr << "unknown status\n";
+			cerr << "tranzport: unknown status\n";
 			break;
 		}
 
@@ -213,6 +163,9 @@ TranzportControlProtocol::thread_work ()
 			break;
 		}
 	}
+
+	lcd_clear ();
+	show_wheel_mode();
 
 	while (true) {
 		if (read ()) {
@@ -305,20 +258,12 @@ TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 void
 TranzportControlProtocol::lcd_clear ()
 {
-	lcd_write (0, "    ");
-	lcd_write (1, "    ");
-	lcd_write (2, "    ");
-	lcd_write (3, "    ");
-	lcd_write (4, "    ");
-	lcd_write (5, "    ");
-	lcd_write (6, "    ");
-	lcd_write (7, "    ");
-	lcd_write (8, "    ");
-	lcd_write (9, "    ");
+	print (0, 0, "          ");
+	print (1, 0, "          ");
 }
 
 int
-TranzportControlProtocol::lcd_write (uint8_t cell, const char* text)       
+TranzportControlProtocol::lcd_write (int row, int col, uint8_t cell, const char* text)       
 {
 	uint8_t cmd[8];
 	
@@ -326,74 +271,26 @@ TranzportControlProtocol::lcd_write (uint8_t cell, const char* text)
 		return -1;
 	}
 
-	cmd[0] = 0x00;
-	cmd[1] = 0x01;
-	cmd[2] = cell;
-	cmd[3] = text[0];
-	cmd[4] = text[1];
-	cmd[5] = text[2];
-	cmd[6] = text[3];
-	cmd[7] = 0x00;
-
-	if (write (cmd, 500) == 0) {
-		int row;
-		int col;
-		
-		switch (cell) {
-		case 0:
-			row = 0;
-			col = 0;
-			break;
-		case 1:
-			row = 0;
-			col = 4;
-			break;
-		case 2:
-			row = 0;
-			col = 8;
-			break;
-		case 3:
-			row = 0;
-			col = 12;
-			break;
-		case 4:
-			row = 0;
-			col = 16;
-			break;
-		case 5:
-			row = 1;
-			col = 0;
-			break;
-		case 6:
-			row = 1;
-			col = 4;
-			break;
-		case 7:
-			row = 1;
-			col = 8;
-			break;
-		case 8:
-			row = 1;
-			col = 12;
-			break;
-		case 9:
-			row = 1;
-			col = 16;
-			break;
-		}
-		
+	if (memcmp (text, &current_screen[row][col], 4)) {
+	
 		current_screen[row][col]   = text[0];
 		current_screen[row][col+1] = text[1];
 		current_screen[row][col+2] = text[2];
 		current_screen[row][col+3] = text[3];
 
-		cerr << "stored " << text[0] << text[1] << text[2] << text[3] << " to " << row << ',' << col << endl;
+		cmd[0] = 0x00;
+		cmd[1] = 0x01;
+		cmd[2] = cell;
+		cmd[3] = text[0];
+		cmd[4] = text[1];
+		cmd[5] = text[2];
+		cmd[6] = text[3];
+		cmd[7] = 0x00;
 
-		return 0;
+		return write (cmd, 500);
 	}
 
-	cerr << "failed to write text\n";
-	return -1;
+	return 0;
 }
 
 int
@@ -486,6 +383,10 @@ TranzportControlProtocol::read (uint32_t timeout_override)
 
 	button_changes = (this_button_mask ^ buttonmask);
 	buttonmask = this_button_mask;
+
+	if (_datawheel) {
+		datawheel ();
+	}
 
 	if (button_changes & ButtonBattery) {
 		if (buttonmask & ButtonBattery) {
@@ -640,16 +541,13 @@ TranzportControlProtocol::show_current_track ()
 	track_connections.clear ();
 
 	if (current_route == 0) {
-		char buf[5];
-		lcd_write (0, "----");
-		lcd_write (1, "----");
+		print (0, 0, "--------");
 		return;
 	}
 
 	string name = current_route->name();
 
-	memcpy (&next_screen[0][0], name.substr (0, 4).c_str(), 4);
-	memcpy (&next_screen[0][4], name.substr (4, 4).c_str(), 4);
+	print (0, 0, name.substr (0, 8).c_str());
 
 	track_solo_changed (0);
 	track_mute_changed (0);
@@ -658,7 +556,25 @@ TranzportControlProtocol::show_current_track ()
 	track_connections.push_back (current_route->solo_changed.connect (mem_fun (*this, &TranzportControlProtocol::track_solo_changed)));
 	track_connections.push_back (current_route->mute_changed.connect (mem_fun (*this, &TranzportControlProtocol::track_mute_changed)));
 	track_connections.push_back (current_route->record_enable_changed.connect (mem_fun (*this, &TranzportControlProtocol::track_rec_changed)));
+	track_connections.push_back (current_route->gain_changed.connect (mem_fun (*this, &TranzportControlProtocol::track_gain_changed)));
+}
 
+void
+TranzportControlProtocol::record_status_changed ()
+{
+	if (session.get_record_enabled()) {
+		light_on (LightRecord);
+	} else {
+		light_off (LightRecord);
+	}
+}
+
+void
+TranzportControlProtocol::track_gain_changed (void* ignored)
+{
+	char buf[8];
+	snprintf (buf, sizeof (buf), "%.1f", coefficient_to_dB (current_route->gain()));
+	print (0, 9, buf);
 }
 
 void
@@ -715,26 +631,7 @@ TranzportControlProtocol::button_event_backlight_release (bool shifted)
 void
 TranzportControlProtocol::button_event_trackleft_press (bool shifted)
 {
-	if (current_track_id == 0) {
-		current_track_id = session.nroutes() - 1;
-	} else {
-		current_track_id--;
-	}
-
-	while (current_track_id >= 0) {
-		if ((current_route = session.route_by_remote_id (current_track_id)) != 0) {
-			break;
-		}
-		current_track_id--;
-	}
-
-	if (current_track_id < 0) {
-		current_track_id = 0;
-	}
-
-	cerr << "current track = " << current_track_id << " route = " << current_route << endl;
-	
-	show_current_track ();
+	prev_track ();
 }
 
 void
@@ -745,31 +642,7 @@ TranzportControlProtocol::button_event_trackleft_release (bool shifted)
 void
 TranzportControlProtocol::button_event_trackright_press (bool shifted)
 {
-	uint32_t limit = session.nroutes();
-
-	if (current_track_id == limit) {
-		current_track_id = 0;
-	} else {
-		current_track_id++;
-	}
-
-	while (current_track_id < limit) {
-		if ((current_route = session.route_by_remote_id (current_track_id)) != 0) {
-			break;
-		}
-		current_track_id++;
-	}
-
-	if (current_track_id == limit) {
-		current_track_id = 0;
-	}
-
-	cerr << "current track = " << current_track_id << " route = " << current_route;
-	if (current_route) {
-		cerr << ' ' << current_route->name();
-	} 
-	cerr << endl;
-	show_current_track ();
+	next_track ();
 }
 
 void
@@ -780,9 +653,17 @@ TranzportControlProtocol::button_event_trackright_release (bool shifted)
 void
 TranzportControlProtocol::button_event_trackrec_press (bool shifted)
 {
-	if (current_route) {
-		AudioTrack* at = dynamic_cast<AudioTrack*>(current_route);
-		at->set_record_enable (!at->record_enabled(), this);
+	if (shifted) {
+		if (session.get_record_enabled()) {
+			session.record_disenable_all ();
+		} else {
+			session.record_enable_all ();
+		}
+	} else {
+		if (current_route) {
+			AudioTrack* at = dynamic_cast<AudioTrack*>(current_route);
+			at->set_record_enable (!at->record_enabled(), this);
+		}
 	}
 }
 
@@ -807,8 +688,12 @@ TranzportControlProtocol::button_event_trackmute_release (bool shifted)
 void
 TranzportControlProtocol::button_event_tracksolo_press (bool shifted)
 {
-	if (current_route) {
-		current_route->set_solo (!current_route->soloed(), this);
+	if (shifted) {
+		session.set_all_solo (!session.soloing());
+	} else {
+		if (current_route) {
+			current_route->set_solo (!current_route->soloed(), this);
+		}
 	}
 }
 
@@ -835,6 +720,9 @@ TranzportControlProtocol::button_event_undo_release (bool shifted)
 void
 TranzportControlProtocol::button_event_in_press (bool shifted)
 {
+	if (shifted) {
+		ControlProtocol::ZoomIn (); /* EMIT SIGNAL */
+	}
 }
 
 void
@@ -845,6 +733,9 @@ TranzportControlProtocol::button_event_in_release (bool shifted)
 void
 TranzportControlProtocol::button_event_out_press (bool shifted)
 {
+	if (shifted) {
+		ControlProtocol::ZoomOut (); /* EMIT SIGNAL */
+	}
 }
 
 void
@@ -865,6 +756,9 @@ TranzportControlProtocol::button_event_punch_release (bool shifted)
 void
 TranzportControlProtocol::button_event_loop_press (bool shifted)
 {
+	if (shifted) {
+		next_wheel_mode ();
+	}
 }
 
 void
@@ -875,6 +769,11 @@ TranzportControlProtocol::button_event_loop_release (bool shifted)
 void
 TranzportControlProtocol::button_event_prev_press (bool shifted)
 {
+	if (shifted) {
+		ControlProtocol::ZoomToSession (); /* EMIT SIGNAL */
+	} else {
+		prev_marker ();
+	}
 }
 
 void
@@ -897,6 +796,7 @@ TranzportControlProtocol::button_event_add_release (bool shifted)
 void
 TranzportControlProtocol::button_event_next_press (bool shifted)
 {
+	next_marker ();
 }
 
 void
@@ -958,9 +858,314 @@ TranzportControlProtocol::button_event_play_release (bool shifted)
 void
 TranzportControlProtocol::button_event_record_press (bool shifted)
 {
+	if (shifted) {
+		session.save_state ("");
+	} else {
+		switch (session.record_status()) {
+		case Session::Disabled:
+			if (session.ntracks() == 0) {
+				// string txt = _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu.");
+				// MessageDialog msg (*editor, txt);
+				// msg.run ();
+				return;
+			}
+			session.maybe_enable_record ();
+			break;
+		case Session::Recording:
+		case Session::Enabled:
+			session.disable_record (true);
+		}
+	}
 }
 
 void
 TranzportControlProtocol::button_event_record_release (bool shifted)
 {
 }
+
+void
+TranzportControlProtocol::datawheel ()
+{
+	if ((buttonmask & ButtonTrackRight) || (buttonmask & ButtonTrackLeft)) {
+		
+		/* track scrolling */
+
+		if (_datawheel < WheelDirectionThreshold) {
+			next_track ();
+		} else {
+			prev_track ();
+		}
+
+		timerclear (&last_wheel_motion);
+
+	} else if ((buttonmask & ButtonPrev) || (buttonmask & ButtonNext)) {
+		
+		if (_datawheel < WheelDirectionThreshold) {
+			next_marker ();
+		} else {
+			prev_marker ();
+		}
+
+		timerclear (&last_wheel_motion);
+
+	} else if (buttonmask & ButtonShift) {
+
+		/* parameter control */
+
+		if (current_route) {
+			switch (wheel_mode) {
+			case WheelGain:
+				if (_datawheel < WheelDirectionThreshold) {
+					step_gain_up ();
+				} else {
+					step_gain_down ();
+				}
+				break;
+			case WheelPan:
+				if (_datawheel < WheelDirectionThreshold) {
+					step_pan_right ();
+				} else {
+					step_pan_left ();
+				}
+				break;
+
+			case WheelMaster:
+				break;
+			}
+		}
+
+		timerclear (&last_wheel_motion);
+
+	} else {
+
+		float speed;
+		struct timeval now;
+		struct timeval delta;
+		int dir;
+
+		gettimeofday (&now, 0);
+		
+		if (_datawheel < WheelDirectionThreshold) {
+			dir = 1;
+		} else {
+			dir = -1;
+		}
+
+		if (dir != last_wheel_dir) {
+			/* changed direction, start over */
+			speed = 1.0f;
+		} else {
+			if (timerisset (&last_wheel_motion)) {
+
+				timersub (&now, &last_wheel_motion, &delta);
+				
+				/* 10 clicks per second => speed == 1.0 */
+				
+				speed = 100000.0f / (delta.tv_sec * 1000000 + delta.tv_usec);
+				
+			} else {
+
+				/* start at half-speed and see where we go from there */
+
+				speed = 0.5f;
+			}
+		}
+
+		last_wheel_motion = now;
+		last_wheel_dir = dir;
+
+		session.request_transport_speed (speed * dir);
+	}
+}
+
+void
+TranzportControlProtocol::step_gain_up ()
+{
+	if (buttonmask & ButtonStop) {
+		current_route->inc_gain (0.01, this);
+	} else {
+		current_route->inc_gain (0.1, this);
+	}
+}
+
+void
+TranzportControlProtocol::step_gain_down ()
+{
+	if (buttonmask & ButtonStop) {
+		current_route->inc_gain (-0.01, this);
+	} else {
+		current_route->inc_gain (-0.1, this);
+	}
+}
+
+void
+TranzportControlProtocol::step_pan_right ()
+{
+}
+
+void
+TranzportControlProtocol::step_pan_left ()
+{
+}
+
+void
+TranzportControlProtocol::next_wheel_mode ()
+{
+	switch (wheel_mode) {
+	case WheelGain:
+		wheel_mode = WheelPan;
+		break;
+	case WheelPan:
+		wheel_mode = WheelMaster;
+		break;
+	case WheelMaster:
+		wheel_mode = WheelGain;
+	}
+
+	show_wheel_mode ();
+}
+
+void
+TranzportControlProtocol::next_marker ()
+{
+	Location *location = session.locations()->first_location_after (session.transport_frame());
+
+	if (location) {
+		session.request_locate (location->start(), session.transport_rolling());
+	} else {
+		session.request_locate (session.current_end_frame());
+	}
+}
+
+void
+TranzportControlProtocol::prev_marker ()
+{
+	Location *location = session.locations()->first_location_before (session.transport_frame());
+	
+	if (location) {
+		session.request_locate (location->start(), session.transport_rolling());
+	} else {
+		session.goto_start ();
+	}
+}
+
+void
+TranzportControlProtocol::next_track ()
+{
+	uint32_t limit = session.nroutes();
+
+	if (current_track_id == limit) {
+		current_track_id = 0;
+	} else {
+		current_track_id++;
+	}
+
+	while (current_track_id < limit) {
+		if ((current_route = session.route_by_remote_id (current_track_id)) != 0) {
+			break;
+		}
+		current_track_id++;
+	}
+
+	if (current_track_id == limit) {
+		current_track_id = 0;
+	}
+
+	show_current_track ();
+}
+
+void
+TranzportControlProtocol::prev_track ()
+{
+	if (current_track_id == 0) {
+		current_track_id = session.nroutes() - 1;
+	} else {
+		current_track_id--;
+	}
+
+	while (current_track_id >= 0) {
+		if ((current_route = session.route_by_remote_id (current_track_id)) != 0) {
+			break;
+		}
+		current_track_id--;
+	}
+
+	if (current_track_id < 0) {
+		current_track_id = 0;
+	}
+
+	show_current_track ();
+}
+
+void
+TranzportControlProtocol::show_wheel_mode ()
+{
+	switch (wheel_mode) {
+	case WheelGain:
+		print (1, 0, _("Wh: gain"));
+		break;
+
+	case WheelPan:
+		print (1, 0, _("Wh: pan"));
+		break;
+
+	case WheelMaster:
+		print (1, 0, _("Wh: mstr"));
+		break;
+	}
+}
+
+void
+TranzportControlProtocol::print (int row, int col, const char *text)
+{
+	int cell;
+	uint32_t left = strlen (text);
+	char tmp[5];
+
+	if (row < 0 || row > 1) {
+		return;
+	}
+
+	if (col < 0 || col > 19) {
+		return;
+	}
+
+	while (left) {
+
+		if (left && left < 4) {
+			memset (tmp, ' ', 4);
+			memcpy (tmp, text, left);
+			tmp[4] = '\0';
+			text = tmp;
+		}
+
+		if (col >= 0 && col < 4) {
+			cell = 0;
+		} else if (col >= 4 && col < 8) {
+			cell = 1;
+			
+		} else if (col >= 8 && col < 12) {
+			cell = 2;
+			
+		} else if (col >= 12 && col < 16) {
+			cell = 3;
+			
+		} else if (col >= 16 && col < 20) {
+			cell = 4;
+			
+		} else {
+			return;
+		}
+		
+		cell += (row * 5);
+
+		lcd_write (row, col, cell, text);
+		
+		int shift = min (4U, left);
+
+		text += shift;
+		left -= shift;
+		col  += 4;
+	}
+}	
+

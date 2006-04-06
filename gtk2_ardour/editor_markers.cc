@@ -55,6 +55,8 @@ Editor::clear_marker_display ()
 void
 Editor::add_new_location (Location *location)
 {
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::add_new_location), location));
+
 	LocationMarkers *lam = new LocationMarkers;
 	uint32_t color;
 

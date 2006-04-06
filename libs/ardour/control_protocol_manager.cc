@@ -24,6 +24,14 @@ ControlProtocolManager::ControlProtocolManager ()
 
 ControlProtocolManager::~ControlProtocolManager()
 {
+	LockMonitor lm (protocols_lock, __LINE__, __FILE__);
+
+	for (list<ControlProtocol*>::iterator i = control_protocols.begin(); i != control_protocols.end(); ++i) {
+		delete (*i);
+	}
+
+	control_protocols.clear ();
+		
 }
 
 void
@@ -54,13 +62,8 @@ ControlProtocolManager::startup (Session& s)
 				control_protocols.push_back (cpi->protocol);
 			}
 			
-			cerr << "start " << cpi->name << endl;
 			cpi->protocol->init ();
-			
-			cerr << "activate " << cpi->name << endl;
 			cpi->protocol->set_active (true);
-			
-			cerr << cpi->name << " now running\n";
 		}
 	}
 }

@@ -38,6 +38,15 @@ class ControlProtocol : public sigc::trackable {
 	virtual void send_route_feedback (std::list<Route*>&) {}
 	virtual void send_global_feedback () {}
 
+	/* signals that a control protocol can emit and other (presumably graphical)
+	   user interfaces can respond to
+	*/
+
+	static sigc::signal<void> ZoomToSession;
+	static sigc::signal<void> ZoomIn;
+	static sigc::signal<void> ZoomOut;
+	static sigc::signal<void> Enter;
+
   protected:
 
 	ARDOUR::Session& session;

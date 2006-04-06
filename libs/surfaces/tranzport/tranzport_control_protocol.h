@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include <sys/time.h>
+
 #include <pthread.h>
 #include <usb.h>
 #include <ardour/control_protocol.h>
@@ -28,6 +30,7 @@ class TranzportControlProtocol : public ControlProtocol {
 	static const int WRITE_ENDPOINT = 0x02;
 	const static int STATUS_OFFLINE  = 0xff;
 	const static int STATUS_ONLINE = 0x01;
+	const static uint8_t WheelDirectionThreshold = 0x3f;
 
 	enum LightID {
 		LightRecord = 0,
@@ -62,6 +65,12 @@ class TranzportControlProtocol : public ControlProtocol {
 		ButtonRecord = 0x00000100,
 		ButtonShift = 0x08000000
 	};
+
+	enum WheelMode {
+		WheelGain,
+		WheelPan,
+		WheelMaster
+	};
 		
 	pthread_t       thread;
 	uint32_t        buttonmask;
@@ -72,8 +81,10 @@ class TranzportControlProtocol : public ControlProtocol {
 	Route*          current_route;
 	uint32_t        current_track_id;
 	char            current_screen[2][20];
-	char            next_screen[2][20];
 	bool            lights[7];
+	WheelMode       wheel_mode;
+	struct timeval  last_wheel_motion;
+	int             last_wheel_dir;
 
 	std::vector<sigc::connection> track_connections;
 
@@ -92,20 +103,35 @@ class TranzportControlProtocol : public ControlProtocol {
 	int open_core (struct usb_device*);
 
 	void lcd_clear ();
-	int  lcd_write (uint8_t cell, const char *text);
-
+	int  lcd_write (int row, int col, uint8_t cell, const char *text);
+	void print (int row, int col, const char* text);
 	int  light_on (LightID);
 	int  light_off (LightID);
 
-	void flush_lcd ();
-	void write_clock (const uint8_t* label);
-
 	void show_current_track ();
 	void show_transport_time ();
+	void show_wheel_mode ();
+	void show_gain ();
+	void show_pan ();
 
 	void track_solo_changed (void*);
 	void track_rec_changed (void*);
 	void track_mute_changed (void*);
+	void track_gain_changed (void*);
+	void record_status_changed ();
+
+	void datawheel ();
+
+	void next_wheel_mode ();
+
+	void next_track ();
+	void prev_track ();
+	void next_marker ();
+	void prev_marker ();
+	void step_gain_up ();
+	void step_gain_down ();
+	void step_pan_right ();
+	void step_pan_left ();
 
 	static void* _thread_work (void* arg);
 	void* thread_work ();

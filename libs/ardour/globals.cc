@@ -280,6 +280,7 @@ ARDOUR::cleanup ()
 {
 	delete Library;
 	lrdf_cleanup ();
+	delete &ControlProtocolManager::instance();
 	return 0;
 }
 

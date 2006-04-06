@@ -34,15 +34,28 @@ using namespace std;
 
 #include "i18n.h"
 
+sigc::signal<void> ControlProtocol::ZoomToSession;
+sigc::signal<void> ControlProtocol::ZoomOut;
+sigc::signal<void> ControlProtocol::ZoomIn;
+sigc::signal<void> ControlProtocol::Enter;
+
 ControlProtocol::ControlProtocol (Session& s, string str)
 	: session (s), 
 	  _name (str)
 {
 	active_thread = 1;
+	thread_request_pipe[0] = -1;
+	thread_request_pipe[1] = -1;
 }
 
 ControlProtocol::~ControlProtocol ()
 {
+	terminate_thread ();
+
+	if (thread_request_pipe[0] >= 0) {
+		close (thread_request_pipe[0]);
+		close (thread_request_pipe[1]);
+	}
 }
 
 void

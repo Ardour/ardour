@@ -43,8 +43,6 @@ pthread_create_and_store (string name, pthread_t  *thread, pthread_attr_t *attr,
 {
 	int ret;
 
-	cerr << "Creating thread " << name << endl;
-
 	if ((ret = pthread_create (thread, attr, start_routine, arg)) == 0) {
 		std::pair<string,pthread_t> newpair;
 		newpair.first = name;
