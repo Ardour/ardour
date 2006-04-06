@@ -60,6 +60,7 @@
 #include "sfdb_ui.h"
 #include "editing.h"
 #include "gtk-custom-hruler.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -1021,6 +1022,8 @@ Editor::scroll_tracks_up_line ()
 void
 Editor::temporal_zoom_step (bool coarser)
 {
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::temporal_zoom_step), coarser));
+
 	double nfpu;
 
 	nfpu = frames_per_unit;
@@ -1122,6 +1125,8 @@ Editor::temporal_zoom_selection ()
 void
 Editor::temporal_zoom_session ()
 {
+	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::temporal_zoom_session));
+
 	if (session) {
 		temporal_zoom_by_frame (session->current_start_frame(), session->current_end_frame(), "zoom to session");
 	}

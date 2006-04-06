@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <sys/time.h>
-
+#include <pbd/lockmonitor.h>
 #include <pthread.h>
 #include <usb.h>
 #include <ardour/control_protocol.h>
@@ -66,12 +66,18 @@ class TranzportControlProtocol : public ControlProtocol {
 		ButtonShift = 0x08000000
 	};
 
-	enum WheelMode {
-		WheelGain,
-		WheelPan,
-		WheelMaster
+	enum WheelShiftMode {
+		WheelShiftGain,
+		WheelShiftPan,
+		WheelShiftMaster
 	};
 		
+	enum WheelMode {
+		WheelTimeline,
+		WheelScrub,
+		WheelShuttle
+	};
+	
 	pthread_t       thread;
 	uint32_t        buttonmask;
 	uint32_t        timeout;
@@ -83,6 +89,7 @@ class TranzportControlProtocol : public ControlProtocol {
 	char            current_screen[2][20];
 	bool            lights[7];
 	WheelMode       wheel_mode;
+	WheelShiftMode  wheel_shift_mode;
 	struct timeval  last_wheel_motion;
 	int             last_wheel_dir;
 
@@ -94,6 +101,8 @@ class TranzportControlProtocol : public ControlProtocol {
 	uint32_t last_secs;
 	uint32_t last_frames;
 	jack_nframes_t last_where;
+
+	PBD::Lock write_lock;
 
 	int open ();
 	int read (uint32_t timeout_override = 0);
@@ -121,8 +130,12 @@ class TranzportControlProtocol : public ControlProtocol {
 	void record_status_changed ();
 
 	void datawheel ();
+	void scrub ();
+	void scroll ();
+	void shuttle ();
 
 	void next_wheel_mode ();
+	void next_wheel_shift_mode ();
 
 	void next_track ();
 	void prev_track ();

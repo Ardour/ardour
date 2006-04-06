@@ -719,7 +719,7 @@ Editor::Editor (AudioEngine& eng)
 	ControlProtocol::ZoomToSession.connect (mem_fun (*this, &Editor::temporal_zoom_session));
 	ControlProtocol::ZoomIn.connect (bind (mem_fun (*this, &Editor::temporal_zoom_step), false));
 	ControlProtocol::ZoomOut.connect (bind (mem_fun (*this, &Editor::temporal_zoom_step), true));
-
+	ControlProtocol::ScrollTimeline.connect (mem_fun (*this, &Editor::control_scroll));
 	constructed = true;
 	instant_save ();
 }
@@ -917,7 +917,6 @@ Editor::reposition_x_origin (jack_nframes_t frame)
 			horizontal_adjustment.set_upper (frame_to_pixel (frame + (current_page_frames())));
 		}
 		horizontal_adjustment.set_value (frame/frames_per_unit);
-		XOriginChanged (); /* EMIT_SIGNAL */
 	}
 }
 
@@ -950,11 +949,58 @@ Editor::zoom_adjustment_changed ()
 	temporal_zoom (fpu);
 }
 
+void
+Editor::control_scroll (float fraction)
+{
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &Editor::control_scroll), fraction));
+
+	if (!session) {
+		return;
+	}
+
+	double step = fraction * current_page_frames();
+	jack_nframes_t target;
+
+	if ((fraction < 0.0f) && (session->transport_frame() < (jack_nframes_t) fabs(step))) {
+		target = 0;
+	} else if ((fraction > 0.0f) && (max_frames - session->transport_frame() < step)) {
+		target = (max_frames - (current_page_frames()*2)); // allow room for slop in where the PH is on the screen
+	} else {
+		target = (session->transport_frame() + (fraction * current_page_frames()));
+	}
+
+	/* move visuals, we'll catch up with it later */
+
+	playhead_cursor->set_position (target);
+
+	if (target > (current_page_frames() / 2)) {
+		/* try to center PH in window */
+		reposition_x_origin (target - (current_page_frames()/2));
+	} else {
+		reposition_x_origin (0);
+	}
+
+	/* cancel the existing */
+
+	control_scroll_connection.disconnect ();
+
+	/* add the next one */
+
+	control_scroll_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::deferred_control_scroll), target), 50);
+}
+
+bool
+Editor::deferred_control_scroll (jack_nframes_t target)
+{
+	session->request_locate (target);
+	return false;
+}
+
 void 
 Editor::canvas_horizontally_scrolled ()
 {
 	leftmost_frame = (jack_nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
-	
+
 	update_fixed_rulers ();
 	
 	if (!edit_hscroll_dragging) {
@@ -968,7 +1014,7 @@ void
 Editor::reposition_and_zoom (jack_nframes_t frame, double nfpu)
 {
 	if (!repos_zoom_queued) {
-	  Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::deferred_reposition_and_zoom), frame, nfpu));
+		Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::deferred_reposition_and_zoom), frame, nfpu));
 		repos_zoom_queued = true;
 	}
 }

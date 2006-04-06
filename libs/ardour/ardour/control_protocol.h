@@ -46,6 +46,7 @@ class ControlProtocol : public sigc::trackable {
 	static sigc::signal<void> ZoomIn;
 	static sigc::signal<void> ZoomOut;
 	static sigc::signal<void> Enter;
+	static sigc::signal<void,float> ScrollTimeline;
 
   protected:
 

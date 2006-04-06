@@ -150,7 +150,6 @@ class Editor : public PublicEditor
 	void connect_to_image_compositor() ;
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
 	TimeAxisView* get_named_time_axis(const string & name) ;
-	/* </CMT Additions> */
 
 	void consider_auditioning (ARDOUR::Region&);
 	void hide_a_region (ARDOUR::Region&);
@@ -322,7 +321,7 @@ class Editor : public PublicEditor
 	void ensure_float (Gtk::Window&);
 
 	void show_window ();
-	
+
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
 
@@ -714,6 +713,10 @@ class Editor : public PublicEditor
 	Gtk::VBox           time_canvas_vbox;
 	Gtk::VBox           edit_controls_vbox;
 	Gtk::HBox           edit_controls_hbox;
+
+	void control_scroll (float);
+	bool deferred_control_scroll (jack_nframes_t);
+	sigc::connection control_scroll_connection;
 
 	void tie_vertical_scrolling ();
 	void canvas_horizontally_scrolled ();

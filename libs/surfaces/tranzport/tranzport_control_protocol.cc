@@ -30,7 +30,8 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	current_route = 0;
 	current_track_id = 0;
 	last_where = max_frames;
-	wheel_mode = WheelGain;
+	wheel_mode = WheelTimeline;
+	wheel_shift_mode = WheelShiftGain;
 	timerclear (&last_wheel_motion);
 	last_wheel_dir = 1;
 
@@ -246,7 +247,11 @@ TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 {
 	int val;
 
-	val = usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, timeout_override ? timeout_override : timeout);
+	{
+		LockMonitor lm (write_lock, __LINE__, __FILE__);
+		val = usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, timeout_override ? timeout_override : timeout);
+	}
+
 	if (val < 0)
 		return val;
 	if (val != 8)
@@ -258,8 +263,28 @@ TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 void
 TranzportControlProtocol::lcd_clear ()
 {
-	print (0, 0, "                    ");
-	print (1, 0, "                    ");
+	/* special case this for speed and atomicity */
+
+	uint8_t cmd[8];
+	
+	cmd[0] = 0x00;
+	cmd[1] = 0x01;
+	cmd[3] = ' ';
+	cmd[4] = ' ';
+	cmd[5] = ' ';
+	cmd[6] = ' ';
+	cmd[7] = 0x00;
+
+	{
+		LockMonitor lm (write_lock, __LINE__, __FILE__);
+
+		for (uint8_t i = 0; i < 10; ++i) {
+			cmd[2] = i;
+			usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, 500);
+		}
+		
+		memset (current_screen, ' ', sizeof (current_screen));
+	}
 }
 
 int
@@ -573,7 +598,7 @@ void
 TranzportControlProtocol::track_gain_changed (void* ignored)
 {
 	char buf[8];
-	snprintf (buf, sizeof (buf), "%.1f", coefficient_to_dB (current_route->gain()));
+	snprintf (buf, sizeof (buf), "%.1fdB", coefficient_to_dB (current_route->gain()));
 	print (0, 9, buf);
 }
 
@@ -757,7 +782,7 @@ void
 TranzportControlProtocol::button_event_loop_press (bool shifted)
 {
 	if (shifted) {
-		next_wheel_mode ();
+		next_wheel_shift_mode ();
 	}
 }
 
@@ -796,7 +821,11 @@ TranzportControlProtocol::button_event_add_release (bool shifted)
 void
 TranzportControlProtocol::button_event_next_press (bool shifted)
 {
-	next_marker ();
+	if (shifted) {
+		next_wheel_mode ();
+	} else {
+		next_marker ();
+	}
 }
 
 void
@@ -913,15 +942,15 @@ TranzportControlProtocol::datawheel ()
 		/* parameter control */
 
 		if (current_route) {
-			switch (wheel_mode) {
-			case WheelGain:
+			switch (wheel_shift_mode) {
+			case WheelShiftGain:
 				if (_datawheel < WheelDirectionThreshold) {
 					step_gain_up ();
 				} else {
 					step_gain_down ();
 				}
 				break;
-			case WheelPan:
+			case WheelShiftPan:
 				if (_datawheel < WheelDirectionThreshold) {
 					step_pan_right ();
 				} else {
@@ -929,7 +958,7 @@ TranzportControlProtocol::datawheel ()
 				}
 				break;
 
-			case WheelMaster:
+			case WheelShiftMaster:
 				break;
 			}
 		}
@@ -938,43 +967,81 @@ TranzportControlProtocol::datawheel ()
 
 	} else {
 
-		float speed;
-		struct timeval now;
-		struct timeval delta;
-		int dir;
+		switch (wheel_mode) {
+		case WheelTimeline:
+			scroll ();
+			break;
+			
+		case WheelScrub:
+			scrub ();
+			break;
 
-		gettimeofday (&now, 0);
-		
-		if (_datawheel < WheelDirectionThreshold) {
-			dir = 1;
-		} else {
-			dir = -1;
+		case WheelShuttle:
+			shuttle ();
+			break;
 		}
+	}
+}
 
-		if (dir != last_wheel_dir) {
-			/* changed direction, start over */
-			speed = 1.0f;
+void
+TranzportControlProtocol::scroll ()
+{
+	if (_datawheel < WheelDirectionThreshold) {
+		ScrollTimeline (0.2);
+	} else {
+		ScrollTimeline (-0.2);
+	}
+}
+
+void
+TranzportControlProtocol::scrub ()
+{
+	float speed;
+	struct timeval now;
+	struct timeval delta;
+	int dir;
+	
+	gettimeofday (&now, 0);
+	
+	if (_datawheel < WheelDirectionThreshold) {
+		dir = 1;
+	} else {
+		dir = -1;
+	}
+	
+	if (dir != last_wheel_dir) {
+		/* changed direction, start over */
+		speed = 1.0f;
+	} else {
+		if (timerisset (&last_wheel_motion)) {
+			
+			timersub (&now, &last_wheel_motion, &delta);
+			
+			/* 10 clicks per second => speed == 1.0 */
+			
+			speed = 100000.0f / (delta.tv_sec * 1000000 + delta.tv_usec);
+			
 		} else {
-			if (timerisset (&last_wheel_motion)) {
-
-				timersub (&now, &last_wheel_motion, &delta);
-				
-				/* 10 clicks per second => speed == 1.0 */
-				
-				speed = 100000.0f / (delta.tv_sec * 1000000 + delta.tv_usec);
-				
-			} else {
-
-				/* start at half-speed and see where we go from there */
-
-				speed = 0.5f;
-			}
+			
+			/* start at half-speed and see where we go from there */
+			
+			speed = 0.5f;
 		}
+	}
+	
+	last_wheel_motion = now;
+	last_wheel_dir = dir;
+	
+	session.request_transport_speed (speed * dir);
+}
 
-		last_wheel_motion = now;
-		last_wheel_dir = dir;
-
-		session.request_transport_speed (speed * dir);
+void
+TranzportControlProtocol::shuttle ()
+{
+	if (_datawheel < WheelDirectionThreshold) {
+		session.request_transport_speed (session.transport_speed() + 0.1);
+	} else {
+		session.request_transport_speed (session.transport_speed() - 0.1);
 	}
 }
 
@@ -1009,17 +1076,34 @@ TranzportControlProtocol::step_pan_left ()
 }
 
 void
+TranzportControlProtocol::next_wheel_shift_mode ()
+{
+	switch (wheel_shift_mode) {
+	case WheelShiftGain:
+		wheel_shift_mode = WheelShiftPan;
+		break;
+	case WheelShiftPan:
+		wheel_shift_mode = WheelShiftMaster;
+		break;
+	case WheelShiftMaster:
+		wheel_shift_mode = WheelShiftGain;
+	}
+
+	show_wheel_mode ();
+}
+
+void
 TranzportControlProtocol::next_wheel_mode ()
 {
 	switch (wheel_mode) {
-	case WheelGain:
-		wheel_mode = WheelPan;
+	case WheelTimeline:
+		wheel_mode = WheelScrub;
 		break;
-	case WheelPan:
-		wheel_mode = WheelMaster;
+	case WheelScrub:
+		wheel_mode = WheelShuttle;
 		break;
-	case WheelMaster:
-		wheel_mode = WheelGain;
+	case WheelShuttle:
+		wheel_mode = WheelTimeline;
 	}
 
 	show_wheel_mode ();
@@ -1100,19 +1184,35 @@ TranzportControlProtocol::prev_track ()
 void
 TranzportControlProtocol::show_wheel_mode ()
 {
+	string text;
+
 	switch (wheel_mode) {
-	case WheelGain:
-		print (1, 0, _("Wh: gain"));
+	case WheelTimeline:
+		text = "Time";
 		break;
-
-	case WheelPan:
-		print (1, 0, _("Wh: pan "));
+	case WheelScrub:
+		text = "Scrb";
 		break;
-
-	case WheelMaster:
-		print (1, 0, _("Wh: mstr"));
+	case WheelShuttle:
+		text = "Shtl";
 		break;
 	}
+
+	switch (wheel_shift_mode) {
+	case WheelShiftGain:
+		text += ":Gain";
+		break;
+
+	case WheelShiftPan:
+		text += ":Pan";
+		break;
+
+	case WheelShiftMaster:
+		text += ":Mstr";
+		break;
+	}
+	
+	print (1, 0, text.c_str());
 }
 
 void

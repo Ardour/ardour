@@ -38,6 +38,7 @@ sigc::signal<void> ControlProtocol::ZoomToSession;
 sigc::signal<void> ControlProtocol::ZoomOut;
 sigc::signal<void> ControlProtocol::ZoomIn;
 sigc::signal<void> ControlProtocol::Enter;
+sigc::signal<void,float> ControlProtocol::ScrollTimeline;
 
 ControlProtocol::ControlProtocol (Session& s, string str)
 	: session (s), 
