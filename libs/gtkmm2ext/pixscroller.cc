@@ -176,11 +176,34 @@ PixScroller::on_button_release_event (GdkEventButton* ev)
 			}
 		}
 		break;
-	case 4:
+	default:
+		break;
+	}
+	return false;
+}
+
+bool
+PixScroller::on_scroll_event (GdkEventScroll* ev)
+{
+	double scale;
+	
+	if (ev->state & GDK_CONTROL_MASK) {
+		if (ev->state & GDK_MOD1_MASK) {
+			scale = 0.05;
+		} else {
+			scale = 0.1;
+		}
+	} else {
+		scale = 0.5;
+	}
+
+	switch (ev->direction) {
+
+	case GDK_SCROLL_UP:
 		/* wheel up */
 		adj.set_value (adj.get_value() + (adj.get_page_increment() * scale));
 		break;
-	case 5:
+	case GDK_SCROLL_DOWN:
 		/* wheel down */
 		adj.set_value (adj.get_value() - (adj.get_page_increment() * scale));
 		break;

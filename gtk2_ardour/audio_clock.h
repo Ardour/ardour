@@ -153,6 +153,7 @@ class AudioClock : public Gtk::HBox
 	bool field_motion_notify_event (GdkEventMotion *ev, Field);
 	bool field_button_press_event (GdkEventButton *ev, Field);
 	bool field_button_release_event (GdkEventButton *ev, Field);
+	bool field_button_scroll_event (GdkEventScroll *ev, Field);
 	bool field_key_release_event (GdkEventKey *, Field);
 	bool field_focus_in_event (GdkEventFocus *, Field);
 	bool field_focus_out_event (GdkEventFocus *, Field);

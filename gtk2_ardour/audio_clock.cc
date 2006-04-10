@@ -186,7 +186,7 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 	   stays disabled.
 	*/
 
-	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	clock_base.signal_button_release_event().connect (bind (mem_fun (*this, &AudioClock::field_button_release_event), SMPTE_Hours));
 
 	if (editable) {
@@ -201,17 +201,17 @@ AudioClock::setup_events ()
 {
 	clock_base.set_flags (Gtk::CAN_FOCUS);
 
-	hours_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
-	minutes_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
-	seconds_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
-	frames_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
-	bars_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
-	beats_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
-	ticks_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
-	ms_hours_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
-	ms_minutes_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
-	ms_seconds_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
-	audio_frames_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK);
+	hours_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	minutes_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	seconds_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	frames_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	bars_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	beats_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	ticks_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	ms_hours_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	ms_minutes_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	ms_seconds_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	audio_frames_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 
 	hours_ebox.set_flags (Gtk::CAN_FOCUS);
 	minutes_ebox.set_flags (Gtk::CAN_FOCUS);
@@ -260,6 +260,18 @@ AudioClock::setup_events ()
 	ms_hours_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), MS_Hours));
 	ms_minutes_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), MS_Minutes));
 	ms_seconds_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), MS_Seconds));
+
+	hours_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), SMPTE_Hours));
+	minutes_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), SMPTE_Minutes));
+	seconds_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), SMPTE_Seconds));
+	frames_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), SMPTE_Frames));
+	audio_frames_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), AudioFrames));
+	bars_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), Bars));
+	beats_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), Beats));
+	ticks_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), Ticks));
+	ms_hours_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Hours));
+	ms_minutes_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Minutes));
+	ms_seconds_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Seconds));
 
 	hours_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Hours));
 	minutes_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Minutes));
@@ -975,6 +987,51 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 			}
 		}
 		break;
+
+	default:
+		return FALSE;
+		break;
+	}
+	
+	return TRUE;
+}
+
+bool
+AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
+{
+	if (session == 0) return FALSE;
+
+	jack_nframes_t frames = 0;
+
+	switch (ev->direction) {
+
+	case GDK_SCROLL_UP:
+	       frames = get_frames (field);
+	       if (frames != 0) {
+		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+			     frames *= 10;
+		      }
+		      set (current_time() + frames, true);
+		      ValueChanged (); /* EMIT_SIGNAL */
+	       }
+	       break;
+
+	case GDK_SCROLL_DOWN:
+	       frames = get_frames (field);
+	       if (frames != 0) {
+		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+			     frames *= 10;
+		      }
+		      
+		      if ((double)current_time() - (double)frames < 0.0) {
+			     set (0, true);
+		      } else {
+			     set (current_time() - frames, true);
+		      }
+		      
+		      ValueChanged (); /* EMIT_SIGNAL */
+	       }
+	       break;
 
 	default:
 		return FALSE;

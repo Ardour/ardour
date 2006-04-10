@@ -244,14 +244,14 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 {
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			step_height (true);
 			return true;
 		}
 		break;
 		
 	case GDK_SCROLL_DOWN:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			step_height (false);
 			return true;
 		}
@@ -328,30 +328,35 @@ TimeAxisView::hide ()
 void
 TimeAxisView::step_height (bool bigger)
 {
- 	switch (height) {
- 	case Largest:
-  		if (!bigger) set_height (Large);
- 		break;
- 	case Large:
-  		if (bigger) set_height (Largest);
-  		else set_height (Larger);
- 		break;
- 	case Larger:
-  		if (bigger) set_height (Large);
-  		else set_height (Normal);
- 		break;
- 	case Normal:
-  		if (bigger) set_height (Larger);
-  		else set_height (Smaller);
- 		break;
- 	case Smaller:
-  		if (bigger) set_height (Normal);
-  		else set_height (Small);
- 		break;
- 	case Small:
-  		if (bigger) set_height (Smaller);
- 		break;
-  	}
+  
+       if (height == hLargest) {
+               if (!bigger) set_height (Large);
+               return;
+       }
+       if (height == hLarge) {
+               if (bigger) set_height (Largest);
+                else set_height (Larger);
+               return;
+       }
+       if (height == hLarger) {
+                if (bigger) set_height (Large);
+                else set_height (Normal);
+               return;
+       }
+       if (height == hNormal) {
+                if (bigger) set_height (Larger);
+                else set_height (Smaller);
+               return;
+       }
+       if (height == hSmaller) {
+                if (bigger) set_height (Normal);
+                else set_height (Small);
+               return;
+       }
+       if (height == hSmall) {
+                if (bigger) set_height (Smaller);
+               return;
+       }
 }
 
 void

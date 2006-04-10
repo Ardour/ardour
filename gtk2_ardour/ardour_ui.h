@@ -408,6 +408,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	gint shuttle_box_button_press (GdkEventButton*);
 	gint shuttle_box_button_release (GdkEventButton*);
+	gint shuttle_box_scroll (GdkEventScroll*);
 	gint shuttle_box_motion (GdkEventMotion*);
 	gint shuttle_box_expose (GdkEventExpose*);
 	gint mouse_shuttle (double x, bool force);

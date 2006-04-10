@@ -984,7 +984,12 @@ Editor::scroll_tracks_down ()
 		cnt = (int) floor (prefix);
 	}
 
-	vertical_adjustment.set_value (vertical_adjustment.get_value() + (cnt * vertical_adjustment.get_page_size()));
+	double vert_value = vertical_adjustment.get_value() + (cnt *
+		vertical_adjustment.get_page_size());
+	if (vert_value > vertical_adjustment.get_upper() - canvas_height) {
+		vert_value = vertical_adjustment.get_upper() - canvas_height;
+	}
+	vertical_adjustment.set_value (vert_value);
 }
 
 void
@@ -1006,15 +1011,21 @@ Editor::scroll_tracks_up ()
 void
 Editor::scroll_tracks_down_line ()
 {
+
         Gtk::Adjustment* adj = edit_vscrollbar.get_adjustment();
-	adj->set_value (adj->get_value() + 10);
+	double vert_value = adj->get_value() + 20;
+
+	if (vert_value>adj->get_upper() - canvas_height) {
+		vert_value = adj->get_upper() - canvas_height;
+	}
+	adj->set_value (vert_value);
 }
 
 void
 Editor::scroll_tracks_up_line ()
 {
         Gtk::Adjustment* adj = edit_vscrollbar.get_adjustment();
-	adj->set_value (adj->get_value() - 10);
+	adj->set_value (adj->get_value() - 20);
 }
 
 /* ZOOM */

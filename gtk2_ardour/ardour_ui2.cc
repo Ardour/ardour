@@ -306,11 +306,12 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (speed_display_box, _("Current transport speed"));
 	
 	shuttle_box.set_flags (CAN_FOCUS);
-	shuttle_box.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK);
+	shuttle_box.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 	shuttle_box.set_size_request (100, 15);
 
 	shuttle_box.signal_button_press_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_press));
 	shuttle_box.signal_button_release_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_release));
+	shuttle_box.signal_scroll_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_scroll));
 	shuttle_box.signal_motion_notify_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_motion));
 	shuttle_box.signal_expose_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_expose));
 
@@ -674,6 +675,28 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		shuttle_fract += 0.005;
 		break;
 	case 5:
+		shuttle_fract -= 0.005;
+		break;
+	}
+
+	use_shuttle_fract (true);
+
+	return true;
+}
+
+gint
+ARDOUR_UI::shuttle_box_scroll (GdkEventScroll* ev)
+{
+	if (!session) {
+		return true;
+	}
+	
+	switch (ev->direction) {
+		
+	case GDK_SCROLL_UP:
+		shuttle_fract += 0.005;
+		break;
+	case GDK_SCROLL_DOWN:
 		shuttle_fract -= 0.005;
 		break;
 	}
