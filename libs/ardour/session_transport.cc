@@ -720,7 +720,7 @@ Session::set_transport_speed (float speed, bool abort)
 
 	} else if (transport_stopped() && speed == 1.0) {
 
-		if (Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
+		if (!get_record_enabled() && Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
 			return;
 		}
 
@@ -746,7 +746,7 @@ Session::set_transport_speed (float speed, bool abort)
 
 	} else {
 
-		if (Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
+		if (!get_record_enabled() && Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
 			return;
 		}
 
