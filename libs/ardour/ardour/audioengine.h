@@ -202,6 +202,8 @@ class AudioEngine : public sigc::trackable
 	sigc::slot<int,jack_nframes_t>  freewheel_action;
 	bool                  reconnect_on_halt;
 	int                  _usecs_per_cycle;
+	jack_nframes_t       last_meter_point;
+	jack_nframes_t       meter_interval;
 
 	typedef std::set<Port*> Ports;
 	Ports ports;
@@ -232,9 +234,13 @@ class AudioEngine : public sigc::trackable
 	int  jack_sample_rate_callback (jack_nframes_t);
 
 	static void halted (void *);
-	static void meter (Port *port, jack_nframes_t nframes);
 
 	int connect_to_jack (std::string client_name);
+
+	static void* _meter_thread (void* arg);
+	void* meter_thread ();
+	pthread_t meter_thread_id;
+	void maybe_start_metering_thread ();
 };
 
 }; /* namespace ARDOUR */

@@ -198,19 +198,14 @@ class IO : public Stateful, public ARDOUR::StateManager
 	/* Peak metering */
 
 	float peak_input_power (uint32_t n) { 
-		if (n < std::max(_ninputs, _noutputs)) {
-			float x = _stored_peak_power[n];
-			if(x > 0.0) {
-				return 20 * fast_log10(x);
-			} else {
-				return minus_infinity();
-			}
+		if (n < std::max (_ninputs, _noutputs)) {
+			return _visible_peak_power[n];
 		} else {
 			return minus_infinity();
 		}
 	}
 
-	static sigc::signal<void> GrabPeakPower;
+	static sigc::signal<void> Meter;
 
 	/* automation */
 
@@ -278,7 +273,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	vector<Port*>       _outputs;
 	vector<Port*>       _inputs;
 	vector<float>       _peak_power;
-	vector<float>       _stored_peak_power;
+	vector<float>       _visible_peak_power;
 	string              _name;
 	Connection*         _input_connection;
 	Connection*         _output_connection;
@@ -394,7 +389,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	int make_connections (const XMLNode&);
 
 	void setup_peak_meters ();
-	void grab_peak_power ();
+	void meter ();
 
 	bool ensure_inputs_locked (uint32_t, bool clear, void *src);
 	bool ensure_outputs_locked (uint32_t, bool clear, void *src);

@@ -4,6 +4,7 @@
 #include <pbd/error.h>
 #include <pbd/pathscanner.h>
 
+#include <ardour/session.h>
 #include <ardour/control_protocol.h>
 #include <ardour/control_protocol_manager.h>
 
@@ -20,6 +21,8 @@ ControlProtocolManager::ControlProtocolManager ()
 	if (_instance == 0) {
 		_instance = this;
 	}
+
+	_session = 0;
 }
 
 ControlProtocolManager::~ControlProtocolManager()
@@ -35,97 +38,75 @@ ControlProtocolManager::~ControlProtocolManager()
 }
 
 void
-ControlProtocolManager::startup (Session& s)
+ControlProtocolManager::set_session (Session& s)
 {
-	list<ControlProtocolInfo *>::iterator i;
-	
-	for (i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
+	_session = &s;
+	_session->going_away.connect (mem_fun (*this, &ControlProtocolManager::drop_session));
+}
 
-		ControlProtocolInfo* cpi = (*i);
+void
+ControlProtocolManager::drop_session ()
+{
+	_session = 0;
 
-		if (cpi->name == "Tranzport") {
-		
-			cpi->descriptor = get_descriptor ((*i)->path);
-			
-			if (cpi->descriptor == 0) {
-				error << string_compose (_("control protocol name \"%1\" has no descriptor"), cpi->name) << endmsg;
-				continue;
-			}
-			
-			if ((cpi->protocol = cpi->descriptor->initialize (cpi->descriptor, &s)) == 0) {
-				error << string_compose (_("control protocol name \"%1\" could not be initialized"), cpi->name) << endmsg;
-				continue;
-			}
-			
-			{
-				LockMonitor lm (protocols_lock, __LINE__, __FILE__);
-				control_protocols.push_back (cpi->protocol);
-			}
-			
-			cpi->protocol->init ();
-			cpi->protocol->set_active (true);
+	{
+		LockMonitor lm (protocols_lock, __LINE__, __FILE__);
+		for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
+			delete *p;
 		}
+		control_protocols.clear ();
 	}
 }
 
 ControlProtocol*
-ControlProtocolManager::instantiate (Session& session, string name)
+ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 {
-	list<ControlProtocolInfo *>::iterator i;
-
-	for (i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
-		if ((*i)->name == name) {
-			break;
-		}
-	}
-
-	if (i == control_protocol_info.end()) {
-		error << string_compose (_("control protocol name \"%1\" is unknown"), name) << endmsg;
+	if (_session == 0) {
 		return 0;
 	}
 
-	ControlProtocolInfo* cpi = (*i);
+	cpi.descriptor = get_descriptor (cpi.path);
 
-	cpi->descriptor = get_descriptor ((*i)->path);
-
-	if (cpi->descriptor == 0) {
-		error << string_compose (_("control protocol name \"%1\" has no descriptor"), name) << endmsg;
+	if (cpi.descriptor == 0) {
+		error << string_compose (_("control protocol name \"%1\" has no descriptor"), cpi.name) << endmsg;
 		return 0;
 	}
 
-	if ((cpi->protocol = cpi->descriptor->initialize (cpi->descriptor, &session)) == 0) {
-		error << string_compose (_("control protocol name \"%1\" could not be initialized"), name) << endmsg;
+	if ((cpi.protocol = cpi.descriptor->initialize (cpi.descriptor, _session)) == 0) {
+		error << string_compose (_("control protocol name \"%1\" could not be initialized"), cpi.name) << endmsg;
 		return 0;
 	}
 
 	LockMonitor lm (protocols_lock, __LINE__, __FILE__);
-	control_protocols.push_back (cpi->protocol);
-	return cpi->protocol;
+	control_protocols.push_back (cpi.protocol);
+
+	return cpi.protocol;
 }
 
 int
-ControlProtocolManager::teardown (string name)
+ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 {
-	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
-		ControlProtocolInfo* cpi = *i;
-
-		if (cpi->name == name && cpi->descriptor && cpi->protocol) {
-			cpi->descriptor->destroy (cpi->descriptor, cpi->protocol);
-			
-			{
-				LockMonitor lm (protocols_lock, __LINE__, __FILE__);
-				list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi->protocol);
-				if (p != control_protocols.end()) {
-					control_protocols.erase (p);
-				}
-			}
-
-			cpi->protocol = 0;
-			return 0;
-		}
+	if (!cpi.protocol) {
+		return 0;
 	}
 
-	return -1;
+	if (!cpi.descriptor) {
+		return 0;
+	}
+
+	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
+	
+	{
+		LockMonitor lm (protocols_lock, __LINE__, __FILE__);
+		list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
+		if (p != control_protocols.end()) {
+			control_protocols.erase (p);
+		}
+	}
+	
+	cpi.protocol = 0;
+	dlclose (cpi.descriptor->module);
+	return 0;
 }
 
 static bool protocol_filter (const string& str, void *arg)
@@ -141,12 +122,9 @@ ControlProtocolManager::discover_control_protocols (string path)
 	vector<string *> *found;
 	PathScanner scanner;
 
-	cerr << "CP Manager looking for surfaces\n";
-
 	found = scanner (path, protocol_filter, 0, false, true);
 
 	for (vector<string*>::iterator i = found->begin(); i != found->end(); ++i) {
-		cerr << "CP Manager looking at " << **i << endl;
 		control_protocol_discover (**i);
 		delete *i;
 	}
@@ -166,15 +144,12 @@ ControlProtocolManager::control_protocol_discover (string path)
 		info->descriptor = descriptor;
 		info->name = descriptor->name;
 		info->path = path;
-		
-		control_protocol_info.push_back (info);
+		info->protocol = 0;
 
-		cerr << "Found \"" << info->name << "\"\n";
+		control_protocol_info.push_back (info);
 
 		dlclose (descriptor->module);
 
-	} else {
-		cerr << "no descriptor\n";
 	}
 
 	return 0;
@@ -211,4 +186,12 @@ ControlProtocolManager::get_descriptor (string path)
 	}
 
 	return descriptor;
+}
+
+void
+ControlProtocolManager::foreach_known_protocol (sigc::slot<void,const ControlProtocolInfo*> method)
+{
+	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
+		method (*i);
+	}
 }

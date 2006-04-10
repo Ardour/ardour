@@ -33,6 +33,7 @@
 #include "actions.h"
 
 #include <ardour/session.h>
+#include <ardour/control_protocol_manager.h>
 
 #include "i18n.h"
 
@@ -76,6 +77,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("AudioFileFormat"), _("Audio File Format"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormatHeader"), _("Header"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormatData"), _("Data"));
+	ActionManager::register_action (main_actions, X_("ControlSurfaces"), _("Control Surfaces"));
 
 	/* the real actions */
 
@@ -442,8 +444,50 @@ ARDOUR_UI::install_actions ()
 }
 
 void
+ARDOUR_UI::toggle_control_protocol (ControlProtocolInfo* cpi)
+{
+	if (cpi->protocol == 0) {
+		ControlProtocolManager::instance().instantiate (*cpi);
+	} else {
+		ControlProtocolManager::instance().teardown (*cpi);
+	}
+}
+
+void
+ARDOUR_UI::build_control_surface_menu ()
+{
+	list<ControlProtocolInfo*>::iterator i;
+
+	/* !!! this has to match the top level entry from ardour.menus */
+
+	string ui = "<menubar name='Main' action='MainMenu'>\n<menu name='Options' action='Options'>\n<menu action='ControlSurfaces'><separator/>\n";
+
+	for (i = ControlProtocolManager::instance().control_protocol_info.begin(); i != ControlProtocolManager::instance().control_protocol_info.end(); ++i) {
+
+		string action_name = "Toggle";
+		action_name += (*i)->name;
+		action_name += "Surface";
+		
+		string action_label = (*i)->name;
+
+		ActionManager::register_toggle_action (editor->editor_actions, action_name.c_str(), action_label.c_str(),
+						       (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol), *i)));
+
+		ui += "<menuitem action='";
+		ui += action_name;
+		ui += "'/>\n";
+	}
+
+	ui += "</menu>\n</menu>\n</menubar>\n";
+
+	ActionManager::ui_manager->add_ui_from_string (ui);
+}
+
+void
 ARDOUR_UI::build_menu_bar ()
 {
+	build_control_surface_menu ();
+
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
 	menu_bar->set_name ("MainMenuBar");
 
@@ -470,10 +514,6 @@ ARDOUR_UI::build_menu_bar ()
 	buffer_load_box.set_name ("BufferLoad");
 	buffer_load_label.set_name ("BufferLoad");
 
-//	disk_rate_box.add (disk_rate_label);
-//	disk_rate_box.set_name ("DiskRate");
-//	disk_rate_label.set_name ("DiskRate");
-
 	sample_rate_box.add (sample_rate_label);
 	sample_rate_box.set_name ("SampleRate");
 	sample_rate_label.set_name ("SampleRate");
@@ -482,7 +522,6 @@ ARDOUR_UI::build_menu_bar ()
 	menu_hbox.pack_end (wall_clock_box, false, false, 10);
 	menu_hbox.pack_end (disk_space_box, false, false, 10);
 	menu_hbox.pack_end (cpu_load_box, false, false, 10);
-//	menu_hbox.pack_end (disk_rate_box, false, false, 10);
 	menu_hbox.pack_end (buffer_load_box, false, false, 10);
 	menu_hbox.pack_end (sample_rate_box, false, false, 10);
 

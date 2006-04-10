@@ -1,3 +1,5 @@
+#include <midi++/port.h>
+
 #include <ardour/route.h>
 #include <ardour/session.h>
 
@@ -10,11 +12,26 @@ using namespace ARDOUR;
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	: ControlProtocol  (s, _("GenericMIDI"))
 {
-	_port = 0;
+	_port = s.midi_port();
+	s.MIDI_PortChanged.connect (mem_fun (*this, &GenericMidiControlProtocol::port_change));
+	
 }
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 {
+}
+
+int
+GenericMidiControlProtocol::init ()
+{
+	/* start delivery/outbound thread */
+	return init_thread ();
+}
+
+void
+GenericMidiControlProtocol::port_change ()
+{
+	_port = session.midi_port ();
 }
 
 void
@@ -29,20 +46,19 @@ GenericMidiControlProtocol::send_route_feedback (list<Route*>& routes)
 	if (_port != 0) {
 
 		const int32_t bufsize = 16 * 1024;
+		MIDI::byte buf[bufsize];
 		int32_t bsize = bufsize;
-		MIDI::byte* buf = new MIDI::byte[bufsize];
 		MIDI::byte* end = buf;
 		
 		for (list<Route*>::iterator r = routes.begin(); r != routes.end(); ++r) {
-		end = (*r)->write_midi_feedback (end, bsize);
+			end = (*r)->write_midi_feedback (end, bsize);
 		}
 		
 		if (end == buf) {
-			delete [] buf;
 			return;
 		} 
 		
-		session.deliver_midi (_port, buf, (int32_t) (end - buf));
+		_port->write (buf, (int32_t) (end - buf));
 		//cerr << "MIDI feedback: wrote " << (int32_t) (end - buf) << " to midi port\n";
 	}
 }

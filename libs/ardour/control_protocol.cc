@@ -240,11 +240,10 @@ ControlProtocol::thread_work ()
 
 		if (send()) {
 			
-			// list<Route*> routes = session.get_routes(); /* copies the routes */
-			
-			// if (send_route_feedback ()) {
-			//send_route_feedback (routes);
-			// }
+			if (send_route_feedback ()) {
+				list<Route*> routes = session.get_routes(); /* copies the routes */
+				send_route_feedback (routes);
+			}
 
 			send_global_feedback ();
 		}

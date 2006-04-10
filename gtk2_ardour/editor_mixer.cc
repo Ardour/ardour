@@ -205,14 +205,6 @@ Editor::update_current_screen ()
 }
 
 void
-Editor::update_slower ()
-{
-		if (current_mixer_strip) {
-			current_mixer_strip->update ();
-		}
-}
-
-void
 Editor::current_mixer_strip_removed ()
 {
 	if (current_mixer_strip) {

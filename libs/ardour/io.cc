@@ -63,7 +63,7 @@ const string IO::state_node_name = "IO";
 bool         IO::connecting_legal = false;
 bool         IO::ports_legal = false;
 bool         IO::panners_legal = false;
-sigc::signal<void>                IO::GrabPeakPower;
+sigc::signal<void>                IO::Meter;
 sigc::signal<int>                 IO::ConnectingLegal;
 sigc::signal<int>                 IO::PortsLegal;
 sigc::signal<int>                 IO::PannersLegal;
@@ -127,7 +127,7 @@ IO::IO (Session& s, string name,
 	_gain_automation_state = Off;
 	_gain_automation_style = Absolute;
 
-	GrabPeakPower.connect (mem_fun (*this, &IO::grab_peak_power));
+	Meter.connect (mem_fun (*this, &IO::meter));
 }
 
 IO::~IO ()
@@ -1171,11 +1171,11 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 				_session.engine().disconnect (*i);
 			}
 		}
-	}
-
-	if (in_changed || out_changed) {
-		setup_peak_meters ();
-		reset_panner ();
+		
+		if (in_changed || out_changed) {
+			setup_peak_meters ();
+			reset_panner ();
+		}
 	}
 
 	if (out_changed) {
@@ -1213,6 +1213,7 @@ IO::ensure_inputs (uint32_t n, bool clear, bool lockit, void* src)
 	
 	if (lockit) {
 		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
+		LockMonitor im (io_lock, __LINE__, __FILE__);
 		changed = ensure_inputs_locked (n, clear, src);
 	} else {
 		changed = ensure_inputs_locked (n, clear, src);
@@ -1314,6 +1315,7 @@ IO::ensure_outputs (uint32_t n, bool clear, bool lockit, void* src)
 
 	if (lockit) {
 		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
+		LockMonitor im (io_lock, __LINE__, __FILE__);
 		changed = ensure_outputs_locked (n, clear, src);
 	} else {
 		changed = ensure_outputs_locked (n, clear, src);
@@ -2406,7 +2408,7 @@ IO::setup_peak_meters ()
 
 	while (_peak_power.size() < limit) {
 		_peak_power.push_back (0);
-		_stored_peak_power.push_back (0);
+		_visible_peak_power.push_back (0);
 	}
 }
 
@@ -2436,16 +2438,35 @@ IO::send_state_changed ()
 }
 
 void
-IO::grab_peak_power ()
+IO::meter ()
 {
 	LockMonitor lm (io_lock, __LINE__, __FILE__);
-
 	uint32_t limit = max (_ninputs, _noutputs);
-
+	
 	for (uint32_t n = 0; n < limit; ++n) {
-		/* XXX should we use atomic exchange here ? */
-		_stored_peak_power[n] = _peak_power[n];
+
+		/* XXX we should use atomic exchange here */
+
+		/* grab peak since last read */
+
+ 		float new_peak = _peak_power[n];
 		_peak_power[n] = 0;
+		
+		/* compute new visible value using falloff */
+
+		if (new_peak > 0.0) {
+			new_peak = coefficient_to_dB (new_peak);
+		} else {
+			new_peak = minus_infinity();
+		}
+		
+		if (_session.meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
+			_visible_peak_power[n] = new_peak;
+		} else {
+			// do falloff
+			new_peak = _visible_peak_power[n] - _session.meter_falloff();
+			_visible_peak_power[n] = max (new_peak, -200.0f);
+		}
 	}
 }
 

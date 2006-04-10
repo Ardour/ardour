@@ -341,7 +341,7 @@ Session::second_stage_init (bool new_session)
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
 
-	ControlProtocolManager::instance().startup (*this);
+	ControlProtocolManager::instance().set_session (*this);
 
 	if (new_session) {
 		_end_location_is_free = true;

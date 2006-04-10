@@ -154,7 +154,6 @@ void *
 Session::_butler_thread_work (void* arg)
 {
 	PBD::ThreadCreated (pthread_self(), X_("Butler"));
-
 	return ((Session *) arg)->butler_thread_work ();
 	return 0;
 }

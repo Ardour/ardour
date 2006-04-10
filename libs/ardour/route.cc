@@ -813,8 +813,8 @@ Route::add_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 		while (_peak_power.size() < potential_max_streams) {
 			_peak_power.push_back(0);
 		}
-		while (_stored_peak_power.size() < potential_max_streams) {
-			_stored_peak_power.push_back(0);
+		while (_visible_peak_power.size() < potential_max_streams) {
+			_visible_peak_power.push_back(0);
 		}
 
 		_redirects.push_back (redirect);
@@ -871,8 +871,8 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 			while (_peak_power.size() < potential_max_streams) {
 				_peak_power.push_back(0);
 			}
-			while (_stored_peak_power.size() < potential_max_streams) {
-				_stored_peak_power.push_back(0);
+			while (_visible_peak_power.size() < potential_max_streams) {
+				_visible_peak_power.push_back(0);
 			}
 
 			_redirects.push_back (*i);

@@ -767,17 +767,9 @@ MixerStrip::update_output_display ()
 }
 
 void
-MixerStrip::update ()
-{
-	gpm.update_meters ();
-}
-
-void
 MixerStrip::fast_update ()
 {
-	if (_session.meter_falloff() > 0.0f) {
-		gpm.update_meters_falloff ();
-	}
+	gpm.update_meters ();
 }
 
 gint

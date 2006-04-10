@@ -131,8 +131,6 @@ class Mixer_UI : public Gtk::Window
 
 	void disconnect_from_session ();
 	
-	sigc::connection screen_update_connection;
-	void update_strips ();
 	sigc::connection fast_screen_update_connection;
 	void fast_update_strips ();
 

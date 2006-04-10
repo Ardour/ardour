@@ -353,7 +353,7 @@ find_file (string name, string dir, string subdir = "")
 			path = *i;
 			path += "/" + name;
 			if (access (path.c_str(), R_OK) == 0) {
-				cerr << "Using file " << path << " found in ARDOUR_PATH." << endl;
+				// cerr << "Using file " << path << " found in ARDOUR_PATH." << endl;
 				return path;
 			}
 		}

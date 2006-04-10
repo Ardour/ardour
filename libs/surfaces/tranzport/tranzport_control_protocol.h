@@ -77,6 +77,11 @@ class TranzportControlProtocol : public ControlProtocol {
 		WheelScrub,
 		WheelShuttle
 	};
+
+	enum DisplayMode {
+		DisplayNormal,
+		DisplayBigMeter
+	};
 	
 	pthread_t       thread;
 	uint32_t        buttonmask;
@@ -92,6 +97,8 @@ class TranzportControlProtocol : public ControlProtocol {
 	WheelShiftMode  wheel_shift_mode;
 	struct timeval  last_wheel_motion;
 	int             last_wheel_dir;
+	DisplayMode     display_mode;
+	DisplayMode     requested_display_mode;
 
 	std::vector<sigc::connection> track_connections;
 
@@ -103,6 +110,7 @@ class TranzportControlProtocol : public ControlProtocol {
 	jack_nframes_t last_where;
 
 	PBD::Lock write_lock;
+	PBD::Lock print_lock;
 
 	int open ();
 	int read (uint32_t timeout_override = 0);
@@ -112,16 +120,21 @@ class TranzportControlProtocol : public ControlProtocol {
 	int open_core (struct usb_device*);
 
 	void lcd_clear ();
-	int  lcd_write (int row, int col, uint8_t cell, const char *text);
 	void print (int row, int col, const char* text);
 	int  light_on (LightID);
 	int  light_off (LightID);
+	void lights_off ();
+
+	void enter_big_meter_mode ();
+	void enter_normal_display_mode ();
+	void next_display_mode ();
 
 	void show_current_track ();
 	void show_transport_time ();
 	void show_wheel_mode ();
 	void show_gain ();
 	void show_pan ();
+	void show_meter ();
 
 	void track_solo_changed (void*);
 	void track_rec_changed (void*);

@@ -89,7 +89,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void set_width (Width);
 	Width get_width() const { return _width; }
 
-	void update ();
 	void fast_update ();
 	void set_embedded (bool);
 

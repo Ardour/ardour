@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <cerrno>
 #include <vector>
+
 #include <pbd/pthread_utils.h>
 
 #include <ardour/audioengine.h>
@@ -59,6 +60,9 @@ AudioEngine::AudioEngine (string client_name)
 	_buffer_size = 0;
 	_freewheeling = false;
 	_freewheel_thread_registered = false;
+	last_meter_point = 0;
+	meter_interval = 0;
+	meter_thread_id = (pthread_t) 0;
 
 	if (connect_to_jack (client_name)) {
 		throw NoBackendAvailable ();
@@ -70,6 +74,10 @@ AudioEngine::~AudioEngine ()
 {
 	if (_running) {
 		jack_client_close (_jack);
+	}
+
+	if (meter_thread_id != (pthread_t) 0) {
+		pthread_cancel (meter_thread_id);
 	}
 }
 
@@ -216,59 +224,6 @@ AudioEngine::_freewheel_callback (int onoff, void *arg)
 	static_cast<AudioEngine*>(arg)->_freewheeling = onoff;
 }
 
-void 
-AudioEngine::meter (Port *port, jack_nframes_t nframes)
-{
-	double peak;
-	uint32_t overlen;
-	jack_default_audio_sample_t *buf;
-	
-	buf = port->get_buffer (nframes);
-	peak = port->_peak;
-	overlen = port->overlen;
-	
-	{
-		for (jack_nframes_t n = 0; n < nframes; ++n) {
-			
-			/* 1) peak metering */
-			
-			peak = f_max (peak, buf[n]);
-			
-			/* 2) clip/over metering */
-			
-			if (buf[n] >= 1.0) {
-				overlen++;
-			} else if (overlen) {
-				if (overlen > Port::short_over_length) {
-					port->_short_overs++;
-				}
-				if (overlen > Port::long_over_length) {
-					port->_long_overs++;
-				}
-				overlen = 0;
-			}
-		}
-	}
-	
-        /* post-loop check on the final status of overlen */
-	
-	if (overlen > Port::short_over_length) {
-		port->_short_overs++;
-	}
-	if (overlen > Port::long_over_length) {
-		port->_short_overs++;
-	}
-
-	if (peak > 0.0) {
-		port->_peak_db= 20 * fast_log10 (peak);
-	} else {
-		port->_peak_db = minus_infinity();
-	}
-	
-	port->_peak = peak;
-	port->overlen = overlen;
-}
-
 int
 AudioEngine::process_callback (jack_nframes_t nframes)
 {
@@ -304,14 +259,6 @@ AudioEngine::process_callback (jack_nframes_t nframes)
 		return 0;
 	}
 
-	/* do input peak metering */
-
-	for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
-		if ((*i)->metering) {
-			meter ((*i), nframes);
-		}
-	}
-	
 	session->process (nframes);
 
 	if (!_running) {
@@ -323,6 +270,13 @@ AudioEngine::process_callback (jack_nframes_t nframes)
 		return 0;
 	}
 		
+	/* manage meters */
+
+	if ((meter_interval > _buffer_size) && (last_meter_point + meter_interval < next_processed_frames)) {
+		IO::Meter ();
+		last_meter_point = next_processed_frames;
+	}
+	
 	if (last_monitor_check + monitor_check_interval < next_processed_frames) {
 		for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
 			
@@ -360,6 +314,11 @@ AudioEngine::jack_sample_rate_callback (jack_nframes_t nframes)
 
 	monitor_check_interval = nframes / 10;
 	last_monitor_check = 0;
+	
+	meter_interval = nframes / 100;
+	last_meter_point = 0;
+
+	maybe_start_metering_thread ();
 
 	if (session) {
 		session->set_frame_rate (nframes);
@@ -391,6 +350,47 @@ AudioEngine::jack_bufsize_callback (jack_nframes_t nframes)
 		session->set_block_size (_buffer_size);
 	}
 
+	maybe_start_metering_thread ();
+
+	return 0;
+}
+
+void
+AudioEngine::maybe_start_metering_thread ()
+{
+	if (meter_interval == 0) {
+		return;
+	}
+
+	if (_buffer_size == 0) {
+		return;
+	}
+
+	if (meter_interval < _buffer_size) {
+		if (meter_thread_id != (pthread_t) 0) {
+			pthread_cancel (meter_thread_id);
+		}
+		pthread_create (&meter_thread_id, 0, _meter_thread, this);
+	}
+}
+
+void*
+AudioEngine::_meter_thread (void *arg)
+{
+	return static_cast<AudioEngine*>(arg)->meter_thread ();
+}
+
+void*
+AudioEngine::meter_thread ()
+{
+	PBD::ThreadCreated (pthread_self(), "Metering");
+
+	while (true) {
+		usleep (10000); /* 1/100th sec interval */
+		pthread_testcancel();
+		IO::Meter ();
+	}
+	
 	return 0;
 }
 

@@ -29,12 +29,13 @@ genericmidi.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
 genericmidi.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
 genericmidi.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 
+genericmidi.Append(CPPPATH=libraries['ardour'].get ('CPPPATH', []))
+genericmidi.Append(CPPPATH=libraries['sigc2'].get ('CPPPATH', []))
+genericmidi.Append(CPPPATH=libraries['pbd3'].get ('CPPPATH', []))
+genericmidi.Append(CPPPATH=libraries['midi++2'].get ('CPPPATH', []))
+
 genericmidi.Merge ([
 	     libraries['usb'],
-	     libraries['ardour'],
-	     libraries['sigc2'],
-	     libraries['pbd3'],
-	     libraries['midi++2'],
 	     libraries['xml']
 	     ])
 

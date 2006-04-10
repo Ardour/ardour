@@ -108,7 +108,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	name_entry.signal_activate().connect (mem_fun(*this, &TimeAxisView::name_entry_activated));
 	name_entry.signal_focus_in_event().connect (mem_fun (*this, &TimeAxisView::name_entry_focus_in));
 	name_entry.signal_focus_out_event().connect (mem_fun (*this, &TimeAxisView::name_entry_focus_out));
-	Gtkmm2ext::set_size_request_to_display_given_text (name_entry, N_("gTortnam"), 10, 10); // just represents a short name
+	Gtkmm2ext::set_size_request_to_display_given_text (name_entry, N_("gTortnam"), 2, 2); // just represents a short name
 
 	name_label.set_name ("TrackLabel");
 	name_label.set_alignment (0.0, 0.5);

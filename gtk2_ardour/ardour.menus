@@ -211,10 +211,28 @@
                    <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
                    <menuitem action='ManuallyConnectNewTrackOutputs'/>
                </menu>
+	       <menu action='ControlSurfaces'/>
                <menu action='Monitoring'>
                    <menuitem action='UseHardwareMonitoring'/>
                    <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>
+               </menu>
+	       <menu action='Metering'>
+                   <menu action='MeteringFallOffRate'>
+		        <menuitem action='MeterFalloffOff'/>
+   		        <menuitem action='MeterFalloffSlowest'/>
+			<menuitem action='MeterFalloffSlow'/>
+	                <menuitem action='MeterFalloffMedium'/>
+	                <menuitem action='MeterFalloffFast'/>
+	                <menuitem action='MeterFalloffFaster'/>
+	                <menuitem action='MeterFalloffFastest'/>
+                   </menu>
+                   <menu action='MeteringHoldTime'>
+	                <menuitem action='MeterHoldOff'/>
+	                <menuitem action='MeterHoldShort'/>
+	                <menuitem action='MeterHoldMedium'/>
+	                <menuitem action='MeterHoldLong'/>
+                   </menu>
                </menu>
                <menu action='Solo'>
                    <menuitem action='LatchedSolo'/>
@@ -250,6 +268,7 @@
                <menuitem action='StopRecordingOnXrun'/>
                <menuitem action='StopTransportAtEndOfSession'/>
                <menuitem action='GainReduceFastTransport'/>
+	       <separator/>
          </menu>
 	 <menu name='Help' action='Help'>
 	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>

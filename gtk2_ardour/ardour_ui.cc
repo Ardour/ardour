@@ -497,27 +497,12 @@ ARDOUR_UI::every_second ()
 	update_cpu_load ();
 	update_buffer_load ();
 	update_disk_space ();
-	// update_disk_rate ();
 	return TRUE;
 }
 
 gint
 ARDOUR_UI::every_point_one_seconds ()
 {
-	struct timeval now;
-	struct timeval diff;
-	
-	/* do not attempt to grab peak power more than once per cycle.
-	 */
-
-	gettimeofday (&now, 0);
-	timersub (&now, &last_peak_grab, &diff);
-
-	if ((diff.tv_usec + (diff.tv_sec * 1000000)) >= engine->usecs_per_cycle()) {
-		IO::GrabPeakPower(); /* EMIT_SIGNAL */
-		last_peak_grab = now;
-	} 
-
 	update_speed_display ();
 	RapidScreenUpdate(); /* EMIT_SIGNAL */
 	return TRUE;
@@ -565,20 +550,6 @@ ARDOUR_UI::update_cpu_load ()
 	char buf[32];
 	snprintf (buf, sizeof (buf), _("DSP Load: %.1f%%"), engine->get_cpu_load());
 	cpu_load_label.set_text (buf);
-}
-
-void
-ARDOUR_UI::update_disk_rate ()
-{
-	char buf[64];
-
-	if (session) {
-		snprintf (buf, sizeof (buf), _("Disk r:%5.1f w:%5.1f MB/s"), 
-			  session->read_data_rate()/1048576.0f, session->write_data_rate()/1048576.0f);
-		disk_rate_label.set_text (buf);
-	} else {
-		disk_rate_label.set_text ("");
-	}
 }
 
 void

@@ -966,7 +966,7 @@ Editor::control_scroll (float fraction)
 	} else if ((fraction > 0.0f) && (max_frames - session->transport_frame() < step)) {
 		target = (max_frames - (current_page_frames()*2)); // allow room for slop in where the PH is on the screen
 	} else {
-		target = (session->transport_frame() + (jack_nframes_t)(fraction * current_page_frames()));
+		target = (session->transport_frame() + (jack_nframes_t) floor ((fraction * current_page_frames())));
 	}
 
 	/* move visuals, we'll catch up with it later */
@@ -1097,9 +1097,6 @@ Editor::start_scrolling ()
 {
 	scroll_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect 
 		(mem_fun(*this, &Editor::update_current_screen));
-
-	slower_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
-		(mem_fun(*this, &Editor::update_slower));
 }
 
 void

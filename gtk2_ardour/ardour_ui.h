@@ -87,6 +87,7 @@ namespace ARDOUR {
 	class Route;
 	class Port;
 	class IO;
+	class ControlProtocolInfo;
 };
 
 namespace ALSA {
@@ -491,6 +492,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::HBox     menu_hbox;
 
 	void build_menu_bar ();
+	void build_control_surface_menu ();
 	void pack_toplevel_controls();
 
 	Gtk::Label   wall_clock_label;
@@ -504,10 +506,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::Label   cpu_load_label;
 	Gtk::EventBox cpu_load_box;
 	void update_cpu_load ();
-
-	Gtk::Label   disk_rate_label;
-	Gtk::EventBox disk_rate_box;
-	void update_disk_rate();
 
 	Gtk::Label   buffer_load_label;
 	Gtk::EventBox buffer_load_box;
@@ -718,7 +716,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void map_some_session_state (const char* group, const char* action, bool (ARDOUR::Session::*get)() const);
 	void queue_session_control_changed (ARDOUR::Session::ControlType t);
 	void session_control_changed (ARDOUR::Session::ControlType t);
-	
+
+	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
 };
 
 

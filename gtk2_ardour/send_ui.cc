@@ -63,7 +63,7 @@ SendUI::SendUI (Send& s, Session& se)
 	gpm.setup_meters ();
 	gpm.set_fader_name ("SendUIFrame");
 
-	screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun (*this, &SendUI::update));
+	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun (*this, &SendUI::update));
 	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun (*this, &SendUI::fast_update));
 }
 
@@ -107,14 +107,13 @@ SendUI::send_going_away (Redirect *ignored)
 void
 SendUI::update ()
 {
-	gpm.update_meters ();
 }
 
 void
 SendUI::fast_update ()
 {
 	if (_session.meter_falloff() > 0.0f) {
-		gpm.update_meters_falloff ();
+		gpm.update_meters ();
 	}
 }
 	

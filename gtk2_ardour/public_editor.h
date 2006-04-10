@@ -7,6 +7,7 @@
 #include <glib.h>
 #include <gdk/gdktypes.h>
 #include <gtkmm/window.h>
+#include <gtkmm/actiongroup.h>
 #include <jack/types.h>
 #include <sigc++/signal.h>
 
@@ -129,11 +130,10 @@ class PublicEditor : public Gtk::Window, public Stateful {
 	sigc::signal<void,Editing::DisplayControl> DisplayControlChanged;
 	sigc::signal<void> ZoomFocusChanged;
 	sigc::signal<void> ZoomChanged;
-	sigc::signal<void> XOriginChanged;
 	sigc::signal<void> Resized;
 	sigc::signal<void> Realized;
 
-	// FIXED FOR GTK2
+	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 
 	virtual bool canvas_control_point_event (GdkEvent* event,ArdourCanvas::Item*, ControlPoint*) = 0;
 	virtual bool canvas_line_event (GdkEvent* event,ArdourCanvas::Item*, AutomationLine*) = 0;

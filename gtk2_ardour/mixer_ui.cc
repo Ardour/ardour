@@ -398,7 +398,6 @@ Mixer_UI::hide_strip (MixerStrip* ms)
  gint
  Mixer_UI::start_updating ()
  {
-	 screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::update_strips));
 	 fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::fast_update_strips));
 	 return 0;
  }
@@ -406,19 +405,8 @@ Mixer_UI::hide_strip (MixerStrip* ms)
  gint
  Mixer_UI::stop_updating ()
  {
-	 screen_update_connection.disconnect();
 	 fast_screen_update_connection.disconnect();
 	 return 0;
- }
-
- void
- Mixer_UI::update_strips ()
- {
-	 if (is_mapped () && session) {
-		 for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-			 (*i)->update ();
-		 }
-	 }
  }
 
  void

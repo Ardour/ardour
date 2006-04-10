@@ -7,7 +7,14 @@ using namespace ARDOUR;
 ControlProtocol*
 new_generic_midi_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 {
-	return new GenericMidiControlProtocol (*s);
+	GenericMidiControlProtocol* gmcp =  new GenericMidiControlProtocol (*s);
+	
+	if (gmcp->init ()) {
+		delete gmcp;
+		return 0;
+	}
+
+	return gmcp;
 }
 
 void
@@ -18,6 +25,7 @@ delete_generic_midi_protocol (ControlProtocolDescriptor* descriptor, ControlProt
 
 static ControlProtocolDescriptor generic_midi_descriptor = {
 	name : "Generic MIDI",
+	id : "uri://ardour.org/surfaces/generic_midi:0",
 	ptr : 0,
 	module : 0,
 	initialize : new_generic_midi_protocol,

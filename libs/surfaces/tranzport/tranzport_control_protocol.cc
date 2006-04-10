@@ -34,6 +34,8 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	wheel_shift_mode = WheelShiftGain;
 	timerclear (&last_wheel_motion);
 	last_wheel_dir = 1;
+	display_mode = DisplayNormal;
+	requested_display_mode = display_mode;
 
 	memset (current_screen, 0, sizeof (current_screen));
 
@@ -60,6 +62,15 @@ TranzportControlProtocol::init ()
 		return -1;
 	}
 
+	lcd_clear ();
+
+	print (0, 0, "Welcome to");
+	print (1, 0, "Ardour");
+
+	show_wheel_mode();
+	next_track ();
+	show_transport_time ();
+
 	/* outbound thread */
 
 	init_thread ();
@@ -85,17 +96,124 @@ TranzportControlProtocol::send_route_feedback (list<Route*>& routes)
 void
 TranzportControlProtocol::send_global_feedback ()
 {
-	if (_device_status == STATUS_OFFLINE) {
+	if (requested_display_mode != display_mode) {
+		switch (requested_display_mode) {
+		case DisplayNormal:
+			enter_normal_display_mode ();
+			break;
+		case DisplayBigMeter:
+			enter_big_meter_mode ();
+			break;
+		}
+	}
+
+	switch (display_mode) {
+	case DisplayBigMeter:
+		show_meter ();
+		break;
+
+	case DisplayNormal:
+		show_transport_time ();
+		if (session.soloing()) {
+			light_on (LightAnysolo);
+		} else {
+			light_off (LightAnysolo);
+		}
+		break;
+	}
+}
+
+void
+TranzportControlProtocol::next_display_mode ()
+{
+	cerr << "Next display mode\n";
+
+	switch (display_mode) {
+	case DisplayNormal:
+		requested_display_mode = DisplayBigMeter;
+		break;
+
+	case DisplayBigMeter:
+		requested_display_mode = DisplayNormal;
+		break;
+	}
+}
+
+void
+TranzportControlProtocol::enter_big_meter_mode ()
+{
+	lcd_clear ();
+	lights_off ();
+	display_mode = DisplayBigMeter;
+}
+
+void
+TranzportControlProtocol::enter_normal_display_mode ()
+{
+	lcd_clear ();
+	lights_off ();
+	show_current_track ();
+	show_wheel_mode ();
+	show_transport_time ();
+	display_mode = DisplayNormal;
+}
+
+
+float
+log_meter (float db)
+{
+	float def = 0.0f; /* Meter deflection %age */
+ 
+	if (db < -70.0f) {
+		def = 0.0f;
+	} else if (db < -60.0f) {
+		def = (db + 70.0f) * 0.25f;
+	} else if (db < -50.0f) {
+		def = (db + 60.0f) * 0.5f + 2.5f;
+	} else if (db < -40.0f) {
+		def = (db + 50.0f) * 0.75f + 7.5f;
+	} else if (db < -30.0f) {
+		def = (db + 40.0f) * 1.5f + 15.0f;
+	} else if (db < -20.0f) {
+		def = (db + 30.0f) * 2.0f + 30.0f;
+	} else if (db < 6.0f) {
+		def = (db + 20.0f) * 2.5f + 50.0f;
+	} else {
+		def = 115.0f;
+	}
+	
+	/* 115 is the deflection %age that would be 
+	   when db=6.0. this is an arbitrary
+	   endpoint for our scaling.
+	*/
+	
+	return def/115.0f;
+}
+
+void
+TranzportControlProtocol::show_meter ()
+{
+	if (current_route == 0) {
 		return;
 	}
 
-	show_transport_time ();
+	float level = current_route->peak_input_power (0);
+	float fraction = log_meter (level);
+	int fill  = (int) floor (fraction * 20);
+	char buf[21];
+	int i;
 
-	if (session.soloing()) {
-		light_on (LightAnysolo);
-	} else {
-		light_off (LightAnysolo);
+	for (i = 0; i < fill; ++i) {
+		buf[i] = 0x70; /* tranzport special code for 4 quadrant LCD block */
+	} 
+	for (; i < 20; ++i) {
+		buf[i] = ' ';
 	}
+
+	buf[21] = '\0';
+
+	print (0, 0, buf);
+	print (1, 0, buf);
 }
 
 void
@@ -141,33 +259,6 @@ TranzportControlProtocol::thread_work ()
 {
 	PBD::ThreadCreated (pthread_self(), X_("tranzport monitor"));
 
-	/* wait for the device to go online */
-
-	while (true) {
-		if (read()) {
-			return 0;
-		}
-		switch (_device_status) {
-		case STATUS_OFFLINE:
-			cerr << "tranzport offline\n";
-			break;
-		case STATUS_ONLINE:
-		case 0:
-			cerr << "tranzport online\n";
-			break;
-		default:
-			cerr << "tranzport: unknown status\n";
-			break;
-		}
-
-		if (_device_status == STATUS_ONLINE || _device_status == 0) {
-			break;
-		}
-	}
-
-	lcd_clear ();
-	show_wheel_mode();
-
 	while (true) {
 		if (read ()) {
 			break;
@@ -212,6 +303,13 @@ TranzportControlProtocol::open_core (struct usb_device* dev)
 	 
 	if (usb_claim_interface (udev, 0) < 0) {
 		error << _("Tranzport: cannot claim USB interface") << endmsg;
+		usb_close (udev);
+		udev = 0;
+		return -1;
+	}
+
+	if (usb_set_configuration (udev, 1) < 0) {
+		error << _("Tranzport: cannot configure USB interface") << endmsg;
 		usb_close (udev);
 		udev = 0;
 		return -1;
@@ -276,7 +374,8 @@ TranzportControlProtocol::lcd_clear ()
 	cmd[7] = 0x00;
 
 	{
-		LockMonitor lm (write_lock, __LINE__, __FILE__);
+		LockMonitor lp (print_lock, __LINE__, __FILE__);
+		LockMonitor lw (write_lock, __LINE__, __FILE__);
 
 		for (uint8_t i = 0; i < 10; ++i) {
 			cmd[2] = i;
@@ -287,35 +386,16 @@ TranzportControlProtocol::lcd_clear ()
 	}
 }
 
-int
-TranzportControlProtocol::lcd_write (int row, int col, uint8_t cell, const char* text)       
+void
+TranzportControlProtocol::lights_off ()
 {
-	uint8_t cmd[8];
-	
-	if (cell > 9) {
-		return -1;
-	}
-
-	if (memcmp (text, &current_screen[row][col], 4)) {
-	
-		current_screen[row][col]   = text[0];
-		current_screen[row][col+1] = text[1];
-		current_screen[row][col+2] = text[2];
-		current_screen[row][col+3] = text[3];
-
-		cmd[0] = 0x00;
-		cmd[1] = 0x01;
-		cmd[2] = cell;
-		cmd[3] = text[0];
-		cmd[4] = text[1];
-		cmd[5] = text[2];
-		cmd[6] = text[3];
-		cmd[7] = 0x00;
-
-		return write (cmd, 500);
-	}
-
-	return 0;
+	light_off (LightRecord);
+	light_off (LightTrackrec);
+	light_off (LightTrackmute);
+	light_off (LightTracksolo);
+	light_off (LightAnysolo);
+	light_off (LightLoop);
+	light_off (LightPunch);
 }
 
 int
@@ -865,7 +945,11 @@ TranzportControlProtocol::button_event_fastforward_release (bool shifted)
 void
 TranzportControlProtocol::button_event_stop_press (bool shifted)
 {
-	session.request_transport_speed (0.0);
+	if (shifted) {
+		next_display_mode ();
+	} else {
+		session.request_transport_speed (0.0);
+	}
 }
 
 void
@@ -1039,9 +1123,17 @@ void
 TranzportControlProtocol::shuttle ()
 {
 	if (_datawheel < WheelDirectionThreshold) {
-		session.request_transport_speed (session.transport_speed() + 0.1);
+		if (session.transport_speed() < 0) {
+			session.request_transport_speed (1.0);
+		} else {
+			session.request_transport_speed (session.transport_speed() + 0.1);
+		}
 	} else {
-		session.request_transport_speed (session.transport_speed() - 0.1);
+		if (session.transport_speed() > 0) {
+			session.request_transport_speed (-1.0);
+		} else {
+			session.request_transport_speed (session.transport_speed() - 0.1);
+		}
 	}
 }
 
@@ -1254,23 +1346,46 @@ TranzportControlProtocol::print (int row, int col, const char *text)
 
 		int offset = col % 4;
 
-		/* copy current cell contents into tmp */
+		{
 
-		memcpy (tmp, &current_screen[row][base_col], 4);
+			LockMonitor lm (print_lock, __LINE__, __FILE__);
 
-		/* overwrite with new text */
+			/* copy current cell contents into tmp */
+			
+			memcpy (tmp, &current_screen[row][base_col], 4);
+			
+			/* overwrite with new text */
+			
+			uint32_t tocopy = min ((4U - offset), left);
 
-		uint32_t tocopy = min ((4U - offset), left);
+			memcpy (tmp+offset, text, tocopy);
 
-		memcpy (tmp+offset, text, tocopy);
-		
-		cell += (row * 5);
+			uint8_t cmd[8];
 
-		lcd_write (row, base_col, cell, tmp);
-		
-		text += tocopy;
-		left -= tocopy;
-		col  += tocopy;
+			/* compare with current screen */
+
+			if (memcmp (tmp, &current_screen[row][base_col], 4)) {
+
+				/* different, so update */
+				
+				memcpy (&current_screen[row][base_col], tmp, 4);
+				
+				cmd[0] = 0x00;
+				cmd[1] = 0x01;
+				cmd[2] = cell + (row * 5);
+				cmd[3] = tmp[0];
+				cmd[4] = tmp[1];
+				cmd[5] = tmp[2];
+				cmd[6] = tmp[3];
+				cmd[7] = 0x00;
+				
+				write (cmd, 500);
+			}
+			
+			text += tocopy;
+			left -= tocopy;
+			col  += tocopy;
+		}
 	}
 }	
 

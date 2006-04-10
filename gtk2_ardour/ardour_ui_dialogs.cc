@@ -193,7 +193,6 @@ ARDOUR_UI::unload_session ()
 	session = 0;
 
 	update_buffer_load ();
-	// update_disk_rate ();
 
 	return 0;
 }

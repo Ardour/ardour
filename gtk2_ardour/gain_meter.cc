@@ -318,10 +318,8 @@ GainMeter::update_meters ()
                 if ((*i).packed) {
                         peak = _io.peak_input_power (n);
 
-			if (_session.meter_falloff() == 0.0f || peak > (*i).meter->get_user_level()) {
-				(*i).meter->set (log_meter (peak), peak);
-			}
-
+			(*i).meter->set (log_meter (peak), peak);
+			
                         if (peak > max_peak) {
                                 max_peak = peak;
                                 /* set peak display */
@@ -334,31 +332,7 @@ GainMeter::update_meters ()
                         }
                 }
         }
-
 }
-
-void
-GainMeter::update_meters_falloff ()
-{
-	vector<MeterInfo>::iterator i;
-	uint32_t n;
-	float dbpeak;
-	
-	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
-		if ((*i).packed) {
-			// just do falloff
-			//peak = (*i).meter->get_level() * _falloff_rate;
-			dbpeak = (*i).meter->get_user_level() - _session.meter_falloff();
-
-			dbpeak = std::max(dbpeak, -200.0f);
-			
-			// cerr << "tmplevel: " << tmplevel << endl;
-			(*i).meter->set (log_meter (dbpeak), dbpeak);
-		}
-	}
-	
-}
-
 
 void
 GainMeter::meter_hold_changed()

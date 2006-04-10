@@ -30,7 +30,6 @@ class ControlProtocol : public sigc::trackable {
 	void set_active (bool yn);
 	bool get_active() const { return active_thread > 0; }
 
-
 	bool send() const { return _send != 0; }
 	bool send_route_feedback () const { return _send & SendRoute; }
 	bool send_global_feedback () const { return _send & SendGlobal; }
@@ -77,9 +76,10 @@ class ControlProtocol : public sigc::trackable {
 
 extern "C" {
 	struct ControlProtocolDescriptor {
-	    const char* name;
-	    void*       ptr;
-	    void*       module;
+	    const char* name;   /* descriptive */
+	    const char* id;     /* unique and version-specific */
+	    void*       ptr;    /* protocol can store a value here */
+	    void*       module; /* not for public access */
 	    ControlProtocol* (*initialize)(ControlProtocolDescriptor*,Session*);
 	    void             (*destroy)(ControlProtocolDescriptor*,ControlProtocol*);
 	    

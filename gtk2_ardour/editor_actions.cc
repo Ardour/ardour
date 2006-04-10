@@ -18,7 +18,8 @@ void
 Editor::register_actions ()
 {
 	RefPtr<Action> act;
-	RefPtr<ActionGroup> editor_actions = ActionGroup::create (X_("Editor"));
+
+	editor_actions = ActionGroup::create (X_("Editor"));
 	
 	/* non-operative menu items for menu bar */
 
@@ -37,6 +38,9 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_actions, X_("Autoconnect"), _("Autoconnect"));
 	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
+	ActionManager::register_action (editor_actions, X_("Metering"), _("Metering"));
+	ActionManager::register_action (editor_actions, X_("MeteringFallOffRate"), _("Fall off rate"));
+	ActionManager::register_action (editor_actions, X_("MeteringHoldTime"), _("Hold Time"));
 	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Add Existing Audio"));
 
 	/* add named actions for the editor */
