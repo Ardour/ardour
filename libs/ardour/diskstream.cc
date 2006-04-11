@@ -470,7 +470,8 @@ DiskStream::use_destructive_playlist ()
 	Playlist::RegionList* rl = _playlist->regions_at (0);
 
 	if (rl->empty()) {
-		throw failed_constructor();
+		reset_write_sources (false, true);
+		return;
 	}
 
 	AudioRegion* region = dynamic_cast<AudioRegion*> (rl->front());

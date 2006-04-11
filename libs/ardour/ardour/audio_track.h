@@ -85,6 +85,7 @@ class AudioTrack : public Route
 	void bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo&);
 
 	XMLNode& get_state();
+	XMLNode& get_template();
 	int set_state(const XMLNode& node);
 
 	MIDI::Controllable& midi_rec_enable_control() {
@@ -101,6 +102,8 @@ class AudioTrack : public Route
 	DiskStream *diskstream;
 	MeterPoint _saved_meter_point;
 	TrackMode _mode;
+
+	XMLNode& state (bool full);
 
 	void passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 			       jack_nframes_t nframes, jack_nframes_t offset, int declick,
@@ -143,8 +146,6 @@ class AudioTrack : public Route
 
 	sigc::connection recenable_connection;
 	sigc::connection ic_connection;
-
-	XMLNode& state(bool);
 
 	int deprecated_use_diskstream_connections ();
 	void set_state_part_two ();

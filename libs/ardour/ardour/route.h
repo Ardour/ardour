@@ -200,7 +200,7 @@ class Route : public IO
 
 	XMLNode& get_state();
 	int set_state(const XMLNode& node);
-	XMLNode& get_template();
+	virtual XMLNode& get_template();
 
 	sigc::signal<void,void*> SelectedChanged;
 

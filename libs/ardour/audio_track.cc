@@ -243,24 +243,6 @@ AudioTrack::set_meter_point (MeterPoint p, void *src)
 	Route::set_meter_point (p, src);
 }
 
-XMLNode&
-AudioTrack::state(bool full_state)
-{
-	XMLNode& track_state (Route::state (full_state));
-	char buf[64];
-
-	/* we don't return diskstream state because we don't
-	   own the diskstream exclusively. control of the diskstream
-	   state is ceded to the Session, even if we create the
-	   diskstream.
-	*/
-
-	snprintf (buf, sizeof (buf), "%" PRIu64, diskstream->id());
-	track_state.add_property ("diskstream-id", buf);
-
-	return track_state;
-}
-
 int
 AudioTrack::set_state (const XMLNode& node)
 {
@@ -363,10 +345,22 @@ AudioTrack::set_state (const XMLNode& node)
 	return 0;
 }
 
-XMLNode& 
-AudioTrack::get_state()
+XMLNode&
+AudioTrack::get_template ()
 {
-	XMLNode& root (Route::get_state());
+	return state (false);
+}
+
+XMLNode&
+AudioTrack::get_state ()
+{
+	return state (true);
+}
+
+XMLNode& 
+AudioTrack::state(bool full_state)
+{
+	XMLNode& root (Route::state(full_state));
 	XMLNode* freeze_node;
 	char buf[32];
 
@@ -440,6 +434,15 @@ AudioTrack::get_state()
 		root.add_property (X_("mode"), X_("destructive"));
 		break;
 	}
+
+	/* we don't return diskstream state because we don't
+	   own the diskstream exclusively. control of the diskstream
+	   state is ceded to the Session, even if we create the
+	   diskstream.
+	*/
+
+	snprintf (buf, sizeof (buf), "%" PRIu64, diskstream->id());
+	root.add_property ("diskstream-id", buf);
 
 	return root;
 }
