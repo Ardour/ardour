@@ -33,6 +33,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/externalsource.h>
 
+#include "ardour_ui.h"
 #include "gui_thread.h"
 #include "prompter.h"
 #include "sfdb_ui.h"
@@ -110,7 +111,7 @@ SoundFileBox::set_session(Session* s)
 {
 	_session = s;
 
-    if (!_session) {
+	if (!_session) {
 		play_btn.set_sensitive(false);
 	} else {
 		_session->AuditionActive.connect(mem_fun (*this, &SoundFileBox::audition_status_changed));
@@ -334,8 +335,17 @@ SoundFileOmega::SoundFileOmega (string title)
 		mode_strings = internationalize (import_mode_strings);
 	}
 
-	add_button (_("Embed"), ResponseEmbed);
-	add_button (_("Import"), ResponseImport);
+	ARDOUR_UI::instance()->tooltips().set_tip(split_check, 
+			_("Create a region for each channel"));
+
+	Gtk::Button* btn = add_button (_("Embed"), ResponseEmbed);
+	ARDOUR_UI::instance()->tooltips().set_tip(*btn, 
+			_("Link to an external file"));
+
+	btn = add_button (_("Import"), ResponseImport);
+	ARDOUR_UI::instance()->tooltips().set_tip(*btn, 
+			_("Copy a file to the session folder"));
+
 	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CLOSE);
 
 	Gtk::HBox *box = manage (new Gtk::HBox());

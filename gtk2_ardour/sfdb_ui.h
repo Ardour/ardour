@@ -51,7 +51,7 @@ class SoundFileBox : public Gtk::VBox
     SoundFileBox ();
     virtual ~SoundFileBox () {};
 
-	void set_session (ARDOUR::Session* s);
+    void set_session (ARDOUR::Session* s);
     bool setup_labels (std::string filename);
 
   protected:

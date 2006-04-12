@@ -667,6 +667,7 @@ void
 OptionEditor::click_browse_clicked ()
 {
 	SoundFileChooser sfdb (_("Choose Click"));
+	sfdb.set_session (session);
 	
 	int result = sfdb.run ();
 
@@ -686,6 +687,7 @@ void
 OptionEditor::click_emphasis_browse_clicked ()
 {
 	SoundFileChooser sfdb (_("Choose Click Emphasis"));
+	sfdb.set_session (session);
 
 	int result = sfdb.run ();
 

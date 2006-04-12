@@ -75,6 +75,7 @@ Editor::bring_in_external_audio (ImportMode mode, AudioTrack* track, jack_nframe
 	}
 
 	SoundFileOmega sfdb (_("Add existing audio to session"));
+	sfdb.set_session (session);
 	sfdb.set_mode (mode);
 
 	switch (sfdb.run()) {
