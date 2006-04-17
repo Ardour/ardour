@@ -78,6 +78,7 @@ AudioRegion::AudioRegion (Source& src, jack_nframes_t start, jack_nframes_t leng
 
 	set_default_fades ();
 	set_default_envelope ();
+
 	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
@@ -164,27 +165,31 @@ AudioRegion::AudioRegion (const AudioRegion& other, jack_nframes_t offset, jack_
 	}
 
 	/* return to default fades if the existing ones are too long */
+	_fade_in_disabled = 0;
+	_fade_out_disabled = 0;
+
 
 	if (_flags & LeftOfSplit) {
 		if (_fade_in.back()->when >= _length) {
 			set_default_fade_in ();
+		} else {
+			_fade_in_disabled = other._fade_in_disabled;
 		}
 		set_default_fade_out ();
-		_flags = Flag (_flags & ~Region::RightOfSplit);
+		_flags = Flag (_flags & ~Region::LeftOfSplit);
 	}
 
 	if (_flags & RightOfSplit) {
 		if (_fade_out.back()->when >= _length) {
 			set_default_fade_out ();
+		} else {
+			_fade_out_disabled = other._fade_out_disabled;
 		}
 		set_default_fade_in ();
-		_flags = Flag (_flags & ~Region::LeftOfSplit);
+		_flags = Flag (_flags & ~Region::RightOfSplit);
 	}
 
 	_scale_amplitude = other._scale_amplitude;
-
-	_fade_in_disabled = 0;
-	_fade_out_disabled = 0;
 
 	save_state ("initial state");
 
@@ -718,6 +723,9 @@ AudioRegion::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("flags")) != 0) {
 		_flags = Flag (strtol (prop->value().c_str(), (char **) 0, 16));
+
+		_flags = Flag (_flags & ~Region::LeftOfSplit);
+		_flags = Flag (_flags & ~Region::RightOfSplit);
 	}
 
 	if ((prop = node.property ("scale-gain")) != 0) {
