@@ -2227,29 +2227,37 @@ Session::route_by_remote_id (uint32_t id)
 void
 Session::find_current_end ()
 {
-	jack_nframes_t max = 0;
-	jack_nframes_t me; 
-
 	if (_state_of_the_state & Loading) {
 		return;
 	}
 
-	/* Don't take the diskstream lock. Caller must have other ways to
-	   ensure atomicity.
-	*/
+	jack_nframes_t max = get_maximum_extent ();
 
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
-		Playlist* pl = (*i)->playlist();
-		if ((me = pl->get_maximum_extent()) > max) {
-			max = me;
-		}
-	}
-	
 	if (max > end_location->end()) {
 		end_location->set_end (max);
 		set_dirty();
 		DurationChanged(); /* EMIT SIGNAL */
 	}
+}
+
+jack_nframes_t
+Session::get_maximum_extent () const
+{
+	jack_nframes_t max = 0;
+	jack_nframes_t me; 
+
+	/* Don't take the diskstream lock. Caller must have other ways to
+	   ensure atomicity.
+	*/
+
+	for (DiskStreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		Playlist* pl = (*i)->playlist();
+		if ((me = pl->get_maximum_extent()) > max) {
+			max = me;
+		}
+	}
+
+	return max;
 }
 
 DiskStream *

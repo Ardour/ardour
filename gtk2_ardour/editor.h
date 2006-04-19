@@ -691,6 +691,8 @@ class Editor : public PublicEditor
 
 	Gtk::HScrollbar     edit_hscrollbar;
 	bool                edit_hscroll_dragging;
+
+	void reset_hscrollbar_stepping ();
 	
 	bool hscrollbar_button_press (GdkEventButton*);
 	bool hscrollbar_button_release (GdkEventButton*);

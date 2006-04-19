@@ -158,6 +158,20 @@ show_me_the_size (Requisition* r, const char* what)
 	cerr << "size of " << what << " = " << r->width << " x " << r->height << endl;
 }
 
+void 
+check_adjustment (Gtk::Adjustment* adj)
+{
+	cerr << "CHANGE adj  = " 
+	     << adj->get_lower () <<  ' '
+	     << adj->get_upper () <<  ' '
+	     << adj->get_value () <<  ' '
+	     << adj->get_step_increment () <<  ' '
+	     << adj->get_page_increment () <<  ' '
+	     << adj->get_page_size () <<  ' '
+	     << endl;
+
+}
+
 Editor::Editor (AudioEngine& eng) 
 	: engine (eng),
 
@@ -179,8 +193,8 @@ Editor::Editor (AudioEngine& eng)
 	     reset them as needed.
 	  */
 
-	  vertical_adjustment (0.0, 0.0, 400.0, 10),
-	  horizontal_adjustment (0.0, 0.0, 1200.0, 20),
+	  vertical_adjustment (0.0, 0.0, 10.0, 400.0),
+	  horizontal_adjustment (0.0, 0.0, 20.0, 1200.0),
 
 	  /* tool bar related */
 
@@ -321,6 +335,8 @@ Editor::Editor (AudioEngine& eng)
 	set_mouse_mode (MouseObject, true);
 
 	frames_per_unit = 2048; /* too early to use set_frames_per_unit */
+	reset_hscrollbar_stepping ();
+	
 	zoom_focus = ZoomFocusLeft;
  	zoom_range_clock.ValueChanged.connect (mem_fun(*this, &Editor::zoom_adjustment_changed));
 
@@ -862,10 +878,6 @@ Editor::set_frames_per_unit (double fpu)
 	   which will do the same updates.
 	*/
 	
-	if (session && !no_zoom_repos_update) {
-		horizontal_adjustment.set_upper (session->current_end_frame() / frames_per_unit);
-	}
-	
 	if (!no_zoom_repos_update) {
 		horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
 		update_fixed_rulers ();
@@ -886,6 +898,9 @@ Editor::set_frames_per_unit (double fpu)
 
 	ZoomChanged (); /* EMIT_SIGNAL */
 
+	reset_hscrollbar_stepping ();
+	reset_scrolling_region ();
+	
 	if (edit_cursor) edit_cursor->set_position (edit_cursor->current_frame);
 	if (playhead_cursor) playhead_cursor->set_position (playhead_cursor->current_frame);
 
@@ -912,10 +927,6 @@ Editor::reposition_x_origin (jack_nframes_t frame)
 {
 	if (frame != leftmost_frame) {
 		leftmost_frame = frame;
-		double pixel = frame_to_pixel (frame);
-		if (pixel >= horizontal_adjustment.get_upper()) {
-			horizontal_adjustment.set_upper (frame_to_pixel (frame + (current_page_frames())));
-		}
 		horizontal_adjustment.set_value (frame/frames_per_unit);
 	}
 }
@@ -1152,7 +1163,7 @@ Editor::handle_new_duration ()
 	reset_scrolling_region ();
 
 	if (session) {
-		horizontal_adjustment.set_upper (session->current_end_frame() / frames_per_unit);
+		cerr << "Set upper #2 to " << horizontal_adjustment.get_upper () << endl;
 		horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
 	}
 }
@@ -1342,7 +1353,6 @@ Editor::connect_to_session (Session *t)
 
 	leftmost_frame = 0;
 	
-	horizontal_adjustment.set_upper (session->current_end_frame() / frames_per_unit);
 	horizontal_adjustment.set_value (0);
 
 	restore_ruler_visibility ();
@@ -3971,7 +3981,7 @@ void
 Editor::end_location_changed (Location* location)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::end_location_changed), location));
-	horizontal_adjustment.set_upper (location->end() / frames_per_unit);
+	reset_scrolling_region ();
 }
 
 int

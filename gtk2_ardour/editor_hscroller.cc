@@ -28,10 +28,6 @@ using namespace ARDOUR;
 void
 Editor::hscrollbar_allocate (Gtk::Allocation &alloc)
 {
-	if (session) {
-		horizontal_adjustment.set_upper (session->current_end_frame() / frames_per_unit);
-	}
-
 }
 
 bool
@@ -55,3 +51,9 @@ Editor::hscrollbar_button_release (GdkEventButton *ev)
 	return true;
 }
 
+void
+Editor::reset_hscrollbar_stepping ()
+{
+	horizontal_adjustment.set_step_increment ((current_page_frames() / 5)/frames_per_unit); /* 5 clicks to scroll the entire page */
+	horizontal_adjustment.set_page_increment (current_page_frames()/frames_per_unit);
+}

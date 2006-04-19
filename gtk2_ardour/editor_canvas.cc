@@ -312,6 +312,7 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 	edit_cursor->set_position (edit_cursor->current_frame);
 	playhead_cursor->set_position (playhead_cursor->current_frame);
 
+	reset_hscrollbar_stepping ();
 	reset_scrolling_region ();
 
 	if (edit_cursor) edit_cursor->set_length (canvas_height);
@@ -374,14 +375,22 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 		}
 	}
 
-	double last_canvas_unit = ceil ((double) max_frames / frames_per_unit);
+	// old: ceil ((double) max_frames / frames_per_unit);
+	
+	double last_canvas_unit;
+
+	if (session) {
+		last_canvas_unit =  (session->get_maximum_extent() + (current_page_frames() * 0.10f)) / frames_per_unit;
+	} else {
+		last_canvas_unit = 0;
+	}
+
 	track_canvas.set_scroll_region (0.0, 0.0, max (last_canvas_unit, canvas_width), pos);
 
 	// XXX what is the correct height value for the time canvas ? this overstates it
 	time_canvas.set_scroll_region ( 0.0, 0.0, max (last_canvas_unit, canvas_width), canvas_height);
 
 	controls_layout.queue_resize();
-
 }
 
 void
@@ -522,3 +531,4 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 
 	context->drag_finish (true, false, time);
 }
+

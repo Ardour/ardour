@@ -49,8 +49,8 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 TranzportControlProtocol::~TranzportControlProtocol ()
 {
 	if (udev) {
-		lcd_clear ();
 		pthread_cancel_one (thread);
+		lcd_clear ();
 		close ();
 	}
 }
@@ -63,9 +63,7 @@ TranzportControlProtocol::init ()
 	}
 
 	lcd_clear ();
-
-	print (0, 0, "Welcome to");
-	print (1, 0, "Ardour");
+	lights_off ();
 
 	show_wheel_mode();
 	next_track ();
@@ -77,7 +75,7 @@ TranzportControlProtocol::init ()
 
 	/* inbound thread */
 	
-	pthread_create_and_store (X_("tranzport monitor"), &thread, 0, _thread_work, this);
+	pthread_create_and_store (X_("tranzport monitor"), &thread, 0, _monitor_work, this);
 
 	return 0;
 }
@@ -126,8 +124,6 @@ TranzportControlProtocol::send_global_feedback ()
 void
 TranzportControlProtocol::next_display_mode ()
 {
-	cerr << "Next display mode\n";
-
 	switch (display_mode) {
 	case DisplayNormal:
 		requested_display_mode = DisplayBigMeter;
@@ -144,6 +140,7 @@ TranzportControlProtocol::enter_big_meter_mode ()
 {
 	lcd_clear ();
 	lights_off ();
+	last_meter_fill = 0;
 	display_mode = DisplayBigMeter;
 }
 
@@ -154,6 +151,7 @@ TranzportControlProtocol::enter_normal_display_mode ()
 	lights_off ();
 	show_current_track ();
 	show_wheel_mode ();
+	last_where += 1; /* force time redisplay */
 	show_transport_time ();
 	display_mode = DisplayNormal;
 }
@@ -199,17 +197,51 @@ TranzportControlProtocol::show_meter ()
 
 	float level = current_route->peak_input_power (0);
 	float fraction = log_meter (level);
-	int fill  = (int) floor (fraction * 20);
+
+	/* we draw using a choice of a sort of double colon-like character ("::") or a single, left-aligned ":".
+	   the screen is 20 chars wide, so we can display 40 different levels. compute the level,
+	   then figure out how many "::" to fill. if the answer is odd, make the last one a ":"
+	*/
+
+	uint32_t fill  = (uint32_t) floor (fraction * 40);
 	char buf[21];
 	int i;
 
+	if (fill == last_meter_fill) {
+		/* nothing to do */
+		return;
+	}
+
+	last_meter_fill = fill;
+
+	bool add_single_level = (fill % 2 != 0);
+	fill /= 2;
+	
+	if (fraction > 0.98) {
+		light_on (LightAnysolo);
+	}
+
+	/* add all full steps */
+
 	for (i = 0; i < fill; ++i) {
-		buf[i] = 0x70; /* tranzport special code for 4 quadrant LCD block */
+		buf[i] = 0x07; /* tranzport special code for 4 quadrant LCD block */
 	} 
+
+	/* add a possible half-step */
+
+	if (i < 20 && add_single_level) {
+		buf[i] = 0x03; /* tranzport special code for 2 left quadrant LCD block */
+		++i;
+	}
+
+	/* fill rest with space */
+
 	for (; i < 20; ++i) {
 		buf[i] = ' ';
 	}
 
+	/* print() requires this */
+	
 	buf[21] = '\0';
 
 	print (0, 0, buf);
@@ -249,13 +281,13 @@ TranzportControlProtocol::show_transport_time ()
 }
 
 void*
-TranzportControlProtocol::_thread_work (void* arg)
+TranzportControlProtocol::_monitor_work (void* arg)
 {
-	return static_cast<TranzportControlProtocol*>(arg)->thread_work ();
+	return static_cast<TranzportControlProtocol*>(arg)->monitor_work ();
 }
 
 void*
-TranzportControlProtocol::thread_work ()
+TranzportControlProtocol::monitor_work ()
 {
 	PBD::ThreadCreated (pthread_self(), X_("tranzport monitor"));
 
@@ -678,8 +710,15 @@ void
 TranzportControlProtocol::track_gain_changed (void* ignored)
 {
 	char buf[8];
-	snprintf (buf, sizeof (buf), "%.1fdB", coefficient_to_dB (current_route->gain()));
-	print (0, 9, buf);
+
+	switch (display_mode) {
+	case DisplayNormal:
+		snprintf (buf, sizeof (buf), "%.1fdB", coefficient_to_dB (current_route->gain()));
+		print (0, 9, buf);
+		break;
+	default:
+		break;
+	}
 }
 
 void
@@ -793,6 +832,11 @@ TranzportControlProtocol::button_event_trackmute_release (bool shifted)
 void
 TranzportControlProtocol::button_event_tracksolo_press (bool shifted)
 {
+	if (display_mode == DisplayBigMeter) {
+		light_off (LightAnysolo);
+		return;
+	}
+
 	if (shifted) {
 		session.set_all_solo (!session.soloing());
 	} else {
@@ -1353,7 +1397,7 @@ TranzportControlProtocol::print (int row, int col, const char *text)
 			/* copy current cell contents into tmp */
 			
 			memcpy (tmp, &current_screen[row][base_col], 4);
-			
+
 			/* overwrite with new text */
 			
 			uint32_t tocopy = min ((4U - offset), left);

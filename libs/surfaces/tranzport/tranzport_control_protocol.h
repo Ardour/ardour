@@ -99,6 +99,7 @@ class TranzportControlProtocol : public ControlProtocol {
 	int             last_wheel_dir;
 	DisplayMode     display_mode;
 	DisplayMode     requested_display_mode;
+	uint32_t        last_meter_fill;
 
 	std::vector<sigc::connection> track_connections;
 
@@ -159,8 +160,8 @@ class TranzportControlProtocol : public ControlProtocol {
 	void step_pan_right ();
 	void step_pan_left ();
 
-	static void* _thread_work (void* arg);
-	void* thread_work ();
+	static void* _monitor_work (void* arg);
+	void* monitor_work ();
 
 	void button_event_battery_press (bool shifted);
 	void button_event_battery_release (bool shifted);

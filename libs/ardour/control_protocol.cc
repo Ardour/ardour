@@ -153,6 +153,8 @@ ControlProtocol::thread_work ()
 	struct sched_param rtparam;
 	int err;
 
+	cerr << _name << " receiver thread running\n";
+
 	memset (&rtparam, 0, sizeof (rtparam));
 	rtparam.sched_priority = 3; /* XXX should be relative to audio (JACK) thread */
 	
@@ -238,15 +240,12 @@ ControlProtocol::thread_work ()
 			continue;
 		}
 
-		if (send()) {
-			
-			if (send_route_feedback ()) {
-				list<Route*> routes = session.get_routes(); /* copies the routes */
-				send_route_feedback (routes);
-			}
-
-			send_global_feedback ();
+		if (send_route_feedback ()) {
+			list<Route*> routes = session.get_routes(); /* copies the routes */
+			send_route_feedback (routes);
 		}
+		
+		send_global_feedback ();
 	}
 
 	return 0;

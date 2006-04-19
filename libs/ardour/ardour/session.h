@@ -365,6 +365,7 @@ class Session : public sigc::trackable, public Stateful
 
 	int remove_region_from_region_list (Region&);
 
+	jack_nframes_t get_maximum_extent () const;
 	jack_nframes_t current_end_frame() const { return end_location->start(); }
 	jack_nframes_t current_start_frame() const { return start_location->start(); }
 	jack_nframes_t frame_rate() const   { return _current_frame_rate; }
