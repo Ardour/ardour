@@ -5,6 +5,7 @@
 
 #include <gtkmm/entry.h>
 #include <gtkmm/dialog.h>
+#include <gtkmm/frame.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
@@ -33,6 +34,8 @@ class AddRouteDialog : public Gtk::Dialog
 	Gtk::SpinButton routes_spinner;
 	Gtk::ComboBoxText channel_combo;
 	Gtk::ComboBoxText track_mode_combo;
+	Gtk::Frame aframe;
+	Gtk::Frame ccframe;
 
 	void track_type_chosen ();
 };

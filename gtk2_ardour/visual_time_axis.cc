@@ -322,6 +322,7 @@ VisualTimeAxis::start_time_axis_rename()
 	ArdourPrompter name_prompter;
 
 	name_prompter.set_prompt (_("new name: ")) ;
+	name_prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
 	name_prompter.show_all() ;
 
 	switch (name_prompter.run ()) {

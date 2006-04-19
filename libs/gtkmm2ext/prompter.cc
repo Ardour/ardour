@@ -52,7 +52,11 @@ Prompter::init ()
 	set_default_response (Gtk::RESPONSE_ACCEPT);
 	
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
+
+	/* 
+	   Alas a generic 'affirmative' button seems a bit useless sometimes.
+	   You will have to add your own.
+	*/
 	
 	entryLabel.set_line_wrap (true);
 	entryLabel.set_name ("PrompterLabel");

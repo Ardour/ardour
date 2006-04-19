@@ -270,18 +270,20 @@ show_ui_callback (void *arg)
 void
 gui_jack_error ()
 {
-	ArdourDialog win (_("ardour: unplugged"));
-	Label label (_("Ardour could not connect to JACK.\n\
-There are several possible reasons:\n\
+  MessageDialog win (_("Ardour could not connect to JACK."),
+		     false,
+		     Gtk::MESSAGE_INFO,
+		     (Gtk::ButtonsType)(Gtk::BUTTONS_NONE));
+win.set_secondary_text(_("There are several possible reasons:\n\
 \n\
 1) JACK is not running.\n\
 2) JACK is running as another user, perhaps root.\n\
 3) There is already another client called \"ardour\".\n\
 \n\
 Please consider the possibilities, and perhaps (re)start JACK."));
-	
-	win.get_vbox()->pack_start (label);
-	win.add_button (Stock::OK, RESPONSE_ACCEPT);
+
+	win.add_button (Stock::QUIT, RESPONSE_CLOSE);
+	win.set_default_response (RESPONSE_CLOSE);
 	
 	win.show_all ();
 	win.set_position (Gtk::WIN_POS_CENTER);

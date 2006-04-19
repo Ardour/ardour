@@ -809,6 +809,8 @@ Editor::marker_menu_rename ()
 	
 	Dialog dialog;
 	Entry  entry;
+	HBox dhbox;
+	Label dlabel (_("New Name:"));
 	
 	if (loc->is_mark()) {
 		dialog.set_title (_("ardour: rename mark"));
@@ -817,13 +819,16 @@ Editor::marker_menu_rename ()
 	}
 
 	dialog.set_name ("MarkRenameWindow");
-	dialog.set_size_request (300, -1);
+	dialog.set_size_request (250, -1);
 	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
+	dhbox.pack_start (dlabel, true, false, 10);
+	dhbox.pack_start (entry, true, false, 10);
+	dialog.get_vbox()->pack_start (dhbox, true, false, 10);
 
-	dialog.add_action_widget (entry, RESPONSE_ACCEPT);
-	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
-	dialog.add_button (Stock::CANCEL, RESPONSE_ACCEPT);
+	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
+	dialog.set_default_response (RESPONSE_ACCEPT);
 
 	entry.set_text (loc->name());
 	entry.set_name ("MarkerNameDisplay");

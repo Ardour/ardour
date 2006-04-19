@@ -52,7 +52,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	lmodel = Gtk::ListStore::create(lcols);
 	ladspa_display.set_model (lmodel);
-	ladspa_display.append_column (_("Available LADSPA plugins"), lcols.name);
+	ladspa_display.append_column (_("Available LADSPA Plugins"), lcols.name);
 	ladspa_display.append_column (_("Type"), lcols.type);
 	ladspa_display.append_column (_("# Inputs"),lcols.ins);
 	ladspa_display.append_column (_("# Outputs"), lcols.outs);
@@ -64,7 +64,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	amodel = Gtk::ListStore::create(acols);
 	added_list.set_model (amodel);
-	added_list.append_column (_("To be added"), acols.text);
+	added_list.append_column (_("Plugins to be Applied to Channel"), acols.text);
 	added_list.set_headers_visible (true);
 	added_list.set_reorderable (false);
 
@@ -93,11 +93,11 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	ascroller.set_border_width(10);
 	ascroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	ascroller.add(added_list);
-	Gtk::Button *btn_add = manage(new Gtk::Button(_("Add")));
+	Gtk::Button *btn_add = manage(new Gtk::Button(Stock::ADD));
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn_add, _("Add a plugin to the effect list"));
-	Gtk::Button *btn_remove = manage(new Gtk::Button(_("Remove")));
+	Gtk::Button *btn_remove = manage(new Gtk::Button(Stock::REMOVE));
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn_remove, _("Remove a plugin from the effect list"));
-	Gtk::Button *btn_update = manage(new Gtk::Button(_("Update")));
+	Gtk::Button *btn_update = manage(new Gtk::Button(Stock::REFRESH));
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn_update, _("Update available plugins"));
 
 	btn_add->set_name("PluginSelectorButton");
@@ -113,8 +113,9 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	table->attach(ascroller, 0, 7, 7, 9);
 
-	add_button (Stock::OK, RESPONSE_ACCEPT);
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::APPLY, RESPONSE_APPLY);
+	set_default_response (RESPONSE_APPLY);
 
 	get_vbox()->pack_start (*table);
 
@@ -127,8 +128,8 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 #endif
 
 	table->set_name("PluginSelectorTable");
-	//ladspa_display.set_name("PluginSelectorDisplay");
-	ladspa_display.set_name("PluginSelectorList");
+	ladspa_display.set_name("PluginSelectorDisplay");
+	//ladspa_display.set_name("PluginSelectorList");
 	added_list.set_name("PluginSelectorList");
 
 	ladspa_display.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::row_clicked));
@@ -303,7 +304,7 @@ PluginSelector::run ()
 	r = (ResponseType) Dialog::run ();
 
 	switch (r) {
-	case RESPONSE_ACCEPT:
+	case RESPONSE_APPLY:
 		for (i = added_plugins.begin(); i != added_plugins.end(); ++i){
 			use_plugin (*i);
 		}

@@ -135,14 +135,14 @@ PluginUI::PluginUI (AudioEngine &engine, PluginInsert& pi, bool scrollable)
 
 	HBox* constraint_hbox = manage (new HBox);
 	HBox* smaller_hbox = manage (new HBox);
-	Label* combo_label = manage (new Label (_("<span size=\"large\" weight=\"bold\">Presets</span>")));
+	Label* combo_label = manage (new Label (_("<span size=\"large\">Presets</span>")));
 	combo_label->set_use_markup (true);
 
 	smaller_hbox->pack_start (*combo_label, false, false, 10);
 	smaller_hbox->pack_start (combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 
-	constraint_hbox->set_spacing (10);
+	constraint_hbox->set_spacing (5);
 	constraint_hbox->pack_start (*smaller_hbox, true, false);
 	constraint_hbox->pack_end (bypass_button, false, false);
 
@@ -226,6 +226,7 @@ PluginUI::build (AudioEngine &engine)
 
 	frame = manage (new Frame);
 	frame->set_name ("BaseFrame");
+	frame->set_label (_("Controls"));
 	frame->add (*box);
 	hpacker.pack_start(*frame, true, true);
 
@@ -828,11 +829,12 @@ PluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 PlugUIBase::PlugUIBase (PluginInsert& pi)
 	: insert (pi),
 	  plugin (insert.plugin()),
-	  save_button(_("save")),
-	  bypass_button (_("bypass"))
+	  save_button(_("Add")),
+	  bypass_button (_("Bypass"))
 {
         //combo.set_use_arrows_always(true);
 	set_popdown_strings (combo, plugin.get_presets());
+	combo.set_size_request (100, -1);
 	combo.set_active_text ("");
 	combo.signal_changed().connect(mem_fun(*this, &PlugUIBase::setting_selected));
 
@@ -858,7 +860,8 @@ void
 PlugUIBase::save_plugin_setting ()
 {
 	ArdourPrompter prompter (true);
-	prompter.set_prompt(_("Name for plugin settings:"));
+	prompter.set_prompt(_("Name of New Preset:"));
+	prompter.add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
 
 	prompter.show_all();
 

@@ -745,6 +745,7 @@ RedirectBox::rename_redirect (Redirect* redirect)
 	string result;
 	name_prompter.set_prompt (_("rename redirect"));
 	name_prompter.set_initial_text (redirect->name());
+	name_prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
 	name_prompter.show_all ();
 
 	switch (name_prompter.run ()) {

@@ -834,6 +834,7 @@ AudioTimeAxisView::rename_current_playlist ()
 
 	prompter.set_prompt (_("Name for playlist"));
 	prompter.set_initial_text (pl->name());
+	prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
 
 	switch (prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
@@ -865,8 +866,9 @@ AudioTimeAxisView::use_copy_playlist (bool prompt)
 
 		ArdourPrompter prompter (true);
 		
-		prompter.set_prompt (_("Name for playlist"));
+		prompter.set_prompt (_("Name for Playlist"));
 		prompter.set_initial_text (name);
+		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
 		prompter.show_all ();
 		
 		switch (prompter.run ()) {
@@ -903,8 +905,9 @@ AudioTimeAxisView::use_new_playlist (bool prompt)
 		
 		ArdourPrompter prompter (true);
 		
-		prompter.set_prompt (_("Name for playlist"));
+		prompter.set_prompt (_("Name for Playlist"));
 		prompter.set_initial_text (name);
+		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
 		
 		switch (prompter.run ()) {
 		case Gtk::RESPONSE_ACCEPT:

@@ -107,8 +107,9 @@ Editor::name_selection ()
 {
 	ArdourPrompter p;
 
-	p.set_prompt (_("name for chunk:"));
-	p.change_labels (_("Create chunk"), _("Forget it"));
+	p.set_prompt (_("Name for Chunk:"));
+	p.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
+	p.change_labels (_("Create Chunk"), _("Forget it"));
 	p.show_all ();
 
 	switch (p.run ()) {

@@ -759,7 +759,7 @@ ARDOUR_UI::build_session_selector ()
 	
 	session_selector_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	session_selector_window->add_button (Stock::OPEN, RESPONSE_ACCEPT);
-
+	session_selector_window->set_default_response (RESPONSE_ACCEPT);
 	recent_session_model = TreeStore::create (recent_session_columns);
 	recent_session_display.set_model (recent_session_model);
 	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
@@ -1519,10 +1519,11 @@ ARDOUR_UI::snapshot_session ()
 
 	time (&n);
 	now = ctime (&n);
-	now = now.substr (0, now.length() - 1);
+	now = now.substr (20, 4) + now.substr (3, 16) + " (" + now.substr (0, 3) + ")";
 
 	prompter.set_name ("Prompter");
-	prompter.set_prompt (_("Name for snapshot"));
+	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.set_prompt (_("Name of New Snapshot"));
 	prompter.set_initial_text (now);
 	
 	switch (prompter.run()) {
@@ -1670,6 +1671,7 @@ ARDOUR_UI::save_template ()
 	prompter.set_name (X_("Prompter"));
 	prompter.set_prompt (_("Name for mix template:"));
 	prompter.set_initial_text(session->name() + _("-template"));
+	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	
 	switch (prompter.run()) {
 	case RESPONSE_ACCEPT:
@@ -1965,7 +1967,7 @@ require some unused files to continue to exist."));
 		}
 	}
 
-	dvbox.pack_start (txt, true, false, 10);
+	dvbox.pack_start (txt, true, false, 5);
 
 	for (vector<string>::iterator i = rep.paths.begin(); i != rep.paths.end(); ++i) {
 		TreeModel::Row row = *(results_model->append());
@@ -1978,9 +1980,10 @@ require some unused files to continue to exist."));
 	list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	dvbox.pack_start (list_scroller, true, false);
-	dhbox.pack_start (dvbox, true, false, 10);
+	dhbox.pack_start (dvbox, true, false, 5);
 	results.get_vbox()->pack_start (dhbox, true, false);
 	results.add_button (Stock::CLOSE, RESPONSE_CLOSE);
+	results.set_default_response (RESPONSE_CLOSE);
 	results.set_position (Gtk::WIN_POS_CENTER);
 	results.show_all_children ();
 
@@ -2009,6 +2012,7 @@ After cleanup, unused audio files will be moved to a \
 	
 	checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	checker.add_button (_("Clean Up"), RESPONSE_ACCEPT);
+	checker.set_default_response (RESPONSE_CANCEL);
 
 	checker.set_name (_("CleanupDialog"));
 	checker.set_wmclass (_("ardour_cleanup"), "Ardour");
@@ -2033,9 +2037,9 @@ After cleanup, unused audio files will be moved to a \
 				 _("cleaned files"),
 				 _("\
 The following %1 %2 not in use and \n\
-have been moved to %3. \n\
+have been moved to %3. \n\n\
 Flushing the wastebasket will release an additional\n\
-%4 %5bytes of disk space by deleting these files."
+%4 %5bytes of disk space.\n"
 					 ));
 }
 
@@ -2055,8 +2059,8 @@ ARDOUR_UI::flush_trash ()
 
 	display_cleanup_results (rep, 
 				 _("deleted file"),
-				 _("The following %1 %2 \n\
-deleted from %3, releasing \n\
+				 _("The following %1 %2 deleted from\n\
+%3,releasing \n\
 %4 %5bytes of disk space"));
 }
 
