@@ -1913,8 +1913,9 @@ ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* l
 				    false,
 				    Gtk::MESSAGE_INFO,
 				    (Gtk::ButtonsType)(Gtk::BUTTONS_CLOSE)  );
-		msgd.set_secondary_text (_("If this seems suprising, check for any existing\n\
-snapshots. These may still include regions that\n\
+		msgd.set_secondary_text (_("If this seems suprising, \n\
+check for any existing snapshots.\n\
+These may still include regions that\n\
 require some unused files to continue to exist."));
 	
 		msgd.run ();
@@ -1922,7 +1923,6 @@ require some unused files to continue to exist."));
 	} 
 
 	ArdourDialog results (_("ardour: cleanup"), true, true);
-	Gtk::Frame dframe;
 	
 	struct CleanupResultsModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    CleanupResultsModelColumns() { 
@@ -1948,6 +1948,8 @@ require some unused files to continue to exist."));
 
 	Gtk::ScrolledWindow list_scroller;
 	Gtk::Label txt;
+	Gtk::VBox dvbox;
+	Gtk::HBox dhbox;
 
 	if (rep.space < 1048576.0f) {
 		if (removed > 1) {
@@ -1962,8 +1964,9 @@ require some unused files to continue to exist."));
 			txt.set_text (string_compose (msg, removed, _("file was"), session->path() + "dead_sounds", (float) rep.space / 1048576.0f, "mega"));
 		}
 	}
-	 results.get_vbox()->pack_start (txt, true, false, 20);
-	
+
+	dvbox.pack_start (txt, true, false, 10);
+
 	for (vector<string>::iterator i = rep.paths.begin(); i != rep.paths.end(); ++i) {
 		TreeModel::Row row = *(results_model->append());
 		row[results_columns.visible_name] = *i;
@@ -1971,11 +1974,12 @@ require some unused files to continue to exist."));
 	}
 	
 	list_scroller.add (results_display);
-	list_scroller.set_size_request (-1, 250);
+	list_scroller.set_size_request (-1, 150);
 	list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	dframe.add (list_scroller);
-	//results.get_vbox()->pack_start (list_scroller, true, true);
-	results.get_vbox()->pack_start (dframe, true, false, 20);
+
+	dvbox.pack_start (list_scroller, true, false);
+	dhbox.pack_start (dvbox, true, false, 10);
+	results.get_vbox()->pack_start (dhbox, true, false);
 	results.add_button (Stock::CLOSE, RESPONSE_CLOSE);
 	results.set_position (Gtk::WIN_POS_CENTER);
 	results.show_all_children ();
@@ -2028,7 +2032,8 @@ After cleanup, unused audio files will be moved to a \
 	display_cleanup_results (rep, 
 				 _("cleaned files"),
 				 _("\
-The following %1 %2 not in use.and have been moved to %3. \n\
+The following %1 %2 not in use and \n\
+have been moved to %3. \n\
 Flushing the wastebasket will release an additional\n\
 %4 %5bytes of disk space by deleting these files."
 					 ));
@@ -2050,7 +2055,9 @@ ARDOUR_UI::flush_trash ()
 
 	display_cleanup_results (rep, 
 				 _("deleted file"),
-				 _("The following %1 %2 deleted from %3, releasing %4 %5bytes of disk space"));
+				 _("The following %1 %2 \n\
+deleted from %3, releasing \n\
+%4 %5bytes of disk space"));
 }
 
 void
