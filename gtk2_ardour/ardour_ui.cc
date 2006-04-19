@@ -758,7 +758,7 @@ ARDOUR_UI::build_session_selector ()
 	Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow);
 	
 	session_selector_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	session_selector_window->add_button (Stock::OK, RESPONSE_ACCEPT);
+	session_selector_window->add_button (Stock::OPEN, RESPONSE_ACCEPT);
 
 	recent_session_model = TreeStore::create (recent_session_columns);
 	recent_session_display.set_model (recent_session_model);
@@ -1908,17 +1908,21 @@ ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* l
 	removed = rep.paths.size();
 
 	if (removed == 0) {
-		MessageDialog msg (*editor, X_("cleanupresults"),
-				   _("\
-No audio files were ready for cleanup\n\n\
-If this seems suprising, check for any existing\n\
+		MessageDialog msgd (*editor,
+				    _("No audio files were ready for cleanup"), 
+				    false,
+				    Gtk::MESSAGE_INFO,
+				    (Gtk::ButtonsType)(Gtk::BUTTONS_CLOSE)  );
+		msgd.set_secondary_text (_("If this seems suprising, check for any existing\n\
 snapshots. These may still include regions that\n\
 require some unused files to continue to exist."));
-		msg.run ();
+	
+		msgd.run ();
 		return;
 	} 
 
-	ArdourDialog results (_("ardour: cleanup"), true);
+	ArdourDialog results (_("ardour: cleanup"), true, true);
+	Gtk::Frame dframe;
 	
 	struct CleanupResultsModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    CleanupResultsModelColumns() { 
@@ -1930,33 +1934,35 @@ require some unused files to continue to exist."));
 	};
 
 	
-	Glib::RefPtr<Gtk::ListStore> results_model;
 	CleanupResultsModelColumns results_columns;
+	Glib::RefPtr<Gtk::ListStore> results_model;
 	Gtk::TreeView results_display;
 	
 	results_model = ListStore::create (results_columns);
 	results_display.set_model (results_model);
 	results_display.append_column (list_title, results_columns.visible_name);
+
+	results_display.set_name ("CleanupResultsList");
 	results_display.set_headers_visible (true);
+	results_display.set_headers_clickable (false);
 
 	Gtk::ScrolledWindow list_scroller;
 	Gtk::Label txt;
 
 	if (rep.space < 1048576.0f) {
 		if (removed > 1) {
-			txt.set_text (string_compose (msg, removed, _("files"), (float) rep.space / 1024.0f, "kilo"));
+		  txt.set_text (string_compose (msg, removed, _("files were"), session->path() + "dead_sounds", (float) rep.space / 1024.0f, "kilo"));
 		} else {
-			txt.set_text (string_compose (msg, removed, _("file"), (float) rep.space / 1024.0f, "kilo"));
+			txt.set_text (string_compose (msg, removed, _("file was"), session->path() + "dead_sounds", (float) rep.space / 1024.0f, "kilo"));
 		}
 	} else {
 		if (removed > 1) {
-			txt.set_text (string_compose (msg, removed, _("files"), (float) rep.space / 1048576.0f, "mega"));
+			txt.set_text (string_compose (msg, removed, _("files were"), session->path() + "dead_sounds", (float) rep.space / 1048576.0f, "mega"));
 		} else {
-			txt.set_text (string_compose (msg, removed, _("file"), (float) rep.space / 1048576.0f, "mega"));
+			txt.set_text (string_compose (msg, removed, _("file was"), session->path() + "dead_sounds", (float) rep.space / 1048576.0f, "mega"));
 		}
 	}
-
-	results.get_vbox()->pack_start (txt, false, false);
+	 results.get_vbox()->pack_start (txt, true, false, 20);
 	
 	for (vector<string>::iterator i = rep.paths.begin(); i != rep.paths.end(); ++i) {
 		TreeModel::Row row = *(results_model->append());
@@ -1967,12 +1973,15 @@ require some unused files to continue to exist."));
 	list_scroller.add (results_display);
 	list_scroller.set_size_request (-1, 250);
 	list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	
-	results.get_vbox()->pack_start (list_scroller, true, true);
-	results.add_button (Stock::OK, RESPONSE_ACCEPT);
-	results.set_position (Gtk::WIN_POS_MOUSE);
+	dframe.add (list_scroller);
+	//results.get_vbox()->pack_start (list_scroller, true, true);
+	results.get_vbox()->pack_start (dframe, true, false, 20);
+	results.add_button (Stock::CLOSE, RESPONSE_CLOSE);
+	results.set_position (Gtk::WIN_POS_CENTER);
+	results.show_all_children ();
 
 	results.run ();
+
 }
 
 void
@@ -1983,19 +1992,23 @@ ARDOUR_UI::cleanup ()
 		return;
 	}
 
-	ArdourDialog checker (_("ardour cleanup"));
-	Gtk::Label label (_("\
-Cleanup is a destructive operation.\n\
+
+	MessageDialog  checker (_("Are you sure you want to cleanup?"),
+				false,
+				Gtk::MESSAGE_QUESTION,
+				(Gtk::ButtonsType)(Gtk::BUTTONS_NONE));
+
+	checker.set_secondary_text(_("Cleanup is a destructive operation.\n\
 ALL undo/redo information will be lost if you cleanup.\n\
-Unused audio files will be moved to a \"dead sounds\" location."));
+After cleanup, unused audio files will be moved to a \
+\"dead sounds\" location."));
 	
-	checker.get_vbox()->pack_start (label, false, false);
-	checker.add_button (Stock::OK, RESPONSE_ACCEPT);
 	checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	checker.add_button (_("Clean Up"), RESPONSE_ACCEPT);
 
 	checker.set_name (_("CleanupDialog"));
 	checker.set_wmclass (_("ardour_cleanup"), "Ardour");
-	checker.set_position (Gtk::WIN_POS_MOUSE);
+	checker.set_position (Gtk::WIN_POS_CENTER);
 
 	switch (checker.run()) {
 	case RESPONSE_ACCEPT:
@@ -2011,14 +2024,13 @@ Unused audio files will be moved to a \"dead sounds\" location."));
 	if (session->cleanup_sources (rep)) {
 		return;
 	}
-
+	checker.hide();
 	display_cleanup_results (rep, 
 				 _("cleaned files"),
 				 _("\
-The following %1 %2 were not in use.\n\
-The next time you flush the wastebasket\n\
-it will release an additional %3 %4bytes\n\
-of disk space"
+The following %1 %2 not in use.and have been moved to %3. \n\
+Flushing the wastebasket will release an additional\n\
+%4 %5bytes of disk space by deleting these files."
 					 ));
 }
 
@@ -2038,7 +2050,7 @@ ARDOUR_UI::flush_trash ()
 
 	display_cleanup_results (rep, 
 				 _("deleted file"),
-				 _("The following %1 file%2 were deleted, releasing %3 %4bytes of disk space"));
+				 _("The following %1 %2 deleted from %3, releasing %4 %5bytes of disk space"));
 }
 
 void
