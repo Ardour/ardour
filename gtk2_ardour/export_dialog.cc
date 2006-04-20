@@ -97,17 +97,17 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	: ArdourDialog ("export dialog"),
 	  editor (e),
 	  format_table (9, 2),
-	  format_frame (_("FORMAT")),
-	  cue_file_label (_("CD MARKER FILE TYPE"), 1.0, 0.5),
-	  channel_count_label (_("CHANNELS"), 1.0, 0.5),
-	  header_format_label (_("FILE TYPE"), 1.0, 0.5),
-	  bitdepth_format_label (_("SAMPLE FORMAT"), 1.0, 0.5),
-	  endian_format_label (_("SAMPLE ENDIANNESS"), 1.0, 0.5),
-	  sample_rate_label (_("SAMPLE RATE"), 1.0, 0.5),
-	  src_quality_label (_("CONVERSION QUALITY"), 1.0, 0.5),
-	  dither_type_label (_("DITHER TYPE"), 1.0, 0.5),
-	  cuefile_only_checkbox (_("EXPORT CD MARKER FILE ONLY")),
-	  file_frame (_("EXPORT TO FILE")),
+	  format_frame (_("Format")),
+	  cue_file_label (_("CD Marker File Type"), 1.0, 0.5),
+	  channel_count_label (_("Channels"), 1.0, 0.5),
+	  header_format_label (_("File Type"), 1.0, 0.5),
+	  bitdepth_format_label (_("Sample Format"), 1.0, 0.5),
+	  endian_format_label (_("Sample Endianness"), 1.0, 0.5),
+	  sample_rate_label (_("Sample Rate"), 1.0, 0.5),
+	  src_quality_label (_("Conversion Quality"), 1.0, 0.5),
+	  dither_type_label (_("Dither Type"), 1.0, 0.5),
+	  cuefile_only_checkbox (_("Export CD Marker File Only")),
+	  file_frame (_("Export to File")),
 	  file_browse_button (_("Browse")),
 	  track_selector_button (_("Specific tracks ..."))
 {
@@ -345,7 +345,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 
 	cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	cancel_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::end_dialog));
-	ok_button = add_button (Stock::OK, RESPONSE_ACCEPT);
+	ok_button = add_button (_("Export"), RESPONSE_ACCEPT);
 	ok_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::do_export));
 	
 	file_browse_button.set_name ("EditorGTKButton");

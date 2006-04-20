@@ -235,7 +235,7 @@ SoundFileBox::add_field_clicked ()
     string name;
 
     prompter.set_prompt (_("Name for Field"));
-    prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+    prompter.add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
 
     switch (prompter.run ()) {
 		case Gtk::RESPONSE_ACCEPT:

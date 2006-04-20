@@ -229,29 +229,29 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 	if (check_sample_rate  && (finfo.samplerate != (int) session->frame_rate())) {
 		vector<string> choices;
 		
-		choices.push_back (_("Embed it anyway"));
-		
 		if (multiple_files) {
+			choices.push_back (_("Cancel entire import"));
 			choices.push_back (_("Don't embed it"));
 			choices.push_back (_("Embed all without questions"));
-			choices.push_back (_("Cancel entire import"));
 		} else {
 			choices.push_back (_("Cancel"));
 		}
+
+		choices.push_back (_("Embed it anyway"));
 		
 		Gtkmm2ext::Choice rate_choice (
 			string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
 			choices, false);
 		
 		switch (rate_choice.run()) {
-		case 0: /* do it */
-			break;
+		case 0: /* stop a multi-file import */
 		case 1: /* don't import this one */
 			return -1;
 		case 2: /* do it, and the rest without asking */
 			check_sample_rate = false;
 			break;
-		case 3: /* stop a multi-file import */
+		case 3: /* do it */
+			break;
 		default:
 			return -2;
 		}

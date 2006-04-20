@@ -896,12 +896,12 @@ RedirectBox::clear_redirects()
 			   "(this cannot be undone)");
 	}
 
-	choices.push_back (_("Yes, remove them all"));
 	choices.push_back (_("Cancel"));
+	choices.push_back (_("Yes, remove them all"));
 
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
-	if (prompter.run () == 0) {
+	if (prompter.run () == 1) {
 		_route.clear_redirects (this);
 	}
 }

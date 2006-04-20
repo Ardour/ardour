@@ -190,17 +190,17 @@ Do you really want to destroy %1 ?"),
 			   (selected > 1 ? 
 			    _("these regions") : _("this region")));
 
+	choices.push_back (_("No, do nothing."));
+
 	if (selected > 1) {
 		choices.push_back (_("Yes, destroy them."));
 	} else {
 		choices.push_back (_("Yes, destroy it."));
 	}
 
-	choices.push_back (_("No, do nothing."));
-
 	Gtkmm2ext::Choice prompter (prompt, choices);
 	
-	if (prompter.run() != 0) { /* first choice */
+	if (prompter.run() == 0) { /* first choice */
 		return;
 	}
 
@@ -3226,12 +3226,12 @@ Editor::remove_last_capture ()
 		prompt  = _("Do you really want to destroy the last capture?"
 			    "\n(This is destructive and cannot be undone)");
 
-		choices.push_back (_("Yes, destroy it."));
 		choices.push_back (_("No, do nothing."));
+		choices.push_back (_("Yes, destroy it."));
 		
 		Gtkmm2ext::Choice prompter (prompt, choices);
 		
-		if (prompter.run () == 0) {
+		if (prompter.run () == 1) {
 			session->remove_last_capture ();
 		}
 

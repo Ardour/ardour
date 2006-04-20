@@ -2,6 +2,9 @@
 #define __pbd_gtkmm_choice_h__
 
 #include <gtkmm/dialog.h>
+#include <gtkmm/image.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/box.h>
 #include <string>
 #include <vector>
 

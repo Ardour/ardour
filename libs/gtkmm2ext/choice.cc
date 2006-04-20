@@ -39,13 +39,18 @@ Choice::Choice (string prompt, vector<string> choices, bool center)
 
 	set_name ("ChoiceWindow");
 
+	HBox* dhbox = manage (new HBox());
+	Image* dimage = manage (new Gtk::Image(Stock::DIALOG_QUESTION,  Gtk::ICON_SIZE_DIALOG));
 	Label* label = manage (new Label (prompt));
-	label->show ();
+
+	dhbox->pack_start (*dimage, true, false, 10);
+	dhbox->pack_start  (*label, true, false, 10);
 
 	get_vbox()->set_border_width (12);
-	get_vbox()->pack_start (*label);
+	get_vbox()->pack_start (*dhbox,  true, false);
 	
 	set_has_separator (false);
+	show_all_children ();
 
 	for (n = 0, i = choices.begin(); i != choices.end(); ++i, ++n) {
 		add_button (*i, n);

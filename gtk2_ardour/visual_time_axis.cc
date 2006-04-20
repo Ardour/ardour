@@ -274,12 +274,12 @@ VisualTimeAxis::remove_this_time_axis(void* src)
 
 	std::string prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n(cannot be undone)"), time_axis_name);
 
-	choices.push_back (_("Yes, remove it."));
 	choices.push_back (_("No, do nothing."));
+	choices.push_back (_("Yes, remove it."));
 
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
-	if (prompter.run () == 0) {
+	if (prompter.run () == 1) {
 		/*
 		  defer to idle loop, otherwise we'll delete this object
 		  while we're still inside this function ...
