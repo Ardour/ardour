@@ -40,7 +40,7 @@ Choice::Choice (string prompt, vector<string> choices, bool center)
 	set_name ("ChoiceWindow");
 
 	HBox* dhbox = manage (new HBox());
-	Image* dimage = manage (new Gtk::Image(Stock::DIALOG_QUESTION,  Gtk::ICON_SIZE_DIALOG));
+	Image* dimage = manage (new Gtk::Image(Stock::DIALOG_QUESTION, Gtk::ICON_SIZE_DIALOG));
 	Label* label = manage (new Label (prompt));
 
 	dhbox->pack_start (*dimage, true, false, 10);
@@ -50,6 +50,7 @@ Choice::Choice (string prompt, vector<string> choices, bool center)
 	get_vbox()->pack_start (*dhbox,  true, false);
 	
 	set_has_separator (false);
+	set_resizable (false);
 	show_all_children ();
 
 	for (n = 0, i = choices.begin(); i != choices.end(); ++i, ++n) {

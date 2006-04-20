@@ -149,7 +149,7 @@ int
 ARDOUR_UI::unload_session ()
 {
 	if (session && session->dirty()) {
-		switch (ask_about_saving_session (_("close session"))) {
+		switch (ask_about_saving_session (_("close"))) {
 		case -1:
 			return 1;
 			

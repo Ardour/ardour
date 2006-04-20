@@ -436,15 +436,22 @@ int
 ARDOUR_UI::ask_about_saving_session (const string & what)
 {
 	ArdourDialog window (_("ardour: save session?"));
+	Gtk::HBox dhbox;  // the hbox for the image and text
 	Gtk::Label  prompt_label;
+	Gtk::Image* dimage = manage (new Gtk::Image(Stock::DIALOG_WARNING,  Gtk::ICON_SIZE_DIALOG));
+
+	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
+
 	string msg;
 
-	msg = string_compose(_("Save and %1"), what);
-	window.add_button (msg, RESPONSE_ACCEPT);
-	msg = string_compose(_("Just %1"), what);
-	window.add_button (msg, RESPONSE_APPLY);
 	msg = string_compose(_("Don't %1"), what);
 	window.add_button (msg, RESPONSE_REJECT);
+	msg = string_compose(_("Just %1"), what);
+	window.add_button (msg, RESPONSE_APPLY);
+	msg = string_compose(_("Save and %1"), what);
+	window.add_button (msg, RESPONSE_ACCEPT);
+
+	window.set_default_response (RESPONSE_ACCEPT);
 
 	Gtk::Button noquit_button (msg);
 	noquit_button.set_name ("EditorGTKButton");
@@ -461,14 +468,16 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 			 type, session->snap_name());
 	
 	prompt_label.set_text (prompt);
-	prompt_label.set_alignment (0.5, 0.5);
 	prompt_label.set_name (X_("PrompterLabel"));
-	
-	window.get_vbox()->pack_start (prompt_label);
+	prompt_label.set_alignment(ALIGN_LEFT, ALIGN_TOP);
+	dhbox.pack_start (*dimage, true, false, 5);
+	dhbox.pack_start (prompt_label, true, false, 5);
+	window.get_vbox()->pack_start (dhbox);
 
 	window.set_name (_("Prompter"));
 	window.set_position (Gtk::WIN_POS_MOUSE);
 	window.set_modal (true);
+	window.set_resizable (false);
 	window.show_all ();
 
 	save_the_session = 0;
@@ -1912,7 +1921,7 @@ ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* l
 	if (removed == 0) {
 		MessageDialog msgd (*editor,
 				    _("No audio files were ready for cleanup"), 
-				    false,
+				    true,
 				    Gtk::MESSAGE_INFO,
 				    (Gtk::ButtonsType)(Gtk::BUTTONS_CLOSE)  );
 		msgd.set_secondary_text (_("If this seems suprising, \n\
@@ -1924,7 +1933,7 @@ require some unused files to continue to exist."));
 		return;
 	} 
 
-	ArdourDialog results (_("ardour: cleanup"), true, true);
+	ArdourDialog results (_("ardour: cleanup"), true, false);
 	
 	struct CleanupResultsModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    CleanupResultsModelColumns() { 
@@ -1947,11 +1956,16 @@ require some unused files to continue to exist."));
 	results_display.set_name ("CleanupResultsList");
 	results_display.set_headers_visible (true);
 	results_display.set_headers_clickable (false);
+	results_display.set_reorderable (false);
 
 	Gtk::ScrolledWindow list_scroller;
 	Gtk::Label txt;
 	Gtk::VBox dvbox;
-	Gtk::HBox dhbox;
+	Gtk::HBox dhbox;  // the hbox for the image and text
+	Gtk::HBox ddhbox; // the hbox we eventually pack into the dialog's vbox
+	Gtk::Image* dimage = manage (new Gtk::Image(Stock::DIALOG_INFO,  Gtk::ICON_SIZE_DIALOG));
+
+	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
 
 	if (rep.space < 1048576.0f) {
 		if (removed > 1) {
@@ -1967,7 +1981,8 @@ require some unused files to continue to exist."));
 		}
 	}
 
-	dvbox.pack_start (txt, true, false, 5);
+	dhbox.pack_start (*dimage, true, false, 5);
+	dhbox.pack_start (txt, true, false, 5);
 
 	for (vector<string>::iterator i = rep.paths.begin(); i != rep.paths.end(); ++i) {
 		TreeModel::Row row = *(results_model->append());
@@ -1979,13 +1994,16 @@ require some unused files to continue to exist."));
 	list_scroller.set_size_request (-1, 150);
 	list_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	dvbox.pack_start (list_scroller, true, false);
-	dhbox.pack_start (dvbox, true, false, 5);
-	results.get_vbox()->pack_start (dhbox, true, false);
+	dvbox.pack_start (dhbox, true, false, 5);
+	dvbox.pack_start (list_scroller, true, false, 5);
+	ddhbox.pack_start (dvbox, true, false, 5);
+
+	results.get_vbox()->pack_start (ddhbox, true, false, 5);
 	results.add_button (Stock::CLOSE, RESPONSE_CLOSE);
 	results.set_default_response (RESPONSE_CLOSE);
-	results.set_position (Gtk::WIN_POS_CENTER);
+	results.set_position (Gtk::WIN_POS_MOUSE);
 	results.show_all_children ();
+	results.set_resizable (false);
 
 	results.run ();
 
@@ -2001,7 +2019,7 @@ ARDOUR_UI::cleanup ()
 
 
 	MessageDialog  checker (_("Are you sure you want to cleanup?"),
-				false,
+				true,
 				Gtk::MESSAGE_QUESTION,
 				(Gtk::ButtonsType)(Gtk::BUTTONS_NONE));
 
@@ -2016,7 +2034,7 @@ After cleanup, unused audio files will be moved to a \
 
 	checker.set_name (_("CleanupDialog"));
 	checker.set_wmclass (_("ardour_cleanup"), "Ardour");
-	checker.set_position (Gtk::WIN_POS_CENTER);
+	checker.set_position (Gtk::WIN_POS_MOUSE);
 
 	switch (checker.run()) {
 	case RESPONSE_ACCEPT:
@@ -2037,8 +2055,10 @@ After cleanup, unused audio files will be moved to a \
 				 _("cleaned files"),
 				 _("\
 The following %1 %2 not in use and \n\
-have been moved to %3. \n\n\
-Flushing the wastebasket will release an additional\n\
+have been moved to:\n\
+%3. \n\n\
+Flushing the wastebasket will \n\
+release an additional\n\
 %4 %5bytes of disk space.\n"
 					 ));
 }
@@ -2060,8 +2080,8 @@ ARDOUR_UI::flush_trash ()
 	display_cleanup_results (rep, 
 				 _("deleted file"),
 				 _("The following %1 %2 deleted from\n\
-%3,releasing \n\
-%4 %5bytes of disk space"));
+%3,\n\
+releasing %4 %5bytes of disk space"));
 }
 
 void

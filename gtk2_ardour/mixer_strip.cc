@@ -92,7 +92,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	  gain_automation_state_button (""),
 	  pan_automation_style_button (""),
 	  pan_automation_state_button (""),
-	  comment_button (_("comments")),
+	  comment_button (_("Comments")),
 	  speed_adjustment (1.0, 0.001, 4.0, 0.001, 0.1),
 	  speed_spinner (&speed_adjustment, "MixerStripSpeedBase", true)
 
@@ -239,9 +239,11 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	group_label.set_name ("MixerGroupButtonLabel");
 
 	comment_button.set_name ("MixerCommentButton");
+
 	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, _route.comment()==""	?
-							_("click to add/edit comments"):
+							_("Click to Add/Edit Comments"):
 							_route.comment());
+
 	comment_button.signal_clicked().connect (mem_fun(*this, &MixerStrip::comment_button_clicked));
 	
 	global_vpacker.set_border_width (0);
@@ -430,14 +432,20 @@ MixerStrip::set_width (Width w)
 		set_size_request (-1, -1);
 		xml_node->add_property ("strip_width", "wide");
 
-		static_cast<Gtk::Label*> (rec_enable_button->get_child())->set_text (_("RECORD"));
-		static_cast<Gtk::Label*> (mute_button->get_child())->set_text (_("mute"));
-		static_cast<Gtk::Label*> (solo_button->get_child())->set_text (_("solo"));
-		static_cast<Gtk::Label*> (comment_button.get_child())->set_text (_("comments"));
-		static_cast<Gtk::Label*> (gain_automation_style_button.get_child())->set_text (astyle_string(_route.gain_automation_curve().automation_style()));
-		static_cast<Gtk::Label*> (gain_automation_state_button.get_child())->set_text (astate_string(_route.gain_automation_curve().automation_state()));
-		static_cast<Gtk::Label*> (pan_automation_style_button.get_child())->set_text (astyle_string(_route.panner().automation_style()));
-		static_cast<Gtk::Label*> (pan_automation_state_button.get_child())->set_text (astate_string(_route.panner().automation_state()));
+		rec_enable_button->set_label (_("RECORD"));
+		mute_button->set_label  (_("mute"));
+		solo_button->set_label (_("solo"));
+
+		if (_route.comment() == "") {
+		       comment_button.set_label (_("Comments"));
+		} else {
+		       comment_button.set_label (_("*Comments*"));
+		}
+
+		gain_automation_style_button.set_label (astyle_string(_route.gain_automation_curve().automation_style()));
+		gain_automation_state_button.set_label (astate_string(_route.gain_automation_curve().automation_state()));
+		pan_automation_style_button.set_label (astyle_string(_route.panner().automation_style()));
+		pan_automation_state_button.set_label (astate_string(_route.panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		break;
 
@@ -445,14 +453,20 @@ MixerStrip::set_width (Width w)
 		set_size_request (50, -1);
 		xml_node->add_property ("strip_width", "narrow");
 
-		static_cast<Gtk::Label*> (rec_enable_button->get_child())->set_text (_("REC"));
-		static_cast<Gtk::Label*> (mute_button->get_child())->set_text (_("m"));
-		static_cast<Gtk::Label*> (solo_button->get_child())->set_text (_("s"));
-		static_cast<Gtk::Label*> (comment_button.get_child())->set_text (_("cmt"));
-		static_cast<Gtk::Label*> (gain_automation_style_button.get_child())->set_text (short_astyle_string(_route.gain_automation_curve().automation_style()));
-		static_cast<Gtk::Label*> (gain_automation_state_button.get_child())->set_text (short_astate_string(_route.gain_automation_curve().automation_state()));
-		static_cast<Gtk::Label*> (pan_automation_style_button.get_child())->set_text (short_astyle_string(_route.panner().automation_style()));
-		static_cast<Gtk::Label*> (pan_automation_state_button.get_child())->set_text (short_astate_string(_route.panner().automation_state()));
+		rec_enable_button->set_label (_("REC"));
+		mute_button->set_label (_("m"));
+		solo_button->set_label (_("s"));
+
+		if (_route.comment() == "") {
+		       comment_button.set_label (_("Cmt"));
+		} else {
+		       comment_button.set_label (_("*Cmt*"));
+		}
+
+		gain_automation_style_button.set_label (short_astyle_string(_route.gain_automation_curve().automation_style()));
+		gain_automation_state_button.set_label (short_astate_string(_route.gain_automation_curve().automation_state()));
+		pan_automation_style_button.set_label (short_astyle_string(_route.panner().automation_style()));
+		pan_automation_state_button.set_label (short_astate_string(_route.panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
 		break;
 	}
@@ -461,6 +475,7 @@ MixerStrip::set_width (Width w)
 	update_output_display ();
 	mix_group_changed (0);
 	name_changed (0);
+
 }
 
 void
@@ -1040,23 +1055,37 @@ MixerStrip::comment_button_clicked ()
 	} 
 
 	comment_window->set_position (Gtk::WIN_POS_MOUSE);
-	comment_window->show_all ();
+	comment_window->show();
 	comment_window->present();
-	
-	ResponseType response = (ResponseType) comment_window->run();
-	comment_window->hide ();
-
-	switch (response) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
-		return;
-	}
+	comment_window->run(); // we don't care what the response is
+	comment_window->hide();
 
 	string str =  comment_area->get_buffer()->get_text();
-	_route.set_comment (str, this);
-	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
-						   str.empty() ? _("click to add/edit comments") : str);
+	if (_route.comment() != str) {
+	       _route.set_comment (str, this);
+
+	       switch (_width) {
+		 
+	       case Wide:
+		      if (! str.empty()) {
+			     comment_button.set_label (_("*Comments*"));
+		      } else {
+			     comment_button.set_label (_("Comments"));
+		      }
+		      break;
+		 
+	       case Narrow:
+		      if (! str.empty()) {
+			     comment_button.set_label (_("*Cmt*"));
+		      } else {
+			     comment_button.set_label (_("Cmt"));
+		      } 
+		      break;
+	       }
+	       
+	       ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
+							  str.empty() ? _("Click to Add/Edit Comments") : str);
+	}
 }
 
 void
@@ -1072,12 +1101,11 @@ MixerStrip::setup_comment_editor ()
 	comment_area->set_name ("MixerTrackCommentArea");
 	comment_area->set_editable (true);
 	comment_area->get_buffer()->set_text (_route.comment());
-	comment_area->set_size_request (200,100);
+	comment_area->set_size_request (200,124);
 	comment_area->show ();
 
 	comment_window->get_vbox()->pack_start (*comment_area);
-	comment_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	comment_window->add_button (Stock::OK, RESPONSE_ACCEPT);
+	comment_window->get_action_area()->hide();
 }
 
 void
