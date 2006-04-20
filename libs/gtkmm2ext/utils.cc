@@ -35,20 +35,26 @@
 using namespace std;
 
 void
+Gtkmm2ext::get_ink_pixel_size (Glib::RefPtr<Pango::Layout> layout,
+			       int& width,
+			       int& height)
+{
+	Pango::Rectangle ink_rect = layout->get_ink_extents ();
+	
+	width = (ink_rect.get_width() + PANGO_SCALE / 2) / PANGO_SCALE;
+	height = (ink_rect.get_height() + PANGO_SCALE / 2) / PANGO_SCALE;
+}
+
+void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *text,
 						   gint hpadding, gint vpadding)
-
+	
 {
-	int height = 0;
-	int width = 0;
-
+	int width, height;
 	w.ensure_style ();
-	w.create_pango_layout (text)->get_pixel_size (width, height);
-
-	height += vpadding;
-	width += hpadding;
-
-	w.set_size_request(width, height);
+	
+	get_ink_pixel_size (w.create_pango_layout (text), width, height);
+	w.set_size_request(width + hpadding, height + vpadding);
 }
 
 void

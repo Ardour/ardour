@@ -89,10 +89,12 @@ class BarController : public Gtk::Frame
 	guint bind_statemask;
 	bool prompting, unprompting;
 	
-	gint button_press (GdkEventButton *);
-	gint button_release (GdkEventButton *);
-	gint motion (GdkEventMotion *);
-	gint expose (GdkEventExpose *);
+	bool button_press (GdkEventButton *);
+	bool button_release (GdkEventButton *);
+	bool motion (GdkEventMotion *);
+	bool expose (GdkEventExpose *);
+	bool scroll (GdkEventScroll *);
+	bool entry_focus_out (GdkEventFocus*);
 
 	gint mouse_control (double x, GdkWindow* w, double scaling);
 
@@ -105,7 +107,6 @@ class BarController : public Gtk::Frame
 	gint switch_to_spinner ();
 
 	void entry_activated ();
-	gint entry_focus_out (GdkEventFocus*);
 };
 
 

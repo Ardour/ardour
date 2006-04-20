@@ -699,6 +699,9 @@ ARDOUR_UI::shuttle_box_scroll (GdkEventScroll* ev)
 	case GDK_SCROLL_DOWN:
 		shuttle_fract -= 0.005;
 		break;
+	default:
+		/* scroll left/right */
+		return false;
 	}
 
 	use_shuttle_fract (true);

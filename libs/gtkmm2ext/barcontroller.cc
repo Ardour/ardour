@@ -26,6 +26,7 @@
 #include <midi++/controllable.h>
 
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/barcontroller.h>
 
 #include "i18n.h"
@@ -67,12 +68,14 @@ BarController::BarController (Gtk::Adjustment& adj,
 			  Gdk::BUTTON_PRESS_MASK|
 			  Gdk::POINTER_MOTION_MASK|
 			  Gdk::ENTER_NOTIFY_MASK|
-			  Gdk::LEAVE_NOTIFY_MASK);
+			  Gdk::LEAVE_NOTIFY_MASK|
+			  Gdk::SCROLL_MASK);
 
 	darea.signal_expose_event().connect (mem_fun (*this, &BarController::expose));
 	darea.signal_motion_notify_event().connect (mem_fun (*this, &BarController::motion));
 	darea.signal_button_press_event().connect (mem_fun (*this, &BarController::button_press));
 	darea.signal_button_release_event().connect (mem_fun (*this, &BarController::button_release));
+	darea.signal_scroll_event().connect (mem_fun (*this, &BarController::scroll));
 
 	prompter.signal_unmap_event().connect (mem_fun (*this, &BarController::prompter_hiding));
 	
@@ -107,13 +110,15 @@ BarController::get_bind_button_state (guint &button, guint &statemask)
 }
 
 
-gint
+bool
 BarController::button_press (GdkEventButton* ev)
 {
 	switch (ev->button) {
 	case 1:
 		if (ev->type == GDK_2BUTTON_PRESS) {
 			switch_on_release = true;
+			grabbed = false;
+			darea.remove_modal_grab();
 		} else {
 			switch_on_release = false;
 			darea.add_modal_grab();
@@ -122,7 +127,7 @@ BarController::button_press (GdkEventButton* ev)
 			grab_window = ev->window;
 			StartGesture ();
 		}
-		return TRUE;
+		return true;
 		break;
 
 	case 2:
@@ -134,17 +139,17 @@ BarController::button_press (GdkEventButton* ev)
 		break;
 	}
 
-	return FALSE;
+	return false;
 }
 
-gint
+bool
 BarController::button_release (GdkEventButton* ev)
 {
 	switch (ev->button) {
 	case 1:
 		if (switch_on_release) {
 			Glib::signal_idle().connect (mem_fun (*this, &BarController::switch_to_spinner));
-			return TRUE;
+			return true;
 		}
 
 		if ((ev->state & (GDK_SHIFT_MASK|GDK_CONTROL_MASK)) == GDK_SHIFT_MASK) {
@@ -162,7 +167,6 @@ BarController::button_release (GdkEventButton* ev)
 
 			mouse_control (ev->x, ev->window, scale);
 		}
-		grabbed = false;
 		darea.remove_modal_grab();
 		StopGesture ();
 		break;
@@ -176,29 +180,51 @@ BarController::button_release (GdkEventButton* ev)
 			adjustment.set_value (adjustment.get_lower() + 
 					      fract * (adjustment.get_upper() - adjustment.get_lower()));
 		}
-		return TRUE;
+		return true;
 
 	case 3:
 		if ((ev->state & bind_statemask) && bind_button == 3) {
 			midi_learn ();
 			return TRUE;
 		}
-		return FALSE;
+		return false;
 		
-	case 4:
-		adjustment.set_value (adjustment.get_value() +
-				      adjustment.get_step_increment());
-		break;
-	case 5:
-		adjustment.set_value (adjustment.get_value() -
-				      adjustment.get_step_increment());
+	default:
 		break;
 	}
 
-	return TRUE;
+	return true;
 }
 
-gint
+bool
+BarController::scroll (GdkEventScroll* ev)
+{
+	double scale;
+
+	if (ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
+		scale = 0.01;
+	} else if (ev->state & GDK_CONTROL_MASK) {
+		scale = 0.1;
+	} else {
+		scale = 1.0;
+	}
+
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+	case GDK_SCROLL_RIGHT:
+		adjustment.set_value (adjustment.get_value() + (scale * adjustment.get_step_increment()));
+		break;
+
+	case GDK_SCROLL_DOWN:
+	case GDK_SCROLL_LEFT:
+		adjustment.set_value (adjustment.get_value() - (scale * adjustment.get_step_increment()));
+		break;
+	}
+
+	return true;
+}
+
+bool
 BarController::motion (GdkEventMotion* ev)
 {
 	double scale;
@@ -254,7 +280,7 @@ BarController::mouse_control (double x, GdkWindow* window, double scaling)
 	return TRUE;
 }
 
-gint
+bool
 BarController::expose (GdkEventExpose* event)
 {
 	Glib::RefPtr<Gdk::Window> win (darea.get_window());
@@ -350,12 +376,11 @@ BarController::expose (GdkEventExpose* event)
 
 		if (buf[0] != '\0') {
 
-			int width;
-			int height;
-			
-			layout->set_text (buf);
-			layout->get_pixel_size(width, height);			
-			
+			layout->set_text (buf);			
+
+			int width, height;
+			layout->get_pixel_size (width, height);
+
 			int xpos;
 
 			xpos = max (3, 1 + (x2 - (width/2)));
@@ -368,7 +393,7 @@ BarController::expose (GdkEventExpose* event)
 		}
 	}
 
-	return TRUE;
+	return true;
 }
 
 void
@@ -498,11 +523,11 @@ BarController::entry_activated ()
 	switch_to_bar ();
 }
 
-gint
+bool
 BarController::entry_focus_out (GdkEventFocus* ev)
 {
 	entry_activated ();
-	return TRUE;
+	return true;
 }
 
 void

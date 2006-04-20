@@ -26,6 +26,8 @@
 #include <ardour/types.h>
 #include <libgnomecanvasmm/line.h>
 #include <gdkmm/types.h>
+#include <glibmm/ustring.h>
+
 #include "canvas.h"
 
 namespace Gtk {
@@ -51,7 +53,7 @@ slider_position_to_gain (double pos)
 }
 
 std::string short_version (std::string, std::string::size_type target_length);
-std::string fit_to_pixels (const std::string &, int pixel_width, const std::string & font);
+Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width);
 
 int    atoi (const std::string&);
 double atof (const std::string&);

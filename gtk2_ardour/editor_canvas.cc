@@ -20,6 +20,7 @@
 
 #include <libgnomecanvasmm/init.h>
 #include <jack/types.h>
+#include <gtkmm2ext/utils.h>
 
 #include <ardour/audioregion.h>
 
@@ -279,32 +280,30 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 		/* this mess of code is here to find out how wide this text is and
 		   position the message in the center of the editor window.
 		*/
-			
-		int pixel_height;
-		int pixel_width;
 		
 		ustring msg = string_compose ("<span face=\"sans\" style=\"normal\" weight=\"bold\" size=\"x-large\">%1%2</span>",
 					   _("Start a new session\n"), _("via Session menu"));
 
 		RefPtr<Pango::Layout> layout = create_pango_layout (msg);
 		Pango::FontDescription font = get_font_for_style (N_("FirstActionMessage"));
-		layout->get_pixel_size (pixel_width, pixel_height);
+		int width, height;
+		get_ink_pixel_size (layout, width, height);
 			
 		if (first_action_message == 0) {
 			
 			first_action_message = new ArdourCanvas::Text (*track_canvas.root());
 			first_action_message->property_font_desc() = font;
 			first_action_message->property_fill_color_rgba() = color_map[cFirstActionMessage];
-			first_action_message->property_x() = (canvas_width - pixel_width) / 2.0;
-			first_action_message->property_y() = (canvas_height/2.0) - pixel_height;
+			first_action_message->property_x() = (canvas_width - width) / 2.0;
+			first_action_message->property_y() = (canvas_height/2.0) - height;
 			first_action_message->property_anchor() = ANCHOR_NORTH_WEST;
 			first_action_message->property_markup() = msg;
 			
 		} else {
 
 			/* center it */
-			first_action_message->property_x() = (canvas_width - pixel_width) / 2.0;
-			first_action_message->property_y() = (canvas_height/2.0) - pixel_height;
+			first_action_message->property_x() = (canvas_width - width) / 2.0;
+			first_action_message->property_y() = (canvas_height/2.0) - height;
 		}
 	}
 

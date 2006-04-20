@@ -37,6 +37,8 @@ namespace Gtk {
 namespace Gtkmm2ext {
 	void init ();
 
+	void get_ink_pixel_size (Glib::RefPtr<Pango::Layout>, int& width, int& height);
+
 	void set_size_request_to_display_given_text (Gtk::Widget &w,
 						     const gchar *text,
 						     gint hpadding,

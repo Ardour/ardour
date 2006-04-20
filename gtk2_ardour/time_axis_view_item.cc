@@ -867,35 +867,14 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 void
 TimeAxisViewItem::reset_name_width (double pixel_width)
 {
-	int width;
-	int height;
-	ustring ustr;
-	Pango::FontDescription fd (NAME_FONT);
-
 	if (name_text == 0) {
 		return;
 	}
                        
-	ustr = item_name;
-	int namelen = ustr.length();
+	int width;
+	ustring ustr = fit_to_pixels (item_name, (int) floor (pixel_width - NAME_X_OFFSET), NAME_FONT, width);
 
-	Glib::RefPtr<Pango::Layout> layout = group->get_canvas()->create_pango_layout (ustr);
-	layout->set_font_description (fd);
-
-	while (namelen) {
-		
-		layout->set_text (ustr);
-		layout->get_pixel_size (width, height);
-
-		if (width < (pixel_width - NAME_X_OFFSET)) {
-			break;
-		}
-
-		--namelen;
-		ustr = ustr.substr (0, namelen);
-	}
-
-	if (namelen == 0) {
+	if (ustr.empty()) {
 		
 		name_text->hide ();
 		

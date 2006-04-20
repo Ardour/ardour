@@ -108,34 +108,37 @@ short_version (string orig, string::size_type target_length)
 	return orig;
 }
 
-string
-fit_to_pixels (const string & str, int pixel_width, const string & font)
+ustring
+fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width)
 {
 	Label foo;
-	int width;
-	int height;
-	Pango::FontDescription fontdesc (font);
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
 	
-	int namelen = str.length();
-	char cstr[namelen+1];
-	strcpy (cstr, str.c_str());
-	
-	while (namelen) {
-		Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (cstr);
+	layout->set_font_description (font);
 
-		layout->set_font_description (fontdesc);
-		layout->get_pixel_size (width, height);
+	actual_width = 0;
 
-		if (width < (pixel_width)) {
+	ustring ustr = str;
+	ustring::iterator last = ustr.end();
+	--last; /* now points at final entry */
+
+	while (!ustr.empty()) {
+
+		layout->set_text (ustr);
+
+		int width, height;
+		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+
+		if (width < pixel_width) {
+			actual_width = width;
 			break;
 		}
-
-		--namelen;
-		cstr[namelen] = '\0';
-
+		
+		ustr.erase (last);
+		--last;
 	}
 
-	return cstr;
+	return ustr;
 }
 
 int
@@ -602,7 +605,7 @@ length2string (const int32_t frames, const float sample_rate)
     secs -= (mins * 60);
 
     int total_secs = (hrs * 3600) + (mins * 60) + secs;
-    int frames_remaining = frames - (total_secs * sample_rate);
+    int frames_remaining = (int) floor (frames - (total_secs * sample_rate));
     float fractional_secs = (float) frames_remaining / sample_rate;
 
     char duration_str[32];

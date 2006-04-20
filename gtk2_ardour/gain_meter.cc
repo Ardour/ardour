@@ -230,8 +230,6 @@ GainMeter::render_metrics (Gtk::Widget& w)
 	gint x, y, width, height, depth;
 	int  db_points[] = { -50, -40, -20, -30, -10, -3, 0, 4 };
 	char buf[32];
-	int theight;
-	int twidth;
 
 	win->get_geometry (x, y, width, height, depth);
 	
@@ -251,10 +249,14 @@ GainMeter::render_metrics (Gtk::Widget& w)
 		snprintf (buf, sizeof (buf), "%d", abs (db_points[i]));
 
 		layout->set_text (buf);
-		layout->get_pixel_size (twidth, theight);
+
+		/* we want logical extents, not ink extents here */
+
+		int width, height;
+		layout->get_pixel_size (width, height);
 
 		pixmap->draw_line (fg_gc, 0, pos, 4, pos);
-		pixmap->draw_layout (fg_gc, 6, pos - (theight/2), layout);
+		pixmap->draw_layout (fg_gc, 6, pos - (height/2), layout);
 	}
 
 	return pixmap;
