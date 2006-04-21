@@ -1050,42 +1050,40 @@ MixerStrip::comment_button_clicked ()
 	}
 
 	if (comment_window->is_visible()) {
-		comment_window->hide ();
-		return;
-	} 
+	       string str =  comment_area->get_buffer()->get_text();
+	       if (_route.comment() != str) {
+		 _route.set_comment (str, this);
 
+		 switch (_width) {
+		   
+		 case Wide:
+		   if (! str.empty()) {
+		     comment_button.set_label (_("*Comments*"));
+		   } else {
+		     comment_button.set_label (_("Comments"));
+		      }
+		   break;
+		   
+		 case Narrow:
+		   if (! str.empty()) {
+		     comment_button.set_label (_("*Cmt*"));
+		   } else {
+		     comment_button.set_label (_("Cmt"));
+		   } 
+		   break;
+		 }
+		 
+		 ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
+							    str.empty() ? _("Click to Add/Edit Comments") : str);
+	       }
+	       comment_window->hide ();
+	       return;
+	} 
+	
 	comment_window->set_position (Gtk::WIN_POS_MOUSE);
 	comment_window->show();
 	comment_window->present();
-	comment_window->run(); // we don't care what the response is
-	comment_window->hide();
 
-	string str =  comment_area->get_buffer()->get_text();
-	if (_route.comment() != str) {
-	       _route.set_comment (str, this);
-
-	       switch (_width) {
-		 
-	       case Wide:
-		      if (! str.empty()) {
-			     comment_button.set_label (_("*Comments*"));
-		      } else {
-			     comment_button.set_label (_("Comments"));
-		      }
-		      break;
-		 
-	       case Narrow:
-		      if (! str.empty()) {
-			     comment_button.set_label (_("*Cmt*"));
-		      } else {
-			     comment_button.set_label (_("Cmt"));
-		      } 
-		      break;
-	       }
-	       
-	       ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
-							  str.empty() ? _("Click to Add/Edit Comments") : str);
-	}
 }
 
 void
