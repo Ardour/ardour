@@ -928,10 +928,10 @@ MixerStrip::gain_automation_style_changed ()
 {
 	switch (_width) {
 	case Wide:
-		static_cast<Gtk::Label*> (gain_automation_style_button.get_child())->set_text (astyle_string(_route.gain_automation_curve().automation_style()));
+		gain_automation_style_button.set_label (astyle_string(_route.gain_automation_curve().automation_style()));
 		break;
 	case Narrow:
-		static_cast<Gtk::Label*> (gain_automation_style_button.get_child())->set_text (short_astyle_string(_route.gain_automation_curve().automation_style()));
+		gain_automation_style_button.set_label  (short_astyle_string(_route.gain_automation_curve().automation_style()));
 		break;
 	}
 }
@@ -945,10 +945,10 @@ MixerStrip::gain_automation_state_changed ()
 
 	switch (_width) {
 	case Wide:
-		static_cast<Gtk::Label*> (gain_automation_state_button.get_child())->set_text (astate_string(_route.gain_automation_curve().automation_state()));
+		gain_automation_state_button.set_label (astate_string(_route.gain_automation_curve().automation_state()));
 		break;
 	case Narrow:
-		static_cast<Gtk::Label*> (gain_automation_state_button.get_child())->set_text (short_astate_string(_route.gain_automation_curve().automation_state()));
+		gain_automation_state_button.set_label (short_astate_string(_route.gain_automation_curve().automation_state()));
 		break;
 	}
 
@@ -978,10 +978,10 @@ MixerStrip::pan_automation_style_changed ()
 	
 	switch (_width) {
 	case Wide:
-		static_cast<Gtk::Label*> (pan_automation_style_button.get_child())->set_text (astyle_string(_route.panner().automation_style()));
+		pan_automation_style_button.set_label (astyle_string(_route.panner().automation_style()));
 		break;
 	case Narrow:
-		static_cast<Gtk::Label*> (pan_automation_style_button.get_child())->set_text (short_astyle_string(_route.panner().automation_style()));
+		pan_automation_style_button.set_label (short_astyle_string(_route.panner().automation_style()));
 		break;
 	}
 }
@@ -995,10 +995,10 @@ MixerStrip::pan_automation_state_changed ()
 
 	switch (_width) {
 	case Wide:
-		static_cast<Gtk::Label*> (pan_automation_state_button.get_child())->set_text (astate_string(_route.panner().automation_state()));
+		pan_automation_state_button.set_label (astate_string(_route.panner().automation_state()));
 		break;
 	case Narrow:
-		static_cast<Gtk::Label*> (pan_automation_state_button.get_child())->set_text (short_astate_string(_route.panner().automation_state()));
+		pan_automation_state_button.set_label (short_astate_string(_route.panner().automation_state()));
 		break;
 	}
 

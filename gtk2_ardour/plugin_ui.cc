@@ -388,19 +388,19 @@ PluginUI::automation_state_changed (ControlUI* cui)
 
 	switch (insert.get_port_automation_state (cui->port_index) & (Off|Play|Touch|Write)) {
 	case Off:
-		static_cast<Gtk::Label*>(cui->automate_button.get_child())->set_text (_("off"));
+		cui->automate_button.set_label (_("off"));
 		break;
 	case Play:
-		static_cast<Gtk::Label*>(cui->automate_button.get_child())->set_text (_("play"));
+		cui->automate_button.set_label (_("play"));
 		break;
 	case Write:
-		static_cast<Gtk::Label*>(cui->automate_button.get_child())->set_text (_("write"));
+		cui->automate_button.set_label (_("write"));
 		break;
 	case Touch:
-		static_cast<Gtk::Label*>(cui->automate_button.get_child())->set_text (_("touch"));
+		cui->automate_button.set_label (_("touch"));
 		break;
 	default:
-		static_cast<Gtk::Label*>(cui->automate_button.get_child())->set_text (_("???"));
+		cui->automate_button.set_label (_("???"));
 		break;
 	}
 }

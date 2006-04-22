@@ -807,10 +807,10 @@ ARDOUR_UI::set_shuttle_units (ShuttleUnits u)
 {
 	switch ((shuttle_units = u)) {
 	case Percentage:
-		static_cast<Label*>(shuttle_units_button.get_child())->set_text ("% ");
+		shuttle_units_button.set_label("% ");
 		break;
 	case Semitones:
-		static_cast<Label*>(shuttle_units_button.get_child())->set_text (_("st"));
+		shuttle_units_button.set_label(_("st"));
 		break;
 	}
 }

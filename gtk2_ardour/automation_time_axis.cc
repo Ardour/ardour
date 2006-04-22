@@ -209,7 +209,7 @@ AutomationTimeAxisView::automation_state_changed ()
 
 	switch (state & (Off|Play|Touch|Write)) {
 	case Off:
-		static_cast<Gtk::Label*>(auto_button.get_child())->set_text (_("off"));
+		auto_button.set_label (_("off"));
 		if (auto_off_item) {
 			ignore_state_request = true;
 			auto_off_item->set_active (true);
@@ -220,7 +220,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Play:
-		static_cast<Gtk::Label*>(auto_button.get_child())->set_text (_("play"));
+		auto_button.set_label (_("play"));
 		if (auto_play_item) {
 			ignore_state_request = true;
 			auto_play_item->set_active (true);
@@ -231,7 +231,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Write:
-		static_cast<Gtk::Label*>(auto_button.get_child())->set_text (_("write"));
+		auto_button.set_label (_("write"));
 		if (auto_write_item) {
 			ignore_state_request = true;
 			auto_write_item->set_active (true);
@@ -242,7 +242,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Touch:
-		static_cast<Gtk::Label*>(auto_button.get_child())->set_text (_("touch"));
+		auto_button.set_label (_("touch"));
 		if (auto_touch_item) {
 			ignore_state_request = true;
 			auto_touch_item->set_active (true);
@@ -253,7 +253,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	default:
-		static_cast<Gtk::Label*>(auto_button.get_child())->set_text (_("???"));
+		auto_button.set_label (_("???"));
 		break;
 	}
 }

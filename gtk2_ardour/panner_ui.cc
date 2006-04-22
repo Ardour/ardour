@@ -184,7 +184,7 @@ PannerUI::set_width (Width w)
 		for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 				(*i)->set_size_request (61, 15);
 		}
-		static_cast<Gtk::Label*> (panning_link_button.get_child())->set_text (_("link"));
+		panning_link_button.set_label (_("link"));
 		break;
 	case Narrow:
 		panning_viewport.set_size_request (31, 61);
@@ -194,7 +194,7 @@ PannerUI::set_width (Width w)
 		for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 				(*i)->set_size_request (31, 15);
 		}
-		static_cast<Gtk::Label*> (panning_link_button.get_child())->set_text (_("L"));
+		panning_link_button.set_label (_("L"));
 		break;
 	}
 
