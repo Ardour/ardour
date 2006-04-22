@@ -323,6 +323,7 @@ VisualTimeAxis::start_time_axis_rename()
 
 	name_prompter.set_prompt (_("new name: ")) ;
 	name_prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
+	name_prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	name_prompter.show_all() ;
 
 	switch (name_prompter.run ()) {

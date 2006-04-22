@@ -221,6 +221,7 @@ MeterBridgeStrip::label_button_press_release (GdkEventButton *ev)
 	prompter.set_prompt (_("New Name for Meter:"));
 	prompter.set_initial_text (label.get_text());
 	prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
+	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	prompter.show_all();
 	
 	switch (prompter.run ()) {

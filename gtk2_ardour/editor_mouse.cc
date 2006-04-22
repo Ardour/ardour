@@ -4607,6 +4607,7 @@ Editor::mouse_rename_region (ArdourCanvas::Item* item, GdkEvent* event)
 	prompter.set_prompt (_("Name for region:"));
 	prompter.set_initial_text (clicked_regionview->region.name());
 	prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
+	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	prompter.show_all ();
 	switch (prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:

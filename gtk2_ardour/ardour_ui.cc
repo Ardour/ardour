@@ -470,6 +470,7 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 	prompt_label.set_text (prompt);
 	prompt_label.set_name (X_("PrompterLabel"));
 	prompt_label.set_alignment(ALIGN_LEFT, ALIGN_TOP);
+	dhbox.set_homogeneous (false);
 	dhbox.pack_start (*dimage, true, false, 5);
 	dhbox.pack_start (prompt_label, true, false, 5);
 	window.get_vbox()->pack_start (dhbox);
@@ -1532,6 +1533,7 @@ ARDOUR_UI::snapshot_session ()
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	prompter.set_prompt (_("Name of New Snapshot"));
 	prompter.set_initial_text (now);
 	
@@ -1681,7 +1683,8 @@ ARDOUR_UI::save_template ()
 	prompter.set_prompt (_("Name for mix template:"));
 	prompter.set_initial_text(session->name() + _("-template"));
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	
+	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+
 	switch (prompter.run()) {
 	case RESPONSE_ACCEPT:
 		prompter.get_result (name);

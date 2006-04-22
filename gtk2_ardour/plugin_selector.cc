@@ -64,7 +64,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	amodel = Gtk::ListStore::create(acols);
 	added_list.set_model (amodel);
-	added_list.append_column (_("Plugins to be Applied to Channel"), acols.text);
+	added_list.append_column (_("Plugins to be Connected to Insert"), acols.text);
 	added_list.set_headers_visible (true);
 	added_list.set_reorderable (false);
 
@@ -114,7 +114,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	table->attach(ascroller, 0, 7, 7, 9);
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (Stock::APPLY, RESPONSE_APPLY);
+	add_button (Stock::CONNECT, RESPONSE_APPLY);
 	set_default_response (RESPONSE_APPLY);
 
 	get_vbox()->pack_start (*table);

@@ -34,6 +34,7 @@
 #include "gui_thread.h"
 #include "simplerect.h"
 #include "actions.h"
+#include "prompter.h"
 
 #include "i18n.h"
 
@@ -807,10 +808,10 @@ Editor::marker_menu_rename ()
 
 	if (!loc) return;
 	
-	Dialog dialog;
-	Entry  entry;
-	HBox dhbox;
-	Label dlabel (_("New Name:"));
+	ArdourPrompter dialog (true);
+	string txt;
+
+	dialog.set_prompt (_("New Name:"));
 	
 	if (loc->is_mark()) {
 		dialog.set_title (_("ardour: rename mark"));
@@ -821,20 +822,12 @@ Editor::marker_menu_rename ()
 	dialog.set_name ("MarkRenameWindow");
 	dialog.set_size_request (250, -1);
 	dialog.set_position (Gtk::WIN_POS_MOUSE);
-	dialog.set_modal (true);
-	dhbox.pack_start (dlabel, true, false, 10);
-	dhbox.pack_start (entry, true, false, 10);
-	dialog.get_vbox()->pack_start (dhbox, true, false, 10);
 
-	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
-	dialog.set_default_response (RESPONSE_ACCEPT);
+	dialog.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+	dialog.set_initial_text (loc->name());
 
-	entry.set_text (loc->name());
-	entry.set_name ("MarkerNameDisplay");
-
-	dialog.show_all ();
-	entry.grab_focus ();
+	dialog.show ();
 
 	switch (dialog.run ()) {
 	case RESPONSE_ACCEPT:
@@ -846,7 +839,8 @@ Editor::marker_menu_rename ()
 	begin_reversible_command ( _("rename marker") );
 	session->add_undo( session->locations()->get_memento() );
 
-	loc->set_name (entry.get_text());
+	dialog.get_result(txt);
+	loc->set_name (txt);
 	
 	session->add_redo_no_execute( session->locations()->get_memento() );
 	commit_reversible_command ();

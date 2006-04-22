@@ -48,14 +48,15 @@ Prompter::init ()
 	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("Prompter");
-
-	set_default_response (Gtk::RESPONSE_ACCEPT);
 	
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
 	/* 
 	   Alas a generic 'affirmative' button seems a bit useless sometimes.
 	   You will have to add your own.
+	   After adding, use :
+	   set_response_sensitive (Gtk::RESPONSE_ACCEPT, false)
+	   to prevent the RESPONSE_ACCEPT button from permitting blank strings.
 	*/
 	
 	entryLabel.set_line_wrap (true);
@@ -69,7 +70,7 @@ Prompter::init ()
 
 	get_vbox()->pack_start (entryBox);
 	show_all_children();
-
+	entry.signal_key_release_event().connect (mem_fun (*this, &Prompter::maybe_allow_response));
 	entry.signal_activate().connect (bind (mem_fun (*this, &Prompter::response), Gtk::RESPONSE_ACCEPT));
 }	
 
@@ -88,3 +89,23 @@ Prompter::get_result (string &str, bool strip)
 		strip_whitespace_edges (str);
 	}
 }
+
+bool
+Prompter::maybe_allow_response (GdkEventKey* ev)
+{
+        /* 
+	   This is set up so that entering text in the entry 
+	   field makes the RESPONSE_ACCEPT button active. 
+	   Of course if you haven't added a RESPONSE_ACCEPT 
+	   button, nothing will happen at all.
+	*/
+
+        if (entry.get_text() != "") {
+	  set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
+	  set_default_response (Gtk::RESPONSE_ACCEPT);
+	} else {
+	  set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+	}
+	return true;
+}
+

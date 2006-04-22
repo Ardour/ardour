@@ -109,6 +109,7 @@ Editor::name_selection ()
 
 	p.set_prompt (_("Name for Chunk:"));
 	p.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
+	p.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	p.change_labels (_("Create Chunk"), _("Forget it"));
 	p.show_all ();
 

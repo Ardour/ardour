@@ -727,9 +727,10 @@ RouteUI::route_rename ()
 {
 	ArdourPrompter name_prompter (true);
 	string result;
-	name_prompter.set_prompt (_("new name: "));
+	name_prompter.set_prompt (_("New Name: "));
 	name_prompter.set_initial_text (_route.name());
 	name_prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
+	name_prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	name_prompter.show_all ();
 
 	switch (name_prompter.run ()) {
