@@ -440,8 +440,6 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 	Gtk::Label  prompt_label;
 	Gtk::Image* dimage = manage (new Gtk::Image(Stock::DIALOG_WARNING,  Gtk::ICON_SIZE_DIALOG));
 
-	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
-
 	string msg;
 
 	msg = string_compose(_("Don't %1"), what);
@@ -464,14 +462,14 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 	} else {
 		type = _("snapshot");
 	}
-	prompt = string_compose(_("The %1\n\"%2\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"), 
+	prompt = string_compose(_("The %1\"%2\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"), 
 			 type, session->snap_name());
 	
 	prompt_label.set_text (prompt);
 	prompt_label.set_name (X_("PrompterLabel"));
 	prompt_label.set_alignment(ALIGN_LEFT, ALIGN_TOP);
 	dhbox.set_homogeneous (false);
-	dhbox.pack_start (*dimage, true, false, 5);
+	dhbox.pack_start (*dimage, false, false, 5);
 	dhbox.pack_start (prompt_label, true, false, 5);
 	window.get_vbox()->pack_start (dhbox);
 
@@ -1710,8 +1708,29 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 
 	do {
 		response = m_new_session_dialog->run ();
-	
-		if(response == Gtk::RESPONSE_OK) {
+		if(response == Gtk::RESPONSE_CANCEL) {
+		  quit();
+		  return;
+		} else if (response == Gtk::RESPONSE_YES) {
+		  /* YES  == OPEN, but there's no enum for that */
+		  std::string session_name = m_new_session_dialog->session_name();
+		  std::string session_path = m_new_session_dialog->session_folder();
+		  load_session (session_path, session_name);
+
+
+		} else if (response == Gtk::RESPONSE_OK) {
+		  if (m_new_session_dialog->get_current_page() == 1) {
+
+		    /* XXX this is a bit of a hack.. 
+		       i really want the new sesion dialog to return RESPONSE_YES
+		       if we're on page 1 (the load page)
+		       Unfortunately i can't see how atm.. 
+		    */
+			std::string session_name = m_new_session_dialog->session_name();
+			std::string session_path = m_new_session_dialog->session_folder();
+			load_session (session_path, session_name);
+
+		  } else {
 
 			_session_is_new = true;
 			
@@ -1777,11 +1796,21 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 					       nphysin,
 					       nphysout, 
 					       engine->frame_rate() * 60 * 5);
-			}		
+			}
+		  }	
 		}
-
+		
 	} while(response == Gtk::RESPONSE_HELP);
 	m_new_session_dialog->hide_all();
+	show();
+
+}
+
+void
+ARDOUR_UI::close_session()
+{
+  unload_session();
+  new_session ();
 }
 
 int
@@ -1833,6 +1862,8 @@ ARDOUR_UI::make_session_clean ()
 	if (session) {
 		session->set_clean ();
 	}
+
+	show ();
 
 	return FALSE;
 }

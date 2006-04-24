@@ -25,6 +25,14 @@
 
 #include <string>
 #include <gtkmm/dialog.h>
+#include <gtkmm/treeview.h>
+#include <gtkmm/treestore.h>
+#include <gtkmm/treepath.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/notebook.h>
+
+#include <ardour/utils.h>
+
 #include <glibmm/refptr.h>
 
 namespace Gtk {
@@ -33,6 +41,8 @@ namespace Gtk {
 	class SpinButton;
 	class CheckButton;
 	class RadioButton;
+	class TreeView;
+	class Notebook;
 }
 
 #include "glade_factory.h"
@@ -82,6 +92,7 @@ public:
 
 	bool connect_outs_to_master() const;
 	bool connect_outs_to_physical() const ;
+	int get_current_page();
 
 protected:
 
@@ -92,7 +103,7 @@ protected:
 	void reset();
 
 	// references to widgets we care about.
-
+	Gtk::Dialog* m_new_session_dialog;
 	Gtk::Entry*  m_name;
 	Gtk::FileChooserButton* m_folder;
 	Gtk::FileChooserButton* m_template;
@@ -113,6 +124,39 @@ protected:
 
 	Gtk::RadioButton* m_connect_outputs_to_master;
 	Gtk::RadioButton* m_connect_outputs_to_physical;
+	Gtk::Button* m_okbutton;
+
+	Gtk::FileChooserButton* m_open_filechooser;
+	Gtk::TreeView* m_treeview;
+	Gtk::Notebook* m_notebook;
+	Gtk::ScrolledWindow* m_scrolledwindow;
+ private:
+	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    RecentSessionModelColumns() { 
+		    add (visible_name);
+		    add (fullpath);
+	    }
+	  Gtk::TreeModelColumn<std::string> visible_name;
+	  Gtk::TreeModelColumn<std::string> fullpath;
+	};
+
+	RecentSessionModelColumns    recent_columns;
+	Glib::RefPtr<Gtk::TreeStore> recent_model;
+
+	void recent_session_selection_changed ();
+	void nsd_redisplay_recent_sessions();
+	void nsd_recent_session_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
+	struct RecentSessionsSorter {
+	  bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
+		    return cmp_nocase(a.first, b.first) == -1;
+	    }
+	};
+	bool entry_key_release (GdkEventKey*);
+	void notebook_page_changed (GtkNotebookPage*, uint);
+	void treeview_selection_changed ();
+	void file_chosen ();
+	void recent_row_activated (const Gtk::TreePath&, Gtk::TreeViewColumn*);
+
 	
 };
 

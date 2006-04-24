@@ -436,9 +436,8 @@ To create it from the command line, start ardour as \"ardour --new %1"), path)
 
 	} else {
 		ui->hide_splash ();
-		ui->show ();
 		if (!Config->get_no_new_session_dialog()) {
-			ui->new_session (true);
+		       ui->new_session (true);
 		}
 	}
 

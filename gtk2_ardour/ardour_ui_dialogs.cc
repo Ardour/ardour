@@ -158,7 +158,7 @@ ARDOUR_UI::unload_session ()
 			break;
 		}
 	}
-
+	editor->hide ();
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
 	point_zero_one_second_connection.disconnect();
