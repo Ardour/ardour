@@ -250,7 +250,7 @@ FFTGraph::draw_scales(Glib::RefPtr<Gdk::Window> window)
 		window->draw_line(graph_gc, coord, v_margin, coord, height - v_margin);
 
 		int width, height;
-		get_ink_pixel_size (layout, width, height);
+		layout->get_pixel_size (width, height);
 		
 		window->draw_layout(white, coord - width / 2, v_margin / 2, layout);
 		
