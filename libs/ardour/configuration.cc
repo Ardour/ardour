@@ -28,6 +28,7 @@
 #include <ardour/configuration.h>
 #include <ardour/diskstream.h>
 #include <ardour/destructive_filesource.h>
+#include <ardour/control_protocol_manager.h>
 
 #include "i18n.h"
 
@@ -55,6 +56,7 @@ Configuration::Configuration ()
 
 	user_configuration (false)
 {
+	_control_protocol_state = 0;
 }
 
 Configuration::~Configuration ()
@@ -174,6 +176,8 @@ Configuration::state (bool user_only)
 		root->add_child_copy (*_extra_xml);
 	}
 
+	root->add_child_nocopy (ControlProtocolManager::instance().get_state());
+
 	return *root;
 }
 
@@ -221,6 +225,9 @@ Configuration::set_state (const XMLNode& root)
 			
 		} else if (node->name() == "extra") {
 			_extra_xml = new XMLNode (*node);
+
+		} else if (node->name() == ControlProtocolManager::state_node_name) {
+			_control_protocol_state = new XMLNode (*node);
 		}
 	}
 

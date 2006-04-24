@@ -152,13 +152,13 @@ GainMeter::GainMeter (IO& io, Session& s)
 		   used to describe meter points. In english, its "input".
 		*/
 		
-		set_size_request_to_display_given_text (meter_point_button, _("tupni"), 2, 2);
+		set_size_request_to_display_given_text (meter_point_button, _("tupni"), 5, 5);
 
 
 		top_table.attach (meter_point_button, 1, 2, 0, 1);
 	}
 	gain_display_box.set_spacing (2);
-	set_size_request_to_display_given_text (gain_display_frame, "-86.0", 2, 2);
+	set_size_request_to_display_given_text (gain_display_frame, "-86.g", 2, 6); /* note the descender */
 	gain_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	gain_display_frame.set_name ("BaseFrame");
 	gain_display_frame.add (gain_display);
@@ -166,7 +166,7 @@ GainMeter::GainMeter (IO& io, Session& s)
 
 	peak_display.set_name ("MixerStripPeakDisplay");
 	peak_display.add (peak_display_label);
-	set_size_request_to_display_given_text (peak_display_frame, "-86.0", 2, 2);
+	set_size_request_to_display_given_text (peak_display_frame, "-86.g", 2, 6); /* note the descender */
 	peak_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	peak_display_frame.set_name ("BaseFrame");
 	peak_display_frame.add (peak_display);

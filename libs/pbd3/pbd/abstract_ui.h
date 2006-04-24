@@ -21,47 +21,58 @@
 #ifndef __pbd_abstract_ui_h__
 #define __pbd_abstract_ui_h__
 
-#include <pbd/receiver.h>
+#include <map>
+#include <string>
+#include <pthread.h>
+
 #include <sigc++/sigc++.h>
+
+#include <pbd/receiver.h>
+#include <pbd/lockmonitor.h>
+#include <pbd/ringbufferNPT.h>
+#include <pbd/base_ui.h>
 
 class Touchable;
 
-class AbstractUI : public Receiver
+template <class RequestObject>
+class AbstractUI : public BaseUI
 {
   public:
-	enum RequestType {
-		ErrorMessage,
-		Quit,
-		CallSlot,
-		CallSlotLocked,
-		TouchDisplay,
-		StateChange,
-		SetTip,
-		AddIdle,
-		AddTimeout,
-	};
-
-	bool ok() { return _ok; }
-
-	AbstractUI () {}
+	AbstractUI (std::string name, bool with_signal_pipe);
 	virtual ~AbstractUI() {}
 
-	virtual void run (Receiver &old_receiver) = 0;
-	virtual void quit    () = 0;
-	virtual bool running () = 0;
-	virtual void request (RequestType) = 0;
-	virtual void touch_display (Touchable *) = 0;
-	virtual void call_slot (sigc::slot<void>) = 0;
-	virtual bool caller_is_gui_thread() = 0;
+	virtual bool caller_is_ui_thread() = 0;
 
-	/* needed to be a receiver ... */
+	void call_slot (sigc::slot<void> el_slot) {
+		RequestObject *req = get_request (BaseUI::CallSlot);
+		
+		if (req == 0) {
+			return;
+		}
+		
+		req->slot = el_slot;
+		send_request (req);
+	}	
 
-	virtual void receive (Transmitter::Channel, const char *) = 0;
-	
+	void register_thread (pthread_t, std::string);
+	void register_thread_with_request_count (pthread_t, std::string, uint32_t num_requests);
+
   protected:
-	bool _ok;
+	typedef RingBufferNPT<RequestObject> RequestBuffer;
+	typedef typename RequestBuffer::rw_vector RequestBufferVector;
+	typedef typename std::map<pthread_t,RequestBuffer*>::iterator RequestBufferMapIterator;
+
+	PBD::Lock request_buffer_map_lock;
+	typedef std::map<pthread_t,RequestBuffer*> RequestBufferMap;
+	RequestBufferMap request_buffers;
+	pthread_key_t thread_request_buffer_key;
+	RequestObject* get_request (RequestType);
+	void handle_ui_requests ();
+	void send_request (RequestObject *);
+
+	virtual void do_request (RequestObject *) = 0;
 };
 
-#endif // __pbd_abstract_ui_h__
+#endif /* __pbd_abstract_ui_h__ */
 
 

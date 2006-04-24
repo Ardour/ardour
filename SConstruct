@@ -35,7 +35,8 @@ opts.AddOptions(
     BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
-	BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0)
+    BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
+    BoolOption('SURFACES', 'Build support for control surfaces', 0)
   )
 
 #----------------------------------------------------------------------
@@ -389,8 +390,6 @@ libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomeca
 libraries['glade2'] = LibraryInfo()
 libraries['glade2'].ParseConfig ('pkg-config --cflags --libs libglade-2.0')
 
-libraries['usb'] = LibraryInfo (LIBS='usb')
-
 #libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
 
 libraries['ardour'] = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')
@@ -402,6 +401,21 @@ libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext
 libraries['fst'] = LibraryInfo()
 if env['VST']:
     libraries['fst'].ParseConfig('pkg-config --cflags --libs libfst')
+
+#
+# Check for libusb
+
+libraries['usb'] = LibraryInfo ()
+
+conf = Configure (libraries['usb'])
+if conf.CheckLib ('usb', 'usb_interrupt_write'):
+    have_libusb = 1
+else:
+    have_libusb = 0
+    
+libraries['usb'] = conf.Finish ()
+
+#
 
 #
 # Audio/MIDI library (needed for MIDI, since audio is all handled via JACK)
@@ -518,10 +532,13 @@ else:
     'gtk2_ardour'
         ]
 
-surface_subdirs = [
-    'libs/surfaces/tranzport',
-    'libs/surfaces/generic_midi'
-    ]
+surface_subdirs = []
+
+if env['SURFACES']:
+    surface_subdirs += [ 'libs/surfaces/generic_midi' ]
+    if have_libusb:
+        surface_subdirs += [ 'libs/surfaces/tranzport' ]
+    
 
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))

@@ -31,7 +31,7 @@ using std::vector;
 
 class strstream;
 
-class Receiver : public sigc::trackable
+class Receiver : virtual public sigc::trackable
 {
   public:
 	Receiver ();

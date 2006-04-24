@@ -14,9 +14,7 @@ class GenericMidiControlProtocol : public ControlProtocol {
 	GenericMidiControlProtocol (Session&);
 	virtual ~GenericMidiControlProtocol();
 
-	int init ();
-
-	bool active() const;
+	int set_active (bool yn);
 
 	void set_port (MIDI::Port*);
 	MIDI::Port* port () const { return _port; }

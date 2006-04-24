@@ -1,7 +1,29 @@
+/*
+    Copyright (C) 2006 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+    $Id$
+*/
+
 #include <iostream>
 #include <algorithm>
 
+#include <float.h>
 #include <sys/time.h>
+#include <errno.h>
 
 #include <pbd/pthread_utils.h>
 
@@ -19,8 +41,16 @@ using namespace sigc;
 
 #include "i18n.h"
 
+#include <pbd/abstract_ui.cc>
+
+BaseUI::RequestType LEDChange = BaseUI::new_request_type ();
+BaseUI::RequestType Print = BaseUI::new_request_type ();
+BaseUI::RequestType SetCurrentTrack = BaseUI::new_request_type ();
+
 TranzportControlProtocol::TranzportControlProtocol (Session& s)
-	: ControlProtocol  (s, _("Tranzport"))
+	: ControlProtocol  (s, X_("Tranzport")),
+	  AbstractUI<TranzportRequest> (X_("Tranzport"), false)
+	
 {
 	timeout = 60000;
 	buttonmask = 0;
@@ -34,91 +64,78 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	wheel_shift_mode = WheelShiftGain;
 	timerclear (&last_wheel_motion);
 	last_wheel_dir = 1;
+	last_track_gain = FLT_MAX;
 	display_mode = DisplayNormal;
-	requested_display_mode = display_mode;
 
 	memset (current_screen, 0, sizeof (current_screen));
+	memset (pending_screen, 0, sizeof (pending_screen));
 
 	for (uint32_t i = 0; i < sizeof(lights)/sizeof(lights[0]); ++i) {
 		lights[i] = false;
 	}
 
-	session.RecordStateChanged.connect (mem_fun (*this, &TranzportControlProtocol::record_status_changed));
+	for (uint32_t i = 0; i < sizeof(pending_lights)/sizeof(pending_lights[0]); ++i) {
+		pending_lights[i] = false;
+	}
 }
 
 TranzportControlProtocol::~TranzportControlProtocol ()
 {
-	if (udev) {
-		pthread_cancel_one (thread);
-		lcd_clear ();
-		close ();
-	}
+	set_active (false);
 }
 
 int
-TranzportControlProtocol::init ()
+TranzportControlProtocol::set_active (bool yn)
 {
-	if (open ()) {
-		return -1;
+	if (yn != _active) {
+
+		if (yn) {
+
+			if (open ()) {
+				return -1;
+			}
+			
+			if (pthread_create_and_store (X_("tranzport monitor"), &thread, 0, _monitor_work, this) == 0) {
+				_active = true;
+			} else {
+				return -1;
+			}
+
+		} else {
+
+			pthread_cancel_one (thread);
+			lcd_clear ();
+			close ();
+			_active = false;
+		} 
 	}
-
-	lcd_clear ();
-	lights_off ();
-
-	show_wheel_mode();
-	next_track ();
-	show_transport_time ();
-
-	/* outbound thread */
-
-	init_thread ();
-
-	/* inbound thread */
-	
-	pthread_create_and_store (X_("tranzport monitor"), &thread, 0, _monitor_work, this);
 
 	return 0;
 }
 
-bool
-TranzportControlProtocol::active() const
-{
-	return true;
-}
-		
 void
-TranzportControlProtocol::send_route_feedback (list<Route*>& routes)
+TranzportControlProtocol::show_track_gain ()
 {
+	if (current_route) {
+		gain_t g = current_route->gain();
+		if (g != last_track_gain) {
+			char buf[16];
+			snprintf (buf, sizeof (buf), "%6.1fdB", coefficient_to_dB (current_route->gain()));
+			print (0, 9, buf); 
+			last_track_gain = g;
+		}
+	} else {
+		print (0, 9, "        "); 
+	}
 }
 
 void
-TranzportControlProtocol::send_global_feedback ()
+TranzportControlProtocol::normal_update ()
 {
-	if (requested_display_mode != display_mode) {
-		switch (requested_display_mode) {
-		case DisplayNormal:
-			enter_normal_display_mode ();
-			break;
-		case DisplayBigMeter:
-			enter_big_meter_mode ();
-			break;
-		}
-	}
-
-	switch (display_mode) {
-	case DisplayBigMeter:
-		show_meter ();
-		break;
-
-	case DisplayNormal:
-		show_transport_time ();
-		if (session.soloing()) {
-			light_on (LightAnysolo);
-		} else {
-			light_off (LightAnysolo);
-		}
-		break;
-	}
+	show_current_track ();
+	show_transport_time ();
+	show_track_gain ();
+	show_wheel_mode ();
 }
 
 void
@@ -126,11 +143,11 @@ TranzportControlProtocol::next_display_mode ()
 {
 	switch (display_mode) {
 	case DisplayNormal:
-		requested_display_mode = DisplayBigMeter;
+		display_mode = DisplayBigMeter;
 		break;
 
 	case DisplayBigMeter:
-		requested_display_mode = DisplayNormal;
+		display_mode = DisplayNormal;
 		break;
 	}
 }
@@ -147,11 +164,14 @@ TranzportControlProtocol::enter_big_meter_mode ()
 void
 TranzportControlProtocol::enter_normal_display_mode ()
 {
+	last_where += 1; /* force time redisplay */
+	last_track_gain = FLT_MAX; /* force gain redisplay */
+
 	lcd_clear ();
 	lights_off ();
 	show_current_track ();
 	show_wheel_mode ();
-	last_where += 1; /* force time redisplay */
+	show_wheel_mode ();
 	show_transport_time ();
 	display_mode = DisplayNormal;
 }
@@ -205,7 +225,7 @@ TranzportControlProtocol::show_meter ()
 
 	uint32_t fill  = (uint32_t) floor (fraction * 40);
 	char buf[21];
-	int i;
+	uint32_t i;
 
 	if (fill == last_meter_fill) {
 		/* nothing to do */
@@ -286,20 +306,6 @@ TranzportControlProtocol::_monitor_work (void* arg)
 	return static_cast<TranzportControlProtocol*>(arg)->monitor_work ();
 }
 
-void*
-TranzportControlProtocol::monitor_work ()
-{
-	PBD::ThreadCreated (pthread_self(), X_("tranzport monitor"));
-
-	while (true) {
-		if (read ()) {
-			break;
-		}
-	}
-
-	return 0;
-}
-
 int
 TranzportControlProtocol::open ()
 {
@@ -366,6 +372,7 @@ TranzportControlProtocol::close ()
 
 	if (usb_close (udev)) {
 		error << _("Tranzport: cannot close device") << endmsg;
+		udev = 0;
 		ret = 0;
 	}
 
@@ -377,10 +384,7 @@ TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 {
 	int val;
 
-	{
-		LockMonitor lm (write_lock, __LINE__, __FILE__);
-		val = usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, timeout_override ? timeout_override : timeout);
-	}
+	val = usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, timeout_override ? timeout_override : timeout);
 
 	if (val < 0)
 		return val;
@@ -405,29 +409,56 @@ TranzportControlProtocol::lcd_clear ()
 	cmd[6] = ' ';
 	cmd[7] = 0x00;
 
-	{
-		LockMonitor lp (print_lock, __LINE__, __FILE__);
-		LockMonitor lw (write_lock, __LINE__, __FILE__);
-
-		for (uint8_t i = 0; i < 10; ++i) {
-			cmd[2] = i;
-			usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, 500);
-		}
-		
-		memset (current_screen, ' ', sizeof (current_screen));
+	for (uint8_t i = 0; i < 10; ++i) {
+		cmd[2] = i;
+		usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, 500);
 	}
+	
+	memset (current_screen, ' ', sizeof (current_screen));
+	memset (pending_screen, ' ', sizeof (pending_screen));
 }
 
 void
 TranzportControlProtocol::lights_off ()
 {
-	light_off (LightRecord);
-	light_off (LightTrackrec);
-	light_off (LightTrackmute);
-	light_off (LightTracksolo);
-	light_off (LightAnysolo);
-	light_off (LightLoop);
-	light_off (LightPunch);
+	uint8_t cmd[8];
+
+	cmd[0] = 0x00;
+	cmd[1] = 0x00;
+	cmd[3] = 0x00;
+	cmd[4] = 0x00;
+	cmd[5] = 0x00;
+	cmd[6] = 0x00;
+	cmd[7] = 0x00;
+
+	cmd[2] = LightRecord;
+	if (write (cmd, 500) == 0) {
+		lights[LightRecord] = false;
+	}
+	cmd[2] = LightTrackrec;
+	if (write (cmd, 500) == 0) {
+		lights[LightTrackrec] = false;
+	}
+	cmd[2] = LightTrackmute;
+	if (write (cmd, 500) == 0) {
+		lights[LightTrackmute] = false;
+	}
+	cmd[2] = LightTracksolo;
+	if (write (cmd, 500) == 0) {
+		lights[LightTracksolo] = false;
+	}
+	cmd[2] = LightAnysolo;
+	if (write (cmd, 500) == 0) {
+		lights[LightAnysolo] = false;
+	}
+	cmd[2] = LightLoop;
+	if (write (cmd, 500) == 0) {
+		lights[LightLoop] = false;
+	}
+	cmd[2] = LightPunch;
+	if (write (cmd, 500) == 0) {
+		lights[LightPunch] = false;
+	}
 }
 
 int
@@ -486,25 +517,250 @@ TranzportControlProtocol::light_off (LightID light)
 	}
 }
 
-int
-TranzportControlProtocol::read (uint32_t timeout_override)
+void*
+TranzportControlProtocol::monitor_work ()
 {
+	struct sched_param rtparam;
+	int err;
 	uint8_t buf[8];
 	int val;
 
-	memset(buf, 0, 8);
-  again:
-	val = usb_interrupt_read(udev, READ_ENDPOINT, (char*) buf, 8, timeout_override ? timeout_override : timeout);
-	if (val < 0) {
-		return val;
-	}
-	if (val != 8) {
-		if (val == 0) {
-			goto again;
+	PBD::ThreadCreated (pthread_self(), X_("Tranzport"));
+
+	memset (&rtparam, 0, sizeof (rtparam));
+	rtparam.sched_priority = 3; /* XXX should be relative to audio (JACK) thread */
+	
+	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
+		// do we care? not particularly.
+		info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), BaseUI::name(), strerror (errno)) << endmsg;
+	} 
+
+	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
+	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
+
+	/* set initial state */
+
+	lcd_clear ();
+	lights_off ();
+
+	show_wheel_mode();
+	next_track ();
+	show_transport_time ();
+
+	while (true) {
+
+		/* bInterval for this beastie is 10ms */
+
+		pthread_testcancel();
+		usleep (20000);
+		pthread_testcancel();
+
+		/* anything to read ? */
+
+		val = usb_interrupt_read (udev, READ_ENDPOINT, (char*) buf, 8, 0);
+
+		/* any requests to handle? */
+
+		handle_ui_requests ();
+
+		if (val == 8) {
+			process (buf);
 		}
-		return -1;
+
+		/* update whatever needs updating */
+		
+		update_state ();
 	}
 
+	return (void*) 0;
+}
+
+int
+TranzportControlProtocol::update_state ()
+{
+	int row;
+	int col_base;
+	int col;
+	int cell;
+
+	/* do the text updates */
+
+	switch (display_mode) {
+	case DisplayBigMeter:
+		show_meter ();
+		break;
+
+	case DisplayNormal:
+		normal_update ();
+		break;
+	}
+
+	/* next: flush LCD */
+
+	cell = 0;
+	
+	for (row = 0; row < 2; ++row) {
+
+		for (col_base = 0, col = 0; col < 20; ) {
+			
+			if (pending_screen[row][col] != current_screen[row][col]) {
+
+				/* something in this cell is different, so dump the cell
+				   to the device.
+				*/
+
+				uint8_t cmd[8];
+				
+				cmd[0] = 0x00;
+				cmd[1] = 0x01;
+				cmd[2] = cell;
+				cmd[3] = pending_screen[row][col_base];
+				cmd[4] = pending_screen[row][col_base+1];
+				cmd[5] = pending_screen[row][col_base+2];
+				cmd[6] = pending_screen[row][col_base+3];
+				cmd[7] = 0x00;
+
+				if (usb_interrupt_write (udev, WRITE_ENDPOINT, (char *) cmd, 8, 500) == 8) {
+					/* successful write: copy to current */
+					memcpy (&current_screen[row][col_base], &pending_screen[row][col_base], 4);
+				}
+
+				/* skip the rest of the 4 character cell since we wrote+copied it already */
+				
+				col_base += 4;
+				col = col_base;
+				cell++;
+
+			} else {
+
+				col++;
+				
+				if (col && col % 4 == 0) {
+					cell++;
+					col_base += 4;
+				}
+			}
+		}
+	}
+
+	/* now update LED's */
+
+	/* per track */
+
+	if (current_route) {
+		AudioTrack* at = dynamic_cast<AudioTrack*> (current_route);
+		if (at && at->record_enabled()) {
+			pending_lights[LightTrackrec] = true;
+		} else {
+			pending_lights[LightTrackrec] = false;
+		}
+		if (current_route->muted()) {
+			pending_lights[LightTrackmute] = true;
+		} else {
+			pending_lights[LightTrackmute] = false;
+		}
+		if (current_route->soloed()) {
+			pending_lights[LightTracksolo] = true;
+		} else {
+			pending_lights[LightTracksolo] = false;
+		}
+
+	} else {
+		pending_lights[LightTrackrec] = false;
+		pending_lights[LightTracksolo] = false;
+		pending_lights[LightTrackmute] = false;
+	}
+
+	/* global */
+
+	if (session.get_auto_loop()) {
+		pending_lights[LightLoop] = true;
+	} else {
+		pending_lights[LightLoop] = false;
+	}
+
+	if (session.get_punch_in() || session.get_punch_out()) {
+		pending_lights[LightPunch] = true;
+	} else {
+		pending_lights[LightPunch] = false;
+	}
+
+	if (session.get_record_enabled()) {
+		pending_lights[LightRecord] = true;
+	} else {
+		pending_lights[LightRecord] = false;
+	}
+
+	if (session.soloing ()) {
+		pending_lights[LightAnysolo] = true;
+	} else {
+		pending_lights[LightAnysolo] = false;
+	}
+
+	/* flush changed light change */
+
+	if (pending_lights[LightRecord] != lights[LightRecord]) {
+		if (pending_lights[LightRecord]) {
+			light_on (LightRecord);
+		} else {
+			light_off (LightRecord);
+		}
+	}
+
+	if (pending_lights[LightTracksolo] != lights[LightTracksolo]) {
+		if (pending_lights[LightTracksolo]) {
+			light_on (LightTracksolo);
+		} else {
+			light_off (LightTracksolo);
+		}
+	}
+
+	if (pending_lights[LightTrackmute] != lights[LightTrackmute]) {
+		if (pending_lights[LightTrackmute]) {
+			light_on (LightTrackmute);
+		} else {
+			light_off (LightTrackmute);
+		}
+	}
+
+	if (pending_lights[LightTracksolo] != lights[LightTracksolo]) {
+		if (pending_lights[LightTracksolo]) {
+			light_on (LightTracksolo);
+		} else {
+			light_off (LightTracksolo);
+		}
+	}
+
+	if (pending_lights[LightAnysolo] != lights[LightAnysolo]) {
+		if (pending_lights[LightAnysolo]) {
+			light_on (LightAnysolo);
+		} else {
+			light_off (LightAnysolo);
+		}
+	}
+
+	if (pending_lights[LightLoop] != lights[LightLoop]) {
+		if (pending_lights[LightLoop]) {
+			light_on (LightLoop);
+		} else {
+			light_off (LightLoop);
+		}
+	}
+
+	if (pending_lights[LightPunch] != lights[LightPunch]) {
+		if (pending_lights[LightPunch]) {
+			light_on (LightPunch);
+		} else {
+			light_off (LightPunch);
+		}
+	}
+
+	return 0;
+}
+
+int
+TranzportControlProtocol::process (uint8_t* buf)
+{
 	// printf("read: %02x %02x %02x %02x %02x %02x %02x %02x\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
 
 	uint32_t this_button_mask;
@@ -672,86 +928,13 @@ TranzportControlProtocol::read (uint32_t timeout_override)
 void
 TranzportControlProtocol::show_current_track ()
 {
-	for (vector<sigc::connection>::iterator i = track_connections.begin(); i != track_connections.end(); ++i) {
-		(*i).disconnect ();
-	}
-	track_connections.clear ();
-
 	if (current_route == 0) {
 		print (0, 0, "--------");
-		return;
-	}
-
-	string name = current_route->name();
-
-	print (0, 0, name.substr (0, 8).c_str());
-
-	track_solo_changed (0);
-	track_mute_changed (0);
-	track_rec_changed (0);
-
-	track_connections.push_back (current_route->solo_changed.connect (mem_fun (*this, &TranzportControlProtocol::track_solo_changed)));
-	track_connections.push_back (current_route->mute_changed.connect (mem_fun (*this, &TranzportControlProtocol::track_mute_changed)));
-	track_connections.push_back (current_route->record_enable_changed.connect (mem_fun (*this, &TranzportControlProtocol::track_rec_changed)));
-	track_connections.push_back (current_route->gain_changed.connect (mem_fun (*this, &TranzportControlProtocol::track_gain_changed)));
-}
-
-void
-TranzportControlProtocol::record_status_changed ()
-{
-	if (session.get_record_enabled()) {
-		light_on (LightRecord);
 	} else {
-		light_off (LightRecord);
+		print (0, 0, current_route->name().substr (0, 8).c_str());
 	}
 }
 
-void
-TranzportControlProtocol::track_gain_changed (void* ignored)
-{
-	char buf[8];
-
-	switch (display_mode) {
-	case DisplayNormal:
-		snprintf (buf, sizeof (buf), "%.1fdB", coefficient_to_dB (current_route->gain()));
-		print (0, 9, buf);
-		break;
-	default:
-		break;
-	}
-}
-
-void
-TranzportControlProtocol::track_solo_changed (void* ignored)
-{
-	if (current_route->soloed()) {
-		light_on (LightTracksolo);
-	} else {
-		light_off (LightTracksolo);
-	}
-}
-
-void
-TranzportControlProtocol::track_mute_changed (void *ignored)
-{
-	if (current_route->muted()) {
-		light_on (LightTrackmute);
-	} else {
-		light_off (LightTrackmute);
-	}
-}
-
-void
-TranzportControlProtocol::track_rec_changed (void *ignored)
-{
-	if (current_route->record_enabled()) {
-		light_on (LightTrackrec);
-	} else {
-		light_off (LightTrackrec);
-	}
-}
-
-	
 void
 TranzportControlProtocol::button_event_battery_press (bool shifted)
 {
@@ -798,11 +981,7 @@ void
 TranzportControlProtocol::button_event_trackrec_press (bool shifted)
 {
 	if (shifted) {
-		if (session.get_record_enabled()) {
-			session.record_disenable_all ();
-		} else {
-			session.record_enable_all ();
-		}
+		toggle_all_rec_enables ();
 	} else {
 		if (current_route) {
 			AudioTrack* at = dynamic_cast<AudioTrack*>(current_route);
@@ -855,9 +1034,9 @@ void
 TranzportControlProtocol::button_event_undo_press (bool shifted)
 {
 	if (shifted) {
-		session.redo (1);
+		redo ();
 	} else {
-		session.undo (1);
+		undo ();
 	}
 }
 
@@ -907,6 +1086,8 @@ TranzportControlProtocol::button_event_loop_press (bool shifted)
 {
 	if (shifted) {
 		next_wheel_shift_mode ();
+	} else {
+		loop_toggle ();
 	}
 }
 
@@ -933,8 +1114,7 @@ TranzportControlProtocol::button_event_prev_release (bool shifted)
 void
 TranzportControlProtocol::button_event_add_press (bool shifted)
 {
-	jack_nframes_t when = session.audible_frame();
-	session.locations()->add (new Location (when, when, _("unnamed"), Location::IsMark));
+	add_marker ();
 }
 
 void
@@ -961,9 +1141,9 @@ void
 TranzportControlProtocol::button_event_rewind_press (bool shifted)
 {
 	if (shifted) {
-		session.goto_start ();
+		goto_start ();
 	} else {
-		session.request_transport_speed (-2.0f);
+		rewind ();
 	}
 }
 
@@ -976,9 +1156,10 @@ void
 TranzportControlProtocol::button_event_fastforward_press (bool shifted)
 {
 	if (shifted) {
-		session.goto_end();
+		goto_end ();
 	} else {
-		session.request_transport_speed (2.0f);}
+		ffwd ();
+	}
 }
 
 void
@@ -992,7 +1173,7 @@ TranzportControlProtocol::button_event_stop_press (bool shifted)
 	if (shifted) {
 		next_display_mode ();
 	} else {
-		session.request_transport_speed (0.0);
+		transport_stop ();
 	}
 }
 
@@ -1004,7 +1185,7 @@ TranzportControlProtocol::button_event_stop_release (bool shifted)
 void
 TranzportControlProtocol::button_event_play_press (bool shifted)
 {
-	session.request_transport_speed (1.0);
+	transport_play ();
 }
 
 void
@@ -1016,22 +1197,9 @@ void
 TranzportControlProtocol::button_event_record_press (bool shifted)
 {
 	if (shifted) {
-		session.save_state ("");
+		save_state ();
 	} else {
-		switch (session.record_status()) {
-		case Session::Disabled:
-			if (session.ntracks() == 0) {
-				// string txt = _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu.");
-				// MessageDialog msg (*editor, txt);
-				// msg.run ();
-				return;
-			}
-			session.maybe_enable_record ();
-			break;
-		case Session::Recording:
-		case Session::Enabled:
-			session.disable_record (true);
-		}
+		rec_enable_toggle ();
 	}
 }
 
@@ -1139,7 +1307,7 @@ TranzportControlProtocol::scrub ()
 	
 	if (dir != last_wheel_dir) {
 		/* changed direction, start over */
-		speed = 1.0f;
+		speed = 0.1f;
 	} else {
 		if (timerisset (&last_wheel_motion)) {
 			
@@ -1160,7 +1328,7 @@ TranzportControlProtocol::scrub ()
 	last_wheel_motion = now;
 	last_wheel_dir = dir;
 	
-	session.request_transport_speed (speed * dir);
+	move_at (speed * dir);
 }
 
 void
@@ -1246,33 +1414,11 @@ TranzportControlProtocol::next_wheel_mode ()
 }
 
 void
-TranzportControlProtocol::next_marker ()
-{
-	Location *location = session.locations()->first_location_after (session.transport_frame());
-
-	if (location) {
-		session.request_locate (location->start(), session.transport_rolling());
-	} else {
-		session.request_locate (session.current_end_frame());
-	}
-}
-
-void
-TranzportControlProtocol::prev_marker ()
-{
-	Location *location = session.locations()->first_location_before (session.transport_frame());
-	
-	if (location) {
-		session.request_locate (location->start(), session.transport_rolling());
-	} else {
-		session.goto_start ();
-	}
-}
-
-void
 TranzportControlProtocol::next_track ()
 {
 	uint32_t limit = session.nroutes();
+	uint32_t start = current_track_id;
+	Route* cr = current_route;
 
 	if (current_track_id == limit) {
 		current_track_id = 0;
@@ -1281,7 +1427,7 @@ TranzportControlProtocol::next_track ()
 	}
 
 	while (current_track_id < limit) {
-		if ((current_route = session.route_by_remote_id (current_track_id)) != 0) {
+		if ((cr = session.route_by_remote_id (current_track_id)) != 0) {
 			break;
 		}
 		current_track_id++;
@@ -1289,14 +1435,24 @@ TranzportControlProtocol::next_track ()
 
 	if (current_track_id == limit) {
 		current_track_id = 0;
+		while (current_track_id != start) {
+			if ((cr = session.route_by_remote_id (current_track_id)) != 0) {
+				break;
+			}
+			current_track_id++;
+		}
 	}
 
-	show_current_track ();
+	current_route = cr;
 }
 
 void
 TranzportControlProtocol::prev_track ()
 {
+	uint32_t limit = session.nroutes() - 1;
+	uint32_t start = current_track_id;
+	Route* cr = current_route;
+
 	if (current_track_id == 0) {
 		current_track_id = session.nroutes() - 1;
 	} else {
@@ -1304,17 +1460,37 @@ TranzportControlProtocol::prev_track ()
 	}
 
 	while (current_track_id >= 0) {
-		if ((current_route = session.route_by_remote_id (current_track_id)) != 0) {
+		if ((cr = session.route_by_remote_id (current_track_id)) != 0) {
 			break;
 		}
 		current_track_id--;
 	}
 
 	if (current_track_id < 0) {
-		current_track_id = 0;
+		current_track_id = limit;
+		while (current_track_id > start) {
+			if ((cr = session.route_by_remote_id (current_track_id)) != 0) {
+				break;
+			}
+			current_track_id--;
+		}
 	}
 
-	show_current_track ();
+	current_route = cr;
+}
+
+void
+TranzportControlProtocol::set_current_track (Route* r)
+{
+	TranzportRequest* req = get_request (SetCurrentTrack);
+	
+	if (req == 0) {
+		return;
+	}
+
+	req->track = r;
+	
+	send_request (req);
 }
 
 void
@@ -1390,46 +1566,38 @@ TranzportControlProtocol::print (int row, int col, const char *text)
 
 		int offset = col % 4;
 
-		{
-
-			LockMonitor lm (print_lock, __LINE__, __FILE__);
-
-			/* copy current cell contents into tmp */
-			
-			memcpy (tmp, &current_screen[row][base_col], 4);
-
-			/* overwrite with new text */
-			
-			uint32_t tocopy = min ((4U - offset), left);
-
-			memcpy (tmp+offset, text, tocopy);
-
-			uint8_t cmd[8];
-
-			/* compare with current screen */
-
-			if (memcmp (tmp, &current_screen[row][base_col], 4)) {
-
-				/* different, so update */
-				
-				memcpy (&current_screen[row][base_col], tmp, 4);
-				
-				cmd[0] = 0x00;
-				cmd[1] = 0x01;
-				cmd[2] = cell + (row * 5);
-				cmd[3] = tmp[0];
-				cmd[4] = tmp[1];
-				cmd[5] = tmp[2];
-				cmd[6] = tmp[3];
-				cmd[7] = 0x00;
-				
-				write (cmd, 500);
-			}
-			
-			text += tocopy;
-			left -= tocopy;
-			col  += tocopy;
-		}
+		/* copy current cell contents into tmp */
+		
+		memcpy (tmp, &pending_screen[row][base_col], 4);
+		
+		/* overwrite with new text */
+		
+		uint32_t tocopy = min ((4U - offset), left);
+		
+		memcpy (tmp+offset, text, tocopy);
+		
+		/* copy it back to pending */
+		
+		memcpy (&pending_screen[row][base_col], tmp, 4);
+		
+		text += tocopy;
+		left -= tocopy;
+		col  += tocopy;
 	}
 }	
 
+bool
+TranzportControlProtocol::caller_is_ui_thread ()
+{
+	return (pthread_self() == thread);
+}
+
+void
+TranzportControlProtocol::do_request (TranzportRequest* req)
+{
+	if (req->type == SetCurrentTrack) {
+		current_route = req->track;
+	} 
+
+	return;
+}

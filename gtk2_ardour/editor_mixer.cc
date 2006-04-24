@@ -36,8 +36,6 @@ Editor::editor_mixer_button_toggled ()
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 	if (act) {
 		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
-		bool yn = tact->get_active();
-		cerr << "button toggled, state = " << yn << endl;
 		show_editor_mixer (tact->get_active());
 	}
 }

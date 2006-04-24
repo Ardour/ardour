@@ -946,16 +946,16 @@ Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
 	bool reverse = false;
 	bool non_rt_required = false;
 
-	if (_transport_speed) {
-		error << _("please stop the transport before adjusting slave settings") << endmsg;
-		/* help out non-MVC friendly UI's by telling them the slave type changed */
-		 ControlChanged (SlaveType); /* EMIT SIGNAL */
-		return 0;
-	}
-
 	if (src == _slave_type) {
 		return 0;
 	} 
+
+	if (_transport_speed) {
+		error << _("please stop the transport before adjusting slave settings") << endmsg;
+		/* help out non-MVC friendly UI's by telling them the slave type changed */
+		ControlChanged (SlaveType); /* EMIT SIGNAL */
+		return 0;
+	}
 
 // 	if (src == JACK && Config->get_jack_time_master()) {
 // 		return -1;

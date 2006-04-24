@@ -275,7 +275,7 @@ StreamView::remove_rec_region (Region *r)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &StreamView::remove_rec_region), r));
 	
-	if (!Gtkmm2ext::UI::instance()->caller_is_gui_thread()) {
+	if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
 		fatal << "region deleted from non-GUI thread!" << endmsg;
 		/*NOTREACHED*/
 	} 

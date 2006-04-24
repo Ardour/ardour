@@ -245,7 +245,7 @@ class Session : public sigc::trackable, public Stateful
 	std::string dead_sound_dir () const;
 	std::string automation_dir () const;
 
-	static string suffixed_search_path (std::string suffix);
+	static string suffixed_search_path (std::string suffix, bool data);
 	static string control_protocol_path ();
 	static string template_path ();
 	static string template_dir ();

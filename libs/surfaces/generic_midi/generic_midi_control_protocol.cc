@@ -22,10 +22,10 @@ GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 }
 
 int
-GenericMidiControlProtocol::init ()
+GenericMidiControlProtocol::set_active (bool yn)
 {
 	/* start delivery/outbound thread */
-	return init_thread ();
+	return 0;
 }
 
 void
@@ -61,11 +61,5 @@ GenericMidiControlProtocol::send_route_feedback (list<Route*>& routes)
 		_port->write (buf, (int32_t) (end - buf));
 		//cerr << "MIDI feedback: wrote " << (int32_t) (end - buf) << " to midi port\n";
 	}
-}
-
-bool
-GenericMidiControlProtocol::active() const
-{
-	return _port && send();
 }
 

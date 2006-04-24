@@ -269,6 +269,11 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 	/* singleton - first object is "it" */
 	new ControlProtocolManager ();
 	ControlProtocolManager::instance().discover_control_protocols (Session::control_protocol_path());
+
+	XMLNode* node;
+	if ((node = Config->control_protocol_state()) != 0) {
+		ControlProtocolManager::instance().set_state (*node);
+	}
 	
 	BoundsChanged = Change (StartChanged|PositionChanged|LengthChanged);
 
@@ -325,11 +330,22 @@ ARDOUR::get_user_ardour_path ()
 }
 
 string
-ARDOUR::get_system_ardour_path ()
+ARDOUR::get_system_data_path ()
 {
 	string path;
 
 	path += DATA_DIR;
+	path += "/ardour2/";
+	
+	return path;
+}
+
+string
+ARDOUR::get_system_module_path ()
+{
+	string path;
+
+	path += MODULE_DIR;
 	path += "/ardour2/";
 	
 	return path;

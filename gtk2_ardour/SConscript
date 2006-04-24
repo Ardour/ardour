@@ -213,7 +213,6 @@ if env['FFT_ANALYSIS']:
 intl_files += extra_sources
 
 gtkardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
-gtkardour.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
 gtkardour.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 gtkardour.Append(CXXFLAGS="-DGLADEPATH=\\\""+final_prefix+"/share/ardour/glade\\\"")
 

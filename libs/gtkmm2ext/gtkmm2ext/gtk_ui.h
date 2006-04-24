@@ -39,6 +39,7 @@
 #include <pbd/atomic.h>
 #include <pbd/pool.h>
 #include <pbd/error.h>
+#include <pbd/receiver.h>
 #include <pbd/lockmonitor.h>
 
 using std::string;
@@ -50,8 +51,42 @@ namespace Gtkmm2ext {
 
 class TextViewer;
 
-class UI : public AbstractUI
+extern BaseUI::RequestType ErrorMessage;
+extern BaseUI::RequestType Quit;
+extern BaseUI::RequestType CallSlot;
+extern BaseUI::RequestType TouchDisplay;
+extern BaseUI::RequestType StateChange;
+extern BaseUI::RequestType SetTip;
+extern BaseUI::RequestType AddIdle;
+extern BaseUI::RequestType AddTimeout;
 
+struct UIRequest : public BaseUI::BaseRequestObject {
+     
+     /* this once used anonymous unions to merge elements
+	that are never part of the same request. that makes
+	the creation of a legal copy constructor difficult
+	because of the semantics of the slot member.
+     */
+     
+    Touchable *display;
+    const char *msg;
+    Gtk::StateType new_state;
+    int (*function)(void *);
+    Gtk::Widget *widget;
+    Transmitter::Channel chn;
+    void *arg;
+    const char *msg2;
+    sigc::slot<void> slot;
+    
+    ~UIRequest () { 
+	    if (type == ErrorMessage && msg) {
+		    /* msg was strdup()'ed */
+		    free ((char *)msg);
+	    }
+    }
+ };
+
+class UI : public Receiver, public AbstractUI<UIRequest>
 {
   public:
 	UI (string name, int *argc, char **argv[], string rcfile);
@@ -59,36 +94,29 @@ class UI : public AbstractUI
 
 	static UI *instance() { return theGtkUI; }
 
+	/* receiver interface */
+
+	void receive (Transmitter::Channel, const char *);
+
 	/* Abstract UI interfaces */
+
+	bool caller_is_ui_thread ();
+
+	/* Gtk-UI specific interfaces */
 
 	bool running ();
 	void quit    ();
 	void kill    ();
 	int  load_rcfile (string);
-	void request (RequestType); 
 	void run (Receiver &old_receiver);
-	void call_slot (sigc::slot<void>);
-	void call_slot_locked (sigc::slot<void>);
-	void touch_display (Touchable *);
-	void receive (Transmitter::Channel, const char *);
 
-	void register_thread (pthread_t, string);
-	void register_thread_with_request_count (pthread_t, string, uint32_t num_requests);
-
-	bool caller_is_gui_thread () { 
-		return pthread_equal (gui_thread, pthread_self());
-	}
-
-	/* Gtk-UI specific interfaces */
-
-	int  set_quit_context ();
-	void set_tip (Gtk::Widget *, const gchar *txt, const gchar *hlp = 0);
 	void set_state (Gtk::Widget *w, Gtk::StateType state);
-	void idle_add (int (*)(void *), void *);
-	void timeout_add (unsigned int, int (*)(void *), void *);
 	void popup_error (const char *text);
 	void flush_pending ();
 	void toggle_errors ();
+	void touch_display (Touchable *);
+	void set_tip (Gtk::Widget *w, const gchar *tip, const gchar *hlp);
+	void idle_add (int (*func)(void *), void *arg);
 
 	template<class T> static bool idle_delete (T *obj) { delete obj; return false; }
 	template<class T> static void delete_when_idle (T *obj) {
@@ -106,6 +134,8 @@ class UI : public AbstractUI
 
 	static bool just_hide_it (GdkEventAny *, Gtk::Window *);
 
+	static pthread_t the_gui_thread() { return gui_thread; }
+
   protected:
 	virtual void handle_fatal (const char *);
 	virtual void display_message (const char *prefix, gint prefix_len, 
@@ -113,58 +143,10 @@ class UI : public AbstractUI
 				      Glib::RefPtr<Gtk::TextBuffer::Tag> mtag, 
 				      const char *msg);
 
-	/* stuff to invoke member functions in another
-	   thread so that we can keep the GUI running.
-	*/
-
-	template<class UI_CLASS> struct thread_arg {
-	    UI_CLASS *ui;
-	    void (UI_CLASS::*func)(void *);
-	    void *arg;
-	};
-
-	template<class UI_CLASS> static void *start_other_thread (void *arg);
-	template<class UI_CLASS> void other_thread (void (UI_CLASS::*func)(void *), void *arg = 0);
-
   private:
-	struct Request {
-
-	    /* this once used anonymous unions to merge elements
-	       that are never part of the same request. that makes
-	       the creation of a legal copy constructor difficult
-	       because of the semantics of the slot member.
-	    */
-
-	    RequestType type;
-	    Touchable *display;
-	    const char *msg;
-	    Gtk::StateType new_state;
-	    int (*function)(void *);
-	    Gtk::Widget *widget;
-	    Transmitter::Channel chn;
-	    void *arg;
-	    const char *msg2;
-	    unsigned int timeout;
-	    sigc::slot<void> slot;
-
-	    /* this is for CallSlotLocked requests */
-
-	    pthread_mutex_t slot_lock;
-	    pthread_cond_t  slot_cond;
-
-	    Request ();
-	    ~Request () { 
-		    if (type == ErrorMessage && msg) {
-			    /* msg was strdup()'ed */
-			    free ((char *)msg);
-		    }
-	    }
-	};
-
 	static UI *theGtkUI;
 	static pthread_t gui_thread;
 	bool _active;
-	string _ui_name;
 	Gtk::Main *theMain;
 	Gtk::Tooltips *tips;
 	TextViewer *errors;
@@ -177,18 +159,6 @@ class UI : public AbstractUI
 	Glib::RefPtr<Gtk::TextBuffer::Tag> warning_ptag;
 	Glib::RefPtr<Gtk::TextBuffer::Tag> warning_mtag;
 
-	int signal_pipe[2];
-	PBD::Lock request_buffer_map_lock;
-	typedef std::map<pthread_t,RingBufferNPT<Request>* > RequestBufferMap;
-	RequestBufferMap request_buffers;
-	Request* get_request(RequestType);
-	pthread_key_t thread_request_buffer_key;
-
-	int setup_signal_pipe ();
-
-	void handle_ui_requests ();
-	void do_request (Request *);
-	void send_request (Request *);
 	static void signal_pipe_callback (void *, gint, GdkInputCondition);
 	void process_error_message (Transmitter::Channel, const char *);
 	void do_quit ();
@@ -197,37 +167,8 @@ class UI : public AbstractUI
 	bool color_selection_deleted (GdkEventAny *);
 	bool color_picked;
 
-	jmp_buf quit_context;
+	void do_request (UIRequest*);
 };
-
-template<class UI_CLASS> void *
-UI::start_other_thread (void *arg)
-
-{
-	thread_arg<UI_CLASS> *ta = (thread_arg<UI_CLASS> *) arg;
-	(ta->ui->*ta->func)(ta->arg);
-	delete ta;
-	return 0;
-}
-
-template<class UI_CLASS> void
-UI::other_thread (void (UI_CLASS::*func)(void *), void *arg)
-
-{
-	pthread_t thread_id;
-	thread_arg<UI_CLASS> *ta = new thread_arg<UI_CLASS>;
-
-	ta->ui = dynamic_cast<UI_CLASS *> (this);
-	if (ta->ui == 0) {
-		error << "UI::other thread called illegally"
-		      << endmsg;
-		return;
-	}
-	ta->func = func;
-	ta->arg = arg;
-	pthread_create (&thread_id, 0, start_other_thread, ta);
-}
-
 
 } /* namespace */
 

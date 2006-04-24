@@ -60,6 +60,8 @@ class Configuration : public Stateful
 	int set_state (const XMLNode&);
 	XMLNode& get_state (void);
 
+	XMLNode* control_protocol_state () { return _control_protocol_state; }
+
         /* define accessor methods */
 
 #undef  CONFIG_VARIABLE
@@ -88,6 +90,7 @@ class Configuration : public Stateful
 #undef  CONFIG_VARIABLE_SPECIAL	
 
 	bool     user_configuration;
+	XMLNode* _control_protocol_state;
 
 	XMLNode& state (bool user_only);
 };

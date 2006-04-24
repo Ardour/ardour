@@ -2293,7 +2293,7 @@ Session::template_dir ()
 }
 
 string
-Session::suffixed_search_path (string suffix)
+Session::suffixed_search_path (string suffix, bool data)
 {
 	string path;
 
@@ -2301,7 +2301,12 @@ Session::suffixed_search_path (string suffix)
 	if (path[path.length()-1] != ':') {
 		path += ':';
 	}
-	path += get_system_ardour_path();
+
+	if (data) {
+		path += get_system_data_path();
+	} else {
+		path += get_system_module_path();
+	}
 
 	vector<string> split_path;
 	
@@ -2324,13 +2329,13 @@ Session::suffixed_search_path (string suffix)
 string
 Session::template_path ()
 {
-	return suffixed_search_path (X_("templates"));
+	return suffixed_search_path (X_("templates"), true);
 }
 
 string
 Session::control_protocol_path ()
 {
-	return suffixed_search_path (X_("surfaces"));
+	return suffixed_search_path (X_("surfaces"), false);
 }
 
 int

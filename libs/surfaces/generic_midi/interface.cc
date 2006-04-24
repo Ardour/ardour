@@ -9,7 +9,7 @@ new_generic_midi_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 {
 	GenericMidiControlProtocol* gmcp =  new GenericMidiControlProtocol (*s);
 	
-	if (gmcp->init ()) {
+	if (gmcp->set_active (true)) {
 		delete gmcp;
 		return 0;
 	}

@@ -8,6 +8,8 @@
 
 #include <pbd/lockmonitor.h>
 
+#include <ardour/stateful.h>
+
 namespace ARDOUR {
 
 class ControlProtocol;
@@ -19,9 +21,10 @@ struct ControlProtocolInfo {
     ControlProtocol* protocol;
     std::string name;
     std::string path;
+    bool requested;
 };
 
- class ControlProtocolManager : public sigc::trackable
+ class ControlProtocolManager : public sigc::trackable, public Stateful
 {
   public:
 	ControlProtocolManager ();
@@ -38,6 +41,11 @@ struct ControlProtocolInfo {
 
 	std::list<ControlProtocolInfo*> control_protocol_info;
 
+	static const std::string state_node_name;
+
+	int set_state (const XMLNode&);
+	XMLNode& get_state (void);
+
   private:
 	static ControlProtocolManager* _instance;
 
@@ -49,6 +57,7 @@ struct ControlProtocolInfo {
 
 	int control_protocol_discover (std::string path);
 	ControlProtocolDescriptor* get_descriptor (std::string path);
+	ControlProtocolInfo* cpi_by_name (std::string);
 };
 
 } // namespace

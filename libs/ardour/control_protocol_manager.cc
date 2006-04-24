@@ -15,6 +15,7 @@ using namespace std;
 #include "i18n.h"
 
 ControlProtocolManager* ControlProtocolManager::_instance = 0;
+const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
 
 ControlProtocolManager::ControlProtocolManager ()
 {
@@ -42,6 +43,13 @@ ControlProtocolManager::set_session (Session& s)
 {
 	_session = &s;
 	_session->going_away.connect (mem_fun (*this, &ControlProtocolManager::drop_session));
+
+	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
+		if ((*i)->requested) {
+			instantiate (**i);
+			(*i)->requested = false;
+		}
+	}
 }
 
 void
@@ -122,6 +130,8 @@ ControlProtocolManager::discover_control_protocols (string path)
 	vector<string *> *found;
 	PathScanner scanner;
 
+	cerr << "looking for control protocols in " << path << endl;
+
 	found = scanner (path, protocol_filter, 0, false, true);
 
 	for (vector<string*>::iterator i = found->begin(); i != found->end(); ++i) {
@@ -145,8 +155,11 @@ ControlProtocolManager::control_protocol_discover (string path)
 		info->name = descriptor->name;
 		info->path = path;
 		info->protocol = 0;
+		info->requested = false;
 
 		control_protocol_info.push_back (info);
+
+		cerr << "discovered control surface protocol \"" << info->name << '"' << endl;
 
 		dlclose (descriptor->module);
 
@@ -194,4 +207,60 @@ ControlProtocolManager::foreach_known_protocol (sigc::slot<void,const ControlPro
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 		method (*i);
 	}
+}
+
+ControlProtocolInfo*
+ControlProtocolManager::cpi_by_name (string name)
+{
+	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
+		if (name == (*i)->name) {
+			return *i;
+		}
+	}
+	return 0;
+}
+
+int
+ControlProtocolManager::set_state (const XMLNode& node)
+{
+	XMLNodeList clist;
+	XMLNodeConstIterator citer;
+	XMLProperty* prop;
+
+	clist = node.children();
+
+	for (citer = clist.begin(); citer != clist.end(); ++citer) {
+		if ((*citer)->name() == X_("Protocol")) {
+			if ((prop = (*citer)->property (X_("active"))) != 0) {
+				if (prop->value() == X_("yes")) {
+					if ((prop = (*citer)->property (X_("name"))) != 0) {
+						ControlProtocolInfo* cpi = cpi_by_name (prop->value());
+						if (cpi) {
+							if (_session) {
+								instantiate (*cpi);
+							} else {
+								cpi->requested = true;
+							}
+						}
+					}
+				}
+			}    
+		}
+	}
+}
+
+XMLNode&
+ControlProtocolManager::get_state (void)
+{
+	XMLNode* root = new XMLNode (state_node_name);
+	LockMonitor lm (protocols_lock, __LINE__, __FILE__);
+
+	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
+		XMLNode* child = new XMLNode (X_("Protocol"));
+		child->add_property (X_("name"), (*i)->name);
+		child->add_property (X_("active"), (*i)->protocol ? "yes" : "no");
+		root->add_child_nocopy (*child);
+	}
+
+	return *root;
 }

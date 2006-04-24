@@ -446,6 +446,14 @@ ARDOUR_UI::install_actions ()
 void
 ARDOUR_UI::toggle_control_protocol (ControlProtocolInfo* cpi)
 {
+	if (!session) {
+		/* this happens when we build the menu bar when control protocol support
+		   has been used in the past for some given protocol - the item needs
+		   to be made active, but there is no session yet.
+		*/
+		return;
+	}
+
 	if (cpi->protocol == 0) {
 		ControlProtocolManager::instance().instantiate (*cpi);
 	} else {
@@ -465,13 +473,19 @@ ARDOUR_UI::build_control_surface_menu ()
 	for (i = ControlProtocolManager::instance().control_protocol_info.begin(); i != ControlProtocolManager::instance().control_protocol_info.end(); ++i) {
 
 		string action_name = "Toggle";
-		action_name += (*i)->name;
+		action_name += legalize_for_path ((*i)->name);
 		action_name += "Surface";
 		
 		string action_label = (*i)->name;
+		
+		Glib::RefPtr<Action> act = ActionManager::register_toggle_action (editor->editor_actions, action_name.c_str(), action_label.c_str(),
+										  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol), *i)));
 
-		ActionManager::register_toggle_action (editor->editor_actions, action_name.c_str(), action_label.c_str(),
-						       (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol), *i)));
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+
+		if ((*i)->protocol || (*i)->requested) {
+			tact->set_active ();
+		}
 
 		ui += "<menuitem action='";
 		ui += action_name;

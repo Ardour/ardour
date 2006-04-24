@@ -9,7 +9,7 @@ new_tranzport_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 {
 	TranzportControlProtocol* tcp = new TranzportControlProtocol (*s);
 
-	if (tcp->init ()) {
+	if (tcp->set_active (true)) {
 		delete tcp;
 		return 0;
 	}

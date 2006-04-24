@@ -2283,18 +2283,10 @@ Editor::set_state (const XMLNode& node)
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 			bool yn = (prop->value() == X_("yes"));
 
-			cerr << "at load time, show-editor-mixer = " << prop->value() << endl;
-
 			/* do it twice to force the change */
 			
 			tact->set_active (!yn);
-			
-			cerr << "now reset to " << yn << endl;
-
 			tact->set_active (yn);
-
-			cerr << "should be done\n";
-
 		}
 	}
 

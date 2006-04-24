@@ -10,18 +10,29 @@
 #include <ardour/control_protocol.h>
 #include <ardour/types.h>
 
-namespace ARDOUR {
+#include <pbd/abstract_ui.h>
 
-class TranzportControlProtocol : public ControlProtocol {
+extern BaseUI::RequestType LEDChange;
+extern BaseUI::RequestType Print;
+extern BaseUI::RequestType SetCurrentTrack;
+
+struct TranzportRequest : public BaseUI::BaseRequestObject {
+    int led;
+    int row;
+    int col;
+    char* text;
+    ARDOUR::Route* track;
+};
+
+class TranzportControlProtocol : public ARDOUR::ControlProtocol, public AbstractUI<TranzportRequest> 
+{
   public:
-	TranzportControlProtocol (Session&);
+	TranzportControlProtocol (ARDOUR::Session&);
 	virtual ~TranzportControlProtocol();
 
-	int init ();
-	bool active() const;
+	int set_active (bool yn);
 
-	void send_route_feedback (std::list<Route*>&);
-	void send_global_feedback ();
+	bool caller_is_ui_thread();
 
   private:
 	static const int VENDORID = 0x165b;
@@ -89,29 +100,32 @@ class TranzportControlProtocol : public ControlProtocol {
 	uint8_t        _datawheel;
 	uint8_t        _device_status;
 	usb_dev_handle* udev;
-	Route*          current_route;
+	ARDOUR::Route*  current_route;
 	uint32_t        current_track_id;
-	char            current_screen[2][20];
-	bool            lights[7];
 	WheelMode       wheel_mode;
 	WheelShiftMode  wheel_shift_mode;
-	struct timeval  last_wheel_motion;
-	int             last_wheel_dir;
 	DisplayMode     display_mode;
-	DisplayMode     requested_display_mode;
-	uint32_t        last_meter_fill;
 
-	std::vector<sigc::connection> track_connections;
+	void do_request (TranzportRequest*);
+	
+	PBD::Lock update_lock;
+	char current_screen[2][20];
+	char pending_screen[2][20];
+	bool lights[7];
+	bool pending_lights[7];
 
-	bool     last_negative;
-	uint32_t last_hrs;
-	uint32_t last_mins;
-	uint32_t last_secs;
-	uint32_t last_frames;
+	bool           last_negative;
+	uint32_t       last_hrs;
+	uint32_t       last_mins;
+	uint32_t       last_secs;
+	uint32_t       last_frames;
 	jack_nframes_t last_where;
+	ARDOUR::gain_t last_track_gain;
+	uint32_t       last_meter_fill;
+	struct timeval last_wheel_motion;
+	int            last_wheel_dir;
 
-	PBD::Lock write_lock;
-	PBD::Lock print_lock;
+	PBD::Lock io_lock;
 
 	int open ();
 	int read (uint32_t timeout_override = 0);
@@ -128,20 +142,18 @@ class TranzportControlProtocol : public ControlProtocol {
 
 	void enter_big_meter_mode ();
 	void enter_normal_display_mode ();
+
 	void next_display_mode ();
 
+	void normal_update ();
+
 	void show_current_track ();
+	void show_track_gain ();
 	void show_transport_time ();
 	void show_wheel_mode ();
 	void show_gain ();
 	void show_pan ();
 	void show_meter ();
-
-	void track_solo_changed (void*);
-	void track_rec_changed (void*);
-	void track_mute_changed (void*);
-	void track_gain_changed (void*);
-	void record_status_changed ();
 
 	void datawheel ();
 	void scrub ();
@@ -151,10 +163,9 @@ class TranzportControlProtocol : public ControlProtocol {
 	void next_wheel_mode ();
 	void next_wheel_shift_mode ();
 
+	void set_current_track (ARDOUR::Route*);
 	void next_track ();
 	void prev_track ();
-	void next_marker ();
-	void prev_marker ();
 	void step_gain_up ();
 	void step_gain_down ();
 	void step_pan_right ();
@@ -203,8 +214,10 @@ class TranzportControlProtocol : public ControlProtocol {
 	void button_event_play_release (bool shifted);
 	void button_event_record_press (bool shifted);
 	void button_event_record_release (bool shifted);
+
+	int process (uint8_t *);
+	int update_state();
 };
 
-} // namespace
 
 #endif // ardour_tranzport_control_protocol_h

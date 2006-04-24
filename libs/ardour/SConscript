@@ -29,6 +29,7 @@ audioregion.cc
 auditioner.cc
 automation.cc
 automation_event.cc
+basic_ui.cc
 configuration.cc
 connection.cc
 control_protocol.cc
@@ -99,6 +100,7 @@ if ardour['VST']:
 
 ardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 ardour.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
+ardour.Append(CXXFLAGS="-DMODULE_DIR=\\\""+final_prefix+"/lib\\\"")
 ardour.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
 ardour.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 
