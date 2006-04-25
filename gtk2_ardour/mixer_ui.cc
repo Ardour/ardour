@@ -23,7 +23,9 @@
 
 #include <gtkmm/accelmap.h>
 
+#include <pbd/convert.h>
 #include <pbd/lockmonitor.h>
+
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
@@ -52,6 +54,8 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace sigc;
 using namespace std;
+
+using PBD::atoi;
 
 Mixer_UI::Mixer_UI (AudioEngine& eng)
 	: Window (Gtk::WINDOW_TOPLEVEL),

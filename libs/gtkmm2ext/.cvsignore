@@ -3,3 +3,5 @@ libgtkmmext.spec
 version.cc
 *.mo
 *.pot
+*.os
+*.dylib

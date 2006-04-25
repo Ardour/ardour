@@ -168,6 +168,7 @@ if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Core
 
 if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h'):
     ardour.Append(CXXFLAGS="-DHAVE_COREAUDIO")    
+    ardour.Append(LINKFLAGS="-framework AudioToolbox")
     extra_sources += coreaudio_files
 
 ardour = conf.Finish ()
@@ -199,26 +200,15 @@ env['BUILDERS']['SharedAsmObject'] = Builder (action = '$CXX -c -fPIC $SOURCE -o
 					      src_suffix = '.s',
 					      single_source = 1)
 
-if env['DEVBUILD'] == 1:
-	if env['FPU_OPTIMIZATION']:
-		if env['DIST_TARGET'] == "i386":
-			arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
-		if env['DIST_TARGET'] == "i686":
-			arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
-		if env['DIST_TARGET'] == "x86_64":
-			arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
+if env['FPU_OPTIMIZATION']:
+	if env['DIST_TARGET'] == "i386":
+		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+	if env['DIST_TARGET'] == "i686":
+		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+	if env['DIST_TARGET'] == "x86_64":
+		arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
 			
-	libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
-else:
-	if env['FPU_OPTIMIZATION']:
-		if env['DIST_TARGET'] == "i386":
-			arch_specific_objects = env.StaticObject(target='sse_functions',source='sse_functions.s')
-		if env['DIST_TARGET'] == "i686":
-			arch_specific_objects = env.StaticObject(target='sse_functions',source='sse_functions.s')
-		if env['DIST_TARGET'] == "x86_64":
-			arch_specific_objects = env.StaticObject(target='sse_functions_64bit',source='sse_functions_64bit.s')
-
-	libardour = ardour.StaticLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
+libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
 
 Default(libardour)
 

@@ -28,7 +28,6 @@ opts.AddOptions(
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
-    BoolOption('DEVBUILD', 'Use shared libardour (developers only)', 0),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('VST', 'Compile with support for VST', 0),
@@ -409,9 +408,9 @@ libraries['usb'] = LibraryInfo ()
 
 conf = Configure (libraries['usb'])
 if conf.CheckLib ('usb', 'usb_interrupt_write'):
-    have_libusb = 1
+    have_libusb = True
 else:
-    have_libusb = 0
+    have_libusb = False
     
 libraries['usb'] = conf.Finish ()
 
@@ -512,7 +511,7 @@ else:
     ]
 
     subdirs = [
-#	'libs/cassowary',
+#	    'libs/cassowary',
         'libs/sigc++2',
         'libs/pbd3',
         'libs/midi++2',
@@ -539,7 +538,6 @@ if env['SURFACES']:
     if have_libusb:
         surface_subdirs += [ 'libs/surfaces/tranzport' ]
     
-
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
 

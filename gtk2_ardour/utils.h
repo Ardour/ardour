@@ -52,12 +52,8 @@ slider_position_to_gain (double pos)
 	return pow (2.0,(sqrt(sqrt(sqrt(pos)))*198.0-192.0)/6.0);
 }
 
-std::string short_version (std::string, std::string::size_type target_length);
 Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width);
 
-int    atoi (const std::string&);
-double atof (const std::string&);
-void   url_decode (std::string&);
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void   allow_keyboard_focus (bool);
 
@@ -82,6 +78,5 @@ bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
 Glib::RefPtr<Gdk::Pixbuf> get_xpm(std::string);
 static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;
 const char* const *get_xpm_data (std::string path);
-std::string length2string (const int32_t frames, const float sample_rate);
 
 #endif /* __ardour_gtk_utils_h__ */

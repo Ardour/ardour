@@ -22,12 +22,13 @@
 #include <unistd.h>
 #include <utility>
 #include <sys/stat.h>
-
 #include <fstream>
 
 #include <samplerate.h>
-#include <pbd/xml++.h>
+
+#include <pbd/convert.h>
 #include <pbd/dirname.h>
+#include <pbd/xml++.h>
 
 #include <gtkmm2ext/utils.h>
 #include <ardour/export.h>
@@ -48,10 +49,11 @@
 #define FRAME_NAME "BaseFrame"
 
 using namespace std;
-
 using namespace ARDOUR;
 using namespace sigc;
 using namespace Gtk;
+
+using PBD::internationalize;
 
 static const gchar *sample_rates[] = {
 	N_("22.05kHz"),

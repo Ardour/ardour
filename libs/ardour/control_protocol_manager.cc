@@ -231,22 +231,22 @@ ControlProtocolManager::set_state (const XMLNode& node)
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
 		if ((*citer)->name() == X_("Protocol")) {
-			if ((prop = (*citer)->property (X_("active"))) != 0) {
-				if (prop->value() == X_("yes")) {
-					if ((prop = (*citer)->property (X_("name"))) != 0) {
-						ControlProtocolInfo* cpi = cpi_by_name (prop->value());
-						if (cpi) {
-							if (_session) {
-								instantiate (*cpi);
-							} else {
-								cpi->requested = true;
-							}
+			prop = (*citer)->property (X_("active"));
+			if (prop && prop->value() == X_("yes")) {
+				if ((prop = (*citer)->property (X_("name"))) != 0) {
+					ControlProtocolInfo* cpi = cpi_by_name (prop->value());
+					if (cpi) {
+						if (_session) {
+							instantiate (*cpi);
+						} else {
+							cpi->requested = true;
 						}
 					}
 				}
-			}    
-		}
+			}
+		}    
 	}
+	return 0;
 }
 
 XMLNode&

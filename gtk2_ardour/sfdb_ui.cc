@@ -26,6 +26,7 @@
 #include <gtkmm/stock.h>
 
 #include <pbd/basename.h>
+#include <pbd/convert.h>
 
 #include <gtkmm2ext/utils.h>
 
@@ -43,8 +44,6 @@
 
 using namespace ARDOUR;
 using namespace std;
-
-string length2string (const int32_t frames, const float sample_rate);
 
 SoundFileBox::SoundFileBox ()
 	:
@@ -129,7 +128,7 @@ SoundFileBox::setup_labels (string filename)
 	}
 
 	length.set_alignment (0.0f, 0.0f);
-	length.set_text (string_compose("Length: %1", length2string(sf_info.length, sf_info.samplerate)));
+	length.set_text (string_compose("Length: %1", PBD::length2string(sf_info.length, sf_info.samplerate)));
 
 	format.set_alignment (0.0f, 0.0f);
 	format.set_text (sf_info.format_name);
@@ -334,7 +333,7 @@ SoundFileOmega::SoundFileOmega (string title)
 	  split_check (_("Split Channels"))
 {
 	if (mode_strings.empty()) {
-		mode_strings = internationalize (import_mode_strings);
+		mode_strings = PBD::internationalize (import_mode_strings);
 	}
 
 	ARDOUR_UI::instance()->tooltips().set_tip(split_check, 

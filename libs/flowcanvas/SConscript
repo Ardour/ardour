@@ -35,7 +35,7 @@ src/Module.cpp
 src/Port.cpp
 """)
 
-libflowcanvas = flowcanvas.StaticLibrary('flowcanvas', flowcanvas_files)
+libflowcanvas = flowcanvas.SharedLibrary('flowcanvas', flowcanvas_files)
 
 Default(libflowcanvas)
 

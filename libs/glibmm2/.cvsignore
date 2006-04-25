@@ -9,3 +9,5 @@ glibmm-2.4.pc
 glibmmconfig.h
 libtool
 stamp-h1
+*.os
+*.dylib

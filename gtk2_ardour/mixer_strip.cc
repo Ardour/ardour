@@ -19,9 +19,10 @@
 */
 
 #include <cmath>
-#include <glib.h>
 
 #include <sigc++/bind.h>
+
+#include <pbd/convert.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -1318,7 +1319,7 @@ MixerStrip::name_changed (void *src)
 		RouteUI::name_changed (src);
 		break;
 	case Narrow:
-		name_label.set_text (short_version (_route.name(), 5));
+		name_label.set_text (PBD::short_version (_route.name(), 5));
 		break;
 	}
 }

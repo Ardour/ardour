@@ -198,7 +198,6 @@ PluginManager::add_presets(string domain)
 	vector_delete (presets);
 }
 
-
 void
 PluginManager::add_lrdf_data (const string &path)
 {
@@ -341,6 +340,9 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::T
 		plugs = &mgr->vst_plugin_info();
 		unique_id = 0; // VST plugins don't have a unique id.
 		break;
+	case PluginInfo::AudioUnit:
+	default:
+		return 0;
 	}
 
 	for (i = plugs->begin(); i != plugs->end(); ++i) {

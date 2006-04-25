@@ -8,7 +8,7 @@ sigc2_files = glob.glob('sigc++/*.cc') + glob.glob('sigc++/functors/*.cc') + glo
 Import('env')
 sigc2 = env.Copy()
 
-libsigc2 = sigc2.StaticLibrary('sigc++2', sigc2_files)
+libsigc2 = sigc2.SharedLibrary('sigc++2', sigc2_files)
 
 if os.path.exists ('CVS'):
     sigc2_configure_script = sigc2.Command ('configure', 'configure.ac', 'cd libs/sigc++2; ./autogen.sh; cd -', ENV=os.environ)

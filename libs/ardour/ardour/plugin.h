@@ -47,6 +47,7 @@ class Session;
 class PluginInfo {
   public:
 	enum Type {
+		AudioUnit,
 		LADSPA,
 		VST
 	};

@@ -18,6 +18,8 @@
     $Id$
 */
 
+#include <pbd/convert.h>
+
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/configuration.h>
@@ -380,7 +382,7 @@ ARDOUR_UI::mtc_port_changed ()
 			0
 		};
 		
-		positional_sync_strings = internationalize (psync_strings);
+		positional_sync_strings = PBD::internationalize (psync_strings);
 		
 	} else {
 		const gchar *psync_strings[] = {
@@ -388,7 +390,7 @@ ARDOUR_UI::mtc_port_changed ()
 			N_("JACK"),
 			0
 		};
-		positional_sync_strings = internationalize (psync_strings);
+		positional_sync_strings = PBD::internationalize (psync_strings);
 	}
 	
 	set_popdown_strings (sync_option_combo, positional_sync_strings);

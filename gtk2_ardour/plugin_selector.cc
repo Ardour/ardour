@@ -168,7 +168,6 @@ PluginSelector::set_session (Session* s)
 void
 PluginSelector::_input_refiller (void *arg)
 {
-
 	((PluginSelector *) arg)->input_refiller ();
 }
 

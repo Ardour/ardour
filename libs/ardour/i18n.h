@@ -7,8 +7,6 @@
 #include <vector>
 #include <string>
 
-std::vector<std::string> internationalize (const char **);
-
 #define _(Text)  dgettext (PACKAGE,Text)
 #define N_(Text) gettext_noop (Text)
 #define X_(Text) Text

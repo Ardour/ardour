@@ -17,10 +17,7 @@ Import('env')
 st = env.Copy()
 st.Append(CCFLAGS="-DHAVE_CONFIG_H -D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 
-if env['DEVBUILD']:
-	libst = st.SharedLibrary('soundtouch', soundtouch_files)
-else:
-	libst = st.StaticLibrary('soundtouch', soundtouch_files)
+libst = st.SharedLibrary('soundtouch', soundtouch_files)
 
 Default(libst)
 

@@ -26,6 +26,7 @@
 
 #include <sigc++/bind.h>
 
+#include <pbd/convert.h>
 #include <pbd/error.h>
 
 #include <gtkmm/image.h>
@@ -86,6 +87,8 @@ using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
+
+using PBD::internationalize;
 
 const double Editor::timebar_height = 15.0;
 

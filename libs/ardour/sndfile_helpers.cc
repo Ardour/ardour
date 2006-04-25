@@ -1,6 +1,8 @@
 #include <map>
 #include <vector>
 
+#include <pbd/convert.h>
+
 #include <sndfile.h>
 #include <ardour/sndfile_helpers.h>
 
@@ -108,7 +110,7 @@ sndfile_file_ending_from_string (string str)
 	static vector<string> file_endings;
 
 	if (file_endings.empty()) {
-		file_endings = internationalize((const char **) sndfile_file_endings_strings);
+		file_endings = PBD::internationalize((const char **) sndfile_file_endings_strings);
 	}
 
 	for (int n = 0; sndfile_header_formats_strings[n]; ++n) {

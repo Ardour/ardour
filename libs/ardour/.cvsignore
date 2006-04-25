@@ -5,3 +5,4 @@ version.cc
 *.os
 *.mo
 *.pot
+*.dylib

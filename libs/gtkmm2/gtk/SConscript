@@ -1,3 +1,5 @@
+# -*- python -*-
+
 import glob
 
 gtkmm2_files = glob.glob('gtkmm/*.cc')
@@ -6,7 +8,7 @@ Import('env libraries')
 gtkmm2 = env.Copy()
 gtkmm2.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'], libraries['pangomm'], libraries['atkmm'], libraries['gdkmm2'] ])
 
-libgtkmm2 = gtkmm2.StaticLibrary('gtkmm2', gtkmm2_files)
+libgtkmm2 = gtkmm2.SharedLibrary('gtkmm2', gtkmm2_files)
 Default(libgtkmm2)
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],

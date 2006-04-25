@@ -4,3 +4,4 @@ ardour.rc
 config.log
 scache.conf
 .gdb_history
+docs/

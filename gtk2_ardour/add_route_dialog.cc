@@ -24,6 +24,7 @@
 #include <sigc++/bind.h>
 #include <gtkmm/stock.h>
 #include <pbd/error.h>
+#include <pbd/convert.h>
 #include <gtkmm2ext/utils.h>
 
 #include "utils.h"
@@ -64,11 +65,11 @@ AddRouteDialog::AddRouteDialog ()
 	  routes_spinner (routes_adjustment)
 {
 	if (channel_combo_strings.empty()) {
-		channel_combo_strings = internationalize (channel_setup_names);
+		channel_combo_strings = PBD::internationalize (channel_setup_names);
 	}
 
 	if (track_mode_strings.empty()) {
-		track_mode_strings = internationalize (track_mode_names);
+		track_mode_strings = PBD::internationalize (track_mode_names);
 	}
 
 	set_name ("AddRouteDialog");
@@ -195,10 +196,10 @@ AddRouteDialog::channels ()
 		return 1;
 	} else if (str == _("Stereo")) {
 		return 2;
-	} else if ((chns = atoi (str)) != 0) {
+	} else if ((chns = PBD::atoi (str)) != 0) {
 		return chns;
-	} else {
-		return 0;
-	}
+	} 
+
+	return 0;
 }
 

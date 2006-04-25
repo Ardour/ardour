@@ -35,6 +35,8 @@ coremidi_midiport.cc
 if env['SYSMIDI'] == 'CoreMIDI':
    sysdep_src = [ 'coremidi_midiport.cc' ]
    midi2.Append (CCFLAGS="-DWITH_COREMIDI")
+   midi2.Append (LINKFLAGS="-framework CoreMIDI")
+   midi2.Append (LINKFLAGS="-framework CoreFoundation")
 else:
    sysdep_src = [ 'alsa_sequencer_midiport.cc' ]
    midi2.Append (CCFLAGS="-DWITH_ALSA")
@@ -44,10 +46,7 @@ midi2.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 
 midi2.VersionBuild(['version.cc','midi++/version.h'], 'SConscript')
 
-if env['DEVBUILD']:
-	libmidi2 = midi2.SharedLibrary('midi++', [ sources, sysdep_src ])
-else:
-	libmidi2 = midi2.StaticLibrary('midi++', [ sources, sysdep_src ])
+libmidi2 = midi2.SharedLibrary('midi++', [ sources, sysdep_src ])
 
 Default(libmidi2)
 

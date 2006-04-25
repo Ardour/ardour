@@ -18,6 +18,7 @@ pbd3.Append(POTFILE=domain + '.pot')
 pbd3_files = Split("""
 basename.cc
 base_ui.cc
+convert.cc
 dirname.cc
 dmalloc.cc
 mountpoint.cc
@@ -45,13 +46,9 @@ pbd3 = conf.Finish()
 
 pbd3.Merge ([ libraries['sigc2'], libraries['xml'] ])
 
-
 pbd3.VersionBuild(['version.cc','pbd/version.h'], 'SConscript')
 
-if env['DEVBUILD']:
-	libpbd3 = pbd3.SharedLibrary('pbd', pbd3_files)
-else:
-	libpbd3 = pbd3.StaticLibrary('pbd', pbd3_files)
+libpbd3 = pbd3.SharedLibrary('pbd', pbd3_files)
 
 Default(libpbd3)
 

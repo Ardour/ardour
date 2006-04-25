@@ -1,3 +1,5 @@
+# -*- python -*-
+
 import glob
 import os
 
@@ -12,7 +14,7 @@ glibmm2.Append(CXXFLAGS='-DHAVE_CONFIG_H')
 #glibmm2.Append(CXXFLAGS='-DG_DISABLE_DEPRECATED')
 glibmm2.Append(CXXFLAGS='-DG_LOG_DOMAIN=\\\"glibmm\\\"')
 
-libglibmm2 = glibmm2.StaticLibrary('glibmm2', glibmm2_files)
+libglibmm2 = glibmm2.SharedLibrary('glibmm2', glibmm2_files)
 
 if os.path.exists ('CVS'):
    glibmm2_configure_script = glibmm2.Command ('configure', 'configure.ac', 'cd libs/glibmm2; ./autogen.sh; cd -', ENV=os.environ)

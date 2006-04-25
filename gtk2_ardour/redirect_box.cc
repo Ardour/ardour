@@ -19,9 +19,10 @@
 */
 
 #include <cmath>
-#include <glib.h>
 
 #include <sigc++/bind.h>
+
+#include <pbd/convert.h>
 
 #include <gtkmm/messagedialog.h>
 
@@ -539,7 +540,7 @@ RedirectBox::redirect_name (Redirect& redirect)
 			name_display += send->name().substr (lbracket+1, lbracket-rbracket-1);
 			break;
 		case Narrow:
-			name_display += short_version (send->name().substr (lbracket+1, lbracket-rbracket-1), 4);
+			name_display += PBD::short_version (send->name().substr (lbracket+1, lbracket-rbracket-1), 4);
 			break;
 		}
 
@@ -550,7 +551,7 @@ RedirectBox::redirect_name (Redirect& redirect)
 			name_display += redirect.name();
 			break;
 		case Narrow:
-			name_display += short_version (redirect.name(), 5);
+			name_display += PBD::short_version (redirect.name(), 5);
 			break;
 		}
 

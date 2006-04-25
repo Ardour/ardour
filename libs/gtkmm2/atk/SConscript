@@ -1,3 +1,5 @@
+# -*- python -*-
+
 import glob
 
 atkmm_files = glob.glob('atkmm/*.cc')
@@ -6,7 +8,7 @@ Import('env libraries')
 atkmm = env.Copy()
 atkmm.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'] ])
 
-libatkmm = atkmm.StaticLibrary('atkmm', atkmm_files)
+libatkmm = atkmm.SharedLibrary('atkmm', atkmm_files)
 Default(libatkmm)
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],

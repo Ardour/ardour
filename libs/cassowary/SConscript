@@ -28,5 +28,5 @@ cassowary.Append(CCFLAGS="-D_REENTRANT")
 cassowary.CXXFile(target = ['ClReader.cc', 'ClReader.cc.h'], source = 'ClReader.yy')
 cassowary.CXXFile(target = 'ClReader-lex.cc', source = 'ClReader.ll')
 
-libcassowary = cassowary.StaticLibrary('cassowary', cassowary_files)
+libcassowary = cassowary.SharedLibrary('cassowary', cassowary_files)
 Default(libcassowary)

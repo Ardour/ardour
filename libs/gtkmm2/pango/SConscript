@@ -1,3 +1,5 @@
+# -*- python -*-
+
 import glob
 import os
 
@@ -7,7 +9,7 @@ Import('env libraries')
 pangomm = env.Copy()
 pangomm.Merge([libraries['glibmm2'], libraries['pango'], libraries['sigc2']])
 
-libpangomm = pangomm.StaticLibrary('pangomm', pangomm_files)
+libpangomm = pangomm.SharedLibrary('pangomm', pangomm_files)
 Default(libpangomm)
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],

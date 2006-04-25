@@ -44,70 +44,6 @@ using namespace Gtk;
 using namespace sigc;
 using namespace Glib;
 
-string
-short_version (string orig, string::size_type target_length)
-{
-	/* this tries to create a recognizable abbreviation
-	   of "orig" by removing characters until we meet
-	   a certain target length.
-
-	   note that we deliberately leave digits in the result
-	   without modification.
-	*/
-
-
-	string::size_type pos;
-
-	/* remove white-space and punctuation, starting at end */
-
-	while (orig.length() > target_length) {
-		if ((pos = orig.find_last_of (_("\"\n\t ,<.>/?:;'[{}]~`!@#$%^&*()_-+="))) == string::npos) {
-			break;
-		}
-		orig.replace (pos, 1, "");
-	}
-
-	/* remove lower-case vowels, starting at end */
-
-	while (orig.length() > target_length) {
-		if ((pos = orig.find_last_of (_("aeiou"))) == string::npos) {
-			break;
-		}
-		orig.replace (pos, 1, "");
-	}
-
-	/* remove upper-case vowels, starting at end */
-
-	while (orig.length() > target_length) {
-		if ((pos = orig.find_last_of (_("AEIOU"))) == string::npos) {
-			break;
-		}
-		orig.replace (pos, 1, "");
-	}
-
-	/* remove lower-case consonants, starting at end */
-
-	while (orig.length() > target_length) {
-		if ((pos = orig.find_last_of (_("bcdfghjklmnpqrtvwxyz"))) == string::npos) {
-			break;
-		}
-		orig.replace (pos, 1, "");
-	}
-
-	/* remove upper-case consonants, starting at end */
-
-	while (orig.length() > target_length) {
-		if ((pos = orig.find_last_of (_("BCDFGHJKLMNPQRTVWXYZ"))) == string::npos) {
-			break;
-		}
-		orig.replace (pos, 1, "");
-	}
-
-	/* whatever the length is now, use it */
-	
-	return orig;
-}
-
 ustring
 fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width)
 {
@@ -139,30 +75,6 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 	}
 
 	return ustr;
-}
-
-int
-atoi (const string& s)
-{
-	return atoi (s.c_str());
-}
-
-double
-atof (const string& s)
-{
-	return atof (s.c_str());
-}
-
-vector<string>
-internationalize (const char **array)
-{
-	vector<string> v;
-
-	for (uint32_t i = 0; array[i]; ++i) {
-		v.push_back (_(array[i]));
-	}
-
-	return v;
 }
 
 gint
@@ -295,79 +207,6 @@ get_canvas_points (string who, uint32_t npoints)
 	}
 #endif
 	return new ArdourCanvas::Points (npoints);
-}
-
-static int32_t 
-int_from_hex (char hic, char loc) 
-{
-	int hi;		/* hi byte */
-	int lo;		/* low byte */
-
-	hi = (int) hic;
-
-	if( ('0'<=hi) && (hi<='9') ) {
-		hi -= '0';
-	} else if( ('a'<= hi) && (hi<= 'f') ) {
-		hi -= ('a'-10);
-	} else if( ('A'<=hi) && (hi<='F') ) {
-		hi -= ('A'-10);
-	}
-	
-	lo = (int) loc;
-	
-	if( ('0'<=lo) && (lo<='9') ) {
-		lo -= '0';
-	} else if( ('a'<=lo) && (lo<='f') ) {
-		lo -= ('a'-10);
-	} else if( ('A'<=lo) && (lo<='F') ) {
-		lo -= ('A'-10);
-	}
-
-	return lo + (16 * hi);
-}
-
-void
-url_decode (string& url)
-{
-	string::iterator last;
-	string::iterator next;
-
-	for (string::iterator i = url.begin(); i != url.end(); ++i) {
-		if ((*i) == '+') {
-			*i = ' ';
-		}
-	}
-
-	if (url.length() <= 3) {
-		return;
-	}
-
-	last = url.end();
-
-	--last; /* points at last char */
-	--last; /* points at last char - 1 */
-
-	for (string::iterator i = url.begin(); i != last; ) {
-
-		if (*i == '%') {
-
-			next = i;
-
-			url.erase (i);
-			
-			i = next;
-			++next;
-			
-			if (isxdigit (*i) && isxdigit (*next)) {
-				/* replace first digit with char */
-				*i = int_from_hex (*i,*next);
-				++i; /* points at 2nd of 2 digits */
-				url.erase (i);
-			}
-		} else {
-			++i;
-		}
-	}
 }
 
 Pango::FontDescription
@@ -595,21 +434,3 @@ get_xpm (std::string name)
 	return (xpm_map[name]);
 }
 
-string
-length2string (const int32_t frames, const float sample_rate)
-{
-    int secs = (int) (frames / sample_rate);
-    int hrs =  secs / 3600;
-    secs -= (hrs * 3600);
-    int mins = secs / 60;
-    secs -= (mins * 60);
-
-    int total_secs = (hrs * 3600) + (mins * 60) + secs;
-    int frames_remaining = (int) floor (frames - (total_secs * sample_rate));
-    float fractional_secs = (float) frames_remaining / sample_rate;
-
-    char duration_str[32];
-    sprintf (duration_str, "%02d:%02d:%05.2f", hrs, mins, (float) secs + fractional_secs);
-
-    return duration_str;
-}

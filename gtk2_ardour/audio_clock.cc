@@ -20,6 +20,9 @@
 
 #include <cstdio> // for sprintf
 #include <cmath>
+
+#include <pbd/convert.h>
+
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/ardour.h>
@@ -36,6 +39,8 @@
 using namespace ARDOUR;
 using namespace sigc;
 using namespace Gtk;
+
+using PBD::atoi;
 
 const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	2,   /* SMPTE_Hours */

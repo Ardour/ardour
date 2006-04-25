@@ -16,3 +16,4 @@ sigc++-2.0.pc
 stamp-h1
 configure
 sigc++config.h
+*.dylib
