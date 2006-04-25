@@ -29,12 +29,11 @@ tranzport.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
 tranzport.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
 tranzport.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 
-tranzport.Append(CPPPATH=libraries['ardour'].get ('CPPPATH', []))
-tranzport.Append(CPPPATH=libraries['sigc2'].get ('CPPPATH', []))
-tranzport.Append(CPPPATH=libraries['pbd3'].get ('CPPPATH', []))
-tranzport.Append(CPPPATH=libraries['midi++2'].get ('CPPPATH', []))
-
 tranzport.Merge ([
+    libraries['ardour'],
+    libraries['sigc2'],
+    libraries['pbd3'],
+    libraries['midi++2'],
 	libraries['xml'],
 	libraries['usb']
 	])
