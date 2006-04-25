@@ -93,13 +93,28 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 
 	get_vbox()->pack_start (bpm_frame, false, false);
 	
-	add_button (Stock::OK, RESPONSE_ACCEPT);
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::APPLY, RESPONSE_ACCEPT);
+	set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+	set_default_response (RESPONSE_ACCEPT);
 
 	get_vbox()->show_all();
 	bpm_entry.show();
 
 	set_name ("MetricDialog");
+	bpm_entry.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
+	bpm_entry.signal_key_release_event().connect (mem_fun (*this, &TempoDialog::bpm_key_release));
+}
+
+bool
+TempoDialog::bpm_key_release (GdkEventKey* ev)
+{
+        if (bpm_entry.get_text() != "") {
+	        set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
+	} else {
+	        set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+	}
+	return false;
 }
 
 double 
@@ -197,7 +212,7 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		
 	/* strings.back() just happens to be the longest one to display */
 	// GTK2FIX
-	// Gtkmm2ext::set_size_request_to_display_given_text (*(note_types.get_entry()), strings.back(), 7, 7);
+        //Gtkmm2ext::set_size_request_to_display_given_text (note_types, "thirty-second (32)", 7, 7);
 
 	hspacer1.set_border_width (5);
 	hspacer1.pack_start (note_types, false, false);
@@ -243,7 +258,6 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		
 		get_vbox()->pack_start (when_frame, false, false);
 	}
-
 	get_vbox()->pack_start (bpb_frame, false, false);
 	get_vbox()->pack_start (note_frame, false, false);
 	
@@ -251,13 +265,35 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	note_frame.set_name ("MetricDialogFrame");
 	bpb_entry.set_name ("MetricEntry");
 
-	add_button (Stock::OK, RESPONSE_ACCEPT);
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::APPLY, RESPONSE_ACCEPT);
+	set_response_sensitive (RESPONSE_ACCEPT, false);
+	set_default_response (RESPONSE_ACCEPT);
 
 	get_vbox()->show_all ();
 	bpb_entry.show ();
 
 	set_name ("MetricDialog");
+	bpb_entry.signal_activate().connect (bind (mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
+	bpb_entry.signal_key_release_event().connect (mem_fun (*this, &MeterDialog::bpb_key_release));
+	note_types.signal_changed().connect (mem_fun (*this, &MeterDialog::note_types_change));
+}
+
+bool
+MeterDialog::bpb_key_release (GdkEventKey* ev)
+{
+        if (bpb_entry.get_text() != "") {
+	        set_response_sensitive (RESPONSE_ACCEPT, true);
+	} else {
+	        set_response_sensitive (RESPONSE_ACCEPT, false);
+	}
+	return false;
+}
+
+void
+MeterDialog::note_types_change ()
+{
+        set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
 }
 
 double

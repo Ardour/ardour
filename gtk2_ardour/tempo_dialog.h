@@ -41,6 +41,7 @@ struct TempoDialog : public ArdourDialog
     
   private:
     void init (const ARDOUR::BBT_Time& start, double, bool);
+    bool bpm_key_release (GdkEventKey* );
 };
 
 struct MeterDialog : public ArdourDialog 
@@ -73,6 +74,8 @@ struct MeterDialog : public ArdourDialog
 
   private:
     void init (const ARDOUR::BBT_Time&, double, double, bool);
+    bool bpb_key_release (GdkEventKey* );
+    void note_types_change ();
 };
 
 #endif /* __ardour_gtk_tempo_dialog_h__ */
