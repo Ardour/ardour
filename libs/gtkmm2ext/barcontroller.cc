@@ -168,6 +168,7 @@ BarController::button_release (GdkEventButton* ev)
 			mouse_control (ev->x, ev->window, scale);
 		}
 		darea.remove_modal_grab();
+		grabbed = false;
 		StopGesture ();
 		break;
 
