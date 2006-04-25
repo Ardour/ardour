@@ -75,7 +75,6 @@ class PortInsert : public Insert
 
 	void init ();
 	void run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void silence (jack_nframes_t nframes, jack_nframes_t offset);
 
 	jack_nframes_t latency();
 	

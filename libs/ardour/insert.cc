@@ -877,20 +877,6 @@ PortInsert::~PortInsert ()
 }
 
 void
-PortInsert::silence (jack_nframes_t nframes, jack_nframes_t offset)
-{
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	/* this silences our outputs, but we need to silence our inputs as well */
-
-	for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		(*i)->silence (nframes, offset);
-	}
-	
-	// IO::silence (nframes, offset);
-}
-
-void
 PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
 {
 	if (n_outputs() == 0) {
