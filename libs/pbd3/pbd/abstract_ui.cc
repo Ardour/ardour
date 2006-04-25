@@ -5,7 +5,7 @@
 #include <pbd/failed_constructor.h>
 
 template <typename RequestObject>
-AbstractUI<RequestObject>::AbstractUI<RequestObject> (string name, bool with_signal_pipes)
+AbstractUI<RequestObject>::AbstractUI (string name, bool with_signal_pipes)
 	: BaseUI (name, with_signal_pipes)
 {
 	if (pthread_key_create (&thread_request_buffer_key, 0)) {

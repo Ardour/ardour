@@ -28,7 +28,7 @@ class BaseUI : virtual public sigc::trackable {
 	};
 
 	static RequestType new_request_type();
-	static RequestType BaseUI::CallSlot;
+	static RequestType CallSlot;
 
   protected:
 	int signal_pipe[2];
