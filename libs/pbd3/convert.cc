@@ -18,6 +18,7 @@
 */
 
 #include <cmath>
+#include <stdint.h>
 
 #include "pbd/convert.h"
 
