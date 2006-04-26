@@ -96,13 +96,13 @@ short_version (string orig, string::size_type target_length)
 int
 atoi (const string& s)
 {
-	return atoi (s.c_str());
+	return std::atoi (s.c_str());
 }
 
 double
 atof (const string& s)
 {
-	return atof (s.c_str());
+	return std::atof (s.c_str());
 }
 
 vector<string>
