@@ -232,6 +232,7 @@ my_subst_dict = { }
 my_subst_dict['%INSTALL_PREFIX%'] = install_prefix
 
 ardoursh = env.SubstInFile ('ardour.sh','ardour.sh.in', SUBST_DICT = my_subst_dict);
+env.AddPostAction (ardoursh, Chmod ('$TARGET', 0755))
 
 Default(ardour)
 
@@ -248,7 +249,6 @@ if env['NLS']:
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), ardour))
 # the script - into the bin dir
 env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour2', ardoursh))
-env.Alias('install', Execute(Chmod (os.path.join(install_prefix, 'bin')+'/ardour2', 0755)))
 # configuration files
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
