@@ -103,7 +103,7 @@ class PluginSelector : public ArdourDialog
 	Gtk::TreeView vst_display;
 	static void _vst_refiller (void *);
 	void vst_refiller ();
-	void vst_dispaly_selection_changed();
+	void vst_display_selection_changed();
 #endif	
 
 	ARDOUR::PluginInfo* i_selected_plug;
