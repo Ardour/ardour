@@ -102,9 +102,9 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 	bpm_entry.show();
 
 	set_name ("MetricDialog");
-	bpm_entry.signal_key_press_event().connect (mem_fun (*this, &TempoDialog::bpm_key_press), false);
 	bpm_entry.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	bpm_entry.signal_key_release_event().connect (mem_fun (*this, &TempoDialog::bpm_key_release));
+	bpm_entry.signal_key_press_event().connect (mem_fun (*this, &TempoDialog::bpm_key_press), false);
 }
 
 bool
@@ -324,6 +324,7 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 
 	set_name ("MetricDialog");
 	bpb_entry.signal_activate().connect (bind (mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
+	bpb_entry.signal_key_press_event().connect (mem_fun (*this, &MeterDialog::bpb_key_press), false);
 	bpb_entry.signal_key_release_event().connect (mem_fun (*this, &MeterDialog::bpb_key_release));
 	note_types.signal_changed().connect (mem_fun (*this, &MeterDialog::note_types_change));
 }
