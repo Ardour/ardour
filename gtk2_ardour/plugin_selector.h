@@ -67,6 +67,8 @@ class PluginSelector : public ArdourDialog
 	Glib::RefPtr<Gtk::ListStore> lmodel;
 	Glib::RefPtr<Gtk::TreeSelection> lselection;
 	Gtk::TreeView ladspa_display;
+	Gtk::Button* btn_add;
+	Gtk::Button* btn_remove;
 
 	struct AddedColumns : public Gtk::TreeModel::ColumnRecord {
 		AddedColumns () {
@@ -101,6 +103,7 @@ class PluginSelector : public ArdourDialog
 	Gtk::TreeView vst_display;
 	static void _vst_refiller (void *);
 	void vst_refiller ();
+	void vst_dispaly_selection_changed();
 #endif	
 
 	ARDOUR::PluginInfo* i_selected_plug;
@@ -119,6 +122,8 @@ class PluginSelector : public ArdourDialog
 	void btn_add_clicked();
 	void btn_remove_clicked();
 	void btn_update_clicked();
+	void added_list_selection_changed();
+	void ladspa_display_selection_changed();
 	void btn_apply_clicked();
 	void use_plugin (ARDOUR::PluginInfo*);
 	void cleanup ();

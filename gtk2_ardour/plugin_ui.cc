@@ -100,7 +100,7 @@ PluginUIWindow::PluginUIWindow (AudioEngine &engine, PluginInsert& insert, bool 
 
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
-	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)));
 	insert.GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));

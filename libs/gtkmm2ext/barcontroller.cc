@@ -170,6 +170,7 @@ BarController::button_release (GdkEventButton* ev)
 		darea.remove_modal_grab();
 		grabbed = false;
 		StopGesture ();
+		grabbed = false;
 		break;
 
 	case 2:

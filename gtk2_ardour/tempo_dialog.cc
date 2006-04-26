@@ -102,8 +102,57 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 	bpm_entry.show();
 
 	set_name ("MetricDialog");
+	bpm_entry.signal_key_press_event().connect (mem_fun (*this, &TempoDialog::bpm_key_press), false);
 	bpm_entry.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	bpm_entry.signal_key_release_event().connect (mem_fun (*this, &TempoDialog::bpm_key_release));
+}
+
+bool
+TempoDialog::bpm_key_press (GdkEventKey* ev)
+{
+
+switch (ev->keyval) { 
+
+ case GDK_0:
+ case GDK_1:
+ case GDK_2:
+ case GDK_3:
+ case GDK_4:
+ case GDK_5:
+ case GDK_6:
+ case GDK_7:
+ case GDK_8:
+ case GDK_9:
+ case GDK_KP_0:
+ case GDK_KP_1:
+ case GDK_KP_2:
+ case GDK_KP_3:
+ case GDK_KP_4:
+ case GDK_KP_5:
+ case GDK_KP_6:
+ case GDK_KP_7:
+ case GDK_KP_8:
+ case GDK_KP_9:
+ case GDK_period:
+ case GDK_comma:
+ case  GDK_KP_Delete:
+ case  GDK_KP_Enter:
+ case  GDK_Delete:
+ case  GDK_BackSpace:
+ case  GDK_Escape:
+ case  GDK_Return:
+ case  GDK_Home:
+ case  GDK_End:
+ case  GDK_Left:
+ case  GDK_Right:
+ case  GDK_Num_Lock:
+ case  GDK_Tab:
+    return FALSE;
+ default:
+      break;
+ }
+
+   return TRUE;
 }
 
 bool
@@ -277,6 +326,54 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	bpb_entry.signal_activate().connect (bind (mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
 	bpb_entry.signal_key_release_event().connect (mem_fun (*this, &MeterDialog::bpb_key_release));
 	note_types.signal_changed().connect (mem_fun (*this, &MeterDialog::note_types_change));
+}
+
+bool
+MeterDialog::bpb_key_press (GdkEventKey* ev)
+{
+
+switch (ev->keyval) { 
+
+ case GDK_0:
+ case GDK_1:
+ case GDK_2:
+ case GDK_3:
+ case GDK_4:
+ case GDK_5:
+ case GDK_6:
+ case GDK_7:
+ case GDK_8:
+ case GDK_9:
+ case GDK_KP_0:
+ case GDK_KP_1:
+ case GDK_KP_2:
+ case GDK_KP_3:
+ case GDK_KP_4:
+ case GDK_KP_5:
+ case GDK_KP_6:
+ case GDK_KP_7:
+ case GDK_KP_8:
+ case GDK_KP_9:
+ case GDK_period:
+ case GDK_comma:
+ case  GDK_KP_Delete:
+ case  GDK_KP_Enter:
+ case  GDK_Delete:
+ case  GDK_BackSpace:
+ case  GDK_Escape:
+ case  GDK_Return:
+ case  GDK_Home:
+ case  GDK_End:
+ case  GDK_Left:
+ case  GDK_Right:
+ case  GDK_Num_Lock:
+ case  GDK_Tab:
+    return FALSE;
+ default:
+      break;
+ }
+
+   return TRUE;
 }
 
 bool

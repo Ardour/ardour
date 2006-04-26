@@ -93,9 +93,11 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	ascroller.set_border_width(10);
 	ascroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	ascroller.add(added_list);
-	Gtk::Button *btn_add = manage(new Gtk::Button(Stock::ADD));
+	btn_add = manage(new Gtk::Button(Stock::ADD));
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn_add, _("Add a plugin to the effect list"));
-	Gtk::Button *btn_remove = manage(new Gtk::Button(Stock::REMOVE));
+	btn_add->set_sensitive (false);
+	btn_remove = manage(new Gtk::Button(Stock::REMOVE));
+	btn_remove->set_sensitive (false);
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn_remove, _("Remove a plugin from the effect list"));
 	Gtk::Button *btn_update = manage(new Gtk::Button(Stock::REFRESH));
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn_update, _("Update available plugins"));
@@ -116,7 +118,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::CONNECT, RESPONSE_APPLY);
 	set_default_response (RESPONSE_APPLY);
-
+	set_response_sensitive (RESPONSE_APPLY, false);
 	get_vbox()->pack_start (*table);
 
 	using namespace Gtk::Notebook_Helpers;
@@ -136,12 +138,15 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 #ifdef VST_SUPPORT
 	if (Config->get_use_vst()) {
 		vst_display.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::row_clicked));
+		vst_display.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::vst_display_selection_changed));
 	}
 #endif
 	
 	btn_update->signal_clicked().connect (mem_fun(*this, &PluginSelector::btn_update_clicked));
 	btn_add->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_add_clicked));
 	btn_remove->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_remove_clicked));
+	ladspa_display.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::ladspa_display_selection_changed));
+	added_list.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::added_list_selection_changed));
 
 	input_refiller ();
 }
@@ -274,6 +279,10 @@ PluginSelector::btn_add_clicked()
 	}
 	newrow[acols.text] = name;
 	newrow[acols.plugin] = pi;
+
+	if (!amodel->children().empty()) {
+	  set_response_sensitive (RESPONSE_APPLY, true);
+	}
 }
 
 void
@@ -285,6 +294,11 @@ PluginSelector::btn_remove_clicked()
 
 	added_plugins.erase(i);	
 	amodel->erase(iter);
+	if (amodel->children().empty()) {
+	  set_response_sensitive (RESPONSE_APPLY, false);
+	}
+
+
 }
 
 void
@@ -292,6 +306,38 @@ PluginSelector::btn_update_clicked()
 {
 	manager->refresh ();
 	input_refiller ();
+}
+
+#ifdef VST_SUPPORT
+void
+PluginSelector::vst_display_selection_changed()
+{
+  if (vst_display.get_selection()->count_selected_rows() != 0) {
+    btn_add->set_sensitive (true);
+  } else {
+    btn_add->set_sensitive (false);
+  }
+}
+#endif
+
+void
+PluginSelector::ladspa_display_selection_changed()
+{
+  if (ladspa_display.get_selection()->count_selected_rows() != 0) {
+    btn_add->set_sensitive (true);
+  } else {
+    btn_add->set_sensitive (false);
+  }
+}
+
+void
+PluginSelector::added_list_selection_changed()
+{
+  if (added_list.get_selection()->count_selected_rows() != 0) {
+    btn_remove->set_sensitive (true);
+  } else {
+    btn_remove->set_sensitive (false);
+  }
 }
 
 int
