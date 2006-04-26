@@ -1,6 +1,7 @@
 # -*- python -*-
 
 import os
+import os.path
 import glob
 
 Import('env final_prefix install_prefix final_config_prefix libraries i18n')

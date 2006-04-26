@@ -1,0 +1,9 @@
+#!/bin/sh
+
+export LD_LIBRARY_PATH=%INSTALL_PREFIX%/lib/ardour2:$LD_LIBRARY_PATH 
+# DYLD_LIBRARY_PATH is for Darwin
+export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
+
+exec %INSTALL_PREFIX%/lib/ardour2/ardour.bin $*
+
+

@@ -228,6 +228,11 @@ ardour = gtkardour.Program(target = executable, source = gtkardour_files + extra
 mtest = gtkardour.Program(target = 'mtest', source = mtest_files)
 itest = gtkardour.Program(target = 'itest', source = itest_files)
 
+my_subst_dict = { }
+my_subst_dict['%INSTALL_PREFIX%'] = install_prefix
+
+ardoursh = env.SubstInFile ('ardour.sh','ardour.sh.in', SUBST_DICT = my_subst_dict);
+
 Default(ardour)
 
 if env['VERSIONED']:
@@ -239,12 +244,17 @@ if env['NLS']:
     
 #install
 
-
-env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour', ardour))
+# the executable - into the library dir
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), ardour))
+# the script - into the bin dir
+env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour2', ardoursh))
+env.Alias('install', Execute(Chmod (os.path.join(install_prefix, 'bin')+'/ardour2', 0755)))
+# configuration files
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.colors'))
+# data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 'splash.ppm'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/glade'), glade_files))

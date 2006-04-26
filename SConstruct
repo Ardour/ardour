@@ -560,6 +560,8 @@ if os.environ.has_key('DISTCC_HOSTS'):
 final_prefix = '$PREFIX'
 install_prefix = '$DESTDIR/$PREFIX'
 
+subst_dict['INSTALL_PREFIX'] = install_prefix;
+
 if env['PREFIX'] == '/usr':
     final_config_prefix = '/etc'
 else:

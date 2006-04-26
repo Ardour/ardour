@@ -1,8 +1,10 @@
 # -*- python -*-
 
+import os
+import os.path
 import glob
 
-Import('env libraries i18n')
+Import('env libraries i18n install_prefix')
 
 pbd3 = env.Copy()
 
@@ -54,6 +56,8 @@ Default(libpbd3)
 
 if env['NLS']:
     i18n (pbd3, pbd3_files, env)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libpbd3))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript' ] +

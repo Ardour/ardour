@@ -1,15 +1,19 @@
 # -*- python -*-
 
+import os
+import os.path
 import glob
 
 gtkmm2_files = glob.glob('gtkmm/*.cc')
 
-Import('env libraries')
+Import('env libraries install_prefix')
 gtkmm2 = env.Copy()
 gtkmm2.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'], libraries['pangomm'], libraries['atkmm'], libraries['gdkmm2'] ])
 
 libgtkmm2 = gtkmm2.SharedLibrary('gtkmm2', gtkmm2_files)
 Default(libgtkmm2)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libgtkmm2))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'gtkmmconfig.h', 'gtkmm.h'] + 

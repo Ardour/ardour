@@ -1,11 +1,12 @@
 # -*- python -*-
 
-import glob
 import os
+import os.path
+import glob
 
 sigc2_files = glob.glob('sigc++/*.cc') + glob.glob('sigc++/functors/*.cc') + glob.glob('sigc++/adaptors/lambda/*.cc')
 
-Import('env')
+Import('env install_prefix')
 sigc2 = env.Copy()
 
 libsigc2 = sigc2.SharedLibrary('sigc++2', sigc2_files)
@@ -16,6 +17,8 @@ if os.path.exists ('CVS'):
     Default([sigc2_config_h,libsigc2])
 else:
     Default([libsigc2])
+
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libsigc2))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'NEWS', 'README', 'AUTHORS', 'ChangeLog',

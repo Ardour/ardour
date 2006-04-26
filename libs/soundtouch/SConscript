@@ -1,5 +1,7 @@
 # -*- python -*-
 
+import os
+import os.path
 import glob
 
 soundtouch_files = Split("""
@@ -13,13 +15,15 @@ mmx_gcc.cpp
 cpu_detect_x86_gcc.cpp
 """)
 
-Import('env')
+Import('env install_prefix')
 st = env.Copy()
 st.Append(CCFLAGS="-DHAVE_CONFIG_H -D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 
 libst = st.SharedLibrary('soundtouch', soundtouch_files)
 
 Default(libst)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libst))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 	[ 'SConscript'] + soundtouch_files + glob.glob('*.h')))

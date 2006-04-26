@@ -1,16 +1,19 @@
 # -*- python -*-
 
-import glob
 import os
+import os.path
+import glob
 
 pangomm_files = glob.glob('pangomm/*.cc')
 
-Import('env libraries')
+Import('env libraries install_prefix')
 pangomm = env.Copy()
 pangomm.Merge([libraries['glibmm2'], libraries['pango'], libraries['sigc2']])
 
 libpangomm = pangomm.SharedLibrary('pangomm', pangomm_files)
 Default(libpangomm)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libpangomm))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'pangomm.h'] + 

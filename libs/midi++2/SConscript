@@ -1,8 +1,10 @@
 # -*- python -*-
 
+import os
+import os.path
 import glob
 
-Import('env libraries')
+Import('env libraries install_prefix')
 
 midi2 = env.Copy()
 midi2.Merge([ libraries['sigc2'], libraries['xml'], libraries['pbd3'] ])
@@ -49,6 +51,8 @@ midi2.VersionBuild(['version.cc','midi++/version.h'], 'SConscript')
 libmidi2 = midi2.SharedLibrary('midi++', [ sources, sysdep_src ])
 
 Default(libmidi2)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libmidi2))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript' ] + sources + sysdep_sources +

@@ -1,6 +1,7 @@
 # -*- python -*-
 
 import os
+import os.path
 import glob
 
 Import('env final_prefix install_prefix final_config_prefix libraries i18n')
@@ -214,6 +215,9 @@ Default(libardour)
 
 if env['NLS']:
 	i18n (ardour, ardour_files + vst_files + coreaudio_files, env)
+
+
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libardour))
 	      
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions.s', 'sse_functions_64bit.s' ] +

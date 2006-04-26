@@ -39,6 +39,8 @@ libflowcanvas = flowcanvas.SharedLibrary('flowcanvas', flowcanvas_files)
 
 Default(libflowcanvas)
 
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libflowcanvas))
+
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      ['SConscript'] +
                                      flowcanvas_files +
