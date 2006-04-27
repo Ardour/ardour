@@ -368,7 +368,7 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 
         for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
 	        TimeAxisView *tv = (*i)[route_display_columns.tv];
-		if (tv != 0) {
+		if (tv != 0 && !tv->hidden()) {
 			pos += tv->effective_height;
 			pos += track_spacing;
 		}

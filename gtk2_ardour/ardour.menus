@@ -207,8 +207,9 @@
                </menu>
                <menu action='Autoconnect'>
                    <menuitem action='AutoConnectNewTrackInputsToHardware'/>
+    	           <separator/>
                    <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
-                   <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
+                   <menuitem action='AutoConnectNewTrackOutputsToMaster'/>
                    <menuitem action='ManuallyConnectNewTrackOutputs'/>
                </menu>
 	       <menu action='ControlSurfaces'/>

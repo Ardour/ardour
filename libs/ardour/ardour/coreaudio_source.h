@@ -32,6 +32,7 @@ class CoreAudioSource : public ExternalSource {
 	~CoreAudioSource ();
 
 	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
+	float sample_rate() const;
 
   private:
 	ExtAudioFileRef af;

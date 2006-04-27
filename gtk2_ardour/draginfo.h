@@ -31,6 +31,7 @@ struct DragInfo {
     void (Editor::*finished_callback)(ArdourCanvas::Item*, GdkEvent*);
     TimeAxisView* last_trackview;
     bool x_constrained;
+    bool y_constrained;
     bool copy;
     bool was_rolling;
     bool first_move;

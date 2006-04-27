@@ -275,8 +275,9 @@ AutomationTimeAxisView::clear_clicked ()
 }
 
 void
-AutomationTimeAxisView::set_height (TrackHeight h)
+AutomationTimeAxisView::set_height (TrackHeight ht)
 {
+	uint32_t h = height_to_pixels (ht);
 	bool changed = (height != (uint32_t) h);
 
 	TimeAxisView* state_parent = get_parent_with_state ();
@@ -284,7 +285,7 @@ AutomationTimeAxisView::set_height (TrackHeight h)
 
 	controls_table.show_all ();
 
-	TimeAxisView::set_height (h);
+	TimeAxisView::set_height (ht);
 	base_rect->property_y2() = h;
 
 	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {

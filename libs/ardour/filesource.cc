@@ -907,12 +907,18 @@ FileSource::check_header (jack_nframes_t rate, bool silent)
 				   _path, header.data.size, _length * sizeof (Sample)) << endmsg;
 	}
 
-	if ((jack_nframes_t) header.format.nSamplesPerSec != rate) {
-		warning << string_compose(_("\"%1\" has a sample rate of %2 instead of %3 as used by this session"),
-				   _path, header.format.nSamplesPerSec, rate) << endmsg;
-	}
+//	if ((jack_nframes_t) header.format.nSamplesPerSec != rate) {
+//		warning << string_compose(_("\"%1\" has a sample rate of %2 instead of %3 as used by this session"),
+//				   _path, header.format.nSamplesPerSec, rate) << endmsg;
+//	}
 
 	return 0;
+}
+
+float
+FileSource::sample_rate () const
+{
+	return header.format.nSamplesPerSec;
 }
 
 int

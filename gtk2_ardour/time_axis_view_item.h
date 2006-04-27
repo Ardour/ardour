@@ -272,10 +272,13 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
     static Pango::FontDescription NAME_FONT ;
     static bool have_name_font;
     static const double NAME_X_OFFSET ;
-    static const double NAME_Y_OFFSET ;
-    static const double NAME_HIGHLIGHT_SIZE ;
-    static const double NAME_HIGHLIGHT_THRESH ;
     static const double GRAB_HANDLE_LENGTH ;
+    /* these are not constant, but vary with the pixel size
+       of the font used to display the item name.
+    */
+    static double NAME_Y_OFFSET ;
+    static double NAME_HIGHLIGHT_SIZE ;
+    static double NAME_HIGHLIGHT_THRESH ;
 
     /**
      * Handles the Removal of this time axis item

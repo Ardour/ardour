@@ -58,6 +58,7 @@ class FileSource : public Source {
 	void           mark_for_remove();
 	string         peak_path(string audio_path);
 	string         path() const { return _path; }
+	float sample_rate () const;
 
 	virtual int            seek (jack_nframes_t frame) {return 0; }
 	virtual jack_nframes_t last_capture_start_frame() const { return 0; }
@@ -129,9 +130,9 @@ class FileSource : public Source {
 	};
 
 	struct ChunkInfo {
-	    string        name;
-	    uint32_t size;
-	    off64_t         offset;
+	    std::string name;
+	    uint32_t    size;
+	    off64_t     offset;
 	    
 	    ChunkInfo (string s, uint32_t sz, off64_t o) 
 		    : name (s), size (sz), offset (o) {}

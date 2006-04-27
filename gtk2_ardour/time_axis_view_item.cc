@@ -23,6 +23,8 @@
 #include <ardour/types.h>
 #include <ardour/ardour.h>
 
+#include <gtkmm2ext/utils.h>
+
 #include "public_editor.h"
 #include "time_axis_view_item.h"
 #include "time_axis_view.h"
@@ -38,14 +40,16 @@ using namespace Editing;
 using namespace Glib;
 
 //------------------------------------------------------------------------------
-/** Initialize static memeber data */
+/** Initialize const static memeber data */
+
 Pango::FontDescription TimeAxisViewItem::NAME_FONT;
 bool TimeAxisViewItem::have_name_font = false;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
-const double TimeAxisViewItem::NAME_Y_OFFSET = 15.0 ;           /* XXX depends a lot on the font size, sigh. */
-const double TimeAxisViewItem::NAME_HIGHLIGHT_SIZE = 15.0 ;     /* ditto */
-const double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH = 32.0 ;     /* ditto */
 const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6 ;
+
+double TimeAxisViewItem::NAME_Y_OFFSET;
+double TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
+double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 
 
 //---------------------------------------------------------------------------------------//
@@ -68,7 +72,26 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 	: trackview (tv)
 {
 	if (!have_name_font) {
+
+		/* first constructed item sets up font info */
+
 		NAME_FONT = get_font_for_style (N_("TimeAxisViewItemName"));
+		
+		Gtk::Window win;
+		Gtk::Label foo;
+		win.add (foo);
+
+		Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
+		int width;
+		int height;
+
+		layout->set_font_description (NAME_FONT);
+		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+
+		NAME_Y_OFFSET = height + 4;
+		NAME_HIGHLIGHT_SIZE = height + 6;
+		NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 2;
+
 		have_name_font = true;
 	}
 
@@ -150,7 +173,10 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 	if (visibility & ShowNameText) {
 		name_text = new ArdourCanvas::Text (*group);
 		name_text->property_x() = (double) TimeAxisViewItem::NAME_X_OFFSET;
-		name_text->property_y() = (double) trackview.height + 1.0 - TimeAxisViewItem::NAME_Y_OFFSET;
+		/* trackview.height is the bottom of the trackview. subtract 1 to get back to the bottom of the highlight,
+		   then NAME_Y_OFFSET to position the text in the vertical center of the highlight
+		*/
+		name_text->property_y() = (double) trackview.height - 1.0 - TimeAxisViewItem::NAME_Y_OFFSET;
 		name_text->property_font_desc() = NAME_FONT;
 		name_text->property_anchor() = Gtk::ANCHOR_NW;
 
@@ -872,6 +898,7 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 	}
                        
 	int width;
+	
 	ustring ustr = fit_to_pixels (item_name, (int) floor (pixel_width - NAME_X_OFFSET), NAME_FONT, width);
 
 	if (ustr.empty()) {
@@ -934,8 +961,8 @@ TimeAxisViewItem::remove_this_item(void* src)
 gint
 TimeAxisViewItem::idle_remove_this_item(TimeAxisViewItem* item, void* src)
 {
-	 item->ItemRemoved(item->get_item_name(), src) ; /* EMIT_SIGNAL */
-	delete item ;
-	item = 0 ;
-	return(false) ;
+	item->ItemRemoved (item->get_item_name(), src) ; /* EMIT_SIGNAL */
+	delete item;
+	item = 0;
+	return false;
 }

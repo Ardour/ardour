@@ -109,6 +109,12 @@ SndFileSource::~SndFileSource ()
 	}
 }
 
+float
+SndFileSource::sample_rate () const 
+{
+	return _info.samplerate;
+}
+
 jack_nframes_t
 SndFileSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {

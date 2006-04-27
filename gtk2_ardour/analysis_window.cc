@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2006 Paul Davis
+    Written by Sampo Savolainen
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+    $Id$
 */
-
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm/stock.h>
@@ -54,7 +55,6 @@ AnalysisWindow::AnalysisWindow()
 	  display_model_composite_all_tracks_rb (_("Composite graph of all tracks"))
 
 {
-
 	track_list_ready = false;
 	
 	// Left side: track list + controls

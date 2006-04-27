@@ -54,7 +54,7 @@ Keyboard* Keyboard::_the_keyboard = 0;
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
 
 GdkModifierType Keyboard::RelevantModifierKeyMask = 
-                               GdkModifierType (GDK_SHIFT_MASK|GDK_CONTROL_MASK|GDK_MOD3_MASK);
+                               GdkModifierType (GDK_SHIFT_MASK|GDK_CONTROL_MASK|GDK_MOD1_MASK|GDK_MOD3_MASK);
 
 
 Keyboard::Keyboard ()

@@ -1392,6 +1392,19 @@ AudioRegion::resume_fade_out ()
 	}
 }
 
+bool
+AudioRegion::speed_mismatch (float sr) const
+{
+	if (sources.empty()) {
+		/* impossible, but ... */
+		return false;
+	}
+
+	float fsr = sources.front()->sample_rate();
+
+	return fsr == sr;
+}
+
 extern "C" {
 
 	int region_read_peaks_from_c (void *arg, uint32_t npeaks, uint32_t start, uint32_t cnt, intptr_t data, uint32_t n_chan, double samples_per_unit) 

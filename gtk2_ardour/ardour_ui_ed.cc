@@ -371,7 +371,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (option_actions, X_("UseMIDIcontrol"), _("Use MIDI control"), mem_fun (*this, &ARDOUR_UI::toggle_use_midi_control));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (option_actions, X_("AutoConnectNewTrackInputsToHardware"), _("Connect newtrack inputs to hardware"), mem_fun (*this, &ARDOUR_UI::toggle_AutoConnectNewTrackInputsToHardware));
+	act = ActionManager::register_toggle_action (option_actions, X_("AutoConnectNewTrackInputsToHardware"), _("Connect new track inputs to hardware"), mem_fun (*this, &ARDOUR_UI::toggle_AutoConnectNewTrackInputsToHardware));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	RadioAction::Group file_header_group;

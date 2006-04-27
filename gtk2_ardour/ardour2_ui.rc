@@ -75,7 +75,7 @@ style "marker_text"
 
 style "time_axis_view_item_name"
 {
-	font_name = "sans medium 10"
+	font_name = "sans medium 8"
 }
 
 style "default_base" = "medium_text"

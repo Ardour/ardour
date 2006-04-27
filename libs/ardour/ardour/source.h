@@ -75,6 +75,8 @@ class Source : public Stateful, public sigc::trackable
 		return 0;
 	}
 
+	virtual float sample_rate () const { return 0; }
+
 	uint32_t use_cnt() const { return _use_cnt; }
 	void use ();
 	void release ();

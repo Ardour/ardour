@@ -33,9 +33,9 @@ class SndFileSource : public ExternalSource {
 	SndFileSource (const XMLNode&);
 	~SndFileSource ();
 
-    jack_nframes_t length() const { return _info.frames; } 
-
+	jack_nframes_t length() const { return _info.frames; } 
 	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
+	float sample_rate () const;
 
   private:
 	SNDFILE *sf;

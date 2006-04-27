@@ -865,11 +865,15 @@ AudioRegionView::region_renamed ()
 		str = region.name();
 	}
 
+	if (region.speed_mismatch (trackview.session().frame_rate())) {
+		str = string ("*") + str;
+	}
+
 	if (region.muted()) {
 		str = string ("!") + str;
 	}
 
-	set_item_name (region.name(), this);
+	set_item_name (str, this);
 	set_name_text (str);
 }
 

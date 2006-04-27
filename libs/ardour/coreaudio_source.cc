@@ -204,3 +204,10 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, ch
 	return real_cnt;
 }
 
+float
+CoreAudioSource::sample_rate() const
+{
+	/* XXX taybin fill me in please */
+
+	return 44100.0f;
+}

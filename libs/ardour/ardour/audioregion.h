@@ -80,6 +80,8 @@ class AudioRegion : public Region
 	bool equivalent (const AudioRegion&);
 	bool size_equivalent (const AudioRegion&);
 
+	bool speed_mismatch (float) const;
+
 	void lock_sources ();
 	void unlock_sources ();
 	Source& source (uint32_t n=0) const { if (n < sources.size()) return *sources[n]; else return *sources[0]; } 

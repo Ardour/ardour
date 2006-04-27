@@ -942,9 +942,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MarkerItem:
-
 			remove_marker (*item, event);
-
 			break;
 
 		case RegionItem:
@@ -1598,9 +1596,16 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
         // if dragging with button2, the motion is x constrained, with Alt-button2 it is y constrained
 
 	if (event->button.button == 2) {
-		drag_info.x_constrained = true;
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Alt)) {
+			drag_info.y_constrained = true;
+			drag_info.x_constrained = false;
+		} else {
+			drag_info.y_constrained = false;
+			drag_info.x_constrained = true;
+		}
 	} else {
 		drag_info.x_constrained = false;
+		drag_info.y_constrained = false;
 	}
 
 	drag_info.grab_frame = event_frame(event, &drag_info.grab_x, &drag_info.grab_y);
@@ -2455,18 +2460,12 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 	drag_info.cumulative_x_drag = cx - drag_info.grab_x ;
 	drag_info.cumulative_y_drag = cy - drag_info.grab_y ;
 
-	bool x_constrained = false;
-
 	if (drag_info.x_constrained) {
-		if (fabs(drag_info.cumulative_x_drag) < fabs(drag_info.cumulative_y_drag)) {
-			cx = drag_info.grab_x;
-			x_constrained = true;
-
-		} else {
-			cy = drag_info.grab_y;
-		}
-	
-	} 
+		cx = drag_info.grab_x;
+	}
+	if (drag_info.y_constrained) {
+		cy = drag_info.grab_y;
+	}
 
 	cp->line.parent_group().w2i (cx, cy);
 
@@ -2475,9 +2474,9 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 	cy = min ((double) cp->line.height(), cy);
 
 	//translate cx to frames
-	jack_nframes_t cx_frames = (jack_nframes_t) floor (cx * frames_per_unit);
+	jack_nframes_t cx_frames = unit_to_frame (cx);
 
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier()) && !x_constrained) {
+	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier()) && !drag_info.x_constrained) {
 		snap_to (cx_frames);
 	}
 
