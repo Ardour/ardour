@@ -1704,7 +1704,7 @@ void
 ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 {
 	m_new_session_dialog->show_all();
-	m_new_session_dialog->set_transient_for(*editor);
+	m_new_session_dialog->set_modal(true);
 	m_new_session_dialog->set_name(predetermined_path);
 
 	int response = Gtk::RESPONSE_CANCEL;
