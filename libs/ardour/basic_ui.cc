@@ -184,6 +184,14 @@ BasicUI::toggle_all_rec_enables ()
 	}
 }
 
-		
+void
+BasicUI::toggle_punch_in ()
+{
+	session.set_punch_in (!session.get_punch_in());
+}
 
-
+void
+BasicUI::toggle_punch_out ()
+{
+	session.set_punch_out (!session.get_punch_out());
+}

@@ -259,9 +259,9 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	else
 		note_types.set_active_text (_("quarter (4)"));
 		
-	/* strings.back() just happens to be the longest one to display */
-	// GTK2FIX
-        //Gtkmm2ext::set_size_request_to_display_given_text (note_types, "thirty-second (32)", 7, 7);
+	/* the string here needs to be the longest one to display */
+	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
+        Gtkmm2ext::set_size_request_to_display_given_text (note_types, "thirty-second (32)", 7+FUDGE, 7);
 
 	hspacer1.set_border_width (5);
 	hspacer1.pack_start (note_types, false, false);

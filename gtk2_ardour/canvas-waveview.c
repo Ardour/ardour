@@ -314,9 +314,6 @@ gnome_canvas_waveview_init (GnomeCanvasWaveView *waveview)
 	waveview->reload_cache_in_render = FALSE;
 
  	waveview->wave_color = RGBA_TO_UINT(44,35,126,255);
-
-	// GTK2FIX
-	// GNOME_CANVAS_ITEM(waveview)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 static void

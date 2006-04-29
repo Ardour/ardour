@@ -424,10 +424,6 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, IO& io)
 	dialog.set_modal (true);
 	dialog.show_all ();
 
-	// GTK2FIX
-	//dialog.realize();
-	//dialog.get_window()->set_decorations (Gdk::WMDecoration (GDK_DECOR_BORDER|GDK_DECOR_RESIZEH));
-
 	dialog.run ();
 }
 

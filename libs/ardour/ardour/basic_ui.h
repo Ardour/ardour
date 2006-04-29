@@ -26,6 +26,8 @@ class BasicUI {
 	void undo ();
 	void redo ();
 	void toggle_all_rec_enables ();
+	void toggle_punch_in ();
+	void toggle_punch_out ();
 
   protected:
 	ARDOUR::Session& session;

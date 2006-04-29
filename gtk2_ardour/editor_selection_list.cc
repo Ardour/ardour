@@ -60,11 +60,8 @@ Editor::add_named_selection_to_named_selection_display (NamedSelection& selectio
 void
 Editor::redisplay_named_selections ()
 {
-        //GTK2FIX
-        //named_selection_display.freeze ();
 	named_selection_model->clear ();
 	session->foreach_named_selection (*this, &Editor::add_named_selection_to_named_selection_display);
-	//named_selection_display.thaw ();
 }
 
 gint

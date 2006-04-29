@@ -52,8 +52,6 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	region_color = _trackview.color();
 	stream_base_color = color_map[cMarkerTrackBase];
 
-	//GTK2FIX -- how to get the group? is the canvas display really a group?
-	//canvas_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(_trackview.canvas_display), gnome_canvas_group_get_type (), 0);
 	canvas_group = new ArdourCanvas::Group (*_trackview.canvas_display);
 
 	canvas_rect =  new ArdourCanvas::SimpleRect (*canvas_group);

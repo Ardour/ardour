@@ -163,9 +163,6 @@ gnome_canvas_ruler_init (GnomeCanvasRuler *ruler)
 	ruler->frames_per_unit = 1;
 	ruler->fill_color = 0;
 	ruler->tick_color = 0;
-
-	// GTK2FIX
-	//GNOME_CANVAS_ITEM(ruler)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 static void 

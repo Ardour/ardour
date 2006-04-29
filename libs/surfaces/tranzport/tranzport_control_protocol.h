@@ -100,11 +100,13 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol, public Abstract
 	uint8_t        _datawheel;
 	uint8_t        _device_status;
 	usb_dev_handle* udev;
+
 	ARDOUR::Route*  current_route;
 	uint32_t        current_track_id;
 	WheelMode       wheel_mode;
 	WheelShiftMode  wheel_shift_mode;
 	DisplayMode     display_mode;
+	ARDOUR::gain_t  gain_fraction;
 
 	void do_request (TranzportRequest*);
 	

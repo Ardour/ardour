@@ -3212,7 +3212,7 @@ void
 Session::set_dirty ()
 {
 	bool was_dirty = dirty();
-	
+
 	_state_of_the_state = StateOfTheState (_state_of_the_state | Dirty);
 
 	if (!was_dirty) {

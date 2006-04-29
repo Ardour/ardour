@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 
 #include <float.h>
 #include <sys/time.h>
@@ -47,6 +48,23 @@ BaseUI::RequestType LEDChange = BaseUI::new_request_type ();
 BaseUI::RequestType Print = BaseUI::new_request_type ();
 BaseUI::RequestType SetCurrentTrack = BaseUI::new_request_type ();
 
+static inline double 
+gain_to_slider_position (ARDOUR::gain_t g)
+{
+	if (g == 0) return 0;
+	return pow((6.0*log(g)/log(2.0)+192.0)/198.0, 8.0);
+
+}
+
+static inline ARDOUR::gain_t 
+slider_position_to_gain (double pos)
+{
+	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
+	if (pos == 0.0) return 0;
+	return pow (2.0,(sqrt(sqrt(sqrt(pos)))*198.0-192.0)/6.0);
+}
+
+
 TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	: ControlProtocol  (s, X_("Tranzport")),
 	  AbstractUI<TranzportRequest> (X_("Tranzport"), false)
@@ -66,6 +84,7 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	last_wheel_dir = 1;
 	last_track_gain = FLT_MAX;
 	display_mode = DisplayNormal;
+	gain_fraction = 0.0;
 
 	memset (current_screen, 0, sizeof (current_screen));
 	memset (pending_screen, 0, sizeof (pending_screen));
@@ -102,11 +121,15 @@ TranzportControlProtocol::set_active (bool yn)
 			}
 
 		} else {
-
+			cerr << "Begin tranzport shutdown\n";
 			pthread_cancel_one (thread);
-			lcd_clear ();
+			cerr << "Thread dead\n";
+			// lcd_clear ();
+			// lights_off ();
+			// cerr << "dev reset\n";
 			close ();
 			_active = false;
+			cerr << "End tranzport shutdown\n";
 		} 
 	}
 
@@ -120,7 +143,7 @@ TranzportControlProtocol::show_track_gain ()
 		gain_t g = current_route->gain();
 		if (g != last_track_gain) {
 			char buf[16];
-			snprintf (buf, sizeof (buf), "%6.1fdB", coefficient_to_dB (current_route->gain()));
+			snprintf (buf, sizeof (buf), "%6.1fdB", coefficient_to_dB (current_route->effective_gain()));
 			print (0, 9, buf); 
 			last_track_gain = g;
 		}
@@ -411,7 +434,7 @@ TranzportControlProtocol::lcd_clear ()
 
 	for (uint8_t i = 0; i < 10; ++i) {
 		cmd[2] = i;
-		usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, 500);
+		usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, 1000);
 	}
 	
 	memset (current_screen, ' ', sizeof (current_screen));
@@ -432,31 +455,31 @@ TranzportControlProtocol::lights_off ()
 	cmd[7] = 0x00;
 
 	cmd[2] = LightRecord;
-	if (write (cmd, 500) == 0) {
+	if (write (cmd, 1000) == 0) {
 		lights[LightRecord] = false;
 	}
 	cmd[2] = LightTrackrec;
-	if (write (cmd, 500) == 0) {
+	if (write (cmd, 1000) == 0) {
 		lights[LightTrackrec] = false;
 	}
 	cmd[2] = LightTrackmute;
-	if (write (cmd, 500) == 0) {
+	if (write (cmd, 1000) == 0) {
 		lights[LightTrackmute] = false;
 	}
 	cmd[2] = LightTracksolo;
-	if (write (cmd, 500) == 0) {
+	if (write (cmd, 1000) == 0) {
 		lights[LightTracksolo] = false;
 	}
 	cmd[2] = LightAnysolo;
-	if (write (cmd, 500) == 0) {
+	if (write (cmd, 1000) == 0) {
 		lights[LightAnysolo] = false;
 	}
 	cmd[2] = LightLoop;
-	if (write (cmd, 500) == 0) {
+	if (write (cmd, 1000) == 0) {
 		lights[LightLoop] = false;
 	}
 	cmd[2] = LightPunch;
-	if (write (cmd, 500) == 0) {
+	if (write (cmd, 1000) == 0) {
 		lights[LightPunch] = false;
 	}
 }
@@ -477,7 +500,7 @@ TranzportControlProtocol::light_on (LightID light)
 		cmd[6] = 0x00;
 		cmd[7] = 0x00;
 
-		if (write (cmd, 500) == 0) {
+		if (write (cmd, 1000) == 0) {
 			lights[light] = true;
 			return 0;
 		} else {
@@ -505,7 +528,7 @@ TranzportControlProtocol::light_off (LightID light)
 		cmd[6] = 0x00;
 		cmd[7] = 0x00;
 
-		if (write (cmd, 500) == 0) {
+		if (write (cmd, 1000) == 0) {
 			lights[light] = false;
 			return 0;
 		} else {
@@ -524,6 +547,7 @@ TranzportControlProtocol::monitor_work ()
 	int err;
 	uint8_t buf[8];
 	int val;
+	bool first_time = true;
 
 	PBD::ThreadCreated (pthread_self(), X_("Tranzport"));
 
@@ -538,26 +562,22 @@ TranzportControlProtocol::monitor_work ()
 	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
-	/* set initial state */
-
-	lcd_clear ();
-	lights_off ();
-
-	show_wheel_mode();
 	next_track ();
-	show_transport_time ();
 
 	while (true) {
 
 		/* bInterval for this beastie is 10ms */
 
-		pthread_testcancel();
-		usleep (20000);
-		pthread_testcancel();
-
 		/* anything to read ? */
 
-		val = usb_interrupt_read (udev, READ_ENDPOINT, (char*) buf, 8, 0);
+		if (_device_status == STATUS_OFFLINE) {
+			light_off (LightRecord);
+			first_time = true;
+		}
+
+		pthread_testcancel();
+		val = usb_interrupt_read (udev, READ_ENDPOINT, (char*) buf, 8, 10);
+		pthread_testcancel();
 
 		/* any requests to handle? */
 
@@ -567,9 +587,15 @@ TranzportControlProtocol::monitor_work ()
 			process (buf);
 		}
 
-		/* update whatever needs updating */
-		
-		update_state ();
+		if (_device_status != STATUS_OFFLINE) {
+			if (first_time) {
+				lcd_clear ();
+				lights_off ();
+				first_time = false;
+			}
+			/* update whatever needs updating */
+			update_state ();
+		}
 	}
 
 	return (void*) 0;
@@ -620,7 +646,7 @@ TranzportControlProtocol::update_state ()
 				cmd[6] = pending_screen[row][col_base+3];
 				cmd[7] = 0x00;
 
-				if (usb_interrupt_write (udev, WRITE_ENDPOINT, (char *) cmd, 8, 500) == 8) {
+				if (usb_interrupt_write (udev, WRITE_ENDPOINT, (char *) cmd, 8, 1000) == 8) {
 					/* successful write: copy to current */
 					memcpy (&current_screen[row][col_base], &pending_screen[row][col_base], 4);
 				}
@@ -1049,6 +1075,8 @@ void
 TranzportControlProtocol::button_event_in_press (bool shifted)
 {
 	if (shifted) {
+		toggle_punch_in ();
+	} else {
 		ControlProtocol::ZoomIn (); /* EMIT SIGNAL */
 	}
 }
@@ -1062,6 +1090,8 @@ void
 TranzportControlProtocol::button_event_out_press (bool shifted)
 {
 	if (shifted) {
+		toggle_punch_out ();
+	} else {
 		ControlProtocol::ZoomOut (); /* EMIT SIGNAL */
 	}
 }
@@ -1353,20 +1383,32 @@ void
 TranzportControlProtocol::step_gain_up ()
 {
 	if (buttonmask & ButtonStop) {
-		current_route->inc_gain (0.01, this);
+		gain_fraction += 0.001;
 	} else {
-		current_route->inc_gain (0.1, this);
+		gain_fraction += 0.01;
 	}
+
+	if (gain_fraction > 2.0) {
+		gain_fraction = 2.0;
+	}
+	
+	current_route->set_gain (slider_position_to_gain (gain_fraction), this);
 }
 
 void
 TranzportControlProtocol::step_gain_down ()
 {
 	if (buttonmask & ButtonStop) {
-		current_route->inc_gain (-0.01, this);
+		gain_fraction -= 0.001;
 	} else {
-		current_route->inc_gain (-0.1, this);
+		gain_fraction -= 0.01;
 	}
+
+	if (gain_fraction < 0.0) {
+		gain_fraction = 0.0;
+	}
+	
+	current_route->set_gain (slider_position_to_gain (gain_fraction), this);
 }
 
 void
@@ -1444,6 +1486,7 @@ TranzportControlProtocol::next_track ()
 	}
 
 	current_route = cr;
+	gain_fraction = gain_to_slider_position (current_route->effective_gain());
 }
 
 void
@@ -1477,6 +1520,7 @@ TranzportControlProtocol::prev_track ()
 	}
 
 	current_route = cr;
+	gain_fraction = gain_to_slider_position (current_route->effective_gain());
 }
 
 void

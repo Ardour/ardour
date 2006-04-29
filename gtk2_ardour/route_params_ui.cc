@@ -356,9 +356,6 @@ RouteParams_UI::set_session (Session *sess)
 {
 	ArdourDialog::set_session (sess);
 
-	// GTK2FIX
-	// route_select_list.freeze ();
-
 	route_display_model->clear();
 
 	if (session) {

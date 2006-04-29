@@ -64,8 +64,6 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(const string & track_id, PublicEditor& ed
 {
 	_color = unique_random_color() ;
 	
-	//GTK2FIX -- how to get the group? is the canvas display really a group?
-	//selection_group = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display), gnome_canvas_group_get_type (), NULL) ;
 	selection_group = new ArdourCanvas::Group (*canvas_display);
 	selection_group->hide();
 

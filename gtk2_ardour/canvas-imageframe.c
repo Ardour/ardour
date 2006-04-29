@@ -180,8 +180,6 @@ gnome_canvas_imageframe_init (GnomeCanvasImageFrame *image)
 	image->height = 0.0;
 	image->drawwidth = 0.0;
 	image->anchor = GTK_ANCHOR_CENTER;
-	// GTK2FIX
-	// GNOME_CANVAS_ITEM(image)->object.flags |= GNOME_CANVAS_ITEM_NO_AUTO_REDRAW;
 }
 
 static void

@@ -1735,9 +1735,8 @@ AudioClock::set_mode (Mode m)
 	   started editing the clock and then we switch clock mode.
 	*/
 
-	// GTK2FIX might need an equivalent here for drop focus
-
-
+	clock_base.grab_focus ();
+		
 	if (_mode == m) {
 		return;
 	}
