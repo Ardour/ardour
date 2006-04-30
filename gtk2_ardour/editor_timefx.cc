@@ -57,13 +57,11 @@ Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
 	set_title (_("ardour: timestretch"));
 	set_name (N_("TimeStretchDialog"));
 
-	add (packer);
-
-	packer.set_spacing (5);
-	packer.set_border_width (5);
-	packer.pack_start (upper_button_box);
-	packer.pack_start (progress_bar);
-	packer.pack_start (lower_button_box);
+	get_vbox()->set_spacing (5);
+	get_vbox()->set_border_width (5);
+	get_vbox()->pack_start (upper_button_box);
+	get_vbox()->pack_start (progress_bar);
+	get_vbox()->pack_start (lower_button_box);
 	
 	upper_button_box.set_homogeneous (true);
 	upper_button_box.set_spacing (5);
@@ -85,6 +83,7 @@ Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
 
 	// GTK2FIX
 	// action_button.signal_clicked().connect (bind (mem_fun(*this, &ArdourDialog::stop), 1));
+	show_all_children();
 }
 
 gint
