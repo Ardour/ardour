@@ -930,6 +930,14 @@ Editor::reposition_x_origin (jack_nframes_t frame)
 {
 	if (frame != leftmost_frame) {
 		leftmost_frame = frame;
+		
+		jack_nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
+
+		if (rightmost_frame > last_canvas_frame) {
+			last_canvas_frame = rightmost_frame;
+			reset_scrolling_region ();
+		}
+
 		horizontal_adjustment.set_value (frame/frames_per_unit);
 	}
 }
@@ -1089,24 +1097,6 @@ Editor::session_control_changed (Session::ControlType t)
 }
 
 void
-Editor::fake_handle_new_audio_region (AudioRegion *region)
-{
-	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &Editor::handle_new_audio_region), region));
-}
-
-void
-Editor::fake_handle_audio_region_removed (AudioRegion *region)
-{
-	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &Editor::handle_audio_region_removed), region));
-}
-
-void
-Editor::fake_handle_new_duration ()
-{
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &Editor::handle_new_duration));
-}
-
-void
 Editor::start_scrolling ()
 {
 	scroll_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect 
@@ -1163,12 +1153,16 @@ Editor::center_screen_internal (jack_nframes_t frame, float page)
 void
 Editor::handle_new_duration ()
 {
-	reset_scrolling_region ();
+	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::handle_new_duration));
 
-	if (session) {
-		cerr << "Set upper #2 to " << horizontal_adjustment.get_upper () << endl;
-		horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
+	jack_nframes_t new_end = session->get_maximum_extent() + (jack_nframes_t) floorf (current_page_frames() * 0.10f);
+				  
+	if (new_end > last_canvas_frame) {
+		last_canvas_frame = new_end;
+		reset_scrolling_region ();
 	}
+
+	horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
 }
 
 void
@@ -1229,9 +1223,9 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->TransportStateChange.connect (mem_fun(*this, &Editor::map_transport_state)));
 	session_connections.push_back (session->PositionChanged.connect (mem_fun(*this, &Editor::map_position_change)));
 	session_connections.push_back (session->RouteAdded.connect (mem_fun(*this, &Editor::handle_new_route_p)));
-	session_connections.push_back (session->AudioRegionAdded.connect (mem_fun(*this, &Editor::fake_handle_new_audio_region)));
-	session_connections.push_back (session->AudioRegionRemoved.connect (mem_fun(*this, &Editor::fake_handle_audio_region_removed)));
-	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::fake_handle_new_duration)));
+	session_connections.push_back (session->AudioRegionAdded.connect (mem_fun(*this, &Editor::handle_new_audio_region)));
+	session_connections.push_back (session->AudioRegionRemoved.connect (mem_fun(*this, &Editor::handle_audio_region_removed)));
+	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::handle_new_duration)));
 	session_connections.push_back (session->edit_group_added.connect (mem_fun(*this, &Editor::add_edit_group)));
 	session_connections.push_back (session->edit_group_removed.connect (mem_fun(*this, &Editor::edit_groups_changed)));
 	session_connections.push_back (session->NamedSelectionAdded.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
@@ -1337,7 +1331,7 @@ Editor::connect_to_session (Session *t)
 	update_crossfade_model ();
 	update_layering_model ();
 
-	reset_scrolling_region ();
+	handle_new_duration ();
 
 	redisplay_regions ();
 	redisplay_named_selections ();
@@ -2880,29 +2874,21 @@ Editor::autoscroll_canvas ()
 
 		/* connect the timeout so that we get called repeatedly */
 		
-		autoscroll_timeout_tag = gtk_timeout_add (100, _autoscroll_canvas, this);
-		keep_calling = false;
+		autoscroll_timeout_tag = gtk_timeout_add (40, _autoscroll_canvas, this);
 
 	} else if (autoscroll_cnt > 10 && autoscroll_cnt < 20) {
 		
 		/* after about a while, speed up a bit by changing the timeout interval */
 
-		autoscroll_timeout_tag = gtk_timeout_add (50, _autoscroll_canvas, this);
-		keep_calling = false;
+		autoscroll_timeout_tag = gtk_timeout_add (20, _autoscroll_canvas, this);
 		
-	} else if (autoscroll_cnt >= 20 && autoscroll_cnt < 30) {
-
-		/* after about another while, speed up some more */
-
-		autoscroll_timeout_tag = gtk_timeout_add (25, _autoscroll_canvas, this);
-		keep_calling = false;
-
 	} else if (autoscroll_cnt >= 30) {
 
-		/* we've been scrolling for a while ... crank it up */
+		/* after about another while, speed up by increasing the shift per callback */
 
-		autoscroll_distance = 10 * (jack_nframes_t) floor (canvas_width * frames_per_unit);
-	}
+		autoscroll_distance =  (jack_nframes_t) floor (0.5 * current_page_frames());
+
+	} 
 
 	return keep_calling;
 }
@@ -2917,7 +2903,7 @@ Editor::start_canvas_autoscroll (int dir)
 	stop_canvas_autoscroll ();
 
 	autoscroll_direction = dir;
-	autoscroll_distance = (jack_nframes_t) floor ((canvas_width * frames_per_unit)/10.0);
+	autoscroll_distance = (jack_nframes_t) floor ((canvas_width * frames_per_unit)/50.0);
 	autoscroll_cnt = 0;
 	
 	/* do it right now, which will start the repeated callbacks */

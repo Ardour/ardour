@@ -256,6 +256,7 @@ Editor::session_going_away ()
 	last_update_frame = 0;
 	drag_info.item = 0;
 	last_audition_region = 0;
+	last_canvas_frame = 0;
 
 	/* hide all tracks */
 

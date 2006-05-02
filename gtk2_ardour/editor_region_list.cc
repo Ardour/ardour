@@ -46,14 +46,17 @@ using namespace Glib;
 using namespace Editing;
 
 void
-Editor::handle_audio_region_removed (AudioRegion* ignored)
+Editor::handle_audio_region_removed (AudioRegion* region)
 {
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_audio_region_removed), region));
 	redisplay_regions ();
 }
 
 void
 Editor::handle_new_audio_region (AudioRegion *region)
 {
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_audio_region), region));
+
 	/* don't copy region - the one we are being notified
 	   about belongs to the session, and so it will
 	   never be edited.

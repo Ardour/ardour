@@ -159,6 +159,9 @@
                <menuitem action='step-tracks-up'/>
                <menuitem action='step-tracks-down'/>
    	       <separator/>
+               <menuitem action='scroll-forward'/>
+               <menuitem action='scroll-backward'/>
+   	       <separator/>
                <menuitem action='ToggleWaveformVisibility'/>
                <menuitem action='ToggleWaveformsWhileRecording'/>
                <menuitem action='ToggleMeasureVisibility'/>

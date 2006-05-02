@@ -53,8 +53,10 @@
 
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-down" "Page_Down")
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-up" "Page_Up")
-(gtk_accel_path "<Actions>/Editor/step-tracks-down" "Down")
-(gtk_accel_path "<Actions>/Editor/step-tracks-up" "Up")
+(gtk_accel_path "<Actions>/Editor/scroll-backward" "leftarrow")
+(gtk_accel_path "<Actions>/Editor/scroll-forward" "rightarrow")
+(gtk_accel_path "<Actions>/Editor/step-tracks-down" "downarrow")
+(gtk_accel_path "<Actions>/Editor/step-tracks-up" "uparrow")
 (gtk_accel_path "<Actions>/Editor/playhead-to-edit" "Return")
 (gtk_accel_path "<Actions>/Editor/edit-to-playhead" "<Alt>Return")
 

@@ -700,6 +700,7 @@ class Editor : public PublicEditor
 
 	double canvas_width;
 	double canvas_height;
+	jack_nframes_t last_canvas_frame;
 
 	bool track_canvas_map_handler (GdkEventAny*);
 	bool time_canvas_map_handler (GdkEventAny*);
@@ -870,9 +871,7 @@ class Editor : public PublicEditor
 
 	int ensure_cursor (jack_nframes_t* pos);
 
-	void fake_handle_new_audio_region (ARDOUR::AudioRegion *);
 	void handle_new_audio_region (ARDOUR::AudioRegion *);
-	void fake_handle_audio_region_removed (ARDOUR::AudioRegion *);
 	void handle_audio_region_removed (ARDOUR::AudioRegion *);
 	void add_audio_region_to_region_display (ARDOUR::AudioRegion *);
 	void region_hidden (ARDOUR::Region*);
@@ -1215,7 +1214,6 @@ class Editor : public PublicEditor
 	void kbd_do_brush (GdkEvent*);
 	void kbd_do_audition (GdkEvent*);
 
-	void fake_handle_new_duration ();
 	void handle_new_duration ();
 	void initialize_canvas ();
 	void reset_scrolling_region (Gtk::Allocation* alloc = 0);

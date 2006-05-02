@@ -275,38 +275,6 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 	canvas_width = alloc.get_width();
 	canvas_height = alloc.get_height();
 
-	if (session == 0 && !ARDOUR_UI::instance()->will_create_new_session_automatically()) {
-
-		/* this mess of code is here to find out how wide this text is and
-		   position the message in the center of the editor window.
-		*/
-		
-		ustring msg = string_compose ("<span face=\"sans\" style=\"normal\" weight=\"bold\" size=\"x-large\">%1%2</span>",
-					   _("Start a new session\n"), _("via Session menu"));
-
-		RefPtr<Pango::Layout> layout = create_pango_layout (msg);
-		Pango::FontDescription font = get_font_for_style (N_("FirstActionMessage"));
-		int width, height;
-		get_ink_pixel_size (layout, width, height);
-			
-		if (first_action_message == 0) {
-			
-			first_action_message = new ArdourCanvas::Text (*track_canvas.root());
-			first_action_message->property_font_desc() = font;
-			first_action_message->property_fill_color_rgba() = color_map[cFirstActionMessage];
-			first_action_message->property_x() = (canvas_width - width) / 2.0;
-			first_action_message->property_y() = (canvas_height/2.0) - height;
-			first_action_message->property_anchor() = ANCHOR_NORTH_WEST;
-			first_action_message->property_markup() = msg;
-			
-		} else {
-
-			/* center it */
-			first_action_message->property_x() = (canvas_width - width) / 2.0;
-			first_action_message->property_y() = (canvas_height/2.0) - height;
-		}
-	}
-
 	zoom_range_clock.set ((jack_nframes_t) floor ((canvas_width * frames_per_unit)));
 	edit_cursor->set_position (edit_cursor->current_frame);
 	playhead_cursor->set_position (playhead_cursor->current_frame);
@@ -374,15 +342,7 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 		}
 	}
 
-	// old: ceil ((double) max_frames / frames_per_unit);
-	
-	double last_canvas_unit;
-
-	if (session) {
-		last_canvas_unit =  (session->get_maximum_extent() + (current_page_frames() * 0.10f)) / frames_per_unit;
-	} else {
-		last_canvas_unit = 0;
-	}
+	double last_canvas_unit =  last_canvas_frame / frames_per_unit;
 
 	track_canvas.set_scroll_region (0.0, 0.0, max (last_canvas_unit, canvas_width), pos);
 
@@ -418,6 +378,10 @@ Editor::controls_layout_size_request (Requisition* req)
 	edit_controls_vbox.check_resize();
 
 	req->width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
+	
+	/* don't get too big. the fudge factors here are just guesses */
+	
+	req->width = min (req->width, screen->get_width() - 300);
 	req->height = min ((gint) pos, (screen->get_height() - 400));
 
 	/* this one is important: it determines how big the layout thinks it really is, as 

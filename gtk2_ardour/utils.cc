@@ -396,6 +396,42 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	   all "normal text" accelerators.
 	*/
 
+
+	if (!special_handling_of_unmodified_accelerators) {
+
+		/* pretend that certain key events that GTK does not allow
+		   to be used as accelerators are actually something that
+		   it does allow.
+		*/
+
+		int ret = false;
+
+		switch (ev->keyval) {
+		case GDK_Up:
+			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_uparrow, GdkModifierType(ev->state));
+			break;
+
+		case GDK_Down:
+			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_downarrow, GdkModifierType(ev->state));
+			break;
+
+		case GDK_Right:
+			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_rightarrow, GdkModifierType(ev->state));
+			break;
+
+		case GDK_Left:
+			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_leftarrow, GdkModifierType(ev->state));
+			break;
+
+		default:
+			break;
+		}
+
+		if (ret) {
+			return true;
+		}
+	}
+		
 	if (!special_handling_of_unmodified_accelerators ||
 	    ev->state & (Gdk::MOD1_MASK|
 			 Gdk::MOD2_MASK|
