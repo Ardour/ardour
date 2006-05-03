@@ -49,6 +49,10 @@ gtkardour.Merge ([
     libraries['libglademm']
 ])
 
+if gtkardour['DMALLOC']:
+	gtkardour.Merge([libraries['dmalloc']])
+	gtkardour.Append(CCFLAGS='-DUSE_DMALLOC')
+
 if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Merge ([libraries['fftw3f']])
 	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')

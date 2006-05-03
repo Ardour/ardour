@@ -35,7 +35,8 @@ opts.AddOptions(
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
-    BoolOption('SURFACES', 'Build support for control surfaces', 0)
+    BoolOption('SURFACES', 'Build support for control surfaces', 0),
+    BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0)
   )
 
 #----------------------------------------------------------------------
@@ -413,6 +414,23 @@ else:
     have_libusb = False
     
 libraries['usb'] = conf.Finish ()
+
+#
+# Check for dmalloc
+
+libraries['dmalloc'] = LibraryInfo ()
+
+#
+# look for the threaded version
+#
+
+conf = Configure (libraries['dmalloc'])
+if conf.CheckLib ('dmallocth', 'dmalloc_shutdown'):
+    have_libdmalloc = True
+else:
+    have_libdmalloc = False
+    
+libraries['dmalloc'] = conf.Finish ()
 
 #
 
