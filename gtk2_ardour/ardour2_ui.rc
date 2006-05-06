@@ -678,6 +678,16 @@ style "track_list_display" = "small_bold_text"
  	base[SELECTED] = { 0, 0, 0 }
 }
 
+style "inspector_track_list_display" = "track_list_display"
+{
+ 	text[ACTIVE] = { 0.8, 0.8, 0.8 }
+
+	base[NORMAL] = { 0, 0, 0 }
+ 	base[ACTIVE] = { 0.2, 0.2, 0.2 }
+ 	base[INSENSITIVE] = { 0, 0, 0 }
+ 	base[SELECTED] = { 0.3, 0.3, 0.4 }
+}
+
 style "redirect_list_display"
 {
 	GtkTreeView::horizontal-separator = 0
@@ -699,6 +709,11 @@ style "redirect_list_display"
 
 	fg[NORMAL] = { 0.5, 0.5, 0.5 }  # used for inactive
 	fg[ACTIVE] = { 0.5, 1.0, 1.0 }  # used for active
+}
+
+style "inspector_redirect_list_display" = "redirect_list_display"
+{
+ 	base[SELECTED] = { 0.3, 0.3, 0.3 }
 }
 
 # MixerPanZone:
@@ -1101,9 +1116,9 @@ widget "*ConnectionEditorPortListSelected" style "selected_io_selector_port_list
 widget "*ConnectionEditorNotebook" style "io_selector_notebook"
 widget "*ConnectionEditorNotebookTab" style "io_selector_notebook"
 widget "*ConnectionEditorFrame" style "base_frame"
-widget "*RouteParamsListDisplay" style "track_list_display"
-widget "*RouteParamsPreListDisplay" style "track_list_display"
-widget "*RouteParamsPostListDisplay" style "track_list_display"
+widget "*RouteParamsListDisplay" style "inspector_track_list_display"
+widget "*RouteParamsPreListDisplay" style "inspector_redirect_list_display"
+widget "*RouteParamsPostListDisplay" style "inspector_redirect_list_display"
 widget "*TearOffArrow" style "tearoff_arrow"
 widget "*RouteParamsTitleButton" style "medium_text"
 widget "*RouteParamsTitleLabel" style "medium_text"

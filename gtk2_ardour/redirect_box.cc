@@ -303,7 +303,12 @@ RedirectBox::redirect_button_press_event (GdkEventButton *ev)
 		ret = true;
 
 	} 
+	else if (redirect && ev->button == 1 && selected) {
 
+		// this is purely informational but necessary
+		RedirectSelected (redirect); // emit
+	}
+	
 	return ret;
 }
 

@@ -125,7 +125,7 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	route_vpacker.pack_start (route_hpacker, true, true);
 
 	
-	list_hpane.add1 (list_vpacker);
+	list_hpane.pack1 (list_vpacker);
 	list_hpane.add2 (route_vpacker);
 
 	list_hpane.set_position(110);
@@ -133,9 +133,11 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	pre_redir_hpane.set_position(110);
 	post_redir_hpane.set_position(110);
 	
-	global_vpacker.pack_start (list_hpane, true, true);
+	//global_vpacker.pack_start (list_hpane, true, true);
+	//get_vbox()->pack_start (global_vpacker);
+	get_vbox()->pack_start (list_hpane);
 	
-	add (global_vpacker);
+	
 	set_name ("RouteParamsWindow");
 	set_default_size (620,370);
 	set_title (_("ardour: track/bus inspector"));
@@ -217,14 +219,16 @@ RouteParams_UI::setup_redirect_boxes()
 		pre_redirect_box = new RedirectBox(PreFader, *session, *_route, *_plugin_selector, _rr_selection);
 		post_redirect_box = new RedirectBox(PostFader, *session, *_route, *_plugin_selector, _rr_selection);
 
-	        pre_redir_hpane.add1 (*pre_redirect_box);
-		post_redir_hpane.add1 (*post_redirect_box);
+	        pre_redir_hpane.pack1 (*pre_redirect_box);
+		post_redir_hpane.pack1 (*post_redirect_box);
 
 		pre_redirect_box->RedirectSelected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PreFader));
 		pre_redirect_box->RedirectUnselected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PreFader));
 		post_redirect_box->RedirectSelected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PostFader));
 		post_redirect_box->RedirectUnselected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PostFader));
-		
+
+		pre_redir_hpane.show_all();
+		post_redir_hpane.show_all();
 	}
 	
 }
@@ -567,7 +571,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 				_pre_plugin_conn = plugin_insert->plugin().GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PreFader));
 				plugin_ui->start_updating (0);
 				_active_pre_view = plugin_ui;
-				pre_redir_hpane.add2 (*_active_pre_view);
+				pre_redir_hpane.pack2 (*_active_pre_view);
 				pre_redir_hpane.show_all();
 			}
 			else {
@@ -575,7 +579,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 				_post_plugin_conn = plugin_insert->plugin().GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PostFader));
 				plugin_ui->start_updating (0);
 				_active_post_view = plugin_ui;
-				post_redir_hpane.add2 (*_active_post_view);
+				post_redir_hpane.pack2 (*_active_post_view);
 				post_redir_hpane.show_all();
 			}
 
@@ -587,7 +591,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 				cleanup_pre_view();
 				_pre_plugin_conn = port_insert->GoingAway.connect (mem_fun(*this, &RouteParams_UI::redirect_going_away));
 				_active_pre_view = portinsert_ui;
-				pre_redir_hpane.add2 (*_active_pre_view);
+				pre_redir_hpane.pack2 (*_active_pre_view);
 				portinsert_ui->redisplay();
 				pre_redir_hpane.show_all();
 			}
@@ -595,7 +599,7 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 				cleanup_post_view();
 				_post_plugin_conn = port_insert->GoingAway.connect (mem_fun(*this, &RouteParams_UI::redirect_going_away));
 				_active_post_view = portinsert_ui;
-				post_redir_hpane.add2 (*_active_post_view);
+				post_redir_hpane.pack2 (*_active_post_view);
 				portinsert_ui->redisplay();
 				post_redir_hpane.show_all();
 			}
