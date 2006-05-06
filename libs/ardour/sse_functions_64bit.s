@@ -482,9 +482,6 @@ x86_sse_apply_gain_vector:
 .globl x86_sse_compute_peak
 	.type	x86_sse_compute_peak,@function
 
-abs_mask:
-	.long   2147483647
-
 	
 x86_sse_compute_peak:
 
@@ -505,7 +502,9 @@ x86_sse_compute_peak:
 	je	.CP_END
 
 	#; create the "abs" mask in %xmm2
-	movss	abs_mask, %xmm2
+	pushq   $2147483647
+	movss	(%rsp), %xmm2
+	addq    $8, %rsp
 	shufps	$0x00, %xmm2, %xmm2
 
 	#; Check for alignment
