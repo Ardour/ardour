@@ -356,8 +356,7 @@ int
 ARDOUR_UI::create_sound_file_browser ()
 {
 	if (sfdb == 0) {
-		sfdb = new SoundFileBrowser (_("Sound File Browser"));
-		sfdb->set_session (session);
+		sfdb = new SoundFileBrowser (_("Sound File Browser"), session);
 		sfdb->signal_unmap().connect (sigc::bind(sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleSoundFileBrowser")));
 	}
 	return 0;

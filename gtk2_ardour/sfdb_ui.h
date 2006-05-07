@@ -109,7 +109,7 @@ class SoundFileBox : public Gtk::VBox
 class SoundFileBrowser : public ArdourDialog
 {
   public:
-    SoundFileBrowser (std::string title);
+    SoundFileBrowser (std::string title, ARDOUR::Session* _s = 0);
     virtual ~SoundFileBrowser () {}; 
 
     virtual void set_session (ARDOUR::Session*);
@@ -124,7 +124,7 @@ class SoundFileBrowser : public ArdourDialog
 class SoundFileChooser : public SoundFileBrowser
 {
   public:
-    SoundFileChooser (std::string title);
+    SoundFileChooser (std::string title, ARDOUR::Session* _s = 0);
     virtual ~SoundFileChooser () {};
 
     std::string get_filename () {return chooser.get_filename();};
@@ -133,7 +133,7 @@ class SoundFileChooser : public SoundFileBrowser
 class SoundFileOmega : public SoundFileBrowser
 {
   public:
-    SoundFileOmega (std::string title);
+    SoundFileOmega (std::string title, ARDOUR::Session* _s);
     virtual ~SoundFileOmega () {};
 
     /* these are returned by the Dialog::run() method. note

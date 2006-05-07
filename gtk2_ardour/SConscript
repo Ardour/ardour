@@ -42,6 +42,7 @@ gtkardour.Merge ([
     libraries['sigc2'],
     libraries['gtk2'],
     libraries['xml'],
+    libraries['xslt'],
     libraries['soundtouch'],
     libraries['samplerate'],
     libraries['jack'],

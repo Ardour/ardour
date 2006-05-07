@@ -287,7 +287,7 @@ SoundFileBox::field_selected ()
 	}
 }
 
-SoundFileBrowser::SoundFileBrowser (string title)
+SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
 	: ArdourDialog (title, false),
 	  chooser (Gtk::FILE_CHOOSER_ACTION_OPEN)
 {
@@ -296,6 +296,8 @@ SoundFileBrowser::SoundFileBrowser (string title)
 	chooser.set_select_multiple (true);
 
 	chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
+
+	set_session (s);
 }
 
 void
@@ -310,9 +312,9 @@ SoundFileBrowser::update_preview ()
 	chooser.set_preview_widget_active(preview.setup_labels(chooser.get_filename()));
 }
 
-SoundFileChooser::SoundFileChooser (string title)
+SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
 	:
-	SoundFileBrowser(title)
+	SoundFileBrowser(title, s)
 {
 	add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -328,8 +330,8 @@ static const char *import_mode_strings[] = {
 
 vector<string> SoundFileOmega::mode_strings;
 
-SoundFileOmega::SoundFileOmega (string title)
-	: SoundFileBrowser (title),
+SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s)
+	: SoundFileBrowser (title, s),
 	  split_check (_("Split Channels"))
 {
 	if (mode_strings.empty()) {

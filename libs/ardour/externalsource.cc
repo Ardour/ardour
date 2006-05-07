@@ -76,7 +76,11 @@ ExternalSource::peak_path (string audio_path)
 	stat (mp.c_str(), &stat_mount);
 
 	char buf[32];
+#ifdef __APPLE__
+	snprintf (buf, sizeof (buf), "%u-%u-%d.peak", stat_mount.st_ino, stat_file.st_ino, channel);
+#else
 	snprintf (buf, sizeof (buf), "%ld-%ld-%d.peak", stat_mount.st_ino, stat_file.st_ino, channel);
+#endif
 
 	string res = peak_dir;
 	res += buf;

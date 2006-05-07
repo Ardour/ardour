@@ -373,6 +373,9 @@ libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
 libraries['xml'] = LibraryInfo()
 libraries['xml'].ParseConfig('pkg-config --cflags --libs libxml-2.0')
 
+libraries['xslt'] = LibraryInfo()
+libraries['xslt'].ParseConfig('pkg-config --cflags --libs libxslt')
+
 libraries['glib2'] = LibraryInfo()
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs glib-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gobject-2.0')
