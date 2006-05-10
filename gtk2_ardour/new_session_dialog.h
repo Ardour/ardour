@@ -93,15 +93,16 @@ public:
 	bool connect_outs_to_master() const;
 	bool connect_outs_to_physical() const ;
 	int get_current_page();
+	void reset_recent();
+
+	// reset everything to default values.
+	void reset();
 
 protected:
 
 	void reset_name();
 	void reset_template();
 	
-	// reset everything to default values.
-	void reset();
-
 	// references to widgets we care about.
 	Gtk::Dialog* m_new_session_dialog;
 	Gtk::Entry*  m_name;

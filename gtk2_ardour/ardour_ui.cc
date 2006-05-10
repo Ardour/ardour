@@ -1706,14 +1706,20 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 	m_new_session_dialog->show_all();
 	m_new_session_dialog->set_modal(true);
 	m_new_session_dialog->set_name(predetermined_path);
+	m_new_session_dialog->reset_recent();
 
 	int response = Gtk::RESPONSE_CANCEL;
 
 	do {
 		response = m_new_session_dialog->run ();
-		if(response == Gtk::RESPONSE_CANCEL) {
+		if(response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
 		  quit();
 		  return;
+
+		} else if (response == 0) {
+		  /* Clear was pressed */
+		  m_new_session_dialog->reset();
+
 		} else if (response == Gtk::RESPONSE_YES) {
 		  /* YES  == OPEN, but there's no enum for that */
 		  std::string session_name = m_new_session_dialog->session_name();
@@ -1803,7 +1809,7 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 		  }	
 		}
 		
-	} while(response == Gtk::RESPONSE_HELP);
+	} while (response == 0);
 	m_new_session_dialog->hide_all();
 	show();
 

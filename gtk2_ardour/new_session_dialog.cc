@@ -77,77 +77,17 @@ NewSessionDialog::NewSessionDialog(BaseObjectType* cobject,
 	xml->get_widget(X_("TheTreeview"), m_treeview);
 	xml->get_widget(X_("OkButton"), m_okbutton);
 
-
 	if (m_treeview) {
-	        /* Shamelessly ripped from ardour_ui.cc */
-	        std::vector<string *> *sessions;
-		std::vector<string *>::iterator i;
-		RecentSessionsSorter cmp;
-		
 		recent_model = Gtk::TreeStore::create (recent_columns);
 		m_treeview->set_model (recent_model);
 		m_treeview->append_column (_("Recent Sessions"), recent_columns.visible_name);
 		m_treeview->set_headers_visible (false);
 		m_treeview->get_selection()->set_mode (Gtk::SELECTION_SINGLE);
-		
-		recent_model->clear ();
-		
-		ARDOUR::RecentSessions rs;
-		ARDOUR::read_recent_sessions (rs);
-		
-		/* sort them alphabetically */
-		sort (rs.begin(), rs.end(), cmp);
-		sessions = new std::vector<std::string*>;
-		
-		for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
-		        sessions->push_back (new string ((*i).second));
-		}
-	  
-		for (i = sessions->begin(); i != sessions->end(); ++i) {
-		  
-		  std::vector<std::string*>* states;
-		  std::vector<const gchar*> item;
-		  std::string fullpath = *(*i);
-		  
-		  /* remove any trailing / */
-		  
-		  if (fullpath[fullpath.length()-1] == '/') {
-		          fullpath = fullpath.substr (0, fullpath.length()-1);
-		  }
-	    
-		  /* now get available states for this session */
-		  
-		  if ((states = ARDOUR::Session::possible_states (fullpath)) == 0) {
-		          /* no state file? */
-		          continue;
-		  }
-	    
-		  Gtk::TreeModel::Row row = *(recent_model->append());
-		  
-		  row[recent_columns.visible_name] = PBD::basename (fullpath);
-		  row[recent_columns.fullpath] = fullpath;
-		  
-		  if (states->size() > 1) {
-		    
-		          /* add the children */
-		    
-		          for (std::vector<std::string*>::iterator i2 = states->begin(); i2 != states->end(); ++i2) {
-			    
-			          Gtk::TreeModel::Row child_row = *(recent_model->append (row.children()));
-				  
-				  child_row[recent_columns.visible_name] = **i2;
-				  child_row[recent_columns.fullpath] = fullpath;
-				  
-				  delete *i2;
-			  }
-		  }
-		  
-		  delete states;
-		}
-		delete sessions;
+
 	}
-	
+
 	m_new_session_dialog->set_response_sensitive (Gtk::RESPONSE_OK, false);
+	m_new_session_dialog->set_response_sensitive (0, false);
 	m_new_session_dialog->set_default_response (Gtk::RESPONSE_OK);
 	m_notebook->show_all_children();
 	m_notebook->set_current_page(0);
@@ -321,6 +261,7 @@ NewSessionDialog::entry_key_release (GdkEventKey* ev)
 {
         if (m_name->get_text() != "") {
 	        m_new_session_dialog->set_response_sensitive (Gtk::RESPONSE_OK, true);
+		m_new_session_dialog->set_response_sensitive (0, true);
 	} else {
 	        m_new_session_dialog->set_response_sensitive (Gtk::RESPONSE_OK, false);
 	}
@@ -331,6 +272,7 @@ void
 NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 {
         if (pagenum == 1) {
+	        m_new_session_dialog->set_response_sensitive (0, false);
 	        m_okbutton->set_label(_("Open"));
 		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
@@ -339,6 +281,9 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		        m_new_session_dialog->set_response_sensitive (Gtk::RESPONSE_OK, true);
 		}
 	} else {
+	        if (m_name->get_text() != "") {
+		        m_new_session_dialog->set_response_sensitive (0, true);
+		}
 	        m_okbutton->set_label(_("New"));
 	        m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
 		if (m_name->get_text() == "") {
@@ -384,6 +329,71 @@ void
 NewSessionDialog::reset_template()
 {
 
+}
+
+void
+NewSessionDialog::reset_recent()
+{
+	        /* Shamelessly ripped from ardour_ui.cc */
+	        std::vector<string *> *sessions;
+		std::vector<string *>::iterator i;
+		RecentSessionsSorter cmp;
+		
+		recent_model->clear ();
+		
+		ARDOUR::RecentSessions rs;
+		ARDOUR::read_recent_sessions (rs);
+		
+		/* sort them alphabetically */
+		sort (rs.begin(), rs.end(), cmp);
+		sessions = new std::vector<std::string*>;
+		
+		for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
+		        sessions->push_back (new string ((*i).second));
+		}
+	  
+		for (i = sessions->begin(); i != sessions->end(); ++i) {
+		  
+		  std::vector<std::string*>* states;
+		  std::vector<const gchar*> item;
+		  std::string fullpath = *(*i);
+		  
+		  /* remove any trailing / */
+		  
+		  if (fullpath[fullpath.length()-1] == '/') {
+		          fullpath = fullpath.substr (0, fullpath.length()-1);
+		  }
+	    
+		  /* now get available states for this session */
+		  
+		  if ((states = ARDOUR::Session::possible_states (fullpath)) == 0) {
+		          /* no state file? */
+		          continue;
+		  }
+	    
+		  Gtk::TreeModel::Row row = *(recent_model->append());
+		  
+		  row[recent_columns.visible_name] = PBD::basename (fullpath);
+		  row[recent_columns.fullpath] = fullpath;
+		  
+		  if (states->size() > 1) {
+		    
+		          /* add the children */
+		    
+		          for (std::vector<std::string*>::iterator i2 = states->begin(); i2 != states->end(); ++i2) {
+			    
+			          Gtk::TreeModel::Row child_row = *(recent_model->append (row.children()));
+				  
+				  child_row[recent_columns.visible_name] = **i2;
+				  child_row[recent_columns.fullpath] = fullpath;
+				  
+				  delete *i2;
+			  }
+		  }
+		  
+		  delete states;
+		}
+		delete sessions;
 }
 
 void
