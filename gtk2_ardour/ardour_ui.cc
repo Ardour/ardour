@@ -147,9 +147,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	
 	color_manager->load (color_file);
 
-	m_new_session_dialog = 0;
-	m_new_session_dialog_ref = NewSessionDialogFactory::create();
-	m_new_session_dialog_ref->get_widget_derived (NewSessionDialogFactory::top_level_widget_name(), m_new_session_dialog);
+	m_new_session_dialog = new NewSessionDialog();
 	editor = 0;
 	mixer = 0;
 	session = 0;
@@ -1746,10 +1744,10 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 			std::string session_name = m_new_session_dialog->session_name();
 			std::string session_path = m_new_session_dialog->session_folder();
 			
-			/*
-			  XXX This is needed because session constructor wants a 
-			  non-existant path. hopefully this will be fixed at some point.
-			*/
+
+			  //XXX This is needed because session constructor wants a 
+			  //non-existant path. hopefully this will be fixed at some point.
+			
 			session_path = Glib::build_filename(session_path, session_name);
 			
 			std::string template_name = m_new_session_dialog->session_template_name();

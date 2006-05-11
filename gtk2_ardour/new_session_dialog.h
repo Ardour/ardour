@@ -24,16 +24,21 @@
 #define NEW_SESSION_DIALOG_H
 
 #include <string>
-#include <gtkmm/dialog.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/treepath.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/notebook.h>
+#include <gtkmm/table.h>
+#include <gtkmm/alignment.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/expander.h>
 
 #include <ardour/utils.h>
 
 #include <glibmm/refptr.h>
+
+#include "ardour_dialog.h"
 
 namespace Gtk {
 	class Entry;
@@ -45,26 +50,11 @@ namespace Gtk {
 	class Notebook;
 }
 
-#include "glade_factory.h"
-
-struct NewSessionDialogFactory : public GladeFactory
-{
-	static GladeRef create();
-
-	static const char* top_level_widget_name();
-
-private:
-
-	static const char* s_m_top_level_widget_name;
-	
-};
-
-class NewSessionDialog : public Gtk::Dialog
+class NewSessionDialog : public ArdourDialog
 {
 public:
 		
-	NewSessionDialog(BaseObjectType* cobject,
-			 const Glib::RefPtr<Gnome::Glade::Xml>& xml);
+	NewSessionDialog();
 
 	void set_session_name(const Glib::ustring& name);
 
@@ -102,8 +92,39 @@ protected:
 
 	void reset_name();
 	void reset_template();
-	
-	// references to widgets we care about.
+
+	Gtk::Label * session_name_label;
+	Gtk::Label * session_location_label;
+	Gtk::Label * session_template_label;
+	Gtk::Label * chan_count_label;
+	Gtk::Table * advanced_table;
+	Gtk::Label * options_label;
+	Gtk::HBox * input_port_limit_hbox;
+	Gtk::HBox * input_port_hbox;
+	Gtk::Table * input_table;
+	Gtk::Alignment * input_port_alignment;
+	Gtk::Label * input_label;
+	Gtk::Frame * input_frame;
+	Gtk::HBox * output_port_limit_hbox;
+	Gtk::HBox * output_port_hbox;
+	Gtk::VBox * output_conn_vbox;
+	Gtk::VBox * output_vbox;
+	Gtk::Alignment * output_port_alignment;
+	Gtk::Label * output_label;
+	Gtk::Frame * output_frame;
+	Gtk::VBox * advanced_vbox;
+	Gtk::Label * advanced_label;
+	Gtk::Expander * advanced_expander;
+	Gtk::Table * new_session_table;
+	Gtk::HBox * open_session_hbox;
+	Gtk::Alignment * open_session_alignment;
+	Gtk::Label * open_sesion_label;
+	Gtk::Frame * open_session_frame;
+	Gtk::ScrolledWindow * recent_scrolledwindow;
+	Gtk::Alignment * recent_alignment;
+	Gtk::Label * recent_sesion_label;
+	Gtk::Frame * recent_frame;
+	Gtk::VBox * open_session_vbox;
 	Gtk::Dialog* m_new_session_dialog;
 	Gtk::Entry*  m_name;
 	Gtk::FileChooserButton* m_folder;
