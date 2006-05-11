@@ -85,12 +85,13 @@ NewSessionDialog::NewSessionDialog(BaseObjectType* cobject,
 		m_treeview->get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 
 	}
-
-	std::string path = ARDOUR::find_config_file (X_("templates"));
-	if (path !=  "") {
+	std::string path = ARDOUR::get_user_ardour_path() + X_("templates/");
+	if (path == Glib::ustring()) {
+	  path = ARDOUR::get_system_data_path() + X_("templates/");
+	}
+	if (path != Glib::ustring()) {
 	  m_template->set_current_folder (path);
 	}
-
 	m_template->set_show_hidden (true);
 	m_new_session_dialog->set_response_sensitive (Gtk::RESPONSE_OK, false);
 	m_new_session_dialog->set_response_sensitive (0, false);
@@ -111,6 +112,7 @@ NewSessionDialog::NewSessionDialog(BaseObjectType* cobject,
 	m_treeview->signal_row_activated().connect (mem_fun (*this, &NewSessionDialog::recent_row_activated));
 	m_open_filechooser->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::file_chosen));
 	m_template->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::template_chosen));
+	m_name->grab_focus();
 }
 
 void
