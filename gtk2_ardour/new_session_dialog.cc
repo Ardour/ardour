@@ -86,9 +86,14 @@ NewSessionDialog::NewSessionDialog(BaseObjectType* cobject,
 
 	}
 
+	std::string path = ARDOUR::find_config_file (X_("templates"));
+	if (path !=  "") {
+	  m_template->set_current_folder (path);
+	}
+
+	m_template->set_show_hidden (true);
 	m_new_session_dialog->set_response_sensitive (Gtk::RESPONSE_OK, false);
 	m_new_session_dialog->set_response_sensitive (0, false);
-	m_new_session_dialog->set_default_response (Gtk::RESPONSE_OK);
 	m_notebook->show_all_children();
 	m_notebook->set_current_page(0);
 
@@ -105,6 +110,7 @@ NewSessionDialog::NewSessionDialog(BaseObjectType* cobject,
 	m_treeview->get_selection()->signal_changed().connect (mem_fun (*this, &NewSessionDialog::treeview_selection_changed));
 	m_treeview->signal_row_activated().connect (mem_fun (*this, &NewSessionDialog::recent_row_activated));
 	m_open_filechooser->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::file_chosen));
+	m_template->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::template_chosen));
 }
 
 void
@@ -253,6 +259,7 @@ void
 NewSessionDialog::reset_name()
 {
 	m_name->set_text(Glib::ustring());
+	m_new_session_dialog->set_response_sensitive (Gtk::RESPONSE_OK, false);
 	
 }
 
@@ -319,16 +326,26 @@ NewSessionDialog::file_chosen ()
 }
 
 void
+NewSessionDialog::template_chosen ()
+{
+  if (m_template->get_filename() != "" ) {;
+    m_new_session_dialog->set_response_sensitive (0, true);
+  } else {
+    m_new_session_dialog->set_response_sensitive (0, false);
+  }
+
+}
+
+void
 NewSessionDialog::recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col)
 {
         m_new_session_dialog->response (Gtk::RESPONSE_YES);
 }
 
-/// @todo
 void
 NewSessionDialog::reset_template()
 {
-
+  m_template->set_filename("");
 }
 
 void

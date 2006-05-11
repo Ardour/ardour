@@ -156,6 +156,7 @@ protected:
 	void notebook_page_changed (GtkNotebookPage*, uint);
 	void treeview_selection_changed ();
 	void file_chosen ();
+	void template_chosen ();
 	void recent_row_activated (const Gtk::TreePath&, Gtk::TreeViewColumn*);
 
 	
