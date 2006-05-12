@@ -61,7 +61,6 @@
 #include "audio_clock.h"
 #include "ardour_dialog.h"
 #include "editing.h"
-#include "glade_factory.h"
 
 class AudioClock;
 class PublicEditor;
@@ -529,7 +528,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	bool _will_create_new_session_automatically;
 
-	GladeRef m_new_session_dialog_ref;
 	NewSessionDialog* m_new_session_dialog;
 	
 	void open_session ();

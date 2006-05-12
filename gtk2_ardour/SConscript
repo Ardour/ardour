@@ -45,9 +45,7 @@ gtkardour.Merge ([
     libraries['xslt'],
     libraries['soundtouch'],
     libraries['samplerate'],
-    libraries['jack'],
-    libraries['glade2'],
-    libraries['libglademm']
+    libraries['jack']
 ])
 
 if gtkardour['DMALLOC']:
@@ -127,8 +125,6 @@ export_range_markers_dialog.cc
 gain_automation_time_axis.cc
 gain_meter.cc
 ghostregion.cc
-glade_path.cc
-glade_factory.cc
 grouped_buttons.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
@@ -192,10 +188,9 @@ fft_graph.cc
 fft_result.cc
 """)
 
-glade_files=glob.glob('glade/*.glade')
 pixmap_files=glob.glob('pixmaps/*.xpm')
 
-intl_files = gtkardour_files + glade_files + glob.glob('*.h')
+intl_files = gtkardour_files + glob.glob('*.h')
 
 mtest_files=Split("""
 mtest.cc
@@ -219,7 +214,6 @@ intl_files += extra_sources
 
 gtkardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 gtkardour.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
-gtkardour.Append(CXXFLAGS="-DGLADEPATH=\\\""+final_prefix+"/share/ardour/glade\\\"")
 
 versionflag = '-DVERSIONSTRING=\\\"' + env['VERSION'] + '\\\"'
 
@@ -262,7 +256,6 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 'splash.ppm'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/glade'), glade_files))
 
 #dist
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],
@@ -272,7 +265,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                         'ardour.menus', 'ardour.bindings', 'ardour.colors',
 					'editor_xpms'
                                         ] +
-                                      gtkardour_files + vst_files + glade_files + pixmap_files +
+                                      gtkardour_files + vst_files + pixmap_files +
                                       glob.glob('po/*.po') + glob.glob('*.h')))
 
 # generate a prototype full-featured ardour_ui.rc file
