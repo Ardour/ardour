@@ -1701,7 +1701,7 @@ ARDOUR_UI::save_template ()
 void
 ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 {
-	m_new_session_dialog->show_all();
+	m_new_session_dialog->show();
 	m_new_session_dialog->set_modal(true);
 	m_new_session_dialog->set_name(predetermined_path);
 	m_new_session_dialog->reset_recent();
@@ -1807,8 +1807,8 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 		  }	
 		}
 		
-	} while (response == 0);
-	m_new_session_dialog->hide_all();
+	} while (response == Gtk::RESPONSE_NONE);
+	m_new_session_dialog->hide();
 	show();
 
 }

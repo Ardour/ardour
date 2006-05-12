@@ -125,7 +125,6 @@ protected:
 	Gtk::Label * recent_sesion_label;
 	Gtk::Frame * recent_frame;
 	Gtk::VBox * open_session_vbox;
-	Gtk::Dialog* m_new_session_dialog;
 	Gtk::Entry*  m_name;
 	Gtk::FileChooserButton* m_folder;
 	Gtk::FileChooserButton* m_template;
@@ -151,7 +150,7 @@ protected:
 	Gtk::FileChooserButton* m_open_filechooser;
 	Gtk::TreeView* m_treeview;
 	Gtk::Notebook* m_notebook;
-	Gtk::ScrolledWindow* m_scrolledwindow;
+
  private:
 	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    RecentSessionModelColumns() { 
