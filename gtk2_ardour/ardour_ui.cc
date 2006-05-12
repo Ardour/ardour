@@ -1714,7 +1714,7 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 		  quit();
 		  return;
 
-		} else if (response == 0) {
+		} else if (response == Gtk::RESPONSE_NONE) {
 		  /* Clear was pressed */
 		  m_new_session_dialog->reset();
 
