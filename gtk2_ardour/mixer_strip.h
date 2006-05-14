@@ -221,7 +221,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	Gtk::Menu* route_ops_menu;
 	void build_route_ops_menu ();
-	gint name_button_button_release (GdkEventButton*);
+	gint name_button_button_press (GdkEventButton*);
 	void list_route_operations ();
 
 	gint comment_key_release_handler (GdkEventKey*);

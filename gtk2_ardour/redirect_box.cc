@@ -244,7 +244,7 @@ RedirectBox::show_redirect_menu (gint arg)
 
 	paste_action->set_sensitive (!_rr_selection.redirects.empty());
 
-	redirect_menu->popup (1, 0);
+	redirect_menu->popup (1, arg);
 }
 
 void
@@ -294,7 +294,7 @@ RedirectBox::redirect_button_press_event (GdkEventButton *ev)
 		
 	} else if (Keyboard::is_context_menu_event (ev)) {
 
-		show_redirect_menu(0);
+		show_redirect_menu(ev->time);
 		ret = true;
 
 	} else if (redirect && ev->button == 2 && ev->state == 0) {

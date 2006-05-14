@@ -305,8 +305,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	_route.comment_changed.connect (mem_fun(*this, &MixerStrip::comment_changed));
 	_route.gui_changed.connect (mem_fun(*this, &MixerStrip::route_gui_changed));
 
-	input_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::input_press), false);
-	output_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::output_press), false);
+	input_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::input_press), false);
+	output_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::output_press), false);
 
 	rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
 	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
@@ -320,13 +320,11 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	pan_automation_style_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event), false);
 
 	gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event), false);
-	gain_automation_state_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event), false);
 	pan_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event), false);
-	pan_automation_state_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event), false);
 
-	name_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::name_button_button_release), false);
+	name_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::name_button_button_press), false);
 
-	group_button.signal_button_release_event().connect (mem_fun(*this, &MixerStrip::select_mix_group), false);
+	group_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::select_mix_group), false);
 
 	_width = (Width) -1;
 	set_stuff_from_route ();
@@ -791,7 +789,7 @@ MixerStrip::fast_update ()
 gint
 MixerStrip::gain_automation_state_button_event (GdkEventButton *ev)
 {
-	if (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_2BUTTON_PRESS) {
+	if (ev->type == GDK_BUTTON_RELEASE) {
 		return TRUE;
 	}
 	
@@ -831,7 +829,7 @@ MixerStrip::pan_automation_state_button_event (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
 
-	if (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_2BUTTON_PRESS) {
+	if (ev->type == GDK_BUTTON_RELEASE) {
 		return TRUE;
 	}
 
@@ -1169,7 +1167,7 @@ MixerStrip::select_mix_group (GdkEventButton *ev)
 
 	_session.foreach_mix_group (bind (mem_fun (*this, &MixerStrip::add_mix_group_to_menu), &group));
 	
-	group_menu->popup (1, 0);
+	group_menu->popup (1, ev->time);
 
 	return true;
 }	
@@ -1251,10 +1249,11 @@ MixerStrip::build_route_ops_menu ()
 }
 
 gint
-MixerStrip::name_button_button_release (GdkEventButton* ev)
+MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
-	if (ev->button == 3) {
+	if (ev->button == 1) {
 		list_route_operations ();
+		route_ops_menu->popup (1, ev->time);
 	}
 	return FALSE;
 }
@@ -1267,8 +1266,6 @@ MixerStrip::list_route_operations ()
 	}
 	
 	refresh_remote_control_menu();
-
-	route_ops_menu->popup (1, 0);
 }
 
 
