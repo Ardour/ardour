@@ -1050,6 +1050,8 @@ MixerStrip::comment_button_clicked ()
 		setup_comment_editor ();
 	}
 
+        int x, y, cw_width, cw_height;
+
 	if (comment_window->is_visible()) {
 	       string str =  comment_area->get_buffer()->get_text();
 	       if (_route.comment() != str) {
@@ -1080,8 +1082,14 @@ MixerStrip::comment_button_clicked ()
 	       comment_window->hide ();
 	       return;
 	} 
-	
-	comment_window->set_position (Gtk::WIN_POS_MOUSE);
+	comment_window->get_size (cw_width, cw_height);
+	comment_window->get_position(x, y);
+	comment_window->move(x, y - (cw_height / 2) - 45);
+	/* 
+	   half the dialog height minus the comments button height 
+	   with some window decoration fudge thrown in.
+	*/
+
 	comment_window->show();
 	comment_window->present();
 
@@ -1095,12 +1103,15 @@ MixerStrip::setup_comment_editor ()
 	title += _(": comment editor");
 
 	comment_window = new ArdourDialog (title, false);
-	comment_area = manage (new TextView());
+	comment_window->set_position (Gtk::WIN_POS_MOUSE);
+	comment_window->set_skip_taskbar_hint (true);
 
+	comment_area = manage (new TextView());
 	comment_area->set_name ("MixerTrackCommentArea");
+	comment_area->set_size_request (110, 178);
+	comment_area->set_wrap_mode (WRAP_WORD);
 	comment_area->set_editable (true);
 	comment_area->get_buffer()->set_text (_route.comment());
-	comment_area->set_size_request (200,124);
 	comment_area->show ();
 
 	comment_window->get_vbox()->pack_start (*comment_area);
