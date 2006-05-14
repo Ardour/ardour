@@ -98,15 +98,14 @@ protected:
 	Gtk::Label * session_template_label;
 	Gtk::Label * chan_count_label;
 	Gtk::Table * advanced_table;
-	Gtk::Label * options_label;
 	Gtk::HBox * input_port_limit_hbox;
-	Gtk::HBox * input_port_hbox;
+	Gtk::VBox * input_port_vbox;
 	Gtk::Table * input_table;
 	Gtk::Alignment * input_port_alignment;
 	Gtk::Label * input_label;
 	Gtk::Frame * input_frame;
 	Gtk::HBox * output_port_limit_hbox;
-	Gtk::HBox * output_port_hbox;
+	Gtk::VBox * output_port_vbox;
 	Gtk::VBox * output_conn_vbox;
 	Gtk::VBox * output_vbox;
 	Gtk::Alignment * output_port_alignment;
@@ -117,9 +116,6 @@ protected:
 	Gtk::Expander * advanced_expander;
 	Gtk::Table * new_session_table;
 	Gtk::HBox * open_session_hbox;
-	Gtk::Alignment * open_session_alignment;
-	Gtk::Label * open_sesion_label;
-	Gtk::Frame * open_session_frame;
 	Gtk::ScrolledWindow * recent_scrolledwindow;
 	Gtk::Alignment * recent_alignment;
 	Gtk::Label * recent_sesion_label;
@@ -128,7 +124,8 @@ protected:
 	Gtk::Entry*  m_name;
 	Gtk::FileChooserButton* m_folder;
 	Gtk::FileChooserButton* m_template;
-	
+	Gtk::Label * open_session_file_label;
+
 	Gtk::CheckButton* m_create_master_bus;
 	Gtk::SpinButton* m_master_bus_channel_count;
        	
@@ -178,6 +175,12 @@ protected:
 	void file_chosen ();
 	void template_chosen ();
 	void recent_row_activated (const Gtk::TreePath&, Gtk::TreeViewColumn*);
+	void connect_inputs_clicked ();
+	void connect_outputs_clicked ();
+	void limit_inputs_clicked ();
+	void limit_outputs_clicked ();
+	void master_bus_button_clicked ();
+	void monitor_bus_button_clicked ();
 
 	
 };
