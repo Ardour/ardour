@@ -185,7 +185,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
 
-	ARDOUR::DiskStream::CannotRecordNoInput.connect (mem_fun(*this, &ARDOUR_UI::cannot_record_no_input));
 	ARDOUR::DiskStream::DeleteSources.connect (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread));
 	ARDOUR::DiskStream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 	ARDOUR::DiskStream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
@@ -195,22 +194,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	ARDOUR::Session::AskAboutPendingState.connect (mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
 
 	/* have to wait for AudioEngine and Configuration before proceeding */
-}
-
-void
-ARDOUR_UI::cannot_record_no_input (DiskStream* ds)
-{
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::cannot_record_no_input), ds));
-	
-	string msg = string_compose (_("\
-You cannot record-enable\n\
-track %1\n\
-because it has no input connections.\n\
-You would be wasting space recording silence."),
-			      ds->name());
-
-	MessageDialog message (*editor, msg);
-	message.run ();
 }
 
 void

@@ -751,7 +751,7 @@ void
 RouteUI::name_changed (void *src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::name_changed), src));
-	
+
 	name_label.set_text (_route.name());
 }
 
@@ -786,6 +786,11 @@ RouteUI::toggle_polarity ()
 		
 		if ((x = polarity_menu_item->get_active()) != _route.phase_invert()) {
 			_route.set_phase_invert (x, this);
+			if (x) {
+			        name_label.set_text (X_("Ø ") + name_label.get_text());
+			} else {
+			        name_label.set_text (_route.name());
+			}
 		}
 	}
 }
@@ -908,4 +913,3 @@ RouteUI::map_frozen ()
 		}
 	}
 }
-

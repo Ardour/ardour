@@ -180,13 +180,13 @@ AutomationTimeAxisView::auto_clicked ()
 		automation_menu->set_name ("ArdourContextMenu");
 		MenuList& items (automation_menu->items());
 
-		items.push_back (MenuElem (_("off"), 
+		items.push_back (MenuElem (_("Isolate"), 
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
-		items.push_back (MenuElem (_("play"),
+		items.push_back (MenuElem (_("Play"),
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
-		items.push_back (MenuElem (_("write"),
+		items.push_back (MenuElem (_("Write"),
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
-		items.push_back (MenuElem (_("touch"),
+		items.push_back (MenuElem (_("Touch"),
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
 	}
 
@@ -209,7 +209,7 @@ AutomationTimeAxisView::automation_state_changed ()
 
 	switch (state & (Off|Play|Touch|Write)) {
 	case Off:
-		auto_button.set_label (_("off"));
+		auto_button.set_label (_("Isolate"));
 		if (auto_off_item) {
 			ignore_state_request = true;
 			auto_off_item->set_active (true);
@@ -220,7 +220,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Play:
-		auto_button.set_label (_("play"));
+		auto_button.set_label (_("Play"));
 		if (auto_play_item) {
 			ignore_state_request = true;
 			auto_play_item->set_active (true);
@@ -231,7 +231,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Write:
-		auto_button.set_label (_("write"));
+		auto_button.set_label (_("Write"));
 		if (auto_write_item) {
 			ignore_state_request = true;
 			auto_write_item->set_active (true);
@@ -242,7 +242,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Touch:
-		auto_button.set_label (_("touch"));
+		auto_button.set_label (_("Touch"));
 		if (auto_touch_item) {
 			ignore_state_request = true;
 			auto_touch_item->set_active (true);
@@ -457,19 +457,19 @@ AutomationTimeAxisView::build_display_menu ()
 	auto_state_menu->set_name ("ArdourContextMenu");
 	MenuList& as_items = auto_state_menu->items();
 	
-	as_items.push_back (CheckMenuElem (_("off"), 
+	as_items.push_back (CheckMenuElem (_("Isolate"), 
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
 	auto_off_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
-	as_items.push_back (CheckMenuElem (_("play"),
+	as_items.push_back (CheckMenuElem (_("Play"),
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
 	auto_play_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
-	as_items.push_back (CheckMenuElem (_("write"),
+	as_items.push_back (CheckMenuElem (_("Write"),
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
 	auto_write_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
-	as_items.push_back (CheckMenuElem (_("touch"),
+	as_items.push_back (CheckMenuElem (_("Touch"),
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
 	auto_touch_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 

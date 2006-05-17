@@ -134,12 +134,6 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	hide_button.set_name ("TrackRemoveButton");
 
 	hide_button.add (*(manage (new Image (get_xpm("small_x.xpm")))));
-	
-	_route.mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
-	_route.solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	_route.solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-
-	_route.panner().Changed.connect (mem_fun(*this, &AudioTimeAxisView::update_pans));
 
 	solo_button->signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
 	mute_button->signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
@@ -218,8 +212,9 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	_route.mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
 	_route.solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 	_route.redirects_changed.connect (mem_fun(*this, &AudioTimeAxisView::redirects_changed));
-
 	_route.name_changed.connect (mem_fun(*this, &AudioTimeAxisView::route_name_changed));
+	_route.solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route.panner().Changed.connect (mem_fun(*this, &AudioTimeAxisView::update_pans));
 
 	if (is_audio_track()) {
 
@@ -717,23 +712,23 @@ AudioTimeAxisView::build_display_menu ()
 	MenuList& automation_items = automation_action_menu->items();
 	automation_action_menu->set_name ("ArdourContextMenu");
 	
-	automation_items.push_back (MenuElem (_("show all automation"),
+	automation_items.push_back (MenuElem (_("Show all automation"),
 					      mem_fun(*this, &AudioTimeAxisView::show_all_automation)));
 
-	automation_items.push_back (MenuElem (_("show existing automation"),
+	automation_items.push_back (MenuElem (_("Show existing automation"),
 					      mem_fun(*this, &AudioTimeAxisView::show_existing_automation)));
 
-	automation_items.push_back (MenuElem (_("hide all automation"),
+	automation_items.push_back (MenuElem (_("Hide all automation"),
 					      mem_fun(*this, &AudioTimeAxisView::hide_all_automation)));
 
 	automation_items.push_back (SeparatorElem());
 
-	automation_items.push_back (CheckMenuElem (_("gain"), 
+	automation_items.push_back (CheckMenuElem (_("Fader"), 
 						   mem_fun(*this, &AudioTimeAxisView::toggle_gain_track)));
 	gain_automation_item = static_cast<CheckMenuItem*> (&automation_items.back());
 	gain_automation_item->set_active(show_gain_automation);
 
-	automation_items.push_back (CheckMenuElem (_("pan"),
+	automation_items.push_back (CheckMenuElem (_("Pan"),
 						   mem_fun(*this, &AudioTimeAxisView::toggle_pan_track)));
 	pan_automation_item = static_cast<CheckMenuItem*> (&automation_items.back());
 	pan_automation_item->set_active(show_pan_automation);
@@ -770,12 +765,12 @@ AudioTimeAxisView::build_display_menu ()
 
 		RadioMenuItem::Group align_group;
 		
-		alignment_items.push_back (RadioMenuElem (align_group, _("align with existing material"), bind (mem_fun(*this, &AudioTimeAxisView::set_align_style), ExistingMaterial)));
+		alignment_items.push_back (RadioMenuElem (align_group, _("Align with existing material"), bind (mem_fun(*this, &AudioTimeAxisView::set_align_style), ExistingMaterial)));
 		align_existing_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
 		if (get_diskstream()->alignment_style() == ExistingMaterial) {
 			align_existing_item->set_active();
 		}
-		alignment_items.push_back (RadioMenuElem (align_group, _("align with capture time"), bind (mem_fun(*this, &AudioTimeAxisView::set_align_style), CaptureTime)));
+		alignment_items.push_back (RadioMenuElem (align_group, _("Align with capture time"), bind (mem_fun(*this, &AudioTimeAxisView::set_align_style), CaptureTime)));
 		align_capture_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
 		if (get_diskstream()->alignment_style() == CaptureTime) {
 			align_capture_item->set_active();

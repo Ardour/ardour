@@ -649,8 +649,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	struct timeval last_peak_grab;
 	struct timeval last_shuttle_request;
 
-	void cannot_record_no_input (ARDOUR::DiskStream*);
-
 	void delete_sources_in_the_right_thread (list<ARDOUR::Source*>*);
 
 	void editor_display_control_changed (Editing::DisplayControl c);

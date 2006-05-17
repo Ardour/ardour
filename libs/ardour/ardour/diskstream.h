@@ -185,7 +185,6 @@ class DiskStream : public Stateful, public sigc::trackable
 	static sigc::signal<void> DiskOverrun;
 	static sigc::signal<void> DiskUnderrun;
 	static sigc::signal<void,DiskStream*> DiskStreamCreated;   // XXX use a ref with sigc2
-	static sigc::signal<void,DiskStream*> CannotRecordNoInput; // XXX use a ref with sigc2
 	static sigc::signal<void,list<Source*>*> DeleteSources;
 
 	/* stateful */

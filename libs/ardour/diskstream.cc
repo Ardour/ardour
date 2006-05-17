@@ -57,7 +57,6 @@ using namespace ARDOUR;
 jack_nframes_t DiskStream::disk_io_chunk_frames;
 
 sigc::signal<void,DiskStream*>    DiskStream::DiskStreamCreated;
-sigc::signal<void,DiskStream*>    DiskStream::CannotRecordNoInput;
 sigc::signal<void,list<Source*>*> DiskStream::DeleteSources;
 sigc::signal<void>                DiskStream::DiskOverrun;
 sigc::signal<void>                DiskStream::DiskUnderrun;
@@ -1918,14 +1917,6 @@ DiskStream::set_record_enabled (bool yn, void* src)
 		*/
 
 		get_input_sources ();
-
-		if (channels[0].source == 0) {
-		
-			if (yn) {
-				CannotRecordNoInput (this); /* emit signal */
-			}
-			return;
-		}
 	}
 
 	/* yes, i know that this not proof against race conditions, but its

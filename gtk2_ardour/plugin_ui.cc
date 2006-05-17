@@ -354,7 +354,7 @@ PluginUI::ControlUI::ControlUI ()
 {
 	automate_button.set_name ("PluginAutomateButton");
 	ARDOUR_UI::instance()->tooltips().set_tip (automate_button,
-						   _("automation control"));
+						   _("Automation control"));
 
 	/* don't fix the height, it messes up the bar controllers */
 
@@ -388,16 +388,16 @@ PluginUI::automation_state_changed (ControlUI* cui)
 
 	switch (insert.get_port_automation_state (cui->port_index) & (Off|Play|Touch|Write)) {
 	case Off:
-		cui->automate_button.set_label (_("off"));
+		cui->automate_button.set_label (_("Isolate"));
 		break;
 	case Play:
-		cui->automate_button.set_label (_("play"));
+		cui->automate_button.set_label (_("Play"));
 		break;
 	case Write:
-		cui->automate_button.set_label (_("write"));
+		cui->automate_button.set_label (_("Write"));
 		break;
 	case Touch:
-		cui->automate_button.set_label (_("touch"));
+		cui->automate_button.set_label (_("Touch"));
 		break;
 	default:
 		cui->automate_button.set_label (_("???"));
@@ -631,13 +631,13 @@ PluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 	MenuList& items (automation_menu->items());
 
 	items.clear ();
-	items.push_back (MenuElem (_("off"), 
+	items.push_back (MenuElem (_("Isolate"), 
 				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Off, cui)));
-	items.push_back (MenuElem (_("play"),
+	items.push_back (MenuElem (_("Play"),
 				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Play, cui)));
-	items.push_back (MenuElem (_("write"),
+	items.push_back (MenuElem (_("Write"),
 				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Write, cui)));
-	items.push_back (MenuElem (_("touch"),
+	items.push_back (MenuElem (_("Touch"),
 				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Touch, cui)));
 
 	automation_menu->popup (1, 0);
