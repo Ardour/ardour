@@ -19,6 +19,9 @@
 */
 
 #include <ardour/control_protocol.h>
+#include <ardour/session.h>
+#include <ardour/route.h>
+#include <ardour/audio_track.h>
 
 using namespace ARDOUR;
 using namespace std;
@@ -38,5 +41,271 @@ ControlProtocol::ControlProtocol (Session& s, string str)
 
 ControlProtocol::~ControlProtocol ()
 {
+}
+
+void
+ControlProtocol::next_track (uint32_t initial_id)
+{
+	uint32_t limit = session.nroutes();
+	Route* cr = route_table[0];
+	uint32_t id;
+
+	if (cr) {
+		id = cr->remote_control_id ();
+	} else {
+		id = 0;
+	}
+
+	if (id == limit) {
+		id = 0;
+	} else {
+		id++;
+	}
+
+	while (id < limit) {
+		if ((cr = session.route_by_remote_id (id)) != 0) {
+			break;
+		}
+		id++;
+	}
+
+	if (id == limit) {
+		id = 0;
+		while (id != initial_id) {
+			if ((cr = session.route_by_remote_id (id)) != 0) {
+				break;
+			}
+			id++;
+		}
+	}
+
+	route_table[0] = cr;
+}
+
+void
+ControlProtocol::prev_track (uint32_t initial_id)
+{
+	uint32_t limit = session.nroutes() - 1;
+	Route* cr = route_table[0];
+	uint32_t id;
+
+	if (cr) {
+		id = cr->remote_control_id ();
+	} else {
+		id = 0;
+	}
+
+	if (id == 0) {
+		id = session.nroutes() - 1;
+	} else {
+		id--;
+	}
+
+	while (id >= 0) {
+		if ((cr = session.route_by_remote_id (id)) != 0) {
+			break;
+		}
+		id--;
+	}
+
+	if (id < 0) {
+		id = limit;
+		while (id > initial_id) {
+			if ((cr = session.route_by_remote_id (id)) != 0) {
+				break;
+			}
+			id--;
+		}
+	}
+
+	route_table[0] = cr;
+}
+
+
+void
+ControlProtocol::set_route_table_size (uint32_t size)
+{
+	while (route_table.size() < size) {
+		route_table.push_back (0);
+	}
+}
+
+void
+ControlProtocol::set_route_table (uint32_t table_index, ARDOUR::Route*)
+{
+}
+
+void
+ControlProtocol::route_set_rec_enable (uint32_t table_index, bool yn)
+{
+	if (table_index > route_table.size()) {
+		return;
+	}
+
+	Route* r = route_table[table_index];
+
+	AudioTrack* at = dynamic_cast<AudioTrack*>(r);
+
+	if (at) {
+		at->set_record_enable (yn, this);
+	}
+}
+
+bool
+ControlProtocol::route_get_rec_enable (uint32_t table_index)
+{
+	if (table_index > route_table.size()) {
+		return false;
+	}
+
+	Route* r = route_table[table_index];
+
+	AudioTrack* at = dynamic_cast<AudioTrack*>(r);
+
+	if (at) {
+		at->record_enabled ();
+	}
+}
+
+
+float
+ControlProtocol::route_get_gain (uint32_t table_index)
+{
+	if (table_index > route_table.size()) {
+		return 0.0f;
+	}
+
+	Route* r = route_table[table_index];
+
+	if (r == 0) {
+		return 0.0f;
+	}
+
+	return r->gain ();
+}
+
+void
+ControlProtocol::route_set_gain (uint32_t table_index, float gain)
+{
+	if (table_index > route_table.size()) {
+		return;
+	}
+
+	Route* r = route_table[table_index];
+	
+	if (r != 0) {
+		r->set_gain (gain, this);
+	}
+}
+
+float
+ControlProtocol::route_get_effective_gain (uint32_t table_index)
+{
+	if (table_index > route_table.size()) {
+		return 0.0f;
+	}
+
+	Route* r = route_table[table_index];
+
+	if (r == 0) {
+		return 0.0f;
+	}
+
+	return r->effective_gain ();
+}
+
+
+float
+ControlProtocol::route_get_peak_input_power (uint32_t table_index, uint32_t which_input)
+{
+	if (table_index > route_table.size()) {
+		return 0.0f;
+	}
+
+	Route* r = route_table[table_index];
+
+	if (r == 0) {
+		return 0.0f;
+	}
+
+	return r->peak_input_power (which_input);
+}
+
+
+bool
+ControlProtocol::route_get_muted (uint32_t table_index)
+{
+	if (table_index > route_table.size()) {
+		return false;
+	}
+
+	Route* r = route_table[table_index];
+
+	if (r == 0) {
+		return false;
+	}
+
+	return r->muted ();
+}
+
+void
+ControlProtocol::route_set_muted (uint32_t table_index, bool yn)
+{
+	if (table_index > route_table.size()) {
+		return;
+	}
+
+	Route* r = route_table[table_index];
+
+	if (r != 0) {
+		r->set_mute (yn, this);
+	}
+}
+
+
+bool
+ControlProtocol::route_get_soloed (uint32_t table_index)
+{
+	if (table_index > route_table.size()) {
+		return false;
+	}
+
+	Route* r = route_table[table_index];
+
+	if (r == 0) {
+		return false;
+	}
+
+	return r->soloed ();
+}
+
+void
+ControlProtocol::route_set_soloed (uint32_t table_index, bool yn)
+{
+	if (table_index > route_table.size()) {
+		return;
+	}
+
+	Route* r = route_table[table_index];
+
+	if (r != 0) {
+		r->set_solo (yn, this);
+	}
+}
+
+string
+ControlProtocol:: route_get_name (uint32_t table_index)
+{
+	if (table_index > route_table.size()) {
+		return "";
+	}
+
+	Route* r = route_table[table_index];
+
+	if (r == 0) {
+		return "";
+	}
+
+	return r->name();
 }
 

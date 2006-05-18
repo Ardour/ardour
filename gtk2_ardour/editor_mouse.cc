@@ -1107,26 +1107,23 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 void
 Editor::maybe_autoscroll (GdkEvent* event)
 {
-	jack_nframes_t one_page = (jack_nframes_t) rint (canvas_width * frames_per_unit);
-	jack_nframes_t rightmost_frame = leftmost_frame + one_page;
+	jack_nframes_t rightmost_frame = leftmost_frame + current_page_frames();
 
 	jack_nframes_t frame = drag_info.current_pointer_frame;
 
-	if (autoscroll_timeout_tag < 0) {
-		if (frame > rightmost_frame) {
-			if (rightmost_frame < max_frames) {
-				start_canvas_autoscroll (1);
-			}
-		} else if (frame < leftmost_frame) {
-			if (leftmost_frame > 0) {
-				start_canvas_autoscroll (-1);
-			}
-		} 
-	} else {
-		if (frame >= leftmost_frame && frame < rightmost_frame) {
-			stop_canvas_autoscroll ();
+	cerr << "maybe autoscroll @ " << frame << " left = " << leftmost_frame << " right = " << rightmost_frame << endl;
+
+	if (frame > rightmost_frame) {
+		if (rightmost_frame < max_frames) {
+			autoscroll_direction = 1;
+			autoscroll_canvas ();
 		}
-	}
+	} else if (frame < leftmost_frame) {
+		if (leftmost_frame > 0) {
+			autoscroll_direction = -1;
+			autoscroll_canvas ();
+		}
+	} 
 }
 
 bool
@@ -1469,7 +1466,7 @@ Editor::left_automation_track ()
 }
 
 bool
-Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type, bool from_autoscroll)
 {
 	gint x, y;
 	
@@ -1495,10 +1492,11 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		return true;
 	}
 
+	drag_info.item_type = item_type;
 	drag_info.current_pointer_frame = event_frame (event, &drag_info.current_pointer_x,
 						       &drag_info.current_pointer_y);
 
-	if (drag_info.item) {
+	if (!from_autoscroll && drag_info.item) {
 		/* item != 0 is the best test i can think of for 
 		   dragging.
 		*/
@@ -1544,12 +1542,14 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	/* </CMT Additions> */
 	  if (drag_info.item && (event->motion.state & Gdk::BUTTON1_MASK ||
 				 (event->motion.state & Gdk::BUTTON2_MASK))) {
-			maybe_autoscroll (event);
-			(this->*(drag_info.motion_callback)) (item, event);
-			goto handled;
-		}
-		goto not_handled;
-
+		  if (!from_autoscroll) {
+			  maybe_autoscroll (event);
+		  }
+		  (this->*(drag_info.motion_callback)) (item, event);
+		  goto handled;
+	  }
+	  goto not_handled;
+	  
 	default:
 		break;
 	}
@@ -1561,7 +1561,9 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case MouseTimeFX:
 		if (drag_info.item && (event->motion.state & GDK_BUTTON1_MASK ||
 				       (event->motion.state & GDK_BUTTON2_MASK))) {
-			maybe_autoscroll (event);
+			if (!from_autoscroll) {
+				maybe_autoscroll (event);
+			}
 			(this->*(drag_info.motion_callback)) (item, event);
 			goto handled;
 		}
@@ -2769,6 +2771,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	bool clamp_y_axis = false;
 	vector<int32_t>  height_list(512) ;
 	vector<int32_t>::iterator j;
+
+	cerr << "region motion to " << drag_info.current_pointer_frame << endl;
 
 	/* Which trackview is this ? */
 

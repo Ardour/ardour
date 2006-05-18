@@ -70,12 +70,15 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	  AbstractUI<TranzportRequest> (X_("Tranzport"), false)
 	
 {
+	/* tranzport controls one track at a time */
+
+	set_route_table_size (1);
+	
 	timeout = 60000;
 	buttonmask = 0;
 	_datawheel = 0;
 	_device_status = STATUS_OFFLINE;
 	udev = 0;
-	current_route = 0;
 	current_track_id = 0;
 	last_where = max_frames;
 	wheel_mode = WheelTimeline;
@@ -139,11 +142,11 @@ TranzportControlProtocol::set_active (bool yn)
 void
 TranzportControlProtocol::show_track_gain ()
 {
-	if (current_route) {
-		gain_t g = current_route->gain();
+	if (route_table[0]) {
+		gain_t g = route_get_gain (0);
 		if (g != last_track_gain) {
 			char buf[16];
-			snprintf (buf, sizeof (buf), "%6.1fdB", coefficient_to_dB (current_route->effective_gain()));
+			snprintf (buf, sizeof (buf), "%6.1fdB", coefficient_to_dB (route_get_effective_gain (0)));
 			print (0, 9, buf); 
 			last_track_gain = g;
 		}
@@ -234,11 +237,11 @@ log_meter (float db)
 void
 TranzportControlProtocol::show_meter ()
 {
-	if (current_route == 0) {
+	if (route_table[0] == 0) {
 		return;
 	}
 
-	float level = current_route->peak_input_power (0);
+	float level = route_get_peak_input_power (0, 0);
 	float fraction = log_meter (level);
 
 	/* we draw using a choice of a sort of double colon-like character ("::") or a single, left-aligned ":".
@@ -579,10 +582,6 @@ TranzportControlProtocol::monitor_work ()
 		val = usb_interrupt_read (udev, READ_ENDPOINT, (char*) buf, 8, 10);
 		pthread_testcancel();
 
-		/* any requests to handle? */
-
-		handle_ui_requests ();
-
 		if (val == 8) {
 			process (buf);
 		}
@@ -673,19 +672,19 @@ TranzportControlProtocol::update_state ()
 
 	/* per track */
 
-	if (current_route) {
-		AudioTrack* at = dynamic_cast<AudioTrack*> (current_route);
+	if (route_table[0]) {
+		AudioTrack* at = dynamic_cast<AudioTrack*> (route_table[0]);
 		if (at && at->record_enabled()) {
 			pending_lights[LightTrackrec] = true;
 		} else {
 			pending_lights[LightTrackrec] = false;
 		}
-		if (current_route->muted()) {
+		if (route_get_muted (0)) {
 			pending_lights[LightTrackmute] = true;
 		} else {
 			pending_lights[LightTrackmute] = false;
 		}
-		if (current_route->soloed()) {
+		if (route_get_soloed (0)) {
 			pending_lights[LightTracksolo] = true;
 		} else {
 			pending_lights[LightTracksolo] = false;
@@ -954,10 +953,10 @@ TranzportControlProtocol::process (uint8_t* buf)
 void
 TranzportControlProtocol::show_current_track ()
 {
-	if (current_route == 0) {
+	if (route_table[0] == 0) {
 		print (0, 0, "--------");
 	} else {
-		print (0, 0, current_route->name().substr (0, 8).c_str());
+		print (0, 0, route_get_name (0).substr (0, 8).c_str());
 	}
 }
 
@@ -1009,10 +1008,7 @@ TranzportControlProtocol::button_event_trackrec_press (bool shifted)
 	if (shifted) {
 		toggle_all_rec_enables ();
 	} else {
-		if (current_route) {
-			AudioTrack* at = dynamic_cast<AudioTrack*>(current_route);
-			at->set_record_enable (!at->record_enabled(), this);
-		}
+		route_set_rec_enable (0, !route_get_rec_enable (0));
 	}
 }
 
@@ -1024,9 +1020,7 @@ TranzportControlProtocol::button_event_trackrec_release (bool shifted)
 void
 TranzportControlProtocol::button_event_trackmute_press (bool shifted)
 {
-	if (current_route) {
-		current_route->set_mute (!current_route->muted(), this);
-	}
+	route_set_muted (0, !route_get_muted (0));
 }
 
 void
@@ -1045,9 +1039,7 @@ TranzportControlProtocol::button_event_tracksolo_press (bool shifted)
 	if (shifted) {
 		session.set_all_solo (!session.soloing());
 	} else {
-		if (current_route) {
-			current_route->set_solo (!current_route->soloed(), this);
-		}
+		route_set_soloed (0, !route_get_soloed (0));
 	}
 }
 
@@ -1267,7 +1259,7 @@ TranzportControlProtocol::datawheel ()
 
 		/* parameter control */
 
-		if (current_route) {
+		if (route_table[0]) {
 			switch (wheel_shift_mode) {
 			case WheelShiftGain:
 				if (_datawheel < WheelDirectionThreshold) {
@@ -1358,7 +1350,7 @@ TranzportControlProtocol::scrub ()
 	last_wheel_motion = now;
 	last_wheel_dir = dir;
 	
-	move_at (speed * dir);
+	set_transport_speed (speed * dir);
 }
 
 void
@@ -1392,7 +1384,7 @@ TranzportControlProtocol::step_gain_up ()
 		gain_fraction = 2.0;
 	}
 	
-	current_route->set_gain (slider_position_to_gain (gain_fraction), this);
+	route_set_gain (0, slider_position_to_gain (gain_fraction));
 }
 
 void
@@ -1408,7 +1400,7 @@ TranzportControlProtocol::step_gain_down ()
 		gain_fraction = 0.0;
 	}
 	
-	current_route->set_gain (slider_position_to_gain (gain_fraction), this);
+	route_set_gain (0, slider_position_to_gain (gain_fraction));
 }
 
 void
@@ -1458,83 +1450,15 @@ TranzportControlProtocol::next_wheel_mode ()
 void
 TranzportControlProtocol::next_track ()
 {
-	uint32_t limit = session.nroutes();
-	uint32_t start = current_track_id;
-	Route* cr = current_route;
-
-	if (current_track_id == limit) {
-		current_track_id = 0;
-	} else {
-		current_track_id++;
-	}
-
-	while (current_track_id < limit) {
-		if ((cr = session.route_by_remote_id (current_track_id)) != 0) {
-			break;
-		}
-		current_track_id++;
-	}
-
-	if (current_track_id == limit) {
-		current_track_id = 0;
-		while (current_track_id != start) {
-			if ((cr = session.route_by_remote_id (current_track_id)) != 0) {
-				break;
-			}
-			current_track_id++;
-		}
-	}
-
-	current_route = cr;
-	gain_fraction = gain_to_slider_position (current_route->effective_gain());
+	ControlProtocol::next_track (current_track_id);
+	gain_fraction = gain_to_slider_position (route_get_effective_gain (0));
 }
 
 void
 TranzportControlProtocol::prev_track ()
 {
-	uint32_t limit = session.nroutes() - 1;
-	uint32_t start = current_track_id;
-	Route* cr = current_route;
-
-	if (current_track_id == 0) {
-		current_track_id = session.nroutes() - 1;
-	} else {
-		current_track_id--;
-	}
-
-	while (current_track_id >= 0) {
-		if ((cr = session.route_by_remote_id (current_track_id)) != 0) {
-			break;
-		}
-		current_track_id--;
-	}
-
-	if (current_track_id < 0) {
-		current_track_id = limit;
-		while (current_track_id > start) {
-			if ((cr = session.route_by_remote_id (current_track_id)) != 0) {
-				break;
-			}
-			current_track_id--;
-		}
-	}
-
-	current_route = cr;
-	gain_fraction = gain_to_slider_position (current_route->effective_gain());
-}
-
-void
-TranzportControlProtocol::set_current_track (Route* r)
-{
-	TranzportRequest* req = get_request (SetCurrentTrack);
-	
-	if (req == 0) {
-		return;
-	}
-
-	req->track = r;
-	
-	send_request (req);
+	ControlProtocol::prev_track (current_track_id);
+	gain_fraction = gain_to_slider_position (route_get_effective_gain (0));
 }
 
 void
@@ -1640,8 +1564,8 @@ void
 TranzportControlProtocol::do_request (TranzportRequest* req)
 {
 	if (req->type == SetCurrentTrack) {
-		current_route = req->track;
-	} 
-
-	return;
+ 		route_table[0] = req->track;
+ 	} 
+ 
+ 	return;
 }

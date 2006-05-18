@@ -5,6 +5,8 @@
 #include <stdint.h>
 
 #include "canvas.h"
+#include "editor_items.h"
+
 #include <ardour/types.h>
 
 namespace ARDOUR {
@@ -16,6 +18,7 @@ class TimeAxisView;
 
 struct DragInfo {
     ArdourCanvas::Item* item;
+    ItemType            item_type;
     void* data;
     jack_nframes_t last_frame_position;
     int32_t pointer_frame_offset;

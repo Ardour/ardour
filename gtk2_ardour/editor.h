@@ -53,6 +53,7 @@
 #include "public_editor.h"
 #include "editing.h"
 #include "enums.h"
+#include "editor_items.h"
 #include "region_selection.h"
 #include "canvas.h"
 #include "draginfo.h"
@@ -346,56 +347,6 @@ class Editor : public PublicEditor
 	bool                 constructed;
 
 	PlaylistSelector* _playlist_selector;
-
-	enum ItemType {
-		RegionItem,
-		StreamItem,
-		PlayheadCursorItem,
-		EditCursorItem,
-		MarkerItem,
-		MarkerBarItem,
-		RangeMarkerBarItem,
-		TransportMarkerBarItem,
-		SelectionItem,
-		GainControlPointItem,
-		GainLineItem,
-		GainAutomationControlPointItem,
-		GainAutomationLineItem,
-		PanAutomationControlPointItem,
-		PanAutomationLineItem,
-		RedirectAutomationControlPointItem,
-		RedirectAutomationLineItem,
-		MeterMarkerItem,
-		TempoMarkerItem,
-		MeterBarItem,
-		TempoBarItem,
-		AudioRegionViewNameHighlight,
-		AudioRegionViewName,
-		StartSelectionTrimItem,
-		EndSelectionTrimItem,
-		AutomationTrackItem,
-		FadeInItem,
-		FadeInHandleItem,
-		FadeOutItem,
-		FadeOutHandleItem,
-
-		/* <CMT Additions> */
-		MarkerViewItem,
-		MarkerTimeAxisItem,
-		MarkerViewHandleStartItem,
-		MarkerViewHandleEndItem,
-		ImageFrameItem,
-		ImageFrameTimeAxisItem,
-		ImageFrameHandleStartItem,
-		ImageFrameHandleEndItem,
-		/* </CMT Additions> */
-
-		CrossfadeViewItem,
-		
-		/* don't remove this */
-
-		NoItem
-	};
 
 	void          set_frames_per_unit (double);
 	void          frames_per_unit_modified ();
@@ -861,7 +812,7 @@ class Editor : public PublicEditor
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
-	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, ItemType, bool from_autoscroll = false);
 	bool enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	

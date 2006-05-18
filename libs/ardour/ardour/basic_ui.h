@@ -10,24 +10,30 @@ class BasicUI {
 	BasicUI (ARDOUR::Session&);
 	virtual ~BasicUI ();
 	
+	void add_marker ();
+
+	/* transport control */
+
 	void loop_toggle ();
 	void goto_start ();
 	void goto_end ();
-	void add_marker ();
 	void rewind ();
 	void ffwd ();
 	void transport_stop ();
 	void transport_play ();
-	void rec_enable_toggle ();
+	void set_transport_speed (float speed);
+	float get_transport_speed (float speed);
+
 	void save_state ();
 	void prev_marker ();
 	void next_marker ();
-	void move_at (float speed);
 	void undo ();
 	void redo ();
-	void toggle_all_rec_enables ();
 	void toggle_punch_in ();
 	void toggle_punch_out ();
+
+	void rec_enable_toggle ();
+	void toggle_all_rec_enables ();
 
   protected:
 	ARDOUR::Session& session;

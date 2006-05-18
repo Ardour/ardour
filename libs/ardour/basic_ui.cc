@@ -157,7 +157,7 @@ BasicUI::next_marker ()
 }
 
 void
-BasicUI::move_at (float speed)
+BasicUI::set_transport_speed (float speed)
 {
 	session.request_transport_speed (speed);
 }

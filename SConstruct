@@ -419,6 +419,19 @@ else:
 libraries['usb'] = conf.Finish ()
 
 #
+# Check for liblo
+
+libraries['lo'] = LibraryInfo ()
+
+conf = Configure (libraries['lo'])
+if conf.CheckLib ('lo', 'lo_server_new'):
+    have_liblo = True
+else:
+    have_liblo = False
+    
+libraries['lo'] = conf.Finish ()
+
+#
 # Check for dmalloc
 
 libraries['dmalloc'] = LibraryInfo ()
@@ -558,6 +571,8 @@ if env['SURFACES']:
     surface_subdirs += [ 'libs/surfaces/generic_midi' ]
     if have_libusb:
         surface_subdirs += [ 'libs/surfaces/tranzport' ]
+    if have_liblo:
+        surface_subdirs += [ 'libs/surfaces/osc' ]        
     
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
