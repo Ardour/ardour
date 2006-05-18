@@ -261,8 +261,8 @@ namespace ARDOUR {
 
 };
 
-std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat sf);
-std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat sf);
+std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
 
 static inline jack_nframes_t
 session_frame_to_track_frame (jack_nframes_t session_frame, double speed)
