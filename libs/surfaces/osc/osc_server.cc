@@ -99,6 +99,8 @@ ControlOSC::set_active (bool yn)
 		}
 #endif
 
+		cerr << "OSC @ " << get_server_url () << endl;
+
 		register_callbacks();
 	
 		on_session_load ();

@@ -85,6 +85,7 @@ class ControlOSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCRequest>
 
 #define PATH_CALLBACK1(name,type) \
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+                cerr << "callback from OSC\n"; \
 		return static_cast<ControlOSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
         int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
