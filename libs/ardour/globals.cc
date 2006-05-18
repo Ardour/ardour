@@ -47,6 +47,7 @@
 #include <ardour/utils.h>
 #include <ardour/session.h>
 #include <ardour/control_protocol_manager.h>
+#include <ardour/osc.h>
 
 #include <ardour/mix.h>
 
@@ -58,6 +59,7 @@
 
 ARDOUR::Configuration* ARDOUR::Config = 0;
 ARDOUR::AudioLibrary* ARDOUR::Library = 0;
+ARDOUR::OSC* ARDOUR::osc = 0;
 
 using namespace ARDOUR;
 using namespace std;
@@ -71,6 +73,22 @@ Change ARDOUR::LengthChanged = ARDOUR::new_change ();
 Change ARDOUR::PositionChanged = ARDOUR::new_change ();
 Change ARDOUR::NameChanged = ARDOUR::new_change ();
 Change ARDOUR::BoundsChanged = Change (0); // see init(), below
+
+static int
+setup_osc ()
+{
+	/* no real cost to creating this object, and it avoids
+	   conditionals anywhere that uses it 
+	*/
+	
+	osc = new OSC (Config->get_osc_port());
+	
+	if (Config->get_use_osc ()) {
+		return osc->start ();
+	} else {
+		return 0;
+	}
+}
 
 static int 
 setup_midi ()
@@ -177,6 +195,10 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 	Config->set_use_vst (use_vst);
 
 	if (setup_midi ()) {
+		return -1;
+	}
+
+	if (setup_osc ()) {
 		return -1;
 	}
 

@@ -31,7 +31,7 @@ GenericMidiControlProtocol::set_active (bool yn)
 void
 GenericMidiControlProtocol::port_change ()
 {
-	_port = session.midi_port ();
+	_port = session->midi_port ();
 }
 
 void

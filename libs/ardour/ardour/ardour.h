@@ -42,6 +42,9 @@ namespace MIDI {
 namespace ARDOUR {
 
 	class AudioEngine;
+	class OSC;
+
+	extern OSC* osc;
 
 	static const jack_nframes_t max_frames = JACK_MAX_FRAMES;
 

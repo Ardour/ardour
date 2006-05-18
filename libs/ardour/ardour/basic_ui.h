@@ -36,7 +36,8 @@ class BasicUI {
 	void toggle_all_rec_enables ();
 
   protected:
-	ARDOUR::Session& session;
+	BasicUI ();
+	ARDOUR::Session* session;
 };
 
 #endif /* __ardour_basic_ui_h__ */

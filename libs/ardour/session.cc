@@ -64,7 +64,7 @@
 #include <ardour/crossfade.h>
 #include <ardour/playlist.h>
 #include <ardour/click.h>
-#include <ardour/timestamps.h>
+#include <ardour/osc.h>
 
 #include "i18n.h"
 
@@ -793,6 +793,10 @@ Session::when_engine_running ()
 	/* hook us up to the engine */
 
 	_engine.set_session (this);
+
+	/* and to OSC */
+
+	osc->set_session (*this);
 
 	_state_of_the_state = Clean;
 

@@ -297,14 +297,14 @@ TranzportControlProtocol::show_meter ()
 void
 TranzportControlProtocol::show_transport_time ()
 {
-	jack_nframes_t where = session.transport_frame();
+	jack_nframes_t where = session->transport_frame();
 	
 	if (where != last_where) {
 
 		char buf[5];
 		SMPTE_Time smpte;
 
-		session.smpte_time (where, smpte);
+		session->smpte_time (where, smpte);
 		
 		if (smpte.negative) {
 			sprintf (buf, "-%02ld:", smpte.hours);
@@ -698,25 +698,25 @@ TranzportControlProtocol::update_state ()
 
 	/* global */
 
-	if (session.get_auto_loop()) {
+	if (session->get_auto_loop()) {
 		pending_lights[LightLoop] = true;
 	} else {
 		pending_lights[LightLoop] = false;
 	}
 
-	if (session.get_punch_in() || session.get_punch_out()) {
+	if (session->get_punch_in() || session->get_punch_out()) {
 		pending_lights[LightPunch] = true;
 	} else {
 		pending_lights[LightPunch] = false;
 	}
 
-	if (session.get_record_enabled()) {
+	if (session->get_record_enabled()) {
 		pending_lights[LightRecord] = true;
 	} else {
 		pending_lights[LightRecord] = false;
 	}
 
-	if (session.soloing ()) {
+	if (session->soloing ()) {
 		pending_lights[LightAnysolo] = true;
 	} else {
 		pending_lights[LightAnysolo] = false;
@@ -1037,7 +1037,7 @@ TranzportControlProtocol::button_event_tracksolo_press (bool shifted)
 	}
 
 	if (shifted) {
-		session.set_all_solo (!session.soloing());
+		session->set_all_solo (!session->soloing());
 	} else {
 		route_set_soloed (0, !route_get_soloed (0));
 	}
@@ -1357,16 +1357,16 @@ void
 TranzportControlProtocol::shuttle ()
 {
 	if (_datawheel < WheelDirectionThreshold) {
-		if (session.transport_speed() < 0) {
-			session.request_transport_speed (1.0);
+		if (session->transport_speed() < 0) {
+			session->request_transport_speed (1.0);
 		} else {
-			session.request_transport_speed (session.transport_speed() + 0.1);
+			session->request_transport_speed (session->transport_speed() + 0.1);
 		}
 	} else {
-		if (session.transport_speed() > 0) {
-			session.request_transport_speed (-1.0);
+		if (session->transport_speed() > 0) {
+			session->request_transport_speed (-1.0);
 		} else {
-			session.request_transport_speed (session.transport_speed() - 0.1);
+			session->request_transport_speed (session->transport_speed() - 0.1);
 		}
 	}
 }

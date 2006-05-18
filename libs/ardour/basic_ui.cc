@@ -27,7 +27,12 @@
 using namespace ARDOUR;
 
 BasicUI::BasicUI (Session& s)
-	: session (s)
+	: session (&s)
+{
+}
+
+BasicUI::BasicUI ()
+	: session (0)
 {
 }
 
@@ -39,12 +44,12 @@ BasicUI::~BasicUI ()
 void
 BasicUI::loop_toggle () 
 {
-	if (session.get_auto_loop()) {
-		session.request_auto_loop (false);
+	if (session->get_auto_loop()) {
+		session->request_auto_loop (false);
 	} else {
-		session.request_auto_loop (true);
-		if (!session.transport_rolling()) {
-			session.request_transport_speed (1.0);
+		session->request_auto_loop (true);
+		if (!session->transport_rolling()) {
+			session->request_transport_speed (1.0);
 		}
 	}
 }
@@ -52,146 +57,146 @@ BasicUI::loop_toggle ()
 void
 BasicUI::goto_start ()
 {
-	session.goto_start ();
+	session->goto_start ();
 }
 
 void
 BasicUI::goto_end ()
 {
-	session.goto_end ();
+	session->goto_end ();
 }
 
 void       
 BasicUI::add_marker ()
 {
-	jack_nframes_t when = session.audible_frame();
-	session.locations()->add (new Location (when, when, _("unnamed"), Location::IsMark));
+	jack_nframes_t when = session->audible_frame();
+	session->locations()->add (new Location (when, when, _("unnamed"), Location::IsMark));
 }
 
 void
 BasicUI::rewind ()
 {
-	session.request_transport_speed (-2.0f);
+	session->request_transport_speed (-2.0f);
 }
 
 void
 BasicUI::ffwd ()
 {
-	session.request_transport_speed (2.0f);
+	session->request_transport_speed (2.0f);
 }
 
 void
 BasicUI::transport_stop ()
 {
-	session.request_transport_speed (0.0);
+	session->request_transport_speed (0.0);
 }
 
 void
 BasicUI::transport_play ()
 {
-	bool rolling = session.transport_rolling ();
+	bool rolling = session->transport_rolling ();
 
-	if (session.get_auto_loop()) {
-		session.request_auto_loop (false);
+	if (session->get_auto_loop()) {
+		session->request_auto_loop (false);
 	} 
 
-	if (session.get_play_range ()) {
-		session.request_play_range (false);
+	if (session->get_play_range ()) {
+		session->request_play_range (false);
 	}
 	
 	if (rolling) {
-		session.request_locate (session.last_transport_start(), true);
+		session->request_locate (session->last_transport_start(), true);
 
 	}
 
-	session.request_transport_speed (1.0f);
+	session->request_transport_speed (1.0f);
 }
 
 void
 BasicUI::rec_enable_toggle ()
 {
-	switch (session.record_status()) {
+	switch (session->record_status()) {
 	case Session::Disabled:
-		if (session.ntracks() == 0) {
+		if (session->ntracks() == 0) {
 			// string txt = _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu.");
 			// MessageDialog msg (*editor, txt);
 			// msg.run ();
 			return;
 		}
-		session.maybe_enable_record ();
+		session->maybe_enable_record ();
 		break;
 	case Session::Recording:
 	case Session::Enabled:
-		session.disable_record (true);
+		session->disable_record (true);
 	}
 }
 
 void
 BasicUI::save_state ()
 {
-	session.save_state ("");
+	session->save_state ("");
 }
 
 void
 BasicUI::prev_marker ()
 {
-	Location *location = session.locations()->first_location_before (session.transport_frame());
+	Location *location = session->locations()->first_location_before (session->transport_frame());
 	
 	if (location) {
-		session.request_locate (location->start(), session.transport_rolling());
+		session->request_locate (location->start(), session->transport_rolling());
 	} else {
-		session.goto_start ();
+		session->goto_start ();
 	}
 }
 
 void
 BasicUI::next_marker ()
 {
-	Location *location = session.locations()->first_location_after (session.transport_frame());
+	Location *location = session->locations()->first_location_after (session->transport_frame());
 
 	if (location) {
-		session.request_locate (location->start(), session.transport_rolling());
+		session->request_locate (location->start(), session->transport_rolling());
 	} else {
-		session.request_locate (session.current_end_frame());
+		session->request_locate (session->current_end_frame());
 	}
 }
 
 void
 BasicUI::set_transport_speed (float speed)
 {
-	session.request_transport_speed (speed);
+	session->request_transport_speed (speed);
 }
 
 void
 BasicUI::undo ()
 {
-	session.undo (1);
+	session->undo (1);
 }
 
 void
 BasicUI::redo ()
 {
-	session.redo (1);
+	session->redo (1);
 }
 
 void
 BasicUI::toggle_all_rec_enables ()
 {
-	if (session.get_record_enabled()) {
-		session.record_disenable_all ();
+	if (session->get_record_enabled()) {
+		session->record_disenable_all ();
 	} else {
-		session.record_enable_all ();
+		session->record_enable_all ();
 	}
 }
 
 void
 BasicUI::toggle_punch_in ()
 {
-	session.set_punch_in (!session.get_punch_in());
+	session->set_punch_in (!session->get_punch_in());
 }
 
 void
 BasicUI::toggle_punch_out ()
 {
-	session.set_punch_out (!session.get_punch_out());
+	session->set_punch_out (!session->get_punch_out());
 }

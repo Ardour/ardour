@@ -54,6 +54,7 @@ ladspa_plugin.cc
 location.cc
 mtc_slave.cc
 named_selection.cc
+osc.cc
 panner.cc
 pcm_utils.cc
 playlist.cc
@@ -184,7 +185,7 @@ ardour.Merge ([
 	     libraries['pbd3'],
 	     libraries['soundtouch'],
 	     libraries['midi++2'],
-	     libraries['xslt'],
+	     libraries['lo'],
 	     ])
 
 

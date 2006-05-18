@@ -39,6 +39,8 @@ CONFIG_VARIABLE(uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 2
 CONFIG_VARIABLE(SampleFormat, native_file_data_format,  "native-file-data-format", ARDOUR::FormatFloat)
 CONFIG_VARIABLE(HeaderFormat, native_file_header_format,  "native-file-header-format", ARDOUR::WAVE)
 CONFIG_VARIABLE(bool, use_tranzport,  "use-tranzport", false)
+CONFIG_VARIABLE(uint32_t, osc_port, "osc-port", 3819)
+CONFIG_VARIABLE(bool, use_osc, "use-osc", true)
 
 /* these variables have custom set() methods */
 
