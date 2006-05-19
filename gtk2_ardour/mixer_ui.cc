@@ -954,6 +954,8 @@ Mixer_UI::add_mix_group (RouteGroup* group)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_mix_group), group));
 	bool focus = false;
 
+	in_group_row_change = true;
+
 	TreeModel::Row row = *(group_model->append());
 	row[group_columns.active] = group->is_active();
 	row[group_columns.visible] = true;
@@ -972,6 +974,8 @@ Mixer_UI::add_mix_group (RouteGroup* group)
 		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (0));
 		group_display.set_cursor (group_model->get_path (row), *col, *name_cell, true);
 	}
+
+	in_group_row_change = false;
 }
 
 bool

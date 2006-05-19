@@ -71,6 +71,8 @@ class OSC : public BasicUI, public sigc::trackable
 	std::string get_server_url ();
 	std::string get_unix_server_url ();
 
+	int current_value (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
+
 #define PATH_CALLBACK(name) \
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \

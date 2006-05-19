@@ -349,6 +349,8 @@ AudioTimeAxisView::add_edit_group_menu_item (RouteGroup *eg, RadioMenuItem::Grou
 
 	MenuList &items = edit_group_menu.items();
 
+	cerr << "adding edit group called " << eg->name() << endl;
+
 	items.push_back (RadioMenuElem (*group, eg->name(), bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), eg)));
 	if (_route.edit_group() == eg) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();

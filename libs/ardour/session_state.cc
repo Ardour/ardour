@@ -2377,18 +2377,18 @@ Session::load_route_groups (const XMLNode& node, bool edit)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeConstIterator niter;
-	RouteGroup* route;
+	RouteGroup* rg;
 
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == "RouteGroup") {
 			if (edit) {
-				route = add_edit_group ("");
-				route->set_state (**niter);
+				rg = add_edit_group ("");
+				rg->set_state (**niter);
 			} else {
-				route = add_mix_group ("");
-				route->set_state (**niter);
+				rg = add_mix_group ("");
+				rg->set_state (**niter);
 			}
 		}
 	}

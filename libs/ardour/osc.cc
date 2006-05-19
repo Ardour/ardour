@@ -377,3 +377,62 @@ OSC::session_going_away ()
 
 /* path callbacks */
 
+int 
+OSC::current_value (const char *path, const char *types, lo_arg **argv, int argc, void *data, void* user_data) 
+{ 
+#if 0
+	const char* returl;
+
+	if (argc < 3 || types == 0 || strlen (types) < 3 || types[0] != 's' || types[1] != 's' || types[2] != s) {
+		return 1;
+	}
+
+	const char *returl = argv[1]->s;
+	lo_address addr = find_or_cache_addr (returl);
+
+	const char *retpath = argv[2]->s;
+
+	
+	if (strcmp (argv[0]->s, "transport_frame")) {
+
+		if (session) {
+			lo_send (addr, retpath, "i", session->transport_frame());
+		}
+
+	} else if (strcmp (argv[0]->s, "transport_speed")) {
+
+		if (session) {
+			lo_send (addr, retpath, "i", session->transport_frame());
+		}
+
+	} else if (strcmp (argv[0]->s, "transport_locked")) {
+
+		if (session) {
+			lo_send (addr, retpath, "i", session->transport_frame());
+		}
+
+	} else if (strcmp (argv[0]->s, "punch_in") {
+
+		if (session) {
+			lo_send (addr, retpath, "i", session->transport_frame());
+		}
+
+	} else if (strcmp (argv[0]->s, "punch_out") {
+
+		if (session) {
+			lo_send (addr, retpath, "i", session->transport_frame());
+		}
+
+	} else if (strcmp (argv[0]->s, "rec_enable") {
+
+		if (session) {
+			lo_send (addr, retpath, "i", session->transport_frame());
+		}
+
+	} else {
+
+		/* error */
+	}
+#endif
+	return 0;
+}

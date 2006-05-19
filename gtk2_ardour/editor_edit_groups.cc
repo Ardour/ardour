@@ -218,7 +218,10 @@ Editor::add_edit_group (RouteGroup* group)
 	row[group_columns.is_active] = group->is_active();
 	row[group_columns.is_visible] = !group->is_hidden();
 
+	in_edit_group_row_change = true;
+
 	row[group_columns.routegroup] = group;
+
 	if (!group->name().empty()) {
 		row[group_columns.text] = group->name();
 	} else {
@@ -233,6 +236,8 @@ Editor::add_edit_group (RouteGroup* group)
 		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(edit_group_display.get_column_cell_renderer (0));
 		edit_group_display.set_cursor (group_model->get_path (row), *col, *name_cell, true);
 	}
+
+	in_edit_group_row_change = false;
 }
 
 void
