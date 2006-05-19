@@ -22,6 +22,7 @@ struct ControlProtocolInfo {
     std::string name;
     std::string path;
     bool requested;
+    bool mandatory;
 };
 
  class ControlProtocolManager : public sigc::trackable, public Stateful
@@ -35,6 +36,7 @@ struct ControlProtocolInfo {
 	void set_session (Session&);
 	void discover_control_protocols (std::string search_path);
 	void foreach_known_protocol (sigc::slot<void,const ControlProtocolInfo*>);
+	void load_mandatory_protocols ();
 
 	ControlProtocol* instantiate (ControlProtocolInfo&);
 	int              teardown (ControlProtocolInfo&);

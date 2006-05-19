@@ -45,7 +45,7 @@ ControlProtocolManager::set_session (Session& s)
 	_session->going_away.connect (mem_fun (*this, &ControlProtocolManager::drop_session));
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
-		if ((*i)->requested) {
+		if ((*i)->requested || (*i)->mandatory) {
 			instantiate (**i);
 			(*i)->requested = false;
 		}
@@ -102,6 +102,10 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 		return 0;
 	}
 
+	if (cpi.mandatory) {
+		return 0;
+	}
+
 	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
 	
 	{
@@ -122,6 +126,21 @@ static bool protocol_filter (const string& str, void *arg)
 	/* Not a dotfile, has a prefix before a period, suffix is "so" */
 	
 	return str[0] != '.' && (str.length() > 3 && str.find (".so") == (str.length() - 3));
+}
+
+void
+ControlProtocolManager::load_mandatory_protocols ()
+{
+	if (_session == 0) {
+		return;
+	}
+
+	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
+		if ((*i)->mandatory && ((*i)->protocol == 0)) {
+			info << string_compose (_("Instantiating mandatory control protocol %1"), (*i)->name) << endmsg;
+			instantiate (**i);
+		}
+	}
 }
 
 void
@@ -156,13 +175,13 @@ ControlProtocolManager::control_protocol_discover (string path)
 		info->path = path;
 		info->protocol = 0;
 		info->requested = false;
+		info->mandatory = descriptor->mandatory;
 
 		control_protocol_info.push_back (info);
 
 		cerr << "discovered control surface protocol \"" << info->name << '"' << endl;
 
 		dlclose (descriptor->module);
-
 	}
 
 	return 0;

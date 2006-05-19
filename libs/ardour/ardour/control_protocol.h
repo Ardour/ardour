@@ -83,10 +83,11 @@ class ControlProtocol : public sigc::trackable, public BasicUI {
 
 extern "C" {
 	struct ControlProtocolDescriptor {
-	    const char* name;   /* descriptive */
-	    const char* id;     /* unique and version-specific */
-	    void*       ptr;    /* protocol can store a value here */
-	    void*       module; /* not for public access */
+	    const char* name;      /* descriptive */
+	    const char* id;        /* unique and version-specific */
+	    void*       ptr;       /* protocol can store a value here */
+	    void*       module;    /* not for public access */
+	    int         mandatory; /* if non-zero, always load and do not make optional */
 	    ControlProtocol* (*initialize)(ControlProtocolDescriptor*,Session*);
 	    void             (*destroy)(ControlProtocolDescriptor*,ControlProtocol*);
 	    

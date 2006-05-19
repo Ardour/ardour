@@ -61,7 +61,7 @@ AddRouteDialog::AddRouteDialog ()
 	: Dialog (_("ardour: add track/bus")),
 	  track_button (_("Tracks")),
 	  bus_button (_("Busses")),
-	  routes_adjustment (1, 1, 32, 1, 4),
+	  routes_adjustment (1, 1, 128, 1, 4),
 	  routes_spinner (routes_adjustment)
 {
 	if (channel_combo_strings.empty()) {

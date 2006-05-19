@@ -163,8 +163,10 @@ ControlProtocol::route_get_rec_enable (uint32_t table_index)
 	AudioTrack* at = dynamic_cast<AudioTrack*>(r);
 
 	if (at) {
-		at->record_enabled ();
+		return at->record_enabled ();
 	}
+
+	return false;
 }
 
 

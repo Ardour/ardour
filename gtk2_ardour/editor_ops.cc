@@ -1351,18 +1351,27 @@ Editor::select_all_within (jack_nframes_t start, jack_nframes_t end, double top,
 		}
 		(*iter)->get_selectables (start, end, top, bot, touched);
 	}
+
+	cerr << "select all within found " << touched.size() << endl;
+
 	begin_reversible_command (_("select all within"));
 	switch (op) {
 	case Selection::Toggle:
+		cerr << "toggle\n";
 		selection->add (touched);
 		break;
 	case Selection::Set:
+		cerr << "set\n";
 		selection->set (touched);
 		break;
 	case Selection::Extend:
+		cerr << "extend\n";
 		/* not defined yet */
 		break;
 	}
+
+	cerr << "selection now has " << selection->points.size() << endl;
+
 	commit_reversible_command ();
 	return !touched.empty();
 }
@@ -3146,6 +3155,23 @@ Editor::duplicate_selection (float times)
 	}
 
 	commit_reversible_command ();
+}
+
+void
+Editor::reset_point_selection ()
+{
+	/* reset all selected points to the relevant default value */
+
+	cerr << "point selection has " << selection->points.size() << " entries\n";
+	
+	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
+		
+		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>(&(*i).track);
+		
+		if (atv) {
+			atv->reset_objects (selection->points);
+		} 
+	}
 }
 
 void

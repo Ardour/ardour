@@ -3143,19 +3143,25 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool wit
 		return;
 	}
 
-	if (with_undo) {
-		begin_reversible_command (_("set selected control point"));
-	}
+	/* select this point and any others that it represents */
 
-	switch (op) {
-	case Selection::Set:
-		break;
-	case Selection::Toggle:
-		break;
-	case Selection::Extend:
-		break;
-	}
+	bool commit;
+	
 	if (with_undo) {
+		begin_reversible_command (_("select control points"));
+	}
+	
+	double y1, y2;
+	jack_nframes_t x1, x2;
+
+	x1 = pixel_to_frame (clicked_control_point->get_x() - 10);
+	x2 = pixel_to_frame (clicked_control_point->get_x() + 10);
+ 	y1 = clicked_control_point->get_x() - 10;
+	y2 = clicked_control_point->get_y() + 10;
+
+	commit = select_all_within (x1, x2, y1, y2, op);
+	
+	if (with_undo && commit) {
 		commit_reversible_command ();
 	}
 }

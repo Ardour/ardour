@@ -28,6 +28,7 @@ static ControlProtocolDescriptor generic_midi_descriptor = {
 	id : "uri://ardour.org/surfaces/generic_midi:0",
 	ptr : 0,
 	module : 0,
+	mandatory : 0,
 	initialize : new_generic_midi_protocol,
 	destroy : delete_generic_midi_protocol
 };

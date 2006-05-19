@@ -328,7 +328,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		case PanAutomationControlPointItem:
 		case RedirectAutomationControlPointItem:
 			if ((cp = static_cast<ControlPoint *> (item->get_data ("control_point"))) != 0) {
-				set_selected_control_point_from_click (Keyboard::selection_type (event->button.state), true);
+				set_selected_control_point_from_click (Keyboard::selection_type (event->button.state), false);
 			}
 			break;
 
@@ -2495,13 +2495,26 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 	cp->line.point_drag (*cp, cx_frames , fraction, push);
 	
 	set_verbose_canvas_cursor_text (cp->line.get_verbose_cursor_string (fraction));
+
+	drag_info.first_move = false;
 }
 
 void
 Editor::control_point_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	ControlPoint* cp = reinterpret_cast<ControlPoint *> (drag_info.data);
-	control_point_drag_motion_callback (item, event);
+
+	if (drag_info.first_move) {
+
+		/* just a click */
+		
+		if ((event->type == GDK_BUTTON_RELEASE) && (event->button.button == 1) && Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
+			reset_point_selection ();
+		}
+
+	} else {
+		control_point_drag_motion_callback (item, event);
+	}
 	cp->line.end_drag (cp);
 }
 

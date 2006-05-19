@@ -841,6 +841,7 @@ class Editor : public PublicEditor
 
 	/* EDITING OPERATIONS */
 	
+	void reset_point_selection ();
 	void toggle_region_mute ();
 	void toggle_region_opaque ();
 	void raise_region ();

@@ -536,6 +536,31 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	return ret;
 }
 
+void
+AutomationTimeAxisView::reset_objects (PointSelection& selection)
+{
+	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
+		reset_objects_one ((**i), selection);
+	}
+}
+
+void
+AutomationTimeAxisView::reset_objects_one (AutomationLine& line, PointSelection& selection)
+{
+	AutomationList& alist (line.the_list());
+
+	_session.add_undo (alist.get_memento());
+
+	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
+
+		if (&(*i).track != this) {
+			continue;
+		}
+		
+		alist.reset_range ((*i).start, (*i).end);
+	}
+}
+
 bool
 AutomationTimeAxisView::cut_copy_clear_objects (PointSelection& selection, CutCopyOp op)
 {

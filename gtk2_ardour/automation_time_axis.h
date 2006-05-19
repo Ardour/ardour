@@ -64,6 +64,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool cut_copy_clear (Selection&, Editing::CutCopyOp);
 	bool cut_copy_clear_objects (PointSelection&, Editing::CutCopyOp);
 	bool paste (jack_nframes_t, float times, Selection&, size_t nth);
+	void reset_objects (PointSelection&);
 
 	void add_ghost (GhostRegion*);
 	void remove_ghost (GhostRegion*);
@@ -105,6 +106,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool cut_copy_clear_one (AutomationLine&, Selection&, Editing::CutCopyOp);
 	bool cut_copy_clear_objects_one (AutomationLine&, PointSelection&, Editing::CutCopyOp);
 	bool paste_one (AutomationLine&, jack_nframes_t, float times, Selection&, size_t nth);
+	void reset_objects_one (AutomationLine&, PointSelection&);
 
 	virtual void set_automation_state (ARDOUR::AutoState) = 0;
 	bool ignore_state_request;

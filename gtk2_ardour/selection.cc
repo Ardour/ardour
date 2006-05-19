@@ -633,6 +633,8 @@ Selection::add (list<Selectable*>& selectables)
 	if (!autos.empty()) {
 		add (autos);
 	} 
+
+	cerr << "Selection @ " << this << " has " << points.size() << " points\n";
 }
 
 void
@@ -651,6 +653,6 @@ Selection::add (vector<AutomationSelectable*>& autos)
 		points.push_back (**i);
 		delete *i;
 	}
-	
+
 	PointsChanged ();
 }
