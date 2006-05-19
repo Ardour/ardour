@@ -88,11 +88,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	  post_redirect_box (PostFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
 	  gpm (_route, sess),
 	  panners (_route, sess),
-	  button_table (6, 2),
-	  gain_automation_style_button (""),
-	  gain_automation_state_button (""),
-	  pan_automation_style_button (""),
-	  pan_automation_state_button (""),
+	  button_table (3, 2),
+	  bottom_button_table (2, 2),
 	  comment_button (_("Comments")),
 	  speed_adjustment (1.0, 0.001, 4.0, 0.001, 0.1),
 	  speed_spinner (&speed_adjustment, "MixerStripSpeedBase", true)
@@ -131,16 +128,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 	solo_button->set_name ("MixerSoloButton");
 	mute_button->set_name ("MixerMuteButton");
-	gain_automation_style_button.set_name ("MixerAutomationModeButton");
-	gain_automation_state_button.set_name ("MixerAutomationPlaybackButton");
-	pan_automation_style_button.set_name ("MixerAutomationModeButton");
-	pan_automation_state_button.set_name ("MixerAutomationPlaybackButton");
-
-	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_state_button, _("Pan automation mode"));
-	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_state_button, _("Fader automation mode"));
-
-	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_style_button, _("Pan automation type"));
-	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_style_button, _("Fader automation type"));
 
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
@@ -150,59 +137,18 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	output_button.unset_flags (Gtk::CAN_FOCUS);
 	solo_button->unset_flags (Gtk::CAN_FOCUS);
 	mute_button->unset_flags (Gtk::CAN_FOCUS);
-	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
-	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
-	pan_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
-	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
 	button_table.set_homogeneous (true);
 	button_table.set_spacings (0);
 
 	button_table.attach (name_button, 0, 2, 0, 1);
-	button_table.attach (group_button, 0, 2, 1, 2);
-	button_table.attach (input_button, 0, 2, 2, 3);
+	button_table.attach (input_button, 0, 2, 1, 2);
+	button_table.attach (*rec_enable_button, 0, 2, 2, 3);
 
-	button_table.attach (*solo_button, 0, 1, 3, 4);
-	button_table.attach (*mute_button, 1, 2, 3, 4);
-
-	button_table.attach (gain_automation_state_button, 0, 1, 4, 5);
-	button_table.attach (pan_automation_state_button, 1, 2, 4, 5);
-
-	using namespace Menu_Helpers;
-	
-	gain_astate_menu.items().push_back (MenuElem (_("Isolate"), 
-						      bind (mem_fun (_route, &IO::set_gain_automation_state), (AutoState) Off)));
-	gain_astate_menu.items().push_back (MenuElem (_("Play"),
-						      bind (mem_fun (_route, &IO::set_gain_automation_state), (AutoState) Play)));
-	gain_astate_menu.items().push_back (MenuElem (_("Write"),
-						      bind (mem_fun (_route, &IO::set_gain_automation_state), (AutoState) Write)));
-	gain_astate_menu.items().push_back (MenuElem (_("Touch"),
-						      bind (mem_fun (_route, &IO::set_gain_automation_state), (AutoState) Touch)));
-	
-	gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
-	gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
-
-	pan_astate_menu.items().push_back (MenuElem (_("Isolate"), 
-						     bind (mem_fun (_route.panner(), &Panner::set_automation_state), (AutoState) Off)));
-	pan_astate_menu.items().push_back (MenuElem (_("Play"),
-						     bind (mem_fun (_route.panner(), &Panner::set_automation_state), (AutoState) Play)));
-	pan_astate_menu.items().push_back (MenuElem (_("Write"),
-						     bind (mem_fun (_route.panner(), &Panner::set_automation_state), (AutoState) Write)));
-	pan_astate_menu.items().push_back (MenuElem (_("Touch"),
-						     bind (mem_fun (_route.panner(), &Panner::set_automation_state), (AutoState) Touch)));
-
-	pan_astyle_menu.items().push_back (MenuElem (_("Trim")));
-	pan_astyle_menu.items().push_back (MenuElem (_("Abs")));
-	
-	gain_astate_menu.set_name ("ArdourContextMenu");
-	gain_astyle_menu.set_name ("ArdourContextMenu");
-	pan_astate_menu.set_name ("ArdourContextMenu");
-	pan_astyle_menu.set_name ("ArdourContextMenu");
-
-	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_style_button, _("Fader automation mode"));
-	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_style_button, _("Pan automation mode"));
-	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_state_button, _("Fader automation state"));
-	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_state_button, _("Pan automation state"));
+	bottom_button_table.set_homogeneous (true);
+	bottom_button_table.set_spacings (0);
+	bottom_button_table.attach (*solo_button, 0, 1, 1, 2);
+	bottom_button_table.attach (*mute_button, 1, 2, 1, 2);
 
 	if (is_audio_track()) {
 		
@@ -224,7 +170,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 		button_table.attach (speed_frame, 0, 2, 5, 6);
 #endif /* VARISPEED_IN_MIXER_STRIP */
 
-		button_table.attach (*rec_enable_button, 0, 2, 5, 6);
+		bottom_button_table.attach (group_button, 0, 2, 0, 1);
 	}
 
 	name_button.add (name_label);
@@ -263,13 +209,17 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 	width_hide_box.pack_start (width_button, false, true);
 	width_hide_box.pack_end (hide_button, false, true);
+	Gtk::Alignment *gain_meter_alignment = Gtk::manage(new Gtk::Alignment());
+	gain_meter_alignment->set_padding(0, 4, 0, 0);
+	gain_meter_alignment->add(gpm);
 
 	whvbox->pack_start (width_hide_box, true, true);
 
 	global_vpacker.pack_start (*whvbox, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (pre_redirect_box, true, true);
-	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK, 4);
+	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (*gain_meter_alignment,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (post_redirect_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
@@ -297,8 +247,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	_route.solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 	_route.solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 	_route.mix_group_changed.connect (mem_fun(*this, &MixerStrip::mix_group_changed));
-	_route.gain_automation_curve().automation_state_changed.connect (mem_fun(*this, &MixerStrip::gain_automation_state_changed));
-	_route.gain_automation_curve().automation_style_changed.connect (mem_fun(*this, &MixerStrip::gain_automation_style_changed));
 	_route.panner().Changed.connect (mem_fun(*this, &MixerStrip::connect_to_pan));
 
 	if (is_audio_track()) {
@@ -319,15 +267,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release), false);
 
-	gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::gain_automation_style_button_event), false);
-
-	pan_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::pan_automation_style_button_event), false);
-
-	gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::gain_automation_state_button_event), false);
-	pan_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::pan_automation_state_button_event), false);
-
 	name_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::name_button_button_press), false);
-
 	group_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::select_mix_group), false);
 
 	_width = (Width) -1;
@@ -348,8 +288,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	name_changed (0);
 	comment_changed (0);
 	mix_group_changed (0);
-	gain_automation_state_changed ();
-	pan_automation_state_changed ();
+
 	connect_to_pan ();
 
 	panners.setup_pan ();
@@ -445,10 +384,10 @@ MixerStrip::set_width (Width w)
 		       comment_button.set_label (_("*Comments*"));
 		}
 
-		gain_automation_style_button.set_label (_("F:") + astyle_string(_route.gain_automation_curve().automation_style()));
-		gain_automation_state_button.set_label (_("F:") + astate_string(_route.gain_automation_curve().automation_state()));
-		pan_automation_style_button.set_label (_("P:") + astyle_string(_route.panner().automation_style()));
-		pan_automation_state_button.set_label (_("P:") + astate_string(_route.panner().automation_state()));
+		gpm.gain_automation_style_button.set_label (gpm.astyle_string(_route.gain_automation_curve().automation_style()));
+		gpm.gain_automation_state_button.set_label (gpm.astate_string(_route.gain_automation_curve().automation_state()));
+		panners.pan_automation_style_button.set_label (panners.astyle_string(_route.panner().automation_style()));
+		panners.pan_automation_state_button.set_label (panners.astate_string(_route.panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		break;
 
@@ -466,10 +405,10 @@ MixerStrip::set_width (Width w)
 		       comment_button.set_label (_("*Cmt*"));
 		}
 
-		gain_automation_style_button.set_label (_("F:") + short_astyle_string(_route.gain_automation_curve().automation_style()));
-		gain_automation_state_button.set_label (_("F:") + short_astate_string(_route.gain_automation_curve().automation_state()));
-		pan_automation_style_button.set_label (_("P:") + short_astyle_string(_route.panner().automation_style()));
-		pan_automation_state_button.set_label (_("P:") + short_astate_string(_route.panner().automation_state()));
+		gpm.gain_automation_style_button.set_label (gpm.short_astyle_string(_route.gain_automation_curve().automation_style()));
+		gpm.gain_automation_state_button.set_label (gpm.short_astate_string(_route.gain_automation_curve().automation_state()));
+		panners.pan_automation_style_button.set_label (panners.short_astyle_string(_route.panner().automation_style()));
+		panners.pan_automation_state_button.set_label (panners.short_astate_string(_route.panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
 		break;
 	}
@@ -748,8 +687,8 @@ MixerStrip::connect_to_pan ()
 	if (!_route.panner().empty()) {
 		StreamPanner* sp = _route.panner().front();
 
-		panstate_connection = sp->automation().automation_state_changed.connect (mem_fun(*this, &MixerStrip::pan_automation_state_changed));
-		panstyle_connection = sp->automation().automation_style_changed.connect (mem_fun(*this, &MixerStrip::pan_automation_style_changed));
+		panstate_connection = sp->automation().automation_state_changed.connect (mem_fun(panners, &PannerUI::pan_automation_state_changed));
+		panstyle_connection = sp->automation().automation_style_changed.connect (mem_fun(panners, &PannerUI::pan_automation_style_changed));
 	}
 
 	panners.pan_changed (this);
@@ -802,249 +741,11 @@ MixerStrip::fast_update ()
 	gpm.update_meters ();
 }
 
-gint
-MixerStrip::gain_automation_state_button_event (GdkEventButton *ev)
-{
-	if (ev->type == GDK_BUTTON_RELEASE) {
-		return TRUE;
-	}
-	
-	switch (ev->button) {
-		case 1:
-			gain_astate_menu.popup (1, ev->time);
-			break;
-		default:
-			break;
-	}
-
-	return TRUE;
-}
-
-gint
-MixerStrip::gain_automation_style_button_event (GdkEventButton *ev)
-{
-	if (ev->type == GDK_BUTTON_RELEASE) {
-		return TRUE;
-	}
-
-	switch (ev->button) {
-	case 1:
-		gain_astyle_menu.popup (1, ev->time);
-		break;
-	default:
-		break;
-	}
-	return TRUE;
-}
-
-gint
-MixerStrip::pan_automation_state_button_event (GdkEventButton *ev)
-{
-	using namespace Menu_Helpers;
-
-	if (ev->type == GDK_BUTTON_RELEASE) {
-		return TRUE;
-	}
-
-	switch (ev->button) {
-	case 1:
-		pan_astate_menu.popup (1, ev->time);
-		break;
-	default:
-		break;
-	}
-
-	return TRUE;
-}
-
-gint
-MixerStrip::pan_automation_style_button_event (GdkEventButton *ev)
-{
-	if (ev->type == GDK_BUTTON_RELEASE) {
-		return TRUE;
-	}
-
-	switch (ev->button) {
-	case 1:
-		pan_astyle_menu.popup (1, ev->time);
-		break;
-	default:
-		break;
-	}
-	return TRUE;
-}
-
-string
-MixerStrip::astate_string (AutoState state)
-{
-	return _astate_string (state, false);
-}
-
-string
-MixerStrip::short_astate_string (AutoState state)
-{
-	return _astate_string (state, true);
-}
-
-string
-MixerStrip::_astate_string (AutoState state, bool shrt)
-{
-	string sstr;
-
-	switch (state) {
-	case Off:
-		sstr = (shrt ? "I" : _("Iso"));
-		break;
-	case Play:
-		sstr = (shrt ? "P" : _("Ply"));
-		break;
-	case Touch:
-		sstr = (shrt ? "T" : _("Tch"));
-		break;
-	case Write:
-		sstr = (shrt ? "W" : _("Wri"));
-		break;
-	}
-
-	return sstr;
-}
-
-string
-MixerStrip::astyle_string (AutoStyle style)
-{
-	return _astyle_string (style, false);
-}
-
-string
-MixerStrip::short_astyle_string (AutoStyle style)
-{
-	return _astyle_string (style, true);
-}
-
-string
-MixerStrip::_astyle_string (AutoStyle style, bool shrt)
-{
-	if (style & Trim) {
-		return _("Trim");
-	} else {
-		/* XXX it might different in different languages */
-
-		return (shrt ? _("Abs") : _("Abs"));
-	}
-}
-
 void
 MixerStrip::diskstream_changed (void *src)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_diskstream_display));
 }	
-
-void
-MixerStrip::gain_automation_style_changed ()
-{
-	switch (_width) {
-	case Wide:
-	        gain_automation_style_button.set_label (_("F:") + astyle_string(_route.gain_automation_curve().automation_style()));
-		break;
-	case Narrow:
-		gain_automation_style_button.set_label  (_("F:") + short_astyle_string(_route.gain_automation_curve().automation_style()));
-		break;
-	}
-}
-
-void
-MixerStrip::gain_automation_state_changed ()
-{
-	ENSURE_GUI_THREAD(mem_fun(*this, &MixerStrip::gain_automation_state_changed));
-	
-	bool x;
-
-	switch (_width) {
-	case Wide:
-		gain_automation_state_button.set_label (_("F:") + astate_string(_route.gain_automation_curve().automation_state()));
-		break;
-	case Narrow:
-		gain_automation_state_button.set_label (_("F:") + short_astate_string(_route.gain_automation_curve().automation_state()));
-		break;
-	}
-
-	x = (_route.gain_automation_state() != Off);
-	
-	if (gain_automation_state_button.get_active() != x) {
-		ignore_toggle = true;
-		gain_automation_state_button.set_active (x);
-		ignore_toggle = false;
-	}
-
-	gpm.update_gain_sensitive ();
-	
-	/* start watching automation so that things move */
-	
-	gain_watching.disconnect();
-
-	if (x) {
-		gain_watching = ARDOUR_UI::RapidScreenUpdate.connect (mem_fun (gpm, &GainMeter::effective_gain_display));
-	}
-}
-
-void
-MixerStrip::pan_automation_style_changed ()
-{
-	ENSURE_GUI_THREAD(mem_fun(*this, &MixerStrip::pan_automation_style_changed));
-	
-	switch (_width) {
-	case Wide:
-	  pan_automation_style_button.set_label (_("P:") + astyle_string(_route.panner().automation_style()));
-		break;
-	case Narrow:
-		pan_automation_style_button.set_label (_("P:") + short_astyle_string(_route.panner().automation_style()));
-		break;
-	}
-}
-
-void
-MixerStrip::pan_automation_state_changed ()
-{
-	ENSURE_GUI_THREAD(mem_fun(*this, &MixerStrip::pan_automation_state_changed));
-	
-	bool x;
-
-	switch (_width) {
-	case Wide:
-	  pan_automation_state_button.set_label (_("P:") + astate_string(_route.panner().automation_state()));
-		break;
-	case Narrow:
-		pan_automation_state_button.set_label (_("P:") + short_astate_string(_route.panner().automation_state()));
-		break;
-	}
-
-	/* when creating a new session, we get to create busses (and
-	   sometimes tracks) with no outputs by the time they get
-	   here.
-	*/
-
-	if (_route.panner().empty()) {
-		return;
-	}
-
-	x = (_route.panner().front()->automation().automation_state() != Off);
-
-	if (pan_automation_state_button.get_active() != x) {
-		ignore_toggle = true;
-		pan_automation_state_button.set_active (x);
-		ignore_toggle = false;
-	}
-
-	panners.update_pan_sensitive ();
-	
-	/* start watching automation so that things move */
-	
-	pan_watching.disconnect();
-
-	if (x) {
-		pan_watching = ARDOUR_UI::RapidScreenUpdate.connect (mem_fun (panners, &PannerUI::effective_pan_display));
-	}
-}
 
 void
 MixerStrip::input_changed (IOChange change, void *src)

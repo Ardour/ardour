@@ -228,7 +228,7 @@ class Mixer_UI : public Gtk::Window
 
 	Width _strip_width;
 
-	static const int32_t default_width = -1;
+	static const int32_t default_width = 478;
 	static const int32_t default_height = 765;
 };
 

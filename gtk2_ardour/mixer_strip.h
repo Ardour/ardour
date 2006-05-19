@@ -122,9 +122,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	RedirectBox pre_redirect_box;
 	RedirectBox post_redirect_box;
 	GainMeter   gpm;
-	PannerUI    panners;
+       	PannerUI    panners;
 	
 	Gtk::Table button_table;
+	Gtk::Table bottom_button_table;
 
 	Gtk::Button diskstream_button;
 	Gtk::Label  diskstream_label;
@@ -133,17 +134,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Label  input_label;
 	Gtk::Button output_button;
 	Gtk::Label  output_label;
-
-	Gtk::Button gain_automation_style_button;
-	Gtk::ToggleButton gain_automation_state_button;
-
-	Gtk::Button pan_automation_style_button;
-	Gtk::ToggleButton pan_automation_state_button;
-
-	Gtk::Menu gain_astate_menu;
-	Gtk::Menu gain_astyle_menu;
-	Gtk::Menu pan_astate_menu;
-	Gtk::Menu pan_astyle_menu;
 
 	sigc::connection newplug_connection;
     
@@ -188,30 +178,12 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void new_send ();
 	void show_send_controls ();
 
-
-	gint gain_automation_style_button_event (GdkEventButton *);
-	gint gain_automation_state_button_event (GdkEventButton *);
-	gint pan_automation_style_button_event (GdkEventButton *);
-	gint pan_automation_state_button_event (GdkEventButton *);
-
 	void input_changed (ARDOUR::IOChange, void *);
 	void output_changed (ARDOUR::IOChange, void *);
-	void gain_automation_state_changed();
-	void pan_automation_state_changed();
-	void gain_automation_style_changed();
-	void pan_automation_style_changed();
 
 	sigc::connection panstate_connection;
 	sigc::connection panstyle_connection;
 	void connect_to_pan ();
-
-	std::string astate_string (ARDOUR::AutoState);
-	std::string short_astate_string (ARDOUR::AutoState);
-	std::string _astate_string (ARDOUR::AutoState, bool);
-
-	std::string astyle_string (ARDOUR::AutoStyle);
-	std::string short_astyle_string (ARDOUR::AutoStyle);
-	std::string _astyle_string (ARDOUR::AutoStyle, bool);
 
 	void update_diskstream_display ();
 	void update_input_display ();
@@ -260,8 +232,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void map_frozen ();
 	void hide_redirect_editor (ARDOUR::Redirect* redirect);
 
-	sigc::connection gain_watching;
-	sigc::connection pan_watching;
 	bool ignore_speed_adjustment;
 
 	string solo_button_name () const { return "MixerSoloButton"; }

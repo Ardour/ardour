@@ -35,8 +35,8 @@
 #include "gui_thread.h"
 
 #include <ardour/session.h>
-#include <ardour/route.h>
 #include <ardour/panner.h>
+#include <ardour/route.h>
 
 #include "i18n.h"
 
@@ -54,12 +54,19 @@ PannerUI::PannerUI (IO& io, Session& s)
 	  panning_viewport(hAdjustment, vAdjustment),
 	  panning_up_arrow (Gtk::ARROW_UP, Gtk::SHADOW_OUT),
 	  panning_down_arrow (Gtk::ARROW_DOWN, Gtk::SHADOW_OUT),
-	  panning_link_button (_("link"))
-	
+	  panning_link_button (_("link")),
+	  pan_automation_style_button (""),
+	  pan_automation_state_button ("")
 {
 	ignore_toggle = false;
 	pan_menu = 0;
 	in_pan_update = false;
+
+	pan_automation_style_button.set_name ("MixerAutomationModeButton");
+	pan_automation_state_button.set_name ("MixerAutomationPlaybackButton");
+
+	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_state_button, _("Pan automation mode"));
+	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_style_button, _("Pan automation type"));
 
 	pan_bar_packer.set_size_request (-1, 61);
 	panning_viewport.set_size_request (61, 61);
@@ -71,8 +78,34 @@ PannerUI::PannerUI (IO& io, Session& s)
 	ARDOUR_UI::instance()->tooltips().set_tip (panning_link_direction_button,
 						   _("panning link direction"));
 
+	pan_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
+	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
+
+	using namespace Menu_Helpers;
+	pan_astate_menu.items().push_back (MenuElem (_("Isolate"), 
+						     bind (mem_fun (_io.panner(), &Panner::set_automation_state), (AutoState) Off)));
+	pan_astate_menu.items().push_back (MenuElem (_("Play"),
+						     bind (mem_fun (_io.panner(), &Panner::set_automation_state), (AutoState) Play)));
+	pan_astate_menu.items().push_back (MenuElem (_("Write"),
+						     bind (mem_fun (_io.panner(), &Panner::set_automation_state), (AutoState) Write)));
+	pan_astate_menu.items().push_back (MenuElem (_("Touch"),
+						     bind (mem_fun (_io.panner(), &Panner::set_automation_state), (AutoState) Touch)));
+
+	pan_astyle_menu.items().push_back (MenuElem (_("Trim")));
+	pan_astyle_menu.items().push_back (MenuElem (_("Abs")));
+
+	pan_astate_menu.set_name ("ArdourContextMenu");
+	pan_astyle_menu.set_name ("ArdourContextMenu");
+
+	pan_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &PannerUI::pan_automation_style_button_event), false);
+	pan_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &PannerUI::pan_automation_state_button_event), false);
+
+	Gtk::HBox* pan_button_hbox = manage (new Gtk::HBox());
+
 	panning_link_box.pack_start (panning_link_button, true, true);
 	panning_link_box.pack_start (panning_link_direction_button, true, true);
+	pan_button_hbox->pack_start (panning_link_box, true, true);
+	pan_button_hbox->pack_start (pan_automation_state_button, true, true);
 
 	panning_link_button.set_name (X_("PanningLinkButton"));
 	panning_link_direction_button.set_name (X_("PanningLinkDirectionButton"));
@@ -102,7 +135,7 @@ PannerUI::PannerUI (IO& io, Session& s)
 
 	pan_vbox.set_spacing (4);
 	pan_vbox.pack_start (panning_viewport, Gtk::PACK_SHRINK);
-	pan_vbox.pack_start (panning_link_box, Gtk::PACK_SHRINK);
+	pan_vbox.pack_start (*pan_button_hbox, Gtk::PACK_SHRINK);
 
 	pack_start (pan_vbox, true, false);
 
@@ -115,6 +148,7 @@ PannerUI::PannerUI (IO& io, Session& s)
 	pan_changed (0);
 	update_pan_sensitive ();
 	update_pan_linkage ();
+	pan_automation_state_changed ();
 }
 
 gint
@@ -612,3 +646,157 @@ PannerUI::update_pan_sensitive ()
 	}
 }
 
+gint
+PannerUI::pan_automation_state_button_event (GdkEventButton *ev)
+{
+	using namespace Menu_Helpers;
+
+	if (ev->type == GDK_BUTTON_RELEASE) {
+		return TRUE;
+	}
+
+	switch (ev->button) {
+	case 1:
+		pan_astate_menu.popup (1, ev->time);
+		break;
+	default:
+		break;
+	}
+
+	return TRUE;
+}
+
+gint
+PannerUI::pan_automation_style_button_event (GdkEventButton *ev)
+{
+	if (ev->type == GDK_BUTTON_RELEASE) {
+		return TRUE;
+	}
+
+	switch (ev->button) {
+	case 1:
+		pan_astyle_menu.popup (1, ev->time);
+		break;
+	default:
+		break;
+	}
+	return TRUE;
+}
+
+void
+PannerUI::pan_automation_style_changed ()
+{
+	ENSURE_GUI_THREAD(mem_fun(*this, &PannerUI::pan_automation_style_changed));
+	
+	switch (_width) {
+	case Wide:
+	        pan_automation_style_button.set_label (astyle_string(_io.panner().automation_style()));
+		break;
+	case Narrow:
+	  	pan_automation_style_button.set_label (short_astyle_string(_io.panner().automation_style()));
+		break;
+	}
+}
+
+void
+PannerUI::pan_automation_state_changed ()
+{
+	ENSURE_GUI_THREAD(mem_fun(*this, &PannerUI::pan_automation_state_changed));
+	
+	bool x;
+
+	switch (_width) {
+	case Wide:
+	  pan_automation_state_button.set_label (astate_string(_io.panner().automation_state()));
+		break;
+	case Narrow:
+	  pan_automation_state_button.set_label (short_astate_string(_io.panner().automation_state()));
+		break;
+	}
+
+	/* when creating a new session, we get to create busses (and
+	   sometimes tracks) with no outputs by the time they get
+	   here.
+	*/
+
+	if (_io.panner().empty()) {
+		return;
+	}
+
+	x = (_io.panner().front()->automation().automation_state() != Off);
+
+	if (pan_automation_state_button.get_active() != x) {
+	ignore_toggle = true;
+		pan_automation_state_button.set_active (x);
+		ignore_toggle = false;
+	}
+
+	update_pan_sensitive ();
+
+	/* start watching automation so that things move */
+
+	pan_watching.disconnect();
+
+	if (x) {
+	  pan_watching = ARDOUR_UI::RapidScreenUpdate.connect (mem_fun (*this, &PannerUI::effective_pan_display));
+	}
+}
+
+string
+PannerUI::astate_string (AutoState state)
+{
+	return _astate_string (state, false);
+}
+
+string
+PannerUI::short_astate_string (AutoState state)
+{
+	return _astate_string (state, true);
+}
+
+string
+PannerUI::_astate_string (AutoState state, bool shrt)
+{
+	string sstr;
+
+	switch (state) {
+	case Off:
+		sstr = (shrt ? "I" : _("I"));
+		break;
+	case Play:
+		sstr = (shrt ? "P" : _("P"));
+		break;
+	case Touch:
+		sstr = (shrt ? "T" : _("T"));
+		break;
+	case Write:
+		sstr = (shrt ? "W" : _("W"));
+		break;
+	}
+
+	return sstr;
+}
+
+string
+PannerUI::astyle_string (AutoStyle style)
+{
+	return _astyle_string (style, false);
+}
+
+string
+PannerUI::short_astyle_string (AutoStyle style)
+{
+	return _astyle_string (style, true);
+}
+
+string
+PannerUI::_astyle_string (AutoStyle style, bool shrt)
+{
+	if (style & Trim) {
+		return _("Trim");
+	} else {
+	        /* XXX it might different in different languages */
+
+		return (shrt ? _("Abs") : _("Abs"));
+	}
+}

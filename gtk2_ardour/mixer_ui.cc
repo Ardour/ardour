@@ -88,7 +88,6 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	track_display.set_name (X_("MixerTrackDisplayList"));
 	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
 	track_display.set_reorderable (true);
-	track_display.set_size_request (100, -1);
 	track_display.set_headers_visible (true);
 
 	track_model->signal_row_deleted().connect (mem_fun (*this, &Mixer_UI::track_list_delete));
@@ -105,16 +104,15 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	group_model = ListStore::create (group_columns);
 	group_display.set_model (group_model);
-	group_display.append_column (_("groupname"), group_columns.text);
-	group_display.append_column (_("active"), group_columns.active);
-	group_display.append_column (_("visible"), group_columns.visible);
+	group_display.append_column (_("Group"), group_columns.text);
+	group_display.append_column (_("Active"), group_columns.active);
+	group_display.append_column (_("Visible"), group_columns.visible);
 	group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
 	group_display.set_name ("MixerGroupList");
 	group_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	group_display.set_reorderable (true);
-      	group_display.set_size_request (150, -1);
 	group_display.set_headers_visible (true);
        	group_display.set_headers_clickable (false);
 	group_display.set_rules_hint (true);
@@ -144,8 +142,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	group_display_scroller.add (group_display);
 	group_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	HButtonBox* mix_group_display_button_box = manage (new HButtonBox());
-	mix_group_display_button_box->set_homogeneous (true);
+	HBox* mix_group_display_button_box = manage (new HBox());
 
 	Button* mix_group_add_button = manage (new Button ());
 	Button* mix_group_remove_button = manage (new Button ());
@@ -160,11 +157,13 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	w->show();
 	mix_group_remove_button->add (*w);
 
+	mix_group_display_button_box->set_homogeneous (true);
+
 	mix_group_add_button->signal_clicked().connect (mem_fun (*this, &Mixer_UI::new_mix_group));
 	mix_group_remove_button->signal_clicked().connect (mem_fun (*this, &Mixer_UI::remove_selected_mix_group));
 
-	mix_group_display_button_box->pack_start (*mix_group_add_button, false, false);
-	mix_group_display_button_box->pack_start (*mix_group_remove_button, false, false);
+	mix_group_display_button_box->add (*mix_group_remove_button);
+	mix_group_display_button_box->add (*mix_group_add_button);
 
 	group_display_vbox.pack_start (group_display_scroller, true, true);
 	group_display_vbox.pack_start (*mix_group_display_button_box, false, false);
@@ -177,15 +176,16 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	group_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	group_display_frame.add (group_display_vbox);
 
-	rhs_pane1.add1 (track_display_frame);
-	rhs_pane1.add2 (group_display_frame);
+	rhs_pane1.pack1 (track_display_frame);
+	rhs_pane1.pack2 (group_display_frame);
+	rhs_pane1.set_size_request (110, -1);
 
 	list_vpacker.pack_start (rhs_pane1, true, true);
 
 	global_hpacker.pack_start (scroller, true, true);
 	global_hpacker.pack_start (out_packer, false, false);
 
-	list_hpane.add1(list_vpacker);
+	list_hpane.pack1(list_vpacker, false, false);
 	list_hpane.add2(global_hpacker);
 
 	rhs_pane1.signal_size_allocate().connect (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 

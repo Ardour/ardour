@@ -32,7 +32,6 @@
 #include <gtkmm/table.h>
 #include <gtkmm/drawingarea.h>
 
-
 #include <ardour/types.h>
 
 #include <gtkmm2ext/slider_controller.h>
@@ -74,6 +73,8 @@ class GainMeter : public Gtk::VBox
 	void set_fader_name (const char * name);
 
   private:
+
+	friend class MixerStrip;
 	ARDOUR::IO& _io;
 	ARDOUR::Session& _session;
 
@@ -94,6 +95,31 @@ class GainMeter : public Gtk::VBox
 	Gtk::Button                  meter_point_button;
         Gtk::Label                   meter_point_label;
 	Gtk::Table                   top_table;
+
+	sigc::connection gain_watching;
+
+	Gtk::Button gain_automation_style_button;
+	Gtk::ToggleButton gain_automation_state_button;
+
+	Gtk::Menu gain_astate_menu;
+	Gtk::Menu gain_astyle_menu;
+
+	gint gain_automation_style_button_event (GdkEventButton *);
+	gint gain_automation_state_button_event (GdkEventButton *);
+	gint pan_automation_style_button_event (GdkEventButton *);
+	gint pan_automation_state_button_event (GdkEventButton *);
+
+	void gain_automation_state_changed();
+	void gain_automation_style_changed();
+
+	std::string astate_string (ARDOUR::AutoState);
+	std::string short_astate_string (ARDOUR::AutoState);
+	std::string _astate_string (ARDOUR::AutoState, bool);
+
+	std::string astyle_string (ARDOUR::AutoStyle);
+	std::string short_astyle_string (ARDOUR::AutoStyle);
+	std::string _astyle_string (ARDOUR::AutoStyle, bool);
+
 	Width                       _width;
 
 	static std::map<std::string,Glib::RefPtr<Gdk::Pixmap> > metric_pixmaps;
@@ -121,7 +147,7 @@ class GainMeter : public Gtk::VBox
 	vector<MeterInfo>    meters;
 	float       max_peak;
 	
-
+Gtk::VBox*   fader_vbox;
 	Gtk::HBox   hbox;
 	Gtk::HBox   meter_packer;
 

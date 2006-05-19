@@ -71,6 +71,7 @@ class PannerUI : public Gtk::HBox
 	void set_meter_strip_name (string name);
 
   private:
+	friend class MixerStrip;
 	ARDOUR::IO& _io;
 	ARDOUR::Session& _session;
 
@@ -89,13 +90,19 @@ class PannerUI : public Gtk::HBox
 	Gtk::Arrow          panning_down_arrow;
 	Gtk::VBox           pan_vbox;
 	Width              _width;
-
 	gint panning_scroll_button_press_event (GdkEventButton*, int32_t dir);
 	gint panning_scroll_button_release_event (GdkEventButton*, int32_t dir);
 	
 	Gtk::ToggleButton   panning_link_button;
 	Gtk::Button         panning_link_direction_button;
 	Gtk::HBox           panning_link_box;
+
+	Gtk::Menu pan_astate_menu;
+	Gtk::Menu pan_astyle_menu;
+
+	Gtk::Button pan_automation_style_button;
+	Gtk::ToggleButton pan_automation_state_button;
+
 
 	gint panning_link_button_press (GdkEventButton*);
 	gint panning_link_button_release (GdkEventButton*);
@@ -128,6 +135,20 @@ class PannerUI : public Gtk::HBox
 	void pan_mute (uint32_t which);
 	void pan_reset ();
 	void pan_bypass_toggle ();
+
+	void pan_automation_state_changed();
+	void pan_automation_style_changed();
+	gint pan_automation_style_button_event (GdkEventButton *);
+	gint pan_automation_state_button_event (GdkEventButton *);
+	sigc::connection pan_watching;
+
+	std::string astate_string (ARDOUR::AutoState);
+	std::string short_astate_string (ARDOUR::AutoState);
+	std::string _astate_string (ARDOUR::AutoState, bool);
+
+	std::string astyle_string (ARDOUR::AutoStyle);
+	std::string short_astyle_string (ARDOUR::AutoStyle);
+	std::string _astyle_string (ARDOUR::AutoStyle, bool);
 };
 
 #endif /* __ardour_gtk_panner_ui_h__ */

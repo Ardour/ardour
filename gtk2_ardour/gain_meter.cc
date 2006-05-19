@@ -87,7 +87,9 @@ GainMeter::GainMeter (IO& io, Session& s)
 	  gain_display (&gain_adjustment, "MixerStripGainDisplay"),
 	  gain_unit_label (_("dbFS")),
 	  meter_point_label (_("pre")),
-	  top_table (1, 2)
+	  top_table (1, 2),
+	  gain_automation_style_button (""),
+	  gain_automation_state_button ("")
 	
 {
 	if (slider == 0) {
@@ -180,8 +182,47 @@ GainMeter::GainMeter (IO& io, Session& s)
 
 	meter_packer.set_spacing (2);
 
-	hbox.set_spacing (4);
-	hbox.pack_start (*gain_slider, false, false, 2);
+	gain_automation_style_button.set_name ("MixerAutomationModeButton");
+	gain_automation_state_button.set_name ("MixerAutomationPlaybackButton");
+
+	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_state_button, _("Fader automation mode"));
+	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_style_button, _("Fader automation type"));
+
+	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
+	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
+
+	using namespace Menu_Helpers;
+	
+	gain_astate_menu.items().push_back (MenuElem (_("Isolate"), 
+						      bind (mem_fun (dynamic_cast<Route*>(&_io), &IO::set_gain_automation_state), (AutoState) Off)));
+	gain_astate_menu.items().push_back (MenuElem (_("Play"),
+						      bind (mem_fun (dynamic_cast<Route*>(&_io), &IO::set_gain_automation_state), (AutoState) Play)));
+	gain_astate_menu.items().push_back (MenuElem (_("Write"),
+						      bind (mem_fun (dynamic_cast<Route*>(&_io), &IO::set_gain_automation_state), (AutoState) Write)));
+	gain_astate_menu.items().push_back (MenuElem (_("Touch"),
+						      bind (mem_fun (dynamic_cast<Route*>(&_io), &IO::set_gain_automation_state), (AutoState) Touch)));
+	
+	gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
+	gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
+
+	Route* _route = dynamic_cast<Route*>(&_io);
+	
+	gain_astate_menu.set_name ("ArdourContextMenu");
+	gain_astyle_menu.set_name ("ArdourContextMenu");
+
+	gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeter::gain_automation_style_button_event), false);
+	gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeter::gain_automation_state_button_event), false);
+
+	_route->gain_automation_curve().automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed));
+	_route->gain_automation_curve().automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed));
+
+	fader_vbox = manage (new Gtk::VBox());
+	fader_vbox->set_spacing (0);
+	fader_vbox->pack_start (*gain_slider, false, false, 0);
+	fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
+
+	hbox.set_spacing (0);
+	hbox.pack_start (*fader_vbox, false, false, 2);
 	hbox.pack_start (meter_packer, true, false);
 
 	set_spacing (4);
@@ -198,6 +239,8 @@ GainMeter::GainMeter (IO& io, Session& s)
 
 	_session.MeterHoldChanged.connect (mem_fun(*this, &GainMeter::meter_hold_changed));
 	
+	gain_automation_state_changed ();
+
 	gain_changed (0);
 	update_gain_sensitive ();
 
@@ -455,8 +498,8 @@ void
 GainMeter::reset_peak_display ()
 {
 	max_peak = minus_infinity();
-	peak_display_label.set_text (_("-inf"));
-	peak_display.set_name ("MixerStripPeakDisplay");
+	peak_display_label.set_text (_("-Inf"));
+	peak_display.set_name ("Mixerstrippeakdisplay");
 }
 
 void
@@ -735,4 +778,148 @@ GainMeter::end_gain_touch (GdkEventButton* ev)
 {
 	_io.end_gain_touch ();
 	return FALSE;
+}
+
+gint
+GainMeter::gain_automation_state_button_event (GdkEventButton *ev)
+{
+	if (ev->type == GDK_BUTTON_RELEASE) {
+		return TRUE;
+	}
+	
+	switch (ev->button) {
+		case 1:
+			gain_astate_menu.popup (1, ev->time);
+			break;
+		default:
+			break;
+	}
+
+	return TRUE;
+}
+
+gint
+GainMeter::gain_automation_style_button_event (GdkEventButton *ev)
+{
+	if (ev->type == GDK_BUTTON_RELEASE) {
+		return TRUE;
+	}
+
+	switch (ev->button) {
+	case 1:
+		gain_astyle_menu.popup (1, ev->time);
+		break;
+	default:
+		break;
+	}
+	return TRUE;
+}
+
+string
+GainMeter::astate_string (AutoState state)
+{
+	return _astate_string (state, false);
+}
+
+string
+GainMeter::short_astate_string (AutoState state)
+{
+	return _astate_string (state, true);
+}
+
+string
+GainMeter::_astate_string (AutoState state, bool shrt)
+{
+	string sstr;
+
+	switch (state) {
+	case Off:
+		sstr = (shrt ? "I" : _("I"));
+		break;
+	case Play:
+		sstr = (shrt ? "P" : _("P"));
+		break;
+	case Touch:
+		sstr = (shrt ? "T" : _("T"));
+		break;
+	case Write:
+		sstr = (shrt ? "W" : _("W"));
+		break;
+	}
+
+	return sstr;
+}
+
+string
+GainMeter::astyle_string (AutoStyle style)
+{
+	return _astyle_string (style, false);
+}
+
+string
+GainMeter::short_astyle_string (AutoStyle style)
+{
+	return _astyle_string (style, true);
+}
+
+string
+GainMeter::_astyle_string (AutoStyle style, bool shrt)
+{
+	if (style & Trim) {
+		return _("Trim");
+	} else {
+	        /* XXX it might different in different languages */
+
+		return (shrt ? _("Abs") : _("Abs"));
+	}
+}
+
+void
+GainMeter::gain_automation_style_changed ()
+{
+  Route* _route = dynamic_cast<Route*>(&_io);
+	switch (_width) {
+	case Wide:
+	        gain_automation_style_button.set_label (astyle_string(_route->gain_automation_curve().automation_style()));
+		break;
+	case Narrow:
+		gain_automation_style_button.set_label  (short_astyle_string(_route->gain_automation_curve().automation_style()));
+		break;
+	}
+}
+
+void
+GainMeter::gain_automation_state_changed ()
+{
+	ENSURE_GUI_THREAD(mem_fun(*this, &GainMeter::gain_automation_state_changed));
+	Route* _route = dynamic_cast<Route*>(&_io);
+	
+	bool x;
+
+	switch (_width) {
+	case Wide:
+		gain_automation_state_button.set_label (astate_string(_route->gain_automation_curve().automation_state()));
+		break;
+	case Narrow:
+		gain_automation_state_button.set_label (short_astate_string(_route->gain_automation_curve().automation_state()));
+		break;
+	}
+
+	x = (_route->gain_automation_state() != Off);
+	
+	if (gain_automation_state_button.get_active() != x) {
+		ignore_toggle = true;
+		gain_automation_state_button.set_active (x);
+		ignore_toggle = false;
+	}
+
+	update_gain_sensitive ();
+	
+	/* start watching automation so that things move */
+	
+	gain_watching.disconnect();
+
+	if (x) {
+		gain_watching = ARDOUR_UI::RapidScreenUpdate.connect (mem_fun (*this, &GainMeter::effective_gain_display));
+	}
 }
