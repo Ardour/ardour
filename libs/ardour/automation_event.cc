@@ -440,6 +440,42 @@ AutomationList::erase (AutomationList::iterator start, AutomationList::iterator 
 }	
 
 void
+AutomationList::reset_range (double start, double endt)
+{
+	bool reset = false;
+
+	{
+		LockMonitor lm (lock, __LINE__, __FILE__);
+		TimeComparator cmp;
+		ControlEvent cp (start, 0.0f);
+		iterator s;
+		iterator e;
+		
+		if ((s = lower_bound (events.begin(), events.end(), &cp, cmp)) != events.end()) {
+
+			cp.when = endt;
+			e = upper_bound (events.begin(), events.end(), &cp, cmp);
+
+			for (iterator i = s; i != e; ++i) {
+				(*i)->value = default_value;
+			}
+			
+			reset = true;
+
+			if (!no_state) {
+				save_state (_("removed range"));
+			}
+
+			mark_dirty ();
+		}
+	}
+
+	if (reset) {
+		maybe_signal_changed ();
+	}
+}
+
+void
 AutomationList::erase_range (double start, double endt)
 {
 	bool erased = false;

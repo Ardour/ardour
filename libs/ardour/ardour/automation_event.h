@@ -85,6 +85,7 @@ class AutomationList : public StateManager
 	iterator add (double when, double value, iterator, bool ignore_mode = false);
 	void add (double when, double value, bool for_loading = false);
 
+	void reset_range (double start, double end);
 	void erase_range (double start, double end);
 	void erase (iterator);
 	void erase (iterator, iterator);

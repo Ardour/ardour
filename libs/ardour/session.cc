@@ -1887,11 +1887,6 @@ Session::add_route (Route* route)
 		_control_out = route;
 	}
 
-	AudioTrack* at = dynamic_cast<AudioTrack*>(route);
-	if (at && at->mode() == Destructive) {
-		destructive_index++;
-	}
-
 	set_dirty();
 	save_state (_current_snapshot_name);
 
@@ -2801,8 +2796,8 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 	/* find a "version" of the file name that doesn't exist in
 	   any of the possible directories.
 	*/
-	
-	for (cnt = (destructive ? destructive_index + 1 : 1); cnt <= limit; ++cnt) {
+
+	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
 		
 		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
