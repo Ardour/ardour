@@ -143,12 +143,12 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 	button_table.attach (name_button, 0, 2, 0, 1);
 	button_table.attach (input_button, 0, 2, 1, 2);
-	button_table.attach (*rec_enable_button, 0, 2, 2, 3);
 
 	bottom_button_table.set_homogeneous (true);
 	bottom_button_table.set_spacings (0);
 	bottom_button_table.attach (*solo_button, 0, 1, 1, 2);
 	bottom_button_table.attach (*mute_button, 1, 2, 1, 2);
+	bottom_button_table.attach (group_button, 0, 2, 0, 1);
 
 	if (is_audio_track()) {
 		
@@ -170,7 +170,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 		button_table.attach (speed_frame, 0, 2, 5, 6);
 #endif /* VARISPEED_IN_MIXER_STRIP */
 
-		bottom_button_table.attach (group_button, 0, 2, 0, 1);
+		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
 	}
 
 	name_button.add (name_label);
