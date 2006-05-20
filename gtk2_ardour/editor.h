@@ -1669,9 +1669,8 @@ class Editor : public PublicEditor
 	    Gtk::ProgressBar      progress_bar;
 	    Gtk::ToggleButton     quick_button;
 	    Gtk::ToggleButton     antialias_button;
-	    Gtk::Button           cancel_button;
-	    Gtk::Button           action_button;
-	    Gtk::HBox             lower_button_box;
+	    Gtk::Button*          cancel_button;
+	    Gtk::Button*          action_button;
 	    Gtk::HBox             upper_button_box;
 	    Gtk::VBox             packer;
 	    int                   status;

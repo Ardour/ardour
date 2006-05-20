@@ -322,7 +322,7 @@ Editor::Editor (AudioEngine& eng)
 	_new_regionviews_show_envelope = false;
 	current_timestretch = 0;
 	in_edit_group_row_change = false;
-
+	last_canvas_frame = 0;
 	edit_cursor = 0;
 	playhead_cursor = 0;
 

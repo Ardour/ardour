@@ -48,9 +48,7 @@ Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
 	: ArdourDialog ("time stretch dialog"),
 	  editor (e),
 	  quick_button (_("Quick but Ugly")),
-	  antialias_button (_("Skip Anti-aliasing")),
-	  cancel_button (_("Cancel")),
-	  action_button (_("Stretch/Shrink it"))
+	  antialias_button (_("Skip Anti-aliasing"))
 {
 	set_modal (true);
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -61,35 +59,27 @@ Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
 	get_vbox()->set_border_width (5);
 	get_vbox()->pack_start (upper_button_box);
 	get_vbox()->pack_start (progress_bar);
-	get_vbox()->pack_start (lower_button_box);
-	
+
 	upper_button_box.set_homogeneous (true);
 	upper_button_box.set_spacing (5);
 	upper_button_box.set_border_width (5);
 	upper_button_box.pack_start (quick_button, true, true);
 	upper_button_box.pack_start (antialias_button, true, true);
 
-	lower_button_box.set_homogeneous (true);
-	lower_button_box.set_spacing (5);
-	lower_button_box.set_border_width (5);
-	lower_button_box.pack_start (action_button, true, true);
-	lower_button_box.pack_start (cancel_button, true, true);
+	action_button = add_button (_("Stretch/Shrink it"), Gtk::RESPONSE_ACCEPT);
+	cancel_button = add_button (_("Cancel"), Gtk::RESPONSE_CANCEL);
 
-	action_button.set_name (N_("TimeStretchButton"));
-	cancel_button.set_name (N_("TimeStretchButton"));
 	quick_button.set_name (N_("TimeStretchButton"));
 	antialias_button.set_name (N_("TimeStretchButton"));
 	progress_bar.set_name (N_("TimeStretchProgress"));
 
-	// GTK2FIX
-	// action_button.signal_clicked().connect (bind (mem_fun(*this, &ArdourDialog::stop), 1));
-	show_all_children();
+	show_all_children ();
 }
 
 gint
 Editor::TimeStretchDialog::update_progress ()
 {
-	progress_bar.set_fraction (request.progress/100);
+	progress_bar.set_fraction (request.progress);
 	return request.running;
 }
 
@@ -118,9 +108,6 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 	}
 
 	current_timestretch->progress_bar.set_fraction (0.0f);
-	// GTK2FIX
-	// current_timestretch->first_cancel = current_timestretch->cancel_button.signal_clicked().connect (bind (mem_fun (*current_timestretch, &ArdourDialog::stop), -1));
-	// current_timestretch->first_delete = current_timestretch->signal_delete_event().connect (mem_fun (*current_timestretch, &ArdourDialog::wm_close_event));
 
 	switch (current_timestretch->run ()) {
 	case RESPONSE_ACCEPT:
@@ -143,12 +130,11 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 	current_timestretch->first_cancel.disconnect();
 	current_timestretch->first_delete.disconnect();
 	
-	current_timestretch->cancel_button.signal_clicked().connect (mem_fun (current_timestretch, &TimeStretchDialog::cancel_timestretch_in_progress));
+	current_timestretch->cancel_button->signal_clicked().connect (mem_fun (current_timestretch, &TimeStretchDialog::cancel_timestretch_in_progress));
 	current_timestretch->signal_delete_event().connect (mem_fun (current_timestretch, &TimeStretchDialog::delete_timestretch_in_progress));
 
 	if (pthread_create_and_store ("timestretch", &thread, 0, timestretch_thread, current_timestretch)) {
-		// GTK2FIX
-	  //current_timestretch->close ();
+		current_timestretch->hide ();
 		error << _("timestretch cannot be started - thread creation error") << endmsg;
 		return -1;
 	}
@@ -174,6 +160,7 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 	Playlist* playlist;
 	AudioRegion* new_region;
 
+
 	for (AudioRegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {
 
 		AudioRegion& aregion ((*i)->region);
@@ -181,6 +168,8 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 		AudioTimeAxisView* atv;
 		AudioRegionSelection::iterator tmp;
 		
+		cerr << "stretch " << aregion.name() << endl;
+
 		tmp = i;
 		++tmp;
 

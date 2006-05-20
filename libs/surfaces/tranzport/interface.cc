@@ -29,7 +29,7 @@ static ControlProtocolDescriptor tranzport_descriptor = {
 	id : "uri://ardour.org/surfaces/tranzport:0",
 	ptr : 0,
 	module : 0,
-	mandatory : 1,
+	mandatory : 0,
 	initialize : new_tranzport_protocol,
 	destroy : delete_tranzport_protocol
 };
