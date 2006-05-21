@@ -125,7 +125,15 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
        	PannerUI    panners;
 	
 	Gtk::Table button_table;
+	Gtk::Table middle_button_table;
 	Gtk::Table bottom_button_table;
+
+	Gtk::Button                  gain_unit_button;
+	Gtk::Label                   gain_unit_label;
+	Gtk::Button                  meter_point_button;
+	Gtk::Label                   meter_point_label;
+
+	void meter_changed (void *);
 
 	Gtk::Button diskstream_button;
 	Gtk::Label  diskstream_label;

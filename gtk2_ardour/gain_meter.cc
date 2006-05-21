@@ -85,9 +85,6 @@ GainMeter::GainMeter (IO& io, Session& s)
 	  // 0.781787 is the value needed for gain to be set to 0.
 	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1),
 	  gain_display (&gain_adjustment, "MixerStripGainDisplay"),
-	  gain_unit_label (_("dbFS")),
-	  meter_point_label (_("pre")),
-	  top_table (1, 2),
 	  gain_automation_style_button (""),
 	  gain_automation_state_button ("")
 	
@@ -115,50 +112,6 @@ GainMeter::GainMeter (IO& io, Session& s)
 
 	gain_display.set_print_func (_gain_printer, this);
 
-	gain_unit_button.add (gain_unit_label);
-	gain_unit_button.set_name ("MixerStripGainUnitButton");
-	gain_unit_label.set_name ("MixerStripGainUnitButton");
-
-	meter_point_button.signal_button_press_event().connect (mem_fun (*this, &GainMeter::meter_press), false);
-	meter_point_button.signal_button_release_event().connect (mem_fun (*this, &GainMeter::meter_release), false);
-	
-
-	top_table.set_col_spacings (2);
-	top_table.set_homogeneous (true);
-	top_table.attach (gain_unit_button, 0, 1, 0, 1);
-
-	Route* r;
-
-	if ((r = dynamic_cast<Route*> (&_io)) != 0) {
-
-		r->meter_change.connect (mem_fun(*this, &GainMeter::meter_changed));
-		meter_point_button.add (meter_point_label);
-		meter_point_button.set_name ("MixerStripMeterPreButton");
-		meter_point_label.set_name ("MixerStripMeterPreButton");
-		
-		switch (r->meter_point()) {
-		case MeterInput:
-			meter_point_label.set_text (_("input"));
-			break;
-			
-		case MeterPreFader:
-			meter_point_label.set_text (_("pre"));
-			break;
-			
-		case MeterPostFader:
-			meter_point_label.set_text (_("post"));
-			break;
-		}
-		
-		/* TRANSLATORS: this string should be longest of the strings
-		   used to describe meter points. In english, its "input".
-		*/
-		
-		set_size_request_to_display_given_text (meter_point_button, _("tupni"), 5, 5);
-
-
-		top_table.attach (meter_point_button, 1, 2, 0, 1);
-	}
 	gain_display_box.set_spacing (2);
 	set_size_request_to_display_given_text (gain_display_frame, "-86.g", 2, 6); /* note the descender */
 	gain_display_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -191,9 +144,12 @@ GainMeter::GainMeter (IO& io, Session& s)
 	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
+	gain_automation_state_button.set_size_request(10, -1);
+	gain_automation_style_button.set_size_request(10, -1);
+
 	using namespace Menu_Helpers;
 	
-	gain_astate_menu.items().push_back (MenuElem (_("Isolate"), 
+	gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
 						      bind (mem_fun (dynamic_cast<Route*>(&_io), &IO::set_gain_automation_state), (AutoState) Off)));
 	gain_astate_menu.items().push_back (MenuElem (_("Play"),
 						      bind (mem_fun (dynamic_cast<Route*>(&_io), &IO::set_gain_automation_state), (AutoState) Play)));
@@ -227,7 +183,6 @@ GainMeter::GainMeter (IO& io, Session& s)
 
 	set_spacing (4);
 
-	pack_start (top_table,  Gtk::PACK_SHRINK);
 	pack_start (gain_display_box,  Gtk::PACK_SHRINK);
 	pack_start (hbox,  Gtk::PACK_SHRINK);
 
@@ -730,33 +685,6 @@ GainMeter::set_mix_group_meter_point (Route& route, MeterPoint mp)
 }
 
 void
-GainMeter::meter_changed (void *src)
-{
-	Route* r;
-
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &GainMeter::meter_changed), src));
-
-	if ((r = dynamic_cast<Route*> (&_io)) != 0) {
-
-		switch (r->meter_point()) {
-		case MeterInput:
-			meter_point_label.set_text (_("input"));
-			break;
-			
-		case MeterPreFader:
-			meter_point_label.set_text (_("pre"));
-			break;
-			
-		case MeterPostFader:
-			meter_point_label.set_text (_("post"));
-			break;
-		}
-
-		setup_meters ();
-	}
-}
-
-void
 GainMeter::meter_point_clicked ()
 {
 	Route* r;
@@ -834,7 +762,7 @@ GainMeter::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case Off:
-		sstr = (shrt ? "I" : _("I"));
+		sstr = (shrt ? "M" : _("M"));
 		break;
 	case Play:
 		sstr = (shrt ? "P" : _("P"));

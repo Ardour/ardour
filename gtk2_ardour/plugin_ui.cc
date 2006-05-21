@@ -358,7 +358,7 @@ PluginUI::ControlUI::ControlUI ()
 
 	/* don't fix the height, it messes up the bar controllers */
 
-	set_size_request_to_display_given_text (automate_button, X_("longenuff"), 2, 2);
+	set_size_request_to_display_given_text (automate_button, X_("lngnuf"), 2, 2);
 
 	ignore_change = 0;
 	display = 0;
@@ -388,7 +388,7 @@ PluginUI::automation_state_changed (ControlUI* cui)
 
 	switch (insert.get_port_automation_state (cui->port_index) & (Off|Play|Touch|Write)) {
 	case Off:
-		cui->automate_button.set_label (_("Isolate"));
+		cui->automate_button.set_label (_("Manual"));
 		break;
 	case Play:
 		cui->automate_button.set_label (_("Play"));
@@ -631,7 +631,7 @@ PluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 	MenuList& items (automation_menu->items());
 
 	items.clear ();
-	items.push_back (MenuElem (_("Isolate"), 
+	items.push_back (MenuElem (_("Manual"), 
 				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Off, cui)));
 	items.push_back (MenuElem (_("Play"),
 				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Play, cui)));

@@ -68,6 +68,9 @@ PannerUI::PannerUI (IO& io, Session& s)
 	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_state_button, _("Pan automation mode"));
 	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_style_button, _("Pan automation type"));
 
+	set_size_request_to_display_given_text (pan_automation_state_button, X_("M"), 2, 2);
+	set_size_request_to_display_given_text (pan_automation_style_button, X_("M"), 2, 2);
+
 	pan_bar_packer.set_size_request (-1, 61);
 	panning_viewport.set_size_request (61, 61);
 
@@ -82,7 +85,7 @@ PannerUI::PannerUI (IO& io, Session& s)
 	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
 	using namespace Menu_Helpers;
-	pan_astate_menu.items().push_back (MenuElem (_("Isolate"), 
+	pan_astate_menu.items().push_back (MenuElem (_("Manual"), 
 						     bind (mem_fun (_io.panner(), &Panner::set_automation_state), (AutoState) Off)));
 	pan_astate_menu.items().push_back (MenuElem (_("Play"),
 						     bind (mem_fun (_io.panner(), &Panner::set_automation_state), (AutoState) Play)));
@@ -761,7 +764,7 @@ PannerUI::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case Off:
-		sstr = (shrt ? "I" : _("I"));
+		sstr = (shrt ? "M" : _("M"));
 		break;
 	case Play:
 		sstr = (shrt ? "P" : _("P"));

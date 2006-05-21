@@ -525,6 +525,9 @@ Editor::Editor (AudioEngine& eng)
 	edit_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	edit_group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	edit_group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
+	edit_group_display.get_column (0)->set_expand (true);
+	edit_group_display.get_column (1)->set_expand (false);
+	edit_group_display.get_column (2)->set_expand (false);
 	edit_group_display.set_headers_visible (true);
 
 	/* name is directly editable */
@@ -594,6 +597,7 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.set_model (region_list_model);
 	region_list_display.append_column (_("Regions"), region_list_columns.name);
 	region_list_display.set_headers_visible (false);
+	region_list_display.set_hover_expand (true);
 
 	region_list_display.get_selection()->set_select_function (mem_fun (*this, &Editor::region_list_selection_filter));
 	

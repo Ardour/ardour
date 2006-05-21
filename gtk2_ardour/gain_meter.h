@@ -87,14 +87,9 @@ class GainMeter : public Gtk::VBox
 	Gtk::Frame                   peak_display_frame;
 	Gtk::EventBox                peak_display;
 	Gtk::Label                   peak_display_label;
-	Gtk::Button                  gain_unit_button;
-	Gtk::Label                   gain_unit_label;
 	Gtk::HBox                    gain_display_box;
 	Gtk::HBox                    fader_box;
 	Gtk::DrawingArea             meter_metric_area;
-	Gtk::Button                  meter_point_button;
-        Gtk::Label                   meter_point_label;
-	Gtk::Table                   top_table;
 
 	sigc::connection gain_watching;
 
@@ -155,7 +150,6 @@ Gtk::VBox*   fader_vbox;
 	void gain_changed (void *);
 	
 	void meter_point_clicked ();
-	void meter_changed (void *);
 	void gain_unit_changed ();
 	
 	void hide_all_meters ();

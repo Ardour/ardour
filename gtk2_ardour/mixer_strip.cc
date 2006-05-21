@@ -89,7 +89,9 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	  gpm (_route, sess),
 	  panners (_route, sess),
 	  button_table (3, 2),
-	  bottom_button_table (2, 2),
+	  middle_button_table (1, 2),
+	  bottom_button_table (1, 2),
+	  meter_point_label (_("pre")),
 	  comment_button (_("Comments")),
 	  speed_adjustment (1.0, 0.001, 4.0, 0.001, 0.1),
 	  speed_spinner (&speed_adjustment, "MixerStripSpeedBase", true)
@@ -123,6 +125,40 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	output_button.set_name ("MixerIOButton");
 	output_label.set_name ("MixerIOButtonLabel");
 
+
+	_route.meter_change.connect (mem_fun(*this, &MixerStrip::meter_changed));
+		meter_point_button.add (meter_point_label);
+		meter_point_button.set_name ("MixerStripMeterPreButton");
+		meter_point_label.set_name ("MixerStripMeterPreButton");
+		
+		switch (_route.meter_point()) {
+		case MeterInput:
+			meter_point_label.set_text (_("input"));
+			break;
+			
+		case MeterPreFader:
+			meter_point_label.set_text (_("pre"));
+			break;
+			
+		case MeterPostFader:
+			meter_point_label.set_text (_("post"));
+			break;
+		}
+		
+		/* TRANSLATORS: this string should be longest of the strings
+		   used to describe meter points. In english, its "input".
+		*/
+		
+		set_size_request_to_display_given_text (meter_point_button, _("tupni"), 5, 5);
+
+
+		bottom_button_table.attach (meter_point_button, 1, 2, 0, 1);
+
+
+	meter_point_button.signal_button_press_event().connect (mem_fun (gpm, &GainMeter::meter_press), false);
+	/* XXX what is this meant to do? */
+	//meter_point_button.signal_button_release_event().connect (mem_fun (gpm, &GainMeter::meter_release), false);
+
 	rec_enable_button->set_name ("MixerRecordEnableButton");
 	rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
 
@@ -144,11 +180,14 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	button_table.attach (name_button, 0, 2, 0, 1);
 	button_table.attach (input_button, 0, 2, 1, 2);
 
+	middle_button_table.set_homogeneous (true);
+	middle_button_table.set_spacings (0);
+	middle_button_table.attach (*mute_button, 0, 1, 0, 1);
+	middle_button_table.attach (*solo_button, 1, 2, 0, 1);
+
+	bottom_button_table.set_col_spacings (0);
 	bottom_button_table.set_homogeneous (true);
-	bottom_button_table.set_spacings (0);
-	bottom_button_table.attach (*solo_button, 0, 1, 1, 2);
-	bottom_button_table.attach (*mute_button, 1, 2, 1, 2);
-	bottom_button_table.attach (group_button, 0, 2, 0, 1);
+	bottom_button_table.attach (group_button, 0, 1, 0, 1);
 
 	if (is_audio_track()) {
 		
@@ -218,8 +257,9 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	global_vpacker.pack_start (*whvbox, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (pre_redirect_box, true, true);
-	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (middle_button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (*gain_meter_alignment,Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (post_redirect_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
@@ -910,7 +950,7 @@ MixerStrip::mix_group_changed (void *ignored)
 	} else {
 		switch (_width) {
 		case Wide:
-			group_label.set_text (_("No group"));
+			group_label.set_text (_("Grp"));
 			break;
 		case Narrow:
 			group_label.set_text (_("~G"));
@@ -1171,3 +1211,27 @@ MixerStrip::engine_running ()
 	rec_enable_button->set_sensitive (true);
 	output_button.set_sensitive (true);
 }
+
+void
+MixerStrip::meter_changed (void *src)
+{
+
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &MixerStrip::meter_changed), src));
+
+		switch (_route.meter_point()) {
+		case MeterInput:
+			meter_point_label.set_text (_("input"));
+			break;
+			
+		case MeterPreFader:
+			meter_point_label.set_text (_("pre"));
+			break;
+			
+		case MeterPostFader:
+			meter_point_label.set_text (_("post"));
+			break;
+		}
+
+		gpm.setup_meters ();
+}
+

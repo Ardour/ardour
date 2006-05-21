@@ -85,6 +85,8 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	track_display.append_column (_("Visible"), track_columns.visible);
 	track_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	track_display.get_column (0)->set_expand(true);
+	track_display.get_column (1)->set_expand(false);
 	track_display.set_name (X_("MixerTrackDisplayList"));
 	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
 	track_display.set_reorderable (true);
@@ -110,11 +112,13 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
+	group_display.get_column (0)->set_expand(true);
+	group_display.get_column (1)->set_expand(false);
+	group_display.get_column (2)->set_expand(false);
 	group_display.set_name ("MixerGroupList");
 	group_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	group_display.set_reorderable (true);
 	group_display.set_headers_visible (true);
-       	group_display.set_headers_clickable (false);
 	group_display.set_rules_hint (true);
 
 	/* name is directly editable */
@@ -178,7 +182,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	rhs_pane1.pack1 (track_display_frame);
 	rhs_pane1.pack2 (group_display_frame);
-	rhs_pane1.set_size_request (110, -1);
+	rhs_pane1.set_size_request (105, -1);
 
 	list_vpacker.pack_start (rhs_pane1, true, true);
 
