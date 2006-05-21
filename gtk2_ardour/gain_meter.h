@@ -142,7 +142,7 @@ class GainMeter : public Gtk::VBox
 	vector<MeterInfo>    meters;
 	float       max_peak;
 	
-Gtk::VBox*   fader_vbox;
+	Gtk::VBox*   fader_vbox;
 	Gtk::HBox   hbox;
 	Gtk::HBox   meter_packer;
 

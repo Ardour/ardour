@@ -103,19 +103,19 @@ PannerUI::PannerUI (IO& io, Session& s)
 	pan_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &PannerUI::pan_automation_style_button_event), false);
 	pan_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &PannerUI::pan_automation_state_button_event), false);
 
-	Gtk::HBox* pan_button_hbox = manage (new Gtk::HBox());
-
-	panning_link_box.pack_start (panning_link_button, true, true);
-	panning_link_box.pack_start (panning_link_direction_button, true, true);
-	pan_button_hbox->pack_start (panning_link_box, true, true);
-	pan_button_hbox->pack_start (pan_automation_state_button, true, true);
-
 	panning_link_button.set_name (X_("PanningLinkButton"));
 	panning_link_direction_button.set_name (X_("PanningLinkDirectionButton"));
 
 	/* the pixmap will be reset at some point, but the key thing is that
 	   we need a pixmap in the button just to get started.
 	*/
+
+	Gtk::HBox* pan_button_hbox = manage (new Gtk::HBox());
+
+	panning_link_box.pack_start (panning_link_button, true, true);
+	panning_link_box.pack_start (panning_link_direction_button, true, true);
+	pan_button_hbox->pack_start (panning_link_box, true, true);
+	pan_button_hbox->pack_start (pan_automation_state_button, true, true);
 
 	panning_link_direction_button.add (*(manage (new Image (get_xpm("forwardblarrow.xpm")))));
 
