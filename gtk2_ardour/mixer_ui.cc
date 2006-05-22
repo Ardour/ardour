@@ -182,14 +182,13 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	rhs_pane1.pack1 (track_display_frame);
 	rhs_pane1.pack2 (group_display_frame);
-	rhs_pane1.set_size_request (105, -1);
 
 	list_vpacker.pack_start (rhs_pane1, true, true);
 
 	global_hpacker.pack_start (scroller, true, true);
 	global_hpacker.pack_start (out_packer, false, false);
 
-	list_hpane.pack1(list_vpacker, false, false);
+	list_hpane.add1(list_vpacker);
 	list_hpane.add2(global_hpacker);
 
 	rhs_pane1.signal_size_allocate().connect (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 

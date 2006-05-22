@@ -128,8 +128,6 @@ GainMeter::GainMeter (IO& io, Session& s)
 	max_peak = minus_infinity();
 	peak_display_label.set_text (_("-inf"));
 
-	gain_display_box.pack_end (peak_display_frame,  Gtk::PACK_SHRINK);
-
 	meter_metric_area.set_size_request (25, -1);
 	meter_metric_area.set_name ("MeterMetricsStrip");
 
@@ -144,19 +142,31 @@ GainMeter::GainMeter (IO& io, Session& s)
 	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
-	gain_automation_state_button.set_size_request(10, -1);
-	gain_automation_style_button.set_size_request(10, -1);
+	gain_automation_state_button.set_size_request(15, 15);
+	gain_automation_style_button.set_size_request(15, 15);
 
 	fader_vbox = manage (new Gtk::VBox());
 	fader_vbox->set_spacing (0);
 	fader_vbox->pack_start (*gain_slider, false, false, 0);
 
+	hbox.set_spacing (0);
+	hbox.pack_start (*fader_vbox, false, false, 2);
+
 	Route* r;
 
 	if ((r = dynamic_cast<Route*> (&_io)) != 0) {
-	        using namespace Menu_Helpers;
+	        /* 
+		   if we don't have a route (if we're the click), 
+		   pack some route-dependent stuff.
+		*/
+
+	        gain_display_box.pack_end (peak_display_frame,  Gtk::PACK_SHRINK);
+
+		hbox.pack_start (meter_packer, true, false);
+
+		using namespace Menu_Helpers;
 	
-		gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
+		gain_astate_menu.items().push_back (MenuElem (_("Off"), 
 						      bind (mem_fun (&_io, &IO::set_gain_automation_state), (AutoState) Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),
 						      bind (mem_fun (&_io, &IO::set_gain_automation_state), (AutoState) Play)));
@@ -181,9 +191,6 @@ GainMeter::GainMeter (IO& io, Session& s)
 		gain_automation_state_changed ();
 	}
 
-	hbox.set_spacing (0);
-	hbox.pack_start (*fader_vbox, false, false, 2);
-	hbox.pack_start (meter_packer, true, false);
 
 	set_spacing (4);
 
@@ -764,7 +771,7 @@ GainMeter::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case Off:
-		sstr = (shrt ? "M" : _("M"));
+		sstr = (shrt ? "O" : _("O"));
 		break;
 	case Play:
 		sstr = (shrt ? "P" : _("P"));
@@ -807,13 +814,13 @@ GainMeter::_astyle_string (AutoStyle style, bool shrt)
 void
 GainMeter::gain_automation_style_changed ()
 {
-  Route* _route = dynamic_cast<Route*>(&_io);
+  // Route* _route = dynamic_cast<Route*>(&_io);
 	switch (_width) {
 	case Wide:
-	        gain_automation_style_button.set_label (astyle_string(_route->gain_automation_curve().automation_style()));
+	        gain_automation_style_button.set_label (astyle_string(_io.gain_automation_curve().automation_style()));
 		break;
 	case Narrow:
-		gain_automation_style_button.set_label  (short_astyle_string(_route->gain_automation_curve().automation_style()));
+		gain_automation_style_button.set_label  (short_astyle_string(_io.gain_automation_curve().automation_style()));
 		break;
 	}
 }
@@ -822,20 +829,20 @@ void
 GainMeter::gain_automation_state_changed ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &GainMeter::gain_automation_state_changed));
-	Route* _route = dynamic_cast<Route*>(&_io);
+	//Route* _route = dynamic_cast<Route*>(&_io);
 	
 	bool x;
 
 	switch (_width) {
 	case Wide:
-		gain_automation_state_button.set_label (astate_string(_route->gain_automation_curve().automation_state()));
+		gain_automation_state_button.set_label (astate_string(_io.gain_automation_curve().automation_state()));
 		break;
 	case Narrow:
-		gain_automation_state_button.set_label (short_astate_string(_route->gain_automation_curve().automation_state()));
+		gain_automation_state_button.set_label (short_astate_string(_io.gain_automation_curve().automation_state()));
 		break;
 	}
 
-	x = (_route->gain_automation_state() != Off);
+	x = (_io.gain_automation_state() != Off);
 	
 	if (gain_automation_state_button.get_active() != x) {
 		ignore_toggle = true;

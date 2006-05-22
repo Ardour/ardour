@@ -85,7 +85,7 @@ PannerUI::PannerUI (IO& io, Session& s)
 	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
 	using namespace Menu_Helpers;
-	pan_astate_menu.items().push_back (MenuElem (_("Manual"), 
+	pan_astate_menu.items().push_back (MenuElem (_("Off"), 
 						     bind (mem_fun (_io.panner(), &Panner::set_automation_state), (AutoState) Off)));
 	pan_astate_menu.items().push_back (MenuElem (_("Play"),
 						     bind (mem_fun (_io.panner(), &Panner::set_automation_state), (AutoState) Play)));
@@ -764,7 +764,7 @@ PannerUI::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case Off:
-		sstr = (shrt ? "M" : _("M"));
+		sstr = (shrt ? "O" : _("O"));
 		break;
 	case Play:
 		sstr = (shrt ? "P" : _("P"));

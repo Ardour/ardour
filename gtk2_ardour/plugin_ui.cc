@@ -388,7 +388,7 @@ PluginUI::automation_state_changed (ControlUI* cui)
 
 	switch (insert.get_port_automation_state (cui->port_index) & (Off|Play|Touch|Write)) {
 	case Off:
-		cui->automate_button.set_label (_("Manual"));
+		cui->automate_button.set_label (_("Off"));
 		break;
 	case Play:
 		cui->automate_button.set_label (_("Play"));
@@ -631,7 +631,7 @@ PluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 	MenuList& items (automation_menu->items());
 
 	items.clear ();
-	items.push_back (MenuElem (_("Manual"), 
+	items.push_back (MenuElem (_("Off"), 
 				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Off, cui)));
 	items.push_back (MenuElem (_("Play"),
 				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Play, cui)));
