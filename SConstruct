@@ -568,10 +568,17 @@ else:
     'gtk2_ardour'
         ]
 
+
+
 surface_subdirs = []
 
+#
+# always build the LGPL control protocol lib, since we link against it ourselves
+# ditto for generic MIDI
+
+surface_subdirs += [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_midi' ]
+
 if env['SURFACES']:
-    surface_subdirs += [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_midi' ]
     if have_libusb:
         surface_subdirs += [ 'libs/surfaces/tranzport' ]
     if os.access ('libs/surfaces/sony9pin', os.F_OK):
