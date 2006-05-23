@@ -392,6 +392,13 @@ libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomeca
 
 #libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
 
+# The Ardour Control Protocol Library
+
+libraries['ardour_cp'] = LibraryInfo (LIBS='ardour_cp', LIBPATH='#libs/surfaces/control_protocol',
+                                      CPPPATH='#libs/surfaces/control_protocol')
+
+# The Ardour backend/engine
+
 libraries['ardour'] = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')
 libraries['midi++2'] = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++2', CPPPATH='#libs/midi++2')
 libraries['pbd3']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd3', CPPPATH='#libs/pbd3')
@@ -564,9 +571,11 @@ else:
 surface_subdirs = []
 
 if env['SURFACES']:
-    surface_subdirs += [ 'libs/surfaces/generic_midi' ]
+    surface_subdirs += [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_midi' ]
     if have_libusb:
         surface_subdirs += [ 'libs/surfaces/tranzport' ]
+    if os.access ('libs/surfaces/sony9pin', os.F_OK):
+        surface_subdirs += [ 'libs/surfaces/sony9pin' ]
     
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))

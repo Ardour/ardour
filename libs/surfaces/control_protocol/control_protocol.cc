@@ -1,10 +1,11 @@
 /*
     Copyright (C) 2006 Paul Davis 
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+    This program is free software; you can redistribute it
+    and/or modify it under the terms of the GNU Lesser
+    General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your
+    option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,10 +19,11 @@
     $Id$
 */
 
-#include <ardour/control_protocol.h>
 #include <ardour/session.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
+
+#include "control_protocol.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -133,6 +135,24 @@ ControlProtocol::set_route_table_size (uint32_t size)
 void
 ControlProtocol::set_route_table (uint32_t table_index, ARDOUR::Route*)
 {
+}
+
+bool
+ControlProtocol::set_route_table (uint32_t table_index, uint32_t remote_control_id)
+{
+	if (table_index >= route_table.size()) {
+		return false;
+	}
+		
+	Route* r = session->route_by_remote_id (remote_control_id);
+
+	if (!r) {
+		return false;
+	}
+	
+	route_table[table_index] = r;
+
+	return true;
 }
 
 void

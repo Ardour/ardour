@@ -34,7 +34,8 @@
 
 #include <ardour/session.h>
 #include <ardour/control_protocol_manager.h>
-#include <ardour/control_protocol.h>
+
+#include "control_protocol.h"
 
 #include "i18n.h"
 

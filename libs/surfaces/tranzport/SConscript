@@ -32,12 +32,13 @@ tranzport.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 
 tranzport.Merge ([
     libraries['ardour'],
+    libraries['ardour_cp'],
     libraries['sigc2'],
     libraries['pbd3'],
     libraries['midi++2'],
-	libraries['xml'],
-	libraries['usb']
-	])
+    libraries['xml'],
+    libraries['usb']
+    ])
 
 libardour_tranzport = tranzport.SharedLibrary('ardour_tranzport', tranzport_files)
 

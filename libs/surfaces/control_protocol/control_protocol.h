@@ -1,3 +1,24 @@
+/*
+    Copyright (C) 2006 Paul Davis 
+
+    This program is free software; you can redistribute it
+    and/or modify it under the terms of the GNU Lesser
+    General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+    $Id$
+*/
+
 #ifndef ardour_control_protocols_h
 #define ardour_control_protocols_h
 
@@ -6,7 +27,7 @@
 #include <list>
 #include <sigc++/sigc++.h>
 
-#include <ardour/basic_ui.h>
+#include "basic_ui.h"
 
 namespace ARDOUR {
 
@@ -24,7 +45,6 @@ class ControlProtocol : public sigc::trackable, public BasicUI {
 	bool get_active() const { return _active; }
 
 	sigc::signal<void> ActiveChanged;
-
 
 	/* signals that a control protocol can emit and other (presumably graphical)
 	   user interfaces can respond to
@@ -54,6 +74,7 @@ class ControlProtocol : public sigc::trackable, public BasicUI {
 
 	void set_route_table_size (uint32_t size);
 	void set_route_table (uint32_t table_index, ARDOUR::Route*);
+	bool set_route_table (uint32_t table_index, uint32_t remote_control_id);
 
 	void route_set_rec_enable (uint32_t table_index, bool yn);
 	bool route_get_rec_enable (uint32_t table_index);
@@ -88,6 +109,7 @@ extern "C" {
 	    void*       ptr;       /* protocol can store a value here */
 	    void*       module;    /* not for public access */
 	    int         mandatory; /* if non-zero, always load and do not make optional */
+	    bool             (*probe)(ControlProtocolDescriptor*);
 	    ControlProtocol* (*initialize)(ControlProtocolDescriptor*,Session*);
 	    void             (*destroy)(ControlProtocolDescriptor*,ControlProtocol*);
 	    

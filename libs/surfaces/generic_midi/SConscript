@@ -31,13 +31,14 @@ genericmidi.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
 genericmidi.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 
 genericmidi.Merge ([
-		 libraries['ardour'],
-		 libraries['midi++2'],
-		 libraries['pbd3'],
-		 libraries['sigc2'],
-	     libraries['usb'],
-	     libraries['xml']
-	     ])
+	libraries['ardour'],
+	libraries['ardour_cp'],
+	libraries['midi++2'],
+	libraries['pbd3'],
+	libraries['sigc2'],
+	libraries['usb'],
+	libraries['xml']
+	])
 
 libardour_genericmidi = genericmidi.SharedLibrary('ardour_genericmidi', genericmidi_files)
 

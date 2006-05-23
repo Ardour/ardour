@@ -4,9 +4,13 @@
 #include <pbd/error.h>
 #include <pbd/pathscanner.h>
 
+#include "control_protocol.h"
+
 #include <ardour/session.h>
-#include <ardour/control_protocol.h>
 #include <ardour/control_protocol_manager.h>
+
+
+
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -168,18 +172,23 @@ ControlProtocolManager::control_protocol_discover (string path)
 
 	if ((descriptor = get_descriptor (path)) != 0) {
 
-		ControlProtocolInfo* info = new ControlProtocolInfo ();
+		ControlProtocolInfo* cpi = new ControlProtocolInfo ();
 
-		info->descriptor = descriptor;
-		info->name = descriptor->name;
-		info->path = path;
-		info->protocol = 0;
-		info->requested = false;
-		info->mandatory = descriptor->mandatory;
+		if (!descriptor->probe (descriptor)) {
+			info << string_compose (_("Control protocol %1 not usable"), descriptor->name) << endmsg;
+		} else {
 
-		control_protocol_info.push_back (info);
-
-		cerr << "discovered control surface protocol \"" << info->name << '"' << endl;
+			cpi->descriptor = descriptor;
+			cpi->name = descriptor->name;
+			cpi->path = path;
+			cpi->protocol = 0;
+			cpi->requested = false;
+			cpi->mandatory = descriptor->mandatory;
+			
+			control_protocol_info.push_back (cpi);
+			
+			info << string_compose(_("Control surface protocol discovered: \"%1\""), cpi->name) << endmsg;
+		}
 
 		dlclose (descriptor->module);
 	}

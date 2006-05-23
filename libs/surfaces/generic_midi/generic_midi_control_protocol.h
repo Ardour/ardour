@@ -1,7 +1,7 @@
 #ifndef ardour_generic_midi_control_protocol_h
 #define ardour_generic_midi_control_protocol_h
 
-#include <ardour/control_protocol.h>
+#include "control_protocol.h"
 
 namespace MIDI {
 	class Port;
@@ -15,6 +15,7 @@ class GenericMidiControlProtocol : public ControlProtocol {
 	virtual ~GenericMidiControlProtocol();
 
 	int set_active (bool yn);
+	static bool probe() { return true; }
 
 	void set_port (MIDI::Port*);
 	MIDI::Port* port () const { return _port; }

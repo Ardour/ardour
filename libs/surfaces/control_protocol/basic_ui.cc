@@ -1,10 +1,11 @@
 /*
     Copyright (C) 2006 Paul Davis 
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+    This program is free software; you can redistribute it
+    and/or modify it under the terms of the GNU Lesser
+    General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your
+    option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,10 +19,10 @@
     $Id$
 */
 
-#include <ardour/basic_ui.h>
 #include <ardour/session.h>
 #include <ardour/location.h>
 
+#include "basic_ui.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -92,7 +93,7 @@ BasicUI::transport_stop ()
 }
 
 void
-BasicUI::transport_play ()
+BasicUI::transport_play (bool from_last_start)
 {
 	bool rolling = session->transport_rolling ();
 
@@ -104,7 +105,7 @@ BasicUI::transport_play ()
 		session->request_play_range (false);
 	}
 	
-	if (rolling) {
+	if (from_last_start && rolling) {
 		session->request_locate (session->last_transport_start(), true);
 
 	}
@@ -167,6 +168,12 @@ BasicUI::set_transport_speed (float speed)
 	session->request_transport_speed (speed);
 }
 
+float
+BasicUI::get_transport_speed ()
+{
+	return session->transport_speed ();
+}
+
 void
 BasicUI::undo ()
 {
@@ -199,4 +206,68 @@ void
 BasicUI::toggle_punch_out ()
 {
 	session->set_punch_out (!session->get_punch_out());
+}
+
+bool
+BasicUI::get_record_enabled ()
+{
+	return session->get_record_enabled();
+}
+
+void
+BasicUI::set_record_enable (bool yn)
+{
+	if (yn) {
+		session->maybe_enable_record ();
+	} else {
+		session->disable_record (false, true);
+	}
+}
+
+jack_nframes_t
+BasicUI::transport_frame ()
+{
+	return session->transport_frame();
+}
+
+void
+BasicUI::locate (jack_nframes_t where, bool roll_after_locate)
+{
+	session->request_locate (where, roll_after_locate);
+}
+
+bool
+BasicUI::locating ()
+{
+	return session->locate_pending();
+}
+
+bool
+BasicUI::locked ()
+{
+	return session->transport_locked ();
+}
+
+jack_nframes_t
+BasicUI::smpte_frames_per_hour ()
+{
+	return session->smpte_frames_per_hour ();
+}
+
+void
+BasicUI::smpte_time (jack_nframes_t where, SMPTE_t& smpte)
+{
+	session->smpte_time (where, *((SMPTE_Time *) &smpte));
+}
+
+void 
+BasicUI::smpte_to_sample (SMPTE_t& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes) const
+{
+	session->smpte_to_sample (*((SMPTE_Time*)&smpte), sample, use_offset, use_subframes);
+}
+
+void 
+BasicUI::sample_to_smpte (jack_nframes_t sample, SMPTE_t& smpte, bool use_offset, bool use_subframes) const
+{
+	session->sample_to_smpte (sample, *((SMPTE_Time*)&smpte), use_offset, use_subframes);
 }

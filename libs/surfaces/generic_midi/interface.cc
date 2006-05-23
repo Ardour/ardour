@@ -1,4 +1,4 @@
-#include <ardour/control_protocol.h>
+#include "control_protocol.h"
 
 #include "generic_midi_control_protocol.h"
 
@@ -23,12 +23,19 @@ delete_generic_midi_protocol (ControlProtocolDescriptor* descriptor, ControlProt
 	delete cp;
 }
 
+bool
+probe_generic_midi_protocol (ControlProtocolDescriptor* descriptor)
+{
+	return GenericMidiControlProtocol::probe ();
+}
+
 static ControlProtocolDescriptor generic_midi_descriptor = {
 	name : "Generic MIDI",
 	id : "uri://ardour.org/surfaces/generic_midi:0",
 	ptr : 0,
 	module : 0,
 	mandatory : 0,
+	probe : probe_generic_midi_protocol,
 	initialize : new_generic_midi_protocol,
 	destroy : delete_generic_midi_protocol
 };

@@ -90,12 +90,13 @@ class PannerUI : public Gtk::HBox
 	Gtk::Arrow          panning_down_arrow;
 	Gtk::VBox           pan_vbox;
 	Width              _width;
-	gint panning_scroll_button_press_event (GdkEventButton*, int32_t dir);
-	gint panning_scroll_button_release_event (GdkEventButton*, int32_t dir);
-	
+
 	Gtk::ToggleButton   panning_link_button;
 	Gtk::Button         panning_link_direction_button;
 	Gtk::HBox           panning_link_box;
+
+	bool panning_link_button_press (GdkEventButton*);
+	bool panning_link_button_release (GdkEventButton*);
 
 	Gtk::Menu pan_astate_menu;
 	Gtk::Menu pan_astyle_menu;
@@ -103,9 +104,6 @@ class PannerUI : public Gtk::HBox
 	Gtk::Button pan_automation_style_button;
 	Gtk::ToggleButton pan_automation_state_button;
 
-
-	gint panning_link_button_press (GdkEventButton*);
-	gint panning_link_button_release (GdkEventButton*);
 	void panning_link_direction_clicked ();
 
 	vector<Gtk::Adjustment*> pan_adjustments;
@@ -128,7 +126,8 @@ class PannerUI : public Gtk::HBox
 	gint start_pan_touch (GdkEventButton*);
 	gint end_pan_touch (GdkEventButton*);
 
-	gint pan_button_event (GdkEventButton*, uint32_t which);
+	bool pan_button_event (GdkEventButton*, uint32_t which);
+
 	Gtk::Menu* pan_menu;
 	Gtk::CheckMenuItem* bypass_menu_item;
 	void build_pan_menu (uint32_t which);

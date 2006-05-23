@@ -123,9 +123,9 @@ PannerUI::PannerUI (IO& io, Session& s)
 		(mem_fun(*this, &PannerUI::panning_link_direction_clicked));
 
 	panning_link_button.signal_button_press_event().connect
-		(mem_fun(*this, &PannerUI::panning_link_button_press));
+		(mem_fun(*this, &PannerUI::panning_link_button_press), false);
 	panning_link_button.signal_button_release_event().connect
-		(mem_fun(*this, &PannerUI::panning_link_button_release));
+		(mem_fun(*this, &PannerUI::panning_link_button_release), false);
 
 	panning_up.set_border_width (3);
 	panning_down.set_border_width (3);
@@ -154,19 +154,21 @@ PannerUI::PannerUI (IO& io, Session& s)
 	pan_automation_state_changed ();
 }
 
-gint
+bool
 PannerUI::panning_link_button_press (GdkEventButton* ev)
 {
-	return stop_signal (panning_link_button, "button-press-event");
+	cerr << "link press\n";
+	return true;
 }
 
-gint
+bool
 PannerUI::panning_link_button_release (GdkEventButton* ev)
 {
+	cerr << "link release\n";
 	if (!ignore_toggle) {
 		_io.panner().set_linked (!_io.panner().linked());
 	}
-	return TRUE;
+	return true;
 }
 
 void
@@ -395,7 +397,7 @@ PannerUI::setup_pan ()
 	}
 }
 
-gint
+bool
 PannerUI::pan_button_event (GdkEventButton* ev, uint32_t which)
 {
 	switch (ev->button) {
@@ -406,13 +408,13 @@ PannerUI::pan_button_event (GdkEventButton* ev, uint32_t which)
 		}
 		build_pan_menu (which);
 		pan_menu->popup (1, ev->time);
-		return TRUE;
+		return true;
 		break;
 	default:
-		return FALSE;
+		return false;
 	}
 
-	return FALSE; // what's wrong with gcc?
+	return false; // what's wrong with gcc?
 }
 
 void

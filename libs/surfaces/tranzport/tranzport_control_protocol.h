@@ -7,24 +7,12 @@
 #include <pbd/lockmonitor.h>
 #include <pthread.h>
 #include <usb.h>
-#include <ardour/control_protocol.h>
+
 #include <ardour/types.h>
 
-#include <pbd/abstract_ui.h>
+#include "control_protocol.h"
 
-extern BaseUI::RequestType LEDChange;
-extern BaseUI::RequestType Print;
-extern BaseUI::RequestType SetCurrentTrack;
-
-struct TranzportRequest : public BaseUI::BaseRequestObject {
-    int led;
-    int row;
-    int col;
-    char* text;
-    ARDOUR::Route* track;
-};
-
-class TranzportControlProtocol : public ARDOUR::ControlProtocol, public AbstractUI<TranzportRequest> 
+class TranzportControlProtocol : public ARDOUR::ControlProtocol
 {
   public:
 	TranzportControlProtocol (ARDOUR::Session&);
@@ -32,7 +20,7 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol, public Abstract
 
 	int set_active (bool yn);
 
-	bool caller_is_ui_thread();
+	static bool probe ();
 
   private:
 	static const int VENDORID = 0x165b;
@@ -107,8 +95,6 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol, public Abstract
 	DisplayMode     display_mode;
 	ARDOUR::gain_t  gain_fraction;
 
-	void do_request (TranzportRequest*);
-	
 	PBD::Lock update_lock;
 	char current_screen[2][20];
 	char pending_screen[2][20];

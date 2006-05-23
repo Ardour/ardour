@@ -47,7 +47,8 @@
 #include <ardour/session_route.h>
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
-#include <ardour/control_protocol.h>
+
+#include "control_protocol.h"
 
 #include "ardour_ui.h"
 #include "editor.h"

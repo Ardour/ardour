@@ -360,6 +360,9 @@ class Session : public sigc::trackable, public Stateful
 	void request_diskstream_speed (DiskStream&, float speed);
 	void request_input_change_handling ();
 
+	bool locate_pending() const { return static_cast<bool>(post_transport_work&PostTransportLocate); }
+	bool transport_locked () const;
+
 	int wipe ();
 	int wipe_diskstream (DiskStream *);
 

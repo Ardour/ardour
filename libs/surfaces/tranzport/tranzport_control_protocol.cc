@@ -66,9 +66,7 @@ slider_position_to_gain (double pos)
 
 
 TranzportControlProtocol::TranzportControlProtocol (Session& s)
-	: ControlProtocol  (s, X_("Tranzport")),
-	  AbstractUI<TranzportRequest> (X_("Tranzport"), false)
-	
+	: ControlProtocol  (s, X_("Tranzport"))
 {
 	/* tranzport controls one track at a time */
 
@@ -104,6 +102,28 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 TranzportControlProtocol::~TranzportControlProtocol ()
 {
 	set_active (false);
+}
+
+bool
+TranzportControlProtocol::probe ()
+{
+	struct usb_bus *bus;
+	struct usb_device *dev;
+
+	usb_init();
+	usb_find_busses();
+	usb_find_devices();
+
+	for (bus = usb_busses; bus; bus = bus->next) {
+
+		for(dev = bus->devices; dev; dev = dev->next) {
+			if (dev->descriptor.idVendor == VENDORID && dev->descriptor.idProduct == PRODUCTID) {
+				return true; 
+			}
+		}
+	}
+
+	return false;
 }
 
 int
@@ -559,7 +579,7 @@ TranzportControlProtocol::monitor_work ()
 	
 	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
 		// do we care? not particularly.
-		info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), BaseUI::name(), strerror (errno)) << endmsg;
+		info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
 	} 
 
 	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
@@ -1554,18 +1574,3 @@ TranzportControlProtocol::print (int row, int col, const char *text)
 	}
 }	
 
-bool
-TranzportControlProtocol::caller_is_ui_thread ()
-{
-	return (pthread_self() == thread);
-}
-
-void
-TranzportControlProtocol::do_request (TranzportRequest* req)
-{
-	if (req->type == SetCurrentTrack) {
- 		route_table[0] = req->track;
- 	} 
- 
- 	return;
-}

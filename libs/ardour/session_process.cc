@@ -422,6 +422,18 @@ Session::reset_slave_state ()
 }
 
 bool
+Session::transport_locked () const
+{
+	Slave* sl = _slave;
+
+	if (!locate_pending() && ((_slave_type == None) || (sl && sl->ok() && sl->locked()))) {
+		return true;
+	}
+
+	return false;
+}
+
+bool
 Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 {
 	float slave_speed;
