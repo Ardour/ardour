@@ -144,6 +144,8 @@ PannerUI::PannerUI (IO& io, Session& s)
 
 	panner = 0;
 
+	set_width(Narrow);
+
 	_io.panner().Changed.connect (mem_fun(*this, &PannerUI::panner_changed));
 	_io.panner().LinkStateChanged.connect (mem_fun(*this, &PannerUI::update_pan_linkage));
 	_io.panner().StateChanged.connect (mem_fun(*this, &PannerUI::update_pan_state));

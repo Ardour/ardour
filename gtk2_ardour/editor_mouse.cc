@@ -168,7 +168,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		return;
 	}
 
-	if (m == mouse_mode && !force) {
+	if (!force && m == mouse_mode) {
 		return;
 	}
 	

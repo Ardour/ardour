@@ -578,7 +578,7 @@ AudioTimeAxisView::set_state (const XMLNode& node)
 void
 AudioTimeAxisView::set_height (TrackHeight h)
 {
-	bool height_changed = (h != height_style);
+	bool height_changed = (height == 0) || (h != height_style);
 
 	TimeAxisView::set_height (h);
 

@@ -152,6 +152,8 @@ GainMeter::GainMeter (IO& io, Session& s)
 	hbox.set_spacing (0);
 	hbox.pack_start (*fader_vbox, false, false, 2);
 
+	set_width(Narrow);
+
 	Route* r;
 
 	if ((r = dynamic_cast<Route*> (&_io)) != 0) {
