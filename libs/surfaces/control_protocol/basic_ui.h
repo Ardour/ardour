@@ -22,6 +22,8 @@
 #ifndef __ardour_basic_ui_h__
 #define __ardour_basic_ui_h__
 
+#include <string>
+
 #include <jack/types.h>
 
 namespace ARDOUR {
@@ -34,6 +36,8 @@ class BasicUI {
 	virtual ~BasicUI ();
 	
 	void add_marker ();
+
+	void register_thread (std::string name);
 
 	/* transport control */
 

@@ -19,6 +19,8 @@
     $Id$
 */
 
+#include <pbd/pthread_utils.h>
+
 #include <ardour/session.h>
 #include <ardour/location.h>
 
@@ -40,6 +42,12 @@ BasicUI::BasicUI ()
 BasicUI::~BasicUI ()
 {
 	
+}
+
+void
+BasicUI::register_thread (std::string name)
+{
+	PBD::ThreadCreated (pthread_self(), name);
 }
 
 void
