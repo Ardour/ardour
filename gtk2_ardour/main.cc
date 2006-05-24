@@ -293,6 +293,72 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	win.run ();
 }
 
+static bool
+maybe_load_session ()
+{
+
+	/* load session, if given */
+	string name, path;
+
+	if (session_name.length()){
+		bool isnew;
+
+		if (Session::find_session (session_name, path, name, isnew)) {
+			error << string_compose(_("could not load command line session \"%1\""), session_name) << endmsg;
+		} else {
+
+			if (new_session) {
+
+				/* command line required that the session be new */
+
+				if (isnew) {
+					
+					/* popup the new session dialog
+					   once everything else is OK.
+					*/
+
+					Glib::signal_idle().connect (bind (mem_fun (*ui, &ARDOUR_UI::cmdline_new_session), path));
+					ui->set_will_create_new_session_automatically (true);
+
+				} else {
+
+					/* it wasn't new, but we require a new session */
+
+					error << string_compose (_("\n\nA session named \"%1\" already exists.\n\
+To avoid this message, start ardour as \"ardour %1"), path)
+					      << endmsg;
+					return false;
+				}
+
+			} else {
+
+				/* command line didn't require a new session */
+				
+				if (isnew) {
+					error << string_compose (_("\n\nNo session named \"%1\" exists.\n\
+To create it from the command line, start ardour as \"ardour --new %1"), path) 
+					      << endmsg;
+					return false;
+				}
+
+				ui->load_session (path, name);
+			}
+		}
+
+		if (no_splash) {
+			ui->show();
+		}
+
+	} else {
+		ui->hide_splash ();
+		if (!Config->get_no_new_session_dialog()) {
+		       ui->new_session (true);
+		}
+	}
+
+	return true;
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -382,67 +448,10 @@ main (int argc, char *argv[])
 		return -1;
 	} 
 
-	/* load session, if given */
-	string name, path;
-
-	if (session_name.length()){
-		bool isnew;
-
-		if (Session::find_session (session_name, path, name, isnew)) {
-			error << string_compose(_("could not load command line session \"%1\""), session_name) << endmsg;
-		} else {
-
-			if (new_session) {
-
-				/* command line required that the session be new */
-
-				if (isnew) {
-					
-					/* popup the new session dialog
-					   once everything else is OK.
-					*/
-
-					Glib::signal_idle().connect (bind (mem_fun (*ui, &ARDOUR_UI::cmdline_new_session), path));
-					ui->set_will_create_new_session_automatically (true);
-
-				} else {
-
-					/* it wasn't new, but we require a new session */
-
-					error << string_compose (_("\n\nA session named \"%1\" already exists.\n\
-To avoid this message, start ardour as \"ardour %1"), path)
-					      << endmsg;
-					goto out;
-				}
-
-			} else {
-
-				/* command line didn't require a new session */
-				
-				if (isnew) {
-					error << string_compose (_("\n\nNo session named \"%1\" exists.\n\
-To create it from the command line, start ardour as \"ardour --new %1"), path) 
-					      << endmsg;
-					goto out;
-				}
-
-				ui->load_session (path, name);
-			}
-		}
-
-		if (no_splash) {
-			ui->show();
-		}
-
-	} else {
-		ui->hide_splash ();
-		if (!Config->get_no_new_session_dialog()) {
-		       ui->new_session (true);
-		}
+	if (maybe_load_session ()) {
+		ui->run (text_receiver);
+		ui = 0;
 	}
-
-	ui->run (text_receiver);
-	ui = 0;
 
   out:
 	delete engine;
