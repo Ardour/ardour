@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <cmath>
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 #include <float.h>
 #include <sys/time.h>
 #include <errno.h>
@@ -327,19 +329,19 @@ TranzportControlProtocol::show_transport_time ()
 		session->smpte_time (where, smpte);
 		
 		if (smpte.negative) {
-			sprintf (buf, "-%02ld:", smpte.hours);
+			sprintf (buf, "-%02" PRIu32 ":", smpte.hours);
 		} else {
-			sprintf (buf, " %02ld:", smpte.hours);
+			sprintf (buf, " %02" PRIu32 ":", smpte.hours);
 		}
 		print (1, 8, buf);
 
-		sprintf (buf, "%02ld:", smpte.minutes);
+		sprintf (buf, "%02" PRIu32 ":", smpte.minutes);
 		print (1, 12, buf);
 
-		sprintf (buf, "%02ld:", smpte.seconds);
+		sprintf (buf, "%02" PRIu32 ":", smpte.seconds);
 		print (1, 15, buf);
 
-		sprintf (buf, "%02ld", smpte.frames);
+		sprintf (buf, "%02" PRIu32, smpte.frames);
 		print (1, 18, buf);
 
 		last_where = where;

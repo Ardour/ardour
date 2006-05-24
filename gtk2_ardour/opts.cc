@@ -37,7 +37,6 @@ bool GTK_ARDOUR::use_vst = true;
 bool GTK_ARDOUR::new_session = false;
 char* GTK_ARDOUR::curvetest_file = 0;
 bool GTK_ARDOUR::try_hw_optimization = false;
-bool GTK_ARDOUR::use_gtk_theme = false;
 
 using namespace GTK_ARDOUR;
 
@@ -114,10 +113,6 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 			break;
 		case 'b':
 			show_key_actions = true;
-			break;
-
-		case 'g':
-			use_gtk_theme = true;
 			break;
 
 		case 'n':
