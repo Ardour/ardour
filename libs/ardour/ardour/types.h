@@ -106,14 +106,14 @@ namespace ARDOUR {
 		smpte_wrap_minutes,
 		smpte_wrap_hours
 	};
-  
+
 	struct SMPTE_Time {
 		bool negative;
-		long hours;
-		long minutes;
-		long seconds;
-		long frames;
-		long subframes; // mostly not used
+		uint32_t hours;
+		uint32_t minutes;
+		uint32_t seconds;
+		uint32_t frames;
+		uint32_t subframes; // mostly not used
 
 		SMPTE_Time() {
 			negative = false;
