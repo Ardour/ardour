@@ -215,7 +215,7 @@ if env['FPU_OPTIMIZATION']:
 	if env['DIST_TARGET'] == "x86_64":
 		arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
 			
-libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
+libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects, LINKFLAGS='-undefined suppress -flat_namespace')
 
 Default(libardour)
 
