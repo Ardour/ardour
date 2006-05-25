@@ -815,15 +815,6 @@ Editor::set_entered_track (TimeAxisView* tav)
 	}
 }
 
-gint
-Editor::left_track_canvas (GdkEventCrossing *ev)
-{
-	set_entered_track (0);
-	set_entered_regionview (0);
-	return FALSE;
-}
-
-
 void
 Editor::show_window ()
 {
@@ -2836,117 +2827,6 @@ Editor::setup_toolbar ()
 	toolbar_frame.set_shadow_type (SHADOW_OUT);
 	toolbar_frame.set_name ("BaseFrame");
 	toolbar_frame.add (toolbar_base);
-}
-
-gint
-Editor::_autoscroll_canvas (void *arg)
-{
-	return ((Editor *) arg)->autoscroll_canvas ();
-}
-
-gint
-Editor::autoscroll_canvas ()
-{
-	jack_nframes_t new_frame;
-	bool keep_calling = true;
-	jack_nframes_t limit = max_frames - current_page_frames();
-	GdkEventMotion ev;
-
-	autoscroll_distance = current_page_frames() * 3 / 4;
-
-	if (autoscroll_direction < 0) {
-		if (leftmost_frame < autoscroll_distance) {
-			new_frame = 0;
-		} else {
-			new_frame = leftmost_frame - autoscroll_distance;
-		}
-		ev.x = drag_info.current_pointer_x - autoscroll_distance;
- 	} else {
-		if (leftmost_frame > limit - autoscroll_distance) {
-			new_frame = limit;
-		} else {
-			new_frame = leftmost_frame + autoscroll_distance;
-		}
-		ev.x = drag_info.current_pointer_x + autoscroll_distance;
-	}
-
-	if (new_frame != leftmost_frame) {
-		cerr << "move to " << new_frame << " which is " << autoscroll_distance << " away" << endl;
-		reposition_x_origin (new_frame);
-	}
-
-	/* now fake a motion event to get the object that is being dragged to move too */
-
-	ev.type = GDK_MOTION_NOTIFY;
-	ev.x = frame_to_unit (ev.x);
-	ev.y = frame_to_unit (drag_info.current_pointer_y);
-	motion_handler (drag_info.item, (GdkEvent*) &ev, drag_info.item_type, true);
-
-	if (new_frame == 0 || new_frame == limit) {
-		/* we are done */
-		return false;
-	}
-
-	return false;
-
-	autoscroll_cnt++;
-
-	if (autoscroll_cnt == 1) {
-
-		/* connect the timeout so that we get called repeatedly */
-
-		autoscroll_timeout_tag = gtk_timeout_add (20, _autoscroll_canvas, this);
-		keep_calling = false;
-
-	} else if (autoscroll_cnt == 50) { /* 0.5 seconds */
-		
-		/* after about a while, speed up a bit by changing the timeout interval */
-
-		autoscroll_distance = (jack_nframes_t) floor (current_page_frames()/50.0f);
-		cerr << "change distance to " << autoscroll_distance << endl;
-		
-	} else if (autoscroll_cnt == 75) { /* 1.0 seconds */
-
-		autoscroll_distance = (jack_nframes_t) floor (current_page_frames()/20.0f);
-		cerr << "change distance to " << autoscroll_distance << endl;
-
-	} else if (autoscroll_cnt == 100) { /* 1.5 seconds */
-
-		/* after about another while, speed up by increasing the shift per callback */
-
-		autoscroll_distance =  (jack_nframes_t) floor (current_page_frames()/10.0f);
-		cerr << "change distance to " << autoscroll_distance << endl;
-
-	} 
-
-	return keep_calling;
-}
-
-void
-Editor::start_canvas_autoscroll (int dir)
-{
-	if (!session) {
-		return;
-	}
-
-	stop_canvas_autoscroll ();
-
-	autoscroll_direction = dir;
-	autoscroll_distance = (jack_nframes_t) floor (current_page_frames()/100.0);
-	autoscroll_cnt = 0;
-	
-	/* do it right now, which will start the repeated callbacks */
-	
-	autoscroll_canvas ();
-}
-
-void
-Editor::stop_canvas_autoscroll ()
-{
-	if (autoscroll_timeout_tag >= 0) {
-		gtk_timeout_remove (autoscroll_timeout_tag);
-		autoscroll_timeout_tag = -1;
-	}
 }
 
 int

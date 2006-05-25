@@ -568,15 +568,12 @@ else:
     'gtk2_ardour'
         ]
 
-
-
-surface_subdirs = []
-
 #
 # always build the LGPL control protocol lib, since we link against it ourselves
 # ditto for generic MIDI
+#
 
-surface_subdirs += [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_midi' ]
+surface_subdirs = [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_midi' ]
 
 if env['SURFACES']:
     if have_libusb:
@@ -859,7 +856,7 @@ env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 for subdir in coredirs:
     SConscript (subdir + '/SConscript')
 
-for sublistdir in [subdirs, gtk_subdirs, surface_subdirs]:
+for sublistdir in [ subdirs, gtk_subdirs, surface_subdirs ]:
     for subdir in sublistdir:
         SConscript (subdir + '/SConscript')
             

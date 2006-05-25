@@ -1104,28 +1104,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	return false;
 }
 
-void
-Editor::maybe_autoscroll (GdkEvent* event)
-{
-	jack_nframes_t rightmost_frame = leftmost_frame + current_page_frames();
-
-	jack_nframes_t frame = drag_info.current_pointer_frame;
-
-	cerr << "maybe autoscroll @ " << frame << " left = " << leftmost_frame << " right = " << rightmost_frame << endl;
-
-	if (frame > rightmost_frame) {
-		if (rightmost_frame < max_frames) {
-			autoscroll_direction = 1;
-			autoscroll_canvas ();
-		}
-	} else if (frame < leftmost_frame) {
-		if (leftmost_frame > 0) {
-			autoscroll_direction = -1;
-			autoscroll_canvas ();
-		}
-	} 
-}
-
 bool
 Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
@@ -1497,13 +1475,14 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 						       &drag_info.current_pointer_y);
 
 	if (!from_autoscroll && drag_info.item) {
-		/* item != 0 is the best test i can think of for 
-		   dragging.
+		/* item != 0 is the best test i can think of for dragging.
 		*/
 		if (!drag_info.move_threshold_passsed) {
+
 			drag_info.move_threshold_passsed = (abs ((int) (drag_info.current_pointer_x - drag_info.grab_x)) > 4);
 			
 			// and change the initial grab loc/frame if this drag info wants us to
+
 			if (drag_info.want_move_threshold && drag_info.move_threshold_passsed) {
 				drag_info.grab_frame = drag_info.current_pointer_frame;
 				drag_info.grab_x = drag_info.current_pointer_x;
@@ -2784,8 +2763,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	bool clamp_y_axis = false;
 	vector<int32_t>  height_list(512) ;
 	vector<int32_t>::iterator j;
-
-	cerr << "region motion to " << drag_info.current_pointer_frame << endl;
 
 	/* Which trackview is this ? */
 
