@@ -263,7 +263,7 @@ class TimeAxisView : public virtual AxisView
 	/**
 	 * Displays the standard LHS controls size menu for the track heights
 	 *
-	 * @parem when the popup activation time
+	 * @param when the popup activation time
 	 */
  	void popup_size_menu(guint32 when);
 

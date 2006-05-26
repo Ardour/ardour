@@ -73,37 +73,37 @@ class Channel : public sigc::trackable {
 		controller_val[n%128] = val;
 	}
 
-	int channel_msg (byte id, byte val1, byte val2);
+	bool channel_msg (byte id, byte val1, byte val2);
 
-	int all_notes_off () {
+	bool all_notes_off () {
 		return channel_msg (MIDI::controller, 123, 0);
 	}
 	
-	int control (byte id, byte value) {
+	bool control (byte id, byte value) {
 		return channel_msg (MIDI::controller, id, value);
 	}
 	
-	int note_on (byte note, byte velocity) {
+	bool note_on (byte note, byte velocity) {
 		return channel_msg (MIDI::on, note, velocity);
 	}
 	
-	int note_off (byte note, byte velocity) {
+	bool note_off (byte note, byte velocity) {
 		return channel_msg (MIDI::off, note, velocity);
 	}
 	
-	int aftertouch (byte value) {
+	bool aftertouch (byte value) {
 		return channel_msg (MIDI::chanpress, value, 0);
 	}
 
-	int poly_aftertouch (byte note, byte value) {
+	bool poly_aftertouch (byte note, byte value) {
 		return channel_msg (MIDI::polypress, note, value);
 	}
 
-	int program_change (byte value) {
+	bool program_change (byte value) {
 		return channel_msg (MIDI::program, value, 0);
 	}
 
-	int pitchbend (byte msb, byte lsb) {
+	bool pitchbend (byte msb, byte lsb) {
 		return channel_msg (MIDI::pitchbend, lsb, msb);
 	}
 

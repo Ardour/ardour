@@ -209,9 +209,10 @@ class ImageFrameSocketHandler : public sigc::trackable
 		/**
 		 * Send a message indicating that an ImageFrameView has been renamed
 		 *
-		 * @param item the ImageFrameView which has been renamed
+		 * @param new_id the renamed item's new ID
+		 * @param old_id the renamed item's old ID
 		 * @param src the identity of the object that initiated the change
-		 * @param item the renamed item
+		 * @param item the ImageFrameView which has been renamed
 		 */
 		void send_imageframe_view_renamed(const string & new_id, const string & old_id, void* src, ImageFrameView* item) ;
 		

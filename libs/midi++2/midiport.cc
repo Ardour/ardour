@@ -83,7 +83,10 @@ Port::~Port ()
 	}
 }
 
-int
+/** Send a clock tick message.
+ * \return true on success.
+ */
+bool
 Port::clock ()
 	
 {
@@ -93,7 +96,7 @@ Port::clock ()
 		return midimsg (&clockmsg, 1);
 	}
 	
-	return 0;
+	return false;
 }
 
 void

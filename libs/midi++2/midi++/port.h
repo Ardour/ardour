@@ -50,17 +50,17 @@ class Port : public sigc::trackable {
 
 	/* Direct I/O */
 
+	/** \return number of bytes successfully written */
 	virtual int write (byte *msg, size_t msglen) = 0;	
+
+	/** \return number of bytes successfully written to \a buf */
 	virtual int read (byte *buf, size_t max) = 0;
 
-	/* slowdown i/o to a loop of single byte emissions
+	/** Slow down I/O to a loop of single byte emissions
 	   interspersed with a busy loop of 10000 * this value.
 
-	   This may be ignored by a particular instance
-	   of this virtual class. See FD_MidiPort for an 
-	   example of where it used.  
-	*/
-
+	   This may be ignored by a particular instance of this virtual
+	   class. See FD_MidiPort for an example of where it used.  */
 	void set_slowdown (size_t n) { slowdown = n; }
 
 	/* select(2)/poll(2)-based I/O */
@@ -99,21 +99,25 @@ class Port : public sigc::trackable {
 		}
 	}
 	
-	int midimsg (byte *msg, size_t len) {
+	/** Write a message.
+	 * \return true on success. */
+	bool midimsg (byte *msg, size_t len) {
 		return !(write (msg, len) == (int) len);
 	} 
 
-	int three_byte_msg (byte a, byte b, byte c) {
+	/** Write a 3-byte message.
+	 * \return true on success. */
+	bool three_byte_msg (byte a, byte b, byte c) {
 		byte msg[3];
-
-            	msg[0] = a;
+		
+        msg[0] = a;
 		msg[1] = b;
 		msg[2] = c;
 
 		return !(write (msg, 3) == 3);
 	} 
 	
-	int clock ();
+	bool clock ();
 	
 	const char *device () const { return _devname.c_str(); }
 	const char *name () const   { return _tagname.c_str(); }

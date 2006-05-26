@@ -523,13 +523,9 @@ Parser::scanner (unsigned char inbyte)
 	return;
 }
 
-/*
- * realtime_msg(inbyte)
- *
- * Call the real-time function for the specified byte, immediately.
+/** Call the real-time function for the specified byte, immediately.
  * These can occur anywhere, so they don't change the state.
  */
-
 void
 Parser::realtime_msg(unsigned char inbyte)
 
@@ -565,12 +561,9 @@ Parser::realtime_msg(unsigned char inbyte)
 	any (*this, &inbyte, 1);
 }
 
-/*
- * channel_msg(inbyte)
- *
- * Interpret a Channel (voice or mode) Message status byte.
- */
 
+/** Interpret a Channel (voice or mode) Message status byte.
+ */
 void
 Parser::channel_msg(unsigned char inbyte)
 {
@@ -611,16 +604,12 @@ Parser::channel_msg(unsigned char inbyte)
 	}
 }
 
-/*
- * system_msg(inbyte)
- *
- * Initialize (and possibly emit) the signals for the
+/** Initialize (and possibly emit) the signals for the
  * specified byte.  Set the state that the state-machine
  * should go into.  If the signal is not emitted
  * immediately, it will be when the state machine gets to
  * the end of the MIDI message.
  */
-
 void
 Parser::system_msg (unsigned char inbyte)
 {

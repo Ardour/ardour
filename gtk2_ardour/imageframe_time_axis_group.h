@@ -104,7 +104,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 *
 		 * @param height the new height
 		 */
-		int set_item_heights(gdouble) ;
+		int set_item_heights(gdouble height) ;
 		
 		/**
 		 * Sets the current samples per unit.
@@ -119,7 +119,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 *
 		 * @param color the new base color
 		 */
-		void apply_item_color(Gdk::Color&) ;
+		void apply_item_color(Gdk::Color& color) ;
 		
 		
 		//---------------------------------------------------------------------------------------//
@@ -130,7 +130,6 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 * the new ImageFrameView is returned
 		 *
 		 * @param item_id the unique id of the new item
-		 * @param image_id the id/name of the image data we are usin
 		 * @param start the position the new item should be placed upon the time line
 		 * @param duration the duration the new item should be placed upon the timeline
 		 * @param rgb_data the rgb data of the image
@@ -139,7 +138,8 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 * @param num_channels the number of channles within the rgb_data
 		 * @param src the identity of the object that initiated the change
 		 */
-		ImageFrameView* add_imageframe_item(const string & item_id, jack_nframes_t start, jack_nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src) ;
+		ImageFrameView* add_imageframe_item(const string & item_id, jack_nframes_t start, jack_nframes_t duration,
+			unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src) ;
 		
 		/**
 		 * Returns the named ImageFrameView or 0 if the named view does not exist on this view helper
@@ -171,8 +171,9 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 * if ifv is not upon this TimeAxis, this method takes no action
 		 *
 		 * @param ifv the ImageFrameView to remove
+		 * @param src the identity of the object that initiated the change
 		 */
-		void remove_imageframe_item(ImageFrameView*, void* src) ;
+		void remove_imageframe_item(ImageFrameView* ifv, void* src) ;
 		
 	
 		//---------------------------------------------------------------------------------------//

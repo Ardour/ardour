@@ -24,8 +24,9 @@
 #include <sys/mman.h>
 #include <pbd/atomic.h>
 
-/* ringbuffer class where the element size is not required to be a power of two */
-
+/** Ringbuffer class where the element size is not required to be a
+ * power of two.
+ */
 template<class T>
 class RingBufferNPT
 {

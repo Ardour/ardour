@@ -249,9 +249,11 @@ Channel::process_reset (Parser &parser)
 	reset ();
 }
 
-int
+/** Write a message to a channel.
+ * \return true if success
+ */
+bool
 Channel::channel_msg (byte id, byte val1, byte val2)
-
 {
 	unsigned char msg[3];
 	int len = 0;

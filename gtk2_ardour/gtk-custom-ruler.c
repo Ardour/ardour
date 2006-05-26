@@ -300,18 +300,16 @@ gtk_custom_ruler_set_range (GtkCustomRuler *ruler,
     gtk_widget_queue_draw (GTK_WIDGET (ruler));
 }
 
-/**
- * gtk_custom_ruler_get_range:
- * @ruler: a #GtkCustomRuler
- * @lower: location to store lower limit of the ruler, or %NULL
- * @upper: location to store upper limit of the ruler, or %NULL
- * @position: location to store the current position of the mark on the ruler, or %NULL
- * @max_size: location to store the maximum size of the ruler used when calculating
- *            the space to leave for the text, or %NULL.
- *
- * Retrieves values indicating the range and current position of a #GtkCustomRuler.
+/** Retrieves values indicating the range and current position of a #GtkCustomRuler.
  * See gtk_custom_ruler_set_range().
- **/
+ *
+ * @param ruler: a #GtkCustomRuler
+ * @param lower: location to store lower limit of the ruler, or %NULL
+ * @param upper: location to store upper limit of the ruler, or %NULL
+ * @param position: location to store the current position of the mark on the ruler, or %NULL
+ * @param max_size: location to store the maximum size of the ruler used when calculating
+ *            the space to leave for the text, or %NULL.
+ */
 void
 gtk_custom_ruler_get_range (GtkCustomRuler *ruler,
 		     gdouble  *lower,
