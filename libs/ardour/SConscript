@@ -175,6 +175,11 @@ if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Core
 if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h'):
     ardour.Append(CXXFLAGS="-DHAVE_COREAUDIO")    
     ardour.Append(LINKFLAGS="-framework AudioToolbox")
+    #
+    # this next line avoids issues with circular dependencies between libardour and libardour_cp.
+    # it is based on the (entirely reasonable) assumption that a system with CoreAudio is OS X
+    #
+    ardour.Append(LINKFLAGS='-undefined suppress -flat_namespace') 
     extra_sources += coreaudio_files
 
 ardour = conf.Finish ()
@@ -215,7 +220,7 @@ if env['FPU_OPTIMIZATION']:
 	if env['DIST_TARGET'] == "x86_64":
 		arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
 			
-libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects, LINKFLAGS='-undefined suppress -flat_namespace')
+libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
 
 Default(libardour)
 
