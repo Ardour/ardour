@@ -36,7 +36,7 @@ AC_PROG_CPP
 
 dnl Using libtool
 AC_CONFIG_MACRO_DIR(scripts)
-LT_INIT
+dnl LT_INIT
 dnl AM_PROG_LIBTOOL
 
 dnl Using C++ compiler

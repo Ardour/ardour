@@ -60,11 +60,12 @@ nobase_library_include_HEADERS = $(sigc_m4) $(sigc_built_h) \
   adaptors/lambda/lambda.h
 
 # build the library
-lib_LTLIBRARIES = libsigc-2.0.la
-libsigc_2_0_la_SOURCES = signal.cc signal_base.cc trackable.cc connection.cc \
+#lib_LTLIBRARIES = libsigc-2.0.la
+#libsigc_2_0_la_SOURCES = signal.cc signal_base.cc trackable.cc connection.cc \
                          functors/slot.cc functors/slot_base.cc \
 			 adaptors/lambda/lambda.cc
-libsigc_2_0_la_LDFLAGS  = 
+#libsigc_2_0_la_LDFLAGS  = 
+
 BUILT_SOURCES = $(sigc_built_h) $(sigc_built_cc)
 
 CLEANFILES = build-subdirs-stamp
