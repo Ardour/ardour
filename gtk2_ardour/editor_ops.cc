@@ -93,14 +93,78 @@ Editor::redo (uint32_t n)
 void
 Editor::set_meter_hold (int32_t cnt)
 {
+	Config->set_meter_hold_off(false);
+	Config->set_meter_hold_short(false);
+	Config->set_meter_hold_medium(false);
+	Config->set_meter_hold_long(false);
+
+	switch (cnt)
+	{
+		case 0:
+		 Config->set_meter_hold_off(true);
+		 break;
+		case 40:
+		 Config->set_meter_hold_short(true);
+		 break;
+		case 100:
+		 Config->set_meter_hold_medium(true);
+		 break;
+		case 200:
+		 Config->set_meter_hold_long(true);
+		 break;
+	}
+		 
 	if (session) {
 		session->set_meter_hold (cnt);
 	}
 }
 
 void
-Editor::set_meter_falloff (float val)
+Editor::set_meter_falloff (int intval)
 {
+	float val;
+	std::string str;
+	cerr << "set_meter_falloff () called: intval = " << intval << endl;
+	Config->set_meter_falloff_off(false);
+	Config->set_meter_falloff_slowest(false);
+	Config->set_meter_falloff_slow(false);
+	Config->set_meter_falloff_medium(false);
+	Config->set_meter_falloff_fast(false);
+	Config->set_meter_falloff_faster(false);
+	Config->set_meter_falloff_fastest(false);
+	
+	switch (intval)
+	{
+		case 0:
+		 val = 0.0f;
+		 Config->set_meter_falloff_off(true);
+		 break;
+		case 1:
+		 val = 0.266f;
+		 Config->set_meter_falloff_slowest(true);
+		 break;
+		case 2:
+		 val = 0.342f;
+		 Config->set_meter_falloff_slow(true);
+		 break;
+		case 3:
+		 val = 0.7f;
+		 Config->set_meter_falloff_medium(true);
+		 break;
+		case 4:
+		 val = 1.1f;
+		 Config->set_meter_falloff_fast(true);
+		 break;
+		case 5:
+		 val = 1.5f;
+		 Config->set_meter_falloff_faster(true);
+		 break;
+		case 6:
+		 val = 2.5f;
+		 Config->set_meter_falloff_fastest(true);
+		 break;
+	}
+	
 	if (session) {
 		session->set_meter_falloff (val);
 	}

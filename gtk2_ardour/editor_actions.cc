@@ -371,13 +371,13 @@ Editor::register_actions ()
 	    Slow    = 6.8dB/sec falloff at update rate of 40ms
 	*/
 
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffOff"), _("Off"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.0f));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlowest"), _("Slowest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.266f)); 
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlow"), _("Slow"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.342f));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffMedium"), _("Medium"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0.7f));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFast"), _("Fast"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1.1f));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFaster"), _("Faster"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1.5f));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFastest"), _("Fastest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 2.5f));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffOff"), _("Off"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlowest"), _("Slowest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1)); 
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlow"), _("Slow"), bind (mem_fun (*this, &Editor::set_meter_falloff), 2));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffMedium"), _("Medium"), bind (mem_fun (*this, &Editor::set_meter_falloff), 3));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFast"), _("Fast"), bind (mem_fun (*this, &Editor::set_meter_falloff), 4));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFaster"), _("Faster"), bind (mem_fun (*this, &Editor::set_meter_falloff), 5));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFastest"), _("Fastest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 6));
 
 	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldOff"), _("Off"), bind (mem_fun (*this, &Editor::set_meter_hold), 0));
 	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldShort"), _("Short"), bind (mem_fun (*this, &Editor::set_meter_hold), 40));

@@ -81,16 +81,20 @@ style "time_axis_view_item_name"
 style "default_base" = "medium_text"
 {
   GtkWidget::cursor_color =  {1.0, 1.0, 1.0 }
+  GtkButton::default_border = { 0, 0, 0, 0 }
+  GtkButton::default_outside_border = { 0, 0, 0, 0 }
+  GtkTreeView::vertical-padding = 0
+  GtkTreeView::horizontal-padding = 0
   
   fg[NORMAL] = { 0.80, 0.80, 0.80 }	
   fg[ACTIVE] = { 0.80, 0.80, 0.80 }	
-  fg[PRELIGHT] = { 0.50, 1.0, 1.0 }
+  fg[PRELIGHT] = { 1.0, 1.0, 1.0 }
   fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }	
   fg[SELECTED] = { 0.80, 0.80, 0.80 }	
   
   bg[NORMAL] = { 0.40, 0.40, 0.40 }
   bg[ACTIVE] = { 0.40, 0.40, 0.40 }
-  bg[PRELIGHT] = { 0.40, 0.40, 0.40 }
+  bg[PRELIGHT] = "#565690"
   bg[INSENSITIVE] = { 0.10, 0.10, 0.10 }
   bg[SELECTED] = { 0, 0.40, 0.60 }
   
@@ -105,6 +109,7 @@ style "default_base" = "medium_text"
   base[PRELIGHT]     = { 0.20, 0.20, 0.20 }
   base[INSENSITIVE]  = "#4c5159"
   base[SELECTED]     = { 0.25, 0.25, 0.25 }
+  
 }
 
 style "base_frame"
@@ -131,11 +136,11 @@ style "black_mackie_menu_bar" = "medium_bold_text"
 style "default_buttons_menus" 
 {
   font_name = "sans 8"
-  fg[ACTIVE] = { 0, 0, 0 }
+  fg[ACTIVE] = { 1.0, 1.0, 1.0 }
   
-  bg[NORMAL] = { 0.25, 0.25, 0.25 }
-  bg[ACTIVE] = { 0.50, 1.0, 1.0 }
-  bg[PRELIGHT] = { 0.15, 0.15, 0.15 }
+  bg[NORMAL] = { 0.35, 0.35, 0.35 }
+  bg[ACTIVE] = "#565690"
+  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
   bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
   bg[SELECTED] = { 0.20, 0.20, 0.20 }	
 }
@@ -239,6 +244,7 @@ style "time_button" = "default_buttons_menus"
 style "transport_button"
 {
 	bg[ACTIVE] = { 0.50, 1.0, 0.50 }
+	fg[ACTIVE] = { 0, 0, 0 }
 }
 
 style "transport_rec_button"
@@ -853,8 +859,8 @@ style "region_list_whole_file"
 
 style "ardour_button" ="default_buttons_menus"
 {
-	xthickness = 0
-	ythickness = 2
+	xthickness = 1
+	ythickness = 1
 }
 
 #---------------------------------------------------------------

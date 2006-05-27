@@ -39,24 +39,48 @@ using namespace ARDOUR;
 void
 ARDOUR_UI::setup_config_options ()
 {
+	std::vector<Glib::ustring> groups;
+	groups.push_back("options");
+	groups.push_back("Editor");
+	
 	struct { 
 	    char* name;
 	    bool (Configuration::*method)(void) const;
+	    char act_type;  // (t)oggle or (r)adio
 	} options[] = {
-		{ "ToggleTimeMaster", &Configuration::get_jack_time_master },
-		{ "StopPluginsWithTransport", &Configuration::get_plugins_stop_with_transport },
-		{ "LatchedRecordEnable", &Configuration::get_latched_record_enable },
-		{ "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture },
-		{ "StopRecordingOnXrun", &Configuration::get_stop_recording_on_xrun },
-		{ "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end },
-		{ 0, 0 }
+		{ "ToggleTimeMaster", &Configuration::get_jack_time_master, 't' },
+		{ "StopPluginsWithTransport", &Configuration::get_plugins_stop_with_transport, 't' },
+		{ "LatchedRecordEnable", &Configuration::get_latched_record_enable, 't' },
+		{ "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture, 't' },
+		{ "StopRecordingOnXrun", &Configuration::get_stop_recording_on_xrun, 't' },
+		{ "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end, 't' },
+		{ "UseHardwareMonitoring", &Configuration::get_use_hardware_monitoring, 'r' },
+		{ "UseSoftwareMonitoring", &Configuration::get_use_sw_monitoring, 'r' },
+		{ "UseExternalMonitoring", &Configuration::get_use_external_monitoring, 'r' },
+		{ "MeterFalloffOff", &Configuration::get_meter_falloff_off, 'r' },
+		{ "MeterFalloffSlowest", &Configuration::get_meter_falloff_slowest, 'r' },
+		{ "MeterFalloffSlow", &Configuration::get_meter_falloff_slow, 'r' },
+		{ "MeterFalloffMedium", &Configuration::get_meter_falloff_medium, 'r' },
+		{ "MeterFalloffFast", &Configuration::get_meter_falloff_fast, 'r' },
+		{ "MeterFalloffFaster", &Configuration::get_meter_falloff_faster, 'r' },
+		{ "MeterFalloffFastest", &Configuration::get_meter_falloff_fastest, 'r' },
+		{ "MeterHoldOff", &Configuration::get_meter_hold_off, 'r' },
+		{ "MeterHoldShort", &Configuration::get_meter_hold_short, 'r' },
+		{ "MeterHoldMedium", &Configuration::get_meter_hold_medium, 'r' },
+		{ "MeterHoldLong", &Configuration::get_meter_hold_long, 'r' },
+		{ 0, 0, 0 }
 	};
 	
 	for (uint32_t n = 0; options[n].name; ++n) {
-		Glib::RefPtr<Action> act = ActionManager::get_action ("options", options[n].name);
-		if (act) {
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-			tact->set_active ((Config->*(options[n].method))());
+		for (std::vector<Glib::ustring>::iterator i = groups.begin(); i != groups.end(); i++) {
+			Glib::RefPtr<Action> act = ActionManager::get_action (i->c_str(), options[n].name);
+			if (act) {
+				Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+				cerr << "action = " << (options[n].name) << " val = " << (Config->*(options[n].method))() << endl;//DEBUG
+				if (options[n].act_type == 't' || (options[n].act_type == 'r' && (Config->*(options[n].method))()))
+					tact->set_active ((Config->*(options[n].method))());
+				continue;
+			}
 		}
 	}
 }
@@ -230,12 +254,14 @@ ARDOUR_UI::toggle_editing_space()
 void
 ARDOUR_UI::toggle_UseHardwareMonitoring()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "UseSoftwareMonitoring");
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "UseHardwareMonitoring");
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		cerr << "get_active() cond = " << tact->get_active() << endl;//DEBUG
 		if (tact->get_active()) {
 			Config->set_use_hardware_monitoring (true);
 			Config->set_use_sw_monitoring (false);
+			Config->set_use_external_monitoring (false);
 			if (session) {
 				session->reset_input_monitor_state();
 			}
@@ -252,6 +278,7 @@ ARDOUR_UI::toggle_UseSoftwareMonitoring()
 		if (tact->get_active()) {
 			Config->set_use_hardware_monitoring (false);
 			Config->set_use_sw_monitoring (true);
+			Config->set_use_external_monitoring (false);
 			if (session) {
 				session->reset_input_monitor_state();
 			}
@@ -268,6 +295,7 @@ ARDOUR_UI::toggle_UseExternalMonitoring()
 		if (tact->get_active()) {
 			Config->set_use_hardware_monitoring (false);
 			Config->set_use_sw_monitoring (false);
+			Config->set_use_external_monitoring (true);
 			if (session) {
 				session->reset_input_monitor_state();
 			}
