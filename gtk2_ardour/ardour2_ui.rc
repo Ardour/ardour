@@ -110,6 +110,12 @@ style "default_base" = "medium_text"
   base[INSENSITIVE]  = "#4c5159"
   base[SELECTED]     = { 0.25, 0.25, 0.25 }
   
+  engine "clearlooks"  {
+    menubarstyle      = 2       # 0 = flat, 1 = sunken, 2 = flat gradient
+    menuitemstyle     = 1       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
+    listviewitemstyle = 1       # 0 = flat, 1 = 3d-ish (gradient)
+    progressbarstyle  = 0       # 0 = candy bar, 1 = flat
+  }
 }
 
 style "base_frame"
