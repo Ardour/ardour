@@ -175,10 +175,13 @@ tokenize_fullpath (string fullpath, string& path, string& name)
 }
 
 int
-touch_file(string path)
+touch_file (string path)
 {
-	FILE* file = fopen(path.c_str(), "a");
-	fclose(file);
+	int fd = open (path.c_str(), O_RDONLY|O_CREAT);
+	if (fd >= 0) {
+		close (fd);
+		return 0;
+	}
 	return 1;
 }
 

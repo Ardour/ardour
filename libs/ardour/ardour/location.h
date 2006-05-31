@@ -159,6 +159,9 @@ class Locations : public Stateful, public StateManager
 	Location *first_location_before (jack_nframes_t);
 	Location *first_location_after (jack_nframes_t);
 
+	jack_nframes_t first_mark_before (jack_nframes_t);
+	jack_nframes_t first_mark_after (jack_nframes_t);
+
 	sigc::signal<void,Location*> current_changed;
 	sigc::signal<void>           changed;
 	sigc::signal<void,Location*> added;

@@ -886,8 +886,14 @@ AudioPlaylist::get_equivalent_regions (const AudioRegion& other, vector<AudioReg
 
 		AudioRegion* ar = dynamic_cast<AudioRegion*> (*i);
 
-		if (ar && ar->equivalent (other)) {
-			results.push_back (ar);
+		if (ar) {
+			if (Config->get_use_overlap_equivalency()) {
+				if (ar->overlap_equivalent (other)) {
+					results.push_back (ar);
+				} else if (ar->equivalent (other)) {
+					results.push_back (ar);
+				}
+			}
 		}
 	}
 }

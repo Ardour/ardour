@@ -656,6 +656,80 @@ Locations::first_location_after (jack_nframes_t frame)
 	return 0;
 }
 
+jack_nframes_t
+Locations::first_mark_before (jack_nframes_t frame)
+{
+	LocationList locs;
+
+	{
+		LockMonitor lm (lock, __LINE__, __FILE__);
+		locs = locations;
+	}
+
+	LocationStartLaterComparison cmp;
+	locs.sort (cmp);
+
+	/* locs is now sorted latest..earliest */
+	
+	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
+		if (!(*i)->is_hidden()) {
+			if ((*i)->is_mark()) {
+				/* MARK: start == end */
+				if ((*i)->start() < frame) {
+					return (*i)->start();
+				}
+			} else {
+				/* RANGE: start != end, compare start and end */
+				if ((*i)->end() < frame) {
+					return (*i)->end();
+				}
+				if ((*i)->start () < frame) {
+					return (*i)->start();
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+jack_nframes_t
+Locations::first_mark_after (jack_nframes_t frame)
+{
+	LocationList locs;
+
+	{
+		LockMonitor lm (lock, __LINE__, __FILE__);
+		locs = locations;
+	}
+
+	LocationStartEarlierComparison cmp;
+	locs.sort (cmp);
+
+	/* locs is now sorted earliest..latest */
+	
+	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
+		if (!(*i)->is_hidden()) {
+			if ((*i)->is_mark()) {
+				/* MARK, start == end so just compare start */
+				if ((*i)->start() > frame) {
+					return (*i)->start();
+				}
+			} else {
+				/* RANGE, start != end, compare start and end */
+				if ((*i)->start() > frame ) {
+					return (*i)->start ();
+				}
+				if ((*i)->end() > frame) {
+					return (*i)->end ();
+				}
+			}
+		}
+	}
+
+	return max_frames;
+}
+
 Location*
 Locations::end_location () const
 {

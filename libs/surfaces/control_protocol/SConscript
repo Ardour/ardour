@@ -49,6 +49,6 @@ if env['NLS']:
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libardour_cp))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-				     [ 'SConscript', 'i18n.h', 'gettext.h' ] +
+				     [ 'SConscript' ] +
 				     cp_files + 
 				     glob.glob('po/*.po') + glob.glob('*.h')))

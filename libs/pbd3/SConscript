@@ -60,7 +60,7 @@ if env['NLS']:
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libpbd3))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-                                     [ 'SConscript', 'i18n.h' ] +
+                                     [ 'SConscript', 'i18n.h', 'gettext.h', 'pbd/abstract_ui.cc' ] +
                                      pbd3_files +
                                      glob.glob('po/*.po') +
                                      glob.glob('pbd/*.h')))

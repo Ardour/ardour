@@ -36,7 +36,7 @@ bool GTK_ARDOUR::just_version = false;
 bool GTK_ARDOUR::use_vst = true;
 bool GTK_ARDOUR::new_session = false;
 char* GTK_ARDOUR::curvetest_file = 0;
-bool GTK_ARDOUR::try_hw_optimization = false;
+bool GTK_ARDOUR::try_hw_optimization = true;
 
 using namespace GTK_ARDOUR;
 

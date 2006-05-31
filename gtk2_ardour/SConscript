@@ -262,6 +262,7 @@ env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pix
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       [ 'SConscript',
                                         'i18n.h', 'gettext.h',
+					'ardour.sh.in',
                                         'ardour2_ui.rc', 'splash.ppm',
                                         'ardour.menus', 'ardour.bindings', 'ardour.colors',
 					'editor_xpms'
