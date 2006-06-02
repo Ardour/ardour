@@ -18,12 +18,9 @@ glibmm2.Append(CXXFLAGS='-DG_LOG_DOMAIN=\\\"glibmm\\\"')
 
 libglibmm2 = glibmm2.SharedLibrary('glibmm2', glibmm2_files)
 
-if os.path.exists ('CVS') or os.path.exists ('.svn'):
-   glibmm2_configure_script = glibmm2.Command ('configure', 'configure.ac', 'cd libs/glibmm2; ./autogen.sh; cd -', ENV=os.environ)
-   glibmm2_config_h = glibmm2.Command('glibmmconfig.h', [glibmm2_configure_script, 'glibmmconfig.h.in'], 'cd libs/glibmm2; ./configure; cd -', ENV=os.environ)
-   Default([glibmm2_config_h, libglibmm2])
-else:
-   Default([libglibmm2])
+glibmm2_configure_script = glibmm2.Command ('configure', 'configure.ac', 'cd libs/glibmm2; ./autogen.sh; cd -', ENV=os.environ)
+glibmm2_config_h = glibmm2.Command('glibmmconfig.h', [glibmm2_configure_script, 'glibmmconfig.h.in'], 'cd libs/glibmm2; ./configure; cd -', ENV=os.environ)
+Default([glibmm2_config_h, libglibmm2])
 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libglibmm2))
 
