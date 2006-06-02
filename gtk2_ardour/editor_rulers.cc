@@ -913,10 +913,10 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 			if ((smpte.subframes % mark_modulo) == 0) {
 				if (smpte.subframes == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
-					snprintf (buf, sizeof(buf), "%s%02ld:%02ld:%02ld:%02ld", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+					snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 				} else {
 					(*marks)[n].style = GtkCustomRulerMarkMinor;
-					snprintf (buf, sizeof(buf), ".%02ld", smpte.subframes);
+					snprintf (buf, sizeof(buf), ".%02u", smpte.subframes);
 				}
 			} else {
 				snprintf (buf, sizeof(buf)," ");
@@ -945,7 +945,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 					(*marks)[n].style = GtkCustomRulerMarkMinor;
 					(*marks)[n].position = pos;
 				}
-				snprintf (buf, sizeof(buf), "%s%02ld:%02ld:%02ld:%02ld", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
@@ -969,7 +969,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 				} else {
 					(*marks)[n].style = GtkCustomRulerMarkMinor;
 				}
-				snprintf (buf, sizeof(buf), "%s%02ld:%02ld:%02ld:%02ld", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
@@ -989,7 +989,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 			session->smpte_to_sample(smpte, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((smpte.hours % mark_modulo) == 0) {
 				(*marks)[n].style = GtkCustomRulerMarkMajor;
-				snprintf (buf, sizeof(buf), "%s%02ld:%02ld:%02ld:%02ld", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
@@ -1011,7 +1011,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 			if ((smpte.frames % mark_modulo) == 0)  {
 				(*marks)[n].style = GtkCustomRulerMarkMajor;
 				(*marks)[n].position = pos;
-				snprintf (buf, sizeof(buf), "%s%02ld:%02ld:%02ld:%02ld", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;

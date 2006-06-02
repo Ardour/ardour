@@ -68,8 +68,8 @@ PannerUI::PannerUI (IO& io, Session& s)
 	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_state_button, _("Pan automation mode"));
 	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_style_button, _("Pan automation type"));
 
-	set_size_request_to_display_given_text (pan_automation_state_button, X_("M"), 2, 2);
-	set_size_request_to_display_given_text (pan_automation_style_button, X_("M"), 2, 2);
+	//set_size_request_to_display_given_text (pan_automation_state_button, X_("O"), 2, 2);
+	//set_size_request_to_display_given_text (pan_automation_style_button, X_("0"), 2, 2);
 
 	pan_bar_packer.set_size_request (-1, 61);
 	panning_viewport.set_size_request (61, 61);
@@ -106,17 +106,13 @@ PannerUI::PannerUI (IO& io, Session& s)
 	panning_link_button.set_name (X_("PanningLinkButton"));
 	panning_link_direction_button.set_name (X_("PanningLinkDirectionButton"));
 
+	panning_link_box.pack_start (panning_link_button, true, true);
+	panning_link_box.pack_start (panning_link_direction_button, true, true);
+	panning_link_box.pack_start (pan_automation_state_button, true, true);
+
 	/* the pixmap will be reset at some point, but the key thing is that
 	   we need a pixmap in the button just to get started.
 	*/
-
-	Gtk::HBox* pan_button_hbox = manage (new Gtk::HBox());
-
-	panning_link_box.pack_start (panning_link_button, true, true);
-	panning_link_box.pack_start (panning_link_direction_button, true, true);
-	pan_button_hbox->pack_start (panning_link_box, true, true);
-	pan_button_hbox->pack_start (pan_automation_state_button, true, true);
-
 	panning_link_direction_button.add (*(manage (new Image (get_xpm("forwardblarrow.xpm")))));
 
 	panning_link_direction_button.signal_clicked().connect
@@ -138,7 +134,7 @@ PannerUI::PannerUI (IO& io, Session& s)
 
 	pan_vbox.set_spacing (4);
 	pan_vbox.pack_start (panning_viewport, Gtk::PACK_SHRINK);
-	pan_vbox.pack_start (*pan_button_hbox, Gtk::PACK_SHRINK);
+	pan_vbox.pack_start (panning_link_box, Gtk::PACK_SHRINK);
 
 	pack_start (pan_vbox, true, false);
 
@@ -500,13 +496,16 @@ PannerUI::pan_changed (void *src)
 
 	switch (_io.panner().size()) {
 	case 0:
-		panning_link_box.set_sensitive (false);
+		panning_link_direction_button.set_sensitive (false);
+		panning_link_button.set_sensitive (false);
 		return;
 	case 1:
-		panning_link_box.set_sensitive (false);
+		panning_link_direction_button.set_sensitive (false);
+		panning_link_button.set_sensitive (false);
 		break;
 	default:
-		panning_link_box.set_sensitive (true);
+		panning_link_direction_button.set_sensitive (true);
+		panning_link_button.set_sensitive (true);
 	}
 
 	uint32_t nouts = _io.n_outputs();
