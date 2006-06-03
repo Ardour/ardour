@@ -323,10 +323,17 @@ ARDOUR::new_change ()
 	Change c;
 	static uint32_t change_bit = 1;
 
-	/* XXX catch out-of-range */
+	/* catch out-of-range */
+	if (!change_bit)
+	{
+		fatal << _("programming error: ")
+			<< "change_bit out of range in ARDOUR::new_change()"
+			<< endmsg;
+		/*NOTREACHED*/
+	}
 
 	c = Change (change_bit);
-	change_bit <<= 1;
+	change_bit <<= 1;	// if it shifts too far, change_bit == 0
 
 	return c;
 }
