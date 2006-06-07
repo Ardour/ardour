@@ -175,7 +175,7 @@ if conf.CheckCHeader('sys/vfs.h'):
 if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
     ardour.Append(LINKFLAGS="-framework CoreMIDI")
 
-if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h'):
+if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h') and ardour['COREAUDIO'] == 1:
     ardour.Append(CXXFLAGS="-DHAVE_COREAUDIO")    
     ardour.Append(LINKFLAGS="-framework AudioToolbox")
     #

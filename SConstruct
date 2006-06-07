@@ -37,7 +37,8 @@ opts.AddOptions(
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('SURFACES', 'Build support for control surfaces', 0),
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
-    BoolOption('LIBLO', 'Compile with support for liblo library', 1)
+    BoolOption('LIBLO', 'Compile with support for liblo library', 1),
+    BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library -- UNSTABLE', 0)
 )
 
 #----------------------------------------------------------------------
