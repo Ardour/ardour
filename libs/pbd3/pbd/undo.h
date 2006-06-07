@@ -24,12 +24,44 @@
 #include <string>
 #include <list>
 #include <sigc++/slot.h>
+#include <sigc++/bind.h>
 #include <sys/time.h>
+#include <pbd/xml++.h>
 
 using std::string;
 using std::list;
 
 typedef sigc::slot<void> UndoAction;
+
+class Serializable;
+
+class MementoBase
+{
+public:
+    MementoBase(std::string key);
+    void operator() () { return _slot(); }
+    XMLNode &serialize();
+protected:
+    sigc::slot<void> _slot;
+    std::list<Serializable> _args;
+};
+
+template <class T1=void, class T2=void, class T3=void, class T4=void>
+class Memento;
+
+template <>
+class Memento <> : public MementoBase {};
+
+template <class T1>
+class Memento <T1> : public MementoBase
+{
+public:
+    Memento(std::string key, T1 arg1) : MementoBase(key)
+    {
+	_args.push_back(arg1);
+	_slot = sigc::bind(_slot, arg1);
+    }
+};
 
 class UndoCommand 
 {
