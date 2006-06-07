@@ -90,6 +90,7 @@ using namespace Gtkmm2ext;
 using namespace Editing;
 
 using PBD::internationalize;
+using PBD::atoi;
 
 const double Editor::timebar_height = 15.0;
 
@@ -2191,7 +2192,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("zoom"))) {
-		set_frames_per_unit (atof (prop->value()));
+		set_frames_per_unit (PBD::atof (prop->value()));
 	}
 
 	if ((prop = node.property ("snap-to"))) {
@@ -2899,7 +2900,7 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 	for (vector<ustring>::iterator i = uris.begin(); i != uris.end(); ++i) {
 		if ((*i).substr (0,7) == "file://") {
 			string p = *i;
-			url_decode (p);
+                        PBD::url_decode (p);
 			paths.push_back (p.substr (7));
 		}
 	}

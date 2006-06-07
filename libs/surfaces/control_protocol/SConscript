@@ -36,7 +36,9 @@ cp.Merge ([
     libraries['pbd3'],
     libraries['midi++2'],
     libraries['xml'],
-    libraries['usb']
+    libraries['usb'],
+    libraries['glib2'],
+    libraries['glibmm2']
 	])
 
 libardour_cp = cp.SharedLibrary('ardour_cp', cp_files)

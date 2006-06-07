@@ -203,7 +203,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 	/* lets see if we can link it into the session */
 	
 	linked_path = session->sound_dir();
-	linked_path += PBD::basename (path);
+	linked_path += Glib::path_get_basename (path);
 
 	if (link (path.c_str(), linked_path.c_str()) == 0) {
 

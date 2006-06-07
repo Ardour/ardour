@@ -173,7 +173,7 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, ch
 	uint32_t real_cnt = cnt * n_channels;
 
 	{
-		LockMonitor lm (_tmpbuf_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (_tmpbuf_lock);
 		
 		if (tmpbufsize < real_cnt) {
 			

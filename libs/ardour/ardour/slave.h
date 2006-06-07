@@ -25,7 +25,6 @@
 
 #include <jack/jack.h>
 
-#include <pthread.h>
 #include <sigc++/signal.h>
 #include <ardour/ardour.h>
 #include <midi++/parser.h>

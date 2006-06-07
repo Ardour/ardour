@@ -58,7 +58,6 @@ ladspa_plugin.cc
 location.cc
 mtc_slave.cc
 named_selection.cc
-osc.cc
 panner.cc
 pcm_utils.cc
 playlist.cc
@@ -97,12 +96,16 @@ mix.cc
 
 arch_specific_objects = [ ]
 
+osc_files = [ 'osc.cc' ]
 vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
 coreaudio_files = [ 'coreaudio_source.cc' ]
 extra_sources = [ ]
 
 if ardour['VST']:
 	extra_sources += vst_files
+
+if ardour['LIBLO']:
+    extra_sources += osc_files
 
 ardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 ardour.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
@@ -194,9 +197,12 @@ ardour.Merge ([
 	     libraries['pbd3'],
 	     libraries['soundtouch'],
 	     libraries['midi++2'],
-	     libraries['lo'],
+             libraries['glib2'],
+             libraries['glibmm2']
 	     ])
 
+if ardour['LIBLO']:
+    ardour.Merge ([ libraries['lo'] ])
 
 ardour.VersionBuild(['version.cc', 'ardour/version.h'], 'SConscript')
 

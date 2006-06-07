@@ -21,7 +21,6 @@ pbd3_files = Split("""
 basename.cc
 base_ui.cc
 convert.cc
-dirname.cc
 dmalloc.cc
 mountpoint.cc
 pathscanner.cc
@@ -33,7 +32,6 @@ strsplit.cc
 textreceiver.cc
 transmitter.cc
 undo.cc
-unescape.cc
 version.cc
 whitespace.cc
 xml++.cc
@@ -46,7 +44,7 @@ if conf.CheckCHeader('execinfo.h'):
     conf.env.Append(CXXFLAGS="-DHAVE_EXECINFO")
 pbd3 = conf.Finish()
 
-pbd3.Merge ([ libraries['sigc2'], libraries['xml'] ])
+pbd3.Merge ([ libraries['sigc2'], libraries['xml'], libraries['glibmm2'], libraries['glib2'] ])
 
 pbd3.VersionBuild(['version.cc','pbd/version.h'], 'SConscript')
 

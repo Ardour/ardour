@@ -29,7 +29,7 @@ AbstractUI<RequestObject>::register_thread_with_request_count (pthread_t thread_
 	RequestBuffer* b = new RequestBuffer (num_requests);
 
 	{
-		PBD::LockMonitor lm (request_buffer_map_lock, __LINE__, __FILE__);
+        Glib::Mutex::Lock lm (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
 	}
 

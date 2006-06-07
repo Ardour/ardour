@@ -23,7 +23,7 @@
 
 #include <gtkmm/messagedialog.h>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 
 #include <ardour/io.h>
 #include <ardour/route.h>
@@ -368,7 +368,7 @@ IOSelector::display_ports ()
 	TreeView *selected_port_tview = 0;
 
 	{
-		LockMonitor lm (port_display_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm  (port_display_lock);
 		Port *port;
 		uint32_t limit;
 
@@ -670,7 +670,7 @@ IOSelector::port_column_button_release (GdkEventButton* event, TreeView* treevie
 	if (Keyboard::is_delete_event (event)) {
 		Port* port;
 		{
-			LockMonitor lm (port_display_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm  (port_display_lock);
 			
 			port = static_cast<Port *> (treeview->get_data (_("port")));
 			
@@ -724,7 +724,7 @@ IOSelector::select_treeview (TreeView* tview)
 	   switch.
 	*/
 
-	LockMonitor lm (port_display_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm  (port_display_lock);
  	Port* port = reinterpret_cast<Port *> (tview->get_data (_("port")));
 	
 	if (port != selected_port) {

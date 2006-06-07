@@ -47,7 +47,10 @@
 #include <ardour/utils.h>
 #include <ardour/session.h>
 #include <ardour/control_protocol_manager.h>
+
+#ifdef HAVE_LIBLO
 #include <ardour/osc.h>
+#endif
 
 #include <ardour/mix.h>
 
@@ -59,7 +62,10 @@
 
 ARDOUR::Configuration* ARDOUR::Config = 0;
 ARDOUR::AudioLibrary* ARDOUR::Library = 0;
+
+#ifdef HAVE_LIBLO
 ARDOUR::OSC* ARDOUR::osc = 0;
+#endif
 
 using namespace ARDOUR;
 using namespace std;
@@ -74,6 +80,7 @@ Change ARDOUR::PositionChanged = ARDOUR::new_change ();
 Change ARDOUR::NameChanged = ARDOUR::new_change ();
 Change ARDOUR::BoundsChanged = Change (0); // see init(), below
 
+#ifdef HAVE_LIBLO
 static int
 setup_osc ()
 {
@@ -89,6 +96,7 @@ setup_osc ()
 		return 0;
 	}
 }
+#endif
 
 static int 
 setup_midi ()
@@ -197,10 +205,12 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 	if (setup_midi ()) {
 		return -1;
 	}
-
+    
+#ifdef HAVE_LIBLO
 	if (setup_osc ()) {
 		return -1;
 	}
+#endif
 
 #ifdef VST_SUPPORT
 	if (Config->get_use_vst() && fst_init (sighandler)) {

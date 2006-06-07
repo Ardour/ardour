@@ -29,7 +29,7 @@ namespace ARDOUR {
 template<class T> void 
 Session::foreach_named_selection (T& obj, void (T::*func)(NamedSelection&)) 
 {
-	LockMonitor lm (named_selection_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (named_selection_lock);
 	for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); i++) {
 		(obj.*func) (**i);
 	}

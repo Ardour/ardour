@@ -18,7 +18,7 @@
     $Id$
 */
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 
 #include <ardour/diskstream.h>
 #include <ardour/audioregion.h>
@@ -57,7 +57,7 @@ Auditioner::Auditioner (Session& s)
 	IO::output_changed.connect (mem_fun (*this, &Auditioner::output_changed));
 
 	the_region = 0;
-	atomic_set (&_active, 0);
+	g_atomic_int_set (&_active, 0);
 }
 
 Auditioner::~Auditioner ()
@@ -74,14 +74,14 @@ Auditioner::prepare_playlist ()
 void
 Auditioner::audition_current_playlist ()
 {
-	if (atomic_read (&_active)) {
+	if (g_atomic_int_get (&_active)) {
 		/* don't go via session for this, because we are going
 		   to remain active.
 		*/
 		cancel_audition ();
 	}
 
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	diskstream->seek (0);
 	length = diskstream->playlist()->get_maximum_extent();
 	current_frame = 0;
@@ -90,20 +90,20 @@ Auditioner::audition_current_playlist ()
 
 	_panner->reset (n_outputs(), diskstream->n_channels());
 
-	atomic_set (&_active, 1);
+	g_atomic_int_set (&_active, 1);
 }
 
 void
 Auditioner::audition_region (AudioRegion& region)
 {
-	if (atomic_read (&_active)) {
+	if (g_atomic_int_get (&_active)) {
 		/* don't go via session for this, because we are going
 		   to remain active.
 		*/
 		cancel_audition ();
 	}
 
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 
 	the_region = new AudioRegion (region);
 	the_region->set_position (0, this);
@@ -126,7 +126,7 @@ Auditioner::audition_region (AudioRegion& region)
 	length = the_region->length();
 	diskstream->seek (0);
 	current_frame = 0;
-	atomic_set (&_active, 1);
+	g_atomic_int_set (&_active, 1);
 }
 
 int
@@ -136,7 +136,7 @@ Auditioner::play_audition (jack_nframes_t nframes)
 	jack_nframes_t this_nframes;
 	int ret;
 
-	if (atomic_read (&_active) == 0) {
+	if (g_atomic_int_get (&_active) == 0) {
 		silence (nframes, 0);
 		return 0;
 	}

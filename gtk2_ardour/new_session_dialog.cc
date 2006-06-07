@@ -24,8 +24,6 @@
 #include <ardour/recent_sessions.h>
 #include <ardour/session.h>
 
-#include <pbd/basename.h>
-
 #include <gtkmm/entry.h>
 #include <gtkmm/filechooserbutton.h>
 #include <gtkmm/spinbutton.h>
@@ -659,7 +657,7 @@ NewSessionDialog::reset_recent()
 	    
 		Gtk::TreeModel::Row row = *(recent_model->append());
 		
-		row[recent_columns.visible_name] = PBD::basename (fullpath);
+		row[recent_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_columns.fullpath] = fullpath;
 		
 		if (states->size() > 1) {

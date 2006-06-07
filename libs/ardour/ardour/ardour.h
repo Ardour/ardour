@@ -26,13 +26,10 @@
 #include <signal.h>
 
 #include <pbd/error.h>
-#include <pbd/lockmonitor.h>
 #include <pbd/failed_constructor.h>
 
 #include <ardour/configuration.h>
 #include <ardour/types.h>
-
-using namespace PBD;
 
 namespace MIDI {
 	class MachineControl;

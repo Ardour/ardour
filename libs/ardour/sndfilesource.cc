@@ -138,7 +138,7 @@ SndFileSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char
 	real_cnt = cnt * _info.channels;
 
 	{
-		LockMonitor lm (_tmpbuf_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (_tmpbuf_lock);
 		
 		if (tmpbufsize < real_cnt) {
 			

@@ -28,9 +28,10 @@
 #include <unistd.h>
 #include <float.h>
 
+#include <glibmm.h>
+
 #include <pbd/error.h>
 #include <pbd/failed_constructor.h>
-#include <pbd/basename.h>
 #include <pbd/xml++.h>
 
 #include <ardour/session.h>
@@ -1369,7 +1370,7 @@ Panner::state (bool full)
 
 	if (full) {
 		if (save () == 0) {
-			root->add_property (X_("automation"), PBD::basename (automation_path));
+			root->add_property (X_("automation"), Glib::path_get_basename (automation_path));
 		}
 	}
 

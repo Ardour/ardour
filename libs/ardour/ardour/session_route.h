@@ -23,7 +23,8 @@
 
 #include <iostream>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
+
 #include <ardour/session.h>
 #include <ardour/route.h>
 
@@ -35,7 +36,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route&))
 	RouteList public_order;
 
 	{
-		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (route_lock);
 		public_order = routes;
 	}
 
@@ -53,7 +54,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route*))
 	RouteList public_order;
 
 	{
-		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (route_lock);
 		public_order = routes;
 	}
 
@@ -72,7 +73,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route&, A), A arg1)
 	RouteList public_order;
 
 	{
-		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (route_lock);
 		public_order = routes;
 	}
 

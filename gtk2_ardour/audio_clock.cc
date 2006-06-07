@@ -41,6 +41,7 @@ using namespace sigc;
 using namespace Gtk;
 
 using PBD::atoi;
+using PBD::atof;
 
 const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	2,   /* SMPTE_Hours */

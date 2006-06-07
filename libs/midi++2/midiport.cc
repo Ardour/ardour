@@ -26,7 +26,7 @@
 #include <midi++/channel.h>
 #include <midi++/port_request.h>
 
-using namespace Select;
+//using namespace Select;
 using namespace MIDI;
 
 size_t Port::nports = 0;
@@ -96,6 +96,7 @@ Port::clock ()
 	return 0;
 }
 
+/*
 void
 Port::selector_read_callback (Selectable *s, Select::Condition cond) 
 
@@ -103,6 +104,7 @@ Port::selector_read_callback (Selectable *s, Select::Condition cond)
 	byte buf[64];
 	read (buf, sizeof (buf));
 }
+*/
 
 void
 Port::xforms_read_callback (int cond, int fd, void *ptr) 

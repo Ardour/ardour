@@ -33,7 +33,6 @@
 
 #include <pbd/error.h>
 #include <pbd/compose.h>
-#include <pbd/basename.h>
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
 #include <gtkmm2ext/gtk_ui.h>
@@ -717,7 +716,7 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 		TreeModel::Row row = *(recent_session_model->append());
 
-		row[recent_session_columns.visible_name] = PBD::basename (fullpath);
+		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
 
 		if (states->size() > 1) {
@@ -824,9 +823,11 @@ ARDOUR_UI::filter_ardour_session_dirs (const FileFilter::Info& info)
 		return false;
 	}
 
+        // XXX Portability
+        
 	string session_file = info.filename;
 	session_file += '/';
-	session_file += PBD::basename (info.filename);
+	session_file += Glib::path_get_basename (info.filename);
 	session_file += ".ardour";
 	
 	if (stat (session_file.c_str(), &statbuf) != 0) {

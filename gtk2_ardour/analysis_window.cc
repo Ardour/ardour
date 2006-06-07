@@ -211,7 +211,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 {
 	track_list_ready = false;
 	{
-		LockMonitor lm (track_list_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm  (track_list_lock);
 
 		// Empty track list & free old graphs
 		clear_tracklist();

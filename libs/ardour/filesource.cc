@@ -53,10 +53,11 @@
 #include <vector>
 #include <cstdio> /* for rename(2) */
 
+#include <glibmm.h>
+
 #include <pbd/stl_delete.h>
-#include <pbd/basename.h>
-#include <pbd/dirname.h>
-#include <pbd/lockmonitor.h>
+
+#include <glibmm/thread.h>
 #include <pbd/pathscanner.h>
 
 #include <ardour/ardour.h>
@@ -351,7 +352,7 @@ FileSource::set_allow_remove_if_empty (bool yn)
 int
 FileSource::set_name (string newname, bool destructive)
 {
-	LockMonitor lm (_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_lock);
 	string oldpath = _path;
 	string newpath = Session::change_audio_path_by_name (oldpath, _name, newname, destructive);
 
@@ -365,7 +366,7 @@ FileSource::set_name (string newname, bool destructive)
 		return -1;
 	}
 
-	_name = basename (newpath);
+	_name = Glib::path_get_basename (newpath);
 	_path = newpath;
 
 	return rename_peakfile (peak_path (_path));
@@ -680,7 +681,7 @@ FileSource::compute_header_size ()
 int
 FileSource::update_header (jack_nframes_t when, struct tm& now, time_t tnow)
 {
-	LockMonitor lm (_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_lock);
 
 	if (is_bwf) {
 		/* random code is 9 digits */
@@ -1009,7 +1010,7 @@ FileSource::mark_for_remove ()
 jack_nframes_t
 FileSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {
-	LockMonitor lm (_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt, workbuf);
 }
 
@@ -1055,7 +1056,7 @@ jack_nframes_t
 FileSource::write (Sample *data, jack_nframes_t cnt, char * workbuf)
 {
 	{
-		LockMonitor lm (_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (_lock);
 		
 		jack_nframes_t oldlen;
 		int32_t frame_pos = _length;
@@ -1287,7 +1288,7 @@ FileSource::is_empty (string path)
 void
 FileSource::mark_streaming_write_completed ()
 {
-	LockMonitor lm (_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_lock);
 
 	next_peak_clear_should_notify = true;
 
@@ -1313,13 +1314,15 @@ FileSource::move_to_trash (const string trash_dir_name)
 	   on whichever filesystem it was already on.
 	*/
 
-	newpath = PBD::dirname (_path);
-	newpath = PBD::dirname (newpath);
+        // XXX Portability
+
+	newpath = Glib::path_get_dirname (_path);
+	newpath = Glib::path_get_dirname (newpath);
 
 	newpath += '/';
 	newpath += trash_dir_name;
 	newpath += '/';
-	newpath += PBD::basename (_path);
+	newpath += Glib::path_get_basename (_path);
 
 	if (access (newpath.c_str(), F_OK) == 0) {
 

@@ -44,14 +44,15 @@
 #include <sys/param.h>
 #endif
 
+#include <glibmm.h>
+
 #include <midi++/mmc.h>
 #include <midi++/port.h>
 #include <pbd/error.h>
-#include <pbd/dirname.h>
-#include <pbd/lockmonitor.h>
+
+#include <glibmm/thread.h>
 #include <pbd/pathscanner.h>
 #include <pbd/pthread_utils.h>
-#include <pbd/basename.h>
 #include <pbd/strsplit.h>
 
 #include <ardour/audioengine.h>
@@ -118,7 +119,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_tempo_map = new TempoMap (_current_frame_rate);
 	_tempo_map->StateChanged.connect (mem_fun (*this, &Session::tempo_map_changed));
 
-	atomic_set (&processing_prohibited, 0);
+	g_atomic_int_set (&processing_prohibited, 0);
 	send_cnt = 0;
 	insert_cnt = 0;
 	_transport_speed = 0;
@@ -129,7 +130,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	end_location = new Location (0, 0, _("end"), Location::Flags ((Location::IsMark|Location::IsEnd)));
 	start_location = new Location (0, 0, _("start"), Location::Flags ((Location::IsMark|Location::IsStart)));
 	_end_location_is_free = true;
-	atomic_set (&_record_status, Disabled);
+	g_atomic_int_set (&_record_status, Disabled);
 	auto_play = false;
 	punch_in = false;
 	punch_out = false;
@@ -170,12 +171,12 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	midi_control = true;
 	mmc = 0;
 	post_transport_work = PostTransportWork (0);
-	atomic_set (&butler_should_do_transport_work, 0);
-	atomic_set (&butler_active, 0);
-	atomic_set (&_playback_load, 100);
-	atomic_set (&_capture_load, 100);
-	atomic_set (&_playback_load_min, 100);
-	atomic_set (&_capture_load_min, 100);
+	g_atomic_int_set (&butler_should_do_transport_work, 0);
+	g_atomic_int_set (&butler_active, 0);
+	g_atomic_int_set (&_playback_load, 100);
+	g_atomic_int_set (&_capture_load, 100);
+	g_atomic_int_set (&_playback_load_min, 100);
+	g_atomic_int_set (&_capture_load_min, 100);
 	pending_audition_region = 0;
 	_edit_mode = Slide;
 	pending_edit_mode = _edit_mode;
@@ -1334,7 +1335,7 @@ Session::state(bool full_state)
 	child = node->add_child ("Sources");
 
 	if (full_state) {
-		LockMonitor sl (source_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock sl (source_lock);
 
 		for (SourceList::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
 			
@@ -1363,7 +1364,7 @@ Session::state(bool full_state)
 	child = node->add_child ("Regions");
 
 	if (full_state) { 
-		LockMonitor rl (region_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock rl (region_lock);
 
 		for (AudioRegionList::const_iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
 			
@@ -1378,7 +1379,7 @@ Session::state(bool full_state)
 	child = node->add_child ("DiskStreams");
 
 	{ 
-		RWLockMonitor dl (diskstream_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock dl (diskstream_lock);
 		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if (!(*i)->hidden()) {
 				child->add_child_nocopy ((*i)->get_state());
@@ -1390,7 +1391,7 @@ Session::state(bool full_state)
 	
 	child = node->add_child ("Connections");
 	{
-		LockMonitor lm (connection_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (connection_lock);
 		for (ConnectionList::iterator i = _connections.begin(); i != _connections.end(); ++i) {
 			if (!(*i)->system_dependent()) {
 				child->add_child_nocopy ((*i)->get_state());
@@ -1400,7 +1401,7 @@ Session::state(bool full_state)
 
 	child = node->add_child ("Routes");
 	{
-		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (route_lock);
 		
 		RoutePublicOrderSorter cmp;
 		RouteList public_order(routes);
@@ -1803,7 +1804,7 @@ Session::get_sources_as_xml ()
 
 {
 	XMLNode* node = new XMLNode (X_("Sources"));
-	LockMonitor lm (source_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (source_lock);
 
 	for (SourceList::iterator i = sources.begin(); i != sources.end(); ++i) {
 		node->add_child_nocopy ((*i).second->get_state());
@@ -1958,7 +1959,7 @@ Session::refresh_disk_space ()
 #if HAVE_SYS_VFS_H
 	struct statfs statfsbuf;
 	vector<space_and_path>::iterator i;
-	LockMonitor lm (space_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (space_lock);
 	double scale;
 
 	/* get freespace on every FS that is part of the session path */
@@ -2399,7 +2400,7 @@ Session::load_route_groups (const XMLNode& node, bool edit)
 void
 Session::swap_configuration(Configuration** new_config)
 {
-	RWLockMonitor lm (route_lock, true, __LINE__, __FILE__); // jlc - WHY?
+	Glib::RWLock::WriterLock lm (route_lock); // jlc - WHY?
 	Configuration* tmp = *new_config;
 	*new_config = Config;
 	Config = tmp;
@@ -2409,7 +2410,7 @@ Session::swap_configuration(Configuration** new_config)
 void
 Session::copy_configuration(Configuration* new_config)
 {
-	RWLockMonitor lm (route_lock, true, __LINE__, __FILE__);
+	Glib::RWLock::WriterLock lm (route_lock);
 	new_config = new Configuration(*Config);
 }
 
@@ -2588,7 +2589,7 @@ Session::GlobalRouteBooleanState
 Session::get_global_route_boolean (bool (Route::*method)(void) const)
 {
 	GlobalRouteBooleanState s;
-	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock lm (route_lock);
 
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -2608,7 +2609,7 @@ Session::GlobalRouteMeterState
 Session::get_global_route_metering ()
 {
 	GlobalRouteMeterState s;
-	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock lm (route_lock);
 
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -3065,13 +3066,13 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   on whichever filesystem it was already on.
 		*/
 
-		newpath = PBD::dirname (*x);
-		newpath = PBD::dirname (newpath);
+		newpath = Glib::path_get_dirname (*x);
+		newpath = Glib::path_get_dirname (newpath);
 
 		newpath += '/';
 		newpath += dead_sound_dir_name;
 		newpath += '/';
-		newpath += PBD::basename ((*x));
+		newpath += Glib::path_get_basename ((*x));
 		
 		if (access (newpath.c_str(), F_OK) == 0) {
 			

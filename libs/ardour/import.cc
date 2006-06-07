@@ -30,7 +30,10 @@
 #include <sndfile.h>
 #include <samplerate.h>
 
+#include <glibmm.h>
+
 #include <pbd/basename.h>
+
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 #include <ardour/diskstream.h>
@@ -212,7 +215,7 @@ Session::import_audiofile (import_status& status)
 			sources.push_back(newfiles[n]);
 		}
 
-		AudioRegion *r = new AudioRegion (sources, 0, newfiles[0]->length(), region_name_from_path (PBD::basename(basepath)),
+		AudioRegion *r = new AudioRegion (sources, 0, newfiles[0]->length(), region_name_from_path (Glib::path_get_basename (basepath)),
 					0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile));
 		
 		status.new_regions.push_back (r);
@@ -228,7 +231,7 @@ Session::import_audiofile (import_status& status)
 			   did not bother to create whole-file AudioRegions for them. Do it now.
 			*/
 		
-			AudioRegion *r = new AudioRegion (*newfiles[n], 0, newfiles[n]->length(), region_name_from_path (PBD::basename (newfiles[n]->name())),
+			AudioRegion *r = new AudioRegion (*newfiles[n], 0, newfiles[n]->length(), region_name_from_path (Glib::path_get_basename (newfiles[n]->name())),
 						0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile | AudioRegion::Import));
 
 			status.new_regions.push_back (r);
@@ -285,7 +288,7 @@ Session::import_audiofile (import_status& status)
 string
 Session::build_tmp_convert_name(string infile)
 {
-	string tmp_name(_path + "/." + PBD::basename (infile.c_str()) + "XXXXXX");
+	string tmp_name(_path + "/." + Glib::path_get_basename (infile.c_str()) + "XXXXXX");
 	char* tmp = new char[tmp_name.length() + 1];
 	tmp_name.copy(tmp, string::npos);
 	tmp[tmp_name.length()] = 0;
