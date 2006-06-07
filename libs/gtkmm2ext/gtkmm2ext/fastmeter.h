@@ -46,23 +46,16 @@ class FastMeter : public Gtk::DrawingArea {
 	long hold_count() { return hold_cnt; }
 	void set_hold_count (long);
 	
-	static void set_horizontal_xpm (std::string);
-	static void set_vertical_xpm (std::string);
-	
   protected:
 	bool on_expose_event (GdkEventExpose*);
 	void on_size_request (GtkRequisition*);
+	void on_size_allocate (Gtk::Allocation&);
 
   private:  
-	static std::string h_image_path;
-	static std::string v_image_path;
-	static Glib::RefPtr<Gdk::Pixbuf> h_pixbuf;
-	static gint h_pixheight;
-	static gint h_pixwidth;
 
-	static Glib::RefPtr<Gdk::Pixbuf> v_pixbuf;
-	static gint v_pixheight;
-	static gint v_pixwidth;
+	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+	gint pixheight;
+	gint pixwidth;
 
 	Orientation orientation;
 	GdkRectangle pixrect;
@@ -76,6 +69,18 @@ class FastMeter : public Gtk::DrawingArea {
 	
 	bool vertical_expose (GdkEventExpose*);
 	bool horizontal_expose (GdkEventExpose*);
+	
+	static Glib::RefPtr<Gdk::Pixbuf> request_vertical_meter(int);
+
+	static Glib::RefPtr<Gdk::Pixbuf> *v_pixbuf_cache;
+	static int min_v_pixbuf_size;
+	static int max_v_pixbuf_size;
+
+	static Glib::RefPtr<Gdk::Pixbuf> request_horizontal_meter(int);
+
+	static Glib::RefPtr<Gdk::Pixbuf> *h_pixbuf_cache;
+	static int min_h_pixbuf_size;
+	static int max_h_pixbuf_size;
 };
 
 
