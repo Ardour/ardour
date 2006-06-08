@@ -4,9 +4,11 @@
 namespace MIDI {
 
 	typedef char           channel_t;
-	typedef float controller_value_t;
+	typedef float          controller_value_t;
 	typedef unsigned char  byte;
 	typedef unsigned short pitchbend_t;
+	typedef unsigned int   timestamp_t;
+	typedef unsigned int   nframes_t;
 
 	enum eventType {
 	    none = 0x0,

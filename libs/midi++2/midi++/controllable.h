@@ -60,7 +60,7 @@ class Controllable : public sigc::trackable
 	
 	std::string control_description() const { return _control_description; }
 
-	void send_midi_feedback (float);
+	void send_midi_feedback (float val, timestamp_t timestamp);
 	
   private:
 	bool             bistate;

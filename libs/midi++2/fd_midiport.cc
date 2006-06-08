@@ -151,7 +151,7 @@ FD_MidiPort::do_slow_write (byte *msg, unsigned int msglen)
 }
 
 int
-FD_MidiPort::read (byte* buf, size_t max)
+FD_MidiPort::read (byte* buf, size_t max, timestamp_t timestamp)
 {
 	int nread;
 	

@@ -409,7 +409,7 @@ If you still wish to quit, please use the\n\n\
 			break;
 		}
 	}
-
+	Config->save_state();
 	quit ();
 }
 

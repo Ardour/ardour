@@ -247,7 +247,8 @@ Session::Session (AudioEngine &eng,
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
-	  midi_requests (128), // the size of this should match the midi request pool size
+	  //midi_requests (128), // the size of this should match the midi request pool size
+	  _send_smpte_update (false),
 	  main_outs (0)
 {
 	bool new_session;
@@ -294,7 +295,7 @@ Session::Session (AudioEngine &eng,
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
-	  midi_requests (16),
+	  //midi_requests (16),
 	  main_outs (0)
 
 {
@@ -360,7 +361,7 @@ Session::~Session ()
 	going_away (); /* EMIT SIGNAL */
 	
 	terminate_butler_thread ();
-	terminate_midi_thread ();
+	//terminate_midi_thread ();
 	
 	if (click_data && click_data != default_click) {
 		delete [] click_data;
@@ -1250,7 +1251,8 @@ Session::enable_record ()
 	if (atomic_read (&_record_status) != Recording) {
 		atomic_set (&_record_status, Recording);
 		_last_record_location = _transport_frame;
-		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordStrobe);
+		// FIXME
+		//send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordStrobe);
 
 		if (Config->get_use_hardware_monitoring() && auto_input) {
 			/* Even though this can be called from RT context we are using
@@ -1285,7 +1287,8 @@ Session::disable_record (bool rt_context, bool force)
 			}
 		}
 
-		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordExit);
+		// FIXME
+		//send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordExit);
 
 		if (Config->get_use_hardware_monitoring() && auto_input) {
 			/* Even though this can be called from RT context we are using
@@ -1346,7 +1349,8 @@ Session::maybe_enable_record ()
 			enable_record ();
 		} 
 	} else {
-		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordPause);
+		// FIXME
+		//send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordPause);
 		RecordStateChanged (); /* EMIT SIGNAL */
 	}
 

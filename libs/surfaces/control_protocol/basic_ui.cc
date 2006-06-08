@@ -265,17 +265,17 @@ BasicUI::smpte_frames_per_hour ()
 void
 BasicUI::smpte_time (jack_nframes_t where, SMPTE_t& smpte)
 {
-	session->smpte_time (where, *((SMPTE_Time *) &smpte));
+	session->smpte_time (where, *((SMPTE::Time *) &smpte));
 }
 
 void 
 BasicUI::smpte_to_sample (SMPTE_t& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes) const
 {
-	session->smpte_to_sample (*((SMPTE_Time*)&smpte), sample, use_offset, use_subframes);
+	session->smpte_to_sample (*((SMPTE::Time*)&smpte), sample, use_offset, use_subframes);
 }
 
 void 
 BasicUI::sample_to_smpte (jack_nframes_t sample, SMPTE_t& smpte, bool use_offset, bool use_subframes) const
 {
-	session->sample_to_smpte (sample, *((SMPTE_Time*)&smpte), use_offset, use_subframes);
+	session->sample_to_smpte (sample, *((SMPTE::Time*)&smpte), use_offset, use_subframes);
 }

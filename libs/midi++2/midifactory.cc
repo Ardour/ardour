@@ -17,10 +17,15 @@
     $Id$
 */
 
+#include <cassert>
 #include <midi++/types.h>
 #include <midi++/factory.h>
 #include <midi++/nullmidi.h>
 #include <midi++/fifomidi.h>
+
+#ifdef WITH_JACK_MIDI
+#include <midi++/jack.h>
+#endif // WITH_JACK_MIDI
 
 #ifdef WITH_ALSA
 #include <midi++/alsa_sequencer.h>
@@ -35,13 +40,21 @@
 using namespace std;
 using namespace MIDI;
 
+// FIXME: void* data pointer, filthy
 Port *
-PortFactory::create_port (PortRequest &req)
+PortFactory::create_port (PortRequest &req, void* data)
 
 {
 	Port *port;
 	
 	switch (req.type) {
+#ifdef WITH_JACK_MIDI
+	case Port::JACK_Midi:
+		assert(data != NULL);
+		port = new JACK_MidiPort (req, (jack_client_t*)data);
+		break;
+#endif // WITH_JACK_MIDI
+	
 #ifdef WITH_ALSA
 	case Port::ALSA_RawMidi:
 		port = new ALSA_RawMidiPort (req);

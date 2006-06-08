@@ -414,14 +414,14 @@ MixerStrip::set_width (Width w)
 		set_size_request (-1, -1);
 		xml_node->add_property ("strip_width", "wide");
 
-		rec_enable_button->set_label (_("Record"));
-		mute_button->set_label  (_("Mute"));
-		solo_button->set_label (_("Solo"));
+		rec_enable_button->set_label (_("record"));
+		mute_button->set_label  (_("mute"));
+		solo_button->set_label (_("solo"));
 
 		if (_route.comment() == "") {
-		       comment_button.set_label (_("Comments"));
+		       comment_button.set_label (_("comments"));
 		} else {
-		       comment_button.set_label (_("*Comments*"));
+		       comment_button.set_label (_("*comments*"));
 		}
 
 		gpm.gain_automation_style_button.set_label (gpm.astyle_string(_route.gain_automation_curve().automation_style()));

@@ -46,11 +46,12 @@ class Null_MidiPort : public Port
 
 	virtual ~Null_MidiPort () {};
 
-	virtual int write (byte *msg, size_t msglen) {
+	/* Direct I/O */
+	int write (byte *msg, size_t msglen, timestamp_t timestamp) {
 		return msglen;
 	}
 
-	virtual int read (byte *buf, size_t max) {
+	int read (byte *buf, size_t max, timestamp_t timestamp) {
 		return 0;
 	}
 	

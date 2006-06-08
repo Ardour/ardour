@@ -11,6 +11,8 @@ import platform
 from sets import Set
 import SCons.Node.FS
 
+#import pickle
+
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
@@ -459,7 +461,12 @@ libraries['dmalloc'] = conf.Finish ()
 
 conf = Configure(env)
 
-if conf.CheckCHeader('alsa/asoundlib.h'):
+if conf.CheckCHeader('jack/midiport.h'):
+    libraries['sysmidi'] = LibraryInfo (LIBS='jack')
+    env['SYSMIDI'] = 'JACK MIDI'
+    subst_dict['%MIDITAG%'] = "control"
+    subst_dict['%MIDITYPE%'] = "jack"
+elif conf.CheckCHeader('alsa/asoundlib.h'):
     libraries['sysmidi'] = LibraryInfo (LIBS='asound')
     env['SYSMIDI'] = 'ALSA Sequencer'
     subst_dict['%MIDITAG%'] = "seq"
@@ -586,6 +593,12 @@ Help(opts.GenerateHelpText(env))
 
 if os.environ.has_key('PATH'):
     env.Append(PATH = os.environ['PATH'])
+
+if os.environ.has_key('TERM'):
+    env.Append(PATH = os.environ['TERM'])
+
+if os.environ.has_key('HOME'):
+    env.Append(HOME = os.environ['HOME'])
 
 if os.environ.has_key('PKG_CONFIG_PATH'):
     env.Append(PKG_CONFIG_PATH = os.environ['PKG_CONFIG_PATH'])
@@ -859,7 +872,9 @@ for subdir in coredirs:
 for sublistdir in [ subdirs, gtk_subdirs, surface_subdirs ]:
     for subdir in sublistdir:
         SConscript (subdir + '/SConscript')
-            
+
+#pickle.dump(env, open('.scons_env', 'w'), pickle.HIGHEST_PROTOCOL)
+
 # cleanup
 env.Clean ('scrub', [ 'scache.conf', '.sconf_temp', '.sconsign.dblite', 'config.log'])
 

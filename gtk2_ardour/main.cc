@@ -251,8 +251,10 @@ which_ui_rcfile ()
 	
 	if (rcfile.empty()) {
 		warning << _("Without a UI style file, ardour will look strange.\n Please set ARDOUR2_UI_RC to point to a valid UI style file") << endmsg;
+	} else {
+		cerr << "Loading ui configuration file " << rcfile << endl;
 	}
-
+	
 	return rcfile;
 }
 

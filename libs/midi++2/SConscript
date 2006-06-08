@@ -30,18 +30,24 @@ version.cc
 """)
 
 sysdep_sources = Split ("""
+jack_midiport.cc
 alsa_sequencer_midiport.cc
 coremidi_midiport.cc
 """)
 
-if env['SYSMIDI'] == 'CoreMIDI':
+if env['SYSMIDI'] == 'JACK MIDI':
+   sysdep_src = [ 'jack_midiport.cc' ]
+   midi2.Append (CCFLAGS="-DWITH_JACK_MIDI")
+elif env['SYSMIDI'] == 'ALSA Sequencer':
+   sysdep_src = [ 'alsa_sequencer_midiport.cc' ]
+   midi2.Append (CCFLAGS="-DWITH_ALSA")
+elif env['SYSMIDI'] == 'CoreMIDI':
    sysdep_src = [ 'coremidi_midiport.cc' ]
    midi2.Append (CCFLAGS="-DWITH_COREMIDI")
    midi2.Append (LINKFLAGS="-framework CoreMIDI")
    midi2.Append (LINKFLAGS="-framework CoreFoundation")
-else:
-   sysdep_src = [ 'alsa_sequencer_midiport.cc' ]
-   midi2.Append (CCFLAGS="-DWITH_ALSA")
+
+
 
 midi2.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 midi2.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")

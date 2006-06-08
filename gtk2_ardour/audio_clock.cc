@@ -435,7 +435,7 @@ void
 AudioClock::set_smpte (jack_nframes_t when, bool force)
 {
 	char buf[32];
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	
 	if (is_duration) {
 		session->smpte_duration (when, smpte);
@@ -1259,7 +1259,7 @@ AudioClock::smpte_frame_from_display () const
 		return 0;
 	}
 	
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	jack_nframes_t sample;
 	
 	smpte.hours = atoi (hours_label.get_text());
@@ -1280,19 +1280,19 @@ AudioClock::smpte_frame_from_display () const
 #define SMPTE_SAMPLE_TEST_7
 
 	// Testcode for smpte<->sample conversions (P.S.)
-	SMPTE_Time smpte1;
+	SMPTE::Time smpte1;
 	jack_nframes_t sample1;
 	jack_nframes_t oldsample = 0;
-	SMPTE_Time smpte2;
+	SMPTE::Time smpte2;
 	jack_nframes_t sample_increment;
 
-	sample_increment = (long)rint(session->frame_rate() / session->smpte_frames_per_second);
+	sample_increment = (long)rint(session->frame_rate() / SMPTE::frames_per_second);
 
 #ifdef SMPTE_SAMPLE_TEST_1
 	// Test 1: use_offset = false, use_subframes = false
 	cout << "use_offset = false, use_subframes = false" << endl;
 	for (int i = 0; i < 108003; i++) {
-		session->smpte_to_sample( smpte1, sample1, false /* use_offset */, false /* use_subframes */ );
+		SMPTE::to_sample( smpte1, sample1, false /* use_offset */, false /* use_subframes */ );
 		session->sample_to_smpte( sample1, smpte2, false /* use_offset */, false /* use_subframes */ );
 
 		if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1)))) {
@@ -1313,7 +1313,7 @@ AudioClock::smpte_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_increment( smpte1 );
+		SMPTE::increment( smpte1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
@@ -1337,7 +1337,7 @@ AudioClock::smpte_frame_from_display () const
 	cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
 
 	for (int i = 0; i < 108003; i++) {
-		session->smpte_to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
+		SMPTE::to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
 		session->sample_to_smpte( sample1, smpte2, true /* use_offset */, false /* use_subframes */ );
 
 //     cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1363,7 +1363,7 @@ AudioClock::smpte_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_increment( smpte1 );
+		SMPTE::increment( smpte1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
@@ -1380,7 +1380,7 @@ AudioClock::smpte_frame_from_display () const
 	cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
 
 	for (int i = 0; i < 108003; i++) {
-		session->smpte_to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
+		SMPTE::to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
 		session->sample_to_smpte( sample1, smpte2, true /* use_offset */, false /* use_subframes */ );
 
 //     cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1406,7 +1406,7 @@ AudioClock::smpte_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_decrement( smpte1 );
+		SMPTE::decrement( smpte1 );
 	}
 
 	cout << "sample_decrement: " << sample_increment << endl;
@@ -1433,7 +1433,7 @@ AudioClock::smpte_frame_from_display () const
 		cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
     
 		for (int i = 0; i < 108003; i++) {
-			session->smpte_to_sample( smpte1, sample1, true /* use_offset */, true /* use_subframes */ );
+			SMPTE::to_sample( smpte1, sample1, true /* use_offset */, true /* use_subframes */ );
 			session->sample_to_smpte( sample1, smpte2, true /* use_offset */, true /* use_subframes */ );
       
 			if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1)))) {
@@ -1454,7 +1454,7 @@ AudioClock::smpte_frame_from_display () const
 				break;
 			}
 			oldsample = sample1;
-			session->smpte_increment( smpte1 );
+			SMPTE::increment( smpte1 );
 		}
     
 		cout << "sample_increment: " << sample_increment << endl;
@@ -1462,7 +1462,7 @@ AudioClock::smpte_frame_from_display () const
 		cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
 
 		for (int i = 0; i < 108003; i++) {
-			session->smpte_to_sample( smpte1, sample1, true /* use_offset */, true /* use_subframes */ );
+			SMPTE::to_sample( smpte1, sample1, true /* use_offset */, true /* use_subframes */ );
 			session->sample_to_smpte( sample1, smpte2, true /* use_offset */, true /* use_subframes */ );
       
 			if ((i > 0) && ( ((oldsample - sample1) != sample_increment) && ((oldsample - sample1) != (sample_increment + 1)) && ((oldsample - sample1) != (sample_increment - 1)))) {
@@ -1483,7 +1483,7 @@ AudioClock::smpte_frame_from_display () const
 				break;
 			}
 			oldsample = sample1;
-			session->smpte_decrement( smpte1 );
+			SMPTE::decrement( smpte1 );
 		}
     
 		cout << "sample_decrement: " << sample_increment << endl;
@@ -1510,7 +1510,7 @@ AudioClock::smpte_frame_from_display () const
 	cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
 
 	for (int i = 0; i < 3600; i++) {
-		session->smpte_to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
+		SMPTE::to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
 		session->sample_to_smpte( sample1, smpte2, true /* use_offset */, false /* use_subframes */ );
 
 //     cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1533,7 +1533,7 @@ AudioClock::smpte_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_increment_seconds( smpte1 );
+		SMPTE::increment_seconds( smpte1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
@@ -1559,7 +1559,7 @@ AudioClock::smpte_frame_from_display () const
 	cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
 
 	for (int i = 0; i < 60; i++) {
-		session->smpte_to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
+		SMPTE::to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
 		session->sample_to_smpte( sample1, smpte2, true /* use_offset */, false /* use_subframes */ );
 
 //     cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1582,7 +1582,7 @@ AudioClock::smpte_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_increment_minutes( smpte1 );
+		SMPTE::increment_minutes( smpte1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
@@ -1607,7 +1607,7 @@ AudioClock::smpte_frame_from_display () const
 	cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
 
 	for (int i = 0; i < 10; i++) {
-		session->smpte_to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
+		SMPTE::to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
 		session->sample_to_smpte( sample1, smpte2, true /* use_offset */, false /* use_subframes */ );
 
 //     cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1630,7 +1630,7 @@ AudioClock::smpte_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_increment_hours( smpte1 );
+		SMPTE::increment_hours( smpte1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;

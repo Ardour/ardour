@@ -150,7 +150,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	state_was_pending = false;
 	set_next_event ();
 	outbound_mtc_smpte_frame = 0;
-	next_quarter_frame_to_send = -1;
+	next_quarter_frame_to_send = 0;
 	current_block_size = 0;
 	_solo_latched = true;
 	_solo_model = InverseMute;
@@ -297,9 +297,11 @@ Session::second_stage_init (bool new_session)
 		return -1;
 	}
 
+	/* FIXME
 	if (start_midi_thread ()) {
 		return -1;
 	}
+	*/
 
 	if (state_tree) {
 		if (set_state (*state_tree->root())) {
@@ -336,10 +338,11 @@ Session::second_stage_init (bool new_session)
 		first_time_running = _engine.Running.connect (mem_fun (*this, &Session::when_engine_running));
 	}
 
-	send_full_time_code ();
+	// FIXME
+	//send_full_time_code ();
 	_engine.transport_locate (0);
-	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
-	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
+	//deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
+	//deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
 
 	ControlProtocolManager::instance().set_session (*this);
 

@@ -38,6 +38,8 @@
 #include <ardour/cycles.h>
 #include <ardour/cycle_timer.h>
 
+#include <midi++/manager.h>
+
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -47,6 +49,10 @@ using namespace std;
 void
 Session::process (jack_nframes_t nframes)
 {
+	cerr << "CYCLE START " << _transport_frame << "-------------------" << endl;
+	
+	MIDI::Manager::instance()->cycle_start(nframes);
+
 	if (synced_to_jack() && waiting_to_start) {
 		if ( _engine.transport_state() == AudioEngine::TransportRolling) {
 			actually_start_transport ();
@@ -60,6 +66,10 @@ Session::process (jack_nframes_t nframes)
 	} 
 	
 	(this->*process_function) (nframes);
+	
+	MIDI::Manager::instance()->cycle_end();
+	
+	cerr << "CYCLE END " << _transport_frame << "-----------------------" << endl;
 }
 
 void
@@ -76,6 +86,8 @@ Session::no_roll (jack_nframes_t nframes, jack_nframes_t offset)
 	jack_nframes_t end_frame = _transport_frame + nframes;
 	int ret = 0;
 	bool declick = get_transport_declick_required();
+
+	cerr << "[DR] no_roll\n";
 
 	if (_click_io) {
 		_click_io->silence (nframes, offset);
@@ -237,16 +249,19 @@ Session::commit_diskstreams (jack_nframes_t nframes, bool &needs_butler)
 	}
 }
 
+
 void
 Session::process_with_events (jack_nframes_t nframes)
 {
-	Event* ev;
+	Event*         ev;
 	jack_nframes_t this_nframes;
 	jack_nframes_t end_frame;
 	jack_nframes_t offset;
-	bool session_needs_butler = false;
 	jack_nframes_t stop_limit;
 	long           frames_moved;
+	bool           session_needs_butler = false;
+
+	cerr << "[DR] with events" << endl;
 
 	if (auditioner) {
 		auditioner->silence (nframes, 0);
@@ -265,6 +280,13 @@ Session::process_with_events (jack_nframes_t nframes)
 		Event *ev = immediate_events.front ();
 		immediate_events.pop_front ();
 		process_event (ev);
+	}
+
+	/* Events caused a transport change and we need to send MTC
+	 * [DR] FIXME: best place for this? */
+	if (_send_smpte_update) {
+		cerr << "[DR] TIME CHANGE\n" << endl;
+		send_full_time_code(nframes);
 	}
 
 	if (!process_can_proceed()) {
@@ -400,17 +422,11 @@ Session::process_with_events (jack_nframes_t nframes)
 
 	} /* implicit release of route lock */
 
-
-	if (session_needs_butler) {
+	if (session_needs_butler)
 		summon_butler ();
-	} 
 	
-	if (!_engine.freewheeling() && send_mtc) {
-		send_midi_time_code_in_another_thread ();
-	}
-
-	return;
-}		
+	send_midi_time_code_for_cycle(nframes);
+}
 
 void
 Session::reset_slave_state ()
@@ -725,6 +741,8 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 void
 Session::process_without_events (jack_nframes_t nframes)
 {
+	cerr << "[DR] without events" << endl;
+
 	bool session_needs_butler = false;
 	jack_nframes_t stop_limit;
 	long frames_moved;
@@ -788,16 +806,11 @@ Session::process_without_events (jack_nframes_t nframes)
 
 	} /* implicit release of route lock */
 
-	if (session_needs_butler) {
-		summon_butler ();
-	} 
-	
-	if (!_engine.freewheeling() && send_mtc) {
-		send_midi_time_code_in_another_thread ();
-	}
+	send_midi_time_code_for_cycle(nframes);
 
-	return;
-}		
+	if (session_needs_butler)
+		summon_butler ();
+}
 
 void
 Session::process_audition (jack_nframes_t nframes)

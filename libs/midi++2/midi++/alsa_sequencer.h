@@ -44,9 +44,8 @@ class ALSA_SequencerMidiPort : public Port
 
   protected:
 	/* Direct I/O */
-	
-	int write (byte *msg, size_t msglen);	
-	int read (byte *buf, size_t max);
+	int write (byte *msg, size_t msglen, timestamp_t timestamp);	
+	int read (byte *buf, size_t max, timestamp_t timestamp);
 
   private:
 	snd_seq_t *seq;

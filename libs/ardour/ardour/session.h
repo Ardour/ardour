@@ -585,24 +585,13 @@ class Session : public sigc::trackable, public Stateful
 
 	void bbt_time (jack_nframes_t when, BBT_Time&);
 
-	ARDOUR::smpte_wrap_t smpte_increment( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_decrement( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_increment_subframes( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_decrement_subframes( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_increment_seconds( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_increment_minutes( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_increment_hours( SMPTE_Time& smpte ) const;
-	void smpte_frames_floor( SMPTE_Time& smpte ) const;
-	void smpte_seconds_floor( SMPTE_Time& smpte ) const;
-	void smpte_minutes_floor( SMPTE_Time& smpte ) const;
-	void smpte_hours_floor( SMPTE_Time& smpte ) const;
-	void smpte_to_sample( SMPTE_Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const;
-	void sample_to_smpte( jack_nframes_t sample, SMPTE_Time& smpte, bool use_offset, bool use_subframes ) const;
-	void smpte_time (SMPTE_Time &);
-	void smpte_time (jack_nframes_t when, SMPTE_Time&);
-	void smpte_time_subframes (jack_nframes_t when, SMPTE_Time&);
+	void smpte_to_sample( SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const;
+	void sample_to_smpte( jack_nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes ) const;
+	void smpte_time (SMPTE::Time &);
+	void smpte_time (jack_nframes_t when, SMPTE::Time&);
+	void smpte_time_subframes (jack_nframes_t when, SMPTE::Time&);
 
-	void smpte_duration (jack_nframes_t, SMPTE_Time&) const;
+	void smpte_duration (jack_nframes_t, SMPTE::Time&) const;
 	void smpte_duration_string (char *, jack_nframes_t) const;
 
 	void           set_smpte_offset (jack_nframes_t);
@@ -1271,7 +1260,7 @@ class Session : public sigc::trackable, public Stateful
 	void remove_empty_sounds ();
 
 	void setup_midi_control ();
-	int  midi_read (MIDI::Port *);
+	//int  midi_read (MIDI::Port *);
 
 	void enable_record ();
 	
@@ -1297,13 +1286,13 @@ class Session : public sigc::trackable, public Stateful
 	void *do_work();
 
 	void set_next_event ();
-	void process_event (Event *);
+	void process_event (Event *ev);
 
 	/* MIDI Machine Control */
 
 	void deliver_mmc (MIDI::MachineControl::Command, jack_nframes_t);
-	void deliver_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t, MIDI::EventTwoBytes);
-	void deliver_data (MIDI::Port* port, MIDI::byte*, int32_t size);
+	//void deliver_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t, MIDI::EventTwoBytes);
+	//void deliver_data (MIDI::Port* port, MIDI::byte*, int32_t size);
 
 	void spp_start (MIDI::Parser&);
 	void spp_continue (MIDI::Parser&);
@@ -1338,7 +1327,7 @@ class Session : public sigc::trackable, public Stateful
 	MIDI::byte mtc_smpte_bits;   /* encoding of SMTPE type for MTC */
 	MIDI::byte midi_msg[16];
 	jack_nframes_t  outbound_mtc_smpte_frame;
-	SMPTE_Time transmitting_smpte_time;
+	SMPTE::Time transmitting_smpte_time;
 	int next_quarter_frame_to_send;
 	
 	double _frames_per_smpte_frame; /* has to be floating point because of drop frame */
@@ -1347,22 +1336,18 @@ class Session : public sigc::trackable, public Stateful
 	jack_nframes_t _smpte_offset;
 	bool _smpte_offset_negative;
 	
-	/* cache the most-recently requested time conversions.
-	   this helps when we have multiple clocks showing the
-	   same time (e.g. the transport frame)
-	*/
+	/* cache the most-recently requested time conversions. This helps when we
+	 * have multiple clocks showing the same time (e.g. the transport frame) */
+	bool           last_smpte_valid;
+	jack_nframes_t last_smpte_when;
+	SMPTE::Time    last_smpte;
+	
+	bool _send_smpte_update; ///< Send a full MTC timecode this cycle
 
-	bool       last_smpte_valid;
-	jack_nframes_t  last_smpte_when;
-	SMPTE_Time last_smpte;
+	int send_full_time_code(jack_nframes_t nframes);
+	int send_midi_time_code_for_cycle(jack_nframes_t nframes);
 
-	int send_full_time_code ();
-	int send_midi_time_code ();
-
-	void send_full_time_code_in_another_thread ();
-	void send_midi_time_code_in_another_thread ();
-	void send_time_code_in_another_thread (bool full);
-	void send_mmc_in_another_thread (MIDI::MachineControl::Command, jack_nframes_t frame = 0);
+	//void send_mmc_in_another_thread (MIDI::MachineControl::Command, jack_nframes_t frame = 0);
 
 	jack_nframes_t adjust_apparent_position (jack_nframes_t frames);
 	
@@ -1417,17 +1402,17 @@ class Session : public sigc::trackable, public Stateful
 	    static MultiAllocSingleReleasePool pool;
 	};
 
-	PBD::Lock       midi_lock;
-	pthread_t       midi_thread;
-	int             midi_request_pipe[2];
+	//PBD::Lock       midi_lock;
+	//pthread_t       midi_thread;
+	//int             midi_request_pipe[2];
 	atomic_t        butler_active;
-	RingBuffer<MIDIRequest*> midi_requests;
-
+	//RingBuffer<MIDIRequest*> midi_requests;
+/*
 	int           start_midi_thread ();
 	void          terminate_midi_thread ();
 	void          poke_midi_thread ();
 	static void *_midi_thread_work (void *arg);
-	void          midi_thread_work ();
+	void          midi_thread_work ();*/
 	void          change_midi_ports ();
 	int           use_config_midi_ports ();
 

@@ -29,6 +29,7 @@
 
 #include <inttypes.h>
 #include <jack/types.h>
+#include <ardour/smpte.h>
 #include <map>
 
 #if __GNUC__ < 3
@@ -99,33 +100,6 @@ namespace ARDOUR {
 		Destructive
 	};
 
-	enum smpte_wrap_t {
-		smpte_wrap_none = 0,
-		smpte_wrap_frames,
-		smpte_wrap_seconds,
-		smpte_wrap_minutes,
-		smpte_wrap_hours
-	};
-
-	struct SMPTE_Time {
-		bool negative;
-		uint32_t hours;
-		uint32_t minutes;
-		uint32_t seconds;
-		uint32_t frames;
-		uint32_t subframes; // mostly not used
-
-		SMPTE_Time() {
-			negative = false;
-			hours = 0;
-			minutes = 0;
-			seconds = 0;
-			frames = 0;
-			subframes = 0;
-		}
-		
-	};
-
 	struct BBT_Time {
 	    uint32_t bars;
 	    uint32_t beats;
@@ -164,7 +138,7 @@ namespace ARDOUR {
 
 	    Type type;
 
-	    SMPTE_Time     smpte;
+	    SMPTE::Time    smpte;
 	    BBT_Time       bbt;
 
 	    union { 

@@ -53,7 +53,10 @@ class FD_MidiPort : public Port
 	int _fd;
 	virtual void open (PortRequest &req);
 
-	virtual int write (byte *msg, size_t msglen) {
+	/* Direct I/O */
+	
+	virtual int write (byte *msg, size_t msglen,
+	                   timestamp_t timestamp) {
 		int nwritten;
 		
 		if ((_mode & O_ACCMODE) == O_RDONLY) {
@@ -80,7 +83,8 @@ class FD_MidiPort : public Port
 		return nwritten;
 	}
 
-	virtual int read (byte *buf, size_t max);
+	virtual int read (byte *buf, size_t max,
+	                  timestamp_t timestamp);
 
   private:
 	static std::string *midi_dirpath;

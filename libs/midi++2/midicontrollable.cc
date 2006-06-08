@@ -308,7 +308,7 @@ Controllable::get_control_info (channel_t& chn, eventType& ev, byte& additional)
 
 
 void
-Controllable::send_midi_feedback (float val)
+Controllable::send_midi_feedback (float val, timestamp_t timestamp)
 {
 	byte msg[3];
 
@@ -320,6 +320,6 @@ Controllable::send_midi_feedback (float val)
 	msg[1] = control_additional;
 	msg[2] = (byte) (val * 127.0f);
 
-	port->write (msg, 3);
+	port->write (msg, 3, timestamp);
 }
 

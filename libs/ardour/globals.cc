@@ -40,6 +40,7 @@
 #include <midi++/mmc.h>
 
 #include <ardour/ardour.h>
+#include <ardour/audioengine.h>
 #include <ardour/audio_library.h>
 #include <ardour/configuration.h>
 #include <ardour/plugin_manager.h>
@@ -91,7 +92,7 @@ setup_osc ()
 }
 
 static int 
-setup_midi ()
+setup_midi (AudioEngine& engine)
 {
 	std::map<string,Configuration::MidiPortDescriptor*>::iterator i;
 	int nports;
@@ -100,6 +101,8 @@ setup_midi ()
 		warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
 		return 0;
 	}
+
+	MIDI::Manager::instance()->set_api_data(engine.jack());
 
 	for (i = Config->midi_ports.begin(); i != Config->midi_ports.end(); ++i) {
 		Configuration::MidiPortDescriptor* port_descriptor;
@@ -112,7 +115,9 @@ setup_midi ()
 					   port_descriptor->type);
 
 		if (request.status != MIDI::PortRequest::OK) {
-			error << string_compose(_("MIDI port specifications for \"%1\" are not understandable."), port_descriptor->tag) << endmsg;
+			error << string_compose(
+				_("MIDI port specifications for \"%1\" (%2, %3) are not understandable."),
+				port_descriptor->tag, port_descriptor->mode, port_descriptor->type) << endmsg;
 			continue;
 		}
 		
@@ -163,12 +168,15 @@ setup_midi ()
 	if (default_mmc_port == 0) {
 		warning << string_compose (_("No MMC control (MIDI port \"%1\" not available)"), Config->get_mmc_port_name()) 
 			<< endmsg;
-		return 0;
+		//return 0;
 	} 
 
 	if (default_mtc_port == 0) {
 		warning << string_compose (_("No MTC support (MIDI port \"%1\" not available)"), Config->get_mtc_port_name()) 
 			<< endmsg;
+	} else {
+		// [DR]
+		warning << "MTC port available" << endl;
 	}
 
 	if (default_midi_port == 0) {
@@ -194,7 +202,7 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 
 	Config->set_use_vst (use_vst);
 
-	if (setup_midi ()) {
+	if (setup_midi (engine)) {
 		return -1;
 	}
 

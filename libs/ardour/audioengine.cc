@@ -212,6 +212,7 @@ AudioEngine::_graph_order_callback (void *arg)
 	return 0;
 }
 
+/** @callgraph */
 int
 AudioEngine::_process_callback (jack_nframes_t nframes, void *arg)
 {
@@ -224,6 +225,7 @@ AudioEngine::_freewheel_callback (int onoff, void *arg)
 	static_cast<AudioEngine*>(arg)->_freewheeling = onoff;
 }
 
+/** @callgraph */
 int
 AudioEngine::process_callback (jack_nframes_t nframes)
 {

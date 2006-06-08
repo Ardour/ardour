@@ -29,7 +29,7 @@ namespace MIDI {
 
 class PortFactory {
   public:
-	Port *create_port (PortRequest &req);
+	Port *create_port (PortRequest &req, void* data);
 	
 	static void add_port_request (std::vector<PortRequest *> &reqs,
 				      const std::string &reqstr);
