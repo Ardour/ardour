@@ -10,7 +10,7 @@ pbd3 = env.Copy()
 
 domain = 'libpbd'
 
-pbd3.Append(DOMAIN=domain,MAJOR=3,MINOR=2,MICRO=0)
+pbd3.Append(DOMAIN=domain,MAJOR=4,MINOR=0,MICRO=0)
 pbd3.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 pbd3.Append(CXXFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 pbd3.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
