@@ -120,7 +120,6 @@ Session::queue_event (Event* ev)
 	}
 }
 
-/* [DR] Always called from audio thread? */
 void
 Session::merge_event (Event* ev)
 {
@@ -311,8 +310,7 @@ Session::process_event (Event* ev)
 		return;
 	}
 
-	// FIXME [DR]
-	printf("Processing event: %s\n", event_names[ev->type]);
+	//printf("Processing event: %s\n", event_names[ev->type]);
 
 	switch (ev->type) {
 	case Event::SetLoop:

@@ -32,7 +32,6 @@ FPS Time::default_rate = MTC_30_FPS;
 Wrap
 increment( Time& smpte )
 {
-	//Wrap wrap = NONE;
 	Wrap wrap = NONE;
 
 	if (smpte.negative) {

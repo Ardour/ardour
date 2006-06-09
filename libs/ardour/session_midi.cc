@@ -818,6 +818,9 @@ Session::change_midi_ports ()
 }
 
 /** Send MTC Full Frame message (complete SMPTE time) for the start of this cycle.
+ * This resets the MTC code, the next quarter frame message that is sent will be
+ * the first one with the beginning of this cycle as the new start point.
+ *
  * Audio thread only, realtime safe.  MIDI::Manager::cycle_start must
  * have been called with the appropriate nframes parameter this cycle.
  */
@@ -825,7 +828,7 @@ int
 Session::send_full_time_code(jack_nframes_t nframes)
 {
 	/* This function could easily send at a given frame offset, but would
-	 * that be useful? [DR] */
+	 * that be useful?  Does ardour do sub-block accurate locating? [DR] */
 
 	MIDI::byte msg[10];
 	SMPTE::Time smpte;
@@ -839,27 +842,14 @@ Session::send_full_time_code(jack_nframes_t nframes)
 	// Get smpte time for this transport frame
 	sample_to_smpte(_transport_frame, smpte, true /* use_offset */, false /* no subframes */);
 
-	// Check for negative smpte time and prepare for quarter frame transmission
-	assert(!smpte.negative); // this shouldn't happen
-	if (smpte.negative) {
-		// Negative mtc is not defined, so sync slave to smpte zero.
-		// When _transport_frame gets there we will start transmitting quarter frames
-		smpte.hours = 0;
-		smpte.minutes = 0;
-		smpte.seconds = 0;
-		smpte.frames = 0;
-		smpte.subframes = 0;
-		smpte.negative = false;
-		smpte_to_sample( smpte, outbound_mtc_smpte_frame, true, false );
-		transmitting_smpte_time = smpte;
-	} else {
-		transmitting_smpte_time = smpte;
-		outbound_mtc_smpte_frame = _transport_frame;
-		if (((mtc_smpte_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_smpte_time.frames % 2)) {
-			// start MTC quarter frame transmission on an even frame
-			SMPTE::increment( transmitting_smpte_time );
-			outbound_mtc_smpte_frame += (jack_nframes_t) _frames_per_smpte_frame;
-		}
+	transmitting_smpte_time = smpte;
+	outbound_mtc_smpte_frame = _transport_frame;
+
+	// I don't understand this bit yet.. [DR]
+	if (((mtc_smpte_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_smpte_time.frames % 2)) {
+		// start MTC quarter frame transmission on an even frame
+		SMPTE::increment( transmitting_smpte_time );
+		outbound_mtc_smpte_frame += (jack_nframes_t) _frames_per_smpte_frame;
 	}
 
 	// Compensate for audio latency
@@ -867,7 +857,7 @@ Session::send_full_time_code(jack_nframes_t nframes)
 
 	next_quarter_frame_to_send = 0;
 
-	// Sync slave to the same smpte time as we are on (except if negative, see above)
+	// Sync slave to the same SMPTE time as we are on
 	msg[0] = 0xf0;
 	msg[1] = 0x7f;
 	msg[2] = 0x7f;
@@ -880,6 +870,8 @@ Session::send_full_time_code(jack_nframes_t nframes)
 	msg[7] = smpte.seconds;
 	msg[8] = smpte.frames;
 
+	cerr << "MTC: Sending full time code at " << outbound_mtc_smpte_frame << endl;
+
 	// Send message at offset 0, sent time is for the start of this cycle
 	if (!_mtc_port->midimsg (msg, sizeof (msg), 0)) {
 		error << _("Session: could not send full MIDI time code") << endmsg;
@@ -889,76 +881,47 @@ Session::send_full_time_code(jack_nframes_t nframes)
 	return 0;
 }
 
-/** Sends all time code messages for this cycle.
+
+/** Sends MTC (quarter-frame) messages for this cycle.
  * Must be called exactly once per cycle from the audio thread.  Realtime safe.
  * This function assumes the state of full SMPTE is sane, eg. the slave is
  * expecting quarter frame messages and has the right frame of reference (any
  * full MTC SMPTE time messages that needed to be sent should have been sent
- * earlier in the cycle).
+ * earlier already this cycle by send_full_time_code)
  */
 int
 Session::send_midi_time_code_for_cycle(jack_nframes_t nframes)
 {	
-	//cerr << "----------------------" << endl;
-
-	// FIXME: remove, just for debug print statement
-	static jack_nframes_t last_time = 0;
-
 	assert (next_quarter_frame_to_send >= 0);
+	assert (next_quarter_frame_to_send <= 7);
+	
+	if (next_quarter_frame_to_send < 0)
+	{
+		printf("Negative????\n");
+	}
 
 	if (_mtc_port == 0 || !send_mtc || transmitting_smpte_time.negative
 			/*|| (next_quarter_frame_to_send < 0)*/ ) {
-		printf("Not sending MTC\n");
+		printf("(MTC) Not sending MTC\n");
 		return 0;
 	}
 	
 	/* Duration of one quarter frame */
 	jack_nframes_t quarter_frame_duration = ((long) _frames_per_smpte_frame) >> 2;
 	
-	// FIXME: what was transmitting_smpte_time before??
-	//smpte_time(_transport_frame, transmitting_smpte_time);
-	//smpte_to_sample( transmitting_smpte_time, outbound_mtc_smpte_frame, true /* use_offset */, false );
-	
+	//cerr << "(MTC) TR: " << _transport_frame << " - SF: " << outbound_mtc_smpte_frame
+	//<< " - NQ: " << next_quarter_frame_to_send << " - FD" << quarter_frame_duration << endl;
+		
+	// FIXME: this should always be true
+	//assert((outbound_mtc_smpte_frame + (next_quarter_frame_to_send * quarter_frame_duration))
+	//		> _transport_frame);
 
-#if 0
-	if (_send_smpte_update) {
-		// Send full SMPTE time and reset quarter frames
-		cerr << "[DR] Sending full SMTPE update" << endl;
-		// Re-calculate timing of first quarter frame
-		smpte_to_sample( transmitting_smpte_time, outbound_mtc_smpte_frame, true /* use_offset */, false );
-		// Compensate for audio latency
-		//outbound_mtc_smpte_frame += _worst_output_latency;
-		send_full_time_code(nframes);
-		_send_smpte_update = false;
-		next_quarter_frame_to_send = 0;
-	}
-#endif
-
-	//cerr << "A - " << _transport_frame << " - " << outbound_mtc_smpte_frame
-	//<< " - " << next_quarter_frame_to_send << " - " << quarter_frame_duration << endl;
-
-	// Note:  Unlike the previous implementation of this function (for slow MIDI I/O), 
-	// this now sends all MTC messages for _this_ frame, not messages from the past
-	// up until the start of the current frame (any messages in the past must have
-	// been sent last cycle).  This assertion enforces this:
-	//assert(outbound_mtc_smpte_frame >= _transport_frame
-	  //     && (outbound_mtc_smpte_frame - _transport_frame) < nframes);
-	/*if ( ! (outbound_mtc_smpte_frame >= _transport_frame
-	       && (outbound_mtc_smpte_frame - _transport_frame) < nframes)) { */
-	if (outbound_mtc_smpte_frame + (next_quarter_frame_to_send * quarter_frame_duration)
-			< _transport_frame) {
-		cerr << "[MTC] ERROR: MTC message stamped " << outbound_mtc_smpte_frame
-			<< " in cycle starting " << _transport_frame << endl;
-		return 0;
-	} else {
-		//cerr << "[MTC] OK" << endl;
-	}
 	
 	// Send quarter frames for this cycle
 	while (_transport_frame + nframes > (outbound_mtc_smpte_frame +
 				(next_quarter_frame_to_send * quarter_frame_duration))) {
 
-		//cerr << "B: Next frame to send: " << next_quarter_frame_to_send << endl;
+		//cerr << "(MTC) Next frame to send: " << next_quarter_frame_to_send << endl;
 
 		switch (next_quarter_frame_to_send) {
 			case 0:
@@ -986,9 +949,11 @@ Session::send_midi_time_code_for_cycle(jack_nframes_t nframes)
 				mtc_msg[1] = 0x70 | (((mtc_smpte_bits|transmitting_smpte_time.hours) & 0xf0) >> 4);
 				break;
 		}			
-
-		jack_nframes_t msg_time = (outbound_mtc_smpte_frame
+		
+		const jack_nframes_t msg_time = (outbound_mtc_smpte_frame
 			+ (quarter_frame_duration * next_quarter_frame_to_send));
+	
+		// This message must fall within this block or something is broken
 		assert(msg_time >= _transport_frame);
 		assert(msg_time < _transport_frame + nframes);
 
@@ -1001,7 +966,7 @@ Session::send_midi_time_code_for_cycle(jack_nframes_t nframes)
 			return -1;
 		}
 
-		/*cerr << "smpte = " << transmitting_smpte_time.hours
+		/*cerr << "(MTC) SMPTE: " << transmitting_smpte_time.hours
 			<< ":" << transmitting_smpte_time.minutes
 			<< ":" << transmitting_smpte_time.seconds
 			<< ":" << transmitting_smpte_time.frames
@@ -1009,8 +974,6 @@ Session::send_midi_time_code_for_cycle(jack_nframes_t nframes)
 			<< ", stamp = " << out_stamp
 			<< ", delta = " << _transport_frame + out_stamp - last_time << endl;*/
 		
-		last_time = _transport_frame + out_stamp;
-
 		// Increment quarter frame counter
 		next_quarter_frame_to_send++;
 
@@ -1186,6 +1149,10 @@ Session::deliver_midi (MIDI::Port * port, MIDI::byte* buf, int32_t bufsize)
 }
 
 #if 0
+
+This is aaalll gone. 
+
+
 void
 Session::deliver_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t ch, MIDI::EventTwoBytes data)
 {

@@ -278,10 +278,11 @@ Session::process_with_events (jack_nframes_t nframes)
 		process_event (ev);
 	}
 
-	/* Events caused a transport change and we need to send MTC
-	 * [DR] FIXME: best place for this? */
+	/* Events caused a transport change, send an MTC Full Frame (SMPTE) message.
+	 * This is sent whether rolling or not, to give slaves an idea of ardour time
+	 * on locates (and allow slow slaves to position and prepare for rolling)
+	 */
 	if (_send_smpte_update) {
-		cerr << "[DR] TIME CHANGE\n" << endl;
 		send_full_time_code(nframes);
 	}
 
@@ -289,7 +290,7 @@ Session::process_with_events (jack_nframes_t nframes)
 		no_roll (nframes, 0);
 		return;
 	}
-		
+
 	if (events.empty() || next_event == events.end()) {
 		process_without_events (nframes);
 		return;
@@ -319,6 +320,8 @@ Session::process_with_events (jack_nframes_t nframes)
 			no_roll (nframes, 0);
 			return;
 		}
+	
+		send_midi_time_code_for_cycle(nframes);
 
 		if (actively_recording()) {
 			stop_limit = max_frames;
@@ -420,8 +423,6 @@ Session::process_with_events (jack_nframes_t nframes)
 
 	if (session_needs_butler)
 		summon_butler ();
-	
-	send_midi_time_code_for_cycle(nframes);
 }
 
 void
@@ -760,6 +761,8 @@ Session::process_without_events (jack_nframes_t nframes)
 			no_roll (nframes, 0);
 			return;
 		}
+	
+		send_midi_time_code_for_cycle(nframes);
 		
 		if (actively_recording()) {
 			stop_limit = max_frames;
@@ -799,8 +802,6 @@ Session::process_without_events (jack_nframes_t nframes)
 		check_declick_out ();
 
 	} /* implicit release of route lock */
-
-	send_midi_time_code_for_cycle(nframes);
 
 	if (session_needs_butler)
 		summon_butler ();

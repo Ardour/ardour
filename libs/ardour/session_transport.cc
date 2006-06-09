@@ -596,16 +596,12 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 		return;
 	}
 
+	// Update SMPTE time
+	// [DR] FIXME: find out exactly where this should go below
 	_transport_frame = target_frame;
 	smpte_time(_transport_frame, transmitting_smpte_time);
 	outbound_mtc_smpte_frame = _transport_frame;
 	next_quarter_frame_to_send = 0;
-	cerr << "[DR] LOCATE ----------" << endl;
-	cerr << "\t_transport_frame        = " << _transport_frame << endl;
-	cerr << "\ttransmitting_smpte_time = " << string_compose("%1:%2:%3:%4",
-		transmitting_smpte_time.hours,transmitting_smpte_time.minutes,
-		transmitting_smpte_time.seconds,transmitting_smpte_time.frames) << endl;
-	cerr << "-------------" << endl;
 
 	if (_transport_speed && (!with_loop || loop_changing)) {
 		/* schedule a declick. we'll be called again when its done */
@@ -893,18 +889,6 @@ Session::actually_start_transport ()
 	send_mmc_in_another_thread (MIDI::MachineControl::cmdDeferredPlay, 0);
 	*/
 
-	// [DR] Update SMPTE time from transport frame
-	smpte_time(_transport_frame, transmitting_smpte_time);
-	outbound_mtc_smpte_frame = _transport_frame;
-	next_quarter_frame_to_send = 0;
-
-	cerr << "[DR] ACTUALLY START TRANSPORT ----------" << endl;
-	cerr << "\t_transport_frame        = " << _transport_frame << endl;
-	cerr << "\ttransmitting_smpte_time = " << string_compose("%1:%2:%3:%4",
-		transmitting_smpte_time.hours,transmitting_smpte_time.minutes,
-		transmitting_smpte_time.seconds,transmitting_smpte_time.frames) << endl;
-	cerr << "-------------" << endl;
-
 	TransportStateChange (); /* EMIT SIGNAL */
 }
 
@@ -941,18 +925,6 @@ Session::post_transport ()
 	set_next_event ();
 
 	post_transport_work = PostTransportWork (0);
-
-	// [DR] Update SMPTE time from transport frame
-	smpte_time(_transport_frame, transmitting_smpte_time);
-	outbound_mtc_smpte_frame = _transport_frame;
-	next_quarter_frame_to_send = 0;
-
-	cerr << "[DR] POST TRANSPORT ----------" << endl;
-	cerr << "\t_transport_frame        = " << _transport_frame << endl;
-	cerr << "\ttransmitting_smpte_time = " << string_compose("%1:%2:%3:%4",
-		transmitting_smpte_time.hours,transmitting_smpte_time.minutes,
-		transmitting_smpte_time.seconds,transmitting_smpte_time.frames) << endl;
-	cerr << "-------------" << endl;
 }
 
 void

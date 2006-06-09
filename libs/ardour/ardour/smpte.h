@@ -30,7 +30,10 @@ enum Wrap {
 	HOURS
 };
 
-// FIXME: make this a float
+/** SMPTE frame rate (in frames per second).
+ *
+ * This should be eliminated in favour of a float to support arbitrary rates.
+ */
 enum FPS {
     MTC_24_FPS = 0,
     MTC_25_FPS = 1,

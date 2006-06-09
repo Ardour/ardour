@@ -168,15 +168,11 @@ setup_midi (AudioEngine& engine)
 	if (default_mmc_port == 0) {
 		warning << string_compose (_("No MMC control (MIDI port \"%1\" not available)"), Config->get_mmc_port_name()) 
 			<< endmsg;
-		//return 0;
 	} 
 
 	if (default_mtc_port == 0) {
 		warning << string_compose (_("No MTC support (MIDI port \"%1\" not available)"), Config->get_mtc_port_name()) 
 			<< endmsg;
-	} else {
-		// [DR]
-		warning << "MTC port available" << endl;
 	}
 
 	if (default_midi_port == 0) {
