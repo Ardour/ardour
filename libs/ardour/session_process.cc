@@ -49,7 +49,7 @@ using namespace std;
 void
 Session::process (jack_nframes_t nframes)
 {
-	cerr << "CYCLE START " << _transport_frame << "-------------------" << endl;
+	//cerr << "CYCLE START " << _transport_frame << "-------------------" << endl;
 	
 	MIDI::Manager::instance()->cycle_start(nframes);
 
@@ -69,7 +69,7 @@ Session::process (jack_nframes_t nframes)
 	
 	MIDI::Manager::instance()->cycle_end();
 	
-	cerr << "CYCLE END " << _transport_frame << "-----------------------" << endl;
+	//cerr << "CYCLE END " << _transport_frame << "-----------------------" << endl;
 }
 
 void
@@ -86,8 +86,6 @@ Session::no_roll (jack_nframes_t nframes, jack_nframes_t offset)
 	jack_nframes_t end_frame = _transport_frame + nframes;
 	int ret = 0;
 	bool declick = get_transport_declick_required();
-
-	cerr << "[DR] no_roll\n";
 
 	if (_click_io) {
 		_click_io->silence (nframes, offset);
@@ -260,8 +258,6 @@ Session::process_with_events (jack_nframes_t nframes)
 	jack_nframes_t stop_limit;
 	long           frames_moved;
 	bool           session_needs_butler = false;
-
-	cerr << "[DR] with events" << endl;
 
 	if (auditioner) {
 		auditioner->silence (nframes, 0);
@@ -741,8 +737,6 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 void
 Session::process_without_events (jack_nframes_t nframes)
 {
-	cerr << "[DR] without events" << endl;
-
 	bool session_needs_butler = false;
 	jack_nframes_t stop_limit;
 	long frames_moved;

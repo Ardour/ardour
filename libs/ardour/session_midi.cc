@@ -22,6 +22,7 @@
 #include <string>
 #include <cmath>
 #include <cerrno>
+#include <cassert>
 #include <unistd.h>
 #include <fcntl.h>
 #include <poll.h>
