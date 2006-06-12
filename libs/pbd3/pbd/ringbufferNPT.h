@@ -113,8 +113,8 @@ class RingBufferNPT
   protected:
 	T *buf;
 	size_t size;
-	gint write_ptr;
-	gint read_ptr;
+	mutable gint write_ptr;
+	mutable gint read_ptr;
 };
 
 template<class T> size_t

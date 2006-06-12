@@ -737,6 +737,12 @@ if env['FPU_OPTIMIZATION']:
 # end optimization section
 
 #
+# save off guessed arch element in an env
+#
+env.Append(CONFIG_ARCH=config[config_arch])
+
+
+#
 # ARCH="..." overrides all 
 #
 

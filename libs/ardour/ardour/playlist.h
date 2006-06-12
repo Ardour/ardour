@@ -170,8 +170,8 @@ class Playlist : public Stateful, public StateManager {
 	RegionList       regions;
 	string          _name;
 	Session&        _session;
-	gint             block_notifications;
-	gint             ignore_state_changes;
+	mutable gint    block_notifications;
+	mutable gint    ignore_state_changes;
 	mutable Glib::Mutex region_lock;
 	RegionList       pending_removals;
 	RegionList       pending_adds;

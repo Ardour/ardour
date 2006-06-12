@@ -1004,12 +1004,12 @@ class Session : public sigc::trackable, public Stateful
 	typedef void (Session::*process_function_type)(jack_nframes_t);
 
 	AudioEngine            &_engine;
-	gint                 processing_prohibited;
+	mutable gint            processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
 	jack_nframes_t          _current_frame_rate;
 	int                      transport_sub_state;
-	gint                _record_status;
+	mutable gint           _record_status;
 	jack_nframes_t          _transport_frame;
 	Location*                end_location;
 	Location*                start_location;
@@ -1172,7 +1172,7 @@ class Session : public sigc::trackable, public Stateful
 	Glib::Mutex       butler_request_lock;
         Glib::Cond        butler_paused;
 	bool              butler_should_run;
-	gint              butler_should_do_transport_work;
+	mutable gint      butler_should_do_transport_work;
 	int               butler_request_pipe[2];
 	
 	struct ButlerRequest {
@@ -1420,7 +1420,7 @@ class Session : public sigc::trackable, public Stateful
 	Glib::Mutex       midi_lock;
 	pthread_t       midi_thread;
 	int             midi_request_pipe[2];
-	gint        butler_active;
+	mutable  gint   butler_active;
 	RingBuffer<MIDIRequest*> midi_requests;
 
 	int           start_midi_thread ();
@@ -1618,10 +1618,10 @@ class Session : public sigc::trackable, public Stateful
 	int ensure_sound_dir (string, string&);
 	void refresh_disk_space ();
 
-	gint _playback_load;
-	gint _capture_load;
-	gint _playback_load_min;
-	gint _capture_load_min;
+	mutable gint _playback_load;
+	mutable gint _capture_load;
+	mutable gint _playback_load_min;
+	mutable gint _capture_load_min;
 
 	/* I/O Connections */
 

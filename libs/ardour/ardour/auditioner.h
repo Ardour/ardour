@@ -56,7 +56,7 @@ class Auditioner : public AudioTrack
   private:
 	AudioRegion *the_region;
 	jack_nframes_t current_frame;
-	gint _active;
+	mutable gint _active;
 	Glib::Mutex lock;
 	jack_nframes_t length;
 

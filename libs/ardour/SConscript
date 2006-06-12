@@ -178,10 +178,13 @@ if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Core
 if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h') and ardour['COREAUDIO'] == 1:
     ardour.Append(CXXFLAGS="-DHAVE_COREAUDIO")    
     ardour.Append(LINKFLAGS="-framework AudioToolbox")
-    #
+    
+
+if env['CONFIG_ARCH'] == 'apple':
     # this next line avoids issues with circular dependencies between libardour and libardour_cp.
     # it is based on the (entirely reasonable) assumption that a system with CoreAudio is OS X
     #
+    print 'APPLE CONFIG'
     ardour.Append(LINKFLAGS='-undefined suppress -flat_namespace') 
     extra_sources += coreaudio_files
 
@@ -191,6 +194,7 @@ ardour.Merge ([
 	     libraries['core'],
 	     libraries['xml'],
 	     libraries['sndfile'],
+	     libraries['raptor'],
 	     libraries['lrdf'],
 	     libraries['samplerate'],
 	     libraries['sigc2'],
