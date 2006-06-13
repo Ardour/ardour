@@ -25,8 +25,6 @@
 #include <ardour/audioengine.h>
 #include <ardour/sndfile_helpers.h>
 
-#include <pbd/dirname.h>
-
 #include "ardour_ui.h"
 #include "export_range_markers_dialog.h"
 
@@ -149,7 +147,7 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
 	}
  	
  	// directory needs to exist and be writable
- 	string dirpath = PBD::dirname (filepath);
+ 	string dirpath = Glib::path_get_dirname (filepath);
  	if (::access (dirpath.c_str(), W_OK) != 0) {
  		string txt = _("Cannot write file in: ") + dirpath;
 		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);

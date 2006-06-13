@@ -203,7 +203,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ch
 	   its OK to block (for short intervals).
 	*/
 
-	LockMonitor rm (region_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock rm (region_lock);
 
 	end =  start + cnt - 1;
 
@@ -504,7 +504,7 @@ AudioPlaylist::add_crossfade (Crossfade& xfade)
 	
 void AudioPlaylist::notify_crossfade_added (Crossfade *x)
 {
-	if (atomic_read(&block_notifications)) {
+	if (g_atomic_int_get(&block_notifications)) {
 		_pending_xfade_adds.insert (_pending_xfade_adds.end(), x);
 	} else {
 		NewCrossfade (x); /* EMIT SIGNAL */
@@ -886,8 +886,14 @@ AudioPlaylist::get_equivalent_regions (const AudioRegion& other, vector<AudioReg
 
 		AudioRegion* ar = dynamic_cast<AudioRegion*> (*i);
 
-		if (ar && ar->equivalent (other)) {
-			results.push_back (ar);
+		if (ar) {
+			if (Config->get_use_overlap_equivalency()) {
+				if (ar->overlap_equivalent (other)) {
+					results.push_back (ar);
+				} else if (ar->equivalent (other)) {
+					results.push_back (ar);
+				}
+			}
 		}
 	}
 }

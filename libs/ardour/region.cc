@@ -26,7 +26,7 @@
 #include <sigc++/bind.h>
 #include <sigc++/class_slot.h>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <pbd/xml++.h>
 
 #include <ardour/region.h>
@@ -178,7 +178,7 @@ Region::restore_and_return_flags (RegionState& state)
 	Change what_changed = Change (0);
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		
 		if (_start != state._start) {
 			what_changed = Change (what_changed|StartChanged);	
@@ -947,7 +947,7 @@ Region::thaw (const string& why)
 	Change what_changed = Change (0);
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 
 		if (_frozen && --_frozen > 0) {
 			return;
@@ -978,7 +978,7 @@ void
 Region::send_change (Change what_changed)
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		if (_frozen) {
 			pending_changed = Change (pending_changed|what_changed);
 			return;

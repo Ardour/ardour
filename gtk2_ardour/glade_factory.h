@@ -29,9 +29,10 @@
 typedef Glib::RefPtr<Gnome::Glade::Xml> GladeRef;
 
 /**
- * This is the base class for all glade factories so that the same domain
- * is used.
- */
+   This is the base class for all glade 
+   factories so that the same domain is
+   used.
+*/
 class GladeFactory {
 	
 protected:

@@ -29,6 +29,9 @@ using __gnu_cxx::slist;
 #endif
 
 #include <string>
+
+#include <glibmm/thread.h>
+
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/button.h>
@@ -38,6 +41,7 @@ using __gnu_cxx::slist;
 #include <gtkmm/liststore.h>
 
 #include <ardour_dialog.h>
+
 
 namespace ARDOUR {
 	class IO;
@@ -105,7 +109,7 @@ class IOSelector : public Gtk::VBox {
 	Gtk::Button clear_connections_button;
 	Gtk::ScrolledWindow port_display_scroller;
 
-	PBD::Lock port_display_lock;
+	Glib::Mutex port_display_lock;
 	slist<Gtk::TreeView *> port_displays;
 	void display_ports ();
 

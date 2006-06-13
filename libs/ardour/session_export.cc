@@ -37,7 +37,7 @@
 #include <sigc++/bind.h>
 
 #include <pbd/error.h>
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 
 #include <ardour/gdither.h>
 #include <ardour/timestamps.h>
@@ -485,7 +485,7 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 	/* take everyone out of awrite to avoid disasters */
 
 	{
-		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (route_lock);
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			(*i)->protect_automation ();
 		}
@@ -494,7 +494,7 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 	/* get everyone to the right position */
 
 	{
-		RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (diskstream_lock);
 		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if ((*i)-> seek (spec.start_frame, true)) {
 				error << string_compose (_("%1: cannot seek to %2 for export"),
@@ -524,7 +524,7 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 
 	set_transport_speed (1.0, false);
 	butler_transport_work ();
-	atomic_set (&butler_should_do_transport_work, 0);
+	g_atomic_int_set (&butler_should_do_transport_work, 0);
 	post_transport ();
 
 	/* we are ready to go ... */

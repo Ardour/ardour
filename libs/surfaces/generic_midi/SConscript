@@ -37,7 +37,9 @@ genericmidi.Merge ([
 	libraries['pbd3'],
 	libraries['sigc2'],
 	libraries['usb'],
-	libraries['xml']
+	libraries['xml'],
+    libraries['glib2'],
+    libraries['glibmm2']
 	])
 
 libardour_genericmidi = genericmidi.SharedLibrary('ardour_genericmidi', genericmidi_files)
@@ -50,6 +52,6 @@ if env['NLS']:
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2/surfaces'), libardour_genericmidi))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-				     [ 'SConscript', 'i18n.h', 'gettext.h' ] +
+				     [ 'SConscript' ] +
 				     genericmidi_files + 
 				     glob.glob('po/*.po') + glob.glob('*.h')))

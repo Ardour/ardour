@@ -24,7 +24,7 @@
 #include <vector>
 #include <string>
 #include <sigc++/signal.h>
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <ardour/stateful.h>
 
 using std::vector;
@@ -67,7 +67,7 @@ class Connection : public Stateful, public sigc::trackable {
 	Connection (const XMLNode&);
 
   private:
-	mutable PBD::Lock port_lock;
+	mutable Glib::Mutex port_lock;
 	vector<PortList> _ports;
 	string _name;
 	bool   _sysdep;

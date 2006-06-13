@@ -66,29 +66,34 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 	}
 
 	/* note that we temporarily truncated _id at the colon */
-	FSRef ref;
-	err = FSPathMakeRef ((UInt8*)file.c_str(), &ref, 0);
+	FSRef fsr;
+	err = FSPathMakeRef ((UInt8*)file.c_str(), &fsr, 0);
 	if (err != noErr) {
+		cerr << "FSPathMakeRef " << err << endl;
 		throw failed_constructor();
 	}
 
-	err = ExtAudioFileOpen (&ref, &af);
+	err = ExtAudioFileOpen (&fsr, &af);
 	if (err != noErr) {
+		cerr << "ExtAudioFileOpen " << err << endl;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
 
 	AudioStreamBasicDescription file_asbd;
-	memset(&file_asbd, 0, sizeof(file_asbd));
-	size_t asbd_size = sizeof(file_asbd);
+	memset(&file_asbd, 0, sizeof(AudioStreamBasicDescription));
+	size_t asbd_size = sizeof(AudioStreamBasicDescription);
 	err = ExtAudioFileGetProperty(af,
 			kExtAudioFileProperty_FileDataFormat, &asbd_size, &file_asbd);
 	if (err != noErr) {
+		cerr << "ExtAudioFileGetProperty1 " << err << endl;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
 	n_channels = file_asbd.mChannelsPerFrame;
 
+	cerr << "number of channels: " << n_channels << endl;
+	
 	if (channel >= n_channels) {
 		error << string_compose(_("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number"), n_channels, channel) << endmsg;
 		ExtAudioFileDispose (af);
@@ -96,41 +101,42 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 	}
 
 	int64_t ca_frames;
-	size_t prop_size = sizeof(ca_frames);
+	size_t prop_size = sizeof(int64_t);
 
 	err = ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &prop_size, &ca_frames);
 	if (err != noErr) {
+		cerr << "ExtAudioFileGetProperty2 " << err << endl;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
-	_length = ca_frames;
 
+	_length = ca_frames;
 	_path = file;
 
+	AudioStreamBasicDescription client_asbd;
+	memset(&client_asbd, 0, sizeof(AudioStreamBasicDescription));
+	client_asbd.mSampleRate = file_asbd.mSampleRate;
+	client_asbd.mFormatID = kAudioFormatLinearPCM;
+	client_asbd.mFormatFlags = kLinearPCMFormatFlagIsFloat;
+	client_asbd.mBytesPerPacket = file_asbd.mChannelsPerFrame * 4;
+	client_asbd.mFramesPerPacket = 1;
+	client_asbd.mBytesPerFrame = client_asbd.mBytesPerPacket;
+	client_asbd.mChannelsPerFrame = file_asbd.mChannelsPerFrame;
+	client_asbd.mBitsPerChannel = 32;
+
+	err = ExtAudioFileSetProperty (af, kExtAudioFileProperty_ClientDataFormat, asbd_size, &client_asbd);
+	if (err != noErr) {
+		cerr << "ExtAudioFileSetProperty3 " << err << endl;
+		ExtAudioFileDispose (af);
+		throw failed_constructor ();
+	}
+	
 	if (build_peak) {
 		if (initialize_peakfile (false, file)) {
 			error << "initialize peakfile failed" << endmsg;
 			ExtAudioFileDispose (af);
 			throw failed_constructor ();
 		}
-	}
-	
-	AudioStreamBasicDescription client_asbd;
-	memset(&client_asbd, 0, sizeof(client_asbd));
-	client_asbd.mFormatID = kAudioFormatLinearPCM;
-	client_asbd.mFormatFlags = kLinearPCMFormatFlagIsFloat;
-	client_asbd.mSampleRate = file_asbd.mSampleRate;
-
-	err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &asbd_size, &client_asbd);
-	if (err != noErr) {
-		ExtAudioFileDispose (af);
-		throw failed_constructor ();
-	}
-
-	err = ExtAudioFileSetProperty (af, kExtAudioFileProperty_ClientDataFormat, asbd_size, &client_asbd);
-	if (err != noErr) {
-		ExtAudioFileDispose (af);
-		throw failed_constructor ();
 	}
 }
 
@@ -173,7 +179,7 @@ CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, ch
 	uint32_t real_cnt = cnt * n_channels;
 
 	{
-		LockMonitor lm (_tmpbuf_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (_tmpbuf_lock);
 		
 		if (tmpbufsize < real_cnt) {
 			

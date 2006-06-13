@@ -27,8 +27,9 @@
 #include <sigc++/bind.h>
 #include <sigc++/class_slot.h>
 
+#include <glibmm/thread.h>
+
 #include <pbd/basename.h>
-#include <pbd/lockmonitor.h>
 #include <pbd/xml++.h>
 
 #include <ardour/audioregion.h>
@@ -1139,15 +1140,15 @@ AudioRegion::master_source_names ()
 }
 
 bool
-AudioRegion::region_list_equivalent (const AudioRegion& other)
+AudioRegion::region_list_equivalent (const AudioRegion& other) const
 {
 	return size_equivalent (other) && source_equivalent (other) && _name == other._name;
 }
 
 bool
-AudioRegion::source_equivalent (const AudioRegion& other)
+AudioRegion::source_equivalent (const AudioRegion& other) const
 {
-	SourceList::iterator i;
+	SourceList::const_iterator i;
 	SourceList::const_iterator io;
 
 	for (i = sources.begin(), io = other.sources.begin(); i != sources.end() && io != other.sources.end(); ++i, ++io) {
@@ -1166,7 +1167,13 @@ AudioRegion::source_equivalent (const AudioRegion& other)
 }
 
 bool
-AudioRegion::equivalent (const AudioRegion& other)
+AudioRegion::overlap_equivalent (const AudioRegion& other) const
+{
+	return coverage (other.first_frame(), other.last_frame()) != OverlapNone;
+}
+
+bool
+AudioRegion::equivalent (const AudioRegion& other) const
 {
 	return _start == other._start &&
 		_position == other._position &&
@@ -1174,7 +1181,7 @@ AudioRegion::equivalent (const AudioRegion& other)
 }
 
 bool
-AudioRegion::size_equivalent (const AudioRegion& other)
+AudioRegion::size_equivalent (const AudioRegion& other) const
 {
 	return _start == other._start &&
 		_length == other._length;

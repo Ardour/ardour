@@ -58,8 +58,7 @@ GenericMidiControlProtocol::send_route_feedback (list<Route*>& routes)
 			return;
 		} 
 		
-		// FIXME
-		//_port->write (buf, (int32_t) (end - buf));
+		_port->write (buf, 0, (int32_t) (end - buf));
 		//cerr << "MIDI feedback: wrote " << (int32_t) (end - buf) << " to midi port\n";
 	}
 }

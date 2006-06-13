@@ -90,6 +90,7 @@ using namespace Gtkmm2ext;
 using namespace Editing;
 
 using PBD::internationalize;
+using PBD::atoi;
 
 const double Editor::timebar_height = 15.0;
 
@@ -326,6 +327,7 @@ Editor::Editor (AudioEngine& eng)
 	last_canvas_frame = 0;
 	edit_cursor = 0;
 	playhead_cursor = 0;
+	button_release_can_deselect = true;
 
 	location_marker_color = color_map[cLocationMarker];
 	location_range_color = color_map[cLocationRange];
@@ -2190,7 +2192,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("zoom"))) {
-		set_frames_per_unit (atof (prop->value()));
+		set_frames_per_unit (PBD::atof (prop->value()));
 	}
 
 	if ((prop = node.property ("snap-to"))) {
@@ -2898,7 +2900,7 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 	for (vector<ustring>::iterator i = uris.begin(); i != uris.end(); ++i) {
 		if ((*i).substr (0,7) == "file://") {
 			string p = *i;
-			url_decode (p);
+                        PBD::url_decode (p);
 			paths.push_back (p.substr (7));
 		}
 	}
@@ -2981,31 +2983,31 @@ Editor::commit_reversible_command ()
 	}
 }
 
-void
-Editor::set_selected_track_from_click (Selection::Operation op, bool with_undo, bool no_remove)
+bool
+Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool with_undo, bool no_remove)
 {
+	bool commit = false;
+
 	if (!clicked_trackview) {
-		return;
+		return false;
 	}
 
-	if (with_undo) {
-		begin_reversible_command (_("set selected trackview"));
-	}
-	
 	switch (op) {
 	case Selection::Toggle:
 		if (selection->selected (clicked_trackview)) {
 			if (!no_remove) {
 				selection->remove (clicked_trackview);
+				commit = true;
 			}
 		} else {
-			selection->toggle (clicked_trackview);
+			selection->add (clicked_trackview);
+			commit = false;
 		}
 		break;
+
 	case Selection::Set:
 		if (selection->selected (clicked_trackview) && selection->tracks.size() == 1) {
 			/* no commit necessary */
-			return;
 		} 
 
 		selection->set (clicked_trackview);
@@ -3015,27 +3017,19 @@ Editor::set_selected_track_from_click (Selection::Operation op, bool with_undo, 
 		/* not defined yet */
 		break;
 	}
-	
-	if (with_undo) {
-		commit_reversible_command ();
-	}
+
+	return commit;
 }
 
-void
-Editor::set_selected_control_point_from_click (Selection::Operation op, bool with_undo, bool no_remove)
+bool
+Editor::set_selected_control_point_from_click (bool press, Selection::Operation op, bool with_undo, bool no_remove)
 {
 	if (!clicked_control_point) {
-		return;
+		return false;
 	}
 
 	/* select this point and any others that it represents */
 
-	bool commit;
-	
-	if (with_undo) {
-		begin_reversible_command (_("select control points"));
-	}
-	
 	double y1, y2;
 	jack_nframes_t x1, x2;
 
@@ -3044,18 +3038,12 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool wit
  	y1 = clicked_control_point->get_x() - 10;
 	y2 = clicked_control_point->get_y() + 10;
 
-	commit = select_all_within (x1, x2, y1, y2, op);
-	
-	if (with_undo && commit) {
-		commit_reversible_command ();
-	}
+	return select_all_within (x1, x2, y1, y2, op);
 }
 
 void
-Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl)
+Editor::get_relevant_audio_tracks (AudioTimeAxisView& base, set<AudioTimeAxisView*>& relevant_tracks)
 {
-	set<AudioTimeAxisView*> relevant_tracks;
-
 	/* step one: get all selected tracks and all tracks in the relevant edit groups */
 
 	for (TrackSelection::iterator ti = selection->tracks.begin(); ti != selection->tracks.end(); ++ti) {
@@ -3088,12 +3076,22 @@ Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl)
 
 			/* no active group, or no group */
 
-			relevant_tracks.insert (atv);
+			relevant_tracks.insert (&base);
 		}
 
 	}
+}
 
-	/* step two: apply operation to each track */
+void
+Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl)
+{
+	set<AudioTimeAxisView*> relevant_tracks;
+
+	if (!clicked_audio_trackview) {
+		return;
+	}
+
+	get_relevant_audio_tracks (*clicked_audio_trackview, relevant_tracks);
 
 	uint32_t sz = relevant_tracks.size();
 	
@@ -3110,11 +3108,17 @@ Editor::mapped_set_selected_regionview_from_click (AudioTimeAxisView& atv, uint3
 	vector<AudioRegion*> results;
 	AudioRegionView* marv;
 	DiskStream* ds;
-	
+
 	if ((ds = atv.get_diskstream()) == 0) {
 		/* bus */
 		return;
 	}
+
+	if (&atv == &basis->get_time_axis_view()) {
+		/* looking in same track as the original */
+		return;
+	}
+
 	
 	if ((pl = ds->playlist()) != 0) {
 		pl->get_equivalent_regions (basis->region, results);
@@ -3127,70 +3131,192 @@ Editor::mapped_set_selected_regionview_from_click (AudioTimeAxisView& atv, uint3
 	}
 }
 
-void
-Editor::set_selected_regionview_from_click (Selection::Operation op, bool no_track_remove)
+bool
+Editor::set_selected_regionview_from_click (bool press, Selection::Operation op, bool no_track_remove)
 {
-	cerr << "In SSRfC\n";
-
 	vector<AudioRegionView*> all_equivalent_regions;
+	bool commit = false;
 
-	if (!clicked_regionview) {
-		return;
+	if (!clicked_regionview || !clicked_audio_trackview) {
+		return false;
 	}
 
-	mapover_audio_tracks (bind (mem_fun (*this, &Editor::mapped_set_selected_regionview_from_click), 
-				    clicked_regionview, &all_equivalent_regions));
-	
-
-	cerr << "mapover done\n";
-
-	begin_reversible_command (_("set selected regionview"));
-
-	switch (op) {
-	case Selection::Toggle:
-		selection->toggle (clicked_regionview);
-#if 0
-		if (clicked_regionview->get_selected()) {
-			if (/* group && group->is_active() && */ selection->audio_regions.size() > 1) {
-				/* reduce selection down to just the one clicked */
-				selection->set (clicked_regionview);
-			} else {
-				selection->remove (clicked_regionview);
-			}
-		} else {
-			selection->add (all_equivalent_regions);
-		}
-#endif
-		set_selected_track_from_click (op, false, no_track_remove);
-		break;
-
-	case Selection::Set:
-		// karsten wiese suggested these two lines to make
-		// a selected region rise to the top. but this
-		// leads to a mismatch between actual layering
-		// and visual layering. resolution required ....
-		//
-		// gnome_canvas_item_raise_to_top (clicked_regionview->get_canvas_group());
-		// gnome_canvas_item_raise_to_top (clicked_regionview->get_time_axis_view().canvas_display);
-
-		if (clicked_regionview->get_selected()) {
-			/* no commit necessary: we are the one selected. */
-			return;
-
-		} else {
+	if (op == Selection::Toggle || op == Selection::Set) {
+		
+		mapover_audio_tracks (bind (mem_fun (*this, &Editor::mapped_set_selected_regionview_from_click), 
+					    clicked_regionview, &all_equivalent_regions));
+		
+		
+		/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
+		
+		all_equivalent_regions.push_back (clicked_regionview);
+		
+		switch (op) {
+		case Selection::Toggle:
 			
-			selection->set (all_equivalent_regions);
-			set_selected_track_from_click (op, false, false);
+			if (clicked_regionview->get_selected()) {
+				if (press) {
+
+					/* whatever was clicked was selected already; do nothing here but allow
+					   the button release to deselect it
+					*/
+
+					button_release_can_deselect = true;
+
+				} else {
+
+					if (button_release_can_deselect) {
+
+						/* just remove this one region, but only on a permitted button release */
+
+						selection->remove (clicked_regionview);
+						commit = true;
+
+						/* no more deselect action on button release till a new press
+						   finds an already selected object.
+						*/
+
+						button_release_can_deselect = false;
+					}
+				} 
+
+			} else {
+
+				if (press) {
+					/* add all the equivalent regions, but only on button press */
+					
+					if (!all_equivalent_regions.empty()) {
+						commit = true;
+					}
+					
+					for (vector<AudioRegionView*>::iterator i = all_equivalent_regions.begin(); i != all_equivalent_regions.end(); ++i) {
+						selection->add (*i);
+					}
+				} 
+			}
+			break;
+			
+		case Selection::Set:
+			if (!clicked_regionview->get_selected()) {
+				selection->set (all_equivalent_regions);
+				commit = true;
+			} else {
+				/* no commit necessary: clicked on an already selected region */
+				goto out;
+			}
+			break;
+
+		default:
+			/* silly compiler */
+			break;
 		}
-		break;
 
-	case Selection::Extend:
-		/* not defined yet */
-		break;
+	} else if (op == Selection::Extend) {
+
+		list<Selectable*> results;
+		jack_nframes_t last_frame;
+		jack_nframes_t first_frame;
+
+		/* 1. find the last selected regionview in the track that was clicked in */
+
+		last_frame = 0;
+		first_frame = max_frames;
+
+		for (AudioRegionSelection::iterator x = selection->audio_regions.begin(); x != selection->audio_regions.end(); ++x) {
+			if (&(*x)->get_time_axis_view() == &clicked_regionview->get_time_axis_view()) {
+
+				if ((*x)->region.last_frame() > last_frame) {
+					last_frame = (*x)->region.last_frame();
+				}
+
+				if ((*x)->region.first_frame() < first_frame) {
+					first_frame = (*x)->region.first_frame();
+				}
+			}
+		}
+
+		/* 2. figure out the boundaries for our search for new objects */
+
+		switch (clicked_regionview->region.coverage (first_frame, last_frame)) {
+		case OverlapNone:
+			cerr << "no overlap, first = " << first_frame << " last = " << last_frame << " region = " 
+			     << clicked_regionview->region.first_frame() << " .. " << clicked_regionview->region.last_frame() << endl;
+
+			if (last_frame < clicked_regionview->region.first_frame()) {
+				first_frame = last_frame;
+				last_frame = clicked_regionview->region.last_frame();
+			} else {
+				last_frame = first_frame;
+				first_frame = clicked_regionview->region.first_frame();
+			}
+			break;
+
+		case OverlapExternal:
+			cerr << "external overlap, first = " << first_frame << " last = " << last_frame << " region = " 
+			     << clicked_regionview->region.first_frame() << " .. " << clicked_regionview->region.last_frame() << endl;
+
+			if (last_frame < clicked_regionview->region.first_frame()) {
+				first_frame = last_frame;
+				last_frame = clicked_regionview->region.last_frame();
+			} else {
+				last_frame = first_frame;
+				first_frame = clicked_regionview->region.first_frame();
+			}
+			break;
+
+		case OverlapInternal:
+			cerr << "internal overlap, first = " << first_frame << " last = " << last_frame << " region = " 
+			     << clicked_regionview->region.first_frame() << " .. " << clicked_regionview->region.last_frame() << endl;
+
+			if (last_frame < clicked_regionview->region.first_frame()) {
+				first_frame = last_frame;
+				last_frame = clicked_regionview->region.last_frame();
+			} else {
+				last_frame = first_frame;
+				first_frame = clicked_regionview->region.first_frame();
+			}
+			break;
+
+		case OverlapStart:
+		case OverlapEnd:
+			/* nothing to do except add clicked region to selection, since it
+			   overlaps with the existing selection in this track.
+			*/
+			break;
+		}
+
+		/* 2. find all selectable objects (regionviews in this case) between that one and the end of the
+		      one that was clicked.
+		*/
+
+		set<AudioTimeAxisView*> relevant_tracks;
+		
+		get_relevant_audio_tracks (*clicked_audio_trackview, relevant_tracks);
+		
+		for (set<AudioTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
+			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
+		}
+		
+		/* 3. convert to a vector of audio regions */
+
+		vector<AudioRegionView*> audio_regions;
+		
+		for (list<Selectable*>::iterator x = results.begin(); x != results.end(); ++x) {
+			AudioRegionView* arv;
+
+			if ((arv = dynamic_cast<AudioRegionView*>(*x)) != 0) {
+				audio_regions.push_back (arv);
+			}
+		}
+
+		if (!audio_regions.empty()) {
+			selection->add (audio_regions);
+			commit = true;
+		}
 	}
-	cerr << "case done\n";
 
-	commit_reversible_command () ;
+  out:
+	return commit;
 }
 
 void
@@ -3237,13 +3363,13 @@ Editor::set_selected_regionview_from_region_list (Region& r, Selection::Operatio
 	switch (op) {
 	case Selection::Toggle:
 		/* XXX this is not correct */
-		selection->add (all_equivalent_regions);
+		selection->toggle (all_equivalent_regions);
 		break;
 	case Selection::Set:
 		selection->set (all_equivalent_regions);
 		break;
 	case Selection::Extend:
-		/* not defined yet */
+		selection->add (all_equivalent_regions);
 		break;
 	}
 

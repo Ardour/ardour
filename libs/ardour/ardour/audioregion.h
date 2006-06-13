@@ -75,10 +75,11 @@ class AudioRegion : public Region
 	AudioRegion (SourceList &, const XMLNode&);
 	~AudioRegion();
 
-	bool region_list_equivalent (const AudioRegion&);
-	bool source_equivalent (const AudioRegion&);
-	bool equivalent (const AudioRegion&);
-	bool size_equivalent (const AudioRegion&);
+	bool region_list_equivalent (const AudioRegion&) const ;
+	bool source_equivalent (const AudioRegion&) const;
+	bool equivalent (const AudioRegion&) const;
+	bool size_equivalent (const AudioRegion&) const;
+	bool overlap_equivalent (const AudioRegion&) const;
 
 	bool speed_mismatch (float) const;
 

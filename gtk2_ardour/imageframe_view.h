@@ -53,7 +53,6 @@ class ImageFrameView : public TimeAxisViewItem
 		 * @param tv the time axis view that this item is to be placed upon
 		 * @param group the ImageFrameGroup that this item is a member of
 		 * @param spu the current samples per canvas unit
-		 * @param base_color the base color of this item
 		 * @param start the start frame ogf this item
 		 * @param duration the duration of this item
 		 * @param rgb_data the rgb data of the image
@@ -62,11 +61,11 @@ class ImageFrameView : public TimeAxisViewItem
 		 * @param num_channels the number of color channels within rgb_data
 		 */
 		ImageFrameView(const std::string & item_id,
-			ArdourCanvas::Group *parent,
+			 ArdourCanvas::Group *parent,
 			ImageFrameTimeAxis *tv,
 			ImageFrameTimeAxisGroup* group,
 			double spu,
-			Gdk::Color& base_color,
+		        Gdk::Color& base_color,
 			jack_nframes_t start,
 			jack_nframes_t duration,
 			unsigned char* rgb_data,

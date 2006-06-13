@@ -29,7 +29,7 @@
 #include <iomanip>
 #include <algorithm>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <pbd/xml++.h>
 #include <pbd/pthread_utils.h>
 
@@ -41,13 +41,12 @@ using std::min;
 using std::max;
 
 using namespace ARDOUR;
-using namespace PBD;
 
-sigc::signal<void,Source *> Source::SourceCreated;
+sigc::signal<void,Source *>  Source::SourceCreated;
 pthread_t                    Source::peak_thread;
 bool                         Source::have_peak_thread = false;
 vector<Source*>              Source::pending_peak_sources;
-PBD::Lock                    Source::pending_peak_sources_lock;
+Glib::StaticMutex            Source::pending_peak_sources_lock = GLIBMM_STATIC_MUTEX_INIT;
 int                          Source::peak_request_pipe[2];
 
 bool Source::_build_missing_peakfiles = false;
@@ -142,19 +141,19 @@ Source::peak_thread_work (void* arg)
 	PBD::ThreadCreated (pthread_self(), X_("Peak"));
 	struct pollfd pfd[1];
 
-	LockMonitor lm (pending_peak_sources_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (pending_peak_sources_lock);
 
 	while (true) {
 
 		pfd[0].fd = peak_request_pipe[0];
 		pfd[0].events = POLLIN|POLLERR|POLLHUP;
 
-		pthread_mutex_unlock (pending_peak_sources_lock.mutex());
+		pending_peak_sources_lock.unlock();
 
 		if (poll (pfd, 1, -1) < 0) {
 
 			if (errno == EINTR) {
-				pthread_mutex_lock (pending_peak_sources_lock.mutex());
+				pending_peak_sources_lock.lock();
 				continue;
 			}
 			
@@ -204,16 +203,16 @@ Source::peak_thread_work (void* arg)
 			}
 		}
 
-		pthread_mutex_lock (pending_peak_sources_lock.mutex());
+		pending_peak_sources_lock.lock();
 
 		while (!pending_peak_sources.empty()) {
 
 			Source* s = pending_peak_sources.front();
 			pending_peak_sources.erase (pending_peak_sources.begin());
 
-			pthread_mutex_unlock (pending_peak_sources_lock.mutex());
+			pending_peak_sources_lock.unlock();
 			s->build_peaks();
-			pthread_mutex_lock (pending_peak_sources_lock.mutex());
+			pending_peak_sources_lock.lock();
 		}
 	}
 
@@ -272,7 +271,7 @@ Source::queue_for_peaks (Source& source)
 {
 	if (have_peak_thread) {
 
-		LockMonitor lm (pending_peak_sources_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (pending_peak_sources_lock);
 
 		source.next_peak_clear_should_notify = true;
 
@@ -291,7 +290,7 @@ void Source::clear_queue_for_peaks ()
 {
 	/* this is done to cancel a group of running peak builds */
 	if (have_peak_thread) {
-		LockMonitor lm (pending_peak_sources_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (pending_peak_sources_lock);
 		pending_peak_sources.clear ();
 	}
 }
@@ -301,7 +300,7 @@ bool
 Source::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) const
 {
 	bool ret;
-	LockMonitor lm (_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_lock);
 
 	/* check to see if the peak data is ready. if not
 	   connect the slot while still holding the lock.
@@ -388,7 +387,7 @@ Source::initialize_peakfile (bool newfile, string audio_path)
 int 
 Source::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start, jack_nframes_t cnt, double samples_per_visual_peak) const
 {
-	LockMonitor lm (_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_lock);
 	double scale;
 	double expected_peaks;
 	PeakData::PeakDatum xmax;
@@ -699,7 +698,7 @@ Source::build_peaks ()
 	list<PeakBuildRecord*> copy;
 
 	{
-		LockMonitor lm (_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (_lock);
 		copy = pending_peak_builds;
 		pending_peak_builds.clear ();
 	}
@@ -719,7 +718,7 @@ Source::build_peaks ()
 	}
 
 	{ 
-		LockMonitor lm (_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (_lock);
 
 		if (status == 0) {
 			_peaks_built = true;
@@ -830,7 +829,7 @@ Source::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 void
 Source::build_peaks_from_scratch ()
 {
-	LockMonitor lp (_lock, __LINE__, __FILE__); 
+	Glib::Mutex::Lock lp (_lock); 
 
 	next_peak_clear_should_notify = true;
 	pending_peak_builds.push_back (new PeakBuildRecord (0, _length));
@@ -883,7 +882,7 @@ Source::available_peaks (double zoom_factor) const
 	}
 
 	{ 
-		LockMonitor lm (_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (_lock);
 		end = lseek (peakfile, 0, SEEK_END);
 	}
 

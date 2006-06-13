@@ -537,7 +537,6 @@ Editor::maybe_autoscroll (GdkEvent* event)
 	}
 
 	last_autoscroll_direction = autoscroll_direction;
-	drag_info.last_pointer_frame = drag_info.current_pointer_frame;
 }
 
 gint

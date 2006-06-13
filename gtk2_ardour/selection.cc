@@ -199,18 +199,29 @@ Selection::toggle (AudioRegionView* r)
 {
 	AudioRegionSelection::iterator i;
 
-	cerr << "about to toggle a regionview\n";
-
 	if ((i = find (audio_regions.begin(), audio_regions.end(), r)) == audio_regions.end()) {
 		audio_regions.add (r);
-		cerr << "\tadded\n";
 	} else {
 		audio_regions.erase (i);
-		cerr << "\tremoved\n";
 	}
 
 	RegionsChanged ();
-	cerr << "done\n";
+}
+
+void
+Selection::toggle (vector<AudioRegionView*>& r)
+{
+	AudioRegionSelection::iterator i;
+
+	for (vector<AudioRegionView*>::iterator x = r.begin(); x != r.end(); ++x) {
+		if ((i = find (audio_regions.begin(), audio_regions.end(), (*x))) == audio_regions.end()) {
+			audio_regions.add ((*x));
+		} else {
+			audio_regions.erase (i);
+		}
+	}
+
+	RegionsChanged ();
 }
 
 long
@@ -633,8 +644,6 @@ Selection::add (list<Selectable*>& selectables)
 	if (!autos.empty()) {
 		add (autos);
 	} 
-
-	cerr << "Selection @ " << this << " has " << points.size() << " points\n";
 }
 
 void

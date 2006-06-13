@@ -23,11 +23,10 @@
 
 #include <sys/types.h>
 #include <sigc++/signal.h>
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <pbd/undo.h>
 #include <list>
 #include <algorithm>
-#include <pthread.h>
 #include <ardour/automation_event.h>
 
 namespace ARDOUR {

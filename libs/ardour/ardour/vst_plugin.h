@@ -35,7 +35,6 @@
 #include <ardour/stateful.h>
 #include <ardour/plugin_state.h>
 #include <ardour/plugin.h>
-#include <ardour/vst_plugin.h>
 
 using std::string;
 using std::vector;

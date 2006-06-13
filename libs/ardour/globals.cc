@@ -40,7 +40,6 @@
 #include <midi++/mmc.h>
 
 #include <ardour/ardour.h>
-#include <ardour/audioengine.h>
 #include <ardour/audio_library.h>
 #include <ardour/configuration.h>
 #include <ardour/plugin_manager.h>
@@ -48,7 +47,10 @@
 #include <ardour/utils.h>
 #include <ardour/session.h>
 #include <ardour/control_protocol_manager.h>
+
+#ifdef HAVE_LIBLO
 #include <ardour/osc.h>
+#endif
 
 #include <ardour/mix.h>
 
@@ -60,7 +62,10 @@
 
 ARDOUR::Configuration* ARDOUR::Config = 0;
 ARDOUR::AudioLibrary* ARDOUR::Library = 0;
+
+#ifdef HAVE_LIBLO
 ARDOUR::OSC* ARDOUR::osc = 0;
+#endif
 
 using namespace ARDOUR;
 using namespace std;
@@ -75,6 +80,7 @@ Change ARDOUR::PositionChanged = ARDOUR::new_change ();
 Change ARDOUR::NameChanged = ARDOUR::new_change ();
 Change ARDOUR::BoundsChanged = Change (0); // see init(), below
 
+#ifdef HAVE_LIBLO
 static int
 setup_osc ()
 {
@@ -90,9 +96,10 @@ setup_osc ()
 		return 0;
 	}
 }
+#endif
 
 static int 
-setup_midi (AudioEngine& engine)
+setup_midi ()
 {
 	std::map<string,Configuration::MidiPortDescriptor*>::iterator i;
 	int nports;
@@ -101,8 +108,6 @@ setup_midi (AudioEngine& engine)
 		warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
 		return 0;
 	}
-
-	MIDI::Manager::instance()->set_api_data(engine.jack());
 
 	for (i = Config->midi_ports.begin(); i != Config->midi_ports.end(); ++i) {
 		Configuration::MidiPortDescriptor* port_descriptor;
@@ -115,9 +120,7 @@ setup_midi (AudioEngine& engine)
 					   port_descriptor->type);
 
 		if (request.status != MIDI::PortRequest::OK) {
-			error << string_compose(
-				_("MIDI port specifications for \"%1\" (%2, %3) are not understandable."),
-				port_descriptor->tag, port_descriptor->mode, port_descriptor->type) << endmsg;
+			error << string_compose(_("MIDI port specifications for \"%1\" are not understandable."), port_descriptor->tag) << endmsg;
 			continue;
 		}
 		
@@ -168,6 +171,7 @@ setup_midi (AudioEngine& engine)
 	if (default_mmc_port == 0) {
 		warning << string_compose (_("No MMC control (MIDI port \"%1\" not available)"), Config->get_mmc_port_name()) 
 			<< endmsg;
+		return 0;
 	} 
 
 	if (default_mtc_port == 0) {
@@ -198,13 +202,15 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 
 	Config->set_use_vst (use_vst);
 
-	if (setup_midi (engine)) {
+	if (setup_midi ()) {
 		return -1;
 	}
-
+    
+#ifdef HAVE_LIBLO
 	if (setup_osc ()) {
 		return -1;
 	}
+#endif
 
 #ifdef VST_SUPPORT
 	if (Config->get_use_vst() && fst_init (sighandler)) {
@@ -327,10 +333,17 @@ ARDOUR::new_change ()
 	Change c;
 	static uint32_t change_bit = 1;
 
-	/* XXX catch out-of-range */
+	/* catch out-of-range */
+	if (!change_bit)
+	{
+		fatal << _("programming error: ")
+			<< "change_bit out of range in ARDOUR::new_change()"
+			<< endmsg;
+		/*NOTREACHED*/
+	}
 
 	c = Change (change_bit);
-	change_bit <<= 1;
+	change_bit <<= 1;	// if it shifts too far, change_bit == 0
 
 	return c;
 }

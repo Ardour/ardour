@@ -87,7 +87,7 @@ class ImageFrameTimeAxisView : public sigc::trackable
 		 *
 		 * @param height the new height
 		 */
-		int set_height(gdouble height) ;
+		int set_height(gdouble) ;
 		
 		/**
 		 * Sets the position of this view helper on the canvas
@@ -117,7 +117,7 @@ class ImageFrameTimeAxisView : public sigc::trackable
 		 *
 		 * @param color the new base color
 		 */
-		void apply_color (Gdk::Color& color) ;
+		void apply_color (Gdk::Color&) ;
 		
 		//---------------------------------------------------------------------------------------//
 		// Child ImageFrameTimeAxisGroup Accessors/Mutators
@@ -152,7 +152,6 @@ class ImageFrameTimeAxisView : public sigc::trackable
 		 * Removes the specified ImageFrameTimeAxisGroup from the list of ImageFrameTimeAxisGroups upon this TimeAxis.
 		 *
 		 * @param iftag the ImageFrameView to remove
-		 * @param src the identity of the object that initiated the change
 		 */
 		void remove_imageframe_group(ImageFrameTimeAxisGroup* iftag, void* src) ;
 		
@@ -163,7 +162,7 @@ class ImageFrameTimeAxisView : public sigc::trackable
 		/**
 		 * Sets the currently selected group upon this time axis
 		 *
-		 * @param iftag the item to set selected
+		 * @param ifv the item to set selected
 		 */
 		void set_selected_imageframe_group(ImageFrameTimeAxisGroup* iftag) ;
 		

@@ -33,7 +33,7 @@
 
 #include <pbd/error.h>
 #include <pbd/basename.h>
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <pbd/xml++.h>
 
 #include <ardour/ardour.h>
@@ -139,7 +139,7 @@ DiskStream::init (Flag f)
 	first_input_change = true;
 	_playlist = 0;
 	i_am_the_modifier = 0;
-	atomic_set (&_record_enabled, 0);
+	g_atomic_int_set (&_record_enabled, 0);
 	was_recording = false;
 	capture_start_frame = 0;
 	capture_captured = 0;
@@ -213,7 +213,7 @@ DiskStream::destroy_channel (ChannelInfo &chan)
 
 DiskStream::~DiskStream ()
 {
-	LockMonitor lm (state_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (state_lock);
 
 	if (_playlist) {
 		_playlist->unref ();
@@ -229,7 +229,7 @@ DiskStream::~DiskStream ()
 void
 DiskStream::handle_input_change (IOChange change, void *src)
 {
-	LockMonitor lm (state_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (state_lock);
 
 	if (!(input_change_pending & change)) {
 		input_change_pending = IOChange (input_change_pending|change);
@@ -241,7 +241,7 @@ void
 DiskStream::non_realtime_input_change ()
 {
 	{ 
-		LockMonitor lm (state_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (state_lock);
 
 		if (input_change_pending == NoChange) {
 			return;
@@ -349,7 +349,7 @@ int
 DiskStream::use_playlist (AudioPlaylist* playlist)
 {
 	{
-		LockMonitor lm (state_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (state_lock);
 
 		if (playlist == _playlist) {
 			return 0;
@@ -565,7 +565,7 @@ DiskStream::non_realtime_set_speed ()
 {
 	if (_buffer_reallocation_required)
 	{
-		LockMonitor lm (state_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (state_lock);
 		allocate_temporary_buffers ();
 
 		_buffer_reallocation_required = false;
@@ -753,7 +753,8 @@ DiskStream::process (jack_nframes_t transport_frame, jack_nframes_t nframes, jac
 	   returns a non-zero value, in which case, ::commit should not be called.
 	*/
 
-	if (pthread_mutex_trylock (state_lock.mutex())) {
+        // If we can't take the state lock return.
+	if (!state_lock.trylock()) {
 		return 1;
 	}
 
@@ -1002,7 +1003,7 @@ DiskStream::process (jack_nframes_t transport_frame, jack_nframes_t nframes, jac
 		   be called. unlock the state lock.
 		*/
 		
-		pthread_mutex_unlock (state_lock.mutex());
+		state_lock.unlock();
 	} 
 
 	return ret;
@@ -1011,7 +1012,7 @@ DiskStream::process (jack_nframes_t transport_frame, jack_nframes_t nframes, jac
 void
 DiskStream::recover ()
 {
-	pthread_mutex_unlock (state_lock.mutex());
+	state_lock.unlock();
 	_processed = false;
 }
 
@@ -1047,7 +1048,7 @@ DiskStream::commit (jack_nframes_t nframes)
 			|| channels[0].capture_buf->read_space() >= disk_io_chunk_frames;
 	}
 
-	pthread_mutex_unlock (state_lock.mutex());
+	state_lock.unlock();
 
 	_processed = false;
 
@@ -1140,7 +1141,7 @@ DiskStream::overwrite_existing_buffers ()
 int
 DiskStream::seek (jack_nframes_t frame, bool complete_refill)
 {
-	LockMonitor lm (state_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (state_lock);
 	uint32_t n;
 	int ret;
 	ChannelList::iterator chan;
@@ -1702,7 +1703,7 @@ DiskStream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture
 	}
 
 	/* XXX is there anything we can do if err != 0 ? */
-	LockMonitor lm (capture_info_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (capture_info_lock);
 	
 	if (capture_info.empty()) {
 		return;
@@ -1925,7 +1926,7 @@ DiskStream::set_record_enabled (bool yn, void* src)
 
 	if (record_enabled() != yn) {
 		if (yn) {
-			atomic_set (&_record_enabled, 1);
+			g_atomic_int_set (&_record_enabled, 1);
 			capturing_sources.clear ();
 			if (Config->get_use_hardware_monitoring())  {
 				for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
@@ -1941,7 +1942,7 @@ DiskStream::set_record_enabled (bool yn, void* src)
 			}
 
 		} else {
-			atomic_set (&_record_enabled, 0);
+			g_atomic_int_set (&_record_enabled, 0);
 			if (Config->get_use_hardware_monitoring()) {
 				for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 					if ((*chan).source) {
@@ -2415,7 +2416,7 @@ DiskStream::set_loop (Location *location)
 jack_nframes_t
 DiskStream::get_capture_start_frame (uint32_t n)
 {
-	LockMonitor lm (capture_info_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.size() > n) {
 		return capture_info[n]->start;
@@ -2428,7 +2429,7 @@ DiskStream::get_capture_start_frame (uint32_t n)
 jack_nframes_t
 DiskStream::get_captured_frames (uint32_t n)
 {
-	LockMonitor lm (capture_info_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.size() > n) {
 		return capture_info[n]->frames;

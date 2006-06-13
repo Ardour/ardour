@@ -6,7 +6,7 @@
 
 #include <sigc++/sigc++.h>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 
 #include <ardour/stateful.h>
 
@@ -52,7 +52,7 @@ struct ControlProtocolInfo {
 	static ControlProtocolManager* _instance;
 
 	Session* _session;
-	PBD::Lock protocols_lock;
+	Glib::Mutex protocols_lock;
 	std::list<ControlProtocol*>    control_protocols;
 
 	void drop_session ();

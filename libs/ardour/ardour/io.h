@@ -27,10 +27,11 @@
 #include <sigc++/signal.h>
 #include <jack/jack.h>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
+
 #include <pbd/fastlog.h>
 #include <pbd/undo.h>
-#include <pbd/atomic.h>
+
 #include <midi++/controllable.h>
 
 #include <ardour/ardour.h>
@@ -205,7 +206,15 @@ class IO : public Stateful, public ARDOUR::StateManager
 		}
 	}
 
-	static sigc::signal<void> Meter;
+    static void update_meters();
+
+private: 
+
+    static sigc::signal<void>   Meter;
+    static Glib::StaticMutex    m_meter_signal_lock;
+    sigc::connection            m_meter_connection;
+
+public:
 
 	/* automation */
 
@@ -261,7 +270,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	int ports_became_legal ();
 
   private:
-	mutable PBD::Lock io_lock;
+	mutable Glib::Mutex io_lock;
 
   protected:
 	Session&            _session;
@@ -269,7 +278,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	gain_t              _gain;
 	gain_t              _effective_gain;
 	gain_t              _desired_gain;
-	PBD::NonBlockingLock declick_lock;
+	Glib::Mutex         declick_lock;
 	vector<Port*>       _outputs;
 	vector<Port*>       _inputs;
 	vector<float>       _peak_power;
@@ -322,7 +331,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	jack_nframes_t last_automation_snapshot;
 	static jack_nframes_t _automation_interval;
 
-        AutoState      _gain_automation_state;
+    AutoState      _gain_automation_state;
 	AutoStyle      _gain_automation_style;
 
 	bool     apply_gain_automation;
@@ -331,7 +340,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	int  save_automation (const string&);
 	int  load_automation (const string&);
 	
-	PBD::NonBlockingLock automation_lock;
+	Glib::Mutex automation_lock;
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
 

@@ -22,6 +22,7 @@
 #include <cerrno>
 #include <vector>
 
+#include <glibmm/timer.h>
 #include <pbd/pthread_utils.h>
 
 #include <ardour/audioengine.h>
@@ -45,7 +46,6 @@ jack_nframes_t Port::long_over_length = 10;
 
 AudioEngine::AudioEngine (string client_name) 
 {
-	pthread_cond_init (&session_removed, 0);
 	session = 0;
 	session_remove_pending = false;
 	_running = false;
@@ -60,10 +60,12 @@ AudioEngine::AudioEngine (string client_name)
 	_buffer_size = 0;
 	_freewheeling = false;
 	_freewheel_thread_registered = false;
-	last_meter_point = 0;
-	meter_interval = 0;
-	meter_thread_id = (pthread_t) 0;
+    
+    m_meter_thread = 0;
+    m_meter_exit = false;
 
+    start_metering_thread();
+    
 	if (connect_to_jack (client_name)) {
 		throw NoBackendAvailable ();
 	}
@@ -76,9 +78,9 @@ AudioEngine::~AudioEngine ()
 		jack_client_close (_jack);
 	}
 
-	if (meter_thread_id != (pthread_t) 0) {
-		pthread_cancel (meter_thread_id);
-	}
+    if(m_meter_thread) {
+        g_atomic_int_inc(&m_meter_exit);
+    }
 }
 
 void
@@ -212,7 +214,6 @@ AudioEngine::_graph_order_callback (void *arg)
 	return 0;
 }
 
-/** @callgraph */
 int
 AudioEngine::_process_callback (jack_nframes_t nframes, void *arg)
 {
@@ -225,11 +226,10 @@ AudioEngine::_freewheel_callback (int onoff, void *arg)
 	static_cast<AudioEngine*>(arg)->_freewheeling = onoff;
 }
 
-/** @callgraph */
 int
 AudioEngine::process_callback (jack_nframes_t nframes)
 {
-	TentativeLockMonitor tm (_process_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock tm (_process_lock, Glib::TRY_LOCK);
 	jack_nframes_t next_processed_frames;
 
 	/* handle wrap around of total frames counter */
@@ -248,7 +248,7 @@ AudioEngine::process_callback (jack_nframes_t nframes)
 	if (session_remove_pending) {
 		session = 0;
 		session_remove_pending = false;
-		pthread_cond_signal (&session_removed);
+		session_removed.signal();
 		_processed_frames = next_processed_frames;
 		return 0;
 	}
@@ -271,14 +271,7 @@ AudioEngine::process_callback (jack_nframes_t nframes)
 		_processed_frames = next_processed_frames;
 		return 0;
 	}
-		
-	/* manage meters */
 
-	if ((meter_interval > _buffer_size) && (last_meter_point + meter_interval < next_processed_frames)) {
-		IO::Meter ();
-		last_meter_point = next_processed_frames;
-	}
-	
 	if (last_monitor_check + monitor_check_interval < next_processed_frames) {
 		for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
 			
@@ -317,11 +310,6 @@ AudioEngine::jack_sample_rate_callback (jack_nframes_t nframes)
 	monitor_check_interval = nframes / 10;
 	last_monitor_check = 0;
 	
-	meter_interval = nframes / 100;
-	last_meter_point = 0;
-
-	maybe_start_metering_thread ();
-
 	if (session) {
 		session->set_frame_rate (nframes);
 	}
@@ -352,48 +340,25 @@ AudioEngine::jack_bufsize_callback (jack_nframes_t nframes)
 		session->set_block_size (_buffer_size);
 	}
 
-	maybe_start_metering_thread ();
-
 	return 0;
 }
 
 void
-AudioEngine::maybe_start_metering_thread ()
+AudioEngine::start_metering_thread ()
 {
-	if (meter_interval == 0) {
-		return;
-	}
-
-	if (_buffer_size == 0) {
-		return;
-	}
-
-	if (meter_interval < _buffer_size) {
-		if (meter_thread_id != (pthread_t) 0) {
-			pthread_cancel (meter_thread_id);
-		}
-		pthread_create (&meter_thread_id, 0, _meter_thread, this);
-	}
+    if(m_meter_thread == 0) {
+        m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread), false);
+    }
 }
 
-void*
-AudioEngine::_meter_thread (void *arg)
-{
-	return static_cast<AudioEngine*>(arg)->meter_thread ();
-}
-
-void*
+void
 AudioEngine::meter_thread ()
 {
-	PBD::ThreadCreated (pthread_self(), "Metering");
-
-	while (true) {
-		usleep (10000); /* 1/100th sec interval */
-		pthread_testcancel();
-		IO::Meter ();
+	while (g_atomic_int_get(&m_meter_exit) != true) {
+        Glib::usleep (10000); /* 1/100th sec interval */
+        IO::update_meters ();
 	}
-	
-	return 0;
+	return;
 }
 
 void 
@@ -407,13 +372,13 @@ AudioEngine::set_session (Session *s)
 void 
 AudioEngine::remove_session ()
 {
-	LockMonitor lm (_process_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_process_lock);
 
 	if (_running) {
 
 		if (session) {
 			session_remove_pending = true;
-			pthread_cond_wait (&session_removed, _process_lock.mutex());
+			session_removed.wait(_process_lock);
 		} 
 
 	} else {
@@ -450,7 +415,7 @@ AudioEngine::register_audio_input_port (const string& portname)
 
 	} else {
 
-		pthread_mutex_unlock (_process_lock.mutex());
+		_process_lock.unlock();
 		throw PortRegistrationFailure();
 	}
 
@@ -478,7 +443,7 @@ AudioEngine::register_audio_output_port (const string& portname)
 
 	} else {
 
-		pthread_mutex_unlock (_process_lock.mutex());
+		_process_lock.unlock();
 		throw PortRegistrationFailure ();
 	}
 
@@ -635,7 +600,7 @@ AudioEngine::frames_per_cycle ()
 Port *
 AudioEngine::get_port_by_name (const string& portname, bool keep)
 {
-	LockMonitor lm (_process_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_process_lock);
 
 	if (!_running) {
 		if (!_has_run) {
@@ -968,7 +933,7 @@ AudioEngine::reconnect_to_jack ()
 	if (_jack) {
 		disconnect_from_jack ();
 		/* XXX give jackd a chance */
-		usleep (250000);
+        Glib::usleep (250000);
 	}
 
 	if (connect_to_jack (jack_client_name)) {

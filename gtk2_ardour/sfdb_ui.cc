@@ -25,7 +25,6 @@
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
 
-#include <pbd/basename.h>
 #include <pbd/convert.h>
 
 #include <gtkmm2ext/utils.h>
@@ -206,7 +205,7 @@ SoundFileBox::play_btn_clicked ()
 		}
 
 		string result;
-		_session->region_name (result, PBD::basename(srclist[0]->name()), false);
+		_session->region_name (result, Glib::path_get_basename(srclist[0]->name()), false);
 		AudioRegion* a_region = new AudioRegion(srclist, 0, srclist[0]->length(), result, 0, Region::DefaultFlags, false);
 		region_cache[path] = a_region;
 	}

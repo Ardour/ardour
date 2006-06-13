@@ -29,7 +29,7 @@ namespace ARDOUR {
 template<class T> void 
 Session::foreach_diskstream (T *obj, void (T::*func)(DiskStream&)) 
 {
-	RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); i++) {
 		if (!(*i)->hidden()) {
 			(obj->*func) (**i);

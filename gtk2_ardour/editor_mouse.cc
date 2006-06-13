@@ -96,7 +96,6 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy)
 		break;
 	case GDK_KEY_PRESS:
 	case GDK_KEY_RELEASE:
-		cerr << "here\n";
 		// track_canvas.w2c(event->key.x, event->key.y, *pcx, *pcy);
 		break;
 	default:
@@ -284,6 +283,93 @@ Editor::step_mouse_mode (bool next)
 	}
 }
 
+void
+Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+{
+	bool commit;
+	bool c1; 
+	bool c2;
+
+	/* in object/audition/timefx mode, any button press sets
+	   the selection if the object can be selected. this is a
+	   bit of hack, because we want to avoid this if the
+	   mouse operation is a region alignment.
+
+	   note: not dbl-click or triple-click
+	*/
+
+	if (((mouse_mode != MouseObject) &&
+	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
+	     (mouse_mode != MouseTimeFX || item_type != RegionItem)) ||
+	    (event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE || event->button.button > 3)) {
+		
+		return;
+	}
+	    
+	Selection::Operation op = Keyboard::selection_type (event->button.state);
+	bool press = (event->type == GDK_BUTTON_PRESS);
+
+	begin_reversible_command (_("select on click"));
+
+	switch (item_type) {
+	case RegionItem:
+		c1 = set_selected_track_from_click (press, op, true, true);
+		c2 = set_selected_regionview_from_click (press, op, true);
+		commit = (c1 || c2);
+		break;
+		
+	case AudioRegionViewNameHighlight:
+	case AudioRegionViewName:
+		c1 = set_selected_track_from_click (press, op, true, true);
+		c2 = set_selected_regionview_from_click (press, op, true);
+		commit = (c1 || c2);
+		break;
+		
+	case GainAutomationControlPointItem:
+	case PanAutomationControlPointItem:
+	case RedirectAutomationControlPointItem:
+		c1 = set_selected_track_from_click (press, op, true, true);
+		c2 = set_selected_control_point_from_click (press, op, false);
+		commit = (c1 || c2);
+		break;
+		
+	case StreamItem:
+		commit = set_selected_track_from_click (press, op, true, true);
+		break;
+		    
+	case AutomationTrackItem:
+		commit = set_selected_track_from_click (press, op, true, true);
+		break;
+		
+	default:
+		break;
+	}
+	
+#define SELECT_TRACK_FROM_CANVAS_IN_RANGE_MODE
+#ifdef  SELECT_TRACK_FROM_CANVAS_IN_RANGE_MODE
+	/* in range mode, button 1/2/3 press potentially selects a track */
+
+	if (mouse_mode == MouseRange && 
+	    event->type == GDK_BUTTON_PRESS && 
+	    event->button.button <= 3) {
+		
+		switch (item_type) {
+		case StreamItem:
+		case RegionItem:
+		case AutomationTrackItem:
+			commit = set_selected_track_from_click (press, op, true, true);
+			break;
+
+		default:
+			break;
+		}
+	}
+#endif
+	if (commit) {
+		commit_reversible_command ();
+	}
+}
+
 bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
@@ -295,81 +381,8 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		return true;
 	}
 
-	/* in object/audition/timefx mode, any button press sets
-	   the selection if the object can be selected. this is a
-	   bit of hack, because we want to avoid this if the
-	   mouse operation is a region alignment.
-	*/
-
-	if (((mouse_mode == MouseObject) ||
-	     (mouse_mode == MouseAudition && item_type == RegionItem) ||
-	     (mouse_mode == MouseTimeFX && item_type == RegionItem)) &&
-	    event->type == GDK_BUTTON_PRESS && 
-	    event->button.button <= 3) {
-
-		AudioRegionView* rv;
-		ControlPoint* cp;
-
-		/* not dbl-click or triple-click */
-
-		switch (item_type) {
-		case RegionItem:
-			set_selected_regionview_from_click (Keyboard::selection_type (event->button.state), true);
-			break;
-			
-		case AudioRegionViewNameHighlight:
-		case AudioRegionViewName:
-			if ((rv = static_cast<AudioRegionView *> (item->get_data ("regionview"))) != 0) {
-				set_selected_regionview_from_click (Keyboard::selection_type (event->button.state), true);
-			}
-			break;
-			
-		case GainAutomationControlPointItem:
-		case PanAutomationControlPointItem:
-		case RedirectAutomationControlPointItem:
-			if ((cp = static_cast<ControlPoint *> (item->get_data ("control_point"))) != 0) {
-				set_selected_control_point_from_click (Keyboard::selection_type (event->button.state), false);
-			}
-			break;
-
-		case StreamItem:
-			set_selected_track_from_click (Keyboard::selection_type (event->button.state), true, true);
-			break;
-
-		case AutomationTrackItem:
-			break;
-
-		default:
-			break;
-		}
-	}
-
-#define SELECT_TRACK_FROM_CANVAS_IN_RANGE_MODE
-#ifdef  SELECT_TRACK_FROM_CANVAS_IN_RANGE_MODE
-	/* in range mode, button 1/2/3 press potentially selects a track */
-
-	if (mouse_mode == MouseRange && 
-	    event->type == GDK_BUTTON_PRESS && 
-	    event->button.button <= 3) {
-		
-		AudioRegionView* rv;
-
-		switch (item_type) {
-		case StreamItem:
-		case RegionItem:
-		case AutomationTrackItem:
-			set_selected_track_from_click (Keyboard::selection_type (event->button.state), true, true);
-			break;
-
-		case AudioRegionViewNameHighlight:
-		case AudioRegionViewName:
-			rv = reinterpret_cast<AudioRegionView *> (item->get_data ("regionview"));
-		default:
-			break;
-		}
-	}
-#endif
-
+	button_selection (item, event, item_type);
+	
 	if (drag_info.item == 0 &&
 	    (Keyboard::is_delete_event (&event->button) ||
 	     Keyboard::is_context_menu_event (&event->button) ||
@@ -435,6 +448,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				start_range_markerbar_op (item, event, CreateRangeMarker); 
 				return true;
 				break;
+
 			case TransportMarkerBarItem:
 				start_range_markerbar_op (item, event, CreateTransportMarker); 
 				return true;
@@ -563,6 +577,10 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					start_imageframe_grab(item, event) ;
 					break ;
 				/* </CMT Additions> */
+
+				case MarkerBarItem:
+					
+					break;
 
 				default:
 					break;
@@ -816,6 +834,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 	}
 	
+	button_selection (item, event, item_type);
+
 	/* edit events get handled here */
 	
 	if (drag_info.item == 0 && Keyboard::is_edit_event (&event->button)) {
@@ -1477,13 +1497,13 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	if (!from_autoscroll && drag_info.item) {
 		/* item != 0 is the best test i can think of for dragging.
 		*/
-		if (!drag_info.move_threshold_passsed) {
+		if (!drag_info.move_threshold_passed) {
 
-			drag_info.move_threshold_passsed = (abs ((int) (drag_info.current_pointer_x - drag_info.grab_x)) > 4);
+			drag_info.move_threshold_passed = (abs ((int) (drag_info.current_pointer_x - drag_info.grab_x)) > 4);
 			
 			// and change the initial grab loc/frame if this drag info wants us to
 
-			if (drag_info.want_move_threshold && drag_info.move_threshold_passsed) {
+			if (drag_info.want_move_threshold && drag_info.move_threshold_passed) {
 				drag_info.grab_frame = drag_info.current_pointer_frame;
 				drag_info.grab_x = drag_info.current_pointer_x;
 				drag_info.grab_y = drag_info.current_pointer_y;
@@ -1555,6 +1575,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 
   handled:
 	track_canvas_motion (event);
+	// drag_info.last_pointer_frame = drag_info.current_pointer_frame;
 	return true;
 	
   not_handled:
@@ -1597,7 +1618,7 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	drag_info.cumulative_x_drag = 0;
 	drag_info.cumulative_y_drag = 0;
 	drag_info.first_move = true;
-	drag_info.move_threshold_passsed = false;
+	drag_info.move_threshold_passed = false;
 	drag_info.want_move_threshold = false;
 	drag_info.pointer_frame_offset = 0;
 	drag_info.brushing = false;
@@ -1623,6 +1644,19 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	default:
 		break;
 	}
+}
+
+void
+Editor::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t time)
+{
+	drag_info.item->ungrab (0);
+	drag_info.item = new_item;
+
+	if (cursor == 0) {
+		cursor = grabber_cursor;
+	}
+
+	drag_info.item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK, *cursor, time);
 }
 
 bool
@@ -2020,6 +2054,7 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	bool is_start;
 	bool move_both = false;
 
+
 	jack_nframes_t newframe;
 	if (drag_info.pointer_frame_offset <= (long) drag_info.current_pointer_frame) {
 		newframe = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
@@ -2027,14 +2062,16 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	else {
 		newframe = 0;
 	}
-		
+
 	jack_nframes_t next = newframe;
 
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 		snap_to (newframe, 0, true);
 	}
 	
-	if (drag_info.current_pointer_frame == drag_info.last_pointer_frame) return;
+	if (drag_info.current_pointer_frame == drag_info.last_pointer_frame) { 
+		return;
+	}
 
 	/* call this to find out if its the start or end */
 	
@@ -2099,7 +2136,6 @@ Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	
 	Marker* marker = (Marker *) drag_info.data;
 	bool is_start;
-
 
 
 	begin_reversible_command ( _("move marker") );
@@ -2634,68 +2670,9 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		return;
 	}
 
-	/* this is committed in the grab finished callback. */
-
-	begin_reversible_command (_("Drag region copy"));
-
-	/* duplicate the region(s) */
-	
-	vector<AudioRegionView*> new_regionviews;
-	
-	set<Playlist*> affected_playlists;
-	pair<set<Playlist*>::iterator,bool> insert_result;
-	
-	for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
-		AudioRegionView* rv;
-		
-		rv = (*i);
-		
-		Playlist* to_playlist = rv->region.playlist();
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&rv->get_time_axis_view());
-		
-		insert_result = affected_playlists.insert (to_playlist);
-		if (insert_result.second) {
-			session->add_undo (to_playlist->get_memento ());
-		}
-		
-		latest_regionview = 0;
-		
-		sigc::connection c = atv->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
-		
-		/* create a new region with the same name.
-		 */
-		
-		AudioRegion* newregion = new AudioRegion (rv->region);
-		
-		/* if the original region was locked, we don't care */
-		
-		newregion->set_locked (false);
-		
-		to_playlist->add_region (*newregion, (jack_nframes_t) (rv->region.position() * atv->get_diskstream()->speed()));
-		
-		c.disconnect ();
-		
-		if (latest_regionview) {
-			new_regionviews.push_back (latest_regionview);
-		}
-	}
-	
-	if (new_regionviews.empty()) {
-		return;
-	}
-	
-	/* reset selection to new regionviews */
-	
-	selection->set (new_regionviews);
-	
-	/* reset drag_info data to reflect the fact that we are dragging the copies */
-	
-	drag_info.data = new_regionviews.front();
-	drag_info.item = new_regionviews.front()->get_canvas_group ();
-	
 	drag_info.copy = true;
-	drag_info.motion_callback = &Editor::region_drag_motion_callback;
-	drag_info.finished_callback = &Editor::region_drag_finished_callback;
+	drag_info.item = item;
+	drag_info.data = clicked_regionview;	
 
 	start_grab(event);
 
@@ -2712,10 +2689,8 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.pointer_frame_offset = drag_info.grab_frame - drag_info.last_frame_position;
 	// we want a move threshold
 	drag_info.want_move_threshold = true;
-
-	show_verbose_time_cursor (drag_info.last_frame_position, 10);
-
-	//begin_reversible_command (_("copy region(s)"));
+	drag_info.motion_callback = &Editor::region_drag_motion_callback;
+	drag_info.finished_callback = &Editor::region_drag_finished_callback;
 }
 
 void
@@ -2763,6 +2738,72 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	bool clamp_y_axis = false;
 	vector<int32_t>  height_list(512) ;
 	vector<int32_t>::iterator j;
+
+	show_verbose_time_cursor (drag_info.last_frame_position, 10);
+
+	if (drag_info.copy && drag_info.move_threshold_passed && drag_info.want_move_threshold) {
+
+		drag_info.want_move_threshold = false; // don't copy again
+
+		/* this is committed in the grab finished callback. */
+		
+		begin_reversible_command (_("Drag region copy"));
+		
+		/* duplicate the region(s) */
+		
+		vector<AudioRegionView*> new_regionviews;
+		
+		set<Playlist*> affected_playlists;
+		pair<set<Playlist*>::iterator,bool> insert_result;
+		
+		for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
+			AudioRegionView* rv;
+			
+			rv = (*i);
+			
+			Playlist* to_playlist = rv->region.playlist();
+			AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&rv->get_time_axis_view());
+			
+			insert_result = affected_playlists.insert (to_playlist);
+			if (insert_result.second) {
+				session->add_undo (to_playlist->get_memento ());
+			}
+			
+			latest_regionview = 0;
+			
+			sigc::connection c = atv->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+			
+			/* create a new region with the same name.
+			 */
+			
+			AudioRegion* newregion = new AudioRegion (rv->region);
+			
+			/* if the original region was locked, we don't care */
+			
+			newregion->set_locked (false);
+			
+			to_playlist->add_region (*newregion, (jack_nframes_t) (rv->region.position() * atv->get_diskstream()->speed()));
+			
+			c.disconnect ();
+			
+			if (latest_regionview) {
+				new_regionviews.push_back (latest_regionview);
+			}
+		}
+		
+		if (new_regionviews.empty()) {
+			return;
+		}
+		
+		/* reset selection to new regionviews */
+		
+		selection->set (new_regionviews);
+		
+		/* reset drag_info data to reflect the fact that we are dragging the copies */
+		
+		drag_info.data = new_regionviews.front();
+		swap_grab (new_regionviews.front()->get_canvas_group (), 0, event->motion.time);
+	}
 
 	/* Which trackview is this ? */
 
@@ -2947,7 +2988,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	   the region would be if we moved it by that much.
 	*/
 
-	if (drag_info.move_threshold_passsed) {
+	if (drag_info.move_threshold_passed) {
 
 		if ((int32_t)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 
@@ -3507,7 +3548,7 @@ Editor::show_verbose_duration_cursor (jack_nframes_t start, jack_nframes_t end, 
 		/* XXX fix this to compute min/sec properly */
 		session->smpte_duration (end - start, smpte);
 		secs = smpte.seconds + ((float) smpte.frames / session->smpte_frames_per_second);
-		snprintf (buf, sizeof (buf), "%02ld:%02ld:%.4f", smpte.hours, smpte.minutes, secs);
+		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%.4f", smpte.hours, smpte.minutes, secs);
 		break;
 
 	default:
@@ -3629,7 +3670,6 @@ Editor::start_selection_op (ArdourCanvas::Item* item, GdkEvent* event, Selection
 
 	switch (op) {
 	case CreateSelection:
-		
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
 			drag_info.copy = true;
 		} else {
@@ -3639,14 +3679,18 @@ Editor::start_selection_op (ArdourCanvas::Item* item, GdkEvent* event, Selection
 		break;
 
 	case SelectionStartTrim:
-		clicked_trackview->order_selection_trims (item, true);
+		if (clicked_trackview) {
+			clicked_trackview->order_selection_trims (item, true);
+		} 
 		start_grab (event, trimmer_cursor);
 		start = selection->time[clicked_selection].start;
 		drag_info.pointer_frame_offset = drag_info.grab_frame - start;	
 		break;
 		
 	case SelectionEndTrim:
-		clicked_trackview->order_selection_trims (item, false);
+		if (clicked_trackview) {
+			clicked_trackview->order_selection_trims (item, false);
+		}
 		start_grab (event, trimmer_cursor);
 		end = selection->time[clicked_selection].end;
 		drag_info.pointer_frame_offset = drag_info.grab_frame - end;	
@@ -4239,7 +4283,6 @@ Editor::hide_marker (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::start_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event, RangeMarkerOp op)
 {
-
 	if (session == 0) {
 		return;
 	}
@@ -4304,7 +4347,7 @@ Editor::drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 		
 		/* first drag: Either add to the selection
-		   or create a new selection->
+		   or create a new selection.
 		*/
 		
 		if (drag_info.first_move) {
@@ -4371,12 +4414,39 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 			break;
 		}
 	} else {
-		/* just a click, no pointer movement.*/
+		/* just a click, no pointer movement. remember that context menu stuff was handled elsewhere */
 
 		if (Keyboard::no_modifier_keys_pressed (&event->button)) {
 
-			// nothing yet
+			jack_nframes_t start;
+			jack_nframes_t end;
 
+			start = session->locations()->first_mark_before (drag_info.grab_frame);
+			end = session->locations()->first_mark_after (drag_info.grab_frame);
+			
+			if (end == max_frames) {
+				end = session->current_end_frame ();
+			}
+
+			if (start == 0) {
+				start = session->current_start_frame ();
+			}
+
+			switch (mouse_mode) {
+			case MouseObject:
+				/* find the two markers on either side and then make the selection from it */
+				cerr << "select between " << start << " .. " << end << endl;
+				select_all_within (start, end, 0.0f, FLT_MAX, Selection::Set);
+				break;
+
+			case MouseRange:
+				/* find the two markers on either side of the click and make the range out of it */
+				selection->set (0, start, end);
+				break;
+
+			default:
+				break;
+			}
 		} 
 	}
 

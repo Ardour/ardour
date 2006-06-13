@@ -11,12 +11,10 @@ import platform
 from sets import Set
 import SCons.Node.FS
 
-#import pickle
-
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0alpha2'
+version = '2.0beta1'
 
 subst_dict = { }
 
@@ -38,8 +36,10 @@ opts.AddOptions(
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('SURFACES', 'Build support for control surfaces', 0),
-    BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0)
-  )
+    BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
+    BoolOption('LIBLO', 'Compile with support for liblo library', 1),
+    BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library -- UNSTABLE', 0)
+)
 
 #----------------------------------------------------------------------
 # a handy helper that provides a way to merge compile/link information
@@ -382,6 +382,7 @@ libraries['glib2'] = LibraryInfo()
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs glib-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gobject-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gmodule-2.0')
+libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gthread-2.0')
 
 libraries['gtk2'] = LibraryInfo()
 libraries['gtk2'].ParseConfig ('pkg-config --cflags --libs gtk+-2.0')
@@ -427,14 +428,15 @@ libraries['usb'] = conf.Finish ()
 #
 # Check for liblo
 
-libraries['lo'] = LibraryInfo ()
+if env['LIBLO']:
+    libraries['lo'] = LibraryInfo ()
 
-conf = Configure (libraries['lo'])
-if conf.CheckLib ('lo', 'lo_server_new') == False:
-    print "liblo does not appear to be installed."
-    exit (0)
+    conf = Configure (libraries['lo'])
+    if conf.CheckLib ('lo', 'lo_server_new') == False:
+        print "liblo does not appear to be installed."
+        sys.exit (1)
     
-libraries['lo'] = conf.Finish ()
+    libraries['lo'] = conf.Finish ()
 
 #
 # Check for dmalloc
@@ -461,12 +463,7 @@ libraries['dmalloc'] = conf.Finish ()
 
 conf = Configure(env)
 
-if conf.CheckCHeader('jack/midiport.h'):
-    libraries['sysmidi'] = LibraryInfo (LIBS='jack')
-    env['SYSMIDI'] = 'JACK MIDI'
-    subst_dict['%MIDITAG%'] = "control"
-    subst_dict['%MIDITYPE%'] = "jack"
-elif conf.CheckCHeader('alsa/asoundlib.h'):
+if conf.CheckCHeader('alsa/asoundlib.h'):
     libraries['sysmidi'] = LibraryInfo (LIBS='asound')
     env['SYSMIDI'] = 'ALSA Sequencer'
     subst_dict['%MIDITAG%'] = "seq"
@@ -477,7 +474,10 @@ elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Co
     env['SYSMIDI'] = 'CoreMIDI'
     subst_dict['%MIDITAG%'] = "ardour"
     subst_dict['%MIDITYPE%'] = "coremidi"
-
+else:
+    print "It appears you don't have the required MIDI libraries installed."
+    sys.exit (1)
+        
 env = conf.Finish()
 
 if env['SYSLIBS']:
@@ -593,12 +593,6 @@ Help(opts.GenerateHelpText(env))
 
 if os.environ.has_key('PATH'):
     env.Append(PATH = os.environ['PATH'])
-
-if os.environ.has_key('TERM'):
-    env.Append(PATH = os.environ['TERM'])
-
-if os.environ.has_key('HOME'):
-    env.Append(HOME = os.environ['HOME'])
 
 if os.environ.has_key('PKG_CONFIG_PATH'):
     env.Append(PKG_CONFIG_PATH = os.environ['PKG_CONFIG_PATH'])
@@ -743,6 +737,12 @@ if env['FPU_OPTIMIZATION']:
 # end optimization section
 
 #
+# save off guessed arch element in an env
+#
+env.Append(CONFIG_ARCH=config[config_arch])
+
+
+#
 # ARCH="..." overrides all 
 #
 
@@ -769,6 +769,9 @@ env.Append(CCFLAGS="-Wall")
 
 if env['VST']:
     env.Append(CCFLAGS="-DVST_SUPPORT")
+
+if env['LIBLO']:
+    env.Append(CCFLAGS="-DHAVE_LIBLO")
 
 #
 # everybody needs this
@@ -872,9 +875,7 @@ for subdir in coredirs:
 for sublistdir in [ subdirs, gtk_subdirs, surface_subdirs ]:
     for subdir in sublistdir:
         SConscript (subdir + '/SConscript')
-
-#pickle.dump(env, open('.scons_env', 'w'), pickle.HIGHEST_PROTOCOL)
-
+            
 # cleanup
 env.Clean ('scrub', [ 'scache.conf', '.sconf_temp', '.sconsign.dblite', 'config.log'])
 

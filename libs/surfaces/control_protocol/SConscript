@@ -36,7 +36,9 @@ cp.Merge ([
     libraries['pbd3'],
     libraries['midi++2'],
     libraries['xml'],
-    libraries['usb']
+    libraries['usb'],
+    libraries['glib2'],
+    libraries['glibmm2']
 	])
 
 libardour_cp = cp.SharedLibrary('ardour_cp', cp_files)
@@ -49,6 +51,6 @@ if env['NLS']:
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libardour_cp))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-				     [ 'SConscript', 'i18n.h', 'gettext.h' ] +
+				     [ 'SConscript' ] +
 				     cp_files + 
 				     glob.glob('po/*.po') + glob.glob('*.h')))

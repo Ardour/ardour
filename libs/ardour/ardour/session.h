@@ -31,9 +31,9 @@
 
 #include <sndfile.h>
 
+#include <glibmm/thread.h>
+
 #include <pbd/error.h>
-#include <pbd/atomic.h>
-#include <pbd/lockmonitor.h>
 #include <pbd/undo.h>
 #include <pbd/pool.h>
 
@@ -46,6 +46,8 @@
 #include <ardour/stateful.h>
 #include <ardour/gain.h>
 #include <ardour/io.h>
+
+#include <ardour/smpte.h>
 
 class XMLTree;
 class XMLNode;
@@ -274,7 +276,7 @@ class Session : public sigc::trackable, public Stateful
 	typedef list<DiskStream *> DiskStreamList;
 
 	Session::DiskStreamList disk_streams() const {
-		RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (diskstream_lock);
 		return diskstreams; /* XXX yes, force a copy */
 	}
 
@@ -284,7 +286,7 @@ class Session : public sigc::trackable, public Stateful
 	typedef list<Route *> RouteList;
 
 	RouteList get_routes() const {
-		RWLockMonitor rlock (route_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock rlock (route_lock);
 		return routes; /* XXX yes, force a copy */
 	}
 
@@ -310,7 +312,7 @@ class Session : public sigc::trackable, public Stateful
 	}
 
 	RecordState record_status() const {
-		return (RecordState) atomic_read (&_record_status);
+		return (RecordState) g_atomic_int_get (&_record_status);
 	}
 
 	bool actively_recording () {
@@ -1402,22 +1404,14 @@ class Session : public sigc::trackable, public Stateful
 	    static MultiAllocSingleReleasePool pool;
 	};
 
-<<<<<<< .working
+	mutable  gint   butler_active;
+	
 	//PBD::Lock       midi_lock;
 	//pthread_t       midi_thread;
 	//int             midi_request_pipe[2];
-	atomic_t        butler_active;
-	//RingBuffer<MIDIRequest*> midi_requests;
-/*
-=======
-	Glib::Mutex       midi_lock;
-	pthread_t       midi_thread;
-	int             midi_request_pipe[2];
-	mutable  gint   butler_active;
-	RingBuffer<MIDIRequest*> midi_requests;
 
->>>>>>> .merge-right.r579
-	int           start_midi_thread ();
+	//RingBuffer<MIDIRequest*> midi_requests;
+	/*int           start_midi_thread ();
 	void          terminate_midi_thread ();
 	void          poke_midi_thread ();
 	static void *_midi_thread_work (void *arg);
@@ -1465,7 +1459,7 @@ class Session : public sigc::trackable, public Stateful
 	/* disk-streams */
 
 	DiskStreamList  diskstreams; 
-	mutable PBD::NonBlockingRWLock diskstream_lock;
+	mutable Glib::RWLock diskstream_lock;
 	uint32_t dstream_buffer_size;
 	void add_diskstream (DiskStream*);
 	int  load_diskstreams (const XMLNode&);
@@ -1473,7 +1467,7 @@ class Session : public sigc::trackable, public Stateful
 	/* routes stuff */
 
 	RouteList       routes;
-	mutable PBD::NonBlockingRWLock route_lock;
+	mutable Glib::RWLock route_lock;
 	void   add_route (Route*);
 	uint32_t destructive_index;
 
@@ -1496,7 +1490,7 @@ class Session : public sigc::trackable, public Stateful
 
 	/* REGION MANAGEMENT */
 
-	mutable PBD::Lock region_lock;
+	mutable Glib::Mutex region_lock;
 	typedef map<ARDOUR::id_t,AudioRegion *> AudioRegionList;
 	AudioRegionList audio_regions;
 	
@@ -1509,7 +1503,7 @@ class Session : public sigc::trackable, public Stateful
 
 	/* SOURCES */
 	
-	mutable PBD::Lock source_lock;
+	mutable Glib::Mutex source_lock;
 	typedef std::map<id_t, Source *>    SourceList;
 
 	SourceList sources;
@@ -1523,7 +1517,7 @@ class Session : public sigc::trackable, public Stateful
 
 	/* PLAYLISTS */
 	
-	mutable PBD::Lock playlist_lock;
+	mutable Glib::Mutex playlist_lock;
 	typedef set<Playlist *> PlaylistList;
 	PlaylistList playlists;
 	PlaylistList unused_playlists;
@@ -1541,7 +1535,7 @@ class Session : public sigc::trackable, public Stateful
 
 	/* NAMED SELECTIONS */
 
-	mutable PBD::Lock named_selection_lock;
+	mutable Glib::Mutex named_selection_lock;
 	typedef set<NamedSelection *> NamedSelectionList;
 	NamedSelectionList named_selections;
 
@@ -1601,7 +1595,7 @@ class Session : public sigc::trackable, public Stateful
 	vector<space_and_path> session_dirs;
 	vector<space_and_path>::iterator last_rr_session_dir;
 	uint32_t _total_free_4k_blocks;
-	PBD::Lock space_lock;
+	Glib::Mutex space_lock;
 
 	static const char* sound_dir_name;
 	static const char* tape_dir_name;
@@ -1612,22 +1606,15 @@ class Session : public sigc::trackable, public Stateful
 	int ensure_sound_dir (string, string&);
 	void refresh_disk_space ();
 
-<<<<<<< .working
-	atomic_t _playback_load;
-	atomic_t _capture_load;
-	atomic_t _playback_load_min;
-	atomic_t _capture_load_min;
-=======
 	mutable gint _playback_load;
 	mutable gint _capture_load;
 	mutable gint _playback_load_min;
 	mutable gint _capture_load_min;
->>>>>>> .merge-right.r579
 
 	/* I/O Connections */
 
 	typedef list<Connection *> ConnectionList;
-	mutable PBD::Lock connection_lock;
+	mutable Glib::Mutex connection_lock;
 	ConnectionList _connections;
 	int load_connections (const XMLNode&);
 
@@ -1686,7 +1673,7 @@ class Session : public sigc::trackable, public Stateful
 	Sample*         click_emphasis_data;
 	jack_nframes_t  click_length;
 	jack_nframes_t  click_emphasis_length;
-	mutable PBD::NonBlockingRWLock click_lock;
+	mutable Glib::RWLock click_lock;
 
 	static const Sample         default_click[];
 	static const jack_nframes_t default_click_length;

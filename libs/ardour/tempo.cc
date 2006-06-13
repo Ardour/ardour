@@ -25,7 +25,7 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <pbd/xml++.h>
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
@@ -240,7 +240,7 @@ TempoMap::move_metric_section (MetricSection& section, const BBT_Time& when)
 		return 1;
 	}
 
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	MetricSectionSorter cmp;
 	BBT_Time corrected (when);
 	
@@ -283,7 +283,7 @@ TempoMap::remove_tempo (const TempoSection& tempo)
 	bool removed = false;
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		Metrics::iterator i;
 
 		for (i = metrics->begin(); i != metrics->end(); ++i) {
@@ -310,7 +310,7 @@ TempoMap::remove_meter (const MeterSection& tempo)
 	bool removed = false;
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		Metrics::iterator i;
 
 		for (i = metrics->begin(); i != metrics->end(); ++i) {
@@ -361,7 +361,7 @@ void
 TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 
 		/* new tempos always start on a beat */
 	
@@ -381,7 +381,7 @@ TempoMap::replace_tempo (TempoSection& existing, const Tempo& replacement)
 	bool replaced = false;
 
 	{ 
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		Metrics::iterator i;
 		
 		for (i = metrics->begin(); i != metrics->end(); ++i) {
@@ -411,7 +411,7 @@ void
 TempoMap::add_meter (const Meter& meter, BBT_Time where)
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 
 		/* a new meter always starts a new bar on the first beat. so
 		   round the start time appropriately. remember that
@@ -443,7 +443,7 @@ TempoMap::replace_meter (MeterSection& existing, const Meter& replacement)
 	bool replaced = false;
 
 	{ 
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		Metrics::iterator i;
 		
 		for (i = metrics->begin(); i != metrics->end(); ++i) {
@@ -611,7 +611,7 @@ TempoMap::metric_at (BBT_Time bbt) const
 void
 TempoMap::bbt_time (jack_nframes_t frame, BBT_Time& bbt) const
 {
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	bbt_time_unlocked (frame, bbt);
 }
 
@@ -759,7 +759,7 @@ TempoMap::bbt_duration_at (jack_nframes_t pos, const BBT_Time& bbt, int dir) con
 	bbt_time(pos,when);
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		frames = bbt_duration_at_unlocked (when, bbt,dir);
 	}
 
@@ -896,7 +896,7 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 jack_nframes_t
 TempoMap::round_to_bar (jack_nframes_t fr, int dir)
 {
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	return round_to_type (fr, dir, Bar);
 }
 
@@ -904,7 +904,7 @@ TempoMap::round_to_bar (jack_nframes_t fr, int dir)
 jack_nframes_t
 TempoMap::round_to_beat (jack_nframes_t fr, int dir)
 {
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	return round_to_type (fr, dir, Beat);
 }
 
@@ -912,7 +912,7 @@ jack_nframes_t
 
 TempoMap::round_to_beat_subdivision (jack_nframes_t fr, int sub_num)
 {
-        LockMonitor lm (lock, __LINE__, __FILE__);
+        Glib::Mutex::Lock lm (lock);
         TempoMap::BBTPointList::iterator i;
         TempoMap::BBTPointList *more_zoomed_bbt_points;
         jack_nframes_t frame_one_beats_worth;
@@ -1185,7 +1185,7 @@ TempoMap::meter_at (jack_nframes_t frame)
 XMLNode&
 TempoMap::get_state ()
 {
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	Metrics::const_iterator i;
 	XMLNode *root = new XMLNode ("TempoMap");
 
@@ -1200,7 +1200,7 @@ int
 TempoMap::set_state (const XMLNode& node)
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 
 		XMLNodeList nlist;
 		XMLNodeConstIterator niter;
@@ -1292,7 +1292,7 @@ TempoMap::get_memento () const
 Change
 TempoMap::restore_state (StateManager::State& state)
 {
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 
 	TempoMapState* tmstate = dynamic_cast<TempoMapState*> (&state);
 

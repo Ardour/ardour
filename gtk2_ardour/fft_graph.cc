@@ -58,7 +58,7 @@ void
 FFTGraph::setWindowSize(int windowSize)
 {
 	if (_a_window) {
-		LockMonitor lm (_a_window->track_list_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm  (_a_window->track_list_lock);
 		setWindowSize_internal(windowSize);
 	} else {
 		setWindowSize_internal(windowSize);
@@ -261,7 +261,7 @@ FFTGraph::draw_scales(Glib::RefPtr<Gdk::Window> window)
 void
 FFTGraph::redraw()
 {	
-	LockMonitor lm (_a_window->track_list_lock, __LINE__, __FILE__ );
+	Glib::Mutex::Lock lm  (_a_window->track_list_lock);
 
 	draw_scales(get_window());
 	

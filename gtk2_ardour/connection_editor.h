@@ -39,7 +39,7 @@ using __gnu_cxx::slist;
 
 #include "ardour_dialog.h"
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 
 namespace ARDOUR {
 	class Session;
@@ -116,7 +116,7 @@ class ConnectionEditor : public ArdourDialog {
 	Gtk::Button clear_button;
 	Gtk::Button add_port_button;
 
-	PBD::Lock port_display_lock;
+	Glib::Mutex port_display_lock;
 	slist<Gtk::ScrolledWindow *> port_displays;
 
 	Gtk::Button ok_button;

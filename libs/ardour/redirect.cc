@@ -126,7 +126,7 @@ Redirect::load_automation (string path)
 		return 1;
 	}
 
-	LockMonitor lm (_automation_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_automation_lock);
 	set<uint32_t> tosave;
 	parameter_automation.clear ();
 
@@ -159,7 +159,7 @@ Redirect::load_automation (string path)
 int
 Redirect::save_automation (string path)
 {
-	LockMonitor lm (_automation_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_automation_lock);
 	string fullpath;
 
 	if (parameter_automation.empty()) {
@@ -268,7 +268,7 @@ Redirect::state (bool full_state)
 void
 Redirect::what_has_automation (set<uint32_t>& s) const
 {
-	LockMonitor lm (_automation_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_automation_lock);
 	map<uint32_t,AutomationList*>::const_iterator li;
 	
 	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
@@ -279,7 +279,7 @@ Redirect::what_has_automation (set<uint32_t>& s) const
 void
 Redirect::what_has_visible_automation (set<uint32_t>& s) const
 {
-	LockMonitor lm (_automation_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_automation_lock);
 	set<uint32_t>::const_iterator li;
 	
 	for (li = visible_parameter_automation.begin(); li != visible_parameter_automation.end(); ++li) {

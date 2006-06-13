@@ -28,7 +28,6 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace PBD;
 
 Connection::Connection (const XMLNode& node)
 {
@@ -58,7 +57,7 @@ void
 Connection::add_connection (int port, string portname)
 {
 	{
-		LockMonitor lm (port_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (port_lock);
 		_ports[port].push_back (portname);
 	}
 	 ConnectionsChanged (port); /* EMIT SIGNAL */
@@ -70,7 +69,7 @@ Connection::remove_connection (int port, string portname)
 	bool changed = false;
 
 	{
-		LockMonitor lm (port_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (port_lock);
 		PortList& pl = _ports[port];
 		PortList::iterator i = find (pl.begin(), pl.end(), portname);
 		
@@ -88,7 +87,7 @@ Connection::remove_connection (int port, string portname)
 const Connection::PortList&
 Connection::port_connections (int port) const
 {
-	LockMonitor lm (port_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (port_lock);
 	return _ports[port];
 }
 
@@ -102,7 +101,7 @@ void
 Connection::add_port ()
 {
 	{
-		LockMonitor lm (port_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (port_lock);
 		_ports.push_back (PortList());
 	}
 	 ConfigurationChanged(); /* EMIT SIGNAL */
@@ -114,7 +113,7 @@ Connection::remove_port (int which_port)
 	bool changed = false;
 
 	{
-		LockMonitor lm (port_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (port_lock);
 		vector<PortList>::iterator i;
 		int n;
 		
@@ -135,7 +134,7 @@ void
 Connection::clear ()
 {
 	{
-		LockMonitor lm (port_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (port_lock);
 		_ports.clear ();
 	}
 

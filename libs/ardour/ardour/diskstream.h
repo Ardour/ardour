@@ -33,7 +33,7 @@
 
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
-#include <pbd/atomic.h>
+ 
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
@@ -115,7 +115,7 @@ class DiskStream : public Stateful, public sigc::trackable
 	}
 
 	void set_record_enabled (bool yn, void *src);
-	bool record_enabled() const { return atomic_read (&_record_enabled); }
+	bool record_enabled() const { return g_atomic_int_get (&_record_enabled); }
 	void punch_in ();
 	void punch_out ();
 
@@ -365,7 +365,7 @@ class DiskStream : public Stateful, public sigc::trackable
 	AlignStyle               _persistent_alignment_style;
 	bool                      first_input_change;
 
-	PBD::NonBlockingLock  state_lock;
+	Glib::Mutex  state_lock;
 
 	jack_nframes_t scrub_start;
 	jack_nframes_t scrub_buffer_size;
@@ -404,7 +404,7 @@ class DiskStream : public Stateful, public sigc::trackable
 	};
 
 	vector<CaptureInfo*> capture_info;
-	PBD::Lock  capture_info_lock;
+	Glib::Mutex  capture_info_lock;
 	
 	void init (Flag);
 

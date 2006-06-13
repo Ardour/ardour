@@ -23,14 +23,13 @@
 #include <algorithm>
 #include <unistd.h>
 
-#include <ardour/timestamps.h>
-
 #include <pbd/error.h>
-#include <pbd/atomic.h>
-#include <pbd/lockmonitor.h>
+
+#include <glibmm/thread.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
+#include <ardour/timestamps.h>
 #include <ardour/diskstream.h>
 #include <ardour/audioengine.h>
 #include <ardour/slave.h>
@@ -60,7 +59,7 @@ Session::process (jack_nframes_t nframes)
 	}
 
 	if (non_realtime_work_pending()) {
-		if (atomic_read (&butler_should_do_transport_work) == 0) {
+		if (g_atomic_int_get (&butler_should_do_transport_work) == 0) {
 			post_transport ();
 		} 
 	} 
@@ -95,7 +94,7 @@ Session::no_roll (jack_nframes_t nframes, jack_nframes_t offset)
 	   this is really bad ...
 	*/
 
-	if (atomic_read (&processing_prohibited)) {
+	if (g_atomic_int_get (&processing_prohibited)) {
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			(*i)->silence (nframes, offset);
 		}
@@ -232,15 +231,15 @@ Session::commit_diskstreams (jack_nframes_t nframes, bool &needs_butler)
 		cworst = min (cworst, (*i)->capture_buffer_load());
 	}
 
-	uint32_t pmin = atomic_read (&_playback_load);
-	uint32_t pminold = atomic_read (&_playback_load_min);
-	uint32_t cmin = atomic_read (&_capture_load);
-	uint32_t cminold = atomic_read (&_capture_load_min);
+	uint32_t pmin = g_atomic_int_get (&_playback_load);
+	uint32_t pminold = g_atomic_int_get (&_playback_load_min);
+	uint32_t cmin = g_atomic_int_get (&_capture_load);
+	uint32_t cminold = g_atomic_int_get (&_capture_load_min);
 
-	atomic_set (&_playback_load, (uint32_t) floor (pworst * 100.0f));
-	atomic_set (&_capture_load, (uint32_t) floor (cworst * 100.0f));
-	atomic_set (&_playback_load_min, min (pmin, pminold));
-	atomic_set (&_capture_load_min, min (cmin, cminold));
+	g_atomic_int_set (&_playback_load, (uint32_t) floor (pworst * 100.0f));
+	g_atomic_int_set (&_capture_load, (uint32_t) floor (cworst * 100.0f));
+	g_atomic_int_set (&_playback_load_min, min (pmin, pminold));
+	g_atomic_int_set (&_capture_load_min, min (cmin, cminold));
 
 	if (actively_recording()) {
 		set_dirty();
@@ -299,9 +298,9 @@ Session::process_with_events (jack_nframes_t nframes)
 	end_frame = _transport_frame + nframes;
 
 	{
-		TentativeRWLockMonitor rm (route_lock, false, __LINE__, __FILE__);
-		TentativeRWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
-	
+		Glib::RWLock::ReaderLock rm (route_lock, Glib::TRY_LOCK);
+		Glib::RWLock::ReaderLock dsm (diskstream_lock, Glib::TRY_LOCK);
+		
 		Event* this_event;
 		Events::iterator the_next_one;
 
@@ -570,8 +569,8 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 		if (slave_state == Waiting) {
 
 			// cerr << "waiting at " << slave_transport_frame << endl;
-			TentativeRWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
-				
+			Glib::RWLock::ReaderLock dsm (diskstream_lock, Glib::TRY_LOCK);
+			
 			if (dsm.locked() && slave_transport_frame >= slave_wait_end) {
 				// cerr << "\tstart at " << _transport_frame << endl;
 
@@ -692,7 +691,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 
 		bool need_butler;
 		
-		TentativeRWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock dsm (diskstream_lock, Glib::TRY_LOCK);
 		if (!dsm.locked()) {
 			goto noroll;
 		}
@@ -743,8 +742,8 @@ Session::process_without_events (jack_nframes_t nframes)
 	long frames_moved;
 	
 	{
-		TentativeRWLockMonitor rm (route_lock, false, __LINE__, __FILE__);
-		TentativeRWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock rm (route_lock, Glib::TRY_LOCK);
+		Glib::RWLock::ReaderLock dsm (diskstream_lock, Glib::TRY_LOCK);
 
 		if (!rm.locked() || !dsm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
 			no_roll (nframes, 0);
@@ -810,7 +809,7 @@ Session::process_without_events (jack_nframes_t nframes)
 void
 Session::process_audition (jack_nframes_t nframes)
 {
-	TentativeRWLockMonitor rm (route_lock, false, __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock rm (route_lock, Glib::TRY_LOCK);
 	Event* ev;
 
 	if (rm.locked()) {

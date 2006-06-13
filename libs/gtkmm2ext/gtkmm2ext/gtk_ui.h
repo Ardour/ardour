@@ -36,11 +36,10 @@
 #include <gdkmm/color.h>
 #include <pbd/abstract_ui.h>
 #include <pbd/ringbufferNPT.h>
-#include <pbd/atomic.h>
+ 
 #include <pbd/pool.h>
 #include <pbd/error.h>
 #include <pbd/receiver.h>
-#include <pbd/lockmonitor.h>
 
 using std::string;
 using std::queue;

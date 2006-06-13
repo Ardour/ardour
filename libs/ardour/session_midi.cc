@@ -31,7 +31,7 @@
 #include <midi++/port.h>
 #include <midi++/manager.h>
 #include <pbd/error.h>
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <pbd/pthread_utils.h>
 
 #include <ardour/configuration.h>
@@ -114,7 +114,7 @@ Session::set_midi_control (bool yn)
 	poke_midi_thread ();
 
 	if (_midi_port) {
-		RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock guard (route_lock);
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			(*i)->reset_midi_control (_midi_port, midi_control);
 		}
@@ -607,7 +607,7 @@ Session::mmc_record_strobe (MIDI::MachineControl &mmc)
 		*/
 		
 		save_state ("", true);
-		atomic_set (&_record_status, Enabled);
+		g_atomic_int_set (&_record_status, Enabled);
 		RecordStateChanged (); /* EMIT SIGNAL */
 		
 		request_transport_speed (1.0);
@@ -789,7 +789,7 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 	if (mmc_control) {
 
 		RouteList::iterator i;
-		RWLockMonitor (route_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock guard (route_lock);
 		
 		for (i = routes.begin(); i != routes.end(); ++i) {
 			AudioTrack *at;
@@ -1073,8 +1073,8 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 
 		mmc_buffer[nbytes++] = 0xf7; // terminate SysEx/MMC message
 
-		LockMonitor lm (midi_lock, __LINE__, __FILE__);
-
+		Glib::Mutex::Lock lm (midi_lock);
+		
 		if (_mmc_port->write (mmc_buffer, nbytes) != nbytes) {
 			error << string_compose(_("MMC: cannot send command %1%2%3"), &hex, cmd, &dec) << endmsg;
 		}

@@ -37,7 +37,9 @@ tranzport.Merge ([
     libraries['pbd3'],
     libraries['midi++2'],
     libraries['xml'],
-    libraries['usb']
+    libraries['usb'],
+    libraries['glib2'],
+    libraries['glibmm2']
     ])
 
 libardour_tranzport = tranzport.SharedLibrary('ardour_tranzport', tranzport_files)
@@ -50,6 +52,6 @@ if env['NLS']:
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2/surfaces'), libardour_tranzport))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-				     [ 'SConscript', 'i18n.h', 'gettext.h' ] +
+				     [ 'SConscript' ] +
 				     tranzport_files + 
 				     glob.glob('po/*.po') + glob.glob('*.h')))

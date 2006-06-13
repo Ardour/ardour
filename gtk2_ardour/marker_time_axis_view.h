@@ -125,10 +125,10 @@ class MarkerTimeAxisView : public sigc::trackable
 		 * the new MarkerView is returned
 		 *
 		 * @param ifv the ImageFrameView that the new item is marking up
-		 * @param mark_type the text to be displayed uopn the new marker item
+		 * @param mark_text the text to be displayed uopn the new marker item
 		 * @param mark_id the unique id of the new item
 		 * @param start the position the new item should be placed upon the time line
-		 * @param dur the duration the new item should be placed upon the timeline
+		 * @param duration the duration the new item should be placed upon the timeline
 		 * @param src the identity of the object that initiated the change
 		 */
 		MarkerView* add_marker_view(ImageFrameView* ifv, std::string mark_type, std::string mark_id, jack_nframes_t start, jack_nframes_t dur, void* src) ;
@@ -163,7 +163,7 @@ class MarkerTimeAxisView : public sigc::trackable
 		/**
 		 * Removes mv from the list of MarkerView upon this TimeAxis
 		 *
-		 * @param item the MarkerView to remove
+		 * @param mv the MarkerView to remove
 		 * @param src the identity of the object that initiated the change
 		 */
 		void remove_marker_view(MarkerView* item, void* src) ;

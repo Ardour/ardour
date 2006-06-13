@@ -48,7 +48,6 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
      *
      * @param pos the new position
      * @param src the identity of the object that initiated the change
-	 * @param delta ignored
      * @return true if the position change was a success, false otherwise
      */
     virtual bool set_position(jack_nframes_t pos, void* src, double* delta = 0) ;
@@ -93,7 +92,7 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
     /**
      * Sets the minimu duration that this item may be set to
      *
-     * @param dur the minimum duration that this item may be set to
+     * @param the minimum duration that this item may be set to
      * @param src the identity of the object that initiated the change
      */
     virtual void set_min_duration(jack_nframes_t dur, void* src) ;
@@ -343,13 +342,12 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
      * @param parent the parent canvas group
      * @param tv the TimeAxisView we are going to be added to
      * @param spu samples per unit
-     * @param base_color base color
+     * @param base_color
      * @param start the start point of this item
      * @param duration the duration of this item
-	 * @param v visibility
      */
-    TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu,
-		Gdk::Color& base_color, jack_nframes_t start, jack_nframes_t duration, Visibility v = Visibility (0));
+    TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
+		     jack_nframes_t start, jack_nframes_t duration, Visibility v = Visibility (0));
     
     /**
      * Calculates some contrasting color for displaying various parts of this item, based upon the base color

@@ -217,8 +217,8 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	~VSTPluginUI ();
 
 	gint get_preferred_height ();
-	bool start_updating(GdkEventAny*) {}
-	bool stop_updating(GdkEventAny*) {}
+	bool start_updating(GdkEventAny*) {return false;}
+	bool stop_updating(GdkEventAny*) {return false;}
 
 	int package (Gtk::Window&);
 
@@ -228,7 +228,7 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::HBox   preset_box;
 	Gtk::VBox   vpacker;
 	
-	gboolean configure_handler (GdkEventConfigure*, GtkSocket*);
+	gboolean configure_handler (GdkEventConfigure*, Gtk::Socket*);
 	void save_plugin_setting ();
 };
 #endif

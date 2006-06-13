@@ -43,7 +43,7 @@ class SndFileSource : public ExternalSource {
 
 	mutable float *tmpbuf;
 	mutable jack_nframes_t tmpbufsize;
-	mutable PBD::Lock _tmpbuf_lock;
+	mutable Glib::Mutex _tmpbuf_lock;
 
 	void init (const string &str, bool build_peak);
 };

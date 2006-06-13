@@ -652,8 +652,15 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		shuttle_grabbed = false;
 		shuttle_box.remove_modal_grab ();
 		if (shuttle_behaviour == Sprung) {
-			shuttle_fract = SHUTTLE_FRACT_SPEED1;
-			session->request_transport_speed (1.0);
+			if (session->get_auto_play() || roll_button.get_state()) {
+				shuttle_fract = SHUTTLE_FRACT_SPEED1;				
+				session->request_transport_speed (1.0);
+				stop_button.set_active (false);
+				roll_button.set_active (true);
+			} else {
+				shuttle_fract = 0;
+				session->request_transport_speed (0.0);
+			}
 			shuttle_box.queue_draw ();
 		}
 		return true;
@@ -662,6 +669,8 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		if (session->transport_rolling()) {
 			shuttle_fract = SHUTTLE_FRACT_SPEED1;
 			session->request_transport_speed (1.0);
+			stop_button.set_active (false);
+			roll_button.set_active (true);
 		} else {
 			shuttle_fract = 0;
 		}

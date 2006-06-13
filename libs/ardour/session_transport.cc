@@ -27,7 +27,7 @@
 
 #include <pbd/undo.h>
 #include <pbd/error.h>
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <pbd/pthread_utils.h>
 
 #include <midi++/mmc.h>
@@ -190,9 +190,9 @@ Session::realtime_stop (bool abort)
 void
 Session::butler_transport_work ()
 {
-	RWLockMonitor rm (route_lock, false, __LINE__, __FILE__);
-	RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
-		
+	Glib::RWLock::ReaderLock rm (route_lock);
+	Glib::RWLock::ReaderLock dsm (diskstream_lock);
+	
 	if (post_transport_work & PostTransportCurveRealloc) {
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 			(*i)->curve_reallocate();
@@ -240,13 +240,13 @@ Session::butler_transport_work ()
 		non_realtime_set_audition ();
 	}
 
-	atomic_dec (&butler_should_do_transport_work);
+	g_atomic_int_dec_and_test (&butler_should_do_transport_work);
 }
 
 void
 Session::non_realtime_set_speed ()
 {
-	RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->non_realtime_set_speed ();
@@ -256,7 +256,7 @@ Session::non_realtime_set_speed ()
 void
 Session::non_realtime_overwrite ()
 {
-	RWLockMonitor lm (diskstream_lock, false, __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
 	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->pending_overwrite) {
@@ -398,9 +398,9 @@ Session::non_realtime_stop (bool abort)
 		*/
 
 		if (!Config->get_latched_record_enable()) {
-			atomic_set (&_record_status, Disabled);
+			g_atomic_int_set (&_record_status, Disabled);
 		} else {
-			atomic_set (&_record_status, Enabled);
+			g_atomic_int_set (&_record_status, Enabled);
 		}
 		RecordStateChanged (); /* emit signal */
 	}
@@ -633,7 +633,7 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 
 		/* this is functionally what clear_clicks() does but with a tentative lock */
 
-		TentativeRWLockMonitor clickm (click_lock, true, __LINE__, __FILE__);
+		Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
 	
 		if (clickm.locked()) {
 			
@@ -652,7 +652,7 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 			   a non-tentative rwlock here,  because the action must occur.
 			   The rarity and short potential lock duration makes this "OK"
 			*/
-			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
@@ -667,7 +667,7 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 			   a non-tentative rwlock here,  because the action must occur.
 			   The rarity and short potential lock duration makes this "OK"
 			*/
-			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
@@ -713,7 +713,7 @@ Session::set_transport_speed (float speed, bool abort)
 			   a non-tentative rwlock here,  because the action must occur.
 			   The rarity and short potential lock duration makes this "OK"
 			*/
-			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
@@ -739,7 +739,7 @@ Session::set_transport_speed (float speed, bool abort)
 			   a non-tentative rwlock here,  because the action must occur.
 			   The rarity and short potential lock duration makes this "OK"
 			*/
-			RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+			Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if (auto_input && (*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
@@ -1171,7 +1171,7 @@ Session::engine_halted ()
 	   the picture.
 	*/
 
-	atomic_set (&butler_should_do_transport_work, 0);
+	g_atomic_int_set (&butler_should_do_transport_work, 0);
 	post_transport_work = PostTransportWork (0);
 	stop_butler ();
 	
@@ -1207,8 +1207,8 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		return;
 	}
 
-	RWLockMonitor lm (route_lock, false, __LINE__, __FILE__);
-	RWLockMonitor lm2 (diskstream_lock, false, __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock lm (route_lock);
+	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
 	_worst_track_latency = 0;
 
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {

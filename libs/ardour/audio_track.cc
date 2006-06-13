@@ -625,7 +625,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 	jack_nframes_t transport_frame;
 
 	{
-		TentativeRWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
 			// automation snapshot can also be called from the non-rt context
 			// and it uses the redirect list, so we take the lock out here
@@ -709,7 +709,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
 
 		if (!diskstream->record_enabled() && _session.transport_rolling()) {
-			TentativeLockMonitor am (automation_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock am (automation_lock, Glib::TRY_LOCK);
 			
 			if (am.locked() && gain_automation_playback()) {
 				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
@@ -789,7 +789,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbu
 	vector<Sample*>::iterator bi;
 	Sample * b;
 	
-	RWLockMonitor rlock (redirect_lock, false, __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock rlock (redirect_lock);
 		
 	if (diskstream->playlist()->read (buffers[0], mix_buffer, gain_buffer, workbuf, start, nframes) != nframes) {
 		return -1;
@@ -958,7 +958,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	_freeze_record.have_mementos = true;
 
 	{
-		RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (redirect_lock);
 		
 		for (RedirectList::iterator r = _redirects.begin(); r != _redirects.end(); ++r) {
 			
@@ -1015,7 +1015,7 @@ AudioTrack::unfreeze ()
 
 		} else {
 
-			RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__); // should this be a write lock? jlc
+			Glib::RWLock::ReaderLock lm (redirect_lock); // should this be a write lock? jlc
 			for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 				for (vector<FreezeRecordInsertInfo*>::iterator ii = _freeze_record.insert_info.begin(); ii != _freeze_record.insert_info.end(); ++ii) {
 					if ((*ii)->id == (*i)->id()) {

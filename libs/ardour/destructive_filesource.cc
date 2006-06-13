@@ -268,7 +268,7 @@ jack_nframes_t
 DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
 {
 	{
-		LockMonitor lm (_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (_lock);
 		
 		jack_nframes_t old_file_pos;
 

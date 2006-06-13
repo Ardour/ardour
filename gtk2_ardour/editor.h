@@ -413,6 +413,7 @@ class Editor : public PublicEditor
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
+	void get_relevant_audio_tracks (AudioTimeAxisView& base, std::set<AudioTimeAxisView*>& relevant_tracks);
 	void mapover_audio_tracks (sigc::slot<void,AudioTimeAxisView&,uint32_t> sl);
 
 	/* functions to be passed to mapover_audio_tracks(), possibly with sigc::bind()-supplied arguments */
@@ -424,10 +425,15 @@ class Editor : public PublicEditor
 
 	/* end */
 
+	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
+	bool button_release_can_deselect;
+
 	void catch_vanishing_audio_regionview (AudioRegionView *);
-	void set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
-	void set_selected_track_from_click (Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
-	void set_selected_regionview_from_click (Selection::Operation op = Selection::Set, bool no_track_remove=false);
+
+	bool set_selected_control_point_from_click (bool press, Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
+	bool set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
+	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
+
 	void set_selected_regionview_from_region_list (ARDOUR::Region& region, Selection::Operation op = Selection::Set);
 	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, ARDOUR::Region*);
 	void collect_new_region_view (AudioRegionView *);
@@ -1037,6 +1043,7 @@ class Editor : public PublicEditor
 
 	void start_grab (GdkEvent*, Gdk::Cursor* cursor = 0);
 	bool end_grab (ArdourCanvas::Item*, GdkEvent*);
+	void swap_grab (ArdourCanvas::Item*, Gdk::Cursor* cursor, uint32_t time);
 
 	Gtk::Menu fade_context_menu;
 	void popup_fade_context_menu (int, int, ArdourCanvas::Item*, ItemType);

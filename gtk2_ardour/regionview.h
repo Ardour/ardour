@@ -64,9 +64,9 @@ class AudioRegionView : public TimeAxisViewItem
     void set_valid (bool yn) { valid = yn; }
 
     std::string get_item_name();
-    void set_height (double h);
-    void set_samples_per_unit (double spu);
-    bool set_duration (jack_nframes_t dur, void* src);
+    void set_height (double);
+    void set_samples_per_unit (double);
+    bool set_duration (jack_nframes_t, void*);
 
     void set_amplitude_above_axis (gdouble spp);
 
@@ -193,7 +193,7 @@ class AudioRegionView : public TimeAxisViewItem
     void store_flags ();
 
     void set_colors ();
-    void compute_colors (Gdk::Color& color);
+    void compute_colors (Gdk::Color&);
     virtual void set_frame_color ();
     void reset_width_dependent_items (double pixel_width);
     void set_waveview_data_src();

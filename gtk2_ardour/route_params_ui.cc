@@ -20,7 +20,7 @@
 
 #include <algorithm>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
 

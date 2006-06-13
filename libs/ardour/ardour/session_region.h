@@ -8,7 +8,7 @@ namespace ARDOUR {
 
 template<class T> void Session::foreach_audio_region (T *obj, void (T::*func)(AudioRegion *))
 {
-	LockMonitor lm (region_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (region_lock);
 	for (AudioRegionList::iterator i = audio_regions.begin(); i != audio_regions.end(); i++) {
 		(obj->*func) ((*i).second);
 	}

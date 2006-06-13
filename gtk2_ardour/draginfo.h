@@ -38,7 +38,7 @@ struct DragInfo {
     bool copy;
     bool was_rolling;
     bool first_move;
-    bool move_threshold_passsed;
+    bool move_threshold_passed;
     bool want_move_threshold;
     bool brushing;
     ARDOUR::Location* copied_location;

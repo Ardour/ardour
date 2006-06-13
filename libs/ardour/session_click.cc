@@ -47,7 +47,7 @@ Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t off
 		return;
 	}
 
-	TentativeRWLockMonitor clickm (click_lock, true, __LINE__, __FILE__);
+	Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
 	
 	if (!clickm.locked() || _transport_speed != 1.0 || !_clicking || click_data == 0) {
 		_click_io->silence (nframes, offset);
@@ -209,7 +209,7 @@ Session::setup_click_sounds (int which)
 void
 Session::clear_clicks ()
 {
-	RWLockMonitor lm (click_lock, true, __LINE__, __FILE__);
+	Glib::RWLock::WriterLock lm (click_lock);
 
 	for (Clicks::iterator i = clicks.begin(); i != clicks.end(); ++i) {
 		delete *i;

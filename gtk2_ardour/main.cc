@@ -367,6 +367,9 @@ main (int argc, char *argv[])
 	ARDOUR::AudioEngine *engine;
 	vector<Glib::ustring> null_file_list;
 
+        // needs a better home.
+        Glib::thread_init();
+        
 	gtk_set_locale ();
 
 	(void)   bindtextdomain (PACKAGE, LOCALEDIR);

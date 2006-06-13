@@ -22,10 +22,8 @@
 #define __ardour_auditioner_h__
 
 #include <string>
-#include <pthread.h>
 
-#include <pbd/lockmonitor.h>
-#include <pbd/atomic.h>
+#include <glibmm/thread.h>
 
 #include <ardour/ardour.h>
 #include <ardour/audio_track.h>
@@ -50,10 +48,10 @@ class Auditioner : public AudioTrack
 	int  play_audition (jack_nframes_t nframes);
 
 	void cancel_audition () { 
-		atomic_set (&_active, 0);
+		g_atomic_int_set (&_active, 0);
 	}
 
-	bool active() const { return atomic_read (&_active); }
+	bool active() const { return g_atomic_int_get (&_active); }
 
   private:
 	AudioRegion *the_region;
