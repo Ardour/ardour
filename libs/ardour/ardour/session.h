@@ -993,12 +993,12 @@ class Session : public sigc::trackable, public Stateful
 	typedef void (Session::*process_function_type)(jack_nframes_t);
 
 	AudioEngine            &_engine;
-	atomic_t                 processing_prohibited;
+	mutable gint            processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
 	jack_nframes_t          _current_frame_rate;
 	int                      transport_sub_state;
-	atomic_t                _record_status;
+	mutable gint           _record_status;
 	jack_nframes_t          _transport_frame;
 	Location*                end_location;
 	Location*                start_location;
@@ -1155,14 +1155,14 @@ class Session : public sigc::trackable, public Stateful
 	bool              pending_abort;
 	bool              pending_auto_loop;
 	
-	Sample*              butler_mixdown_buffer;
-	float*               butler_gain_buffer;
-	pthread_t            butler_thread;
-	PBD::NonBlockingLock butler_request_lock;
-	pthread_cond_t       butler_paused;
-	bool                 butler_should_run;
-	atomic_t             butler_should_do_transport_work;
-	int                  butler_request_pipe[2];
+	Sample*           butler_mixdown_buffer;
+	float*            butler_gain_buffer;
+	pthread_t         butler_thread;
+	Glib::Mutex       butler_request_lock;
+        Glib::Cond        butler_paused;
+	bool              butler_should_run;
+	mutable gint      butler_should_do_transport_work;
+	int               butler_request_pipe[2];
 	
 	struct ButlerRequest {
 	    enum Type {
@@ -1402,12 +1402,21 @@ class Session : public sigc::trackable, public Stateful
 	    static MultiAllocSingleReleasePool pool;
 	};
 
+<<<<<<< .working
 	//PBD::Lock       midi_lock;
 	//pthread_t       midi_thread;
 	//int             midi_request_pipe[2];
 	atomic_t        butler_active;
 	//RingBuffer<MIDIRequest*> midi_requests;
 /*
+=======
+	Glib::Mutex       midi_lock;
+	pthread_t       midi_thread;
+	int             midi_request_pipe[2];
+	mutable  gint   butler_active;
+	RingBuffer<MIDIRequest*> midi_requests;
+
+>>>>>>> .merge-right.r579
 	int           start_midi_thread ();
 	void          terminate_midi_thread ();
 	void          poke_midi_thread ();
@@ -1603,10 +1612,17 @@ class Session : public sigc::trackable, public Stateful
 	int ensure_sound_dir (string, string&);
 	void refresh_disk_space ();
 
+<<<<<<< .working
 	atomic_t _playback_load;
 	atomic_t _capture_load;
 	atomic_t _playback_load_min;
 	atomic_t _capture_load_min;
+=======
+	mutable gint _playback_load;
+	mutable gint _capture_load;
+	mutable gint _playback_load_min;
+	mutable gint _capture_load_min;
+>>>>>>> .merge-right.r579
 
 	/* I/O Connections */
 

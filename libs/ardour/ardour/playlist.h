@@ -169,9 +169,9 @@ class Playlist : public Stateful, public StateManager {
 	RegionList       regions;
 	string          _name;
 	Session&        _session;
-	atomic_t         block_notifications;
-	atomic_t         ignore_state_changes;
-	mutable PBD::NonBlockingLock region_lock;
+	mutable gint    block_notifications;
+	mutable gint    ignore_state_changes;
+	mutable Glib::Mutex region_lock;
 	RegionList       pending_removals;
 	RegionList       pending_adds;
 	RegionList       pending_bounds;

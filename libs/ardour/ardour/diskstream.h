@@ -320,7 +320,7 @@ class DiskStream : public Stateful, public sigc::trackable
 	uint32_t      _n_channels;
 	id_t              _id;
 
-	atomic_t                 _record_enabled;
+	mutable gint             _record_enabled;
 	AudioPlaylist*           _playlist;
 	double                   _visible_speed;
 	double                   _actual_speed;

@@ -237,10 +237,10 @@ class AudioEngine : public sigc::trackable
 
 	int connect_to_jack (std::string client_name);
 
-	static void* _meter_thread (void* arg);
-	void* meter_thread ();
-	pthread_t meter_thread_id;
-	void maybe_start_metering_thread ();
+	void meter_thread ();
+	void start_metering_thread ();
+    Glib::Thread*    m_meter_thread;
+    mutable gint     m_meter_exit;
 };
 
 }; /* namespace ARDOUR */

@@ -116,8 +116,8 @@ class RingBuffer
   protected:
 	T *buf;
 	size_t size;
-	atomic_t write_ptr;
-	atomic_t read_ptr;
+	mutable gint write_ptr;
+	mutable gint read_ptr;
 	size_t size_mask;
 };
 
