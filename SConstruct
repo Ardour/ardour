@@ -353,7 +353,7 @@ libraries = { }
 
 libraries['core'] = LibraryInfo (CCFLAGS = '-Ilibs')
 
-#libraries['sndfile'] = LibraryInfo(CCFLAGS = '-Ilibs/libsndfile/src')
+#libraries['sndfile'] = LibraryInfo()
 #libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
 
 libraries['lrdf'] = LibraryInfo()
@@ -548,7 +548,7 @@ else:
                                           CPPPATH=['#libs', '#libs/soundtouch'])
     libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
                                     LIBPATH='#libs/libsndfile',
-                                    CPPPATH='#libs/libsndfile')
+                                    CPPPATH=(['#libs/libsndfile', '#libs/libsndfile/src'])
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
