@@ -31,8 +31,11 @@ class CoreAudioSource : public ExternalSource {
 	CoreAudioSource (const XMLNode&);
 	~CoreAudioSource ();
 
-	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 	float sample_rate() const;
+	int update_header (jack_nframes_t when, struct tm&, time_t);
+
+  protected:
+	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 
   private:
 	ExtAudioFileRef af;

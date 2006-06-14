@@ -32,6 +32,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
 #include <ardour/tempo.h>
+#include <ardour/audiofilesource.h>
 
 #include "i18n.h"
 
@@ -91,6 +92,9 @@ Session::set_smpte_offset (jack_nframes_t off)
 {
 	_smpte_offset = off;
 	last_smpte_valid = false;
+
+	AudioFileSource::set_header_position_offset (_smpte_offset, _smpte_offset_negative);
+
 	SMPTEOffsetChanged (); /* EMIT SIGNAL */
 }
 
@@ -99,6 +103,9 @@ Session::set_smpte_offset_negative (bool neg)
 {
 	_smpte_offset_negative = neg;
 	last_smpte_valid = false;
+
+	AudioFileSource::set_header_position_offset (_smpte_offset, _smpte_offset_negative);
+
 	SMPTEOffsetChanged (); /* EMIT SIGNAL */
 }
 
@@ -558,7 +565,7 @@ void
 Session::sample_to_smpte( jack_nframes_t sample, SMPTE_Time& smpte, bool use_offset, bool use_subframes ) const
 {
 	jack_nframes_t offset_sample;
-  
+
 	if (!use_offset) {
 		offset_sample = sample;
 		smpte.negative = false;
@@ -690,7 +697,7 @@ Session::smpte_duration_string (char* buf, jack_nframes_t when) const
 	SMPTE_Time smpte;
 
 	smpte_duration (when, smpte);
-	snprintf (buf, sizeof (buf), "%02ld:%02ld:%02ld:%02ld", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+	snprintf (buf, sizeof (buf), "%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 }
 
 void

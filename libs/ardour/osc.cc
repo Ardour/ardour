@@ -309,7 +309,6 @@ OSC::osc_receiver()
 		if ((ret = poll (pfd, nfds, timeout)) < 0) {
 			if (errno == EINTR) {
 				/* gdb at work, perhaps */
-				cerr << "EINTR hit " << endl;
 				goto again;
 			}
 			

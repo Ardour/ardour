@@ -31,7 +31,7 @@
 #include <ardour/port.h>
 #include <ardour/insert.h>
 #include <ardour/session.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/gtk_ui.h>

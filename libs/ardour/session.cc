@@ -32,7 +32,8 @@
 #include <sigc++/bind.h>
 #include <sigc++/retype.h>
 
-#include <glibmm.h>
+#include <glibmm/thread.h>
+#include <glibmm/miscutils.h>
 
 #include <pbd/error.h>
 #include <glibmm/thread.h>
@@ -43,14 +44,12 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/utils.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
-#include <ardour/source.h>
-#include <ardour/filesource.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/destructive_filesource.h>
-#include <ardour/sndfilesource.h>
 #include <ardour/auditioner.h>
 #include <ardour/recent_sessions.h>
 #include <ardour/redirect.h>
@@ -90,6 +89,7 @@ Session::mix_buffers_with_gain_t	Session::mix_buffers_with_gain 	= 0;
 Session::mix_buffers_no_gain_t		Session::mix_buffers_no_gain 	= 0;
 
 sigc::signal<int> Session::AskAboutPendingState;
+sigc::signal<void> Session::SMPTEOffsetChanged;
 
 int
 Session::find_session (string str, string& path, string& snapshot, bool& isnew)
@@ -455,10 +455,10 @@ Session::~Session ()
 	}
 
 #ifdef TRACK_DESTRUCTION
-	cerr << "delete diskstreams\n";
+	cerr << "delete audio_diskstreams\n";
 #endif /* TRACK_DESTRUCTION */
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ) {
-		DiskStreamList::iterator tmp;
+	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ) {
+		AudioDiskstreamList::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -469,10 +469,10 @@ Session::~Session ()
 	}
 
 #ifdef TRACK_DESTRUCTION
-	cerr << "delete sources\n";
+	cerr << "delete audio sources\n";
 #endif /* TRACK_DESTRUCTION */
-	for (SourceList::iterator i = sources.begin(); i != sources.end(); ) {
-		SourceList::iterator tmp;
+	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ) {
+		AudioSourceList::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -881,7 +881,7 @@ Session::playlist_length_changed (Playlist* pl)
 }
 
 void
-Session::diskstream_playlist_changed (DiskStream* dstream)
+Session::diskstream_playlist_changed (AudioDiskstream* dstream)
 {
 	Playlist *playlist;
 
@@ -961,7 +961,7 @@ Session::set_auto_input (bool yn)
 			   The rarity and short potential lock duration makes this "OK"
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (!auto_input);   
@@ -979,7 +979,7 @@ Session::reset_input_monitor_state ()
 {
 	if (transport_rolling()) {
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring() && !auto_input);
@@ -987,7 +987,7 @@ Session::reset_input_monitor_state ()
 		}
 	} else {
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring());
@@ -1068,7 +1068,7 @@ Session::auto_loop_changed (Location* location)
 		}
 		else if (seamless_loop && !loop_changing) {
 			
-			// schedule a locate-roll to refill the diskstreams at the
+			// schedule a locate-roll to refill the audio_diskstreams at the
 			// previous loop end
 			loop_changing = true;
 
@@ -1265,7 +1265,7 @@ Session::enable_record ()
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			
-			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (true);   
 				}
@@ -1300,7 +1300,7 @@ Session::disable_record (bool rt_context, bool force)
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			
-			for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (false);   
 				}
@@ -1327,7 +1327,7 @@ Session::step_back_from_record ()
 		*/
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 		
-		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		        if (auto_input && (*i)->record_enabled ()) {
 			        //cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 		                (*i)->monitor_input (false);   
@@ -1432,6 +1432,9 @@ Session::set_frame_rate (jack_nframes_t frames_per_second)
 
 	Route::set_automation_interval ((jack_nframes_t) ceil ((double) frames_per_second * 0.25));
 
+	// XXX we need some equivalent to this, somehow
+	// DestructiveFileSource::setup_standard_crossfades (frames_per_second);
+
 	set_dirty();
 
 	/* XXX need to reset/reinstantiate all LADSPA plugins */
@@ -1493,7 +1496,7 @@ Session::set_block_size (jack_nframes_t nframes)
 			(*i)->set_block_size (nframes);
 		}
 		
-		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 			(*i)->set_block_size (nframes);
 		}
 
@@ -1900,14 +1903,14 @@ Session::add_route (Route* route)
 }
 
 void
-Session::add_diskstream (DiskStream* dstream)
+Session::add_diskstream (AudioDiskstream* dstream)
 {
 	/* need to do this in case we're rolling at the time, to prevent false underruns */
 	dstream->do_refill(0, 0, 0);
 	
 	{ 
 		Glib::RWLock::WriterLock lm (diskstream_lock);
-		diskstreams.push_back (dstream);
+		audio_diskstreams.push_back (dstream);
 	}
 
 	/* take a reference to the diskstream, preventing it from
@@ -1927,7 +1930,7 @@ Session::add_diskstream (DiskStream* dstream)
 	set_dirty();
 	save_state (_current_snapshot_name);
 
-	DiskStreamAdded (dstream); /* EMIT SIGNAL */
+	AudioDiskstreamAdded (dstream); /* EMIT SIGNAL */
 }
 
 void
@@ -1961,18 +1964,24 @@ Session::remove_route (Route& route)
 		update_route_solo_state ();
 	}
 
-	{
-		Glib::RWLock::WriterLock lm (diskstream_lock);
+	AudioTrack* at;
+	AudioDiskstream* ds = 0;
+	
+	if ((at = dynamic_cast<AudioTrack*>(&route)) != 0) {
+		ds = &at->disk_stream();
+	}
+	
+	if (ds) {
 
-		AudioTrack* at;
-
-		if ((at = dynamic_cast<AudioTrack*>(&route)) != 0) {
-			diskstreams.remove (&at->disk_stream());
-			at->disk_stream().unref ();
+		{
+			Glib::RWLock::WriterLock lm (diskstream_lock);
+			audio_diskstreams.remove (ds);
 		}
 
-		find_current_end ();
+		ds->unref ();
 	}
+
+	find_current_end ();
 	
 	update_latency_compensation (false, false);
 	set_dirty();
@@ -2255,7 +2264,7 @@ Session::get_maximum_extent () const
 	   ensure atomicity.
 	*/
 
-	for (DiskStreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (AudioDiskstreamList::const_iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		Playlist* pl = (*i)->playlist();
 		if ((me = pl->get_maximum_extent()) > max) {
 			max = me;
@@ -2265,12 +2274,12 @@ Session::get_maximum_extent () const
 	return max;
 }
 
-DiskStream *
+AudioDiskstream *
 Session::diskstream_by_name (string name)
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
 		}
@@ -2279,12 +2288,12 @@ Session::diskstream_by_name (string name)
 	return 0;
 }
 
-DiskStream *
+AudioDiskstream *
 Session::diskstream_by_id (id_t id)
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		if ((*i)->id() == id) {
 			return *i;
 		}
@@ -2583,7 +2592,10 @@ Session::destroy_region (Region* region)
 	for (vector<Source*>::iterator i = srcs.begin(); i != srcs.end(); ++i) {
 		
 		if ((*i)->use_cnt() == 0) {
-			(*i)->mark_for_remove ();
+			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*i);
+			if (afs) {
+				(afs)->mark_for_remove ();
+			}
 			delete *i;
 		}
 	}
@@ -2607,7 +2619,7 @@ Session::remove_last_capture ()
 
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		list<Region*>& l = (*i)->last_capture_regions();
 		
 		if (!l.empty()) {
@@ -2630,15 +2642,15 @@ Session::remove_region_from_region_list (Region& r)
 /* Source Management */
 
 void
-Session::add_source (Source* source)
+Session::add_audio_source (AudioSource* source)
 {
-	pair<SourceList::key_type, SourceList::mapped_type> entry;
+	pair<AudioSourceList::key_type, AudioSourceList::mapped_type> entry;
 
 	{
-		Glib::Mutex::Lock lm (source_lock);
+		Glib::Mutex::Lock lm (audio_source_lock);
 		entry.first = source->id();
 		entry.second = source;
-		sources.insert (entry);
+		audio_sources.insert (entry);
 	}
 	
 	source->GoingAway.connect (mem_fun (this, &Session::remove_source));
@@ -2650,13 +2662,13 @@ Session::add_source (Source* source)
 void
 Session::remove_source (Source* source)
 {
-	SourceList::iterator i;
+	AudioSourceList::iterator i;
 
 	{ 
-		Glib::Mutex::Lock lm (source_lock);
+		Glib::Mutex::Lock lm (audio_source_lock);
 
-		if ((i = sources.find (source->id())) != sources.end()) {
-			sources.erase (i);
+		if ((i = audio_sources.find (source->id())) != audio_sources.end()) {
+			audio_sources.erase (i);
 		}
 	}
 
@@ -2675,15 +2687,21 @@ Session::remove_source (Source* source)
 Source *
 Session::get_source (ARDOUR::id_t id)
 {
-	Glib::Mutex::Lock lm (source_lock);
-	SourceList::iterator i;
+	Glib::Mutex::Lock lm (audio_source_lock);
+	AudioSourceList::iterator i;
 	Source* source = 0;
 
-	if ((i = sources.find (id)) != sources.end()) {
+	if ((i = audio_sources.find (id)) != audio_sources.end()) {
 		source = (*i).second;
 	}
 
-	return source;
+	if (source) {
+		return source;
+	}
+
+	/* XXX search MIDI or other searches here */
+	
+	return 0;
 }
 
 string
@@ -2890,17 +2908,23 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 	return spath;
 }
 
-FileSource *
-Session::create_file_source (DiskStream& ds, int32_t chan, bool destructive)
+AudioFileSource *
+Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bool destructive)
 {
 	string spath = audio_path_from_name (ds.name(), ds.n_channels(), chan, destructive);
 
 	/* this might throw failed_constructor(), which is OK */
-
+	
 	if (destructive) {
-		return new DestructiveFileSource (spath, frame_rate(), false, Config->get_native_file_data_format());
+		return new DestructiveFileSource (spath,
+						  Config->get_native_file_data_format(),
+						  Config->get_native_file_header_format(),
+						  frame_rate());
 	} else {
-		return new FileSource (spath, frame_rate(), false, Config->get_native_file_data_format());
+		return new SndFileSource (spath, 
+					  Config->get_native_file_data_format(),
+					  Config->get_native_file_header_format(),
+					  frame_rate());
 	}
 }
 
@@ -3082,7 +3106,7 @@ Session::remove_empty_sounds ()
 	
 	for (vector<string *>::iterator i = possible_audiofiles->begin(); i != possible_audiofiles->end(); ++i) {
 
-		if (FileSource::is_empty (*(*i))) {
+		if (AudioFileSource::is_empty (*(*i))) {
 
 			unlink ((*i)->c_str());
 			
@@ -3140,12 +3164,12 @@ Session::set_all_mute (bool yn)
 }
 		
 uint32_t
-Session::n_diskstreams () const
+Session::n_audio_diskstreams () const
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	uint32_t n = 0;
 
-	for (DiskStreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (AudioDiskstreamList::const_iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		if (!(*i)->hidden()) {
 			n++;
 		}
@@ -3154,10 +3178,10 @@ Session::n_diskstreams () const
 }
 
 void 
-Session::foreach_diskstream (void (DiskStream::*func)(void)) 
+Session::foreach_audio_diskstream (void (AudioDiskstream::*func)(void)) 
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		if (!(*i)->hidden()) {
 			((*i)->*func)();
 		}
@@ -3184,7 +3208,7 @@ Session::graph_reordered ()
 	   reflect any changes in latencies within the graph.
 	*/
 	
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		(*i)->set_capture_offset ();
 	}
 }
@@ -3467,7 +3491,7 @@ Session::reset_native_file_format ()
 	//RWLockMonitor lm1 (route_lock, true, __LINE__, __FILE__);
 	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
 
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		(*i)->reset_write_sources (false);
 	}
 }
@@ -3487,7 +3511,7 @@ Session::route_name_unique (string n) const
 }
 
 int
-Session::remove_file_source (FileSource& fs)
+Session::cleanup_audio_file_source (AudioFileSource& fs)
 {
 	return fs.move_to_trash (dead_sound_dir_name);
 }
@@ -3562,12 +3586,12 @@ Session::freeze (InterThreadInfo& itt)
 }
 
 int
-Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_t len, 	bool overwrite, vector<Source*>& srcs,
-			  InterThreadInfo& itt)
+Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nframes_t len, 	
+			       bool overwrite, vector<AudioSource*>& srcs, InterThreadInfo& itt)
 {
 	int ret = -1;
 	Playlist* playlist;
-	FileSource* fsource;
+	AudioFileSource* fsource;
 	uint32_t x;
 	char buf[PATH_MAX+1];
 	string dir;
@@ -3612,7 +3636,11 @@ Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_
 		}
 		
 		try {
-			fsource = new FileSource (buf, frame_rate(), false, Config->get_native_file_data_format());
+			fsource =  new SndFileSource (buf, 
+						      Config->get_native_file_data_format(),
+						      Config->get_native_file_header_format(),
+						      frame_rate());
+							    
 		}
 		
 		catch (failed_constructor& err) {
@@ -3651,9 +3679,13 @@ Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_
 		}
 
 		uint32_t n = 0;
-		for (vector<Source*>::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
-			if ((*src)->write (buffers[n], this_chunk, workbuf) != this_chunk) {
-				goto out;
+		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
+			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
+
+			if (afs) {
+				if (afs->write (buffers[n], this_chunk, workbuf) != this_chunk) {
+					goto out;
+				}
 			}
 		}
 		
@@ -3671,14 +3703,20 @@ Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_
 		time (&now);
 		xnow = localtime (&now);
 		
-		for (vector<Source*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
-			dynamic_cast<FileSource*>((*src))->update_header (position, *xnow, now);
+		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
+			if (afs) {
+				afs->update_header (position, *xnow, now);
+			}
 		}
 		
 		/* build peakfile for new source */
 		
-		for (vector<Source*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
-			dynamic_cast<FileSource*>(*src)->build_peaks ();
+		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
+			if (afs) {
+				afs->build_peaks ();
+			}
 		}
 		
 		ret = 0;
@@ -3686,8 +3724,11 @@ Session::write_one_track (AudioTrack& track, jack_nframes_t start, jack_nframes_
 		
   out:
 	if (ret) {
-		for (vector<Source*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
-			dynamic_cast<FileSource*>(*src)->mark_for_remove ();
+		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
+			if (afs) {
+				afs->mark_for_remove ();
+			}
 			delete *src;
 		}
 	}

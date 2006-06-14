@@ -27,7 +27,8 @@
 
 #include <ardour/playlist.h>
 #include <ardour/audioregion.h>
-#include <ardour/diskstream.h>
+#include <ardour/audiosource.h>
+#include <ardour/audio_diskstream.h>
 
 #include "taperegionview.h"
 #include "audio_time_axis.h"

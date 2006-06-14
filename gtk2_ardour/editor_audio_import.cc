@@ -26,12 +26,11 @@
 #include <ardour/session.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
-#include <ardour/diskstream.h>
-#include <ardour/filesource.h>
-#include <ardour/externalsource.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/utils.h>
 #include <ardour/audio_track.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/audiofilesource.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -187,7 +186,7 @@ int
 Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool& check_sample_rate, ImportMode mode, 
 		       AudioTrack* track, jack_nframes_t& pos, bool prompt)
 {
-	ExternalSource *source = 0; /* keep g++ quiet */
+	AudioFileSource *source = 0; /* keep g++ quiet */
 	AudioRegion::SourceList sources;
 	AudioRegion* region;
 	string idspec;
@@ -220,7 +219,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 
 	string error_msg;
 
-	if (!ExternalSource::get_soundfile_info (path, finfo, error_msg)) {
+	if (!AudioFileSource::get_soundfile_info (path, finfo, error_msg)) {
 		error << string_compose(_("Editor: cannot open file \"%1\", (%2)"), selection, error_msg ) << endmsg;
 		return 0;
 	}
@@ -267,7 +266,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 		idspec += string_compose(":%1", n);
 		
 		try {
-			source = ExternalSource::create (idspec.c_str());
+			source = AudioFileSource::create (idspec.c_str());
 			sources.push_back(source);
 		} 
 		

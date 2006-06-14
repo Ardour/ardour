@@ -38,7 +38,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/send.h>
 #include <ardour/insert.h>
 #include <ardour/ladspa_plugin.h>

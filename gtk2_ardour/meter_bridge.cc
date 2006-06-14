@@ -20,7 +20,7 @@
 
 #include <ardour/session.h>
 #include <ardour/session_route.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/audio_track.h>
 
 #include "ardour_ui.h"

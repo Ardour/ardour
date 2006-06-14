@@ -458,7 +458,6 @@ main (int argc, char *argv[])
 		ui = 0;
 	}
 
-  out:
 	delete engine;
 	ARDOUR::cleanup ();
 	shutdown (0);

@@ -38,7 +38,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/plugin_manager.h>
 #include <ardour/location.h>
 #include <ardour/audioplaylist.h>
@@ -1636,7 +1636,7 @@ Editor::build_track_region_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
 
 	if (atv) {
-		DiskStream* ds;
+		AudioDiskstream* ds;
 		Playlist* pl;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
@@ -1663,7 +1663,7 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
 
 	if (atv) {
-		DiskStream* ds;
+		AudioDiskstream* ds;
 		Playlist* pl;
 		AudioPlaylist* apl;
 
@@ -3107,7 +3107,7 @@ Editor::mapped_set_selected_regionview_from_click (AudioTimeAxisView& atv, uint3
 	AudioPlaylist* pl;
 	vector<AudioRegion*> results;
 	AudioRegionView* marv;
-	DiskStream* ds;
+	AudioDiskstream* ds;
 
 	if ((ds = atv.get_diskstream()) == 0) {
 		/* bus */
@@ -3338,7 +3338,7 @@ Editor::set_selected_regionview_from_region_list (Region& r, Selection::Operatio
 			AudioPlaylist* pl;
 			vector<AudioRegion*> results;
 			AudioRegionView* marv;
-			DiskStream* ds;
+			AudioDiskstream* ds;
 			
 			if ((ds = tatv->get_diskstream()) == 0) {
 				/* bus */

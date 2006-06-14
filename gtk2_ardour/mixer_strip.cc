@@ -37,7 +37,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/panner.h>
 #include <ardour/send.h>
 #include <ardour/insert.h>
@@ -665,9 +665,9 @@ MixerStrip::select_stream_input ()
 	MenuList& items = stream_menu->items();
 	stream_menu->set_name ("ArdourContextMenu");
 	
-	Session::DiskStreamList streams = _session.disk_streams();
+	Session::AudioDiskstreamList streams = _session.audio_disk_streams();
 
-	for (Session::DiskStreamList::iterator i = streams.begin(); i != streams.end(); ++i) {
+	for (Session::AudioDiskstreamList::iterator i = streams.begin(); i != streams.end(); ++i) {
 
 		if (!(*i)->hidden()) {
 
@@ -685,7 +685,7 @@ MixerStrip::select_stream_input ()
 }
 
 void
-MixerStrip::stream_input_chosen (DiskStream *stream)
+MixerStrip::stream_input_chosen (AudioDiskstream *stream)
 {
 	if (is_audio_track()) {
 		audio_track()->set_diskstream (*stream, this);

@@ -26,7 +26,7 @@
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/destructive_filesource.h>
 #include <ardour/control_protocol_manager.h>
 
@@ -231,7 +231,7 @@ Configuration::set_state (const XMLNode& root)
 		}
 	}
 
-	DiskStream::set_disk_io_chunk_frames (minimum_disk_io_bytes.get() / sizeof (Sample));
+	AudioDiskstream::set_disk_io_chunk_frames (minimum_disk_io_bytes.get() / sizeof (Sample));
 
 	return 0;
 }

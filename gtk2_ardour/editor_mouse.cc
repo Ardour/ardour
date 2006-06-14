@@ -47,7 +47,7 @@
 #include <ardour/types.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/playlist.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
@@ -286,7 +286,7 @@ Editor::step_mouse_mode (bool next)
 void
 Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	bool commit;
+	bool commit = false;
 	bool c1; 
 	bool c2;
 

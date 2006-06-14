@@ -22,29 +22,27 @@
 #define __ardour_cycle_timer_h__
 
 #include <string>
-#include <cstdio>
+#include <iostream>
 
 #include <ardour/cycles.h>
-
-using std::string;
 
 class CycleTimer {
   private:
 	static float cycles_per_usec;
-	uint32_t long entry;
-	uint32_t long exit;
-	string _name;
+	cycles_t _entry;
+	cycles_t _exit;
+	std::string _name;
 	
   public:
-	CycleTimer(string name) : _name (name){
+	CycleTimer(std::string name) : _name (name){
 		if (cycles_per_usec == 0) {
 			cycles_per_usec = get_mhz ();
 		}
-		entry = get_cycles();
+		_entry = get_cycles();
 	}
 	~CycleTimer() {
-		exit = get_cycles();
-		printf ("%s: %.9f usecs (%lu-%lu)\n", _name.c_str(), (float) (exit - entry) / cycles_per_usec, entry, exit);
+		_exit = get_cycles();
+		std::cerr << _name << ": " << (float) (_exit - _entry) / cycles_per_usec << " (" <<  _entry << ", " << _exit << ')' << endl;
 	}
 
 	static float get_mhz ();

@@ -60,11 +60,12 @@ namespace ARDOUR {
 class Port;
 class AudioEngine;
 class Slave;
-class DiskStream;	
+class AudioDiskstream;	
 class Route;
 class AuxInput;
 class Source;
-class FileSource;
+class AudioSource;
+class AudioFileSource;
 class Auditioner;
 class Insert;
 class Send;
@@ -261,25 +262,30 @@ class Session : public sigc::trackable, public Stateful
 	vector<Sample*>& get_silent_buffers (uint32_t howmany);
 	vector<Sample*>& get_send_buffers () { return _send_buffers; }
 
-	DiskStream    *diskstream_by_id (id_t id);
-	DiskStream    *diskstream_by_name (string name);
+	AudioDiskstream    *diskstream_by_id (id_t id);
+	AudioDiskstream    *diskstream_by_name (string name);
 
 	bool have_captured() const { return _have_captured; }
 
 	void refill_all_diskstream_buffers ();
 	uint32_t diskstream_buffer_size() const { return dstream_buffer_size; }
-	uint32_t get_next_diskstream_id() const { return n_diskstreams(); }
-	uint32_t n_diskstreams() const;
 	
-	typedef list<DiskStream *> DiskStreamList;
+	/* XXX fix required here when we get new diskstream types *, but
+	   not sure of the direction to take this in until then.
+	*/
 
-	Session::DiskStreamList disk_streams() const {
+	uint32_t get_next_diskstream_id() const { return n_audio_diskstreams(); }
+	uint32_t n_audio_diskstreams() const;
+	
+	typedef list<AudioDiskstream *> AudioDiskstreamList;
+
+	Session::AudioDiskstreamList audio_disk_streams() const {
 		Glib::RWLock::ReaderLock lm (diskstream_lock);
-		return diskstreams; /* XXX yes, force a copy */
+		return audio_diskstreams; /* XXX yes, force a copy */
 	}
 
-	void foreach_diskstream (void (DiskStream::*func)(void));
-	template<class T> void foreach_diskstream (T *obj, void (T::*func)(DiskStream&));
+	void foreach_audio_diskstream (void (AudioDiskstream::*func)(void));
+	template<class T> void foreach_audio_diskstream (T *obj, void (T::*func)(AudioDiskstream&));
 
 	typedef list<Route *> RouteList;
 
@@ -344,7 +350,7 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void> HaltOnXrun;
 
 	sigc::signal<void,Route*> RouteAdded;
-	sigc::signal<void,DiskStream*> DiskStreamAdded;
+	sigc::signal<void,AudioDiskstream*> AudioDiskstreamAdded;
 
 	void request_roll ();
 	void request_bounded_roll (jack_nframes_t start, jack_nframes_t end);
@@ -356,15 +362,15 @@ class Session : public sigc::trackable, public Stateful
 	void goto_start () { request_locate (start_location->start(), false); }
 	void use_rf_shuttle_speed ();
 	void request_transport_speed (float speed);
-	void request_overwrite_buffer (DiskStream*);
-	void request_diskstream_speed (DiskStream&, float speed);
+	void request_overwrite_buffer (AudioDiskstream*);
+	void request_diskstream_speed (AudioDiskstream&, float speed);
 	void request_input_change_handling ();
 
 	bool locate_pending() const { return static_cast<bool>(post_transport_work&PostTransportLocate); }
 	bool transport_locked () const;
 
 	int wipe ();
-	int wipe_diskstream (DiskStream *);
+	int wipe_diskstream (AudioDiskstream *);
 
 	int remove_region_from_region_list (Region&);
 
@@ -612,7 +618,7 @@ class Session : public sigc::trackable, public Stateful
 
 	jack_nframes_t convert_to_frames_at (jack_nframes_t position, AnyTime&);
 
-	sigc::signal<void> SMPTEOffsetChanged;
+	static sigc::signal<void> SMPTEOffsetChanged;
 	sigc::signal<void> SMPTETypeChanged;
 
 	void        request_slave_source (SlaveSource, jack_nframes_t pos = 0);
@@ -668,8 +674,9 @@ class Session : public sigc::trackable, public Stateful
 	int start_audio_export (ARDOUR::AudioExportSpecification&);
 	int stop_audio_export (ARDOUR::AudioExportSpecification&);
 	
-	void add_source (Source *);
-	int  remove_file_source (FileSource&);
+	void add_audio_source (AudioSource *);
+	void remove_source (Source *);
+	int  cleanup_audio_file_source (AudioFileSource&);
 
 	struct cleanup_report {
 	    vector<string> paths;
@@ -701,7 +708,8 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void,Source *> SourceAdded;
 	sigc::signal<void,Source *> SourceRemoved;
 
-	FileSource *create_file_source (ARDOUR::DiskStream&, int32_t chan, bool destructive);
+	AudioFileSource *create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
+
 	Source *get_source (ARDOUR::id_t);
 
 	/* playlist management */
@@ -745,8 +753,8 @@ class Session : public sigc::trackable, public Stateful
 
 	/* flattening stuff */
 
-	int write_one_track (AudioTrack&, jack_nframes_t start, jack_nframes_t cnt, bool overwrite, vector<Source*>&,
-			     InterThreadInfo& wot);
+	int write_one_audio_track (AudioTrack&, jack_nframes_t start, jack_nframes_t cnt, bool overwrite, vector<AudioSource*>&,
+				   InterThreadInfo& wot);
 	int freeze (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
@@ -972,7 +980,7 @@ class Session : public sigc::trackable, public Stateful
 	void set_frame_rate (jack_nframes_t nframes);
 
   protected:
-	friend class DiskStream;
+	friend class AudioDiskstream;
 	void stop_butler ();
 	void wait_till_butler_finished();
 
@@ -1434,12 +1442,12 @@ class Session : public sigc::trackable, public Stateful
 	bool waiting_to_start;
 
 	void set_auto_loop (bool yn);
-	void overwrite_some_buffers (DiskStream*);
+	void overwrite_some_buffers (AudioDiskstream*);
 	void flush_all_redirects ();
 	void locate (jack_nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void start_locate (jack_nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void force_locate (jack_nframes_t frame, bool with_roll = false);
-	void set_diskstream_speed (DiskStream*, float speed);
+	void set_diskstream_speed (AudioDiskstream*, float speed);
 	void set_transport_speed (float speed, bool abort = false);
 	void stop_transport (bool abort = false);
 	void start_transport ();
@@ -1470,10 +1478,10 @@ class Session : public sigc::trackable, public Stateful
 
 	/* disk-streams */
 
-	DiskStreamList  diskstreams; 
+	AudioDiskstreamList  audio_diskstreams; 
 	mutable Glib::RWLock diskstream_lock;
 	uint32_t dstream_buffer_size;
-	void add_diskstream (DiskStream*);
+	void add_diskstream (AudioDiskstream*);
 	int  load_diskstreams (const XMLNode&);
 
 	/* routes stuff */
@@ -1515,15 +1523,13 @@ class Session : public sigc::trackable, public Stateful
 
 	/* SOURCES */
 	
-	mutable Glib::Mutex source_lock;
-	typedef std::map<id_t, Source *>    SourceList;
+	mutable Glib::Mutex audio_source_lock;
+	typedef std::map<id_t, AudioSource *>    AudioSourceList;
 
-	SourceList sources;
+	AudioSourceList audio_sources;
 
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();
-
-	void remove_source (Source *);
 
 	Source *XMLSourceFactory (const XMLNode&);
 
@@ -1543,7 +1549,7 @@ class Session : public sigc::trackable, public Stateful
 	Playlist *XMLPlaylistFactory (const XMLNode&);
 
 	void playlist_length_changed (Playlist *);
-	void diskstream_playlist_changed (DiskStream *);
+	void diskstream_playlist_changed (AudioDiskstream *);
 
 	/* NAMED SELECTIONS */
 

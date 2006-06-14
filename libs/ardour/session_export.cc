@@ -47,7 +47,7 @@
 #include <ardour/sndfile_helpers.h>
 #include <ardour/port.h>
 #include <ardour/audioengine.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/panner.h>
 
 #include "i18n.h"
@@ -495,7 +495,7 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 
 	{
 		Glib::RWLock::ReaderLock lm (diskstream_lock);
-		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 			if ((*i)-> seek (spec.start_frame, true)) {
 				error << string_compose (_("%1: cannot seek to %2 for export"),
 						  (*i)->name(), spec.start_frame)

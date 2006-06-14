@@ -229,9 +229,10 @@ AudioEngine::_freewheel_callback (int onoff, void *arg)
 int
 AudioEngine::process_callback (jack_nframes_t nframes)
 {
+	// CycleTimer ct ("AudioEngine::process");
 	Glib::Mutex::Lock tm (_process_lock, Glib::TRY_LOCK);
 	jack_nframes_t next_processed_frames;
-
+	
 	/* handle wrap around of total frames counter */
 
 	if (max_frames - _processed_frames < nframes) {

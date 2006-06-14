@@ -31,7 +31,7 @@
 
 #include <ardour/audio_library.h>
 #include <ardour/audioregion.h>
-#include <ardour/externalsource.h>
+#include <ardour/audiofilesource.h>
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -122,7 +122,7 @@ SoundFileBox::setup_labels (string filename)
 	path = filename;
 
 	string error_msg;
-	if(!ExternalSource::get_soundfile_info (filename, sf_info, error_msg)) {
+	if(!AudioFileSource::get_soundfile_info (filename, sf_info, error_msg)) {
 		return false;
 	}
 
@@ -187,12 +187,12 @@ SoundFileBox::play_btn_clicked ()
 
 	if (region_cache.find (path) == region_cache.end()) {
 		AudioRegion::SourceList srclist;
-		ExternalSource* sfs;
+		AudioFileSource* afs;
 
 		for (int n = 0; n < sf_info.channels; ++n) {
 			try {
-				sfs = ExternalSource::create (path+":"+string_compose("%1", n), false);
-				srclist.push_back(sfs);
+				afs = AudioFileSource::create (path+":"+string_compose("%1", n));
+				srclist.push_back(afs);
 
 			} catch (failed_constructor& err) {
 				error << _("Could not access soundfile: ") << path << endmsg;

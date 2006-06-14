@@ -23,29 +23,57 @@
 
 #include <sndfile.h>
 
-#include <ardour/externalsource.h>
+#include <ardour/audiofilesource.h>
 
 namespace ARDOUR {
 
-class SndFileSource : public ExternalSource {
+class SndFileSource : public AudioFileSource {
   public:
-	SndFileSource (const string& path_plus_channel, bool build_peak = true);
+	/* constructor to be called for existing external-to-session files */
+
+	SndFileSource (std::string path, Flag flags);
+
+	/* constructor to be called for new in-session files */
+
+	SndFileSource (std::string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate, 
+		       Flag flags = AudioFileSource::Flag (AudioFileSource::Writable|
+							   AudioFileSource::Removable|
+							   AudioFileSource::RemovableIfEmpty|
+							   AudioFileSource::CanRename|
+							   AudioFileSource::BuildPeaks));
+		       
+	/* constructor to be called for existing in-session files */
+	
 	SndFileSource (const XMLNode&);
+
 	~SndFileSource ();
 
-	jack_nframes_t length() const { return _info.frames; } 
-	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 	float sample_rate () const;
+	int update_header (jack_nframes_t when, struct tm&, time_t);
+	int flush_header ();
+
+	static Flag default_in_session_flags();
+
+  protected:
+	void set_header_timeline_position ();
+
+	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
+	jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt, char * workbuf);
+
+	jack_nframes_t write_float (Sample* data, jack_nframes_t pos, jack_nframes_t cnt);
 
   private:
 	SNDFILE *sf;
 	SF_INFO _info;
+	SF_BROADCAST_INFO* _broadcast_info;
 
-	mutable float *tmpbuf;
-	mutable jack_nframes_t tmpbufsize;
-	mutable Glib::Mutex _tmpbuf_lock;
+	mutable float *interleave_buf;
+	mutable jack_nframes_t interleave_bufsize;
 
-	void init (const string &str, bool build_peak);
+	void init (const string &str);
+	int open();
+	void close();
+	int setup_broadcast_info (jack_nframes_t when, struct tm&, time_t);
 };
 
 }; /* namespace ARDOUR */

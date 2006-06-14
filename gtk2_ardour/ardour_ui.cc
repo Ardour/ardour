@@ -50,8 +50,8 @@
 #include <ardour/audioengine.h>
 #include <ardour/playlist.h>
 #include <ardour/utils.h>
-#include <ardour/diskstream.h>
-#include <ardour/filesource.h>
+#include <ardour/audio_diskstream.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/recent_sessions.h>
 #include <ardour/session_diskstream.h>
 #include <ardour/port.h>
@@ -184,9 +184,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
 
-	ARDOUR::DiskStream::DeleteSources.connect (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread));
-	ARDOUR::DiskStream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
-	ARDOUR::DiskStream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
+	ARDOUR::AudioDiskstream::DeleteSources.connect (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread));
+	ARDOUR::AudioDiskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
+	ARDOUR::AudioDiskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
 	/* handle pending state with a dialog */
 
@@ -241,10 +241,10 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 
 	/* this being a GUI and all, we want peakfiles */
 
-	FileSource::set_build_peakfiles (true);
-	FileSource::set_build_missing_peakfiles (true);
+	AudioFileSource::set_build_peakfiles (true);
+	AudioFileSource::set_build_missing_peakfiles (true);
 
-	if (Source::start_peak_thread ()) {
+	if (AudioSource::start_peak_thread ()) {
 		throw failed_constructor();
 	}
 
@@ -281,7 +281,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete add_route_dialog;
 	}
 
-	Source::stop_peak_thread ();
+	AudioSource::stop_peak_thread ();
 }
 
 gint
@@ -542,7 +542,7 @@ ARDOUR_UI::update_buffer_load ()
 }
 
 void
-ARDOUR_UI::count_recenabled_diskstreams (DiskStream& ds)
+ARDOUR_UI::count_recenabled_diskstreams (AudioDiskstream& ds)
 {
 	if (ds.record_enabled()) {
 		rec_enabled_diskstreams++;
@@ -570,7 +570,7 @@ ARDOUR_UI::update_disk_space()
 		if (session->actively_recording()){
 			
 			rec_enabled_diskstreams = 0;
-			session->foreach_diskstream (this, &ARDOUR_UI::count_recenabled_diskstreams);
+			session->foreach_audio_diskstream (this, &ARDOUR_UI::count_recenabled_diskstreams);
 			
 			if (rec_enabled_diskstreams) {
 				frames /= rec_enabled_diskstreams;
@@ -917,7 +917,7 @@ restart JACK with more ports."));
 }
 
 void
-ARDOUR_UI::diskstream_added (DiskStream* ds)
+ARDOUR_UI::diskstream_added (AudioDiskstream* ds)
 {
 }
 
@@ -1164,7 +1164,7 @@ ARDOUR_UI::toggle_monitor_enable (guint32 dstream)
 		return;
 	}
 
-	DiskStream *ds;
+	AudioDiskstream *ds;
 
 	if ((ds = session->diskstream_by_id (dstream)) != 0) {
 		Port *port = ds->io()->input (0);
@@ -1179,7 +1179,7 @@ ARDOUR_UI::toggle_record_enable (guint32 dstream)
 		return;
 	}
 
-	DiskStream *ds;
+	AudioDiskstream *ds;
 
 	if ((ds = session->diskstream_by_id (dstream)) != 0) {
 		ds->set_record_enabled (!ds->record_enabled(), this);
@@ -1386,7 +1386,7 @@ ARDOUR_UI::stop_blinking ()
 
 
 void
-ARDOUR_UI::add_diskstream_to_menu (DiskStream& dstream)
+ARDOUR_UI::add_diskstream_to_menu (AudioDiskstream& dstream)
 {
 	using namespace Gtk;
 	using namespace Menu_Helpers;
@@ -1424,7 +1424,7 @@ ARDOUR_UI::select_diskstream (GdkEventButton *ev)
 	MenuList& items = diskstream_menu->items();
 	items.push_back (MenuElem (_("No Stream"), (bind (mem_fun(*this, &ARDOUR_UI::diskstream_selected), -1))));
 
-	session->foreach_diskstream (this, &ARDOUR_UI::add_diskstream_to_menu);
+	session->foreach_audio_diskstream (this, &ARDOUR_UI::add_diskstream_to_menu);
 
 	if (ev) {
 		diskstream_menu->popup (ev->button, ev->time);
@@ -1569,7 +1569,7 @@ ARDOUR_UI::secondary_clock_value_changed ()
 }
 
 void
-ARDOUR_UI::rec_enable_button_blink (bool onoff, DiskStream *dstream, Widget *w)
+ARDOUR_UI::rec_enable_button_blink (bool onoff, AudioDiskstream *dstream, Widget *w)
 {
 	if (session && dstream && dstream->record_enabled()) {
 
@@ -2216,11 +2216,11 @@ ARDOUR_UI::halt_on_xrun_message ()
 }
 
 void 
-ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::Source*>* deletion_list)
+ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::AudioFileSource*>* deletion_list)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread), deletion_list));
 
-	for (list<Source*>::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
+	for (list<AudioFileSource*>::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
 		delete *i;
 	}
 
@@ -2377,6 +2377,12 @@ ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 	case RF64:
 		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatRF64"));
 		break;
+	case CAF:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatCAF"));
+		break;
+	case AIFF:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatAIFF"));
+		break;
 	}
 
 	if (act) {
@@ -2450,6 +2456,12 @@ ARDOUR_UI::use_config ()
 		break;
 	case RF64:
 		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatRF64"));
+		break;
+	case CAF:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatCAF"));
+		break;
+	case AIFF:
+		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatAIFF"));
 		break;
 	}
 

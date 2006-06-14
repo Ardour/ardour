@@ -50,7 +50,7 @@ class RouteUI : public virtual AxisView
 	virtual ~RouteUI();
 
 	bool is_audio_track() const;
-	ARDOUR::DiskStream* get_diskstream() const;
+	ARDOUR::AudioDiskstream* get_diskstream() const;
 
 	ARDOUR::Route& route() const { return _route; }
 	ARDOUR::AudioTrack* audio_track() const;
@@ -116,7 +116,7 @@ class RouteUI : public virtual AxisView
 
 	sigc::connection blink_connection;
 
-	void rec_enable_button_blink (bool onoff, ARDOUR::DiskStream *, Gtk::Widget *w);
+	void rec_enable_button_blink (bool onoff, ARDOUR::AudioDiskstream *, Gtk::Widget *w);
 	
 	void remove_this_route ();
 	static gint idle_remove_this_route (RouteUI *);
