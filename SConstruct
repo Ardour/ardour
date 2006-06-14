@@ -548,7 +548,7 @@ else:
                                           CPPPATH=['#libs', '#libs/soundtouch'])
     libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
                                     LIBPATH='#libs/libsndfile',
-                                    CPPPATH=(['#libs/libsndfile', '#libs/libsndfile/src'])
+                                    CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
