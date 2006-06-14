@@ -1,0 +1,36 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+sndfile_files = glob.glob('src/*.c') + glob.glob('src/GSM610/*.c') + glob.glob('src/G72x/*.c')
+
+Import('env install_prefix')
+sndfile = env.Copy()
+
+domain = 'libsndfile'
+
+sndfile.Append(CCFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
+sndfile.Append(CCFLAGS = "-DVERSION=\\\"ardour-special\\\"")
+# mingw may need this
+#sndfile.Append(CCFLAGS="-no-undefined")
+sndfile.Append(PACKAGE = domain)
+sndfile.Append(POTFILE = domain + '.pot')
+
+libsndfile = sndfile.SharedLibrary('sndfile', sndfile_files)
+
+sndfile_h = sndfile.Command('src/sndfile.h', ['src/sndfile.h.in'], 'cd libs/libsndfile && ./configure && cd -', ENV=os.environ)
+
+Default([sndfile_h,libsndfile])
+
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libsndfile))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'NEWS', 'README', 'AUTHORS', 'ChangeLog',
+                                       'configure', 'SConscript',] +
+                                       sndfile_files +
+                                       glob.glob('src/*.h') +
+                                      [ 'src/sndfile.h.in', 'src/config.h.in', 'src/Symbols.linux', 'src/Symbols.darwin', 'src/libsndfile.def', 'src/cygsndfile.def' ]
+                                     ))
+                                     
