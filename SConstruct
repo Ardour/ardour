@@ -36,8 +36,10 @@ opts.AddOptions(
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('SURFACES', 'Build support for control surfaces', 0),
-    BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0)
-  )
+    BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
+    BoolOption('LIBLO', 'Compile with support for liblo library', 1),
+    BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library -- UNSTABLE', 0)
+)
 
 #----------------------------------------------------------------------
 # a handy helper that provides a way to merge compile/link information
@@ -351,8 +353,8 @@ libraries = { }
 
 libraries['core'] = LibraryInfo (CCFLAGS = '-Ilibs')
 
-libraries['sndfile'] = LibraryInfo()
-libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
+#libraries['sndfile'] = LibraryInfo(CCFLAGS = '-Ilibs/libsndfile/src')
+#libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
 
 libraries['lrdf'] = LibraryInfo()
 libraries['lrdf'].ParseConfig('pkg-config --cflags --libs lrdf')
@@ -380,6 +382,7 @@ libraries['glib2'] = LibraryInfo()
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs glib-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gobject-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gmodule-2.0')
+libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gthread-2.0')
 
 libraries['gtk2'] = LibraryInfo()
 libraries['gtk2'].ParseConfig ('pkg-config --cflags --libs gtk+-2.0')
@@ -425,14 +428,15 @@ libraries['usb'] = conf.Finish ()
 #
 # Check for liblo
 
-libraries['lo'] = LibraryInfo ()
+if env['LIBLO']:
+    libraries['lo'] = LibraryInfo ()
 
-conf = Configure (libraries['lo'])
-if conf.CheckLib ('lo', 'lo_server_new') == False:
-    print "liblo does not appear to be installed."
-    exit (0)
+    conf = Configure (libraries['lo'])
+    if conf.CheckLib ('lo', 'lo_server_new') == False:
+        print "liblo does not appear to be installed."
+        sys.exit (1)
     
-libraries['lo'] = conf.Finish ()
+    libraries['lo'] = conf.Finish ()
 
 #
 # Check for dmalloc
@@ -470,7 +474,10 @@ elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Co
     env['SYSMIDI'] = 'CoreMIDI'
     subst_dict['%MIDITAG%'] = "ardour"
     subst_dict['%MIDITYPE%'] = "coremidi"
-
+else:
+    print "It appears you don't have the required MIDI libraries installed."
+    sys.exit (1)
+        
 env = conf.Finish()
 
 if env['SYSLIBS']:
@@ -539,6 +546,9 @@ else:
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
+    libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
+                                    LIBPATH='#libs/libsndfile',
+                                    CPPPATH='#libs/libsndfile')
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
@@ -551,6 +561,7 @@ else:
     subdirs = [
 #	    'libs/cassowary',
         'libs/sigc++2',
+        'libs/libsndfile',
         'libs/pbd3',
         'libs/midi++2',
         'libs/ardour'
@@ -730,6 +741,12 @@ if env['FPU_OPTIMIZATION']:
 # end optimization section
 
 #
+# save off guessed arch element in an env
+#
+env.Append(CONFIG_ARCH=config[config_arch])
+
+
+#
 # ARCH="..." overrides all 
 #
 
@@ -756,6 +773,9 @@ env.Append(CCFLAGS="-Wall")
 
 if env['VST']:
     env.Append(CCFLAGS="-DVST_SUPPORT")
+
+if env['LIBLO']:
+    env.Append(CCFLAGS="-DHAVE_LIBLO")
 
 #
 # everybody needs this

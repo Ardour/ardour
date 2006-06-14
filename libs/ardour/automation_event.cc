@@ -225,7 +225,7 @@ void
 AutomationList::clear ()
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		events.clear ();
 		if (!no_state) {
 			save_state (_("cleared"));
@@ -239,14 +239,14 @@ AutomationList::clear ()
 void
 AutomationList::x_scale (double factor)
 {
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	_x_scale (factor);
 }
 
 bool
 AutomationList::extend_to (double when)
 {
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	if (events.empty() || events.back()->when == when) {
 		return false;
 	}
@@ -285,7 +285,7 @@ AutomationList::rt_add (double when, double value)
 	// cerr << "RT: alist @ " << this << " add " << value << " @ " << when << endl;
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 
 		iterator where;
 		TimeComparator cmp;
@@ -369,7 +369,7 @@ AutomationList::add (double when, double value, bool for_loading)
 	/* this is for graphical editing and loading data from storage */
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		TimeComparator cmp;
 		ControlEvent cp (when, 0.0f);
 		bool insert = true;
@@ -413,7 +413,7 @@ void
 AutomationList::erase (AutomationList::iterator i)
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		events.erase (i);
 		reposition_for_rt_add (0);
 		if (!no_state) {
@@ -428,7 +428,7 @@ void
 AutomationList::erase (AutomationList::iterator start, AutomationList::iterator end)
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		events.erase (start, end);
 		reposition_for_rt_add (0);
 		if (!no_state) {
@@ -445,7 +445,7 @@ AutomationList::reset_range (double start, double endt)
 	bool reset = false;
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+        Glib::Mutex::Lock lm (lock);
 		TimeComparator cmp;
 		ControlEvent cp (start, 0.0f);
 		iterator s;
@@ -481,7 +481,7 @@ AutomationList::erase_range (double start, double endt)
 	bool erased = false;
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		TimeComparator cmp;
 		ControlEvent cp (start, 0.0f);
 		iterator s;
@@ -515,7 +515,7 @@ AutomationList::move_range (iterator start, iterator end, double xdelta, double 
 	*/
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 
 		while (start != end) {
 			(*start)->when += xdelta;
@@ -542,7 +542,7 @@ AutomationList::modify (iterator iter, double when, double val)
 	*/
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		(*iter)->when = when;
 		(*iter)->value = val;
 		if (!no_state) {
@@ -558,7 +558,7 @@ AutomationList::modify (iterator iter, double when, double val)
 std::pair<AutomationList::iterator,AutomationList::iterator>
 AutomationList::control_points_adjacent (double xval)
 {
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	iterator i;
 	TimeComparator cmp;
 	ControlEvent cp (xval, 0.0f);
@@ -620,7 +620,7 @@ Change
 AutomationList::restore_state (StateManager::State& state) 
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		State* lstate = dynamic_cast<State*> (&state);
 
 		events.clear ();
@@ -655,7 +655,7 @@ void
 AutomationList::truncate_end (double last_coordinate)
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		ControlEvent cp (last_coordinate, 0);
 		list<ControlEvent*>::reverse_iterator i;
 		double last_val;
@@ -760,7 +760,7 @@ void
 AutomationList::truncate_start (double overall_length)
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		AutomationList::iterator i;
 		double first_legal_value;
 		double first_legal_coordinate;
@@ -998,7 +998,7 @@ AutomationList::cut (iterator start, iterator end)
 	AutomationList* nal = new AutomationList (default_value);
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 
 		for (iterator x = start; x != end; ) {
 			iterator tmp;
@@ -1032,7 +1032,7 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 	bool changed = false;
 	
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 
 		if ((s = lower_bound (events.begin(), events.end(), &cp, cmp)) == events.end()) {
 			return nal;
@@ -1094,7 +1094,7 @@ AutomationList::copy (iterator start, iterator end)
 	AutomationList* nal = new AutomationList (default_value);
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		
 		for (iterator x = start; x != end; ) {
 			iterator tmp;
@@ -1141,7 +1141,7 @@ AutomationList::paste (AutomationList& alist, double pos, float times)
 	}
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		iterator where;
 		iterator prev;
 		double end = 0;

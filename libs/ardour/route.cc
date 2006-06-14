@@ -235,7 +235,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	declick = _pending_declick;
 
 	{
-		TentativeLockMonitor cm (control_outs_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock cm (control_outs_lock, Glib::TRY_LOCK);
 		
 		if (cm.locked()) {
 			co = _control_outs;
@@ -245,7 +245,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	}
 	
 	{ 
-		TentativeLockMonitor dm (declick_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
 		
 		if (dm.locked()) {
 			dmg = desired_mute_gain;
@@ -330,7 +330,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (with_redirects) {
-		TentativeRWLockMonitor rm (redirect_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock rm (redirect_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
 			if (mute_gain > 0 || !_mute_affects_pre_fader) {
 				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
@@ -499,7 +499,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 
 	if (post_fader_work) {
 
-		TentativeRWLockMonitor rm (redirect_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock rm (redirect_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
 			if (mute_gain > 0 || !_mute_affects_post_fader) {
 				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
@@ -723,7 +723,7 @@ Route::set_solo (bool yn, void *src)
 void
 Route::set_solo_mute (bool yn)
 {
-	LockMonitor lm (declick_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (declick_lock);
 
 	/* Called by Session in response to another Route being soloed.
 	 */
@@ -757,7 +757,7 @@ Route::set_mute (bool yn, void *src)
 			_midi_mute_control.send_feedback (_muted);
 		}
 		
-		LockMonitor lm (declick_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (declick_lock);
 		desired_mute_gain = (yn?0.0f:1.0f);
 	}
 }
@@ -772,7 +772,7 @@ Route::add_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 	}
 
 	{
-		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
+		Glib::RWLock::WriterLock lm (redirect_lock);
 
 		PluginInsert* pi;
 		PortInsert* porti;
@@ -845,7 +845,7 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 	}
 
 	{
-		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
+		Glib::RWLock::WriterLock lm (redirect_lock);
 
 		RedirectList::iterator existing_end = _redirects.end();
 		--existing_end;
@@ -904,7 +904,7 @@ Route::clear_redirects (void *src)
 	}
 
 	{
-		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
+		Glib::RWLock::WriterLock lm (redirect_lock);
 
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			delete *i;
@@ -934,7 +934,7 @@ Route::remove_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 	redirect_max_outs = 0;
 
 	{
-		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
+		Glib::RWLock::WriterLock lm (redirect_lock);
 		RedirectList::iterator i;
 		bool removed = false;
 
@@ -1013,7 +1013,7 @@ Route::remove_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 int
 Route::reset_plugin_counts (uint32_t* lpc)
 {
-	RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
+	Glib::RWLock::WriterLock lm (redirect_lock);
 	return _reset_plugin_counts (lpc);
 }
 
@@ -1183,7 +1183,7 @@ Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_st
 	RedirectList to_be_deleted;
 
 	{
-		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
+		Glib::RWLock::WriterLock lm (redirect_lock);
 		RedirectList::iterator tmp;
 		RedirectList the_copy;
 
@@ -1262,7 +1262,7 @@ Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_st
 void
 Route::all_redirects_flip ()
 {
-	RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock lm (redirect_lock);
 
 	if (_redirects.empty()) {
 		return;
@@ -1278,7 +1278,7 @@ Route::all_redirects_flip ()
 void
 Route::all_redirects_active (bool state)
 {
-	RWLockMonitor lm (redirect_lock, false,  __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock lm (redirect_lock);
 
 	if (_redirects.empty()) {
 		return;
@@ -1300,7 +1300,7 @@ Route::sort_redirects (uint32_t* err_streams)
 {
 	{
 		RedirectSorter comparator;
-		RWLockMonitor lm (redirect_lock, true, __LINE__, __FILE__);
+		Glib::RWLock::WriterLock lm (redirect_lock);
 		uint32_t old_rmo = redirect_max_outs;
 
 		/* the sweet power of C++ ... */
@@ -1779,7 +1779,7 @@ Route::silence (jack_nframes_t nframes, jack_nframes_t offset)
 		}
 
 		{ 
-			TentativeRWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
+			Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
 			
 			if (lm.locked()) {
 				for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
@@ -1804,7 +1804,7 @@ Route::silence (jack_nframes_t nframes, jack_nframes_t offset)
 int
 Route::set_control_outs (const vector<string>& ports)
 {
-	LockMonitor lm (control_outs_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (control_outs_lock);
 	vector<string>::const_iterator i;
 
  	if (_control_outs) {
@@ -2007,7 +2007,7 @@ Route::transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_re
 	jack_nframes_t now = _session.transport_frame();
 
 	{
-		RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (redirect_lock);
 
 		if (!did_locate) {
 			automation_snapshot (now);
@@ -2126,7 +2126,7 @@ Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t 
 	     bool can_record, bool rec_monitors_input)
 {
 	{
-		TentativeRWLockMonitor lm(redirect_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
 			// automation snapshot can also be called from the non-rt context
 			// and it uses the redirect list, so we take the lock out here
@@ -2150,7 +2150,7 @@ Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t 
 	apply_gain_automation = false;
 
 	{ 
-		TentativeLockMonitor am (automation_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock am (automation_lock, Glib::TRY_LOCK);
 		
 		if (am.locked() && _session.transport_rolling()) {
 			
@@ -2242,7 +2242,7 @@ Route::send_all_midi_feedback ()
 	if (_session.get_midi_feedback()) {
 
 		{
-			RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
+			Glib::RWLock::ReaderLock lm (redirect_lock);
 			for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 				(*i)->send_all_midi_feedback ();
 			}
@@ -2262,7 +2262,7 @@ Route::write_midi_feedback (MIDI::byte* buf, int32_t& bufsize)
 	buf = _midi_mute_control.write_feedback (buf, bufsize, _muted);
 
 	{
-		RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock lm (redirect_lock);
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			buf = (*i)->write_midi_feedback (buf, bufsize);
 		}
@@ -2278,7 +2278,7 @@ Route::flush_redirects ()
 	   this is called from the RT audio thread.
 	*/
 
-	RWLockMonitor lm (redirect_lock, false, __LINE__, __FILE__);
+	Glib::RWLock::ReaderLock lm (redirect_lock);
 
 	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 		(*i)->deactivate ();

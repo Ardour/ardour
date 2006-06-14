@@ -76,7 +76,7 @@ PluginInsert::PluginInsert (Session& s, Plugin& plug, Placement placement)
 	save_state (_("initial state"));
 
 	{
-		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::MoreOutputs (output_streams ());
 	}
 
@@ -97,7 +97,7 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
 
 	{
-		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::MoreOutputs (output_streams());
 	}
 }
@@ -410,7 +410,7 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, jack_nfram
 	jack_nframes_t now = _session.transport_frame ();
 	jack_nframes_t end = now + nframes;
 
-	TentativeLockMonitor lm (_automation_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (_automation_lock, Glib::TRY_LOCK);
 
 	if (!lm.locked()) {
 		connect_and_run (bufs, nbufs, nframes, offset, false);

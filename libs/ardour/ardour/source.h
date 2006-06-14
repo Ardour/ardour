@@ -25,9 +25,11 @@
 #include <vector>
 #include <string>
 
-#include <time.h>
+#include <ctime>
 
 #include <sigc++/signal.h>
+
+#include <glibmm/thread.h>
 
 #include <ardour/ardour.h>
 #include <ardour/stateful.h>
@@ -125,7 +127,7 @@ class Source : public Stateful, public sigc::trackable
 	string            _name;
 	uint32_t     _use_cnt;
 	bool              _peaks_built;
-	mutable PBD::Lock _lock;
+	mutable Glib::Mutex _lock;
 	jack_nframes_t    _length;
 	bool               next_peak_clear_should_notify;
 	string             peakpath;
@@ -156,7 +158,7 @@ class Source : public Stateful, public sigc::trackable
 	};
 
 	static vector<Source*> pending_peak_sources;
-	static PBD::Lock pending_peak_sources_lock;
+	static Glib::StaticMutex pending_peak_sources_lock;
 
 	static void queue_for_peaks (Source&);
 	static void clear_queue_for_peaks ();

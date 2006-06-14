@@ -25,7 +25,8 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
+
 #include <pbd/xml++.h>
 
 #include <ardour/audioengine.h>
@@ -69,6 +70,8 @@ sigc::signal<int>                 IO::PortsLegal;
 sigc::signal<int>                 IO::PannersLegal;
 sigc::signal<void,uint32_t>  IO::MoreOutputs;
 sigc::signal<int>                 IO::PortsCreated;
+
+Glib::StaticMutex       IO::m_meter_signal_lock = GLIBMM_STATIC_MUTEX_INIT;
 
 /* this is a default mapper of MIDI control values to a gain coefficient.
    others can be imagined. see IO::set_midi_to_gain_function().
@@ -126,13 +129,20 @@ IO::IO (Session& s, string name,
 
 	_gain_automation_state = Off;
 	_gain_automation_style = Absolute;
-
-	Meter.connect (mem_fun (*this, &IO::meter));
+    
+    {
+        // IO::Meter is emitted from another thread so the
+        // Meter signal must be protected.
+        Glib::Mutex::Lock guard (m_meter_signal_lock);
+        m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
+    }
 }
 
 IO::~IO ()
 {
-	LockMonitor lm (io_lock, __LINE__, __FILE__);
+
+    Glib::Mutex::Lock guard (m_meter_signal_lock);
+	Glib::Mutex::Lock lm (io_lock);
 	vector<Port *>::iterator i;
 
 	for (i = _inputs.begin(); i != _inputs.end(); ++i) {
@@ -142,6 +152,8 @@ IO::~IO ()
 	for (i = _outputs.begin(); i != _outputs.end(); ++i) {
 		_session.engine().unregister_port (*i);
 	}
+
+    m_meter_connection.disconnect();
 }
 
 void
@@ -380,7 +392,7 @@ IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nfram
 	gain_t pangain = _gain;
 	
 	{
-		TentativeLockMonitor dm (declick_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
 		
 		if (dm.locked()) {
 			dg = _desired_gain;
@@ -427,7 +439,7 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_
 		
 	} else {
 
-		TentativeLockMonitor dm (declick_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
 		
 		if (dm.locked()) {
 			dg = _desired_gain;
@@ -568,10 +580,10 @@ IO::disconnect_input (Port* our_port, string other_port, void* src)
 	}
 
 	{ 
-		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em (_session.engine().process_lock());
 		
 		{
-			LockMonitor lm (io_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (io_lock);
 			
 			/* check that our_port is really one of ours */
 			
@@ -604,10 +616,10 @@ IO::connect_input (Port* our_port, string other_port, void* src)
 	}
 
 	{
-		LockMonitor em(_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em(_session.engine().process_lock());
 		
 		{
-			LockMonitor lm (io_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (io_lock);
 			
 			/* check that our_port is really one of ours */
 			
@@ -638,10 +650,10 @@ IO::disconnect_output (Port* our_port, string other_port, void* src)
 	}
 
 	{
-		LockMonitor em(_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em(_session.engine().process_lock());
 		
 		{
-			LockMonitor lm (io_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (io_lock);
 			
 			if (find (_outputs.begin(), _outputs.end(), our_port) == _outputs.end()) {
 				return -1;
@@ -671,10 +683,10 @@ IO::connect_output (Port* our_port, string other_port, void* src)
 	}
 
 	{
-		LockMonitor em(_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em(_session.engine().process_lock());
 		
 		{
-			LockMonitor lm (io_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (io_lock);
 			
 			/* check that our_port is really one of ours */
 			
@@ -730,10 +742,10 @@ IO::remove_output_port (Port* port, void* src)
 	IOChange change (NoChange);
 
 	{
-		LockMonitor em(_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em(_session.engine().process_lock());
 		
 		{
-			LockMonitor lm (io_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (io_lock);
 			
 			if (_noutputs - 1 == (uint32_t) _output_minimum) {
 				/* sorry, you can't do this */
@@ -779,10 +791,10 @@ IO::add_output_port (string destination, void* src)
 	char buf[64];
 
 	{
-		LockMonitor em(_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em(_session.engine().process_lock());
 		
 		{ 
-			LockMonitor lm (io_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (io_lock);
 			
 			if (_output_maximum >= 0 && (int) _noutputs == _output_maximum) {
 				return -1;
@@ -830,10 +842,10 @@ IO::remove_input_port (Port* port, void* src)
 	IOChange change (NoChange);
 
 	{
-		LockMonitor em(_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em(_session.engine().process_lock());
 		
 		{
-			LockMonitor lm (io_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (io_lock);
 
 			if (((int)_ninputs - 1) < _input_minimum) {
 				/* sorry, you can't do this */
@@ -880,10 +892,10 @@ IO::add_input_port (string source, void* src)
 	char buf[64];
 
 	{
-		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em (_session.engine().process_lock());
 		
 		{ 
-			LockMonitor lm (io_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (io_lock);
 			
 			if (_input_maximum >= 0 && (int) _ninputs == _input_maximum) {
 				return -1;
@@ -931,10 +943,10 @@ int
 IO::disconnect_inputs (void* src)
 {
 	{ 
-		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em (_session.engine().process_lock());
 		
 		{
-			LockMonitor lm (io_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (io_lock);
 			
 			for (vector<Port *>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 				_session.engine().disconnect (*i);
@@ -951,10 +963,10 @@ int
 IO::disconnect_outputs (void* src)
 {
 	{
-		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
+		Glib::Mutex::Lock em (_session.engine().process_lock());
 		
 		{
-			LockMonitor lm (io_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (io_lock);
 			
 			for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 				_session.engine().disconnect (*i);
@@ -1063,8 +1075,8 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 	}
 
 	{
-		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
-		LockMonitor lm (io_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock em (_session.engine().process_lock());
+		Glib::Mutex::Lock lm (io_lock);
 
 		Port* port;
 		
@@ -1212,8 +1224,8 @@ IO::ensure_inputs (uint32_t n, bool clear, bool lockit, void* src)
 	}
 	
 	if (lockit) {
-		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
-		LockMonitor im (io_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock em (_session.engine().process_lock());
+		Glib::Mutex::Lock im (io_lock);
 		changed = ensure_inputs_locked (n, clear, src);
 	} else {
 		changed = ensure_inputs_locked (n, clear, src);
@@ -1314,8 +1326,8 @@ IO::ensure_outputs (uint32_t n, bool clear, bool lockit, void* src)
 	/* XXX caller should hold io_lock, but generally doesn't */
 
 	if (lockit) {
-		LockMonitor em (_session.engine().process_lock(), __LINE__, __FILE__);
-		LockMonitor im (io_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock em (_session.engine().process_lock());
+		Glib::Mutex::Lock im (io_lock);
 		changed = ensure_outputs_locked (n, clear, src);
 	} else {
 		changed = ensure_outputs_locked (n, clear, src);
@@ -1389,7 +1401,7 @@ IO::state (bool full_state)
 	bool need_ins = true;
 	bool need_outs = true;
 	LocaleGuard lg (X_("POSIX"));
-	LockMonitor lm (io_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (io_lock);
 
 	node->add_property("name", _name);
 	snprintf (buf, sizeof(buf), "%" PRIu64, id());
@@ -2058,7 +2070,7 @@ IO::set_output_maximum (int n)
 void
 IO::set_port_latency (jack_nframes_t nframes)
 {
-	LockMonitor lm (io_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (io_lock);
 
 	for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 		(*i)->set_latency (nframes);
@@ -2109,8 +2121,8 @@ IO::use_input_connection (Connection& c, void* src)
 	uint32_t limit;
 
 	{
-		LockMonitor lm (_session.engine().process_lock(), __LINE__, __FILE__);
-		LockMonitor lm2 (io_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (_session.engine().process_lock());
+		Glib::Mutex::Lock lm2 (io_lock);
 		
 		limit = c.nports();
 		
@@ -2187,8 +2199,8 @@ IO::use_output_connection (Connection& c, void* src)
 	uint32_t limit;	
 
 	{
-		LockMonitor lm (_session.engine().process_lock(), __LINE__, __FILE__);
-		LockMonitor lm2 (io_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (_session.engine().process_lock());
+		Glib::Mutex::Lock lm2 (io_lock);
 
 		limit = c.nports();
 			
@@ -2437,10 +2449,26 @@ IO::send_state_changed ()
 	return;
 }
 
+/**
+    Update the peak meters.
+
+    The meter signal lock is taken to prevent modification of the 
+    Meter signal while updating the meters, taking the meter signal
+    lock prior to taking the io_lock ensures that all IO will remain 
+    valid while metering.
+*/   
+void
+IO::update_meters()
+{
+    Glib::Mutex::Lock guard (m_meter_signal_lock);
+    
+    Meter();
+}
+
 void
 IO::meter ()
 {
-	LockMonitor lm (io_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (io_lock); // READER: meter thread.
 	uint32_t limit = max (_ninputs, _noutputs);
 	
 	for (uint32_t n = 0; n < limit; ++n) {
@@ -2602,7 +2630,7 @@ IO::load_automation (const string& path)
 void
 IO::clear_automation ()
 {
-	LockMonitor lm (automation_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (automation_lock);
 	_gain_automation_curve.clear ();
 	_panner->clear_automation ();
 }
@@ -2613,7 +2641,7 @@ IO::set_gain_automation_state (AutoState state)
 	bool changed = false;
 
 	{
-		LockMonitor lm (automation_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (automation_lock);
 
 		if (state != _gain_automation_curve.automation_state()) {
 			changed = true;
@@ -2638,7 +2666,7 @@ IO::set_gain_automation_style (AutoStyle style)
 	bool changed = false;
 
 	{
-		LockMonitor lm (automation_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (automation_lock);
 
 		if (style != _gain_automation_curve.automation_style()) {
 			changed = true;
@@ -2666,7 +2694,7 @@ IO::set_gain (gain_t val, void *src)
 	if (val>1.99526231f) val=1.99526231f;
 
 	{
-		LockMonitor dm (declick_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock dm (declick_lock);
 		_desired_gain = val;
 	}
 

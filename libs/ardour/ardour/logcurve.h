@@ -22,7 +22,7 @@
 #define __ardour_logcurve_h__
 
 #include <pbd/fastlog.h>
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 
 namespace ARDOUR {
 
@@ -94,7 +94,7 @@ class LogCurve {
 	}
 	void set_length (uint32_t len) { l = len; }
 
-	mutable PBD::NonBlockingLock lock;
+	mutable Glib::Mutex lock;
 
   protected:
 	float a;

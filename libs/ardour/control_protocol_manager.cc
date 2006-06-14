@@ -13,7 +13,6 @@
 
 
 using namespace ARDOUR;
-using namespace PBD;
 using namespace std;
 
 #include "i18n.h"
@@ -32,7 +31,7 @@ ControlProtocolManager::ControlProtocolManager ()
 
 ControlProtocolManager::~ControlProtocolManager()
 {
-	LockMonitor lm (protocols_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (protocols_lock);
 
 	for (list<ControlProtocol*>::iterator i = control_protocols.begin(); i != control_protocols.end(); ++i) {
 		delete (*i);
@@ -62,7 +61,7 @@ ControlProtocolManager::drop_session ()
 	_session = 0;
 
 	{
-		LockMonitor lm (protocols_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (protocols_lock);
 		for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 			delete *p;
 		}
@@ -89,7 +88,7 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 		return 0;
 	}
 
-	LockMonitor lm (protocols_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (protocols_lock);
 	control_protocols.push_back (cpi.protocol);
 
 	return cpi.protocol;
@@ -113,7 +112,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
 	
 	{
-		LockMonitor lm (protocols_lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (protocols_lock);
 		list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
 		if (p != control_protocols.end()) {
 			control_protocols.erase (p);
@@ -281,7 +280,7 @@ XMLNode&
 ControlProtocolManager::get_state (void)
 {
 	XMLNode* root = new XMLNode (state_node_name);
-	LockMonitor lm (protocols_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (protocols_lock);
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 		XMLNode* child = new XMLNode (X_("Protocol"));

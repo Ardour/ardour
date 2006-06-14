@@ -28,8 +28,9 @@
 
 #include <sys/stat.h>
 
+#include <glib.h>
+
 #include <sigc++/signal.h>
-#include <pbd/atomic.h>
 #include <pbd/undo.h>
 
 #include <ardour/ardour.h>
@@ -169,9 +170,9 @@ class Playlist : public Stateful, public StateManager {
 	RegionList       regions;
 	string          _name;
 	Session&        _session;
-	atomic_t         block_notifications;
-	atomic_t         ignore_state_changes;
-	mutable PBD::NonBlockingLock region_lock;
+	mutable gint    block_notifications;
+	mutable gint    ignore_state_changes;
+	mutable Glib::Mutex region_lock;
 	RegionList       pending_removals;
 	RegionList       pending_adds;
 	RegionList       pending_bounds;
@@ -197,8 +198,8 @@ class Playlist : public Stateful, public StateManager {
 	void init (bool hide);
 
 	bool holding_state () const { 
-		return atomic_read (&block_notifications) != 0 ||
-			atomic_read (&ignore_state_changes) != 0;
+		return g_atomic_int_get (&block_notifications) != 0 ||
+			g_atomic_int_get (&ignore_state_changes) != 0;
 	}
 
 	/* prevent the compiler from ever generating these */

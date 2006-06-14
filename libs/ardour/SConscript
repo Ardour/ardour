@@ -58,7 +58,6 @@ ladspa_plugin.cc
 location.cc
 mtc_slave.cc
 named_selection.cc
-osc.cc
 panner.cc
 pcm_utils.cc
 playlist.cc
@@ -97,12 +96,16 @@ mix.cc
 
 arch_specific_objects = [ ]
 
+osc_files = [ 'osc.cc' ]
 vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
 coreaudio_files = [ 'coreaudio_source.cc' ]
 extra_sources = [ ]
 
 if ardour['VST']:
 	extra_sources += vst_files
+
+if ardour['LIBLO']:
+    extra_sources += osc_files
 
 ardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 ardour.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
@@ -172,13 +175,16 @@ if conf.CheckCHeader('sys/vfs.h'):
 if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
     ardour.Append(LINKFLAGS="-framework CoreMIDI")
 
-if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h'):
+if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h') and ardour['COREAUDIO'] == 1:
     ardour.Append(CXXFLAGS="-DHAVE_COREAUDIO")    
     ardour.Append(LINKFLAGS="-framework AudioToolbox")
-    #
+    
+
+if env['CONFIG_ARCH'] == 'apple':
     # this next line avoids issues with circular dependencies between libardour and libardour_cp.
     # it is based on the (entirely reasonable) assumption that a system with CoreAudio is OS X
     #
+    print 'APPLE CONFIG'
     ardour.Append(LINKFLAGS='-undefined suppress -flat_namespace') 
     extra_sources += coreaudio_files
 
@@ -188,15 +194,19 @@ ardour.Merge ([
 	     libraries['core'],
 	     libraries['xml'],
 	     libraries['sndfile'],
+	     libraries['raptor'],
 	     libraries['lrdf'],
 	     libraries['samplerate'],
 	     libraries['sigc2'],
 	     libraries['pbd3'],
 	     libraries['soundtouch'],
 	     libraries['midi++2'],
-	     libraries['lo'],
+             libraries['glib2'],
+             libraries['glibmm2']
 	     ])
 
+if ardour['LIBLO']:
+    ardour.Merge ([ libraries['lo'] ])
 
 ardour.VersionBuild(['version.cc', 'ardour/version.h'], 'SConscript')
 

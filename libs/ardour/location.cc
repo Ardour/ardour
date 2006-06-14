@@ -371,7 +371,7 @@ Locations::set_current (Location *loc, bool want_lock)
 	int ret;
 
 	if (want_lock) {
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		ret = set_current_unlocked (loc);
 	} else {
 		ret = set_current_unlocked (loc);
@@ -399,7 +399,7 @@ void
 Locations::clear ()
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 			tmp = i;
@@ -424,7 +424,7 @@ void
 Locations::clear_markers ()
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
@@ -448,7 +448,7 @@ void
 Locations::clear_ranges ()
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
 		
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
@@ -477,7 +477,7 @@ void
 Locations::add (Location *loc, bool make_current)
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		locations.push_back (loc);
 
 		if (make_current) {
@@ -507,7 +507,7 @@ Locations::remove (Location *loc)
 	}
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 
 		for (i = locations.begin(); i != locations.end(); ++i) {
 			if ((*i) == loc) {
@@ -547,7 +547,7 @@ Locations::get_state ()
 {
 	XMLNode *node = new XMLNode ("Locations");
 	LocationList::iterator iter;
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
        
 	for (iter  = locations.begin(); iter != locations.end(); ++iter) {
 		node->add_child_nocopy ((*iter)->get_state ());
@@ -570,7 +570,7 @@ Locations::set_state (const XMLNode& node)
 	nlist = node.children();
 	
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			Location *loc = new Location;
@@ -614,7 +614,7 @@ Locations::first_location_before (jack_nframes_t frame)
 	LocationList locs;
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		locs = locations;
 	}
 
@@ -638,7 +638,7 @@ Locations::first_location_after (jack_nframes_t frame)
 	LocationList locs;
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		locs = locations;
 	}
 
@@ -662,7 +662,7 @@ Locations::first_mark_before (jack_nframes_t frame)
 	LocationList locs;
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+        Glib::Mutex::Lock lm (lock);
 		locs = locations;
 	}
 
@@ -699,7 +699,7 @@ Locations::first_mark_after (jack_nframes_t frame)
 	LocationList locs;
 
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+        Glib::Mutex::Lock lm (lock);
 		locs = locations;
 	}
 
@@ -792,7 +792,7 @@ Change
 Locations::restore_state (StateManager::State& state) 
 {
 	{
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		State* lstate = dynamic_cast<State*> (&state);
 
 		locations = lstate->locations;
@@ -817,7 +817,7 @@ uint32_t
 Locations::num_range_markers () const
 {
 	uint32_t cnt = 0;
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_range_marker()) {
 			++cnt;

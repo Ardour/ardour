@@ -24,7 +24,6 @@
 
 #include <sigc++/sigc++.h>
 
-#include <pbd/selectable.h>
 #include <midi++/types.h>
 #include <midi++/parser.h>
 
@@ -67,7 +66,7 @@ class Port : public sigc::trackable {
 
 	virtual int selectable() const = 0;
 
-	void selector_read_callback (Select::Selectable *, Select::Condition);
+	//void selector_read_callback (Select::Selectable *, Select::Condition);
 
 	static void xforms_read_callback (int cond, int fd, void *ptr);
 	static void gtk_read_callback (void *ptr, int fd, int cond);

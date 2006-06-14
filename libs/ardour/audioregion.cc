@@ -27,8 +27,9 @@
 #include <sigc++/bind.h>
 #include <sigc++/class_slot.h>
 
+#include <glibmm/thread.h>
+
 #include <pbd/basename.h>
-#include <pbd/lockmonitor.h>
 #include <pbd/xml++.h>
 
 #include <ardour/audioregion.h>

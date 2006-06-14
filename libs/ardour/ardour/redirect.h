@@ -27,7 +27,8 @@
 #include <map>
 #include <sigc++/signal.h>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
+
 #include <pbd/undo.h>
 
 #include <ardour/ardour.h>
@@ -131,7 +132,7 @@ class Redirect : public IO
 	map<uint32_t,AutomationList*> parameter_automation;
 	set<uint32_t> visible_parameter_automation;
 
-	mutable PBD::NonBlockingLock _automation_lock;
+	mutable Glib::Mutex _automation_lock;
 
 	void can_automate (uint32_t);
 	set<uint32_t> can_automate_list;

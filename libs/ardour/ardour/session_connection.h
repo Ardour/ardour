@@ -29,7 +29,7 @@ namespace ARDOUR {
 template<class T> void 
 Session::foreach_connection (T *obj, void (T::*func)(Connection *)) 
 {
-	LockMonitor lm (connection_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (connection_lock);
 	for (ConnectionList::iterator i = _connections.begin(); i != _connections.end(); i++) {
 		(obj->*func) (*i);
 	}

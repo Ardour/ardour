@@ -25,8 +25,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <pthread.h>
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <pbd/undo.h>
 #include <sigc++/signal.h>
 
@@ -198,7 +197,7 @@ class TempoMap : public Stateful, public StateManager {
 	typedef vector<BBTPoint> BBTPointList;
 	
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(const Metrics&)) {
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		(obj.*method)(*metrics);
 	}
 
@@ -285,7 +284,7 @@ class TempoMap : public Stateful, public StateManager {
 	jack_nframes_t      last_bbt_when;
 	bool                last_bbt_valid;
 	BBT_Time            last_bbt;
-	mutable PBD::Lock   lock;
+	mutable Glib::Mutex   lock;
 	
 	void timestamp_metrics ();
 

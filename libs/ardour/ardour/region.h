@@ -221,7 +221,7 @@ class Region : public Stateful, public StateManager
 	string                _name;        
 	mutable RegionEditState _first_edit;
 	int                   _frozen;
-	PBD::Lock              lock;
+	Glib::Mutex              lock;
 	ARDOUR::id_t          _id;
 	ARDOUR::Playlist*     _playlist;
 	mutable uint32_t      _read_data_count; // modified in read()

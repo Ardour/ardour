@@ -29,7 +29,7 @@ namespace ARDOUR {
 template<class T> void 
 Session::foreach_playlist (T *obj, void (T::*func)(Playlist *)) 
 {
-	LockMonitor lm (playlist_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (playlist_lock);
 	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); i++) {
 		if (!(*i)->hidden()) {
 			(obj->*func) (*i);

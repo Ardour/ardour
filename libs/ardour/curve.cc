@@ -28,7 +28,7 @@
 #include <cfloat>
 #include <cmath>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <sigc++/bind.h>
 
 #include "ardour/curve.h"
@@ -37,7 +37,6 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace PBD;
 using namespace sigc;
 
 Curve::Curve (double minv, double maxv, double canv, bool nostate)
@@ -204,7 +203,7 @@ Curve::solve ()
 bool
 Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
 {
-	TentativeLockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock, Glib::TRY_LOCK);
 
 	if (!lm.locked()) {
 		return false;
@@ -217,7 +216,7 @@ Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
 void
 Curve::get_vector (double x0, double x1, float *vec, int32_t veclen)
 {
-	LockMonitor lm (lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (lock);
 	_get_vector (x0, x1, vec, veclen);
 }
 

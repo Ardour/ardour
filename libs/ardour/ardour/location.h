@@ -27,10 +27,10 @@
 #include <map>
 
 #include <sys/types.h>
-#include <pthread.h>
 #include <sigc++/signal.h>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
+
 #include <pbd/undo.h>
 
 #include "ardour.h"
@@ -168,12 +168,12 @@ class Locations : public Stateful, public StateManager
 	sigc::signal<void,Location*> removed;
 
 	template<class T> void apply (T& obj, void (T::*method)(LocationList&)) {
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		(obj.*method)(locations);
 	}
 
 	template<class T1, class T2> void apply (T1& obj, void (T1::*method)(LocationList&, T2& arg), T2& arg) {
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		(obj.*method)(locations, arg);
 	}
 
@@ -190,7 +190,7 @@ class Locations : public Stateful, public StateManager
 
 	LocationList       locations;
 	Location          *current_location;
-	mutable PBD::Lock  lock;
+	mutable Glib::Mutex  lock;
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);

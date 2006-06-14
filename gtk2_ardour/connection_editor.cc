@@ -490,7 +490,7 @@ ConnectionEditor::display_ports ()
 void
 ConnectionEditor::display_connection_state (bool for_input)
 {
-	LockMonitor lm (port_display_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm  (port_display_lock);
 	uint32_t limit;
 
 	if (session == 0 || current_connection == 0) {
@@ -601,7 +601,7 @@ ConnectionEditor::add_port ()
 void
 ConnectionEditor::connection_port_button_press_event (GdkEventButton* ev, TreeView* tview)
 {
-	LockMonitor lm (port_display_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm  (port_display_lock);
 
 	int which_port = reinterpret_cast<intptr_t> (treeview->get_data ("port"));
 

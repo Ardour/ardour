@@ -34,7 +34,7 @@
 
 #include <gtkmm2ext/dndtreeview.h>
 
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 
 
 #include "ardour_dialog.h"
@@ -106,7 +106,7 @@ class AnalysisWindow : public ArdourDialog
 	  FFTGraph fft_graph;
 
 	  bool track_list_ready;
-	  PBD::Lock track_list_lock;
+	  Glib::Mutex track_list_lock;
 
 	  friend class FFTGraph;
 };

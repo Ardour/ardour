@@ -28,7 +28,9 @@
 #include <string>
 
 #include <sigc++/signal.h>
-#include <pthread.h>
+
+#include <glibmm/thread.h>
+
 #include <ardour/ardour.h>
 #include <jack/jack.h>
 #include <jack/transport.h>
@@ -59,7 +61,7 @@ class AudioEngine : public sigc::trackable
 	int start ();
 	bool running() const { return _running; }
 
-	PBD::NonBlockingLock& process_lock() { return _process_lock; }
+	Glib::Mutex& process_lock() { return _process_lock; }
 
 	jack_nframes_t frame_rate();
 	jack_nframes_t frames_per_cycle();
@@ -185,10 +187,10 @@ class AudioEngine : public sigc::trackable
 	ARDOUR::Session      *session;
 	jack_client_t       *_jack;
 	std::string           jack_client_name;
-	PBD::NonBlockingLock  port_lock;
-	PBD::NonBlockingLock _process_lock;
-	PBD::Lock             session_remove_lock;
-	pthread_cond_t        session_removed;
+	Glib::Mutex           port_lock;
+	Glib::Mutex           _process_lock;
+	Glib::Mutex           session_remove_lock;
+    Glib::Cond            session_removed;
 	bool                  session_remove_pending;
 	bool                 _running;
 	bool                 _has_run;
@@ -202,8 +204,6 @@ class AudioEngine : public sigc::trackable
 	sigc::slot<int,jack_nframes_t>  freewheel_action;
 	bool                  reconnect_on_halt;
 	int                  _usecs_per_cycle;
-	jack_nframes_t       last_meter_point;
-	jack_nframes_t       meter_interval;
 
 	typedef std::set<Port*> Ports;
 	Ports ports;
@@ -237,10 +237,10 @@ class AudioEngine : public sigc::trackable
 
 	int connect_to_jack (std::string client_name);
 
-	static void* _meter_thread (void* arg);
-	void* meter_thread ();
-	pthread_t meter_thread_id;
-	void maybe_start_metering_thread ();
+	void meter_thread ();
+	void start_metering_thread ();
+    Glib::Thread*    m_meter_thread;
+    mutable gint     m_meter_exit;
 };
 
 }; /* namespace ARDOUR */

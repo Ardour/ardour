@@ -24,7 +24,7 @@
 #include <gtkmm/accelmap.h>
 
 #include <pbd/convert.h>
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>

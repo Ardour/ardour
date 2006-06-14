@@ -27,7 +27,6 @@
 #include <samplerate.h>
 
 #include <pbd/convert.h>
-#include <pbd/dirname.h>
 #include <pbd/xml++.h>
 
 #include <gtkmm2ext/utils.h>
@@ -1154,7 +1153,7 @@ ExportDialog::is_filepath_valid(string &filepath)
  	
  	// directory needs to exist and be writable
 
- 	string dirpath = PBD::dirname (filepath);
+ 	string dirpath = Glib::path_get_dirname (filepath);
  	if (::access (dirpath.c_str(), W_OK) != 0) {
  		string txt = _("Cannot write file in: ") + dirpath;
 		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);

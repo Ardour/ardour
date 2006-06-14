@@ -225,8 +225,8 @@ Playlist::copy_regions (RegionList& newlist) const
 void
 Playlist::init (bool hide)
 {
-	atomic_set (&block_notifications, 0);
-	atomic_set (&ignore_state_changes, 0);
+	g_atomic_int_set (&block_notifications, 0);
+	g_atomic_int_set (&ignore_state_changes, 0);
 	pending_modified = false;
 	pending_length = false;
 	_refcnt = 0;
@@ -292,13 +292,13 @@ void
 Playlist::freeze ()
 {
 	delay_notifications ();
-	atomic_inc (&ignore_state_changes);
+	g_atomic_int_inc (&ignore_state_changes);
 }
 
 void
 Playlist::thaw ()
 {
-	atomic_dec (&ignore_state_changes);
+	g_atomic_int_dec_and_test (&ignore_state_changes);
 	release_notifications ();
 }
 
@@ -306,14 +306,14 @@ Playlist::thaw ()
 void
 Playlist::delay_notifications ()
 {
-	atomic_inc (&block_notifications);
+	g_atomic_int_inc (&block_notifications);
 	freeze_length = _get_maximum_extent();
 }
 
 void
 Playlist::release_notifications ()
 {
-	if (atomic_dec_and_test(&block_notifications)) { 
+	if (g_atomic_int_dec_and_test (&block_notifications)) { 
 		flush_notifications ();
 	} 
 }

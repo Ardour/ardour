@@ -26,7 +26,7 @@
 #include <cmath>
 
 #include <sigc++/signal.h>
-#include <pbd/lockmonitor.h>
+#include <glibmm/thread.h>
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
 #include <ardour/ardour.h>
@@ -144,7 +144,7 @@ class AutomationList : public StateManager
 	std::pair<AutomationList::iterator,AutomationList::iterator> control_points_adjacent (double when);
 
 	template<class T> void apply_to_points (T& obj, void (T::*method)(const AutomationList&)) {
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		(obj.*method)(*this);
 	}
 
@@ -157,13 +157,13 @@ class AutomationList : public StateManager
 	double get_max_xval() const { return max_xval; }
 
 	double eval (double where) {
-		LockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock);
 		return unlocked_eval (where);
 	}
 
 	double rt_safe_eval (double where, bool& ok) {
 
-		TentativeLockMonitor lm (lock, __LINE__, __FILE__);
+		Glib::Mutex::Lock lm (lock, Glib::TRY_LOCK);
 
 		if ((ok = lm.locked())) {
 			return unlocked_eval (where);
@@ -186,7 +186,7 @@ class AutomationList : public StateManager
 	};
 
 	AutomationEventList events;
-	mutable PBD::NonBlockingLock lock;
+	mutable Glib::Mutex lock;
 	bool   _frozen;
 	bool    changed_when_thawed;
 	bool   _dirty;

@@ -4,9 +4,10 @@
 #include <vector>
 
 #include <sys/time.h>
-#include <pbd/lockmonitor.h>
 #include <pthread.h>
 #include <usb.h>
+
+#include <glibmm/thread.h>
 
 #include <ardour/types.h>
 
@@ -95,7 +96,7 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	DisplayMode     display_mode;
 	ARDOUR::gain_t  gain_fraction;
 
-	PBD::Lock update_lock;
+	Glib::Mutex update_lock;
 	char current_screen[2][20];
 	char pending_screen[2][20];
 	bool lights[7];
@@ -112,7 +113,7 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	struct timeval last_wheel_motion;
 	int            last_wheel_dir;
 
-	PBD::Lock io_lock;
+	Glib::Mutex io_lock;
 
 	int open ();
 	int read (uint32_t timeout_override = 0);

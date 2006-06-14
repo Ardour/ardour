@@ -23,7 +23,9 @@
 
 #include <vector>
 #include <string>
-#include <pthread.h>
+
+#include <glibmm/thread.h>
+
 #include <pbd/ringbuffer.h>
 
 class Pool 
@@ -53,7 +55,7 @@ class SingleAllocMultiReleasePool : public Pool
 	virtual void release (void *);
 
   private:
-	pthread_mutex_t lock;
+    Glib::Mutex* m_lock;
 };
 
 
@@ -67,8 +69,7 @@ class MultiAllocSingleReleasePool : public Pool
 	virtual void release (void *);
 
   private:
-	pthread_mutex_t lock;
+    Glib::Mutex* m_lock;
 };
-
 
 #endif // __qm_pool_h__

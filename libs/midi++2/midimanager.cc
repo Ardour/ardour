@@ -18,8 +18,10 @@
 */
 
 #include <fcntl.h>
+
+#include <glib.h>
+
 #include <pbd/error.h>
-#include <pbd/basename.h>
 
 #include <midi++/types.h>
 #include <midi++/manager.h>
@@ -29,6 +31,8 @@
 
 using namespace std;
 using namespace MIDI;
+
+/* XXX check for strdup leaks */
 
 Manager *Manager::theManager = 0;
 
@@ -312,7 +316,7 @@ Manager::parse_port_request (string str, Port::Type type)
 	   "devicename" is the full path to the requested file
 	   
 	   "tagname" (optional) is the name used to refer to the
-		         port. If not given, PBD::basename (devicename)
+		         port. If not given, g_path_get_basename (devicename)
 			 will be used.
 
 	   "mode" (optional) is either "r" or "w" or something else.
@@ -360,7 +364,8 @@ Manager::parse_port_request (string str, Port::Type type)
 		}
 
 	} else {
-		req->tagname = strdup (PBD::basename (req->devname));
+                // check when tagname is freed
+		req->tagname = g_path_get_basename (req->devname);
 		req->mode = O_RDWR;
 	}
 

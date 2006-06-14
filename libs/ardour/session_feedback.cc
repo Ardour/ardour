@@ -28,8 +28,10 @@
 #include <midi++/types.h>
 #include <midi++/port.h>
 #include <midi++/manager.h>
+
+#include <glibmm/thread.h>
+
 #include <pbd/error.h>
-#include <pbd/lockmonitor.h>
 #include <pbd/pthread_utils.h>
 
 #include <ardour/configuration.h>

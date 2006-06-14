@@ -26,8 +26,9 @@
 #include <fcntl.h>
 #include <poll.h>
 
+#include <glibmm/thread.h>
+
 #include <pbd/error.h>
-#include <pbd/lockmonitor.h>
 #include <pbd/pthread_utils.h>
 
 #include <ardour/configuration.h>
@@ -73,8 +74,6 @@ Session::start_butler_thread ()
 
 	Crossfade::set_buffer_size (dstream_buffer_size);
 
-	pthread_cond_init (&butler_paused, 0);
-	
 	butler_should_run = false;
 
 	if (pipe (butler_request_pipe)) {
@@ -114,7 +113,7 @@ Session::terminate_butler_thread ()
 void
 Session::schedule_butler_transport_work ()
 {
-	atomic_inc (&butler_should_do_transport_work);
+	g_atomic_int_inc (&butler_should_do_transport_work);
 	summon_butler ();
 }
 
@@ -135,19 +134,19 @@ Session::summon_butler ()
 void
 Session::stop_butler ()
 {
-	LockMonitor lm (butler_request_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (butler_request_lock);
 	char c = ButlerRequest::Pause;
 	::write (butler_request_pipe[1], &c, 1);
-	pthread_cond_wait (&butler_paused, butler_request_lock.mutex());
+	butler_paused.wait(butler_request_lock);
 }
 
 void
 Session::wait_till_butler_finished ()
 {
-	LockMonitor lm (butler_request_lock, __LINE__, __FILE__);
+	Glib::Mutex::Lock lm (butler_request_lock);
 	char c = ButlerRequest::Wake;
 	::write (butler_request_pipe[1], &c, 1);
-	pthread_cond_wait (&butler_paused, butler_request_lock.mutex());
+	butler_paused.wait(butler_request_lock);
 }
 
 void *
@@ -158,7 +157,7 @@ Session::_butler_thread_work (void* arg)
 	return 0;
 }
 
-#define transport_work_requested() atomic_read(&butler_should_do_transport_work)
+#define transport_work_requested() g_atomic_int_get(&butler_should_do_transport_work)
 
 void *
 Session::butler_thread_work ()
@@ -256,7 +255,7 @@ Session::butler_thread_work ()
 
 		gettimeofday (&begin, 0);
 
-		RWLockMonitor dsm (diskstream_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 		
 		for (i = diskstreams.begin(); !transport_work_requested() && butler_should_run && i != diskstreams.end(); ++i) {
 			
@@ -355,7 +354,7 @@ Session::butler_thread_work ()
 
 
 		{
-			LockMonitor lm (butler_request_lock, __LINE__, __FILE__);
+			Glib::Mutex::Lock lm (butler_request_lock);
 
 			if (butler_should_run && (disk_work_outstanding || transport_work_requested())) {
 //				for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
@@ -365,7 +364,7 @@ Session::butler_thread_work ()
 				continue;
 			}
 
-			pthread_cond_signal (&butler_paused);
+			butler_paused.signal();
 		}
 	}
 
@@ -398,7 +397,7 @@ Session::overwrite_some_buffers (DiskStream* ds)
 
 	} else {
 
-		RWLockMonitor dm (diskstream_lock, false, __LINE__, __FILE__);
+		Glib::RWLock::ReaderLock dm (diskstream_lock);
 		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			(*i)->set_pending_overwrite (true);
 		}
@@ -429,36 +428,36 @@ Session::write_data_rate () const
 uint32_t
 Session::playback_load ()
 {
-	return (uint32_t) atomic_read (&_playback_load);
+	return (uint32_t) g_atomic_int_get (&_playback_load);
 }
 
 uint32_t
 Session::capture_load ()
 {
-	return (uint32_t) atomic_read (&_capture_load);
+	return (uint32_t) g_atomic_int_get (&_capture_load);
 }
 
 uint32_t
 Session::playback_load_min ()
 {
-	return (uint32_t) atomic_read (&_playback_load_min);
+	return (uint32_t) g_atomic_int_get (&_playback_load_min);
 }
 
 uint32_t
 Session::capture_load_min ()
 {
-	return (uint32_t) atomic_read (&_capture_load_min);
+	return (uint32_t) g_atomic_int_get (&_capture_load_min);
 }
 
 void
 Session::reset_capture_load_min ()
 {
-	atomic_set (&_capture_load_min, 100);
+	g_atomic_int_set (&_capture_load_min, 100);
 }
 
 
 void
 Session::reset_playback_load_min ()
 {
-	atomic_set (&_playback_load_min, 100);
+	g_atomic_int_set (&_playback_load_min, 100);
 }
