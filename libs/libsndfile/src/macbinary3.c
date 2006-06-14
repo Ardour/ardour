@@ -27,7 +27,7 @@
 
 #if (OS_IS_MACOSX == 1)
 
-#include	<CoreServices.h>
+#include	<CoreServices/CoreServices.h>
 
 int
 macbinary3_open (SF_PRIVATE *psf)

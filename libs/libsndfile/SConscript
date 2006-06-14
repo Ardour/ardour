@@ -18,6 +18,13 @@ sndfile.Append(CCFLAGS = "-DVERSION=\\\"ardour-special\\\"")
 sndfile.Append(PACKAGE = domain)
 sndfile.Append(POTFILE = domain + '.pot')
 
+conf = Configure(sndfile)
+
+if conf.CheckCHeader('/System/Library/Frameworks/CoreServices.framework/Headers/CoreServices.h'):
+    sndfile.Append(LINKFLAGS = "-framework CoreServices")
+
+sndfile = conf.Finish()
+
 libsndfile = sndfile.SharedLibrary('sndfile', sndfile_files)
 
 sndfile_h = sndfile.Command('src/sndfile.h', ['src/sndfile.h.in'], 'cd libs/libsndfile && ./configure && cd -', ENV=os.environ)
