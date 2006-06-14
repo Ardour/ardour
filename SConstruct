@@ -462,18 +462,25 @@ libraries['dmalloc'] = conf.Finish ()
 # 
 
 conf = Configure(env)
-
-if conf.CheckCHeader('alsa/asoundlib.h'):
+if conf.CheckCHeader('jack/midiport.h'):
+    libraries['sysmidi'] = LibraryInfo (LIBS='jack')
+    env['SYSMIDI'] = 'JACK MIDI'
+    subst_dict['%MIDITAG%'] = "control"
+    subst_dict['%MIDITYPE%'] = "jack"
+    print "Using JACK MIDI"
+elif conf.CheckCHeader('alsa/asoundlib.h'):
     libraries['sysmidi'] = LibraryInfo (LIBS='asound')
     env['SYSMIDI'] = 'ALSA Sequencer'
     subst_dict['%MIDITAG%'] = "seq"
     subst_dict['%MIDITYPE%'] = "alsa/sequencer"
+    print "Using ALSA MIDI"
 elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
     # this line is needed because scons can't handle -framework in ParseConfig() yet.
     libraries['sysmidi'] = LibraryInfo (LINKFLAGS= '-framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -bind_at_load')
     env['SYSMIDI'] = 'CoreMIDI'
     subst_dict['%MIDITAG%'] = "ardour"
     subst_dict['%MIDITYPE%'] = "coremidi"
+    print "Using CoreMIDI"
 else:
     print "It appears you don't have the required MIDI libraries installed."
     sys.exit (1)

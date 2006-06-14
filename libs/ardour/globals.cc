@@ -47,6 +47,7 @@
 #include <ardour/utils.h>
 #include <ardour/session.h>
 #include <ardour/control_protocol_manager.h>
+#include <ardour/audioengine.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -99,7 +100,7 @@ setup_osc ()
 #endif
 
 static int 
-setup_midi ()
+setup_midi (AudioEngine& engine	)
 {
 	std::map<string,Configuration::MidiPortDescriptor*>::iterator i;
 	int nports;
@@ -108,6 +109,8 @@ setup_midi ()
 		warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
 		return 0;
 	}
+
+	MIDI::Manager::instance()->set_api_data(engine.jack());
 
 	for (i = Config->midi_ports.begin(); i != Config->midi_ports.end(); ++i) {
 		Configuration::MidiPortDescriptor* port_descriptor;
@@ -202,7 +205,7 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 
 	Config->set_use_vst (use_vst);
 
-	if (setup_midi ()) {
+	if (setup_midi (engine)) {
 		return -1;
 	}
     
