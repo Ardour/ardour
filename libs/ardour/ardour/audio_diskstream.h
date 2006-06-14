@@ -15,7 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
+    $Id: diskstream.h 579 2006-06-12 19:56:37Z essej $
 */
 
 #ifndef __ardour_diskstream_h__
@@ -52,10 +52,10 @@ class AudioEngine;
 class Send;
 class Session;
 class AudioPlaylist;
-class FileSource;
+class AudioFileSource;
 class IO;
 
-class DiskStream : public Stateful, public sigc::trackable
+class AudioDiskstream : public Stateful, public sigc::trackable
 {	
   public:
 	enum Flag {
@@ -64,15 +64,15 @@ class DiskStream : public Stateful, public sigc::trackable
 		Destructive = 0x4
 	};
 
-	DiskStream (Session &, const string& name, Flag f = Recordable);
-	DiskStream (Session &, const XMLNode&);
+	AudioDiskstream (Session &, const string& name, Flag f = Recordable);
+	AudioDiskstream (Session &, const XMLNode&);
 
 	string name() const { return _name; }
 
 	ARDOUR::IO* io() const { return _io; }
 	void set_io (ARDOUR::IO& io);
 
-	DiskStream& ref() { _refcnt++; return *this; }
+	AudioDiskstream& ref() { _refcnt++; return *this; }
 	void unref() { if (_refcnt) _refcnt--; if (_refcnt == 0) delete this; }
 	uint32_t refcnt() const { return _refcnt; }
 
@@ -154,7 +154,7 @@ class DiskStream : public Stateful, public sigc::trackable
 
 	AudioPlaylist *playlist () { return _playlist; }
 
-	FileSource *write_source (uint32_t n=0) {
+	AudioFileSource *write_source (uint32_t n=0) {
 		if (n < channels.size())
 			return channels[n].write_source;
 		return 0;
@@ -184,8 +184,8 @@ class DiskStream : public Stateful, public sigc::trackable
 
 	static sigc::signal<void> DiskOverrun;
 	static sigc::signal<void> DiskUnderrun;
-	static sigc::signal<void,DiskStream*> DiskStreamCreated;   // XXX use a ref with sigc2
-	static sigc::signal<void,list<Source*>*> DeleteSources;
+	static sigc::signal<void,AudioDiskstream*> AudioDiskstreamCreated;   // XXX use a ref with sigc2
+	static sigc::signal<void,list<AudioFileSource*>*> DeleteSources;
 
 	/* stateful */
 
@@ -266,7 +266,7 @@ class DiskStream : public Stateful, public sigc::trackable
 
 	/* use unref() to destroy a diskstream */
 
-	~DiskStream();
+	~AudioDiskstream();
 
 	enum TransitionType {
 		CaptureStart = 0,
@@ -288,8 +288,8 @@ class DiskStream : public Stateful, public sigc::trackable
 
 	        float       peak_power;
 
-		FileSource   *fades_source;
-		FileSource   *write_source;
+	        AudioFileSource   *fades_source;
+		AudioFileSource   *write_source;
 
 		Port         *source;
 		Sample       *current_capture_buffer;
@@ -432,7 +432,7 @@ class DiskStream : public Stateful, public sigc::trackable
 	void non_realtime_set_speed ();
 
 	std::list<Region*> _last_capture_regions;
-	std::vector<FileSource*> capturing_sources;
+	std::vector<AudioFileSource*> capturing_sources;
 	int use_pending_capture_data (XMLNode& node);
 
 	void get_input_sources ();
