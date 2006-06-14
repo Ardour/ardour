@@ -431,7 +431,7 @@ libraries['usb'] = conf.Finish ()
 libraries['flac'] = LibraryInfo ()
 
 conf = Configure (libraries['flac'])
-conf.CheckLib ('FLAC', 'flac_buffer_copy')
+conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new')
 libraries['flac'] = conf.Finish ()
 
 #
