@@ -431,11 +431,7 @@ libraries['usb'] = conf.Finish ()
 libraries['flac'] = LibraryInfo ()
 
 conf = Configure (libraries['flac'])
-if conf.CheckLib ('FLAC', 'flac_buffer_copy'):
-    have_libusb = True
-else:
-    have_libusb = False
-    
+conf.CheckLib ('FLAC', 'flac_buffer_copy')
 libraries['flac'] = conf.Finish ()
 
 #
