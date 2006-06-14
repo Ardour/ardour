@@ -353,8 +353,8 @@ libraries = { }
 
 libraries['core'] = LibraryInfo (CCFLAGS = '-Ilibs')
 
-libraries['sndfile'] = LibraryInfo()
-libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
+#libraries['sndfile'] = LibraryInfo(CCFLAGS = '-Ilibs/libsndfile/src')
+#libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
 
 libraries['lrdf'] = LibraryInfo()
 libraries['lrdf'].ParseConfig('pkg-config --cflags --libs lrdf')
@@ -546,6 +546,9 @@ else:
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
+    libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
+                                    LIBPATH='#libs/libsndfile',
+                                    CPPPATH='#libs/libsndfile')
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
@@ -558,6 +561,7 @@ else:
     subdirs = [
 #	    'libs/cassowary',
         'libs/sigc++2',
+        'libs/libsndfile',
         'libs/pbd3',
         'libs/midi++2',
         'libs/ardour'
