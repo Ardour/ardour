@@ -35,6 +35,7 @@ gtkardour.Merge ([
     libraries['libgnomecanvasmm'],
     libraries['sysmidi'],
     libraries['sndfile'],
+    libraries['flac'],
     libraries['lrdf'],
     libraries['glibmm2'],
     libraries['pangomm'],

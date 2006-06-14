@@ -426,6 +426,19 @@ else:
 libraries['usb'] = conf.Finish ()
 
 #
+# Check for FLAC
+
+libraries['flac'] = LibraryInfo ()
+
+conf = Configure (libraries['flac'])
+if conf.CheckLib ('FLAC', 'flac_buffer_copy'):
+    have_libusb = True
+else:
+    have_libusb = False
+    
+libraries['flac'] = conf.Finish ()
+
+#
 # Check for liblo
 
 if env['LIBLO']:
