@@ -2493,7 +2493,7 @@ IO::meter ()
 		} else {
 			// do falloff
 			new_peak = _visible_peak_power[n] - _session.meter_falloff();
-			_visible_peak_power[n] = max (new_peak, -200.0f);
+			_visible_peak_power[n] = max (new_peak, -INFINITY);
 		}
 	}
 }
