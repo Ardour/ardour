@@ -354,11 +354,12 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	// draw peak bar 
 	if (hold_state && intersection.width > 0) {
 		gint y = pixheight - (gint) floor (pixheight * current_peak);
+		int h = min(3, pixheight - y);
 
 		get_window()->draw_pixbuf (get_style()->get_fg_gc(get_state()), pixbuf,
 					   intersection.x, y,
 					   intersection.x, y,
-					   intersection.width, 3,
+					   intersection.width, h,
 					   Gdk::RGB_DITHER_NONE, 0, 0);
 	}
 
