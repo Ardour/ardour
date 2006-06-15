@@ -25,6 +25,7 @@
 #include <string>
 
 #include <jack/types.h>
+#include <control_protocol/smpte.h>
 
 namespace ARDOUR {
 	class Session;
@@ -72,27 +73,9 @@ class BasicUI {
 
 	jack_nframes_t smpte_frames_per_hour ();
 
-	struct SMPTE_t {
-		bool negative;
-		uint32_t hours;
-		uint32_t minutes;
-		uint32_t seconds;
-		uint32_t frames;
-		uint32_t subframes; // mostly not used
-
-		SMPTE_t () {
-			negative = false;
-			hours = 0;
-			minutes = 0;
-			seconds = 0;
-			frames = 0;
-			subframes = 0;
-		}
-	};
-
-	void smpte_time (jack_nframes_t where, SMPTE_t&);
-	void smpte_to_sample (SMPTE_t& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes) const;
-	void sample_to_smpte (jack_nframes_t sample, SMPTE_t& smpte, bool use_offset, bool use_subframes) const;
+	void smpte_time (jack_nframes_t where, SMPTE::Time&);
+	void smpte_to_sample (SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes) const;
+	void sample_to_smpte (jack_nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes) const;
 
   protected:
 	BasicUI ();

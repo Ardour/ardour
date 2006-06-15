@@ -592,7 +592,6 @@ class Session : public sigc::trackable, public Stateful
 	int  set_smpte_type (float fps, bool drop_frames);
 
 	void bbt_time (jack_nframes_t when, BBT_Time&);
-
 	void smpte_to_sample( SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const;
 	void sample_to_smpte( jack_nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes ) const;
 	void smpte_time (SMPTE::Time &);
@@ -1352,7 +1351,7 @@ class Session : public sigc::trackable, public Stateful
 	jack_nframes_t last_smpte_when;
 	SMPTE::Time    last_smpte;
 	
-	bool _send_smpte_update; ///< Send a full MTC timecode this cycle
+	bool _send_smpte_update; ///< Flag to send a full frame (SMPTE) MTC message this cycle
 
 	int send_full_time_code(jack_nframes_t nframes);
 	int send_midi_time_code_for_cycle(jack_nframes_t nframes);

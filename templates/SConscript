@@ -13,5 +13,5 @@ for template in template_files:
 
 Default(template_build)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/templates'), template_build))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/templates'), template_build))
 env.Alias('tarball', env.Distribute (env['DISTTREE'], [ 'SConscript' ] + template_build))

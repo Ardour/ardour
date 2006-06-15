@@ -23,7 +23,7 @@
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
 
-#include "control_protocol.h"
+#include <control_protocol/control_protocol.h>
 
 using namespace ARDOUR;
 using namespace std;

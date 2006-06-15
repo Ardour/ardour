@@ -324,7 +324,7 @@ TranzportControlProtocol::show_transport_time ()
 	if (where != last_where) {
 
 		char buf[5];
-		SMPTE_Time smpte;
+		SMPTE::Time smpte;
 
 		session->smpte_time (where, smpte);
 		
@@ -395,10 +395,7 @@ TranzportControlProtocol::open_core (struct usb_device* dev)
 	}
 
 	if (usb_set_configuration (udev, 1) < 0) {
-		error << _("Tranzport: cannot configure USB interface") << endmsg;
-		usb_close (udev);
-		udev = 0;
-		return -1;
+		cerr << _("Tranzport: cannot configure USB interface") << endmsg;
 	}
 
 	return 0;

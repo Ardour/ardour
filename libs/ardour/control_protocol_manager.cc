@@ -4,7 +4,7 @@
 #include <pbd/error.h>
 #include <pbd/pathscanner.h>
 
-#include "control_protocol.h"
+#include <control_protocol/control_protocol.h>
 
 #include <ardour/session.h>
 #include <ardour/control_protocol_manager.h>
