@@ -46,7 +46,7 @@ ARDOUR_UI::setup_config_options ()
 	struct { 
 	    char* name;
 	    bool (Configuration::*method)(void) const;
-	    char act_type;  // (t)oggle or (r)adio
+	    char act_type;  //(t)oggle or (r)adio
 	} options[] = {
 		{ "ToggleTimeMaster", &Configuration::get_jack_time_master, 't' },
 		{ "StopPluginsWithTransport", &Configuration::get_plugins_stop_with_transport, 't' },
