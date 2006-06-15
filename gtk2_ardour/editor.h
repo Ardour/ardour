@@ -1616,7 +1616,7 @@ class Editor : public PublicEditor
 	/* visual history */
 
 	UndoHistory visual_history;
-	UndoCommand current_visual_command;
+	UndoTransaction current_visual_command;
 
 	void begin_reversible_visual_command (const string & cmd_name);
 	void commit_reversible_visual_command ();

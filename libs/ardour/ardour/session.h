@@ -489,7 +489,7 @@ class Session : public sigc::trackable, public Stateful
 	static vector<string*>* possible_states(string path);
 
 	XMLNode& get_state();
-	int      set_state(const XMLNode& node);
+	int      set_state(const XMLNode& node); // not idempotent
 	XMLNode& get_template();
 
 	void add_instant_xml (XMLNode&, const std::string& dir);
@@ -849,13 +849,13 @@ class Session : public sigc::trackable, public Stateful
 	void commit_reversible_command (UndoAction* private_redo = 0);
 
 	void add_undo (const UndoAction& ua) {
-		current_cmd.add_undo (ua);
+		current_trans.add_undo (ua);
 	}
 	void add_redo (const UndoAction& ua) {
-		current_cmd.add_redo (ua);
+		current_trans.add_redo (ua);
 	}
 	void add_redo_no_execute (const UndoAction& ua) {
-		current_cmd.add_redo_no_execute (ua);
+		current_trans.add_redo_no_execute (ua);
 	}
 
 	UndoAction global_solo_memento (void *src);
@@ -1635,7 +1635,7 @@ class Session : public sigc::trackable, public Stateful
 	void reverse_diskstream_buffers ();
 
 	UndoHistory history;
-	UndoCommand current_cmd;
+	UndoTransaction current_trans;
 
 	GlobalRouteBooleanState get_global_route_boolean (bool (Route::*method)(void) const);
 	GlobalRouteMeterState get_global_route_metering ();

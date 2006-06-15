@@ -25,11 +25,11 @@
 using namespace std;
 using namespace sigc;
 
-UndoCommand::UndoCommand ()
+UndoTransaction::UndoTransaction ()
 {
 }
 
-UndoCommand::UndoCommand (const UndoCommand& rhs)
+UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
 {
 	_name = rhs._name;
 	clear ();
@@ -37,8 +37,8 @@ UndoCommand::UndoCommand (const UndoCommand& rhs)
 	redo_actions.insert(redo_actions.end(),rhs.redo_actions.begin(),rhs.redo_actions.end());
 }
 
-UndoCommand& 
-UndoCommand::operator= (const UndoCommand& rhs)
+UndoTransaction& 
+UndoTransaction::operator= (const UndoTransaction& rhs)
 {
 	if (this == &rhs) return *this;
 	_name = rhs._name;
@@ -49,33 +49,33 @@ UndoCommand::operator= (const UndoCommand& rhs)
 }
 
 void
-UndoCommand::add_undo (const UndoAction& action)
+UndoTransaction::add_undo (const UndoAction& action)
 {
 	undo_actions.push_back (action);
 }
 
 void
-UndoCommand::add_redo (const UndoAction& action)
+UndoTransaction::add_redo (const UndoAction& action)
 {
 	redo_actions.push_back (action);
 	redo_actions.back()(); // operator()
 }
 
 void
-UndoCommand::add_redo_no_execute (const UndoAction& action)
+UndoTransaction::add_redo_no_execute (const UndoAction& action)
 {
 	redo_actions.push_back (action);
 }
 
 void
-UndoCommand::clear ()
+UndoTransaction::clear ()
 {
 	undo_actions.clear ();
 	redo_actions.clear ();
 }
 
 void
-UndoCommand::undo ()
+UndoTransaction::undo ()
 {
 	cerr << "Undo " << _name << endl;
 	for (list<UndoAction>::reverse_iterator i = undo_actions.rbegin(); i != undo_actions.rend(); ++i) {
@@ -84,7 +84,7 @@ UndoCommand::undo ()
 }
 
 void
-UndoCommand::redo ()
+UndoTransaction::redo ()
 {
 	cerr << "Redo " << _name << endl;
 	for (list<UndoAction>::iterator i = redo_actions.begin(); i != redo_actions.end(); ++i) {
@@ -93,9 +93,9 @@ UndoCommand::redo ()
 }
 
 void
-UndoHistory::add (UndoCommand uc)
+UndoHistory::add (UndoTransaction ut)
 {
-	UndoList.push_back (uc);
+	UndoList.push_back (ut);
 }
 
 void
@@ -105,10 +105,10 @@ UndoHistory::undo (unsigned int n)
 		if (UndoList.size() == 0) {
 			return;
 		}
-		UndoCommand uc = UndoList.back ();
+		UndoTransaction ut = UndoList.back ();
 		UndoList.pop_back ();
-		uc.undo ();
-		RedoList.push_back (uc);
+		ut.undo ();
+		RedoList.push_back (ut);
 	}
 }
 
@@ -119,10 +119,10 @@ UndoHistory::redo (unsigned int n)
 		if (RedoList.size() == 0) {
 			return;
 		}
-		UndoCommand cmd = RedoList.back ();
+		UndoTransaction trans = RedoList.back ();
 		RedoList.pop_back ();
-		cmd.redo ();
-		UndoList.push_back (cmd);
+		trans.redo ();
+		UndoList.push_back (trans);
 	}
 }
 

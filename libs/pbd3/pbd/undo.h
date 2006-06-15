@@ -23,6 +23,7 @@
 
 #include <string>
 #include <list>
+#include <map>
 #include <sigc++/slot.h>
 #include <sigc++/bind.h>
 #include <sys/time.h>
@@ -33,42 +34,47 @@ using std::list;
 
 typedef sigc::slot<void> UndoAction;
 
-class Serializable;
-
-class MementoBase
+// TODO stick this in its own file, and make the arguments multiply-inherit it
+class Serializable 
 {
 public:
-    MementoBase(std::string key);
+    XMLNode &serialize();
+};
+
+class UndoCommand
+{
+public:
+    UndoCommand(id_t object_id, std::string method_name);
     void operator() () { return _slot(); }
     XMLNode &serialize();
 protected:
     sigc::slot<void> _slot;
-    std::list<Serializable> _args;
 };
 
 template <class T1=void, class T2=void, class T3=void, class T4=void>
-class Memento;
+class SlotCommand;
 
 template <>
-class Memento <> : public MementoBase {};
+class SlotCommand <> : public UndoCommand {};
 
 template <class T1>
-class Memento <T1> : public MementoBase
+class SlotCommand <T1> : public UndoCommand
 {
+    T1 _arg1;
 public:
-    Memento(std::string key, T1 arg1) : MementoBase(key)
+    SlotCommand(id_t object_id, std::string key, T1 arg1) 
+	: UndoCommand(object_id, key), _arg1(arg1)
     {
-	_args.push_back(arg1);
 	_slot = sigc::bind(_slot, arg1);
     }
 };
 
-class UndoCommand 
+class UndoTransaction 
 {
   public:
-	UndoCommand ();
-	UndoCommand (const UndoCommand&);
-	UndoCommand& operator= (const UndoCommand&);
+	UndoTransaction ();
+	UndoTransaction (const UndoTransaction&);
+	UndoTransaction& operator= (const UndoTransaction&);
 
 	void clear ();
 
@@ -105,7 +111,7 @@ class UndoHistory
 	UndoHistory() {}
 	~UndoHistory() {}
 	
-	void add (UndoCommand uc);
+	void add (UndoTransaction ut);
 	void undo (unsigned int n);
 	void redo (unsigned int n);
 	
@@ -120,8 +126,8 @@ class UndoHistory
 	void clear_redo ();
 
   private:
-	list<UndoCommand> UndoList;
-	list<UndoCommand> RedoList;
+	list<UndoTransaction> UndoList;
+	list<UndoTransaction> RedoList;
 };
 
 

@@ -2562,11 +2562,11 @@ Session::set_meter_falloff (float val)
 void
 Session::begin_reversible_command (string name, UndoAction* private_undo)
 {
-	current_cmd.clear ();
-	current_cmd.set_name (name);
+	current_trans.clear ();
+	current_trans.set_name (name);
 
 	if (private_undo) {
-		current_cmd.add_undo (*private_undo);
+		current_trans.add_undo (*private_undo);
 	}
 }
 
@@ -2576,13 +2576,13 @@ Session::commit_reversible_command (UndoAction* private_redo)
 	struct timeval now;
 
 	if (private_redo) {
-		current_cmd.add_redo_no_execute (*private_redo);
+		current_trans.add_redo_no_execute (*private_redo);
 	}
 
 	gettimeofday (&now, 0);
-	current_cmd.set_timestamp (now);
+	current_trans.set_timestamp (now);
 
-	history.add (current_cmd);
+	history.add (current_trans);
 }
 
 Session::GlobalRouteBooleanState 
