@@ -324,7 +324,7 @@ TranzportControlProtocol::show_transport_time ()
 	if (where != last_where) {
 
 		char buf[5];
-		SMPTE_Time smpte;
+		SMPTE::Time smpte;
 
 		session->smpte_time (where, smpte);
 		

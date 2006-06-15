@@ -457,7 +457,7 @@ void
 AudioClock::set_smpte (jack_nframes_t when, bool force)
 {
 	char buf[32];
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	
 	if (is_duration) {
 		session->smpte_duration (when, smpte);
@@ -1281,7 +1281,7 @@ AudioClock::smpte_frame_from_display () const
 		return 0;
 	}
 	
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	jack_nframes_t sample;
 	
 	smpte.hours = atoi (hours_label.get_text());
@@ -1302,10 +1302,10 @@ AudioClock::smpte_frame_from_display () const
 #define SMPTE_SAMPLE_TEST_7
 
 	// Testcode for smpte<->sample conversions (P.S.)
-	SMPTE_Time smpte1;
+	SMPTE::Time smpte1;
 	jack_nframes_t sample1;
 	jack_nframes_t oldsample = 0;
-	SMPTE_Time smpte2;
+	SMPTE::Time smpte2;
 	jack_nframes_t sample_increment;
 
 	sample_increment = (long)rint(session->frame_rate() / session->smpte_frames_per_second);

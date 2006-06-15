@@ -87,7 +87,7 @@ void
 MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 {
 	jack_nframes_t now = session.engine().frame_time();
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	
 	smpte.hours = msg[3];
 	smpte.minutes = msg[2];

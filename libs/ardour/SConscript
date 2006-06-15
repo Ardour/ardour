@@ -201,8 +201,8 @@ ardour.Merge ([
 	     libraries['pbd3'],
 	     libraries['soundtouch'],
 	     libraries['midi++2'],
-             libraries['glib2'],
-             libraries['glibmm2']
+	     libraries['glib2'],
+	     libraries['glibmm2']
 	     ])
 
 if ardour['LIBLO']:

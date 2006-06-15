@@ -590,25 +590,13 @@ class Session : public sigc::trackable, public Stateful
 	int  set_smpte_type (float fps, bool drop_frames);
 
 	void bbt_time (jack_nframes_t when, BBT_Time&);
+	void smpte_to_sample( SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const;
+	void sample_to_smpte( jack_nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes ) const;
+	void smpte_time (SMPTE::Time &);
+	void smpte_time (jack_nframes_t when, SMPTE::Time&);
+	void smpte_time_subframes (jack_nframes_t when, SMPTE::Time&);
 
-	ARDOUR::smpte_wrap_t smpte_increment( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_decrement( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_increment_subframes( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_decrement_subframes( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_increment_seconds( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_increment_minutes( SMPTE_Time& smpte ) const;
-	ARDOUR::smpte_wrap_t smpte_increment_hours( SMPTE_Time& smpte ) const;
-	void smpte_frames_floor( SMPTE_Time& smpte ) const;
-	void smpte_seconds_floor( SMPTE_Time& smpte ) const;
-	void smpte_minutes_floor( SMPTE_Time& smpte ) const;
-	void smpte_hours_floor( SMPTE_Time& smpte ) const;
-	void smpte_to_sample( SMPTE_Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const;
-	void sample_to_smpte( jack_nframes_t sample, SMPTE_Time& smpte, bool use_offset, bool use_subframes ) const;
-	void smpte_time (SMPTE_Time &);
-	void smpte_time (jack_nframes_t when, SMPTE_Time&);
-	void smpte_time_subframes (jack_nframes_t when, SMPTE_Time&);
-
-	void smpte_duration (jack_nframes_t, SMPTE_Time&) const;
+	void smpte_duration (jack_nframes_t, SMPTE::Time&) const;
 	void smpte_duration_string (char *, jack_nframes_t) const;
 
 	void           set_smpte_offset (jack_nframes_t);
@@ -1346,7 +1334,7 @@ class Session : public sigc::trackable, public Stateful
 	MIDI::byte mtc_smpte_bits;   /* encoding of SMTPE type for MTC */
 	MIDI::byte midi_msg[16];
 	jack_nframes_t  outbound_mtc_smpte_frame;
-	SMPTE_Time transmitting_smpte_time;
+	SMPTE::Time transmitting_smpte_time;
 	int next_quarter_frame_to_send;
 	
 	double _frames_per_smpte_frame; /* has to be floating point because of drop frame */
@@ -1362,7 +1350,7 @@ class Session : public sigc::trackable, public Stateful
 
 	bool       last_smpte_valid;
 	jack_nframes_t  last_smpte_when;
-	SMPTE_Time last_smpte;
+	SMPTE::Time last_smpte;
 
 	int send_full_time_code ();
 	int send_midi_time_code ();

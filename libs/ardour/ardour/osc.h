@@ -32,7 +32,7 @@
 
 #include <ardour/types.h>
 
-#include "basic_ui.h"
+#include <control_protocol/basic_ui.h>
 
 namespace ARDOUR {
 	class Session;

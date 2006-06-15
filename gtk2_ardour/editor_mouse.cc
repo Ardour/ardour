@@ -3458,7 +3458,7 @@ void
 Editor::show_verbose_time_cursor (jack_nframes_t frame, double offset, double xpos, double ypos) 
 {
 	char buf[128];
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	BBT_Time bbt;
 	float secs;
 
@@ -3502,7 +3502,7 @@ void
 Editor::show_verbose_duration_cursor (jack_nframes_t start, jack_nframes_t end, double offset, double xpos, double ypos) 
 {
 	char buf[128];
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	BBT_Time sbbt;
 	BBT_Time ebbt;
 	float secs;

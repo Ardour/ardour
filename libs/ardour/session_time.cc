@@ -109,377 +109,9 @@ Session::set_smpte_offset_negative (bool neg)
 	SMPTEOffsetChanged (); /* EMIT SIGNAL */
 }
 
-#define SMPTE_IS_AROUND_ZERO( sm ) (!(sm).frames && !(sm).seconds && !(sm).minutes && !(sm).hours)
-#define SMPTE_IS_ZERO( sm ) (!(sm).frames && !(sm).seconds && !(sm).minutes && !(sm).hours && !(sm.subframes))
-
-// Increment by exactly one frame (keep subframes value)
-// Return true if seconds wrap
-smpte_wrap_t
-Session::smpte_increment( SMPTE_Time& smpte ) const
-{
-	smpte_wrap_t wrap = smpte_wrap_none;
-
-	if (smpte.negative) {
-		if (SMPTE_IS_AROUND_ZERO(smpte) && smpte.subframes) {
-			// We have a zero transition involving only subframes
-			smpte.subframes = 80 - smpte.subframes;
-			smpte.negative = false;
-			return smpte_wrap_seconds;
-		}
-    
-		smpte.negative = false;
-		wrap = smpte_decrement( smpte );
-		if (!SMPTE_IS_ZERO( smpte )) {
-			smpte.negative = true;
-		}
-		return wrap;
-	}
-  
-	switch (mtc_smpte_bits >> 5) {
-	case MIDI::MTC_24_FPS:
-		if (smpte.frames == 23) {
-			smpte.frames = 0;
-			wrap = smpte_wrap_seconds;
-		}
-		break;
-	case MIDI::MTC_25_FPS:
-		if (smpte.frames == 24) {
-			smpte.frames = 0;
-			wrap = smpte_wrap_seconds;
-		}
-		break;
-	case MIDI::MTC_30_FPS_DROP:
-		if (smpte.frames == 29) {
-			if ( ((smpte.minutes + 1) % 10) && (smpte.seconds == 59) ) {
-				smpte.frames = 2;
-			}
-			else {
-				smpte.frames = 0;
-			}
-			wrap = smpte_wrap_seconds;
-		}
-		break;
-	case MIDI::MTC_30_FPS:
-		if (smpte.frames == 29) {
-			smpte.frames = 0;
-			wrap = smpte_wrap_seconds;
-		}
-		break;
-	}
-  
-	if (wrap == smpte_wrap_seconds) {
-		if (smpte.seconds == 59) {
-			smpte.seconds = 0;
-			wrap = smpte_wrap_minutes;
-			if (smpte.minutes == 59) {
-				smpte.minutes = 0;
-				wrap = smpte_wrap_hours;
-				smpte.hours++;
-			} else {
-				smpte.minutes++;
-			}
-		} else {
-			smpte.seconds++;
-		}
-	} else {
-		smpte.frames++;
-	}
-  
-	return wrap;
-}
-
-// Decrement by exactly one frame (keep subframes value)
-smpte_wrap_t
-Session::smpte_decrement( SMPTE_Time& smpte ) const
-{
-	smpte_wrap_t wrap = smpte_wrap_none;
-  
-  
-	if (smpte.negative || SMPTE_IS_ZERO(smpte)) {
-		smpte.negative = false;
-		wrap = smpte_increment( smpte );
-		smpte.negative = true;
-		return wrap;
-	} else if (SMPTE_IS_AROUND_ZERO(smpte) && smpte.subframes) {
-		// We have a zero transition involving only subframes
-		smpte.subframes = 80 - smpte.subframes;
-		smpte.negative = true;
-		return smpte_wrap_seconds;
-	}
-  
-	switch (mtc_smpte_bits >> 5) {
-	case MIDI::MTC_24_FPS:
-		if (smpte.frames == 0) {
-			smpte.frames = 23;
-			wrap = smpte_wrap_seconds;
-		}
-		break;
-	case MIDI::MTC_25_FPS:
-		if (smpte.frames == 0) {
-			smpte.frames = 24;
-			wrap = smpte_wrap_seconds;
-		}
-		break;
-	case MIDI::MTC_30_FPS_DROP:
-		if ((smpte.minutes % 10) && (smpte.seconds == 0)) {
-			if (smpte.frames <= 2) {
-				smpte.frames = 29;
-				wrap = smpte_wrap_seconds;
-			}
-		} else if (smpte.frames == 0) {
-			smpte.frames = 29;
-			wrap = smpte_wrap_seconds;
-		}
-		break;
-	case MIDI::MTC_30_FPS:
-		if (smpte.frames == 0) {
-			smpte.frames = 29;
-			wrap = smpte_wrap_seconds;
-		}
-		break;
-	}
-  
-	if (wrap == smpte_wrap_seconds) {
-		if (smpte.seconds == 0) {
-			smpte.seconds = 59;
-			wrap = smpte_wrap_minutes;
-			if (smpte.minutes == 0) {
-				smpte.minutes = 59;
-				wrap = smpte_wrap_hours;
-				smpte.hours--;
-			}
-			else {
-				smpte.minutes--;
-			}
-		} else {
-			smpte.seconds--;
-		}
-	} else {
-		smpte.frames--;
-	}
-  
-	if (SMPTE_IS_ZERO( smpte )) {
-		smpte.negative = false;
-	}
-  
-	return wrap;
-}
-
-// Go to lowest absolute subframe value in this frame (set to 0 :-)
-void
-Session::smpte_frames_floor( SMPTE_Time& smpte ) const
-{
-	smpte.subframes = 0;
-	if (SMPTE_IS_ZERO(smpte)) {
-		smpte.negative = false;
-	}
-}
-
-// Increment by one subframe
-smpte_wrap_t
-Session::smpte_increment_subframes( SMPTE_Time& smpte ) const
-{
-	smpte_wrap_t wrap = smpte_wrap_none;
-  
-	if (smpte.negative) {
-		smpte.negative = false;
-		wrap = smpte_decrement_subframes( smpte );
-		if (!SMPTE_IS_ZERO(smpte)) {
-			smpte.negative = true;
-		}
-		return wrap;
-	}
-  
-	smpte.subframes++;
-	if (smpte.subframes >= 80) {
-		smpte.subframes = 0;
-		smpte_increment( smpte );
-		return smpte_wrap_frames;
-	}
-	return smpte_wrap_none;
-}
-
-
-// Decrement by one subframe
-smpte_wrap_t
-Session::smpte_decrement_subframes( SMPTE_Time& smpte ) const
-{
-	smpte_wrap_t wrap = smpte_wrap_none;
-  
-	if (smpte.negative) {
-		smpte.negative = false;
-		wrap = smpte_increment_subframes( smpte );
-		smpte.negative = true;
-		return wrap;
-	}
-  
-	if (smpte.subframes <= 0) {
-		smpte.subframes = 0;
-		if (SMPTE_IS_ZERO(smpte)) {
-			smpte.negative = true;
-			smpte.subframes = 1;
-			return smpte_wrap_frames;
-		} else {
-			smpte_decrement( smpte );
-			smpte.subframes = 79;
-			return smpte_wrap_frames;
-		}
-	} else {
-		smpte.subframes--;
-		if (SMPTE_IS_ZERO(smpte)) {
-			smpte.negative = false;
-		}
-		return smpte_wrap_none;
-	}
-}
-
-
-// Go to next whole second (frames == 0 or frames == 2)
-smpte_wrap_t
-Session::smpte_increment_seconds( SMPTE_Time& smpte ) const
-{
-	smpte_wrap_t wrap = smpte_wrap_none;
-  
-	// Clear subframes
-	smpte_frames_floor( smpte );
-  
-	if (smpte.negative) {
-		// Wrap second if on second boundary
-		wrap = smpte_increment(smpte);
-		// Go to lowest absolute frame value
-		smpte_seconds_floor( smpte );
-		if (SMPTE_IS_ZERO(smpte)) {
-			smpte.negative = false;
-		}
-	} else {
-		// Go to highest possible frame in this second
-		switch (mtc_smpte_bits >> 5) {
-		case MIDI::MTC_24_FPS:
-			smpte.frames = 23;
-			break;
-		case MIDI::MTC_25_FPS:
-			smpte.frames = 24;
-			break;
-		case MIDI::MTC_30_FPS_DROP:
-		case MIDI::MTC_30_FPS:
-			smpte.frames = 29;
-			break;
-		}
-    
-		// Increment by one frame
-		wrap = smpte_increment( smpte );
-	}
-  
-	return wrap;
-}
-
-// Go to lowest (absolute) frame value in this second
-// Doesn't care about positive/negative
-void
-Session::smpte_seconds_floor( SMPTE_Time& smpte ) const
-{
-	// Clear subframes
-	smpte_frames_floor( smpte );
-  
-	// Go to lowest possible frame in this second
-	switch (mtc_smpte_bits >> 5) {
-	case MIDI::MTC_24_FPS:
-	case MIDI::MTC_25_FPS:
-	case MIDI::MTC_30_FPS:
-		smpte.frames = 0;
-		break;
-	case MIDI::MTC_30_FPS_DROP:
-		if ((smpte.minutes % 10) && (smpte.seconds == 0)) {
-			smpte.frames = 2;
-		} else {
-			smpte.frames = 0;
-		}
-		break;
-	}
-  
-	if (SMPTE_IS_ZERO(smpte)) {
-		smpte.negative = false;
-	}
-}
-
-
-// Go to next whole minute (seconds == 0, frames == 0 or frames == 2)
-smpte_wrap_t
-Session::smpte_increment_minutes( SMPTE_Time& smpte ) const
-{
-	smpte_wrap_t wrap = smpte_wrap_none;
-  
-	// Clear subframes
-	smpte_frames_floor( smpte );
-  
-	if (smpte.negative) {
-		// Wrap if on minute boundary
-		wrap = smpte_increment_seconds( smpte );
-		// Go to lowest possible value in this minute
-		smpte_minutes_floor( smpte );
-	} else {
-		// Go to highest possible second
-		smpte.seconds = 59;
-		// Wrap minute by incrementing second
-		wrap = smpte_increment_seconds( smpte );
-	}
-  
-	return wrap;
-}
-
-// Go to lowest absolute value in this minute
-void
-Session::smpte_minutes_floor( SMPTE_Time& smpte ) const
-{
-	// Go to lowest possible second
-	smpte.seconds = 0;
-	// Go to lowest possible frame
-	smpte_seconds_floor( smpte );
-
-	if (SMPTE_IS_ZERO(smpte)) {
-		smpte.negative = false;
-	}
-}
-
-// Go to next whole hour (minute = 0, second = 0, frame = 0)
-smpte_wrap_t
-Session::smpte_increment_hours( SMPTE_Time& smpte ) const
-{
-	smpte_wrap_t wrap = smpte_wrap_none;
-  
-	// Clear subframes
-	smpte_frames_floor(smpte);
-  
-	if (smpte.negative) {
-		// Wrap if on hour boundary
-		wrap = smpte_increment_minutes( smpte );
-		// Go to lowest possible value in this hour
-		smpte_hours_floor( smpte );
-	} else {
-		smpte.minutes = 59;
-		wrap = smpte_increment_minutes( smpte );
-	}
-  
-	return wrap;
-}
-
-// Go to lowest absolute value in this hour
-void
-Session::smpte_hours_floor( SMPTE_Time& smpte ) const
-{
-	smpte.minutes = 0;
-	smpte.seconds = 0;
-	smpte.frames = 0;
-	smpte.subframes = 0;
-  
-	if (SMPTE_IS_ZERO(smpte)) {
-		smpte.negative = false;
-	}
-}
-
 
 void
-Session::smpte_to_sample( SMPTE_Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const
+Session::smpte_to_sample( SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const
 {
 	if (smpte_drop_frames) {
 		// The drop frame format was created to better approximate the 30000/1001 = 29.97002997002997....
@@ -562,7 +194,7 @@ Session::smpte_to_sample( SMPTE_Time& smpte, jack_nframes_t& sample, bool use_of
 
 
 void
-Session::sample_to_smpte( jack_nframes_t sample, SMPTE_Time& smpte, bool use_offset, bool use_subframes ) const
+Session::sample_to_smpte( jack_nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes ) const
 {
 	jack_nframes_t offset_sample;
 
@@ -656,7 +288,7 @@ Session::sample_to_smpte( jack_nframes_t sample, SMPTE_Time& smpte, bool use_off
 }
 
 void
-Session::smpte_time (jack_nframes_t when, SMPTE_Time& smpte)
+Session::smpte_time (jack_nframes_t when, SMPTE::Time& smpte)
 {
 	if (last_smpte_valid && when == last_smpte_when) {
 		smpte = last_smpte;
@@ -671,7 +303,7 @@ Session::smpte_time (jack_nframes_t when, SMPTE_Time& smpte)
 }
 
 void
-Session::smpte_time_subframes (jack_nframes_t when, SMPTE_Time& smpte)
+Session::smpte_time_subframes (jack_nframes_t when, SMPTE::Time& smpte)
 {
 	if (last_smpte_valid && when == last_smpte_when) {
 		smpte = last_smpte;
@@ -686,7 +318,7 @@ Session::smpte_time_subframes (jack_nframes_t when, SMPTE_Time& smpte)
 }
 
 void
-Session::smpte_duration (jack_nframes_t when, SMPTE_Time& smpte) const
+Session::smpte_duration (jack_nframes_t when, SMPTE::Time& smpte) const
 {
 	sample_to_smpte( when, smpte, false /* use_offset */, true /* use_subframes */ );
 }
@@ -694,14 +326,14 @@ Session::smpte_duration (jack_nframes_t when, SMPTE_Time& smpte) const
 void
 Session::smpte_duration_string (char* buf, jack_nframes_t when) const
 {
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 
 	smpte_duration (when, smpte);
 	snprintf (buf, sizeof (buf), "%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 }
 
 void
-Session::smpte_time (SMPTE_Time &t)
+Session::smpte_time (SMPTE::Time &t)
 
 {
 	smpte_time (_transport_frame, t);
