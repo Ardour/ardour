@@ -256,7 +256,6 @@ ARDOUR_UI::toggle_UseHardwareMonitoring()
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "UseHardwareMonitoring");
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		cerr << "get_active() cond = " << tact->get_active() << endl;//DEBUG
 		if (tact->get_active()) {
 			Config->set_use_hardware_monitoring (true);
 			Config->set_use_sw_monitoring (false);
