@@ -506,6 +506,14 @@ if env['SYSLIBS']:
     libraries['libgnomecanvasmm'] = LibraryInfo()
     libraries['libgnomecanvasmm'].ParseConfig ('pkg-config --cflags --libs libgnomecanvasmm-2.6')
 
+#
+# cannot use system one for the time being
+#
+
+    libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
+                                    LIBPATH='#libs/libsndfile',
+                                    CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
+
 #    libraries['libglademm'] = LibraryInfo()
 #    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
 
@@ -518,6 +526,7 @@ if env['SYSLIBS']:
     ]
 
     subdirs = [
+        'libs/libsndfile',
         'libs/pbd3',
         'libs/midi++2',
         'libs/ardour'
