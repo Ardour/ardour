@@ -302,6 +302,7 @@ NewSessionDialog::NewSessionDialog()
 	if (!path.empty()) {
 	        m_template->set_current_folder (path + X_("templates/"));
 	}
+	m_template->add_shortcut_folder(ARDOUR::get_system_data_path() + X_("templates"));
 	m_template->set_title(_("select template"));
 	Gtk::FileFilter* session_filter = manage (new (Gtk::FileFilter));
 	session_filter->add_pattern(X_("*.ardour"));
