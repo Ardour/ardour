@@ -76,7 +76,6 @@ ARDOUR_UI::setup_config_options ()
 			Glib::RefPtr<Action> act = ActionManager::get_action (i->c_str(), options[n].name);
 			if (act) {
 				Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-				cerr << "action = " << (options[n].name) << " val = " << (Config->*(options[n].method))() << endl;//DEBUG
 				if (options[n].act_type == 't' || (options[n].act_type == 'r' && (Config->*(options[n].method))()))
 					tact->set_active ((Config->*(options[n].method))());
 				continue;

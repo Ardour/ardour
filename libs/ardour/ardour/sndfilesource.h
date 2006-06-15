@@ -65,7 +65,7 @@ class SndFileSource : public AudioFileSource {
   private:
 	SNDFILE *sf;
 	SF_INFO _info;
-	SF_BROADCAST_INFO* _broadcast_info;
+	SF_BROADCAST_INFO *_broadcast_info;
 
 	mutable float *interleave_buf;
 	mutable jack_nframes_t interleave_bufsize;
