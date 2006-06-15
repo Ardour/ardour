@@ -46,7 +46,7 @@ ARDOUR_UI::setup_config_options ()
 	struct { 
 	    char* name;
 	    bool (Configuration::*method)(void) const;
-	    char act_type;  // (t)oggle or (r)adio
+	    char act_type;  //(t)oggle or (r)adio
 	} options[] = {
 		{ "ToggleTimeMaster", &Configuration::get_jack_time_master, 't' },
 		{ "StopPluginsWithTransport", &Configuration::get_plugins_stop_with_transport, 't' },
@@ -76,7 +76,6 @@ ARDOUR_UI::setup_config_options ()
 			Glib::RefPtr<Action> act = ActionManager::get_action (i->c_str(), options[n].name);
 			if (act) {
 				Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-				cerr << "action = " << (options[n].name) << " val = " << (Config->*(options[n].method))() << endl;//DEBUG
 				if (options[n].act_type == 't' || (options[n].act_type == 'r' && (Config->*(options[n].method))()))
 					tact->set_active ((Config->*(options[n].method))());
 				continue;
@@ -257,7 +256,6 @@ ARDOUR_UI::toggle_UseHardwareMonitoring()
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "UseHardwareMonitoring");
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		cerr << "get_active() cond = " << tact->get_active() << endl;//DEBUG
 		if (tact->get_active()) {
 			Config->set_use_hardware_monitoring (true);
 			Config->set_use_sw_monitoring (false);

@@ -1,5 +1,5 @@
 #include <ardour/location.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 
 #include "editor.h"
 #include "editing.h"

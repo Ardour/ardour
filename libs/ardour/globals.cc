@@ -43,7 +43,7 @@
 #include <ardour/audio_library.h>
 #include <ardour/configuration.h>
 #include <ardour/plugin_manager.h>
-#include <ardour/source.h>
+#include <ardour/audiosource.h>
 #include <ardour/utils.h>
 #include <ardour/session.h>
 #include <ardour/control_protocol_manager.h>

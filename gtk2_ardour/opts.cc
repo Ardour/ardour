@@ -83,7 +83,7 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 		{ "name", 1, 0, 'c' },
 		{ "novst", 0, 0, 'V' },
 		{ "new", 1, 0, 'N' },
-		{ "use-hw-optimizations", 0, 0, 'o' },
+		{ "no-hw-optimizations", 0, 0, 'O' },
 		{ "curvetest", 1, 0, 'C' },
 		{ "gtktheme", 0, 0, 'g' },
 		{ 0, 0, 0, 0 }
@@ -124,8 +124,8 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 			session_name = optarg;
 			break;
 
-		case 'o':
-			try_hw_optimization = true;
+		case 'O':
+			try_hw_optimization = false;
 			break;
 
 		case 'V':

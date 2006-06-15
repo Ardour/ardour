@@ -38,7 +38,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/control_protocol.h>
 
 #include "i18n.h"

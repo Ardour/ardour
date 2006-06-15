@@ -27,12 +27,15 @@ ardour.Append(POTFILE = domain + '.pot')
 ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
 
 ardour_files=Split("""
+audio_diskstream.cc
 audio_library.cc
 audio_playlist.cc
 audio_track.cc
 audioengine.cc
+audiofilesource.cc
 audiofilter.cc
 audioregion.cc
+audiosource.cc
 auditioner.cc
 automation.cc
 automation_event.cc
@@ -44,9 +47,6 @@ curve.cc
 cycle_timer.cc
 default_click.cc
 destructive_filesource.cc
-diskstream.cc
-externalsource.cc
-filesource.cc
 gain.cc
 gdither.cc
 globals.cc
@@ -202,8 +202,8 @@ ardour.Merge ([
 	     libraries['pbd3'],
 	     libraries['soundtouch'],
 	     libraries['midi++2'],
-             libraries['glib2'],
-             libraries['glibmm2']
+	     libraries['glib2'],
+	     libraries['glibmm2']
 	     ])
 
 if ardour['LIBLO']:

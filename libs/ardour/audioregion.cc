@@ -38,6 +38,7 @@
 #include <ardour/dB.h>
 #include <ardour/playlist.h>
 #include <ardour/audiofilter.h>
+#include <ardour/audiosource.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -63,7 +64,7 @@ AudioRegionState::AudioRegionState (string why)
 {
 }
 
-AudioRegion::AudioRegion (Source& src, jack_nframes_t start, jack_nframes_t length, bool announce)
+AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t length, bool announce)
 	: Region (start, length, PBD::basename_nosuffix(src.name()), 0,  Region::Flag(Region::DefaultFlags|Region::External)),
 	  _fade_in (0.0, 2.0, 1.0, false),
 	  _fade_out (0.0, 2.0, 1.0, false),
@@ -89,7 +90,7 @@ AudioRegion::AudioRegion (Source& src, jack_nframes_t start, jack_nframes_t leng
 	}
 }
 
-AudioRegion::AudioRegion (Source& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
+AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
 	: Region (start, length, name, layer, flags),
 	  _fade_in (0.0, 2.0, 1.0, false),
 	  _fade_out (0.0, 2.0, 1.0, false),
@@ -150,7 +151,7 @@ AudioRegion::AudioRegion (const AudioRegion& other, jack_nframes_t offset, jack_
 {
 	/* create a new AudioRegion, that is part of an existing one */
 	
-	set<Source*> unique_srcs;
+	set<AudioSource*> unique_srcs;
 
 	for (SourceList::const_iterator i= other.sources.begin(); i != other.sources.end(); ++i) {
 		sources.push_back (*i);
@@ -209,7 +210,7 @@ AudioRegion::AudioRegion (const AudioRegion &other)
 {
 	/* Pure copy constructor */
 
-	set<Source*> unique_srcs;
+	set<AudioSource*> unique_srcs;
 
 	for (SourceList::const_iterator i = other.sources.begin(); i != other.sources.end(); ++i) {
 		sources.push_back (*i);
@@ -237,7 +238,7 @@ AudioRegion::AudioRegion (const AudioRegion &other)
 	/* NOTE: no CheckNewRegion signal emitted here. This is the copy constructor */
 }
 
-AudioRegion::AudioRegion (Source& src, const XMLNode& node)
+AudioRegion::AudioRegion (AudioSource& src, const XMLNode& node)
 	: Region (node),
 	  _fade_in (0.0, 2.0, 1.0, false),
 	  _fade_out (0.0, 2.0, 1.0, false),
@@ -268,7 +269,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 {
 	/* basic AudioRegion constructor */
 
-	set<Source*> unique_srcs;
+	set<AudioSource*> unique_srcs;
 
 	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		sources.push_back (*i);
@@ -1094,7 +1095,7 @@ void
 AudioRegion::lock_sources ()
 {
 	SourceList::iterator i;
-	set<Source*> unique_srcs;
+	set<AudioSource*> unique_srcs;
 
 	for (i = sources.begin(); i != sources.end(); ++i) {
 		unique_srcs.insert (*i);
@@ -1112,7 +1113,7 @@ void
 AudioRegion::unlock_sources ()
 {
 	SourceList::iterator i;
-	set<Source*> unique_srcs;
+	set<AudioSource*> unique_srcs;
 
 	for (i = sources.begin(); i != sources.end(); ++i) {
 		unique_srcs.insert (*i);

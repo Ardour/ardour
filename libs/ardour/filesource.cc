@@ -62,8 +62,7 @@
 
 #include <ardour/ardour.h>
 #include <ardour/version.h>
-#include <ardour/source.h>
-#include <ardour/filesource.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/pcm_utils.h>

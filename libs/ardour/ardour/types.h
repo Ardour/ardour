@@ -255,10 +255,18 @@ namespace ARDOUR {
 		BWF,
 		WAVE,
 		WAVE64,
+		CAF,
+		AIFF,
 		iXML,
 		RF64
 	};
 
+	struct PeakData {
+	    typedef Sample PeakDatum;
+	    
+	    PeakDatum min;
+	    PeakDatum max;
+	};
 };
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);

@@ -36,7 +36,7 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/audio_track.h>
 #include <ardour/audioregion.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 
 #include "i18n.h"
 

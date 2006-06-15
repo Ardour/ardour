@@ -24,7 +24,7 @@
 
 #include <ardour/types.h>
 #include <ardour/reverse.h>
-#include <ardour/filesource.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/session.h>
 #include <ardour/audioregion.h>
 

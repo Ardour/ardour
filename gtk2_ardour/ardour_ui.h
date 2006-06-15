@@ -167,7 +167,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	   blinking rec-enable buttons.
 	*/
 
-	void rec_enable_button_blink (bool onoff, ARDOUR::DiskStream *, Gtk::Widget *w);
+	void rec_enable_button_blink (bool onoff, ARDOUR::AudioDiskstream *, Gtk::Widget *w);
 
 	void name_io_setup (ARDOUR::AudioEngine&, string&, ARDOUR::IO& io, bool in);
 	void choose_io (ARDOUR::IO&, bool input);
@@ -522,7 +522,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	sigc::connection point_one_second_connection;
 	sigc::connection point_zero_one_second_connection;
 
-	void diskstream_added (ARDOUR::DiskStream*);
+	void diskstream_added (ARDOUR::AudioDiskstream*);
 
 	gint session_menu (GdkEventButton *);
 
@@ -539,7 +539,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode);
 
-	void add_diskstream_to_menu (ARDOUR::DiskStream&);
+	void add_diskstream_to_menu (ARDOUR::AudioDiskstream&);
 	void diskstream_selected (gint32);
 	Gtk::Menu *diskstream_menu;
 	gint32 selected_dstream;
@@ -630,7 +630,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_monitor_enable (guint32);
 
 	uint32_t rec_enabled_diskstreams;
-	void count_recenabled_diskstreams (ARDOUR::DiskStream&);
+	void count_recenabled_diskstreams (ARDOUR::AudioDiskstream&);
 
 	About* about;
 	bool shown_flag;
@@ -649,7 +649,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	struct timeval last_peak_grab;
 	struct timeval last_shuttle_request;
 
-	void delete_sources_in_the_right_thread (list<ARDOUR::Source*>*);
+	void delete_sources_in_the_right_thread (list<ARDOUR::AudioFileSource*>*);
 
 	void editor_display_control_changed (Editing::DisplayControl c);
 

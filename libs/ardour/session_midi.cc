@@ -38,7 +38,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/slave.h>
 #include <ardour/cycles.h>
 #include <ardour/smpte.h>
@@ -1016,10 +1016,15 @@ Session::send_mmc_in_another_thread (MIDI::MachineControl::Command cmd, jack_nfr
 	poke_midi_thread ();
 }
 */
+
+/** Send an MMC command at the given absolute timestamp (@a where).
+ *
+ * This must be called in the process thread, and @a where must fall within
+ * this process cycle or horrible things will happen.
+ */
 void
 Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 {
-#if 0
 	using namespace MIDI;
 	int nbytes = 4;
 	SMPTE::Time smpte;
@@ -1030,7 +1035,7 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 
 	mmc_buffer[nbytes++] = cmd;
 
-	// cerr << "delivering MMC, cmd = " << hex << (int) cmd << dec << endl;
+	cerr << "delivering MMC, cmd = " << hex << (int) cmd << dec << endl;
 	
 	switch (cmd) {
 	case MachineControl::cmdLocate:
@@ -1050,6 +1055,7 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 
 	case MachineControl::cmdPlay:
 		/* always convert Play into Deferred Play */
+		/* Why? [DR] */
 		mmc_buffer[4] = MachineControl::cmdDeferredPlay;
 		break;
 
@@ -1073,14 +1079,13 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 
 		mmc_buffer[nbytes++] = 0xf7; // terminate SysEx/MMC message
 
-		Glib::Mutex::Lock lm (midi_lock);
+		//Glib::Mutex::Lock lm (midi_lock);
 		
-		if (_mmc_port->write (mmc_buffer, nbytes) != nbytes) {
+		// FIXME: timestamp correct? [DR]
+		if (_mmc_port->write (mmc_buffer, nbytes, where - _transport_frame) != nbytes) {
 			error << string_compose(_("MMC: cannot send command %1%2%3"), &hex, cmd, &dec) << endmsg;
 		}
 	}
-#endif
-	cout << "MMC support broken." << endl;
 }
 
 bool

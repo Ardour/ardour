@@ -36,9 +36,7 @@
 #include <ardour/session.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
-#include <ardour/diskstream.h>
-#include <ardour/filesource.h>
-#include <ardour/externalsource.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/utils.h>
 #include <ardour/location.h>
 #include <ardour/named_selection.h>
@@ -122,9 +120,9 @@ Editor::set_meter_hold (int32_t cnt)
 void
 Editor::set_meter_falloff (int intval)
 {
-	float val;
+	float val = 0.0f; /* off */
 	std::string str;
-	cerr << "set_meter_falloff () called: intval = " << intval << endl;
+
 	Config->set_meter_falloff_off(false);
 	Config->set_meter_falloff_slowest(false);
 	Config->set_meter_falloff_slow(false);

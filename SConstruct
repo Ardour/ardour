@@ -353,8 +353,8 @@ libraries = { }
 
 libraries['core'] = LibraryInfo (CCFLAGS = '-Ilibs')
 
-libraries['sndfile'] = LibraryInfo()
-libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
+#libraries['sndfile'] = LibraryInfo()
+#libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
 
 libraries['lrdf'] = LibraryInfo()
 libraries['lrdf'].ParseConfig('pkg-config --cflags --libs lrdf')
@@ -424,6 +424,15 @@ else:
     have_libusb = False
     
 libraries['usb'] = conf.Finish ()
+
+#
+# Check for FLAC
+
+libraries['flac'] = LibraryInfo ()
+
+conf = Configure (libraries['flac'])
+conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new')
+libraries['flac'] = conf.Finish ()
 
 #
 # Check for liblo
@@ -504,6 +513,14 @@ if env['SYSLIBS']:
     libraries['libgnomecanvasmm'] = LibraryInfo()
     libraries['libgnomecanvasmm'].ParseConfig ('pkg-config --cflags --libs libgnomecanvasmm-2.6')
 
+#
+# cannot use system one for the time being
+#
+
+    libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
+                                    LIBPATH='#libs/libsndfile',
+                                    CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
+
 #    libraries['libglademm'] = LibraryInfo()
 #    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
 
@@ -516,6 +533,7 @@ if env['SYSLIBS']:
     ]
 
     subdirs = [
+        'libs/libsndfile',
         'libs/pbd3',
         'libs/midi++2',
         'libs/ardour'
@@ -553,6 +571,9 @@ else:
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
+    libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
+                                    LIBPATH='#libs/libsndfile',
+                                    CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
@@ -565,6 +586,7 @@ else:
     subdirs = [
 #	    'libs/cassowary',
         'libs/sigc++2',
+        'libs/libsndfile',
         'libs/pbd3',
         'libs/midi++2',
         'libs/ardour'

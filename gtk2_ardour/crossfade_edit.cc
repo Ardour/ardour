@@ -34,6 +34,7 @@
 #include <ardour/session.h>
 #include <ardour/auditioner.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/audiosource.h>
 #include <ardour/playlist_templates.h>
 
 #include <gtkmm2ext/gtk_ui.h>

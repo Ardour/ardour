@@ -38,7 +38,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/audioplaylist.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/insert.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/location.h>
@@ -823,7 +823,7 @@ AudioTimeAxisView::rename_current_playlist ()
 	string name;
 
 	AudioPlaylist *pl;
-	DiskStream *ds;
+	AudioDiskstream *ds;
 
 	if (((ds = get_diskstream()) == 0) || ds->destructive() || ((pl = ds->playlist()) == 0)) {
 		return;
@@ -851,7 +851,7 @@ void
 AudioTimeAxisView::use_copy_playlist (bool prompt)
 {
 	AudioPlaylist *pl;
-	DiskStream *ds;
+	AudioDiskstream *ds;
 	string name;
 
 	if (((ds = get_diskstream()) == 0) || ds->destructive() || ((pl = ds->playlist()) == 0)) {
@@ -891,7 +891,7 @@ void
 AudioTimeAxisView::use_new_playlist (bool prompt)
 {
 	AudioPlaylist *pl;
-	DiskStream *ds;
+	AudioDiskstream *ds;
 	string name;
 
 	if (((ds = get_diskstream()) == 0) || ds->destructive() || ((pl = ds->playlist()) == 0)) {
@@ -930,7 +930,7 @@ void
 AudioTimeAxisView::clear_playlist ()
 {
 	AudioPlaylist *pl;
-	DiskStream *ds;
+	AudioDiskstream *ds;
 	
 	if ((ds = get_diskstream()) != 0) {
 		if ((pl = ds->playlist()) != 0) {
@@ -988,7 +988,7 @@ AudioTimeAxisView::diskstream_changed (void *src)
 void
 AudioTimeAxisView::update_diskstream_display ()
 {
-	DiskStream *ds;
+	AudioDiskstream *ds;
 
 	if ((ds = get_diskstream()) != 0) {
 		set_playlist (ds->playlist ());
@@ -1092,7 +1092,7 @@ AudioTimeAxisView::name() const
 Playlist *
 AudioTimeAxisView::playlist () const 
 {
-	DiskStream *ds;
+	AudioDiskstream *ds;
 
 	if ((ds = get_diskstream()) != 0) {
 		return ds->playlist(); 
@@ -1142,7 +1142,7 @@ AudioTimeAxisView::hide_click ()
 Region*
 AudioTimeAxisView::find_next_region (jack_nframes_t pos, RegionPoint point, int32_t dir)
 {
-	DiskStream *stream;
+	AudioDiskstream *stream;
 	AudioPlaylist *playlist;
 
 	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
@@ -1717,7 +1717,7 @@ bool
 AudioTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	Playlist* what_we_got;
-	DiskStream* ds = get_diskstream();
+	AudioDiskstream* ds = get_diskstream();
 	Playlist* playlist;
 	bool ret = false;
 

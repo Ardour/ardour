@@ -75,8 +75,8 @@ ARDOUR_UI::connect_to_session (Session *s)
 	rec_button.set_sensitive (true);
 	shuttle_box.set_sensitive (true);
 	
-	if (session->n_diskstreams() == 0) {
-		session->DiskStreamAdded.connect (mem_fun(*this, &ARDOUR_UI::diskstream_added));
+	if (session->n_audio_diskstreams() == 0) {
+		session->AudioDiskstreamAdded.connect (mem_fun(*this, &ARDOUR_UI::diskstream_added));
 	}
 
 	if (connection_editor) {

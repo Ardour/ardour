@@ -6,7 +6,8 @@
 
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
-#include <ardour/diskstream.h>
+#include <ardour/audiosource.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/audio_track.h>
 #include <ardour/playlist_templates.h>
 #include <ardour/source.h>
@@ -311,7 +312,7 @@ StreamView::undisplay_diskstream ()
 }
 
 void
-StreamView::display_diskstream (DiskStream *ds)
+StreamView::display_diskstream (AudioDiskstream *ds)
 {
 	playlist_change_connection.disconnect();
 	playlist_changed (ds);
@@ -337,7 +338,7 @@ StreamView::playlist_modified ()
 }
 
 void
-StreamView::playlist_changed (DiskStream *ds)
+StreamView::playlist_changed (AudioDiskstream *ds)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_changed), ds));
 
@@ -491,7 +492,7 @@ StreamView::diskstream_changed (void *src_ignored)
 	AudioTrack *at;
 
 	if ((at = _trackview.audio_track()) != 0) {
-		DiskStream& ds = at->disk_stream();
+		AudioDiskstream& ds = at->disk_stream();
 		/* XXX grrr: when will SigC++ allow me to bind references? */
 		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*this, &StreamView::display_diskstream), &ds));
 	} else {
@@ -634,7 +635,7 @@ StreamView::setup_rec_box ()
 				peak_ready_connections.clear();
 					
 				for (uint32_t n=0; n < _trackview.get_diskstream()->n_channels(); ++n) {
-					Source *src = (Source *) _trackview.get_diskstream()->write_source (n);
+					AudioSource *src = (AudioSource *) _trackview.get_diskstream()->write_source (n);
 					if (src) {
 						sources.push_back (src);
 						peak_ready_connections.push_back (src->PeakRangeReady.connect (bind (mem_fun (*this, &StreamView::rec_peak_range_ready), src))); 
@@ -662,7 +663,7 @@ StreamView::setup_rec_box ()
 			AudioTrack* at;
 
 			at = _trackview.audio_track(); /* we know what it is already */
-			DiskStream& ds = at->disk_stream();
+			AudioDiskstream& ds = at->disk_stream();
 			jack_nframes_t frame_pos = ds.current_capture_start ();
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend;

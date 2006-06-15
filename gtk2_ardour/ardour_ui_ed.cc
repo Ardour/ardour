@@ -381,8 +381,9 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatBWF"), X_("Broadcast WAVE"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::BWF));
 	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatWAVE"), X_("WAVE"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::WAVE));
 	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatWAVE64"), X_("WAVE-64"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::WAVE64));
-	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatiXML"), X_("iXML"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::iXML));
-	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatRF64"), X_("RF64"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::RF64));
+	// act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatiXML"), X_("iXML"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::iXML));
+	// act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatRF64"), X_("RF64"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::RF64));
+	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatCAF"), X_("CAF"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::CAF));
 
 	RadioAction::Group file_data_group;
 

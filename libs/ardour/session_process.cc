@@ -30,7 +30,7 @@
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 #include <ardour/timestamps.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/audioengine.h>
 #include <ardour/slave.h>
 #include <ardour/auditioner.h>
@@ -74,7 +74,7 @@ Session::process (jack_nframes_t nframes)
 void
 Session::prepare_diskstreams ()
 {
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		(*i)->prepare ();
 	}
 }
@@ -146,12 +146,12 @@ Session::process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 
 		if ((ret = (*i)->roll (nframes, _transport_frame, _transport_frame + nframes, offset, declick, record_active, rec_monitors)) < 0) {
 
-			/* we have to do this here. Route::roll() for an AudioTrack will have called DiskStream::process(),
-			   and the DS will expect DiskStream::commit() to be called. but we're aborting from that
+			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
+			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that
 			   call path, so make sure we release any outstanding locks here before we return failure.
 			*/
 
-			for (DiskStreamList::iterator ids = diskstreams.begin(); ids != diskstreams.end(); ++ids) {
+			for (AudioDiskstreamList::iterator ids = audio_diskstreams.begin(); ids != audio_diskstreams.end(); ++ids) {
 				(*ids)->recover ();
 			}
 
@@ -185,12 +185,12 @@ Session::silent_process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 
 		if ((ret = (*i)->silent_roll (nframes, _transport_frame, _transport_frame + nframes, offset, record_active, rec_monitors)) < 0) {
 			
-			/* we have to do this here. Route::roll() for an AudioTrack will have called DiskStream::process(),
-			   and the DS will expect DiskStream::commit() to be called. but we're aborting from that
+			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
+			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that
 			   call path, so make sure we release any outstanding locks here before we return failure.
 			*/
 
-			for (DiskStreamList::iterator ids = diskstreams.begin(); ids != diskstreams.end(); ++ids) {
+			for (AudioDiskstreamList::iterator ids = audio_diskstreams.begin(); ids != audio_diskstreams.end(); ++ids) {
 				(*ids)->recover ();
 			}
 
@@ -209,7 +209,7 @@ Session::commit_diskstreams (jack_nframes_t nframes, bool &needs_butler)
 	float pworst = 1.0f;
 	float cworst = 1.0f;
 
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 
 		if ((*i)->hidden()) {
 			continue;
@@ -579,7 +579,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 				bool ok = true;
 				jack_nframes_t frame_delta = slave_transport_frame - _transport_frame;
 				
-				for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 					if (!(*i)->can_internal_playback_seek (frame_delta)) {
 						ok = false;
 						break;
@@ -587,7 +587,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 				}
 
 				if (ok) {
-					for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+					for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 						(*i)->internal_playback_seek (frame_delta);
 					}
 					_transport_frame += frame_delta;

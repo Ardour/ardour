@@ -23,29 +23,32 @@
 
 #include <string>
 
-#include <ardour/filesource.h>
+#include <ardour/sndfilesource.h>
 
 struct tm;
 
 namespace ARDOUR {
 
-class DestructiveFileSource : public FileSource {
+class DestructiveFileSource : public SndFileSource {
   public:
-	DestructiveFileSource (std::string path, jack_nframes_t rate, bool repair_first = false, SampleFormat samp_format=FormatInt24);
-	DestructiveFileSource (const XMLNode&, jack_nframes_t rate);
+	DestructiveFileSource (std::string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate,
+			       Flag flags = AudioFileSource::Flag (AudioFileSource::Writable|
+								   AudioFileSource::BuildPeaks));
+
+	DestructiveFileSource (const XMLNode&);
 	~DestructiveFileSource ();
 
-	int  seek (jack_nframes_t frame);
 	jack_nframes_t last_capture_start_frame() const;
 	void mark_capture_start (jack_nframes_t);
 	void mark_capture_end ();
 	void clear_capture_marks();
 
-	jack_nframes_t write (Sample *src, jack_nframes_t cnt, char * workbuf);
-
 	XMLNode& get_state ();
 
 	static void setup_standard_crossfades (jack_nframes_t sample_rate);
+
+  protected:
+	jack_nframes_t write_unlocked (Sample *src, jack_nframes_t start, jack_nframes_t cnt, char * workbuf);
 
   private:
 	static jack_nframes_t xfade_frames;
@@ -59,7 +62,7 @@ class DestructiveFileSource : public FileSource {
 	Sample*        xfade_buf;
 
 	jack_nframes_t crossfade (Sample* data, jack_nframes_t cnt, int dir, char * workbuf);
-
+	void set_timeline_position (jack_nframes_t);
 };
 
 }
