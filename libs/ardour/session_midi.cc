@@ -146,11 +146,15 @@ Session::set_send_mtc (bool yn)
 void
 Session::set_send_mmc (bool yn)
 {
+	cerr << "set send mmc " << yn << endl;
+
 	if (_mmc_port == 0) {
+		cerr << "\tno 1\n";
 		return;
 	}
 
 	if (send_midi_machine_control == yn) {
+		cerr << "\tno 2\n";
 		return;
 	}
 
@@ -159,6 +163,7 @@ Session::set_send_mmc (bool yn)
 	*/
 
 	if (_mmc_port) {
+		cerr << "\tyes\n";
 		send_mmc = yn;
 	}
 
@@ -1030,6 +1035,7 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 	SMPTE::Time smpte;
 
 	if (_mmc_port == 0 || !send_mmc) {
+		cerr << "Not delivering MMC " << _mmc_port << " - " << send_mmc << endl;
 		return;
 	}
 
@@ -1079,11 +1085,13 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 
 		mmc_buffer[nbytes++] = 0xf7; // terminate SysEx/MMC message
 
-		//Glib::Mutex::Lock lm (midi_lock);
-		
+		assert(where >= _transport_frame);
+
 		// FIXME: timestamp correct? [DR]
-		if (_mmc_port->write (mmc_buffer, nbytes, where - _transport_frame) != nbytes) {
+		if (!_mmc_port->midimsg (mmc_buffer, sizeof (mmc_buffer), where - _transport_frame)) {
 			error << string_compose(_("MMC: cannot send command %1%2%3"), &hex, cmd, &dec) << endmsg;
+		} else {
+			cerr << "Sending MMC\n";
 		}
 	}
 }

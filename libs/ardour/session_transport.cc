@@ -147,6 +147,11 @@ void
 Session::realtime_stop (bool abort)
 {
 	/* assume that when we start, we'll be moving forwards */
+	
+	// FIXME: where should this really be? [DR]
+	//send_full_time_code();
+	deliver_mmc (MIDI::MachineControl::cmdStop, _transport_frame);
+	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
 	if (_transport_speed < 0.0f) {
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportStop | PostTransportReverse);
@@ -383,12 +388,6 @@ Session::non_realtime_stop (bool abort)
 #endif
 
 	last_stop_frame = _transport_frame;
-
-	/* FIXME
-	send_full_time_code();
-	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
-	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
-	*/
 
 	if (did_record) {
 
@@ -885,9 +884,7 @@ Session::actually_start_transport ()
 		(*i)->realtime_set_speed ((*i)->speed(), true);
 	}
 
-	/* FIXME
-	send_mmc_in_another_thread (MIDI::MachineControl::cmdDeferredPlay, 0);
-	*/
+	deliver_mmc(MIDI::MachineControl::cmdDeferredPlay, _transport_frame);
 
 	TransportStateChange (); /* EMIT SIGNAL */
 }
