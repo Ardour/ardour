@@ -793,7 +793,8 @@ else:
 # warnings flags
 #
 
-env.Append(CXXFLAGS="-Wall -Woverloaded-virtual")
+env.Append(CCFLAGS="-Wall")
+env.Append(CXXFLAGS="-Woverloaded-virtual")
 
 if env['LIBLO']:
     env.Append(CCFLAGS="-DHAVE_LIBLO")

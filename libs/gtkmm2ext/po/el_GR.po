@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.99beta23\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-04-25 17:46-0400\n"
+"POT-Creation-Date: 2006-06-20 16:25-0400\n"
 "PO-Revision-Date: 2005-01-11\n"
 "Last-Translator: Muadibas\n"
 "Language-Team: Hellenic(Greek) <LL@li.org>\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libs/gtkmm2ext/barcontroller.cc:431 libs/gtkmm2ext/bindable_button.cc:131
+#: libs/gtkmm2ext/barcontroller.cc:432 libs/gtkmm2ext/bindable_button.cc:131
 #: libs/gtkmm2ext/controller.cc:50 libs/gtkmm2ext/slider_controller.cc:132
 msgid "operate MIDI controller now"
 msgstr "λειτουργία ελεγκτή MIDI τώρα"
