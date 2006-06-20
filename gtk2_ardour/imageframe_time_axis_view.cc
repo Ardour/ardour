@@ -365,11 +365,11 @@ ImageFrameTimeAxisView::set_selected_imageframe_view(ImageFrameTimeAxisGroup* if
 	
 	if(selected_imageframe_view)
 	{
-		selected_imageframe_view->set_selected(false, this) ;
+		selected_imageframe_view->set_selected(false) ;
 	}
 	
 	selected_imageframe_view = ifv ;
-	selected_imageframe_view->set_selected(true, this) ;
+	selected_imageframe_view->set_selected(true) ;
 }
 
 /**
@@ -386,7 +386,7 @@ ImageFrameTimeAxisView::clear_selected_imageframe_item(bool clear_group)
 	
 	if(selected_imageframe_view)
 	{
-		selected_imageframe_view->set_selected(false, this) ;
+		selected_imageframe_view->set_selected(false) ;
 	}
 	selected_imageframe_view = 0 ;
 }

@@ -81,8 +81,6 @@ SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, 
 
 	init (idstr);
 
-	cerr << "creating " << idstr << " hf = " << hf << endl;
-
 	switch (hf) {
 	case CAF:
 		fmt = SF_FORMAT_CAF;
@@ -174,7 +172,7 @@ SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, 
 	}
 	
 	if (_build_peakfiles) {
-		if (initialize_peakfile (false, _path)) {
+		if (initialize_peakfile (true, _path)) {
 			sf_close (sf);
 			sf = 0;
 			throw failed_constructor ();
@@ -185,14 +183,6 @@ SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, 
 
 	if (writable()) {
 		HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioFileSource::handle_header_position_change));
-	}
-
-	if (_build_peakfiles) {
-		if (initialize_peakfile (false, _path)) {
-			sf_close (sf);
-			sf = 0;
-			throw failed_constructor ();
-		}
 	}
 
 	AudioSourceCreated (this); /* EMIT SIGNAL */
@@ -310,7 +300,7 @@ SndFileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t 
 	
 	if (file_cnt) {
 
-		if (sf_seek (sf, (off_t) start, SEEK_SET) < 0) {
+		if (sf_seek (sf, (sf_count_t) start, SEEK_SET|SFM_READ) != (sf_count_t) start) {
 			char errbuf[256];
 			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 			error << string_compose(_("SndFileSource: could not seek to frame %1 within %2 (%3)"), start, _name.substr (1), errbuf) << endmsg;
@@ -505,7 +495,7 @@ SndFileSource::set_header_timeline_position ()
 jack_nframes_t
 SndFileSource::write_float (Sample* data, jack_nframes_t frame_pos, jack_nframes_t cnt)
 {
-	if (sf_seek (sf, frame_pos, SEEK_SET) != frame_pos) {
+	if (sf_seek (sf, frame_pos, SEEK_SET|SFM_WRITE) != frame_pos) {
 		error << string_compose (_("%1: cannot seek to %2"), _path, frame_pos) << endmsg;
 		return 0;
 	}

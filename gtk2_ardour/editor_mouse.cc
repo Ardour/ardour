@@ -195,7 +195,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		*/
 
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			if ((*i)->selected()) {
+			if ((*i)->get_selected()) {
 				(*i)->show_selection (selection->time);
 			}
 		}

@@ -548,7 +548,7 @@ StreamView::set_selected_regionviews (AudioRegionSelection& regions)
 		}
 		
 		// cerr << "\tregion " << (*i)->region.name() << " selected = " << selected << endl;
-		(*i)->set_selected (selected, this);
+		(*i)->set_selected (selected);
 	}
 }
 

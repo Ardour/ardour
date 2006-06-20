@@ -1234,12 +1234,6 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 	}
 }
 
-std::string
-AudioRegionView::get_item_name ()
-{
-	return region.name();
-}
-
 void
 AudioRegionView::move (double x_delta, double y_delta)
 {

@@ -50,7 +50,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 			      AudioRegionView& rview)
 			      
 
-	: TimeAxisViewItem ("xf.name()", *parent, tv, spu, basic_color, xf.position(), 
+	: TimeAxisViewItem ("xfade" /*xf.name()*/, *parent, tv, spu, basic_color, xf.position(), 
 			    xf.overlap_length(), TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
 	  crossfade (xf),
 	  left_view (lview),
@@ -89,13 +89,6 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 CrossfadeView::~CrossfadeView ()
 {
 	 GoingAway (this) ; /* EMIT_SIGNAL */
-}
-
-std::string
-CrossfadeView::get_item_name ()
-{
-	return "xfade";
-//	return crossfade.name();
 }
 
 void

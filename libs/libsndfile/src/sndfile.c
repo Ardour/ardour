@@ -1150,7 +1150,7 @@ sf_seek	(SNDFILE *sndfile, sf_count_t offset, int whence)
 	** it makes sense.
 	*/
 	if (((whence & SFM_MASK) == SFM_WRITE && psf->mode == SFM_READ) ||
-			((whence & SFM_MASK) == SFM_WRITE && psf->mode == SFM_WRITE))
+			((whence & SFM_MASK) == SFM_READ && psf->mode == SFM_WRITE))
 	{	psf->error = SFE_WRONG_SEEK ;
 		return PSF_SEEK_ERROR ;
 		} ;
@@ -1210,10 +1210,25 @@ sf_seek	(SNDFILE *sndfile, sf_count_t offset, int whence)
 	if (psf->error)
 		return PSF_SEEK_ERROR ;
 
+#ifdef ECDL_ORIGINAL#
 	if (seek_from_start < 0 || seek_from_start > psf->sf.frames)
 	{	psf->error = SFE_BAD_SEEK ;
 		return PSF_SEEK_ERROR ;
 		} ;
+#else
+	if (((whence & SFM_MASK) == SFM_WRITE) || (psf->mode == SFM_WRITE || psf->mode == SFM_RDWR))
+	{   if (seek_from_start < 0  /* || (seek_from_start > psf->sf.frames && post-audio chunks exist) */ )
+	    { 	psf->error = SFE_BAD_SEEK ;
+		return PSF_SEEK_ERROR ;
+		} 
+	    }
+        else /* seek for reading */
+	{   if (seek_from_start < 0 || seek_from_start > psf->sf.frames)
+	    {	psf->error = SFE_BAD_SEEK ;
+		return PSF_SEEK_ERROR ;
+		}
+	    }
+#endif
 
 	if (psf->seek)
 	{	int new_mode = (whence & SFM_MASK) ? (whence & SFM_MASK) : psf->mode ;
@@ -1233,6 +1248,7 @@ sf_seek	(SNDFILE *sndfile, sf_count_t offset, int whence)
 					new_mode = SFM_READ ;
 					break ;
 			} ;
+
 
 		psf->last_op = new_mode ;
 

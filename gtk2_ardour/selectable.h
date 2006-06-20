@@ -21,7 +21,9 @@
 #ifndef __ardour_gtk_selectable_h__
 #define __ardour_gtk_selectable_h__
 
-class Selectable 
+#include <sigc++/signal.h>
+
+class Selectable : public virtual sigc::trackable
 {
   public:
 	Selectable() {
@@ -30,9 +32,19 @@ class Selectable
 
 	virtual ~Selectable() {}
 
-	virtual void set_selected (bool) {
-		_selected = true;
+	virtual void set_selected (bool yn) {
+		if (yn != _selected) {
+			_selected = true;
+			Selected (_selected); /* EMIT_SIGNAL */
+		}
 	}
+
+	bool get_selected() const {
+		return _selected;
+	}
+
+	/** Emitted when the selected status of this Selectable changes */
+	sigc::signal<void, bool> Selected ;
 
   protected:
 	bool _selected;

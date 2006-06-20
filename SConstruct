@@ -408,10 +408,6 @@ libraries['pbd3']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd3', CPPPATH='#
 libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext', CPPPATH='#libs/gtkmm2ext')
 #libraries['cassowary'] = LibraryInfo(LIBS='cassowary', LIBPATH='#libs/cassowary', CPPPATH='#libs/cassowary')
 
-libraries['fst'] = LibraryInfo()
-if env['VST']:
-    libraries['fst'].ParseConfig('pkg-config --cflags --libs libfst')
-
 #
 # Check for libusb
 
@@ -532,6 +528,9 @@ if env['SYSLIBS']:
         'libs/ardour'
         ]
 
+    if env['VST']:
+        subdirs = ['libs/fst'] + subdirs + ['vst']
+
     gtk_subdirs = [
 #        'libs/flowcanvas',
         'libs/gtkmm2ext',
@@ -584,6 +583,9 @@ else:
         'libs/midi++2',
         'libs/ardour'
         ]
+
+    if env['VST']:
+        subdirs = ['libs/fst'] + subdirs + ['vst']
 
     gtk_subdirs = [
 	'libs/glibmm2',
@@ -787,10 +789,11 @@ if env['DEBUG'] == 1:
 else:
     env.Append(CCFLAGS=" ".join (opt_flags))
 
-env.Append(CCFLAGS="-Wall")
+#
+# warnings flags
+#
 
-if env['VST']:
-    env.Append(CCFLAGS="-DVST_SUPPORT")
+env.Append(CCFLAGS="-Wall -Woverloaded-virtual")
 
 if env['LIBLO']:
     env.Append(CCFLAGS="-DHAVE_LIBLO")

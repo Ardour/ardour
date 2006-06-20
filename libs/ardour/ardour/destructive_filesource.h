@@ -48,7 +48,7 @@ class DestructiveFileSource : public SndFileSource {
 	static void setup_standard_crossfades (jack_nframes_t sample_rate);
 
   protected:
-	jack_nframes_t write_unlocked (Sample *src, jack_nframes_t start, jack_nframes_t cnt, char * workbuf);
+	jack_nframes_t write_unlocked (Sample *src, jack_nframes_t cnt, char * workbuf);
 
   private:
 	static jack_nframes_t xfade_frames;

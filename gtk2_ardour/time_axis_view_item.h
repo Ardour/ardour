@@ -21,8 +21,6 @@
 #ifndef __gtk_ardour_time_axis_view_item_h__
 #define __gtk_ardour_time_axis_view_item_h__
 
-#include <sigc++/signal.h>
-
 #include <jack/jack.h>
 #include <string>
 
@@ -38,7 +36,7 @@ class TimeAxisView;
  * A base class for 'items' that may appear upon a TimeAxisView
  *
  */
-class TimeAxisViewItem : public sigc::trackable, public Selectable
+class TimeAxisViewItem : public Selectable
 {
    public:
        virtual ~TimeAxisViewItem() ;
@@ -170,9 +168,8 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
      * Set to true to indicate that this item is currently selected
      *
      * @param yn true if this item is currently selected
-     * @param src the identity of the object that initiated the change
      */
-    virtual void set_selected(bool yn, void* src) ;
+    virtual void set_selected(bool yn) ;
 
     /**
      * Set to true to indicate that this item should show its selection status
@@ -180,13 +177,6 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
      * @param yn true if this item should show its selected status
      */
     virtual void set_should_show_selection (bool yn) ;
-    
-    /**
-     * Returns whether this item is currently selected.
-     *
-     * @return true if this item is currently selected, false otherwise
-     */
-    bool get_selected() const ; 
     
     //---------------------------------------------------------------------------------------//
     // Parent Component Methods
@@ -319,10 +309,6 @@ class TimeAxisViewItem : public sigc::trackable, public Selectable
     /** Emitted when the mionimum item duration is changed */
     sigc::signal<void,jack_nframes_t,void*> MinDurationChanged ;
     
-    /** Emitted when the selected status of this item changes */
-    sigc::signal<void, bool> Selected ;
-    
-
   protected:
     
     enum Visibility {

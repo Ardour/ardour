@@ -125,7 +125,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	output_button.set_name ("MixerIOButton");
 	output_label.set_name ("MixerIOButtonLabel");
 
-
 	_route.meter_change.connect (mem_fun(*this, &MixerStrip::meter_changed));
 		meter_point_button.add (meter_point_label);
 		meter_point_button.set_name ("MixerStripMeterPreButton");

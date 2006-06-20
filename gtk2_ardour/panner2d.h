@@ -78,7 +78,7 @@ class Panner2d : public Gtk::DrawingArea
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton *);
 	bool on_motion_notify_event (GdkEventMotion *);
-	void on_size_allocate (Gtk::Allocation alloc);
+	void on_size_allocate (Gtk::Allocation& alloc);
 
   private:
 	struct Target {

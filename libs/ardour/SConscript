@@ -103,6 +103,7 @@ extra_sources = [ ]
 
 if ardour['VST']:
 	extra_sources += vst_files
+	ardour.Append(CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
 
 if ardour['LIBLO']:
     extra_sources += osc_files
