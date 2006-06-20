@@ -177,7 +177,7 @@ tokenize_fullpath (string fullpath, string& path, string& name)
 int
 touch_file (string path)
 {
-	int fd = open (path.c_str(), O_RDONLY|O_CREAT);
+	int fd = open (path.c_str(), O_RDWR|O_CREAT, 0660);
 	if (fd >= 0) {
 		close (fd);
 		return 0;

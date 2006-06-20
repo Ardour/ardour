@@ -3601,7 +3601,9 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	jack_nframes_t to_do;
 	vector<Sample*> buffers;
 	char *  workbuf = 0;
-	const jack_nframes_t chunk_size = (256 * 1024)/4;
+
+	// any bigger than this seems to cause stack overflows in called functions
+	const jack_nframes_t chunk_size = (128 * 1024)/4;
 
 	g_atomic_int_set (&processing_prohibited, 1);
 	

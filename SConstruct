@@ -14,7 +14,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta1'
+version = '2.0beta2'
 
 subst_dict = { }
 
@@ -25,20 +25,20 @@ subst_dict = { }
 opts = Options('scache.conf')
 opts.AddOptions(
   ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
-    BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
+    BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
+    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
+    BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
+    BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
+    BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
+    BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
-    BoolOption('VST', 'Compile with support for VST', 0),
-    BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
-    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
-    BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
-    BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('SURFACES', 'Build support for control surfaces', 0),
-    BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
-    BoolOption('LIBLO', 'Compile with support for liblo library', 1),
-    BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library -- UNSTABLE', 0)
+    BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
+    BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
+    BoolOption('VST', 'Compile with support for VST', 0)
 )
 
 #----------------------------------------------------------------------
@@ -58,8 +58,8 @@ class LibraryInfo(Environment):
             self.Append (LINKFLAGS = other.get('LINKFLAGS', []))
 	self.Replace(LIBPATH = list(Set(self.get('LIBPATH', []))))
 	self.Replace(CPPPATH = list(Set(self.get('CPPPATH',[]))))
-	#doing LINKFLAGS breaks -framework
-    #doing LIBS break link order dependency
+        #doing LINKFLAGS breaks -framework
+        #doing LIBS break link order dependency
 
 
 env = LibraryInfo (options = opts,
@@ -793,7 +793,7 @@ else:
 # warnings flags
 #
 
-env.Append(CCFLAGS="-Wall -Woverloaded-virtual")
+env.Append(CXXFLAGS="-Wall -Woverloaded-virtual")
 
 if env['LIBLO']:
     env.Append(CCFLAGS="-DHAVE_LIBLO")
