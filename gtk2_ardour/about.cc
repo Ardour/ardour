@@ -43,6 +43,7 @@ using namespace Gdk;
 using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 
 #ifdef WITH_PAYMENT_OPTIONS
 

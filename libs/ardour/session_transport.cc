@@ -46,6 +46,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace sigc;
+using namespace PBD;
 
 void
 Session::request_input_change_handling ()

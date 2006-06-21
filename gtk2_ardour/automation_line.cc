@@ -48,6 +48,7 @@
 using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Editing;
 using namespace Gnome; // for Canvas
 

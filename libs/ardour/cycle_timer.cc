@@ -24,6 +24,8 @@
 
 #include "i18n.h"
 
+using namespace PBD;
+
 float CycleTimer::cycles_per_usec = 0;
 
 float

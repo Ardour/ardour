@@ -48,6 +48,7 @@
 #include <locale.h>
 
 using namespace ARDOUR;
+using namespace PBD;
 
 Plugin::Plugin (AudioEngine& e, Session& s)
 	: _engine (e), _session (s)

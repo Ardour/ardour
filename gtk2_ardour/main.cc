@@ -53,6 +53,7 @@
 using namespace Gtk;
 using namespace GTK_ARDOUR;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace sigc;
 
 TextReceiver text_receiver ("ardour");
@@ -361,9 +362,17 @@ To create it from the command line, start ardour as \"ardour --new %1"), path)
 	return true;
 }
 
+#ifdef VST_SUPPORT
+/* this is called from the entry point of a wine-compiled
+   executable that is linked against gtk2_ardour built
+   as a shared library.
+*/
+extern "C" {
+int ardour_main (int argc, char *argv[])
+#else
+int main (int argc, char *argv[])
+#endif
 
-int
-main (int argc, char *argv[])
 {
 	ARDOUR::AudioEngine *engine;
 	vector<Glib::ustring> null_file_list;
@@ -463,6 +472,9 @@ main (int argc, char *argv[])
 	ARDOUR::cleanup ();
 	shutdown (0);
 
-	/* just another commit forcing change */
+	return 0;
 }
+#ifdef VST_SUPPORT
+} // end of extern C block
+#endif
 

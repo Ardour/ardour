@@ -32,6 +32,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace std;
 
 ExportRangeMarkersDialog::ExportRangeMarkersDialog (PublicEditor& editor) 

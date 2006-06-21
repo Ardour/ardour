@@ -22,6 +22,7 @@ basename.cc
 base_ui.cc
 convert.cc
 dmalloc.cc
+error.cc
 mountpoint.cc
 pathscanner.cc
 pool.cc

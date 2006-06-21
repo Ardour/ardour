@@ -29,6 +29,7 @@
 #include "color.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Editing;
 
 StreamView::StreamView (AudioTimeAxisView& tv)

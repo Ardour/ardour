@@ -40,6 +40,7 @@ using namespace std;
 using namespace sigc;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace PBD;
 
 PlaylistSelector::PlaylistSelector ()
 	: ArdourDialog ("playlist selector")

@@ -29,6 +29,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace PBD;
 
 VSTPluginUI::VSTPluginUI (PluginInsert& pi, VSTPlugin& vp)
 	: PlugUIBase (pi),

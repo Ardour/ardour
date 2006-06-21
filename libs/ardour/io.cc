@@ -55,7 +55,8 @@ extern "C" int isinf (double);
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
+
 
 static float current_automation_version_number = 1.0;
 

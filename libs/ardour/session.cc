@@ -73,7 +73,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 const char* Session::_template_suffix = X_(".template");
 const char* Session::_statefile_suffix = X_(".ardour");

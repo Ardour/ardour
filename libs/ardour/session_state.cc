@@ -87,6 +87,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 void
 Session::first_stage_init (string fullpath, string snapshot_name)

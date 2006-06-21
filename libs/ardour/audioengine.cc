@@ -40,6 +40,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 jack_nframes_t Port::short_over_length = 2;
 jack_nframes_t Port::long_over_length = 10;

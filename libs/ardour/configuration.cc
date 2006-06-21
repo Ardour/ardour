@@ -34,6 +34,7 @@
 
 using namespace ARDOUR;
 using namespace std;
+using namespace PBD;
 
 /* this is global so that we do not have to indirect through an object pointer
    to reference it.

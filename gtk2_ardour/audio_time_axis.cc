@@ -80,6 +80,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace LADSPA;
 using namespace Gtk;
 using namespace Editing;

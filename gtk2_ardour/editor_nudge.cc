@@ -27,4 +27,5 @@
 
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;

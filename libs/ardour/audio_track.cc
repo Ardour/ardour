@@ -38,6 +38,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Route (sess, name, 1, -1, -1, -1, flag),

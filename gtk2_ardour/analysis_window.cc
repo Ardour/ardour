@@ -40,6 +40,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 AnalysisWindow::AnalysisWindow()
 	: ArdourDialog(_("analysis window")),

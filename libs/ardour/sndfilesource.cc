@@ -32,6 +32,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 SndFileSource::SndFileSource (const XMLNode& node)
 	: AudioFileSource (node)

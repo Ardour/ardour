@@ -28,11 +28,6 @@
 using std::string;
 using std::ios;
 
-Transmitter  error (Transmitter::Error);
-Transmitter  info (Transmitter::Info);
-Transmitter  fatal (Transmitter::Fatal);
-Transmitter  warning (Transmitter::Warning);
-
 Transmitter::Transmitter (Channel c)
 
 {
@@ -109,6 +104,7 @@ Transmitter::does_not_return ()
 		return false;
 	}
 }
+
 
 extern "C" {
   void pbd_c_error (const char *str)

@@ -37,6 +37,7 @@
 using namespace ARDOUR;
 using namespace sigc;
 using namespace MIDI;
+using namespace PBD;
 
 MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p) 
 	: session (s)

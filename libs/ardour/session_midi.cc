@@ -45,7 +45,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 using namespace MIDI;
 
 MachineControl::CommandSignature MMC_CommandSignature;

@@ -37,6 +37,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 Change Region::FadeChanged = ARDOUR::new_change ();
 Change Region::SyncOffsetChanged = ARDOUR::new_change ();

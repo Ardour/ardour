@@ -39,7 +39,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 const string Redirect::state_node_name = "Redirect";
 sigc::signal<void,Redirect*> Redirect::RedirectCreated;

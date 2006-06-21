@@ -54,7 +54,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 static int
 convert_spec_to_info (AudioExportSpecification& spec, SF_INFO& sfinfo)

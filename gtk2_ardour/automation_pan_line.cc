@@ -31,6 +31,7 @@
 #include <ardour/session.h>
 
 using namespace ARDOUR;
+using namespace PBD;
 
 AutomationPanLine::AutomationPanLine (const string & name, Session& s, TimeAxisView& tv, ArdourCanvas::Group& parent, Curve& c)
 

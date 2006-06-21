@@ -33,7 +33,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 MultiAllocSingleReleasePool Session::Event::pool ("event", sizeof (Session::Event), 512);
 

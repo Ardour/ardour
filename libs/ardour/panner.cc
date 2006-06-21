@@ -44,9 +44,9 @@
 
 #include <pbd/mathfix.h>
 
-
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 float Panner::current_automation_version_number = 1.0;
 

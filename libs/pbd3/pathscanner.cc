@@ -27,6 +27,8 @@
 #include <pbd/pathscanner.h>
 #include <pbd/stl_delete.h>
 
+using namespace PBD;
+
 vector<string *> *
 PathScanner::operator() (const string &dirpath, const string &regexp,
 			 bool match_fullpath, bool return_fullpath, 

@@ -26,6 +26,7 @@
 #include <AudioToolbox/AudioFormat.h>
 
 using namespace ARDOUR;
+using namespace PBD;
 
 CoreAudioSource::CoreAudioSource (const XMLNode& node)
 	: AudioFileSource (node)

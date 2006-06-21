@@ -104,6 +104,7 @@ endmsg (std::ostream &ostr)
 	return ostr;
 }
 
+
 extern "C" { void pbd_c_error (const char *); }
 
 #endif // __libmisc_transmitter_h__

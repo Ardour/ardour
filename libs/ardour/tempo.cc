@@ -35,6 +35,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 /* _default tempo is 4/4 qtr=120 */
 

@@ -36,6 +36,7 @@
 
 using namespace sigc;
 using namespace Gtk;
+using namespace PBD;
 
 namespace ARDOUR {
 	class Session;

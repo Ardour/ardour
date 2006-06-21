@@ -37,7 +37,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 /* BBT TIME*/
 

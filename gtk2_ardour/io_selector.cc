@@ -49,6 +49,7 @@ using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtkmm2ext;
 
 IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can_cancel)

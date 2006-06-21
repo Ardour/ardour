@@ -27,6 +27,7 @@
 
 using namespace std;
 using namespace MIDI;
+using namespace PBD;
 
 static std::map<int,string> mmc_cmd_map;
 static void build_mmc_cmd_map ()

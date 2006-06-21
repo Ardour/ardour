@@ -12,6 +12,7 @@ using namespace Glib;
 using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Editing;
 
 void

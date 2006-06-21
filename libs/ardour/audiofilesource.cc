@@ -50,6 +50,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 string AudioFileSource::peak_dir = "";
 string AudioFileSource::search_path;

@@ -42,7 +42,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 static float _read_data_rate;
 static float _write_data_rate;

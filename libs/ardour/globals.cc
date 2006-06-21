@@ -69,6 +69,7 @@ ARDOUR::OSC* ARDOUR::osc = 0;
 
 using namespace ARDOUR;
 using namespace std;
+using namespace PBD;
 
 MIDI::Port *default_mmc_port = 0;
 MIDI::Port *default_mtc_port = 0;

@@ -53,6 +53,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 jack_nframes_t AudioDiskstream::disk_io_chunk_frames;
 

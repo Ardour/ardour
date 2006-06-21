@@ -26,6 +26,7 @@
 
 using namespace sigc;
 using namespace MIDI;
+using namespace PBD;
 
 Controllable::Controllable (Port *p, bool is_bistate)
 {

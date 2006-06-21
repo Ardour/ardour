@@ -25,7 +25,6 @@
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/utils.h>
 #include <pbd/pathscanner.h>
-#include <pbd/error.h>
 
 using namespace std;
 using namespace Gtkmm2ext;

@@ -44,7 +44,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 
 uint32_t Route::order_key_cnt = 0;

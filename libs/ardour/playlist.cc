@@ -41,7 +41,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 sigc::signal<void,Playlist*> Playlist::PlaylistCreated;
 
