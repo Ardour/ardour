@@ -58,9 +58,6 @@ if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Merge ([libraries['fftw3f']])
 	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
 
-if gtkardour['VST']:
-    gtkardour.Merge ([ libraries['fst']])
-
 skipped_files=Split("""
 connection_editor.cc
 """)
@@ -203,14 +200,15 @@ itest.cc
 """)
 
 extra_sources = []
+
 vst_files = [ 'vst_pluginui.cc' ]
 
 if env['VST']:
-   extra_sources += vst_files
-
+	extra_sources += vst_files
+	gtkardour.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
+  
 if env['FFT_ANALYSIS']:
 	extra_sources += fft_analysis_files
-
 
 intl_files += extra_sources
 
@@ -226,6 +224,8 @@ gtkardour.VersionBuild(['version.cc','version.h'], 'SConscript')
 executable = 'ardour.bin'
 
 ardour = gtkardour.Program(target = executable, source = gtkardour_files + extra_sources)
+ardourlib = gtkardour.SharedLibrary(target = 'ardourgtk', source = gtkardour_files + extra_sources)
+
 mtest = gtkardour.Program(target = 'mtest', source = mtest_files)
 itest = gtkardour.Program(target = 'itest', source = itest_files)
 
@@ -235,21 +235,28 @@ my_subst_dict['%INSTALL_PREFIX%'] = install_prefix
 ardoursh = env.SubstInFile ('ardour.sh','ardour.sh.in', SUBST_DICT = my_subst_dict);
 env.AddPostAction (ardoursh, Chmod ('$TARGET', 0755))
 
-Default(ardour)
+if env['VST']:
+	Default(ardourlib)
+	# the library - into the library dir
+	env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), ardourlib))
+else:
 
-if env['VERSIONED']:
-    Default (env.VersionedExecutable ('tagged_executable', ardour))
+	if env['VERSIONED']:
+		Default (env.VersionedExecutable ('tagged_executable', ardour))
+	else:
+		Default(ardour)
+
+        #install
+
+	# the executable - into the library dir
+	env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), ardour))
+	# the script - into the bin dir
+	env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour2', ardoursh))
 
 if env['NLS']:
-    Export('gtkardour', 'intl_files')
-    SConscript ('po/SConscript')
+	Export('gtkardour', 'intl_files')
+	SConscript ('po/SConscript')
     
-#install
-
-# the executable - into the library dir
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), ardour))
-# the script - into the bin dir
-env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour2', ardoursh))
 # configuration files
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
@@ -259,6 +266,7 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 'splash.ppm'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
 
+		
 #dist
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       [ 'SConscript',

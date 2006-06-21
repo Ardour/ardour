@@ -1210,8 +1210,8 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 
 	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 		if (with_stop) {
-			(*i)->transport_stopped (abort, (post_transport_work & PostTransportLocate), 
-						 (!(post_transport_work & PostTransportLocate) || pending_locate_flush));
+			(*i)->handle_transport_stopped (abort, (post_transport_work & PostTransportLocate), 
+							(!(post_transport_work & PostTransportLocate) || pending_locate_flush));
 		}
 
 		jack_nframes_t old_latency = (*i)->signal_latency ();

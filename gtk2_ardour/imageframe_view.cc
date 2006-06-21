@@ -172,16 +172,15 @@ delete imageframe;
  * @return true if the position change was a success, false otherwise
  */
 bool
-ImageFrameView::set_position(jack_nframes_t pos, void* src)
+ImageFrameView::set_position(jack_nframes_t pos, void* src, double* delta)
 {
 	jack_nframes_t old_pos = frame_position ;
 	
 	// do the standard stuff
-	bool ret = TimeAxisViewItem::set_position(pos, src) ;
+	bool ret = TimeAxisViewItem::set_position(pos, src, delta) ;
 
 	// everything went ok with the standard stuff?
-	if(ret)
-	{
+ 	if (ret) {
 		/* move each of our associated markers with this ImageFrameView */
 		for (MarkerViewList::iterator i = marker_view_list.begin(); i != marker_view_list.end(); ++i)
 		{

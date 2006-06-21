@@ -2443,12 +2443,6 @@ IO::state_factory (std::string why) const
 	return state;
 }
 
-void
-IO::send_state_changed ()
-{
-	return;
-}
-
 /**
     Update the peak meters.
 

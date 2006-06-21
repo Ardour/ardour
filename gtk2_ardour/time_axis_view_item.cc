@@ -484,24 +484,12 @@ TimeAxisViewItem::get_item_name() const
  * @param src the identity of the object that initiated the change
  */
 void
-TimeAxisViewItem::set_selected(bool yn, void* src)
+TimeAxisViewItem::set_selected(bool yn)
 {
 	if (_selected != yn) {
-		_selected = yn ;
+		Selectable::set_selected (yn);
 		set_frame_color ();
-		Selected (_selected) ; /* EMIT_SIGNAL */
 	}
-}
-
-/**
- * Returns whether this item is currently selected.
- *
- * @return true if this item is currently selected, false otherwise
- */
-bool
-TimeAxisViewItem::get_selected() const
-{
-	return (_selected) ;
 }
 
 void 

@@ -233,7 +233,6 @@ class Region : public Stateful, public StateManager
 	/* state management */
 
 	void send_change (Change);
-	void send_state_changed ();
 
 	/* derived classes need these during their own state management calls */
 

@@ -361,6 +361,7 @@ To create it from the command line, start ardour as \"ardour --new %1"), path)
 	return true;
 }
 
+
 int
 main (int argc, char *argv[])
 {

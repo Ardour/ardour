@@ -28,6 +28,7 @@
 
 #include <pbd/xml++.h>
 #include "prompter.h"
+#include "selectable.h"
 
 namespace ARDOUR {
 	class Session;
@@ -37,7 +38,7 @@ namespace ARDOUR {
  * AxisView defines the abstract base class for time-axis trackviews and routes.
  *
  */
-class AxisView : public virtual sigc::trackable
+class AxisView : public virtual Selectable
 {
   public:
 	/**
@@ -51,12 +52,6 @@ class AxisView : public virtual sigc::trackable
 
 	virtual string name() const = 0;
 
-	virtual void set_selected (bool yn) {
-		if (yn != _selected) {
-			_selected = yn;
-		}
-	}
-	
 	virtual bool marked_for_display() const { return _marked_for_display; }
 
 	virtual void set_marked_for_display (bool yn) {
@@ -65,7 +60,6 @@ class AxisView : public virtual sigc::trackable
 		}
 	}
 	
-	virtual bool selected() const { return _selected; }
 	sigc::signal<void> Hiding;
 	sigc::signal<void> GoingAway;
 

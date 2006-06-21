@@ -46,7 +46,6 @@ struct CrossfadeView : public TimeAxisViewItem
     AudioRegionView& left_view;    // and these too
     AudioRegionView& right_view;
 
-    std::string get_item_name();
     void set_height (double);
 
     bool valid() const { return _valid; }

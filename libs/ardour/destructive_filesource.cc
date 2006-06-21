@@ -255,7 +255,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 }
 
 jack_nframes_t
-DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t start, jack_nframes_t cnt, char * workbuf)
+DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * workbuf)
 {
 	jack_nframes_t old_file_pos;
 
@@ -319,9 +319,7 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t start, jack_
 	}
 	
 	old_file_pos = file_pos;
-	if (file_pos + cnt > _length) {
-		_length = file_pos + cnt;
-	}
+	update_length (file_pos, cnt);
 	file_pos += cnt;
 	
 	if (_build_peakfiles) {

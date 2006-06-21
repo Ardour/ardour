@@ -321,7 +321,6 @@ public:
 
 	Change               restore_state (State&);
 	StateManager::State* state_factory (std::string why) const;
-	void                 send_state_changed();
 
 	bool get_midi_node_info (XMLNode * node, MIDI::eventType & ev, MIDI::channel_t & chan, MIDI::byte & additional);
 	bool set_midi_node_info (XMLNode * node, MIDI::eventType ev, MIDI::channel_t chan, MIDI::byte additional);

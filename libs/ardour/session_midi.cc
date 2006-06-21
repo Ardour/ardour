@@ -907,7 +907,7 @@ Session::send_midi_time_code_for_cycle(jack_nframes_t nframes)
 
 	if (_mtc_port == 0 || !send_mtc || transmitting_smpte_time.negative
 			/*|| (next_quarter_frame_to_send < 0)*/ ) {
-		printf("(MTC) Not sending MTC\n");
+		//printf("(MTC) Not sending MTC\n");
 		return 0;
 	}
 	
@@ -1035,13 +1035,13 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 	SMPTE::Time smpte;
 
 	if (_mmc_port == 0 || !send_mmc) {
-		cerr << "Not delivering MMC " << _mmc_port << " - " << send_mmc << endl;
+		//cerr << "Not delivering MMC " << _mmc_port << " - " << send_mmc << endl;
 		return;
 	}
 
 	mmc_buffer[nbytes++] = cmd;
 
-	cerr << "delivering MMC, cmd = " << hex << (int) cmd << dec << endl;
+	//cerr << "delivering MMC, cmd = " << hex << (int) cmd << dec << endl;
 	
 	switch (cmd) {
 	case MachineControl::cmdLocate:
@@ -1090,9 +1090,9 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 		// FIXME: timestamp correct? [DR]
 		if (!_mmc_port->midimsg (mmc_buffer, sizeof (mmc_buffer), where - _transport_frame)) {
 			error << string_compose(_("MMC: cannot send command %1%2%3"), &hex, cmd, &dec) << endmsg;
-		} else {
+		} /*else {
 			cerr << "Sending MMC\n";
-		}
+		}*/
 	}
 }
 

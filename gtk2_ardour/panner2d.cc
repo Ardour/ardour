@@ -127,7 +127,7 @@ Panner2d::reset (uint32_t n_inputs)
 }
 
 void
-Panner2d::on_size_allocate (Gtk::Allocation alloc)
+Panner2d::on_size_allocate (Gtk::Allocation& alloc)
 {
   	width = alloc.get_width();
   	height = alloc.get_height();

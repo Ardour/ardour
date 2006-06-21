@@ -792,7 +792,9 @@ AudioSource::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 
 		frames_to_read = min (frames_per_peak, cnt);
 
-		if ((frames_read = read_unlocked (buf, current_frame, frames_to_read, workbuf)) != frames_to_read) {
+		/* lock for every read */
+
+		if ((frames_read = read (buf, current_frame, frames_to_read, workbuf)) != frames_to_read) {
 			error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
 			goto out;
 		}
