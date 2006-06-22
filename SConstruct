@@ -353,7 +353,7 @@ env.Append (BUILDERS = {'Tarball' : tarball_bld})
 if env['VST']:
     sys.stdout.write ("Are you building Ardour for personal use (rather than distributiont to others)? [no]: ")
     answer = sys.stdin.readline ()
-    answer = string.strip (string.rstrip (answer));
+    answer = answer.rstrip().strip()
     if answer != "yes" and answer != "y":
         print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. VST support disabled.'
         env['VST'] = 0;
