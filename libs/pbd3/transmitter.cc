@@ -24,12 +24,12 @@
 #include <string>
 
 #include <pbd/transmitter.h>
+#include <pbd/error.h>
 
 using std::string;
 using std::ios;
 
 Transmitter::Transmitter (Channel c)
-
 {
 	channel = c;
 	switch (c) {
@@ -110,7 +110,6 @@ extern "C" {
   void pbd_c_error (const char *str)
  
   {
-	extern Transmitter error;
-	error << str << endmsg;
+	PBD::error << str << endmsg;
   }
 }
