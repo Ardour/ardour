@@ -150,7 +150,9 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	added_list.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::added_list_selection_changed));
 
 	input_refiller ();
+#ifdef VST_SUPPORT
 	vst_refiller ();
+#endif
 }
 
 void
@@ -308,7 +310,9 @@ PluginSelector::btn_update_clicked()
 {
 	manager->refresh ();
 	input_refiller ();
+#ifdef VST_SUPPORT
 	vst_refiller ();
+#endif	
 }
 
 #ifdef VST_SUPPORT
