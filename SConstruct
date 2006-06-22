@@ -8,6 +8,7 @@ import glob
 import errno
 import time
 import platform
+import string
 from sets import Set
 import SCons.Node.FS
 
@@ -344,6 +345,21 @@ tarball_bld = Builder (action = tarballer,
 
 env.Append (BUILDERS = {'Distribute' : dist_bld})
 env.Append (BUILDERS = {'Tarball' : tarball_bld})
+
+#
+# Make sure they know what they are doing
+#
+
+if env['VST']:
+    sys.stdout.write ("Are you building Ardour for personal use (rather than distributiont to others)? [no]: ")
+    answer = sys.stdin.readline ()
+    answer = string.strip (string.rstrip (answer));
+    if answer != "yes" and answer != "y":
+        print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. VST support disabled.'
+        env['VST'] = 0;
+    else:
+        print "OK, VST support will be enabled"
+        
 
 # ----------------------------------------------------------------------
 # Construction environment setup
