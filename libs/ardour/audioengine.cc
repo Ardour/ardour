@@ -92,12 +92,6 @@ _thread_init_callback (void *arg)
 	*/
 
 	PBD::ThreadCreatedWithRequestSize (pthread_self(), X_("Audioengine"), 4096);
-
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst()) {
-		fst_adopt_thread ();
-	}
-#endif
 }
 
 int

@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <stdlib.h>
 
 #define MAX_STRING_LEN 256
 

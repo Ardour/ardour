@@ -8,18 +8,18 @@
 /**
  * Display FST error message.
  *
- * Set via fst_set_error_function(), otherwise a FST-provided
- * default will print @a msg (plus a newline) to stderr.
- *
- * @param msg error message text (no newline at end).
+ * @param fmt printf-style formatting specification
  */
-extern void (*fst_error_callback)(const char *msg);
+extern void fst_error (const char *fmt, ...);
 
 /**
  * Set the @ref fst_error_callback for error message display.
  *
  * The FST library provides two built-in callbacks for this purpose:
- * default_fst_error_callback() and silent_fst_error_callback().
+ * default_fst_error_callback().
+ *
+ * The default will print the message (plus a newline) to stderr.
+ *
  */
 void fst_set_error_function (void (*func)(const char *));
 
@@ -81,7 +81,7 @@ struct _FST
 extern "C" {
 #endif
 
-extern int        fst_init (void (*sighandler)(int,siginfo_t*,void*));
+extern int  fst_init ();
 
 extern FSTHandle* fst_load (const char*);
 extern int        fst_unload (FSTHandle*);
@@ -95,9 +95,6 @@ extern void fst_event_loop_add_plugin (FST* fst);
 extern int  fst_run_editor (FST*);
 extern void  fst_destroy_editor (FST*);
 extern int  fst_get_XID (FST*);
-
-extern int   fst_adopt_thread ();
-extern void* fst_get_teb();
 
 extern void fst_signal_handler (int sig, siginfo_t* info, void* context);
 

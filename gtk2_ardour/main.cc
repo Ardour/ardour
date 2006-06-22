@@ -103,12 +103,6 @@ handler (int sig)
 	shutdown (1);
 }
 
-static void 
-handler2 (int sig, siginfo_t* ctxt, void* ignored)
-{
-	handler (sig);
-}	
-
 static void *
 signal_thread (void *arg)
 {
@@ -452,7 +446,7 @@ int main (int argc, char *argv[])
 	
 	try { 
 		engine = new ARDOUR::AudioEngine (jack_client_name);
-		ARDOUR::init (*engine, use_vst, try_hw_optimization, handler2);
+		ARDOUR::init (*engine, use_vst, try_hw_optimization);
 		ui->set_engine (*engine);
 	} catch (AudioEngine::NoBackendAvailable& err) {
 		gui_jack_error ();
