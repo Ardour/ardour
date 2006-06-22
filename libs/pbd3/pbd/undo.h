@@ -27,47 +27,12 @@
 #include <sigc++/slot.h>
 #include <sigc++/bind.h>
 #include <sys/time.h>
-#include <pbd/xml++.h>
+#include <pbd/undo_command.h>
 
 using std::string;
 using std::list;
 
 typedef sigc::slot<void> UndoAction;
-
-// TODO stick this in its own file, and make the arguments multiply-inherit it
-class Serializable 
-{
-public:
-    XMLNode &serialize();
-};
-
-class UndoCommand
-{
-public:
-    UndoCommand(id_t object_id, std::string method_name);
-    void operator() () { return _slot(); }
-    XMLNode &serialize();
-protected:
-    sigc::slot<void> _slot;
-};
-
-template <class T1=void, class T2=void, class T3=void, class T4=void>
-class SlotCommand;
-
-template <>
-class SlotCommand <> : public UndoCommand {};
-
-template <class T1>
-class SlotCommand <T1> : public UndoCommand
-{
-    T1 _arg1;
-public:
-    SlotCommand(id_t object_id, std::string key, T1 arg1) 
-	: UndoCommand(object_id, key), _arg1(arg1)
-    {
-	_slot = sigc::bind(_slot, arg1);
-    }
-};
 
 class UndoTransaction 
 {
