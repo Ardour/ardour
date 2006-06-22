@@ -58,13 +58,11 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/utils.h>
 #include <ardour/audioplaylist.h>
-#include <ardour/source.h>
-#include <ardour/filesource.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/destructive_filesource.h>
-#include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/auditioner.h>
 #include <ardour/export.h>
@@ -89,6 +87,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 void
 Session::first_stage_init (string fullpath, string snapshot_name)
@@ -196,12 +195,13 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	destructive_index = 0;
 
 	/* allocate conversion buffers */
-	_conversion_buffers[ButlerContext] = new char[DiskStream::disk_io_frames() * 4];
-	_conversion_buffers[TransportContext] = new char[DiskStream::disk_io_frames() * 4];
+	_conversion_buffers[ButlerContext] = new char[AudioDiskstream::disk_io_frames() * 4];
+	_conversion_buffers[TransportContext] = new char[AudioDiskstream::disk_io_frames() * 4];
 	
 	/* default short fade = 15ms */
 
 	Crossfade::set_short_xfade_length ((jack_nframes_t) floor ((15.0 * frame_rate()) / 1000.0));
+	DestructiveFileSource::setup_standard_crossfades (frame_rate());
 
 	last_mmc_step.tv_sec = 0;
 	last_mmc_step.tv_usec = 0;
@@ -267,10 +267,10 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	/* These are all static "per-class" signals */
 
 	Region::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
-	Source::SourceCreated.connect (mem_fun (*this, &Session::add_source));
+	AudioSource::AudioSourceCreated.connect (mem_fun (*this, &Session::add_audio_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
-	DiskStream::DiskStreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
+	AudioDiskstream::AudioDiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
 
 	IO::MoreOutputs.connect (mem_fun (*this, &Session::ensure_passthru_buffers));
@@ -285,7 +285,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 int
 Session::second_stage_init (bool new_session)
 {
-	ExternalSource::set_peak_dir (peak_dir());
+	AudioFileSource::set_peak_dir (peak_dir());
 
 	if (!new_session) {
 		if (load_state (_current_snapshot_name)) {
@@ -425,7 +425,7 @@ Session::setup_raid_path (string path)
 		}
 		fspath += tape_dir_name;
 		
-		FileSource::set_search_path (fspath);
+		AudioFileSource::set_search_path (fspath);
 
 		return;
 	}
@@ -481,9 +481,9 @@ Session::setup_raid_path (string path)
 		session_dirs.push_back (sp);
 	}
 
-	/* set the FileSource search path */
+	/* set the AudioFileSource search path */
 
-	FileSource::set_search_path (fspath);
+	AudioFileSource::set_search_path (fspath);
 
 	/* reset the round-robin soundfile path thingie */
 
@@ -625,11 +625,11 @@ Session::load_diskstreams (const XMLNode& node)
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
 		
-		DiskStream* dstream;
+		AudioDiskstream* dstream;
 
 		try {
-			dstream = new DiskStream (*this, **citer);
-			/* added automatically by DiskStreamCreated handler */
+			dstream = new AudioDiskstream (*this, **citer);
+			/* added automatically by AudioDiskstreamCreated handler */
 		} 
 		
 		catch (failed_constructor& err) {
@@ -1335,15 +1335,15 @@ Session::state(bool full_state)
 	child = node->add_child ("Sources");
 
 	if (full_state) {
-		Glib::Mutex::Lock sl (source_lock);
+		Glib::Mutex::Lock sl (audio_source_lock);
 
-		for (SourceList::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
+		for (AudioSourceList::iterator siter = audio_sources.begin(); siter != audio_sources.end(); ++siter) {
 			
-			/* Don't save information about FileSources that are empty */
+			/* Don't save information about AudioFileSources that are empty */
 			
-			FileSource* fs;
+			AudioFileSource* fs;
 
-			if ((fs = dynamic_cast<FileSource*> ((*siter).second)) != 0) {
+			if ((fs = dynamic_cast<AudioFileSource*> ((*siter).second)) != 0) {
 				DestructiveFileSource* dfs = dynamic_cast<DestructiveFileSource*> (fs);
 
 				/* destructive file sources are OK if they are empty, because
@@ -1380,7 +1380,7 @@ Session::state(bool full_state)
 
 	{ 
 		Glib::RWLock::ReaderLock dl (diskstream_lock);
-		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 			if (!(*i)->hidden()) {
 				child->add_child_nocopy ((*i)->get_state());
 			}
@@ -1511,7 +1511,7 @@ Session::set_state (const XMLNode& node)
 	Options
 	Sources
 	AudioRegions
-	DiskStreams
+	AudioDiskstreams
 	Connections
 	Locations
 	Routes
@@ -1745,6 +1745,7 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 	const XMLProperty* prop;
 	id_t s_id;
 	Source* source;
+	AudioSource* as;
 	AudioRegion::SourceList sources;
 	uint32_t nchans = 1;
 	char buf[128];
@@ -1772,7 +1773,13 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 		return 0;
 	}
 
-	sources.push_back(source);
+	as = dynamic_cast<AudioSource*>(source);
+	if (!as) {
+		error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), s_id) << endmsg;
+		return 0;
+	}
+
+	sources.push_back (as);
 
 	/* pickup other channels */
 
@@ -1785,7 +1792,13 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
 				return 0;
 			}
-			sources.push_back(source);
+			
+			as = dynamic_cast<AudioSource*>(source);
+			if (!as) {
+				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), s_id) << endmsg;
+				return 0;
+			}
+			sources.push_back (as);
 		}
 	}
 	
@@ -1804,11 +1817,13 @@ Session::get_sources_as_xml ()
 
 {
 	XMLNode* node = new XMLNode (X_("Sources"));
-	Glib::Mutex::Lock lm (source_lock);
+	Glib::Mutex::Lock lm (audio_source_lock);
 
-	for (SourceList::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
 		node->add_child_nocopy ((*i).second->get_state());
 	}
+
+	/* XXX get MIDI and other sources here */
 
 	return *node;
 }
@@ -1867,23 +1882,12 @@ Session::XMLSourceFactory (const XMLNode& node)
 	}
 
 	try {
-		if (node.property (X_("destructive")) != 0) {
-			src = new DestructiveFileSource (node, frame_rate());
-		} else {
-			src = new FileSource (node, frame_rate());
-		}
+		src = AudioFileSource::create (node);
 	}
 	
 	catch (failed_constructor& err) {
-
-		try {
-			src = ExternalSource::create (node);
-		}
-
-		catch (failed_constructor& err) {
-			error << _("Found a sound file that cannot be used by Ardour. See the progammers.") << endmsg;
-			return 0;
-		} 
+		error << _("Found a sound file that cannot be used by Ardour. Talk to the progammers.") << endmsg;
+		return 0;
 	}
 
 	return src;
@@ -2930,9 +2934,9 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	rep.paths.clear ();
 	rep.space = 0;
 
-	for (SourceList::iterator i = sources.begin(); i != sources.end(); ) {
+	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ) {
 
-		SourceList::iterator tmp;
+		AudioSourceList::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -2949,7 +2953,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			   adding it to the list of all sources below
 			*/
 
-			sources.erase (i);
+			audio_sources.erase (i);
 		}
 
 		i = tmp;
@@ -3013,20 +3017,17 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	   state file on disk still references sources we may have already
 	   dropped.
 	*/
-
+	
 	find_all_sources_across_snapshots (all_sources, true);
 
-	/* add our current source list
+	/*  add our current source list
 	 */
-
-	for (SourceList::iterator i = sources.begin(); i != sources.end(); ++i) {
-		FileSource* fs;
-		ExternalSource* sfs;
+	
+	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
+		AudioFileSource* fs;
 		
-		if ((fs = dynamic_cast<FileSource*> ((*i).second)) != 0) {
+		if ((fs = dynamic_cast<AudioFileSource*> ((*i).second)) != 0) {
 			all_sources.insert (fs->path());
-		} else if ((sfs = dynamic_cast<ExternalSource*> ((*i).second)) != 0) {
-			all_sources.insert (sfs->path());
 		} 
 	}
 

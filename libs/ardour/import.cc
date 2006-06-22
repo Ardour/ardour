@@ -36,14 +36,15 @@
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
-#include <ardour/diskstream.h>
-#include <ardour/filesource.h>
+#include <ardour/audio_diskstream.h>
+#include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/audioregion.h>
 
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 #define BLOCKSIZE 4096U
 
@@ -51,8 +52,8 @@ int
 Session::import_audiofile (import_status& status)
 {
 	SNDFILE *in;
-	FileSource **newfiles = 0;
-	ARDOUR::AudioRegion::SourceList sources;
+	AudioFileSource **newfiles = 0;
+	AudioRegion::SourceList sources;
 	SF_INFO info;
 	float *data = 0;
 	Sample **channel_data = 0;
@@ -94,7 +95,7 @@ Session::import_audiofile (import_status& status)
 		}
 	}
 
-	newfiles = new FileSource *[info.channels];
+	newfiles = new AudioFileSource *[info.channels];
 	for (n = 0; n < info.channels; ++n) {
 		newfiles[n] = 0;
 	}
@@ -137,7 +138,10 @@ Session::import_audiofile (import_status& status)
 
 			
 		try { 
-			newfiles[n] = new FileSource (buf, frame_rate(), false, Config->get_native_file_data_format());
+			newfiles[n] = new SndFileSource (buf, 
+							 Config->get_native_file_data_format(),
+							 Config->get_native_file_header_format(),
+							 frame_rate ());
 		}
 
 		catch (failed_constructor& err) {

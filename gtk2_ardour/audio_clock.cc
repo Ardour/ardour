@@ -37,6 +37,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
 
@@ -194,6 +195,8 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 
 	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	clock_base.signal_button_release_event().connect (bind (mem_fun (*this, &AudioClock::field_button_release_event), SMPTE_Hours));
+
+	Session::SMPTEOffsetChanged.connect (mem_fun (*this, &AudioClock::smpte_offset_changed));
 
 	if (editable) {
 		setup_events ();
@@ -390,6 +393,25 @@ AudioClock::set (jack_nframes_t when, bool force)
 }
 
 void
+AudioClock::smpte_offset_changed ()
+{
+	jack_nframes_t current;
+
+	switch (_mode) {
+	case SMPTE:
+		if (is_duration) {
+			current = current_duration();
+		} else {
+			current = current_time ();
+		}
+		set (current, true);
+		break;
+	default:
+		break;
+	}
+}
+
+void
 AudioClock::set_frames (jack_nframes_t when, bool force)
 {
 	char buf[32];
@@ -436,7 +458,7 @@ void
 AudioClock::set_smpte (jack_nframes_t when, bool force)
 {
 	char buf[32];
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	
 	if (is_duration) {
 		session->smpte_duration (when, smpte);
@@ -446,9 +468,9 @@ AudioClock::set_smpte (jack_nframes_t when, bool force)
 
 	if (force || smpte.hours != last_hrs || smpte.negative != last_negative) {
 		if (smpte.negative) {
-			sprintf (buf, "-%02ld", smpte.hours);
+			sprintf (buf, "-%02" PRIu32, smpte.hours);
 		} else {
-			sprintf (buf, " %02ld", smpte.hours);
+			sprintf (buf, " %02" PRIu32, smpte.hours);
 		}
 		hours_label.set_text (buf);
 		last_hrs = smpte.hours;
@@ -456,19 +478,19 @@ AudioClock::set_smpte (jack_nframes_t when, bool force)
 	}
 
 	if (force || smpte.minutes != last_mins) {
-		sprintf (buf, "%02ld", smpte.minutes);
+		sprintf (buf, "%02" PRIu32, smpte.minutes);
 		minutes_label.set_text (buf);
 		last_mins = smpte.minutes;
 	}
 
 	if (force || smpte.seconds != last_secs) {
-		sprintf (buf, "%02ld", smpte.seconds);
+		sprintf (buf, "%02" PRIu32, smpte.seconds);
 		seconds_label.set_text (buf);
 		last_secs = smpte.seconds;
 	}
 
 	if (force || smpte.frames != last_frames) {
-		sprintf (buf, "%02ld", smpte.frames);
+		sprintf (buf, "%02" PRIu32, smpte.frames);
 		frames_label.set_text (buf);
 		last_frames = smpte.frames;
 	}
@@ -1260,14 +1282,14 @@ AudioClock::smpte_frame_from_display () const
 		return 0;
 	}
 	
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	jack_nframes_t sample;
 	
 	smpte.hours = atoi (hours_label.get_text());
 	smpte.minutes = atoi (minutes_label.get_text());
 	smpte.seconds = atoi (seconds_label.get_text());
 	smpte.frames = atoi (frames_label.get_text());
-	
+
 	session->smpte_to_sample( smpte, sample, false /* use_offset */, false /* use_subframes */ );
 	
 
@@ -1281,10 +1303,10 @@ AudioClock::smpte_frame_from_display () const
 #define SMPTE_SAMPLE_TEST_7
 
 	// Testcode for smpte<->sample conversions (P.S.)
-	SMPTE_Time smpte1;
+	SMPTE::Time smpte1;
 	jack_nframes_t sample1;
 	jack_nframes_t oldsample = 0;
-	SMPTE_Time smpte2;
+	SMPTE::Time smpte2;
 	jack_nframes_t sample_increment;
 
 	sample_increment = (long)rint(session->frame_rate() / session->smpte_frames_per_second);

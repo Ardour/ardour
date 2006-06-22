@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/audioplaylist.h>
 
 #include "editor.h"
@@ -42,6 +42,7 @@
 
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 
 bool

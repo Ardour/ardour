@@ -22,7 +22,7 @@
 #include <cerrno>
 
 #include <pbd/basename.h>
-#include <ardour/filesource.h>
+#include <ardour/sndfilesource.h>
 #include <ardour/session.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiofilter.h>
@@ -30,6 +30,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 int
 AudioFilter::make_new_sources (AudioRegion& region, AudioRegion::SourceList& nsrcs)
@@ -47,7 +48,10 @@ AudioFilter::make_new_sources (AudioRegion& region, AudioRegion::SourceList& nsr
 		}
 
 		try {
-			nsrcs.push_back (new FileSource (path, session.frame_rate(), false, Config->get_native_file_data_format()));
+			nsrcs.push_back (new SndFileSource (path, 
+							    Config->get_native_file_data_format(),
+							    Config->get_native_file_header_format(),
+							    session.frame_rate()));
 		} 
 
 		catch (failed_constructor& err) {
@@ -73,7 +77,10 @@ AudioFilter::finish (AudioRegion& region, AudioRegion::SourceList& nsrcs)
 	now = localtime (&xnow);
 
 	for (AudioRegion::SourceList::iterator si = nsrcs.begin(); si != nsrcs.end(); ++si) {
-		dynamic_cast<FileSource*>((*si))->update_header (region.position(), *now, xnow);
+		AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*si);
+		if (afs) {
+			afs->update_header (region.position(), *now, xnow);
+		}
 	}
 
 	/* create a new region */

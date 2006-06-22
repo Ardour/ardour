@@ -22,15 +22,15 @@
 #define __ardour_session_diskstream_h__
 
 #include <ardour/session.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 
 namespace ARDOUR {
 
 template<class T> void 
-Session::foreach_diskstream (T *obj, void (T::*func)(DiskStream&)) 
+Session::foreach_audio_diskstream (T *obj, void (T::*func)(AudioDiskstream&)) 
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
-	for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); i++) {
+	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); i++) {
 		if (!(*i)->hidden()) {
 			(obj->*func) (**i);
 		}

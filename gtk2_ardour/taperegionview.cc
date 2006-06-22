@@ -27,7 +27,8 @@
 
 #include <ardour/playlist.h>
 #include <ardour/audioregion.h>
-#include <ardour/diskstream.h>
+#include <ardour/audiosource.h>
+#include <ardour/audio_diskstream.h>
 
 #include "taperegionview.h"
 #include "audio_time_axis.h"
@@ -37,6 +38,7 @@
 
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
 

@@ -1,7 +1,7 @@
 #ifndef ardour_generic_midi_control_protocol_h
 #define ardour_generic_midi_control_protocol_h
 
-#include "control_protocol.h"
+#include <control_protocol/control_protocol.h>
 
 namespace MIDI {
 	class Port;

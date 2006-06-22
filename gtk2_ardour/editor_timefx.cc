@@ -36,11 +36,12 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/audio_track.h>
 #include <ardour/audioregion.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
 

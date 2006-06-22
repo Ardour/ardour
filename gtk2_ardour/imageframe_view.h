@@ -91,7 +91,7 @@ class ImageFrameView : public TimeAxisViewItem
 		 * @param src the identity of the object that initiated the change
 		 * @return true if the position change was a success, false otherwise
 		 */
-		virtual bool set_position(jack_nframes_t pos, void* src) ;
+		virtual bool set_position(jack_nframes_t pos, void* src, double* delta = 0) ;
 		
 		/**
 		 * Sets the duration of this item

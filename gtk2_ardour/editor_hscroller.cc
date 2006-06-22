@@ -24,6 +24,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 void
 Editor::hscrollbar_allocate (Gtk::Allocation &alloc)

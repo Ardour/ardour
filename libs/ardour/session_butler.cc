@@ -34,7 +34,7 @@
 #include <ardour/configuration.h>
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/crossfade.h>
 #include <ardour/timestamps.h>
 
@@ -42,7 +42,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 static float _read_data_rate;
 static float _write_data_rate;
@@ -168,10 +168,10 @@ Session::butler_thread_work ()
 	struct timeval begin, end;
 	struct pollfd pfd[1];
 	bool disk_work_outstanding = false;
-	DiskStreamList::iterator i;
+	AudioDiskstreamList::iterator i;
 
-	butler_mixdown_buffer = new Sample[DiskStream::disk_io_frames()];
-	butler_gain_buffer = new gain_t[DiskStream::disk_io_frames()];
+	butler_mixdown_buffer = new Sample[AudioDiskstream::disk_io_frames()];
+	butler_gain_buffer = new gain_t[AudioDiskstream::disk_io_frames()];
 	// this buffer is used for temp conversion purposes in filesources
 	char * conv_buffer = conversion_buffer(ButlerContext);
 
@@ -241,7 +241,7 @@ Session::butler_thread_work ()
 			}
 		}
 	
-		for (i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 			// cerr << "BEFORE " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 		}
 
@@ -257,7 +257,7 @@ Session::butler_thread_work ()
 
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 		
-		for (i = diskstreams.begin(); !transport_work_requested() && butler_should_run && i != diskstreams.end(); ++i) {
+		for (i = audio_diskstreams.begin(); !transport_work_requested() && butler_should_run && i != audio_diskstreams.end(); ++i) {
 			
 			// cerr << "rah fondr " << (*i)->io()->name () << endl;
 
@@ -278,7 +278,7 @@ Session::butler_thread_work ()
 
 		}
 
-		if (i != diskstreams.end()) {
+		if (i != audio_diskstreams.end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
@@ -300,7 +300,7 @@ Session::butler_thread_work ()
 		compute_io = true;
 		gettimeofday (&begin, 0);
 		
-		for (i = diskstreams.begin(); !transport_work_requested() && butler_should_run && i != diskstreams.end(); ++i) {
+		for (i = audio_diskstreams.begin(); !transport_work_requested() && butler_should_run && i != audio_diskstreams.end(); ++i) {
 			
 			// cerr << "write behind for " << (*i)->name () << endl;
 			
@@ -330,7 +330,7 @@ Session::butler_thread_work ()
 			request_stop ();
 		}
 
-		if (i != diskstreams.end()) {
+		if (i != audio_diskstreams.end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
@@ -357,7 +357,7 @@ Session::butler_thread_work ()
 			Glib::Mutex::Lock lm (butler_request_lock);
 
 			if (butler_should_run && (disk_work_outstanding || transport_work_requested())) {
-//				for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+//				for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 //					cerr << "AFTER " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //				}
 
@@ -375,7 +375,7 @@ Session::butler_thread_work ()
 
 
 void
-Session::request_overwrite_buffer (DiskStream* stream)
+Session::request_overwrite_buffer (AudioDiskstream* stream)
 {
 	Event *ev = new Event (Event::Overwrite, Event::Add, Event::Immediate, 0, 0, 0.0);
 	ev->set_ptr (stream);
@@ -383,7 +383,7 @@ Session::request_overwrite_buffer (DiskStream* stream)
 }
 
 void
-Session::overwrite_some_buffers (DiskStream* ds)
+Session::overwrite_some_buffers (AudioDiskstream* ds)
 {
 	/* executed by the audio thread */
 
@@ -398,7 +398,7 @@ Session::overwrite_some_buffers (DiskStream* ds)
 	} else {
 
 		Glib::RWLock::ReaderLock dm (diskstream_lock);
-		for (DiskStreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 			(*i)->set_pending_overwrite (true);
 		}
 	}

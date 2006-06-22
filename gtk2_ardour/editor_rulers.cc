@@ -35,6 +35,7 @@
 
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 using namespace Editing;
 
@@ -798,7 +799,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 	jack_nframes_t pos;
 	jack_nframes_t spacer;
 	jack_nframes_t fr;
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	gchar buf[16];
 	gint nmarks = 0;
 	gint n;
@@ -927,13 +928,13 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 			(*marks)[n].position = pos;
 
 			// Increment subframes by one
-			session->smpte_increment_subframes( smpte );
+			SMPTE::increment_subframes( smpte );
 		}
 	} else if (show_seconds) {
 		// Find smpte time of this sample (pos)
 		session->sample_to_smpte(pos, smpte, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole second down
-		session->smpte_seconds_floor( smpte );
+		SMPTE::seconds_floor( smpte );
 
 		for (n = 0; n < nmarks; n++) {
 			session->smpte_to_sample(smpte, pos, true /* use_offset */, false /* use_subframes */ );
@@ -953,13 +954,13 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
         
 			}
 			(*marks)[n].label = g_strdup (buf);
-			session->smpte_increment_seconds( smpte );
+			SMPTE::increment_seconds( smpte );
 		}
 	} else if (show_minutes) {
 		// Find smpte time of this sample (pos)
 		session->sample_to_smpte(pos, smpte, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole minute down
-		session->smpte_minutes_floor( smpte );
+		SMPTE::minutes_floor( smpte );
 
 		for (n = 0; n < nmarks; n++) {
 			session->smpte_to_sample(smpte, pos, true /* use_offset */, false /* use_subframes */ );
@@ -977,13 +978,13 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 			}
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
-			session->smpte_increment_minutes( smpte );
+			SMPTE::increment_minutes( smpte );
 		}
 	} else if (show_hours) {
 		// Find smpte time of this sample (pos)
 		session->sample_to_smpte(pos, smpte, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole hour down
-		session->smpte_hours_floor( smpte );
+		SMPTE::hours_floor( smpte );
 
 		for (n = 0; n < nmarks; n++) {
 			session->smpte_to_sample(smpte, pos, true /* use_offset */, false /* use_subframes */ );
@@ -998,13 +999,13 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
 
-			session->smpte_increment_hours( smpte );
+			SMPTE::increment_hours( smpte );
 		}
 	} else { // show_frames
 		// Find smpte time of this sample (pos)
 		session->sample_to_smpte(pos, smpte, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole frame down
-		session->smpte_frames_floor( smpte );
+		SMPTE::frames_floor( smpte );
 
 		for (n = 0; n < nmarks; n++) {
 			session->smpte_to_sample(smpte, pos, true /* use_offset */, false /* use_subframes */ );
@@ -1019,7 +1020,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
         
 			}
 			(*marks)[n].label = g_strdup (buf);
-			session->smpte_increment( smpte );
+			SMPTE::increment( smpte );
 		}
 	}
   

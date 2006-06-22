@@ -29,6 +29,7 @@
 
 using namespace std;
 using namespace MIDI;
+using namespace PBD;
 
 string *FD_MidiPort::midi_dirpath = 0;
 string *FD_MidiPort::midi_filename_pattern = 0;

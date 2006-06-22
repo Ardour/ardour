@@ -1,0 +1,54 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env install_prefix final_prefix config_prefix libraries')
+
+ardour_vst = env.Copy()
+
+sources = Split ("""
+winmain.c
+#libs/fst/fst.o
+#libs/fst/fstinfofile.o
+#libs/fst/vstwin.o
+#libs/fst/vsti.o
+"""
+)
+
+ardour_vst.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst", LIBPATH='#gtk2_ardour')
+ardour_vst.Append (LINKFLAGS='-L/usr/X11R6/lib -lasound -lardourgtk -lX11 -lpthread') 
+ardour_vst["CC"] ="winegcc"
+ardour_vst["LINK"] ="wineg++ -mwindows"
+
+ardour_vst.Merge ([
+    libraries['ardour'],
+    libraries['ardour_cp'],
+    libraries['gtkmm2ext'],
+    libraries['midi++2'],
+    libraries['pbd3'],
+    libraries['gtkmm2'],
+    libraries['glib2'],
+    libraries['libgnomecanvas2'],
+    libraries['libgnomecanvasmm'],
+    libraries['sysmidi'],
+    libraries['sndfile'],
+    libraries['flac'],
+    libraries['lrdf'],
+    libraries['glibmm2'],
+    libraries['pangomm'],
+    libraries['atkmm'],
+    libraries['gdkmm2'],
+    libraries['sigc2'],
+    libraries['gtk2'],
+    libraries['xml'],
+    libraries['xslt'],
+    libraries['soundtouch'],
+    libraries['samplerate'],
+    libraries['jack']
+])
+
+wine_executable = ardour_vst.Program (target = 'ardour_vst', source = sources)
+
+Default(wine_executable)

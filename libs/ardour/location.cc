@@ -36,6 +36,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace sigc;
+using namespace PBD;
 
 Location::Location (const Location& other)
 	: _name (other._name),

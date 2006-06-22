@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis
+    Copyright (C) 1998-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,14 +17,16 @@
 
     $Id$
 */
-#ifndef __libmisc_error_h__
-#define __libmisc_error_h__
+#ifndef __libpbd_error_h__
+#define __libpbd_error_h__
 
 #include "transmitter.h"
 
-extern Transmitter error;
-extern Transmitter info;
-extern Transmitter warning;
-extern Transmitter fatal;
+namespace PBD {
+	extern Transmitter error;
+	extern Transmitter info;
+	extern Transmitter warning;
+	extern Transmitter fatal;
+}
 
-#endif  // __libmisc_error_h__
+#endif  // __libpbd_error_h__

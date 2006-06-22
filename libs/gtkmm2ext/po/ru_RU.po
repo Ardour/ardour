@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-04-25 17:46-0400\n"
+"POT-Creation-Date: 2006-06-21 15:09-0400\n"
 "PO-Revision-Date: 2004-02-13 00:35+0300\n"
 "Last-Translator: Igor Blinov pitstop@nm.ru\n"
 "Language-Team: Russian\n"
@@ -14,12 +14,12 @@ msgstr ""
 "Content-Type: text/plain; charset=koi8-r\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libs/gtkmm2ext/barcontroller.cc:431 libs/gtkmm2ext/bindable_button.cc:131
+#: libs/gtkmm2ext/barcontroller.cc:432 libs/gtkmm2ext/bindable_button.cc:131
 #: libs/gtkmm2ext/controller.cc:50 libs/gtkmm2ext/slider_controller.cc:132
 msgid "operate MIDI controller now"
 msgstr "включить MIDI-контроллер"
 
-#: libs/gtkmm2ext/gtk_ui.cc:509
+#: libs/gtkmm2ext/gtk_ui.cc:510
 msgid "Press To Exit"
 msgstr ""
 

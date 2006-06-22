@@ -28,6 +28,7 @@
 #include "gui_thread.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 SendUI::SendUI (Send& s, Session& se)
 	: _send (s),

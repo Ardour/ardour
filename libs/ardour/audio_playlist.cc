@@ -37,6 +37,7 @@
 using namespace ARDOUR;
 using namespace sigc;
 using namespace std;
+using namespace PBD;
 
 AudioPlaylist::State::~State ()
 {

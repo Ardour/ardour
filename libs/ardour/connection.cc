@@ -28,6 +28,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 Connection::Connection (const XMLNode& node)
 {

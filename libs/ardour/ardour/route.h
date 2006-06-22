@@ -95,7 +95,7 @@ class Route : public IO
 	virtual bool can_record() const { return false; }
 	virtual void set_record_enable (bool yn, void *src) {}
 	virtual bool record_enabled() const { return false; }
-	virtual void transport_stopped (bool abort, bool did_locate, bool flush_redirects);
+	virtual void handle_transport_stopped (bool abort, bool did_locate, bool flush_redirects);
 	virtual void set_pending_declick (int);
 
 	/* end of vfunc-based API */

@@ -54,6 +54,7 @@
 #include <locale.h>
 
 using namespace ARDOUR;
+using namespace PBD;
 using std::min;
 using std::max;
 

@@ -52,6 +52,7 @@ using namespace std;
 using namespace ardourvis ;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 
 ImageFrameSocketHandler* ImageFrameSocketHandler::_instance = 0 ;
 
@@ -1091,7 +1092,7 @@ ImageFrameSocketHandler::handle_item_selected(const char* msg)
 				}
 				else
 				{
-					ifv->set_selected(true, this) ;
+					ifv->set_selected(true) ;
 					ifta->get_view()->set_selected_imageframe_view(iftag, ifv) ;
 
 					thePublicEditor.scroll_timeaxis_to_imageframe_item(ifv) ;

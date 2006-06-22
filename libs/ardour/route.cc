@@ -44,7 +44,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 
 uint32_t Route::order_key_cnt = 0;
@@ -2002,7 +2002,7 @@ Route::set_active (bool yn)
 }
 
 void
-Route::transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_redirects)
+Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_redirects)
 {
 	jack_nframes_t now = _session.transport_frame();
 

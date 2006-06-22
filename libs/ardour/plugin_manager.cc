@@ -44,6 +44,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 PluginManager* PluginManager::_manager = 0;
 

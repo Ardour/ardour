@@ -43,6 +43,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 using namespace sigc;
 

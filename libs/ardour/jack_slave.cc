@@ -23,7 +23,6 @@
 #include <errno.h>
 #include <jack/jack.h>
 #include <jack/transport.h>
-#include <pbd/error.h>
 
 #include <ardour/slave.h>
 #include <ardour/session.h>

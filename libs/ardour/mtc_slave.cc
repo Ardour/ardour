@@ -37,6 +37,7 @@
 using namespace ARDOUR;
 using namespace sigc;
 using namespace MIDI;
+using namespace PBD;
 
 MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p) 
 	: session (s)
@@ -87,7 +88,7 @@ void
 MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 {
 	jack_nframes_t now = session.engine().frame_time();
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	
 	smpte.hours = msg[3];
 	smpte.minutes = msg[2];

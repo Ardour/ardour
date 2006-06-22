@@ -45,7 +45,7 @@ namespace ARDOUR {
 
 	static const jack_nframes_t max_frames = JACK_MAX_FRAMES;
 
-	int init (AudioEngine&, bool with_vst, bool try_optimization, void (*sighandler)(int,siginfo_t*,void*) = 0);
+	int init (AudioEngine&, bool with_vst, bool try_optimization);
 	int cleanup ();
 
 	

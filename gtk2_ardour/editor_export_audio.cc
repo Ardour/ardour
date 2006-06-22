@@ -37,8 +37,8 @@
 #include <ardour/types.h>
 #include <ardour/export.h>
 #include <ardour/audio_track.h>
-#include <ardour/filesource.h>
-#include <ardour/diskstream.h>
+#include <ardour/audiofilesource.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/audioregion.h>
 #include <ardour/audioplaylist.h>
 
@@ -46,6 +46,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 
 void
@@ -154,7 +155,7 @@ Editor::bounce_region_selection ()
 bool
 Editor::write_region (string path, AudioRegion& region)
 {
-	FileSource* fs;
+	AudioFileSource* fs;
 	const jack_nframes_t chunk_size = 4096;
 	jack_nframes_t to_read;
 	Sample buf[chunk_size];
@@ -163,7 +164,7 @@ Editor::write_region (string path, AudioRegion& region)
 	jack_nframes_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
-	vector<FileSource *> sources;
+	vector<AudioFileSource *> sources;
 	uint32_t nchans;
 	
 	nchans = region.n_channels();
@@ -204,7 +205,7 @@ Editor::write_region (string path, AudioRegion& region)
 		
 			
 			try {
-				fs = new FileSource (path, session->frame_rate());
+				fs = AudioFileSource::create (path);
 			}
 			
 			catch (failed_constructor& err) {
@@ -227,10 +228,10 @@ Editor::write_region (string path, AudioRegion& region)
 
 		this_time = min (to_read, chunk_size);
 
-		for (vector<FileSource *>::iterator src=sources.begin(); src != sources.end(); ++src) {
-
-			fs = (*src);
+		for (vector<AudioFileSource *>::iterator src=sources.begin(); src != sources.end(); ++src) {
 			
+			fs = (*src);
+
 			if (region.read_at (buf, buf, gain_buffer, workbuf, pos, this_time) != this_time) {
 				break;
 			}
@@ -250,7 +251,7 @@ Editor::write_region (string path, AudioRegion& region)
 	time (&tnow);
 	now = localtime (&tnow);
 	
-	for (vector<FileSource *>::iterator src = sources.begin(); src != sources.end(); ++src) {
+	for (vector<AudioFileSource *>::iterator src = sources.begin(); src != sources.end(); ++src) {
 		(*src)->update_header (0, *now, tnow);
 	}
 
@@ -258,7 +259,8 @@ Editor::write_region (string path, AudioRegion& region)
 
 error_out:
 
-	for (vector<FileSource*>::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (vector<AudioFileSource*>::iterator i = sources.begin(); i != sources.end(); ++i) {
+		
 		(*i)->mark_for_remove ();
 		delete (*i);
 	}
@@ -300,7 +302,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 bool
 Editor::write_audio_range (Playlist& playlist, uint32_t channels, list<AudioRange>& range)
 {
-	FileSource* fs;
+	AudioFileSource* fs;
 	const jack_nframes_t chunk_size = 4096;
 	jack_nframes_t nframes;
 	Sample buf[chunk_size];
@@ -310,7 +312,7 @@ Editor::write_audio_range (Playlist& playlist, uint32_t channels, list<AudioRang
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	string path;
-	vector<FileSource *> sources;
+	vector<AudioFileSource *> sources;
 
 	for (uint32_t n=0; n < channels; ++n) {
 		
@@ -337,7 +339,7 @@ Editor::write_audio_range (Playlist& playlist, uint32_t channels, list<AudioRang
 		path = s;
 		
 		try {
-			fs = new FileSource (path, session->frame_rate());
+			fs = AudioFileSource::create (path);
 		}
 		
 		catch (failed_constructor& err) {
@@ -420,7 +422,7 @@ Editor::write_audio_range (Playlist& playlist, uint32_t channels, list<AudioRang
 error_out:
 	/* unref created files */
 
-	for (vector<FileSource*>::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (vector<AudioFileSource*>::iterator i = sources.begin(); i != sources.end(); ++i) {
 		(*i)->mark_for_remove ();
 		delete *i;
 	}

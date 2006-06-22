@@ -389,7 +389,11 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 	/* but make sure it doesn't extend beyond the end of the source material */
 
 	rf3 = (gulong) (waveview->sourcefile_length_function (waveview->data_src, waveview->samples_per_unit)) + 1;
-	rf3 -= new_cache_start;
+	if (rf3 < new_cache_start) {
+		rf3 = 0;
+	} else {
+		rf3 -= new_cache_start;
+	}
 
 #if DEBUG_CACHE
 	fprintf (stderr, "\n\nAVAILABLE FRAMES = %lu of %lu, start = %lu, sstart = %lu, cstart = %lu\n", 
@@ -405,8 +409,8 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 
 #if DEBUG_CACHE
 	fprintf (stderr, "new cache = %lu - %lu\n", new_cache_start, new_cache_end);
-	fprintf(stderr,"required_cach_entries = %lu, samples_per_unit = %f\n",
-		required_cache_entries,waveview->samples_per_unit);
+	fprintf(stderr,"required_cach_entries = %lu, samples_per_unit = %f req frames = %lu\n",
+		required_cache_entries,waveview->samples_per_unit, required_frames);
 #endif
 
 	if (required_cache_entries > cache->allocated) {
@@ -514,8 +518,8 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 
 //	fprintf(stderr,"length == %lu\n",waveview->length_function (waveview->data_src));
 //	required_frames = MIN (waveview->length_function (waveview->data_src) - new_cache_start, required_frames);
+
 	npeaks = (gulong) floor (required_frames / waveview->samples_per_unit);
-	npeaks = MAX (1, npeaks);
 	required_frames = npeaks * waveview->samples_per_unit;
 
 #if DEBUG_CACHE
@@ -532,11 +536,15 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 //		start_sample, end_sample);
 #endif
 
-	waveview->peak_function (waveview->data_src, npeaks, new_cache_start, required_frames, cache->data + offset, waveview->channel,waveview->samples_per_unit);
+	if (required_frames) {
+		waveview->peak_function (waveview->data_src, npeaks, new_cache_start, required_frames, cache->data + offset, waveview->channel,waveview->samples_per_unit);
 
-	/* take into account any copied peaks */
-
-	npeaks += copied;
+		/* take into account any copied peaks */
+		
+		npeaks += copied;
+	} else {
+		npeaks = copied;
+	}
 
 	if (npeaks < cache->allocated) {
 #if DEBUG_CACHE

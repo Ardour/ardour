@@ -61,18 +61,15 @@ typedef off_t off64_t;
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 gain_t* DestructiveFileSource::out_coefficient = 0;
 gain_t* DestructiveFileSource::in_coefficient = 0;
 jack_nframes_t DestructiveFileSource::xfade_frames = 64;
 
-DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, bool repair_first, SampleFormat samp_format)
-	: FileSource (path, rate, repair_first, samp_format)
+DestructiveFileSource::DestructiveFileSource (string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate, Flag flags)
+	: SndFileSource (path, samp_format, hdr_format, rate, flags)
 {
-	if (out_coefficient == 0) {
-		setup_standard_crossfades (rate);
-	}
-
 	xfade_buf = new Sample[xfade_frames];
 
 	_capture_start = false;
@@ -80,13 +77,9 @@ DestructiveFileSource::DestructiveFileSource (string path, jack_nframes_t rate, 
 	file_pos = 0;
 }
 
-DestructiveFileSource::DestructiveFileSource (const XMLNode& node, jack_nframes_t rate)
-	: FileSource (node, rate)
+DestructiveFileSource::DestructiveFileSource (const XMLNode& node)
+	: SndFileSource (node)
 {
-	if (out_coefficient == 0) {
-		setup_standard_crossfades (rate);
-	}
-
 	xfade_buf = new Sample[xfade_frames];
 
 	_capture_start = false;
@@ -102,6 +95,10 @@ DestructiveFileSource::~DestructiveFileSource()
 void
 DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
 {
+	/* This static method is assumed to have been called by the Session
+	   before any DFS's are created.
+	*/
+
 	xfade_frames = (jack_nframes_t) floor ((Config->get_destructive_xfade_msecs () / 1000.0) * rate);
 
 	if (out_coefficient) {
@@ -122,12 +119,6 @@ DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
 		in_coefficient[n] = n/(gain_t) (xfade_frames-1); /* 0 .. 1 */
 		out_coefficient[n] = 1.0 - in_coefficient[n];    /* 1 .. 0 */
 	}
-}
-
-int
-DestructiveFileSource::seek (jack_nframes_t frame)
-{
-	return 0;
 }
 
 void
@@ -188,7 +179,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 	}
 
 	if (file_cnt) {
-		if ((retval = file_read (xfade_buf, fade_position, file_cnt, workbuf)) != (ssize_t) file_cnt) {
+		if ((retval = write_float (xfade_buf, fade_position, file_cnt)) != (ssize_t) file_cnt) {
 			if (retval >= 0 && errno == EAGAIN) {
 				/* XXX - can we really trust that errno is meaningful here?  yes POSIX, i'm talking to you.
 				 * short or no data there */
@@ -206,7 +197,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 	}
 	
 	if (nofade && !fade_in) {
-		if (file_write (data, file_pos, nofade, workbuf) != (ssize_t) nofade) {
+		if (write_float (data, file_pos, nofade) != nofade) {
 			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
@@ -248,14 +239,14 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 	}
 
 	if (xfade) {
-		if (file_write (xfade_buf, fade_position, xfade, workbuf) != (ssize_t) xfade) {
+		if (write_float (xfade_buf, fade_position, xfade) != xfade) {
 			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
 	}
 	
 	if (fade_in && nofade) {
-		if (file_write (data + xfade, file_pos + xfade, nofade, workbuf) != (ssize_t) nofade) {
+		if (write_float (data + xfade, file_pos + xfade, nofade) != nofade) {
 			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
@@ -265,96 +256,98 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 }
 
 jack_nframes_t
-DestructiveFileSource::write (Sample* data, jack_nframes_t cnt, char * workbuf)
+DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * workbuf)
 {
-	{
-		Glib::Mutex::Lock lm (_lock);
+	jack_nframes_t old_file_pos;
+
+	if (!writable()) {
+		return 0;
+	}
+
+	if (_capture_start && _capture_end) {
+		_capture_start = false;
+		_capture_end = false;
 		
-		jack_nframes_t old_file_pos;
-
-		if (_capture_start && _capture_end) {
-			_capture_start = false;
-			_capture_end = false;
-
-			/* move to the correct location place */
-			file_pos = capture_start_frame;
-			
-			// split cnt in half
-			jack_nframes_t subcnt = cnt / 2;
-			jack_nframes_t ofilepos = file_pos;
-			
-			// fade in
-			if (crossfade (data, subcnt, 1, workbuf) != subcnt) {
-				return 0;
-			}
-
-			file_pos += subcnt;
-			Sample * tmpdata = data + subcnt;
-			
-			// fade out
-			subcnt = cnt - subcnt;
-			if (crossfade (tmpdata, subcnt, 0, workbuf) != subcnt) {
-				return 0;
-			}
-
-			file_pos = ofilepos; // adjusted below
+		/* move to the correct location place */
+		file_pos = capture_start_frame;
+		
+		// split cnt in half
+		jack_nframes_t subcnt = cnt / 2;
+		jack_nframes_t ofilepos = file_pos;
+		
+		// fade in
+		if (crossfade (data, subcnt, 1, workbuf) != subcnt) {
+			return 0;
 		}
-		else if (_capture_start) {
-			_capture_start = false;
-			_capture_end = false;
+		
+		file_pos += subcnt;
+		Sample * tmpdata = data + subcnt;
+		
+		// fade out
+		subcnt = cnt - subcnt;
+		if (crossfade (tmpdata, subcnt, 0, workbuf) != subcnt) {
+			return 0;
+		}
+		
+		file_pos = ofilepos; // adjusted below
+	}
+	else if (_capture_start) {
 
-			/* move to the correct location place */
-			file_pos = capture_start_frame;
+		_capture_start = false;
+		_capture_end = false;
+		
+		/* move to the correct location place */
+		file_pos = capture_start_frame;
+		
+		if (crossfade (data, cnt, 1, workbuf) != cnt) {
+			return 0;
+		}
+		
+	} else if (_capture_end) {
+
+		_capture_start = false;
+		_capture_end = false;
+		
+		if (crossfade (data, cnt, 0, workbuf) != cnt) {
+			return 0;
+		}
+
+	} else {
+
+		if (write_float (data, file_pos, cnt) != cnt) {
+			return 0;
+		}
+	}
+	
+	old_file_pos = file_pos;
+	update_length (file_pos, cnt);
+	file_pos += cnt;
+	
+	if (_build_peakfiles) {
+		PeakBuildRecord *pbr = 0;
+		
+		if (pending_peak_builds.size()) {
+			pbr = pending_peak_builds.back();
+		}
+		
+		if (pbr && pbr->frame + pbr->cnt == old_file_pos) {
 			
-			if (crossfade (data, cnt, 1, workbuf) != cnt) {
-				return 0;
-			}
-
-		} else if (_capture_end) {
-			_capture_start = false;
-			_capture_end = false;
-
-			if (crossfade (data, cnt, 0, workbuf) != cnt) {
-				return 0;
-			}
+			/* the last PBR extended to the start of the current write,
+			   so just extend it again.
+			*/
+			
+			pbr->cnt += cnt;
 		} else {
-			if (file_write(data, file_pos, cnt, workbuf) != (ssize_t) cnt) {
-				return 0;
-			}
+			pending_peak_builds.push_back (new PeakBuildRecord (old_file_pos, cnt));
 		}
-
-		old_file_pos = file_pos;
-		if (file_pos + cnt > _length) {
-			_length = file_pos + cnt;
-		}
-		file_pos += cnt;
 		
-		if (_build_peakfiles) {
-			PeakBuildRecord *pbr = 0;
-			
-			if (pending_peak_builds.size()) {
-				pbr = pending_peak_builds.back();
-			}
-			
-			if (pbr && pbr->frame + pbr->cnt == old_file_pos) {
-				
-				/* the last PBR extended to the start of the current write,
-				   so just extend it again.
-				*/
-
-				pbr->cnt += cnt;
-			} else {
-				pending_peak_builds.push_back (new PeakBuildRecord (old_file_pos, cnt));
-			}
-			
-			_peaks_built = false;
-		}
+		_peaks_built = false;
 	}
 
 	if (_build_peakfiles) {
 		queue_for_peaks (*this);
 	}
-
+	
 	return cnt;
 }
 
@@ -367,7 +360,14 @@ DestructiveFileSource::last_capture_start_frame () const
 XMLNode& 
 DestructiveFileSource::get_state ()
 {
-	XMLNode& node = FileSource::get_state ();
+	XMLNode& node = AudioFileSource::get_state ();
 	node.add_property (X_("destructive"), "true");
 	return node;
+}
+
+void
+DestructiveFileSource::set_timeline_position (jack_nframes_t pos)
+{
+	/* destructive tracks always start at where our reference frame zero is */
+	timeline_position = 0;
 }

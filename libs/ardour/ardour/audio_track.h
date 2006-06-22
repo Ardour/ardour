@@ -26,7 +26,7 @@
 namespace ARDOUR {
 
 class Session;
-class DiskStream;
+class AudioDiskstream;
 class AudioPlaylist;
 class RouteGroup;
 
@@ -52,8 +52,8 @@ class AudioTrack : public Route
 	bool can_record() const { return true; }
 	void set_record_enable (bool yn, void *src);
 
-	DiskStream& disk_stream() const { return *diskstream; }
-	int set_diskstream (DiskStream&, void *);
+	AudioDiskstream& disk_stream() const { return *diskstream; }
+	int set_diskstream (AudioDiskstream&, void *);
 	int use_diskstream (string name);
 	int use_diskstream (id_t id);
 
@@ -99,7 +99,7 @@ class AudioTrack : public Route
 	void set_meter_point (MeterPoint, void* src);
 
   protected:
-	DiskStream *diskstream;
+	AudioDiskstream *diskstream;
 	MeterPoint _saved_meter_point;
 	TrackMode _mode;
 

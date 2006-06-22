@@ -55,6 +55,7 @@ using namespace Gtk;
 using namespace Gdk;
 using namespace sigc; 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
 

@@ -47,6 +47,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
@@ -326,23 +327,27 @@ GainMeter::update_meters ()
 	char buf[32];
 	
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
-                if ((*i).packed) {
-                        peak = _io.peak_input_power (n);
+		if ((*i).packed) {
+			peak = _io.peak_input_power (n);
 
 			(*i).meter->set (log_meter (peak), peak);
-			
-                        if (peak > max_peak) {
-                                max_peak = peak;
-                                /* set peak display */
-                                snprintf (buf, sizeof(buf), "%.1f", max_peak);
-                                peak_display_label.set_text (buf);
+						
+			if (peak > max_peak) {
+            	max_peak = peak;
+                /* set peak display */
+				if (max_peak <= -200.0f) {
+					peak_display_label.set_text (_("-inf"));
+				} else {
+					snprintf (buf, sizeof(buf), "%.1f", max_peak);
+					peak_display_label.set_text (buf);
+				}
 
-                                if (max_peak >= 0.0f) {
-                                        peak_display.set_name ("MixerStripPeakDisplayPeak");
-                                }
-                        }
-                }
-        }
+				if (max_peak >= 0.0f) {
+					peak_display.set_name ("MixerStripPeakDisplayPeak");
+				}
+			}
+		}
+	}
 }
 
 void

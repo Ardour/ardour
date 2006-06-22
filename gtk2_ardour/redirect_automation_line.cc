@@ -32,6 +32,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 RedirectAutomationLine::RedirectAutomationLine (const string & name, Redirect& rd, uint32_t port, Session& s,
 						

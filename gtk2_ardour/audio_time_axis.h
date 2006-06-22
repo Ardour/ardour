@@ -48,7 +48,7 @@ namespace ALSA {
 
 namespace ARDOUR {
 	class Session;
-	class DiskStream;
+	class AudioDiskstream;
 	class RouteGroup;
 	class Redirect;
 	class Insert;

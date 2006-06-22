@@ -28,7 +28,6 @@ namespace ARDOUR {
 
 class AudioRegion;
 class Session;
-class FileSource;
 
 class AudioFilter {
 
@@ -36,7 +35,6 @@ class AudioFilter {
 	AudioFilter (ARDOUR::Session& s)
 		: session (s){}
 	virtual ~AudioFilter() {}
-
 
 	virtual int run (ARDOUR::AudioRegion&) = 0;
 	std::vector<ARDOUR::AudioRegion*> results;

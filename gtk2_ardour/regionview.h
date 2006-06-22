@@ -63,7 +63,6 @@ class AudioRegionView : public TimeAxisViewItem
     bool is_valid() const { return valid; }
     void set_valid (bool yn) { valid = yn; }
 
-    std::string get_item_name();
     void set_height (double);
     void set_samples_per_unit (double);
     bool set_duration (jack_nframes_t, void*);

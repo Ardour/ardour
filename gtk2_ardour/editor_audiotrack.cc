@@ -1,5 +1,5 @@
 #include <ardour/location.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 
 #include "editor.h"
 #include "editing.h"
@@ -8,6 +8,7 @@
 #include "selection.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 void
 Editor::set_route_loop_selection ()

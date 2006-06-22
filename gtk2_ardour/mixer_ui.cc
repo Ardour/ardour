@@ -34,7 +34,7 @@
 #include <ardour/session.h>
 #include <ardour/audio_track.h>
 #include <ardour/session_route.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/plugin_manager.h>
 
 #include "mixer_ui.h"
@@ -49,6 +49,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;

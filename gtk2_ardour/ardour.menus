@@ -207,6 +207,8 @@
                    <menu action='AudioFileFormatHeader'>
 		        <menuitem action='FileHeaderFormatBWF'/>
 		        <menuitem action='FileHeaderFormatWAVE'/>
+		        <menuitem action='FileHeaderFormatWAVE64'/>
+		        <menuitem action='FileHeaderFormatCAF'/>
 		   </menu>
                </menu>
                <menu action='Autoconnect'>

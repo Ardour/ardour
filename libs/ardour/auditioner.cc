@@ -20,7 +20,7 @@
 
 #include <glibmm/thread.h>
 
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/audioregion.h>
 #include <ardour/route.h>
 #include <ardour/session.h>

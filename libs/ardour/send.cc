@@ -29,6 +29,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 Send::Send (Session& s, Placement p)
 	: Redirect (s, s.next_send_name(), p)

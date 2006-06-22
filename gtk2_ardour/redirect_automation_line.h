@@ -53,8 +53,6 @@ class RedirectAutomationLine : public AutomationLine
 
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);
-	void change_model (uint32_t, double x, double y);
-	void change_model_range (uint32_t, uint32_t, double delta);
 };
 
 #endif /* __ardour_gtk_region_gain_line_h__ */

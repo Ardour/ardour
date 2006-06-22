@@ -27,6 +27,8 @@
 
 #include "i18n.h"
 
+using namespace PBD;
+
 Stateful::Stateful ()
 {
 	_extra_xml = 0;

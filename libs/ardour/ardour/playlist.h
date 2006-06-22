@@ -37,7 +37,6 @@
 #include <ardour/crossfade_compare.h>
 #include <ardour/location.h>
 #include <ardour/stateful.h>
-#include <ardour/source.h>
 #include <ardour/state_manager.h>
 
 namespace ARDOUR  {

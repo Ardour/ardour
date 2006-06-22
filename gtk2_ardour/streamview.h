@@ -37,7 +37,7 @@ namespace Gdk {
 
 namespace ARDOUR {
 	class Route;
-	class DiskStream;
+	class AudioDiskstream;
 	class Crossfade;
 	class PeakData;
 	class AudioRegion;
@@ -151,12 +151,12 @@ class StreamView : public sigc::trackable
 	void remove_audio_region_view (ARDOUR::AudioRegion* );
 	void remove_audio_rec_region (ARDOUR::AudioRegion*);
 
-	void display_diskstream (ARDOUR::DiskStream* );
+	void display_diskstream (ARDOUR::AudioDiskstream* );
 	void undisplay_diskstream ();
 	void redisplay_diskstream ();
 	void diskstream_changed (void* );
 	void playlist_state_changed (ARDOUR::Change);
-	void playlist_changed (ARDOUR::DiskStream* );
+	void playlist_changed (ARDOUR::AudioDiskstream* );
 	void playlist_modified ();
 
 	bool crossfades_visible;

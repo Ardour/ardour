@@ -1,8 +1,8 @@
 
 #include <ardour/session.h>
-#include <ardour/control_protocol.h>
-#include <ardour/generic_midi_control_protocol.h>
-#include <ardour/tranzport_control_protocol.h>
+#include <control_protocol/control_protocol.h>
+#include <generic_midi/generic_midi_control_protocol.h>
+#include <transport/tranzport_control_protocol.h>
 
 using namespace ARDOUR;
 

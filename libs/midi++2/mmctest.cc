@@ -16,6 +16,7 @@ TextReceiver text_receiver ("mmctest");
 #include "midi++/mmc.h"
 
 using namespace MIDI;
+using namespace PBD;
 
 Port *port;
 PortRequest midi_device;

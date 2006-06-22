@@ -25,6 +25,7 @@
 #include <pbd/error.h>
 
 using namespace std;
+using namespace PBD;
 
 Pool::Pool (string n, unsigned long item_size, unsigned long nitems)
 {

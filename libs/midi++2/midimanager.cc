@@ -31,6 +31,7 @@
 
 using namespace std;
 using namespace MIDI;
+using namespace PBD;
 
 /* XXX check for strdup leaks */
 

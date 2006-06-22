@@ -40,6 +40,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 jack_nframes_t Port::short_over_length = 2;
 jack_nframes_t Port::long_over_length = 10;
@@ -91,12 +92,6 @@ _thread_init_callback (void *arg)
 	*/
 
 	PBD::ThreadCreatedWithRequestSize (pthread_self(), X_("Audioengine"), 4096);
-
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst()) {
-		fst_adopt_thread ();
-	}
-#endif
 }
 
 int
@@ -229,9 +224,10 @@ AudioEngine::_freewheel_callback (int onoff, void *arg)
 int
 AudioEngine::process_callback (jack_nframes_t nframes)
 {
+	// CycleTimer ct ("AudioEngine::process");
 	Glib::Mutex::Lock tm (_process_lock, Glib::TRY_LOCK);
 	jack_nframes_t next_processed_frames;
-
+	
 	/* handle wrap around of total frames counter */
 
 	if (max_frames - _processed_frames < nframes) {

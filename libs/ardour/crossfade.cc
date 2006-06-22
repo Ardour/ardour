@@ -33,7 +33,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 jack_nframes_t Crossfade::_short_xfade_length = 0;
 Change Crossfade::ActiveChanged = ARDOUR::new_change();

@@ -5,6 +5,7 @@
 
 using namespace ARDOUR;
 using namespace std;
+using namespace PBD;
 
 bool StateManager::_allow_save = true;
 sigc::signal<void,const char*> StateManager::SaveAllowed;

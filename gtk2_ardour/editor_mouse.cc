@@ -47,7 +47,7 @@
 #include <ardour/types.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/playlist.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
@@ -61,6 +61,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
 using namespace Editing;
@@ -195,7 +196,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		*/
 
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			if ((*i)->selected()) {
+			if ((*i)->get_selected()) {
 				(*i)->show_selection (selection->time);
 			}
 		}
@@ -286,7 +287,7 @@ Editor::step_mouse_mode (bool next)
 void
 Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	bool commit;
+	bool commit = false;
 	bool c1; 
 	bool c2;
 
@@ -3458,7 +3459,7 @@ void
 Editor::show_verbose_time_cursor (jack_nframes_t frame, double offset, double xpos, double ypos) 
 {
 	char buf[128];
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	BBT_Time bbt;
 	float secs;
 
@@ -3502,7 +3503,7 @@ void
 Editor::show_verbose_duration_cursor (jack_nframes_t start, jack_nframes_t end, double offset, double xpos, double ypos) 
 {
 	char buf[128];
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 	BBT_Time sbbt;
 	BBT_Time ebbt;
 	float secs;

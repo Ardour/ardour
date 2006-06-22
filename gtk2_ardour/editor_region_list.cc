@@ -26,6 +26,7 @@
 #include <pbd/basename.h>
 
 #include <ardour/audioregion.h>
+#include <ardour/audiosource.h>
 #include <ardour/session_region.h>
 
 #include <gtkmm2ext/stop_signal.h>
@@ -41,6 +42,7 @@
 
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
 using namespace Editing;

@@ -8,13 +8,14 @@ import glob
 import errno
 import time
 import platform
+import string
 from sets import Set
 import SCons.Node.FS
 
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta1'
+version = '2.0beta2'
 
 subst_dict = { }
 
@@ -25,20 +26,20 @@ subst_dict = { }
 opts = Options('scache.conf')
 opts.AddOptions(
   ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
-    BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
+    BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
+    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
+    BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
+    BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
+    BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
+    BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
-    BoolOption('VST', 'Compile with support for VST', 0),
-    BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
-    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
-    BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
-    BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('SURFACES', 'Build support for control surfaces', 0),
-    BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
-    BoolOption('LIBLO', 'Compile with support for liblo library', 1),
-    BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library -- UNSTABLE', 0)
+    BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
+    BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
+    BoolOption('VST', 'Compile with support for VST', 0)
 )
 
 #----------------------------------------------------------------------
@@ -58,8 +59,8 @@ class LibraryInfo(Environment):
             self.Append (LINKFLAGS = other.get('LINKFLAGS', []))
 	self.Replace(LIBPATH = list(Set(self.get('LIBPATH', []))))
 	self.Replace(CPPPATH = list(Set(self.get('CPPPATH',[]))))
-	#doing LINKFLAGS breaks -framework
-    #doing LIBS break link order dependency
+        #doing LINKFLAGS breaks -framework
+        #doing LIBS break link order dependency
 
 
 env = LibraryInfo (options = opts,
@@ -345,6 +346,21 @@ tarball_bld = Builder (action = tarballer,
 env.Append (BUILDERS = {'Distribute' : dist_bld})
 env.Append (BUILDERS = {'Tarball' : tarball_bld})
 
+#
+# Make sure they know what they are doing
+#
+
+if env['VST']:
+    sys.stdout.write ("Are you building Ardour for personal use (rather than distributiont to others)? [no]: ")
+    answer = sys.stdin.readline ()
+    answer = answer.rstrip().strip()
+    if answer != "yes" and answer != "y":
+        print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. VST support disabled.'
+        env['VST'] = 0;
+    else:
+        print "OK, VST support will be enabled"
+        
+
 # ----------------------------------------------------------------------
 # Construction environment setup
 # ----------------------------------------------------------------------
@@ -353,7 +369,7 @@ libraries = { }
 
 libraries['core'] = LibraryInfo (CCFLAGS = '-Ilibs')
 
-#libraries['sndfile'] = LibraryInfo(CCFLAGS = '-Ilibs/libsndfile/src')
+#libraries['sndfile'] = LibraryInfo()
 #libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
 
 libraries['lrdf'] = LibraryInfo()
@@ -408,10 +424,6 @@ libraries['pbd3']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd3', CPPPATH='#
 libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext', CPPPATH='#libs/gtkmm2ext')
 #libraries['cassowary'] = LibraryInfo(LIBS='cassowary', LIBPATH='#libs/cassowary', CPPPATH='#libs/cassowary')
 
-libraries['fst'] = LibraryInfo()
-if env['VST']:
-    libraries['fst'].ParseConfig('pkg-config --cflags --libs libfst')
-
 #
 # Check for libusb
 
@@ -424,6 +436,15 @@ else:
     have_libusb = False
     
 libraries['usb'] = conf.Finish ()
+
+#
+# Check for FLAC
+
+libraries['flac'] = LibraryInfo ()
+
+conf = Configure (libraries['flac'])
+conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new')
+libraries['flac'] = conf.Finish ()
 
 #
 # Check for liblo
@@ -497,6 +518,14 @@ if env['SYSLIBS']:
     libraries['libgnomecanvasmm'] = LibraryInfo()
     libraries['libgnomecanvasmm'].ParseConfig ('pkg-config --cflags --libs libgnomecanvasmm-2.6')
 
+#
+# cannot use system one for the time being
+#
+
+    libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
+                                    LIBPATH='#libs/libsndfile',
+                                    CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
+
 #    libraries['libglademm'] = LibraryInfo()
 #    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
 
@@ -509,10 +538,14 @@ if env['SYSLIBS']:
     ]
 
     subdirs = [
+        'libs/libsndfile',
         'libs/pbd3',
         'libs/midi++2',
         'libs/ardour'
         ]
+
+    if env['VST']:
+        subdirs = ['libs/fst'] + subdirs + ['vst']
 
     gtk_subdirs = [
 #        'libs/flowcanvas',
@@ -548,7 +581,7 @@ else:
                                           CPPPATH=['#libs', '#libs/soundtouch'])
     libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
                                     LIBPATH='#libs/libsndfile',
-                                    CPPPATH='#libs/libsndfile')
+                                    CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
@@ -566,6 +599,9 @@ else:
         'libs/midi++2',
         'libs/ardour'
         ]
+
+    if env['VST']:
+        subdirs = ['libs/fst'] + subdirs + ['vst']
 
     gtk_subdirs = [
 	'libs/glibmm2',
@@ -769,10 +805,12 @@ if env['DEBUG'] == 1:
 else:
     env.Append(CCFLAGS=" ".join (opt_flags))
 
-env.Append(CCFLAGS="-Wall")
+#
+# warnings flags
+#
 
-if env['VST']:
-    env.Append(CCFLAGS="-DVST_SUPPORT")
+env.Append(CCFLAGS="-Wall")
+env.Append(CXXFLAGS="-Woverloaded-virtual")
 
 if env['LIBLO']:
     env.Append(CCFLAGS="-DHAVE_LIBLO")

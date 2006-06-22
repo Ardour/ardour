@@ -37,7 +37,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/slave.h>
 #include <ardour/cycles.h>
 
@@ -45,7 +45,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 using namespace MIDI;
 
 MachineControl::CommandSignature MMC_CommandSignature;
@@ -724,7 +724,7 @@ Session::mmc_locate (MIDI::MachineControl &mmc, const MIDI::byte* mmc_tc)
 	}
 
 	jack_nframes_t target_frame;
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 
 	smpte.hours = mmc_tc[0] & 0xf;
 	smpte.minutes = mmc_tc[1];
@@ -858,7 +858,7 @@ Session::send_full_time_code ()
 
 {
 	MIDI::byte msg[10];
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 
 	if (_mtc_port == 0 || !send_mtc) {
 		return 0;
@@ -884,7 +884,7 @@ Session::send_full_time_code ()
 		outbound_mtc_smpte_frame = _transport_frame;
 		if (((mtc_smpte_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_smpte_time.frames % 2)) {
 			// start MTC quarter frame transmission on an even frame
-			smpte_increment( transmitting_smpte_time );
+			SMPTE::increment( transmitting_smpte_time );
 			outbound_mtc_smpte_frame += (jack_nframes_t) _frames_per_smpte_frame;
 		}
 	}
@@ -985,8 +985,8 @@ Session::send_midi_time_code ()
 				// Wrap quarter frame counter
 				next_quarter_frame_to_send = 0;
 				// Increment smpte time twice
-				smpte_increment( transmitting_smpte_time );
-				smpte_increment( transmitting_smpte_time );        
+				SMPTE::increment( transmitting_smpte_time );
+				SMPTE::increment( transmitting_smpte_time );        
 				// Re-calculate timing of first quarter frame
 				smpte_to_sample( transmitting_smpte_time, outbound_mtc_smpte_frame, true /* use_offset */, false );
 				// Compensate for audio latency
@@ -1024,7 +1024,7 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
 {
 	using namespace MIDI;
 	int nbytes = 4;
-	SMPTE_Time smpte;
+	SMPTE::Time smpte;
 
 	if (_mmc_port == 0 || !send_mmc) {
 		return;

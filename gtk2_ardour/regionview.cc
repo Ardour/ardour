@@ -27,7 +27,8 @@
 
 #include <ardour/playlist.h>
 #include <ardour/audioregion.h>
-#include <ardour/diskstream.h>
+#include <ardour/audiosource.h>
+#include <ardour/audio_diskstream.h>
 
 #include "streamview.h"
 #include "regionview.h"
@@ -48,6 +49,7 @@
 
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
 
@@ -1231,12 +1233,6 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 			_flags &= ~WaveformRectified;
 		}
 	}
-}
-
-std::string
-AudioRegionView::get_item_name ()
-{
-	return region.name();
 }
 
 void

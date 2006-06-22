@@ -45,7 +45,6 @@
 #include <ardour/tempo.h>
 #include <ardour/location.h>
 #include <ardour/region.h>
-#include <ardour/externalsource.h>
 
 #include "audio_clock.h"
 #include "gtk-custom-ruler.h"
@@ -67,9 +66,8 @@ namespace LinuxAudioSystems {
 }
 
 namespace ARDOUR {
-	class DiskStream;
+	class AudioDiskstream;
 	class RouteGroup;
-	class Source;
 	class Playlist;
 	class Region;
 	class Location;

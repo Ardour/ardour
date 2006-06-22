@@ -55,7 +55,8 @@ extern "C" int isinf (double);
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
+
 
 static float current_automation_version_number = 1.0;
 
@@ -2443,12 +2444,6 @@ IO::state_factory (std::string why) const
 	return state;
 }
 
-void
-IO::send_state_changed ()
-{
-	return;
-}
-
 /**
     Update the peak meters.
 
@@ -2493,7 +2488,7 @@ IO::meter ()
 		} else {
 			// do falloff
 			new_peak = _visible_peak_power[n] - _session.meter_falloff();
-			_visible_peak_power[n] = max (new_peak, -200.0f);
+			_visible_peak_power[n] = max (new_peak, -INFINITY);
 		}
 	}
 }

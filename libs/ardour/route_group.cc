@@ -29,7 +29,7 @@
 
 #include <ardour/route_group.h>
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/configuration.h>
 
 using namespace ARDOUR;

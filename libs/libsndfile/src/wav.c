@@ -539,7 +539,6 @@ wav_read_header	 (SF_PRIVATE *psf, int *blockalign, int *framesperblock)
 					break ;
 
 			case bext_MARKER :
-					parsestage |= HAVE_other ;
 
 					psf_binheader_readf (psf, "4", &dword) ;
 					if (dword < WAV_BEXT_CHUNK_SIZE)

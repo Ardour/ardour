@@ -35,11 +35,12 @@
 #include <ardour/session.h>
 #include <ardour/control_protocol_manager.h>
 
-#include "control_protocol.h"
+#include <control_protocol/control_protocol.h>
 
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
@@ -364,7 +365,7 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_toggle_action (option_actions, X_("SendMTC"), _("Send MTC"), mem_fun (*this, &ARDOUR_UI::toggle_send_mtc));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (option_actions, X_("SendMMC"), _("Send MMC"), mem_fun (*this, &ARDOUR_UI::toggle_send_mtc));
+	act = ActionManager::register_toggle_action (option_actions, X_("SendMMC"), _("Send MMC"), mem_fun (*this, &ARDOUR_UI::toggle_send_mmc));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("UseMMC"), _("Use MMC"), mem_fun (*this, &ARDOUR_UI::toggle_use_mmc));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -381,8 +382,9 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatBWF"), X_("Broadcast WAVE"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::BWF));
 	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatWAVE"), X_("WAVE"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::WAVE));
 	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatWAVE64"), X_("WAVE-64"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::WAVE64));
-	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatiXML"), X_("iXML"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::iXML));
-	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatRF64"), X_("RF64"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::RF64));
+	// act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatiXML"), X_("iXML"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::iXML));
+	// act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatRF64"), X_("RF64"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::RF64));
+	act = ActionManager::register_radio_action (option_actions, file_header_group, X_("FileHeaderFormatCAF"), X_("CAF"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_header_format), ARDOUR::CAF));
 
 	RadioAction::Group file_data_group;
 

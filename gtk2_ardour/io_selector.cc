@@ -31,7 +31,7 @@
 #include <ardour/port.h>
 #include <ardour/insert.h>
 #include <ardour/session.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/gtk_ui.h>
@@ -49,6 +49,7 @@ using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtkmm2ext;
 
 IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can_cancel)

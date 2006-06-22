@@ -44,6 +44,7 @@
 #include "public_editor.h"
 
 using namespace Gtk;
+using namespace PBD;
 
 /* <CMT Additions file="editor.cc"> */
 

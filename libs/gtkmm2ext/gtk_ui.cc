@@ -43,6 +43,7 @@
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Glib;
+using namespace PBD;
 using std::map;
 
 pthread_t UI::gui_thread;

@@ -39,6 +39,7 @@ using namespace std;
 using namespace Gtk;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 
 Panner2d::Target::Target (float xa, float ya, const char *txt)
 	: x (xa), y (ya), text (txt ? strdup (txt) : 0)
@@ -127,7 +128,7 @@ Panner2d::reset (uint32_t n_inputs)
 }
 
 void
-Panner2d::on_size_allocate (Gtk::Allocation alloc)
+Panner2d::on_size_allocate (Gtk::Allocation& alloc)
 {
   	width = alloc.get_width();
   	height = alloc.get_height();

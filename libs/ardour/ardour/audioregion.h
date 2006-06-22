@@ -27,7 +27,6 @@
 #include <pbd/undo.h>
 
 #include <ardour/ardour.h>
-#include <ardour/source.h>
 #include <ardour/gain.h>
 #include <ardour/region.h>
 #include <ardour/export.h>
@@ -40,6 +39,7 @@ class Route;
 class Playlist;
 class Session;
 class AudioFilter;
+class AudioSource;
 
 struct AudioRegionState : public RegionState 
 {
@@ -56,7 +56,7 @@ struct AudioRegionState : public RegionState
 class AudioRegion : public Region
 {
   public:
-	typedef vector<Source *> SourceList;
+	typedef vector<AudioSource *> SourceList;
 
 	static Change FadeInChanged;
 	static Change FadeOutChanged;
@@ -66,12 +66,12 @@ class AudioRegion : public Region
 	static Change ScaleAmplitudeChanged;
 	static Change EnvelopeChanged;
 
-	AudioRegion (Source&, jack_nframes_t start, jack_nframes_t length, bool announce = true);
-	AudioRegion (Source&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
+	AudioRegion (AudioSource&, jack_nframes_t start, jack_nframes_t length, bool announce = true);
+	AudioRegion (AudioSource&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
 	AudioRegion (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
 	AudioRegion (const AudioRegion&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
 	AudioRegion (const AudioRegion&);
-	AudioRegion (Source&, const XMLNode&);
+	AudioRegion (AudioSource&, const XMLNode&);
 	AudioRegion (SourceList &, const XMLNode&);
 	~AudioRegion();
 
@@ -85,7 +85,7 @@ class AudioRegion : public Region
 
 	void lock_sources ();
 	void unlock_sources ();
-	Source& source (uint32_t n=0) const { if (n < sources.size()) return *sources[n]; else return *sources[0]; } 
+	AudioSource& source (uint32_t n=0) const { if (n < sources.size()) return *sources[n]; else return *sources[0]; } 
 
 	void set_scale_amplitude (gain_t);
 	gain_t scale_amplitude() const { return _scale_amplitude; }

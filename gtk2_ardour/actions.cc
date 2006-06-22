@@ -39,6 +39,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
+using namespace PBD;
 
 vector<RefPtr<Gtk::Action> > ActionManager::session_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;

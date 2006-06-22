@@ -27,13 +27,13 @@
 
 #include <ardour/session.h>
 #include <ardour/audioregion.h>
-#include <ardour/filesource.h>
 #include <ardour/sndfilesource.h>
 
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace soundtouch;
 
 AudioRegion*
@@ -80,7 +80,10 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		}
 
 		try {
-			sources.push_back(new FileSource (path, frame_rate(), false, Config->get_native_file_data_format()));
+			sources.push_back (new SndFileSource (path, 
+							      Config->get_native_file_data_format(),
+							      Config->get_native_file_header_format(),
+							      frame_rate()));
 		} catch (failed_constructor& err) {
 			error << string_compose (_("tempoize: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
 			goto out;
@@ -150,13 +153,16 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 	xnow = localtime (&now);
 
 	for (it = sources.begin(); it != sources.end(); ++it) {
-		dynamic_cast<FileSource*>(*it)->update_header (tsr.region->position(), *xnow, now);
+		AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*it);
+		if (afs) {
+			afs->update_header (tsr.region->position(), *xnow, now);
+		}
 	}
 
 	region_name = tsr.region->name() + X_(".t");
 
 	r = new AudioRegion (sources, 0, sources.front()->length(), region_name,
-			0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile));
+			     0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile));
 
 
   out:

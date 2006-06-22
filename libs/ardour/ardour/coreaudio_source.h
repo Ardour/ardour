@@ -20,19 +20,22 @@
 #ifndef __coreaudio_source_h__ 
 #define __coreaudio_source_h__
 
-#include <ardour/externalsource.h>
+#include <ardour/audiofilesource.h>
 #include <AudioToolbox/ExtendedAudioFile.h>
 
 namespace ARDOUR {
 
-class CoreAudioSource : public ExternalSource {
+class CoreAudioSource : public AudioFileSource {
   public:
 	CoreAudioSource (const string& path_plus_channel, bool build_peak = true);
 	CoreAudioSource (const XMLNode&);
 	~CoreAudioSource ();
 
-	jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 	float sample_rate() const;
+	int update_header (jack_nframes_t when, struct tm&, time_t);
+
+  protected:
+	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
 
   private:
 	ExtAudioFileRef af;

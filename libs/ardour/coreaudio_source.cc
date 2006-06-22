@@ -26,21 +26,22 @@
 #include <AudioToolbox/AudioFormat.h>
 
 using namespace ARDOUR;
+using namespace PBD;
 
 CoreAudioSource::CoreAudioSource (const XMLNode& node)
-	: ExternalSource (node)
+	: AudioFileSource (node)
 {
 	init (_name, true);
-	SourceCreated (this); /* EMIT SIGNAL */
+	AudioSourceCreated (this); /* EMIT SIGNAL */
 }
 
 CoreAudioSource::CoreAudioSource (const string& idstr, bool build_peak)
-	: ExternalSource(idstr, build_peak)
+	: AudioFileSource(idstr, build_peak)
 {
 	init (idstr, build_peak);
 
 	if (build_peak) {
-		 SourceCreated (this); /* EMIT SIGNAL */
+		 AudioSourceCreated (this); /* EMIT SIGNAL */
 	}
 }
 

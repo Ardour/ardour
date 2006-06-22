@@ -28,12 +28,12 @@
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 
 #include "i18n.h"
 
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 MultiAllocSingleReleasePool Session::Event::pool ("event", sizeof (Session::Event), 512);
 
@@ -389,11 +389,11 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::Overwrite:
-		overwrite_some_buffers (static_cast<DiskStream*>(ev->ptr));
+		overwrite_some_buffers (static_cast<AudioDiskstream*>(ev->ptr));
 		break;
 
 	case Event::SetDiskstreamSpeed:
-		set_diskstream_speed (static_cast<DiskStream*> (ev->ptr), ev->speed);
+		set_diskstream_speed (static_cast<AudioDiskstream*> (ev->ptr), ev->speed);
 		break;
 
 	case Event::SetSlaveSource:

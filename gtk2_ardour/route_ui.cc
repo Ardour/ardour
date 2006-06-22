@@ -34,13 +34,14 @@
 
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 
 #include "i18n.h"
 using namespace sigc;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace PBD;
 
 
 RouteUI::RouteUI (ARDOUR::Route& rt, ARDOUR::Session& sess, const char* m_name,
@@ -433,7 +434,13 @@ RouteUI::refresh_remote_control_menu ()
 
 	limit += 4; /* leave some breathing room */
 	
-	for (uint32_t i = 0; i < limit; ++i) {
+	rc_items.push_back (RadioMenuElem (rc_group, _("None")));
+	if (_route.remote_control_id() == 0) {
+		rc_active = dynamic_cast<CheckMenuItem*> (&rc_items.back());
+		rc_active->set_active ();
+	}
+		
+	for (uint32_t i = 1; i < limit; ++i) {
 		snprintf (buf, sizeof (buf), "%u", i);
 		rc_items.push_back (RadioMenuElem (rc_group, buf));
 		rc_active = dynamic_cast<RadioMenuItem*>(&rc_items.back());
@@ -872,7 +879,7 @@ RouteUI::is_audio_track () const
 	return dynamic_cast<AudioTrack*>(&_route) != 0;
 }
 
-DiskStream*
+AudioDiskstream*
 RouteUI::get_diskstream () const
 {
 	AudioTrack *at;

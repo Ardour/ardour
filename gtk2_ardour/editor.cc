@@ -38,7 +38,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/plugin_manager.h>
 #include <ardour/location.h>
 #include <ardour/audioplaylist.h>
@@ -48,7 +48,7 @@
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
 
-#include "control_protocol.h"
+#include <control_protocol/control_protocol.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -84,6 +84,7 @@
 using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
@@ -1636,7 +1637,7 @@ Editor::build_track_region_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
 
 	if (atv) {
-		DiskStream* ds;
+		AudioDiskstream* ds;
 		Playlist* pl;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
@@ -1663,7 +1664,7 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
 
 	if (atv) {
-		DiskStream* ds;
+		AudioDiskstream* ds;
 		Playlist* pl;
 		AudioPlaylist* apl;
 
@@ -3107,7 +3108,7 @@ Editor::mapped_set_selected_regionview_from_click (AudioTimeAxisView& atv, uint3
 	AudioPlaylist* pl;
 	vector<AudioRegion*> results;
 	AudioRegionView* marv;
-	DiskStream* ds;
+	AudioDiskstream* ds;
 
 	if ((ds = atv.get_diskstream()) == 0) {
 		/* bus */
@@ -3338,7 +3339,7 @@ Editor::set_selected_regionview_from_region_list (Region& r, Selection::Operatio
 			AudioPlaylist* pl;
 			vector<AudioRegion*> results;
 			AudioRegionView* marv;
-			DiskStream* ds;
+			AudioDiskstream* ds;
 			
 			if ((ds = tatv->get_diskstream()) == 0) {
 				/* bus */

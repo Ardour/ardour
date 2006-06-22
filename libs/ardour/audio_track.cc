@@ -23,10 +23,11 @@
 #include <sigc++/bind.h>
 
 #include <ardour/audio_track.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/session.h>
 #include <ardour/redirect.h>
 #include <ardour/audioregion.h>
+#include <ardour/audiosource.h>
 #include <ardour/route_group_specialized.h>
 #include <ardour/insert.h>
 #include <ardour/audioplaylist.h>
@@ -37,25 +38,26 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Route (sess, name, 1, -1, -1, -1, flag),
 	  diskstream (0),
 	  _midi_rec_enable_control (*this, _session.midi_port())
 {
-	DiskStream::Flag dflags = DiskStream::Flag (0);
+	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (0);
 
 	if (_flags & Hidden) {
-		dflags = DiskStream::Flag (dflags | DiskStream::Hidden);
+		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Hidden);
 	} else {
-		dflags = DiskStream::Flag (dflags | DiskStream::Recordable);
+		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Recordable);
 	}
 
 	if (mode == Destructive) {
-		dflags = DiskStream::Flag (dflags | DiskStream::Destructive);
+		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Destructive);
 	}
 
-	DiskStream* ds = new DiskStream (_session, name, dflags);
+	AudioDiskstream* ds = new AudioDiskstream (_session, name, dflags);
 	
 	_declickable = true;
 	_freeze_record.state = NoFreeze;
@@ -63,6 +65,8 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 	_mode = mode;
 
 	set_diskstream (*ds, this);
+
+	// session.SMPTEOffsetChanged.connect (mem_fun (*this, &AudioTrack::handle_smpte_offset_change));
 
 	// we do this even though Route already did it in it's init
 	reset_midi_control (_session.midi_port(), _session.get_midi_control());
@@ -89,6 +93,14 @@ AudioTrack::~AudioTrack ()
 		diskstream->unref();
 	}
 }
+
+#if 0
+void
+AudioTrack::handle_smpte_offset_change ()
+{
+	diskstream
+}
+#endif
 
 int
 AudioTrack::deprecated_use_diskstream_connections ()
@@ -143,7 +155,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 }
 
 int
-AudioTrack::set_diskstream (DiskStream& ds, void *src)
+AudioTrack::set_diskstream (AudioDiskstream& ds, void *src)
 {
 	if (diskstream) {
 		diskstream->unref();
@@ -166,7 +178,7 @@ AudioTrack::set_diskstream (DiskStream& ds, void *src)
 	diskstream->monitor_input (false);
 
 	ic_connection.disconnect();
-	ic_connection = input_changed.connect (mem_fun (*diskstream, &DiskStream::handle_input_change));
+	ic_connection = input_changed.connect (mem_fun (*diskstream, &AudioDiskstream::handle_input_change));
 
 	diskstream_changed (src); /* EMIT SIGNAL */
 
@@ -176,7 +188,7 @@ AudioTrack::set_diskstream (DiskStream& ds, void *src)
 int 
 AudioTrack::use_diskstream (string name)
 {
-	DiskStream *dstream;
+	AudioDiskstream *dstream;
 
 	if ((dstream = _session.diskstream_by_name (name)) == 0) {
 	  error << string_compose(_("AudioTrack: diskstream \"%1\" not known by session"), name) << endmsg;
@@ -189,7 +201,7 @@ AudioTrack::use_diskstream (string name)
 int 
 AudioTrack::use_diskstream (id_t id)
 {
-	DiskStream *dstream;
+	AudioDiskstream *dstream;
 
 	if ((dstream = _session.diskstream_by_id (id)) == 0) {
 	  	error << string_compose(_("AudioTrack: diskstream \"%1\" not known by session"), id) << endmsg;
@@ -899,23 +911,23 @@ AudioTrack::update_total_latency ()
 void
 AudioTrack::bounce (InterThreadInfo& itt)
 {
-	vector<Source*> srcs;
-	_session.write_one_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
+	vector<AudioSource*> srcs;
+	_session.write_one_audio_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
 }
 
 
 void
 AudioTrack::bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo& itt)
 {
-	vector<Source*> srcs;
-	_session.write_one_track (*this, start, end, false, srcs, itt);
+	vector<AudioSource*> srcs;
+	_session.write_one_audio_track (*this, start, end, false, srcs, itt);
 }
 
 void
 AudioTrack::freeze (InterThreadInfo& itt)
 {
 	Insert* insert;
-	vector<Source*> srcs;
+	vector<AudioSource*> srcs;
 	string new_playlist_name;
 	Playlist* new_playlist;
 	string dir;
@@ -950,7 +962,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		return;
 	}
 
-	if (_session.write_one_track (*this, 0, _session.current_end_frame(), true, srcs, itt)) {
+	if (_session.write_one_audio_track (*this, 0, _session.current_end_frame(), true, srcs, itt)) {
 		return;
 	}
 

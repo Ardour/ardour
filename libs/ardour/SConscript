@@ -27,12 +27,15 @@ ardour.Append(POTFILE = domain + '.pot')
 ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
 
 ardour_files=Split("""
+audio_diskstream.cc
 audio_library.cc
 audio_playlist.cc
 audio_track.cc
 audioengine.cc
+audiofilesource.cc
 audiofilter.cc
 audioregion.cc
+audiosource.cc
 auditioner.cc
 automation.cc
 automation_event.cc
@@ -44,9 +47,6 @@ curve.cc
 cycle_timer.cc
 default_click.cc
 destructive_filesource.cc
-diskstream.cc
-externalsource.cc
-filesource.cc
 gain.cc
 gdither.cc
 globals.cc
@@ -103,6 +103,7 @@ extra_sources = [ ]
 
 if ardour['VST']:
 	extra_sources += vst_files
+	ardour.Append(CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
 
 if ardour['LIBLO']:
     extra_sources += osc_files
@@ -178,15 +179,14 @@ if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Core
 if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h') and ardour['COREAUDIO'] == 1:
     ardour.Append(CXXFLAGS="-DHAVE_COREAUDIO")    
     ardour.Append(LINKFLAGS="-framework AudioToolbox")
+    extra_sources += coreaudio_files
     
 
 if env['CONFIG_ARCH'] == 'apple':
     # this next line avoids issues with circular dependencies between libardour and libardour_cp.
     # it is based on the (entirely reasonable) assumption that a system with CoreAudio is OS X
     #
-    print 'APPLE CONFIG'
     ardour.Append(LINKFLAGS='-undefined suppress -flat_namespace') 
-    extra_sources += coreaudio_files
 
 ardour = conf.Finish ()
 
@@ -201,8 +201,8 @@ ardour.Merge ([
 	     libraries['pbd3'],
 	     libraries['soundtouch'],
 	     libraries['midi++2'],
-             libraries['glib2'],
-             libraries['glibmm2']
+	     libraries['glib2'],
+	     libraries['glibmm2']
 	     ])
 
 if ardour['LIBLO']:

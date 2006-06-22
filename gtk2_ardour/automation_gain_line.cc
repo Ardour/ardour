@@ -31,6 +31,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 AutomationGainLine::AutomationGainLine (const string & name, Session& s, TimeAxisView& tv, ArdourCanvas::Group& parent, Curve& c)
 

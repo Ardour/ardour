@@ -22,7 +22,7 @@
 #include <gtkmm/button.h>
 
 #include <ardour/session_playlist.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/playlist.h>
 #include <ardour/audio_track.h>
 #include <ardour/audioplaylist.h>
@@ -40,6 +40,7 @@ using namespace std;
 using namespace sigc;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace PBD;
 
 PlaylistSelector::PlaylistSelector ()
 	: ArdourDialog ("playlist selector")
@@ -89,7 +90,7 @@ void
 PlaylistSelector::show_for (RouteUI* ruix)
 {
 	vector<const char*> item;
-	DiskStream* this_ds;
+	AudioDiskstream* this_ds;
 	string str;
 
 	rui = ruix;
@@ -115,7 +116,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	
 	for (DSPL_Map::iterator x = dspl_map.begin(); x != dspl_map.end(); ++x) {
 
-		DiskStream* ds = session->diskstream_by_id (x->first);
+		AudioDiskstream* ds = session->diskstream_by_id (x->first);
 
 		if (ds == 0) {
 			continue;

@@ -26,7 +26,7 @@
 
 #include <ardour/session.h>
 #include <ardour/session_route.h>
-#include <ardour/diskstream.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/plugin.h>
 #include <ardour/plugin_manager.h>
 #include <ardour/ardour.h>
@@ -52,6 +52,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 using namespace sigc;
 
