@@ -21,12 +21,22 @@
 #ifndef __lib_pbd_undo_command_h__
 #define __lib_pbd_undo_command_h__
 
+#include <sigc++/slot.h>
+#include <sigc++/bind.h>
+#include <list>
+#include <string>
 #include <pbd/serializable.h>
 
 using sigc::nil;
 using sigc::slot;
+using sigc::bind;
+using sigc::mem_fun;
 using std::list;
 using std::string;
+
+
+/* One of the joys of templates is that you have to do everything right here
+ * in the header file; you can't split this to make undo_command.cc */
 
 template <class T1=nil, class T2=nil, class T3=nil, class T4=nil>
 class UndoCommand
@@ -38,40 +48,55 @@ class UndoCommand
 	 *   UndoCommand<Foo> cmd(id, key, foo_instance);
 	 */
 	UndoCommand(id_t object_id, string key) 
-	    : _obj_id(object_id), _key(key) {}
-	UndoCommand(id_t object_id, string key, T1 arg1)
 	    : _obj_id(object_id), _key(key) 
-	{ 
-	    _args.push_back(arg1); 
+	{
+	    _slot = mem_fun( get_object(object_id), get_method(key) );
 	}
-	UndoCommand(id_t object_id, string key, T1 arg1, T2 arg2)
+	UndoCommand(id_t object_id, string key, T1 &arg1)
 	    : _obj_id(object_id), _key(key) 
 	{ 
-	    _args.push_back(arg1); 
-	    _args.push_back(arg2); 
+	    _slot = bind( mem_fun( get_object(object_id), get_method(key) ), 
+		    arg1);
+	    _args.push_back(&arg1); 
 	}
-	UndoCommand(id_t object_id, string key, T1 arg1, T2 arg2, T3 arg3)
+	UndoCommand(id_t object_id, string key, T1 &arg1, T2 &arg2)
 	    : _obj_id(object_id), _key(key) 
 	{ 
-	    _args.push_back(arg1); 
-	    _args.push_back(arg2); 
-	    _args.push_back(arg3); 
+	    _slot = bind( mem_fun( get_object(object_id), get_method(key) ), 
+		    arg1, arg2);
+	    _args.push_back(&arg1); 
+	    _args.push_back(&arg2); 
 	}
-	UndoCommand(id_t object_id, string key, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+	UndoCommand(id_t object_id, string key, T1 &arg1, T2 &arg2, T3 &arg3)
 	    : _obj_id(object_id), _key(key) 
 	{ 
-	    _args.push_back(arg1); 
-	    _args.push_back(arg2); 
-	    _args.push_back(arg3); 
-	    _args.push_back(arg4); 
+	    _slot = bind( mem_fun( get_object(object_id), get_method(key) ), 
+		    arg1, arg2, arg3);
+	    _args.push_back(&arg1); 
+	    _args.push_back(&arg2); 
+	    _args.push_back(&arg3); 
+	}
+	UndoCommand(id_t object_id, string key, T1 &arg1, T2 &arg2, T3 &arg3, T4 &arg4)
+	    : _obj_id(object_id), _key(key) 
+	{ 
+	    _slot = bind( mem_fun( get_object(object_id), get_method(key) ), 
+		    arg1, arg2, arg4);
+	    _args.push_back(&arg1); 
+	    _args.push_back(&arg2); 
+	    _args.push_back(&arg3); 
+	    _args.push_back(&arg4); 
 	}
 
 	void operator() () { return _slot(); }
+
 	XMLNode &serialize();
     protected:
+	template <class T_object> T_object &get_object(id_t);
+	template <class T_method> T_method &get_method(string);
 	id_t _obj_id;
 	string _key;
 	slot<void> _slot;
+
 	// Note that arguments must be instances of Serializable or this will
 	// rightly cause a compiler error when compiling the constructor.
 	list<Serializable*> _args;
