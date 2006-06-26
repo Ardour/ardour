@@ -42,6 +42,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace std;
 
 SoundFileBox::SoundFileBox ()

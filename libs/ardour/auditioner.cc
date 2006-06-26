@@ -44,12 +44,12 @@ Auditioner::Auditioner (Session& s)
 	defer_pan_reset ();
 
 	if (left.length()) {
-		add_output_port (left, this);
+		add_output_port (left, this, Buffer::AUDIO);
 	}
 
 	if (right.length()) {
 		disk_stream().add_channel();
-		add_output_port (right, this);
+		add_output_port (right, this, Buffer::AUDIO);
 	}
 
 	allow_pan_reset ();
@@ -67,8 +67,12 @@ Auditioner::~Auditioner ()
 AudioPlaylist&
 Auditioner::prepare_playlist ()
 {
-	diskstream->playlist()->clear (false, false);
-	return *diskstream->playlist();
+	// FIXME
+	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(_diskstream->playlist());
+	assert(apl);
+
+	apl->clear (false, false);
+	return *apl;
 }
 
 void
@@ -82,13 +86,13 @@ Auditioner::audition_current_playlist ()
 	}
 
 	Glib::Mutex::Lock lm (lock);
-	diskstream->seek (0);
-	length = diskstream->playlist()->get_maximum_extent();
+	_diskstream->seek (0);
+	length = _diskstream->playlist()->get_maximum_extent();
 	current_frame = 0;
 
 	/* force a panner reset now that we have all channels */
 
-	_panner->reset (n_outputs(), diskstream->n_channels());
+	_panner->reset (n_outputs(), _diskstream->n_channels());
 
 	g_atomic_int_set (&_active, 1);
 }
@@ -108,23 +112,23 @@ Auditioner::audition_region (AudioRegion& region)
 	the_region = new AudioRegion (region);
 	the_region->set_position (0, this);
 
-	diskstream->playlist()->clear (true, false);
-	diskstream->playlist()->add_region (*the_region, 0, 1, false);
+	_diskstream->playlist()->clear (true, false);
+	_diskstream->playlist()->add_region (*the_region, 0, 1, false);
 
-	while (diskstream->n_channels() < the_region->n_channels()) {
-		diskstream->add_channel ();
+	while (_diskstream->n_channels() < the_region->n_channels()) {
+		_diskstream->add_channel ();
 	}
 
-	while (diskstream->n_channels() > the_region->n_channels()) {
-		diskstream->remove_channel ();
+	while (_diskstream->n_channels() > the_region->n_channels()) {
+		_diskstream->remove_channel ();
 	}
 
 	/* force a panner reset now that we have all channels */
 
-	_panner->reset (n_outputs(), diskstream->n_channels());
+	_panner->reset (n_outputs(), _diskstream->n_channels());
 
 	length = the_region->length();
-	diskstream->seek (0);
+	_diskstream->seek (0);
 	current_frame = 0;
 	g_atomic_int_set (&_active, 1);
 }
@@ -143,14 +147,14 @@ Auditioner::play_audition (jack_nframes_t nframes)
 
 	this_nframes = min (nframes, length - current_frame);
 
-	diskstream->prepare ();
+	_diskstream->prepare ();
 
 	if ((ret = roll (this_nframes, current_frame, current_frame + nframes, 0, false, false, false)) != 0) {
 		silence (nframes, 0);
 		return ret;
 	}
 
-	need_butler = diskstream->commit (this_nframes);
+	need_butler = _diskstream->commit (this_nframes);
 	current_frame += this_nframes;
 
 	if (current_frame >= length) {

@@ -52,7 +52,7 @@ class AudioTrack : public Route
 	bool can_record() const { return true; }
 	void set_record_enable (bool yn, void *src);
 
-	AudioDiskstream& disk_stream() const { return *diskstream; }
+	AudioDiskstream& disk_stream() const { return *_diskstream; }
 	int set_diskstream (AudioDiskstream&, void *);
 	int use_diskstream (string name);
 	int use_diskstream (id_t id);
@@ -99,7 +99,7 @@ class AudioTrack : public Route
 	void set_meter_point (MeterPoint, void* src);
 
   protected:
-	AudioDiskstream *diskstream;
+	AudioDiskstream *_diskstream;
 	MeterPoint _saved_meter_point;
 	TrackMode _mode;
 

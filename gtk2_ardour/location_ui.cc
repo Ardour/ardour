@@ -38,6 +38,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 

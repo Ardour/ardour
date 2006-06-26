@@ -62,11 +62,13 @@ namespace ARDOUR {
 class Port;
 class AudioEngine;
 class Slave;
-class AudioDiskstream;	
+class Diskstream;
 class Route;
 class AuxInput;
 class Source;
 class AudioSource;
+
+class AudioDiskstream;
 class AudioFileSource;
 class Auditioner;
 class Insert;
@@ -79,10 +81,17 @@ class TempoMap;
 class AudioTrack;
 class NamedSelection;
 class AudioRegion;
+
 class Region;
 class Playlist;
 class VSTPlugin;
 class ControlProtocolManager;
+
+//class MidiDiskstream;
+class MidiSource;
+class MidiTrack;
+class MidiRegion;
+class SMFSource;
 
 struct AudioExportSpecification;
 struct RouteGroup;
@@ -264,8 +273,8 @@ class Session : public sigc::trackable, public Stateful
 	vector<Sample*>& get_silent_buffers (uint32_t howmany);
 	vector<Sample*>& get_send_buffers () { return _send_buffers; }
 
-	AudioDiskstream    *diskstream_by_id (id_t id);
-	AudioDiskstream    *diskstream_by_name (string name);
+	Diskstream    *diskstream_by_id (id_t id);
+	Diskstream    *diskstream_by_name (string name);
 
 	bool have_captured() const { return _have_captured; }
 
@@ -352,7 +361,7 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void> HaltOnXrun;
 
 	sigc::signal<void,Route*> RouteAdded;
-	sigc::signal<void,AudioDiskstream*> AudioDiskstreamAdded;
+	sigc::signal<void,Diskstream*> DiskstreamAdded;
 
 	void request_roll ();
 	void request_bounded_roll (jack_nframes_t start, jack_nframes_t end);
@@ -364,15 +373,15 @@ class Session : public sigc::trackable, public Stateful
 	void goto_start () { request_locate (start_location->start(), false); }
 	void use_rf_shuttle_speed ();
 	void request_transport_speed (float speed);
-	void request_overwrite_buffer (AudioDiskstream*);
-	void request_diskstream_speed (AudioDiskstream&, float speed);
+	void request_overwrite_buffer (Diskstream*);
+	void request_diskstream_speed (Diskstream&, float speed);
 	void request_input_change_handling ();
 
 	bool locate_pending() const { return static_cast<bool>(post_transport_work&PostTransportLocate); }
 	bool transport_locked () const;
 
 	int wipe ();
-	int wipe_diskstream (AudioDiskstream *);
+	//int wipe_diskstream (AudioDiskstream *);
 
 	int remove_region_from_region_list (Region&);
 
@@ -545,10 +554,11 @@ class Session : public sigc::trackable, public Stateful
 
 	/* fundamental operations. duh. */
 
-
 	AudioTrack *new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal);
-
 	Route *new_audio_route (int input_channels, int output_channels);
+	
+	MidiTrack *new_midi_track (TrackMode mode = Normal);
+	Route *new_midi_route ();
 
 	void   remove_route (Route&);
 	void   resort_routes (void *src);
@@ -1429,12 +1439,12 @@ class Session : public sigc::trackable, public Stateful
 	bool waiting_to_start;
 
 	void set_auto_loop (bool yn);
-	void overwrite_some_buffers (AudioDiskstream*);
+	void overwrite_some_buffers (Diskstream*);
 	void flush_all_redirects ();
 	void locate (jack_nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void start_locate (jack_nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void force_locate (jack_nframes_t frame, bool with_roll = false);
-	void set_diskstream_speed (AudioDiskstream*, float speed);
+	void set_diskstream_speed (Diskstream*, float speed);
 	void set_transport_speed (float speed, bool abort = false);
 	void stop_transport (bool abort = false);
 	void start_transport ();
@@ -1468,7 +1478,7 @@ class Session : public sigc::trackable, public Stateful
 	AudioDiskstreamList  audio_diskstreams; 
 	mutable Glib::RWLock diskstream_lock;
 	uint32_t dstream_buffer_size;
-	void add_diskstream (AudioDiskstream*);
+	void add_diskstream (Diskstream*);
 	int  load_diskstreams (const XMLNode&);
 
 	/* routes stuff */
@@ -1536,7 +1546,7 @@ class Session : public sigc::trackable, public Stateful
 	Playlist *XMLPlaylistFactory (const XMLNode&);
 
 	void playlist_length_changed (Playlist *);
-	void diskstream_playlist_changed (AudioDiskstream *);
+	void diskstream_playlist_changed (Diskstream *);
 
 	/* NAMED SELECTIONS */
 

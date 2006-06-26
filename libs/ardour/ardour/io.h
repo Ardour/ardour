@@ -39,6 +39,7 @@
 #include <ardour/utils.h>
 #include <ardour/state_manager.h>
 #include <ardour/curve.h>
+#include <ardour/buffer.h>
 
 using std::string;
 using std::vector;
@@ -53,6 +54,11 @@ class Port;
 class Connection;
 class Panner;
 
+/** A collection of input and output ports with connections.
+ *
+ * An IO can contain ports of varying types, making routes/inserts/etc with
+ * varied combinations of types (eg MIDI and audio) possible.
+ */
 class IO : public Stateful, public ARDOUR::StateManager
 {
 
@@ -61,7 +67,8 @@ class IO : public Stateful, public ARDOUR::StateManager
 
 	IO (Session&, string name, 
 	    int input_min = -1, int input_max = -1, 
-	    int output_min = -1, int output_max = -1);
+	    int output_min = -1, int output_max = -1,
+		Buffer::Type default_type = Buffer::AUDIO);
 
 	virtual ~IO();
 
@@ -80,20 +87,22 @@ class IO : public Stateful, public ARDOUR::StateManager
 	
 	virtual void silence  (jack_nframes_t, jack_nframes_t offset);
 
+	// These should be moved in to a separate object that manipulates an IO
+	
 	void pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff);
 	void pan_automated (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t start_frame, jack_nframes_t end_frame, 
 			    jack_nframes_t nframes, jack_nframes_t offset);
 	void collect_input  (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void deliver_output (vector<Sample *>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void deliver_output_no_pan (vector<Sample *>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void deliver_output (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void deliver_output_no_pan (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
 	void just_meter_input (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 			       jack_nframes_t nframes, jack_nframes_t offset);
 
 	virtual uint32_t n_process_buffers () { return 0; }
 
 	virtual void   set_gain (gain_t g, void *src);
-	void   inc_gain (gain_t delta, void *src);
-	gain_t         gain () const                      { return _desired_gain; }
+	void           inc_gain (gain_t delta, void *src);
+	gain_t         gain () const { return _desired_gain; }
 	virtual gain_t effective_gain () const;
 
 	Panner& panner() { return *_panner; }
@@ -106,8 +115,8 @@ class IO : public Stateful, public ARDOUR::StateManager
 	Connection *input_connection() const { return _input_connection; }
 	Connection *output_connection() const { return _output_connection; }
 
-	int add_input_port (string source, void *src);
-	int add_output_port (string destination, void *src);
+	int add_input_port (string source, void *src, Buffer::Type type = Buffer::NIL);
+	int add_output_port (string destination, void *src, Buffer::Type type = Buffer::NIL);
 
 	int remove_input_port (Port *, void *src);
 	int remove_output_port (Port *, void *src);
@@ -289,6 +298,7 @@ public:
 	id_t                _id;
 	bool                 no_panner_reset;
 	XMLNode*             deferred_state;
+	Buffer::Type        _default_type;
 
 	virtual void set_deferred_state() {}
 

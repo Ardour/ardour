@@ -26,7 +26,7 @@
 #include <gtkmm/treeiter.h>
 
 #include <ardour/audioregion.h>
-#include <ardour/playlist.h>
+#include <ardour/audioplaylist.h>
 #include <ardour/types.h>
 
 #include "analysis_window.h"
@@ -40,6 +40,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 AnalysisWindow::AnalysisWindow()
 	: ArdourDialog(_("analysis window")),
@@ -229,7 +230,12 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 	
 	
 		for (TrackSelection::iterator i = s.tracks.begin(); i != s.tracks.end(); ++i) {
-			ARDOUR::Playlist *pl = (*i)->playlist();
+			ARDOUR::AudioPlaylist *pl
+				= dynamic_cast<ARDOUR::AudioPlaylist*>((*i)->playlist());
+
+			if (!pl)
+				continue;
+
 			RouteUI *rui = dynamic_cast<RouteUI *>(*i);
 			
 			// Busses don't have playlists, so we need to check that we actually are working with a playlist

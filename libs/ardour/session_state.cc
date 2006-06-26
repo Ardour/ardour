@@ -87,6 +87,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 void
 Session::first_stage_init (string fullpath, string snapshot_name)
@@ -269,7 +270,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	AudioSource::AudioSourceCreated.connect (mem_fun (*this, &Session::add_audio_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
-	AudioDiskstream::AudioDiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
+	AudioDiskstream::DiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
 
 	IO::MoreOutputs.connect (mem_fun (*this, &Session::ensure_passthru_buffers));

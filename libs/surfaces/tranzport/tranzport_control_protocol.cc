@@ -41,6 +41,7 @@
 using namespace ARDOUR;
 using namespace std;
 using namespace sigc;
+using namespace PBD;
 
 #include "i18n.h"
 

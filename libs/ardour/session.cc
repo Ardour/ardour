@@ -44,11 +44,15 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
-#include <ardour/audio_diskstream.h>
 #include <ardour/utils.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiofilesource.h>
+#include <ardour/midi_diskstream.h>
+#include <ardour/midi_playlist.h>
+#include <ardour/midi_region.h>
+#include <ardour/smf_source.h>
 #include <ardour/destructive_filesource.h>
 #include <ardour/auditioner.h>
 #include <ardour/recent_sessions.h>
@@ -59,6 +63,7 @@
 #include <ardour/slave.h>
 #include <ardour/tempo.h>
 #include <ardour/audio_track.h>
+#include <ardour/midi_track.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/named_selection.h>
 #include <ardour/crossfade.h>
@@ -73,7 +78,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 const char* Session::_template_suffix = X_(".template");
 const char* Session::_statefile_suffix = X_(".ardour");
@@ -300,6 +305,7 @@ Session::Session (AudioEngine &eng,
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
 	  //midi_requests (16),
+	  _send_smpte_update (false),
 	  main_outs (0)
 
 {
@@ -617,8 +623,13 @@ Session::when_engine_running ()
 			
 			/* default state for Click */
 
+			// FIXME: there's no JackPortIsAudio flag or anything like that, so this is _bad_.
+			// we need a get_nth_physical_audio_output or similar, but the existing one just
+			// deals with strings :/
+
 			first_physical_output = _engine.get_nth_physical_output (0);
-			
+			cerr << "FIXME: click type" << endl;
+
 			if (first_physical_output.length()) {
 				if (_click_io->add_output_port (first_physical_output, this)) {
 					// relax, even though its an error
@@ -736,7 +747,7 @@ Session::when_engine_running ()
 			_master_out->defer_pan_reset ();
 			
 			while ((int) _master_out->n_inputs() < _master_out->input_maximum()) {
-				if (_master_out->add_input_port ("", this)) {
+				if (_master_out->add_input_port ("", this)) { // FIXME
 					error << _("cannot setup master inputs") 
 					      << endmsg;
 					break;
@@ -744,7 +755,7 @@ Session::when_engine_running ()
 			}
 			n = 0;
 			while ((int) _master_out->n_outputs() < _master_out->output_maximum()) {
-				if (_master_out->add_output_port (_engine.get_nth_physical_output (n), this)) {
+				if (_master_out->add_output_port (_engine.get_nth_physical_output (n), this)) { // FIXME
 					error << _("cannot setup master outputs")
 					      << endmsg;
 					break;
@@ -882,7 +893,7 @@ Session::playlist_length_changed (Playlist* pl)
 }
 
 void
-Session::diskstream_playlist_changed (AudioDiskstream* dstream)
+Session::diskstream_playlist_changed (Diskstream* dstream)
 {
 	Playlist *playlist;
 
@@ -1670,6 +1681,202 @@ Session::resort_routes (void* src)
 
 }
 
+MidiTrack*
+Session::new_midi_track (TrackMode mode)
+{
+	MidiTrack *track;
+	char track_name[32];
+	uint32_t n = 0;
+	uint32_t channels_used = 0;
+	string port;
+
+	/* count existing midi tracks */
+
+	{
+		Glib::RWLock::ReaderLock lm (route_lock);
+		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+			if (dynamic_cast<MidiTrack*>(*i) != 0) {
+				if (!(*i)->hidden()) {
+					n++;
+					channels_used += (*i)->n_inputs();
+				}
+			}
+		}
+	}
+
+	/* check for duplicate route names, since we might have pre-existing
+	   routes with this name (e.g. create Midi1, Midi2, delete Midi1,
+	   save, close,restart,add new route - first named route is now
+	   Midi2)
+	*/
+
+	do {
+		snprintf (track_name, sizeof(track_name), "Midi %" PRIu32, n+1);
+		if (route_by_name (track_name) == 0) {
+			break;
+		}
+		n++;
+
+	} while (n < (UINT_MAX-1));
+
+	try {
+		track = new MidiTrack (*this, track_name, Route::Flag (0), mode);
+
+		if (track->ensure_io (1, 1, false, this)) {
+			error << string_compose (_("cannot configure %1 in/%2 out configuration for new midi track"), track_name)
+			      << endmsg;
+		}
+#if 0
+		if (nphysical_in) {
+			for (uint32_t x = 0; x < track->n_inputs() && x < nphysical_in; ++x) {
+				
+				port = "";
+				
+				if (input_auto_connect & AutoConnectPhysical) {
+					port = _engine.get_nth_physical_input ((channels_used+x)%nphysical_in);
+				} 
+				
+				if (port.length() && track->connect_input (track->input (x), port, this)) {
+					break;
+				}
+			}
+		}
+		
+		for (uint32_t x = 0; x < track->n_outputs(); ++x) {
+			
+			port = "";
+
+			if (nphysical_out && (output_auto_connect & AutoConnectPhysical)) {
+				port = _engine.get_nth_physical_output ((channels_used+x)%nphysical_out);
+			} else if (output_auto_connect & AutoConnectMaster) {
+				if (_master_out) {
+					port = _master_out->input (x%_master_out->n_inputs())->name();
+				}
+			}
+
+			if (port.length() && track->connect_output (track->output (x), port, this)) {
+				break;
+			}
+		}
+
+		if (_control_out) {
+			vector<string> cports;
+			uint32_t ni = _control_out->n_inputs();
+
+			for (n = 0; n < ni; ++n) {
+				cports.push_back (_control_out->input(n)->name());
+			}
+
+			track->set_control_outs (cports);
+		}
+#endif
+		track->diskstream_changed.connect (mem_fun (this, &Session::resort_routes));
+
+		add_route (track);
+
+		track->set_remote_control_id (ntracks());
+	}
+
+	catch (failed_constructor &err) {
+		error << _("Session: could not create new midi track.") << endmsg;
+		return 0;
+	}
+
+	return track;
+}
+
+
+Route*
+Session::new_midi_route ()
+{
+	Route *bus;
+	char bus_name[32];
+	uint32_t n = 0;
+	string port;
+
+	/* count existing midi busses */
+
+	{
+		Glib::RWLock::ReaderLock lm (route_lock);
+		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+			if (dynamic_cast<MidiTrack*>(*i) == 0) {
+				if (!(*i)->hidden()) {
+					n++;
+				}
+			}
+		}
+	}
+
+	do {
+		snprintf (bus_name, sizeof(bus_name), "Bus %" PRIu32, n+1);
+		if (route_by_name (bus_name) == 0) {
+			break;
+		}
+		n++;
+
+	} while (n < (UINT_MAX-1));
+
+	try {
+		bus = new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), Buffer::MIDI);
+		
+		if (bus->ensure_io (1, 1, false, this)) {
+			error << (_("cannot configure 1 in/1 out configuration for new midi track"))
+			      << endmsg;
+		}
+#if 0
+		for (uint32_t x = 0; x < bus->n_inputs(); ++x) {
+			
+			port = "";
+
+			if (input_auto_connect & AutoConnectPhysical) {
+				port = _engine.get_nth_physical_input ((n+x)%n_physical_inputs);
+			} 
+			
+			if (port.length() && bus->connect_input (bus->input (x), port, this)) {
+				break;
+			}
+		}
+
+		for (uint32_t x = 0; x < bus->n_outputs(); ++x) {
+			
+			port = "";
+
+			if (output_auto_connect & AutoConnectPhysical) {
+				port = _engine.get_nth_physical_input ((n+x)%n_physical_outputs);
+			} else if (output_auto_connect & AutoConnectMaster) {
+				if (_master_out) {
+					port = _master_out->input (x%_master_out->n_inputs())->name();
+				}
+			}
+
+			if (port.length() && bus->connect_output (bus->output (x), port, this)) {
+				break;
+			}
+		}
+#endif
+/*
+		if (_control_out) {
+			vector<string> cports;
+			uint32_t ni = _control_out->n_inputs();
+
+			for (uint32_t n = 0; n < ni; ++n) {
+				cports.push_back (_control_out->input(n)->name());
+			}
+			bus->set_control_outs (cports);
+		}
+*/		
+		add_route (bus);
+	}
+
+	catch (failed_constructor &err) {
+		error << _("Session: could not create new MIDI route.") << endmsg;
+		return 0;
+	}
+
+	return bus;
+}
+
+
 AudioTrack*
 Session::new_audio_track (int input_channels, int output_channels, TrackMode mode)
 {
@@ -1820,7 +2027,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 	} while (n < (UINT_MAX-1));
 
 	try {
-		bus = new Route (*this, bus_name, -1, -1, -1, -1);
+		bus = new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), Buffer::AUDIO);
 
 		if (bus->ensure_io (input_channels, output_channels, false, this)) {
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -1872,7 +2079,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 	}
 
 	catch (failed_constructor &err) {
-		error << _("Session: could not create new route.") << endmsg;
+		error << _("Session: could not create new audio route.") << endmsg;
 		return 0;
 	}
 
@@ -1908,10 +2115,17 @@ Session::add_route (Route* route)
 }
 
 void
-Session::add_diskstream (AudioDiskstream* dstream)
+Session::add_diskstream (Diskstream* s)
 {
+	// FIXME: temporary.  duh.
+	AudioDiskstream* dstream = dynamic_cast<AudioDiskstream*>(s);
+	if (!dstream) {
+		cerr << "FIXME: Non Audio Diskstream" << endl;
+		return;
+	}
+
 	/* need to do this in case we're rolling at the time, to prevent false underruns */
-	dstream->do_refill(0, 0, 0);
+	dstream->non_realtime_do_refill();
 	
 	{ 
 		Glib::RWLock::WriterLock lm (diskstream_lock);
@@ -1935,7 +2149,7 @@ Session::add_diskstream (AudioDiskstream* dstream)
 	set_dirty();
 	save_state (_current_snapshot_name);
 
-	AudioDiskstreamAdded (dstream); /* EMIT SIGNAL */
+	DiskstreamAdded (dstream); /* EMIT SIGNAL */
 }
 
 void
@@ -2279,11 +2493,12 @@ Session::get_maximum_extent () const
 	return max;
 }
 
-AudioDiskstream *
+Diskstream *
 Session::diskstream_by_name (string name)
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
+	// FIXME: duh
 	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
@@ -2293,11 +2508,12 @@ Session::diskstream_by_name (string name)
 	return 0;
 }
 
-AudioDiskstream *
+Diskstream *
 Session::diskstream_by_id (id_t id)
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
+	// FIXME: duh
 	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
 		if ((*i)->id() == id) {
 			return *i;

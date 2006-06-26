@@ -29,6 +29,7 @@
 #include "color.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Editing;
 
 StreamView::StreamView (AudioTimeAxisView& tv)
@@ -361,7 +362,9 @@ StreamView::playlist_changed (AudioDiskstream *ds)
 	playlist_connections.push_back (ds->playlist()->RegionRemoved.connect (mem_fun (*this, &StreamView::remove_region_view)));
 	playlist_connections.push_back (ds->playlist()->StateChanged.connect (mem_fun (*this, &StreamView::playlist_state_changed)));
 	playlist_connections.push_back (ds->playlist()->Modified.connect (mem_fun (*this, &StreamView::playlist_modified)));
-	playlist_connections.push_back (ds->playlist()->NewCrossfade.connect (mem_fun (*this, &StreamView::add_crossfade)));
+	AudioPlaylist* apl = dynamic_cast<AudioPlaylist*>(ds->playlist());
+	if (apl)
+		playlist_connections.push_back (apl->NewCrossfade.connect (mem_fun (*this, &StreamView::add_crossfade)));
 }
 
 void
@@ -454,7 +457,9 @@ StreamView::redisplay_diskstream ()
 
 	if (_trackview.is_audio_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region (this, &StreamView::add_region_view);
-		_trackview.get_diskstream()->playlist()->foreach_crossfade (this, &StreamView::add_crossfade);
+		AudioPlaylist* apl = dynamic_cast<AudioPlaylist*>(_trackview.get_diskstream()->playlist());
+		if (apl)
+			apl->foreach_crossfade (this, &StreamView::add_crossfade);
 	}
 
 	for (i = region_views.begin(); i != region_views.end(); ) {

@@ -35,6 +35,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace sigc;
 using namespace std;
+using namespace PBD;
 
 static const char* channel_setup_names[] = {
 	"Mono",
@@ -44,6 +45,7 @@ static const char* channel_setup_names[] = {
 	"6 Channels",
 	"8 Channels",
 	"Manual Setup",
+	"MIDI",
 	0
 };
 
@@ -157,6 +159,13 @@ AddRouteDialog::track ()
 	return track_button.get_active ();
 }
 
+bool
+AddRouteDialog::midi ()
+{
+	const string str = channel_combo.get_active_text();
+	return (str == _("MIDI"));
+}
+
 string
 AddRouteDialog::name_template ()
 {
@@ -192,7 +201,7 @@ AddRouteDialog::channels ()
 	string str = channel_combo.get_active_text();
 	int chns;
 
-	if (str == _("Mono")) {
+	if (str == _("Mono") || str == _("MIDI")) {
 		return 1;
 	} else if (str == _("Stereo")) {
 		return 2;

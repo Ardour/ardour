@@ -28,6 +28,7 @@
 #include "mixer_ui.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 int
 ARDOUR_UI::create_mixer ()

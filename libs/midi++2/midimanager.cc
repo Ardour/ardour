@@ -31,6 +31,7 @@
 
 using namespace std;
 using namespace MIDI;
+using namespace PBD;
 
 Manager *Manager::theManager = 0;
 

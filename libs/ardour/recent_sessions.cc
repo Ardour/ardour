@@ -27,9 +27,9 @@
 #include <ardour/utils.h>
 #include "i18n.h"
 
-
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 int
 ARDOUR::read_recent_sessions (RecentSessions& rs)

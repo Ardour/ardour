@@ -21,6 +21,7 @@ class AddRouteDialog : public Gtk::Dialog
 	~AddRouteDialog ();
 
 	bool track ();
+	bool midi ();
 	std::string name_template ();
 	int channels ();
 	int count ();

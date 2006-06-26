@@ -42,6 +42,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
 using namespace Editing;

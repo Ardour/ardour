@@ -80,6 +80,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace LADSPA;
 using namespace Gtk;
 using namespace Editing;
@@ -378,7 +379,7 @@ AudioTimeAxisView::playlist_changed ()
 	label_view ();
 
 	if (is_audio_track()) {
-		set_playlist (get_diskstream()->playlist());
+		set_playlist (dynamic_cast<AudioPlaylist*>(get_diskstream()->playlist()));
 	}
 }
 
@@ -825,7 +826,8 @@ AudioTimeAxisView::rename_current_playlist ()
 	AudioPlaylist *pl;
 	AudioDiskstream *ds;
 
-	if (((ds = get_diskstream()) == 0) || ds->destructive() || ((pl = ds->playlist()) == 0)) {
+	if (((ds = get_diskstream()) == 0) || ds->destructive()
+			|| ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) == 0)) {
 		return;
 	}
 
@@ -854,7 +856,8 @@ AudioTimeAxisView::use_copy_playlist (bool prompt)
 	AudioDiskstream *ds;
 	string name;
 
-	if (((ds = get_diskstream()) == 0) || ds->destructive() || ((pl = ds->playlist()) == 0)) {
+	if (((ds = get_diskstream()) == 0) || ds->destructive()
+			|| ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) == 0)) {
 		return;
 	}
 	
@@ -882,7 +885,7 @@ AudioTimeAxisView::use_copy_playlist (bool prompt)
 
 	if (name.length()) {
 		ds->use_copy_playlist ();
-		pl = ds->playlist();
+		pl = dynamic_cast<AudioPlaylist*>(ds->playlist());
 		pl->set_name (name);
 	}
 }
@@ -894,7 +897,8 @@ AudioTimeAxisView::use_new_playlist (bool prompt)
 	AudioDiskstream *ds;
 	string name;
 
-	if (((ds = get_diskstream()) == 0) || ds->destructive() || ((pl = ds->playlist()) == 0)) {
+	if (((ds = get_diskstream()) == 0) || ds->destructive()
+			|| ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) == 0)) {
 		return;
 	}
 	
@@ -921,7 +925,7 @@ AudioTimeAxisView::use_new_playlist (bool prompt)
 
 	if (name.length()) {
 		ds->use_new_playlist ();
-		pl = ds->playlist();
+		pl = dynamic_cast<AudioPlaylist*>(ds->playlist());
 		pl->set_name (name);
 	}
 }
@@ -933,7 +937,7 @@ AudioTimeAxisView::clear_playlist ()
 	AudioDiskstream *ds;
 	
 	if ((ds = get_diskstream()) != 0) {
-		if ((pl = ds->playlist()) != 0) {
+		if ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) != 0) {
 			editor.clear_playlist (*pl);
 		}
 	}
@@ -991,7 +995,7 @@ AudioTimeAxisView::update_diskstream_display ()
 	AudioDiskstream *ds;
 
 	if ((ds = get_diskstream()) != 0) {
-		set_playlist (ds->playlist ());
+		set_playlist (dynamic_cast<AudioPlaylist*> (ds->playlist ()));
 	}
 
 	map_frozen ();
@@ -1143,7 +1147,7 @@ Region*
 AudioTimeAxisView::find_next_region (jack_nframes_t pos, RegionPoint point, int32_t dir)
 {
 	AudioDiskstream *stream;
-	AudioPlaylist *playlist;
+	Playlist *playlist;
 
 	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
 		return playlist->find_next_region (pos, point, dir);

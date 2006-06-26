@@ -47,7 +47,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 using namespace MIDI;
 
 MachineControl::CommandSignature MMC_CommandSignature;
@@ -660,7 +660,6 @@ Session::mmc_pause (MIDI::MachineControl &mmc)
 static bool step_queued = false;
 
 void
-
 Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 {
 	if (!mmc_control) {

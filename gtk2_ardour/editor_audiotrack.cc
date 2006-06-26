@@ -8,6 +8,7 @@
 #include "selection.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 void
 Editor::set_route_loop_selection ()

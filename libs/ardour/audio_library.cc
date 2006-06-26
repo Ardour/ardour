@@ -42,6 +42,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 static char* SOUNDFILE = "http://ardour.org/ontology/Soundfile";
 

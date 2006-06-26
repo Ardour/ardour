@@ -29,6 +29,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 sigc::signal<void,NamedSelection*> NamedSelection::NamedSelectionCreated;
 

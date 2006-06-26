@@ -53,17 +53,16 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
-jack_nframes_t AudioDiskstream::disk_io_chunk_frames;
-
-sigc::signal<void,AudioDiskstream*>    AudioDiskstream::AudioDiskstreamCreated;
+//sigc::signal<void,AudioDiskstream*>    AudioDiskstream::AudioDiskstreamCreated;
 sigc::signal<void,list<AudioFileSource*>*> AudioDiskstream::DeleteSources;
-sigc::signal<void>                AudioDiskstream::DiskOverrun;
-sigc::signal<void>                AudioDiskstream::DiskUnderrun;
+//sigc::signal<void>                AudioDiskstream::DiskOverrun;
+//sigc::signal<void>                AudioDiskstream::DiskUnderrun;
 
-AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Flag flag)
-	: _name (name),
-	  _session (sess)
+AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
+	: Diskstream(sess, name, flag)
+	, _playlist(NULL)
 {
 	/* prevent any write sources from being created */
 
@@ -74,12 +73,12 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Flag flag)
 
 	in_set_state = false;
 
-	AudioDiskstreamCreated (this); /* EMIT SIGNAL */
+	DiskstreamCreated (this); /* EMIT SIGNAL */
 }
 	
 AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
-	: _session (sess)
-	
+	: Diskstream(sess, node)
+	, _playlist(NULL)
 {
 	in_set_state = true;
 	init (Recordable);
@@ -95,7 +94,7 @@ AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 		use_destructive_playlist ();
 	}
 
-	AudioDiskstreamCreated (this); /* EMIT SIGNAL */
+	DiskstreamCreated (this); /* EMIT SIGNAL */
 }
 
 void
@@ -128,44 +127,9 @@ AudioDiskstream::init_channel (ChannelInfo &chan)
 
 
 void
-AudioDiskstream::init (Flag f)
+AudioDiskstream::init (Diskstream::Flag f)
 {
-	_id = new_id();
-	_refcnt = 0;
-	_flags = f;
-	_io = 0;
-	_alignment_style = ExistingMaterial;
-	_persistent_alignment_style = ExistingMaterial;
-	first_input_change = true;
-	_playlist = 0;
-	i_am_the_modifier = 0;
-	g_atomic_int_set (&_record_enabled, 0);
-	was_recording = false;
-	capture_start_frame = 0;
-	capture_captured = 0;
-	_visible_speed = 1.0f;
-	_actual_speed = 1.0f;
-	_buffer_reallocation_required = false;
-	_seek_required = false;
-	first_recordable_frame = max_frames;
-	last_recordable_frame = max_frames;
-	_roll_delay = 0;
-	_capture_offset = 0;
-	_processed = false;
-	_slaved = false;
-	adjust_capture_position = 0;
-	last_possibly_recording = 0;
-	loop_location = 0;
-	wrap_buffer_size = 0;
-	speed_buffer_size = 0;
-	last_phase = 0;
-	phi = (uint64_t) (0x1000000);
-	file_frame = 0;
-	playback_sample = 0;
-	playback_distance = 0;
-	_read_data_count = 0;
-	_write_data_count = 0;
-	deprecated_io_node = 0;
+	Diskstream::init(f);
 
 	/* there are no channels at this point, so these
 	   two calls just get speed_buffer_size and wrap_buffer
@@ -215,9 +179,8 @@ AudioDiskstream::~AudioDiskstream ()
 {
 	Glib::Mutex::Lock lm (state_lock);
 
-	if (_playlist) {
+	if (_playlist)
 		_playlist->unref ();
-	}
 
 	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 		destroy_channel((*chan));
@@ -225,7 +188,7 @@ AudioDiskstream::~AudioDiskstream ()
 	
 	channels.clear();
 }
-
+/*
 void
 AudioDiskstream::handle_input_change (IOChange change, void *src)
 {
@@ -236,7 +199,7 @@ AudioDiskstream::handle_input_change (IOChange change, void *src)
 		_session.request_input_change_handling ();
 	}
 }
-
+*/
 void
 AudioDiskstream::non_realtime_input_change ()
 {
@@ -346,8 +309,10 @@ AudioDiskstream::find_and_use_playlist (const string& name)
 }
 
 int
-AudioDiskstream::use_playlist (AudioPlaylist* playlist)
+AudioDiskstream::use_playlist (Playlist* playlist)
 {
+	assert(dynamic_cast<AudioPlaylist*>(playlist));
+
 	{
 		Glib::Mutex::Lock lm (state_lock);
 
@@ -363,7 +328,7 @@ AudioDiskstream::use_playlist (AudioPlaylist* playlist)
 			_playlist->unref();
 		}
 			
-		_playlist = playlist;
+		_playlist = dynamic_cast<AudioPlaylist*>(playlist);
 		_playlist->ref();
 
 		if (!in_set_state && recordable()) {
@@ -384,17 +349,6 @@ AudioDiskstream::use_playlist (AudioPlaylist* playlist)
 	_session.set_dirty ();
 
 	return 0;
-}
-
-void
-AudioDiskstream::playlist_deleted (Playlist* pl)
-{
-	/* this catches an ordering issue with session destruction. playlists 
-	   are destroyed before diskstreams. we have to invalidate any handles
-	   we have to the playlist.
-	*/
-
-	_playlist = 0;
 }
 
 int
@@ -445,6 +399,19 @@ AudioDiskstream::use_copy_playlist ()
 		return -1;
 	}
 }
+
+
+void
+AudioDiskstream::playlist_deleted (Playlist* pl)
+{
+	/* this catches an ordering issue with session destruction. playlists 
+	   are destroyed before diskstreams. we have to invalidate any handles
+	   we have to the playlist.
+	*/
+
+	_playlist = 0;
+}
+
 
 void
 AudioDiskstream::setup_destructive_playlist ()
@@ -499,67 +466,6 @@ AudioDiskstream::set_io (IO& io)
 	set_align_style_from_io ();
 }
 
-int
-AudioDiskstream::set_name (string str, void *src)
-{
-	if (str != _name) {
-		_playlist->set_name (str);
-		_name = str;
-		
-		if (!in_set_state && recordable()) {
-			/* rename existing capture files so that they have the correct name */
-			return rename_write_sources ();
-		} else {
-			return -1;
-		}
-	}
-
-	return 0;
-}
-
-void
-AudioDiskstream::set_speed (double sp)
-{
-	_session.request_diskstream_speed (*this, sp);
-
-	/* to force a rebuffering at the right place */
-	playlist_modified();
-}
-
-bool
-AudioDiskstream::realtime_set_speed (double sp, bool global)
-{
-	bool changed = false;
-	double new_speed = sp * _session.transport_speed();
-	
-	if (_visible_speed != sp) {
-		_visible_speed = sp;
-		changed = true;
-	}
-	
-	if (new_speed != _actual_speed) {
-		
-		jack_nframes_t required_wrap_size = (jack_nframes_t) floor (_session.get_block_size() * 
-									    fabs (new_speed)) + 1;
-		
-		if (required_wrap_size > wrap_buffer_size) {
-			_buffer_reallocation_required = true;
-		}
-		
-		_actual_speed = new_speed;
-		phi = (uint64_t) (0x1000000 * fabs(_actual_speed));
-	}
-
-	if (changed) {
-		if (!global) {
-			_seek_required = true;
-		}
-		 speed_changed (); /* EMIT SIGNAL */
-	}
-
-	return _buffer_reallocation_required || _seek_required;
-}
-
 void
 AudioDiskstream::non_realtime_set_speed ()
 {
@@ -581,13 +487,6 @@ AudioDiskstream::non_realtime_set_speed ()
 
 		_seek_required = false;
 	}
-}
-
-void
-AudioDiskstream::prepare ()
-{
-	_processed = false;
-	playback_distance = 0;
 }
 
 void
@@ -1009,13 +908,6 @@ AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes
 	return ret;
 }
 
-void
-AudioDiskstream::recover ()
-{
-	state_lock.unlock();
-	_processed = false;
-}
-
 bool
 AudioDiskstream::commit (jack_nframes_t nframes)
 {
@@ -1155,9 +1047,9 @@ AudioDiskstream::seek (jack_nframes_t frame, bool complete_refill)
 	file_frame = frame;
 
 	if (complete_refill) {
-		while ((ret = do_refill (0, 0, 0)) > 0);
+		while ((ret = non_realtime_do_refill ()) > 0);
 	} else {
-		ret = do_refill (0, 0, 0);
+		ret = non_realtime_do_refill ();
 	}
 
 	return ret;
@@ -1650,21 +1542,6 @@ AudioDiskstream::do_flush (char * workbuf, bool force_flush)
 }
 
 void
-AudioDiskstream::playlist_changed (Change ignored)
-{
-	playlist_modified ();
-}
-
-void
-AudioDiskstream::playlist_modified ()
-{
-	if (!i_am_the_modifier && !overwrite_queued) {
-		_session.request_overwrite_buffer (this);
-		overwrite_queued = true;
-	} 
-}
-
-void
 AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture)
 {
 	uint32_t buffer_position;
@@ -1898,7 +1775,7 @@ AudioDiskstream::finish_capture (bool rec_monitors_input)
 void
 AudioDiskstream::set_record_enabled (bool yn, void* src)
 {
-        bool rolling = _session.transport_speed() != 0.0f;
+    bool rolling = _session.transport_speed() != 0.0f;
 
 	if (!recordable() || !_session.record_enabling_legal()) {
 		return;
@@ -1958,7 +1835,7 @@ XMLNode&
 AudioDiskstream::get_state ()
 {
 	XMLNode* node = new XMLNode ("AudioDiskstream");
-	char buf[64];
+	char buf[64] = "";
 	LocaleGuard lg (X_("POSIX"));
 
 	snprintf (buf, sizeof(buf), "0x%x", _flags);
@@ -2289,23 +2166,6 @@ AudioDiskstream::monitor_input (bool yn)
 }
 
 void
-AudioDiskstream::set_capture_offset ()
-{
-	if (_io == 0) {
-		/* can't capture, so forget it */
-		return;
-	}
-
-	_capture_offset = _io->input_latency();
-}
-
-void
-AudioDiskstream::set_persistent_align_style (AlignStyle a)
-{
-	_persistent_alignment_style = a;
-}
-
-void
 AudioDiskstream::set_align_style_from_io ()
 {
 	bool have_physical = false;
@@ -2327,20 +2187,6 @@ AudioDiskstream::set_align_style_from_io ()
 		set_align_style (ExistingMaterial);
 	} else {
 		set_align_style (CaptureTime);
-	}
-}
-
-void
-AudioDiskstream::set_align_style (AlignStyle a)
-{
-	if (record_enabled() && _session.actively_recording()) {
-		return;
-	}
-
-
-	if (a != _alignment_style) {
-		_alignment_style = a;
-		AlignmentStyleChanged ();
 	}
 }
 
@@ -2394,57 +2240,6 @@ AudioDiskstream::capture_buffer_load () const
 			(double) channels.front().capture_buf->bufsize());
 }
 
-int
-AudioDiskstream::set_loop (Location *location)
-{
-	if (location) {
-		if (location->start() >= location->end()) {
-			error << string_compose(_("Location \"%1\" not valid for track loop (start >= end)"), location->name()) << endl;
-			return -1;
-		}
-	}
-
-	loop_location = location;
-
-	 LoopSet (location); /* EMIT SIGNAL */
-	return 0;
-}
-
-jack_nframes_t
-AudioDiskstream::get_capture_start_frame (uint32_t n)
-{
-	Glib::Mutex::Lock lm (capture_info_lock);
-
-	if (capture_info.size() > n) {
-		return capture_info[n]->start;
-	}
-	else {
-		return capture_start_frame;
-	}
-}
-
-jack_nframes_t
-AudioDiskstream::get_captured_frames (uint32_t n)
-{
-	Glib::Mutex::Lock lm (capture_info_lock);
-
-	if (capture_info.size() > n) {
-		return capture_info[n]->frames;
-	}
-	else {
-		return capture_captured;
-	}
-}
-
-void
-AudioDiskstream::punch_in ()
-{
-}
-
-void
-AudioDiskstream::punch_out ()
-{
-}
 
 int
 AudioDiskstream::use_pending_capture_data (XMLNode& node)
@@ -2540,23 +2335,4 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	_playlist->add_region (*region, position);
 
 	return 0;
-}
-
-void
-AudioDiskstream::set_roll_delay (jack_nframes_t nframes)
-{
-	_roll_delay = nframes;
-}
-
-void
-AudioDiskstream::set_destructive (bool yn)
-{
-	if (yn != destructive()) {
-		reset_write_sources (true, true);
-		if (yn) {
-			_flags |= Destructive;
-		} else {
-			_flags &= ~Destructive;
-		}
-	}
 }

@@ -19,15 +19,13 @@
 */
 
 #include <iostream>
-#include <sys/mman.h>
 #include <vector>
 
 #include <pbd/pool.h>
 #include <pbd/error.h>
-#include <pbd/stl_delete.h>
-#include <pbd/pthread_utils.h>
 
 using namespace std;
+using namespace PBD;
 
 Pool::Pool (string n, unsigned long item_size, unsigned long nitems)
 {
@@ -84,32 +82,39 @@ Pool::release (void *ptr)
 /*---------------------------------------------*/
 
 MultiAllocSingleReleasePool::MultiAllocSingleReleasePool (string n, unsigned long isize, unsigned long nitems) 
-	: Pool (n, isize, nitems)
+	: Pool (n, isize, nitems),
+        m_lock(0)
 {
-	pthread_mutex_init (&lock, 0);
 }
 
 MultiAllocSingleReleasePool::~MultiAllocSingleReleasePool ()
 {
+    if(m_lock) delete m_lock;
 }
 
 SingleAllocMultiReleasePool::SingleAllocMultiReleasePool (string n, unsigned long isize, unsigned long nitems) 
-	: Pool (n, isize, nitems)
+	: Pool (n, isize, nitems),
+    m_lock(0)
 {
-	pthread_mutex_init (&lock, 0);
 }
 
 SingleAllocMultiReleasePool::~SingleAllocMultiReleasePool ()
 {
+    if(m_lock) delete m_lock;
 }
 
 void*
 MultiAllocSingleReleasePool::alloc ()
 {
 	void *ptr;
-	pthread_mutex_lock (&lock);
+    if(!m_lock) {
+        m_lock = new Glib::Mutex();
+        // umm, I'm not sure that this doesn't also allocate memory.
+        if(!m_lock) error << "cannot create Glib::Mutex in pool.cc" << endmsg;
+    }
+    
+    Glib::Mutex::Lock guard(*m_lock);
 	ptr = Pool::alloc ();
-	pthread_mutex_unlock (&lock);
 	return ptr;
 }
 
@@ -128,8 +133,12 @@ SingleAllocMultiReleasePool::alloc ()
 void
 SingleAllocMultiReleasePool::release (void* ptr)
 {
-	pthread_mutex_lock (&lock);
+    if(!m_lock) {
+        m_lock = new Glib::Mutex();
+        // umm, I'm not sure that this doesn't also allocate memory.
+        if(!m_lock) error << "cannot create Glib::Mutex in pool.cc" << endmsg;
+    }
+    Glib::Mutex::Lock guard(*m_lock);
 	Pool::release (ptr);
-	pthread_mutex_unlock (&lock);
 }
 

@@ -11,6 +11,7 @@
 #include "i18n.h"
 
 using namespace std;
+using namespace PBD;
 	
 uint32_t BaseUI::rt_bit = 1;
 BaseUI::RequestType BaseUI::CallSlot = BaseUI::new_request_type();

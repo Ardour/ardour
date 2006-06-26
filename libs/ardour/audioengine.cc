@@ -40,9 +40,11 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
-jack_nframes_t Port::short_over_length = 2;
-jack_nframes_t Port::long_over_length = 10;
+// Why here? [DR]
+jack_nframes_t Port::_short_over_length = 2;
+jack_nframes_t Port::_long_over_length = 10;
 
 AudioEngine::AudioEngine (string client_name) 
 {
@@ -91,12 +93,6 @@ _thread_init_callback (void *arg)
 	*/
 
 	PBD::ThreadCreatedWithRequestSize (pthread_self(), X_("Audioengine"), 4096);
-
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst()) {
-		fst_adopt_thread ();
-	}
-#endif
 }
 
 int
@@ -279,8 +275,8 @@ AudioEngine::process_callback (jack_nframes_t nframes)
 			Port *port = (*i);
 			bool x;
 			
-			if (port->last_monitor != (x = port->monitoring_input ())) {
-				port->last_monitor = x;
+			if (port->_last_monitor != (x = port->monitoring_input ())) {
+				port->_last_monitor = x;
 				/* XXX I think this is dangerous, due to 
 				   a likely mutex in the signal handlers ...
 				*/
@@ -393,18 +389,19 @@ AudioEngine::remove_session ()
 }
 
 Port *
-AudioEngine::register_audio_input_port (const string& portname)
+AudioEngine::register_input_port (Buffer::Type type, const string& portname)
 {
 	if (!_running) {
 		if (!_has_run) {
-			fatal << _("register audio input port called before engine was started") << endmsg;
+			fatal << _("register input port called before engine was started") << endmsg;
 			/*NOTREACHED*/
 		} else {
 			return 0;
 		}
 	}
 
-	jack_port_t *p = jack_port_register (_jack, portname.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+	jack_port_t *p = jack_port_register (_jack, portname.c_str(),
+		Buffer::type_to_jack_type(type), JackPortIsInput, 0);
 
 	if (p) {
 
@@ -424,11 +421,11 @@ AudioEngine::register_audio_input_port (const string& portname)
 }
 
 Port *
-AudioEngine::register_audio_output_port (const string& portname)
+AudioEngine::register_output_port (Buffer::Type type, const string& portname)
 {
 	if (!_running) {
 		if (!_has_run) {
-			fatal << _("register audio output port called before engine was started") << endmsg;
+			fatal << _("register output port called before engine was started") << endmsg;
 			/*NOTREACHED*/
 		} else {
 			return 0;
@@ -437,7 +434,8 @@ AudioEngine::register_audio_output_port (const string& portname)
 
 	jack_port_t *p;
 
-	if ((p = jack_port_register (_jack, portname.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0)) != 0) {
+	if ((p = jack_port_register (_jack, portname.c_str(),
+		Buffer::type_to_jack_type(type), JackPortIsOutput, 0)) != 0) {
 		Port *newport = new Port (p);
 		ports.insert (ports.begin(), newport);
 		return newport;
@@ -451,6 +449,7 @@ AudioEngine::register_audio_output_port (const string& portname)
 	return 0;
 }
 
+
 int          
 AudioEngine::unregister_port (Port *port)
 {
@@ -463,7 +462,7 @@ AudioEngine::unregister_port (Port *port)
 
 	if (port) {
 
-		int ret = jack_port_unregister (_jack, port->port);
+		int ret = jack_port_unregister (_jack, port->_port);
 		
 		if (ret == 0) {
 
@@ -554,7 +553,7 @@ AudioEngine::disconnect (Port *port)
 		}
 	}
 
-	int ret = jack_port_disconnect (_jack, port->port);
+	int ret = jack_port_disconnect (_jack, port->_port);
 
 	if (ret == 0) {
 		remove_connections_for (port);
@@ -704,7 +703,6 @@ AudioEngine::n_physical_inputs () const
 }
 
 string
-
 AudioEngine::get_nth_physical (uint32_t n, int flag)
 {
 	const char ** ports;
@@ -752,7 +750,7 @@ AudioEngine::get_port_total_latency (const Port& port)
 		} 
 	}
 
-	return jack_port_get_total_latency (_jack, port.port);
+	return jack_port_get_total_latency (_jack, port._port);
 }
 
 void
@@ -830,7 +828,7 @@ AudioEngine::remove_all_ports ()
 
 	if (_jack) {
 		for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
-			jack_port_unregister (_jack, (*i)->port);
+			jack_port_unregister (_jack, (*i)->_port);
 		}
 	}
 
@@ -953,7 +951,7 @@ AudioEngine::reconnect_to_jack ()
 		
 		short_name = long_name.substr (long_name.find_last_of (':') + 1);
 
-		if (((*i)->port = jack_port_register (_jack, short_name.c_str(), (*i)->type(), (*i)->flags(), 0)) == 0) {
+		if (((*i)->_port = jack_port_register (_jack, short_name.c_str(), (*i)->type(), (*i)->flags(), 0)) == 0) {
 			error << string_compose (_("could not reregister %1"), (*i)->name()) << endmsg;
 			break;
 		} else {
@@ -968,7 +966,7 @@ AudioEngine::reconnect_to_jack ()
 
 	if (i != ports.end()) {
 		for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
-			jack_port_unregister (_jack, (*i)->port);
+			jack_port_unregister (_jack, (*i)->_port);
 		}
 		return -1;
 	} 

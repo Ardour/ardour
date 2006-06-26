@@ -46,6 +46,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace sigc;
+using namespace PBD;
 
 void
 Session::request_input_change_handling ()
@@ -78,7 +79,7 @@ Session::request_transport_speed (float speed)
 }
 
 void
-Session::request_diskstream_speed (AudioDiskstream& ds, float speed)
+Session::request_diskstream_speed (Diskstream& ds, float speed)
 {
 	Event* ev = new Event (Event::SetDiskstreamSpeed, Event::Add, Event::Immediate, 0, speed);
 	ev->set_ptr (&ds);
@@ -1045,7 +1046,7 @@ Session::reverse_diskstream_buffers ()
 }
 
 void
-Session::set_diskstream_speed (AudioDiskstream* stream, float speed)
+Session::set_diskstream_speed (Diskstream* stream, float speed)
 {
 	if (stream->realtime_set_speed (speed, false)) {
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportSpeed);

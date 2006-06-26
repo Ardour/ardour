@@ -46,6 +46,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 
 void
@@ -286,7 +287,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 
 		if (atv->is_audio_track()) {
 
-			Playlist* playlist = atv->get_diskstream()->playlist();
+			AudioPlaylist* playlist = dynamic_cast<AudioPlaylist*>(atv->get_diskstream()->playlist());
 			
 			if (playlist && write_audio_range (*playlist, atv->get_diskstream()->n_channels(), ts) == 0) {
 				ret = -1;
@@ -299,7 +300,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 }
 
 bool
-Editor::write_audio_range (Playlist& playlist, uint32_t channels, list<AudioRange>& range)
+Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<AudioRange>& range)
 {
 	AudioFileSource* fs;
 	const jack_nframes_t chunk_size = 4096;

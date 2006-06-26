@@ -1,0 +1,27 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+fst_src = glob.glob('*.c')
+
+Import('env install_prefix')
+fst = env.Copy(CC="winegcc")
+fst.Append (CPPPATH=".")
+
+hackSDK = fst.Command('vst/aeffectx.h', 'vstsdk2.3/source/common/aeffectx.h', [
+    Delete ('${TARGET.dir}'),
+    Copy ('${TARGET.dir}', '${SOURCE.dir}'),
+    "sed -i '/struct VstFileType\|struct VstFileSelect/,/};/d' $TARGET"
+])
+
+a = fst.Object ('fst', 'fst.c')
+b = fst.Object ('fstinfofile', 'fstinfofile.c')
+c = fst.Object ('vstwin', 'vstwin.c')
+d = fst.Object ('vsti', 'vsti.c')
+
+Default([hackSDK,a,b,c,d])
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'], fst_src + ['SConscript'] ))
+

@@ -31,7 +31,6 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/error.h>
 #include <pbd/pthread_utils.h>
 
 #include <ardour/configuration.h>

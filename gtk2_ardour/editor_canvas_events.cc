@@ -42,6 +42,7 @@
 
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 
 bool
@@ -511,22 +512,25 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 	if ((atv = dynamic_cast<AudioTimeAxisView*>(&tv)) != 0) {
 
 		if (atv->is_audio_track()) {
-			
-			AudioPlaylist* pl = atv->get_diskstream()->playlist();
-			Playlist::RegionList* rl = pl->regions_at (event_frame (event));
 
-			if (!rl->empty()) {
-				DescendingRegionLayerSorter cmp;
-				rl->sort (cmp);
+			AudioPlaylist* pl;
+			if ((pl = dynamic_cast<AudioPlaylist*> (atv->get_diskstream()->playlist())) != 0) {
 
-				AudioRegionView* arv = atv->view->find_view (*(dynamic_cast<AudioRegion*> (rl->front())));
+				Playlist::RegionList* rl = pl->regions_at (event_frame (event));
 
-				/* proxy */
-				
-				delete rl;
+				if (!rl->empty()) {
+					DescendingRegionLayerSorter cmp;
+					rl->sort (cmp);
 
-				return canvas_region_view_event (event, arv->get_canvas_group(), arv);
-			} 
+					AudioRegionView* arv = atv->view->find_view (*(dynamic_cast<AudioRegion*> (rl->front())));
+
+					/* proxy */
+
+					delete rl;
+
+					return canvas_region_view_event (event, arv->get_canvas_group(), arv);
+				} 
+			}
 		}
 	}
 

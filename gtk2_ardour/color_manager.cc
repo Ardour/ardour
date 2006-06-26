@@ -12,6 +12,7 @@
 
 using namespace std;
 using namespace Gtk;
+using namespace PBD;
 
 /* the global color map */
 

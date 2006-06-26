@@ -30,6 +30,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 int
 AudioFilter::make_new_sources (AudioRegion& region, AudioRegion::SourceList& nsrcs)

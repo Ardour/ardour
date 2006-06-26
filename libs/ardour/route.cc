@@ -44,14 +44,14 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 
 uint32_t Route::order_key_cnt = 0;
 
 
-Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg)
-	: IO (sess, name, input_min, input_max, output_min, output_max),
+Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, Buffer::Type default_type)
+	: IO (sess, name, input_min, input_max, output_min, output_max, default_type),
 	  _flags (flg),
 	  _midi_solo_control (*this, MIDIToggleControl::SoloControl, _session.midi_port()),
 	  _midi_mute_control (*this, MIDIToggleControl::MuteControl, _session.midi_port())

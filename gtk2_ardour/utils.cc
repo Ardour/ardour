@@ -43,6 +43,7 @@ using namespace std;
 using namespace Gtk;
 using namespace sigc;
 using namespace Glib;
+using namespace PBD;
 
 ustring
 fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width)

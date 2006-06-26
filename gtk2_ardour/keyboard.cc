@@ -35,6 +35,8 @@
 
 #include "i18n.h"
 
+using namespace PBD;
+
 #define KBD_DEBUG 1
 bool debug_keyboard = false;
 

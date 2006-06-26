@@ -39,6 +39,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Glib;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -76,7 +77,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 	shuttle_box.set_sensitive (true);
 	
 	if (session->n_audio_diskstreams() == 0) {
-		session->AudioDiskstreamAdded.connect (mem_fun(*this, &ARDOUR_UI::diskstream_added));
+		session->DiskstreamAdded.connect (mem_fun(*this, &ARDOUR_UI::diskstream_added));
 	}
 
 	if (connection_editor) {

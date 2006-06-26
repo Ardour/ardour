@@ -6,4 +6,4 @@ if [ gprofhelper.c -nt gprofhelper.so ] ; then
 fi
 
 export LD_LIBRARY_PATH=../libs/ardour/.libs
-LDPRELOAD=./gprofhelper.so ./ardour $*
+LDPRELOAD=./gprofhelper.so ./ardev $*

@@ -199,7 +199,13 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal);
 	}
 
-	void session_add_midi_track ();
+	void session_add_midi_track () {
+		session_add_midi_route (true);
+	}
+
+	void session_add_midi_bus () {
+		session_add_midi_route (false);
+	}
 
 	void set_engine (ARDOUR::AudioEngine&);
 
@@ -522,7 +528,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	sigc::connection point_one_second_connection;
 	sigc::connection point_zero_one_second_connection;
 
-	void diskstream_added (ARDOUR::AudioDiskstream*);
+	void diskstream_added (ARDOUR::Diskstream*);
 
 	gint session_menu (GdkEventButton *);
 
@@ -538,6 +544,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 
 	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode);
+	void session_add_midi_route (bool disk);
 
 	void add_diskstream_to_menu (ARDOUR::AudioDiskstream&);
 	void diskstream_selected (gint32);

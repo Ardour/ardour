@@ -28,6 +28,7 @@
 
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 
 Editor::Cursor::Cursor (Editor& ed, const string& color, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))

@@ -11,6 +11,7 @@
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace PBD;
 
 TempoDialog::TempoDialog (TempoMap& map, jack_nframes_t frame, const string & action)
 	: ArdourDialog ("tempo dialog"),

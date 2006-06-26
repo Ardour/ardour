@@ -24,17 +24,12 @@
 #include <string>
 
 #include <pbd/transmitter.h>
+#include <pbd/error.h>
 
 using std::string;
 using std::ios;
 
-Transmitter  error (Transmitter::Error);
-Transmitter  info (Transmitter::Info);
-Transmitter  fatal (Transmitter::Fatal);
-Transmitter  warning (Transmitter::Warning);
-
 Transmitter::Transmitter (Channel c)
-
 {
 	channel = c;
 	switch (c) {
@@ -110,11 +105,11 @@ Transmitter::does_not_return ()
 	}
 }
 
+
 extern "C" {
   void pbd_c_error (const char *str)
  
   {
-	extern Transmitter error;
-	error << str << endmsg;
+	PBD::error << str << endmsg;
   }
 }

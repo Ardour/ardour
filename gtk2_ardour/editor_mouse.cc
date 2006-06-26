@@ -61,6 +61,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
 using namespace Editing;
@@ -3197,7 +3198,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 			AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&rv->get_time_axis_view());
 			if (atv && atv->is_audio_track()) {
-				AudioPlaylist* pl = atv->get_diskstream()->playlist();
+				AudioPlaylist* pl = dynamic_cast<AudioPlaylist*>(atv->get_diskstream()->playlist());
 				if (pl) {
 					/* only freeze and capture state once */
 

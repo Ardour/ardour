@@ -84,6 +84,7 @@
 using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
@@ -3120,7 +3121,7 @@ Editor::mapped_set_selected_regionview_from_click (AudioTimeAxisView& atv, uint3
 	}
 
 	
-	if ((pl = ds->playlist()) != 0) {
+	if ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) != 0) {
 		pl->get_equivalent_regions (basis->region, results);
 	}
 	
@@ -3345,7 +3346,7 @@ Editor::set_selected_regionview_from_region_list (Region& r, Selection::Operatio
 				continue;
 			}
 
-			if ((pl = ds->playlist()) != 0) {
+			if ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) != 0) {
 				pl->get_region_list_equivalent_regions (*region, results);
 			}
 			

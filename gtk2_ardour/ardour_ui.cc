@@ -56,6 +56,7 @@
 #include <ardour/session_diskstream.h>
 #include <ardour/port.h>
 #include <ardour/audio_track.h>
+#include <ardour/midi_track.h>
 
 #include "actions.h"
 #include "ardour_ui.h"
@@ -76,6 +77,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
@@ -867,10 +869,50 @@ ARDOUR_UI::open_session ()
 
 
 void
-ARDOUR_UI::session_add_midi_track ()
+ARDOUR_UI::session_add_midi_route (bool disk)
 {
-	cerr << _("Patience is a virtue.\n");
+	Route* route;
+
+	if (session == 0) {
+		warning << _("You cannot add a track without a session already loaded.") << endmsg;
+		return;
+	}
+
+	try { 
+		if (disk) {
+			if ((route = session->new_midi_track ()) == 0) {
+				error << _("could not create new MIDI track") << endmsg;
+			}
+		} else {
+			if ((route = session->new_midi_route ()) == 0) {
+				error << _("could not create new MIDI bus") << endmsg;
+			}
+		}
+#if 0		
+#if CONTROLOUTS
+		if (need_control_room_outs) {
+			pan_t pans[2];
+			
+			pans[0] = 0.5;
+			pans[1] = 0.5;
+			
+			route->set_stereo_control_outs (control_lr_channels);
+			route->control_outs()->set_stereo_pan (pans, this);
+		}
+#endif /* CONTROLOUTS */
+#endif
+	}
+
+	catch (...) {
+		MessageDialog msg (*editor, 
+				   _("There are insufficient JACK ports available\n\
+to create a new track or bus.\n\
+You should save Ardour, exit and\n\
+restart JACK with more ports."));
+		msg.run ();
+	}
 }
+
 
 void
 ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode)
@@ -917,7 +959,7 @@ restart JACK with more ports."));
 }
 
 void
-ARDOUR_UI::diskstream_added (AudioDiskstream* ds)
+ARDOUR_UI::diskstream_added (Diskstream* ds)
 {
 }
 
@@ -1164,11 +1206,14 @@ ARDOUR_UI::toggle_monitor_enable (guint32 dstream)
 		return;
 	}
 
-	AudioDiskstream *ds;
+	Diskstream *ds;
 
 	if ((ds = session->diskstream_by_id (dstream)) != 0) {
-		Port *port = ds->io()->input (0);
-		port->request_monitor_input (!port->monitoring_input());
+		AudioDiskstream *ads = dynamic_cast<AudioDiskstream*>(ds);
+		if (ads) {
+			Port *port = ds->io()->input (0);
+			port->request_monitor_input (!port->monitoring_input());
+		}
 	}
 }
 
@@ -1179,7 +1224,7 @@ ARDOUR_UI::toggle_record_enable (guint32 dstream)
 		return;
 	}
 
-	AudioDiskstream *ds;
+	Diskstream *ds;
 
 	if ((ds = session->diskstream_by_id (dstream)) != 0) {
 		ds->set_record_enabled (!ds->record_enabled(), this);
@@ -2144,7 +2189,11 @@ ARDOUR_UI::add_route ()
 	/* XXX do something with name template */
 
 	while (count) {
-		if (track) {
+		if (track && add_route_dialog->midi()) {
+			session_add_midi_track();
+		} else if (add_route_dialog->midi()) {
+			session_add_midi_bus();
+		} else if (track) {
 			session_add_audio_track (input_chan, output_chan, add_route_dialog->mode());
 		} else {
 			session_add_audio_bus (input_chan, output_chan);

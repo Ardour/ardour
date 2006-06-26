@@ -69,6 +69,7 @@ namespace ARDOUR {
 	class AudioDiskstream;
 	class RouteGroup;
 	class Playlist;
+	class AudioPlaylist;
 	class Region;
 	class Location;
 	class TempoSection;
@@ -1600,7 +1601,7 @@ class Editor : public PublicEditor
 	void external_edit_region ();
 
 	int write_audio_selection (TimeSelection&);
-	bool write_audio_range (ARDOUR::Playlist&, uint32_t channels, list<ARDOUR::AudioRange>&);
+	bool write_audio_range (ARDOUR::AudioPlaylist&, uint32_t channels, list<ARDOUR::AudioRange>&);
 
 	void write_selection ();
 

@@ -19,7 +19,7 @@
 */
 
 #include <fst.h>
-
+#include <gtk/gtksocket.h>
 #include <ardour/insert.h>
 #include <ardour/vst_plugin.h>
 
@@ -29,6 +29,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace PBD;
 
 VSTPluginUI::VSTPluginUI (PluginInsert& pi, VSTPlugin& vp)
 	: PlugUIBase (pi),
@@ -60,16 +61,12 @@ VSTPluginUI::get_preferred_height ()
 int
 VSTPluginUI::package (Gtk::Window& win)
 {
-	/* for GTK+2, remove this: you cannot add to a realized socket */
-
-	//socket.realize ();
-
 	/* forward configure events to plugin window */
 
-	win.signal_configure_event().connect (bind (mem_fun (*this, &VSTPluginUI::configure_handler), &socket));
+	win.signal_configure_event().connect (bind (mem_fun (*this, &VSTPluginUI::configure_handler), &socket), false);
 
-	/* XXX in GTK2, use add_id() instead of steal, although add_id()
-	   assumes that the window's owner understands the XEmbed protocol.
+	/*
+	   this assumes that the window's owner understands the XEmbed protocol.
 	*/
 	
 	socket.add_id (fst_get_XID (vst.fst()));
@@ -77,45 +74,42 @@ VSTPluginUI::package (Gtk::Window& win)
 	return 0;
 }
 
-gboolean
+bool
 VSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
 {
 	XEvent event;
-
 	gint x, y;
+	GdkWindow* w;
 
-	if (socket->gobj() == NULL) {
-		return FALSE;
+	if (socket == 0 || ((w = socket->gobj()->plug_window) == 0)) {
+		return false;
 	}
 
 	event.xconfigure.type = ConfigureNotify;
-	event.xconfigure.event = GDK_WINDOW_XWINDOW (socket->get_window()->gobj());
-	event.xconfigure.window = GDK_WINDOW_XWINDOW (socket->get_window()->gobj());
+	event.xconfigure.event = GDK_WINDOW_XWINDOW (w);
+	event.xconfigure.window = GDK_WINDOW_XWINDOW (w);
 
 	/* The ICCCM says that synthetic events should have root relative
 	 * coordinates. We still aren't really ICCCM compliant, since
 	 * we don't send events when the real toplevel is moved.
 	 */
 	gdk_error_trap_push ();
-	gdk_window_get_origin (socket->get_window()->gobj(), &x, &y);
+	gdk_window_get_origin (w, &x, &y);
 	gdk_error_trap_pop ();
 
 	event.xconfigure.x = x;
 	event.xconfigure.y = y;
-	event.xconfigure.width = GTK_WIDGET(socket)->allocation.width;
-	event.xconfigure.height = GTK_WIDGET(socket)->allocation.height;
+	event.xconfigure.width = GTK_WIDGET(socket->gobj())->allocation.width;
+	event.xconfigure.height = GTK_WIDGET(socket->gobj())->allocation.height;
 
 	event.xconfigure.border_width = 0;
 	event.xconfigure.above = None;
 	event.xconfigure.override_redirect = False;
 
 	gdk_error_trap_push ();
-	XSendEvent (GDK_WINDOW_XDISPLAY (socket->get_window()->gobj()),
-		    GDK_WINDOW_XWINDOW (socket->get_window()->gobj()),
-		    False, StructureNotifyMask, &event);
-	// gdk_display_sync (GDK_WINDOW_XDISPLAY (socket->plug_window));
+	XSendEvent (GDK_WINDOW_XDISPLAY (w), GDK_WINDOW_XWINDOW (w), False, StructureNotifyMask, &event);
 	gdk_error_trap_pop ();
 
-	return FALSE;
+	return false;
 }
 

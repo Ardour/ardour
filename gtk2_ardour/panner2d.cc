@@ -39,6 +39,7 @@ using namespace std;
 using namespace Gtk;
 using namespace sigc;
 using namespace ARDOUR;
+using namespace PBD;
 
 Panner2d::Target::Target (float xa, float ya, const char *txt)
 	: x (xa), y (ya), text (txt ? strdup (txt) : 0)

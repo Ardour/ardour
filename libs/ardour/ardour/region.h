@@ -140,11 +140,11 @@ class Region : public Stateful, public StateManager
 		return ARDOUR::coverage (_position, _position + _length - 1, start, end);
 	}
 
-	virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
+	/*virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
 					float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
 					uint32_t chan_n = 0,
 					jack_nframes_t read_frames = 0,
-					jack_nframes_t skip_frames = 0) const = 0;
+					jack_nframes_t skip_frames = 0) const = 0;*/
 
 	/* EDITING OPERATIONS */
 

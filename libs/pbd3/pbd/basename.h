@@ -6,9 +6,7 @@
 namespace PBD
 {
 	
-extern char *basename (const char *);
-extern std::string basename (const std::string);
-extern std::string basename_nosuffix (const std::string);
+extern std::string basename_nosuffix (const std::string&);
 
 };
 

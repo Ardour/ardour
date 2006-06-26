@@ -38,6 +38,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace sigc;
+using namespace PBD;
 
 Curve::Curve (double minv, double maxv, double canv, bool nostate)
 	: AutomationList (canv, nostate)

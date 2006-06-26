@@ -44,6 +44,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 #define BLOCKSIZE 4096U
 

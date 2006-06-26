@@ -7,6 +7,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 int
 curvetest (string filename)

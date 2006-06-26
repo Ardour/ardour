@@ -27,8 +27,9 @@
 
 #include <sigc++/sigc++.h>
 
+#include <glibmm/thread.h>
+
 #include <pbd/receiver.h>
-#include <pbd/lockmonitor.h>
 #include <pbd/ringbufferNPT.h>
 #include <pbd/base_ui.h>
 
@@ -62,7 +63,7 @@ class AbstractUI : public BaseUI
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 	typedef typename std::map<pthread_t,RequestBuffer*>::iterator RequestBufferMapIterator;
 
-	PBD::Lock request_buffer_map_lock;
+    Glib::Mutex request_buffer_map_lock;
 	typedef std::map<pthread_t,RequestBuffer*> RequestBufferMap;
 	RequestBufferMap request_buffers;
 	pthread_key_t thread_request_buffer_key;

@@ -61,6 +61,7 @@ typedef off_t off64_t;
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 gain_t* DestructiveFileSource::out_coefficient = 0;
 gain_t* DestructiveFileSource::in_coefficient = 0;

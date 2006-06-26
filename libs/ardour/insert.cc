@@ -38,7 +38,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 Insert::Insert(Session& s, Placement p)
 	: Redirect (s, s.next_insert_name(), p)

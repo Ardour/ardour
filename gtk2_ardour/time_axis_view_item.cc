@@ -38,6 +38,7 @@
 using namespace std;
 using namespace Editing;
 using namespace Glib;
+using namespace PBD;
 
 //------------------------------------------------------------------------------
 /** Initialize const static memeber data */

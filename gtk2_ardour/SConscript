@@ -26,7 +26,6 @@ gtkardour.Merge ([
     libraries['ardour'],
     libraries['ardour_cp'],
     libraries['gtkmm2ext'],
-#    libraries['flowcanvas'],
     libraries['midi++2'],
     libraries['pbd3'],
     libraries['gtkmm2'],
@@ -61,6 +60,7 @@ if gtkardour['FFT_ANALYSIS']:
 skipped_files=Split("""
 connection_editor.cc
 """)
+
 
 gtkardour_files=Split("""
 about.cc
@@ -180,6 +180,7 @@ version.cc
 visual_time_axis.cc
 waveview.cc
 """)
+
 
 fft_analysis_files=Split("""
 analysis_window.cc

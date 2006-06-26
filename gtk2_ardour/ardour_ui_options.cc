@@ -35,6 +35,7 @@
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace PBD;
 
 void
 ARDOUR_UI::setup_config_options ()

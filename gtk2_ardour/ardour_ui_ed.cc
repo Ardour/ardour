@@ -40,6 +40,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
@@ -190,12 +191,16 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleBigClock"), _("Big Clock"), mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_splash));
+	act = ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_splash));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleColorManager"), _("Colors"), mem_fun(*this, &ARDOUR_UI::toggle_color_manager));
-	
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("Add Audio Track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1, ARDOUR::Normal));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("AddAudioBus"), _("Add Audio Bus"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_bus), 1, 1));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, X_("AddMIDITrack"), _("Add MIDI Track"), (mem_fun(*this, &ARDOUR_UI::session_add_midi_track)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, X_("AddMidiBus"), _("Add Midi Bus"), mem_fun(*this, &ARDOUR_UI::session_add_midi_bus));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  bind (mem_fun(*this, &ARDOUR_UI::save_state), string("")));
 	ActionManager::session_sensitive_actions.push_back (act);

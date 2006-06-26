@@ -42,6 +42,7 @@
 
 using namespace ARDOUR;
 using namespace std;
+using namespace PBD;
 
 void
 elapsed_time_to_str (char *buf, uint32_t seconds)

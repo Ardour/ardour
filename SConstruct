@@ -8,6 +8,7 @@ import glob
 import errno
 import time
 import platform
+import string
 from sets import Set
 import SCons.Node.FS
 
@@ -345,6 +346,21 @@ tarball_bld = Builder (action = tarballer,
 env.Append (BUILDERS = {'Distribute' : dist_bld})
 env.Append (BUILDERS = {'Tarball' : tarball_bld})
 
+#
+# Make sure they know what they are doing
+#
+
+if env['VST']:
+    sys.stdout.write ("Are you building Ardour for personal use (rather than distributiont to others)? [no]: ")
+    answer = sys.stdin.readline ()
+    answer = answer.rstrip().strip()
+    if answer != "yes" and answer != "y":
+        print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. VST support disabled.'
+        env['VST'] = 0;
+    else:
+        print "OK, VST support will be enabled"
+        
+
 # ----------------------------------------------------------------------
 # Construction environment setup
 # ----------------------------------------------------------------------
@@ -649,6 +665,14 @@ else:
     final_config_prefix = env['PREFIX'] + '/etc'
 
 config_prefix = '$DESTDIR' + final_config_prefix
+
+# For colorgcc ( so says the wiki, but it's still not working :/  anyone? )
+if os.environ.has_key('PATH'):
+	env['PATH'] = os.environ['PATH']
+if os.environ.has_key('TERM'):
+	env['TERM'] = os.environ['TERM']
+if os.environ.has_key('HOME'):
+	env['HOME'] = os.environ['HOME']
 
 
 # SCons should really do this for us

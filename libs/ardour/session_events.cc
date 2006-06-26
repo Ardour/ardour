@@ -33,7 +33,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-//using namespace sigc;
+using namespace PBD;
 
 MultiAllocSingleReleasePool Session::Event::pool ("event", sizeof (Session::Event), 512);
 
@@ -397,7 +397,7 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::SetDiskstreamSpeed:
-		set_diskstream_speed (static_cast<AudioDiskstream*> (ev->ptr), ev->speed);
+		set_diskstream_speed (static_cast<Diskstream*> (ev->ptr), ev->speed);
 		break;
 
 	case Event::SetSlaveSource:

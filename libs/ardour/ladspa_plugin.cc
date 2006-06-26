@@ -49,6 +49,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 LadspaPlugin::LadspaPlugin (void *mod, AudioEngine& e, Session& session, uint32_t index, jack_nframes_t rate)
 	: Plugin (e, session)

@@ -70,6 +70,7 @@ ARDOUR::OSC* ARDOUR::osc = 0;
 
 using namespace ARDOUR;
 using namespace std;
+using namespace PBD;
 
 MIDI::Port *default_mmc_port = 0;
 MIDI::Port *default_mtc_port = 0;
@@ -191,7 +192,7 @@ setup_midi (AudioEngine& engine	)
 }
 
 int
-ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*sighandler)(int,siginfo_t*,void*))
+ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization)
 {
         bool generic_mix_functions = true;
 
@@ -216,7 +217,7 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization, void (*s
 #endif
 
 #ifdef VST_SUPPORT
-	if (Config->get_use_vst() && fst_init (sighandler)) {
+	if (Config->get_use_vst() && fst_init ()) {
 		return -1;
 	}
 #endif

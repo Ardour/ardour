@@ -77,6 +77,7 @@ UndoCommand::clear ()
 void
 UndoCommand::undo ()
 {
+	cerr << "Undo " << _name << endl;
 	for (list<UndoAction>::reverse_iterator i = undo_actions.rbegin(); i != undo_actions.rend(); ++i) {
 		(*i)();
 	}
@@ -85,6 +86,7 @@ UndoCommand::undo ()
 void
 UndoCommand::redo ()
 {
+	cerr << "Redo " << _name << endl;
 	for (list<UndoAction>::iterator i = redo_actions.begin(); i != redo_actions.end(); ++i) {
 		(*i)();
 	}

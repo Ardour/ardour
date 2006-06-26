@@ -31,6 +31,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace sigc;
+using namespace PBD;
 
 #if 0
 static void dumpit (const AutomationList& al, string prefix = "")

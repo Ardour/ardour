@@ -37,6 +37,7 @@
 using namespace ARDOUR;
 using namespace sigc;
 using namespace std;
+using namespace PBD;
 
 AudioPlaylist::State::~State ()
 {
@@ -242,16 +243,18 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ch
 
 	for (vector<uint32_t>::iterator l = relevant_layers.begin(); l != relevant_layers.end(); ++l) {
 
+		// FIXME: Should be vector<AudioRegion*>
 		vector<Region*>& r (relevant_regions[*l]);
 		vector<Crossfade*>& x (relevant_xfades[*l]);
 
 		for (vector<Region*>::iterator i = r.begin(); i != r.end(); ++i) {
-			(*i)->read_at (buf, mixdown_buffer, gain_buffer, workbuf, start, cnt, chan_n, read_frames, skip_frames);
-			_read_data_count += (*i)->read_data_count();
+			AudioRegion* const ar = dynamic_cast<AudioRegion*>(*i);
+			assert(ar);
+			ar->read_at (buf, mixdown_buffer, gain_buffer, workbuf, start, cnt, chan_n, read_frames, skip_frames);
+			_read_data_count += ar->read_data_count();
 		}
 		
 		for (vector<Crossfade*>::iterator i = x.begin(); i != x.end(); ++i) {
-			
 			(*i)->read_at (buf, mixdown_buffer, gain_buffer, workbuf, start, cnt, chan_n);
 
 			/* don't JACK up _read_data_count, since its the same data as we just

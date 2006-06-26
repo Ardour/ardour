@@ -28,6 +28,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 AudioRange&
 TimeSelection::operator[] (uint32_t which)

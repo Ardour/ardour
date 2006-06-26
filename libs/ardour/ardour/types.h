@@ -47,6 +47,8 @@ namespace ARDOUR {
 	typedef uint32_t                    layer_t;
 	typedef uint64_t                    id_t;
 
+	typedef unsigned char RawMidi;
+
 	enum IOChange {
 		NoChange = 0,
 		ConfigurationChanged = 0x1,
