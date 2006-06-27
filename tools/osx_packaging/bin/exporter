@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Author: Aaron Voisine <aaron@voisine.org>
+
+CWD="`(cd \"\`dirname \\\"$0\\\"\`\"; echo $PWD)`"
+TOP="`dirname \"$CWD\"`"
+ETC=$HOME/Library/"Application Support"/Ardour
+
+export "DYLD_LIBRARY_PATH=$TOP/lib"
+export "PATH=$CWD:$PATH"
+export "PANGO_RC_FILE=$ETC/pangorc"
+export "FONTCONFIG_PATH=$TOP/etc/fonts"
+export "GTK_IM_MODULE_FILE=$ETC/gtk.immodules"
+export "GDK_PIXBUF_MODULE_FILE=$ETC/gdk-pixbuf.loaders"
+export "GTK_DATA_PREFIX=$TOP"
+export "GTK_EXE_PREFIX=$TOP"
+export "GS_LIB=$TOP/share/ghostscript/8.51/lib:$TOP/share/ghostscript/fonts"
+export LANG=`grep '\b'\`defaults read .GlobalPreferences AppleCollationOrder\`_\
+       /usr/share/locale/locale.alias | sed -n 's/.*\(.._..\)\..*/\1/p;1q'`
+
+export ARDOUR2_UI_RC=ardour2_ui.rc
+export ARDOUR_CONFIG_PATH=$TOP/etc
+export ARDOUR_DATA_PATH=$TOP/share
+export ARDOUR_GLADE_PATH=$TOP/share/ardour2/glade
+
+mkdir -p "$ETC"
+sed 's|${HOME}|'"$HOME|g" "$TOP/etc/pango/pangorc" > "$ETC/pangorc"
+sed 's|${CWD}|'"$TOP|g" "$TOP/etc/pango/pango.modules" > "$ETC/pango.modules"
+cp -f "$TOP/etc/pango/pangox.aliases" "$ETC"
+sed 's|${CWD}|'"$TOP|g" "$TOP/etc/gtk-2.0/gtk.immodules" > "$ETC/gtk.immodules"
+sed 's|${CWD}|'"$TOP|g" "$TOP/etc/gtk-2.0/gdk-pixbuf.loaders" \
+    > "$ETC/gdk-pixbuf.loaders"
+
+exec "$CWD/ardour" "$@"
