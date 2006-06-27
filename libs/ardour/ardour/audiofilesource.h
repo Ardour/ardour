@@ -62,7 +62,7 @@ class AudioFileSource : public AudioSource {
 	   cannot.
 	 */
 
-	static AudioFileSource* create (string path_plus_channel);
+	static AudioFileSource* create (const string& path_plus_channel);
 	static AudioFileSource* create (const XMLNode&);
 
 	static bool get_soundfile_info (string path, SoundFileInfo& _info, string& error);

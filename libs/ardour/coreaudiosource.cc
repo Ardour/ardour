@@ -18,8 +18,7 @@
 */
 
 #include <pbd/error.h>
-
-#include <ardour/coreaudio_source.h>
+#include <ardour/coreaudiosource.h>
 
 #include "i18n.h"
 
@@ -31,22 +30,21 @@ using namespace PBD;
 CoreAudioSource::CoreAudioSource (const XMLNode& node)
 	: AudioFileSource (node)
 {
-	init (_name, true);
+	init (_name);
+	
 	AudioSourceCreated (this); /* EMIT SIGNAL */
 }
 
-CoreAudioSource::CoreAudioSource (const string& idstr, bool build_peak)
-	: AudioFileSource(idstr, build_peak)
+CoreAudioSource::CoreAudioSource (const string& idstr, Flag flags)
+	: AudioFileSource(idstr, flags)
 {
-	init (idstr, build_peak);
+	init (idstr);
 
-	if (build_peak) {
-		 AudioSourceCreated (this); /* EMIT SIGNAL */
-	}
+	AudioSourceCreated (this); /* EMIT SIGNAL */
 }
 
 void 
-CoreAudioSource::init (const string& idstr, bool build_peak)
+CoreAudioSource::init (const string& idstr)
 {
 	string::size_type pos;
 	string file;
@@ -132,7 +130,7 @@ CoreAudioSource::init (const string& idstr, bool build_peak)
 		throw failed_constructor ();
 	}
 	
-	if (build_peak) {
+	if (_build_peakfiles) {
 		if (initialize_peakfile (false, file)) {
 			error << "initialize peakfile failed" << endmsg;
 			ExtAudioFileDispose (af);
@@ -155,7 +153,7 @@ CoreAudioSource::~CoreAudioSource ()
 }
 
 jack_nframes_t
-CoreAudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
+CoreAudioSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
 {
 	OSStatus err = noErr;
 

@@ -27,15 +27,22 @@ namespace ARDOUR {
 
 class CoreAudioSource : public AudioFileSource {
   public:
-	CoreAudioSource (const string& path_plus_channel, bool build_peak = true);
 	CoreAudioSource (const XMLNode&);
+	CoreAudioSource (const string& path_plus_channel, Flag);
 	~CoreAudioSource ();
 
 	float sample_rate() const;
 	int update_header (jack_nframes_t when, struct tm&, time_t);
 
+	int flush_header () {return 0;};
+	void set_header_timeline_position () {};
+
   protected:
 	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
+	
+	jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt, char * workbuf) 
+	{ return 0; }
+	
 
   private:
 	ExtAudioFileRef af;
@@ -45,7 +52,7 @@ class CoreAudioSource : public AudioFileSource {
 	mutable jack_nframes_t tmpbufsize;
 	mutable Glib::Mutex _tmpbuf_lock;
 
-	void init (const string &str, bool build_peak);
+	void init (const string &str);
 };
 
 }; /* namespace ARDOUR */

@@ -42,7 +42,7 @@
 // if these headers come before sigc++ is included
 // the parser throws ObjC++ errors. (nil is a keyword)
 #ifdef HAVE_COREAUDIO 
-#include <ardour/coreaudio_source.h>
+#include <ardour/coreaudiosource.h>
 #include <AudioToolbox/ExtendedAudioFile.h>
 #include <AudioToolbox/AudioFormat.h>
 #endif // HAVE_COREAUDIO
@@ -216,11 +216,11 @@ AudioFileSource::create (const string& idstr)
 	AudioFileSource* es = 0;
 
 	try {
-		es = new CoreAudioSource (idstr);
+		es = new CoreAudioSource (idstr, Flag(0x0));
 	}
 
 	catch (failed_constructor& err) {
-		es = new SndFileSource (idstr);
+		es = new SndFileSource (idstr, Flag(0x0));
 	}
 
 	return es;
@@ -229,9 +229,9 @@ AudioFileSource::create (const string& idstr)
 #else
 
 AudioFileSource*
-AudioFileSource::create (string idstr)
+AudioFileSource::create (const string& idstr)
 {
-	return new SndFileSource (idstr);
+	return new SndFileSource (idstr, Flag(0x0));
 }
 
 #endif // HAVE_COREAUDIO

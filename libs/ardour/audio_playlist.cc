@@ -20,7 +20,7 @@
 
 #include <algorithm>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <sigc++/bind.h>
 
