@@ -362,7 +362,7 @@ ARDOUR_UI::setup_transport ()
 	alert_box.pack_start (solo_alert_button);
 	alert_box.pack_start (auditioning_alert_button);
 
-	transport_tearoff_hbox.set_border_width (5);
+	transport_tearoff_hbox.set_border_width (4);
 
 	transport_tearoff_hbox.pack_start (goto_start_button, false, false);
 	transport_tearoff_hbox.pack_start (goto_end_button, false, false);
@@ -412,19 +412,31 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff_hbox.pack_start (play_selection_button, false, false);
 	transport_tearoff_hbox.pack_start (roll_button, false, false);
 	transport_tearoff_hbox.pack_start (stop_button, false, false);
-	transport_tearoff_hbox.pack_start (rec_button, false, false, 10);
+	transport_tearoff_hbox.pack_start (rec_button, false, false, 8);
 
-	transport_tearoff_hbox.pack_start (primary_clock, false, false, 5);
-	transport_tearoff_hbox.pack_start (secondary_clock, false, false, 5);
+	HBox* clock_box = manage (new HBox);
+	clock_box->pack_start (primary_clock, false, false);
+	clock_box->pack_start (secondary_clock, false, false);
+	VBox* time_controls_box = manage (new VBox);
+	time_controls_box->pack_start (sync_option_combo, false, false);
+	time_controls_box->pack_start (time_master_button, false, false);
+	clock_box->pack_start (*time_controls_box, false, false, 2);
+	transport_tearoff_hbox.pack_start (*clock_box, false, false, 4);
+	
+	VBox* punch_box = manage (new VBox);
+	punch_box->pack_start (punch_in_button, false, false);
+	punch_box->pack_start (punch_out_button, false, false);
+	transport_tearoff_hbox.pack_start (*punch_box, false, false);
 
-	transport_tearoff_hbox.pack_start (sync_option_combo, false, false);
-	transport_tearoff_hbox.pack_start (time_master_button, false, false);
-	transport_tearoff_hbox.pack_start (punch_in_button, false, false);
-	transport_tearoff_hbox.pack_start (punch_out_button, false, false);
-	transport_tearoff_hbox.pack_start (auto_input_button, false, false);
-	transport_tearoff_hbox.pack_start (auto_return_button, false, false);
-	transport_tearoff_hbox.pack_start (auto_play_button, false, false);
-	transport_tearoff_hbox.pack_start (click_button, false, false);
+	VBox* auto_box = manage (new VBox);
+	auto_box->pack_start (auto_play_button, false, false);
+	auto_box->pack_start (auto_return_button, false, false);
+	transport_tearoff_hbox.pack_start (*auto_box, false, false);
+	
+	VBox* io_box = manage (new VBox);
+	io_box->pack_start (auto_input_button, false, false);
+	io_box->pack_start (click_button, false, false);
+	transport_tearoff_hbox.pack_start (*io_box, false, false);
 	
 	/* desensitize */
 

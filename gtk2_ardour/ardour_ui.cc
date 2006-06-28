@@ -117,12 +117,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  shuttle_units_button (_("% ")),
 
-	  punch_in_button (_("punch\nin")),
-	  punch_out_button (_("punch\nout")),
-	  auto_return_button (_("auto\nreturn")),
-	  auto_play_button (_("auto\nplay")),
-	  auto_input_button (_("auto\ninput")),
-	  click_button (_("click")),
+	  punch_in_button (_("Punch In")),
+	  punch_out_button (_("Punch Out")),
+	  auto_return_button (_("Auto Return")),
+	  auto_play_button (_("Autuo Play")),
+	  auto_input_button (_("Auto Input")),
+	  click_button (_("Click")),
 	  auditioning_alert_button (_("AUDITIONING")),
 	  solo_alert_button (_("SOLO")),
 	  shown_flag (false)
@@ -508,11 +508,11 @@ ARDOUR_UI::update_sample_rate (jack_nframes_t ignored)
 		jack_nframes_t rate = engine->frame_rate();
 		
 		if (fmod (rate, 1000.0) != 0.0) {
-			snprintf (buf, sizeof (buf), _("SR: %.1f kHz / %4.1f msecs"), 
+			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f msecs"), 
 				  (float) rate/1000.0f,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		} else {
-			snprintf (buf, sizeof (buf), _("SR: %u kHz / %4.1f msecs"), 
+			snprintf (buf, sizeof (buf), _("%u kHz / %4.1f msecs"), 
 				  rate/1000,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		}
@@ -525,7 +525,7 @@ void
 ARDOUR_UI::update_cpu_load ()
 {
 	char buf[32];
-	snprintf (buf, sizeof (buf), _("DSP Load: %.1f%%"), engine->get_cpu_load());
+	snprintf (buf, sizeof (buf), _("DSP: %.1f%%"), engine->get_cpu_load());
 	cpu_load_label.set_text (buf);
 }
 
@@ -562,7 +562,7 @@ ARDOUR_UI::update_disk_space()
 	char buf[64];
 
 	if (frames == max_frames) {
-		strcpy (buf, _("space: 24hrs+"));
+		strcpy (buf, _("Disk: 24hrs+"));
 	} else {
 		int hrs;
 		int mins;
@@ -592,7 +592,7 @@ ARDOUR_UI::update_disk_space()
 		frames -= mins * fr * 60;
 		secs = frames / fr;
 		
-		snprintf (buf, sizeof(buf), _("space: %02dh:%02dm:%02ds"), hrs, mins, secs);
+		snprintf (buf, sizeof(buf), _("Space: %02dh:%02dm:%02ds"), hrs, mins, secs);
 	}
 
 	disk_space_label.set_text (buf);

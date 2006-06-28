@@ -111,7 +111,7 @@ style "default_base" = "medium_text"
   base[SELECTED]     = { 0.25, 0.25, 0.25 }
   
   engine "clearlooks"  {
-    menubarstyle      = 2       # 0 = flat, 1 = sunken, 2 = flat gradient
+    menubarstyle      = 1       # 0 = flat, 1 = sunken, 2 = flat gradient
     menuitemstyle     = 1       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
     listviewitemstyle = 1       # 0 = flat, 1 = 3d-ish (gradient)
     progressbarstyle  = 0       # 0 = candy bar, 1 = flat
@@ -132,13 +132,13 @@ style "transport_base" = "medium_bold_text"
   bg[INSENSITIVE] = { 0, 0, 0 }
   bg[SELECTED] = { 0, 0, 0 }
 }
-
+/*
 style "black_mackie_menu_bar" = "medium_bold_text"
 {
       fg[NORMAL] = { 1.0, 1.0, 1.0 }
       bg[NORMAL] = { 0, 0, 0 }
 }
-
+*/
 style "default_buttons_menus" 
 {
   font_name = "sans 8"
@@ -327,7 +327,7 @@ style "xrun_warn"
 	bg[NORMAL] = { 1.0, 0.48, 0.46 }
 	bg[ACTIVE] = { 0.09, 1.0, 0.46 }
 }
-
+/*
 style "menu_bar_base"
 {
   bg[NORMAL] = { 0, 0, 0 }	
@@ -336,7 +336,7 @@ style "menu_bar_base"
   bg[INSENSITIVE] = { 0, 0, 0 }
   bg[SELECTED] = { 0, 0, 0 }
 }
-
+*/
 style "fatal_message" = "medium_text"
 {
    fg[ACTIVE] = { 1.0, 0, 1.0 }
@@ -973,7 +973,7 @@ widget "*TransportRecButton" style "transport_rec_button"
 widget "*TransportRecButton*" style "transport_rec_button"
 widget "*RecordingXrunWarningWindow" style "xrun_warn"
 widget "*RecordingXrunWarningWindow*" style "xrun_warn"
-widget "*MainMenuBar" style "menu_bar_base"
+/*widget "*MainMenuBar" style "menu_bar_base"*/
 widget "*ErrorMessage" style "error_message"
 widget "*FatalMessage" style "fatal_message"
 widget "*InfoMessage" style "info_message"
@@ -1055,8 +1055,8 @@ widget "*AudioTrackControlsBaseSelected" style "edit_controls_base_selected"
 widget "*BusControlsBaseSelected" style "edit_controls_base_selected"
 widget "*AutomationTrackControlsBase" style "automation_track_controls_base"
 widget "*AutomationTrackControlsBaseSelected" style "edit_controls_base_selected"
-widget "*EditorMenuBar*" style "black_mackie_menu_bar"
-widget "*MainMenuBar*" style "black_mackie_menu_bar"
+/*widget "*EditorMenuBar*" style "black_mackie_menu_bar"
+widget "*MainMenuBar*" style "black_mackie_menu_bar"*/
 widget "*ZoomClickBox" style "medium_bold_entry"
 widget "*PluginParameterLabel" style "medium_text"
 widget "*PluginNameInfo" style "plugin_name_text"
@@ -1080,8 +1080,8 @@ widget "*MixerTrackDisplayList" style "track_list_display"
 widget "*MixerSnapshotDisplayList" style "track_list_display"
 widget "*MixerAuxDisplayList" style "track_list_display"
 widget "*MixerGroupList" style "track_list_display"
-widget "*WallClock" style "wall_clock"
-widget "*CPULoad" style "wall_clock"
+/*widget "*WallClock" style "wall_clock"
+widget "*CPULoad" style "wall_clock"*/
 widget "*RegionEditorLabel" style "medium_text"
 widget "*RegionEditorSmallLabel" style "small_text"
 widget "*RegionEditorEntry" style "medium_entry"
