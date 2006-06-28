@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 0.664.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-06-21 15:09-0400\n"
+"POT-Creation-Date: 2006-06-27 13:00-0400\n"
 "PO-Revision-Date: 2003-05-21 12:50+0500\n"
 "Last-Translator: Muadibas\n"
 "Language-Team: Hellenic(Greek)\n"
@@ -198,77 +198,77 @@ msgid "programming error: AudioTrack given state without diskstream!"
 msgstr ""
 "σφάλμα προγραμματισμού: εδόθη κατάσταση στην AudioTrack δίχως diskstream!"
 
-#: libs/ardour/audioengine.cc:150
+#: libs/ardour/audioengine.cc:144
 msgid "cannot activate JACK client"
 msgstr "Ο JACK δεν μπορεί να ενεργοποιηθεί"
 
-#: libs/ardour/audioengine.cc:401
+#: libs/ardour/audioengine.cc:395
 msgid "register audio input port called before engine was started"
 msgstr "η register audio input port εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:432
+#: libs/ardour/audioengine.cc:426
 msgid "register audio output port called before engine was started"
 msgstr "η register audio output port εκλήθη πρίν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:493
+#: libs/ardour/audioengine.cc:487
 msgid "connect called before engine was started"
 msgstr "η σύνδεση εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:509
+#: libs/ardour/audioengine.cc:503
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:522 libs/ardour/audioengine.cc:551
+#: libs/ardour/audioengine.cc:516 libs/ardour/audioengine.cc:545
 msgid "disconnect called before engine was started"
 msgstr "η αποσύνδεση εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:609
+#: libs/ardour/audioengine.cc:603
 msgid "get_port_by_name() called before engine was started"
 msgstr "η ρουτίνα get_port_by_name() εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:642
+#: libs/ardour/audioengine.cc:636
 msgid "get_ports called before engine was started"
 msgstr "η ρουτίνα get_ports εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:717
+#: libs/ardour/audioengine.cc:711
 msgid "get_nth_physical called before engine was started"
 msgstr "η ρουτίνα get_nth_physical εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:745
+#: libs/ardour/audioengine.cc:739
 #, fuzzy
 msgid "get_port_total_latency() called with no JACK client connection"
 msgstr "η ρουτίνα get_port_total_latency() εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:751
+#: libs/ardour/audioengine.cc:745
 msgid "get_port_total_latency() called before engine was started"
 msgstr "η ρουτίνα get_port_total_latency() εκλήθη πριν να εκκινηθεί η engine"
 
-#: libs/ardour/audioengine.cc:875
+#: libs/ardour/audioengine.cc:869
 msgid "Unable to connect to JACK server"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:878
+#: libs/ardour/audioengine.cc:872
 msgid "Could not connect to JACK server as  \"%1\""
 msgstr ""
 
-#: libs/ardour/audioengine.cc:883
+#: libs/ardour/audioengine.cc:877
 msgid "JACK server started"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:917
+#: libs/ardour/audioengine.cc:911
 msgid "cannot shutdown connection to JACK"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:942
+#: libs/ardour/audioengine.cc:936
 msgid "failed to connect to JACK"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:958
+#: libs/ardour/audioengine.cc:952
 #, fuzzy
 msgid "could not reregister %1"
 msgstr "Σφάλμα: δεν μπόρεσα να γράψω %1"
 
-#: libs/ardour/audioengine.cc:1015
+#: libs/ardour/audioengine.cc:1009
 msgid "could not reconnect %1 and %2 (err = %3)"
 msgstr ""
 

@@ -94,14 +94,6 @@ AudioTrack::~AudioTrack ()
 	}
 }
 
-#if 0
-void
-AudioTrack::handle_smpte_offset_change ()
-{
-	diskstream
-}
-#endif
-
 int
 AudioTrack::deprecated_use_diskstream_connections ()
 {

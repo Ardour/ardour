@@ -55,9 +55,9 @@ using namespace PBD;
 string AudioFileSource::peak_dir = "";
 string AudioFileSource::search_path;
 
-sigc::signal<void,struct tm*, time_t> AudioFileSource::HeaderPositionOffsetChanged;
-bool                                  AudioFileSource::header_position_negative;
-uint64_t                              AudioFileSource::header_position_offset;
+sigc::signal<void> AudioFileSource::HeaderPositionOffsetChanged;
+bool               AudioFileSource::header_position_negative;
+uint64_t           AudioFileSource::header_position_offset;
 
 char   AudioFileSource::bwf_country_code[3] = "US";
 char   AudioFileSource::bwf_organization_code[4] = "LAS";
@@ -122,7 +122,6 @@ AudioFileSource::init (string pathstr, bool must_exist)
 	next_peak_clear_should_notify = false;
 	
 	if (!find (pathstr, must_exist, is_new)) {
-		cerr << "cannot find " << pathstr << " with me = " << must_exist << endl;
 		return -1;
 	}
 
@@ -211,16 +210,16 @@ AudioFileSource::create (const XMLNode& node)
 
 #ifdef HAVE_COREAUDIO
 AudioFileSource*
-AudioFileSource::create (const string& idstr)
+AudioFileSource::create (const string& idstr, Flag flags)
 {
 	AudioFileSource* es = 0;
 
 	try {
-		es = new CoreAudioSource (idstr, Flag(0x0));
+		es = new CoreAudioSource (idstr, flags);
 	}
 
 	catch (failed_constructor& err) {
-		es = new SndFileSource (idstr, Flag(0x0));
+		es = new SndFileSource (idstr, flags);
 	}
 
 	return es;
@@ -229,9 +228,9 @@ AudioFileSource::create (const string& idstr)
 #else
 
 AudioFileSource*
-AudioFileSource::create (const string& idstr)
+AudioFileSource::create (const string& idstr, Flag flags)
 {
-	return new SndFileSource (idstr, Flag(0x0));
+	return new SndFileSource (idstr, flags);
 }
 
 #endif // HAVE_COREAUDIO
@@ -595,30 +594,25 @@ AudioFileSource::set_search_path (string p)
 void
 AudioFileSource::set_header_position_offset (jack_nframes_t offset, bool negative)
 {
-	time_t tnow;
-
-	time (&tnow);
-
 	header_position_offset = offset;
 	header_position_negative = negative;
-	HeaderPositionOffsetChanged (localtime (&tnow), tnow); /* EMIT SIGNAL */
+
+	HeaderPositionOffsetChanged ();
+}
+
+void 
+AudioFileSource::handle_header_position_change ()
+{
+	if (writable()) {
+		set_header_timeline_position ();
+		flush_header ();
+	}
 }
 
 void
 AudioFileSource::set_timeline_position (jack_nframes_t pos)
 {
 	timeline_position = pos;
-}
-
-void
-AudioFileSource::handle_header_position_change (struct tm* now, time_t tnow)
-{
-	/* don't do this if the file has never had its header flushed to disk yet */
-
-	if (writable() && _timestamp) {
-		set_header_timeline_position ();
-		flush_header ();
-	}
 }
 
 void
@@ -655,8 +649,14 @@ AudioFileSource::set_name (string newname, bool destructive)
 bool
 AudioFileSource::is_empty (string path)
 {
-	/* XXX fix me */
+	bool ret = false;
+	AudioFileSource* afs = create (path, NoPeakFile);
 
-	return false;
+	if (afs) {
+		ret = (afs->length() == 0);
+		delete afs;
+	}
+
+	return ret;
 }
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.99beta23\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-06-21 18:09-0400\n"
+"POT-Creation-Date: 2006-06-27 13:00-0400\n"
 "PO-Revision-Date: 2005-01-11\n"
 "Last-Translator: Muadibas <EMAIL@ADDRESS>\n"
 "Language-Team: Hellenic(Greek) <LL@li.org>\n"
@@ -4776,19 +4776,19 @@ msgstr "παύση του user interface\n"
 msgid "%d(%d): received signal %d\n"
 msgstr "%d: εδέχθη σήμα %d\n"
 
-#: main.cc:186
+#: main.cc:180
 msgid "cannot become new process group leader (%1)"
 msgstr ""
 
-#: main.cc:213
+#: main.cc:207
 msgid "cannot setup signal handling for %1"
 msgstr "δεν γίνεται να διαμορφώθεί η διαχείρηση σημάτων για %1"
 
-#: main.cc:224
+#: main.cc:218
 msgid "cannot set default signal mask (%1)"
 msgstr "δεν γίνεται να διαμορφώθεί η προκαθορισμένη μάσκα σημάτων (%1)"
 
-#: main.cc:254
+#: main.cc:248
 #, fuzzy
 msgid ""
 "Without a UI style file, ardour will look strange.\n"
@@ -4797,12 +4797,12 @@ msgstr ""
 "Δίχως αρχείο εμφάνισεως UI, ο ardour θα φαίνεται παράξενα.\n"
 "Παρακαλώ θέστε το ARDOUR_UI_RC να δείχνει σε ενεργό αρχείο εμφανίσεως UI"
 
-#: main.cc:276
+#: main.cc:270
 #, fuzzy
 msgid "Ardour could not connect to JACK."
 msgstr "Δεν γινόταν να συνδεθώ στον JACK server σαν  \"%1\""
 
-#: main.cc:280
+#: main.cc:274
 #, fuzzy
 msgid ""
 "There are several possible reasons:\n"
@@ -4822,12 +4822,12 @@ msgstr ""
 "\n"
 "Παρακαλώ αναλογιστείτε τις πιθανότητες, και ίσως (ξανα)ξεκινήστε τον JACK."
 
-#: main.cc:310
+#: main.cc:304
 msgid "could not load command line session \"%1\""
 msgstr "δεν γινόταν να φορτωθεί η συνεδρία γραμμής εντολών  \"%1\""
 
 #. it wasn't new, but we require a new session
-#: main.cc:330
+#: main.cc:324
 msgid ""
 "\n"
 "\n"
@@ -4835,7 +4835,7 @@ msgid ""
 "To avoid this message, start ardour as \"ardour %1"
 msgstr ""
 
-#: main.cc:341
+#: main.cc:335
 msgid ""
 "\n"
 "\n"
@@ -4843,63 +4843,63 @@ msgid ""
 "To create it from the command line, start ardour as \"ardour --new %1"
 msgstr ""
 
-#: main.cc:405
+#: main.cc:399
 msgid "Ardour/GTK "
 msgstr "Ardour/GTK "
 
-#: main.cc:407
+#: main.cc:401
 msgid ""
 "\n"
 "   (built using "
 msgstr ""
 
-#: main.cc:411
+#: main.cc:405
 #, fuzzy
 msgid " with libardour "
 msgstr " τρέχοντας με libardour "
 
-#: main.cc:416
+#: main.cc:410
 msgid " and GCC version "
 msgstr ""
 
-#: main.cc:426
+#: main.cc:420
 #, fuzzy
 msgid "Copyright (C) 1999-2006 Paul Davis"
 msgstr "Πνευματικα Δικαιώματα 1999-2004 Paul Davis"
 
-#: main.cc:427
+#: main.cc:421
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker"
 msgstr ""
 
-#: main.cc:429
+#: main.cc:423
 msgid "Ardour comes with ABSOLUTELY NO WARRANTY"
 msgstr "Ο Ardour έρχεται με απολύτως ΚΑΜΙΑ ΕΓΓΥΗΣΗ"
 
-#: main.cc:430
+#: main.cc:424
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr ""
 
-#: main.cc:431
+#: main.cc:425
 msgid "This is free software, and you are welcome to redistribute it "
 msgstr ""
 "Το παρόν είναι ελεύθερο λογισμικό, είστε ελεύθεροι να το επαναδιανείμετε "
 
-#: main.cc:432
+#: main.cc:426
 #, fuzzy
 msgid "under certain conditions; see the source for copying conditions."
 msgstr "υπό ορισμένους όρους, ανατρέξτε στο αρχείο COPYING για λεπτομέρειες"
 
-#: main.cc:441
+#: main.cc:435
 msgid "could not create ARDOUR GUI"
 msgstr "δεν γινόταν να δημιουργηθεί ARDOUR GUI"
 
-#: main.cc:459
+#: main.cc:453
 msgid "Could not connect to JACK server as  \"%1\""
 msgstr "Δεν γινόταν να συνδεθώ στον JACK server σαν  \"%1\""
 
-#: main.cc:462
+#: main.cc:456
 msgid "could not initialize Ardour."
 msgstr "δεν γινόταν να εκκινηθεί ο  Ardour."
 

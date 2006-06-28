@@ -39,8 +39,7 @@ class SndFileSource : public AudioFileSource {
 		       Flag flags = AudioFileSource::Flag (AudioFileSource::Writable|
 							   AudioFileSource::Removable|
 							   AudioFileSource::RemovableIfEmpty|
-							   AudioFileSource::CanRename|
-							   AudioFileSource::BuildPeaks));
+							   AudioFileSource::CanRename));
 		       
 	/* constructor to be called for existing in-session files */
 	
@@ -52,7 +51,7 @@ class SndFileSource : public AudioFileSource {
 	int update_header (jack_nframes_t when, struct tm&, time_t);
 	int flush_header ();
 
-	static Flag default_in_session_flags();
+	void handle_smpte_offset_change (jack_nframes_t offset, bool negative);
 
   protected:
 	void set_header_timeline_position ();

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.334.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-06-21 18:09-0400\n"
+"POT-Creation-Date: 2006-06-27 13:00-0400\n"
 "PO-Revision-Date: 2005-02-14 11:19-0500\n"
 "Last-Translator: Alain Fréhel <alain.frehel@free.fr>\n"
 "Language-Team: French <ardour-dev@lists.sourceforge.net>\n"
@@ -4809,19 +4809,19 @@ msgstr "en train d'arrêter l'interface utilisateur\n"
 msgid "%d(%d): received signal %d\n"
 msgstr "%d(%d) : reçu le signal %d\n"
 
-#: main.cc:186
+#: main.cc:180
 msgid "cannot become new process group leader (%1)"
 msgstr ""
 
-#: main.cc:213
+#: main.cc:207
 msgid "cannot setup signal handling for %1"
 msgstr "impossible d'installer le gestionnaire de signaux pour %1"
 
-#: main.cc:224
+#: main.cc:218
 msgid "cannot set default signal mask (%1)"
 msgstr "impossible de définir le masque de signalisation"
 
-#: main.cc:254
+#: main.cc:248
 #, fuzzy
 msgid ""
 "Without a UI style file, ardour will look strange.\n"
@@ -4830,12 +4830,12 @@ msgstr ""
 "Sans un fichier de style pour son IHM, ardour aura une apparence bizarre.\n"
 "Veuillez faire pointer ARDOUR_UI_RC vers un fichier de style d'IHM valide"
 
-#: main.cc:276
+#: main.cc:270
 #, fuzzy
 msgid "Ardour could not connect to JACK."
 msgstr "Impossible de se reconnecter à JACK"
 
-#: main.cc:280
+#: main.cc:274
 #, fuzzy
 msgid ""
 "There are several possible reasons:\n"
@@ -4855,12 +4855,12 @@ msgstr ""
 "\n"
 "Veuillez étudier les possibilités, et peut-être (re)lancer JACK."
 
-#: main.cc:310
+#: main.cc:304
 msgid "could not load command line session \"%1\""
 msgstr "impossible de charger la session indiqué en ligne de commande \"%1\""
 
 #. it wasn't new, but we require a new session
-#: main.cc:330
+#: main.cc:324
 msgid ""
 "\n"
 "\n"
@@ -4872,7 +4872,7 @@ msgstr ""
 "Une session nommé \"%1\" existe déjà.\n"
 "Pour éviter ce message, lancez ardour comme cela : \"ardour %1"
 
-#: main.cc:341
+#: main.cc:335
 msgid ""
 "\n"
 "\n"
@@ -4885,11 +4885,11 @@ msgstr ""
 "Pour la créer depuis la ligne de commande, lancez ardour comme cela : "
 "\"ardour --new %1"
 
-#: main.cc:405
+#: main.cc:399
 msgid "Ardour/GTK "
 msgstr "Ardour/GTK"
 
-#: main.cc:407
+#: main.cc:401
 msgid ""
 "\n"
 "   (built using "
@@ -4897,20 +4897,20 @@ msgstr ""
 "\n"
 "   (fonctionnant avec "
 
-#: main.cc:411
+#: main.cc:405
 msgid " with libardour "
 msgstr " avec libardour "
 
-#: main.cc:416
+#: main.cc:410
 msgid " and GCC version "
 msgstr ""
 
-#: main.cc:426
+#: main.cc:420
 #, fuzzy
 msgid "Copyright (C) 1999-2006 Paul Davis"
 msgstr "Copyright (C) 1999-2005 Paul Davis"
 
-#: main.cc:427
+#: main.cc:421
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker"
@@ -4918,33 +4918,33 @@ msgstr ""
 "Certaines parties Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker"
 
-#: main.cc:429
+#: main.cc:423
 msgid "Ardour comes with ABSOLUTELY NO WARRANTY"
 msgstr "Ardour est distribué sans AUCUNE GARANTIE"
 
-#: main.cc:430
+#: main.cc:424
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr "ni même pour la COMMERCIALISATION ou pour UN BUT PARTICULIER."
 
-#: main.cc:431
+#: main.cc:425
 msgid "This is free software, and you are welcome to redistribute it "
 msgstr "Ceci est un logiciel libre, et vous êtes encouragé à le distribuer "
 
-#: main.cc:432
+#: main.cc:426
 msgid "under certain conditions; see the source for copying conditions."
 msgstr ""
 "sous certaines conditions ; voir le fichier source pour les conditions de "
 "distribution."
 
-#: main.cc:441
+#: main.cc:435
 msgid "could not create ARDOUR GUI"
 msgstr "impossible de créer l'interface utilisateur d'ARDOUR"
 
-#: main.cc:459
+#: main.cc:453
 msgid "Could not connect to JACK server as  \"%1\""
 msgstr "Impossible de se connecter au serveur JACK en tant que \"%1\""
 
-#: main.cc:462
+#: main.cc:456
 msgid "could not initialize Ardour."
 msgstr "impossible d'initialiser Ardour."
 
