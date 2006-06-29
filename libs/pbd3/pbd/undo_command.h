@@ -38,7 +38,7 @@ using std::string;
 /* One of the joys of templates is that you have to do everything right here
  * in the header file; you can't split this to make undo_command.cc */
 
-template <class T1=nil, class T2=nil, class T3=nil, class T4=nil>
+template <class T_obj, class T1=nil, class T2=nil, class T3=nil, class T4=nil>
 class UndoCommand
 {
     public:
@@ -47,39 +47,39 @@ class UndoCommand
 	 * 
 	 *   UndoCommand<Foo> cmd(id, key, foo_instance);
 	 */
-	UndoCommand(id_t object_id, string key) 
-	    : _obj_id(object_id), _key(key) 
+	UndoCommand(T_obj &object, string key) 
+	    : _obj(object), _key(key) 
 	{
-	    _slot = mem_fun( get_object(object_id), get_method(key) );
+	    _slot = mem_fun( _obj, get_method(_key) );
 	}
-	UndoCommand(id_t object_id, string key, T1 &arg1)
-	    : _obj_id(object_id), _key(key) 
+	UndoCommand(T_obj &object, string key, T1 &arg1)
+	    : _obj(object), _key(key) 
 	{ 
-	    _slot = bind( mem_fun( get_object(object_id), get_method(key) ), 
+	    _slot = bind( mem_fun( _obj, get_method(_key) ), 
 		    arg1);
 	    _args.push_back(&arg1); 
 	}
-	UndoCommand(id_t object_id, string key, T1 &arg1, T2 &arg2)
-	    : _obj_id(object_id), _key(key) 
+	UndoCommand(T_obj &object, string key, T1 &arg1, T2 &arg2)
+	    : _obj(object), _key(key) 
 	{ 
-	    _slot = bind( mem_fun( get_object(object_id), get_method(key) ), 
+	    _slot = bind( mem_fun( _obj, get_method(_key) ), 
 		    arg1, arg2);
 	    _args.push_back(&arg1); 
 	    _args.push_back(&arg2); 
 	}
-	UndoCommand(id_t object_id, string key, T1 &arg1, T2 &arg2, T3 &arg3)
-	    : _obj_id(object_id), _key(key) 
+	UndoCommand(T_obj &object, string key, T1 &arg1, T2 &arg2, T3 &arg3)
+	    : _obj(object), _key(key) 
 	{ 
-	    _slot = bind( mem_fun( get_object(object_id), get_method(key) ), 
+	    _slot = bind( mem_fun( _obj, get_method(_key) ), 
 		    arg1, arg2, arg3);
 	    _args.push_back(&arg1); 
 	    _args.push_back(&arg2); 
 	    _args.push_back(&arg3); 
 	}
-	UndoCommand(id_t object_id, string key, T1 &arg1, T2 &arg2, T3 &arg3, T4 &arg4)
-	    : _obj_id(object_id), _key(key) 
+	UndoCommand(T_obj &object, string key, T1 &arg1, T2 &arg2, T3 &arg3, T4 &arg4)
+	    : _obj(object), _key(key) 
 	{ 
-	    _slot = bind( mem_fun( get_object(object_id), get_method(key) ), 
+	    _slot = bind( mem_fun( _obj, get_method(_key) ), 
 		    arg1, arg2, arg4);
 	    _args.push_back(&arg1); 
 	    _args.push_back(&arg2); 
@@ -91,9 +91,8 @@ class UndoCommand
 
 	XMLNode &serialize();
     protected:
-	template <class T_object> T_object &get_object(id_t);
 	template <class T_method> T_method &get_method(string);
-	id_t _obj_id;
+	T_obj &_obj;
 	string _key;
 	slot<void> _slot;
 
