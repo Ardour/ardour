@@ -88,7 +88,7 @@ mountpoint (string path)
 	return best;
 }
 
-#else // no getmntent()
+#else // !HAVE_GETMNTENT
 
 #include <sys/param.h>
 #include <sys/ucred.h>
@@ -97,10 +97,55 @@ mountpoint (string path)
 string
 mountpoint (string path)
 {
-//XXX IMPLEMENT ME using getmntinfo() or getfsstat().
-	return "/";
+	struct statfs *mntbufp = 0;
+	int count;
+	unsigned int maxmatch = 0;
+	unsigned int matchlen;
+	const char *cpath = path.c_str();
+	char best[PATH_MAX+1];
+	
+	if ((count = getmntinfo(&mntbufp, MNT_NOWAIT)) == 0) {
+		free(mntbufp);
+		return "\0";
+	}
+
+	best[0] = '\0';
+
+	for (int i = 0; i < count; ++i) {
+		unsigned int n = 0;
+		matchlen = 0;
+
+		/* note: strcmp's semantics are not 
+		   strict enough to use for this.
+		*/
+
+		while (cpath[n] && mntbufp[i].f_mntonname[n]) {
+			if (cpath[n] != mntbufp[i].f_mntonname[n]) {
+				break;
+			}
+			matchlen++;
+			n++;
+		}
+
+		if (cpath[matchlen] == '\0') {
+			snprintf(best, sizeof(best), "%s", mntbufp[i].f_mntonname);
+			free(mntbufp);
+			return best;
+
+		} else {
+
+			if (matchlen > maxmatch) {
+				snprintf (best, sizeof(best), "%s", mntbufp[i].f_mntonname);
+				maxmatch = matchlen;
+			}
+		}
+	}
+
+	free(mntbufp);
+	
+	return best;
 }
-#endif
+#endif // HAVE_GETMNTENT
 
 #ifdef TEST_MOUNTPOINT
 		
@@ -110,4 +155,4 @@ main (int argc, char *argv[])
 	exit (0);
 }
 
-#endif
+#endif // TEST_MOUNTPOINT
