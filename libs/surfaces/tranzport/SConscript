@@ -34,7 +34,7 @@ tranzport.Merge ([
     libraries['ardour'],
     libraries['ardour_cp'],
     libraries['sigc2'],
-    libraries['pbd3'],
+    libraries['pbd'],
     libraries['midi++2'],
     libraries['xml'],
     libraries['usb'],

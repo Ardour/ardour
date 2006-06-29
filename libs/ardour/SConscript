@@ -198,7 +198,7 @@ ardour.Merge ([
 	     libraries['lrdf'],
 	     libraries['samplerate'],
 	     libraries['sigc2'],
-	     libraries['pbd3'],
+	     libraries['pbd'],
 	     libraries['soundtouch'],
 	     libraries['midi++2'],
 	     libraries['glib2'],

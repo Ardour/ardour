@@ -27,7 +27,7 @@ print "Updating pot file: "
 domain = gtkardour['DOMAIN']
 potfile = gtkardour['POTFILE']
 
-poaction = Action('intltool-update -p -g=' + domain)
+poaction = env.Action('intltool-update -p -g=' + domain)
 
 Execute(poaction)
 

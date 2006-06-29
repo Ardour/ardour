@@ -9,7 +9,7 @@ Import('env final_prefix install_prefix libraries i18n')
 gtkmm2ext = env.Copy()
 gtkmm2ext.Merge ([ 
     libraries['sigc2'], 
-    libraries['pbd3'],
+    libraries['pbd'],
     libraries['midi++2'],
     libraries['gtk2'],
     libraries['glibmm2'],
