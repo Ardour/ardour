@@ -1087,7 +1087,7 @@ sf_command	(SNDFILE *sndfile, int command, void *data, int datasize)
 			broadcast_info_copy (psf->broadcast_info, data) ;
 			broadcast_add_coding_history (psf->broadcast_info, psf->sf.channels, psf->sf.samplerate) ;
 
-			if (psf->write_header)
+			if (psf->auto_header && psf->write_header)
 				psf->write_header (psf, SF_TRUE) ;
 			return SF_TRUE ;
 
@@ -1210,7 +1210,7 @@ sf_seek	(SNDFILE *sndfile, sf_count_t offset, int whence)
 	if (psf->error)
 		return PSF_SEEK_ERROR ;
 
-#ifdef ECDL_ORIGINAL#
+#ifdef ECDL_ORIGINAL
 	if (seek_from_start < 0 || seek_from_start > psf->sf.frames)
 	{	psf->error = SFE_BAD_SEEK ;
 		return PSF_SEEK_ERROR ;

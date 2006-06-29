@@ -1,0 +1,68 @@
+{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf390
+{\fonttbl\f0\fswiss\fcharset77 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww9000\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0\fs24 \cf0 This is the Mac OS X version of Ardour (http://ardour.org)\
+\
+You don't need a lot of stuff to get Ardour running on OS X. You will need:\
+\
+    * At least OS X 10.4\
+\
+    * Apple's X11 which is found on your OS X install CD (or a large download)\
+\
+    * JACK (either JackOSX - http://jackosx.com or "regular" JACK.) In\
+      general, we recommend JackOSX for new users, specifically version\
+      0.72 or above. It should run on OS X versions 10.3.x and above,\
+      including Tiger.  Version 0.73 or above must be used for Mac Intel\
+      universal binary support.\
+\
+See http://ardour.org/requirements_osx for more information.\
+\
+The universal binary of Ardour should run on OSX versions >= 10.4. A version\
+that also runs on Panther should also be available.\
+Please report any problems to osx-support@ardour.org or on the #ardour \
+IRC channel at irc.freenode.net.  And include any output from the \
+console.log as shown in the Applications->Utilities->Console application \
+in the report.\
+\
+IMPORTANT: before starting Ardour, you should configure and start the\
+JACK server. You can either use JackPilot, which comes with the\
+JackOSX package, or you can use the more advanced QJackCtl. A disk\
+image for QJackCtl is available at http://ardour.org/requirements_osx,\
+please read the included README carefully for initial setup\
+instructions.\
+\
+Because ardour does not come with any effect plugins, we are providing\
+installable packages for some of the top LADSPA plugins sets.  Please\
+download and install them from http://ardour.org/requirements_osx\
+page.\
+\
+Also see the online documentation at http://ardour.org/manual/ for\
+basic usage of the software.\
+\
+\
+FAQ\
+------------------------\
+\
+Q: When I click on the Ardour icon, the program will not start\
+\
+First, check a few basic issues:\
+   1. Are you running at least OS X 10.4 ?\
+   2. Did you install Apple's X11 application?\
+   3. Did you install a suitable version of JACK ?\
+   4. Did you start JACK running before trying to run Ardour?\
+      (Typically this is done using a JACK control app like JackPilot or qjackctl.)\
+\
+If the answer is yes to all of the above\
+   1. Launch "Console", which can be found in the "Applications->Utilities" folder\
+   2. Look at the console.log in the Console app.\
+      Press the "clear" button to remove any previous messages.\
+   3. Try to launch Ardour again\
+   4. Cut and paste the entire contents of the Console window\
+      (including any data stored in the scrollback) into a new posting\
+      in the ardour OS X forum at http://ardour.org/forums .\
+      Include details of your OS version and processor type. \
+\
+}

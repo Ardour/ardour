@@ -1754,6 +1754,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			srcs.push_back (s);
 
 			if ((fsrc = dynamic_cast<AudioFileSource *>(s)) != 0) {
+				cerr << "updating source after capture\n";
 				fsrc->update_header (capture_info.front()->start, when, twhen);
 			}
 

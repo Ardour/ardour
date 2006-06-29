@@ -32,8 +32,7 @@ namespace ARDOUR {
 class DestructiveFileSource : public SndFileSource {
   public:
 	DestructiveFileSource (std::string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate,
-			       Flag flags = AudioFileSource::Flag (AudioFileSource::Writable|
-								   AudioFileSource::BuildPeaks));
+			       Flag flags = AudioFileSource::Flag (AudioFileSource::Writable));
 
 	DestructiveFileSource (const XMLNode&);
 	~DestructiveFileSource ();

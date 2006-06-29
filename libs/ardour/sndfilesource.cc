@@ -55,6 +55,7 @@ SndFileSource::SndFileSource (const XMLNode& node)
 }
 
 SndFileSource::SndFileSource (string idstr, Flag flags)
+	                                /* files created this way are never writable or removable */
 	: AudioFileSource (idstr, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
 	init (idstr);
@@ -63,7 +64,7 @@ SndFileSource::SndFileSource (string idstr, Flag flags)
 		throw failed_constructor ();
 	}
 
-	if (_build_peakfiles) {
+	if (!(_flags & NoPeakFile) && _build_peakfiles) {
 		if (initialize_peakfile (false, _path)) {
 			sf_close (sf);
 			sf = 0;
@@ -170,20 +171,15 @@ SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, 
 			delete _broadcast_info;
 			_broadcast_info = 0;
 		}
+		
 	}
 	
-	if (_build_peakfiles) {
+	if (!(_flags & NoPeakFile) && _build_peakfiles) {
 		if (initialize_peakfile (true, _path)) {
 			sf_close (sf);
 			sf = 0;
 			throw failed_constructor ();
 		}
-	}
-
-	/* since SndFileSource's constructed with this constructor can be writable, make sure we update if the header info changes */
-
-	if (writable()) {
-		HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioFileSource::handle_header_position_change));
 	}
 
 	AudioSourceCreated (this); /* EMIT SIGNAL */
@@ -235,34 +231,56 @@ SndFileSource::open ()
 
 	_length = _info.frames;
 
+
+	_broadcast_info = (SF_BROADCAST_INFO*) calloc (1, sizeof (SF_BROADCAST_INFO));
+	
+	/* lookup broadcast info */
+	
+	if (sf_command (sf, SFC_GET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
+
+		/* if the file has data but no broadcast info, then clearly, there is no broadcast info */
+
+		if (_length) {
+			free (_broadcast_info);
+			_broadcast_info = 0;
+			_flags = Flag (_flags & ~Broadcast);
+		}
+
+	} else {
+	
+		/* XXX 64 bit alert: when JACK switches to a 64 bit frame count, this needs to use the high bits
+		   of the time reference.
+		*/
+		
+		set_timeline_position (_broadcast_info->time_reference_low);
+	}
+
 	if (writable()) {
 		sf_command (sf, SFC_SET_UPDATE_HEADER_AUTO, 0, SF_FALSE);
+
+		/* update header if header offset info changes */
+		
+		AudioFileSource::HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioFileSource::handle_header_position_change));
 	}
 
 	return 0;
-}
-
-void
-SndFileSource::close ()
-{
-	if (sf) {
-		sf_close (sf);
-		sf = 0;
-	}
 }
 
 SndFileSource::~SndFileSource ()
 {
 	GoingAway (this); /* EMIT SIGNAL */
 
-	close ();
+	if (sf) {
+		sf_close (sf);
+		sf = 0;
+	}
 
 	if (interleave_buf) {
 		delete [] interleave_buf;
 	}
 
 	if (_broadcast_info) {
-		delete [] _broadcast_info;
+		free (_broadcast_info);
 	}
 }
 
@@ -404,27 +422,38 @@ SndFileSource::write_unlocked (Sample *data, jack_nframes_t cnt, char * workbuf)
 int
 SndFileSource::update_header (jack_nframes_t when, struct tm& now, time_t tnow)
 {	
-	/* allow derived classes to override how this is done */
-
 	set_timeline_position (when);
 
 	if (_flags & Broadcast) {
-		/* this will flush the header implicitly */
-		return setup_broadcast_info (when, now, tnow);
-	} else {
-		return flush_header ();
-	}
+		if (setup_broadcast_info (when, now, tnow)) {
+			return -1;
+		}
+	} 
+
+	return flush_header ();
 }
 
 int
 SndFileSource::flush_header ()
 {
+	if (!writable() || (sf == 0)) {
+		return -1;
+	}
+
 	return (sf_command (sf, SFC_UPDATE_HEADER_NOW, 0, 0) != SF_TRUE);
 }
 
 int
 SndFileSource::setup_broadcast_info (jack_nframes_t when, struct tm& now, time_t tnow)
 {
+	if (!writable()) {
+		return -1;
+	}
+
+	if (!(_flags & Broadcast)) {
+		return 0;
+	}
+
 	/* random code is 9 digits */
 	
 	int random_code = random() % 999999999;
@@ -452,12 +481,10 @@ SndFileSource::setup_broadcast_info (jack_nframes_t when, struct tm& now, time_t
 	
 	set_header_timeline_position ();
 
-	/* note that libsndfile flushes the header to disk when resetting the broadcast info */
-
 	if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
 		error << string_compose (_("cannot set broadcast info for audio file %1; Dropping broadcast info for this file"), _path) << endmsg;
 		_flags = Flag (_flags & ~Broadcast);
-		delete _broadcast_info;
+		free (_broadcast_info);
 		_broadcast_info = 0;
 		return -1;
 	}
@@ -469,6 +496,10 @@ void
 SndFileSource::set_header_timeline_position ()
 {
 	uint64_t pos;
+
+	if (!(_flags & Broadcast)) {
+		return;
+	}
 
 	_broadcast_info->time_reference_high = 0;
 
@@ -491,6 +522,13 @@ SndFileSource::set_header_timeline_position ()
 
 	_broadcast_info->time_reference_high = (pos >> 32);
 	_broadcast_info->time_reference_low = (pos & 0xffffffff);
+
+	if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
+		error << string_compose (_("cannot set broadcast info for audio file %1; Dropping broadcast info for this file"), _path) << endmsg;
+		_flags = Flag (_flags & ~Broadcast);
+		free (_broadcast_info);
+		_broadcast_info = 0;
+	}
 }
 
 jack_nframes_t

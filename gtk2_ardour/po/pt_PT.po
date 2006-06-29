@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.814.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-06-21 18:09-0400\n"
+"POT-Creation-Date: 2006-06-27 13:00-0400\n"
 "PO-Revision-Date: 2004-12-07 13:00+0000\n"
 "Last-Translator: Rui Nuno Capela <rncbc@rncbc.org>\n"
 "Language-Team: Portuguese\n"
@@ -4768,19 +4768,19 @@ msgstr "interface homem-máquina em fase terminal\n"
 msgid "%d(%d): received signal %d\n"
 msgstr "%d: sinal %d recebido\n"
 
-#: main.cc:186
+#: main.cc:180
 msgid "cannot become new process group leader (%1)"
 msgstr ""
 
-#: main.cc:213
+#: main.cc:207
 msgid "cannot setup signal handling for %1"
 msgstr "não foi possível estabelecer receptor de sinal %1"
 
-#: main.cc:224
+#: main.cc:218
 msgid "cannot set default signal mask (%1)"
 msgstr "não foi possível estabelecer máscara de sinal %1"
 
-#: main.cc:254
+#: main.cc:248
 #, fuzzy
 msgid ""
 "Without a UI style file, ardour will look strange.\n"
@@ -4791,12 +4791,12 @@ msgstr ""
 "Por favor, indique um ficheiro de estilo visual válido em ARDOUR_UI_RC "
 "(variável de ambiente)"
 
-#: main.cc:276
+#: main.cc:270
 #, fuzzy
 msgid "Ardour could not connect to JACK."
 msgstr "Não foi possível conectar ao serviço JACK como \"%1\""
 
-#: main.cc:280
+#: main.cc:274
 #, fuzzy
 msgid ""
 "There are several possible reasons:\n"
@@ -4816,12 +4816,12 @@ msgstr ""
 "\n"
 "Por favor, considere estas possibilidades e (re)inicie o serviço JACK."
 
-#: main.cc:310
+#: main.cc:304
 msgid "could not load command line session \"%1\""
 msgstr "não foi possível carregar a sessão de linha de comando \"%1\""
 
 #. it wasn't new, but we require a new session
-#: main.cc:330
+#: main.cc:324
 msgid ""
 "\n"
 "\n"
@@ -4829,7 +4829,7 @@ msgid ""
 "To avoid this message, start ardour as \"ardour %1"
 msgstr ""
 
-#: main.cc:341
+#: main.cc:335
 msgid ""
 "\n"
 "\n"
@@ -4837,63 +4837,63 @@ msgid ""
 "To create it from the command line, start ardour as \"ardour --new %1"
 msgstr ""
 
-#: main.cc:405
+#: main.cc:399
 msgid "Ardour/GTK "
 msgstr ""
 
-#: main.cc:407
+#: main.cc:401
 msgid ""
 "\n"
 "   (built using "
 msgstr ""
 
-#: main.cc:411
+#: main.cc:405
 #, fuzzy
 msgid " with libardour "
 msgstr " em execução com libardour "
 
-#: main.cc:416
+#: main.cc:410
 msgid " and GCC version "
 msgstr ""
 
-#: main.cc:426
+#: main.cc:420
 msgid "Copyright (C) 1999-2006 Paul Davis"
 msgstr ""
 
-#: main.cc:427
+#: main.cc:421
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker"
 msgstr ""
 
-#: main.cc:429
+#: main.cc:423
 msgid "Ardour comes with ABSOLUTELY NO WARRANTY"
 msgstr "Ardour é fornecido ABSOLUTAMENTE SEM QUALQUER GARANTIA"
 
-#: main.cc:430
+#: main.cc:424
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr ""
 
-#: main.cc:431
+#: main.cc:425
 msgid "This is free software, and you are welcome to redistribute it "
 msgstr "Sendo software livre, é permitida e até encorajada a sua distribuição"
 
-#: main.cc:432
+#: main.cc:426
 #, fuzzy
 msgid "under certain conditions; see the source for copying conditions."
 msgstr ""
 "desde que sejam respeitadas algumas condições; para mais informações, leia "
 "por favor o ficheiro COPYING."
 
-#: main.cc:441
+#: main.cc:435
 msgid "could not create ARDOUR GUI"
 msgstr "não foi possível criar o interface gráfico (GUI)"
 
-#: main.cc:459
+#: main.cc:453
 msgid "Could not connect to JACK server as  \"%1\""
 msgstr "Não foi possível conectar ao serviço JACK como \"%1\""
 
-#: main.cc:462
+#: main.cc:456
 msgid "could not initialize Ardour."
 msgstr "não foi possível inicializar o Ardour"
 

@@ -255,7 +255,7 @@ else:
 	env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour2', ardoursh))
 
 if env['NLS']:
-	Export('gtkardour', 'intl_files')
+        Export('gtkardour', 'intl_files')
 	SConscript ('po/SConscript')
     
 # configuration files

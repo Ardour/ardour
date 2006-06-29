@@ -838,6 +838,11 @@ if env['NLS']:
         print 'This system is not configured for internationalized applications (no libintl.h). An english-only version will be built\n'
         env['NLS'] = 0
 
+    have_intltool = conf.TryAction(Action('intltool-update --version'))
+    if have_intltool[0] != 1:
+        print 'This system is not configured for internationalized applications (no intltool-update command). An english-only version will be built\n'
+        env['NLS'] = 0
+    
 
 env = conf.Finish()
 
