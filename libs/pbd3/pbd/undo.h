@@ -27,14 +27,14 @@
 #include <sigc++/slot.h>
 #include <sigc++/bind.h>
 #include <sys/time.h>
-#include <pbd/undo_command.h>
+#include <pbd/command.h>
 
 using std::string;
 using std::list;
 
-typedef sigc::slot<void> UndoAction;
+typedef Command UndoAction;
 
-class UndoTransaction 
+class UndoTransaction : public Command
 {
   public:
 	UndoTransaction ();
@@ -43,12 +43,10 @@ class UndoTransaction
 
 	void clear ();
 
-	void add_undo (const UndoAction&);
-	void add_redo (const UndoAction&);
-	void add_redo_no_execute (const UndoAction&);
+	void add_command (const UndoAction&);
 
+        void operator() ();
 	void undo();
-	void redo();
 	
 	void set_name (const string& str) {
 		_name = str;
@@ -64,8 +62,7 @@ class UndoTransaction
 	}
 
   private:
-	list<UndoAction> redo_actions;
-	list<UndoAction> undo_actions;
+	list<UndoAction> actions;
 	struct timeval   _timestamp;
 	string           _name;
 };

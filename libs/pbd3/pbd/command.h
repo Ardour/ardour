@@ -1,5 +1,5 @@
 /* 
-   Copyright (C) 2006 Paul Davis
+   Copyright (C) 2006 Hans Fugal & Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,18 +15,23 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: /local/undo/libs/pbd3/pbd/undo.h 59 2006-06-15T18:16:20.960977Z fugalh  $
+    $Id: /local/undo/libs/pbd3/pbd/undo.h 80 2006-06-22T22:37:01.079855Z fugalh  $
 */
 
-#ifndef __lib_pbd_serializable_h__
-#define __lib_pbd_serializable_h__
+#ifndef __lib_pbd_undo_h__
+#define __lib_pbd_undo_h__
 
-#include <pbd/xml++.h>
+#include <pbd/serializable.h>
 
-class Serializable 
+class Command : public Serializable
 {
-public:
-    virtual XMLNode &serialize() = 0;
+    public:
+	virtual ~Command();
+	virtual void operator() () = 0;
+        virtual void undo() = 0;
+        virtual void redo() { (*this)(); }
+    protected:
+	Command();
 };
 
-#endif // __lib_pbd_serializable_h__
+#endif

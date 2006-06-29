@@ -33,8 +33,7 @@ UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
 {
 	_name = rhs._name;
 	clear ();
-	undo_actions.insert(undo_actions.end(),rhs.undo_actions.begin(),rhs.undo_actions.end());
-	redo_actions.insert(redo_actions.end(),rhs.redo_actions.begin(),rhs.redo_actions.end());
+	actions.insert(actions.end(),rhs.actions.begin(),rhs.actions.end());
 }
 
 UndoTransaction& 
@@ -43,43 +42,36 @@ UndoTransaction::operator= (const UndoTransaction& rhs)
 	if (this == &rhs) return *this;
 	_name = rhs._name;
 	clear ();
-	undo_actions.insert(undo_actions.end(),rhs.undo_actions.begin(),rhs.undo_actions.end());
-	redo_actions.insert(redo_actions.end(),rhs.redo_actions.begin(),rhs.redo_actions.end());
+	actions.insert(actions.end(),rhs.actions.begin(),rhs.actions.end());
 	return *this;
 }
 
 void
-UndoTransaction::add_undo (const UndoAction& action)
+UndoTransaction::add_command (const UndoAction& action)
 {
-	undo_actions.push_back (action);
-}
-
-void
-UndoTransaction::add_redo (const UndoAction& action)
-{
-	redo_actions.push_back (action);
-	redo_actions.back()(); // operator()
-}
-
-void
-UndoTransaction::add_redo_no_execute (const UndoAction& action)
-{
-	redo_actions.push_back (action);
+	actions.push_back (action);
 }
 
 void
 UndoTransaction::clear ()
 {
-	undo_actions.clear ();
-	redo_actions.clear ();
+	actions.clear ();
+}
+
+void
+UndoTransaction::operator() ()
+{
+	for (list<UndoAction>::iterator i = actions.begin(); i != actions.end(); ++i) {
+		(*i)();
+	}
 }
 
 void
 UndoTransaction::undo ()
 {
 	cerr << "Undo " << _name << endl;
-	for (list<UndoAction>::reverse_iterator i = undo_actions.rbegin(); i != undo_actions.rend(); ++i) {
-		(*i)();
+	for (list<UndoAction>::reverse_iterator i = actions.rbegin(); i != actions.rend(); ++i) {
+		i->undo();
 	}
 }
 
@@ -87,9 +79,7 @@ void
 UndoTransaction::redo ()
 {
 	cerr << "Redo " << _name << endl;
-	for (list<UndoAction>::iterator i = redo_actions.begin(); i != redo_actions.end(); ++i) {
-		(*i)();
-	}
+        (*this)();
 }
 
 void
@@ -119,9 +109,9 @@ UndoHistory::redo (unsigned int n)
 		if (RedoList.size() == 0) {
 			return;
 		}
-		UndoTransaction trans = RedoList.back ();
+		UndoTransaction ut = RedoList.back ();
 		RedoList.pop_back ();
-		trans.redo ();
+		ut.redo ();
 		UndoList.push_back (trans);
 	}
 }
