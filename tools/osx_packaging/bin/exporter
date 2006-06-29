@@ -19,9 +19,14 @@ export LANG=`grep '\b'\`defaults read .GlobalPreferences AppleCollationOrder\`_\
        /usr/share/locale/locale.alias | sed -n 's/.*\(.._..\)\..*/\1/p;1q'`
 
 export ARDOUR2_UI_RC=ardour2_ui.rc
-export ARDOUR_CONFIG_PATH=$TOP/etc
-export ARDOUR_DATA_PATH=$TOP/share
-export ARDOUR_GLADE_PATH=$TOP/share/ardour2/glade
+export ARDOUR_CONFIG_PATH="$TOP/etc"
+export ARDOUR_DATA_PATH="$TOP/share"
+export ARDOUR_GLADE_PATH="$TOP/share/ardour2/glade"
+
+export LADSPA_RDF_PATH="$HOME/Library/Audio/Plug-Ins/LADSPA/rdf:/Library/Audio/Plug-Ins/LADSPA/rdf:$TOP/s
+hare/ladspa/rdf:/usr/local/share/ladspa/rdf:/usr/share/ladspa/rdf"
+export LADSPA_PATH="$HOME/Library/Audio/Plug-Ins/LADSPA:/Library/Audio/Plug-Ins/LADSPA:/usr/local/lib/lad
+spa:/usr/lib/ladspa"
 
 mkdir -p "$ETC"
 sed 's|${HOME}|'"$HOME|g" "$TOP/etc/pango/pangorc" > "$ETC/pangorc"
