@@ -234,11 +234,11 @@ FFTGraph::draw_scales(Glib::RefPtr<Gdk::Window> window)
 		while (_logScale[logscale_pos] < position_on_scale)
 			logscale_pos++;
 		
-		int coord = v_margin + 1.0 + position_on_scale;
+		int coord = (int)(v_margin + 1.0 + position_on_scale);
 		
 		int SR = 44100;
 
-		int rate_at_pos = (double)(SR/2) * (double)logscale_pos / (double)_dataSize;
+		int rate_at_pos = (int)((double)(SR/2) * (double)logscale_pos / (double)_dataSize);
 		
 		char buf[32];
 		snprintf(buf,32,"%dhz",rate_at_pos);
@@ -384,7 +384,7 @@ FFTGraph::on_size_request(Gtk::Requisition* requisition)
 }
 
 void
-FFTGraph::on_size_allocate(Gtk::Allocation alloc)
+FFTGraph::on_size_allocate(Gtk::Allocation& alloc)
 {
 	width = alloc.get_width();
 	height = alloc.get_height();

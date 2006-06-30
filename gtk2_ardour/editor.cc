@@ -131,17 +131,17 @@ static const gchar *snap_type_strings[] = {
 };
 
 static const gchar *snap_mode_strings[] = {
-	N_("Normal"),
-	N_("Magnetic"),
+	N_("Normal Snap"),
+	N_("Magnetic Snap"),
 	0
 };
 
 static const gchar *zoom_focus_strings[] = {
-	N_("Left"),
-	N_("Right"),
-	N_("Center"),
-	N_("Playhead"),
-	N_("Edit Cursor"),
+	N_("Focus Left"),
+	N_("Focus Right"),
+	N_("Focus Center"),
+	N_("Focus Play"),
+	N_("Focus Edit"),
 	0
 };
 
@@ -211,22 +211,17 @@ Editor::Editor (AudioEngine& eng)
 	  
 	  toolbar_selection_clock_table (2,3),
 	  
-	  mouse_mode_button_table (2, 3),
+	  //mouse_mode_button_table (2, 3),
 
-	  mouse_select_button (_("range")),
+	  /*mouse_select_button (_("range")),
 	  mouse_move_button (_("object")),
 	  mouse_gain_button (_("gain")),
 	  mouse_zoom_button (_("zoom")),
 	  mouse_timefx_button (_("timefx")),
-	  mouse_audition_button (_("listen")),
+	  mouse_audition_button (_("listen")),*/
 
 	  automation_mode_button (_("mode")),
 	  global_automation_button (_("automation")),
-
-	  edit_mode_label (_("Edit Mode")),
-	  snap_type_label (_("Snap To")),
-	  snap_mode_label(_("Snap Mode")),
-	  zoom_focus_label (_("Zoom Focus")),
 
 	  /* <CMT Additions> */
 	  image_socket_listener(0),
@@ -234,7 +229,6 @@ Editor::Editor (AudioEngine& eng)
 
 	  /* nudge */
 
-	  nudge_label (_("Nudge")),
 	  nudge_clock (X_("NudgeClock"), true, true)
 
 {
@@ -465,36 +459,7 @@ Editor::Editor (AudioEngine& eng)
 
 	edit_packer.attach (edit_hscrollbar,         2, 3, 2, 3,    FILL|EXPAND,  FILL, 0, 0);
 
-	zoom_in_button.set_name ("EditorTimeButton");
-	zoom_out_button.set_name ("EditorTimeButton");
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom in"));
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom out"));
-
-	zoom_out_full_button.set_name ("EditorTimeButton");
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to session"));
-
-	zoom_in_button.add (*(manage (new Image (Stock::ZOOM_IN, ICON_SIZE_BUTTON))));
-	zoom_out_button.add (*(manage (new Image (Stock::ZOOM_OUT, ICON_SIZE_BUTTON))));
-	zoom_out_full_button.add (*(manage (new Image (Stock::ZOOM_FIT, ICON_SIZE_BUTTON))));
-	
-	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
-	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
-	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
-	
-	zoom_indicator_box.pack_start (zoom_out_button, false, false);
-	zoom_indicator_box.pack_start (zoom_in_button, false, false);
- 	zoom_indicator_box.pack_start (zoom_range_clock, false, false);	
-	zoom_indicator_box.pack_start (zoom_out_full_button, false, false);
-	
-	zoom_indicator_label.set_text (_("Zoom Span"));
-	zoom_indicator_label.set_name ("ToolBarLabel");
-
-	zoom_indicator_vbox.set_spacing (3);
-	zoom_indicator_vbox.set_border_width (3);
-	zoom_indicator_vbox.pack_start (zoom_indicator_label, false, false);
-	zoom_indicator_vbox.pack_start (zoom_indicator_box, false, false);
-
-	bottom_hbox.set_border_width (3);
+	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
 
 	route_display_model = ListStore::create(route_display_columns);
@@ -724,8 +689,8 @@ Editor::Editor (AudioEngine& eng)
 	nudge_forward_button.add (*(manage (new Image (get_xpm("right_arrow.xpm")))));
 	nudge_backward_button.add (*(manage (new Image (get_xpm("left_arrow.xpm")))));
 
-	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge region/selection forwards"));
-	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge region/selection backwards"));
+	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge Region/Selection Forwards"));
+	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge Region/Selection Backwards"));
 
 	nudge_forward_button.set_name ("TransportButton");
 	nudge_backward_button.set_name ("TransportButton");
@@ -2585,20 +2550,33 @@ void
 Editor::setup_toolbar ()
 {
 	string pixmap_path;
+
+	const guint32 FUDGE = 18; // Combo's are stupid - they steal space from the entry for the button
+
+	/* Mode Buttons (tool selection) */
+
 	vector<ToggleButton *> mouse_mode_buttons;
 
+	mouse_move_button.add (*(manage (new Image (get_xpm("tool_object.xpm")))));
 	mouse_mode_buttons.push_back (&mouse_move_button);
+	mouse_select_button.add (*(manage (new Image (get_xpm("tool_range.xpm")))));
 	mouse_mode_buttons.push_back (&mouse_select_button);
+	mouse_gain_button.add (*(manage (new Image (get_xpm("tool_gain.xpm")))));
 	mouse_mode_buttons.push_back (&mouse_gain_button);
+	mouse_zoom_button.add (*(manage (new Image (get_xpm("tool_zoom.xpm")))));
 	mouse_mode_buttons.push_back (&mouse_zoom_button);
+	mouse_timefx_button.add (*(manage (new Image (get_xpm("tool_stretch.xpm")))));
 	mouse_mode_buttons.push_back (&mouse_timefx_button);
+	mouse_audition_button.add (*(manage (new Image (get_xpm("tool_audition.xpm")))));
 	mouse_mode_buttons.push_back (&mouse_audition_button);
+	
 	mouse_mode_button_set = new GroupedButtons (mouse_mode_buttons);
 
+	/*
 	mouse_mode_button_table.set_homogeneous (true);
-	mouse_mode_button_table.set_col_spacings (2);
-	mouse_mode_button_table.set_row_spacings (2);
-	mouse_mode_button_table.set_border_width (5);
+	mouse_mode_button_table.set_col_spacings (1);
+	mouse_mode_button_table.set_row_spacings (1);
+	mouse_mode_button_table.set_border_width (2);
 
 	mouse_mode_button_table.attach (mouse_move_button, 0, 1, 0, 1);
 	mouse_mode_button_table.attach (mouse_select_button, 1, 2, 0, 1);
@@ -2607,8 +2585,31 @@ Editor::setup_toolbar ()
 	mouse_mode_button_table.attach (mouse_gain_button, 0, 1, 1, 2);
 	mouse_mode_button_table.attach (mouse_timefx_button, 1, 2, 1, 2);
 	mouse_mode_button_table.attach (mouse_audition_button, 2, 3, 1, 2);
-
+	
 	mouse_mode_tearoff = manage (new TearOff (mouse_mode_button_table));
+	*/
+
+	HBox* mode_box = manage(new HBox);
+	mode_box->set_border_width (2);
+	mode_box->set_spacing(4);
+	mouse_mode_button_box.set_spacing(1);
+	mouse_mode_button_box.pack_start(mouse_move_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_select_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_zoom_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_gain_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_timefx_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_audition_button, true, true);
+	mouse_mode_button_box.set_homogeneous(true);
+
+	edit_mode_selector.set_name ("EditModeSelector");
+	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "Splice", 2+FUDGE, 10);
+	set_popdown_strings (edit_mode_selector, internationalize (edit_mode_strings));
+	edit_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
+
+	mode_box->pack_start(mouse_mode_button_box);
+	mode_box->pack_start(edit_mode_selector);
+	
+	mouse_mode_tearoff = manage (new TearOff (*mode_box));
 	mouse_mode_tearoff->set_name ("MouseModeBase");
 
 	mouse_mode_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
@@ -2627,12 +2628,12 @@ Editor::setup_toolbar ()
 	mouse_timefx_button.set_name ("MouseModeButton");
 	mouse_audition_button.set_name ("MouseModeButton");
 
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_move_button, _("select/move objects"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("select/move ranges"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_gain_button, _("draw gain automation"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_zoom_button, _("select zoom range"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("stretch/shrink regions"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("listen to specific regions"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_move_button, _("Select/Move Objects"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Select/Move Ranges"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_gain_button, _("Draw Gain Automation"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_zoom_button, _("Select Zoom Range"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("Stretch/Shrink Regions"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("Listen to Specific Regions"));
 
 	mouse_move_button.unset_flags (CAN_FOCUS);
 	mouse_select_button.unset_flags (CAN_FOCUS);
@@ -2651,101 +2652,81 @@ Editor::setup_toolbar ()
 	mouse_audition_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));
 
 	// mouse_move_button.set_active (true);
+	
+
+	/* Zoom */
+	
+	zoom_box.set_spacing (1);
+	zoom_box.set_border_width (2);
+
+	zoom_in_button.set_name ("EditorTimeButton");
+	zoom_in_button.add (*(manage (new Image (get_xpm("zoom_in.xpm")))));
+	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom In"));
+	
+	zoom_out_button.set_name ("EditorTimeButton");
+	zoom_out_button.add (*(manage (new Image (get_xpm("zoom_out.xpm")))));
+	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom Out"));
+
+	zoom_out_full_button.set_name ("EditorTimeButton");
+	zoom_out_full_button.add (*(manage (new Image (get_xpm("zoom_full.xpm")))));
+	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
+	
+	zoom_box.pack_start (zoom_out_button, false, false);
+	zoom_box.pack_start (zoom_in_button, false, false);
+ 	zoom_box.pack_start (zoom_range_clock, false, false);	
+	zoom_box.pack_start (zoom_out_full_button, false, false);
+	
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_range_clock, _("Current Zoom Range\n(Width of visible area)"));
+	
+	zoom_focus_selector.set_name ("ZoomFocusSelector");
+	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Focus Center", 2+FUDGE, 0);
+	set_popdown_strings (zoom_focus_selector, internationalize (zoom_focus_strings));
+	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
+
+	zoom_box.pack_start (zoom_focus_selector, false, false);
+
+
+	/* Edit Cursor / Snap */
+
+	snap_box.set_spacing (1);
+	snap_box.set_border_width (2);
+
+	snap_type_selector.set_name ("SnapTypeSelector");
+	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, "SMPTE Seconds", 2+FUDGE, 10);
+	set_popdown_strings (snap_type_selector, internationalize (snap_type_strings));
+	snap_type_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_type_selection_done));
+	ARDOUR_UI::instance()->tooltips().set_tip (snap_type_selector, _("Unit to snap cursors and ranges to"));
+
+	snap_mode_selector.set_name ("SnapModeSelector");
+	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, "Magnetic Snap", 2+FUDGE, 10);
+	set_popdown_strings (snap_mode_selector, internationalize (snap_mode_strings));
+	snap_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
+
+	snap_box.pack_start (edit_cursor_clock, false, false);
+	snap_box.pack_start (snap_mode_selector, false, false);
+	snap_box.pack_start (snap_type_selector, false, false);
 
 	/* automation control */
 
-	global_automation_button.set_name ("MouseModeButton");
+	/*global_automation_button.set_name ("MouseModeButton");
 	automation_mode_button.set_name ("MouseModeButton");
 
 	automation_box.set_spacing (2);
 	automation_box.set_border_width (2);
 	automation_box.pack_start (global_automation_button, false, false);
-	automation_box.pack_start (automation_mode_button, false, false);
+	automation_box.pack_start (automation_mode_button, false, false);*/
 
-	/* Edit mode */
-
-	edit_mode_label.set_name ("ToolBarLabel");
-
-	edit_mode_selector.set_name ("EditModeSelector");
-
-	edit_mode_box.set_spacing (3);
-	edit_mode_box.set_border_width (3);
-
-	/* XXX another disgusting hack because of the way combo boxes size themselves */
-
-	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
-	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "EdgtMode", 2+FUDGE, 10);
-	set_popdown_strings (edit_mode_selector, internationalize (edit_mode_strings));
-	edit_mode_box.pack_start (edit_mode_label, false, false);
-	edit_mode_box.pack_start (edit_mode_selector, false, false);
-
-	edit_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
-
-	/* Snap Type */
-
-	snap_type_label.set_name ("ToolBarLabel");
-
-	snap_type_selector.set_name ("SnapTypeSelector");
-
-	snap_type_box.set_spacing (3);
-	snap_type_box.set_border_width (3);
-
-	/* XXX another disgusting hack because of the way combo boxes size themselves */
-
-	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, "SMPTE Seconds", 2+FUDGE, 10);
-	set_popdown_strings (snap_type_selector, internationalize (snap_type_strings));
-
-	snap_type_box.pack_start (snap_type_label, false, false);
-	snap_type_box.pack_start (snap_type_selector, false, false);
-
-	snap_type_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_type_selection_done));
-
-	/* Snap mode, not snap type */
-
-	snap_mode_label.set_name ("ToolBarLabel");
-
-	snap_mode_selector.set_name ("SnapModeSelector");
-	
-	snap_mode_box.set_spacing (3);
-	snap_mode_box.set_border_width (3);
-
-	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, "SngpMode", 2+FUDGE, 10);
-	set_popdown_strings (snap_mode_selector, internationalize (snap_mode_strings));
-
-	snap_mode_box.pack_start (snap_mode_label, false, false);
-	snap_mode_box.pack_start (snap_mode_selector, false, false);
-
-	snap_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
-
-	/* Zoom focus mode */
-
-	zoom_focus_label.set_name ("ToolBarLabel");
-
-	zoom_focus_selector.set_name ("ZoomFocusSelector");
-
-	zoom_focus_box.set_spacing (3);
-	zoom_focus_box.set_border_width (3);
-
-	/* XXX another disgusting hack because of the way combo boxes size themselves */
-
-	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Edgt Cursor", 2+FUDGE, 10);
-	set_popdown_strings (zoom_focus_selector, internationalize (zoom_focus_strings));
-
-	zoom_focus_box.pack_start (zoom_focus_label, false, false);
-	zoom_focus_box.pack_start (zoom_focus_selector, false, false);
-
-	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
-
-	/* selection/cursor clocks */
+	/* Selection/cursor clocks */
 
 	toolbar_selection_cursor_label.set_name ("ToolBarLabel");
 	selection_start_clock_label.set_name ("ToolBarLabel");
 	selection_end_clock_label.set_name ("ToolBarLabel");
-	edit_cursor_clock_label.set_name ("ToolBarLabel");
-
+	
 	selection_start_clock_label.set_text (_("Start:"));
 	selection_end_clock_label.set_text (_("End:"));
-	edit_cursor_clock_label.set_text (_("Edit"));
 
 	/* the zoom in/out buttons are generally taller than the clocks, so
 	   put all the toolbar clocks into a size group with one of the 
@@ -2754,57 +2735,17 @@ Editor::setup_toolbar ()
 	   this also applies to the various toolbar combos
 	*/
 
-	RefPtr<SizeGroup> toolbar_clock_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
+	/*RefPtr<SizeGroup> toolbar_clock_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
 	toolbar_clock_size_group->add_widget (zoom_out_button);
 	toolbar_clock_size_group->add_widget (edit_cursor_clock);
 	toolbar_clock_size_group->add_widget (zoom_range_clock);
 	toolbar_clock_size_group->add_widget (nudge_clock);
 	toolbar_clock_size_group->add_widget (edit_mode_selector);
 	toolbar_clock_size_group->add_widget (snap_type_selector);
-	toolbar_clock_size_group->add_widget (snap_mode_selector);
-	toolbar_clock_size_group->add_widget (zoom_focus_selector);
-
-	HBox* edit_clock_hbox = manage (new HBox());
-	VBox* edit_clock_vbox = manage (new VBox());
-
-	edit_clock_hbox->pack_start (edit_cursor_clock, false, false);
-
-	edit_clock_vbox->set_spacing (3);
-	edit_clock_vbox->set_border_width (3);
-	edit_clock_vbox->pack_start (edit_cursor_clock_label, false, false);
-	edit_clock_vbox->pack_start (*edit_clock_hbox, false, false);
+	toolbar_clock_size_group->add_widget (snap_mode_selector);*/
 
 	HBox* hbox = new HBox;
-
-	hbox->pack_start (*edit_clock_vbox, false, false);
-	hbox->pack_start (zoom_indicator_vbox, false, false); 
-	hbox->pack_start (zoom_focus_box, false, false);
-	hbox->pack_start (snap_type_box, false, false);
-	hbox->pack_start (snap_mode_box, false, false);
-	hbox->pack_start (edit_mode_box, false, false);
-
-	VBox *vbox = manage (new VBox);
-
-	vbox->set_spacing (3);
-	vbox->set_border_width (3);
-
-	HBox *nbox = manage (new HBox);
-	
-	nudge_forward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_forward), false));
-	nudge_backward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_backward), false));
-
-	nbox->pack_start (nudge_backward_button, false, false);
-	nbox->pack_start (nudge_forward_button, false, false);
-	nbox->pack_start (nudge_clock, false, false, 5);
-
-	nudge_label.set_name ("ToolBarLabel");
-
-	vbox->pack_start (nudge_label, false, false);
-	vbox->pack_start (*nbox, false, false);
-
-	hbox->pack_start (*vbox, false, false);
-
-	hbox->show_all ();
+	hbox->set_spacing(10);
 
 	tools_tearoff = new TearOff (*hbox);
 	tools_tearoff->set_name ("MouseModeBase");
@@ -2818,11 +2759,36 @@ Editor::setup_toolbar ()
 	tools_tearoff->Visible.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox), 
 					      &tools_tearoff->tearoff_window(), 0));
 
-	toolbar_hbox.set_spacing (8);
+	toolbar_hbox.set_spacing (10);
 	toolbar_hbox.set_border_width (2);
 
-	toolbar_hbox.pack_start (*tools_tearoff, false, false);
 	toolbar_hbox.pack_start (*mouse_mode_tearoff, false, false);
+	toolbar_hbox.pack_start (*tools_tearoff, false, false);
+
+	hbox->pack_start (snap_box, false, false);
+	hbox->pack_start (zoom_box, false, false); 
+	hbox->pack_start (edit_mode_box, false, false);
+
+	//VBox *nudge_vbox = manage (new VBox);
+
+	//nudge_vbox->set_border_width (2);
+
+	HBox *nudge_box = manage (new HBox);
+	nudge_box->set_spacing(1);
+	nudge_box->set_border_width (2);
+
+	nudge_forward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_forward), false));
+	nudge_backward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_backward), false));
+
+	nudge_box->pack_start (nudge_backward_button, false, false);
+	nudge_box->pack_start (nudge_forward_button, false, false);
+	nudge_box->pack_start (nudge_clock, false, false);
+
+	//nudge_vbox->pack_start (*nudge_box, false, false);
+
+	hbox->pack_start (*nudge_box, false, false);
+
+	hbox->show_all ();
 	
 	toolbar_base.set_name ("ToolBarBase");
 	toolbar_base.add (toolbar_hbox);
@@ -3629,18 +3595,18 @@ Editor::snap_type_selection_done ()
 
 	string choice = snap_type_selector.get_active_text();
 	SnapType snaptype = SnapToFrame;
-	
+
 	if (choice == _("Beats/3")) {
-                snaptype = SnapToAThirdBeat;
-        } else if (choice == _("Beats/4")) {
-                snaptype = SnapToAQuarterBeat;
-        } else if (choice == _("Beats/8")) {
-                snaptype = SnapToAEighthBeat;
-        } else if (choice == _("Beats/16")) {
-                snaptype = SnapToASixteenthBeat;
-        } else if (choice == _("Beats/32")) {
-                snaptype = SnapToAThirtysecondBeat;
-        } else if (choice == _("Beats")) {
+		snaptype = SnapToAThirdBeat;
+	} else if (choice == _("Beats/4")) {
+		snaptype = SnapToAQuarterBeat;
+	} else if (choice == _("Beats/8")) {
+		snaptype = SnapToAEighthBeat;
+	} else if (choice == _("Beats/16")) {
+		snaptype = SnapToASixteenthBeat;
+	} else if (choice == _("Beats/32")) {
+		snaptype = SnapToAThirtysecondBeat;
+	} else if (choice == _("Beats")) {
 		snaptype = SnapToBeat;
 	} else if (choice == _("Bars")) {
 		snaptype = SnapToBar;
@@ -3668,10 +3634,10 @@ Editor::snap_type_selection_done ()
 		snaptype = SnapToSeconds;
 	} else if (choice == _("Minutes")) {
 		snaptype = SnapToMinutes;
-        } else if (choice == _("None")) {
+	} else if (choice == _("None")) {
 		snaptype = SnapToFrame;
 	}
-	
+
 	set_snap_to (snaptype);
 }	
 
@@ -3685,9 +3651,9 @@ Editor::snap_mode_selection_done ()
 	string choice = snap_mode_selector.get_active_text();
 	SnapMode mode = SnapNormal;
 
-	if (choice == _("Normal")) {
+	if (choice == _("Normal Snap")) {
 		mode = SnapNormal;
-	} else if (choice == _("Magnetic")) {
+	} else if (choice == _("Magnetic Snap")) {
 		mode = SnapMagnetic;
 	}
 

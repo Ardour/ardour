@@ -359,8 +359,8 @@ ARDOUR_UI::setup_transport ()
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
 	auditioning_alert_button.signal_pressed().connect (mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
 
-	alert_box.pack_start (solo_alert_button);
-	alert_box.pack_start (auditioning_alert_button);
+	alert_box.pack_start (solo_alert_button, false, false);
+	alert_box.pack_start (auditioning_alert_button, false, false);
 
 	transport_tearoff_hbox.set_border_width (4);
 

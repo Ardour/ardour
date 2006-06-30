@@ -1269,7 +1269,6 @@ class Editor : public PublicEditor
 	AudioClock               selection_end_clock;
 	Gtk::Label               selection_end_clock_label;
 	AudioClock               edit_cursor_clock;
-	Gtk::Label               edit_cursor_clock_label;
 	AudioClock               zoom_range_clock;
 	Gtk::Button              zoom_in_button;
 	Gtk::Button              zoom_out_button;
@@ -1281,8 +1280,8 @@ class Editor : public PublicEditor
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
 	
-	Gtk::Table               mouse_mode_button_table;
-	Gtkmm2ext::TearOff*       mouse_mode_tearoff;
+	Gtk::HBox                mouse_mode_button_box;
+	Gtkmm2ext::TearOff*      mouse_mode_tearoff;
 	Gtk::ToggleButton        mouse_select_button;
 	Gtk::ToggleButton        mouse_move_button;
 	Gtk::ToggleButton        mouse_gain_button;
@@ -1300,32 +1299,23 @@ class Editor : public PublicEditor
 	Gtk::ToggleButton        global_automation_button;
 
 	Gtk::ComboBoxText edit_mode_selector;
-	Gtk::Label               edit_mode_label;
-	Gtk::VBox                edit_mode_box;
+	Gtk::VBox         edit_mode_box;
 
 	void edit_mode_selection_done ();
 
 	Gtk::ComboBoxText snap_type_selector;
-	Gtk::Label               snap_type_label;
-	Gtk::VBox                snap_type_box;
+	Gtk::ComboBoxText snap_mode_selector;
+	Gtk::HBox         snap_box;
 
 	void snap_type_selection_done ();
-
-	Gtk::ComboBoxText               snap_mode_selector;
-	Gtk::Label               snap_mode_label;
-	Gtk::VBox                snap_mode_box;
-
 	void snap_mode_selection_done ();
 	
 	Gtk::ComboBoxText zoom_focus_selector;
-	Gtk::Label               zoom_focus_label;
 	Gtk::VBox                zoom_focus_box;
 	
 	void zoom_focus_selection_done ();
 
-	Gtk::Label          zoom_indicator_label;
-	Gtk::HBox           zoom_indicator_box;
-	Gtk::VBox           zoom_indicator_vbox;
+	Gtk::HBox           zoom_box;
 
 	void                update_zoom_indicator ();
 	void                zoom_adjustment_changed();
@@ -1776,7 +1766,6 @@ class Editor : public PublicEditor
 	Gtk::Button      nudge_backward_button;
 	Gtk::HBox        nudge_hbox;
 	Gtk::VBox        nudge_vbox;
-	Gtk::Label       nudge_label;
 	AudioClock       nudge_clock;
 
 	jack_nframes_t get_nudge_distance (jack_nframes_t pos, jack_nframes_t& next);

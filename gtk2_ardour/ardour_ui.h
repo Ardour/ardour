@@ -433,7 +433,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::ToggleButton solo_alert_button;
 
 	Gtk::VBox alert_box;
-	
+
 	void solo_blink (bool);
 	void audition_blink (bool);
 
