@@ -18,8 +18,8 @@
     $Id: /local/undo/libs/pbd3/pbd/undo.h 80 2006-06-22T22:37:01.079855Z fugalh  $
 */
 
-#ifndef __lib_pbd_undo_h__
-#define __lib_pbd_undo_h__
+#ifndef __lib_pbd_command_h__
+#define __lib_pbd_command_h__
 
 #include <pbd/serializable.h>
 
@@ -34,4 +34,4 @@ class Command : public Serializable
 	Command();
 };
 
-#endif
+#endif // __lib_pbd_command_h_
