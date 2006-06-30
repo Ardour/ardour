@@ -270,8 +270,6 @@ Editor::session_going_away ()
 	group_model->clear ();
 
 	edit_cursor_clock.set_session (0);
-	selection_start_clock.set_session (0);
-	selection_end_clock.set_session (0);
 	zoom_range_clock.set_session (0);
 	nudge_clock.set_session (0);
 

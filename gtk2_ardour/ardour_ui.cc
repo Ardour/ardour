@@ -123,7 +123,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	  auto_play_button (_("Autuo Play")),
 	  auto_input_button (_("Auto Input")),
 	  click_button (_("Click")),
-	  auditioning_alert_button (_("AUDITIONING")),
+	  auditioning_alert_button (_("AUDITION")),
 	  solo_alert_button (_("SOLO")),
 	  shown_flag (false)
 

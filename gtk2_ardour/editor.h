@@ -1264,10 +1264,6 @@ class Editor : public PublicEditor
 
 	void editor_mixer_button_toggled ();
 
-	AudioClock               selection_start_clock;
-	Gtk::Label               selection_start_clock_label;
-	AudioClock               selection_end_clock;
-	Gtk::Label               selection_end_clock_label;
 	AudioClock               edit_cursor_clock;
 	AudioClock               zoom_range_clock;
 	Gtk::Button              zoom_in_button;

@@ -101,8 +101,8 @@ static const int32_t slide_index = 0;
 static const int32_t splice_index = 1;
 
 static const gchar *edit_mode_strings[] = {
-	N_("Slide"),
-	N_("Splice"),
+	N_("Slide Edit"),
+	N_("Splice Edit"),
 	0
 };
 
@@ -204,8 +204,6 @@ Editor::Editor (AudioEngine& eng)
 
 	  /* tool bar related */
 
-	  selection_start_clock (X_("SelectionStartClock"), true),
-	  selection_end_clock (X_("SelectionEndClock"), true),
 	  edit_cursor_clock (X_("EditCursorClock"), true),
 	  zoom_range_clock (X_("ZoomRangeClock"), true, true),
 	  
@@ -339,6 +337,7 @@ Editor::Editor (AudioEngine& eng)
 	reset_hscrollbar_stepping ();
 	
 	zoom_focus = ZoomFocusLeft;
+	set_zoom_focus (ZoomFocusLeft);
  	zoom_range_clock.ValueChanged.connect (mem_fun(*this, &Editor::zoom_adjustment_changed));
 
 	initialize_rulers ();
@@ -1207,8 +1206,6 @@ Editor::connect_to_session (Session *t)
 	edit_groups_changed ();
 
 	edit_cursor_clock.set_session (session);
-	selection_start_clock.set_session (session);
-	selection_end_clock.set_session (session);
 	zoom_range_clock.set_session (session);
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
@@ -2553,41 +2550,31 @@ Editor::setup_toolbar ()
 
 	const guint32 FUDGE = 18; // Combo's are stupid - they steal space from the entry for the button
 
+
 	/* Mode Buttons (tool selection) */
 
 	vector<ToggleButton *> mouse_mode_buttons;
 
 	mouse_move_button.add (*(manage (new Image (get_xpm("tool_object.xpm")))));
+	mouse_move_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_move_button);
 	mouse_select_button.add (*(manage (new Image (get_xpm("tool_range.xpm")))));
+	mouse_select_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_select_button);
 	mouse_gain_button.add (*(manage (new Image (get_xpm("tool_gain.xpm")))));
+	mouse_gain_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_gain_button);
 	mouse_zoom_button.add (*(manage (new Image (get_xpm("tool_zoom.xpm")))));
+	mouse_zoom_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_zoom_button);
 	mouse_timefx_button.add (*(manage (new Image (get_xpm("tool_stretch.xpm")))));
+	mouse_timefx_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_timefx_button);
 	mouse_audition_button.add (*(manage (new Image (get_xpm("tool_audition.xpm")))));
+	mouse_audition_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_audition_button);
 	
 	mouse_mode_button_set = new GroupedButtons (mouse_mode_buttons);
-
-	/*
-	mouse_mode_button_table.set_homogeneous (true);
-	mouse_mode_button_table.set_col_spacings (1);
-	mouse_mode_button_table.set_row_spacings (1);
-	mouse_mode_button_table.set_border_width (2);
-
-	mouse_mode_button_table.attach (mouse_move_button, 0, 1, 0, 1);
-	mouse_mode_button_table.attach (mouse_select_button, 1, 2, 0, 1);
-	mouse_mode_button_table.attach (mouse_zoom_button, 2, 3, 0, 1);
- 
-	mouse_mode_button_table.attach (mouse_gain_button, 0, 1, 1, 2);
-	mouse_mode_button_table.attach (mouse_timefx_button, 1, 2, 1, 2);
-	mouse_mode_button_table.attach (mouse_audition_button, 2, 3, 1, 2);
-	
-	mouse_mode_tearoff = manage (new TearOff (mouse_mode_button_table));
-	*/
 
 	HBox* mode_box = manage(new HBox);
 	mode_box->set_border_width (2);
@@ -2601,13 +2588,14 @@ Editor::setup_toolbar ()
 	mouse_mode_button_box.pack_start(mouse_audition_button, true, true);
 	mouse_mode_button_box.set_homogeneous(true);
 
+	// This one needs a little more "FUDGE" on my machine at least..
 	edit_mode_selector.set_name ("EditModeSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "Splice", 2+FUDGE, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "Splice Edit", 3+FUDGE, 10);
 	set_popdown_strings (edit_mode_selector, internationalize (edit_mode_strings));
 	edit_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
 
-	mode_box->pack_start(mouse_mode_button_box);
 	mode_box->pack_start(edit_mode_selector);
+	mode_box->pack_start(mouse_mode_button_box);
 	
 	mouse_mode_tearoff = manage (new TearOff (*mode_box));
 	mouse_mode_tearoff->set_name ("MouseModeBase");
@@ -2709,40 +2697,22 @@ Editor::setup_toolbar ()
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
 
-	/* automation control */
 
-	/*global_automation_button.set_name ("MouseModeButton");
-	automation_mode_button.set_name ("MouseModeButton");
+	/* Nudge */
 
-	automation_box.set_spacing (2);
-	automation_box.set_border_width (2);
-	automation_box.pack_start (global_automation_button, false, false);
-	automation_box.pack_start (automation_mode_button, false, false);*/
+	HBox *nudge_box = manage (new HBox);
+	nudge_box->set_spacing(1);
+	nudge_box->set_border_width (2);
 
-	/* Selection/cursor clocks */
+	nudge_forward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_forward), false));
+	nudge_backward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_backward), false));
 
-	toolbar_selection_cursor_label.set_name ("ToolBarLabel");
-	selection_start_clock_label.set_name ("ToolBarLabel");
-	selection_end_clock_label.set_name ("ToolBarLabel");
-	
-	selection_start_clock_label.set_text (_("Start:"));
-	selection_end_clock_label.set_text (_("End:"));
+	nudge_box->pack_start (nudge_backward_button, false, false);
+	nudge_box->pack_start (nudge_forward_button, false, false);
+	nudge_box->pack_start (nudge_clock, false, false);
 
-	/* the zoom in/out buttons are generally taller than the clocks, so
-	   put all the toolbar clocks into a size group with one of the 
-	   buttons to make them all equal height.
 
-	   this also applies to the various toolbar combos
-	*/
-
-	/*RefPtr<SizeGroup> toolbar_clock_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
-	toolbar_clock_size_group->add_widget (zoom_out_button);
-	toolbar_clock_size_group->add_widget (edit_cursor_clock);
-	toolbar_clock_size_group->add_widget (zoom_range_clock);
-	toolbar_clock_size_group->add_widget (nudge_clock);
-	toolbar_clock_size_group->add_widget (edit_mode_selector);
-	toolbar_clock_size_group->add_widget (snap_type_selector);
-	toolbar_clock_size_group->add_widget (snap_mode_selector);*/
+	/* Pack everything in... */
 
 	HBox* hbox = new HBox;
 	hbox->set_spacing(10);
@@ -2760,32 +2730,14 @@ Editor::setup_toolbar ()
 					      &tools_tearoff->tearoff_window(), 0));
 
 	toolbar_hbox.set_spacing (10);
-	toolbar_hbox.set_border_width (2);
+	toolbar_hbox.set_border_width (1);
 
 	toolbar_hbox.pack_start (*mouse_mode_tearoff, false, false);
 	toolbar_hbox.pack_start (*tools_tearoff, false, false);
 
+	
 	hbox->pack_start (snap_box, false, false);
 	hbox->pack_start (zoom_box, false, false); 
-	hbox->pack_start (edit_mode_box, false, false);
-
-	//VBox *nudge_vbox = manage (new VBox);
-
-	//nudge_vbox->set_border_width (2);
-
-	HBox *nudge_box = manage (new HBox);
-	nudge_box->set_spacing(1);
-	nudge_box->set_border_width (2);
-
-	nudge_forward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_forward), false));
-	nudge_backward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_backward), false));
-
-	nudge_box->pack_start (nudge_backward_button, false, false);
-	nudge_box->pack_start (nudge_forward_button, false, false);
-	nudge_box->pack_start (nudge_clock, false, false);
-
-	//nudge_vbox->pack_start (*nudge_box, false, false);
-
 	hbox->pack_start (*nudge_box, false, false);
 
 	hbox->show_all ();
@@ -3577,9 +3529,9 @@ Editor::edit_mode_selection_done ()
 	string choice = edit_mode_selector.get_active_text();
 	EditMode mode = Slide;
 
-	if (choice == _("Splice")) {
+	if (choice == _("Splice Edit")) {
 		mode = Splice;
-	} else if (choice == _("Slide")) {
+	} else if (choice == _("Slide Edit")) {
 		mode = Slide;
 	}
 
@@ -3670,15 +3622,15 @@ Editor::zoom_focus_selection_done ()
 	string choice = zoom_focus_selector.get_active_text();
 	ZoomFocus focus_type = ZoomFocusLeft;
 
-	if (choice == _("Left")) {
+	if (choice == _("Focus Left")) {
 		focus_type = ZoomFocusLeft;
-	} else if (choice == _("Right")) {
+	} else if (choice == _("Focus Right")) {
 		focus_type = ZoomFocusRight;
-	} else if (choice == _("Center")) {
+	} else if (choice == _("Focus Center")) {
 		focus_type = ZoomFocusCenter;
-        } else if (choice == _("Playhead")) {
+	} else if (choice == _("Focus Playhead")) {
 		focus_type = ZoomFocusPlayhead;
-        } else if (choice == _("Edit Cursor")) {
+	} else if (choice == _("Focus Edit Cursor")) {
 		focus_type = ZoomFocusEdit;
 	} 
 
