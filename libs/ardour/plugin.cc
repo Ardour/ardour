@@ -127,10 +127,16 @@ Plugin::MIDIPortControl::set_value (float value)
 			value = 0.0;
 		}
 	} else {
-		value = lower + (range * value);
-		
-		if (logarithmic) {
-			value = exp(value);
+
+		if (!logarithmic) {
+			value = lower + (range * value);
+		} else {
+			float _lower = 0.0f;
+			if (lower > 0.0f) {
+				_lower = log(lower);
+			}
+
+			value = exp(_lower + log(range) * value);
 		}
 	}
 
