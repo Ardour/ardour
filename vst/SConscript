@@ -27,7 +27,7 @@ ardour_vst.Merge ([
     libraries['ardour_cp'],
     libraries['gtkmm2ext'],
     libraries['midi++2'],
-    libraries['pbd3'],
+    libraries['pbd'],
     libraries['gtkmm2'],
     libraries['glib2'],
     libraries['libgnomecanvas2'],
