@@ -90,7 +90,7 @@ void
 PlaylistSelector::show_for (RouteUI* ruix)
 {
 	vector<const char*> item;
-	AudioDiskstream* this_ds;
+	Diskstream* this_ds;
 	string str;
 
 	rui = ruix;

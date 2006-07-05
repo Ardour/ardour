@@ -27,10 +27,10 @@
 namespace ARDOUR {
 
 template<class T> void 
-Session::foreach_audio_diskstream (T *obj, void (T::*func)(AudioDiskstream&)) 
+Session::foreach_diskstream (T *obj, void (T::*func)(Diskstream&)) 
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); i++) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); i++) {
 		if (!(*i)->hidden()) {
 			(obj->*func) (**i);
 		}

@@ -35,6 +35,7 @@ namespace Gtkmm2ext {
 
 namespace ARDOUR {
 	class AudioTrack;
+	class MidiTrack;
 }
 
 namespace Gtk {
@@ -50,10 +51,13 @@ class RouteUI : public virtual AxisView
 	virtual ~RouteUI();
 
 	bool is_audio_track() const;
-	ARDOUR::AudioDiskstream* get_diskstream() const;
+	bool is_midi_track() const;
+	//ARDOUR::AudioDiskstream* get_diskstream() const;
+	ARDOUR::Diskstream* get_diskstream() const;
 
 	ARDOUR::Route& route() const { return _route; }
 	ARDOUR::AudioTrack* audio_track() const;
+	ARDOUR::MidiTrack* midi_track() const;
 
 	string name() const;
 	

@@ -241,7 +241,6 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 		map_frozen ();
 
 	} else {
-
 		/* bus */
 
 		controls_ebox.set_name ("BusControlsBaseUnselected");
@@ -826,7 +825,7 @@ AudioTimeAxisView::rename_current_playlist ()
 	AudioPlaylist *pl;
 	AudioDiskstream *ds;
 
-	if (((ds = get_diskstream()) == 0) || ds->destructive()
+	if (((ds = dynamic_cast<AudioDiskstream*>(get_diskstream())) == 0) || ds->destructive()
 			|| ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) == 0)) {
 		return;
 	}
@@ -856,7 +855,7 @@ AudioTimeAxisView::use_copy_playlist (bool prompt)
 	AudioDiskstream *ds;
 	string name;
 
-	if (((ds = get_diskstream()) == 0) || ds->destructive()
+	if (((ds = dynamic_cast<AudioDiskstream*>(get_diskstream())) == 0) || ds->destructive()
 			|| ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) == 0)) {
 		return;
 	}
@@ -897,7 +896,7 @@ AudioTimeAxisView::use_new_playlist (bool prompt)
 	AudioDiskstream *ds;
 	string name;
 
-	if (((ds = get_diskstream()) == 0) || ds->destructive()
+	if (((ds = dynamic_cast<AudioDiskstream*>(get_diskstream())) == 0) || ds->destructive()
 			|| ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) == 0)) {
 		return;
 	}
@@ -936,7 +935,7 @@ AudioTimeAxisView::clear_playlist ()
 	AudioPlaylist *pl;
 	AudioDiskstream *ds;
 	
-	if ((ds = get_diskstream()) != 0) {
+	if ((ds = dynamic_cast<AudioDiskstream*>(get_diskstream())) != 0) {
 		if ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) != 0) {
 			editor.clear_playlist (*pl);
 		}
@@ -994,7 +993,7 @@ AudioTimeAxisView::update_diskstream_display ()
 {
 	AudioDiskstream *ds;
 
-	if ((ds = get_diskstream()) != 0) {
+	if ((ds = dynamic_cast<AudioDiskstream*>(get_diskstream())) != 0) {
 		set_playlist (dynamic_cast<AudioPlaylist*> (ds->playlist ()));
 	}
 
@@ -1096,7 +1095,7 @@ AudioTimeAxisView::name() const
 Playlist *
 AudioTimeAxisView::playlist () const 
 {
-	AudioDiskstream *ds;
+	Diskstream *ds;
 
 	if ((ds = get_diskstream()) != 0) {
 		return ds->playlist(); 
@@ -1143,10 +1142,16 @@ AudioTimeAxisView::hide_click ()
 	editor.hide_track_in_display (*this);
 }
 
+ARDOUR::AudioDiskstream*
+AudioTimeAxisView::get_diskstream() const
+{
+	return dynamic_cast<ARDOUR::AudioDiskstream*>(RouteUI::get_diskstream());
+}
+
 Region*
 AudioTimeAxisView::find_next_region (jack_nframes_t pos, RegionPoint point, int32_t dir)
 {
-	AudioDiskstream *stream;
+	Diskstream *stream;
 	Playlist *playlist;
 
 	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
@@ -1721,7 +1726,7 @@ bool
 AudioTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	Playlist* what_we_got;
-	AudioDiskstream* ds = get_diskstream();
+	AudioDiskstream* ds = dynamic_cast<AudioDiskstream*>(get_diskstream());
 	Playlist* playlist;
 	bool ret = false;
 

@@ -20,9 +20,9 @@
 
 #include <fft_result.h>
 #include <fft_graph.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include <cstdlib>
+#include <string>
+#include <cmath>
 
 #include <iostream>
 

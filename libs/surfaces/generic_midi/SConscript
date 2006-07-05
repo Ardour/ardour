@@ -34,7 +34,7 @@ genericmidi.Merge ([
 	libraries['ardour'],
 	libraries['ardour_cp'],
 	libraries['midi++2'],
-	libraries['pbd3'],
+	libraries['pbd'],
 	libraries['sigc2'],
 	libraries['usb'],
 	libraries['xml'],

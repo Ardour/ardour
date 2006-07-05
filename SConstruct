@@ -50,18 +50,25 @@ opts.AddOptions(
 class LibraryInfo(Environment):
     def __init__(self,*args,**kw):
         Environment.__init__ (self,*args,**kw)
-        
+    
     def Merge (self,others):
         for other in others:
             self.Append (LIBS = other.get ('LIBS',[]))
-            self.Append (LIBPATH = other.get ('LIBPATH', []))	
+            self.Append (LIBPATH = other.get ('LIBPATH', []))
             self.Append (CPPPATH = other.get('CPPPATH', []))
             self.Append (LINKFLAGS = other.get('LINKFLAGS', []))
 	self.Replace(LIBPATH = list(Set(self.get('LIBPATH', []))))
 	self.Replace(CPPPATH = list(Set(self.get('CPPPATH',[]))))
         #doing LINKFLAGS breaks -framework
         #doing LIBS break link order dependency
-
+    
+    def ENV_update(self, src_ENV):
+        for k in src_ENV.keys():
+            if k in self['ENV'].keys() and k in [ 'PATH', 'LD_LIBRARY_PATH',
+                                                  'LIB', 'INCLUDE' ]:
+                self['ENV'][k]=SCons.Util.AppendPath(self['ENV'][k], src_ENV[k])
+            else:
+                self['ENV'][k]=src_ENV[k]
 
 env = LibraryInfo (options = opts,
                    CPPPATH = [ '.' ],
@@ -72,68 +79,69 @@ env = LibraryInfo (options = opts,
                    DISTCHECKDIR = '#ardour-' + version + '/check'
                    )
 
+env.ENV_update(os.environ)
 
 #----------------------------------------------------------------------
 # Builders
 #----------------------------------------------------------------------
 
 # Handy subst-in-file builder
-# 
+#
 
 def do_subst_in_file(targetfile, sourcefile, dict):
-        """Replace all instances of the keys of dict with their values.
-        For example, if dict is {'%VERSION%': '1.2345', '%BASE%': 'MyProg'},
-        then all instances of %VERSION% in the file will be replaced with 1.2345 etc.
-        """
-        try:
-            f = open(sourcefile, 'rb')
-            contents = f.read()
-            f.close()
-        except:
-            raise SCons.Errors.UserError, "Can't read source file %s"%sourcefile
-        for (k,v) in dict.items():
-            contents = re.sub(k, v, contents)
-        try:
-            f = open(targetfile, 'wb')
-            f.write(contents)
-            f.close()
-        except:
-            raise SCons.Errors.UserError, "Can't write target file %s"%targetfile
-        return 0 # success
- 
+    """Replace all instances of the keys of dict with their values.
+    For example, if dict is {'%VERSION%': '1.2345', '%BASE%': 'MyProg'},
+    then all instances of %VERSION% in the file will be replaced with 1.2345 etc.
+    """
+    try:
+        f = open(sourcefile, 'rb')
+        contents = f.read()
+        f.close()
+    except:
+        raise SCons.Errors.UserError, "Can't read source file %s"%sourcefile
+    for (k,v) in dict.items():
+        contents = re.sub(k, v, contents)
+    try:
+        f = open(targetfile, 'wb')
+        f.write(contents)
+        f.close()
+    except:
+        raise SCons.Errors.UserError, "Can't write target file %s"%targetfile
+    return 0 # success
+
 def subst_in_file(target, source, env):
-        if not env.has_key('SUBST_DICT'):
-            raise SCons.Errors.UserError, "SubstInFile requires SUBST_DICT to be set."
-        d = dict(env['SUBST_DICT']) # copy it
-        for (k,v) in d.items():
-            if callable(v):
-                d[k] = env.subst(v())
-            elif SCons.Util.is_String(v):
-                d[k]=env.subst(v)
-            else:
-                raise SCons.Errors.UserError, "SubstInFile: key %s: %s must be a string or callable"%(k, repr(v))
-        for (t,s) in zip(target, source):
-            return do_subst_in_file(str(t), str(s), d)
- 
+    if not env.has_key('SUBST_DICT'):
+        raise SCons.Errors.UserError, "SubstInFile requires SUBST_DICT to be set."
+    d = dict(env['SUBST_DICT']) # copy it
+    for (k,v) in d.items():
+        if callable(v):
+            d[k] = env.subst(v())
+        elif SCons.Util.is_String(v):
+            d[k]=env.subst(v)
+        else:
+            raise SCons.Errors.UserError, "SubstInFile: key %s: %s must be a string or callable"%(k, repr(v))
+    for (t,s) in zip(target, source):
+        return do_subst_in_file(str(t), str(s), d)
+
 def subst_in_file_string(target, source, env):
-        """This is what gets printed on the console."""
-        return '\n'.join(['Substituting vars from %s into %s'%(str(s), str(t))
-                          for (t,s) in zip(target, source)])
- 
+    """This is what gets printed on the console."""
+    return '\n'.join(['Substituting vars from %s into %s'%(str(s), str(t))
+                      for (t,s) in zip(target, source)])
+
 def subst_emitter(target, source, env):
-        """Add dependency from substituted SUBST_DICT to target.
-        Returns original target, source tuple unchanged.
-        """
-        d = env['SUBST_DICT'].copy() # copy it
-        for (k,v) in d.items():
-            if callable(v):
-                d[k] = env.subst(v())
-            elif SCons.Util.is_String(v):
-                d[k]=env.subst(v)
-        Depends(target, SCons.Node.Python.Value(d))
-        # Depends(target, source) # this doesn't help the install-sapphire-linux.sh problem
-        return target, source
- 
+    """Add dependency from substituted SUBST_DICT to target.
+    Returns original target, source tuple unchanged.
+    """
+    d = env['SUBST_DICT'].copy() # copy it
+    for (k,v) in d.items():
+        if callable(v):
+            d[k] = env.subst(v())
+        elif SCons.Util.is_String(v):
+            d[k]=env.subst(v)
+    Depends(target, SCons.Node.Python.Value(d))
+    # Depends(target, source) # this doesn't help the install-sapphire-linux.sh problem
+    return target, source
+
 subst_action = Action (subst_in_file, subst_in_file_string)
 env['BUILDERS']['SubstInFile'] = Builder(action=subst_action, emitter=subst_emitter)
 
@@ -141,31 +149,31 @@ env['BUILDERS']['SubstInFile'] = Builder(action=subst_action, emitter=subst_emit
 # internationalization
 #
 
-# po_helper
-#
-# this is not a builder. we can't list the .po files as a target,
-# because then scons -c will remove them (even Precious doesn't alter
-# this). this function is called whenever a .mo file is being
-# built, and will conditionally update the .po file if necessary.
-#
-
-def po_helper(po,pot):
-    args = [ 'msgmerge',
-             '--update',
-             po,
-             pot,
-             ]
-    print 'Updating ' + po
-    return os.spawnvp (os.P_WAIT, 'msgmerge', args)
-
-# mo_builder: builder function for (binary) message catalogs (.mo)
+# po_builder: builder function to copy po files to the parent directory while updating them
 #
 # first source:  .po file
 # second source: .pot file
 #
 
+def po_builder(target,source,env):
+    os.spawnvp (os.P_WAIT, 'cp', ['cp', str(source[0]), str(target[0])])
+    args = [ 'msgmerge',
+             '--update',
+             str(target[0]),
+             str(source[1])
+             ]
+    print 'Updating ' + str(target[0])
+    return os.spawnvp (os.P_WAIT, 'msgmerge', args)
+
+po_bld = Builder (action = po_builder)
+env.Append(BUILDERS = {'PoBuild' : po_bld})
+
+# mo_builder: builder function for (binary) message catalogs (.mo)
+#
+# first source:  .po file
+#
+
 def mo_builder(target,source,env):
-    po_helper (source[0].get_path(), source[1].get_path())
     args = [ 'msgfmt',
              '-c',
              '-o',
@@ -183,15 +191,15 @@ env.Append(BUILDERS = {'MoBuild' : mo_bld})
 #
 
 def pot_builder(target,source,env):
-    args = [ 'xgettext', 
+    args = [ 'xgettext',
              '--keyword=_',
              '--keyword=N_',
              '--from-code=UTF-8',
-             '-o', target[0].get_path(), 
+             '-o', target[0].get_path(),
              "--default-domain=" + env['PACKAGE'],
              '--copyright-holder="Paul Davis"' ]
     args += [ src.get_path() for src in source ]
-
+    
     return os.spawnvp (os.P_WAIT, 'xgettext', args)
 
 pot_bld = Builder (action = pot_builder)
@@ -204,33 +212,33 @@ env.Append(BUILDERS = {'PotBuild' : pot_bld})
 def i18n (buildenv, sources, installenv):
     domain = buildenv['PACKAGE']
     potfile = buildenv['POTFILE']
-
+    
     installenv.Alias ('potupdate', buildenv.PotBuild (potfile, sources))
-
+    
     p_oze = [ os.path.basename (po) for po in glob.glob ('po/*.po') ]
     languages = [ po.replace ('.po', '') for po in p_oze ]
-    m_oze = [ po.replace (".po", ".mo") for po in p_oze ]
     
-    for mo in m_oze[:]:
-        po = 'po/' + mo.replace (".mo", ".po")
-        installenv.Alias ('install', buildenv.MoBuild (mo, [ po, potfile ]))
-        
-    for lang in languages[:]:
+    for po_file in p_oze:
+        buildenv.PoBuild(po_file, ['po/'+po_file, potfile])
+        mo_file = po_file.replace (".po", ".mo")
+        installenv.Alias ('install', buildenv.MoBuild (mo_file, po_file))
+    
+    for lang in languages:
         modir = (os.path.join (install_prefix, 'share/locale/' + lang + '/LC_MESSAGES/'))
         moname = domain + '.mo'
         installenv.Alias('install', installenv.InstallAs (os.path.join (modir, moname), lang + '.mo'))
 
 #
 # A generic builder for version.cc files
-# 
+#
 # note: requires that DOMAIN, MAJOR, MINOR, MICRO are set in the construction environment
 # note: assumes one source files, the header that declares the version variables
-# 
+#
 def version_builder (target, source, env):
    text  = "int " + env['DOMAIN'] + "_major_version = " + str (env['MAJOR']) + ";\n"
    text += "int " + env['DOMAIN'] + "_minor_version = " + str (env['MINOR']) + ";\n"
    text += "int " + env['DOMAIN'] + "_micro_version = " + str (env['MICRO']) + ";\n"
-
+   
    try:
       o = file (target[0].get_path(), 'w')
       o.write (text)
@@ -238,14 +246,14 @@ def version_builder (target, source, env):
    except IOError:
       print "Could not open", target[0].get_path(), " for writing\n"
       sys.exit (-1)
-
+   
    text  = "#ifndef __" + env['DOMAIN'] + "_version_h__\n"
    text += "#define __" + env['DOMAIN'] + "_version_h__\n"
    text += "extern int " + env['DOMAIN'] + "_major_version;\n"
    text += "extern int " + env['DOMAIN'] + "_minor_version;\n"
    text += "extern int " + env['DOMAIN'] + "_micro_version;\n"
    text += "#endif /* __" + env['DOMAIN'] + "_version_h__ */\n"
-
+   
    try:
       o = file (target[1].get_path(), 'w')
       o.write (text)
@@ -253,7 +261,7 @@ def version_builder (target, source, env):
    except IOError:
       print "Could not open", target[1].get_path(), " for writing\n"
       sys.exit (-1)
-  
+   
    return None
 
 version_bld = Builder (action = version_builder)
@@ -276,8 +284,8 @@ def versioned_builder(target,source,env):
     except IOError:
         print "Could not CVS/Entries for reading"
         return -1
-
-    last_date = ""        
+    
+    last_date = ""
     lines = o.readlines()
     for line in lines:
         if line[0:12] == '/SConscript/':
@@ -285,20 +293,20 @@ def versioned_builder(target,source,env):
             last_date = parts[3]
             break
     o.close ()
-
+    
     if last_date == "":
         print "No SConscript CVS update info found - versioned executable cannot be built"
         return -1
-
+    
     tag = time.strftime ('%Y%M%d%H%m', time.strptime (last_date))
     print "The current build ID is " + tag
-
+    
     tagged_executable = source[0].get_path() + '-' + tag
-
+    
     if os.path.exists (tagged_executable):
         print "Replacing existing executable with the same build tag."
         os.unlink (tagged_executable)
-
+    
     return os.link (source[0].get_path(), tagged_executable)
 
 verbuild = Builder (action = versioned_builder)
@@ -310,13 +318,13 @@ env.Append (BUILDERS = {'VersionedExecutable' : verbuild})
 
 def distcopy (target, source, env):
     treedir = str (target[0])
-
+    
     try:
         os.mkdir (treedir)
     except OSError, (errnum, strerror):
         if errnum != errno.EEXIST:
             print 'mkdir ', treedir, ':', strerror
-
+    
     cmd = 'tar cf - '
     #
     # we don't know what characters might be in the file names
@@ -328,7 +336,7 @@ def distcopy (target, source, env):
     p = os.popen (cmd)
     return p.close ()
 
-def tarballer (target, source, env):            
+def tarballer (target, source, env):
     cmd = 'tar -jcf ' + str (target[0]) +  ' ' + str(source[0]) + "  --exclude '*~'"
     print 'running ', cmd, ' ... '
     p = os.popen (cmd)
@@ -359,7 +367,7 @@ if env['VST']:
         env['VST'] = 0;
     else:
         print "OK, VST support will be enabled"
-        
+
 
 # ----------------------------------------------------------------------
 # Construction environment setup
@@ -381,7 +389,7 @@ libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
 libraries['samplerate'] = LibraryInfo()
 libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
 
-if env['FFT_ANALYSIS']: 
+if env['FFT_ANALYSIS']:
 	libraries['fftw3f'] = LibraryInfo()
 	libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
 
@@ -420,9 +428,8 @@ libraries['ardour_cp'] = LibraryInfo (LIBS='ardour_cp', LIBPATH='#libs/surfaces/
 
 libraries['ardour'] = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')
 libraries['midi++2'] = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++2', CPPPATH='#libs/midi++2')
-libraries['pbd3']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd3', CPPPATH='#libs/pbd3')
+libraries['pbd']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd', CPPPATH='#libs/pbd')
 libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext', CPPPATH='#libs/gtkmm2ext')
-#libraries['cassowary'] = LibraryInfo(LIBS='cassowary', LIBPATH='#libs/cassowary', CPPPATH='#libs/cassowary')
 
 #
 # Check for libusb
@@ -434,7 +441,7 @@ if conf.CheckLib ('usb', 'usb_interrupt_write'):
     have_libusb = True
 else:
     have_libusb = False
-    
+
 libraries['usb'] = conf.Finish ()
 
 #
@@ -451,7 +458,7 @@ libraries['flac'] = conf.Finish ()
 
 if env['LIBLO']:
     libraries['lo'] = LibraryInfo ()
-
+    
     conf = Configure (libraries['lo'])
     if conf.CheckLib ('lo', 'lo_server_new') == False:
         print "liblo does not appear to be installed."
@@ -473,14 +480,14 @@ if conf.CheckLib ('dmallocth', 'dmalloc_shutdown'):
     have_libdmalloc = True
 else:
     have_libdmalloc = False
-    
+
 libraries['dmalloc'] = conf.Finish ()
 
 #
 
 #
 # Audio/MIDI library (needed for MIDI, since audio is all handled via JACK)
-# 
+#
 
 conf = Configure(env)
 if conf.CheckCHeader('jack/midiport.h'):
@@ -505,11 +512,11 @@ elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Co
 else:
     print "It appears you don't have the required MIDI libraries installed."
     sys.exit (1)
-        
+
 env = conf.Finish()
 
 if env['SYSLIBS']:
-
+    
     libraries['sigc2'] = LibraryInfo()
     libraries['sigc2'].ParseConfig('pkg-config --cflags --libs sigc++-2.0')
     libraries['glibmm2'] = LibraryInfo()
@@ -528,7 +535,7 @@ if env['SYSLIBS']:
 #
 # cannot use system one for the time being
 #
-
+    
     libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
                                     LIBPATH='#libs/libsndfile',
                                     CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
@@ -539,21 +546,21 @@ if env['SYSLIBS']:
 #    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
     libraries['soundtouch'] = LibraryInfo()
     libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
-
+    
     coredirs = [
         'templates'
     ]
-
+    
     subdirs = [
         'libs/libsndfile',
-        'libs/pbd3',
+        'libs/pbd',
         'libs/midi++2',
         'libs/ardour'
         ]
-
+    
     if env['VST']:
         subdirs = ['libs/fst'] + subdirs + ['vst']
-
+    
     gtk_subdirs = [
 #        'libs/flowcanvas',
         'libs/gtkmm2ext',
@@ -582,7 +589,7 @@ else:
     libraries['libgnomecanvasmm'] = LibraryInfo(LIBS='libgnomecanvasmm',
                                                 LIBPATH='#libs/libgnomecanvasmm',
                                                 CPPPATH='#libs/libgnomecanvasmm')
-
+    
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
@@ -592,24 +599,23 @@ else:
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
-
+    
     coredirs = [
         'libs/soundtouch',
         'templates'
     ]
-
+    
     subdirs = [
-#	    'libs/cassowary',
         'libs/sigc++2',
         'libs/libsndfile',
-        'libs/pbd3',
+        'libs/pbd',
         'libs/midi++2',
         'libs/ardour'
         ]
-
+    
     if env['VST']:
         subdirs = ['libs/fst'] + subdirs + ['vst']
-
+    
     gtk_subdirs = [
 	'libs/glibmm2',
 	'libs/gtkmm2/pango',
@@ -634,7 +640,7 @@ if env['SURFACES']:
         surface_subdirs += [ 'libs/surfaces/tranzport' ]
     if os.access ('libs/surfaces/sony9pin', os.F_OK):
         surface_subdirs += [ 'libs/surfaces/sony9pin' ]
-    
+
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
 
@@ -653,7 +659,7 @@ if os.environ.has_key('CXX'):
 if os.environ.has_key('DISTCC_HOSTS'):
     env['ENV']['DISTCC_HOSTS'] = os.environ['DISTCC_HOSTS']
     env['ENV']['HOME'] = os.environ['HOME']
-    
+
 final_prefix = '$PREFIX'
 install_prefix = '$DESTDIR/$PREFIX'
 
@@ -685,7 +691,7 @@ if have_cxx[0] != 1:
     exit (1)
 else:
     print "Congratulations, you have a functioning C++ compiler."
-    
+
 env = conf.Finish()
 
 #
@@ -739,37 +745,37 @@ if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
         if config[config_arch] == 'apple':
             opt_flags.extend ([ "-mcpu=7450", "-faltivec"])
         else:
-            opt_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"]) 
+            opt_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
     else:
         opt_flags.extend([ "-mcpu=750", "-mmultiple" ])
     opt_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
 
 elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_64", config[config_cpu]) != None)) and env['DIST_TARGET'] != 'none':
-
+    
     build_host_supports_sse = 0
     
     debug_flags.append ("-DARCH_X86")
     opt_flags.append ("-DARCH_X86")
-
+    
     if config[config_kernel] == 'linux' :
-
-        if env['DIST_TARGET'] != 'i386': 
-
+        
+        if env['DIST_TARGET'] != 'i386':
+            
             flag_line = os.popen ("cat /proc/cpuinfo | grep '^flags'").read()[:-1]
             x86_flags = flag_line.split (": ")[1:][0].split (' ')
-
+            
             if "mmx" in x86_flags:
                 opt_flags.append ("-mmmx")
             if "sse" in x86_flags:
                 build_host_supports_sse = 1
             if "3dnow" in x86_flags:
                 opt_flags.append ("-m3dnow")
-
+            
             if config[config_cpu] == "i586":
                 opt_flags.append ("-march=i586")
             elif config[config_cpu] == "i686":
                 opt_flags.append ("-march=i686")
-
+    
     if ((env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64')) and build_host_supports_sse:
         opt_flags.extend (["-msse", "-mfpmath=sse"])
         debug_flags.extend (["-msse", "-mfpmath=sse"])
@@ -798,7 +804,7 @@ env.Append(CONFIG_ARCH=config[config_arch])
 
 
 #
-# ARCH="..." overrides all 
+# ARCH="..." overrides all
 #
 
 if env['ARCH'] != '':
@@ -837,28 +843,46 @@ if env['LIBLO']:
 env.Merge ([ libraries['core'] ])
 
 #
-# i18n support 
+# fix scons nitpickiness on APPLE
+#
+
+if env['DIST_TARGET'] == 'panther' or env['DIST_TARGET'] == 'tiger':
+    env.Append(CCFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
+
+#
+# i18n support
 #
 
 conf = Configure (env)
-
 if env['NLS']:
+    nls_error = 'This system is not configured for internationalized applications.  An english-only version will be built:'
     print 'Checking for internationalization support ...'
     have_gettext = conf.TryAction(Action('xgettext --version'))
     if have_gettext[0] != 1:
-        print 'This system is not configured for internationalized applications (no xgettext command). An english-only version will be built\n'
+        nls_error += ' No xgettext command.'
+        env['NLS'] = 0
+    else:
+        print "Found xgettext"
+    
+    have_msgmerge = conf.TryAction(Action('msgmerge --version'))
+    if have_msgmerge[0] != 1:
+        nls_error += ' No msgmerge command.'
+        env['NLS'] = 0
+    else:
+        print "Found msgmerge"
+    
+    if not conf.CheckCHeader('libintl.h'):
+        nls_error += ' No libintl.h.'
         env['NLS'] = 0
         
-    if conf.CheckCHeader('libintl.h') == None:
-        print 'This system is not configured for internationalized applications (no libintl.h). An english-only version will be built\n'
-        env['NLS'] = 0
-
-
+    if env['NLS'] == 0:
+        print nls_error
+    else:
+        print "International version will be built."
 env = conf.Finish()
 
 if env['NLS'] == 1:
     env.Append(CCFLAGS="-DENABLE_NLS")
-
 
 Export('env install_prefix final_prefix config_prefix final_config_prefix libraries i18n version subst_dict')
 
@@ -913,18 +937,18 @@ env.Distribute (env['DISTTREE'],
                 glob.glob ('DOCUMENTATION/FAQ*') +
                 glob.glob ('DOCUMENTATION/README*')
                 )
-                
+
 srcdist = env.Tarball(env['TARBALL'], env['DISTTREE'])
 env.Alias ('srctar', srcdist)
 #
-# don't leave the distree around 
+# don't leave the distree around
 #
 env.AddPreAction (env['DISTTREE'], Action ('rm -rf ' + str (File (env['DISTTREE']))))
 env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 
 #
 # the subdirs
-# 
+#
 
 for subdir in coredirs:
     SConscript (subdir + '/SConscript')
@@ -932,7 +956,7 @@ for subdir in coredirs:
 for sublistdir in [ subdirs, gtk_subdirs, surface_subdirs ]:
     for subdir in sublistdir:
         SConscript (subdir + '/SConscript')
-            
+
 # cleanup
 env.Clean ('scrub', [ 'scache.conf', '.sconf_temp', '.sconsign.dblite', 'config.log'])
 

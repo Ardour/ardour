@@ -186,32 +186,30 @@ MidiTrack::set_diskstream (MidiDiskstream& ds, void *src)
 int 
 MidiTrack::use_diskstream (string name)
 {
-	/*
 	MidiDiskstream *dstream;
 
-	if ((dstream = _session.diskstream_by_name (name)) == 0) {
+	if ((dstream = dynamic_cast<MidiDiskstream*>(_session.diskstream_by_name (name))) == 0) {
 	  PBD::error << string_compose(_("MidiTrack: diskstream \"%1\" not known by session"), name) << endmsg;
 		return -1;
 	}
 
 	return set_diskstream (*dstream, this);
-	*/
+	
 	return 0;
 }
 
 int 
 MidiTrack::use_diskstream (id_t id)
 {
-	/*
 	MidiDiskstream *dstream;
 
-	if ((dstream = _session.diskstream_by_id (id)) == 0) {
+	if ((dstream = dynamic_cast<MidiDiskstream*>(_session.diskstream_by_id (id))) == 0) {
 	  	PBD::error << string_compose(_("MidiTrack: diskstream \"%1\" not known by session"), id) << endmsg;
 		return -1;
 	}
 	
 	return set_diskstream (*dstream, this);
-	*/
+	
 	return 0;
 }
 

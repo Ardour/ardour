@@ -74,7 +74,7 @@ Session::process (jack_nframes_t nframes)
 void
 Session::prepare_diskstreams ()
 {
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->prepare ();
 	}
 }
@@ -151,7 +151,7 @@ Session::process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 			   call path, so make sure we release any outstanding locks here before we return failure.
 			*/
 
-			for (AudioDiskstreamList::iterator ids = audio_diskstreams.begin(); ids != audio_diskstreams.end(); ++ids) {
+			for (DiskstreamList::iterator ids = diskstreams.begin(); ids != diskstreams.end(); ++ids) {
 				(*ids)->recover ();
 			}
 
@@ -190,7 +190,7 @@ Session::silent_process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 			   call path, so make sure we release any outstanding locks here before we return failure.
 			*/
 
-			for (AudioDiskstreamList::iterator ids = audio_diskstreams.begin(); ids != audio_diskstreams.end(); ++ids) {
+			for (DiskstreamList::iterator ids = diskstreams.begin(); ids != diskstreams.end(); ++ids) {
 				(*ids)->recover ();
 			}
 
@@ -209,7 +209,7 @@ Session::commit_diskstreams (jack_nframes_t nframes, bool &needs_butler)
 	float pworst = 1.0f;
 	float cworst = 1.0f;
 
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 
 		if ((*i)->hidden()) {
 			continue;
@@ -579,7 +579,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 				bool ok = true;
 				jack_nframes_t frame_delta = slave_transport_frame - _transport_frame;
 				
-				for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+				for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 					if (!(*i)->can_internal_playback_seek (frame_delta)) {
 						ok = false;
 						break;
@@ -587,7 +587,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 				}
 
 				if (ok) {
-					for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+					for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 						(*i)->internal_playback_seek (frame_delta);
 					}
 					_transport_frame += frame_delta;

@@ -55,10 +55,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-//sigc::signal<void,AudioDiskstream*>    AudioDiskstream::AudioDiskstreamCreated;
 sigc::signal<void,list<AudioFileSource*>*> AudioDiskstream::DeleteSources;
-//sigc::signal<void>                AudioDiskstream::DiskOverrun;
-//sigc::signal<void>                AudioDiskstream::DiskUnderrun;
 
 AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
 	: Diskstream(sess, name, flag)
@@ -295,9 +292,9 @@ AudioDiskstream::find_and_use_playlist (const string& name)
 	Playlist* pl;
 	AudioPlaylist* playlist;
 		
-	if ((pl = _session.get_playlist (name)) == 0) {
-		error << string_compose(_("AudioDiskstream: Session doesn't know about a Playlist called \"%1\""), name) << endmsg;
-		return -1;
+	if ((pl = _session.playlist_by_name (name)) == 0) {
+		playlist = new AudioPlaylist(_session, name);
+		pl = playlist;
 	}
 
 	if ((playlist = dynamic_cast<AudioPlaylist*> (pl)) == 0) {
@@ -1630,6 +1627,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			srcs.push_back (s);
 
 			if ((fsrc = dynamic_cast<AudioFileSource *>(s)) != 0) {
+				cerr << "updating source after capture\n";
 				fsrc->update_header (capture_info.front()->start, when, twhen);
 			}
 

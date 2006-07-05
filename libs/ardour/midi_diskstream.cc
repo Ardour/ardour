@@ -55,10 +55,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-//sigc::signal<void,MidiDiskstream*>    MidiDiskstream::MidiDiskstreamCreated;
 sigc::signal<void,list<SMFSource*>*> MidiDiskstream::DeleteSources;
-//sigc::signal<void>                MidiDiskstream::DiskOverrun;
-//sigc::signal<void>                MidiDiskstream::DiskUnderrun;
 
 MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
 	: Diskstream(sess, name, flag)
@@ -154,13 +151,13 @@ MidiDiskstream::find_and_use_playlist (const string& name)
 	Playlist* pl;
 	MidiPlaylist* playlist;
 		
-	if ((pl = _session.get_playlist (name)) == 0) {
-		error << string_compose(_("MidiDiskstream: Session doesn't know about a Playlist called \"%1\""), name) << endmsg;
-		return -1;
+	if ((pl = _session.playlist_by_name (name)) == 0) {
+		playlist = new MidiPlaylist(_session, name);
+		pl = playlist;
 	}
 
 	if ((playlist = dynamic_cast<MidiPlaylist*> (pl)) == 0) {
-		error << string_compose(_("MidiDiskstream: Playlist \"%1\" isn't an midi playlist"), name) << endmsg;
+		error << string_compose(_("MidiDiskstream: Playlist \"%1\" isn't a midi playlist"), name) << endmsg;
 		return -1;
 	}
 

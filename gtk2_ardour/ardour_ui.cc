@@ -544,7 +544,7 @@ ARDOUR_UI::update_buffer_load ()
 }
 
 void
-ARDOUR_UI::count_recenabled_diskstreams (AudioDiskstream& ds)
+ARDOUR_UI::count_recenabled_diskstreams (Diskstream& ds)
 {
 	if (ds.record_enabled()) {
 		rec_enabled_diskstreams++;
@@ -572,7 +572,7 @@ ARDOUR_UI::update_disk_space()
 		if (session->actively_recording()){
 			
 			rec_enabled_diskstreams = 0;
-			session->foreach_audio_diskstream (this, &ARDOUR_UI::count_recenabled_diskstreams);
+			session->foreach_diskstream (this, &ARDOUR_UI::count_recenabled_diskstreams);
 			
 			if (rec_enabled_diskstreams) {
 				frames /= rec_enabled_diskstreams;
@@ -1431,7 +1431,7 @@ ARDOUR_UI::stop_blinking ()
 
 
 void
-ARDOUR_UI::add_diskstream_to_menu (AudioDiskstream& dstream)
+ARDOUR_UI::add_diskstream_to_menu (Diskstream& dstream)
 {
 	using namespace Gtk;
 	using namespace Menu_Helpers;
@@ -1469,7 +1469,7 @@ ARDOUR_UI::select_diskstream (GdkEventButton *ev)
 	MenuList& items = diskstream_menu->items();
 	items.push_back (MenuElem (_("No Stream"), (bind (mem_fun(*this, &ARDOUR_UI::diskstream_selected), -1))));
 
-	session->foreach_audio_diskstream (this, &ARDOUR_UI::add_diskstream_to_menu);
+	session->foreach_diskstream (this, &ARDOUR_UI::add_diskstream_to_menu);
 
 	if (ev) {
 		diskstream_menu->popup (ev->button, ev->time);

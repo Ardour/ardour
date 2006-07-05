@@ -5,6 +5,9 @@ cFrameBase 0.75 0.75 0.76 1.0
 cAudioTrackBase 0.75 0.75 0.85 0.41
 cAudioTrackOutline 0.00 0.00 0.00 1.00
 cAudioBusBase 0.75 0.80 0.75 0.41
+cMidiTrackBase 0.85 0.75 0.75 0.41
+cMidiTrackOutline 0.00 0.00 0.00 1.00
+cMidiBusBase 0.80 0.75 0.75 0.41
 cMeterBar 0.40 0.40 0.40 1.0
 cTempoBar 0.45 0.45 0.45 1.0
 cMarkerBar 0.50 0.50 0.50 1.0

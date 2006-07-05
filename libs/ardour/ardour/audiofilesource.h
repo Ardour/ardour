@@ -42,7 +42,7 @@ class AudioFileSource : public AudioSource {
 		Removable = 0x8,
 		RemovableIfEmpty = 0x10,
 		RemoveAtDestroy = 0x20,
-		BuildPeaks = 0x40
+		NoPeakFile = 0x40
 	};
 
 	virtual ~AudioFileSource ();
@@ -62,7 +62,7 @@ class AudioFileSource : public AudioSource {
 	   cannot.
 	 */
 
-	static AudioFileSource* create (string path_plus_channel);
+	static AudioFileSource* create (const string& path_plus_channel, Flag flags = Flag (0));
 	static AudioFileSource* create (const XMLNode&);
 
 	static bool get_soundfile_info (string path, SoundFileInfo& _info, string& error);
@@ -97,7 +97,7 @@ class AudioFileSource : public AudioSource {
 	static void set_search_path (string);
 	static void set_header_position_offset (jack_nframes_t offset, bool negative);
 
-	static sigc::signal<void,struct tm*, time_t> HeaderPositionOffsetChanged;
+	static sigc::signal<void> HeaderPositionOffsetChanged;
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
@@ -107,7 +107,7 @@ class AudioFileSource : public AudioSource {
 	   to cause issues.
 	*/
 
-	void handle_header_position_change (struct tm*, time_t tnow);
+	void handle_header_position_change ();
 
   protected:
 	

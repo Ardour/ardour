@@ -462,10 +462,10 @@ Session::~Session ()
 	}
 
 #ifdef TRACK_DESTRUCTION
-	cerr << "delete audio_diskstreams\n";
+	cerr << "delete diskstreams\n";
 #endif /* TRACK_DESTRUCTION */
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ) {
-		AudioDiskstreamList::iterator tmp;
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ) {
+		DiskstreamList::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -973,7 +973,7 @@ Session::set_auto_input (bool yn)
 			   The rarity and short potential lock duration makes this "OK"
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (!auto_input);   
@@ -991,7 +991,7 @@ Session::reset_input_monitor_state ()
 {
 	if (transport_rolling()) {
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring() && !auto_input);
@@ -999,7 +999,7 @@ Session::reset_input_monitor_state ()
 		}
 	} else {
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring());
@@ -1080,7 +1080,7 @@ Session::auto_loop_changed (Location* location)
 		}
 		else if (seamless_loop && !loop_changing) {
 			
-			// schedule a locate-roll to refill the audio_diskstreams at the
+			// schedule a locate-roll to refill the diskstreams at the
 			// previous loop end
 			loop_changing = true;
 
@@ -1277,7 +1277,7 @@ Session::enable_record ()
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			
-			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (true);   
 				}
@@ -1316,7 +1316,7 @@ Session::disable_record (bool rt_context, bool force)
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			
-			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (false);   
 				}
@@ -1343,7 +1343,7 @@ Session::step_back_from_record ()
 		*/
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 		
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		        if (auto_input && (*i)->record_enabled ()) {
 			        //cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 		                (*i)->monitor_input (false);   
@@ -1512,7 +1512,7 @@ Session::set_block_size (jack_nframes_t nframes)
 			(*i)->set_block_size (nframes);
 		}
 		
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			(*i)->set_block_size (nframes);
 		}
 
@@ -2115,21 +2115,14 @@ Session::add_route (Route* route)
 }
 
 void
-Session::add_diskstream (Diskstream* s)
+Session::add_diskstream (Diskstream* dstream)
 {
-	// FIXME: temporary.  duh.
-	AudioDiskstream* dstream = dynamic_cast<AudioDiskstream*>(s);
-	if (!dstream) {
-		cerr << "FIXME: Non Audio Diskstream" << endl;
-		return;
-	}
-
 	/* need to do this in case we're rolling at the time, to prevent false underruns */
 	dstream->non_realtime_do_refill();
 	
 	{ 
 		Glib::RWLock::WriterLock lm (diskstream_lock);
-		audio_diskstreams.push_back (dstream);
+		diskstreams.push_back (dstream);
 	}
 
 	/* take a reference to the diskstream, preventing it from
@@ -2194,7 +2187,7 @@ Session::remove_route (Route& route)
 
 		{
 			Glib::RWLock::WriterLock lm (diskstream_lock);
-			audio_diskstreams.remove (ds);
+			diskstreams.remove (ds);
 		}
 
 		ds->unref ();
@@ -2483,7 +2476,7 @@ Session::get_maximum_extent () const
 	   ensure atomicity.
 	*/
 
-	for (AudioDiskstreamList::const_iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		Playlist* pl = (*i)->playlist();
 		if ((me = pl->get_maximum_extent()) > max) {
 			max = me;
@@ -2499,7 +2492,7 @@ Session::diskstream_by_name (string name)
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
 	// FIXME: duh
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
 		}
@@ -2514,7 +2507,7 @@ Session::diskstream_by_id (id_t id)
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
 	// FIXME: duh
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->id() == id) {
 			return *i;
 		}
@@ -2840,7 +2833,7 @@ Session::remove_last_capture ()
 
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		list<Region*>& l = (*i)->last_capture_regions();
 		
 		if (!l.empty()) {
@@ -3152,18 +3145,6 @@ Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bo
 /* Playlist management */
 
 Playlist *
-Session::get_playlist (string name)
-{
-	Playlist* ret = 0;
-
-	if ((ret = playlist_by_name (name)) == 0) {
-		ret = new AudioPlaylist (*this, name);
-	}
-
-	return ret;
-}
-
-Playlist *
 Session::playlist_by_name (string name)
 {
 	Glib::Mutex::Lock lm (playlist_lock);
@@ -3385,29 +3366,30 @@ Session::set_all_mute (bool yn)
 }
 		
 uint32_t
-Session::n_audio_diskstreams () const
+Session::n_diskstreams () const
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	uint32_t n = 0;
 
-	for (AudioDiskstreamList::const_iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if (!(*i)->hidden()) {
 			n++;
 		}
 	}
 	return n;
 }
-
+/*
 void 
 Session::foreach_audio_diskstream (void (AudioDiskstream::*func)(void)) 
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if (!(*i)->hidden()) {
 			((*i)->*func)();
 		}
 	}
 }
+*/
 
 void
 Session::graph_reordered ()
@@ -3429,7 +3411,7 @@ Session::graph_reordered ()
 	   reflect any changes in latencies within the graph.
 	*/
 	
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->set_capture_offset ();
 	}
 }
@@ -3712,7 +3694,7 @@ Session::reset_native_file_format ()
 	//RWLockMonitor lm1 (route_lock, true, __LINE__, __FILE__);
 	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
 
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->reset_write_sources (false);
 	}
 }

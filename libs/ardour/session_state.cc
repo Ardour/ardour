@@ -59,6 +59,7 @@
 #include <ardour/configuration.h>
 #include <ardour/session.h>
 #include <ardour/audio_diskstream.h>
+#include <ardour/midi_diskstream.h>
 #include <ardour/utils.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audiofilesource.h>
@@ -270,7 +271,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	AudioSource::AudioSourceCreated.connect (mem_fun (*this, &Session::add_audio_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
-	AudioDiskstream::DiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
+	Diskstream::DiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
 
 	IO::MoreOutputs.connect (mem_fun (*this, &Session::ensure_passthru_buffers));
@@ -624,12 +625,16 @@ Session::load_diskstreams (const XMLNode& node)
 	clist = node.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
-		
-		AudioDiskstream* dstream;
+		Diskstream* dstream = NULL;
 
 		try {
-			dstream = new AudioDiskstream (*this, **citer);
-			/* added automatically by AudioDiskstreamCreated handler */
+			if ((*citer)->name() == "AudioDiskstream") {
+				dstream = new AudioDiskstream (*this, **citer);
+				/* added automatically by DiskstreamCreated handler */
+			} else {
+				assert((*citer)->name() == "MidiDiskstream");
+				dstream = new MidiDiskstream (*this, **citer);
+			}
 		} 
 		
 		catch (failed_constructor& err) {
@@ -1380,7 +1385,7 @@ Session::state(bool full_state)
 
 	{ 
 		Glib::RWLock::ReaderLock dl (diskstream_lock);
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if (!(*i)->hidden()) {
 				child->add_child_nocopy ((*i)->get_state());
 			}

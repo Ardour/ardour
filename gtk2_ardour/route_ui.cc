@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,6 +35,8 @@
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
+#include <ardour/midi_track.h>
+#include <ardour/midi_diskstream.h>
 
 #include "i18n.h"
 using namespace sigc;
@@ -879,13 +881,22 @@ RouteUI::is_audio_track () const
 	return dynamic_cast<AudioTrack*>(&_route) != 0;
 }
 
-AudioDiskstream*
+bool
+RouteUI::is_midi_track () const
+{
+	return dynamic_cast<MidiTrack*>(&_route) != 0;
+}
+
+Diskstream*
 RouteUI::get_diskstream () const
 {
 	AudioTrack *at;
+	MidiTrack *mt;
 
 	if ((at = dynamic_cast<AudioTrack*>(&_route)) != 0) {
 		return &at->disk_stream();
+	} else if ((mt = dynamic_cast<MidiTrack*>(&_route)) != 0) {
+		return &mt->disk_stream();
 	} else {
 		return 0;
 	}
@@ -896,6 +907,13 @@ RouteUI::audio_track() const
 {
 	return dynamic_cast<AudioTrack*>(&_route);
 }
+
+MidiTrack*
+RouteUI::midi_track() const
+{
+	return dynamic_cast<MidiTrack*>(&_route);
+}
+
 string
 RouteUI::name() const
 {

@@ -113,7 +113,6 @@ Session::set_smpte_offset_negative (bool neg)
 	SMPTEOffsetChanged (); /* EMIT SIGNAL */
 }
 
-
 void
 Session::smpte_to_sample( SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const
 {

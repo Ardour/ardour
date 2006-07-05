@@ -80,6 +80,9 @@ class Diskstream : public Stateful, public sigc::trackable
 	void unref() { if (_refcnt) _refcnt--; if (_refcnt == 0) delete this; }
 	uint32_t refcnt() const { return _refcnt; }
 
+	virtual float playback_buffer_load() const = 0;
+	virtual float capture_buffer_load() const = 0;
+
 	void set_flag (Flag f)   { _flags |= f; }
 	void unset_flag (Flag f) { _flags &= ~f; }
 
@@ -106,6 +109,7 @@ class Diskstream : public Stateful, public sigc::trackable
 	virtual void punch_out() {}
 
 	virtual void set_speed (double);
+	virtual void non_realtime_set_speed () = 0;
 
 	virtual Playlist *playlist () = 0;
 	virtual int use_new_playlist () = 0;
@@ -128,6 +132,9 @@ class Diskstream : public Stateful, public sigc::trackable
 	/* Stateful */
 	virtual XMLNode& get_state(void) = 0;
 	virtual int      set_state(const XMLNode& node) = 0;
+	
+	// FIXME: makes sense for all diskstream types?
+	virtual void monitor_input (bool) {}
 
 	jack_nframes_t capture_offset() const { return _capture_offset; }
 	virtual void   set_capture_offset ();
@@ -166,7 +173,7 @@ class Diskstream : public Stateful, public sigc::trackable
 	virtual void set_pending_overwrite (bool) = 0;
 	virtual int  overwrite_existing_buffers () = 0;
 	virtual void reverse_scrub_buffer (bool to_forward) = 0;
-	//void set_block_size (jack_nframes_t);
+	virtual void set_block_size (jack_nframes_t) = 0;
 	virtual int  internal_playback_seek (jack_nframes_t distance) = 0;
 	virtual int  can_internal_playback_seek (jack_nframes_t distance) = 0;
 	virtual int  rename_write_sources () = 0;

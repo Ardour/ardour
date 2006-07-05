@@ -68,6 +68,7 @@ class AuxInput;
 class Source;
 class AudioSource;
 
+class Diskstream;
 class AudioDiskstream;
 class AudioFileSource;
 class Auditioner;
@@ -281,30 +282,25 @@ class Session : public sigc::trackable, public Stateful
 	void refill_all_diskstream_buffers ();
 	uint32_t diskstream_buffer_size() const { return dstream_buffer_size; }
 	
-	/* XXX fix required here when we get new diskstream types *, but
-	   not sure of the direction to take this in until then.
-	*/
-
-	uint32_t get_next_diskstream_id() const { return n_audio_diskstreams(); }
-	uint32_t n_audio_diskstreams() const;
+	uint32_t get_next_diskstream_id() const { return n_diskstreams(); }
+	uint32_t n_diskstreams() const;
 	
-	typedef list<AudioDiskstream *> AudioDiskstreamList;
+	template<class T> void foreach_diskstream (T *obj, void (T::*func)(Diskstream&));
 
-	Session::AudioDiskstreamList audio_disk_streams() const {
+	typedef list<Diskstream *> DiskstreamList;
+	
+	Session::DiskstreamList disk_streams() const {
 		Glib::RWLock::ReaderLock lm (diskstream_lock);
-		return audio_diskstreams; /* XXX yes, force a copy */
+		return diskstreams; /* XXX yes, force a copy */
 	}
 
-	void foreach_audio_diskstream (void (AudioDiskstream::*func)(void));
-	template<class T> void foreach_audio_diskstream (T *obj, void (T::*func)(AudioDiskstream&));
-
 	typedef list<Route *> RouteList;
-
+	
 	RouteList get_routes() const {
 		Glib::RWLock::ReaderLock rlock (route_lock);
 		return routes; /* XXX yes, force a copy */
 	}
-
+	
 	uint32_t nroutes() const { return routes.size(); }
 	uint32_t ntracks () const;
 	uint32_t nbusses () const;
@@ -719,8 +715,6 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void,Playlist*> PlaylistAdded;
 	sigc::signal<void,Playlist*> PlaylistRemoved;
 
-	Playlist *get_playlist (string name);
-
 	uint32_t n_playlists() const;
 
 	template<class T> void foreach_playlist (T *obj, void (T::*func)(Playlist *));
@@ -980,7 +974,7 @@ class Session : public sigc::trackable, public Stateful
 	void set_frame_rate (jack_nframes_t nframes);
 
   protected:
-	friend class AudioDiskstream;
+	friend class Diskstream;
 	void stop_butler ();
 	void wait_till_butler_finished();
 
@@ -1475,7 +1469,7 @@ class Session : public sigc::trackable, public Stateful
 
 	/* disk-streams */
 
-	AudioDiskstreamList  audio_diskstreams; 
+	DiskstreamList  diskstreams; 
 	mutable Glib::RWLock diskstream_lock;
 	uint32_t dstream_buffer_size;
 	void add_diskstream (Diskstream*);

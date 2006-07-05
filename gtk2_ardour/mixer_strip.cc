@@ -665,15 +665,16 @@ MixerStrip::select_stream_input ()
 	MenuList& items = stream_menu->items();
 	stream_menu->set_name ("ArdourContextMenu");
 	
-	Session::AudioDiskstreamList streams = _session.audio_disk_streams();
+	Session::DiskstreamList streams = _session.disk_streams();
 
-	for (Session::AudioDiskstreamList::iterator i = streams.begin(); i != streams.end(); ++i) {
+	for (Session::DiskstreamList::iterator i = streams.begin(); i != streams.end(); ++i) {
+		AudioDiskstream* ads = dynamic_cast<AudioDiskstream*>(*i);
 
-		if (!(*i)->hidden()) {
+		if (ads && !(*i)->hidden()) {
 
-			items.push_back (CheckMenuElem ((*i)->name(), bind (mem_fun(*this, &MixerStrip::stream_input_chosen), *i)));
+			items.push_back (CheckMenuElem (ads->name(), bind (mem_fun(*this, &MixerStrip::stream_input_chosen), ads)));
 			
-			if (get_diskstream() == *i) {
+			if (get_diskstream() == ads) {
 				ignore_toggle = true;
 				static_cast<CheckMenuItem *> (&items.back())->set_active (true);
 				ignore_toggle = false;

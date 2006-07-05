@@ -1599,7 +1599,7 @@ Editor::build_track_region_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
 
 	if (atv) {
-		AudioDiskstream* ds;
+		Diskstream* ds;
 		Playlist* pl;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
@@ -1626,7 +1626,7 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
 
 	if (atv) {
-		AudioDiskstream* ds;
+		Diskstream* ds;
 		Playlist* pl;
 		AudioPlaylist* apl;
 

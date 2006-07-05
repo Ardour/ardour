@@ -39,10 +39,14 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 	crossfades_visible = true;
 
 	if (tv.is_audio_track()) {
-		/* TRACK */
+		/* AUDIO TRACK */
 		//stream_base_color = RGBA_TO_UINT (222,223,218,255);
 		stream_base_color = color_map[cAudioTrackBase];
+	} else if (tv.is_midi_track()) {
+		/* MIDI TRACK */
+		stream_base_color = color_map[cMidiTrackBase];
 	} else {
+		// FIXME: distinction between audio and midi busses
 		/* BUS */
 		//stream_base_color = RGBA_TO_UINT (230,226,238,255);
 		stream_base_color = color_map[cAudioBusBase];

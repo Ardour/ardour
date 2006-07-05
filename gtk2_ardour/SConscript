@@ -27,7 +27,7 @@ gtkardour.Merge ([
     libraries['ardour_cp'],
     libraries['gtkmm2ext'],
     libraries['midi++2'],
-    libraries['pbd3'],
+    libraries['pbd'],
     libraries['gtkmm2'],
     libraries['glib2'],
     libraries['libgnomecanvas2'],
@@ -255,8 +255,7 @@ else:
 	env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour2', ardoursh))
 
 if env['NLS']:
-	Export('gtkardour', 'intl_files')
-	SConscript ('po/SConscript')
+	i18n (gtkardour, gtkardour_files+skipped_files+fft_analysis_files, env)
     
 # configuration files
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui.rc'))

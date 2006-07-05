@@ -546,7 +546,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode);
 	void session_add_midi_route (bool disk);
 
-	void add_diskstream_to_menu (ARDOUR::AudioDiskstream&);
+	void add_diskstream_to_menu (ARDOUR::Diskstream&);
 	void diskstream_selected (gint32);
 	Gtk::Menu *diskstream_menu;
 	gint32 selected_dstream;
@@ -637,7 +637,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_monitor_enable (guint32);
 
 	uint32_t rec_enabled_diskstreams;
-	void count_recenabled_diskstreams (ARDOUR::AudioDiskstream&);
+	void count_recenabled_diskstreams (ARDOUR::Diskstream&);
 
 	About* about;
 	bool shown_flag;

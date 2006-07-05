@@ -99,6 +99,8 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	void hide_dependent_views (TimeAxisViewItem&);
 	void reveal_dependent_views (TimeAxisViewItem&);
 		
+	ARDOUR::AudioDiskstream* get_diskstream() const;
+
 	ARDOUR::Region* find_next_region (jack_nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
 
 	string name() const;
