@@ -384,7 +384,7 @@ FFTGraph::on_size_request(Gtk::Requisition* requisition)
 }
 
 void
-FFTGraph::on_size_allocate(Gtk::Allocation alloc)
+FFTGraph::on_size_allocate(Gtk::Allocation & alloc)
 {
 	width = alloc.get_width();
 	height = alloc.get_height();
