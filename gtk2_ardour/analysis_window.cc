@@ -45,16 +45,15 @@ using namespace PBD;
 AnalysisWindow::AnalysisWindow()
 	: ArdourDialog(_("analysis window")),
 	
-	  fft_graph (2048),
-	
 	  source_selection_label       (_("Signal source")),
 	  source_selection_ranges_rb   (_("Selected ranges")),
 	  source_selection_regions_rb  (_("Selected regions")),
-	  
+	
 	  display_model_label                   (_("Display model")),
 	  display_model_composite_separate_rb   (_("Composite graphs for each track")),
-	  display_model_composite_all_tracks_rb (_("Composite graph of all tracks"))
+	  display_model_composite_all_tracks_rb (_("Composite graph of all tracks")),
 
+	  fft_graph (2048)
 {
 	track_list_ready = false;
 	
@@ -237,7 +236,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 			if (!pl || !rui)
 				continue;
 
-			FFTResult *res = fft_graph.prepareResult(*&rui->color(), *&rui->route().name());
+			FFTResult *res = fft_graph.prepareResult(rui->color(), rui->route().name());
 		
 			// if timeSelection
 			if (source_selection_ranges_rb.get_active()) {
@@ -315,7 +314,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 			Gtk::TreeModel::Row newrow = *(tlmodel)->append();
 			newrow[tlcols.trackname]   = rui->route().name();
 			newrow[tlcols.visible]     = true;
-			newrow[tlcols.color]       = *&rui->color();
+			newrow[tlcols.color]       = rui->color();
 			newrow[tlcols.graph]       = res;
 		}	
 
