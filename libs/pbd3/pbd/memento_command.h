@@ -24,7 +24,28 @@
 #include <pbd/command.h>
 #include <sigc++/slot.h>
 
-// TODO: make a macro to make constructing this even easier
+#define MEMENTO_COMMAND(obj_T, mem_T, obj, meth) \
+    (MementoCommand<(obj_T),(mem_T)>((obj),sigc::mem_fun((obj),&(meth)),#meth))
+
+#define MEMENTO_COMMAND_1(obj_T, mem_T, obj, meth, arg1) \
+    (MementoCommand<(obj_T),(mem_T)>((obj),\
+                                     sigc::bind(sigc::mem_fun((obj),\
+                                                              &(meth)),\
+                                                arg1),#meth))
+
+#define MEMENTO_COMMAND_2(obj_T, mem_T, obj, meth, arg1, arg2) \
+    (MementoCommand<(obj_T),(mem_T)>((obj),\
+                                     sigc::bind(sigc::mem_fun((obj),\
+                                                              &(meth)),\
+                                                arg1, arg2),#meth))
+
+#define MEMENTO_COMMAND_3(obj_T, mem_T, obj, meth, arg1, arg2, arg3) \
+    (MementoCommand<(obj_T),(mem_T)>((obj),\
+                                     sigc::bind(sigc::mem_fun((obj),\
+                                                              &(meth)),\
+                                                arg1, arg2, arg3),#meth))
+
+
 template <class obj_T, class mem_T>
 class MementoCommand : public Command
 {
@@ -35,6 +56,27 @@ class MementoCommand : public Command
                        std::list<Serializable *> args
                        ) 
             : obj(obj), action(action), key(key), args(args), memento(obj.get_memento()) {}
+        MementoCommand(obj_T obj, 
+                       sigc::slot<void> action,
+                       std::string key
+                       Serializable *arg1 = 0,
+                       Serializable *arg2 = 0,
+                       Serializable *arg3 = 0
+                       ) 
+            : obj(obj), action(action), key(key), memento(obj.get_memento())
+        {
+            if (arg1 == 0)
+                return;
+            args.push_back(arg1);
+
+            if (arg2 == 0)
+                return;
+            args.push_back(arg2);
+
+            if (arg3 == 0)
+                return;
+            args.push_back(arg3);
+        }
         void operator() () { action(); }
         void undo() { obj.set_memento(memento); }
         virtual XMLNode &serialize() 
