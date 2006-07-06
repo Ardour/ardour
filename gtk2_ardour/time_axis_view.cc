@@ -131,8 +131,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
-
-	controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
+	
+	//controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_ebox.add (controls_vbox);
 	controls_ebox.add_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|SCROLL_MASK);
 	controls_ebox.set_flags (CAN_FOCUS);

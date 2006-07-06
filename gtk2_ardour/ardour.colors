@@ -1,7 +1,7 @@
 cWaveForm 0.0 0.0 0.0 0.80
 cMutedWaveForm 0.35 0.35 0.35 1.0
-cSelectedFrameBase 0.71 0.57 0.66 1.0
-cFrameBase 0.75 0.75 0.76 1.0
+cSelectedFrameBase 0.0 0.57 0.66 0.5
+cFrameBase 0.0 0.76 0.75 0.5
 cAudioTrackBase 0.75 0.75 0.85 0.41
 cAudioTrackOutline 0.00 0.00 0.00 1.00
 cAudioBusBase 0.75 0.80 0.75 0.41

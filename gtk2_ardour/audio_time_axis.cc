@@ -157,6 +157,12 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	visual_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::visual_click));
 	hide_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::hide_click));
 
+	// FIXME: hack (pretty colours)
+	if (is_audio_track())
+		controls_ebox.set_name ("AudioTimeAxisViewControlsBaseUnselected");
+	else
+		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
+
 	if (is_audio_track()) {
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	}

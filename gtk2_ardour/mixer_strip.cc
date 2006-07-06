@@ -1170,7 +1170,18 @@ MixerStrip::route_active_changed ()
 {
 	RouteUI::route_active_changed ();
 
-	if (is_audio_track()) {
+	// FIXME: MIDI/Audio bus distinction
+	
+	if (is_midi_track()) {
+		if (_route.active()) {
+			set_name ("MidiTrackStripBase");
+			gpm.set_meter_strip_name ("MidiTrackStripBase");
+		} else {
+			set_name ("MidiTrackStripBaseInactive");
+			gpm.set_meter_strip_name ("MidiTrackStripBaseInactive");
+		}
+		gpm.set_fader_name ("MidiTrackFader");
+	} else if (is_audio_track()) {
 		if (_route.active()) {
 			set_name ("AudioTrackStripBase");
 			gpm.set_meter_strip_name ("AudioTrackStripBase");

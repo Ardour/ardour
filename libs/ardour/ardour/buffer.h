@@ -29,6 +29,10 @@
 namespace ARDOUR {
 
 
+/* Yes, this is a bit of a mess right now.  I'll clean it up when everything
+ * using it works out.. */
+
+
 /** A buffer of recordable/playable data.
  *
  * This is a datatype-agnostic base class for all buffers (there are no
@@ -60,19 +64,41 @@ public:
 	size_t size() const { return _size; }
 
 	/** Type of this buffer.
-	 * Based on this you can cast a Buffer* to the desired type. */
+	 * Based on this you can static cast a Buffer* to the desired type. */
 	virtual Type type() const { return _type; }
 
 	/** Jack type (eg JACK_DEFAULT_AUDIO_TYPE) */
 	const char* jack_type() const { return type_to_jack_type(type()); }
 	
-	/** Separate for creating ports (before a buffer exists to call jack_type on) */
+	/** String type as saved in session XML files (eg "audio" or "midi") */
+	const char* type_string() const { return type_to_string(type()); }
+
+	/* The below static methods need to be separate from the above methods
+	 * because the conversion is needed in places where there's no Buffer */
 	static const char* type_to_jack_type(Type t) {
 		switch (t) {
 			case AUDIO: return JACK_DEFAULT_AUDIO_TYPE;
 			case MIDI:  return JACK_DEFAULT_MIDI_TYPE;
 			default:    return "";
 		}
+	}
+	
+	static const char* type_to_string(Type t) {
+		switch (t) {
+			case AUDIO: return "audio";
+			case MIDI:  return "midi";
+			default:    return "unknown"; // reeeally shouldn't ever happen
+		}
+	}
+
+	/** Used for loading from XML (route default types etc) */
+	static Type type_from_string(const string& str) {
+		if (str == "audio")
+			return AUDIO;
+		else if (str == "midi")
+			return MIDI;
+		else
+			return NIL;
 	}
 
 protected:
@@ -82,7 +108,7 @@ protected:
 };
 
 
-/* Since we only have two types, templates aren't worth it, yet.. */
+/* Inside every class with a type in it's name is a template waiting to get out... */
 
 
 /** Buffer containing 32-bit floating point (audio) data. */

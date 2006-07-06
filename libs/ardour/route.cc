@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <fstream>
+#include <cassert>
 
 #include <sigc++/bind.h>
 #include <pbd/xml++.h>
@@ -1346,6 +1347,10 @@ Route::state(bool full_state)
 		snprintf (buf, sizeof (buf), "0x%x", _flags);
 		node->add_property("flags", buf);
 	}
+	
+	// FIXME: assumes there's only audio and MIDI types
+	node->add_property("default-type", Buffer::type_to_string(_default_type));
+
 	node->add_property("active", _active?"yes":"no");
 	node->add_property("muted", _muted?"yes":"no");
 	node->add_property("soloed", _soloed?"yes":"no");
@@ -1540,6 +1545,11 @@ Route::set_state (const XMLNode& node)
 		_flags = Flag (x);
 	} else {
 		_flags = Flag (0);
+	}
+	
+	if ((prop = node.property ("default-type")) != 0) {
+		_default_type = Buffer::type_from_string(prop->value());
+		assert(_default_type != Buffer::NIL);
 	}
 
 	if ((prop = node.property ("phase-invert")) != 0) {

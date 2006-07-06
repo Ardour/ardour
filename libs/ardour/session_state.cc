@@ -74,6 +74,7 @@
 #include <ardour/slave.h>
 #include <ardour/tempo.h>
 #include <ardour/audio_track.h>
+#include <ardour/midi_track.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
 #include <ardour/named_selection.h>
@@ -1716,8 +1717,20 @@ Session::XMLRouteFactory (const XMLNode& node)
 		return 0;
 	}
 
-	if (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0) {
-		return new AudioTrack (*this, node);
+	bool has_diskstream = (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0);
+	
+	Buffer::Type type = Buffer::AUDIO;
+	const XMLProperty* prop = node.property("default-type");
+	if (prop)
+		type = Buffer::type_from_string(prop->value());
+	
+	assert(type != Buffer::NIL);
+
+	if (has_diskstream) {
+		if (type == Buffer::AUDIO)
+			return new AudioTrack (*this, node);
+		else
+			return new MidiTrack (*this, node);
 	} else {
 		return new Route (*this, node);
 	}

@@ -517,7 +517,7 @@ style "audio_bus_base"
   font_name = "sans 6"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
-  bg[NORMAL] = {0, 0.36, 0.40 }	
+  bg[NORMAL] = {0, 0.40, 0.36 }	
 }
 
 style "midi_track_base" = "default_base"
@@ -1028,13 +1028,19 @@ widget "*BBTRuler" style "editor_time_ruler"
 widget "*FramesRuler" style "editor_time_ruler"
 widget "*MinSecRuler" style "editor_time_ruler"
 widget "*BaseFrame" style "base_frame"
+widget "*BusControlsBaseUnselected" style "audio_bus_base"
+widget "*AudioTimeAxisViewControlsBaseUnselected" style "audio_track_base"
 widget "*AudioTrackStripBase" style "audio_track_base"
-widget "*TimeAxisViewControlsBaseUnselected" style "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style "audio_track_base"
 widget "*AudioTrackFader" style "audio_track_base"
 widget "*AudioBusStripBase" style "audio_bus_base"
-widget "*BusControlsBaseUnselected" style "audio_bus_base"
 widget "*AudioBusFader" style "audio_bus_base"
+widget "*MidiTimeAxisViewControlsBaseUnselected" style "midi_track_base"
+widget "*MidiTrackStripBase" style "midi_track_base"
+widget "*MidiTrackControlsBaseUnselected" style "midi_track_base"
+widget "*MidiTrackFader" style "midi_track_base"
+widget "*MidiBusStripBase" style "midi_bus_base"
+widget "*MidiBusFader" style "midi_bus_base"
 widget "*TrackSeparator" style "track_separator"
 widget "*TrackEditIndicator0*" style "edit_group_0"
 widget "*TrackEditIndicator1*" style "edit_group_1"
