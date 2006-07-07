@@ -603,6 +603,8 @@ AudioFileSource::set_header_position_offset (jack_nframes_t offset, bool negativ
 void 
 AudioFileSource::handle_header_position_change ()
 {
+	cerr << _path << " handling header position change " << writable() << endl;
+
 	if (writable()) {
 		set_header_timeline_position ();
 		flush_header ();

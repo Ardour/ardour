@@ -112,7 +112,6 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 {
 	Region* r;
 	XMLProperty* prop;
-	id_t id;
 	LocaleGuard lg (X_("POSIX"));
 
 	/* we have to find the in/out regions before we can do anything else */
@@ -122,7 +121,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 		throw failed_constructor();
 	}
 	
-	sscanf (prop->value().c_str(), "%" PRIu64, &id);
+	PBD::ID id (prop->value());
 
 	if ((r = playlist.find_region (id)) == 0) {
 		error << string_compose (_("Crossfade: no \"in\" region %1 found in playlist %2"), id, playlist.name())
@@ -139,10 +138,10 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 		throw failed_constructor();
 	}
 
-	sscanf (prop->value().c_str(), "%" PRIu64, &id);
+	PBD::ID id2 (prop->value());
 
-	if ((r = playlist.find_region (id)) == 0) {
-		error << string_compose (_("Crossfade: no \"out\" region %1 found in playlist %2"), id, playlist.name())
+	if ((r = playlist.find_region (id2)) == 0) {
+		error << string_compose (_("Crossfade: no \"out\" region %1 found in playlist %2"), id2, playlist.name())
 		      << endmsg;
 		throw failed_constructor();
 	}
@@ -680,9 +679,9 @@ Crossfade::get_state ()
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof(buf), "%" PRIu64, _out->id());
+	_out->id().print (buf);
 	node->add_property ("out", buf);
-	snprintf (buf, sizeof(buf), "%" PRIu64, _in->id());
+	_in->id().print (buf);
 	node->add_property ("in", buf);
 	node->add_property ("active", (_active ? "yes" : "no"));
 	node->add_property ("follow-overlap", (_follow_overlap ? "yes" : "no"));

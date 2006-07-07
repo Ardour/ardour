@@ -31,11 +31,10 @@
 
 #include <pbd/fastlog.h>
 #include <pbd/undo.h>
-
-#include <midi++/controllable.h>
+#include <pbd/stateful.h> 
+#include <pbd/controllable.h>
 
 #include <ardour/ardour.h>
-#include <ardour/stateful.h>
 #include <ardour/utils.h>
 #include <ardour/state_manager.h>
 #include <ardour/curve.h>
@@ -177,25 +176,10 @@ class IO : public Stateful, public ARDOUR::StateManager
 	static sigc::signal<void,uint32_t> MoreOutputs;
 	static sigc::signal<int> PortsCreated;
 
-	/* MIDI control */
-
-	void set_midi_to_gain_function (gain_t (*function)(double val)) {
-		_midi_gain_control.midi_to_gain = function;
+	PBD::Controllable& gain_control() {
+		return _gain_control;
 	}
 
-	void set_gain_to_midi_function (double (*function)(gain_t gain)) {
-		_midi_gain_control.gain_to_midi = function;
-	}
-
-	MIDI::Controllable& midi_gain_control() {
-		return _midi_gain_control;
-	}
-
-	virtual void reset_midi_control (MIDI::Port*, bool on);
-
-	virtual void send_all_midi_feedback ();
-	virtual MIDI::byte* write_midi_feedback (MIDI::byte*, int32_t& bufsize);
-	
 	/* Peak metering */
 
 	float peak_input_power (uint32_t n) { 
@@ -257,7 +241,7 @@ public:
 	void start_pan_touch (uint32_t which);
 	void end_pan_touch (uint32_t which);
 
-	id_t id() const { return _id; }
+	const PBD::ID& id() const { return _id; }
 
 	void defer_pan_reset ();
 	void allow_pan_reset ();
@@ -286,7 +270,7 @@ public:
 	string              _name;
 	Connection*         _input_connection;
 	Connection*         _output_connection;
-	id_t                _id;
+	PBD::ID             _id;
 	bool                 no_panner_reset;
 	XMLNode*             deferred_state;
 
@@ -300,31 +284,22 @@ public:
 	static void apply_declick (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, 
 				   gain_t initial, gain_t target, bool invert_polarity);
 
-	struct MIDIGainControl : public MIDI::Controllable {
-	    MIDIGainControl (IO&, MIDI::Port *);
-	    void set_value (float);
-
-	    void send_feedback (gain_t);
-	    MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, gain_t val, bool force = false);
-
+	struct GainControllable : public PBD::Controllable {
+	    GainControllable (IO& i) : io (i) {}
+	 
+	    void set_value (float val);
+	    float get_value (void) const;
+   
 	    IO& io;
-	    bool setting;
-	    MIDI::byte last_written;
-
-	    gain_t (*midi_to_gain) (double val);
-	    double (*gain_to_midi) (gain_t gain);
 	};
 
-	MIDIGainControl _midi_gain_control;
+	GainControllable _gain_control;
 
 	/* state management */
 
 	Change               restore_state (State&);
 	StateManager::State* state_factory (std::string why) const;
 
-	bool get_midi_node_info (XMLNode * node, MIDI::eventType & ev, MIDI::channel_t & chan, MIDI::byte & additional);
-	bool set_midi_node_info (XMLNode * node, MIDI::eventType ev, MIDI::channel_t chan, MIDI::byte additional);
-	
 	/* automation */
 
 	jack_nframes_t last_automation_snapshot;

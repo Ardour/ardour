@@ -21,8 +21,10 @@ pbd_files = Split("""
 basename.cc
 base_ui.cc
 convert.cc
+controllable.cc
 dmalloc.cc
 error.cc
+id.cc
 mountpoint.cc
 path.cc
 pathscanner.cc
@@ -30,6 +32,7 @@ pool.cc
 pthread_utils.cc
 receiver.cc
 stacktrace.cc
+stateful.cc
 strsplit.cc
 textreceiver.cc
 transmitter.cc
@@ -46,7 +49,11 @@ if conf.CheckCHeader('execinfo.h'):
     conf.env.Append(CXXFLAGS="-DHAVE_EXECINFO")
 pbd = conf.Finish()
 
-pbd.Merge ([ libraries['sigc2'], libraries['xml'], libraries['glibmm2'], libraries['glib2'] ])
+pbd.Merge ([ libraries['sigc2'],
+             libraries['uuid'],
+             libraries['xml'],
+             libraries['glibmm2'],
+             libraries['glib2'] ])
 
 pbd.VersionBuild(['version.cc','pbd/version.h'], 'SConscript')
 

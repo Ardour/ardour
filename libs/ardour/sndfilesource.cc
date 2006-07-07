@@ -246,6 +246,8 @@ SndFileSource::open ()
 			_flags = Flag (_flags & ~Broadcast);
 		}
 
+		set_timeline_position (0);
+
 	} else {
 	
 		/* XXX 64 bit alert: when JACK switches to a 64 bit frame count, this needs to use the high bits
@@ -280,7 +282,7 @@ SndFileSource::~SndFileSource ()
 	}
 
 	if (_broadcast_info) {
-		free (_broadcast_info);
+		delete _broadcast_info;
 	}
 }
 
@@ -501,6 +503,8 @@ SndFileSource::set_header_timeline_position ()
 		return;
 	}
 
+	cerr << "timeline pos = " << timeline_position << " offset = " << header_position_offset << endl;
+
 	_broadcast_info->time_reference_high = 0;
 
 	if (header_position_negative) {
@@ -522,6 +526,8 @@ SndFileSource::set_header_timeline_position ()
 
 	_broadcast_info->time_reference_high = (pos >> 32);
 	_broadcast_info->time_reference_low = (pos & 0xffffffff);
+
+	cerr << "set binfo pos to " << _broadcast_info->time_reference_high << " + " << _broadcast_info->time_reference_low << endl;
 
 	if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
 		error << string_compose (_("cannot set broadcast info for audio file %1; Dropping broadcast info for this file"), _path) << endmsg;

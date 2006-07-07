@@ -31,8 +31,8 @@
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/button.h>
 
-#include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/slider_controller.h>
 
 #include "enums.h"
 

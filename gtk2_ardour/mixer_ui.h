@@ -33,8 +33,9 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/treeview.h>
 
+#include <pbd/stateful.h>
+
 #include <ardour/ardour.h>
-#include <ardour/stateful.h>
 #include <ardour/io.h>
 
 #include "keyboard_target.h"

@@ -322,10 +322,15 @@ ARDOUR::cleanup ()
 	return 0;
 }
 
-ARDOUR::id_t
-ARDOUR::new_id ()
+
+microseconds_t
+ARDOUR::get_microseconds ()
 {
-	return get_uid();
+	/* XXX need JACK to export its functionality */
+
+	struct timeval now;
+	gettimeofday (&now, 0);
+	return now.tv_sec * 1000000ULL + now.tv_usec;
 }
 
 ARDOUR::Change

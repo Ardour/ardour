@@ -52,7 +52,7 @@ namespace ARDOUR {
 	class Redirect;
 }
 
-namespace MIDI {
+namespace PBD {
 	class Controllable;
 }
 
@@ -174,7 +174,7 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 	void output_update();
 	
 	void build (ARDOUR::AudioEngine &);
-	ControlUI* build_control_ui (ARDOUR::AudioEngine &, guint32 port_index, MIDI::Controllable *);
+	ControlUI* build_control_ui (ARDOUR::AudioEngine &, guint32 port_index, PBD::Controllable *);
 	std::vector<string> setup_scale_values(guint32 port_index, ControlUI* cui);
 	void control_adjustment_changed (ControlUI* cui);
 	void parameter_changed (uint32_t, float, ControlUI* cui);

@@ -17,8 +17,8 @@ winmain.c
 """
 )
 
-ardour_vst.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst", LIBPATH='#gtk2_ardour')
-ardour_vst.Append (LINKFLAGS='-L/usr/X11R6/lib -lasound -lardourgtk -lX11 -lpthread') 
+ardour_vst.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst", LIBPATH='#gtk2_ardour', LIBS="ardourgtk")
+ardour_vst.Append (LINKFLAGS='-L/usr/X11R6/lib -lasound -lX11 -lpthread') 
 ardour_vst["CC"] ="winegcc"
 ardour_vst["LINK"] ="wineg++ -mwindows"
 

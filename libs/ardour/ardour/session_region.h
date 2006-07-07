@@ -10,7 +10,7 @@ template<class T> void Session::foreach_audio_region (T *obj, void (T::*func)(Au
 {
 	Glib::Mutex::Lock lm (region_lock);
 	for (AudioRegionList::iterator i = audio_regions.begin(); i != audio_regions.end(); i++) {
-		(obj->*func) ((*i).second);
+		(obj->*func) (i->second);
 	}
 }
 

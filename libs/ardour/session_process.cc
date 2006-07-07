@@ -59,6 +59,8 @@ Session::process (jack_nframes_t nframes)
 	} 
 	
 	(this->*process_function) (nframes);
+
+	SendFeedback (); /* EMIT SIGNAL */
 }
 
 void

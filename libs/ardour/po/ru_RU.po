@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 0.716.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-06-27 13:00-0400\n"
+"POT-Creation-Date: 2006-06-29 21:03-0400\n"
 "PO-Revision-Date: 2004-03-31 00:55+0300\n"
 "Last-Translator: Igor Blinov pitstop@nm.ru\n"
 "Language-Team: Russian\n"
@@ -43,44 +43,44 @@ msgstr ""
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:1795
+#: libs/ardour/audio_diskstream.cc:1796
 msgid "%1: could not create region for complete audio file"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:1818
+#: libs/ardour/audio_diskstream.cc:1819
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:1873
+#: libs/ardour/audio_diskstream.cc:1874
 #, fuzzy
 msgid "programmer error: %1"
 msgstr "ошибка программы: "
 
-#: libs/ardour/audio_diskstream.cc:2145
+#: libs/ardour/audio_diskstream.cc:2146
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2170
+#: libs/ardour/audio_diskstream.cc:2171
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2403
+#: libs/ardour/audio_diskstream.cc:2404
 msgid "Location \"%1\" not valid for track loop (start >= end)"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2484
+#: libs/ardour/audio_diskstream.cc:2485
 msgid "%1: cannot restore pending capture source file %2"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2506
+#: libs/ardour/audio_diskstream.cc:2507
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2522
+#: libs/ardour/audio_diskstream.cc:2523
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2534
+#: libs/ardour/audio_diskstream.cc:2535
 msgid "%1: cannot create region from pending capture sources"
 msgstr ""
 
@@ -133,41 +133,41 @@ msgstr ""
 msgid "region modified"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:133 libs/ardour/io.cc:1716
+#: libs/ardour/audio_track.cc:125 libs/ardour/io.cc:1716
 #: libs/ardour/io.cc:1826
 msgid "Unknown connection \"%1\" listed for input of %2"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:135 libs/ardour/io.cc:1718
+#: libs/ardour/audio_track.cc:127 libs/ardour/io.cc:1718
 #: libs/ardour/io.cc:1828
 msgid "in 1"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:136 libs/ardour/io.cc:1719
+#: libs/ardour/audio_track.cc:128 libs/ardour/io.cc:1719
 #: libs/ardour/io.cc:1829
 msgid "No input connections available as a replacement"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:140 libs/ardour/io.cc:1723
+#: libs/ardour/audio_track.cc:132 libs/ardour/io.cc:1723
 #: libs/ardour/io.cc:1833
 msgid "Connection %1 was not available - \"in 1\" used instead"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:149 libs/ardour/io.cc:1842
+#: libs/ardour/audio_track.cc:141 libs/ardour/io.cc:1842
 msgid "improper input channel list in XML node (%1)"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:194 libs/ardour/audio_track.cc:207
+#: libs/ardour/audio_track.cc:186 libs/ardour/audio_track.cc:199
 msgid "AudioTrack: diskstream \"%1\" not known by session"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:305
+#: libs/ardour/audio_track.cc:297
 msgid ""
 "MIDI rec_enable control specification for %1 is incomplete, so it has been "
 "ignored"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:317
+#: libs/ardour/audio_track.cc:309
 msgid "programming error: AudioTrack given state without diskstream!"
 msgstr ""
 
@@ -243,48 +243,48 @@ msgstr ""
 msgid "could not reconnect %1 and %2 (err = %3)"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:445 libs/ardour/session_state.cc:3095
+#: libs/ardour/audiofilesource.cc:444 libs/ardour/session_state.cc:3095
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:459 libs/ardour/session_state.cc:3109
+#: libs/ardour/audiofilesource.cc:458 libs/ardour/session_state.cc:3109
 msgid "cannot rename audio file source from %1 to %2 (%3)"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:466 libs/ardour/session_state.cc:3124
+#: libs/ardour/audiofilesource.cc:465 libs/ardour/session_state.cc:3124
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:510
+#: libs/ardour/audiofilesource.cc:509
 msgid "FileSource: search path not set"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:534
+#: libs/ardour/audiofilesource.cc:533
 msgid ""
 "FileSource: \"%1\" is ambigous when searching %2\n"
 "\t"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:540
+#: libs/ardour/audiofilesource.cc:539
 msgid "Filesource: cannot find required file (%1): while searching %2"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:563
+#: libs/ardour/audiofilesource.cc:562
 msgid "Filesource: cannot find required file (%1): %2"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:568
+#: libs/ardour/audiofilesource.cc:567
 msgid "Filesource: cannot check for existing file (%1): %2"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:640 libs/ardour/insert.cc:525
-#: libs/ardour/sndfilesource.cc:112
+#: libs/ardour/audiofilesource.cc:636 libs/ardour/insert.cc:525
+#: libs/ardour/sndfilesource.cc:113
 #, fuzzy
 msgid "programming error: %1"
 msgstr "ошибка программы: "
 
-#: libs/ardour/audiofilesource.cc:645
+#: libs/ardour/audiofilesource.cc:641
 msgid "cannot rename audio file for %1 to %2"
 msgstr ""
 
@@ -1684,7 +1684,7 @@ msgstr ""
 msgid "cannot remove dead sound file %1 (%2)"
 msgstr ""
 
-#: libs/ardour/session_time.cc:375
+#: libs/ardour/session_time.cc:374
 msgid "Unknown JACK transport state %1 in sync callback"
 msgstr ""
 
@@ -1816,42 +1816,42 @@ msgstr ""
 msgid "Big-endian (Mac)"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:146
+#: libs/ardour/sndfilesource.cc:147
 msgid "FileSource: cannot get host information for BWF header (%1)"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:168
+#: libs/ardour/sndfilesource.cc:169
 msgid ""
 "cannot set broadcast info for audio file %1 (%2); dropping broadcast info "
 "for this file"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:224
+#: libs/ardour/sndfilesource.cc:220
 msgid "SndFileSource: cannot open file \"%1\" for %2 (%3)"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:230
+#: libs/ardour/sndfilesource.cc:226
 msgid ""
 "SndFileSource: file only contains %1 channels; %2 is invalid as a channel "
 "number"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:307
+#: libs/ardour/sndfilesource.cc:327
 msgid "SndFileSource: could not seek to frame %1 within %2 (%3)"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:358
+#: libs/ardour/sndfilesource.cc:378
 #, fuzzy
 msgid "programming error: %1 %2"
 msgstr "ошибка программы: "
 
-#: libs/ardour/sndfilesource.cc:458
+#: libs/ardour/sndfilesource.cc:487 libs/ardour/sndfilesource.cc:533
 msgid ""
 "cannot set broadcast info for audio file %1; Dropping broadcast info for "
 "this file"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:500
+#: libs/ardour/sndfilesource.cc:544
 msgid "%1: cannot seek to %2"
 msgstr ""
 
@@ -1989,12 +1989,12 @@ msgstr ""
 msgid "no support for presets using chunks at this time"
 msgstr ""
 
-#: libs/ardour/coreaudio_source.cc:99
+#: libs/ardour/coreaudiosource.cc:97
 msgid ""
 "CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel "
 "number"
 msgstr ""
 
-#: libs/ardour/coreaudio_source.cc:164
+#: libs/ardour/coreaudiosource.cc:162
 msgid "CoreAudioSource: could not seek to frame %1 within %2 (%3)"
 msgstr ""

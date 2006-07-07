@@ -74,17 +74,17 @@ sigc::signal<int>                 IO::PortsCreated;
 
 Glib::StaticMutex       IO::m_meter_signal_lock = GLIBMM_STATIC_MUTEX_INIT;
 
-/* this is a default mapper of MIDI control values to a gain coefficient.
-   others can be imagined. see IO::set_midi_to_gain_function().
+/* this is a default mapper of [0 .. 1.0] control values to a gain coefficient.
+   others can be imagined. 
 */
 
-static gain_t direct_midi_to_gain (double fract) { 
+static gain_t direct_control_to_gain (double fract) { 
 	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
 	/* this maxes at +6dB */
 	return pow (2.0,(sqrt(sqrt(sqrt(fract)))*198.0-192.0)/6.0);
 }
 
-static double direct_gain_to_midi (gain_t gain) { 
+static double direct_gain_to_control (gain_t gain) { 
 	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
 	if (gain == 0) return 0.0;
 	
@@ -102,14 +102,13 @@ IO::IO (Session& s, string name,
 	int input_min, int input_max, int output_min, int output_max)
 	: _session (s),
 	  _name (name),
-	  _midi_gain_control (*this, _session.midi_port()),
+	  _gain_control (*this),
 	  _gain_automation_curve (0.0, 2.0, 1.0),
 	  _input_minimum (input_min),
 	  _input_maximum (input_max),
 	  _output_minimum (output_min),
 	  _output_maximum (output_max)
 {
-	_id = new_id();
 	_panner = new Panner (name, _session);
 	_gain = 1.0;
 	_desired_gain = 1.0;
@@ -120,9 +119,6 @@ IO::IO (Session& s, string name,
 	_noutputs = 0;
 	no_panner_reset = false;
 	deferred_state = 0;
-
-	_midi_gain_control.midi_to_gain = direct_midi_to_gain;
-	_midi_gain_control.gain_to_midi = direct_gain_to_midi;
 
 	apply_gain_automation = false;
 
@@ -1397,7 +1393,7 @@ XMLNode&
 IO::state (bool full_state)
 {
 	XMLNode* node = new XMLNode (state_node_name);
-	char buf[32];
+	char buf[64];
 	string str;
 	bool need_ins = true;
 	bool need_outs = true;
@@ -1405,7 +1401,7 @@ IO::state (bool full_state)
 	Glib::Mutex::Lock lm (io_lock);
 
 	node->add_property("name", _name);
-	snprintf (buf, sizeof(buf), "%" PRIu64, id());
+	id().print (buf);
 	node->add_property("id", buf);
 
 	str = "";
@@ -1499,22 +1495,6 @@ IO::state (bool full_state)
 
 	node->add_property ("iolimits", buf);
 
-	/* MIDI control */
-
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte      additional;
-	XMLNode*        midi_node = 0;
-	XMLNode*        child;
-
-	if (_midi_gain_control.get_control_info (chn, ev, additional)) {
-
-		midi_node = node->add_child ("MIDI");
-
-		child = midi_node->add_child ("gain");
-		set_midi_node_info (child, ev, chn, additional);
-	}
-
 	/* automation */
 
 	if (full_state) {
@@ -1583,7 +1563,6 @@ IO::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
 	XMLNodeConstIterator iter;
-	XMLNodeList midi_kids;
 	LocaleGuard lg (X_("POSIX"));
 
 	/* force use of non-localized representation of decimal point,
@@ -1601,7 +1580,7 @@ IO::set_state (const XMLNode& node)
 	} 
 
 	if ((prop = node.property ("id")) != 0) {
-		sscanf (prop->value().c_str(), "%" PRIu64, &_id);
+		_id = prop->value ();
 	}
 
 	if ((prop = node.property ("iolimits")) != 0) {
@@ -1623,35 +1602,6 @@ IO::set_state (const XMLNode& node)
 		}
 	}
 
-	midi_kids = node.children ("MIDI");
-	
-	for (iter = midi_kids.begin(); iter != midi_kids.end(); ++iter) {
-	
-		XMLNodeList kids;
-		XMLNodeConstIterator miter;
-		XMLNode*    child;
-
-		kids = (*iter)->children ();
-
-		for (miter = kids.begin(); miter != kids.end(); ++miter) {
-
-			child =* miter;
-
-			if (child->name() == "gain") {
-			
-				MIDI::eventType ev = MIDI::on; /* initialize to keep gcc happy */
-				MIDI::byte additional = 0;  /* ditto */
-				MIDI::channel_t chn = 0;    /* ditto */
-
-				if (get_midi_node_info (child, ev, chn, additional)) {
-					_midi_gain_control.set_control_type (chn, ev, additional);
-				} else {
-					error << string_compose(_("MIDI gain control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
-				}
-			}
-		}
-	}
-			
 	if ((prop = node.property ("automation-state")) != 0) {
 
 		long int x;
@@ -1767,50 +1717,6 @@ IO::create_ports (const XMLNode& node)
 
 	PortsCreated();
 	return 0;
-}
-
-bool
-IO::get_midi_node_info (XMLNode * node, MIDI::eventType & ev, MIDI::channel_t & chan, MIDI::byte & additional)
-{
-	bool ok = true;
-	const XMLProperty* prop;
-	int xx;
-
-	if ((prop = node->property ("event")) != 0) {
-		sscanf (prop->value().c_str(), "0x%x", &xx);
-		ev = (MIDI::eventType) xx;
-	} else {
-		ok = false;
-	}
-
-	if (ok && ((prop = node->property ("channel")) != 0)) {
-		sscanf (prop->value().c_str(), "%d", &xx);
-		chan = (MIDI::channel_t) xx;
-	} else {
-		ok = false;
-	}
-
-	if (ok && ((prop = node->property ("additional")) != 0)) {
-		sscanf (prop->value().c_str(), "0x%x", &xx);
-		additional = (MIDI::byte) xx;
-	}
-
-	return ok;
-}
-
-bool
-IO::set_midi_node_info (XMLNode * node, MIDI::eventType ev, MIDI::channel_t chan, MIDI::byte additional)
-{
-	char buf[32];
-
-	snprintf (buf, sizeof(buf), "0x%x", ev);
-	node->add_property ("event", buf);
-	snprintf (buf, sizeof(buf), "%d", chan);
-	node->add_property ("channel", buf);
-	snprintf (buf, sizeof(buf), "0x%x", additional);
-	node->add_property ("additional", buf);
-
-	return true;
 }
 
 
@@ -2339,69 +2245,16 @@ IO::output_connection_configuration_changed ()
 	use_output_connection (*_output_connection, this);
 }
 
-IO::MIDIGainControl::MIDIGainControl (IO& i, MIDI::Port* port)
-	: MIDI::Controllable (port, 0), io (i), setting(false)
-{
-	midi_to_gain = 0;
-	gain_to_midi = 0;
-	setting = false;
-	last_written = 0; /* XXX need a good out-of-bound-value */
-}
-
 void
-IO::MIDIGainControl::set_value (float val)
+IO::GainControllable::set_value (float val)
 {
-	if (midi_to_gain == 0) return;
-	
-	setting = true;
-	io.set_gain (midi_to_gain (val), this);
-	setting = false;
+	io.set_gain (direct_control_to_gain (val), this);
 }
 
-void
-IO::MIDIGainControl::send_feedback (gain_t gain)
+float
+IO::GainControllable::get_value (void) const
 {
-	if (!setting && get_midi_feedback() && gain_to_midi) {
-		MIDI::byte val = (MIDI::byte) (gain_to_midi (gain) * 127.0);
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-		MIDI::EventTwoBytes data;
-	    
-		if (get_control_info (ch, ev, additional)) {
-			data.controller_number = additional;
-			data.value = val;
-			last_written = val;
-			
-			io._session.send_midi_message (get_port(), ev, ch, data);
-		}
-		//send_midi_feedback (gain_to_midi (gain));
-	}
-}
-
-MIDI::byte*
-IO::MIDIGainControl::write_feedback (MIDI::byte* buf, int32_t& bufsize, gain_t val, bool force)
-{
-	if (get_midi_feedback() && gain_to_midi && bufsize > 2) {
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-		MIDI::byte gm;
-
-		if (get_control_info (ch, ev, additional)) {
-			gm = (MIDI::byte) (gain_to_midi (val) * 127.0);
-			
-			if (gm != last_written) {
-				*buf++ = (0xF0 & ev) | (0xF & ch);
-				*buf++ = additional; /* controller number */
-				*buf++ = gm;
-				last_written = gm;
-				bufsize -= 3;
-			}
-		}
-	}
-	
-	return buf;
+	return direct_gain_to_control (io.effective_gain());
 }
 
 void
@@ -2492,23 +2345,6 @@ IO::meter ()
 		}
 	}
 }
-
-void
-IO::reset_midi_control (MIDI::Port* port, bool on)
-{
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte extra;
-
-	_midi_gain_control.get_control_info (chn, ev, extra);
-	if (!on) {
-		chn = -1;
-	}
-	_midi_gain_control.midi_rebind (port, chn);
-	
-	_panner->reset_midi_control (port, on);
-}
-
 
 int
 IO::save_automation (const string& path)
@@ -2699,10 +2535,7 @@ IO::set_gain (gain_t val, void *src)
 	}
 
 	gain_changed (src);
-
-	if (_session.get_midi_feedback()) {
-		_midi_gain_control.send_feedback (_desired_gain);
-	}
+	_gain_control.Changed (); /* EMIT SIGNAL */
 	
 	if (_session.transport_stopped() && src != 0 && src != this && gain_automation_recording()) {
 		_gain_automation_curve.add (_session.transport_frame(), val);
@@ -2710,30 +2543,6 @@ IO::set_gain (gain_t val, void *src)
 	}
 
 	_session.set_dirty();
-}
-
-void
-IO::send_all_midi_feedback ()
-{
-	if (_session.get_midi_feedback()) {
-		_midi_gain_control.send_feedback (_effective_gain);
-
-		// panners
-		_panner->send_all_midi_feedback();
-	}
-}
-
-MIDI::byte*
-IO::write_midi_feedback (MIDI::byte* buf, int32_t& bufsize)
-{
-	if (_session.get_midi_feedback()) {
-		if (gain_automation_playback ()) {
-			buf = _midi_gain_control.write_feedback (buf, bufsize, _effective_gain);
-		}
-		buf = _panner->write_midi_feedback (buf, bufsize);
-	}
-
-	return buf;
 }
 
 void

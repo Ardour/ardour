@@ -77,7 +77,6 @@ Playlist::Playlist (Session& sess, string nom, bool hide)
 {
 	init (hide);
 	_name = nom;
-	_orig_diskstream_id = 0;
 	
 }
 
@@ -86,7 +85,6 @@ Playlist::Playlist (Session& sess, const XMLNode& node, bool hide)
 {
 	init (hide);
 	_name = "unnamed"; /* reset by set_state */
-	_orig_diskstream_id = 0;
 	
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -1343,7 +1341,7 @@ Playlist::set_state (const XMLNode& node)
 		if (prop->name() == X_("name")) {
 			_name = prop->value();
 		} else if (prop->name() == X_("orig_diskstream_id")) {
-			sscanf (prop->value().c_str(), "%" PRIu64, &_orig_diskstream_id);
+			_orig_diskstream_id = prop->value ();
 		} else if (prop->name() == X_("frozen")) {
 			_frozen = (prop->value() == X_("yes"));
 		}
@@ -1404,7 +1402,7 @@ Playlist::state (bool full_state)
 	
 	node->add_property (X_("name"), _name);
 
-	snprintf (buf, sizeof(buf), "%" PRIu64, _orig_diskstream_id);
+	_orig_diskstream_id.print (buf);
 	node->add_property (X_("orig_diskstream_id"), buf);
 	node->add_property (X_("frozen"), _frozen ? "yes" : "no");
 
@@ -1725,7 +1723,7 @@ Playlist::nudge_after (jack_nframes_t start, jack_nframes_t distance, bool forwa
 }
 
 Region*
-Playlist::find_region (id_t id) const
+Playlist::find_region (const ID& id) const
 {
 	RegionLock rlock (const_cast<Playlist*> (this));
 	RegionList::const_iterator i;

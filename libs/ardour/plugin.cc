@@ -35,8 +35,6 @@
 #include <pbd/pathscanner.h>
 #include <pbd/xml++.h>
 
-#include <midi++/manager.h>
-
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
@@ -61,64 +59,59 @@ Plugin::Plugin (const Plugin& other)
 }
 
 void
-Plugin::setup_midi_controls ()
+Plugin::setup_controls ()
 {
-	uint32_t port_cnt;
+	uint32_t port_cnt = parameter_count();
 
-	port_cnt = parameter_count();
-
-	/* set up a vector of null pointers for the MIDI controls.
+	/* set up a vector of null pointers for the controls.
 	   we'll fill this in on an as-needed basis.
 	*/
 
 	for (uint32_t i = 0; i < port_cnt; ++i) {
-		midi_controls.push_back (0);
+		controls.push_back (0);
 	}
 }
 
 Plugin::~Plugin ()
 {
-	for (vector<MIDIPortControl*>::iterator i = midi_controls.begin(); i != midi_controls.end(); ++i) {
+	for (vector<PortControllable*>::iterator i = controls.begin(); i != controls.end(); ++i) {
 		if (*i) {
 			delete *i;
 		}
 	}
 }
 
-MIDI::Controllable *
-Plugin::get_nth_midi_control (uint32_t n)
+Controllable *
+Plugin::get_nth_control (uint32_t n)
 {
 	if (n >= parameter_count()) {
 		return 0;
 	}
 
-	if (midi_controls[n] == 0) {
+	if (controls[n] == 0) {
 
 		Plugin::ParameterDescriptor desc;
 
 		get_parameter_descriptor (n, desc);
-
-		midi_controls[n] = new MIDIPortControl (*this, n, _session.midi_port(), desc.lower, desc.upper, desc.toggled, desc.logarithmic);
+		
+		controls[n] = new PortControllable (*this, n, desc.lower, desc.upper, desc.toggled, desc.logarithmic);
 	} 
 
-	return midi_controls[n];
+	return controls[n];
 }
 
-Plugin::MIDIPortControl::MIDIPortControl (Plugin& p, uint32_t port_id, MIDI::Port *port,
-					  float low, float up, bool t, bool loga)
-	: MIDI::Controllable (port, 0), plugin (p), absolute_port (port_id)
+Plugin::PortControllable::PortControllable (Plugin& p, uint32_t port_id, float low, float up, bool t, bool loga)
+	: plugin (p), absolute_port (port_id)
 {
 	toggled = t;
 	logarithmic = loga;
 	lower = low;
 	upper = up;
 	range = upper - lower;
-	last_written = 0; /* XXX need a good out-of-bound-value */
-	setting = false;
 }
 
 void
-Plugin::MIDIPortControl::set_value (float value)
+Plugin::PortControllable::set_value (float value)
 {
 	if (toggled) {
 		if (value > 0.5) {
@@ -140,138 +133,27 @@ Plugin::MIDIPortControl::set_value (float value)
 		}
 	}
 
-	setting = true;
 	plugin.set_parameter (absolute_port, value);
-	setting = false;
 }
 
-void
-Plugin::MIDIPortControl::send_feedback (float value)
+float
+Plugin::PortControllable::get_value (void) const
 {
+	float val = plugin.get_parameter (absolute_port);
 
-	if (!setting && get_midi_feedback()) {
-		MIDI::byte val;
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-		MIDI::EventTwoBytes data;
-
-		if (toggled) {
-			val = (MIDI::byte) (value * 127.0f);
-		} else {
-			if (logarithmic) {
-				value = log(value);
-			}
-
-			val = (MIDI::byte) (((value - lower) / range) * 127.0f);
+	if (toggled) {
+		
+		return val;
+		
+	} else {
+		
+		if (logarithmic) {
+			val = log(val);
 		}
 		
-		if (get_control_info (ch, ev, additional)) {
-			data.controller_number = additional;
-			data.value = val;
-			last_written = val;
-			
-			plugin.session().send_midi_message (get_port(), ev, ch, data);
-		}
+		return ((val - lower) / range);
 	}
-	
-}
-
-MIDI::byte*
-Plugin::MIDIPortControl::write_feedback (MIDI::byte* buf, int32_t& bufsize, float value, bool force)
-{
-	if (get_midi_feedback() && bufsize > 2) {
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-
-		if (get_control_info (ch, ev, additional)) {
-
-			MIDI::byte val;
-
-			if (toggled) {
-
-				val = (MIDI::byte) (value * 127.0f);
-
-			} else {
-
-				if (logarithmic) {
-					value = log(value);
-				}
-				
-				val = (MIDI::byte) (((value - lower) / range) * 127.0f);
-			}
-
-			if (val != last_written || force)  {
-				*buf++ = MIDI::controller & ch;
-				*buf++ = additional; /* controller number */
-				*buf++ = val;
-				last_written = val;
-				bufsize -= 3;
-			}
-		}
-	}
-
-	return buf;
-}
-
-
-void
-Plugin::reset_midi_control (MIDI::Port* port, bool on)
-{
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte extra;
-	
-	for (vector<MIDIPortControl*>::iterator i = midi_controls.begin(); i != midi_controls.end(); ++i) {
-		if (*i == 0)
-			continue;
-		(*i)->get_control_info (chn, ev, extra);
-		if (!on) {
-			chn = -1;
-		}
-		(*i)->midi_rebind (port, chn);
-	}
-}
-
-void
-Plugin::send_all_midi_feedback ()
-{
-	if (_session.get_midi_feedback()) {
-		float val = 0.0;
-		uint32_t n = 0;
-		
-		for (vector<MIDIPortControl*>::iterator i = midi_controls.begin(); i != midi_controls.end(); ++i, ++n) {
-			if (*i == 0) {
-				continue;
-			}
-
-			val = (*i)->plugin.get_parameter (n);
-			(*i)->send_feedback (val);
-		}
-		
-	}
-}
-
-MIDI::byte*
-Plugin::write_midi_feedback (MIDI::byte* buf, int32_t& bufsize)
-{
-	if (_session.get_midi_feedback()) {
-		float val = 0.0;
-		uint32_t n = 0;
-		
-		for (vector<MIDIPortControl*>::iterator i = midi_controls.begin(); i != midi_controls.end(); ++i, ++n) {
-			if (*i == 0) {
-				continue;
-			}
-
-			val = (*i)->plugin.get_parameter (n);
-			buf = (*i)->write_feedback (buf, bufsize, val);
-		}
-	}
-
-	return buf;
-}
+}	
 
 vector<string>
 Plugin::get_presets()

@@ -37,14 +37,15 @@
 #include <gtkmm/adjustment.h>
 
 #include <gtkmm2ext/auto_spin.h>
-#include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/slider_controller.h>
+
+#include <pbd/stateful.h>
 
 #include <ardour/types.h>
 #include <ardour/ardour.h>
 #include <ardour/io.h>
 #include <ardour/insert.h>
-#include <ardour/stateful.h>
 #include <ardour/redirect.h>
 
 #include <pbd/fastlog.h>

@@ -15,11 +15,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
+    $Id: stateful.h 17 2005-09-24 19:13:41Z taybin $
 */
 
-#ifndef __ardour_stateful_h__
-#define __ardour_stateful_h__
+#ifndef __pbd_stateful_h__
+#define __pbd_stateful_h__
 
 #include <string>
 
@@ -47,5 +47,5 @@ class Stateful {
 	XMLNode *_instant_xml;
 };
 
-#endif /* __ardour_stateful_h__ */
+#endif /* __pbd_stateful_h__ */
 

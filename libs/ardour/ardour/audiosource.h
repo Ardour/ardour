@@ -33,7 +33,7 @@
 
 #include <ardour/source.h>
 #include <ardour/ardour.h>
-#include <ardour/stateful.h>
+#include <pbd/stateful.h> 
 #include <pbd/xml++.h>
 
 using std::list;

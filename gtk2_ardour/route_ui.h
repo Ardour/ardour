@@ -29,10 +29,6 @@
 
 #include "axis_view.h"
 
-namespace Gtkmm2ext {
-	class BindableToggleButton;
-}
-
 namespace ARDOUR {
 	class AudioTrack;
 }
@@ -42,6 +38,8 @@ namespace Gtk {
 	class CheckMenuItem;
 	class Widget;
 }
+
+class BindableToggleButton;
 
 class RouteUI : public virtual AxisView
 {
@@ -65,9 +63,9 @@ class RouteUI : public virtual AxisView
 	bool ignore_toggle;
 	bool wait_for_release;
 
-	Gtkmm2ext::BindableToggleButton * mute_button;
-	Gtkmm2ext::BindableToggleButton * solo_button;
-	Gtkmm2ext::BindableToggleButton * rec_enable_button;
+	BindableToggleButton* mute_button;
+	BindableToggleButton* solo_button;
+	BindableToggleButton* rec_enable_button;
 	
 	virtual string solo_button_name () const { return "SoloButton"; }
 	virtual string safe_solo_button_name () const { return "SafeSoloButton"; }

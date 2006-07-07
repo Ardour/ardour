@@ -32,10 +32,10 @@
 #include <glibmm/thread.h>
 
 #include <pbd/undo.h>
+#include <pbd/stateful.h> 
 
-#include "ardour.h"
-#include "stateful.h"
-#include "state_manager.h"
+#include <ardour/ardour.h>
+#include <ardour/state_manager.h>
 
 using std::string;
 

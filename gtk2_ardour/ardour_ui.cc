@@ -374,9 +374,11 @@ ARDOUR_UI::finish()
 	if (session && session->dirty()) {
 		switch (ask_about_saving_session(_("quit"))) {
 		case -1:
+			cerr << "dialog return -1\n";
 			return;
 			break;
 		case 1:
+			cerr << "dialog return +1\n";
 			/* use the default name */
 			if (save_state_canfail ("")) {
 				/* failed - don't quit */
@@ -390,7 +392,10 @@ If you still wish to quit, please use the\n\n\
 			}
 			break;
 		case 0:
+			cerr << "dialog return 0\n";
 			break;
+		default:
+			cerr << "dialog return other\n";
 		}
 	}
 	Config->save_state();
@@ -1159,31 +1164,21 @@ ARDOUR_UI::transport_forward (int option)
 }
 
 void
-ARDOUR_UI::toggle_monitor_enable (guint32 dstream)
+ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 {
 	if (session == 0) {
 		return;
 	}
 
-	AudioDiskstream *ds;
+	Route* r;
+	
+	if ((r = session->route_by_remote_id (dstream)) != 0) {
 
-	if ((ds = session->diskstream_by_id (dstream)) != 0) {
-		Port *port = ds->io()->input (0);
-		port->request_monitor_input (!port->monitoring_input());
-	}
-}
+		AudioTrack* at;
 
-void
-ARDOUR_UI::toggle_record_enable (guint32 dstream)
-{
-	if (session == 0) {
-		return;
-	}
-
-	AudioDiskstream *ds;
-
-	if ((ds = session->diskstream_by_id (dstream)) != 0) {
-		ds->set_record_enabled (!ds->record_enabled(), this);
+		if ((at = dynamic_cast<AudioTrack*>(r)) != 0) {
+			at->disk_stream().set_record_enabled (!at->disk_stream().record_enabled(), this);
+		}
 	}
 }
 
@@ -1383,63 +1378,6 @@ ARDOUR_UI::stop_blinking ()
 		gtk_timeout_remove (blink_timeout_tag);
 		blink_timeout_tag = -1;
 	}
-}
-
-
-void
-ARDOUR_UI::add_diskstream_to_menu (AudioDiskstream& dstream)
-{
-	using namespace Gtk;
-	using namespace Menu_Helpers;
-
-	if (dstream.hidden()) {
-		return;
-	}
-
-	MenuList& items = diskstream_menu->items();
-	items.push_back (MenuElem (dstream.name(), bind (mem_fun(*this, &ARDOUR_UI::diskstream_selected), (gint32) dstream.id())));
-}
-	
-void
-ARDOUR_UI::diskstream_selected (gint32 id)
-{
-	selected_dstream = id;
-	Main::quit ();
-}
-
-gint32
-ARDOUR_UI::select_diskstream (GdkEventButton *ev)
-{
-	using namespace Gtk;
-	using namespace Menu_Helpers;
-
-	if (session == 0) {
-		return -1;
-	}
-
-	diskstream_menu = new Menu();
-	diskstream_menu->set_name ("ArdourContextMenu");
-	using namespace Gtk;
-	using namespace Menu_Helpers;
-
-	MenuList& items = diskstream_menu->items();
-	items.push_back (MenuElem (_("No Stream"), (bind (mem_fun(*this, &ARDOUR_UI::diskstream_selected), -1))));
-
-	session->foreach_audio_diskstream (this, &ARDOUR_UI::add_diskstream_to_menu);
-
-	if (ev) {
-		diskstream_menu->popup (ev->button, ev->time);
-	} else {
-		diskstream_menu->popup (0, 0);
-	}
-
-	selected_dstream = -1;
-
-	Main::run ();
-
-	delete diskstream_menu;
-
-	return selected_dstream;
 }
 
 void

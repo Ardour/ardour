@@ -316,12 +316,8 @@ PannerUI::setup_pan ()
 			_io.panner()[asz]->Changed.connect (bind (mem_fun(*this, &PannerUI::pan_value_changed), (uint32_t) asz));
 
 			bc = new BarController (*pan_adjustments[asz], 
-						&_io.panner()[asz]->midi_control(),
+						_io.panner()[asz]->control(),
 						bind (mem_fun(*this, &PannerUI::pan_printer), pan_adjustments[asz]));
-			
-			if (_session.midi_port()) {
-				_io.panner()[asz]->reset_midi_control (_session.midi_port(), true);
-			}
 			
 			bc->set_name ("PanSlider");
 			bc->set_shadow_type (Gtk::SHADOW_NONE);

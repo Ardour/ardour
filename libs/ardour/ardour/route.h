@@ -31,10 +31,10 @@
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
 #include <pbd/undo.h>
-#include <midi++/controllable.h>
+#include <pbd/stateful.h> 
+#include <pbd/controllable.h>
 
 #include <ardour/ardour.h>
-#include <ardour/stateful.h>
 #include <ardour/io.h>
 #include <ardour/session.h>
 #include <ardour/redirect.h>
@@ -212,34 +212,28 @@ class Route : public IO
 	bool feeds (Route *);
 	set<Route *> fed_by;
 
-	struct MIDIToggleControl : public MIDI::Controllable {
-		enum ToggleType {
-			MuteControl = 0,
-			SoloControl
-		};
-		
-		MIDIToggleControl (Route&, ToggleType, MIDI::Port *);
-		void set_value (float);
-		void send_feedback (bool);
- 	        MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, bool val, bool force = false);
+	struct ToggleControllable : public PBD::Controllable {
+	    enum ToggleType {
+		    MuteControl = 0,
+		    SoloControl
+	    };
+	    
+	    ToggleControllable (Route&, ToggleType);
+	    void set_value (float);
+	    float get_value (void) const;
 
-		Route& route;
-		ToggleType type;
-		bool setting;
-		bool last_written;
+	    Route& route;
+	    ToggleType type;
 	};
 
-	MIDI::Controllable& midi_solo_control() {
-		return _midi_solo_control;
+	PBD::Controllable& solo_control() {
+		return _solo_control;
 	}
-	MIDI::Controllable& midi_mute_control() {
-		return _midi_mute_control;
+
+	PBD::Controllable& mute_control() {
+		return _mute_control;
 	}
 	
-	virtual void reset_midi_control (MIDI::Port*, bool);
-	virtual void send_all_midi_feedback ();
-	virtual MIDI::byte* write_midi_feedback (MIDI::byte*, int32_t& bufsize);
-
 	void automation_snapshot (jack_nframes_t now);
 
 	void protect_automation ();
@@ -299,8 +293,8 @@ class Route : public IO
 	std::string              _comment;
 	bool                     _have_internal_generator;
 
-	MIDIToggleControl _midi_solo_control;
-	MIDIToggleControl _midi_mute_control;
+	ToggleControllable _solo_control;
+	ToggleControllable _mute_control;
 	
 	void passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		       jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter_inputs);

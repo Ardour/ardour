@@ -27,10 +27,10 @@
 #include <cmath>
 #include <glibmm/thread.h>
 #include <pbd/undo.h>
+#include <pbd/stateful.h> 
 #include <sigc++/signal.h>
 
 #include <ardour/ardour.h>
-#include <ardour/stateful.h>
 #include <ardour/state_manager.h>
 
 class XMLNode;

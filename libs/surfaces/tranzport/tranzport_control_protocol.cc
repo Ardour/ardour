@@ -579,7 +579,7 @@ TranzportControlProtocol::monitor_work ()
 	
 	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
 		// do we care? not particularly.
-		info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
+		PBD::info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
 	} 
 
 	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);

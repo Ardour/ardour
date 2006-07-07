@@ -33,7 +33,7 @@
 
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
- 
+#include <pbd/stateful.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
@@ -42,7 +42,6 @@
 #include <ardour/route.h>
 #include <ardour/port.h>
 #include <ardour/utils.h>
-#include <ardour/stateful.h>
 
 struct tm;
 
@@ -225,7 +224,7 @@ class AudioDiskstream : public Stateful, public sigc::trackable
 
 	void handle_input_change (IOChange, void *src);
 
-	id_t id() const { return _id; }
+	const PBD::ID& id() const { return _id; }
 
 	XMLNode* deprecated_io_node;
 
@@ -318,7 +317,7 @@ class AudioDiskstream : public Stateful, public sigc::trackable
 	ARDOUR::IO*       _io;
 	ChannelList        channels;
 	uint32_t      _n_channels;
-	id_t              _id;
+	PBD::ID           _id;
 
 	mutable gint             _record_enabled;
 	AudioPlaylist*           _playlist;

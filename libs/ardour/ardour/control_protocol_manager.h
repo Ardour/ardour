@@ -8,7 +8,7 @@
 
 #include <glibmm/thread.h>
 
-#include <ardour/stateful.h>
+#include <pbd/stateful.h> 
 
 namespace ARDOUR {
 

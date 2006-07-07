@@ -154,8 +154,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_tempo_window ();
 	void toggle_editing_space();
 
-	gint32 select_diskstream (GdkEventButton *ev);
-
 	Gtk::Tooltips& tooltips() { return _tooltips; }
 
 	static sigc::signal<void,bool> Blink;
@@ -536,14 +534,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void save_template ();
 
-
 	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode);
 
-	void add_diskstream_to_menu (ARDOUR::AudioDiskstream&);
-	void diskstream_selected (gint32);
-	Gtk::Menu *diskstream_menu;
-	gint32 selected_dstream;
-	
 	void set_transport_sensitivity (bool);
 
 	void remove_last_capture ();
@@ -626,8 +618,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void test_binding_action (const char *);
 	void start_keyboard_prefix();
 
-	void toggle_record_enable (guint32);
-	void toggle_monitor_enable (guint32);
+	void toggle_record_enable (uint32_t);
 
 	uint32_t rec_enabled_diskstreams;
 	void count_recenabled_diskstreams (ARDOUR::AudioDiskstream&);

@@ -186,15 +186,6 @@ touch_file (string path)
 	return 1;
 }
 
-uint32_t long
-get_uid()
-{
-	struct timeval tv;
-	gettimeofday(&tv, 0);
-
-	return (uint32_t long) tv.tv_sec * 1000000 + tv.tv_usec;
-}
-
 string
 placement_as_string (Placement p)
 {

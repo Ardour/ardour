@@ -40,10 +40,11 @@
 #include <midi++/types.h>
 #include <midi++/mmc.h>
 
+#include <pbd/stateful.h> 
+
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
 #include <ardour/location.h>
-#include <ardour/stateful.h>
 #include <ardour/gain.h>
 #include <ardour/io.h>
 
@@ -53,6 +54,10 @@ class AEffect;
 
 namespace MIDI {
 	class Port;
+}
+
+namespace PBD {
+	class Controllable;
 }
 
 namespace ARDOUR {
@@ -262,7 +267,7 @@ class Session : public sigc::trackable, public Stateful
 	vector<Sample*>& get_silent_buffers (uint32_t howmany);
 	vector<Sample*>& get_send_buffers () { return _send_buffers; }
 
-	AudioDiskstream    *diskstream_by_id (id_t id);
+	AudioDiskstream    *diskstream_by_id (const PBD::ID& id);
 	AudioDiskstream    *diskstream_by_name (string name);
 
 	bool have_captured() const { return _have_captured; }
@@ -698,7 +703,7 @@ class Session : public sigc::trackable, public Stateful
 
 	AudioFileSource *create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
-	Source *get_source (ARDOUR::id_t);
+	Source *source_by_id (const PBD::ID&);
 
 	/* playlist management */
 
@@ -961,7 +966,13 @@ class Session : public sigc::trackable, public Stateful
 	static apply_gain_to_buffer_t	apply_gain_to_buffer;
 	static mix_buffers_with_gain_t	mix_buffers_with_gain;
 	static mix_buffers_no_gain_t	mix_buffers_no_gain;
-	
+
+	static sigc::signal<void> SendFeedback;
+
+	/* Controllables */
+
+	PBD::Controllable* controllable_by_id (const PBD::ID&);
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (jack_nframes_t nframes);
@@ -1499,7 +1510,7 @@ class Session : public sigc::trackable, public Stateful
 	/* REGION MANAGEMENT */
 
 	mutable Glib::Mutex region_lock;
-	typedef map<ARDOUR::id_t,AudioRegion *> AudioRegionList;
+	typedef map<PBD::ID,AudioRegion *> AudioRegionList;
 	AudioRegionList audio_regions;
 	
 	void region_renamed (Region *);
@@ -1512,7 +1523,7 @@ class Session : public sigc::trackable, public Stateful
 	/* SOURCES */
 	
 	mutable Glib::Mutex audio_source_lock;
-	typedef std::map<id_t, AudioSource *>    AudioSourceList;
+	typedef std::map<PBD::ID,AudioSource *> AudioSourceList;
 
 	AudioSourceList audio_sources;
 
@@ -1740,6 +1751,13 @@ class Session : public sigc::trackable, public Stateful
 
 	LayerModel layer_model;
 	CrossfadeModel xfade_model;
+
+	typedef std::list<PBD::Controllable*> Controllables;
+	Glib::Mutex controllables_lock;
+	Controllables controllables;
+
+	void add_controllable (PBD::Controllable*);
+	void remove_controllable (PBD::Controllable*);
 };
 
 }; /* namespace ARDOUR */

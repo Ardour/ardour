@@ -131,7 +131,6 @@ AudioDiskstream::init_channel (ChannelInfo &chan)
 void
 AudioDiskstream::init (Flag f)
 {
-	_id = new_id();
 	_refcnt = 0;
 	_flags = f;
 	_io = 0;
@@ -1975,7 +1974,7 @@ AudioDiskstream::get_state ()
 	node->add_property ("speed", buf);
 
 	node->add_property("name", _name);
-	snprintf (buf, sizeof(buf), "%" PRIu64, id());
+	id().print (buf);
 	node->add_property("id", buf);
 
 	if (!capturing_sources.empty() && _session.get_record_enabled()) {
@@ -2042,11 +2041,11 @@ AudioDiskstream::set_state (const XMLNode& node)
 
 	if (deprecated_io_node) {
 		if ((prop = deprecated_io_node->property ("id")) != 0) {
-			sscanf (prop->value().c_str(), "%" PRIu64, &_id);
+			_id = prop->value ();
 		}
 	} else {
 		if ((prop = node.property ("id")) != 0) {
-			sscanf (prop->value().c_str(), "%" PRIu64, &_id);
+			_id = prop->value ();
 		}
 	}
 

@@ -10,7 +10,6 @@ gtkmm2ext = env.Copy()
 gtkmm2ext.Merge ([ 
     libraries['sigc2'], 
     libraries['pbd'],
-    libraries['midi++2'],
     libraries['gtk2'],
     libraries['glibmm2'],
     libraries['pangomm'],
@@ -28,16 +27,16 @@ domain = 'libgtkmm2ext'
 gtkmm2ext.Append(DOMAIN=domain,MAJOR=0,MINOR=8,MICRO=2)
 gtkmm2ext.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkmm2ext.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+gtkmm2ext.Append(CPPPATH='#libs/surfaces/control_protocol')
 gtkmm2ext.Append(PACKAGE=domain)
 gtkmm2ext.Append(POTFILE=domain + '.pot')
 
 gtkmm2ext_files = Split("""
 auto_spin.cc
 barcontroller.cc
-bindable_button.cc
+binding_proxy.cc
 choice.cc
 click_box.cc
-controller.cc
 dndtreeview.cc
 fastmeter.cc
 gtk_ui.cc

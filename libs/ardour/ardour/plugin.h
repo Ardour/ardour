@@ -21,12 +21,13 @@
 #ifndef __ardour_ladspa_h__
 #define __ardour_ladspa_h__
 
-#include <midi++/controllable.h>
 #include <sigc++/signal.h>
+
+#include <pbd/stateful.h> 
+#include <pbd/controllable.h>
 
 #include <jack/types.h>
 #include <ardour/types.h>
-#include <ardour/stateful.h>
 #include <ardour/plugin_state.h>
 #include <ardour/cycles.h>
 
@@ -136,10 +137,7 @@ class Plugin : public Stateful, public sigc::trackable
 	sigc::signal<void,uint32_t,float> ParameterChanged;
 	sigc::signal<void,Plugin *> GoingAway;
 	
-	void reset_midi_control (MIDI::Port*, bool);
-	void send_all_midi_feedback ();
-	MIDI::byte* write_midi_feedback (MIDI::byte*, int32_t& bufsize);
-	MIDI::Controllable *get_nth_midi_control (uint32_t);
+	PBD::Controllable *get_nth_control (uint32_t);
 
 	PluginInfo & get_info() { return _info; }
 	void set_info (const PluginInfo &inf) { _info = inf; }
@@ -158,16 +156,14 @@ class Plugin : public Stateful, public sigc::trackable
 	map<string,string> 	 presets;
 	bool save_preset(string name, string domain /* vst, ladspa etc. */);
 
-	void setup_midi_controls ();
+	void setup_controls ();
 
-
-	struct MIDIPortControl : public MIDI::Controllable {
-	    MIDIPortControl (Plugin&, uint32_t abs_port_id, MIDI::Port *,
-			     float lower, float upper, bool toggled, bool logarithmic);
+	struct PortControllable : public PBD::Controllable {
+	    PortControllable (Plugin&, uint32_t abs_port_id,
+			      float lower, float upper, bool toggled, bool logarithmic);
 
 	    void set_value (float);
-	    void send_feedback (float);
-	    MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, float val, bool force = false);
+	    float get_value () const;
 
 	    Plugin& plugin;
 	    uint32_t absolute_port;
@@ -176,14 +172,9 @@ class Plugin : public Stateful, public sigc::trackable
 	    float range;
 	    bool  toggled;
 	    bool  logarithmic;
-
-	    bool setting;
-	    float last_written;
 	};
 
-	vector<MIDIPortControl*> midi_controls;
-
-	
+	vector<PortControllable*> controls;
 };
 
 /* this is actually defined in plugin_manager.cc */
