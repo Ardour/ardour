@@ -1,17 +1,24 @@
 #include <ostream>
 #include <iostream>
+#include <stdio.h>
 
-#include <string.h>
-#include <uuid/uuid.h>
+#ifndef __STDC_FORMAT_MACROS
+#define __STDC_FORMAT_MACROS
+#endif
+#include <inttypes.h>
 
 #include <pbd/id.h>
 
 using namespace std;
 using namespace PBD;
 
+Glib::Mutex ID::counter_lock;
+uint64_t ID::_counter = 0;
+
 ID::ID ()
 {
-	uuid_generate (id);
+	Glib::Mutex::Lock lm (counter_lock);
+	id = _counter++;
 }
 
 ID::ID (string str)
@@ -22,33 +29,14 @@ ID::ID (string str)
 int
 ID::string_assign (string str)
 {
-	/* first check for old-style all-numeric ID's */
-
-	if (strcspn (str.c_str(), "0123456789") == 0) {
-		/* all chars are numeric. just render the existing ID into the space in 
-		   which we would otherwise store a UUID.
-		*/
-
-		memset (id, ' ', sizeof (id));
-		snprintf ((char*) id, sizeof (id), str.c_str());
-
-	} else {
-
-		/* OK, its UUID, probably */
-
-		if (uuid_parse (str.c_str(), id)) {
-			/* XXX error */
-			return -1;
-		}
-	}
-
-	return 0;
+	return sscanf (str.c_str(), "%" PRIu64, &id) != 0;
 }
 
 void
 ID::print (char* buf) const
 {
-	uuid_unparse (id, buf);
+	/* XXX sizeof buf is unknown. bad API design */
+	snprintf (buf, 16, "%" PRIu64, id);
 }
 
 ID&
@@ -58,16 +46,10 @@ ID::operator= (string str)
 	return *this;
 }
 
-bool
-ID::operator== (const ID& other) const
-{
-	return memcmp (id, other.id, sizeof (id)) == 0;
-}
-
 ostream&
 operator<< (ostream& ostr, const ID& id)
 {
-	char buf[37];
+	char buf[32];
 	id.print (buf);
 	ostr << buf;
 	return ostr;

@@ -454,15 +454,6 @@ conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new')
 libraries['flac'] = conf.Finish ()
 
 #
-# Check for UUID stuff
-
-libraries['uuid'] = LibraryInfo ()
-
-conf = Configure (libraries['uuid'])
-conf.CheckLib ('uuid', 'uuid_generate')
-libraries['uuid'] = conf.Finish ()
-
-#
 # Check for liblo
 
 if env['LIBLO']:

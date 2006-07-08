@@ -50,7 +50,6 @@ if conf.CheckCHeader('execinfo.h'):
 pbd = conf.Finish()
 
 pbd.Merge ([ libraries['sigc2'],
-             libraries['uuid'],
              libraries['xml'],
              libraries['glibmm2'],
              libraries['glib2'] ])
