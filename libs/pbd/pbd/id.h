@@ -31,12 +31,13 @@ class ID {
 	
 	static uint64_t counter() { return _counter; }
 	static void init_counter (uint64_t val) { _counter = val; }
+	static void init ();
 
   private:
 	uint64_t id;
 	int string_assign (std::string);
 
-	static Glib::Mutex counter_lock;
+	static Glib::Mutex* counter_lock;
 	static uint64_t _counter;
 };
 

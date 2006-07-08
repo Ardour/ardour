@@ -195,6 +195,8 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization)
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 
+	ID::init ();
+
 	Config = new Configuration;
 
 	if (Config->load_state ()) {

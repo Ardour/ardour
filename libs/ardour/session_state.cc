@@ -1333,6 +1333,13 @@ Session::state(bool full_state)
 		}
 	}
 
+	/* save the ID counter */
+	
+	snprintf (buf, sizeof (buf), "%" PRIu64, ID::counter());
+	node->add_property ("id-counter", buf);
+
+	/* various options */
+
 	node->add_child_nocopy (get_options());
 
 	child = node->add_child ("Sources");
@@ -1502,6 +1509,21 @@ Session::set_state (const XMLNode& node)
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value ();
 	}
+
+	if ((prop = node.property (X_("id-counter"))) != 0) {
+		uint64_t x;
+		sscanf (prop->value().c_str(), "%" PRIu64, &x);
+		ID::init_counter (x);
+	} else {
+		/* old sessions used a timebased counter, so fake
+		   the startup ID counter based on a standard
+		   timestamp.
+		*/
+		time_t now;
+		time (&now);
+		ID::init_counter (now);
+	}
+
 	
 	IO::disable_ports ();
 	IO::disable_connecting ();

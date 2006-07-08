@@ -12,12 +12,18 @@
 using namespace std;
 using namespace PBD;
 
-Glib::Mutex ID::counter_lock;
+Glib::Mutex* ID::counter_lock = 0;
 uint64_t ID::_counter = 0;
+
+void
+ID::init ()
+{
+	counter_lock = new Glib::Mutex;
+}
 
 ID::ID ()
 {
-	Glib::Mutex::Lock lm (counter_lock);
+	Glib::Mutex::Lock lm (*counter_lock);
 	id = _counter++;
 }
 
