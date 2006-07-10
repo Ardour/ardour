@@ -75,6 +75,9 @@ DestructiveFileSource::DestructiveFileSource (string path, SampleFormat samp_for
 	_capture_start = false;
 	_capture_end = false;
 	file_pos = 0;
+
+	timeline_position = header_position_offset;
+	AudioFileSource::HeaderPositionOffsetChanged.connect (mem_fun (*this, &DestructiveFileSource::handle_header_position_change));
 }
 
 DestructiveFileSource::DestructiveFileSource (const XMLNode& node)
@@ -85,6 +88,9 @@ DestructiveFileSource::DestructiveFileSource (const XMLNode& node)
 	_capture_start = false;
 	_capture_end = false;
 	file_pos = 0;
+
+	timeline_position = header_position_offset;
+	AudioFileSource::HeaderPositionOffsetChanged.connect (mem_fun (*this, &DestructiveFileSource::handle_header_position_change));
 }
 
 DestructiveFileSource::~DestructiveFileSource()
@@ -366,8 +372,19 @@ DestructiveFileSource::get_state ()
 }
 
 void
+DestructiveFileSource::handle_header_position_change ()
+{
+	if ( _length != 0 ) {
+		error << string_compose(_("Filesource: start time is already set for existing file (%1): Cannot change start time."), _path ) << endmsg;
+		//in the future, pop up a dialog here that allows user to regenerate file with new start offset
+	} else if (writable()) {
+		timeline_position = header_position_offset;
+		set_header_timeline_position ();  //this will get flushed if/when the file is recorded to
+	}
+}
+
+void
 DestructiveFileSource::set_timeline_position (jack_nframes_t pos)
 {
-	/* destructive tracks always start at where our reference frame zero is */
-	timeline_position = 0;
+	//destructive track timeline postion does not change except at instantion or when header_position_offset (session start) changes
 }

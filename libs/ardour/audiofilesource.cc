@@ -56,8 +56,7 @@ string AudioFileSource::peak_dir = "";
 string AudioFileSource::search_path;
 
 sigc::signal<void> AudioFileSource::HeaderPositionOffsetChanged;
-bool               AudioFileSource::header_position_negative;
-uint64_t           AudioFileSource::header_position_offset;
+uint64_t           AudioFileSource::header_position_offset = 0;
 
 char   AudioFileSource::bwf_country_code[3] = "US";
 char   AudioFileSource::bwf_organization_code[4] = "LAS";
@@ -592,23 +591,11 @@ AudioFileSource::set_search_path (string p)
 }
 
 void
-AudioFileSource::set_header_position_offset (jack_nframes_t offset, bool negative)
+AudioFileSource::set_header_position_offset (jack_nframes_t offset)
 {
 	header_position_offset = offset;
-	header_position_negative = negative;
 
 	HeaderPositionOffsetChanged ();
-}
-
-void 
-AudioFileSource::handle_header_position_change ()
-{
-	cerr << _path << " handling header position change " << writable() << endl;
-
-	if (writable()) {
-		set_header_timeline_position ();
-		flush_header ();
-	}
 }
 
 void
