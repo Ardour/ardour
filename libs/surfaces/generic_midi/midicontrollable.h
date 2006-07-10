@@ -53,9 +53,6 @@ class MIDIControllable : public Stateful
 	void stop_learning ();
 	void drop_external_control ();
 
-	sigc::signal<void> learning_started;
-	sigc::signal<void> learning_stopped;
-
 	bool get_midi_feedback () { return feedback; }
 	void set_midi_feedback (bool val) { feedback = val; }
 

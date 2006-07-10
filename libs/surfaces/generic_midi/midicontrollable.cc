@@ -90,7 +90,6 @@ MIDIControllable::learn_about_external_control ()
 {
 	drop_external_control ();
 	midi_learn_connection = _port.input()->any.connect (mem_fun (*this, &MIDIControllable::midi_receiver));
-	learning_started ();
 }
 
 void
@@ -199,7 +198,7 @@ MIDIControllable::midi_receiver (Parser &p, byte *msg, size_t len)
 
 	bind_midi ((channel_t) (msg[0] & 0xf), eventType (msg[0] & 0xF0), msg[1]);
 
-	learning_stopped ();
+	controllable.LearningFinished ();
 }
 
 void

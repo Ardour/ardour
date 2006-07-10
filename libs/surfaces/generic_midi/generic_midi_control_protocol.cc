@@ -20,6 +20,9 @@
 
 #include <algorithm>
 
+#include <pbd/error.h>
+#include <pbd/failed_constructor.h>
+
 #include <midi++/port.h>
 #include <midi++/manager.h>
 #include <midi++/port_request.h>
@@ -39,9 +42,17 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	: ControlProtocol  (s, _("GenericMIDI"))
 {
 	MIDI::Manager* mm = MIDI::Manager::instance();
-	MIDI::PortRequest pr ("ardour:MIDI control", "ardour:MIDI control", "duplex", "alsa/seq");
+
+	/* XXX it might be nice to run "control" through i18n, but thats a bit tricky because
+	   the name is defined in ardour.rc which is likely not internationalized.
+	*/
 	
-	_port = mm->add_port (pr);
+	_port = mm->port (X_("control"));
+
+	if (_port == 0) {
+		error << _("no MIDI port named \"control\" exists - generic MIDI control disabled") << endmsg;
+		throw failed_constructor();
+	}
 
 	_feedback_interval = 10000; // microseconds
 	last_feedback_time = 0;
@@ -112,11 +123,13 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 
 	MIDIControllable* mc = new MIDIControllable (*_port, *c);
 	
-
 	{
 		Glib::Mutex::Lock lm (pending_lock);
-		pending_controllables.push_back (mc);
-		mc->learning_stopped.connect (bind (mem_fun (*this, &GenericMidiControlProtocol::learning_stopped), mc));
+		std::pair<MIDIControllables::iterator,bool> result;
+		result = pending_controllables.insert (mc);
+		if (result.second) {
+			c->LearningFinished.connect (bind (mem_fun (*this, &GenericMidiControlProtocol::learning_stopped), mc));
+		}
 	}
 
 	mc->learn_about_external_control ();
@@ -135,7 +148,7 @@ GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 		pending_controllables.erase (i);
 	}
 
-	controllables.push_back (mc);
+	controllables.insert (mc);
 }
 
 void
@@ -155,4 +168,66 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 			break;
 		}
 	}
+}
+
+XMLNode&
+GenericMidiControlProtocol::get_state () 
+{
+	XMLNode* node = new XMLNode (_name); /* node name must match protocol name */
+	XMLNode* children = new XMLNode (X_("controls"));
+
+	node->add_child_nocopy (*children);
+
+	Glib::Mutex::Lock lm2 (controllables_lock);
+	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
+		children->add_child_nocopy ((*i)->get_state());
+	}
+
+	return *node;
+}
+
+int
+GenericMidiControlProtocol::set_state (const XMLNode& node)
+{
+	XMLNodeList nlist;
+	XMLNodeConstIterator niter;
+	Controllable* c;
+
+	{
+		Glib::Mutex::Lock lm (pending_lock);
+		pending_controllables.clear ();
+	}
+
+	Glib::Mutex::Lock lm2 (controllables_lock);
+
+	controllables.clear ();
+
+	nlist = node.children();
+
+	if (nlist.empty()) {
+		return 0;
+	}
+
+	nlist = nlist.front()->children ();
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+		XMLProperty* prop;
+
+		if ((prop = (*niter)->property ("id")) != 0) {
+
+			ID id = prop->value ();
+
+			c = session->controllable_by_id (id);
+
+			if (c) {
+				MIDIControllable* mc = new MIDIControllable (*_port, *c);
+				if (mc->set_state (**niter) == 0) {
+					controllables.insert (mc);
+				}
+			}
+		}
+	}
+	
+	return 0;
 }

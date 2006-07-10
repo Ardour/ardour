@@ -46,7 +46,8 @@ class BindingProxy : public sigc::trackable
 	PBD::Controllable& controllable;
 	guint bind_button;
 	guint bind_statemask;
-
+	sigc::connection learning_connection;
+	void learning_finished ();
 	bool prompter_hiding (GdkEventAny *);
 };
 

@@ -1574,3 +1574,15 @@ TranzportControlProtocol::print (int row, int col, const char *text)
 	}
 }	
 
+XMLNode&
+TranzportControlProtocol::get_state () 
+{
+	XMLNode* node = new XMLNode (_name); /* node name must match protocol name */
+	return *node;
+}
+
+int
+TranzportControlProtocol::set_state (const XMLNode& node)
+{
+	return 0;
+}

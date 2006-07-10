@@ -26,7 +26,7 @@
 #include <vector>
 #include <list>
 #include <sigc++/sigc++.h>
-
+#include <pbd/stateful.h>
 #include <control_protocol/basic_ui.h>
 
 namespace ARDOUR {
@@ -34,7 +34,7 @@ namespace ARDOUR {
 class Route;
 class Session;
 
-class ControlProtocol : public sigc::trackable, public BasicUI {
+class ControlProtocol : public sigc::trackable, public Stateful, public BasicUI {
   public:
 	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol();

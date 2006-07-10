@@ -1,7 +1,7 @@
 #ifndef ardour_generic_midi_control_protocol_h
 #define ardour_generic_midi_control_protocol_h
 
-#include <vector>
+#include <set>
 #include <glibmm/thread.h>
 #include <ardour/types.h>
 
@@ -32,6 +32,9 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	MIDI::Port* port () const { return _port; }
 	void set_feedback_interval (ARDOUR::microseconds_t);
 
+	XMLNode& get_state ();
+	int set_state (const XMLNode&);
+
   private:
 	MIDI::Port* _port;
 	ARDOUR::microseconds_t _feedback_interval;
@@ -40,7 +43,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void _send_feedback ();
 	void  send_feedback ();
 
-	typedef std::vector<MIDIControllable*> MIDIControllables;
+	typedef std::set<MIDIControllable*> MIDIControllables;
 	MIDIControllables controllables;
 	MIDIControllables pending_controllables;
 	Glib::Mutex controllables_lock;

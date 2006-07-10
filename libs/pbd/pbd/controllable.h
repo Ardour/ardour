@@ -21,6 +21,8 @@ class Controllable : public virtual sigc::trackable, public Stateful {
 
 	virtual bool can_send_feedback() const { return true; }
 
+	sigc::signal<void> LearningFinished;
+
 	static sigc::signal<void,Controllable*> Created;
 	static sigc::signal<void,Controllable*> GoingAway;
 

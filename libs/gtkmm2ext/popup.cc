@@ -73,11 +73,12 @@ PopUp::remove ()
 {
 	hide ();
 
+	if (popdown_time != 0 && timeout != -1) {
+		gtk_timeout_remove (timeout);
+	}
+
 	if (delete_on_hide) {
 		std::cerr << "deleting prompter\n";
-		if (popdown_time != 0 && timeout != -1) {
-			gtk_timeout_remove (timeout);
-		}
 		gtk_idle_add (idle_delete, this);
 	}
 }
@@ -125,11 +126,12 @@ PopUp::on_delete_event (GdkEventAny* ev)
 {
 	hide();
 
+	if (popdown_time != 0 && timeout != -1) {
+		gtk_timeout_remove (timeout);
+	}	
+
 	if (delete_on_hide) {
 		std::cerr << "deleting prompter\n" << endl;
-		if (popdown_time != 0 && timeout != -1) {
-			gtk_timeout_remove (timeout);
-		}
 		gtk_idle_add (idle_delete, this);
 	}
 

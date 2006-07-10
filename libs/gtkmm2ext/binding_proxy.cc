@@ -62,7 +62,8 @@ BindingProxy::button_press_handler (GdkEventButton *ev)
 		if (Controllable::StartLearning (&controllable)) {
 			string prompt = _("operate controller now");
 			prompter.set_text (prompt);
-			prompter.show_all ();
+			prompter.touch (); // shows popup
+			learning_connection = controllable.LearningFinished.connect (mem_fun (*this, &BindingProxy::learning_finished));
 		}
 		return true;
 	}
@@ -70,9 +71,18 @@ BindingProxy::button_press_handler (GdkEventButton *ev)
 	return false;
 }
 
+void
+BindingProxy::learning_finished ()
+{
+	learning_connection.disconnect ();
+	prompter.touch (); // hides popup
+}
+
+
 bool
 BindingProxy::prompter_hiding (GdkEventAny *ev)
 {
+	learning_connection.disconnect ();
 	Controllable::StopLearning (&controllable);
 	return false;
 }
