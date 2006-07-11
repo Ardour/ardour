@@ -374,11 +374,9 @@ ARDOUR_UI::finish()
 	if (session && session->dirty()) {
 		switch (ask_about_saving_session(_("quit"))) {
 		case -1:
-			cerr << "dialog return -1\n";
 			return;
 			break;
 		case 1:
-			cerr << "dialog return +1\n";
 			/* use the default name */
 			if (save_state_canfail ("")) {
 				/* failed - don't quit */
@@ -392,10 +390,7 @@ If you still wish to quit, please use the\n\n\
 			}
 			break;
 		case 0:
-			cerr << "dialog return 0\n";
 			break;
-		default:
-			cerr << "dialog return other\n";
 		}
 	}
 	Config->save_state();

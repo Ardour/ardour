@@ -50,6 +50,15 @@ SliderController::set_value (float v)
 	adj.set_value (v);
 }
 
+bool 
+SliderController::on_button_press_event (GdkEventButton *ev) 
+{
+	if (binding_proxy.button_press_handler (ev)) {
+		return true;
+	}
+	return PixScroller::on_button_press_event (ev);
+}
+
 VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
 				      Glib::RefPtr<Gdk::Pixbuf> rail,
 				      Gtk::Adjustment *adj,

@@ -50,9 +50,7 @@ class SliderController : public Gtkmm2ext::PixScroller
 
 	Gtk::SpinButton& get_spin_button () { return spin; }
 	
-	bool on_button_press_event (GdkEventButton *ev) {
-		return binding_proxy.button_press_handler (ev);
-	}
+	bool on_button_press_event (GdkEventButton *ev);
 
   protected:
 	BindingProxy binding_proxy;

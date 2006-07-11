@@ -244,7 +244,6 @@ SndFileSource::open ()
 		/* if the file has data but no broadcast info, then clearly, there is no broadcast info */
 
 		if (_length) {
-			error << "SndFileSource: file has no broadcast info" << endmsg;
 			free (_broadcast_info);
 			_broadcast_info = 0;
 			_flags = Flag (_flags & ~Broadcast);
