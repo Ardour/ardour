@@ -24,73 +24,26 @@
 #include <pbd/command.h>
 #include <sigc++/slot.h>
 
-#define MEMENTO_COMMAND(obj_T, mem_T, obj, meth) \
-    (MementoCommand<(obj_T),(mem_T)>((obj),sigc::mem_fun((obj),&(meth)),#meth))
-
-#define MEMENTO_COMMAND_1(obj_T, mem_T, obj, meth, arg1) \
-    (MementoCommand<(obj_T),(mem_T)>((obj),\
-                                     sigc::bind(sigc::mem_fun((obj),\
-                                                              &(meth)),\
-                                                arg1),#meth))
-
-#define MEMENTO_COMMAND_2(obj_T, mem_T, obj, meth, arg1, arg2) \
-    (MementoCommand<(obj_T),(mem_T)>((obj),\
-                                     sigc::bind(sigc::mem_fun((obj),\
-                                                              &(meth)),\
-                                                arg1, arg2),#meth))
-
-#define MEMENTO_COMMAND_3(obj_T, mem_T, obj, meth, arg1, arg2, arg3) \
-    (MementoCommand<(obj_T),(mem_T)>((obj),\
-                                     sigc::bind(sigc::mem_fun((obj),\
-                                                              &(meth)),\
-                                                arg1, arg2, arg3),#meth))
-
-
 template <class obj_T, class mem_T>
 class MementoCommand : public Command
 {
     public:
-        MementoCommand(obj_T obj, 
-                       sigc::slot<void> action,
-                       std::string key
-                       std::list<Serializable *> args
+        MementoCommand(obj_T &obj, 
+                       mem_T before,
+                       mem_T after
                        ) 
-            : obj(obj), action(action), key(key), args(args), memento(obj.get_memento()) {}
-        MementoCommand(obj_T obj, 
-                       sigc::slot<void> action,
-                       std::string key
-                       Serializable *arg1 = 0,
-                       Serializable *arg2 = 0,
-                       Serializable *arg3 = 0
-                       ) 
-            : obj(obj), action(action), key(key), memento(obj.get_memento())
-        {
-            if (arg1 == 0)
-                return;
-            args.push_back(arg1);
-
-            if (arg2 == 0)
-                return;
-            args.push_back(arg2);
-
-            if (arg3 == 0)
-                return;
-            args.push_back(arg3);
-        }
-        void operator() () { action(); }
-        void undo() { obj.set_memento(memento); }
+            : obj(obj), before(before), after(after) {}
+        void operator() () { obj.set_memento(after); }
+        void undo() { obj.set_memento(before); }
         virtual XMLNode &serialize() 
         {
             // obj.id
-            // key
-            // args
+            // key is "MementoCommand" or something
+            // before and after mementos
         }
     protected:
         obj_T &obj;
-        mem_T memento;
-        sigc::slot<void> action;
-        std::string key;
-        std::list<Serializable*> args;
+        mem_T before, after;
 };
 
 #endif // __lib_pbd_memento_h__
