@@ -948,6 +948,8 @@ TimeAxisView::compute_controls_size_info ()
 
 	hSmaller = req.height + extra_height;
 
+	cerr << "hSmaller = " << hSmaller << endl;
+
 	window.remove ();
 	window.add (two_row_table);
 

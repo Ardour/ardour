@@ -93,6 +93,8 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		NAME_HIGHLIGHT_SIZE = height + 6;
 		NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 2;
 
+		cerr << "name highlight threshold = " << NAME_HIGHLIGHT_THRESH << endl;
+
 		have_name_font = true;
 	}
 
