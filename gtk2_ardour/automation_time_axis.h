@@ -41,14 +41,14 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	~AutomationTimeAxisView();
 	
-	void set_height (TimeAxisView::TrackHeight);
+	virtual void set_height (TimeAxisView::TrackHeight);
 	void set_samples_per_unit (double);
 	std::string name() const { return _name; }
 
 	virtual void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, jack_nframes_t, double) = 0;
 
-	void clear_lines ();
-	void add_line (AutomationLine&);
+	virtual void clear_lines ();
+	virtual void add_line (AutomationLine&);
 
 	vector<AutomationLine*> lines;
 

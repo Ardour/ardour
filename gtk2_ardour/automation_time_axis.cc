@@ -140,7 +140,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEdit
 
 	controls_table.attach (auto_button, 6, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.attach (clear_button, 6, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	
+
 	controls_table.show_all ();
 
 	height_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::height_clicked));
@@ -284,7 +284,7 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 	TimeAxisView* state_parent = get_parent_with_state ();
 	XMLNode* xml_node = state_parent->get_child_xml_node (_state_name);
 
-	controls_table.show_all ();
+	//controls_table.show_all ();
 
 	TimeAxisView::set_height (ht);
 	base_rect->property_y2() = h;
@@ -297,7 +297,7 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 		(*i)->set_height ();
 	}
 
-	switch (height) {
+	switch (ht) {
 	case Largest:
 		xml_node->add_property ("track_height", "largest");
 		controls_table.remove (name_hbox);
@@ -313,6 +313,7 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 			controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		}
 		controls_table.show_all ();
+
 		hide_name_entry ();
 		show_name_label ();
 		break;
@@ -409,7 +410,7 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 
 	if (changed) {
 		/* only emit the signal if the height really changed */
-		 route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
 }
 

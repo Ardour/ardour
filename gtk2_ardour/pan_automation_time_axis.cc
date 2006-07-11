@@ -39,6 +39,9 @@ PanAutomationTimeAxisView::PanAutomationTimeAxisView (Session& s, Route& r, Publ
 	: AxisView (s),
 	  AutomationTimeAxisView (s, r, e, parent, canvas, n, X_("pan"), "")
 {
+	multiline_selector.set_name ("PanAutomationLineSelector");
+	
+	controls_table.attach (multiline_selector, 1, 5, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 }
 
 PanAutomationTimeAxisView::~PanAutomationTimeAxisView ()
@@ -53,14 +56,19 @@ PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEv
 		return;
 	}
 
-	if (lines.size() > 1) {
+	int line_index = 0;
 
-		Gtkmm2ext::PopUp* msg = new Gtkmm2ext::PopUp (Gtk::WIN_POS_MOUSE, 5000, true);
+	if (lines.size() > 1) {
+		line_index = multiline_selector.get_active_row_number();
+
+		if (line_index < 0 || line_index >= (int)lines.size()) {
+			Gtkmm2ext::PopUp* msg = new Gtkmm2ext::PopUp (Gtk::WIN_POS_MOUSE, 5000, true);
 		
-		msg->set_text (_("You can't graphically edit panning of more than stream"));
-		msg->touch ();
-		
-		return;
+			msg->set_text (_("You need to select which line to edit"));
+			msg->touch ();
+
+			return;
+		}
 	}
 
 	double x = 0;
@@ -75,7 +83,7 @@ PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEv
 
 	lines.front()->view_to_model_y (y);
 
-	AutomationList& alist (lines.front()->the_list());
+	AutomationList& alist (lines[line_index]->the_list());
 
 	_session.begin_reversible_command (_("add pan automation event"));
 	_session.add_undo (alist.get_memento());
@@ -83,6 +91,49 @@ PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEv
 	_session.add_undo (alist.get_memento());
 	_session.commit_reversible_command ();
 	_session.set_dirty ();
+}
+
+void
+PanAutomationTimeAxisView::clear_lines ()
+{
+	AutomationTimeAxisView::clear_lines();
+	multiline_selector.clear();
+}
+
+void
+PanAutomationTimeAxisView::add_line (AutomationLine& line)
+{
+	char buf[32];
+	snprintf(buf,32,"Line %d",lines.size()+1);
+	multiline_selector.append_text(buf);
+
+	if (lines.empty()) {
+		multiline_selector.set_active(0);
+	}
+
+	if (lines.size() + 1 > 1) {
+		multiline_selector.show();
+	}
+
+	AutomationTimeAxisView::add_line(line);
+}
+
+void
+PanAutomationTimeAxisView::set_height (TimeAxisView::TrackHeight th)
+{
+	AutomationTimeAxisView::set_height(th);
+
+	switch (th) {
+		case Largest:
+		case Large:
+		case Larger:
+		case Normal:
+			multiline_selector.show();
+			break;
+
+		default:
+			multiline_selector.hide();
+	}
 }
 
 void

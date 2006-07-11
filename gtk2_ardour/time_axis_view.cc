@@ -882,7 +882,7 @@ TimeAxisView::reset_height()
 	set_height_pixels (height);
 
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->set_height ((TrackHeight)(*i)->height);
+		(*i)->set_height_pixels ((TrackHeight)(*i)->height);
 	}
 }
 	
