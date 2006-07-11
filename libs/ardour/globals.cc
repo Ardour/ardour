@@ -32,6 +32,7 @@
 #include <lrdf.h>
 
 #include <pbd/error.h>
+#include <pbd/id.h>
 #include <pbd/strsplit.h>
 
 #include <midi++/port.h>
@@ -195,7 +196,7 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization)
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 
-	ID::init ();
+	PBD::ID::init ();
 
 	Config = new Configuration;
 
@@ -294,7 +295,7 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization)
 		
 		info << "No H/W specific optimizations in use" << endmsg;
 	}
-	
+
 	lrdf_init();
 	Library = new AudioLibrary;
 

@@ -1499,7 +1499,7 @@ Session::set_state (const XMLNode& node)
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
 	
-	if (node.name() != "Session"){
+	if (node.name() != X_("Session")){
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
 		return -1;
 	}
