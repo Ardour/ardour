@@ -93,8 +93,6 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		NAME_HIGHLIGHT_SIZE = height + 6;
 		NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 2;
 
-		cerr << "name highlight threshold = " << NAME_HIGHLIGHT_THRESH << endl;
-
 		have_name_font = true;
 	}
 
@@ -139,8 +137,12 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 
 		uint32_t outline_what = 0x1|0x2|0x4|0x8;
 
-		if (visibility & HideFrameLR) {
-			outline_what &= ~(0x1 | 0x2);
+		if (visibility & HideFrameLeft) {
+			outline_what &= ~(0x1);
+		}
+
+		if (visibility & HideFrameRight) {
+			outline_what &= ~(0x2);
 		}
 
 		if (visibility & HideFrameTB) {

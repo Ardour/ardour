@@ -439,6 +439,8 @@ class AudioDiskstream : public Stateful, public sigc::trackable
 	void set_align_style_from_io();
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
+	void engage_record_enable (void* src);
+	void disengage_record_enable (void* src);
 };
 
 }; /* namespace ARDOUR */

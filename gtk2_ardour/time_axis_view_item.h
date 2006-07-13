@@ -316,9 +316,10 @@ class TimeAxisViewItem : public Selectable
 	    ShowNameHighlight = 0x2,
 	    ShowNameText = 0x4,
 	    ShowHandles = 0x8,
-	    HideFrameLR = 0x10,
-	    HideFrameTB = 0x20,
-	    FullWidthNameHighlight = 0x40
+	    HideFrameLeft = 0x10,
+	    HideFrameRight = 0x20,
+	    HideFrameTB = 0x40,
+	    FullWidthNameHighlight = 0x80
     };
 
     /**

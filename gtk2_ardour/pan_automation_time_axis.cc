@@ -88,7 +88,7 @@ PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEv
 	_session.begin_reversible_command (_("add pan automation event"));
 	_session.add_undo (alist.get_memento());
 	alist.add (when, y);
-	_session.add_undo (alist.get_memento());
+	_session.add_redo_no_execute (alist.get_memento());
 	_session.commit_reversible_command ();
 	_session.set_dirty ();
 }

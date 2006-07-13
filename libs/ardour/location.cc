@@ -45,6 +45,10 @@ Location::Location (const Location& other)
 	  _end (other._end),
 	  _flags (other._flags)
 {
+	/* start and end flags can never be copied, because there can only ever be one of each */
+
+	_flags = Flags (_flags & ~IsStart);
+	_flags = Flags (_flags & ~IsEnd);
 }
 
 Location*

@@ -594,7 +594,7 @@ void
 AudioFileSource::set_header_position_offset (jack_nframes_t offset)
 {
 	header_position_offset = offset;
-
+	cerr << "hpo set to " << offset << endl;
 	HeaderPositionOffsetChanged ();
 }
 

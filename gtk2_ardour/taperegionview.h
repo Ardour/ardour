@@ -40,6 +40,8 @@ class TapeAudioRegionView : public AudioRegionView
 
 	void set_frame_color ();
 	void update (uint32_t n);
+
+	static const TimeAxisViewItem::Visibility default_tape_visibility;
 };
 
 #endif /* __gtk_ardour_tape_audio_region_view_h__ */

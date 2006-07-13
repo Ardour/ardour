@@ -661,8 +661,6 @@ TimeAxisView::show_selection (TimeSelection& ts)
 void
 TimeAxisView::reshow_selection (TimeSelection& ts)
 {
-	cerr << name() << ": reshow selection" << endl;
-
 	show_selection (ts);
 
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
@@ -947,8 +945,6 @@ TimeAxisView::compute_controls_size_info ()
 	// height required to show 1 row of buttons
 
 	hSmaller = req.height + extra_height;
-
-	cerr << "hSmaller = " << hSmaller << endl;
 
 	window.remove ();
 	window.add (two_row_table);

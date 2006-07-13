@@ -249,14 +249,14 @@ SndFileSource::open ()
 			_flags = Flag (_flags & ~Broadcast);
 		}
 
-		set_timeline_position (0);
+		set_timeline_position (header_position_offset);
 
 	} else {
 	
 		/* XXX 64 bit alert: when JACK switches to a 64 bit frame count, this needs to use the high bits
 		   of the time reference.
 		*/
-		
+
 		set_timeline_position ( _broadcast_info->time_reference_low );
 	}
 
@@ -524,4 +524,10 @@ SndFileSource::write_float (Sample* data, jack_nframes_t frame_pos, jack_nframes
 	}
 	
 	return cnt;
+}
+
+jack_nframes_t
+SndFileSource::natural_position() const
+{
+	return timeline_position;
 }

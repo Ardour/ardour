@@ -130,8 +130,12 @@ DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
 void
 DestructiveFileSource::mark_capture_start (jack_nframes_t pos)
 {
-	_capture_start = true;
-	capture_start_frame = pos;
+	if (pos < timeline_position) {
+		_capture_start = false;
+	} else {
+		_capture_start = true;
+		capture_start_frame = pos;
+	}
 }
 
 void
@@ -271,6 +275,11 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 	}
 
 	if (_capture_start && _capture_end) {
+
+		/* start and end of capture both occur within the data we are writing,
+		   so do both crossfades.
+		*/
+
 		_capture_start = false;
 		_capture_end = false;
 		
@@ -296,8 +305,12 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 		}
 		
 		file_pos = ofilepos; // adjusted below
-	}
-	else if (_capture_start) {
+
+	} else if (_capture_start) {
+
+		/* start of capture both occur within the data we are writing,
+		   so do the fade in
+		*/
 
 		_capture_start = false;
 		_capture_end = false;
@@ -311,6 +324,10 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 		
 	} else if (_capture_end) {
 
+		/* end of capture both occur within the data we are writing,
+		   so do the fade out
+		*/
+
 		_capture_start = false;
 		_capture_end = false;
 		
@@ -320,6 +337,8 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 
 	} else {
 
+		/* in the middle of recording */
+		
 		if (write_float (data, file_pos, cnt) != cnt) {
 			return 0;
 		}
