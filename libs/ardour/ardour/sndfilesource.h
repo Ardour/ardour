@@ -51,7 +51,7 @@ class SndFileSource : public AudioFileSource {
 	int update_header (jack_nframes_t when, struct tm&, time_t);
 	int flush_header ();
 
-	void handle_smpte_offset_change (jack_nframes_t offset, bool negative);
+	jack_nframes_t natural_position () const;
 
   protected:
 	void set_header_timeline_position ();

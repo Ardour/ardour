@@ -31,10 +31,10 @@
 #include <pbd/stl_delete.h>
 #include <pbd/whitespace.h>
 
-#include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/audioplaylist.h>
@@ -120,11 +120,9 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 
 	ignore_toggle = false;
 
-	rec_enable_button->set_active (false);
 	mute_button->set_active (false);
 	solo_button->set_active (false);
 	
-	rec_enable_button->set_name ("TrackRecordEnableButton");
 	mute_button->set_name ("TrackMuteButton");
 	solo_button->set_name ("SoloButton");
 	edit_group_button.set_name ("TrackGroupButton");
@@ -138,7 +136,6 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 
 	solo_button->signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
 	mute_button->signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
-	rec_enable_button->signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
 	playlist_button.signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
 	automation_button.signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
 	size_button.signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
@@ -149,7 +146,6 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release), false);
-	rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
  	edit_group_button.signal_button_release_event().connect (mem_fun(*this, &AudioTimeAxisView::edit_click), false);
 	playlist_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::playlist_click));
 	automation_button.signal_clicked().connect (mem_fun(*this, &AudioTimeAxisView::automation_click));
@@ -164,14 +160,19 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
 
 	if (is_audio_track()) {
+		rec_enable_button->set_active (false);
+		rec_enable_button->set_name ("TrackRecordEnableButton");
+		rec_enable_button->signal_button_press_event().connect (mem_fun (*this, &AudioTimeAxisView::select_me), false);
+		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 	}
+
 	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::FILL|Gtk::EXPAND, 0, 0);
 
 	controls_table.attach (edit_group_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
-	ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 	ARDOUR_UI::instance()->tooltips().set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->tooltips().set_tip(*mute_button,_("Mute"));
 	ARDOUR_UI::instance()->tooltips().set_tip(edit_group_button,_("Edit Group"));
@@ -1889,7 +1890,6 @@ AudioTimeAxisView::map_frozen ()
 	}
 
 	ENSURE_GUI_THREAD (mem_fun(*this, &AudioTimeAxisView::map_frozen));
-
 
 	switch (audio_track()->freeze_state()) {
 	case AudioTrack::Frozen:

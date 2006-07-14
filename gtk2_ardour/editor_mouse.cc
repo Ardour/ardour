@@ -2029,7 +2029,7 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	drag_info.copied_location = new Location (*location);
 	drag_info.pointer_frame_offset = drag_info.grab_frame - (is_start ? location->start() : location->end());	
-	
+
 	update_marker_drag_item (location);
 
 	if (location->is_mark()) {
@@ -2088,31 +2088,39 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		move_both = true;
 	}
 
-	if (is_start) { // start marker
+	if (copy_location->is_mark()) {
+		/* just move it */
 
-		if (move_both) {
-			copy_location->set_start (newframe);
-			copy_location->set_end (newframe + f_delta);
-		} else 	if (newframe < copy_location->end()) {
-			copy_location->set_start (newframe);
-		} else { 
-			snap_to (next, 1, true);
-			copy_location->set_end (next);
-			copy_location->set_start (newframe);
-		}
+		copy_location->set_start (newframe);
 
-	} else { // end marker
+	} else {
 
-		if (move_both) {
-			copy_location->set_end (newframe);
-			copy_location->set_start (newframe - f_delta);
-		} else if (newframe > copy_location->start()) {
-			copy_location->set_end (newframe);
+		if (is_start) { // start-of-range marker
 			
-		} else if (newframe > 0) {
-			snap_to (next, -1, true);
-			copy_location->set_start (next);
-			copy_location->set_end (newframe);
+			if (move_both) {
+				copy_location->set_start (newframe);
+				copy_location->set_end (newframe + f_delta);
+			} else 	if (newframe < copy_location->end()) {
+				copy_location->set_start (newframe);
+			} else { 
+				snap_to (next, 1, true);
+				copy_location->set_end (next);
+				copy_location->set_start (newframe);
+			}
+			
+		} else { // end marker
+			
+			if (move_both) {
+				copy_location->set_end (newframe);
+				copy_location->set_start (newframe - f_delta);
+			} else if (newframe > copy_location->start()) {
+				copy_location->set_end (newframe);
+				
+			} else if (newframe > 0) {
+				snap_to (next, -1, true);
+				copy_location->set_start (next);
+				copy_location->set_end (newframe);
+			}
 		}
 	}
 
@@ -2145,7 +2153,11 @@ Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	Location * location = find_location_from_marker (marker, is_start);
 	
 	if (location) {
-		location->set (drag_info.copied_location->start(), drag_info.copied_location->end());
+		if (location->is_mark()) {
+			location->set_start (drag_info.copied_location->start());
+		} else {
+			location->set (drag_info.copied_location->start(), drag_info.copied_location->end());
+		}
 	}
 
 	session->add_redo_no_execute( session->locations()->get_memento() );

@@ -48,8 +48,6 @@ using namespace std;
 void
 Session::process (jack_nframes_t nframes)
 {
-	//cerr << "CYCLE START " << _transport_frame << "-------------------" << endl;
-	
 	MIDI::Manager::instance()->cycle_start(nframes);
 
 	if (synced_to_jack() && waiting_to_start) {
@@ -67,8 +65,8 @@ Session::process (jack_nframes_t nframes)
 	(this->*process_function) (nframes);
 	
 	MIDI::Manager::instance()->cycle_end();
-	
-	//cerr << "CYCLE END " << _transport_frame << "-----------------------" << endl;
+
+	SendFeedback (); /* EMIT SIGNAL */
 }
 
 void

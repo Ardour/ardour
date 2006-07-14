@@ -231,9 +231,9 @@ Redirect::state (bool full_state)
 		string path;
 		string legal_name;
 		
-		snprintf (buf, sizeof(buf), "%" PRIu64, id());
 		path = _session.snap_name();
 		path += "-redirect-";
+		id().print (buf);
 		path += buf;
 		path += ".automation";
 		

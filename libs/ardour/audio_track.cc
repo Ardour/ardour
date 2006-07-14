@@ -43,7 +43,7 @@ using namespace PBD;
 AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Route (sess, name, 1, -1, -1, -1, flag),
 	  _diskstream (0),
-	  _midi_rec_enable_control (*this, _session.midi_port())
+	  _rec_enable_control (*this)
 {
 	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (0);
 
@@ -65,26 +65,17 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 	_mode = mode;
 
 	set_diskstream (*ds, this);
-
-	// session.SMPTEOffsetChanged.connect (mem_fun (*this, &AudioTrack::handle_smpte_offset_change));
-
-	// we do this even though Route already did it in it's init
-	reset_midi_control (_session.midi_port(), _session.get_midi_control());
-	
 }
 
 AudioTrack::AudioTrack (Session& sess, const XMLNode& node)
 	: Route (sess, "to be renamed", 0, 0, -1, -1),
 	  _diskstream (0),
-	  _midi_rec_enable_control (*this, _session.midi_port())
+	  _rec_enable_control (*this)
 {
 	_freeze_record.state = NoFreeze;
 	set_state (node);
 	_declickable = true;
 	_saved_meter_point = _meter_point;
-
-	// we do this even though Route already did it in it's init
-	reset_midi_control (_session.midi_port(), _session.get_midi_control());
 }
 
 AudioTrack::~AudioTrack ()
@@ -191,7 +182,7 @@ AudioTrack::use_diskstream (string name)
 }
 
 int 
-AudioTrack::use_diskstream (id_t id)
+AudioTrack::use_diskstream (const PBD::ID& id)
 {
 	AudioDiskstream *dstream;
 
@@ -235,10 +226,7 @@ AudioTrack::set_record_enable (bool yn, void *src)
 		set_meter_point (_saved_meter_point, this);
 	}
 
-	if (_session.get_midi_feedback()) {
-		_midi_rec_enable_control.send_feedback (record_enabled());
-	}
-
+	_rec_enable_control.Changed ();
 }
 
 void
@@ -252,7 +240,6 @@ AudioTrack::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
-	XMLNodeList midi_kids;
 
 	if (Route::set_state (node)) {
 		return -1;
@@ -271,36 +258,6 @@ AudioTrack::set_state (const XMLNode& node)
 		_mode = Normal;
 	}
 
-	midi_kids = node.children ("MIDI");
-	
-	for (iter = midi_kids.begin(); iter != midi_kids.end(); ++iter) {
-	
-		XMLNodeList kids;
-		XMLNodeConstIterator miter;
-		XMLNode*    child;
-
-		kids = (*iter)->children ();
-
-		for (miter = kids.begin(); miter != kids.end(); ++miter) {
-
-			child =* miter;
-
-			if (child->name() == "rec_enable") {
-			
-				MIDI::eventType ev = MIDI::on; /* initialize to keep gcc happy */
-				MIDI::byte additional = 0;  /* ditto */
-				MIDI::channel_t chn = 0;    /* ditto */
-
-				if (get_midi_node_info (child, ev, chn, additional)) {
-					_midi_rec_enable_control.set_control_type (chn, ev, additional);
-				} else {
-				  error << string_compose(_("MIDI rec_enable control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
-				}
-			}
-		}
-	}
-
-	
 	if ((prop = node.property ("diskstream-id")) == 0) {
 		
 		/* some old sessions use the diskstream name rather than the ID */
@@ -317,7 +274,7 @@ AudioTrack::set_state (const XMLNode& node)
 
 	} else {
 		
-		id_t id = strtoull (prop->value().c_str(), 0, 10);
+		PBD::ID id (prop->value());
 		
 		if (use_diskstream (id)) {
 			return -1;
@@ -366,7 +323,7 @@ AudioTrack::state(bool full_state)
 {
 	XMLNode& root (Route::state(full_state));
 	XMLNode* freeze_node;
-	char buf[32];
+	char buf[64];
 
 	if (_freeze_record.playlist) {
 		XMLNode* inode;
@@ -378,7 +335,7 @@ AudioTrack::state(bool full_state)
 
 		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
 			inode = new XMLNode (X_("insert"));
-			snprintf (buf, sizeof (buf), "%" PRIu64, (*i)->id);
+			(*i)->id.print (buf);
 			inode->add_property (X_("id"), buf);
 			inode->add_child_copy ((*i)->state);
 		
@@ -402,29 +359,6 @@ AudioTrack::state(bool full_state)
 	align_node->add_property (X_("style"), buf);
 	root.add_child_nocopy (*align_node);
 
-	/* MIDI control */
-
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte      additional;
-	XMLNode*        midi_node = 0;
-	XMLNode*        child;
-	XMLNodeList     midikids;
-
-	midikids = root.children ("MIDI");
-	if (!midikids.empty()) {
-		midi_node = midikids.front();
-	}
-	else {
-		midi_node = root.add_child ("MIDI");
-	}
-		
-	if (_midi_rec_enable_control.get_control_info (chn, ev, additional) && midi_node) {
-
-		child = midi_node->add_child ("rec_enable");
-		set_midi_node_info (child, ev, chn, additional);
-	}
-
 	XMLNode* remote_control_node = new XMLNode (X_("remote_control"));
 	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
 	remote_control_node->add_property (X_("id"), buf);
@@ -445,7 +379,7 @@ AudioTrack::state(bool full_state)
 	   diskstream.
 	*/
 
-	snprintf (buf, sizeof (buf), "%" PRIu64, _diskstream->id());
+	_diskstream->id().print (buf);
 	root.add_property ("diskstream-id", buf);
 
 	return root;
@@ -506,7 +440,7 @@ AudioTrack::set_state_part_two ()
 			
 			FreezeRecordInsertInfo* frii = new FreezeRecordInsertInfo (*((*citer)->children().front()));
 			frii->insert = 0;
-			sscanf (prop->value().c_str(), "%" PRIu64, &frii->id);
+			frii->id = prop->value ();
 			_freeze_record.insert_info.push_back (frii);
 		}
 	}
@@ -1054,93 +988,23 @@ AudioTrack::freeze_state() const
 	return _freeze_record.state;
 }
 
-
-void
-AudioTrack::reset_midi_control (MIDI::Port* port, bool on)
+AudioTrack::RecEnableControllable::RecEnableControllable (AudioTrack& s)
+	: track (s)
 {
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte extra;
-
-	Route::reset_midi_control (port, on);
-	
-	_midi_rec_enable_control.get_control_info (chn, ev, extra);
-	if (!on) {
-		chn = -1;
-	}
-	_midi_rec_enable_control.midi_rebind (port, chn);
 }
 
 void
-AudioTrack::send_all_midi_feedback ()
-{
-	if (_session.get_midi_feedback()) {
-
-		Route::send_all_midi_feedback();
-
-		_midi_rec_enable_control.send_feedback (record_enabled());
-	}
-}
-
-
-AudioTrack::MIDIRecEnableControl::MIDIRecEnableControl (AudioTrack& s,  MIDI::Port* port)
-	: MIDI::Controllable (port, 0), track (s), setting(false)
-{
-	last_written = false; /* XXX need a good out of bound value */
-}
-
-void
-AudioTrack::MIDIRecEnableControl::set_value (float val)
+AudioTrack::RecEnableControllable::set_value (float val)
 {
 	bool bval = ((val >= 0.5f) ? true: false);
-	
-	setting = true;
 	track.set_record_enable (bval, this);
-	setting = false;
 }
 
-void
-AudioTrack::MIDIRecEnableControl::send_feedback (bool value)
+float
+AudioTrack::RecEnableControllable::get_value (void) const
 {
-
-	if (!setting && get_midi_feedback()) {
-		MIDI::byte val = (MIDI::byte) (value ? 127: 0);
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-		MIDI::EventTwoBytes data;
-	    
-		if (get_control_info (ch, ev, additional)) {
-			data.controller_number = additional;
-			data.value = val;
-
-			track._session.send_midi_message (get_port(), ev, ch, data);
-		}
-	}
-	
-}
-
-MIDI::byte*
-AudioTrack::MIDIRecEnableControl::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool val, bool force)
-{
-	if (get_midi_feedback()) {
-
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-
-		if (get_control_info (ch, ev, additional)) {
-			if (val != last_written || force) {
-				*buf++ = ev & ch;
-				*buf++ = additional; /* controller number */
-				*buf++ = (MIDI::byte) (val ? 127: 0);
-				last_written = val;
-				bufsize -= 3;
-			}
-		}
-	}
-
-	return buf;
+	if (track.record_enabled()) { return 1.0f; }
+	return 0.0f;
 }
 
 void

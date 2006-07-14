@@ -27,8 +27,9 @@
 #include <sys/types.h>
 #include <string>
 
+#include <pbd/stateful.h> 
+
 #include <ardour/types.h>
-#include <ardour/stateful.h>
 #include <ardour/utils.h>
 #include <ardour/configuration_variable.h>
 

@@ -33,7 +33,7 @@
 
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
- 
+#include <pbd/stateful.h>
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
@@ -42,7 +42,7 @@
 #include <ardour/route.h>
 #include <ardour/port.h>
 #include <ardour/utils.h>
-#include <ardour/stateful.h>
+
 
 struct tm;
 
@@ -66,9 +66,6 @@ class Diskstream : public Stateful, public sigc::trackable
 		Hidden = 0x2,
 		Destructive = 0x4
 	};
-
-	Diskstream (Session &, const string& name, Flag f = Recordable);
-	Diskstream (Session &, const XMLNode&);
 
 	string name () const { return _name; }
 	virtual int set_name (string str, void* src);
@@ -99,11 +96,11 @@ class Diskstream : public Stateful, public sigc::trackable
 	bool destructive() const { return _flags & Destructive; }
 	virtual void set_destructive (bool yn);
 
-	id_t   id()          const { return _id; }
-	bool   hidden()      const { return _flags & Hidden; }
-	bool   recordable()  const { return _flags & Recordable; }
-	bool   reversed()    const { return _actual_speed < 0.0f; }
-	double speed()       const { return _visible_speed; }
+	const PBD::ID& id()          const { return _id; }
+	bool           hidden()      const { return _flags & Hidden; }
+	bool           recordable()  const { return _flags & Recordable; }
+	bool           reversed()    const { return _actual_speed < 0.0f; }
+	double         speed()       const { return _visible_speed; }
 	
 	virtual void punch_in()  {}
 	virtual void punch_out() {}
@@ -164,6 +161,9 @@ class Diskstream : public Stateful, public sigc::trackable
 
   protected:
 	friend class Session;
+
+	Diskstream (Session &, const string& name, Flag f = Recordable);
+	Diskstream (Session &, const XMLNode&);
 
 	/* the Session is the only point of access for these
 	   because they require that the Session is "inactive"
@@ -280,7 +280,7 @@ class Diskstream : public Stateful, public sigc::trackable
 	ARDOUR::Session&  _session;
 	ARDOUR::IO*       _io;
 	uint32_t          _n_channels;
-	id_t              _id;
+	PBD::ID           _id;
 
 	mutable gint             _record_enabled;
 	double                   _visible_speed;

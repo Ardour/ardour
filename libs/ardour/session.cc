@@ -95,6 +95,8 @@ Session::mix_buffers_no_gain_t		Session::mix_buffers_no_gain 	= 0;
 
 sigc::signal<int> Session::AskAboutPendingState;
 sigc::signal<void> Session::SMPTEOffsetChanged;
+sigc::signal<void> Session::SendFeedback;
+
 
 int
 Session::find_session (string str, string& path, string& snapshot, bool& isnew)
@@ -445,7 +447,7 @@ Session::~Session ()
 		tmp =i;
 		++tmp;
 
-		delete (*i).second;
+		delete i->second;
 
 		i = tmp;
 	}
@@ -484,7 +486,7 @@ Session::~Session ()
 		tmp = i;
 		++tmp;
 
-		delete (*i).second;
+		delete i->second;
 
 		i = tmp;
 	}
@@ -2502,7 +2504,7 @@ Session::diskstream_by_name (string name)
 }
 
 Diskstream *
-Session::diskstream_by_id (id_t id)
+Session::diskstream_by_id (const PBD::ID& id)
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
@@ -2551,7 +2553,7 @@ Session::new_region_name (string old)
 		sbuf = buf;
 
 		for (i = audio_regions.begin(); i != audio_regions.end(); ++i) {
-			if ((*i).second->name() == sbuf) {
+			if (i->second->name() == sbuf) {
 				break;
 			}
 		}
@@ -2616,7 +2618,7 @@ Session::region_name (string& result, string base, bool newlevel) const
 				name_taken = false;
 				
 				for (AudioRegionList::const_iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
-					if ((*i).second->name() == result) {
+					if (i->second->name() == result) {
 						name_taken = true;
 						break;
 					}
@@ -2661,8 +2663,8 @@ Session::add_region (Region* region)
 
 			if (x == audio_regions.end()) {
 
-				pair<AudioRegionList::key_type, AudioRegionList::mapped_type> entry;
-	
+				pair<AudioRegionList::key_type,AudioRegionList::mapped_type> entry;
+
 				entry.first = region->id();
 				entry.second = ar;
 
@@ -2719,16 +2721,18 @@ Session::remove_region (Region* region)
 	AudioRegionList::iterator i;
 	AudioRegion* ar = 0;
 	bool removed = false;
-
+	
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
-		if ((ar = dynamic_cast<AudioRegion*> (region)) != 0) {
+ 		if ((ar = dynamic_cast<AudioRegion*> (region)) != 0) {
 			if ((i = audio_regions.find (region->id())) != audio_regions.end()) {
 				audio_regions.erase (i);
 				removed = true;
-			} 
+			}
+
 		} else {
+
 			fatal << _("programming error: ") 
 			      << X_("unknown region type passed to Session::remove_region()")
 			      << endmsg;
@@ -2756,7 +2760,7 @@ Session::find_whole_file_parent (AudioRegion& child)
 
 	for (i = audio_regions.begin(); i != audio_regions.end(); ++i) {
 
-		region = (*i).second;
+		region = i->second;
 
 		if (region->whole_file()) {
 
@@ -2860,12 +2864,12 @@ Session::add_audio_source (AudioSource* source)
 {
 	pair<AudioSourceList::key_type, AudioSourceList::mapped_type> entry;
 
-	{
-		Glib::Mutex::Lock lm (audio_source_lock);
+ 	{
+ 		Glib::Mutex::Lock lm (audio_source_lock);
 		entry.first = source->id();
 		entry.second = source;
 		audio_sources.insert (entry);
-	}
+ 	}
 	
 	source->GoingAway.connect (mem_fun (this, &Session::remove_source));
 	set_dirty();
@@ -2883,7 +2887,7 @@ Session::remove_source (Source* source)
 
 		if ((i = audio_sources.find (source->id())) != audio_sources.end()) {
 			audio_sources.erase (i);
-		}
+		} 
 	}
 
 	if (!_state_of_the_state & InCleanup) {
@@ -2899,23 +2903,19 @@ Session::remove_source (Source* source)
 }
 
 Source *
-Session::get_source (ARDOUR::id_t id)
+Session::source_by_id (const PBD::ID& id)
 {
 	Glib::Mutex::Lock lm (audio_source_lock);
 	AudioSourceList::iterator i;
 	Source* source = 0;
 
 	if ((i = audio_sources.find (id)) != audio_sources.end()) {
-		source = (*i).second;
-	}
-
-	if (source) {
-		return source;
+		source = i->second;
 	}
 
 	/* XXX search MIDI or other searches here */
 	
-	return 0;
+	return source;
 }
 
 string

@@ -661,8 +661,6 @@ TimeAxisView::show_selection (TimeSelection& ts)
 void
 TimeAxisView::reshow_selection (TimeSelection& ts)
 {
-	cerr << name() << ": reshow selection" << endl;
-
 	show_selection (ts);
 
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
@@ -882,7 +880,7 @@ TimeAxisView::reset_height()
 	set_height_pixels (height);
 
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->set_height ((TrackHeight)(*i)->height);
+		(*i)->set_height_pixels ((TrackHeight)(*i)->height);
 	}
 }
 	

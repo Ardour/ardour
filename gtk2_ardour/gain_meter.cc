@@ -99,17 +99,12 @@ GainMeter::GainMeter (IO& io, Session& s)
 	
 	gain_slider = manage (new VSliderController (slider, rail,
 						     &gain_adjustment,
-						     & _io.midi_gain_control(),
+						     _io.gain_control(),
 						     false));
 
 	gain_slider->signal_button_press_event().connect (mem_fun(*this, &GainMeter::start_gain_touch));
 	gain_slider->signal_button_release_event().connect (mem_fun(*this, &GainMeter::end_gain_touch));
 	gain_slider->set_name ("MixerGainMeter");
-
-	if (_session.midi_port()) {
-		_io.set_midi_to_gain_function (slider_position_to_gain);
-		_io.set_gain_to_midi_function (gain_to_slider_position);
-	}
 
 	gain_display.set_print_func (_gain_printer, this);
 

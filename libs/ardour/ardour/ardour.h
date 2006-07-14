@@ -58,7 +58,7 @@ namespace ARDOUR {
 
 	const layer_t max_layer = UCHAR_MAX;
 
-	id_t new_id();
+	microseconds_t get_microseconds ();
 
 	Change new_change ();
 

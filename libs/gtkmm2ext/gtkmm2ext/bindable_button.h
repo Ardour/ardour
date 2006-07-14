@@ -18,59 +18,31 @@
     $Id$
 */
 
-#ifndef __pbd_gtkmm_bindable_button_h__
-#define __pbd_gtkmm_bindable_button_h__
+#ifndef __bindable_button_h__
+#define __bindable_button_h__
 
 #include <string>
 
 #include <gtkmm2ext/stateful_button.h>
-#include <gtkmm2ext/popup.h>
+#include "binding_proxy.h"
 
-namespace MIDI {
+namespace PBD {
 	class Controllable;
 }
-
-namespace Gtkmm2ext {
 
 class BindableToggleButton : public Gtk::ToggleButton
 {
    public:
-	BindableToggleButton(MIDI::Controllable *);
-
-	//: Create a check button with a label.
-	//- You won't be able
-	//- to add a widget in this button since it already has a {\class Gtk_Label}
-	//- in it.
-	explicit BindableToggleButton(MIDI::Controllable *, const std::string &label);
-
+	BindableToggleButton (PBD::Controllable& c) : binding_proxy (c) {}
+	explicit BindableToggleButton (PBD::Controllable& c, const std::string &label) : Gtk::ToggleButton (label), binding_proxy (c) {}
 	virtual ~BindableToggleButton() {}
 	
-	void set_bind_button_state (guint button, guint statemask);
-	void get_bind_button_state (guint &button, guint &statemask);
-	
-	void midicontrol_set_tip ();
+	bool on_button_press_event (GdkEventButton *ev) {
+		return binding_proxy.button_press_handler (ev);
+	}
 
-	void midi_learn ();
-	
-  protected:
-
-	Gtkmm2ext::PopUp     prompter;
-	
-	MIDI::Controllable* midi_control;
-
-	guint bind_button;
-	guint bind_statemask;
-
-	bool prompting, unprompting;
-	
-	void init_events ();
-	bool prompter_hiding (GdkEventAny *);
-	void midicontrol_prompt ();
-	void midicontrol_unprompt ();
-	
-	bool on_button_press_event (GdkEventButton *);
-};
-
+  private:
+	BindingProxy binding_proxy;
 };
 
 #endif

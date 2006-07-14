@@ -27,10 +27,10 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/stop_signal.h>
-#include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/doi.h>
+#include <gtkmm2ext/slider_controller.h>
+#include <gtkmm2ext/bindable_button.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -52,7 +52,6 @@
 #include "keyboard.h"
 #include "plugin_selector.h"
 #include "public_editor.h"
-
 #include "plugin_ui.h"
 #include "send_ui.h"
 #include "io_selector.h"
@@ -159,9 +158,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	/* XXX what is this meant to do? */
 	//meter_point_button.signal_button_release_event().connect (mem_fun (gpm, &GainMeter::meter_release), false);
 
-	rec_enable_button->set_name ("MixerRecordEnableButton");
-	rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
-
 	solo_button->set_name ("MixerSoloButton");
 	mute_button->set_name ("MixerMuteButton");
 
@@ -191,6 +187,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 	if (is_audio_track()) {
 		
+		rec_enable_button->set_name ("MixerRecordEnableButton");
+		rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
+		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
+
 		AudioTrack* at = dynamic_cast<AudioTrack*>(&_route);
 
 		at->FreezeChange.connect (mem_fun(*this, &MixerStrip::map_frozen));
@@ -301,7 +301,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	input_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::input_press), false);
 	output_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::output_press), false);
 
-	rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
 	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
 	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
@@ -414,7 +413,9 @@ MixerStrip::set_width (Width w)
 		set_size_request (-1, -1);
 		xml_node->add_property ("strip_width", "wide");
 
-		rec_enable_button->set_label (_("record"));
+		if (rec_enable_button) {
+			rec_enable_button->set_label (_("record"));
+		}
 		mute_button->set_label  (_("mute"));
 		solo_button->set_label (_("solo"));
 
@@ -435,7 +436,9 @@ MixerStrip::set_width (Width w)
 		set_size_request (50, -1);
 		xml_node->add_property ("strip_width", "narrow");
 
-		rec_enable_button->set_label (_("Rec"));
+		if (rec_enable_button) {
+			rec_enable_button->set_label (_("Rec"));
+		}
 		mute_button->set_label (_("M"));
 		solo_button->set_label (_("S"));
 
@@ -1212,7 +1215,9 @@ void
 MixerStrip::engine_stopped ()
 {
         input_button.set_sensitive (false);
-	rec_enable_button->set_sensitive (false);
+	if (rec_enable_button) {
+		rec_enable_button->set_sensitive (false);
+	}
 	output_button.set_sensitive (false);
 }
 
@@ -1220,7 +1225,9 @@ void
 MixerStrip::engine_running ()
 {
         input_button.set_sensitive (true);
-	rec_enable_button->set_sensitive (true);
+	if (rec_enable_button) {
+		rec_enable_button->set_sensitive (true);
+	}
 	output_button.set_sensitive (true);
 }
 

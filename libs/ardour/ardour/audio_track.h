@@ -55,7 +55,7 @@ class AudioTrack : public Route
 	AudioDiskstream& disk_stream() const { return *_diskstream; }
 	int set_diskstream (AudioDiskstream&, void *);
 	int use_diskstream (string name);
-	int use_diskstream (id_t id);
+	int use_diskstream (const PBD::ID& id);
 
 	TrackMode mode() const { return _mode; }
 	void set_mode (TrackMode m);
@@ -88,12 +88,9 @@ class AudioTrack : public Route
 	XMLNode& get_template();
 	int set_state(const XMLNode& node);
 
-	MIDI::Controllable& midi_rec_enable_control() {
-		return _midi_rec_enable_control;
+	PBD::Controllable& rec_enable_control() {
+		return _rec_enable_control;
 	}
-
-	void reset_midi_control (MIDI::Port*, bool);
-	void send_all_midi_feedback ();
 
 	bool record_enabled() const;
 	void set_meter_point (MeterPoint, void* src);
@@ -116,9 +113,9 @@ class AudioTrack : public Route
 	    FreezeRecordInsertInfo(XMLNode& st) 
 		    : state (st), insert (0) {}
 
-	    XMLNode  state;
-	    Insert*  insert;
-	    id_t     id;
+	    XMLNode    state;
+	    Insert*    insert;
+	    PBD::ID    id;
 	    UndoAction memento;
 	};
 
@@ -151,17 +148,16 @@ class AudioTrack : public Route
 	void set_state_part_two ();
 	void set_state_part_three ();
 
-	struct MIDIRecEnableControl : public MIDI::Controllable {
-		MIDIRecEnableControl (AudioTrack&, MIDI::Port *);
-		void set_value (float);
-		void send_feedback (bool);
-	        MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, bool val, bool force = false);
-		AudioTrack& track;
-		bool setting;
-  	        bool last_written;
+	struct RecEnableControllable : public PBD::Controllable {
+	    RecEnableControllable (AudioTrack&);
+	    
+	    void set_value (float);
+	    float get_value (void) const;
+
+	    AudioTrack& track;
 	};
 
-	MIDIRecEnableControl _midi_rec_enable_control;
+	RecEnableControllable _rec_enable_control;
 
 	bool _destructive;
 };

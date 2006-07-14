@@ -267,8 +267,6 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	  _fade_out (0.0, 2.0, 1.0, false),
 	  _envelope (0.0, 2.0, 1.0, false)
 {
-	/* basic AudioRegion constructor */
-
 	set<AudioSource*> unique_srcs;
 
 	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
@@ -657,7 +655,7 @@ AudioRegion::state (bool full)
 
 	for (uint32_t n=0; n < sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
-		snprintf (buf, sizeof(buf), "%" PRIu64, sources[n]->id());
+		sources[n]->id().print (buf);
 		node.add_property (buf2, buf);
 	}
 

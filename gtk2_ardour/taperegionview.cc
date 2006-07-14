@@ -42,16 +42,19 @@ using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
 
+const TimeAxisViewItem::Visibility TapeAudioRegionView::default_tape_visibility = TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameHighlight|
+													  TimeAxisViewItem::ShowFrame|
+													  TimeAxisViewItem::HideFrameRight|
+													  TimeAxisViewItem::FullWidthNameHighlight);
+
 TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView &tv, 
 					  AudioRegion& r, 
 					  double spu, 
 					  Gdk::Color& basic_color)
 
 	: AudioRegionView (parent, tv, r, spu, basic_color, 
-			   TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameHighlight|
-							 TimeAxisViewItem::ShowFrame|
-							 TimeAxisViewItem::HideFrameLR|
-							 TimeAxisViewItem::FullWidthNameHighlight))
+			   TimeAxisViewItem::Visibility ((r.position() != 0) ? default_tape_visibility : 
+							 TimeAxisViewItem::Visibility (default_tape_visibility|TimeAxisViewItem::HideFrameLeft)))
 {
 }
 

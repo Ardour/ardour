@@ -275,6 +275,9 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	Diskstream::DiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
 
+	Controllable::Created.connect (mem_fun (*this, &Session::add_controllable));
+	Controllable::GoingAway.connect (mem_fun (*this, &Session::remove_controllable));
+
 	IO::MoreOutputs.connect (mem_fun (*this, &Session::ensure_passthru_buffers));
 
 	/* stop IO objects from doing stuff until we're ready for them */
@@ -639,7 +642,7 @@ Session::load_diskstreams (const XMLNode& node)
 		} 
 		
 		catch (failed_constructor& err) {
-			error << _("Session: could not load diskstream via XML state")			      << endmsg;
+			error << _("Session: could not load diskstream via XML state") << endmsg;
 			return -1;
 		}
 	}
@@ -1336,6 +1339,13 @@ Session::state(bool full_state)
 		}
 	}
 
+	/* save the ID counter */
+	
+	snprintf (buf, sizeof (buf), "%" PRIu64, ID::counter());
+	node->add_property ("id-counter", buf);
+
+	/* various options */
+
 	node->add_child_nocopy (get_options());
 
 	child = node->add_child ("Sources");
@@ -1349,7 +1359,7 @@ Session::state(bool full_state)
 			
 			AudioFileSource* fs;
 
-			if ((fs = dynamic_cast<AudioFileSource*> ((*siter).second)) != 0) {
+			if ((fs = dynamic_cast<AudioFileSource*> (siter->second)) != 0) {
 				DestructiveFileSource* dfs = dynamic_cast<DestructiveFileSource*> (fs);
 
 				/* destructive file sources are OK if they are empty, because
@@ -1363,7 +1373,7 @@ Session::state(bool full_state)
 				}
 			}
 			
-			child->add_child_nocopy ((*siter).second->get_state());
+			child->add_child_nocopy (siter->second->get_state());
 		}
 	}
 
@@ -1376,7 +1386,7 @@ Session::state(bool full_state)
 			
 			/* only store regions not attached to playlists */
 
-			if ((*i).second->playlist() == 0) {
+			if (i->second->playlist() == 0) {
 				child->add_child_nocopy (i->second->state (true));
 			}
 		}
@@ -1495,7 +1505,7 @@ Session::set_state (const XMLNode& node)
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
 	
-	if (node.name() != "Session"){
+	if (node.name() != X_("Session")){
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
 		return -1;
 	}
@@ -1505,6 +1515,21 @@ Session::set_state (const XMLNode& node)
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value ();
 	}
+
+	if ((prop = node.property (X_("id-counter"))) != 0) {
+		uint64_t x;
+		sscanf (prop->value().c_str(), "%" PRIu64, &x);
+		ID::init_counter (x);
+	} else {
+		/* old sessions used a timebased counter, so fake
+		   the startup ID counter based on a standard
+		   timestamp.
+		*/
+		time_t now;
+		time (&now);
+		ID::init_counter (now);
+	}
+
 	
 	IO::disable_ports ();
 	IO::disable_connecting ();
@@ -1748,12 +1773,10 @@ Session::load_regions (const XMLNode& node)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
 		if ((region = XMLRegionFactory (**niter, false)) == 0) {
 			error << _("Session: cannot create Region from XML description.") << endmsg;
 		}
 	}
-
 	return 0;
 }
 
@@ -1761,7 +1784,6 @@ AudioRegion *
 Session::XMLRegionFactory (const XMLNode& node, bool full)
 {
 	const XMLProperty* prop;
-	id_t s_id;
 	Source* source;
 	AudioSource* as;
 	AudioRegion::SourceList sources;
@@ -1784,9 +1806,9 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 		}
 	}
 
-	sscanf (prop->value().c_str(), "%" PRIu64, &s_id);
+	PBD::ID s_id (prop->value());
 
-	if ((source = get_source (s_id)) == 0) {
+	if ((source = source_by_id (s_id)) == 0) {
 		error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
 		return 0;
 	}
@@ -1804,22 +1826,22 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 	for (uint32_t n=1; n < nchans; ++n) {
 		snprintf (buf, sizeof(buf), X_("source-%d"), n);
 		if ((prop = node.property (buf)) != 0) {
-			sscanf (prop->value().c_str(), "%" PRIu64, &s_id);
 			
-			if ((source = get_source (s_id)) == 0) {
-				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
+			PBD::ID id2 (prop->value());
+			
+			if ((source = source_by_id (id2)) == 0) {
+				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), id2) << endmsg;
 				return 0;
 			}
 			
 			as = dynamic_cast<AudioSource*>(source);
 			if (!as) {
-				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), s_id) << endmsg;
+				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), id2) << endmsg;
 				return 0;
 			}
 			sources.push_back (as);
 		}
 	}
-	
 	
 	try {
 		return new AudioRegion (sources, node);
@@ -1838,7 +1860,7 @@ Session::get_sources_as_xml ()
 	Glib::Mutex::Lock lm (audio_source_lock);
 
 	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
-		node->add_child_nocopy ((*i).second->get_state());
+		node->add_child_nocopy (i->second->get_state());
 	}
 
 	/* XXX get MIDI and other sources here */
@@ -2964,7 +2986,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   capture files.
 		*/
 
-		if ((*i).second->use_cnt() == 0 && (*i).second->length() > 0) {
+		if (i->second->use_cnt() == 0 && i->second->length() > 0) {
 			dead_sources.push_back (i->second);
 
 			/* remove this source from our own list to avoid us
@@ -2991,7 +3013,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			tmp = r;
 			++tmp;
 			
-			ar = (*r).second;
+			ar = r->second;
 
 			for (uint32_t n = 0; n < ar->n_channels(); ++n) {
 				if (&ar->source (n) == (*i)) {
@@ -3044,7 +3066,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
 		AudioFileSource* fs;
 		
-		if ((fs = dynamic_cast<AudioFileSource*> ((*i).second)) != 0) {
+		if ((fs = dynamic_cast<AudioFileSource*> (i->second)) != 0) {
 			all_sources.insert (fs->path());
 		} 
 	}
@@ -3253,3 +3275,30 @@ Session::set_clean ()
 	}
 }
 
+void
+Session::add_controllable (Controllable* c)
+{
+	Glib::Mutex::Lock lm (controllables_lock);
+	controllables.push_back (c);
+}
+
+void
+Session::remove_controllable (Controllable* c)
+{
+	Glib::Mutex::Lock lm (controllables_lock);
+	controllables.remove (c);
+}	
+
+Controllable*
+Session::controllable_by_id (const PBD::ID& id)
+{
+	Glib::Mutex::Lock lm (controllables_lock);
+	
+	for (Controllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
+		if ((*i)->id() == id) {
+			return *i;
+		}
+	}
+
+	return 0;
+}

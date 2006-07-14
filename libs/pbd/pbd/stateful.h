@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Barton-Davis 
+    Copyright (C) 2000 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,39 +15,37 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
+    $Id: stateful.h 17 2005-09-24 19:13:41Z taybin $
 */
 
-#ifndef __pbd_scale_h__
-#define __pbd_scale_h__
+#ifndef __pbd_stateful_h__
+#define __pbd_stateful_h__
 
-#include <cmath>
+#include <string>
 
-inline float
-scale (float value, float lower, float upper)
-{
-	return fabs (lower + value) / (upper-lower);
-}	
+class XMLNode;
 
-inline float
-scale_with_range (float value, float lower, float range)
-{
-	return fabs (lower + value) / range;
-}	
+class Stateful {
+  public:
+	Stateful();
+	virtual ~Stateful();
 
+	virtual XMLNode& get_state (void) = 0;
 
-inline float 
-scale_to (float value, float lower, float upper, float to)
-{
-	return (fabs (lower + value) / (upper-lower)) * to;
-}	
+	virtual int set_state (const XMLNode&) = 0;
 
-inline float
-scale_to_with_range (float value, float lower, float range, float to)
-{
-	return (fabs (lower + value) / range) * to;
-}	
+	/* Extra XML nodes */
 
-#endif /* __pbd_scale_h__ */
+	void add_extra_xml (XMLNode&);
+	XMLNode *extra_xml (const std::string& str);
 
+	virtual void add_instant_xml (XMLNode&, const std::string& dir);
+	XMLNode *instant_xml (const std::string& str, const std::string& dir);
+
+  protected:
+	XMLNode *_extra_xml;
+	XMLNode *_instant_xml;
+};
+
+#endif /* __pbd_stateful_h__ */
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,26 +15,40 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+    $Id$
 */
 
-#ifndef __pbd_convert_h__
-#define __pbd_convert_h__
+#ifndef __binding_proxy__
+#define __binding_proxy__
 
 #include <string>
-#include <vector>
+
+#include <gtkmm2ext/popup.h>
 
 namespace PBD {
+	class Controllable;
+}
 
-std::string short_version (std::string, std::string::size_type target_length);
+class BindingProxy : public sigc::trackable
+{
+   public:
+	BindingProxy (PBD::Controllable&);
+	virtual ~BindingProxy() {}
+	
+	void set_bind_button_state (guint button, guint statemask);
+	void get_bind_button_state (guint &button, guint &statemask);
 
-int    atoi (const std::string&);
-double atof (const std::string&);
-void   url_decode (std::string&);
+	bool button_press_handler (GdkEventButton *);
 
-std::string length2string (const int32_t frames, const float sample_rate);
+  protected:
 
-std::vector<std::string> internationalize (const char **);
+	Gtkmm2ext::PopUp     prompter;
+	PBD::Controllable& controllable;
+	guint bind_button;
+	guint bind_statemask;
+	sigc::connection learning_connection;
+	void learning_finished ();
+	bool prompter_hiding (GdkEventAny *);
+};
 
-} //namespace PBD
-
-#endif /* __pbd_convert_h__ */
+#endif

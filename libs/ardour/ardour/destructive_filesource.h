@@ -49,6 +49,8 @@ class DestructiveFileSource : public SndFileSource {
   protected:
 	jack_nframes_t write_unlocked (Sample *src, jack_nframes_t cnt, char * workbuf);
 
+	virtual void handle_header_position_change ();
+
   private:
 	static jack_nframes_t xfade_frames;
 	static gain_t* out_coefficient;

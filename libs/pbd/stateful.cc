@@ -15,15 +15,14 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
+    $Id: stateful.cc 629 2006-06-21 23:01:03Z paul $
 */
 
-#include <cstdio>
 #include <unistd.h>
 
-#include <ardour/stateful.h>
-#include <ardour/utils.h>
+#include <pbd/stateful.h>
 #include <pbd/xml++.h>
+#include <pbd/error.h>
 
 #include "i18n.h"
 
@@ -39,7 +38,10 @@ Stateful::~Stateful ()
 {
 	// Do not delete _extra_xml.  The use of add_child_nocopy() 
 	// means it needs to live on indefinately.
-	delete _instant_xml;
+
+	if (_instant_xml) {
+		delete _instant_xml;
+	}
 }
 
 void

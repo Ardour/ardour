@@ -26,7 +26,7 @@
 #include <string>
 #include <stdint.h>
 #include <sigc++/signal.h>
-#include <ardour/stateful.h>
+#include <pbd/stateful.h> 
 #include <ardour/types.h>
 
 using std::string;

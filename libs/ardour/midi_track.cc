@@ -37,11 +37,12 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Route (sess, name, 1, -1, -1, -1, flag, Buffer::MIDI),
-	  diskstream (0),
-	  _midi_rec_enable_control (*this, _session.midi_port())
+	  _diskstream (0),
+	  _rec_enable_control (*this)
 {
 	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
 
@@ -63,32 +64,23 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	_mode = mode;
 
 	set_diskstream (*ds, this);
-
-	// session.SMPTEOffsetChanged.connect (mem_fun (*this, &MidiTrack::handle_smpte_offset_change));
-
-	// we do this even though Route already did it in it's init
-	reset_midi_control (_session.midi_port(), _session.get_midi_control());
-	
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	: Route (sess, "to be renamed", 0, 0, -1, -1),
-	  diskstream (0),
-	  _midi_rec_enable_control (*this, _session.midi_port())
+	  _diskstream (0),
+	  _rec_enable_control (*this)
 {
 	_freeze_record.state = NoFreeze;
 	set_state (node);
 	_declickable = true;
 	_saved_meter_point = _meter_point;
-
-	// we do this even though Route already did it in it's init
-	reset_midi_control (_session.midi_port(), _session.get_midi_control());
 }
 
 MidiTrack::~MidiTrack ()
 {
-	if (diskstream) {
-		diskstream->unref();
+	if (_diskstream) {
+		_diskstream->unref();
 	}
 }
 
@@ -103,16 +95,16 @@ MidiTrack::handle_smpte_offset_change ()
 int
 MidiTrack::deprecated_use_diskstream_connections ()
 {
-	if (diskstream->deprecated_io_node == 0) {
+	if (_diskstream->deprecated_io_node == 0) {
 		return 0;
 	}
 
 	const XMLProperty* prop;
-	XMLNode& node (*diskstream->deprecated_io_node);
+	XMLNode& node (*_diskstream->deprecated_io_node);
 
 	/* don't do this more than once. */
 
-	diskstream->deprecated_io_node = 0;
+	_diskstream->deprecated_io_node = 0;
 
 	set_input_minimum (-1);
 	set_input_maximum (-1);
@@ -155,15 +147,15 @@ MidiTrack::deprecated_use_diskstream_connections ()
 int
 MidiTrack::set_diskstream (MidiDiskstream& ds, void *src)
 {
-	if (diskstream) {
-		diskstream->unref();
+	if (_diskstream) {
+		_diskstream->unref();
 	}
 
-	diskstream = &ds.ref();
-	diskstream->set_io (*this);
-	diskstream->set_destructive (_mode == Destructive);
+	_diskstream = &ds.ref();
+	_diskstream->set_io (*this);
+	_diskstream->set_destructive (_mode == Destructive);
 
-	if (diskstream->deprecated_io_node) {
+	if (_diskstream->deprecated_io_node) {
 
 		if (!connecting_legal) {
 			ConnectingLegal.connect (mem_fun (*this, &MidiTrack::deprecated_use_diskstream_connections));
@@ -172,11 +164,11 @@ MidiTrack::set_diskstream (MidiDiskstream& ds, void *src)
 		}
 	}
 
-	diskstream->set_record_enabled (false, this);
-	//diskstream->monitor_input (false);
+	_diskstream->set_record_enabled (false, this);
+	//_diskstream->monitor_input (false);
 
 	ic_connection.disconnect();
-	ic_connection = input_changed.connect (mem_fun (*diskstream, &MidiDiskstream::handle_input_change));
+	ic_connection = input_changed.connect (mem_fun (*_diskstream, &MidiDiskstream::handle_input_change));
 
 	diskstream_changed (src); /* EMIT SIGNAL */
 
@@ -189,34 +181,30 @@ MidiTrack::use_diskstream (string name)
 	MidiDiskstream *dstream;
 
 	if ((dstream = dynamic_cast<MidiDiskstream*>(_session.diskstream_by_name (name))) == 0) {
-	  PBD::error << string_compose(_("MidiTrack: diskstream \"%1\" not known by session"), name) << endmsg;
+	  error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), name) << endmsg;
 		return -1;
 	}
-
-	return set_diskstream (*dstream, this);
 	
-	return 0;
+	return set_diskstream (*dstream, this);
 }
 
 int 
-MidiTrack::use_diskstream (id_t id)
+MidiTrack::use_diskstream (const PBD::ID& id)
 {
 	MidiDiskstream *dstream;
 
 	if ((dstream = dynamic_cast<MidiDiskstream*>(_session.diskstream_by_id (id))) == 0) {
-	  	PBD::error << string_compose(_("MidiTrack: diskstream \"%1\" not known by session"), id) << endmsg;
+	  	error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), id) << endmsg;
 		return -1;
 	}
 	
 	return set_diskstream (*dstream, this);
-	
-	return 0;
 }
 
 bool
 MidiTrack::record_enabled () const
 {
-	return diskstream->record_enabled ();
+	return _diskstream->record_enabled ();
 }
 
 void
@@ -262,7 +250,6 @@ MidiTrack::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
-	XMLNodeList midi_kids;
 
 	if (Route::set_state (node)) {
 		return -1;
@@ -274,49 +261,19 @@ MidiTrack::set_state (const XMLNode& node)
 		} else if (prop->value() == X_("destructive")) {
 			_mode = Destructive;
 		} else {
-			PBD::warning << string_compose ("unknown midi track mode \"%1\" seen and ignored", prop->value()) << endmsg;
+			warning << string_compose ("unknown midi track mode \"%1\" seen and ignored", prop->value()) << endmsg;
 			_mode = Normal;
 		}
 	} else {
 		_mode = Normal;
 	}
 
-	midi_kids = node.children ("MIDI");
-	
-	for (iter = midi_kids.begin(); iter != midi_kids.end(); ++iter) {
-	
-		XMLNodeList kids;
-		XMLNodeConstIterator miter;
-		XMLNode*    child;
-
-		kids = (*iter)->children ();
-
-		for (miter = kids.begin(); miter != kids.end(); ++miter) {
-
-			child =* miter;
-
-			if (child->name() == "rec_enable") {
-			
-				MIDI::eventType ev = MIDI::on; /* initialize to keep gcc happy */
-				MIDI::byte additional = 0;  /* ditto */
-				MIDI::channel_t chn = 0;    /* ditto */
-
-				if (get_midi_node_info (child, ev, chn, additional)) {
-					_midi_rec_enable_control.set_control_type (chn, ev, additional);
-				} else {
-				  PBD::error << string_compose(_("MIDI rec_enable control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
-				}
-			}
-		}
-	}
-
-	
 	if ((prop = node.property ("diskstream-id")) == 0) {
 		
 		/* some old sessions use the diskstream name rather than the ID */
 
 		if ((prop = node.property ("diskstream")) == 0) {
-			PBD::fatal << _("programming error: MidiTrack given state without diskstream!") << endmsg;
+			fatal << _("programming error: MidiTrack given state without diskstream!") << endmsg;
 			/*NOTREACHED*/
 			return -1;
 		}
@@ -327,7 +284,7 @@ MidiTrack::set_state (const XMLNode& node)
 
 	} else {
 		
-		id_t id = strtoull (prop->value().c_str(), 0, 10);
+		PBD::ID id (prop->value());
 		
 		if (use_diskstream (id)) {
 			return -1;
@@ -376,7 +333,7 @@ MidiTrack::state(bool full_state)
 {
 	XMLNode& root (Route::state(full_state));
 	XMLNode* freeze_node;
-	char buf[32];
+	char buf[64];
 
 	if (_freeze_record.playlist) {
 		XMLNode* inode;
@@ -388,7 +345,7 @@ MidiTrack::state(bool full_state)
 
 		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
 			inode = new XMLNode (X_("insert"));
-			snprintf (buf, sizeof (buf), "%" PRIu64, (*i)->id);
+			(*i)->id.print (buf);
 			inode->add_property (X_("id"), buf);
 			inode->add_child_copy ((*i)->state);
 		
@@ -401,7 +358,7 @@ MidiTrack::state(bool full_state)
 	/* Alignment: act as a proxy for the diskstream */
 	
 	XMLNode* align_node = new XMLNode (X_("alignment"));
-	switch (diskstream->alignment_style()) {
+	switch (_diskstream->alignment_style()) {
 	case ExistingMaterial:
 		snprintf (buf, sizeof (buf), X_("existing"));
 		break;
@@ -411,29 +368,6 @@ MidiTrack::state(bool full_state)
 	}
 	align_node->add_property (X_("style"), buf);
 	root.add_child_nocopy (*align_node);
-
-	/* MIDI control */
-
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte      additional;
-	XMLNode*        midi_node = 0;
-	XMLNode*        child;
-	XMLNodeList     midikids;
-
-	midikids = root.children ("MIDI");
-	if (!midikids.empty()) {
-		midi_node = midikids.front();
-	}
-	else {
-		midi_node = root.add_child ("MIDI");
-	}
-		
-	if (_midi_rec_enable_control.get_control_info (chn, ev, additional) && midi_node) {
-
-		child = midi_node->add_child ("rec_enable");
-		set_midi_node_info (child, ev, chn, additional);
-	}
 
 	XMLNode* remote_control_node = new XMLNode (X_("remote_control"));
 	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
@@ -455,7 +389,7 @@ MidiTrack::state(bool full_state)
 	   diskstream.
 	*/
 
-	snprintf (buf, sizeof (buf), "%" PRIu64, diskstream->id());
+	_diskstream->id().print (buf);
 	root.add_property ("diskstream-id", buf);
 
 	return root;
@@ -516,7 +450,7 @@ MidiTrack::set_state_part_two ()
 			
 			FreezeRecordInsertInfo* frii = new FreezeRecordInsertInfo (*((*citer)->children().front()));
 			frii->insert = 0;
-			sscanf (prop->value().c_str(), "%" PRIu64, &frii->id);
+			frii->id = prop->value ();
 			_freeze_record.insert_info.push_back (frii);
 		}
 	}
@@ -527,9 +461,9 @@ MidiTrack::set_state_part_two ()
 
 		if ((prop = fnode->property (X_("style"))) != 0) {
 			if (prop->value() == "existing") {
-				diskstream->set_persistent_align_style (ExistingMaterial);
+				_diskstream->set_persistent_align_style (ExistingMaterial);
 			} else if (prop->value() == "capture") {
-				diskstream->set_persistent_align_style (CaptureTime);
+				_diskstream->set_persistent_align_style (CaptureTime);
 			}
 		}
 	}
@@ -539,7 +473,7 @@ MidiTrack::set_state_part_two ()
 uint32_t
 MidiTrack::n_process_buffers ()
 {
-	return max ((uint32_t) diskstream->n_channels(), redirect_max_outs);
+	return max ((uint32_t) _diskstream->n_channels(), redirect_max_outs);
 }
 
 void
@@ -570,7 +504,7 @@ MidiTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfr
 		return 0;
 	}
 
-	diskstream->check_record_status (start_frame, nframes, can_record);
+	_diskstream->check_record_status (start_frame, nframes, can_record);
 
 	bool send_silence;
 	
@@ -589,7 +523,7 @@ MidiTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfr
 				send_silence = true;
 			}
 		} else {
-			if (diskstream->record_enabled()) {
+			if (_diskstream->record_enabled()) {
 				if (Config->get_use_sw_monitoring()) {
 					send_silence = false;
 				} else {
@@ -759,7 +693,7 @@ MidiTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack
 
 	silence (nframes, offset);
 
-	return diskstream->process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
+	return _diskstream->process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
 }
 
 void
@@ -780,7 +714,7 @@ MidiTrack::set_name (string str, void *src)
 		return -1;
 	}
 
-	if (diskstream->set_name (str, src)) {
+	if (_diskstream->set_name (str, src)) {
 		return -1;
 	}
 
@@ -893,7 +827,7 @@ void
 MidiTrack::set_latency_delay (jack_nframes_t longest_session_latency)
 {
 	Route::set_latency_delay (longest_session_latency);
-	diskstream->set_roll_delay (_roll_delay);
+	_diskstream->set_roll_delay (_roll_delay);
 }
 
 jack_nframes_t
@@ -1064,101 +998,32 @@ MidiTrack::freeze_state() const
 }
 
 
-void
-MidiTrack::reset_midi_control (MIDI::Port* port, bool on)
+MidiTrack::MIDIRecEnableControllable::MIDIRecEnableControllable (MidiTrack& s)
+	: track(s)
 {
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte extra;
-
-	Route::reset_midi_control (port, on);
-	
-	_midi_rec_enable_control.get_control_info (chn, ev, extra);
-	if (!on) {
-		chn = -1;
-	}
-	_midi_rec_enable_control.midi_rebind (port, chn);
 }
 
 void
-MidiTrack::send_all_midi_feedback ()
-{
-	if (_session.get_midi_feedback()) {
-
-		Route::send_all_midi_feedback();
-
-		_midi_rec_enable_control.send_feedback (record_enabled());
-	}
-}
-
-
-MidiTrack::MIDIRecEnableControl::MIDIRecEnableControl (MidiTrack& s,  MIDI::Port* port)
-	: MIDI::Controllable (port, 0), track (s), setting(false)
-{
-	last_written = false; /* XXX need a good out of bound value */
-}
-
-void
-MidiTrack::MIDIRecEnableControl::set_value (float val)
+MidiTrack::MIDIRecEnableControllable::set_value (float val)
 {
 	bool bval = ((val >= 0.5f) ? true: false);
-	
-	setting = true;
 	track.set_record_enable (bval, this);
-	setting = false;
 }
 
-void
-MidiTrack::MIDIRecEnableControl::send_feedback (bool value)
+float
+MidiTrack::MIDIRecEnableControllable::get_value (void) const
 {
-
-	if (!setting && get_midi_feedback()) {
-		MIDI::byte val = (MIDI::byte) (value ? 127: 0);
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-		MIDI::EventTwoBytes data;
-	    
-		if (get_control_info (ch, ev, additional)) {
-			data.controller_number = additional;
-			data.value = val;
-
-			track._session.send_midi_message (get_port(), ev, ch, data);
-		}
-	}
-	
-}
-
-MIDI::byte*
-MidiTrack::MIDIRecEnableControl::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool val, bool force)
-{
-	if (get_midi_feedback()) {
-
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-
-		if (get_control_info (ch, ev, additional)) {
-			if (val != last_written || force) {
-				*buf++ = ev & ch;
-				*buf++ = additional; /* controller number */
-				*buf++ = (MIDI::byte) (val ? 127: 0);
-				last_written = val;
-				bufsize -= 3;
-			}
-		}
-	}
-
-	return buf;
+	if (track.record_enabled()) { return 1.0f; }
+	return 0.0f;
 }
 
 void
 MidiTrack::set_mode (TrackMode m)
 {
-	if (diskstream) {
+	if (_diskstream) {
 		if (_mode != m) {
 			_mode = m;
-			diskstream->set_destructive (m == Destructive);
+			_diskstream->set_destructive (m == Destructive);
 			ModeChanged();
 		}
 	}

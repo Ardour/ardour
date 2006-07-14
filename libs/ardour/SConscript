@@ -94,7 +94,6 @@ sndfile_helpers.cc
 sndfilesource.cc
 source.cc
 state_manager.cc
-stateful.cc
 tempo.cc
 utils.cc
 version.cc

@@ -30,6 +30,8 @@
 #include <inttypes.h>
 #include <jack/types.h>
 #include <control_protocol/smpte.h>
+#include <pbd/id.h>
+
 #include <map>
 
 #if __GNUC__ < 3
@@ -45,7 +47,7 @@ namespace ARDOUR {
 	typedef float                       pan_t;
 	typedef float                       gain_t;
 	typedef uint32_t                    layer_t;
-	typedef uint64_t                    id_t;
+	typedef uint64_t                    microseconds_t;
 
 	typedef unsigned char RawMidi;
 

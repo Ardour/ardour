@@ -23,7 +23,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include <midi++/controllable.h>
+#include <pbd/controllable.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -36,16 +36,13 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 BarController::BarController (Gtk::Adjustment& adj,
-			      MIDI::Controllable *mc,
+			      PBD::Controllable& mc,
 			      sigc::slot<void,char*,unsigned int> lc) 
 
 	: adjustment (adj),
-	  prompter (Gtk::WIN_POS_MOUSE, 30000, false),
-	  midi_control (mc),
+	  binding_proxy (mc),
 	  label_callback (lc),
-	  spinner (adjustment),
-	  bind_button (2),
-	  bind_statemask (Gdk::CONTROL_MASK)
+	  spinner (adjustment)
 
 {			  
 	_style = LeftToRight;
@@ -77,16 +74,6 @@ BarController::BarController (Gtk::Adjustment& adj,
 	darea.signal_button_release_event().connect (mem_fun (*this, &BarController::button_release));
 	darea.signal_scroll_event().connect (mem_fun (*this, &BarController::scroll));
 
-	prompter.signal_unmap_event().connect (mem_fun (*this, &BarController::prompter_hiding));
-	
-	prompting = false;
-	unprompting = false;
-	
-	if (mc) {
-		mc->learning_started.connect (mem_fun (*this, &BarController::midicontrol_prompt));
-		mc->learning_stopped.connect (mem_fun (*this, &BarController::midicontrol_unprompt));
-	}
-
 	spinner.signal_activate().connect (mem_fun (*this, &BarController::entry_activated));
 	spinner.signal_focus_out_event().connect (mem_fun (*this, &BarController::entry_focus_out));
 	spinner.set_digits (3);
@@ -95,24 +82,13 @@ BarController::BarController (Gtk::Adjustment& adj,
 	show_all ();
 }
 
-void
-BarController::set_bind_button_state (guint button, guint statemask)
-{
-	bind_button = button;
-	bind_statemask = statemask;
-}
-
-void
-BarController::get_bind_button_state (guint &button, guint &statemask)
-{
-	button = bind_button;
-	statemask = bind_statemask;
-}
-
-
 bool
 BarController::button_press (GdkEventButton* ev)
 {
+	if (binding_proxy.button_press_handler (ev)) {
+		return true;
+	}
+
 	switch (ev->button) {
 	case 1:
 		if (ev->type == GDK_2BUTTON_PRESS) {
@@ -174,8 +150,8 @@ BarController::button_release (GdkEventButton* ev)
 		break;
 
 	case 2:
-		if ((ev->state & bind_statemask) && bind_button == 2) {
-			midi_learn ();
+		if (true) { // XXX FIX ME
+			/* relax */
 		} else {
 			double fract;
 			fract = ev->x / (darea.get_width() - 2.0);
@@ -185,10 +161,6 @@ BarController::button_release (GdkEventButton* ev)
 		return true;
 
 	case 3:
-		if ((ev->state & bind_statemask) && bind_button == 3) {
-			midi_learn ();
-			return TRUE;
-		}
 		return false;
 		
 	default:
@@ -406,61 +378,6 @@ BarController::set_with_text (bool yn)
 		queue_draw ();
 	}
 }
-
-void
-BarController::midicontrol_set_tip ()
-{
-	if (midi_control) {
-		// Gtkmm2ext::UI::instance()->set_tip (&darea, midi_control->control_description());
-	}
-}
-
-void
-BarController::midi_learn()
-{
-	if (midi_control) {
-		prompting = true;
-		midi_control->learn_about_external_control ();
-	}
-}
-
-
-void
-BarController::midicontrol_prompt ()
-{
-	if (prompting) {
-		string prompt = _("operate MIDI controller now");
-		prompter.set_text (prompt);
-		Gtkmm2ext::UI::instance()->touch_display (&prompter);
-
-		unprompting = true;
-		prompting = false;
-	}
-}
-
-void
-BarController::midicontrol_unprompt ()
-{
-	if (unprompting) {
-		Gtkmm2ext::UI::instance()->touch_display (&prompter);
-		
-		unprompting = false;
-	}
-}
-
-gint
-BarController::prompter_hiding (GdkEventAny *ev)
-{
-	if (unprompting) {
-		if (midi_control) {
-			midi_control->stop_learning();
-		}
-		unprompting = false;
-	}
-	
-	return FALSE;
-}
-
 
 void
 BarController::set_style (Style s)

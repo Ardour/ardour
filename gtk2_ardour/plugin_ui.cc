@@ -29,10 +29,10 @@
 
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/doi.h>
+#include <gtkmm2ext/slider_controller.h>
 
 #include <midi++/manager.h>
 
@@ -263,7 +263,7 @@ PluginUI::build (AudioEngine &engine)
 				}
 			}
 
-			if ((cui = build_control_ui (engine, i, plugin.get_nth_midi_control (i))) == 0) {
+			if ((cui = build_control_ui (engine, i, plugin.get_nth_control (i))) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
 			}
@@ -419,7 +419,7 @@ PluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 }
 
 PluginUI::ControlUI*
-PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Controllable* mcontrol)
+PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, PBD::Controllable* mcontrol)
 
 {
 	ControlUI* control_ui;
@@ -516,7 +516,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, MIDI::Contr
 		} else {
 			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &PluginUI::print_parameter), (uint32_t) port_index);
 
-			control_ui->control = new BarController (*control_ui->adjustment, mcontrol, pslot);
+			control_ui->control = new BarController (*control_ui->adjustment, *mcontrol, pslot);
 			// should really match the height of the text in the automation button+label
 			control_ui->control->set_size_request (200, 22);
 			control_ui->control->set_name (X_("PluginSlider"));

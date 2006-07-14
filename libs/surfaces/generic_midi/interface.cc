@@ -1,3 +1,5 @@
+#include <pbd/failed_constructor.h>
+
 #include <control_protocol/control_protocol.h>
 #include "generic_midi_control_protocol.h"
 
@@ -6,7 +8,13 @@ using namespace ARDOUR;
 ControlProtocol*
 new_generic_midi_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 {
-	GenericMidiControlProtocol* gmcp =  new GenericMidiControlProtocol (*s);
+	GenericMidiControlProtocol* gmcp;
+		
+	try {
+		gmcp =  new GenericMidiControlProtocol (*s);
+	} catch (failed_constructor& err) {
+		return 0;
+	}
 	
 	if (gmcp->set_active (true)) {
 		delete gmcp;

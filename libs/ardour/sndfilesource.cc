@@ -156,6 +156,8 @@ SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, 
 			  utsinfo.version);
 		
 		_broadcast_info->version = 1;  
+		_broadcast_info->time_reference_low = 0;  
+		_broadcast_info->time_reference_high = 0;  
 		
 		/* XXX do something about this field */
 		
@@ -183,6 +185,7 @@ SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, 
 	}
 
 	AudioSourceCreated (this); /* EMIT SIGNAL */
+
 }
 
 void 
@@ -246,21 +249,19 @@ SndFileSource::open ()
 			_flags = Flag (_flags & ~Broadcast);
 		}
 
+		set_timeline_position (header_position_offset);
+
 	} else {
 	
 		/* XXX 64 bit alert: when JACK switches to a 64 bit frame count, this needs to use the high bits
 		   of the time reference.
 		*/
-		
-		set_timeline_position (_broadcast_info->time_reference_low);
+
+		set_timeline_position ( _broadcast_info->time_reference_low );
 	}
 
 	if (writable()) {
 		sf_command (sf, SFC_SET_UPDATE_HEADER_AUTO, 0, SF_FALSE);
-
-		/* update header if header offset info changes */
-		
-		AudioFileSource::HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioFileSource::handle_header_position_change));
 	}
 
 	return 0;
@@ -280,7 +281,7 @@ SndFileSource::~SndFileSource ()
 	}
 
 	if (_broadcast_info) {
-		free (_broadcast_info);
+		delete _broadcast_info;
 	}
 }
 
@@ -472,7 +473,7 @@ SndFileSource::setup_broadcast_info (jack_nframes_t when, struct tm& now, time_t
 		  now.tm_mon,
 		  now.tm_mday);
 	
-	snprintf (_broadcast_info->origination_time, sizeof (_broadcast_info->origination_time), "%02d-%02d-%02d",
+	snprintf (_broadcast_info->origination_time, sizeof (_broadcast_info->origination_time), "%02d:%02d:%02d",
 		  now.tm_hour,
 		  now.tm_min,
 		  now.tm_sec);
@@ -495,33 +496,12 @@ SndFileSource::setup_broadcast_info (jack_nframes_t when, struct tm& now, time_t
 void
 SndFileSource::set_header_timeline_position ()
 {
-	uint64_t pos;
-
 	if (!(_flags & Broadcast)) {
 		return;
 	}
 
-	_broadcast_info->time_reference_high = 0;
-
-	if (header_position_negative) {
-
-		if (ULONG_LONG_MAX - header_position_offset < timeline_position) {
-			pos = ULONG_LONG_MAX; // impossible
-		} else {
-			pos = timeline_position + header_position_offset;
-		}
-
-	} else {
-
-		if (timeline_position < header_position_offset) {
-			pos = 0;
-		} else {
-			pos = timeline_position - header_position_offset;
-		}
-	}
-
-	_broadcast_info->time_reference_high = (pos >> 32);
-	_broadcast_info->time_reference_low = (pos & 0xffffffff);
+       _broadcast_info->time_reference_high = (timeline_position >> 32);
+       _broadcast_info->time_reference_low = (timeline_position & 0xffffffff);
 
 	if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
 		error << string_compose (_("cannot set broadcast info for audio file %1; Dropping broadcast info for this file"), _path) << endmsg;
@@ -544,4 +524,10 @@ SndFileSource::write_float (Sample* data, jack_nframes_t frame_pos, jack_nframes
 	}
 	
 	return cnt;
+}
+
+jack_nframes_t
+SndFileSource::natural_position() const
+{
+	return timeline_position;
 }

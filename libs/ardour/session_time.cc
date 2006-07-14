@@ -32,7 +32,6 @@
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
 #include <ardour/tempo.h>
-#include <ardour/audiofilesource.h>
 
 #include "i18n.h"
 
@@ -97,8 +96,6 @@ Session::set_smpte_offset (jack_nframes_t off)
 	_smpte_offset = off;
 	last_smpte_valid = false;
 
-	AudioFileSource::set_header_position_offset (_smpte_offset, _smpte_offset_negative);
-
 	SMPTEOffsetChanged (); /* EMIT SIGNAL */
 }
 
@@ -107,8 +104,6 @@ Session::set_smpte_offset_negative (bool neg)
 {
 	_smpte_offset_negative = neg;
 	last_smpte_valid = false;
-
-	AudioFileSource::set_header_position_offset (_smpte_offset, _smpte_offset_negative);
 
 	SMPTEOffsetChanged (); /* EMIT SIGNAL */
 }

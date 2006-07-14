@@ -54,11 +54,11 @@ public:
 
 	void set_record_enable (bool yn, void *src);
 
-	MidiDiskstream& disk_stream() const { return *diskstream; }
+	MidiDiskstream& disk_stream() const { return *_diskstream; }
 
 	int set_diskstream (MidiDiskstream&, void *);
 	int use_diskstream (string name);
-	int use_diskstream (id_t id);
+	int use_diskstream (const PBD::ID& id);
 
 	TrackMode mode() const { return _mode; }
 
@@ -93,16 +93,13 @@ public:
 	XMLNode& get_template();
 	int set_state(const XMLNode& node);
 
-	MIDI::Controllable& midi_rec_enable_control() { return _midi_rec_enable_control; }
-
-	void reset_midi_control (MIDI::Port*, bool);
-	void send_all_midi_feedback ();
+	PBD::Controllable& rec_enable_control() { return _rec_enable_control; }
 
 	bool record_enabled() const;
 	void set_meter_point (MeterPoint, void* src);
 
 protected:
-	MidiDiskstream *diskstream;
+	MidiDiskstream *_diskstream;
 	MeterPoint _saved_meter_point;
 	TrackMode _mode;
 
@@ -123,7 +120,7 @@ private:
 
 		XMLNode    state;
 		Insert*    insert;
-		id_t       id;
+	    PBD::ID    id;
 		UndoAction memento;
 	};
 
@@ -158,18 +155,16 @@ private:
 	void set_state_part_two ();
 	void set_state_part_three ();
 
-	struct MIDIRecEnableControl : public MIDI::Controllable
-	{
-		MIDIRecEnableControl (MidiTrack&, MIDI::Port *);
-		void set_value (float);
-		void send_feedback (bool);
-		MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, bool val, bool force = false);
-		MidiTrack& track;
-		bool setting;
-		bool last_written;
+	struct MIDIRecEnableControllable : public PBD::Controllable {
+	    MIDIRecEnableControllable (MidiTrack&);
+	    
+	    void set_value (float);
+	    float get_value (void) const;
+
+	    MidiTrack& track;
 	};
 
-	MIDIRecEnableControl _midi_rec_enable_control;
+	MIDIRecEnableControllable _rec_enable_control;
 
 	bool _destructive;
 };

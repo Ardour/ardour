@@ -27,10 +27,10 @@
 #include <iostream>
 #include <sigc++/signal.h>
 
-#include <midi++/controllable.h>
+#include <pbd/stateful.h> 
+#include <pbd/controllable.h>
 
 #include <ardour/types.h>
-#include <ardour/stateful.h>
 #include <ardour/curve.h>
 
 using std::istream;
@@ -75,31 +75,13 @@ class StreamPanner : public sigc::trackable, public Stateful
 	virtual void set_automation_state (AutoState) = 0;
 	virtual void set_automation_style (AutoStyle) = 0;
 	
-	/* MIDI control */
-
-	struct MIDIControl : public MIDI::Controllable {
-	    MIDIControl (StreamPanner&, MIDI::Port *);
-	    void set_value (float);
-	    void send_feedback (gain_t);
-	    MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, gain_t val, bool force = false);
-
-	    pan_t (*midi_to_pan)(double val);
-	    double (*pan_to_midi)(pan_t p);
-
-	    StreamPanner& sp;
-	    bool setting;
-	    gain_t last_written;
-	};
-
-	MIDIControl& midi_control()  { return _midi_control; }
-	void reset_midi_control (MIDI::Port *, bool);
+	PBD::Controllable& control()  { return _control; }
 	
 	/* XXX this is wrong. for multi-dimensional panners, there
 	   must surely be more than 1 automation curve.
 	*/
 
 	virtual Curve& automation() = 0;
-
 
 	virtual int load (istream&, string path, uint32_t&) = 0;
 
@@ -130,12 +112,20 @@ class StreamPanner : public sigc::trackable, public Stateful
 	float effective_z;
 
 	bool             _muted;
-	MIDIControl _midi_control;
+
+	struct PanControllable : public PBD::Controllable {
+	    PanControllable (StreamPanner& p) : panner (p) {}
+	    
+	    StreamPanner& panner;
+	    
+	    void set_value (float);
+	    float get_value (void) const;
+	    bool can_send_feedback() const;
+	};
+
+	PanControllable  _control;
 
 	void add_state (XMLNode&);
-	bool get_midi_node_info (XMLNode * node, MIDI::eventType & ev, MIDI::channel_t & chan, MIDI::byte & additional);
-	bool set_midi_node_info (XMLNode * node, MIDI::eventType ev, MIDI::channel_t chan, MIDI::byte additional);
-
 	virtual void update () = 0;
 };
 
@@ -289,10 +279,6 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 
 	std::vector<Output> outputs;
 	Session& session() const { return _session; }
-
-	void reset_midi_control (MIDI::Port *, bool);
-	void send_all_midi_feedback ();
-	MIDI::byte* write_midi_feedback (MIDI::byte*, int32_t& bufsize);
 
 	enum LinkDirection {
 		SameDirection,

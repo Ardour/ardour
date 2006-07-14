@@ -1065,20 +1065,19 @@ sf_command	(SNDFILE *sndfile, int command, void *data, int datasize)
 			memcpy (data, psf->loop_info, sizeof (SF_LOOP_INFO)) ;
 			return SF_TRUE ;
 
-		case SFC_SET_BROADCAST_INFO :
-			{	int format = psf->sf.format & SF_FORMAT_TYPEMASK ;
+		case SFC_SET_BROADCAST_INFO : {
+			int format = psf->sf.format & SF_FORMAT_TYPEMASK ;
 
-				/* Only WAV supports the BEXT (Broadcast) chunk. */
-           			if (format != SF_FORMAT_WAV && format != SF_FORMAT_WAVEX) 
-					return SF_FALSE ;
-			         } ;
+			/* Only WAV supports the BEXT (Broadcast) chunk. */
+			if (format != SF_FORMAT_WAV && format != SF_FORMAT_WAVEX)
+				return SF_FALSE ;
 
 			/* Can only do this is in SFM_RDWR or SFM_WRITE modes. */
 			if (psf->mode == SFM_READ)
 				return SF_FALSE ;
 
 			/* If data has already been written this must fail. */
-			if (psf->broadcast_info == NULL && psf->have_written) 
+			if (psf->broadcast_info == NULL && psf->have_written)
 				return SF_FALSE ;
 
 			if (psf->broadcast_info == NULL)
@@ -1089,7 +1088,9 @@ sf_command	(SNDFILE *sndfile, int command, void *data, int datasize)
 
 			if (psf->auto_header && psf->write_header)
 				psf->write_header (psf, SF_TRUE) ;
+
 			return SF_TRUE ;
+		}
 
 		case SFC_GET_BROADCAST_INFO :
 			if (datasize != sizeof (SF_BROADCAST_INFO) || data == NULL)

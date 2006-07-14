@@ -599,7 +599,7 @@ PluginInsert::state (bool full)
 	node->add_property("id", string(buf));
 	if (_plugins[0]->state_node_name() == "ladspa") {
 		char buf[32];
-		snprintf (buf, 31, "%ld", _plugins[0]->get_info().unique_id); 
+		snprintf (buf, sizeof (buf), "%ld", _plugins[0]->get_info().unique_id); 
 		node->add_property("unique-id", string(buf));
 	}
 	node->add_property("count", string_compose("%1", _plugins.size()));
@@ -778,18 +778,6 @@ string
 PluginInsert::describe_parameter (uint32_t what)
 {
 	return _plugins[0]->describe_parameter (what);
-}
-
-void
-PluginInsert::reset_midi_control (MIDI::Port* port, bool on)
-{
-	_plugins[0]->reset_midi_control (port, on);
-}
-
-void
-PluginInsert::send_all_midi_feedback ()
-{
-	_plugins[0]->send_all_midi_feedback();
 }
 
 jack_nframes_t 

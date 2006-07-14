@@ -54,16 +54,16 @@ uint32_t Route::order_key_cnt = 0;
 Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, Buffer::Type default_type)
 	: IO (sess, name, input_min, input_max, output_min, output_max, default_type),
 	  _flags (flg),
-	  _midi_solo_control (*this, MIDIToggleControl::SoloControl, _session.midi_port()),
-	  _midi_mute_control (*this, MIDIToggleControl::MuteControl, _session.midi_port())
+	  _solo_control (*this, ToggleControllable::SoloControl),
+	  _mute_control (*this, ToggleControllable::MuteControl)
 {
 	init ();
 }
 
 Route::Route (Session& sess, const XMLNode& node)
 	: IO (sess, "route"),
-	  _midi_solo_control (*this, MIDIToggleControl::SoloControl, _session.midi_port()),
-	  _midi_mute_control (*this, MIDIToggleControl::MuteControl, _session.midi_port())
+	  _solo_control (*this, ToggleControllable::SoloControl),
+	  _mute_control (*this, ToggleControllable::MuteControl)
 {
 	init ();
 	set_state (node);
@@ -106,8 +106,6 @@ Route::init ()
 
 	input_changed.connect (mem_fun (this, &Route::input_change_handler));
 	output_changed.connect (mem_fun (this, &Route::output_change_handler));
-
-	reset_midi_control (_session.midi_port(), _session.get_midi_control());
 }
 
 Route::~Route ()
@@ -713,11 +711,8 @@ Route::set_solo (bool yn, void *src)
 
 	if (_soloed != yn) {
 		_soloed = yn;
-		 solo_changed (src); /* EMIT SIGNAL */
-
-		 if (_session.get_midi_feedback()) {
-			 _midi_solo_control.send_feedback (_soloed);
-		 }
+		solo_changed (src); /* EMIT SIGNAL */
+		_solo_control.Changed (); /* EMIT SIGNAL */
 	}
 }
 
@@ -754,9 +749,7 @@ Route::set_mute (bool yn, void *src)
 		_muted = yn;
 		mute_changed (src); /* EMIT SIGNAL */
 		
-		if (_session.get_midi_feedback()) {
-			_midi_mute_control.send_feedback (_muted);
-		}
+		_mute_control.Changed (); /* EMIT SIGNAL */
 		
 		Glib::Mutex::Lock lm (declick_lock);
 		desired_mute_gain = (yn?0.0f:1.0f);
@@ -1367,26 +1360,6 @@ Route::state(bool full_state)
 		node->add_property("mix-group", _mix_group->name());
 	}
 
-	/* MIDI control */
-
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte      additional;
-	XMLNode*        midi_node = 0;
-	XMLNode*        child;
-
-	midi_node = node->add_child ("MIDI");
-	
-	if (_midi_mute_control.get_control_info (chn, ev, additional)) {
-		child = midi_node->add_child ("mute");
-		set_midi_node_info (child, ev, chn, additional);
-	}
-	if (_midi_solo_control.get_control_info (chn, ev, additional)) {
-		child = midi_node->add_child ("solo");
-		set_midi_node_info (child, ev, chn, additional);
-	}
-
-	
 	string order_string;
 	OrderKeys::iterator x = order_keys.begin(); 
 
@@ -1531,8 +1504,6 @@ Route::set_state (const XMLNode& node)
 	XMLNode *child;
 	XMLPropertyList plist;
 	const XMLProperty *prop;
-	XMLNodeList midi_kids;
-
 
 	if (node.name() != "Route"){
 		error << string_compose(_("Bad node sent to Route::set_state() [%1]"), node.name()) << endmsg;
@@ -1726,45 +1697,6 @@ Route::set_state (const XMLNode& node)
 		}
 	}
 
-	midi_kids = node.children ("MIDI");
-	
-	for (niter = midi_kids.begin(); niter != midi_kids.end(); ++niter) {
-	
-		XMLNodeList kids;
-		XMLNodeConstIterator miter;
-		XMLNode*    child;
-
-		kids = (*niter)->children ();
-
-		for (miter = kids.begin(); miter != kids.end(); ++miter) {
-
-			child =* miter;
-
-			MIDI::eventType ev = MIDI::on; /* initialize to keep gcc happy */
-			MIDI::byte additional = 0;  /* ditto */
-			MIDI::channel_t chn = 0;    /* ditto */
-			
-			if (child->name() == "mute") {
-			
-				if (get_midi_node_info (child, ev, chn, additional)) {
-					_midi_mute_control.set_control_type (chn, ev, additional);
-				} else {
-					error << string_compose(_("MIDI mute control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
-				}
-			}
-			else if (child->name() == "solo") {
-			
-				if (get_midi_node_info (child, ev, chn, additional)) {
-					_midi_solo_control.set_control_type (chn, ev, additional);
-				} else {
-					error << string_compose(_("MIDI mute control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
-				}
-			}
-
-		}
-	}
-
-	
 	return 0;
 }
 
@@ -2221,67 +2153,6 @@ Route::has_external_redirects () const
 }
 
 void
-Route::reset_midi_control (MIDI::Port* port, bool on)
-{
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte extra;
-
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-			(*i)->reset_midi_control (port, on);
-	}
-
-	IO::reset_midi_control (port, on);
-	
-	_midi_solo_control.get_control_info (chn, ev, extra);
-	if (!on) {
-		chn = -1;
-	}
-	_midi_solo_control.midi_rebind (port, chn);
-	
-	_midi_mute_control.get_control_info (chn, ev, extra);
-	if (!on) {
-		chn = -1;
-	}
-	_midi_mute_control.midi_rebind (port, chn);
-}
-
-void
-Route::send_all_midi_feedback ()
-{
-	if (_session.get_midi_feedback()) {
-
-		{
-			Glib::RWLock::ReaderLock lm (redirect_lock);
-			for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-				(*i)->send_all_midi_feedback ();
-			}
-		}
-
-		IO::send_all_midi_feedback();
-
-		_midi_solo_control.send_feedback (_soloed);
-		_midi_mute_control.send_feedback (_muted);
-	}
-}
-
-MIDI::byte*
-Route::write_midi_feedback (MIDI::byte* buf, int32_t& bufsize)
-{
-	buf = _midi_solo_control.write_feedback (buf, bufsize, _soloed);
-	buf = _midi_mute_control.write_feedback (buf, bufsize, _muted);
-
-	{
-		Glib::RWLock::ReaderLock lm (redirect_lock);
-		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-			buf = (*i)->write_midi_feedback (buf, bufsize);
-		}
-	}
-
-	return IO::write_midi_feedback (buf, bufsize);
-}
-
-void
 Route::flush_redirects ()
 {
 	/* XXX shouldn't really try to take this lock, since
@@ -2351,106 +2222,46 @@ Route::automation_snapshot (jack_nframes_t now)
 	}
 }
 
-Route::MIDIToggleControl::MIDIToggleControl (Route& s, ToggleType tp, MIDI::Port* port)
-	: MIDI::Controllable (port, true), route (s), type(tp), setting(false)
+Route::ToggleControllable::ToggleControllable (Route& s, ToggleType tp)
+	: route (s), type(tp)
 {
-	last_written = false; /* XXX need a good out-of-bound-value */
-}
-
-void
-Route::MIDIToggleControl::set_value (float val)
-{
-	MIDI::eventType et;
-	MIDI::channel_t chn;
-	MIDI::byte additional;
-
-	get_control_info (chn, et, additional);
-
-	setting = true;
-
-#ifdef HOLD_TOGGLE_VALUES
-	if (et == MIDI::off || et == MIDI::on) {
-
-		/* literal toggle */
-
-		switch (type) {
-		case MuteControl:
-			route.set_mute (!route.muted(), this);
-			break;
-		case SoloControl:
-			route.set_solo (!route.soloed(), this);
-			break;
-		default:
-			break;
-		}
-
-	} else {
-#endif
-
-		/* map full control range to a boolean */
-
-		bool bval = ((val >= 0.5f) ? true: false);
-		
-		switch (type) {
-		case MuteControl:
-			route.set_mute (bval, this);
-			break;
-		case SoloControl:
-			route.set_solo (bval, this);
-			break;
-		default:
-			break;
-		}
-
-#ifdef HOLD_TOGGLE_VALUES
-	}
-#endif
-
-	setting = false;
-}
-
-void
-Route::MIDIToggleControl::send_feedback (bool value)
-{
-
-	if (!setting && get_midi_feedback()) {
-		MIDI::byte val = (MIDI::byte) (value ? 127: 0);
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-		MIDI::EventTwoBytes data;
-	    
-		if (get_control_info (ch, ev, additional)) {
-			data.controller_number = additional;
-			data.value = val;
-			last_written = value;
-			
-			route._session.send_midi_message (get_port(), ev, ch, data);
-		}
-	}
 	
 }
 
-MIDI::byte*
-Route::MIDIToggleControl::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool val, bool force)
+void
+Route::ToggleControllable::set_value (float val)
 {
-	if (get_midi_feedback() && bufsize > 2) {
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
+	bool bval = ((val >= 0.5f) ? true: false);
+	
+	switch (type) {
+	case MuteControl:
+		route.set_mute (bval, this);
+		break;
+	case SoloControl:
+		route.set_solo (bval, this);
+		break;
+	default:
+		break;
+	}
+}
 
-		if (get_control_info (ch, ev, additional)) {
-			if (val != last_written || force) {
-				*buf++ = (0xF0 & ev) | (0xF & ch);
-				*buf++ = additional; /* controller number */
-				*buf++ = (MIDI::byte) (val ? 127 : 0);
-				bufsize -= 3;
-				last_written = val;
-			}
-		}
+float
+Route::ToggleControllable::get_value (void) const
+{
+	float val = 0.0f;
+	
+	switch (type) {
+	case MuteControl:
+		val = route.muted() ? 1.0f : 0.0f;
+		break;
+	case SoloControl:
+		val = route.soloed() ? 1.0f : 0.0f;
+		break;
+	default:
+		break;
 	}
 
-	return buf;
+	return val;
 }
 
 void 

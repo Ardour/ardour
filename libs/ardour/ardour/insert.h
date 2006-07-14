@@ -133,9 +133,6 @@ class PluginInsert : public Insert
 
 	bool is_generator() const;
 
-	void reset_midi_control (MIDI::Port*, bool);
-	void send_all_midi_feedback ();
-
 	void set_parameter (uint32_t port, float val);
 
 	AutoState get_port_automation_state (uint32_t port);

@@ -46,7 +46,7 @@ class PlaylistSelector : public ArdourDialog
 	void show_for (RouteUI*);
 
   private:
-	typedef std::map<ARDOUR::id_t,std::list<ARDOUR::Playlist*>*> DSPL_Map;
+	typedef std::map<PBD::ID,std::list<ARDOUR::Playlist*>*> DSPL_Map;
 
 	ARDOUR::Session* session;
 	Gtk::ScrolledWindow scroller;

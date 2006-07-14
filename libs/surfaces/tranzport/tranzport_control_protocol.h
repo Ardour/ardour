@@ -23,6 +23,9 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 
 	static bool probe ();
 
+	XMLNode& get_state ();
+	int set_state (const XMLNode&);
+
   private:
 	static const int VENDORID = 0x165b;
 	static const int PRODUCTID = 0x8101;

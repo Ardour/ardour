@@ -33,7 +33,7 @@
 
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
- 
+#include <pbd/stateful.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
@@ -44,6 +44,7 @@
 #include <ardour/utils.h>
 #include <ardour/diskstream.h>
 #include <ardour/audioplaylist.h>
+
 struct tm;
 
 namespace ARDOUR {
@@ -159,6 +160,17 @@ class AudioDiskstream : public Diskstream
 	//static sigc::signal<void> DiskUnderrun;
 	//static sigc::signal<void,AudioDiskstream*> AudioDiskstreamCreated;   // XXX use a ref with sigc2
 	static sigc::signal<void,list<AudioFileSource*>*> DeleteSources;
+
+	int set_loop (Location *loc);
+	sigc::signal<void,Location *> LoopSet;
+
+	std::list<Region*>& last_capture_regions () {
+		return _last_capture_regions;
+	}
+
+	void handle_input_change (IOChange, void *src);
+
+	const PBD::ID& id() const { return _id; }
 
   protected:
 	friend class Session;
@@ -284,10 +296,11 @@ class AudioDiskstream : public Diskstream
 	void set_align_style_from_io();
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
-	
 
 	ChannelList    channels;
 	AudioPlaylist* _playlist;
+	void engage_record_enable (void* src);
+	void disengage_record_enable (void* src);
 };
 
 }; /* namespace ARDOUR */

@@ -112,13 +112,6 @@ Session::set_midi_control (bool yn)
 	midi_control = yn;
 	set_dirty();
 	poke_midi_thread ();
-
-	if (_midi_port) {
-		Glib::RWLock::ReaderLock guard (route_lock);
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			(*i)->reset_midi_control (_midi_port, midi_control);
-		}
-	}
 #endif
 	ControlChanged (MidiControl); /* EMIT SIGNAL */
 }

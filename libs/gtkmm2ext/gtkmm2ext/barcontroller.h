@@ -21,9 +21,9 @@
 #define __gtkmm2ext_bar_controller_h__
 
 #include <gtkmm.h>
-#include <gtkmm2ext/popup.h>
+#include <gtkmm2ext/binding_proxy.h>
 
-namespace MIDI {
+namespace ARDOUR {
 	class Controllable;
 }
 
@@ -32,14 +32,9 @@ namespace Gtkmm2ext {
 class BarController : public Gtk::Frame
 {
   public:
-	BarController (Gtk::Adjustment& adj, MIDI::Controllable*, sigc::slot<void,char*,unsigned int>);
+	BarController (Gtk::Adjustment& adj, PBD::Controllable&, sigc::slot<void,char*,unsigned int>);
 	virtual ~BarController () {}
 	
-	void set_bind_button_state (guint button, guint statemask);
-	void get_bind_button_state (guint &button, guint &statemask);
-	void midicontrol_set_tip ();
-	void midi_learn ();
-
 	void set_sensitive (bool yn) {
 		darea.set_sensitive (yn);
 	}
@@ -69,9 +64,8 @@ class BarController : public Gtk::Frame
 
   protected:
 	Gtk::Adjustment&    adjustment;
+	BindingProxy        binding_proxy;
 	Gtk::DrawingArea    darea;
-	Gtkmm2ext::PopUp     prompter;
-	MIDI::Controllable* midi_control;
 	sigc::slot<void,char*,unsigned int> label_callback;
 	Glib::RefPtr<Pango::Layout> layout;
 	Style              _style;
@@ -85,10 +79,6 @@ class BarController : public Gtk::Frame
 	Gtk::SpinButton     spinner;
 	bool                use_parent;
 
-	guint bind_button;
-	guint bind_statemask;
-	bool prompting, unprompting;
-	
 	bool button_press (GdkEventButton *);
 	bool button_release (GdkEventButton *);
 	bool motion (GdkEventMotion *);
@@ -97,11 +87,6 @@ class BarController : public Gtk::Frame
 	bool entry_focus_out (GdkEventFocus*);
 
 	gint mouse_control (double x, GdkWindow* w, double scaling);
-
-	gint prompter_hiding (GdkEventAny *);
-	void midicontrol_prompt ();
-	void midicontrol_unprompt ();
-	void update_midi_control ();
 
 	gint switch_to_bar ();
 	gint switch_to_spinner ();

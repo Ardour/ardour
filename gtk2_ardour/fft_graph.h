@@ -51,7 +51,7 @@ class FFTGraph : public Gtk::DrawingArea
 		bool on_expose_event (GdkEventExpose* event);
 		
 		void on_size_request(Gtk::Requisition* requisition);
-		void on_size_allocate(Gtk::Allocation& alloc);
+		void on_size_allocate(Gtk::Allocation & alloc);
 		FFTResult *prepareResult(Gdk::Color color, std::string trackname);
 		
 	private:

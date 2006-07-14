@@ -2146,7 +2146,6 @@ Editor::set_state (const XMLNode& node)
 		yoff = atoi(geometry->property("y_off")->value());
 	}
 
-	set_geometry_hints (vpacker, g, Gdk::HINT_BASE_SIZE);
 	set_default_size (g.base_width, g.base_height);
 	move (x, y);
 

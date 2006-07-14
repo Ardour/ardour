@@ -21,8 +21,8 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/doi.h>
+#include <gtkmm2ext/bindable_button.h>
 
 #include <ardour/route_group.h>
 
@@ -69,11 +69,9 @@ RouteUI::RouteUI (ARDOUR::Route& rt, ARDOUR::Session& sess, const char* m_name,
 	_route.GoingAway.connect (mem_fun (*this, &RouteUI::route_removed));
 	_route.active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed));
 
-        mute_button = manage (new BindableToggleButton (& _route.midi_mute_control(), m_name ));
-	mute_button->set_bind_button_state (2, GDK_CONTROL_MASK);
-        solo_button = manage (new BindableToggleButton (& _route.midi_solo_control(), s_name ));
-	solo_button->set_bind_button_state (2, GDK_CONTROL_MASK);
-
+        mute_button = manage (new BindableToggleButton (_route.mute_control(), m_name ));
+        solo_button = manage (new BindableToggleButton (_route.solo_control(), s_name ));
+	
 	if (is_audio_track()) {
 		AudioTrack* at = dynamic_cast<AudioTrack*>(&_route);
 
@@ -81,20 +79,18 @@ RouteUI::RouteUI (ARDOUR::Route& rt, ARDOUR::Session& sess, const char* m_name,
 
 		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
-		rec_enable_button = manage (new BindableToggleButton (& at->midi_rec_enable_control(), r_name ));
-		rec_enable_button->set_bind_button_state (2, GDK_CONTROL_MASK);
+		rec_enable_button = manage (new BindableToggleButton (at->rec_enable_control(), r_name ));
 
-	} else {
-		rec_enable_button = manage (new BindableToggleButton (0, r_name ));
-	}
+		rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
+		
+		update_rec_display ();
+	} 
 	
 	mute_button->unset_flags (Gtk::CAN_FOCUS);
 	solo_button->unset_flags (Gtk::CAN_FOCUS);
-	rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
 
 	/* map the current state */
 
-	update_rec_display ();
 	map_frozen ();
 }
 
@@ -274,7 +270,7 @@ RouteUI::solo_release(GdkEventButton* ev)
 gint
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
-	if (!ignore_toggle && is_audio_track()) {
+	if (!ignore_toggle && is_audio_track() && rec_enable_button) {
 
 		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
 			// do nothing on midi bind event
@@ -486,7 +482,7 @@ RouteUI::build_solo_menu (void)
 	check->show_all();
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
+	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 	
 }
 
@@ -529,7 +525,7 @@ RouteUI::build_mute_menu(void)
 	check->show_all();
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
+	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 }
 
 void

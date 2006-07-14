@@ -50,8 +50,6 @@ int tokenize_fullpath (std::string fullpath, std::string& path, std::string& nam
 
 int touch_file(std::string path);
 
-uint32_t long get_uid();
-
 std::string region_name_from_path (std::string path);
 std::string path_expand (std::string);
 

@@ -40,7 +40,7 @@
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/dndtreeview.h>
 
-#include <ardour/stateful.h>
+#include <pbd/stateful.h>
 #include <ardour/session.h>
 #include <ardour/tempo.h>
 #include <ardour/location.h>

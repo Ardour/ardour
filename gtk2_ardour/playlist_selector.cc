@@ -189,7 +189,7 @@ PlaylistSelector::add_playlist_to_map (Playlist *pl)
 
 	if ((x = dspl_map.find (apl->get_orig_diskstream_id())) == dspl_map.end()) {
 
-		pair<ARDOUR::id_t,list<Playlist*>*> newp (apl->get_orig_diskstream_id(), new list<Playlist*>);
+		pair<PBD::ID,list<Playlist*>*> newp (apl->get_orig_diskstream_id(), new list<Playlist*>);
 		
 		x = dspl_map.insert (dspl_map.end(), newp);
 	}

@@ -63,48 +63,24 @@ sigc::signal<void>                Diskstream::DiskOverrun;
 sigc::signal<void>                Diskstream::DiskUnderrun;
 
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
-	: _name (name)
+	: deprecated_io_node(NULL)
+	, _name (name)
 	, _session (sess)
 {
-#if 0
-	/* prevent any write sources from being created */
-
-	in_set_state = true;
-
 	init (flag);
-	//use_new_playlist ();
-
-	in_set_state = false;
-	DiskstreamCreated (this); /* EMIT SIGNAL */
-#endif
 }
 	
 Diskstream::Diskstream (Session& sess, const XMLNode& node)
-	: _session (sess)
+	: deprecated_io_node(NULL)
+	, _session (sess)
 	
 {
-#if 0
-	in_set_state = true;
 	init (Recordable);
-
-	/*if (set_state (node)) {
-		in_set_state = false;
-		throw failed_constructor();
-	}*/
-
-	in_set_state = false;
-
-	//if (destructive()) {
-	//	use_destructive_playlist ();
-	//}
-	DiskstreamCreated (this); /* EMIT SIGNAL */
-#endif
 }
 
 void
 Diskstream::init (Flag f)
 {
-	_id = new_id();
 	_refcnt = 0;
 	_flags = f;
 	_io = 0;

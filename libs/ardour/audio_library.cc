@@ -75,11 +75,16 @@ AudioLibrary::AudioLibrary ()
 
 	lrdf_free_statements(matches);
 
+	XMLNode* state = instant_xml(X_("AudioLibrary"), get_user_ardour_path());
+	if (state) {
+		set_state(*state);
+	}
 	scan_paths();
 }
 
 AudioLibrary::~AudioLibrary ()
 {
+	add_instant_xml(get_state(), get_user_ardour_path());
 }
 
 void
@@ -429,5 +434,50 @@ AudioLibrary::safe_file_extension(string file)
         file.rfind(".maud")== string::npos &&
         file.rfind(".vwe") == string::npos &&
         file.rfind(".paf") == string::npos &&
+#ifdef HAVE_COREAUDIO
+		file.rfind(".mp3") == string::npos &&
+		file.rfind(".aac") == string::npos &&
+		file.rfind(".mp4") == string::npos &&
+#endif // HAVE_COREAUDIO
         file.rfind(".voc") == string::npos);
+}
+
+XMLNode&
+AudioLibrary::get_state ()
+{
+	XMLNode* root = new XMLNode(X_("AudioLibrary"));
+	
+	for (vector<string>::iterator i = sfdb_paths.begin(); i != sfdb_paths.end(); ++i) {
+		XMLNode* node = new XMLNode(X_("Path"));
+		node->add_property("value", *i);
+		root->add_child_nocopy(*node);
+	}
+	
+	return *root;
+}
+
+int
+AudioLibrary::set_state (const XMLNode& node)
+{
+	if (node.name() != X_("AudioLibrary")) {
+		fatal << "programming error: AudioLibrary: incorrect XML node sent to set_state()" << endmsg;
+		return -1;
+	}
+	
+	XMLNodeList nodes = node.children(X_("Path"));
+	
+	vector<string> paths;
+	XMLProperty* prop;
+	XMLNode* child;
+	for (XMLNodeConstIterator iter = nodes.begin(); iter != nodes.end(); ++iter) {
+		child = *iter;
+		
+		if ((prop = child->property(X_("value"))) != 0) {
+			paths.push_back(prop->value());
+		}
+	}
+	
+	sfdb_paths = paths;
+	
+	return 0;
 }

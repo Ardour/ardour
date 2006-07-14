@@ -95,7 +95,7 @@ class AudioFileSource : public AudioSource {
 	static void set_bwf_serial_number (int);
 	
 	static void set_search_path (string);
-	static void set_header_position_offset (jack_nframes_t offset, bool negative);
+	static void set_header_position_offset (jack_nframes_t offset );
 
 	static sigc::signal<void> HeaderPositionOffsetChanged;
 
@@ -107,7 +107,7 @@ class AudioFileSource : public AudioSource {
 	   to cause issues.
 	*/
 
-	void handle_header_position_change ();
+	virtual void handle_header_position_change ();
 
   protected:
 	
@@ -141,7 +141,6 @@ class AudioFileSource : public AudioSource {
 	static char bwf_serial_number[13];
 
 	static uint64_t header_position_offset;
-	static bool     header_position_negative;
 
 	virtual void set_timeline_position (jack_nframes_t pos);
 	virtual void set_header_timeline_position () = 0;
