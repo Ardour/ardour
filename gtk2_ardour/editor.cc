@@ -2970,8 +2970,8 @@ void
 Editor::begin_reversible_command (string name)
 {
 	if (session) {
-		UndoAction ua = get_memento();
-		session->begin_reversible_command (name, &ua);
+                before = get_state();
+		session->begin_reversible_command (name);
 	}
 }
 
@@ -2979,8 +2979,12 @@ void
 Editor::commit_reversible_command ()
 {
 	if (session) {
-		UndoAction ua = get_memento();
-		session->commit_reversible_command (&ua);
+                // yes, cmd lasts long enough to be copied onto the action
+                // list in the history, but this has the potential to be a
+                // problem if memory management of actions changes in
+                // UndoTransaction
+                MementoCommand<Editor> cmd(*this, before, get_state());
+		session->commit_reversible_command (&cmd);
 	}
 }
 

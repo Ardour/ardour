@@ -841,8 +841,8 @@ class Session : public sigc::trackable, public Stateful
 	string next_undo() const { return history.next_undo(); }
 	string next_redo() const { return history.next_redo(); }
 
-	void begin_reversible_command (string cmd_name, UndoAction *private_undo = 0);
-	void commit_reversible_command (UndoAction* private_redo = 0);
+	void begin_reversible_command (string cmd_name);
+	void commit_reversible_command (Command* cmd = 0);
 
 	void add_undo (const UndoAction& ua) {
 		current_trans.add_undo (ua);

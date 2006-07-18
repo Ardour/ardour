@@ -2564,23 +2564,19 @@ Session::set_meter_falloff (float val)
 
 
 void
-Session::begin_reversible_command (string name, UndoAction* private_undo)
+Session::begin_reversible_command (string name)
 {
 	current_trans.clear ();
 	current_trans.set_name (name);
-
-	if (private_undo) {
-		current_trans.add_undo (*private_undo);
-	}
 }
 
 void
-Session::commit_reversible_command (UndoAction* private_redo)
+Session::commit_reversible_command (Command *cmd)
 {
 	struct timeval now;
 
-	if (private_redo) {
-		current_trans.add_redo_no_execute (*private_redo);
+	if (cmd) {
+		current_trans.add_command (*cmd);
 	}
 
 	gettimeofday (&now, 0);
