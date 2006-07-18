@@ -24,13 +24,17 @@
 #include <pbd/command.h>
 #include <sigc++/slot.h>
 
-template <class obj_T, class mem_T>
+/** This command class is initialized with before and after mementos 
+ * (from Stateful::get_state()), so undo becomes restoring the before
+ * memento, and redo is restoring the after memento.
+ */
+template <class obj_T>
 class MementoCommand : public Command
 {
     public:
         MementoCommand(obj_T &obj, 
-                       mem_T before,
-                       mem_T after
+                       XMLNode &before,
+                       XMLNode &after
                        ) 
             : obj(obj), before(before), after(after) {}
         void operator() () { obj.set_memento(after); }
@@ -41,9 +45,10 @@ class MementoCommand : public Command
             // key is "MementoCommand" or something
             // before and after mementos
         }
+        // TODO does this need a copy constructor?
     protected:
         obj_T &obj;
-        mem_T before, after;
+        XMLNode &before, &after;
 };
 
 #endif // __lib_pbd_memento_h__
