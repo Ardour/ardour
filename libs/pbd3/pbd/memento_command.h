@@ -37,8 +37,8 @@ class MementoCommand : public Command
                        XMLNode &after
                        ) 
             : obj(obj), before(before), after(after) {}
-        void operator() () { obj.set_memento(after); }
-        void undo() { obj.set_memento(before); }
+        void operator() () { obj.set_state(after); }
+        void undo() { obj.set_state(before); }
         virtual XMLNode &serialize() 
         {
             // obj.id

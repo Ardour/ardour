@@ -1812,9 +1812,15 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 	}
 
 	begin_reversible_command (_("change fade in length"));
-	session->add_undo (arv->region.get_memento());
+        XMLNode &before, &after;
+        before = arv->region.get_state();
+
 	arv->region.set_fade_in_length (fade_length);
-	session->add_redo_no_execute (arv->region.get_memento());
+
+        after = arv->region.get_state();
+        session->add_command(MementoCommand<ARDOUR::AudioRegion>(arv->region,
+                                                                 before,
+                                                                 after));
 	commit_reversible_command ();
 	fade_in_drag_motion_callback (item, event);
 }
@@ -1904,9 +1910,13 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 	}
 
 	begin_reversible_command (_("change fade out length"));
-	session->add_undo (arv->region.get_memento());
+        XMLNode &before, &after;
+        before = arv->region.get_state();
+
 	arv->region.set_fade_out_length (fade_length);
-	session->add_redo_no_execute (arv->region.get_memento());
+
+        after = arv->region.get_state();
+        session->add_command(MementoCommand<ARDOUR::AudioRegion>(arv->region, before, after));
 	commit_reversible_command ();
 
 	fade_out_drag_motion_callback (item, event);
@@ -2140,7 +2150,8 @@ Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 
 	begin_reversible_command ( _("move marker") );
-	session->add_undo( session->locations()->get_memento() );
+        XMLNode &before, &after;
+	before = session->locations()->get_state();
 	
 	Location * location = find_location_from_marker (marker, is_start);
 	
@@ -2148,7 +2159,8 @@ Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		location->set (drag_info.copied_location->start(), drag_info.copied_location->end());
 	}
 
-	session->add_redo_no_execute( session->locations()->get_memento() );
+	after = session->locations()->get_state();
+	session->add_command(MementoCommand<Locations>(session->locations(), before, after));
 	commit_reversible_command ();
 	
 	marker_drag_line->hide();
@@ -2260,11 +2272,14 @@ Editor::meter_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 	TempoMap& map (session->tempo_map());
 	map.bbt_time (drag_info.last_pointer_frame, when);
 	
+        XMLNode &before, &after;
+
 	if (drag_info.copy == true) {
 		begin_reversible_command (_("copy meter mark"));
-		session->add_undo (map.get_memento());
+                before = map.get_state();
 		map.add_meter (marker->meter(), when);
-		session->add_redo_no_execute (map.get_memento());
+		after = map.get_state();
+                session->add_command(MementoCommand<TempoMap>(map, before, after));
 		commit_reversible_command ();
 		
 		// delete the dummy marker we used for visual representation of copying.
@@ -2272,9 +2287,10 @@ Editor::meter_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 		delete marker;
 	} else {
 		begin_reversible_command (_("move meter mark"));
-		session->add_undo (map.get_memento());
+		before = map.get_state();
 		map.move_meter (marker->meter(), when);
-		session->add_redo_no_execute (map.get_memento());
+		after = map.get_state();
+                session->add_command(MementoCommand<TempoMap>(map, before, after));
 		commit_reversible_command ();
 	}
 }
@@ -2389,12 +2405,15 @@ Editor::tempo_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 	
 	TempoMap& map (session->tempo_map());
 	map.bbt_time (drag_info.last_pointer_frame, when);
+
+        XMLNode &before, &after;
 	
 	if (drag_info.copy == true) {
 		begin_reversible_command (_("copy tempo mark"));
-		session->add_undo (map.get_memento());
+		before = map.get_state();
 		map.add_tempo (marker->tempo(), when);
-		session->add_redo_no_execute (map.get_memento());
+		after = map.get_state();
+		session->add_command (MementoCommand<TempoMap>(map, before, after));
 		commit_reversible_command ();
 		
 		// delete the dummy marker we used for visual representation of copying.
@@ -2402,9 +2421,10 @@ Editor::tempo_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 		delete marker;
 	} else {
 		begin_reversible_command (_("move tempo mark"));
-		session->add_undo (map.get_memento());
+                before = map.get_state();
 		map.move_tempo (marker->tempo(), when);
-		session->add_redo_no_execute (map.get_memento());
+                after = map.get_state();
+                session->add_command (MementoCommand<TempoMap>(map, before, after));
 		commit_reversible_command ();
 	}
 }
@@ -3610,9 +3630,10 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	Playlist* playlist = clicked_trackview->playlist();
 
-	session->add_undo (playlist->get_memento ());
+        before = playlist->get_state();
 	clicked_trackview->playlist()->add_region (*region, selection->time[clicked_selection].start);
-	session->add_redo_no_execute (playlist->get_memento ());
+        after = playlist->get_state();
+	session->add_command(MementoCommand<Playlist>(*playlist, before, after));
 
 	commit_reversible_command ();
 	
@@ -4200,18 +4221,24 @@ Editor::point_trim (GdkEvent* event)
 			     i != selection->audio_regions.by_layer().end(); ++i)
 			{
 				if (!(*i)->region.locked()) {
-					session->add_undo ((*i)->region.playlist()->get_memento());
+                                        XMLNode &before, &after;
+                                        Playlist *pl = (*i)->region.playlist();
+                                        before = pl->get_state();
 					(*i)->region.trim_front (new_bound, this);	
-					session->add_redo_no_execute ((*i)->region.playlist()->get_memento());
+                                        after = pl->get_state();
+                                        session->add_command(MementoCommand<Playlist>(*pl, before, after));
 				}
 			}
 
 		} else {
 
 			if (!rv->region.locked()) {
-				session->add_undo (rv->region.playlist()->get_memento());
+                                XMLNode &before, &after;
+                                Playlist *pl = rv->region.playlist();
+				before = pl->get_state();
 				rv->region.trim_front (new_bound, this);	
-				session->add_redo_no_execute (rv->region.playlist()->get_memento());
+                                after = pl->get_state();
+				session->add_command(MementoCommand<Playlist>(*pl, before, after));
 			}
 		}
 
@@ -4227,18 +4254,24 @@ Editor::point_trim (GdkEvent* event)
 			for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i)
 			{
 				if (!(*i)->region.locked()) {
-					session->add_undo ((*i)->region.playlist()->get_memento());
+                                        XMLNode &before, &after;
+                                        Playlist *pl = (*i)->region.playlist();
+					before = pl->get_state();
 					(*i)->region.trim_end (new_bound, this);
-					session->add_redo_no_execute ((*i)->region.playlist()->get_memento());	
+					after = pl->get_state();
+					session->add_command(MementoCommand<Playlist>(*pl, before, after));
 				}
 			}
 
 		} else {
 
 			if (!rv->region.locked()) {
-				session->add_undo (rv->region.playlist()->get_memento());
+                                XMLNode &before, &after;
+                                Playlist *pl = rv->region.playlist();
+				before = pl->get_state();
 				rv->region.trim_end (new_bound, this);
-				session->add_redo_no_execute (rv->region.playlist()->get_memento());	
+                                after = pl->get_state();
+				session->add_command (MementoCommand<Playlist>(*pl, before, after));
 			}
 		}
 
@@ -4398,10 +4431,12 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 		switch (range_marker_op) {
 		case CreateRangeMarker:
 			begin_reversible_command (_("new range marker"));
-			session->add_undo (session->locations()->get_memento());
+                        XMLNode &before, &after;
+                        before = session->locations()->get_state();
 			newloc = new Location(temp_location->start(), temp_location->end(), "unnamed", Location::IsRangeMarker);
 			session->locations()->add (newloc, true);
-			session->add_redo_no_execute (session->locations()->get_memento());
+                        after = session->locations()->get_state();
+			session->add_command(MementoCommand<Locations>(session->locations(), before, after));
 			commit_reversible_command ();
 			
 			range_bar_drag_rect->hide();
@@ -4776,9 +4811,11 @@ Editor::mouse_brush_insert_region (AudioRegionView* rv, jack_nframes_t pos)
 	Playlist* playlist = atv->playlist();
 	double speed = atv->get_diskstream()->speed();
 	
-	session->add_undo (playlist->get_memento());
+        XMLNode &before, &after;
+        before = playlist->get_state();
 	playlist->add_region (*(new AudioRegion (rv->region)), (jack_nframes_t) (pos * speed));
-	session->add_redo_no_execute (playlist->get_memento());
+        after = playlist->get_state();
+	session->add_command(MementoCommand<Playlist>(*playlist, before, after));
 	
 	// playlist is frozen, so we have to update manually
 	

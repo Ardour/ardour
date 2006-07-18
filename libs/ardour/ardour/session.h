@@ -844,14 +844,8 @@ class Session : public sigc::trackable, public Stateful
 	void begin_reversible_command (string cmd_name);
 	void commit_reversible_command (Command* cmd = 0);
 
-	void add_undo (const UndoAction& ua) {
-		current_trans.add_undo (ua);
-	}
-	void add_redo (const UndoAction& ua) {
-		current_trans.add_redo (ua);
-	}
-	void add_redo_no_execute (const UndoAction& ua) {
-		current_trans.add_redo_no_execute (ua);
+	void add_command (const Command& cmd) {
+		current_trans.add_command (cmd);
 	}
 
 	UndoAction global_solo_memento (void *src);
