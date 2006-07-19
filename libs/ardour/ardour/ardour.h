@@ -74,7 +74,7 @@ namespace ARDOUR {
 	    const char* old;
 	};
 
-};
+}
 
 /* how do we make these be within the Ardour namespace? */
 

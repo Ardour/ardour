@@ -18,7 +18,6 @@ fd_midiport.cc
 fifomidi.cc
 midi.cc
 midichannel.cc
-midicontrollable.cc
 midifactory.cc
 midimanager.cc
 midiparser.cc

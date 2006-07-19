@@ -2463,7 +2463,7 @@ remove_end(string* state)
 		statename = statename.substr (start+1);
 	}
 		
-	if ((end = statename.rfind(".ardour")) < 0) {
+	if ((end = statename.rfind(".ardour")) == string::npos) {
 		end = statename.length();
 	}
 

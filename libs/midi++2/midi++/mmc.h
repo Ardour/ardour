@@ -82,7 +82,7 @@ class MachineControl : public sigc::trackable
 		cmdRecordStrobeVariable = 0x55,
 
 		cmdWait = 0x7C,
-		cmdResume = 0x7F,
+		cmdResume = 0x7F
 	};
 	
 	MachineControl (Port &port,
@@ -256,6 +256,6 @@ class MachineControl : public sigc::trackable
 	void write_track_record_ready (byte *, size_t len);
 };
 
-}; /* namespace MIDI */	
+} // namespace MIDI
 
 #endif /* __midipp_mmc_h_h__ */

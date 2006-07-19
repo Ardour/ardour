@@ -150,7 +150,7 @@ class AudioFileSource : public AudioSource {
 	bool writable() const { return _flags & Writable; }
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_audiofilesource_h__ */
 

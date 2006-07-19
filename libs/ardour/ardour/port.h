@@ -208,6 +208,6 @@ class Port : public sigc::trackable {
 	static jack_nframes_t short_over_length;
 };
  
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_port_h__ */

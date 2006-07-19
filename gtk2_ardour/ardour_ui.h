@@ -79,7 +79,7 @@ class ColorManager;
 
 namespace Gtkmm2ext {
 	class TearOff;
-};
+}
 
 namespace ARDOUR {
 	class AudioEngine;
@@ -87,11 +87,11 @@ namespace ARDOUR {
 	class Port;
 	class IO;
 	class ControlProtocolInfo;
-};
+}
 
 namespace ALSA {
 	class MultiChannelDevice;
-};
+}
 
 #define FRAME_NAME "BaseFrame"
 
@@ -707,5 +707,5 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
 };
 
-
 #endif /* __ardour_gui_h__ */
+

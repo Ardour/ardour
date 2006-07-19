@@ -115,7 +115,7 @@ class Session : public sigc::trackable, public Stateful
 	enum SlaveSource {
 		None = 0,
 		MTC,
-		JACK,
+		JACK
 	};
 	
 	enum AutoConnectOption {
@@ -146,7 +146,7 @@ class Session : public sigc::trackable, public Stateful
 		    */
 
 		    StopOnce,
-		    AutoLoop,
+		    AutoLoop
 	    };
 
 	    enum Action {
@@ -1760,6 +1760,6 @@ class Session : public sigc::trackable, public Stateful
 	void remove_controllable (PBD::Controllable*);
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_session_h__ */

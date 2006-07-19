@@ -162,6 +162,6 @@ class AudioTrack : public Route
 	bool _destructive;
 };
 
-}; /* namespace ARDOUR*/
+} // namespace ARDOUR
 
 #endif /* __ardour_audio_track_h__ */

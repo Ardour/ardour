@@ -62,7 +62,7 @@ class Route : public IO
 	enum Flag {
 		Hidden = 0x1,
 		MasterOut = 0x2,
-		ControlOut = 0x4,
+		ControlOut = 0x4
 	};
 
 
@@ -352,6 +352,6 @@ class Route : public IO
 	void redirect_active_proxy (Redirect*, void*);
 };
 
-}; /* namespace ARDOUR*/
+} // namespace ARDOUR
 
 #endif /* __ardour_route_h__ */

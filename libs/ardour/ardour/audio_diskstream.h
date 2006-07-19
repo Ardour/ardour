@@ -443,6 +443,6 @@ class AudioDiskstream : public Stateful, public sigc::trackable
 	void disengage_record_enable (void* src);
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_diskstream_h__ */

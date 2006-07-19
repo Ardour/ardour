@@ -70,7 +70,7 @@ Pool::alloc ()
 	} else {
 		return ptr;
 	}
-};
+}
 
 void		
 Pool::release (void *ptr)

@@ -175,6 +175,6 @@ class PluginInsert : public Insert
 	Plugin* plugin_factory (Plugin&);
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_insert_h__ */

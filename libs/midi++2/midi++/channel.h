@@ -152,7 +152,7 @@ class Channel : public sigc::trackable {
 	void process_reset (Parser &);
 };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif // __midichannel_h__
 

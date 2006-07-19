@@ -312,6 +312,6 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	static float current_automation_version_number;
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /*__ardour_panner_h__ */

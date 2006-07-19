@@ -199,6 +199,6 @@ class Locations : public Stateful, public StateManager
 	StateManager::State* state_factory (std::string why) const;
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_location_h__ */

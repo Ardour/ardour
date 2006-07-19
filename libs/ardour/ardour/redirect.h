@@ -148,6 +148,6 @@ class Redirect : public IO
 	void* _gui;  /* generic, we don't know or care what this is */
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_redirect_h__ */

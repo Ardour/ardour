@@ -183,7 +183,7 @@ class Parser : public sigc::trackable {
 	void process_mtc_quarter_frame (byte *msg);
 };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif   // __midi_parse_h__
 
