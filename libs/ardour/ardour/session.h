@@ -290,15 +290,8 @@ class Session : public sigc::trackable, public Stateful
 	uint32_t get_next_diskstream_id() const { return n_diskstreams(); }
 	uint32_t n_diskstreams() const;
 	
-	template<class T> void foreach_diskstream (T *obj, void (T::*func)(Diskstream&));
-
 	typedef list<Diskstream *> DiskstreamList;
 	
-	Session::DiskstreamList disk_streams() const {
-		Glib::RWLock::ReaderLock lm (diskstream_lock);
-		return diskstreams; /* XXX yes, force a copy */
-	}
-
 	typedef list<Route *> RouteList;
 	
 	RouteList get_routes() const {

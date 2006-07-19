@@ -53,7 +53,7 @@
 #include <ardour/audio_diskstream.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/recent_sessions.h>
-#include <ardour/session_diskstream.h>
+#include <ardour/session_route.h>
 #include <ardour/port.h>
 #include <ardour/audio_track.h>
 #include <ardour/midi_track.h>
@@ -544,9 +544,10 @@ ARDOUR_UI::update_buffer_load ()
 }
 
 void
-ARDOUR_UI::count_recenabled_diskstreams (Diskstream& ds)
+ARDOUR_UI::count_recenabled_diskstreams (Route* route)
 {
-	if (ds.record_enabled()) {
+	Track* track = dynamic_cast<Track*>(route);
+	if (track && track->diskstream().record_enabled()) {
 		rec_enabled_diskstreams++;
 	}
 }
@@ -572,7 +573,7 @@ ARDOUR_UI::update_disk_space()
 		if (session->actively_recording()){
 			
 			rec_enabled_diskstreams = 0;
-			session->foreach_diskstream (this, &ARDOUR_UI::count_recenabled_diskstreams);
+			session->foreach_route (this, &ARDOUR_UI::count_recenabled_diskstreams);
 			
 			if (rec_enabled_diskstreams) {
 				frames /= rec_enabled_diskstreams;
@@ -592,7 +593,7 @@ ARDOUR_UI::update_disk_space()
 		frames -= mins * fr * 60;
 		secs = frames / fr;
 		
-		snprintf (buf, sizeof(buf), _("Space: %02dh:%02dm:%02ds"), hrs, mins, secs);
+		snprintf (buf, sizeof(buf), _("Disk: %02dh:%02dm:%02ds"), hrs, mins, secs);
 	}
 
 	disk_space_label.set_text (buf);
@@ -1210,10 +1211,10 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 	
 	if ((r = session->route_by_remote_id (dstream)) != 0) {
 
-		AudioTrack* at;
+		Track* t;
 
-		if ((at = dynamic_cast<AudioTrack*>(r)) != 0) {
-			at->disk_stream().set_record_enabled (!at->disk_stream().record_enabled(), this);
+		if ((t = dynamic_cast<Track*>(r)) != 0) {
+			t->diskstream().set_record_enabled (!t->diskstream().record_enabled(), this);
 		}
 	}
 	if (session == 0) {

@@ -27,6 +27,8 @@ ardour.Append(POTFILE = domain + '.pot')
 ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
 
 ardour_files=Split("""
+diskstream.cc
+track.cc
 audio_diskstream.cc
 audio_library.cc
 audio_playlist.cc
@@ -36,7 +38,6 @@ audiofilesource.cc
 audiofilter.cc
 audioregion.cc
 audiosource.cc
-diskstream.cc
 midi_source.cc
 midi_diskstream.cc
 midi_playlist.cc

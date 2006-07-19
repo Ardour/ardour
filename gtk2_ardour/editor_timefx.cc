@@ -184,7 +184,7 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 			continue;
 		}
 	
-		if ((playlist = at->disk_stream().playlist()) == 0) {
+		if ((playlist = at->diskstream().playlist()) == 0) {
 			i = tmp;
 			continue;
 		}

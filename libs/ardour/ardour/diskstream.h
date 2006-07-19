@@ -146,9 +146,9 @@ class Diskstream : public Stateful, public sigc::trackable
 
 	virtual void handle_input_change (IOChange, void *src);
 
-	sigc::signal<void,void*> record_enable_changed;
-	sigc::signal<void>       speed_changed;
-	sigc::signal<void,void*> reverse_changed;
+	sigc::signal<void,void*> RecordEnableChanged;
+	sigc::signal<void>       SpeedChanged;
+	sigc::signal<void,void*> ReverseChanged;
 	sigc::signal<void>       PlaylistChanged;
 	sigc::signal<void>       AlignmentStyleChanged;
 
@@ -156,8 +156,6 @@ class Diskstream : public Stateful, public sigc::trackable
 	static sigc::signal<void>                DiskUnderrun;
 	static sigc::signal<void,Diskstream*>    DiskstreamCreated; // XXX use a ref with sigc2
 	//static sigc::signal<void,list<Source*>*> DeleteSources;
-	
-	XMLNode* deprecated_io_node;
 
   protected:
 	friend class Session;

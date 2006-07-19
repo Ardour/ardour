@@ -40,9 +40,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
-	: Route (sess, name, 1, -1, -1, -1, flag, Buffer::MIDI),
-	  _diskstream (0),
-	  _rec_enable_control (*this)
+	: Track (sess, name, flag, mode, Buffer::MIDI)
 {
 	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
 
@@ -67,9 +65,7 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
-	: Route (sess, "to be renamed", 0, 0, -1, -1),
-	  _diskstream (0),
-	  _rec_enable_control (*this)
+	: Track (sess, node)
 {
 	_freeze_record.state = NoFreeze;
 	set_state (node);
@@ -92,57 +88,6 @@ MidiTrack::handle_smpte_offset_change ()
 }
 #endif
 
-int
-MidiTrack::deprecated_use_diskstream_connections ()
-{
-	if (_diskstream->deprecated_io_node == 0) {
-		return 0;
-	}
-
-	const XMLProperty* prop;
-	XMLNode& node (*_diskstream->deprecated_io_node);
-
-	/* don't do this more than once. */
-
-	_diskstream->deprecated_io_node = 0;
-
-	set_input_minimum (-1);
-	set_input_maximum (-1);
-	set_output_minimum (-1);
-	set_output_maximum (-1);
-	
-	if ((prop = node.property ("gain")) != 0) {
-		set_gain (atof (prop->value().c_str()), this);
-		_gain = _desired_gain;
-	}
-
-	if ((prop = node.property ("input-connection")) != 0) {
-		Connection* c = _session.connection_by_name (prop->value());
-		
-		if (c == 0) {
-		  	PBD::error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
-			
-			if ((c = _session.connection_by_name (_("in 1"))) == 0) {
-			  	PBD::error << _("No input connections available as a replacement")
-			        << endmsg;
-				return -1;
-			} else {
-			  	PBD::info << string_compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
-			       << endmsg;
-			}
-		}
-
-		use_input_connection (*c, this);
-
-	} else if ((prop = node.property ("inputs")) != 0) {
-		if (set_inputs (prop->value())) {
-		  	PBD::error << string_compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
-			return -1;
-		}
-	}
-	
-	return 0;
-}
 
 int
 MidiTrack::set_diskstream (MidiDiskstream& ds, void *src)
@@ -155,22 +100,13 @@ MidiTrack::set_diskstream (MidiDiskstream& ds, void *src)
 	_diskstream->set_io (*this);
 	_diskstream->set_destructive (_mode == Destructive);
 
-	if (_diskstream->deprecated_io_node) {
-
-		if (!connecting_legal) {
-			ConnectingLegal.connect (mem_fun (*this, &MidiTrack::deprecated_use_diskstream_connections));
-		} else {
-			deprecated_use_diskstream_connections ();
-		}
-	}
-
 	_diskstream->set_record_enabled (false, this);
 	//_diskstream->monitor_input (false);
 
 	ic_connection.disconnect();
 	ic_connection = input_changed.connect (mem_fun (*_diskstream, &MidiDiskstream::handle_input_change));
 
-	diskstream_changed (src); /* EMIT SIGNAL */
+	DiskstreamChanged (src); /* EMIT SIGNAL */
 
 	return 0;
 }	
@@ -239,10 +175,10 @@ MidiTrack::set_record_enable (bool yn, void *src)
 #endif
 }
 
-void
-MidiTrack::set_meter_point (MeterPoint p, void *src)
+MidiDiskstream&
+MidiTrack::midi_diskstream() const
 {
-	Route::set_meter_point (p, src);
+	return *dynamic_cast<MidiDiskstream*>(_diskstream);
 }
 
 int
@@ -314,18 +250,6 @@ MidiTrack::set_state (const XMLNode& node)
 	_session.StateReady.connect (mem_fun (*this, &MidiTrack::set_state_part_two));
 
 	return 0;
-}
-
-XMLNode&
-MidiTrack::get_template ()
-{
-	return state (false);
-}
-
-XMLNode&
-MidiTrack::get_state ()
-{
-	return state (true);
 }
 
 XMLNode& 
@@ -504,7 +428,7 @@ MidiTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfr
 		return 0;
 	}
 
-	_diskstream->check_record_status (start_frame, nframes, can_record);
+	midi_diskstream().check_record_status (start_frame, nframes, can_record);
 
 	bool send_silence;
 	
@@ -693,15 +617,7 @@ MidiTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack
 
 	silence (nframes, offset);
 
-	return _diskstream->process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
-}
-
-void
-MidiTrack::toggle_monitor_input ()
-{
-	for (vector<Port*>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		(*i)->request_monitor_input(!(*i)->monitoring_input());
-	}
+	return midi_diskstream().process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
 }
 
 int
@@ -830,22 +746,6 @@ MidiTrack::set_latency_delay (jack_nframes_t longest_session_latency)
 	_diskstream->set_roll_delay (_roll_delay);
 }
 
-jack_nframes_t
-MidiTrack::update_total_latency ()
-{
-	_own_latency = 0;
-
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		if ((*i)->active ()) {
-			_own_latency += (*i)->latency ();
-		}
-	}
-
-	set_port_latency (_own_latency);
-
-	return _own_latency;
-}
-
 void
 MidiTrack::bounce (InterThreadInfo& itt)
 {
@@ -950,11 +850,13 @@ MidiTrack::freeze (InterThreadInfo& itt)
 
 	_freeze_record.state = Frozen;
 	FreezeChange(); /* EMIT SIGNAL */
+#endif
 }
 
 void
 MidiTrack::unfreeze ()
 {
+#if 0
 	if (_freeze_record.playlist) {
 		diskstream->use_playlist (_freeze_record.playlist);
 
@@ -982,39 +884,6 @@ MidiTrack::unfreeze ()
 #endif
 	_freeze_record.state = UnFrozen;
 	FreezeChange (); /* EMIT SIGNAL */
-}
-
-MidiTrack::FreezeRecord::~FreezeRecord ()
-{
-	for (vector<FreezeRecordInsertInfo*>::iterator i = insert_info.begin(); i != insert_info.end(); ++i) {
-		delete *i;
-	}
-}
-
-MidiTrack::FreezeState
-MidiTrack::freeze_state() const
-{
-	return _freeze_record.state;
-}
-
-
-MidiTrack::MIDIRecEnableControllable::MIDIRecEnableControllable (MidiTrack& s)
-	: track(s)
-{
-}
-
-void
-MidiTrack::MIDIRecEnableControllable::set_value (float val)
-{
-	bool bval = ((val >= 0.5f) ? true: false);
-	track.set_record_enable (bval, this);
-}
-
-float
-MidiTrack::MIDIRecEnableControllable::get_value (void) const
-{
-	if (track.record_enabled()) { return 1.0f; }
-	return 0.0f;
 }
 
 void

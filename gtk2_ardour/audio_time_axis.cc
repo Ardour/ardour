@@ -230,8 +230,8 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 
 		audio_track()->FreezeChange.connect (mem_fun(*this, &AudioTimeAxisView::map_frozen));
 
-		audio_track()->diskstream_changed.connect (mem_fun(*this, &AudioTimeAxisView::diskstream_changed));
-		get_diskstream()->speed_changed.connect (mem_fun(*this, &AudioTimeAxisView::speed_changed));
+		audio_track()->DiskstreamChanged.connect (mem_fun(*this, &AudioTimeAxisView::diskstream_changed));
+		get_diskstream()->SpeedChanged.connect (mem_fun(*this, &AudioTimeAxisView::speed_changed));
 
 		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
 		controls_base_selected_name = "AudioTrackControlsBaseSelected";

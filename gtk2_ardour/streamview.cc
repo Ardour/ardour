@@ -71,9 +71,9 @@ StreamView::StreamView (AudioTimeAxisView& tv)
 	_amplitude_above_axis = 1.0;
 
 	if (_trackview.is_audio_track()) {
-		_trackview.audio_track()->diskstream_changed.connect (mem_fun (*this, &StreamView::diskstream_changed));
+		_trackview.audio_track()->DiskstreamChanged.connect (mem_fun (*this, &StreamView::diskstream_changed));
 		_trackview.session().TransportStateChange.connect (mem_fun (*this, &StreamView::transport_changed));
-		_trackview.get_diskstream()->record_enable_changed.connect (mem_fun (*this, &StreamView::rec_enable_changed));
+		_trackview.get_diskstream()->RecordEnableChanged.connect (mem_fun (*this, &StreamView::rec_enable_changed));
 		_trackview.session().RecordStateChanged.connect (mem_fun (*this, &StreamView::sess_rec_enable_changed));
 	} 
 
@@ -501,7 +501,7 @@ StreamView::diskstream_changed (void *src_ignored)
 	AudioTrack *at;
 
 	if ((at = _trackview.audio_track()) != 0) {
-		AudioDiskstream& ds = at->disk_stream();
+		AudioDiskstream& ds = at->audio_diskstream();
 		/* XXX grrr: when will SigC++ allow me to bind references? */
 		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*this, &StreamView::display_diskstream), &ds));
 	} else {
@@ -672,7 +672,7 @@ StreamView::setup_rec_box ()
 			AudioTrack* at;
 
 			at = _trackview.audio_track(); /* we know what it is already */
-			AudioDiskstream& ds = at->disk_stream();
+			AudioDiskstream& ds = at->audio_diskstream();
 			jack_nframes_t frame_pos = ds.current_capture_start ();
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend;

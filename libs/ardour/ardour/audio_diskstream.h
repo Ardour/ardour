@@ -172,6 +172,8 @@ class AudioDiskstream : public Diskstream
 
 	const PBD::ID& id() const { return _id; }
 
+	XMLNode* deprecated_io_node;
+
   protected:
 	friend class Session;
 

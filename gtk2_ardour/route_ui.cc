@@ -75,7 +75,7 @@ RouteUI::RouteUI (ARDOUR::Route& rt, ARDOUR::Session& sess, const char* m_name,
 	if (is_audio_track()) {
 		AudioTrack* at = dynamic_cast<AudioTrack*>(&_route);
 
-		get_diskstream()->record_enable_changed.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
+		get_diskstream()->RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
 
 		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
@@ -886,13 +886,10 @@ RouteUI::is_midi_track () const
 Diskstream*
 RouteUI::get_diskstream () const
 {
-	AudioTrack *at;
-	MidiTrack *mt;
+	Track *t;
 
-	if ((at = dynamic_cast<AudioTrack*>(&_route)) != 0) {
-		return &at->disk_stream();
-	} else if ((mt = dynamic_cast<MidiTrack*>(&_route)) != 0) {
-		return &mt->disk_stream();
+	if ((t = dynamic_cast<Track*>(&_route)) != 0) {
+		return &t->diskstream();
 	} else {
 		return 0;
 	}

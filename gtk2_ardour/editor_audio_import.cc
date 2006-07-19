@@ -314,7 +314,7 @@ int
 		
 	case ImportToTrack:
 		if (track) {
-			Playlist* playlist  = track->disk_stream().playlist();
+			Playlist* playlist  = track->diskstream().playlist();
 			
 			AudioRegion* copy = new AudioRegion (region);
 			begin_reversible_command (_("insert sndfile"));
@@ -330,7 +330,7 @@ int
 	case ImportAsTrack:
 		AudioTrack* at = session->new_audio_track (in_chans, out_chans);
 		AudioRegion* copy = new AudioRegion (region);
-		at->disk_stream().playlist()->add_region (*copy, pos);
+		at->diskstream().playlist()->add_region (*copy, pos);
 		break;
 	}
 

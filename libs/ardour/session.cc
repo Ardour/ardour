@@ -1772,7 +1772,7 @@ Session::new_midi_track (TrackMode mode)
 			track->set_control_outs (cports);
 		}
 #endif
-		track->diskstream_changed.connect (mem_fun (this, &Session::resort_routes));
+		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 
 		add_route (track);
 
@@ -1983,7 +1983,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			track->set_control_outs (cports);
 		}
 
-		track->diskstream_changed.connect (mem_fun (this, &Session::resort_routes));
+		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 
 		add_route (track);
 
@@ -2182,7 +2182,7 @@ Session::remove_route (Route& route)
 	AudioDiskstream* ds = 0;
 	
 	if ((at = dynamic_cast<AudioTrack*>(&route)) != 0) {
-		ds = &at->disk_stream();
+		ds = &at->audio_diskstream();
 	}
 	
 	if (ds) {
@@ -3812,7 +3812,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	
 	/* call tree *MUST* hold route_lock */
 	
-	if ((playlist = track.disk_stream().playlist()) == 0) {
+	if ((playlist = track.diskstream().playlist()) == 0) {
 		goto out;
 	}
 
@@ -3822,7 +3822,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		goto out;
 	}
 
-	nchans = track.disk_stream().n_channels();
+	nchans = track.audio_diskstream().n_channels();
 	
 	dir = discover_best_sound_dir ();
 

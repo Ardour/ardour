@@ -243,7 +243,7 @@ PlaylistSelector::selection_changed ()
 			return;
 		}
 		
-		at->disk_stream().use_playlist (apl);
+		at->diskstream().use_playlist (apl);
 
 		hide ();
 	}

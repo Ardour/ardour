@@ -63,16 +63,14 @@ sigc::signal<void>                Diskstream::DiskOverrun;
 sigc::signal<void>                Diskstream::DiskUnderrun;
 
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
-	: deprecated_io_node(NULL)
-	, _name (name)
+	: _name (name)
 	, _session (sess)
 {
 	init (flag);
 }
 	
 Diskstream::Diskstream (Session& sess, const XMLNode& node)
-	: deprecated_io_node(NULL)
-	, _session (sess)
+	: _session (sess)
 	
 {
 	init (Recordable);
@@ -114,7 +112,6 @@ Diskstream::init (Flag f)
 	playback_distance = 0;
 	_read_data_count = 0;
 	_write_data_count = 0;
-	deprecated_io_node = 0;
 
 	/* there are no channels at this point, so these
 	   two calls just get speed_buffer_size and wrap_buffer
@@ -188,7 +185,7 @@ Diskstream::realtime_set_speed (double sp, bool global)
 		if (!global) {
 			_seek_required = true;
 		}
-		 speed_changed (); /* EMIT SIGNAL */
+		SpeedChanged (); /* EMIT SIGNAL */
 	}
 
 	return _buffer_reallocation_required || _seek_required;

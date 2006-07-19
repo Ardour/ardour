@@ -21,7 +21,7 @@
 #ifndef __ardour_audio_track_h__
 #define __ardour_audio_track_h__
 
-#include <ardour/route.h>
+#include <ardour/track.h>
 
 namespace ARDOUR {
 
@@ -30,7 +30,7 @@ class AudioDiskstream;
 class AudioPlaylist;
 class RouteGroup;
 
-class AudioTrack : public Route
+class AudioTrack : public Track
 {
   public:
 	AudioTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
@@ -39,67 +39,39 @@ class AudioTrack : public Route
 	
 	int set_name (string str, void *src);
 
-	int  roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
+	int roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
+		jack_nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
+	
+	int no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
+		jack_nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
+	
+	int silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
+		jack_nframes_t offset, bool can_record, bool rec_monitors_input);
 
-		   jack_nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
-	int  no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		      jack_nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
-	int  silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			  jack_nframes_t offset, bool can_record, bool rec_monitors_input);
-
-	void toggle_monitor_input ();
-
-	bool can_record() const { return true; }
 	void set_record_enable (bool yn, void *src);
 
-	AudioDiskstream& disk_stream() const { return *_diskstream; }
-	int set_diskstream (AudioDiskstream&, void *);
+	AudioDiskstream& audio_diskstream() const;
+
 	int use_diskstream (string name);
 	int use_diskstream (const PBD::ID& id);
 
-	TrackMode mode() const { return _mode; }
 	void set_mode (TrackMode m);
-	sigc::signal<void> ModeChanged;
 
-	jack_nframes_t update_total_latency();
 	void set_latency_delay (jack_nframes_t);
 	
 	int export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t end_frame);
 
-	sigc::signal<void,void*> diskstream_changed;
-
-	enum FreezeState {
-		NoFreeze,
-		Frozen,
-		UnFrozen
-	};
-
-	FreezeState freeze_state() const;
-
-	sigc::signal<void> FreezeChange;
- 
 	void freeze (InterThreadInfo&);
 	void unfreeze ();
 
 	void bounce (InterThreadInfo&);
 	void bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo&);
 
-	XMLNode& get_state();
-	XMLNode& get_template();
 	int set_state(const XMLNode& node);
 
-	PBD::Controllable& rec_enable_control() {
-		return _rec_enable_control;
-	}
-
 	bool record_enabled() const;
-	void set_meter_point (MeterPoint, void* src);
 
   protected:
-	AudioDiskstream *_diskstream;
-	MeterPoint _saved_meter_point;
-	TrackMode _mode;
-
 	XMLNode& state (bool full);
 
 	void passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, 
@@ -107,61 +79,15 @@ class AudioTrack : public Route
 			       bool meter);
 
 	uint32_t n_process_buffers ();
-
+	
   private:
-	struct FreezeRecordInsertInfo {
-	    FreezeRecordInsertInfo(XMLNode& st) 
-		    : state (st), insert (0) {}
+	int set_diskstream (AudioDiskstream&, void *);
 
-	    XMLNode    state;
-	    Insert*    insert;
-	    PBD::ID    id;
-	    UndoAction memento;
-	};
-
-	struct FreezeRecord {
-	    FreezeRecord() {
-		    playlist = 0;
-		    have_mementos = false;
-	    }
-
-	    ~FreezeRecord();
-
-	    AudioPlaylist* playlist;
-	    vector<FreezeRecordInsertInfo*> insert_info;
-	    bool have_mementos;
-	    FreezeState state;
-	};
-
-	FreezeRecord _freeze_record;
-	XMLNode* pending_state;
-
-	void diskstream_record_enable_changed (void *src);
-	void diskstream_input_channel_changed (void *src);
-
-	void input_change_handler (void *src);
-
-	sigc::connection recenable_connection;
-	sigc::connection ic_connection;
-
-	int deprecated_use_diskstream_connections ();
+	int  deprecated_use_diskstream_connections ();
 	void set_state_part_two ();
 	void set_state_part_three ();
-
-	struct RecEnableControllable : public PBD::Controllable {
-	    RecEnableControllable (AudioTrack&);
-	    
-	    void set_value (float);
-	    float get_value (void) const;
-
-	    AudioTrack& track;
-	};
-
-	RecEnableControllable _rec_enable_control;
-
-	bool _destructive;
 };
 
-}; /* namespace ARDOUR*/
+} /* namespace ARDOUR*/
 
 #endif /* __ardour_audio_track_h__ */

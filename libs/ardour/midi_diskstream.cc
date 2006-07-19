@@ -480,9 +480,10 @@ MidiDiskstream::set_state (const XMLNode& node)
 	in_set_state = true;
 
  	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
- 		if ((*niter)->name() == IO::state_node_name) {
+ 		/*if ((*niter)->name() == IO::state_node_name) {
 			deprecated_io_node = new XMLNode (**niter);
- 		}
+ 		}*/
+ 		assert ((*niter)->name() != IO::state_node_name);
 
 		if ((*niter)->name() == X_("CapturingSources")) {
 			capture_pending_node = *niter;
@@ -497,14 +498,8 @@ MidiDiskstream::set_state (const XMLNode& node)
 		_name = prop->value();
 	} 
 
-	if (deprecated_io_node) {
-		if ((prop = deprecated_io_node->property ("id")) != 0) {
-			_id = prop->value ();
-		}
-	} else {
-		if ((prop = node.property ("id")) != 0) {
-			_id = prop->value ();
-		}
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value ();
 	}
 
 	if ((prop = node.property ("flags")) != 0) {

@@ -41,9 +41,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
-	: Route (sess, name, 1, -1, -1, -1, flag),
-	  _diskstream (0),
-	  _rec_enable_control (*this)
+	: Track (sess, name, flag, mode)
 {
 	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (0);
 
@@ -68,9 +66,7 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 }
 
 AudioTrack::AudioTrack (Session& sess, const XMLNode& node)
-	: Route (sess, "to be renamed", 0, 0, -1, -1),
-	  _diskstream (0),
-	  _rec_enable_control (*this)
+	: Track (sess, node)
 {
 	_freeze_record.state = NoFreeze;
 	set_state (node);
@@ -88,16 +84,18 @@ AudioTrack::~AudioTrack ()
 int
 AudioTrack::deprecated_use_diskstream_connections ()
 {
-	if (_diskstream->deprecated_io_node == 0) {
+	AudioDiskstream& diskstream = audio_diskstream();
+
+	if (diskstream.deprecated_io_node == 0) {
 		return 0;
 	}
 
 	const XMLProperty* prop;
-	XMLNode& node (*_diskstream->deprecated_io_node);
+	XMLNode& node (*diskstream.deprecated_io_node);
 
 	/* don't do this more than once. */
 
-	_diskstream->deprecated_io_node = 0;
+	diskstream.deprecated_io_node = 0;
 
 	set_input_minimum (-1);
 	set_input_maximum (-1);
@@ -148,7 +146,7 @@ AudioTrack::set_diskstream (AudioDiskstream& ds, void *src)
 	_diskstream->set_io (*this);
 	_diskstream->set_destructive (_mode == Destructive);
 
-	if (_diskstream->deprecated_io_node) {
+	if (audio_diskstream().deprecated_io_node) {
 
 		if (!connecting_legal) {
 			ConnectingLegal.connect (mem_fun (*this, &AudioTrack::deprecated_use_diskstream_connections));
@@ -161,9 +159,9 @@ AudioTrack::set_diskstream (AudioDiskstream& ds, void *src)
 	_diskstream->monitor_input (false);
 
 	ic_connection.disconnect();
-	ic_connection = input_changed.connect (mem_fun (*_diskstream, &AudioDiskstream::handle_input_change));
+	ic_connection = input_changed.connect (mem_fun (*_diskstream, &Diskstream::handle_input_change));
 
-	diskstream_changed (src); /* EMIT SIGNAL */
+	DiskstreamChanged (src); /* EMIT SIGNAL */
 
 	return 0;
 }	
@@ -229,10 +227,10 @@ AudioTrack::set_record_enable (bool yn, void *src)
 	_rec_enable_control.Changed ();
 }
 
-void
-AudioTrack::set_meter_point (MeterPoint p, void *src)
+AudioDiskstream&
+AudioTrack::audio_diskstream() const
 {
-	Route::set_meter_point (p, src);
+	return *dynamic_cast<AudioDiskstream*>(_diskstream);
 }
 
 int
@@ -304,18 +302,6 @@ AudioTrack::set_state (const XMLNode& node)
 	_session.StateReady.connect (mem_fun (*this, &AudioTrack::set_state_part_two));
 
 	return 0;
-}
-
-XMLNode&
-AudioTrack::get_template ()
-{
-	return state (false);
-}
-
-XMLNode&
-AudioTrack::get_state ()
-{
-	return state (true);
 }
 
 XMLNode& 
@@ -494,7 +480,7 @@ AudioTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nf
 		return 0;
 	}
 
-	_diskstream->check_record_status (start_frame, nframes, can_record);
+	audio_diskstream().check_record_status (start_frame, nframes, can_record);
 
 	bool send_silence;
 	
@@ -561,7 +547,8 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 	Sample* b;
 	Sample* tmpb;
 	jack_nframes_t transport_frame;
-
+	AudioDiskstream& diskstream = audio_diskstream();
+	
 	{
 		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
@@ -587,13 +574,13 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		*/
-		return _diskstream->process (transport_frame, 0, 0, can_record, rec_monitors_input);
+		return diskstream.process (transport_frame, 0, 0, can_record, rec_monitors_input);
 	} 
 
 	_silent = false;
 	apply_gain_automation = false;
 
-	if ((dret = _diskstream->process (transport_frame, nframes, offset, can_record, rec_monitors_input)) != 0) {
+	if ((dret = diskstream.process (transport_frame, nframes, offset, can_record, rec_monitors_input)) != 0) {
 		
 		silence (nframes, offset);
 
@@ -606,7 +593,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 		just_meter_input (start_frame, end_frame, nframes, offset);
 	}
 
-	if (_diskstream->record_enabled() && !can_record && !_session.get_auto_input()) {
+	if (diskstream.record_enabled() && !can_record && !_session.get_auto_input()) {
 
 		/* not actually recording, but we want to hear the input material anyway,
 		   at least potentially (depending on monitoring options)
@@ -614,7 +601,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 
 		passthru (start_frame, end_frame, nframes, offset, 0, true);
 
-	} else if ((b = _diskstream->playback_buffer(0)) != 0) {
+	} else if ((b = diskstream.playback_buffer(0)) != 0) {
 
 		/*
 		  XXX is it true that the earlier test on n_outputs()
@@ -636,8 +623,8 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 
 		for (i = 0, n = 1; i < limit; ++i, ++n) {
 			memcpy (bufs[i], b, sizeof (Sample) * nframes); 
-			if (n < _diskstream->n_channels()) {
-				tmpb = _diskstream->playback_buffer(n);
+			if (n < diskstream.n_channels()) {
+				tmpb = diskstream.playback_buffer(n);
 				if (tmpb!=0) {
 					b = tmpb;
 				}
@@ -646,7 +633,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 
 		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
 
-		if (!_diskstream->record_enabled() && _session.transport_rolling()) {
+		if (!diskstream.record_enabled() && _session.transport_rolling()) {
 			Glib::Mutex::Lock am (automation_lock, Glib::TRY_LOCK);
 			
 			if (am.locked() && gain_automation_playback()) {
@@ -682,15 +669,7 @@ AudioTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jac
 
 	silence (nframes, offset);
 
-	return _diskstream->process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
-}
-
-void
-AudioTrack::toggle_monitor_input ()
-{
-	for (vector<Port*>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		(*i)->request_monitor_input(!(*i)->monitoring_input());
-	}
+	return audio_diskstream().process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
 }
 
 int
@@ -703,7 +682,7 @@ AudioTrack::set_name (string str, void *src)
 		return -1;
 	}
 
-	if (_diskstream->set_name (str, src)) {
+	if (audio_diskstream().set_name (str, src)) {
 		return -1;
 	}
 
@@ -726,11 +705,12 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbu
 	gain_t this_gain = _gain;
 	vector<Sample*>::iterator bi;
 	Sample * b;
+	AudioDiskstream& diskstream = audio_diskstream();
 	
 	Glib::RWLock::ReaderLock rlock (redirect_lock);
 
 	// FIXME
-	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(_diskstream->playlist());
+	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(diskstream.playlist());
 	assert(apl);
 
 	if (apl->read (buffers[0], mix_buffer, gain_buffer, workbuf, start, nframes) != nframes) {
@@ -742,7 +722,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbu
 	b = buffers[0];
 	++bi;
 	for (; bi != buffers.end(); ++bi, ++n) {
-		if (n < _diskstream->n_channels()) {
+		if (n < diskstream.n_channels()) {
 			if (apl->read ((*bi), mix_buffer, gain_buffer, workbuf, start, nframes, n) != nframes) {
 				return -1;
 			}
@@ -819,23 +799,7 @@ void
 AudioTrack::set_latency_delay (jack_nframes_t longest_session_latency)
 {
 	Route::set_latency_delay (longest_session_latency);
-	_diskstream->set_roll_delay (_roll_delay);
-}
-
-jack_nframes_t
-AudioTrack::update_total_latency ()
-{
-	_own_latency = 0;
-
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		if ((*i)->active ()) {
-			_own_latency += (*i)->latency ();
-		}
-	}
-
-	set_port_latency (_own_latency);
-
-	return _own_latency;
+	audio_diskstream().set_roll_delay (_roll_delay);
 }
 
 void
@@ -863,8 +827,9 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	string dir;
 	AudioRegion* region;
 	string region_name;
+	AudioDiskstream& diskstream = audio_diskstream();
 	
-	if ((_freeze_record.playlist = dynamic_cast<AudioPlaylist*>(_diskstream->playlist())) == 0) {
+	if ((_freeze_record.playlist = dynamic_cast<AudioPlaylist*>(diskstream.playlist())) == 0) {
 		return;
 	}
 
@@ -931,13 +896,13 @@ AudioTrack::freeze (InterThreadInfo& itt)
 				  (AudioRegion::Flag) (AudioRegion::WholeFile|AudioRegion::DefaultFlags),
 				  false);
 
-	new_playlist->set_orig_diskstream_id (_diskstream->id());
+	new_playlist->set_orig_diskstream_id (diskstream.id());
 	new_playlist->add_region (*region, 0);
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 
-	_diskstream->use_playlist (dynamic_cast<AudioPlaylist*>(new_playlist));
-	_diskstream->set_record_enabled (false, this);
+	diskstream.use_playlist (dynamic_cast<AudioPlaylist*>(new_playlist));
+	diskstream.set_record_enabled (false, this);
 
 	_freeze_record.state = Frozen;
 	FreezeChange(); /* EMIT SIGNAL */
@@ -947,7 +912,7 @@ void
 AudioTrack::unfreeze ()
 {
 	if (_freeze_record.playlist) {
-		_diskstream->use_playlist (_freeze_record.playlist);
+		audio_diskstream().use_playlist (_freeze_record.playlist);
 
 		if (_freeze_record.have_mementos) {
 
@@ -975,45 +940,13 @@ AudioTrack::unfreeze ()
 	FreezeChange (); /* EMIT SIGNAL */
 }
 
-AudioTrack::FreezeRecord::~FreezeRecord ()
-{
-	for (vector<FreezeRecordInsertInfo*>::iterator i = insert_info.begin(); i != insert_info.end(); ++i) {
-		delete *i;
-	}
-}
-
-AudioTrack::FreezeState
-AudioTrack::freeze_state() const
-{
-	return _freeze_record.state;
-}
-
-AudioTrack::RecEnableControllable::RecEnableControllable (AudioTrack& s)
-	: track (s)
-{
-}
-
-void
-AudioTrack::RecEnableControllable::set_value (float val)
-{
-	bool bval = ((val >= 0.5f) ? true: false);
-	track.set_record_enable (bval, this);
-}
-
-float
-AudioTrack::RecEnableControllable::get_value (void) const
-{
-	if (track.record_enabled()) { return 1.0f; }
-	return 0.0f;
-}
-
 void
 AudioTrack::set_mode (TrackMode m)
 {
 	if (_diskstream) {
 		if (_mode != m) {
 			_mode = m;
-			_diskstream->set_destructive (m == Destructive);
+			audio_diskstream().set_destructive (m == Destructive);
 			ModeChanged();
 		}
 	}

@@ -59,6 +59,7 @@ sigc::signal<void,list<AudioFileSource*>*> AudioDiskstream::DeleteSources;
 
 AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
 	: Diskstream(sess, name, flag)
+	, deprecated_io_node(NULL)
 	, _playlist(NULL)
 {
 	/* prevent any write sources from being created */
@@ -75,6 +76,7 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream:
 	
 AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 	: Diskstream(sess, node)
+	, deprecated_io_node(NULL)
 	, _playlist(NULL)
 {
 	in_set_state = true;
@@ -1832,7 +1834,7 @@ AudioDiskstream::engage_record_enable (void* src)
 		}
 	}
 
-	record_enable_changed (src); /* EMIT SIGNAL */
+	RecordEnableChanged (src); /* EMIT SIGNAL */
 }
 
 void
@@ -1847,7 +1849,7 @@ AudioDiskstream::disengage_record_enable (void* src)
 		}
 	}
 	capturing_sources.clear ();
-	record_enable_changed (src); /* EMIT SIGNAL */
+	RecordEnableChanged (src); /* EMIT SIGNAL */
 }
 		
 

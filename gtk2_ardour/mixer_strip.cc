@@ -290,8 +290,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	_route.panner().Changed.connect (mem_fun(*this, &MixerStrip::connect_to_pan));
 
 	if (is_audio_track()) {
-		audio_track()->diskstream_changed.connect (mem_fun(*this, &MixerStrip::diskstream_changed));
-		get_diskstream()->speed_changed.connect (mem_fun(*this, &MixerStrip::speed_changed));
+		audio_track()->DiskstreamChanged.connect (mem_fun(*this, &MixerStrip::diskstream_changed));
+		get_diskstream()->SpeedChanged.connect (mem_fun(*this, &MixerStrip::speed_changed));
 	}
 
 	_route.name_changed.connect (mem_fun(*this, &RouteUI::name_changed));
@@ -558,11 +558,6 @@ MixerStrip::input_press (GdkEventButton *ev)
 
 	case 1:
 
-#if ADVANCED_ROUTE_DISKSTREAM_CONNECTIVITY
-	        if (is_audio_track()) {
-		        citems.push_back (MenuElem (_("Track"), mem_fun(*this, &MixerStrip::select_stream_input)));
-		}
-#endif
 		citems.push_back (MenuElem (_("Edit"), mem_fun(*this, &MixerStrip::edit_input_configuration)));
 		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
@@ -656,43 +651,6 @@ MixerStrip::add_connection_to_output_menu (ARDOUR::Connection* c)
 			dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
 			ignore_toggle = false;
 		}
-	}
-}
-
-void
-MixerStrip::select_stream_input ()
-{
-	using namespace Menu_Helpers;
-
-	Menu *stream_menu = manage (new Menu);
-	MenuList& items = stream_menu->items();
-	stream_menu->set_name ("ArdourContextMenu");
-	
-	Session::DiskstreamList streams = _session.disk_streams();
-
-	for (Session::DiskstreamList::iterator i = streams.begin(); i != streams.end(); ++i) {
-		AudioDiskstream* ads = dynamic_cast<AudioDiskstream*>(*i);
-
-		if (ads && !(*i)->hidden()) {
-
-			items.push_back (CheckMenuElem (ads->name(), bind (mem_fun(*this, &MixerStrip::stream_input_chosen), ads)));
-			
-			if (get_diskstream() == ads) {
-				ignore_toggle = true;
-				static_cast<CheckMenuItem *> (&items.back())->set_active (true);
-				ignore_toggle = false;
-			} 
-		}
-	}
-	
-	stream_menu->popup (1, 0);
-}
-
-void
-MixerStrip::stream_input_chosen (AudioDiskstream *stream)
-{
-	if (is_audio_track()) {
-		audio_track()->set_diskstream (*stream, this);
 	}
 }
 

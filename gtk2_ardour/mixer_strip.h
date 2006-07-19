@@ -171,8 +171,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Menu output_menu;
 	void add_connection_to_output_menu (ARDOUR::Connection *);
 	
-	void stream_input_chosen (ARDOUR::AudioDiskstream*);
-	void select_stream_input ();
 	void connection_input_chosen (ARDOUR::Connection *);
 	void connection_output_chosen (ARDOUR::Connection *);
 

@@ -628,7 +628,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_record_enable (uint32_t);
 
 	uint32_t rec_enabled_diskstreams;
-	void count_recenabled_diskstreams (ARDOUR::Diskstream&);
+	void count_recenabled_diskstreams (ARDOUR::Route*);
 
 	About* about;
 	bool shown_flag;

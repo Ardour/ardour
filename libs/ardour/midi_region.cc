@@ -366,7 +366,8 @@ XMLNode&
 MidiRegion::state (bool full)
 {
 	XMLNode& node (Region::state (full));
-	//XMLNode *child;
+#if 0
+//XMLNode *child;
 	char buf[64];
 	char buf2[64];
 	LocaleGuard lg (X_("POSIX"));
@@ -386,7 +387,7 @@ MidiRegion::state (bool full)
 	if (full && _extra_xml) {
 		node.add_child_copy (*_extra_xml);
 	}
-
+#endif
 	return node;
 }
 
