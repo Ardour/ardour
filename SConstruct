@@ -31,6 +31,7 @@ opts.AddOptions(
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
+    BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
     BoolOption('LIBLO', 'Compile with support for liblo library', 1),
@@ -817,6 +818,10 @@ else:
 
 env.Append(CCFLAGS="-Wall")
 env.Append(CXXFLAGS="-Woverloaded-virtual")
+
+if env['EXTRA_WARN']:
+    env.Append(CCFLAGS="-Wextra -pedantic")
+    env.Append(CXXFLAGS="-ansi")
 
 if env['LIBLO']:
     env.Append(CCFLAGS="-DHAVE_LIBLO")

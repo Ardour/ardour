@@ -84,7 +84,6 @@ AudioLibrary::AudioLibrary ()
 
 AudioLibrary::~AudioLibrary ()
 {
-	add_instant_xml(get_state(), get_user_ardour_path());
 }
 
 void
@@ -361,6 +360,8 @@ void
 AudioLibrary::set_paths (vector<string> paths)
 {
 	sfdb_paths = paths;
+	
+	add_instant_xml(get_state(), get_user_ardour_path());
 }
 
 vector<string> 

@@ -339,15 +339,15 @@ ARDOUR_UI::save_ardour_state ()
 	Config->add_extra_xml (*node);
 	Config->save_state();
 
-	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
-	XMLNode& mnode (mixer->get_state());
+	XMLNode* enode = new XMLNode (static_cast<Stateful*>(editor)->get_state());
+	XMLNode* mnode = new XMLNode (mixer->get_state());
 
 	if (session) {
-		session->add_instant_xml(enode, session->path());
-		session->add_instant_xml(mnode, session->path());
+		session->add_instant_xml(*enode, session->path());
+		session->add_instant_xml(*mnode, session->path());
 	} else {
-		Config->add_instant_xml(enode, get_user_ardour_path());
-		Config->add_instant_xml(mnode, get_user_ardour_path());
+		Config->add_instant_xml(*enode, get_user_ardour_path());
+		Config->add_instant_xml(*mnode, get_user_ardour_path());
 	}
 
 	/* keybindings */

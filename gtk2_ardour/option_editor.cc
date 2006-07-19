@@ -253,6 +253,7 @@ OptionEditor::setup_path_options()
 
 	sfdb_path_view.append_column(_("Paths"), sfdb_path_columns.paths);
 	sfdb_path_view.set_size_request(-1, 100);
+	sfdb_path_view.set_headers_visible (false);
 
 	path_table.show_all();
 }
