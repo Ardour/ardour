@@ -913,7 +913,7 @@ Editor::set_frames_per_unit (double fpu)
 void
 Editor::instant_save ()
 {
-        if (!constructed || !ARDOUR_UI::instance()->session_loaded) {
+	if (!constructed || !ARDOUR_UI::instance()->session_loaded) {
 		return;
 	}
 
@@ -2295,7 +2295,7 @@ Editor::get_state ()
 	char buf[32];
 
 	if (is_realized()) {
-	        Glib::RefPtr<Gdk::Window> win = get_window();
+		Glib::RefPtr<Gdk::Window> win = get_window();
 		
 		int x, y, xoff, yoff, width, height;
 		win->get_root_origin(x, y);

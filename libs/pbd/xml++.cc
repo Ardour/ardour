@@ -12,17 +12,15 @@ static void writenode(xmlDocPtr, XMLNode *, xmlNodePtr, int);
 
 XMLTree::XMLTree() 
 	: _filename(), 
-	_root(), 
-	_compression(0), 
-	_initialized(false) 
+	_root(0), 
+	_compression(0)
 { 
 }
 
 XMLTree::XMLTree(const string &fn)
 	: _filename(fn), 
 	_root(0), 
-	_compression(0), 
-	_initialized(false) 
+	_compression(0)
 { 
 	read(); 
 }
@@ -32,13 +30,13 @@ XMLTree::XMLTree(const XMLTree * from)
 	_filename = from->filename();
 	_root = new XMLNode(*from->root());
 	_compression = from->compression();
-	_initialized = true;
 }
 
 XMLTree::~XMLTree()
 {
-	if (_initialized && _root)
+	if (_root) {
 		delete _root;
+	}
 }
 
 int 
@@ -69,13 +67,11 @@ XMLTree::read(void)
 	
 	doc = xmlParseFile(_filename.c_str());
 	if (!doc) {
-	 	_initialized = false;
 	 	return false;
 	}
 	
 	_root = readnode(xmlDocGetRootElement(doc));
 	xmlFreeDoc(doc);
-	_initialized = true;
 	
 	return true;
 }
@@ -94,13 +90,11 @@ XMLTree::read_buffer(const string & buffer)
 	
 	doc = xmlParseMemory((char *) buffer.c_str(), buffer.length());
 	if (!doc) {
-		_initialized = false;
 		return false;
 	}
 	
 	_root = readnode(xmlDocGetRootElement(doc));
 	xmlFreeDoc(doc);
-	_initialized = true;
 	
 	return true;
 }
@@ -166,21 +160,14 @@ XMLTree::write_buffer(void) const
 XMLNode::XMLNode(const string & n)
 	:  _name(n), _is_content(false), _content(string())
 {
-	if (_name.empty()) {
-		_initialized = false;
-	} else {
-		_initialized = true;
-	}
 }
 
 XMLNode::XMLNode(const string & n, const string & c)
 	:_name(n), _is_content(true), _content(c)
 {
-	_initialized = true;
 }
 
 XMLNode::XMLNode(const XMLNode& from)
-	: _initialized(false)
 {
 	XMLPropertyList props;
 	XMLPropertyIterator curprop;

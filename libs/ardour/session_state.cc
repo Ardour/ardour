@@ -3284,3 +3284,10 @@ Session::controllable_by_id (const PBD::ID& id)
 
 	return 0;
 }
+
+void 
+Session::add_instant_xml (XMLNode& node, const std::string& dir)
+{
+	Stateful::add_instant_xml (node, dir);
+	Config->add_instant_xml (node, get_user_ardour_path());
+}

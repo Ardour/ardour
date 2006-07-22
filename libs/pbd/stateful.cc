@@ -82,7 +82,7 @@ Stateful::add_instant_xml (XMLNode& node, const string& dir)
 	}
 
 	_instant_xml->remove_nodes_and_delete (node.name());
-	_instant_xml->add_child_nocopy (node);
+	_instant_xml->add_child_copy (node);
 	
 	XMLTree tree;
 	tree.set_filename(dir+"/instant.xml");
@@ -134,4 +134,3 @@ Stateful::instant_xml (const string& str, const string& dir)
 
 	return 0;
 }
-

@@ -3558,13 +3558,6 @@ Session::allocate_pan_automation_buffers (jack_nframes_t nframes, uint32_t howma
 	_npan_buffers = howmany;
 }
 
-void 
-Session::add_instant_xml (XMLNode& node, const std::string& dir)
-{
-	Stateful::add_instant_xml (node, dir);
-	Config->add_instant_xml (node, get_user_ardour_path());
-}
-
 int
 Session::freeze (InterThreadInfo& itt)
 {
