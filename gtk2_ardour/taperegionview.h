@@ -23,20 +23,20 @@
 
 #include <vector>
 
-#include "regionview.h"
+#include "audio_regionview.h"
 
 class TapeAudioRegionView : public AudioRegionView
 {
   public:
 	TapeAudioRegionView (ArdourCanvas::Group *, 
-			     AudioTimeAxisView&,
+			     RouteTimeAxisView&,
 			     ARDOUR::AudioRegion&,
 			     double initial_samples_per_unit,
 			     Gdk::Color& base_color);
 	~TapeAudioRegionView ();
 
   protected:
-	void init (double amplitude_above_axis, Gdk::Color& base_color, bool wait_for_waves);
+	void init (Gdk::Color& base_color, bool wait_for_waves);
 
 	void set_frame_color ();
 	void update (uint32_t n);

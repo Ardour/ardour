@@ -501,51 +501,28 @@ MidiRegion::master_source_names ()
 }
 
 bool
-MidiRegion::region_list_equivalent (const MidiRegion& other) const
+MidiRegion::source_equivalent (const Region& o) const
 {
-	return size_equivalent (other) && source_equivalent (other) && _name == other._name;
-}
+	const MidiRegion* other = dynamic_cast<const MidiRegion*>(&o);
+	if (!other)
+		return false;
 
-bool
-MidiRegion::source_equivalent (const MidiRegion& other) const
-{
 	SourceList::const_iterator i;
 	SourceList::const_iterator io;
 
-	for (i = sources.begin(), io = other.sources.begin(); i != sources.end() && io != other.sources.end(); ++i, ++io) {
+	for (i = sources.begin(), io = other->sources.begin(); i != sources.end() && io != other->sources.end(); ++i, ++io) {
 		if ((*i)->id() != (*io)->id()) {
 			return false;
 		}
 	}
 
-	for (i = master_sources.begin(), io = other.master_sources.begin(); i != master_sources.end() && io != other.master_sources.end(); ++i, ++io) {
+	for (i = master_sources.begin(), io = other->master_sources.begin(); i != master_sources.end() && io != other->master_sources.end(); ++i, ++io) {
 		if ((*i)->id() != (*io)->id()) {
 			return false;
 		}
 	}
 
 	return true;
-}
-
-bool
-MidiRegion::overlap_equivalent (const MidiRegion& other) const
-{
-	return coverage (other.first_frame(), other.last_frame()) != OverlapNone;
-}
-
-bool
-MidiRegion::equivalent (const MidiRegion& other) const
-{
-	return _start == other._start &&
-		_position == other._position &&
-		_length == other._length;
-}
-
-bool
-MidiRegion::size_equivalent (const MidiRegion& other) const
-{
-	return _start == other._start &&
-		_length == other._length;
 }
 
 #if 0

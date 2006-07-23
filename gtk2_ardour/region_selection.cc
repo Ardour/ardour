@@ -1,6 +1,24 @@
+/*
+    Copyright (C) 2006 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
 #include <algorithm>
 
-#include <ardour/audioregion.h>
+#include <ardour/region.h>
 
 #include "regionview.h"
 #include "region_selection.h"
@@ -11,7 +29,7 @@ using namespace sigc;
 
 
 bool 
-AudioRegionComparator::operator() (const AudioRegionView* a, const AudioRegionView* b) const
+RegionComparator::operator() (const RegionView* a, const RegionView* b) const
 {
  	if (a == b) {
  		return false;
@@ -20,16 +38,16 @@ AudioRegionComparator::operator() (const AudioRegionView* a, const AudioRegionVi
  	}
 }
 
-AudioRegionSelection::AudioRegionSelection ()
+RegionSelection::RegionSelection ()
 {
 	_current_start = 0;
 	_current_end = 0;
 }
 
-AudioRegionSelection::AudioRegionSelection (const AudioRegionSelection& other)
+RegionSelection::RegionSelection (const RegionSelection& other)
 {
 
-	for (AudioRegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
+	for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
 		add (*i, false);
 	}
 	_current_start = other._current_start;
@@ -38,14 +56,14 @@ AudioRegionSelection::AudioRegionSelection (const AudioRegionSelection& other)
 
 
 
-AudioRegionSelection&
-AudioRegionSelection::operator= (const AudioRegionSelection& other)
+RegionSelection&
+RegionSelection::operator= (const RegionSelection& other)
 {
 	if (this != &other) {
 
 		clear_all();
 		
-		for (AudioRegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
+		for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
 			add (*i, false);
 		}
 
@@ -57,13 +75,13 @@ AudioRegionSelection::operator= (const AudioRegionSelection& other)
 }
 
 void
-AudioRegionSelection::clear_all()
+RegionSelection::clear_all()
 {
 	clear();
 	_bylayer.clear();
 }
 
-bool AudioRegionSelection::contains (AudioRegionView* rv)
+bool RegionSelection::contains (RegionView* rv)
 {
 	if (this->find (rv) != end()) {
 		return true;
@@ -75,21 +93,21 @@ bool AudioRegionSelection::contains (AudioRegionView* rv)
 }
 
 void
-AudioRegionSelection::add (AudioRegionView* rv, bool dosort)
+RegionSelection::add (RegionView* rv, bool dosort)
 {
 	if (this->find (rv) != end()) {
 		/* we already have it */
 		return;
 	}
 
-	rv->AudioRegionViewGoingAway.connect (mem_fun(*this, &AudioRegionSelection::remove_it));
+	rv->RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
 
-	if (rv->region.first_frame() < _current_start || empty()) {
-		_current_start = rv->region.first_frame();
+	if (rv->region().first_frame() < _current_start || empty()) {
+		_current_start = rv->region().first_frame();
 	}
 	
-	if (rv->region.last_frame() > _current_end || empty()) {
-		_current_end = rv->region.last_frame();
+	if (rv->region().last_frame() > _current_end || empty()) {
+		_current_end = rv->region().last_frame();
 	}
 	
 	insert (rv);
@@ -100,15 +118,15 @@ AudioRegionSelection::add (AudioRegionView* rv, bool dosort)
 }
 
 void
-AudioRegionSelection::remove_it (AudioRegionView *rv)
+RegionSelection::remove_it (RegionView *rv)
 {
 	remove (rv);
 }
 
 bool
-AudioRegionSelection::remove (AudioRegionView* rv)
+RegionSelection::remove (RegionView* rv)
 {
-	AudioRegionSelection::iterator i;
+	RegionSelection::iterator i;
 
 	if ((i = this->find (rv)) != end()) {
 
@@ -124,7 +142,7 @@ AudioRegionSelection::remove (AudioRegionView* rv)
 
 		} else {
 			
-			AudioRegion& region ((*i)->region);
+			Region& region ((*i)->region());
 
 			if (region.first_frame() == _current_start) {
 				
@@ -165,15 +183,15 @@ AudioRegionSelection::remove (AudioRegionView* rv)
 }
 
 void
-AudioRegionSelection::add_to_layer (AudioRegionView * rv)
+RegionSelection::add_to_layer (RegionView * rv)
 {
 	// insert it into layer sorted position
 
-	list<AudioRegionView*>::iterator i;
+	list<RegionView*>::iterator i;
 
 	for (i = _bylayer.begin(); i != _bylayer.end(); ++i)
 	{
-		if (rv->region.layer() < (*i)->region.layer()) {
+		if (rv->region().layer() < (*i)->region().layer()) {
 			_bylayer.insert(i, rv);
 			return;
 		}
@@ -184,16 +202,16 @@ AudioRegionSelection::add_to_layer (AudioRegionView * rv)
 }
 
 struct RegionSortByTime {
-    bool operator() (const AudioRegionView* a, const AudioRegionView* b) {
-	    return a->region.position() < b->region.position();
+    bool operator() (const RegionView* a, const RegionView* b) {
+	    return a->region().position() < b->region().position();
     }
 };
 
 
 void
-AudioRegionSelection::by_position (list<AudioRegionView*>& foo) const
+RegionSelection::by_position (list<RegionView*>& foo) const
 {
-	list<AudioRegionView*>::const_iterator i;
+	list<RegionView*>::const_iterator i;
 	RegionSortByTime sorter;
 
 	for (i = _bylayer.begin(); i != _bylayer.end(); ++i) {

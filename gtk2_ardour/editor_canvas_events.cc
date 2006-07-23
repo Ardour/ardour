@@ -26,8 +26,8 @@
 
 #include "editor.h"
 #include "public_editor.h"
-#include "regionview.h"
-#include "streamview.h"
+#include "audio_regionview.h"
+#include "audio_streamview.h"
 #include "crossfade_view.h"
 #include "audio_time_axis.h"
 #include "region_gain_line.h"
@@ -212,9 +212,11 @@ Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 }
 
 bool
-Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
+Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView *rv)
 {
 	gint ret = FALSE;
+
+	/* FIXME: type specific */
 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
@@ -251,8 +253,10 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Aud
 }
 
 bool
-Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, AudioTimeAxisView *tv)
+Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, RouteTimeAxisView *tv)
 {
+	/* FIXME: type specific */
+
 	bool ret = FALSE;
 	
 	switch (event->type) {
@@ -262,7 +266,7 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Aud
 		clicked_regionview = 0;
 		clicked_control_point = 0;
 		clicked_trackview = tv;
-		clicked_audio_trackview = tv;
+		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(tv);
 		ret = button_press_handler (item, event, StreamItem);
 		break;
 
@@ -522,13 +526,13 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 					DescendingRegionLayerSorter cmp;
 					rl->sort (cmp);
 
-					AudioRegionView* arv = atv->view->find_view (*(dynamic_cast<AudioRegion*> (rl->front())));
+					RegionView* rv = atv->view()->find_view (*rl->front());
 
 					/* proxy */
 
 					delete rl;
 
-					return canvas_region_view_event (event, arv->get_canvas_group(), arv);
+					return canvas_region_view_event (event, rv->get_canvas_group(), rv);
 				} 
 			}
 		}
@@ -699,10 +703,12 @@ Editor::canvas_selection_end_trim_event (GdkEvent *event, ArdourCanvas::Item* it
 
 
 bool
-Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::Item* item, AudioRegionView* rv)
+Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
 {
 	bool ret = false;
 	
+	/* FIXME: type specific (audio only) */
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -711,20 +717,20 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 		clicked_control_point = 0;
 		clicked_trackview = &clicked_regionview->get_time_axis_view();
 		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
-		ret = button_press_handler (item, event, AudioRegionViewNameHighlight);
+		ret = button_press_handler (item, event, RegionViewNameHighlight);
 		break;
 	case GDK_BUTTON_RELEASE:
-		ret = button_release_handler (item, event, AudioRegionViewNameHighlight);
+		ret = button_release_handler (item, event, RegionViewNameHighlight);
 		break;
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, AudioRegionViewNameHighlight);
+		ret = motion_handler (item, event, RegionViewNameHighlight);
 		break;
 	case GDK_ENTER_NOTIFY:
-		ret = enter_handler (item, event, AudioRegionViewNameHighlight);
+		ret = enter_handler (item, event, RegionViewNameHighlight);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		ret = leave_handler (item, event, AudioRegionViewNameHighlight);
+		ret = leave_handler (item, event, RegionViewNameHighlight);
 		break;
 
 	default:
@@ -747,20 +753,20 @@ Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item
 		clicked_control_point = 0;
 		clicked_trackview = &clicked_regionview->get_time_axis_view();
 		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
-		ret = button_press_handler (item, event, AudioRegionViewName);
+		ret = button_press_handler (item, event, RegionViewName);
 		break;
 	case GDK_BUTTON_RELEASE:
-		ret = button_release_handler (item, event, AudioRegionViewName);
+		ret = button_release_handler (item, event, RegionViewName);
 		break;
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, AudioRegionViewName);
+		ret = motion_handler (item, event, RegionViewName);
 		break;
 	case GDK_ENTER_NOTIFY:
-		ret = enter_handler (item, event, AudioRegionViewName);
+		ret = enter_handler (item, event, RegionViewName);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		ret = leave_handler (item, event, AudioRegionViewName);
+		ret = leave_handler (item, event, RegionViewName);
 		break;
 
 	default:

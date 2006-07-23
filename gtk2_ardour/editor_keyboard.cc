@@ -81,10 +81,10 @@ Editor::kbd_do_split (GdkEvent* ev)
 	jack_nframes_t where = event_frame (ev);
 
 	if (entered_regionview) {
-		if (selection->audio_regions.find (entered_regionview) != selection->audio_regions.end()) {
-			split_regions_at (where, selection->audio_regions);
+		if (selection->regions.find (entered_regionview) != selection->regions.end()) {
+			split_regions_at (where, selection->regions);
 		} else {
-			AudioRegionSelection s;
+			RegionSelection s;
 			s.add (entered_regionview);
 			split_regions_at (where, s);
 		}
@@ -102,11 +102,11 @@ Editor::kbd_mute_unmute_region ()
 {
 	if (entered_regionview) {
 		begin_reversible_command (_("mute region"));
-		session->add_undo (entered_regionview->region.playlist()->get_memento());
+		session->add_undo (entered_regionview->region().playlist()->get_memento());
 		
-	    entered_regionview->region.set_muted (!entered_regionview->region.muted());
+	    entered_regionview->region().set_muted (!entered_regionview->region().muted());
 		
-		session->add_redo_no_execute (entered_regionview->region.playlist()->get_memento());
+		session->add_redo_no_execute (entered_regionview->region().playlist()->get_memento());
 		commit_reversible_command();
 	}
 }
@@ -124,7 +124,7 @@ Editor::kbd_do_set_sync_position (GdkEvent* ev)
 	snap_to (where);
 
 	if (entered_regionview) {
-	  set_a_regions_sync_position (entered_regionview->region, where);
+	  set_a_regions_sync_position (entered_regionview->region(), where);
 	}
 }
 

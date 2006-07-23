@@ -66,7 +66,7 @@ Editor::keyboard_selection_begin ()
 void
 Editor::keyboard_duplicate_region ()
 {
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
@@ -74,9 +74,9 @@ Editor::keyboard_duplicate_region ()
 	bool was_floating;
 
 	if (get_prefix (prefix, was_floating) == 0) {
-		duplicate_some_regions (selection->audio_regions, prefix);
+		duplicate_some_regions (selection->regions, prefix);
 	} else {
-		duplicate_some_regions (selection->audio_regions, 1);
+		duplicate_some_regions (selection->regions, 1);
 	}
 }
 

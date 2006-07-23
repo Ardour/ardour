@@ -1033,3 +1033,4 @@ TimeAxisView::color_handler (ColorID id, uint32_t val)
 		break;
 	}
 }
+

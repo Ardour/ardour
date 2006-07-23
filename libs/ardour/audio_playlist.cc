@@ -882,38 +882,6 @@ AudioPlaylist::crossfade_changed (Change ignored)
 	notify_modified ();
 }
 
-void
-AudioPlaylist::get_equivalent_regions (const AudioRegion& other, vector<AudioRegion*>& results)
-{
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		AudioRegion* ar = dynamic_cast<AudioRegion*> (*i);
-
-		if (ar) {
-			if (Config->get_use_overlap_equivalency()) {
-				if (ar->overlap_equivalent (other)) {
-					results.push_back (ar);
-				} else if (ar->equivalent (other)) {
-					results.push_back (ar);
-				}
-			}
-		}
-	}
-}
-
-void
-AudioPlaylist::get_region_list_equivalent_regions (const AudioRegion& other, vector<AudioRegion*>& results)
-{
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		AudioRegion* ar = dynamic_cast<AudioRegion*> (*i);
-		
-		if (ar && ar->region_list_equivalent (other)) {
-			results.push_back (ar);
-		}
-	}
-}
-
 bool
 AudioPlaylist::region_changed (Change what_changed, Region* region)
 {

@@ -72,14 +72,14 @@ RouteUI::RouteUI (ARDOUR::Route& rt, ARDOUR::Session& sess, const char* m_name,
         mute_button = manage (new BindableToggleButton (_route.mute_control(), m_name ));
         solo_button = manage (new BindableToggleButton (_route.solo_control(), s_name ));
 	
-	if (is_audio_track()) {
-		AudioTrack* at = dynamic_cast<AudioTrack*>(&_route);
+	if (is_track()) {
+		Track* t = dynamic_cast<Track*>(&_route);
 
 		get_diskstream()->RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
 
 		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
-		rec_enable_button = manage (new BindableToggleButton (at->rec_enable_control(), r_name ));
+		rec_enable_button = manage (new BindableToggleButton (t->rec_enable_control(), r_name ));
 
 		rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
 		
@@ -270,7 +270,7 @@ RouteUI::solo_release(GdkEventButton* ev)
 gint
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
-	if (!ignore_toggle && is_audio_track() && rec_enable_button) {
+	if (!ignore_toggle && is_track() && rec_enable_button) {
 
 		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
 			// do nothing on midi bind event
@@ -696,7 +696,7 @@ RouteUI::remove_this_route ()
 	vector<string> choices;
 	string prompt;
 
-	if (is_audio_track()) {
+	if (is_track()) {
 		prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n\nYou may also lose the playlist used by this track.\n(cannot be undone)"), _route.name());
 	} else {
 		prompt  = string_compose (_("Do you really want to remove bus \"%1\" ?\n(cannot be undone)"), _route.name());
@@ -872,6 +872,12 @@ RouteUI::disconnect_output ()
 }
 
 bool
+RouteUI::is_track () const
+{
+	return dynamic_cast<Track*>(&_route) != 0;
+}
+
+bool
 RouteUI::is_audio_track () const
 {
 	return dynamic_cast<AudioTrack*>(&_route) != 0;
@@ -881,6 +887,24 @@ bool
 RouteUI::is_midi_track () const
 {
 	return dynamic_cast<MidiTrack*>(&_route) != 0;
+}
+
+Track*
+RouteUI::track() const
+{
+	return dynamic_cast<Track*>(&_route);
+}
+
+AudioTrack*
+RouteUI::audio_track() const
+{
+	return dynamic_cast<AudioTrack*>(&_route);
+}
+
+MidiTrack*
+RouteUI::midi_track() const
+{
+	return dynamic_cast<MidiTrack*>(&_route);
 }
 
 Diskstream*
@@ -895,17 +919,6 @@ RouteUI::get_diskstream () const
 	}
 }
 
-AudioTrack*
-RouteUI::audio_track() const
-{
-	return dynamic_cast<AudioTrack*>(&_route);
-}
-
-MidiTrack*
-RouteUI::midi_track() const
-{
-	return dynamic_cast<MidiTrack*>(&_route);
-}
 
 string
 RouteUI::name() const

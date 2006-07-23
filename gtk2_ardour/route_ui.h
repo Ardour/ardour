@@ -26,6 +26,7 @@
 #include <pbd/xml++.h>
 #include <ardour/ardour.h>
 #include <ardour/route.h>
+#include <ardour/track.h>
 
 #include "axis_view.h"
 
@@ -48,14 +49,17 @@ class RouteUI : public virtual AxisView
 	RouteUI(ARDOUR::Route&, ARDOUR::Session&, const char*, const char*, const char*);
 	virtual ~RouteUI();
 
+	ARDOUR::Route& route() const { return _route; }
+
+	bool is_track() const;
 	bool is_audio_track() const;
 	bool is_midi_track() const;
-	//ARDOUR::AudioDiskstream* get_diskstream() const;
-	ARDOUR::Diskstream* get_diskstream() const;
 
-	ARDOUR::Route& route() const { return _route; }
+	ARDOUR::Track*      track() const;
 	ARDOUR::AudioTrack* audio_track() const;
-	ARDOUR::MidiTrack* midi_track() const;
+	ARDOUR::MidiTrack*  midi_track() const;
+	
+	ARDOUR::Diskstream* get_diskstream() const;
 
 	string name() const;
 	

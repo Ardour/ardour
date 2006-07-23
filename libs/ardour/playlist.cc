@@ -599,6 +599,31 @@ Playlist::remove_region_internal (Region *region, bool delay_sort)
 }
 
 void
+Playlist::get_equivalent_regions (const Region& other, vector<Region*>& results)
+{
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		if (Config->get_use_overlap_equivalency()) {
+			if ((*i)->overlap_equivalent (other)) {
+				results.push_back ((*i));
+			} else if ((*i)->equivalent (other)) {
+				results.push_back ((*i));
+			}
+		}
+	}
+}
+
+void
+Playlist::get_region_list_equivalent_regions (const Region& other, vector<Region*>& results)
+{
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+
+		if ((*i) && (*i)->region_list_equivalent (other)) {
+			results.push_back (*i);
+		}
+	}
+}
+
+void
 Playlist::partition (jack_nframes_t start, jack_nframes_t end, bool just_top_level)
 {
 	RegionList thawlist;

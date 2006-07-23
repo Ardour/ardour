@@ -35,7 +35,7 @@
 #include "time_axis_view.h"
 #include "public_editor.h"
 #include "selection.h"
-#include "regionview.h"
+#include "audio_regionview.h"
 
 #include "i18n.h"
 
@@ -225,7 +225,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 	
 		Selection s = PublicEditor::instance().get_selection();
 		TimeSelection ts = s.time;
-		AudioRegionSelection ars = s.audio_regions;
+		RegionSelection ars = s.regions;
 	
 	
 		for (TrackSelection::iterator i = s.tracks.begin(); i != s.tracks.end(); ++i) {
@@ -279,24 +279,29 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 				
 				TimeAxisView *current_axis = (*i);
 				
-				for (std::set<AudioRegionView *>::iterator j = ars.begin(); j != ars.end(); ++j) {
+				for (std::set<RegionView *>::iterator j = ars.begin(); j != ars.end(); ++j) {
+					// Check that the region is actually audio (so we can analyze it)
+					AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*j);
+					if (!arv)
+						continue;
+					
 					// Check that the region really is selected on _this_ track/solo
-					if ( &(*j)->get_time_axis_view() != current_axis)
+					if ( &arv->get_time_axis_view() != current_axis)
 						continue;
 
-//					cerr << " - " << (*j)->region.name() << ": " << (*j)->region.length() << " samples starting at " << (*j)->region.position() << endl;
+//					cerr << " - " << (*j)->region().name() << ": " << (*j)->region().length() << " samples starting at " << (*j)->region().position() << endl;
 					jack_nframes_t i = 0;
 					int n;
 
-					while ( i < (*j)->region.length() ) {
+					while ( i < arv->region().length() ) {
 						// TODO: What about stereo+ channels? composite all to one, I guess
 
 						n = fft_graph.windowSize();
-						if (i + n >= (*j)->region.length() ) {
-							n = (*j)->region.length() - i;
+						if (i + n >= arv->region().length() ) {
+							n = arv->region().length() - i;
 						}
-				
-						n = (*j)->region.read_at(buf, mixbuf, gain, work, (*j)->region.position() + i, n);
+
+						n = arv->audio_region().read_at(buf, mixbuf, gain, work, arv->region().position() + i, n);
 	
 						if ( n < fft_graph.windowSize()) {
 							for (int j = n; j < fft_graph.windowSize(); j++) {

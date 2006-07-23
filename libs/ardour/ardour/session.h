@@ -636,7 +636,7 @@ class Session : public sigc::trackable, public Stateful
 	string path_from_region_name (string name, string identifier);
 
 	AudioRegion* find_whole_file_parent (AudioRegion&);
-	void find_equivalent_playlist_regions (AudioRegion&, std::vector<AudioRegion*>& result);
+	void find_equivalent_playlist_regions (Region&, std::vector<Region*>& result);
 
 	AudioRegion *XMLRegionFactory (const XMLNode&, bool full);
 

@@ -121,7 +121,7 @@ class Region : public Stateful, public StateManager
 	bool hidden() const { return _flags & Hidden; }
 	bool muted() const { return _flags & Muted; }
 	bool opaque () const { return _flags & Opaque; }
-	bool envelope_active () const { return _flags & EnvelopeActive; }
+	//bool envelope_active () const { return _flags & EnvelopeActive; }
 	bool locked() const { return _flags & Locked; }
 	bool automatic() const { return  _flags & Automatic; }
 	bool whole_file() const { return _flags & WholeFile ; }
@@ -139,6 +139,12 @@ class Region : public Stateful, public StateManager
 	OverlapType coverage (jack_nframes_t start, jack_nframes_t end) const {
 		return ARDOUR::coverage (_position, _position + _length - 1, start, end);
 	}
+	
+	bool equivalent (const Region&) const;
+	bool size_equivalent (const Region&) const;
+	bool overlap_equivalent (const Region&) const;
+	bool region_list_equivalent (const Region&) const;
+	virtual bool source_equivalent (const Region&) const = 0;
 
 	/*virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
 					float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
@@ -173,7 +179,7 @@ class Region : public Stateful, public StateManager
 	void set_hidden (bool yn);
 	void set_muted (bool yn);
 	void set_opaque (bool yn);
-	void set_envelope_active (bool yn);
+	//void set_envelope_active (bool yn);
 	void set_locked (bool yn);
 
 	virtual uint32_t read_data_count() const { return _read_data_count; }

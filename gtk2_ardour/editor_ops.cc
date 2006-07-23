@@ -51,7 +51,7 @@
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "streamview.h"
-#include "regionview.h"
+#include "audio_regionview.h"
 #include "rgb_macros.h"
 #include "selection_templates.h"
 #include "selection.h"
@@ -186,29 +186,31 @@ Editor::split_region ()
 void
 Editor::split_region_at (jack_nframes_t where)
 {
-	split_regions_at (where, selection->audio_regions);
+	split_regions_at (where, selection->regions);
 }
 
 void
-Editor::split_regions_at (jack_nframes_t where, AudioRegionSelection& regions)
+Editor::split_regions_at (jack_nframes_t where, RegionSelection& regions)
 {
 	begin_reversible_command (_("split"));
 
 	snap_to (where);
-	for (AudioRegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
+	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
 
-		AudioRegionSelection::iterator tmp;
+		RegionSelection::iterator tmp;
 		
 		tmp = a;
 		++tmp;
 
-		Playlist* pl = (*a)->region.playlist();
+		Playlist* pl = (*a)->region().playlist();
 
-		_new_regionviews_show_envelope = (*a)->envelope_visible();
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*a);
+		if (arv)
+			_new_regionviews_show_envelope = arv->envelope_visible();
 		
 		if (pl) {
 			session->add_undo (pl->get_memento());
-			pl->split_region ((*a)->region, where);
+			pl->split_region ((*a)->region(), where);
 			session->add_redo_no_execute (pl->get_memento());
 		}
 
@@ -230,7 +232,7 @@ Editor::remove_clicked_region ()
 	
 	begin_reversible_command (_("remove region"));
 	session->add_undo (playlist->get_memento());
-	playlist->remove_region (&clicked_regionview->region);
+	playlist->remove_region (&clicked_regionview->region());
 	session->add_redo_no_execute (playlist->get_memento());
 	commit_reversible_command ();
 }
@@ -238,7 +240,7 @@ Editor::remove_clicked_region ()
 void
 Editor::destroy_clicked_region ()
 {
-	int32_t selected = selection->audio_regions.size();
+	int32_t selected = selection->regions.size();
 
 	if (!session || clicked_regionview == 0 && selected == 0) {
 		return;
@@ -270,29 +272,29 @@ Do you really want to destroy %1 ?"),
 	if (selected > 0) {
 		list<Region*> r;
 
-		for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-			r.push_back (&(*i)->region);
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			r.push_back (&(*i)->region());
 		}
 
 		session->destroy_regions (r);
 
 	} else if (clicked_regionview) {
-		session->destroy_region (&clicked_regionview->region);
+		session->destroy_region (&clicked_regionview->region());
 	} 
 }
 
-AudioRegion *
+Region *
 Editor::select_region_for_operation (int dir, TimeAxisView **tv)
 {
-	AudioRegionView* rv;
-	AudioRegion *region;
+	RegionView* rv;
+	Region *region;
 	jack_nframes_t start = 0;
 
 	if (selection->time.start () == selection->time.end_frame ()) {
 		
 		/* no current selection-> is there a selected regionview? */
 
-		if (selection->audio_regions.empty()) {
+		if (selection->regions.empty()) {
 			return 0;
 		}
 
@@ -300,26 +302,26 @@ Editor::select_region_for_operation (int dir, TimeAxisView **tv)
 
 	region = 0;
 
-	if (!selection->audio_regions.empty()) {
+	if (!selection->regions.empty()) {
 
-		rv = *(selection->audio_regions.begin());
+		rv = *(selection->regions.begin());
 		(*tv) = &rv->get_time_axis_view();
-		region = &rv->region;
+		region = &rv->region();
 
 	} else if (!selection->tracks.empty()) {
 
 		(*tv) = selection->tracks.front();
 
-		AudioTimeAxisView* atv;
+		RouteTimeAxisView* rtv;
 
-		if ((atv = dynamic_cast<AudioTimeAxisView*> (*tv)) != 0) {
+		if ((rtv = dynamic_cast<RouteTimeAxisView*> (*tv)) != 0) {
 			Playlist *pl;
 			
-			if ((pl = atv->playlist()) == 0) {
+			if ((pl = rtv->playlist()) == 0) {
 				return 0;
 			}
 			
-			region = dynamic_cast<AudioRegion*> (pl->top_region_at (start));
+			region = pl->top_region_at (start);
 		}
 	} 
 	
@@ -391,12 +393,12 @@ Editor::nudge_forward (bool next)
 
 	if (!session) return;
 	
-	if (!selection->audio_regions.empty()) {
+	if (!selection->regions.empty()) {
 
 		begin_reversible_command (_("nudge forward"));
 
-		for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-			AudioRegion& r ((*i)->region);
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			Region& r ((*i)->region());
 			
 			distance = get_nudge_distance (r.position(), next_distance);
 
@@ -425,12 +427,12 @@ Editor::nudge_backward (bool next)
 
 	if (!session) return;
 	
-	if (!selection->audio_regions.empty()) {
+	if (!selection->regions.empty()) {
 
 		begin_reversible_command (_("nudge forward"));
 
-		for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-			AudioRegion& r ((*i)->region);
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			Region& r ((*i)->region());
 
 			distance = get_nudge_distance (r.position(), next_distance);
 			
@@ -469,14 +471,14 @@ Editor::nudge_forward_capture_offset ()
 
 	if (!session) return;
 	
-	if (!selection->audio_regions.empty()) {
+	if (!selection->regions.empty()) {
 
 		begin_reversible_command (_("nudge forward"));
 
 		distance = session->worst_output_latency();
 
-		for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-			AudioRegion& r ((*i)->region);
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			Region& r ((*i)->region());
 			
 			session->add_undo (r.playlist()->get_memento());
 			r.set_position (r.position() + distance, this);
@@ -495,14 +497,14 @@ Editor::nudge_backward_capture_offset ()
 
 	if (!session) return;
 	
-	if (!selection->audio_regions.empty()) {
+	if (!selection->regions.empty()) {
 
 		begin_reversible_command (_("nudge forward"));
 
 		distance = session->worst_output_latency();
 
-		for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-			AudioRegion& r ((*i)->region);
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			Region& r ((*i)->region());
 
 			session->add_undo (r.playlist()->get_memento());
 			
@@ -782,8 +784,8 @@ Editor::cursor_to_selection_start (Cursor *cursor)
 	jack_nframes_t pos = 0;
 	switch (mouse_mode) {
 	case MouseObject:
-		if (!selection->audio_regions.empty()) {
-			pos = selection->audio_regions.start();
+		if (!selection->regions.empty()) {
+			pos = selection->regions.start();
 		}
 		break;
 
@@ -811,8 +813,8 @@ Editor::cursor_to_selection_end (Cursor *cursor)
 
 	switch (mouse_mode) {
 	case MouseObject:
-		if (!selection->audio_regions.empty()) {
-			pos = selection->audio_regions.end_frame();
+		if (!selection->regions.empty()) {
+			pos = selection->regions.end_frame();
 		}
 		break;
 
@@ -1310,12 +1312,12 @@ Editor::add_location_from_playhead_cursor ()
 void
 Editor::add_location_from_audio_region ()
 {
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
-	AudioRegionView* rv = *(selection->audio_regions.begin());
-	Region& region = rv->region;
+	RegionView* rv = *(selection->regions.begin());
+	Region& region = rv->region();
 	
 	Location *location = new Location (region.position(), region.last_frame(), region.name());
 	session->begin_reversible_command (_("add marker"));
@@ -1442,12 +1444,12 @@ Editor::select_all_within (jack_nframes_t start, jack_nframes_t end, double top,
 void
 Editor::set_selection_from_audio_region ()
 {
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
-	AudioRegionView* rv = *(selection->audio_regions.begin());
-	Region& region = rv->region;
+	RegionView* rv = *(selection->regions.begin());
+	Region& region = rv->region();
 	
 	begin_reversible_command (_("set selection from region"));
 	selection->set (0, region.position(), region.last_frame());
@@ -1827,13 +1829,13 @@ Editor::insert_region_list_drag (AudioRegion& region, int x, int y)
 void
 Editor::insert_region_list_selection (float times)
 {
-	AudioTimeAxisView *tv = 0;
+	RouteTimeAxisView *tv = 0;
 	Playlist *playlist;
 
 	if (clicked_audio_trackview != 0) {
 		tv = clicked_audio_trackview;
 	} else if (!selection->tracks.empty()) {
-		if ((tv = dynamic_cast<AudioTimeAxisView*>(selection->tracks.front())) == 0) {
+		if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
 			return;
 		}
 	} else {
@@ -1928,23 +1930,23 @@ Editor::play_selection ()
 void
 Editor::play_selected_region ()
 {
-	if (!selection->audio_regions.empty()) {
-		AudioRegionView *rv = *(selection->audio_regions.begin());
+	if (!selection->regions.empty()) {
+		RegionView *rv = *(selection->regions.begin());
 
-		session->request_bounded_roll (rv->region.position(), rv->region.last_frame());	
+		session->request_bounded_roll (rv->region().position(), rv->region().last_frame());	
 	}
 }
 
 void
 Editor::loop_selected_region ()
 {
-	if (!selection->audio_regions.empty()) {
-		AudioRegionView *rv = *(selection->audio_regions.begin());
+	if (!selection->regions.empty()) {
+		RegionView *rv = *(selection->regions.begin());
 		Location* tll;
 
 		if ((tll = transport_loop_location()) != 0)  {
 
-			tll->set (rv->region.position(), rv->region.last_frame());
+			tll->set (rv->region().position(), rv->region().last_frame());
 			
 			// enable looping, reposition and start rolling
 
@@ -1987,10 +1989,10 @@ void
 Editor::toggle_region_mute ()
 {
 	if (clicked_regionview) {
-		clicked_regionview->region.set_muted (!clicked_regionview->region.muted());
-	} else if (!selection->audio_regions.empty()) {
-		bool yn = ! (*selection->audio_regions.begin())->region.muted();
-		selection->foreach_audio_region (&AudioRegion::set_muted, yn);
+		clicked_regionview->region().set_muted (!clicked_regionview->region().muted());
+	} else if (!selection->regions.empty()) {
+		bool yn = ! (*selection->regions.begin())->region().muted();
+		selection->foreach_region (&Region::set_muted, yn);
 	}
 }
 
@@ -1998,35 +2000,35 @@ void
 Editor::toggle_region_opaque ()
 {
 	if (clicked_regionview) {
-		clicked_regionview->region.set_opaque (!clicked_regionview->region.opaque());
-	} else if (!selection->audio_regions.empty()) {
-		bool yn = ! (*selection->audio_regions.begin())->region.opaque();
-		selection->foreach_audio_region (&Region::set_opaque, yn);
+		clicked_regionview->region().set_opaque (!clicked_regionview->region().opaque());
+	} else if (!selection->regions.empty()) {
+		bool yn = ! (*selection->regions.begin())->region().opaque();
+		selection->foreach_region (&Region::set_opaque, yn);
 	}
 }
 
 void
 Editor::raise_region ()
 {
-	selection->foreach_audio_region (&Region::raise);
+	selection->foreach_region (&Region::raise);
 }
 
 void
 Editor::raise_region_to_top ()
 {
-	selection->foreach_audio_region (&Region::raise_to_top);
+	selection->foreach_region (&Region::raise_to_top);
 }
 
 void
 Editor::lower_region ()
 {
-	selection->foreach_audio_region (&Region::lower);
+	selection->foreach_region (&Region::lower);
 }
 
 void
 Editor::lower_region_to_bottom ()
 {
-	selection->foreach_audio_region (&Region::lower_to_bottom);
+	selection->foreach_region (&Region::lower_to_bottom);
 }
 
 void
@@ -2047,7 +2049,7 @@ Editor::rename_region ()
 	Button ok_button (_("OK"));
 	Button cancel_button (_("Cancel"));
 
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
@@ -2078,7 +2080,7 @@ Editor::rename_region ()
 	Main::run ();
 
 	if (region_renamed) {
-		(*selection->audio_regions.begin())->region.set_name (entry.get_text());
+		(*selection->regions.begin())->region().set_name (entry.get_text());
 		redisplay_regions ();
 	}
 }
@@ -2092,7 +2094,7 @@ Editor::rename_region_finished (bool status)
 }
 
 void
-Editor::audition_playlist_region_via_route (AudioRegion& region, Route& route)
+Editor::audition_playlist_region_via_route (Region& region, Route& route)
 {
 	if (session->is_auditioning()) {
 		session->cancel_audition ();
@@ -2113,16 +2115,22 @@ Editor::audition_playlist_region_via_route (AudioRegion& region, Route& route)
 void
 Editor::audition_selected_region ()
 {
-	if (!selection->audio_regions.empty()) {
-		AudioRegionView* rv = *(selection->audio_regions.begin());
-		session->audition_region (rv->region);
+	if (!selection->regions.empty()) {
+		RegionView* rv = *(selection->regions.begin());
+		// FIXME
+		AudioRegion* const ar = dynamic_cast<AudioRegion*>(&rv->region());
+		assert(ar);
+		session->audition_region (*ar);
 	}
 }
 
 void
-Editor::audition_playlist_region_standalone (AudioRegion& region)
+Editor::audition_playlist_region_standalone (Region& region)
 {
-	session->audition_region (region);
+	// FIXME
+	AudioRegion* const ar = dynamic_cast<AudioRegion*>(&region);
+	assert(ar);
+	session->audition_region (*ar);
 }
 
 void
@@ -2191,6 +2199,8 @@ Editor::region_from_selection ()
 			internal_start = start - current->position();
 			session->region_name (new_name, current->name(), true);
 			region = new AudioRegion (*current, internal_start, selection_cnt, new_name);
+		} else {
+			assert(false); // FIXME
 		}
 	}
 }	
@@ -2237,11 +2247,13 @@ Editor::split_multichannel_region ()
 {
 	vector<AudioRegion*> v;
 
-	if (!clicked_regionview || clicked_regionview->region.n_channels() < 2) {
+	AudioRegionView* clicked_arv = dynamic_cast<AudioRegionView*>(clicked_regionview);
+	
+	if (!clicked_arv || clicked_arv->audio_region().n_channels() < 2) {
 		return;
 	}
 
-	clicked_regionview->region.separate_by_channel (*session, v);
+	clicked_arv->audio_region().separate_by_channel (*session, v);
 
 	/* nothing else to do, really */
 }
@@ -2419,7 +2431,7 @@ Editor::region_fill_track ()
 {
 	jack_nframes_t end;
 
-	if (!session || selection->audio_regions.empty()) {
+	if (!session || selection->regions.empty()) {
 		return;
 	}
 
@@ -2427,9 +2439,15 @@ Editor::region_fill_track ()
 
 	begin_reversible_command (_("region fill"));
 
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
-		AudioRegion& region ((*i)->region);
+		Region& region ((*i)->region());
+		
+		// FIXME
+		AudioRegion* const ar = dynamic_cast<AudioRegion*>(&region);
+		if (!ar)
+			continue;
+
 		Playlist* pl = region.playlist();
 
 		if (end <= region.last_frame()) {
@@ -2443,7 +2461,7 @@ Editor::region_fill_track ()
 		}
 
 		session->add_undo (pl->get_memento());
-		pl->add_region (*(new AudioRegion (region)), region.last_frame(), times);
+		pl->add_region (*(new AudioRegion (*ar)), ar->last_frame(), times);
 		session->add_redo_no_execute (pl->get_memento());
 	}
 
@@ -2522,12 +2540,12 @@ Editor::set_region_sync_from_edit_cursor ()
 		return;
 	}
 
-	if (!clicked_regionview->region.covers (edit_cursor->current_frame)) {
+	if (!clicked_regionview->region().covers (edit_cursor->current_frame)) {
 		error << _("Place the edit cursor at the desired sync point") << endmsg;
 		return;
 	}
 
-	Region& region (clicked_regionview->region);
+	Region& region (clicked_regionview->region());
 	begin_reversible_command (_("set sync from edit cursor"));
 	session->add_undo (region.playlist()->get_memento());
 	region.set_sync_position (edit_cursor->current_frame);
@@ -2539,7 +2557,7 @@ void
 Editor::remove_region_sync ()
 {
 	if (clicked_regionview) {
-		Region& region (clicked_regionview->region);
+		Region& region (clicked_regionview->region());
 		begin_reversible_command (_("remove sync"));
 		session->add_undo (region.playlist()->get_memento());
 		region.clear_sync_position ();
@@ -2551,14 +2569,14 @@ Editor::remove_region_sync ()
 void
 Editor::naturalize ()
 {
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		return;
 	}
 	begin_reversible_command (_("naturalize"));
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-		session->add_undo ((*i)->region.get_memento());
-		(*i)->region.move_to_natural_position (this);
-		session->add_redo_no_execute ((*i)->region.get_memento());
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		session->add_undo ((*i)->region().get_memento());
+		(*i)->region().move_to_natural_position (this);
+		session->add_redo_no_execute ((*i)->region().get_memento());
 	}
 	commit_reversible_command ();
 }
@@ -2577,14 +2595,14 @@ Editor::align_relative (RegionPoint what)
 
 struct RegionSortByTime {
     bool operator() (const AudioRegionView* a, const AudioRegionView* b) {
-	    return a->region.position() < b->region.position();
+	    return a->region().position() < b->region().position();
     }
 };
 
 void
 Editor::align_selection_relative (RegionPoint point, jack_nframes_t position)
 {
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
@@ -2592,9 +2610,9 @@ Editor::align_selection_relative (RegionPoint point, jack_nframes_t position)
 	jack_nframes_t pos = 0;
 	int dir;
 
-	list<AudioRegionView*> sorted;
-	selection->audio_regions.by_position (sorted);
-	Region& r ((*sorted.begin())->region);
+	list<RegionView*> sorted;
+	selection->regions.by_position (sorted);
+	Region& r ((*sorted.begin())->region());
 
 	switch (point) {
 	case Start:
@@ -2620,9 +2638,9 @@ Editor::align_selection_relative (RegionPoint point, jack_nframes_t position)
 
 	begin_reversible_command (_("align selection (relative)"));
 
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
-		Region& region ((*i)->region);
+		Region& region ((*i)->region());
 
 		session->add_undo (region.playlist()->get_memento());
 		
@@ -2642,14 +2660,14 @@ Editor::align_selection_relative (RegionPoint point, jack_nframes_t position)
 void
 Editor::align_selection (RegionPoint point, jack_nframes_t position)
 {
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
 	begin_reversible_command (_("align selection"));
 
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-		align_region_internal ((*i)->region, point, position);
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		align_region_internal ((*i)->region(), point, position);
 	}
 
 	commit_reversible_command ();
@@ -2694,7 +2712,7 @@ Editor::trim_region_to_edit_cursor ()
 		return;
 	}
 
-	Region& region (clicked_regionview->region);
+	Region& region (clicked_regionview->region());
 
 	float speed = 1.0f;
 	AudioTimeAxisView *atav;
@@ -2719,7 +2737,7 @@ Editor::trim_region_from_edit_cursor ()
 		return;
 	}
 
-	Region& region (clicked_regionview->region);
+	Region& region (clicked_regionview->region());
 
 	float speed = 1.0f;
 	AudioTimeAxisView *atav;
@@ -2890,16 +2908,16 @@ Editor::cut_copy (CutCopyOp op)
 
 	switch (current_mouse_mode()) {
 	case MouseObject: 
-		if (!selection->audio_regions.empty() || !selection->points.empty()) {
+		if (!selection->regions.empty() || !selection->points.empty()) {
 
 			begin_reversible_command (opname + _(" objects"));
 
-			if (!selection->audio_regions.empty()) {
+			if (!selection->regions.empty()) {
 				
 				cut_copy_regions (op);
 				
 				if (op == Cut) {
-					selection->clear_audio_regions ();
+					selection->clear_regions ();
 				}
 			}
 
@@ -2956,11 +2974,11 @@ Editor::cut_copy_regions (CutCopyOp op)
 	set<Playlist*> freezelist;
 	pair<set<Playlist*>::iterator,bool> insert_result;
 
-	for (AudioRegionSelection::iterator x = selection->audio_regions.begin(); x != selection->audio_regions.end(); ++x) {
-		first_position = min ((*x)->region.position(), first_position);
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+		first_position = min ((*x)->region().position(), first_position);
 
 		if (op == Cut || op == Clear) {
-			AudioPlaylist *pl = dynamic_cast<AudioPlaylist*>((*x)->region.playlist());
+			AudioPlaylist *pl = dynamic_cast<AudioPlaylist*>((*x)->region().playlist());
 			if (pl) {
 				insert_result = freezelist.insert (pl);
 				if (insert_result.second) {
@@ -2971,11 +2989,11 @@ Editor::cut_copy_regions (CutCopyOp op)
 		}
 	}
 
-	for (AudioRegionSelection::iterator x = selection->audio_regions.begin(); x != selection->audio_regions.end(); ) {
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ) {
 
-		AudioPlaylist *pl = dynamic_cast<AudioPlaylist*>((*x)->region.playlist());
+		AudioPlaylist *pl = dynamic_cast<AudioPlaylist*>((*x)->region().playlist());
 		AudioPlaylist* npl;
-		AudioRegionSelection::iterator tmp;
+		RegionSelection::iterator tmp;
 		
 		tmp = x;
 		++tmp;
@@ -2992,18 +3010,24 @@ Editor::cut_copy_regions (CutCopyOp op)
 				npl = pi->second;
 			}
 
+			// FIXME
+			AudioRegion* const ar = dynamic_cast<AudioRegion*>(&(*x)->region());
 			switch (op) {
 			case Cut:
-				npl->add_region (*(new AudioRegion ((*x)->region)), (*x)->region.position() - first_position);
-				pl->remove_region (&((*x)->region));
+				if (!ar) break;
+
+				npl->add_region (*(new AudioRegion (*ar)), (*x)->region().position() - first_position);
+				pl->remove_region (&((*x)->region()));
 				break;
 
 			case Copy:
-				npl->add_region (*(new AudioRegion ((*x)->region)), (*x)->region.position() - first_position);
+				if (!ar) break;
+
+				npl->add_region (*(new AudioRegion (*ar)), (*x)->region().position() - first_position);
 				break;
 
 			case Clear:
-				pl->remove_region (&((*x)->region));
+				pl->remove_region (&((*x)->region()));
 				break;
 			}
 		}
@@ -3149,24 +3173,24 @@ Editor::paste_named_selection (float times)
 }
 
 void
-Editor::duplicate_some_regions (AudioRegionSelection& regions, float times)
+Editor::duplicate_some_regions (RegionSelection& regions, float times)
 {
 	Playlist *playlist; 
-	AudioRegionSelection sel = regions; // clear (below) will clear the argument list
+	RegionSelection sel = regions; // clear (below) will clear the argument list
 		
 	begin_reversible_command (_("duplicate region"));
 
-	selection->clear_audio_regions ();
+	selection->clear_regions ();
 
-	for (AudioRegionSelection::iterator i = sel.begin(); i != sel.end(); ++i) {
+	for (RegionSelection::iterator i = sel.begin(); i != sel.end(); ++i) {
 
-		Region& r ((*i)->region);
+		Region& r ((*i)->region());
 
 		TimeAxisView& tv = (*i)->get_time_axis_view();
 		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&tv);
-		sigc::connection c = atv->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+		sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 		
- 		playlist = (*i)->region.playlist();
+ 		playlist = (*i)->region().playlist();
 		session->add_undo (playlist->get_memento());
 		playlist->duplicate (r, r.last_frame(), times);
 		session->add_redo_no_execute (playlist->get_memento());
@@ -3336,7 +3360,7 @@ Editor::normalize_region ()
 		return;
 	}
 
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
@@ -3345,10 +3369,13 @@ Editor::normalize_region ()
 	track_canvas.get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
-	for (AudioRegionSelection::iterator r = selection->audio_regions.begin(); r != selection->audio_regions.end(); ++r) {
-		session->add_undo ((*r)->region.get_memento());
-		(*r)->region.normalize_to (0.0f);
-		session->add_redo_no_execute ((*r)->region.get_memento());
+	for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
+		if (!arv)
+			continue;
+		session->add_undo (arv->region().get_memento());
+		arv->audio_region().normalize_to (0.0f);
+		session->add_redo_no_execute (arv->region().get_memento());
 	}
 
 	commit_reversible_command ();
@@ -3363,16 +3390,19 @@ Editor::denormalize_region ()
 		return;
 	}
 
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
 	begin_reversible_command ("denormalize");
 
-	for (AudioRegionSelection::iterator r = selection->audio_regions.begin(); r != selection->audio_regions.end(); ++r) {
-		session->add_undo ((*r)->region.get_memento());
-		(*r)->region.set_scale_amplitude (1.0f);
-		session->add_redo_no_execute ((*r)->region.get_memento());
+	for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
+		if (!arv)
+			continue;
+		session->add_undo (arv->region().get_memento());
+		arv->audio_region().set_scale_amplitude (1.0f);
+		session->add_redo_no_execute (arv->region().get_memento());
 	}
 
 	commit_reversible_command ();
@@ -3393,7 +3423,7 @@ Editor::reverse_region ()
 void
 Editor::apply_filter (AudioFilter& filter, string command)
 {
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
@@ -3402,20 +3432,22 @@ Editor::apply_filter (AudioFilter& filter, string command)
 	track_canvas.get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
-	for (AudioRegionSelection::iterator r = selection->audio_regions.begin(); r != selection->audio_regions.end(); ) {
+	for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
+		if (!arv)
+			continue;
 
-		AudioRegion& region ((*r)->region);
-		Playlist* playlist = region.playlist();
+		Playlist* playlist = arv->region().playlist();
 
-		AudioRegionSelection::iterator tmp;
+		RegionSelection::iterator tmp;
 		
 		tmp = r;
 		++tmp;
 
-		if (region.apply (filter) == 0) {
+		if (arv->audio_region().apply (filter) == 0) {
 
 			session->add_undo (playlist->get_memento());
-			playlist->replace_region (region, *(filter.results.front()), region.position());
+			playlist->replace_region (arv->region(), *(filter.results.front()), arv->region().position());
 			session->add_redo_no_execute (playlist->get_memento());
 		} else {
 			goto out;
@@ -3425,7 +3457,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 	}
 
 	commit_reversible_command ();
-	selection->audio_regions.clear ();
+	selection->regions.clear ();
 
   out:
 	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
@@ -3434,8 +3466,8 @@ Editor::apply_filter (AudioFilter& filter, string command)
 void
 Editor::region_selection_op (void (Region::*pmf)(void))
 {
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-		((*i)->region.*pmf)();
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		((*i)->region().*pmf)();
 	}
 }
 
@@ -3443,16 +3475,16 @@ Editor::region_selection_op (void (Region::*pmf)(void))
 void
 Editor::region_selection_op (void (Region::*pmf)(void*), void *arg)
 {
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-		((*i)->region.*pmf)(arg);
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		((*i)->region().*pmf)(arg);
 	}
 }
 
 void
 Editor::region_selection_op (void (Region::*pmf)(bool), bool yn)
 {
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-		((*i)->region.*pmf)(yn);
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		((*i)->region().*pmf)(yn);
 	}
 }
 
@@ -3469,20 +3501,20 @@ Editor::external_edit_region ()
 void
 Editor::brush (jack_nframes_t pos)
 {
-	AudioRegionSelection sel;
+	RegionSelection sel;
 	snap_to (pos);
 
-	if (selection->audio_regions.empty()) {
+	if (selection->regions.empty()) {
 		/* XXX get selection from region list */
 	} else { 
-		sel = selection->audio_regions;
+		sel = selection->regions;
 	}
 
 	if (sel.empty()) {
 		return;
 	}
 
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		mouse_brush_insert_region ((*i), pos);
 	}
 }
@@ -3490,18 +3522,19 @@ Editor::brush (jack_nframes_t pos)
 void
 Editor::toggle_gain_envelope_visibility ()
 {
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-		(*i)->set_envelope_visible (!(*i)->envelope_visible());
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv)
+			arv->set_envelope_visible (!arv->envelope_visible());
 	}
 }
 
 void
 Editor::toggle_gain_envelope_active ()
 {
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
-		AudioRegion* ar = dynamic_cast<AudioRegion*>(&(*i)->region);
-		if (ar) {
-			ar->set_envelope_active (true);
-		}
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv)
+			arv->audio_region().set_envelope_active (true);
 	}
 }

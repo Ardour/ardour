@@ -21,15 +21,17 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
+#include <cassert>
 
 #include "editor.h"
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
+#include "midi_time_axis.h"
 #include "mixer_strip.h"
 #include "gui_thread.h"
 
 #include <ardour/route.h>
-#include <ardour/audio_track.h>
+//#include <ardour/audio_track.h>
 
 #include "i18n.h"
 
@@ -39,26 +41,27 @@ using namespace PBD;
 using namespace Gtk;
 
 void
-Editor::handle_new_route_p (Route* route)
+Editor::handle_new_route (Route* route)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route_p), route));
-	handle_new_route (*route);
-}
-
-void
-Editor::handle_new_route (Route& route)
-{
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route), route));
+	
 	TimeAxisView *tv;
-	AudioTimeAxisView *atv;
 	TreeModel::Row parent;
 	TreeModel::Row row;
 
-	if (route.hidden()) {
+	if (route->hidden()) {
 		return;
 	}
-	
-	tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
 
+	// FIXME
+	Buffer::Type type = route->default_type();
+	assert(type == Buffer::AUDIO || type == Buffer::MIDI);
+	
+	if (type == Buffer::AUDIO)
+		tv = new AudioTimeAxisView (*this, *session, *route, track_canvas);
+	else
+		tv = new MidiTimeAxisView (*this, *session, *route, track_canvas);
+	
 #if 0
 	if (route_display_model->children().size() == 0) {
 		
@@ -89,7 +92,7 @@ Editor::handle_new_route (Route& route)
 	row = *(route_display_model->append ());
 #endif
 
-	row[route_display_columns.text] = route.name();
+	row[route_display_columns.text] = route->name();
 	row[route_display_columns.visible] = tv->marked_for_display();
 	row[route_display_columns.tv] = tv;
 	
@@ -97,16 +100,17 @@ Editor::handle_new_route (Route& route)
 
 	ignore_route_list_reorder = true;
 	
-	if ((atv = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
+	RouteTimeAxisView* rtv = NULL;
+	if ((rtv = dynamic_cast<RouteTimeAxisView*> (tv)) != 0) {
 		/* added a new fresh one at the end */
-		if (atv->route().order_key(N_("editor")) == -1) {
-		        atv->route().set_order_key (N_("editor"), route_display_model->children().size()-1);
+		if (rtv->route().order_key(N_("editor")) == -1) {
+		        rtv->route().set_order_key (N_("editor"), route_display_model->children().size()-1);
 		}
 	}
 
 	ignore_route_list_reorder = false;
 	
-	route.gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
+	route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
 
 	tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	
@@ -496,7 +500,7 @@ Editor::initial_route_list_display ()
 	route_display_model->clear ();
 
 	for (Session::RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-		handle_new_route (**i);
+		handle_new_route (*i);
 	}
 
 	no_route_list_redisplay = false;

@@ -59,11 +59,7 @@ class MidiRegion : public Region
 	MidiRegion (SourceList &, const XMLNode&);
 	~MidiRegion();
 
-	bool region_list_equivalent (const MidiRegion&) const ;
-	bool source_equivalent (const MidiRegion&) const;
-	bool equivalent (const MidiRegion&) const;
-	bool size_equivalent (const MidiRegion&) const;
-	bool overlap_equivalent (const MidiRegion&) const;
+	bool source_equivalent (const Region&) const;
 
 	bool speed_mismatch (float) const;
 

@@ -46,7 +46,7 @@ Selection&
 Selection::operator= (const Selection& other)
 {
 	if (&other != this) {
-		audio_regions = other.audio_regions;
+		regions = other.regions;
 		tracks = other.tracks;
 		time = other.time;
 		lines = other.lines;
@@ -57,7 +57,7 @@ Selection::operator= (const Selection& other)
 bool
 operator== (const Selection& a, const Selection& b)
 {
-	return a.audio_regions == b.audio_regions &&
+	return a.regions == b.regions &&
 		a.tracks == b.tracks &&
 		a.time.track == b.time.track &&
 		a.time.group == b.time.group && 
@@ -71,7 +71,7 @@ void
 Selection::clear ()
 {
 	clear_tracks ();
-	clear_audio_regions ();
+	clear_regions ();
 	clear_points ();
 	clear_lines();
 	clear_time ();
@@ -83,8 +83,8 @@ void
 Selection::dump_region_layers()
 {
 	cerr << "region selection layer dump" << endl;
-	for (AudioRegionSelection::iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
-		cerr << "layer: " << (int)(*i)->region.layer() << endl;
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+		cerr << "layer: " << (int)(*i)->region().layer() << endl;
 	}
 }
 
@@ -99,10 +99,10 @@ Selection::clear_redirects ()
 }
 
 void
-Selection::clear_audio_regions ()
+Selection::clear_regions ()
 {
-	if (!audio_regions.empty()) {
-		audio_regions.clear_all ();
+	if (!regions.empty()) {
+		regions.clear_all ();
 		RegionsChanged();
 	}
 }
@@ -196,29 +196,29 @@ Selection::toggle (TimeAxisView* track)
 }
 
 void
-Selection::toggle (AudioRegionView* r)
+Selection::toggle (RegionView* r)
 {
-	AudioRegionSelection::iterator i;
+	RegionSelection::iterator i;
 
-	if ((i = find (audio_regions.begin(), audio_regions.end(), r)) == audio_regions.end()) {
-		audio_regions.add (r);
+	if ((i = find (regions.begin(), regions.end(), r)) == regions.end()) {
+		regions.add (r);
 	} else {
-		audio_regions.erase (i);
+		regions.erase (i);
 	}
 
 	RegionsChanged ();
 }
 
 void
-Selection::toggle (vector<AudioRegionView*>& r)
+Selection::toggle (vector<RegionView*>& r)
 {
-	AudioRegionSelection::iterator i;
+	RegionSelection::iterator i;
 
-	for (vector<AudioRegionView*>::iterator x = r.begin(); x != r.end(); ++x) {
-		if ((i = find (audio_regions.begin(), audio_regions.end(), (*x))) == audio_regions.end()) {
-			audio_regions.add ((*x));
+	for (vector<RegionView*>::iterator x = r.begin(); x != r.end(); ++x) {
+		if ((i = find (regions.begin(), regions.end(), (*x))) == regions.end()) {
+			regions.add ((*x));
 		} else {
-			audio_regions.erase (i);
+			regions.erase (i);
 		}
 	}
 
@@ -310,22 +310,22 @@ Selection::add (TimeAxisView* track)
 }
 
 void
-Selection::add (AudioRegionView* r)
+Selection::add (RegionView* r)
 {
-	if (find (audio_regions.begin(), audio_regions.end(), r) == audio_regions.end()) {
-		audio_regions.add (r);
+	if (find (regions.begin(), regions.end(), r) == regions.end()) {
+		regions.add (r);
 		RegionsChanged ();
 	}
 }
 
 void
-Selection::add (vector<AudioRegionView*>& v)
+Selection::add (vector<RegionView*>& v)
 {
 	bool changed = false;
 
-	for (vector<AudioRegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
-		if (find (audio_regions.begin(), audio_regions.end(), (*i)) == audio_regions.end()) {
-			audio_regions.add ((*i));
+	for (vector<RegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
+		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
+			regions.add ((*i));
 			changed = true;
 		}
 	}
@@ -451,9 +451,9 @@ Selection::remove (const list<Playlist*>& pllist)
 }
 
 void
-Selection::remove (AudioRegionView* r)
+Selection::remove (RegionView* r)
 {
-	audio_regions.remove (r);
+	regions.remove (r);
 	RegionsChanged ();
 }
 
@@ -526,17 +526,16 @@ Selection::set (const list<Playlist*>& pllist)
 }
 
 void
-Selection::set (AudioRegionView* r)
+Selection::set (RegionView* r)
 {
-	clear_audio_regions ();
+	clear_regions ();
 	add (r);
 }
 
 void
-Selection::set (vector<AudioRegionView*>& v)
+Selection::set (vector<RegionView*>& v)
 {
-
-	clear_audio_regions ();
+	clear_regions ();
 	// make sure to deselect any automation selections
 	clear_points();
 	add (v);
@@ -590,15 +589,15 @@ Selection::selected (TimeAxisView* tv)
 }
 
 bool
-Selection::selected (AudioRegionView* arv)
+Selection::selected (RegionView* rv)
 {
-	return find (audio_regions.begin(), audio_regions.end(), arv) != audio_regions.end();
+	return find (regions.begin(), regions.end(), rv) != regions.end();
 }
 
 bool
 Selection::empty ()
 {
-	return audio_regions.empty () &&
+	return regions.empty () &&
 		tracks.empty () &&
 		points.empty () && 
 		playlists.empty () && 
@@ -612,7 +611,7 @@ Selection::empty ()
 void
 Selection::set (list<Selectable*>& selectables)
 {
-	clear_audio_regions();
+	clear_regions();
 	clear_points ();
 	add (selectables);
 }
@@ -620,14 +619,14 @@ Selection::set (list<Selectable*>& selectables)
 void
 Selection::add (list<Selectable*>& selectables)
 {
-	AudioRegionView* arv;
+	RegionView* rv;
 	AutomationSelectable* as;
-	vector<AudioRegionView*> arvs;
+	vector<RegionView*> rvs;
 	vector<AutomationSelectable*> autos;
 
 	for (std::list<Selectable*>::iterator i = selectables.begin(); i != selectables.end(); ++i) {
-		if ((arv = dynamic_cast<AudioRegionView*> (*i)) != 0) {
-			arvs.push_back (arv);
+		if ((rv = dynamic_cast<RegionView*> (*i)) != 0) {
+			rvs.push_back (rv);
 		} else if ((as = dynamic_cast<AutomationSelectable*> (*i)) != 0) {
 			autos.push_back (as);
 		} else {
@@ -638,8 +637,8 @@ Selection::add (list<Selectable*>& selectables)
 		}
 	}
 
-	if (!arvs.empty()) {
-		add (arvs);
+	if (!rvs.empty()) {
+		add (rvs);
 	} 
 
 	if (!autos.empty()) {

@@ -714,9 +714,9 @@ Editor::marker_menu_set_from_selection ()
 				}
 			}
 			else {
-				if (!selection->audio_regions.empty()) {
-					l->set_start (selection->audio_regions.start());
-					l->set_end (selection->audio_regions.end_frame());
+				if (!selection->regions.empty()) {
+					l->set_start (selection->regions.start());
+					l->set_end (selection->regions.end_frame());
 				}
 			}
 		}

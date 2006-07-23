@@ -81,6 +81,8 @@ class IO : public Stateful, public ARDOUR::StateManager
 	void set_output_minimum (int n);
 	void set_output_maximum (int n);
 
+	Buffer::Type default_type() const { return _default_type; }
+
 	const string& name() const { return _name; }
 	virtual int set_name (string str, void *src);
 	

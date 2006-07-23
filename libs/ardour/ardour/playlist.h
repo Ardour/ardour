@@ -81,6 +81,8 @@ class Playlist : public Stateful, public StateManager {
 
 	void add_region (const Region&, jack_nframes_t position, float times = 1, bool with_save = true);
 	void remove_region (Region *);
+	void get_equivalent_regions (const Region&, std::vector<Region*>&);
+	void get_region_list_equivalent_regions (const Region&, std::vector<Region*>&);
 	void replace_region (Region& old, Region& newr, jack_nframes_t pos);
 	void split_region (Region&, jack_nframes_t position);
 	void partition (jack_nframes_t start, jack_nframes_t end, bool just_top_level);

@@ -27,7 +27,7 @@
 class ExportRegionDialog : public ExportDialog
 {
   public:
-	ExportRegionDialog (PublicEditor&, ARDOUR::AudioRegion*);
+	ExportRegionDialog (PublicEditor&, ARDOUR::Region*);
  
  	static void* _export_region_thread (void *);
 	void export_region ();

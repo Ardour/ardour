@@ -1,3 +1,21 @@
+/*
+    Copyright (C) 2006 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
 #ifndef __ardour_gtk_region_selection_h__
 #define __ardour_gtk_region_selection_h__
 
@@ -9,23 +27,23 @@
 using std::list;
 using std::set;
 
-class AudioRegionView;
+class RegionView;
 
-struct AudioRegionComparator {
-    bool operator() (const AudioRegionView* a, const AudioRegionView* b) const;
+struct RegionComparator {
+    bool operator() (const RegionView* a, const RegionView* b) const;
 };
 
-class AudioRegionSelection : public set<AudioRegionView*, AudioRegionComparator>, public sigc::trackable
+class RegionSelection : public set<RegionView*, RegionComparator>, public sigc::trackable
 {
   public:
-        AudioRegionSelection();
-	AudioRegionSelection (const AudioRegionSelection&);
+	RegionSelection();
+	RegionSelection (const RegionSelection&);
 
-	AudioRegionSelection& operator= (const AudioRegionSelection&);
+	RegionSelection& operator= (const RegionSelection&);
 
-	void add (AudioRegionView*, bool dosort = true);
-	bool remove (AudioRegionView*);
-	bool contains (AudioRegionView*);
+	void add (RegionView*, bool dosort = true);
+	bool remove (RegionView*);
+	bool contains (RegionView*);
 
 	void clear_all();
 	
@@ -39,18 +57,18 @@ class AudioRegionSelection : public set<AudioRegionView*, AudioRegionComparator>
 		return _current_end;
 	}
 
-	const list<AudioRegionView *> & by_layer() const { return _bylayer; }
-	void  by_position (list<AudioRegionView*>&) const;
+	const list<RegionView *> & by_layer() const { return _bylayer; }
+	void  by_position (list<RegionView*>&) const;
 	
   private:
-	void remove_it (AudioRegionView*);
+	void remove_it (RegionView*);
 
-	void add_to_layer (AudioRegionView *);
+	void add_to_layer (RegionView *);
 	
 	jack_nframes_t _current_start;
 	jack_nframes_t _current_end;
 
-	list<AudioRegionView *> _bylayer;
+	list<RegionView *> _bylayer;
 };
 
 #endif /* __ardour_gtk_region_selection_h__ */

@@ -501,30 +501,19 @@ style "editor_time_ruler" = "small_text"
 	bg[NORMAL] = { 0.09, 0.09, 0.09 }
 }
 
-style "audio_track_base" = "default_base"
-{
-  font_name = "sans 6"
-  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
-  bg[NORMAL] = { 0.18, 0.18, 0.22 }
-  bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
-  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
-  bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
-  bg[SELECTED] = { 0.20, 0.20, 0.20 }
-}
-
 style "audio_bus_base"
 {
   font_name = "sans 6"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
-  bg[NORMAL] = {0, 0.40, 0.36 }	
+  bg[NORMAL] = { 0.20, 0.20, 0.26 }	
 }
 
-style "midi_track_base" = "default_base"
+style "audio_track_base" = "default_base"
 {
   font_name = "sans 6"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
-  bg[NORMAL] = { 0.22, 0.18, 0.18 }
+  bg[NORMAL] = { 0.32, 0.32, 0.45 }
   bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
   bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
   bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
@@ -536,7 +525,18 @@ style "midi_bus_base"
   font_name = "sans 6"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   fg[NORMAL] = { 0.8, 0.7, 0.2 }	
-  bg[NORMAL] = {0.40, 0.36, 0.00 }	
+  bg[NORMAL] = { 0.26, 0.20, 0.20 }	
+}
+
+style "midi_track_base" = "default_base"
+{
+  font_name = "sans 6"
+  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
+  bg[NORMAL] = { 0.48, 0.30, 0.32 }
+  bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
+  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
+  bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
+  bg[SELECTED] = { 0.20, 0.20, 0.20 }
 }
 
 style "track_name_display"
@@ -1028,13 +1028,20 @@ widget "*BBTRuler" style "editor_time_ruler"
 widget "*FramesRuler" style "editor_time_ruler"
 widget "*MinSecRuler" style "editor_time_ruler"
 widget "*BaseFrame" style "base_frame"
-widget "*BusControlsBaseUnselected" style "audio_bus_base"
+widget "*AudioBusControlsBaseUnselected" style "audio_bus_base"
+widget "*AudioBusControlsBaseInactiveUnselected" style "track_controls_inactive"
+widget "*AudioBusControlsBaseInactiveSelected" style "track_controls_inactive"
+widget "*AudioBusControlsBaseSelected" style "edit_controls_base_selected"
 widget "*AudioTimeAxisViewControlsBaseUnselected" style "audio_track_base"
 widget "*AudioTrackStripBase" style "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style "audio_track_base"
 widget "*AudioTrackFader" style "audio_track_base"
 widget "*AudioBusStripBase" style "audio_bus_base"
 widget "*AudioBusFader" style "audio_bus_base"
+widget "*MidiBusControlsBaseUnselected" style "midi_bus_base"
+widget "*MidiBusControlsBaseInactiveUnselected" style "track_controls_inactive"
+widget "*MidiBusControlsBaseInactiveSelected" style "track_controls_inactive"
+widget "*MidiBusControlsBaseSelected" style "edit_controls_base_selected"
 widget "*MidiTimeAxisViewControlsBaseUnselected" style "midi_track_base"
 widget "*MidiTrackStripBase" style "midi_track_base"
 widget "*MidiTrackControlsBaseUnselected" style "midi_track_base"
@@ -1065,15 +1072,12 @@ widget "*MouseModeButton" style "default_buttons_menus"
 widget "*MouseModeButton*" style "default_buttons_menus"
 widget "*EditorMainCanvas" style "main_canvas_area"
 widget "*AudioTrackControlsBaseInactiveUnselected" style "track_controls_inactive"
-widget "*BusControlsBaseInactiveUnselected" style "track_controls_inactive"
 widget "*AutomationTrackControlsBaseInactiveUnselected" style "track_controls_inactive"
 widget "*AudioTrackControlsBaseInactiveSelected" style "track_controls_inactive"
-widget "*BusControlsBaseInactiveSelected" style "track_controls_inactive"
 widget "*AutomationTrackControlsBaseInactiveSelected" style "track_controls_inactive"
 widget "*AudioTrackStripBaseInactive" style "track_controls_inactive"
 widget "*AudioBusStripBaseInactive" style "track_controls_inactive"
 widget "*AudioTrackControlsBaseSelected" style "edit_controls_base_selected"
-widget "*BusControlsBaseSelected" style "edit_controls_base_selected"
 widget "*AutomationTrackControlsBase" style "automation_track_controls_base"
 widget "*AutomationTrackControlsBaseSelected" style "edit_controls_base_selected"
 /*widget "*EditorMenuBar*" style "black_mackie_menu_bar"

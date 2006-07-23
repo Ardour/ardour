@@ -990,3 +990,30 @@ Region::set_last_layer_op (uint64_t when)
 {
 	_last_layer_op = when;
 }
+
+bool
+Region::overlap_equivalent (const Region& other) const
+{
+	return coverage (other.first_frame(), other.last_frame()) != OverlapNone;
+}
+
+bool
+Region::equivalent (const Region& other) const
+{
+	return _start == other._start &&
+		_position == other._position &&
+		_length == other._length;
+}
+
+bool
+Region::size_equivalent (const Region& other) const
+{
+	return _start == other._start &&
+		_length == other._length;
+}
+
+bool
+Region::region_list_equivalent (const Region& other) const
+{
+	return size_equivalent (other) && source_equivalent (other) && _name == other._name;
+}

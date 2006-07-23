@@ -255,7 +255,7 @@ VisualTimeAxis::set_time_axis_color(Gdk::Color c)
 }
 
 void
-VisualTimeAxis::set_selected_regionviews (AudioRegionSelection& regions)
+VisualTimeAxis::set_selected_regionviews (RegionSelection& regions)
 {
 	// Not handled by purely visual TimeAxis
 }

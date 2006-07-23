@@ -2774,18 +2774,10 @@ Session::find_whole_file_parent (AudioRegion& child)
 }	
 
 void
-Session::find_equivalent_playlist_regions (AudioRegion& region, vector<AudioRegion*>& result)
+Session::find_equivalent_playlist_regions (Region& region, vector<Region*>& result)
 {
-	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-
-		AudioPlaylist* pl;
-
-		if ((pl = dynamic_cast<AudioPlaylist*>(*i)) == 0) {
-			continue;
-		}
-
-		pl->get_region_list_equivalent_regions (region, result);
-	}
+	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i)
+		(*i)->get_region_list_equivalent_regions (region, result);
 }
 
 int

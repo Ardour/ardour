@@ -56,10 +56,10 @@
 #include "keyboard.h"
 #include "marker.h"
 #include "playlist_selector.h"
-#include "regionview.h"
+#include "audio_regionview.h"
 #include "rgb_macros.h"
 #include "selection.h"
-#include "streamview.h"
+#include "audio_streamview.h"
 #include "time_axis_view.h"
 #include "utils.h"
 #include "crossfade_view.h"
@@ -681,7 +681,7 @@ Editor::Editor (AudioEngine& eng)
 	_playlist_selector = new PlaylistSelector();
 	_playlist_selector->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
 
-	AudioRegionView::AudioRegionViewGoingAway.connect (mem_fun(*this, &Editor::catch_vanishing_audio_regionview));
+	RegionView::RegionViewGoingAway.connect (mem_fun(*this, &Editor::catch_vanishing_regionview));
 
 	/* nudge stuff */
 
@@ -739,7 +739,7 @@ Editor::add_toplevel_controls (Container& cont)
 }
 
 void
-Editor::catch_vanishing_audio_regionview (AudioRegionView *rv)
+Editor::catch_vanishing_regionview (RegionView *rv)
 {
 	/* note: the selection will take care of the vanishing
 	   audioregionview by itself.
@@ -755,7 +755,7 @@ Editor::catch_vanishing_audio_regionview (AudioRegionView *rv)
 }
 
 void
-Editor::set_entered_regionview (AudioRegionView* rv)
+Editor::set_entered_regionview (RegionView* rv)
 {
 	if (rv == entered_regionview) {
 		return;
@@ -1185,7 +1185,7 @@ Editor::connect_to_session (Session *t)
 
 	session_connections.push_back (session->TransportStateChange.connect (mem_fun(*this, &Editor::map_transport_state)));
 	session_connections.push_back (session->PositionChanged.connect (mem_fun(*this, &Editor::map_position_change)));
-	session_connections.push_back (session->RouteAdded.connect (mem_fun(*this, &Editor::handle_new_route_p)));
+	session_connections.push_back (session->RouteAdded.connect (mem_fun(*this, &Editor::handle_new_route)));
 	session_connections.push_back (session->AudioRegionAdded.connect (mem_fun(*this, &Editor::handle_new_audio_region)));
 	session_connections.push_back (session->AudioRegionRemoved.connect (mem_fun(*this, &Editor::handle_audio_region_removed)));
 	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::handle_new_duration)));
@@ -1409,7 +1409,7 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 	switch (item_type) {
 	case FadeInItem:
 	case FadeInHandleItem:
-		if (arv->region.fade_in_active()) {
+		if (arv->audio_region().fade_in_active()) {
 			items.push_back (MenuElem (_("Deactivate"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_active), false)));
 		} else {
 			items.push_back (MenuElem (_("Activate"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_active), true)));
@@ -1417,16 +1417,16 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		
 		items.push_back (SeparatorElem());
 		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (arv->region, &AudioRegion::set_fade_in_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (arv->region, &AudioRegion::set_fade_in_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (arv->region, &AudioRegion::set_fade_in_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (arv->region, &AudioRegion::set_fade_in_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (arv->region, &AudioRegion::set_fade_in_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Linear"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_in_shape), AudioRegion::Linear)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_in_shape), AudioRegion::LogB)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_in_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Fast"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_in_shape), AudioRegion::LogA)));
+		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_in_shape), AudioRegion::Slow)));
 		break;
 
 	case FadeOutItem:
 	case FadeOutHandleItem:
-		if (arv->region.fade_out_active()) {
+		if (arv->audio_region().fade_out_active()) {
 			items.push_back (MenuElem (_("Deactivate"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_active), false)));
 		} else {
 			items.push_back (MenuElem (_("Activate"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_active), true)));
@@ -1434,11 +1434,11 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		
 		items.push_back (SeparatorElem());
 		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (arv->region, &AudioRegion::set_fade_out_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (arv->region, &AudioRegion::set_fade_out_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (arv->region, &AudioRegion::set_fade_out_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (arv->region, &AudioRegion::set_fade_out_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (arv->region, &AudioRegion::set_fade_out_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Linear"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_out_shape), AudioRegion::Linear)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_out_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_out_shape), AudioRegion::LogB)));
+		items.push_back (MenuElem (_("Fast"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_out_shape), AudioRegion::LogA)));
+		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_out_shape), AudioRegion::Slow)));
 
 		break;
 	default:
@@ -1460,8 +1460,8 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 
 	switch (item_type) {
 	case RegionItem:
-	case AudioRegionViewName:
-	case AudioRegionViewNameHighlight:
+	case RegionViewName:
+	case RegionViewNameHighlight:
 		if (with_selection) {
 			build_menu_function = &Editor::build_track_selection_context_menu;
 		} else {
@@ -1501,25 +1501,26 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 
 	switch (item_type) {
 	case RegionItem:
-	case AudioRegionViewName:
-	case AudioRegionViewNameHighlight:
+	case RegionViewName:
+	case RegionViewNameHighlight:
 		if (!with_selection) {
 			if (region_edit_menu_split_item) {
-				if (clicked_regionview && clicked_regionview->region.covers (edit_cursor->current_frame)) {
+				if (clicked_regionview && clicked_regionview->region().covers (edit_cursor->current_frame)) {
 					ActionManager::set_sensitive (ActionManager::edit_cursor_in_region_sensitive_actions, true);
 				} else {
 					ActionManager::set_sensitive (ActionManager::edit_cursor_in_region_sensitive_actions, false);
 				}
 			}
+			/*
 			if (region_edit_menu_split_multichannel_item) {
-				if (clicked_regionview && clicked_regionview->region.n_channels() > 1) {
+				if (clicked_regionview && clicked_regionview->region().n_channels() > 1) {
 					// GTK2FIX find the action, change its sensitivity
 					// region_edit_menu_split_multichannel_item->set_sensitive (true);
 				} else {
 					// GTK2FIX see above
 					// region_edit_menu_split_multichannel_item->set_sensitive (false);
 				}
-			}
+			}*/
 		}
 		break;
 
@@ -1605,7 +1606,7 @@ Editor::build_track_region_context_menu (jack_nframes_t frame)
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
 			Playlist::RegionList* regions = pl->regions_at ((jack_nframes_t) floor ( (double)frame * ds->speed()));
 			for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
-				add_region_context_items (atv->view, (*i), edit_items);
+				add_region_context_items (atv->audio_view(), (*i), edit_items);
 			}
 			delete regions;
 		}
@@ -1640,11 +1641,11 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 			bool many = xfades.size() > 1;
 
 			for (AudioPlaylist::Crossfades::iterator i = xfades.begin(); i != xfades.end(); ++i) {
-				add_crossfade_context_items (atv->view, (*i), edit_items, many);
+				add_crossfade_context_items (atv->audio_view(), (*i), edit_items, many);
 			}
 
 			for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
-				add_region_context_items (atv->view, (*i), edit_items);
+				add_region_context_items (atv->audio_view(), (*i), edit_items);
 			}
 
 			delete regions;
@@ -1710,7 +1711,7 @@ Editor::build_track_selection_context_menu (jack_nframes_t ignored)
 }
 
 void
-Editor::add_crossfade_context_items (StreamView* view, Crossfade* xfade, Menu_Helpers::MenuList& edit_items, bool many)
+Editor::add_crossfade_context_items (AudioStreamView* view, Crossfade* xfade, Menu_Helpers::MenuList& edit_items, bool many)
 {
 	using namespace Menu_Helpers;
 	Menu     *xfade_menu = manage (new Menu);
@@ -1767,7 +1768,7 @@ Editor::xfade_edit_right_region ()
 }
 
 void
-Editor::add_region_context_items (StreamView* sv, Region* region, Menu_Helpers::MenuList& edit_items)
+Editor::add_region_context_items (AudioStreamView* sv, Region* region, Menu_Helpers::MenuList& edit_items)
 {
 	using namespace Menu_Helpers;
 	Menu     *region_menu = manage (new Menu);
@@ -3019,31 +3020,31 @@ Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl)
 }
 
 void
-Editor::mapped_set_selected_regionview_from_click (AudioTimeAxisView& atv, uint32_t ignored, 
-						  AudioRegionView* basis, vector<AudioRegionView*>* all_equivs)
+Editor::mapped_set_selected_regionview_from_click (RouteTimeAxisView& tv, uint32_t ignored, 
+						  RegionView* basis, vector<RegionView*>* all_equivs)
 {
-	AudioPlaylist* pl;
-	vector<AudioRegion*> results;
-	AudioRegionView* marv;
-	AudioDiskstream* ds;
+	Playlist* pl;
+	vector<Region*> results;
+	RegionView* marv;
+	Diskstream* ds;
 
-	if ((ds = atv.get_diskstream()) == 0) {
+	if ((ds = tv.get_diskstream()) == 0) {
 		/* bus */
 		return;
 	}
 
-	if (&atv == &basis->get_time_axis_view()) {
+	if (&tv == &basis->get_time_axis_view()) {
 		/* looking in same track as the original */
 		return;
 	}
 
 	
-	if ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) != 0) {
-		pl->get_equivalent_regions (basis->region, results);
+	if ((pl = dynamic_cast<Playlist*>(ds->playlist())) != 0) {
+		pl->get_equivalent_regions (basis->region(), results);
 	}
 	
-	for (vector<AudioRegion*>::iterator ir = results.begin(); ir != results.end(); ++ir) {
-		if ((marv = atv.view->find_view (**ir)) != 0) {
+	for (vector<Region*>::iterator ir = results.begin(); ir != results.end(); ++ir) {
+		if ((marv = tv.view()->find_view (**ir)) != 0) {
 			all_equivs->push_back (marv);
 		}
 	}
@@ -3052,7 +3053,7 @@ Editor::mapped_set_selected_regionview_from_click (AudioTimeAxisView& atv, uint3
 bool
 Editor::set_selected_regionview_from_click (bool press, Selection::Operation op, bool no_track_remove)
 {
-	vector<AudioRegionView*> all_equivalent_regions;
+	vector<RegionView*> all_equivalent_regions;
 	bool commit = false;
 
 	if (!clicked_regionview || !clicked_audio_trackview) {
@@ -3107,7 +3108,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 						commit = true;
 					}
 					
-					for (vector<AudioRegionView*>::iterator i = all_equivalent_regions.begin(); i != all_equivalent_regions.end(); ++i) {
+					for (vector<RegionView*>::iterator i = all_equivalent_regions.begin(); i != all_equivalent_regions.end(); ++i) {
 						selection->add (*i);
 					}
 				} 
@@ -3140,58 +3141,58 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		last_frame = 0;
 		first_frame = max_frames;
 
-		for (AudioRegionSelection::iterator x = selection->audio_regions.begin(); x != selection->audio_regions.end(); ++x) {
+		for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
 			if (&(*x)->get_time_axis_view() == &clicked_regionview->get_time_axis_view()) {
 
-				if ((*x)->region.last_frame() > last_frame) {
-					last_frame = (*x)->region.last_frame();
+				if ((*x)->region().last_frame() > last_frame) {
+					last_frame = (*x)->region().last_frame();
 				}
 
-				if ((*x)->region.first_frame() < first_frame) {
-					first_frame = (*x)->region.first_frame();
+				if ((*x)->region().first_frame() < first_frame) {
+					first_frame = (*x)->region().first_frame();
 				}
 			}
 		}
 
 		/* 2. figure out the boundaries for our search for new objects */
 
-		switch (clicked_regionview->region.coverage (first_frame, last_frame)) {
+		switch (clicked_regionview->region().coverage (first_frame, last_frame)) {
 		case OverlapNone:
 			cerr << "no overlap, first = " << first_frame << " last = " << last_frame << " region = " 
-			     << clicked_regionview->region.first_frame() << " .. " << clicked_regionview->region.last_frame() << endl;
+			     << clicked_regionview->region().first_frame() << " .. " << clicked_regionview->region().last_frame() << endl;
 
-			if (last_frame < clicked_regionview->region.first_frame()) {
+			if (last_frame < clicked_regionview->region().first_frame()) {
 				first_frame = last_frame;
-				last_frame = clicked_regionview->region.last_frame();
+				last_frame = clicked_regionview->region().last_frame();
 			} else {
 				last_frame = first_frame;
-				first_frame = clicked_regionview->region.first_frame();
+				first_frame = clicked_regionview->region().first_frame();
 			}
 			break;
 
 		case OverlapExternal:
 			cerr << "external overlap, first = " << first_frame << " last = " << last_frame << " region = " 
-			     << clicked_regionview->region.first_frame() << " .. " << clicked_regionview->region.last_frame() << endl;
+			     << clicked_regionview->region().first_frame() << " .. " << clicked_regionview->region().last_frame() << endl;
 
-			if (last_frame < clicked_regionview->region.first_frame()) {
+			if (last_frame < clicked_regionview->region().first_frame()) {
 				first_frame = last_frame;
-				last_frame = clicked_regionview->region.last_frame();
+				last_frame = clicked_regionview->region().last_frame();
 			} else {
 				last_frame = first_frame;
-				first_frame = clicked_regionview->region.first_frame();
+				first_frame = clicked_regionview->region().first_frame();
 			}
 			break;
 
 		case OverlapInternal:
 			cerr << "internal overlap, first = " << first_frame << " last = " << last_frame << " region = " 
-			     << clicked_regionview->region.first_frame() << " .. " << clicked_regionview->region.last_frame() << endl;
+			     << clicked_regionview->region().first_frame() << " .. " << clicked_regionview->region().last_frame() << endl;
 
-			if (last_frame < clicked_regionview->region.first_frame()) {
+			if (last_frame < clicked_regionview->region().first_frame()) {
 				first_frame = last_frame;
-				last_frame = clicked_regionview->region.last_frame();
+				last_frame = clicked_regionview->region().last_frame();
 			} else {
 				last_frame = first_frame;
-				first_frame = clicked_regionview->region.first_frame();
+				first_frame = clicked_regionview->region().first_frame();
 			}
 			break;
 
@@ -3217,18 +3218,18 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		
 		/* 3. convert to a vector of audio regions */
 
-		vector<AudioRegionView*> audio_regions;
+		vector<RegionView*> regions;
 		
 		for (list<Selectable*>::iterator x = results.begin(); x != results.end(); ++x) {
-			AudioRegionView* arv;
+			RegionView* arv;
 
-			if ((arv = dynamic_cast<AudioRegionView*>(*x)) != 0) {
-				audio_regions.push_back (arv);
+			if ((arv = dynamic_cast<RegionView*>(*x)) != 0) {
+				regions.push_back (arv);
 			}
 		}
 
-		if (!audio_regions.empty()) {
-			selection->add (audio_regions);
+		if (!regions.empty()) {
+			selection->add (regions);
 			commit = true;
 		}
 	}
@@ -3238,37 +3239,32 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 }
 
 void
-Editor::set_selected_regionview_from_region_list (Region& r, Selection::Operation op)
+Editor::set_selected_regionview_from_region_list (Region& region, Selection::Operation op)
 {
-	vector<AudioRegionView*> all_equivalent_regions;
-	AudioRegion* region;
-
-	if ((region = dynamic_cast<AudioRegion*>(&r)) == 0) {
-		return;
-	}
+	vector<RegionView*> all_equivalent_regions;
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		
-		AudioTimeAxisView* tatv;
+		RouteTimeAxisView* tatv;
 		
-		if ((tatv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
+		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 			
-			AudioPlaylist* pl;
-			vector<AudioRegion*> results;
-			AudioRegionView* marv;
-			AudioDiskstream* ds;
+			Playlist* pl;
+			vector<Region*> results;
+			RegionView* marv;
+			Diskstream* ds;
 			
 			if ((ds = tatv->get_diskstream()) == 0) {
 				/* bus */
 				continue;
 			}
 
-			if ((pl = dynamic_cast<AudioPlaylist*>(ds->playlist())) != 0) {
-				pl->get_region_list_equivalent_regions (*region, results);
+			if ((pl = dynamic_cast<Playlist*>(ds->playlist())) != 0) {
+				pl->get_region_list_equivalent_regions (region, results);
 			}
 			
-			for (vector<AudioRegion*>::iterator ir = results.begin(); ir != results.end(); ++ir) {
-				if ((marv = tatv->view->find_view (**ir)) != 0) {
+			for (vector<Region*>::iterator ir = results.begin(); ir != results.end(); ++ir) {
+				if ((marv = tatv->view()->find_view (**ir)) != 0) {
 					all_equivalent_regions.push_back (marv);
 				}
 			}
@@ -3297,10 +3293,10 @@ Editor::set_selected_regionview_from_region_list (Region& r, Selection::Operatio
 bool
 Editor::set_selected_regionview_from_map_event (GdkEventAny* ev, StreamView* sv, Region* r)
 {
-	AudioRegionView* rv;
-	AudioRegion* ar;
+	RegionView* rv;
+	Region* ar;
 
-	if ((ar = dynamic_cast<AudioRegion*> (r)) == 0) {
+	if ((ar = dynamic_cast<Region*> (r)) == 0) {
 		return TRUE;
 	}
 
@@ -3312,7 +3308,7 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* ev, StreamView* sv,
 	   a single other region.
 	*/
 
-	if (selection->audio_regions.size() > 1) {
+	if (selection->regions.size() > 1) {
 		return TRUE;
 	}
 	
@@ -3477,7 +3473,7 @@ Editor::duplicate_dialog (bool dup_region)
 
 	if (sscanf (text.c_str(), "%f", &times) == 1) {
 		if (dup_region) {
-			AudioRegionSelection regions;
+			RegionSelection regions;
 			regions.add (clicked_regionview);
 			duplicate_some_regions (regions, times);
 		} else {
@@ -3699,7 +3695,7 @@ void
 Editor::region_selection_changed ()
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->set_selected_regionviews (selection->audio_regions);
+		(*i)->set_selected_regionviews (selection->regions);
 	}
 }
 
@@ -3969,8 +3965,8 @@ Editor::playlist_deletion_dialog (Playlist* pl)
 bool
 Editor::audio_region_selection_covers (jack_nframes_t where)
 {
-	for (AudioRegionSelection::iterator a = selection->audio_regions.begin(); a != selection->audio_regions.end(); ++a) {
-		if ((*a)->region.covers (where)) {
+	for (RegionSelection::iterator a = selection->regions.begin(); a != selection->regions.end(); ++a) {
+		if ((*a)->region().covers (where)) {
 			return true;
 		}
 	}
@@ -3981,10 +3977,10 @@ Editor::audio_region_selection_covers (jack_nframes_t where)
 void
 Editor::prepare_for_cleanup ()
 {
-	cut_buffer->clear_audio_regions ();
+	cut_buffer->clear_regions ();
 	cut_buffer->clear_playlists ();
 
-	selection->clear_audio_regions ();
+	selection->clear_regions ();
 	selection->clear_playlists ();
 }
 

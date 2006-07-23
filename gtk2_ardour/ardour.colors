@@ -2,12 +2,12 @@ cWaveForm 0.0 0.0 0.0 0.80
 cMutedWaveForm 0.35 0.35 0.35 1.0
 cSelectedFrameBase 0.0 0.57 0.66 0.5
 cFrameBase 0.0 0.76 0.75 0.5
-cAudioTrackBase 0.75 0.75 0.85 0.41
 cAudioTrackOutline 0.00 0.00 0.00 1.00
-cAudioBusBase 0.75 0.80 0.75 0.41
-cMidiTrackBase 0.85 0.75 0.75 0.41
+cAudioTrackBase 0.80 0.80 1.0 0.5
+cAudioBusBase 0.65 0.65 0.75 0.41
 cMidiTrackOutline 0.00 0.00 0.00 1.00
-cMidiBusBase 0.80 0.75 0.75 0.41
+cMidiTrackBase 1.0 0.85 0.85 0.5
+cMidiBusBase 0.75 0.65 0.65 0.41
 cMeterBar 0.40 0.40 0.40 1.0
 cTempoBar 0.45 0.45 0.45 1.0
 cMarkerBar 0.50 0.50 0.50 1.0

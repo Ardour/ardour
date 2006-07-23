@@ -21,7 +21,7 @@ namespace ARDOUR {
 
 class PublicEditor;
 class TimeSelection;
-class AudioRegionSelection;
+class RegionSelection;
 class PointSelection;
 class AutomationLine;
 class GhostRegion;

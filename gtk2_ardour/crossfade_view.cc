@@ -29,7 +29,7 @@
 #include "rgb_macros.h"
 #include "audio_time_axis.h"
 #include "public_editor.h"
-#include "regionview.h"
+#include "audio_regionview.h"
 #include "utils.h"
 #include "canvas_impl.h"
 
@@ -43,7 +43,7 @@ using namespace Canvas;
 sigc::signal<void,CrossfadeView*> CrossfadeView::GoingAway;
 
 CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent, 
-			      AudioTimeAxisView &tv, 
+			      RouteTimeAxisView &tv, 
 			      Crossfade& xf, 
 			      double spu,
 			      Gdk::Color& basic_color,
@@ -227,7 +227,7 @@ CrossfadeView::set_valid (bool yn)
 AudioRegionView&
 CrossfadeView::upper_regionview () const
 {
-	if (left_view.region.layer() > right_view.region.layer()) {
+	if (left_view.region().layer() > right_view.region().layer()) {
 		return left_view;
 	} else {
 		return right_view;
