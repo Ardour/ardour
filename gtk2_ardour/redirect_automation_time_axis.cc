@@ -97,9 +97,11 @@ RedirectAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, 
 		lines.front()->view_to_model_y (y);
 		
 		_session.begin_reversible_command (description);
-		_session.add_undo (alist.get_memento());
+                XMLNode &before, &after;
+                before = alist.get_state();
 		alist.add (when, y);
-		_session.add_redo_no_execute (alist.get_memento());
+                after = alist.get_state();
+                _session.add_command(MementoCommand<AutomationList>(alist, before, after));
 		_session.commit_reversible_command ();
 		_session.set_dirty ();
 	}

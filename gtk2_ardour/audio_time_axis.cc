@@ -1786,9 +1786,10 @@ AudioTimeAxisView::paste (jack_nframes_t pos, float times, Selection& selection,
 	if (get_diskstream()->speed() != 1.0f)
 		pos = session_frame_to_track_frame(pos, get_diskstream()->speed() );
 	
-	_session.add_undo (playlist->get_memento());
+        XMLNode &before = playlist->get_state();
 	playlist->paste (**p, pos, times);
-	_session.add_redo_no_execute (playlist->get_memento());
+        _session.add_command(MementoCommand<Playlist>(*playlist, before, 
+                                                      playlist->get_state()));
 
 	return true;
 }

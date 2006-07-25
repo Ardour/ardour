@@ -662,9 +662,9 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, jack_nframes_t pos, flo
 		(*x)->value = foo;
 	}
 
-	_session.add_undo (alist.get_memento());
+        XMLNode &before = alist.get_state();
 	alist.paste (copy, pos, times);
-	_session.add_redo_no_execute (alist.get_memento());
+	_session.add_command (MementoCommand<AutomationList>(alist, before, alist.get_state()));
 
 	return true;
 }

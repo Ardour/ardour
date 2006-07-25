@@ -1144,7 +1144,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 	gain_line->view_to_model_y (y);
 
 	trackview.session().begin_reversible_command (_("add gain control point"));
-	trackview.session().add_undo (region.envelope().get_memento());
+        XMLNode &before = region.envelope().get_state();
 
 
 	if (!region.envelope_active()) {
@@ -1155,7 +1155,8 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	region.envelope().add (fx, y);
 	
-	trackview.session().add_redo_no_execute (region.envelope().get_memento());
+	XMLNode &after = region.envelope().get_state();
+	trackview.session().add_command(MementoCommand<Curve>(region.envelope(), before, after));
 	trackview.session().commit_reversible_command ();
 }
 

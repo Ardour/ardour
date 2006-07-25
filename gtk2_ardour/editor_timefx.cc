@@ -203,9 +203,10 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 			return;
 		}
 
-		session->add_undo (playlist->get_memento());
+		XMLNode &before = playlist->get_state();
 		playlist->replace_region (aregion, *new_region, aregion.position());
-		session->add_redo_no_execute (playlist->get_memento());
+		XMLNode &after = playlist->get_state();
+		session->add_command (MementoCommand<Playlist>(*playlist, before, after));
 
 		i = tmp;
 	}

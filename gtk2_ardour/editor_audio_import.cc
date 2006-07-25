@@ -318,9 +318,9 @@ int
 			
 			AudioRegion* copy = new AudioRegion (region);
 			begin_reversible_command (_("insert sndfile"));
-			session->add_undo (playlist->get_memento());
+                        XMLNode &before = playlist->get_state();
 			playlist->add_region (*copy, pos);
-			session->add_redo_no_execute (playlist->get_memento());
+			session->add_command (MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 			commit_reversible_command ();
 
 			pos += region.length();

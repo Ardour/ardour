@@ -1013,11 +1013,11 @@ AutomationLine::remove_point (ControlPoint& cp)
 	model_representation (cp, mr);
 
 	trackview.editor.current_session()->begin_reversible_command (_("remove control point"));
-	trackview.editor.current_session()->add_undo (get_memento());
+        XMLNode &before = get_state();
 
 	alist.erase (mr.start, mr.end);
 
-	trackview.editor.current_session()->add_redo_no_execute (get_memento());
+	trackview.editor.current_session()->add_command(MementoCommand<AutomationLine>(*this, before, get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }
@@ -1225,9 +1225,10 @@ void
 AutomationLine::clear ()
 {
 	/* parent must create command */
+        XMLNode &before = get_state();
 	trackview.editor.current_session()->add_undo (get_memento());
 	alist.clear();
-	trackview.editor.current_session()->add_redo_no_execute (get_memento());
+	trackview.editor.current_session()->add_command (MementoCommand<AutomationLine>(*this, before, get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }
