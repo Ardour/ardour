@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -59,9 +59,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* Paths */
 	  path_table (11, 2),
-	  sfdb_path_columns(),
-	  sfdb_paths(ListStore::create(sfdb_path_columns)),
-	  sfdb_path_view(sfdb_paths),
+	  sfdb_path_view(),
 
 	  /* Fades */
 
@@ -250,10 +248,6 @@ OptionEditor::setup_path_options()
 	label->set_name("OptionsLabel");
 	path_table.attach(*label, 0, 1, 2, 3, FILL|EXPAND, FILL);
 	path_table.attach(sfdb_path_view, 1, 3, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
-
-	sfdb_path_view.append_column(_("Paths"), sfdb_path_columns.paths);
-	sfdb_path_view.set_size_request(-1, 100);
-	sfdb_path_view.set_headers_visible (false);
 
 	path_table.show_all();
 }

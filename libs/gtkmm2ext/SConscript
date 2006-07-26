@@ -24,10 +24,10 @@ gtkmm2ext.Merge ([
 
 domain = 'libgtkmm2ext'
 
-gtkmm2ext.Append(DOMAIN=domain,MAJOR=0,MINOR=8,MICRO=2)
+gtkmm2ext.Append(DOMAIN=domain,MAJOR=0,MINOR=8,MICRO=3)
 gtkmm2ext.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkmm2ext.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
-gtkmm2ext.Append(CPPPATH='#libs/surfaces/control_protocol')
+#gtkmm2ext.Append(CPPPATH='#libs/surfaces/control_protocol')
 gtkmm2ext.Append(PACKAGE=domain)
 gtkmm2ext.Append(POTFILE=domain + '.pot')
 
@@ -42,6 +42,7 @@ fastmeter.cc
 gtk_ui.cc
 hexentry.cc
 idle_adjustment.cc
+pathlist.cc
 pixscroller.cc
 popup.cc
 prompter.cc
