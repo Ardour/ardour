@@ -72,7 +72,7 @@ PathList::get_paths ()
 void
 PathList::set_paths (vector<string> paths)
 {
-	_store.clear();
+	_store->clear();
 	
 	for (vector<string>::iterator i = paths.begin(); i != paths.end(); ++i) {
 		Gtk::ListStore::iterator iter = _store->append();
@@ -99,7 +99,7 @@ PathList::add_btn_clicked ()
 			Gtk::ListStore::Row row = *iter;
 			row[path_columns.paths] = pathname;
 			
-			paths_updated (); // EMIT_SIGNAL
+			PathsUpdated (); // EMIT_SIGNAL
 		}
 	}
 }
@@ -110,7 +110,7 @@ PathList::subtract_btn_clicked ()
 	Gtk::ListStore::iterator iter = _view.get_selection()->get_selected();
 	_store->erase (iter);
 	
-	paths_updated (); // EMIT_SIGNAL
+	PathsUpdated (); // EMIT_SIGNAL
 }
 
 void

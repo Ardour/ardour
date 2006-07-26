@@ -36,7 +36,7 @@ class PathList : public Gtk::VBox
 	std::vector<std::string> get_paths ();
 	void set_paths (std::vector<std::string> paths);
 	
-	sigc::signal<void> paths_updated;
+	sigc::signal<void> PathsUpdated;
 	
   protected:
 	Gtk::Button    add_btn;

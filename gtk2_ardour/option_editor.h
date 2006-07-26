@@ -81,6 +81,7 @@ class OptionEditor : public Gtk::Dialog
 	void add_session_paths ();
 	void remove_session_paths ();
 	void raid_path_changed ();
+	void sfdb_paths_changed ();
 
 	/* fades */
 
