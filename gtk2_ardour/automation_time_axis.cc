@@ -551,7 +551,7 @@ AutomationTimeAxisView::reset_objects_one (AutomationLine& line, PointSelection&
 {
 	AutomationList& alist (line.the_list());
 
-	_session.add_undo (alist.get_memento());
+	_session.add_command (MementoUndoCommand<AutomationList>(alist, alist.get_state()));
 
 	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
 
