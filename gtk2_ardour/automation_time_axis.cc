@@ -500,13 +500,14 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	AutomationList& alist (line.the_list());
 	bool ret = false;
 
-	_session.add_undo (alist.get_memento());
+        XMLNode &before, &after;
+        before = alist.get_state();
 
 	switch (op) {
 	case Cut:
 		if ((what_we_got = alist.cut (selection.time.front().start, selection.time.front().end)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
-			_session.add_redo_no_execute (alist.get_memento());
+			_session.add_command(MementoCommand<AutomationList>(alist, before, alist.get_state()));
 			ret = true;
 		}
 		break;
@@ -518,7 +519,7 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 
 	case Clear:
 		if ((what_we_got = alist.cut (selection.time.front().start, selection.time.front().end)) != 0) {
-			_session.add_redo_no_execute (alist.get_memento());
+			_session.add_command(MementoCommand<AutomationList>(alist, before, alist.get_state()));
 			delete what_we_got;
 			what_we_got = 0;
 			ret = true;
@@ -580,8 +581,9 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 	AutomationList* what_we_got = 0;
 	AutomationList& alist (line.the_list());
 	bool ret = false;
+        XMLNode &before, &after;
 
-	_session.add_undo (alist.get_memento());
+        before = alist.get_state();
 
 	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
 
@@ -593,7 +595,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 		case Cut:
 			if ((what_we_got = alist.cut ((*i).start, (*i).end)) != 0) {
 				editor.get_cut_buffer().add (what_we_got);
-				_session.add_redo_no_execute (alist.get_memento());
+				_session.add_command (MementoCommand<AutomationList>(alist, before, alist.get_state()));
 				ret = true;
 			}
 			break;
@@ -605,7 +607,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 			
 		case Clear:
 			if ((what_we_got = alist.cut ((*i).start, (*i).end)) != 0) {
-				_session.add_redo_no_execute (alist.get_memento());
+				_session.add_command (MementoCommand<AutomationList>(alist, before, alist.get_state()));
 				delete what_we_got;
 				what_we_got = 0;
 				ret = true;

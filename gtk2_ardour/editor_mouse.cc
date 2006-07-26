@@ -2787,7 +2787,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 			insert_result = affected_playlists.insert (to_playlist);
 			if (insert_result.second) {
-				session->add_undo (to_playlist->get_memento ());
+				session->add_command (MementoUndoCommand<Playlist>(*to_playlist, to_playlist->get_state()));
 			}
 			
 			latest_regionview = 0;
@@ -3225,7 +3225,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 					insert_result = motion_frozen_playlists.insert (pl);
 					if (insert_result.second) {
 						pl->freeze();
-						session->add_undo(pl->get_memento());
+						session->add_command(MementoUndoCommand<Playlist>(*pl, pl->get_state()));
 					}
 				}
 			}
@@ -3353,7 +3353,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			insert_result = motion_frozen_playlists.insert(to_playlist);
 			if (insert_result.second) {
 				to_playlist->freeze();
-				session->add_undo(to_playlist->get_memento());
+                                session->add_command(MementoUndoCommand<Playlist>(*to_playlist, to_playlist->get_state()));
 			}
 
 		}
@@ -3435,7 +3435,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
   out:
 	for (set<Playlist*>::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
 		(*p)->thaw ();
-		session->add_redo_no_execute ((*p)->get_memento());
+		session->add_command (MementoRedoCommand<Playlist>(*(*p), (*p)->get_state()));
 	}
 
 	motion_frozen_playlists.clear ();
@@ -3997,7 +3997,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			Playlist * pl = (*i)->region.playlist();
 			insert_result = motion_frozen_playlists.insert (pl);
 			if (insert_result.second) {
-				session->add_undo (pl->get_memento());
+                                session->add_command(MementoUndoCommand<Playlist>(*pl, pl->get_state()));
 			}
 		}
 	}
@@ -4187,8 +4187,8 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		
 		for (set<Playlist*>::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
 			//(*p)->thaw ();
-			session->add_redo_no_execute ((*p)->get_memento());
-		}
+                        session->add_command (MementoRedoCommand<Playlist>(*(*p), (*p)->get_state()));
+                }
 		
 		motion_frozen_playlists.clear ();
 
@@ -4293,7 +4293,8 @@ Editor::thaw_region_after_trim (AudioRegionView& rv)
 	}
 
 	region.thaw (_("trimmed region"));
-	session->add_redo_no_execute (region.playlist()->get_memento());
+        XMLNode &after = region.playlist()->get_state();
+	session->add_command (MementoRedoCommand<Playlist>(*(region.playlist()), after));
 
 	rv.unhide_envelope ();
 }

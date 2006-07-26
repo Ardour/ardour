@@ -1739,12 +1739,14 @@ AudioTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		}
 	}
 	
+        XMLNode &before, &after;
 	switch (op) {
 	case Cut:
-		_session.add_undo (playlist->get_memento());
+                before = playlist->get_state();
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
-			_session.add_redo_no_execute (playlist->get_memento());
+                        after = playlist->get_state();
+			_session.add_command (MementoCommand<Playlist>(*playlist, before, after));
 			ret = true;
 		}
 		break;
@@ -1755,9 +1757,9 @@ AudioTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		break;
 
 	case Clear:
-		_session.add_undo (playlist->get_memento());
+		before = playlist->get_state();
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			_session.add_redo_no_execute (playlist->get_memento());
+			_session.add_command(MementoCommand<Playlist>(*playlist, before, after));
 			what_we_got->unref ();
 			ret = true;
 		}

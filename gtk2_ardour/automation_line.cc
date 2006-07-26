@@ -887,7 +887,7 @@ AutomationLine::start_drag (ControlPoint* cp, float fraction)
 	}
 
 	trackview.editor.current_session()->begin_reversible_command (str);
-	trackview.editor.current_session()->add_undo (get_memento());
+	trackview.editor.current_session()->add_command (MementoUndoCommand<AutomationLine>(*this, get_state()));
 	
 	first_drag_fraction = fraction;
 	last_drag_fraction = fraction;
@@ -936,7 +936,7 @@ AutomationLine::end_drag (ControlPoint* cp)
 
 		update_pending = false;
 
-		trackview.editor.current_session()->add_redo_no_execute (get_memento());
+		trackview.editor.current_session()->add_command (MementoRedoCommand<AutomationLine>(*this, get_state()));
 		trackview.editor.current_session()->commit_reversible_command ();
 		trackview.editor.current_session()->set_dirty ();
 	}
@@ -1226,7 +1226,6 @@ AutomationLine::clear ()
 {
 	/* parent must create command */
         XMLNode &before = get_state();
-	trackview.editor.current_session()->add_undo (get_memento());
 	alist.clear();
 	trackview.editor.current_session()->add_command (MementoCommand<AutomationLine>(*this, before, get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();

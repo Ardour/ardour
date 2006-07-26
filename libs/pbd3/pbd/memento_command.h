@@ -51,4 +51,38 @@ class MementoCommand : public Command
         XMLNode &before, &after;
 };
 
+template <class obj_T>
+class MementoUndoCommand : public MementoCommand<obj_T>
+{
+public:
+    MementoUndoCommand(obj_T &obj, 
+                       XMLNode &before)
+        : obj(obj), before(before) {}
+    void operator() () { /* noop */ }
+    void undo() { obj.set_state(before); }
+    virtual XMLNode &serialize() 
+    {
+        // obj.id
+        // key is "MementoCommand" or something
+        // before and after mementos
+    }
+}
+
+template <class obj_T>
+class MementoRedoCommand : public MementoCommand<obj_T>
+{
+public:
+    MementoUndoCommand(obj_T &obj, 
+                       XMLNode &after)
+        : obj(obj), after(after) {}
+    void operator() () { obj.set_state(after); }
+    void undo() { /* noop */ }
+    virtual XMLNode &serialize() 
+    {
+        // obj.id
+        // key is "MementoCommand" or something
+        // before and after mementos
+    }
+}
+
 #endif // __lib_pbd_memento_h__

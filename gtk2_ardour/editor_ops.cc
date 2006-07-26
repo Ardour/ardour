@@ -2997,7 +2997,7 @@ Editor::cut_copy_regions (CutCopyOp op)
 				insert_result = freezelist.insert (pl);
 				if (insert_result.second) {
 					pl->freeze ();
-					session->add_undo (pl->get_memento());
+                                        session->add_command (MementoUndoCommand<Playlist>(*pl, pl->get_state()));
 				}
 			}
 		}
@@ -3055,7 +3055,7 @@ Editor::cut_copy_regions (CutCopyOp op)
 	
 	for (set<Playlist*>::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
 		(*pl)->thaw ();
-		session->add_redo_no_execute ((*pl)->get_memento());
+		session->add_command (MementoRedoCommand<Playlist>(*(*pl), *(*pl)->get_state()));
 	}
 }
 
