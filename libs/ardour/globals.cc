@@ -198,6 +198,9 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization)
 
 	PBD::ID::init ();
 
+	lrdf_init();
+	Library = new AudioLibrary;
+
 	Config = new Configuration;
 
 	if (Config->load_state ()) {
@@ -295,9 +298,6 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization)
 		
 		info << "No H/W specific optimizations in use" << endmsg;
 	}
-
-	lrdf_init();
-	Library = new AudioLibrary;
 
 	/* singleton - first object is "it" */
 	new PluginManager (engine);

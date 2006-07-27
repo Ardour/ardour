@@ -46,6 +46,8 @@ using namespace PBD;
 
 static char* SOUNDFILE = "http://ardour.org/ontology/Soundfile";
 
+string AudioLibrary::state_node_name = "AudioLibrary";
+
 AudioLibrary::AudioLibrary ()
 {
 //	sfdb_paths.push_back("/Users/taybin/sounds");
@@ -74,12 +76,6 @@ AudioLibrary::AudioLibrary ()
 	} 
 
 	lrdf_free_statements(matches);
-
-	XMLNode* state = instant_xml(X_("AudioLibrary"), get_user_ardour_path());
-	if (state) {
-		set_state(*state);
-	}
-	scan_paths();
 }
 
 AudioLibrary::~AudioLibrary ()
@@ -361,7 +357,7 @@ AudioLibrary::set_paths (vector<string> paths)
 {
 	sfdb_paths = paths;
 	
-	add_instant_xml(get_state(), get_user_ardour_path());
+	scan_paths ();
 }
 
 vector<string> 
@@ -478,7 +474,7 @@ AudioLibrary::set_state (const XMLNode& node)
 		}
 	}
 	
-	sfdb_paths = paths;
+	set_paths (paths);
 	
 	return 0;
 }
