@@ -47,7 +47,8 @@ AudioRegionGainLine::start_drag (ControlPoint* cp, float fraction)
 {
 	AutomationLine::start_drag(cp,fraction);
 	if (!rv.region.envelope_active()) {
-		trackview.session().add_undo( bind( mem_fun(rv.region, &AudioRegion::set_envelope_active), false) );
+                trackview.session().add_command(MementoUndoCommand<AudioRegion>(rv.region, rv.region.get_state()));
+                rv.region.set_envelope_active(false);
 	}
 }
 
@@ -63,9 +64,10 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
         XMLNode &before = get_state();
 
 	if (!rv.region.envelope_active()) {
-		trackview.session().add_undo( bind( mem_fun(rv.region, &AudioRegion::set_envelope_active), false) );
-		trackview.session().add_redo( bind( mem_fun(rv.region, &AudioRegion::set_envelope_active), true) );
+                XMLNode &before = rv.region.get_state();
 		rv.region.set_envelope_active(true);
+                XMLNode &after = rv.region.get_state();
+                trackview.session().add_command(MementoCommand<AudioRegion>(rv.region, before, after));
 	}
 
 	alist.erase (mr.start, mr.end);

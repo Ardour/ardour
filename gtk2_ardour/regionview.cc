@@ -1148,9 +1148,11 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 
 	if (!region.envelope_active()) {
-		trackview.session().add_undo( bind( mem_fun(region, &AudioRegion::set_envelope_active), false) );
+                XMLNode &before, &after;
+                before = region.get_state();
 		region.set_envelope_active(true);
-		trackview.session().add_redo( bind( mem_fun(region, &AudioRegion::set_envelope_active), true) );
+                after = region.get_state();
+		trackview.session().add_command(MementoCommand<AudioRegion>(region, before, after));
 	}
 
 	region.envelope().add (fx, y);

@@ -906,10 +906,11 @@ Editor::new_transport_marker_menu_set_punch ()
                 XMLNode &after = session->locations()->get_state();
 		session->add_command (MementoCommand<Locations>(*(session->locations()), before, after));
 	} else {
-		session->add_undo (retype_return<void>(bind (mem_fun (*tpl, &Location::set), tpl->start(), tpl->end())));
-		session->add_redo (retype_return<void>(bind (mem_fun (*tpl, &Location::set), temp_location->start(), temp_location->end())));
+                XMLNode &before = tpl->get_state();
 		tpl->set_hidden(false, this);
 		tpl->set(temp_location->start(), temp_location->end());
+                XMLNode &after = tpl->get_state();
+                session->add_command (MementoCommand<Location>(*tpl, before, after));
 	}
 	
 	commit_reversible_command ();
