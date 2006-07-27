@@ -81,8 +81,8 @@ void
 AudioRegionGainLine::end_drag (ControlPoint* cp) 
 {
 	if (!rv.region.envelope_active()) {
-		trackview.session().add_redo( bind( mem_fun(rv.region, &AudioRegion::set_envelope_active), true) );
 		rv.region.set_envelope_active(true);
+                trackview.session().add_command(MementoRedoCommand<AudioRegion>(rv.region, rv.region.get_state()));
 	}
 	AutomationLine::end_drag(cp);
 }
