@@ -55,7 +55,7 @@ namespace Gtk {
 class PannerUI : public Gtk::HBox
 {
   public:
-	PannerUI (ARDOUR::IO&, ARDOUR::Session&);
+	PannerUI (boost::shared_ptr<ARDOUR::IO>, ARDOUR::Session&);
 	~PannerUI ();
 
 	void pan_changed (void *);
@@ -72,7 +72,7 @@ class PannerUI : public Gtk::HBox
 
   private:
 	friend class MixerStrip;
-	ARDOUR::IO& _io;
+	boost::shared_ptr<ARDOUR::IO> _io;
 	ARDOUR::Session& _session;
 
 	bool ignore_toggle;

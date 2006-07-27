@@ -70,18 +70,24 @@ jack_nframes_t DestructiveFileSource::xfade_frames = 64;
 DestructiveFileSource::DestructiveFileSource (string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate, Flag flags)
 	: SndFileSource (path, samp_format, hdr_format, rate, flags)
 {
-	xfade_buf = new Sample[xfade_frames];
+	init ();
+}
 
-	_capture_start = false;
-	_capture_end = false;
-	file_pos = 0;
 
-	timeline_position = header_position_offset;
-	AudioFileSource::HeaderPositionOffsetChanged.connect (mem_fun (*this, &DestructiveFileSource::handle_header_position_change));
+DestructiveFileSource::DestructiveFileSource (string path, Flag flags)
+	: SndFileSource (path, flags)
+{
+	init ();
 }
 
 DestructiveFileSource::DestructiveFileSource (const XMLNode& node)
 	: SndFileSource (node)
+{
+	init ();
+}
+
+void
+DestructiveFileSource::init ()
 {
 	xfade_buf = new Sample[xfade_frames];
 

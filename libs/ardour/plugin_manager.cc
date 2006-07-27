@@ -280,13 +280,14 @@ PluginManager::ladspa_discover (string path)
 	return 0;
 }
 
-Plugin *
+boost::shared_ptr<Plugin>
 PluginManager::load (Session& session, PluginInfo *info)
 {
 	void *module;
-	Plugin *plugin = 0;
 
 	try {
+		boost::shared_ptr<Plugin> plugin;
+
 		if (info->type == PluginInfo::VST) {
 
 #ifdef VST_SUPPORT			
@@ -296,14 +297,14 @@ PluginManager::load (Session& session, PluginInfo *info)
 				if ((handle = fst_load (info->path.c_str())) == 0) {
 					error << string_compose(_("VST: cannot load module from \"%1\""), info->path) << endmsg;
 				} else {
-					plugin = new VSTPlugin (_engine, session, handle);
+					plugin.reset (new VSTPlugin (_engine, session, handle));
 				}
 			} else {
 				error << _("You asked ardour to not use any VST plugins") << endmsg;
 			}
 #else
 			error << _("This version of ardour has no support for VST plugins") << endmsg;
-			return 0;
+			return boost::shared_ptr<Plugin> ((Plugin*) 0);
 #endif			
 				
 		} else {
@@ -312,21 +313,20 @@ PluginManager::load (Session& session, PluginInfo *info)
 				error << string_compose(_("LADSPA: cannot load module from \"%1\""), info->path) << endmsg;
 				error << dlerror() << endmsg;
 			} else {
-				plugin = new LadspaPlugin (module, _engine, session, info->index, session.frame_rate());
+				plugin.reset (new LadspaPlugin (module, _engine, session, info->index, session.frame_rate()));
 			}
 		}
 
 		plugin->set_info(*info);
+		return plugin;
 	}
 
 	catch (failed_constructor &err) {
-		plugin = 0;
+		return boost::shared_ptr<Plugin> ((Plugin*) 0);
 	}
-	
-	return plugin;
 }
 
-Plugin *
+boost::shared_ptr<Plugin>
 ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::Type type)
 {
 	PluginManager *mgr = PluginManager::the_manager();
@@ -343,7 +343,7 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::T
 		break;
 	case PluginInfo::AudioUnit:
 	default:
-		return 0;
+		return boost::shared_ptr<Plugin> ((Plugin *) 0);
 	}
 
 	for (i = plugs->begin(); i != plugs->end(); ++i) {
@@ -353,7 +353,7 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::T
 		}
 	}
 	
-	return 0;
+	return boost::shared_ptr<Plugin> ((Plugin*) 0);
 }
 
 string

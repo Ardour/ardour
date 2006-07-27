@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <boost/shared_ptr.hpp>
 #include <sigc++/sigc++.h>
 #include <pbd/stateful.h>
 #include <control_protocol/basic_ui.h>
@@ -73,7 +74,7 @@ class ControlProtocol : public sigc::trackable, public Stateful, public BasicUI 
 	*/
 
 	void set_route_table_size (uint32_t size);
-	void set_route_table (uint32_t table_index, ARDOUR::Route*);
+	void set_route_table (uint32_t table_index, boost::shared_ptr<ARDOUR::Route>);
 	bool set_route_table (uint32_t table_index, uint32_t remote_control_id);
 
 	void route_set_rec_enable (uint32_t table_index, bool yn);
@@ -94,7 +95,7 @@ class ControlProtocol : public sigc::trackable, public Stateful, public BasicUI 
 	std::string route_get_name (uint32_t table_index);
 
   protected:
-	std::vector<ARDOUR::Route*> route_table;
+	std::vector<boost::shared_ptr<ARDOUR::Route> > route_table;
 	std::string _name;
 	bool _active;
 

@@ -32,7 +32,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, Canvas& canvas, std::string n,
+RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, 
+								PublicEditor& e, TimeAxisView& parent, Canvas& canvas, std::string n,
 								uint32_t prt, Redirect& rd, string state_name)
 
 	: AxisView (s),

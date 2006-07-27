@@ -876,7 +876,7 @@ ARDOUR_UI::session_add_midi_track ()
 void
 ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode)
 {
-	Route* route;
+	boost::shared_ptr<Route> route;
 
 	if (session == 0) {
 		warning << _("You cannot add a track without a session already loaded.") << endmsg;
@@ -1165,13 +1165,13 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 		return;
 	}
 
-	Route* r;
+	boost::shared_ptr<Route> r;
 	
 	if ((r = session->route_by_remote_id (dstream)) != 0) {
 
 		AudioTrack* at;
 
-		if ((at = dynamic_cast<AudioTrack*>(r)) != 0) {
+		if ((at = dynamic_cast<AudioTrack*>(r.get())) != 0) {
 			at->disk_stream().set_record_enabled (!at->disk_stream().record_enabled(), this);
 		}
 	}

@@ -459,8 +459,8 @@ class Editor : public PublicEditor
 	void add_crossfade_context_items (StreamView*, ARDOUR::Crossfade*, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
-	void handle_new_route (ARDOUR::Route&);
-	void handle_new_route_p (ARDOUR::Route*);
+	void handle_new_route (boost::shared_ptr<ARDOUR::Route>);
+	void handle_new_route_p (boost::shared_ptr<ARDOUR::Route>);
 	void remove_route (TimeAxisView *);
 	bool route_removal;
 

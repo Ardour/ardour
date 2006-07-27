@@ -86,7 +86,7 @@ using namespace Gtk;
 using namespace Editing;
 
 
-AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt, Canvas& canvas)
+AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess),
 	  RouteUI(rt, sess, _("m"), _("s"), _("r")), // mute, solo, and record
 	  TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas),
@@ -211,12 +211,12 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 
 	set_state (*xml_node);
 	
-	_route.mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
-	_route.solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	_route.redirects_changed.connect (mem_fun(*this, &AudioTimeAxisView::redirects_changed));
-	_route.name_changed.connect (mem_fun(*this, &AudioTimeAxisView::route_name_changed));
-	_route.solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	_route.panner().Changed.connect (mem_fun(*this, &AudioTimeAxisView::update_pans));
+	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
+	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route->redirects_changed.connect (mem_fun(*this, &AudioTimeAxisView::redirects_changed));
+	_route->name_changed.connect (mem_fun(*this, &AudioTimeAxisView::route_name_changed));
+	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route->panner().Changed.connect (mem_fun(*this, &AudioTimeAxisView::update_pans));
 
 	if (is_audio_track()) {
 
@@ -321,7 +321,7 @@ gint
 AudioTimeAxisView::edit_click (GdkEventButton *ev)
 {
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
-	        _route.set_edit_group (0, this);
+	        _route->set_edit_group (0, this);
 		return FALSE;
 	} 
 
@@ -334,7 +334,7 @@ AudioTimeAxisView::edit_click (GdkEventButton *ev)
 	items.push_back (RadioMenuElem (group, _("No group"), 
 					bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), (RouteGroup *) 0)));
 	
-	if (_route.edit_group() == 0) {
+	if (_route->edit_group() == 0) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 	
@@ -354,7 +354,7 @@ AudioTimeAxisView::add_edit_group_menu_item (RouteGroup *eg, RadioMenuItem::Grou
 	cerr << "adding edit group called " << eg->name() << endl;
 
 	items.push_back (RadioMenuElem (*group, eg->name(), bind (mem_fun(*this, &AudioTimeAxisView::set_edit_group_from_menu), eg)));
-	if (_route.edit_group() == eg) {
+	if (_route->edit_group() == eg) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 }
@@ -363,7 +363,7 @@ void
 AudioTimeAxisView::set_edit_group_from_menu (RouteGroup *eg)
 
 {
-	_route.set_edit_group (eg, this);
+	_route->set_edit_group (eg, this);
 }
 
 void
@@ -387,7 +387,7 @@ AudioTimeAxisView::playlist_changed ()
 void
 AudioTimeAxisView::label_view ()
 {
-	string x = _route.name();
+	string x = _route->name();
 
 	if (x != name_entry.get_text()) {
 		name_entry.set_text (x);
@@ -460,14 +460,14 @@ AudioTimeAxisView::show_timestretch (jack_nframes_t start, jack_nframes_t end)
 	   remember that edit_group() == 0 implies the route is *not* in a edit group.
 	*/
 
-	if (!(ts.track == this || (ts.group != 0 && ts.group == _route.edit_group()))) {
+	if (!(ts.track == this || (ts.group != 0 && ts.group == _route->edit_group()))) {
 		/* this doesn't apply to us */
 		return;
 	}
 
 	/* ignore it if our edit group is not active */
 	
-	if ((ts.track != this) && _route.edit_group() && !_route.edit_group()->is_active()) {
+	if ((ts.track != this) && _route->edit_group() && !_route->edit_group()->is_active()) {
 		return;
 	}
 #endif
@@ -515,8 +515,8 @@ AudioTimeAxisView::show_selection (TimeSelection& ts)
 	   that the track is not in an edit group).
 	*/
 
-	if (((ts.track != this && !is_child (ts.track)) && _route.edit_group() && !_route.edit_group()->is_active()) ||
-	    (!(ts.track == this || is_child (ts.track) || (ts.group != 0 && ts.group == _route.edit_group())))) {
+	if (((ts.track != this && !is_child (ts.track)) && _route->edit_group() && !_route->edit_group()->is_active()) ||
+	    (!(ts.track == this || is_child (ts.track) || (ts.group != 0 && ts.group == _route->edit_group())))) {
 		hide_selection ();
 		return;
 	}
@@ -631,13 +631,13 @@ AudioTimeAxisView::set_height (TrackHeight h)
 		controls_table.show ();
 		hide_name_entry ();
 		show_name_label ();
-		name_label.set_text (_route.name());
+		name_label.set_text (_route->name());
 		break;
 	}
 
 	if (height_changed) {
 		/* only emit the signal if the height really changed */
-		 _route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
 }
 
@@ -788,7 +788,7 @@ AudioTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
-	route_active_menu_item->set_active (_route.active());
+	route_active_menu_item->set_active (_route->active());
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
@@ -1002,7 +1002,7 @@ AudioTimeAxisView::update_diskstream_display ()
 void
 AudioTimeAxisView::selection_click (GdkEventButton* ev)
 {
-	PublicEditor::TrackViewList* tracks = editor.get_valid_views (this, _route.edit_group());
+	PublicEditor::TrackViewList* tracks = editor.get_valid_views (this, _route->edit_group());
 
 	switch (Keyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
@@ -1082,13 +1082,13 @@ AudioTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 RouteGroup*
 AudioTimeAxisView::edit_group() const
 {
-	return _route.edit_group();
+	return _route->edit_group();
 }
 
 string
 AudioTimeAxisView::name() const
 {
-	return _route.name();
+	return _route->name();
 }
 
 Playlist *
@@ -1110,22 +1110,22 @@ AudioTimeAxisView::name_entry_changed ()
 
 	x = name_entry.get_text ();
 	
-	if (x == _route.name()) {
+	if (x == _route->name()) {
 		return;
 	}
 
 	if (x.length() == 0) {
-		name_entry.set_text (_route.name());
+		name_entry.set_text (_route->name());
 		return;
 	}
 
 	strip_whitespace_edges(x);
 
 	if (_session.route_name_unique (x)) {
-		_route.set_name (x, this);
+		_route->set_name (x, this);
 	} else {
 		ARDOUR_UI::instance()->popup_error (_("a track already exists with that name"));
-		name_entry.set_text (_route.name());
+		name_entry.set_text (_route->name());
 	}
 }
 
@@ -1166,13 +1166,13 @@ AudioTimeAxisView::add_gain_automation_child ()
 						     *this,
 						     parent_canvas,
 						     _("gain"),
-						     _route.gain_automation_curve());
+						     _route->gain_automation_curve());
 	
 	line = new AutomationGainLine ("automation gain",
 				       _session,
 				       *gain_track,
 				       *gain_track->canvas_display,
-				       _route.gain_automation_curve());
+				       _route->gain_automation_curve());
 
 	line->set_line_color (color_map[cAutomationLine]);
 	
@@ -1241,11 +1241,11 @@ AudioTimeAxisView::update_pans ()
 	/* we don't draw lines for "greater than stereo" panning.
 	 */
 
-	if (_route.n_outputs() > 2) {
+	if (_route->n_outputs() > 2) {
 		return;
 	}
 
-	for (p = _route.panner().begin(); p != _route.panner().end(); ++p) {
+	for (p = _route->panner().begin(); p != _route->panner().end(); ++p) {
 
 		AutomationLine* line;
 
@@ -1253,7 +1253,7 @@ AudioTimeAxisView::update_pans ()
 					      *pan_track->canvas_display, 
 					      (*p)->automation());
 
-		if (p == _route.panner().begin()) {
+		if (p == _route->panner().begin()) {
 			/* first line is a nice orange */
 			line->set_line_color (color_map[cLeftPanAutomationLine]);
 		} else {
@@ -1285,7 +1285,7 @@ AudioTimeAxisView::toggle_gain_track ()
 		/* now trigger a redisplay */
 		
 		if (!no_redraw) {
-			 _route.gui_changed (X_("track_height"), (void *) 0); /* EMIT_SIGNAL */
+			 _route->gui_changed (X_("track_height"), (void *) 0); /* EMIT_SIGNAL */
 		}
 	}
 }
@@ -1299,7 +1299,7 @@ AudioTimeAxisView::gain_hidden ()
 		gain_automation_item->set_active (false);
 	}
 
-	 _route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1321,7 +1321,7 @@ AudioTimeAxisView::toggle_pan_track ()
 		/* now trigger a redisplay */
 		
 		if (!no_redraw) {
-			 _route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+			 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 		}
 	}
 }
@@ -1335,7 +1335,7 @@ AudioTimeAxisView::pan_hidden ()
 		pan_automation_item->set_active (false);
 	}
 
-	 _route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 AudioTimeAxisView::RedirectAutomationInfo::~RedirectAutomationInfo ()
@@ -1364,7 +1364,7 @@ AudioTimeAxisView::remove_ran (RedirectAutomationNode* ran)
 }
 
 AudioTimeAxisView::RedirectAutomationNode*
-AudioTimeAxisView::find_redirect_automation_node (Redirect *redirect, uint32_t what)
+AudioTimeAxisView::find_redirect_automation_node (boost::shared_ptr<Redirect> redirect, uint32_t what)
 {
 	for (list<RedirectAutomationInfo*>::iterator i = redirect_automation.begin(); i != redirect_automation.end(); ++i) {
 
@@ -1401,7 +1401,7 @@ legalize_for_xml_node (string str)
 
 
 void
-AudioTimeAxisView::add_redirect_automation_curve (Redirect *redirect, uint32_t what)
+AudioTimeAxisView::add_redirect_automation_curve (boost::shared_ptr<Redirect> redirect, uint32_t what)
 {
 	RedirectAutomationLine* ral;
 	string name;
@@ -1454,7 +1454,7 @@ AudioTimeAxisView::add_redirect_automation_curve (Redirect *redirect, uint32_t w
 }
 
 void
-AudioTimeAxisView::redirect_automation_track_hidden (AudioTimeAxisView::RedirectAutomationNode* ran, Redirect* r)
+AudioTimeAxisView::redirect_automation_track_hidden (AudioTimeAxisView::RedirectAutomationNode* ran, boost::shared_ptr<Redirect> r)
 {
 	if (!_hidden) {
 		ran->menu_item->set_active (false);
@@ -1462,11 +1462,11 @@ AudioTimeAxisView::redirect_automation_track_hidden (AudioTimeAxisView::Redirect
 
 	r->mark_automation_visible (ran->what, false);
 
-	 _route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
-AudioTimeAxisView::add_existing_redirect_automation_curves (Redirect *redirect)
+AudioTimeAxisView::add_existing_redirect_automation_curves (boost::shared_ptr<Redirect> redirect)
 {
 	set<uint32_t> s;
 	RedirectAutomationLine *ral;
@@ -1484,7 +1484,7 @@ AudioTimeAxisView::add_existing_redirect_automation_curves (Redirect *redirect)
 }
 
 void
-AudioTimeAxisView::add_redirect_to_subplugin_menu (Redirect* r)
+AudioTimeAxisView::add_redirect_to_subplugin_menu (boost::shared_ptr<Redirect> r)
 {
 	using namespace Menu_Helpers;
 	RedirectAutomationInfo *rai;
@@ -1598,7 +1598,7 @@ AudioTimeAxisView::redirect_menu_item_toggled (AudioTimeAxisView::RedirectAutoma
 
 		/* now trigger a redisplay */
 		
-		 _route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 
 	}
 }
@@ -1614,8 +1614,8 @@ AudioTimeAxisView::redirects_changed (void *src)
 
 	subplugin_menu.items().clear ();
 
-	_route.foreach_redirect (this, &AudioTimeAxisView::add_redirect_to_subplugin_menu);
-	_route.foreach_redirect (this, &AudioTimeAxisView::add_existing_redirect_automation_curves);
+	_route->foreach_redirect (this, &AudioTimeAxisView::add_redirect_to_subplugin_menu);
+	_route->foreach_redirect (this, &AudioTimeAxisView::add_existing_redirect_automation_curves);
 
 	for (list<RedirectAutomationInfo*>::iterator i = redirect_automation.begin(); i != redirect_automation.end(); ) {
 
@@ -1636,11 +1636,11 @@ AudioTimeAxisView::redirects_changed (void *src)
 
 	/* change in visibility was possible */
 
-	_route.gui_changed ("track_height", this);
+	_route->gui_changed ("track_height", this);
 }
 
 RedirectAutomationLine *
-AudioTimeAxisView::find_redirect_automation_curve (Redirect *redirect, uint32_t what)
+AudioTimeAxisView::find_redirect_automation_curve (boost::shared_ptr<Redirect> redirect, uint32_t what)
 {
 	RedirectAutomationNode* ran;
 
@@ -1673,7 +1673,7 @@ AudioTimeAxisView::show_all_automation ()
 
 	no_redraw = false;
 
-	 _route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1694,7 +1694,7 @@ AudioTimeAxisView::show_existing_automation ()
 
 	no_redraw = false;
 
-	 _route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1712,7 +1712,7 @@ AudioTimeAxisView::hide_all_automation ()
 	}
 
 	no_redraw = false;
-	 _route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 bool
@@ -1931,7 +1931,7 @@ AudioTimeAxisView::route_active_changed ()
 	RouteUI::route_active_changed ();
 
 	if (is_audio_track()) {
-		if (_route.active()) {
+		if (_route->active()) {
 			controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
 			controls_base_selected_name = "AudioTrackControlsBaseSelected";
 			controls_base_unselected_name = "AudioTrackControlsBaseUnselected";
@@ -1941,7 +1941,7 @@ AudioTimeAxisView::route_active_changed ()
 			controls_base_unselected_name = "AudioTrackControlsBaseInactiveUnselected";
 		}
 	} else {
-		if (_route.active()) {
+		if (_route->active()) {
 			controls_ebox.set_name ("BusControlsBaseUnselected");
 			controls_base_selected_name = "BusControlsBaseSelected";
 			controls_base_unselected_name = "BusControlsBaseUnselected";

@@ -14,11 +14,11 @@ class PanAutomationTimeAxisView : public AutomationTimeAxisView
 {
 	public:
 		PanAutomationTimeAxisView (ARDOUR::Session&,
-				ARDOUR::Route&,
-				PublicEditor&,
-				TimeAxisView& parent_axis,
-				ArdourCanvas::Canvas& canvas,
-				std::string name);
+					   boost::shared_ptr<ARDOUR::Route>,
+					   PublicEditor&,
+					   TimeAxisView& parent_axis,
+					   ArdourCanvas::Canvas& canvas,
+					   std::string name);
 
 		~PanAutomationTimeAxisView();
 

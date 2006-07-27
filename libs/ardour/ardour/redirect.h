@@ -25,6 +25,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <boost/shared_ptr.hpp>
 #include <sigc++/signal.h>
 
 #include <glibmm/thread.h>
@@ -64,7 +65,7 @@ class Redirect : public IO
 	Redirect (const Redirect&);
 	virtual ~Redirect ();
 
-	static Redirect *clone (const Redirect&);
+	static boost::shared_ptr<Redirect> clone (boost::shared_ptr<const Redirect>);
 
 	bool active () const { return _active; }
 	void set_active (bool yn, void *src);

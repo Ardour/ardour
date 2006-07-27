@@ -21,6 +21,7 @@
 #ifndef __ardour_ladspa_h__
 #define __ardour_ladspa_h__
 
+#include <boost/shared_ptr.hpp>
 #include <sigc++/signal.h>
 
 #include <pbd/stateful.h> 
@@ -179,7 +180,7 @@ class Plugin : public Stateful, public sigc::trackable
 
 /* this is actually defined in plugin_manager.cc */
 
-Plugin * find_plugin(ARDOUR::Session&, string name, long unique_id, PluginInfo::Type);
+boost::shared_ptr<Plugin> find_plugin(ARDOUR::Session&, string name, long unique_id, PluginInfo::Type);
 
 } // namespace ARDOUR
  

@@ -110,11 +110,11 @@ class AudioTrack : public Route
 
   private:
 	struct FreezeRecordInsertInfo {
-	    FreezeRecordInsertInfo(XMLNode& st) 
-		    : state (st), insert (0) {}
+	    FreezeRecordInsertInfo(XMLNode& st, boost::shared_ptr<Insert> ins) 
+		    : state (st), insert (ins) {}
 
 	    XMLNode    state;
-	    Insert*    insert;
+	    boost::shared_ptr<Insert>    insert;
 	    PBD::ID    id;
 	    UndoAction memento;
 	};

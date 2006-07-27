@@ -39,21 +39,21 @@ using namespace PBD;
 using namespace Gtk;
 
 void
-Editor::handle_new_route_p (Route* route)
+Editor::handle_new_route_p (boost::shared_ptr<Route> route)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route_p), route));
-	handle_new_route (*route);
+	handle_new_route (route);
 }
 
 void
-Editor::handle_new_route (Route& route)
+Editor::handle_new_route (boost::shared_ptr<Route> route)
 {
 	TimeAxisView *tv;
 	AudioTimeAxisView *atv;
 	TreeModel::Row parent;
 	TreeModel::Row row;
 
-	if (route.hidden()) {
+	if (route->hidden()) {
 		return;
 	}
 	
@@ -75,7 +75,7 @@ Editor::handle_new_route (Route& route)
 
 	}
 
-	if (dynamic_cast<AudioTrack*>(&route) != 0) {
+	if (dynamic_cast<AudioTrack*>(route.get()) != 0) {
 		TreeModel::iterator iter = route_display_model->get_iter ("1");  // audio tracks 
 		parent = *iter;
 	} else {
@@ -89,7 +89,7 @@ Editor::handle_new_route (Route& route)
 	row = *(route_display_model->append ());
 #endif
 
-	row[route_display_columns.text] = route.name();
+	row[route_display_columns.text] = route->name();
 	row[route_display_columns.visible] = tv->marked_for_display();
 	row[route_display_columns.tv] = tv;
 	
@@ -99,14 +99,14 @@ Editor::handle_new_route (Route& route)
 	
 	if ((atv = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
 		/* added a new fresh one at the end */
-		if (atv->route().order_key(N_("editor")) == -1) {
-		        atv->route().set_order_key (N_("editor"), route_display_model->children().size()-1);
+		if (atv->route()->order_key(N_("editor")) == -1) {
+		        atv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
 		}
 	}
 
 	ignore_route_list_reorder = false;
 	
-	route.gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
+	route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
 
 	tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	
@@ -188,7 +188,7 @@ Editor::hide_track_in_display (TimeAxisView& tv)
 
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&tv);
 
-	if (atv && current_mixer_strip && &(atv->route()) == &(current_mixer_strip->route())) {
+	if (atv && current_mixer_strip && (atv->route() == current_mixer_strip->route())) {
 		// this will hide the mixer strip
 		set_selected_mixer_strip (tv);
 	}
@@ -244,7 +244,7 @@ Editor::redisplay_route_list ()
 			*/
 			
 			if ((at = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
-				at->route().set_order_key (N_("editor"), order);
+				at->route()->set_order_key (N_("editor"), order);
 				++order;
 			}
 		}
@@ -477,7 +477,7 @@ Editor::route_list_selection_filter (const Glib::RefPtr<TreeModel>& model, const
 }
 
 struct EditorOrderRouteSorter {
-    bool operator() (Route* a, Route* b) {
+    bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 	    /* use of ">" forces the correct sort order */
 	    return a->order_key ("editor") < b->order_key ("editor");
     }
@@ -486,17 +486,18 @@ struct EditorOrderRouteSorter {
 void
 Editor::initial_route_list_display ()
 {
-	Session::RouteList routes = session->get_routes();
+	boost::shared_ptr<Session::RouteList> routes = session->get_routes();
+	Session::RouteList r (*routes);
 	EditorOrderRouteSorter sorter;
 
-	routes.sort (sorter);
+	r.sort (sorter);
 	
 	no_route_list_redisplay = true;
 
 	route_display_model->clear ();
 
-	for (Session::RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-		handle_new_route (**i);
+	for (Session::RouteList::iterator i = r.begin(); i != r.end(); ++i) {
+		handle_new_route (*i);
 	}
 
 	no_route_list_redisplay = false;

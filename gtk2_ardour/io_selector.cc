@@ -52,7 +52,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
 
-IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can_cancel)
+IOSelectorWindow::IOSelectorWindow (Session& sess, boost::shared_ptr<IO> ior, bool input, bool can_cancel)
 	: ArdourDialog ("i/o selector"),
 	  _selector (sess, ior, input),
 	  ok_button (can_cancel ? _("OK"): _("Close")),
@@ -65,9 +65,9 @@ IOSelectorWindow::IOSelectorWindow (Session& sess, IO& ior, bool input, bool can
 
 	string title;
 	if (input) {
-		title = string_compose(_("%1 input"), ior.name());
+		title = string_compose(_("%1 input"), ior->name());
 	} else {
-		title = string_compose(_("%1 output"), ior.name());
+		title = string_compose(_("%1 output"), ior->name());
 	}
 
 	ok_button.set_name ("IOSelectorButton");
@@ -135,7 +135,7 @@ IOSelectorWindow::on_map ()
   The IO Selector "widget"
  *************************/  
 
-IOSelector::IOSelector (Session& sess, IO& ior, bool input)
+IOSelector::IOSelector (Session& sess, boost::shared_ptr<IO> ior, bool input)
 	: session (sess),
 	  io (ior),
 	  for_input (input),
@@ -184,14 +184,14 @@ IOSelector::IOSelector (Session& sess, IO& ior, bool input)
 	port_button_box.pack_start (add_port_button, false, false);
 
 	if (for_input) {
-		if (io.input_maximum() < 0 || io.input_maximum() > (int) io.n_inputs()) {
+		if (io->input_maximum() < 0 || io->input_maximum() > (int) io->n_inputs()) {
 			add_port_button.set_sensitive (true);
 		} else {
 			add_port_button.set_sensitive (false);
 		}
 
 	} else {
-		if (io.output_maximum() < 0 || io.output_maximum() > (int) io.n_outputs()) {
+		if (io->output_maximum() < 0 || io->output_maximum() > (int) io->n_outputs()) {
 			add_port_button.set_sensitive (true);
 		} else {
 			add_port_button.set_sensitive (false);
@@ -202,14 +202,14 @@ IOSelector::IOSelector (Session& sess, IO& ior, bool input)
 	port_button_box.pack_start (remove_port_button, false, false);
 
 	if (for_input) {
-		if (io.input_minimum() < 0 || io.input_minimum() < (int) io.n_inputs()) {
+		if (io->input_minimum() < 0 || io->input_minimum() < (int) io->n_inputs()) {
 			remove_port_button.set_sensitive (true);
 		} else {
 			remove_port_button.set_sensitive (false);
 		}
 			
 	} else {
-		if (io.output_minimum() < 0 || io.output_minimum() < (int) io.n_outputs()) {
+		if (io->output_minimum() < 0 || io->output_minimum() < (int) io->n_outputs()) {
 			remove_port_button.set_sensitive (true);
 		} else {
 			remove_port_button.set_sensitive (false);
@@ -241,12 +241,12 @@ IOSelector::IOSelector (Session& sess, IO& ior, bool input)
 	remove_port_button.signal_clicked().connect (mem_fun(*this, &IOSelector::remove_port));
 
 	if (for_input) {
-		io.input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
+		io->input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	} else {
-		io.output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
+		io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	}
 
-	io.name_changed.connect (mem_fun(*this, &IOSelector::name_changed));
+	io->name_changed.connect (mem_fun(*this, &IOSelector::name_changed));
 }
 
 IOSelector::~IOSelector ()
@@ -265,9 +265,9 @@ void
 IOSelector::clear_connections ()
 {
 	if (for_input) {
-		io.disconnect_inputs (this);
+		io->disconnect_inputs (this);
 	} else {
-		io.disconnect_outputs (this);
+		io->disconnect_outputs (this);
 	}
 }
 
@@ -374,9 +374,9 @@ IOSelector::display_ports ()
 		uint32_t limit;
 
 		if (for_input) {
-			limit = io.n_inputs();
+			limit = io->n_inputs();
 		} else {
-			limit = io.n_outputs();
+			limit = io->n_outputs();
 		}
 
 		for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ) {
@@ -401,9 +401,9 @@ IOSelector::display_ports ()
 			string really_short_name;
 			
 			if (for_input) {
-				port = io.input (n);
+				port = io->input (n);
 			} else {
-				port = io.output (n);
+				port = io->output (n);
 			}
 			
 			/* we know there is '/' because we put it there */
@@ -443,7 +443,7 @@ IOSelector::display_ports ()
 			
 			if (for_input) {
 				
-				if (io.input_maximum() == 1) {
+				if (io->input_maximum() == 1) {
 					selected_port = port;
 					selected_port_tview = tview;
 				} else {
@@ -454,7 +454,7 @@ IOSelector::display_ports ()
 			
 			} else {
 
-				if (io.output_maximum() == 1) {
+				if (io->output_maximum() == 1) {
 					selected_port = port;
 					selected_port_tview = tview;
 				} else {
@@ -516,12 +516,12 @@ IOSelector::port_selection_changed (GdkEventButton *ev, TreeView* treeview)
 	ustring other_port_name = (*i)[port_display_columns.full_name];
 	
 	if (for_input) {
-		if ((status = io.connect_input (selected_port, other_port_name, this)) == 0) {
+		if ((status = io->connect_input (selected_port, other_port_name, this)) == 0) {
 			Port *p = session.engine().get_port_by_name (other_port_name);
 			p->enable_metering();
 		}
 	} else {
-		status = io.connect_output (selected_port, other_port_name, this);
+		status = io->connect_output (selected_port, other_port_name, this);
 	}
 
 	if (status == 0) {
@@ -548,7 +548,7 @@ IOSelector::add_port ()
 	if (for_input) {
 
 		try {
-			io.add_input_port ("", this);
+			io->add_input_port ("", this);
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
@@ -556,18 +556,18 @@ IOSelector::add_port ()
 			msg.run ();
 		}
 
-		if (io.input_maximum() >= 0 && io.input_maximum() <= (int) io.n_inputs()) {
+		if (io->input_maximum() >= 0 && io->input_maximum() <= (int) io->n_inputs()) {
 			add_port_button.set_sensitive (false);
 		}
 		
-		if (io.input_minimum() < (int) io.n_inputs()) {
+		if (io->input_minimum() < (int) io->n_inputs()) {
 			remove_port_button.set_sensitive (true);
 		}
 
 	} else {
 
 		try {
-			io.add_output_port ("", this);
+			io->add_output_port ("", this);
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
@@ -575,7 +575,7 @@ IOSelector::add_port ()
 			msg.run ();
 		}
 
-		if (io.output_maximum() >= 0 && io.output_maximum() <= (int) io.n_outputs()) {
+		if (io->output_maximum() >= 0 && io->output_maximum() <= (int) io->n_outputs()) {
 			add_port_button.set_sensitive (false);
 		}
 	}
@@ -589,15 +589,15 @@ IOSelector::remove_port ()
 	// always remove last port
 	
 	if (for_input) {
-		if ((nports = io.n_inputs()) > 0) {
-			io.remove_input_port (io.input(nports-1), this);
+		if ((nports = io->n_inputs()) > 0) {
+			io->remove_input_port (io->input(nports-1), this);
 		}
-		if (io.input_minimum() == (int) io.n_inputs()) {
+		if (io->input_minimum() == (int) io->n_inputs()) {
 		        remove_port_button.set_sensitive (false);
 		}
 	} else {
-		if ((nports = io.n_outputs()) > 0) {
-			io.remove_output_port (io.output(nports-1), this);
+		if ((nports = io->n_outputs()) > 0) {
+			io->remove_output_port (io->output(nports-1), this);
 		}
 	}
 }
@@ -606,9 +606,9 @@ gint
 IOSelector::remove_port_when_idle (Port *port)
 {
 	if (for_input) {
-		io.remove_input_port (port, this);
+		io->remove_input_port (port, this);
 	} else {
-		io.remove_output_port (port, this);
+		io->remove_output_port (port, this);
 	}
 
 	return FALSE;
@@ -651,9 +651,9 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 		if (for_input) {
 			Port *p = session.engine().get_port_by_name (connected_port_name);
 			p->disable_metering();
-			io.disconnect_input (port, connected_port_name, this);
+			io->disconnect_input (port, connected_port_name, this);
 		} else {
-			io.disconnect_output (port, connected_port_name, this);
+			io->disconnect_output (port, connected_port_name, this);
 		}
 	}
 
@@ -749,17 +749,17 @@ IOSelector::redisplay ()
 	display_ports ();
 
 	if (for_input) {
-		if (io.input_maximum() != 0) {
+		if (io->input_maximum() != 0) {
 			rescan ();
 		}
 	} else {
-		if (io.output_maximum() != 0) {
+		if (io->output_maximum() != 0) {
 			rescan();
 		}
 	}
 }
 
-PortInsertUI::PortInsertUI (Session& sess, PortInsert& pi)
+PortInsertUI::PortInsertUI (Session& sess, boost::shared_ptr<PortInsert> pi)
 	: input_selector (sess, pi, true),
 	  output_selector (sess, pi, false)
 {
@@ -786,9 +786,9 @@ PortInsertUI::finished(IOSelector::Result r)
 }
 
 
-PortInsertWindow::PortInsertWindow (Session& sess, PortInsert& pi, bool can_cancel)
+PortInsertWindow::PortInsertWindow (Session& sess, boost::shared_ptr<PortInsert> pi, bool can_cancel)
 	: ArdourDialog ("port insert dialog"),
-	  _portinsertui(sess, pi),
+	  _portinsertui (sess, pi),
 	  ok_button (can_cancel ? _("OK"): _("Close")),
 	  cancel_button (_("Cancel")),
 	  rescan_button (_("Rescan"))
@@ -796,7 +796,7 @@ PortInsertWindow::PortInsertWindow (Session& sess, PortInsert& pi, bool can_canc
 
 	set_name ("IOSelectorWindow");
 	string title = _("ardour: ");
-	title += pi.name();
+	title += pi->name();
 	set_title (title);
 	
 	ok_button.set_name ("IOSelectorButton");
@@ -823,7 +823,7 @@ PortInsertWindow::PortInsertWindow (Session& sess, PortInsert& pi, bool can_canc
 	rescan_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::rescan));
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));	
-	pi.GoingAway.connect (mem_fun(*this, &PortInsertWindow::plugin_going_away));
+	pi->GoingAway.connect (mem_fun(*this, &PortInsertWindow::plugin_going_away));
 }
 
 void

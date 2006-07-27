@@ -253,7 +253,7 @@ PluginSelector::use_plugin (PluginInfo* pi)
 		return;
 	}
 
-	Plugin *plugin = manager->load (*session, pi);
+	boost::shared_ptr<Plugin> plugin = manager->load (*session, pi);
 
 	if (plugin) {
 		PluginCreated (plugin);

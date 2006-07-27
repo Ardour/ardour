@@ -179,7 +179,7 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 			continue;
 		}
 
-		if ((at = dynamic_cast<AudioTrack*> (&atv->route())) == 0) {
+		if ((at = atv->audio_track()) == 0) {
 			i = tmp;
 			continue;
 		}

@@ -49,7 +49,7 @@ void
 ControlProtocol::next_track (uint32_t initial_id)
 {
 	uint32_t limit = session->nroutes();
-	Route* cr = route_table[0];
+	boost::shared_ptr<Route> cr = route_table[0];
 	uint32_t id;
 
 	if (cr) {
@@ -88,7 +88,7 @@ void
 ControlProtocol::prev_track (uint32_t initial_id)
 {
 	uint32_t limit = session->nroutes() - 1;
-	Route* cr = route_table[0];
+	boost::shared_ptr<Route> cr = route_table[0];
 	uint32_t id;
 
 	if (cr) {
@@ -128,29 +128,32 @@ void
 ControlProtocol::set_route_table_size (uint32_t size)
 {
 	while (route_table.size() < size) {
-		route_table.push_back (0);
+		route_table.push_back (boost::shared_ptr<Route> ((Route*) 0));
 	}
 }
 
 void
-ControlProtocol::set_route_table (uint32_t table_index, ARDOUR::Route*)
+ControlProtocol::set_route_table (uint32_t table_index, boost::shared_ptr<ARDOUR::Route> r)
 {
+	if (table_index >= route_table.size()) {
+		return;
+	}
+	
+	route_table[table_index] = r;
+
+	// XXX SHAREDPTR need to handle r->GoingAway
 }
 
 bool
 ControlProtocol::set_route_table (uint32_t table_index, uint32_t remote_control_id)
 {
-	if (table_index >= route_table.size()) {
-		return false;
-	}
-		
-	Route* r = session->route_by_remote_id (remote_control_id);
+	boost::shared_ptr<Route> r = session->route_by_remote_id (remote_control_id);
 
 	if (!r) {
 		return false;
 	}
-	
-	route_table[table_index] = r;
+
+	set_route_table (table_index, r);
 
 	return true;
 }
@@ -162,9 +165,9 @@ ControlProtocol::route_set_rec_enable (uint32_t table_index, bool yn)
 		return;
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 
-	AudioTrack* at = dynamic_cast<AudioTrack*>(r);
+	boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(r);
 
 	if (at) {
 		at->set_record_enable (yn, this);
@@ -178,9 +181,9 @@ ControlProtocol::route_get_rec_enable (uint32_t table_index)
 		return false;
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 
-	AudioTrack* at = dynamic_cast<AudioTrack*>(r);
+	boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(r);
 
 	if (at) {
 		return at->record_enabled ();
@@ -197,7 +200,7 @@ ControlProtocol::route_get_gain (uint32_t table_index)
 		return 0.0f;
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return 0.0f;
@@ -213,7 +216,7 @@ ControlProtocol::route_set_gain (uint32_t table_index, float gain)
 		return;
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 	
 	if (r != 0) {
 		r->set_gain (gain, this);
@@ -227,7 +230,7 @@ ControlProtocol::route_get_effective_gain (uint32_t table_index)
 		return 0.0f;
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return 0.0f;
@@ -244,7 +247,7 @@ ControlProtocol::route_get_peak_input_power (uint32_t table_index, uint32_t whic
 		return 0.0f;
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return 0.0f;
@@ -261,7 +264,7 @@ ControlProtocol::route_get_muted (uint32_t table_index)
 		return false;
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return false;
@@ -277,7 +280,7 @@ ControlProtocol::route_set_muted (uint32_t table_index, bool yn)
 		return;
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
 		r->set_mute (yn, this);
@@ -292,7 +295,7 @@ ControlProtocol::route_get_soloed (uint32_t table_index)
 		return false;
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return false;
@@ -308,7 +311,7 @@ ControlProtocol::route_set_soloed (uint32_t table_index, bool yn)
 		return;
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
 		r->set_solo (yn, this);
@@ -322,7 +325,7 @@ ControlProtocol:: route_get_name (uint32_t table_index)
 		return "";
 	}
 
-	Route* r = route_table[table_index];
+	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return "";

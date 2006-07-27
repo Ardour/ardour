@@ -34,7 +34,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-PanAutomationTimeAxisView::PanAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, Canvas& canvas, std::string n)
+PanAutomationTimeAxisView::PanAutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, PublicEditor& e, 
+						      TimeAxisView& parent, Canvas& canvas, std::string n)
 
 	: AxisView (s),
 	  AutomationTimeAxisView (s, r, e, parent, canvas, n, X_("pan"), "")
@@ -140,6 +141,6 @@ void
 PanAutomationTimeAxisView::set_automation_state (AutoState state)
 {
 	if (!ignore_state_request) {
-		route.panner().set_automation_state (state);
+		route->panner().set_automation_state (state);
 	}
 }

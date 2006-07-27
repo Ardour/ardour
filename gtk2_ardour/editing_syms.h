@@ -56,4 +56,5 @@ DISPLAYCONTROL(ShowWaveformsRecording)
 
 IMPORTMODE(ImportAsRegion)
 IMPORTMODE(ImportAsTrack)
+IMPORTMODE(ImportAsTapeTrack)
 IMPORTMODE(ImportToTrack)

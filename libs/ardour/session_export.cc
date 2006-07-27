@@ -485,8 +485,9 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 	/* take everyone out of awrite to avoid disasters */
 
 	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		boost::shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->protect_automation ();
 		}
 	}

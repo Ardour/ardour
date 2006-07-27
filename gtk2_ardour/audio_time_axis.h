@@ -77,7 +77,7 @@ class AutomationTimeAxisView;
 class AudioTimeAxisView : public RouteUI, public TimeAxisView
 {
   public:
- 	AudioTimeAxisView (PublicEditor&, ARDOUR::Session&, ARDOUR::Route&, ArdourCanvas::Canvas& canvas);
+ 	AudioTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
  	virtual ~AudioTimeAxisView ();
 
 	void show_selection (TimeSelection&);
@@ -177,7 +177,7 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	void redirect_edit ();
 	void redirect_relist ();
 	void redirect_row_selected (gint row, gint col, GdkEvent *ev);
-	void add_to_redirect_display (ARDOUR::Redirect *);
+	void add_to_redirect_display (boost::shared_ptr<ARDOUR::Redirect>);
 	void redirects_changed (void *);
 
 	sigc::connection modified_connection;
@@ -259,33 +259,33 @@ class AudioTimeAxisView : public RouteUI, public TimeAxisView
 	};
 
 	struct RedirectAutomationInfo {
-	    ARDOUR::Redirect* redirect;
+	    boost::shared_ptr<ARDOUR::Redirect> redirect;
 	    bool valid;
 	    Gtk::Menu* menu;
 	    vector<RedirectAutomationNode*> lines;
 
-	    RedirectAutomationInfo (ARDOUR::Redirect* r) 
+	    RedirectAutomationInfo (boost::shared_ptr<ARDOUR::Redirect> r) 
 		    : redirect (r), valid (true) {}
 
 	    ~RedirectAutomationInfo ();
 	};
 
 	list<RedirectAutomationInfo*> redirect_automation;
-	RedirectAutomationNode* find_redirect_automation_node (ARDOUR::Redirect *redirect, uint32_t what);
+	RedirectAutomationNode* find_redirect_automation_node (boost::shared_ptr<ARDOUR::Redirect> redirect, uint32_t what);
 	
 	Gtk::Menu subplugin_menu;
-	void add_redirect_to_subplugin_menu (ARDOUR::Redirect *);
+	void add_redirect_to_subplugin_menu (boost::shared_ptr<ARDOUR::Redirect>);
 
 	void remove_ran (RedirectAutomationNode* ran);
 
 	void redirect_menu_item_toggled (AudioTimeAxisView::RedirectAutomationInfo*,
 					 AudioTimeAxisView::RedirectAutomationNode*);
-	void redirect_automation_track_hidden (RedirectAutomationNode*, ARDOUR::Redirect*);
+	void redirect_automation_track_hidden (RedirectAutomationNode*, boost::shared_ptr<ARDOUR::Redirect>);
 	
 	vector<RedirectAutomationLine*> redirect_automation_curves;
-	RedirectAutomationLine *find_redirect_automation_curve (ARDOUR::Redirect*,uint32_t);
-	void add_redirect_automation_curve (ARDOUR::Redirect*, uint32_t);
-	void add_existing_redirect_automation_curves (ARDOUR::Redirect*);
+	RedirectAutomationLine *find_redirect_automation_curve (boost::shared_ptr<ARDOUR::Redirect>,uint32_t);
+	void add_redirect_automation_curve (boost::shared_ptr<ARDOUR::Redirect>, uint32_t);
+	void add_existing_redirect_automation_curves (boost::shared_ptr<ARDOUR::Redirect>);
 
 	ArdourCanvas::SimpleRect *timestretch_rect;
 

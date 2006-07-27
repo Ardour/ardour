@@ -140,7 +140,7 @@ Editor::bounce_region_selection ()
 		
 		AudioRegion& region ((*i)->region);
 		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&(*i)->get_time_axis_view());
-		AudioTrack* track = dynamic_cast<AudioTrack*>(&(atv->route()));
+		AudioTrack* track = dynamic_cast<AudioTrack*>(atv->route().get());
 
 		InterThreadInfo itt;
 

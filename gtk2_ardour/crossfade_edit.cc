@@ -1077,7 +1077,7 @@ CrossfadeEditor::peaks_ready (AudioRegion* r, WhichFade which)
 void
 CrossfadeEditor::audition_both ()
 {
-	AudioPlaylist& pl (session.the_auditioner().prepare_playlist());
+	AudioPlaylist& pl (session.the_auditioner()->prepare_playlist());
 	jack_nframes_t preroll;
 	jack_nframes_t postroll;
 	jack_nframes_t length;
@@ -1140,7 +1140,7 @@ CrossfadeEditor::audition_left_dry ()
 void
 CrossfadeEditor::audition_left ()
 {
-	AudioPlaylist& pl (session.the_auditioner().prepare_playlist());
+	AudioPlaylist& pl (session.the_auditioner()->prepare_playlist());
 
 	AudioRegion* left = new AudioRegion (xfade.out(), xfade.out().length() - xfade.length(), xfade.length(), "xfade left", 
 					     0, Region::DefaultFlags, false);
@@ -1172,7 +1172,7 @@ CrossfadeEditor::audition_right_dry ()
 void
 CrossfadeEditor::audition_right ()
 {
-	AudioPlaylist& pl (session.the_auditioner().prepare_playlist());
+	AudioPlaylist& pl (session.the_auditioner()->prepare_playlist());
 
 	AudioRegion* left = new AudioRegion (xfade.out(), xfade.out().length() - xfade.length(), xfade.length(), "xfade out", 
 					     0, Region::DefaultFlags, false);

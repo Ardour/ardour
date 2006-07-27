@@ -111,7 +111,7 @@ class Mixer_UI : public Gtk::Window
 
 	bool strip_scroller_button_release (GdkEventButton*);
 
-	void add_strip (ARDOUR::Route*);
+	void add_strip (boost::shared_ptr<ARDOUR::Route>);
 	void remove_strip (MixerStrip *);
 
 	void hide_all_strips (bool with_select);
@@ -194,7 +194,7 @@ class Mixer_UI : public Gtk::Window
 	    }
 	    Gtk::TreeModelColumn<bool>           visible;
 	    Gtk::TreeModelColumn<Glib::ustring>  text;
-	    Gtk::TreeModelColumn<ARDOUR::Route*> route;
+	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
 	    Gtk::TreeModelColumn<MixerStrip*>    strip;
 	};
 

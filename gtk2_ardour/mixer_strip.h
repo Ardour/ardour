@@ -84,7 +84,7 @@ class Mixer_UI;
 class MixerStrip : public RouteUI, public Gtk::EventBox
 {
   public:
-	MixerStrip (Mixer_UI&, ARDOUR::Session&, ARDOUR::Route &, bool in_mixer = true);
+	MixerStrip (Mixer_UI&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, bool in_mixer = true);
 	~MixerStrip ();
 
 	void set_width (Width);
@@ -239,7 +239,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void name_changed (void *src);
 	void update_speed_display ();
 	void map_frozen ();
-	void hide_redirect_editor (ARDOUR::Redirect* redirect);
+	void hide_redirect_editor (boost::shared_ptr<ARDOUR::Redirect> redirect);
 
 	bool ignore_speed_adjustment;
 

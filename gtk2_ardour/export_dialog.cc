@@ -1082,11 +1082,11 @@ ExportDialog::fill_lists ()
 	track_list->clear();
 	master_list->clear();
 	
-	Session::RouteList routes = session->get_routes ();
+	boost::shared_ptr<Session::RouteList> routes = session->get_routes ();
 
-	for (Session::RouteList::iterator ri = routes.begin(); ri != routes.end(); ++ri) {
-
-		Route* route = (*ri);
+	for (Session::RouteList::iterator ri = routes->begin(); ri != routes->end(); ++ri) {
+		
+		boost::shared_ptr<Route> route = (*ri);
 		
 		if (route->hidden()) {
 			continue;

@@ -67,7 +67,7 @@ namespace Gtkmm2ext {
 class PlugUIBase : public virtual sigc::trackable
 {
   public:
-	PlugUIBase (ARDOUR::PluginInsert&);
+	PlugUIBase (boost::shared_ptr<ARDOUR::PluginInsert>);
 	virtual ~PlugUIBase() {}
 
 	virtual gint get_preferred_height () = 0;
@@ -75,8 +75,8 @@ class PlugUIBase : public virtual sigc::trackable
 	virtual bool stop_updating(GdkEventAny*) = 0;
 
   protected:
-	ARDOUR::PluginInsert& insert;
-	ARDOUR::Plugin& plugin;
+	boost::shared_ptr<ARDOUR::PluginInsert> insert;
+	boost::shared_ptr<ARDOUR::Plugin> plugin;
 	Gtk::ComboBoxText combo;
 	Gtk::Button save_button;
 	Gtk::ToggleButton bypass_button;
@@ -89,7 +89,7 @@ class PlugUIBase : public virtual sigc::trackable
 class PluginUI : public PlugUIBase, public Gtk::VBox 
 {
   public:
-	PluginUI (ARDOUR::AudioEngine &, ARDOUR::PluginInsert& plug, bool scrollable=false);
+	PluginUI (ARDOUR::AudioEngine &, boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
 	~PluginUI ();
 	
 	gint get_preferred_height () { return prefheight; }
@@ -196,7 +196,7 @@ class PluginUI : public PlugUIBase, public Gtk::VBox
 class PluginUIWindow : public ArdourDialog
 {
   public:
-	PluginUIWindow (ARDOUR::AudioEngine &, ARDOUR::PluginInsert& insert, bool scrollable=false);
+	PluginUIWindow (ARDOUR::AudioEngine &, boost::shared_ptr<ARDOUR::PluginInsert> insert, bool scrollable=false);
 	~PluginUIWindow ();
 
 	PlugUIBase& pluginui() { return *_pluginui; }
@@ -213,7 +213,7 @@ class PluginUIWindow : public ArdourDialog
 class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 {
   public:
-	VSTPluginUI (ARDOUR::PluginInsert&, ARDOUR::VSTPlugin&);
+	VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
 	~VSTPluginUI ();
 
 	gint get_preferred_height ();
@@ -223,7 +223,7 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	int package (Gtk::Window&);
 
   private:
-	ARDOUR::VSTPlugin&  vst;
+	boost::shared_ptr<ARDOUR::VSTPlugin>  vst;
 	Gtk::Socket socket;
 	Gtk::HBox   preset_box;
 	Gtk::VBox   vpacker;

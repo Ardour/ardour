@@ -96,7 +96,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	rui = ruix;
 
 	str = _("ardour: playlist for ");
-	str += rui->route().name();
+	str += rui->route()->name();
 
 	set_title (str);
 
@@ -223,7 +223,7 @@ PlaylistSelector::selection_changed ()
 
 	TreeModel::iterator iter = tree.get_selection()->get_selected();
 
-	if (!iter) {
+	if (!iter || rui == 0) {
 		/* nothing selected */
 		return;
 	}
@@ -233,7 +233,7 @@ PlaylistSelector::selection_changed ()
 		AudioTrack* at;
 		AudioPlaylist* apl;
 		
-		if ((at = dynamic_cast<AudioTrack*> (&rui->route())) == 0) {
+		if ((at = rui->audio_track()) == 0) {
 			/* eh? */
 			return;
 		}

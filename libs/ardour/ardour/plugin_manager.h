@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 #include <ardour/types.h>
 
 namespace ARDOUR {
@@ -26,7 +28,7 @@ class PluginManager {
 	int add_ladspa_directory (std::string dirpath);
 	int add_vst_directory (std::string dirpath);
 
-	Plugin *load (ARDOUR::Session& s, PluginInfo* info);
+	boost::shared_ptr<Plugin> load (ARDOUR::Session& s, PluginInfo* info);
 
 	static PluginManager* the_manager() { return _manager; }
 

@@ -191,11 +191,11 @@ Session::realtime_stop (bool abort)
 void
 Session::butler_transport_work ()
 {
-	Glib::RWLock::ReaderLock rm (route_lock);
 	Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
 	if (post_transport_work & PostTransportCurveRealloc) {
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->curve_reallocate();
 		}
 	}
@@ -332,7 +332,9 @@ Session::non_realtime_stop (bool abort)
 		(*i)->transport_stopped (*now, xnow, abort);
 	}
 	
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->hidden()) {
 			(*i)->set_pending_declick (0);
 		}
@@ -544,7 +546,9 @@ Session::set_auto_loop (bool yn)
 void
 Session::flush_all_redirects ()
 {
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->flush_redirects ();
 	}
 }
@@ -1193,11 +1197,12 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		return;
 	}
 
-	Glib::RWLock::ReaderLock lm (route_lock);
 	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
 	_worst_track_latency = 0;
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (with_stop) {
 			(*i)->handle_transport_stopped (abort, (post_transport_work & PostTransportLocate), 
 							(!(post_transport_work & PostTransportLocate) || pending_locate_flush));
@@ -1215,7 +1220,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		}
 	}
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->set_latency_delay (_worst_track_latency);
 	}
 
@@ -1225,7 +1230,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		_engine.update_total_latencies ();
 	}
 
-	set_worst_io_latencies (false);
+	set_worst_io_latencies ();
 
 	/* reflect any changes in latencies into capture offsets
 	*/

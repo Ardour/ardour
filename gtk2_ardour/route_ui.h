@@ -44,18 +44,20 @@ class BindableToggleButton;
 class RouteUI : public virtual AxisView
 {
   public:
-	RouteUI(ARDOUR::Route&, ARDOUR::Session&, const char*, const char*, const char*);
+	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session&, const char*, const char*, const char*);
 	virtual ~RouteUI();
 
 	bool is_audio_track() const;
 	ARDOUR::AudioDiskstream* get_diskstream() const;
 
-	ARDOUR::Route& route() const { return _route; }
+	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
 	ARDOUR::AudioTrack* audio_track() const;
 
 	string name() const;
-	
-	ARDOUR::Route& _route;
+
+	// protected: XXX sigh this should be here
+
+	boost::shared_ptr<ARDOUR::Route> _route;
 	
 	void set_color (const Gdk::Color & c);
 	bool choose_color ();
@@ -106,9 +108,9 @@ class RouteUI : public virtual AxisView
 	void build_mute_menu(void);
 	void init_mute_menu(ARDOUR::mute_type, Gtk::CheckMenuItem*);
 	
-	void set_mix_group_solo(ARDOUR::Route&, bool);
-	void set_mix_group_mute(ARDOUR::Route&, bool);
-	void set_mix_group_rec_enable(ARDOUR::Route&, bool);
+	void set_mix_group_solo(boost::shared_ptr<ARDOUR::Route>, bool);
+	void set_mix_group_mute(boost::shared_ptr<ARDOUR::Route>, bool);
+	void set_mix_group_rec_enable(boost::shared_ptr<ARDOUR::Route>, bool);
 
 	int  set_color_from_route ();
 

@@ -165,7 +165,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_slave_type = None;
 	butler_mixdown_buffer = 0;
 	butler_gain_buffer = 0;
-	auditioner = 0;
 	mmc_control = false;
 	midi_control = true;
 	mmc = 0;
@@ -180,8 +179,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_edit_mode = Slide;
 	pending_edit_mode = _edit_mode;
 	_play_range = false;
-	_control_out = 0;
-	_master_out = 0;
 	input_auto_connect = AutoConnectOption (0);
 	output_auto_connect = AutoConnectOption (0);
 	waiting_to_start = false;
@@ -216,7 +213,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	   waveforms for clicks.
 	*/
 	
-	_click_io = 0;
 	_clicking = false;
 	click_requested = false;
 	click_data = 0;
@@ -1411,10 +1407,10 @@ Session::state(bool full_state)
 
 	child = node->add_child ("Routes");
 	{
-		Glib::RWLock::ReaderLock lm (route_lock);
+		boost::shared_ptr<RouteList> r = routes.reader ();
 		
 		RoutePublicOrderSorter cmp;
-		RouteList public_order(routes);
+		RouteList public_order (*r);
 		public_order.sort (cmp);
 		
 		for (RouteList::iterator i = public_order.begin(); i != public_order.end(); ++i) {
@@ -1710,7 +1706,6 @@ Session::load_routes (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	Route *route;
 
 	nlist = node.children();
 
@@ -1718,7 +1713,9 @@ Session::load_routes (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		if ((route = XMLRouteFactory (**niter)) == 0) {
+		boost::shared_ptr<Route> route (XMLRouteFactory (**niter));
+
+		if (route == 0) {
 			error << _("Session: cannot create Route from XML description.")			      << endmsg;
 			return -1;
 		}
@@ -1729,17 +1726,19 @@ Session::load_routes (const XMLNode& node)
 	return 0;
 }
 
-Route *
+boost::shared_ptr<Route>
 Session::XMLRouteFactory (const XMLNode& node)
 {
 	if (node.name() != "Route") {
-		return 0;
+		return boost::shared_ptr<Route> ((Route*) 0);
 	}
 
 	if (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0) {
-		return new AudioTrack (*this, node);
+		boost::shared_ptr<Route> x (new AudioTrack (*this, node));
+		return x;
 	} else {
-		return new Route (*this, node);
+		boost::shared_ptr<Route> x (new Route (*this, node));
+		return x;
 	}
 }
 
@@ -2423,23 +2422,6 @@ Session::load_route_groups (const XMLNode& node, bool edit)
 	return 0;
 }				
 
-void
-Session::swap_configuration(Configuration** new_config)
-{
-	Glib::RWLock::WriterLock lm (route_lock); // jlc - WHY?
-	Configuration* tmp = *new_config;
-	*new_config = Config;
-	Config = tmp;
-	set_dirty();
-}
-
-void
-Session::copy_configuration(Configuration* new_config)
-{
-	Glib::RWLock::WriterLock lm (route_lock);
-	new_config = new Configuration(*Config);
-}
-
 static bool
 state_file_filter (const string &str, void *arg)
 {
@@ -2615,14 +2597,15 @@ Session::GlobalRouteBooleanState
 Session::get_global_route_boolean (bool (Route::*method)(void) const)
 {
 	GlobalRouteBooleanState s;
-	Glib::RWLock::ReaderLock lm (route_lock);
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->hidden()) {
 			RouteBooleanState v;
 			
 			v.first =* i;
-			v.second = ((*i)->*method)();
+			Route* r = (*i).get();
+			v.second = (r->*method)();
 			
 			s.push_back (v);
 		}
@@ -2635,9 +2618,9 @@ Session::GlobalRouteMeterState
 Session::get_global_route_metering ()
 {
 	GlobalRouteMeterState s;
-	Glib::RWLock::ReaderLock lm (route_lock);
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->hidden()) {
 			RouteMeterState v;
 			
@@ -2663,7 +2646,8 @@ void
 Session::set_global_route_boolean (GlobalRouteBooleanState s, void (Route::*method)(bool, void*), void* arg)
 {
 	for (GlobalRouteBooleanState::iterator i = s.begin(); i != s.end(); ++i) {
-		(i->first->*method) (i->second, arg);
+		Route* r = i->first.get();
+		(r->*method) (i->second, arg);
 	}
 }
 
@@ -3267,6 +3251,10 @@ Session::add_controllable (Controllable* c)
 void
 Session::remove_controllable (Controllable* c)
 {
+	if (_state_of_the_state | Deletion) {
+		return;
+	}
+
 	Glib::Mutex::Lock lm (controllables_lock);
 	controllables.remove (c);
 }	

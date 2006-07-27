@@ -22,6 +22,7 @@
 #define __ardour_gtk_selection_h__
 
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 #include <sigc++/signal.h>
 
@@ -101,7 +102,7 @@ class Selection : public sigc::trackable
 	void set (ARDOUR::AutomationList*);
 	void set (ARDOUR::Playlist*);
 	void set (const list<ARDOUR::Playlist*>&);
-	void set (ARDOUR::Redirect*);
+	void set (boost::shared_ptr<ARDOUR::Redirect>);
 	void set (AutomationSelectable*);
 
 	void toggle (TimeAxisView*);
@@ -112,7 +113,7 @@ class Selection : public sigc::trackable
 	void toggle (ARDOUR::AutomationList*);
 	void toggle (ARDOUR::Playlist*);
 	void toggle (const list<ARDOUR::Playlist*>&);
-	void toggle (ARDOUR::Redirect*);
+	void toggle (boost::shared_ptr<ARDOUR::Redirect>);
 
 	void add (TimeAxisView*);
 	void add (const list<TimeAxisView*>&);
@@ -122,7 +123,7 @@ class Selection : public sigc::trackable
 	void add (ARDOUR::AutomationList*);
 	void add (ARDOUR::Playlist*);
 	void add (const list<ARDOUR::Playlist*>&);
-	void add (ARDOUR::Redirect*);
+	void add (boost::shared_ptr<ARDOUR::Redirect>);
 	
 	void remove (TimeAxisView*);
 	void remove (const list<TimeAxisView*>&);
@@ -132,7 +133,7 @@ class Selection : public sigc::trackable
 	void remove (ARDOUR::AutomationList*);
 	void remove (ARDOUR::Playlist*);
 	void remove (const list<ARDOUR::Playlist*>&);
-	void remove (ARDOUR::Redirect*);
+	void remove (boost::shared_ptr<ARDOUR::Redirect>);
 
 	void replace (uint32_t time_index, jack_nframes_t start, jack_nframes_t end);
 	

@@ -640,7 +640,7 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 				
 				to_read = min (chunksize, (_length - current_frame));
 				
-				if ((frames_read = read_unlocked (raw_staging, current_frame, to_read, workbuf)) < 0) {
+				if ((frames_read = read_unlocked (raw_staging, current_frame, to_read, workbuf)) == 0) {
 					error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3")
 							 , _name, to_read, current_frame) 
 					      << endmsg;

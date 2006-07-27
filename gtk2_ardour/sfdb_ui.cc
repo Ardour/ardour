@@ -404,6 +404,9 @@ SoundFileOmega::set_mode (Editing::ImportMode mode)
 	case Editing::ImportToTrack:
 		split_check.set_sensitive (false);
 		break;
+	case Editing::ImportAsTapeTrack:
+		split_check.set_sensitive (true);
+		break;
 	}
 }
 
@@ -442,6 +445,9 @@ SoundFileOmega::mode_changed ()
 		break;
 	case Editing::ImportToTrack:
 		split_check.set_sensitive (false);
+		break;
+	case Editing::ImportAsTapeTrack:
+		split_check.set_sensitive (true);
 		break;
 	}
 }

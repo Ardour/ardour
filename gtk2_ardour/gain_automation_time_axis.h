@@ -13,7 +13,7 @@ class GainAutomationTimeAxisView : public AutomationTimeAxisView
 {
   public:
 	GainAutomationTimeAxisView (ARDOUR::Session&,
-				    ARDOUR::Route&,
+				    boost::shared_ptr<ARDOUR::Route>,
 				    PublicEditor&,
 				    TimeAxisView& parent_axis,
 				    ArdourCanvas::Canvas& canvas,

@@ -4,6 +4,9 @@
 #include <vector>
 #include <list>
 #include <string>
+
+#include <boost/shared_ptr.hpp>
+
 #include <ardour/types.h>
 
 #include "canvas.h"
@@ -31,7 +34,7 @@ class Selectable;
 class AutomationTimeAxisView : public TimeAxisView {
   public:
 	AutomationTimeAxisView (ARDOUR::Session&,
-				ARDOUR::Route&,
+				boost::shared_ptr<ARDOUR::Route>,
 				PublicEditor&,
 				TimeAxisView& parent,
 				ArdourCanvas::Canvas& canvas,
@@ -75,7 +78,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	XMLNode* get_state_node ();
 
   protected:
-	ARDOUR::Route& route;
+	boost::shared_ptr<ARDOUR::Route> route;
 	ArdourCanvas::SimpleRect* base_rect;
 	string _name;
 	string _state_name;
