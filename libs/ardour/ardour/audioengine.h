@@ -244,6 +244,6 @@ class AudioEngine : public sigc::trackable
     mutable gint     m_meter_exit;
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_audioengine_h__ */

@@ -182,7 +182,7 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 			continue;
 		}
 
-		if ((t = dynamic_cast<Track*> (&rtv->route())) == 0) {
+		if ((t = dynamic_cast<Track*> (rtv->route().get())) == 0) {
 			i = tmp;
 			continue;
 		}

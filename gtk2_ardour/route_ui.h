@@ -46,15 +46,16 @@ class BindableToggleButton;
 class RouteUI : public virtual AxisView
 {
   public:
-	RouteUI(ARDOUR::Route&, ARDOUR::Session&, const char*, const char*, const char*);
+	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session&, const char*, const char*, const char*);
 	virtual ~RouteUI();
-
-	ARDOUR::Route& route() const { return _route; }
 
 	bool is_track() const;
 	bool is_audio_track() const;
 	bool is_midi_track() const;
 
+	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
+	
+	// FIXME: make these return shared_ptr
 	ARDOUR::Track*      track() const;
 	ARDOUR::AudioTrack* audio_track() const;
 	ARDOUR::MidiTrack*  midi_track() const;
@@ -62,8 +63,10 @@ class RouteUI : public virtual AxisView
 	ARDOUR::Diskstream* get_diskstream() const;
 
 	string name() const;
-	
-	ARDOUR::Route& _route;
+
+	// protected: XXX sigh this should be here
+
+	boost::shared_ptr<ARDOUR::Route> _route;
 	
 	void set_color (const Gdk::Color & c);
 	bool choose_color ();
@@ -95,6 +98,7 @@ class RouteUI : public virtual AxisView
 
 	void solo_changed(void*);
 	void mute_changed(void*);
+	virtual void redirects_changed (void *) {}
 	void route_rec_enable_changed(void*);
 	void session_rec_enable_changed();
 
@@ -114,9 +118,9 @@ class RouteUI : public virtual AxisView
 	void build_mute_menu(void);
 	void init_mute_menu(ARDOUR::mute_type, Gtk::CheckMenuItem*);
 	
-	void set_mix_group_solo(ARDOUR::Route&, bool);
-	void set_mix_group_mute(ARDOUR::Route&, bool);
-	void set_mix_group_rec_enable(ARDOUR::Route&, bool);
+	void set_mix_group_solo(boost::shared_ptr<ARDOUR::Route>, bool);
+	void set_mix_group_mute(boost::shared_ptr<ARDOUR::Route>, bool);
+	void set_mix_group_rec_enable(boost::shared_ptr<ARDOUR::Route>, bool);
 
 	int  set_color_from_route ();
 

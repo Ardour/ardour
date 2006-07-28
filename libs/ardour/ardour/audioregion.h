@@ -123,8 +123,7 @@ class AudioRegion : public Region
 		Fast,
 		Slow,
 		LogA,
-		LogB,
-
+		LogB
 	};
 
 	void set_fade_in_active (bool yn);

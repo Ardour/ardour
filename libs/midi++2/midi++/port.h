@@ -42,7 +42,7 @@ class Port : public sigc::trackable {
 		ALSA_Sequencer,
 		CoreMidi_MidiPort,
 		Null,
-		FIFO,
+		FIFO
 	};
 
 	Port (PortRequest &);
@@ -152,7 +152,6 @@ class Port : public sigc::trackable {
 	static size_t nports;
 };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif // __libmidi_port_h__
-

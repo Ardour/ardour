@@ -73,7 +73,7 @@ namespace ARDOUR {
 		PanAutomation = 0x2,
 		PluginAutomation = 0x4,
 		SoloAutomation = 0x8,
-		MuteAutomation = 0x10,
+		MuteAutomation = 0x10
 	};
 
 	enum AutoState {
@@ -192,7 +192,7 @@ namespace ARDOUR {
 
 	enum EditMode {
 		Slide,
-		Splice,
+		Splice
 	};
 
         enum RegionPoint { 
@@ -245,7 +245,7 @@ namespace ARDOUR {
 	    PeakDatum min;
 	    PeakDatum max;
 	};
-};
+}
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);

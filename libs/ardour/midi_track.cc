@@ -80,14 +80,6 @@ MidiTrack::~MidiTrack ()
 	}
 }
 
-#if 0
-void
-MidiTrack::handle_smpte_offset_change ()
-{
-	diskstream
-}
-#endif
-
 
 int
 MidiTrack::set_diskstream (MidiDiskstream& ds, void *src)
@@ -372,8 +364,8 @@ MidiTrack::set_state_part_two ()
 				continue;
 			}
 			
-			FreezeRecordInsertInfo* frii = new FreezeRecordInsertInfo (*((*citer)->children().front()));
-			frii->insert = 0;
+			FreezeRecordInsertInfo* frii = new FreezeRecordInsertInfo (*((*citer)->children().front()),
+										   boost::shared_ptr<Insert>());
 			frii->id = prop->value ();
 			_freeze_record.insert_info.push_back (frii);
 		}
@@ -491,111 +483,6 @@ int
 MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, int declick,
 		  bool can_record, bool rec_monitors_input)
 {
-#if 0
-	int dret;
-	Sample* b;
-	Sample* tmpb;
-	jack_nframes_t transport_frame;
-
-	{
-		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
-		if (lm.locked()) {
-			// automation snapshot can also be called from the non-rt context
-			// and it uses the redirect list, so we take the lock out here
-			automation_snapshot (start_frame);
-		}
-	}
-	
-	if (n_outputs() == 0 && _redirects.empty()) {
-		return 0;
-	}
-
-	if (!_active) {
-		silence (nframes, offset);
-		return 0;
-	}
-
-	transport_frame = _session.transport_frame();
-
-	if ((nframes = check_initial_delay (nframes, offset, transport_frame)) == 0) {
-		/* need to do this so that the diskstream sets its
-		   playback distance to zero, thus causing diskstream::commit
-		   to do nothing.
-		*/
-		return diskstream->process (transport_frame, 0, 0, can_record, rec_monitors_input);
-	} 
-
-	_silent = false;
-	apply_gain_automation = false;
-
-	if ((dret = diskstream->process (transport_frame, nframes, offset, can_record, rec_monitors_input)) != 0) {
-		
-		silence (nframes, offset);
-
-		return dret;
-	}
-
-	/* special condition applies */
-	
-	if (_meter_point == MeterInput) {
-		just_meter_input (start_frame, end_frame, nframes, offset);
-	}
-
-	if (diskstream->record_enabled() && !can_record && !_session.get_auto_input()) {
-
-		/* not actually recording, but we want to hear the input material anyway,
-		   at least potentially (depending on monitoring options)
-		 */
-
-		passthru (start_frame, end_frame, nframes, offset, 0, true);
-
-	} else if ((b = diskstream->playback_buffer(0)) != 0) {
-
-		/*
-		  XXX is it true that the earlier test on n_outputs()
-		  means that we can avoid checking it again here? i think
-		  so, because changing the i/o configuration of an IO
-		  requires holding the AudioEngine lock, which we hold
-		  while in the process() tree.
-		*/
-
-		
-		/* copy the diskstream data to all output buffers */
-		
-		vector<Sample*>& bufs = _session.get_passthru_buffers ();
-		uint32_t limit = n_process_buffers ();
-		
-		uint32_t n;
-		uint32_t i;
-
-
-		for (i = 0, n = 1; i < limit; ++i, ++n) {
-			memcpy (bufs[i], b, sizeof (Sample) * nframes); 
-			if (n < diskstream->n_channels()) {
-				tmpb = diskstream->playback_buffer(n);
-				if (tmpb!=0) {
-					b = tmpb;
-				}
-			}
-		}
-
-		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
-
-		if (!diskstream->record_enabled() && _session.transport_rolling()) {
-			Glib::Mutex::Lock am (automation_lock, Glib::TRY_LOCK);
-			
-			if (am.locked() && gain_automation_playback()) {
-				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
-			}
-		}
-
-		process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !_session.get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
-		
-	} else {
-		/* problem with the diskstream; just be quiet for a bit */
-		silence (nframes, offset);
-	}
-#endif
 	return 0;
 }
 
@@ -645,97 +532,6 @@ MidiTrack::set_name (string str, void *src)
 int
 MidiTrack::export_stuff (vector<unsigned char*>& buffers, char * workbuf, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
 {
-#if 0
-	gain_t  gain_automation[nframes];
-	gain_t  gain_buffer[nframes];
-	float   mix_buffer[nframes];
-	RedirectList::iterator i;
-	bool post_fader_work = false;
-	gain_t this_gain = _gain;
-	vector<Sample*>::iterator bi;
-	Sample * b;
-	
-	Glib::RWLock::ReaderLock rlock (redirect_lock);
-		
-	if (diskstream->playlist()->read (buffers[0], mix_buffer, gain_buffer, workbuf, start, nframes) != nframes) {
-		return -1;
-	}
-
-	uint32_t n=1;
-	bi = buffers.begin();
-	b = buffers[0];
-	++bi;
-	for (; bi != buffers.end(); ++bi, ++n) {
-		if (n < diskstream->n_channels()) {
-			if (diskstream->playlist()->read ((*bi), mix_buffer, gain_buffer, workbuf, start, nframes, n) != nframes) {
-				return -1;
-			}
-			b = (*bi);
-		}
-		else {
-			/* duplicate last across remaining buffers */
-			memcpy ((*bi), b, sizeof (Sample) * nframes); 
-		}
-	}
-
-
-	/* note: only run inserts during export. other layers in the machinery
-	   will already have checked that there are no external port inserts.
-	*/
-	
-	for (i = _redirects.begin(); i != _redirects.end(); ++i) {
-		Insert *insert;
-		
-		if ((insert = dynamic_cast<Insert*>(*i)) != 0) {
-			switch (insert->placement()) {
-			case PreFader:
-				insert->run (buffers, nbufs, nframes, 0);
-				break;
-			case PostFader:
-				post_fader_work = true;
-				break;
-			}
-		}
-	}
-	
-	if (_gain_automation_curve.automation_state() == Play) {
-		
-		_gain_automation_curve.get_vector (start, start + nframes, gain_automation, nframes);
-
-		for (bi = buffers.begin(); bi != buffers.end(); ++bi) {
-			Sample *b = *bi;
-			for (jack_nframes_t n = 0; n < nframes; ++n) {
-				b[n] *= gain_automation[n];
-			}
-		}
-
-	} else {
-
-		for (bi = buffers.begin(); bi != buffers.end(); ++bi) {
-			Sample *b = *bi;
-			for (jack_nframes_t n = 0; n < nframes; ++n) {
-				b[n] *= this_gain;
-			}
-		}
-	}
-
-	if (post_fader_work) {
-
-		for (i = _redirects.begin(); i != _redirects.end(); ++i) {
-			PluginInsert *insert;
-			
-			if ((insert = dynamic_cast<PluginInsert*>(*i)) != 0) {
-				switch ((*i)->placement()) {
-				case PreFader:
-					break;
-				case PostFader:
-					insert->run (buffers, nbufs, nframes, 0);
-					break;
-				}
-			}
-		}
-	} 
-#endif
 	return 0;
 }
 
@@ -764,124 +560,11 @@ MidiTrack::bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadIn
 void
 MidiTrack::freeze (InterThreadInfo& itt)
 {
-#if 0
-	Insert* insert;
-	vector<MidiSource*> srcs;
-	string new_playlist_name;
-	Playlist* new_playlist;
-	string dir;
-	AudioRegion* region;
-	string region_name;
-	
-	if ((_freeze_record.playlist = diskstream->playlist()) == 0) {
-		return;
-	}
-
-	uint32_t n = 1;
-
-	while (n < (UINT_MAX-1)) {
-	 
-		string candidate;
-		
-		candidate = string_compose ("<F%2>%1", _freeze_record.playlist->name(), n);
-
-		if (_session.playlist_by_name (candidate) == 0) {
-			new_playlist_name = candidate;
-			break;
-		}
-
-		++n;
-
-	} 
-
-	if (n == (UINT_MAX-1)) {
-	  PBD::error << string_compose (X_("There Are too many frozen versions of playlist \"%1\""
-	  		    " to create another one"), _freeze_record.playlist->name())
-	       << endmsg;
-		return;
-	}
-
-	if (_session.write_one_midi_track (*this, 0, _session.current_end_frame(), true, srcs, itt)) {
-		return;
-	}
-
-	_freeze_record.insert_info.clear ();
-	_freeze_record.have_mementos = true;
-
-	{
-		Glib::RWLock::ReaderLock lm (redirect_lock);
-		
-		for (RedirectList::iterator r = _redirects.begin(); r != _redirects.end(); ++r) {
-			
-			if ((insert = dynamic_cast<Insert*>(*r)) != 0) {
-				
-				FreezeRecordInsertInfo* frii  = new FreezeRecordInsertInfo ((*r)->get_state());
-				
-				frii->insert = insert;
-				frii->id = insert->id();
-				frii->memento = (*r)->get_memento();
-				
-				_freeze_record.insert_info.push_back (frii);
-				
-				/* now deactivate the insert */
-				
-				insert->set_active (false, this);
-			}
-		}
-	}
-
-	new_playlist = new MidiPlaylist (_session, new_playlist_name, false);
-	region_name = new_playlist_name;
-
-	/* create a new region from all filesources, keep it private */
-
-	region = new AudioRegion (srcs, 0, srcs[0]->length(), 
-				  region_name, 0, 
-				  (AudioRegion::Flag) (AudioRegion::WholeFile|AudioRegion::DefaultFlags),
-				  false);
-
-	new_playlist->set_orig_diskstream_id (diskstream->id());
-	new_playlist->add_region (*region, 0);
-	new_playlist->set_frozen (true);
-	region->set_locked (true);
-
-	diskstream->use_playlist (dynamic_cast<MidiPlaylist*>(new_playlist));
-	diskstream->set_record_enabled (false, this);
-
-	_freeze_record.state = Frozen;
-	FreezeChange(); /* EMIT SIGNAL */
-#endif
 }
 
 void
 MidiTrack::unfreeze ()
 {
-#if 0
-	if (_freeze_record.playlist) {
-		diskstream->use_playlist (_freeze_record.playlist);
-
-		if (_freeze_record.have_mementos) {
-
-			for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
-				(*i)->memento ();
-			}
-
-		} else {
-
-			Glib::RWLock::ReaderLock lm (redirect_lock); // should this be a write lock? jlc
-			for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-				for (vector<FreezeRecordInsertInfo*>::iterator ii = _freeze_record.insert_info.begin(); ii != _freeze_record.insert_info.end(); ++ii) {
-					if ((*ii)->id == (*i)->id()) {
-						(*i)->set_state (((*ii)->state));
-						break;
-					}
-				}
-			}
-		}
-		
-		_freeze_record.playlist = 0;
-	}
-#endif
 	_freeze_record.state = UnFrozen;
 	FreezeChange (); /* EMIT SIGNAL */
 }

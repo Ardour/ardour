@@ -79,6 +79,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using boost::shared_ptr;
 
 const char* Session::_template_suffix = X_(".template");
 const char* Session::_statefile_suffix = X_(".ardour");
@@ -260,6 +261,9 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  //midi_requests (128), // the size of this should match the midi request pool size
 	  _send_smpte_update (false),
+	  routes (new RouteList),
+	  auditioner ((Auditioner*) 0),
+	  _click_io ((IO*) 0),
 	  main_outs (0)
 {
 	bool new_session;
@@ -308,6 +312,7 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  //midi_requests (16),
 	  _send_smpte_update (false),
+	  routes (new RouteList),
 	  main_outs (0)
 
 {
@@ -325,15 +330,13 @@ Session::Session (AudioEngine &eng,
 	}
 
 	if (control_out_channels) {
-		Route* r;
-		r = new Route (*this, _("monitor"), -1, control_out_channels, -1, control_out_channels, Route::ControlOut);
+		shared_ptr<Route> r (new Route (*this, _("monitor"), -1, control_out_channels, -1, control_out_channels, Route::ControlOut));
 		add_route (r);
 		_control_out = r;
 	}
 
 	if (master_out_channels) {
-		Route* r;
-		r = new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut);
+		shared_ptr<Route> r (new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut));
 		add_route (r);
 		_master_out = r;
 	} else {
@@ -384,15 +387,6 @@ Session::~Session ()
 	}
 
 	clear_clicks ();
-
-	if (_click_io) {
-		delete _click_io;
-	}
-
-
-	if (auditioner) {
-		delete auditioner;
-	}
 
 	for (vector<Sample*>::iterator i = _passthru_buffers.begin(); i != _passthru_buffers.end(); ++i) {
 		free(*i);
@@ -452,17 +446,6 @@ Session::~Session ()
 		i = tmp;
 	}
 	
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete routes\n";
-#endif /* TRACK_DESTRUCTION */
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ) {
-		RouteList::iterator tmp;
-		tmp = i;
-		++tmp;
-		delete *i;
-		i = tmp;
-	}
-
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete diskstreams\n";
 #endif /* TRACK_DESTRUCTION */
@@ -553,7 +536,7 @@ Session::~Session ()
 }
 
 void
-Session::set_worst_io_latencies (bool take_lock)
+Session::set_worst_io_latencies ()
 {
 	_worst_output_latency = 0;
 	_worst_input_latency = 0;
@@ -562,17 +545,11 @@ Session::set_worst_io_latencies (bool take_lock)
 		return;
 	}
 
-	if (take_lock) {
-		route_lock.reader_lock ();
-	}
+	boost::shared_ptr<RouteList> r = routes.reader ();
 	
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		_worst_output_latency = max (_worst_output_latency, (*i)->output_latency());
 		_worst_input_latency = max (_worst_input_latency, (*i)->input_latency());
-	}
-
-	if (take_lock) {
-		route_lock.reader_unlock ();
 	}
 }
 
@@ -590,7 +567,7 @@ Session::when_engine_running ()
 
 	/* every time we reconnect, recompute worst case output latencies */
 
-	_engine.Running.connect (sigc::bind (mem_fun (*this, &Session::set_worst_io_latencies), true));
+	_engine.Running.connect (mem_fun (*this, &Session::set_worst_io_latencies));
 
 	if (synced_to_jack()) {
 		_engine.transport_stop ();
@@ -605,7 +582,7 @@ Session::when_engine_running ()
 	try {
 		XMLNode* child = 0;
 		
-		_click_io = new ClickIO (*this, "click", 0, 0, -1, -1);
+		_click_io.reset (new ClickIO (*this, "click", 0, 0, -1, -1));
 
 		if (state_tree && (child = find_named_node (*state_tree->root(), "Click")) != 0) {
 
@@ -646,7 +623,7 @@ Session::when_engine_running ()
 		error << _("cannot setup Click I/O") << endmsg;
 	}
 
-	set_worst_io_latencies (true);
+	set_worst_io_latencies ();
 
 	if (_clicking) {
 		 ControlChanged (Clicking); /* EMIT SIGNAL */
@@ -661,7 +638,7 @@ Session::when_engine_running ()
 		*/
 
 		try {
-			auditioner = new Auditioner (*this);
+			auditioner.reset (new Auditioner (*this));
 		}
 
 		catch (failed_constructor& err) {
@@ -1468,7 +1445,6 @@ Session::set_block_size (jack_nframes_t nframes)
 	*/
 
 	{ 
-		Glib::RWLock::ReaderLock lm (route_lock);
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 		vector<Sample*>::iterator i;
 		uint32_t np;
@@ -1510,7 +1486,9 @@ Session::set_block_size (jack_nframes_t nframes)
 
 		allocate_pan_automation_buffers (nframes, _npan_buffers, true);
 
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		boost::shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->set_block_size (nframes);
 		}
 		
@@ -1518,7 +1496,7 @@ Session::set_block_size (jack_nframes_t nframes)
 			(*i)->set_block_size (nframes);
 		}
 
-		set_worst_io_latencies (false);
+		set_worst_io_latencies ();
 	}
 }
 
@@ -1560,7 +1538,7 @@ Session::set_default_fade (float steepness, float fade_msecs)
 }
 
 struct RouteSorter {
-    bool operator() (Route* r1, Route* r2) {
+    bool operator() (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> r2) {
 	    if (r1->fed_by.find (r2) != r1->fed_by.end()) {
 		    return false;
 	    } else if (r2->fed_by.find (r1) != r2->fed_by.end()) {
@@ -1582,9 +1560,9 @@ struct RouteSorter {
 };
 
 static void
-trace_terminal (Route* r1, Route* rbase)
+trace_terminal (shared_ptr<Route> r1, shared_ptr<Route> rbase)
 {
-	Route* r2;
+	shared_ptr<Route> r2;
 
 	if ((r1->fed_by.find (rbase) != r1->fed_by.end()) && (rbase->fed_by.find (r1) != rbase->fed_by.end())) {
 		info << string_compose(_("feedback loop setup between %1 and %2"), r1->name(), rbase->name()) << endmsg;
@@ -1593,13 +1571,13 @@ trace_terminal (Route* r1, Route* rbase)
 
 	/* make a copy of the existing list of routes that feed r1 */
 
-	set<Route *> existing = r1->fed_by;
+	set<shared_ptr<Route> > existing = r1->fed_by;
 
 	/* for each route that feeds r1, recurse, marking it as feeding
 	   rbase as well.
 	*/
 
-	for (set<Route *>::iterator i = existing.begin(); i != existing.end(); ++i) {
+	for (set<shared_ptr<Route> >::iterator i = existing.begin(); i != existing.end(); ++i) {
 		r2 =* i;
 
 		/* r2 is a route that feeds r1 which somehow feeds base. mark
@@ -1629,7 +1607,7 @@ trace_terminal (Route* r1, Route* rbase)
 }
 
 void
-Session::resort_routes (void* src)
+Session::resort_routes ()
 {
 	/* don't do anything here with signals emitted
 	   by Routes while we are being destroyed.
@@ -1639,54 +1617,64 @@ Session::resort_routes (void* src)
 		return;
 	}
 
-	/* Caller MUST hold the route_lock */
 
+	{
+
+		RCUWriter<RouteList> writer (routes);
+		shared_ptr<RouteList> r = writer.get_copy ();
+		resort_routes_using (r);
+		/* writer goes out of scope and forces update */
+	}
+
+}
+void
+Session::resort_routes_using (shared_ptr<RouteList> r)
+{
 	RouteList::iterator i, j;
-
-	for (i = routes.begin(); i != routes.end(); ++i) {
-
+	
+	for (i = r->begin(); i != r->end(); ++i) {
+		
 		(*i)->fed_by.clear ();
 		
-		for (j = routes.begin(); j != routes.end(); ++j) {
-
+		for (j = r->begin(); j != r->end(); ++j) {
+			
 			/* although routes can feed themselves, it will
 			   cause an endless recursive descent if we
 			   detect it. so don't bother checking for
 			   self-feeding.
 			*/
-
+			
 			if (*j == *i) {
 				continue;
 			}
-
+			
 			if ((*j)->feeds (*i)) {
 				(*i)->fed_by.insert (*j);
 			} 
 		}
 	}
 	
-	for (i = routes.begin(); i != routes.end(); ++i) {
+	for (i = r->begin(); i != r->end(); ++i) {
 		trace_terminal (*i, *i);
 	}
-
+	
 	RouteSorter cmp;
-	routes.sort (cmp);
-
+	r->sort (cmp);
+	
 #if 0
 	cerr << "finished route resort\n";
 	
-	for (i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		cerr << " " << (*i)->name() << " signal order = " << (*i)->order_key ("signal") << endl;
 	}
 	cerr << endl;
 #endif
-
+	
 }
 
-MidiTrack*
+boost::shared_ptr<MidiTrack>
 Session::new_midi_track (TrackMode mode)
 {
-	MidiTrack *track;
 	char track_name[32];
 	uint32_t n = 0;
 	uint32_t channels_used = 0;
@@ -1695,9 +1683,10 @@ Session::new_midi_track (TrackMode mode)
 	/* count existing midi tracks */
 
 	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (dynamic_cast<MidiTrack*>(*i) != 0) {
+		shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			if (dynamic_cast<MidiTrack*>((*i).get()) != 0) {
 				if (!(*i)->hidden()) {
 					n++;
 					channels_used += (*i)->n_inputs();
@@ -1722,7 +1711,7 @@ Session::new_midi_track (TrackMode mode)
 	} while (n < (UINT_MAX-1));
 
 	try {
-		track = new MidiTrack (*this, track_name, Route::Flag (0), mode);
+		shared_ptr<MidiTrack> track (new MidiTrack (*this, track_name, Route::Flag (0), mode));
 
 		if (track->ensure_io (1, 1, false, this)) {
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new midi track"), track_name)
@@ -1772,36 +1761,34 @@ Session::new_midi_track (TrackMode mode)
 			track->set_control_outs (cports);
 		}
 #endif
-		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
+		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes_proxy));
 
 		add_route (track);
 
 		track->set_remote_control_id (ntracks());
+		return track;
 	}
 
 	catch (failed_constructor &err) {
 		error << _("Session: could not create new midi track.") << endmsg;
-		return 0;
+		return shared_ptr<MidiTrack> ((MidiTrack*) 0);
 	}
-
-	return track;
 }
 
 
-Route*
+boost::shared_ptr<Route>
 Session::new_midi_route ()
 {
-	Route *bus;
 	char bus_name[32];
 	uint32_t n = 0;
 	string port;
 
 	/* count existing midi busses */
-
 	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (dynamic_cast<MidiTrack*>(*i) == 0) {
+		shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			if (dynamic_cast<MidiTrack*>((*i).get()) == 0) {
 				if (!(*i)->hidden()) {
 					n++;
 				}
@@ -1819,7 +1806,7 @@ Session::new_midi_route ()
 	} while (n < (UINT_MAX-1));
 
 	try {
-		bus = new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), Buffer::MIDI);
+		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), Buffer::MIDI));
 		
 		if (bus->ensure_io (1, 1, false, this)) {
 			error << (_("cannot configure 1 in/1 out configuration for new midi track"))
@@ -1868,21 +1855,19 @@ Session::new_midi_route ()
 		}
 */		
 		add_route (bus);
+		return bus;
 	}
 
 	catch (failed_constructor &err) {
 		error << _("Session: could not create new MIDI route.") << endmsg;
-		return 0;
+		return shared_ptr<Route> ((Route*) 0);
 	}
-
-	return bus;
 }
 
 
-AudioTrack*
+shared_ptr<AudioTrack>
 Session::new_audio_track (int input_channels, int output_channels, TrackMode mode)
 {
-	AudioTrack *track;
 	char track_name[32];
 	uint32_t n = 0;
 	uint32_t channels_used = 0;
@@ -1893,9 +1878,10 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	/* count existing audio tracks */
 
 	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (dynamic_cast<AudioTrack*>(*i) != 0) {
+		shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			if (dynamic_cast<AudioTrack*>((*i).get()) != 0) {
 				if (!(*i)->hidden()) {
 					n++;
 					channels_used += (*i)->n_inputs();
@@ -1932,7 +1918,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	}
 
 	try {
-		track = new AudioTrack (*this, track_name, Route::Flag (0), mode);
+		shared_ptr<AudioTrack> track (new AudioTrack (*this, track_name, Route::Flag (0), mode));
 
 		if (track->ensure_io (input_channels, output_channels, false, this)) {
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -1983,25 +1969,23 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			track->set_control_outs (cports);
 		}
 
-		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
+		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes_proxy));
 
 		add_route (track);
 
 		track->set_remote_control_id (ntracks());
+		return track;
 	}
 
 	catch (failed_constructor &err) {
 		error << _("Session: could not create new audio track.") << endmsg;
-		return 0;
+		return shared_ptr<AudioTrack> ((AudioTrack*) 0);
 	}
-
-	return track;
 }
 
-Route*
+shared_ptr<Route>
 Session::new_audio_route (int input_channels, int output_channels)
 {
-	Route *bus;
 	char bus_name[32];
 	uint32_t n = 0;
 	string port;
@@ -2009,9 +1993,10 @@ Session::new_audio_route (int input_channels, int output_channels)
 	/* count existing audio busses */
 
 	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (dynamic_cast<AudioTrack*>(*i) == 0) {
+		shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
 				if (!(*i)->hidden()) {
 					n++;
 				}
@@ -2029,7 +2014,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 	} while (n < (UINT_MAX-1));
 
 	try {
-		bus = new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), Buffer::AUDIO);
+		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), Buffer::AUDIO));
 
 		if (bus->ensure_io (input_channels, output_channels, false, this)) {
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -2078,23 +2063,23 @@ Session::new_audio_route (int input_channels, int output_channels)
 		}
 		
 		add_route (bus);
+		return bus;
 	}
 
 	catch (failed_constructor &err) {
 		error << _("Session: could not create new audio route.") << endmsg;
-		return 0;
+		return shared_ptr<Route> ((Route*) 0);
 	}
-
-	return bus;
 }
 
 void
-Session::add_route (Route* route)
+Session::add_route (shared_ptr<Route> route)
 {
 	{ 
-		Glib::RWLock::WriterLock lm (route_lock);
-		routes.push_front (route);
-		resort_routes(0);
+		RCUWriter<RouteList> writer (routes);
+		shared_ptr<RouteList> r = writer.get_copy ();
+		r->push_front (route);
+		resort_routes_using (r);
 	}
 
 	route->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), route));
@@ -2148,40 +2133,43 @@ Session::add_diskstream (Diskstream* dstream)
 }
 
 void
-Session::remove_route (Route& route)
+Session::remove_route (shared_ptr<Route> route)
 {
 	{ 	
-		Glib::RWLock::WriterLock lm (route_lock);
-		routes.remove (&route);
+		RCUWriter<RouteList> writer (routes);
+		shared_ptr<RouteList> rs = writer.get_copy ();
+		rs->remove (route);
 		
 		/* deleting the master out seems like a dumb
 		   idea, but its more of a UI policy issue
 		   than our concern.
 		*/
 
-		if (&route == _master_out) {
-			_master_out = 0;
+		if (route == _master_out) {
+			_master_out = shared_ptr<Route> ((Route*) 0);
 		}
 
-		if (&route == _control_out) {
-			_control_out = 0;
+		if (route == _control_out) {
+			_control_out = shared_ptr<Route> ((Route*) 0);
 
 			/* cancel control outs for all routes */
 
 			vector<string> empty;
 
-			for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
+			for (RouteList::iterator r = rs->begin(); r != rs->end(); ++r) {
 				(*r)->set_control_outs (empty);
 			}
 		}
 
 		update_route_solo_state ();
+		
+		/* writer goes out of scope, forces route list update */
 	}
 
 	AudioTrack* at;
 	AudioDiskstream* ds = 0;
 	
-	if ((at = dynamic_cast<AudioTrack*>(&route)) != 0) {
+	if ((at = dynamic_cast<AudioTrack*>(route.get())) != 0) {
 		ds = &at->audio_diskstream();
 	}
 	
@@ -2204,7 +2192,7 @@ Session::remove_route (Route& route)
 
 	save_state (_current_snapshot_name);
 
-	delete &route;
+	/* all shared ptrs to route should go out of scope here */
 }	
 
 void
@@ -2214,19 +2202,20 @@ Session::route_mute_changed (void* src)
 }
 
 void
-Session::route_solo_changed (void* src, Route* route)
+Session::route_solo_changed (void* src, shared_ptr<Route> route)
 {      
 	if (solo_update_disabled) {
 		// We know already
 		return;
 	}
 	
-	Glib::RWLock::ReaderLock lm (route_lock);
 	bool is_track;
 	
-	is_track = (dynamic_cast<AudioTrack*>(route) != 0);
+	is_track = (dynamic_cast<AudioTrack*>(route.get()) != 0);
 	
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		
 		/* soloing a track mutes all other tracks, soloing a bus mutes all other busses */
 		
@@ -2234,7 +2223,7 @@ Session::route_solo_changed (void* src, Route* route)
 			
 			/* don't mess with busses */
 			
-			if (dynamic_cast<AudioTrack*>(*i) == 0) {
+			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
 				continue;
 			}
 			
@@ -2242,7 +2231,7 @@ Session::route_solo_changed (void* src, Route* route)
 			
 			/* don't mess with tracks */
 			
-			if (dynamic_cast<AudioTrack*>(*i) != 0) {
+			if (dynamic_cast<AudioTrack*>((*i).get()) != 0) {
 				continue;
 			}
 		}
@@ -2275,10 +2264,10 @@ Session::route_solo_changed (void* src, Route* route)
 	bool same_thing_soloed = false;
 	bool signal = false;
 
-        for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			something_soloed = true;
-			if (dynamic_cast<AudioTrack*>(*i)) {
+			if (dynamic_cast<AudioTrack*>((*i).get())) {
 				if (is_track) {
 					same_thing_soloed = true;
 					break;
@@ -2329,11 +2318,13 @@ Session::update_route_solo_state ()
 	/* this is where we actually implement solo by changing
 	   the solo mute setting of each track.
 	*/
-		
-        for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	
+	shared_ptr<RouteList> r = routes.reader ();
+
+        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			mute = true;
-			if (dynamic_cast<AudioTrack*>(*i)) {
+			if (dynamic_cast<AudioTrack*>((*i).get())) {
 				is_track = true;
 			}
 			break;
@@ -2349,7 +2340,7 @@ Session::update_route_solo_state ()
 
 		/* nothing is soloed */
 
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->set_solo_mute (false);
 		}
 		
@@ -2370,13 +2361,15 @@ Session::update_route_solo_state ()
 void
 Session::modify_solo_mute (bool is_track, bool mute)
 {
-        for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	shared_ptr<RouteList> r = routes.reader ();
+
+        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		
 		if (is_track) {
 			
 			/* only alter track solo mute */
 			
-			if (dynamic_cast<AudioTrack*>(*i)) {
+			if (dynamic_cast<AudioTrack*>((*i).get())) {
 				if ((*i)->soloed()) {
 					(*i)->set_solo_mute (!mute);
 				} else {
@@ -2388,7 +2381,7 @@ Session::modify_solo_mute (bool is_track, bool mute)
 
 			/* only alter bus solo mute */
 
-			if (!dynamic_cast<AudioTrack*>(*i)) {
+			if (!dynamic_cast<AudioTrack*>((*i).get())) {
 
 				if ((*i)->soloed()) {
 
@@ -2420,36 +2413,35 @@ Session::catch_up_on_solo ()
 	   basis, but needs the global overview that only the session
 	   has.
 	*/
-        Glib::RWLock::ReaderLock lm (route_lock);
 	update_route_solo_state();
 }	
 		
-Route *
+shared_ptr<Route>
 Session::route_by_name (string name)
 {
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->name() == name) {
-			return* i;
+			return *i;
 		}
 	}
 
-	return 0;
+	return shared_ptr<Route> ((Route*) 0);
 }
 
-Route *
+shared_ptr<Route>
 Session::route_by_remote_id (uint32_t id)
 {
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->remote_control_id() == id) {
-			return* i;
+			return *i;
 		}
 	}
 
-	return 0;
+	return shared_ptr<Route> ((Route*) 0);
 }
 
 void
@@ -3282,7 +3274,7 @@ Session::cancel_audition ()
 }
 
 bool
-Session::RoutePublicOrderSorter::operator() (Route* a, Route* b)
+Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b)
 {
 	return a->order_key(N_("signal")) < b->order_key(N_("signal"));
 }
@@ -3328,13 +3320,11 @@ Session::is_auditioning () const
 void
 Session::set_all_solo (bool yn)
 {
-	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (!(*i)->hidden()) {
-				(*i)->set_solo (yn, this);
-			}
+	shared_ptr<RouteList> r = routes.reader ();
+	
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->set_solo (yn, this);
 		}
 	}
 
@@ -3344,13 +3334,11 @@ Session::set_all_solo (bool yn)
 void
 Session::set_all_mute (bool yn)
 {
-	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (!(*i)->hidden()) {
-				(*i)->set_mute (yn, this);
-			}
+	shared_ptr<RouteList> r = routes.reader ();
+	
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->set_mute (yn, this);
 		}
 	}
 
@@ -3394,10 +3382,9 @@ Session::graph_reordered ()
 		return;
 	}
 	
-	Glib::RWLock::WriterLock lm1 (route_lock);
 	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
 
-	resort_routes (0);
+	resort_routes ();
 
 	/* force all diskstreams to update their capture offset values to 
 	   reflect any changes in latencies within the graph.
@@ -3423,12 +3410,12 @@ Session::record_enable_all ()
 void
 Session::record_enable_change_all (bool yn)
 {
-	Glib::RWLock::ReaderLock lm1 (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 	
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		AudioTrack* at;
 
-		if ((at = dynamic_cast<AudioTrack*>(*i)) != 0) {
+		if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
 			at->set_record_enable (yn, this);
 		}
 	}
@@ -3694,9 +3681,9 @@ Session::reset_native_file_format ()
 bool
 Session::route_name_unique (string n) const
 {
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 	
-	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->name() == n) {
 			return false;
 		}
@@ -3753,23 +3740,16 @@ Session::allocate_pan_automation_buffers (jack_nframes_t nframes, uint32_t howma
 	_npan_buffers = howmany;
 }
 
-void 
-Session::add_instant_xml (XMLNode& node, const std::string& dir)
-{
-	Stateful::add_instant_xml (node, dir);
-	Config->add_instant_xml (node, get_user_ardour_path());
-}
-
 int
 Session::freeze (InterThreadInfo& itt)
 {
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		AudioTrack *at;
 
-		if ((at = dynamic_cast<AudioTrack*>(*i)) != 0) {
+		if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
 			/* XXX this is wrong because itt.progress will keep returning to zero at the start
 			   of every track.
 			*/
@@ -3958,10 +3938,10 @@ uint32_t
 Session::ntracks () const
 {
 	uint32_t n = 0;
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
-		if (dynamic_cast<AudioTrack*> (*i)) {
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+		if (dynamic_cast<AudioTrack*> ((*i).get())) {
 			++n;
 		}
 	}
@@ -3973,10 +3953,10 @@ uint32_t
 Session::nbusses () const
 {
 	uint32_t n = 0;
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
-		if (dynamic_cast<AudioTrack*> (*i) == 0) {
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+		if (dynamic_cast<AudioTrack*> ((*i).get()) == 0) {
 			++n;
 		}
 	}

@@ -58,6 +58,6 @@ class Send : public Redirect {
 	uint32_t expected_inputs;
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_send_h__ */

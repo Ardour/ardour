@@ -75,7 +75,7 @@ class SndFileSource : public AudioFileSource {
 	int setup_broadcast_info (jack_nframes_t when, struct tm&, time_t);
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __sndfile_source_h__ */
 

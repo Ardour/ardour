@@ -877,7 +877,7 @@ Editor::set_frames_per_unit (double fpu)
 void
 Editor::instant_save ()
 {
-        if (!constructed || !ARDOUR_UI::instance()->session_loaded) {
+	if (!constructed || !ARDOUR_UI::instance()->session_loaded) {
 		return;
 	}
 
@@ -1338,7 +1338,7 @@ Editor::connect_to_session (Session *t)
 			AudioTimeAxisView *atv;
 			
 			if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
-				if (atv->route().master()) {
+				if (atv->route()->master()) {
 					route_list_display.get_selection()->unselect (i);
 				}
 			}
@@ -2258,7 +2258,7 @@ Editor::get_state ()
 	char buf[32];
 
 	if (is_realized()) {
-	        Glib::RefPtr<Gdk::Window> win = get_window();
+		Glib::RefPtr<Gdk::Window> win = get_window();
 		
 		int x, y, xoff, yoff, width, height;
 		win->get_root_origin(x, y);
@@ -2973,7 +2973,7 @@ Editor::get_relevant_audio_tracks (AudioTimeAxisView& base, set<AudioTimeAxisVie
 			continue;
 		}
 
-		RouteGroup* group = atv->route().edit_group();
+		RouteGroup* group = atv->route()->edit_group();
 
 		if (group && group->is_active()) {
 			
@@ -2985,7 +2985,7 @@ Editor::get_relevant_audio_tracks (AudioTimeAxisView& base, set<AudioTimeAxisVie
 				
 				if ((tatv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
 					
-					if (tatv->route().edit_group() == group) {
+					if (tatv->route()->edit_group() == group) {
 						relevant_tracks.insert (tatv);
 					}
 				}

@@ -35,6 +35,6 @@ class PortFactory {
 				      const std::string &reqstr);
 };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif // __midi_factory_h__

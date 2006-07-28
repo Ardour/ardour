@@ -25,6 +25,7 @@
 #include <pbd/xml++.h>
 
 #include <ardour/ardour.h>
+#include <ardour/audio_library.h>
 #include <ardour/configuration.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/destructive_filesource.h>
@@ -178,6 +179,7 @@ Configuration::state (bool user_only)
 	}
 
 	root->add_child_nocopy (ControlProtocolManager::instance().get_state());
+	root->add_child_nocopy (Library->get_state());
 
 	return *root;
 }
@@ -229,6 +231,8 @@ Configuration::set_state (const XMLNode& root)
 
 		} else if (node->name() == ControlProtocolManager::state_node_name) {
 			_control_protocol_state = new XMLNode (*node);
+		} else if (node->name() == AudioLibrary::state_node_name) {
+			Library->set_state (*node);
 		}
 	}
 

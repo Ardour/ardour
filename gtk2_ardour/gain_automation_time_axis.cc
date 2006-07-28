@@ -31,7 +31,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-GainAutomationTimeAxisView::GainAutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& parent, ArdourCanvas::Canvas& canvas, const string & n, ARDOUR::Curve& c)
+GainAutomationTimeAxisView::GainAutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, 
+							PublicEditor& e, TimeAxisView& parent, 
+							ArdourCanvas::Canvas& canvas, const string & n, ARDOUR::Curve& c)
 
 	: AxisView (s),
 	  AutomationTimeAxisView (s, r, e, parent, canvas, n, X_("gain"), ""),
@@ -72,6 +74,6 @@ void
 GainAutomationTimeAxisView::set_automation_state (AutoState state)
 {
 	if (!ignore_state_request) {
-		route.set_gain_automation_state (state);
+		route->set_gain_automation_state (state);
 	}
 }

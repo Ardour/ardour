@@ -27,6 +27,8 @@
 #include <map>
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 #include <pbd/fastlog.h>
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
@@ -57,13 +59,13 @@ class Route : public IO
 {
   protected:
 
-        typedef list<Redirect *> RedirectList;
+        typedef list<boost::shared_ptr<Redirect> > RedirectList;
   public:
 
 	enum Flag {
 		Hidden = 0x1,
 		MasterOut = 0x2,
-		ControlOut = 0x4,
+		ControlOut = 0x4
 	};
 
 
@@ -141,19 +143,19 @@ class Route : public IO
 
 	void flush_redirects ();
 
-	template<class T> void foreach_redirect (T *obj, void (T::*func)(Redirect *)) {
+	template<class T> void foreach_redirect (T *obj, void (T::*func)(boost::shared_ptr<Redirect>)) {
 		Glib::RWLock::ReaderLock lm (redirect_lock);
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			(obj->*func) (*i);
 		}
 	}
 
-	Redirect *nth_redirect (uint32_t n) {
+	boost::shared_ptr<Redirect> nth_redirect (uint32_t n) {
 		Glib::RWLock::ReaderLock lm (redirect_lock);
 		RedirectList::iterator i;
 		for (i = _redirects.begin(); i != _redirects.end() && n; ++i, --n);
 		if (i == _redirects.end()) {
-			return 0;
+			return boost::shared_ptr<Redirect> ();
 		} else {
 			return *i;
 		}
@@ -161,9 +163,9 @@ class Route : public IO
 	
 	uint32_t max_redirect_outs () const { return redirect_max_outs; }
 		
-	int add_redirect (Redirect *, void *src, uint32_t* err_streams = 0);
+	int add_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
 	int add_redirects (const RedirectList&, void *src, uint32_t* err_streams = 0);
-	int remove_redirect (Redirect *, void *src, uint32_t* err_streams = 0);
+	int remove_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
 	int copy_redirects (const Route&, Placement, uint32_t* err_streams = 0);
 	int sort_redirects (uint32_t* err_streams = 0);
 
@@ -212,8 +214,8 @@ class Route : public IO
 	int set_control_outs (const vector<std::string>& ports);
 	IO* control_outs() { return _control_outs; }
 
-	bool feeds (Route *);
-	set<Route *> fed_by;
+	bool feeds (boost::shared_ptr<Route>);
+	set<boost::shared_ptr<Route> > fed_by;
 
 	struct ToggleControllable : public PBD::Controllable {
 	    enum ToggleType {
@@ -339,12 +341,12 @@ class Route : public IO
 	/* plugin count handling */
 
 	struct InsertCount {
-	    ARDOUR::Insert& insert;
+	    boost::shared_ptr<ARDOUR::Insert> insert;
 	    int32_t cnt;
 	    int32_t in;
 	    int32_t out;
 
-	    InsertCount (ARDOUR::Insert& ins) : insert (ins), cnt (-1) {}
+	    InsertCount (boost::shared_ptr<ARDOUR::Insert> ins) : insert (ins), cnt (-1) {}
 	};
 	
 	int32_t apply_some_plugin_counts (std::list<InsertCount>& iclist);
@@ -355,6 +357,6 @@ class Route : public IO
 	void redirect_active_proxy (Redirect*, void*);
 };
 
-}; /* namespace ARDOUR*/
+} // namespace ARDOUR
 
 #endif /* __ardour_route_h__ */

@@ -97,6 +97,9 @@ SoundFileBox::SoundFileBox ()
 	                (mem_fun (*this, &SoundFileBox::add_field_clicked));
 	remove_field_btn.signal_clicked().connect
 	                (mem_fun (*this, &SoundFileBox::remove_field_clicked));
+	
+	Gtk::CellRendererText* cell(static_cast<Gtk::CellRendererText*>(field_view.get_column_cell_renderer(1)));
+	cell->signal_edited().connect (mem_fun (*this, &SoundFileBox::field_edited));
 
 	field_view.get_selection()->signal_changed().connect (mem_fun (*this, &SoundFileBox::field_selected));
 	Library->fields_changed.connect (mem_fun (*this, &SoundFileBox::setup_fields));
@@ -260,6 +263,13 @@ SoundFileBox::remove_field_clicked ()
 }
 
 void
+SoundFileBox::field_edited (const Glib::ustring& str1, const Glib::ustring& str2)
+{
+	cout << "field_edited" << endl;
+	Library->save_changes ();
+}
+
+void
 SoundFileBox::delete_row (const Gtk::TreeModel::iterator& iter)
 {
 	Gtk::TreeModel::Row row = *iter;
@@ -394,6 +404,9 @@ SoundFileOmega::set_mode (Editing::ImportMode mode)
 	case Editing::ImportToTrack:
 		split_check.set_sensitive (false);
 		break;
+	case Editing::ImportAsTapeTrack:
+		split_check.set_sensitive (true);
+		break;
 	}
 }
 
@@ -432,6 +445,9 @@ SoundFileOmega::mode_changed ()
 		break;
 	case Editing::ImportToTrack:
 		split_check.set_sensitive (false);
+		break;
+	case Editing::ImportAsTapeTrack:
+		split_check.set_sensitive (true);
 		break;
 	}
 }

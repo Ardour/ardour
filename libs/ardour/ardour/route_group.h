@@ -43,7 +43,7 @@ class RouteGroup : public Stateful, public sigc::trackable {
     enum Flag {
 	    Relative = 0x1,
 	    Active = 0x2,
-	    Hidden = 0x4,
+	    Hidden = 0x4
     };
 
     RouteGroup (Session& s, const string &n, Flag f = Flag(0));

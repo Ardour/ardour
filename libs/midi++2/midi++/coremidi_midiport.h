@@ -62,6 +62,6 @@ class CoreMidi_MidiPort:public Port {
 		bool firstrecv;
 };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif	// __coremidi_midiport_h__

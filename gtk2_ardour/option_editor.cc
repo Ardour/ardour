@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include <pbd/whitespace.h>
 
+#include <ardour/audio_library.h>
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
@@ -59,9 +60,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* Paths */
 	  path_table (11, 2),
-	  sfdb_path_columns(),
-	  sfdb_paths(ListStore::create(sfdb_path_columns)),
-	  sfdb_path_view(sfdb_paths),
+	  sfdb_path_view(),
 
 	  /* Fades */
 
@@ -163,7 +162,6 @@ OptionEditor::set_session (Session *s)
 		return;
 	}
 
-
 	click_path_entry.set_sensitive (true);
 	click_emphasis_path_entry.set_sensitive (true);
 	session_raid_entry.set_sensitive (true);
@@ -251,10 +249,16 @@ OptionEditor::setup_path_options()
 	path_table.attach(*label, 0, 1, 2, 3, FILL|EXPAND, FILL);
 	path_table.attach(sfdb_path_view, 1, 3, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
 
-	sfdb_path_view.append_column(_("Paths"), sfdb_path_columns.paths);
-	sfdb_path_view.set_size_request(-1, 100);
+	sfdb_path_view.set_paths(Library->get_paths());
+	sfdb_path_view.PathsUpdated.connect (mem_fun(*this, &OptionEditor::sfdb_paths_changed));
 
 	path_table.show_all();
+}
+
+void
+OptionEditor::sfdb_paths_changed ()
+{
+	Library->set_paths (sfdb_path_view.get_paths());
 }
 
 void

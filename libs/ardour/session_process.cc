@@ -83,23 +83,20 @@ Session::no_roll (jack_nframes_t nframes, jack_nframes_t offset)
 	jack_nframes_t end_frame = _transport_frame + nframes;
 	int ret = 0;
 	bool declick = get_transport_declick_required();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	if (_click_io) {
 		_click_io->silence (nframes, offset);
 	}
 
-	/* XXX we're supposed to have the route_lock while doing this.
-	   this is really bad ...
-	*/
-
 	if (g_atomic_int_get (&processing_prohibited)) {
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->silence (nframes, offset);
 		}
 		return 0;
 	}
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		
 		if ((*i)->hidden()) {
 			continue;
@@ -124,6 +121,7 @@ Session::process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 	bool record_active;
 	int  declick = get_transport_declick_required();
 	bool rec_monitors = get_rec_monitors_input();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	if (transport_sub_state & StopPendingCapture) {
 		/* force a declick out */
@@ -132,7 +130,7 @@ Session::process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 
 	record_active = actively_recording(); // || (get_record_enabled() && get_punch_in());
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		int ret;
 
@@ -167,13 +165,14 @@ Session::silent_process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 	bool record_active = actively_recording();
 	int  declick = get_transport_declick_required();
 	bool rec_monitors = get_rec_monitors_input();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	if (transport_sub_state & StopPendingCapture) {
 		/* force a declick out */
 		declick = -1;
 	}
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		int ret;
 
@@ -256,9 +255,13 @@ Session::process_with_events (jack_nframes_t nframes)
 	long           frames_moved;
 	bool           session_needs_butler = false;
 
+	/* make sure the auditioner is silent */
+
 	if (auditioner) {
 		auditioner->silence (nframes, 0);
 	}
+
+	/* handle any pending events */
 
 	while (pending_events.read (&ev, 1) == 1) {
 		merge_event (ev);
@@ -296,13 +299,12 @@ Session::process_with_events (jack_nframes_t nframes)
 	end_frame = _transport_frame + nframes;
 
 	{
-		Glib::RWLock::ReaderLock rm (route_lock, Glib::TRY_LOCK);
 		Glib::RWLock::ReaderLock dsm (diskstream_lock, Glib::TRY_LOCK);
 		
 		Event* this_event;
 		Events::iterator the_next_one;
-
-		if (!rm.locked() || !dsm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
+		
+		if (!dsm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
 			no_roll (nframes, 0);
 			return;
 		}
@@ -703,7 +705,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 			summon_butler ();
 		}
 		
-		jack_nframes_t frames_moved = (long) floor (_transport_speed * nframes);
+		int32_t frames_moved = (int32_t) floor (_transport_speed * nframes);
 		
 		if (frames_moved < 0) {
 			decrement_transport_position (-frames_moved);
@@ -740,10 +742,9 @@ Session::process_without_events (jack_nframes_t nframes)
 	long frames_moved;
 	
 	{
-		Glib::RWLock::ReaderLock rm (route_lock, Glib::TRY_LOCK);
 		Glib::RWLock::ReaderLock dsm (diskstream_lock, Glib::TRY_LOCK);
 
-		if (!rm.locked() || !dsm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
+		if (!dsm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
 			no_roll (nframes, 0);
 			return;
 		}
@@ -807,20 +808,22 @@ Session::process_without_events (jack_nframes_t nframes)
 void
 Session::process_audition (jack_nframes_t nframes)
 {
-	Glib::RWLock::ReaderLock rm (route_lock, Glib::TRY_LOCK);
 	Event* ev;
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
-	if (rm.locked()) {
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (!(*i)->hidden()) {
-				(*i)->silence (nframes, 0);
-			}
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->silence (nframes, 0);
 		}
 	}
+
+	/* run the auditioner, and if it says we need butler service, ask for it */
 	
 	if (auditioner->play_audition (nframes) > 0) {
 		summon_butler ();
 	} 
+
+	/* handle pending events */
 
 	while (pending_events.read (&ev, 1) == 1) {
 		merge_event (ev);

@@ -1179,7 +1179,7 @@ struct PanPlugins {
 PanPlugins pan_plugins[] = {
 	{ EqualPowerStereoPanner::name, 2, EqualPowerStereoPanner::factory },
 	{ Multi2dPanner::name, 3, Multi2dPanner::factory },
-	{ string (""), 0 }
+	{ string (""), 0, 0 }
 };
 
 XMLNode&

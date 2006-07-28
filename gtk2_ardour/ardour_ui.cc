@@ -340,15 +340,15 @@ ARDOUR_UI::save_ardour_state ()
 	Config->add_extra_xml (*node);
 	Config->save_state();
 
-	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
-	XMLNode& mnode (mixer->get_state());
+	XMLNode enode(static_cast<Stateful*>(editor)->get_state());
+	XMLNode mnode(mixer->get_state());
 
 	if (session) {
-		session->add_instant_xml(enode, session->path());
-		session->add_instant_xml(mnode, session->path());
+		session->add_instant_xml (enode, session->path());
+		session->add_instant_xml (mnode, session->path());
 	} else {
-		Config->add_instant_xml(enode, get_user_ardour_path());
-		Config->add_instant_xml(mnode, get_user_ardour_path());
+		Config->add_instant_xml (enode, get_user_ardour_path());
+		Config->add_instant_xml (mnode, get_user_ardour_path());
 	}
 
 	/* keybindings */
@@ -544,9 +544,9 @@ ARDOUR_UI::update_buffer_load ()
 }
 
 void
-ARDOUR_UI::count_recenabled_diskstreams (Route* route)
+ARDOUR_UI::count_recenabled_diskstreams (Route& route)
 {
-	Track* track = dynamic_cast<Track*>(route);
+	Track* track = dynamic_cast<Track*>(&route);
 	if (track && track->diskstream().record_enabled()) {
 		rec_enabled_diskstreams++;
 	}
@@ -872,7 +872,7 @@ ARDOUR_UI::open_session ()
 void
 ARDOUR_UI::session_add_midi_route (bool disk)
 {
-	Route* route;
+	boost::shared_ptr<Route> route;
 
 	if (session == 0) {
 		warning << _("You cannot add a track without a session already loaded.") << endmsg;
@@ -881,27 +881,14 @@ ARDOUR_UI::session_add_midi_route (bool disk)
 
 	try { 
 		if (disk) {
-			if ((route = session->new_midi_track ()) == 0) {
-				error << _("could not create new MIDI track") << endmsg;
+			if ((route = session->new_midi_track (/*mode*/)) == 0) {
+				error << _("could not create new midi track") << endmsg;
 			}
 		} else {
 			if ((route = session->new_midi_route ()) == 0) {
-				error << _("could not create new MIDI bus") << endmsg;
+				error << _("could not create new midi bus") << endmsg;
 			}
 		}
-#if 0		
-#if CONTROLOUTS
-		if (need_control_room_outs) {
-			pan_t pans[2];
-			
-			pans[0] = 0.5;
-			pans[1] = 0.5;
-			
-			route->set_stereo_control_outs (control_lr_channels);
-			route->control_outs()->set_stereo_pan (pans, this);
-		}
-#endif /* CONTROLOUTS */
-#endif
 	}
 
 	catch (...) {
@@ -918,7 +905,7 @@ restart JACK with more ports."));
 void
 ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode)
 {
-	Route* route;
+	boost::shared_ptr<Route> route;
 
 	if (session == 0) {
 		warning << _("You cannot add a track without a session already loaded.") << endmsg;
@@ -1207,13 +1194,13 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 		return;
 	}
 
-	Route* r;
+	boost::shared_ptr<Route> r;
 	
 	if ((r = session->route_by_remote_id (dstream)) != 0) {
 
 		Track* t;
 
-		if ((t = dynamic_cast<Track*>(r)) != 0) {
+		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
 			t->diskstream().set_record_enabled (!t->diskstream().record_enabled(), this);
 		}
 	}

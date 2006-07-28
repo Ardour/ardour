@@ -63,7 +63,7 @@ class AutomationTimeAxisView;
 class MidiTimeAxisView : public RouteTimeAxisView
 {
   public:
- 	MidiTimeAxisView (PublicEditor&, ARDOUR::Session&, ARDOUR::Route&, ArdourCanvas::Canvas& canvas);
+ 	MidiTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
  	virtual ~MidiTimeAxisView ();
 
 	/* overridden from parent to store display state */
@@ -78,7 +78,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	void route_active_changed ();
 
-	void redirects_changed (void *);
+	//void redirects_changed (void *); FIXME?
 
 	void build_display_menu ();
 

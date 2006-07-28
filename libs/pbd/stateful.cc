@@ -134,4 +134,3 @@ Stateful::instant_xml (const string& str, const string& dir)
 
 	return 0;
 }
-

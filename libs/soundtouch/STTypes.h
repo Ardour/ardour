@@ -105,6 +105,6 @@ namespace soundtouch
         #endif
 
     #endif  // INTEGER_SAMPLES
-};
+}
 
 #endif

@@ -63,7 +63,7 @@ class TimeSelection;
 class RouteTimeAxisView : public RouteUI, public TimeAxisView
 {
   public:
- 	RouteTimeAxisView (PublicEditor&, ARDOUR::Session&, ARDOUR::Route&, ArdourCanvas::Canvas& canvas);
+ 	RouteTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
  	virtual ~RouteTimeAxisView ();
 
 	void show_selection (TimeSelection&);
@@ -101,7 +101,7 @@ class RouteTimeAxisView : public RouteUI, public TimeAxisView
 	void use_copy_playlist (bool prompt);
 	void clear_playlist ();
 
-  //private:
+  //private: (FIXME)
 	friend class StreamView;
 	
 	StreamView *_view;

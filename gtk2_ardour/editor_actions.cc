@@ -357,6 +357,8 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, X_("addExternalAudioAsTrack"), _("as Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsTrack));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, X_("addExternalAudioAsTapeTrack"), _("as Tape Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsTapeTrack));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToTrack"), _("to Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack));
 	ActionManager::session_sensitive_actions.push_back (act);
 

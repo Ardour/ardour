@@ -305,6 +305,6 @@ class AudioDiskstream : public Diskstream
 	void disengage_record_enable (void* src);
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_audio_diskstream_h__ */

@@ -43,20 +43,20 @@ class RouteRedirectSelection : public sigc::trackable
 	void clear ();
 	bool empty();
 
-	void set (ARDOUR::Redirect*);
-	void set (const std::vector<ARDOUR::Redirect*>&);
-	void add (ARDOUR::Redirect*);
-	void add (const std::vector<ARDOUR::Redirect*>&);
-	void remove (ARDOUR::Redirect*);
+	void set (boost::shared_ptr<ARDOUR::Redirect>);
+	void set (const std::vector<boost::shared_ptr<ARDOUR::Redirect> >&);
+	void add (boost::shared_ptr<ARDOUR::Redirect>);
+	void add (const std::vector<boost::shared_ptr<ARDOUR::Redirect> >&);
+	void remove (boost::shared_ptr<ARDOUR::Redirect>);
 
-	void set (ARDOUR::Route*);
-	void add (ARDOUR::Route*);
-	void remove (ARDOUR::Route*);
+	void set (boost::shared_ptr<ARDOUR::Route>);
+	void add (boost::shared_ptr<ARDOUR::Route>);
+	void remove (boost::shared_ptr<ARDOUR::Route>);
 
 	void clear_redirects ();
 	void clear_routes ();
 
-	bool selected (ARDOUR::Route*);
+	bool selected (boost::shared_ptr<ARDOUR::Route>);
 };
 
 bool operator==(const RouteRedirectSelection& a, const RouteRedirectSelection& b);

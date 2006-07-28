@@ -126,7 +126,7 @@ class LogCurveOut : public LogCurve
 
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_logcurve_h__ */
 

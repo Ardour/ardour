@@ -20,7 +20,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Editing;
 
-AutomationTimeAxisView::AutomationTimeAxisView (Session& s, Route& r, PublicEditor& e, TimeAxisView& rent, 
+AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, PublicEditor& e, TimeAxisView& rent, 
 						ArdourCanvas::Canvas& canvas, const string & nom, 
 						const string & state_name, const string & nomparent)
 
@@ -410,7 +410,7 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 
 	if (changed) {
 		/* only emit the signal if the height really changed */
-		route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
 }
 

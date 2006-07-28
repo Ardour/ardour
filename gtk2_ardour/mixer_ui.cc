@@ -251,7 +251,7 @@ Mixer_UI::show_window ()
 }
 
 void
-Mixer_UI::add_strip (Route* route)
+Mixer_UI::add_strip (boost::shared_ptr<Route> route)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_strip), route));
 	
@@ -261,7 +261,7 @@ Mixer_UI::add_strip (Route* route)
 		return;
 	}
 
-	strip = new MixerStrip (*this, *session, *route);
+	strip = new MixerStrip (*this, *session, route);
 	strips.push_back (strip);
 
 	strip->set_width (_strip_width);
@@ -310,7 +310,7 @@ void
 Mixer_UI::follow_strip_selection ()
 {
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		(*i)->set_selected (_selection.selected (&(*i)->route()));
+		(*i)->set_selected (_selection.selected ((*i)->route()));
 	}
 }
 
@@ -324,13 +324,13 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 		   at the same time.
 		*/
 		
-		if (_selection.selected (&strip->route())) {
-			_selection.remove (&strip->route());
+		if (_selection.selected (strip->route())) {
+			_selection.remove (strip->route());
 		} else {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
-				_selection.add (&strip->route());
+				_selection.add (strip->route());
 			} else {
-				_selection.set (&strip->route());
+				_selection.set (strip->route());
 			}
 		}
 	}
@@ -444,7 +444,7 @@ Mixer_UI::set_all_strips_visibility (bool yn)
 			continue;
 		}
 		
-		if (strip->route().master() || strip->route().control()) {
+		if (strip->route()->master() || strip->route()->control()) {
 			continue;
 		}
 
@@ -472,11 +472,11 @@ Mixer_UI::set_all_audio_visibility (int tracks, bool yn)
 			continue;
 		}
 
-		if (strip->route().master() || strip->route().control()) {
+		if (strip->route()->master() || strip->route()->control()) {
 			continue;
 		}
 
-		AudioTrack* at = dynamic_cast<AudioTrack*> (&strip->route());
+		AudioTrack* at = strip->audio_track();
 
 		switch (tracks) {
 		case 0:
@@ -570,11 +570,11 @@ Mixer_UI::redisplay_track_list ()
 
 		if (visible) {
 			strip->set_marked_for_display (true);
-			strip->route().set_order_key (N_("signal"), order);
+			strip->route()->set_order_key (N_("signal"), order);
 
 			if (strip->packed()) {
 
-				if (strip->route().master() || strip->route().control()) {
+				if (strip->route()->master() || strip->route()->control()) {
 					out_packer.reorder_child (*strip, -1);
 				} else {
 					strip_packer.reorder_child (*strip, -1); /* put at end */
@@ -582,7 +582,7 @@ Mixer_UI::redisplay_track_list ()
 
 			} else {
 
-				if (strip->route().master() || strip->route().control()) {
+				if (strip->route()->master() || strip->route()->control()) {
 					out_packer.pack_start (*strip, false, false);
 				} else {
 					strip_packer.pack_start (*strip, false, false);
@@ -593,7 +593,7 @@ Mixer_UI::redisplay_track_list ()
 
 		} else {
 
-			if (strip->route().master() || strip->route().control()) {
+			if (strip->route()->master() || strip->route()->control()) {
 				/* do nothing, these cannot be hidden */
 			} else {
 				strip_packer.remove (*strip);
@@ -604,7 +604,7 @@ Mixer_UI::redisplay_track_list ()
 }
 
 struct SignalOrderRouteSorter {
-    bool operator() (Route* a, Route* b) {
+    bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 	    /* use of ">" forces the correct sort order */
 	    return a->order_key ("signal") < b->order_key ("signal");
     }
@@ -613,16 +613,17 @@ struct SignalOrderRouteSorter {
 void
 Mixer_UI::initial_track_display ()
 {
-	Session::RouteList routes = session->get_routes();
+	boost::shared_ptr<Session::RouteList> routes = session->get_routes();
+	Session::RouteList copy (*routes);
 	SignalOrderRouteSorter sorter;
 
-	routes.sort (sorter);
+	copy.sort (sorter);
 	
 	no_track_list_redisplay = true;
 
 	track_model->clear ();
 
-	for (Session::RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (Session::RouteList::iterator i = copy.begin(); i != copy.end(); ++i) {
 		add_strip (*i);
 	}
 
@@ -670,7 +671,7 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 			MixerStrip* strip = (*iter)[track_columns.strip];
 			if (strip) {
 
-				if (!strip->route().master() && !strip->route().control()) {
+				if (!strip->route()->master() && !strip->route()->control()) {
 					bool visible = (*iter)[track_columns.visible];
 					(*iter)[track_columns.visible] = !visible;
 				}
@@ -715,7 +716,7 @@ Mixer_UI::strip_name_changed (void* src, MixerStrip* mx)
 	
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[track_columns.strip] == mx) {
-			(*i)[track_columns.text] = mx->route().name();
+			(*i)[track_columns.text] = mx->route()->name();
 			return;
 		}
 	} 

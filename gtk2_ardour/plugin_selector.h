@@ -35,7 +35,7 @@ class PluginSelector : public ArdourDialog
 {
   public:
 	PluginSelector (ARDOUR::PluginManager *);
-	sigc::signal<void,ARDOUR::Plugin *> PluginCreated;
+	sigc::signal<void,boost::shared_ptr<ARDOUR::Plugin> > PluginCreated;
 
 	int run (); // XXX should we try not to overload the non-virtual Gtk::Dialog::run() ?
 

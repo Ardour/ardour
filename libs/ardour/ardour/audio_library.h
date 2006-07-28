@@ -42,6 +42,8 @@ class AudioLibrary : public Stateful
 	AudioLibrary ();
 	~AudioLibrary ();
 
+	static string state_node_name;
+	
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 

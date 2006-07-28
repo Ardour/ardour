@@ -42,7 +42,8 @@ class AudioFileSource : public AudioSource {
 		Removable = 0x8,
 		RemovableIfEmpty = 0x10,
 		RemoveAtDestroy = 0x20,
-		NoPeakFile = 0x40
+		NoPeakFile = 0x40,
+		Destructive = 0x80
 	};
 
 	virtual ~AudioFileSource ();
@@ -150,7 +151,7 @@ class AudioFileSource : public AudioSource {
 	bool writable() const { return _flags & Writable; }
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_audiofilesource_h__ */
 

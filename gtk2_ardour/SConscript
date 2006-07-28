@@ -144,8 +144,6 @@ marker.cc
 marker_time_axis.cc
 marker_time_axis_view.cc
 marker_view.cc
-meter_bridge.cc
-meter_bridge_strip.cc
 mixer_strip.cc
 mixer_ui.cc
 new_session_dialog.cc

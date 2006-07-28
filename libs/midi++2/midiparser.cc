@@ -101,7 +101,7 @@ Parser::midi_event_type_name (eventType t)
 	default:
 		return "unknow MIDI event type";
 	}
-};
+}
 
 Parser::Parser (Port &p) 
 	: _port (p)

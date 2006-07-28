@@ -213,6 +213,10 @@ AudioFileSource::create (const string& idstr, Flag flags)
 {
 	AudioFileSource* es = 0;
 
+	if (flags & Destructive) {
+		return new DestructiveFileSource (idstr, flags);
+	}
+
 	try {
 		es = new CoreAudioSource (idstr, flags);
 	}

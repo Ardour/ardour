@@ -142,8 +142,8 @@ Editor::bounce_region_selection ()
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		
 		Region& region ((*i)->region());
-		RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
-		Track* track = dynamic_cast<Track*>(&(atv->route()));
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
+		Track* track = dynamic_cast<Track*>(rtv->route().get());
 
 		InterThreadInfo itt;
 

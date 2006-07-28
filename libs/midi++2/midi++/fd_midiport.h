@@ -93,6 +93,6 @@ class FD_MidiPort : public Port
 	int do_slow_write (byte *msg, unsigned int msglen);
 };
 
-}; /*namespace MIDI */
+} // namespace MIDI
 
 #endif  // __fd_midiport_h__

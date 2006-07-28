@@ -58,6 +58,6 @@ class Null_MidiPort : public Port
 	virtual int selectable() const { return -1; }
 };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif // __nullmidi_h__

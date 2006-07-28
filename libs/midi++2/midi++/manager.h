@@ -88,6 +88,6 @@ class Manager {
 	void close_ports ();
 };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif  // __midi_manager_h__

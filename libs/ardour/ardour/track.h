@@ -103,15 +103,15 @@ class Track : public Route
 	MeterPoint  _saved_meter_point;
 	TrackMode   _mode;
 
-	//private:
+	//private: (FIXME)
 	struct FreezeRecordInsertInfo {
-	    FreezeRecordInsertInfo(XMLNode& st) 
-		    : state (st), insert (0) {}
+	    FreezeRecordInsertInfo(XMLNode& st, boost::shared_ptr<Insert> ins) 
+		    : state (st), insert (ins) {}
 
-	    XMLNode    state;
-	    Insert*    insert;
-	    PBD::ID    id;
-	    UndoAction memento;
+	    XMLNode                   state;
+	    boost::shared_ptr<Insert> insert;
+	    PBD::ID                   id;
+	    UndoAction                memento;
 	};
 
 	struct FreezeRecord {

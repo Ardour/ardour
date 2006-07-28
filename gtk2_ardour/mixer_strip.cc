@@ -80,7 +80,7 @@ speed_printer (char buf[32], Gtk::Adjustment& adj, void* arg)
 }
 #endif 
 
-MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
+MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt, bool in_mixer)
 	: AxisView(sess),
 	  RouteUI (rt, sess, _("Mute"), _("Solo"), _("Record")),
 	  _mixer(mx),
@@ -125,12 +125,12 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	output_button.set_name ("MixerIOButton");
 	output_label.set_name ("MixerIOButtonLabel");
 
-	_route.meter_change.connect (mem_fun(*this, &MixerStrip::meter_changed));
+	_route->meter_change.connect (mem_fun(*this, &MixerStrip::meter_changed));
 		meter_point_button.add (meter_point_label);
 		meter_point_button.set_name ("MixerStripMeterPreButton");
 		meter_point_label.set_name ("MixerStripMeterPreButton");
 		
-		switch (_route.meter_point()) {
+		switch (_route->meter_point()) {
 		case MeterInput:
 			meter_point_label.set_text (_("input"));
 			break;
@@ -191,7 +191,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 		rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
 		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
 
-		AudioTrack* at = dynamic_cast<AudioTrack*>(&_route);
+		AudioTrack* at = audio_track();
 
 		at->FreezeChange.connect (mem_fun(*this, &MixerStrip::map_frozen));
 
@@ -217,10 +217,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 	Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
 
 	name_label.set_name ("MixerNameButtonLabel");
-	if (_route.phase_invert()) {
+	if (_route->phase_invert()) {
 	        name_label.set_text (X_("Ø ") + name_label.get_text());
 	} else {
-	        name_label.set_text (_route.name());
+	        name_label.set_text (_route->name());
 	}
 
 	group_button.add (group_label);
@@ -229,9 +229,9 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 	comment_button.set_name ("MixerCommentButton");
 
-	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, _route.comment()==""	?
+	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, _route->comment()==""	?
 							_("Click to Add/Edit Comments"):
-							_route.comment());
+							_route->comment());
 
 	comment_button.signal_clicked().connect (mem_fun(*this, &MixerStrip::comment_button_clicked));
 	
@@ -281,22 +281,22 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, Route& rt, bool in_mixer)
 
 	_session.engine().Stopped.connect (mem_fun(*this, &MixerStrip::engine_stopped));
 	_session.engine().Running.connect (mem_fun(*this, &MixerStrip::engine_running));
-	_route.input_changed.connect (mem_fun(*this, &MixerStrip::input_changed));
-	_route.output_changed.connect (mem_fun(*this, &MixerStrip::output_changed));
-	_route.mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
-	_route.solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	_route.solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	_route.mix_group_changed.connect (mem_fun(*this, &MixerStrip::mix_group_changed));
-	_route.panner().Changed.connect (mem_fun(*this, &MixerStrip::connect_to_pan));
+	_route->input_changed.connect (mem_fun(*this, &MixerStrip::input_changed));
+	_route->output_changed.connect (mem_fun(*this, &MixerStrip::output_changed));
+	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
+	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route->mix_group_changed.connect (mem_fun(*this, &MixerStrip::mix_group_changed));
+	_route->panner().Changed.connect (mem_fun(*this, &MixerStrip::connect_to_pan));
 
 	if (is_audio_track()) {
 		audio_track()->DiskstreamChanged.connect (mem_fun(*this, &MixerStrip::diskstream_changed));
 		get_diskstream()->SpeedChanged.connect (mem_fun(*this, &MixerStrip::speed_changed));
 	}
 
-	_route.name_changed.connect (mem_fun(*this, &RouteUI::name_changed));
-	_route.comment_changed.connect (mem_fun(*this, &MixerStrip::comment_changed));
-	_route.gui_changed.connect (mem_fun(*this, &MixerStrip::route_gui_changed));
+	_route->name_changed.connect (mem_fun(*this, &RouteUI::name_changed));
+	_route->comment_changed.connect (mem_fun(*this, &MixerStrip::comment_changed));
+	_route->gui_changed.connect (mem_fun(*this, &MixerStrip::route_gui_changed));
 
 	input_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::input_press), false);
 	output_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::output_press), false);
@@ -419,16 +419,16 @@ MixerStrip::set_width (Width w)
 		mute_button->set_label  (_("mute"));
 		solo_button->set_label (_("solo"));
 
-		if (_route.comment() == "") {
+		if (_route->comment() == "") {
 		       comment_button.set_label (_("comments"));
 		} else {
 		       comment_button.set_label (_("*comments*"));
 		}
 
-		gpm.gain_automation_style_button.set_label (gpm.astyle_string(_route.gain_automation_curve().automation_style()));
-		gpm.gain_automation_state_button.set_label (gpm.astate_string(_route.gain_automation_curve().automation_state()));
-		panners.pan_automation_style_button.set_label (panners.astyle_string(_route.panner().automation_style()));
-		panners.pan_automation_state_button.set_label (panners.astate_string(_route.panner().automation_state()));
+		gpm.gain_automation_style_button.set_label (gpm.astyle_string(_route->gain_automation_curve().automation_style()));
+		gpm.gain_automation_state_button.set_label (gpm.astate_string(_route->gain_automation_curve().automation_state()));
+		panners.pan_automation_style_button.set_label (panners.astyle_string(_route->panner().automation_style()));
+		panners.pan_automation_state_button.set_label (panners.astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		break;
 
@@ -442,16 +442,16 @@ MixerStrip::set_width (Width w)
 		mute_button->set_label (_("M"));
 		solo_button->set_label (_("S"));
 
-		if (_route.comment() == "") {
+		if (_route->comment() == "") {
 		       comment_button.set_label (_("Cmt"));
 		} else {
 		       comment_button.set_label (_("*Cmt*"));
 		}
 
-		gpm.gain_automation_style_button.set_label (gpm.short_astyle_string(_route.gain_automation_curve().automation_style()));
-		gpm.gain_automation_state_button.set_label (gpm.short_astate_string(_route.gain_automation_curve().automation_state()));
-		panners.pan_automation_style_button.set_label (panners.short_astyle_string(_route.panner().automation_style()));
-		panners.pan_automation_state_button.set_label (panners.short_astate_string(_route.panner().automation_state()));
+		gpm.gain_automation_style_button.set_label (gpm.short_astyle_string(_route->gain_automation_curve().automation_style()));
+		gpm.gain_automation_state_button.set_label (gpm.short_astate_string(_route->gain_automation_curve().automation_state()));
+		panners.pan_automation_style_button.set_label (panners.short_astyle_string(_route->panner().automation_style()));
+		panners.pan_automation_state_button.set_label (panners.short_astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
 		break;
 	}
@@ -579,7 +579,7 @@ MixerStrip::connection_input_chosen (ARDOUR::Connection *c)
 	if (!ignore_toggle) {
 
 		try { 
-			_route.use_input_connection (*c, this);
+			_route->use_input_connection (*c, this);
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
@@ -595,7 +595,7 @@ MixerStrip::connection_output_chosen (ARDOUR::Connection *c)
 	if (!ignore_toggle) {
 
 		try { 
-			_route.use_output_connection (*c, this);
+			_route->use_output_connection (*c, this);
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
@@ -616,11 +616,11 @@ MixerStrip::add_connection_to_input_menu (ARDOUR::Connection* c)
 
 	MenuList& citems = input_menu.items();
 	
-	if (c->nports() == _route.n_inputs()) {
+	if (c->nports() == _route->n_inputs()) {
 
 		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::connection_input_chosen), c)));
 		
-		ARDOUR::Connection *current = _route.input_connection();
+		ARDOUR::Connection *current = _route->input_connection();
 		
 		if (current == c) {
 			ignore_toggle = true;
@@ -639,12 +639,12 @@ MixerStrip::add_connection_to_output_menu (ARDOUR::Connection* c)
 		return;
 	}
 
-	if (c->nports() == _route.n_outputs()) {
+	if (c->nports() == _route->n_outputs()) {
 
 		MenuList& citems = output_menu.items();
 		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::connection_output_chosen), c)));
 		
-		ARDOUR::Connection *current = _route.output_connection();
+		ARDOUR::Connection *current = _route->output_connection();
 		
 		if (current == c) {
 			ignore_toggle = true;
@@ -686,8 +686,8 @@ MixerStrip::connect_to_pan ()
 	panstate_connection.disconnect ();
 	panstyle_connection.disconnect ();
 
-	if (!_route.panner().empty()) {
-		StreamPanner* sp = _route.panner().front();
+	if (!_route->panner().empty()) {
+		StreamPanner* sp = _route->panner().front();
 
 		panstate_connection = sp->automation().automation_state_changed.connect (mem_fun(panners, &PannerUI::pan_automation_state_changed));
 		panstyle_connection = sp->automation().automation_style_changed.connect (mem_fun(panners, &PannerUI::pan_automation_style_changed));
@@ -701,7 +701,7 @@ MixerStrip::update_input_display ()
 {
 	ARDOUR::Connection *c;
 
-	if ((c = _route.input_connection()) != 0) {
+	if ((c = _route->input_connection()) != 0) {
 		input_label.set_text (c->name());
 	} else {
 		switch (_width) {
@@ -721,7 +721,7 @@ MixerStrip::update_output_display ()
 {
 	ARDOUR::Connection *c;
 
-	if ((c = _route.output_connection()) != 0) {
+	if ((c = _route->output_connection()) != 0) {
 		output_label.set_text (c->name());
 	} else {
 		switch (_width) {
@@ -772,8 +772,8 @@ MixerStrip::comment_button_clicked ()
 
 	if (comment_window->is_visible()) {
 	       string str =  comment_area->get_buffer()->get_text();
-	       if (_route.comment() != str) {
-		 _route.set_comment (str, this);
+	       if (_route->comment() != str) {
+		 _route->set_comment (str, this);
 
 		 switch (_width) {
 		   
@@ -817,7 +817,7 @@ void
 MixerStrip::setup_comment_editor ()
 {
 	string title;
-	title = _route.name();
+	title = _route->name();
 	title += _(": comment editor");
 
 	comment_window = new ArdourDialog (title, false);
@@ -829,7 +829,7 @@ MixerStrip::setup_comment_editor ()
 	comment_area->set_size_request (110, 178);
 	comment_area->set_wrap_mode (WRAP_WORD);
 	comment_area->set_editable (true);
-	comment_area->get_buffer()->set_text (_route.comment());
+	comment_area->get_buffer()->set_text (_route->comment());
 	comment_area->show ();
 
 	comment_window->get_vbox()->pack_start (*comment_area);
@@ -844,7 +844,7 @@ MixerStrip::comment_changed (void *src)
 	if (src != this) {
 		ignore_comment_edit = true;
 		if (comment_area) {
-			comment_area->get_buffer()->set_text (_route.comment());
+			comment_area->get_buffer()->set_text (_route->comment());
 		}
 		ignore_comment_edit = false;
 	}
@@ -853,7 +853,7 @@ MixerStrip::comment_changed (void *src)
 void
 MixerStrip::set_mix_group (RouteGroup *rg)
 {
-	_route.set_mix_group (rg, this);
+	_route->set_mix_group (rg, this);
 }
 
 void
@@ -865,7 +865,7 @@ MixerStrip::add_mix_group_to_menu (RouteGroup *rg, RadioMenuItem::Group* group)
 
 	items.push_back (RadioMenuElem (*group, rg->name(), bind (mem_fun(*this, &MixerStrip::set_mix_group), rg)));
 
-	if (_route.mix_group() == rg) {
+	if (_route->mix_group() == rg) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 }
@@ -905,7 +905,7 @@ MixerStrip::mix_group_changed (void *ignored)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &MixerStrip::mix_group_changed), ignored));
 	
-	RouteGroup *rg = _route.mix_group();
+	RouteGroup *rg = _route->mix_group();
 	
 	if (rg) {
 		group_label.set_text (rg->name());
@@ -961,11 +961,11 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun (*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
-	route_active_menu_item->set_active (_route.active());
+	route_active_menu_item->set_active (_route->active());
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Invert Polarity"), mem_fun (*this, &RouteUI::toggle_polarity)));
 	polarity_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
-	polarity_menu_item->set_active (_route.phase_invert());
+	polarity_menu_item->set_active (_route->phase_invert());
 
 	build_remote_control_menu ();
 	
@@ -1055,10 +1055,10 @@ MixerStrip::name_changed (void *src)
 		RouteUI::name_changed (src);
 		break;
 	case Narrow:
-	        name_label.set_text (PBD::short_version (_route.name(), 5));
+	        name_label.set_text (PBD::short_version (_route->name(), 5));
 		break;
 	}
-	if (_route.phase_invert()) {
+	if (_route->phase_invert()) {
 	        name_label.set_text (X_("Ø ") + name_label.get_text());
 	}
 }
@@ -1097,7 +1097,7 @@ MixerStrip::map_frozen ()
 {
 	ENSURE_GUI_THREAD (mem_fun(*this, &MixerStrip::map_frozen));
 
-	AudioTrack* at = dynamic_cast<AudioTrack*>(&_route);
+	AudioTrack* at = audio_track();
 
 	if (at) {
 		switch (at->freeze_state()) {
@@ -1113,11 +1113,11 @@ MixerStrip::map_frozen ()
 			break;
 		}
 	}
-	_route.foreach_redirect (this, &MixerStrip::hide_redirect_editor);
+	_route->foreach_redirect (this, &MixerStrip::hide_redirect_editor);
 }
 
 void
-MixerStrip::hide_redirect_editor (Redirect* redirect)
+MixerStrip::hide_redirect_editor (boost::shared_ptr<Redirect> redirect)
 {
 	void* gui = redirect->get_gui ();
 	
@@ -1134,7 +1134,7 @@ MixerStrip::route_active_changed ()
 	// FIXME: MIDI/Audio bus distinction
 	
 	if (is_midi_track()) {
-		if (_route.active()) {
+		if (_route->active()) {
 			set_name ("MidiTrackStripBase");
 			gpm.set_meter_strip_name ("MidiTrackStripBase");
 		} else {
@@ -1143,7 +1143,7 @@ MixerStrip::route_active_changed ()
 		}
 		gpm.set_fader_name ("MidiTrackFader");
 	} else if (is_audio_track()) {
-		if (_route.active()) {
+		if (_route->active()) {
 			set_name ("AudioTrackStripBase");
 			gpm.set_meter_strip_name ("AudioTrackStripBase");
 		} else {
@@ -1152,7 +1152,7 @@ MixerStrip::route_active_changed ()
 		}
 		gpm.set_fader_name ("AudioTrackFader");
 	} else {
-		if (_route.active()) {
+		if (_route->active()) {
 			set_name ("AudioBusStripBase");
 			gpm.set_meter_strip_name ("AudioBusStripBase");
 		} else {
@@ -1166,7 +1166,7 @@ MixerStrip::route_active_changed ()
 RouteGroup*
 MixerStrip::mix_group() const
 {
-	return _route.mix_group();
+	return _route->mix_group();
 }
 
 void
@@ -1195,7 +1195,7 @@ MixerStrip::meter_changed (void *src)
 
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &MixerStrip::meter_changed), src));
 
-		switch (_route.meter_point()) {
+		switch (_route->meter_point()) {
 		case MeterInput:
 			meter_point_label.set_text (_("input"));
 			break;

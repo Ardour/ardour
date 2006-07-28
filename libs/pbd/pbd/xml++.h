@@ -37,7 +37,6 @@ private:
   string _filename;
   XMLNode *_root;
   int _compression;
-  bool _initialized;
 
 public:
   XMLTree();
@@ -45,9 +44,8 @@ public:
   XMLTree(const XMLTree *);
   ~XMLTree();
 
-  bool initialized() const { return _initialized; };
   XMLNode *root() const { return _root; };
-  XMLNode *set_root(XMLNode *n) { _initialized = true; return _root = n; };
+  XMLNode *set_root(XMLNode *n) { return _root = n; };
 
   const string & filename() const { return _filename; };
   const string & set_filename(const string &fn) { return _filename = fn; };
@@ -69,7 +67,6 @@ public:
 
 class XMLNode {
 private:
-  bool _initialized;
   string _name;
   bool _is_content;
   string _content;
@@ -83,18 +80,17 @@ public:
   XMLNode(const XMLNode&);
   ~XMLNode();
 
-  bool initialized() const { return _initialized; };
   const string name() const { return _name; };
 
   bool is_content() const { return _is_content; };
   const string & content() const { return _content; };
-  const string & set_content(const string &);
+  const string & set_content (const string &);
   XMLNode *add_content(const string & = string());
 
-  const XMLNodeList & children(const string & = string()) const;
-  XMLNode *add_child(const char *);
-  XMLNode *add_child_copy(const XMLNode&);
-  void     add_child_nocopy (XMLNode&);
+  const XMLNodeList & children (const string & = string()) const;
+  XMLNode *add_child (const char *);
+  XMLNode *add_child_copy (const XMLNode&);
+  void add_child_nocopy (XMLNode&);
 
   const XMLPropertyList & properties() const { return _proplist; };
   XMLProperty *property(const char * );

@@ -59,10 +59,10 @@ namespace MIDI {
     enum MTC_Status {
 	    MTC_Stopped = 0,
 	    MTC_Forward,
-	    MTC_Backward,
+	    MTC_Backward
     };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif // __midi_types_h__
 

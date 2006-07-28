@@ -81,13 +81,12 @@ class AudioTrack : public Track
 	uint32_t n_process_buffers ();
 	
   private:
-	int set_diskstream (AudioDiskstream&, void *);
-
+	int  set_diskstream (AudioDiskstream&, void *);
 	int  deprecated_use_diskstream_connections ();
 	void set_state_part_two ();
 	void set_state_part_three ();
 };
 
-} /* namespace ARDOUR*/
+} // namespace ARDOUR
 
 #endif /* __ardour_audio_track_h__ */

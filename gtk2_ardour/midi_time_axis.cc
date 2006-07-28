@@ -78,7 +78,7 @@ using namespace Gtk;
 using namespace Editing;
 
 
-MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, Route& rt, Canvas& canvas)
+MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess), // FIXME: won't compile without this, why??
 	RouteTimeAxisView(ed, sess, rt, canvas)
 {
@@ -236,7 +236,7 @@ MidiTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
-	route_active_menu_item->set_active (_route.active());
+	route_active_menu_item->set_active (_route->active());
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
@@ -268,7 +268,7 @@ MidiTimeAxisView::route_active_changed ()
 	RouteUI::route_active_changed ();
 
 	if (is_midi_track()) {
-		if (_route.active()) {
+		if (_route->active()) {
 			controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 			controls_base_selected_name = "MidiTrackControlsBaseSelected";
 			controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
@@ -278,7 +278,7 @@ MidiTimeAxisView::route_active_changed ()
 			controls_base_unselected_name = "MidiTrackControlsBaseInactiveUnselected";
 		}
 	} else {
-		if (_route.active()) {
+		if (_route->active()) {
 			controls_ebox.set_name ("BusControlsBaseUnselected");
 			controls_base_selected_name = "BusControlsBaseSelected";
 			controls_base_unselected_name = "BusControlsBaseUnselected";

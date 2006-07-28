@@ -99,6 +99,6 @@ class Configuration : public Stateful
 extern Configuration *Config;
 extern gain_t speed_quietning; /* see comment in configuration.cc */
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_configuration_h__ */

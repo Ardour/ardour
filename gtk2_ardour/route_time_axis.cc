@@ -77,7 +77,7 @@ using namespace Gtk;
 using namespace Editing;
 
 
-RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, Route& rt, Canvas& canvas)
+RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess),
 	  RouteUI(rt, sess, _("m"), _("s"), _("r")), // mute, solo, and record
 	  TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas),
@@ -97,8 +97,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	_view = 0;
 	timestretch_rect = 0;
 	no_redraw = false;
-
-	//view = new AudioStreamView (*this);
 
 	ignore_toggle = false;
 
@@ -189,11 +187,11 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, Route& rt
 	//reset_redirect_automation_curves ();
 	y_position = -1;
 
-	_route.mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
-	_route.solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	//_route.redirects_changed.connect (mem_fun(*this, &RouteTimeAxisView::redirects_changed));
-	_route.name_changed.connect (mem_fun(*this, &RouteTimeAxisView::route_name_changed));
-	_route.solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
+	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route->redirects_changed.connect (mem_fun(*this, &RouteTimeAxisView::redirects_changed));
+	_route->name_changed.connect (mem_fun(*this, &RouteTimeAxisView::route_name_changed));
+	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 
 	if (is_track()) {
 
@@ -257,7 +255,7 @@ gint
 RouteTimeAxisView::edit_click (GdkEventButton *ev)
 {
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
-	        _route.set_edit_group (0, this);
+	        _route->set_edit_group (0, this);
 		return FALSE;
 	} 
 
@@ -270,7 +268,7 @@ RouteTimeAxisView::edit_click (GdkEventButton *ev)
 	items.push_back (RadioMenuElem (group, _("No group"), 
 					bind (mem_fun(*this, &RouteTimeAxisView::set_edit_group_from_menu), (RouteGroup *) 0)));
 	
-	if (_route.edit_group() == 0) {
+	if (_route->edit_group() == 0) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 	
@@ -290,7 +288,7 @@ RouteTimeAxisView::add_edit_group_menu_item (RouteGroup *eg, RadioMenuItem::Grou
 	cerr << "adding edit group " << eg->name() << endl;
 
 	items.push_back (RadioMenuElem (*group, eg->name(), bind (mem_fun(*this, &RouteTimeAxisView::set_edit_group_from_menu), eg)));
-	if (_route.edit_group() == eg) {
+	if (_route->edit_group() == eg) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 }
@@ -299,7 +297,7 @@ void
 RouteTimeAxisView::set_edit_group_from_menu (RouteGroup *eg)
 
 {
-	_route.set_edit_group (eg, this);
+	_route->set_edit_group (eg, this);
 }
 
 void
@@ -323,7 +321,7 @@ RouteTimeAxisView::playlist_changed ()
 void
 RouteTimeAxisView::label_view ()
 {
-	string x = _route.name();
+	string x = _route->name();
 
 	if (x != name_entry.get_text()) {
 		name_entry.set_text (x);
@@ -396,14 +394,14 @@ RouteTimeAxisView::show_timestretch (jack_nframes_t start, jack_nframes_t end)
 	   remember that edit_group() == 0 implies the route is *not* in a edit group.
 	*/
 
-	if (!(ts.track == this || (ts.group != 0 && ts.group == _route.edit_group()))) {
+	if (!(ts.track == this || (ts.group != 0 && ts.group == _route->edit_group()))) {
 		/* this doesn't apply to us */
 		return;
 	}
 
 	/* ignore it if our edit group is not active */
 	
-	if ((ts.track != this) && _route.edit_group() && !_route.edit_group()->is_active()) {
+	if ((ts.track != this) && _route->edit_group() && !_route->edit_group()->is_active()) {
 		return;
 	}
 #endif
@@ -451,8 +449,8 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 	   that the track is not in an edit group).
 	*/
 
-	if (((ts.track != this && !is_child (ts.track)) && _route.edit_group() && !_route.edit_group()->is_active()) ||
-	    (!(ts.track == this || is_child (ts.track) || (ts.group != 0 && ts.group == _route.edit_group())))) {
+	if (((ts.track != this && !is_child (ts.track)) && _route->edit_group() && !_route->edit_group()->is_active()) ||
+	    (!(ts.track == this || is_child (ts.track) || (ts.group != 0 && ts.group == _route->edit_group())))) {
 		hide_selection ();
 		return;
 	}
@@ -515,13 +513,13 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		controls_table.show ();
 		hide_name_entry ();
 		show_name_label ();
-		name_label.set_text (_route.name());
+		name_label.set_text (_route->name());
 		break;
 	}
 
 	if (height_changed) {
 		/* only emit the signal if the height really changed */
-		 _route.gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
 }
 
@@ -733,7 +731,7 @@ RouteTimeAxisView::update_diskstream_display ()
 void
 RouteTimeAxisView::selection_click (GdkEventButton* ev)
 {
-	PublicEditor::TrackViewList* tracks = editor.get_valid_views (this, _route.edit_group());
+	PublicEditor::TrackViewList* tracks = editor.get_valid_views (this, _route->edit_group());
 
 	switch (Keyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
@@ -805,13 +803,13 @@ RouteTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 RouteGroup*
 RouteTimeAxisView::edit_group() const
 {
-	return _route.edit_group();
+	return _route->edit_group();
 }
 
 string
 RouteTimeAxisView::name() const
 {
-	return _route.name();
+	return _route->name();
 }
 
 Playlist *
@@ -833,22 +831,22 @@ RouteTimeAxisView::name_entry_changed ()
 
 	x = name_entry.get_text ();
 	
-	if (x == _route.name()) {
+	if (x == _route->name()) {
 		return;
 	}
 
 	if (x.length() == 0) {
-		name_entry.set_text (_route.name());
+		name_entry.set_text (_route->name());
 		return;
 	}
 
 	strip_whitespace_edges(x);
 
 	if (_session.route_name_unique (x)) {
-		_route.set_name (x, this);
+		_route->set_name (x, this);
 	} else {
 		ARDOUR_UI::instance()->popup_error (_("a track already exists with that name"));
-		name_entry.set_text (_route.name());
+		name_entry.set_text (_route->name());
 	}
 }
 

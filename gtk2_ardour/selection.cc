@@ -151,7 +151,7 @@ Selection::clear_lines ()
 }
 
 void
-Selection::toggle (Redirect* r)
+Selection::toggle (boost::shared_ptr<Redirect> r)
 {
 	RedirectSelection::iterator i;
 
@@ -243,7 +243,7 @@ Selection::toggle (jack_nframes_t start, jack_nframes_t end)
 
 
 void
-Selection::add (Redirect* r)
+Selection::add (boost::shared_ptr<Redirect> r)
 {
 	if (find (redirects.begin(), redirects.end(), r) == redirects.end()) {
 		redirects.push_back (r);
@@ -381,9 +381,9 @@ Selection::add (AutomationList* ac)
 }
 
 void
-Selection::remove (Redirect* r)
+Selection::remove (boost::shared_ptr<Redirect> r)
 {
-	list<Redirect*>::iterator i;
+	RedirectSelection::iterator i;
 	if ((i = find (redirects.begin(), redirects.end(), r)) != redirects.end()) {
 		redirects.erase (i);
 		RedirectsChanged ();
@@ -491,7 +491,7 @@ Selection::remove (AutomationList *ac)
 }
 
 void
-Selection::set (Redirect *r)
+Selection::set (boost::shared_ptr<Redirect> r)
 {
 	clear_redirects ();
 	add (r);

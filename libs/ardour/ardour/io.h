@@ -393,6 +393,6 @@ public:
 	int32_t find_output_port_hole ();
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /*__ardour_io_h__ */

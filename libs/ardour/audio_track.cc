@@ -424,8 +424,8 @@ AudioTrack::set_state_part_two ()
 				continue;
 			}
 			
-			FreezeRecordInsertInfo* frii = new FreezeRecordInsertInfo (*((*citer)->children().front()));
-			frii->insert = 0;
+			FreezeRecordInsertInfo* frii = new FreezeRecordInsertInfo (*((*citer)->children().front()),
+										   boost::shared_ptr<Insert>());
 			frii->id = prop->value ();
 			_freeze_record.insert_info.push_back (frii);
 		}
@@ -740,9 +740,9 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbu
 	*/
 	
 	for (i = _redirects.begin(); i != _redirects.end(); ++i) {
-		Insert *insert;
+		boost::shared_ptr<Insert> insert;
 		
-		if ((insert = dynamic_cast<Insert*>(*i)) != 0) {
+		if ((insert = boost::dynamic_pointer_cast<Insert>(*i)) != 0) {
 			switch (insert->placement()) {
 			case PreFader:
 				insert->run (buffers, nbufs, nframes, 0);
@@ -778,9 +778,9 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbu
 	if (post_fader_work) {
 
 		for (i = _redirects.begin(); i != _redirects.end(); ++i) {
-			PluginInsert *insert;
+			boost::shared_ptr<PluginInsert> insert;
 			
-			if ((insert = dynamic_cast<PluginInsert*>(*i)) != 0) {
+			if ((insert = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				switch ((*i)->placement()) {
 				case PreFader:
 					break;
@@ -820,7 +820,6 @@ AudioTrack::bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadI
 void
 AudioTrack::freeze (InterThreadInfo& itt)
 {
-	Insert* insert;
 	vector<AudioSource*> srcs;
 	string new_playlist_name;
 	Playlist* new_playlist;
@@ -851,7 +850,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	} 
 
 	if (n == (UINT_MAX-1)) {
-	  error << string_compose (X_("There Are too many frozen versions of playlist \"%1\""
+	  error << string_compose (X_("There are too many frozen versions of playlist \"%1\""
 	  		    " to create another one"), _freeze_record.playlist->name())
 	       << endmsg;
 		return;
@@ -869,11 +868,12 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		
 		for (RedirectList::iterator r = _redirects.begin(); r != _redirects.end(); ++r) {
 			
-			if ((insert = dynamic_cast<Insert*>(*r)) != 0) {
+			boost::shared_ptr<Insert> insert;
+
+			if ((insert = boost::dynamic_pointer_cast<Insert>(*r)) != 0) {
 				
-				FreezeRecordInsertInfo* frii  = new FreezeRecordInsertInfo ((*r)->get_state());
+				FreezeRecordInsertInfo* frii  = new FreezeRecordInsertInfo ((*r)->get_state(), insert);
 				
-				frii->insert = insert;
 				frii->id = insert->id();
 				frii->memento = (*r)->get_memento();
 				

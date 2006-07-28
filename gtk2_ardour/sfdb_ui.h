@@ -100,6 +100,7 @@ class SoundFileBox : public Gtk::VBox
     void stop_btn_clicked ();
     void add_field_clicked ();
     void remove_field_clicked ();
+	void field_edited (const Glib::ustring&, const Glib::ustring&);
 	void delete_row (const Gtk::TreeModel::iterator& iter);
 
     void field_selected ();
