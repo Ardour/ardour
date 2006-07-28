@@ -68,13 +68,13 @@ CoreAudioSource::init (const string& idstr)
 	FSRef fsr;
 	err = FSPathMakeRef ((UInt8*)file.c_str(), &fsr, 0);
 	if (err != noErr) {
-		cerr << "FSPathMakeRef " << err << endl;
+		error << string_compose (_("Could not make reference to file: %1"), name()) << endmsg;
 		throw failed_constructor();
 	}
 
 	err = ExtAudioFileOpen (&fsr, &af);
 	if (err != noErr) {
-		cerr << "ExtAudioFileOpen " << err << endl;
+		error << string_compose (_("Could not open file: %1"), name()) << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
@@ -85,7 +85,7 @@ CoreAudioSource::init (const string& idstr)
 	err = ExtAudioFileGetProperty(af,
 			kExtAudioFileProperty_FileDataFormat, &asbd_size, &file_asbd);
 	if (err != noErr) {
-		cerr << "ExtAudioFileGetProperty1 " << err << endl;
+		error << string_compose (_("Could not get file data format for file: %1"), name()) << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
@@ -104,7 +104,7 @@ CoreAudioSource::init (const string& idstr)
 
 	err = ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &prop_size, &ca_frames);
 	if (err != noErr) {
-		cerr << "ExtAudioFileGetProperty2 " << err << endl;
+		error << string_compose (_("Could not get file length for file: %1"), name()) << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor();
 	}
@@ -125,14 +125,14 @@ CoreAudioSource::init (const string& idstr)
 
 	err = ExtAudioFileSetProperty (af, kExtAudioFileProperty_ClientDataFormat, asbd_size, &client_asbd);
 	if (err != noErr) {
-		cerr << "ExtAudioFileSetProperty3 " << err << endl;
+		error << string_compose (_("Could not set client data format for file: %1"), name()) << endmsg;
 		ExtAudioFileDispose (af);
 		throw failed_constructor ();
 	}
 	
 	if (_build_peakfiles) {
 		if (initialize_peakfile (false, file)) {
-			error << "initialize peakfile failed" << endmsg;
+			error << string_compose(_("initialize peakfile failed for file %1"), name()) << endmsg;
 			ExtAudioFileDispose (af);
 			throw failed_constructor ();
 		}
@@ -212,7 +212,24 @@ CoreAudioSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_
 float
 CoreAudioSource::sample_rate() const
 {
-	/* XXX taybin fill me in please */
+        AudioStreamBasicDescription client_asbd;
+        memset(&client_asbd, 0, sizeof(AudioStreamBasicDescription));
 
-	return 44100.0f;
+	OSStatus err = noErr;
+	size_t asbd_size = sizeof(AudioStreamBasicDescription);
+
+        err = ExtAudioFileSetProperty (af, kExtAudioFileProperty_ClientDataFormat, asbd_size, &client_asbd);
+        if (err != noErr) {
+		error << string_compose(_("Could not detect samplerate for: %1"), name()) << endmsg;
+		return 0.0;
+	}
+
+	return client_asbd.mSampleRate;
 }
+
+int
+CoreAudioSource::update_header (jack_nframes_t when, struct tm&, time_t)
+{
+	return 0;
+}
+
