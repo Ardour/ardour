@@ -848,10 +848,54 @@ class Session : public sigc::trackable, public Stateful
 		current_trans.add_command (cmd);
 	}
 
-	UndoAction global_solo_memento (void *src);
-	UndoAction global_mute_memento (void *src);
-	UndoAction global_record_enable_memento (void *src);
-	UndoAction global_metering_memento (void *src);
+        // these commands are implemented in libs/ardour/session_command.cc
+        class GlobalSoloStateCommand : public Command
+        {
+            GlobalRouteBooleanState before, after;
+            void *src;
+        public:
+            GlobalSoloStateCommand(void *src);
+            void operator()();
+            void undo();
+            XMLNode &serialize();
+            void mark();
+        }
+
+        class GlobalMuteStateCommand : public Command
+        {
+            GlobalRouteBooleanState before, after;
+            void *src;
+        public:
+            GlobalMuteStateCommand(void *src);
+            void operator()();
+            void undo();
+            XMLNode &serialize();
+            void mark();
+        }
+
+        class GlobalRecordEnableStateCommand : public Command
+        {
+            GlobalRouteBooleanState before, after;
+            void *src;
+        public:
+            GlobalRecordEnableStateCommand(void *src);
+            void operator()();
+            void undo();
+            XMLNode &serialize();
+            void mark();
+        }
+
+        class GlobalMeteringStateCommand : public Command
+        {
+            GlobalRouteMeterState before, after;
+            void *src;
+        public:
+            GlobalMeteringStateCommand(void *src);
+            void operator()();
+            void undo();
+            XMLNode &serialize();
+            void mark();
+        }
 
 	/* edit mode */
 
