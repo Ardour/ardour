@@ -32,7 +32,7 @@
 using std::string;
 using std::list;
 
-typedef Command UndoAction;
+typedef sigc::slot<void> UndoAction;
 
 class UndoTransaction : public Command
 {
@@ -43,10 +43,13 @@ class UndoTransaction : public Command
 
 	void clear ();
 
-	void add_command (const UndoAction&);
+	void add_command (Command *const);
 
         void operator() ();
 	void undo();
+	void redo();
+
+	XMLNode &serialize();
 	
 	void set_name (const string& str) {
 		_name = str;
@@ -62,7 +65,7 @@ class UndoTransaction : public Command
 	}
 
   private:
-	list<UndoAction> actions;
+	list<Command*>	 actions;
 	struct timeval   _timestamp;
 	string           _name;
 };

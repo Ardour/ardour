@@ -2576,7 +2576,7 @@ Session::commit_reversible_command (Command *cmd)
 	struct timeval now;
 
 	if (cmd) {
-		current_trans.add_command (*cmd);
+		current_trans.add_command (cmd);
 	}
 
 	gettimeofday (&now, 0);
@@ -2659,6 +2659,7 @@ Session::set_global_record_enable (GlobalRouteBooleanState s, void* src)
 	set_global_route_boolean (s, &Route::set_record_enable, src);
 }
 
+#if 0
 UndoAction
 Session::global_mute_memento (void* src)
 {
@@ -2682,6 +2683,7 @@ Session::global_record_enable_memento (void* src)
 {
 	return sigc::bind (mem_fun (*this, &Session::set_global_record_enable), get_global_route_boolean (&Route::record_enabled), src);
 }
+#endif
 
 static bool
 template_filter (const string &str, void *arg)

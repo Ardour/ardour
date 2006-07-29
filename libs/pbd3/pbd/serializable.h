@@ -27,6 +27,7 @@ class Serializable
 {
 public:
     virtual XMLNode &serialize() = 0;
+    virtual ~Serializable();
 };
 
 #endif // __lib_pbd_serializable_h__

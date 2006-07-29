@@ -47,7 +47,7 @@ UndoTransaction::operator= (const UndoTransaction& rhs)
 }
 
 void
-UndoTransaction::add_command (const UndoAction& action)
+UndoTransaction::add_command (Command *const action)
 {
 	actions.push_back (action);
 }
@@ -61,8 +61,8 @@ UndoTransaction::clear ()
 void
 UndoTransaction::operator() ()
 {
-	for (list<UndoAction>::iterator i = actions.begin(); i != actions.end(); ++i) {
-		(*i)();
+	for (list<Command*>::iterator i = actions.begin(); i != actions.end(); ++i) {
+		(*(*i))();
 	}
 }
 
@@ -70,8 +70,8 @@ void
 UndoTransaction::undo ()
 {
 	cerr << "Undo " << _name << endl;
-	for (list<UndoAction>::reverse_iterator i = actions.rbegin(); i != actions.rend(); ++i) {
-		i->undo();
+	for (list<Command*>::reverse_iterator i = actions.rbegin(); i != actions.rend(); ++i) {
+		(*i)->undo();
 	}
 }
 
@@ -112,7 +112,7 @@ UndoHistory::redo (unsigned int n)
 		UndoTransaction ut = RedoList.back ();
 		RedoList.pop_back ();
 		ut.redo ();
-		UndoList.push_back (trans);
+		UndoList.push_back (ut);
 	}
 }
 

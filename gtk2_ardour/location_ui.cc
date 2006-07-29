@@ -27,6 +27,7 @@
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
+#include <pbd/memento_command.h>
 
 #include "ardour_ui.h"
 #include "prompter.h"
@@ -654,11 +655,10 @@ gint LocationUI::do_location_remove (ARDOUR::Location *loc)
 	}
 
 	session->begin_reversible_command (_("remove marker"));
-        XMLNode &before, &after;
-	before = session->locations()->get_state();
+	XMLNode &before = session->locations()->get_state();
 	session->locations()->remove (loc);
-	after = session->locations()->get_state();
-	session->add_command(MementoCommand<Location>(*(session->locations()), before, after));
+	XMLNode &after = session->locations()->get_state();
+	session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
 	session->commit_reversible_command ();
 
 	return FALSE;
@@ -777,7 +777,7 @@ LocationUI::add_new_location()
 		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);
 		XMLNode &after = session->locations()->get_state();
-		session->add_command (MementoCommand<Locations>(*(session->locations()), before, after));
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
 		session->commit_reversible_command ();
 	}
 	
@@ -794,7 +794,7 @@ LocationUI::add_new_range()
 		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);
 		XMLNode &after = session->locations()->get_state();
-		session->add_command (MementoCommand<Locations>(*(session->locations()), before, after));
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
 		session->commit_reversible_command ();
 	}
 }

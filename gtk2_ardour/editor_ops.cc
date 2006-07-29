@@ -28,6 +28,7 @@
 #include <pbd/error.h>
 #include <pbd/basename.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/memento_command.h>
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
@@ -207,11 +208,10 @@ Editor::split_regions_at (jack_nframes_t where, AudioRegionSelection& regions)
 		_new_regionviews_show_envelope = (*a)->envelope_visible();
 		
 		if (pl) {
-                        XMLNode &before, &after;
-                        before = pl->get_state();
+                        XMLNode &before = pl->get_state();
 			pl->split_region ((*a)->region, where);
-                        after = pl->get_state();
-                        session->add_command(MementoCommand<Playlist>(*pl, before, after));
+                        XMLNode &after = pl->get_state();
+                        session->add_command(new MementoCommand<Playlist>(*pl, before, after));
 		}
 
 		a = tmp;
@@ -234,7 +234,7 @@ Editor::remove_clicked_region ()
         XMLNode &before = playlist->get_state();
 	playlist->remove_region (&clicked_regionview->region);
         XMLNode &after = playlist->get_state();
-	session->add_command(MementoCommand<Playlist>(*playlist, before, after));
+	session->add_command(new MementoCommand<Playlist>(*playlist, before, after));
 	commit_reversible_command ();
 }
 
@@ -410,7 +410,7 @@ Editor::nudge_forward (bool next)
                         XMLNode &before = r.playlist()->get_state();
 			r.set_position (r.position() + distance, this);
                         XMLNode &after = r.playlist()->get_state();
-			session->add_command (MementoCommand<Playlist>(*(r.playlist()), before, after));
+			session->add_command (new MementoCommand<Playlist>(*(r.playlist()), before, after));
 		}
 
 		commit_reversible_command ();
@@ -450,7 +450,7 @@ Editor::nudge_backward (bool next)
 				r.set_position (0, this);
 			}
                         XMLNode &after = r.playlist()->get_state();
-			session->add_command(MementoCommand<Playlist>(*(r.playlist()), before, after));
+			session->add_command(new MementoCommand<Playlist>(*(r.playlist()), before, after));
 		}
 
 		commit_reversible_command ();
@@ -483,11 +483,10 @@ Editor::nudge_forward_capture_offset ()
 		for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
 			AudioRegion& r ((*i)->region);
 			
-                        XMLNode &before, &after;
-			before = r.playlist()->get_state();
+			XMLNode &before = r.playlist()->get_state();
 			r.set_position (r.position() + distance, this);
-			after = r.playlist()->get_state();
-			session->add_command(MementoCommand<Playlist>(*(r.playlist()), before, after));
+			XMLNode &after = r.playlist()->get_state();
+			session->add_command(new MementoCommand<Playlist>(*(r.playlist()), before, after));
 		}
 
 		commit_reversible_command ();
@@ -519,7 +518,7 @@ Editor::nudge_backward_capture_offset ()
 				r.set_position (0, this);
 			}
                         XMLNode &after = r.playlist()->get_state();
-			session->add_command(MementoCommand<Playlist>(*(r.playlist()), before, after));
+			session->add_command(new MementoCommand<Playlist>(*(r.playlist()), before, after));
 		}
 
 		commit_reversible_command ();
@@ -1299,7 +1298,7 @@ Editor::add_location_from_selection ()
         XMLNode &before = session->locations()->get_state();
 	session->locations()->add (location, true);
         XMLNode &after = session->locations()->get_state();
-	session->add_command(MementoCommand<Locations>(*(session->locations()), before, after));
+	session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
 	session->commit_reversible_command ();
 }
 
@@ -1313,7 +1312,7 @@ Editor::add_location_from_playhead_cursor ()
         XMLNode &before = session->locations()->get_state();
 	session->locations()->add (location, true);
         XMLNode &after = session->locations()->get_state();
-	session->add_command(MementoCommand<Locations>(*(session->locations()), before, after));
+	session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
 	session->commit_reversible_command ();
 }
 
@@ -1332,7 +1331,7 @@ Editor::add_location_from_audio_region ()
         XMLNode &before = session->locations()->get_state();
 	session->locations()->add (location, true);
         XMLNode &after = session->locations()->get_state();
-	session->add_command(MementoCommand<Locations>(*(session->locations()), before, after));
+	session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
 	session->commit_reversible_command ();
 }
 
@@ -1751,7 +1750,7 @@ Editor::clear_markers ()
                 XMLNode &before = session->locations()->get_state();
 		session->locations()->clear_markers ();
                 XMLNode &after = session->locations()->get_state();
-		session->add_command(MementoCommand<Locations>(*(session->locations()), before, after));
+		session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
 		session->commit_reversible_command ();
 	}
 }
@@ -1772,7 +1771,7 @@ Editor::clear_ranges ()
 		if (punchloc) session->locations()->add (punchloc);
 		
                 XMLNode &after = session->locations()->get_state();
-		session->add_command(MementoCommand<Locations>(*(session->locations()), before, after));
+		session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
 		session->commit_reversible_command ();
 	}
 }
@@ -1784,7 +1783,7 @@ Editor::clear_locations ()
         XMLNode &before = session->locations()->get_state();
 	session->locations()->clear ();
         XMLNode &after = session->locations()->get_state();
-	session->add_command(MementoCommand<Locations>(*(sessions->locations()), before, after));
+	session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
 	session->commit_reversible_command ();
 	session->locations()->clear ();
 }
@@ -1834,7 +1833,7 @@ Editor::insert_region_list_drag (AudioRegion& region, int x, int y)
 	begin_reversible_command (_("insert dragged region"));
         XMLNode &before = playlist->get_state();
 	playlist->add_region (*(new AudioRegion (region)), where, 1.0);
-	session->add_command(MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+	session->add_command(new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 	commit_reversible_command ();
 }
 
@@ -1870,7 +1869,7 @@ Editor::insert_region_list_selection (float times)
 	begin_reversible_command (_("insert region"));
         XMLNode &before = playlist->get_state();
 	playlist->add_region (*(createRegion (*region)), edit_cursor->current_frame, times);
-	session->add_command(MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+	session->add_command(new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 	commit_reversible_command ();
 }
 
@@ -2291,9 +2290,9 @@ Editor::separate_region_from_selection ()
 						begin_reversible_command (_("separate"));
 						doing_undo = true;
 					}
-                                        XMLNode &before, &after;
+                                        XMLNode *before;
 					if (doing_undo) 
-                                            before = playlist->get_state();
+                                            before = &(playlist->get_state());
 			
 					/* XXX need to consider musical time selections here at some point */
 
@@ -2304,7 +2303,7 @@ Editor::separate_region_from_selection ()
 					}
 
 					if (doing_undo) 
-                                            session->add_command(MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+                                            session->add_command(new MementoCommand<Playlist>(*playlist, *before, playlist->get_state()));
 				}
 			}
 		}
@@ -2339,13 +2338,13 @@ Editor::separate_regions_using_location (Location& loc)
 			if (atv->is_audio_track()) {
 					
 				if ((playlist = atv->playlist()) != 0) {
-                                        XMLNode &before, &after;
+                                        XMLNode *before;
 					if (!doing_undo) {
 						begin_reversible_command (_("separate"));
 						doing_undo = true;
 					}
 					if (doing_undo) 
-                                            before = playlist->get_state();
+                                            before = &(playlist->get_state());
                                             
 			
 					/* XXX need to consider musical time selections here at some point */
@@ -2355,7 +2354,7 @@ Editor::separate_regions_using_location (Location& loc)
 
 					playlist->partition ((jack_nframes_t)(loc.start() * speed), (jack_nframes_t)(loc.end() * speed), true);
 					if (doing_undo) 
-                                            session->add_command(MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+                                            session->add_command(new MementoCommand<Playlist>(*playlist, *before, playlist->get_state()));
 				}
 			}
 		}
@@ -2429,7 +2428,7 @@ Editor::crop_region_to_selection ()
                         XMLNode &before = (*i)->get_state();
 			region->trim_to (start, cnt, this);
                         XMLNode &after = (*i)->get_state();
-			session->add_command (MementoCommand<Playlist>(*(*i), before, after));
+			session->add_command (new MementoCommand<Playlist>(*(*i), before, after));
 		}
 
 		commit_reversible_command ();
@@ -2466,7 +2465,7 @@ Editor::region_fill_track ()
 
                 XMLNode &before = pl->get_state();
 		pl->add_region (*(new AudioRegion (region)), region.last_frame(), times);
-		session->add_command (MementoCommand<Playlist>(*pl, before, pl->get_state()));
+		session->add_command (new MementoCommand<Playlist>(*pl, before, pl->get_state()));
 	}
 
 	commit_reversible_command ();
@@ -2516,7 +2515,7 @@ Editor::region_fill_selection ()
 		
                 XMLNode &before = playlist->get_state();
 		playlist->add_region (*(createRegion (*region)), start, times);
-		session->add_command (MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+		session->add_command (new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 	}
 	
 	commit_reversible_command ();			
@@ -2534,7 +2533,7 @@ Editor::set_a_regions_sync_position (Region& region, jack_nframes_t position)
         XMLNode &before = region.playlist()->get_state();
 	region.set_sync_position (position);
         XMLNode &after = region.playlist()->get_state();
-	session->add_command(MementoCommand<Playlist>(*(region.playlist()), before, after));
+	session->add_command(new MementoCommand<Playlist>(*(region.playlist()), before, after));
 	commit_reversible_command ();
 }
 
@@ -2555,7 +2554,7 @@ Editor::set_region_sync_from_edit_cursor ()
         XMLNode &before = region.playlist()->get_state();
 	region.set_sync_position (edit_cursor->current_frame);
         XMLNode &after = region.playlist()->get_state();
-	session->add_command(MementoCommand<Playlist>(*(region.playlist()), before, after));
+	session->add_command(new MementoCommand<Playlist>(*(region.playlist()), before, after));
 	commit_reversible_command ();
 }
 
@@ -2568,7 +2567,7 @@ Editor::remove_region_sync ()
                 XMLNode &before = region.playlist()->get_state();
 		region.clear_sync_position ();
                 XMLNode &after = region.playlist()->get_state();
-		session->add_command(MementoCommand<Playlist>(*(region.playlist()), before, after));
+		session->add_command(new MementoCommand<Playlist>(*(region.playlist()), before, after));
 		commit_reversible_command ();
 	}
 }
@@ -2584,7 +2583,7 @@ Editor::naturalize ()
                 XMLNode &before = (*i)->region.get_state();
 		(*i)->region.move_to_natural_position (this);
                 XMLNode &after = (*i)->region.get_state();
-		session->add_command (MementoCommand<AudioRegion>((*i)->region, before, after));
+		session->add_command (new MementoCommand<AudioRegion>((*i)->region, before, after));
 	}
 	commit_reversible_command ();
 }
@@ -2659,7 +2658,7 @@ Editor::align_selection_relative (RegionPoint point, jack_nframes_t position)
 		}
 
                 XMLNode &after = region.playlist()->get_state();
-		session->add_command(MementoCommand<Playlist>(*(region.playlist()), before, after));
+		session->add_command(new MementoCommand<Playlist>(*(region.playlist()), before, after));
 
 	}
 
@@ -2693,8 +2692,7 @@ Editor::align_region (Region& region, RegionPoint point, jack_nframes_t position
 void
 Editor::align_region_internal (Region& region, RegionPoint point, jack_nframes_t position)
 {
-        XMLNode &before, &after;
-	before = region.playlist()->get_state();
+	XMLNode &before = region.playlist()->get_state();
 
 	switch (point) {
 	case SyncPoint:
@@ -2712,8 +2710,8 @@ Editor::align_region_internal (Region& region, RegionPoint point, jack_nframes_t
 		break;
 	}
 
-	after = region.playlist()->get_state();
-	session->add_command(MementoCommand<Playlist>(*(region.playlist()), before, after));
+	XMLNode &after = region.playlist()->get_state();
+	session->add_command(new MementoCommand<Playlist>(*(region.playlist()), before, after));
 }	
 
 void
@@ -2738,7 +2736,7 @@ Editor::trim_region_to_edit_cursor ()
         XMLNode &before = region.playlist()->get_state();
 	region.trim_end( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
         XMLNode &after = region.playlist()->get_state();
-	session->add_command(MementoCommand<Playlist>(*(region.playlist()), before, after));
+	session->add_command(new MementoCommand<Playlist>(*(region.playlist()), before, after));
 	commit_reversible_command ();
 }
 
@@ -2764,7 +2762,7 @@ Editor::trim_region_from_edit_cursor ()
         XMLNode &before = region.playlist()->get_state();
 	region.trim_front ( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
         XMLNode &after = region.playlist()->get_state();
-	session->add_command(MementoCommand<Playlist>(*(region.playlist()), before, after));
+	session->add_command(new MementoCommand<Playlist>(*(region.playlist()), before, after));
 	commit_reversible_command ();
 }
 
@@ -2879,7 +2877,7 @@ Editor::bounce_range_selection ()
                 XMLNode &before = playlist->get_state();
 		atv->audio_track()->bounce_range (start, cnt, itt);
                 XMLNode &after = playlist->get_state();
-		session->add_command (MementoCommand<Playlist> (*playlist, before, after));
+		session->add_command (new MementoCommand<Playlist> (*playlist, before, after));
 	}
 	
 	commit_reversible_command ();
@@ -2997,7 +2995,7 @@ Editor::cut_copy_regions (CutCopyOp op)
 				insert_result = freezelist.insert (pl);
 				if (insert_result.second) {
 					pl->freeze ();
-                                        session->add_command (MementoUndoCommand<Playlist>(*pl, pl->get_state()));
+                                        session->add_command (new MementoUndoCommand<Playlist>(*pl, pl->get_state()));
 				}
 			}
 		}
@@ -3055,7 +3053,7 @@ Editor::cut_copy_regions (CutCopyOp op)
 	
 	for (set<Playlist*>::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
 		(*pl)->thaw ();
-		session->add_command (MementoRedoCommand<Playlist>(*(*pl), *(*pl)->get_state()));
+		session->add_command (new MementoRedoCommand<Playlist>(*(*pl), (*pl)->get_state()));
 	}
 }
 
@@ -3170,7 +3168,7 @@ Editor::paste_named_selection (float times)
 
                 XMLNode &before = apl->get_state();
 		apl->paste (**chunk, edit_cursor->current_frame, times);
-		session->add_command(MementoCommand<AudioPlaylist>(*apl, before, apl->get_state()));
+		session->add_command(new MementoCommand<AudioPlaylist>(*apl, before, apl->get_state()));
 
 		if (tmp != ns->playlists.end()) {
 			chunk = tmp;
@@ -3201,7 +3199,7 @@ Editor::duplicate_some_regions (AudioRegionSelection& regions, float times)
  		playlist = (*i)->region.playlist();
                 XMLNode &before = playlist->get_state();
 		playlist->duplicate (r, r.last_frame(), times);
-		session->add_command(MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+		session->add_command(new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 
 		c.disconnect ();
 
@@ -3242,7 +3240,7 @@ Editor::duplicate_selection (float times)
                 XMLNode &before = playlist->get_state();
 		playlist->duplicate (**ri, selection->time[clicked_selection].end, times);
                 XMLNode &after = playlist->get_state();
-		session->add_command (MementoCommand<Playlist>(*playlist, before, after));
+		session->add_command (new MementoCommand<Playlist>(*playlist, before, after));
 
 		++ri;
 		if (ri == new_regions.end()) {
@@ -3293,7 +3291,7 @@ Editor::clear_playlist (Playlist& playlist)
         XMLNode &before = playlist.get_state();
 	playlist.clear ();
         XMLNode &after = playlist.get_state();
-	session->add_command (MementoCommand<Playlist>(playlist, before, after));
+	session->add_command (new MementoCommand<Playlist>(playlist, before, after));
 	commit_reversible_command ();
 }
 
@@ -3330,7 +3328,7 @@ Editor::nudge_track (bool use_edit_cursor, bool forwards)
                 XMLNode &before = playlist->get_state();
 		playlist->nudge_after (start, distance, forwards);
                 XMLNode &after = playlist->get_state();
-		session->add_command (MementoCommand<Playlist>(*playlist, before, after));
+		session->add_command (new MementoCommand<Playlist>(*playlist, before, after));
 	}
 	
 	commit_reversible_command ();			
@@ -3384,7 +3382,7 @@ Editor::normalize_region ()
                 XMLNode &before = (*r)->region.get_state();
 		(*r)->region.normalize_to (0.0f);
                 XMLNode &after = (*r)->region.get_state();
-		session->add_command (MementoCommand<AudioRegion>((*r)->region, before, after));
+		session->add_command (new MementoCommand<AudioRegion>((*r)->region, before, after));
 	}
 
 	commit_reversible_command ();
@@ -3409,7 +3407,7 @@ Editor::denormalize_region ()
                 XMLNode &before = (*r)->region.get_state();
 		(*r)->region.set_scale_amplitude (1.0f);
                 XMLNode &after = (*r)->region.get_state();
-		session->add_command (MementoCommand<AudioRegion>((*r)->region, before, after));
+		session->add_command (new MementoCommand<AudioRegion>((*r)->region, before, after));
 	}
 
 	commit_reversible_command ();
@@ -3454,7 +3452,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
                         XMLNode &before = playlist->get_state();
 			playlist->replace_region (region, *(filter.results.front()), region.position());
                         XMLNode &after = playlist->get_state();
-			session->add_command(MementoCommand<Playlist>(*playlist, before, after));
+			session->add_command(new MementoCommand<Playlist>(*playlist, before, after));
 		} else {
 			goto out;
 		}

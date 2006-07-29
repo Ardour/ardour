@@ -1,4 +1,5 @@
 #include <ardour/route.h>
+#include <pbd/memento_command.h>
 
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
@@ -500,14 +501,13 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	AutomationList& alist (line.the_list());
 	bool ret = false;
 
-        XMLNode &before, &after;
-        before = alist.get_state();
+        XMLNode &before = alist.get_state();
 
 	switch (op) {
 	case Cut:
 		if ((what_we_got = alist.cut (selection.time.front().start, selection.time.front().end)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
-			_session.add_command(MementoCommand<AutomationList>(alist, before, alist.get_state()));
+			_session.add_command(new MementoCommand<AutomationList>(alist, before, alist.get_state()));
 			ret = true;
 		}
 		break;
@@ -519,7 +519,7 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 
 	case Clear:
 		if ((what_we_got = alist.cut (selection.time.front().start, selection.time.front().end)) != 0) {
-			_session.add_command(MementoCommand<AutomationList>(alist, before, alist.get_state()));
+			_session.add_command(new MementoCommand<AutomationList>(alist, before, alist.get_state()));
 			delete what_we_got;
 			what_we_got = 0;
 			ret = true;
@@ -551,7 +551,7 @@ AutomationTimeAxisView::reset_objects_one (AutomationLine& line, PointSelection&
 {
 	AutomationList& alist (line.the_list());
 
-	_session.add_command (MementoUndoCommand<AutomationList>(alist, alist.get_state()));
+	_session.add_command (new MementoUndoCommand<AutomationList>(alist, alist.get_state()));
 
 	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
 
@@ -581,9 +581,8 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 	AutomationList* what_we_got = 0;
 	AutomationList& alist (line.the_list());
 	bool ret = false;
-        XMLNode &before, &after;
 
-        before = alist.get_state();
+        XMLNode &before = alist.get_state();
 
 	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
 
@@ -595,7 +594,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 		case Cut:
 			if ((what_we_got = alist.cut ((*i).start, (*i).end)) != 0) {
 				editor.get_cut_buffer().add (what_we_got);
-				_session.add_command (MementoCommand<AutomationList>(alist, before, alist.get_state()));
+				_session.add_command (new MementoCommand<AutomationList>(alist, before, alist.get_state()));
 				ret = true;
 			}
 			break;
@@ -607,7 +606,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 			
 		case Clear:
 			if ((what_we_got = alist.cut ((*i).start, (*i).end)) != 0) {
-				_session.add_command (MementoCommand<AutomationList>(alist, before, alist.get_state()));
+				_session.add_command (new MementoCommand<AutomationList>(alist, before, alist.get_state()));
 				delete what_we_got;
 				what_we_got = 0;
 				ret = true;
@@ -666,7 +665,7 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, jack_nframes_t pos, flo
 
         XMLNode &before = alist.get_state();
 	alist.paste (copy, pos, times);
-	_session.add_command (MementoCommand<AutomationList>(alist, before, alist.get_state()));
+	_session.add_command (new MementoCommand<AutomationList>(alist, before, alist.get_state()));
 
 	return true;
 }

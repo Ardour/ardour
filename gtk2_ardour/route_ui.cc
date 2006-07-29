@@ -25,6 +25,7 @@
 #include <gtkmm2ext/doi.h>
 
 #include <ardour/route_group.h>
+#include <pbd/memento_command.h>
 
 #include "route_ui.h"
 #include "keyboard.h"
@@ -132,9 +133,9 @@ RouteUI::mute_press(GdkEventButton* ev)
 					/* ctrl-shift-click applies change to all routes */
 
 					_session.begin_reversible_command (_("mute change"));
-                                        Session::GlobalMuteStateCommand cmd(this);
+                                        Session::GlobalMuteStateCommand *cmd = new Session::GlobalMuteStateCommand(this);
 					_session.set_all_mute (!_route.muted());
-                                        cmd.mark();
+                                        cmd->mark();
 					_session.add_command(cmd);
 					_session.commit_reversible_command ();
 
@@ -208,9 +209,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 					/* ctrl-shift-click applies change to all routes */
 
 					_session.begin_reversible_command (_("solo change"));
-                                        Session::GlobalSoloStateCommand cmd(this);
+                                        Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(this);
 					_session.set_all_solo (!_route.soloed());
-                                        cmd.mark();
+                                        cmd->mark();
 					_session.add_command (cmd);
 					_session.commit_reversible_command ();
 					
@@ -219,10 +220,10 @@ RouteUI::solo_press(GdkEventButton* ev)
 					// ctrl-alt-click: exclusively solo this track, not a toggle */
 
 					_session.begin_reversible_command (_("solo change"));
-                                        Session::GlobalSoloStateCommand cmd(this);
+                                        Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand (this);
 					_session.set_all_solo (false);
 					_route.set_solo (true, this);
-                                        cmd.mark();
+                                        cmd->mark();
 					_session.add_command(cmd);
 					_session.commit_reversible_command ();
 
@@ -283,7 +284,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
 
 			_session.begin_reversible_command (_("rec-enable change"));
-                        Session::GlobalRecordEnableStateCommand cmd(this);
+                        Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(this);
 
 			if (rec_enable_button->get_active()) {
 				_session.record_disenable_all ();
@@ -291,7 +292,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 				_session.record_enable_all ();
 			}
 
-                        cmd.mark();
+                        cmd->mark();
 			_session.add_command(cmd);
 			_session.commit_reversible_command ();
 
@@ -561,9 +562,9 @@ RouteUI::set_mix_group_solo(Route& route, bool yn)
 
 	if((mix_group = route.mix_group()) != 0){
 		_session.begin_reversible_command (_("mix group solo  change"));
-                Session::GlobalSoloStateCommand cmd(this);
+                Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(this);
 		mix_group->apply(&Route::set_solo, yn, this);
-                cmd.mark();
+                cmd->mark();
 		_session.add_command (cmd);
 		_session.commit_reversible_command ();
 	} else {
@@ -578,7 +579,7 @@ RouteUI::reversibly_apply_route_boolean (string name, void (Route::*func)(bool, 
         XMLNode &before = _route.get_state();
         bind(mem_fun(_route, func), yn, arg)();
         XMLNode &after = _route.get_state();
-        _session.add_command (MementoCommand<Route>(_route, before, after));
+        _session.add_command (new MementoCommand<Route>(_route, before, after));
 	_session.commit_reversible_command ();
 }
 
@@ -589,7 +590,7 @@ RouteUI::reversibly_apply_audio_track_boolean (string name, void (AudioTrack::*f
         XMLNode &before = audio_track()->get_state();
 	bind (mem_fun (*audio_track(), func), yn, arg)();
         XMLNode &after = audio_track()->get_state();
-	_session.add_command (MementoCommand<AudioTrack>(*audio_track(), before, after));
+	_session.add_command (new MementoCommand<AudioTrack>(*audio_track(), before, after));
 	_session.commit_reversible_command ();
 }
 
@@ -600,9 +601,9 @@ RouteUI::set_mix_group_mute(Route& route, bool yn)
 
 	if((mix_group = route.mix_group()) != 0){
 		_session.begin_reversible_command (_("mix group mute change"));
-                Session::GlobalMuteStateCommand cmd(this);
+                Session::GlobalMuteStateCommand *cmd = new Session::GlobalMuteStateCommand (this);
 		mix_group->apply(&Route::set_mute, yn, this);
-                cmd.mark();
+                cmd->mark();
 		_session.add_command(cmd);
 		_session.commit_reversible_command ();
 	} else {
@@ -617,9 +618,9 @@ RouteUI::set_mix_group_rec_enable(Route& route, bool yn)
 
 	if((mix_group = route.mix_group()) != 0){
 		_session.begin_reversible_command (_("mix group rec-enable change"));
-                Session::GlobalRecordEnableStateCommand cmd(this);
+                Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(this);
 		mix_group->apply (&Route::set_record_enable, yn, this);
-                cmd.mark();
+                cmd->mark();
 		_session.add_command(cmd);
 		_session.commit_reversible_command ();
 	} else {

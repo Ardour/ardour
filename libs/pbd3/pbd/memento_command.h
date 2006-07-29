@@ -39,12 +39,12 @@ class MementoCommand : public Command
             : obj(obj), before(before), after(after) {}
         void operator() () { obj.set_state(after); }
         void undo() { obj.set_state(before); }
-        virtual XMLNode &serialize() 
-        {
+        virtual XMLNode &serialize() ;
+        //{
             // obj.id
             // key is "MementoCommand" or something
             // before and after mementos
-        }
+        //}
         // TODO does this need a copy constructor?
     protected:
         obj_T &obj;
@@ -52,7 +52,7 @@ class MementoCommand : public Command
 };
 
 template <class obj_T>
-class MementoUndoCommand : public MementoCommand<obj_T>
+class MementoUndoCommand : public Command
 {
 public:
     MementoUndoCommand(obj_T &obj, 
@@ -60,29 +60,35 @@ public:
         : obj(obj), before(before) {}
     void operator() () { /* noop */ }
     void undo() { obj.set_state(before); }
-    virtual XMLNode &serialize() 
-    {
+    virtual XMLNode &serialize() ;
+    //{
         // obj.id
         // key is "MementoCommand" or something
         // before and after mementos
-    }
-}
+    //}
+protected:
+    obj_T &obj;
+    XMLNode &before;
+};
 
 template <class obj_T>
-class MementoRedoCommand : public MementoCommand<obj_T>
+class MementoRedoCommand : public Command
 {
 public:
-    MementoUndoCommand(obj_T &obj, 
+    MementoRedoCommand(obj_T &obj, 
                        XMLNode &after)
         : obj(obj), after(after) {}
     void operator() () { obj.set_state(after); }
     void undo() { /* noop */ }
-    virtual XMLNode &serialize() 
-    {
+    virtual XMLNode &serialize();
+    //{
         // obj.id
         // key is "MementoCommand" or something
         // before and after mementos
-    }
-}
+    //}
+protected:
+    obj_T &obj;
+    XMLNode &after;
+};
 
 #endif // __lib_pbd_memento_h__

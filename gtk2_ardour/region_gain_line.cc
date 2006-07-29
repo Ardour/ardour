@@ -1,5 +1,6 @@
 #include <ardour/curve.h>
 #include <ardour/audioregion.h>
+#include <pbd/memento_command.h>
 
 #include "region_gain_line.h"
 #include "regionview.h"
@@ -47,7 +48,7 @@ AudioRegionGainLine::start_drag (ControlPoint* cp, float fraction)
 {
 	AutomationLine::start_drag(cp,fraction);
 	if (!rv.region.envelope_active()) {
-                trackview.session().add_command(MementoUndoCommand<AudioRegion>(rv.region, rv.region.get_state()));
+                trackview.session().add_command(new MementoUndoCommand<AudioRegion>(rv.region, rv.region.get_state()));
                 rv.region.set_envelope_active(false);
 	}
 }
@@ -67,12 +68,12 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
                 XMLNode &before = rv.region.get_state();
 		rv.region.set_envelope_active(true);
                 XMLNode &after = rv.region.get_state();
-                trackview.session().add_command(MementoCommand<AudioRegion>(rv.region, before, after));
+                trackview.session().add_command(new MementoCommand<AudioRegion>(rv.region, before, after));
 	}
 
 	alist.erase (mr.start, mr.end);
 
-	trackview.editor.current_session()->add_command (MementoCommand<AudioRegionGainLine>(*this, before, get_state()));
+	trackview.editor.current_session()->add_command (new MementoCommand<AudioRegionGainLine>(*this, before, get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }
@@ -82,7 +83,7 @@ AudioRegionGainLine::end_drag (ControlPoint* cp)
 {
 	if (!rv.region.envelope_active()) {
 		rv.region.set_envelope_active(true);
-                trackview.session().add_command(MementoRedoCommand<AudioRegion>(rv.region, rv.region.get_state()));
+                trackview.session().add_command(new MementoRedoCommand<AudioRegion>(rv.region, rv.region.get_state()));
 	}
 	AutomationLine::end_drag(cp);
 }

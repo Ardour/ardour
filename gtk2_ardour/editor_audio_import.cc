@@ -31,6 +31,7 @@
 #include <ardour/audio_track.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audiofilesource.h>
+#include <pbd/memento_command.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -320,7 +321,7 @@ int
 			begin_reversible_command (_("insert sndfile"));
                         XMLNode &before = playlist->get_state();
 			playlist->add_region (*copy, pos);
-			session->add_command (MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+			session->add_command (new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 			commit_reversible_command ();
 
 			pos += region.length();

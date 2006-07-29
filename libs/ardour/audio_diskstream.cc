@@ -35,6 +35,7 @@
 #include <pbd/basename.h>
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
+#include <pbd/memento_command.h>
 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
@@ -1833,7 +1834,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 		_playlist->thaw ();
                 XMLNode &after = _playlist->get_state();
-		_session.add_command (MementoCommand<Playlist>(*_playlist, before, after));
+		_session.add_command (new MementoCommand<Playlist>(*_playlist, before, after));
 	}
 
 	mark_write_completed = true;

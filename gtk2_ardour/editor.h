@@ -1608,7 +1608,7 @@ class Editor : public PublicEditor
 
 	UndoAction get_memento() const;
 
-        XMLNode &before; /* used in *_reversible_command */
+        XMLNode *before; /* used in *_reversible_command */
 	void begin_reversible_command (string cmd_name);
 	void commit_reversible_command ();
 

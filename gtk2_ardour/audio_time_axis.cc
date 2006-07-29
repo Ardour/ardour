@@ -30,6 +30,7 @@
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
 #include <pbd/whitespace.h>
+#include <pbd/memento_command.h>
 
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/gtk_ui.h>
@@ -1739,14 +1740,13 @@ AudioTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		}
 	}
 	
-        XMLNode &before, &after;
+	XMLNode &before = playlist->get_state();
 	switch (op) {
 	case Cut:
-                before = playlist->get_state();
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
-                        after = playlist->get_state();
-			_session.add_command (MementoCommand<Playlist>(*playlist, before, after));
+                        XMLNode &after = playlist->get_state();
+			_session.add_command (new MementoCommand<Playlist>(*playlist, before, after));
 			ret = true;
 		}
 		break;
@@ -1757,9 +1757,9 @@ AudioTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		break;
 
 	case Clear:
-		before = playlist->get_state();
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			_session.add_command(MementoCommand<Playlist>(*playlist, before, after));
+			XMLNode &after = playlist->get_state();
+			_session.add_command(new MementoCommand<Playlist>(*playlist, before, after));
 			what_we_got->unref ();
 			ret = true;
 		}
@@ -1790,7 +1790,7 @@ AudioTimeAxisView::paste (jack_nframes_t pos, float times, Selection& selection,
 	
         XMLNode &before = playlist->get_state();
 	playlist->paste (**p, pos, times);
-        _session.add_command(MementoCommand<Playlist>(*playlist, before, 
+        _session.add_command(new MementoCommand<Playlist>(*playlist, before, 
                                                       playlist->get_state()));
 
 	return true;

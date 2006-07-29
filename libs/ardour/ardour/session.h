@@ -844,7 +844,7 @@ class Session : public sigc::trackable, public Stateful
 	void begin_reversible_command (string cmd_name);
 	void commit_reversible_command (Command* cmd = 0);
 
-	void add_command (const Command& cmd) {
+	void add_command (Command *const cmd) {
 		current_trans.add_command (cmd);
 	}
 
@@ -859,7 +859,7 @@ class Session : public sigc::trackable, public Stateful
             void undo();
             XMLNode &serialize();
             void mark();
-        }
+        };
 
         class GlobalMuteStateCommand : public Command
         {
@@ -871,7 +871,7 @@ class Session : public sigc::trackable, public Stateful
             void undo();
             XMLNode &serialize();
             void mark();
-        }
+        };
 
         class GlobalRecordEnableStateCommand : public Command
         {
@@ -883,7 +883,7 @@ class Session : public sigc::trackable, public Stateful
             void undo();
             XMLNode &serialize();
             void mark();
-        }
+        };
 
         class GlobalMeteringStateCommand : public Command
         {
@@ -895,7 +895,7 @@ class Session : public sigc::trackable, public Stateful
             void undo();
             XMLNode &serialize();
             void mark();
-        }
+        };
 
 	/* edit mode */
 

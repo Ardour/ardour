@@ -29,6 +29,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/audiosource.h>
 #include <ardour/audio_diskstream.h>
+#include <pbd/memento_command.h>
 
 #include "streamview.h"
 #include "regionview.h"
@@ -1148,17 +1149,16 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 
 	if (!region.envelope_active()) {
-                XMLNode &before, &after;
-                before = region.get_state();
+                XMLNode &before = region.get_state();
 		region.set_envelope_active(true);
-                after = region.get_state();
-		trackview.session().add_command(MementoCommand<AudioRegion>(region, before, after));
+                XMLNode &after = region.get_state();
+		trackview.session().add_command(new MementoCommand<AudioRegion>(region, before, after));
 	}
 
 	region.envelope().add (fx, y);
 	
 	XMLNode &after = region.envelope().get_state();
-	trackview.session().add_command(MementoCommand<Curve>(region.envelope(), before, after));
+	trackview.session().add_command(new MementoCommand<Curve>(region.envelope(), before, after));
 	trackview.session().commit_reversible_command ();
 }
 

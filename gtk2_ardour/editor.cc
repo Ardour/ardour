@@ -28,6 +28,7 @@
 
 #include <pbd/convert.h>
 #include <pbd/error.h>
+#include <pbd/memento_command.h>
 
 #include <gtkmm/image.h>
 #include <gdkmm/color.h>
@@ -2970,7 +2971,7 @@ void
 Editor::begin_reversible_command (string name)
 {
 	if (session) {
-                before = get_state();
+                before = &get_state();
 		session->begin_reversible_command (name);
 	}
 }
@@ -2979,12 +2980,7 @@ void
 Editor::commit_reversible_command ()
 {
 	if (session) {
-                // yes, cmd lasts long enough to be copied onto the action
-                // list in the history, but this has the potential to be a
-                // problem if memory management of actions changes in
-                // UndoTransaction
-                MementoCommand<Editor> cmd(*this, before, get_state());
-		session->commit_reversible_command (&cmd);
+		session->commit_reversible_command (new MementoCommand<Editor>(*this, *before, get_state()));
 	}
 }
 

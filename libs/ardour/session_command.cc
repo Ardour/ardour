@@ -1,5 +1,6 @@
 #include <ardour/session.h>
 
+namespace ARDOUR {
 // solo
 Session::GlobalSoloStateCommand::GlobalSoloStateCommand(void *src) : src(src)
 {
@@ -84,3 +85,4 @@ XMLNode &serialize()
 {
 }
 
+} // namespace ARDOUR
