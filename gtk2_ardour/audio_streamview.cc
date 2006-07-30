@@ -54,7 +54,6 @@ using namespace Editing;
 AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	: StreamView (tv)
 {
-	region_color = _trackview.color();
 	crossfades_visible = true;
 
 	if (tv.is_audio_track())
@@ -62,43 +61,16 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	else
 		stream_base_color = color_map[cAudioBusBase];
 
-	/* set_position() will position the group */
-
-	canvas_group = new ArdourCanvas::Group(*_trackview.canvas_display);
-
-	canvas_rect = new ArdourCanvas::SimpleRect (*canvas_group);
-	canvas_rect->property_x1() = 0.0;
-	canvas_rect->property_y1() = 0.0;
-	canvas_rect->property_x2() = 1000000.0;
-	canvas_rect->property_y2() = (double) tv.height;
 	canvas_rect->property_outline_color_rgba() = color_map[cAudioTrackOutline];
-	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
-	canvas_rect->property_fill_color_rgba() = stream_base_color;
 
-	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
-
-	_samples_per_unit = _trackview.editor.get_current_zoom();
 	_amplitude_above_axis = 1.0;
 
-	if (_trackview.is_audio_track()) {
-		_trackview.audio_track()->DiskstreamChanged.connect (mem_fun (*this, &AudioStreamView::diskstream_changed));
-		_trackview.session().TransportStateChange.connect (mem_fun (*this, &AudioStreamView::transport_changed));
-		_trackview.get_diskstream()->RecordEnableChanged.connect (mem_fun (*this, &AudioStreamView::rec_enable_changed));
-		_trackview.session().RecordStateChanged.connect (mem_fun (*this, &AudioStreamView::sess_rec_enable_changed));
-	} 
-
-	rec_updating = false;
-	rec_active = false;
 	use_rec_regions = tv.editor.show_waveforms_recording ();
 	last_rec_peak_frame = 0;
-
-	ColorChanged.connect (mem_fun (*this, &AudioStreamView::color_handler));
 }
 
 AudioStreamView::~AudioStreamView ()
 {
-	undisplay_diskstream ();
-	delete canvas_group;
 }
 
 int
@@ -132,7 +104,6 @@ AudioStreamView::set_samples_per_unit (gdouble spp)
 
 int 
 AudioStreamView::set_amplitude_above_axis (gdouble app)
-
 {
 	RegionViewList::iterator i;
 
@@ -206,8 +177,6 @@ AudioStreamView::remove_region_view (Region *r)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_region_view), r));
 
-	StreamView::remove_region_view(r);
-	
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end();) {
 		list<CrossfadeView*>::iterator tmp;
 		
@@ -222,6 +191,8 @@ AudioStreamView::remove_region_view (Region *r)
 		
 		i = tmp;
 	}
+
+	StreamView::remove_region_view(r);
 }
 
 void

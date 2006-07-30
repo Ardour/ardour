@@ -196,7 +196,8 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	/* allocate conversion buffers */
 	_conversion_buffers[ButlerContext] = new char[AudioDiskstream::disk_io_frames() * 4];
 	_conversion_buffers[TransportContext] = new char[AudioDiskstream::disk_io_frames() * 4];
-	
+	AudioDiskstream::allocate_working_buffers();
+
 	/* default short fade = 15ms */
 
 	Crossfade::set_short_xfade_length ((jack_nframes_t) floor ((15.0 * frame_rate()) / 1000.0));

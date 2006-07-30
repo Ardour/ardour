@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2003 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id: diskstream.cc 567 2006-06-07 14:54:12Z trutkin $
 */
 
 #include <fstream>
@@ -23,6 +21,7 @@
 #include <unistd.h>
 #include <cmath>
 #include <cerrno>
+#include <cassert>
 #include <string>
 #include <climits>
 #include <fcntl.h>
@@ -57,10 +56,14 @@ using namespace PBD;
 
 sigc::signal<void,list<AudioFileSource*>*> AudioDiskstream::DeleteSources;
 
+size_t  AudioDiskstream::_working_buffers_size = 0;
+Sample* AudioDiskstream::_mixdown_buffer       = 0;
+gain_t* AudioDiskstream::_gain_buffer          = 0;
+char*   AudioDiskstream::_conversion_buffer    = 0;
+
 AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
 	: Diskstream(sess, name, flag)
 	, deprecated_io_node(NULL)
-	, _playlist(NULL)
 {
 	/* prevent any write sources from being created */
 
@@ -77,7 +80,6 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream:
 AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 	: Diskstream(sess, node)
 	, deprecated_io_node(NULL)
-	, _playlist(NULL)
 {
 	in_set_state = true;
 	init (Recordable);
@@ -178,25 +180,33 @@ AudioDiskstream::~AudioDiskstream ()
 {
 	Glib::Mutex::Lock lm (state_lock);
 
-	if (_playlist)
-		_playlist->unref ();
-
-	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan)
 		destroy_channel((*chan));
-	}
 	
 	channels.clear();
 }
 
 void
-AudioDiskstream::handle_input_change (IOChange change, void *src)
+AudioDiskstream::allocate_working_buffers()
 {
-	Glib::Mutex::Lock lm (state_lock);
+	assert(disk_io_frames() > 0);
 
-	if (!(input_change_pending & change)) {
-		input_change_pending = IOChange (input_change_pending|change);
-		_session.request_input_change_handling ();
-	}
+	_working_buffers_size = disk_io_frames();
+	_mixdown_buffer       = new Sample[_working_buffers_size];
+	_gain_buffer          = new gain_t[_working_buffers_size];
+	_conversion_buffer    = new char[_working_buffers_size * 4];
+}
+
+void
+AudioDiskstream::free_working_buffers()
+{
+	delete _mixdown_buffer;
+	delete _gain_buffer;
+	delete _conversion_buffer;
+	_working_buffers_size = 0;
+	_mixdown_buffer       = 0;
+	_gain_buffer          = 0;
+	_conversion_buffer    = 0;
 }
 
 void
@@ -312,40 +322,7 @@ AudioDiskstream::use_playlist (Playlist* playlist)
 {
 	assert(dynamic_cast<AudioPlaylist*>(playlist));
 
-	{
-		Glib::Mutex::Lock lm (state_lock);
-
-		if (playlist == _playlist) {
-			return 0;
-		}
-
-		plstate_connection.disconnect();
-		plmod_connection.disconnect ();
-		plgone_connection.disconnect ();
-
-		if (_playlist) {
-			_playlist->unref();
-		}
-			
-		_playlist = dynamic_cast<AudioPlaylist*>(playlist);
-		_playlist->ref();
-
-		if (!in_set_state && recordable()) {
-			reset_write_sources (false);
-		}
-		
-		plstate_connection = _playlist->StateChanged.connect (mem_fun (*this, &AudioDiskstream::playlist_changed));
-		plmod_connection = _playlist->Modified.connect (mem_fun (*this, &AudioDiskstream::playlist_modified));
-		plgone_connection = _playlist->GoingAway.connect (mem_fun (*this, &AudioDiskstream::playlist_deleted));
-	}
-
-	if (!overwrite_queued) {
-		_session.request_overwrite_buffer (this);
-		overwrite_queued = true;
-	}
-	
-	PlaylistChanged (); /* EMIT SIGNAL */
-	_session.set_dirty ();
+	Diskstream::use_playlist(playlist);
 
 	return 0;
 }
@@ -377,6 +354,8 @@ AudioDiskstream::use_new_playlist ()
 int
 AudioDiskstream::use_copy_playlist ()
 {
+	assert(audio_playlist());
+
 	if (destructive()) {
 		return 0;
 	}
@@ -391,26 +370,13 @@ AudioDiskstream::use_copy_playlist ()
 
 	newname = Playlist::bump_name (_playlist->name(), _session);
 	
-	if ((playlist  = new AudioPlaylist (*_playlist, newname)) != 0) {
+	if ((playlist  = new AudioPlaylist (*audio_playlist(), newname)) != 0) {
 		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);
 	} else { 
 		return -1;
 	}
 }
-
-
-void
-AudioDiskstream::playlist_deleted (Playlist* pl)
-{
-	/* this catches an ordering issue with session destruction. playlists 
-	   are destroyed before diskstreams. we have to invalidate any handles
-	   we have to the playlist.
-	*/
-
-	_playlist = 0;
-}
-
 
 void
 AudioDiskstream::setup_destructive_playlist ()
@@ -458,36 +424,6 @@ AudioDiskstream::use_destructive_playlist ()
 	}
 
 	/* the source list will never be reset for a destructive track */
-}
-
-void
-AudioDiskstream::set_io (IO& io)
-{
-	_io = &io;
-	set_align_style_from_io ();
-}
-
-void
-AudioDiskstream::non_realtime_set_speed ()
-{
-	if (_buffer_reallocation_required)
-	{
-		Glib::Mutex::Lock lm (state_lock);
-		allocate_temporary_buffers ();
-
-		_buffer_reallocation_required = false;
-	}
-
-	if (_seek_required) {
-		if (speed() != 1.0f || speed() != -1.0f) {
-			seek ((jack_nframes_t) (_session.transport_frame() * (double) speed()), true);
-		}
-		else {
-			seek (_session.transport_frame(), true);
-		}
-
-		_seek_required = false;
-	}
 }
 
 void
@@ -1054,9 +990,9 @@ AudioDiskstream::seek (jack_nframes_t frame, bool complete_refill)
 	file_frame = frame;
 
 	if (complete_refill) {
-		while ((ret = non_realtime_do_refill ()) > 0);
+		while ((ret = do_refill_with_alloc ()) > 0) ;
 	} else {
-		ret = non_realtime_do_refill ();
+		ret = do_refill_with_alloc ();
 	}
 
 	return ret;
@@ -1148,7 +1084,7 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 
 		this_read = min(cnt,this_read);
 
-		if (_playlist->read (buf+offset, mixdown_buffer, gain_buffer, workbuf, start, this_read, channel) != this_read) {
+		if (audio_playlist()->read (buf+offset, mixdown_buffer, gain_buffer, workbuf, start, this_read, channel) != this_read) {
 			error << string_compose(_("AudioDiskstream %1: cannot read %2 from playlist at frame %3"), _id, this_read, 
 					 start) << endmsg;
 			return -1;
@@ -1182,20 +1118,37 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 }
 
 int
-AudioDiskstream::do_refill (Sample* mixdown_buffer, float* gain_buffer, char * workbuf)
+AudioDiskstream::do_refill_with_alloc()
+{
+	Sample* mix_buf  = new Sample[disk_io_chunk_frames];
+	float*  gain_buf = new float[disk_io_chunk_frames];
+	char*   work_buf = new char[disk_io_chunk_frames * 4];
+
+	int ret = _do_refill(mix_buf, gain_buf, work_buf);
+	
+	delete [] mix_buf;
+	delete [] gain_buf;
+	delete [] work_buf;
+
+	return ret;
+}
+
+int
+AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, char * workbuf)
 {
 	int32_t ret = 0;
 	jack_nframes_t to_read;
 	RingBufferNPT<Sample>::rw_vector vector;
-	bool free_mixdown;
-	bool free_gain;
-	bool free_workbuf;
 	bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
 	jack_nframes_t total_space;
 	jack_nframes_t zero_fill;
 	uint32_t chan_n;
 	ChannelList::iterator i;
 	jack_nframes_t ts;
+
+	assert(mixdown_buffer);
+	assert(gain_buffer);
+	assert(workbuf);
 
 	channels.front().playback_buf->get_write_vector (&vector);
 	
@@ -1303,33 +1256,6 @@ AudioDiskstream::do_refill (Sample* mixdown_buffer, float* gain_buffer, char * w
 			zero_fill = 0;
 		}
 	}
-
-	/* Please note: the code to allocate buffers isn't run
-	   during normal butler thread operation. Its there
-	   for other times when we need to call do_refill()
-	   from somewhere other than the butler thread.
-	*/
-
-	if (mixdown_buffer == 0) {
-		mixdown_buffer = new Sample[disk_io_chunk_frames];
-		free_mixdown = true;
-	} else {
-		free_mixdown = false;
-	}
-
-	if (gain_buffer == 0) {
-		gain_buffer = new float[disk_io_chunk_frames];
-		free_gain = true;
-	} else {
-		free_gain = false;
-	}
-
-	if (workbuf == 0) {
-		workbuf = new char[disk_io_chunk_frames * 4];
-		free_workbuf = true;
-	} else {
-		free_workbuf = false;
-	}
 	
 	jack_nframes_t file_frame_tmp = 0;
 
@@ -1398,22 +1324,15 @@ AudioDiskstream::do_refill (Sample* mixdown_buffer, float* gain_buffer, char * w
 	file_frame = file_frame_tmp;
 
   out:
-	if (free_mixdown) {
-		delete [] mixdown_buffer;
-	}
-	if (free_gain) {
-		delete [] gain_buffer;
-	}
-	if (free_workbuf) {
-		delete [] workbuf;
-	}
 
 	return ret;
 }	
 
 int
-AudioDiskstream::do_flush (char * workbuf, bool force_flush)
+AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 {
+	char* workbuf = _session.conversion_buffer(context);
+
 	uint32_t to_write;
 	int32_t ret = 0;
 	RingBufferNPT<Sample>::rw_vector vector;
@@ -1570,7 +1489,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 	*/
 
 	while (more_work && !err) {
-		switch (do_flush ( _session.conversion_buffer(Session::TransportContext), true)) {
+		switch (do_flush (Session::TransportContext, true)) {
 		case 0:
 			more_work = false;
 			break;

@@ -60,7 +60,6 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 	canvas_rect->property_y1() = 0.0;
 	canvas_rect->property_x2() = 1000000.0;
 	canvas_rect->property_y2() = (double) tv.height;
-	canvas_rect->property_outline_color_rgba() = color_map[cAudioTrackOutline]; // FIXME
 	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
 

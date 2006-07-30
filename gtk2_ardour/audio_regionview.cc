@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 */
 
 #include <cmath>
+#include <cassert>
 #include <algorithm>
 
 #include <gtkmm.h>
@@ -68,20 +69,18 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 }
 
 void
-AudioRegionView::init (Gdk::Color& basic_color, bool wfw)
+AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 {
-    ArdourCanvas::Points shape;
+	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
+	// where order is important and where it isn't...
+	
+	RegionView::init(basic_color, wfd);
+
 	XMLNode *node;
 
-	editor = 0;
-	valid = true;
-	in_destructor = false;
 	_amplitude_above_axis = 1.0;
-	zero_line = 0;
-	wait_for_waves = wfw;
-	_height = 0;
-
-	_flags = 0;
+	zero_line             = 0;
+	_flags                = 0;
 
 	if ((node = _region.extra_xml ("GUI")) != 0) {
 		set_flags (node);
@@ -97,23 +96,6 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfw)
 	compute_colors (basic_color);
 
 	create_waves ();
-
-	name_highlight->set_data ("regionview", this);
-	name_text->set_data ("regionview", this);
-
-	//	shape = new ArdourCanvas::Points ();
-
-	/* an equilateral triangle */
-
-	shape.push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
-	shape.push_back (Gnome::Art::Point ((sync_mark_width - 1)/2, 1));
-	shape.push_back (Gnome::Art::Point (0, sync_mark_width - 1));
-	shape.push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
-
-	sync_mark =  new ArdourCanvas::Polygon (*group);
-	sync_mark->property_points() = shape;
-	sync_mark->property_fill_color_rgba() = fill_color;
-	sync_mark->hide();
 
 	fade_in_shape = new ArdourCanvas::Polygon (*group);
 	fade_in_shape->property_fill_color_rgba() = fade_color;
@@ -175,16 +157,12 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfw)
 
 	_region.StateChanged.connect (mem_fun(*this, &AudioRegionView::region_changed));
 
-	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
-	name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
 	fade_in_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
 	fade_in_handle->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
 	fade_out_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_event), fade_out_shape, this));
 	fade_out_handle->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_handle_event), fade_out_handle, this));
 
 	set_colors ();
-
-	ColorChanged.connect (mem_fun (*this, &AudioRegionView::color_handler));
 
 	/* XXX sync mark drag? */
 }
@@ -201,14 +179,6 @@ AudioRegionView::~AudioRegionView ()
 
 	/* all waveviews etc will be destroyed when the group is destroyed */
 
-	for (vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
-		delete *g;
-	}
-
-	if (editor) {
-		delete editor;
-	}
-
 	if (gain_line) {
 		delete gain_line;
 	}
@@ -217,29 +187,8 @@ AudioRegionView::~AudioRegionView ()
 ARDOUR::AudioRegion&
 AudioRegionView::audio_region() const
 {
-	// Guaranteed to succeed
+	// "Guaranteed" to succeed...
 	return dynamic_cast<AudioRegion&>(_region);
-}
-
-
-gint
-AudioRegionView::_lock_toggle (ArdourCanvas::Item* item, GdkEvent* ev, void* arg)
-{
-	switch (ev->type) {
-	case GDK_BUTTON_RELEASE:
-		static_cast<AudioRegionView*>(arg)->lock_toggle ();
-		return TRUE;
-		break;
-	default:
-		break;
-	} 
-	return FALSE;
-}
-
-void
-AudioRegionView::lock_toggle ()
-{
-	_region.set_locked (!_region.locked());
 }
 
 void
@@ -247,28 +196,8 @@ AudioRegionView::region_changed (Change what_changed)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &AudioRegionView::region_changed), what_changed));
 
-	if (what_changed & BoundsChanged) {
-		region_resized (what_changed);
-		region_sync_changed ();
-	}
-	if (what_changed & Region::MuteChanged) {
-		region_muted ();
-	}
-	if (what_changed & Region::OpacityChanged) {
-		region_opacity ();
-	}
-	if (what_changed & ARDOUR::NameChanged) {
-		region_renamed ();
-	}
-	if (what_changed & Region::SyncOffsetChanged) {
-		region_sync_changed ();
-	}
-	if (what_changed & Region::LayerChanged) {
-		region_layered ();
-	}
-	if (what_changed & Region::LockChanged) {
-		region_locked ();
-	}
+	RegionView::region_changed(what_changed);
+
 	if (what_changed & AudioRegion::ScaleAmplitudeChanged) {
 		region_scale_amplitude_changed ();
 	}
@@ -366,36 +295,17 @@ AudioRegionView::region_scale_amplitude_changed ()
 }
 
 void
-AudioRegionView::region_locked ()
-{
-	/* name will show locked status */
-	region_renamed ();
-}
-
-void
 AudioRegionView::region_resized (Change what_changed)
 {
-	double unit_length;
-
-	if (what_changed & ARDOUR::PositionChanged) {
-		set_position (_region.position(), 0);
-	}
+	RegionView::region_resized(what_changed);
 
 	if (what_changed & Change (StartChanged|LengthChanged)) {
 
-		set_duration (_region.length(), 0);
-
-		unit_length = _region.length() / samples_per_unit;
-		
-		reset_width_dependent_items (unit_length);
-		
 	 	for (uint32_t n = 0; n < waves.size(); ++n) {
  			waves[n]->property_region_start() = _region.start();
- 		}
+		}
 		
  		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-
- 			(*i)->set_duration (unit_length);
 
  			for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
 				(*w)->property_region_start() = _region.start();
@@ -407,8 +317,8 @@ AudioRegionView::region_resized (Change what_changed)
 void
 AudioRegionView::reset_width_dependent_items (double pixel_width)
 {
-	TimeAxisViewItem::reset_width_dependent_items (pixel_width);
-	_pixel_width = pixel_width;
+	RegionView::reset_width_dependent_items(pixel_width);
+	assert(_pixel_width == pixel_width);
 
 	if (zero_line) {
 		zero_line->property_x2() = pixel_width - 1.0;
@@ -433,17 +343,9 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 }
 
 void
-AudioRegionView::region_layered ()
-{
-	RouteTimeAxisView *atv = dynamic_cast<RouteTimeAxisView*> (&get_time_axis_view());
-	atv->view()->region_layered (this);
-}
-	
-void
 AudioRegionView::region_muted ()
 {
-	set_frame_color ();
-	region_renamed ();
+	RegionView::region_muted();
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (_region.muted()) {
@@ -460,6 +362,7 @@ AudioRegionView::set_height (gdouble height)
 {
 	uint32_t wcnt = waves.size();
 
+	// FIXME: ick
 	TimeAxisViewItem::set_height (height - 2);
 	
 	_height = height;
@@ -695,36 +598,16 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 void
 AudioRegionView::set_samples_per_unit (gdouble spu)
 {
-	TimeAxisViewItem::set_samples_per_unit (spu);
+	RegionView::set_samples_per_unit (spu);
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		waves[n]->property_samples_per_unit() = spu;
-	}
-
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_samples_per_unit (spu);
-		(*i)->set_duration (_region.length() / samples_per_unit);
 	}
 
 	if (gain_line) {
 		gain_line->reset ();
 	}
 	reset_fade_shapes ();
-	region_sync_changed ();
-}
-
-bool
-AudioRegionView::set_duration (jack_nframes_t frames, void *src)
-{
-	if (!TimeAxisViewItem::set_duration (frames, src)) {
-		return false;
-	}
-	
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_duration (_region.length() / samples_per_unit);
-	}
-
-	return true;
 }
 
 void
@@ -738,7 +621,8 @@ AudioRegionView::set_amplitude_above_axis (gdouble spp)
 void
 AudioRegionView::compute_colors (Gdk::Color& basic_color)
 {
-	TimeAxisViewItem::compute_colors (basic_color);
+	RegionView::compute_colors(basic_color);
+	
 	uint32_t r, g, b, a;
 
 	/* gain color computed in envelope_active_changed() */
@@ -750,14 +634,10 @@ AudioRegionView::compute_colors (Gdk::Color& basic_color)
 void
 AudioRegionView::set_colors ()
 {
-	TimeAxisViewItem::set_colors ();
+	RegionView::set_colors();
 	
 	if (gain_line) {
 		gain_line->set_line_color (audio_region().envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
-	}
-
-	if (sync_mark) {
-		sync_mark->property_fill_color_rgba() = fill_color;
 	}
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
@@ -767,18 +647,6 @@ AudioRegionView::set_colors ()
 			waves[n]->property_wave_color() = color_map[cWaveForm];
 		}
 	}
-}
-
-void
-AudioRegionView::set_frame_color ()
-{
-	if (_region.opaque()) {
-		fill_opacity = 180;
-	} else {
-		fill_opacity = 100;
-	}
-
-	TimeAxisViewItem::set_frame_color ();
 }
 
 void
@@ -793,89 +661,6 @@ AudioRegionView::show_region_editor ()
 
 	editor->show_all ();
 	editor->get_window()->raise();
-}
-
-void
-AudioRegionView::hide_region_editor()
-{
-	if (editor) {
-		editor->hide_all ();
-	}
-}
-
-void
-AudioRegionView::region_renamed ()
-{
-	string str;
-
-	if (_region.locked()) {
-		str += '>';
-		str += _region.name();
-		str += '<';
-	} else {
-		str = _region.name();
-	}
-
-	if (audio_region().speed_mismatch (trackview.session().frame_rate())) {
-		str = string ("*") + str;
-	}
-
-	if (_region.muted()) {
-		str = string ("!") + str;
-	}
-
-	set_item_name (str, this);
-	set_name_text (str);
-}
-
-void
-AudioRegionView::region_sync_changed ()
-{
-	if (sync_mark == 0) {
-		return;
-	}
-
-	int sync_dir;
-	jack_nframes_t sync_offset;
-
-	sync_offset = _region.sync_offset (sync_dir);
-
-	/* this has to handle both a genuine change of position, a change of samples_per_unit,
-	   and a change in the bounds of the _region.
-	 */
-
-	if (sync_offset == 0) {
-
-		/* no sync mark - its the start of the region */
-
-		sync_mark->hide();
-
-	} else {
-
-		if ((sync_dir < 0) || ((sync_dir > 0) && (sync_offset > _region.length()))) { 
-
-			/* no sync mark - its out of the bounds of the region */
-
-			sync_mark->hide();
-
-		} else {
-
-			/* lets do it */
-
-			Points points;
-			
-			//points = sync_mark->property_points().get_value();
-			
-			double offset = sync_offset / samples_per_unit;
-			points.push_back (Gnome::Art::Point (offset - ((sync_mark_width-1)/2), 1));
-			points.push_back (Gnome::Art::Point (offset + ((sync_mark_width-1)/2), 1));
-			points.push_back (Gnome::Art::Point (offset, sync_mark_width - 1));
-			points.push_back (Gnome::Art::Point (offset - ((sync_mark_width-1)/2), 1));	
-			sync_mark->property_points().set_value (points);
-			sync_mark->show();
-
-		}
-	}
 }
 
 void
@@ -954,8 +739,8 @@ AudioRegionView::create_waves ()
 		
 		wave_caches.push_back (WaveView::create_cache ());
 
-		if (wait_for_waves) {
-			if (audio_region().source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), peaks_ready_connection)) {
+		if (wait_for_data) {
+			if (audio_region().source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				create_one_wave (n, true);
 			} else {
 				create_zero_line = false;
@@ -1056,7 +841,7 @@ AudioRegionView::peaks_ready_handler (uint32_t which)
 
 	if (!waves.empty()) {
 		/* all waves created, don't hook into peaks ready anymore */
-		peaks_ready_connection.disconnect ();		
+		data_ready_connection.disconnect ();		
 	}
 }
 
@@ -1184,22 +969,6 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 	}
 }
 
-void
-AudioRegionView::move (double x_delta, double y_delta)
-{
-	if (_region.locked() || (x_delta == 0 && y_delta == 0)) {
-		return;
-	}
-
-	get_canvas_group()->move (x_delta, y_delta);
-
-	/* note: ghosts never leave their tracks so y_delta for them is always zero */
-
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->group->move (x_delta, 0.0);
-	}
-}
-
 GhostRegion*
 AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 {
@@ -1241,21 +1010,6 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 	ghost->GoingAway.connect (mem_fun(*this, &AudioRegionView::remove_ghost));
 
 	return ghost;
-}
-
-void
-AudioRegionView::remove_ghost (GhostRegion* ghost)
-{
-	if (in_destructor) {
-		return;
-	}
-
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		if (*i == ghost) {
-			ghosts.erase (i);
-			break;
-		}
-	}
 }
 
 void

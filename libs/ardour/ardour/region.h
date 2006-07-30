@@ -145,6 +145,8 @@ class Region : public Stateful, public StateManager
 	bool overlap_equivalent (const Region&) const;
 	bool region_list_equivalent (const Region&) const;
 	virtual bool source_equivalent (const Region&) const = 0;
+	
+	virtual bool speed_mismatch (float) const = 0;
 
 	/*virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
 					float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 

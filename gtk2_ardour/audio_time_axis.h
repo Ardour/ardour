@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@
 #include <list>
 
 #include <ardour/types.h>
-#include <ardour/region.h>
 
 #include "ardour_dialog.h"
 #include "route_ui.h"
@@ -62,7 +61,6 @@ class AudioRegionView;
 class AutomationLine;
 class AutomationGainLine;
 class AutomationPanLine;
-class RedirectAutomationLine;
 class TimeSelection;
 class AutomationTimeAxisView;
 
@@ -78,11 +76,10 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void set_show_waveforms_recording (bool yn);
 	void show_all_xfades ();
 	void hide_all_xfades ();
-	void set_selected_regionviews (RegionSelection&);
 	void hide_dependent_views (TimeAxisViewItem&);
 	void reveal_dependent_views (TimeAxisViewItem&);
 		
-	/* overridden from parent to store display state */
+	/* Overridden from parent to store display state */
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
 	
@@ -95,83 +92,16 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	
 	void route_active_changed ();
 
-	AutomationTimeAxisView *gain_track;
-	AutomationTimeAxisView *pan_track;
-
-	void update_automation_view (ARDOUR::AutomationType);
-	void reset_redirect_automation_curves ();
-
-	// variables to get the context menu
-	// automation buttons correctly initialized
-	bool show_gain_automation;
-	bool show_pan_automation;
-
-	// FIXME?
-	void redirects_changed (void *);
-
-	void build_display_menu ();
-
-	Gtk::CheckMenuItem* waveform_item;
-	Gtk::RadioMenuItem* traditional_item;
-	Gtk::RadioMenuItem* rectified_item;
+	void build_automation_action_menu ();
+	void append_extra_display_menu_items ();
 	
 	void toggle_show_waveforms ();
-
 	void set_waveform_shape (WaveformShape);
 	void toggle_waveforms ();
 
-	/* automation stuff */
-	
-	Gtk::Menu*          automation_action_menu;
-	Gtk::CheckMenuItem* gain_automation_item;
-	Gtk::CheckMenuItem* pan_automation_item;
-
-	void automation_click ();
-	void clear_automation ();
-	void hide_all_automation ();
 	void show_all_automation ();
 	void show_existing_automation ();
-
-	struct RedirectAutomationNode {
-	    uint32_t what;
-	    Gtk::CheckMenuItem* menu_item;
-	    AutomationTimeAxisView* view;
-	    AudioTimeAxisView& parent;
-
-	    RedirectAutomationNode (uint32_t w, Gtk::CheckMenuItem* mitem, AudioTimeAxisView& p)
-		    : what (w), menu_item (mitem), view (0), parent (p) {}
-
-	    ~RedirectAutomationNode ();
-	};
-
-	struct RedirectAutomationInfo {
-	    boost::shared_ptr<ARDOUR::Redirect> redirect;
-	    bool valid;
-	    Gtk::Menu* menu;
-	    vector<RedirectAutomationNode*> lines;
-
-	    RedirectAutomationInfo (boost::shared_ptr<ARDOUR::Redirect> r) 
-		    : redirect (r), valid (true) {}
-
-	    ~RedirectAutomationInfo ();
-	};
-
-	list<RedirectAutomationInfo*> redirect_automation;
-	RedirectAutomationNode* find_redirect_automation_node (boost::shared_ptr<ARDOUR::Redirect> redirect, uint32_t what);
-	
-	Gtk::Menu subplugin_menu;
-	void add_redirect_to_subplugin_menu (boost::shared_ptr<ARDOUR::Redirect>);
-
-	void remove_ran (RedirectAutomationNode* ran);
-
-	void redirect_menu_item_toggled (AudioTimeAxisView::RedirectAutomationInfo*,
-					 AudioTimeAxisView::RedirectAutomationNode*);
-	void redirect_automation_track_hidden (RedirectAutomationNode*, boost::shared_ptr<ARDOUR::Redirect>);
-	
-	vector<RedirectAutomationLine*> redirect_automation_curves;
-	RedirectAutomationLine *find_redirect_automation_curve (boost::shared_ptr<ARDOUR::Redirect>,uint32_t);
-	void add_redirect_automation_curve (boost::shared_ptr<ARDOUR::Redirect>, uint32_t);
-	void add_existing_redirect_automation_curves (boost::shared_ptr<ARDOUR::Redirect>);
+	void hide_all_automation ();
 
 	void add_gain_automation_child ();
 	void add_pan_automation_child ();
@@ -185,8 +115,18 @@ class AudioTimeAxisView : public RouteTimeAxisView
 
 	void update_pans ();
 
-	void region_view_added (RegionView*);
-	void add_ghost_to_redirect (RegionView*, AutomationTimeAxisView*);
+	AutomationTimeAxisView* gain_track;
+	AutomationTimeAxisView* pan_track;
+
+	// Set from XML so context menu automation buttons can be correctly initialized
+	bool show_gain_automation;
+	bool show_pan_automation;
+	
+	Gtk::CheckMenuItem* waveform_item;
+	Gtk::RadioMenuItem* traditional_item;
+	Gtk::RadioMenuItem* rectified_item;
+	Gtk::CheckMenuItem* gain_automation_item;
+	Gtk::CheckMenuItem* pan_automation_item;
 };
 
 #endif /* __ardour_audio_time_axis_h__ */

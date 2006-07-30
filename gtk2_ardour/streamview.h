@@ -98,35 +98,37 @@ public:
 protected:
 	StreamView (RouteTimeAxisView&);
 	
-//private:
-	void update_rec_box ();
-	void transport_changed();
-	void rec_enable_changed(void*  src = 0);
-	void sess_rec_enable_changed();
+//private: (FIXME?)
+
+	void         transport_changed();
+	void         rec_enable_changed(void*  src = 0);
+	void         sess_rec_enable_changed();
 	virtual void setup_rec_box () = 0;
-	void rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt, ARDOUR::Source* src); 
+	void         update_rec_box ();
 	virtual void update_rec_regions () = 0;
 	
 	virtual void add_region_view_internal (ARDOUR::Region*, bool wait_for_waves) = 0;
 	virtual void remove_region_view (ARDOUR::Region* );
-	void remove_rec_region (ARDOUR::Region*);
+	void         remove_rec_region (ARDOUR::Region*);
 
-	void display_diskstream (ARDOUR::Diskstream* );
+	void         display_diskstream (ARDOUR::Diskstream* );
 	virtual void undisplay_diskstream ();
 	virtual void redisplay_diskstream () = 0;
-	void diskstream_changed (void* );
-	void playlist_state_changed (ARDOUR::Change);
+	void         diskstream_changed (void* );
+	
+	void         playlist_state_changed (ARDOUR::Change);
 	virtual void playlist_changed (ARDOUR::Diskstream* );
 	virtual void playlist_modified ();
+	
+	virtual void color_handler (ColorID, uint32_t) = 0;
 
 
-	RouteTimeAxisView& _trackview;
-
+	RouteTimeAxisView&        _trackview;
 	ArdourCanvas::Group*      canvas_group;
 	ArdourCanvas::SimpleRect* canvas_rect; /* frame around the whole thing */
 
 	typedef list<RegionView* > RegionViewList;
-	RegionViewList region_views;
+	RegionViewList  region_views;
 
 	double _samples_per_unit;
 
@@ -140,8 +142,6 @@ protected:
 	/* XXX why are these different? */
 	Gdk::Color region_color;
 	uint32_t   stream_base_color;
-
-	virtual void color_handler (ColorID, uint32_t) = 0;
 
 	vector<sigc::connection> playlist_connections;
 	sigc::connection         playlist_change_connection;

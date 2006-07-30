@@ -170,11 +170,6 @@ Session::butler_thread_work ()
 	bool disk_work_outstanding = false;
 	DiskstreamList::iterator i;
 
-	butler_mixdown_buffer = new Sample[AudioDiskstream::disk_io_frames()];
-	butler_gain_buffer = new gain_t[AudioDiskstream::disk_io_frames()];
-	// this buffer is used for temp conversion purposes in filesources
-	char * conv_buffer = conversion_buffer(ButlerContext);
-	
 	while (true) {
 		pfd[0].fd = butler_request_pipe[0];
 		pfd[0].events = POLLIN|POLLERR|POLLHUP;
@@ -256,16 +251,15 @@ Session::butler_thread_work ()
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 		
 		for (i = diskstreams.begin(); !transport_work_requested() && butler_should_run && i != diskstreams.end(); ++i) {
-			// cerr << "rah fondr " << (*i)->io()->name () << endl;
-			AudioDiskstream* ads = dynamic_cast<AudioDiskstream*>(*i);
-			if (!ads) continue; // FIXME
 
-			switch (ads->do_refill (butler_mixdown_buffer, butler_gain_buffer, conv_buffer)) {
+			Diskstream* const ds = *i;
+
+			switch (ds->do_refill ()) {
 			case 0:
-				bytes += ads->read_data_count();
+				bytes += ds->read_data_count();
 				break;
 			case 1:
-				bytes += ads->read_data_count();
+				bytes += ds->read_data_count();
 				disk_work_outstanding = true;
 				break;
 				
@@ -302,7 +296,7 @@ Session::butler_thread_work ()
 		for (i = diskstreams.begin(); !transport_work_requested() && butler_should_run && i != diskstreams.end(); ++i) {
 			// cerr << "write behind for " << (*i)->name () << endl;
 			
-			switch ((*i)->do_flush (conv_buffer)) {
+			switch ((*i)->do_flush (Session::ButlerContext)) {
 			case 0:
 				bytes += (*i)->write_data_count();
 				break;

@@ -59,10 +59,9 @@ class AudioStreamView : public StreamView
 	void set_waveform_shape (WaveformShape);
 
 	int set_height (gdouble h);
-
 	int set_samples_per_unit (gdouble spp);
 
-	int set_amplitude_above_axis (gdouble app);
+	int     set_amplitude_above_axis (gdouble app);
 	gdouble get_amplitude_above_axis () { return _amplitude_above_axis; }
 
 	void set_show_waveforms (bool yn);
@@ -90,17 +89,17 @@ class AudioStreamView : public StreamView
 	void playlist_modified ();
 	void playlist_changed (ARDOUR::Diskstream *ds);
 
-	bool crossfades_visible;
 	void add_crossfade (ARDOUR::Crossfade*);
 	void remove_crossfade (ARDOUR::Crossfade*);
 
 	void color_handler (ColorID id, uint32_t val);
 	
 
+	double _amplitude_above_axis;
+	
 	typedef list<CrossfadeView*> CrossfadeViewList;
 	CrossfadeViewList crossfade_views;
-
-	double _amplitude_above_axis;
+	bool              crossfades_visible;
 
 	list<sigc::connection>     peak_ready_connections;
 	jack_nframes_t             last_rec_peak_frame;

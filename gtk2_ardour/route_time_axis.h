@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@
 #include <list>
 
 #include <ardour/types.h>
-#include <ardour/region.h>
 
 #include "ardour_dialog.h"
 #include "route_ui.h"
@@ -44,6 +43,7 @@
 
 namespace ARDOUR {
 	class Session;
+	class Region;
 	class Diskstream;
 	class RouteGroup;
 	class Redirect;
@@ -57,12 +57,14 @@ class RegionView;
 class StreamView;
 class Selection;
 class Selectable;
+class AutomationTimeAxisView;
 class AutomationLine;
+class RedirectAutomationLine;
 class TimeSelection;
 
 class RouteTimeAxisView : public RouteUI, public TimeAxisView
 {
-  public:
+public:
  	RouteTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
  	virtual ~RouteTimeAxisView ();
 
@@ -74,51 +76,57 @@ class RouteTimeAxisView : public RouteUI, public TimeAxisView
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);
 	void set_selected_points (PointSelection&);
+	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (jack_nframes_t start, jack_nframes_t end, double top, double bot, list<Selectable *>&);
 	void get_inverted_selectables (Selection&, list<Selectable*>&);
 		
 	ARDOUR::Region* find_next_region (jack_nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
 
-	string name() const;
-
-	ARDOUR::RouteGroup* edit_group() const;
-
-	void build_playlist_menu (Gtk::Menu *);
-	ARDOUR::Playlist* playlist() const;
-
-	StreamView* view() { return _view; }
-
-	/* editing operations */
-	
+	/* Editing operations */
 	bool cut_copy_clear (Selection&, Editing::CutCopyOp);
 	bool paste (jack_nframes_t, float times, Selection&, size_t nth);
 
 	list<TimeAxisView*> get_child_list();
 
-	/* the editor calls these when mapping an operation across multiple tracks */
-
+	/* The editor calls these when mapping an operation across multiple tracks */
 	void use_new_playlist (bool prompt);
 	void use_copy_playlist (bool prompt);
 	void clear_playlist ();
+	
+	void build_playlist_menu (Gtk::Menu *);
+	
+	string              name() const;
+	StreamView*         view() const { return _view; }
+	ARDOUR::RouteGroup* edit_group() const;
+	ARDOUR::Playlist*   playlist() const;
 
-  //private: (FIXME)
+protected:
 	friend class StreamView;
 	
-	StreamView *_view;
+	struct RedirectAutomationNode {
+	    uint32_t                what;
+	    Gtk::CheckMenuItem*     menu_item;
+	    AutomationTimeAxisView* view;
+	    RouteTimeAxisView&      parent;
 
-	ArdourCanvas::Canvas& parent_canvas;
+	    RedirectAutomationNode (uint32_t w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
+		    : what (w), menu_item (mitem), view (0), parent (p) {}
 
-	bool         no_redraw;
-  
-	Gtk::HBox   other_button_hbox;
-	Gtk::Table  button_table;
-	Gtk::Button redirect_button;
-	Gtk::Button edit_group_button;
-	Gtk::Button playlist_button;
-	Gtk::Button size_button;
-	Gtk::Button automation_button;
-	Gtk::Button hide_button;
-	Gtk::Button visual_button;
+	    ~RedirectAutomationNode ();
+	};
+
+	struct RedirectAutomationInfo {
+	    boost::shared_ptr<ARDOUR::Redirect> redirect;
+	    bool                                valid;
+	    Gtk::Menu*                          menu;
+	    vector<RedirectAutomationNode*>     lines;
+
+	    RedirectAutomationInfo (boost::shared_ptr<ARDOUR::Redirect> r) 
+		    : redirect (r), valid (true), menu (0) {}
+
+	    ~RedirectAutomationInfo ();
+	};
+	
 
 	void diskstream_changed (void *src);
 	void update_diskstream_display ();
@@ -133,11 +141,30 @@ class RouteTimeAxisView : public RouteUI, public TimeAxisView
 	void redirect_relist ();
 	void redirect_row_selected (gint row, gint col, GdkEvent *ev);
 	void add_to_redirect_display (ARDOUR::Redirect *);
-	//void redirects_changed (void *);
+	void redirects_changed (void *);
+	
+	void add_redirect_to_subplugin_menu (boost::shared_ptr<ARDOUR::Redirect>);
+	void remove_ran (RedirectAutomationNode* ran);
 
-	sigc::connection modified_connection;
-	sigc::connection state_changed_connection;
+	void redirect_menu_item_toggled (RouteTimeAxisView::RedirectAutomationInfo*,
+	                                 RouteTimeAxisView::RedirectAutomationNode*);
+	
+	void redirect_automation_track_hidden (RedirectAutomationNode*,
+	                                       boost::shared_ptr<ARDOUR::Redirect>);
 
+	RedirectAutomationNode*
+	find_redirect_automation_node (boost::shared_ptr<ARDOUR::Redirect> r, uint32_t);
+	
+	RedirectAutomationLine*
+	find_redirect_automation_curve (boost::shared_ptr<ARDOUR::Redirect> r, uint32_t);
+
+	void add_redirect_automation_curve (boost::shared_ptr<ARDOUR::Redirect> r, uint32_t);
+	void add_existing_redirect_automation_curves (boost::shared_ptr<ARDOUR::Redirect>);
+	
+	void reset_redirect_automation_curves ();
+
+	void update_automation_view (ARDOUR::AutomationType);
+	
 	void take_name_changed (void *);
 	void route_name_changed (void *);
 	void name_entry_changed ();
@@ -145,9 +172,7 @@ class RouteTimeAxisView : public RouteUI, public TimeAxisView
 	void on_area_realize ();
 
 	virtual void label_view ();
-
-	Gtk::Menu edit_group_menu;
-
+	
 	void add_edit_group_menu_item (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
 	void set_edit_group_from_menu (ARDOUR::RouteGroup *);
 
@@ -155,35 +180,27 @@ class RouteTimeAxisView : public RouteUI, public TimeAxisView
 
 	void select_track_color();
 	
-	virtual void build_display_menu () = 0;
-
-	Gtk::RadioMenuItem* align_existing_item;
-	Gtk::RadioMenuItem* align_capture_item;
+	virtual void build_automation_action_menu ();
+	virtual void append_extra_display_menu_items () {}
+	void         build_display_menu ();
 	
 	void align_style_changed ();
 	void set_align_style (ARDOUR::AlignStyle);
-
-	Gtk::Menu     *playlist_menu;
-	Gtk::Menu     *playlist_action_menu;
-	Gtk::MenuItem *playlist_item;
 	
-	/* playlist */
-
 	virtual void set_playlist (ARDOUR::Playlist *);
-	void playlist_click ();
-	void show_playlist_selector ();
-
-	void playlist_changed ();
-	void playlist_state_changed (ARDOUR::Change);
-	void playlist_modified ();
+	void         playlist_click ();
+	void         show_playlist_selector ();
+	void         playlist_changed ();
+	void         playlist_state_changed (ARDOUR::Change);
+	void         playlist_modified ();
 
 	void add_playlist_to_playlist_menu (ARDOUR::Playlist*);
 	void rename_current_playlist ();
 	
-	Gtk::Menu* automation_action_menu;
-	void automation_click ();
-
-	ArdourCanvas::SimpleRect *timestretch_rect;
+	void         automation_click ();
+	virtual void show_all_automation ();
+	virtual void show_existing_automation ();
+	virtual void hide_all_automation ();
 
 	void timestretch (jack_nframes_t start, jack_nframes_t end);
 
@@ -198,7 +215,40 @@ class RouteTimeAxisView : public RouteUI, public TimeAxisView
 	void color_handler (ColorID, uint32_t);
 	bool select_me (GdkEventButton*);
 	
-	virtual void region_view_added (RegionView*) = 0;
+	void region_view_added (RegionView*);
+	void add_ghost_to_redirect (RegionView*, AutomationTimeAxisView*);
+	
+	
+	StreamView*           _view;
+	ArdourCanvas::Canvas& parent_canvas;
+	bool                  no_redraw;
+  
+	Gtk::HBox   other_button_hbox;
+	Gtk::Table  button_table;
+	Gtk::Button redirect_button;
+	Gtk::Button edit_group_button;
+	Gtk::Button playlist_button;
+	Gtk::Button size_button;
+	Gtk::Button automation_button;
+	Gtk::Button hide_button;
+	Gtk::Button visual_button;
+	
+	Gtk::Menu           subplugin_menu;
+	Gtk::Menu*          automation_action_menu;
+	Gtk::Menu           edit_group_menu;
+	Gtk::RadioMenuItem* align_existing_item;
+	Gtk::RadioMenuItem* align_capture_item;
+	Gtk::Menu*          playlist_menu;
+	Gtk::Menu*          playlist_action_menu;
+	Gtk::MenuItem*      playlist_item;
+
+	ArdourCanvas::SimpleRect* timestretch_rect;
+	
+	list<RedirectAutomationInfo*>   redirect_automation;
+	vector<RedirectAutomationLine*> redirect_automation_curves;
+
+	sigc::connection modified_connection;
+	sigc::connection state_changed_connection;
 };
 
 #endif /* __ardour_route_time_axis_h__ */

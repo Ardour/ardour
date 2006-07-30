@@ -63,53 +63,9 @@ TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTime
 void
 TapeAudioRegionView::init (Gdk::Color& basic_color, bool wfw)
 {
-	XMLNode *node;
-
-	editor = 0;
-	valid = true;
-	in_destructor = false;
-	_amplitude_above_axis = 1.0;
-	zero_line = 0;
-	wait_for_waves = wfw;
-	_height = 0;
-
-	_flags = 0;
-
-	if ((node = _region.extra_xml ("GUI")) != 0) {
-		set_flags (node);
-	} else {
-		_flags = WaveformVisible;
-		store_flags ();
-	}
-
-	fade_in_handle = 0;
-	fade_out_handle = 0;
-	gain_line = 0;
-	sync_mark = 0;
-
-	compute_colors (basic_color);
-
-	create_waves ();
-
-	name_highlight->set_data ("regionview", this);
-
-	reset_width_dependent_items ((double) _region.length() / samples_per_unit);
-
-	set_height (trackview.height);
-
-	region_muted ();
-	region_resized (BoundsChanged);
-	set_waveview_data_src();
-	region_locked ();
-
-	/* no events, no state changes */
-
-	set_colors ();
-
-	// ColorChanged.connect (mem_fun (*this, &AudioRegionView::color_handler));
+	AudioRegionView::init(basic_color, wfw);
 
 	/* every time the wave data changes and peaks are ready, redraw */
-
 	
 	for (uint32_t n = 0; n < audio_region().n_channels(); ++n) {
 		audio_region().source(n).PeaksReady.connect (bind (mem_fun(*this, &TapeAudioRegionView::update), n));

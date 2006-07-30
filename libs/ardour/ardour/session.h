@@ -938,7 +938,7 @@ class Session : public sigc::trackable, public Stateful
 	/* buffers for gain and pan */
 
 	gain_t* gain_automation_buffer () const { return _gain_automation_buffer; }
-	pan_t** pan_automation_buffer() const { return _pan_automation_buffer; }
+	pan_t** pan_automation_buffer () const  { return _pan_automation_buffer; }
 
 	/* buffers for conversion */
 	enum RunContext {

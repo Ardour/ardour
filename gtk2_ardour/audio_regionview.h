@@ -57,20 +57,14 @@ class AudioRegionView : public RegionView
 
 	~AudioRegionView ();
 	
-	virtual void init (Gdk::Color& base_color, bool wait_for_waves);
+	virtual void init (Gdk::Color& base_color, bool wait_for_data = false);
 	
 	ARDOUR::AudioRegion& audio_region() const;
     
-    bool is_valid() const { return valid; }
-    void set_valid (bool yn) { valid = yn; }
-
     void set_height (double);
     void set_samples_per_unit (double);
-    bool set_duration (jack_nframes_t, void*);
 
     void set_amplitude_above_axis (gdouble spp);
-
-    void move (double xdelta, double ydelta);
 
     void temporarily_hide_envelope (); ///< Dangerous!
     void unhide_envelope ();           ///< Dangerous!
@@ -80,11 +74,10 @@ class AudioRegionView : public RegionView
     void set_waveform_shape (WaveformShape);
 
     bool waveform_rectified() const { return _flags & WaveformRectified; }
-    bool waveform_visible() const { return _flags & WaveformVisible; }
-    bool envelope_visible() const { return _flags & EnvelopeVisible; }
+    bool waveform_visible()   const { return _flags & WaveformVisible; }
+    bool envelope_visible()   const { return _flags & EnvelopeVisible; }
     
     void show_region_editor ();
-    void hide_region_editor();
 
     void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
     void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
@@ -95,7 +88,6 @@ class AudioRegionView : public RegionView
     void envelope_active_changed ();
 
     GhostRegion* add_ghost (AutomationTimeAxisView&);
-    void remove_ghost (GhostRegion*);
 
     void reset_fade_in_shape_width (jack_nframes_t);
     void reset_fade_out_shape_width (jack_nframes_t);
@@ -113,11 +105,11 @@ class AudioRegionView : public RegionView
     */
     
     AudioRegionView (ArdourCanvas::Group *, 
-		     RouteTimeAxisView&,
-		     ARDOUR::AudioRegion&,
-		     double initial_samples_per_unit,
-		     Gdk::Color& basic_color,
-		     TimeAxisViewItem::Visibility);
+		             RouteTimeAxisView&,
+		             ARDOUR::AudioRegion&,
+		             double      samples_per_unit,
+		             Gdk::Color& basic_color,
+		             TimeAxisViewItem::Visibility);
     
     enum Flags {
 	    EnvelopeVisible = 0x1,
@@ -125,32 +117,22 @@ class AudioRegionView : public RegionView
 	    WaveformRectified = 0x8
     };
 
-    vector<ArdourCanvas::WaveView *> waves; ///< waveviews 
+    vector<ArdourCanvas::WaveView *> waves;
     vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
-    ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position 
-    ArdourCanvas::Text* no_wave_msg; ///< text 
-    ArdourCanvas::SimpleLine* zero_line; ///< simpleline 
-    ArdourCanvas::Polygon* fade_in_shape; ///< polygon 
-    ArdourCanvas::Polygon* fade_out_shape; ///< polygon 
-    ArdourCanvas::SimpleRect* fade_in_handle; ///< simplerect 
-    ArdourCanvas::SimpleRect* fade_out_handle; ///< simplerect 
+    ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position 
+    ArdourCanvas::SimpleLine*        zero_line;
+    ArdourCanvas::Polygon*           fade_in_shape;
+    ArdourCanvas::Polygon*           fade_out_shape;
+    ArdourCanvas::SimpleRect*        fade_in_handle;
+    ArdourCanvas::SimpleRect*        fade_out_handle;
     
     AudioRegionGainLine * gain_line;
-    AudioRegionEditor   * editor;
 
-    vector<ControlPoint *> control_points;
     double _amplitude_above_axis;
-    double current_visible_sync_position;
 
     uint32_t _flags;
     uint32_t fade_color;
-    bool     valid; /* see StreamView::redisplay_diskstream() */
-    double _pixel_width;
-    double _height;
-    bool    in_destructor;
-    bool    wait_for_waves;
-    sigc::connection peaks_ready_connection;
-
+    
     void reset_fade_shapes ();
     void reset_fade_in_shape ();
     void reset_fade_out_shape ();
@@ -162,31 +144,21 @@ class AudioRegionView : public RegionView
     void region_resized (ARDOUR::Change);
     void region_moved (void *);
     void region_muted ();
-    void region_locked ();
-    void region_layered ();
-    void region_renamed ();
-    void region_sync_changed ();
     void region_scale_amplitude_changed ();
-
-    static gint _lock_toggle (ArdourCanvas::Item*, GdkEvent*, void*);
-    void lock_toggle ();
 
     void create_waves ();
     void create_one_wave (uint32_t, bool);
     void manage_zero_line ();
     void peaks_ready_handler (uint32_t);
-    void reset_name (gdouble width);
     void set_flags (XMLNode *);
     void store_flags ();
 
     void set_colors ();
     void compute_colors (Gdk::Color&);
-    virtual void set_frame_color ();
     void reset_width_dependent_items (double pixel_width);
     void set_waveview_data_src();
 
     vector<GnomeCanvasWaveViewCache*> wave_caches;
-    vector<GhostRegion*> ghosts;
     
     void color_handler (ColorID, uint32_t);
 };

@@ -80,9 +80,6 @@ class MidiDiskstream : public Diskstream
 	int use_new_playlist ();
 	int use_copy_playlist ();
 
-	void start_scrub (jack_nframes_t where) {} // FIXME?
-	void end_scrub () {} // FIXME?
-
 	Playlist *playlist () { return _playlist; }
 
 	static sigc::signal<void,list<SMFSource*>*> DeleteSources;
@@ -106,7 +103,6 @@ class MidiDiskstream : public Diskstream
 
 	void set_pending_overwrite(bool);
 	int  overwrite_existing_buffers ();
-	void reverse_scrub_buffer (bool to_forward) {} // FIXME?
 	void set_block_size (jack_nframes_t);
 	int  internal_playback_seek (jack_nframes_t distance);
 	int  can_internal_playback_seek (jack_nframes_t distance);
@@ -134,12 +130,11 @@ class MidiDiskstream : public Diskstream
 
 	MidiPlaylist* _playlist;
 
-	/* the two central butler operations */
-
-	int do_flush (char * workbuf, bool force = false);
-	int do_refill (RawMidi *mixdown_buffer, float *gain_buffer, char *workbuf);
+	/*Tthe two central butler operations */
+	int do_flush (Session::RunContext context, bool force = false) { return 0; }
+	int do_refill () { return 0; }
 	
-	virtual int non_realtime_do_refill() { return do_refill(0, 0, 0); }
+	int do_refill_with_alloc() { return 0; }
 
 	int read (RawMidi* buf, RawMidi* mixdown_buffer, char * workbuf, jack_nframes_t& start, jack_nframes_t cnt, bool reversed);
 
@@ -148,10 +143,8 @@ class MidiDiskstream : public Diskstream
 	//void playlist_changed (Change);
 	//void playlist_modified ();
 	void playlist_deleted (Playlist*);
-	void session_controls_changed (Session::ControlType) {} // FIXME?
 
 	void finish_capture (bool rec_monitors_input);
-	void clean_up_capture (struct tm&, time_t, bool abort) {} // FIXME?
 	void transport_stopped (struct tm&, time_t, bool abort);
 
 	struct CaptureInfo {
@@ -162,17 +155,10 @@ class MidiDiskstream : public Diskstream
 	void init (Diskstream::Flag);
 
 	int use_new_write_source (uint32_t n=0);
-	int use_new_fade_source (uint32_t n=0) { return 0; } // FIXME?
 
 	int find_and_use_playlist (const string&);
 
 	void allocate_temporary_buffers ();
-
-	int  create_input_port () { return 0; } // FIXME?
-	int  connect_input_port () { return 0; } // FIXME?
-	int  seek_unlocked (jack_nframes_t which_sample) { return 0; } // FIXME?
-
-	int ports_created () { return 0; } // FIXME?
 
 	//bool realtime_set_speed (double, bool global_change);
 	void non_realtime_set_speed ();

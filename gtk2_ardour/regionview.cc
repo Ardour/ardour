@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -82,35 +82,21 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 }
 
 void
-RegionView::init (Gdk::Color& basic_color, bool wfw)
+RegionView::init (Gdk::Color& basic_color, bool wfd)
 {
-    ArdourCanvas::Points shape;
-	//XMLNode *node;
-
-	editor = 0;
-	valid = true;
+	editor        = 0;
+	valid         = true;
 	in_destructor = false;
-	_height = 0;
-
-	_flags = 0;
-
-	/*
-	if ((node = _region.extra_xml ("GUI")) != 0) {
-		set_flags (node);
-	} else {
-		//_flags = WaveformVisible;
-		store_flags ();
-	}*/
+	_height       = 0;
+	wait_for_data = wfd;
 
 	compute_colors (basic_color);
 
 	name_highlight->set_data ("regionview", this);
 	name_text->set_data ("regionview", this);
 
-	//	shape = new ArdourCanvas::Points ();
-
 	/* an equilateral triangle */
-
+    ArdourCanvas::Points shape;
 	shape.push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
 	shape.push_back (Gnome::Art::Point ((sync_mark_width - 1)/2, 1));
 	shape.push_back (Gnome::Art::Point (0, sync_mark_width - 1));
@@ -234,9 +220,6 @@ RegionView::region_resized (Change what_changed)
 
  			(*i)->set_duration (unit_length);
 
- 			/*for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
-				(*w)->property_region_start() = _region.start();
- 			}*/
  		}
 	}
 }
@@ -246,27 +229,6 @@ RegionView::reset_width_dependent_items (double pixel_width)
 {
 	TimeAxisViewItem::reset_width_dependent_items (pixel_width);
 	_pixel_width = pixel_width;
-/*
-	if (zero_line) {
-		zero_line->property_x2() = pixel_width - 1.0;
-	}
-
-	if (fade_in_handle) {
-		if (pixel_width <= 6.0) {
-			fade_in_handle->hide();
-			fade_out_handle->hide();
-		} else {
-			if (_height < 5.0) {
-				fade_in_handle->hide();
-				fade_out_handle->hide();
-			} else {
-				fade_in_handle->show();
-				fade_out_handle->show();
-			}
-		}
-	}
-
-	reset_fade_shapes ();*/
 }
 
 void
@@ -282,14 +244,6 @@ RegionView::region_muted ()
 {
 	set_frame_color ();
 	region_renamed ();
-
-	/*for (uint32_t n=0; n < waves.size(); ++n) {
-		if (_region.muted()) {
-			waves[n]->property_wave_color() = color_map[cMutedWaveForm];
-		} else {
-			waves[n]->property_wave_color() = color_map[cWaveForm];
-		}
-	}*/
 }
 
 void
@@ -350,19 +304,11 @@ RegionView::set_samples_per_unit (gdouble spu)
 {
 	TimeAxisViewItem::set_samples_per_unit (spu);
 
-	/*for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->property_samples_per_unit() = spu;
-	}*/
-
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		(*i)->set_samples_per_unit (spu);
 		(*i)->set_duration (_region.length() / samples_per_unit);
 	}
 
-	/*if (gain_line) {
-		gain_line->reset ();
-	}*/
-	//reset_fade_shapes ();
 	region_sync_changed ();
 }
 
@@ -384,10 +330,6 @@ void
 RegionView::compute_colors (Gdk::Color& basic_color)
 {
 	TimeAxisViewItem::compute_colors (basic_color);
-	uint32_t r, g, b, a;
-
-	UINT_TO_RGBA (fill_color, &r, &g, &b, &a);
-	fade_color = RGBA_TO_UINT(r,g,b,120);
 }
 
 void
@@ -395,21 +337,9 @@ RegionView::set_colors ()
 {
 	TimeAxisViewItem::set_colors ();
 	
-	/*if (gain_line) {
-		gain_line->set_line_color (_region.envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
-	}*/
-
 	if (sync_mark) {
 		sync_mark->property_fill_color_rgba() = fill_color;
 	}
-
-	/*for (uint32_t n=0; n < waves.size(); ++n) {
-		if (_region.muted()) {
-			waves[n]->property_wave_color() = color_map[cMutedWaveForm];
-		} else {
-			waves[n]->property_wave_color() = color_map[cWaveForm];
-		}
-	}*/
 }
 
 void
@@ -445,10 +375,9 @@ RegionView::region_renamed ()
 		str = _region.name();
 	}
 
-	/* FIXME
 	if (_region.speed_mismatch (trackview.session().frame_rate())) {
 		str = string ("*") + str;
-	}*/
+	}
 
 	if (_region.muted()) {
 		str = string ("!") + str;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id: diskstream.h 579 2006-06-12 19:56:37Z essej $
 */
 
 #ifndef __ardour_audio_diskstream_h__
@@ -62,17 +60,11 @@ class AudioDiskstream : public Diskstream
 	AudioDiskstream (Session &, const string& name, Diskstream::Flag f = Recordable);
 	AudioDiskstream (Session &, const XMLNode&);
 
-	void set_io (ARDOUR::IO& io);
-
+	// FIXME
 	AudioDiskstream& ref() { _refcnt++; return *this; }
-	//void unref() { if (_refcnt) _refcnt--; if (_refcnt == 0) delete this; }
-	//uint32_t refcnt() const { return _refcnt; }
 
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
-
-	//void set_align_style (AlignStyle);
-	//void set_persistent_align_style (AlignStyle);
 
 	string input_source (uint32_t n=0) const {
 		if (n < channels.size()) {
@@ -87,7 +79,6 @@ class AudioDiskstream : public Diskstream
 	}
 
 	void set_record_enabled (bool yn, void *src);
-	//void set_speed (double);
 
 	float peak_power(uint32_t n=0) { 
 		float x = channels[n].peak_power;
@@ -98,15 +89,12 @@ class AudioDiskstream : public Diskstream
 			return minus_infinity();
 		}
 	}
+	
+	AudioPlaylist* audio_playlist () { return dynamic_cast<AudioPlaylist*>(_playlist); }
 
 	int use_playlist (Playlist *);
 	int use_new_playlist ();
 	int use_copy_playlist ();
-
-	void start_scrub (jack_nframes_t where) {} // FIXME?
-	void end_scrub () {} // FIXME?
-
-	Playlist *playlist () { return _playlist; }
 
 	Sample *playback_buffer (uint32_t n=0) {
 		if (n < channels.size())
@@ -137,7 +125,6 @@ class AudioDiskstream : public Diskstream
 
 	void monitor_input (bool);
 
-	// FIXME: these don't belong here
 	static void swap_by_ptr (Sample *first, Sample *last) {
 		while (first < last) {
 			Sample tmp = *first;
@@ -154,11 +141,6 @@ class AudioDiskstream : public Diskstream
 		}
 	}
 
-	//void handle_input_change (IOChange, void *src);
-	
-	//static sigc::signal<void> DiskOverrun;
-	//static sigc::signal<void> DiskUnderrun;
-	//static sigc::signal<void,AudioDiskstream*> AudioDiskstreamCreated;   // XXX use a ref with sigc2
 	static sigc::signal<void,list<AudioFileSource*>*> DeleteSources;
 
 	int set_loop (Location *loc);
@@ -167,8 +149,6 @@ class AudioDiskstream : public Diskstream
 	std::list<Region*>& last_capture_regions () {
 		return _last_capture_regions;
 	}
-
-	void handle_input_change (IOChange, void *src);
 
 	const PBD::ID& id() const { return _id; }
 
@@ -184,7 +164,6 @@ class AudioDiskstream : public Diskstream
 
 	void set_pending_overwrite(bool);
 	int  overwrite_existing_buffers ();
-	void reverse_scrub_buffer (bool to_forward) {} // FIXME?
 	void set_block_size (jack_nframes_t);
 	int  internal_playback_seek (jack_nframes_t distance);
 	int  can_internal_playback_seek (jack_nframes_t distance);
@@ -237,60 +216,30 @@ class AudioDiskstream : public Diskstream
 		jack_nframes_t                     curr_capture_cnt;
 	};
 
-	typedef vector<ChannelInfo> ChannelList;
-
-	/* the two central butler operations */
-
-	int do_flush (char * workbuf, bool force = false);
-	int do_refill (Sample *mixdown_buffer, float *gain_buffer, char *workbuf);
+	/* The two central butler operations */
+	int do_flush (Session::RunContext context, bool force = false);
+	int do_refill () { return _do_refill(_mixdown_buffer, _gain_buffer, _conversion_buffer); }
 	
-	virtual int non_realtime_do_refill() { return do_refill(0, 0, 0); }
+	int do_refill_with_alloc();
 
-	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, char * workbuf, jack_nframes_t& start, jack_nframes_t cnt, 
-		  ChannelInfo& channel_info, int channel, bool reversed);
-
-	/* XXX fix this redundancy ... */
-
-	//void playlist_changed (Change);
-	//void playlist_modified ();
-	void playlist_deleted (Playlist*);
-	void session_controls_changed (Session::ControlType) {} // FIXME?
+	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, char * workbuf,
+		jack_nframes_t& start, jack_nframes_t cnt, 
+		ChannelInfo& channel_info, int channel, bool reversed);
 
 	void finish_capture (bool rec_monitors_input);
-	void clean_up_capture (struct tm&, time_t, bool abort) {} // FIXME?
 	void transport_stopped (struct tm&, time_t, bool abort);
 
-	struct CaptureInfo {
-	    uint32_t start;
-	    uint32_t frames;
-	};
-
-	vector<CaptureInfo*> capture_info;
-	Glib::Mutex  capture_info_lock;
-	
 	void init (Diskstream::Flag);
 
 	void init_channel (ChannelInfo &chan);
 	void destroy_channel (ChannelInfo &chan);
 	
 	int use_new_write_source (uint32_t n=0);
-	int use_new_fade_source (uint32_t n=0) { return 0; } // FIXME?
 
 	int find_and_use_playlist (const string&);
 
 	void allocate_temporary_buffers ();
 
-	int  create_input_port () { return 0; } // FIXME?
-	int  connect_input_port () { return 0; } // FIXME?
-	int  seek_unlocked (jack_nframes_t which_sample) { return 0; } // FIXME?
-
-	int ports_created () { return 0; } // FIXME?
-
-	//bool realtime_set_speed (double, bool global_change);
-	void non_realtime_set_speed ();
-
-	std::list<Region*> _last_capture_regions;
-	std::vector<AudioFileSource*> capturing_sources;
 	int use_pending_capture_data (XMLNode& node);
 
 	void get_input_sources ();
@@ -299,10 +248,26 @@ class AudioDiskstream : public Diskstream
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
 
-	ChannelList    channels;
-	AudioPlaylist* _playlist;
 	void engage_record_enable (void* src);
 	void disengage_record_enable (void* src);
+
+	// Working buffers for do_refill (butler thread)
+	static void allocate_working_buffers();
+	static void free_working_buffers();
+
+	static size_t  _working_buffers_size;
+	static Sample* _mixdown_buffer;
+	static gain_t* _gain_buffer;
+	static char*   _conversion_buffer;
+
+	// Uh, /really/ private?  (death to friend classes)
+	int _do_refill (Sample *mixdown_buffer, float *gain_buffer, char *workbuf);
+	
+	
+	std::vector<AudioFileSource*> capturing_sources;
+	
+	typedef vector<ChannelInfo> ChannelList;
+	ChannelList channels;
 };
 
 } // namespace ARDOUR

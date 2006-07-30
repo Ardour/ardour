@@ -49,7 +49,7 @@ class RegionView : public TimeAxisViewItem
 
 	~RegionView ();
 	
-	virtual void init (Gdk::Color& base_color, bool wait_for_waves);
+	virtual void init (Gdk::Color& base_color, bool wait_for_data);
     
 	ARDOUR::Region& region() const { return _region; }
 	
@@ -57,8 +57,8 @@ class RegionView : public TimeAxisViewItem
     void set_valid (bool yn) { valid = yn; }
 
     virtual void set_height (double) = 0;
-    void set_samples_per_unit (double);
-    bool set_duration (jack_nframes_t, void*);
+    virtual void set_samples_per_unit (double);
+    virtual bool set_duration (jack_nframes_t, void*);
 
     void move (double xdelta, double ydelta);
 
@@ -70,9 +70,9 @@ class RegionView : public TimeAxisViewItem
     bool set_position(jack_nframes_t pos, void* src, double* delta = 0);
 
     virtual void show_region_editor () = 0;
-    void hide_region_editor();
+    virtual void hide_region_editor();
 
-    void region_changed (ARDOUR::Change);
+    virtual void region_changed (ARDOUR::Change);
 
     virtual GhostRegion* add_ghost (AutomationTimeAxisView&) = 0;
     void                 remove_ghost (GhostRegion*);
@@ -93,56 +93,44 @@ class RegionView : public TimeAxisViewItem
     RegionView (ArdourCanvas::Group *, 
 	            TimeAxisView&,
 	            ARDOUR::Region&,
-	            double initial_samples_per_unit,
+	            double      samples_per_unit,
 	            Gdk::Color& basic_color,
 	            TimeAxisViewItem::Visibility);
     
 	ARDOUR::Region& _region;
     
-    enum Flags {
-	    EnvelopeVisible = 0x1,
-	    WaveformVisible = 0x4,
-	    WaveformRectified = 0x8
-    };
-
     ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position 
-    ArdourCanvas::Text* no_wave_msg; ///< text 
+    ArdourCanvas::Text*    no_wave_msg;
 
     RegionEditor *editor;
 
     vector<ControlPoint *> control_points;
     double current_visible_sync_position;
 
-    uint32_t _flags;
-    uint32_t fade_color;
     bool     valid; ///< see StreamView::redisplay_diskstream() 
     double  _pixel_width;
     double  _height;
     bool    in_destructor;
-    bool    wait_for_waves;
-    
-	sigc::connection peaks_ready_connection;
 
-    void region_resized (ARDOUR::Change);
-    void region_moved (void *);
-    void region_muted ();
-    void region_locked ();
-    void region_opacity ();
-    void region_layered ();
-    void region_renamed ();
-    void region_sync_changed ();
-    void region_scale_amplitude_changed ();
+    bool             wait_for_data;
+	sigc::connection data_ready_connection;
+
+    virtual void region_resized (ARDOUR::Change);
+    void         region_moved (void *);
+    virtual void region_muted ();
+    void         region_locked ();
+    void         region_opacity ();
+    void         region_layered ();
+    void         region_renamed ();
+    void         region_sync_changed ();
 
     static gint _lock_toggle (ArdourCanvas::Item*, GdkEvent*, void*);
     void        lock_toggle ();
 
-    void peaks_ready_handler (uint32_t);
-    void reset_name (gdouble width);
-
-    void set_colors ();
-    void compute_colors (Gdk::Color&);
+    virtual void set_colors ();
+    virtual void compute_colors (Gdk::Color&);
     virtual void set_frame_color ();
-    void reset_width_dependent_items (double pixel_width);
+    virtual void reset_width_dependent_items (double pixel_width);
 
     vector<GhostRegion*> ghosts;
     

@@ -388,7 +388,7 @@ MidiDiskstream::read (RawMidi* buf, RawMidi* mixdown_buffer, char * workbuf, jac
 {
 	return 0;
 }
-
+/*
 int
 MidiDiskstream::do_refill (RawMidi* mixdown_buffer, float* gain_buffer, char * workbuf)
 {
@@ -400,7 +400,7 @@ MidiDiskstream::do_flush (char * workbuf, bool force_flush)
 {
 	return 0;
 }
-
+*/
 void
 MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture)
 {

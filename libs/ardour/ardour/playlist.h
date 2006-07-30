@@ -110,16 +110,15 @@ class Playlist : public Stateful, public StateManager {
 	int set_state (const XMLNode&);
 	XMLNode& get_template ();
 
-	sigc::signal<void,Region *> RegionAdded;
-	sigc::signal<void,Region *> RegionRemoved;
-
+	sigc::signal<void,Region *>       RegionAdded;
+	sigc::signal<void,Region *>       RegionRemoved;
 	sigc::signal<void,Playlist*,bool> InUse;
-	sigc::signal<void>            Modified;
-	sigc::signal<void>            NameChanged;
-	sigc::signal<void>            LengthChanged;
-	sigc::signal<void>            LayeringChanged;
-	sigc::signal<void,Playlist *> GoingAway;
-	sigc::signal<void>            StatePushed;
+	sigc::signal<void>                Modified;
+	sigc::signal<void>                NameChanged;
+	sigc::signal<void>                LengthChanged;
+	sigc::signal<void>                LayeringChanged;
+	sigc::signal<void,Playlist *>     GoingAway;
+	sigc::signal<void>                StatePushed;
 
 	static sigc::signal<void,Playlist*> PlaylistCreated;
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2003 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-jack_nframes_t Diskstream::disk_io_chunk_frames;
+jack_nframes_t Diskstream::disk_io_chunk_frames = 0;
 
 sigc::signal<void,Diskstream*>    Diskstream::DiskstreamCreated;
 //sigc::signal<void,list<AudioFileSource*>*> Diskstream::DeleteSources;
@@ -65,13 +65,14 @@ sigc::signal<void>                Diskstream::DiskUnderrun;
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 	: _name (name)
 	, _session (sess)
+	, _playlist(NULL)
 {
 	init (flag);
 }
 	
 Diskstream::Diskstream (Session& sess, const XMLNode& node)
 	: _session (sess)
-	
+	, _playlist(NULL)
 {
 	init (Recordable);
 }
@@ -113,37 +114,28 @@ Diskstream::init (Flag f)
 	_read_data_count = 0;
 	_write_data_count = 0;
 
-	/* there are no channels at this point, so these
-	   two calls just get speed_buffer_size and wrap_buffer
-	   size setup without duplicating their code.
-	*/
-
-	//set_block_size (_session.get_block_size());
-	//allocate_temporary_buffers ();
-
 	pending_overwrite = false;
 	overwrite_frame = 0;
 	overwrite_queued = false;
 	input_change_pending = NoChange;
 
-	//add_channel ();
-	_n_channels = 0;//1;
+	_n_channels = 0;
 }
 
 Diskstream::~Diskstream ()
 {
-	// Taken by child.. assure lock?
+	// Taken by derived class destrctors.. assure lock?
 	//Glib::Mutex::Lock lm (state_lock);
 
-	//if (_playlist) {
-	//	_playlist->unref ();
-	//}
+	if (_playlist)
+		_playlist->unref ();
+}
 
-	//for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-	//	destroy_channel((*chan));
-	//}
-	
-	//channels.clear();
+void
+Diskstream::set_io (IO& io)
+{
+	_io = &io;
+	set_align_style_from_io ();
 }
 
 void
@@ -154,6 +146,29 @@ Diskstream::handle_input_change (IOChange change, void *src)
 	if (!(input_change_pending & change)) {
 		input_change_pending = IOChange (input_change_pending|change);
 		_session.request_input_change_handling ();
+	}
+}
+
+void
+Diskstream::non_realtime_set_speed ()
+{
+	if (_buffer_reallocation_required)
+	{
+		Glib::Mutex::Lock lm (state_lock);
+		allocate_temporary_buffers ();
+
+		_buffer_reallocation_required = false;
+	}
+
+	if (_seek_required) {
+		if (speed() != 1.0f || speed() != -1.0f) {
+			seek ((jack_nframes_t) (_session.transport_frame() * (double) speed()), true);
+		}
+		else {
+			seek (_session.transport_frame(), true);
+		}
+
+		_seek_required = false;
 	}
 }
 
@@ -223,7 +238,6 @@ Diskstream::set_align_style (AlignStyle a)
 		return;
 	}
 
-
 	if (a != _alignment_style) {
 		_alignment_style = a;
 		AlignmentStyleChanged ();
@@ -287,6 +301,47 @@ Diskstream::set_speed (double sp)
 	playlist_modified();
 }
 
+int
+Diskstream::use_playlist (Playlist* playlist)
+{
+	{
+		Glib::Mutex::Lock lm (state_lock);
+
+		if (playlist == _playlist) {
+			return 0;
+		}
+
+		plstate_connection.disconnect();
+		plmod_connection.disconnect ();
+		plgone_connection.disconnect ();
+
+		if (_playlist) {
+			_playlist->unref();
+		}
+			
+		_playlist = playlist;
+		_playlist->ref();
+
+		if (!in_set_state && recordable()) {
+			reset_write_sources (false);
+		}
+		
+		plstate_connection = _playlist->StateChanged.connect (mem_fun (*this, &Diskstream::playlist_changed));
+		plmod_connection = _playlist->Modified.connect (mem_fun (*this, &Diskstream::playlist_modified));
+		plgone_connection = _playlist->GoingAway.connect (mem_fun (*this, &Diskstream::playlist_deleted));
+	}
+
+	if (!overwrite_queued) {
+		_session.request_overwrite_buffer (this);
+		overwrite_queued = true;
+	}
+	
+	PlaylistChanged (); /* EMIT SIGNAL */
+	_session.set_dirty ();
+
+	return 0;
+}
+
 void
 Diskstream::playlist_changed (Change ignored)
 {
@@ -300,6 +355,17 @@ Diskstream::playlist_modified ()
 		_session.request_overwrite_buffer (this);
 		overwrite_queued = true;
 	} 
+}
+
+void
+Diskstream::playlist_deleted (Playlist* pl)
+{
+	/* this catches an ordering issue with session destruction. playlists 
+	   are destroyed before diskstreams. we have to invalidate any handles
+	   we have to the playlist.
+	*/
+
+	_playlist = 0;
 }
 
 int

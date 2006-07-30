@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,6 @@ class AudioEngine;
 class Send;
 class Session;
 class Playlist;
-//class FileSource;
 class IO;
 
 /* FIXME: There are (obviously) far too many virtual functions in this ATM.
@@ -71,10 +70,10 @@ class Diskstream : public Stateful, public sigc::trackable
 	virtual int set_name (string str, void* src);
 
 	ARDOUR::IO* io() const { return _io; }
-	virtual void set_io (ARDOUR::IO& io) = 0;
+	void set_io (ARDOUR::IO& io);
 
 	virtual Diskstream& ref() { _refcnt++; return *this; }
-	void unref() { if (_refcnt) _refcnt--; if (_refcnt == 0) delete this; }
+	void     unref() { if (_refcnt) _refcnt--; if (_refcnt == 0) delete this; }
 	uint32_t refcnt() const { return _refcnt; }
 
 	virtual float playback_buffer_load() const = 0;
@@ -105,16 +104,14 @@ class Diskstream : public Stateful, public sigc::trackable
 	virtual void punch_in()  {}
 	virtual void punch_out() {}
 
-	virtual void set_speed (double);
-	virtual void non_realtime_set_speed () = 0;
+	void set_speed (double);
+	void non_realtime_set_speed ();
 
-	virtual Playlist *playlist () = 0;
+	Playlist* playlist () { return _playlist; }
+
+	virtual int use_playlist (Playlist *);
 	virtual int use_new_playlist () = 0;
-	virtual int use_playlist (Playlist *) = 0;
 	virtual int use_copy_playlist () = 0;
-
-	virtual void start_scrub (jack_nframes_t where) = 0;
-	virtual void end_scrub () = 0;
 
 	jack_nframes_t current_capture_start() const { return capture_start_frame; }
 	jack_nframes_t current_capture_end()   const { return capture_start_frame + capture_captured; }
@@ -123,7 +120,7 @@ class Diskstream : public Stateful, public sigc::trackable
 	
 	uint32_t n_channels() { return _n_channels; }
 
-	static jack_nframes_t disk_io_frames() { return disk_io_chunk_frames; }
+	static jack_nframes_t disk_io_frames()            { return disk_io_chunk_frames; }
 	static void set_disk_io_chunk_frames (uint32_t n) { disk_io_chunk_frames = n; }
 
 	/* Stateful */
@@ -144,7 +141,7 @@ class Diskstream : public Stateful, public sigc::trackable
 
 	std::list<Region*>& last_capture_regions () { return _last_capture_regions; }
 
-	virtual void handle_input_change (IOChange, void *src);
+	void handle_input_change (IOChange, void *src);
 
 	sigc::signal<void,void*> RecordEnableChanged;
 	sigc::signal<void>       SpeedChanged;
@@ -170,7 +167,6 @@ class Diskstream : public Stateful, public sigc::trackable
 
 	virtual void set_pending_overwrite (bool) = 0;
 	virtual int  overwrite_existing_buffers () = 0;
-	virtual void reverse_scrub_buffer (bool to_forward) = 0;
 	virtual void set_block_size (jack_nframes_t) = 0;
 	virtual int  internal_playback_seek (jack_nframes_t distance) = 0;
 	virtual int  can_internal_playback_seek (jack_nframes_t distance) = 0;
@@ -209,25 +205,21 @@ class Diskstream : public Stateful, public sigc::trackable
 		jack_nframes_t   capture_val;
 	};
 
-	/* the two central butler operations */
-
-	virtual int do_flush (char * workbuf, bool force = false) = 0;
-	//int do_refill (Sample *mixdown_buffer, float *gain_buffer, char *workbuf);
+	/* The two central butler operations */
+	virtual int do_flush (Session::RunContext context, bool force = false) = 0;
+	virtual int do_refill () = 0;
 	
-	virtual int non_realtime_do_refill() = 0;
+	/** For non-butler contexts (allocates temporary working buffers) */
+	virtual int do_refill_with_alloc() = 0;
 
-	//int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, char * workbuf, jack_nframes_t& start, jack_nframes_t cnt, 
-	//	  ChannelInfo& channel_info, int channel, bool reversed);
 	
 	/* XXX fix this redundancy ... */
 
 	virtual void playlist_changed (Change);
 	virtual void playlist_modified ();
-	virtual void playlist_deleted (Playlist*) = 0;
-	virtual void session_controls_changed (Session::ControlType) = 0;
+	virtual void playlist_deleted (Playlist*);
 
 	virtual void finish_capture (bool rec_monitors_input) = 0;
-	virtual void clean_up_capture (struct tm&, time_t, bool abort) = 0;
 	virtual void transport_stopped (struct tm&, time_t, bool abort) = 0;
 
 	struct CaptureInfo {
@@ -237,37 +229,23 @@ class Diskstream : public Stateful, public sigc::trackable
 
 	virtual void init (Flag);
 
-	//void init_channel (ChannelInfo &chan);
-	//void destroy_channel (ChannelInfo &chan);
-
 	virtual int use_new_write_source (uint32_t n=0) = 0;
-	virtual int use_new_fade_source (uint32_t n=0) = 0;
 
 	virtual int find_and_use_playlist (const string&) = 0;
 
-	//void allocate_temporary_buffers ();
-
-	virtual int  create_input_port () = 0;
-	virtual int  connect_input_port () = 0;
-	virtual int  seek_unlocked (jack_nframes_t which_sample) = 0;
-
-	virtual int ports_created () = 0;
+	virtual void allocate_temporary_buffers () = 0;
 
 	virtual bool realtime_set_speed (double, bool global_change);
-	//void non_realtime_set_speed ();
 
 	std::list<Region*> _last_capture_regions;
-	//std::vector<FileSource*> capturing_sources;
 	virtual int use_pending_capture_data (XMLNode& node) = 0;
 
 	virtual void get_input_sources () = 0;
 	virtual void check_record_status (jack_nframes_t transport_frame, jack_nframes_t nframes, bool can_record) = 0;
-	//void set_align_style_from_io();
+	virtual void set_align_style_from_io() {}
 	virtual void setup_destructive_playlist () = 0;
-	//void use_destructive_playlist ();
+	virtual void use_destructive_playlist () = 0;
 
-	// Wouldn't hurt for this thing to do on a diet:
-	
 	static jack_nframes_t disk_io_chunk_frames;
 	vector<CaptureInfo*>  capture_info;
 	Glib::Mutex           capture_info_lock;
@@ -279,6 +257,7 @@ class Diskstream : public Stateful, public sigc::trackable
 	ARDOUR::IO*       _io;
 	uint32_t          _n_channels;
 	PBD::ID           _id;
+	Playlist*         _playlist;
 
 	mutable gint             _record_enabled;
 	double                   _visible_speed;
@@ -338,7 +317,6 @@ class Diskstream : public Stateful, public sigc::trackable
 	sigc::connection plgone_connection;
 	
 	unsigned char _flags;
-
 };
 
 }; /* namespace ARDOUR */

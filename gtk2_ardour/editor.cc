@@ -209,15 +209,6 @@ Editor::Editor (AudioEngine& eng)
 	  
 	  toolbar_selection_clock_table (2,3),
 	  
-	  //mouse_mode_button_table (2, 3),
-
-	  /*mouse_select_button (_("range")),
-	  mouse_move_button (_("object")),
-	  mouse_gain_button (_("gain")),
-	  mouse_zoom_button (_("zoom")),
-	  mouse_timefx_button (_("timefx")),
-	  mouse_audition_button (_("listen")),*/
-
 	  automation_mode_button (_("mode")),
 	  global_automation_button (_("automation")),
 
@@ -2588,9 +2579,8 @@ Editor::setup_toolbar ()
 	mouse_mode_button_box.pack_start(mouse_audition_button, true, true);
 	mouse_mode_button_box.set_homogeneous(true);
 
-	// This one needs a little more "FUDGE" on my machine at least..
 	edit_mode_selector.set_name ("EditModeSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "Splice Edit", 3+FUDGE, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "Splice Edit", 2+FUDGE, 10);
 	set_popdown_strings (edit_mode_selector, internationalize (edit_mode_strings));
 	edit_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
 

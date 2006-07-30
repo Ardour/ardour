@@ -403,6 +403,8 @@ Session::~Session ()
 	for (map<RunContext,char*>::iterator i = _conversion_buffers.begin(); i != _conversion_buffers.end(); ++i) {
 		delete [] (i->second);
 	}
+
+	AudioDiskstream::free_working_buffers();
 	
 #undef TRACK_DESTRUCTION
 #ifdef TRACK_DESTRUCTION
@@ -2105,7 +2107,7 @@ void
 Session::add_diskstream (Diskstream* dstream)
 {
 	/* need to do this in case we're rolling at the time, to prevent false underruns */
-	dstream->non_realtime_do_refill();
+	dstream->do_refill_with_alloc();
 	
 	{ 
 		Glib::RWLock::WriterLock lm (diskstream_lock);
