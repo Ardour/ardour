@@ -98,7 +98,7 @@ SoundFileBox::SoundFileBox ()
 	remove_field_btn.signal_clicked().connect
 	                (mem_fun (*this, &SoundFileBox::remove_field_clicked));
 	
-	Gtk::CellRendererText* cell(static_cast<Gtk::CellRendererText*>(field_view.get_column_cell_renderer(1)));
+	Gtk::CellRendererText* cell(dynamic_cast<Gtk::CellRendererText*>(field_view.get_column_cell_renderer(1)));
 	cell->signal_edited().connect (mem_fun (*this, &SoundFileBox::field_edited));
 
 	field_view.get_selection()->signal_changed().connect (mem_fun (*this, &SoundFileBox::field_selected));

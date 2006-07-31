@@ -253,3 +253,21 @@ path_expand (string path)
 #endif
 }
 
+#ifdef HAVE_COREAUDIO
+string 
+CFStringRefToStdString(CFStringRef stringRef)
+{
+	CFIndex size = 
+		CFStringGetMaximumSizeForEncoding(CFStringGetLength(stringRef) , 
+		kCFStringEncodingASCII);
+	    char *buf = new char[size];
+	
+	std::string result;
+
+	if(CFStringGetCString(stringRef, buf, size, kCFStringEncodingASCII)) {
+	    result = buf;
+	}
+	delete [] buf;
+	return result;
+}
+#endif // HAVE_COREAUDIO
