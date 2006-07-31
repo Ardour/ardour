@@ -259,12 +259,12 @@ CFStringRefToStdString(CFStringRef stringRef)
 {
 	CFIndex size = 
 		CFStringGetMaximumSizeForEncoding(CFStringGetLength(stringRef) , 
-		kCFStringEncodingASCII);
+		kCFStringEncodingUTF8);
 	    char *buf = new char[size];
 	
 	std::string result;
 
-	if(CFStringGetCString(stringRef, buf, size, kCFStringEncodingASCII)) {
+	if(CFStringGetCString(stringRef, buf, size, kCFStringEncodingUTF8)) {
 	    result = buf;
 	}
 	delete [] buf;
