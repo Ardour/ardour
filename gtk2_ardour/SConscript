@@ -57,6 +57,9 @@ if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Merge ([libraries['fftw3f']])
 	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
 
+if gtkardour['COREAUDIO']:
+	gtkardour.Append(CCFLAGS='-DHAVE_COREAUDIO')
+
 skipped_files=Split("""
 connection_editor.cc
 """)

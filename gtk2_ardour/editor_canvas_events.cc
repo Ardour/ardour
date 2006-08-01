@@ -735,7 +735,7 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 }
 
 bool
-Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView* rv)
+Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView* rv)
 {
 	bool ret = false;
 

@@ -23,6 +23,8 @@ class PluginManager {
 
 	std::list<PluginInfo*> &vst_plugin_info () { return _vst_plugin_info; }
 	std::list<PluginInfo*> &ladspa_plugin_info () { return _ladspa_plugin_info; }
+	std::list<PluginInfo*> &au_plugin_info () { return _au_plugin_info; }
+
 	void refresh ();
 
 	int add_ladspa_directory (std::string dirpath);
@@ -36,6 +38,7 @@ class PluginManager {
 	ARDOUR::AudioEngine&   _engine;
 	std::list<PluginInfo*> _vst_plugin_info;
 	std::list<PluginInfo*> _ladspa_plugin_info;
+	std::list<PluginInfo*> _au_plugin_info;
 	std::map<uint32_t, std::string> rdf_type;
 
 	std::string ladspa_path;
@@ -55,6 +58,8 @@ class PluginManager {
 	int ladspa_discover_from_path (std::string path);
 	int ladspa_discover (std::string path);
 
+	int au_discover ();
+
 	std::string get_ladspa_category (uint32_t id);
 
 	static PluginManager* _manager; // singleton
@@ -63,3 +68,4 @@ class PluginManager {
 } /* namespace ARDOUR */
 
 #endif /* __ardour_plugin_manager_h__ */
+

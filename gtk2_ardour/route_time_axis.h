@@ -56,6 +56,7 @@ class PublicEditor;
 class RegionView;
 class StreamView;
 class Selection;
+class RegionSelection;
 class Selectable;
 class AutomationTimeAxisView;
 class AutomationLine;

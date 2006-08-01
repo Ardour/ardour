@@ -27,9 +27,9 @@
 */
 
 #include <ardour/region.h>
-#include <ardour/audioregion.h>
 
 #include "selection.h"
+#include "region_view.h"
 
 inline void
 Selection::foreach_region (void (ARDOUR::Region::*method)(void)) {

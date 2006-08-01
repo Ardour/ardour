@@ -67,6 +67,15 @@ RegionView::RegionView (ArdourCanvas::Group* parent,
 			                              TimeAxisViewItem::ShowNameHighlight|
 			                              TimeAxisViewItem::ShowFrame))
 	, _region (r)
+	, sync_mark(0)
+	, no_wave_msg(0)
+	, editor(0)
+	, current_visible_sync_position(0.0)
+	, valid(false)
+	, _pixel_width(1.0)
+	, _height(1.0)
+	, in_destructor(false)
+	, wait_for_data(false)
 {
 }
 
@@ -78,6 +87,15 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
                         TimeAxisViewItem::Visibility visibility)
 	: TimeAxisViewItem (r.name(), *parent, tv, spu, basic_color, r.position(), r.length(), visibility)
 	, _region (r)
+	, sync_mark(0)
+	, no_wave_msg(0)
+	, editor(0)
+	, current_visible_sync_position(0.0)
+	, valid(false)
+	, _pixel_width(1.0)
+	, _height(1.0)
+	, in_destructor(false)
+	, wait_for_data(false)
 {
 }
 

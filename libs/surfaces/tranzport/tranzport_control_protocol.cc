@@ -693,7 +693,7 @@ TranzportControlProtocol::update_state ()
 	/* per track */
 
 	if (route_table[0]) {
-		AudioTrack* at = dynamic_cast<AudioTrack*> (route_table[0]);
+		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack> (route_table[0]);
 		if (at && at->record_enabled()) {
 			pending_lights[LightTrackrec] = true;
 		} else {

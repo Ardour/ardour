@@ -57,12 +57,32 @@ static const int32_t sync_mark_width = 9;
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, AudioRegion& r, double spu,
 				  Gdk::Color& basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
+	, sync_mark(0)
+	, zero_line(0)
+	, fade_in_shape(0)
+	, fade_out_shape(0)
+	, fade_in_handle(0)
+	, fade_out_handle(0)
+	, gain_line(0)
+	, _amplitude_above_axis(1.0)
+	, _flags(0)
+	, fade_color(0)
 {
 }
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, AudioRegion& r, double spu, 
 				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
+	, sync_mark(0)
+	, zero_line(0)
+	, fade_in_shape(0)
+	, fade_out_shape(0)
+	, fade_in_handle(0)
+	, fade_out_handle(0)
+	, gain_line(0)
+	, _amplitude_above_axis(1.0)
+	, _flags(0)
+	, fade_color(0)
 {
 }
 

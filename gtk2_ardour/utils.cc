@@ -215,7 +215,7 @@ get_font_for_style (string widgetname)
 {
 	Gtk::Window window (WINDOW_TOPLEVEL);
 	Gtk::Label foobar;
-	Glib::RefPtr<Style> style;
+	Glib::RefPtr<Gtk::Style> style;
 
 	window.add (foobar);
 	foobar.set_name (widgetname);
@@ -435,12 +435,10 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		
 	if (!special_handling_of_unmodified_accelerators ||
 	    ev->state & (Gdk::MOD1_MASK|
-			 Gdk::MOD2_MASK|
 			 Gdk::MOD3_MASK|
 			 Gdk::MOD4_MASK|
 			 Gdk::MOD5_MASK|
-			 Gdk::CONTROL_MASK|
-			 Gdk::LOCK_MASK)) {
+			 Gdk::CONTROL_MASK)) {
 
 		/* no special handling or modifiers in effect: accelerate first */
 

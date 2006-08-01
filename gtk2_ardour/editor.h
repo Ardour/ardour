@@ -1115,7 +1115,7 @@ class Editor : public PublicEditor
 	bool canvas_fade_out_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
-	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
+	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, RouteTimeAxisView*);
 	bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, Marker*);
 	bool canvas_zoom_rect_event (GdkEvent* event,ArdourCanvas::Item*);

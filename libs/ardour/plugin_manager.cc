@@ -27,7 +27,7 @@
 #include <fst.h>
 #include <pbd/basename.h>
 #include <string.h>
-#endif
+#endif // VST_SUPPORT
 
 #include <pbd/pathscanner.h>
 
@@ -40,6 +40,11 @@
 
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
+
+#ifdef HAVE_COREAUDIO
+#include <CoreServices/CoreServices.h>
+#include <AudioUnit/AudioUnit.h>
+#endif // HAVE_COREAUDIO
 
 #include "i18n.h"
 
@@ -95,7 +100,11 @@ PluginManager::refresh ()
 	if (Config->get_use_vst()) {
 		vst_refresh ();
 	}
-#endif
+#endif // VST_SUPPORT
+
+#ifdef HAVE_COREAUDIO
+	au_discover ();
+#endif // HAVE_COREAUDIO
 }
 
 void
@@ -302,10 +311,10 @@ PluginManager::load (Session& session, PluginInfo *info)
 			} else {
 				error << _("You asked ardour to not use any VST plugins") << endmsg;
 			}
-#else
+#else // !VST_SUPPORT
 			error << _("This version of ardour has no support for VST plugins") << endmsg;
 			return boost::shared_ptr<Plugin> ((Plugin*) 0);
-#endif			
+#endif // !VST_SUPPORT
 				
 		} else {
 
@@ -342,12 +351,15 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::T
 		unique_id = 0; // VST plugins don't have a unique id.
 		break;
 	case PluginInfo::AudioUnit:
+		plugs = &mgr->au_plugin_info();
+		unique_id = 0;
+		break;
 	default:
 		return boost::shared_ptr<Plugin> ((Plugin *) 0);
 	}
 
 	for (i = plugs->begin(); i != plugs->end(); ++i) {
-		if ((name == ""     || (*i)->name == name) &&
+		if ((name == "" || (*i)->name == name) &&
 			(unique_id == 0 || (*i)->unique_id == unique_id)) {	
 			return mgr->load (session, *i);
 		}
@@ -489,4 +501,95 @@ PluginManager::vst_discover (string path)
 	return 0;
 }
 
-#endif
+#endif // VST_SUPPORT
+
+#ifdef HAVE_COREAUDIO
+
+int
+PluginManager::au_discover ()
+{
+	_au_plugin_info.clear ();
+	
+	int numTypes = 2;    // this magic number was retrieved from the apple AUHost example.
+
+	ComponentDescription desc;
+	desc.componentFlags = 0;
+	desc.componentFlagsMask = 0;
+	desc.componentSubType = 0;
+	desc.componentManufacturer = 0;
+	
+	vector<ComponentDescription> vCompDescs;
+
+	for (int i = 0; i < numTypes; ++i) {
+		if (i == 1) {
+			desc.componentType = kAudioUnitType_MusicEffect;
+		} else {
+			desc.componentType = kAudioUnitType_Effect;
+		}
+		
+		Component comp = 0;
+
+		comp = FindNextComponent (NULL, &desc);
+		while (comp != NULL) {
+			ComponentDescription temp;
+			GetComponentInfo (comp, &temp, NULL, NULL, NULL);
+			vCompDescs.push_back(temp);
+			comp = FindNextComponent (comp, &desc);
+		}
+	}
+
+	PluginInfo* plug;
+	for (unsigned int i = 0; i < vCompDescs.size(); ++i) {
+
+		// the following large block is just for determining the name of the plugin.
+		CFStringRef itemName = NULL;
+		// Marc Poirier -style item name
+		Component auComponent = FindNextComponent (0, &(vCompDescs[i]));
+		if (auComponent != NULL) {
+			ComponentDescription dummydesc;
+			Handle nameHandle = NewHandle(sizeof(void*));
+			if (nameHandle != NULL) {
+				OSErr err = GetComponentInfo(auComponent, &dummydesc, nameHandle, NULL, NULL);
+				if (err == noErr) {
+					ConstStr255Param nameString = (ConstStr255Param) (*nameHandle);
+					if (nameString != NULL) {
+						itemName = CFStringCreateWithPascalString(kCFAllocatorDefault, nameString, CFStringGetSystemEncoding());
+					}
+				}
+				DisposeHandle(nameHandle);
+			}
+		}
+		
+		// if Marc-style fails, do the original way
+		if (itemName == NULL) {
+			CFStringRef compTypeString = UTCreateStringForOSType(vCompDescs[i].componentType);
+			CFStringRef compSubTypeString = UTCreateStringForOSType(vCompDescs[i].componentSubType);
+			CFStringRef compManufacturerString = UTCreateStringForOSType(vCompDescs[i].componentManufacturer);
+			
+			itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"), 
+				compTypeString, compManufacturerString, compSubTypeString);
+
+			if (compTypeString != NULL)
+				CFRelease(compTypeString);
+			if (compSubTypeString != NULL)
+				CFRelease(compSubTypeString);
+			if (compManufacturerString != NULL)
+				CFRelease(compManufacturerString);
+		}
+		string realname = CFStringRefToStdString(itemName);
+		
+		plug = new PluginInfo;
+		plug->name = realname;
+		plug->type = PluginInfo::AudioUnit;
+		plug->n_inputs = 0;
+		plug->n_outputs = 0;
+		plug->category = "AudioUnit";
+		
+		_au_plugin_info.push_back(plug);
+	}
+
+	return 0;
+}
+
+#endif // HAVE_COREAUDIO
+

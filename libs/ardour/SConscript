@@ -105,7 +105,7 @@ arch_specific_objects = [ ]
 
 osc_files = [ 'osc.cc' ]
 vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
-coreaudio_files = [ 'coreaudiosource.cc' ]
+coreaudio_files = [ 'audio_unit.cc', 'coreaudiosource.cc' ]
 extra_sources = [ ]
 
 if ardour['VST']:

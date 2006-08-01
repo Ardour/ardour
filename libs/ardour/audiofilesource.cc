@@ -238,25 +238,6 @@ AudioFileSource::create (const string& idstr, Flag flags)
 
 #endif // HAVE_COREAUDIO
 
-#ifdef HAVE_COREAUDIO
-std::string 
-CFStringRefToStdString(CFStringRef stringRef)
-{
-	CFIndex size = 
-		CFStringGetMaximumSizeForEncoding(CFStringGetLength(stringRef) , 
-		kCFStringEncodingASCII);
-	    char *buf = new char[size];
-	
-	std::string result;
-
-	if(CFStringGetCString(stringRef, buf, size, kCFStringEncodingASCII)) {
-	    result = buf;
-	}
-	delete [] buf;
-	return result;
-}
-#endif // HAVE_COREAUDIO
-
 bool
 AudioFileSource::get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg)
 {
