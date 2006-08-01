@@ -359,10 +359,10 @@ ARDOUR_UI::setup_transport ()
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
 	auditioning_alert_button.signal_pressed().connect (mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
 
-	alert_box.pack_start (solo_alert_button);
-	alert_box.pack_start (auditioning_alert_button);
+	alert_box.pack_start (solo_alert_button, false, false);
+	alert_box.pack_start (auditioning_alert_button, false, false);
 
-	transport_tearoff_hbox.set_border_width (5);
+	transport_tearoff_hbox.set_border_width (3);
 
 	transport_tearoff_hbox.pack_start (goto_start_button, false, false);
 	transport_tearoff_hbox.pack_start (goto_end_button, false, false);
@@ -398,6 +398,7 @@ ARDOUR_UI::setup_transport ()
 	mtc_port_changed ();
 	sync_option_combo.set_active_text (positional_sync_strings.front());
 	sync_option_combo.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::sync_option_changed));
+	Gtkmm2ext::set_size_request_to_display_given_text (sync_option_combo, "Internal", 22, 10);
 
 	shbox->pack_start (*sdframe, false, false);
 	shbox->pack_start (shuttle_units_button, true, true);
@@ -406,37 +407,52 @@ ARDOUR_UI::setup_transport ()
 	svbox->pack_start (*sframe, false, false);
 	svbox->pack_start (*shbox, false, false);
 
-	transport_tearoff_hbox.pack_start (*svbox, false, false, 5);
+	transport_tearoff_hbox.pack_start (*svbox, false, false, 3);
 
 	transport_tearoff_hbox.pack_start (auto_loop_button, false, false);
 	transport_tearoff_hbox.pack_start (play_selection_button, false, false);
 	transport_tearoff_hbox.pack_start (roll_button, false, false);
 	transport_tearoff_hbox.pack_start (stop_button, false, false);
-	transport_tearoff_hbox.pack_start (rec_button, false, false, 10);
+	transport_tearoff_hbox.pack_start (rec_button, false, false, 6);
 
-	transport_tearoff_hbox.pack_start (primary_clock, false, false, 5);
-	transport_tearoff_hbox.pack_start (secondary_clock, false, false, 5);
+	HBox* clock_box = manage (new HBox);
+	clock_box->pack_start (primary_clock, false, false);
+	clock_box->pack_start (secondary_clock, false, false);
+	VBox* time_controls_box = manage (new VBox);
+	time_controls_box->pack_start (sync_option_combo, false, false);
+	time_controls_box->pack_start (time_master_button, false, false);
+	clock_box->pack_start (*time_controls_box, false, false, 1);
+	transport_tearoff_hbox.pack_start (*clock_box, false, false, 0);
+	
+	HBox* toggle_box = manage(new HBox);
+	
+	VBox* punch_box = manage (new VBox);
+	punch_box->pack_start (punch_in_button, false, false);
+	punch_box->pack_start (punch_out_button, false, false);
+	toggle_box->pack_start (*punch_box, false, false);
 
-	transport_tearoff_hbox.pack_start (sync_option_combo, false, false);
-	transport_tearoff_hbox.pack_start (time_master_button, false, false);
-	transport_tearoff_hbox.pack_start (punch_in_button, false, false);
-	transport_tearoff_hbox.pack_start (punch_out_button, false, false);
-	transport_tearoff_hbox.pack_start (auto_input_button, false, false);
-	transport_tearoff_hbox.pack_start (auto_return_button, false, false);
-	transport_tearoff_hbox.pack_start (auto_play_button, false, false);
-	transport_tearoff_hbox.pack_start (click_button, false, false);
+	VBox* auto_box = manage (new VBox);
+	auto_box->pack_start (auto_play_button, false, false);
+	auto_box->pack_start (auto_return_button, false, false);
+	toggle_box->pack_start (*auto_box, false, false);
+	
+	VBox* io_box = manage (new VBox);
+	io_box->pack_start (auto_input_button, false, false);
+	io_box->pack_start (click_button, false, false);
+	toggle_box->pack_start (*io_box, false, false);
 	
 	/* desensitize */
 
 	set_transport_sensitivity (false);
 
-//	transport_tearoff_hbox.pack_start (preroll_button, false, false);
-//	transport_tearoff_hbox.pack_start (preroll_clock, false, false);
+//	toggle_box->pack_start (preroll_button, false, false);
+//	toggle_box->pack_start (preroll_clock, false, false);
 
-//	transport_tearoff_hbox.pack_start (postroll_button, false, false);
-//	transport_tearoff_hbox.pack_start (postroll_clock, false, false);
+//	toggle_box->pack_start (postroll_button, false, false);
+//	toggle_box->pack_start (postroll_clock, false, false);
 
-	transport_tearoff_hbox.pack_start (alert_box, false, false, 5);
+	transport_tearoff_hbox.pack_start (*toggle_box, false, false, 4);
+	transport_tearoff_hbox.pack_start (alert_box, false, false);
 }
 
 void
@@ -820,7 +836,7 @@ ARDOUR_UI::set_shuttle_units (ShuttleUnits u)
 		shuttle_units_button.set_label("% ");
 		break;
 	case Semitones:
-		shuttle_units_button.set_label(_("st"));
+		shuttle_units_button.set_label(_("ST"));
 		break;
 	}
 }
@@ -864,7 +880,7 @@ ARDOUR_UI::update_speed_display ()
 {
 	if (!session) {
 		if (last_speed_displayed != 0) {
-			speed_display_label.set_text (_("stopped"));
+			speed_display_label.set_text (_("stop"));
 			last_speed_displayed = 0;
 		}
 		return;
@@ -877,7 +893,7 @@ ARDOUR_UI::update_speed_display ()
 
 		if (x != 0) {
 			if (shuttle_units == Percentage) {
-				snprintf (buf, sizeof (buf), "%.4f", x);
+				snprintf (buf, sizeof (buf), "%.2f", x);
 			} else {
 				if (x < 0) {
 					snprintf (buf, sizeof (buf), "< %.1f", 12.0 * fast_log2 (-x));
@@ -887,7 +903,7 @@ ARDOUR_UI::update_speed_display ()
 			}
 			speed_display_label.set_text (buf);
 		} else {
-			speed_display_label.set_text (_("stopped"));
+			speed_display_label.set_text (_("stop"));
 		}
 
 		last_speed_displayed = x;
@@ -904,7 +920,7 @@ ARDOUR_UI::set_transport_sensitivity (bool yn)
 void
 ARDOUR_UI::editor_realized ()
 {
-	set_size_request_to_display_given_text (speed_display_box, _("stopped"), 2, 2);
+	set_size_request_to_display_given_text (speed_display_box, _("-0.55"), 2, 2);
 	/* XXX: this should really be saved in instant.xml or something similar and restored from there */
 	shuttle_style_button.set_active_text (_("sprung"));
 	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button

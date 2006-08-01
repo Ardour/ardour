@@ -58,3 +58,4 @@ typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;
 } // namespace ARDOUR
 
 #endif // __ardour_audio_unit_h__
+

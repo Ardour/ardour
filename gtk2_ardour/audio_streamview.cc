@@ -60,7 +60,8 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 		stream_base_color = color_map[cAudioTrackBase];
 	else
 		stream_base_color = color_map[cAudioBusBase];
-
+	
+	canvas_rect->property_fill_color_rgba() = stream_base_color;
 	canvas_rect->property_outline_color_rgba() = color_map[cAudioTrackOutline];
 
 	_amplitude_above_axis = 1.0;
@@ -679,12 +680,12 @@ AudioStreamView::color_handler (ColorID id, uint32_t val)
 {
 	switch (id) {
 	case cAudioTrackBase:
-		if (_trackview.is_audio_track()) {
+		if (_trackview.is_track()) {
 			canvas_rect->property_fill_color_rgba() = val;
 		} 
 		break;
 	case cAudioBusBase:
-		if (!_trackview.is_audio_track()) {
+		if (!_trackview.is_track()) {
 			canvas_rect->property_fill_color_rgba() = val;
 		}
 		break;
@@ -696,3 +697,4 @@ AudioStreamView::color_handler (ColorID id, uint32_t val)
 		break;
 	}
 }
+

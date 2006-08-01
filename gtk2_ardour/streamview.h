@@ -139,9 +139,8 @@ protected:
 	bool                   rec_active;
 	bool                   use_rec_regions;
 	
-	/* XXX why are these different? */
-	Gdk::Color region_color;
-	uint32_t   stream_base_color;
+	Gdk::Color region_color;      ///< Contained region color
+	uint32_t   stream_base_color; ///< Background color
 
 	vector<sigc::connection> playlist_connections;
 	sigc::connection         playlist_change_connection;

@@ -506,11 +506,11 @@ ARDOUR_UI::update_sample_rate (jack_nframes_t ignored)
 		jack_nframes_t rate = engine->frame_rate();
 		
 		if (fmod (rate, 1000.0) != 0.0) {
-			snprintf (buf, sizeof (buf), _("SR: %.1f kHz / %4.1f msecs"), 
+			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f msecs"), 
 				  (float) rate/1000.0f,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		} else {
-			snprintf (buf, sizeof (buf), _("SR: %u kHz / %4.1f msecs"), 
+			snprintf (buf, sizeof (buf), _("%u kHz / %4.1f msecs"), 
 				  rate/1000,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		}
@@ -523,7 +523,7 @@ void
 ARDOUR_UI::update_cpu_load ()
 {
 	char buf[32];
-	snprintf (buf, sizeof (buf), _("DSP Load: %.1f%%"), engine->get_cpu_load());
+	snprintf (buf, sizeof (buf), _("DSP: %.1f%%"), engine->get_cpu_load());
 	cpu_load_label.set_text (buf);
 }
 
@@ -561,7 +561,7 @@ ARDOUR_UI::update_disk_space()
 	char buf[64];
 
 	if (frames == max_frames) {
-		strcpy (buf, _("space: 24hrs+"));
+		strcpy (buf, _("Disk: 24hrs+"));
 	} else {
 		int hrs;
 		int mins;
@@ -591,7 +591,7 @@ ARDOUR_UI::update_disk_space()
 		frames -= mins * fr * 60;
 		secs = frames / fr;
 		
-		snprintf (buf, sizeof(buf), _("space: %02dh:%02dm:%02ds"), hrs, mins, secs);
+		snprintf (buf, sizeof(buf), _("Disk: %02dh:%02dm:%02ds"), hrs, mins, secs);
 	}
 
 	disk_space_label.set_text (buf);

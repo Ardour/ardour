@@ -48,12 +48,16 @@ using namespace Editing;
 
 StreamView::StreamView (RouteTimeAxisView& tv)
 	: _trackview (tv)
+	, canvas_group(new ArdourCanvas::Group(*_trackview.canvas_display))
+	, canvas_rect(new ArdourCanvas::SimpleRect (*canvas_group))
+	, _samples_per_unit(_trackview.editor.get_current_zoom())
+	, rec_updating(false)
+	, rec_active(false)
+	, use_rec_regions(tv.editor.show_waveforms_recording())
+	, region_color(_trackview.color())
+	, stream_base_color(0xFFFFFFFF)
 {
-	region_color = _trackview.color();
-
 	/* set_position() will position the group */
-
-	canvas_group = new ArdourCanvas::Group(*_trackview.canvas_display);
 
 	canvas_rect = new ArdourCanvas::SimpleRect (*canvas_group);
 	canvas_rect->property_x1() = 0.0;
@@ -61,11 +65,9 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 	canvas_rect->property_x2() = 1000000.0;
 	canvas_rect->property_y2() = (double) tv.height;
 	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
-	canvas_rect->property_fill_color_rgba() = stream_base_color;
+	// (Fill/Outline colours set in derived classes)
 
 	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
-
-	_samples_per_unit = _trackview.editor.get_current_zoom();
 
 	if (_trackview.is_track()) {
 		_trackview.track()->DiskstreamChanged.connect (mem_fun (*this, &StreamView::diskstream_changed));
@@ -73,10 +75,6 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 		_trackview.get_diskstream()->RecordEnableChanged.connect (mem_fun (*this, &StreamView::rec_enable_changed));
 		_trackview.session().RecordStateChanged.connect (mem_fun (*this, &StreamView::sess_rec_enable_changed));
 	} 
-
-	rec_updating = false;
-	rec_active = false;
-	use_rec_regions = tv.editor.show_waveforms_recording ();
 
 	ColorChanged.connect (mem_fun (*this, &StreamView::color_handler));
 }
@@ -285,13 +283,12 @@ StreamView::apply_color (Gdk::Color& color, ColorTarget target)
 		for (i = region_views.begin(); i != region_views.end(); ++i) {
 			(*i)->set_color (region_color);
 		}
-		// stream_base_color = RGBA_TO_UINT (color.red/256, color.green/256, color.blue/256, 255);
-		// gnome_canvas_item_set (canvas_rect, "fill_color_rgba", stream_base_color, NULL);
 		break;
 		
 	case StreamBaseColor:
-		// stream_base_color = RGBA_TO_UINT (color.red/256, color.green/256, color.blue/256, 255);
-		// gnome_canvas_item_set (canvas_rect, "fill_color_rgba", stream_base_color, NULL);
+		stream_base_color = RGBA_TO_UINT (
+			color.get_red_p(), color.get_green_p(), color.get_blue_p(), 255);
+		canvas_rect->property_fill_color_rgba() = stream_base_color;
 		break;
 	}
 }
