@@ -48,13 +48,13 @@ using namespace ARDOUR;
 
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
-Change AudioRegion::FadeInChanged = ARDOUR::new_change();
-Change AudioRegion::FadeOutChanged = ARDOUR::new_change();
-Change AudioRegion::FadeInActiveChanged = ARDOUR::new_change();
-Change AudioRegion::FadeOutActiveChanged = ARDOUR::new_change();
+Change AudioRegion::FadeInChanged         = ARDOUR::new_change();
+Change AudioRegion::FadeOutChanged        = ARDOUR::new_change();
+Change AudioRegion::FadeInActiveChanged   = ARDOUR::new_change();
+Change AudioRegion::FadeOutActiveChanged  = ARDOUR::new_change();
 Change AudioRegion::EnvelopeActiveChanged = ARDOUR::new_change();
 Change AudioRegion::ScaleAmplitudeChanged = ARDOUR::new_change();
-Change AudioRegion::EnvelopeChanged = ARDOUR::new_change();
+Change AudioRegion::EnvelopeChanged       = ARDOUR::new_change();
 
 AudioRegionState::AudioRegionState (string why)
 	: RegionState (why),
@@ -634,12 +634,6 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 }
 	
 XMLNode&
-AudioRegion::get_state ()
-{
-	return state (true);
-}
-
-XMLNode&
 AudioRegion::state (bool full)
 {
 	XMLNode& node (Region::state (full));
@@ -1139,51 +1133,28 @@ AudioRegion::master_source_names ()
 }
 
 bool
-AudioRegion::region_list_equivalent (const AudioRegion& other) const
+AudioRegion::source_equivalent (const Region& o) const
 {
-	return size_equivalent (other) && source_equivalent (other) && _name == other._name;
-}
+	const AudioRegion* other = dynamic_cast<const AudioRegion*>(&o);
+	if (!other)
+		return false;
 
-bool
-AudioRegion::source_equivalent (const AudioRegion& other) const
-{
 	SourceList::const_iterator i;
 	SourceList::const_iterator io;
 
-	for (i = sources.begin(), io = other.sources.begin(); i != sources.end() && io != other.sources.end(); ++i, ++io) {
+	for (i = sources.begin(), io = other->sources.begin(); i != sources.end() && io != other->sources.end(); ++i, ++io) {
 		if ((*i)->id() != (*io)->id()) {
 			return false;
 		}
 	}
 
-	for (i = master_sources.begin(), io = other.master_sources.begin(); i != master_sources.end() && io != other.master_sources.end(); ++i, ++io) {
+	for (i = master_sources.begin(), io = other->master_sources.begin(); i != master_sources.end() && io != other->master_sources.end(); ++i, ++io) {
 		if ((*i)->id() != (*io)->id()) {
 			return false;
 		}
 	}
 
 	return true;
-}
-
-bool
-AudioRegion::overlap_equivalent (const AudioRegion& other) const
-{
-	return coverage (other.first_frame(), other.last_frame()) != OverlapNone;
-}
-
-bool
-AudioRegion::equivalent (const AudioRegion& other) const
-{
-	return _start == other._start &&
-		_position == other._position &&
-		_length == other._length;
-}
-
-bool
-AudioRegion::size_equivalent (const AudioRegion& other) const
-{
-	return _start == other._start &&
-		_length == other._length;
 }
 
 int

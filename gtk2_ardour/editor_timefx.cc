@@ -28,7 +28,7 @@
 
 #include "editor.h"
 #include "audio_time_axis.h"
-#include "regionview.h"
+#include "audio_region_view.h"
 #include "region_selection.h"
 
 #include <ardour/session.h>
@@ -100,7 +100,7 @@ Editor::TimeStretchDialog::delete_timestretch_in_progress (GdkEventAny* ev)
 }
 
 int
-Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
+Editor::run_timestretch (RegionSelection& regions, float fraction)
 {
 	pthread_t thread;
 
@@ -157,39 +157,42 @@ Editor::run_timestretch (AudioRegionSelection& regions, float fraction)
 void
 Editor::do_timestretch (TimeStretchDialog& dialog)
 {
-	AudioTrack* at;
+	Track*    t;
 	Playlist* playlist;
-	AudioRegion* new_region;
+	Region*   new_region;
 
 
-	for (AudioRegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {
+	for (RegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
+		if (!arv)
+			continue;
 
-		AudioRegion& aregion ((*i)->region);
-		TimeAxisView* tv = &(*i)->get_time_axis_view();
-		AudioTimeAxisView* atv;
-		AudioRegionSelection::iterator tmp;
+		AudioRegion& region (arv->audio_region());
+		TimeAxisView* tv = &(arv->get_time_axis_view());
+		RouteTimeAxisView* rtv;
+		RegionSelection::iterator tmp;
 		
-		cerr << "stretch " << aregion.name() << endl;
+		cerr << "stretch " << region.name() << endl;
 
 		tmp = i;
 		++tmp;
 
-		if ((atv = dynamic_cast<AudioTimeAxisView*> (tv)) == 0) {
+		if ((rtv = dynamic_cast<RouteTimeAxisView*> (tv)) == 0) {
 			i = tmp;
 			continue;
 		}
 
-		if ((at = atv->audio_track()) == 0) {
+		if ((t = dynamic_cast<Track*> (rtv->route().get())) == 0) {
 			i = tmp;
 			continue;
 		}
 	
-		if ((playlist = at->disk_stream().playlist()) == 0) {
+		if ((playlist = t->diskstream().playlist()) == 0) {
 			i = tmp;
 			continue;
 		}
 
-		dialog.request.region = &aregion;
+		dialog.request.region = &region;
 
 		if (!dialog.request.running) {
 			/* we were cancelled */
@@ -204,7 +207,7 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 		}
 
 		session->add_undo (playlist->get_memento());
-		playlist->replace_region (aregion, *new_region, aregion.position());
+		playlist->replace_region (region, *new_region, region.position());
 		session->add_redo_no_execute (playlist->get_memento());
 
 		i = tmp;

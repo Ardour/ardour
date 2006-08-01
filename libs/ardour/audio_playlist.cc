@@ -243,16 +243,18 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ch
 
 	for (vector<uint32_t>::iterator l = relevant_layers.begin(); l != relevant_layers.end(); ++l) {
 
+		// FIXME: Should be vector<AudioRegion*>
 		vector<Region*>& r (relevant_regions[*l]);
 		vector<Crossfade*>& x (relevant_xfades[*l]);
 
 		for (vector<Region*>::iterator i = r.begin(); i != r.end(); ++i) {
-			(*i)->read_at (buf, mixdown_buffer, gain_buffer, workbuf, start, cnt, chan_n, read_frames, skip_frames);
-			_read_data_count += (*i)->read_data_count();
+			AudioRegion* const ar = dynamic_cast<AudioRegion*>(*i);
+			assert(ar);
+			ar->read_at (buf, mixdown_buffer, gain_buffer, workbuf, start, cnt, chan_n, read_frames, skip_frames);
+			_read_data_count += ar->read_data_count();
 		}
 		
 		for (vector<Crossfade*>::iterator i = x.begin(); i != x.end(); ++i) {
-			
 			(*i)->read_at (buf, mixdown_buffer, gain_buffer, workbuf, start, cnt, chan_n);
 
 			/* don't JACK up _read_data_count, since its the same data as we just
@@ -878,38 +880,6 @@ AudioPlaylist::crossfade_changed (Change ignored)
 	maybe_save_state (_("xfade change"));
 
 	notify_modified ();
-}
-
-void
-AudioPlaylist::get_equivalent_regions (const AudioRegion& other, vector<AudioRegion*>& results)
-{
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		AudioRegion* ar = dynamic_cast<AudioRegion*> (*i);
-
-		if (ar) {
-			if (Config->get_use_overlap_equivalency()) {
-				if (ar->overlap_equivalent (other)) {
-					results.push_back (ar);
-				} else if (ar->equivalent (other)) {
-					results.push_back (ar);
-				}
-			}
-		}
-	}
-}
-
-void
-AudioPlaylist::get_region_list_equivalent_regions (const AudioRegion& other, vector<AudioRegion*>& results)
-{
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		AudioRegion* ar = dynamic_cast<AudioRegion*> (*i);
-		
-		if (ar && ar->region_list_equivalent (other)) {
-			results.push_back (ar);
-		}
-	}
 }
 
 bool

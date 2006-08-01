@@ -39,13 +39,13 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Change Region::FadeChanged = ARDOUR::new_change ();
+Change Region::FadeChanged       = ARDOUR::new_change ();
 Change Region::SyncOffsetChanged = ARDOUR::new_change ();
-Change Region::MuteChanged = ARDOUR::new_change ();
-Change Region::OpacityChanged = ARDOUR::new_change ();
-Change Region::LockChanged = ARDOUR::new_change ();
-Change Region::LayerChanged = ARDOUR::new_change ();
-Change Region::HiddenChanged = ARDOUR::new_change ();
+Change Region::MuteChanged       = ARDOUR::new_change ();
+Change Region::OpacityChanged    = ARDOUR::new_change ();
+Change Region::LockChanged       = ARDOUR::new_change ();
+Change Region::LayerChanged      = ARDOUR::new_change ();
+Change Region::HiddenChanged     = ARDOUR::new_change ();
 
 sigc::signal<void,Region *> Region::CheckNewRegion;
 
@@ -989,4 +989,31 @@ void
 Region::set_last_layer_op (uint64_t when)
 {
 	_last_layer_op = when;
+}
+
+bool
+Region::overlap_equivalent (const Region& other) const
+{
+	return coverage (other.first_frame(), other.last_frame()) != OverlapNone;
+}
+
+bool
+Region::equivalent (const Region& other) const
+{
+	return _start == other._start &&
+		_position == other._position &&
+		_length == other._length;
+}
+
+bool
+Region::size_equivalent (const Region& other) const
+{
+	return _start == other._start &&
+		_length == other._length;
+}
+
+bool
+Region::region_list_equivalent (const Region& other) const
+{
+	return size_equivalent (other) && source_equivalent (other) && _name == other._name;
 }

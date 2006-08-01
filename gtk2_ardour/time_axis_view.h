@@ -54,7 +54,7 @@ namespace Gtk {
 }
 
 class PublicEditor;
-class AudioRegionSelection;
+class RegionSelection;
 class TimeSelection;
 class PointSelection;
 class TimeAxisViewItem;
@@ -183,7 +183,7 @@ class TimeAxisView : public virtual AxisView
 	virtual bool cut_copy_clear (Selection&, Editing::CutCopyOp) { return false; }
 	virtual bool paste (jack_nframes_t, float times, Selection&, size_t nth) { return false; }
 	
-	virtual void set_selected_regionviews (AudioRegionSelection&) {}
+	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&) {}
 
 	virtual ARDOUR::Region* find_next_region (jack_nframes_t pos, ARDOUR::RegionPoint, int32_t dir) {

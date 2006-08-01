@@ -77,9 +77,6 @@ class AudioPlaylist : public ARDOUR::Playlist
 
 	bool destroy_region (Region*);
 
-	void get_equivalent_regions (const AudioRegion&, std::vector<AudioRegion*>&);
-	void get_region_list_equivalent_regions (const AudioRegion&, std::vector<AudioRegion*>&);
-
 	void drop_all_states ();
 
     protected:

@@ -18,6 +18,7 @@
     $Id$
 */
 
+#include <cassert>
 #include <cstdlib>
 #include <stdint.h>
 #include <cmath>
@@ -32,7 +33,7 @@
 #include "editor.h"
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
-#include "regionview.h"
+#include "audio_region_view.h"
 #include "marker.h"
 #include "streamview.h"
 #include "region_gain_line.h"
@@ -182,7 +183,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		   show the object (region) selection.
 		*/
 
-		for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 			(*i)->set_should_show_selection (true);
 		}
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
@@ -319,8 +320,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		commit = (c1 || c2);
 		break;
 		
-	case AudioRegionViewNameHighlight:
-	case AudioRegionViewName:
+	case RegionViewNameHighlight:
+	case RegionViewName:
 		c1 = set_selected_track_from_click (press, op, true, true);
 		c2 = set_selected_regionview_from_click (press, op, true);
 		commit = (c1 || c2);
@@ -521,12 +522,12 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					}
 					break;
 					
-				case AudioRegionViewNameHighlight:
+				case RegionViewNameHighlight:
 					start_trim (item, event);
 					return true;
 					break;
 					
-				case AudioRegionViewName:
+				case RegionViewName:
 					/* rename happens on edit clicks */
 						start_trim (clicked_regionview->get_name_highlight(), event);
 						return true;
@@ -692,12 +693,12 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			
 			
 			switch (item_type) {
-			case AudioRegionViewNameHighlight:
+			case RegionViewNameHighlight:
 				start_trim (item, event);
 				return true;
 				break;
 				
-			case AudioRegionViewName:
+			case RegionViewName:
 				start_trim (clicked_regionview->get_name_highlight(), event);
 				return true;
 				break;
@@ -853,7 +854,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			edit_meter_marker (item);
 			break;
 			
-		case AudioRegionViewName:
+		case RegionViewName:
 			if (clicked_regionview->name_active()) {
 				return mouse_rename_region (item, event);
 			}
@@ -888,8 +889,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 				
 			case RegionItem:
-			case AudioRegionViewNameHighlight:
-			case AudioRegionViewName:
+			case RegionViewNameHighlight:
+			case RegionViewName:
 				popup_track_context_menu (1, event->button.time, item_type, false, where);
 				break;
 				
@@ -1047,9 +1048,13 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MouseGain:
+			// Gain only makes sense for audio regions
+			if ( ! dynamic_cast<AudioRegionView*>(clicked_regionview))
+				break;
+
 			switch (item_type) {
 			case RegionItem:
-				clicked_regionview->add_gain_point_event (item, event);
+				dynamic_cast<AudioRegionView*>(clicked_regionview)->add_gain_point_event (item, event);
 				return true;
 				break;
 				
@@ -1203,7 +1208,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 		
-	case AudioRegionViewNameHighlight:
+	case RegionViewNameHighlight:
 		if (is_drawable() && mouse_mode == MouseObject) {
 			track_canvas.get_window()->set_cursor (*trimmer_cursor);
 		}
@@ -1230,11 +1235,11 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 
-	case AudioRegionViewName:
+	case RegionViewName:
 		
 		/* when the name is not an active item, the entire name highlight is for trimming */
 
-		if (!reinterpret_cast<AudioRegionView *> (item->get_data ("regionview"))->name_active()) {
+		if (!reinterpret_cast<RegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (mouse_mode == MouseObject && is_drawable()) {
 				track_canvas.get_window()->set_cursor (*trimmer_cursor);
 			}
@@ -1339,7 +1344,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	ControlPoint* cp;
 	Marker *marker;
 	Location *loc;
-	AudioRegionView* rv;
+	RegionView* rv;
 	bool is_start;
 
 	switch (item_type) {
@@ -1361,7 +1366,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		hide_verbose_canvas_cursor ();
 		break;
 		
-	case AudioRegionViewNameHighlight:
+	case RegionViewNameHighlight:
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
 	case EditCursorItem:
@@ -1392,9 +1397,9 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 
-	case AudioRegionViewName:
+	case RegionViewName:
 		/* see enter_handler() for notes */
-		if (!reinterpret_cast<AudioRegionView *> (item->get_data ("regionview"))->name_active()) {
+		if (!reinterpret_cast<RegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (is_drawable() && mouse_mode == MouseObject) {
 				track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 			}
@@ -1429,7 +1434,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
-		rv = static_cast<AudioRegionView*>(item->get_data ("regionview"));
+		rv = static_cast<RegionView*>(item->get_data ("regionview"));
 		{
 			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
 			if (rect) {
@@ -1524,7 +1529,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case PanAutomationControlPointItem:
 	case TempoMarkerItem:
 	case MeterMarkerItem:
-	case AudioRegionViewNameHighlight:
+	case RegionViewNameHighlight:
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
 	case SelectionItem:
@@ -1745,7 +1750,7 @@ Editor::start_fade_in_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	AudioRegionView* arv = static_cast<AudioRegionView*>(drag_info.data);
 
-	drag_info.pointer_frame_offset = drag_info.grab_frame - ((jack_nframes_t) arv->region.fade_in().back()->when + arv->region.position());	
+	drag_info.pointer_frame_offset = drag_info.grab_frame - ((jack_nframes_t) arv->audio_region().fade_in().back()->when + arv->region().position());	
 }
 
 void
@@ -1766,17 +1771,17 @@ Editor::fade_in_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		snap_to (pos);
 	}
 	
-	if (pos < (arv->region.position() + 64)) {
+	if (pos < (arv->region().position() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
-	} else if (pos > arv->region.last_frame()) {
-		fade_length = arv->region.length();
+	} else if (pos > arv->region().last_frame()) {
+		fade_length = arv->region().length();
 	} else {
-		fade_length = pos - arv->region.position();
+		fade_length = pos - arv->region().position();
 	}
 	
 	arv->reset_fade_in_shape_width (fade_length);
 
-	show_verbose_duration_cursor (arv->region.position(),  arv->region.position() + fade_length, 10);
+	show_verbose_duration_cursor (arv->region().position(),  arv->region().position() + fade_length, 10);
 
 	drag_info.first_move = false;
 }
@@ -1801,20 +1806,20 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 		snap_to (pos);
 	}
 
-	if (pos < (arv->region.position() + 64)) {
+	if (pos < (arv->region().position() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
 	}
-	else if (pos > arv->region.last_frame()) {
-		fade_length = arv->region.length();
+	else if (pos > arv->region().last_frame()) {
+		fade_length = arv->region().length();
 	}
 	else {
-		fade_length = pos - arv->region.position();
+		fade_length = pos - arv->region().position();
 	}
 
 	begin_reversible_command (_("change fade in length"));
-	session->add_undo (arv->region.get_memento());
-	arv->region.set_fade_in_length (fade_length);
-	session->add_redo_no_execute (arv->region.get_memento());
+	session->add_undo (arv->region().get_memento());
+	arv->audio_region().set_fade_in_length (fade_length);
+	session->add_redo_no_execute (arv->region().get_memento());
 	commit_reversible_command ();
 	fade_in_drag_motion_callback (item, event);
 }
@@ -1835,7 +1840,7 @@ Editor::start_fade_out_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	AudioRegionView* arv = static_cast<AudioRegionView*>(drag_info.data);
 
-	drag_info.pointer_frame_offset = drag_info.grab_frame - (arv->region.length() - (jack_nframes_t) arv->region.fade_out().back()->when + arv->region.position());	
+	drag_info.pointer_frame_offset = drag_info.grab_frame - (arv->region().length() - (jack_nframes_t) arv->audio_region().fade_out().back()->when + arv->region().position());	
 }
 
 void
@@ -1856,19 +1861,19 @@ Editor::fade_out_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event
 		snap_to (pos);
 	}
 
-	if (pos > (arv->region.last_frame() - 64)) {
+	if (pos > (arv->region().last_frame() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
 	}
-	else if (pos < arv->region.position()) {
-		fade_length = arv->region.length();
+	else if (pos < arv->region().position()) {
+		fade_length = arv->region().length();
 	}
 	else {
-		fade_length = arv->region.last_frame() - pos;
+		fade_length = arv->region().last_frame() - pos;
 	}
 	
 	arv->reset_fade_out_shape_width (fade_length);
 
-	show_verbose_duration_cursor (arv->region.last_frame() - fade_length, arv->region.last_frame(), 10);
+	show_verbose_duration_cursor (arv->region().last_frame() - fade_length, arv->region().last_frame(), 10);
 
 	drag_info.first_move = false;
 }
@@ -1893,20 +1898,20 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 		snap_to (pos);
 	}
 
-	if (pos > (arv->region.last_frame() - 64)) {
+	if (pos > (arv->region().last_frame() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
 	}
-	else if (pos < arv->region.position()) {
-		fade_length = arv->region.length();
+	else if (pos < arv->region().position()) {
+		fade_length = arv->region().length();
 	}
 	else {
-		fade_length = arv->region.last_frame() - pos;
+		fade_length = arv->region().last_frame() - pos;
 	}
 
 	begin_reversible_command (_("change fade out length"));
-	session->add_undo (arv->region.get_memento());
-	arv->region.set_fade_out_length (fade_length);
-	session->add_redo_no_execute (arv->region.get_memento());
+	session->add_undo (arv->region().get_memento());
+	arv->audio_region().set_fade_out_length (fade_length);
+	session->add_redo_no_execute (arv->region().get_memento());
 	commit_reversible_command ();
 
 	fade_out_drag_motion_callback (item, event);
@@ -2551,7 +2556,8 @@ Editor::start_line_grab_from_regionview (ArdourCanvas::Item* item, GdkEvent* eve
 {
 	switch (mouse_mode) {
 	case MouseGain:
-		start_line_grab (clicked_regionview->get_gain_line(), event);
+		assert(dynamic_cast<AudioRegionView*>(clicked_regionview));
+		start_line_grab (dynamic_cast<AudioRegionView*>(clicked_regionview)->get_gain_line(), event);
 		break;
 	default:
 		break;
@@ -2645,7 +2651,7 @@ Editor::line_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	if (selection->audio_regions.empty() || clicked_regionview == 0) {
+	if (selection->regions.empty() || clicked_regionview == 0) {
 		return;
 	}
 
@@ -2659,13 +2665,13 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_trackview;
-	AudioTimeAxisView* tv = dynamic_cast<AudioTimeAxisView*>(tvp);
+	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_audio_track()) {
 		speed = tv->get_diskstream()->speed();
 	}
 	
-	drag_info.last_frame_position = (jack_nframes_t) (clicked_regionview->region.position() / speed);
+	drag_info.last_frame_position = (jack_nframes_t) (clicked_regionview->region().position() / speed);
 	drag_info.pointer_frame_offset = drag_info.grab_frame - drag_info.last_frame_position;
 	drag_info.last_trackview = &clicked_regionview->get_time_axis_view();
 	// we want a move threshold
@@ -2679,7 +2685,7 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	if (selection->audio_regions.empty() || clicked_regionview == 0) {
+	if (selection->regions.empty() || clicked_regionview == 0) {
 		return;
 	}
 
@@ -2690,7 +2696,7 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	start_grab(event);
 
 	TimeAxisView* tv = &clicked_regionview->get_time_axis_view();
-	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(tv);
+	RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(tv);
 	double speed = 1.0;
 
 	if (atv && atv->is_audio_track()) {
@@ -2698,7 +2704,7 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 	
 	drag_info.last_trackview = &clicked_regionview->get_time_axis_view();
-	drag_info.last_frame_position = (jack_nframes_t) (clicked_regionview->region.position() / speed);
+	drag_info.last_frame_position = (jack_nframes_t) (clicked_regionview->region().position() / speed);
 	drag_info.pointer_frame_offset = drag_info.grab_frame - drag_info.last_frame_position;
 	// we want a move threshold
 	drag_info.want_move_threshold = true;
@@ -2709,7 +2715,7 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::start_region_brush_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	if (selection->audio_regions.empty() || clicked_regionview == 0) {
+	if (selection->regions.empty() || clicked_regionview == 0) {
 		return;
 	}
 
@@ -2723,13 +2729,13 @@ Editor::start_region_brush_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_trackview;
-	AudioTimeAxisView* tv = dynamic_cast<AudioTimeAxisView*>(tvp);
+	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_audio_track()) {
 		speed = tv->get_diskstream()->speed();
 	}
 	
-	drag_info.last_frame_position = (jack_nframes_t) (clicked_regionview->region.position() / speed);
+	drag_info.last_frame_position = (jack_nframes_t) (clicked_regionview->region().position() / speed);
 	drag_info.pointer_frame_offset = drag_info.grab_frame - drag_info.last_frame_position;
 	drag_info.last_trackview = &clicked_regionview->get_time_axis_view();
 	// we want a move threshold
@@ -2744,7 +2750,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	double x_delta;
 	double y_delta = 0;
-	AudioRegionView *rv = reinterpret_cast<AudioRegionView*> (drag_info.data); 
+	RegionView* rv = reinterpret_cast<RegionView*> (drag_info.data); 
 	jack_nframes_t pending_region_position = 0;
 	int32_t pointer_y_span = 0, canvas_pointer_y_span = 0, original_pointer_order;
 	int32_t visible_y_high = 0, visible_y_low = 512;  //high meaning higher numbered.. not the height on the screen
@@ -2764,18 +2770,18 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		
 		/* duplicate the region(s) */
 		
-		vector<AudioRegionView*> new_regionviews;
+		vector<RegionView*> new_regionviews;
 		
 		set<Playlist*> affected_playlists;
 		pair<set<Playlist*>::iterator,bool> insert_result;
 		
-		for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
-			AudioRegionView* rv;
+		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
+			RegionView* rv;
 			
 			rv = (*i);
 			
-			Playlist* to_playlist = rv->region.playlist();
-			AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&rv->get_time_axis_view());
+			Playlist* to_playlist = rv->region().playlist();
+			RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(&rv->get_time_axis_view());
 			
 			insert_result = affected_playlists.insert (to_playlist);
 			if (insert_result.second) {
@@ -2784,18 +2790,21 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 			latest_regionview = 0;
 			
-			sigc::connection c = atv->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+			sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 			
-			/* create a new region with the same name.
-			 */
+			/* create a new region with the same name. */
 			
-			AudioRegion* newregion = new AudioRegion (rv->region);
-			
+			// FIXME: ew.  need a (virtual) Region::duplicate() or something?
+			Region* newregion = NULL;
+			if (dynamic_cast<AudioRegion*>(&rv->region()))
+				newregion = new AudioRegion (dynamic_cast<AudioRegion&>(rv->region()));
+			assert(newregion);
+
 			/* if the original region was locked, we don't care */
 			
 			newregion->set_locked (false);
 			
-			to_playlist->add_region (*newregion, (jack_nframes_t) (rv->region.position() * atv->get_diskstream()->speed()));
+			to_playlist->add_region (*newregion, (jack_nframes_t) (rv->region().position() * atv->get_diskstream()->speed()));
 			
 			c.disconnect ();
 			
@@ -2907,16 +2916,15 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			}
 		}
 
-		for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
-			AudioRegionView* rv2;
-			rv2 = (*i);
+		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
+			RegionView* rv2 = (*i);
 			double ix1, ix2, iy1, iy2;
 			int32_t n = 0;
 
 			rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 			rv2->get_canvas_group()->i2w (ix1, iy1);
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
-			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
+			RouteTimeAxisView* atv2 = dynamic_cast<RouteTimeAxisView*>(tvp2);
 
 			if (atv2->order != original_pointer_order) {	
 				/* this isn't the pointer track */	
@@ -3011,8 +3019,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	    
 			pending_region_position = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 	    
-			sync_offset = rv->region.sync_offset (sync_dir);
-			sync_frame = rv->region.adjust_to_sync (pending_region_position);
+			sync_offset = rv->region().sync_offset (sync_dir);
+			sync_frame = rv->region().adjust_to_sync (pending_region_position);
 
 			/* we snap if the snap modifier is not enabled.
 			 */
@@ -3031,7 +3039,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			pending_region_position = 0;
 		}
 	  
-		if (pending_region_position > max_frames - rv->region.length()) {
+		if (pending_region_position > max_frames - rv->region().length()) {
 			pending_region_position = drag_info.last_frame_position;
 		}
 	  
@@ -3073,14 +3081,11 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	} 
 
 	if (x_delta < 0) {
-		for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
+		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 
-			AudioRegionView* rv2;
-			rv2 = (*i);
+			RegionView* rv2 = (*i);
 
-			/* if any regionview is at zero, we need to know so we can 
-			   stop further leftward motion.
-			*/
+			// If any regionview is at zero, we need to know so we can stop further leftward motion.
 			
 			double ix1, ix2, iy1, iy2;
 			rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
@@ -3098,12 +3103,11 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	************************************************************/
 
 	pair<set<Playlist*>::iterator,bool> insert_result;
-	const list<AudioRegionView*>& layered_regions = selection->audio_regions.by_layer();
+	const list<RegionView*>& layered_regions = selection->regions.by_layer();
 
-	for (list<AudioRegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
+	for (list<RegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
 	    
-		AudioRegionView* rv;
-		rv = (*i);
+		RegionView* rv = (*i);
 		double ix1, ix2, iy1, iy2;
 		int32_t temp_pointer_y_span = pointer_y_span;
 
@@ -3184,8 +3188,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			if (-x_delta > ix1) {
 				x_delta = -ix1;
 			}
-		} else if ((x_delta > 0) &&(rv->region.last_frame() > max_frames - x_delta)) {
-			x_delta = max_frames - rv->region.last_frame();
+		} else if ((x_delta > 0) &&(rv->region().last_frame() > max_frames - x_delta)) {
+			x_delta = max_frames - rv->region().last_frame();
 		}
 			
 		if (drag_info.first_move) {
@@ -3210,7 +3214,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 			AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&rv->get_time_axis_view());
 			if (atv && atv->is_audio_track()) {
-				AudioPlaylist* pl = atv->get_diskstream()->playlist();
+				AudioPlaylist* pl = dynamic_cast<AudioPlaylist*>(atv->get_diskstream()->playlist());
 				if (pl) {
 					/* only freeze and capture state once */
 
@@ -3246,11 +3250,11 @@ void
 Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	jack_nframes_t where;
-	AudioRegionView* rv = reinterpret_cast<AudioRegionView *> (drag_info.data);
+	RegionView* rv = reinterpret_cast<RegionView *> (drag_info.data);
 	pair<set<Playlist*>::iterator,bool> insert_result;
 	bool nocommit = true;
 	double speed;
-	AudioTimeAxisView* atv;
+	RouteTimeAxisView* atv;
 	bool regionview_y_movement;
 	bool regionview_x_movement;
 
@@ -3284,7 +3288,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		speed = atv->get_diskstream()->speed();
 	}
 	
-	regionview_x_movement = (drag_info.last_frame_position != (jack_nframes_t) (rv->region.position()/speed));
+	regionview_x_movement = (drag_info.last_frame_position != (jack_nframes_t) (rv->region().position()/speed));
 	regionview_y_movement = (drag_info.last_trackview != &rv->get_time_axis_view());
 
 	//printf ("last_frame: %s position is %lu  %g\n", rv->get_time_axis_view().name().c_str(), drag_info.last_frame_position, speed); 
@@ -3294,13 +3298,13 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 		/* motion between tracks */
 
-		list<AudioRegionView*> new_selection;
+		list<RegionView*> new_selection;
 	
 		/* moved to a different audio track. */
 
-		for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ) {
+		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
 	    
-			AudioRegionView* rv2 = (*i);	    	    
+			RegionView* rv2 = (*i);	    	    
 	    
 			/* the region that used to be in the old playlist is not
 			   moved to the new one - we make a copy of it. as a result,
@@ -3317,7 +3321,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 		/* first, freeze the target tracks */
 
-		for (list<AudioRegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end();i++ ) {
+		for (list<RegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end();i++ ) {
 
 			Playlist* from_playlist;
 			Playlist* to_playlist;
@@ -3329,7 +3333,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
 	    
-			from_playlist = (*i)->region.playlist();
+			from_playlist = (*i)->region().playlist();
 			to_playlist = atv2->playlist();
 
 			/* the from_playlist was frozen in the "first_move" case 
@@ -3352,7 +3356,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 		/* now do it again with the actual operations */
 
-		for (list<AudioRegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end();i++ ) {
+		for (list<RegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end();i++ ) {
 
 			Playlist* from_playlist;
 			Playlist* to_playlist;
@@ -3364,17 +3368,17 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
 	    
-			from_playlist = (*i)->region.playlist();
+			from_playlist = (*i)->region().playlist();
 			to_playlist = atv2->playlist();
 
 			latest_regionview = 0;
 	    
 			where = (jack_nframes_t) (unit_to_frame (ix1) * speed);
-			Region* new_region = createRegion ((*i)->region);
+			Region* new_region = createRegion ((*i)->region());
 
-			from_playlist->remove_region (&((*i)->region));
+			from_playlist->remove_region (&((*i)->region()));
 	  
-			sigc::connection c = atv2->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+			sigc::connection c = atv2->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 			to_playlist->add_region (*new_region, where);
 			c.disconnect ();
 			
@@ -3387,11 +3391,11 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 		/* motion within a single track */
 		
-		for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
+		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 
 			rv = (*i);
 
-			if (rv->region.locked()) {
+			if (rv->region().locked()) {
 				continue;
 			}
 			
@@ -3413,14 +3417,14 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 				
 			} else {
 				
-				where = rv->region.position();
+				where = rv->region().position();
 			}
 
 			rv->get_time_axis_view().reveal_dependent_views (*rv);
 
 			/* no need to add an undo here, we did that when we added this playlist to motion_frozen playlists */
 			
-			rv->region.set_position (where, (void *) this);
+			rv->region().set_position (where, (void *) this);
 		}
 	}
 
@@ -3454,15 +3458,15 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 
 		if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Alt))) {
 
-			align_region (rv.region, SyncPoint, (jack_nframes_t) (edit_cursor->current_frame * speed));
+			align_region (rv.region(), SyncPoint, (jack_nframes_t) (edit_cursor->current_frame * speed));
 
 		} else if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
 
-			align_region (rv.region, End, (jack_nframes_t) (edit_cursor->current_frame * speed));
+			align_region (rv.region(), End, (jack_nframes_t) (edit_cursor->current_frame * speed));
 
 		} else {
 
-			align_region (rv.region, Start, (jack_nframes_t) (edit_cursor->current_frame * speed));
+			align_region (rv.region(), Start, (jack_nframes_t) (edit_cursor->current_frame * speed));
 		}
 	}
 }
@@ -3579,7 +3583,7 @@ Editor::show_verbose_duration_cursor (jack_nframes_t start, jack_nframes_t end, 
 }
 
 void
-Editor::collect_new_region_view (AudioRegionView* rv)
+Editor::collect_new_region_view (RegionView* rv)
 {
 	latest_regionview = rv;
 }
@@ -3612,7 +3616,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	*/
 	
 	latest_regionview = 0;
-	sigc::connection c = clicked_audio_trackview->view->AudioRegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+	sigc::connection c = clicked_audio_trackview->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 	
 	/* A selection grab currently creates two undo/redo operations, one for 
 	   creating the new region and another for moving it.
@@ -3647,7 +3651,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	start_grab (event);
 	
 	drag_info.last_trackview = clicked_trackview;
-	drag_info.last_frame_position = latest_regionview->region.position();
+	drag_info.last_frame_position = latest_regionview->region().position();
 	drag_info.pointer_frame_offset = drag_info.grab_frame - drag_info.last_frame_position;
 	
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
@@ -3888,9 +3892,9 @@ Editor::start_trim (ArdourCanvas::Item* item, GdkEvent* event)
 		speed = tv->get_diskstream()->speed();
 	}
 	
-	jack_nframes_t region_start = (jack_nframes_t) (clicked_regionview->region.position() / speed);
-	jack_nframes_t region_end = (jack_nframes_t) (clicked_regionview->region.last_frame() / speed);
-	jack_nframes_t region_length = (jack_nframes_t) (clicked_regionview->region.length() / speed);
+	jack_nframes_t region_start = (jack_nframes_t) (clicked_regionview->region().position() / speed);
+	jack_nframes_t region_end = (jack_nframes_t) (clicked_regionview->region().last_frame() / speed);
+	jack_nframes_t region_length = (jack_nframes_t) (clicked_regionview->region().length() / speed);
 
 	motion_frozen_playlists.clear();
 	
@@ -3930,7 +3934,7 @@ Editor::start_trim (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	AudioRegionView* rv = clicked_regionview;
+	RegionView* rv = clicked_regionview;
 	jack_nframes_t frame_delta = 0;
 	bool left_direction;
 	bool obey_snap = !Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier());
@@ -3942,7 +3946,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_trackview;
-	AudioTimeAxisView* tv = dynamic_cast<AudioTimeAxisView*>(tvp);
+	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 	pair<set<Playlist*>::iterator,bool> insert_result;
 
 	if (tv && tv->is_audio_track()) {
@@ -3981,11 +3985,14 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 		begin_reversible_command (trim_type);
 
-		for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
-			(*i)->region.freeze ();
-			(*i)->temporarily_hide_envelope ();
+		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
+			(*i)->region().freeze ();
+		
+			AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+			if (arv)
+				arv->temporarily_hide_envelope ();
 
-			Playlist * pl = (*i)->region.playlist();
+			Playlist * pl = (*i)->region().playlist();
 			insert_result = motion_frozen_playlists.insert (pl);
 			if (insert_result.second) {
 				session->add_undo (pl->get_memento());
@@ -4001,20 +4008,20 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	switch (trim_op) {		
 	case StartTrim:
-		if ((left_direction == false) && (drag_info.current_pointer_frame <= rv->region.first_frame()/speed)) {
+		if ((left_direction == false) && (drag_info.current_pointer_frame <= rv->region().first_frame()/speed)) {
 			break;
                 } else {
-			for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
+			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 				single_start_trim (**i, frame_delta, left_direction, obey_snap);
 			}
 			break;
 		}
 		
 	case EndTrim:
-		if ((left_direction == true) && (drag_info.current_pointer_frame > (jack_nframes_t) (rv->region.last_frame()/speed))) {
+		if ((left_direction == true) && (drag_info.current_pointer_frame > (jack_nframes_t) (rv->region().last_frame()/speed))) {
 			break;
 		} else {
-			for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i) {
+			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 				single_end_trim (**i, frame_delta, left_direction, obey_snap);
 			}
 			break;
@@ -4028,8 +4035,8 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				swap_direction = true;
 			}
 			
-			for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin();
-			     i != selection->audio_regions.by_layer().end(); ++i)
+			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin();
+			     i != selection->regions.by_layer().end(); ++i)
 			{
 				single_contents_trim (**i, frame_delta, left_direction, swap_direction, obey_snap);
 			}
@@ -4039,10 +4046,10 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	switch (trim_op) {
 	case StartTrim:
-		show_verbose_time_cursor((jack_nframes_t) (rv->region.position()/speed), 10);	
+		show_verbose_time_cursor((jack_nframes_t) (rv->region().position()/speed), 10);	
 		break;
 	case EndTrim:
-		show_verbose_time_cursor((jack_nframes_t) (rv->region.last_frame()/speed), 10);	
+		show_verbose_time_cursor((jack_nframes_t) (rv->region().last_frame()/speed), 10);	
 		break;
 	case ContentsTrim:
 		show_verbose_time_cursor(drag_info.current_pointer_frame, 10);	
@@ -4054,9 +4061,9 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 }
 
 void
-Editor::single_contents_trim (AudioRegionView& rv, jack_nframes_t frame_delta, bool left_direction, bool swap_direction, bool obey_snap)
+Editor::single_contents_trim (RegionView& rv, jack_nframes_t frame_delta, bool left_direction, bool swap_direction, bool obey_snap)
 {
-	Region& region (rv.region);
+	Region& region (rv.region());
 
 	if (region.locked()) {
 		return;
@@ -4066,7 +4073,7 @@ Editor::single_contents_trim (AudioRegionView& rv, jack_nframes_t frame_delta, b
 
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_trackview;
-	AudioTimeAxisView* tv = dynamic_cast<AudioTimeAxisView*>(tvp);
+	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_audio_track()) {
 		speed = tv->get_diskstream()->speed();
@@ -4094,9 +4101,9 @@ Editor::single_contents_trim (AudioRegionView& rv, jack_nframes_t frame_delta, b
 }
 
 void
-Editor::single_start_trim (AudioRegionView& rv, jack_nframes_t frame_delta, bool left_direction, bool obey_snap)
+Editor::single_start_trim (RegionView& rv, jack_nframes_t frame_delta, bool left_direction, bool obey_snap)
 {
-	Region& region (rv.region);	
+	Region& region (rv.region());	
 
 	if (region.locked()) {
 		return;
@@ -4128,9 +4135,9 @@ Editor::single_start_trim (AudioRegionView& rv, jack_nframes_t frame_delta, bool
 }
 
 void
-Editor::single_end_trim (AudioRegionView& rv, jack_nframes_t frame_delta, bool left_direction, bool obey_snap)
+Editor::single_end_trim (RegionView& rv, jack_nframes_t frame_delta, bool left_direction, bool obey_snap)
 {
-	Region& region (rv.region);
+	Region& region (rv.region());
 
 	if (region.locked()) {
 		return;
@@ -4169,8 +4176,8 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			thaw_region_after_trim (*clicked_regionview);		
 		} else {
 			
-			for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin();
-			     i != selection->audio_regions.by_layer().end(); ++i)
+			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin();
+			     i != selection->regions.by_layer().end(); ++i)
 			{
 				thaw_region_after_trim (**i);
 			}
@@ -4193,7 +4200,7 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::point_trim (GdkEvent* event)
 {
-	AudioRegionView* rv = clicked_regionview;
+	RegionView* rv = clicked_regionview;
 	jack_nframes_t new_bound = drag_info.current_pointer_frame;
 
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
@@ -4208,22 +4215,22 @@ Editor::point_trim (GdkEvent* event)
 
 		if (rv->get_selected()) {
 
-			for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin();
-			     i != selection->audio_regions.by_layer().end(); ++i)
+			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin();
+			     i != selection->regions.by_layer().end(); ++i)
 			{
-				if (!(*i)->region.locked()) {
-					session->add_undo ((*i)->region.playlist()->get_memento());
-					(*i)->region.trim_front (new_bound, this);	
-					session->add_redo_no_execute ((*i)->region.playlist()->get_memento());
+				if (!(*i)->region().locked()) {
+					session->add_undo ((*i)->region().playlist()->get_memento());
+					(*i)->region().trim_front (new_bound, this);	
+					session->add_redo_no_execute ((*i)->region().playlist()->get_memento());
 				}
 			}
 
 		} else {
 
-			if (!rv->region.locked()) {
-				session->add_undo (rv->region.playlist()->get_memento());
-				rv->region.trim_front (new_bound, this);	
-				session->add_redo_no_execute (rv->region.playlist()->get_memento());
+			if (!rv->region().locked()) {
+				session->add_undo (rv->region().playlist()->get_memento());
+				rv->region().trim_front (new_bound, this);	
+				session->add_redo_no_execute (rv->region().playlist()->get_memento());
 			}
 		}
 
@@ -4236,21 +4243,21 @@ Editor::point_trim (GdkEvent* event)
 
 		if (rv->get_selected()) {
 			
-			for (list<AudioRegionView*>::const_iterator i = selection->audio_regions.by_layer().begin(); i != selection->audio_regions.by_layer().end(); ++i)
+			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i)
 			{
-				if (!(*i)->region.locked()) {
-					session->add_undo ((*i)->region.playlist()->get_memento());
-					(*i)->region.trim_end (new_bound, this);
-					session->add_redo_no_execute ((*i)->region.playlist()->get_memento());	
+				if (!(*i)->region().locked()) {
+					session->add_undo ((*i)->region().playlist()->get_memento());
+					(*i)->region().trim_end (new_bound, this);
+					session->add_redo_no_execute ((*i)->region().playlist()->get_memento());	
 				}
 			}
 
 		} else {
 
-			if (!rv->region.locked()) {
-				session->add_undo (rv->region.playlist()->get_memento());
-				rv->region.trim_end (new_bound, this);
-				session->add_redo_no_execute (rv->region.playlist()->get_memento());	
+			if (!rv->region().locked()) {
+				session->add_undo (rv->region().playlist()->get_memento());
+				rv->region().trim_end (new_bound, this);
+				session->add_redo_no_execute (rv->region().playlist()->get_memento());	
 			}
 		}
 
@@ -4263,9 +4270,9 @@ Editor::point_trim (GdkEvent* event)
 }
 
 void
-Editor::thaw_region_after_trim (AudioRegionView& rv)
+Editor::thaw_region_after_trim (RegionView& rv)
 {
-	Region& region (rv.region);
+	Region& region (rv.region());
 
 	if (region.locked()) {
 		return;
@@ -4274,7 +4281,9 @@ Editor::thaw_region_after_trim (AudioRegionView& rv)
 	region.thaw (_("trimmed region"));
 	session->add_redo_no_execute (region.playlist()->get_memento());
 
-	rv.unhide_envelope ();
+	AudioRegionView* arv = dynamic_cast<AudioRegionView*>(&rv);
+	if (arv)
+		arv->unhide_envelope ();
 }
 
 void
@@ -4664,7 +4673,7 @@ Editor::end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 		
 	} else {
-		selection->clear_audio_regions();
+		selection->clear_regions();
 		selection->clear_points ();
 		selection->clear_lines ();
 	}
@@ -4681,7 +4690,7 @@ Editor::mouse_rename_region (ArdourCanvas::Item* item, GdkEvent* event)
 	ArdourPrompter prompter (false);
 
 	prompter.set_prompt (_("Name for region:"));
-	prompter.set_initial_text (clicked_regionview->region.name());
+	prompter.set_initial_text (clicked_regionview->region().name());
 	prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
 	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	prompter.show_all ();
@@ -4690,7 +4699,7 @@ Editor::mouse_rename_region (ArdourCanvas::Item* item, GdkEvent* event)
         string str;
 		prompter.get_result(str);
 		if (str.length()) {
-	        clicked_regionview->region.set_name (str);
+	        clicked_regionview->region().set_name (str);
 		}
 		break;
 	}
@@ -4712,7 +4721,7 @@ Editor::start_time_fx (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::time_fx_motion (ArdourCanvas::Item *item, GdkEvent* event)
 {
-	AudioRegionView* rv = clicked_regionview;
+	RegionView* rv = clicked_regionview;
 
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 		snap_to (drag_info.current_pointer_frame);
@@ -4722,8 +4731,8 @@ Editor::time_fx_motion (ArdourCanvas::Item *item, GdkEvent* event)
 		return;
 	}
 
-	if (drag_info.current_pointer_frame > rv->region.position()) {
-		rv->get_time_axis_view().show_timestretch (rv->region.position(), drag_info.current_pointer_frame);
+	if (drag_info.current_pointer_frame > rv->region().position()) {
+		rv->get_time_axis_view().show_timestretch (rv->region().position(), drag_info.current_pointer_frame);
 	}
 
 	drag_info.last_pointer_frame = drag_info.current_pointer_frame;
@@ -4741,20 +4750,24 @@ Editor::end_time_fx (ArdourCanvas::Item* item, GdkEvent* event)
 		return;
 	}
 	
-	jack_nframes_t newlen = drag_info.last_pointer_frame - clicked_regionview->region.position();
-	float percentage = (float) ((double) newlen - (double) clicked_regionview->region.length()) / ((double) newlen) * 100.0f;
+	jack_nframes_t newlen = drag_info.last_pointer_frame - clicked_regionview->region().position();
+	float percentage = (float) ((double) newlen - (double) clicked_regionview->region().length()) / ((double) newlen) * 100.0f;
 	
 	begin_reversible_command (_("timestretch"));
 
-	if (run_timestretch (selection->audio_regions, percentage) == 0) {
+	if (run_timestretch (selection->regions, percentage) == 0) {
 		session->commit_reversible_command ();
 	}
 }
 
 void
-Editor::mouse_brush_insert_region (AudioRegionView* rv, jack_nframes_t pos)
+Editor::mouse_brush_insert_region (RegionView* rv, jack_nframes_t pos)
 {
 	/* no brushing without a useful snap setting */
+
+	// FIXME
+	AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
+	assert(arv);
 
 	switch (snap_mode) {
 	case SnapMagnetic:
@@ -4775,11 +4788,11 @@ Editor::mouse_brush_insert_region (AudioRegionView* rv, jack_nframes_t pos)
 
 	/* don't brush a copy over the original */
 	
-	if (pos == rv->region.position()) {
+	if (pos == rv->region().position()) {
 		return;
 	}
 
-	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&rv->get_time_axis_view());
+	RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(&arv->get_time_axis_view());
 
 	if (atv == 0 || !atv->is_audio_track()) {
 		return;
@@ -4789,7 +4802,7 @@ Editor::mouse_brush_insert_region (AudioRegionView* rv, jack_nframes_t pos)
 	double speed = atv->get_diskstream()->speed();
 	
 	session->add_undo (playlist->get_memento());
-	playlist->add_region (*(new AudioRegion (rv->region)), (jack_nframes_t) (pos * speed));
+	playlist->add_region (*(new AudioRegion (arv->audio_region())), (jack_nframes_t) (pos * speed));
 	session->add_redo_no_execute (playlist->get_memento());
 	
 	// playlist is frozen, so we have to update manually

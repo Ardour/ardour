@@ -39,15 +39,10 @@ using namespace PBD;
 using namespace Gtk;
 
 void
-Editor::handle_new_route_p (boost::shared_ptr<Route> route)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route_p), route));
-	handle_new_route (route);
-}
-
-void
 Editor::handle_new_route (boost::shared_ptr<Route> route)
 {
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route), route));
+	
 	TimeAxisView *tv;
 	AudioTimeAxisView *atv;
 	TreeModel::Row parent;

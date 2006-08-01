@@ -75,6 +75,7 @@ ardour_ui_ed.cc
 ardour_ui_mixer.cc
 ardour_ui_options.cc
 audio_clock.cc
+route_time_axis.cc
 audio_time_axis.cc
 automation_gain_line.cc
 automation_line.cc
@@ -157,10 +158,11 @@ public_editor.cc
 redirect_automation_line.cc
 redirect_automation_time_axis.cc
 redirect_box.cc
-region_editor.cc
+audio_region_editor.cc
 region_gain_line.cc
 region_selection.cc
-regionview.cc
+region_view.cc
+audio_region_view.cc
 route_params_ui.cc
 route_redirect_selection.cc
 route_ui.cc
@@ -168,7 +170,8 @@ selection.cc
 sfdb_ui.cc
 send_ui.cc
 streamview.cc
-taperegionview.cc
+audio_streamview.cc
+tape_region_view.cc
 tempo_dialog.cc
 time_axis_view.cc
 time_axis_view_item.cc

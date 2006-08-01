@@ -18,8 +18,8 @@
     $Id$
 */
 
-#ifndef __gtk_ardour_region_edit_h__
-#define __gtk_ardour_region_edit_h__
+#ifndef __gtk_ardour_audio_region_edit_h__
+#define __gtk_ardour_audio_region_edit_h__
 
 #include <map>
 
@@ -41,6 +41,7 @@
 
 #include "audio_clock.h"
 #include "ardour_dialog.h"
+#include "region_editor.h"
 
 namespace ARDOUR {
 	class AudioRegion;
@@ -49,14 +50,13 @@ namespace ARDOUR {
 
 class AudioRegionView;
 
-class AudioRegionEditor : public ArdourDialog
+class AudioRegionEditor : public RegionEditor
 {
   public:
 	AudioRegionEditor (ARDOUR::Session&, ARDOUR::AudioRegion&, AudioRegionView& rv);
 	~AudioRegionEditor ();
 
   private:
-	ARDOUR::Session& _session;
 	ARDOUR::AudioRegion& _region;
 	AudioRegionView& _region_view;
 
@@ -183,4 +183,4 @@ class AudioRegionEditor : public ArdourDialog
 	bool spin_arrow_grab;
 };
 
-#endif /* __gtk_ardour_region_edit_h__ */
+#endif /* __gtk_ardour_audio_region_edit_h__ */

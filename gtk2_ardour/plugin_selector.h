@@ -29,6 +29,7 @@ namespace ARDOUR {
 	class Session;
 	class PluginManager;
 	class Plugin;
+	class PluginInfo;
 }
 
 class PluginSelector : public ArdourDialog

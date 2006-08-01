@@ -97,11 +97,15 @@ static bool sort_ports_by_name (Port* a, Port* b)
 }
 
 
+/** @param default_type The type of port that will be created by ensure_io
+ * and friends if no type is explicitly requested (to avoid breakage).
+ */
 IO::IO (Session& s, string name,
-
-	int input_min, int input_max, int output_min, int output_max)
+	int input_min, int input_max, int output_min, int output_max,
+	DataType default_type)
 	: _session (s),
 	  _name (name),
+	  _default_type(default_type),
 	  _gain_control (*this),
 	  _gain_automation_curve (0.0, 2.0, 1.0),
 	  _input_minimum (input_min),
@@ -781,11 +785,20 @@ IO::remove_output_port (Port* port, void* src)
 	return -1;
 }
 
+/** Add an output port.
+ *
+ * @param destination Name of input port to connect new port to.
+ * @param src Source for emitted ConfigurationChanged signal.
+ * @param type Data type of port.  Default value (NIL) will use this IO's default type.
+ */
 int
-IO::add_output_port (string destination, void* src)
+IO::add_output_port (string destination, void* src, DataType type)
 {
 	Port* our_port;
-	char buf[64];
+	char name[64];
+
+	if (type == NIL)
+		type = _default_type;
 
 	{
 		Glib::Mutex::Lock em(_session.engine().process_lock());
@@ -799,14 +812,15 @@ IO::add_output_port (string destination, void* src)
 		
 			/* Create a new output port */
 			
+			// FIXME: naming scheme for differently typed ports?
 			if (_output_maximum == 1) {
-				snprintf (buf, sizeof (buf), _("%s/out"), _name.c_str());
+				snprintf (name, sizeof (name), _("%s/out"), _name.c_str());
 			} else {
-				snprintf (buf, sizeof (buf), _("%s/out %u"), _name.c_str(), find_output_port_hole());
+				snprintf (name, sizeof (name), _("%s/out %u"), _name.c_str(), find_output_port_hole());
 			}
 			
-			if ((our_port = _session.engine().register_audio_output_port (buf)) == 0) {
-				error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
+			if ((our_port = _session.engine().register_output_port (type, name)) == 0) {
+				error << string_compose(_("IO: cannot register output port %1"), name) << endmsg;
 				return -1;
 			}
 			
@@ -882,11 +896,21 @@ IO::remove_input_port (Port* port, void* src)
 	return -1;
 }
 
+
+/** Add an input port.
+ *
+ * @param type Data type of port.  The appropriate Jack port type, and @ref Port will be created.
+ * @param destination Name of input port to connect new port to.
+ * @param src Source for emitted ConfigurationChanged signal.
+ */
 int
-IO::add_input_port (string source, void* src)
+IO::add_input_port (string source, void* src, DataType type)
 {
 	Port* our_port;
-	char buf[64];
+	char name[64];
+	
+	if (type == NIL)
+		type = _default_type;
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
@@ -900,14 +924,15 @@ IO::add_input_port (string source, void* src)
 
 			/* Create a new input port */
 			
+			// FIXME: naming scheme for differently typed ports?
 			if (_input_maximum == 1) {
-				snprintf (buf, sizeof (buf), _("%s/in"), _name.c_str());
+				snprintf (name, sizeof (name), _("%s/in"), _name.c_str());
 			} else {
-				snprintf (buf, sizeof (buf), _("%s/in %u"), _name.c_str(), find_input_port_hole());
+				snprintf (name, sizeof (name), _("%s/in %u"), _name.c_str(), find_input_port_hole());
 			}
 			
-			if ((our_port = _session.engine().register_audio_input_port (buf)) == 0) {
-				error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
+			if ((our_port = _session.engine().register_input_port (type, name)) == 0) {
+				error << string_compose(_("IO: cannot register input port %1"), name) << endmsg;
 				return -1;
 			}
 			
@@ -1001,7 +1026,7 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 		
 		char buf[64];
 		
-		/* Create a new input port */
+		/* Create a new input port (of the default type) */
 		
 		if (_input_maximum == 1) {
 			snprintf (buf, sizeof (buf), _("%s/in"), _name.c_str());
@@ -1012,7 +1037,7 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 		
 		try {
 			
-			if ((input_port = _session.engine().register_audio_input_port (buf)) == 0) {
+			if ((input_port = _session.engine().register_input_port (_default_type, buf)) == 0) {
 				error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
 				return -1;
 			}
@@ -1101,7 +1126,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 			out_changed = true;
 		}
 		
-		/* create any necessary new ports */
+		/* create any necessary new ports (of the default type) */
 		
 		while (_ninputs < nin) {
 			
@@ -1117,7 +1142,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 			}
 			
 			try {
-				if ((port = _session.engine().register_audio_input_port (buf)) == 0) {
+				if ((port = _session.engine().register_input_port (_default_type, buf)) == 0) {
 					error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
 					return -1;
 				}
@@ -1150,7 +1175,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 			}
 			
 			try { 
-				if ((port = _session.engine().register_audio_output_port (buf)) == 0) {
+				if ((port = _session.engine().register_output_port (_default_type, buf)) == 0) {
 					error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
 					return -1;
 				}
@@ -1275,7 +1300,7 @@ IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
 			snprintf (buf, sizeof (buf), _("%s/out %u"), _name.c_str(), find_output_port_hole());
 		}
 		
-		if ((output_port = _session.engine().register_audio_output_port (buf)) == 0) {
+		if ((output_port = _session.engine().register_output_port (_default_type, buf)) == 0) {
 			error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
 			return -1;
 		}

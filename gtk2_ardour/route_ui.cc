@@ -70,14 +70,14 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
         mute_button = manage (new BindableToggleButton (_route->mute_control(), m_name ));
         solo_button = manage (new BindableToggleButton (_route->solo_control(), s_name ));
 	
-	if (is_audio_track()) {
-		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(_route);
+	if (is_track()) {
+		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
-		at->disk_stream().record_enable_changed.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
+		t->diskstream().RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
 
 		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
-		rec_enable_button = manage (new BindableToggleButton (at->rec_enable_control(), r_name ));
+		rec_enable_button = manage (new BindableToggleButton (t->rec_enable_control(), r_name ));
 
 		rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
 		
@@ -268,7 +268,7 @@ RouteUI::solo_release(GdkEventButton* ev)
 gint
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
-	if (!ignore_toggle && is_audio_track() && rec_enable_button) {
+	if (!ignore_toggle && is_track() && rec_enable_button) {
 
 		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
 			// do nothing on midi bind event
@@ -351,7 +351,7 @@ RouteUI::update_mute_display ()
 }
 
 void
-RouteUI::route_rec_enable_changed (void *src)
+RouteUI::route_rec_enable_changed ()
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_rec_display));
 }
@@ -694,7 +694,7 @@ RouteUI::remove_this_route ()
 	vector<string> choices;
 	string prompt;
 
-	if (is_audio_track()) {
+	if (is_track()) {
 		prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n\nYou may also lose the playlist used by this track.\n(cannot be undone)"), _route->name());
 	} else {
 		prompt  = string_compose (_("Do you really want to remove bus \"%1\" ?\n(cannot be undone)"), _route->name());
@@ -870,27 +870,39 @@ RouteUI::disconnect_output ()
 }
 
 bool
+RouteUI::is_track () const
+{
+	return dynamic_cast<Track*>(_route.get()) != 0;
+}
+
+Track*
+RouteUI::track() const
+{
+	return dynamic_cast<Track*>(_route.get());
+}
+
+bool
 RouteUI::is_audio_track () const
 {
 	return dynamic_cast<AudioTrack*>(_route.get()) != 0;
-}
-
-AudioDiskstream*
-RouteUI::get_diskstream () const
-{
-	boost::shared_ptr<AudioTrack> at;
-
-	if ((at = boost::dynamic_pointer_cast<AudioTrack>(_route)) != 0) {
-		return &at->disk_stream();
-	} else {
-		return 0;
-	}
 }
 
 AudioTrack*
 RouteUI::audio_track() const
 {
 	return dynamic_cast<AudioTrack*>(_route.get());
+}
+
+Diskstream*
+RouteUI::get_diskstream () const
+{
+	boost::shared_ptr<Track> t;
+
+	if ((t = boost::dynamic_pointer_cast<Track>(_route)) != 0) {
+		return &t->diskstream();
+	} else {
+		return 0;
+	}
 }
 
 string
@@ -917,3 +929,4 @@ RouteUI::map_frozen ()
 		}
 	}
 }
+

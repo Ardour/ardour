@@ -26,6 +26,7 @@
 #include <pbd/xml++.h>
 #include <ardour/ardour.h>
 #include <ardour/route.h>
+#include <ardour/track.h>
 
 #include "axis_view.h"
 
@@ -47,11 +48,16 @@ class RouteUI : public virtual AxisView
 	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session&, const char*, const char*, const char*);
 	virtual ~RouteUI();
 
+	bool is_track() const;
 	bool is_audio_track() const;
-	ARDOUR::AudioDiskstream* get_diskstream() const;
 
 	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
+	
+	// FIXME: make these return shared_ptr
+	ARDOUR::Track*      track() const;
 	ARDOUR::AudioTrack* audio_track() const;
+	
+	ARDOUR::Diskstream* get_diskstream() const;
 
 	string name() const;
 
@@ -89,7 +95,8 @@ class RouteUI : public virtual AxisView
 
 	void solo_changed(void*);
 	void mute_changed(void*);
-	void route_rec_enable_changed(void*);
+	virtual void redirects_changed (void *) {}
+	void route_rec_enable_changed();
 	void session_rec_enable_changed();
 
 	void build_solo_menu (void);

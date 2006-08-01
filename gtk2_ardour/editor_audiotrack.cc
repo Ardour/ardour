@@ -4,7 +4,7 @@
 #include "editor.h"
 #include "editing.h"
 #include "audio_time_axis.h"
-#include "regionview.h"
+#include "region_view.h"
 #include "selection.h"
 
 using namespace ARDOUR;

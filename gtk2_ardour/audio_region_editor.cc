@@ -24,8 +24,8 @@
 #include <gtkmm2ext/stop_signal.h>
 #include <cmath>
 
-#include "region_editor.h"
-#include "regionview.h"
+#include "audio_region_editor.h"
+#include "audio_region_view.h"
 #include "ardour_ui.h"
 #include "utils.h"
 #include "gui_thread.h"
@@ -37,9 +37,8 @@ using namespace PBD;
 using namespace sigc;
 using namespace std;
 
-AudioRegionEditor::AudioRegionEditor (Session&s, AudioRegion& r, AudioRegionView& rv)
-	: ArdourDialog ("audio region editor"),
-	  _session (s),
+AudioRegionEditor::AudioRegionEditor (Session& s, AudioRegion& r, AudioRegionView& rv)
+	: RegionEditor (s),
 	  _region (r),
 	  _region_view (rv),
 	  name_label (_("NAME:")),

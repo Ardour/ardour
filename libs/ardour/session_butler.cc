@@ -168,15 +168,9 @@ Session::butler_thread_work ()
 	struct timeval begin, end;
 	struct pollfd pfd[1];
 	bool disk_work_outstanding = false;
-	AudioDiskstreamList::iterator i;
-
-	butler_mixdown_buffer = new Sample[AudioDiskstream::disk_io_frames()];
-	butler_gain_buffer = new gain_t[AudioDiskstream::disk_io_frames()];
-	// this buffer is used for temp conversion purposes in filesources
-	char * conv_buffer = conversion_buffer(ButlerContext);
+	DiskstreamList::iterator i;
 
 	while (true) {
-
 		pfd[0].fd = butler_request_pipe[0];
 		pfd[0].events = POLLIN|POLLERR|POLLHUP;
 		
@@ -198,14 +192,13 @@ Session::butler_thread_work ()
 		}
 		
 		if (pfd[0].revents & POLLIN) {
-			
+
 			char req;
 			
 			/* empty the pipe of all current requests */
 			
 			while (1) {
 				size_t nread = ::read (butler_request_pipe[0], &req, sizeof (req));
-				
 				if (nread == 1) {
 					
 					switch ((ButlerRequest::Type) req) {
@@ -240,10 +233,10 @@ Session::butler_thread_work ()
 				}
 			}
 		}
-	
-		for (i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+
+		//for (i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			// cerr << "BEFORE " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
-		}
+		//}
 
 		if (transport_work_requested()) {
 			butler_transport_work ();
@@ -257,16 +250,16 @@ Session::butler_thread_work ()
 
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 		
-		for (i = audio_diskstreams.begin(); !transport_work_requested() && butler_should_run && i != audio_diskstreams.end(); ++i) {
-			
-			// cerr << "rah fondr " << (*i)->io()->name () << endl;
+		for (i = diskstreams.begin(); !transport_work_requested() && butler_should_run && i != diskstreams.end(); ++i) {
 
-			switch ((*i)->do_refill (butler_mixdown_buffer, butler_gain_buffer, conv_buffer)) {
+			Diskstream* const ds = *i;
+
+			switch (ds->do_refill ()) {
 			case 0:
-				bytes += (*i)->read_data_count();
+				bytes += ds->read_data_count();
 				break;
 			case 1:
-				bytes += (*i)->read_data_count();
+				bytes += ds->read_data_count();
 				disk_work_outstanding = true;
 				break;
 				
@@ -278,7 +271,7 @@ Session::butler_thread_work ()
 
 		}
 
-		if (i != audio_diskstreams.end()) {
+		if (i != diskstreams.end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
@@ -299,12 +292,11 @@ Session::butler_thread_work ()
 		bytes = 0;
 		compute_io = true;
 		gettimeofday (&begin, 0);
-		
-		for (i = audio_diskstreams.begin(); !transport_work_requested() && butler_should_run && i != audio_diskstreams.end(); ++i) {
-			
+
+		for (i = diskstreams.begin(); !transport_work_requested() && butler_should_run && i != diskstreams.end(); ++i) {
 			// cerr << "write behind for " << (*i)->name () << endl;
 			
-			switch ((*i)->do_flush (conv_buffer)) {
+			switch ((*i)->do_flush (Session::ButlerContext)) {
 			case 0:
 				bytes += (*i)->write_data_count();
 				break;
@@ -330,7 +322,7 @@ Session::butler_thread_work ()
 			request_stop ();
 		}
 
-		if (i != audio_diskstreams.end()) {
+		if (i != diskstreams.end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
@@ -357,7 +349,7 @@ Session::butler_thread_work ()
 			Glib::Mutex::Lock lm (butler_request_lock);
 
 			if (butler_should_run && (disk_work_outstanding || transport_work_requested())) {
-//				for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+//				for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 //					cerr << "AFTER " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //				}
 
@@ -375,18 +367,17 @@ Session::butler_thread_work ()
 
 
 void
-Session::request_overwrite_buffer (AudioDiskstream* stream)
+Session::request_overwrite_buffer (Diskstream* stream)
 {
 	Event *ev = new Event (Event::Overwrite, Event::Add, Event::Immediate, 0, 0, 0.0);
 	ev->set_ptr (stream);
 	queue_event (ev);
 }
 
+/** Process thread. */
 void
-Session::overwrite_some_buffers (AudioDiskstream* ds)
+Session::overwrite_some_buffers (Diskstream* ds)
 {
-	/* executed by the audio thread */
-
 	if (actively_recording()) {
 		return;
 	}
@@ -398,7 +389,7 @@ Session::overwrite_some_buffers (AudioDiskstream* ds)
 	} else {
 
 		Glib::RWLock::ReaderLock dm (diskstream_lock);
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			(*i)->set_pending_overwrite (true);
 		}
 	}

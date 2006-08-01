@@ -28,13 +28,13 @@
 
 #include "time_axis_view_item.h"
 
-class AudioTimeAxisView;
+class RouteTimeAxisView;
 class AudioRegionView;
 
 struct CrossfadeView : public TimeAxisViewItem
 {
     CrossfadeView (ArdourCanvas::Group*, 
-		   AudioTimeAxisView&,
+		   RouteTimeAxisView&,
 		   ARDOUR::Crossfade&,
 		   double initial_samples_per_unit, 
 		   Gdk::Color& basic_color,

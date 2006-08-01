@@ -46,6 +46,7 @@
 #include <midi++/mmc.h>
 
 #include <ardour/ardour.h>
+#include <ardour/session_route.h>
 #include <ardour/port.h>
 #include <ardour/audioengine.h>
 #include <ardour/playlist.h>
@@ -53,7 +54,6 @@
 #include <ardour/audio_diskstream.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/recent_sessions.h>
-#include <ardour/session_diskstream.h>
 #include <ardour/port.h>
 #include <ardour/audio_track.h>
 
@@ -186,8 +186,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	gettimeofday (&last_shuttle_request, 0);
 
 	ARDOUR::AudioDiskstream::DeleteSources.connect (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread));
-	ARDOUR::AudioDiskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
-	ARDOUR::AudioDiskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
+	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
+	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
 	/* handle pending state with a dialog */
 
@@ -543,9 +543,10 @@ ARDOUR_UI::update_buffer_load ()
 }
 
 void
-ARDOUR_UI::count_recenabled_diskstreams (AudioDiskstream& ds)
+ARDOUR_UI::count_recenabled_diskstreams (Route& route)
 {
-	if (ds.record_enabled()) {
+	Track* track = dynamic_cast<Track*>(&route);
+	if (track && track->diskstream().record_enabled()) {
 		rec_enabled_diskstreams++;
 	}
 }
@@ -571,7 +572,7 @@ ARDOUR_UI::update_disk_space()
 		if (session->actively_recording()){
 			
 			rec_enabled_diskstreams = 0;
-			session->foreach_audio_diskstream (this, &ARDOUR_UI::count_recenabled_diskstreams);
+			session->foreach_route (this, &ARDOUR_UI::count_recenabled_diskstreams);
 			
 			if (rec_enabled_diskstreams) {
 				frames /= rec_enabled_diskstreams;
@@ -918,7 +919,7 @@ restart JACK with more ports."));
 }
 
 void
-ARDOUR_UI::diskstream_added (AudioDiskstream* ds)
+ARDOUR_UI::diskstream_added (Diskstream* ds)
 {
 }
 
@@ -1169,11 +1170,14 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 	
 	if ((r = session->route_by_remote_id (dstream)) != 0) {
 
-		AudioTrack* at;
+		Track* t;
 
-		if ((at = dynamic_cast<AudioTrack*>(r.get())) != 0) {
-			at->disk_stream().set_record_enabled (!at->disk_stream().record_enabled(), this);
+		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
+			t->diskstream().set_record_enabled (!t->diskstream().record_enabled());
 		}
+	}
+	if (session == 0) {
+		return;
 	}
 }
 
@@ -2150,11 +2154,11 @@ ARDOUR_UI::halt_on_xrun_message ()
 }
 
 void 
-ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::AudioFileSource*>* deletion_list)
+ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::Source*>* deletion_list)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread), deletion_list));
 
-	for (list<AudioFileSource*>::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
+	for (list<Source*>::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
 		delete *i;
 	}
 

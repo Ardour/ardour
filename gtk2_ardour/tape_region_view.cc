@@ -30,7 +30,7 @@
 #include <ardour/audiosource.h>
 #include <ardour/audio_diskstream.h>
 
-#include "taperegionview.h"
+#include "tape_region_view.h"
 #include "audio_time_axis.h"
 #include "gui_thread.h"
 
@@ -42,12 +42,14 @@ using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
 
-const TimeAxisViewItem::Visibility TapeAudioRegionView::default_tape_visibility = TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameHighlight|
-													  TimeAxisViewItem::ShowFrame|
-													  TimeAxisViewItem::HideFrameRight|
-													  TimeAxisViewItem::FullWidthNameHighlight);
+const TimeAxisViewItem::Visibility TapeAudioRegionView::default_tape_visibility
+	= TimeAxisViewItem::Visibility (
+		TimeAxisViewItem::ShowNameHighlight |
+		TimeAxisViewItem::ShowFrame |
+		TimeAxisViewItem::HideFrameRight |
+		TimeAxisViewItem::FullWidthNameHighlight);
 
-TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, AudioTimeAxisView &tv, 
+TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, 
 					  AudioRegion& r, 
 					  double spu, 
 					  Gdk::Color& basic_color)
@@ -59,58 +61,14 @@ TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, AudioTime
 }
 
 void
-TapeAudioRegionView::init (double amplitude_above_axis, Gdk::Color& basic_color, bool wfw)
+TapeAudioRegionView::init (Gdk::Color& basic_color, bool wfw)
 {
-	XMLNode *node;
-
-	editor = 0;
-	valid = true;
-	in_destructor = false;
-	_amplitude_above_axis = amplitude_above_axis;
-	zero_line = 0;
-	wait_for_waves = wfw;
-	_height = 0;
-
-	_flags = 0;
-
-	if ((node = region.extra_xml ("GUI")) != 0) {
-		set_flags (node);
-	} else {
-		_flags = WaveformVisible;
-		store_flags ();
-	}
-
-	fade_in_handle = 0;
-	fade_out_handle = 0;
-	gain_line = 0;
-	sync_mark = 0;
-
-	compute_colors (basic_color);
-
-	create_waves ();
-
-	name_highlight->set_data ("regionview", this);
-
-	reset_width_dependent_items ((double) region.length() / samples_per_unit);
-
-	set_height (trackview.height);
-
-	region_muted ();
-	region_resized (BoundsChanged);
-	set_waveview_data_src();
-	region_locked ();
-
-	/* no events, no state changes */
-
-	set_colors ();
-
-	// ColorChanged.connect (mem_fun (*this, &AudioRegionView::color_handler));
+	AudioRegionView::init(basic_color, wfw);
 
 	/* every time the wave data changes and peaks are ready, redraw */
-
 	
-	for (uint32_t n = 0; n < region.n_channels(); ++n) {
-		region.source(n).PeaksReady.connect (bind (mem_fun(*this, &TapeAudioRegionView::update), n));
+	for (uint32_t n = 0; n < audio_region().n_channels(); ++n) {
+		audio_region().source(n).PeaksReady.connect (bind (mem_fun(*this, &TapeAudioRegionView::update), n));
 	}
 	
 }
@@ -132,7 +90,7 @@ TapeAudioRegionView::update (uint32_t n)
 
 	/* this triggers a cache invalidation and redraw in the waveview */
 
-	waves[n]->property_data_src() = &region;
+	waves[n]->property_data_src() = &_region;
 }
 
 void

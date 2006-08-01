@@ -520,7 +520,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	sigc::connection point_one_second_connection;
 	sigc::connection point_zero_one_second_connection;
 
-	void diskstream_added (ARDOUR::AudioDiskstream*);
+	void diskstream_added (ARDOUR::Diskstream*);
 
 	gint session_menu (GdkEventButton *);
 
@@ -621,7 +621,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_record_enable (uint32_t);
 
 	uint32_t rec_enabled_diskstreams;
-	void count_recenabled_diskstreams (ARDOUR::AudioDiskstream&);
+	void count_recenabled_diskstreams (ARDOUR::Route&);
 
 	About* about;
 	bool shown_flag;
@@ -640,7 +640,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	struct timeval last_peak_grab;
 	struct timeval last_shuttle_request;
 
-	void delete_sources_in_the_right_thread (list<ARDOUR::AudioFileSource*>*);
+	void delete_sources_in_the_right_thread (list<ARDOUR::Source*>*);
 
 	void editor_display_control_changed (Editing::DisplayControl c);
 

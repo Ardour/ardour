@@ -35,7 +35,7 @@
 #include "point_selection.h"
 
 class TimeAxisView;
-class AudioRegionView;
+class RegionView;
 class Selectable;
 
 namespace ARDOUR {
@@ -61,7 +61,7 @@ class Selection : public sigc::trackable
 	};
 
 	TrackSelection       tracks;
-	AudioRegionSelection audio_regions;
+	RegionSelection      regions;
 	TimeSelection        time;
 	AutomationSelection  lines;
 	PlaylistSelection    playlists;
@@ -89,15 +89,15 @@ class Selection : public sigc::trackable
 	void dump_region_layers();
 
 	bool selected (TimeAxisView*);
-	bool selected (AudioRegionView*);
+	bool selected (RegionView*);
 
 	void set (list<Selectable*>&);
 	void add (list<Selectable*>&);
 	
 	void set (TimeAxisView*);
 	void set (const list<TimeAxisView*>&);
-	void set (AudioRegionView*);
-	void set (std::vector<AudioRegionView*>&);
+	void set (RegionView*);
+	void set (std::vector<RegionView*>&);
 	long set (TimeAxisView*, jack_nframes_t, jack_nframes_t);
 	void set (ARDOUR::AutomationList*);
 	void set (ARDOUR::Playlist*);
@@ -107,8 +107,8 @@ class Selection : public sigc::trackable
 
 	void toggle (TimeAxisView*);
 	void toggle (const list<TimeAxisView*>&);
-	void toggle (AudioRegionView*);
-	void toggle (std::vector<AudioRegionView*>&);
+	void toggle (RegionView*);
+	void toggle (std::vector<RegionView*>&);
 	long toggle (jack_nframes_t, jack_nframes_t);
 	void toggle (ARDOUR::AutomationList*);
 	void toggle (ARDOUR::Playlist*);
@@ -117,8 +117,8 @@ class Selection : public sigc::trackable
 
 	void add (TimeAxisView*);
 	void add (const list<TimeAxisView*>&);
-	void add (AudioRegionView*);
-	void add (std::vector<AudioRegionView*>&);
+	void add (RegionView*);
+	void add (std::vector<RegionView*>&);
 	long add (jack_nframes_t, jack_nframes_t);
 	void add (ARDOUR::AutomationList*);
 	void add (ARDOUR::Playlist*);
@@ -127,7 +127,7 @@ class Selection : public sigc::trackable
 	
 	void remove (TimeAxisView*);
 	void remove (const list<TimeAxisView*>&);
-	void remove (AudioRegionView*);
+	void remove (RegionView*);
 	void remove (uint32_t selection_id);
 	void remove (jack_nframes_t, jack_nframes_t);
 	void remove (ARDOUR::AutomationList*);
@@ -137,7 +137,7 @@ class Selection : public sigc::trackable
 
 	void replace (uint32_t time_index, jack_nframes_t start, jack_nframes_t end);
 	
-	void clear_audio_regions();
+	void clear_regions();
 	void clear_tracks ();
 	void clear_time();
 	void clear_lines ();
@@ -145,10 +145,8 @@ class Selection : public sigc::trackable
 	void clear_redirects ();
 	void clear_points ();
 
-	void foreach_audio_region (void (ARDOUR::AudioRegion::*method)(void));
-	void foreach_audio_region (void (ARDOUR::Region::*method)(void));
-	template<class A> void foreach_audio_region (void (ARDOUR::AudioRegion::*method)(A), A arg);
-	template<class A> void foreach_audio_region (void (ARDOUR::Region::*method)(A), A arg);
+	void foreach_region (void (ARDOUR::Region::*method)(void));
+	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
   private:
 	uint32_t next_time_id;

@@ -54,7 +54,6 @@ class Playlist : public Stateful, public StateManager {
 	Playlist (const Playlist&, string name, bool hidden = false);
 	Playlist (const Playlist&, jack_nframes_t start, jack_nframes_t cnt, string name, bool hidden = false);
 
-	virtual jack_nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, char * workbuf, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0) = 0;
 	virtual void clear (bool with_delete = false, bool with_save = true);
 	virtual void dump () const;
 	virtual UndoAction get_memento() const = 0;
@@ -81,6 +80,8 @@ class Playlist : public Stateful, public StateManager {
 
 	void add_region (const Region&, jack_nframes_t position, float times = 1, bool with_save = true);
 	void remove_region (Region *);
+	void get_equivalent_regions (const Region&, std::vector<Region*>&);
+	void get_region_list_equivalent_regions (const Region&, std::vector<Region*>&);
 	void replace_region (Region& old, Region& newr, jack_nframes_t pos);
 	void split_region (Region&, jack_nframes_t position);
 	void partition (jack_nframes_t start, jack_nframes_t end, bool just_top_level);
@@ -108,16 +109,15 @@ class Playlist : public Stateful, public StateManager {
 	int set_state (const XMLNode&);
 	XMLNode& get_template ();
 
-	sigc::signal<void,Region *> RegionAdded;
-	sigc::signal<void,Region *> RegionRemoved;
-
+	sigc::signal<void,Region *>       RegionAdded;
+	sigc::signal<void,Region *>       RegionRemoved;
 	sigc::signal<void,Playlist*,bool> InUse;
-	sigc::signal<void>            Modified;
-	sigc::signal<void>            NameChanged;
-	sigc::signal<void>            LengthChanged;
-	sigc::signal<void>            LayeringChanged;
-	sigc::signal<void,Playlist *> GoingAway;
-	sigc::signal<void>            StatePushed;
+	sigc::signal<void>                Modified;
+	sigc::signal<void>                NameChanged;
+	sigc::signal<void>                LengthChanged;
+	sigc::signal<void>                LayeringChanged;
+	sigc::signal<void,Playlist *>     GoingAway;
+	sigc::signal<void>                StatePushed;
 
 	static sigc::signal<void,Playlist*> PlaylistCreated;
 

@@ -18,6 +18,8 @@
 
 */
 
+#include <cassert>
+
 #include <pbd/pthread_utils.h>
 #include <ardour/audioregion.h>
 
@@ -26,11 +28,13 @@
 #include "i18n.h"
 
 
-ExportRegionDialog::ExportRegionDialog (PublicEditor& editor, ARDOUR::AudioRegion* region) 
+ExportRegionDialog::ExportRegionDialog (PublicEditor& editor, ARDOUR::Region* region) 
 	: ExportDialog(editor)
 {
-	audio_region = region;
-	
+	// FIXME
+	ARDOUR::AudioRegion* audio_region = dynamic_cast<ARDOUR::AudioRegion*>(region);
+	assert(audio_region);
+
 	do_not_allow_track_and_master_selection();
 	do_not_allow_channel_count_selection();
 }

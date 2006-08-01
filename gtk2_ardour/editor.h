@@ -69,6 +69,7 @@ namespace ARDOUR {
 	class AudioDiskstream;
 	class RouteGroup;
 	class Playlist;
+	class AudioPlaylist;
 	class Region;
 	class Location;
 	class TempoSection;
@@ -83,6 +84,7 @@ namespace LADSPA {
 }
 
 class TimeAxisView;
+class RouteTimeAxisView;
 class AudioTimeAxisView;
 class AutomationTimeAxisView;
 class AudioRegionView;
@@ -100,6 +102,7 @@ class TrackSelection;
 class AutomationSelection;
 class MixerStrip;
 class StreamView;
+class AudioStreamView;
 class ControlPoint;
 #ifdef FFT_ANALYSIS
 class AnalysisWindow;
@@ -405,8 +408,8 @@ class Editor : public PublicEditor
 
 	TimeAxisView*      clicked_trackview;
 	AudioTimeAxisView* clicked_audio_trackview;
-	AudioRegionView*   clicked_regionview;
-	AudioRegionView*   latest_regionview;
+	RegionView*        clicked_regionview;
+	RegionView*        latest_regionview;
 	uint32_t           clicked_selection;
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
@@ -416,7 +419,7 @@ class Editor : public PublicEditor
 
 	/* functions to be passed to mapover_audio_tracks(), possibly with sigc::bind()-supplied arguments */
 
-	void mapped_set_selected_regionview_from_click (AudioTimeAxisView&, uint32_t, AudioRegionView*, vector<AudioRegionView*>*);
+	void mapped_set_selected_regionview_from_click (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*);
 	void mapped_use_new_playlist (AudioTimeAxisView&, uint32_t);
 	void mapped_use_copy_playlist (AudioTimeAxisView&, uint32_t);
 	void mapped_clear_playlist (AudioTimeAxisView&, uint32_t);
@@ -426,7 +429,7 @@ class Editor : public PublicEditor
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
 	bool button_release_can_deselect;
 
-	void catch_vanishing_audio_regionview (AudioRegionView *);
+	void catch_vanishing_regionview (RegionView *);
 
 	bool set_selected_control_point_from_click (bool press, Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
 	bool set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
@@ -434,7 +437,7 @@ class Editor : public PublicEditor
 
 	void set_selected_regionview_from_region_list (ARDOUR::Region& region, Selection::Operation op = Selection::Set);
 	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, ARDOUR::Region*);
-	void collect_new_region_view (AudioRegionView *);
+	void collect_new_region_view (RegionView *);
 
 	Gtk::Menu track_context_menu;
 	Gtk::Menu track_region_context_menu;
@@ -455,12 +458,11 @@ class Editor : public PublicEditor
 	Gtk::Menu* build_track_selection_context_menu (jack_nframes_t);
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
-	void add_region_context_items (StreamView*, ARDOUR::Region*, Gtk::Menu_Helpers::MenuList&);
-	void add_crossfade_context_items (StreamView*, ARDOUR::Crossfade*, Gtk::Menu_Helpers::MenuList&, bool many);
+	void add_region_context_items (AudioStreamView*, ARDOUR::Region*, Gtk::Menu_Helpers::MenuList&);
+	void add_crossfade_context_items (AudioStreamView*, ARDOUR::Crossfade*, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
 	void handle_new_route (boost::shared_ptr<ARDOUR::Route>);
-	void handle_new_route_p (boost::shared_ptr<ARDOUR::Route>);
 	void remove_route (TimeAxisView *);
 	bool route_removal;
 
@@ -854,7 +856,7 @@ class Editor : public PublicEditor
 	void lower_region_to_bottom ();
 	void split_region ();
 	void split_region_at (jack_nframes_t);
-	void split_regions_at (jack_nframes_t, AudioRegionSelection&);
+	void split_regions_at (jack_nframes_t, RegionSelection&);
 	void crop_region_to_selection ();
 	void set_a_regions_sync_position (ARDOUR::Region&, jack_nframes_t);
 	void set_region_sync_from_edit_cursor ();
@@ -867,13 +869,13 @@ class Editor : public PublicEditor
 	void remove_clicked_region ();
 	void destroy_clicked_region ();
 	void edit_region ();
-	void duplicate_some_regions (AudioRegionSelection&, float times);
+	void duplicate_some_regions (RegionSelection&, float times);
 	void duplicate_selection (float times);
 	void region_fill_selection ();
 
 	void region_fill_track ();
-	void audition_playlist_region_standalone (ARDOUR::AudioRegion&);
-	void audition_playlist_region_via_route (ARDOUR::AudioRegion&, ARDOUR::Route&);
+	void audition_playlist_region_standalone (ARDOUR::Region&);
+	void audition_playlist_region_via_route (ARDOUR::Region&, ARDOUR::Route&);
 	void split_multichannel_region();
 	void reverse_region ();
 	void normalize_region ();
@@ -1020,7 +1022,7 @@ class Editor : public PublicEditor
 	bool have_pending_keyboard_selection;
 	jack_nframes_t pending_keyboard_selection_start;
 
-	ARDOUR::AudioRegion* select_region_for_operation (int dir, TimeAxisView **tv);
+	ARDOUR::Region* select_region_for_operation (int dir, TimeAxisView **tv);
 	void extend_selection_to_end_of_region (bool next);
 	void extend_selection_to_start_of_region (bool previous);
 
@@ -1094,7 +1096,7 @@ class Editor : public PublicEditor
 	void remove_gain_control_point (ArdourCanvas::Item*, GdkEvent*);
 	void remove_control_point (ArdourCanvas::Item*, GdkEvent*);
 
-	void mouse_brush_insert_region (AudioRegionView*, jack_nframes_t pos);
+	void mouse_brush_insert_region (RegionView*, jack_nframes_t pos);
 	void brush (jack_nframes_t);
 
 	void show_verbose_time_cursor (jack_nframes_t frame, double offset = 0, double xpos=-1, double ypos=-1);
@@ -1112,10 +1114,10 @@ class Editor : public PublicEditor
 	bool canvas_fade_in_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_out_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_out_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
-	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
-	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
-	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
-	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, AudioTimeAxisView*);
+	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
+	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
+	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
+	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, RouteTimeAxisView*);
 	bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, Marker*);
 	bool canvas_zoom_rect_event (GdkEvent* event,ArdourCanvas::Item*);
 	bool canvas_tempo_marker_event (GdkEvent* event,ArdourCanvas::Item*, TempoMarker*);
@@ -1263,12 +1265,7 @@ class Editor : public PublicEditor
 
 	void editor_mixer_button_toggled ();
 
-	AudioClock               selection_start_clock;
-	Gtk::Label               selection_start_clock_label;
-	AudioClock               selection_end_clock;
-	Gtk::Label               selection_end_clock_label;
 	AudioClock               edit_cursor_clock;
-	Gtk::Label               edit_cursor_clock_label;
 	AudioClock               zoom_range_clock;
 	Gtk::Button              zoom_in_button;
 	Gtk::Button              zoom_out_button;
@@ -1280,8 +1277,8 @@ class Editor : public PublicEditor
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
 	
-	Gtk::Table               mouse_mode_button_table;
-	Gtkmm2ext::TearOff*       mouse_mode_tearoff;
+	Gtk::HBox                mouse_mode_button_box;
+	Gtkmm2ext::TearOff*      mouse_mode_tearoff;
 	Gtk::ToggleButton        mouse_select_button;
 	Gtk::ToggleButton        mouse_move_button;
 	Gtk::ToggleButton        mouse_gain_button;
@@ -1299,32 +1296,23 @@ class Editor : public PublicEditor
 	Gtk::ToggleButton        global_automation_button;
 
 	Gtk::ComboBoxText edit_mode_selector;
-	Gtk::Label               edit_mode_label;
-	Gtk::VBox                edit_mode_box;
+	Gtk::VBox         edit_mode_box;
 
 	void edit_mode_selection_done ();
 
 	Gtk::ComboBoxText snap_type_selector;
-	Gtk::Label               snap_type_label;
-	Gtk::VBox                snap_type_box;
+	Gtk::ComboBoxText snap_mode_selector;
+	Gtk::HBox         snap_box;
 
 	void snap_type_selection_done ();
-
-	Gtk::ComboBoxText               snap_mode_selector;
-	Gtk::Label               snap_mode_label;
-	Gtk::VBox                snap_mode_box;
-
 	void snap_mode_selection_done ();
 	
 	Gtk::ComboBoxText zoom_focus_selector;
-	Gtk::Label               zoom_focus_label;
 	Gtk::VBox                zoom_focus_box;
 	
 	void zoom_focus_selection_done ();
 
-	Gtk::Label          zoom_indicator_label;
-	Gtk::HBox           zoom_indicator_box;
-	Gtk::VBox           zoom_indicator_vbox;
+	Gtk::HBox           zoom_box;
 
 	void                update_zoom_indicator ();
 	void                zoom_adjustment_changed();
@@ -1533,12 +1521,12 @@ class Editor : public PublicEditor
 	void start_trim (ArdourCanvas::Item*, GdkEvent*);
 	void point_trim (GdkEvent*);
 	void trim_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void single_contents_trim (AudioRegionView&, jack_nframes_t, bool, bool, bool);
-	void single_start_trim (AudioRegionView&, jack_nframes_t, bool, bool);
-	void single_end_trim (AudioRegionView&, jack_nframes_t, bool, bool);
+	void single_contents_trim (RegionView&, jack_nframes_t, bool, bool, bool);
+	void single_start_trim (RegionView&, jack_nframes_t, bool, bool);
+	void single_end_trim (RegionView&, jack_nframes_t, bool, bool);
 
 	void trim_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	void thaw_region_after_trim (AudioRegionView& rv);
+	void thaw_region_after_trim (RegionView& rv);
 	
 	void trim_region_to_edit_cursor ();
 	void trim_region_from_edit_cursor ();
@@ -1592,7 +1580,7 @@ class Editor : public PublicEditor
 	void export_range (jack_nframes_t start, jack_nframes_t end);
 	void export_range_markers ();
 
-	int  write_region_selection(AudioRegionSelection&);
+	int  write_region_selection(RegionSelection&);
 	bool write_region (string path, ARDOUR::AudioRegion&);
 	void export_region ();
 	void bounce_region_selection ();
@@ -1600,7 +1588,7 @@ class Editor : public PublicEditor
 	void external_edit_region ();
 
 	int write_audio_selection (TimeSelection&);
-	bool write_audio_range (ARDOUR::Playlist&, uint32_t channels, list<ARDOUR::AudioRange>&);
+	bool write_audio_range (ARDOUR::AudioPlaylist&, uint32_t channels, list<ARDOUR::AudioRange>&);
 
 	void write_selection ();
 
@@ -1670,7 +1658,7 @@ class Editor : public PublicEditor
 	struct TimeStretchDialog : public ArdourDialog {
 	    ARDOUR::Session::TimeStretchRequest request;
 	    Editor&               editor;
-	    AudioRegionSelection  regions;
+	    RegionSelection       regions;
 	    Gtk::ProgressBar      progress_bar;
 	    Gtk::ToggleButton     quick_button;
 	    Gtk::ToggleButton     antialias_button;
@@ -1696,7 +1684,7 @@ class Editor : public PublicEditor
 	TimeStretchDialog* current_timestretch;
 
 	static void* timestretch_thread (void *arg);
-	int run_timestretch (AudioRegionSelection&, float fraction);
+	int run_timestretch (RegionSelection&, float fraction);
 	void do_timestretch (TimeStretchDialog&);
 
 	/* editor-mixer strip */
@@ -1775,7 +1763,6 @@ class Editor : public PublicEditor
 	Gtk::Button      nudge_backward_button;
 	Gtk::HBox        nudge_hbox;
 	Gtk::VBox        nudge_vbox;
-	Gtk::Label       nudge_label;
 	AudioClock       nudge_clock;
 
 	jack_nframes_t get_nudge_distance (jack_nframes_t pos, jack_nframes_t& next);
@@ -1798,11 +1785,11 @@ class Editor : public PublicEditor
 	sigc::connection step_timeout;
 
 	TimeAxisView* entered_track;
-	AudioRegionView* entered_regionview;
+	RegionView*   entered_regionview;
 	bool clear_entered_track;
 	gint left_track_canvas (GdkEventCrossing*);
 	void set_entered_track (TimeAxisView*);
-	void set_entered_regionview (AudioRegionView*);
+	void set_entered_regionview (RegionView*);
 	gint left_automation_track ();
 
 	bool _new_regionviews_show_envelope;

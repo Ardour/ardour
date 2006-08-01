@@ -316,7 +316,7 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 		
 	case ImportToTrack:
 		if (track) {
-			Playlist* playlist  = track->disk_stream().playlist();
+			Playlist* playlist  = track->diskstream().playlist();
 			
 			AudioRegion* copy = new AudioRegion (region);
 			begin_reversible_command (_("insert sndfile"));
@@ -333,7 +333,7 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 	{ 
 		boost::shared_ptr<AudioTrack> at (session->new_audio_track (in_chans, out_chans, Normal));
 		copy = new AudioRegion (region);
-		at->disk_stream().playlist()->add_region (*copy, pos);
+		at->diskstream().playlist()->add_region (*copy, pos);
 		break;
 	}
 
@@ -341,7 +341,7 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 	{
 		boost::shared_ptr<AudioTrack> at (session->new_audio_track (in_chans, out_chans, Destructive));
 		copy = new AudioRegion (region);
-		at->disk_stream().playlist()->add_region (*copy, pos);
+		at->diskstream().playlist()->add_region (*copy, pos);
 		break;
 	}
 	}

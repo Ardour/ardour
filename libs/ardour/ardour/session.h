@@ -66,6 +66,7 @@ namespace ARDOUR {
 class Port;
 class AudioEngine;
 class Slave;
+class Diskstream;	
 class AudioDiskstream;	
 class Route;
 class AuxInput;
@@ -157,17 +158,17 @@ class Session : public sigc::trackable, public Stateful
 		    Clear
 	    };
 
-	    Type		type;
-	    Action              action;
-	    jack_nframes_t	action_frame;
-	    jack_nframes_t	target_frame;
-	    float               speed;
+	    Type           type;
+	    Action         action;
+	    jack_nframes_t action_frame;
+	    jack_nframes_t target_frame;
+	    float          speed;
 
 	    union {
-		void*                ptr;
-		bool                 yes_or_no;
-		Session::SlaveSource slave;
-		Route*               route;
+			void*                ptr;
+			bool                 yes_or_no;
+			Session::SlaveSource slave;
+			Route*               route;
 	    };
 
 	    list<AudioRange>     audio_range;
@@ -269,30 +270,18 @@ class Session : public sigc::trackable, public Stateful
 	vector<Sample*>& get_silent_buffers (uint32_t howmany);
 	vector<Sample*>& get_send_buffers () { return _send_buffers; }
 
-	AudioDiskstream    *diskstream_by_id (const PBD::ID& id);
-	AudioDiskstream    *diskstream_by_name (string name);
+	Diskstream* diskstream_by_id (const PBD::ID& id);
+	Diskstream* diskstream_by_name (string name);
 
 	bool have_captured() const { return _have_captured; }
 
 	void refill_all_diskstream_buffers ();
 	uint32_t diskstream_buffer_size() const { return dstream_buffer_size; }
 	
-	/* XXX fix required here when we get new diskstream types *, but
-	   not sure of the direction to take this in until then.
-	*/
-
-	uint32_t get_next_diskstream_id() const { return n_audio_diskstreams(); }
-	uint32_t n_audio_diskstreams() const;
+	uint32_t get_next_diskstream_id() const { return n_diskstreams(); }
+	uint32_t n_diskstreams() const;
 	
-	typedef list<AudioDiskstream *> AudioDiskstreamList;
-
-	Session::AudioDiskstreamList audio_disk_streams() const {
-		Glib::RWLock::ReaderLock lm (diskstream_lock);
-		return audio_diskstreams; /* XXX yes, force a copy */
-	}
-
-	void foreach_audio_diskstream (void (AudioDiskstream::*func)(void));
-	template<class T> void foreach_audio_diskstream (T *obj, void (T::*func)(AudioDiskstream&));
+	typedef list<Diskstream *> DiskstreamList;
 
 	typedef std::list<boost::shared_ptr<Route> > RouteList; 
 
@@ -356,7 +345,7 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void> HaltOnXrun;
 
 	sigc::signal<void,boost::shared_ptr<Route> > RouteAdded;
-	sigc::signal<void,AudioDiskstream*> AudioDiskstreamAdded;
+	sigc::signal<void,Diskstream*> DiskstreamAdded; // FIXME: make a shared_ptr
 
 	void request_roll ();
 	void request_bounded_roll (jack_nframes_t start, jack_nframes_t end);
@@ -368,15 +357,14 @@ class Session : public sigc::trackable, public Stateful
 	void goto_start () { request_locate (start_location->start(), false); }
 	void use_rf_shuttle_speed ();
 	void request_transport_speed (float speed);
-	void request_overwrite_buffer (AudioDiskstream*);
-	void request_diskstream_speed (AudioDiskstream&, float speed);
+	void request_overwrite_buffer (Diskstream*);
+	void request_diskstream_speed (Diskstream&, float speed);
 	void request_input_change_handling ();
 
 	bool locate_pending() const { return static_cast<bool>(post_transport_work&PostTransportLocate); }
 	bool transport_locked () const;
 
 	int wipe ();
-	int wipe_diskstream (AudioDiskstream *);
 
 	int remove_region_from_region_list (Region&);
 
@@ -553,9 +541,6 @@ class Session : public sigc::trackable, public Stateful
 
 	void   resort_routes ();
 	void   resort_routes_using (boost::shared_ptr<RouteList>);
-	void   resort_routes_proxy (void* src) {
-		resort_routes ();
-	}
 
 	AudioEngine &engine() { return _engine; };
 
@@ -636,7 +621,7 @@ class Session : public sigc::trackable, public Stateful
 	string path_from_region_name (string name, string identifier);
 
 	AudioRegion* find_whole_file_parent (AudioRegion&);
-	void find_equivalent_playlist_regions (AudioRegion&, std::vector<AudioRegion*>& result);
+	void find_equivalent_playlist_regions (Region&, std::vector<Region*>& result);
 
 	AudioRegion *XMLRegionFactory (const XMLNode&, bool full);
 
@@ -713,8 +698,6 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void,Playlist*> PlaylistAdded;
 	sigc::signal<void,Playlist*> PlaylistRemoved;
 
-	Playlist *get_playlist (string name);
-
 	uint32_t n_playlists() const;
 
 	template<class T> void foreach_playlist (T *obj, void (T::*func)(Playlist *));
@@ -739,7 +722,7 @@ class Session : public sigc::trackable, public Stateful
 
 	boost::shared_ptr<Auditioner> the_auditioner() { return auditioner; }
 	void audition_playlist ();
-	void audition_region (AudioRegion&);
+	void audition_region (Region&);
 	void cancel_audition ();
 	bool is_auditioning () const;
 	
@@ -980,7 +963,7 @@ class Session : public sigc::trackable, public Stateful
 	void set_frame_rate (jack_nframes_t nframes);
 
   protected:
-	friend class AudioDiskstream;
+	friend class Diskstream;
 	void stop_butler ();
 	void wait_till_butler_finished();
 
@@ -1442,12 +1425,12 @@ class Session : public sigc::trackable, public Stateful
 	bool waiting_to_start;
 
 	void set_auto_loop (bool yn);
-	void overwrite_some_buffers (AudioDiskstream*);
+	void overwrite_some_buffers (Diskstream*);
 	void flush_all_redirects ();
 	void locate (jack_nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void start_locate (jack_nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void force_locate (jack_nframes_t frame, bool with_roll = false);
-	void set_diskstream_speed (AudioDiskstream*, float speed);
+	void set_diskstream_speed (Diskstream*, float speed);
 	void set_transport_speed (float speed, bool abort = false);
 	void stop_transport (bool abort = false);
 	void start_transport ();
@@ -1478,10 +1461,10 @@ class Session : public sigc::trackable, public Stateful
 
 	/* disk-streams */
 
-	AudioDiskstreamList  audio_diskstreams; 
+	DiskstreamList  diskstreams; 
 	mutable Glib::RWLock diskstream_lock;
 	uint32_t dstream_buffer_size;
-	void add_diskstream (AudioDiskstream*);
+	void add_diskstream (Diskstream*);
 	int  load_diskstreams (const XMLNode&);
 
 	/* routes stuff */
@@ -1549,7 +1532,7 @@ class Session : public sigc::trackable, public Stateful
 	Playlist *XMLPlaylistFactory (const XMLNode&);
 
 	void playlist_length_changed (Playlist *);
-	void diskstream_playlist_changed (AudioDiskstream *);
+	void diskstream_playlist_changed (Diskstream *);
 
 	/* NAMED SELECTIONS */
 

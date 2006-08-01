@@ -194,6 +194,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	/* allocate conversion buffers */
 	_conversion_buffers[ButlerContext] = new char[AudioDiskstream::disk_io_frames() * 4];
 	_conversion_buffers[TransportContext] = new char[AudioDiskstream::disk_io_frames() * 4];
+	AudioDiskstream::allocate_working_buffers();
 	
 	/* default short fade = 15ms */
 
@@ -266,7 +267,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	AudioSource::AudioSourceCreated.connect (mem_fun (*this, &Session::add_audio_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
-	AudioDiskstream::AudioDiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
+	AudioDiskstream::DiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
 
 	Controllable::Created.connect (mem_fun (*this, &Session::add_controllable));
@@ -1386,7 +1387,7 @@ Session::state(bool full_state)
 
 	{ 
 		Glib::RWLock::ReaderLock dl (diskstream_lock);
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if (!(*i)->hidden()) {
 				child->add_child_nocopy ((*i)->get_state());
 			}

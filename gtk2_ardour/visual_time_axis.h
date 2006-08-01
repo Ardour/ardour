@@ -42,7 +42,7 @@ class ImageFrameView;
 class ImageFrameTimeAxisView;
 class MarkersTimeAxisView;
 class TimeSelection;
-class AudioRegionSelection;
+class RegionSelection;
 class MarkerTimeAxis;
 class TimeAxisViewStrip;
 
@@ -105,7 +105,7 @@ class VisualTimeAxis : public TimeAxisView
 		/**
 		 * Not implemented
 		 */
-		virtual void set_selected_regionviews(AudioRegionSelection&) ;
+		virtual void set_selected_regionviews(RegionSelection&) ;
 	
 
 		//---------------------------------------------------------------------------------//
