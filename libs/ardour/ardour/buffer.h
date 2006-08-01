@@ -135,7 +135,7 @@ private:
 	AudioBuffer(const AudioBuffer& copy);            
 	AudioBuffer& operator=(const AudioBuffer& copy);
 
-	Sample* const _data; ///< Actual buffer contents
+	Sample* _data; ///< Actual buffer contents
 };
 
 
