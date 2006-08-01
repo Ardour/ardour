@@ -14,8 +14,6 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-  $Id$
 */
 
 #include <limits.h>
@@ -327,11 +325,7 @@ PannerUI::setup_pan ()
 			bc->StopGesture.connect (bind (mem_fun (*_io, &IO::end_pan_touch), (uint32_t) asz));
 
 			char buf[64];
-#ifdef __APPLE__
-			snprintf (buf, sizeof (buf), _("panner for channel %lu"), asz + 1);
-#else
-			snprintf (buf, sizeof (buf), _("panner for channel %u"), asz + 1);
-#endif
+			snprintf (buf, sizeof (buf), _("panner for channel %zu"), asz + 1);
 			ARDOUR_UI::instance()->tooltips().set_tip (bc->event_widget(), buf);
 
 			bc->event_widget().signal_button_release_event().connect

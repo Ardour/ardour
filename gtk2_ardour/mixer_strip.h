@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
 */
 
 #ifndef __ardour_mixer_strip__
@@ -171,8 +169,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Menu output_menu;
 	void add_connection_to_output_menu (ARDOUR::Connection *);
 	
-	void stream_input_chosen (ARDOUR::AudioDiskstream*);
-	void select_stream_input ();
 	void connection_input_chosen (ARDOUR::Connection *);
 	void connection_output_chosen (ARDOUR::Connection *);
 

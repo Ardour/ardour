@@ -116,16 +116,15 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  shuttle_units_button (_("% ")),
 
-	  punch_in_button (_("punch\nin")),
-	  punch_out_button (_("punch\nout")),
-	  auto_return_button (_("auto\nreturn")),
-	  auto_play_button (_("auto\nplay")),
-	  auto_input_button (_("auto\ninput")),
-	  click_button (_("click")),
-	  auditioning_alert_button (_("AUDITIONING")),
+	  punch_in_button (_("Punch In")),
+	  punch_out_button (_("Punch Out")),
+	  auto_return_button (_("Auto Return")),
+	  auto_play_button (_("Autuo Play")),
+	  auto_input_button (_("Auto Input")),
+	  click_button (_("Click")),
+	  auditioning_alert_button (_("AUDITION")),
 	  solo_alert_button (_("SOLO")),
 	  shown_flag (false)
-
 {
 	using namespace Gtk::Menu_Helpers;
 
