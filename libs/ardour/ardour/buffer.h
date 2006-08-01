@@ -76,7 +76,7 @@ public:
 	static const char* type_to_jack_type(DataType t) {
 		switch (t) {
 			case AUDIO: return JACK_DEFAULT_AUDIO_TYPE;
-			case MIDI:  return JACK_DEFAULT_MIDI_TYPE;
+			//case MIDI:  return JACK_DEFAULT_MIDI_TYPE;
 			default:    return "";
 		}
 	}
