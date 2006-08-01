@@ -797,7 +797,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 	Port* our_port;
 	char name[64];
 
-	if (type == NIL)
+	if (type == DataType::NIL)
 		type = _default_type;
 
 	{
@@ -909,7 +909,7 @@ IO::add_input_port (string source, void* src, DataType type)
 	Port* our_port;
 	char name[64];
 	
-	if (type == NIL)
+	if (type == DataType::NIL)
 		type = _default_type;
 
 	{

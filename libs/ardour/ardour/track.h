@@ -31,7 +31,7 @@ class RouteGroup;
 class Track : public Route
 {
   public:
-	Track (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = AUDIO);
+	Track (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
 
 	virtual ~Track ();
 	
@@ -91,7 +91,7 @@ class Track : public Route
 	sigc::signal<void> FreezeChange;
 
   protected:
-	Track (Session& sess, const XMLNode& node, DataType default_type = AUDIO);
+	Track (Session& sess, const XMLNode& node, DataType default_type = DataType::AUDIO);
 
 	virtual XMLNode& state (bool full) = 0;
 

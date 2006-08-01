@@ -64,6 +64,7 @@
 #include <ardour/crossfade.h>
 #include <ardour/playlist.h>
 #include <ardour/click.h>
+#include <ardour/data_type.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -1807,7 +1808,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 	} while (n < (UINT_MAX-1));
 
 	try {
-		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), AUDIO));
+		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
 
 		if (bus->ensure_io (input_channels, output_channels, false, this)) {
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),

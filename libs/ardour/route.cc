@@ -1333,7 +1333,7 @@ Route::state(bool full_state)
 		node->add_property("flags", buf);
 	}
 	
-	node->add_property("default-type", Buffer::type_to_string(_default_type));
+	node->add_property("default-type", _default_type.to_string());
 
 	node->add_property("active", _active?"yes":"no");
 	node->add_property("muted", _muted?"yes":"no");
@@ -1510,8 +1510,8 @@ Route::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("default-type")) != 0) {
-		_default_type = Buffer::type_from_string(prop->value());
-		assert(_default_type != NIL);
+		_default_type = DataType(prop->value());
+		assert(_default_type != DataType::NIL);
 	}
 
 	if ((prop = node.property ("phase-invert")) != 0) {

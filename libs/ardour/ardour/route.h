@@ -70,7 +70,7 @@ class Route : public IO
 
 
 	Route (Session&, std::string name, int input_min, int input_max, int output_min, int output_max,
-	       Flag flags = Flag(0), DataType default_type = AUDIO);
+	       Flag flags = Flag(0), DataType default_type = DataType::AUDIO);
 	
 	Route (Session&, const XMLNode&);
 	virtual ~Route();
