@@ -508,7 +508,8 @@ PluginManager::vst_discover (string path)
 int
 PluginManager::au_discover ()
 {
-	int mNumUnits = 0;
+	_au_plugin_info.clear ();
+	
 	int numTypes = 2;    // this magic number was retrieved from the apple AUHost example.
 
 	ComponentDescription desc;
@@ -516,25 +517,10 @@ PluginManager::au_discover ()
 	desc.componentFlagsMask = 0;
 	desc.componentSubType = 0;
 	desc.componentManufacturer = 0;
+	
+	vector<ComponentDescription> vCompDescs;
 
 	for (int i = 0; i < numTypes; ++i) {
-		if (i == 1) {
-			desc.componentType = kAudioUnitType_MusicEffect;
-		} else {
-			desc.componentType = kAudioUnitType_Effect;
-		}
-
-		int n = CountComponents (&desc);
-
-		mNumUnits += n;
-	}
-	cout << "Number of AU plugins: " << mNumUnits << endl;
-
-	ComponentDescription* mCompDescs = new ComponentDescription[mNumUnits];
-
-	int n = 0;
-	for (int i = 0; i < numTypes; ++i)
-	{
 		if (i == 1) {
 			desc.componentType = kAudioUnitType_MusicEffect;
 		} else {
@@ -547,17 +533,18 @@ PluginManager::au_discover ()
 		while (comp != NULL) {
 			ComponentDescription temp;
 			GetComponentInfo (comp, &temp, NULL, NULL, NULL);
-			mCompDescs[n++] = temp;
+			vCompDescs.push_back(temp);
 			comp = FindNextComponent (comp, &desc);
 		}
 	}
 
-	for (int i = 0; i < mNumUnits; ++i) {
+	PluginInfo* plug;
+	for (unsigned int i = 0; i < vCompDescs.size(); ++i) {
 
 		// the following large block is just for determining the name of the plugin.
 		CFStringRef itemName = NULL;
 		// Marc Poirier -style item name
-		Component auComponent = FindNextComponent (0, &(mCompDescs[i]));
+		Component auComponent = FindNextComponent (0, &(vCompDescs[i]));
 		if (auComponent != NULL) {
 			ComponentDescription dummydesc;
 			Handle nameHandle = NewHandle(sizeof(void*));
@@ -575,9 +562,9 @@ PluginManager::au_discover ()
 		
 		// if Marc-style fails, do the original way
 		if (itemName == NULL) {
-			CFStringRef compTypeString = UTCreateStringForOSType(mCompDescs[i].componentType);
-			CFStringRef compSubTypeString = UTCreateStringForOSType(mCompDescs[i].componentSubType);
-			CFStringRef compManufacturerString = UTCreateStringForOSType(mCompDescs[i].componentManufacturer);
+			CFStringRef compTypeString = UTCreateStringForOSType(vCompDescs[i].componentType);
+			CFStringRef compSubTypeString = UTCreateStringForOSType(vCompDescs[i].componentSubType);
+			CFStringRef compManufacturerString = UTCreateStringForOSType(vCompDescs[i].componentManufacturer);
 			
 			itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"), 
 				compTypeString, compManufacturerString, compSubTypeString);
@@ -590,10 +577,16 @@ PluginManager::au_discover ()
 				CFRelease(compManufacturerString);
 		}
 		string realname = CFStringRefToStdString(itemName);
-		cout << realname << endl;	
+		
+		plug = new PluginInfo;
+		plug->name = realname;
+		plug->type = PluginInfo::AudioUnit;
+		plug->n_inputs = 0;
+		plug->n_outputs = 0;
+		plug->category = "AudioUnit";
+		
+		_au_plugin_info.push_back(plug);
 	}
-
-	delete[] mCompDescs;
 
 	return 0;
 }

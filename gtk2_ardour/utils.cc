@@ -215,7 +215,7 @@ get_font_for_style (string widgetname)
 {
 	Gtk::Window window (WINDOW_TOPLEVEL);
 	Gtk::Label foobar;
-	Glib::RefPtr<Style> style;
+	Glib::RefPtr<Gtk::Style> style;
 
 	window.add (foobar);
 	foobar.set_name (widgetname);

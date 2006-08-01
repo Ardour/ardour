@@ -25,10 +25,11 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm2ext/selector.h>
 
+#include <ardour/plugin.h>
+
 namespace ARDOUR {
 	class Session;
 	class PluginManager;
-	class Plugin;
 	class PluginInfo;
 }
 
@@ -45,9 +46,12 @@ class PluginSelector : public ArdourDialog
   private:
 	ARDOUR::Session* session;
 	Gtk::Notebook notebook;
-	Gtk::ScrolledWindow lscroller;
-	Gtk::ScrolledWindow vscroller;
-	Gtk::ScrolledWindow ascroller;
+	Gtk::ScrolledWindow lscroller;  // ladspa
+	Gtk::ScrolledWindow vscroller;  // vst
+	Gtk::ScrolledWindow auscroller; // AudioUnit
+	Gtk::ScrolledWindow ascroller;  // Added plugins
+	
+	ARDOUR::PluginInfo::Type current_selection;
 
 	// page 1
 	struct LadspaColumns : public Gtk::TreeModel::ColumnRecord {
