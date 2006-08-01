@@ -21,14 +21,39 @@
 #ifndef __ardour_audio_unit_h__
 #define __ardour_audio_unit_h__
 
+#include <list>
+
 #include <ardour/plugin.h>
+
+#include <boost/shared_ptr.hpp>
+
+struct ComponentDescription;
 
 namespace ARDOUR {
 
-class AudioUnit : public ARDOUR::Plugin
+class AUPlugin : public ARDOUR::Plugin
 {
-	
+  public:
+	AUPlugin (AudioEngine& engine, Session& session) : Plugin(engine, session) {};
+	virtual ~AUPlugin () {};
 };
+
+class AUPluginInfo : public PluginInfo {
+  public:
+	typedef boost::shared_ptr<ComponentDescription> CompDescPtr;
+	
+	AUPluginInfo () { };
+	~AUPluginInfo () { };
+
+	CompDescPtr desc;
+
+	static PluginInfoList discover ();
+
+  private:
+	friend class PluginManager;
+};
+
+typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;
 
 } // namespace ARDOUR
 
