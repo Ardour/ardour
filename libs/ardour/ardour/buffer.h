@@ -119,7 +119,7 @@ public:
 	{
 		_size = capacity; // For audio buffers, size = capacity (always)
 #ifdef NO_POSIX_MEMALIGN
-		b =  (Sample *) malloc(sizeof(Sample) * capacity);
+		_data =  (Sample *) malloc(sizeof(Sample) * capacity);
 #else
 		posix_memalign((void**)_data, 16, sizeof(Sample) * capacity);
 #endif	
