@@ -353,7 +353,7 @@ RouteUI::update_mute_display ()
 }
 
 void
-RouteUI::route_rec_enable_changed (void *src)
+RouteUI::route_rec_enable_changed ()
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_rec_display));
 }

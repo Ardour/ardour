@@ -45,12 +45,7 @@ namespace ARDOUR {
 class Buffer
 {
 public:
-	/** Unfortunately using RTTI and dynamic_cast to find the type of the
-	 * buffer is just too slow, this is done in very performance critical
-	 * bits of the code. */
-	enum Type { NIL = 0, AUDIO, MIDI };
-
-	Buffer(Type type, size_t capacity)
+	Buffer(DataType type, size_t capacity)
 	: _type(type), _capacity(capacity), _size(0) 
 	{}
 
@@ -65,7 +60,7 @@ public:
 
 	/** Type of this buffer.
 	 * Based on this you can static cast a Buffer* to the desired type. */
-	virtual Type type() const { return _type; }
+	virtual DataType type() const { return _type; }
 
 	/** Jack type (eg JACK_DEFAULT_AUDIO_TYPE) */
 	const char* jack_type() const { return type_to_jack_type(type()); }
@@ -74,8 +69,11 @@ public:
 	const char* type_string() const { return type_to_string(type()); }
 
 	/* The below static methods need to be separate from the above methods
-	 * because the conversion is needed in places where there's no Buffer */
-	static const char* type_to_jack_type(Type t) {
+	 * because the conversion is needed in places where there's no Buffer.
+	 * These should probably live somewhere else...
+	 */
+
+	static const char* type_to_jack_type(DataType t) {
 		switch (t) {
 			case AUDIO: return JACK_DEFAULT_AUDIO_TYPE;
 			case MIDI:  return JACK_DEFAULT_MIDI_TYPE;
@@ -83,7 +81,7 @@ public:
 		}
 	}
 	
-	static const char* type_to_string(Type t) {
+	static const char* type_to_string(DataType t) {
 		switch (t) {
 			case AUDIO: return "audio";
 			case MIDI:  return "midi";
@@ -92,7 +90,7 @@ public:
 	}
 
 	/** Used for loading from XML (route default types etc) */
-	static Type type_from_string(const string& str) {
+	static DataType type_from_string(const string& str) {
 		if (str == "audio")
 			return AUDIO;
 		else if (str == "midi")
@@ -102,9 +100,9 @@ public:
 	}
 
 protected:
-	Type   _type;
-	size_t _capacity;
-	size_t _size;
+	DataType _type;
+	size_t   _capacity;
+	size_t   _size;
 };
 
 
@@ -119,8 +117,12 @@ public:
 		: Buffer(AUDIO, capacity)
 		, _data(NULL)
 	{
-		_size = capacity; // For audio buffers, size = capacity always
+		_size = capacity; // For audio buffers, size = capacity (always)
+#ifdef NO_POSIX_MEMALIGN
+		b =  (Sample *) malloc(sizeof(Sample) * capacity);
+#else
 		posix_memalign((void**)_data, 16, sizeof(Sample) * capacity);
+#endif	
 		assert(_data);
 		memset(_data, 0, sizeof(Sample) * capacity);
 	}
@@ -146,7 +148,11 @@ public:
 		: Buffer(MIDI, capacity)
 		, _data(NULL)
 	{
+#ifdef NO_POSIX_MEMALIGN
+		b =  (Sample *) malloc(sizeof(RawMidi) * capacity);
+#else
 		posix_memalign((void**)_data, 16, sizeof(RawMidi) * capacity);
+#endif	
 		assert(_data);
 		assert(_size == 0);
 		memset(_data, 0, sizeof(Sample) * capacity);

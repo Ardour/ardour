@@ -26,6 +26,7 @@
 #include <pbd/pthread_utils.h>
 
 #include <ardour/audioengine.h>
+#include <ardour/buffer.h>
 #include <ardour/port.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
@@ -42,7 +43,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-// Why here? [DR]
 jack_nframes_t Port::_short_over_length = 2;
 jack_nframes_t Port::_long_over_length = 10;
 
@@ -389,7 +389,7 @@ AudioEngine::remove_session ()
 }
 
 Port *
-AudioEngine::register_input_port (Buffer::Type type, const string& portname)
+AudioEngine::register_input_port (DataType type, const string& portname)
 {
 	if (!_running) {
 		if (!_has_run) {
@@ -421,7 +421,7 @@ AudioEngine::register_input_port (Buffer::Type type, const string& portname)
 }
 
 Port *
-AudioEngine::register_output_port (Buffer::Type type, const string& portname)
+AudioEngine::register_output_port (DataType type, const string& portname)
 {
 	if (!_running) {
 		if (!_has_run) {

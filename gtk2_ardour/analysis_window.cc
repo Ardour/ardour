@@ -35,7 +35,7 @@
 #include "time_axis_view.h"
 #include "public_editor.h"
 #include "selection.h"
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 
 #include "i18n.h"
 

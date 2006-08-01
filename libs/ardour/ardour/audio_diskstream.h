@@ -60,6 +60,8 @@ class AudioDiskstream : public Diskstream
 	AudioDiskstream (Session &, const string& name, Diskstream::Flag f = Recordable);
 	AudioDiskstream (Session &, const XMLNode&);
 
+	const PBD::ID& id() const { return _id; }
+
 	// FIXME
 	AudioDiskstream& ref() { _refcnt++; return *this; }
 
@@ -78,7 +80,7 @@ class AudioDiskstream : public Diskstream
 		if (n < channels.size()) return channels[n].source; return 0; 
 	}
 
-	void set_record_enabled (bool yn, void *src);
+	void set_record_enabled (bool yn);
 
 	float peak_power(uint32_t n=0) { 
 		float x = channels[n].peak_power;
@@ -121,7 +123,7 @@ class AudioDiskstream : public Diskstream
 	/* stateful */
 
 	XMLNode& get_state(void);
-	int set_state(const XMLNode& node);
+	int      set_state(const XMLNode& node);
 
 	void monitor_input (bool);
 
@@ -141,16 +143,7 @@ class AudioDiskstream : public Diskstream
 		}
 	}
 
-	static sigc::signal<void,list<AudioFileSource*>*> DeleteSources;
-
-	int set_loop (Location *loc);
-	sigc::signal<void,Location *> LoopSet;
-
-	std::list<Region*>& last_capture_regions () {
-		return _last_capture_regions;
-	}
-
-	const PBD::ID& id() const { return _id; }
+	std::list<Region*>& last_capture_regions () { return _last_capture_regions; }
 
 	XMLNode* deprecated_io_node;
 
@@ -248,8 +241,8 @@ class AudioDiskstream : public Diskstream
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
 
-	void engage_record_enable (void* src);
-	void disengage_record_enable (void* src);
+	void engage_record_enable ();
+	void disengage_record_enable ();
 
 	// Working buffers for do_refill (butler thread)
 	static void allocate_working_buffers();

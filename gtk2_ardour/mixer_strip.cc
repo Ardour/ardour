@@ -744,7 +744,7 @@ MixerStrip::fast_update ()
 }
 
 void
-MixerStrip::diskstream_changed (void *src)
+MixerStrip::diskstream_changed ()
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_diskstream_display));
 }	

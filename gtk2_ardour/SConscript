@@ -162,9 +162,9 @@ redirect_automation_time_axis.cc
 redirect_box.cc
 region_gain_line.cc
 region_selection.cc
-regionview.cc
-audio_regionview.cc
-taperegionview.cc
+region_view.cc
+audio_region_view.cc
+tape_region_view.cc
 route_params_ui.cc
 route_redirect_selection.cc
 route_ui.cc

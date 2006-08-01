@@ -99,7 +99,7 @@ class RouteUI : public virtual AxisView
 	void solo_changed(void*);
 	void mute_changed(void*);
 	virtual void redirects_changed (void *) {}
-	void route_rec_enable_changed(void*);
+	void route_rec_enable_changed();
 	void session_rec_enable_changed();
 
 	void build_solo_menu (void);

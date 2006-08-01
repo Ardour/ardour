@@ -728,7 +728,7 @@ Session::when_engine_running ()
 			_master_out->defer_pan_reset ();
 			
 			while ((int) _master_out->n_inputs() < _master_out->input_maximum()) {
-				if (_master_out->add_input_port ("", this)) { // FIXME
+				if (_master_out->add_input_port ("", this, AUDIO)) {
 					error << _("cannot setup master inputs") 
 					      << endmsg;
 					break;
@@ -736,7 +736,7 @@ Session::when_engine_running ()
 			}
 			n = 0;
 			while ((int) _master_out->n_outputs() < _master_out->output_maximum()) {
-				if (_master_out->add_output_port (_engine.get_nth_physical_output (n), this)) { // FIXME
+				if (_master_out->add_output_port (_engine.get_nth_physical_output (n), this, AUDIO)) {
 					error << _("cannot setup master outputs")
 					      << endmsg;
 					break;
@@ -1763,7 +1763,7 @@ Session::new_midi_track (TrackMode mode)
 			track->set_control_outs (cports);
 		}
 #endif
-		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes_proxy));
+		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 
 		add_route (track);
 
@@ -1808,7 +1808,7 @@ Session::new_midi_route ()
 	} while (n < (UINT_MAX-1));
 
 	try {
-		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), Buffer::MIDI));
+		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), MIDI));
 		
 		if (bus->ensure_io (1, 1, false, this)) {
 			error << (_("cannot configure 1 in/1 out configuration for new midi track"))
@@ -1971,7 +1971,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			track->set_control_outs (cports);
 		}
 
-		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes_proxy));
+		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 
 		add_route (track);
 
@@ -2016,7 +2016,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 	} while (n < (UINT_MAX-1));
 
 	try {
-		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), Buffer::AUDIO));
+		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), AUDIO));
 
 		if (bus->ensure_io (input_channels, output_channels, false, this)) {
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -2487,7 +2487,6 @@ Session::diskstream_by_name (string name)
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
-	// FIXME: duh
 	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
@@ -2502,7 +2501,6 @@ Session::diskstream_by_id (const PBD::ID& id)
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
-	// FIXME: duh
 	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->id() == id) {
 			return *i;
@@ -3259,11 +3257,14 @@ Session::audition_playlist ()
 }
 
 void
-Session::audition_region (AudioRegion& r)
+Session::audition_region (Region& r)
 {
-	Event* ev = new Event (Event::Audition, Event::Add, Event::Immediate, 0, 0.0);
-	ev->set_ptr (&r);
-	queue_event (ev);
+	AudioRegion* ar = dynamic_cast<AudioRegion*>(&r);
+	if (ar) {
+		Event* ev = new Event (Event::Audition, Event::Add, Event::Immediate, 0, 0.0);
+		ev->set_ptr (ar);
+		queue_event (ev);
+	}
 }
 
 void
@@ -3360,18 +3361,6 @@ Session::n_diskstreams () const
 	}
 	return n;
 }
-/*
-void 
-Session::foreach_audio_diskstream (void (AudioDiskstream::*func)(void)) 
-{
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
-		if (!(*i)->hidden()) {
-			((*i)->*func)();
-		}
-	}
-}
-*/
 
 void
 Session::graph_reordered ()

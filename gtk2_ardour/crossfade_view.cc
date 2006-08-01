@@ -29,7 +29,7 @@
 #include "rgb_macros.h"
 #include "audio_time_axis.h"
 #include "public_editor.h"
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 #include "utils.h"
 #include "canvas_impl.h"
 

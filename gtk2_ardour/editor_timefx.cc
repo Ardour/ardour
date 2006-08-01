@@ -28,7 +28,7 @@
 
 #include "editor.h"
 #include "audio_time_axis.h"
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 #include "region_selection.h"
 
 #include <ardour/session.h>

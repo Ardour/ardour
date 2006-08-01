@@ -121,10 +121,6 @@ class MidiRegion : public Region
 	StateManager::State* state_factory (std::string why) const;
 	Change restore_state (StateManager::State&);
 
-	bool copied() const { return _flags & Copied; }
-	void maybe_uncopy ();
-	void rename_after_first_edit ();
-
 	jack_nframes_t _read_at (const SourceList&, unsigned char *buf, unsigned char *mixdown_buffer, 
 				 char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
 				 uint32_t chan_n = 0,

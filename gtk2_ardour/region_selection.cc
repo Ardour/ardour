@@ -20,7 +20,7 @@
 
 #include <ardour/region.h>
 
-#include "regionview.h"
+#include "region_view.h"
 #include "region_selection.h"
 
 using namespace ARDOUR;

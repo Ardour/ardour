@@ -65,7 +65,7 @@
 #include "point_selection.h"
 #include "prompter.h"
 #include "public_editor.h"
-#include "regionview.h"
+#include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
 #include "simplerect.h"
@@ -815,7 +815,7 @@ RouteTimeAxisView::speed_changed ()
 }
 
 void
-RouteTimeAxisView::diskstream_changed (void *src)
+RouteTimeAxisView::diskstream_changed ()
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &RouteTimeAxisView::update_diskstream_display));
 }	

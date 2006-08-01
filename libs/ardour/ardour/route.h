@@ -40,7 +40,7 @@
 #include <ardour/io.h>
 #include <ardour/session.h>
 #include <ardour/redirect.h>
-#include <ardour/buffer.h>
+#include <ardour/types.h>
 
 namespace ARDOUR {
 
@@ -70,7 +70,7 @@ class Route : public IO
 
 
 	Route (Session&, std::string name, int input_min, int input_max, int output_min, int output_max,
-	       Flag flags = Flag(0), Buffer::Type default_type = Buffer::AUDIO);
+	       Flag flags = Flag(0), DataType default_type = AUDIO);
 	
 	Route (Session&, const XMLNode&);
 	virtual ~Route();

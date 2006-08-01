@@ -48,13 +48,13 @@ using namespace ARDOUR;
 
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
-Change AudioRegion::FadeInChanged = ARDOUR::new_change();
-Change AudioRegion::FadeOutChanged = ARDOUR::new_change();
-Change AudioRegion::FadeInActiveChanged = ARDOUR::new_change();
-Change AudioRegion::FadeOutActiveChanged = ARDOUR::new_change();
+Change AudioRegion::FadeInChanged         = ARDOUR::new_change();
+Change AudioRegion::FadeOutChanged        = ARDOUR::new_change();
+Change AudioRegion::FadeInActiveChanged   = ARDOUR::new_change();
+Change AudioRegion::FadeOutActiveChanged  = ARDOUR::new_change();
 Change AudioRegion::EnvelopeActiveChanged = ARDOUR::new_change();
 Change AudioRegion::ScaleAmplitudeChanged = ARDOUR::new_change();
-Change AudioRegion::EnvelopeChanged = ARDOUR::new_change();
+Change AudioRegion::EnvelopeChanged       = ARDOUR::new_change();
 
 AudioRegionState::AudioRegionState (string why)
 	: RegionState (why),
@@ -633,12 +633,6 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 	return to_read;
 }
 	
-XMLNode&
-AudioRegion::get_state ()
-{
-	return state (true);
-}
-
 XMLNode&
 AudioRegion::state (bool full)
 {

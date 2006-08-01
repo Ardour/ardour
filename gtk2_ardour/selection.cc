@@ -24,7 +24,7 @@
 
 #include <ardour/playlist.h>
 
-#include "regionview.h"
+#include "region_view.h"
 #include "selection.h"
 #include "selection_templates.h"
 #include "time_axis_view.h"

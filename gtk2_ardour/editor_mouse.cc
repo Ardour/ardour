@@ -33,7 +33,7 @@
 #include "editor.h"
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 #include "marker.h"
 #include "streamview.h"
 #include "region_gain_line.h"
@@ -1049,8 +1049,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MouseGain:
-			// FIXME
-			assert(dynamic_cast<AudioRegionView*>(clicked_regionview));
+			// Gain only makes sense for audio regions
+			if ( ! dynamic_cast<AudioRegionView*>(clicked_regionview))
+				break;
+
 			switch (item_type) {
 			case RegionItem:
 				dynamic_cast<AudioRegionView*>(clicked_regionview)->add_gain_point_event (item, event);
@@ -2747,12 +2749,9 @@ Editor::start_region_brush_grab (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	/* FIXME: type specific (audio only) */
-
 	double x_delta;
 	double y_delta = 0;
-	AudioRegionView *rv = reinterpret_cast<AudioRegionView*> (drag_info.data); 
-	assert(rv);
+	RegionView* rv = reinterpret_cast<RegionView*> (drag_info.data); 
 	jack_nframes_t pending_region_position = 0;
 	int32_t pointer_y_span = 0, canvas_pointer_y_span = 0, original_pointer_order;
 	int32_t visible_y_high = 0, visible_y_low = 512;  //high meaning higher numbered.. not the height on the screen
@@ -2796,7 +2795,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 			/* create a new region with the same name. */
 			
-			// FIXME: ew
+			// FIXME: ew.  need a (virtual) Region::duplicate() or something?
 			Region* newregion = NULL;
 			if (dynamic_cast<AudioRegion*>(&rv->region()))
 				newregion = new AudioRegion (dynamic_cast<AudioRegion&>(rv->region()));

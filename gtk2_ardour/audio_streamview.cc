@@ -32,8 +32,8 @@
 #include <ardour/source.h>
 
 #include "audio_streamview.h"
-#include "audio_regionview.h"
-#include "taperegionview.h"
+#include "audio_region_view.h"
+#include "tape_region_view.h"
 #include "audio_time_axis.h"
 #include "canvas-waveview.h"
 #include "canvas-simplerect.h"

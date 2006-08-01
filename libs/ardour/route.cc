@@ -28,6 +28,7 @@
 #include <ardour/timestamps.h>
 #include <ardour/audioengine.h>
 #include <ardour/route.h>
+#include <ardour/buffer.h>
 #include <ardour/insert.h>
 #include <ardour/send.h>
 #include <ardour/session.h>
@@ -51,7 +52,7 @@ using namespace PBD;
 uint32_t Route::order_key_cnt = 0;
 
 
-Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, Buffer::Type default_type)
+Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, DataType default_type)
 	: IO (sess, name, input_min, input_max, output_min, output_max, default_type),
 	  _flags (flg),
 	  _solo_control (*this, ToggleControllable::SoloControl),
@@ -1332,7 +1333,6 @@ Route::state(bool full_state)
 		node->add_property("flags", buf);
 	}
 	
-	// FIXME: assumes there's only audio and MIDI types
 	node->add_property("default-type", Buffer::type_to_string(_default_type));
 
 	node->add_property("active", _active?"yes":"no");
@@ -1511,7 +1511,7 @@ Route::set_state (const XMLNode& node)
 	
 	if ((prop = node.property ("default-type")) != 0) {
 		_default_type = Buffer::type_from_string(prop->value());
-		assert(_default_type != Buffer::NIL);
+		assert(_default_type != NIL);
 	}
 
 	if ((prop = node.property ("phase-invert")) != 0) {

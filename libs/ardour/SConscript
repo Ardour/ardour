@@ -99,7 +99,6 @@ tempo.cc
 utils.cc
 version.cc
 mix.cc
-smpte.cc
 """)
 
 arch_specific_objects = [ ]

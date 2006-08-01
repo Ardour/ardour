@@ -23,7 +23,7 @@
 
 #include <vector>
 
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 
 class TapeAudioRegionView : public AudioRegionView
 {

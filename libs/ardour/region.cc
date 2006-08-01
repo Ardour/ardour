@@ -39,13 +39,13 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Change Region::FadeChanged = ARDOUR::new_change ();
+Change Region::FadeChanged       = ARDOUR::new_change ();
 Change Region::SyncOffsetChanged = ARDOUR::new_change ();
-Change Region::MuteChanged = ARDOUR::new_change ();
-Change Region::OpacityChanged = ARDOUR::new_change ();
-Change Region::LockChanged = ARDOUR::new_change ();
-Change Region::LayerChanged = ARDOUR::new_change ();
-Change Region::HiddenChanged = ARDOUR::new_change ();
+Change Region::MuteChanged       = ARDOUR::new_change ();
+Change Region::OpacityChanged    = ARDOUR::new_change ();
+Change Region::LockChanged       = ARDOUR::new_change ();
+Change Region::LayerChanged      = ARDOUR::new_change ();
+Change Region::HiddenChanged     = ARDOUR::new_change ();
 
 sigc::signal<void,Region *> Region::CheckNewRegion;
 

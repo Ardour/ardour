@@ -168,18 +168,18 @@ class Session : public sigc::trackable, public Stateful
 		    Replace,
 		    Clear
 	    };
-
-	    Type		type;
-	    Action              action;
-	    jack_nframes_t	action_frame;
-	    jack_nframes_t	target_frame;
-	    float               speed;
+		
+		Type           type;
+	    Action         action;
+	    jack_nframes_t action_frame;
+	    jack_nframes_t target_frame;
+	    float          speed;
 
 	    union {
-		void*                ptr;
-		bool                 yes_or_no;
-		Session::SlaveSource slave;
-		Route*               route;
+			void*                ptr;
+			bool                 yes_or_no;
+			Session::SlaveSource slave;
+			Route*               route;
 	    };
 
 	    list<AudioRange>     audio_range;
@@ -555,9 +555,6 @@ class Session : public sigc::trackable, public Stateful
 	void   remove_route (boost::shared_ptr<Route>);
 	void   resort_routes ();
 	void   resort_routes_using (boost::shared_ptr<RouteList>);
-	void   resort_routes_proxy (void* src) {
-		resort_routes ();
-	}
 	
 	AudioEngine &engine() { return _engine; };
 
@@ -739,7 +736,7 @@ class Session : public sigc::trackable, public Stateful
 
 	boost::shared_ptr<Auditioner> the_auditioner() { return auditioner; }
 	void audition_playlist ();
-	void audition_region (AudioRegion&);
+	void audition_region (Region&);
 	void cancel_audition ();
 	bool is_auditioning () const;
 	

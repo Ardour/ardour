@@ -30,7 +30,7 @@
 #include <ardour/audiosource.h>
 #include <ardour/audio_diskstream.h>
 
-#include "taperegionview.h"
+#include "tape_region_view.h"
 #include "audio_time_axis.h"
 #include "gui_thread.h"
 

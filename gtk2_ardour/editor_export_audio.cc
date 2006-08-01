@@ -31,7 +31,7 @@
 #include "selection.h"
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 
 #include <pbd/pthread_utils.h>
 #include <ardour/types.h>

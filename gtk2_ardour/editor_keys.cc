@@ -30,7 +30,7 @@
 #include "ardour_ui.h"
 #include "editor.h"
 #include "time_axis_view.h"
-#include "regionview.h"
+#include "region_view.h"
 #include "selection.h"
 
 #include "i18n.h"

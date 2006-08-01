@@ -58,6 +58,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
+#include <ardour/buffer.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/midi_diskstream.h>
 #include <ardour/utils.h>
@@ -1742,15 +1743,15 @@ Session::XMLRouteFactory (const XMLNode& node)
 
 	bool has_diskstream = (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0);
 	
-	Buffer::Type type = Buffer::AUDIO;
+	DataType type = AUDIO;
 	const XMLProperty* prop = node.property("default-type");
 	if (prop)
 		type = Buffer::type_from_string(prop->value());
 	
-	assert(type != Buffer::NIL);
+	assert(type != NIL);
 
 	if (has_diskstream) {
-		if (type == Buffer::AUDIO) {
+		if (type == AUDIO) {
 			boost::shared_ptr<Route> ret (new AudioTrack (*this, node));
 			return ret;
 		} else {

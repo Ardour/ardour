@@ -32,7 +32,7 @@
 #include <ardour/audio_diskstream.h>
 
 #include "streamview.h"
-#include "regionview.h"
+#include "region_view.h"
 #include "route_time_axis.h"
 #include "simplerect.h"
 #include "simpleline.h"

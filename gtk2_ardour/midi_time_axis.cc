@@ -61,7 +61,7 @@
 #include "public_editor.h"
 #include "redirect_automation_line.h"
 #include "redirect_automation_time_axis.h"
-#include "regionview.h"
+#include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
 #include "simplerect.h"

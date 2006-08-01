@@ -57,28 +57,17 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 
 	AudioDiskstream* ds = new AudioDiskstream (_session, name, dflags);
 	
-	_declickable = true;
-	_freeze_record.state = NoFreeze;
-	_saved_meter_point = _meter_point;
-	_mode = mode;
-
 	set_diskstream (*ds, this);
 }
 
 AudioTrack::AudioTrack (Session& sess, const XMLNode& node)
 	: Track (sess, node)
 {
-	_freeze_record.state = NoFreeze;
 	set_state (node);
-	_declickable = true;
-	_saved_meter_point = _meter_point;
 }
 
 AudioTrack::~AudioTrack ()
 {
-	if (_diskstream) {
-		_diskstream->unref();
-	}
 }
 
 int
@@ -155,13 +144,13 @@ AudioTrack::set_diskstream (AudioDiskstream& ds, void *src)
 		}
 	}
 
-	_diskstream->set_record_enabled (false, this);
+	_diskstream->set_record_enabled (false);
 	_diskstream->monitor_input (false);
 
 	ic_connection.disconnect();
 	ic_connection = input_changed.connect (mem_fun (*_diskstream, &Diskstream::handle_input_change));
 
-	DiskstreamChanged (src); /* EMIT SIGNAL */
+	DiskstreamChanged (); /* EMIT SIGNAL */
 
 	return 0;
 }	
@@ -190,41 +179,6 @@ AudioTrack::use_diskstream (const PBD::ID& id)
 	}
 	
 	return set_diskstream (*dstream, this);
-}
-
-bool
-AudioTrack::record_enabled () const
-{
-	return _diskstream->record_enabled ();
-}
-
-void
-AudioTrack::set_record_enable (bool yn, void *src)
-{
-	if (_freeze_record.state == Frozen) {
-		return;
-	}
-
-	if (_mix_group && src != _mix_group && _mix_group->is_active()) {
-		_mix_group->apply (&AudioTrack::set_record_enable, yn, _mix_group);
-		return;
-	}
-
-	/* keep track of the meter point as it was before we rec-enabled */
-
-	if (!_diskstream->record_enabled()) {
-		_saved_meter_point = _meter_point;
-	}
-	
-	_diskstream->set_record_enabled (yn, src);
-
-	if (_diskstream->record_enabled()) {
-		set_meter_point (MeterInput, this);
-	} else {
-		set_meter_point (_saved_meter_point, this);
-	}
-
-	_rec_enable_control.Changed ();
 }
 
 AudioDiskstream&
@@ -673,28 +627,6 @@ AudioTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jac
 }
 
 int
-AudioTrack::set_name (string str, void *src)
-{
-	int ret;
-
-	if (record_enabled() && _session.actively_recording()) {
-		/* this messes things up if done while recording */
-		return -1;
-	}
-
-	if (audio_diskstream().set_name (str, src)) {
-		return -1;
-	}
-
-	/* save state so that the statefile fully reflects any filename changes */
-
-	if ((ret = IO::set_name (str, src)) == 0) {
-		_session.save_state ("");
-	}
-	return ret;
-}
-
-int
 AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
 {
 	gain_t  gain_automation[nframes];
@@ -793,13 +725,6 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbu
 	} 
 
 	return 0;
-}
-
-void
-AudioTrack::set_latency_delay (jack_nframes_t longest_session_latency)
-{
-	Route::set_latency_delay (longest_session_latency);
-	audio_diskstream().set_roll_delay (_roll_delay);
 }
 
 void
@@ -902,7 +827,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	region->set_locked (true);
 
 	diskstream.use_playlist (dynamic_cast<AudioPlaylist*>(new_playlist));
-	diskstream.set_record_enabled (false, this);
+	diskstream.set_record_enabled (false);
 
 	_freeze_record.state = Frozen;
 	FreezeChange(); /* EMIT SIGNAL */
@@ -940,14 +865,3 @@ AudioTrack::unfreeze ()
 	FreezeChange (); /* EMIT SIGNAL */
 }
 
-void
-AudioTrack::set_mode (TrackMode m)
-{
-	if (_diskstream) {
-		if (_mode != m) {
-			_mode = m;
-			audio_diskstream().set_destructive (m == Destructive);
-			ModeChanged();
-		}
-	}
-}

@@ -24,7 +24,6 @@
 #include <pbd/undo.h>
 
 #include <ardour/ardour.h>
-#include <ardour/logcurve.h>
 #include <ardour/state_manager.h>
 
 class XMLNode;
@@ -36,22 +35,22 @@ class Source;
 
 enum RegionEditState {
 	EditChangesNothing = 0,
-	EditChangesName = 1,
-	EditChangesID = 2
+	EditChangesName    = 1,
+	EditChangesID      = 2
 };
 
-struct RegionState : public StateManager::State {
+struct RegionState : public StateManager::State
+{
+	RegionState (std::string why) : StateManager::State (why) {}
 
-    RegionState (std::string why) : StateManager::State (why) {}
-    
-    jack_nframes_t      _start;
-    jack_nframes_t      _length;
-    jack_nframes_t      _position;
-    uint32_t        _flags;
-    jack_nframes_t      _sync_position;
-    layer_t        	_layer;
-    string              _name;        
-    mutable RegionEditState _first_edit;
+	jack_nframes_t          _start;
+	jack_nframes_t          _length;
+	jack_nframes_t          _position;
+	uint32_t                _flags;
+	jack_nframes_t          _sync_position;
+	layer_t        	        _layer;
+	string                  _name;        
+	mutable RegionEditState _first_edit;
 };
 
 class Region : public Stateful, public StateManager
@@ -95,7 +94,7 @@ class Region : public Stateful, public StateManager
 	Region (const Region&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
 	Region (const Region&);
 	Region (const XMLNode&);
-	~Region();
+	virtual ~Region();
 
 	const PBD::ID& id() const { return _id; }
 
@@ -105,9 +104,10 @@ class Region : public Stateful, public StateManager
 	void set_name (string str);
 
 	jack_nframes_t position () const { return _position; }
-	jack_nframes_t start () const { return _start; }
-	jack_nframes_t length() const { return _length; }
-	layer_t layer () const { return _layer; }
+	jack_nframes_t start ()    const { return _start; }
+	jack_nframes_t length()    const { return _length; }
+	layer_t        layer ()    const { return _layer; }
+	
 	jack_nframes_t sync_offset(int& dir) const;
 	jack_nframes_t sync_position() const;
 
@@ -118,14 +118,13 @@ class Region : public Stateful, public StateManager
 	jack_nframes_t first_frame() const { return _position; }
 	jack_nframes_t last_frame() const { return _position + _length - 1; }
 
-	bool hidden() const { return _flags & Hidden; }
-	bool muted() const { return _flags & Muted; }
-	bool opaque () const { return _flags & Opaque; }
-	//bool envelope_active () const { return _flags & EnvelopeActive; }
-	bool locked() const { return _flags & Locked; }
-	bool automatic() const { return  _flags & Automatic; }
+	bool hidden()     const { return _flags & Hidden; }
+	bool muted()      const { return _flags & Muted; }
+	bool opaque ()    const { return _flags & Opaque; }
+	bool locked()     const { return _flags & Locked; }
+	bool automatic()  const { return _flags & Automatic; }
 	bool whole_file() const { return _flags & WholeFile ; }
-	Flag flags() const { return _flags; }
+	Flag flags()      const { return _flags; }
 
 	virtual bool should_save_state () const { return !(_flags & DoNotSaveState); };
 
@@ -147,12 +146,6 @@ class Region : public Stateful, public StateManager
 	virtual bool source_equivalent (const Region&) const = 0;
 	
 	virtual bool speed_mismatch (float) const = 0;
-
-	/*virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
-					float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
-					uint32_t chan_n = 0,
-					jack_nframes_t read_frames = 0,
-					jack_nframes_t skip_frames = 0) const = 0;*/
 
 	/* EDITING OPERATIONS */
 
@@ -181,7 +174,6 @@ class Region : public Stateful, public StateManager
 	void set_hidden (bool yn);
 	void set_muted (bool yn);
 	void set_opaque (bool yn);
-	//void set_envelope_active (bool yn);
 	void set_locked (bool yn);
 
 	virtual uint32_t read_data_count() const { return _read_data_count; }
@@ -197,9 +189,9 @@ class Region : public Stateful, public StateManager
 
 	/* serialization */
 	
+	XMLNode&         get_state ();
 	virtual XMLNode& state (bool);
-	XMLNode& get_state ();
-	int      set_state (const XMLNode&);
+	virtual int      set_state (const XMLNode&);
 
 	sigc::signal<void,Region*> GoingAway;
 
@@ -219,23 +211,6 @@ class Region : public Stateful, public StateManager
 	void set_last_layer_op (uint64_t when);
 
   protected:
-
-	jack_nframes_t        _start;
-	jack_nframes_t        _length;
-	jack_nframes_t        _position;
-	Flag 	              _flags;
-	jack_nframes_t        _sync_position;
-	layer_t        	      _layer;
-	string                _name;        
-	mutable RegionEditState _first_edit;
-	int                   _frozen;
-	Glib::Mutex              lock;
-	PBD::ID               _id;
-	ARDOUR::Playlist*     _playlist;
-	mutable uint32_t      _read_data_count; // modified in read()
-	Change                 pending_changed;
-	uint64_t              _last_layer_op; // timestamp
- 
 	XMLNode& get_short_state (); /* used only by Session */
 
 	/* state management */
@@ -259,6 +234,23 @@ class Region : public Stateful, public StateManager
 	virtual bool verify_length (jack_nframes_t) = 0;
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
+	
+	
+	jack_nframes_t          _start;
+	jack_nframes_t          _length;
+	jack_nframes_t          _position;
+	Flag                     _flags;
+	jack_nframes_t          _sync_position;
+	layer_t                 _layer;
+	string                  _name;        
+	mutable RegionEditState _first_edit;
+	int                     _frozen;
+	Glib::Mutex             lock;
+	PBD::ID                 _id;
+	ARDOUR::Playlist*       _playlist;
+	mutable uint32_t        _read_data_count; // modified in read()
+	Change                   pending_changed;
+	uint64_t                _last_layer_op; // timestamp
 };
 
 } /* namespace ARDOUR */

@@ -26,7 +26,7 @@
 #include <sigc++/signal.h>
 #include <ardour/region.h>
 
-#include "regionview.h"
+#include "region_view.h"
 #include "route_time_axis.h"
 #include "time_axis_view_item.h"
 #include "automation_line.h"

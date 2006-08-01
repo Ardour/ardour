@@ -102,7 +102,7 @@ static bool sort_ports_by_name (Port* a, Port* b)
  */
 IO::IO (Session& s, string name,
 	int input_min, int input_max, int output_min, int output_max,
-	Buffer::Type default_type)
+	DataType default_type)
 	: _session (s),
 	  _name (name),
 	  _default_type(default_type),
@@ -789,15 +789,15 @@ IO::remove_output_port (Port* port, void* src)
  *
  * @param destination Name of input port to connect new port to.
  * @param src Source for emitted ConfigurationChanged signal.
- * @param type Data type of port.  Default value (Buffer::NIL) will use this IO's default type.
+ * @param type Data type of port.  Default value (NIL) will use this IO's default type.
  */
 int
-IO::add_output_port (string destination, void* src, Buffer::Type type)
+IO::add_output_port (string destination, void* src, DataType type)
 {
 	Port* our_port;
 	char name[64];
 
-	if (type == Buffer::NIL)
+	if (type == NIL)
 		type = _default_type;
 
 	{
@@ -904,12 +904,12 @@ IO::remove_input_port (Port* port, void* src)
  * @param src Source for emitted ConfigurationChanged signal.
  */
 int
-IO::add_input_port (string source, void* src, Buffer::Type type)
+IO::add_input_port (string source, void* src, DataType type)
 {
 	Port* our_port;
 	char name[64];
 	
-	if (type == Buffer::NIL)
+	if (type == NIL)
 		type = _default_type;
 
 	{
@@ -1026,10 +1026,8 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 		
 		char buf[64];
 		
-		/* Create a new input port */
+		/* Create a new input port (of the default type) */
 		
-		// FIXME: of what type?
-
 		if (_input_maximum == 1) {
 			snprintf (buf, sizeof (buf), _("%s/in"), _name.c_str());
 		}
@@ -1128,10 +1126,8 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 			out_changed = true;
 		}
 		
-		/* create any necessary new ports */
+		/* create any necessary new ports (of the default type) */
 		
-		// FIXME: of what type?
-
 		while (_ninputs < nin) {
 			
 			char buf[64];

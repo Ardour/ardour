@@ -2,7 +2,7 @@
 #include <ardour/audioregion.h>
 
 #include "region_gain_line.h"
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 #include "utils.h"
 
 #include "time_axis_view.h"

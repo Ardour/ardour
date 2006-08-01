@@ -51,7 +51,7 @@
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "streamview.h"
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 #include "rgb_macros.h"
 #include "selection_templates.h"
 #include "selection.h"
@@ -2117,20 +2117,14 @@ Editor::audition_selected_region ()
 {
 	if (!selection->regions.empty()) {
 		RegionView* rv = *(selection->regions.begin());
-		// FIXME
-		AudioRegion* const ar = dynamic_cast<AudioRegion*>(&rv->region());
-		assert(ar);
-		session->audition_region (*ar);
+		session->audition_region (rv->region());
 	}
 }
 
 void
 Editor::audition_playlist_region_standalone (Region& region)
 {
-	// FIXME
-	AudioRegion* const ar = dynamic_cast<AudioRegion*>(&region);
-	assert(ar);
-	session->audition_region (*ar);
+	session->audition_region (region);
 }
 
 void
@@ -2195,12 +2189,12 @@ Editor::region_from_selection ()
 			continue;
 		}
 
-		if ((current = dynamic_cast<AudioRegion*> (current_r)) != 0) {
+		current = dynamic_cast<AudioRegion*> (current_r);
+		assert(current); // FIXME
+		if (current != 0) {
 			internal_start = start - current->position();
 			session->region_name (new_name, current->name(), true);
 			region = new AudioRegion (*current, internal_start, selection_cnt, new_name);
-		} else {
-			assert(false); // FIXME
 		}
 	}
 }	

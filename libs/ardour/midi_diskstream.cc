@@ -55,8 +55,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-sigc::signal<void,list<SMFSource*>*> MidiDiskstream::DeleteSources;
-
 MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
 	: Diskstream(sess, name, flag)
 	, _playlist(NULL)
@@ -412,7 +410,7 @@ MidiDiskstream::finish_capture (bool rec_monitors_input)
 }
 
 void
-MidiDiskstream::set_record_enabled (bool yn, void* src)
+MidiDiskstream::set_record_enabled (bool yn)
 {
 }
 

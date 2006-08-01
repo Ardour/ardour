@@ -32,7 +32,7 @@
 #include <ardour/source.h>
 
 #include "midi_streamview.h"
-#include "regionview.h"
+#include "region_view.h"
 //#include "midi_regionview.h"
 #include "midi_time_axis.h"
 #include "canvas-simplerect.h"

@@ -54,9 +54,6 @@ class Session;
 class Playlist;
 class IO;
 
-/* FIXME: There are (obviously) far too many virtual functions in this ATM.
- * Just to get things off the ground, they'll be removed. */
-
 class Diskstream : public Stateful, public sigc::trackable
 {	
   public:
@@ -66,8 +63,8 @@ class Diskstream : public Stateful, public sigc::trackable
 		Destructive = 0x4
 	};
 
-	string name () const { return _name; }
-	virtual int set_name (string str, void* src);
+	string      name () const { return _name; }
+	virtual int set_name (string str);
 
 	ARDOUR::IO* io() const { return _io; }
 	void set_io (ARDOUR::IO& io);
@@ -83,14 +80,14 @@ class Diskstream : public Stateful, public sigc::trackable
 	void unset_flag (Flag f) { _flags &= ~f; }
 
 	AlignStyle alignment_style() const { return _alignment_style; }
-	void set_align_style (AlignStyle);
-	void set_persistent_align_style (AlignStyle a) { _persistent_alignment_style = a; }
+	void       set_align_style (AlignStyle);
+	void       set_persistent_align_style (AlignStyle a) { _persistent_alignment_style = a; }
 	
 	jack_nframes_t roll_delay() const { return _roll_delay; }
-	void set_roll_delay (jack_nframes_t);
+	void           set_roll_delay (jack_nframes_t);
 
-	bool record_enabled() const { return g_atomic_int_get (&_record_enabled); }
-	virtual void set_record_enabled (bool yn, void *src) = 0;
+	bool         record_enabled() const { return g_atomic_int_get (&_record_enabled); }
+	virtual void set_record_enabled (bool yn) = 0;
 
 	bool destructive() const { return _flags & Destructive; }
 	virtual void set_destructive (bool yn);
@@ -120,8 +117,8 @@ class Diskstream : public Stateful, public sigc::trackable
 	
 	uint32_t n_channels() { return _n_channels; }
 
-	static jack_nframes_t disk_io_frames()            { return disk_io_chunk_frames; }
-	static void set_disk_io_chunk_frames (uint32_t n) { disk_io_chunk_frames = n; }
+	static jack_nframes_t disk_io_frames()                      { return disk_io_chunk_frames; }
+	static void           set_disk_io_chunk_frames (uint32_t n) { disk_io_chunk_frames = n; }
 
 	/* Stateful */
 	virtual XMLNode& get_state(void) = 0;
@@ -136,23 +133,23 @@ class Diskstream : public Stateful, public sigc::trackable
 	bool slaved() const      { return _slaved; }
 	void set_slaved(bool yn) { _slaved = yn; }
 
-	virtual int set_loop (Location *loc);
-	sigc::signal<void,Location *> LoopSet;
+	int set_loop (Location *loc);
 
 	std::list<Region*>& last_capture_regions () { return _last_capture_regions; }
 
 	void handle_input_change (IOChange, void *src);
 
-	sigc::signal<void,void*> RecordEnableChanged;
-	sigc::signal<void>       SpeedChanged;
-	sigc::signal<void,void*> ReverseChanged;
-	sigc::signal<void>       PlaylistChanged;
-	sigc::signal<void>       AlignmentStyleChanged;
+	sigc::signal<void>            RecordEnableChanged;
+	sigc::signal<void>            SpeedChanged;
+	sigc::signal<void>            ReverseChanged;
+	sigc::signal<void>            PlaylistChanged;
+	sigc::signal<void>            AlignmentStyleChanged;
+	sigc::signal<void,Location *> LoopSet;
 
 	static sigc::signal<void>                DiskOverrun;
 	static sigc::signal<void>                DiskUnderrun;
 	static sigc::signal<void,Diskstream*>    DiskstreamCreated; // XXX use a ref with sigc2
-	//static sigc::signal<void,list<Source*>*> DeleteSources;
+	static sigc::signal<void,list<Source*>*> DeleteSources;
 
   protected:
 	friend class Session;
@@ -160,10 +157,9 @@ class Diskstream : public Stateful, public sigc::trackable
 	Diskstream (Session &, const string& name, Flag f = Recordable);
 	Diskstream (Session &, const XMLNode&);
 
-	/* the Session is the only point of access for these
-	   because they require that the Session is "inactive"
-	   while they are called.
-	*/
+	/* the Session is the only point of access for these because they require
+	 * that the Session is "inactive" while they are called.
+	 */
 
 	virtual void set_pending_overwrite (bool) = 0;
 	virtual int  overwrite_existing_buffers () = 0;
@@ -191,7 +187,7 @@ class Diskstream : public Stateful, public sigc::trackable
 
 	//private:
 	
-	/* use unref() to destroy a diskstream */
+	/** Use unref() to destroy a diskstream */
 	virtual ~Diskstream();
 
 	enum TransitionType {
@@ -201,8 +197,7 @@ class Diskstream : public Stateful, public sigc::trackable
 	
 	struct CaptureTransition {
 		TransitionType   type;
-		// the start or end file frame pos
-		jack_nframes_t   capture_val;
+		jack_nframes_t   capture_val; ///< The start or end file frame position
 	};
 
 	/* The two central butler operations */

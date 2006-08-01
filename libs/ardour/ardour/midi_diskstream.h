@@ -73,7 +73,7 @@ class MidiDiskstream : public Diskstream
 	//void set_align_style (AlignStyle);
 	//void set_persistent_align_style (AlignStyle);
 
-	void set_record_enabled (bool yn, void *src);
+	void set_record_enabled (bool yn);
 	//void set_speed (double);
 
 	int use_playlist (Playlist *);
@@ -81,8 +81,6 @@ class MidiDiskstream : public Diskstream
 	int use_copy_playlist ();
 
 	Playlist *playlist () { return _playlist; }
-
-	static sigc::signal<void,list<SMFSource*>*> DeleteSources;
 
 	/* stateful */
 

@@ -36,8 +36,6 @@ class AudioTrack : public Track
 	AudioTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
 	AudioTrack (Session&, const XMLNode&);
 	~AudioTrack ();
-	
-	int set_name (string str, void *src);
 
 	int roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		jack_nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
@@ -48,16 +46,10 @@ class AudioTrack : public Track
 	int silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		jack_nframes_t offset, bool can_record, bool rec_monitors_input);
 
-	void set_record_enable (bool yn, void *src);
-
 	AudioDiskstream& audio_diskstream() const;
 
 	int use_diskstream (string name);
 	int use_diskstream (const PBD::ID& id);
-
-	void set_mode (TrackMode m);
-
-	void set_latency_delay (jack_nframes_t);
 	
 	int export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t end_frame);
 
@@ -68,8 +60,6 @@ class AudioTrack : public Track
 	void bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo&);
 
 	int set_state(const XMLNode& node);
-
-	bool record_enabled() const;
 
   protected:
 	XMLNode& state (bool full);

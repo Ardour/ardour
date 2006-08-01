@@ -26,7 +26,7 @@
 
 #include "editor.h"
 #include "public_editor.h"
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 #include "audio_streamview.h"
 #include "crossfade_view.h"
 #include "audio_time_axis.h"
@@ -216,8 +216,6 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 {
 	gint ret = FALSE;
 
-	/* FIXME: type specific */
-
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -255,8 +253,6 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 bool
 Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, RouteTimeAxisView *tv)
 {
-	/* FIXME: type specific */
-
 	bool ret = FALSE;
 	
 	switch (event->type) {
@@ -707,8 +703,6 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 {
 	bool ret = false;
 	
-	/* FIXME: type specific (audio only) */
-
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:

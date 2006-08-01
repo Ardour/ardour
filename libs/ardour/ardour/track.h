@@ -31,11 +31,11 @@ class RouteGroup;
 class Track : public Route
 {
   public:
-	Track (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, Buffer::Type default_type = Buffer::AUDIO);
+	Track (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = AUDIO);
 
-	virtual ~Track () {}
+	virtual ~Track ();
 	
-	virtual int set_name (string str, void *src) = 0;
+	int set_name (string str, void *src);
 
 	virtual int roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		jack_nframes_t offset, int declick, bool can_record, bool rec_monitors_input) = 0;
@@ -49,18 +49,17 @@ class Track : public Route
 	void toggle_monitor_input ();
 
 	bool can_record() const { return true; }
-	virtual void set_record_enable (bool yn, void *src) = 0;
 
 	Diskstream& diskstream() const { return *_diskstream; }
 
 	virtual int use_diskstream (string name) = 0;
 	virtual int use_diskstream (const PBD::ID& id) = 0;
 
-	TrackMode    mode() const { return _mode; }
-	virtual void set_mode (TrackMode m) = 0;
+	TrackMode mode() const { return _mode; }
+	void      set_mode (TrackMode m);
 
 	jack_nframes_t update_total_latency();
-	virtual void   set_latency_delay (jack_nframes_t) = 0;
+	void           set_latency_delay (jack_nframes_t);
 
 	enum FreezeState {
 		NoFreeze,
@@ -82,15 +81,17 @@ class Track : public Route
 
 	PBD::Controllable& rec_enable_control() { return _rec_enable_control; }
 
-	virtual bool record_enabled() const = 0;
+	bool record_enabled() const;
+	void set_record_enable (bool yn, void *src);
+	
 	void set_meter_point (MeterPoint, void* src);
 	
-	sigc::signal<void>       ModeChanged;
-	sigc::signal<void,void*> DiskstreamChanged;
-	sigc::signal<void>       FreezeChange;
+	sigc::signal<void> ModeChanged;
+	sigc::signal<void> DiskstreamChanged;
+	sigc::signal<void> FreezeChange;
 
   protected:
-	Track (Session& sess, const XMLNode& node, Buffer::Type default_type = Buffer::AUDIO);
+	Track (Session& sess, const XMLNode& node, DataType default_type = AUDIO);
 
 	virtual XMLNode& state (bool full) = 0;
 

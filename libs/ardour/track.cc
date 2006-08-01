@@ -20,8 +20,8 @@
 #include <sigc++/retype_return.h>
 #include <sigc++/bind.h>
 
-#include <ardour/audio_track.h>
-#include <ardour/audio_diskstream.h>
+#include <ardour/track.h>
+#include <ardour/diskstream.h>
 #include <ardour/session.h>
 #include <ardour/redirect.h>
 #include <ardour/audioregion.h>
@@ -38,7 +38,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Buffer::Type default_type)
+Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, 1, -1, -1, -1, flag, default_type)
 	, _diskstream (0)
 	,  _rec_enable_control (*this)
@@ -49,7 +49,7 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Buff
 	_mode = mode;
 }
 
-Track::Track (Session& sess, const XMLNode& node, Buffer::Type default_type)
+Track::Track (Session& sess, const XMLNode& node, DataType default_type)
 	: Route (sess, "to be renamed", 0, 0, -1, -1, Route::Flag(0), default_type)
 	, _diskstream (0)
 	, _rec_enable_control (*this)
@@ -57,6 +57,13 @@ Track::Track (Session& sess, const XMLNode& node, Buffer::Type default_type)
 	_freeze_record.state = NoFreeze;
 	_declickable = true;
 	_saved_meter_point = _meter_point;
+}
+
+Track::~Track ()
+{
+	if (_diskstream) {
+		_diskstream->unref();
+	}
 }
 
 void
@@ -132,5 +139,81 @@ Track::RecEnableControllable::get_value (void) const
 {
 	if (track.record_enabled()) { return 1.0f; }
 	return 0.0f;
+}
+
+bool
+Track::record_enabled () const
+{
+	return _diskstream->record_enabled ();
+}
+	
+void
+Track::set_record_enable (bool yn, void *src)
+{
+	if (_freeze_record.state == Frozen) {
+		return;
+	}
+
+	if (_mix_group && src != _mix_group && _mix_group->is_active()) {
+		_mix_group->apply (&Track::set_record_enable, yn, _mix_group);
+		return;
+	}
+
+	/* keep track of the meter point as it was before we rec-enabled */
+
+	if (!_diskstream->record_enabled()) {
+		_saved_meter_point = _meter_point;
+	}
+	
+	_diskstream->set_record_enabled (yn);
+
+	if (_diskstream->record_enabled()) {
+		set_meter_point (MeterInput, this);
+	} else {
+		set_meter_point (_saved_meter_point, this);
+	}
+
+	_rec_enable_control.Changed ();
+}
+
+void
+Track::set_mode (TrackMode m)
+{
+	if (_diskstream) {
+		if (_mode != m) {
+			_mode = m;
+			_diskstream->set_destructive (m == Destructive);
+			ModeChanged();
+		}
+	}
+}
+
+int
+Track::set_name (string str, void *src)
+{
+	int ret;
+
+	if (record_enabled() && _session.actively_recording()) {
+		/* this messes things up if done while recording */
+		return -1;
+	}
+
+	if (_diskstream->set_name (str)) {
+		return -1;
+	}
+
+	/* save state so that the statefile fully reflects any filename changes */
+
+	if ((ret = IO::set_name (str, src)) == 0) {
+		_session.save_state ("");
+	}
+	return ret;
+}
+
+void
+Track::set_latency_delay (jack_nframes_t longest_session_latency)
+{
+	Route::set_latency_delay (longest_session_latency);
+	_diskstream->set_roll_delay (_roll_delay);
 }
 

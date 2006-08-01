@@ -128,7 +128,7 @@ protected:
 	};
 	
 
-	void diskstream_changed (void *src);
+	void diskstream_changed ();
 	void update_diskstream_display ();
 	
 	gint edit_click  (GdkEventButton *);

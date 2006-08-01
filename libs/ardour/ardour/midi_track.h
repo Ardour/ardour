@@ -82,7 +82,7 @@ protected:
 	uint32_t n_process_buffers ();
 
 private:
-	int set_diskstream (MidiDiskstream&, void *);
+	int set_diskstream (MidiDiskstream&);
 
 	void set_state_part_two ();
 	void set_state_part_three ();

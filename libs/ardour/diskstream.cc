@@ -58,7 +58,7 @@ using namespace PBD;
 jack_nframes_t Diskstream::disk_io_chunk_frames = 0;
 
 sigc::signal<void,Diskstream*>    Diskstream::DiskstreamCreated;
-//sigc::signal<void,list<AudioFileSource*>*> Diskstream::DeleteSources;
+sigc::signal<void,list<Source*>*> Diskstream::DeleteSources;
 sigc::signal<void>                Diskstream::DiskOverrun;
 sigc::signal<void>                Diskstream::DiskUnderrun;
 
@@ -124,7 +124,7 @@ Diskstream::init (Flag f)
 
 Diskstream::~Diskstream ()
 {
-	// Taken by derived class destrctors.. assure lock?
+	// Taken by derived class destrctors.. should assure locked here somehow?
 	//Glib::Mutex::Lock lm (state_lock);
 
 	if (_playlist)
@@ -369,7 +369,7 @@ Diskstream::playlist_deleted (Playlist* pl)
 }
 
 int
-Diskstream::set_name (string str, void *src)
+Diskstream::set_name (string str)
 {
 	if (str != _name) {
 		assert(playlist());

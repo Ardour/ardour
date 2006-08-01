@@ -14,8 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id: regionview.cc 682 2006-07-14 03:43:32Z drobilla $
 */
 
 #include <cmath>
@@ -32,7 +30,7 @@
 #include <ardour/audio_diskstream.h>
 
 #include "streamview.h"
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 #include "audio_time_axis.h"
 #include "simplerect.h"
 #include "simpleline.h"

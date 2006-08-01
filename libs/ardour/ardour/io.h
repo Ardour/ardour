@@ -38,7 +38,7 @@
 #include <ardour/utils.h>
 #include <ardour/state_manager.h>
 #include <ardour/curve.h>
-#include <ardour/buffer.h>
+#include <ardour/types.h>
 
 using std::string;
 using std::vector;
@@ -67,7 +67,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	IO (Session&, string name, 
 	    int input_min = -1, int input_max = -1, 
 	    int output_min = -1, int output_max = -1,
-		Buffer::Type default_type = Buffer::AUDIO);
+		DataType default_type = AUDIO);
 
 	virtual ~IO();
 
@@ -81,7 +81,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	void set_output_minimum (int n);
 	void set_output_maximum (int n);
 
-	Buffer::Type default_type() const { return _default_type; }
+	DataType default_type() const { return _default_type; }
 
 	const string& name() const { return _name; }
 	virtual int set_name (string str, void *src);
@@ -116,8 +116,8 @@ class IO : public Stateful, public ARDOUR::StateManager
 	Connection *input_connection() const { return _input_connection; }
 	Connection *output_connection() const { return _output_connection; }
 
-	int add_input_port (string source, void *src, Buffer::Type type = Buffer::NIL);
-	int add_output_port (string destination, void *src, Buffer::Type type = Buffer::NIL);
+	int add_input_port (string source, void *src, DataType type = NIL);
+	int add_output_port (string destination, void *src, DataType type = NIL);
 
 	int remove_input_port (Port *, void *src);
 	int remove_output_port (Port *, void *src);
@@ -284,7 +284,7 @@ public:
 	PBD::ID             _id;
 	bool                 no_panner_reset;
 	XMLNode*             deferred_state;
-	Buffer::Type        _default_type;
+	DataType        _default_type;
 
 	virtual void set_deferred_state() {}
 

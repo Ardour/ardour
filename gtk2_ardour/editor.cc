@@ -56,7 +56,7 @@
 #include "keyboard.h"
 #include "marker.h"
 #include "playlist_selector.h"
-#include "audio_regionview.h"
+#include "audio_region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
 #include "audio_streamview.h"

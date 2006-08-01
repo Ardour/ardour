@@ -177,7 +177,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void edit_input_configuration ();
 	void edit_output_configuration ();
 
-	void diskstream_changed (void *src);
+	void diskstream_changed ();
 
 	Gtk::Menu *send_action_menu;
 	void build_send_action_menu ();

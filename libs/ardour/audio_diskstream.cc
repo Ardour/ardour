@@ -54,8 +54,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-sigc::signal<void,list<AudioFileSource*>*> AudioDiskstream::DeleteSources;
-
 size_t  AudioDiskstream::_working_buffers_size = 0;
 Sample* AudioDiskstream::_mixdown_buffer       = 0;
 gain_t* AudioDiskstream::_gain_buffer          = 0;
@@ -140,13 +138,8 @@ AudioDiskstream::init (Diskstream::Flag f)
 	set_block_size (_session.get_block_size());
 	allocate_temporary_buffers ();
 
-	pending_overwrite = false;
-	overwrite_frame = 0;
-	overwrite_queued = false;
-	input_change_pending = NoChange;
-
 	add_channel ();
-	_n_channels = 1;
+	assert(_n_channels == 1);
 }
 
 void
@@ -420,6 +413,7 @@ AudioDiskstream::use_destructive_playlist ()
 
 	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
 		(*chan).write_source = dynamic_cast<AudioFileSource*>(&region->source (n));
+		assert((*chan).write_source);
 		(*chan).write_source->set_allow_remove_if_empty (false);
 	}
 
@@ -589,7 +583,7 @@ AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes
 	   returns a non-zero value, in which case, ::commit should not be called.
 	*/
 
-        // If we can't take the state lock return.
+	// If we can't take the state lock return.
 	if (!state_lock.trylock()) {
 		return 1;
 	}
@@ -983,7 +977,7 @@ AudioDiskstream::seek (jack_nframes_t frame, bool complete_refill)
 	/* can't rec-enable in destructive mode if transport is before start */
 
 	if (destructive() && record_enabled() && frame < _session.current_start_frame()) {
-		disengage_record_enable (this);
+		disengage_record_enable ();
 	}
 
 	playback_sample = frame;
@@ -1328,6 +1322,16 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, char * 
 	return ret;
 }	
 
+/** Flush pending data to disk.
+ *
+ * Important note: this function will write *AT MOST* disk_io_chunk_frames
+ * of data to disk. it will never write more than that.  If it writes that
+ * much and there is more than that waiting to be written, it will return 1,
+ * otherwise 0 on success or -1 on failure.
+ * 
+ * If there is less than disk_io_chunk_frames to be written, no data will be
+ * written at all unless @a force_flush is true.
+ */
 int
 AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 {
@@ -1338,16 +1342,6 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 	RingBufferNPT<Sample>::rw_vector vector;
 	RingBufferNPT<CaptureTransition>::rw_vector transvec;
 	jack_nframes_t total;
-	
-	/* important note: this function will write *AT MOST* 
-	   disk_io_chunk_frames of data to disk. it will never 
-	   write more than that. if its writes that much and there 
-	   is more than that waiting to be written, it will return 1,
-	   otherwise 0 on success or -1 on failure.
-
-	   if there is less than disk_io_chunk_frames to be written, 
-	   no data will be written at all unless `force_flush' is true.  
-	*/
 
 	_write_data_count = 0;
 
@@ -1362,7 +1356,6 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 			goto out;
 		}
 
-		
 		/* if there are 2+ chunks of disk i/o possible for
 		   this track, let the caller know so that it can arrange
 		   for us to be called again, ASAP.
@@ -1479,7 +1472,6 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 	ChannelList::iterator chan;
 	vector<CaptureInfo*>::iterator ci;
 	uint32_t n = 0; 
-	list<AudioFileSource*>* deletion_list;
 	bool mark_write_completed = false;
 
 	finish_capture (true);
@@ -1512,7 +1504,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		
 		ChannelList::iterator chan;
 		
-		deletion_list = new list<AudioFileSource*>;
+		list<Source*>* deletion_list = new list<Source*>;
 
 		for ( chan = channels.begin(); chan != channels.end(); ++chan) {
 
@@ -1699,7 +1691,7 @@ AudioDiskstream::finish_capture (bool rec_monitors_input)
 }
 
 void
-AudioDiskstream::set_record_enabled (bool yn, void* src)
+AudioDiskstream::set_record_enabled (bool yn)
 {
 	if (!recordable() || !_session.record_enabling_legal()) {
 		return;
@@ -1726,17 +1718,17 @@ AudioDiskstream::set_record_enabled (bool yn, void* src)
 
 	if (record_enabled() != yn) {
 		if (yn) {
-			engage_record_enable (src);
+			engage_record_enable ();
 		} else {
-			disengage_record_enable (src);
+			disengage_record_enable ();
 		}
 	}
 }
 
 void
-AudioDiskstream::engage_record_enable (void* src)
+AudioDiskstream::engage_record_enable ()
 {
-        bool rolling = _session.transport_speed() != 0.0f;
+    bool rolling = _session.transport_speed() != 0.0f;
 
 	g_atomic_int_set (&_record_enabled, 1);
 	capturing_sources.clear ();
@@ -1753,11 +1745,11 @@ AudioDiskstream::engage_record_enable (void* src)
 		}
 	}
 
-	RecordEnableChanged (src); /* EMIT SIGNAL */
+	RecordEnableChanged (); /* EMIT SIGNAL */
 }
 
 void
-AudioDiskstream::disengage_record_enable (void* src)
+AudioDiskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
 	if (Config->get_use_hardware_monitoring()) {
@@ -1768,7 +1760,7 @@ AudioDiskstream::disengage_record_enable (void* src)
 		}
 	}
 	capturing_sources.clear ();
-	RecordEnableChanged (src); /* EMIT SIGNAL */
+	RecordEnableChanged (); /* EMIT SIGNAL */
 }
 		
 
@@ -1875,8 +1867,7 @@ AudioDiskstream::set_state (const XMLNode& node)
 	}
 	
 	// create necessary extra channels
-	// we are always constructed with one
-	// and we always need one
+	// we are always constructed with one and we always need one
 
 	if (nchans > _n_channels) {
 
@@ -2179,22 +2170,6 @@ AudioDiskstream::capture_buffer_load () const
 {
 	return (float) ((double) channels.front().capture_buf->write_space()/
 			(double) channels.front().capture_buf->bufsize());
-}
-
-int
-AudioDiskstream::set_loop (Location *location)
-{
-	if (location) {
-		if (location->start() >= location->end()) {
-			error << string_compose(_("Location \"%1\" not valid for track loop (start >= end)"), location->name()) << endl;
-			return -1;
-		}
-	}
-
-	loop_location = location;
-
-	 LoopSet (location); /* EMIT SIGNAL */
-	return 0;
 }
 
 int

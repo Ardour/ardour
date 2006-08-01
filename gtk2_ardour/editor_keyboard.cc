@@ -22,7 +22,7 @@
 #include <ardour/playlist.h>
 
 #include "editor.h"
-#include "regionview.h"
+#include "region_view.h"
 #include "selection.h"
 
 #include "i18n.h"

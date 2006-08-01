@@ -40,7 +40,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
-	: Track (sess, name, flag, mode, Buffer::MIDI)
+	: Track (sess, name, flag, mode, MIDI)
 {
 	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
 
@@ -61,7 +61,7 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	_saved_meter_point = _meter_point;
 	_mode = mode;
 
-	set_diskstream (*ds, this);
+	set_diskstream (*ds);
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
@@ -82,7 +82,7 @@ MidiTrack::~MidiTrack ()
 
 
 int
-MidiTrack::set_diskstream (MidiDiskstream& ds, void *src)
+MidiTrack::set_diskstream (MidiDiskstream& ds)
 {
 	if (_diskstream) {
 		_diskstream->unref();
@@ -92,13 +92,13 @@ MidiTrack::set_diskstream (MidiDiskstream& ds, void *src)
 	_diskstream->set_io (*this);
 	_diskstream->set_destructive (_mode == Destructive);
 
-	_diskstream->set_record_enabled (false, this);
+	_diskstream->set_record_enabled (false);
 	//_diskstream->monitor_input (false);
 
 	ic_connection.disconnect();
 	ic_connection = input_changed.connect (mem_fun (*_diskstream, &MidiDiskstream::handle_input_change));
 
-	DiskstreamChanged (src); /* EMIT SIGNAL */
+	DiskstreamChanged (); /* EMIT SIGNAL */
 
 	return 0;
 }	
@@ -113,7 +113,7 @@ MidiTrack::use_diskstream (string name)
 		return -1;
 	}
 	
-	return set_diskstream (*dstream, this);
+	return set_diskstream (*dstream);
 }
 
 int 
@@ -126,7 +126,7 @@ MidiTrack::use_diskstream (const PBD::ID& id)
 		return -1;
 	}
 	
-	return set_diskstream (*dstream, this);
+	return set_diskstream (*dstream);
 }
 
 bool
@@ -517,7 +517,7 @@ MidiTrack::set_name (string str, void *src)
 		return -1;
 	}
 
-	if (_diskstream->set_name (str, src)) {
+	if (_diskstream->set_name (str)) {
 		return -1;
 	}
 

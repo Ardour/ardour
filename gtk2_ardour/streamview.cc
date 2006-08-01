@@ -29,7 +29,7 @@
 #include <ardour/track.h>
 
 #include "streamview.h"
-#include "regionview.h"
+#include "region_view.h"
 #include "route_time_axis.h"
 #include "canvas-waveview.h"
 #include "canvas-simplerect.h"
@@ -260,7 +260,7 @@ StreamView::playlist_state_changed (Change ignored)
 }
 
 void
-StreamView::diskstream_changed (void *src_ignored)
+StreamView::diskstream_changed ()
 {
 	Track *t;
 
@@ -309,7 +309,7 @@ StreamView::region_layered (RegionView* rv)
 }
 
 void
-StreamView::rec_enable_changed (void *src)
+StreamView::rec_enable_changed ()
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::setup_rec_box));
 }

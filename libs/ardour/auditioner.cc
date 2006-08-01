@@ -44,12 +44,12 @@ Auditioner::Auditioner (Session& s)
 	defer_pan_reset ();
 
 	if (left.length()) {
-		add_output_port (left, this, Buffer::AUDIO);
+		add_output_port (left, this, AUDIO);
 	}
 
 	if (right.length()) {
 		audio_diskstream().add_channel();
-		add_output_port (right, this, Buffer::AUDIO);
+		add_output_port (right, this, AUDIO);
 	}
 
 	allow_pan_reset ();
@@ -67,7 +67,7 @@ Auditioner::~Auditioner ()
 AudioPlaylist&
 Auditioner::prepare_playlist ()
 {
-	// FIXME
+	// FIXME auditioner is still audio-only
 	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(_diskstream->playlist());
 	assert(apl);
 

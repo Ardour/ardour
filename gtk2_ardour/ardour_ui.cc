@@ -1201,7 +1201,7 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 		Track* t;
 
 		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
-			t->diskstream().set_record_enabled (!t->diskstream().record_enabled(), this);
+			t->diskstream().set_record_enabled (!t->diskstream().record_enabled());
 		}
 	}
 	if (session == 0) {
@@ -2186,11 +2186,11 @@ ARDOUR_UI::halt_on_xrun_message ()
 }
 
 void 
-ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::AudioFileSource*>* deletion_list)
+ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::Source*>* deletion_list)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread), deletion_list));
 
-	for (list<AudioFileSource*>::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
+	for (list<Source*>::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
 		delete *i;
 	}
 
