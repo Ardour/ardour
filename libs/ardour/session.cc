@@ -2767,12 +2767,13 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 		    the task here is to replace NAME with the new name.
 		*/
 		
-		/* find last slash */
-
 		string dir;
 		string suffix;
 		string::size_type slash;
 		string::size_type dash;
+		string::size_type postfix;
+
+		/* find last slash */
 
 		if ((slash = path.find_last_of ('/')) == string::npos) {
 			return "";
@@ -2786,11 +2787,41 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 			return "";
 		}
 
-		suffix = path.substr (dash);
+		suffix = path.substr (dash+1);
+		
+		// Suffix is now everything after the dash. Now we need to eliminate
+		// the nnnnn part, which is done by either finding a '%' or a '.'
 
-		path = dir;
-		path += new_legalized;
-		path += suffix;
+		postfix = suffix.find_last_of ("%");
+		if (postfix == string::npos) {
+			postfix = suffix.find_last_of ('.');
+		}
+
+		if (postfix != string::npos) {
+			suffix = suffix.substr (postfix);
+		} else {
+			error << "Logic error in Session::change_audio_path_by_name(), please report to the developers" << endl;
+			return "";
+		}
+
+		const uint32_t limit = 10000;
+		char buf[PATH_MAX+1];
+
+		for (uint32_t cnt = 1; cnt <= limit; ++cnt) {
+
+			snprintf (buf, sizeof(buf), "%s%s-%u%s", dir.c_str(), newname.c_str(), cnt, suffix.c_str());
+
+			if (access (buf, F_OK) != 0) {
+				path = buf;
+				break;
+			}
+			path = "";
+		}
+
+		if (path == "") {
+			error << "FATAL ERROR! Could not find a " << endl;
+		}
+
 	}
 
 	return path;
@@ -2813,20 +2844,20 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 	*/
 
 	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
-		
+
 		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
-		
+
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-			
+
 			spath = (*i).path;
-			
+
 			if (destructive) {
 				spath += tape_dir_name;
 			} else {
 				spath += sound_dir_name;
 			}
-			
+
 			if (destructive) {
 				if (nchan < 2) {
 					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
@@ -2842,10 +2873,10 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
 				}
 			} else {
-				
+
 				spath += '/';
 				spath += legalized;
-					
+
 				if (nchan < 2) {
 					snprintf (buf, sizeof(buf), "%s-%u.wav", spath.c_str(), cnt);
 				} else if (nchan == 2) {
@@ -2865,7 +2896,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 				existing++;
 			}
 		}
-			
+
 		if (existing == 0) {
 			break;
 		}

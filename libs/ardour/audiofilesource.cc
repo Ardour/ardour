@@ -609,6 +609,12 @@ AudioFileSource::set_name (string newname, bool destructive)
 		return -1;
 	}
 
+	// Test whether newpath exists, if yes notify the user but continue. 
+	if (access(newpath.c_str(),F_OK) == 0) {
+		error << _("Programming error! Ardour tried to rename a file over another file! It's safe to continue working, but please report this to the developers.") << endmsg;
+		return -1;
+	}
+
 	if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
 		error << string_compose (_("cannot rename audio file for %1 to %2"), _name, newpath) << endmsg;
 		return -1;
