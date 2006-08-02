@@ -302,7 +302,10 @@ StreamView::region_layered (RegionView* rv)
 	   get events - the  parent group does instead ...
 	*/
 	
-	rv->get_canvas_group()->raise (rv->region().layer() + 1);
+	/* this used to be + 1, but regions to the left ended up below
+	  ..something.. and couldn't receive events.  why?  good question.
+	*/
+	rv->get_canvas_group()->raise (rv->region().layer() + 2);
 }
 
 void
