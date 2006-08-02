@@ -39,8 +39,6 @@ AUPluginInfo::discover ()
 	desc.componentSubType = 0;
 	desc.componentManufacturer = 0;
 
-	vector<ComponentDescription> vCompDescs;
-
 	for (int i = 0; i < numTypes; ++i) {
 		if (i == 1) {
 			desc.componentType = kAudioUnitType_MusicEffect;
@@ -54,17 +52,30 @@ AUPluginInfo::discover ()
 		while (comp != NULL) {
 			ComponentDescription temp;
 			GetComponentInfo (comp, &temp, NULL, NULL, NULL);
-			vCompDescs.push_back(temp);
+			
+			AUPluginInfoPtr plug(new AUPluginInfo);
+			plug->name = AUPluginInfo::get_name (temp);
+			plug->type = PluginInfo::AudioUnit;
+			plug->n_inputs = 0;
+			plug->n_outputs = 0;
+			plug->category = "AudioUnit";
+			plug->desc = CompDescPtr(new ComponentDescription(temp));
+
+			plugs.push_back(plug);
+			
 			comp = FindNextComponent (comp, &desc);
 		}
 	}
 
-	for (unsigned int i = 0; i < vCompDescs.size(); ++i) {
+	return plugs;
+}
 
-		// the following large block is just for determining the name of the plugin.
+std::string
+AUPluginInfo::get_name (ComponentDescription& comp_desc)
+{
 		CFStringRef itemName = NULL;
 		// Marc Poirier -style item name
-		Component auComponent = FindNextComponent (0, &(vCompDescs[i]));
+		Component auComponent = FindNextComponent (0, &comp_desc);
 		if (auComponent != NULL) {
 			ComponentDescription dummydesc;
 			Handle nameHandle = NewHandle(sizeof(void*));
@@ -82,9 +93,9 @@ AUPluginInfo::discover ()
 
 		// if Marc-style fails, do the original way
 		if (itemName == NULL) {
-			CFStringRef compTypeString = UTCreateStringForOSType(vCompDescs[i].componentType);
-			CFStringRef compSubTypeString = UTCreateStringForOSType(vCompDescs[i].componentSubType);
-			CFStringRef compManufacturerString = UTCreateStringForOSType(vCompDescs[i].componentManufacturer);
+			CFStringRef compTypeString = UTCreateStringForOSType(comp_desc.componentType);
+			CFStringRef compSubTypeString = UTCreateStringForOSType(comp_desc.componentSubType);
+			CFStringRef compManufacturerString = UTCreateStringForOSType(comp_desc.componentManufacturer);
 
 			itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"), 
 				compTypeString, compManufacturerString, compSubTypeString);
@@ -96,17 +107,6 @@ AUPluginInfo::discover ()
 			if (compManufacturerString != NULL)
 				CFRelease(compManufacturerString);
 		}
-		string realname = CFStringRefToStdString(itemName);
-
-		AUPluginInfoPtr plug(new AUPluginInfo);
-		plug->name = realname;
-		plug->type = PluginInfo::AudioUnit;
-		plug->n_inputs = 0;
-		plug->n_outputs = 0;
-		plug->category = "AudioUnit";
-
-		plugs.push_back(plug);
-	}
-
-	return plugs;
+		
+		return CFStringRefToStdString(itemName);
 }

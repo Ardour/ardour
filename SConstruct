@@ -554,6 +554,9 @@ if env['SYSLIBS']:
     
     if env['VST']:
         subdirs = ['libs/fst'] + subdirs + ['vst']
+
+    if env['COREAUDIO']:
+        subdirs = subdirs + ['libs/appleutility']
     
     gtk_subdirs = [
 #        'libs/flowcanvas',
@@ -609,6 +612,9 @@ else:
     
     if env['VST']:
         subdirs = ['libs/fst'] + subdirs + ['vst']
+
+    if env['COREAUDIO']:
+        subdirs = subdirs + ['libs/appleutility']
     
     gtk_subdirs = [
 	'libs/glibmm2',

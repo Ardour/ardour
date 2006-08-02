@@ -97,10 +97,6 @@ PluginManager::refresh ()
 		vst_refresh ();
 	}
 #endif // VST_SUPPORT
-
-#ifdef HAVE_COREAUDIO
-	_au_plugin_info = AUPluginInfo::discover ();
-#endif // HAVE_COREAUDIO
 }
 
 void
@@ -307,7 +303,7 @@ PluginManager::load (Session& session, PluginInfoPtr info)
 			return boost::shared_ptr<Plugin> ((Plugin*) 0);
 #endif // !VST_SUPPORT
 				
-		} else {
+		} else if (info->type == PluginInfo::LADSPA) {
 
 			if ((module = dlopen (info->path.c_str(), RTLD_NOW)) == 0) {
 				error << string_compose(_("LADSPA: cannot load module from \"%1\""), info->path) << endmsg;
@@ -315,6 +311,14 @@ PluginManager::load (Session& session, PluginInfoPtr info)
 			} else {
 				plugin.reset (new LadspaPlugin (module, _engine, session, info->index, session.frame_rate()));
 			}
+		} else if (info->type == PluginInfo::AudioUnit) {
+
+#ifdef HAVE_COREAUDIO
+			
+#else // !HAVE_COREAUDIO
+			error << _("This version of ardour has no support for AudioUnit plugins") << endmsg;
+			return boost::shared_ptr<Plugin> ((Plugin*) 0);
+#endif
 		}
 
 		plugin->set_info(*info);
@@ -330,26 +334,26 @@ boost::shared_ptr<Plugin>
 ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::Type type)
 {
 	PluginManager *mgr = PluginManager::the_manager();
-	PluginInfoList* plugs = 0;
+	PluginInfoList plugs;
 
 	switch (type) {
 	case PluginInfo::LADSPA:
-		plugs = &mgr->ladspa_plugin_info();
+		plugs = mgr->ladspa_plugin_info();
 		break;
 	case PluginInfo::VST:
-		plugs = &mgr->vst_plugin_info();
+		plugs = mgr->vst_plugin_info();
 		unique_id = 0; // VST plugins don't have a unique id.
 		break;
 	case PluginInfo::AudioUnit:
-		plugs = &mgr->au_plugin_info();
-		unique_id = 0;
+		plugs = AUPluginInfo::discover ();
+		unique_id = 0; // Neither do AU.
 		break;
 	default:
 		return boost::shared_ptr<Plugin> ((Plugin *) 0);
 	}
 
 	PluginInfoList::iterator i;
-	for (i = plugs->begin(); i != plugs->end(); ++i) {
+	for (i = plugs.begin(); i != plugs.end(); ++i) {
 		if ((name == "" || (*i)->name == name) &&
 			(unique_id == 0 || (*i)->unique_id == unique_id)) {	
 			return mgr->load (session, *i);

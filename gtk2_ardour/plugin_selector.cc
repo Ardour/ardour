@@ -305,7 +305,7 @@ void
 PluginSelector::au_refiller ()
 {
 	guint row;
-	PluginInfoList &plugs = manager->au_plugin_info ();
+	PluginInfoList plugs (AUPluginInfo::discover ());
 	PluginInfoList::iterator i;
 	char ibuf[16], obuf[16];
 	aumodel->clear();

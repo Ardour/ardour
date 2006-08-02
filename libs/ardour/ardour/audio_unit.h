@@ -50,7 +50,7 @@ class AUPluginInfo : public PluginInfo {
 	static PluginInfoList discover ();
 
   private:
-	friend class PluginManager;
+	static std::string get_name (ComponentDescription&);
 };
 
 typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;
