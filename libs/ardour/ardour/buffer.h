@@ -1,6 +1,5 @@
 /*
     Copyright (C) 2006 Paul Davis 
-    Written by Dave Robillard, 2006
     
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
@@ -24,7 +23,7 @@
 #include <cstdlib> // for posix_memalign
 #include <cassert>
 #include <ardour/types.h>
-#include <jack/jack.h>
+#include <ardour/data_type.h>
 
 namespace ARDOUR {
 
@@ -60,44 +59,7 @@ public:
 
 	/** Type of this buffer.
 	 * Based on this you can static cast a Buffer* to the desired type. */
-	virtual DataType type() const { return _type; }
-
-	/** Jack type (eg JACK_DEFAULT_AUDIO_TYPE) */
-	const char* jack_type() const { return type_to_jack_type(type()); }
-	
-	/** String type as saved in session XML files (eg "audio" or "midi") */
-	const char* type_string() const { return type_to_string(type()); }
-
-	/* The below static methods need to be separate from the above methods
-	 * because the conversion is needed in places where there's no Buffer.
-	 * These should probably live somewhere else...
-	 */
-
-	static const char* type_to_jack_type(DataType t) {
-		switch (t) {
-			case AUDIO: return JACK_DEFAULT_AUDIO_TYPE;
-			case MIDI:  return JACK_DEFAULT_MIDI_TYPE;
-			default:    return "";
-		}
-	}
-	
-	static const char* type_to_string(DataType t) {
-		switch (t) {
-			case AUDIO: return "audio";
-			case MIDI:  return "midi";
-			default:    return "unknown"; // reeeally shouldn't ever happen
-		}
-	}
-
-	/** Used for loading from XML (route default types etc) */
-	static DataType type_from_string(const string& str) {
-		if (str == "audio")
-			return AUDIO;
-		else if (str == "midi")
-			return MIDI;
-		else
-			return NIL;
-	}
+	DataType type() const { return _type; }
 
 protected:
 	DataType _type;
@@ -114,12 +76,12 @@ class AudioBuffer : public Buffer
 {
 public:
 	AudioBuffer(size_t capacity)
-		: Buffer(AUDIO, capacity)
+		: Buffer(DataType::AUDIO, capacity)
 		, _data(NULL)
 	{
 		_size = capacity; // For audio buffers, size = capacity (always)
 #ifdef NO_POSIX_MEMALIGN
-		b =  (Sample *) malloc(sizeof(Sample) * capacity);
+		_data =  (Sample *) malloc(sizeof(Sample) * capacity);
 #else
 		posix_memalign((void**)_data, 16, sizeof(Sample) * capacity);
 #endif	
@@ -135,7 +97,7 @@ private:
 	AudioBuffer(const AudioBuffer& copy);            
 	AudioBuffer& operator=(const AudioBuffer& copy);
 
-	Sample* const _data; ///< Actual buffer contents
+	Sample* _data; ///< Actual buffer contents
 };
 
 
@@ -145,17 +107,17 @@ class MidiBuffer : public Buffer
 {
 public:
 	MidiBuffer(size_t capacity)
-		: Buffer(MIDI, capacity)
+		: Buffer(DataType::MIDI, capacity)
 		, _data(NULL)
 	{
+		_size = capacity; // For audio buffers, size = capacity (always)
 #ifdef NO_POSIX_MEMALIGN
-		b =  (Sample *) malloc(sizeof(RawMidi) * capacity);
+		_data =  (RawMidi *) malloc(sizeof(RawMidi) * capacity);
 #else
 		posix_memalign((void**)_data, 16, sizeof(RawMidi) * capacity);
 #endif	
 		assert(_data);
-		assert(_size == 0);
-		memset(_data, 0, sizeof(Sample) * capacity);
+		memset(_data, 0, sizeof(RawMidi) * capacity);
 	}
 
 	const RawMidi* data() const { return _data; }
@@ -166,7 +128,7 @@ private:
 	MidiBuffer(const MidiBuffer& copy);            
 	MidiBuffer& operator=(const MidiBuffer& copy);
 
-	RawMidi* const _data; ///< Actual buffer contents
+	RawMidi* _data; ///< Actual buffer contents
 };
 
 

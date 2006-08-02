@@ -195,7 +195,7 @@ namespace ARDOUR {
 		Splice
 	};
 
-        enum RegionPoint { 
+	enum RegionPoint { 
 	    Start,
 	    End,
 	    SyncPoint
@@ -244,12 +244,6 @@ namespace ARDOUR {
 	    
 	    PeakDatum min;
 	    PeakDatum max;
-	};
-
-	enum DataType {
-		NIL = 0,
-		AUDIO,
-		MIDI
 	};
 }
 

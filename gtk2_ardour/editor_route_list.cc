@@ -55,9 +55,9 @@ Editor::handle_new_route (boost::shared_ptr<Route> route)
 
 	// FIXME
 	DataType type = route->default_type();
-	assert(type == ARDOUR::AUDIO || type == ARDOUR::MIDI);
+	assert(type == ARDOUR::DataType::AUDIO || type == ARDOUR::DataType::MIDI);
 	
-	if (type == ARDOUR::AUDIO)
+	if (type == ARDOUR::DataType::AUDIO)
 		tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
 	else
 		tv = new MidiTimeAxisView (*this, *session, route, track_canvas);

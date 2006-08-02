@@ -6,3 +6,6 @@ export LD_LIBRARY_PATH=../libs/surfaces/control_protocol:../libs/ardour:../libs/
 
 # DYLD_LIBRARY_PATH is for darwin.
 export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
+
+# LADSPA_PATH for OSX
+export LADSPA_PATH=$LADSPA_PATH:/Library/Audio/Plug-Ins/LADSPA

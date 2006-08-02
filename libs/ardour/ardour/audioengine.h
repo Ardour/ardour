@@ -35,6 +35,7 @@
 #include <jack/jack.h>
 #include <jack/transport.h>
 #include <ardour/types.h>
+#include <ardour/data_type.h>
 
 namespace ARDOUR {
 

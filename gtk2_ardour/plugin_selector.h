@@ -66,7 +66,7 @@ class PluginSelector : public ArdourDialog
 		Gtk::TreeModelColumn<std::string> type;
 		Gtk::TreeModelColumn<std::string> ins;
 		Gtk::TreeModelColumn<std::string> outs;
-	    Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
+	    Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 	LadspaColumns lcols;
 	Glib::RefPtr<Gtk::ListStore> lmodel;
@@ -81,7 +81,7 @@ class PluginSelector : public ArdourDialog
 			add (plugin);
 		}
 		Gtk::TreeModelColumn<std::string> text;
-		Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
+		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 	AddedColumns acols;
 	Glib::RefPtr<Gtk::ListStore> amodel;
@@ -100,7 +100,7 @@ class PluginSelector : public ArdourDialog
 	    Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> ins;
 		Gtk::TreeModelColumn<std::string> outs;
-	    Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
+	    Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 	VstColumns vcols;
 	Glib::RefPtr<Gtk::ListStore> vmodel;
@@ -123,7 +123,7 @@ class PluginSelector : public ArdourDialog
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> ins;
 		Gtk::TreeModelColumn<std::string> outs;
-		Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
+		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 	AUColumns aucols;
 	Glib::RefPtr<Gtk::ListStore> aumodel;
@@ -141,7 +141,6 @@ class PluginSelector : public ArdourDialog
 	gint o_selected_plug;
 
 	ARDOUR::PluginManager *manager;
-	list<ARDOUR::PluginInfo*> added_plugins;
 
 	static void _input_refiller (void *);
 	
@@ -153,7 +152,7 @@ class PluginSelector : public ArdourDialog
 	void added_list_selection_changed();
 	void ladspa_display_selection_changed();
 	void btn_apply_clicked();
-	void use_plugin (ARDOUR::PluginInfo*);
+	void use_plugin (ARDOUR::PluginInfoPtr);
 	void cleanup ();
 };
 

@@ -401,7 +401,7 @@ AudioEngine::register_input_port (DataType type, const string& portname)
 	}
 
 	jack_port_t *p = jack_port_register (_jack, portname.c_str(),
-		Buffer::type_to_jack_type(type), JackPortIsInput, 0);
+		type.to_jack_type(), JackPortIsInput, 0);
 
 	if (p) {
 
@@ -435,7 +435,7 @@ AudioEngine::register_output_port (DataType type, const string& portname)
 	jack_port_t *p;
 
 	if ((p = jack_port_register (_jack, portname.c_str(),
-		Buffer::type_to_jack_type(type), JackPortIsOutput, 0)) != 0) {
+		type.to_jack_type(), JackPortIsOutput, 0)) != 0) {
 		Port *newport = new Port (p);
 		ports.insert (ports.begin(), newport);
 		return newport;

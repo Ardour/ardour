@@ -69,6 +69,7 @@
 #include <ardour/crossfade.h>
 #include <ardour/playlist.h>
 #include <ardour/click.h>
+#include <ardour/data_type.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -728,7 +729,7 @@ Session::when_engine_running ()
 			_master_out->defer_pan_reset ();
 			
 			while ((int) _master_out->n_inputs() < _master_out->input_maximum()) {
-				if (_master_out->add_input_port ("", this, AUDIO)) {
+				if (_master_out->add_input_port ("", this, DataType::AUDIO)) {
 					error << _("cannot setup master inputs") 
 					      << endmsg;
 					break;
@@ -736,7 +737,7 @@ Session::when_engine_running ()
 			}
 			n = 0;
 			while ((int) _master_out->n_outputs() < _master_out->output_maximum()) {
-				if (_master_out->add_output_port (_engine.get_nth_physical_output (n), this, AUDIO)) {
+				if (_master_out->add_output_port (_engine.get_nth_physical_output (n), this, DataType::AUDIO)) {
 					error << _("cannot setup master outputs")
 					      << endmsg;
 					break;
@@ -1808,7 +1809,7 @@ Session::new_midi_route ()
 	} while (n < (UINT_MAX-1));
 
 	try {
-		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), MIDI));
+		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::MIDI));
 		
 		if (bus->ensure_io (1, 1, false, this)) {
 			error << (_("cannot configure 1 in/1 out configuration for new midi track"))
@@ -2016,7 +2017,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 	} while (n < (UINT_MAX-1));
 
 	try {
-		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), AUDIO));
+		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
 
 		if (bus->ensure_io (input_channels, output_channels, false, this)) {
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -2974,12 +2975,13 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 		    the task here is to replace NAME with the new name.
 		*/
 		
-		/* find last slash */
-
 		string dir;
 		string suffix;
 		string::size_type slash;
 		string::size_type dash;
+		string::size_type postfix;
+
+		/* find last slash */
 
 		if ((slash = path.find_last_of ('/')) == string::npos) {
 			return "";
@@ -2993,11 +2995,41 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 			return "";
 		}
 
-		suffix = path.substr (dash);
+		suffix = path.substr (dash+1);
+		
+		// Suffix is now everything after the dash. Now we need to eliminate
+		// the nnnnn part, which is done by either finding a '%' or a '.'
 
-		path = dir;
-		path += new_legalized;
-		path += suffix;
+		postfix = suffix.find_last_of ("%");
+		if (postfix == string::npos) {
+			postfix = suffix.find_last_of ('.');
+		}
+
+		if (postfix != string::npos) {
+			suffix = suffix.substr (postfix);
+		} else {
+			error << "Logic error in Session::change_audio_path_by_name(), please report to the developers" << endl;
+			return "";
+		}
+
+		const uint32_t limit = 10000;
+		char buf[PATH_MAX+1];
+
+		for (uint32_t cnt = 1; cnt <= limit; ++cnt) {
+
+			snprintf (buf, sizeof(buf), "%s%s-%u%s", dir.c_str(), newname.c_str(), cnt, suffix.c_str());
+
+			if (access (buf, F_OK) != 0) {
+				path = buf;
+				break;
+			}
+			path = "";
+		}
+
+		if (path == "") {
+			error << "FATAL ERROR! Could not find a " << endl;
+		}
+
 	}
 
 	return path;
@@ -3020,20 +3052,20 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 	*/
 
 	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
-		
+
 		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
-		
+
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-			
+
 			spath = (*i).path;
-			
+
 			if (destructive) {
 				spath += tape_dir_name;
 			} else {
 				spath += sound_dir_name;
 			}
-			
+
 			if (destructive) {
 				if (nchan < 2) {
 					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
@@ -3049,10 +3081,10 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
 				}
 			} else {
-				
+
 				spath += '/';
 				spath += legalized;
-					
+
 				if (nchan < 2) {
 					snprintf (buf, sizeof(buf), "%s-%u.wav", spath.c_str(), cnt);
 				} else if (nchan == 2) {
@@ -3072,7 +3104,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 				existing++;
 			}
 		}
-			
+
 		if (existing == 0) {
 			break;
 		}

@@ -644,7 +644,7 @@ AudioRegion::state (bool full)
 	
 	snprintf (buf, sizeof (buf), "0x%x", (int) _flags);
 	node.add_property ("flags", buf);
-	snprintf (buf, sizeof(buf), "%f", _scale_amplitude);
+	snprintf (buf, sizeof(buf), "%.12g", _scale_amplitude);
 	node.add_property ("scale-gain", buf);
 
 	for (uint32_t n=0; n < sources.size(); ++n) {
@@ -1258,7 +1258,7 @@ AudioRegion::set_scale_amplitude (gain_t g)
 void
 AudioRegion::normalize_to (float target_dB)
 {
-	const jack_nframes_t blocksize = 256 * 1048;
+	const jack_nframes_t blocksize = 64 * 1024;
 	Sample buf[blocksize];
 	char workbuf[blocksize * 4];
 	jack_nframes_t fpos;

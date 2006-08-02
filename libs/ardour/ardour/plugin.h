@@ -73,6 +73,9 @@ class PluginInfo {
 	uint32_t index;
 };
 
+typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
+typedef std::list<PluginInfoPtr> PluginInfoList;
+
 class Plugin : public Stateful, public sigc::trackable
 
 {

@@ -39,6 +39,7 @@
 #include <ardour/state_manager.h>
 #include <ardour/curve.h>
 #include <ardour/types.h>
+#include <ardour/data_type.h>
 
 using std::string;
 using std::vector;
@@ -67,7 +68,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	IO (Session&, string name, 
 	    int input_min = -1, int input_max = -1, 
 	    int output_min = -1, int output_max = -1,
-		DataType default_type = AUDIO);
+		DataType default_type = DataType::AUDIO);
 
 	virtual ~IO();
 
@@ -116,8 +117,8 @@ class IO : public Stateful, public ARDOUR::StateManager
 	Connection *input_connection() const { return _input_connection; }
 	Connection *output_connection() const { return _output_connection; }
 
-	int add_input_port (string source, void *src, DataType type = NIL);
-	int add_output_port (string destination, void *src, DataType type = NIL);
+	int add_input_port (string source, void *src, DataType type = DataType::NIL);
+	int add_output_port (string destination, void *src, DataType type = DataType::NIL);
 
 	int remove_input_port (Port *, void *src);
 	int remove_output_port (Port *, void *src);

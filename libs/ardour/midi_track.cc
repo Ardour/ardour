@@ -40,7 +40,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
-	: Track (sess, name, flag, mode, MIDI)
+	: Track (sess, name, flag, mode, DataType::MIDI)
 {
 	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
 

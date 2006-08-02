@@ -529,7 +529,7 @@ EqualPowerStereoPanner::state (bool full_state)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof (buf), "%f", x); 
+	snprintf (buf, sizeof (buf), "%.12g", x); 
 	root->add_property (X_("x"), buf);
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 	if (full_state) {
@@ -763,9 +763,9 @@ Multi2dPanner::state (bool full_state)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof (buf), "%f", x); 
+	snprintf (buf, sizeof (buf), "%.12g", x); 
 	root->add_property (X_("x"), buf);
-	snprintf (buf, sizeof (buf), "%f", y); 
+	snprintf (buf, sizeof (buf), "%.12g", y); 
 	root->add_property (X_("y"), buf);
 	root->add_property (X_("type"), Multi2dPanner::name);
 
@@ -1207,9 +1207,9 @@ Panner::state (bool full)
 
 	for (vector<Panner::Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
 		XMLNode* onode = new XMLNode (X_("Output"));
-		snprintf (buf, sizeof (buf), "%f", (*o).x);
+		snprintf (buf, sizeof (buf), "%.12g", (*o).x);
 		onode->add_property (X_("x"), buf);
-		snprintf (buf, sizeof (buf), "%f", (*o).y);
+		snprintf (buf, sizeof (buf), "%.12g", (*o).y);
 		onode->add_property (X_("y"), buf);
 		root->add_child_nocopy (*onode);
 	}
@@ -1258,10 +1258,10 @@ Panner::set_state (const XMLNode& node)
 			float x, y;
 			
 			prop = (*niter)->property (X_("x"));
-			sscanf (prop->value().c_str(), "%f", &x);
+			sscanf (prop->value().c_str(), "%.12g", &x);
 			
 			prop = (*niter)->property (X_("y"));
-			sscanf (prop->value().c_str(), "%f", &y);
+			sscanf (prop->value().c_str(), "%.12g", &y);
 			
 			outputs.push_back (Output (x, y));
 		}

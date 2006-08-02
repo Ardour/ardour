@@ -51,7 +51,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	o_selected_plug = -1;
 	i_selected_plug = 0;
 	
-	current_selection = ARDOUR::PluginInfo::LADSPA;
+	current_selection = PluginInfo::LADSPA;
 
 	lmodel = Gtk::ListStore::create(lcols);
 	ladspa_display.set_model (lmodel);
@@ -226,8 +226,8 @@ void
 PluginSelector::input_refiller ()
 {
 	guint row;
-	list<PluginInfo *> &plugs = manager->ladspa_plugin_info ();
-	list<PluginInfo *>::iterator i;
+	PluginInfoList &plugs = manager->ladspa_plugin_info ();
+	PluginInfoList::iterator i;
 	char ibuf[16], obuf[16];
 	lmodel->clear();
 
@@ -259,8 +259,8 @@ void
 PluginSelector::vst_refiller ()
 {
 	guint row;
-	list<PluginInfo *> &plugs = manager->vst_plugin_info ();
-	list<PluginInfo *>::iterator i;
+	PluginInfoList &plugs = manager->vst_plugin_info ();
+	PluginInfoList::iterator i;
 	char ibuf[16], obuf[16];
 	vmodel->clear();
 	
@@ -288,7 +288,7 @@ PluginSelector::vst_display_selection_changed()
 		btn_add->set_sensitive (false);
 	}
 
-	current_selection = ARDOUR::PluginInfo::VST;
+	current_selection = PluginInfo::VST;
 }
 
 #endif //VST_SUPPORT
@@ -305,8 +305,8 @@ void
 PluginSelector::au_refiller ()
 {
 	guint row;
-	list<PluginInfo *> &plugs = manager->au_plugin_info ();
-	list<PluginInfo *>::iterator i;
+	PluginInfoList &plugs = manager->au_plugin_info ();
+	PluginInfoList::iterator i;
 	char ibuf[16], obuf[16];
 	aumodel->clear();
 	
@@ -334,17 +334,15 @@ PluginSelector::au_display_selection_changed()
 		btn_add->set_sensitive (false);
 	}
 	
-	current_selection = ARDOUR::PluginInfo::AudioUnit;
+	current_selection = PluginInfo::AudioUnit;
 }
 
 #endif //HAVE_COREAUDIO
 
 void
-PluginSelector::use_plugin (PluginInfo* pi)
+PluginSelector::use_plugin (PluginInfoPtr pi)
 {
-	list<PluginInfo *>::iterator i;
-
-	if (pi == 0 || session == 0) {
+	if (session == 0) {
 		return;
 	}
 
@@ -359,32 +357,29 @@ void
 PluginSelector::btn_add_clicked()
 {
 	std::string name;
-	ARDOUR::PluginInfo *pi;
+	PluginInfoPtr pi;
 	Gtk::TreeModel::Row newrow = *(amodel->append());
 	
 	Gtk::TreeModel::Row row;
 
 	switch (current_selection) {
-		case ARDOUR::PluginInfo::LADSPA:
+		case PluginInfo::LADSPA:
 			row = *(ladspa_display.get_selection()->get_selected());
 			name = row[lcols.name];
 			pi = row[lcols.plugin];
-			added_plugins.push_back (row[lcols.plugin]);
 			break;
-		case ARDOUR::PluginInfo::VST:
+		case PluginInfo::VST:
 #ifdef VST_SUPPORT
 			row = *(vst_display.get_selection()->get_selected());
 			name = row[vcols.name];
 			pi = row[vcols.plugin];
-			added_plugins.push_back (row[vcols.plugin]);
 #endif
 			break;
-		case ARDOUR::PluginInfo::AudioUnit:
+		case PluginInfo::AudioUnit:
 #ifdef HAVE_COREAUDIO
 			row = *(au_display.get_selection()->get_selected());
 			name = row[aucols.name];
 			pi = row[aucols.plugin];
-			added_plugins.push_back (row[aucols.plugin]);
 #endif
 			break;
 		default:
@@ -403,17 +398,12 @@ PluginSelector::btn_add_clicked()
 void
 PluginSelector::btn_remove_clicked()
 {
-	list<PluginInfo*>::iterator i;
 	Gtk::TreeModel::iterator iter = added_list.get_selection()->get_selected();
-	for (i = added_plugins.begin(); (*i) != (*iter)[acols.plugin]; ++i);
-
-	added_plugins.erase(i);	
+	
 	amodel->erase(iter);
 	if (amodel->children().empty()) {
-	  set_response_sensitive (RESPONSE_APPLY, false);
+		set_response_sensitive (RESPONSE_APPLY, false);
 	}
-
-
 }
 
 void
@@ -438,7 +428,7 @@ PluginSelector::ladspa_display_selection_changed()
 		btn_add->set_sensitive (false);
 	}
 	
-	current_selection = ARDOUR::PluginInfo::LADSPA;
+	current_selection = PluginInfo::LADSPA;
 }
 
 void
@@ -455,14 +445,14 @@ int
 PluginSelector::run ()
 {
 	ResponseType r;
-	list<PluginInfo*>::iterator i;
+	TreeModel::Children::iterator i;
 
 	r = (ResponseType) Dialog::run ();
 
 	switch (r) {
 	case RESPONSE_APPLY:
-		for (i = added_plugins.begin(); i != added_plugins.end(); ++i){
-			use_plugin (*i);
+		for (i = amodel->children().begin(); i != amodel->children().end(); ++i) {
+			use_plugin ((*i)[acols.plugin]);
 		}
 		break;
 
@@ -479,6 +469,5 @@ void
 PluginSelector::cleanup ()
 {
 	hide();
-	added_plugins.clear();
 	amodel->clear();
 }

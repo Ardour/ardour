@@ -126,7 +126,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	  auditioning_alert_button (_("AUDITION")),
 	  solo_alert_button (_("SOLO")),
 	  shown_flag (false)
-
 {
 	using namespace Gtk::Menu_Helpers;
 

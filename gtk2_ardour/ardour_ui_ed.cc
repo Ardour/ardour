@@ -268,11 +268,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	/* XXX the newline in the displayed names of these action is really wrong, but its because we want the button
-	   that proxies for these action to be more compact. It would be nice to find a way to override the action
-	   name appearance on the buttons.
-	*/
-
 	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchIn"), _("Punch In"), mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);

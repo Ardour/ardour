@@ -702,7 +702,7 @@ Crossfade::get_state ()
 
 		snprintf (buf, sizeof (buf), "%" PRIu32, (jack_nframes_t) floor ((*ii)->when));
 		pnode->add_property ("x", buf);
-		snprintf (buf, sizeof (buf), "%f", (*ii)->value);
+		snprintf (buf, sizeof (buf), "%.12g", (*ii)->value);
 		pnode->add_property ("y", buf);
 		child->add_child_nocopy (*pnode);
 	}
@@ -716,7 +716,7 @@ Crossfade::get_state ()
 
 		snprintf (buf, sizeof (buf), "%" PRIu32, (jack_nframes_t) floor ((*ii)->when));
 		pnode->add_property ("x", buf);
-		snprintf (buf, sizeof (buf), "%f", (*ii)->value);
+		snprintf (buf, sizeof (buf), "%.12g", (*ii)->value);
 		pnode->add_property ("y", buf);
 		child->add_child_nocopy (*pnode);
 	}

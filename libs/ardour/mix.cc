@@ -22,6 +22,7 @@
 #include <ardour/types.h>
 #include <ardour/utils.h>
 #include <ardour/mix.h>
+#include <stdint.h>
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 
@@ -119,8 +120,9 @@ mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nf
 float
 veclib_compute_peak (ARDOUR::Sample *buf, jack_nframes_t nsamples, float current)
 {
-        vDSP_maxv(buf, 1, &current, nsamples);
-        return current;
+	float tmpmax = 0.0f;
+        vDSP_maxmgv(buf, 1, &tmpmax, nsamples);
+        return f_max(current, tmpmax);
 }
 
 void

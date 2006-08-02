@@ -37,14 +37,10 @@
 #include <ardour/plugin.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/vst_plugin.h>
+#include <ardour/audio_unit.h>
 
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
-
-#ifdef HAVE_COREAUDIO
-#include <CoreServices/CoreServices.h>
-#include <AudioUnit/AudioUnit.h>
-#endif // HAVE_COREAUDIO
 
 #include "i18n.h"
 
@@ -103,17 +99,13 @@ PluginManager::refresh ()
 #endif // VST_SUPPORT
 
 #ifdef HAVE_COREAUDIO
-	au_discover ();
+	_au_plugin_info = AUPluginInfo::discover ();
 #endif // HAVE_COREAUDIO
 }
 
 void
 PluginManager::ladspa_refresh ()
 {
-	for (std::list<PluginInfo*>::iterator i = _ladspa_plugin_info.begin(); i != _ladspa_plugin_info.end(); ++i) {
-		delete *i;
-	}
-
 	_ladspa_plugin_info.clear ();
 
 	if (ladspa_path.length() == 0) {
@@ -234,7 +226,6 @@ PluginManager::add_lrdf_data (const string &path)
 int 
 PluginManager::ladspa_discover (string path)
 {
-	PluginInfo *info;
 	void *module;
 	const LADSPA_Descriptor *descriptor;
 	LADSPA_Descriptor_Function dfunc;
@@ -259,7 +250,7 @@ PluginManager::ladspa_discover (string path)
 			break;
 		}
 
-		info = new PluginInfo;
+		PluginInfoPtr info(new PluginInfo);
 		info->name = descriptor->Name;
 		info->category = get_ladspa_category(descriptor->UniqueID);
 		info->path = path;
@@ -290,7 +281,7 @@ PluginManager::ladspa_discover (string path)
 }
 
 boost::shared_ptr<Plugin>
-PluginManager::load (Session& session, PluginInfo *info)
+PluginManager::load (Session& session, PluginInfoPtr info)
 {
 	void *module;
 
@@ -339,8 +330,7 @@ boost::shared_ptr<Plugin>
 ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::Type type)
 {
 	PluginManager *mgr = PluginManager::the_manager();
-	list<PluginInfo *>::iterator i;
-	list<PluginInfo *>* plugs = 0;
+	PluginInfoList* plugs = 0;
 
 	switch (type) {
 	case PluginInfo::LADSPA:
@@ -358,6 +348,7 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::T
 		return boost::shared_ptr<Plugin> ((Plugin *) 0);
 	}
 
+	PluginInfoList::iterator i;
 	for (i = plugs->begin(); i != plugs->end(); ++i) {
 		if ((name == "" || (*i)->name == name) &&
 			(unique_id == 0 || (*i)->unique_id == unique_id)) {	
@@ -409,10 +400,6 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 void
 PluginManager::vst_refresh ()
 {
-	for (std::list<PluginInfo*>::iterator i = _vst_plugin_info.begin(); i != _vst_plugin_info.end(); ++i) {
-		delete *i;
-	}
-
 	_vst_plugin_info.clear ();
 
 	if (vst_path.length() == 0) {
@@ -466,7 +453,6 @@ int
 PluginManager::vst_discover (string path)
 {
 	FSTInfo* finfo;
-	PluginInfo* info;
 
 	if ((finfo = fst_get_info (const_cast<char *> (path.c_str()))) == 0) {
 		return -1;
@@ -478,7 +464,7 @@ PluginManager::vst_discover (string path)
 			<< endl;
 	}
 	
-	info = new PluginInfo;
+	PluginInfoPtr info(new PluginInfo);
 
 	/* what a goddam joke freeware VST is */
 
@@ -502,94 +488,3 @@ PluginManager::vst_discover (string path)
 }
 
 #endif // VST_SUPPORT
-
-#ifdef HAVE_COREAUDIO
-
-int
-PluginManager::au_discover ()
-{
-	_au_plugin_info.clear ();
-	
-	int numTypes = 2;    // this magic number was retrieved from the apple AUHost example.
-
-	ComponentDescription desc;
-	desc.componentFlags = 0;
-	desc.componentFlagsMask = 0;
-	desc.componentSubType = 0;
-	desc.componentManufacturer = 0;
-	
-	vector<ComponentDescription> vCompDescs;
-
-	for (int i = 0; i < numTypes; ++i) {
-		if (i == 1) {
-			desc.componentType = kAudioUnitType_MusicEffect;
-		} else {
-			desc.componentType = kAudioUnitType_Effect;
-		}
-		
-		Component comp = 0;
-
-		comp = FindNextComponent (NULL, &desc);
-		while (comp != NULL) {
-			ComponentDescription temp;
-			GetComponentInfo (comp, &temp, NULL, NULL, NULL);
-			vCompDescs.push_back(temp);
-			comp = FindNextComponent (comp, &desc);
-		}
-	}
-
-	PluginInfo* plug;
-	for (unsigned int i = 0; i < vCompDescs.size(); ++i) {
-
-		// the following large block is just for determining the name of the plugin.
-		CFStringRef itemName = NULL;
-		// Marc Poirier -style item name
-		Component auComponent = FindNextComponent (0, &(vCompDescs[i]));
-		if (auComponent != NULL) {
-			ComponentDescription dummydesc;
-			Handle nameHandle = NewHandle(sizeof(void*));
-			if (nameHandle != NULL) {
-				OSErr err = GetComponentInfo(auComponent, &dummydesc, nameHandle, NULL, NULL);
-				if (err == noErr) {
-					ConstStr255Param nameString = (ConstStr255Param) (*nameHandle);
-					if (nameString != NULL) {
-						itemName = CFStringCreateWithPascalString(kCFAllocatorDefault, nameString, CFStringGetSystemEncoding());
-					}
-				}
-				DisposeHandle(nameHandle);
-			}
-		}
-		
-		// if Marc-style fails, do the original way
-		if (itemName == NULL) {
-			CFStringRef compTypeString = UTCreateStringForOSType(vCompDescs[i].componentType);
-			CFStringRef compSubTypeString = UTCreateStringForOSType(vCompDescs[i].componentSubType);
-			CFStringRef compManufacturerString = UTCreateStringForOSType(vCompDescs[i].componentManufacturer);
-			
-			itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"), 
-				compTypeString, compManufacturerString, compSubTypeString);
-
-			if (compTypeString != NULL)
-				CFRelease(compTypeString);
-			if (compSubTypeString != NULL)
-				CFRelease(compSubTypeString);
-			if (compManufacturerString != NULL)
-				CFRelease(compManufacturerString);
-		}
-		string realname = CFStringRefToStdString(itemName);
-		
-		plug = new PluginInfo;
-		plug->name = realname;
-		plug->type = PluginInfo::AudioUnit;
-		plug->n_inputs = 0;
-		plug->n_outputs = 0;
-		plug->category = "AudioUnit";
-		
-		_au_plugin_info.push_back(plug);
-	}
-
-	return 0;
-}
-
-#endif // HAVE_COREAUDIO
-

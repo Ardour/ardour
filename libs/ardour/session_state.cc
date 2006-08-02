@@ -1743,15 +1743,15 @@ Session::XMLRouteFactory (const XMLNode& node)
 
 	bool has_diskstream = (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0);
 	
-	DataType type = AUDIO;
+	DataType type = DataType::AUDIO;
 	const XMLProperty* prop = node.property("default-type");
 	if (prop)
-		type = Buffer::type_from_string(prop->value());
+		type = DataType(prop->value());
 	
-	assert(type != NIL);
+	assert(type != DataType::NIL);
 
 	if (has_diskstream) {
-		if (type == AUDIO) {
+		if (type == DataType::AUDIO) {
 			boost::shared_ptr<Route> ret (new AudioTrack (*this, node));
 			return ret;
 		} else {

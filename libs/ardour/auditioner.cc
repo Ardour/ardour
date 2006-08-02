@@ -27,6 +27,7 @@
 #include <ardour/auditioner.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/panner.h>
+#include <ardour/data_type.h>
 
 using namespace std;
 using namespace ARDOUR;
@@ -44,12 +45,12 @@ Auditioner::Auditioner (Session& s)
 	defer_pan_reset ();
 
 	if (left.length()) {
-		add_output_port (left, this, AUDIO);
+		add_output_port (left, this, DataType::AUDIO);
 	}
 
 	if (right.length()) {
 		audio_diskstream().add_channel();
-		add_output_port (right, this, AUDIO);
+		add_output_port (right, this, DataType::AUDIO);
 	}
 
 	allow_pan_reset ();
