@@ -992,12 +992,14 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 GhostRegion*
 AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 {
-	RouteTimeAxisView& myatv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&trackview);
+	assert(rtv);
+
 	double unit_position = _region.position () / samples_per_unit;
 	GhostRegion* ghost = new GhostRegion (atv, unit_position);
 	uint32_t nchans;
 	
-	nchans = myatv.get_diskstream()->n_channels();
+	nchans = rtv->get_diskstream()->n_channels();
 
 	for (uint32_t n = 0; n < nchans; ++n) {
 		

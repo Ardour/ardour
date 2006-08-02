@@ -1379,7 +1379,7 @@ AudioRegion::speed_mismatch (float sr) const
 
 	float fsr = sources.front()->sample_rate();
 
-	return fsr == sr;
+	return fsr != sr;
 }
 
 extern "C" {
