@@ -279,8 +279,6 @@ PluginManager::ladspa_discover (string path)
 boost::shared_ptr<Plugin>
 PluginManager::load (Session& session, PluginInfoPtr info)
 {
-	void *module;
-
 	try {
 		boost::shared_ptr<Plugin> plugin;
 
@@ -304,6 +302,7 @@ PluginManager::load (Session& session, PluginInfoPtr info)
 #endif // !VST_SUPPORT
 				
 		} else if (info->type == PluginInfo::LADSPA) {
+			void *module;
 
 			if ((module = dlopen (info->path.c_str(), RTLD_NOW)) == 0) {
 				error << string_compose(_("LADSPA: cannot load module from \"%1\""), info->path) << endmsg;
@@ -340,14 +339,21 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::T
 	case PluginInfo::LADSPA:
 		plugs = mgr->ladspa_plugin_info();
 		break;
+
+#ifdef VST_SUPPORT
 	case PluginInfo::VST:
 		plugs = mgr->vst_plugin_info();
 		unique_id = 0; // VST plugins don't have a unique id.
 		break;
+#endif
+
+#ifdef HAVE_COREAUDIO
 	case PluginInfo::AudioUnit:
 		plugs = AUPluginInfo::discover ();
 		unique_id = 0; // Neither do AU.
 		break;
+#endif
+
 	default:
 		return boost::shared_ptr<Plugin> ((Plugin *) 0);
 	}
