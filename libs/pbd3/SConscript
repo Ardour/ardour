@@ -21,6 +21,7 @@ pbd3_files = Split("""
 basename.cc
 base_ui.cc
 convert.cc
+command.cc
 dmalloc.cc
 error.cc
 mountpoint.cc

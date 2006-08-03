@@ -1,87 +1,92 @@
 #include <ardour/session.h>
+#include <ardour/route.h>
 
 namespace ARDOUR {
 // solo
-Session::GlobalSoloStateCommand::GlobalSoloStateCommand(void *src) : src(src)
+Session::GlobalSoloStateCommand::GlobalSoloStateCommand(Session &sess, void *src)
+    : sess(sess), src(src)
 {
-    after = before = get_global_route_boolean(&Route::soloed);
+    after = before = sess.get_global_route_boolean(&Route::soloed);
 }
 void Session::GlobalSoloStateCommand::mark()
 {
-    after = get_global_route_boolean(&Route::soloed);
+    after = sess.get_global_route_boolean(&Route::soloed);
 }
-void operator()()
+void Session::GlobalSoloStateCommand::operator()()
 {
-    set_global_solo(after, src);
+    sess.set_global_solo(after, src);
 }
-void undo()
+void Session::GlobalSoloStateCommand::undo()
 {
-    set_global_solo(before, src);
+    sess.set_global_solo(before, src);
 }
-XMLNode &serialize()
+XMLNode &Session::GlobalSoloStateCommand::serialize()
 {
 }
 
 // mute
-Session::GlobalMuteStateCommand::GlobalMuteStateCommand(void *src) : src(src)
+Session::GlobalMuteStateCommand::GlobalMuteStateCommand(Session &sess, void *src)
+    : sess(sess), src(src)
 {
-    after = before = get_global_route_boolean(&Route::muted);
+    after = before = sess.get_global_route_boolean(&Route::muted);
 }
 void Session::GlobalMuteStateCommand::mark()
 {
-    after = get_global_route_boolean(&Route::muted);
+    after = sess.get_global_route_boolean(&Route::muted);
 }
-void operator()()
+void Session::GlobalMuteStateCommand::operator()()
 {
-    set_global_mute(after, src);
+    sess.set_global_mute(after, src);
 }
-void undo()
+void Session::GlobalMuteStateCommand::undo()
 {
-    set_global_mute(before, src);
+    sess.set_global_mute(before, src);
 }
-XMLNode &serialize()
+XMLNode &Session::GlobalMuteStateCommand::serialize()
 {
 }
 
 // record enable
-Session::GlobalRecordEnableStateCommand::GlobalRecordEnableStateCommand(void *src) : src(src)
+Session::GlobalRecordEnableStateCommand::GlobalRecordEnableStateCommand(Session &sess, void *src) 
+    : sess(sess), src(src)
 {
-    after = before = get_global_route_boolean(&Route::record_enabled);
+    after = before = sess.get_global_route_boolean(&Route::record_enabled);
 }
 void Session::GlobalRecordEnableStateCommand::mark()
 {
-    after = get_global_route_boolean(&Route::record_enabled);
+    after = sess.get_global_route_boolean(&Route::record_enabled);
 }
-void operator()()
+void Session::GlobalRecordEnableStateCommand::operator()()
 {
-    set_global_record_enable(after, src);
+    sess.set_global_record_enable(after, src);
 }
-void undo()
+void Session::GlobalRecordEnableStateCommand::undo()
 {
-    set_global_record_enable(before, src);
+    sess.set_global_record_enable(before, src);
 }
-XMLNode &serialize()
+XMLNode &Session::GlobalRecordEnableStateCommand::serialize()
 {
 }
 
 // metering
-Session::GlobalMeteringStateCommand::GlobalMeteringStateCommand(void *src) : src(src)
+Session::GlobalMeteringStateCommand::GlobalMeteringStateCommand(Session &sess, void *src) 
+    : sess(sess), src(src)
 {
-    after = before = get_global_route_metering();
+    after = before = sess.get_global_route_metering();
 }
 void Session::GlobalMeteringStateCommand::mark()
 {
-    after = get_global_route_metering();
+    after = sess.get_global_route_metering();
 }
-void operator()()
+void Session::GlobalMeteringStateCommand::operator()()
 {
-    set_global_route_metering(after, src);
+    sess.set_global_route_metering(after, src);
 }
-void undo()
+void Session::GlobalMeteringStateCommand::undo()
 {
-    set_global_route_metering(before, src);
+    sess.set_global_route_metering(before, src);
 }
-XMLNode &serialize()
+XMLNode &Session::GlobalMeteringStateCommand::serialize()
 {
 }
 

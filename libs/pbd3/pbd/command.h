@@ -26,12 +26,11 @@
 class Command : public Serializable
 {
     public:
-	virtual ~Command();
+	virtual ~Command() {}
 	virtual void operator() () = 0;
         virtual void undo() = 0;
         virtual void redo() { (*this)(); }
-    protected:
-	Command();
+        virtual XMLNode &serialize();
 };
 
 #endif // __lib_pbd_command_h_

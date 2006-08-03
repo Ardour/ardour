@@ -1246,3 +1246,17 @@ AutomationList::load_state (const XMLNode& node)
 		add (x, y);
 	}
 }
+
+XMLNode &AutomationList::get_state ()
+{
+    XMLNode *node = new XMLNode("AutomationList");
+    store_state(*node);
+    return *node;
+}
+
+int AutomationList::set_state(const XMLNode &s)
+{
+    load_state(s);
+    return 0;
+}
+

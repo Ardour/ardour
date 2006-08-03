@@ -75,6 +75,7 @@ send.cc
 session.cc
 session_butler.cc
 session_click.cc
+session_command.cc
 session_events.cc
 session_export.cc
 session_midi.cc

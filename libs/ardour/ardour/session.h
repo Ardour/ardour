@@ -853,8 +853,9 @@ class Session : public sigc::trackable, public Stateful
         {
             GlobalRouteBooleanState before, after;
             void *src;
+            Session &sess;
         public:
-            GlobalSoloStateCommand(void *src);
+            GlobalSoloStateCommand(Session &, void *src);
             void operator()();
             void undo();
             XMLNode &serialize();
@@ -865,8 +866,9 @@ class Session : public sigc::trackable, public Stateful
         {
             GlobalRouteBooleanState before, after;
             void *src;
+            Session &sess;
         public:
-            GlobalMuteStateCommand(void *src);
+            GlobalMuteStateCommand(Session &, void *src);
             void operator()();
             void undo();
             XMLNode &serialize();
@@ -877,8 +879,9 @@ class Session : public sigc::trackable, public Stateful
         {
             GlobalRouteBooleanState before, after;
             void *src;
+            Session &sess;
         public:
-            GlobalRecordEnableStateCommand(void *src);
+            GlobalRecordEnableStateCommand(Session &, void *src);
             void operator()();
             void undo();
             XMLNode &serialize();
@@ -889,8 +892,9 @@ class Session : public sigc::trackable, public Stateful
         {
             GlobalRouteMeterState before, after;
             void *src;
+            Session &sess;
         public:
-            GlobalMeteringStateCommand(void *src);
+            GlobalMeteringStateCommand(Session &, void *src);
             void operator()();
             void undo();
             XMLNode &serialize();

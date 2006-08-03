@@ -82,6 +82,13 @@ UndoTransaction::redo ()
         (*this)();
 }
 
+XMLNode &UndoTransaction::serialize()
+{
+    XMLNode *node = new XMLNode ("UndoTransaction");
+    // TODO
+    return *node;
+}
+
 void
 UndoHistory::add (UndoTransaction ut)
 {

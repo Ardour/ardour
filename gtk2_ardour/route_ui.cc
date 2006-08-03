@@ -133,7 +133,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 					/* ctrl-shift-click applies change to all routes */
 
 					_session.begin_reversible_command (_("mute change"));
-                                        Session::GlobalMuteStateCommand *cmd = new Session::GlobalMuteStateCommand(this);
+                                        Session::GlobalMuteStateCommand *cmd = new Session::GlobalMuteStateCommand(_session, this);
 					_session.set_all_mute (!_route.muted());
                                         cmd->mark();
 					_session.add_command(cmd);
@@ -209,7 +209,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					/* ctrl-shift-click applies change to all routes */
 
 					_session.begin_reversible_command (_("solo change"));
-                                        Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(this);
+                                        Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(_session, this);
 					_session.set_all_solo (!_route.soloed());
                                         cmd->mark();
 					_session.add_command (cmd);
@@ -220,7 +220,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					// ctrl-alt-click: exclusively solo this track, not a toggle */
 
 					_session.begin_reversible_command (_("solo change"));
-                                        Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand (this);
+                                        Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand (_session, this);
 					_session.set_all_solo (false);
 					_route.set_solo (true, this);
                                         cmd->mark();
@@ -284,7 +284,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
 
 			_session.begin_reversible_command (_("rec-enable change"));
-                        Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(this);
+                        Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(_session, this);
 
 			if (rec_enable_button->get_active()) {
 				_session.record_disenable_all ();
@@ -562,7 +562,7 @@ RouteUI::set_mix_group_solo(Route& route, bool yn)
 
 	if((mix_group = route.mix_group()) != 0){
 		_session.begin_reversible_command (_("mix group solo  change"));
-                Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(this);
+                Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(_session, this);
 		mix_group->apply(&Route::set_solo, yn, this);
                 cmd->mark();
 		_session.add_command (cmd);
@@ -601,7 +601,7 @@ RouteUI::set_mix_group_mute(Route& route, bool yn)
 
 	if((mix_group = route.mix_group()) != 0){
 		_session.begin_reversible_command (_("mix group mute change"));
-                Session::GlobalMuteStateCommand *cmd = new Session::GlobalMuteStateCommand (this);
+                Session::GlobalMuteStateCommand *cmd = new Session::GlobalMuteStateCommand (_session, this);
 		mix_group->apply(&Route::set_mute, yn, this);
                 cmd->mark();
 		_session.add_command(cmd);
@@ -618,7 +618,7 @@ RouteUI::set_mix_group_rec_enable(Route& route, bool yn)
 
 	if((mix_group = route.mix_group()) != 0){
 		_session.begin_reversible_command (_("mix group rec-enable change"));
-                Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(this);
+                Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(_session, this);
 		mix_group->apply (&Route::set_record_enable, yn, this);
                 cmd->mark();
 		_session.add_command(cmd);

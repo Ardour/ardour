@@ -39,7 +39,7 @@ class MementoCommand : public Command
             : obj(obj), before(before), after(after) {}
         void operator() () { obj.set_state(after); }
         void undo() { obj.set_state(before); }
-        virtual XMLNode &serialize() ;
+        virtual XMLNode &serialize() {}
         //{
             // obj.id
             // key is "MementoCommand" or something
@@ -60,7 +60,7 @@ public:
         : obj(obj), before(before) {}
     void operator() () { /* noop */ }
     void undo() { obj.set_state(before); }
-    virtual XMLNode &serialize() ;
+    virtual XMLNode &serialize() {}
     //{
         // obj.id
         // key is "MementoCommand" or something
@@ -80,7 +80,7 @@ public:
         : obj(obj), after(after) {}
     void operator() () { obj.set_state(after); }
     void undo() { /* noop */ }
-    virtual XMLNode &serialize();
+    virtual XMLNode &serialize() {}
     //{
         // obj.id
         // key is "MementoCommand" or something

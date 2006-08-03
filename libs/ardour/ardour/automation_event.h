@@ -154,10 +154,7 @@ class AutomationList : public StateManager, public Stateful
 	virtual void load_state (const XMLNode&);
 
 	XMLNode &get_state(void); 
-	int set_state (const XMLNode &s) { 
-	    load_state(s); 
-	    return 1; /*XXX*/ 
-	}
+	int set_state (const XMLNode &s);
 
 	void set_max_xval (double);
 	double get_max_xval() const { return max_xval; }

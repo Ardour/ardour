@@ -1267,3 +1267,15 @@ AutomationLine::hide_all_but_selected_control_points ()
 		}
 	}
 }
+
+XMLNode &AutomationLine::get_state(void)
+{
+    // TODO
+    return alist.get_state();
+}
+
+int AutomationLine::set_state(const XMLNode &node)
+{
+    // TODO
+    alist.set_state(node);
+}
