@@ -59,6 +59,7 @@ if gtkardour['FFT_ANALYSIS']:
 
 if gtkardour['COREAUDIO']:
 	gtkardour.Append(CCFLAGS='-DHAVE_COREAUDIO')
+	gtkardour.Merge([libraries['appleutility']])
 
 skipped_files=Split("""
 connection_editor.cc

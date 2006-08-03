@@ -36,8 +36,10 @@
 #include <ardour/plugin_manager.h>
 #include <ardour/plugin.h>
 #include <ardour/ladspa_plugin.h>
+
+#ifdef VST_SUPPORT
 #include <ardour/vst_plugin.h>
-#include <ardour/audio_unit.h>
+#endif
 
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
@@ -273,46 +275,6 @@ PluginManager::ladspa_discover (string path)
 //	dlclose (module);
 
 	return 0;
-}
-
-PluginPtr
-ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::Type type)
-{
-	PluginManager *mgr = PluginManager::the_manager();
-	PluginInfoList plugs;
-
-	switch (type) {
-	case PluginInfo::LADSPA:
-		plugs = mgr->ladspa_plugin_info();
-		break;
-
-#ifdef VST_SUPPORT
-	case PluginInfo::VST:
-		plugs = mgr->vst_plugin_info();
-		unique_id = 0; // VST plugins don't have a unique id.
-		break;
-#endif
-
-#ifdef HAVE_COREAUDIO
-	case PluginInfo::AudioUnit:
-		plugs = AUPluginInfo::discover ();
-		unique_id = 0; // Neither do AU.
-		break;
-#endif
-
-	default:
-		return PluginPtr ((Plugin *) 0);
-	}
-
-	PluginInfoList::iterator i;
-	for (i = plugs.begin(); i != plugs.end(); ++i) {
-		if ((name == "" || (*i)->name == name) &&
-			(unique_id == 0 || (*i)->unique_id == unique_id)) {
-				return (*i)->load (session);
-		}
-	}
-	
-	return PluginPtr ((Plugin*) 0);
 }
 
 string

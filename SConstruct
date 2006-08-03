@@ -540,6 +540,10 @@ if env['SYSLIBS']:
 #    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
     libraries['soundtouch'] = LibraryInfo()
     libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
+
+    libraries['appleutility'] = LibraryInfo(LIBS='libappleutility',
+                                            LIBPATH='#libs/appleutility',
+                                            CPPPATH='#libs/appleutility')
     
     coredirs = [
         'templates'
@@ -596,7 +600,10 @@ else:
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
-    
+    libraries['appleutility'] = LibraryInfo(LIBS='libappleutility',
+                                            LIBPATH='#libs/appleutility',
+                                            CPPPATH='#libs/appleutility')
+
     coredirs = [
         'libs/soundtouch',
         'templates'

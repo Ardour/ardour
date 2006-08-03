@@ -187,8 +187,7 @@ class Plugin : public Stateful, public sigc::trackable
 	vector<PortControllable*> controls;
 };
 
-/* this is actually defined in plugin_manager.cc */
-boost::shared_ptr<Plugin> find_plugin(ARDOUR::Session&, string name, long unique_id, PluginInfo::Type);
+PluginPtr find_plugin(ARDOUR::Session&, string name, long unique_id, PluginInfo::Type);
 
 } // namespace ARDOUR
  

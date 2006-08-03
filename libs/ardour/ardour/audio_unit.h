@@ -21,23 +21,31 @@
 #ifndef __ardour_audio_unit_h__
 #define __ardour_audio_unit_h__
 
+#include <stdint.h>
+
 #include <list>
+#include <set>
+#include <string>
+#include <vector>
 
 #include <ardour/plugin.h>
 
 #include <boost/shared_ptr.hpp>
 
-struct ComponentDescription;
+class CAComponent;
+class CAAudioUnit;
+class CAComponentDescription;
 
 namespace ARDOUR {
 
-class CAAudioUnit;
+class AudioEngine;
+class Session;
 
 class AUPlugin : public ARDOUR::Plugin
 {
   public:
-	AUPlugin (AudioEngine& engine, Session& session) : Plugin(engine, session) {};
-	virtual ~AUPlugin () {};
+	AUPlugin (AudioEngine& engine, Session& session, CAComponent* comp);
+	virtual ~AUPlugin ();
 	
 	uint32_t unique_id () const;
 	const char * label () const;
@@ -60,7 +68,7 @@ class AUPlugin : public ARDOUR::Plugin
 	void store_state (ARDOUR::PluginState&);
 	void restore_state (ARDOUR::PluginState&);
 	string describe_parameter (uint32_t);
-	string state_node_name () const;
+	string state_node_name () const { return "audiounit"; }
 	void print_parameter (uint32_t, char*, uint32_t len) const;
     
 	bool parameter_is_audio (uint32_t) const;
@@ -68,6 +76,9 @@ class AUPlugin : public ARDOUR::Plugin
 	bool parameter_is_input (uint32_t) const;
 	bool parameter_is_output (uint32_t) const;
     
+	XMLNode& get_state();
+	int set_state(const XMLNode& node);
+	
 	bool save_preset (string name);
 	bool load_preset (const string preset_label);
 	std::vector<std::string> get_presets ();
@@ -75,23 +86,22 @@ class AUPlugin : public ARDOUR::Plugin
 	bool has_editor () const;
 	
   private:
-    boost::shared_ptr<CAAudioUnit> unit;
+	CAComponent* comp;
+    CAAudioUnit* unit;
 };
 
 class AUPluginInfo : public PluginInfo {
-  public:
-	typedef boost::shared_ptr<ComponentDescription> CompDescPtr;
-	
+  public:	
 	AUPluginInfo () { };
-	~AUPluginInfo () { };
+	~AUPluginInfo ();
 
-	CompDescPtr desc;
+	CAComponentDescription* desc;
 
 	static PluginInfoList discover ();
 	PluginPtr load (Session& session);
 
   private:
-	static std::string get_name (ComponentDescription&);
+	static std::string get_name (CAComponentDescription&);
 };
 
 typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;

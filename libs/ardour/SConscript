@@ -209,6 +209,9 @@ ardour.Merge ([
 if ardour['LIBLO']:
     ardour.Merge ([ libraries['lo'] ])
 
+if ardour['COREAUDIO']:
+    ardour.Merge ([ libraries['appleutility'] ])
+
 ardour.VersionBuild(['version.cc', 'ardour/version.h'], 'SConscript')
 
 def SharedAsmObjectEmitter(target, source, env):
