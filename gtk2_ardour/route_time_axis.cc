@@ -575,46 +575,88 @@ RouteTimeAxisView::set_height (TrackHeight h)
 	switch (height_style) {
 	case Largest:
 		xml_node->add_property ("track_height", "largest");
-		show_name_entry ();
-		hide_name_label ();
-		controls_table.show_all();
 		break;
+
 	case Large:
 		xml_node->add_property ("track_height", "large");
-		show_name_entry ();
-		hide_name_label ();
-		controls_table.show_all();
 		break;
+
 	case Larger:
 		xml_node->add_property ("track_height", "larger");
-		show_name_entry ();
-		hide_name_label ();
-		controls_table.show_all();
 		break;
+
 	case Normal:
 		xml_node->add_property ("track_height", "normal");
-		show_name_entry ();
-		hide_name_label ();
-		controls_table.show_all();
 		break;
+
 	case Smaller:
 		xml_node->add_property ("track_height", "smaller");
-		controls_table.show_all ();
+		break;
+
+	case Small:
+		xml_node->add_property ("track_height", "small");
+		break;
+	}
+
+	switch (height_style) {
+	case Largest:
+	case Large:
+	case Larger:
+	case Normal:
 		show_name_entry ();
 		hide_name_label ();
+
+		mute_button->show_all();
+		solo_button->show_all();
+		if (rec_enable_button)
+			rec_enable_button->show_all();
+
+		edit_group_button.show_all();
+		hide_button.show_all();
+		visual_button.show_all();
+		size_button.show_all();
+		automation_button.show_all();
+		
+		if (is_track() && track()->mode() == ARDOUR::Normal) {
+			playlist_button.show_all();
+		}
+		break;
+
+	case Smaller:
+		show_name_entry ();
+		hide_name_label ();
+
+		mute_button->show_all();
+		solo_button->show_all();
+		if (rec_enable_button)
+			rec_enable_button->show_all();
+
+		edit_group_button.hide ();
+		hide_button.hide ();
+		visual_button.hide ();
+		size_button.hide ();
+		automation_button.hide ();
+		
+		if (is_track() && track()->mode() == ARDOUR::Normal) {
+			playlist_button.hide ();
+		}
+		break;
+
+	case Small:
+		hide_name_entry ();
+		show_name_label ();
+
+		mute_button->hide();
+		solo_button->hide();
+		if (rec_enable_button)
+			rec_enable_button->hide();
+
 		edit_group_button.hide ();
 		hide_button.hide ();
 		visual_button.hide ();
 		size_button.hide ();
 		automation_button.hide ();
 		playlist_button.hide ();
-		break;
-	case Small:
-		xml_node->add_property ("track_height", "small");
-		controls_table.hide_all ();
-		controls_table.show ();
-		hide_name_entry ();
-		show_name_label ();
 		name_label.set_text (_route->name());
 		break;
 	}

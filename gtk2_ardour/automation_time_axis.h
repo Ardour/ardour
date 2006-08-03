@@ -84,6 +84,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 	string _state_name;
 	bool    in_destructor;
 
+	bool    first_call_to_set_height;
+
 	Gtk::Button        hide_button;
 	Gtk::Button        height_button;
 	Gtk::Button        clear_button;
