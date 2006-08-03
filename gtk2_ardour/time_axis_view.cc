@@ -128,6 +128,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	controls_table.attach (name_hbox, 0, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.show_all ();
+	controls_table.set_no_show_all ();
 
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
