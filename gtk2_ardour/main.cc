@@ -446,7 +446,7 @@ int main (int argc, char *argv[])
 	
 	try { 
 		engine = new ARDOUR::AudioEngine (jack_client_name);
-		ARDOUR::init (*engine, use_vst, try_hw_optimization);
+		ARDOUR::init (use_vst, try_hw_optimization);
 		ui->set_engine (*engine);
 	} catch (AudioEngine::NoBackendAvailable& err) {
 		gui_jack_error ();

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2002 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -640,4 +640,27 @@ LadspaPlugin::latency_compute_run ()
 	
 	run (bufsize);
 	deactivate ();
+}
+
+PluginPtr
+LadspaPluginInfo::load (Session& session)
+{
+	try {
+		PluginPtr plugin;
+		void *module;
+
+		if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
+			error << string_compose(_("LADSPA: cannot load module from \"%1\""), path) << endmsg;
+			error << dlerror() << endmsg;
+		} else {
+			plugin.reset (new LadspaPlugin (module, session.engine(), session, index, session.frame_rate()));
+		}
+
+		plugin->set_info(PluginInfoPtr(new LadspaPluginInfo(*this)));
+		return plugin;
+	}
+
+	catch (failed_constructor &err) {
+		return PluginPtr ((Plugin*) 0);
+	}	
 }

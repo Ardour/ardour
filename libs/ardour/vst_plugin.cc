@@ -479,3 +479,31 @@ VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 
 	memmove (buf, first_nonws, strlen (buf) - (first_nonws - buf) + 1);
 }
+
+PluginPtr
+VSTPluginInfo::load (Session& session)
+{
+	try {
+		PluginPtr plugin;
+
+		if (Config->get_use_vst()) {
+			FSTHandle* handle;
+
+			if ((handle = fst_load (info->path.c_str())) == 0) {
+				error << string_compose(_("VST: cannot load module from \"%1\""), info->path) << endmsg;
+			} else {
+				plugin.reset (new VSTPlugin (session.engine(), session, handle));
+			}
+		} else {
+			error << _("You asked ardour to not use any VST plugins") << endmsg;
+			return PluginPtr ((Plugin*) 0);
+		}
+
+		plugin->set_info(PluginInfoPtr(new VSTPluginInfo(*this)));
+		return plugin;
+	}	
+
+	catch (failed_constructor &err) {
+		return PluginPtr ((Plugin*) 0);
+	}
+}

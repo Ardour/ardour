@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -137,6 +137,17 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void run (jack_nframes_t nsamples);
 	void latency_compute_run ();
 };
-}
+
+class LadspaPluginInfo : public PluginInfo {
+  public:	
+	LadspaPluginInfo () { };
+	~LadspaPluginInfo () { };
+
+	PluginPtr load (Session& session);
+};
+
+typedef boost::shared_ptr<LadspaPluginInfo> LadspaPluginInfoPtr;
+
+} // namespace ARDOUR
 
 #endif /* __ardour_ladspa_plugin_h__ */

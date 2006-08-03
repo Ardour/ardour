@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2004 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,8 +49,7 @@ using namespace PBD;
 
 PluginManager* PluginManager::_manager = 0;
 
-PluginManager::PluginManager (AudioEngine& e)
-	: _engine (e)
+PluginManager::PluginManager ()
 {
 	char* s;
 	string lrdf_path;
@@ -246,7 +245,7 @@ PluginManager::ladspa_discover (string path)
 			break;
 		}
 
-		PluginInfoPtr info(new PluginInfo);
+		PluginInfoPtr info(new LadspaPluginInfo);
 		info->name = descriptor->Name;
 		info->category = get_ladspa_category(descriptor->UniqueID);
 		info->path = path;
@@ -276,60 +275,7 @@ PluginManager::ladspa_discover (string path)
 	return 0;
 }
 
-boost::shared_ptr<Plugin>
-PluginManager::load (Session& session, PluginInfoPtr info)
-{
-	try {
-		boost::shared_ptr<Plugin> plugin;
-
-		if (info->type == PluginInfo::VST) {
-
-#ifdef VST_SUPPORT			
-			if (Config->get_use_vst()) {
-				FSTHandle* handle;
-				
-				if ((handle = fst_load (info->path.c_str())) == 0) {
-					error << string_compose(_("VST: cannot load module from \"%1\""), info->path) << endmsg;
-				} else {
-					plugin.reset (new VSTPlugin (_engine, session, handle));
-				}
-			} else {
-				error << _("You asked ardour to not use any VST plugins") << endmsg;
-			}
-#else // !VST_SUPPORT
-			error << _("This version of ardour has no support for VST plugins") << endmsg;
-			return boost::shared_ptr<Plugin> ((Plugin*) 0);
-#endif // !VST_SUPPORT
-				
-		} else if (info->type == PluginInfo::LADSPA) {
-			void *module;
-
-			if ((module = dlopen (info->path.c_str(), RTLD_NOW)) == 0) {
-				error << string_compose(_("LADSPA: cannot load module from \"%1\""), info->path) << endmsg;
-				error << dlerror() << endmsg;
-			} else {
-				plugin.reset (new LadspaPlugin (module, _engine, session, info->index, session.frame_rate()));
-			}
-		} else if (info->type == PluginInfo::AudioUnit) {
-
-#ifdef HAVE_COREAUDIO
-			
-#else // !HAVE_COREAUDIO
-			error << _("This version of ardour has no support for AudioUnit plugins") << endmsg;
-			return boost::shared_ptr<Plugin> ((Plugin*) 0);
-#endif
-		}
-
-		plugin->set_info(*info);
-		return plugin;
-	}
-
-	catch (failed_constructor &err) {
-		return boost::shared_ptr<Plugin> ((Plugin*) 0);
-	}
-}
-
-boost::shared_ptr<Plugin>
+PluginPtr
 ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::Type type)
 {
 	PluginManager *mgr = PluginManager::the_manager();
@@ -355,18 +301,18 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::T
 #endif
 
 	default:
-		return boost::shared_ptr<Plugin> ((Plugin *) 0);
+		return PluginPtr ((Plugin *) 0);
 	}
 
 	PluginInfoList::iterator i;
 	for (i = plugs.begin(); i != plugs.end(); ++i) {
 		if ((name == "" || (*i)->name == name) &&
-			(unique_id == 0 || (*i)->unique_id == unique_id)) {	
-			return mgr->load (session, *i);
+			(unique_id == 0 || (*i)->unique_id == unique_id)) {
+				return (*i)->load (session);
 		}
 	}
 	
-	return boost::shared_ptr<Plugin> ((Plugin*) 0);
+	return PluginPtr ((Plugin*) 0);
 }
 
 string

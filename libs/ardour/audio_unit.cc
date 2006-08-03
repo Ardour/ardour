@@ -26,6 +26,14 @@
 
 using namespace ARDOUR;
 
+PluginPtr
+AUPluginInfo::load (Session& session)
+{
+	
+	return PluginPtr((AUPlugin*)0);
+}
+
+
 PluginInfoList
 AUPluginInfo::discover ()
 {

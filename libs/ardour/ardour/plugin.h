@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
     $Id$
 */
 
-#ifndef __ardour_ladspa_h__
-#define __ardour_ladspa_h__
+#ifndef __ardour_plugin_h__
+#define __ardour_plugin_h__
 
 #include <boost/shared_ptr.hpp>
 #include <sigc++/signal.h>
@@ -46,6 +46,9 @@ namespace ARDOUR {
 class AudioEngine;
 class Session;
 
+class Plugin;
+typedef boost::shared_ptr<Plugin> PluginPtr;
+
 class PluginInfo {
   public:
 	enum Type {
@@ -54,11 +57,12 @@ class PluginInfo {
 		VST
 	};
 
-	PluginInfo () { };
+	PluginInfo () { }
 	PluginInfo (const PluginInfo &o)
 		: name(o.name), n_inputs(o.n_inputs), n_outputs(o.n_outputs),
 		unique_id(o.unique_id), path (o.path), index(o.index) {}
-	~PluginInfo () { };
+	virtual ~PluginInfo () { }
+	
 	string name;
 	string category;
 	uint32_t n_inputs;
@@ -67,7 +71,9 @@ class PluginInfo {
 
 	long unique_id;
 
-  private:
+	virtual PluginPtr load (Session& session) = 0;
+
+  protected:
 	friend class PluginManager;
 	string path;
 	uint32_t index;
@@ -82,7 +88,7 @@ class Plugin : public Stateful, public sigc::trackable
   public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
 	Plugin (const Plugin&);
-	~Plugin ();
+	virtual ~Plugin ();
 	
 	struct ParameterDescriptor {
 
@@ -143,8 +149,8 @@ class Plugin : public Stateful, public sigc::trackable
 	
 	PBD::Controllable *get_nth_control (uint32_t);
 
-	PluginInfo & get_info() { return _info; }
-	void set_info (const PluginInfo &inf) { _info = inf; }
+	PluginInfoPtr get_info() { return _info; }
+	void set_info (const PluginInfoPtr inf) { _info = inf; }
 
 	ARDOUR::AudioEngine& engine() const { return _engine; }
 	ARDOUR::Session& session() const { return _session; }
@@ -155,7 +161,7 @@ class Plugin : public Stateful, public sigc::trackable
   protected:
 	ARDOUR::AudioEngine& _engine;
 	ARDOUR::Session& _session;
-	PluginInfo _info;
+	PluginInfoPtr _info;
 	uint32_t _cycles;
 	map<string,string> 	 presets;
 	bool save_preset(string name, string domain /* vst, ladspa etc. */);
@@ -182,7 +188,6 @@ class Plugin : public Stateful, public sigc::trackable
 };
 
 /* this is actually defined in plugin_manager.cc */
-
 boost::shared_ptr<Plugin> find_plugin(ARDOUR::Session&, string name, long unique_id, PluginInfo::Type);
 
 } // namespace ARDOUR

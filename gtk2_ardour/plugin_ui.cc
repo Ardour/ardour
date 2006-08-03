@@ -326,8 +326,8 @@ PluginUI::build (AudioEngine &engine)
 		} 
 	}
 
-	n_ins = plugin->get_info().n_inputs;
-	n_outs = plugin->get_info().n_outputs;
+	n_ins = plugin->get_info()->n_inputs;
+	n_outs = plugin->get_info()->n_outputs;
 
 	if (box->children().empty()) {
 		hpacker.remove (*frame);

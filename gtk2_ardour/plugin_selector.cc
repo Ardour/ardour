@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,8 +48,6 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	manager = mgr;
 	session = 0;
-	o_selected_plug = -1;
-	i_selected_plug = 0;
 	
 	current_selection = PluginInfo::LADSPA;
 
@@ -346,7 +344,7 @@ PluginSelector::use_plugin (PluginInfoPtr pi)
 		return;
 	}
 
-	boost::shared_ptr<Plugin> plugin = manager->load (*session, pi);
+	PluginPtr plugin = pi->load (*session);
 
 	if (plugin) {
 		PluginCreated (plugin);

@@ -31,11 +31,51 @@ struct ComponentDescription;
 
 namespace ARDOUR {
 
+class CAAudioUnit;
+
 class AUPlugin : public ARDOUR::Plugin
 {
   public:
 	AUPlugin (AudioEngine& engine, Session& session) : Plugin(engine, session) {};
 	virtual ~AUPlugin () {};
+	
+	uint32_t unique_id () const;
+	const char * label () const;
+	const char * name () const { return _info->name.c_str(); }
+	const char * maker () const;
+	uint32_t parameter_count () const;
+	float default_value (uint32_t port);
+	jack_nframes_t latency () const;
+	void set_parameter (uint32_t which, float val);
+	float get_parameter (uint32_t which) const;
+    
+	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
+	uint32_t nth_parameter (uint32_t which, bool& ok) const;
+	void activate ();
+	void deactivate ();
+	void set_block_size (jack_nframes_t nframes);
+    
+	int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, jack_nframes_t nframes, jack_nframes_t offset);
+	std::set<uint32_t> automatable() const;
+	void store_state (ARDOUR::PluginState&);
+	void restore_state (ARDOUR::PluginState&);
+	string describe_parameter (uint32_t);
+	string state_node_name () const;
+	void print_parameter (uint32_t, char*, uint32_t len) const;
+    
+	bool parameter_is_audio (uint32_t) const;
+	bool parameter_is_control (uint32_t) const;
+	bool parameter_is_input (uint32_t) const;
+	bool parameter_is_output (uint32_t) const;
+    
+	bool save_preset (string name);
+	bool load_preset (const string preset_label);
+	std::vector<std::string> get_presets ();
+    
+	bool has_editor () const;
+	
+  private:
+    boost::shared_ptr<CAAudioUnit> unit;
 };
 
 class AUPluginInfo : public PluginInfo {
@@ -48,6 +88,7 @@ class AUPluginInfo : public PluginInfo {
 	CompDescPtr desc;
 
 	static PluginInfoList discover ();
+	PluginPtr load (Session& session);
 
   private:
 	static std::string get_name (ComponentDescription&);
@@ -58,4 +99,3 @@ typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;
 } // namespace ARDOUR
 
 #endif // __ardour_audio_unit_h__
-

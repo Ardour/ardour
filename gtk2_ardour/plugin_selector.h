@@ -30,7 +30,6 @@
 namespace ARDOUR {
 	class Session;
 	class PluginManager;
-	class PluginInfo;
 }
 
 class PluginSelector : public ArdourDialog
@@ -133,12 +132,6 @@ class PluginSelector : public ArdourDialog
 	void au_refiller ();
 	void au_display_selection_changed();
 #endif //HAVE_COREAUDIO
-
-	ARDOUR::PluginInfo* i_selected_plug;
-
-	// We need an integer for the output side because
-	// the name isn't promised to be unique.
-	gint o_selected_plug;
 
 	ARDOUR::PluginManager *manager;
 

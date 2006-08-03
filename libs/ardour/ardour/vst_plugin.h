@@ -104,6 +104,14 @@ class VSTPlugin : public ARDOUR::Plugin
 	bool        been_resumed;
 };
 
-}
+class VSTPluginInfo : public PluginInfo
+{
+	VSTPluginInfo () {}
+	~VSTPluginInfo () {}
+	
+	PluginPtr load (Session& session);
+};
+
+} // namespace ARDOUR
 
 #endif /* __ardour_vst_plugin_h__ */
