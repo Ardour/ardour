@@ -41,15 +41,8 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, CAComponent* _comp)
 	:
 	Plugin (engine, session),
 	comp (_comp),
-	unit (0)
-{
-	if (!unit->IsValid()) {
-		error << _("AudioUnit: Not a proper AudioUnit plugin") << endmsg;
-		throw failed_constructor ();
-	}
-		
-	unit = new CAAudioUnit;
-	
+	unit (new CAAudioUnit)
+{			
 	OSErr err = CAAudioUnit::Open (*comp, *unit);
 	if (err != noErr) {
 		error << _("AudioUnit: Could not convert CAComponent to CAAudioUnit") << endmsg;
