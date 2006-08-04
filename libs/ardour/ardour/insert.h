@@ -98,7 +98,7 @@ struct PluginInsertState : public RedirectState
 class PluginInsert : public Insert
 {
   public:
-	PluginInsert (Session&, Plugin&, Placement);
+	PluginInsert (Session&, boost::shared_ptr<Plugin>, Placement);
 	PluginInsert (Session&, const XMLNode&);
 	PluginInsert (const PluginInsert&);
 	~PluginInsert ();
@@ -133,9 +133,6 @@ class PluginInsert : public Insert
 
 	bool is_generator() const;
 
-	void reset_midi_control (MIDI::Port*, bool);
-	void send_all_midi_feedback ();
-
 	void set_parameter (uint32_t port, float val);
 
 	AutoState get_port_automation_state (uint32_t port);
@@ -144,11 +141,11 @@ class PluginInsert : public Insert
 
 	float default_parameter_value (uint32_t which);
 
-	Plugin& plugin(uint32_t num=0) const {
+	boost::shared_ptr<Plugin> plugin(uint32_t num=0) const {
 		if (num < _plugins.size()) { 
-			return *_plugins[num];
+			return _plugins[num];
 		} else {
-			return *_plugins[0]; // we always have one
+			return _plugins[0]; // we always have one
 		}
 	}
 
@@ -166,7 +163,7 @@ class PluginInsert : public Insert
 
 	void parameter_changed (uint32_t, float);
 	
-	vector<Plugin*> _plugins;
+	vector<boost::shared_ptr<Plugin> > _plugins;
 	void automation_run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
 	void connect_and_run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset, bool with_auto, jack_nframes_t now = 0);
 
@@ -175,9 +172,9 @@ class PluginInsert : public Insert
 	void auto_state_changed (uint32_t which);
 	void automation_list_creation_callback (uint32_t, AutomationList&);
 
-	Plugin* plugin_factory (Plugin&);
+	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_insert_h__ */

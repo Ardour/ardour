@@ -30,7 +30,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-SendUI::SendUI (Send& s, Session& se)
+SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 	: _send (s),
 	  _session (se),
 	  gpm (s, se),
@@ -53,10 +53,10 @@ SendUI::SendUI (Send& s, Session& se)
 
 	show_all ();
 
-	_send.set_metering (true);
+	_send->set_metering (true);
 
-	_send.output_changed.connect (mem_fun (*this, &SendUI::ins_changed));
-	_send.output_changed.connect (mem_fun (*this, &SendUI::outs_changed));
+	_send->output_changed.connect (mem_fun (*this, &SendUI::ins_changed));
+	_send->output_changed.connect (mem_fun (*this, &SendUI::outs_changed));
 	
 	panners.set_width (Wide);
 	panners.setup_pan ();
@@ -70,7 +70,7 @@ SendUI::SendUI (Send& s, Session& se)
 
 SendUI::~SendUI ()
 {
-	_send.set_metering (false);
+	_send->set_metering (false);
 	
 	/* XXX not clear that we need to do this */
 
@@ -118,7 +118,7 @@ SendUI::fast_update ()
 	}
 }
 	
-SendUIWindow::SendUIWindow (Send& s, Session& ss)
+SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
 {
 	ui = new SendUI (s, ss);
 
@@ -131,7 +131,7 @@ SendUIWindow::SendUIWindow (Send& s, Session& ss)
 	add (vpacker);
 	set_name ("SendUIWindow");
 
-	s.GoingAway.connect (mem_fun (*this, &SendUIWindow::send_going_away));
+	s->GoingAway.connect (mem_fun (*this, &SendUIWindow::send_going_away));
 
 	signal_delete_event().connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 

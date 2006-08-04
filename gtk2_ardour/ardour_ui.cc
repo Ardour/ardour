@@ -46,6 +46,7 @@
 #include <midi++/mmc.h>
 
 #include <ardour/ardour.h>
+#include <ardour/session_route.h>
 #include <ardour/port.h>
 #include <ardour/audioengine.h>
 #include <ardour/playlist.h>
@@ -53,7 +54,6 @@
 #include <ardour/audio_diskstream.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/recent_sessions.h>
-#include <ardour/session_diskstream.h>
 #include <ardour/port.h>
 #include <ardour/audio_track.h>
 
@@ -116,16 +116,15 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  shuttle_units_button (_("% ")),
 
-	  punch_in_button (_("punch\nin")),
-	  punch_out_button (_("punch\nout")),
-	  auto_return_button (_("auto\nreturn")),
-	  auto_play_button (_("auto\nplay")),
-	  auto_input_button (_("auto\ninput")),
-	  click_button (_("click")),
-	  auditioning_alert_button (_("AUDITIONING")),
+	  punch_in_button (_("Punch In")),
+	  punch_out_button (_("Punch Out")),
+	  auto_return_button (_("Auto Return")),
+	  auto_play_button (_("Autuo Play")),
+	  auto_input_button (_("Auto Input")),
+	  click_button (_("Click")),
+	  auditioning_alert_button (_("AUDITION")),
 	  solo_alert_button (_("SOLO")),
 	  shown_flag (false)
-
 {
 	using namespace Gtk::Menu_Helpers;
 
@@ -186,8 +185,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	gettimeofday (&last_shuttle_request, 0);
 
 	ARDOUR::AudioDiskstream::DeleteSources.connect (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread));
-	ARDOUR::AudioDiskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
-	ARDOUR::AudioDiskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
+	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
+	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
 	/* handle pending state with a dialog */
 
@@ -339,15 +338,15 @@ ARDOUR_UI::save_ardour_state ()
 	Config->add_extra_xml (*node);
 	Config->save_state();
 
-	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
-	XMLNode& mnode (mixer->get_state());
+	XMLNode enode(static_cast<Stateful*>(editor)->get_state());
+	XMLNode mnode(mixer->get_state());
 
 	if (session) {
-		session->add_instant_xml(enode, session->path());
-		session->add_instant_xml(mnode, session->path());
+		session->add_instant_xml (enode, session->path());
+		session->add_instant_xml (mnode, session->path());
 	} else {
-		Config->add_instant_xml(enode, get_user_ardour_path());
-		Config->add_instant_xml(mnode, get_user_ardour_path());
+		Config->add_instant_xml (enode, get_user_ardour_path());
+		Config->add_instant_xml (mnode, get_user_ardour_path());
 	}
 
 	/* keybindings */
@@ -507,11 +506,11 @@ ARDOUR_UI::update_sample_rate (jack_nframes_t ignored)
 		jack_nframes_t rate = engine->frame_rate();
 		
 		if (fmod (rate, 1000.0) != 0.0) {
-			snprintf (buf, sizeof (buf), _("SR: %.1f kHz / %4.1f msecs"), 
+			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f msecs"), 
 				  (float) rate/1000.0f,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		} else {
-			snprintf (buf, sizeof (buf), _("SR: %u kHz / %4.1f msecs"), 
+			snprintf (buf, sizeof (buf), _("%u kHz / %4.1f msecs"), 
 				  rate/1000,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		}
@@ -524,7 +523,7 @@ void
 ARDOUR_UI::update_cpu_load ()
 {
 	char buf[32];
-	snprintf (buf, sizeof (buf), _("DSP Load: %.1f%%"), engine->get_cpu_load());
+	snprintf (buf, sizeof (buf), _("DSP: %.1f%%"), engine->get_cpu_load());
 	cpu_load_label.set_text (buf);
 }
 
@@ -543,9 +542,10 @@ ARDOUR_UI::update_buffer_load ()
 }
 
 void
-ARDOUR_UI::count_recenabled_diskstreams (AudioDiskstream& ds)
+ARDOUR_UI::count_recenabled_diskstreams (Route& route)
 {
-	if (ds.record_enabled()) {
+	Track* track = dynamic_cast<Track*>(&route);
+	if (track && track->diskstream().record_enabled()) {
 		rec_enabled_diskstreams++;
 	}
 }
@@ -561,7 +561,7 @@ ARDOUR_UI::update_disk_space()
 	char buf[64];
 
 	if (frames == max_frames) {
-		strcpy (buf, _("space: 24hrs+"));
+		strcpy (buf, _("Disk: 24hrs+"));
 	} else {
 		int hrs;
 		int mins;
@@ -571,7 +571,7 @@ ARDOUR_UI::update_disk_space()
 		if (session->actively_recording()){
 			
 			rec_enabled_diskstreams = 0;
-			session->foreach_audio_diskstream (this, &ARDOUR_UI::count_recenabled_diskstreams);
+			session->foreach_route (this, &ARDOUR_UI::count_recenabled_diskstreams);
 			
 			if (rec_enabled_diskstreams) {
 				frames /= rec_enabled_diskstreams;
@@ -591,7 +591,7 @@ ARDOUR_UI::update_disk_space()
 		frames -= mins * fr * 60;
 		secs = frames / fr;
 		
-		snprintf (buf, sizeof(buf), _("space: %02dh:%02dm:%02ds"), hrs, mins, secs);
+		snprintf (buf, sizeof(buf), _("Disk: %02dh:%02dm:%02ds"), hrs, mins, secs);
 	}
 
 	disk_space_label.set_text (buf);
@@ -876,7 +876,7 @@ ARDOUR_UI::session_add_midi_track ()
 void
 ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode)
 {
-	Route* route;
+	boost::shared_ptr<Route> route;
 
 	if (session == 0) {
 		warning << _("You cannot add a track without a session already loaded.") << endmsg;
@@ -918,7 +918,7 @@ restart JACK with more ports."));
 }
 
 void
-ARDOUR_UI::diskstream_added (AudioDiskstream* ds)
+ARDOUR_UI::diskstream_added (Diskstream* ds)
 {
 }
 
@@ -1159,31 +1159,24 @@ ARDOUR_UI::transport_forward (int option)
 }
 
 void
-ARDOUR_UI::toggle_monitor_enable (guint32 dstream)
+ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 {
 	if (session == 0) {
 		return;
 	}
 
-	AudioDiskstream *ds;
+	boost::shared_ptr<Route> r;
+	
+	if ((r = session->route_by_remote_id (dstream)) != 0) {
 
-	if ((ds = session->diskstream_by_id (dstream)) != 0) {
-		Port *port = ds->io()->input (0);
-		port->request_monitor_input (!port->monitoring_input());
+		Track* t;
+
+		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
+			t->diskstream().set_record_enabled (!t->diskstream().record_enabled());
+		}
 	}
-}
-
-void
-ARDOUR_UI::toggle_record_enable (guint32 dstream)
-{
 	if (session == 0) {
 		return;
-	}
-
-	AudioDiskstream *ds;
-
-	if ((ds = session->diskstream_by_id (dstream)) != 0) {
-		ds->set_record_enabled (!ds->record_enabled(), this);
 	}
 }
 
@@ -1383,63 +1376,6 @@ ARDOUR_UI::stop_blinking ()
 		gtk_timeout_remove (blink_timeout_tag);
 		blink_timeout_tag = -1;
 	}
-}
-
-
-void
-ARDOUR_UI::add_diskstream_to_menu (AudioDiskstream& dstream)
-{
-	using namespace Gtk;
-	using namespace Menu_Helpers;
-
-	if (dstream.hidden()) {
-		return;
-	}
-
-	MenuList& items = diskstream_menu->items();
-	items.push_back (MenuElem (dstream.name(), bind (mem_fun(*this, &ARDOUR_UI::diskstream_selected), (gint32) dstream.id())));
-}
-	
-void
-ARDOUR_UI::diskstream_selected (gint32 id)
-{
-	selected_dstream = id;
-	Main::quit ();
-}
-
-gint32
-ARDOUR_UI::select_diskstream (GdkEventButton *ev)
-{
-	using namespace Gtk;
-	using namespace Menu_Helpers;
-
-	if (session == 0) {
-		return -1;
-	}
-
-	diskstream_menu = new Menu();
-	diskstream_menu->set_name ("ArdourContextMenu");
-	using namespace Gtk;
-	using namespace Menu_Helpers;
-
-	MenuList& items = diskstream_menu->items();
-	items.push_back (MenuElem (_("No Stream"), (bind (mem_fun(*this, &ARDOUR_UI::diskstream_selected), -1))));
-
-	session->foreach_audio_diskstream (this, &ARDOUR_UI::add_diskstream_to_menu);
-
-	if (ev) {
-		diskstream_menu->popup (ev->button, ev->time);
-	} else {
-		diskstream_menu->popup (0, 0);
-	}
-
-	selected_dstream = -1;
-
-	Main::run ();
-
-	delete diskstream_menu;
-
-	return selected_dstream;
 }
 
 void
@@ -2217,11 +2153,11 @@ ARDOUR_UI::halt_on_xrun_message ()
 }
 
 void 
-ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::AudioFileSource*>* deletion_list)
+ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::Source*>* deletion_list)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread), deletion_list));
 
-	for (list<AudioFileSource*>::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
+	for (list<Source*>::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
 		delete *i;
 	}
 

@@ -18,47 +18,30 @@
 */
 
 #include <string>
-#include <climits>
-
-#include <midi++/controllable.h>
 
 #include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/pixscroller.h>
+#include <gtkmm2ext/slider_controller.h>
 
 #include "i18n.h"
 
 using namespace Gtkmm2ext;
+using namespace PBD;
 
 SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
 				    Glib::RefPtr<Gdk::Pixbuf> rail,
 				    Gtk::Adjustment *adj,
-				    MIDI::Controllable *mc,
+				    Controllable& c,
 				    bool with_numeric)
 
 	: PixScroller (*adj, slide, rail),
-	  spin (*adj, 0, 2),
-	  prompter (Gtk::WIN_POS_MOUSE, 30000, false),
-	  midi_control (mc),
-	  bind_button (2),
-	  bind_statemask (Gdk::CONTROL_MASK)
-
+	  binding_proxy (c),
+	  spin (*adj, 0, 2)
 {			  
-	signal_button_press_event().connect (mem_fun (this, &SliderController::button_press));
 	spin.set_name ("SliderControllerValue");
 	spin.set_size_request (70,-1); // should be based on font size somehow
 	spin.set_numeric (true);
 	spin.set_snap_to_ticks (false);
-
-	prompter.signal_unmap_event().connect (mem_fun (*this, &SliderController::prompter_hiding));
-	
-	prompting = false;
-	unprompting = false;
-	
-	if (mc) {
-		mc->learning_started.connect (mem_fun (*this, &SliderController::midicontrol_prompt));
-		mc->learning_stopped.connect (mem_fun (*this, &SliderController::midicontrol_unprompt));
-	}
 }
 
 void
@@ -67,95 +50,22 @@ SliderController::set_value (float v)
 	adj.set_value (v);
 }
 
-void
-SliderController::set_bind_button_state (guint button, guint statemask)
+bool 
+SliderController::on_button_press_event (GdkEventButton *ev) 
 {
-	bind_button = button;
-	bind_statemask = statemask;
-}
-
-void
-SliderController::get_bind_button_state (guint &button, guint &statemask)
-{
-	button = bind_button;
-	statemask = bind_statemask;
-}
-
-void
-SliderController::midi_learn()
-{
-	if (midi_control) {
-		prompting = true;
-		midi_control->learn_about_external_control ();
-	}
-}
-
-bool
-SliderController::button_press (GdkEventButton *ev)
-{
-	if ((ev->state & bind_statemask) && ev->button == bind_button) { 
-		midi_learn ();
+	if (binding_proxy.button_press_handler (ev)) {
 		return true;
 	}
-
-	return false;
+	return PixScroller::on_button_press_event (ev);
 }
-
-void
-SliderController::midicontrol_set_tip ()
-
-{
-	if (midi_control) {
-		// Gtkmm2ext::UI::instance()->set_tip (this, midi_control->control_description());
-	}
-}
-
-bool
-SliderController::prompter_hiding (GdkEventAny *ev)
-{
-	if (unprompting) {
-		if (midi_control) {
-			midi_control->stop_learning();
-		}
-		unprompting = false;
-	}
-	
-	return false;
-}
-
-void
-SliderController::midicontrol_prompt ()
-
-{
-	if (prompting) {
-
-		string prompt = _("operate MIDI controller now");
-		prompter.set_text (prompt);
-		Gtkmm2ext::UI::instance()->touch_display (&prompter);
-
-		unprompting = true;
-		prompting = false;
-	}
-}
-
-void
-SliderController::midicontrol_unprompt ()
-
-{
-	if (unprompting) {
-		Gtkmm2ext::UI::instance()->touch_display (&prompter);
-		unprompting = false;
-	}
-}
-
 
 VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
 				      Glib::RefPtr<Gdk::Pixbuf> rail,
 				      Gtk::Adjustment *adj,
-				      MIDI::Controllable *mcontrol,
+				      Controllable& control,
 				      bool with_numeric)
 
-	: SliderController (slide, rail, adj, mcontrol, with_numeric)
+	: SliderController (slide, rail, adj, control, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);
@@ -169,10 +79,10 @@ VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
 HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
 				      Glib::RefPtr<Gdk::Pixbuf> rail,
 				      Gtk::Adjustment *adj,
-				      MIDI::Controllable *mcontrol,
+				      Controllable& control,
 				      bool with_numeric)
 	
-	: SliderController (slide, rail, adj, mcontrol, with_numeric)
+	: SliderController (slide, rail, adj, control, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);

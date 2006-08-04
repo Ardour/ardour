@@ -62,6 +62,6 @@ namespace MIDI {
 	bool firstrecv;
     };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif	// __coremidi_midiport_h__

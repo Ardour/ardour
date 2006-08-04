@@ -31,12 +31,13 @@
 #include <glib.h>
 
 #include <sigc++/signal.h>
+
 #include <pbd/undo.h>
+#include <pbd/stateful.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/crossfade_compare.h>
 #include <ardour/location.h>
-#include <ardour/stateful.h>
 #include <ardour/state_manager.h>
 
 namespace ARDOUR  {
@@ -53,7 +54,6 @@ class Playlist : public Stateful, public StateManager {
 	Playlist (const Playlist&, string name, bool hidden = false);
 	Playlist (const Playlist&, jack_nframes_t start, jack_nframes_t cnt, string name, bool hidden = false);
 
-	virtual jack_nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, char * workbuf, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0) = 0;
 	virtual void clear (bool with_delete = false, bool with_save = true);
 	virtual void dump () const;
 	virtual UndoAction get_memento() const = 0;
@@ -80,13 +80,15 @@ class Playlist : public Stateful, public StateManager {
 
 	void add_region (const Region&, jack_nframes_t position, float times = 1, bool with_save = true);
 	void remove_region (Region *);
+	void get_equivalent_regions (const Region&, std::vector<Region*>&);
+	void get_region_list_equivalent_regions (const Region&, std::vector<Region*>&);
 	void replace_region (Region& old, Region& newr, jack_nframes_t pos);
 	void split_region (Region&, jack_nframes_t position);
 	void partition (jack_nframes_t start, jack_nframes_t end, bool just_top_level);
 	void duplicate (Region&, jack_nframes_t position, float times);
 	void nudge_after (jack_nframes_t start, jack_nframes_t distance, bool forwards);
 
-	Region* find_region (id_t) const;
+	Region* find_region (const PBD::ID&) const;
 
 	Playlist* cut  (list<AudioRange>&, bool result_is_hidden = true);
 	Playlist* copy (list<AudioRange>&, bool result_is_hidden = true);
@@ -107,16 +109,15 @@ class Playlist : public Stateful, public StateManager {
 	int set_state (const XMLNode&);
 	XMLNode& get_template ();
 
-	sigc::signal<void,Region *> RegionAdded;
-	sigc::signal<void,Region *> RegionRemoved;
-
+	sigc::signal<void,Region *>       RegionAdded;
+	sigc::signal<void,Region *>       RegionRemoved;
 	sigc::signal<void,Playlist*,bool> InUse;
-	sigc::signal<void>            Modified;
-	sigc::signal<void>            NameChanged;
-	sigc::signal<void>            LengthChanged;
-	sigc::signal<void>            LayeringChanged;
-	sigc::signal<void,Playlist *> GoingAway;
-	sigc::signal<void>            StatePushed;
+	sigc::signal<void>                Modified;
+	sigc::signal<void>                NameChanged;
+	sigc::signal<void>                LengthChanged;
+	sigc::signal<void>                LayeringChanged;
+	sigc::signal<void,Playlist *>     GoingAway;
+	sigc::signal<void>                StatePushed;
 
 	static sigc::signal<void,Playlist*> PlaylistCreated;
 
@@ -135,8 +136,8 @@ class Playlist : public Stateful, public StateManager {
 
 	Session& session() { return _session; }
 
-	id_t get_orig_diskstream_id () const { return _orig_diskstream_id; }
-	void set_orig_diskstream_id (id_t did) { _orig_diskstream_id = did; }  
+	const PBD::ID& get_orig_diskstream_id () const { return _orig_diskstream_id; }
+	void set_orig_diskstream_id (const PBD::ID& did) { _orig_diskstream_id = did; }  
 
 	/* destructive editing */
 	
@@ -190,7 +191,7 @@ class Playlist : public Stateful, public StateManager {
 	bool            _frozen;
 	uint32_t         subcnt;
 	uint32_t        _read_data_count;
-	id_t            _orig_diskstream_id;
+	PBD::ID         _orig_diskstream_id;
 	uint64_t         layer_op_counter;
 	jack_nframes_t   freeze_length;
 

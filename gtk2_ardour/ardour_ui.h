@@ -79,7 +79,7 @@ class ColorManager;
 
 namespace Gtkmm2ext {
 	class TearOff;
-};
+}
 
 namespace ARDOUR {
 	class AudioEngine;
@@ -87,11 +87,11 @@ namespace ARDOUR {
 	class Port;
 	class IO;
 	class ControlProtocolInfo;
-};
+}
 
 namespace ALSA {
 	class MultiChannelDevice;
-};
+}
 
 #define FRAME_NAME "BaseFrame"
 
@@ -153,8 +153,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_route_params_window ();
 	void toggle_tempo_window ();
 	void toggle_editing_space();
-
-	gint32 select_diskstream (GdkEventButton *ev);
 
 	Gtk::Tooltips& tooltips() { return _tooltips; }
 
@@ -522,7 +520,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	sigc::connection point_one_second_connection;
 	sigc::connection point_zero_one_second_connection;
 
-	void diskstream_added (ARDOUR::AudioDiskstream*);
+	void diskstream_added (ARDOUR::Diskstream*);
 
 	gint session_menu (GdkEventButton *);
 
@@ -536,14 +534,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void save_template ();
 
-
 	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode);
 
-	void add_diskstream_to_menu (ARDOUR::AudioDiskstream&);
-	void diskstream_selected (gint32);
-	Gtk::Menu *diskstream_menu;
-	gint32 selected_dstream;
-	
 	void set_transport_sensitivity (bool);
 
 	void remove_last_capture ();
@@ -626,11 +618,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void test_binding_action (const char *);
 	void start_keyboard_prefix();
 
-	void toggle_record_enable (guint32);
-	void toggle_monitor_enable (guint32);
+	void toggle_record_enable (uint32_t);
 
 	uint32_t rec_enabled_diskstreams;
-	void count_recenabled_diskstreams (ARDOUR::AudioDiskstream&);
+	void count_recenabled_diskstreams (ARDOUR::Route&);
 
 	About* about;
 	bool shown_flag;
@@ -649,7 +640,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	struct timeval last_peak_grab;
 	struct timeval last_shuttle_request;
 
-	void delete_sources_in_the_right_thread (list<ARDOUR::AudioFileSource*>*);
+	void delete_sources_in_the_right_thread (list<ARDOUR::Source*>*);
 
 	void editor_display_control_changed (Editing::DisplayControl c);
 
@@ -716,5 +707,5 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
 };
 
-
 #endif /* __ardour_gui_h__ */
+

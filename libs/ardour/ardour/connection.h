@@ -25,7 +25,7 @@
 #include <string>
 #include <sigc++/signal.h>
 #include <glibmm/thread.h>
-#include <ardour/stateful.h>
+#include <pbd/stateful.h> 
 
 using std::vector;
 using std::string;

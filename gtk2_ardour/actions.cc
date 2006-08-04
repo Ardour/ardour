@@ -19,7 +19,7 @@
 */
 
 #include <vector>
-#include <string.h>
+#include <string>
 
 #include <gtk/gtkaccelmap.h>
 #include <gtk/gtkuimanager.h>

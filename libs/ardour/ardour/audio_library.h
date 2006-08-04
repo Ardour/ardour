@@ -28,17 +28,24 @@
 
 #include <sigc++/signal.h>
 
+#include <pbd/stateful.h>
+
 using std::vector;
 using std::string;
 using std::map;
 
 namespace ARDOUR {
 
-class AudioLibrary
+class AudioLibrary : public Stateful
 {
   public:
 	AudioLibrary ();
 	~AudioLibrary ();
+
+	static string state_node_name;
+	
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&);
 
 	void set_paths (vector<string> paths);
 	vector<string> get_paths ();

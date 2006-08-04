@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2004 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include <fst.h>
 #include <pbd/basename.h>
 #include <string.h>
-#endif
+#endif // VST_SUPPORT
 
 #include <pbd/pathscanner.h>
 
@@ -36,7 +36,10 @@
 #include <ardour/plugin_manager.h>
 #include <ardour/plugin.h>
 #include <ardour/ladspa_plugin.h>
+
+#ifdef VST_SUPPORT
 #include <ardour/vst_plugin.h>
+#endif
 
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
@@ -48,8 +51,7 @@ using namespace PBD;
 
 PluginManager* PluginManager::_manager = 0;
 
-PluginManager::PluginManager (AudioEngine& e)
-	: _engine (e)
+PluginManager::PluginManager ()
 {
 	char* s;
 	string lrdf_path;
@@ -95,16 +97,12 @@ PluginManager::refresh ()
 	if (Config->get_use_vst()) {
 		vst_refresh ();
 	}
-#endif
+#endif // VST_SUPPORT
 }
 
 void
 PluginManager::ladspa_refresh ()
 {
-	for (std::list<PluginInfo*>::iterator i = _ladspa_plugin_info.begin(); i != _ladspa_plugin_info.end(); ++i) {
-		delete *i;
-	}
-
 	_ladspa_plugin_info.clear ();
 
 	if (ladspa_path.length() == 0) {
@@ -225,7 +223,6 @@ PluginManager::add_lrdf_data (const string &path)
 int 
 PluginManager::ladspa_discover (string path)
 {
-	PluginInfo *info;
 	void *module;
 	const LADSPA_Descriptor *descriptor;
 	LADSPA_Descriptor_Function dfunc;
@@ -250,7 +247,7 @@ PluginManager::ladspa_discover (string path)
 			break;
 		}
 
-		info = new PluginInfo;
+		PluginInfoPtr info(new LadspaPluginInfo);
 		info->name = descriptor->Name;
 		info->category = get_ladspa_category(descriptor->UniqueID);
 		info->path = path;
@@ -277,82 +274,6 @@ PluginManager::ladspa_discover (string path)
 // GDB WILL NOT LIKE YOU IF YOU DO THIS
 //	dlclose (module);
 
-	return 0;
-}
-
-Plugin *
-PluginManager::load (Session& session, PluginInfo *info)
-{
-	void *module;
-	Plugin *plugin = 0;
-
-	try {
-		if (info->type == PluginInfo::VST) {
-
-#ifdef VST_SUPPORT			
-			if (Config->get_use_vst()) {
-				FSTHandle* handle;
-				
-				if ((handle = fst_load (info->path.c_str())) == 0) {
-					error << string_compose(_("VST: cannot load module from \"%1\""), info->path) << endmsg;
-				} else {
-					plugin = new VSTPlugin (_engine, session, handle);
-				}
-			} else {
-				error << _("You asked ardour to not use any VST plugins") << endmsg;
-			}
-#else
-			error << _("This version of ardour has no support for VST plugins") << endmsg;
-			return 0;
-#endif			
-				
-		} else {
-
-			if ((module = dlopen (info->path.c_str(), RTLD_NOW)) == 0) {
-				error << string_compose(_("LADSPA: cannot load module from \"%1\""), info->path) << endmsg;
-				error << dlerror() << endmsg;
-			} else {
-				plugin = new LadspaPlugin (module, _engine, session, info->index, session.frame_rate());
-			}
-		}
-
-		plugin->set_info(*info);
-	}
-
-	catch (failed_constructor &err) {
-		plugin = 0;
-	}
-	
-	return plugin;
-}
-
-Plugin *
-ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::Type type)
-{
-	PluginManager *mgr = PluginManager::the_manager();
-	list<PluginInfo *>::iterator i;
-	list<PluginInfo *>* plugs = 0;
-
-	switch (type) {
-	case PluginInfo::LADSPA:
-		plugs = &mgr->ladspa_plugin_info();
-		break;
-	case PluginInfo::VST:
-		plugs = &mgr->vst_plugin_info();
-		unique_id = 0; // VST plugins don't have a unique id.
-		break;
-	case PluginInfo::AudioUnit:
-	default:
-		return 0;
-	}
-
-	for (i = plugs->begin(); i != plugs->end(); ++i) {
-		if ((name == ""     || (*i)->name == name) &&
-			(unique_id == 0 || (*i)->unique_id == unique_id)) {	
-			return mgr->load (session, *i);
-		}
-	}
-	
 	return 0;
 }
 
@@ -397,10 +318,6 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 void
 PluginManager::vst_refresh ()
 {
-	for (std::list<PluginInfo*>::iterator i = _vst_plugin_info.begin(); i != _vst_plugin_info.end(); ++i) {
-		delete *i;
-	}
-
 	_vst_plugin_info.clear ();
 
 	if (vst_path.length() == 0) {
@@ -454,7 +371,6 @@ int
 PluginManager::vst_discover (string path)
 {
 	FSTInfo* finfo;
-	PluginInfo* info;
 
 	if ((finfo = fst_get_info (const_cast<char *> (path.c_str()))) == 0) {
 		return -1;
@@ -466,7 +382,7 @@ PluginManager::vst_discover (string path)
 			<< endl;
 	}
 	
-	info = new PluginInfo;
+	PluginInfoPtr info(new PluginInfo);
 
 	/* what a goddam joke freeware VST is */
 
@@ -489,4 +405,4 @@ PluginManager::vst_discover (string path)
 	return 0;
 }
 
-#endif
+#endif // VST_SUPPORT

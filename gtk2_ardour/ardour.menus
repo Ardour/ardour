@@ -15,8 +15,10 @@
            <separator/>
            <menu action='addExistingAudioFiles'>
 	       <menuitem action='addExternalAudioAsRegion'/>	       
-	       <menuitem action='addExternalAudioAsTrack'/>	       
 	       <menuitem action='addExternalAudioToTrack'/>	       
+               <separator/>
+	       <menuitem action='addExternalAudioAsTrack'/>	       
+	       <menuitem action='addExternalAudioAsTapeTrack'/>	       
            </menu>
            <separator/>
            <menu name='Export' action='Export'>

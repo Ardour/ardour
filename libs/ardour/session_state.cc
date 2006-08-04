@@ -165,7 +165,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_slave_type = None;
 	butler_mixdown_buffer = 0;
 	butler_gain_buffer = 0;
-	auditioner = 0;
 	mmc_control = false;
 	midi_control = true;
 	mmc = 0;
@@ -180,8 +179,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_edit_mode = Slide;
 	pending_edit_mode = _edit_mode;
 	_play_range = false;
-	_control_out = 0;
-	_master_out = 0;
 	input_auto_connect = AutoConnectOption (0);
 	output_auto_connect = AutoConnectOption (0);
 	waiting_to_start = false;
@@ -197,6 +194,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	/* allocate conversion buffers */
 	_conversion_buffers[ButlerContext] = new char[AudioDiskstream::disk_io_frames() * 4];
 	_conversion_buffers[TransportContext] = new char[AudioDiskstream::disk_io_frames() * 4];
+	AudioDiskstream::allocate_working_buffers();
 	
 	/* default short fade = 15ms */
 
@@ -216,7 +214,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	   waveforms for clicks.
 	*/
 	
-	_click_io = 0;
 	_clicking = false;
 	click_requested = false;
 	click_data = 0;
@@ -270,8 +267,11 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	AudioSource::AudioSourceCreated.connect (mem_fun (*this, &Session::add_audio_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
-	AudioDiskstream::AudioDiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
+	AudioDiskstream::DiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
+
+	Controllable::Created.connect (mem_fun (*this, &Session::add_controllable));
+	Controllable::GoingAway.connect (mem_fun (*this, &Session::remove_controllable));
 
 	IO::MoreOutputs.connect (mem_fun (*this, &Session::ensure_passthru_buffers));
 
@@ -1330,6 +1330,13 @@ Session::state(bool full_state)
 		}
 	}
 
+	/* save the ID counter */
+	
+	snprintf (buf, sizeof (buf), "%" PRIu64, ID::counter());
+	node->add_property ("id-counter", buf);
+
+	/* various options */
+
 	node->add_child_nocopy (get_options());
 
 	child = node->add_child ("Sources");
@@ -1343,7 +1350,7 @@ Session::state(bool full_state)
 			
 			AudioFileSource* fs;
 
-			if ((fs = dynamic_cast<AudioFileSource*> ((*siter).second)) != 0) {
+			if ((fs = dynamic_cast<AudioFileSource*> (siter->second)) != 0) {
 				DestructiveFileSource* dfs = dynamic_cast<DestructiveFileSource*> (fs);
 
 				/* destructive file sources are OK if they are empty, because
@@ -1357,7 +1364,7 @@ Session::state(bool full_state)
 				}
 			}
 			
-			child->add_child_nocopy ((*siter).second->get_state());
+			child->add_child_nocopy (siter->second->get_state());
 		}
 	}
 
@@ -1370,7 +1377,7 @@ Session::state(bool full_state)
 			
 			/* only store regions not attached to playlists */
 
-			if ((*i).second->playlist() == 0) {
+			if (i->second->playlist() == 0) {
 				child->add_child_nocopy (i->second->state (true));
 			}
 		}
@@ -1380,7 +1387,7 @@ Session::state(bool full_state)
 
 	{ 
 		Glib::RWLock::ReaderLock dl (diskstream_lock);
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if (!(*i)->hidden()) {
 				child->add_child_nocopy ((*i)->get_state());
 			}
@@ -1401,10 +1408,10 @@ Session::state(bool full_state)
 
 	child = node->add_child ("Routes");
 	{
-		Glib::RWLock::ReaderLock lm (route_lock);
+		boost::shared_ptr<RouteList> r = routes.reader ();
 		
 		RoutePublicOrderSorter cmp;
-		RouteList public_order(routes);
+		RouteList public_order (*r);
 		public_order.sort (cmp);
 		
 		for (RouteList::iterator i = public_order.begin(); i != public_order.end(); ++i) {
@@ -1489,7 +1496,7 @@ Session::set_state (const XMLNode& node)
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
 	
-	if (node.name() != "Session"){
+	if (node.name() != X_("Session")){
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
 		return -1;
 	}
@@ -1499,6 +1506,21 @@ Session::set_state (const XMLNode& node)
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value ();
 	}
+
+	if ((prop = node.property (X_("id-counter"))) != 0) {
+		uint64_t x;
+		sscanf (prop->value().c_str(), "%" PRIu64, &x);
+		ID::init_counter (x);
+	} else {
+		/* old sessions used a timebased counter, so fake
+		   the startup ID counter based on a standard
+		   timestamp.
+		*/
+		time_t now;
+		time (&now);
+		ID::init_counter (now);
+	}
+
 	
 	IO::disable_ports ();
 	IO::disable_connecting ();
@@ -1685,7 +1707,6 @@ Session::load_routes (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	Route *route;
 
 	nlist = node.children();
 
@@ -1693,7 +1714,9 @@ Session::load_routes (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		if ((route = XMLRouteFactory (**niter)) == 0) {
+		boost::shared_ptr<Route> route (XMLRouteFactory (**niter));
+
+		if (route == 0) {
 			error << _("Session: cannot create Route from XML description.")			      << endmsg;
 			return -1;
 		}
@@ -1704,17 +1727,19 @@ Session::load_routes (const XMLNode& node)
 	return 0;
 }
 
-Route *
+boost::shared_ptr<Route>
 Session::XMLRouteFactory (const XMLNode& node)
 {
 	if (node.name() != "Route") {
-		return 0;
+		return boost::shared_ptr<Route> ((Route*) 0);
 	}
 
 	if (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0) {
-		return new AudioTrack (*this, node);
+		boost::shared_ptr<Route> x (new AudioTrack (*this, node));
+		return x;
 	} else {
-		return new Route (*this, node);
+		boost::shared_ptr<Route> x (new Route (*this, node));
+		return x;
 	}
 }
 
@@ -1730,12 +1755,10 @@ Session::load_regions (const XMLNode& node)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
 		if ((region = XMLRegionFactory (**niter, false)) == 0) {
 			error << _("Session: cannot create Region from XML description.") << endmsg;
 		}
 	}
-
 	return 0;
 }
 
@@ -1743,7 +1766,6 @@ AudioRegion *
 Session::XMLRegionFactory (const XMLNode& node, bool full)
 {
 	const XMLProperty* prop;
-	id_t s_id;
 	Source* source;
 	AudioSource* as;
 	AudioRegion::SourceList sources;
@@ -1766,9 +1788,9 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 		}
 	}
 
-	sscanf (prop->value().c_str(), "%" PRIu64, &s_id);
+	PBD::ID s_id (prop->value());
 
-	if ((source = get_source (s_id)) == 0) {
+	if ((source = source_by_id (s_id)) == 0) {
 		error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
 		return 0;
 	}
@@ -1786,22 +1808,22 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 	for (uint32_t n=1; n < nchans; ++n) {
 		snprintf (buf, sizeof(buf), X_("source-%d"), n);
 		if ((prop = node.property (buf)) != 0) {
-			sscanf (prop->value().c_str(), "%" PRIu64, &s_id);
 			
-			if ((source = get_source (s_id)) == 0) {
-				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
+			PBD::ID id2 (prop->value());
+			
+			if ((source = source_by_id (id2)) == 0) {
+				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), id2) << endmsg;
 				return 0;
 			}
 			
 			as = dynamic_cast<AudioSource*>(source);
 			if (!as) {
-				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), s_id) << endmsg;
+				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), id2) << endmsg;
 				return 0;
 			}
 			sources.push_back (as);
 		}
 	}
-	
 	
 	try {
 		return new AudioRegion (sources, node);
@@ -1820,7 +1842,7 @@ Session::get_sources_as_xml ()
 	Glib::Mutex::Lock lm (audio_source_lock);
 
 	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
-		node->add_child_nocopy ((*i).second->get_state());
+		node->add_child_nocopy (i->second->get_state());
 	}
 
 	/* XXX get MIDI and other sources here */
@@ -2401,23 +2423,6 @@ Session::load_route_groups (const XMLNode& node, bool edit)
 	return 0;
 }				
 
-void
-Session::swap_configuration(Configuration** new_config)
-{
-	Glib::RWLock::WriterLock lm (route_lock); // jlc - WHY?
-	Configuration* tmp = *new_config;
-	*new_config = Config;
-	Config = tmp;
-	set_dirty();
-}
-
-void
-Session::copy_configuration(Configuration* new_config)
-{
-	Glib::RWLock::WriterLock lm (route_lock);
-	new_config = new Configuration(*Config);
-}
-
 static bool
 state_file_filter (const string &str, void *arg)
 {
@@ -2441,7 +2446,7 @@ remove_end(string* state)
 		statename = statename.substr (start+1);
 	}
 		
-	if ((end = statename.rfind(".ardour")) < 0) {
+	if ((end = statename.rfind(".ardour")) == string::npos) {
 		end = statename.length();
 	}
 
@@ -2589,14 +2594,15 @@ Session::GlobalRouteBooleanState
 Session::get_global_route_boolean (bool (Route::*method)(void) const)
 {
 	GlobalRouteBooleanState s;
-	Glib::RWLock::ReaderLock lm (route_lock);
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->hidden()) {
 			RouteBooleanState v;
 			
 			v.first =* i;
-			v.second = ((*i)->*method)();
+			Route* r = (*i).get();
+			v.second = (r->*method)();
 			
 			s.push_back (v);
 		}
@@ -2609,9 +2615,9 @@ Session::GlobalRouteMeterState
 Session::get_global_route_metering ()
 {
 	GlobalRouteMeterState s;
-	Glib::RWLock::ReaderLock lm (route_lock);
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->hidden()) {
 			RouteMeterState v;
 			
@@ -2637,7 +2643,8 @@ void
 Session::set_global_route_boolean (GlobalRouteBooleanState s, void (Route::*method)(bool, void*), void* arg)
 {
 	for (GlobalRouteBooleanState::iterator i = s.begin(); i != s.end(); ++i) {
-		(i->first->*method) (i->second, arg);
+		Route* r = i->first.get();
+		(r->*method) (i->second, arg);
 	}
 }
 
@@ -2944,7 +2951,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   capture files.
 		*/
 
-		if ((*i).second->use_cnt() == 0 && (*i).second->length() > 0) {
+		if (i->second->use_cnt() == 0 && i->second->length() > 0) {
 			dead_sources.push_back (i->second);
 
 			/* remove this source from our own list to avoid us
@@ -2971,7 +2978,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			tmp = r;
 			++tmp;
 			
-			ar = (*r).second;
+			ar = r->second;
 
 			for (uint32_t n = 0; n < ar->n_channels(); ++n) {
 				if (&ar->source (n) == (*i)) {
@@ -3024,7 +3031,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
 		AudioFileSource* fs;
 		
-		if ((fs = dynamic_cast<AudioFileSource*> ((*i).second)) != 0) {
+		if ((fs = dynamic_cast<AudioFileSource*> (i->second)) != 0) {
 			all_sources.insert (fs->path());
 		} 
 	}
@@ -3233,3 +3240,41 @@ Session::set_clean ()
 	}
 }
 
+void
+Session::add_controllable (Controllable* c)
+{
+	Glib::Mutex::Lock lm (controllables_lock);
+	controllables.push_back (c);
+}
+
+void
+Session::remove_controllable (Controllable* c)
+{
+	if (_state_of_the_state | Deletion) {
+		return;
+	}
+
+	Glib::Mutex::Lock lm (controllables_lock);
+	controllables.remove (c);
+}	
+
+Controllable*
+Session::controllable_by_id (const PBD::ID& id)
+{
+	Glib::Mutex::Lock lm (controllables_lock);
+	
+	for (Controllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
+		if ((*i)->id() == id) {
+			return *i;
+		}
+	}
+
+	return 0;
+}
+
+void 
+Session::add_instant_xml (XMLNode& node, const std::string& dir)
+{
+	Stateful::add_instant_xml (node, dir);
+	Config->add_instant_xml (node, get_user_ardour_path());
+}

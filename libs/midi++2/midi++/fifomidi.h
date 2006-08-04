@@ -42,6 +42,6 @@ class FIFO_MidiPort : public MIDI::FD_MidiPort
 	void open (PortRequest &req);
 };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif // __fifomidi_h__

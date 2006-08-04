@@ -26,7 +26,7 @@
 #include <string>
 #include <stdint.h>
 #include <sigc++/signal.h>
-#include <ardour/stateful.h>
+#include <pbd/stateful.h> 
 #include <ardour/types.h>
 
 using std::string;
@@ -35,6 +35,7 @@ using std::list;
 namespace ARDOUR {
 
 class Route;
+class Track;
 class AudioTrack;
 class Session;
 
@@ -43,7 +44,7 @@ class RouteGroup : public Stateful, public sigc::trackable {
     enum Flag {
 	    Relative = 0x1,
 	    Active = 0x2,
-	    Hidden = 0x4,
+	    Hidden = 0x4
     };
 
     RouteGroup (Session& s, const string &n, Flag f = Flag(0));
@@ -90,7 +91,7 @@ class RouteGroup : public Stateful, public sigc::trackable {
 
     /* to use these, #include <ardour/route_group_specialized.h> */
 
-    template<class T> void apply (void (AudioTrack::*func)(T, void *), T val, void *src);
+    template<class T> void apply (void (Track::*func)(T, void *), T val, void *src);
 
     /* fills at_set with all members of the group that are AudioTracks */
 

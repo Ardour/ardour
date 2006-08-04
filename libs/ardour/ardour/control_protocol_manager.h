@@ -8,7 +8,7 @@
 
 #include <glibmm/thread.h>
 
-#include <ardour/stateful.h>
+#include <pbd/stateful.h> 
 
 namespace ARDOUR {
 
@@ -23,6 +23,7 @@ struct ControlProtocolInfo {
     std::string path;
     bool requested;
     bool mandatory;
+    XMLNode* state;
 };
 
  class ControlProtocolManager : public sigc::trackable, public Stateful

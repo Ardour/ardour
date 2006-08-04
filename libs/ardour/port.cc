@@ -24,15 +24,15 @@ using namespace ARDOUR;
 using namespace std;
 
 Port::Port (jack_port_t *p) 
-	: port (p)
+	: _port (p)
 {
-	if (port == 0) {
+	if (_port == 0) {
 		throw failed_constructor();
 	}
 	
-	_flags = JackPortFlags (jack_port_flags (port));
-	_type  = jack_port_type (port); 
-	_name = jack_port_name (port);
+	_flags = JackPortFlags (jack_port_flags (_port));
+	_type  = jack_port_type (_port); 
+	_name = jack_port_name (_port);
 
 	reset ();
 }
@@ -42,9 +42,9 @@ Port::reset ()
 {
 	reset_buffer ();
 	
-	last_monitor = false;
-	silent = false;
-	metering = 0;
+	_last_monitor = false;
+	_silent = false;
+	_metering = 0;
 	
 	reset_meters ();
 }
@@ -54,7 +54,7 @@ Port::set_name (string str)
 {
 	int ret;
 
-	if ((ret = jack_port_set_name (port, str.c_str())) == 0) {
+	if ((ret = jack_port_set_name (_port, str.c_str())) == 0) {
 		_name = str;
 	}
 	

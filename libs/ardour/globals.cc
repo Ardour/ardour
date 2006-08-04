@@ -32,6 +32,7 @@
 #include <lrdf.h>
 
 #include <pbd/error.h>
+#include <pbd/id.h>
 #include <pbd/strsplit.h>
 
 #include <midi++/port.h>
@@ -189,11 +190,16 @@ setup_midi ()
 }
 
 int
-ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization)
+ARDOUR::init (bool use_vst, bool try_optimization)
 {
         bool generic_mix_functions = true;
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
+
+	PBD::ID::init ();
+
+	lrdf_init();
+	Library = new AudioLibrary;
 
 	Config = new Configuration;
 
@@ -292,12 +298,9 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization)
 		
 		info << "No H/W specific optimizations in use" << endmsg;
 	}
-	
-	lrdf_init();
-	Library = new AudioLibrary;
 
 	/* singleton - first object is "it" */
-	new PluginManager (engine);
+	new PluginManager ();
 	
 	/* singleton - first object is "it" */
 	new ControlProtocolManager ();
@@ -322,10 +325,15 @@ ARDOUR::cleanup ()
 	return 0;
 }
 
-ARDOUR::id_t
-ARDOUR::new_id ()
+
+microseconds_t
+ARDOUR::get_microseconds ()
 {
-	return get_uid();
+	/* XXX need JACK to export its functionality */
+
+	struct timeval now;
+	gettimeofday (&now, 0);
+	return now.tv_sec * 1000000ULL + now.tv_usec;
 }
 
 ARDOUR::Change

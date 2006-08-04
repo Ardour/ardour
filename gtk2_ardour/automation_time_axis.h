@@ -4,6 +4,9 @@
 #include <vector>
 #include <list>
 #include <string>
+
+#include <boost/shared_ptr.hpp>
+
 #include <ardour/types.h>
 
 #include "canvas.h"
@@ -21,7 +24,7 @@ namespace ARDOUR {
 
 class PublicEditor;
 class TimeSelection;
-class AudioRegionSelection;
+class RegionSelection;
 class PointSelection;
 class AutomationLine;
 class GhostRegion;
@@ -31,7 +34,7 @@ class Selectable;
 class AutomationTimeAxisView : public TimeAxisView {
   public:
 	AutomationTimeAxisView (ARDOUR::Session&,
-				ARDOUR::Route&,
+				boost::shared_ptr<ARDOUR::Route>,
 				PublicEditor&,
 				TimeAxisView& parent,
 				ArdourCanvas::Canvas& canvas,
@@ -41,14 +44,14 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	~AutomationTimeAxisView();
 	
-	void set_height (TimeAxisView::TrackHeight);
+	virtual void set_height (TimeAxisView::TrackHeight);
 	void set_samples_per_unit (double);
 	std::string name() const { return _name; }
 
 	virtual void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, jack_nframes_t, double) = 0;
 
-	void clear_lines ();
-	void add_line (AutomationLine&);
+	virtual void clear_lines ();
+	virtual void add_line (AutomationLine&);
 
 	vector<AutomationLine*> lines;
 
@@ -75,11 +78,13 @@ class AutomationTimeAxisView : public TimeAxisView {
 	XMLNode* get_state_node ();
 
   protected:
-	ARDOUR::Route& route;
+	boost::shared_ptr<ARDOUR::Route> route;
 	ArdourCanvas::SimpleRect* base_rect;
 	string _name;
 	string _state_name;
 	bool    in_destructor;
+
+	bool    first_call_to_set_height;
 
 	Gtk::Button        hide_button;
 	Gtk::Button        height_button;

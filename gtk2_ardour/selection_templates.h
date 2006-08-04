@@ -27,35 +27,21 @@
 */
 
 #include <ardour/region.h>
-#include <ardour/audioregion.h>
 
 #include "selection.h"
+#include "region_view.h"
 
 inline void
-Selection::foreach_audio_region (void (ARDOUR::AudioRegion::*method)(void)) {
-	for (AudioRegionSelection::iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
-		((*i)->region.*(method))();
-	}
-}
-
-inline void
-Selection::foreach_audio_region (void (ARDOUR::Region::*method)(void)) {
-	for (AudioRegionSelection::iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
-		((*i)->region.*(method))();
+Selection::foreach_region (void (ARDOUR::Region::*method)(void)) {
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+		((*i)->region().*(method))();
 	}
 }
 
 template<class A> inline void 
-Selection::foreach_audio_region (void (ARDOUR::AudioRegion::*method)(A), A arg) {
-	for (AudioRegionSelection::iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
-		((*i)->region.*(method))(arg);
-	}
-}
-
-template<class A> inline void 
-Selection::foreach_audio_region (void (ARDOUR::Region::*method)(A), A arg) {
-	for (AudioRegionSelection::iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
-		((*i)->region.*(method))(arg);
+Selection::foreach_region (void (ARDOUR::Region::*method)(A), A arg) {
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+		((*i)->region().*(method))(arg);
 	}
 }
 
@@ -64,14 +50,14 @@ Selection::foreach_audio_region (void (ARDOUR::Region::*method)(A), A arg) {
 template<class A> inline void 
 Selection::foreach_route (void (ARDOUR::Route::*method)(A), A arg) {
 	for (list<ARDOUR::Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
-		((*i)->region.*(method))(arg);
+		((*i)->region().*(method))(arg);
 	}
 }
 
 template<class A1, class A2> inline void 
 Selection::foreach_route (void (ARDOUR::Route::*method)(A1,A2), A1 arg1, A2 arg2) {
 	for (list<ARDOUR::Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
-		((*i)->region.*(method))(arg1, arg2);
+		((*i)->region().*(method))(arg1, arg2);
 	}
 }
 

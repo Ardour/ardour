@@ -25,8 +25,9 @@
 
 #include <sigc++/signal.h>
 
+#include <pbd/stateful.h> 
+
 #include <ardour/ardour.h>
-#include <ardour/stateful.h>
 
 namespace ARDOUR {
 
@@ -40,7 +41,7 @@ class Source : public Stateful, public sigc::trackable
 	std::string name() const { return _name; }
 	int set_name (std::string str, bool destructive);
 
-	ARDOUR::id_t  id() const   { return _id; }
+	const PBD::ID&  id() const   { return _id; }
 
 	uint32_t use_cnt() const { return _use_cnt; }
 	void use ();
@@ -60,7 +61,7 @@ class Source : public Stateful, public sigc::trackable
 	time_t            _timestamp;
 
   private:
-	ARDOUR::id_t _id;
+	PBD::ID _id;
 };
 
 }

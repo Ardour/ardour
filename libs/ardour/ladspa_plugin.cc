@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2002 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -133,20 +133,9 @@ LadspaPlugin::init (void *mod, uint32_t index, jack_nframes_t rate)
 		}
 	}
 
-	Plugin::setup_midi_controls ();
+	Plugin::setup_controls ();
 
 	latency_compute_run ();
-
-	MIDI::Controllable *mcontrol;
-
-	for (uint32_t i = 0; i < parameter_count(); ++i) {
-		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) &&
-		    LADSPA_IS_PORT_CONTROL(port_descriptor (i))) {
-			if ((mcontrol = get_nth_midi_control (i)) != 0) {
-				mcontrol->midi_rebind (_session.midi_port(), 0);
-			}
-		}
-	}
 }
 
 LadspaPlugin::~LadspaPlugin ()
@@ -318,17 +307,14 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 		shadow_data[which] = (LADSPA_Data) val;
 		ParameterChanged (which, val); /* EMIT SIGNAL */
 
-		if (session().get_midi_feedback()) {
-
-			if (which < parameter_count() && midi_controls[which]) {
-				midi_controls[which]->send_feedback (val);
-			}
+		if (which < parameter_count() && controls[which]) {
+			controls[which]->Changed ();
 		}
-
+		
 	} else {
 		warning << string_compose (_("illegal parameter number used with plugin \"%1\". This may"
-				      "indicate a change in the plugin design, and presets may be"
-				      "invalid"), name())
+					     "indicate a change in the plugin design, and presets may be"
+					     "invalid"), name())
 			<< endmsg;
 	}
 }
@@ -380,28 +366,6 @@ LadspaPlugin::get_state()
 			snprintf(buf, sizeof(buf), "%+f", shadow_data[i]);
 			child->add_property("value", string(buf));
 			root->add_child_nocopy (*child);
-
-			MIDI::Controllable *pcontrol = get_nth_midi_control (i);
-			
-			if (pcontrol) {
-
-				MIDI::eventType ev;
-				MIDI::byte      additional;
-				MIDI::channel_t chn;
-				XMLNode*        midi_node;
-
-				if (pcontrol->get_control_info (chn, ev, additional)) {
-
-					midi_node = child->add_child ("midi-control");
-		
-					snprintf (buf, sizeof(buf), "0x%x", ev);
-					midi_node->add_property ("event", buf);
-					snprintf (buf, sizeof(buf), "%d", chn);
-					midi_node->add_property ("channel", buf);
-					snprintf (buf, sizeof(buf), "0x%x", additional);
-					midi_node->add_property ("additional", buf);
-				}
-			}
 		}
 	}
 
@@ -452,52 +416,6 @@ LadspaPlugin::set_state(const XMLNode& node)
 
 		sscanf (port, "%" PRIu32, &port_id);
 		set_parameter (port_id, atof(data));
-
-		XMLNodeList midi_kids;
-		XMLNodeConstIterator iter;
-		
-		midi_kids = child->children ("midi-control");
-		
-		for (iter = midi_kids.begin(); iter != midi_kids.end(); ++iter) {
-			
-			child = *iter;
-
-			MIDI::eventType ev = MIDI::on; /* initialize to keep gcc happy */
-			MIDI::byte additional = 0; /* initialize to keep gcc happy */
-			MIDI::channel_t chn = 0; /* initialize to keep gcc happy */
-			bool ok = true;
-			int xx;
-			
-			if ((prop = child->property ("event")) != 0) {
-				sscanf (prop->value().c_str(), "0x%x", &xx);
-				ev = (MIDI::eventType) xx;
-			} else {
-				ok = false;
-			}
-			
-			if (ok && ((prop = child->property ("channel")) != 0)) {
-				sscanf (prop->value().c_str(), "%d", &xx);
-				chn = (MIDI::channel_t) xx;
-			} else {
-				ok = false;
-			}
-			
-			if (ok && ((prop = child->property ("additional")) != 0)) {
-				sscanf (prop->value().c_str(), "0x%x", &xx);
-				additional = (MIDI::byte) xx;
-			}
-			
-			if (ok) {
-				MIDI::Controllable* pcontrol = get_nth_midi_control (port_id);
-
-				if (pcontrol) {
-					pcontrol->set_control_type (chn, ev, additional);
-				}
-
-			} else {
-				error << string_compose(_("LADSPA LadspaPlugin MIDI control specification for port %1 is incomplete, so it has been ignored"), port) << endl;
-			}
-		}
 	}
 
 	latency_compute_run ();
@@ -722,4 +640,27 @@ LadspaPlugin::latency_compute_run ()
 	
 	run (bufsize);
 	deactivate ();
+}
+
+PluginPtr
+LadspaPluginInfo::load (Session& session)
+{
+	try {
+		PluginPtr plugin;
+		void *module;
+
+		if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
+			error << string_compose(_("LADSPA: cannot load module from \"%1\""), path) << endmsg;
+			error << dlerror() << endmsg;
+		} else {
+			plugin.reset (new LadspaPlugin (module, session.engine(), session, index, session.frame_rate()));
+		}
+
+		plugin->set_info(PluginInfoPtr(new LadspaPluginInfo(*this)));
+		return plugin;
+	}
+
+	catch (failed_constructor &err) {
+		return PluginPtr ((Plugin*) 0);
+	}	
 }

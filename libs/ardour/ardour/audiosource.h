@@ -33,7 +33,7 @@
 
 #include <ardour/source.h>
 #include <ardour/ardour.h>
-#include <ardour/stateful.h>
+#include <pbd/stateful.h> 
 #include <pbd/xml++.h>
 
 using std::list;
@@ -51,6 +51,13 @@ class AudioSource : public Source
 	AudioSource (const XMLNode&);
 	virtual ~AudioSource ();
 
+	/* one could argue that this should belong to Source, but other data types
+	   generally do not come with a model of "offset along an audio timeline"
+	   so its here in AudioSource for now.
+	*/
+
+	virtual jack_nframes_t natural_position() const { return 0; }
+	
 	/* returns the number of items in this `audio_source' */
 
 	virtual jack_nframes_t length() const {

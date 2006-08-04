@@ -7,7 +7,7 @@ import glob
 Import('env libraries install_prefix')
 
 midi2 = env.Copy()
-midi2.Merge([ libraries['sigc2'], libraries['xml'], libraries['glib2'], libraries['pbd3'] ])
+midi2.Merge([ libraries['sigc2'], libraries['xml'], libraries['glib2'], libraries['pbd'] ])
 
 domain = 'midipp'
 
@@ -18,7 +18,6 @@ fd_midiport.cc
 fifomidi.cc
 midi.cc
 midichannel.cc
-midicontrollable.cc
 midifactory.cc
 midimanager.cc
 midiparser.cc

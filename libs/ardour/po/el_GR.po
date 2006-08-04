@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 0.664.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-06-27 13:00-0400\n"
+"POT-Creation-Date: 2006-06-29 21:03-0400\n"
 "PO-Revision-Date: 2003-05-21 12:50+0500\n"
 "Last-Translator: Muadibas\n"
 "Language-Team: Hellenic(Greek)\n"
@@ -56,47 +56,47 @@ msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 "DiskStream \"%1\": δεν γίνεται να απορριφθούν δειγματοληψίες στο δίσκο!"
 
-#: libs/ardour/audio_diskstream.cc:1795
+#: libs/ardour/audio_diskstream.cc:1796
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: δεν μπόρεσα να δημιουργήσω περιοχή για ολόκληρο audio file"
 
-#: libs/ardour/audio_diskstream.cc:1818
+#: libs/ardour/audio_diskstream.cc:1819
 #, fuzzy
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr "DiskStream: δεν μπόρεσα να δημιουργήσω περιοχή για δειγματοληψίες!"
 
-#: libs/ardour/audio_diskstream.cc:1873
+#: libs/ardour/audio_diskstream.cc:1874
 #, fuzzy
 msgid "programmer error: %1"
 msgstr "σφάλμα προγραμματισμού: %1"
 
-#: libs/ardour/audio_diskstream.cc:2145
+#: libs/ardour/audio_diskstream.cc:2146
 #, fuzzy
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "DiskStream: κανάλι εκτός διαστήματος"
 
-#: libs/ardour/audio_diskstream.cc:2170
+#: libs/ardour/audio_diskstream.cc:2171
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 νέα δειγματοληψία δεν εκκινήθη σωστά"
 
-#: libs/ardour/audio_diskstream.cc:2403
+#: libs/ardour/audio_diskstream.cc:2404
 msgid "Location \"%1\" not valid for track loop (start >= end)"
 msgstr "Η Τοποθεσία \"%1\" δεν είναι ικανή για track loop (αρχή >= τέλος)"
 
-#: libs/ardour/audio_diskstream.cc:2484
+#: libs/ardour/audio_diskstream.cc:2485
 #, fuzzy
 msgid "%1: cannot restore pending capture source file %2"
 msgstr "Εισαγωγή: δεν μπορώ να ανοίξω το εισαγμένο αρχείο ήχου \"%1\""
 
-#: libs/ardour/audio_diskstream.cc:2506
+#: libs/ardour/audio_diskstream.cc:2507
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2522
+#: libs/ardour/audio_diskstream.cc:2523
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2534
+#: libs/ardour/audio_diskstream.cc:2535
 #, fuzzy
 msgid "%1: cannot create region from pending capture sources"
 msgstr "%1: δεν μπόρεσα να δημιουργήσω περιοχή για ολόκληρο audio file"
@@ -155,36 +155,36 @@ msgstr "αλλαγή xfade"
 msgid "region modified"
 msgstr "η περιοχή μετεβλήθη"
 
-#: libs/ardour/audio_track.cc:133 libs/ardour/io.cc:1716
+#: libs/ardour/audio_track.cc:125 libs/ardour/io.cc:1716
 #: libs/ardour/io.cc:1826
 msgid "Unknown connection \"%1\" listed for input of %2"
 msgstr "Άγνωστη σύνδεση \"%1\" στη λίστα εισόδου του %2"
 
-#: libs/ardour/audio_track.cc:135 libs/ardour/io.cc:1718
+#: libs/ardour/audio_track.cc:127 libs/ardour/io.cc:1718
 #: libs/ardour/io.cc:1828
 #, fuzzy
 msgid "in 1"
 msgstr "in %lu"
 
-#: libs/ardour/audio_track.cc:136 libs/ardour/io.cc:1719
+#: libs/ardour/audio_track.cc:128 libs/ardour/io.cc:1719
 #: libs/ardour/io.cc:1829
 msgid "No input connections available as a replacement"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:140 libs/ardour/io.cc:1723
+#: libs/ardour/audio_track.cc:132 libs/ardour/io.cc:1723
 #: libs/ardour/io.cc:1833
 msgid "Connection %1 was not available - \"in 1\" used instead"
 msgstr ""
 
-#: libs/ardour/audio_track.cc:149 libs/ardour/io.cc:1842
+#: libs/ardour/audio_track.cc:141 libs/ardour/io.cc:1842
 msgid "improper input channel list in XML node (%1)"
 msgstr "ακατάλληλη λίστα καναλιών εισόδου στον κόμβο XML (%1)"
 
-#: libs/ardour/audio_track.cc:194 libs/ardour/audio_track.cc:207
+#: libs/ardour/audio_track.cc:186 libs/ardour/audio_track.cc:199
 msgid "AudioTrack: diskstream \"%1\" not known by session"
 msgstr "AudioTrack: το diskstream \"%1\" είναι μή αναγνωρίσιμο από τη συνεδρία"
 
-#: libs/ardour/audio_track.cc:305
+#: libs/ardour/audio_track.cc:297
 #, fuzzy
 msgid ""
 "MIDI rec_enable control specification for %1 is incomplete, so it has been "
@@ -193,7 +193,7 @@ msgstr ""
 "Η προδιαγραφή ελέγχου του MIDI gain για το %1 είναι ημιτελής, με αποτέλεσμα "
 "να αγνοηθεί"
 
-#: libs/ardour/audio_track.cc:317
+#: libs/ardour/audio_track.cc:309
 msgid "programming error: AudioTrack given state without diskstream!"
 msgstr ""
 "σφάλμα προγραμματισμού: εδόθη κατάσταση στην AudioTrack δίχως diskstream!"
@@ -272,24 +272,24 @@ msgstr "Σφάλμα: δεν μπόρεσα να γράψω %1"
 msgid "could not reconnect %1 and %2 (err = %3)"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:445 libs/ardour/session_state.cc:3095
+#: libs/ardour/audiofilesource.cc:444 libs/ardour/session_state.cc:3095
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr "Υπάρχουν ήδη 1000 αρχεία με ονόματα όπως %1; μη-συνεχές versioning"
 
-#: libs/ardour/audiofilesource.cc:459 libs/ardour/session_state.cc:3109
+#: libs/ardour/audiofilesource.cc:458 libs/ardour/session_state.cc:3109
 msgid "cannot rename audio file source from %1 to %2 (%3)"
 msgstr "δεν μπορώ να μετονομάσω την πηγή του audio file από %1 σε %2 (%3)"
 
-#: libs/ardour/audiofilesource.cc:466 libs/ardour/session_state.cc:3124
+#: libs/ardour/audiofilesource.cc:465 libs/ardour/session_state.cc:3124
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr "δεν μπορώ να απαλοίψω το peakfile %1 για %2 (%3)"
 
-#: libs/ardour/audiofilesource.cc:510
+#: libs/ardour/audiofilesource.cc:509
 msgid "FileSource: search path not set"
 msgstr "FileSource: μονοπάτι αναζητήσεως δεν ετέθη"
 
-#: libs/ardour/audiofilesource.cc:534
+#: libs/ardour/audiofilesource.cc:533
 msgid ""
 "FileSource: \"%1\" is ambigous when searching %2\n"
 "\t"
@@ -297,25 +297,25 @@ msgstr ""
 "FileSource: \"%1\" είναι αμφίβολο κατά την αναζήτηση του %2\n"
 "\t"
 
-#: libs/ardour/audiofilesource.cc:540
+#: libs/ardour/audiofilesource.cc:539
 #, fuzzy
 msgid "Filesource: cannot find required file (%1): while searching %2"
 msgstr "Filesource: δεν ευρέθη το απαιτούμενο αρχείο (%1): %2"
 
-#: libs/ardour/audiofilesource.cc:563
+#: libs/ardour/audiofilesource.cc:562
 msgid "Filesource: cannot find required file (%1): %2"
 msgstr "Filesource: δεν ευρέθη το απαιτούμενο αρχείο (%1): %2"
 
-#: libs/ardour/audiofilesource.cc:568
+#: libs/ardour/audiofilesource.cc:567
 msgid "Filesource: cannot check for existing file (%1): %2"
 msgstr "Filesource: δεν μπορώ να ελέγξω για το υπάρχον αρχείο (%1): %2"
 
-#: libs/ardour/audiofilesource.cc:640 libs/ardour/insert.cc:525
-#: libs/ardour/sndfilesource.cc:112
+#: libs/ardour/audiofilesource.cc:636 libs/ardour/insert.cc:525
+#: libs/ardour/sndfilesource.cc:113
 msgid "programming error: %1"
 msgstr "σφάλμα προγραμματισμού: %1"
 
-#: libs/ardour/audiofilesource.cc:645
+#: libs/ardour/audiofilesource.cc:641
 #, fuzzy
 msgid "cannot rename audio file for %1 to %2"
 msgstr "δεν μπορώ να μετονομάσω την πηγή του audio file από %1 σε %2 (%3)"
@@ -1837,7 +1837,7 @@ msgstr ""
 msgid "cannot remove dead sound file %1 (%2)"
 msgstr "δεν μπορώ να απαλοίψω το 'νεκρο' ηχο-αρχείο %1 (%2)"
 
-#: libs/ardour/session_time.cc:375
+#: libs/ardour/session_time.cc:374
 msgid "Unknown JACK transport state %1 in sync callback"
 msgstr "Άγνωστη κατάσταση του JACK transport %1 στην ανάκληση sync"
 
@@ -1979,24 +1979,24 @@ msgstr "Little-endian (Intel)"
 msgid "Big-endian (Mac)"
 msgstr "Big-endian (Mac)"
 
-#: libs/ardour/sndfilesource.cc:146
+#: libs/ardour/sndfilesource.cc:147
 msgid "FileSource: cannot get host information for BWF header (%1)"
 msgstr ""
 "FileSource: δεν μπορώ να βρώ πληροφορίες οικοδεσπότη(host) για επικεφαλίδα "
 "BWF (%1)"
 
-#: libs/ardour/sndfilesource.cc:168
+#: libs/ardour/sndfilesource.cc:169
 msgid ""
 "cannot set broadcast info for audio file %1 (%2); dropping broadcast info "
 "for this file"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:224
+#: libs/ardour/sndfilesource.cc:220
 #, fuzzy
 msgid "SndFileSource: cannot open file \"%1\" for %2 (%3)"
 msgstr "SndFileSource: δεν μπορώ να ανοίξω το αρχείο \"%1\" (%2)"
 
-#: libs/ardour/sndfilesource.cc:230
+#: libs/ardour/sndfilesource.cc:226
 msgid ""
 "SndFileSource: file only contains %1 channels; %2 is invalid as a channel "
 "number"
@@ -2004,22 +2004,22 @@ msgstr ""
 "SndFileSource: το αρχείο περιέχει μόνο %1 κανάλια; %2 δεν έχει αξία σαν "
 "κανάλι number"
 
-#: libs/ardour/sndfilesource.cc:307
+#: libs/ardour/sndfilesource.cc:327
 msgid "SndFileSource: could not seek to frame %1 within %2 (%3)"
 msgstr "SndFileSource: δεν μπορούσα να αναζητήσω στο frame %1 μέσα στο %2 (%3)"
 
-#: libs/ardour/sndfilesource.cc:358
+#: libs/ardour/sndfilesource.cc:378
 #, fuzzy
 msgid "programming error: %1 %2"
 msgstr "σφάλμα προγραμματισμού: %1"
 
-#: libs/ardour/sndfilesource.cc:458
+#: libs/ardour/sndfilesource.cc:487 libs/ardour/sndfilesource.cc:533
 msgid ""
 "cannot set broadcast info for audio file %1; Dropping broadcast info for "
 "this file"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:500
+#: libs/ardour/sndfilesource.cc:544
 #, fuzzy
 msgid "%1: cannot seek to %2"
 msgstr "%1: δεν μπορώ να αναζητήσω στο %2 για εξαγωγή"
@@ -2166,7 +2166,7 @@ msgid "no support for presets using chunks at this time"
 msgstr ""
 "καμμία υποστήριξη αυτή τη στιγμή για ρυθμίσεις που χρησιμοποιούν κομμάτια"
 
-#: libs/ardour/coreaudio_source.cc:99
+#: libs/ardour/coreaudiosource.cc:97
 #, fuzzy
 msgid ""
 "CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel "
@@ -2175,7 +2175,7 @@ msgstr ""
 "SndFileSource: το αρχείο περιέχει μόνο %1 κανάλια; %2 δεν έχει αξία σαν "
 "κανάλι number"
 
-#: libs/ardour/coreaudio_source.cc:164
+#: libs/ardour/coreaudiosource.cc:162
 #, fuzzy
 msgid "CoreAudioSource: could not seek to frame %1 within %2 (%3)"
 msgstr "SndFileSource: δεν μπορούσα να αναζητήσω στο frame %1 μέσα στο %2 (%3)"

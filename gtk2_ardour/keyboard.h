@@ -28,7 +28,7 @@
 #include <gtk/gtk.h>
 
 #include <ardour/types.h>
-#include <ardour/stateful.h>
+#include <pbd/stateful.h>
 
 #include "selection.h"
 

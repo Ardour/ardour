@@ -33,6 +33,8 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/comboboxtext.h>
 
+#include <gtkmm2ext/pathlist.h>
+
 #include <ardour/session.h>
 
 #include "ardour_dialog.h"
@@ -70,24 +72,16 @@ class OptionEditor : public Gtk::Dialog
 
 	/* paths */
 
-	Gtk::Table		path_table;
-	Gtk::Entry              session_raid_entry;
+	Gtk::Table	path_table;
+	Gtk::Entry	session_raid_entry;
 
-	struct SoundFilePathColumns : public Gtk::TreeModel::ColumnRecord {
-	    public:
-                 SoundFilePathColumns() { add (paths); }
-                 Gtk::TreeModelColumn<std::string> paths;
-	         	    
-	};
-
-	SoundFilePathColumns sfdb_path_columns;
-	Glib::RefPtr<Gtk::ListStore> sfdb_paths;
-	Gtk::TreeView sfdb_path_view;
+	Gtkmm2ext::PathList sfdb_path_view;
 
 	void setup_path_options();
 	void add_session_paths ();
 	void remove_session_paths ();
 	void raid_path_changed ();
+	void sfdb_paths_changed ();
 
 	/* fades */
 

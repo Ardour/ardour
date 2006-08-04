@@ -1,0 +1,75 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env libraries i18n install_prefix')
+
+pbd = env.Copy()
+
+domain = 'libpbd'
+
+pbd.Append(DOMAIN=domain,MAJOR=4,MINOR=1,MICRO=0)
+pbd.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
+pbd.Append(CXXFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+pbd.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+pbd.Append(PACKAGE=domain)
+pbd.Append(POTFILE=domain + '.pot')
+
+pbd_files = Split("""
+basename.cc
+base_ui.cc
+convert.cc
+command.cc
+controllable.cc
+dmalloc.cc
+error.cc
+id.cc
+mountpoint.cc
+path.cc
+pathscanner.cc
+pool.cc
+pthread_utils.cc
+receiver.cc
+stacktrace.cc
+stateful.cc
+strsplit.cc
+textreceiver.cc
+transmitter.cc
+undo.cc
+version.cc
+whitespace.cc
+xml++.cc
+""")
+
+conf = Configure(pbd)
+if conf.CheckFunc('getmntent'):
+    conf.env.Append(CCFLAGS="-DHAVE_GETMNTENT")
+if conf.CheckCHeader('execinfo.h'):
+    conf.env.Append(CXXFLAGS="-DHAVE_EXECINFO")
+pbd = conf.Finish()
+
+pbd.Merge ([ libraries['sigc2'],
+             libraries['xml'],
+             libraries['glibmm2'],
+             libraries['glib2'] ])
+
+pbd.VersionBuild(['version.cc','pbd/version.h'], 'SConscript')
+
+libpbd = pbd.SharedLibrary('pbd', pbd_files)
+Default(libpbd)
+
+mount_env = Environment(CCFLAGS='-DTEST_MOUNTPOINT -Ilibs/pbd')
+mount_env.Program('mountpoint', 'mountpoint.cc')
+
+if env['NLS']:
+    i18n (pbd, pbd_files, env)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libpbd))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'i18n.h', 'gettext.h', 'pbd/abstract_ui.cc' ] +
+                                     pbd_files +
+                                     glob.glob('po/*.po') +
+                                     glob.glob('pbd/*.h')))

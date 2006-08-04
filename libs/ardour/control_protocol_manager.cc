@@ -49,6 +49,10 @@ ControlProtocolManager::set_session (Session& s)
 		if ((*i)->requested || (*i)->mandatory) {
 			instantiate (**i);
 			(*i)->requested = false;
+
+			if ((*i)->state) {
+				(*i)->protocol->set_state (*(*i)->state);
+			}
 		}
 	}
 }
@@ -181,6 +185,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 			cpi->protocol = 0;
 			cpi->requested = false;
 			cpi->mandatory = descriptor->mandatory;
+			cpi->state = 0;
 			
 			control_protocol_info.push_back (cpi);
 			

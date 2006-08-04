@@ -55,7 +55,7 @@ RedirectAutomationLine::RedirectAutomationLine (const string & name, Redirect& r
 		/*NOTREACHED*/
 	}
 
-	pi->plugin().get_parameter_descriptor (_port, desc);
+	pi->plugin()->get_parameter_descriptor (_port, desc);
 
 	upper = desc.upper;
 	lower = desc.lower;

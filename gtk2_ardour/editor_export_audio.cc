@@ -31,7 +31,7 @@
 #include "selection.h"
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
-#include "regionview.h"
+#include "audio_region_view.h"
 
 #include <pbd/pthread_utils.h>
 #include <ardour/types.h>
@@ -92,12 +92,12 @@ Editor::export_region ()
 		return;
 	}
 
-	ExportDialog* dialog = new ExportRegionDialog (*this, &clicked_regionview->region);
+	ExportDialog* dialog = new ExportRegionDialog (*this, &clicked_regionview->region());
 		
 	dialog->connect_to_session (session);
 	dialog->set_range (
-		clicked_regionview->region.first_frame(), 
-		clicked_regionview->region.last_frame());
+		clicked_regionview->region().first_frame(), 
+		clicked_regionview->region().last_frame());
 	dialog->start_export();
 }
 
@@ -123,24 +123,26 @@ Editor::export_range_markers ()
 }	
 
 int
-Editor::write_region_selection (AudioRegionSelection& regions)
+Editor::write_region_selection (RegionSelection& regions)
 {
-	for (AudioRegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
-		if (write_region ("", (*i)->region) == false) {
-			return -1;
-		}
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv)
+			if (write_region ("", arv->audio_region()) == false)
+				return -1;
 	}
+
 	return 0;
 }
 
 void
 Editor::bounce_region_selection ()
 {
-	for (AudioRegionSelection::iterator i = selection->audio_regions.begin(); i != selection->audio_regions.end(); ++i) {
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		
-		AudioRegion& region ((*i)->region);
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(&(*i)->get_time_axis_view());
-		AudioTrack* track = dynamic_cast<AudioTrack*>(&(atv->route()));
+		Region& region ((*i)->region());
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
+		Track* track = dynamic_cast<Track*>(rtv->route().get());
 
 		InterThreadInfo itt;
 
@@ -287,7 +289,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 
 		if (atv->is_audio_track()) {
 
-			Playlist* playlist = atv->get_diskstream()->playlist();
+			AudioPlaylist* playlist = dynamic_cast<AudioPlaylist*>(atv->get_diskstream()->playlist());
 			
 			if (playlist && write_audio_range (*playlist, atv->get_diskstream()->n_channels(), ts) == 0) {
 				ret = -1;
@@ -300,7 +302,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 }
 
 bool
-Editor::write_audio_range (Playlist& playlist, uint32_t channels, list<AudioRange>& range)
+Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<AudioRange>& range)
 {
 	AudioFileSource* fs;
 	const jack_nframes_t chunk_size = 4096;
@@ -435,7 +437,7 @@ Editor::write_selection ()
 {
 	if (!selection->time.empty()) {
 		write_audio_selection (selection->time);
-	} else if (!selection->audio_regions.empty()) {
-		write_region_selection (selection->audio_regions);
+	} else if (!selection->regions.empty()) {
+		write_region_selection (selection->regions);
 	}
 }

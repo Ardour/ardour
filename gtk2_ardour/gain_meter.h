@@ -34,8 +34,8 @@
 
 #include <ardour/types.h>
 
-#include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/slider_controller.h>
 
 #include "enums.h"
 
@@ -56,7 +56,7 @@ namespace Gtk {
 class GainMeter : public Gtk::VBox
 {
   public:
-	GainMeter (ARDOUR::IO&, ARDOUR::Session&);
+	GainMeter (boost::shared_ptr<ARDOUR::IO>, ARDOUR::Session&);
 	~GainMeter ();
 
 	void update_gain_sensitive ();
@@ -75,7 +75,7 @@ class GainMeter : public Gtk::VBox
   private:
 
 	friend class MixerStrip;
-	ARDOUR::IO& _io;
+	boost::shared_ptr<ARDOUR::IO> _io;
 	ARDOUR::Session& _session;
 
 	bool ignore_toggle;

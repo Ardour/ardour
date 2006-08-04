@@ -131,7 +131,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 
 		/* might be nothing to do */
 
-		if (&current_mixer_strip->route() == &at->route()) {
+		if (current_mixer_strip->route() == at->route()) {
 			return;
 		}
 
@@ -221,7 +221,7 @@ Editor::current_mixer_strip_hidden ()
 		AudioTimeAxisView* tmp;
 		
 		if ((tmp = dynamic_cast<AudioTimeAxisView*>(*i)) != 0) {
-			if (&(tmp->route()) == &(current_mixer_strip->route())) {
+			if (tmp->route() == current_mixer_strip->route()) {
 				(*i)->set_selected (false);
 				break;
 			}
@@ -270,8 +270,6 @@ Editor::session_going_away ()
 	group_model->clear ();
 
 	edit_cursor_clock.set_session (0);
-	selection_start_clock.set_session (0);
-	selection_end_clock.set_session (0);
 	zoom_range_clock.set_session (0);
 	nudge_clock.set_session (0);
 

@@ -62,12 +62,12 @@ Insert::Insert(Session& s, string name, Placement p)
 
 const string PluginInsert::port_automation_node_name = "PortAutomation";
 
-PluginInsert::PluginInsert (Session& s, Plugin& plug, Placement placement)
-	: Insert (s, plug.name(), placement)
+PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placement placement)
+	: Insert (s, plug->name(), placement)
 {
 	/* the first is the master */
 
-	_plugins.push_back(&plug);
+	_plugins.push_back (plug);
 
 	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
 	
@@ -103,13 +103,13 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 }
 
 PluginInsert::PluginInsert (const PluginInsert& other)
-	: Insert (other._session, other.plugin().name(), other.placement())
+	: Insert (other._session, other.plugin()->name(), other.placement())
 {
 	uint32_t count = other._plugins.size();
 
 	/* make as many copies as requested */
 	for (uint32_t n = 0; n < count; ++n) {
-		_plugins.push_back (plugin_factory (other.plugin()));
+		_plugins.push_back (plugin_factory (other.plugin (n)));
 	}
 
 
@@ -137,7 +137,7 @@ PluginInsert::set_count (uint32_t num)
 		uint32_t diff = num - _plugins.size();
 
 		for (uint32_t n = 0; n < diff; ++n) {
-			_plugins.push_back (plugin_factory (*_plugins[0]));
+			_plugins.push_back (plugin_factory (_plugins[0]));
 
 			if (require_state) {
 				/* XXX do something */
@@ -147,9 +147,7 @@ PluginInsert::set_count (uint32_t num)
 	} else if (num < _plugins.size()) {
 		uint32_t diff = _plugins.size() - num;
 		for (uint32_t n= 0; n < diff; ++n) {
-			Plugin * plug = _plugins.back();
 			_plugins.pop_back();
-			delete plug;
 		}
 	}
 
@@ -167,12 +165,6 @@ PluginInsert::init ()
 PluginInsert::~PluginInsert ()
 {
 	GoingAway (this); /* EMIT SIGNAL */
-	
-	while (!_plugins.empty()) {
-		Plugin* p = _plugins.back();
-		_plugins.pop_back();
-		delete p;
-	}
 }
 
 void
@@ -194,25 +186,25 @@ PluginInsert::auto_state_changed (uint32_t which)
 uint32_t
 PluginInsert::output_streams() const
 {
-	return _plugins[0]->get_info().n_outputs * _plugins.size();
+	return _plugins[0]->get_info()->n_outputs * _plugins.size();
 }
 
 uint32_t
 PluginInsert::input_streams() const
 {
-	return _plugins[0]->get_info().n_inputs * _plugins.size();
+	return _plugins[0]->get_info()->n_inputs * _plugins.size();
 }
 
 uint32_t
 PluginInsert::natural_output_streams() const
 {
-	return _plugins[0]->get_info().n_outputs;
+	return _plugins[0]->get_info()->n_outputs;
 }
 
 uint32_t
 PluginInsert::natural_input_streams() const
 {
-	return _plugins[0]->get_info().n_inputs;
+	return _plugins[0]->get_info()->n_inputs;
 }
 
 bool
@@ -222,7 +214,7 @@ PluginInsert::is_generator() const
 	   a specific "instrument" flag, for example.
 	 */
 
-	return _plugins[0]->get_info().n_inputs == 0;
+	return _plugins[0]->get_info()->n_inputs == 0;
 }
 
 void
@@ -240,7 +232,7 @@ PluginInsert::set_automatable ()
 void
 PluginInsert::parameter_changed (uint32_t which, float val)
 {
-	vector<Plugin*>::iterator i = _plugins.begin();
+	vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin();
 
 	/* don't set the first plugin, just all the slaves */
 
@@ -255,7 +247,7 @@ PluginInsert::parameter_changed (uint32_t which, float val)
 void
 PluginInsert::set_block_size (jack_nframes_t nframes)
 {
-	for (vector<Plugin*>::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->set_block_size (nframes);
 	}
 }
@@ -263,7 +255,7 @@ PluginInsert::set_block_size (jack_nframes_t nframes)
 void
 PluginInsert::activate ()
 {
-	for (vector<Plugin*>::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->activate ();
 	}
 }
@@ -271,7 +263,7 @@ PluginInsert::activate ()
 void
 PluginInsert::deactivate ()
 {
-	for (vector<Plugin*>::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->deactivate ();
 	}
 }
@@ -309,7 +301,7 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, jack_nfram
 		}
 	}
 
-	for (vector<Plugin*>::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->connect_and_run (bufs, nbufs, in_index, out_index, nframes, offset);
 	}
 
@@ -357,8 +349,8 @@ PluginInsert::silence (jack_nframes_t nframes, jack_nframes_t offset)
 	uint32_t n;
 
 	if (active()) {
-		for (vector<Plugin*>::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-			n = (*i) -> get_info().n_inputs;
+		for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+			n = (*i) -> get_info()->n_inputs;
 			(*i)->connect_and_run (_session.get_silent_buffers (n), n, in_index, out_index, nframes, offset);
 		}
 	}
@@ -375,8 +367,8 @@ PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 			connect_and_run (bufs, nbufs, nframes, offset, false);
 		}
 	} else {
-		uint32_t in = _plugins[0]->get_info().n_inputs;
-		uint32_t out = _plugins[0]->get_info().n_outputs;
+		uint32_t in = _plugins[0]->get_info()->n_inputs;
+		uint32_t out = _plugins[0]->get_info()->n_outputs;
 
 		if (out > in) {
 
@@ -506,19 +498,19 @@ PluginInsert::protect_automation ()
 	}
 }
 
-Plugin*
-PluginInsert::plugin_factory (Plugin& other)
+boost::shared_ptr<Plugin>
+PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 {
-	LadspaPlugin* lp;
+	boost::shared_ptr<LadspaPlugin> lp;
 #ifdef VST_SUPPORT
-	VSTPlugin* vp;
+	boost::shared_ptr<VSTPlugin> vp;
 #endif
 
-	if ((lp = dynamic_cast<LadspaPlugin*> (&other)) != 0) {
-		return new LadspaPlugin (*lp);
+	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
+		return boost::shared_ptr<Plugin> (new LadspaPlugin (*lp));
 #ifdef VST_SUPPORT
-	} else if ((vp = dynamic_cast<VSTPlugin*> (&other)) != 0) {
-		return new VSTPlugin (*vp);
+	} else if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (other)) != 0) {
+		return boost::shared_ptr<Plugin> (new VSTPlugin (*vp));
 #endif
 	}
 
@@ -526,13 +518,13 @@ PluginInsert::plugin_factory (Plugin& other)
 			  X_("unknown plugin type in PluginInsert::plugin_factory"))
 	      << endmsg;
 	/*NOTREACHED*/
-	return 0;
+	return boost::shared_ptr<Plugin> ((Plugin*) 0);
 }
 
 int32_t
 PluginInsert::compute_output_streams (int32_t cnt) const
 {
-	return _plugins[0]->get_info().n_outputs * cnt;
+	return _plugins[0]->get_info()->n_outputs * cnt;
 }
 
 int32_t
@@ -544,8 +536,8 @@ PluginInsert::configure_io (int32_t magic, int32_t in, int32_t out)
 int32_t 
 PluginInsert::can_support_input_configuration (int32_t in) const
 {
-	int32_t outputs = _plugins[0]->get_info().n_outputs;
-	int32_t inputs = _plugins[0]->get_info().n_inputs;
+	int32_t outputs = _plugins[0]->get_info()->n_outputs;
+	int32_t inputs = _plugins[0]->get_info()->n_inputs;
 
 	if (inputs == 0) {
 
@@ -599,7 +591,7 @@ PluginInsert::state (bool full)
 	node->add_property("id", string(buf));
 	if (_plugins[0]->state_node_name() == "ladspa") {
 		char buf[32];
-		snprintf (buf, 31, "%ld", _plugins[0]->get_info().unique_id); 
+		snprintf (buf, sizeof (buf), "%ld", _plugins[0]->get_info()->unique_id); 
 		node->add_property("unique-id", string(buf));
 	}
 	node->add_property("count", string_compose("%1", _plugins.size()));
@@ -666,7 +658,7 @@ PluginInsert::set_state(const XMLNode& node)
  		return -1;
 	}
 
-	Plugin* plugin;
+	boost::shared_ptr<Plugin> plugin;
 	
 	if (unique != 0) {
 		plugin = find_plugin (_session, "", unique, type);	
@@ -692,13 +684,13 @@ PluginInsert::set_state(const XMLNode& node)
 		_plugins.push_back (plugin);
 		
 		for (uint32_t n=1; n < count; ++n) {
-			_plugins.push_back (plugin_factory (*plugin));
+			_plugins.push_back (plugin_factory (plugin));
 		}
 	}
 	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == plugin->state_node_name()) {
-			for (vector<Plugin*>::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+			for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 				(*i)->set_state (**niter);
 			}
 			break;
@@ -769,7 +761,7 @@ PluginInsert::set_state(const XMLNode& node)
 	}
 	
 	// The name of the PluginInsert comes from the plugin, nothing else
-	set_name(plugin->get_info().name,this);
+	set_name(plugin->get_info()->name,this);
 	
 	return 0;
 }
@@ -778,18 +770,6 @@ string
 PluginInsert::describe_parameter (uint32_t what)
 {
 	return _plugins[0]->describe_parameter (what);
-}
-
-void
-PluginInsert::reset_midi_control (MIDI::Port* port, bool on)
-{
-	_plugins[0]->reset_midi_control (port, on);
-}
-
-void
-PluginInsert::send_all_midi_feedback ()
-{
-	_plugins[0]->send_all_midi_feedback();
 }
 
 jack_nframes_t 

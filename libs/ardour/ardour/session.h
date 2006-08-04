@@ -36,14 +36,16 @@
 #include <pbd/error.h>
 #include <pbd/undo.h>
 #include <pbd/pool.h>
+#include <pbd/rcu.h>
 
 #include <midi++/types.h>
 #include <midi++/mmc.h>
 
+#include <pbd/stateful.h> 
+
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
 #include <ardour/location.h>
-#include <ardour/stateful.h>
 #include <ardour/gain.h>
 #include <ardour/io.h>
 
@@ -55,11 +57,16 @@ namespace MIDI {
 	class Port;
 }
 
+namespace PBD {
+	class Controllable;
+}
+
 namespace ARDOUR {
 
 class Port;
 class AudioEngine;
 class Slave;
+class Diskstream;	
 class AudioDiskstream;	
 class Route;
 class AuxInput;
@@ -95,9 +102,9 @@ class Session : public sigc::trackable, public Stateful
 
 {
   private:
-	typedef std::pair<Route*,bool> RouteBooleanState;
+	typedef std::pair<boost::shared_ptr<Route>,bool> RouteBooleanState;
 	typedef vector<RouteBooleanState> GlobalRouteBooleanState;
-	typedef std::pair<Route*,MeterPoint> RouteMeterState;
+	typedef std::pair<boost::shared_ptr<Route>,MeterPoint> RouteMeterState;
 	typedef vector<RouteMeterState> GlobalRouteMeterState;
 
   public:
@@ -110,7 +117,7 @@ class Session : public sigc::trackable, public Stateful
 	enum SlaveSource {
 		None = 0,
 		MTC,
-		JACK,
+		JACK
 	};
 	
 	enum AutoConnectOption {
@@ -141,7 +148,7 @@ class Session : public sigc::trackable, public Stateful
 		    */
 
 		    StopOnce,
-		    AutoLoop,
+		    AutoLoop
 	    };
 
 	    enum Action {
@@ -151,16 +158,17 @@ class Session : public sigc::trackable, public Stateful
 		    Clear
 	    };
 
-	    Type		type;
-	    Action              action;
-	    jack_nframes_t	action_frame;
-	    jack_nframes_t	target_frame;
-	    float               speed;
+	    Type           type;
+	    Action         action;
+	    jack_nframes_t action_frame;
+	    jack_nframes_t target_frame;
+	    float          speed;
 
 	    union {
-		void*                ptr;
-		bool                 yes_or_no;
-		Session::SlaveSource slave;
+			void*                ptr;
+			bool                 yes_or_no;
+			Session::SlaveSource slave;
+			Route*               route;
 	    };
 
 	    list<AudioRange>     audio_range;
@@ -262,52 +270,39 @@ class Session : public sigc::trackable, public Stateful
 	vector<Sample*>& get_silent_buffers (uint32_t howmany);
 	vector<Sample*>& get_send_buffers () { return _send_buffers; }
 
-	AudioDiskstream    *diskstream_by_id (id_t id);
-	AudioDiskstream    *diskstream_by_name (string name);
+	Diskstream* diskstream_by_id (const PBD::ID& id);
+	Diskstream* diskstream_by_name (string name);
 
 	bool have_captured() const { return _have_captured; }
 
 	void refill_all_diskstream_buffers ();
 	uint32_t diskstream_buffer_size() const { return dstream_buffer_size; }
 	
-	/* XXX fix required here when we get new diskstream types *, but
-	   not sure of the direction to take this in until then.
-	*/
-
-	uint32_t get_next_diskstream_id() const { return n_audio_diskstreams(); }
-	uint32_t n_audio_diskstreams() const;
+	uint32_t get_next_diskstream_id() const { return n_diskstreams(); }
+	uint32_t n_diskstreams() const;
 	
-	typedef list<AudioDiskstream *> AudioDiskstreamList;
+	typedef list<Diskstream *> DiskstreamList;
 
-	Session::AudioDiskstreamList audio_disk_streams() const {
-		Glib::RWLock::ReaderLock lm (diskstream_lock);
-		return audio_diskstreams; /* XXX yes, force a copy */
+	typedef std::list<boost::shared_ptr<Route> > RouteList; 
+
+	boost::shared_ptr<RouteList> get_routes() const {
+		return routes.reader ();
 	}
 
-	void foreach_audio_diskstream (void (AudioDiskstream::*func)(void));
-	template<class T> void foreach_audio_diskstream (T *obj, void (T::*func)(AudioDiskstream&));
-
-	typedef list<Route *> RouteList;
-
-	RouteList get_routes() const {
-		Glib::RWLock::ReaderLock rlock (route_lock);
-		return routes; /* XXX yes, force a copy */
-	}
-
-	uint32_t nroutes() const { return routes.size(); }
+	uint32_t nroutes() const { return routes.reader()->size(); }
 	uint32_t ntracks () const;
 	uint32_t nbusses () const;
 
 	struct RoutePublicOrderSorter {
-	    bool operator() (Route *, Route *b);
+	    bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 	
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
-	template<class T> void foreach_route (T *obj, void (T::*func)(Route*));
+	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
 
-	Route *route_by_name (string);
-	Route *route_by_remote_id (uint32_t id);
+	boost::shared_ptr<Route> route_by_name (string);
+	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
 
 	bool route_name_unique (string) const;
 
@@ -349,8 +344,8 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void> DurationChanged;
 	sigc::signal<void> HaltOnXrun;
 
-	sigc::signal<void,Route*> RouteAdded;
-	sigc::signal<void,AudioDiskstream*> AudioDiskstreamAdded;
+	sigc::signal<void,boost::shared_ptr<Route> > RouteAdded;
+	sigc::signal<void,Diskstream*> DiskstreamAdded; // FIXME: make a shared_ptr
 
 	void request_roll ();
 	void request_bounded_roll (jack_nframes_t start, jack_nframes_t end);
@@ -362,15 +357,14 @@ class Session : public sigc::trackable, public Stateful
 	void goto_start () { request_locate (start_location->start(), false); }
 	void use_rf_shuttle_speed ();
 	void request_transport_speed (float speed);
-	void request_overwrite_buffer (AudioDiskstream*);
-	void request_diskstream_speed (AudioDiskstream&, float speed);
+	void request_overwrite_buffer (Diskstream*);
+	void request_diskstream_speed (Diskstream&, float speed);
 	void request_input_change_handling ();
 
 	bool locate_pending() const { return static_cast<bool>(post_transport_work&PostTransportLocate); }
 	bool transport_locked () const;
 
 	int wipe ();
-	int wipe_diskstream (AudioDiskstream *);
 
 	int remove_region_from_region_list (Region&);
 
@@ -500,9 +494,6 @@ class Session : public sigc::trackable, public Stateful
 
 	void add_instant_xml (XMLNode&, const std::string& dir);
 
-	void swap_configuration(Configuration** new_config);
-	void copy_configuration(Configuration* new_config);
-
 	enum StateOfTheState {
 		Clean = 0x0,
 		Dirty = 0x1,
@@ -543,13 +534,13 @@ class Session : public sigc::trackable, public Stateful
 
 	/* fundamental operations. duh. */
 
+	boost::shared_ptr<AudioTrack> new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal);
+	boost::shared_ptr<Route>      new_audio_route (int input_channels, int output_channels);
 
-	AudioTrack *new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal);
+	void   remove_route (boost::shared_ptr<Route>);
 
-	Route *new_audio_route (int input_channels, int output_channels);
-
-	void   remove_route (Route&);
-	void   resort_routes (void *src);
+	void   resort_routes ();
+	void   resort_routes_using (boost::shared_ptr<RouteList>);
 
 	AudioEngine &engine() { return _engine; };
 
@@ -630,7 +621,7 @@ class Session : public sigc::trackable, public Stateful
 	string path_from_region_name (string name, string identifier);
 
 	AudioRegion* find_whole_file_parent (AudioRegion&);
-	void find_equivalent_playlist_regions (AudioRegion&, std::vector<AudioRegion*>& result);
+	void find_equivalent_playlist_regions (Region&, std::vector<Region*>& result);
 
 	AudioRegion *XMLRegionFactory (const XMLNode&, bool full);
 
@@ -698,7 +689,7 @@ class Session : public sigc::trackable, public Stateful
 
 	AudioFileSource *create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
-	Source *get_source (ARDOUR::id_t);
+	Source *source_by_id (const PBD::ID&);
 
 	/* playlist management */
 
@@ -706,8 +697,6 @@ class Session : public sigc::trackable, public Stateful
 	void add_playlist (Playlist *);
 	sigc::signal<void,Playlist*> PlaylistAdded;
 	sigc::signal<void,Playlist*> PlaylistRemoved;
-
-	Playlist *get_playlist (string name);
 
 	uint32_t n_playlists() const;
 
@@ -731,9 +720,9 @@ class Session : public sigc::trackable, public Stateful
 
 	/* auditioning */
 
-	Auditioner& the_auditioner() { return *auditioner; }
+	boost::shared_ptr<Auditioner> the_auditioner() { return auditioner; }
 	void audition_playlist ();
-	void audition_region (AudioRegion&);
+	void audition_region (Region&);
 	void cancel_audition ();
 	bool is_auditioning () const;
 	
@@ -770,8 +759,8 @@ class Session : public sigc::trackable, public Stateful
 
 	/* control/master out */
 
-	IO* control_out() const { return _control_out; }
-	IO* master_out() const { return _master_out; }
+	boost::shared_ptr<IO> control_out() const { return _control_out; }
+	boost::shared_ptr<IO> master_out() const { return _master_out; }
 
 	/* insert/send management */
 	
@@ -908,7 +897,7 @@ class Session : public sigc::trackable, public Stateful
 
 	/* clicking */
 
-	IO&  click_io() { return *_click_io; }
+	boost::shared_ptr<IO>  click_io() { return _click_io; }
 	void set_clicking (bool yn);
 	bool get_clicking() const;
 
@@ -1003,14 +992,20 @@ class Session : public sigc::trackable, public Stateful
 	static apply_gain_to_buffer_t	apply_gain_to_buffer;
 	static mix_buffers_with_gain_t	mix_buffers_with_gain;
 	static mix_buffers_no_gain_t	mix_buffers_no_gain;
-	
+
+	static sigc::signal<void> SendFeedback;
+
+	/* Controllables */
+
+	PBD::Controllable* controllable_by_id (const PBD::ID&);
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (jack_nframes_t nframes);
 	void set_frame_rate (jack_nframes_t nframes);
 
   protected:
-	friend class AudioDiskstream;
+	friend class Diskstream;
 	void stop_butler ();
 	void wait_till_butler_finished();
 
@@ -1072,9 +1067,9 @@ class Session : public sigc::trackable, public Stateful
 	float                   _meter_falloff;
 	bool                    _end_location_is_free;
 
-	void set_worst_io_latencies (bool take_lock);
+	void set_worst_io_latencies ();
 	void set_worst_io_latencies_x (IOChange asifwecare, void *ignored) {
-		set_worst_io_latencies (true);
+		set_worst_io_latencies ();
 	}
 
 	void update_latency_compensation_proxy (void* ignored);
@@ -1472,12 +1467,12 @@ class Session : public sigc::trackable, public Stateful
 	bool waiting_to_start;
 
 	void set_auto_loop (bool yn);
-	void overwrite_some_buffers (AudioDiskstream*);
+	void overwrite_some_buffers (Diskstream*);
 	void flush_all_redirects ();
 	void locate (jack_nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void start_locate (jack_nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void force_locate (jack_nframes_t frame, bool with_roll = false);
-	void set_diskstream_speed (AudioDiskstream*, float speed);
+	void set_diskstream_speed (Diskstream*, float speed);
 	void set_transport_speed (float speed, bool abort = false);
 	void stop_transport (bool abort = false);
 	void start_transport ();
@@ -1508,21 +1503,21 @@ class Session : public sigc::trackable, public Stateful
 
 	/* disk-streams */
 
-	AudioDiskstreamList  audio_diskstreams; 
+	DiskstreamList  diskstreams; 
 	mutable Glib::RWLock diskstream_lock;
 	uint32_t dstream_buffer_size;
-	void add_diskstream (AudioDiskstream*);
+	void add_diskstream (Diskstream*);
 	int  load_diskstreams (const XMLNode&);
 
 	/* routes stuff */
 
-	RouteList       routes;
-	mutable Glib::RWLock route_lock;
-	void   add_route (Route*);
+	SerializedRCUManager<RouteList>  routes;
+
+	void   add_route (boost::shared_ptr<Route>);
 	uint32_t destructive_index;
 
 	int load_routes (const XMLNode&);
-	Route* XMLRouteFactory (const XMLNode&);
+	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&);
 
 	/* mixer stuff */
 
@@ -1532,7 +1527,7 @@ class Session : public sigc::trackable, public Stateful
 	bool       currently_soloing;
 	
 	void route_mute_changed (void *src);
-	void route_solo_changed (void *src, Route *);
+	void route_solo_changed (void *src, boost::shared_ptr<Route>);
 	void catch_up_on_solo ();
 	void update_route_solo_state ();
 	void modify_solo_mute (bool, bool);
@@ -1541,7 +1536,7 @@ class Session : public sigc::trackable, public Stateful
 	/* REGION MANAGEMENT */
 
 	mutable Glib::Mutex region_lock;
-	typedef map<ARDOUR::id_t,AudioRegion *> AudioRegionList;
+	typedef map<PBD::ID,AudioRegion *> AudioRegionList;
 	AudioRegionList audio_regions;
 	
 	void region_renamed (Region *);
@@ -1554,7 +1549,7 @@ class Session : public sigc::trackable, public Stateful
 	/* SOURCES */
 	
 	mutable Glib::Mutex audio_source_lock;
-	typedef std::map<id_t, AudioSource *>    AudioSourceList;
+	typedef std::map<PBD::ID,AudioSource *> AudioSourceList;
 
 	AudioSourceList audio_sources;
 
@@ -1579,7 +1574,7 @@ class Session : public sigc::trackable, public Stateful
 	Playlist *XMLPlaylistFactory (const XMLNode&);
 
 	void playlist_length_changed (Playlist *);
-	void diskstream_playlist_changed (AudioDiskstream *);
+	void diskstream_playlist_changed (Diskstream *);
 
 	/* NAMED SELECTIONS */
 
@@ -1599,7 +1594,7 @@ class Session : public sigc::trackable, public Stateful
 
 	/* AUDITIONING */
 
-	Auditioner *auditioner;
+	boost::shared_ptr<Auditioner> auditioner;
 	void set_audition (AudioRegion*);
 	void non_realtime_set_audition ();
 	AudioRegion *pending_audition_region;
@@ -1716,7 +1711,7 @@ class Session : public sigc::trackable, public Stateful
 
 	Clicks          clicks;
 	bool           _clicking;
-	IO*            _click_io;
+	boost::shared_ptr<IO> _click_io;
 	Sample*         click_data;
 	Sample*         click_emphasis_data;
 	jack_nframes_t  click_length;
@@ -1748,8 +1743,8 @@ class Session : public sigc::trackable, public Stateful
 	/* main outs */
 	uint32_t main_outs;
 	
-	IO* _master_out;
-	IO* _control_out;
+	boost::shared_ptr<IO> _master_out;
+	boost::shared_ptr<IO> _control_out;
 
 	AutoConnectOption input_auto_connect;
 	AutoConnectOption output_auto_connect;
@@ -1782,8 +1777,15 @@ class Session : public sigc::trackable, public Stateful
 
 	LayerModel layer_model;
 	CrossfadeModel xfade_model;
+
+	typedef std::list<PBD::Controllable*> Controllables;
+	Glib::Mutex controllables_lock;
+	Controllables controllables;
+
+	void add_controllable (PBD::Controllable*);
+	void remove_controllable (PBD::Controllable*);
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_session_h__ */

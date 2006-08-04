@@ -25,6 +25,10 @@
 #include <string>
 #include <cmath>
 
+#ifdef HAVE_COREAUDIO
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 #include "ardour.h"
 
 class XMLNode;
@@ -50,9 +54,11 @@ int tokenize_fullpath (std::string fullpath, std::string& path, std::string& nam
 
 int touch_file(std::string path);
 
-uint32_t long get_uid();
-
 std::string region_name_from_path (std::string path);
 std::string path_expand (std::string);
+
+#ifdef HAVE_COREAUDIO
+std::string CFStringRefToStdString(CFStringRef stringRef);
+#endif // HAVE_COREAUDIO
 
 #endif /* __ardour_utils_h__ */

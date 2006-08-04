@@ -53,21 +53,21 @@ float Panner::current_automation_version_number = 1.0;
 string EqualPowerStereoPanner::name = "Equal Power Stereo";
 string Multi2dPanner::name = "Multiple (2D)";
 
-/* this is a default mapper of MIDI control values to a pan position
-   others can be imagined. see Panner::set_midi_to_pan_function().
+/* this is a default mapper of  control values to a pan position
+   others can be imagined. 
 */
 
-static pan_t direct_midi_to_pan (double fract) { 
+static pan_t direct_control_to_pan (double fract) { 
 	return fract;
 }
 
-static double direct_pan_to_midi (pan_t val) { 
+static double direct_pan_to_control (pan_t val) { 
 	return val;
 }
 
 StreamPanner::StreamPanner (Panner& p)
 	: parent (p),
-	  _midi_control (*this, (MIDI::Port*) 0)
+	  _control (*this)
 {
 	_muted = false;
 
@@ -80,84 +80,30 @@ StreamPanner::~StreamPanner ()
 {
 }
 
-StreamPanner::MIDIControl::MIDIControl (StreamPanner& s, MIDI::Port* port)
-	: MIDI::Controllable (port, 0), sp (s), setting(false)
-{
-	midi_to_pan = direct_midi_to_pan;
-	pan_to_midi = direct_pan_to_midi;
-	last_written = 0; /* XXX need a good out-of-bound-value */
-}
-
 void
-StreamPanner::MIDIControl::set_value (float val)
+StreamPanner::PanControllable::set_value (float val)
 {
-	setting = true;
-	sp.set_position (midi_to_pan (val));
-	setting = false;
+	panner.set_position (direct_control_to_pan (val));
 }
 
-void
-StreamPanner::MIDIControl::send_feedback (pan_t value)
+float
+StreamPanner::PanControllable::get_value (void) const
 {
-
-	if (!setting && get_midi_feedback() && pan_to_midi) {
-		MIDI::byte val = (MIDI::byte) (pan_to_midi (value) * 127.0f);
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-		MIDI::EventTwoBytes data;
-	    
-		if (get_control_info (ch, ev, additional)) {
-			data.controller_number = additional;
-			data.value = val;
-			last_written = val;
-			
-			sp.get_parent().session().send_midi_message (get_port(), ev, ch, data);
-		}
-
-		// send_midi_feedback (pan_to_midi (val));
-	}
-	
+	float xpos;
+	panner.get_effective_position (xpos);
+	return direct_pan_to_control (xpos);
 }
 
-MIDI::byte*
-StreamPanner::MIDIControl::write_feedback (MIDI::byte* buf, int32_t& bufsize, pan_t val, bool force)
+bool
+StreamPanner::PanControllable::can_send_feedback () const
 {
-	if (get_midi_feedback() && pan_to_midi && bufsize > 2) {
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-		MIDI::byte pm;
-		if (get_control_info (ch, ev, additional)) {
+	AutoState astate = panner.get_parent().automation_state ();
 
-			pm = (MIDI::byte) (pan_to_midi (val) * 127.0);
-
-			if (pm != last_written || force) {
-				*buf++ = (0xF0 & ev) | (0xF & ch);
-				*buf++ = additional; /* controller number */
-				*buf++ = pm;
-				last_written = pm;
-				bufsize -= 3;
-			}
-		}
+	if ((astate == Play) || (astate == Touch && !panner.get_parent().touching())) {
+		return true;
 	}
 
-	return buf;
-}
-
-
-void
-StreamPanner::reset_midi_control (MIDI::Port* port, bool on)
-{
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte extra;
-
-	_midi_control.get_control_info (chn, ev, extra);
-	if (!on) {
-		chn = -1;
-	}
-	_midi_control.midi_rebind (port, chn);
+	return false;
 }
 
 void
@@ -180,10 +126,7 @@ StreamPanner::set_position (float xpos, bool link_call)
 		x = xpos;
 		update ();
 		Changed ();
-
-		if (parent.session().get_midi_feedback()) {
-			_midi_control.send_feedback (x);
-		}
+		_control.Changed ();
 	}
 }
 
@@ -224,42 +167,11 @@ StreamPanner::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
 	XMLNodeConstIterator iter;
-	XMLNodeList midi_kids;
 
 	if ((prop = node.property (X_("muted")))) {
 		set_muted (prop->value() == "yes");
 	}
 
-	midi_kids = node.children ("MIDI");
-	
-	for (iter = midi_kids.begin(); iter != midi_kids.end(); ++iter) {
-	
-		XMLNodeList kids;
-		XMLNodeConstIterator miter;
-		XMLNode*    child;
-
-		kids = (*iter)->children ();
-
-		for (miter = kids.begin(); miter != kids.end(); ++miter) {
-
-			child =* miter;
-
-			if (child->name() == "pan") {
-			
-				MIDI::eventType ev = MIDI::on; /* initialize to keep gcc happy */
-				MIDI::byte additional = 0;  /* ditto */
-				MIDI::channel_t chn = 0;    /* ditto */
-
-				if (get_midi_node_info (child, ev, chn, additional)) {
-					_midi_control.set_control_type (chn, ev, additional);
-				} else {
-					error << _("MIDI pan control specification is incomplete, so it has been ignored") << endmsg;
-				}
-			}
-		}
-	}
-
-	
 	return 0;
 }
 
@@ -267,68 +179,6 @@ void
 StreamPanner::add_state (XMLNode& node)
 {
 	node.add_property (X_("muted"), (muted() ? "yes" : "no"));
-
-	/* MIDI control */
-
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte      additional;
-	XMLNode*        midi_node = 0;
-	XMLNode*        child;
-
-	if (_midi_control.get_control_info (chn, ev, additional)) {
-
-		midi_node = node.add_child ("MIDI");
-
-		child = midi_node->add_child ("pan");
-		set_midi_node_info (child, ev, chn, additional);
-	}
-
-}
-
-
-bool
-StreamPanner::get_midi_node_info (XMLNode * node, MIDI::eventType & ev, MIDI::channel_t & chan, MIDI::byte & additional)
-{
-	bool ok = true;
-	const XMLProperty* prop;
-	int xx;
-
-	if ((prop = node->property ("event")) != 0) {
-		sscanf (prop->value().c_str(), "0x%x", &xx);
-		ev = (MIDI::eventType) xx;
-	} else {
-		ok = false;
-	}
-
-	if (ok && ((prop = node->property ("channel")) != 0)) {
-		sscanf (prop->value().c_str(), "%d", &xx);
-		chan = (MIDI::channel_t) xx;
-	} else {
-		ok = false;
-	}
-
-	if (ok && ((prop = node->property ("additional")) != 0)) {
-		sscanf (prop->value().c_str(), "0x%x", &xx);
-		additional = (MIDI::byte) xx;
-	}
-
-	return ok;
-}
-
-bool
-StreamPanner::set_midi_node_info (XMLNode * node, MIDI::eventType ev, MIDI::channel_t chan, MIDI::byte additional)
-{
-	char buf[32];
-
-	snprintf (buf, sizeof(buf), "0x%x", ev);
-	node->add_property ("event", buf);
-	snprintf (buf, sizeof(buf), "%d", chan);
-	node->add_property ("channel", buf);
-	snprintf (buf, sizeof(buf), "0x%x", additional);
-	node->add_property ("additional", buf);
-
-	return true;
 }
 
 /*---------------------------------------------------------------------- */
@@ -679,7 +529,7 @@ EqualPowerStereoPanner::state (bool full_state)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof (buf), "%f", x); 
+	snprintf (buf, sizeof (buf), "%.12g", x); 
 	root->add_property (X_("x"), buf);
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 	if (full_state) {
@@ -913,9 +763,9 @@ Multi2dPanner::state (bool full_state)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof (buf), "%f", x); 
+	snprintf (buf, sizeof (buf), "%.12g", x); 
 	root->add_property (X_("x"), buf);
-	snprintf (buf, sizeof (buf), "%f", y); 
+	snprintf (buf, sizeof (buf), "%.12g", y); 
 	root->add_property (X_("y"), buf);
 	root->add_property (X_("type"), Multi2dPanner::name);
 
@@ -959,8 +809,6 @@ Panner::Panner (string name, Session& s)
 	_linked = false;
 	_link_direction = SameDirection;
 	_bypassed = false;
-
-	reset_midi_control (_session.mmc_port(), _session.get_mmc_control());
 }
 
 Panner::~Panner ()
@@ -1106,8 +954,6 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 	for (iterator x = begin(); x != end(); ++x) {
 		(*x)->update ();
 	}
-
-	reset_midi_control (_session.mmc_port(), _session.get_mmc_control());
 
 	/* force hard left/right panning in a common case: 2in/2out 
 	*/
@@ -1333,7 +1179,7 @@ struct PanPlugins {
 PanPlugins pan_plugins[] = {
 	{ EqualPowerStereoPanner::name, 2, EqualPowerStereoPanner::factory },
 	{ Multi2dPanner::name, 3, Multi2dPanner::factory },
-	{ string (""), 0 }
+	{ string (""), 0, 0 }
 };
 
 XMLNode&
@@ -1361,9 +1207,9 @@ Panner::state (bool full)
 
 	for (vector<Panner::Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
 		XMLNode* onode = new XMLNode (X_("Output"));
-		snprintf (buf, sizeof (buf), "%f", (*o).x);
+		snprintf (buf, sizeof (buf), "%.12g", (*o).x);
 		onode->add_property (X_("x"), buf);
-		snprintf (buf, sizeof (buf), "%f", (*o).y);
+		snprintf (buf, sizeof (buf), "%.12g", (*o).y);
 		onode->add_property (X_("y"), buf);
 		root->add_child_nocopy (*onode);
 	}
@@ -1412,10 +1258,10 @@ Panner::set_state (const XMLNode& node)
 			float x, y;
 			
 			prop = (*niter)->property (X_("x"));
-			sscanf (prop->value().c_str(), "%f", &x);
+			sscanf (prop->value().c_str(), "%.12g", &x);
 			
 			prop = (*niter)->property (X_("y"));
-			sscanf (prop->value().c_str(), "%f", &y);
+			sscanf (prop->value().c_str(), "%.12g", &y);
 			
 			outputs.push_back (Output (x, y));
 		}
@@ -1488,14 +1334,6 @@ Panner::touching () const
 
 	return false;
 }
-
-void
-Panner::reset_midi_control (MIDI::Port* port, bool on)
-{
-	for (vector<StreamPanner*>::const_iterator i = begin(); i != end(); ++i) {
-		(*i)->reset_midi_control (port, on);
-	}
-}      
 
 void
 Panner::set_position (float xpos, StreamPanner& orig)
@@ -1639,42 +1477,3 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 		}
 	}
 }
-
-void
-Panner::send_all_midi_feedback ()
-{
-	if (_session.get_midi_feedback()) {
-		float xpos;
-		
-		// do feedback for all panners
-		for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-			(*i)->get_effective_position (xpos);
-
-			(*i)->midi_control().send_feedback (xpos);
-		}
-		
-	}
-}
-
-MIDI::byte*
-Panner::write_midi_feedback (MIDI::byte* buf, int32_t& bufsize)
-{
-	AutoState astate = automation_state ();
-
-	if (_session.get_midi_feedback() && 
-	    (astate == Play || (astate == Touch && !touching()))) {
-		
-		float xpos;
-		
-		// do feedback for all panners
-		for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-			(*i)->get_effective_position (xpos);
-			
-			buf = (*i)->midi_control().write_feedback (buf, bufsize, xpos);
-		}
-		
-	}
-
-	return buf;
-}
-

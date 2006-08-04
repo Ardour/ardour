@@ -268,7 +268,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 		idspec += string_compose(":%1", n);
 		
 		try {
-			source = AudioFileSource::create (idspec.c_str());
+			source = AudioFileSource::create (idspec.c_str(), (mode == ImportAsTrack ? AudioFileSource::Destructive : AudioFileSource::Flag (0)));
 			sources.push_back(source);
 		} 
 		
@@ -306,16 +306,18 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 }
 
 int
- Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32_t out_chans, AudioTrack* track, jack_nframes_t& pos, ImportMode mode)
- {
-	 switch (mode) {
-	 case ImportAsRegion:
-		 /* relax, its been done */
-		 break;
+Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32_t out_chans, AudioTrack* track, jack_nframes_t& pos, ImportMode mode)
+{
+	AudioRegion* copy;
+
+	switch (mode) {
+	case ImportAsRegion:
+		/* relax, its been done */
+		break;
 		
 	case ImportToTrack:
 		if (track) {
-			Playlist* playlist  = track->disk_stream().playlist();
+			Playlist* playlist  = track->diskstream().playlist();
 			
 			AudioRegion* copy = new AudioRegion (region);
 			begin_reversible_command (_("insert sndfile"));
@@ -329,10 +331,20 @@ int
 		break;
 		
 	case ImportAsTrack:
-		AudioTrack* at = session->new_audio_track (in_chans, out_chans);
-		AudioRegion* copy = new AudioRegion (region);
-		at->disk_stream().playlist()->add_region (*copy, pos);
+	{ 
+		boost::shared_ptr<AudioTrack> at (session->new_audio_track (in_chans, out_chans, Normal));
+		copy = new AudioRegion (region);
+		at->diskstream().playlist()->add_region (*copy, pos);
 		break;
+	}
+
+	case ImportAsTapeTrack:
+	{
+		boost::shared_ptr<AudioTrack> at (session->new_audio_track (in_chans, out_chans, Destructive));
+		copy = new AudioRegion (region);
+		at->diskstream().playlist()->add_region (*copy, pos);
+		break;
+	}
 	}
 
 	return 0;

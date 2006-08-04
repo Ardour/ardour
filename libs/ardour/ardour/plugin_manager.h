@@ -6,34 +6,33 @@
 #include <string>
 
 #include <ardour/types.h>
+#include <ardour/plugin.h>
+#include <ardour/audio_unit.h>
 
 namespace ARDOUR {
 
-class PluginInfo;
 class Plugin;
 class Session;
 class AudioEngine;
 
 class PluginManager {
   public:
-	PluginManager (ARDOUR::AudioEngine&);
+	PluginManager ();
 	~PluginManager ();
 
-	std::list<PluginInfo*> &vst_plugin_info () { return _vst_plugin_info; }
-	std::list<PluginInfo*> &ladspa_plugin_info () { return _ladspa_plugin_info; }
+	ARDOUR::PluginInfoList &vst_plugin_info () { return _vst_plugin_info; }
+	ARDOUR::PluginInfoList &ladspa_plugin_info () { return _ladspa_plugin_info; }
+
 	void refresh ();
 
 	int add_ladspa_directory (std::string dirpath);
 	int add_vst_directory (std::string dirpath);
 
-	Plugin *load (ARDOUR::Session& s, PluginInfo* info);
-
 	static PluginManager* the_manager() { return _manager; }
 
   private:
-	ARDOUR::AudioEngine&   _engine;
-	std::list<PluginInfo*> _vst_plugin_info;
-	std::list<PluginInfo*> _ladspa_plugin_info;
+	ARDOUR::PluginInfoList _vst_plugin_info;
+	ARDOUR::PluginInfoList _ladspa_plugin_info;
 	std::map<uint32_t, std::string> rdf_type;
 
 	std::string ladspa_path;
@@ -61,3 +60,4 @@ class PluginManager {
 } /* namespace ARDOUR */
 
 #endif /* __ardour_plugin_manager_h__ */
+

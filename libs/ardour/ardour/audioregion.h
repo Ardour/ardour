@@ -27,8 +27,9 @@
 #include <pbd/undo.h>
 
 #include <ardour/ardour.h>
-#include <ardour/gain.h>
 #include <ardour/region.h>
+#include <ardour/gain.h>
+#include <ardour/logcurve.h>
 #include <ardour/export.h>
 
 class XMLNode;
@@ -43,14 +44,14 @@ class AudioSource;
 
 struct AudioRegionState : public RegionState 
 {
-    AudioRegionState (std::string why);
+	AudioRegionState (std::string why);
 
-    Curve _fade_in;
-    Curve _fade_out;
-    Curve _envelope;
-    gain_t _scale_amplitude;
-    uint32_t _fade_in_disabled;
-    uint32_t _fade_out_disabled;
+	Curve    _fade_in;
+	Curve    _fade_out;
+	Curve    _envelope;
+	gain_t   _scale_amplitude;
+	uint32_t _fade_in_disabled;
+	uint32_t _fade_out_disabled;
 };
 
 class AudioRegion : public Region
@@ -75,11 +76,7 @@ class AudioRegion : public Region
 	AudioRegion (SourceList &, const XMLNode&);
 	~AudioRegion();
 
-	bool region_list_equivalent (const AudioRegion&) const ;
-	bool source_equivalent (const AudioRegion&) const;
-	bool equivalent (const AudioRegion&) const;
-	bool size_equivalent (const AudioRegion&) const;
-	bool overlap_equivalent (const AudioRegion&) const;
+	bool source_equivalent (const Region&) const;
 
 	bool speed_mismatch (float) const;
 
@@ -96,7 +93,7 @@ class AudioRegion : public Region
 	vector<string> master_source_names();
 	
 	bool envelope_active () const { return _flags & Region::EnvelopeActive; }
-	bool fade_in_active () const { return _flags & Region::FadeIn; }
+	bool fade_in_active ()  const { return _flags & Region::FadeIn; }
 	bool fade_out_active () const { return _flags & Region::FadeOut; }
 	bool captured() const { return !(_flags & (Region::Flag (Region::Import|Region::External))); }
 
@@ -104,20 +101,21 @@ class AudioRegion : public Region
 	Curve& fade_out() { return _fade_out; }
 	Curve& envelope() { return _envelope; }
 
-	jack_nframes_t read_peaks (PeakData *buf, jack_nframes_t npeaks, jack_nframes_t offset, jack_nframes_t cnt, uint32_t chan_n=0, double samples_per_unit= 1.0) const;
+	jack_nframes_t read_peaks (PeakData *buf, jack_nframes_t npeaks,
+			jack_nframes_t offset, jack_nframes_t cnt,
+			uint32_t chan_n=0, double samples_per_unit= 1.0) const;
 
-	virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
-					float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
-					uint32_t chan_n = 0,
-					jack_nframes_t read_frames = 0,
-					jack_nframes_t skip_frames = 0) const;
+	virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buf,
+			float *gain_buf, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
+			uint32_t       chan_n      = 0,
+			jack_nframes_t read_frames = 0,
+			jack_nframes_t skip_frames = 0) const;
 
-	jack_nframes_t master_read_at (Sample *buf, Sample *mixdown_buffer, 
-				       float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, uint32_t chan_n=0) const;
-
+	jack_nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, 
+			float *gain_buf, char * workbuf,
+			jack_nframes_t position, jack_nframes_t cnt, uint32_t chan_n=0) const;
 
 	XMLNode& state (bool);
-	XMLNode& get_state ();
 	int      set_state (const XMLNode&);
 
 	static void set_default_fade (float steepness, jack_nframes_t len);
@@ -127,8 +125,7 @@ class AudioRegion : public Region
 		Fast,
 		Slow,
 		LogA,
-		LogB,
-
+		LogB
 	};
 
 	void set_fade_in_active (bool yn);
@@ -144,10 +141,6 @@ class AudioRegion : public Region
 	void set_envelope_active (bool yn);
 
 	int separate_by_channel (ARDOUR::Session&, vector<AudioRegion*>&) const;
-
-	uint32_t read_data_count() const { return _read_data_count; }
-
-	ARDOUR::Playlist* playlist() const { return _playlist; }
 
 	UndoAction get_memento() const;
 
@@ -172,20 +165,6 @@ class AudioRegion : public Region
 	friend class Playlist;
 
   private:
-	SourceList        sources;
-	SourceList        master_sources; /* used when timefx are applied, so 
-					     we can always use the original
-					     source.
-					  */
-	mutable Curve  	  _fade_in;
-	FadeShape         _fade_in_shape;
-	mutable Curve  	  _fade_out;
-	FadeShape         _fade_out_shape;
-	mutable Curve 	  _envelope;
-	gain_t            _scale_amplitude;
-	uint32_t          _fade_in_disabled;
-	uint32_t          _fade_out_disabled;
-
 	void set_default_fades ();
 	void set_default_fade_in ();
 	void set_default_fade_out ();
@@ -196,10 +175,6 @@ class AudioRegion : public Region
 
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();
-
-	bool copied() const { return _flags & Copied; }
-	void maybe_uncopy ();
-	void rename_after_first_edit ();
 
 	jack_nframes_t _read_at (const SourceList&, Sample *buf, Sample *mixdown_buffer, 
 				 float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
@@ -217,6 +192,21 @@ class AudioRegion : public Region
 	void envelope_changed (Change);
 
 	void source_deleted (Source*);
+	
+	
+	SourceList        sources;
+	
+	/** Used when timefx are applied, so we can always use the original source. */
+	SourceList        master_sources; 
+
+	mutable Curve     _fade_in;
+	FadeShape         _fade_in_shape;
+	mutable Curve     _fade_out;
+	FadeShape         _fade_out_shape;
+	mutable Curve     _envelope;
+	gain_t            _scale_amplitude;
+	uint32_t          _fade_in_disabled;
+	uint32_t          _fade_out_disabled;
 };
 
 } /* namespace ARDOUR */

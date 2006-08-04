@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,15 +18,17 @@
     $Id$
 */
 
-#ifndef __ardour_ladspa_h__
-#define __ardour_ladspa_h__
+#ifndef __ardour_plugin_h__
+#define __ardour_plugin_h__
 
-#include <midi++/controllable.h>
+#include <boost/shared_ptr.hpp>
 #include <sigc++/signal.h>
+
+#include <pbd/stateful.h> 
+#include <pbd/controllable.h>
 
 #include <jack/types.h>
 #include <ardour/types.h>
-#include <ardour/stateful.h>
 #include <ardour/plugin_state.h>
 #include <ardour/cycles.h>
 
@@ -44,6 +46,9 @@ namespace ARDOUR {
 class AudioEngine;
 class Session;
 
+class Plugin;
+typedef boost::shared_ptr<Plugin> PluginPtr;
+
 class PluginInfo {
   public:
 	enum Type {
@@ -52,11 +57,12 @@ class PluginInfo {
 		VST
 	};
 
-	PluginInfo () { };
+	PluginInfo () { }
 	PluginInfo (const PluginInfo &o)
 		: name(o.name), n_inputs(o.n_inputs), n_outputs(o.n_outputs),
 		unique_id(o.unique_id), path (o.path), index(o.index) {}
-	~PluginInfo () { };
+	virtual ~PluginInfo () { }
+	
 	string name;
 	string category;
 	uint32_t n_inputs;
@@ -65,11 +71,16 @@ class PluginInfo {
 
 	long unique_id;
 
-  private:
+	virtual PluginPtr load (Session& session) = 0;
+
+  protected:
 	friend class PluginManager;
 	string path;
 	uint32_t index;
 };
+
+typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
+typedef std::list<PluginInfoPtr> PluginInfoList;
 
 class Plugin : public Stateful, public sigc::trackable
 
@@ -77,7 +88,7 @@ class Plugin : public Stateful, public sigc::trackable
   public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
 	Plugin (const Plugin&);
-	~Plugin ();
+	virtual ~Plugin ();
 	
 	struct ParameterDescriptor {
 
@@ -136,13 +147,10 @@ class Plugin : public Stateful, public sigc::trackable
 	sigc::signal<void,uint32_t,float> ParameterChanged;
 	sigc::signal<void,Plugin *> GoingAway;
 	
-	void reset_midi_control (MIDI::Port*, bool);
-	void send_all_midi_feedback ();
-	MIDI::byte* write_midi_feedback (MIDI::byte*, int32_t& bufsize);
-	MIDI::Controllable *get_nth_midi_control (uint32_t);
+	PBD::Controllable *get_nth_control (uint32_t);
 
-	PluginInfo & get_info() { return _info; }
-	void set_info (const PluginInfo &inf) { _info = inf; }
+	PluginInfoPtr get_info() { return _info; }
+	void set_info (const PluginInfoPtr inf) { _info = inf; }
 
 	ARDOUR::AudioEngine& engine() const { return _engine; }
 	ARDOUR::Session& session() const { return _session; }
@@ -153,21 +161,19 @@ class Plugin : public Stateful, public sigc::trackable
   protected:
 	ARDOUR::AudioEngine& _engine;
 	ARDOUR::Session& _session;
-	PluginInfo _info;
+	PluginInfoPtr _info;
 	uint32_t _cycles;
 	map<string,string> 	 presets;
 	bool save_preset(string name, string domain /* vst, ladspa etc. */);
 
-	void setup_midi_controls ();
+	void setup_controls ();
 
-
-	struct MIDIPortControl : public MIDI::Controllable {
-	    MIDIPortControl (Plugin&, uint32_t abs_port_id, MIDI::Port *,
-			     float lower, float upper, bool toggled, bool logarithmic);
+	struct PortControllable : public PBD::Controllable {
+	    PortControllable (Plugin&, uint32_t abs_port_id,
+			      float lower, float upper, bool toggled, bool logarithmic);
 
 	    void set_value (float);
-	    void send_feedback (float);
-	    MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, float val, bool force = false);
+	    float get_value () const;
 
 	    Plugin& plugin;
 	    uint32_t absolute_port;
@@ -176,19 +182,12 @@ class Plugin : public Stateful, public sigc::trackable
 	    float range;
 	    bool  toggled;
 	    bool  logarithmic;
-
-	    bool setting;
-	    float last_written;
 	};
 
-	vector<MIDIPortControl*> midi_controls;
-
-	
+	vector<PortControllable*> controls;
 };
 
-/* this is actually defined in plugin_manager.cc */
-
-Plugin * find_plugin(ARDOUR::Session&, string name, long unique_id, PluginInfo::Type);
+PluginPtr find_plugin(ARDOUR::Session&, string name, long unique_id, PluginInfo::Type);
 
 } // namespace ARDOUR
  

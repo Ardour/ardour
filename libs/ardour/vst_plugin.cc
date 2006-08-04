@@ -41,8 +41,6 @@
 
 #include <vst/aeffectx.h>
 
-#include <midi++/manager.h>
-
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
@@ -81,7 +79,7 @@ VSTPlugin::VSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
 
 	_plugin->dispatcher (_plugin, effSetProgram, 0, 0, NULL, 0.0f);
 	
-	Plugin::setup_midi_controls ();
+	Plugin::setup_controls ();
 }
 
 VSTPlugin::VSTPlugin (const VSTPlugin &other)
@@ -94,7 +92,7 @@ VSTPlugin::VSTPlugin (const VSTPlugin &other)
 	}
 	_plugin = _fst->plugin;
 
-	Plugin::setup_midi_controls ();
+	Plugin::setup_controls ();
 }
 
 VSTPlugin::~VSTPlugin ()
@@ -133,13 +131,6 @@ VSTPlugin::set_parameter (uint32_t which, float val)
 {
 	_plugin->setParameter (_plugin, which, val);
 	ParameterChanged (which, val); /* EMIT SIGNAL */
-
-	if (session().get_midi_feedback()) {
-		
-		if (which < parameter_count() && midi_controls[which]) {
-			midi_controls[which]->send_feedback (val);
-		}
-	}
 }
 
 float
@@ -487,4 +478,32 @@ VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 	}
 
 	memmove (buf, first_nonws, strlen (buf) - (first_nonws - buf) + 1);
+}
+
+PluginPtr
+VSTPluginInfo::load (Session& session)
+{
+	try {
+		PluginPtr plugin;
+
+		if (Config->get_use_vst()) {
+			FSTHandle* handle;
+
+			if ((handle = fst_load (info->path.c_str())) == 0) {
+				error << string_compose(_("VST: cannot load module from \"%1\""), info->path) << endmsg;
+			} else {
+				plugin.reset (new VSTPlugin (session.engine(), session, handle));
+			}
+		} else {
+			error << _("You asked ardour to not use any VST plugins") << endmsg;
+			return PluginPtr ((Plugin*) 0);
+		}
+
+		plugin->set_info(PluginInfoPtr(new VSTPluginInfo(*this)));
+		return plugin;
+	}	
+
+	catch (failed_constructor &err) {
+		return PluginPtr ((Plugin*) 0);
+	}
 }

@@ -34,7 +34,7 @@ class Selectable : public virtual sigc::trackable
 
 	virtual void set_selected (bool yn) {
 		if (yn != _selected) {
-			_selected = true;
+			_selected = yn;
 			Selected (_selected); /* EMIT_SIGNAL */
 		}
 	}

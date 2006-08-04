@@ -26,7 +26,7 @@
 
 namespace ARDOUR {
 	class Session;
-};
+}
 
 /*
  * This virtual parent class is so that each dialog box uses the
@@ -55,3 +55,4 @@ class ArdourDialog : public Gtk::Dialog
 };
 
 #endif // __ardour_dialog_h__
+

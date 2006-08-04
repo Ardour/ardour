@@ -27,7 +27,7 @@ gtkardour.Merge ([
     libraries['ardour_cp'],
     libraries['gtkmm2ext'],
     libraries['midi++2'],
-    libraries['pbd3'],
+    libraries['pbd'],
     libraries['gtkmm2'],
     libraries['glib2'],
     libraries['libgnomecanvas2'],
@@ -57,6 +57,10 @@ if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Merge ([libraries['fftw3f']])
 	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
 
+if gtkardour['COREAUDIO']:
+	gtkardour.Append(CCFLAGS='-DHAVE_COREAUDIO')
+	gtkardour.Merge([libraries['appleutility']])
+
 skipped_files=Split("""
 connection_editor.cc
 """)
@@ -75,6 +79,7 @@ ardour_ui_ed.cc
 ardour_ui_mixer.cc
 ardour_ui_options.cc
 audio_clock.cc
+route_time_axis.cc
 audio_time_axis.cc
 automation_gain_line.cc
 automation_line.cc
@@ -141,8 +146,6 @@ marker.cc
 marker_time_axis.cc
 marker_time_axis_view.cc
 marker_view.cc
-meter_bridge.cc
-meter_bridge_strip.cc
 mixer_strip.cc
 mixer_ui.cc
 new_session_dialog.cc
@@ -159,10 +162,11 @@ public_editor.cc
 redirect_automation_line.cc
 redirect_automation_time_axis.cc
 redirect_box.cc
-region_editor.cc
+audio_region_editor.cc
 region_gain_line.cc
 region_selection.cc
-regionview.cc
+region_view.cc
+audio_region_view.cc
 route_params_ui.cc
 route_redirect_selection.cc
 route_ui.cc
@@ -170,7 +174,8 @@ selection.cc
 sfdb_ui.cc
 send_ui.cc
 streamview.cc
-taperegionview.cc
+audio_streamview.cc
+tape_region_view.cc
 tempo_dialog.cc
 time_axis_view.cc
 time_axis_view_item.cc
@@ -255,8 +260,7 @@ else:
 	env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour2', ardoursh))
 
 if env['NLS']:
-        Export('gtkardour', 'intl_files')
-	SConscript ('po/SConscript')
+	i18n (gtkardour, gtkardour_files+skipped_files+fft_analysis_files, env)
     
 # configuration files
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui.rc'))

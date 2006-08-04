@@ -56,8 +56,7 @@ string AudioFileSource::peak_dir = "";
 string AudioFileSource::search_path;
 
 sigc::signal<void> AudioFileSource::HeaderPositionOffsetChanged;
-bool               AudioFileSource::header_position_negative;
-uint64_t           AudioFileSource::header_position_offset;
+uint64_t           AudioFileSource::header_position_offset = 0;
 
 char   AudioFileSource::bwf_country_code[3] = "US";
 char   AudioFileSource::bwf_organization_code[4] = "LAS";
@@ -214,6 +213,10 @@ AudioFileSource::create (const string& idstr, Flag flags)
 {
 	AudioFileSource* es = 0;
 
+	if (flags & Destructive) {
+		return new DestructiveFileSource (idstr, flags);
+	}
+
 	try {
 		es = new CoreAudioSource (idstr, flags);
 	}
@@ -233,25 +236,6 @@ AudioFileSource::create (const string& idstr, Flag flags)
 	return new SndFileSource (idstr, flags);
 }
 
-#endif // HAVE_COREAUDIO
-
-#ifdef HAVE_COREAUDIO
-std::string 
-CFStringRefToStdString(CFStringRef stringRef)
-{
-	CFIndex size = 
-		CFStringGetMaximumSizeForEncoding(CFStringGetLength(stringRef) , 
-		kCFStringEncodingASCII);
-	    char *buf = new char[size];
-	
-	std::string result;
-
-	if(CFStringGetCString(stringRef, buf, size, kCFStringEncodingASCII)) {
-	    result = buf;
-	}
-	delete [] buf;
-	return result;
-}
 #endif // HAVE_COREAUDIO
 
 bool
@@ -592,21 +576,11 @@ AudioFileSource::set_search_path (string p)
 }
 
 void
-AudioFileSource::set_header_position_offset (jack_nframes_t offset, bool negative)
+AudioFileSource::set_header_position_offset (jack_nframes_t offset)
 {
 	header_position_offset = offset;
-	header_position_negative = negative;
-
+	cerr << "hpo set to " << offset << endl;
 	HeaderPositionOffsetChanged ();
-}
-
-void 
-AudioFileSource::handle_header_position_change ()
-{
-	if (writable()) {
-		set_header_timeline_position ();
-		flush_header ();
-	}
 }
 
 void
@@ -632,6 +606,12 @@ AudioFileSource::set_name (string newname, bool destructive)
 
 	if (newpath.empty()) {
 		error << string_compose (_("programming error: %1"), "cannot generate a changed audio path") << endmsg;
+		return -1;
+	}
+
+	// Test whether newpath exists, if yes notify the user but continue. 
+	if (access(newpath.c_str(),F_OK) == 0) {
+		error << _("Programming error! Ardour tried to rename a file over another file! It's safe to continue working, but please report this to the developers.") << endmsg;
 		return -1;
 	}
 

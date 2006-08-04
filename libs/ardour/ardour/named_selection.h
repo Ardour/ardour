@@ -24,7 +24,7 @@
 #include <string>
 #include <list>
 
-#include <ardour/stateful.h>
+#include <pbd/stateful.h> 
 
 class XMLNode;
 

@@ -90,13 +90,13 @@ void
 PlaylistSelector::show_for (RouteUI* ruix)
 {
 	vector<const char*> item;
-	AudioDiskstream* this_ds;
+	Diskstream* this_ds;
 	string str;
 
 	rui = ruix;
 
 	str = _("ardour: playlist for ");
-	str += rui->route().name();
+	str += rui->route()->name();
 
 	set_title (str);
 
@@ -116,7 +116,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	
 	for (DSPL_Map::iterator x = dspl_map.begin(); x != dspl_map.end(); ++x) {
 
-		AudioDiskstream* ds = session->diskstream_by_id (x->first);
+		Diskstream* ds = session->diskstream_by_id (x->first);
 
 		if (ds == 0) {
 			continue;
@@ -189,7 +189,7 @@ PlaylistSelector::add_playlist_to_map (Playlist *pl)
 
 	if ((x = dspl_map.find (apl->get_orig_diskstream_id())) == dspl_map.end()) {
 
-		pair<ARDOUR::id_t,list<Playlist*>*> newp (apl->get_orig_diskstream_id(), new list<Playlist*>);
+		pair<PBD::ID,list<Playlist*>*> newp (apl->get_orig_diskstream_id(), new list<Playlist*>);
 		
 		x = dspl_map.insert (dspl_map.end(), newp);
 	}
@@ -223,7 +223,7 @@ PlaylistSelector::selection_changed ()
 
 	TreeModel::iterator iter = tree.get_selection()->get_selected();
 
-	if (!iter) {
+	if (!iter || rui == 0) {
 		/* nothing selected */
 		return;
 	}
@@ -233,7 +233,7 @@ PlaylistSelector::selection_changed ()
 		AudioTrack* at;
 		AudioPlaylist* apl;
 		
-		if ((at = dynamic_cast<AudioTrack*> (&rui->route())) == 0) {
+		if ((at = rui->audio_track()) == 0) {
 			/* eh? */
 			return;
 		}
@@ -243,7 +243,7 @@ PlaylistSelector::selection_changed ()
 			return;
 		}
 		
-		at->disk_stream().use_playlist (apl);
+		at->diskstream().use_playlist (apl);
 
 		hide ();
 	}

@@ -34,6 +34,8 @@
 #include <ardour/ardour.h>
 #include <jack/jack.h>
 #include <jack/transport.h>
+#include <ardour/types.h>
+#include <ardour/data_type.h>
 
 namespace ARDOUR {
 
@@ -104,8 +106,8 @@ class AudioEngine : public sigc::trackable
 		virtual const char *what() const throw() { return "could not connect to engine backend"; }
 	};
 
-	Port *register_audio_input_port (const std::string& portname);
-	Port *register_audio_output_port (const std::string& portname);
+	Port *register_input_port (DataType type, const std::string& portname);
+	Port *register_output_port (DataType type, const std::string& portname);
 	int   unregister_port (Port *);
 	
 	int connect (const std::string& source, const std::string& destination);
@@ -243,6 +245,6 @@ class AudioEngine : public sigc::trackable
     mutable gint     m_meter_exit;
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_audioengine_h__ */

@@ -64,6 +64,7 @@
 #include <ardour/crossfade.h>
 #include <ardour/playlist.h>
 #include <ardour/click.h>
+#include <ardour/data_type.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -74,6 +75,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using boost::shared_ptr;
 
 const char* Session::_template_suffix = X_(".template");
 const char* Session::_statefile_suffix = X_(".ardour");
@@ -90,6 +92,8 @@ Session::mix_buffers_no_gain_t		Session::mix_buffers_no_gain 	= 0;
 
 sigc::signal<int> Session::AskAboutPendingState;
 sigc::signal<void> Session::SMPTEOffsetChanged;
+sigc::signal<void> Session::SendFeedback;
+
 
 int
 Session::find_session (string str, string& path, string& snapshot, bool& isnew)
@@ -252,6 +256,9 @@ Session::Session (AudioEngine &eng,
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
 	  midi_requests (128), // the size of this should match the midi request pool size
+	  routes (new RouteList),
+	  auditioner ((Auditioner*) 0),
+	  _click_io ((IO*) 0),
 	  main_outs (0)
 {
 	bool new_session;
@@ -299,6 +306,7 @@ Session::Session (AudioEngine &eng,
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
 	  midi_requests (16),
+	  routes (new RouteList),
 	  main_outs (0)
 
 {
@@ -316,15 +324,13 @@ Session::Session (AudioEngine &eng,
 	}
 
 	if (control_out_channels) {
-		Route* r;
-		r = new Route (*this, _("monitor"), -1, control_out_channels, -1, control_out_channels, Route::ControlOut);
+		shared_ptr<Route> r (new Route (*this, _("monitor"), -1, control_out_channels, -1, control_out_channels, Route::ControlOut));
 		add_route (r);
 		_control_out = r;
 	}
 
 	if (master_out_channels) {
-		Route* r;
-		r = new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut);
+		shared_ptr<Route> r (new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut));
 		add_route (r);
 		_master_out = r;
 	} else {
@@ -376,15 +382,6 @@ Session::~Session ()
 
 	clear_clicks ();
 
-	if (_click_io) {
-		delete _click_io;
-	}
-
-
-	if (auditioner) {
-		delete auditioner;
-	}
-
 	for (vector<Sample*>::iterator i = _passthru_buffers.begin(); i != _passthru_buffers.end(); ++i) {
 		free(*i);
 	}
@@ -400,6 +397,8 @@ Session::~Session ()
 	for (map<RunContext,char*>::iterator i = _conversion_buffers.begin(); i != _conversion_buffers.end(); ++i) {
 		delete [] (i->second);
 	}
+	
+	AudioDiskstream::free_working_buffers();
 	
 #undef TRACK_DESTRUCTION
 #ifdef TRACK_DESTRUCTION
@@ -438,27 +437,16 @@ Session::~Session ()
 		tmp =i;
 		++tmp;
 
-		delete (*i).second;
+		delete i->second;
 
 		i = tmp;
 	}
 	
 #ifdef TRACK_DESTRUCTION
-	cerr << "delete routes\n";
+	cerr << "delete diskstreams\n";
 #endif /* TRACK_DESTRUCTION */
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ) {
-		RouteList::iterator tmp;
-		tmp = i;
-		++tmp;
-		delete *i;
-		i = tmp;
-	}
-
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete audio_diskstreams\n";
-#endif /* TRACK_DESTRUCTION */
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ) {
-		AudioDiskstreamList::iterator tmp;
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ) {
+		DiskstreamList::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -477,7 +465,7 @@ Session::~Session ()
 		tmp = i;
 		++tmp;
 
-		delete (*i).second;
+		delete i->second;
 
 		i = tmp;
 	}
@@ -544,7 +532,7 @@ Session::~Session ()
 }
 
 void
-Session::set_worst_io_latencies (bool take_lock)
+Session::set_worst_io_latencies ()
 {
 	_worst_output_latency = 0;
 	_worst_input_latency = 0;
@@ -553,17 +541,11 @@ Session::set_worst_io_latencies (bool take_lock)
 		return;
 	}
 
-	if (take_lock) {
-		route_lock.reader_lock ();
-	}
+	boost::shared_ptr<RouteList> r = routes.reader ();
 	
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		_worst_output_latency = max (_worst_output_latency, (*i)->output_latency());
 		_worst_input_latency = max (_worst_input_latency, (*i)->input_latency());
-	}
-
-	if (take_lock) {
-		route_lock.reader_unlock ();
 	}
 }
 
@@ -581,7 +563,7 @@ Session::when_engine_running ()
 
 	/* every time we reconnect, recompute worst case output latencies */
 
-	_engine.Running.connect (sigc::bind (mem_fun (*this, &Session::set_worst_io_latencies), true));
+	_engine.Running.connect (mem_fun (*this, &Session::set_worst_io_latencies));
 
 	if (synced_to_jack()) {
 		_engine.transport_stop ();
@@ -596,7 +578,7 @@ Session::when_engine_running ()
 	try {
 		XMLNode* child = 0;
 		
-		_click_io = new ClickIO (*this, "click", 0, 0, -1, -1);
+		_click_io.reset (new ClickIO (*this, "click", 0, 0, -1, -1));
 
 		if (state_tree && (child = find_named_node (*state_tree->root(), "Click")) != 0) {
 
@@ -632,7 +614,7 @@ Session::when_engine_running ()
 		error << _("cannot setup Click I/O") << endmsg;
 	}
 
-	set_worst_io_latencies (true);
+	set_worst_io_latencies ();
 
 	if (_clicking) {
 		 ControlChanged (Clicking); /* EMIT SIGNAL */
@@ -647,7 +629,7 @@ Session::when_engine_running ()
 		*/
 
 		try {
-			auditioner = new Auditioner (*this);
+			auditioner.reset (new Auditioner (*this));
 		}
 
 		catch (failed_constructor& err) {
@@ -881,7 +863,7 @@ Session::playlist_length_changed (Playlist* pl)
 }
 
 void
-Session::diskstream_playlist_changed (AudioDiskstream* dstream)
+Session::diskstream_playlist_changed (Diskstream* dstream)
 {
 	Playlist *playlist;
 
@@ -961,7 +943,7 @@ Session::set_auto_input (bool yn)
 			   The rarity and short potential lock duration makes this "OK"
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (!auto_input);   
@@ -979,7 +961,7 @@ Session::reset_input_monitor_state ()
 {
 	if (transport_rolling()) {
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring() && !auto_input);
@@ -987,7 +969,7 @@ Session::reset_input_monitor_state ()
 		}
 	} else {
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring());
@@ -1068,7 +1050,7 @@ Session::auto_loop_changed (Location* location)
 		}
 		else if (seamless_loop && !loop_changing) {
 			
-			// schedule a locate-roll to refill the audio_diskstreams at the
+			// schedule a locate-roll to refill the diskstreams at the
 			// previous loop end
 			loop_changing = true;
 
@@ -1265,7 +1247,7 @@ Session::enable_record ()
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			
-			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (true);   
 				}
@@ -1300,7 +1282,7 @@ Session::disable_record (bool rt_context, bool force)
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			
-			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (false);   
 				}
@@ -1327,7 +1309,7 @@ Session::step_back_from_record ()
 		*/
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 		
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		        if (auto_input && (*i)->record_enabled ()) {
 			        //cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 		                (*i)->monitor_input (false);   
@@ -1450,7 +1432,6 @@ Session::set_block_size (jack_nframes_t nframes)
 	*/
 
 	{ 
-		Glib::RWLock::ReaderLock lm (route_lock);
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 		vector<Sample*>::iterator i;
 		uint32_t np;
@@ -1492,15 +1473,17 @@ Session::set_block_size (jack_nframes_t nframes)
 
 		allocate_pan_automation_buffers (nframes, _npan_buffers, true);
 
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		boost::shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->set_block_size (nframes);
 		}
 		
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			(*i)->set_block_size (nframes);
 		}
 
-		set_worst_io_latencies (false);
+		set_worst_io_latencies ();
 	}
 }
 
@@ -1542,7 +1525,7 @@ Session::set_default_fade (float steepness, float fade_msecs)
 }
 
 struct RouteSorter {
-    bool operator() (Route* r1, Route* r2) {
+    bool operator() (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> r2) {
 	    if (r1->fed_by.find (r2) != r1->fed_by.end()) {
 		    return false;
 	    } else if (r2->fed_by.find (r1) != r2->fed_by.end()) {
@@ -1564,9 +1547,9 @@ struct RouteSorter {
 };
 
 static void
-trace_terminal (Route* r1, Route* rbase)
+trace_terminal (shared_ptr<Route> r1, shared_ptr<Route> rbase)
 {
-	Route* r2;
+	shared_ptr<Route> r2;
 
 	if ((r1->fed_by.find (rbase) != r1->fed_by.end()) && (rbase->fed_by.find (r1) != rbase->fed_by.end())) {
 		info << string_compose(_("feedback loop setup between %1 and %2"), r1->name(), rbase->name()) << endmsg;
@@ -1575,13 +1558,13 @@ trace_terminal (Route* r1, Route* rbase)
 
 	/* make a copy of the existing list of routes that feed r1 */
 
-	set<Route *> existing = r1->fed_by;
+	set<shared_ptr<Route> > existing = r1->fed_by;
 
 	/* for each route that feeds r1, recurse, marking it as feeding
 	   rbase as well.
 	*/
 
-	for (set<Route *>::iterator i = existing.begin(); i != existing.end(); ++i) {
+	for (set<shared_ptr<Route> >::iterator i = existing.begin(); i != existing.end(); ++i) {
 		r2 =* i;
 
 		/* r2 is a route that feeds r1 which somehow feeds base. mark
@@ -1611,7 +1594,7 @@ trace_terminal (Route* r1, Route* rbase)
 }
 
 void
-Session::resort_routes (void* src)
+Session::resort_routes ()
 {
 	/* don't do anything here with signals emitted
 	   by Routes while we are being destroyed.
@@ -1621,54 +1604,64 @@ Session::resort_routes (void* src)
 		return;
 	}
 
-	/* Caller MUST hold the route_lock */
 
+	{
+
+		RCUWriter<RouteList> writer (routes);
+		shared_ptr<RouteList> r = writer.get_copy ();
+		resort_routes_using (r);
+		/* writer goes out of scope and forces update */
+	}
+
+}
+void
+Session::resort_routes_using (shared_ptr<RouteList> r)
+{
 	RouteList::iterator i, j;
-
-	for (i = routes.begin(); i != routes.end(); ++i) {
-
+	
+	for (i = r->begin(); i != r->end(); ++i) {
+		
 		(*i)->fed_by.clear ();
 		
-		for (j = routes.begin(); j != routes.end(); ++j) {
-
+		for (j = r->begin(); j != r->end(); ++j) {
+			
 			/* although routes can feed themselves, it will
 			   cause an endless recursive descent if we
 			   detect it. so don't bother checking for
 			   self-feeding.
 			*/
-
+			
 			if (*j == *i) {
 				continue;
 			}
-
+			
 			if ((*j)->feeds (*i)) {
 				(*i)->fed_by.insert (*j);
 			} 
 		}
 	}
 	
-	for (i = routes.begin(); i != routes.end(); ++i) {
+	for (i = r->begin(); i != r->end(); ++i) {
 		trace_terminal (*i, *i);
 	}
-
+	
 	RouteSorter cmp;
-	routes.sort (cmp);
-
+	r->sort (cmp);
+	
 #if 0
 	cerr << "finished route resort\n";
 	
-	for (i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		cerr << " " << (*i)->name() << " signal order = " << (*i)->order_key ("signal") << endl;
 	}
 	cerr << endl;
 #endif
-
+	
 }
 
-AudioTrack*
+shared_ptr<AudioTrack>
 Session::new_audio_track (int input_channels, int output_channels, TrackMode mode)
 {
-	AudioTrack *track;
 	char track_name[32];
 	uint32_t n = 0;
 	uint32_t channels_used = 0;
@@ -1679,9 +1672,10 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	/* count existing audio tracks */
 
 	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (dynamic_cast<AudioTrack*>(*i) != 0) {
+		shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			if (dynamic_cast<AudioTrack*>((*i).get()) != 0) {
 				if (!(*i)->hidden()) {
 					n++;
 					channels_used += (*i)->n_inputs();
@@ -1718,7 +1712,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	}
 
 	try {
-		track = new AudioTrack (*this, track_name, Route::Flag (0), mode);
+		shared_ptr<AudioTrack> track (new AudioTrack (*this, track_name, Route::Flag (0), mode));
 
 		if (track->ensure_io (input_channels, output_channels, false, this)) {
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -1769,25 +1763,23 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			track->set_control_outs (cports);
 		}
 
-		track->diskstream_changed.connect (mem_fun (this, &Session::resort_routes));
+		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 
 		add_route (track);
 
 		track->set_remote_control_id (ntracks());
+		return track;
 	}
 
 	catch (failed_constructor &err) {
 		error << _("Session: could not create new audio track.") << endmsg;
-		return 0;
+		return shared_ptr<AudioTrack> ((AudioTrack*) 0);
 	}
-
-	return track;
 }
 
-Route*
+shared_ptr<Route>
 Session::new_audio_route (int input_channels, int output_channels)
 {
-	Route *bus;
 	char bus_name[32];
 	uint32_t n = 0;
 	string port;
@@ -1795,9 +1787,10 @@ Session::new_audio_route (int input_channels, int output_channels)
 	/* count existing audio busses */
 
 	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (dynamic_cast<AudioTrack*>(*i) == 0) {
+		shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
 				if (!(*i)->hidden()) {
 					n++;
 				}
@@ -1815,7 +1808,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 	} while (n < (UINT_MAX-1));
 
 	try {
-		bus = new Route (*this, bus_name, -1, -1, -1, -1);
+		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
 
 		if (bus->ensure_io (input_channels, output_channels, false, this)) {
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -1864,23 +1857,23 @@ Session::new_audio_route (int input_channels, int output_channels)
 		}
 		
 		add_route (bus);
+		return bus;
 	}
 
 	catch (failed_constructor &err) {
-		error << _("Session: could not create new route.") << endmsg;
-		return 0;
+		error << _("Session: could not create new audio route.") << endmsg;
+		return shared_ptr<Route> ((Route*) 0);
 	}
-
-	return bus;
 }
 
 void
-Session::add_route (Route* route)
+Session::add_route (shared_ptr<Route> route)
 {
 	{ 
-		Glib::RWLock::WriterLock lm (route_lock);
-		routes.push_front (route);
-		resort_routes(0);
+		RCUWriter<RouteList> writer (routes);
+		shared_ptr<RouteList> r = writer.get_copy ();
+		r->push_front (route);
+		resort_routes_using (r);
 	}
 
 	route->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), route));
@@ -1903,14 +1896,14 @@ Session::add_route (Route* route)
 }
 
 void
-Session::add_diskstream (AudioDiskstream* dstream)
+Session::add_diskstream (Diskstream* dstream)
 {
 	/* need to do this in case we're rolling at the time, to prevent false underruns */
-	dstream->do_refill(0, 0, 0);
+	dstream->do_refill_with_alloc();
 	
 	{ 
 		Glib::RWLock::WriterLock lm (diskstream_lock);
-		audio_diskstreams.push_back (dstream);
+		diskstreams.push_back (dstream);
 	}
 
 	/* take a reference to the diskstream, preventing it from
@@ -1930,52 +1923,56 @@ Session::add_diskstream (AudioDiskstream* dstream)
 	set_dirty();
 	save_state (_current_snapshot_name);
 
-	AudioDiskstreamAdded (dstream); /* EMIT SIGNAL */
+	DiskstreamAdded (dstream); /* EMIT SIGNAL */
 }
 
 void
-Session::remove_route (Route& route)
+Session::remove_route (shared_ptr<Route> route)
 {
 	{ 	
-		Glib::RWLock::WriterLock lm (route_lock);
-		routes.remove (&route);
+		RCUWriter<RouteList> writer (routes);
+		shared_ptr<RouteList> rs = writer.get_copy ();
+		rs->remove (route);
 		
 		/* deleting the master out seems like a dumb
 		   idea, but its more of a UI policy issue
 		   than our concern.
 		*/
 
-		if (&route == _master_out) {
-			_master_out = 0;
+		if (route == _master_out) {
+			_master_out = shared_ptr<Route> ((Route*) 0);
 		}
 
-		if (&route == _control_out) {
-			_control_out = 0;
+		if (route == _control_out) {
+			_control_out = shared_ptr<Route> ((Route*) 0);
 
 			/* cancel control outs for all routes */
 
 			vector<string> empty;
 
-			for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
+			for (RouteList::iterator r = rs->begin(); r != rs->end(); ++r) {
 				(*r)->set_control_outs (empty);
 			}
 		}
 
 		update_route_solo_state ();
+		
+		/* writer goes out of scope, forces route list update */
 	}
 
+	// FIXME: audio specific
 	AudioTrack* at;
 	AudioDiskstream* ds = 0;
 	
-	if ((at = dynamic_cast<AudioTrack*>(&route)) != 0) {
-		ds = &at->disk_stream();
+	if ((at = dynamic_cast<AudioTrack*>(route.get())) != 0) {
+		ds = &at->audio_diskstream();
 	}
 	
 	if (ds) {
 
 		{
 			Glib::RWLock::WriterLock lm (diskstream_lock);
-			audio_diskstreams.remove (ds);
+			diskstreams.remove (ds);
 		}
 
 		ds->unref ();
@@ -1990,7 +1987,7 @@ Session::remove_route (Route& route)
 
 	save_state (_current_snapshot_name);
 
-	delete &route;
+	/* all shared ptrs to route should go out of scope here */
 }	
 
 void
@@ -2000,19 +1997,20 @@ Session::route_mute_changed (void* src)
 }
 
 void
-Session::route_solo_changed (void* src, Route* route)
+Session::route_solo_changed (void* src, shared_ptr<Route> route)
 {      
 	if (solo_update_disabled) {
 		// We know already
 		return;
 	}
 	
-	Glib::RWLock::ReaderLock lm (route_lock);
 	bool is_track;
 	
-	is_track = (dynamic_cast<AudioTrack*>(route) != 0);
+	is_track = (dynamic_cast<AudioTrack*>(route.get()) != 0);
 	
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		
 		/* soloing a track mutes all other tracks, soloing a bus mutes all other busses */
 		
@@ -2020,7 +2018,7 @@ Session::route_solo_changed (void* src, Route* route)
 			
 			/* don't mess with busses */
 			
-			if (dynamic_cast<AudioTrack*>(*i) == 0) {
+			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
 				continue;
 			}
 			
@@ -2028,7 +2026,7 @@ Session::route_solo_changed (void* src, Route* route)
 			
 			/* don't mess with tracks */
 			
-			if (dynamic_cast<AudioTrack*>(*i) != 0) {
+			if (dynamic_cast<AudioTrack*>((*i).get()) != 0) {
 				continue;
 			}
 		}
@@ -2061,10 +2059,10 @@ Session::route_solo_changed (void* src, Route* route)
 	bool same_thing_soloed = false;
 	bool signal = false;
 
-        for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			something_soloed = true;
-			if (dynamic_cast<AudioTrack*>(*i)) {
+			if (dynamic_cast<AudioTrack*>((*i).get())) {
 				if (is_track) {
 					same_thing_soloed = true;
 					break;
@@ -2115,11 +2113,13 @@ Session::update_route_solo_state ()
 	/* this is where we actually implement solo by changing
 	   the solo mute setting of each track.
 	*/
-		
-        for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	
+	shared_ptr<RouteList> r = routes.reader ();
+
+        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			mute = true;
-			if (dynamic_cast<AudioTrack*>(*i)) {
+			if (dynamic_cast<AudioTrack*>((*i).get())) {
 				is_track = true;
 			}
 			break;
@@ -2135,7 +2135,7 @@ Session::update_route_solo_state ()
 
 		/* nothing is soloed */
 
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->set_solo_mute (false);
 		}
 		
@@ -2156,13 +2156,15 @@ Session::update_route_solo_state ()
 void
 Session::modify_solo_mute (bool is_track, bool mute)
 {
-        for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	shared_ptr<RouteList> r = routes.reader ();
+
+        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		
 		if (is_track) {
 			
 			/* only alter track solo mute */
 			
-			if (dynamic_cast<AudioTrack*>(*i)) {
+			if (dynamic_cast<AudioTrack*>((*i).get())) {
 				if ((*i)->soloed()) {
 					(*i)->set_solo_mute (!mute);
 				} else {
@@ -2174,7 +2176,7 @@ Session::modify_solo_mute (bool is_track, bool mute)
 
 			/* only alter bus solo mute */
 
-			if (!dynamic_cast<AudioTrack*>(*i)) {
+			if (!dynamic_cast<AudioTrack*>((*i).get())) {
 
 				if ((*i)->soloed()) {
 
@@ -2206,36 +2208,35 @@ Session::catch_up_on_solo ()
 	   basis, but needs the global overview that only the session
 	   has.
 	*/
-        Glib::RWLock::ReaderLock lm (route_lock);
 	update_route_solo_state();
 }	
 		
-Route *
+shared_ptr<Route>
 Session::route_by_name (string name)
 {
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->name() == name) {
-			return* i;
+			return *i;
 		}
 	}
 
-	return 0;
+	return shared_ptr<Route> ((Route*) 0);
 }
 
-Route *
+shared_ptr<Route>
 Session::route_by_remote_id (uint32_t id)
 {
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->remote_control_id() == id) {
-			return* i;
+			return *i;
 		}
 	}
 
-	return 0;
+	return shared_ptr<Route> ((Route*) 0);
 }
 
 void
@@ -2264,7 +2265,7 @@ Session::get_maximum_extent () const
 	   ensure atomicity.
 	*/
 
-	for (AudioDiskstreamList::const_iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		Playlist* pl = (*i)->playlist();
 		if ((me = pl->get_maximum_extent()) > max) {
 			max = me;
@@ -2274,12 +2275,12 @@ Session::get_maximum_extent () const
 	return max;
 }
 
-AudioDiskstream *
+Diskstream *
 Session::diskstream_by_name (string name)
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
 		}
@@ -2288,12 +2289,12 @@ Session::diskstream_by_name (string name)
 	return 0;
 }
 
-AudioDiskstream *
-Session::diskstream_by_id (id_t id)
+Diskstream *
+Session::diskstream_by_id (const PBD::ID& id)
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->id() == id) {
 			return *i;
 		}
@@ -2337,7 +2338,7 @@ Session::new_region_name (string old)
 		sbuf = buf;
 
 		for (i = audio_regions.begin(); i != audio_regions.end(); ++i) {
-			if ((*i).second->name() == sbuf) {
+			if (i->second->name() == sbuf) {
 				break;
 			}
 		}
@@ -2402,7 +2403,7 @@ Session::region_name (string& result, string base, bool newlevel) const
 				name_taken = false;
 				
 				for (AudioRegionList::const_iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
-					if ((*i).second->name() == result) {
+					if (i->second->name() == result) {
 						name_taken = true;
 						break;
 					}
@@ -2447,8 +2448,8 @@ Session::add_region (Region* region)
 
 			if (x == audio_regions.end()) {
 
-				pair<AudioRegionList::key_type, AudioRegionList::mapped_type> entry;
-	
+				pair<AudioRegionList::key_type,AudioRegionList::mapped_type> entry;
+
 				entry.first = region->id();
 				entry.second = ar;
 
@@ -2505,16 +2506,18 @@ Session::remove_region (Region* region)
 	AudioRegionList::iterator i;
 	AudioRegion* ar = 0;
 	bool removed = false;
-
+	
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
-		if ((ar = dynamic_cast<AudioRegion*> (region)) != 0) {
+ 		if ((ar = dynamic_cast<AudioRegion*> (region)) != 0) {
 			if ((i = audio_regions.find (region->id())) != audio_regions.end()) {
 				audio_regions.erase (i);
 				removed = true;
-			} 
+			}
+
 		} else {
+
 			fatal << _("programming error: ") 
 			      << X_("unknown region type passed to Session::remove_region()")
 			      << endmsg;
@@ -2542,7 +2545,7 @@ Session::find_whole_file_parent (AudioRegion& child)
 
 	for (i = audio_regions.begin(); i != audio_regions.end(); ++i) {
 
-		region = (*i).second;
+		region = i->second;
 
 		if (region->whole_file()) {
 
@@ -2556,18 +2559,10 @@ Session::find_whole_file_parent (AudioRegion& child)
 }	
 
 void
-Session::find_equivalent_playlist_regions (AudioRegion& region, vector<AudioRegion*>& result)
+Session::find_equivalent_playlist_regions (Region& region, vector<Region*>& result)
 {
-	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-
-		AudioPlaylist* pl;
-
-		if ((pl = dynamic_cast<AudioPlaylist*>(*i)) == 0) {
-			continue;
-		}
-
-		pl->get_region_list_equivalent_regions (region, result);
-	}
+	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i)
+		(*i)->get_region_list_equivalent_regions (region, result);
 }
 
 int
@@ -2619,7 +2614,7 @@ Session::remove_last_capture ()
 
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		list<Region*>& l = (*i)->last_capture_regions();
 		
 		if (!l.empty()) {
@@ -2646,12 +2641,12 @@ Session::add_audio_source (AudioSource* source)
 {
 	pair<AudioSourceList::key_type, AudioSourceList::mapped_type> entry;
 
-	{
-		Glib::Mutex::Lock lm (audio_source_lock);
+ 	{
+ 		Glib::Mutex::Lock lm (audio_source_lock);
 		entry.first = source->id();
 		entry.second = source;
 		audio_sources.insert (entry);
-	}
+ 	}
 	
 	source->GoingAway.connect (mem_fun (this, &Session::remove_source));
 	set_dirty();
@@ -2669,7 +2664,7 @@ Session::remove_source (Source* source)
 
 		if ((i = audio_sources.find (source->id())) != audio_sources.end()) {
 			audio_sources.erase (i);
-		}
+		} 
 	}
 
 	if (!_state_of_the_state & InCleanup) {
@@ -2685,23 +2680,19 @@ Session::remove_source (Source* source)
 }
 
 Source *
-Session::get_source (ARDOUR::id_t id)
+Session::source_by_id (const PBD::ID& id)
 {
 	Glib::Mutex::Lock lm (audio_source_lock);
 	AudioSourceList::iterator i;
 	Source* source = 0;
 
 	if ((i = audio_sources.find (id)) != audio_sources.end()) {
-		source = (*i).second;
-	}
-
-	if (source) {
-		return source;
+		source = i->second;
 	}
 
 	/* XXX search MIDI or other searches here */
 	
-	return 0;
+	return source;
 }
 
 string
@@ -2776,12 +2767,13 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 		    the task here is to replace NAME with the new name.
 		*/
 		
-		/* find last slash */
-
 		string dir;
 		string suffix;
 		string::size_type slash;
 		string::size_type dash;
+		string::size_type postfix;
+
+		/* find last slash */
 
 		if ((slash = path.find_last_of ('/')) == string::npos) {
 			return "";
@@ -2795,11 +2787,41 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 			return "";
 		}
 
-		suffix = path.substr (dash);
+		suffix = path.substr (dash+1);
+		
+		// Suffix is now everything after the dash. Now we need to eliminate
+		// the nnnnn part, which is done by either finding a '%' or a '.'
 
-		path = dir;
-		path += new_legalized;
-		path += suffix;
+		postfix = suffix.find_last_of ("%");
+		if (postfix == string::npos) {
+			postfix = suffix.find_last_of ('.');
+		}
+
+		if (postfix != string::npos) {
+			suffix = suffix.substr (postfix);
+		} else {
+			error << "Logic error in Session::change_audio_path_by_name(), please report to the developers" << endl;
+			return "";
+		}
+
+		const uint32_t limit = 10000;
+		char buf[PATH_MAX+1];
+
+		for (uint32_t cnt = 1; cnt <= limit; ++cnt) {
+
+			snprintf (buf, sizeof(buf), "%s%s-%u%s", dir.c_str(), newname.c_str(), cnt, suffix.c_str());
+
+			if (access (buf, F_OK) != 0) {
+				path = buf;
+				break;
+			}
+			path = "";
+		}
+
+		if (path == "") {
+			error << "FATAL ERROR! Could not find a " << endl;
+		}
+
 	}
 
 	return path;
@@ -2822,20 +2844,20 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 	*/
 
 	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
-		
+
 		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
-		
+
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-			
+
 			spath = (*i).path;
-			
+
 			if (destructive) {
 				spath += tape_dir_name;
 			} else {
 				spath += sound_dir_name;
 			}
-			
+
 			if (destructive) {
 				if (nchan < 2) {
 					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
@@ -2851,10 +2873,10 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
 				}
 			} else {
-				
+
 				spath += '/';
 				spath += legalized;
-					
+
 				if (nchan < 2) {
 					snprintf (buf, sizeof(buf), "%s-%u.wav", spath.c_str(), cnt);
 				} else if (nchan == 2) {
@@ -2874,7 +2896,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 				existing++;
 			}
 		}
-			
+
 		if (existing == 0) {
 			break;
 		}
@@ -2929,18 +2951,6 @@ Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bo
 }
 
 /* Playlist management */
-
-Playlist *
-Session::get_playlist (string name)
-{
-	Playlist* ret = 0;
-
-	if ((ret = playlist_by_name (name)) == 0) {
-		ret = new AudioPlaylist (*this, name);
-	}
-
-	return ret;
-}
 
 Playlist *
 Session::playlist_by_name (string name)
@@ -3071,11 +3081,14 @@ Session::audition_playlist ()
 }
 
 void
-Session::audition_region (AudioRegion& r)
+Session::audition_region (Region& r)
 {
-	Event* ev = new Event (Event::Audition, Event::Add, Event::Immediate, 0, 0.0);
-	ev->set_ptr (&r);
-	queue_event (ev);
+	AudioRegion* ar = dynamic_cast<AudioRegion*>(&r);
+	if (ar) {
+		Event* ev = new Event (Event::Audition, Event::Add, Event::Immediate, 0, 0.0);
+		ev->set_ptr (ar);
+		queue_event (ev);
+	}
 }
 
 void
@@ -3088,7 +3101,7 @@ Session::cancel_audition ()
 }
 
 bool
-Session::RoutePublicOrderSorter::operator() (Route* a, Route* b)
+Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b)
 {
 	return a->order_key(N_("signal")) < b->order_key(N_("signal"));
 }
@@ -3134,13 +3147,11 @@ Session::is_auditioning () const
 void
 Session::set_all_solo (bool yn)
 {
-	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (!(*i)->hidden()) {
-				(*i)->set_solo (yn, this);
-			}
+	shared_ptr<RouteList> r = routes.reader ();
+	
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->set_solo (yn, this);
 		}
 	}
 
@@ -3150,13 +3161,11 @@ Session::set_all_solo (bool yn)
 void
 Session::set_all_mute (bool yn)
 {
-	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			if (!(*i)->hidden()) {
-				(*i)->set_mute (yn, this);
-			}
+	shared_ptr<RouteList> r = routes.reader ();
+	
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->set_mute (yn, this);
 		}
 	}
 
@@ -3164,28 +3173,17 @@ Session::set_all_mute (bool yn)
 }
 		
 uint32_t
-Session::n_audio_diskstreams () const
+Session::n_diskstreams () const
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	uint32_t n = 0;
 
-	for (AudioDiskstreamList::const_iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if (!(*i)->hidden()) {
 			n++;
 		}
 	}
 	return n;
-}
-
-void 
-Session::foreach_audio_diskstream (void (AudioDiskstream::*func)(void)) 
-{
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
-		if (!(*i)->hidden()) {
-			((*i)->*func)();
-		}
-	}
 }
 
 void
@@ -3199,16 +3197,15 @@ Session::graph_reordered ()
 		return;
 	}
 
-	Glib::RWLock::WriterLock lm1 (route_lock);
 	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
 
-	resort_routes (0);
+	resort_routes ();
 
 	/* force all diskstreams to update their capture offset values to 
 	   reflect any changes in latencies within the graph.
 	*/
 	
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->set_capture_offset ();
 	}
 }
@@ -3228,12 +3225,12 @@ Session::record_enable_all ()
 void
 Session::record_enable_change_all (bool yn)
 {
-	Glib::RWLock::ReaderLock lm1 (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 	
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		AudioTrack* at;
 
-		if ((at = dynamic_cast<AudioTrack*>(*i)) != 0) {
+		if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
 			at->set_record_enable (yn, this);
 		}
 	}
@@ -3491,7 +3488,7 @@ Session::reset_native_file_format ()
 	//RWLockMonitor lm1 (route_lock, true, __LINE__, __FILE__);
 	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
 
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->reset_write_sources (false);
 	}
 }
@@ -3499,9 +3496,9 @@ Session::reset_native_file_format ()
 bool
 Session::route_name_unique (string n) const
 {
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 	
-	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->name() == n) {
 			return false;
 		}
@@ -3558,23 +3555,16 @@ Session::allocate_pan_automation_buffers (jack_nframes_t nframes, uint32_t howma
 	_npan_buffers = howmany;
 }
 
-void 
-Session::add_instant_xml (XMLNode& node, const std::string& dir)
-{
-	Stateful::add_instant_xml (node, dir);
-	Config->add_instant_xml (node, get_user_ardour_path());
-}
-
 int
 Session::freeze (InterThreadInfo& itt)
 {
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		AudioTrack *at;
 
-		if ((at = dynamic_cast<AudioTrack*>(*i)) != 0) {
+		if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
 			/* XXX this is wrong because itt.progress will keep returning to zero at the start
 			   of every track.
 			*/
@@ -3609,7 +3599,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	
 	/* call tree *MUST* hold route_lock */
 	
-	if ((playlist = track.disk_stream().playlist()) == 0) {
+	if ((playlist = track.diskstream().playlist()) == 0) {
 		goto out;
 	}
 
@@ -3619,7 +3609,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		goto out;
 	}
 
-	nchans = track.disk_stream().n_channels();
+	nchans = track.audio_diskstream().n_channels();
 	
 	dir = discover_best_sound_dir ();
 
@@ -3763,10 +3753,10 @@ uint32_t
 Session::ntracks () const
 {
 	uint32_t n = 0;
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
-		if (dynamic_cast<AudioTrack*> (*i)) {
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+		if (dynamic_cast<AudioTrack*> ((*i).get())) {
 			++n;
 		}
 	}
@@ -3778,10 +3768,10 @@ uint32_t
 Session::nbusses () const
 {
 	uint32_t n = 0;
-	Glib::RWLock::ReaderLock lm (route_lock);
+	shared_ptr<RouteList> r = routes.reader ();
 
-	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
-		if (dynamic_cast<AudioTrack*> (*i) == 0) {
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+		if (dynamic_cast<AudioTrack*> ((*i).get()) == 0) {
 			++n;
 		}
 	}

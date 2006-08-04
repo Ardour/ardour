@@ -59,14 +59,10 @@ using namespace sigc;
 RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	: ArdourDialog ("track/bus inspector"),
 	  engine (eng),
-	  _route(0), 
 	  track_menu(0)
 {
 	pre_redirect_box = 0;
 	post_redirect_box = 0;
-	_route = 0;
-	_pre_redirect = 0;
-	_post_redirect = 0;
 	_input_iosel = 0;
 	_output_iosel = 0;
 	_active_pre_view = 0;
@@ -163,7 +159,7 @@ RouteParams_UI::~RouteParams_UI ()
 }
 
 void
-RouteParams_UI::add_route (Route* route)
+RouteParams_UI::add_route (boost::shared_ptr<Route> route)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::add_route), route));
 	
@@ -183,22 +179,22 @@ RouteParams_UI::add_route (Route* route)
 
 
 void
-RouteParams_UI::route_name_changed (void *src, Route *route)
+RouteParams_UI::route_name_changed (void *src, boost::shared_ptr<Route> route)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::route_name_changed), src, route));
 
 	bool found = false ;
 	TreeModel::Children rows = route_display_model->children();
 	for(TreeModel::Children::iterator iter = rows.begin(); iter != rows.end(); ++iter) {
-		if((*iter)[route_display_columns.route] == route) {
+		boost::shared_ptr<Route> r =(*iter)[route_display_columns.route];
+		if (r == route) {
 			(*iter)[route_display_columns.text] = route->name() ;
 			found = true ;
 			break;
 		}
 	}
 
-	if(!found)
-	{
+	if(!found) {
 		error << _("route display list item for renamed route not found!") << endmsg;
 	}
 
@@ -217,8 +213,8 @@ RouteParams_UI::setup_redirect_boxes()
 		cleanup_redirect_boxes();
 		
 		// construct new redirect boxes
-		pre_redirect_box = new RedirectBox(PreFader, *session, *_route, *_plugin_selector, _rr_selection);
-		post_redirect_box = new RedirectBox(PostFader, *session, *_route, *_plugin_selector, _rr_selection);
+		pre_redirect_box = new RedirectBox(PreFader, *session, _route, *_plugin_selector, _rr_selection);
+		post_redirect_box = new RedirectBox(PostFader, *session, _route, *_plugin_selector, _rr_selection);
 
 	        pre_redir_hpane.pack1 (*pre_redirect_box);
 		post_redir_hpane.pack1 (*post_redirect_box);
@@ -256,13 +252,13 @@ RouteParams_UI::setup_io_frames()
 	cleanup_io_frames();
 	
 	// input
-	_input_iosel = new IOSelector (*session, *_route, true);
+	_input_iosel = new IOSelector (*session, _route, true);
 	_input_iosel->redisplay ();
         input_frame.add (*_input_iosel);
 	input_frame.show_all();
 	
 	// output
-	_output_iosel = new IOSelector (*session, *_route, false);
+	_output_iosel = new IOSelector (*session, _route, false);
 	_output_iosel->redisplay ();
         output_frame.add (*_output_iosel);
 	output_frame.show_all();
@@ -322,36 +318,31 @@ RouteParams_UI::cleanup_post_view (bool stopupdate)
 
 
 void
-RouteParams_UI::route_removed (Route *route)
+RouteParams_UI::route_removed (boost::shared_ptr<Route> route)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::route_removed), route));
-	/*
-	route_select_list.freeze ();
-	route_select_list.clear ();
-	session->foreach_route (this, &RouteParams_UI::add_route);
-	route_select_list.thaw ();
-	*/
 
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
 
 	for(TreeModel::Children::iterator iter = rows.begin(); iter != rows.end(); ++iter) {
-		if((*iter)[route_display_columns.route] == route) {
+		boost::shared_ptr<Route> r =(*iter)[route_display_columns.route];
+
+		if (r == route) {
 			route_display_model->erase(iter);
 			break;
 		}
 	}
 
-	if (route == _route)
-	{
+	if (route == _route) {
 		cleanup_io_frames();
 		cleanup_pre_view();
 		cleanup_post_view();
 		cleanup_redirect_boxes();
 		
-		_route = 0;
-		_pre_redirect = 0;
-		_post_redirect = 0;
+		_route.reset ((Route*) 0);
+		_pre_redirect.reset ((Redirect*) 0);
+		_post_redirect.reset ((Redirect*) 0);
 		update_title();
 	}
 }
@@ -390,9 +381,9 @@ RouteParams_UI::session_gone ()
 	cleanup_post_view();
 	cleanup_redirect_boxes();
 
-	_route = 0;
-	_pre_redirect = 0;
-	_post_redirect = 0;
+	_route.reset ((Route*) 0);
+	_pre_redirect.reset ((Redirect*) 0);
+	_post_redirect.reset ((Redirect*) 0);
 	update_title();
 
 	ArdourDialog::session_gone();
@@ -406,7 +397,7 @@ RouteParams_UI::route_selected()
 	TreeModel::iterator iter = selection->get_selected(); // only used with Gtk::SELECTION_SINGLE
 	if(iter) {
 		//If anything is selected
-		Route* route = (*iter)[route_display_columns.route] ;
+		boost::shared_ptr<Route> route = (*iter)[route_display_columns.route] ;
 
 		if (_route == route) {
 			// do nothing
@@ -447,9 +438,9 @@ RouteParams_UI::route_selected()
 			cleanup_post_view();
 			cleanup_redirect_boxes();
 
-			_route = 0;
-			_pre_redirect = 0;
-			_post_redirect = 0;
+			_route.reset ((Route*) 0);
+			_pre_redirect.reset ((Redirect*) 0);
+			_post_redirect.reset ((Redirect *) 0);
 			track_input_label.set_text(_("NO TRACK"));
 			update_title();
 		}
@@ -468,7 +459,7 @@ RouteParams_UI::route_selected()
 //		cleanup_post_view();
 //		cleanup_redirect_boxes();
 		
-//		_route = 0;
+//		_route.reset ((Route*)0);
 //		_pre_redirect = 0;
 //		_post_redirect = 0;
 //		track_input_label.set_text(_("NO TRACK"));
@@ -495,8 +486,8 @@ RouteParams_UI::redirects_changed (void *src)
 	cleanup_pre_view();
 	cleanup_post_view();
 	
-	_pre_redirect = 0;
-	_post_redirect = 0;
+	_pre_redirect.reset ((Redirect*) 0);
+	_post_redirect.reset ((Redirect*) 0);
 	//update_title();
 }
 
@@ -520,24 +511,24 @@ RouteParams_UI::show_track_menu()
 
 
 void
-RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement place)
+RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Redirect> redirect, ARDOUR::Placement place)
 {
-	Insert *insert;
+	boost::shared_ptr<Insert> insert;
 
 	if ((place == PreFader && _pre_redirect == redirect)
 	    || (place == PostFader && _post_redirect == redirect)){
 		return;
 	}
 	
-	if ((insert = dynamic_cast<Insert *> (redirect)) == 0) {
+	if ((insert = boost::dynamic_pointer_cast<Insert> (redirect)) == 0) {
 
-		Send *send;
-
-		if ((send = dynamic_cast<Send *> (redirect)) != 0) {
+		boost::shared_ptr<Send> send;
+		
+		if ((send = boost::dynamic_pointer_cast<Send> (redirect)) != 0) {
 
 			/* its a send */
 
-			SendUI *send_ui = new SendUI (*send, *session);
+			SendUI *send_ui = new SendUI (send, *session);
 
 			if (place == PreFader) {
 				cleanup_pre_view();
@@ -560,16 +551,16 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 	} else {
 		/* its an insert, though we don't know what kind yet. */
 
-		PluginInsert *plugin_insert;
-		PortInsert *port_insert;
+		boost::shared_ptr<PluginInsert> plugin_insert;
+		boost::shared_ptr<PortInsert> port_insert;
 				
-		if ((plugin_insert = dynamic_cast<PluginInsert *> (insert)) != 0) {				
+		if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {				
 
-			PluginUI *plugin_ui = new PluginUI (session->engine(), *plugin_insert, true);
+			PluginUI *plugin_ui = new PluginUI (session->engine(), plugin_insert, true);
 
 			if (place == PreFader) {
 				cleanup_pre_view();
-				_pre_plugin_conn = plugin_insert->plugin().GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PreFader));
+				_pre_plugin_conn = plugin_insert->plugin()->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PreFader));
 				plugin_ui->start_updating (0);
 				_active_pre_view = plugin_ui;
 				pre_redir_hpane.pack2 (*_active_pre_view);
@@ -577,16 +568,16 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 			}
 			else {
 				cleanup_post_view();
-				_post_plugin_conn = plugin_insert->plugin().GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PostFader));
+				_post_plugin_conn = plugin_insert->plugin()->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PostFader));
 				plugin_ui->start_updating (0);
 				_active_post_view = plugin_ui;
 				post_redir_hpane.pack2 (*_active_post_view);
 				post_redir_hpane.show_all();
 			}
 
-		} else if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
+		} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
 
-			PortInsertUI *portinsert_ui = new PortInsertUI (*session, *port_insert);
+			PortInsertUI *portinsert_ui = new PortInsertUI (*session, port_insert);
 					
 			if (place == PreFader) {
 				cleanup_pre_view();
@@ -610,31 +601,13 @@ RouteParams_UI::redirect_selected (ARDOUR::Redirect *redirect, ARDOUR::Placement
 
 	if (place == PreFader) {
 		_pre_redirect = redirect;
-	}
-	else {
+	} else {
 		_post_redirect = redirect;
 	}
 	
 	update_title();
 		
 }
-
-void
-RouteParams_UI::redirect_unselected (ARDOUR::Redirect *redirect)
-{
-	// not called anymore
-	
-	if (redirect == _pre_redirect) {
-		cleanup_pre_view();
-		_pre_redirect = 0;
-	}
-	else if (redirect == _post_redirect) {
-		cleanup_post_view();
-		_post_redirect = 0;
-	}
-}
-
-
 
 void
 RouteParams_UI::plugin_going_away (Plugin *plugin, Placement place)
@@ -645,11 +618,11 @@ RouteParams_UI::plugin_going_away (Plugin *plugin, Placement place)
 
 	if (place == PreFader) {
 		cleanup_pre_view (false);
-		_pre_redirect = 0;
+		_pre_redirect.reset ((Redirect*) 0);
 	}
 	else {
 		cleanup_post_view (false);
-		_post_redirect = 0;
+		_post_redirect.reset ((Redirect*) 0);
 	}
 }
 
@@ -661,13 +634,13 @@ RouteParams_UI::redirect_going_away (ARDOUR::Redirect *plugin)
 	
 	printf ("redirect going away\n");
 	// delete the current view without calling finish
-	if (plugin == _pre_redirect) {
+	if (plugin == _pre_redirect.get()) {
 		cleanup_pre_view (false);
-		_pre_redirect = 0;
+		_pre_redirect.reset ((Redirect*) 0);
 	}
-	else if (plugin == _post_redirect) {
+	else if (plugin == _post_redirect.get()) {
 		cleanup_post_view (false);
-		_post_redirect = 0;
+		_post_redirect.reset ((Redirect*) 0);
 	}
 }
 

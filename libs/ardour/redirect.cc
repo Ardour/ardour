@@ -60,25 +60,25 @@ Redirect::~Redirect ()
 {
 }
 
-Redirect*
-Redirect::clone (const Redirect& other)
+boost::shared_ptr<Redirect>
+Redirect::clone (boost::shared_ptr<const Redirect> other)
 {
-	const Send *send;
-	const PortInsert *port_insert;
-	const PluginInsert *plugin_insert;
+	boost::shared_ptr<const Send> send;
+	boost::shared_ptr<const PortInsert> port_insert;
+	boost::shared_ptr<const PluginInsert> plugin_insert;
 
-	if ((send = dynamic_cast<const Send*>(&other)) != 0) {
-		return new Send (*send);
-	} else if ((port_insert = dynamic_cast<const PortInsert*>(&other)) != 0) {
-		return new PortInsert (*port_insert);
-	} else if ((plugin_insert = dynamic_cast<const PluginInsert*>(&other)) != 0) {
-		return new PluginInsert (*plugin_insert);
+	if ((send = boost::dynamic_pointer_cast<const Send>(other)) != 0) {
+		return boost::shared_ptr<Redirect> (new Send (*send));
+	} else if ((port_insert = boost::dynamic_pointer_cast<const PortInsert>(other)) != 0) {
+		return boost::shared_ptr<Redirect> (new PortInsert (*port_insert));
+	} else if ((plugin_insert = boost::dynamic_pointer_cast<const PluginInsert>(other)) != 0) {
+		return boost::shared_ptr<Redirect> (new PluginInsert (*plugin_insert));
 	} else {
 		fatal << _("programming error: unknown Redirect type in Redirect::Clone!\n")
 		      << endmsg;
 		/*NOTREACHED*/
 	}
-	return 0;
+	return boost::shared_ptr<Redirect>();
 }
 
 void
@@ -231,9 +231,9 @@ Redirect::state (bool full_state)
 		string path;
 		string legal_name;
 		
-		snprintf (buf, sizeof(buf), "%" PRIu64, id());
 		path = _session.snap_name();
 		path += "-redirect-";
+		id().print (buf);
 		path += buf;
 		path += ".automation";
 		

@@ -45,7 +45,6 @@ using namespace ARDOUR;
 Source::Source (string name)
 {
 	_name = name;
-	_id = ARDOUR::new_id();
 	_use_cnt = 0;
 	_timestamp = 0;
 }
@@ -71,7 +70,7 @@ Source::get_state ()
 	char buf[64];
 
 	node->add_property ("name", _name);
-	snprintf (buf, sizeof(buf)-1, "%" PRIu64, _id);
+	_id.print (buf);
 	node->add_property ("id", buf);
 
 	if (_timestamp != 0) {
@@ -94,7 +93,7 @@ Source::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("id")) != 0) {
-		sscanf (prop->value().c_str(), "%" PRIu64, &_id);
+		_id = prop->value ();
 	} else {
 		return -1;
 	}

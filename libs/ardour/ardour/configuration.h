@@ -27,8 +27,9 @@
 #include <sys/types.h>
 #include <string>
 
+#include <pbd/stateful.h> 
+
 #include <ardour/types.h>
-#include <ardour/stateful.h>
 #include <ardour/utils.h>
 #include <ardour/configuration_variable.h>
 
@@ -98,6 +99,6 @@ class Configuration : public Stateful
 extern Configuration *Config;
 extern gain_t speed_quietning; /* see comment in configuration.cc */
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_configuration_h__ */

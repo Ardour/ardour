@@ -23,7 +23,7 @@
 #include <pbd/memento_command.h>
 
 #include "editor.h"
-#include "regionview.h"
+#include "region_view.h"
 #include "selection.h"
 
 #include "i18n.h"
@@ -82,10 +82,10 @@ Editor::kbd_do_split (GdkEvent* ev)
 	jack_nframes_t where = event_frame (ev);
 
 	if (entered_regionview) {
-		if (selection->audio_regions.find (entered_regionview) != selection->audio_regions.end()) {
-			split_regions_at (where, selection->audio_regions);
+		if (selection->regions.find (entered_regionview) != selection->regions.end()) {
+			split_regions_at (where, selection->regions);
 		} else {
-			AudioRegionSelection s;
+			RegionSelection s;
 			s.add (entered_regionview);
 			split_regions_at (where, s);
 		}
@@ -103,11 +103,11 @@ Editor::kbd_mute_unmute_region ()
 {
 	if (entered_regionview) {
 		begin_reversible_command (_("mute region"));
-		XMLNode &before = entered_regionview->region.playlist()->get_state();
+		XMLNode &before = entered_regionview->region().playlist()->get_state();
 		
-	    entered_regionview->region.set_muted (!entered_regionview->region.muted());
+	    entered_regionview->region().set_muted (!entered_regionview->region().muted());
 		
-		XMLNode &after = entered_regionview->region.playlist()->get_state();
+		XMLNode &after = entered_regionview->region().playlist()->get_state();
 		session->add_command (new MementoCommand<ARDOUR::Playlist>(*(entered_regionview->region.playlist()), before, after));
 		commit_reversible_command();
 	}
@@ -126,7 +126,7 @@ Editor::kbd_do_set_sync_position (GdkEvent* ev)
 	snap_to (where);
 
 	if (entered_regionview) {
-	  set_a_regions_sync_position (entered_regionview->region, where);
+	  set_a_regions_sync_position (entered_regionview->region(), where);
 	}
 }
 

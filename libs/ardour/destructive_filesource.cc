@@ -70,21 +70,33 @@ jack_nframes_t DestructiveFileSource::xfade_frames = 64;
 DestructiveFileSource::DestructiveFileSource (string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate, Flag flags)
 	: SndFileSource (path, samp_format, hdr_format, rate, flags)
 {
-	xfade_buf = new Sample[xfade_frames];
+	init ();
+}
 
-	_capture_start = false;
-	_capture_end = false;
-	file_pos = 0;
+
+DestructiveFileSource::DestructiveFileSource (string path, Flag flags)
+	: SndFileSource (path, flags)
+{
+	init ();
 }
 
 DestructiveFileSource::DestructiveFileSource (const XMLNode& node)
 	: SndFileSource (node)
+{
+	init ();
+}
+
+void
+DestructiveFileSource::init ()
 {
 	xfade_buf = new Sample[xfade_frames];
 
 	_capture_start = false;
 	_capture_end = false;
 	file_pos = 0;
+
+	timeline_position = header_position_offset;
+	AudioFileSource::HeaderPositionOffsetChanged.connect (mem_fun (*this, &DestructiveFileSource::handle_header_position_change));
 }
 
 DestructiveFileSource::~DestructiveFileSource()
@@ -124,8 +136,12 @@ DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
 void
 DestructiveFileSource::mark_capture_start (jack_nframes_t pos)
 {
-	_capture_start = true;
-	capture_start_frame = pos;
+	if (pos < timeline_position) {
+		_capture_start = false;
+	} else {
+		_capture_start = true;
+		capture_start_frame = pos;
+	}
 }
 
 void
@@ -265,6 +281,11 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 	}
 
 	if (_capture_start && _capture_end) {
+
+		/* start and end of capture both occur within the data we are writing,
+		   so do both crossfades.
+		*/
+
 		_capture_start = false;
 		_capture_end = false;
 		
@@ -290,8 +311,12 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 		}
 		
 		file_pos = ofilepos; // adjusted below
-	}
-	else if (_capture_start) {
+
+	} else if (_capture_start) {
+
+		/* start of capture both occur within the data we are writing,
+		   so do the fade in
+		*/
 
 		_capture_start = false;
 		_capture_end = false;
@@ -305,6 +330,10 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 		
 	} else if (_capture_end) {
 
+		/* end of capture both occur within the data we are writing,
+		   so do the fade out
+		*/
+
 		_capture_start = false;
 		_capture_end = false;
 		
@@ -314,6 +343,8 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 
 	} else {
 
+		/* in the middle of recording */
+		
 		if (write_float (data, file_pos, cnt) != cnt) {
 			return 0;
 		}
@@ -366,8 +397,19 @@ DestructiveFileSource::get_state ()
 }
 
 void
+DestructiveFileSource::handle_header_position_change ()
+{
+	if ( _length != 0 ) {
+		error << string_compose(_("Filesource: start time is already set for existing file (%1): Cannot change start time."), _path ) << endmsg;
+		//in the future, pop up a dialog here that allows user to regenerate file with new start offset
+	} else if (writable()) {
+		timeline_position = header_position_offset;
+		set_header_timeline_position ();  //this will get flushed if/when the file is recorded to
+	}
+}
+
+void
 DestructiveFileSource::set_timeline_position (jack_nframes_t pos)
 {
-	/* destructive tracks always start at where our reference frame zero is */
-	timeline_position = 0;
+	//destructive track timeline postion does not change except at instantion or when header_position_offset (session start) changes
 }

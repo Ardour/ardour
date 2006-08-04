@@ -76,7 +76,7 @@ class Curve : public AutomationList
 
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 extern "C" {
 	void curve_get_vector_from_c (void *arg, double, double, float*, int32_t);

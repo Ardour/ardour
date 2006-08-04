@@ -27,9 +27,11 @@ ardour.Append(POTFILE = domain + '.pot')
 ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
 
 ardour_files=Split("""
+diskstream.cc
 audio_diskstream.cc
 audio_library.cc
 audio_playlist.cc
+track.cc
 audio_track.cc
 audioengine.cc
 audiofilesource.cc
@@ -88,7 +90,6 @@ sndfile_helpers.cc
 sndfilesource.cc
 source.cc
 state_manager.cc
-stateful.cc
 tempo.cc
 utils.cc
 version.cc
@@ -99,7 +100,7 @@ arch_specific_objects = [ ]
 
 osc_files = [ 'osc.cc' ]
 vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
-coreaudio_files = [ 'coreaudiosource.cc' ]
+coreaudio_files = [ 'audio_unit.cc', 'coreaudiosource.cc' ]
 extra_sources = [ ]
 
 if ardour['VST']:
@@ -199,7 +200,7 @@ ardour.Merge ([
 	     libraries['lrdf'],
 	     libraries['samplerate'],
 	     libraries['sigc2'],
-	     libraries['pbd3'],
+	     libraries['pbd'],
 	     libraries['soundtouch'],
 	     libraries['midi++2'],
 	     libraries['glib2'],
@@ -208,6 +209,9 @@ ardour.Merge ([
 
 if ardour['LIBLO']:
     ardour.Merge ([ libraries['lo'] ])
+
+if ardour['COREAUDIO']:
+    ardour.Merge ([ libraries['appleutility'] ])
 
 ardour.VersionBuild(['version.cc', 'ardour/version.h'], 'SConscript')
 

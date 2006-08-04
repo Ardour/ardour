@@ -1211,7 +1211,7 @@ AutomationList::store_state (XMLNode& node) const
 		
 		snprintf (buf, sizeof (buf), "%" PRIu32, (jack_nframes_t) floor ((*i)->when));
 		pointnode->add_property ("x", buf);
-		snprintf (buf, sizeof (buf), "%f", (*i)->value);
+		snprintf (buf, sizeof (buf), "%.12g", (*i)->value);
 		pointnode->add_property ("y", buf);
 
 		node.add_child_nocopy (*pointnode);

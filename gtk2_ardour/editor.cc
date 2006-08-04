@@ -57,10 +57,10 @@
 #include "keyboard.h"
 #include "marker.h"
 #include "playlist_selector.h"
-#include "regionview.h"
+#include "audio_region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
-#include "streamview.h"
+#include "audio_streamview.h"
 #include "time_axis_view.h"
 #include "utils.h"
 #include "crossfade_view.h"
@@ -102,8 +102,8 @@ static const int32_t slide_index = 0;
 static const int32_t splice_index = 1;
 
 static const gchar *edit_mode_strings[] = {
-	N_("Slide"),
-	N_("Splice"),
+	N_("Slide Edit"),
+	N_("Splice Edit"),
 	0
 };
 
@@ -132,17 +132,17 @@ static const gchar *snap_type_strings[] = {
 };
 
 static const gchar *snap_mode_strings[] = {
-	N_("Normal"),
-	N_("Magnetic"),
+	N_("Normal Snap"),
+	N_("Magnetic Snap"),
 	0
 };
 
 static const gchar *zoom_focus_strings[] = {
-	N_("Left"),
-	N_("Right"),
-	N_("Center"),
-	N_("Playhead"),
-	N_("Edit Cursor"),
+	N_("Focus Left"),
+	N_("Focus Right"),
+	N_("Focus Center"),
+	N_("Focus Play"),
+	N_("Focus Edit"),
 	0
 };
 
@@ -205,29 +205,13 @@ Editor::Editor (AudioEngine& eng)
 
 	  /* tool bar related */
 
-	  selection_start_clock (X_("SelectionStartClock"), true),
-	  selection_end_clock (X_("SelectionEndClock"), true),
 	  edit_cursor_clock (X_("EditCursorClock"), true),
 	  zoom_range_clock (X_("ZoomRangeClock"), true, true),
 	  
 	  toolbar_selection_clock_table (2,3),
 	  
-	  mouse_mode_button_table (2, 3),
-
-	  mouse_select_button (_("range")),
-	  mouse_move_button (_("object")),
-	  mouse_gain_button (_("gain")),
-	  mouse_zoom_button (_("zoom")),
-	  mouse_timefx_button (_("timefx")),
-	  mouse_audition_button (_("listen")),
-
 	  automation_mode_button (_("mode")),
 	  global_automation_button (_("automation")),
-
-	  edit_mode_label (_("Edit Mode")),
-	  snap_type_label (_("Snap To")),
-	  snap_mode_label(_("Snap Mode")),
-	  zoom_focus_label (_("Zoom Focus")),
 
 	  /* <CMT Additions> */
 	  image_socket_listener(0),
@@ -235,7 +219,6 @@ Editor::Editor (AudioEngine& eng)
 
 	  /* nudge */
 
-	  nudge_label (_("Nudge")),
 	  nudge_clock (X_("NudgeClock"), true, true)
 
 {
@@ -346,6 +329,7 @@ Editor::Editor (AudioEngine& eng)
 	reset_hscrollbar_stepping ();
 	
 	zoom_focus = ZoomFocusLeft;
+	set_zoom_focus (ZoomFocusLeft);
  	zoom_range_clock.ValueChanged.connect (mem_fun(*this, &Editor::zoom_adjustment_changed));
 
 	initialize_rulers ();
@@ -466,36 +450,7 @@ Editor::Editor (AudioEngine& eng)
 
 	edit_packer.attach (edit_hscrollbar,         2, 3, 2, 3,    FILL|EXPAND,  FILL, 0, 0);
 
-	zoom_in_button.set_name ("EditorTimeButton");
-	zoom_out_button.set_name ("EditorTimeButton");
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom in"));
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom out"));
-
-	zoom_out_full_button.set_name ("EditorTimeButton");
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to session"));
-
-	zoom_in_button.add (*(manage (new Image (Stock::ZOOM_IN, ICON_SIZE_BUTTON))));
-	zoom_out_button.add (*(manage (new Image (Stock::ZOOM_OUT, ICON_SIZE_BUTTON))));
-	zoom_out_full_button.add (*(manage (new Image (Stock::ZOOM_FIT, ICON_SIZE_BUTTON))));
-	
-	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
-	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
-	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
-	
-	zoom_indicator_box.pack_start (zoom_out_button, false, false);
-	zoom_indicator_box.pack_start (zoom_in_button, false, false);
- 	zoom_indicator_box.pack_start (zoom_range_clock, false, false);	
-	zoom_indicator_box.pack_start (zoom_out_full_button, false, false);
-	
-	zoom_indicator_label.set_text (_("Zoom Span"));
-	zoom_indicator_label.set_name ("ToolBarLabel");
-
-	zoom_indicator_vbox.set_spacing (3);
-	zoom_indicator_vbox.set_border_width (3);
-	zoom_indicator_vbox.pack_start (zoom_indicator_label, false, false);
-	zoom_indicator_vbox.pack_start (zoom_indicator_box, false, false);
-
-	bottom_hbox.set_border_width (3);
+	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
 
 	route_display_model = ListStore::create(route_display_columns);
@@ -718,15 +673,15 @@ Editor::Editor (AudioEngine& eng)
 	_playlist_selector = new PlaylistSelector();
 	_playlist_selector->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
 
-	AudioRegionView::AudioRegionViewGoingAway.connect (mem_fun(*this, &Editor::catch_vanishing_audio_regionview));
+	RegionView::RegionViewGoingAway.connect (mem_fun(*this, &Editor::catch_vanishing_regionview));
 
 	/* nudge stuff */
 
 	nudge_forward_button.add (*(manage (new Image (get_xpm("right_arrow.xpm")))));
 	nudge_backward_button.add (*(manage (new Image (get_xpm("left_arrow.xpm")))));
 
-	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge region/selection forwards"));
-	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge region/selection backwards"));
+	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge Region/Selection Forwards"));
+	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge Region/Selection Backwards"));
 
 	nudge_forward_button.set_name ("TransportButton");
 	nudge_backward_button.set_name ("TransportButton");
@@ -776,7 +731,7 @@ Editor::add_toplevel_controls (Container& cont)
 }
 
 void
-Editor::catch_vanishing_audio_regionview (AudioRegionView *rv)
+Editor::catch_vanishing_regionview (RegionView *rv)
 {
 	/* note: the selection will take care of the vanishing
 	   audioregionview by itself.
@@ -792,7 +747,7 @@ Editor::catch_vanishing_audio_regionview (AudioRegionView *rv)
 }
 
 void
-Editor::set_entered_regionview (AudioRegionView* rv)
+Editor::set_entered_regionview (RegionView* rv)
 {
 	if (rv == entered_regionview) {
 		return;
@@ -914,7 +869,7 @@ Editor::set_frames_per_unit (double fpu)
 void
 Editor::instant_save ()
 {
-        if (!constructed || !ARDOUR_UI::instance()->session_loaded) {
+	if (!constructed || !ARDOUR_UI::instance()->session_loaded) {
 		return;
 	}
 
@@ -1222,7 +1177,7 @@ Editor::connect_to_session (Session *t)
 
 	session_connections.push_back (session->TransportStateChange.connect (mem_fun(*this, &Editor::map_transport_state)));
 	session_connections.push_back (session->PositionChanged.connect (mem_fun(*this, &Editor::map_position_change)));
-	session_connections.push_back (session->RouteAdded.connect (mem_fun(*this, &Editor::handle_new_route_p)));
+	session_connections.push_back (session->RouteAdded.connect (mem_fun(*this, &Editor::handle_new_route)));
 	session_connections.push_back (session->AudioRegionAdded.connect (mem_fun(*this, &Editor::handle_new_audio_region)));
 	session_connections.push_back (session->AudioRegionRemoved.connect (mem_fun(*this, &Editor::handle_audio_region_removed)));
 	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::handle_new_duration)));
@@ -1243,8 +1198,6 @@ Editor::connect_to_session (Session *t)
 	edit_groups_changed ();
 
 	edit_cursor_clock.set_session (session);
-	selection_start_clock.set_session (session);
-	selection_end_clock.set_session (session);
 	zoom_range_clock.set_session (session);
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
@@ -1377,7 +1330,7 @@ Editor::connect_to_session (Session *t)
 			AudioTimeAxisView *atv;
 			
 			if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
-				if (atv->route().master()) {
+				if (atv->route()->master()) {
 					route_list_display.get_selection()->unselect (i);
 				}
 			}
@@ -1448,7 +1401,7 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 	switch (item_type) {
 	case FadeInItem:
 	case FadeInHandleItem:
-		if (arv->region.fade_in_active()) {
+		if (arv->audio_region().fade_in_active()) {
 			items.push_back (MenuElem (_("Deactivate"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_active), false)));
 		} else {
 			items.push_back (MenuElem (_("Activate"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_active), true)));
@@ -1456,16 +1409,16 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		
 		items.push_back (SeparatorElem());
 		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (arv->region, &AudioRegion::set_fade_in_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (arv->region, &AudioRegion::set_fade_in_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (arv->region, &AudioRegion::set_fade_in_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (arv->region, &AudioRegion::set_fade_in_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (arv->region, &AudioRegion::set_fade_in_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Linear"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_in_shape), AudioRegion::Linear)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_in_shape), AudioRegion::LogB)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_in_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Fast"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_in_shape), AudioRegion::LogA)));
+		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_in_shape), AudioRegion::Slow)));
 		break;
 
 	case FadeOutItem:
 	case FadeOutHandleItem:
-		if (arv->region.fade_out_active()) {
+		if (arv->audio_region().fade_out_active()) {
 			items.push_back (MenuElem (_("Deactivate"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_active), false)));
 		} else {
 			items.push_back (MenuElem (_("Activate"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_active), true)));
@@ -1473,11 +1426,11 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		
 		items.push_back (SeparatorElem());
 		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (arv->region, &AudioRegion::set_fade_out_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (arv->region, &AudioRegion::set_fade_out_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (arv->region, &AudioRegion::set_fade_out_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (arv->region, &AudioRegion::set_fade_out_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (arv->region, &AudioRegion::set_fade_out_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Linear"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_out_shape), AudioRegion::Linear)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_out_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_out_shape), AudioRegion::LogB)));
+		items.push_back (MenuElem (_("Fast"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_out_shape), AudioRegion::LogA)));
+		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (arv->audio_region(), &AudioRegion::set_fade_out_shape), AudioRegion::Slow)));
 
 		break;
 	default:
@@ -1499,8 +1452,8 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 
 	switch (item_type) {
 	case RegionItem:
-	case AudioRegionViewName:
-	case AudioRegionViewNameHighlight:
+	case RegionViewName:
+	case RegionViewNameHighlight:
 		if (with_selection) {
 			build_menu_function = &Editor::build_track_selection_context_menu;
 		} else {
@@ -1540,25 +1493,26 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 
 	switch (item_type) {
 	case RegionItem:
-	case AudioRegionViewName:
-	case AudioRegionViewNameHighlight:
+	case RegionViewName:
+	case RegionViewNameHighlight:
 		if (!with_selection) {
 			if (region_edit_menu_split_item) {
-				if (clicked_regionview && clicked_regionview->region.covers (edit_cursor->current_frame)) {
+				if (clicked_regionview && clicked_regionview->region().covers (edit_cursor->current_frame)) {
 					ActionManager::set_sensitive (ActionManager::edit_cursor_in_region_sensitive_actions, true);
 				} else {
 					ActionManager::set_sensitive (ActionManager::edit_cursor_in_region_sensitive_actions, false);
 				}
 			}
+			/*
 			if (region_edit_menu_split_multichannel_item) {
-				if (clicked_regionview && clicked_regionview->region.n_channels() > 1) {
+				if (clicked_regionview && clicked_regionview->region().n_channels() > 1) {
 					// GTK2FIX find the action, change its sensitivity
 					// region_edit_menu_split_multichannel_item->set_sensitive (true);
 				} else {
 					// GTK2FIX see above
 					// region_edit_menu_split_multichannel_item->set_sensitive (false);
 				}
-			}
+			}*/
 		}
 		break;
 
@@ -1638,13 +1592,13 @@ Editor::build_track_region_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
 
 	if (atv) {
-		AudioDiskstream* ds;
+		Diskstream* ds;
 		Playlist* pl;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
 			Playlist::RegionList* regions = pl->regions_at ((jack_nframes_t) floor ( (double)frame * ds->speed()));
 			for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
-				add_region_context_items (atv->view, (*i), edit_items);
+				add_region_context_items (atv->audio_view(), (*i), edit_items);
 			}
 			delete regions;
 		}
@@ -1665,7 +1619,7 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
 
 	if (atv) {
-		AudioDiskstream* ds;
+		Diskstream* ds;
 		Playlist* pl;
 		AudioPlaylist* apl;
 
@@ -1679,11 +1633,11 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 			bool many = xfades.size() > 1;
 
 			for (AudioPlaylist::Crossfades::iterator i = xfades.begin(); i != xfades.end(); ++i) {
-				add_crossfade_context_items (atv->view, (*i), edit_items, many);
+				add_crossfade_context_items (atv->audio_view(), (*i), edit_items, many);
 			}
 
 			for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
-				add_region_context_items (atv->view, (*i), edit_items);
+				add_region_context_items (atv->audio_view(), (*i), edit_items);
 			}
 
 			delete regions;
@@ -1749,7 +1703,7 @@ Editor::build_track_selection_context_menu (jack_nframes_t ignored)
 }
 
 void
-Editor::add_crossfade_context_items (StreamView* view, Crossfade* xfade, Menu_Helpers::MenuList& edit_items, bool many)
+Editor::add_crossfade_context_items (AudioStreamView* view, Crossfade* xfade, Menu_Helpers::MenuList& edit_items, bool many)
 {
 	using namespace Menu_Helpers;
 	Menu     *xfade_menu = manage (new Menu);
@@ -1806,7 +1760,7 @@ Editor::xfade_edit_right_region ()
 }
 
 void
-Editor::add_region_context_items (StreamView* sv, Region* region, Menu_Helpers::MenuList& edit_items)
+Editor::add_region_context_items (AudioStreamView* sv, Region* region, Menu_Helpers::MenuList& edit_items)
 {
 	using namespace Menu_Helpers;
 	Menu     *region_menu = manage (new Menu);
@@ -2185,7 +2139,6 @@ Editor::set_state (const XMLNode& node)
 		yoff = atoi(geometry->property("y_off")->value());
 	}
 
-	set_geometry_hints (vpacker, g, Gdk::HINT_BASE_SIZE);
 	set_default_size (g.base_width, g.base_height);
 	move (x, y);
 
@@ -2297,7 +2250,7 @@ Editor::get_state ()
 	char buf[32];
 
 	if (is_realized()) {
-	        Glib::RefPtr<Gdk::Window> win = get_window();
+		Glib::RefPtr<Gdk::Window> win = get_window();
 		
 		int x, y, xoff, yoff, width, height;
 		win->get_root_origin(x, y);
@@ -2586,30 +2539,56 @@ void
 Editor::setup_toolbar ()
 {
 	string pixmap_path;
+
+	const guint32 FUDGE = 18; // Combo's are stupid - they steal space from the entry for the button
+
+
+	/* Mode Buttons (tool selection) */
+
 	vector<ToggleButton *> mouse_mode_buttons;
 
+	mouse_move_button.add (*(manage (new Image (get_xpm("tool_object.xpm")))));
+	mouse_move_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_move_button);
+	mouse_select_button.add (*(manage (new Image (get_xpm("tool_range.xpm")))));
+	mouse_select_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_select_button);
+	mouse_gain_button.add (*(manage (new Image (get_xpm("tool_gain.xpm")))));
+	mouse_gain_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_gain_button);
+	mouse_zoom_button.add (*(manage (new Image (get_xpm("tool_zoom.xpm")))));
+	mouse_zoom_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_zoom_button);
+	mouse_timefx_button.add (*(manage (new Image (get_xpm("tool_stretch.xpm")))));
+	mouse_timefx_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_timefx_button);
+	mouse_audition_button.add (*(manage (new Image (get_xpm("tool_audition.xpm")))));
+	mouse_audition_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_audition_button);
+	
 	mouse_mode_button_set = new GroupedButtons (mouse_mode_buttons);
 
-	mouse_mode_button_table.set_homogeneous (true);
-	mouse_mode_button_table.set_col_spacings (2);
-	mouse_mode_button_table.set_row_spacings (2);
-	mouse_mode_button_table.set_border_width (5);
+	HBox* mode_box = manage(new HBox);
+	mode_box->set_border_width (2);
+	mode_box->set_spacing(4);
+	mouse_mode_button_box.set_spacing(1);
+	mouse_mode_button_box.pack_start(mouse_move_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_select_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_zoom_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_gain_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_timefx_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_audition_button, true, true);
+	mouse_mode_button_box.set_homogeneous(true);
 
-	mouse_mode_button_table.attach (mouse_move_button, 0, 1, 0, 1);
-	mouse_mode_button_table.attach (mouse_select_button, 1, 2, 0, 1);
-	mouse_mode_button_table.attach (mouse_zoom_button, 2, 3, 0, 1);
- 
-	mouse_mode_button_table.attach (mouse_gain_button, 0, 1, 1, 2);
-	mouse_mode_button_table.attach (mouse_timefx_button, 1, 2, 1, 2);
-	mouse_mode_button_table.attach (mouse_audition_button, 2, 3, 1, 2);
+	edit_mode_selector.set_name ("EditModeSelector");
+	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "Splice Edit", 2+FUDGE, 10);
+	set_popdown_strings (edit_mode_selector, internationalize (edit_mode_strings));
+	edit_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
 
-	mouse_mode_tearoff = manage (new TearOff (mouse_mode_button_table));
+	mode_box->pack_start(edit_mode_selector);
+	mode_box->pack_start(mouse_mode_button_box);
+	
+	mouse_mode_tearoff = manage (new TearOff (*mode_box));
 	mouse_mode_tearoff->set_name ("MouseModeBase");
 
 	mouse_mode_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
@@ -2628,12 +2607,12 @@ Editor::setup_toolbar ()
 	mouse_timefx_button.set_name ("MouseModeButton");
 	mouse_audition_button.set_name ("MouseModeButton");
 
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_move_button, _("select/move objects"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("select/move ranges"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_gain_button, _("draw gain automation"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_zoom_button, _("select zoom range"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("stretch/shrink regions"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("listen to specific regions"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_move_button, _("Select/Move Objects"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Select/Move Ranges"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_gain_button, _("Draw Gain Automation"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_zoom_button, _("Select Zoom Range"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("Stretch/Shrink Regions"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("Listen to Specific Regions"));
 
 	mouse_move_button.unset_flags (CAN_FOCUS);
 	mouse_select_button.unset_flags (CAN_FOCUS);
@@ -2652,160 +2631,82 @@ Editor::setup_toolbar ()
 	mouse_audition_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));
 
 	// mouse_move_button.set_active (true);
-
-	/* automation control */
-
-	global_automation_button.set_name ("MouseModeButton");
-	automation_mode_button.set_name ("MouseModeButton");
-
-	automation_box.set_spacing (2);
-	automation_box.set_border_width (2);
-	automation_box.pack_start (global_automation_button, false, false);
-	automation_box.pack_start (automation_mode_button, false, false);
-
-	/* Edit mode */
-
-	edit_mode_label.set_name ("ToolBarLabel");
-
-	edit_mode_selector.set_name ("EditModeSelector");
-
-	edit_mode_box.set_spacing (3);
-	edit_mode_box.set_border_width (3);
-
-	/* XXX another disgusting hack because of the way combo boxes size themselves */
-
-	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
-	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "EdgtMode", 2+FUDGE, 10);
-	set_popdown_strings (edit_mode_selector, internationalize (edit_mode_strings));
-	edit_mode_box.pack_start (edit_mode_label, false, false);
-	edit_mode_box.pack_start (edit_mode_selector, false, false);
-
-	edit_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
-
-	/* Snap Type */
-
-	snap_type_label.set_name ("ToolBarLabel");
-
-	snap_type_selector.set_name ("SnapTypeSelector");
-
-	snap_type_box.set_spacing (3);
-	snap_type_box.set_border_width (3);
-
-	/* XXX another disgusting hack because of the way combo boxes size themselves */
-
-	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, "SMPTE Seconds", 2+FUDGE, 10);
-	set_popdown_strings (snap_type_selector, internationalize (snap_type_strings));
-
-	snap_type_box.pack_start (snap_type_label, false, false);
-	snap_type_box.pack_start (snap_type_selector, false, false);
-
-	snap_type_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_type_selection_done));
-
-	/* Snap mode, not snap type */
-
-	snap_mode_label.set_name ("ToolBarLabel");
-
-	snap_mode_selector.set_name ("SnapModeSelector");
 	
-	snap_mode_box.set_spacing (3);
-	snap_mode_box.set_border_width (3);
 
-	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, "SngpMode", 2+FUDGE, 10);
-	set_popdown_strings (snap_mode_selector, internationalize (snap_mode_strings));
+	/* Zoom */
+	
+	zoom_box.set_spacing (1);
+	zoom_box.set_border_width (2);
 
-	snap_mode_box.pack_start (snap_mode_label, false, false);
-	snap_mode_box.pack_start (snap_mode_selector, false, false);
+	zoom_in_button.set_name ("EditorTimeButton");
+	zoom_in_button.add (*(manage (new Image (get_xpm("zoom_in.xpm")))));
+	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom In"));
+	
+	zoom_out_button.set_name ("EditorTimeButton");
+	zoom_out_button.add (*(manage (new Image (get_xpm("zoom_out.xpm")))));
+	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom Out"));
 
-	snap_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
-
-	/* Zoom focus mode */
-
-	zoom_focus_label.set_name ("ToolBarLabel");
-
+	zoom_out_full_button.set_name ("EditorTimeButton");
+	zoom_out_full_button.add (*(manage (new Image (get_xpm("zoom_full.xpm")))));
+	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
+	
+	zoom_box.pack_start (zoom_out_button, false, false);
+	zoom_box.pack_start (zoom_in_button, false, false);
+ 	zoom_box.pack_start (zoom_range_clock, false, false);	
+	zoom_box.pack_start (zoom_out_full_button, false, false);
+	
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_range_clock, _("Current Zoom Range\n(Width of visible area)"));
+	
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
-
-	zoom_focus_box.set_spacing (3);
-	zoom_focus_box.set_border_width (3);
-
-	/* XXX another disgusting hack because of the way combo boxes size themselves */
-
-	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Edgt Cursor", 2+FUDGE, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Focus Center", 2+FUDGE, 0);
 	set_popdown_strings (zoom_focus_selector, internationalize (zoom_focus_strings));
-
-	zoom_focus_box.pack_start (zoom_focus_label, false, false);
-	zoom_focus_box.pack_start (zoom_focus_selector, false, false);
-
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 
-	/* selection/cursor clocks */
+	zoom_box.pack_start (zoom_focus_selector, false, false);
 
-	toolbar_selection_cursor_label.set_name ("ToolBarLabel");
-	selection_start_clock_label.set_name ("ToolBarLabel");
-	selection_end_clock_label.set_name ("ToolBarLabel");
-	edit_cursor_clock_label.set_name ("ToolBarLabel");
 
-	selection_start_clock_label.set_text (_("Start:"));
-	selection_end_clock_label.set_text (_("End:"));
-	edit_cursor_clock_label.set_text (_("Edit"));
+	/* Edit Cursor / Snap */
 
-	/* the zoom in/out buttons are generally taller than the clocks, so
-	   put all the toolbar clocks into a size group with one of the 
-	   buttons to make them all equal height.
+	snap_box.set_spacing (1);
+	snap_box.set_border_width (2);
 
-	   this also applies to the various toolbar combos
-	*/
+	snap_type_selector.set_name ("SnapTypeSelector");
+	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, "SMPTE Seconds", 2+FUDGE, 10);
+	set_popdown_strings (snap_type_selector, internationalize (snap_type_strings));
+	snap_type_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_type_selection_done));
+	ARDOUR_UI::instance()->tooltips().set_tip (snap_type_selector, _("Unit to snap cursors and ranges to"));
 
-	RefPtr<SizeGroup> toolbar_clock_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
-	toolbar_clock_size_group->add_widget (zoom_out_button);
-	toolbar_clock_size_group->add_widget (edit_cursor_clock);
-	toolbar_clock_size_group->add_widget (zoom_range_clock);
-	toolbar_clock_size_group->add_widget (nudge_clock);
-	toolbar_clock_size_group->add_widget (edit_mode_selector);
-	toolbar_clock_size_group->add_widget (snap_type_selector);
-	toolbar_clock_size_group->add_widget (snap_mode_selector);
-	toolbar_clock_size_group->add_widget (zoom_focus_selector);
+	snap_mode_selector.set_name ("SnapModeSelector");
+	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, "Magnetic Snap", 2+FUDGE, 10);
+	set_popdown_strings (snap_mode_selector, internationalize (snap_mode_strings));
+	snap_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
 
-	HBox* edit_clock_hbox = manage (new HBox());
-	VBox* edit_clock_vbox = manage (new VBox());
+	snap_box.pack_start (edit_cursor_clock, false, false);
+	snap_box.pack_start (snap_mode_selector, false, false);
+	snap_box.pack_start (snap_type_selector, false, false);
 
-	edit_clock_hbox->pack_start (edit_cursor_clock, false, false);
 
-	edit_clock_vbox->set_spacing (3);
-	edit_clock_vbox->set_border_width (3);
-	edit_clock_vbox->pack_start (edit_cursor_clock_label, false, false);
-	edit_clock_vbox->pack_start (*edit_clock_hbox, false, false);
+	/* Nudge */
 
-	HBox* hbox = new HBox;
+	HBox *nudge_box = manage (new HBox);
+	nudge_box->set_spacing(1);
+	nudge_box->set_border_width (2);
 
-	hbox->pack_start (*edit_clock_vbox, false, false);
-	hbox->pack_start (zoom_indicator_vbox, false, false); 
-	hbox->pack_start (zoom_focus_box, false, false);
-	hbox->pack_start (snap_type_box, false, false);
-	hbox->pack_start (snap_mode_box, false, false);
-	hbox->pack_start (edit_mode_box, false, false);
-
-	VBox *vbox = manage (new VBox);
-
-	vbox->set_spacing (3);
-	vbox->set_border_width (3);
-
-	HBox *nbox = manage (new HBox);
-	
 	nudge_forward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_forward), false));
 	nudge_backward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_backward), false));
 
-	nbox->pack_start (nudge_backward_button, false, false);
-	nbox->pack_start (nudge_forward_button, false, false);
-	nbox->pack_start (nudge_clock, false, false, 5);
+	nudge_box->pack_start (nudge_backward_button, false, false);
+	nudge_box->pack_start (nudge_forward_button, false, false);
+	nudge_box->pack_start (nudge_clock, false, false);
 
-	nudge_label.set_name ("ToolBarLabel");
 
-	vbox->pack_start (nudge_label, false, false);
-	vbox->pack_start (*nbox, false, false);
+	/* Pack everything in... */
 
-	hbox->pack_start (*vbox, false, false);
-
-	hbox->show_all ();
+	HBox* hbox = new HBox;
+	hbox->set_spacing(10);
 
 	tools_tearoff = new TearOff (*hbox);
 	tools_tearoff->set_name ("MouseModeBase");
@@ -2819,11 +2720,18 @@ Editor::setup_toolbar ()
 	tools_tearoff->Visible.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox), 
 					      &tools_tearoff->tearoff_window(), 0));
 
-	toolbar_hbox.set_spacing (8);
-	toolbar_hbox.set_border_width (2);
+	toolbar_hbox.set_spacing (10);
+	toolbar_hbox.set_border_width (1);
 
-	toolbar_hbox.pack_start (*tools_tearoff, false, false);
 	toolbar_hbox.pack_start (*mouse_mode_tearoff, false, false);
+	toolbar_hbox.pack_start (*tools_tearoff, false, false);
+
+	
+	hbox->pack_start (snap_box, false, false);
+	hbox->pack_start (zoom_box, false, false); 
+	hbox->pack_start (*nudge_box, false, false);
+
+	hbox->show_all ();
 	
 	toolbar_base.set_name ("ToolBarBase");
 	toolbar_base.add (toolbar_hbox);
@@ -3055,7 +2963,7 @@ Editor::get_relevant_audio_tracks (AudioTimeAxisView& base, set<AudioTimeAxisVie
 			continue;
 		}
 
-		RouteGroup* group = atv->route().edit_group();
+		RouteGroup* group = atv->route()->edit_group();
 
 		if (group && group->is_active()) {
 			
@@ -3067,7 +2975,7 @@ Editor::get_relevant_audio_tracks (AudioTimeAxisView& base, set<AudioTimeAxisVie
 				
 				if ((tatv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
 					
-					if (tatv->route().edit_group() == group) {
+					if (tatv->route()->edit_group() == group) {
 						relevant_tracks.insert (tatv);
 					}
 				}
@@ -3102,31 +3010,31 @@ Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl)
 }
 
 void
-Editor::mapped_set_selected_regionview_from_click (AudioTimeAxisView& atv, uint32_t ignored, 
-						  AudioRegionView* basis, vector<AudioRegionView*>* all_equivs)
+Editor::mapped_set_selected_regionview_from_click (RouteTimeAxisView& tv, uint32_t ignored, 
+						  RegionView* basis, vector<RegionView*>* all_equivs)
 {
-	AudioPlaylist* pl;
-	vector<AudioRegion*> results;
-	AudioRegionView* marv;
-	AudioDiskstream* ds;
+	Playlist* pl;
+	vector<Region*> results;
+	RegionView* marv;
+	Diskstream* ds;
 
-	if ((ds = atv.get_diskstream()) == 0) {
+	if ((ds = tv.get_diskstream()) == 0) {
 		/* bus */
 		return;
 	}
 
-	if (&atv == &basis->get_time_axis_view()) {
+	if (&tv == &basis->get_time_axis_view()) {
 		/* looking in same track as the original */
 		return;
 	}
 
 	
-	if ((pl = ds->playlist()) != 0) {
-		pl->get_equivalent_regions (basis->region, results);
+	if ((pl = dynamic_cast<Playlist*>(ds->playlist())) != 0) {
+		pl->get_equivalent_regions (basis->region(), results);
 	}
 	
-	for (vector<AudioRegion*>::iterator ir = results.begin(); ir != results.end(); ++ir) {
-		if ((marv = atv.view->find_view (**ir)) != 0) {
+	for (vector<Region*>::iterator ir = results.begin(); ir != results.end(); ++ir) {
+		if ((marv = tv.view()->find_view (**ir)) != 0) {
 			all_equivs->push_back (marv);
 		}
 	}
@@ -3135,7 +3043,7 @@ Editor::mapped_set_selected_regionview_from_click (AudioTimeAxisView& atv, uint3
 bool
 Editor::set_selected_regionview_from_click (bool press, Selection::Operation op, bool no_track_remove)
 {
-	vector<AudioRegionView*> all_equivalent_regions;
+	vector<RegionView*> all_equivalent_regions;
 	bool commit = false;
 
 	if (!clicked_regionview || !clicked_audio_trackview) {
@@ -3190,7 +3098,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 						commit = true;
 					}
 					
-					for (vector<AudioRegionView*>::iterator i = all_equivalent_regions.begin(); i != all_equivalent_regions.end(); ++i) {
+					for (vector<RegionView*>::iterator i = all_equivalent_regions.begin(); i != all_equivalent_regions.end(); ++i) {
 						selection->add (*i);
 					}
 				} 
@@ -3223,58 +3131,58 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		last_frame = 0;
 		first_frame = max_frames;
 
-		for (AudioRegionSelection::iterator x = selection->audio_regions.begin(); x != selection->audio_regions.end(); ++x) {
+		for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
 			if (&(*x)->get_time_axis_view() == &clicked_regionview->get_time_axis_view()) {
 
-				if ((*x)->region.last_frame() > last_frame) {
-					last_frame = (*x)->region.last_frame();
+				if ((*x)->region().last_frame() > last_frame) {
+					last_frame = (*x)->region().last_frame();
 				}
 
-				if ((*x)->region.first_frame() < first_frame) {
-					first_frame = (*x)->region.first_frame();
+				if ((*x)->region().first_frame() < first_frame) {
+					first_frame = (*x)->region().first_frame();
 				}
 			}
 		}
 
 		/* 2. figure out the boundaries for our search for new objects */
 
-		switch (clicked_regionview->region.coverage (first_frame, last_frame)) {
+		switch (clicked_regionview->region().coverage (first_frame, last_frame)) {
 		case OverlapNone:
 			cerr << "no overlap, first = " << first_frame << " last = " << last_frame << " region = " 
-			     << clicked_regionview->region.first_frame() << " .. " << clicked_regionview->region.last_frame() << endl;
+			     << clicked_regionview->region().first_frame() << " .. " << clicked_regionview->region().last_frame() << endl;
 
-			if (last_frame < clicked_regionview->region.first_frame()) {
+			if (last_frame < clicked_regionview->region().first_frame()) {
 				first_frame = last_frame;
-				last_frame = clicked_regionview->region.last_frame();
+				last_frame = clicked_regionview->region().last_frame();
 			} else {
 				last_frame = first_frame;
-				first_frame = clicked_regionview->region.first_frame();
+				first_frame = clicked_regionview->region().first_frame();
 			}
 			break;
 
 		case OverlapExternal:
 			cerr << "external overlap, first = " << first_frame << " last = " << last_frame << " region = " 
-			     << clicked_regionview->region.first_frame() << " .. " << clicked_regionview->region.last_frame() << endl;
+			     << clicked_regionview->region().first_frame() << " .. " << clicked_regionview->region().last_frame() << endl;
 
-			if (last_frame < clicked_regionview->region.first_frame()) {
+			if (last_frame < clicked_regionview->region().first_frame()) {
 				first_frame = last_frame;
-				last_frame = clicked_regionview->region.last_frame();
+				last_frame = clicked_regionview->region().last_frame();
 			} else {
 				last_frame = first_frame;
-				first_frame = clicked_regionview->region.first_frame();
+				first_frame = clicked_regionview->region().first_frame();
 			}
 			break;
 
 		case OverlapInternal:
 			cerr << "internal overlap, first = " << first_frame << " last = " << last_frame << " region = " 
-			     << clicked_regionview->region.first_frame() << " .. " << clicked_regionview->region.last_frame() << endl;
+			     << clicked_regionview->region().first_frame() << " .. " << clicked_regionview->region().last_frame() << endl;
 
-			if (last_frame < clicked_regionview->region.first_frame()) {
+			if (last_frame < clicked_regionview->region().first_frame()) {
 				first_frame = last_frame;
-				last_frame = clicked_regionview->region.last_frame();
+				last_frame = clicked_regionview->region().last_frame();
 			} else {
 				last_frame = first_frame;
-				first_frame = clicked_regionview->region.first_frame();
+				first_frame = clicked_regionview->region().first_frame();
 			}
 			break;
 
@@ -3300,18 +3208,18 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		
 		/* 3. convert to a vector of audio regions */
 
-		vector<AudioRegionView*> audio_regions;
+		vector<RegionView*> regions;
 		
 		for (list<Selectable*>::iterator x = results.begin(); x != results.end(); ++x) {
-			AudioRegionView* arv;
+			RegionView* arv;
 
-			if ((arv = dynamic_cast<AudioRegionView*>(*x)) != 0) {
-				audio_regions.push_back (arv);
+			if ((arv = dynamic_cast<RegionView*>(*x)) != 0) {
+				regions.push_back (arv);
 			}
 		}
 
-		if (!audio_regions.empty()) {
-			selection->add (audio_regions);
+		if (!regions.empty()) {
+			selection->add (regions);
 			commit = true;
 		}
 	}
@@ -3321,37 +3229,32 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 }
 
 void
-Editor::set_selected_regionview_from_region_list (Region& r, Selection::Operation op)
+Editor::set_selected_regionview_from_region_list (Region& region, Selection::Operation op)
 {
-	vector<AudioRegionView*> all_equivalent_regions;
-	AudioRegion* region;
-
-	if ((region = dynamic_cast<AudioRegion*>(&r)) == 0) {
-		return;
-	}
+	vector<RegionView*> all_equivalent_regions;
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		
-		AudioTimeAxisView* tatv;
+		RouteTimeAxisView* tatv;
 		
-		if ((tatv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
+		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 			
-			AudioPlaylist* pl;
-			vector<AudioRegion*> results;
-			AudioRegionView* marv;
-			AudioDiskstream* ds;
+			Playlist* pl;
+			vector<Region*> results;
+			RegionView* marv;
+			Diskstream* ds;
 			
 			if ((ds = tatv->get_diskstream()) == 0) {
 				/* bus */
 				continue;
 			}
 
-			if ((pl = ds->playlist()) != 0) {
-				pl->get_region_list_equivalent_regions (*region, results);
+			if ((pl = dynamic_cast<Playlist*>(ds->playlist())) != 0) {
+				pl->get_region_list_equivalent_regions (region, results);
 			}
 			
-			for (vector<AudioRegion*>::iterator ir = results.begin(); ir != results.end(); ++ir) {
-				if ((marv = tatv->view->find_view (**ir)) != 0) {
+			for (vector<Region*>::iterator ir = results.begin(); ir != results.end(); ++ir) {
+				if ((marv = tatv->view()->find_view (**ir)) != 0) {
 					all_equivalent_regions.push_back (marv);
 				}
 			}
@@ -3380,10 +3283,10 @@ Editor::set_selected_regionview_from_region_list (Region& r, Selection::Operatio
 bool
 Editor::set_selected_regionview_from_map_event (GdkEventAny* ev, StreamView* sv, Region* r)
 {
-	AudioRegionView* rv;
-	AudioRegion* ar;
+	RegionView* rv;
+	Region* ar;
 
-	if ((ar = dynamic_cast<AudioRegion*> (r)) == 0) {
+	if ((ar = dynamic_cast<Region*> (r)) == 0) {
 		return TRUE;
 	}
 
@@ -3395,7 +3298,7 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* ev, StreamView* sv,
 	   a single other region.
 	*/
 
-	if (selection->audio_regions.size() > 1) {
+	if (selection->regions.size() > 1) {
 		return TRUE;
 	}
 	
@@ -3560,7 +3463,7 @@ Editor::duplicate_dialog (bool dup_region)
 
 	if (sscanf (text.c_str(), "%f", &times) == 1) {
 		if (dup_region) {
-			AudioRegionSelection regions;
+			RegionSelection regions;
 			regions.add (clicked_regionview);
 			duplicate_some_regions (regions, times);
 		} else {
@@ -3611,9 +3514,9 @@ Editor::edit_mode_selection_done ()
 	string choice = edit_mode_selector.get_active_text();
 	EditMode mode = Slide;
 
-	if (choice == _("Splice")) {
+	if (choice == _("Splice Edit")) {
 		mode = Splice;
-	} else if (choice == _("Slide")) {
+	} else if (choice == _("Slide Edit")) {
 		mode = Slide;
 	}
 
@@ -3629,18 +3532,18 @@ Editor::snap_type_selection_done ()
 
 	string choice = snap_type_selector.get_active_text();
 	SnapType snaptype = SnapToFrame;
-	
+
 	if (choice == _("Beats/3")) {
-                snaptype = SnapToAThirdBeat;
-        } else if (choice == _("Beats/4")) {
-                snaptype = SnapToAQuarterBeat;
-        } else if (choice == _("Beats/8")) {
-                snaptype = SnapToAEighthBeat;
-        } else if (choice == _("Beats/16")) {
-                snaptype = SnapToASixteenthBeat;
-        } else if (choice == _("Beats/32")) {
-                snaptype = SnapToAThirtysecondBeat;
-        } else if (choice == _("Beats")) {
+		snaptype = SnapToAThirdBeat;
+	} else if (choice == _("Beats/4")) {
+		snaptype = SnapToAQuarterBeat;
+	} else if (choice == _("Beats/8")) {
+		snaptype = SnapToAEighthBeat;
+	} else if (choice == _("Beats/16")) {
+		snaptype = SnapToASixteenthBeat;
+	} else if (choice == _("Beats/32")) {
+		snaptype = SnapToAThirtysecondBeat;
+	} else if (choice == _("Beats")) {
 		snaptype = SnapToBeat;
 	} else if (choice == _("Bars")) {
 		snaptype = SnapToBar;
@@ -3668,10 +3571,10 @@ Editor::snap_type_selection_done ()
 		snaptype = SnapToSeconds;
 	} else if (choice == _("Minutes")) {
 		snaptype = SnapToMinutes;
-        } else if (choice == _("None")) {
+	} else if (choice == _("None")) {
 		snaptype = SnapToFrame;
 	}
-	
+
 	set_snap_to (snaptype);
 }	
 
@@ -3685,9 +3588,9 @@ Editor::snap_mode_selection_done ()
 	string choice = snap_mode_selector.get_active_text();
 	SnapMode mode = SnapNormal;
 
-	if (choice == _("Normal")) {
+	if (choice == _("Normal Snap")) {
 		mode = SnapNormal;
-	} else if (choice == _("Magnetic")) {
+	} else if (choice == _("Magnetic Snap")) {
 		mode = SnapMagnetic;
 	}
 
@@ -3704,15 +3607,15 @@ Editor::zoom_focus_selection_done ()
 	string choice = zoom_focus_selector.get_active_text();
 	ZoomFocus focus_type = ZoomFocusLeft;
 
-	if (choice == _("Left")) {
+	if (choice == _("Focus Left")) {
 		focus_type = ZoomFocusLeft;
-	} else if (choice == _("Right")) {
+	} else if (choice == _("Focus Right")) {
 		focus_type = ZoomFocusRight;
-	} else if (choice == _("Center")) {
+	} else if (choice == _("Focus Center")) {
 		focus_type = ZoomFocusCenter;
-        } else if (choice == _("Playhead")) {
+	} else if (choice == _("Focus Playhead")) {
 		focus_type = ZoomFocusPlayhead;
-        } else if (choice == _("Edit Cursor")) {
+	} else if (choice == _("Focus Edit Cursor")) {
 		focus_type = ZoomFocusEdit;
 	} 
 
@@ -3782,7 +3685,7 @@ void
 Editor::region_selection_changed ()
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->set_selected_regionviews (selection->audio_regions);
+		(*i)->set_selected_regionviews (selection->regions);
 	}
 }
 
@@ -4052,8 +3955,8 @@ Editor::playlist_deletion_dialog (Playlist* pl)
 bool
 Editor::audio_region_selection_covers (jack_nframes_t where)
 {
-	for (AudioRegionSelection::iterator a = selection->audio_regions.begin(); a != selection->audio_regions.end(); ++a) {
-		if ((*a)->region.covers (where)) {
+	for (RegionSelection::iterator a = selection->regions.begin(); a != selection->regions.end(); ++a) {
+		if ((*a)->region().covers (where)) {
 			return true;
 		}
 	}
@@ -4064,10 +3967,10 @@ Editor::audio_region_selection_covers (jack_nframes_t where)
 void
 Editor::prepare_for_cleanup ()
 {
-	cut_buffer->clear_audio_regions ();
+	cut_buffer->clear_regions ();
 	cut_buffer->clear_playlists ();
 
-	selection->clear_audio_regions ();
+	selection->clear_regions ();
 	selection->clear_playlists ();
 }
 

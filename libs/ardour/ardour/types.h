@@ -30,6 +30,8 @@
 #include <inttypes.h>
 #include <jack/types.h>
 #include <control_protocol/smpte.h>
+#include <pbd/id.h>
+
 #include <map>
 
 #if __GNUC__ < 3
@@ -45,7 +47,7 @@ namespace ARDOUR {
 	typedef float                       pan_t;
 	typedef float                       gain_t;
 	typedef uint32_t                    layer_t;
-	typedef uint64_t                    id_t;
+	typedef uint64_t                    microseconds_t;
 
 	enum IOChange {
 		NoChange = 0,
@@ -69,7 +71,7 @@ namespace ARDOUR {
 		PanAutomation = 0x2,
 		PluginAutomation = 0x4,
 		SoloAutomation = 0x8,
-		MuteAutomation = 0x10,
+		MuteAutomation = 0x10
 	};
 
 	enum AutoState {
@@ -188,10 +190,10 @@ namespace ARDOUR {
 
 	enum EditMode {
 		Slide,
-		Splice,
+		Splice
 	};
 
-        enum RegionPoint { 
+	enum RegionPoint { 
 	    Start,
 	    End,
 	    SyncPoint
@@ -241,7 +243,7 @@ namespace ARDOUR {
 	    PeakDatum min;
 	    PeakDatum max;
 	};
-};
+}
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);

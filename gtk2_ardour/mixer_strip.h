@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
 */
 
 #ifndef __ardour_mixer_strip__
@@ -37,14 +35,15 @@
 #include <gtkmm/adjustment.h>
 
 #include <gtkmm2ext/auto_spin.h>
-#include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/slider_controller.h>
+
+#include <pbd/stateful.h>
 
 #include <ardour/types.h>
 #include <ardour/ardour.h>
 #include <ardour/io.h>
 #include <ardour/insert.h>
-#include <ardour/stateful.h>
 #include <ardour/redirect.h>
 
 #include <pbd/fastlog.h>
@@ -83,7 +82,7 @@ class Mixer_UI;
 class MixerStrip : public RouteUI, public Gtk::EventBox
 {
   public:
-	MixerStrip (Mixer_UI&, ARDOUR::Session&, ARDOUR::Route &, bool in_mixer = true);
+	MixerStrip (Mixer_UI&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, bool in_mixer = true);
 	~MixerStrip ();
 
 	void set_width (Width);
@@ -170,15 +169,13 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Menu output_menu;
 	void add_connection_to_output_menu (ARDOUR::Connection *);
 	
-	void stream_input_chosen (ARDOUR::AudioDiskstream*);
-	void select_stream_input ();
 	void connection_input_chosen (ARDOUR::Connection *);
 	void connection_output_chosen (ARDOUR::Connection *);
 
 	void edit_input_configuration ();
 	void edit_output_configuration ();
 
-	void diskstream_changed (void *src);
+	void diskstream_changed ();
 
 	Gtk::Menu *send_action_menu;
 	void build_send_action_menu ();
@@ -238,7 +235,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void name_changed (void *src);
 	void update_speed_display ();
 	void map_frozen ();
-	void hide_redirect_editor (ARDOUR::Redirect* redirect);
+	void hide_redirect_editor (boost::shared_ptr<ARDOUR::Redirect> redirect);
 
 	bool ignore_speed_adjustment;
 

@@ -45,7 +45,7 @@ namespace ARDOUR {
 
 	static const jack_nframes_t max_frames = JACK_MAX_FRAMES;
 
-	int init (AudioEngine&, bool with_vst, bool try_optimization);
+	int init (bool with_vst, bool try_optimization);
 	int cleanup ();
 
 	
@@ -58,7 +58,7 @@ namespace ARDOUR {
 
 	const layer_t max_layer = UCHAR_MAX;
 
-	id_t new_id();
+	microseconds_t get_microseconds ();
 
 	Change new_change ();
 
@@ -74,7 +74,7 @@ namespace ARDOUR {
 	    const char* old;
 	};
 
-};
+}
 
 /* how do we make these be within the Ardour namespace? */
 

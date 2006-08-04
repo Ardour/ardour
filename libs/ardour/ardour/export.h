@@ -83,6 +83,6 @@ namespace ARDOUR
 	    int   status;
 
 	};
-};
+} // namespace ARDOUR
 
 #endif /* __ardour_export_h__ */

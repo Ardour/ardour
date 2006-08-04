@@ -459,7 +459,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = libs/pbd3 libs/midi++2 libs/ardour libs/gtkmm2ext gtk2_ardour
+INPUT                  = libs/pbd libs/midi++2 libs/ardour libs/gtkmm2ext gtk2_ardour
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 

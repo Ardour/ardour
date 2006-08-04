@@ -128,7 +128,7 @@ Editor::initialize_canvas ()
 	
 	time_line_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
 	cursor_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
-	
+
 	time_canvas.set_name ("EditorTimeCanvas");
 	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
 	time_canvas.set_flags (CAN_FOCUS);

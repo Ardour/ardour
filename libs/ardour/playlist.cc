@@ -77,7 +77,6 @@ Playlist::Playlist (Session& sess, string nom, bool hide)
 {
 	init (hide);
 	_name = nom;
-	_orig_diskstream_id = 0;
 	
 }
 
@@ -86,7 +85,6 @@ Playlist::Playlist (Session& sess, const XMLNode& node, bool hide)
 {
 	init (hide);
 	_name = "unnamed"; /* reset by set_state */
-	_orig_diskstream_id = 0;
 	
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -598,6 +596,31 @@ Playlist::remove_region_internal (Region *region, bool delay_sort)
 		}
 	}
 	return -1;
+}
+
+void
+Playlist::get_equivalent_regions (const Region& other, vector<Region*>& results)
+{
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		if (Config->get_use_overlap_equivalency()) {
+			if ((*i)->overlap_equivalent (other)) {
+				results.push_back ((*i));
+			} else if ((*i)->equivalent (other)) {
+				results.push_back ((*i));
+			}
+		}
+	}
+}
+
+void
+Playlist::get_region_list_equivalent_regions (const Region& other, vector<Region*>& results)
+{
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+
+		if ((*i) && (*i)->region_list_equivalent (other)) {
+			results.push_back (*i);
+		}
+	}
 }
 
 void
@@ -1343,7 +1366,7 @@ Playlist::set_state (const XMLNode& node)
 		if (prop->name() == X_("name")) {
 			_name = prop->value();
 		} else if (prop->name() == X_("orig_diskstream_id")) {
-			sscanf (prop->value().c_str(), "%" PRIu64, &_orig_diskstream_id);
+			_orig_diskstream_id = prop->value ();
 		} else if (prop->name() == X_("frozen")) {
 			_frozen = (prop->value() == X_("yes"));
 		}
@@ -1404,7 +1427,7 @@ Playlist::state (bool full_state)
 	
 	node->add_property (X_("name"), _name);
 
-	snprintf (buf, sizeof(buf), "%" PRIu64, _orig_diskstream_id);
+	_orig_diskstream_id.print (buf);
 	node->add_property (X_("orig_diskstream_id"), buf);
 	node->add_property (X_("frozen"), _frozen ? "yes" : "no");
 
@@ -1725,7 +1748,7 @@ Playlist::nudge_after (jack_nframes_t start, jack_nframes_t distance, bool forwa
 }
 
 Region*
-Playlist::find_region (id_t id) const
+Playlist::find_region (const ID& id) const
 {
 	RegionLock rlock (const_cast<Playlist*> (this));
 	RegionList::const_iterator i;

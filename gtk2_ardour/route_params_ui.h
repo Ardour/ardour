@@ -33,8 +33,9 @@
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/treeview.h>
 
+#include <pbd/stateful.h>
+
 #include <ardour/ardour.h>
-#include <ardour/stateful.h>
 #include <ardour/io.h>
 #include <ardour/redirect.h>
 
@@ -120,14 +121,14 @@ class RouteParams_UI : public ArdourDialog
 	PluginSelector    *_plugin_selector;
 	RouteRedirectSelection  _rr_selection;
 
-	ARDOUR::Route           *_route;
+	boost::shared_ptr<ARDOUR::Route> _route;
 	sigc::connection            _route_conn;
 	sigc::connection            _route_ds_conn;
 
-	ARDOUR::Redirect       * _pre_redirect;
+	boost::shared_ptr<ARDOUR::Redirect> _pre_redirect;
 	sigc::connection            _pre_plugin_conn;
 
-	ARDOUR::Redirect       * _post_redirect;
+	boost::shared_ptr<ARDOUR::Redirect> _post_redirect;
 	sigc::connection            _post_plugin_conn;
 	
 	
@@ -150,7 +151,7 @@ class RouteParams_UI : public ArdourDialog
 			add(route);
 		}
 		Gtk::TreeModelColumn<Glib::ustring> text;
-		Gtk::TreeModelColumn<ARDOUR::Route*> route;
+		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
 	};
 
 	RouteDisplayModelColumns route_display_columns ;
@@ -158,10 +159,10 @@ class RouteParams_UI : public ArdourDialog
 	Glib::RefPtr<Gtk::ListStore> route_display_model;
 
 	
-	void add_route (ARDOUR::Route*);
+	void add_route (boost::shared_ptr<ARDOUR::Route>);
 
-	void route_name_changed (void *src, ARDOUR::Route *route);
-	void route_removed (ARDOUR::Route *route);
+	void route_name_changed (void *src, boost::shared_ptr<ARDOUR::Route> route);
+	void route_removed (boost::shared_ptr<ARDOUR::Route> route);
 
 
 	void route_selected();
@@ -179,8 +180,7 @@ class RouteParams_UI : public ArdourDialog
 	void setup_redirect_boxes();
 	void cleanup_redirect_boxes();
 
-	void redirect_selected (ARDOUR::Redirect *, ARDOUR::Placement);
-	void redirect_unselected (ARDOUR::Redirect *);
+	void redirect_selected (boost::shared_ptr<ARDOUR::Redirect>, ARDOUR::Placement);
 	
 	void plugin_going_away (ARDOUR::Plugin *foo, ARDOUR::Placement);
 	void redirect_going_away (ARDOUR::Redirect *foo);

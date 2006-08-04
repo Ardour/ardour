@@ -485,8 +485,9 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 	/* take everyone out of awrite to avoid disasters */
 
 	{
-		Glib::RWLock::ReaderLock lm (route_lock);
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		boost::shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->protect_automation ();
 		}
 	}
@@ -495,7 +496,7 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 
 	{
 		Glib::RWLock::ReaderLock lm (diskstream_lock);
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if ((*i)-> seek (spec.start_frame, true)) {
 				error << string_compose (_("%1: cannot seek to %2 for export"),
 						  (*i)->name(), spec.start_frame)

@@ -24,12 +24,12 @@
 #include <sigc++/signal.h>
 #include <string>
 
+
+#include <pbd/stateful.h> 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
-
-#include "io.h"
-#include "stateful.h"
-#include "redirect.h"
+#include <ardour/io.h>
+#include <ardour/redirect.h>
 
 namespace ARDOUR {
 
@@ -58,6 +58,6 @@ class Send : public Redirect {
 	uint32_t expected_inputs;
 };
 
-}; /* namespace ARDOUR */
+} // namespace ARDOUR
 
 #endif /* __ardour_send_h__ */

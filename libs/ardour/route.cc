@@ -20,11 +20,13 @@
 
 #include <cmath>
 #include <fstream>
+#include <cassert>
 
 #include <sigc++/bind.h>
 #include <pbd/xml++.h>
 
 #include <ardour/timestamps.h>
+#include <ardour/buffer.h>
 #include <ardour/audioengine.h>
 #include <ardour/route.h>
 #include <ardour/insert.h>
@@ -50,19 +52,19 @@ using namespace PBD;
 uint32_t Route::order_key_cnt = 0;
 
 
-Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg)
-	: IO (sess, name, input_min, input_max, output_min, output_max),
+Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, DataType default_type)
+	: IO (sess, name, input_min, input_max, output_min, output_max, default_type),
 	  _flags (flg),
-	  _midi_solo_control (*this, MIDIToggleControl::SoloControl, _session.midi_port()),
-	  _midi_mute_control (*this, MIDIToggleControl::MuteControl, _session.midi_port())
+	  _solo_control (*this, ToggleControllable::SoloControl),
+	  _mute_control (*this, ToggleControllable::MuteControl)
 {
 	init ();
 }
 
 Route::Route (Session& sess, const XMLNode& node)
 	: IO (sess, "route"),
-	  _midi_solo_control (*this, MIDIToggleControl::SoloControl, _session.midi_port()),
-	  _midi_mute_control (*this, MIDIToggleControl::MuteControl, _session.midi_port())
+	  _solo_control (*this, ToggleControllable::SoloControl),
+	  _mute_control (*this, ToggleControllable::MuteControl)
 {
 	init ();
 	set_state (node);
@@ -105,8 +107,6 @@ Route::init ()
 
 	input_changed.connect (mem_fun (this, &Route::input_change_handler));
 	output_changed.connect (mem_fun (this, &Route::output_change_handler));
-
-	reset_midi_control (_session.midi_port(), _session.get_midi_control());
 }
 
 Route::~Route ()
@@ -712,11 +712,8 @@ Route::set_solo (bool yn, void *src)
 
 	if (_soloed != yn) {
 		_soloed = yn;
-		 solo_changed (src); /* EMIT SIGNAL */
-
-		 if (_session.get_midi_feedback()) {
-			 _midi_solo_control.send_feedback (_soloed);
-		 }
+		solo_changed (src); /* EMIT SIGNAL */
+		_solo_control.Changed (); /* EMIT SIGNAL */
 	}
 }
 
@@ -753,9 +750,7 @@ Route::set_mute (bool yn, void *src)
 		_muted = yn;
 		mute_changed (src); /* EMIT SIGNAL */
 		
-		if (_session.get_midi_feedback()) {
-			_midi_mute_control.send_feedback (_muted);
-		}
+		_mute_control.Changed (); /* EMIT SIGNAL */
 		
 		Glib::Mutex::Lock lm (declick_lock);
 		desired_mute_gain = (yn?0.0f:1.0f);
@@ -763,7 +758,7 @@ Route::set_mute (bool yn, void *src)
 }
 
 int
-Route::add_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
+Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* err_streams)
 {
 	uint32_t old_rmo = redirect_max_outs;
 
@@ -774,12 +769,12 @@ Route::add_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 	{
 		Glib::RWLock::WriterLock lm (redirect_lock);
 
-		PluginInsert* pi;
-		PortInsert* porti;
+		boost::shared_ptr<PluginInsert> pi;
+		boost::shared_ptr<PortInsert> porti;
 
 		uint32_t potential_max_streams = 0;
 
-		if ((pi = dynamic_cast<PluginInsert*>(redirect)) != 0) {
+		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redirect)) != 0) {
 			pi->set_count (1);
 
 			if (pi->input_streams() == 0) {
@@ -788,8 +783,8 @@ Route::add_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 			}
 
 			potential_max_streams = max(pi->input_streams(), pi->output_streams());
-
-		} else if ((porti = dynamic_cast<PortInsert*>(redirect)) != 0) {
+			
+		} else if ((porti = boost::dynamic_pointer_cast<PortInsert>(redirect)) != 0) {
 
 			/* force new port inserts to start out with an i/o configuration
 			   that matches this route's i/o configuration.
@@ -854,9 +849,9 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 
 		for (RedirectList::const_iterator i = others.begin(); i != others.end(); ++i) {
 			
-			PluginInsert* pi;
+			boost::shared_ptr<PluginInsert> pi;
 			
-			if ((pi = dynamic_cast<PluginInsert*>(*i)) != 0) {
+			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				pi->set_count (1);
 				
 				uint32_t m = max(pi->input_streams(), pi->output_streams());
@@ -905,11 +900,6 @@ Route::clear_redirects (void *src)
 
 	{
 		Glib::RWLock::WriterLock lm (redirect_lock);
-
-		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-			delete *i;
-		}
-
 		_redirects.clear ();
 	}
 
@@ -923,7 +913,7 @@ Route::clear_redirects (void *src)
 }
 
 int
-Route::remove_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
+Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* err_streams)
 {
 	uint32_t old_rmo = redirect_max_outs;
 
@@ -955,13 +945,13 @@ Route::remove_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 				   run.
 				*/
 
-				Send* send;
-				PortInsert* port_insert;
+				boost::shared_ptr<Send> send;
+				boost::shared_ptr<PortInsert> port_insert;
 				
-				if ((send = dynamic_cast<Send*> (*i)) != 0) {
+				if ((send = boost::dynamic_pointer_cast<Send> (*i)) != 0) {
 					send->disconnect_inputs (this);
 					send->disconnect_outputs (this);
-				} else if ((port_insert = dynamic_cast<PortInsert*> (*i)) != 0) {
+				} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (*i)) != 0) {
 					port_insert->disconnect_inputs (this);
 					port_insert->disconnect_outputs (this);
 				}
@@ -990,9 +980,9 @@ Route::remove_redirect (Redirect *redirect, void *src, uint32_t* err_streams)
 		bool foo = false;
 
 		for (i = _redirects.begin(); i != _redirects.end(); ++i) {
-			PluginInsert* pi;
-
-			if ((pi = dynamic_cast<PluginInsert*>(*i)) != 0) {
+			boost::shared_ptr<PluginInsert> pi;
+			
+			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				if (pi->is_generator()) {
 					foo = true;
 				}
@@ -1039,7 +1029,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	
 	for (r = _redirects.begin(); r != _redirects.end(); ++r) {
 
-		Insert *insert;
+		boost::shared_ptr<Insert> insert;
 
 		/* do this here in case we bomb out before we get to the end of
 		   this function.
@@ -1047,22 +1037,22 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
 		redirect_max_outs = max ((*r)->output_streams (), redirect_max_outs);
 
-		if ((insert = dynamic_cast<Insert*>(*r)) != 0) {
+		if ((insert = boost::dynamic_pointer_cast<Insert>(*r)) != 0) {
 			++i_cnt;
-			insert_map[insert->placement()].push_back (InsertCount (*insert));
+			insert_map[insert->placement()].push_back (InsertCount (insert));
 
 			/* reset plugin counts back to one for now so
 			   that we have a predictable, controlled
 			   state to try to configure.
 			*/
 
-			PluginInsert* pi;
+			boost::shared_ptr<PluginInsert> pi;
 		
-			if ((pi = dynamic_cast<PluginInsert*>(insert)) != 0) {
+			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(insert)) != 0) {
 				pi->set_count (1);
 			}
 
-		} else if (dynamic_cast<Send*> (*r) != 0) {
+		} else if (boost::dynamic_pointer_cast<Send> (*r) != 0) {
 			++s_cnt;
 		}
 	}
@@ -1089,7 +1079,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
 	if (!insert_map[PreFader].empty()) {
 		InsertCount& ic (insert_map[PreFader].back());
-		initial_streams = ic.insert.compute_output_streams (ic.cnt);
+		initial_streams = ic.insert->compute_output_streams (ic.cnt);
 	} else {
 		initial_streams = n_inputs ();
 	}
@@ -1113,9 +1103,9 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	RedirectList::iterator prev = _redirects.end();
 
 	for (r = _redirects.begin(); r != _redirects.end(); prev = r, ++r) {
-		Send* s;
+		boost::shared_ptr<Send> s;
 
-		if ((s = dynamic_cast<Send*> (*r)) != 0) {
+		if ((s = boost::dynamic_pointer_cast<Send> (*r)) != 0) {
 			if (r == _redirects.begin()) {
 				s->expect_inputs (n_inputs());
 			} else {
@@ -1138,11 +1128,11 @@ Route::apply_some_plugin_counts (list<InsertCount>& iclist)
 
 	for (i = iclist.begin(); i != iclist.end(); ++i) {
 		
-		if ((*i).insert.configure_io ((*i).cnt, (*i).in, (*i).out)) {
+		if ((*i).insert->configure_io ((*i).cnt, (*i).in, (*i).out)) {
 			return -1;
 		}
 		/* make sure that however many we have, they are all active */
-		(*i).insert.activate ();
+		(*i).insert->activate ();
 	}
 
 	return 0;
@@ -1155,7 +1145,7 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, int32_t required_inp
 	
 	for (i = iclist.begin(); i != iclist.end(); ++i) {
 
-		if (((*i).cnt = (*i).insert.can_support_input_configuration (required_inputs)) < 0) {
+		if (((*i).cnt = (*i).insert->can_support_input_configuration (required_inputs)) < 0) {
 			if (err_streams) {
 				*err_streams = required_inputs;
 			}
@@ -1163,7 +1153,7 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, int32_t required_inp
 		}
 		
 		(*i).in = required_inputs;
-		(*i).out = (*i).insert.compute_output_streams ((*i).cnt);
+		(*i).out = (*i).insert->compute_output_streams ((*i).cnt);
 
 		required_inputs = (*i).out;
 	}
@@ -1207,7 +1197,7 @@ Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_st
 		
 		for (RedirectList::const_iterator i = other._redirects.begin(); i != other._redirects.end(); ++i) {
 			if ((*i)->placement() == placement) {
-				_redirects.push_back (Redirect::clone (**i));
+				_redirects.push_back (Redirect::clone (*i));
 			}
 		}
 
@@ -1225,7 +1215,6 @@ Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_st
 				++tmp;
 
 				if ((*i)->placement() == placement) {
-					delete *i;
 					_redirects.erase (i);
 				}
 				
@@ -1244,10 +1233,7 @@ Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_st
 		} else {
 			
 			/* SUCCESSFUL COPY ATTEMPT: delete the redirects we removed pre-copy */
-
-			for (RedirectList::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
-				delete *i;
-			}
+			to_be_deleted.clear ();
 		}
 	}
 
@@ -1290,7 +1276,7 @@ Route::all_redirects_active (bool state)
 }
 
 struct RedirectSorter {
-    bool operator() (const Redirect *a, const Redirect *b) {
+    bool operator() (boost::shared_ptr<const Redirect> a, boost::shared_ptr<const Redirect> b) {
 	    return a->sort_key() < b->sort_key();
     }
 };
@@ -1346,6 +1332,9 @@ Route::state(bool full_state)
 		snprintf (buf, sizeof (buf), "0x%x", _flags);
 		node->add_property("flags", buf);
 	}
+	
+	node->add_property("default-type", _default_type.to_string());
+
 	node->add_property("active", _active?"yes":"no");
 	node->add_property("muted", _muted?"yes":"no");
 	node->add_property("soloed", _soloed?"yes":"no");
@@ -1362,26 +1351,6 @@ Route::state(bool full_state)
 		node->add_property("mix-group", _mix_group->name());
 	}
 
-	/* MIDI control */
-
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte      additional;
-	XMLNode*        midi_node = 0;
-	XMLNode*        child;
-
-	midi_node = node->add_child ("MIDI");
-	
-	if (_midi_mute_control.get_control_info (chn, ev, additional)) {
-		child = midi_node->add_child ("mute");
-		set_midi_node_info (child, ev, chn, additional);
-	}
-	if (_midi_solo_control.get_control_info (chn, ev, additional)) {
-		child = midi_node->add_child ("solo");
-		set_midi_node_info (child, ev, chn, additional);
-	}
-
-	
 	string order_string;
 	OrderKeys::iterator x = order_keys.begin(); 
 
@@ -1469,13 +1438,13 @@ void
 Route::add_redirect_from_xml (const XMLNode& node)
 {
 	const XMLProperty *prop;
-	Insert *insert = 0;
-	Send *send = 0;
 
 	if (node.name() == "Send") {
 		
+
 		try {
-			send = new Send (_session, node);
+			boost::shared_ptr<Send> send (new Send (_session, node));
+			add_redirect (send, this);
 		} 
 		
 		catch (failed_constructor &err) {
@@ -1483,21 +1452,21 @@ Route::add_redirect_from_xml (const XMLNode& node)
 			return;
 		}
 		
-		add_redirect (send, this);
-		
 	} else if (node.name() == "Insert") {
 		
 		try {
 			if ((prop = node.property ("type")) != 0) {
 
+				boost::shared_ptr<Insert> insert;
+
 				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || prop->value() == "vst") {
 
-					insert = new PluginInsert(_session, node);
+					insert.reset (new PluginInsert(_session, node));
 					
 				} else if (prop->value() == "port") {
 
 
-					insert = new PortInsert (_session, node);
+					insert.reset (new PortInsert (_session, node));
 
 				} else {
 
@@ -1526,8 +1495,6 @@ Route::set_state (const XMLNode& node)
 	XMLNode *child;
 	XMLPropertyList plist;
 	const XMLProperty *prop;
-	XMLNodeList midi_kids;
-
 
 	if (node.name() != "Route"){
 		error << string_compose(_("Bad node sent to Route::set_state() [%1]"), node.name()) << endmsg;
@@ -1540,6 +1507,11 @@ Route::set_state (const XMLNode& node)
 		_flags = Flag (x);
 	} else {
 		_flags = Flag (0);
+	}
+	
+	if ((prop = node.property ("default-type")) != 0) {
+		_default_type = DataType(prop->value());
+		assert(_default_type != DataType::NIL);
 	}
 
 	if ((prop = node.property ("phase-invert")) != 0) {
@@ -1716,45 +1688,6 @@ Route::set_state (const XMLNode& node)
 		}
 	}
 
-	midi_kids = node.children ("MIDI");
-	
-	for (niter = midi_kids.begin(); niter != midi_kids.end(); ++niter) {
-	
-		XMLNodeList kids;
-		XMLNodeConstIterator miter;
-		XMLNode*    child;
-
-		kids = (*niter)->children ();
-
-		for (miter = kids.begin(); miter != kids.end(); ++miter) {
-
-			child =* miter;
-
-			MIDI::eventType ev = MIDI::on; /* initialize to keep gcc happy */
-			MIDI::byte additional = 0;  /* ditto */
-			MIDI::channel_t chn = 0;    /* ditto */
-			
-			if (child->name() == "mute") {
-			
-				if (get_midi_node_info (child, ev, chn, additional)) {
-					_midi_mute_control.set_control_type (chn, ev, additional);
-				} else {
-					error << string_compose(_("MIDI mute control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
-				}
-			}
-			else if (child->name() == "solo") {
-			
-				if (get_midi_node_info (child, ev, chn, additional)) {
-					_midi_solo_control.set_control_type (chn, ev, additional);
-				} else {
-					error << string_compose(_("MIDI mute control specification for %1 is incomplete, so it has been ignored"), _name) << endmsg;
-				}
-			}
-
-		}
-	}
-
-	
 	return 0;
 }
 
@@ -1783,8 +1716,8 @@ Route::silence (jack_nframes_t nframes, jack_nframes_t offset)
 			
 			if (lm.locked()) {
 				for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-					PluginInsert* pi;
-					if (!_active && (pi = dynamic_cast<PluginInsert*> (*i)) != 0) {
+					boost::shared_ptr<PluginInsert> pi;
+					if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
 						// skip plugins, they don't need anything when we're not active
 						continue;
 					}
@@ -1895,18 +1828,17 @@ Route::set_comment (string cmt, void *src)
 }
 
 bool
-Route::feeds (Route *o)
+Route::feeds (boost::shared_ptr<Route> other)
 {
 	uint32_t i, j;
 
-	IO& other = *o;
 	IO& self = *this;
 	uint32_t no = self.n_outputs();
-	uint32_t ni = other.n_inputs ();
+	uint32_t ni = other->n_inputs ();
 
 	for (i = 0; i < no; ++i) {
 		for (j = 0; j < ni; ++j) {
-			if (self.output(i)->connected_to (other.input(j)->name())) {
+			if (self.output(i)->connected_to (other->input(j)->name())) {
 				return true;
 			}
 		}
@@ -1920,7 +1852,7 @@ Route::feeds (Route *o)
 
 		for (i = 0; i < no; ++i) {
 			for (j = 0; j < ni; ++j) {
-				if ((*r)->output(i)->connected_to (other.input (j)->name())) {
+				if ((*r)->output(i)->connected_to (other->input (j)->name())) {
 					return true;
 				}
 			}
@@ -1935,7 +1867,7 @@ Route::feeds (Route *o)
 		
 		for (i = 0; i < no; ++i) {
 			for (j = 0; j < ni; ++j) {
-				if (_control_outs->output(i)->connected_to (other.input (j)->name())) {
+				if (_control_outs->output(i)->connected_to (other->input (j)->name())) {
 					return true;
 				}
 			}
@@ -2186,10 +2118,10 @@ Route::toggle_monitor_input ()
 bool
 Route::has_external_redirects () const
 {
-	const PortInsert* pi;
+	boost::shared_ptr<const PortInsert> pi;
 	
 	for (RedirectList::const_iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		if ((pi = dynamic_cast<const PortInsert*>(*i)) != 0) {
+		if ((pi = boost::dynamic_pointer_cast<const PortInsert>(*i)) != 0) {
 
 			uint32_t no = pi->n_outputs();
 
@@ -2208,67 +2140,6 @@ Route::has_external_redirects () const
 	}
 
 	return false;
-}
-
-void
-Route::reset_midi_control (MIDI::Port* port, bool on)
-{
-	MIDI::channel_t chn;
-	MIDI::eventType ev;
-	MIDI::byte extra;
-
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-			(*i)->reset_midi_control (port, on);
-	}
-
-	IO::reset_midi_control (port, on);
-	
-	_midi_solo_control.get_control_info (chn, ev, extra);
-	if (!on) {
-		chn = -1;
-	}
-	_midi_solo_control.midi_rebind (port, chn);
-	
-	_midi_mute_control.get_control_info (chn, ev, extra);
-	if (!on) {
-		chn = -1;
-	}
-	_midi_mute_control.midi_rebind (port, chn);
-}
-
-void
-Route::send_all_midi_feedback ()
-{
-	if (_session.get_midi_feedback()) {
-
-		{
-			Glib::RWLock::ReaderLock lm (redirect_lock);
-			for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-				(*i)->send_all_midi_feedback ();
-			}
-		}
-
-		IO::send_all_midi_feedback();
-
-		_midi_solo_control.send_feedback (_soloed);
-		_midi_mute_control.send_feedback (_muted);
-	}
-}
-
-MIDI::byte*
-Route::write_midi_feedback (MIDI::byte* buf, int32_t& bufsize)
-{
-	buf = _midi_solo_control.write_feedback (buf, bufsize, _soloed);
-	buf = _midi_mute_control.write_feedback (buf, bufsize, _muted);
-
-	{
-		Glib::RWLock::ReaderLock lm (redirect_lock);
-		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-			buf = (*i)->write_midi_feedback (buf, bufsize);
-		}
-	}
-
-	return IO::write_midi_feedback (buf, bufsize);
 }
 
 void
@@ -2341,106 +2212,46 @@ Route::automation_snapshot (jack_nframes_t now)
 	}
 }
 
-Route::MIDIToggleControl::MIDIToggleControl (Route& s, ToggleType tp, MIDI::Port* port)
-	: MIDI::Controllable (port, true), route (s), type(tp), setting(false)
+Route::ToggleControllable::ToggleControllable (Route& s, ToggleType tp)
+	: route (s), type(tp)
 {
-	last_written = false; /* XXX need a good out-of-bound-value */
-}
-
-void
-Route::MIDIToggleControl::set_value (float val)
-{
-	MIDI::eventType et;
-	MIDI::channel_t chn;
-	MIDI::byte additional;
-
-	get_control_info (chn, et, additional);
-
-	setting = true;
-
-#ifdef HOLD_TOGGLE_VALUES
-	if (et == MIDI::off || et == MIDI::on) {
-
-		/* literal toggle */
-
-		switch (type) {
-		case MuteControl:
-			route.set_mute (!route.muted(), this);
-			break;
-		case SoloControl:
-			route.set_solo (!route.soloed(), this);
-			break;
-		default:
-			break;
-		}
-
-	} else {
-#endif
-
-		/* map full control range to a boolean */
-
-		bool bval = ((val >= 0.5f) ? true: false);
-		
-		switch (type) {
-		case MuteControl:
-			route.set_mute (bval, this);
-			break;
-		case SoloControl:
-			route.set_solo (bval, this);
-			break;
-		default:
-			break;
-		}
-
-#ifdef HOLD_TOGGLE_VALUES
-	}
-#endif
-
-	setting = false;
-}
-
-void
-Route::MIDIToggleControl::send_feedback (bool value)
-{
-
-	if (!setting && get_midi_feedback()) {
-		MIDI::byte val = (MIDI::byte) (value ? 127: 0);
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
-		MIDI::EventTwoBytes data;
-	    
-		if (get_control_info (ch, ev, additional)) {
-			data.controller_number = additional;
-			data.value = val;
-			last_written = value;
-			
-			route._session.send_midi_message (get_port(), ev, ch, data);
-		}
-	}
 	
 }
 
-MIDI::byte*
-Route::MIDIToggleControl::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool val, bool force)
+void
+Route::ToggleControllable::set_value (float val)
 {
-	if (get_midi_feedback() && bufsize > 2) {
-		MIDI::channel_t ch = 0;
-		MIDI::eventType ev = MIDI::none;
-		MIDI::byte additional = 0;
+	bool bval = ((val >= 0.5f) ? true: false);
+	
+	switch (type) {
+	case MuteControl:
+		route.set_mute (bval, this);
+		break;
+	case SoloControl:
+		route.set_solo (bval, this);
+		break;
+	default:
+		break;
+	}
+}
 
-		if (get_control_info (ch, ev, additional)) {
-			if (val != last_written || force) {
-				*buf++ = (0xF0 & ev) | (0xF & ch);
-				*buf++ = additional; /* controller number */
-				*buf++ = (MIDI::byte) (val ? 127 : 0);
-				bufsize -= 3;
-				last_written = val;
-			}
-		}
+float
+Route::ToggleControllable::get_value (void) const
+{
+	float val = 0.0f;
+	
+	switch (type) {
+	case MuteControl:
+		val = route.muted() ? 1.0f : 0.0f;
+		break;
+	case SoloControl:
+		val = route.soloed() ? 1.0f : 0.0f;
+		break;
+	default:
+		break;
 	}
 
-	return buf;
+	return val;
 }
 
 void 
@@ -2479,8 +2290,8 @@ Route::protect_automation ()
 	}
 	
 	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		PluginInsert* pi;
-		if ((pi = dynamic_cast<PluginInsert*> (*i)) != 0) {
+		boost::shared_ptr<PluginInsert> pi;
+		if ((pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
 			pi->protect_automation ();
 		}
 	}

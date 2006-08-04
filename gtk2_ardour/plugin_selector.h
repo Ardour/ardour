@@ -25,17 +25,18 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm2ext/selector.h>
 
+#include <ardour/plugin.h>
+
 namespace ARDOUR {
 	class Session;
 	class PluginManager;
-	class Plugin;
 }
 
 class PluginSelector : public ArdourDialog
 {
   public:
 	PluginSelector (ARDOUR::PluginManager *);
-	sigc::signal<void,ARDOUR::Plugin *> PluginCreated;
+	sigc::signal<void,boost::shared_ptr<ARDOUR::Plugin> > PluginCreated;
 
 	int run (); // XXX should we try not to overload the non-virtual Gtk::Dialog::run() ?
 
@@ -44,9 +45,12 @@ class PluginSelector : public ArdourDialog
   private:
 	ARDOUR::Session* session;
 	Gtk::Notebook notebook;
-	Gtk::ScrolledWindow lscroller;
-	Gtk::ScrolledWindow vscroller;
-	Gtk::ScrolledWindow ascroller;
+	Gtk::ScrolledWindow lscroller;  // ladspa
+	Gtk::ScrolledWindow vscroller;  // vst
+	Gtk::ScrolledWindow auscroller; // AudioUnit
+	Gtk::ScrolledWindow ascroller;  // Added plugins
+	
+	ARDOUR::PluginInfo::Type current_selection;
 
 	// page 1
 	struct LadspaColumns : public Gtk::TreeModel::ColumnRecord {
@@ -61,7 +65,7 @@ class PluginSelector : public ArdourDialog
 		Gtk::TreeModelColumn<std::string> type;
 		Gtk::TreeModelColumn<std::string> ins;
 		Gtk::TreeModelColumn<std::string> outs;
-	    Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
+	    Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 	LadspaColumns lcols;
 	Glib::RefPtr<Gtk::ListStore> lmodel;
@@ -76,7 +80,7 @@ class PluginSelector : public ArdourDialog
 			add (plugin);
 		}
 		Gtk::TreeModelColumn<std::string> text;
-		Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
+		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 	AddedColumns acols;
 	Glib::RefPtr<Gtk::ListStore> amodel;
@@ -95,7 +99,7 @@ class PluginSelector : public ArdourDialog
 	    Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> ins;
 		Gtk::TreeModelColumn<std::string> outs;
-	    Gtk::TreeModelColumn<ARDOUR::PluginInfo *> plugin;
+	    Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 	VstColumns vcols;
 	Glib::RefPtr<Gtk::ListStore> vmodel;
@@ -104,16 +108,32 @@ class PluginSelector : public ArdourDialog
 	static void _vst_refiller (void *);
 	void vst_refiller ();
 	void vst_display_selection_changed();
-#endif	
+#endif // VST_SUPPORT
 
-	ARDOUR::PluginInfo* i_selected_plug;
-
-	// We need an integer for the output side because
-	// the name isn't promised to be unique.
-	gint o_selected_plug;
+#ifdef HAVE_COREAUDIO
+	// page 3
+	struct AUColumns : public Gtk::TreeModel::ColumnRecord {
+		AUColumns () {
+			add (name);
+			add (ins);
+			add (outs);
+			add (plugin);
+		}
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> ins;
+		Gtk::TreeModelColumn<std::string> outs;
+		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
+	};
+	AUColumns aucols;
+	Glib::RefPtr<Gtk::ListStore> aumodel;
+	Glib::RefPtr<Gtk::TreeSelection> auselection;
+	Gtk::TreeView au_display;
+	static void _au_refiller (void *);
+	void au_refiller ();
+	void au_display_selection_changed();
+#endif //HAVE_COREAUDIO
 
 	ARDOUR::PluginManager *manager;
-	list<ARDOUR::PluginInfo*> added_plugins;
 
 	static void _input_refiller (void *);
 	
@@ -125,8 +145,9 @@ class PluginSelector : public ArdourDialog
 	void added_list_selection_changed();
 	void ladspa_display_selection_changed();
 	void btn_apply_clicked();
-	void use_plugin (ARDOUR::PluginInfo*);
+	void use_plugin (ARDOUR::PluginInfoPtr);
 	void cleanup ();
 };
 
 #endif // __ardour_plugin_selector_h__
+

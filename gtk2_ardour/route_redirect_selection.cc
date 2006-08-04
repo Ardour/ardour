@@ -61,17 +61,6 @@ RouteRedirectSelection::clear ()
 void
 RouteRedirectSelection::clear_redirects ()
 {
-	for (RedirectSelection::iterator i = redirects.begin(); i != redirects.end(); ) {
-		RedirectSelection::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
-		delete *i;
-
-		i = tmp;
-	}
-
 	redirects.clear ();
 	RedirectsChanged ();
 }
@@ -84,29 +73,32 @@ RouteRedirectSelection::clear_routes ()
 }
 
 void
-RouteRedirectSelection::add (Redirect* r)
+RouteRedirectSelection::add (boost::shared_ptr<Redirect> r)
 {
 	if (find (redirects.begin(), redirects.end(), r) == redirects.end()) {
 		redirects.push_back (r);
-		
-		void (RouteRedirectSelection::*pmf)(Redirect*) = &RouteRedirectSelection::remove;
-		r->GoingAway.connect (mem_fun(*this, pmf));
+
+		// XXX SHAREDPTR FIXME
+		// void (RouteRedirectSelection::*pmf)(Redirect*) = &RouteRedirectSelection::remove;
+		// r->GoingAway.connect (mem_fun(*this, pmf));
 
 		RedirectsChanged();
 	}
 }
 
 void
-RouteRedirectSelection::add (const vector<Redirect*>& rlist)
+RouteRedirectSelection::add (const vector<boost::shared_ptr<Redirect> >& rlist)
 {
 	bool changed = false;
 
-	for (vector<Redirect*>::const_iterator i = rlist.begin(); i != rlist.end(); ++i) {
+	for (vector<boost::shared_ptr<Redirect> >::const_iterator i = rlist.begin(); i != rlist.end(); ++i) {
 		if (find (redirects.begin(), redirects.end(), *i) == redirects.end()) {
 			redirects.push_back (*i);
 			
-			void (RouteRedirectSelection::*pmf)(Redirect*) = &RouteRedirectSelection::remove;
-			(*i)->GoingAway.connect (mem_fun(*this, pmf));
+			// XXX SHAREDPTR FIXME
+
+			//void (RouteRedirectSelection::*pmf)(Redirect*) = &RouteRedirectSelection::remove;
+			// (*i)->GoingAway.connect (mem_fun(*this, pmf));
 			changed = true;
 		}
 	}
@@ -117,9 +109,9 @@ RouteRedirectSelection::add (const vector<Redirect*>& rlist)
 }
 
 void
-RouteRedirectSelection::remove (Redirect* r)
+RouteRedirectSelection::remove (boost::shared_ptr<Redirect> r)
 {
-	list<Redirect*>::iterator i;
+	list<boost::shared_ptr<Redirect> >::iterator i;
 	if ((i = find (redirects.begin(), redirects.end(), r)) != redirects.end()) {
 		redirects.erase (i);
 		RedirectsChanged ();
@@ -127,36 +119,37 @@ RouteRedirectSelection::remove (Redirect* r)
 }
 
 void
-RouteRedirectSelection::set (Redirect *r)
+RouteRedirectSelection::set (boost::shared_ptr<Redirect> r)
 {
 	clear_redirects ();
 	add (r);
 }
 
 void
-RouteRedirectSelection::set (const vector<Redirect*>& rlist)
+RouteRedirectSelection::set (const vector<boost::shared_ptr<Redirect> >& rlist)
 {
 	clear_redirects ();
 	add (rlist);
 }
 
 void
-RouteRedirectSelection::add (Route* r)
+RouteRedirectSelection::add (boost::shared_ptr<Route> r)
 {
 	if (find (routes.begin(), routes.end(), r) == routes.end()) {
 		routes.push_back (r);
 
-		void (RouteRedirectSelection::*pmf)(Route*) = &RouteRedirectSelection::remove;
-		r->GoingAway.connect (bind (mem_fun(*this, pmf), r));
+		// XXX SHAREDPTR FIXME
+		// void (RouteRedirectSelection::*pmf)(Route*) = &RouteRedirectSelection::remove;
+		// r->GoingAway.connect (bind (mem_fun(*this, pmf), r));
 
 		RoutesChanged();
 	}
 }
 
 void
-RouteRedirectSelection::remove (Route* r)
+RouteRedirectSelection::remove (boost::shared_ptr<Route> r)
 {
-	list<Route*>::iterator i;
+	list<boost::shared_ptr<Route> >::iterator i;
 	if ((i = find (routes.begin(), routes.end(), r)) != routes.end()) {
 		routes.erase (i);
 		RoutesChanged ();
@@ -164,16 +157,16 @@ RouteRedirectSelection::remove (Route* r)
 }
 
 void
-RouteRedirectSelection::set (Route *r)
+RouteRedirectSelection::set (boost::shared_ptr<Route> r)
 {
 	clear_routes ();
 	add (r);
 }
 
 bool
-RouteRedirectSelection::selected (Route* ms)
+RouteRedirectSelection::selected (boost::shared_ptr<Route> r)
 {
-	return find (routes.begin(), routes.end(), ms) != routes.end();
+	return find (routes.begin(), routes.end(), r) != routes.end();
 }
 
 bool

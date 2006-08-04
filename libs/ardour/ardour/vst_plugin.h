@@ -28,11 +28,9 @@
 #include <string>
 #include <dlfcn.h>
 
-#include <midi++/controllable.h>
 #include <sigc++/signal.h>
-
+#include <pbd/stateful.h> 
 #include <jack/types.h>
-#include <ardour/stateful.h>
 #include <ardour/plugin_state.h>
 #include <ardour/plugin.h>
 
@@ -106,6 +104,14 @@ class VSTPlugin : public ARDOUR::Plugin
 	bool        been_resumed;
 };
 
-}
+class VSTPluginInfo : public PluginInfo
+{
+	VSTPluginInfo () {}
+	~VSTPluginInfo () {}
+	
+	PluginPtr load (Session& session);
+};
+
+} // namespace ARDOUR
 
 #endif /* __ardour_vst_plugin_h__ */

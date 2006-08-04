@@ -80,10 +80,10 @@ struct _GnomeCanvasWaveView
     void (*gain_curve_function)(void *arg, double start, double end, float* vector, guint32 veclen);
     void *gain_src;
 
-    /* x-axis: samples per canvas unit. */
+    /** x-axis: samples per canvas unit. */
     double samples_per_unit;
     
-    /* y-axis: amplitude_above_axis.
+    /** y-axis: amplitude_above_axis.
      * 
      * the default is that an (scaled, normalized -1.0 ... +1.0) amplitude of 1.0
      * corresponds to the top of the area assigned to the waveview.
@@ -92,8 +92,8 @@ struct _GnomeCanvasWaveView
      * smaller values will decrease the vertical scale, moving peaks/troughs toward
      * the middle of the area assigned to the waveview.
      */
-
     double amplitude_above_axis;
+
     double x;
     double y;
     double height;

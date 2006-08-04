@@ -34,6 +34,8 @@ class DestructiveFileSource : public SndFileSource {
 	DestructiveFileSource (std::string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate,
 			       Flag flags = AudioFileSource::Flag (AudioFileSource::Writable));
 
+	DestructiveFileSource (std::string path, Flag flags);
+
 	DestructiveFileSource (const XMLNode&);
 	~DestructiveFileSource ();
 
@@ -49,6 +51,8 @@ class DestructiveFileSource : public SndFileSource {
   protected:
 	jack_nframes_t write_unlocked (Sample *src, jack_nframes_t cnt, char * workbuf);
 
+	virtual void handle_header_position_change ();
+
   private:
 	static jack_nframes_t xfade_frames;
 	static gain_t* out_coefficient;
@@ -60,6 +64,7 @@ class DestructiveFileSource : public SndFileSource {
 	jack_nframes_t file_pos; // unit is frames
 	Sample*        xfade_buf;
 
+	void init ();
 	jack_nframes_t crossfade (Sample* data, jack_nframes_t cnt, int dir, char * workbuf);
 	void set_timeline_position (jack_nframes_t);
 };

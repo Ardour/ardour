@@ -39,13 +39,13 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Change Region::FadeChanged = ARDOUR::new_change ();
+Change Region::FadeChanged       = ARDOUR::new_change ();
 Change Region::SyncOffsetChanged = ARDOUR::new_change ();
-Change Region::MuteChanged = ARDOUR::new_change ();
-Change Region::OpacityChanged = ARDOUR::new_change ();
-Change Region::LockChanged = ARDOUR::new_change ();
-Change Region::LayerChanged = ARDOUR::new_change ();
-Change Region::HiddenChanged = ARDOUR::new_change ();
+Change Region::MuteChanged       = ARDOUR::new_change ();
+Change Region::OpacityChanged    = ARDOUR::new_change ();
+Change Region::LockChanged       = ARDOUR::new_change ();
+Change Region::LayerChanged      = ARDOUR::new_change ();
+Change Region::HiddenChanged     = ARDOUR::new_change ();
 
 sigc::signal<void,Region *> Region::CheckNewRegion;
 
@@ -53,7 +53,6 @@ Region::Region (jack_nframes_t start, jack_nframes_t length, const string& name,
 {
 	/* basic Region constructor */
 
-	_id = ARDOUR::new_id();
 	_flags = flags;
 	_playlist = 0;
 	_read_data_count = 0;
@@ -76,7 +75,6 @@ Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t lengt
 {
 	/* create a new Region from part of an existing one */
 
-	_id = ARDOUR::new_id();
 	_frozen = 0;
 	pending_changed = Change (0);
 	_playlist = 0;
@@ -102,7 +100,6 @@ Region::Region (const Region &other)
 {
 	/* Pure copy constructor */
 
-	_id = ARDOUR::new_id();
 	_frozen = 0;
 	pending_changed = Change (0);
 	_playlist = 0;
@@ -130,7 +127,6 @@ Region::Region (const Region &other)
 
 Region::Region (const XMLNode& node)
 {
-	_id = 0;
 	_frozen = 0;
 	pending_changed = Change (0);
 	_playlist = 0;
@@ -844,7 +840,7 @@ Region::state (bool full_state)
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
 	
-	snprintf (buf, sizeof (buf), "%" PRIu64, _id);
+	_id.print (buf);
 	node->add_property ("id", buf);
 	node->add_property ("name", _name);
 	snprintf (buf, sizeof (buf), "%u", _start);
@@ -886,7 +882,7 @@ Region::set_state (const XMLNode& node)
 		return -1;
 	}
 
-	sscanf (prop->value().c_str(), "%" PRIu64, &_id);
+	_id = prop->value();
 
 	if ((prop = node.property ("name")) == 0) {
 		error << _("Session: XMLNode describing a Region is incomplete (no name)") << endmsg;
@@ -993,4 +989,31 @@ void
 Region::set_last_layer_op (uint64_t when)
 {
 	_last_layer_op = when;
+}
+
+bool
+Region::overlap_equivalent (const Region& other) const
+{
+	return coverage (other.first_frame(), other.last_frame()) != OverlapNone;
+}
+
+bool
+Region::equivalent (const Region& other) const
+{
+	return _start == other._start &&
+		_position == other._position &&
+		_length == other._length;
+}
+
+bool
+Region::size_equivalent (const Region& other) const
+{
+	return _start == other._start &&
+		_length == other._length;
+}
+
+bool
+Region::region_list_equivalent (const Region& other) const
+{
+	return size_equivalent (other) && source_equivalent (other) && _name == other._name;
 }

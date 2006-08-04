@@ -80,7 +80,7 @@ Session::request_transport_speed (float speed)
 }
 
 void
-Session::request_diskstream_speed (AudioDiskstream& ds, float speed)
+Session::request_diskstream_speed (Diskstream& ds, float speed)
 {
 	Event* ev = new Event (Event::SetDiskstreamSpeed, Event::Add, Event::Immediate, 0, speed);
 	ev->set_ptr (&ds);
@@ -192,17 +192,17 @@ Session::realtime_stop (bool abort)
 void
 Session::butler_transport_work ()
 {
-	Glib::RWLock::ReaderLock rm (route_lock);
 	Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
 	if (post_transport_work & PostTransportCurveRealloc) {
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->curve_reallocate();
 		}
 	}
 
 	if (post_transport_work & PostTransportInputChange) {
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			(*i)->non_realtime_input_change ();
 		}
 	}
@@ -218,7 +218,7 @@ Session::butler_transport_work ()
 		cumulative_rf_motion = 0;
 		reset_rf_scale (0);
 
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if (!(*i)->hidden()) {
 				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
 					(*i)->seek ((jack_nframes_t) (_transport_frame * (double) (*i)->speed()));
@@ -250,7 +250,7 @@ Session::non_realtime_set_speed ()
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->non_realtime_set_speed ();
 	}
 }
@@ -260,7 +260,7 @@ Session::non_realtime_overwrite ()
 {
 	Glib::RWLock::ReaderLock lm (diskstream_lock);
 
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->pending_overwrite) {
 			(*i)->overwrite_existing_buffers ();
 		}
@@ -276,7 +276,7 @@ Session::non_realtime_stop (bool abort)
 	
 	did_record = false;
 	
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if ((*i)->get_captured_frames () != 0) {
 			did_record = true;
 			break;
@@ -331,11 +331,13 @@ Session::non_realtime_stop (bool abort)
 		_have_captured = true;
 	}
 
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->transport_stopped (*now, xnow, abort);
 	}
 	
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->hidden()) {
 			(*i)->set_pending_declick (0);
 		}
@@ -368,7 +370,7 @@ Session::non_realtime_stop (bool abort)
 	}
 #endif
 
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if (!(*i)->hidden()) {
 				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
 					(*i)->seek ((jack_nframes_t) (_transport_frame * (double) (*i)->speed()));
@@ -495,7 +497,7 @@ Session::set_auto_loop (bool yn)
 
 			if (seamless_loop) {
 				// set all diskstreams to use internal looping
-				for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+				for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 					if (!(*i)->hidden()) {
 						(*i)->set_loop (loc);
 					}
@@ -503,7 +505,7 @@ Session::set_auto_loop (bool yn)
 			}
 			else {
 				// set all diskstreams to NOT use internal looping
-				for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+				for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 					if (!(*i)->hidden()) {
 						(*i)->set_loop (0);
 					}
@@ -533,7 +535,7 @@ Session::set_auto_loop (bool yn)
 		clear_events (Event::AutoLoop);
 
 		// set all diskstreams to NOT use internal looping
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if (!(*i)->hidden()) {
 				(*i)->set_loop (0);
 			}
@@ -547,7 +549,9 @@ Session::set_auto_loop (bool yn)
 void
 Session::flush_all_redirects ()
 {
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->flush_redirects ();
 	}
 }
@@ -649,7 +653,7 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 			   The rarity and short potential lock duration makes this "OK"
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (!auto_input);
@@ -664,7 +668,7 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 			   The rarity and short potential lock duration makes this "OK"
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (true);
@@ -708,7 +712,7 @@ Session::set_transport_speed (float speed, bool abort)
 			   The rarity and short potential lock duration makes this "OK"
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (true);	
@@ -734,7 +738,7 @@ Session::set_transport_speed (float speed, bool abort)
 			   The rarity and short potential lock duration makes this "OK"
 			*/
 			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 				if (auto_input && (*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (false);	
@@ -785,7 +789,7 @@ Session::set_transport_speed (float speed, bool abort)
 		_last_transport_speed = _transport_speed;
 		_transport_speed = speed;
 		
-		for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
 				post_transport_work = PostTransportWork (post_transport_work | PostTransportSpeed);
 			}
@@ -875,7 +879,7 @@ Session::actually_start_transport ()
 	transport_sub_state |= PendingDeclickIn;
 	_transport_speed = 1.0;
 	
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->realtime_set_speed ((*i)->speed(), true);
 	}
 
@@ -1005,7 +1009,7 @@ Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
 	
 	_slave_type = src;
 
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		if (!(*i)->hidden()) {
 			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
 				non_rt_required = true;
@@ -1037,7 +1041,7 @@ Session::reverse_diskstream_buffers ()
 }
 
 void
-Session::set_diskstream_speed (AudioDiskstream* stream, float speed)
+Session::set_diskstream_speed (Diskstream* stream, float speed)
 {
 	if (stream->realtime_set_speed (speed, false)) {
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportSpeed);
@@ -1196,11 +1200,12 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		return;
 	}
 
-	Glib::RWLock::ReaderLock lm (route_lock);
 	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
 	_worst_track_latency = 0;
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (with_stop) {
 			(*i)->handle_transport_stopped (abort, (post_transport_work & PostTransportLocate), 
 							(!(post_transport_work & PostTransportLocate) || pending_locate_flush));
@@ -1218,7 +1223,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		}
 	}
 
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->set_latency_delay (_worst_track_latency);
 	}
 
@@ -1228,12 +1233,12 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		_engine.update_total_latencies ();
 	}
 
-	set_worst_io_latencies (false);
+	set_worst_io_latencies ();
 
 	/* reflect any changes in latencies into capture offsets
 	*/
 	
-	for (AudioDiskstreamList::iterator i = audio_diskstreams.begin(); i != audio_diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
 		(*i)->set_capture_offset ();
 	}
 }

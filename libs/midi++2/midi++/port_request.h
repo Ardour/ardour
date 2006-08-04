@@ -54,7 +54,7 @@ struct PortRequest {
 		 const std::string &xtype);
 };
 
-}; /* namespace MIDI */
+} // namespace MIDI
 
 #endif // __midi_port_request_h__
 

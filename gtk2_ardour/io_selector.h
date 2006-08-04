@@ -53,7 +53,7 @@ namespace ARDOUR {
 
 class IOSelector : public Gtk::VBox {
   public:
-	IOSelector (ARDOUR::Session&, ARDOUR::IO&, bool for_input);
+	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool for_input);
 	~IOSelector ();
 
 	void redisplay ();
@@ -67,9 +67,9 @@ class IOSelector : public Gtk::VBox {
 
   protected:
 	ARDOUR::Session& session;
-
+	
   private:
-	ARDOUR::IO& io;
+	boost::shared_ptr<ARDOUR::IO> io;
 	bool for_input;
 	ARDOUR::Port *selected_port;
 
@@ -135,7 +135,7 @@ class IOSelector : public Gtk::VBox {
 class IOSelectorWindow : public ArdourDialog
 {
   public:
-	IOSelectorWindow (ARDOUR::Session&, ARDOUR::IO&, bool for_input, bool can_cancel=false);
+	IOSelectorWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool for_input, bool can_cancel=false);
 	~IOSelectorWindow ();
 
 	IOSelector& selector() { return _selector; }
@@ -162,7 +162,7 @@ class IOSelectorWindow : public ArdourDialog
 class PortInsertUI : public Gtk::VBox
 {
   public: 
-	PortInsertUI (ARDOUR::Session&, ARDOUR::PortInsert&);
+	PortInsertUI (ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>);
 	
 	void redisplay ();
 	void finished (IOSelector::Result);
@@ -178,7 +178,7 @@ class PortInsertUI : public Gtk::VBox
 class PortInsertWindow : public ArdourDialog
 {
   public: 
-	PortInsertWindow (ARDOUR::Session&, ARDOUR::PortInsert&, bool can_cancel=false);
+	PortInsertWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>, bool can_cancel=false);
 	
   protected:
 	void on_map ();

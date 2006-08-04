@@ -79,7 +79,7 @@ GainMeter::setup_slider_pix ()
 	return 0;
 }
 
-GainMeter::GainMeter (IO& io, Session& s)
+GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	: _io (io),
 	  _session (s),
 	  gain_slider (0),
@@ -99,17 +99,12 @@ GainMeter::GainMeter (IO& io, Session& s)
 	
 	gain_slider = manage (new VSliderController (slider, rail,
 						     &gain_adjustment,
-						     & _io.midi_gain_control(),
+						     _io->gain_control(),
 						     false));
 
 	gain_slider->signal_button_press_event().connect (mem_fun(*this, &GainMeter::start_gain_touch));
 	gain_slider->signal_button_release_event().connect (mem_fun(*this, &GainMeter::end_gain_touch));
 	gain_slider->set_name ("MixerGainMeter");
-
-	if (_session.midi_port()) {
-		_io.set_midi_to_gain_function (slider_position_to_gain);
-		_io.set_gain_to_midi_function (gain_to_slider_position);
-	}
 
 	gain_display.set_print_func (_gain_printer, this);
 
@@ -157,7 +152,7 @@ GainMeter::GainMeter (IO& io, Session& s)
 
 	Route* r;
 
-	if ((r = dynamic_cast<Route*> (&_io)) != 0) {
+	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 	        /* 
 		   if we don't have a route (if we're the click), 
 		   pack some route-dependent stuff.
@@ -170,13 +165,13 @@ GainMeter::GainMeter (IO& io, Session& s)
 		using namespace Menu_Helpers;
 	
 		gain_astate_menu.items().push_back (MenuElem (_("Off"), 
-						      bind (mem_fun (&_io, &IO::set_gain_automation_state), (AutoState) Off)));
+						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),
-						      bind (mem_fun (&_io, &IO::set_gain_automation_state), (AutoState) Play)));
+						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Play)));
 		gain_astate_menu.items().push_back (MenuElem (_("Write"),
-						      bind (mem_fun (&_io, &IO::set_gain_automation_state), (AutoState) Write)));
+						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Write)));
 		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
-						      bind (mem_fun (&_io, &IO::set_gain_automation_state), (AutoState) Touch)));
+						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Touch)));
 	
 		gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
 		gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
@@ -200,7 +195,7 @@ GainMeter::GainMeter (IO& io, Session& s)
 	pack_start (gain_display_box,  Gtk::PACK_SHRINK);
 	pack_start (hbox,  Gtk::PACK_SHRINK);
 
-	_io.gain_changed.connect (mem_fun(*this, &GainMeter::gain_changed));
+	_io->gain_changed.connect (mem_fun(*this, &GainMeter::gain_changed));
 
 	meter_metric_area.signal_expose_event().connect (mem_fun(*this, &GainMeter::meter_metrics_expose));
 	gain_adjustment.signal_value_changed().connect (mem_fun(*this, &GainMeter::gain_adjusted));
@@ -328,7 +323,7 @@ GainMeter::update_meters ()
 	
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
-			peak = _io.peak_input_power (n);
+			peak = _io->peak_input_power (n);
 
 			(*i).meter->set (log_meter (peak), peak);
 						
@@ -387,14 +382,14 @@ GainMeter::hide_all_meters ()
 void
 GainMeter::setup_meters ()
 {
-	uint32_t nmeters = _io.n_outputs();
+	uint32_t nmeters = _io->n_outputs();
 	guint16 width;
 
 	hide_all_meters ();
 
 	Route* r;
 
-	if ((r = dynamic_cast<Route*> (&_io)) != 0) {
+	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 
 		switch (r->meter_point()) {
 		case MeterPreFader:
@@ -408,7 +403,7 @@ GainMeter::setup_meters ()
 
 	} else {
 
-		nmeters = _io.n_outputs();
+		nmeters = _io->n_outputs();
 
 	}
 
@@ -456,7 +451,7 @@ GainMeter::peak_button_release (GdkEventButton* ev)
 		ResetAllPeakDisplays ();
 	} else if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
 		Route* r;
-		if ((r = dynamic_cast<Route*> (&_io)) != 0) {
+		if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 			ResetGroupPeakDisplays (r->mix_group());
 		}
 	} else {
@@ -477,7 +472,7 @@ void
 GainMeter::reset_group_peak_display (RouteGroup* group)
 {
 	Route* r;
-	if ((r = dynamic_cast<Route*> (&_io)) != 0) {
+	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 		if (group == r->mix_group()) {
 			reset_peak_display ();
 		}
@@ -546,14 +541,14 @@ void
 GainMeter::gain_adjusted ()
 {
 	if (!ignore_toggle) {
-		_io.set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+		_io->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
 	}
 }
 
 void
 GainMeter::effective_gain_display ()
 {
-	gfloat value = gain_to_slider_position (_io.effective_gain());
+	gfloat value = gain_to_slider_position (_io->effective_gain());
 	
 	if (gain_adjustment.get_value() != value) {
 		ignore_toggle = true;
@@ -583,7 +578,7 @@ GainMeter::set_fader_name (const char * name)
 void
 GainMeter::update_gain_sensitive ()
 {
-	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (!(_io.gain_automation_state() & Play));
+	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (!(_io->gain_automation_state() & Play));
 }
 
 
@@ -614,7 +609,7 @@ GainMeter::meter_press(GdkEventButton* ev)
 
 	wait_for_release = false;
 
-	if ((_route = dynamic_cast<Route*>(&_io)) == 0) {
+	if ((_route = dynamic_cast<Route*>(_io.get())) == 0) {
 		return FALSE;
 	}
 
@@ -676,7 +671,7 @@ GainMeter::meter_release(GdkEventButton* ev)
 	if(!ignore_toggle){
 		if (wait_for_release){
 			wait_for_release = false;
-			set_meter_point (*(dynamic_cast<Route*>(&_io)), old_meter_point);
+			set_meter_point (*(dynamic_cast<Route*>(_io.get())), old_meter_point);
 		}
 	}
 	return true;
@@ -705,7 +700,7 @@ GainMeter::meter_point_clicked ()
 {
 	Route* r;
 
-	if ((r = dynamic_cast<Route*> (&_io)) != 0) {
+	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 
 	}
 }
@@ -713,14 +708,14 @@ GainMeter::meter_point_clicked ()
 gint
 GainMeter::start_gain_touch (GdkEventButton* ev)
 {
-	_io.start_gain_touch ();
+	_io->start_gain_touch ();
 	return FALSE;
 }
 
 gint
 GainMeter::end_gain_touch (GdkEventButton* ev)
 {
-	_io.end_gain_touch ();
+	_io->end_gain_touch ();
 	return FALSE;
 }
 
@@ -824,10 +819,10 @@ GainMeter::gain_automation_style_changed ()
   // Route* _route = dynamic_cast<Route*>(&_io);
 	switch (_width) {
 	case Wide:
-	        gain_automation_style_button.set_label (astyle_string(_io.gain_automation_curve().automation_style()));
+	        gain_automation_style_button.set_label (astyle_string(_io->gain_automation_curve().automation_style()));
 		break;
 	case Narrow:
-		gain_automation_style_button.set_label  (short_astyle_string(_io.gain_automation_curve().automation_style()));
+		gain_automation_style_button.set_label  (short_astyle_string(_io->gain_automation_curve().automation_style()));
 		break;
 	}
 }
@@ -842,14 +837,14 @@ GainMeter::gain_automation_state_changed ()
 
 	switch (_width) {
 	case Wide:
-		gain_automation_state_button.set_label (astate_string(_io.gain_automation_curve().automation_state()));
+		gain_automation_state_button.set_label (astate_string(_io->gain_automation_curve().automation_state()));
 		break;
 	case Narrow:
-		gain_automation_state_button.set_label (short_astate_string(_io.gain_automation_curve().automation_state()));
+		gain_automation_state_button.set_label (short_astate_string(_io->gain_automation_curve().automation_state()));
 		break;
 	}
 
-	x = (_io.gain_automation_state() != Off);
+	x = (_io->gain_automation_state() != Off);
 	
 	if (gain_automation_state_button.get_active() != x) {
 		ignore_toggle = true;

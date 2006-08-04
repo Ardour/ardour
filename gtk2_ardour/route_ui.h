@@ -26,12 +26,9 @@
 #include <pbd/xml++.h>
 #include <ardour/ardour.h>
 #include <ardour/route.h>
+#include <ardour/track.h>
 
 #include "axis_view.h"
-
-namespace Gtkmm2ext {
-	class BindableToggleButton;
-}
 
 namespace ARDOUR {
 	class AudioTrack;
@@ -43,21 +40,30 @@ namespace Gtk {
 	class Widget;
 }
 
+class BindableToggleButton;
+
 class RouteUI : public virtual AxisView
 {
   public:
-	RouteUI(ARDOUR::Route&, ARDOUR::Session&, const char*, const char*, const char*);
+	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session&, const char*, const char*, const char*);
 	virtual ~RouteUI();
 
+	bool is_track() const;
 	bool is_audio_track() const;
-	ARDOUR::AudioDiskstream* get_diskstream() const;
 
-	ARDOUR::Route& route() const { return _route; }
+	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
+	
+	// FIXME: make these return shared_ptr
+	ARDOUR::Track*      track() const;
 	ARDOUR::AudioTrack* audio_track() const;
+	
+	ARDOUR::Diskstream* get_diskstream() const;
 
 	string name() const;
-	
-	ARDOUR::Route& _route;
+
+	// protected: XXX sigh this should be here
+
+	boost::shared_ptr<ARDOUR::Route> _route;
 	
 	void set_color (const Gdk::Color & c);
 	bool choose_color ();
@@ -65,9 +71,9 @@ class RouteUI : public virtual AxisView
 	bool ignore_toggle;
 	bool wait_for_release;
 
-	Gtkmm2ext::BindableToggleButton * mute_button;
-	Gtkmm2ext::BindableToggleButton * solo_button;
-	Gtkmm2ext::BindableToggleButton * rec_enable_button;
+	BindableToggleButton* mute_button;
+	BindableToggleButton* solo_button;
+	BindableToggleButton* rec_enable_button;
 	
 	virtual string solo_button_name () const { return "SoloButton"; }
 	virtual string safe_solo_button_name () const { return "SafeSoloButton"; }
@@ -89,7 +95,8 @@ class RouteUI : public virtual AxisView
 
 	void solo_changed(void*);
 	void mute_changed(void*);
-	void route_rec_enable_changed(void*);
+	virtual void redirects_changed (void *) {}
+	void route_rec_enable_changed();
 	void session_rec_enable_changed();
 
 	void build_solo_menu (void);
@@ -108,9 +115,9 @@ class RouteUI : public virtual AxisView
 	void build_mute_menu(void);
 	void init_mute_menu(ARDOUR::mute_type, Gtk::CheckMenuItem*);
 	
-	void set_mix_group_solo(ARDOUR::Route&, bool);
-	void set_mix_group_mute(ARDOUR::Route&, bool);
-	void set_mix_group_rec_enable(ARDOUR::Route&, bool);
+	void set_mix_group_solo(boost::shared_ptr<ARDOUR::Route>, bool);
+	void set_mix_group_mute(boost::shared_ptr<ARDOUR::Route>, bool);
+	void set_mix_group_rec_enable(boost::shared_ptr<ARDOUR::Route>, bool);
 
 	int  set_color_from_route ();
 

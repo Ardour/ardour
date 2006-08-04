@@ -30,7 +30,7 @@
 
 namespace ARDOUR {
 	class Session;
-};
+}
 
 class AudioClock : public Gtk::HBox
 {
@@ -40,7 +40,7 @@ class AudioClock : public Gtk::HBox
 		BBT,
 		MinSec,
 		Frames,
-		Off,
+		Off
 	};
 	
 	AudioClock (const string& name, bool editable, bool is_duration = false, bool with_tempo_meter = false);
@@ -87,7 +87,7 @@ class AudioClock : public Gtk::HBox
 		Bars,
 		Beats, 
 		Ticks,
-		AudioFrames,
+		AudioFrames
 	};
 
 	Gtk::EventBox  audio_frames_ebox;

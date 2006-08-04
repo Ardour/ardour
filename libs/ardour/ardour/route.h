@@ -27,17 +27,20 @@
 #include <map>
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 #include <pbd/fastlog.h>
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
 #include <pbd/undo.h>
-#include <midi++/controllable.h>
+#include <pbd/stateful.h> 
+#include <pbd/controllable.h>
 
 #include <ardour/ardour.h>
-#include <ardour/stateful.h>
 #include <ardour/io.h>
 #include <ardour/session.h>
 #include <ardour/redirect.h>
+#include <ardour/types.h>
 
 namespace ARDOUR {
 
@@ -56,17 +59,19 @@ class Route : public IO
 {
   protected:
 
-        typedef list<Redirect *> RedirectList;
+        typedef list<boost::shared_ptr<Redirect> > RedirectList;
   public:
 
 	enum Flag {
 		Hidden = 0x1,
 		MasterOut = 0x2,
-		ControlOut = 0x4,
+		ControlOut = 0x4
 	};
 
 
-	Route (Session&, std::string name, int input_min, int input_max, int output_min, int output_max, Flag flags = Flag(0));
+	Route (Session&, std::string name, int input_min, int input_max, int output_min, int output_max,
+	       Flag flags = Flag(0), DataType default_type = DataType::AUDIO);
+	
 	Route (Session&, const XMLNode&);
 	virtual ~Route();
 
@@ -138,19 +143,19 @@ class Route : public IO
 
 	void flush_redirects ();
 
-	template<class T> void foreach_redirect (T *obj, void (T::*func)(Redirect *)) {
+	template<class T> void foreach_redirect (T *obj, void (T::*func)(boost::shared_ptr<Redirect>)) {
 		Glib::RWLock::ReaderLock lm (redirect_lock);
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			(obj->*func) (*i);
 		}
 	}
 
-	Redirect *nth_redirect (uint32_t n) {
+	boost::shared_ptr<Redirect> nth_redirect (uint32_t n) {
 		Glib::RWLock::ReaderLock lm (redirect_lock);
 		RedirectList::iterator i;
 		for (i = _redirects.begin(); i != _redirects.end() && n; ++i, --n);
 		if (i == _redirects.end()) {
-			return 0;
+			return boost::shared_ptr<Redirect> ();
 		} else {
 			return *i;
 		}
@@ -158,9 +163,9 @@ class Route : public IO
 	
 	uint32_t max_redirect_outs () const { return redirect_max_outs; }
 		
-	int add_redirect (Redirect *, void *src, uint32_t* err_streams = 0);
+	int add_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
 	int add_redirects (const RedirectList&, void *src, uint32_t* err_streams = 0);
-	int remove_redirect (Redirect *, void *src, uint32_t* err_streams = 0);
+	int remove_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
 	int copy_redirects (const Route&, Placement, uint32_t* err_streams = 0);
 	int sort_redirects (uint32_t* err_streams = 0);
 
@@ -209,37 +214,31 @@ class Route : public IO
 	int set_control_outs (const vector<std::string>& ports);
 	IO* control_outs() { return _control_outs; }
 
-	bool feeds (Route *);
-	set<Route *> fed_by;
+	bool feeds (boost::shared_ptr<Route>);
+	set<boost::shared_ptr<Route> > fed_by;
 
-	struct MIDIToggleControl : public MIDI::Controllable {
-		enum ToggleType {
-			MuteControl = 0,
-			SoloControl
-		};
-		
-		MIDIToggleControl (Route&, ToggleType, MIDI::Port *);
-		void set_value (float);
-		void send_feedback (bool);
- 	        MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, bool val, bool force = false);
+	struct ToggleControllable : public PBD::Controllable {
+	    enum ToggleType {
+		    MuteControl = 0,
+		    SoloControl
+	    };
+	    
+	    ToggleControllable (Route&, ToggleType);
+	    void set_value (float);
+	    float get_value (void) const;
 
-		Route& route;
-		ToggleType type;
-		bool setting;
-		bool last_written;
+	    Route& route;
+	    ToggleType type;
 	};
 
-	MIDI::Controllable& midi_solo_control() {
-		return _midi_solo_control;
+	PBD::Controllable& solo_control() {
+		return _solo_control;
 	}
-	MIDI::Controllable& midi_mute_control() {
-		return _midi_mute_control;
+
+	PBD::Controllable& mute_control() {
+		return _mute_control;
 	}
 	
-	virtual void reset_midi_control (MIDI::Port*, bool);
-	virtual void send_all_midi_feedback ();
-	virtual MIDI::byte* write_midi_feedback (MIDI::byte*, int32_t& bufsize);
-
 	void automation_snapshot (jack_nframes_t now);
 
 	void protect_automation ();
@@ -299,8 +298,8 @@ class Route : public IO
 	std::string              _comment;
 	bool                     _have_internal_generator;
 
-	MIDIToggleControl _midi_solo_control;
-	MIDIToggleControl _midi_mute_control;
+	ToggleControllable _solo_control;
+	ToggleControllable _mute_control;
 	
 	void passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		       jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter_inputs);
@@ -342,12 +341,12 @@ class Route : public IO
 	/* plugin count handling */
 
 	struct InsertCount {
-	    ARDOUR::Insert& insert;
+	    boost::shared_ptr<ARDOUR::Insert> insert;
 	    int32_t cnt;
 	    int32_t in;
 	    int32_t out;
 
-	    InsertCount (ARDOUR::Insert& ins) : insert (ins), cnt (-1) {}
+	    InsertCount (boost::shared_ptr<ARDOUR::Insert> ins) : insert (ins), cnt (-1) {}
 	};
 	
 	int32_t apply_some_plugin_counts (std::list<InsertCount>& iclist);
@@ -358,6 +357,6 @@ class Route : public IO
 	void redirect_active_proxy (Redirect*, void*);
 };
 
-}; /* namespace ARDOUR*/
+} // namespace ARDOUR
 
 #endif /* __ardour_route_h__ */

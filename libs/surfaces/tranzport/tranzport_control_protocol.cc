@@ -579,7 +579,7 @@ TranzportControlProtocol::monitor_work ()
 	
 	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
 		// do we care? not particularly.
-		info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
+		PBD::info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
 	} 
 
 	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
@@ -693,7 +693,7 @@ TranzportControlProtocol::update_state ()
 	/* per track */
 
 	if (route_table[0]) {
-		AudioTrack* at = dynamic_cast<AudioTrack*> (route_table[0]);
+		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack> (route_table[0]);
 		if (at && at->record_enabled()) {
 			pending_lights[LightTrackrec] = true;
 		} else {
@@ -1574,3 +1574,15 @@ TranzportControlProtocol::print (int row, int col, const char *text)
 	}
 }	
 
+XMLNode&
+TranzportControlProtocol::get_state () 
+{
+	XMLNode* node = new XMLNode (_name); /* node name must match protocol name */
+	return *node;
+}
+
+int
+TranzportControlProtocol::set_state (const XMLNode& node)
+{
+	return 0;
+}

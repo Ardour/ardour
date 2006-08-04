@@ -23,6 +23,7 @@ genericmidi.Append(POTFILE = domain + '.pot')
 genericmidi_files=Split("""
 interface.cc
 generic_midi_control_protocol.cc
+midicontrollable.cc
 """)
 
 genericmidi.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
@@ -34,7 +35,7 @@ genericmidi.Merge ([
 	libraries['ardour'],
 	libraries['ardour_cp'],
 	libraries['midi++2'],
-	libraries['pbd3'],
+	libraries['pbd'],
 	libraries['sigc2'],
 	libraries['usb'],
 	libraries['xml'],
