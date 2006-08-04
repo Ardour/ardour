@@ -130,7 +130,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 
 					_session.begin_reversible_command (_("mute change"));
                                         Session::GlobalMuteStateCommand *cmd = new Session::GlobalMuteStateCommand(_session, this);
-					_session.set_all_mute (!_route.muted());
+					_session.set_all_mute (!_route->muted());
                                         cmd->mark();
 					_session.add_command(cmd);
 					_session.commit_reversible_command ();
@@ -206,7 +206,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 					_session.begin_reversible_command (_("solo change"));
                                         Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(_session, this);
-					_session.set_all_solo (!_route.soloed());
+					_session.set_all_solo (!_route->soloed());
                                         cmd->mark();
 					_session.add_command (cmd);
 					_session.commit_reversible_command ();
@@ -218,7 +218,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					_session.begin_reversible_command (_("solo change"));
                                         Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand (_session, this);
 					_session.set_all_solo (false);
-					_route.set_solo (true, this);
+					_route->set_solo (true, this);
                                         cmd->mark();
 					_session.add_command(cmd);
 					_session.commit_reversible_command ();
@@ -572,10 +572,10 @@ void
 RouteUI::reversibly_apply_route_boolean (string name, void (Route::*func)(bool, void *), bool yn, void *arg)
 {
 	_session.begin_reversible_command (name);
-        XMLNode &before = _route.get_state();
-        bind(mem_fun(_route, func), yn, arg)();
-        XMLNode &after = _route.get_state();
-        _session.add_command (new MementoCommand<Route>(_route, before, after));
+        XMLNode &before = _route->get_state();
+        bind(mem_fun(*_route, func), yn, arg)();
+        XMLNode &after = _route->get_state();
+        _session.add_command (new MementoCommand<Route>(*_route, before, after));
 	_session.commit_reversible_command ();
 }
 

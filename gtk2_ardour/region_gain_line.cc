@@ -49,7 +49,7 @@ AudioRegionGainLine::start_drag (ControlPoint* cp, float fraction)
 	AutomationLine::start_drag(cp,fraction);
 	if (!rv.audio_region().envelope_active()) {
                 trackview.session().add_command(new MementoUndoCommand<AudioRegion>(rv.audio_region(), rv.audio_region().get_state()));
-                rv.region.set_envelope_active(false);
+                rv.audio_region().set_envelope_active(false);
 	}
 }
 

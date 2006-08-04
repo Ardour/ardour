@@ -1823,7 +1823,7 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 	arv->audio_region().set_fade_in_length (fade_length);
 
         XMLNode &after = arv->audio_region().get_state();
-        session->add_command(new MementoCommand<ARDOUR::AudioRegion>(arv->audio_regio(),
+        session->add_command(new MementoCommand<ARDOUR::AudioRegion>(arv->audio_region(),
                                                                      before,
                                                                      after));
 	commit_reversible_command ();
@@ -1920,7 +1920,7 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 	arv->audio_region().set_fade_out_length (fade_length);
 
         XMLNode &after = arv->region().get_state();
-        session->add_command(new MementoCommand<ARDOUR::AudioRegion>(arv->region(), before, after));
+        session->add_command(new MementoCommand<ARDOUR::Region>(arv->region(), before, after));
 	commit_reversible_command ();
 
 	fade_out_drag_motion_callback (item, event);
@@ -4234,7 +4234,7 @@ Editor::point_trim (GdkEvent* event)
 			     i != selection->regions.by_layer().end(); ++i)
 			{
 				if (!(*i)->region().locked()) {
-                                        Playlist *pl = (*i)->region.playlist();
+                                        Playlist *pl = (*i)->region().playlist();
                                         XMLNode &before = pl->get_state();
 					(*i)->region().trim_front (new_bound, this);	
                                         XMLNode &after = pl->get_state();
@@ -4829,7 +4829,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, jack_nframes_t pos)
 	double speed = atv->get_diskstream()->speed();
 	
         XMLNode &before = playlist->get_state();
-	playlist->add_region (*(new AudioRegion (arv->audio_region)), (jack_nframes_t) (pos * speed));
+	playlist->add_region (*(new AudioRegion (arv->audio_region())), (jack_nframes_t) (pos * speed));
         XMLNode &after = playlist->get_state();
 	session->add_command(new MementoCommand<Playlist>(*playlist, before, after));
 	

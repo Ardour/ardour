@@ -2594,7 +2594,7 @@ Editor::naturalize ()
                 XMLNode &before = (*i)->region().get_state();
 		(*i)->region().move_to_natural_position (this);
                 XMLNode &after = (*i)->region().get_state();
-		session->add_command (new MementoCommand<AudioRegion>((*i)->region(), before, after));
+		session->add_command (new MementoCommand<Region>((*i)->region(), before, after));
 	}
 	commit_reversible_command ();
 }
@@ -3401,7 +3401,7 @@ Editor::normalize_region ()
 			continue;
  		XMLNode &before = arv->region().get_state();
 		arv->audio_region().normalize_to (0.0f);
-		session->add_command (new MementoCommand<Region>(arv->region, arv->region().get_state());
+		session->add_command (new MementoCommand<Region>(arv->region(), before, arv->region().get_state()));
 	}
 
 	commit_reversible_command ();
@@ -3428,7 +3428,7 @@ Editor::denormalize_region ()
 			continue;
 		XMLNode &before = arv->region().get_state();
 		arv->audio_region().set_scale_amplitude (1.0f);
-		session->add_command (new MementoCommand<Region>(arv->region, before, arv->region().get_state());
+		session->add_command (new MementoCommand<Region>(arv->region(), before, arv->region().get_state()));
 	}
 
 	commit_reversible_command ();
@@ -3473,7 +3473,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 		if (arv->audio_region().apply (filter) == 0) {
 
                         XMLNode &before = playlist->get_state();
-			playlist->replace_region (arv->region(), *(filter.results.front()), arv->region()position());
+			playlist->replace_region (arv->region(), *(filter.results.front()), arv->region().position());
                         XMLNode &after = playlist->get_state();
 			session->add_command(new MementoCommand<Playlist>(*playlist, before, after));
 		} else {
