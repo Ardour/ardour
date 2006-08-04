@@ -28,6 +28,7 @@
 
 #include <pbd/convert.h>
 #include <pbd/error.h>
+#include <pbd/memento_command.h>
 
 #include <gtkmm/image.h>
 #include <gdkmm/color.h>
@@ -2878,8 +2879,8 @@ void
 Editor::begin_reversible_command (string name)
 {
 	if (session) {
-		UndoAction ua = get_memento();
-		session->begin_reversible_command (name, &ua);
+                before = &get_state();
+		session->begin_reversible_command (name);
 	}
 }
 
@@ -2887,8 +2888,7 @@ void
 Editor::commit_reversible_command ()
 {
 	if (session) {
-		UndoAction ua = get_memento();
-		session->commit_reversible_command (&ua);
+		session->commit_reversible_command (new MementoCommand<Editor>(*this, *before, get_state()));
 	}
 }
 

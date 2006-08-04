@@ -2569,29 +2569,25 @@ Session::set_meter_falloff (float val)
 
 
 void
-Session::begin_reversible_command (string name, UndoAction* private_undo)
+Session::begin_reversible_command (string name)
 {
-	current_cmd.clear ();
-	current_cmd.set_name (name);
-
-	if (private_undo) {
-		current_cmd.add_undo (*private_undo);
-	}
+	current_trans.clear ();
+	current_trans.set_name (name);
 }
 
 void
-Session::commit_reversible_command (UndoAction* private_redo)
+Session::commit_reversible_command (Command *cmd)
 {
 	struct timeval now;
 
-	if (private_redo) {
-		current_cmd.add_redo_no_execute (*private_redo);
+	if (cmd) {
+		current_trans.add_command (cmd);
 	}
 
 	gettimeofday (&now, 0);
-	current_cmd.set_timestamp (now);
+	current_trans.set_timestamp (now);
 
-	history.add (current_cmd);
+	history.add (current_trans);
 }
 
 Session::GlobalRouteBooleanState 
@@ -2670,6 +2666,7 @@ Session::set_global_record_enable (GlobalRouteBooleanState s, void* src)
 	set_global_route_boolean (s, &Route::set_record_enable, src);
 }
 
+#if 0
 UndoAction
 Session::global_mute_memento (void* src)
 {
@@ -2693,6 +2690,7 @@ Session::global_record_enable_memento (void* src)
 {
 	return sigc::bind (mem_fun (*this, &Session::set_global_record_enable), get_global_route_boolean (&Route::record_enabled), src);
 }
+#endif
 
 static bool
 template_filter (const string &str, void *arg)

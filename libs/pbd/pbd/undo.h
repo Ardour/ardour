@@ -23,29 +23,33 @@
 
 #include <string>
 #include <list>
+#include <map>
 #include <sigc++/slot.h>
+#include <sigc++/bind.h>
 #include <sys/time.h>
+#include <pbd/command.h>
 
 using std::string;
 using std::list;
 
 typedef sigc::slot<void> UndoAction;
 
-class UndoCommand 
+class UndoTransaction : public Command
 {
   public:
-	UndoCommand ();
-	UndoCommand (const UndoCommand&);
-	UndoCommand& operator= (const UndoCommand&);
+	UndoTransaction ();
+	UndoTransaction (const UndoTransaction&);
+	UndoTransaction& operator= (const UndoTransaction&);
 
 	void clear ();
 
-	void add_undo (const UndoAction&);
-	void add_redo (const UndoAction&);
-	void add_redo_no_execute (const UndoAction&);
+	void add_command (Command *const);
 
+        void operator() ();
 	void undo();
 	void redo();
+
+	XMLNode &serialize();
 	
 	void set_name (const string& str) {
 		_name = str;
@@ -61,8 +65,7 @@ class UndoCommand
 	}
 
   private:
-	list<UndoAction> redo_actions;
-	list<UndoAction> undo_actions;
+	list<Command*>	 actions;
 	struct timeval   _timestamp;
 	string           _name;
 };
@@ -73,7 +76,7 @@ class UndoHistory
 	UndoHistory() {}
 	~UndoHistory() {}
 	
-	void add (UndoCommand uc);
+	void add (UndoTransaction ut);
 	void undo (unsigned int n);
 	void redo (unsigned int n);
 	
@@ -88,8 +91,8 @@ class UndoHistory
 	void clear_redo ();
 
   private:
-	list<UndoCommand> UndoList;
-	list<UndoCommand> RedoList;
+	list<UndoTransaction> UndoList;
+	list<UndoTransaction> RedoList;
 };
 
 

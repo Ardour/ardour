@@ -20,6 +20,7 @@
 
 #include <ardour/audioregion.h>
 #include <ardour/playlist.h>
+#include <pbd/memento_command.h>
 
 #include "editor.h"
 #include "region_view.h"
@@ -102,11 +103,12 @@ Editor::kbd_mute_unmute_region ()
 {
 	if (entered_regionview) {
 		begin_reversible_command (_("mute region"));
-		session->add_undo (entered_regionview->region().playlist()->get_memento());
+		XMLNode &before = entered_regionview->region().playlist()->get_state();
 		
 	    entered_regionview->region().set_muted (!entered_regionview->region().muted());
 		
-		session->add_redo_no_execute (entered_regionview->region().playlist()->get_memento());
+		XMLNode &after = entered_regionview->region().playlist()->get_state();
+		session->add_command (new MementoCommand<ARDOUR::Playlist>(*(entered_regionview->region().playlist()), before, after));
 		commit_reversible_command();
 	}
 }

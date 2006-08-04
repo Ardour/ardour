@@ -27,6 +27,7 @@
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
+#include <pbd/memento_command.h>
 
 #include "ardour_ui.h"
 #include "prompter.h"
@@ -654,9 +655,10 @@ gint LocationUI::do_location_remove (ARDOUR::Location *loc)
 	}
 
 	session->begin_reversible_command (_("remove marker"));
-	session->add_undo (session->locations()->get_memento());
+	XMLNode &before = session->locations()->get_state();
 	session->locations()->remove (loc);
-	session->add_redo_no_execute (session->locations()->get_memento());
+	XMLNode &after = session->locations()->get_state();
+	session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
 	session->commit_reversible_command ();
 
 	return FALSE;
@@ -772,9 +774,10 @@ LocationUI::add_new_location()
 		jack_nframes_t where = session->audible_frame();
 		Location *location = new Location (where, where, "mark", Location::IsMark);
 		session->begin_reversible_command (_("add marker"));
-		session->add_undo (session->locations()->get_memento());
+		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);
-		session->add_redo_no_execute (session->locations()->get_memento());
+		XMLNode &after = session->locations()->get_state();
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
 		session->commit_reversible_command ();
 	}
 	
@@ -788,9 +791,10 @@ LocationUI::add_new_range()
 		Location *location = new Location (where, where, "unnamed", 
 											Location::IsRangeMarker);
 		session->begin_reversible_command (_("add range marker"));
-		session->add_undo (session->locations()->get_memento());
+		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);
-		session->add_redo_no_execute (session->locations()->get_memento());
+		XMLNode &after = session->locations()->get_state();
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
 		session->commit_reversible_command ();
 	}
 }

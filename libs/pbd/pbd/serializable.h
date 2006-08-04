@@ -1,5 +1,5 @@
-/*
-    Copyright (C) 2001 Paul Davis 
+/* 
+   Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,29 +15,19 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: /local/undo/gtk2_ardour/region_editor.h 5 2006-05-31T02:48:48.738745Z paul  $
+    $Id: /local/undo/libs/pbd3/pbd/undo.h 59 2006-06-15T18:16:20.960977Z fugalh  $
 */
 
-#ifndef __gtk_ardour_region_edit_h__
-#define __gtk_ardour_region_edit_h__
+#ifndef __lib_pbd_serializable_h__
+#define __lib_pbd_serializable_h__
 
-#include "ardour_dialog.h"
+#include <pbd/xml++.h>
 
-namespace ARDOUR { class Session; }
-
-/** Just a useless stub for now... */
-class RegionEditor : public ArdourDialog
+class Serializable 
 {
-  public:
-	RegionEditor(ARDOUR::Session& s)
-	: ArdourDialog ("region editor")
-	, _session(s)
-	{}
-
-	virtual ~RegionEditor () {}
-
-  protected:
-	ARDOUR::Session&     _session;
+public:
+    virtual XMLNode &serialize() = 0;
+    virtual ~Serializable() {}
 };
 
-#endif /* __gtk_ardour_region_edit_h__ */
+#endif // __lib_pbd_serializable_h__

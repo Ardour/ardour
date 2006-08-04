@@ -34,6 +34,7 @@
 #include <pbd/basename.h>
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
+#include <pbd/memento_command.h>
 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
@@ -1594,7 +1595,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
 		
-		_session.add_undo (_playlist->get_memento());
+                XMLNode &before = _playlist->get_state();
 		_playlist->freeze ();
 		
 		for (buffer_position = channels[0].write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
@@ -1625,7 +1626,8 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		}
 
 		_playlist->thaw ();
-		_session.add_redo_no_execute (_playlist->get_memento());
+                XMLNode &after = _playlist->get_state();
+		_session.add_command (new MementoCommand<Playlist>(*_playlist, before, after));
 	}
 
 	mark_write_completed = true;

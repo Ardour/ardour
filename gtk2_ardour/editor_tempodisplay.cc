@@ -27,6 +27,7 @@
 #include <libgnomecanvasmm.h>
 
 #include <pbd/error.h>
+#include <pbd/memento_command.h>
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/gtk_ui.h>
@@ -273,9 +274,10 @@ Editor::mouse_add_new_tempo_event (jack_nframes_t frame)
 	tempo_dialog.get_bbt_time (requested);
 	
 	begin_reversible_command (_("add tempo mark"));
-	session->add_undo (map.get_memento());
+        XMLNode &before = map.get_state();
 	map.add_tempo (Tempo (bpm), requested);
-	session->add_redo_no_execute (map.get_memento());
+        XMLNode &after = map.get_state();
+	session->add_command(new MementoCommand<TempoMap>(map, before, after));
 	commit_reversible_command ();
 	
 	map.dump (cerr);
@@ -313,9 +315,9 @@ Editor::mouse_add_new_meter_event (jack_nframes_t frame)
 	meter_dialog.get_bbt_time (requested);
 	
 	begin_reversible_command (_("add meter mark"));
-	session->add_undo (map.get_memento());
+        XMLNode &before = map.get_state();
 	map.add_meter (Meter (bpb, note_type), requested);
-	session->add_redo_no_execute (map.get_memento());
+	session->add_command(new MementoCommand<TempoMap>(map, before, map.get_state()));
 	commit_reversible_command ();
 	
 	map.dump (cerr);
@@ -364,9 +366,10 @@ Editor::edit_meter_section (MeterSection* section)
 	double note_type = meter_dialog.get_note_type ();
 
 	begin_reversible_command (_("replace tempo mark"));
-	session->add_undo (session->tempo_map().get_memento());
+        XMLNode &before = session->tempo_map().get_state();
 	session->tempo_map().replace_meter (*section, Meter (bpb, note_type));
-	session->add_redo_no_execute (session->tempo_map().get_memento());
+        XMLNode &after = session->tempo_map().get_state();
+	session->add_command(new MementoCommand<TempoMap>(session->tempo_map(), before, after));
 	commit_reversible_command ();
 }
 
@@ -392,10 +395,11 @@ Editor::edit_tempo_section (TempoSection* section)
 	bpm = max (0.01, bpm);
 	
 	begin_reversible_command (_("replace tempo mark"));
-	session->add_undo (session->tempo_map().get_memento());
+        XMLNode &before = session->tempo_map().get_state();
 	session->tempo_map().replace_tempo (*section, Tempo (bpm));
 	session->tempo_map().move_tempo (*section, when);
-	session->add_redo_no_execute (session->tempo_map().get_memento());
+        XMLNode &after = session->tempo_map().get_state();
+	session->add_command (new MementoCommand<TempoMap>(session->tempo_map(), before, after));
 	commit_reversible_command ();
 }
 
@@ -441,9 +445,10 @@ gint
 Editor::real_remove_tempo_marker (TempoSection *section)
 {
 	begin_reversible_command (_("remove tempo mark"));
-	session->add_undo (session->tempo_map().get_memento());
+	XMLNode &before = session->tempo_map().get_state();
 	session->tempo_map().remove_tempo (*section);
-	session->add_redo_no_execute (session->tempo_map().get_memento());
+	XMLNode &after = session->tempo_map().get_state();
+	session->add_command(new MementoCommand<TempoMap>(session->tempo_map(), before, after));
 	commit_reversible_command ();
 
 	return FALSE;
@@ -474,9 +479,10 @@ gint
 Editor::real_remove_meter_marker (MeterSection *section)
 {
 	begin_reversible_command (_("remove tempo mark"));
-	session->add_undo (session->tempo_map().get_memento());
+	XMLNode &before = session->tempo_map().get_state();
 	session->tempo_map().remove_meter (*section);
-	session->add_redo_no_execute (session->tempo_map().get_memento());
+	XMLNode &after = session->tempo_map().get_state();
+	session->add_command(new MementoCommand<TempoMap>(session->tempo_map(), before, after));
 	commit_reversible_command ();
 	return FALSE;
 }

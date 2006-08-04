@@ -25,6 +25,7 @@
 
 #include <pbd/error.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/memento_command.h>
 
 #include "editor.h"
 #include "audio_time_axis.h"
@@ -206,9 +207,10 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 			return;
 		}
 
-		session->add_undo (playlist->get_memento());
+		XMLNode &before = playlist->get_state();
 		playlist->replace_region (region, *new_region, region.position());
-		session->add_redo_no_execute (playlist->get_memento());
+		XMLNode &after = playlist->get_state();
+		session->add_command (new MementoCommand<Playlist>(*playlist, before, after));
 
 		i = tmp;
 	}

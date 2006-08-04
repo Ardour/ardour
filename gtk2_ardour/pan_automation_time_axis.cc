@@ -23,6 +23,7 @@
 #include <ardour/panner.h>
 
 #include <gtkmm2ext/popup.h>
+#include <pbd/memento_command.h>
 
 #include "pan_automation_time_axis.h"
 #include "automation_line.h"
@@ -88,9 +89,10 @@ PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEv
 	AutomationList& alist (lines[line_index]->the_list());
 
 	_session.begin_reversible_command (_("add pan automation event"));
-	_session.add_undo (alist.get_memento());
+	XMLNode &before = alist.get_state();
 	alist.add (when, y);
-	_session.add_redo_no_execute (alist.get_memento());
+	XMLNode &after = alist.get_state();
+        _session.add_command(new MementoCommand<AutomationList>(alist, before, after));
 	_session.commit_reversible_command ();
 	_session.set_dirty ();
 }

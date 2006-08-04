@@ -29,6 +29,7 @@
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
 #include <pbd/whitespace.h>
+#include <pbd/memento_command.h>
 
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -1050,12 +1051,12 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		}
 	}
 	
+	XMLNode &before = playlist->get_state();
 	switch (op) {
 	case Cut:
-		_session.add_undo (playlist->get_memento());
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
-			_session.add_redo_no_execute (playlist->get_memento());
+			_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 			ret = true;
 		}
 		break;
@@ -1066,9 +1067,8 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		break;
 
 	case Clear:
-		_session.add_undo (playlist->get_memento());
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			_session.add_redo_no_execute (playlist->get_memento());
+			_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 			what_we_got->unref ();
 			ret = true;
 		}
@@ -1097,9 +1097,9 @@ RouteTimeAxisView::paste (jack_nframes_t pos, float times, Selection& selection,
 	if (get_diskstream()->speed() != 1.0f)
 		pos = session_frame_to_track_frame(pos, get_diskstream()->speed() );
 	
-	_session.add_undo (playlist->get_memento());
+	XMLNode &before = playlist->get_state();
 	playlist->paste (**p, pos, times);
-	_session.add_redo_no_execute (playlist->get_memento());
+	_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 
 	return true;
 }
