@@ -382,7 +382,7 @@ PluginManager::vst_discover (string path)
 			<< endl;
 	}
 	
-	PluginInfoPtr info(new PluginInfo);
+	PluginInfoPtr info(new VSTPluginInfo);
 
 	/* what a goddam joke freeware VST is */
 

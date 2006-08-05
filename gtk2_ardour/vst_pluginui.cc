@@ -31,17 +31,17 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
-VSTPluginUI::VSTPluginUI (PluginInsert& pi, VSTPlugin& vp)
+VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VSTPlugin> vp)
 	: PlugUIBase (pi),
 	  vst (vp)
 {
-	fst_run_editor (vst.fst());
+	fst_run_editor (vst->fst());
 
 	preset_box.pack_end (bypass_button, false, false, 10);
 	preset_box.pack_end (save_button, false, false);
 	preset_box.pack_end (combo, false, false);
 
-	bypass_button.set_active (!insert.active());
+	bypass_button.set_active (!insert->active());
 	
 	pack_start (preset_box, false, false);
 	pack_start (socket, true, true);
@@ -55,7 +55,7 @@ VSTPluginUI::~VSTPluginUI ()
 int
 VSTPluginUI::get_preferred_height ()
 {
-	return vst.fst()->height;
+	return vst->fst()->height;
 }
 
 int
@@ -69,7 +69,7 @@ VSTPluginUI::package (Gtk::Window& win)
 	   this assumes that the window's owner understands the XEmbed protocol.
 	*/
 	
-	socket.add_id (fst_get_XID (vst.fst()));
+	socket.add_id (fst_get_XID (vst->fst()));
 
 	return 0;
 }

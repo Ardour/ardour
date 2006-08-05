@@ -106,6 +106,7 @@ class VSTPlugin : public ARDOUR::Plugin
 
 class VSTPluginInfo : public PluginInfo
 {
+  public:
 	VSTPluginInfo () {}
 	~VSTPluginInfo () {}
 	

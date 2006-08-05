@@ -488,9 +488,11 @@ VSTPluginInfo::load (Session& session)
 
 		if (Config->get_use_vst()) {
 			FSTHandle* handle;
-
-			if ((handle = fst_load (info->path.c_str())) == 0) {
-				error << string_compose(_("VST: cannot load module from \"%1\""), info->path) << endmsg;
+			
+			handle = fst_load(path.c_str());
+	
+			if ( (int)handle == -1) {
+				error << string_compose(_("VST: cannot load module from \"%1\""), path) << endmsg;
 			} else {
 				plugin.reset (new VSTPlugin (session.engine(), session, handle));
 			}
