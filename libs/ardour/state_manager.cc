@@ -72,6 +72,9 @@ StateManager::use_state (state_id_t id)
 void
 StateManager::save_state (std::string why)
 {
+	if (!should_save_state())
+		return;
+
 	if (!_allow_save) {
 		SaveAllowed.connect (mem_fun (*this, &StateManager::save_state));
 		return;

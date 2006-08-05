@@ -35,6 +35,8 @@ class StateManager : public sigc::trackable
 
 	state_id_t _current_state_id;
 
+	virtual bool should_save_state () const { return true; }
+
 	static void prohibit_save ();
 	static void allow_save (const char* why, bool dosave);
 
