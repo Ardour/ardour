@@ -182,6 +182,8 @@ protected:
 	void master_bus_button_clicked ();
 	void monitor_bus_button_clicked ();
 
+	bool on_new_session_page;
+
 	
 };
 

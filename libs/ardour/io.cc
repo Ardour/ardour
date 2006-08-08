@@ -170,7 +170,7 @@ IO::silence (jack_nframes_t nframes, jack_nframes_t offset)
 void
 IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
 {
-	jack_nframes_t declick = min ((jack_nframes_t)4096, nframes);
+	jack_nframes_t declick = min ((jack_nframes_t)128, nframes);
 	gain_t delta;
 	Sample *buffer;
 	double fractional_shift;

@@ -143,13 +143,18 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 			break;
 
 		default:
-			break;
+			return print_help(execname);
 		}
 	}
 
 	if (optind < argc) {
+		if (new_session) {
+			cerr << "Illogical combination: you can either create a new session, or a load an existing session but not both!" << endl;
+			return print_help(execname);
+		}
 		session_name = argv[optind++];
 	}
+
 
 	return 0;
 }
