@@ -128,38 +128,38 @@ static const int legal_sample_rates [] =
 {	8000, 16000, 22050, 24000, 32000, 44100, 48000, 96000
 } ;
 
-static inline void
+static void
 s2flac8_array (const short *src, FLAC__int32 *dest, int count)
 {	while (--count >= 0)
 		dest [count] = src [count] >> 8 ;
 } /* s2flac8_array */
 
-static inline void
+static void
 s2flac16_array (const short *src, FLAC__int32 *dest, int count)
 {	while (--count >= 0)
 		dest [count] = src [count] ;
 } /* s2flac16_array */
 
-static inline void
+static void
 s2flac24_array (const short *src, FLAC__int32 *dest, int count)
 {	while (--count >= 0)
 		dest [count] = src [count] << 8 ;
 } /* s2flac24_array */
 
-static inline void
+static void
 i2flac8_array (const int *src, FLAC__int32 *dest, int count)
 {	while (--count >= 0)
 		dest [count] = src [count] >> 24 ;
 } /* i2flac8_array */
 
-static inline void
+static void
 i2flac16_array (const int *src, FLAC__int32 *dest, int count)
 {
   while (--count >= 0)
     dest [count] = src [count] >> 16 ;
 } /* i2flac16_array */
 
-static inline void
+static void
 i2flac24_array (const int *src, FLAC__int32 *dest, int count)
 {	while (--count >= 0)
 		dest [count] = src [count] >> 8 ;

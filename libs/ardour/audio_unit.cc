@@ -82,13 +82,13 @@ AUPlugin::unique_id () const
 const char *
 AUPlugin::label () const
 {
-	return "";
+	return "AUPlugin label";
 }
 
 const char *
 AUPlugin::maker () const
 {
-	return "";
+	return "AUplugin maker";
 }
 
 uint32_t
@@ -100,25 +100,30 @@ AUPlugin::parameter_count () const
 float
 AUPlugin::default_value (uint32_t port)
 {
-	return 0.0;
+	// AudioUnits don't have default values.  Maybe presets though?
+	return 0;
 }
 
 jack_nframes_t
 AUPlugin::latency () const
 {
-	return 0;
+	return unit->Latency ();
 }
 
 void
 AUPlugin::set_parameter (uint32_t which, float val)
 {
-	
+	unit->SetParameter (parameter_map[which].first, parameter_map[which].second, 0, val);
 }
 
 float
 AUPlugin::get_parameter (uint32_t which) const
 {
-	return 0.0;
+	float outValue = 0.0;
+	
+	unit->GetParameter(parameter_map[which].first, parameter_map[which].second, 0, outValue);
+	
+	return outValue;
 }
 
 int
@@ -136,13 +141,13 @@ AUPlugin::nth_parameter (uint32_t which, bool& ok) const
 void
 AUPlugin::activate ()
 {
-	
+	unit->GlobalReset ();
 }
 
 void
 AUPlugin::deactivate ()
 {
-	
+	// not needed.  GlobalReset () takes care of it.
 }
 
 void
@@ -154,7 +159,19 @@ AUPlugin::set_block_size (jack_nframes_t nframes)
 int
 AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, jack_nframes_t nframes, jack_nframes_t offset)
 {
-	return -1;
+	AudioUnitRenderActionFlags flags = 0;
+	AudioTimeStamp ts;
+	
+	AudioBufferList abl;
+	abl.mNumberBuffers = 1;
+	abl.mBuffers[0].mNumberChannels = 1;
+	abl.mBuffers[0].mDataByteSize = nframes * sizeof(Sample);
+	abl.mBuffers[0].mData = &bufs[0];
+	
+	
+	unit->Render (&flags, &ts, 0, 0, &abl);
+	
+	return 0;
 }
 
 set<uint32_t>
@@ -281,40 +298,31 @@ AUPluginInfo::discover ()
 {
 	PluginInfoList plugs;
 
-	int numTypes = 2;    // this magic number was retrieved from the apple AUHost example.
-
 	CAComponentDescription desc;
 	desc.componentFlags = 0;
 	desc.componentFlagsMask = 0;
 	desc.componentSubType = 0;
 	desc.componentManufacturer = 0;
+	desc.componentType = kAudioUnitType_Effect;
 
-	for (int i = 0; i < numTypes; ++i) {
-		if (i == 1) {
-			desc.componentType = kAudioUnitType_MusicEffect;
-		} else {
-			desc.componentType = kAudioUnitType_Effect;
-		}
+	Component comp = 0;
 
-		Component comp = 0;
+	comp = FindNextComponent (NULL, &desc);
+	while (comp != NULL) {
+		CAComponentDescription temp;
+		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
+		
+		AUPluginInfoPtr plug(new AUPluginInfo);
+		plug->name = AUPluginInfo::get_name (temp);
+		plug->type = PluginInfo::AudioUnit;
+		plug->n_inputs = 0;
+		plug->n_outputs = 0;
+		plug->category = "AudioUnit";
+		plug->desc = new CAComponentDescription(temp);
 
-		comp = FindNextComponent (NULL, &desc);
-		while (comp != NULL) {
-			CAComponentDescription temp;
-			GetComponentInfo (comp, &temp, NULL, NULL, NULL);
-			
-			AUPluginInfoPtr plug(new AUPluginInfo);
-			plug->name = AUPluginInfo::get_name (temp);
-			plug->type = PluginInfo::AudioUnit;
-			plug->n_inputs = 0;
-			plug->n_outputs = 0;
-			plug->category = "AudioUnit";
-			plug->desc = new CAComponentDescription(temp);
-
-			plugs.push_back(plug);
-			
-			comp = FindNextComponent (comp, &desc);
-		}
+		plugs.push_back(plug);
+		
+		comp = FindNextComponent (comp, &desc);
 	}
 
 	return plugs;
