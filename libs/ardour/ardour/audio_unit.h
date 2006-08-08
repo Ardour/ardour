@@ -88,6 +88,8 @@ class AUPlugin : public ARDOUR::Plugin
   private:
 	CAComponent* comp;
     CAAudioUnit* unit;
+
+	std::vector<std::pair<uint32_t, uint32_t> > parameter_map;
 };
 
 class AUPluginInfo : public PluginInfo {
