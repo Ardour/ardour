@@ -31,6 +31,7 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>
+#include <ardour/connection.h>
 
 #include "i18n.h"
 
@@ -146,6 +147,18 @@ Track::record_enabled () const
 {
 	return _diskstream->record_enabled ();
 }
+
+bool
+Track::can_record()
+{
+	bool will_record = true;
+	for (int i = 0; i < _inputs.size() && will_record; i++) {
+		if (!_inputs[i]->connected())
+			will_record = false;
+	}
+
+	return will_record;
+}
 	
 void
 Track::set_record_enable (bool yn, void *src)
@@ -159,8 +172,13 @@ Track::set_record_enable (bool yn, void *src)
 		return;
 	}
 
-	/* keep track of the meter point as it was before we rec-enabled */
+	// Do not set rec enabled if the track can't record.
+	if (yn && !can_record()) {
+		error << string_compose( _("Can not arm track '%1'. Check the input connections"), name() ) << endmsg;
+		return;
+	}
 
+	/* keep track of the meter point as it was before we rec-enabled */
 	if (!_diskstream->record_enabled()) {
 		_saved_meter_point = _meter_point;
 	}

@@ -32,12 +32,15 @@
 #include <gtkmm/filefilter.h>
 #include <gtkmm/stock.h>
 
+#include "opts.h"
 
 NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("New Session Dialog")
 {
         session_name_label = Gtk::manage(new class Gtk::Label(_("New Session Name :")));
 	m_name = Gtk::manage(new class Gtk::Entry());
+	m_name->set_text(GTK_ARDOUR::session_name);
+
 	session_location_label = Gtk::manage(new class Gtk::Label(_("Create Session Directory In :")));
 	m_folder = Gtk::manage(new class Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER));
 	session_template_label = Gtk::manage(new class Gtk::Label(_("Use Session Template :")));
@@ -324,12 +327,20 @@ NewSessionDialog::NewSessionDialog()
 	m_folder->set_current_folder(getenv ("HOME"));
 	m_folder->set_title(_("select directory"));
 
-	set_default_response (Gtk::RESPONSE_OK);
-	set_response_sensitive (Gtk::RESPONSE_OK, false);
-	set_response_sensitive (Gtk::RESPONSE_NONE, false);
+	on_new_session_page = true;
 	m_notebook->set_current_page(0);
 	m_notebook->show();
 	m_notebook->show_all_children();
+
+
+	set_default_response (Gtk::RESPONSE_OK);
+	if (!GTK_ARDOUR::session_name.length()) {
+		set_response_sensitive (Gtk::RESPONSE_OK, false);
+		set_response_sensitive (Gtk::RESPONSE_NONE, false);
+	} else {
+		set_response_sensitive (Gtk::RESPONSE_OK, true);
+		set_response_sensitive (Gtk::RESPONSE_NONE, true);
+	}
 
 	///@ connect some signals
 
@@ -501,11 +512,11 @@ NewSessionDialog::reset_name()
 bool
 NewSessionDialog::entry_key_release (GdkEventKey* ev)
 {
-        if (m_name->get_text() != "") {
-	        set_response_sensitive (Gtk::RESPONSE_OK, true);
+	if (m_name->get_text() != "") {
+		set_response_sensitive (Gtk::RESPONSE_OK, true);
 		set_response_sensitive (Gtk::RESPONSE_NONE, true);
 	} else {
-	        set_response_sensitive (Gtk::RESPONSE_OK, false);
+		set_response_sensitive (Gtk::RESPONSE_OK, false);
 	}
 	return true;
 }
@@ -513,25 +524,27 @@ NewSessionDialog::entry_key_release (GdkEventKey* ev)
 void
 NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 {
-        if (pagenum == 1) {
-	       m_okbutton->set_label(_("Open"));
-	       set_response_sensitive (Gtk::RESPONSE_NONE, false);
-	       m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
-	       if (m_treeview->get_selection()->count_selected_rows() == 0) {
-		        set_response_sensitive (Gtk::RESPONSE_OK, false);
+	if (pagenum == 1) {
+		on_new_session_page = false;
+		m_okbutton->set_label(_("Open"));
+		set_response_sensitive (Gtk::RESPONSE_NONE, false);
+		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
+		if (m_treeview->get_selection()->count_selected_rows() == 0) {
+			set_response_sensitive (Gtk::RESPONSE_OK, false);
 		} else {
-		        set_response_sensitive (Gtk::RESPONSE_OK, true);
+			set_response_sensitive (Gtk::RESPONSE_OK, true);
 		}
 	} else {
-	        if (m_name->get_text() != "") {
-		  set_response_sensitive (Gtk::RESPONSE_NONE, true);
+		on_new_session_page = true;
+		if (m_name->get_text() != "") {
+			set_response_sensitive (Gtk::RESPONSE_NONE, true);
 		}
-	        m_okbutton->set_label(_("New"));
-	        m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
+		m_okbutton->set_label(_("New"));
+		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
 		if (m_name->get_text() == "") {
-		       set_response_sensitive (Gtk::RESPONSE_OK, false);
+			set_response_sensitive (Gtk::RESPONSE_OK, false);
 		} else {
-		        set_response_sensitive (Gtk::RESPONSE_OK, true);
+			set_response_sensitive (Gtk::RESPONSE_OK, true);
 		}
 	}
 }
@@ -540,35 +553,37 @@ void
 NewSessionDialog::treeview_selection_changed ()
 {
 	if (m_treeview->get_selection()->count_selected_rows() == 0) {
-	        if (!m_open_filechooser->get_filename().empty()) {
-	                set_response_sensitive (Gtk::RESPONSE_OK, true);
+		if (!m_open_filechooser->get_filename().empty()) {
+			set_response_sensitive (Gtk::RESPONSE_OK, true);
 		} else {
-	                set_response_sensitive (Gtk::RESPONSE_OK, false);
+			set_response_sensitive (Gtk::RESPONSE_OK, false);
 		}
 	} else {
-                set_response_sensitive (Gtk::RESPONSE_OK, true);
+		set_response_sensitive (Gtk::RESPONSE_OK, true);
 	}
 }
 
 void
 NewSessionDialog::file_chosen ()
 {
-        m_treeview->get_selection()->unselect_all();
+	if (on_new_session_page) return;
+
+	m_treeview->get_selection()->unselect_all();
 
 	if (!m_open_filechooser->get_filename().empty()) {
-	          set_response_sensitive (Gtk::RESPONSE_OK, true);
+		set_response_sensitive (Gtk::RESPONSE_OK, true);
 	} else {
-	          set_response_sensitive (Gtk::RESPONSE_OK, false);
+		set_response_sensitive (Gtk::RESPONSE_OK, false);
 	}
 }
 
 void
 NewSessionDialog::template_chosen ()
 {
-        if (m_template->get_filename() != "" ) {;
-	        set_response_sensitive (Gtk::RESPONSE_NONE, true);
+	if (m_template->get_filename() != "" ) {;
+		set_response_sensitive (Gtk::RESPONSE_NONE, true);
 	} else {
-	        set_response_sensitive (Gtk::RESPONSE_NONE, false);
+		set_response_sensitive (Gtk::RESPONSE_NONE, false);
 	}
 }
 

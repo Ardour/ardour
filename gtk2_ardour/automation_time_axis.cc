@@ -102,7 +102,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 		}
 	}
 	name_label.set_text (shortpname);
-	name_label.set_alignment (1.0, 0.5);
+	name_label.set_alignment (Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
 
 	if (nomparent.length()) {
 
@@ -118,7 +118,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
  		plugname = new Label (pname);
 		plugname->set_name (X_("TrackPlugName"));
-		plugname->set_alignment (1.0, 0.5);
 		plugname->show();
 		name_label.set_name (X_("TrackParameterName"));
 		controls_table.remove (name_hbox);

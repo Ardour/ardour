@@ -48,7 +48,7 @@ class Track : public Route
 
 	void toggle_monitor_input ();
 
-	bool can_record() const { return true; }
+	virtual bool can_record();
 
 	Diskstream& diskstream() const { return *_diskstream; }
 

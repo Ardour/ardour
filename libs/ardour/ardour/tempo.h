@@ -238,7 +238,7 @@ class TempoMap : public Stateful, public StateManager {
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
-        PBD::ID id();
+        PBD::ID id() { return _id; }
 
 	void dump (std::ostream&) const;
 	void clear ();

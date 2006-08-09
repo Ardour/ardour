@@ -97,7 +97,7 @@ class Route : public IO
 	virtual int  silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
 				  jack_nframes_t offset, bool can_record, bool rec_monitors_input);
 	virtual void toggle_monitor_input ();
-	virtual bool can_record() const { return false; }
+	virtual bool can_record() { return false; }
 	virtual void set_record_enable (bool yn, void *src) {}
 	virtual bool record_enabled() const { return false; }
 	virtual void handle_transport_stopped (bool abort, bool did_locate, bool flush_redirects);

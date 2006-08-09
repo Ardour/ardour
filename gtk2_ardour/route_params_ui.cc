@@ -287,9 +287,9 @@ void
 RouteParams_UI::cleanup_pre_view (bool stopupdate)
 {
 	if (_active_pre_view) {
-		PluginUI *   plugui = 0;
+		LadspaPluginUI *   plugui = 0;
 		
-		if (stopupdate && (plugui = dynamic_cast<PluginUI*>(_active_pre_view)) != 0) {
+		if (stopupdate && (plugui = dynamic_cast<LadspaPluginUI*>(_active_pre_view)) != 0) {
 			  plugui->stop_updating (0);
 		}
 
@@ -304,9 +304,9 @@ void
 RouteParams_UI::cleanup_post_view (bool stopupdate)
 {
 	if (_active_post_view) {
-		PluginUI *   plugui = 0;
+		LadspaPluginUI *   plugui = 0;
 		
-		if (stopupdate && (plugui = dynamic_cast<PluginUI*>(_active_post_view)) != 0) {
+		if (stopupdate && (plugui = dynamic_cast<LadspaPluginUI*>(_active_post_view)) != 0) {
 			  plugui->stop_updating (0);
 		}
 		_post_plugin_conn.disconnect();
@@ -556,7 +556,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Redirect> redirect,
 				
 		if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {				
 
-			PluginUI *plugin_ui = new PluginUI (session->engine(), plugin_insert, true);
+			LadspaPluginUI *plugin_ui = new LadspaPluginUI (session->engine(), plugin_insert, true);
 
 			if (place == PreFader) {
 				cleanup_pre_view();
