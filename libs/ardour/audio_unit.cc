@@ -64,6 +64,14 @@ AUPlugin::~AUPlugin ()
 	if (comp) {
 		delete comp;
 	}
+	
+	if (in_list) {
+		delete in_list;
+	}
+	
+	if (out_list) {
+		delete out_list;
+	}
 }
 
 AUPluginInfo::~AUPluginInfo ()

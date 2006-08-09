@@ -35,6 +35,7 @@
 class CAComponent;
 class CAAudioUnit;
 class CAComponentDescription;
+struct AudioBufferList;
 
 namespace ARDOUR {
 
@@ -88,6 +89,9 @@ class AUPlugin : public ARDOUR::Plugin
   private:
 	CAComponent* comp;
     CAAudioUnit* unit;
+
+	AudioBufferList* in_list;
+	AudioBufferList* out_list;
 
 	std::vector<std::pair<uint32_t, uint32_t> > parameter_map;
 };

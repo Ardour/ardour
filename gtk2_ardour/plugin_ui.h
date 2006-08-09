@@ -87,11 +87,11 @@ class PlugUIBase : public virtual sigc::trackable
 	void bypass_toggled();
 };
 
-class PluginUI : public PlugUIBase, public Gtk::VBox 
+class LadspaPluginUI : public PlugUIBase, public Gtk::VBox 
 {
   public:
-	PluginUI (ARDOUR::AudioEngine &, boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
-	~PluginUI ();
+	LadspaPluginUI (ARDOUR::AudioEngine &, boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
+	~LadspaPluginUI ();
 	
 	gint get_preferred_height () { return prefheight; }
 
