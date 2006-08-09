@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include <pbd/undo.h>
+#include <pbd/xml++.h>
 
 using namespace std;
 using namespace sigc;
@@ -82,7 +83,7 @@ UndoTransaction::redo ()
         (*this)();
 }
 
-XMLNode &UndoTransaction::serialize()
+XMLNode &UndoTransaction::get_state()
 {
     XMLNode *node = new XMLNode ("UndoTransaction");
     // TODO

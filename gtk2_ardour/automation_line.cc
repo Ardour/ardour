@@ -1278,4 +1278,5 @@ int AutomationLine::set_state(const XMLNode &node)
 {
     // TODO
     alist.set_state(node);
+    return 0;
 }

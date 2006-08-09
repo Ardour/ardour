@@ -49,7 +49,7 @@ class UndoTransaction : public Command
 	void undo();
 	void redo();
 
-	XMLNode &serialize();
+	XMLNode &get_state();
 	
 	void set_name (const string& str) {
 		_name = str;

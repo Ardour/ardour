@@ -841,52 +841,52 @@ class Session : public sigc::trackable, public Stateful
         class GlobalSoloStateCommand : public Command
         {
             GlobalRouteBooleanState before, after;
-            void *src;
             Session &sess;
+            void *src;
         public:
             GlobalSoloStateCommand(Session &, void *src);
             void operator()();
             void undo();
-            XMLNode &serialize();
+            XMLNode &get_state();
             void mark();
         };
 
         class GlobalMuteStateCommand : public Command
         {
             GlobalRouteBooleanState before, after;
-            void *src;
             Session &sess;
+            void *src;
         public:
             GlobalMuteStateCommand(Session &, void *src);
             void operator()();
             void undo();
-            XMLNode &serialize();
+            XMLNode &get_state();
             void mark();
         };
 
         class GlobalRecordEnableStateCommand : public Command
         {
             GlobalRouteBooleanState before, after;
-            void *src;
             Session &sess;
+            void *src;
         public:
             GlobalRecordEnableStateCommand(Session &, void *src);
             void operator()();
             void undo();
-            XMLNode &serialize();
+            XMLNode &get_state();
             void mark();
         };
 
         class GlobalMeteringStateCommand : public Command
         {
             GlobalRouteMeterState before, after;
-            void *src;
             Session &sess;
+            void *src;
         public:
             GlobalMeteringStateCommand(Session &, void *src);
             void operator()();
             void undo();
-            XMLNode &serialize();
+            XMLNode &get_state();
             void mark();
         };
 

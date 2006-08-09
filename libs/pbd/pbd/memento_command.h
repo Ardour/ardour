@@ -39,12 +39,14 @@ class MementoCommand : public Command
             : obj(obj), before(before), after(after) {}
         void operator() () { obj.set_state(after); }
         void undo() { obj.set_state(before); }
-        virtual XMLNode &serialize() {}
-        //{
+        virtual XMLNode &get_state() 
+        {
+            XMLNode *node = new XMLNode("MementoCommand");
             // obj.id
             // key is "MementoCommand" or something
             // before and after mementos
-        //}
+            return *node;
+        }
         // TODO does this need a copy constructor?
     protected:
         obj_T &obj;
@@ -60,12 +62,14 @@ public:
         : obj(obj), before(before) {}
     void operator() () { /* noop */ }
     void undo() { obj.set_state(before); }
-    virtual XMLNode &serialize() {}
-    //{
+    virtual XMLNode &get_state() 
+    {
+        XMLNode *node = new XMLNode("MementoUndoCommand"); // XXX
         // obj.id
         // key is "MementoCommand" or something
         // before and after mementos
-    //}
+        return *node;
+    }
 protected:
     obj_T &obj;
     XMLNode &before;
@@ -80,12 +84,14 @@ public:
         : obj(obj), after(after) {}
     void operator() () { obj.set_state(after); }
     void undo() { /* noop */ }
-    virtual XMLNode &serialize() {}
-    //{
+    virtual XMLNode &get_state()
+    {
+        XMLNode *node = new XMLNode("MementoUndoCommand");
         // obj.id
         // key is "MementoCommand" or something
         // before and after mementos
-    //}
+        return *node;
+    }
 protected:
     obj_T &obj;
     XMLNode &after;
