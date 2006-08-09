@@ -454,6 +454,9 @@ conf = Configure (libraries['flac'])
 conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new', language='CXX')
 libraries['flac'] = conf.Finish ()
 
+# or if that fails...
+#libraries['flac']    = LibraryInfo (LIBS='FLAC')
+
 #
 # Check for liblo
 
