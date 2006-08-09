@@ -20,8 +20,10 @@ void Session::GlobalSoloStateCommand::undo()
 {
     sess.set_global_solo(before, src);
 }
-XMLNode &Session::GlobalSoloStateCommand::serialize()
+XMLNode &Session::GlobalSoloStateCommand::get_state()
 {
+    XMLNode *node = new XMLNode("GlobalSoloStateCommand");
+    return *node;
 }
 
 // mute
@@ -42,8 +44,10 @@ void Session::GlobalMuteStateCommand::undo()
 {
     sess.set_global_mute(before, src);
 }
-XMLNode &Session::GlobalMuteStateCommand::serialize()
+XMLNode &Session::GlobalMuteStateCommand::get_state()
 {
+    XMLNode *node = new XMLNode("GlobalMuteStateCommand");
+    return *node;
 }
 
 // record enable
@@ -64,8 +68,10 @@ void Session::GlobalRecordEnableStateCommand::undo()
 {
     sess.set_global_record_enable(before, src);
 }
-XMLNode &Session::GlobalRecordEnableStateCommand::serialize()
+XMLNode &Session::GlobalRecordEnableStateCommand::get_state()
 {
+    XMLNode *node = new XMLNode("GlobalRecordEnableStateCommand");
+    return *node;
 }
 
 // metering
@@ -86,8 +92,10 @@ void Session::GlobalMeteringStateCommand::undo()
 {
     sess.set_global_route_metering(before, src);
 }
-XMLNode &Session::GlobalMeteringStateCommand::serialize()
+XMLNode &Session::GlobalMeteringStateCommand::get_state()
 {
+    XMLNode *node = new XMLNode("GlobalMeteringStateCommand");
+    return *node;
 }
 
 } // namespace ARDOUR

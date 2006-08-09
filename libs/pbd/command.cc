@@ -1,8 +1,8 @@
 #include <pbd/command.h>
+#include <pbd/xml++.h>
 
-class XMLNode;
 
-XMLNode &Command::serialize()
+XMLNode &Command::get_state()
 {
     XMLNode *node = new XMLNode ("Command");
     // TODO

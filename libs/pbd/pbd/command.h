@@ -21,16 +21,17 @@
 #ifndef __lib_pbd_command_h__
 #define __lib_pbd_command_h__
 
-#include <pbd/serializable.h>
+#include <pbd/stateful.h>
 
-class Command : public Serializable
+class Command : public Stateful
 {
     public:
 	virtual ~Command() {}
 	virtual void operator() () = 0;
         virtual void undo() = 0;
         virtual void redo() { (*this)(); }
-        virtual XMLNode &serialize();
+        virtual XMLNode &get_state();
+        virtual int set_state(const XMLNode&) { /* noop */ return 0; }
 };
 
 #endif // __lib_pbd_command_h_
