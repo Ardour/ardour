@@ -22,6 +22,7 @@
 
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
+#include <string>
 
 using namespace std;
 using namespace sigc;
@@ -86,7 +87,11 @@ UndoTransaction::redo ()
 XMLNode &UndoTransaction::get_state()
 {
     XMLNode *node = new XMLNode ("UndoTransaction");
-    // TODO
+
+    list<Command*>::iterator it;
+    for (it=actions.begin(); it!=actions.end(); it++)
+        node->add_child_nocopy((*it)->get_state());
+
     return *node;
 }
 
@@ -141,4 +146,15 @@ UndoHistory::clear ()
 {
 	RedoList.clear ();
 	UndoList.clear ();
+}
+
+XMLNode & UndoHistory::get_state()
+{
+    XMLNode *node = new XMLNode ("UndoHistory");
+
+    list<UndoTransaction>::iterator it;
+    for (it=UndoList.begin(); it != UndoList.end(); it++)
+        node->add_child_nocopy(it->get_state());
+
+    return *node;
 }

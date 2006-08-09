@@ -608,6 +608,7 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 		_state_of_the_state = Clean;
 
 		if (save_state (_current_snapshot_name)) {
+                        save_history();
 			return -1;
 		}
 	}
@@ -1690,6 +1691,7 @@ Session::set_state (const XMLNode& node)
 
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
+                save_history();
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
@@ -2477,6 +2479,7 @@ void
 Session::auto_save()
 {
 	save_state (_current_snapshot_name);
+        save_history();
 }
 
 RouteGroup *
@@ -3277,4 +3280,49 @@ Session::add_instant_xml (XMLNode& node, const std::string& dir)
 {
 	Stateful::add_instant_xml (node, dir);
 	Config->add_instant_xml (node, get_user_ardour_path());
+}
+
+
+int 
+Session::save_history ()
+{
+    XMLTree tree;
+    string xml_path;
+    string bak_path;
+
+    tree.set_root (&history.get_state());
+
+    xml_path = _path + _current_snapshot_name + ".history"; 
+
+    bak_path = xml_path + ".bak";
+
+    if ((access (xml_path.c_str(), F_OK) == 0) &&
+        (rename (xml_path.c_str(), bak_path.c_str())))
+    {
+        error << _("could not backup old history file, current history not saved.") << endmsg;
+        return -1;
+    }
+
+    if (!tree.write (xml_path))
+    {
+        error << string_compose (_("history could not be saved to %1"), xml_path) << endmsg;
+
+        /* don't leave a corrupt file lying around if it is
+         * possible to fix.
+         */
+
+        if (unlink (xml_path.c_str())) 
+        {
+            error << string_compose (_("could not remove corrupt history file %1"), xml_path) << endmsg;
+        } else {
+            if (rename (bak_path.c_str(), xml_path.c_str())) 
+            {
+                error << string_compose (_("could not restore history file from backup %1"), bak_path) << endmsg;
+            }
+        }
+
+        return -1;
+    }
+
+    return 0;
 }

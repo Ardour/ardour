@@ -90,6 +90,8 @@ class UndoHistory
 	void clear_undo ();
 	void clear_redo ();
 
+        XMLNode &get_state();
+        void save_state();
   private:
 	list<UndoTransaction> UndoList;
 	list<UndoTransaction> RedoList;
