@@ -8,6 +8,7 @@
 #include <inttypes.h>
 
 #include <pbd/id.h>
+#include <string>
 
 using namespace std;
 using namespace PBD;
@@ -43,6 +44,13 @@ ID::print (char* buf) const
 {
 	/* XXX sizeof buf is unknown. bad API design */
 	snprintf (buf, 16, "%" PRIu64, id);
+}
+
+string ID::to_s() const
+{
+    char buf[16]; // see print()
+    print(buf);
+    return string(buf);
 }
 
 ID&

@@ -156,6 +156,8 @@ class AutomationList : public StateManager, public Stateful
 	XMLNode &get_state(void); 
 	int set_state (const XMLNode &s);
 
+        PBD::ID id() { return _id; }
+
 	void set_max_xval (double);
 	double get_max_xval() const { return max_xval; }
 
@@ -182,6 +184,7 @@ class AutomationList : public StateManager, public Stateful
 	};
 
   protected:
+        PBD::ID _id;
 	struct State : public ARDOUR::StateManager::State {
 	    AutomationEventList events;
 

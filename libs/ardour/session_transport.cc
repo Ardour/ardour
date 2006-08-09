@@ -411,6 +411,7 @@ Session::non_realtime_stop (bool abort)
 	if ((post_transport_work & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
 		save_state ("", true);
+                save_history();
 	}
 
         /* always try to get rid of this */

@@ -143,6 +143,8 @@ class Editor : public PublicEditor
 	XMLNode& get_state ();
 	int set_state (const XMLNode& );
 
+        PBD::ID id() { return _id; }
+
 	void set_mouse_mode (Editing::MouseMode, bool force=true);
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () { return mouse_mode; }
@@ -346,6 +348,8 @@ class Editor : public PublicEditor
 	ARDOUR::Session     *session;
 	ARDOUR::AudioEngine& engine;
 	bool                 constructed;
+
+        PBD::ID _id;
 
 	PlaylistSelector* _playlist_selector;
 

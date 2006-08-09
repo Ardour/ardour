@@ -5,6 +5,6 @@
 XMLNode &Command::get_state()
 {
     XMLNode *node = new XMLNode ("Command");
-    // TODO
+    node->add_content("WARNING: Somebody forgot to subclass Command.");
     return *node;
 }

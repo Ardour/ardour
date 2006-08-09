@@ -22,6 +22,7 @@
 #define __lib_pbd_memento_command_h__
 
 #include <pbd/command.h>
+#include <pbd/xml++.h>
 #include <sigc++/slot.h>
 
 /** This command class is initialized with before and after mementos 
@@ -42,9 +43,9 @@ class MementoCommand : public Command
         virtual XMLNode &get_state() 
         {
             XMLNode *node = new XMLNode("MementoCommand");
-            // obj.id
-            // key is "MementoCommand" or something
-            // before and after mementos
+            node->add_property("obj_id", obj.id().to_s());
+            node->add_child_nocopy(before);
+            node->add_child_nocopy(after);
             return *node;
         }
         // TODO does this need a copy constructor?
@@ -64,10 +65,9 @@ public:
     void undo() { obj.set_state(before); }
     virtual XMLNode &get_state() 
     {
-        XMLNode *node = new XMLNode("MementoUndoCommand"); // XXX
-        // obj.id
-        // key is "MementoCommand" or something
-        // before and after mementos
+        XMLNode *node = new XMLNode("MementoUndoCommand");
+        node->add_property("obj_id", obj.id().to_s());
+        node->add_child_nocopy(before);
         return *node;
     }
 protected:
@@ -86,10 +86,9 @@ public:
     void undo() { /* noop */ }
     virtual XMLNode &get_state()
     {
-        XMLNode *node = new XMLNode("MementoUndoCommand");
-        // obj.id
-        // key is "MementoCommand" or something
-        // before and after mementos
+        XMLNode *node = new XMLNode("MementoRedoCommand");
+        node->add_property("obj_id", obj.id().to_s());
+        node->add_child_nocopy(after);
         return *node;
     }
 protected:
