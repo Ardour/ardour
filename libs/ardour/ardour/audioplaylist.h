@@ -60,7 +60,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 
 	void clear (bool with_delete = false, bool with_save = true);
 
-        jack_nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, char * workbuf, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
+        jack_nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&);
 	UndoAction get_memento() const;

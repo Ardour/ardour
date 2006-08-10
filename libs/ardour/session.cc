@@ -394,10 +394,6 @@ Session::~Session ()
  		free(*i);
  	}
 
-	for (map<RunContext,char*>::iterator i = _conversion_buffers.begin(); i != _conversion_buffers.end(); ++i) {
-		delete [] (i->second);
-	}
-	
 	AudioDiskstream::free_working_buffers();
 	
 #undef TRACK_DESTRUCTION
@@ -3594,7 +3590,6 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	jack_nframes_t this_chunk;
 	jack_nframes_t to_do;
 	vector<Sample*> buffers;
-	char *  workbuf = 0;
 
 	// any bigger than this seems to cause stack overflows in called functions
 	const jack_nframes_t chunk_size = (128 * 1024)/4;
@@ -3664,13 +3659,11 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		buffers.push_back (b);
 	}
 
-	workbuf = new char[chunk_size * 4];
-	
 	while (to_do && !itt.cancel) {
 		
 		this_chunk = min (to_do, chunk_size);
 		
-		if (track.export_stuff (buffers, workbuf, nchans, start, this_chunk)) {
+		if (track.export_stuff (buffers, nchans, start, this_chunk)) {
 			goto out;
 		}
 
@@ -3679,7 +3672,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
 
 			if (afs) {
-				if (afs->write (buffers[n], this_chunk, workbuf) != this_chunk) {
+				if (afs->write (buffers[n], this_chunk) != this_chunk) {
 					goto out;
 				}
 			}
@@ -3733,10 +3726,6 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		free(*i);
 	}
 
-	if (workbuf) {
-		delete [] workbuf;
-	}
-	
 	g_atomic_int_set (&processing_prohibited, 0);
 
 	itt.done = true;

@@ -236,7 +236,7 @@ Configuration::set_state (const XMLNode& root)
 		}
 	}
 
-	AudioDiskstream::set_disk_io_chunk_frames (minimum_disk_io_bytes.get() / sizeof (Sample));
+	Diskstream::set_disk_io_chunk_frames (minimum_disk_io_bytes.get() / sizeof (Sample));
 
 	return 0;
 }

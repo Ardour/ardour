@@ -58,7 +58,6 @@ using namespace PBD;
 size_t  AudioDiskstream::_working_buffers_size = 0;
 Sample* AudioDiskstream::_mixdown_buffer       = 0;
 gain_t* AudioDiskstream::_gain_buffer          = 0;
-char*   AudioDiskstream::_conversion_buffer    = 0;
 
 AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
 	: Diskstream(sess, name, flag)
@@ -188,7 +187,6 @@ AudioDiskstream::allocate_working_buffers()
 	_working_buffers_size = disk_io_frames();
 	_mixdown_buffer       = new Sample[_working_buffers_size];
 	_gain_buffer          = new gain_t[_working_buffers_size];
-	_conversion_buffer    = new char[_working_buffers_size * 4];
 }
 
 void
@@ -196,11 +194,9 @@ AudioDiskstream::free_working_buffers()
 {
 	delete _mixdown_buffer;
 	delete _gain_buffer;
-	delete _conversion_buffer;
 	_working_buffers_size = 0;
 	_mixdown_buffer       = 0;
 	_gain_buffer          = 0;
-	_conversion_buffer    = 0;
 }
 
 void
@@ -895,7 +891,6 @@ AudioDiskstream::overwrite_existing_buffers ()
 {
  	Sample* mixdown_buffer;
  	float* gain_buffer;
-	char * workbuf;
  	int ret = -1;
 	bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
 
@@ -906,7 +901,6 @@ AudioDiskstream::overwrite_existing_buffers ()
 	
  	mixdown_buffer = new Sample[size];
  	gain_buffer = new float[size];
-	workbuf = new char[size*4];
 	
 	/* reduce size so that we can fill the buffer correctly. */
 	size--;
@@ -932,8 +926,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 		
 		jack_nframes_t to_read = size - overwrite_offset;
 
-		if (read ((*chan).playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, workbuf,
-			  start, to_read, *chan, n, reversed)) {
+		if (read ((*chan).playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, start, to_read, *chan, n, reversed)) {
 			error << string_compose(_("AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"),
 					 _id, size, playback_sample) << endmsg;
 			goto out;
@@ -943,7 +936,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 
 			cnt -= to_read;
 		
-			if (read ((*chan).playback_buf->buffer(), mixdown_buffer, gain_buffer, workbuf,
+			if (read ((*chan).playback_buf->buffer(), mixdown_buffer, gain_buffer,
 				  start, cnt, *chan, n, reversed)) {
 				error << string_compose(_("AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"),
 						 _id, size, playback_sample) << endmsg;
@@ -958,7 +951,6 @@ AudioDiskstream::overwrite_existing_buffers ()
 	pending_overwrite = false;
  	delete [] gain_buffer;
  	delete [] mixdown_buffer;
-	delete [] workbuf;
  	return ret;
 }
 
@@ -1022,7 +1014,7 @@ AudioDiskstream::internal_playback_seek (jack_nframes_t distance)
 }
 
 int
-AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, char * workbuf, jack_nframes_t& start, jack_nframes_t cnt, 
+AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, jack_nframes_t& start, jack_nframes_t cnt, 
 		  ChannelInfo& channel_info, int channel, bool reversed)
 {
 	jack_nframes_t this_read = 0;
@@ -1079,7 +1071,7 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 
 		this_read = min(cnt,this_read);
 
-		if (audio_playlist()->read (buf+offset, mixdown_buffer, gain_buffer, workbuf, start, this_read, channel) != this_read) {
+		if (audio_playlist()->read (buf+offset, mixdown_buffer, gain_buffer, start, this_read, channel) != this_read) {
 			error << string_compose(_("AudioDiskstream %1: cannot read %2 from playlist at frame %3"), _id, this_read, 
 					 start) << endmsg;
 			return -1;
@@ -1117,19 +1109,17 @@ AudioDiskstream::do_refill_with_alloc()
 {
 	Sample* mix_buf  = new Sample[disk_io_chunk_frames];
 	float*  gain_buf = new float[disk_io_chunk_frames];
-	char*   work_buf = new char[disk_io_chunk_frames * 4];
 
-	int ret = _do_refill(mix_buf, gain_buf, work_buf);
+	int ret = _do_refill(mix_buf, gain_buf);
 	
 	delete [] mix_buf;
 	delete [] gain_buf;
-	delete [] work_buf;
 
 	return ret;
 }
 
 int
-AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, char * workbuf)
+AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 {
 	int32_t ret = 0;
 	jack_nframes_t to_read;
@@ -1143,7 +1133,6 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, char * 
 
 	assert(mixdown_buffer);
 	assert(gain_buffer);
-	assert(workbuf);
 
 	channels.front().playback_buf->get_write_vector (&vector);
 	
@@ -1284,7 +1273,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, char * 
 
 		if (to_read) {
 
-			if (read (buf1, mixdown_buffer, gain_buffer, workbuf, file_frame_tmp, to_read, chan, chan_n, reversed)) {
+			if (read (buf1, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan, chan_n, reversed)) {
 				ret = -1;
 				goto out;
 			}
@@ -1302,7 +1291,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, char * 
 			   so read some or all of vector.len[1] as well.
 			*/
 
-			if (read (buf2, mixdown_buffer, gain_buffer, workbuf, file_frame_tmp, to_read, chan, chan_n, reversed)) {
+			if (read (buf2, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan, chan_n, reversed)) {
 				ret = -1;
 				goto out;
 			}
@@ -1336,8 +1325,6 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, char * 
 int
 AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 {
-	char* workbuf = _session.conversion_buffer(context);
-
 	uint32_t to_write;
 	int32_t ret = 0;
 	RingBufferNPT<Sample>::rw_vector vector;
@@ -1427,7 +1414,7 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 			}
 		}
 
-		if ((!(*chan).write_source) || (*chan).write_source->write (vector.buf[0], to_write, workbuf) != to_write) {
+		if ((!(*chan).write_source) || (*chan).write_source->write (vector.buf[0], to_write) != to_write) {
 			error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
 		}
@@ -1444,7 +1431,7 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 		
 			to_write = min ((jack_nframes_t)(disk_io_chunk_frames - to_write), (jack_nframes_t) vector.len[1]);
 		
-			if ((*chan).write_source->write (vector.buf[1], to_write, workbuf) != to_write) {
+			if ((*chan).write_source->write (vector.buf[1], to_write) != to_write) {
 				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
 				return -1;
 			}

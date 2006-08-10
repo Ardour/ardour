@@ -56,7 +56,12 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-jack_nframes_t Diskstream::disk_io_chunk_frames = 0;
+/* XXX This goes uninitialized when there is no ~/.ardour2 directory.
+ * I can't figure out why, so this will do for now (just stole the
+ * default from configuration_vars.h).  0 is not a good value for
+ * allocating buffer sizes..
+ */
+jack_nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
 
 sigc::signal<void,Diskstream*>    Diskstream::DiskstreamCreated;
 sigc::signal<void,list<Source*>*> Diskstream::DeleteSources;

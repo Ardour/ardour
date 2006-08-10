@@ -162,7 +162,6 @@ Editor::write_region (string path, AudioRegion& region)
 	jack_nframes_t to_read;
 	Sample buf[chunk_size];
 	gain_t gain_buffer[chunk_size];
-	char   workbuf[chunk_size *4];
 	jack_nframes_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
@@ -234,11 +233,11 @@ Editor::write_region (string path, AudioRegion& region)
 			
 			fs = (*src);
 
-			if (region.read_at (buf, buf, gain_buffer, workbuf, pos, this_time) != this_time) {
+			if (region.read_at (buf, buf, gain_buffer, pos, this_time) != this_time) {
 				break;
 			}
 			
-			if (fs->write (buf, this_time, workbuf) != this_time) {
+			if (fs->write (buf, this_time) != this_time) {
 				error << "" << endmsg;
 				goto error_out;
 			}
@@ -309,7 +308,6 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 	jack_nframes_t nframes;
 	Sample buf[chunk_size];
 	gain_t gain_buffer[chunk_size];
-	char   workbuf[chunk_size*4];
 	jack_nframes_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
@@ -367,11 +365,11 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 
 				fs = sources[n];
 				
-				if (playlist.read (buf, buf, gain_buffer, workbuf, pos, this_time, n) != this_time) {
+				if (playlist.read (buf, buf, gain_buffer, pos, this_time, n) != this_time) {
 					break;
 				}
 				
-				if (fs->write (buf, this_time, workbuf) != this_time) {
+				if (fs->write (buf, this_time) != this_time) {
 					goto error_out;
 				}
 			}
@@ -397,7 +395,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 				for (uint32_t n=0; n < channels; ++n) {
 
 					fs = sources[n];
-					if (fs->write (buf, this_time, workbuf) != this_time) {
+					if (fs->write (buf, this_time) != this_time) {
 						goto error_out;
 					}
 				}

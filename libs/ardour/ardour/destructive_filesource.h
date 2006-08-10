@@ -49,7 +49,7 @@ class DestructiveFileSource : public SndFileSource {
 	static void setup_standard_crossfades (jack_nframes_t sample_rate);
 
   protected:
-	jack_nframes_t write_unlocked (Sample *src, jack_nframes_t cnt, char * workbuf);
+	jack_nframes_t write_unlocked (Sample *src, jack_nframes_t cnt);
 
 	virtual void handle_header_position_change ();
 
@@ -65,7 +65,7 @@ class DestructiveFileSource : public SndFileSource {
 	Sample*        xfade_buf;
 
 	void init ();
-	jack_nframes_t crossfade (Sample* data, jack_nframes_t cnt, int dir, char * workbuf);
+	jack_nframes_t crossfade (Sample* data, jack_nframes_t cnt, int dir);
 	void set_timeline_position (jack_nframes_t);
 };
 

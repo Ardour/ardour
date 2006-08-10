@@ -51,7 +51,7 @@ class AudioTrack : public Track
 	int use_diskstream (string name);
 	int use_diskstream (const PBD::ID& id);
 	
-	int export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t end_frame);
+	int export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t end_frame);
 
 	void freeze (InterThreadInfo&);
 	void unfreeze ();
