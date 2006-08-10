@@ -27,6 +27,7 @@
 #include <pbd/xml++.h>
 #include <pbd/failed_constructor.h>
 
+#include <gtkmm/widget.h>
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/barcontroller.h>
@@ -51,6 +52,7 @@
 #include "plugin_ui.h"
 #include "utils.h"
 #include "gui_thread.h"
+#include "public_editor.h"
 
 #include "i18n.h"
 
@@ -111,10 +113,22 @@ PluginUIWindow::PluginUIWindow (AudioEngine &engine, boost::shared_ptr<PluginIns
 		if (h > 600) h = 600;
 		set_default_size (450, h); 
 	}
+
 }
 
 PluginUIWindow::~PluginUIWindow ()
 {
+}
+bool
+PluginUIWindow::on_key_press_event (GdkEventKey* event)
+{
+	return PublicEditor::instance().on_key_press_event(event);
+}
+
+bool
+PluginUIWindow::on_key_release_event (GdkEventKey* event)
+{
+	return PublicEditor::instance().on_key_release_event(event);
 }
 
 void

@@ -147,6 +147,8 @@ class PluginSelector : public ArdourDialog
 	void btn_apply_clicked();
 	void use_plugin (ARDOUR::PluginInfoPtr);
 	void cleanup ();
+
+	void set_correct_focus();
 };
 
 #endif // __ardour_plugin_selector_h__

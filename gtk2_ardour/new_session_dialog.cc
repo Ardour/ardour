@@ -141,15 +141,17 @@ NewSessionDialog::NewSessionDialog()
 	advanced_table->attach(*m_control_bus_channel_count, 1, 2, 2, 3, Gtk::AttachOptions(), Gtk::AttachOptions(), 0, 0);
 	advanced_table->attach(*m_master_bus_channel_count, 1, 2, 1, 2, Gtk::AttachOptions(), Gtk::AttachOptions(), 0, 0);
 	advanced_table->attach(*m_create_master_bus, 0, 1, 1, 2, Gtk::FILL, Gtk::AttachOptions(), 0, 0);
+
 	m_connect_inputs->set_flags(Gtk::CAN_FOCUS);
 	m_connect_inputs->set_relief(Gtk::RELIEF_NORMAL);
 	m_connect_inputs->set_mode(true);
-	m_connect_inputs->set_active(false);
+	m_connect_inputs->set_active(true);
 	m_connect_inputs->set_border_width(0);
+
 	m_limit_input_ports->set_flags(Gtk::CAN_FOCUS);
 	m_limit_input_ports->set_relief(Gtk::RELIEF_NORMAL);
 	m_limit_input_ports->set_mode(true);
-	m_limit_input_ports->set_sensitive(false);
+	m_limit_input_ports->set_sensitive(true);
 	m_limit_input_ports->set_border_width(0);
 	m_input_limit_count->set_flags(Gtk::CAN_FOCUS);
 	m_input_limit_count->set_update_policy(Gtk::UPDATE_ALWAYS);
@@ -157,6 +159,7 @@ NewSessionDialog::NewSessionDialog()
 	m_input_limit_count->set_digits(0);
 	m_input_limit_count->set_wrap(false);
 	m_input_limit_count->set_sensitive(false);
+
 	input_port_limit_hbox->pack_start(*m_limit_input_ports, Gtk::PACK_SHRINK, 6);
 	input_port_limit_hbox->pack_start(*m_input_limit_count, Gtk::PACK_EXPAND_PADDING, 0);
 	input_port_vbox->pack_start(*m_connect_inputs, Gtk::PACK_SHRINK, 0);
@@ -177,12 +180,12 @@ NewSessionDialog::NewSessionDialog()
 	m_connect_outputs->set_flags(Gtk::CAN_FOCUS);
 	m_connect_outputs->set_relief(Gtk::RELIEF_NORMAL);
 	m_connect_outputs->set_mode(true);
-	m_connect_outputs->set_active(false);
+	m_connect_outputs->set_active(true);
 	m_connect_outputs->set_border_width(0);
 	m_limit_output_ports->set_flags(Gtk::CAN_FOCUS);
 	m_limit_output_ports->set_relief(Gtk::RELIEF_NORMAL);
 	m_limit_output_ports->set_mode(true);
-	m_limit_output_ports->set_sensitive(false);
+	m_limit_output_ports->set_sensitive(true);
 	m_limit_output_ports->set_border_width(0);
 	m_output_limit_count->set_flags(Gtk::CAN_FOCUS);
 	m_output_limit_count->set_update_policy(Gtk::UPDATE_ALWAYS);
@@ -597,12 +600,24 @@ void
 NewSessionDialog::connect_inputs_clicked ()
 {
         m_limit_input_ports->set_sensitive(m_connect_inputs->get_active());
+
+		if (m_connect_inputs->get_active() && m_limit_input_ports->get_active()) {
+	        m_input_limit_count->set_sensitive(true);
+		} else {
+	        m_input_limit_count->set_sensitive(false);
+		}
 }
 
 void
 NewSessionDialog::connect_outputs_clicked ()
 {
         m_limit_output_ports->set_sensitive(m_connect_outputs->get_active());
+
+		if (m_connect_outputs->get_active() && m_limit_output_ports->get_active()) {
+	        m_output_limit_count->set_sensitive(true);
+		} else {
+	        m_output_limit_count->set_sensitive(false);
+		}
 }
 
 void

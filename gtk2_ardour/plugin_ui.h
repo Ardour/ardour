@@ -203,6 +203,9 @@ class PluginUIWindow : public ArdourDialog
 	PlugUIBase& pluginui() { return *_pluginui; }
 
 	void resize_preferred();
+
+	virtual bool on_key_press_event (GdkEventKey*);
+	virtual bool on_key_release_event (GdkEventKey*);
 	
   private:
 	PlugUIBase* _pluginui;
