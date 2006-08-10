@@ -29,6 +29,7 @@
 #include <ardour/ardour.h>
 #include <ardour/redirect.h>
 #include <ardour/plugin_state.h>
+#include <ardour/types.h>
 
 class XMLNode;
 
@@ -39,8 +40,8 @@ namespace MIDI {
 namespace ARDOUR {
 
 class Session;
-class Plugin;
 class Route;
+class Plugin;
 
 class Insert : public Redirect
 {
@@ -148,6 +149,8 @@ class PluginInsert : public Insert
 			return _plugins[0]; // we always have one
 		}
 	}
+
+	PluginType type ();
 
 	string describe_parameter (uint32_t);
 

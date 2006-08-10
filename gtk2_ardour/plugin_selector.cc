@@ -49,7 +49,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	manager = mgr;
 	session = 0;
 	
-	current_selection = PluginInfo::LADSPA;
+	current_selection = ARDOUR::LADSPA;
 
 	lmodel = Gtk::ListStore::create(lcols);
 	ladspa_display.set_model (lmodel);
@@ -286,7 +286,7 @@ PluginSelector::vst_display_selection_changed()
 		btn_add->set_sensitive (false);
 	}
 
-	current_selection = PluginInfo::VST;
+	current_selection = ARDOUR::VST;
 }
 
 #endif //VST_SUPPORT
@@ -332,7 +332,7 @@ PluginSelector::au_display_selection_changed()
 		btn_add->set_sensitive (false);
 	}
 	
-	current_selection = PluginInfo::AudioUnit;
+	current_selection = ARDOUR::AudioUnit;
 }
 
 #endif //HAVE_COREAUDIO
@@ -361,19 +361,19 @@ PluginSelector::btn_add_clicked()
 	Gtk::TreeModel::Row row;
 
 	switch (current_selection) {
-		case PluginInfo::LADSPA:
+		case ARDOUR::LADSPA:
 			row = *(ladspa_display.get_selection()->get_selected());
 			name = row[lcols.name];
 			pi = row[lcols.plugin];
 			break;
-		case PluginInfo::VST:
+		case ARDOUR::VST:
 #ifdef VST_SUPPORT
 			row = *(vst_display.get_selection()->get_selected());
 			name = row[vcols.name];
 			pi = row[vcols.plugin];
 #endif
 			break;
-		case PluginInfo::AudioUnit:
+		case ARDOUR::AudioUnit:
 #ifdef HAVE_COREAUDIO
 			row = *(au_display.get_selection()->get_selected());
 			name = row[aucols.name];
@@ -426,7 +426,7 @@ PluginSelector::ladspa_display_selection_changed()
 		btn_add->set_sensitive (false);
 	}
 	
-	current_selection = PluginInfo::LADSPA;
+	current_selection = ARDOUR::LADSPA;
 }
 
 void

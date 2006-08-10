@@ -254,7 +254,7 @@ PluginManager::ladspa_discover (string path)
 		info->index = i;
 		info->n_inputs = 0;
 		info->n_outputs = 0;
-		info->type = PluginInfo::LADSPA;
+		info->type = ARDOUR::LADSPA;
 		info->unique_id = descriptor->UniqueID;
 		
 		for (uint32_t n=0; n < descriptor->PortCount; ++n) {
@@ -397,7 +397,7 @@ PluginManager::vst_discover (string path)
 	info->index = 0;
 	info->n_inputs = finfo->numInputs;
 	info->n_outputs = finfo->numOutputs;
-	info->type = PluginInfo::VST;
+	info->type = ARDOUR::VST;
 	
 	_vst_plugin_info.push_back (info);
 	fst_free_info (finfo);
