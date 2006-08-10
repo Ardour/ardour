@@ -19,6 +19,7 @@
 */
 
 #include <fstream>
+#include <cassert>
 #include <cstdio>
 #include <unistd.h>
 #include <cmath>
