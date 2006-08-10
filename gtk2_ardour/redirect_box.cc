@@ -979,7 +979,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 
 					title = string_compose(_("ardour: %1: %2 (by %3)"), _route->name(), plugin_insert->name(), maker);	
 				
-					plugin_ui = new PluginUIWindow (_session.engine(), plugin_insert);
+					plugin_ui = new PluginUIWindow (plugin_insert);
 					if (_owner_is_mixer) {
 						ARDOUR_UI::instance()->the_mixer()->ensure_float (*plugin_ui);
 					} else {
@@ -1001,7 +1001,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 			} else if (type == ARDOUR::AudioUnit) {
 				AUPluginUI* plugin_ui;
 				if (plugin_insert->get_gui() == 0) {
-					plugin_ui = new AUPluginUI (_session.engine(), plugin_insert);
+					plugin_ui = new AUPluginUI (plugin_insert);
 				} else {
 					plugin_ui = reinterpret_cast<AUPluginUI*> (plugin_insert->get_gui());
 				}
