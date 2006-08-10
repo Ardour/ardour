@@ -489,6 +489,7 @@ class Session : public sigc::trackable, public Stateful
 	int save_state (string snapshot_name, bool pending = false);
 	int restore_state (string snapshot_name);
 	int save_template (string template_name);
+        int save_history ();
 
 	static int rename_template (string old_name, string new_name);
 
@@ -501,7 +502,7 @@ class Session : public sigc::trackable, public Stateful
 	static vector<string*>* possible_states(string path);
 
 	XMLNode& get_state();
-	int      set_state(const XMLNode& node);
+	int      set_state(const XMLNode& node); // not idempotent
 	XMLNode& get_template();
 
 	void add_instant_xml (XMLNode&, const std::string& dir);
@@ -844,23 +845,65 @@ class Session : public sigc::trackable, public Stateful
 	string next_undo() const { return history.next_undo(); }
 	string next_redo() const { return history.next_redo(); }
 
-	void begin_reversible_command (string cmd_name, UndoAction *private_undo = 0);
-	void commit_reversible_command (UndoAction* private_redo = 0);
+	void begin_reversible_command (string cmd_name);
+	void commit_reversible_command (Command* cmd = 0);
 
-	void add_undo (const UndoAction& ua) {
-		current_cmd.add_undo (ua);
-	}
-	void add_redo (const UndoAction& ua) {
-		current_cmd.add_redo (ua);
-	}
-	void add_redo_no_execute (const UndoAction& ua) {
-		current_cmd.add_redo_no_execute (ua);
+	void add_command (Command *const cmd) {
+		current_trans.add_command (cmd);
 	}
 
-	UndoAction global_solo_memento (void *src);
-	UndoAction global_mute_memento (void *src);
-	UndoAction global_record_enable_memento (void *src);
-	UndoAction global_metering_memento (void *src);
+        // these commands are implemented in libs/ardour/session_command.cc
+        class GlobalSoloStateCommand : public Command
+        {
+            GlobalRouteBooleanState before, after;
+            Session &sess;
+            void *src;
+        public:
+            GlobalSoloStateCommand(Session &, void *src);
+            void operator()();
+            void undo();
+            XMLNode &get_state();
+            void mark();
+        };
+
+        class GlobalMuteStateCommand : public Command
+        {
+            GlobalRouteBooleanState before, after;
+            Session &sess;
+            void *src;
+        public:
+            GlobalMuteStateCommand(Session &, void *src);
+            void operator()();
+            void undo();
+            XMLNode &get_state();
+            void mark();
+        };
+
+        class GlobalRecordEnableStateCommand : public Command
+        {
+            GlobalRouteBooleanState before, after;
+            Session &sess;
+            void *src;
+        public:
+            GlobalRecordEnableStateCommand(Session &, void *src);
+            void operator()();
+            void undo();
+            XMLNode &get_state();
+            void mark();
+        };
+
+        class GlobalMeteringStateCommand : public Command
+        {
+            GlobalRouteMeterState before, after;
+            Session &sess;
+            void *src;
+        public:
+            GlobalMeteringStateCommand(Session &, void *src);
+            void operator()();
+            void undo();
+            XMLNode &get_state();
+            void mark();
+        };
 
 	/* edit mode */
 
@@ -1635,7 +1678,7 @@ class Session : public sigc::trackable, public Stateful
 	void reverse_diskstream_buffers ();
 
 	UndoHistory history;
-	UndoCommand current_cmd;
+	UndoTransaction current_trans;
 
 	GlobalRouteBooleanState get_global_route_boolean (bool (Route::*method)(void) const);
 	GlobalRouteMeterState get_global_route_metering ();

@@ -29,6 +29,7 @@
 #include <pbd/error.h>
 #include <glibmm/thread.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/memento_command.h>
 
 #include <midi++/mmc.h>
 #include <midi++/port.h>
@@ -325,8 +326,10 @@ Session::non_realtime_stop (bool abort)
 		}
 		
 		if (change_end) {
-			add_undo (sigc::retype_return<void>(sigc::bind (mem_fun (*loc, &Location::set_end), loc->end())));
-			add_redo (sigc::retype_return<void>(sigc::bind (mem_fun (*loc, &Location::set_end), _transport_frame)));
+                        XMLNode &before = loc->get_state();
+                        loc->set_end(_transport_frame);
+                        XMLNode &after = loc->get_state();
+                        add_command (new MementoCommand<Location>(*loc, before, after));
 		}
 
 		_end_location_is_free = false;
@@ -410,6 +413,7 @@ Session::non_realtime_stop (bool abort)
 	if ((post_transport_work & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
 		save_state ("", true);
+                save_history();
 	}
 
         /* always try to get rid of this */

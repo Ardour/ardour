@@ -1023,6 +1023,7 @@ Session::auto_punch_start_changed (Location* location)
 	if (get_record_enabled() && get_punch_in()) {
 		/* capture start has been changed, so save new pending state */
 		save_state ("", true);
+                save_history();
 	}
 }	
 
@@ -1344,6 +1345,7 @@ Session::maybe_enable_record ()
 	*/
 
 	save_state ("", true);
+        save_history();
 
 	if (_transport_speed) {
 		if (!punch_in) {
@@ -2131,6 +2133,7 @@ Session::add_diskstream (Diskstream* dstream)
 
 	set_dirty();
 	save_state (_current_snapshot_name);
+        save_history();
 
 	DiskstreamAdded (dstream); /* EMIT SIGNAL */
 }
@@ -2882,6 +2885,7 @@ Session::remove_source (Source* source)
 		*/
 		
 		save_state (_current_snapshot_name);
+                save_history();
 	}
 
 	SourceRemoved(source); /* EMIT SIGNAL */

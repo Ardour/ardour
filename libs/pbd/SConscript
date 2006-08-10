@@ -21,6 +21,7 @@ pbd_files = Split("""
 basename.cc
 base_ui.cc
 convert.cc
+command.cc
 controllable.cc
 dmalloc.cc
 error.cc

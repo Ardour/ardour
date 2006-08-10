@@ -20,6 +20,7 @@
 
 #include <ardour/curve.h>
 #include <ardour/route.h>
+#include <pbd/memento_command.h>
 
 #include "gain_automation_time_axis.h"
 #include "automation_line.h"
@@ -63,9 +64,10 @@ GainAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkE
 
 	_session.begin_reversible_command (_("add gain automation event"));
 
-	_session.add_undo (curve.get_memento());
+        XMLNode &before = curve.get_state();
 	curve.add (when, y);
-	_session.add_redo_no_execute (curve.get_memento());
+        XMLNode &after = curve.get_state();
+        _session.add_command(new MementoCommand<ARDOUR::Curve>(curve, before, after));
 	_session.commit_reversible_command ();
 	_session.set_dirty ();
 }

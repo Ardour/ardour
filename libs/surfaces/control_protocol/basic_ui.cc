@@ -145,6 +145,7 @@ void
 BasicUI::save_state ()
 {
 	session->save_state ("");
+        session->save_history();
 }
 
 void

@@ -454,6 +454,9 @@ conf = Configure (libraries['flac'])
 conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new', language='CXX')
 libraries['flac'] = conf.Finish ()
 
+# or if that fails...
+#libraries['flac']    = LibraryInfo (LIBS='FLAC')
+
 #
 # Check for liblo
 
@@ -547,6 +550,10 @@ if env['SYSLIBS']:
 #    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
     libraries['soundtouch'] = LibraryInfo()
     libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
+
+    libraries['appleutility'] = LibraryInfo(LIBS='libappleutility',
+                                            LIBPATH='#libs/appleutility',
+                                            CPPPATH='#libs/appleutility')
     
     coredirs = [
         'templates'
@@ -561,6 +568,9 @@ if env['SYSLIBS']:
     
     if env['VST']:
         subdirs = ['libs/fst'] + subdirs + ['vst']
+
+    if env['COREAUDIO']:
+        subdirs = subdirs + ['libs/appleutility']
     
     gtk_subdirs = [
 #        'libs/flowcanvas',
@@ -600,7 +610,10 @@ else:
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
-    
+    libraries['appleutility'] = LibraryInfo(LIBS='libappleutility',
+                                            LIBPATH='#libs/appleutility',
+                                            CPPPATH='#libs/appleutility')
+
     coredirs = [
         'libs/soundtouch',
         'templates'
@@ -616,6 +629,9 @@ else:
     
     if env['VST']:
         subdirs = ['libs/fst'] + subdirs + ['vst']
+
+    if env['COREAUDIO']:
+        subdirs = subdirs + ['libs/appleutility']
     
     gtk_subdirs = [
 	'libs/glibmm2',

@@ -28,6 +28,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/audiosource.h>
 #include <ardour/audio_diskstream.h>
+#include <pbd/memento_command.h>
 
 #include "streamview.h"
 #include "audio_region_view.h"
@@ -896,18 +897,20 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 	gain_line->view_to_model_y (y);
 
 	trackview.session().begin_reversible_command (_("add gain control point"));
-	trackview.session().add_undo (audio_region().envelope().get_memento());
+	XMLNode &before = audio_region().envelope().get_state();
 
 
 	if (!audio_region().envelope_active()) {
-		trackview.session().add_undo( bind( mem_fun(audio_region(), &AudioRegion::set_envelope_active), false) );
+		XMLNode &before = audio_region().get_state();
 		audio_region().set_envelope_active(true);
-		trackview.session().add_redo( bind( mem_fun(audio_region(), &AudioRegion::set_envelope_active), true) );
+		XMLNode &after = audio_region().get_state();
+		trackview.session().add_command (new MementoCommand<AudioRegion>(audio_region(), before, after));
 	}
 
 	audio_region().envelope().add (fx, y);
 	
-	trackview.session().add_redo_no_execute (audio_region().envelope().get_memento());
+	XMLNode &after = audio_region().envelope().get_state();
+	trackview.session().add_command (new MementoCommand<Curve>(audio_region().envelope(), before, after));
 	trackview.session().commit_reversible_command ();
 }
 

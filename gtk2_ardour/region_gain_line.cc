@@ -1,5 +1,6 @@
 #include <ardour/curve.h>
 #include <ardour/audioregion.h>
+#include <pbd/memento_command.h>
 
 #include "region_gain_line.h"
 #include "audio_region_view.h"
@@ -47,7 +48,8 @@ AudioRegionGainLine::start_drag (ControlPoint* cp, float fraction)
 {
 	AutomationLine::start_drag(cp,fraction);
 	if (!rv.audio_region().envelope_active()) {
-		trackview.session().add_undo( bind( mem_fun(rv.audio_region(), &AudioRegion::set_envelope_active), false) );
+                trackview.session().add_command(new MementoUndoCommand<AudioRegion>(rv.audio_region(), rv.audio_region().get_state()));
+                rv.audio_region().set_envelope_active(false);
 	}
 }
 
@@ -60,17 +62,18 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 	model_representation (cp, mr);
 
 	trackview.editor.current_session()->begin_reversible_command (_("remove control point"));
-	trackview.editor.current_session()->add_undo (get_memento());
+        XMLNode &before = get_state();
 
 	if (!rv.audio_region().envelope_active()) {
-		trackview.session().add_undo( bind( mem_fun(rv.audio_region(), &AudioRegion::set_envelope_active), false) );
-		trackview.session().add_redo( bind( mem_fun(rv.audio_region(), &AudioRegion::set_envelope_active), true) );
+                XMLNode &before = rv.audio_region().get_state();
 		rv.audio_region().set_envelope_active(true);
+                XMLNode &after = rv.audio_region().get_state();
+                trackview.session().add_command(new MementoCommand<AudioRegion>(rv.audio_region(), before, after));
 	}
 
 	alist.erase (mr.start, mr.end);
 
-	trackview.editor.current_session()->add_redo_no_execute (get_memento());
+	trackview.editor.current_session()->add_command (new MementoCommand<AudioRegionGainLine>(*this, before, get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }
@@ -79,8 +82,8 @@ void
 AudioRegionGainLine::end_drag (ControlPoint* cp) 
 {
 	if (!rv.audio_region().envelope_active()) {
-		trackview.session().add_redo( bind( mem_fun(rv.audio_region(), &AudioRegion::set_envelope_active), true) );
 		rv.audio_region().set_envelope_active(true);
+                trackview.session().add_command(new MementoRedoCommand<AudioRegion>(rv.audio_region(), rv.audio_region().get_state()));
 	}
 	AutomationLine::end_drag(cp);
 }

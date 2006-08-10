@@ -21,81 +21,84 @@
 #include <iostream>
 
 #include <pbd/undo.h>
+#include <pbd/xml++.h>
+#include <string>
 
 using namespace std;
 using namespace sigc;
 
-UndoCommand::UndoCommand ()
+UndoTransaction::UndoTransaction ()
 {
 }
 
-UndoCommand::UndoCommand (const UndoCommand& rhs)
+UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
 {
 	_name = rhs._name;
 	clear ();
-	undo_actions.insert(undo_actions.end(),rhs.undo_actions.begin(),rhs.undo_actions.end());
-	redo_actions.insert(redo_actions.end(),rhs.redo_actions.begin(),rhs.redo_actions.end());
+	actions.insert(actions.end(),rhs.actions.begin(),rhs.actions.end());
 }
 
-UndoCommand& 
-UndoCommand::operator= (const UndoCommand& rhs)
+UndoTransaction& 
+UndoTransaction::operator= (const UndoTransaction& rhs)
 {
 	if (this == &rhs) return *this;
 	_name = rhs._name;
 	clear ();
-	undo_actions.insert(undo_actions.end(),rhs.undo_actions.begin(),rhs.undo_actions.end());
-	redo_actions.insert(redo_actions.end(),rhs.redo_actions.begin(),rhs.redo_actions.end());
+	actions.insert(actions.end(),rhs.actions.begin(),rhs.actions.end());
 	return *this;
 }
 
 void
-UndoCommand::add_undo (const UndoAction& action)
+UndoTransaction::add_command (Command *const action)
 {
-	undo_actions.push_back (action);
+	actions.push_back (action);
 }
 
 void
-UndoCommand::add_redo (const UndoAction& action)
+UndoTransaction::clear ()
 {
-	redo_actions.push_back (action);
-	redo_actions.back()(); // operator()
+	actions.clear ();
 }
 
 void
-UndoCommand::add_redo_no_execute (const UndoAction& action)
+UndoTransaction::operator() ()
 {
-	redo_actions.push_back (action);
+	for (list<Command*>::iterator i = actions.begin(); i != actions.end(); ++i) {
+		(*(*i))();
+	}
 }
 
 void
-UndoCommand::clear ()
-{
-	undo_actions.clear ();
-	redo_actions.clear ();
-}
-
-void
-UndoCommand::undo ()
+UndoTransaction::undo ()
 {
 	cerr << "Undo " << _name << endl;
-	for (list<UndoAction>::reverse_iterator i = undo_actions.rbegin(); i != undo_actions.rend(); ++i) {
-		(*i)();
+	for (list<Command*>::reverse_iterator i = actions.rbegin(); i != actions.rend(); ++i) {
+		(*i)->undo();
 	}
 }
 
 void
-UndoCommand::redo ()
+UndoTransaction::redo ()
 {
 	cerr << "Redo " << _name << endl;
-	for (list<UndoAction>::iterator i = redo_actions.begin(); i != redo_actions.end(); ++i) {
-		(*i)();
-	}
+        (*this)();
+}
+
+XMLNode &UndoTransaction::get_state()
+{
+    XMLNode *node = new XMLNode ("UndoTransaction");
+
+    list<Command*>::iterator it;
+    for (it=actions.begin(); it!=actions.end(); it++)
+        node->add_child_nocopy((*it)->get_state());
+
+    return *node;
 }
 
 void
-UndoHistory::add (UndoCommand uc)
+UndoHistory::add (UndoTransaction ut)
 {
-	UndoList.push_back (uc);
+	UndoList.push_back (ut);
 }
 
 void
@@ -105,10 +108,10 @@ UndoHistory::undo (unsigned int n)
 		if (UndoList.size() == 0) {
 			return;
 		}
-		UndoCommand uc = UndoList.back ();
+		UndoTransaction ut = UndoList.back ();
 		UndoList.pop_back ();
-		uc.undo ();
-		RedoList.push_back (uc);
+		ut.undo ();
+		RedoList.push_back (ut);
 	}
 }
 
@@ -119,10 +122,10 @@ UndoHistory::redo (unsigned int n)
 		if (RedoList.size() == 0) {
 			return;
 		}
-		UndoCommand cmd = RedoList.back ();
+		UndoTransaction ut = RedoList.back ();
 		RedoList.pop_back ();
-		cmd.redo ();
-		UndoList.push_back (cmd);
+		ut.redo ();
+		UndoList.push_back (ut);
 	}
 }
 
@@ -143,4 +146,15 @@ UndoHistory::clear ()
 {
 	RedoList.clear ();
 	UndoList.clear ();
+}
+
+XMLNode & UndoHistory::get_state()
+{
+    XMLNode *node = new XMLNode ("UndoHistory");
+
+    list<UndoTransaction>::iterator it;
+    for (it=UndoList.begin(); it != UndoList.end(); it++)
+        node->add_child_nocopy(it->get_state());
+
+    return *node;
 }

@@ -29,6 +29,7 @@
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
 #include <pbd/whitespace.h>
+#include <pbd/memento_command.h>
 
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -575,46 +576,88 @@ RouteTimeAxisView::set_height (TrackHeight h)
 	switch (height_style) {
 	case Largest:
 		xml_node->add_property ("track_height", "largest");
-		show_name_entry ();
-		hide_name_label ();
-		controls_table.show_all();
 		break;
+
 	case Large:
 		xml_node->add_property ("track_height", "large");
-		show_name_entry ();
-		hide_name_label ();
-		controls_table.show_all();
 		break;
+
 	case Larger:
 		xml_node->add_property ("track_height", "larger");
-		show_name_entry ();
-		hide_name_label ();
-		controls_table.show_all();
 		break;
+
 	case Normal:
 		xml_node->add_property ("track_height", "normal");
-		show_name_entry ();
-		hide_name_label ();
-		controls_table.show_all();
 		break;
+
 	case Smaller:
 		xml_node->add_property ("track_height", "smaller");
-		controls_table.show_all ();
+		break;
+
+	case Small:
+		xml_node->add_property ("track_height", "small");
+		break;
+	}
+
+	switch (height_style) {
+	case Largest:
+	case Large:
+	case Larger:
+	case Normal:
 		show_name_entry ();
 		hide_name_label ();
+
+		mute_button->show_all();
+		solo_button->show_all();
+		if (rec_enable_button)
+			rec_enable_button->show_all();
+
+		edit_group_button.show_all();
+		hide_button.show_all();
+		visual_button.show_all();
+		size_button.show_all();
+		automation_button.show_all();
+		
+		if (is_track() && track()->mode() == ARDOUR::Normal) {
+			playlist_button.show_all();
+		}
+		break;
+
+	case Smaller:
+		show_name_entry ();
+		hide_name_label ();
+
+		mute_button->show_all();
+		solo_button->show_all();
+		if (rec_enable_button)
+			rec_enable_button->show_all();
+
+		edit_group_button.hide ();
+		hide_button.hide ();
+		visual_button.hide ();
+		size_button.hide ();
+		automation_button.hide ();
+		
+		if (is_track() && track()->mode() == ARDOUR::Normal) {
+			playlist_button.hide ();
+		}
+		break;
+
+	case Small:
+		hide_name_entry ();
+		show_name_label ();
+
+		mute_button->hide();
+		solo_button->hide();
+		if (rec_enable_button)
+			rec_enable_button->hide();
+
 		edit_group_button.hide ();
 		hide_button.hide ();
 		visual_button.hide ();
 		size_button.hide ();
 		automation_button.hide ();
 		playlist_button.hide ();
-		break;
-	case Small:
-		xml_node->add_property ("track_height", "small");
-		controls_table.hide_all ();
-		controls_table.show ();
-		hide_name_entry ();
-		show_name_label ();
 		name_label.set_text (_route->name());
 		break;
 	}
@@ -1008,12 +1051,12 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		}
 	}
 	
+	XMLNode &before = playlist->get_state();
 	switch (op) {
 	case Cut:
-		_session.add_undo (playlist->get_memento());
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
-			_session.add_redo_no_execute (playlist->get_memento());
+			_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 			ret = true;
 		}
 		break;
@@ -1024,9 +1067,8 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		break;
 
 	case Clear:
-		_session.add_undo (playlist->get_memento());
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			_session.add_redo_no_execute (playlist->get_memento());
+			_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 			what_we_got->unref ();
 			ret = true;
 		}
@@ -1055,9 +1097,9 @@ RouteTimeAxisView::paste (jack_nframes_t pos, float times, Selection& selection,
 	if (get_diskstream()->speed() != 1.0f)
 		pos = session_frame_to_track_frame(pos, get_diskstream()->speed() );
 	
-	_session.add_undo (playlist->get_memento());
+	XMLNode &before = playlist->get_state();
 	playlist->paste (**p, pos, times);
-	_session.add_redo_no_execute (playlist->get_memento());
+	_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 
 	return true;
 }

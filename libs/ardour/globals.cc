@@ -193,9 +193,9 @@ setup_midi (AudioEngine& engine	)
 }
 
 int
-ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization)
+ARDOUR::init (ARDOUR::AudioEngine& engine, bool use_vst, bool try_optimization)
 {
-        bool generic_mix_functions = true;
+	bool generic_mix_functions = true;
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 
@@ -303,7 +303,7 @@ ARDOUR::init (AudioEngine& engine, bool use_vst, bool try_optimization)
 	}
 
 	/* singleton - first object is "it" */
-	new PluginManager (engine);
+	new PluginManager ();
 	
 	/* singleton - first object is "it" */
 	new ControlProtocolManager ();

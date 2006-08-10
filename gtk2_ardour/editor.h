@@ -142,6 +142,8 @@ class Editor : public PublicEditor
 	XMLNode& get_state ();
 	int set_state (const XMLNode& );
 
+        PBD::ID id() { return _id; }
+
 	void set_mouse_mode (Editing::MouseMode, bool force=true);
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () { return mouse_mode; }
@@ -345,6 +347,8 @@ class Editor : public PublicEditor
 	ARDOUR::Session     *session;
 	ARDOUR::AudioEngine& engine;
 	bool                 constructed;
+
+        PBD::ID _id;
 
 	PlaylistSelector* _playlist_selector;
 
@@ -1595,13 +1599,14 @@ class Editor : public PublicEditor
 
 	UndoAction get_memento() const;
 
+        XMLNode *before; /* used in *_reversible_command */
 	void begin_reversible_command (string cmd_name);
 	void commit_reversible_command ();
 
 	/* visual history */
 
 	UndoHistory visual_history;
-	UndoCommand current_visual_command;
+	UndoTransaction current_visual_command;
 
 	void begin_reversible_visual_command (const string & cmd_name);
 	void commit_reversible_visual_command ();

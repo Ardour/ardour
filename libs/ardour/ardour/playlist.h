@@ -76,6 +76,7 @@ class Playlist : public Stateful, public StateManager {
 	EditMode get_edit_mode() const { return _edit_mode; }
 	void set_edit_mode (EditMode);
 
+        PBD::ID id() { return _id; }
 	/* Editing operations */
 
 	void add_region (const Region&, jack_nframes_t position, float times = 1, bool with_save = true);
@@ -273,6 +274,8 @@ class Playlist : public Stateful, public StateManager {
 	void unset_freeze_child (Playlist*);
 
 	void timestamp_layer_op (Region&);
+
+        PBD::ID _id;
 };
 
 } /* namespace ARDOUR */

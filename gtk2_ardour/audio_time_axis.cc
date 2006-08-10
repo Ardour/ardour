@@ -31,6 +31,7 @@
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
 #include <pbd/whitespace.h>
+#include <pbd/memento_command.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/selector.h>

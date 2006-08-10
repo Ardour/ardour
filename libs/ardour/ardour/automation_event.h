@@ -51,7 +51,7 @@ struct ControlEvent {
 
 };
 
-class AutomationList : public StateManager
+class AutomationList : public StateManager, public Stateful
 {
   public:
 	typedef std::list<ControlEvent*> AutomationEventList;
@@ -153,6 +153,11 @@ class AutomationList : public StateManager
 	virtual void store_state (XMLNode& node) const;
 	virtual void load_state (const XMLNode&);
 
+	XMLNode &get_state(void); 
+	int set_state (const XMLNode &s);
+
+        PBD::ID id() { return _id; }
+
 	void set_max_xval (double);
 	double get_max_xval() const { return max_xval; }
 
@@ -179,6 +184,7 @@ class AutomationList : public StateManager
 	};
 
   protected:
+        PBD::ID _id;
 	struct State : public ARDOUR::StateManager::State {
 	    AutomationEventList events;
 

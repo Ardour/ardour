@@ -186,25 +186,25 @@ PluginInsert::auto_state_changed (uint32_t which)
 uint32_t
 PluginInsert::output_streams() const
 {
-	return _plugins[0]->get_info().n_outputs * _plugins.size();
+	return _plugins[0]->get_info()->n_outputs * _plugins.size();
 }
 
 uint32_t
 PluginInsert::input_streams() const
 {
-	return _plugins[0]->get_info().n_inputs * _plugins.size();
+	return _plugins[0]->get_info()->n_inputs * _plugins.size();
 }
 
 uint32_t
 PluginInsert::natural_output_streams() const
 {
-	return _plugins[0]->get_info().n_outputs;
+	return _plugins[0]->get_info()->n_outputs;
 }
 
 uint32_t
 PluginInsert::natural_input_streams() const
 {
-	return _plugins[0]->get_info().n_inputs;
+	return _plugins[0]->get_info()->n_inputs;
 }
 
 bool
@@ -214,7 +214,7 @@ PluginInsert::is_generator() const
 	   a specific "instrument" flag, for example.
 	 */
 
-	return _plugins[0]->get_info().n_inputs == 0;
+	return _plugins[0]->get_info()->n_inputs == 0;
 }
 
 void
@@ -350,7 +350,7 @@ PluginInsert::silence (jack_nframes_t nframes, jack_nframes_t offset)
 
 	if (active()) {
 		for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-			n = (*i) -> get_info().n_inputs;
+			n = (*i) -> get_info()->n_inputs;
 			(*i)->connect_and_run (_session.get_silent_buffers (n), n, in_index, out_index, nframes, offset);
 		}
 	}
@@ -367,8 +367,8 @@ PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 			connect_and_run (bufs, nbufs, nframes, offset, false);
 		}
 	} else {
-		uint32_t in = _plugins[0]->get_info().n_inputs;
-		uint32_t out = _plugins[0]->get_info().n_outputs;
+		uint32_t in = _plugins[0]->get_info()->n_inputs;
+		uint32_t out = _plugins[0]->get_info()->n_outputs;
 
 		if (out > in) {
 
@@ -524,7 +524,7 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 int32_t
 PluginInsert::compute_output_streams (int32_t cnt) const
 {
-	return _plugins[0]->get_info().n_outputs * cnt;
+	return _plugins[0]->get_info()->n_outputs * cnt;
 }
 
 int32_t
@@ -536,8 +536,8 @@ PluginInsert::configure_io (int32_t magic, int32_t in, int32_t out)
 int32_t 
 PluginInsert::can_support_input_configuration (int32_t in) const
 {
-	int32_t outputs = _plugins[0]->get_info().n_outputs;
-	int32_t inputs = _plugins[0]->get_info().n_inputs;
+	int32_t outputs = _plugins[0]->get_info()->n_outputs;
+	int32_t inputs = _plugins[0]->get_info()->n_inputs;
 
 	if (inputs == 0) {
 
@@ -591,7 +591,7 @@ PluginInsert::state (bool full)
 	node->add_property("id", string(buf));
 	if (_plugins[0]->state_node_name() == "ladspa") {
 		char buf[32];
-		snprintf (buf, sizeof (buf), "%ld", _plugins[0]->get_info().unique_id); 
+		snprintf (buf, sizeof (buf), "%ld", _plugins[0]->get_info()->unique_id); 
 		node->add_property("unique-id", string(buf));
 	}
 	node->add_property("count", string_compose("%1", _plugins.size()));
@@ -761,7 +761,7 @@ PluginInsert::set_state(const XMLNode& node)
 	}
 	
 	// The name of the PluginInsert comes from the plugin, nothing else
-	set_name(plugin->get_info().name,this);
+	set_name(plugin->get_info()->name,this);
 	
 	return 0;
 }

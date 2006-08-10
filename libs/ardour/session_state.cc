@@ -611,6 +611,7 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 		_state_of_the_state = Clean;
 
 		if (save_state (_current_snapshot_name)) {
+                        save_history();
 			return -1;
 		}
 	}
@@ -1697,6 +1698,7 @@ Session::set_state (const XMLNode& node)
 
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
+                save_history();
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
@@ -2498,6 +2500,7 @@ void
 Session::auto_save()
 {
 	save_state (_current_snapshot_name);
+        save_history();
 }
 
 RouteGroup *
@@ -2590,29 +2593,25 @@ Session::set_meter_falloff (float val)
 
 
 void
-Session::begin_reversible_command (string name, UndoAction* private_undo)
+Session::begin_reversible_command (string name)
 {
-	current_cmd.clear ();
-	current_cmd.set_name (name);
-
-	if (private_undo) {
-		current_cmd.add_undo (*private_undo);
-	}
+	current_trans.clear ();
+	current_trans.set_name (name);
 }
 
 void
-Session::commit_reversible_command (UndoAction* private_redo)
+Session::commit_reversible_command (Command *cmd)
 {
 	struct timeval now;
 
-	if (private_redo) {
-		current_cmd.add_redo_no_execute (*private_redo);
+	if (cmd) {
+		current_trans.add_command (cmd);
 	}
 
 	gettimeofday (&now, 0);
-	current_cmd.set_timestamp (now);
+	current_trans.set_timestamp (now);
 
-	history.add (current_cmd);
+	history.add (current_trans);
 }
 
 Session::GlobalRouteBooleanState 
@@ -2691,6 +2690,7 @@ Session::set_global_record_enable (GlobalRouteBooleanState s, void* src)
 	set_global_route_boolean (s, &Route::set_record_enable, src);
 }
 
+#if 0
 UndoAction
 Session::global_mute_memento (void* src)
 {
@@ -2714,6 +2714,7 @@ Session::global_record_enable_memento (void* src)
 {
 	return sigc::bind (mem_fun (*this, &Session::set_global_record_enable), get_global_route_boolean (&Route::record_enabled), src);
 }
+#endif
 
 static bool
 template_filter (const string &str, void *arg)
@@ -3300,4 +3301,49 @@ Session::add_instant_xml (XMLNode& node, const std::string& dir)
 {
 	Stateful::add_instant_xml (node, dir);
 	Config->add_instant_xml (node, get_user_ardour_path());
+}
+
+
+int 
+Session::save_history ()
+{
+    XMLTree tree;
+    string xml_path;
+    string bak_path;
+
+    tree.set_root (&history.get_state());
+
+    xml_path = _path + _current_snapshot_name + ".history"; 
+
+    bak_path = xml_path + ".bak";
+
+    if ((access (xml_path.c_str(), F_OK) == 0) &&
+        (rename (xml_path.c_str(), bak_path.c_str())))
+    {
+        error << _("could not backup old history file, current history not saved.") << endmsg;
+        return -1;
+    }
+
+    if (!tree.write (xml_path))
+    {
+        error << string_compose (_("history could not be saved to %1"), xml_path) << endmsg;
+
+        /* don't leave a corrupt file lying around if it is
+         * possible to fix.
+         */
+
+        if (unlink (xml_path.c_str())) 
+        {
+            error << string_compose (_("could not remove corrupt history file %1"), xml_path) << endmsg;
+        } else {
+            if (rename (bak_path.c_str(), xml_path.c_str())) 
+            {
+                error << string_compose (_("could not restore history file from backup %1"), bak_path) << endmsg;
+            }
+        }
+
+        return -1;
+    }
+
+    return 0;
 }

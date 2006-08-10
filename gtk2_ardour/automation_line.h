@@ -94,7 +94,7 @@ class ControlPoint
 	ShapeType _shape;
 };
 
-class AutomationLine : public sigc::trackable
+class AutomationLine : public sigc::trackable, public Stateful
 {
   public:
         AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);
@@ -158,7 +158,12 @@ class AutomationLine : public sigc::trackable
 	bool is_last_point (ControlPoint &);
 	bool is_first_point (ControlPoint &);
 
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&);
+
+        PBD::ID id() { return _id; }
   protected:
+        PBD::ID _id;
 	string _name;
 	guint32 _height;
 	uint32_t _line_color;

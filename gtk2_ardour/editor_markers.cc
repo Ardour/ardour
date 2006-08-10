@@ -26,6 +26,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 
 #include <ardour/location.h>
+#include <pbd/memento_command.h>
 
 #include "editor.h"
 #include "marker.h"
@@ -290,9 +291,10 @@ Editor::mouse_add_new_marker (jack_nframes_t where)
 	if (session) {
 		Location *location = new Location (where, where, "mark", Location::IsMark);
 		session->begin_reversible_command (_("add marker"));
-		session->add_undo (session->locations()->get_memento());
+                XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);
-		session->add_redo_no_execute (session->locations()->get_memento());
+                XMLNode &after = session->locations()->get_state();
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
 		session->commit_reversible_command ();
 	}
 }
@@ -329,9 +331,10 @@ gint
 Editor::really_remove_marker (Location* loc)
 {
 	session->begin_reversible_command (_("remove marker"));
-	session->add_undo (session->locations()->get_memento());
+	XMLNode &before = session->locations()->get_state();
 	session->locations()->remove (loc);
-	session->add_redo_no_execute (session->locations()->get_memento());
+	XMLNode &after = session->locations()->get_state();
+	session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
 	session->commit_reversible_command ();
 	return FALSE;
 }
@@ -838,12 +841,13 @@ Editor::marker_menu_rename ()
 	}
 
 	begin_reversible_command ( _("rename marker") );
-	session->add_undo( session->locations()->get_memento() );
+        XMLNode &before = session->locations()->get_state();
 
 	dialog.get_result(txt);
 	loc->set_name (txt);
 	
-	session->add_redo_no_execute( session->locations()->get_memento() );
+        XMLNode &after = session->locations()->get_state();
+	session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
 	commit_reversible_command ();
 }
 
@@ -868,16 +872,18 @@ Editor::new_transport_marker_menu_set_loop ()
 
 	if ((tll = transport_loop_location()) == 0) {
 		Location* loc = new Location (temp_location->start(), temp_location->end(), _("Loop"),  Location::IsAutoLoop);
-		session->add_undo (session->locations()->get_memento());
+                XMLNode &before = session->locations()->get_state();
 		session->locations()->add (loc, true);
 		session->set_auto_loop_location (loc);
-		session->add_redo_no_execute (session->locations()->get_memento());
+                XMLNode &after = session->locations()->get_state();
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
 	}
 	else {
-		session->add_undo (retype_return<void>(bind (mem_fun (*tll, &Location::set), tll->start(), tll->end())));
-		session->add_redo (retype_return<void>(bind (mem_fun (*tll, &Location::set), temp_location->start(), temp_location->end())));
+                XMLNode &before = tll->get_state();
 		tll->set_hidden (false, this);
 		tll->set (temp_location->start(), temp_location->end());
+                XMLNode &after = tll->get_state();
+                session->add_command (new MementoCommand<Location>(*tll, before, after));
 	}
 	
 	commit_reversible_command ();
@@ -894,15 +900,17 @@ Editor::new_transport_marker_menu_set_punch ()
 
 	if ((tpl = transport_punch_location()) == 0) {
 		tpl = new Location (temp_location->start(), temp_location->end(), _("Punch"), Location::IsAutoPunch);
-		session->add_undo (session->locations()->get_memento());
+                XMLNode &before = session->locations()->get_state();
 		session->locations()->add (tpl, true);
 		session->set_auto_punch_location (tpl);
-		session->add_redo_no_execute (session->locations()->get_memento());
+                XMLNode &after = session->locations()->get_state();
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
 	} else {
-		session->add_undo (retype_return<void>(bind (mem_fun (*tpl, &Location::set), tpl->start(), tpl->end())));
-		session->add_redo (retype_return<void>(bind (mem_fun (*tpl, &Location::set), temp_location->start(), temp_location->end())));
+                XMLNode &before = tpl->get_state();
 		tpl->set_hidden(false, this);
 		tpl->set(temp_location->start(), temp_location->end());
+                XMLNode &after = tpl->get_state();
+                session->add_command (new MementoCommand<Location>(*tpl, before, after));
 	}
 	
 	commit_reversible_command ();

@@ -31,6 +31,7 @@
 #include <ardour/audio_track.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audiofilesource.h>
+#include <pbd/memento_command.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -320,9 +321,9 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 			
 			AudioRegion* copy = new AudioRegion (region);
 			begin_reversible_command (_("insert sndfile"));
-			session->add_undo (playlist->get_memento());
+                        XMLNode &before = playlist->get_state();
 			playlist->add_region (*copy, pos);
-			session->add_redo_no_execute (playlist->get_memento());
+			session->add_command (new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
 			commit_reversible_command ();
 
 			pos += region.length();

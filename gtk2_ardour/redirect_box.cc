@@ -378,7 +378,7 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 
 	/* i hate this kind of code */
 
-	if (streams > p.get_info().n_inputs) {
+	if (streams > p.get_info()->n_inputs) {
 		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
@@ -388,9 +388,9 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 "This makes no sense - you are throwing away\n"
 "part of the signal."),
 					 p.name(),
-					 p.get_info().n_inputs,
+					 p.get_info()->n_inputs,
 					 streams));
-	} else if (streams < p.get_info().n_inputs) {
+	} else if (streams < p.get_info()->n_inputs) {
 		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
@@ -401,7 +401,7 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 "side-chain inputs. A future version of Ardour will\n"
 "support this type of configuration."),
 					 p.name(),
-					 p.get_info().n_inputs,
+					 p.get_info()->n_inputs,
 					 streams));
 	} else {
 		label.set_text (string_compose (_(
@@ -415,8 +415,8 @@ RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 "\n"
 "Ardour does not understand what to do in such situations.\n"),
 					 p.name(),
-					 p.get_info().n_inputs,
-					 p.get_info().n_outputs,
+					 p.get_info()->n_inputs,
+					 p.get_info()->n_outputs,
 					 io->n_inputs(),
 					 io->n_outputs(),
 					 streams));

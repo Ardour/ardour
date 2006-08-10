@@ -21,6 +21,7 @@
 #include <ardour/redirect.h>
 #include <ardour/session.h>
 #include <cstdlib>
+#include <pbd/memento_command.h>
 
 #include "redirect_automation_time_axis.h"
 #include "automation_line.h"
@@ -98,9 +99,10 @@ RedirectAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, 
 		lines.front()->view_to_model_y (y);
 		
 		_session.begin_reversible_command (description);
-		_session.add_undo (alist.get_memento());
+                XMLNode &before = alist.get_state();
 		alist.add (when, y);
-		_session.add_redo_no_execute (alist.get_memento());
+                XMLNode &after = alist.get_state();
+                _session.add_command(new MementoCommand<AutomationList>(alist, before, after));
 		_session.commit_reversible_command ();
 		_session.set_dirty ();
 	}

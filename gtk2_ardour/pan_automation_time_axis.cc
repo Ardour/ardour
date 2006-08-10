@@ -23,10 +23,12 @@
 #include <ardour/panner.h>
 
 #include <gtkmm2ext/popup.h>
+#include <pbd/memento_command.h>
 
 #include "pan_automation_time_axis.h"
 #include "automation_line.h"
 #include "canvas_impl.h"
+#include "route_ui.h"
 
 #include "i18n.h"
 
@@ -42,7 +44,7 @@ PanAutomationTimeAxisView::PanAutomationTimeAxisView (Session& s, boost::shared_
 {
 	multiline_selector.set_name ("PanAutomationLineSelector");
 	
-	controls_table.attach (multiline_selector, 1, 5, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (multiline_selector, 1, 5, 1, 2, Gtk::EXPAND, Gtk::EXPAND);
 }
 
 PanAutomationTimeAxisView::~PanAutomationTimeAxisView ()
@@ -87,9 +89,10 @@ PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEv
 	AutomationList& alist (lines[line_index]->the_list());
 
 	_session.begin_reversible_command (_("add pan automation event"));
-	_session.add_undo (alist.get_memento());
+	XMLNode &before = alist.get_state();
 	alist.add (when, y);
-	_session.add_redo_no_execute (alist.get_memento());
+	XMLNode &after = alist.get_state();
+        _session.add_command(new MementoCommand<AutomationList>(alist, before, after));
 	_session.commit_reversible_command ();
 	_session.set_dirty ();
 }
@@ -105,15 +108,18 @@ void
 PanAutomationTimeAxisView::add_line (AutomationLine& line)
 {
 	char buf[32];
-	snprintf(buf,32,"Line %ld",lines.size()+1);
+	snprintf(buf,32,"Line %zu",lines.size()+1);
 	multiline_selector.append_text(buf);
 
 	if (lines.empty()) {
 		multiline_selector.set_active(0);
 	}
 
-	if (lines.size() + 1 > 1) {
+	if (lines.size() + 1 > 1 && (height_style != Small && height_style != Smaller)) {
 		multiline_selector.show();
+	} else {
+		multiline_selector.hide();
+
 	}
 
 	AutomationTimeAxisView::add_line(line);
@@ -129,9 +135,10 @@ PanAutomationTimeAxisView::set_height (TimeAxisView::TrackHeight th)
 		case Large:
 		case Larger:
 		case Normal:
-			multiline_selector.show();
-			break;
-
+			if (lines.size() > 1) {
+				multiline_selector.show();
+				break;
+			} 
 		default:
 			multiline_selector.hide();
 	}

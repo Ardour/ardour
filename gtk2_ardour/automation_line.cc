@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <pbd/stl_delete.h>
+#include <pbd/memento_command.h>
 
 #include <ardour/automation_event.h>
 #include <ardour/curve.h>
@@ -887,7 +888,7 @@ AutomationLine::start_drag (ControlPoint* cp, float fraction)
 	}
 
 	trackview.editor.current_session()->begin_reversible_command (str);
-	trackview.editor.current_session()->add_undo (get_memento());
+	trackview.editor.current_session()->add_command (new MementoUndoCommand<AutomationLine>(*this, get_state()));
 	
 	first_drag_fraction = fraction;
 	last_drag_fraction = fraction;
@@ -936,7 +937,7 @@ AutomationLine::end_drag (ControlPoint* cp)
 
 		update_pending = false;
 
-		trackview.editor.current_session()->add_redo_no_execute (get_memento());
+		trackview.editor.current_session()->add_command (new MementoRedoCommand<AutomationLine>(*this, get_state()));
 		trackview.editor.current_session()->commit_reversible_command ();
 		trackview.editor.current_session()->set_dirty ();
 	}
@@ -1013,11 +1014,11 @@ AutomationLine::remove_point (ControlPoint& cp)
 	model_representation (cp, mr);
 
 	trackview.editor.current_session()->begin_reversible_command (_("remove control point"));
-	trackview.editor.current_session()->add_undo (get_memento());
+        XMLNode &before = get_state();
 
 	alist.erase (mr.start, mr.end);
 
-	trackview.editor.current_session()->add_redo_no_execute (get_memento());
+	trackview.editor.current_session()->add_command(new MementoCommand<AutomationLine>(*this, before, get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }
@@ -1225,9 +1226,9 @@ void
 AutomationLine::clear ()
 {
 	/* parent must create command */
-	trackview.editor.current_session()->add_undo (get_memento());
+        XMLNode &before = get_state();
 	alist.clear();
-	trackview.editor.current_session()->add_redo_no_execute (get_memento());
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationLine>(*this, before, get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }
@@ -1265,4 +1266,17 @@ AutomationLine::hide_all_but_selected_control_points ()
 			(*i)->set_visible (false);
 		}
 	}
+}
+
+XMLNode &AutomationLine::get_state(void)
+{
+    // TODO
+    return alist.get_state();
+}
+
+int AutomationLine::set_state(const XMLNode &node)
+{
+    // TODO
+    alist.set_state(node);
+    return 0;
 }

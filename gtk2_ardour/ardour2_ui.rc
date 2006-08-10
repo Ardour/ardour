@@ -219,6 +219,14 @@ style "mute_button" = "small_button"
 	fg[PRELIGHT] = { 0, 0, 0 }
 }
 
+
+style "multiline_combo" = "small_button"
+{
+	font_name = "sans 8"
+	xthickness = 0
+	ythickness = 0
+}
+
 style "mixer_mute_button" = "mute_button"
 {
 	font_name = "sans 7"
@@ -951,6 +959,7 @@ widget "*TrackRecordEnableButton" style "track_rec_enable_button"
 widget "*TrackRecordEnableButton*" style "track_rec_enable_button"
 widget "*TrackMuteButton*" style "mute_button"
 widget "*TrackLoopButton*" style "track_loop_button"
+widget "*PanAutomationLineSelector*" style "multiline_combo"
 widget "*EditorTimeButton*" style "time_button"
 widget "*EditorMixerButton*" style "default_buttons_menus"
 widget "*SoloButton*" style "solo_button"

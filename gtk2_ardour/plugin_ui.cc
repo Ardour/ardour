@@ -90,13 +90,13 @@ PluginUIWindow::PluginUIWindow (AudioEngine &engine, boost::shared_ptr<PluginIns
 
 	} else {
 
-		PluginUI*  pu  = new PluginUI (engine, insert, scrollable);
+		LadspaPluginUI*  pu  = new LadspaPluginUI (engine, insert, scrollable);
 		
 		_pluginui = pu;
 		get_vbox()->add (*pu);
 		
-		signal_map_event().connect (mem_fun (*pu, &PluginUI::start_updating));
-		signal_unmap_event().connect (mem_fun (*pu, &PluginUI::stop_updating));
+		signal_map_event().connect (mem_fun (*pu, &LadspaPluginUI::start_updating));
+		signal_unmap_event().connect (mem_fun (*pu, &LadspaPluginUI::stop_updating));
 	}
 
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -117,7 +117,7 @@ PluginUIWindow::~PluginUIWindow ()
 {
 }
 
-PluginUI::PluginUI (AudioEngine &engine, boost::shared_ptr<PluginInsert> pi, bool scrollable)
+LadspaPluginUI::LadspaPluginUI (AudioEngine &engine, boost::shared_ptr<PluginInsert> pi, bool scrollable)
 	: PlugUIBase (pi),
 	  engine(engine),
 	  button_table (initial_button_rows, initial_button_cols),
@@ -165,13 +165,13 @@ PluginUI::PluginUI (AudioEngine &engine, boost::shared_ptr<PluginInsert> pi, boo
 		pack_start (hpacker, false, false);
 	}
 
-	insert->active_changed.connect (mem_fun(*this, &PluginUI::redirect_active_changed));
+	insert->active_changed.connect (mem_fun(*this, &LadspaPluginUI::redirect_active_changed));
 	bypass_button.set_active (!insert->active());
 	
 	build (engine);
 }
 
-PluginUI::~PluginUI ()
+LadspaPluginUI::~LadspaPluginUI ()
 {
 	if (output_controls.size() > 0) {
 		screen_update_connection.disconnect();
@@ -179,7 +179,7 @@ PluginUI::~PluginUI ()
 }
 
 void
-PluginUI::build (AudioEngine &engine)
+LadspaPluginUI::build (AudioEngine &engine)
 
 {
 	guint32 i = 0;
@@ -326,8 +326,8 @@ PluginUI::build (AudioEngine &engine)
 		} 
 	}
 
-	n_ins = plugin->get_info().n_inputs;
-	n_outs = plugin->get_info().n_outputs;
+	n_ins = plugin->get_info()->n_inputs;
+	n_outs = plugin->get_info()->n_outputs;
 
 	if (box->children().empty()) {
 		hpacker.remove (*frame);
@@ -350,7 +350,7 @@ PluginUI::build (AudioEngine &engine)
 	button_table.show_all ();
 }
 
-PluginUI::ControlUI::ControlUI ()
+LadspaPluginUI::ControlUI::ControlUI ()
 	: automate_button (X_("")) // force creation of a label 
 {
 	automate_button.set_name ("PluginAutomateButton");
@@ -370,7 +370,7 @@ PluginUI::ControlUI::ControlUI ()
 	meterinfo = 0;
 }
 
-PluginUI::ControlUI::~ControlUI() 
+LadspaPluginUI::ControlUI::~ControlUI() 
 {
 	if (adjustment) {
 		delete adjustment;
@@ -383,7 +383,7 @@ PluginUI::ControlUI::~ControlUI()
 }
 
 void
-PluginUI::automation_state_changed (ControlUI* cui)
+LadspaPluginUI::automation_state_changed (ControlUI* cui)
 {
 	/* update button label */
 
@@ -413,13 +413,13 @@ static void integer_printer (char buf[32], Adjustment &adj, void *arg)
 }
 
 void
-PluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
+LadspaPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 {
 	plugin->print_parameter (param, buf, len);
 }
 
-PluginUI::ControlUI*
-PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, PBD::Controllable* mcontrol)
+LadspaPluginUI::ControlUI*
+LadspaPluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, PBD::Controllable* mcontrol)
 
 {
 	ControlUI* control_ui;
@@ -452,8 +452,8 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, PBD::Contro
 				control_ui->combo = new Gtk::ComboBoxText;
 				//control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
-				control_ui->combo->signal_changed().connect (bind (mem_fun(*this, &PluginUI::control_combo_changed), control_ui));
-				plugin->ParameterChanged.connect (bind (mem_fun (*this, &PluginUI::parameter_changed), control_ui));
+				control_ui->combo->signal_changed().connect (bind (mem_fun(*this, &LadspaPluginUI::control_combo_changed), control_ui));
+				plugin->ParameterChanged.connect (bind (mem_fun (*this, &LadspaPluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
 				
@@ -476,7 +476,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, PBD::Contro
 			control_ui->pack_start (*control_ui->button, false, true);
 			control_ui->pack_start (control_ui->automate_button, false, false);
 
-			control_ui->button->signal_clicked().connect (bind (mem_fun(*this, &PluginUI::control_port_toggled), control_ui));
+			control_ui->button->signal_clicked().connect (bind (mem_fun(*this, &LadspaPluginUI::control_port_toggled), control_ui));
 		
 			if(plugin->get_parameter (port_index) == 1){
 				control_ui->button->set_active(true);
@@ -514,7 +514,7 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, PBD::Contro
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			control_ui->clickbox->set_print_func (integer_printer, 0);
 		} else {
-			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &PluginUI::print_parameter), (uint32_t) port_index);
+			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &LadspaPluginUI::print_parameter), (uint32_t) port_index);
 
 			control_ui->control = new BarController (*control_ui->adjustment, *mcontrol, pslot);
 			// should really match the height of the text in the automation button+label
@@ -523,8 +523,8 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, PBD::Contro
 			control_ui->control->set_style (BarController::LeftToRight);
 			control_ui->control->set_use_parent (true);
 
-			control_ui->control->StartGesture.connect (bind (mem_fun(*this, &PluginUI::start_touch), control_ui));
-			control_ui->control->StopGesture.connect (bind (mem_fun(*this, &PluginUI::stop_touch), control_ui));
+			control_ui->control->StartGesture.connect (bind (mem_fun(*this, &LadspaPluginUI::start_touch), control_ui));
+			control_ui->control->StopGesture.connect (bind (mem_fun(*this, &LadspaPluginUI::stop_touch), control_ui));
 			
 		}
 
@@ -547,14 +547,14 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, PBD::Contro
 		}
 
 		control_ui->pack_start (control_ui->automate_button, false, false);
-		control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &PluginUI::control_adjustment_changed), control_ui));
-		control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &PluginUI::astate_clicked), control_ui, (uint32_t) port_index));
+		control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &LadspaPluginUI::control_adjustment_changed), control_ui));
+		control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &LadspaPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
 
 		automation_state_changed (control_ui);
 
-		plugin->ParameterChanged.connect (bind (mem_fun(*this, &PluginUI::parameter_changed), control_ui));
+		plugin->ParameterChanged.connect (bind (mem_fun(*this, &LadspaPluginUI::parameter_changed), control_ui));
 		insert->automation_list (port_index).automation_state_changed.connect 
-			(bind (mem_fun(*this, &PluginUI::automation_state_changed), control_ui));
+			(bind (mem_fun(*this, &LadspaPluginUI::automation_state_changed), control_ui));
 
 	} else if (plugin->parameter_is_output (port_index)) {
 
@@ -603,24 +603,24 @@ PluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, PBD::Contro
 		output_controls.push_back (control_ui);
 	}
 	
-	plugin->ParameterChanged.connect (bind (mem_fun(*this, &PluginUI::parameter_changed), control_ui));
+	plugin->ParameterChanged.connect (bind (mem_fun(*this, &LadspaPluginUI::parameter_changed), control_ui));
 	return control_ui;
 }
 
 void
-PluginUI::start_touch (PluginUI::ControlUI* cui)
+LadspaPluginUI::start_touch (LadspaPluginUI::ControlUI* cui)
 {
 	insert->automation_list (cui->port_index).start_touch ();
 }
 
 void
-PluginUI::stop_touch (PluginUI::ControlUI* cui)
+LadspaPluginUI::stop_touch (LadspaPluginUI::ControlUI* cui)
 {
 	insert->automation_list (cui->port_index).stop_touch ();
 }
 
 void
-PluginUI::astate_clicked (ControlUI* cui, uint32_t port)
+LadspaPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 {
 	using namespace Menu_Helpers;
 
@@ -633,25 +633,25 @@ PluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 
 	items.clear ();
 	items.push_back (MenuElem (_("Off"), 
-				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Off, cui)));
+				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Off, cui)));
 	items.push_back (MenuElem (_("Play"),
-				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Play, cui)));
+				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Play, cui)));
 	items.push_back (MenuElem (_("Write"),
-				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Write, cui)));
+				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Write, cui)));
 	items.push_back (MenuElem (_("Touch"),
-				   bind (mem_fun(*this, &PluginUI::set_automation_state), (AutoState) Touch, cui)));
+				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Touch, cui)));
 
 	automation_menu->popup (1, 0);
 }
 
 void
-PluginUI::set_automation_state (AutoState state, ControlUI* cui)
+LadspaPluginUI::set_automation_state (AutoState state, ControlUI* cui)
 {
 	insert->set_port_automation_state (cui->port_index, state);
 }
 
 void
-PluginUI::control_adjustment_changed (ControlUI* cui)
+LadspaPluginUI::control_adjustment_changed (ControlUI* cui)
 {
 	if (cui->ignore_change) {
 		return;
@@ -667,18 +667,18 @@ PluginUI::control_adjustment_changed (ControlUI* cui)
 }
 
 void
-PluginUI::parameter_changed (uint32_t abs_port_id, float val, ControlUI* cui)
+LadspaPluginUI::parameter_changed (uint32_t abs_port_id, float val, ControlUI* cui)
 {
 	if (cui->port_index == abs_port_id) {
 		if (!cui->update_pending) {
 			cui->update_pending = true;
-			Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &PluginUI::update_control_display), cui));
+			Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &LadspaPluginUI::update_control_display), cui));
 		}
 	}
 }
 
 void
-PluginUI::update_control_display (ControlUI* cui)	
+LadspaPluginUI::update_control_display (ControlUI* cui)	
 {
 	/* XXX how do we handle logarithmic stuff here ? */
 	
@@ -715,7 +715,7 @@ PluginUI::update_control_display (ControlUI* cui)
 }
 
 void
-PluginUI::control_port_toggled (ControlUI* cui)
+LadspaPluginUI::control_port_toggled (ControlUI* cui)
 {
 	if (!cui->ignore_change) {
 		insert->set_parameter (cui->port_index, cui->button->get_active());
@@ -723,7 +723,7 @@ PluginUI::control_port_toggled (ControlUI* cui)
 }
 
 void
-PluginUI::control_combo_changed (ControlUI* cui)
+LadspaPluginUI::control_combo_changed (ControlUI* cui)
 {
 	if (!cui->ignore_change) {
 		string value = cui->combo->get_active_text();
@@ -743,26 +743,26 @@ PluginUIWindow::plugin_going_away (ARDOUR::Redirect* ignored)
 }
 
 void
-PluginUI::redirect_active_changed (Redirect* r, void* src)
+LadspaPluginUI::redirect_active_changed (Redirect* r, void* src)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PluginUI::redirect_active_changed), r, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LadspaPluginUI::redirect_active_changed), r, src));
 	
 	bypass_button.set_active (!r->active());
 }
 
 bool
-PluginUI::start_updating (GdkEventAny* ignored)
+LadspaPluginUI::start_updating (GdkEventAny* ignored)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 		screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
-			(mem_fun(*this, &PluginUI::output_update));
+			(mem_fun(*this, &LadspaPluginUI::output_update));
 	}
 	return false;
 }
 
 bool
-PluginUI::stop_updating (GdkEventAny* ignored)
+LadspaPluginUI::stop_updating (GdkEventAny* ignored)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
@@ -771,7 +771,7 @@ PluginUI::stop_updating (GdkEventAny* ignored)
 }
 
 void
-PluginUI::output_update ()
+LadspaPluginUI::output_update ()
 {
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
 		float val = plugin->get_parameter ((*i)->port_index);
@@ -805,7 +805,7 @@ PluginUI::output_update ()
 }
 
 vector<string> 
-PluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
+LadspaPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 {
 	vector<string> enums;
 	boost::shared_ptr<LadspaPlugin> lp = boost::dynamic_pointer_cast<LadspaPlugin> (plugin);
