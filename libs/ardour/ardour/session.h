@@ -839,6 +839,7 @@ class Session : public sigc::trackable, public Stateful
 	}
 
         // these commands are implemented in libs/ardour/session_command.cc
+	Command *memento_command_factory(XMLNode *n);
         class GlobalSoloStateCommand : public Command
         {
             GlobalRouteBooleanState before, after;

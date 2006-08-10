@@ -1,7 +1,28 @@
 #include <ardour/session.h>
 #include <ardour/route.h>
+#include <pbd/memento_command.h>
+#include <ardour/diskstream.h>
 
 namespace ARDOUR {
+
+Command *Session::memento_command_factory(XMLNode *n)
+{
+    PBD::ID id;
+    XMLNode *before, *after;
+    void *obj;
+
+    /* get obj_id */
+
+    /* get before and/or after */
+
+    /* get an object by id by trial and error, and use it to construct an
+     * appropriate memento command */
+    // e.g.
+    if (Diskstream *obj = diskstream_by_id(id))
+	return new MementoCommand<Diskstream>(*obj, *before, *after);
+    // etc.
+}
+
 // solo
 Session::GlobalSoloStateCommand::GlobalSoloStateCommand(Session &sess, void *src)
     : sess(sess), src(src)
