@@ -1258,10 +1258,10 @@ Panner::set_state (const XMLNode& node)
 			float x, y;
 			
 			prop = (*niter)->property (X_("x"));
-			sscanf (prop->value().c_str(), "%.12g", &x);
+			sscanf (prop->value().c_str(), "%g", &x);
 			
 			prop = (*niter)->property (X_("y"));
-			sscanf (prop->value().c_str(), "%.12g", &y);
+			sscanf (prop->value().c_str(), "%g", &y);
 			
 			outputs.push_back (Output (x, y));
 		}

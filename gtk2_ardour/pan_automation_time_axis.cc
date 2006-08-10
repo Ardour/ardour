@@ -108,7 +108,7 @@ void
 PanAutomationTimeAxisView::add_line (AutomationLine& line)
 {
 	char buf[32];
-	snprintf(buf,32,"Line %u",lines.size()+1);
+	snprintf(buf,32,"Line %zu",lines.size()+1);
 	multiline_selector.append_text(buf);
 
 	if (lines.empty()) {
