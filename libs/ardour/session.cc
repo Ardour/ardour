@@ -1011,7 +1011,7 @@ Session::auto_punch_start_changed (Location* location)
 	if (get_record_enabled() && get_punch_in()) {
 		/* capture start has been changed, so save new pending state */
 		save_state ("", true);
-                save_history();
+                save_history("");
 	}
 }	
 
@@ -1329,7 +1329,7 @@ Session::maybe_enable_record ()
 	*/
 
 	save_state ("", true);
-        save_history();
+        save_history ("");
 
 	if (_transport_speed) {
 		if (!punch_in) {
@@ -1893,6 +1893,7 @@ Session::add_route (shared_ptr<Route> route)
 
 	set_dirty();
 	save_state (_current_snapshot_name);
+	save_history (_current_snapshot_name);
 
 	RouteAdded (route); /* EMIT SIGNAL */
 }
@@ -1924,7 +1925,7 @@ Session::add_diskstream (Diskstream* dstream)
 
 	set_dirty();
 	save_state (_current_snapshot_name);
-        save_history();
+        save_history (_current_snapshot_name);
 
 	DiskstreamAdded (dstream); /* EMIT SIGNAL */
 }
@@ -1989,6 +1990,7 @@ Session::remove_route (shared_ptr<Route> route)
 	/* XXX should we disconnect from the Route's signals ? */
 
 	save_state (_current_snapshot_name);
+	save_history (_current_snapshot_name);
 
 	/* all shared ptrs to route should go out of scope here */
 }	
@@ -2677,7 +2679,7 @@ Session::remove_source (Source* source)
 		*/
 		
 		save_state (_current_snapshot_name);
-                save_history();
+                save_history (_current_snapshot_name);
 	}
 
 	SourceRemoved(source); /* EMIT SIGNAL */

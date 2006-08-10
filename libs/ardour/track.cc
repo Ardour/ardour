@@ -224,7 +224,7 @@ Track::set_name (string str, void *src)
 
 	if ((ret = IO::set_name (str, src)) == 0) {
 		_session.save_state ("");
-                _session.save_history();
+                _session.save_history ("");
 	}
 	return ret;
 }

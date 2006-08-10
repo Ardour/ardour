@@ -9,7 +9,6 @@ Command *Session::memento_command_factory(XMLNode *n)
 {
     PBD::ID id;
     XMLNode *before, *after;
-    void *obj;
 
     /* get obj_id */
 
