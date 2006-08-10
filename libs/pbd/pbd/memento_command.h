@@ -24,6 +24,7 @@
 #include <pbd/command.h>
 #include <pbd/xml++.h>
 #include <sigc++/slot.h>
+#include <typeinfo>
 
 /** This command class is initialized with before and after mementos 
  * (from Stateful::get_state()), so undo becomes restoring the before
@@ -33,6 +34,7 @@ template <class obj_T>
 class MementoCommand : public Command
 {
     public:
+	MementoCommand(XMLNode &state);
         MementoCommand(obj_T &obj, 
                        XMLNode &before,
                        XMLNode &after
@@ -44,11 +46,11 @@ class MementoCommand : public Command
         {
             XMLNode *node = new XMLNode("MementoCommand");
             node->add_property("obj_id", obj.id().to_s());
-            node->add_child_nocopy(before);
-            node->add_child_nocopy(after);
+            node->add_property("type_name", typeid(obj).name());
+            node->add_child_copy(before);
+            node->add_child_copy(after);
             return *node;
         }
-        // TODO does this need a copy constructor?
     protected:
         obj_T &obj;
         XMLNode &before, &after;
@@ -58,6 +60,7 @@ template <class obj_T>
 class MementoUndoCommand : public Command
 {
 public:
+    MementoUndoCommand(XMLNode &state);
     MementoUndoCommand(obj_T &obj, 
                        XMLNode &before)
         : obj(obj), before(before) {}
@@ -67,7 +70,8 @@ public:
     {
         XMLNode *node = new XMLNode("MementoUndoCommand");
         node->add_property("obj_id", obj.id().to_s());
-        node->add_child_nocopy(before);
+	node->add_property("type_name", typeid(obj).name());
+        node->add_child_copy(before);
         return *node;
     }
 protected:
@@ -79,6 +83,7 @@ template <class obj_T>
 class MementoRedoCommand : public Command
 {
 public:
+    MementoRedoCommand(XMLNode &state);
     MementoRedoCommand(obj_T &obj, 
                        XMLNode &after)
         : obj(obj), after(after) {}
@@ -88,7 +93,8 @@ public:
     {
         XMLNode *node = new XMLNode("MementoRedoCommand");
         node->add_property("obj_id", obj.id().to_s());
-        node->add_child_nocopy(after);
+	node->add_property("type_name", typeid(obj).name());
+        node->add_child_copy(after);
         return *node;
     }
 protected:
