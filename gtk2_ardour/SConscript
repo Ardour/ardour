@@ -215,6 +215,7 @@ if env['VST']:
 if gtkardour['COREAUDIO']:
     extra_sources += coreaudio_files
     gtkardour.Append(CCFLAGS='-DHAVE_COREAUDIO')
+    gtkardour.Append(LINKFLAGS='-framework Carbon')
     gtkardour.Merge([libraries['appleutility']])
  
 if env['FFT_ANALYSIS']:

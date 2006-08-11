@@ -60,8 +60,6 @@
 #include "keyboard.h"
 #include "pan_automation_time_axis.h"
 #include "playlist_selector.h"
-#include "plugin_selector.h"
-#include "plugin_ui.h"
 #include "prompter.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
