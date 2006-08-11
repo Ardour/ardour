@@ -605,7 +605,7 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 		_state_of_the_state = Clean;
 
 		if (save_state (_current_snapshot_name)) {
-                        save_history();
+                        save_history (_current_snapshot_name);
 			return -1;
 		}
 	}
@@ -1688,7 +1688,7 @@ Session::set_state (const XMLNode& node)
 
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
-                save_history();
+                save_history (_current_snapshot_name);
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
@@ -2476,7 +2476,7 @@ void
 Session::auto_save()
 {
 	save_state (_current_snapshot_name);
-        save_history();
+        save_history (_current_snapshot_name);
 }
 
 RouteGroup *
@@ -3148,6 +3148,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	*/
 	
 	save_state ("");
+	save_history ("");
 
   out:
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state & ~InCleanup);
@@ -3281,7 +3282,7 @@ Session::add_instant_xml (XMLNode& node, const std::string& dir)
 
 
 int 
-Session::save_history ()
+Session::save_history (string snapshot_name)
 {
     XMLTree tree;
     string xml_path;
@@ -3289,7 +3290,11 @@ Session::save_history ()
 
     tree.set_root (&history.get_state());
 
-    xml_path = _path + _current_snapshot_name + ".history"; 
+    if (snapshot_name.empty()) {
+	snapshot_name = _current_snapshot_name;
+    }
+
+    xml_path = _path + snapshot_name + ".history"; 
 
     bak_path = xml_path + ".bak";
 
