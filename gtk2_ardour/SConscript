@@ -200,6 +200,11 @@ mtest_files=Split("""
 mtest.cc
 """)
 
+
+rcu_files=Split("""
+rcu.cc
+""")
+
 itest_files=Split("""
 itest.cc
 """)
@@ -239,6 +244,7 @@ ardourlib = gtkardour.SharedLibrary(target = 'ardourgtk', source = gtkardour_fil
 
 mtest = gtkardour.Program(target = 'mtest', source = mtest_files)
 itest = gtkardour.Program(target = 'itest', source = itest_files)
+rcu = gtkardour.Program(target = 'rcu', source = rcu_files)
 
 my_subst_dict = { }
 my_subst_dict['%INSTALL_PREFIX%'] = install_prefix
