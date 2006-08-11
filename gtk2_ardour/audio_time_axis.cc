@@ -406,7 +406,7 @@ AudioTimeAxisView::update_pans ()
 	/* we don't draw lines for "greater than stereo" panning.
 	 */
 
-	if (_route->n_outputs() > 2) {
+	if (_route->n_outputs().get(DataType::AUDIO) > 2) {
 		return;
 	}
 

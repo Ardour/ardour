@@ -34,7 +34,7 @@ public:
 	ChanCount(DataType type, size_t channels)
 	{
 		reset();
-		set_count(type, channels);
+		set(type, channels);
 	}
 
 	void reset()
@@ -44,10 +44,10 @@ public:
 		}
 	}
 
-	void   set_count(DataType type, size_t count) { _counts[type.to_index()] = count; }
-	size_t get_count(DataType type) const { return _counts[type.to_index()]; }
+	void   set(DataType type, size_t count) { _counts[type.to_index()] = count; }
+	size_t get(DataType type) const { return _counts[type.to_index()]; }
 	
-	size_t get_total_count() const
+	size_t get_total() const
 	{
 		size_t ret = 0;
 		for (size_t i=0; i < DataType::num_types; ++i)
@@ -70,7 +70,51 @@ public:
 		return ! (*this == other);
 	}
 
+	bool operator<(const ChanCount& other) const
+	{
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (_counts[(*t).to_index()] >= other._counts[(*t).to_index()]) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	bool operator<=(const ChanCount& other) const
+	{
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (_counts[(*t).to_index()] > other._counts[(*t).to_index()]) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	bool operator>(const ChanCount& other) const
+	{
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (_counts[(*t).to_index()] <= other._counts[(*t).to_index()]) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	bool operator>=(const ChanCount& other) const
+	{
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (_counts[(*t).to_index()] < other._counts[(*t).to_index()]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	static const ChanCount INFINITE;
+	static const ChanCount ZERO;
+
 private:
+	
 	size_t _counts[DataType::num_types];
 };
 

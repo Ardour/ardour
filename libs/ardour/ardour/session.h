@@ -1091,7 +1091,7 @@ class Session : public sigc::trackable, public Stateful
 
 	void update_latency_compensation_proxy (void* ignored);
 
-	void ensure_passthru_buffers (uint32_t howmany);
+	void ensure_passthru_buffers (ChanCount howmany);
 	
 	void process_scrub          (jack_nframes_t);
 	void process_without_events (jack_nframes_t);

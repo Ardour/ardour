@@ -42,9 +42,9 @@ PortSet::add_port(Port* port)
 	v.push_back(port);
 	sort(v.begin(), v.end(), sort_ports_by_name);
 
-	_chan_count.set_count(port->type(), _chan_count.get_count(port->type()) + 1);
+	_chan_count.set(port->type(), _chan_count.get(port->type()) + 1);
 
-	assert(_chan_count.get_count(port->type()) == _ports[port->type().to_index()].size());
+	assert(_chan_count.get(port->type()) == _ports[port->type().to_index()].size());
 }
 
 

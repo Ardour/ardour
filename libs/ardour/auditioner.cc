@@ -93,7 +93,7 @@ Auditioner::audition_current_playlist ()
 
 	/* force a panner reset now that we have all channels */
 
-	_panner->reset (n_outputs(), _diskstream->n_channels());
+	_panner->reset (n_outputs().get(DataType::AUDIO), _diskstream->n_channels());
 
 	g_atomic_int_set (&_active, 1);
 }
@@ -126,7 +126,7 @@ Auditioner::audition_region (AudioRegion& region)
 
 	/* force a panner reset now that we have all channels */
 
-	_panner->reset (n_outputs(), _diskstream->n_channels());
+	_panner->reset (n_outputs().get(DataType::AUDIO), _diskstream->n_channels());
 
 	length = the_region->length();
 	_diskstream->seek (0);

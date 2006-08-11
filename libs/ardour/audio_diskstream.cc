@@ -212,21 +212,21 @@ AudioDiskstream::non_realtime_input_change ()
 
 		if (input_change_pending & ConfigurationChanged) {
 
-			if (_io->n_inputs() > _n_channels) {
+			if (_io->n_inputs().get(DataType::AUDIO) > _n_channels) {
 				
 				// we need to add new channel infos
 				
-				int diff = _io->n_inputs() - channels.size();
+				int diff = _io->n_inputs().get(DataType::AUDIO) - channels.size();
 				
 				for (int i = 0; i < diff; ++i) {
 					add_channel ();
 				}
 				
-		} else if (_io->n_inputs() < _n_channels) {
+		} else if (_io->n_inputs().get(DataType::AUDIO) < _n_channels) {
 				
 				// we need to get rid of channels
 				
-				int diff = channels.size() - _io->n_inputs();
+				int diff = channels.size() - _io->n_inputs().get(DataType::AUDIO);
 				
 				for (int i = 0; i < diff; ++i) {
 					remove_channel ();
@@ -264,7 +264,7 @@ AudioDiskstream::non_realtime_input_change ()
 void
 AudioDiskstream::get_input_sources ()
 {
-	uint32_t ni = _io->n_inputs();
+	uint32_t ni = _io->n_inputs().get(DataType::AUDIO);
 	
 	for (uint32_t n = 0; n < ni; ++n) {
 		

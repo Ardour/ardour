@@ -148,7 +148,7 @@ MidiDiskstream::non_realtime_input_change ()
 
 		if (input_change_pending & ConfigurationChanged) {
 
-			assert(_io->n_inputs() == _n_channels);
+			assert(_io->n_inputs().get(DataType::MIDI) == _n_channels);
 		} 
 
 		get_input_sources ();

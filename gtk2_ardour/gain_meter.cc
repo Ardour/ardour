@@ -141,13 +141,16 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	gain_automation_state_button.set_size_request(15, 15);
 	gain_automation_style_button.set_size_request(15, 15);
 
+
 	fader_vbox = manage (new Gtk::VBox());
 	fader_vbox->set_spacing (0);
 	fader_vbox->pack_start (*gain_slider, false, false, 0);
 
 	hbox.set_spacing (0);
-	hbox.pack_start (*fader_vbox, false, false, 2);
 
+	if (_io->default_type() == ARDOUR::DataType::AUDIO)
+		hbox.pack_start (*fader_vbox, false, false, 2);
+	
 	set_width(Narrow);
 
 	Route* r;
@@ -382,7 +385,7 @@ GainMeter::hide_all_meters ()
 void
 GainMeter::setup_meters ()
 {
-	uint32_t nmeters = _io->n_outputs();
+	uint32_t nmeters = _io->n_outputs().get(DataType::AUDIO);
 	guint16 width;
 
 	hide_all_meters ();
@@ -394,16 +397,16 @@ GainMeter::setup_meters ()
 		switch (r->meter_point()) {
 		case MeterPreFader:
 		case MeterInput:
-			nmeters = r->n_inputs();
+			nmeters = r->n_inputs().get(DataType::AUDIO);
 			break;
 		case MeterPostFader:
-			nmeters = r->n_outputs();
+			nmeters = r->n_outputs().get(DataType::AUDIO);
 			break;
 		}
 
 	} else {
 
-		nmeters = _io->n_outputs();
+		nmeters = _io->n_outputs().get(DataType::AUDIO);
 
 	}
 

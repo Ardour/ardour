@@ -1414,7 +1414,7 @@ ARDOUR_UI::name_io_setup (AudioEngine& engine,
 			  bool in)
 {
 	if (in) {
-		if (io.n_inputs() == 0) {
+		if (io.n_inputs().get_total() == 0) {
 			buf = _("none");
 			return;
 		}
@@ -1433,7 +1433,7 @@ ARDOUR_UI::name_io_setup (AudioEngine& engine,
 
 	} else {
 
-		if (io.n_outputs() == 0) {
+		if (io.n_outputs().get_total() == 0) {
 			buf = _("none");
 			return;
 		}
@@ -2103,7 +2103,7 @@ ARDOUR_UI::add_route ()
 	Session::AutoConnectOption oac = session->get_output_auto_connect();
 
 	if (oac & Session::AutoConnectMaster) {
-		output_chan = (session->master_out() ? session->master_out()->n_inputs() : input_chan);
+		output_chan = (session->master_out() ? session->master_out()->n_inputs().get(DataType::AUDIO) : input_chan);
 	} else {
 		output_chan = input_chan;
 	}
@@ -2111,10 +2111,15 @@ ARDOUR_UI::add_route ()
 	/* XXX do something with name template */
 
 	while (count) {
-		if (track && add_route_dialog->midi()) {
-			session_add_midi_track();
-		} else if (add_route_dialog->midi()) {
-			session_add_midi_bus();
+		if (add_route_dialog->type() == ARDOUR::DataType::MIDI) {
+			if (track) {
+				session_add_midi_track();
+			} else  {
+				MessageDialog msg (*editor,
+				   _("Sorry, MIDI Busses are not supported at this time."));
+				msg.run ();
+				//session_add_midi_bus();
+			}
 		} else if (track) {
 			session_add_audio_track (input_chan, output_chan, add_route_dialog->mode());
 		} else {

@@ -60,7 +60,7 @@ public:
 
 	const ChanCount& chan_count() const { return _chan_count; }
 
-	bool empty() const { return (_chan_count.get_total_count() == 0); }
+	bool empty() const { return (_chan_count.get_total() == 0); }
 
 	// ITERATORS
 	
@@ -85,7 +85,7 @@ public:
 	};
 
 	iterator begin() { return iterator(*this, 0); }
-	iterator end()   { return iterator(*this, _chan_count.get_total_count()); }
+	iterator end()   { return iterator(*this, _chan_count.get_total()); }
 	
 	class const_iterator {
 	public:
@@ -105,7 +105,7 @@ public:
 	};
 
 	const_iterator begin() const { return const_iterator(*this, 0); }
-	const_iterator end()   const { return const_iterator(*this, _chan_count.get_total_count()); }
+	const_iterator end()   const { return const_iterator(*this, _chan_count.get_total()); }
 
 	
 
@@ -127,7 +127,7 @@ public:
 	};
 
 	audio_iterator audio_begin() { return audio_iterator(*this, 0); }
-	audio_iterator audio_end()   { return audio_iterator(*this, _chan_count.get_count(DataType::AUDIO)); }
+	audio_iterator audio_end()   { return audio_iterator(*this, _chan_count.get(DataType::AUDIO)); }
 
 
 

@@ -123,7 +123,7 @@ Send::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_
 
 		if (_metering) {
 			uint32_t n;
-			uint32_t no = n_outputs();
+			uint32_t no = n_outputs().get(DataType::AUDIO);
 
 			if (_gain == 0) {
 
@@ -144,7 +144,7 @@ Send::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_
 		
 		if (_metering) {
 			uint32_t n;
-			uint32_t no = n_outputs();
+			uint32_t no = n_outputs().get(DataType::AUDIO);
 
 			for (n = 0; n < no; ++n) {
 				_peak_power[n] = 0;

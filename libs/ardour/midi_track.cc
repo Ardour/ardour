@@ -403,7 +403,7 @@ int
 MidiTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs() == 0) {
+	if (n_outputs().get(DataType::MIDI) == 0) {
 		return 0;
 	}
 
@@ -490,7 +490,7 @@ int
 MidiTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs() == 0 && _redirects.empty()) {
+	if (n_outputs().get(DataType::MIDI) == 0 && _redirects.empty()) {
 		return 0;
 	}
 

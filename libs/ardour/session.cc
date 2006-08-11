@@ -719,7 +719,8 @@ Session::when_engine_running ()
 			
 			_master_out->defer_pan_reset ();
 			
-			while ((int) _master_out->n_inputs() < _master_out->input_maximum()) {
+			while (_master_out->n_inputs().get(DataType::AUDIO)
+					< _master_out->input_maximum().get(DataType::AUDIO)) {
 				if (_master_out->add_input_port ("", this, DataType::AUDIO)) {
 					error << _("cannot setup master inputs") 
 					      << endmsg;
@@ -727,7 +728,8 @@ Session::when_engine_running ()
 				}
 			}
 			n = 0;
-			while ((int) _master_out->n_outputs() < _master_out->output_maximum()) {
+			while (_master_out->n_outputs().get(DataType::AUDIO)
+					< _master_out->output_maximum().get(DataType::AUDIO)) {
 				if (_master_out->add_output_port (_engine.get_nth_physical_output (DataType::AUDIO, n), this, DataType::AUDIO)) {
 					error << _("cannot setup master outputs")
 					      << endmsg;
@@ -742,7 +744,7 @@ Session::when_engine_running ()
 
 		Connection* c = new OutputConnection (_("Master Out"), true);
 
-		for (uint32_t n = 0; n < _master_out->n_inputs (); ++n) {
+		for (uint32_t n = 0; n < _master_out->n_inputs ().get_total(); ++n) {
 			c->add_port ();
 			c->add_connection ((int) n, _master_out->input(n)->name());
 		}
@@ -810,7 +812,7 @@ Session::hookup_io ()
 	if (_control_out) {
 		uint32_t n;
 
-		while ((int) _control_out->n_inputs() < _control_out->input_maximum()) {
+		while (_control_out->n_inputs().get(DataType::AUDIO) < _control_out->input_maximum().get(DataType::AUDIO)) {
 			if (_control_out->add_input_port ("", this)) {
 				error << _("cannot setup control inputs")
 				      << endmsg;
@@ -818,7 +820,7 @@ Session::hookup_io ()
 			}
 		}
 		n = 0;
-		while ((int) _control_out->n_outputs() < _control_out->output_maximum()) {
+		while (_control_out->n_outputs().get(DataType::AUDIO) < _control_out->output_maximum().get(DataType::AUDIO)) {
 			if (_control_out->add_output_port (_engine.get_nth_physical_output (DataType::AUDIO, n), this)) {
 				error << _("cannot set up master outputs")
 				      << endmsg;
@@ -1458,7 +1460,7 @@ Session::set_block_size (jack_nframes_t nframes)
 		_passthru_buffers.clear ();
 		_silent_buffers.clear ();
 
-		ensure_passthru_buffers (np);
+		ensure_passthru_buffers (ChanCount(DataType::AUDIO, np));
 
 		for (vector<Sample*>::iterator i = _send_buffers.begin(); i != _send_buffers.end(); ++i) {
 			free(*i);
@@ -1685,7 +1687,7 @@ Session::new_midi_track (TrackMode mode)
 			if (dynamic_cast<MidiTrack*>((*i).get()) != 0) {
 				if (!(*i)->hidden()) {
 					n++;
-					channels_used += (*i)->n_inputs();
+					channels_used += (*i)->n_inputs().get(DataType::MIDI);
 				}
 			}
 		}
@@ -1880,7 +1882,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			if (dynamic_cast<AudioTrack*>((*i).get()) != 0) {
 				if (!(*i)->hidden()) {
 					n++;
-					channels_used += (*i)->n_inputs();
+					channels_used += (*i)->n_inputs().get(DataType::AUDIO);
 				}
 			}
 		}
@@ -1923,7 +1925,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		}
 
 		if (nphysical_in) {
-			for (uint32_t x = 0; x < track->n_inputs() && x < nphysical_in; ++x) {
+			for (uint32_t x = 0; x < track->n_inputs().get(DataType::AUDIO) && x < nphysical_in; ++x) {
 				
 				port = "";
 				
@@ -1937,7 +1939,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			}
 		}
 		
-		for (uint32_t x = 0; x < track->n_outputs(); ++x) {
+		for (uint32_t x = 0; x < track->n_outputs().get(DataType::AUDIO); ++x) {
 			
 			port = "";
 
@@ -1945,7 +1947,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				port = _engine.get_nth_physical_output (DataType::AUDIO, (channels_used+x)%nphysical_out);
 			} else if (output_auto_connect & AutoConnectMaster) {
 				if (_master_out) {
-					port = _master_out->input (x%_master_out->n_inputs())->name();
+					port = _master_out->audio_input (x%_master_out->n_inputs().get(DataType::AUDIO))->name();
 				}
 			}
 
@@ -1956,10 +1958,10 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		if (_control_out) {
 			vector<string> cports;
-			uint32_t ni = _control_out->n_inputs();
+			uint32_t ni = _control_out->n_inputs().get(DataType::AUDIO);
 
 			for (n = 0; n < ni; ++n) {
-				cports.push_back (_control_out->input(n)->name());
+				cports.push_back (_control_out->audio_input(n)->name());
 			}
 
 			track->set_control_outs (cports);
@@ -2018,7 +2020,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 			      << endmsg;
 		}
 
-		for (uint32_t x = 0; x < bus->n_inputs(); ++x) {
+		for (uint32_t x = 0; x < bus->n_inputs().get(DataType::AUDIO); ++x) {
 			
 			port = "";
 
@@ -2031,7 +2033,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 			}
 		}
 
-		for (uint32_t x = 0; x < bus->n_outputs(); ++x) {
+		for (uint32_t x = 0; x < bus->n_outputs().get(DataType::AUDIO); ++x) {
 			
 			port = "";
 
@@ -2039,7 +2041,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 				port = _engine.get_nth_physical_input (DataType::AUDIO, (n+x)%n_physical_outputs);
 			} else if (output_auto_connect & AutoConnectMaster) {
 				if (_master_out) {
-					port = _master_out->input (x%_master_out->n_inputs())->name();
+					port = _master_out->audio_input (x%_master_out->n_inputs().get(DataType::AUDIO))->name();
 				}
 			}
 
@@ -2050,7 +2052,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 
 		if (_control_out) {
 			vector<string> cports;
-			uint32_t ni = _control_out->n_inputs();
+			uint32_t ni = _control_out->n_inputs().get(DataType::AUDIO);
 
 			for (uint32_t n = 0; n < ni; ++n) {
 				cports.push_back (_control_out->input(n)->name());
@@ -3656,9 +3658,11 @@ Session::tempo_map_changed (Change ignored)
 }
 
 void
-Session::ensure_passthru_buffers (uint32_t howmany)
+Session::ensure_passthru_buffers (ChanCount howmany)
 {
-	while (howmany > _passthru_buffers.size()) {
+	// FIXME: temporary hack
+
+	while (howmany.get(DataType::AUDIO) > _passthru_buffers.size()) {
 		Sample *p;
 #ifdef NO_POSIX_MEMALIGN
 		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
@@ -3688,7 +3692,7 @@ Session::ensure_passthru_buffers (uint32_t howmany)
 		_send_buffers.push_back (p);
 		
 	}
-	allocate_pan_automation_buffers (current_block_size, howmany, false);
+	allocate_pan_automation_buffers (current_block_size, howmany.get(DataType::AUDIO), false);
 }
 
 string

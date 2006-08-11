@@ -85,7 +85,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::MoreOutputs (output_streams ());
+		IO::MoreOutputs (ChanCount(_default_type, output_streams()));
 	}
 
 	RedirectCreated (this); /* EMIT SIGNAL */
@@ -106,7 +106,7 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::MoreOutputs (output_streams());
+		IO::MoreOutputs (ChanCount(_default_type, output_streams()));
 	}
 }
 
@@ -903,7 +903,7 @@ PortInsert::~PortInsert ()
 void
 PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
 {
-	if (n_outputs() == 0) {
+	if (n_outputs().get(_default_type) == 0) {
 		return;
 	}
 
@@ -999,7 +999,7 @@ PortInsert::latency()
 int32_t
 PortInsert::can_support_input_configuration (int32_t in) const
 {
-	if (input_maximum() == -1 && output_maximum() == -1) {
+	if (input_maximum() == ChanCount::INFINITE && output_maximum() == ChanCount::INFINITE) {
 
 		/* not configured yet */
 
@@ -1011,7 +1011,7 @@ PortInsert::can_support_input_configuration (int32_t in) const
 		   many output ports it will have.
 		*/
 
-		if (output_maximum() == in) {
+		if (output_maximum().get(_default_type) == static_cast<uint32_t>(in)) {
 			return 1;
 		} 
 	}
@@ -1042,11 +1042,11 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 	set_input_minimum (out);
 
 	if (in < 0) {
-		in = n_outputs ();
+		in = n_outputs ().get(_default_type);
 	} 
 
 	if (out < 0) {
-		out = n_inputs ();
+		out = n_inputs ().get(_default_type);
 	}
 
 	return ensure_io (out, in, false, this);
@@ -1056,17 +1056,17 @@ int32_t
 PortInsert::compute_output_streams (int32_t cnt) const
 {
 	/* puzzling, eh? think about it ... */
-	return n_inputs ();
+	return n_inputs ().get(_default_type);
 }
 
 uint32_t
 PortInsert::output_streams() const
 {
-	return n_inputs ();
+	return n_inputs ().get(_default_type);
 }
 
 uint32_t
 PortInsert::input_streams() const
 {
-	return n_outputs ();
+	return n_outputs ().get(_default_type);
 }

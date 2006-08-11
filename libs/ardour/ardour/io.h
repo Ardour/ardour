@@ -41,6 +41,7 @@
 #include <ardour/types.h>
 #include <ardour/data_type.h>
 #include <ardour/port_set.h>
+#include <ardour/chan_count.h>
 
 using std::string;
 using std::vector;
@@ -72,14 +73,20 @@ class IO : public Stateful, public ARDOUR::StateManager
 	    int input_min = -1, int input_max = -1, 
 	    int output_min = -1, int output_max = -1,
 		DataType default_type = DataType::AUDIO);
-
+	
 	virtual ~IO();
 
-	int input_minimum() const { return _input_minimum; }
-	int input_maximum() const { return _input_maximum; }
-	int output_minimum() const { return _output_minimum; }
-	int output_maximum() const { return _output_maximum; }
+	ChanCount input_minimum() const { return _input_minimum; }
+	ChanCount input_maximum() const { return _input_maximum; }
+	ChanCount output_minimum() const { return _output_minimum; }
+	ChanCount output_maximum() const { return _output_maximum; }
 
+	void set_input_minimum (ChanCount n);
+	void set_input_maximum (ChanCount n);
+	void set_output_minimum (ChanCount n);
+	void set_output_maximum (ChanCount n);
+	
+	// Do not write any new code using these
 	void set_input_minimum (int n);
 	void set_input_maximum (int n);
 	void set_output_minimum (int n);
@@ -162,8 +169,8 @@ class IO : public Stateful, public ARDOUR::StateManager
 	MidiPort*  midi_input(uint32_t n) const;
 	MidiPort*  midi_output(uint32_t n) const;
 
-	uint32_t n_inputs () const { return _inputs.num_ports(); }
-	uint32_t n_outputs () const { return _outputs.num_ports(); }
+	const ChanCount& n_inputs ()  const { return _inputs.chan_count(); }
+	const ChanCount& n_outputs () const { return _outputs.chan_count(); }
 
 	sigc::signal<void,IOChange,void*> input_changed;
 	sigc::signal<void,IOChange,void*> output_changed;
@@ -193,7 +200,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	static sigc::signal<int> PortsLegal;
 	static sigc::signal<int> PannersLegal;
 	static sigc::signal<int> ConnectingLegal;
-	static sigc::signal<void,uint32_t> MoreOutputs;
+	static sigc::signal<void,ChanCount> MoreOutputs;
 	static sigc::signal<int> PortsCreated;
 
 	PBD::Controllable& gain_control() {
@@ -203,7 +210,8 @@ class IO : public Stateful, public ARDOUR::StateManager
 	/* Peak metering */
 
 	float peak_input_power (uint32_t n) { 
-		if (n < std::max (n_inputs(), n_outputs())) {
+		if (n < std::max (_inputs.chan_count().get(DataType::AUDIO),
+		                  _outputs.chan_count().get(DataType::AUDIO))) {
 			return _visible_peak_power[n];
 		} else {
 			return minus_infinity();
@@ -300,7 +308,8 @@ public:
 	void reset_peak_meters();
 	void reset_panner ();
 
-	virtual uint32_t pans_required() const { return n_inputs(); }
+	virtual uint32_t pans_required() const
+		{ return _inputs.chan_count().get(DataType::AUDIO); }
 
 	static void apply_declick (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, 
 				   gain_t initial, gain_t target, bool invert_polarity);
@@ -363,10 +372,10 @@ public:
 	sigc::connection port_legal_c;
 	sigc::connection panner_legal_c;
 
-	int _input_minimum;
-	int _input_maximum;
-	int _output_minimum;
-	int _output_maximum;
+	ChanCount _input_minimum;
+	ChanCount _input_maximum;
+	ChanCount _output_minimum;
+	ChanCount _output_maximum;
 
 
 	static int parse_io_string (const string&, vector<string>& chns);

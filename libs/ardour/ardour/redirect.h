@@ -70,10 +70,10 @@ class Redirect : public IO
 	bool active () const { return _active; }
 	void set_active (bool yn, void *src);
 
-	virtual uint32_t output_streams() const { return n_outputs(); }
-	virtual uint32_t input_streams () const { return n_inputs(); }
-	virtual uint32_t natural_output_streams() const { return n_outputs(); }
-	virtual uint32_t natural_input_streams () const { return n_inputs(); }
+	virtual uint32_t output_streams() const { return n_outputs().get(_default_type); }
+	virtual uint32_t input_streams () const { return n_inputs().get(_default_type); }
+	virtual uint32_t natural_output_streams() const { return n_outputs().get(_default_type); }
+	virtual uint32_t natural_input_streams () const { return n_inputs().get(_default_type); }
 
 	uint32_t sort_key() const { return _sort_key; }
 	void set_sort_key (uint32_t key);

@@ -159,11 +159,16 @@ AddRouteDialog::track ()
 	return track_button.get_active ();
 }
 
-bool
-AddRouteDialog::midi ()
+ARDOUR::DataType
+AddRouteDialog::type ()
 {
+	// FIXME: ew
+	
 	const string str = channel_combo.get_active_text();
-	return (str == _("MIDI"));
+	if (str == _("MIDI"))
+		return ARDOUR::DataType::MIDI;
+	else
+		return ARDOUR::DataType::AUDIO;
 }
 
 string

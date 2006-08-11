@@ -614,7 +614,7 @@ MixerStrip::add_connection_to_input_menu (ARDOUR::Connection* c)
 
 	MenuList& citems = input_menu.items();
 	
-	if (c->nports() == _route->n_inputs()) {
+	if (c->nports() == _route->n_inputs().get_total()) {
 
 		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::connection_input_chosen), c)));
 		
@@ -637,7 +637,7 @@ MixerStrip::add_connection_to_output_menu (ARDOUR::Connection* c)
 		return;
 	}
 
-	if (c->nports() == _route->n_outputs()) {
+	if (c->nports() == _route->n_outputs().get_total()) {
 
 		MenuList& citems = output_menu.items();
 		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::connection_output_chosen), c)));
@@ -1129,8 +1129,6 @@ MixerStrip::route_active_changed ()
 {
 	RouteUI::route_active_changed ();
 
-	// FIXME: MIDI/Audio bus distinction
-	
 	if (is_midi_track()) {
 		if (_route->active()) {
 			set_name ("MidiTrackStripBase");
@@ -1139,7 +1137,6 @@ MixerStrip::route_active_changed ()
 			set_name ("MidiTrackStripBaseInactive");
 			gpm.set_meter_strip_name ("MidiTrackStripBaseInactive");
 		}
-		gpm.set_fader_name ("MidiTrackFader");
 	} else if (is_audio_track()) {
 		if (_route->active()) {
 			set_name ("AudioTrackStripBase");

@@ -587,7 +587,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	solo_audible = dsg > 0;
 	mute_audible = dmg > 0 || !_mute_affects_main_outs;
 	
-	if (n_outputs() == 0) {
+	if (n_outputs().get(_default_type) == 0) {
 	    
 	    /* relax */
 
@@ -647,12 +647,12 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 //		cerr << "meter post" << endl;
 
 		if ((_gain == 0 && !apply_gain_automation) || dmg == 0) {
-			uint32_t no = n_outputs();
+			uint32_t no = n_outputs().get(DataType::AUDIO);
 			for (n = 0; n < no; ++n) {
 				_peak_power[n] = 0;
 			} 
 		} else {
-			uint32_t no = n_outputs();
+			uint32_t no = n_outputs().get(DataType::AUDIO);
 			for (n = 0; n < no; ++n) {
 				_peak_power[n] = Session::compute_peak (audio_output(n)->get_audio_buffer ().data(nframes, offset), nframes, _peak_power[n]);
 			}
@@ -663,7 +663,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 uint32_t
 Route::n_process_buffers ()
 {
-	return max (n_inputs(), redirect_max_outs);
+	return max (n_inputs().get(_default_type), static_cast<size_t>(redirect_max_outs));
 }
 
 void
@@ -801,7 +801,7 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 			   
 			*/
 
-			porti->ensure_io (n_outputs (), n_inputs(), false, this);
+			porti->ensure_io (n_outputs ().get(DataType::AUDIO), n_inputs().get(DataType::AUDIO), false, this);
 		}
 
 		// Ensure peak vector sizes before the plugin is activated
@@ -1074,7 +1074,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
 	/* A: PreFader */
 	
-	if (check_some_plugin_counts (insert_map[PreFader], n_inputs (), err_streams)) {
+	if (check_some_plugin_counts (insert_map[PreFader], n_inputs ().get(_default_type), err_streams)) {
 		return -1;
 	}
 
@@ -1084,7 +1084,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 		InsertCount& ic (insert_map[PreFader].back());
 		initial_streams = ic.insert->compute_output_streams (ic.cnt);
 	} else {
-		initial_streams = n_inputs ();
+		initial_streams = n_inputs ().get(_default_type);
 	}
 
 	/* B: PostFader */
@@ -1110,13 +1110,13 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
 		if ((s = boost::dynamic_pointer_cast<Send> (*r)) != 0) {
 			if (r == _redirects.begin()) {
-				s->expect_inputs (n_inputs());
+				s->expect_inputs (n_inputs().get(_default_type));
 			} else {
 				s->expect_inputs ((*prev)->output_streams());
 			}
 		}
 
-		redirect_max_outs = max ((*r)->output_streams (), redirect_max_outs);
+		redirect_max_outs = max ((*r)->output_streams(), redirect_max_outs);
 	}
 
 	/* we're done */
@@ -1761,7 +1761,7 @@ Route::set_control_outs (const vector<string>& ports)
 	   have outputs. we track the changes in ::output_change_handler().
 	*/
 
-	_control_outs->ensure_io (0, n_outputs(), true, this);
+	_control_outs->ensure_io (0, n_outputs().get(DataType::AUDIO), true, this);
  
  	return 0;
 }	
@@ -1836,8 +1836,8 @@ Route::feeds (boost::shared_ptr<Route> other)
 	uint32_t i, j;
 
 	IO& self = *this;
-	uint32_t no = self.n_outputs();
-	uint32_t ni = other->n_inputs ();
+	uint32_t no = self.n_outputs().get_total();
+	uint32_t ni = other->n_inputs ().get_total();
 
 	for (i = 0; i < no; ++i) {
 		for (j = 0; j < ni; ++j) {
@@ -1851,7 +1851,7 @@ Route::feeds (boost::shared_ptr<Route> other)
 
 	for (RedirectList::iterator r = _redirects.begin(); r != _redirects.end(); r++) {
 
-		no = (*r)->n_outputs();
+		no = (*r)->n_outputs().get_total();
 
 		for (i = 0; i < no; ++i) {
 			for (j = 0; j < ni; ++j) {
@@ -1866,7 +1866,7 @@ Route::feeds (boost::shared_ptr<Route> other)
 
 	if (_control_outs) {
 
-		no = _control_outs->n_outputs();
+		no = _control_outs->n_outputs().get_total();
 		
 		for (i = 0; i < no; ++i) {
 			for (j = 0; j < ni; ++j) {
@@ -1990,7 +1990,7 @@ Route::output_change_handler (IOChange change, void *ignored)
 {
 	if (change & ConfigurationChanged) {
 		if (_control_outs) {
-			_control_outs->ensure_io (0, n_outputs(), true, this);
+			_control_outs->ensure_io (0, n_outputs().get(DataType::AUDIO), true, this);
 		}
 		
 		reset_plugin_counts (0);
@@ -2000,18 +2000,18 @@ Route::output_change_handler (IOChange change, void *ignored)
 uint32_t
 Route::pans_required () const
 {
-	if (n_outputs() < 2) {
+	if (n_outputs().get(DataType::AUDIO) < 2) {
 		return 0;
 	}
 	
-	return max (n_inputs (), redirect_max_outs);
+	return max (n_inputs ().get(DataType::AUDIO), static_cast<size_t>(redirect_max_outs));
 }
 
 int 
 Route::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
 		   bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs() == 0) {
+	if (n_outputs().get(_default_type) == 0) {
 		return 0;
 	}
 
@@ -2022,7 +2022,7 @@ Route::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes
 
 	apply_gain_automation = false;
 	
-	if (n_inputs()) {
+	if (n_inputs().get(_default_type)) {
 		passthru (start_frame, end_frame, nframes, offset, 0, false);
 	} else {
 		silence (nframes, offset);
@@ -2069,7 +2069,7 @@ Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t 
 		}
 	}
 		
-	if ((n_outputs() == 0 && _redirects.empty()) || n_inputs() == 0 || !_active) {
+	if ((n_outputs().get_total() == 0 && _redirects.empty()) || n_inputs().get_total() == 0 || !_active) {
 		silence (nframes, offset);
 		return 0;
 	}
@@ -2126,7 +2126,7 @@ Route::has_external_redirects () const
 	for (RedirectList::const_iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 		if ((pi = boost::dynamic_pointer_cast<const PortInsert>(*i)) != 0) {
 
-			uint32_t no = pi->n_outputs();
+			uint32_t no = pi->n_outputs().get(_default_type);
 
 			for (uint32_t n = 0; n < no; ++n) {
 				
