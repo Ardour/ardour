@@ -194,9 +194,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	xfade_model = ShortCrossfade;
 	destructive_index = 0;
 
-	/* allocate conversion buffers */
-	_conversion_buffers[ButlerContext] = new char[AudioDiskstream::disk_io_frames() * 4];
-	_conversion_buffers[TransportContext] = new char[AudioDiskstream::disk_io_frames() * 4];
 	AudioDiskstream::allocate_working_buffers();
 
 	/* default short fade = 15ms */
@@ -628,15 +625,16 @@ Session::load_diskstreams (const XMLNode& node)
 	clist = node.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
-		Diskstream* dstream = NULL;
+		Diskstream* dstream = 0;
 
 		try {
-			if ((*citer)->name() == "AudioDiskstream") {
+			/* diskstreams added automatically by DiskstreamCreated handler */
+			if ((*citer)->name() == "AudioDiskstream" || (*citer)->name() == "DiskStream") {
 				dstream = new AudioDiskstream (*this, **citer);
-				/* added automatically by DiskstreamCreated handler */
-			} else {
-				assert((*citer)->name() == "MidiDiskstream");
+			} else if ((*citer)->name() == "MidiDiskstream") {
 				dstream = new MidiDiskstream (*this, **citer);
+			} else {
+				error << _("Session: unknown diskstream type in XML") << endmsg;
 			}
 		} 
 		

@@ -34,6 +34,11 @@ audio_library.cc
 audio_playlist.cc
 audio_track.cc
 audioengine.cc
+port.cc
+audio_port.cc
+midi_port.cc
+port_set.cc
+buffer.cc
 audiofilesource.cc
 audiofilter.cc
 audioregion.cc
@@ -72,7 +77,6 @@ playlist.cc
 playlist_factory.cc
 plugin.cc
 plugin_manager.cc
-port.cc
 recent_sessions.cc
 redirect.cc
 region.cc

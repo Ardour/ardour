@@ -30,9 +30,18 @@
 #include <ardour/port.h>
 #include <ardour/route.h>
 #include <ardour/ladspa_plugin.h>
+
+#ifdef VST_SUPPORT
 #include <ardour/vst_plugin.h>
+#endif
+
+#ifdef HAVE_COREAUDIO
+#include <ardour/audio_unit.h>
+#endif
+
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
+#include <ardour/types.h>
 
 #include "i18n.h"
 
@@ -44,7 +53,6 @@ Insert::Insert(Session& s, Placement p)
 	: Redirect (s, s.next_insert_name(), p)
 {
 }
-
 
 Insert::Insert(Session& s, Placement p, int imin, int imax, int omin, int omax)
 	: Redirect (s, s.next_insert_name(), p, imin, imax, omin, omax)
@@ -505,12 +513,19 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef VST_SUPPORT
 	boost::shared_ptr<VSTPlugin> vp;
 #endif
+#ifdef HAVE_COREAUDIO
+	boost::shared_ptr<AUPlugin> ap;
+#endif
 
 	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LadspaPlugin (*lp));
 #ifdef VST_SUPPORT
 	} else if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new VSTPlugin (*vp));
+#endif
+#ifdef HAVE_COREAUDIO
+	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
+		return boost::shared_ptr<Plugin> (new AUPlugin (*ap));
 #endif
 	}
 
@@ -630,7 +645,7 @@ PluginInsert::set_state(const XMLNode& node)
 	XMLPropertyList plist;
 	const XMLProperty *prop;
 	long unique = 0;
-	PluginInfo::Type type;
+	ARDOUR::PluginType type;
 
 	if ((prop = node.property ("type")) == 0) {
 		error << _("XML node describing insert is missing the `type' field") << endmsg;
@@ -638,9 +653,9 @@ PluginInsert::set_state(const XMLNode& node)
 	}
 
 	if (prop->value() == X_("ladspa") || prop->value() == X_("Ladspa")) { /* handle old school sessions */
-		type = PluginInfo::LADSPA;
+		type = ARDOUR::LADSPA;
 	} else if (prop->value() == X_("vst")) {
-		type = PluginInfo::VST;
+		type = ARDOUR::VST;
 	} else {
 		error << string_compose (_("unknown plugin type %1 in plugin insert state"),
 				  prop->value())
@@ -807,6 +822,35 @@ PluginInsert::state_factory (std::string why) const
 	return state;
 }
 
+ARDOUR::PluginType
+PluginInsert::type ()
+{
+	boost::shared_ptr<LadspaPlugin> lp;
+#ifdef VST_SUPPORT
+	boost::shared_ptr<VSTPlugin> vp;
+#endif
+#ifdef HAVE_COREAUDIO
+	boost::shared_ptr<AUPlugin> ap;
+#endif
+	
+	PluginPtr other = plugin ();
+
+	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
+		return ARDOUR::LADSPA;
+#ifdef VST_SUPPORT
+	} else if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (other)) != 0) {
+		return ARDOUR::VST;
+#endif
+#ifdef HAVE_COREAUDIO
+	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
+		return ARDOUR::AudioUnit;
+#endif
+	} else {
+		/* NOT REACHED */
+		return (ARDOUR::PluginType) 0;
+	}
+}
+
 /***************************************************************
  Port inserts: send output to a port, pick up input at a port
  ***************************************************************/
@@ -869,10 +913,11 @@ PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes,
 		return;
 	}
 
-	uint32_t n;
+	//uint32_t n;
 	vector<Port*>::iterator o;
 	vector<Port*>::iterator i;
 
+#if 0
 	/* deliver output */
 
 	for (o = _outputs.begin(), n = 0; o != _outputs.end(); ++o, ++n) {
@@ -885,6 +930,7 @@ PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes,
 	for (i = _inputs.begin(), n = 0; i != _inputs.end(); ++i, ++n) {
 		memcpy (bufs[min(nbufs,n)], (*i)->get_buffer (nframes) + offset, sizeof (Sample) * nframes);
 	}
+#endif
 }
 
 XMLNode&

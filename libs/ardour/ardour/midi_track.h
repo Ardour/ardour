@@ -48,6 +48,11 @@ public:
 	int silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		jack_nframes_t offset, bool can_record, bool rec_monitors_input);
 
+	void process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
+				     jack_nframes_t start_frame, jack_nframes_t end_frame,
+				     jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
+				     bool meter);
+
 	void set_record_enable (bool yn, void *src);
 
 	MidiDiskstream& midi_diskstream() const;
@@ -59,7 +64,7 @@ public:
 
 	void set_latency_delay (jack_nframes_t);
 
-	int export_stuff (vector<unsigned char*>& buffers, char * workbuf, uint32_t nbufs,
+	int export_stuff (vector<unsigned char*>& buffers, uint32_t nbufs,
 		jack_nframes_t nframes, jack_nframes_t end_frame);
 
 	void freeze (InterThreadInfo&);

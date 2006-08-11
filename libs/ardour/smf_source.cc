@@ -103,6 +103,29 @@ SMFSource::init (string pathstr, bool must_exist)
 	return 0;
 }
 
+int
+SMFSource::update_header (jack_nframes_t when, struct tm&, time_t)
+{
+	return 0;
+}
+
+int
+SMFSource::flush_header ()
+{
+	return 0;
+}
+
+jack_nframes_t
+SMFSource::read_unlocked (RawMidi* dst, jack_nframes_t start, jack_nframes_t cnt) const
+{
+	return 0;
+}
+
+jack_nframes_t
+SMFSource::write_unlocked (RawMidi* dst, jack_nframes_t cnt)
+{
+	return 0;
+}
 
 XMLNode&
 SMFSource::get_state ()

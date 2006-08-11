@@ -117,3 +117,11 @@ Source::release ()
 	if (_use_cnt) --_use_cnt;
 }
 
+void
+Source::update_length (jack_nframes_t pos, jack_nframes_t cnt)
+{
+	if (pos + cnt > _length) {
+		_length = pos+cnt;
+	}
+}
+

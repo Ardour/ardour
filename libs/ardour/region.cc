@@ -32,6 +32,7 @@
 #include <ardour/region.h>
 #include <ardour/playlist.h>
 #include <ardour/session.h>
+#include <ardour/source.h>
 
 #include "i18n.h"
 
@@ -49,63 +50,124 @@ Change Region::HiddenChanged     = ARDOUR::new_change ();
 
 sigc::signal<void,Region *> Region::CheckNewRegion;
 
-Region::Region (jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Region::Flag flags)
+/** Basic Region constructor (single source) */
+Region::Region (Source& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Region::Flag flags)
+	: _name(name)
+	, _flags(flags)
+	, _start(start) 
+	, _length(length) 
+	, _position(0) 
+	, _sync_position(_start)
+	, _layer(layer)
+	, _first_edit(EditChangesNothing)
+	, _frozen(0)
+	, _read_data_count(0)
+	, _pending_changed(Change (0))
+	, _last_layer_op(0)
+	, _playlist(0)
 {
-	/* basic Region constructor */
-
-	_flags = flags;
-	_playlist = 0;
-	_read_data_count = 0;
-	_frozen = 0;
-	pending_changed = Change (0);
-
-	_name = name;
-	_start = start; 
-	_sync_position = _start;
-	_length = length; 
-	_position = 0; 
-	_layer = layer;
 	_current_state_id = 0;
-	_read_data_count = 0;
-	_first_edit = EditChangesNothing;
-	_last_layer_op = 0;
+	
+	_sources.push_back (&src);
+	_master_sources.push_back (&src);
+	src.GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+
+	assert(_sources.size() > 0);
 }
 
-Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+/** Basic Region constructor (many sources) */
+Region::Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Region::Flag flags)
+	: _name(name)
+	, _flags(flags)
+	, _start(start) 
+	, _length(length) 
+	, _position(0) 
+	, _sync_position(_start)
+	, _layer(layer)
+	, _first_edit(EditChangesNothing)
+	, _frozen(0)
+	, _read_data_count(0)
+	, _pending_changed(Change (0))
+	, _last_layer_op(0)
+	, _playlist(0)
 {
-	/* create a new Region from part of an existing one */
+	_current_state_id = 0;
+	
+	set<Source*> unique_srcs;
 
-	_frozen = 0;
-	pending_changed = Change (0);
-	_playlist = 0;
-	_read_data_count = 0;
-
-	_start = other._start + offset; 
-	if (other._sync_position < offset) {
-		_sync_position = other._sync_position;
-	} else {
-		_sync_position = _start;
+	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
+		_sources.push_back (*i);
+		(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		unique_srcs.insert (*i);
 	}
-	_length = length; 
-	_name = name;
-	_position = 0; 
-	_layer = layer; 
-	_flags = Flag (flags & ~(Locked|WholeFile|Hidden));
-	_current_state_id = 0;
-	_first_edit = EditChangesNothing;
-	_last_layer_op = 0;
+
+	for (SourceList::iterator i = srcs.begin(); i != srcs.end(); ++i) {
+		_master_sources.push_back (*i);
+		if (unique_srcs.find (*i) == unique_srcs.end()) {
+			(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		}
+	}
+	
+	assert(_sources.size() > 0);
 }
 
-Region::Region (const Region &other)
+/** Create a new Region from part of an existing one */
+Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+	: _name(name)
+	, _flags(Flag(flags & ~(Locked|WholeFile|Hidden)))
+	, _start(other._start + offset) 
+	, _length(length) 
+	, _position(0) 
+	, _sync_position(_start)
+	, _layer(layer)
+	, _first_edit(EditChangesNothing)
+	, _frozen(0)
+	, _read_data_count(0)
+	, _pending_changed(Change (0))
+	, _last_layer_op(0)
+	, _playlist(0)
 {
-	/* Pure copy constructor */
+	_current_state_id = 0;
+	
+	if (other._sync_position < offset)
+		_sync_position = other._sync_position;
 
-	_frozen = 0;
-	pending_changed = Change (0);
-	_playlist = 0;
-	_read_data_count = 0;
+	set<Source*> unique_srcs;
 
-	_first_edit = EditChangesID;
+	for (SourceList::const_iterator i= other._sources.begin(); i != other._sources.end(); ++i) {
+		_sources.push_back (*i);
+		(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		unique_srcs.insert (*i);
+	}
+
+	for (SourceList::const_iterator i = other._master_sources.begin(); i != other._master_sources.end(); ++i) {
+		if (unique_srcs.find (*i) == unique_srcs.end()) {
+			(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		}
+		_master_sources.push_back (*i);
+	}
+	
+	assert(_sources.size() > 0);
+}
+
+/** Pure copy constructor */
+Region::Region (const Region &other)
+	: _name(other._name)
+	, _flags(Flag(other._flags & ~Locked))
+	, _start(other._start) 
+	, _length(other._length) 
+	, _position(other._position) 
+	, _sync_position(other._sync_position)
+	, _layer(other._layer)
+	, _first_edit(EditChangesID)
+	, _frozen(0)
+	, _read_data_count(0)
+	, _pending_changed(Change(0))
+	, _last_layer_op(other._last_layer_op)
+	, _playlist(0)
+{
+	_current_state_id = 0;
+	
 	other._first_edit = EditChangesName;
 
 	if (other._extra_xml) {
@@ -114,36 +176,88 @@ Region::Region (const Region &other)
 		_extra_xml = 0;
 	}
 
-	_start = other._start;
-	_sync_position = other._sync_position;
-	_length = other._length; 
-	_name = other._name;
-	_position = other._position; 
-	_layer = other._layer; 
-	_flags = Flag (other._flags & ~Locked);
-	_current_state_id = 0;
-	_last_layer_op = other._last_layer_op;
+	set<Source*> unique_srcs;
+
+	for (SourceList::const_iterator i = other._sources.begin(); i != other._sources.end(); ++i) {
+		_sources.push_back (*i);
+		(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		unique_srcs.insert (*i);
+	}
+
+	for (SourceList::const_iterator i = other._master_sources.begin(); i != other._master_sources.end(); ++i) {
+		_master_sources.push_back (*i);
+		if (unique_srcs.find (*i) == unique_srcs.end()) {
+			(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		}
+	}
+	
+	assert(_sources.size() > 0);
 }
 
-Region::Region (const XMLNode& node)
+Region::Region (SourceList& srcs, const XMLNode& node)
+	: _name(X_("error: XML did not reset this"))
+	, _flags(Flag(0))
+	, _start(0) 
+	, _length(0) 
+	, _position(0) 
+	, _sync_position(_start)
+	, _layer(0)
+	, _first_edit(EditChangesNothing)
+	, _frozen(0)
+	, _read_data_count(0)
+	, _pending_changed(Change(0))
+	, _last_layer_op(0)
+	, _playlist(0)
+
 {
-	_frozen = 0;
-	pending_changed = Change (0);
-	_playlist = 0;
-	_read_data_count = 0;
-	_start = 0; 
-	_sync_position = _start;
-	_length = 0;
-	_name = X_("error: XML did not reset this");
-	_position = 0; 
-	_layer = 0;
-	_flags = Flag (0);
+	set<Source*> unique_srcs;
+
+	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
+		_sources.push_back (*i);
+		(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		unique_srcs.insert (*i);
+	}
+
+	for (SourceList::iterator i = srcs.begin(); i != srcs.end(); ++i) {
+		_master_sources.push_back (*i);
+		if (unique_srcs.find (*i) == unique_srcs.end()) {
+			(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		}
+	}
+
 	_current_state_id = 0;
-	_first_edit = EditChangesNothing;
 
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
+	
+	assert(_sources.size() > 0);
+}
+
+Region::Region (Source& src, const XMLNode& node)
+	: _name(X_("error: XML did not reset this"))
+	, _flags(Flag(0))
+	, _start(0) 
+	, _length(0) 
+	, _position(0) 
+	, _sync_position(_start)
+	, _layer(0)
+	, _first_edit(EditChangesNothing)
+	, _frozen(0)
+	, _read_data_count(0)
+	, _pending_changed(Change(0))
+	, _last_layer_op(0)
+	, _playlist(0)
+{
+	_sources.push_back (&src);
+
+	_current_state_id = 0;
+
+	if (set_state (node)) {
+		throw failed_constructor();
+	}
+	
+	assert(_sources.size() > 0);
 }
 
 Region::~Region ()
@@ -175,7 +289,7 @@ Region::restore_and_return_flags (RegionState& state)
 	Change what_changed = Change (0);
 
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Mutex::Lock lm (_lock);
 		
 		if (_start != state._start) {
 			what_changed = Change (what_changed|StartChanged);	
@@ -944,15 +1058,15 @@ Region::thaw (const string& why)
 	Change what_changed = Change (0);
 
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Mutex::Lock lm (_lock);
 
 		if (_frozen && --_frozen > 0) {
 			return;
 		}
 
-		if (pending_changed) {
-			what_changed = pending_changed;
-			pending_changed = Change (0);
+		if (_pending_changed) {
+			what_changed = _pending_changed;
+			_pending_changed = Change (0);
 		}
 	}
 
@@ -975,9 +1089,9 @@ void
 Region::send_change (Change what_changed)
 {
 	{
-		Glib::Mutex::Lock lm (lock);
+		Glib::Mutex::Lock lm (_lock);
 		if (_frozen) {
-			pending_changed = Change (pending_changed|what_changed);
+			_pending_changed = Change (_pending_changed|what_changed);
 			return;
 		} 
 	}
@@ -1017,3 +1131,135 @@ Region::region_list_equivalent (const Region& other) const
 {
 	return size_equivalent (other) && source_equivalent (other) && _name == other._name;
 }
+
+void
+Region::source_deleted (Source* ignored)
+{
+	delete this;
+}
+
+void
+Region::lock_sources ()
+{
+	SourceList::iterator i;
+	set<Source*> unique_srcs;
+
+	for (i = _sources.begin(); i != _sources.end(); ++i) {
+		unique_srcs.insert (*i);
+		(*i)->use ();
+	}
+
+	for (i = _master_sources.begin(); i != _master_sources.end(); ++i) {
+		if (unique_srcs.find (*i) == unique_srcs.end()) {
+			(*i)->use ();
+		}
+	}
+}
+
+void
+Region::unlock_sources ()
+{
+	SourceList::iterator i;
+	set<Source*> unique_srcs;
+
+	for (i = _sources.begin(); i != _sources.end(); ++i) {
+		unique_srcs.insert (*i);
+		(*i)->release ();
+	}
+
+	for (i = _master_sources.begin(); i != _master_sources.end(); ++i) {
+		if (unique_srcs.find (*i) == unique_srcs.end()) {
+			(*i)->release ();
+		}
+	}
+}
+
+vector<string>
+Region::master_source_names ()
+{
+	SourceList::iterator i;
+
+	vector<string> names;
+	for (i = _master_sources.begin(); i != _master_sources.end(); ++i) {
+		names.push_back((*i)->name());
+	}
+
+	return names;
+}
+
+bool
+Region::source_equivalent (const Region& other) const
+{
+	SourceList::const_iterator i;
+	SourceList::const_iterator io;
+
+	for (i = _sources.begin(), io = other._sources.begin(); i != _sources.end() && io != other._sources.end(); ++i, ++io) {
+		if ((*i)->id() != (*io)->id()) {
+			return false;
+		}
+	}
+
+	for (i = _master_sources.begin(), io = other._master_sources.begin(); i != _master_sources.end() && io != other._master_sources.end(); ++i, ++io) {
+		if ((*i)->id() != (*io)->id()) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool
+Region::verify_length (jack_nframes_t len)
+{
+	for (uint32_t n=0; n < _sources.size(); ++n) {
+		if (_start > _sources[n]->length() - len) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool
+Region::verify_start_and_length (jack_nframes_t new_start, jack_nframes_t new_length)
+{
+	for (uint32_t n=0; n < _sources.size(); ++n) {
+		if (new_length > _sources[n]->length() - new_start) {
+			return false;
+		}
+	}
+	return true;
+}
+bool
+Region::verify_start (jack_nframes_t pos)
+{
+	for (uint32_t n=0; n < _sources.size(); ++n) {
+		if (pos > _sources[n]->length() - _length) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool
+Region::verify_start_mutable (jack_nframes_t& new_start)
+{
+	for (uint32_t n=0; n < _sources.size(); ++n) {
+		if (new_start > _sources[n]->length() - _length) {
+			new_start = _sources[n]->length() - _length;
+		}
+	}
+	return true;
+}
+
+Region*
+Region::get_parent()
+{
+	Region* r = 0;
+
+	if (_playlist) {
+		r = _playlist->session().find_whole_file_parent (*this);
+	}
+	
+	return r;
+}
+

@@ -28,6 +28,8 @@
 #include <ardour/audioengine.h>
 #include <ardour/buffer.h>
 #include <ardour/port.h>
+#include <ardour/audio_port.h>
+#include <ardour/midi_port.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
@@ -42,9 +44,6 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-
-jack_nframes_t Port::_short_over_length = 2;
-jack_nframes_t Port::_long_over_length = 10;
 
 AudioEngine::AudioEngine (string client_name) 
 {
@@ -258,6 +257,10 @@ AudioEngine::process_callback (jack_nframes_t nframes)
 		return 0;
 	}
 
+	// Prepare ports (ie read data if necessary)
+	for (Ports::iterator i = ports.begin(); i != ports.end(); ++i)
+		(*i)->cycle_start(nframes);
+	
 	session->process (nframes);
 
 	if (!_running) {
@@ -268,6 +271,10 @@ AudioEngine::process_callback (jack_nframes_t nframes)
 		_processed_frames = next_processed_frames;
 		return 0;
 	}
+	
+	// Finalize ports (ie write data if necessary)
+	for (Ports::iterator i = ports.begin(); i != ports.end(); ++i)
+		(*i)->cycle_end();
 
 	if (last_monitor_check + monitor_check_interval < next_processed_frames) {
 		for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
@@ -405,10 +412,16 @@ AudioEngine::register_input_port (DataType type, const string& portname)
 
 	if (p) {
 
-		Port *newport;
-		if ((newport = new Port (p)) != 0) {
+		Port* newport = 0;
+
+		if (type == DataType::AUDIO)
+			newport = new AudioPort (p);
+		else if (type == DataType::MIDI)
+			newport = new MidiPort (p);
+
+		if (newport)
 			ports.insert (ports.begin(), newport);
-		}
+		
 		return newport;
 
 	} else {
@@ -432,14 +445,22 @@ AudioEngine::register_output_port (DataType type, const string& portname)
 		}
 	}
 
-	jack_port_t *p;
-
+	jack_port_t* p = 0;
+	
 	if ((p = jack_port_register (_jack, portname.c_str(),
-		type.to_jack_type(), JackPortIsOutput, 0)) != 0) {
-		Port *newport = new Port (p);
-		ports.insert (ports.begin(), newport);
-		return newport;
+			type.to_jack_type(), JackPortIsOutput, 0)) != 0) {
+		Port *newport = NULL;
+		
+		if (type == DataType::AUDIO)
+			newport = new AudioPort (p);
+		else if (type == DataType::MIDI)
+			newport = new MidiPort (p);
 
+		if (newport)
+			ports.insert (ports.begin(), newport);
+
+		return newport;
+		
 	} else {
 
 		_process_lock.unlock();
@@ -597,6 +618,9 @@ AudioEngine::frames_per_cycle ()
 	}
 }
 
+/** Get a port by name.
+ * Note this can return NULL, it will NOT create a port if it is not found (any more).
+ */
 Port *
 AudioEngine::get_port_by_name (const string& portname, bool keep)
 {
@@ -611,25 +635,13 @@ AudioEngine::get_port_by_name (const string& portname, bool keep)
 		}
 	}
 	
-	/* check to see if we have a Port for this name already */
-
 	for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
 		if (portname == (*i)->name()) {
 			return (*i);
 		}
 	}
 
-	jack_port_t *p;
-
-	if ((p = jack_port_by_name (_jack, portname.c_str())) != 0) {
-		Port *newport = new Port (p);
-		if (keep && newport->is_mine (_jack)) {
-			ports.insert (newport);
-		}
-		return newport;
-	} else {
-		return 0;
-	}
+	return 0;
 }
 
 const char **
@@ -703,11 +715,13 @@ AudioEngine::n_physical_inputs () const
 }
 
 string
-AudioEngine::get_nth_physical (uint32_t n, int flag)
+AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 {
 	const char ** ports;
 	uint32_t i;
 	string ret;
+
+	assert(type != DataType::NIL);
 
 	if (!_running || !_jack) {
 		if (!_has_run) {
@@ -718,7 +732,7 @@ AudioEngine::get_nth_physical (uint32_t n, int flag)
 		}
 	}
 
-	ports = jack_get_ports (_jack, NULL, NULL, JackPortIsPhysical|flag);
+	ports = jack_get_ports (_jack, NULL, type.to_jack_type(), JackPortIsPhysical|flag);
 	
 	if (ports == 0) {
 		return "";
@@ -951,7 +965,7 @@ AudioEngine::reconnect_to_jack ()
 		
 		short_name = long_name.substr (long_name.find_last_of (':') + 1);
 
-		if (((*i)->_port = jack_port_register (_jack, short_name.c_str(), (*i)->type(), (*i)->flags(), 0)) == 0) {
+		if (((*i)->_port = jack_port_register (_jack, short_name.c_str(), (*i)->type().to_jack_type(), (*i)->flags(), 0)) == 0) {
 			error << string_compose (_("could not reregister %1"), (*i)->name()) << endmsg;
 			break;
 		} else {

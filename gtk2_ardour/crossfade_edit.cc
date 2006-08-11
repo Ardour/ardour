@@ -1035,7 +1035,7 @@ CrossfadeEditor::make_waves (AudioRegion& region, WhichFade which)
 		
 		gdouble yoff = n * ht;
 		
-		if (region.source(n).peaks_ready (bind (mem_fun(*this, &CrossfadeEditor::peaks_ready), &region, which), peaks_ready_connection)) {
+		if (region.audio_source(n).peaks_ready (bind (mem_fun(*this, &CrossfadeEditor::peaks_ready), &region, which), peaks_ready_connection)) {
 			
 			WaveView* waveview = new WaveView (*(canvas->root()));
 

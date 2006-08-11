@@ -221,7 +221,6 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 		Sample *buf    = (Sample *) malloc(sizeof(Sample) * fft_graph.windowSize());
 		Sample *mixbuf = (Sample *) malloc(sizeof(Sample) * fft_graph.windowSize());
 		float  *gain   = (float *)  malloc(sizeof(float) * fft_graph.windowSize());
-		char   *work   = (char *)   malloc(sizeof(char) * fft_graph.windowSize());
 	
 		Selection s = PublicEditor::instance().get_selection();
 		TimeSelection ts = s.time;
@@ -261,7 +260,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 							n = (*j).length() - i;
 						}
 				
-						n = pl->read(buf, mixbuf, gain, work, (*j).start + i, n);
+						n = pl->read(buf, mixbuf, gain, (*j).start + i, n);
 	
 						if ( n < fft_graph.windowSize()) {
 							for (int j = n; j < fft_graph.windowSize(); j++) {
@@ -301,7 +300,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 							n = arv->region().length() - i;
 						}
 
-						n = arv->audio_region().read_at(buf, mixbuf, gain, work, arv->region().position() + i, n);
+						n = arv->audio_region().read_at(buf, mixbuf, gain, arv->region().position() + i, n);
 	
 						if ( n < fft_graph.windowSize()) {
 							for (int j = n; j < fft_graph.windowSize(); j++) {
@@ -331,7 +330,6 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 	
 		free(buf);
 		free(mixbuf);
-		free(work);
 
 		track_list_ready = true;
 	} /* end lock */

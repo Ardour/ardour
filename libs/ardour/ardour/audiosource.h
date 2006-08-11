@@ -50,24 +50,11 @@ class AudioSource : public Source
 	AudioSource (string name);
 	AudioSource (const XMLNode&);
 	virtual ~AudioSource ();
-
-	/* one could argue that this should belong to Source, but other data types
-	   generally do not come with a model of "offset along an audio timeline"
-	   so its here in AudioSource for now.
-	*/
-
-	virtual jack_nframes_t natural_position() const { return 0; }
 	
-	/* returns the number of items in this `audio_source' */
-
-	virtual jack_nframes_t length() const {
-		return _length;
-	}
-
 	virtual jack_nframes_t available_peaks (double zoom) const;
 
-	virtual jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
-	virtual jack_nframes_t write (Sample *src, jack_nframes_t cnt, char * workbuf);
+	virtual jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
+	virtual jack_nframes_t write (Sample *src, jack_nframes_t cnt);
 
 	virtual float sample_rate () const = 0;
 
@@ -111,7 +98,6 @@ class AudioSource : public Source
 
 	bool                _peaks_built;
 	mutable Glib::Mutex _lock;
-	jack_nframes_t      _length;
 	bool                 next_peak_clear_should_notify;
 	string               peakpath;
 	string              _captured_for;
@@ -124,13 +110,11 @@ class AudioSource : public Source
 
 	int  do_build_peak (jack_nframes_t, jack_nframes_t);
 
-	virtual jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const = 0;
-	virtual jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt, char * workbuf) = 0;
+	virtual jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const = 0;
+	virtual jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt) = 0;
 	virtual string peak_path(string audio_path) = 0;
 	virtual string old_peak_path(string audio_path) = 0;
 	
-	void update_length (jack_nframes_t pos, jack_nframes_t cnt);
-
 	static pthread_t peak_thread;
 	static bool      have_peak_thread;
 	static void*     peak_thread_work(void*);

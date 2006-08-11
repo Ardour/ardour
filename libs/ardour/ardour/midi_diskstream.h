@@ -24,6 +24,7 @@
 #include <sigc++/signal.h>
 
 #include <cmath>
+#include <cassert>
 #include <string>
 #include <queue>
 #include <map>
@@ -61,26 +62,19 @@ class MidiDiskstream : public Diskstream
 	MidiDiskstream (Session &, const string& name, Diskstream::Flag f = Recordable);
 	MidiDiskstream (Session &, const XMLNode&);
 
-	void set_io (ARDOUR::IO& io);
-
-	MidiDiskstream& ref() { _refcnt++; return *this; }
-	//void unref() { if (_refcnt) _refcnt--; if (_refcnt == 0) delete this; }
-	//uint32_t refcnt() const { return _refcnt; }
-
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
-
-	//void set_align_style (AlignStyle);
-	//void set_persistent_align_style (AlignStyle);
+	
+	RawMidi* playback_buffer () { return _current_playback_buffer; }
+	RawMidi* capture_buffer ()  { return _current_capture_buffer; }
 
 	void set_record_enabled (bool yn);
-	//void set_speed (double);
+
+	MidiPlaylist* midi_playlist () { return dynamic_cast<MidiPlaylist*>(_playlist); }
 
 	int use_playlist (Playlist *);
 	int use_new_playlist ();
 	int use_copy_playlist ();
-
-	Playlist *playlist () { return _playlist; }
 
 	/* stateful */
 
@@ -88,8 +82,6 @@ class MidiDiskstream : public Diskstream
 	int set_state(const XMLNode& node);
 
 	void monitor_input (bool);
-
-	//void handle_input_change (IOChange, void *src);
 
   protected:
 	friend class Session;
@@ -108,12 +100,8 @@ class MidiDiskstream : public Diskstream
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
 
-	uint32_t read_data_count() const { return _read_data_count; }
-	uint32_t write_data_count() const { return _write_data_count; }
-
   protected:
-	friend class Auditioner;
-	int  seek (jack_nframes_t which_sample, bool complete_refill = false);
+	int seek (jack_nframes_t which_sample, bool complete_refill = false);
 
   protected:
 	friend class MidiTrack;
@@ -126,29 +114,16 @@ class MidiDiskstream : public Diskstream
 	/* use unref() to destroy a diskstream */
 	~MidiDiskstream();
 
-	MidiPlaylist* _playlist;
-
-	/*Tthe two central butler operations */
-	int do_flush (Session::RunContext context, bool force = false) { return 0; }
-	int do_refill () { return 0; }
+	/* The two central butler operations */
+	int do_flush (Session::RunContext context, bool force = false);
+	int do_refill ();
 	
-	int do_refill_with_alloc() { return 0; }
+	int do_refill_with_alloc();
 
-	int read (RawMidi* buf, RawMidi* mixdown_buffer, char * workbuf, jack_nframes_t& start, jack_nframes_t cnt, bool reversed);
-
-	/* XXX fix this redundancy ... */
-
-	//void playlist_changed (Change);
-	//void playlist_modified ();
-	void playlist_deleted (Playlist*);
+	int read (RawMidi* buf, jack_nframes_t& start, jack_nframes_t cnt, bool reversed);
 
 	void finish_capture (bool rec_monitors_input);
 	void transport_stopped (struct tm&, time_t, bool abort);
-
-	struct CaptureInfo {
-	    uint32_t start;
-	    uint32_t frames;
-	};
 
 	void init (Diskstream::Flag);
 
@@ -158,9 +133,6 @@ class MidiDiskstream : public Diskstream
 
 	void allocate_temporary_buffers ();
 
-	//bool realtime_set_speed (double, bool global_change);
-	void non_realtime_set_speed ();
-
 	int use_pending_capture_data (XMLNode& node);
 
 	void get_input_sources ();
@@ -169,8 +141,21 @@ class MidiDiskstream : public Diskstream
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
 	
-	std::list<Region*>      _last_capture_regions;
-	std::vector<SMFSource*> _capturing_sources;
+	void engage_record_enable ();
+	void disengage_record_enable ();
+	
+	// FIXME: This is basically a single ChannelInfo.. abstractify that concept?
+	RingBufferNPT<RawMidi>*           _playback_buf;
+	RingBufferNPT<RawMidi>*           _capture_buf;
+	RawMidi*                          _current_playback_buffer;
+	RawMidi*                          _current_capture_buffer;
+	RawMidi*                          _playback_wrap_buffer;
+	RawMidi*                          _capture_wrap_buffer;
+	MidiPort*                         _source_port;
+	SMFSource*                        _write_source; ///< aka capturing source
+	RingBufferNPT<CaptureTransition>* _capture_transition_buf;
+	RingBufferNPT<RawMidi>::rw_vector _playback_vector;
+	RingBufferNPT<RawMidi>::rw_vector _capture_vector;
 };
 
 }; /* namespace ARDOUR */

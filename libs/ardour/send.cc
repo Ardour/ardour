@@ -25,6 +25,7 @@
 #include <ardour/send.h>
 #include <ardour/session.h>
 #include <ardour/port.h>
+#include <ardour/audio_port.h>
 
 #include "i18n.h"
 
@@ -133,7 +134,7 @@ Send::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_
 			} else {
 
 				for (n = 0; n < no; ++n) {
-					_peak_power[n] = Session::compute_peak (output(n)->get_buffer(nframes) + offset, nframes, _peak_power[n]);
+					_peak_power[n] = Session::compute_peak (audio_output(n)->get_audio_buffer().data(nframes, offset), nframes, _peak_power[n]);
 				}
 			}
 		}

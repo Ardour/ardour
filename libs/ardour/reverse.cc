@@ -49,7 +49,6 @@ Reverse::run (AudioRegion& region)
 	AudioRegion::SourceList::iterator si;
 	const jack_nframes_t blocksize = 256 * 1048;
 	Sample buf[blocksize];
-	char * workbuf = 0;;
 	jack_nframes_t fpos;
 	jack_nframes_t fend;
 	jack_nframes_t fstart;
@@ -62,8 +61,6 @@ Reverse::run (AudioRegion& region)
 		goto out;
 	}
 
-	workbuf = new char[blocksize * 4];
-	
 	fend = region.start() + region.length();
 	fstart = region.start();
 
@@ -82,10 +79,11 @@ Reverse::run (AudioRegion& region)
 		uint32_t n;
 
 		for (n = 0, si = nsrcs.begin(); n < region.n_channels(); ++n, ++si) {
+			AudioSource* const asrc = dynamic_cast<AudioSource*>(*si);
 
 			/* read it in */
 			
-			if (region.source (n).read (buf, fpos, to_read, workbuf) != to_read) {
+			if (region.audio_source (n).read (buf, fpos, to_read) != to_read) {
 				goto out;
 			}
 			
@@ -97,7 +95,7 @@ Reverse::run (AudioRegion& region)
 			
 			/* write it out */
 
-			if ((*si)->write (buf, to_read, workbuf) != to_read) {
+			if (asrc->write (buf, to_read) != to_read) {
 				goto out;
 			}
 		}
@@ -122,9 +120,6 @@ Reverse::run (AudioRegion& region)
 			(*si)->mark_for_remove ();
 			delete *si;
 		}
-	}
-	if (workbuf) {
-		delete [] workbuf;
 	}
 	
 	return ret;

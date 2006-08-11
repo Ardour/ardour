@@ -164,71 +164,43 @@ struct RegionSortByLayer
 	}
 };
 
+/** FIXME: semantics of return value? */
 jack_nframes_t
-MidiPlaylist::read (unsigned char *buf, unsigned char *mixdown_buffer, char * workbuf, jack_nframes_t start,
+MidiPlaylist::read (RawMidi *buf, RawMidi *mixdown_buffer, jack_nframes_t start,
                      jack_nframes_t cnt, unsigned chan_n)
 {
-	jack_nframes_t ret = cnt;
-	jack_nframes_t end;
-	jack_nframes_t read_frames;
-	jack_nframes_t skip_frames;
-
-	/* optimizing this memset() away involves a lot of conditionals
-	   that may well cause more of a hit due to cache misses 
-	   and related stuff than just doing this here.
-	   
-	   it would be great if someone could measure this
-	   at some point.
-
-	   one way or another, parts of the requested area
-	   that are not written to by Region::region_at()
-	   for all Regions that cover the area need to be
-	   zeroed.
-	*/
-
-	memset (buf, 0, sizeof (unsigned char) * cnt);
-
 	/* this function is never called from a realtime thread, so
 	   its OK to block (for short intervals).
 	*/
 
 	Glib::Mutex::Lock rm (region_lock);
 
-	end =  start + cnt - 1;
+	jack_nframes_t ret         = 0;
+	jack_nframes_t end         =  start + cnt - 1;
+	jack_nframes_t read_frames = 0;
+	jack_nframes_t skip_frames = 0;
 
-	read_frames = 0;
-	skip_frames = 0;
 	_read_data_count = 0;
 
-	map<uint32_t,vector<Region*> > relevant_regions;
-	vector<uint32_t> relevant_layers;
+	vector<MidiRegion*> regs; // relevent regions overlapping start <--> end
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->coverage (start, end) != OverlapNone) {
-
-			relevant_regions[(*i)->layer()].push_back (*i);
-			relevant_layers.push_back ((*i)->layer());
+		MidiRegion* const mr = dynamic_cast<MidiRegion*>(*i);
+		if (mr && mr->coverage (start, end) != OverlapNone) {
+			regs.push_back(mr);
 		}
 	}
 
-	//	RegionSortByLayer layer_cmp;
-	//	relevant_regions.sort (layer_cmp);
+	RegionSortByLayer layer_cmp;
+	sort(regs.begin(), regs.end(), layer_cmp);
 
-
-	for (vector<uint32_t>::iterator l = relevant_layers.begin(); l != relevant_layers.end(); ++l) {
-
-		// FIXME: Should be vector<MidiRegion*>
-		vector<Region*>& r (relevant_regions[*l]);
-
-		for (vector<Region*>::iterator i = r.begin(); i != r.end(); ++i) {
-			MidiRegion* const mr = dynamic_cast<MidiRegion*>(*i);
-			assert(mr);
-			mr->read_at (buf, mixdown_buffer, workbuf, start, cnt, chan_n, read_frames, skip_frames);
-			_read_data_count += mr->read_data_count();
-		}
-
+	for (vector<MidiRegion*>::iterator i = regs.begin(); i != regs.end(); ++i) {
+			(*i)->read_at (buf, mixdown_buffer, start, cnt, chan_n, read_frames, skip_frames);
+			ret += (*i)->read_data_count();
 	}
 
+	_read_data_count += ret;
+	
 	return ret;
 }
 

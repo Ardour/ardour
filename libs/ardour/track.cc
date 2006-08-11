@@ -88,7 +88,7 @@ Track::get_template ()
 void
 Track::toggle_monitor_input ()
 {
-	for (vector<Port*>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 		(*i)->request_monitor_input(!(*i)->monitoring_input());
 	}
 }
@@ -152,8 +152,8 @@ bool
 Track::can_record()
 {
 	bool will_record = true;
-	for (size_t i = 0; i < _inputs.size() && will_record; i++) {
-		if (!_inputs[i]->connected())
+	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end() && will_record; ++i) {
+		if (!(*i)->connected())
 			will_record = false;
 	}
 

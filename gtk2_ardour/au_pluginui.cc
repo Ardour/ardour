@@ -26,9 +26,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<AUPlugin> ap)
-	: PlugUIBase (pi),
-	  au (ap)
+AUPluginUI::AUPluginUI (ARDOUR::AudioEngine& engine, boost::shared_ptr<PluginInsert> ap)
 {
 	info << "AUPluginUI created" << endmsg;
 }
@@ -36,10 +34,4 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<AU
 AUPluginUI::~AUPluginUI ()
 {
 	// nothing to do here - plugin destructor destroys the GUI
-}
-
-int
-AUPluginUI::get_preferred_height ()
-{
-	return -1;
 }

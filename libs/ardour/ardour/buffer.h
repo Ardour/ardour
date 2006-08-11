@@ -19,17 +19,13 @@
 #ifndef __ardour_buffer_h__
 #define __ardour_buffer_h__
 
-#define _XOPEN_SOURCE 600
-#include <cstdlib> // for posix_memalign
+#include <cstdlib>
 #include <cassert>
+#include <iostream>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
 
 namespace ARDOUR {
-
-
-/* Yes, this is a bit of a mess right now.  I'll clean it up when everything
- * using it works out.. */
 
 
 /** A buffer of recordable/playable data.
@@ -44,11 +40,10 @@ namespace ARDOUR {
 class Buffer
 {
 public:
-	Buffer(DataType type, size_t capacity)
-	: _type(type), _capacity(capacity), _size(0) 
-	{}
-
 	virtual ~Buffer() {}
+
+	/** Factory function */
+	static Buffer* create(DataType type, size_t capacity);
 
 	/** Maximum capacity of buffer.
 	 * Note in some cases the entire buffer may not contain valid data, use size. */
@@ -61,10 +56,24 @@ public:
 	 * Based on this you can static cast a Buffer* to the desired type. */
 	DataType type() const { return _type; }
 
+	/** Clear (eg zero, or empty) buffer starting at TIME @a offset */
+	virtual void clear(jack_nframes_t offset = 0) = 0;
+	
+	virtual void write(const Buffer& src, jack_nframes_t offset, jack_nframes_t len) = 0;
+
 protected:
+	Buffer(DataType type, size_t capacity)
+	: _type(type), _capacity(capacity), _size(0) 
+	{}
+
 	DataType _type;
 	size_t   _capacity;
 	size_t   _size;
+
+private:
+	// Prevent copies (undefined)
+	Buffer(const Buffer& copy);
+	void operator=(const Buffer& other);
 };
 
 
@@ -75,28 +84,51 @@ protected:
 class AudioBuffer : public Buffer
 {
 public:
-	AudioBuffer(size_t capacity)
-		: Buffer(DataType::AUDIO, capacity)
-		, _data(NULL)
+	AudioBuffer(size_t capacity);
+	
+	~AudioBuffer();
+
+	void clear(jack_nframes_t offset=0) { memset(_data + offset, 0, sizeof (Sample) * _capacity); }
+
+	/** Copy @a len frames starting at @a offset, from the start of @a src */
+	void write(const Buffer& src, jack_nframes_t offset, jack_nframes_t len)
 	{
-		_size = capacity; // For audio buffers, size = capacity (always)
-#ifdef NO_POSIX_MEMALIGN
-		_data =  (Sample *) malloc(sizeof(Sample) * capacity);
-#else
-		posix_memalign((void**)_data, 16, sizeof(Sample) * capacity);
-#endif	
-		assert(_data);
-		memset(_data, 0, sizeof(Sample) * capacity);
+		assert(src.type() == _type == DataType::AUDIO);
+		assert(offset + len <= _capacity);
+		memcpy(_data + offset, ((AudioBuffer&)src).data(len, offset), sizeof(Sample) * len);
+	}
+	
+	/** Copy @a len frames starting at @a offset, from the start of @a src */
+	void write(const Sample* src, jack_nframes_t offset, jack_nframes_t len)
+	{
+		assert(offset + len <= _capacity);
+		memcpy(_data + offset, src, sizeof(Sample) * len);
 	}
 
-	const Sample* data() const { return _data; }
-	Sample*       data()       { return _data; }
+	/** Set the data contained by this buffer manually (for setting directly to jack buffer).
+	 * 
+	 * Constructor MUST have been passed capacity=0 or this will die (to prevent mem leaks).
+	 */
+	void set_data(Sample* data, size_t size)
+	{
+		assert(!_owns_data); // prevent leaks
+		_capacity = size;
+		_size = size;
+		_data = data;
+	}
+
+	const Sample* data(jack_nframes_t nframes, jack_nframes_t offset=0) const
+		{ assert(offset + nframes <= _capacity); return _data + offset; }
+
+	Sample* data(jack_nframes_t nframes, jack_nframes_t offset=0)
+		{ assert(offset + nframes <= _capacity); return _data + offset; }
 
 private:
 	// These are undefined (prevent copies)
 	AudioBuffer(const AudioBuffer& copy);            
 	AudioBuffer& operator=(const AudioBuffer& copy);
 
+	bool    _owns_data;
 	Sample* _data; ///< Actual buffer contents
 };
 
@@ -106,19 +138,16 @@ private:
 class MidiBuffer : public Buffer
 {
 public:
-	MidiBuffer(size_t capacity)
-		: Buffer(DataType::MIDI, capacity)
-		, _data(NULL)
-	{
-		_size = capacity; // For audio buffers, size = capacity (always)
-#ifdef NO_POSIX_MEMALIGN
-		_data =  (RawMidi *) malloc(sizeof(RawMidi) * capacity);
-#else
-		posix_memalign((void**)_data, 16, sizeof(RawMidi) * capacity);
-#endif	
-		assert(_data);
-		memset(_data, 0, sizeof(RawMidi) * capacity);
-	}
+	MidiBuffer(size_t capacity);
+	
+	~MidiBuffer();
+
+	// FIXME: clear events starting at offset
+	void clear(jack_nframes_t offset=0) { assert(offset == 0); _size = 0; }
+	
+	void write(const Buffer& src, jack_nframes_t offset, jack_nframes_t nframes);
+
+	void set_size(size_t size) { _size = size; }
 
 	const RawMidi* data() const { return _data; }
 	RawMidi*       data()       { return _data; }
@@ -128,9 +157,9 @@ private:
 	MidiBuffer(const MidiBuffer& copy);            
 	MidiBuffer& operator=(const MidiBuffer& copy);
 
+	bool     _owns_data;
 	RawMidi* _data; ///< Actual buffer contents
 };
-
 
 } // namespace ARDOUR
 

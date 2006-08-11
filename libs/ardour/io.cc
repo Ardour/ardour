@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@
 #include <ardour/audioengine.h>
 #include <ardour/io.h>
 #include <ardour/port.h>
+#include <ardour/audio_port.h>
+#include <ardour/midi_port.h>
 #include <ardour/connection.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
@@ -65,12 +67,12 @@ const string IO::state_node_name = "IO";
 bool         IO::connecting_legal = false;
 bool         IO::ports_legal = false;
 bool         IO::panners_legal = false;
-sigc::signal<void>                IO::Meter;
-sigc::signal<int>                 IO::ConnectingLegal;
-sigc::signal<int>                 IO::PortsLegal;
-sigc::signal<int>                 IO::PannersLegal;
+sigc::signal<void>           IO::Meter;
+sigc::signal<int>            IO::ConnectingLegal;
+sigc::signal<int>            IO::PortsLegal;
+sigc::signal<int>            IO::PannersLegal;
 sigc::signal<void,uint32_t>  IO::MoreOutputs;
-sigc::signal<int>                 IO::PortsCreated;
+sigc::signal<int>            IO::PortsCreated;
 
 Glib::StaticMutex       IO::m_meter_signal_lock = GLIBMM_STATIC_MUTEX_INIT;
 
@@ -91,10 +93,12 @@ static double direct_gain_to_control (gain_t gain) {
 	return pow((6.0*log(gain)/log(2.0)+192.0)/198.0, 8.0);
 }
 
+/*
 static bool sort_ports_by_name (Port* a, Port* b)
 {
 	return a->name() < b->name();
 }
+*/
 
 
 /** @param default_type The type of port that will be created by ensure_io
@@ -119,8 +123,6 @@ IO::IO (Session& s, string name,
 	_input_connection = 0;
 	_output_connection = 0;
 	pending_state_node = 0;
-	_ninputs = 0;
-	_noutputs = 0;
 	no_panner_reset = false;
 	deferred_state = 0;
 
@@ -144,13 +146,12 @@ IO::~IO ()
 
     Glib::Mutex::Lock guard (m_meter_signal_lock);
 	Glib::Mutex::Lock lm (io_lock);
-	vector<Port *>::iterator i;
 
-	for (i = _inputs.begin(); i != _inputs.end(); ++i) {
+	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 		_session.engine().unregister_port (*i);
 	}
 
-	for (i = _outputs.begin(); i != _outputs.end(); ++i) {
+	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 		_session.engine().unregister_port (*i);
 	}
 
@@ -162,7 +163,7 @@ IO::silence (jack_nframes_t nframes, jack_nframes_t offset)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
-	for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 		(*i)->silence (nframes, offset);
 	}
 }
@@ -227,13 +228,13 @@ IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t start, 
 
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
-	if (_noutputs == 0) {
+	if (n_outputs() == 0) {
 		return;
 	}
 
-	if (_noutputs == 1) {
+	if (n_outputs() == 1) {
 
-		dst = output(0)->get_buffer (nframes) + offset;
+		dst = audio_output(0)->get_audio_buffer().data (nframes, offset);
 
 		for (uint32_t n = 0; n < nbufs; ++n) {
 			if (bufs[n] != dst) {
@@ -246,18 +247,15 @@ IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t start, 
 		return;
 	}
 
-	uint32_t o;
-	vector<Port *>::iterator out;
+	uint32_t o = 0;
 	vector<Sample *>::iterator in;
 	Panner::iterator pan;
-	Sample* obufs[_noutputs];
+	Sample* obufs[n_outputs()];
 
 	/* the terrible silence ... */
-
-	for (out = _outputs.begin(), o = 0; out != _outputs.end(); ++out, ++o) {
-		obufs[o] = (*out)->get_buffer (nframes) + offset;
-		memset (obufs[o], 0, sizeof (Sample) * nframes);
-		(*out)->mark_silence (false);
+	for (PortSet::audio_iterator out = _outputs.audio_begin(); out != _outputs.audio_end(); ++out, ++o) {
+		(*out)->silence(nframes, offset);
+		obufs[o] = (*out)->get_audio_buffer().data(nframes, offset);
 	}
 
 	uint32_t n;
@@ -275,7 +273,7 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nfr
 
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
-	if (_noutputs == 0) {
+	if (n_outputs() == 0) {
 		return;
 	}
 
@@ -288,9 +286,9 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nfr
 		return;
 	}
 
-	if (_noutputs == 1) {
+	if (n_outputs() == 1) {
 
-		dst = output(0)->get_buffer (nframes) + offset;
+		dst = audio_output(0)->get_audio_buffer().data(nframes, offset);
 
 		if (gain_coeff == 0.0f) {
 
@@ -314,7 +312,7 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nfr
 				}
 			}
 
-			output(0)->mark_silence (false);
+			audio_output(0)->mark_silence (false);
 
 		} else {
 
@@ -336,24 +334,23 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nfr
 				}	
 			}
 			
-			output(0)->mark_silence (false);
+			audio_output(0)->mark_silence (false);
 		}
 
 		return;
 	}
 
-	uint32_t o;
-	vector<Port *>::iterator out;
+	uint32_t o = 0;
 	vector<Sample *>::iterator in;
 	Panner::iterator pan;
-	Sample* obufs[_noutputs];
+	Sample* obufs[n_outputs()];
 
 	/* the terrible silence ... */
 
 	/* XXX this is wasteful but i see no way to avoid it */
 	
-	for (out = _outputs.begin(), o = 0; out != _outputs.end(); ++out, ++o) {
-		obufs[o] = (*out)->get_buffer (nframes) + offset;
+	for (PortSet::audio_iterator out = _outputs.audio_begin(); out != _outputs.audio_end(); ++out, ++o) {
+		obufs[o] = (*out)->get_audio_buffer().data (nframes, offset);
 		memset (obufs[o], 0, sizeof (Sample) * nframes);
 		(*out)->mark_silence (false);
 	}
@@ -379,7 +376,7 @@ IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nfram
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
-	if (_noutputs == 0) {
+	if (n_outputs() == 0) {
 		return;
 	}
 	
@@ -422,7 +419,7 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
-	if (_noutputs == 0) {
+	if (n_outputs() == 0) {
 		return;
 	}
 
@@ -452,14 +449,14 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_
 	Sample* src;
 	Sample* dst;
 	uint32_t i;
-	vector<Port*>::iterator o;
 	vector<Sample*> outs;
 	gain_t actual_gain;
 
 	if (dg != _gain) {
 		/* unlikely condition */
-		for (o = _outputs.begin(), i = 0; o != _outputs.end(); ++o, ++i) {
-			outs.push_back ((*o)->get_buffer (nframes) + offset);
+		i = 0;
+		for (PortSet::audio_iterator o = _outputs.audio_begin(); o != _outputs.audio_end(); ++o, ++i) {
+			outs.push_back ((*o)->get_audio_buffer().data (nframes, offset));
 		}
 	}
 
@@ -473,9 +470,10 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_
 		actual_gain = _gain;
 	}
 	
-	for (o = _outputs.begin(), i = 0; o != _outputs.end(); ++o, ++i) {
+	i = 0;
+	for (PortSet::audio_iterator o = _outputs.audio_begin(); o != _outputs.audio_end(); ++o, ++i) {
 
-		dst = (*o)->get_buffer (nframes) + offset;
+		dst = (*o)->get_audio_buffer().data(nframes, offset);
 		src = bufs[min(nbufs,i)];
 
 		if (dg != _gain || actual_gain == 1.0f) {
@@ -506,14 +504,13 @@ IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
-	vector<Port *>::iterator i;
-	uint32_t n;
+	uint32_t n = 0;
 	Sample *last = 0;
 	
 	/* we require that bufs.size() >= 1 */
 
-	for (n = 0, i = _inputs.begin(); n < nbufs; ++i, ++n) {
-		if (i == _inputs.end()) {
+	for (PortSet::audio_iterator i = _inputs.audio_begin(); n < nbufs; ++i, ++n) {
+		if (i == _inputs.audio_end()) {
 			break;
 		}
 		
@@ -527,7 +524,7 @@ IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 		   buffer.
 		*/
 
-		last = (*i)->get_buffer (nframes+offset) + offset;
+		last = (*i)->get_audio_buffer().data(nframes, offset);
 		// the dest buffer's offset has already been applied
 		memcpy (bufs[n], last, sizeof (Sample) * nframes);
 	}
@@ -588,7 +585,7 @@ IO::disconnect_input (Port* our_port, string other_port, void* src)
 			
 			/* check that our_port is really one of ours */
 			
-			if (find (_inputs.begin(), _inputs.end(), our_port) == _inputs.end()) {
+			if ( ! _inputs.contains(our_port)) {
 				return -1;
 			}
 			
@@ -624,7 +621,7 @@ IO::connect_input (Port* our_port, string other_port, void* src)
 			
 			/* check that our_port is really one of ours */
 			
-			if (find (_inputs.begin(), _inputs.end(), our_port) == _inputs.end()) {
+			if ( ! _inputs.contains(our_port) ) {
 				return -1;
 			}
 			
@@ -656,7 +653,9 @@ IO::disconnect_output (Port* our_port, string other_port, void* src)
 		{
 			Glib::Mutex::Lock lm (io_lock);
 			
-			if (find (_outputs.begin(), _outputs.end(), our_port) == _outputs.end()) {
+			/* check that our_port is really one of ours */
+			
+			if ( ! _outputs.contains(our_port) ) {
 				return -1;
 			}
 			
@@ -691,7 +690,7 @@ IO::connect_output (Port* our_port, string other_port, void* src)
 			
 			/* check that our_port is really one of ours */
 			
-			if (find (_outputs.begin(), _outputs.end(), our_port) == _outputs.end()) {
+			if ( ! _outputs.contains(our_port) ) {
 				return -1;
 			}
 			
@@ -734,12 +733,14 @@ IO::set_input (Port* other_port, void* src)
 		return -1;
 	}
 
-	return connect_input (_inputs.front(), other_port->name(), src);
+	return connect_input (_inputs.port(0), other_port->name(), src);
 }
 
 int
 IO::remove_output_port (Port* port, void* src)
 {
+	throw; // FIXME
+#if 0
 	IOChange change (NoChange);
 
 	{
@@ -753,7 +754,7 @@ IO::remove_output_port (Port* port, void* src)
 				return -1;
 			}
 			
-			for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+			for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 				if (*i == port) {
 					change = IOChange (change|ConfigurationChanged);
 					if (port->connected()) {
@@ -781,7 +782,7 @@ IO::remove_output_port (Port* port, void* src)
 		_session.set_dirty ();
 		return 0;
 	}
-
+#endif
 	return -1;
 }
 
@@ -806,7 +807,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 		{ 
 			Glib::Mutex::Lock lm (io_lock);
 			
-			if (_output_maximum >= 0 && (int) _noutputs == _output_maximum) {
+			if (_output_maximum >= 0 && (int) n_outputs() == _output_maximum) {
 				return -1;
 			}
 		
@@ -824,15 +825,13 @@ IO::add_output_port (string destination, void* src, DataType type)
 				return -1;
 			}
 			
-			_outputs.push_back (our_port);
-			sort (_outputs.begin(), _outputs.end(), sort_ports_by_name);
-			++_noutputs;
+			_outputs.add_port (our_port);
 			drop_output_connection ();
 			setup_peak_meters ();
 			reset_panner ();
 		}
 
-		MoreOutputs (_noutputs); /* EMIT SIGNAL */
+		MoreOutputs (n_outputs()); /* EMIT SIGNAL */
 	}
 
 	if (destination.length()) {
@@ -844,12 +843,15 @@ IO::add_output_port (string destination, void* src, DataType type)
 	// pan_changed (src); /* EMIT SIGNAL */
 	output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 	_session.set_dirty ();
+	
 	return 0;
 }
 
 int
 IO::remove_input_port (Port* port, void* src)
 {
+	throw; // FIXME
+#if 0
 	IOChange change (NoChange);
 
 	{
@@ -862,7 +864,7 @@ IO::remove_input_port (Port* port, void* src)
 				/* sorry, you can't do this */
 				return -1;
 			}
-			for (vector<Port *>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+			for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 
 				if (*i == port) {
 					change = IOChange (change|ConfigurationChanged);
@@ -892,7 +894,7 @@ IO::remove_input_port (Port* port, void* src)
 		_session.set_dirty ();
 		return 0;
 	} 
-
+#endif
 	return -1;
 }
 
@@ -918,7 +920,7 @@ IO::add_input_port (string source, void* src, DataType type)
 		{ 
 			Glib::Mutex::Lock lm (io_lock);
 			
-			if (_input_maximum >= 0 && (int) _ninputs == _input_maximum) {
+			if (_input_maximum >= 0 && (int) n_inputs() == _input_maximum) {
 				return -1;
 			}
 
@@ -936,15 +938,13 @@ IO::add_input_port (string source, void* src, DataType type)
 				return -1;
 			}
 			
-			_inputs.push_back (our_port);
-			sort (_inputs.begin(), _inputs.end(), sort_ports_by_name);
-			++_ninputs;
+			_inputs.add_port(our_port);
 			drop_input_connection ();
 			setup_peak_meters ();
 			reset_panner ();
 		}
 
-		MoreOutputs (_ninputs); /* EMIT SIGNAL */
+		MoreOutputs (n_inputs()); /* EMIT SIGNAL */
 	}
 
 	if (source.length()) {
@@ -957,7 +957,7 @@ IO::add_input_port (string source, void* src, DataType type)
 	// pan_changed (src); /* EMIT SIGNAL */
 	input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 	_session.set_dirty ();
-
+	
 	return 0;
 }
 
@@ -970,14 +970,16 @@ IO::disconnect_inputs (void* src)
 		{
 			Glib::Mutex::Lock lm (io_lock);
 			
-			for (vector<Port *>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+			for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 				_session.engine().disconnect (*i);
 			}
 
 			drop_input_connection ();
 		}
 	}
-	 input_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
+	
+	input_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
+	
 	return 0;
 }
 
@@ -990,7 +992,7 @@ IO::disconnect_outputs (void* src)
 		{
 			Glib::Mutex::Lock lm (io_lock);
 			
-			for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+			for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 				_session.engine().disconnect (*i);
 			}
 
@@ -1000,6 +1002,7 @@ IO::disconnect_outputs (void* src)
 
 	output_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
 	_session.set_dirty ();
+	
 	return 0;
 }
 
@@ -1008,21 +1011,22 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 {
 	Port* input_port;
 	bool changed = false;
-	bool reduced = false;
 	
 	/* remove unused ports */
 
-	while (_ninputs > n) {
+	while (n_inputs() > n) {
+		throw; // FIXME
+		/*
 		_session.engine().unregister_port (_inputs.back());
 		_inputs.pop_back();
 		_ninputs--;
-		reduced = true;
 		changed = true;
+		*/
 	}
 		
 	/* create any necessary new ports */
 		
-	while (_ninputs < n) {
+	while (n_inputs() < n) {
 		
 		char buf[64];
 		
@@ -1050,9 +1054,7 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 			throw err;
 		}
 		
-		_inputs.push_back (input_port);
-		sort (_inputs.begin(), _inputs.end(), sort_ports_by_name);
-		++_ninputs;
+		_inputs.add_port (input_port);
 		changed = true;
 	}
 	
@@ -1060,14 +1062,14 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 		drop_input_connection ();
 		setup_peak_meters ();
 		reset_panner ();
-		MoreOutputs (_ninputs); /* EMIT SIGNAL */
+		MoreOutputs (n_inputs()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 	
 	if (clear) {
 		/* disconnect all existing ports so that we get a fresh start */
 			
-		for (vector<Port *>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+		for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 			_session.engine().disconnect (*i);
 		}
 	}
@@ -1080,8 +1082,6 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 {
 	bool in_changed = false;
 	bool out_changed = false;
-	bool in_reduced = false;
-	bool out_reduced = false;
 	bool need_pan_reset;
 
 	if (_input_maximum >= 0) {
@@ -1092,7 +1092,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 		nout = min (_output_maximum, (int) nout);
 	}
 
-	if (nin == _ninputs && nout == _noutputs && !clear) {
+	if (nin == n_inputs() && nout == n_outputs() && !clear) {
 		return 0;
 	}
 
@@ -1102,7 +1102,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 
 		Port* port;
 		
-		if (_noutputs == nout) {
+		if (n_outputs() == nout) {
 			need_pan_reset = false;
 		} else {
 			need_pan_reset = true;
@@ -1110,25 +1110,27 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 		
 		/* remove unused ports */
 		
-		while (_ninputs > nin) {
+		while (n_inputs() > nin) {
+			throw; // FIXME
+			/*
 			_session.engine().unregister_port (_inputs.back());
 			_inputs.pop_back();
 			_ninputs--;
-			in_reduced = true;
-			in_changed = true;
+			in_changed = true;*/
 		}
 		
-		while (_noutputs > nout) {
+		while (n_outputs() > nout) {
+			throw; // FIXME
+			/*
 			_session.engine().unregister_port (_outputs.back());
 			_outputs.pop_back();
 			_noutputs--;
-			out_reduced = true;
-			out_changed = true;
+			out_changed = true;*/
 		}
 		
 		/* create any necessary new ports (of the default type) */
 		
-		while (_ninputs < nin) {
+		while (n_inputs() < nin) {
 			
 			char buf[64];
 
@@ -1155,14 +1157,13 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 				throw err;
 			}
 		
-			_inputs.push_back (port);
-			++_ninputs;
+			_inputs.add_port (port);
 			in_changed = true;
 		}
 
 		/* create any necessary new ports */
 		
-		while (_noutputs < nout) {
+		while (n_outputs() < nout) {
 			
 			char buf[64];
 			
@@ -1188,8 +1189,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 				throw err;
 			}
 		
-			_outputs.push_back (port);
-			++_noutputs;
+			_outputs.add_port (port);
 			out_changed = true;
 		}
 		
@@ -1197,11 +1197,11 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 			
 			/* disconnect all existing ports so that we get a fresh start */
 			
-			for (vector<Port *>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+			for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 				_session.engine().disconnect (*i);
 			}
 			
-			for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+			for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 				_session.engine().disconnect (*i);
 			}
 		}
@@ -1213,19 +1213,17 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 	}
 
 	if (out_changed) {
-		sort (_outputs.begin(), _outputs.end(), sort_ports_by_name);
 		drop_output_connection ();
 		output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 	}
 	
 	if (in_changed) {
-		sort (_inputs.begin(), _inputs.end(), sort_ports_by_name);
 		drop_input_connection ();
 		input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 	}
 
 	if (in_changed || out_changed) {
-		MoreOutputs (max (_noutputs, _ninputs)); /* EMIT SIGNAL */
+		MoreOutputs (max (n_outputs(), n_inputs())); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 
@@ -1240,7 +1238,7 @@ IO::ensure_inputs (uint32_t n, bool clear, bool lockit, void* src)
 	if (_input_maximum >= 0) {
 		n = min (_input_maximum, (int) n);
 		
-		if (n == _ninputs && !clear) {
+		if (n == n_inputs() && !clear) {
 			return 0;
 		}
 	}
@@ -1257,7 +1255,6 @@ IO::ensure_inputs (uint32_t n, bool clear, bool lockit, void* src)
 		input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
-
 	return 0;
 }
 
@@ -1266,10 +1263,9 @@ IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
 {
 	Port* output_port;
 	bool changed = false;
-	bool reduced = false;
 	bool need_pan_reset;
 
-	if (_noutputs == n) {
+	if (n_outputs() == n) {
 		need_pan_reset = false;
 	} else {
 		need_pan_reset = true;
@@ -1277,18 +1273,19 @@ IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
 	
 	/* remove unused ports */
 	
-	while (_noutputs > n) {
-		
+	while (n_outputs() > n) {
+		throw; // FIXME
+		/*
 		_session.engine().unregister_port (_outputs.back());
 		_outputs.pop_back();
 		_noutputs--;
-		reduced = true;
 		changed = true;
+		*/
 	}
 	
 	/* create any necessary new ports */
 	
-	while (_noutputs < n) {
+	while (n_outputs() < n) {
 		
 		char buf[64];
 		
@@ -1305,9 +1302,7 @@ IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
 			return -1;
 		}
 		
-		_outputs.push_back (output_port);
-		sort (_outputs.begin(), _outputs.end(), sort_ports_by_name);
-		++_noutputs;
+		_outputs.add_port (output_port);
 		changed = true;
 		setup_peak_meters ();
 
@@ -1318,14 +1313,14 @@ IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
 	
 	if (changed) {
 		drop_output_connection ();
-		MoreOutputs (_noutputs); /* EMIT SIGNAL */
+		MoreOutputs (n_outputs()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 	
 	if (clear) {
 		/* disconnect all existing ports so that we get a fresh start */
 		
-		for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+		for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 			_session.engine().disconnect (*i);
 		}
 	}
@@ -1340,7 +1335,7 @@ IO::ensure_outputs (uint32_t n, bool clear, bool lockit, void* src)
 
 	if (_output_maximum >= 0) {
 		n = min (_output_maximum, (int) n);
-		if (n == _noutputs && !clear) {
+		if (n == n_outputs() && !clear) {
 			return 0;
 		}
 	}
@@ -1358,7 +1353,6 @@ IO::ensure_outputs (uint32_t n, bool clear, bool lockit, void* src)
 	if (changed) {
 		 output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 	}
-
 	return 0;
 }
 
@@ -1377,7 +1371,7 @@ IO::reset_panner ()
 {
 	if (panners_legal) {
 		if (!no_panner_reset) {
-			_panner->reset (_noutputs, pans_required());
+			_panner->reset (n_outputs(), pans_required());
 		}
 	} else {
 		panner_legal_c.disconnect ();
@@ -1388,7 +1382,7 @@ IO::reset_panner ()
 int
 IO::panners_became_legal ()
 {
-	_panner->reset (_noutputs, pans_required());
+	_panner->reset (n_outputs(), pans_required());
 	_panner->load (); // automation
 	panner_legal_c.disconnect ();
 	return 0;
@@ -1442,7 +1436,7 @@ IO::state (bool full_state)
 	}
 
 	if (need_ins) {
-		for (vector<Port *>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+		for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 			
 			const char **connections = (*i)->get_connections();
 			
@@ -1479,7 +1473,7 @@ IO::state (bool full_state)
 	if (need_outs) {
 		str = "";
 		
-		for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+		for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 			
 			const char **connections = (*i)->get_connections();
 			
@@ -1957,13 +1951,13 @@ IO::set_name (string name, void* src)
 		return 0;
 	}
 
-	for (vector<Port *>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 		string current_name = (*i)->short_name();
 		current_name.replace (current_name.find (_name), _name.length(), name);
 		(*i)->set_name (current_name);
 	}
 
-	for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 		string current_name = (*i)->short_name();
 		current_name.replace (current_name.find (_name), _name.length(), name);
 		(*i)->set_name (current_name);
@@ -2004,7 +1998,7 @@ IO::set_port_latency (jack_nframes_t nframes)
 {
 	Glib::Mutex::Lock lm (io_lock);
 
-	for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 		(*i)->set_latency (nframes);
 	}
 }
@@ -2019,7 +2013,7 @@ IO::output_latency () const
 
 	/* io lock not taken - must be protected by other means */
 
-	for (vector<Port *>::const_iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+	for (PortSet::const_iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 		if ((latency = _session.engine().get_port_total_latency (*(*i))) > max_latency) {
 			max_latency = latency;
 		}
@@ -2038,7 +2032,7 @@ IO::input_latency () const
 
 	/* io lock not taken - must be protected by other means */
 
-	for (vector<Port *>::const_iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+	for (PortSet::const_iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 		if ((latency = _session.engine().get_port_total_latency (*(*i))) > max_latency) {
 			max_latency = latency;
 		}
@@ -2073,13 +2067,13 @@ IO::use_input_connection (Connection& c, void* src)
 			
 			for (Connection::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 				
-				if (!_inputs[n]->connected_to ((*i))) {
+				if (!_inputs.port(n)->connected_to ((*i))) {
 					
 					/* clear any existing connections */
 					
-					_session.engine().disconnect (_inputs[n]);
+					_session.engine().disconnect (_inputs.port(n));
 					
-				} else if (_inputs[n]->connected() > 1) {
+				} else if (_inputs.port(n)->connected() > 1) {
 					
 					/* OK, it is connected to the port we want,
 					   but its also connected to other ports.
@@ -2090,7 +2084,7 @@ IO::use_input_connection (Connection& c, void* src)
 					   the one we want.
 					*/
 					
-					_session.engine().disconnect (_inputs[n]);
+					_session.engine().disconnect (_inputs.port(n));
 					
 				}
 			}
@@ -2103,9 +2097,9 @@ IO::use_input_connection (Connection& c, void* src)
 			
 			for (Connection::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 				
-				if (!_inputs[n]->connected_to ((*i))) {
+				if (!_inputs.port(n)->connected_to ((*i))) {
 					
-					if (_session.engine().connect (*i, _inputs[n]->name())) {
+					if (_session.engine().connect (*i, _inputs.port(n)->name())) {
 						return -1;
 					}
 				}
@@ -2152,13 +2146,13 @@ IO::use_output_connection (Connection& c, void* src)
 				
 			for (Connection::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 					
-				if (!_outputs[n]->connected_to ((*i))) {
+				if (!_outputs.port(n)->connected_to ((*i))) {
 
 					/* clear any existing connections */
 
-					_session.engine().disconnect (_outputs[n]);
+					_session.engine().disconnect (_outputs.port(n));
 
-				} else if (_outputs[n]->connected() > 1) {
+				} else if (_outputs.port(n)->connected() > 1) {
 
 					/* OK, it is connected to the port we want,
 					   but its also connected to other ports.
@@ -2169,7 +2163,7 @@ IO::use_output_connection (Connection& c, void* src)
 					   the one we want.
 					*/
 						
-					_session.engine().disconnect (_outputs[n]);
+					_session.engine().disconnect (_outputs.port(n));
 				}
 			}
 		}
@@ -2182,9 +2176,9 @@ IO::use_output_connection (Connection& c, void* src)
 				
 			for (Connection::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 					
-				if (!_outputs[n]->connected_to ((*i))) {
+				if (!_outputs.port(n)->connected_to ((*i))) {
 						
-					if (_session.engine().connect (_outputs[n]->name(), *i)) {
+					if (_session.engine().connect (_outputs.port(n)->name(), *i)) {
 						return -1;
 					}
 				}
@@ -2285,7 +2279,7 @@ IO::GainControllable::get_value (void) const
 void
 IO::reset_peak_meters ()
 {
-	uint32_t limit = max (_ninputs, _noutputs);
+	uint32_t limit = max (n_inputs(), n_outputs());
 
 	for (uint32_t i = 0; i < limit; ++i) {
 		_peak_power[i] = 0;
@@ -2295,7 +2289,7 @@ IO::reset_peak_meters ()
 void
 IO::setup_peak_meters ()
 {
-	uint32_t limit = max (_ninputs, _noutputs);
+	uint32_t limit = max (n_inputs(), n_outputs());
 
 	while (_peak_power.size() < limit) {
 		_peak_power.push_back (0);
@@ -2342,7 +2336,7 @@ void
 IO::meter ()
 {
 	Glib::Mutex::Lock lm (io_lock); // READER: meter thread.
-	uint32_t limit = max (_ninputs, _noutputs);
+	uint32_t limit = max (n_inputs(), n_outputs());
 	
 	for (uint32_t n = 0; n < limit; ++n) {
 
@@ -2648,11 +2642,11 @@ IO::find_input_port_hole ()
 
 	for (n = 1; n < UINT_MAX; ++n) {
 		char buf[jack_port_name_size()];
-		vector<Port*>::iterator i;
+		PortSet::iterator i = _inputs.begin();
 
 		snprintf (buf, jack_port_name_size(), _("%s/in %u"), _name.c_str(), n);
 
-		for (i = _inputs.begin(); i != _inputs.end(); ++i) {
+		for ( ; i != _inputs.end(); ++i) {
 			if ((*i)->short_name() == buf) {
 				break;
 			}
@@ -2678,11 +2672,11 @@ IO::find_output_port_hole ()
 
 	for (n = 1; n < UINT_MAX; ++n) {
 		char buf[jack_port_name_size()];
-		vector<Port*>::iterator i;
+		PortSet::iterator i = _outputs.begin();
 
 		snprintf (buf, jack_port_name_size(), _("%s/out %u"), _name.c_str(), n);
 
-		for (i = _outputs.begin(); i != _outputs.end(); ++i) {
+		for ( ; i != _outputs.end(); ++i) {
 			if ((*i)->short_name() == buf) {
 				break;
 			}
@@ -2695,3 +2689,28 @@ IO::find_output_port_hole ()
 	
 	return n;
 }
+
+AudioPort*
+IO::audio_input(uint32_t n) const
+{
+	return dynamic_cast<AudioPort*>(input(n));
+}
+
+AudioPort*
+IO::audio_output(uint32_t n) const
+{
+	return dynamic_cast<AudioPort*>(output(n));
+}
+
+MidiPort*
+IO::midi_input(uint32_t n) const
+{
+	return dynamic_cast<MidiPort*>(input(n));
+}
+
+MidiPort*
+IO::midi_output(uint32_t n) const
+{
+	return dynamic_cast<MidiPort*>(output(n));
+}
+

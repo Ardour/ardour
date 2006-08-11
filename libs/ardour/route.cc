@@ -37,6 +37,7 @@
 #include <ardour/cycle_timer.h>
 #include <ardour/route_group.h>
 #include <ardour/port.h>
+#include <ardour/audio_port.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/panner.h>
 #include <ardour/dB.h>
@@ -220,6 +221,9 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			       jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
 			       bool meter)
 {
+	// This is definitely very audio-only for now
+	assert(_default_type == DataType::AUDIO);
+	
 	uint32_t n;
 	RedirectList::iterator i;
 	bool post_fader_work = false;
@@ -650,7 +654,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		} else {
 			uint32_t no = n_outputs();
 			for (n = 0; n < no; ++n) {
-				_peak_power[n] = Session::compute_peak (output(n)->get_buffer (nframes) + offset, nframes, _peak_power[n]);
+				_peak_power[n] = Session::compute_peak (audio_output(n)->get_audio_buffer ().data(nframes, offset), nframes, _peak_power[n]);
 			}
 		}
 	}
@@ -663,7 +667,6 @@ Route::n_process_buffers ()
 }
 
 void
-
 Route::passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter_first)
 {
 	vector<Sample*>& bufs = _session.get_passthru_buffers();
@@ -2110,7 +2113,7 @@ Route::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfr
 void
 Route::toggle_monitor_input ()
 {
-	for (vector<Port*>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 		(*i)->request_monitor_input(!(*i)->monitoring_input());
 	}
 }

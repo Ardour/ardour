@@ -45,23 +45,16 @@ class MidiSource : public Source
 	MidiSource (const XMLNode&);
 	virtual ~MidiSource ();
 
-	/* returns the number of items in this `midi_source' */
-
-	// Applicable to MIDI?  With what unit? [DR]
-	virtual jack_nframes_t length() const {
-		return _length;
-	}
-
-	virtual jack_nframes_t read (unsigned char *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
-	virtual jack_nframes_t write (unsigned char *src, jack_nframes_t cnt, char * workbuf);
+	virtual jack_nframes_t read (RawMidi *dst, jack_nframes_t start, jack_nframes_t cnt) const;
+	virtual jack_nframes_t write (RawMidi *src, jack_nframes_t cnt);
 
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_write_completed () {}
 
-	void set_captured_for (string str) { _captured_for = str; }
 	string captured_for() const { return _captured_for; }
+	void   set_captured_for (string str) { _captured_for = str; }
 
-	uint32_t read_data_count() const { return _read_data_count; }
+	uint32_t read_data_count()  const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
 
 	static sigc::signal<void,MidiSource*> MidiSourceCreated;
@@ -73,16 +66,13 @@ class MidiSource : public Source
 	int set_state (const XMLNode&);
 
   protected:
-	jack_nframes_t   _length;
-	string           _captured_for;
-
-	mutable uint32_t _read_data_count;  // modified in read()
-	mutable uint32_t _write_data_count; // modified in write()
-
-	virtual jack_nframes_t read_unlocked (unsigned char *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const = 0;
-	virtual jack_nframes_t write_unlocked (unsigned char *dst, jack_nframes_t cnt, char * workbuf) = 0;
+	virtual jack_nframes_t read_unlocked (RawMidi* dst, jack_nframes_t start, jack_nframes_t cn) const = 0;
+	virtual jack_nframes_t write_unlocked (RawMidi* dst, jack_nframes_t cnt) = 0;
 	
-	void update_length (jack_nframes_t pos, jack_nframes_t cnt);
+	mutable Glib::Mutex _lock;
+	string              _captured_for;
+	mutable uint32_t    _read_data_count;  ///< modified in read()
+	mutable uint32_t    _write_data_count; ///< modified in write()
 
   private:
 	bool file_changed (string path);

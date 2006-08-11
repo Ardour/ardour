@@ -304,7 +304,7 @@ class Route : public IO
 	void passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		       jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter_inputs);
 
-	void process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
+	virtual void process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				     jack_nframes_t start_frame, jack_nframes_t end_frame,
 				     jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
 				     bool meter);

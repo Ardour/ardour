@@ -145,6 +145,7 @@ class AudioRegionView : public RegionView
     void region_moved (void *);
     void region_muted ();
     void region_scale_amplitude_changed ();
+	void region_renamed ();
 
     void create_waves ();
     void create_one_wave (uint32_t, bool);

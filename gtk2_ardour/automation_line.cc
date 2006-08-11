@@ -1270,13 +1270,14 @@ AutomationLine::hide_all_but_selected_control_points ()
 
 XMLNode &AutomationLine::get_state(void)
 {
-    // TODO
-    return alist.get_state();
+    XMLNode *node = new XMLNode("AutomationLine");
+    node->add_child_nocopy(alist.get_state());
+    return *node;
 }
 
 int AutomationLine::set_state(const XMLNode &node)
 {
     // TODO
-    alist.set_state(node);
+    //alist.set_state(node);
     return 0;
 }

@@ -55,8 +55,8 @@ public:
 	MidiPlaylist (const MidiPlaylist&, jack_nframes_t start, jack_nframes_t cnt,
 	              string name, bool hidden = false);
 
-	jack_nframes_t read (unsigned char *dst, unsigned char *mixdown,
-	                     char * workbuf, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
+	jack_nframes_t read (RawMidi *dst, RawMidi *mixdown,
+	                     jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&);
 	UndoAction get_memento() const;

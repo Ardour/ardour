@@ -40,6 +40,7 @@
 #include <ardour/curve.h>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
+#include <ardour/port_set.h>
 
 using std::string;
 using std::vector;
@@ -50,9 +51,11 @@ namespace ARDOUR {
 
 class Session;
 class AudioEngine;
-class Port;
 class Connection;
 class Panner;
+class Port;
+class AudioPort;
+class MidiPort;
 
 /** A collection of input and output ports with connections.
  *
@@ -139,23 +142,28 @@ class IO : public Stateful, public ARDOUR::StateManager
 	void           set_port_latency (jack_nframes_t);
 
 	Port *output (uint32_t n) const {
-		if (n < _noutputs) {
-			return _outputs[n];
+		if (n < _outputs.num_ports()) {
+			return _outputs.port(n);
 		} else {
 			return 0;
 		}
 	}
 
 	Port *input (uint32_t n) const {
-		if (n < _ninputs) {
-			return _inputs[n];
+		if (n < _inputs.num_ports()) {
+			return _inputs.port(n);
 		} else {
 			return 0;
 		}
 	}
 
-	uint32_t n_inputs () const { return _ninputs; }
-	uint32_t n_outputs () const { return _noutputs; }
+	AudioPort* audio_input(uint32_t n) const;
+	AudioPort* audio_output(uint32_t n) const;
+	MidiPort*  midi_input(uint32_t n) const;
+	MidiPort*  midi_output(uint32_t n) const;
+
+	uint32_t n_inputs () const { return _inputs.num_ports(); }
+	uint32_t n_outputs () const { return _outputs.num_ports(); }
 
 	sigc::signal<void,IOChange,void*> input_changed;
 	sigc::signal<void,IOChange,void*> output_changed;
@@ -195,7 +203,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	/* Peak metering */
 
 	float peak_input_power (uint32_t n) { 
-		if (n < std::max (_ninputs, _noutputs)) {
+		if (n < std::max (n_inputs(), n_outputs())) {
 			return _visible_peak_power[n];
 		} else {
 			return minus_infinity();
@@ -269,30 +277,30 @@ public:
 	mutable Glib::Mutex io_lock;
 
   protected:
-	Session&            _session;
-	Panner*             _panner;
-	gain_t              _gain;
-	gain_t              _effective_gain;
-	gain_t              _desired_gain;
-	Glib::Mutex         declick_lock;
-	vector<Port*>       _outputs;
-	vector<Port*>       _inputs;
-	vector<float>       _peak_power;
-	vector<float>       _visible_peak_power;
-	string              _name;
-	Connection*         _input_connection;
-	Connection*         _output_connection;
-	PBD::ID             _id;
-	bool                 no_panner_reset;
-	XMLNode*             deferred_state;
-	DataType        _default_type;
+	Session&      _session;
+	Panner*       _panner;
+	gain_t        _gain;
+	gain_t        _effective_gain;
+	gain_t        _desired_gain;
+	Glib::Mutex   declick_lock;
+	PortSet      _outputs;
+	PortSet      _inputs;
+	vector<float> _peak_power;
+	vector<float> _visible_peak_power;
+	string        _name;
+	Connection*   _input_connection;
+	Connection*   _output_connection;
+	PBD::ID       _id;
+	bool           no_panner_reset;
+	XMLNode*       deferred_state;
+	DataType      _default_type;
 
 	virtual void set_deferred_state() {}
 
 	void reset_peak_meters();
 	void reset_panner ();
 
-	virtual uint32_t pans_required() const { return _ninputs; }
+	virtual uint32_t pans_required() const { return n_inputs(); }
 
 	static void apply_declick (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, 
 				   gain_t initial, gain_t target, bool invert_polarity);
@@ -339,8 +347,6 @@ public:
 
   private:
 
-	uint32_t _ninputs;
-	uint32_t _noutputs;
 
 	/* are these the best variable names ever, or what? */
 

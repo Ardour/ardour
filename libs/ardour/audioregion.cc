@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2001 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,25 +57,20 @@ Change AudioRegion::ScaleAmplitudeChanged = ARDOUR::new_change();
 Change AudioRegion::EnvelopeChanged       = ARDOUR::new_change();
 
 AudioRegionState::AudioRegionState (string why)
-	: RegionState (why),
-	  _fade_in (0.0, 2.0, 1.0, false),
-	  _fade_out (0.0, 2.0, 1.0, false),
-	  _envelope (0.0, 2.0, 1.0, false)
+	: RegionState (why)
+	, _fade_in (0.0, 2.0, 1.0, false)
+	, _fade_out (0.0, 2.0, 1.0, false)
+	, _envelope (0.0, 2.0, 1.0, false)
 {
 }
 
+/** Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t length, bool announce)
-	: Region (start, length, PBD::basename_nosuffix(src.name()), 0,  Region::Flag(Region::DefaultFlags|Region::External)),
-	  _fade_in (0.0, 2.0, 1.0, false),
-	  _fade_out (0.0, 2.0, 1.0, false),
-	  _envelope (0.0, 2.0, 1.0, false)
+	: Region (src, start, length, PBD::basename_nosuffix(src.name()), 0,  Region::Flag(Region::DefaultFlags|Region::External))
+	, _fade_in (0.0, 2.0, 1.0, false)
+	, _fade_out (0.0, 2.0, 1.0, false)
+	, _envelope (0.0, 2.0, 1.0, false)
 {
-	/* basic AudioRegion constructor */
-
-	sources.push_back (&src);
-	master_sources.push_back (&src);
-	src.GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
-
 	_scale_amplitude = 1.0;
 
 	set_default_fades ();
@@ -90,18 +85,13 @@ AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t
 	}
 }
 
+/* Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
-	: Region (start, length, name, layer, flags),
-	  _fade_in (0.0, 2.0, 1.0, false),
-	  _fade_out (0.0, 2.0, 1.0, false),
-	  _envelope (0.0, 2.0, 1.0, false)
+	: Region (src, start, length, name, layer, flags)
+	, _fade_in (0.0, 2.0, 1.0, false)
+	, _fade_out (0.0, 2.0, 1.0, false)
+	, _envelope (0.0, 2.0, 1.0, false)
 {
-	/* basic AudioRegion constructor */
-
-	sources.push_back (&src);
-	master_sources.push_back (&src);
-	src.GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
-
 	_scale_amplitude = 1.0;
 
 	set_default_fades ();
@@ -115,20 +105,13 @@ AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t
 	}
 }
 
+/* Basic AudioRegion constructor (many channels) */
 AudioRegion::AudioRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
-	: Region (start, length, name, layer, flags),
-	  _fade_in (0.0, 2.0, 1.0, false),
-	  _fade_out (0.0, 2.0, 1.0, false),
-	  _envelope (0.0, 2.0, 1.0, false)
+	: Region (srcs, start, length, name, layer, flags)
+	, _fade_in (0.0, 2.0, 1.0, false)
+	, _fade_out (0.0, 2.0, 1.0, false)
+	, _envelope (0.0, 2.0, 1.0, false)
 {
-	/* basic AudioRegion constructor */
-
-	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
-		sources.push_back (*i);
-		master_sources.push_back (*i);
-		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
-	}
-
 	_scale_amplitude = 1.0;
 
 	set_default_fades ();
@@ -143,29 +126,13 @@ AudioRegion::AudioRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t
 }
 
 
+/** Create a new AudioRegion, that is part of an existing one */
 AudioRegion::AudioRegion (const AudioRegion& other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
-	: Region (other, offset, length, name, layer, flags),
-	  _fade_in (other._fade_in),
-	  _fade_out (other._fade_out),
-	  _envelope (other._envelope, (double) offset, (double) offset + length) 
+	: Region (other, offset, length, name, layer, flags)
+	, _fade_in (other._fade_in)
+	, _fade_out (other._fade_out)
+	, _envelope (other._envelope, (double) offset, (double) offset + length) 
 {
-	/* create a new AudioRegion, that is part of an existing one */
-	
-	set<AudioSource*> unique_srcs;
-
-	for (SourceList::const_iterator i= other.sources.begin(); i != other.sources.end(); ++i) {
-		sources.push_back (*i);
-		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
-		unique_srcs.insert (*i);
-	}
-
-	for (SourceList::const_iterator i = other.master_sources.begin(); i != other.master_sources.end(); ++i) {
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
-		}
-		master_sources.push_back (*i);
-	}
-
 	/* return to default fades if the existing ones are too long */
 	_fade_in_disabled = 0;
 	_fade_out_disabled = 0;
@@ -203,28 +170,11 @@ AudioRegion::AudioRegion (const AudioRegion& other, jack_nframes_t offset, jack_
 }
 
 AudioRegion::AudioRegion (const AudioRegion &other)
-	: Region (other),
-	  _fade_in (other._fade_in),
-	  _fade_out (other._fade_out),
-	  _envelope (other._envelope) 
+	: Region (other)
+	, _fade_in (other._fade_in)
+	, _fade_out (other._fade_out)
+	, _envelope (other._envelope) 
 {
-	/* Pure copy constructor */
-
-	set<AudioSource*> unique_srcs;
-
-	for (SourceList::const_iterator i = other.sources.begin(); i != other.sources.end(); ++i) {
-		sources.push_back (*i);
-		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
-		unique_srcs.insert (*i);
-	}
-
-	for (SourceList::const_iterator i = other.master_sources.begin(); i != other.master_sources.end(); ++i) {
-		master_sources.push_back (*i);
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
-		}
-	}
-
 	_scale_amplitude = other._scale_amplitude;
 	_envelope = other._envelope;
 
@@ -239,15 +189,11 @@ AudioRegion::AudioRegion (const AudioRegion &other)
 }
 
 AudioRegion::AudioRegion (AudioSource& src, const XMLNode& node)
-	: Region (node),
-	  _fade_in (0.0, 2.0, 1.0, false),
-	  _fade_out (0.0, 2.0, 1.0, false),
-	  _envelope (0.0, 2.0, 1.0, false)
+	: Region (src, node)
+	, _fade_in (0.0, 2.0, 1.0, false)
+	, _fade_out (0.0, 2.0, 1.0, false)
+	, _envelope (0.0, 2.0, 1.0, false)
 {
-	sources.push_back (&src);
-	master_sources.push_back (&src);
-	src.GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
-
 	set_default_fades ();
 
 	if (set_state (node)) {
@@ -262,26 +208,11 @@ AudioRegion::AudioRegion (AudioSource& src, const XMLNode& node)
 }
 
 AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
-	: Region (node),
+	: Region (srcs, node),
 	  _fade_in (0.0, 2.0, 1.0, false),
 	  _fade_out (0.0, 2.0, 1.0, false),
 	  _envelope (0.0, 2.0, 1.0, false)
 {
-	set<AudioSource*> unique_srcs;
-
-	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
-		sources.push_back (*i);
-		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
-		unique_srcs.insert (*i);
-	}
-
-	for (SourceList::iterator i = srcs.begin(); i != srcs.end(); ++i) {
-		master_sources.push_back (*i);
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
-		}
-	}
-
 	set_default_fades ();
 	_scale_amplitude = 1.0;
 
@@ -383,48 +314,6 @@ AudioRegion::get_memento() const
 	return sigc::bind (mem_fun (*(const_cast<AudioRegion *> (this)), &StateManager::use_state), _current_state_id);
 }
 
-bool
-AudioRegion::verify_length (jack_nframes_t len)
-{
-	for (uint32_t n=0; n < sources.size(); ++n) {
-		if (_start > sources[n]->length() - len) {
-			return false;
-		}
-	}
-	return true;
-}
-
-bool
-AudioRegion::verify_start_and_length (jack_nframes_t new_start, jack_nframes_t new_length)
-{
-	for (uint32_t n=0; n < sources.size(); ++n) {
-		if (new_length > sources[n]->length() - new_start) {
-			return false;
-		}
-	}
-	return true;
-}
-bool
-AudioRegion::verify_start (jack_nframes_t pos)
-{
-	for (uint32_t n=0; n < sources.size(); ++n) {
-		if (pos > sources[n]->length() - _length) {
-			return false;
-		}
-	}
-	return true;
-}
-
-bool
-AudioRegion::verify_start_mutable (jack_nframes_t& new_start)
-{
-	for (uint32_t n=0; n < sources.size(); ++n) {
-		if (new_start > sources[n]->length() - _length) {
-			new_start = sources[n]->length() - _length;
-		}
-	}
-	return true;
-}
 void
 AudioRegion::set_envelope_active (bool yn)
 {
@@ -448,11 +337,11 @@ AudioRegion::set_envelope_active (bool yn)
 jack_nframes_t
 AudioRegion::read_peaks (PeakData *buf, jack_nframes_t npeaks, jack_nframes_t offset, jack_nframes_t cnt, uint32_t chan_n, double samples_per_unit) const
 {
-	if (chan_n >= sources.size()) {
+	if (chan_n >= _sources.size()) {
 		return 0; 
 	}
 	
-	if (sources[chan_n]->read_peaks (buf, npeaks, offset, cnt, samples_per_unit)) {
+	if (audio_source(chan_n).read_peaks (buf, npeaks, offset, cnt, samples_per_unit)) {
 		return 0;
 	} else {
 		if (_scale_amplitude != 1.0) {
@@ -466,22 +355,22 @@ AudioRegion::read_peaks (PeakData *buf, jack_nframes_t npeaks, jack_nframes_t of
 }
 
 jack_nframes_t
-AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, char * workbuf, jack_nframes_t position, 
+AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, jack_nframes_t position, 
 		      jack_nframes_t cnt, 
 		      uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
 {
-	return _read_at (sources, buf, mixdown_buffer, gain_buffer, workbuf, position, cnt, chan_n, read_frames, skip_frames);
+	return _read_at (_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames);
 }
 
 jack_nframes_t
-AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, char * workbuf, jack_nframes_t position, 
+AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, jack_nframes_t position, 
 			     jack_nframes_t cnt, uint32_t chan_n) const
 {
-	return _read_at (master_sources, buf, mixdown_buffer, gain_buffer, workbuf, position, cnt, chan_n, 0, 0);
+	return _read_at (_master_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0);
 }
 
 jack_nframes_t
-AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buffer, float *gain_buffer, char * workbuf,
+AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		       jack_nframes_t position, jack_nframes_t cnt, 
 		       uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
 {
@@ -491,7 +380,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 	
 	/* precondition: caller has verified that we cover the desired section */
 
-	if (chan_n >= sources.size()) {
+	if (chan_n >= _sources.size()) {
 		return 0; /* read nothing */
 	}
 	
@@ -526,11 +415,12 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 
 	_read_data_count = 0;
 
-	if (srcs[chan_n]->read (mixdown_buffer, _start + internal_offset, to_read, workbuf) != to_read) {
+	AudioSource& src = audio_source(chan_n);
+	if (src.read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
 		return 0; /* "read nothing" */
 	}
 
-	_read_data_count += srcs[chan_n]->read_data_count();
+	_read_data_count += src.read_data_count();
 
 	/* fade in */
 
@@ -647,13 +537,13 @@ AudioRegion::state (bool full)
 	snprintf (buf, sizeof(buf), "%.12g", _scale_amplitude);
 	node.add_property ("scale-gain", buf);
 
-	for (uint32_t n=0; n < sources.size(); ++n) {
+	for (uint32_t n=0; n < _sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
-		sources[n]->id().print (buf);
+		_sources[n]->id().print (buf);
 		node.add_property (buf2, buf);
 	}
 
-	snprintf (buf, sizeof (buf), "%u", (uint32_t) sources.size());
+	snprintf (buf, sizeof (buf), "%u", (uint32_t) _sources.size());
 	node.add_property ("channels", buf);
 
 	if (full) {
@@ -1058,7 +948,7 @@ AudioRegion::separate_by_channel (Session& session, vector<AudioRegion*>& v) con
 	SourceList srcs;
 	string new_name;
 
-	for (SourceList::const_iterator i = master_sources.begin(); i != master_sources.end(); ++i) {
+	for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
 
 		srcs.clear ();
 		srcs.push_back (*i);
@@ -1077,86 +967,6 @@ AudioRegion::separate_by_channel (Session& session, vector<AudioRegion*>& v) con
 	return 0;
 }
 
-void
-AudioRegion::source_deleted (Source* ignored)
-{
-	delete this;
-}
-
-void
-AudioRegion::lock_sources ()
-{
-	SourceList::iterator i;
-	set<AudioSource*> unique_srcs;
-
-	for (i = sources.begin(); i != sources.end(); ++i) {
-		unique_srcs.insert (*i);
-		(*i)->use ();
-	}
-
-	for (i = master_sources.begin(); i != master_sources.end(); ++i) {
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->use ();
-		}
-	}
-}
-
-void
-AudioRegion::unlock_sources ()
-{
-	SourceList::iterator i;
-	set<AudioSource*> unique_srcs;
-
-	for (i = sources.begin(); i != sources.end(); ++i) {
-		unique_srcs.insert (*i);
-		(*i)->release ();
-	}
-
-	for (i = master_sources.begin(); i != master_sources.end(); ++i) {
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->release ();
-		}
-	}
-}
-
-vector<string>
-AudioRegion::master_source_names ()
-{
-	SourceList::iterator i;
-
-	vector<string> names;
-	for (i = master_sources.begin(); i != master_sources.end(); ++i) {
-		names.push_back((*i)->name());
-	}
-
-	return names;
-}
-
-bool
-AudioRegion::source_equivalent (const Region& o) const
-{
-	const AudioRegion* other = dynamic_cast<const AudioRegion*>(&o);
-	if (!other)
-		return false;
-
-	SourceList::const_iterator i;
-	SourceList::const_iterator io;
-
-	for (i = sources.begin(), io = other->sources.begin(); i != sources.end() && io != other->sources.end(); ++i, ++io) {
-		if ((*i)->id() != (*io)->id()) {
-			return false;
-		}
-	}
-
-	for (i = master_sources.begin(), io = other->master_sources.begin(); i != master_sources.end() && io != other->master_sources.end(); ++i, ++io) {
-		if ((*i)->id() != (*io)->id()) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
 int
 AudioRegion::apply (AudioFilter& filter)
 {
@@ -1170,7 +980,7 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 	jack_nframes_t to_read;
 	int status = -1;
 
-	spec.channels = sources.size();
+	spec.channels = _sources.size();
 
 	if (spec.prepare (blocksize, session.frame_rate())) {
 		goto out;
@@ -1188,7 +998,7 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 		
 		if (spec.channels == 1) {
 
-			if (sources.front()->read (spec.dataF, _start + spec.pos, to_read, 0) != to_read) {
+			if (audio_source().read (spec.dataF, _start + spec.pos, to_read) != to_read) {
 				goto out;
 			}
 
@@ -1198,7 +1008,7 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 
 			for (uint32_t chan = 0; chan < spec.channels; ++chan) {
 				
-				if (sources[chan]->read (buf, _start + spec.pos, to_read, 0) != to_read) {
+				if (audio_source(chan).read (buf, _start + spec.pos, to_read) != to_read) {
 					goto out;
 				}
 				
@@ -1227,18 +1037,6 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 	return status;
 }
 
-Region*
-AudioRegion::get_parent()
-{
-	Region* r = 0;
-
-	if (_playlist) {
-		r = _playlist->session().find_whole_file_parent (*this);
-	}
-	
-	return r;
-}
-
 void
 AudioRegion::set_scale_amplitude (gain_t g)
 {
@@ -1260,7 +1058,6 @@ AudioRegion::normalize_to (float target_dB)
 {
 	const jack_nframes_t blocksize = 64 * 1024;
 	Sample buf[blocksize];
-	char workbuf[blocksize * 4];
 	jack_nframes_t fpos;
 	jack_nframes_t fend;
 	jack_nframes_t to_read;
@@ -1289,7 +1086,7 @@ AudioRegion::normalize_to (float target_dB)
 
 			/* read it in */
 
-			if (source (n).read (buf, fpos, to_read, workbuf) != to_read) {
+			if (audio_source (n).read (buf, fpos, to_read) != to_read) {
 				return;
 			}
 			
@@ -1372,14 +1169,21 @@ AudioRegion::resume_fade_out ()
 bool
 AudioRegion::speed_mismatch (float sr) const
 {
-	if (sources.empty()) {
+	if (_sources.empty()) {
 		/* impossible, but ... */
 		return false;
 	}
 
-	float fsr = sources.front()->sample_rate();
+	float fsr = audio_source().sample_rate();
 
 	return fsr != sr;
+}
+
+AudioSource&
+AudioRegion::audio_source (uint32_t n) const
+{
+	// Guaranteed to succeed (use a static cast?)
+	return dynamic_cast<AudioSource&>(source(n));
 }
 
 extern "C" {
@@ -1397,7 +1201,7 @@ uint32_t region_length_from_c (void *arg)
 
 uint32_t sourcefile_length_from_c (void *arg, double zoom_factor)
 {
-	return ( (AudioRegion *) arg)->source().available_peaks (zoom_factor) ;
+	return ( (AudioRegion *) arg)->audio_source().available_peaks (zoom_factor) ;
 }
 
 } /* extern "C" */

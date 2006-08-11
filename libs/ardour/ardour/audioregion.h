@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2001 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,8 +57,6 @@ struct AudioRegionState : public RegionState
 class AudioRegion : public Region
 {
   public:
-	typedef vector<AudioSource *> SourceList;
-
 	static Change FadeInChanged;
 	static Change FadeOutChanged;
 	static Change FadeInActiveChanged;
@@ -76,26 +74,18 @@ class AudioRegion : public Region
 	AudioRegion (SourceList &, const XMLNode&);
 	~AudioRegion();
 
-	bool source_equivalent (const Region&) const;
-
 	bool speed_mismatch (float) const;
 
-	void lock_sources ();
-	void unlock_sources ();
-	AudioSource& source (uint32_t n=0) const { if (n < sources.size()) return *sources[n]; else return *sources[0]; } 
+	AudioSource& audio_source (uint32_t n=0) const;
 
-	void set_scale_amplitude (gain_t);
+	void   set_scale_amplitude (gain_t);
 	gain_t scale_amplitude() const { return _scale_amplitude; }
 	
 	void normalize_to (float target_in_dB = 0.0f);
 
-	uint32_t n_channels() { return sources.size(); }
-	vector<string> master_source_names();
-	
 	bool envelope_active () const { return _flags & Region::EnvelopeActive; }
 	bool fade_in_active ()  const { return _flags & Region::FadeIn; }
 	bool fade_out_active () const { return _flags & Region::FadeOut; }
-	bool captured() const { return !(_flags & (Region::Flag (Region::Import|Region::External))); }
 
 	Curve& fade_in()  { return _fade_in; }
 	Curve& fade_out() { return _fade_out; }
@@ -106,13 +96,12 @@ class AudioRegion : public Region
 			uint32_t chan_n=0, double samples_per_unit= 1.0) const;
 
 	virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buf,
-			float *gain_buf, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
+			float *gain_buf, jack_nframes_t position, jack_nframes_t cnt, 
 			uint32_t       chan_n      = 0,
 			jack_nframes_t read_frames = 0,
 			jack_nframes_t skip_frames = 0) const;
 
-	jack_nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, 
-			float *gain_buf, char * workbuf,
+	jack_nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
 			jack_nframes_t position, jack_nframes_t cnt, uint32_t chan_n=0) const;
 
 	XMLNode& state (bool);
@@ -152,8 +141,6 @@ class AudioRegion : public Region
 
 	int exportme (ARDOUR::Session&, ARDOUR::AudioExportSpecification&);
 
-	Region* get_parent();
-
 	/* xfade/fade interactions */
 
 	void suspend_fade_in ();
@@ -177,28 +164,17 @@ class AudioRegion : public Region
 	void recompute_gain_at_start ();
 
 	jack_nframes_t _read_at (const SourceList&, Sample *buf, Sample *mixdown_buffer, 
-				 float *gain_buffer, char * workbuf, jack_nframes_t position, jack_nframes_t cnt, 
+				 float *gain_buffer, jack_nframes_t position, jack_nframes_t cnt, 
 				 uint32_t chan_n = 0,
 				 jack_nframes_t read_frames = 0,
 				 jack_nframes_t skip_frames = 0) const;
 
-	bool verify_start (jack_nframes_t position);
-	bool verify_length (jack_nframes_t position);
-	bool verify_start_mutable (jack_nframes_t& start);
-	bool verify_start_and_length (jack_nframes_t start, jack_nframes_t length);
 	void recompute_at_start ();
 	void recompute_at_end ();
 
 	void envelope_changed (Change);
 
-	void source_deleted (Source*);
 	
-	
-	SourceList        sources;
-	
-	/** Used when timefx are applied, so we can always use the original source. */
-	SourceList        master_sources; 
-
 	mutable Curve     _fade_in;
 	FadeShape         _fade_in_shape;
 	mutable Curve     _fade_out;

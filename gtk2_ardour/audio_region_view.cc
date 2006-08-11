@@ -314,6 +314,34 @@ AudioRegionView::region_scale_amplitude_changed ()
 }
 
 void
+AudioRegionView::region_renamed ()
+{
+	// FIXME: ugly duplication with RegionView...
+	
+	string str;
+
+	if (_region.locked()) {
+		str += '>';
+		str += _region.name();
+		str += '<';
+	} else {
+		str = _region.name();
+	}
+
+	// ... because of this
+	if (audio_region().speed_mismatch (trackview.session().frame_rate())) {
+		str = string ("*") + str;
+	}
+
+	if (_region.muted()) {
+		str = string ("!") + str;
+	}
+
+	set_item_name (str, this);
+	set_name_text (str);
+}
+
+void
 AudioRegionView::region_resized (Change what_changed)
 {
 	RegionView::region_resized(what_changed);
@@ -375,16 +403,12 @@ AudioRegionView::region_muted ()
 	}
 }
 
-
 void
 AudioRegionView::set_height (gdouble height)
 {
-	uint32_t wcnt = waves.size();
-
-	// FIXME: ick
-	TimeAxisViewItem::set_height (height - 2);
+	RegionView::set_height(height);
 	
-	_height = height;
+	uint32_t wcnt = waves.size();
 
 	for (uint32_t n=0; n < wcnt; ++n) {
 		gdouble ht;
@@ -759,7 +783,7 @@ AudioRegionView::create_waves ()
 		wave_caches.push_back (WaveView::create_cache ());
 
 		if (wait_for_data) {
-			if (audio_region().source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
+			if (audio_region().audio_source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				create_one_wave (n, true);
 			} else {
 				create_zero_line = false;

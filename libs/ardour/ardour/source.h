@@ -46,9 +46,16 @@ class Source : public Stateful, public sigc::trackable
 	uint32_t use_cnt() const { return _use_cnt; }
 	void use ();
 	void release ();
+	
+	virtual void mark_for_remove() = 0;
 
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
+	
+	/** @return the number of items in this source */
+	jack_nframes_t length() const { return _length; }
+
+	virtual jack_nframes_t natural_position() const { return 0; }
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
@@ -56,9 +63,12 @@ class Source : public Stateful, public sigc::trackable
 	sigc::signal<void,Source *> GoingAway;
 
   protected:
+	void update_length (jack_nframes_t pos, jack_nframes_t cnt);
+
 	string            _name;
 	uint32_t          _use_cnt;
 	time_t            _timestamp;
+	jack_nframes_t    _length;
 
   private:
 	PBD::ID _id;

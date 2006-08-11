@@ -119,21 +119,19 @@ class AudioEngine : public sigc::trackable
 	uint32_t n_physical_outputs () const;
 	uint32_t n_physical_inputs () const;
 
-	std::string get_nth_physical_output (uint32_t n) {
-		return get_nth_physical (n, JackPortIsInput);
+	std::string get_nth_physical_output (DataType type, uint32_t n) {
+		return get_nth_physical (type, n, JackPortIsInput);
 	}
 
-	std::string get_nth_physical_input (uint32_t n) {
-		return get_nth_physical (n, JackPortIsOutput);
+	std::string get_nth_physical_input (DataType type, uint32_t n) {
+		return get_nth_physical (type, n, JackPortIsOutput);
 	}
 
 	jack_nframes_t get_port_total_latency (const Port&);
 	void update_total_latencies ();
 
-	/* the caller may not delete the object pointed to by 
-	   the return value
+	/** Caller may not delete the object pointed to by the return value
 	*/
-
 	Port *get_port_by_name (const std::string& name, bool keep = true);
 
 	enum TransportState {
@@ -219,7 +217,7 @@ class AudioEngine : public sigc::trackable
 	PortConnections port_connections;
 	void   remove_connections_for (Port*);
 
-	std::string get_nth_physical (uint32_t which, int flags);
+	std::string get_nth_physical (DataType type, uint32_t n, int flags);
 
 	static int  _xrun_callback (void *arg);
 	static int  _graph_order_callback (void *arg);

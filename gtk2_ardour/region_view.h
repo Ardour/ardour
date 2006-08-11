@@ -56,7 +56,7 @@ class RegionView : public TimeAxisViewItem
 	bool is_valid() const    { return valid; }
     void set_valid (bool yn) { valid = yn; }
 
-    virtual void set_height (double) = 0;
+    virtual void set_height (double);
     virtual void set_samples_per_unit (double);
     virtual bool set_duration (jack_nframes_t, void*);
 
@@ -121,7 +121,7 @@ class RegionView : public TimeAxisViewItem
     void         region_locked ();
     void         region_opacity ();
     void         region_layered ();
-    void         region_renamed ();
+    virtual void region_renamed ();
     void         region_sync_changed ();
 
     static gint _lock_toggle (ArdourCanvas::Item*, GdkEvent*, void*);

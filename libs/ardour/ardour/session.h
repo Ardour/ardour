@@ -76,7 +76,9 @@ class AudioSource;
 
 class Diskstream;
 class AudioDiskstream;
+class MidiDiskstream;
 class AudioFileSource;
+class MidiSource;
 class Auditioner;
 class Insert;
 class Send;
@@ -274,6 +276,7 @@ class Session : public sigc::trackable, public Stateful
 	static string change_audio_path_by_name (string oldpath, string oldname, string newname, bool destructive);
 	static string peak_path_from_audio_path (string);
 	string audio_path_from_name (string, uint32_t nchans, uint32_t chan, bool destructive);
+	string midi_path_from_name (string);
 
 	void process (jack_nframes_t nframes);
 
@@ -635,7 +638,7 @@ class Session : public sigc::trackable, public Stateful
 	string new_region_name (string);
 	string path_from_region_name (string name, string identifier);
 
-	AudioRegion* find_whole_file_parent (AudioRegion&);
+	Region* find_whole_file_parent (Region& child);
 	void find_equivalent_playlist_regions (Region&, std::vector<Region*>& result);
 
 	AudioRegion *XMLRegionFactory (const XMLNode&, bool full);
@@ -704,6 +707,8 @@ class Session : public sigc::trackable, public Stateful
 
 	AudioFileSource *create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
+	MidiSource *create_midi_source_for_session (ARDOUR::MidiDiskstream&);
+
 	Source *source_by_id (const PBD::ID&);
 
 	/* playlist management */
@@ -745,8 +750,7 @@ class Session : public sigc::trackable, public Stateful
 
 	/* flattening stuff */
 
-	int write_one_audio_track (AudioTrack&, jack_nframes_t start, jack_nframes_t cnt, bool overwrite, vector<AudioSource*>&,
-				   InterThreadInfo& wot);
+	int write_one_audio_track (AudioTrack&, jack_nframes_t start, jack_nframes_t cnt, bool overwrite, vector<Source*>&, InterThreadInfo& wot);
 	int freeze (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
@@ -853,6 +857,7 @@ class Session : public sigc::trackable, public Stateful
 	}
 
         // these commands are implemented in libs/ardour/session_command.cc
+	Command *memento_command_factory(XMLNode *n);
         class GlobalSoloStateCommand : public Command
         {
             GlobalRouteBooleanState before, after;
@@ -987,8 +992,6 @@ class Session : public sigc::trackable, public Stateful
 		ExportContext
 	};
 	
-	char *  conversion_buffer(RunContext context) { return _conversion_buffers[context]; }
-	
 	/* VST support */
 
 	static long vst_callback (AEffect* effect,
@@ -1072,7 +1075,6 @@ class Session : public sigc::trackable, public Stateful
 	vector<Sample *>        _passthru_buffers;
 	vector<Sample *>        _silent_buffers;
 	vector<Sample *>        _send_buffers;
-	map<RunContext,char*>   _conversion_buffers;
 	jack_nframes_t           current_block_size;
 	jack_nframes_t          _worst_output_latency;
 	jack_nframes_t          _worst_input_latency;

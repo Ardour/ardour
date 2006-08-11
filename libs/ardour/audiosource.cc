@@ -379,17 +379,17 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 }
 
 jack_nframes_t
-AudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
+AudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
 {
 	Glib::Mutex::Lock lm (_lock);
-	return read_unlocked (dst, start, cnt, workbuf);
+	return read_unlocked (dst, start, cnt);
 }
 
 jack_nframes_t
-AudioSource::write (Sample *dst, jack_nframes_t cnt, char * workbuf)
+AudioSource::write (Sample *dst, jack_nframes_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
-	return write_unlocked (dst, cnt, workbuf);
+	return write_unlocked (dst, cnt);
 }
 
 int 
@@ -406,7 +406,6 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 	int ret = -1;
 	PeakData* staging = 0;
 	Sample* raw_staging = 0;
-	char * workbuf = 0;
 	int peakfile = -1;
 
 	expected_peaks = (cnt / (double) frames_per_peak);
@@ -445,9 +444,8 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 		*/
 
 		Sample* raw_staging = new Sample[cnt];
-		workbuf = new char[cnt*4];
 		
-		if (read_unlocked (raw_staging, start, cnt, workbuf) != cnt) {
+		if (read_unlocked (raw_staging, start, cnt) != cnt) {
 			error << _("cannot read sample data for unscaled peak computation") << endmsg;
 			return -1;
 		}
@@ -458,7 +456,6 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 		}
 
 		delete [] raw_staging;
-		delete [] workbuf;
 		return 0;
 	}
 
@@ -624,7 +621,6 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 		jack_nframes_t nvisual_peaks = 0;
 		jack_nframes_t chunksize = (jack_nframes_t) min (cnt, (jack_nframes_t) 4096);
 		raw_staging = new Sample[chunksize];
-		workbuf = new char[chunksize *4];
 		
 		jack_nframes_t frame_pos = start;
 		double pixel_pos = floor (frame_pos / samples_per_visual_peak);
@@ -640,7 +636,7 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 				
 				to_read = min (chunksize, (_length - current_frame));
 				
-				if ((frames_read = read_unlocked (raw_staging, current_frame, to_read, workbuf)) == 0) {
+				if ((frames_read = read_unlocked (raw_staging, current_frame, to_read)) == 0) {
 					error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3")
 							 , _name, to_read, current_frame) 
 					      << endmsg;
@@ -688,10 +684,6 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 		delete [] raw_staging;
 	}
 
-	if (workbuf) {
-		delete [] workbuf;
-	}
-	
 	return ret;
 }
 
@@ -760,7 +752,6 @@ AudioSource::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 	Sample xmin, xmax;
 	uint32_t  peaki;
 	PeakData* peakbuf;
-	char * workbuf = 0;
 	jack_nframes_t frames_read;
 	jack_nframes_t frames_to_read;
 	off_t first_peak_byte;
@@ -781,8 +772,6 @@ AudioSource::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 	peakbuf = new PeakData[(cnt/frames_per_peak)+1];
 	peaki = 0;
 
-	workbuf = new char[max(frames_per_peak, cnt) * 4];
-	
 	if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
 		error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 		return -1;
@@ -794,7 +783,7 @@ AudioSource::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 
 		/* lock for every read */
 
-		if ((frames_read = read (buf, current_frame, frames_to_read, workbuf)) != frames_to_read) {
+		if ((frames_read = read (buf, current_frame, frames_to_read)) != frames_to_read) {
 			error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
 			goto out;
 		}
@@ -831,8 +820,6 @@ AudioSource::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 	if (peakfile >= 0) {
 		close (peakfile);
 	}
-	if (workbuf)
-		delete [] workbuf;
 	return ret;
 }
 
@@ -887,13 +874,5 @@ AudioSource::available_peaks (double zoom_factor) const
 	close (peakfile);
 
 	return (end/sizeof(PeakData)) * frames_per_peak;
-}
-
-void
-AudioSource::update_length (jack_nframes_t pos, jack_nframes_t cnt)
-{
-	if (pos + cnt > _length) {
-		_length = pos+cnt;
-	}
 }
 

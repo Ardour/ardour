@@ -401,10 +401,6 @@ Session::~Session ()
  		free(*i);
  	}
 
-	for (map<RunContext,char*>::iterator i = _conversion_buffers.begin(); i != _conversion_buffers.end(); ++i) {
-		delete [] (i->second);
-	}
-
 	AudioDiskstream::free_working_buffers();
 	
 #undef TRACK_DESTRUCTION
@@ -605,12 +601,7 @@ Session::when_engine_running ()
 			
 			/* default state for Click */
 
-			// FIXME: there's no JackPortIsAudio flag or anything like that, so this is _bad_.
-			// we need a get_nth_physical_audio_output or similar, but the existing one just
-			// deals with strings :/
-
-			first_physical_output = _engine.get_nth_physical_output (0);
-			cerr << "FIXME: click type" << endl;
+			first_physical_output = _engine.get_nth_physical_output (DataType::AUDIO, 0);
 
 			if (first_physical_output.length()) {
 				if (_click_io->add_output_port (first_physical_output, this)) {
@@ -662,7 +653,7 @@ Session::when_engine_running ()
 		Connection* c = new OutputConnection (buf, true);
 
 		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_output (np));
+		c->add_connection (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 
 		add_connection (c);
 	}
@@ -674,7 +665,7 @@ Session::when_engine_running ()
 		Connection* c = new InputConnection (buf, true);
 
 		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_input (np));
+		c->add_connection (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 
 		add_connection (c);
 	}
@@ -689,8 +680,8 @@ Session::when_engine_running ()
 
 		c->add_port ();
 		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_output (np));
-		c->add_connection (1, _engine.get_nth_physical_output (np+1));
+		c->add_connection (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
+		c->add_connection (1, _engine.get_nth_physical_output (DataType::AUDIO, np+1));
 
 		add_connection (c);
 	}
@@ -703,8 +694,8 @@ Session::when_engine_running ()
 
 		c->add_port ();
 		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_input (np));
-		c->add_connection (1, _engine.get_nth_physical_input (np+1));
+		c->add_connection (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
+		c->add_connection (1, _engine.get_nth_physical_input (DataType::AUDIO, np+1));
 
 		add_connection (c);
 	}
@@ -737,7 +728,7 @@ Session::when_engine_running ()
 			}
 			n = 0;
 			while ((int) _master_out->n_outputs() < _master_out->output_maximum()) {
-				if (_master_out->add_output_port (_engine.get_nth_physical_output (n), this, DataType::AUDIO)) {
+				if (_master_out->add_output_port (_engine.get_nth_physical_output (DataType::AUDIO, n), this, DataType::AUDIO)) {
 					error << _("cannot setup master outputs")
 					      << endmsg;
 					break;
@@ -828,7 +819,7 @@ Session::hookup_io ()
 		}
 		n = 0;
 		while ((int) _control_out->n_outputs() < _control_out->output_maximum()) {
-			if (_control_out->add_output_port (_engine.get_nth_physical_output (n), this)) {
+			if (_control_out->add_output_port (_engine.get_nth_physical_output (DataType::AUDIO, n), this)) {
 				error << _("cannot set up master outputs")
 				      << endmsg;
 				break;
@@ -1937,7 +1928,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				port = "";
 				
 				if (input_auto_connect & AutoConnectPhysical) {
-					port = _engine.get_nth_physical_input ((channels_used+x)%nphysical_in);
+					port = _engine.get_nth_physical_input (DataType::AUDIO, (channels_used+x)%nphysical_in);
 				} 
 				
 				if (port.length() && track->connect_input (track->input (x), port, this)) {
@@ -1951,7 +1942,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			port = "";
 
 			if (nphysical_out && (output_auto_connect & AutoConnectPhysical)) {
-				port = _engine.get_nth_physical_output ((channels_used+x)%nphysical_out);
+				port = _engine.get_nth_physical_output (DataType::AUDIO, (channels_used+x)%nphysical_out);
 			} else if (output_auto_connect & AutoConnectMaster) {
 				if (_master_out) {
 					port = _master_out->input (x%_master_out->n_inputs())->name();
@@ -2032,7 +2023,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 			port = "";
 
 			if (input_auto_connect & AutoConnectPhysical) {
-				port = _engine.get_nth_physical_input ((n+x)%n_physical_inputs);
+				port = _engine.get_nth_physical_input (DataType::AUDIO, (n+x)%n_physical_inputs);
 			} 
 			
 			if (port.length() && bus->connect_input (bus->input (x), port, this)) {
@@ -2045,7 +2036,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 			port = "";
 
 			if (output_auto_connect & AutoConnectPhysical) {
-				port = _engine.get_nth_physical_input ((n+x)%n_physical_outputs);
+				port = _engine.get_nth_physical_input (DataType::AUDIO, (n+x)%n_physical_outputs);
 			} else if (output_auto_connect & AutoConnectMaster) {
 				if (_master_out) {
 					port = _master_out->input (x%_master_out->n_inputs())->name();
@@ -2747,8 +2738,8 @@ Session::remove_region (Region* region)
 	}
 }
 
-AudioRegion*
-Session::find_whole_file_parent (AudioRegion& child)
+Region*
+Session::find_whole_file_parent (Region& child)
 {
 	AudioRegionList::iterator i;
 	AudioRegion* region;
@@ -3161,6 +3152,79 @@ Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bo
 					  frame_rate());
 	}
 }
+
+string
+Session::midi_path_from_name (string name)
+{
+	string spath;
+	uint32_t cnt;
+	char buf[PATH_MAX+1];
+	const uint32_t limit = 10000;
+	string legalized;
+
+	buf[0] = '\0';
+	legalized = legalize_for_path (name);
+
+	/* find a "version" of the file name that doesn't exist in
+	   any of the possible directories.
+	*/
+
+	for (cnt = 1; cnt <= limit; ++cnt) {
+
+		vector<space_and_path>::iterator i;
+		uint32_t existing = 0;
+
+		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+
+			// FIXME: different directory from audio?
+			spath = (*i).path + sound_dir_name + "/" + legalized;
+
+			snprintf (buf, sizeof(buf), "%s-%u.mid", spath.c_str(), cnt);
+
+			if (access (buf, F_OK) == 0) {
+				existing++;
+			}
+		}
+
+		if (existing == 0) {
+			break;
+		}
+
+		if (cnt > limit) {
+			error << string_compose(_("There are already %1 recordings for %2, which I consider too many."), limit, name) << endmsg;
+			throw failed_constructor();
+		}
+	}
+
+	/* we now have a unique name for the file, but figure out where to
+	   actually put it.
+	*/
+
+	string foo = buf;
+
+	// FIXME: different directory than audio?
+	spath = discover_best_sound_dir ();
+
+	string::size_type pos = foo.find_last_of ('/');
+	
+	if (pos == string::npos) {
+		spath += foo;
+	} else {
+		spath += foo.substr (pos + 1);
+	}
+
+	return spath;
+}
+
+MidiSource *
+Session::create_midi_source_for_session (MidiDiskstream& ds)
+{
+	string spath = midi_path_from_name (ds.name());
+
+	/* this might throw failed_constructor(), which is OK */
+	return new SMFSource (spath);
+}
+
 
 /* Playlist management */
 
@@ -3789,7 +3853,7 @@ Session::freeze (InterThreadInfo& itt)
 
 int
 Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nframes_t len, 	
-			       bool overwrite, vector<AudioSource*>& srcs, InterThreadInfo& itt)
+			       bool overwrite, vector<Source*>& srcs, InterThreadInfo& itt)
 {
 	int ret = -1;
 	Playlist* playlist;
@@ -3802,7 +3866,6 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	jack_nframes_t this_chunk;
 	jack_nframes_t to_do;
 	vector<Sample*> buffers;
-	char *  workbuf = 0;
 
 	// any bigger than this seems to cause stack overflows in called functions
 	const jack_nframes_t chunk_size = (128 * 1024)/4;
@@ -3872,22 +3935,20 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		buffers.push_back (b);
 	}
 
-	workbuf = new char[chunk_size * 4];
-	
 	while (to_do && !itt.cancel) {
 		
 		this_chunk = min (to_do, chunk_size);
 		
-		if (track.export_stuff (buffers, workbuf, nchans, start, this_chunk)) {
+		if (track.export_stuff (buffers, nchans, start, this_chunk)) {
 			goto out;
 		}
 
 		uint32_t n = 0;
-		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
+		for (vector<Source*>::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
 			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
 
 			if (afs) {
-				if (afs->write (buffers[n], this_chunk, workbuf) != this_chunk) {
+				if (afs->write (buffers[n], this_chunk) != this_chunk) {
 					goto out;
 				}
 			}
@@ -3907,7 +3968,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		time (&now);
 		xnow = localtime (&now);
 		
-		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+		for (vector<Source*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
 			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
 			if (afs) {
 				afs->update_header (position, *xnow, now);
@@ -3916,7 +3977,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		
 		/* build peakfile for new source */
 		
-		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+		for (vector<Source*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
 			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
 			if (afs) {
 				afs->build_peaks ();
@@ -3928,7 +3989,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		
   out:
 	if (ret) {
-		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+		for (vector<Source*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
 			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
 			if (afs) {
 				afs->mark_for_remove ();
@@ -3941,10 +4002,6 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		free(*i);
 	}
 
-	if (workbuf) {
-		delete [] workbuf;
-	}
-	
 	g_atomic_int_set (&processing_prohibited, 0);
 
 	itt.done = true;

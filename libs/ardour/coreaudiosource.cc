@@ -153,7 +153,7 @@ CoreAudioSource::~CoreAudioSource ()
 }
 
 jack_nframes_t
-CoreAudioSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
+CoreAudioSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
 {
 	OSStatus err = noErr;
 

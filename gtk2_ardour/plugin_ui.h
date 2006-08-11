@@ -203,12 +203,14 @@ class PluginUIWindow : public ArdourDialog
 	PlugUIBase& pluginui() { return *_pluginui; }
 
 	void resize_preferred();
+
+	virtual bool on_key_press_event (GdkEventKey*);
+	virtual bool on_key_release_event (GdkEventKey*);
 	
   private:
 	PlugUIBase* _pluginui;
 	void plugin_going_away (ARDOUR::Redirect*);
 };
-
 
 #ifdef VST_SUPPORT
 class VSTPluginUI : public PlugUIBase, public Gtk::VBox
@@ -235,16 +237,12 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 #endif // VST_SUPPORT
 
 #ifdef HAVE_COREAUDIO
-class AUPluginUI : public PlugUIBase
+class AUPluginUI
 {
   public:
-	AUPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::AUPlugin>);
+	AUPluginUI (ARDOUR::AudioEngine&, boost::shared_ptr<ARDOUR::PluginInsert>);
 	~AUPluginUI ();
 	
-	gint get_preferred_height ();
-	bool start_updating(GdkEventAny*) {return false;}
-	bool stop_updating(GdkEventAny*) {return false;}
-
   private:
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
 };

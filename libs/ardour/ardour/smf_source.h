@@ -41,7 +41,7 @@ class SMFSource : public MidiSource {
 	};
 	
 	/** Constructor for existing external-to-session files */
-	SMFSource (std::string path, Flag flags);
+	SMFSource (std::string path, Flag flags = Flag(0));
 
 	/* Constructor for existing in-session files */
 	SMFSource (const XMLNode&);
@@ -55,8 +55,8 @@ class SMFSource : public MidiSource {
 	void set_allow_remove_if_empty (bool yn);
 	void mark_for_remove();
 
-	virtual int update_header (jack_nframes_t when, struct tm&, time_t) = 0;
-	virtual int flush_header () = 0;
+	int update_header (jack_nframes_t when, struct tm&, time_t);
+	int flush_header ();
 
 	int move_to_trash (const string trash_dir_name);
 
@@ -75,6 +75,9 @@ class SMFSource : public MidiSource {
   protected:
 
 	int init (string idstr, bool must_exist);
+
+	jack_nframes_t read_unlocked (RawMidi* dst, jack_nframes_t start, jack_nframes_t cn) const;
+	jack_nframes_t write_unlocked (RawMidi* dst, jack_nframes_t cnt);
 
 	bool find (std::string path, bool must_exist, bool& is_new);
 	bool removable() const;

@@ -507,6 +507,15 @@ MidiTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack
 	return midi_diskstream().process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
 }
 
+void
+MidiTrack::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
+			       jack_nframes_t start_frame, jack_nframes_t end_frame, 
+			       jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
+			       bool meter)
+{
+	// Do nothing (just bypass the Route version to avoid flaming death)
+}
+
 int
 MidiTrack::set_name (string str, void *src)
 {
@@ -530,7 +539,7 @@ MidiTrack::set_name (string str, void *src)
 }
 
 int
-MidiTrack::export_stuff (vector<unsigned char*>& buffers, char * workbuf, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
+MidiTrack::export_stuff (vector<unsigned char*>& buffers, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
 {
 	return 0;
 }

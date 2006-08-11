@@ -56,8 +56,8 @@ class SndFileSource : public AudioFileSource {
   protected:
 	void set_header_timeline_position ();
 
-	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
-	jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt, char * workbuf);
+	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
+	jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt);
 
 	jack_nframes_t write_float (Sample* data, jack_nframes_t pos, jack_nframes_t cnt);
 

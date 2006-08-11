@@ -402,7 +402,7 @@ Crossfade::compute (AudioRegion& a, AudioRegion& b, CrossfadeModel model)
 
 jack_nframes_t 
 Crossfade::read_at (Sample *buf, Sample *mixdown_buffer, 
-		    float *gain_buffer, char * workbuf, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n,
+		    float *gain_buffer, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n,
 		    jack_nframes_t read_frames, jack_nframes_t skip_frames)
 {
 	jack_nframes_t offset;
@@ -438,8 +438,8 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 
 	offset = start - _position;
 
-	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, workbuf, start, to_write, chan_n, read_frames, skip_frames);
-	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, workbuf, start, to_write, chan_n, read_frames, skip_frames);
+	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
+	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
 
 	float* fiv = new float[to_write];
 	float* fov = new float[to_write];

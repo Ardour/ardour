@@ -29,6 +29,7 @@
 
 #include <inttypes.h>
 #include <jack/types.h>
+#include <jack/midiport.h>
 #include <control_protocol/smpte.h>
 #include <pbd/id.h>
 
@@ -49,7 +50,7 @@ namespace ARDOUR {
 	typedef uint32_t                    layer_t;
 	typedef uint64_t                    microseconds_t;
 
-	typedef unsigned char RawMidi;
+	typedef jack_midi_event_t RawMidi;
 
 	enum IOChange {
 		NoChange = 0,
@@ -245,7 +246,14 @@ namespace ARDOUR {
 	    PeakDatum min;
 	    PeakDatum max;
 	};
-}
+	
+	enum PluginType {
+		AudioUnit,
+		LADSPA,
+		VST
+	};
+	
+} // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
@@ -255,7 +263,6 @@ session_frame_to_track_frame (jack_nframes_t session_frame, double speed)
 {
 	return (jack_nframes_t)( (double)session_frame * speed );
 }
-
 
 static inline jack_nframes_t
 track_frame_to_session_frame (jack_nframes_t track_frame, double speed)

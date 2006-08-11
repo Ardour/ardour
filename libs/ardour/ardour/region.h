@@ -21,6 +21,8 @@
 #ifndef __ardour_region_h__
 #define __ardour_region_h__
 
+#include <vector>
+
 #include <pbd/undo.h>
 
 #include <ardour/ardour.h>
@@ -56,6 +58,8 @@ struct RegionState : public StateManager::State
 class Region : public Stateful, public StateManager
 {
   public:
+	typedef std::vector<Source *> SourceList;
+
 	enum Flag {
 		Muted = 0x1,
 		Opaque = 0x2,
@@ -89,11 +93,15 @@ class Region : public Stateful, public StateManager
 	static Change LayerChanged;
 	static Change HiddenChanged;
 
-	Region (jack_nframes_t start, jack_nframes_t length, 
+	Region (Source& src, jack_nframes_t start, jack_nframes_t length, 
 		const string& name, layer_t = 0, Flag flags = DefaultFlags);
-	Region (const Region&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
+	Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, 
+		const string& name, layer_t = 0, Flag flags = DefaultFlags);
+	Region (const Region&, jack_nframes_t start, jack_nframes_t length,
+		const string& name, layer_t = 0, Flag flags = DefaultFlags);
 	Region (const Region&);
-	Region (const XMLNode&);
+	Region (SourceList& srcs, const XMLNode&);
+	Region (Source& src, const XMLNode&);
 	virtual ~Region();
 
 	const PBD::ID& id() const { return _id; }
@@ -118,13 +126,14 @@ class Region : public Stateful, public StateManager
 	jack_nframes_t first_frame() const { return _position; }
 	jack_nframes_t last_frame() const { return _position + _length - 1; }
 
+	Flag flags()      const { return _flags; }
 	bool hidden()     const { return _flags & Hidden; }
 	bool muted()      const { return _flags & Muted; }
 	bool opaque ()    const { return _flags & Opaque; }
 	bool locked()     const { return _flags & Locked; }
 	bool automatic()  const { return _flags & Automatic; }
 	bool whole_file() const { return _flags & WholeFile ; }
-	Flag flags()      const { return _flags; }
+	bool captured()   const { return !(_flags & (Region::Flag (Region::Import|Region::External))); }
 
 	virtual bool should_save_state () const { return !(_flags & DoNotSaveState); };
 
@@ -143,10 +152,8 @@ class Region : public Stateful, public StateManager
 	bool size_equivalent (const Region&) const;
 	bool overlap_equivalent (const Region&) const;
 	bool region_list_equivalent (const Region&) const;
-	virtual bool source_equivalent (const Region&) const = 0;
+	bool source_equivalent (const Region&) const;
 	
-	virtual bool speed_mismatch (float) const = 0;
-
 	/* EDITING OPERATIONS */
 
 	void set_length (jack_nframes_t, void *src);
@@ -184,8 +191,15 @@ class Region : public Stateful, public StateManager
 
 	void set_playlist (ARDOUR::Playlist*);
 
-	virtual void lock_sources () {}
-	virtual void unlock_sources () {}
+	void lock_sources ();
+	void unlock_sources ();
+	void source_deleted (Source*);
+
+	Source&  source (uint32_t n=0) const { return *_sources[ (n < _sources.size()) ? n : 0 ]; }
+	uint32_t n_channels()          const { return _sources.size(); }
+
+	std::vector<string> master_source_names();
+
 
 	/* serialization */
 	
@@ -205,7 +219,7 @@ class Region : public Stateful, public StateManager
 
 	static sigc::signal<void,Region*> CheckNewRegion;
 
-	virtual Region* get_parent() = 0;
+	Region* get_parent();
 	
 	uint64_t last_layer_op() const { return _last_layer_op; }
 	void set_last_layer_op (uint64_t when);
@@ -228,29 +242,32 @@ class Region : public Stateful, public StateManager
 	void maybe_uncopy ();
 	void first_edit ();
 	
-	virtual bool verify_start (jack_nframes_t) = 0;
-	virtual bool verify_start_and_length (jack_nframes_t, jack_nframes_t) = 0;
-	virtual bool verify_start_mutable (jack_nframes_t&_start) = 0;
-	virtual bool verify_length (jack_nframes_t) = 0;
+	bool verify_start (jack_nframes_t);
+	bool verify_start_and_length (jack_nframes_t, jack_nframes_t);
+	bool verify_start_mutable (jack_nframes_t&_start);
+	bool verify_length (jack_nframes_t);
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
 	
-	
+
+	PBD::ID                 _id;
+	string                  _name;        
+	Flag                    _flags;
 	jack_nframes_t          _start;
 	jack_nframes_t          _length;
 	jack_nframes_t          _position;
-	Flag                     _flags;
 	jack_nframes_t          _sync_position;
 	layer_t                 _layer;
-	string                  _name;        
 	mutable RegionEditState _first_edit;
 	int                     _frozen;
-	Glib::Mutex             lock;
-	PBD::ID                 _id;
+	mutable uint32_t        _read_data_count;  ///< modified in read()
+	Change                  _pending_changed;
+	uint64_t                _last_layer_op;  ///< timestamp
+	Glib::Mutex             _lock;
 	ARDOUR::Playlist*       _playlist;
-	mutable uint32_t        _read_data_count; // modified in read()
-	Change                   pending_changed;
-	uint64_t                _last_layer_op; // timestamp
+	SourceList              _sources;
+	/** Used when timefx are applied, so we can always use the original source */
+	SourceList              _master_sources;
 };
 
 } /* namespace ARDOUR */

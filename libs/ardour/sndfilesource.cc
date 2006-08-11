@@ -292,7 +292,7 @@ SndFileSource::sample_rate () const
 }
 
 jack_nframes_t
-SndFileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
+SndFileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
 {
 	int32_t nread;
 	float *ptr;
@@ -367,7 +367,7 @@ SndFileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t 
 }
 
 jack_nframes_t 
-SndFileSource::write_unlocked (Sample *data, jack_nframes_t cnt, char * workbuf)
+SndFileSource::write_unlocked (Sample *data, jack_nframes_t cnt)
 {
 	if (!writable()) {
 		return 0;

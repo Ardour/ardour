@@ -90,44 +90,26 @@ MidiSource::set_state (const XMLNode& node)
 }
 
 jack_nframes_t
-MidiSource::read (unsigned char *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const
+MidiSource::read (RawMidi* dst, jack_nframes_t start, jack_nframes_t cnt) const
 {
-	//Glib::Mutex::Lock lm (_lock);
-	//return read_unlocked (dst, start, cnt, workbuf);
-	return 0;
+	Glib::Mutex::Lock lm (_lock);
+	return read_unlocked (dst, start, cnt);
 }
 
 jack_nframes_t
-MidiSource::write (unsigned char *dst, jack_nframes_t cnt, char * workbuf)
+MidiSource::write (RawMidi* dst, jack_nframes_t cnt)
 {
-	//Glib::Mutex::Lock lm (_lock);
-	//return write_unlocked (dst, cnt, workbuf);
-	return 0;
+	Glib::Mutex::Lock lm (_lock);
+	return write_unlocked (dst, cnt);
 }
-
 
 bool
 MidiSource::file_changed (string path)
 {
 	struct stat stat_file;
-	//struct stat stat_peak;
 
 	int e1 = stat (path.c_str(), &stat_file);
-	//int e2 = stat (peak_path(path).c_str(), &stat_peak);
 	
-	if (!e1){//&& !e2 && stat_file.st_mtime > stat_peak.st_mtime){
-		return true;
-	} else {
-		return false;
-	}
-}
-
-
-void
-MidiSource::update_length (jack_nframes_t pos, jack_nframes_t cnt)
-{
-	if (pos + cnt > _length) {
-		_length = pos+cnt;
-	}
+	return ( !e1 );
 }
 

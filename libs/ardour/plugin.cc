@@ -244,25 +244,25 @@ Plugin::save_preset (string name, string domain)
 }
 
 PluginPtr
-ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginInfo::Type type)
+ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginType type)
 {
 	PluginManager *mgr = PluginManager::the_manager();
 	PluginInfoList plugs;
 
 	switch (type) {
-	case PluginInfo::LADSPA:
+	case ARDOUR::LADSPA:
 		plugs = mgr->ladspa_plugin_info();
 		break;
 
 #ifdef VST_SUPPORT
-	case PluginInfo::VST:
+	case ARDOUR::VST:
 		plugs = mgr->vst_plugin_info();
 		unique_id = 0; // VST plugins don't have a unique id.
 		break;
 #endif
 
 #ifdef HAVE_COREAUDIO
-	case PluginInfo::AudioUnit:
+	case ARDOUR::AudioUnit:
 		plugs = AUPluginInfo::discover ();
 		unique_id = 0; // Neither do AU.
 		break;

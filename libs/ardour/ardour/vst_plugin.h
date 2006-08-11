@@ -113,6 +113,8 @@ class VSTPluginInfo : public PluginInfo
 	PluginPtr load (Session& session);
 };
 
+typedef boost::shared_ptr<VSTPluginInfo> VSTPluginInfoPtr;
+
 } // namespace ARDOUR
 
 #endif /* __ardour_vst_plugin_h__ */
