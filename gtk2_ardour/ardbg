@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 dir=`dirname "$0"`
 source $dir/ardev_common.sh
 exec gdb $dir/ardour.bin $*
