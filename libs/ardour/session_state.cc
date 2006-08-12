@@ -3340,7 +3340,6 @@ Session::restore_history (string snapshot_name)
 
     /* read xml */
     xmlpath = _path + snapshot_name + ".history";
-
     info << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
 
     if (access (xmlpath.c_str(), F_OK)) {
@@ -3352,8 +3351,6 @@ Session::restore_history (string snapshot_name)
         error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
         return -1;
     }
-
-    info << "root children " << tree.root()->children().size() << endmsg;
 
     /* replace history */
     history.clear();
@@ -3393,10 +3390,6 @@ Session::restore_history (string snapshot_name)
         }
         history.add(ut);
     }
-
-    XMLTree tree2;
-    tree2.set_root(&history.get_state());
-    info << tree2.write_buffer() << endmsg;
 
     return 0;
 }
