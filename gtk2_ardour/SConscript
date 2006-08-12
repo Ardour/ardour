@@ -57,14 +57,13 @@ if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Merge ([libraries['fftw3f']])
 	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
 
-if gtkardour['COREAUDIO']:
-	gtkardour.Append(CCFLAGS='-DHAVE_COREAUDIO')
-	gtkardour.Merge([libraries['appleutility']])
-
 skipped_files=Split("""
 connection_editor.cc
 """)
 
+coreaudio_files=Split("""
+au_pluginui.cc
+""")
 
 gtkardour_files=Split("""
 about.cc
@@ -140,6 +139,7 @@ imageframe_time_axis_view.cc
 imageframe_view.cc
 io_selector.cc
 keyboard.cc
+ladspa_pluginui.cc
 location_ui.cc
 main.cc
 marker.cc
@@ -186,7 +186,6 @@ visual_time_axis.cc
 waveview.cc
 """)
 
-
 fft_analysis_files=Split("""
 analysis_window.cc
 fft_graph.cc
@@ -212,7 +211,12 @@ vst_files = [ 'vst_pluginui.cc' ]
 if env['VST']:
 	extra_sources += vst_files
 	gtkardour.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
-  
+
+if gtkardour['COREAUDIO']:
+    extra_sources += coreaudio_files
+    gtkardour.Append(CCFLAGS='-DHAVE_COREAUDIO')
+    gtkardour.Merge([libraries['appleutility']])
+ 
 if env['FFT_ANALYSIS']:
 	extra_sources += fft_analysis_files
 

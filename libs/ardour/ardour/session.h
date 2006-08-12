@@ -974,8 +974,6 @@ class Session : public sigc::trackable, public Stateful
 		ExportContext
 	};
 	
-	char *  conversion_buffer(RunContext context) { return _conversion_buffers[context]; }
-	
 	/* VST support */
 
 	static long vst_callback (AEffect* effect,
@@ -1059,7 +1057,6 @@ class Session : public sigc::trackable, public Stateful
 	vector<Sample *>        _passthru_buffers;
 	vector<Sample *>        _silent_buffers;
 	vector<Sample *>        _send_buffers;
-	map<RunContext,char*>   _conversion_buffers;
 	jack_nframes_t           current_block_size;
 	jack_nframes_t          _worst_output_latency;
 	jack_nframes_t          _worst_input_latency;

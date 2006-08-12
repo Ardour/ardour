@@ -50,7 +50,7 @@ class PluginSelector : public ArdourDialog
 	Gtk::ScrolledWindow auscroller; // AudioUnit
 	Gtk::ScrolledWindow ascroller;  // Added plugins
 	
-	ARDOUR::PluginInfo::Type current_selection;
+	ARDOUR::PluginType current_selection;
 
 	// page 1
 	struct LadspaColumns : public Gtk::TreeModel::ColumnRecord {
@@ -147,6 +147,8 @@ class PluginSelector : public ArdourDialog
 	void btn_apply_clicked();
 	void use_plugin (ARDOUR::PluginInfoPtr);
 	void cleanup ();
+
+	void set_correct_focus();
 };
 
 #endif // __ardour_plugin_selector_h__

@@ -211,11 +211,11 @@ class AudioDiskstream : public Diskstream
 
 	/* The two central butler operations */
 	int do_flush (Session::RunContext context, bool force = false);
-	int do_refill () { return _do_refill(_mixdown_buffer, _gain_buffer, _conversion_buffer); }
+	int do_refill () { return _do_refill(_mixdown_buffer, _gain_buffer); }
 	
 	int do_refill_with_alloc();
 
-	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, char * workbuf,
+	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 		jack_nframes_t& start, jack_nframes_t cnt, 
 		ChannelInfo& channel_info, int channel, bool reversed);
 
@@ -251,10 +251,9 @@ class AudioDiskstream : public Diskstream
 	static size_t  _working_buffers_size;
 	static Sample* _mixdown_buffer;
 	static gain_t* _gain_buffer;
-	static char*   _conversion_buffer;
 
-	// Uh, /really/ private?  (death to friend classes)
-	int _do_refill (Sample *mixdown_buffer, float *gain_buffer, char *workbuf);
+	// Uh, /really/ private? (there should probably be less friends of Diskstream)
+	int _do_refill (Sample *mixdown_buffer, float *gain_buffer);
 	
 	
 	std::vector<AudioFileSource*> capturing_sources;

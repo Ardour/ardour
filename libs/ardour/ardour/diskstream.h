@@ -117,8 +117,8 @@ class Diskstream : public Stateful, public sigc::trackable
 	
 	uint32_t n_channels() { return _n_channels; }
 
-	static jack_nframes_t disk_io_frames()                      { return disk_io_chunk_frames; }
-	static void           set_disk_io_chunk_frames (uint32_t n) { disk_io_chunk_frames = n; }
+	static jack_nframes_t disk_io_frames() { return disk_io_chunk_frames; }
+	static void set_disk_io_chunk_frames (uint32_t n) { disk_io_chunk_frames = n; }
 
 	/* Stateful */
 	virtual XMLNode& get_state(void) = 0;

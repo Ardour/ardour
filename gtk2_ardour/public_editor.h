@@ -31,6 +31,7 @@ namespace Gtk {
 class Editor;
 class TimeAxisViewItem;
 class TimeAxisView;
+class PluginUIWindow;
 class PluginSelector;
 class PlaylistSelector;
 class XMLNode;
@@ -171,6 +172,8 @@ class PublicEditor : public Gtk::Window, public Stateful {
 	virtual bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 
 	static PublicEditor* _instance;
+
+	friend class PluginUIWindow;
 };
 
 #endif // __gtk_ardour_public_editor_h__

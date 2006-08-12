@@ -243,7 +243,14 @@ namespace ARDOUR {
 	    PeakDatum min;
 	    PeakDatum max;
 	};
-}
+	
+	enum PluginType {
+		AudioUnit,
+		LADSPA,
+		VST
+	};
+	
+} // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
@@ -253,7 +260,6 @@ session_frame_to_track_frame (jack_nframes_t session_frame, double speed)
 {
 	return (jack_nframes_t)( (double)session_frame * speed );
 }
-
 
 static inline jack_nframes_t
 track_frame_to_session_frame (jack_nframes_t track_frame, double speed)

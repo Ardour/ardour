@@ -158,7 +158,7 @@ DestructiveFileSource::clear_capture_marks ()
 }	
 
 jack_nframes_t
-DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in, char * workbuf)
+DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 {
 	jack_nframes_t xfade = min (xfade_frames, cnt);
 	jack_nframes_t nofade = cnt - xfade;
@@ -272,7 +272,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in,
 }
 
 jack_nframes_t
-DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * workbuf)
+DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt)
 {
 	jack_nframes_t old_file_pos;
 
@@ -297,7 +297,7 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 		jack_nframes_t ofilepos = file_pos;
 		
 		// fade in
-		if (crossfade (data, subcnt, 1, workbuf) != subcnt) {
+		if (crossfade (data, subcnt, 1) != subcnt) {
 			return 0;
 		}
 		
@@ -306,7 +306,7 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 		
 		// fade out
 		subcnt = cnt - subcnt;
-		if (crossfade (tmpdata, subcnt, 0, workbuf) != subcnt) {
+		if (crossfade (tmpdata, subcnt, 0) != subcnt) {
 			return 0;
 		}
 		
@@ -324,7 +324,7 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 		/* move to the correct location place */
 		file_pos = capture_start_frame;
 		
-		if (crossfade (data, cnt, 1, workbuf) != cnt) {
+		if (crossfade (data, cnt, 1) != cnt) {
 			return 0;
 		}
 		
@@ -337,7 +337,7 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt, char * 
 		_capture_start = false;
 		_capture_end = false;
 		
-		if (crossfade (data, cnt, 0, workbuf) != cnt) {
+		if (crossfade (data, cnt, 0) != cnt) {
 			return 0;
 		}
 

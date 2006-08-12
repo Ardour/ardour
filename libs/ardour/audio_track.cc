@@ -627,7 +627,7 @@ AudioTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jac
 }
 
 int
-AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
+AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
 {
 	gain_t  gain_automation[nframes];
 	gain_t  gain_buffer[nframes];
@@ -645,7 +645,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbu
 	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(diskstream.playlist());
 	assert(apl);
 
-	if (apl->read (buffers[0], mix_buffer, gain_buffer, workbuf, start, nframes) != nframes) {
+	if (apl->read (buffers[0], mix_buffer, gain_buffer, start, nframes) != nframes) {
 		return -1;
 	}
 
@@ -655,7 +655,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, char * workbuf, uint32_t nbu
 	++bi;
 	for (; bi != buffers.end(); ++bi, ++n) {
 		if (n < diskstream.n_channels()) {
-			if (apl->read ((*bi), mix_buffer, gain_buffer, workbuf, start, nframes, n) != nframes) {
+			if (apl->read ((*bi), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
 				return -1;
 			}
 			b = (*bi);

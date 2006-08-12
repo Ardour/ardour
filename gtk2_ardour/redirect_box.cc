@@ -957,44 +957,61 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 		
 		if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {
 			
-			PluginUIWindow *plugin_ui;
-			
-			if (plugin_insert->get_gui() == 0) {
-				
-				string title;
-				string maker = plugin_insert->plugin()->maker();
-				string::size_type email_pos;
-				
-				if ((email_pos = maker.find_first_of ('<')) != string::npos) {
-					maker = maker.substr (0, email_pos - 1);
-				}
-				
-				if (maker.length() > 32) {
-					maker = maker.substr (0, 32);
-					maker += " ...";
-				}
+			ARDOUR::PluginType type = plugin_insert->type();
 
-				title = string_compose(_("ardour: %1: %2 (by %3)"), _route->name(), plugin_insert->name(), maker);	
+			if (type == ARDOUR::LADSPA || type == ARDOUR::VST) {
+				PluginUIWindow *plugin_ui;
+			
+				if (plugin_insert->get_gui() == 0) {
 				
-				plugin_ui = new PluginUIWindow (_session.engine(), plugin_insert);
-				if (_owner_is_mixer) {
-					ARDOUR_UI::instance()->the_mixer()->ensure_float (*plugin_ui);
+					string title;
+					string maker = plugin_insert->plugin()->maker();
+					string::size_type email_pos;
+				
+					if ((email_pos = maker.find_first_of ('<')) != string::npos) {
+						maker = maker.substr (0, email_pos - 1);
+					}
+				
+					if (maker.length() > 32) {
+						maker = maker.substr (0, 32);
+						maker += " ...";
+					}
+
+					title = string_compose(_("ardour: %1: %2 (by %3)"), _route->name(), plugin_insert->name(), maker);	
+				
+					plugin_ui = new PluginUIWindow (plugin_insert);
+					if (_owner_is_mixer) {
+						ARDOUR_UI::instance()->the_mixer()->ensure_float (*plugin_ui);
+					} else {
+						ARDOUR_UI::instance()->the_editor().ensure_float (*plugin_ui);
+					}
+					plugin_ui->set_title (title);
+					plugin_insert->set_gui (plugin_ui);
+				
 				} else {
-					ARDOUR_UI::instance()->the_editor().ensure_float (*plugin_ui);
+					plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
 				}
-				plugin_ui->set_title (title);
-				plugin_insert->set_gui (plugin_ui);
+			
+				if (plugin_ui->is_visible()) {
+					plugin_ui->get_window()->raise ();
+				} else {
+					plugin_ui->show_all ();
+				}
+#ifdef HAVE_COREAUDIO
+			} else if (type == ARDOUR::AudioUnit) {
+				AUPluginUI* plugin_ui;
+				if (plugin_insert->get_gui() == 0) {
+					plugin_ui = new AUPluginUI (plugin_insert);
+				} else {
+					plugin_ui = reinterpret_cast<AUPluginUI*> (plugin_insert->get_gui());
+				}
 				
+				// raise window, somehow
+#endif				
 			} else {
-				plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
+				warning << "Unsupported plugin sent to RedirectBox::edit_redirect()" << endmsg;
+				return;
 			}
-			
-			if (plugin_ui->is_visible()) {
-				plugin_ui->get_window()->raise ();
-			} else {
-				plugin_ui->show_all ();
-			}
-			
 		} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
 			
 			if (!_session.engine().connected()) {

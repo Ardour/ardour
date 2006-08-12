@@ -152,7 +152,7 @@ bool
 Track::can_record()
 {
 	bool will_record = true;
-	for (int i = 0; i < _inputs.size() && will_record; i++) {
+	for (size_t i = 0; i < _inputs.size() && will_record; i++) {
 		if (!_inputs[i]->connected())
 			will_record = false;
 	}

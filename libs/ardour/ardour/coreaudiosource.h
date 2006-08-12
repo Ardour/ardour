@@ -38,9 +38,9 @@ class CoreAudioSource : public AudioFileSource {
 	void set_header_timeline_position () {};
 
   protected:
-	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt, char * workbuf) const;
+	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
 	
-	jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt, char * workbuf) 
+	jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt) 
 	{ return 0; }
 	
 

@@ -322,7 +322,7 @@ AUPluginInfo::discover ()
 		
 		AUPluginInfoPtr plug(new AUPluginInfo);
 		plug->name = AUPluginInfo::get_name (temp);
-		plug->type = PluginInfo::AudioUnit;
+		plug->type = ARDOUR::AudioUnit;
 		plug->n_inputs = 0;
 		plug->n_outputs = 0;
 		plug->category = "AudioUnit";

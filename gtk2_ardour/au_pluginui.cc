@@ -23,23 +23,36 @@
 
 #include "plugin_ui.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 
-AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<AUPlugin> ap)
-	: PlugUIBase (pi),
-	  au (ap)
+AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> ap)
 {
+	if ((au = boost::dynamic_pointer_cast<AUPlugin> (ap->plugin())) == 0) {
+		error << _("unknown type of editor-supplying plugin (note: no AudioUnit support in this version of ardour)") << endmsg;
+		throw failed_constructor ();
+	}
+
+#if 0
+	set_position (Gtk::WIN_POS_MOUSE);
+	set_name ("PluginEditor");
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+
+	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)));
+	insert->GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
+
+	if (scrollable) {
+		gint h = _pluginui->get_preferred_height ();
+		if (h > 600) h = 600;
+		set_default_size (450, h); 
+	}
+#endif
 	info << "AUPluginUI created" << endmsg;
 }
 
 AUPluginUI::~AUPluginUI ()
 {
 	// nothing to do here - plugin destructor destroys the GUI
-}
-
-int
-AUPluginUI::get_preferred_height ()
-{
-	return -1;
 }

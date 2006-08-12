@@ -96,6 +96,8 @@ class AUPlugin : public ARDOUR::Plugin
 	std::vector<std::pair<uint32_t, uint32_t> > parameter_map;
 };
 
+typedef boost::shared_ptr<AUPlugin> AUPluginPtr;
+
 class AUPluginInfo : public PluginInfo {
   public:	
 	AUPluginInfo () { };
