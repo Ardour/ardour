@@ -1486,7 +1486,6 @@ ARDOUR_UI::restore_state (string name)
 			name = session->name();
 		}
 		session->restore_state (name);
-                session->restore_history (name);
 	}
 }
 
