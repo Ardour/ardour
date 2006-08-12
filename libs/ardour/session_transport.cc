@@ -324,7 +324,7 @@ Session::non_realtime_stop (bool abort)
                         XMLNode &before = loc->get_state();
                         loc->set_end(_transport_frame);
                         XMLNode &after = loc->get_state();
-                        add_command (new MementoCommand<Location>(*loc, before, after));
+                        add_command (new MementoCommand<Location>(*loc, &before, &after));
 		}
 
 		_end_location_is_free = false;

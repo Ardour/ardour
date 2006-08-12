@@ -64,6 +64,8 @@ AutomationList::AutomationList (double defval, bool with_state)
 	if (!no_state) {
 		save_state (_("initial"));
 	}
+
+        AutomationListCreated(this);
 }
 
 AutomationList::AutomationList (const AutomationList& other)
@@ -91,6 +93,7 @@ AutomationList::AutomationList (const AutomationList& other)
 	}
 
 	mark_dirty ();
+        AutomationListCreated(this);
 }
 
 AutomationList::AutomationList (const AutomationList& other, double start, double end)
@@ -123,6 +126,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	delete section;
 
 	mark_dirty ();
+        AutomationListCreated(this);
 }
 
 AutomationList::~AutomationList()

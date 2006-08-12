@@ -244,6 +244,9 @@ AutomationLine::AutomationLine (const string & name, TimeAxisView& tv, ArdourCan
 	line->signal_event().connect (mem_fun (*this, &AutomationLine::event_handler));
 
 	alist.StateChanged.connect (mem_fun(*this, &AutomationLine::list_changed));
+
+        trackview.session().register_with_memento_command_factory(_id, this);
+
 }
 
 AutomationLine::~AutomationLine ()
@@ -888,7 +891,7 @@ AutomationLine::start_drag (ControlPoint* cp, float fraction)
 	}
 
 	trackview.editor.current_session()->begin_reversible_command (str);
-	trackview.editor.current_session()->add_command (new MementoUndoCommand<AutomationLine>(*this, get_state()));
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationLine>(*this, &get_state(), 0));
 	
 	first_drag_fraction = fraction;
 	last_drag_fraction = fraction;
@@ -937,7 +940,7 @@ AutomationLine::end_drag (ControlPoint* cp)
 
 		update_pending = false;
 
-		trackview.editor.current_session()->add_command (new MementoRedoCommand<AutomationLine>(*this, get_state()));
+		trackview.editor.current_session()->add_command (new MementoCommand<AutomationLine>(*this, 0, &get_state()));
 		trackview.editor.current_session()->commit_reversible_command ();
 		trackview.editor.current_session()->set_dirty ();
 	}
@@ -1018,7 +1021,7 @@ AutomationLine::remove_point (ControlPoint& cp)
 
 	alist.erase (mr.start, mr.end);
 
-	trackview.editor.current_session()->add_command(new MementoCommand<AutomationLine>(*this, before, get_state()));
+	trackview.editor.current_session()->add_command(new MementoCommand<AutomationLine>(*this, &before, &get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }
@@ -1228,7 +1231,7 @@ AutomationLine::clear ()
 	/* parent must create command */
         XMLNode &before = get_state();
 	alist.clear();
-	trackview.editor.current_session()->add_command (new MementoCommand<AutomationLine>(*this, before, get_state()));
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationLine>(*this, &before, &get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }

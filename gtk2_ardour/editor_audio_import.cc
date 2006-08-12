@@ -323,7 +323,7 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 			begin_reversible_command (_("insert sndfile"));
                         XMLNode &before = playlist->get_state();
 			playlist->add_region (*copy, pos);
-			session->add_command (new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+			session->add_command (new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 			commit_reversible_command ();
 
 			pos += region.length();

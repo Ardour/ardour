@@ -575,7 +575,7 @@ RouteUI::reversibly_apply_route_boolean (string name, void (Route::*func)(bool, 
         XMLNode &before = _route->get_state();
         bind(mem_fun(*_route, func), yn, arg)();
         XMLNode &after = _route->get_state();
-        _session.add_command (new MementoCommand<Route>(*_route, before, after));
+        _session.add_command (new MementoCommand<Route>(*_route, &before, &after));
 	_session.commit_reversible_command ();
 }
 
@@ -586,7 +586,7 @@ RouteUI::reversibly_apply_audio_track_boolean (string name, void (AudioTrack::*f
         XMLNode &before = audio_track()->get_state();
 	bind (mem_fun (*audio_track(), func), yn, arg)();
         XMLNode &after = audio_track()->get_state();
-	_session.add_command (new MementoCommand<AudioTrack>(*audio_track(), before, after));
+	_session.add_command (new MementoCommand<AudioTrack>(*audio_track(), &before, &after));
 	_session.commit_reversible_command ();
 }
 

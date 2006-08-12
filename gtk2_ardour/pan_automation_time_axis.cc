@@ -92,7 +92,7 @@ PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEv
 	XMLNode &before = alist.get_state();
 	alist.add (when, y);
 	XMLNode &after = alist.get_state();
-        _session.add_command(new MementoCommand<AutomationList>(alist, before, after));
+        _session.add_command(new MementoCommand<AutomationList>(alist, &before, &after));
 	_session.commit_reversible_command ();
 	_session.set_dirty ();
 }

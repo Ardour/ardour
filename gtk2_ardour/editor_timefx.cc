@@ -210,7 +210,7 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 		XMLNode &before = playlist->get_state();
 		playlist->replace_region (region, *new_region, region.position());
 		XMLNode &after = playlist->get_state();
-		session->add_command (new MementoCommand<Playlist>(*playlist, before, after));
+		session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
 
 		i = tmp;
 	}

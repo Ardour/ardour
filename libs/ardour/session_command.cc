@@ -2,24 +2,85 @@
 #include <ardour/route.h>
 #include <pbd/memento_command.h>
 #include <ardour/diskstream.h>
+#include <ardour/playlist.h>
+#include <ardour/tempo.h>
+#include <ardour/audiosource.h>
+#include <ardour/audioregion.h>
+#include <pbd/error.h>
+using namespace PBD;
+#include "i18n.h"
+
 
 namespace ARDOUR {
 
+static map<PBD::ID, Stateful*> registry;
+
+void Session::register_with_memento_command_factory(PBD::ID id, Stateful *ptr)
+{
+    registry[id] = ptr;
+}
+    
 Command *Session::memento_command_factory(XMLNode *n)
 {
     PBD::ID id;
-    XMLNode *before, *after;
+    XMLNode *before = 0, *after = 0;
 
-    /* get obj_id */
+    /* get id */
+    id = PBD::ID(n->property("obj_id")->value());
 
-    /* get before and/or after */
+    /* get before/after */
+    if (n->name() == "MementoCommand")
+    {
+        before = n->children().front();
+        after = n->children().back();
+    } else if (n->name() == "MementoUndoCommand")
+        before = n->children().front();
+    else if (n->name() == "MementoRedoCommand")
+        after = n->children().front();
 
-    /* get an object by id by trial and error, and use it to construct an
-     * appropriate memento command */
-    // e.g.
-    if (Diskstream *obj = diskstream_by_id(id))
-	return new MementoCommand<Diskstream>(*obj, *before, *after);
-    // etc.
+
+    /* create command */
+    string obj_T = n->children().front()->name();
+    if (obj_T == "AudioRegion" || obj_T == "Region")
+    {
+        if (audio_regions.count(id))
+            return new MementoCommand<AudioRegion>(*audio_regions[id], before, after);
+    }
+    else if (obj_T == "AudioSource")
+    {
+        if (audio_sources.count(id))
+            return new MementoCommand<AudioSource>(*audio_sources[id], before, after);
+    }
+    else if (obj_T == "Location")
+        return new MementoCommand<Location>(*_locations.get_location_by_id(id), before, after);
+    else if (obj_T == "Locations")
+        return new MementoCommand<Locations>(_locations, before, after);
+    else if (obj_T == "TempoMap")
+        return new MementoCommand<TempoMap>(*_tempo_map, before, after);
+    else if (obj_T == "Playlist" || obj_T == "AudioPlaylist")
+    {
+        if (Playlist *pl = playlist_by_name(before->property("name")->value()))
+            return new MementoCommand<Playlist>(*pl, before, after);
+    }
+    else if (obj_T == "Route") // inlcudes AudioTrack
+        return new MementoCommand<Route>(*route_by_id(id), before, after);
+    // For Editor and AutomationLine which are off-limits here
+    else if (registry.count(id))
+        return new MementoCommand<Stateful>(*registry[id], before, after);
+    else if (obj_T == "Curve")
+    {
+        if (curves.count(id))
+            return new MementoCommand<Curve>(*curves[id], before, after);
+    }
+    else if (obj_T == "AutomationList")
+    {
+        if (automation_lists.count(id))
+            return new MementoCommand<AutomationList>(*automation_lists[id], before, after);
+    }
+
+    /* we failed */
+    error << _("could not reconstitute MementoCommand from XMLNode. id=") << id.to_s() << endmsg;
+    return 0;
 }
 
 // solo
