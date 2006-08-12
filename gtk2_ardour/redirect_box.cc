@@ -54,7 +54,6 @@
 #include "route_redirect_selection.h"
 #include "mixer_ui.h"
 #include "actions.h"
-
 #include "plugin_ui.h"
 #include "send_ui.h"
 #include "io_selector.h"
@@ -62,6 +61,10 @@
 #include "gui_thread.h"
 
 #include "i18n.h"
+
+#ifdef HAVE_COREAUDIO
+#include "au_pluginui.h"
+#endif
 
 using namespace sigc;
 using namespace ARDOUR;
@@ -950,7 +953,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 		
 	} else {
 		
-		/* its an insert */
+		/* it's an insert */
 		
 		boost::shared_ptr<PluginInsert> plugin_insert;
 		boost::shared_ptr<PortInsert> port_insert;
@@ -979,7 +982,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 
 					title = string_compose(_("ardour: %1: %2 (by %3)"), _route->name(), plugin_insert->name(), maker);	
 				
-					plugin_ui = new PluginUIWindow (_session.engine(), plugin_insert);
+					plugin_ui = new PluginUIWindow (plugin_insert);
 					if (_owner_is_mixer) {
 						ARDOUR_UI::instance()->the_mixer()->ensure_float (*plugin_ui);
 					} else {
@@ -1001,7 +1004,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 			} else if (type == ARDOUR::AudioUnit) {
 				AUPluginUI* plugin_ui;
 				if (plugin_insert->get_gui() == 0) {
-					plugin_ui = new AUPluginUI (_session.engine(), plugin_insert);
+					plugin_ui = new AUPluginUI (plugin_insert);
 				} else {
 					plugin_ui = reinterpret_cast<AUPluginUI*> (plugin_insert->get_gui());
 				}
@@ -1012,6 +1015,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 				warning << "Unsupported plugin sent to RedirectBox::edit_redirect()" << endmsg;
 				return;
 			}
+
 		} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
 			
 			if (!_session.engine().connected()) {

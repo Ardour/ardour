@@ -165,19 +165,30 @@ Editor::update_current_screen ()
 
 		if (_follow_playhead) {
 
-		  playhead_cursor->canvas_item.show();
-			if (frame != last_update_frame) {
 
-				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
-					
+			playhead_cursor->canvas_item.show();
+			if (frame != last_update_frame) {
+				const jack_nframes_t page_width = current_page_frames();
+
+				// Percentage width of the visible range to use as a scroll interval
+				// Idea: snap this to the nearest bar/beat/tick/etc, would make scrolling much
+				// less jarring when zoomed in.. and it would be fun to watch :)
+				static const double scroll_pct = 3.0/4.0;
+
+				const jack_nframes_t rightmost_frame = leftmost_frame + page_width;
+				const jack_nframes_t scroll_interval = (jack_nframes_t)(page_width * scroll_pct);
+				const jack_nframes_t padding = (jack_nframes_t)floor((page_width-scroll_interval) / 2.0);
+
+				if (frame < leftmost_frame + padding || frame > rightmost_frame - padding) {
+
 					if (session->transport_speed() < 0) {
-						if (frame > (current_page_frames()/2)) {
-							center_screen (frame-(current_page_frames()/2));
+						if (frame > scroll_interval) {
+							center_screen (frame - scroll_interval/2);
 						} else {
-							center_screen (current_page_frames()/2);
+							center_screen (scroll_interval);
 						}
 					} else {
-						center_screen (frame+(current_page_frames()/2));
+						center_screen(frame + scroll_interval/2);
 					}
 				}
 
@@ -185,7 +196,7 @@ Editor::update_current_screen ()
 			}
 
 		} else {
-			
+
 			if (frame != last_update_frame) {
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
 					playhead_cursor->canvas_item.hide();
@@ -200,7 +211,7 @@ Editor::update_current_screen ()
 		if (current_mixer_strip) {
 			current_mixer_strip->fast_update ();
 		}
-		
+
 	}
 }
 

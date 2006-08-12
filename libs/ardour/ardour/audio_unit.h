@@ -86,6 +86,9 @@ class AUPlugin : public ARDOUR::Plugin
     
 	bool has_editor () const;
 	
+	CAAudioUnit* get_au () { return unit; }
+	CAComponent* get_comp () { return comp; }
+	
   private:
 	CAComponent* comp;
     CAAudioUnit* unit;
@@ -110,6 +113,7 @@ class AUPluginInfo : public PluginInfo {
 
   private:
 	static std::string get_name (CAComponentDescription&);
+	void setup_nchannels (CAComponentDescription&);
 };
 
 typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;

@@ -6,32 +6,29 @@
  
 #include <list> 
  
+ 
 template<class T>
 class RCUManager
 {
-public:
+  public:
  
-	RCUManager (T* new_rcu_value)
-		: m_rcu_value(new_rcu_value)
-	{
- 
+	RCUManager (T* new_rcu_value) {
+		m_rcu_value = new boost::shared_ptr<T> (new_rcu_value);
 	}
  
-	virtual ~RCUManager() { }
+	virtual ~RCUManager() { delete m_rcu_value; }
  
-	boost::shared_ptr<T> reader () const { return m_rcu_value; }
+        boost::shared_ptr<T> reader () const { return *((boost::shared_ptr<T> *) g_atomic_pointer_get (&m_rcu_value)); }
  
-	// should be private
 	virtual boost::shared_ptr<T> write_copy () = 0;
- 
-	// should be private
-	virtual void update (boost::shared_ptr<T> new_value) = 0;
- 
-protected:
- 
-	boost::shared_ptr<T> m_rcu_value;
- 
- 
+	virtual bool update (boost::shared_ptr<T> new_value) = 0;
+
+  protected:
+	boost::shared_ptr<T>* m_rcu_value;
+
+	// this monstrosity is needed because of some wierd behavior by g++
+
+	gpointer * the_pointer() const { return (gpointer *) &m_rcu_value; }
 };
  
  
@@ -49,37 +46,63 @@ public:
 	virtual boost::shared_ptr<T> write_copy ()
 	{
 		m_lock.lock();
- 
-		// I hope this is doing what I think it is doing :)
-		boost::shared_ptr<T> new_copy(new T(*RCUManager<T>::m_rcu_value));
- 
-		// XXX todo remove old copies with only 1 reference from the list.
- 
+
+		// clean out any dead wood
+
+		typename std::list<boost::shared_ptr<T> >::iterator i;
+
+		for (i = m_dead_wood.begin(); i != m_dead_wood.end(); ) {
+			if ((*i).use_count() == 1) {
+				i = m_dead_wood.erase (i);
+			} else {
+				++i;
+			}
+		}
+
+		// store the current 
+
+		current_write_old = RCUManager<T>::m_rcu_value;
+		
+		boost::shared_ptr<T> new_copy (new T(**current_write_old));
+		
 		return new_copy;
 	}
  
-	virtual void update (boost::shared_ptr<T> new_value)
+	virtual bool update (boost::shared_ptr<T> new_value)
 	{
-		// So a current reader doesn't hold the only reference to
-		// the existing value when we assign it a new value which 
-		// should ensure that deletion of old values doesn't
-		// occur in a reader thread.
-		boost::shared_ptr<T> old_copy = RCUManager<T>::m_rcu_value;
- 
 		// we hold the lock at this point effectively blocking
 		// other writers.
-		RCUManager<T>::m_rcu_value = new_value;
- 
- 
-		// XXX add the old value to the list of old copies.
- 
+
+		boost::shared_ptr<T>* new_spp = new boost::shared_ptr<T> (new_value);
+
+		// update, checking that nobody beat us to it
+
+		bool ret = g_atomic_pointer_compare_and_exchange (RCUManager<T>::the_pointer(),
+								  (gpointer) current_write_old,
+								  (gpointer) new_spp);
+		
+		if (ret) {
+
+			// successful update : put the old value into dead_wood,
+
+			m_dead_wood.push_back (*current_write_old);
+
+			// now delete it - this gets rid of the shared_ptr<T> but
+			// because dead_wood contains another shared_ptr<T> that
+			// references the same T, the underlying object lives on
+
+			delete current_write_old;
+		}
+
 		m_lock.unlock();
+
+		return ret;
 	}
  
 private:
-	Glib::Mutex			m_lock;
- 
-	std::list<boost::shared_ptr<T> > m_old_values;
+	Glib::Mutex			 m_lock;
+	boost::shared_ptr<T>*            current_write_old;
+	std::list<boost::shared_ptr<T> > m_dead_wood;
 };
  
 template<class T>

@@ -9,7 +9,6 @@ Command *Session::memento_command_factory(XMLNode *n)
 {
     PBD::ID id;
     XMLNode *before, *after;
-    //void *obj;
 
     /* get obj_id */
 
@@ -21,6 +20,7 @@ Command *Session::memento_command_factory(XMLNode *n)
     if (Diskstream *obj = diskstream_by_id(id))
 	return new MementoCommand<Diskstream>(*obj, *before, *after);
     // etc.
+	
 	return 0;
 }
 

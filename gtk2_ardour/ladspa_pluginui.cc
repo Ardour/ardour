@@ -35,7 +35,6 @@
 
 #include <midi++/manager.h>
 
-#include <ardour/audioengine.h>
 #include <ardour/plugin.h>
 #include <ardour/insert.h>
 #include <ardour/ladspa_plugin.h>
@@ -57,9 +56,8 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 
-LadspaPluginUI::LadspaPluginUI (AudioEngine &engine, boost::shared_ptr<PluginInsert> pi, bool scrollable)
+LadspaPluginUI::LadspaPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrollable)
 	: PlugUIBase (pi),
-	  engine(engine),
 	  button_table (initial_button_rows, initial_button_cols),
 	  output_table (initial_output_rows, initial_output_cols),
 	  hAdjustment(0.0, 0.0, 0.0),
@@ -108,7 +106,7 @@ LadspaPluginUI::LadspaPluginUI (AudioEngine &engine, boost::shared_ptr<PluginIns
 	insert->active_changed.connect (mem_fun(*this, &LadspaPluginUI::redirect_active_changed));
 	bypass_button.set_active (!insert->active());
 	
-	build (engine);
+	build ();
 }
 
 LadspaPluginUI::~LadspaPluginUI ()
@@ -119,7 +117,7 @@ LadspaPluginUI::~LadspaPluginUI ()
 }
 
 void
-LadspaPluginUI::build (AudioEngine &engine)
+LadspaPluginUI::build ()
 
 {
 	guint32 i = 0;
@@ -131,7 +129,6 @@ LadspaPluginUI::build (AudioEngine &engine)
 	int button_row, button_col;
 	int output_rows, output_cols;
 	int button_rows, button_cols;
-	guint32 n_ins=0, n_outs = 0;
 
 	prefheight = 30;
 	hpacker.set_spacing (10);
@@ -203,7 +200,7 @@ LadspaPluginUI::build (AudioEngine &engine)
 				}
 			}
 
-			if ((cui = build_control_ui (engine, i, plugin->get_nth_control (i))) == 0) {
+			if ((cui = build_control_ui (i, plugin->get_nth_control (i))) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
 			}
@@ -265,9 +262,6 @@ LadspaPluginUI::build (AudioEngine &engine)
 
 		} 
 	}
-
-	n_ins = plugin->get_info()->n_inputs;
-	n_outs = plugin->get_info()->n_outputs;
 
 	if (box->children().empty()) {
 		hpacker.remove (*frame);
@@ -359,7 +353,7 @@ LadspaPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 }
 
 LadspaPluginUI::ControlUI*
-LadspaPluginUI::build_control_ui (AudioEngine &engine, guint32 port_index, PBD::Controllable* mcontrol)
+LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontrol)
 
 {
 	ControlUI* control_ui;
@@ -757,3 +751,4 @@ LadspaPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 
 	return enums;
 }
+

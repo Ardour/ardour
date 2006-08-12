@@ -37,7 +37,6 @@
 
 #include <midi++/manager.h>
 
-#include <ardour/audioengine.h>
 #include <ardour/plugin.h>
 #include <ardour/insert.h>
 #include <ardour/ladspa_plugin.h>
@@ -63,7 +62,7 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 
-PluginUIWindow::PluginUIWindow (AudioEngine &engine, boost::shared_ptr<PluginInsert> insert, bool scrollable)
+PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scrollable)
 	: ArdourDialog ("plugin ui")
 {
 	if (insert->plugin()->has_editor()) {
@@ -92,7 +91,7 @@ PluginUIWindow::PluginUIWindow (AudioEngine &engine, boost::shared_ptr<PluginIns
 
 	} else {
 
-		LadspaPluginUI*  pu  = new LadspaPluginUI (engine, insert, scrollable);
+		LadspaPluginUI*  pu  = new LadspaPluginUI (insert, scrollable);
 		
 		_pluginui = pu;
 		get_vbox()->add (*pu);

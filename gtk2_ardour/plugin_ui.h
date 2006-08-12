@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,7 +45,6 @@
 #include <ardour/types.h>
 
 namespace ARDOUR {
-	class AudioEngine;
 	class PluginInsert;
 	class Plugin;
 	class VSTPlugin;
@@ -90,7 +89,7 @@ class PlugUIBase : public virtual sigc::trackable
 class LadspaPluginUI : public PlugUIBase, public Gtk::VBox 
 {
   public:
-	LadspaPluginUI (ARDOUR::AudioEngine &, boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
+	LadspaPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
 	~LadspaPluginUI ();
 	
 	gint get_preferred_height () { return prefheight; }
@@ -99,7 +98,6 @@ class LadspaPluginUI : public PlugUIBase, public Gtk::VBox
 	bool stop_updating(GdkEventAny*);
 
   private:
-	ARDOUR::AudioEngine &engine;
 	Gtk::HBox settings_box;
 	Gtk::HBox hpacker;
 	
@@ -174,8 +172,8 @@ class LadspaPluginUI : public PlugUIBase, public Gtk::VBox
 	sigc::connection screen_update_connection;
 	void output_update();
 	
-	void build (ARDOUR::AudioEngine &);
-	ControlUI* build_control_ui (ARDOUR::AudioEngine &, guint32 port_index, PBD::Controllable *);
+	void build ();
+	ControlUI* build_control_ui (guint32 port_index, PBD::Controllable *);
 	std::vector<string> setup_scale_values(guint32 port_index, ControlUI* cui);
 	void control_adjustment_changed (ControlUI* cui);
 	void parameter_changed (uint32_t, float, ControlUI* cui);
@@ -197,7 +195,7 @@ class LadspaPluginUI : public PlugUIBase, public Gtk::VBox
 class PluginUIWindow : public ArdourDialog
 {
   public:
-	PluginUIWindow (ARDOUR::AudioEngine &, boost::shared_ptr<ARDOUR::PluginInsert> insert, bool scrollable=false);
+	PluginUIWindow (boost::shared_ptr<ARDOUR::PluginInsert> insert, bool scrollable=false);
 	~PluginUIWindow ();
 
 	PlugUIBase& pluginui() { return *_pluginui; }
@@ -235,17 +233,5 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	void save_plugin_setting ();
 };
 #endif // VST_SUPPORT
-
-#ifdef HAVE_COREAUDIO
-class AUPluginUI
-{
-  public:
-	AUPluginUI (ARDOUR::AudioEngine&, boost::shared_ptr<ARDOUR::PluginInsert>);
-	~AUPluginUI ();
-	
-  private:
-	boost::shared_ptr<ARDOUR::AUPlugin> au;
-};
-#endif // HAVE_COREAUDIO
 
 #endif /* __ardour_plugin_ui_h__ */

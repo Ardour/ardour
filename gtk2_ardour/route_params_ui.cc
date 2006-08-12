@@ -556,7 +556,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Redirect> redirect,
 				
 		if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {				
 
-			LadspaPluginUI *plugin_ui = new LadspaPluginUI (session->engine(), plugin_insert, true);
+			LadspaPluginUI *plugin_ui = new LadspaPluginUI (plugin_insert, true);
 
 			if (place == PreFader) {
 				cleanup_pre_view();
