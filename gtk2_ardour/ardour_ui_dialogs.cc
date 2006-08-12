@@ -156,7 +156,6 @@ ARDOUR_UI::unload_session ()
 			
 		case 1:
 			session->save_state ("");
-                        session->save_history ("");
 			break;
 		}
 	}

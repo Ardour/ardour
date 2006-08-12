@@ -31,12 +31,12 @@ Command *Session::memento_command_factory(XMLNode *n)
     /* get before/after */
     if (n->name() == "MementoCommand")
     {
-        before = n->children().front();
-        after = n->children().back();
+        before = new XMLNode(*n->children().front());
+        after = new XMLNode(*n->children().back());
     } else if (n->name() == "MementoUndoCommand")
-        before = n->children().front();
+        before = new XMLNode(*n->children().front());
     else if (n->name() == "MementoRedoCommand")
-        after = n->children().front();
+        after = new XMLNode(*n->children().front());
 
 
     /* create command */
@@ -64,9 +64,6 @@ Command *Session::memento_command_factory(XMLNode *n)
     }
     else if (obj_T == "Route") // inlcudes AudioTrack
         return new MementoCommand<Route>(*route_by_id(id), before, after);
-    // For Editor and AutomationLine which are off-limits here
-    else if (registry.count(id))
-        return new MementoCommand<Stateful>(*registry[id], before, after);
     else if (obj_T == "Curve")
     {
         if (curves.count(id))
@@ -77,6 +74,9 @@ Command *Session::memento_command_factory(XMLNode *n)
         if (automation_lists.count(id))
             return new MementoCommand<AutomationList>(*automation_lists[id], before, after);
     }
+    // For Editor and AutomationLine which are off-limits here
+    else if (registry.count(id))
+        return new MementoCommand<Stateful>(*registry[id], before, after);
 
     /* we failed */
     error << _("could not reconstitute MementoCommand from XMLNode. id=") << id.to_s() << endmsg;

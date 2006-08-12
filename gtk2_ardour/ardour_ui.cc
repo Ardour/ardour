@@ -1298,7 +1298,6 @@ ARDOUR_UI::start_engine ()
 			   settings for a new session 
 			*/
 			session->save_state ("");
-                        session->save_history ("");
 		}
 
 		/* there is too much going on, in too many threads, for us to 
@@ -1472,7 +1471,6 @@ ARDOUR_UI::save_state_canfail (string name)
 		}
 
 		if ((ret = session->save_state (name)) != 0) {
-                        session->save_history (name);
 			return ret;
 		}
 	}

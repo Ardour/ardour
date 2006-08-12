@@ -40,6 +40,8 @@ using namespace ARDOUR;
 using namespace sigc;
 using namespace PBD;
 
+sigc::signal<void, Curve*> Curve::CurveCreated;
+
 Curve::Curve (double minv, double maxv, double canv, bool nostate)
 	: AutomationList (canv, nostate)
 {

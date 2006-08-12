@@ -263,7 +263,7 @@ Session::Session (AudioEngine &eng,
 {
 	bool new_session;
 
-	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << endl;
+	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
 
 	n_physical_outputs = _engine.n_physical_outputs();
 	n_physical_inputs =  _engine.n_physical_inputs();
@@ -312,7 +312,7 @@ Session::Session (AudioEngine &eng,
 {
 	bool new_session;
 
-	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << endl;
+	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
 
 	n_physical_outputs = max (requested_physical_out, _engine.n_physical_outputs());
 	n_physical_inputs = max (requested_physical_in, _engine.n_physical_inputs());
@@ -1007,7 +1007,6 @@ Session::auto_punch_start_changed (Location* location)
 	if (get_record_enabled() && get_punch_in()) {
 		/* capture start has been changed, so save new pending state */
 		save_state ("", true);
-                save_history("");
 	}
 }	
 
@@ -1325,7 +1324,6 @@ Session::maybe_enable_record ()
 	*/
 
 	save_state ("", true);
-        save_history ("");
 
 	if (_transport_speed) {
 		if (!punch_in) {
@@ -1889,7 +1887,6 @@ Session::add_route (shared_ptr<Route> route)
 
 	set_dirty();
 	save_state (_current_snapshot_name);
-	save_history (_current_snapshot_name);
 
 	RouteAdded (route); /* EMIT SIGNAL */
 }
@@ -1921,7 +1918,6 @@ Session::add_diskstream (Diskstream* dstream)
 
 	set_dirty();
 	save_state (_current_snapshot_name);
-        save_history (_current_snapshot_name);
 
 	DiskstreamAdded (dstream); /* EMIT SIGNAL */
 }
@@ -1986,7 +1982,6 @@ Session::remove_route (shared_ptr<Route> route)
 	/* XXX should we disconnect from the Route's signals ? */
 
 	save_state (_current_snapshot_name);
-	save_history (_current_snapshot_name);
 
 	/* all shared ptrs to route should go out of scope here */
 }	
@@ -2689,7 +2684,6 @@ Session::remove_source (Source* source)
 		*/
 		
 		save_state (_current_snapshot_name);
-                save_history (_current_snapshot_name);
 	}
 
 	SourceRemoved(source); /* EMIT SIGNAL */
