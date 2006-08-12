@@ -349,6 +349,7 @@ Session::second_stage_init (bool new_session)
 		_end_location_is_free = false;
 	}
 	
+        restore_history(_current_snapshot_name);
 	return 0;
 }
 
@@ -715,6 +716,7 @@ Session::save_state (string snapshot_name, bool pending)
 	}
 
 	if (!pending) {
+                save_history(snapshot_name);
 
 		bool was_dirty = dirty();
 
@@ -1690,7 +1692,6 @@ Session::set_state (const XMLNode& node)
 
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
-                save_history (_current_snapshot_name);
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
@@ -2478,7 +2479,6 @@ void
 Session::auto_save()
 {
 	save_state (_current_snapshot_name);
-        save_history (_current_snapshot_name);
 }
 
 RouteGroup *
@@ -3150,7 +3150,6 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	*/
 	
 	save_state ("");
-	save_history ("");
 
   out:
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state & ~InCleanup);
@@ -3290,6 +3289,7 @@ Session::save_history (string snapshot_name)
     string xml_path;
     string bak_path;
 
+
     tree.set_root (&history.get_state());
 
     if (snapshot_name.empty()) {
@@ -3297,6 +3297,7 @@ Session::save_history (string snapshot_name)
     }
 
     xml_path = _path + snapshot_name + ".history"; 
+    info << "Saving history to " << xml_path << endmsg;
 
     bak_path = xml_path + ".bak";
 
@@ -3340,6 +3341,8 @@ Session::restore_history (string snapshot_name)
     /* read xml */
     xmlpath = _path + snapshot_name + ".history";
 
+    info << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
+
     if (access (xmlpath.c_str(), F_OK)) {
         error << string_compose(_("%1: session history file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
         return 1;
@@ -3349,6 +3352,8 @@ Session::restore_history (string snapshot_name)
         error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
         return -1;
     }
+
+    info << "root children " << tree.root()->children().size() << endmsg;
 
     /* replace history */
     history.clear();
@@ -3388,5 +3393,10 @@ Session::restore_history (string snapshot_name)
         }
         history.add(ut);
     }
+
+    XMLTree tree2;
+    tree2.set_root(&history.get_state());
+    info << tree2.write_buffer() << endmsg;
+
     return 0;
 }
