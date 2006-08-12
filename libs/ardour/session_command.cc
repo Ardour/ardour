@@ -24,6 +24,7 @@ Command *Session::memento_command_factory(XMLNode *n)
 {
     PBD::ID id;
     XMLNode *before = 0, *after = 0;
+    XMLNode *child;
 
     /* get id */
     id = PBD::ID(n->property("obj_id")->value());
@@ -33,10 +34,23 @@ Command *Session::memento_command_factory(XMLNode *n)
     {
         before = new XMLNode(*n->children().front());
         after = new XMLNode(*n->children().back());
+	child = before;
     } else if (n->name() == "MementoUndoCommand")
+    {
         before = new XMLNode(*n->children().front());
+	child = before;
+    }
     else if (n->name() == "MementoRedoCommand")
+    {
         after = new XMLNode(*n->children().front());
+	child = after;
+    }
+
+    if (!child)
+    {
+	error << _("Tried to reconstitute a MementoCommand with no contents, failing. id=") << id.to_s() << endmsg;
+	return 0;
+    }
 
 
     /* create command */
@@ -59,7 +73,7 @@ Command *Session::memento_command_factory(XMLNode *n)
         return new MementoCommand<TempoMap>(*_tempo_map, before, after);
     else if (obj_T == "Playlist" || obj_T == "AudioPlaylist")
     {
-        if (Playlist *pl = playlist_by_name(before->property("name")->value()))
+        if (Playlist *pl = playlist_by_name(child->property("name")->value()))
             return new MementoCommand<Playlist>(*pl, before, after);
     }
     else if (obj_T == "Route") // inlcudes AudioTrack

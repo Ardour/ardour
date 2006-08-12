@@ -834,3 +834,14 @@ Locations::num_range_markers () const
 	}
 	return cnt;
 }
+
+Location *
+Locations::get_location_by_id(PBD::ID id)
+{
+    LocationList::iterator it;
+    for (it  = locations.begin(); it != locations.end(); it++)
+        if (id == (*it)->id())
+            return *it;
+
+    return 0;
+}
