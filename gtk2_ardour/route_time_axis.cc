@@ -61,8 +61,6 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "playlist_selector.h"
-#include "plugin_selector.h"
-#include "plugin_ui.h"
 #include "point_selection.h"
 #include "prompter.h"
 #include "public_editor.h"

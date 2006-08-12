@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -233,17 +233,5 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	void save_plugin_setting ();
 };
 #endif // VST_SUPPORT
-
-#ifdef HAVE_COREAUDIO
-class AUPluginUI
-{
-  public:
-	AUPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>);
-	~AUPluginUI ();
-	
-  private:
-	boost::shared_ptr<ARDOUR::AUPlugin> au;
-};
-#endif // HAVE_COREAUDIO
 
 #endif /* __ardour_plugin_ui_h__ */

@@ -137,7 +137,7 @@ AUPlugin::get_parameter (uint32_t which) const
 int
 AUPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const
 {
-	return -1;
+	return 0;
 }
 
 uint32_t
@@ -325,6 +325,7 @@ AUPluginInfo::discover ()
 		plug->type = ARDOUR::AudioUnit;
 		plug->n_inputs = 0;
 		plug->n_outputs = 0;
+		// plug->setup_nchannels (temp);
 		plug->category = "AudioUnit";
 		plug->desc = new CAComponentDescription(temp);
 
@@ -375,4 +376,21 @@ AUPluginInfo::get_name (CAComponentDescription& comp_desc)
 	}
 	
 	return CFStringRefToStdString(itemName);
+}
+
+void
+AUPluginInfo::setup_nchannels (CAComponentDescription& comp_desc)
+{
+	CAAudioUnit unit;
+	
+	CAAudioUnit::Open (comp_desc, unit);
+	
+	if (unit.SupportsNumChannels()) {
+		n_inputs = n_outputs = 0;
+	} else {
+		AUChannelInfo cinfo;
+		size_t info_size = sizeof(cinfo);
+		OSStatus err = AudioUnitGetProperty (unit.AU(), kAudioUnitProperty_SupportedNumChannels, kAudioUnitScope_Global,
+                                             0, &cinfo, &info_size);
+	}
 }

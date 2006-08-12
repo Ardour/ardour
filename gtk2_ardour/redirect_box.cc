@@ -54,7 +54,6 @@
 #include "route_redirect_selection.h"
 #include "mixer_ui.h"
 #include "actions.h"
-
 #include "plugin_ui.h"
 #include "send_ui.h"
 #include "io_selector.h"
@@ -62,6 +61,10 @@
 #include "gui_thread.h"
 
 #include "i18n.h"
+
+#ifdef HAVE_COREAUDIO
+#include "au_pluginui.h"
+#endif
 
 using namespace sigc;
 using namespace ARDOUR;

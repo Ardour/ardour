@@ -111,10 +111,14 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	compute_colors (basic_color);
 
 	name_highlight->set_data ("regionview", this);
-	name_text->set_data ("regionview", this);
+
+	if (name_text) {
+		name_text->set_data ("regionview", this);
+	}
 
 	/* an equilateral triangle */
-    ArdourCanvas::Points shape;
+
+	ArdourCanvas::Points shape;
 	shape.push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
 	shape.push_back (Gnome::Art::Point ((sync_mark_width - 1)/2, 1));
 	shape.push_back (Gnome::Art::Point (0, sync_mark_width - 1));
