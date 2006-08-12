@@ -302,6 +302,7 @@ class Session : public sigc::trackable, public Stateful
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
 
 	boost::shared_ptr<Route> route_by_name (string);
+	boost::shared_ptr<Route> route_by_id (PBD::ID);
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
 
 	bool route_name_unique (string) const;
@@ -478,6 +479,7 @@ class Session : public sigc::trackable, public Stateful
 	int restore_state (string snapshot_name);
 	int save_template (string template_name);
         int save_history (string snapshot_name = "");
+        int restore_history (string snapshot_name);
 
 	static int rename_template (string old_name, string new_name);
 
@@ -713,6 +715,10 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void> NamedSelectionAdded;
 	sigc::signal<void> NamedSelectionRemoved;
 
+        /* Curves and AutomationLists (TODO when they go away) */
+        void add_curve(Curve*);
+        void add_automation_list(AutomationList*);
+
 	/* fade curves */
 
 	float get_default_fade_length () const { return default_fade_msecs; }
@@ -840,6 +846,7 @@ class Session : public sigc::trackable, public Stateful
 
         // these commands are implemented in libs/ardour/session_command.cc
 	Command *memento_command_factory(XMLNode *n);
+        void register_with_memento_command_factory(PBD::ID, Stateful *);
         class GlobalSoloStateCommand : public Command
         {
             GlobalRouteBooleanState before, after;
@@ -1585,6 +1592,10 @@ class Session : public sigc::trackable, public Stateful
 
 	NamedSelection *named_selection_factory (string name);
 	NamedSelection *XMLNamedSelectionFactory (const XMLNode&);
+
+        /* CURVES and AUTOMATION LISTS */
+        std::map<PBD::ID, Curve*> curves;
+        std::map<PBD::ID, AutomationList*> automation_lists;
 
 	/* DEFAULT FADE CURVES */
 

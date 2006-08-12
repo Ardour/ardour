@@ -1056,7 +1056,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
-			_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+			_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 			ret = true;
 		}
 		break;
@@ -1068,7 +1068,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+			_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 			what_we_got->unref ();
 			ret = true;
 		}
@@ -1099,7 +1099,7 @@ RouteTimeAxisView::paste (jack_nframes_t pos, float times, Selection& selection,
 	
 	XMLNode &before = playlist->get_state();
 	playlist->paste (**p, pos, times);
-	_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+	_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 
 	return true;
 }

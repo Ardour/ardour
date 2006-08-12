@@ -183,6 +183,8 @@ class AutomationList : public StateManager, public Stateful
 		}
 	};
 
+        static sigc::signal<void, AutomationList*> AutomationListCreated;
+
   protected:
         PBD::ID _id;
 	struct State : public ARDOUR::StateManager::State {

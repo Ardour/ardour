@@ -36,70 +36,44 @@ class MementoCommand : public Command
     public:
 	MementoCommand(XMLNode &state);
         MementoCommand(obj_T &obj, 
-                       XMLNode &before,
-                       XMLNode &after
+                       XMLNode *before,
+                       XMLNode *after
                        ) 
             : obj(obj), before(before), after(after) {}
-        void operator() () { obj.set_state(after); }
-        void undo() { obj.set_state(before); }
+        void operator() () 
+        {
+            if (after)
+                obj.set_state(*after); 
+        }
+        void undo() 
+        { 
+            if (before)
+                obj.set_state(*before); 
+        }
         virtual XMLNode &get_state() 
         {
-            XMLNode *node = new XMLNode("MementoCommand");
+            string name;
+            if (before && after)
+                name = "MementoCommand";
+            else if (before)
+                name = "MementoUndoCommand";
+            else
+                name = "MementoRedoCommand";
+
+            XMLNode *node = new XMLNode(name);
             node->add_property("obj_id", obj.id().to_s());
             node->add_property("type_name", typeid(obj).name());
-            node->add_child_copy(before);
-            node->add_child_copy(after);
+
+            if (before)
+                node->add_child_copy(*before);
+            if (after)
+                node->add_child_copy(*after);
+
             return *node;
         }
     protected:
         obj_T &obj;
-        XMLNode &before, &after;
-};
-
-template <class obj_T>
-class MementoUndoCommand : public Command
-{
-public:
-    MementoUndoCommand(XMLNode &state);
-    MementoUndoCommand(obj_T &obj, 
-                       XMLNode &before)
-        : obj(obj), before(before) {}
-    void operator() () { /* noop */ }
-    void undo() { obj.set_state(before); }
-    virtual XMLNode &get_state() 
-    {
-        XMLNode *node = new XMLNode("MementoUndoCommand");
-        node->add_property("obj_id", obj.id().to_s());
-	node->add_property("type_name", typeid(obj).name());
-        node->add_child_copy(before);
-        return *node;
-    }
-protected:
-    obj_T &obj;
-    XMLNode &before;
-};
-
-template <class obj_T>
-class MementoRedoCommand : public Command
-{
-public:
-    MementoRedoCommand(XMLNode &state);
-    MementoRedoCommand(obj_T &obj, 
-                       XMLNode &after)
-        : obj(obj), after(after) {}
-    void operator() () { obj.set_state(after); }
-    void undo() { /* noop */ }
-    virtual XMLNode &get_state()
-    {
-        XMLNode *node = new XMLNode("MementoRedoCommand");
-        node->add_property("obj_id", obj.id().to_s());
-	node->add_property("type_name", typeid(obj).name());
-        node->add_child_copy(after);
-        return *node;
-    }
-protected:
-    obj_T &obj;
-    XMLNode &after;
+        XMLNode *before, *after;
 };
 
 #endif // __lib_pbd_memento_h__

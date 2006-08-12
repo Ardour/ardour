@@ -2227,6 +2227,20 @@ Session::route_by_name (string name)
 }
 
 shared_ptr<Route>
+Session::route_by_id (PBD::ID id)
+{
+	shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if ((*i)->id() == id) {
+			return *i;
+		}
+	}
+
+	return shared_ptr<Route> ((Route*) 0);
+}
+
+shared_ptr<Route>
 Session::route_by_remote_id (uint32_t id)
 {
 	shared_ptr<RouteList> r = routes.reader ();
@@ -3794,3 +3808,14 @@ Session::set_xfade_model (CrossfadeModel xm)
 	}
 }
 
+void
+Session::add_curve(Curve *curve)
+{
+    curves[curve->id()] = curve;
+}
+
+void
+Session::add_automation_list(AutomationList *al)
+{
+    automation_lists[al->id()] = al;
+}

@@ -22,6 +22,7 @@
 #define __pbd_stateful_h__
 
 #include <string>
+#include <pbd/id.h>
 
 class XMLNode;
 
@@ -41,10 +42,12 @@ class Stateful {
 
 	virtual void add_instant_xml (XMLNode&, const std::string& dir);
 	XMLNode *instant_xml (const std::string& str, const std::string& dir);
+        PBD::ID id() { return _id; }
 
   protected:
 	XMLNode *_extra_xml;
 	XMLNode *_instant_xml;
+        PBD::ID _id;
 };
 
 #endif /* __pbd_stateful_h__ */

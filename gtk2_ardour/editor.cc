@@ -705,6 +705,7 @@ Editor::Editor (AudioEngine& eng)
 	ControlProtocol::ScrollTimeline.connect (mem_fun (*this, &Editor::control_scroll));
 	constructed = true;
 	instant_save ();
+
 }
 
 Editor::~Editor()
@@ -1339,6 +1340,9 @@ Editor::connect_to_session (Session *t)
 		no_route_list_redisplay = false;
 		redisplay_route_list ();
 	}
+
+        /* register for undo history */
+        session->register_with_memento_command_factory(_id, this);
 }
 
 void
@@ -2888,7 +2892,7 @@ void
 Editor::commit_reversible_command ()
 {
 	if (session) {
-		session->commit_reversible_command (new MementoCommand<Editor>(*this, *before, get_state()));
+		session->commit_reversible_command (new MementoCommand<Editor>(*this, before, &get_state()));
 	}
 }
 
