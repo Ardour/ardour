@@ -205,4 +205,3 @@ PlugUIBase::bypass_toggled ()
 		insert->set_active (!x, this);
 	}
 }
-
