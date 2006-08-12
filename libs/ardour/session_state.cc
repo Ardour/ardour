@@ -3297,7 +3297,7 @@ Session::save_history (string snapshot_name)
     }
 
     xml_path = _path + snapshot_name + ".history"; 
-    info << "Saving history to " << xml_path << endmsg;
+    cerr << "Saving history to " << xml_path << endmsg;
 
     bak_path = xml_path + ".bak";
 
@@ -3340,7 +3340,7 @@ Session::restore_history (string snapshot_name)
 
     /* read xml */
     xmlpath = _path + snapshot_name + ".history";
-    info << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
+    cerr << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
 
     if (access (xmlpath.c_str(), F_OK)) {
         error << string_compose(_("%1: session history file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
