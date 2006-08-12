@@ -78,7 +78,7 @@ class AudioPort : public Port {
 	/** Assumes that the port is an audio output port */
 	void silence (jack_nframes_t nframes, jack_nframes_t offset) {
 		if (!_silent) {
-			_buffer.clear(offset);
+			_buffer.silence(nframes, offset);
 			if (offset == 0 && nframes == _buffer.capacity()) {
 				_silent = true;
 			}

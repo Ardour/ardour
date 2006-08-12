@@ -89,7 +89,7 @@ void
 Track::toggle_monitor_input ()
 {
 	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		(*i)->request_monitor_input(!(*i)->monitoring_input());
+		i->request_monitor_input(!i->monitoring_input());
 	}
 }
 
@@ -153,7 +153,7 @@ Track::can_record()
 {
 	bool will_record = true;
 	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end() && will_record; ++i) {
-		if (!(*i)->connected())
+		if (!i->connected())
 			will_record = false;
 	}
 

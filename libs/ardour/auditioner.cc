@@ -55,6 +55,8 @@ Auditioner::Auditioner (Session& s)
 
 	allow_pan_reset ();
 	
+	reset_panner ();
+
 	IO::output_changed.connect (mem_fun (*this, &Auditioner::output_changed));
 
 	the_region = 0;
@@ -93,7 +95,7 @@ Auditioner::audition_current_playlist ()
 
 	/* force a panner reset now that we have all channels */
 
-	_panner->reset (n_outputs().get(DataType::AUDIO), _diskstream->n_channels());
+	_panner->reset (n_outputs().get(DataType::AUDIO), _diskstream->n_channels().get(DataType::AUDIO));
 
 	g_atomic_int_set (&_active, 1);
 }
@@ -116,17 +118,17 @@ Auditioner::audition_region (AudioRegion& region)
 	_diskstream->playlist()->clear (true, false);
 	_diskstream->playlist()->add_region (*the_region, 0, 1, false);
 
-	while (_diskstream->n_channels() < the_region->n_channels()) {
+	while (_diskstream->n_channels().get(DataType::AUDIO) < the_region->n_channels()) {
 		audio_diskstream().add_channel ();
 	}
 
-	while (_diskstream->n_channels() > the_region->n_channels()) {
+	while (_diskstream->n_channels().get(DataType::AUDIO) > the_region->n_channels()) {
 		audio_diskstream().remove_channel ();
 	}
 
 	/* force a panner reset now that we have all channels */
 
-	_panner->reset (n_outputs().get(DataType::AUDIO), _diskstream->n_channels());
+	reset_panner();
 
 	length = the_region->length();
 	_diskstream->seek (0);

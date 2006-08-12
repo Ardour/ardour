@@ -51,7 +51,7 @@ class Port : public sigc::trackable {
 	virtual void silence (jack_nframes_t nframes, jack_nframes_t offset) = 0;
 
 
-	std::string name() { 
+	std::string name() const { 
 		return _name;
 	}
 

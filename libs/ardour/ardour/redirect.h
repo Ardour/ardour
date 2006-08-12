@@ -70,10 +70,10 @@ class Redirect : public IO
 	bool active () const { return _active; }
 	void set_active (bool yn, void *src);
 
-	virtual uint32_t output_streams() const { return n_outputs().get(_default_type); }
-	virtual uint32_t input_streams () const { return n_inputs().get(_default_type); }
-	virtual uint32_t natural_output_streams() const { return n_outputs().get(_default_type); }
-	virtual uint32_t natural_input_streams () const { return n_inputs().get(_default_type); }
+	virtual ChanCount output_streams() const { return n_outputs(); }
+	virtual ChanCount input_streams () const { return n_inputs(); }
+	virtual ChanCount natural_output_streams() const { return n_outputs(); }
+	virtual ChanCount natural_input_streams () const { return n_inputs(); }
 
 	uint32_t sort_key() const { return _sort_key; }
 	void set_sort_key (uint32_t key);
@@ -81,7 +81,7 @@ class Redirect : public IO
 	Placement placement() const { return _placement; }
 	void set_placement (Placement, void *src);
 
-	virtual void run (vector<Sample *>& ibufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset) = 0;
+	virtual void run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset) = 0;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
 	virtual jack_nframes_t latency() { return 0; }

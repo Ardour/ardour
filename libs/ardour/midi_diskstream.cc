@@ -128,7 +128,7 @@ MidiDiskstream::init (Diskstream::Flag f)
 	_capture_buf = new RingBufferNPT<RawMidi> (_session.diskstream_buffer_size());
 	_capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
 	
-	_n_channels = 1;
+	_n_channels = ChanCount(DataType::MIDI, 1);
 }
 
 MidiDiskstream::~MidiDiskstream ()
@@ -148,7 +148,7 @@ MidiDiskstream::non_realtime_input_change ()
 
 		if (input_change_pending & ConfigurationChanged) {
 
-			assert(_io->n_inputs().get(DataType::MIDI) == _n_channels);
+			assert(_io->n_inputs() == _n_channels);
 		} 
 
 		get_input_sources ();

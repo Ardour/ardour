@@ -42,7 +42,9 @@
 #include <ardour/panner.h>
 #include <ardour/dB.h>
 #include <ardour/mix.h>
-
+#include <ardour/declicker.h>
+#include <ardour/meter.h>
+#include <ardour/buffer_set.h>
 #include "i18n.h"
 
 using namespace std;
@@ -74,7 +76,7 @@ Route::Route (Session& sess, const XMLNode& node)
 void
 Route::init ()
 {
-	redirect_max_outs = 0;
+	redirect_max_outs.reset();
 	_muted = false;
 	_soloed = false;
 	_solo_safe = false;
@@ -215,8 +217,19 @@ Route::set_gain (gain_t val, void *src)
 	IO::set_gain (val, src);
 }
 
+/** Process this route for one (sub) cycle (process thread)
+ *
+ * @param bufs Scratch buffers to use for the signal path
+ * @param start_frame Initial transport frame 
+ * @param end_frame Final transport frame
+ * @param nframes Number of frames to output (to ports)
+ * @param offset Output offset (of port buffers, for split cycles)
+ *
+ * Note that (end_frame - start_frame) may not be equal to nframes when the
+ * transport speed isn't 1.0 (eg varispeed).
+ */
 void
-Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
+Route::process_output_buffers (BufferSet& bufs,
 			       jack_nframes_t start_frame, jack_nframes_t end_frame, 
 			       jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
 			       bool meter)
@@ -224,7 +237,6 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	// This is definitely very audio-only for now
 	assert(_default_type == DataType::AUDIO);
 	
-	uint32_t n;
 	RedirectList::iterator i;
 	bool post_fader_work = false;
 	bool mute_declick_applied = false;
@@ -267,17 +279,17 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (declick > 0) {
-		apply_declick (bufs, nbufs, nframes, 0.0, 1.0, _phase_invert);
+		Declicker::run (bufs, nframes, 0.0, 1.0, _phase_invert);
 		_pending_declick = 0;
 	} else if (declick < 0) {
-		apply_declick (bufs, nbufs, nframes, 1.0, 0.0, _phase_invert);
+		Declicker::run (bufs, nframes, 1.0, 0.0, _phase_invert);
 		_pending_declick = 0;
 	} else {
 
 		/* no global declick */
 
 		if (solo_gain != dsg) {
-			apply_declick (bufs, nbufs, nframes, solo_gain, dsg, _phase_invert);
+			Declicker::run (bufs, nframes, solo_gain, dsg, _phase_invert);
 			solo_gain = dsg;
 		}
 	}
@@ -288,13 +300,11 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterInput)) {
-		for (n = 0; n < nbufs; ++n) {
-			_peak_power[n] = Session::compute_peak (bufs[n], nframes, _peak_power[n]); 
-		}
+		_meter->run(bufs, nframes);
 	}
 
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, _phase_invert);
+		Declicker::run (bufs, nframes, mute_gain, dmg, _phase_invert);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -324,7 +334,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 		} else {
 
-			co->deliver_output (bufs, nbufs, nframes, offset);
+			co->deliver_output (bufs, nframes, offset);
 			
 		} 
 	} 
@@ -340,7 +350,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
-						(*i)->run (bufs, nbufs, nframes, offset);
+						(*i)->run (bufs, nframes, offset);
 						break;
 					case PostFader:
 						post_fader_work = true;
@@ -364,7 +374,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, _phase_invert);
+		Declicker::run (bufs, nframes, mute_gain, dmg, _phase_invert);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -374,9 +384,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterPreFader)) {
-		for (n = 0; n < nbufs; ++n) {
-			_peak_power[n] = Session::compute_peak (bufs[n], nframes, _peak_power[n]);
-		}
+		_meter->run(bufs, nframes);
 	}
 
 	
@@ -403,7 +411,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 		} else {
 
-			co->deliver_output (bufs, nbufs, nframes, offset);
+			co->deliver_output (bufs, nframes, offset);
 			
 		} 
 	} 
@@ -431,16 +439,16 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		if (apply_gain_automation) {
 			
 			if (_phase_invert) {
-				for (n = 0; n < nbufs; ++n)  {
-					Sample *sp = bufs[n];
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data(nframes);
 					
 					for (jack_nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] *= -gab[nx];
 					}
 				}
 			} else {
-				for (n = 0; n < nbufs; ++n) {
-					Sample *sp = bufs[n];
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data(nframes);
 					
 					for (jack_nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] *= gab[nx];
@@ -458,7 +466,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 			if (_gain != dg) {
 				
-				apply_declick (bufs, nbufs, nframes, _gain, dg, _phase_invert);
+				Declicker::run (bufs, nframes, _gain, dg, _phase_invert);
 				_gain = dg;
 				
 			} else if (_gain != 0 && (_phase_invert || _gain != 1.0)) {
@@ -477,14 +485,14 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 					this_gain = _gain;
 				}
 				
-				for (n = 0; n < nbufs; ++n) {
-					Sample *sp = bufs[n];
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data(nframes);
 					apply_gain_to_buffer(sp,nframes,this_gain);
 				}
 
 			} else if (_gain == 0) {
-				for (n = 0; n < nbufs; ++n) {
-					memset (bufs[n], 0, sizeof (Sample) * nframes);
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					i->clear();
 				}
 			}
 		}
@@ -511,7 +519,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 					case PreFader:
 						break;
 					case PostFader:
-						(*i)->run (bufs, nbufs, nframes, offset);
+						(*i)->run (bufs, nframes, offset);
 						break;
 					}
 				}
@@ -530,7 +538,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	}
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_control_outs) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, _phase_invert);
+		Declicker::run (bufs, nframes, mute_gain, dmg, _phase_invert);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -566,7 +574,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 		} else {
 
-			co->deliver_output_no_pan (bufs, nbufs, nframes, offset);
+			co->deliver_output_no_pan (bufs, nframes, offset);
 		} 
 	} 
 
@@ -575,7 +583,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   ----------------------------------------------------------------------*/
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_main_outs) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, _phase_invert);
+		Declicker::run (bufs, nframes, mute_gain, dmg, _phase_invert);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -616,7 +624,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			*/
 			
 			if (_meter_point == MeterPostFader) {
-				reset_peak_meters ();
+				peak_meter().reset();
 			}
 			
 			IO::silence (nframes, offset);
@@ -624,15 +632,15 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		} else {
 			
 			if (_session.transport_speed() > 1.5f || _session.transport_speed() < -1.5f) {
-				pan (bufs, nbufs, nframes, offset, speed_quietning); 
+				pan (bufs, nframes, offset, speed_quietning); 
 			} else {
 				// cerr << _name << " panner state = " << _panner->automation_state() << endl;
 				if (!_panner->empty() &&
 				    (_panner->automation_state() & Play ||
 				     ((_panner->automation_state() & Touch) && !_panner->touching()))) {
-					pan_automated (bufs, nbufs, start_frame, end_frame, nframes, offset);
+					pan_automated (bufs, start_frame, end_frame, nframes, offset);
 				} else {
-					pan (bufs, nbufs, nframes, offset, 1.0); 
+					pan (bufs, nframes, offset, 1.0); 
 				}
 			}
 		}
@@ -647,47 +655,38 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 //		cerr << "meter post" << endl;
 
 		if ((_gain == 0 && !apply_gain_automation) || dmg == 0) {
-			uint32_t no = n_outputs().get(DataType::AUDIO);
-			for (n = 0; n < no; ++n) {
-				_peak_power[n] = 0;
-			} 
+			_meter->reset();
 		} else {
-			uint32_t no = n_outputs().get(DataType::AUDIO);
-			for (n = 0; n < no; ++n) {
-				_peak_power[n] = Session::compute_peak (audio_output(n)->get_audio_buffer ().data(nframes, offset), nframes, _peak_power[n]);
-			}
+			_meter->run(output_buffers(), nframes, offset);
 		}
 	}
 }
 
-uint32_t
+ChanCount
 Route::n_process_buffers ()
 {
-	return max (n_inputs().get(_default_type), static_cast<size_t>(redirect_max_outs));
+	return max (n_inputs(), redirect_max_outs);
 }
 
 void
 Route::passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter_first)
 {
-	vector<Sample*>& bufs = _session.get_passthru_buffers();
-	uint32_t limit = n_process_buffers ();
+	BufferSet& bufs = _session.get_scratch_buffers(n_process_buffers());
 
 	_silent = false;
 
-	collect_input (bufs, limit, nframes, offset);
+	collect_input (bufs, nframes, offset);
 
 #define meter_stream meter_first
 
 	if (meter_first) {
-		for (uint32_t n = 0; n < limit; ++n) {
-			_peak_power[n] = Session::compute_peak (bufs[n], nframes, _peak_power[n]);
-		}
+		_meter->run(bufs, nframes);
 		meter_stream = false;
 	} else {
 		meter_stream = true;
 	}
 		
-	process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, true, declick, meter_stream);
+	process_output_buffers (bufs, start_frame, end_frame, nframes, offset, true, declick, meter_stream);
 
 #undef meter_stream
 }
@@ -763,7 +762,7 @@ Route::set_mute (bool yn, void *src)
 int
 Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* err_streams)
 {
-	uint32_t old_rmo = redirect_max_outs;
+	ChanCount old_rmo = redirect_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
@@ -775,13 +774,13 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		boost::shared_ptr<PluginInsert> pi;
 		boost::shared_ptr<PortInsert> porti;
 
-		uint32_t potential_max_streams = 0;
+		ChanCount potential_max_streams;
 
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redirect)) != 0) {
 			pi->set_count (1);
 
-			if (pi->input_streams() == 0) {
-				/* instrument plugin */
+			if (pi->input_streams() == ChanCount::ZERO) {
+				/* generator plugin */
 				_have_internal_generator = true;
 			}
 
@@ -805,12 +804,7 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		}
 
 		// Ensure peak vector sizes before the plugin is activated
-		while (_peak_power.size() < potential_max_streams) {
-			_peak_power.push_back(0);
-		}
-		while (_visible_peak_power.size() < potential_max_streams) {
-			_visible_peak_power.push_back(0);
-		}
+		_meter->setup(potential_max_streams);
 
 		_redirects.push_back (redirect);
 
@@ -824,7 +818,7 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		redirect->active_changed.connect (mem_fun (*this, &Route::redirect_active_proxy));
 	}
 	
-	if (redirect_max_outs != old_rmo || old_rmo == 0) {
+	if (redirect_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -836,7 +830,7 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 int
 Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_streams)
 {
-	uint32_t old_rmo = redirect_max_outs;
+	ChanCount old_rmo = redirect_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
@@ -848,7 +842,7 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 		RedirectList::iterator existing_end = _redirects.end();
 		--existing_end;
 
-		uint32_t potential_max_streams = 0;
+		ChanCount potential_max_streams;
 
 		for (RedirectList::const_iterator i = others.begin(); i != others.end(); ++i) {
 			
@@ -857,18 +851,13 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				pi->set_count (1);
 				
-				uint32_t m = max(pi->input_streams(), pi->output_streams());
+				ChanCount m = max(pi->input_streams(), pi->output_streams());
 				if (m > potential_max_streams)
 					potential_max_streams = m;
 			}
 
 			// Ensure peak vector sizes before the plugin is activated
-			while (_peak_power.size() < potential_max_streams) {
-				_peak_power.push_back(0);
-			}
-			while (_visible_peak_power.size() < potential_max_streams) {
-				_visible_peak_power.push_back(0);
-			}
+			_meter->setup(potential_max_streams);
 
 			_redirects.push_back (*i);
 			
@@ -884,7 +873,7 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 		}
 	}
 	
-	if (redirect_max_outs != old_rmo || old_rmo == 0) {
+	if (redirect_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -895,7 +884,7 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 void
 Route::clear_redirects (void *src)
 {
-	uint32_t old_rmo = redirect_max_outs;
+	ChanCount old_rmo = redirect_max_outs;
 
 	if (!_session.engine().connected()) {
 		return;
@@ -910,7 +899,7 @@ Route::clear_redirects (void *src)
 		reset_panner ();
 	}
 	
-	redirect_max_outs = 0;
+	redirect_max_outs.reset();
 	_have_internal_generator = false;
 	redirects_changed (src); /* EMIT SIGNAL */
 }
@@ -918,13 +907,13 @@ Route::clear_redirects (void *src)
 int
 Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* err_streams)
 {
-	uint32_t old_rmo = redirect_max_outs;
+	ChanCount old_rmo = redirect_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
 	}
 
-	redirect_max_outs = 0;
+	redirect_max_outs.reset();
 
 	{
 		Glib::RWLock::WriterLock lm (redirect_lock);
@@ -1020,7 +1009,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	map<Placement,list<InsertCount> > insert_map;
 	jack_nframes_t initial_streams;
 
-	redirect_max_outs = 0;
+	redirect_max_outs.reset();
 	i_cnt = 0;
 	s_cnt = 0;
 
@@ -1102,7 +1091,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
   recompute:
 
-	redirect_max_outs = 0;
+	redirect_max_outs.reset();
 	RedirectList::iterator prev = _redirects.end();
 
 	for (r = _redirects.begin(); r != _redirects.end(); prev = r, ++r) {
@@ -1110,7 +1099,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
 		if ((s = boost::dynamic_pointer_cast<Send> (*r)) != 0) {
 			if (r == _redirects.begin()) {
-				s->expect_inputs (n_inputs().get(_default_type));
+				s->expect_inputs (n_inputs());
 			} else {
 				s->expect_inputs ((*prev)->output_streams());
 			}
@@ -1167,7 +1156,7 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, int32_t required_inp
 int
 Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_streams)
 {
-	uint32_t old_rmo = redirect_max_outs;
+	ChanCount old_rmo = redirect_max_outs;
 
 	if (err_streams) {
 		*err_streams = 0;
@@ -1240,7 +1229,7 @@ Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_st
 		}
 	}
 
-	if (redirect_max_outs != old_rmo || old_rmo == 0) {
+	if (redirect_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -1290,7 +1279,7 @@ Route::sort_redirects (uint32_t* err_streams)
 	{
 		RedirectSorter comparator;
 		Glib::RWLock::WriterLock lm (redirect_lock);
-		uint32_t old_rmo = redirect_max_outs;
+		ChanCount old_rmo = redirect_max_outs;
 
 		/* the sweet power of C++ ... */
 
@@ -1706,8 +1695,6 @@ Route::silence (jack_nframes_t nframes, jack_nframes_t offset)
 {
 	if (!_silent) {
 
-		// reset_peak_meters ();
-		
 		IO::silence (nframes, offset);
 
 		if (_control_outs) {
@@ -2004,14 +1991,14 @@ Route::pans_required () const
 		return 0;
 	}
 	
-	return max (n_inputs ().get(DataType::AUDIO), static_cast<size_t>(redirect_max_outs));
+	return max (n_inputs ().get(DataType::AUDIO), static_cast<size_t>(redirect_max_outs.get(DataType::AUDIO)));
 }
 
 int 
 Route::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
 		   bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs().get(_default_type) == 0) {
+	if (n_outputs().get_total() == 0) {
 		return 0;
 	}
 
@@ -2022,7 +2009,7 @@ Route::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes
 
 	apply_gain_automation = false;
 	
-	if (n_inputs().get(_default_type)) {
+	if (n_inputs().get_total()) {
 		passthru (start_frame, end_frame, nframes, offset, 0, false);
 	} else {
 		silence (nframes, offset);
@@ -2089,8 +2076,6 @@ Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t 
 		
 		if (am.locked() && _session.transport_rolling()) {
 			
-			jack_nframes_t start_frame = end_frame - nframes;
-			
 			if (gain_automation_playback()) {
 				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
 			}
@@ -2114,7 +2099,7 @@ void
 Route::toggle_monitor_input ()
 {
 	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		(*i)->request_monitor_input(!(*i)->monitoring_input());
+		i->request_monitor_input( ! i->monitoring_input());
 	}
 }
 
@@ -2126,11 +2111,10 @@ Route::has_external_redirects () const
 	for (RedirectList::const_iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 		if ((pi = boost::dynamic_pointer_cast<const PortInsert>(*i)) != 0) {
 
-			uint32_t no = pi->n_outputs().get(_default_type);
-
-			for (uint32_t n = 0; n < no; ++n) {
+			for (PortSet::const_iterator port = pi->outputs().begin();
+					port != pi->outputs().end(); ++port) {
 				
-				string port_name = pi->output(n)->name();
+				string port_name = port->name();
 				string client_name = port_name.substr (0, port_name.find(':'));
 
 				/* only say "yes" if the redirect is actually in use */

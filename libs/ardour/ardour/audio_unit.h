@@ -64,7 +64,7 @@ class AUPlugin : public ARDOUR::Plugin
 	void deactivate ();
 	void set_block_size (jack_nframes_t nframes);
     
-	int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, jack_nframes_t nframes, jack_nframes_t offset);
+	int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, jack_nframes_t nframes, jack_nframes_t offset);
 	std::set<uint32_t> automatable() const;
 	void store_state (ARDOUR::PluginState&);
 	void restore_state (ARDOUR::PluginState&);

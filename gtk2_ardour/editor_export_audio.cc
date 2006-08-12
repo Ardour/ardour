@@ -41,6 +41,7 @@
 #include <ardour/audio_diskstream.h>
 #include <ardour/audioregion.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/chan_count.h>
 
 #include "i18n.h"
 
@@ -302,7 +303,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 }
 
 bool
-Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<AudioRange>& range)
+Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list<AudioRange>& range)
 {
 	AudioFileSource* fs;
 	const jack_nframes_t chunk_size = 4096;
@@ -314,6 +315,8 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 	uint32_t cnt;
 	string path;
 	vector<AudioFileSource *> sources;
+
+	uint32_t channels = count.get(DataType::AUDIO);
 
 	for (uint32_t n=0; n < channels; ++n) {
 		

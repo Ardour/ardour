@@ -19,13 +19,16 @@
 #ifndef __ardour_buffer_set_h__
 #define __ardour_buffer_set_h__
 
+#include <cassert>
 #include <vector>
-#include <ardour/buffer.h>
 #include <ardour/chan_count.h>
 #include <ardour/data_type.h>
-#include <ardour/port_set.h>
 
 namespace ARDOUR {
+
+class Buffer;
+class AudioBuffer;
+class PortSet;
 
 
 /** A set of buffers of various types.
@@ -44,52 +47,91 @@ namespace ARDOUR {
 class BufferSet
 {
 public:
-	BufferSet(const PortSet& ports);
 	BufferSet();
 	~BufferSet();
 
 	void clear();
 	
-	void ensure_buffers(const ChanCount& chan_count, size_t buffer_capacity);
-	void ensure_buffers(size_t num_buffers, DataType type, size_t buffer_capacity);
+	void attach_buffers(PortSet& ports);
 
-	// FIXME: add these
-	//const ChanCount& available() const { return _count; }
-	//ChanCount&       available()       { return _count; }
+	void ensure_buffers(const ChanCount& count, size_t buffer_capacity);
+	void ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity);
+
+	const ChanCount& available() const { return _available; }
+	ChanCount&       available()       { return _available; }
 
 	const ChanCount& count() const { return _count; }
 	ChanCount&       count()       { return _count; }
 
-	size_t available_buffers(DataType type) const;
+	void set_count(const ChanCount& count) { _count = count; }
+	
 	size_t buffer_capacity(DataType type) const;
 
-	Buffer& buffer(DataType type, size_t i)
+	Buffer& get(DataType type, size_t i)
 	{
 		assert(i <= _count.get(type));
 		return *_buffers[type.to_index()][i];
 	}
 
-	AudioBuffer& audio_buffer(size_t i)
+	AudioBuffer& get_audio(size_t i)
 	{
-		return (AudioBuffer&)buffer(DataType::AUDIO, i);
+		return (AudioBuffer&)get(DataType::AUDIO, i);
 	}
-	#if 0
-	/** See PortInsert::run for an example of usage */
-	class IndexSet {
-	public:
-		IndexSet() { reset(); }
-		
-		void reset() { _is[0] = 0; _is[1] = 0; }
 
-		size_t index(DataType type)     { return _is[type.to_index()]; }
-		void   increment(DataType type) { _is[type.to_index()] += 1; }
+	void read_from(BufferSet& in, jack_nframes_t nframes, jack_nframes_t offset=0)
+	{
+		throw; // FIXME: implement this with spiffy DataType iterator etc.
+	}
+
+	// ITERATORS
+	
+	// FIXME: this is a filthy copy-and-paste mess
+	// FIXME: litter these with assertions
+	
+	class audio_iterator {
+	public:
+
+		AudioBuffer& operator*()  { return _set.get_audio(_index); }
+		AudioBuffer* operator->() { return &_set.get_audio(_index); }
+		audio_iterator& operator++() { ++_index; return *this; } // yes, prefix only
+		bool operator==(const audio_iterator& other) { return (_index == other._index); }
+		bool operator!=(const audio_iterator& other) { return (_index != other._index); }
 
 	private:
-		int _is[2];
+		friend class BufferSet;
+
+		audio_iterator(BufferSet& list, size_t index) : _set(list), _index(index) {}
+
+		BufferSet& _set;
+		size_t    _index;
 	};
-	#endif
-	
-	const ChanCount& chan_count() const { return _count; }
+
+	audio_iterator audio_begin() { return audio_iterator(*this, 0); }
+	audio_iterator audio_end()   { return audio_iterator(*this, _count.get(DataType::AUDIO)); }
+
+	class iterator {
+	public:
+
+		Buffer& operator*()  { return _set.get(_type, _index); }
+		Buffer* operator->() { return &_set.get(_type, _index); }
+		iterator& operator++() { ++_index; return *this; } // yes, prefix only
+		bool operator==(const iterator& other) { return (_index == other._index); }
+		bool operator!=(const iterator& other) { return (_index != other._index); }
+
+	private:
+		friend class BufferSet;
+
+		iterator(BufferSet& list, DataType type, size_t index)
+			: _set(list), _type(type), _index(index) {}
+
+		BufferSet& _set;
+		DataType   _type;
+		size_t     _index;
+	};
+
+	iterator begin(DataType type) { return iterator(*this, type, 0); }
+	iterator end(DataType type)   { return iterator(*this, type, _count.get(type)); }
+
 	
 private:
 	typedef std::vector<Buffer*> BufferVec;
@@ -99,6 +141,9 @@ private:
 
 	/// Use counts (there may be more actual buffers than this)
 	ChanCount _count;
+
+	/// Available counts (number of buffers actually allocated)
+	ChanCount _available;
 
 	/// Whether we (don't) 'own' the contained buffers (are a mirror of a PortSet)
 	bool _is_mirror;

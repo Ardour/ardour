@@ -108,11 +108,11 @@ class AudioEngine : public sigc::trackable
 
 	Port *register_input_port (DataType type, const std::string& portname);
 	Port *register_output_port (DataType type, const std::string& portname);
-	int   unregister_port (Port *);
+	int   unregister_port (Port &);
 	
 	int connect (const std::string& source, const std::string& destination);
 	int disconnect (const std::string& source, const std::string& destination);
-	int disconnect (Port *);
+	int disconnect (Port &);
 	
 	const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
 
@@ -215,7 +215,7 @@ class AudioEngine : public sigc::trackable
 	typedef std::list<PortConnection> PortConnections;
 
 	PortConnections port_connections;
-	void   remove_connections_for (Port*);
+	void   remove_connections_for (Port&);
 
 	std::string get_nth_physical (DataType type, uint32_t n, int flags);
 

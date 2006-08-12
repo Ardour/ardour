@@ -41,6 +41,8 @@ midi_port.cc
 port_set.cc
 buffer.cc
 buffer_set.cc
+declicker.cc
+meter.cc
 audiofilesource.cc
 audiofilter.cc
 audioregion.cc

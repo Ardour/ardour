@@ -18,25 +18,11 @@
 
 #include <algorithm>
 #include <ardour/buffer_set.h>
+#include <ardour/buffer.h>
+#include <ardour/port.h>
+#include <ardour/port_set.h>
 
 namespace ARDOUR {
-
-
-/** Create a BufferSet to mirror a PortSet */
-BufferSet::BufferSet(const PortSet& ports)
-	: _count(ports.chan_count())
-	, _is_mirror(true)
-{
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		BufferVec v;
-
-		for (size_t j=0; j < ports.num_ports(*t); ++j) {
-			v.push_back(&ports.nth_port_of_type(*t, j)->get_buffer());
-		}
-
-		_buffers.push_back(v);
-	}
-}
 
 /** Create a new, empty BufferSet */
 BufferSet::BufferSet()
@@ -46,36 +32,60 @@ BufferSet::BufferSet()
 		_buffers.push_back( BufferVec() );
 
 	_count.reset();
+	_available.reset();
 }
-
 
 BufferSet::~BufferSet()
 {
-	if (!_is_mirror)
-		clear();
+	clear();
 }
-
 
 /** Destroy all contained buffers.
  */
 void
 BufferSet::clear()
 {
-	for (std::vector<BufferVec>::iterator i = _buffers.begin(); i != _buffers.end(); ++i) {
-		for (BufferVec::iterator j = (*i).begin(); j != (*i).end(); ++j) {
-			delete *j;
+	if (!_is_mirror) {
+		for (std::vector<BufferVec>::iterator i = _buffers.begin(); i != _buffers.end(); ++i) {
+			for (BufferVec::iterator j = (*i).begin(); j != (*i).end(); ++j) {
+				delete *j;
+			}
+			(*i).clear();
 		}
-		(*i).clear();
 	}
 	_buffers.clear();
+	_count.reset();
+	_available.reset();
 }
 
+/** Make this BufferSet a direct mirror of a PortSet's buffers.
+ */
+void
+BufferSet::attach_buffers(PortSet& ports)
+{
+	clear();
+
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		_buffers.push_back(BufferVec());
+		BufferVec& v = _buffers[(*t).to_index()];
+
+		for (PortSet::iterator p = ports.begin(*t); p != ports.end(*t); ++p) {
+			assert(p->type() == *t);
+			v.push_back(&(p->get_buffer()));
+		}
+
+	}
+	
+	_count = ports.count();
+
+	_is_mirror = true;
+}
 
 void
-BufferSet::ensure_buffers(const ChanCount& chan_count, size_t buffer_capacity)
+BufferSet::ensure_buffers(const ChanCount& count, size_t buffer_capacity)
 {
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		ensure_buffers(chan_count.get(*t), *t, buffer_capacity);
+		ensure_buffers(*t, count.get(*t), buffer_capacity);
 	}
 }
 
@@ -84,7 +94,7 @@ BufferSet::ensure_buffers(const ChanCount& chan_count, size_t buffer_capacity)
  * each of size at least @a buffer_size
  */
 void
-BufferSet::ensure_buffers(size_t num_buffers, DataType type, size_t buffer_capacity)
+BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity)
 {
 	assert(type != DataType::NIL);
 	assert(type.to_index() < _buffers.size());
@@ -94,6 +104,13 @@ BufferSet::ensure_buffers(size_t num_buffers, DataType type, size_t buffer_capac
 
 	// The vector of buffers of the type we care about
 	BufferVec& bufs = _buffers[type.to_index()];
+	
+	// If we're a mirror just make sure we're ok
+	if (_is_mirror) {
+		assert(_count.get(type) >= num_buffers);
+		assert(bufs[0]->type() == type);
+		return;
+	}
 
 	// If there's not enough or they're too small, just nuke the whole thing and
 	// rebuild it (so I'm lazy..)
@@ -110,20 +127,16 @@ BufferSet::ensure_buffers(size_t num_buffers, DataType type, size_t buffer_capac
 		for (size_t i=0; i < num_buffers; ++i) {
 			bufs.push_back(Buffer::create(type, buffer_capacity));
 		}
+	
+		_available.set(type, num_buffers);
 	}
 
 	// Post-conditions
+	assert(bufs[0]->type() == type);
 	assert(bufs.size() >= num_buffers);
-	assert((bufs[0])->type() == type);
+	assert(bufs.size() == _available.get(type));
 	assert(bufs[0]->capacity() >= buffer_capacity);
 }
-
-size_t
-BufferSet::available_buffers(DataType type) const
-{
-	return _buffers[type.to_symbol()-1].size();
-}
-
 
 /** Get the capacity (size) of the available buffers of the given type.
  *
@@ -132,7 +145,7 @@ BufferSet::available_buffers(DataType type) const
 size_t
 BufferSet::buffer_capacity(DataType type) const
 {
-	assert(available_buffers(type) > 0);
+	assert(_available.get(type) > 0);
 	return _buffers[type.to_index()][0]->capacity();
 }
 

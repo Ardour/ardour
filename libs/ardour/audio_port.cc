@@ -41,7 +41,9 @@ AudioPort::reset()
 {
 	Port::reset();
 	if (_flags & JackPortIsOutput) {
-		_buffer.clear();
+		if (_buffer.capacity() > 0) {
+			_buffer.clear();
+		}
 		_silent = true;
 	}
 	

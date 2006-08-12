@@ -273,7 +273,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	Controllable::Created.connect (mem_fun (*this, &Session::add_controllable));
 	Controllable::GoingAway.connect (mem_fun (*this, &Session::remove_controllable));
 
-	IO::MoreOutputs.connect (mem_fun (*this, &Session::ensure_passthru_buffers));
+	IO::MoreChannels.connect (mem_fun (*this, &Session::ensure_buffers));
 
 	/* stop IO objects from doing stuff until we're ready for them */
 

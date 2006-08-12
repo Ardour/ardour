@@ -26,7 +26,8 @@
 #include <ardour/session.h>
 #include <ardour/port.h>
 #include <ardour/audio_port.h>
-
+#include <ardour/buffer_set.h>
+#include <ardour/meter.h>
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -36,7 +37,6 @@ Send::Send (Session& s, Placement p)
 	: Redirect (s, s.next_send_name(), p)
 {
 	_metering = false;
-	expected_inputs = 0;
 	save_state (_("initial state"));
 	 RedirectCreated (this); /* EMIT SIGNAL */
 }
@@ -45,7 +45,6 @@ Send::Send (Session& s, const XMLNode& node)
 	: Redirect (s,  "send", PreFader)
 {
 	_metering = false;
-	expected_inputs = 0;
 
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -59,7 +58,6 @@ Send::Send (const Send& other)
 	: Redirect (other._session, other._session.next_send_name(), other.placement())
 {
 	_metering = false;
-	expected_inputs = 0;
 	save_state (_("initial state"));
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
@@ -105,37 +103,26 @@ Send::set_state(const XMLNode& node)
 }
 
 void
-Send::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+Send::run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset)
 {
 	if (active()) {
 
 		// we have to copy the input, because IO::deliver_output may alter the buffers
 		// in-place, which a send must never do.
 
-		vector<Sample*>& sendbufs = _session.get_send_buffers();
+		BufferSet& sendbufs = _session.get_send_buffers(bufs.count());
 
-		for (size_t i=0; i < nbufs; ++i) {
-			memcpy (sendbufs[i], bufs[i], sizeof (Sample) * nframes);
-		}
-		
-		
-		IO::deliver_output (sendbufs, nbufs, nframes, offset);
+		sendbufs.read_from(bufs, nframes);
+		assert(sendbufs.count() == bufs.count());
+		assert(sendbufs.count() == _outputs.count());
+
+		IO::deliver_output (sendbufs, nframes, offset);
 
 		if (_metering) {
-			uint32_t n;
-			uint32_t no = n_outputs().get(DataType::AUDIO);
-
 			if (_gain == 0) {
-
-				for (n = 0; n < no; ++n) {
-					_peak_power[n] = 0;
-				} 
-
+				_meter->reset();
 			} else {
-
-				for (n = 0; n < no; ++n) {
-					_peak_power[n] = Session::compute_peak (audio_output(n)->get_audio_buffer().data(nframes, offset), nframes, _peak_power[n]);
-				}
+				_meter->run(output_buffers(), nframes, offset);
 			}
 		}
 
@@ -143,12 +130,7 @@ Send::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_
 		silence (nframes, offset);
 		
 		if (_metering) {
-			uint32_t n;
-			uint32_t no = n_outputs().get(DataType::AUDIO);
-
-			for (n = 0; n < no; ++n) {
-				_peak_power[n] = 0;
-			} 
+			_meter->reset();
 		}
 	}
 }
@@ -160,15 +142,15 @@ Send::set_metering (bool yn)
 
 	if (!_metering) {
 		/* XXX possible thread hazard here */
-		reset_peak_meters ();
+		peak_meter().reset();
 	}
 }
 
 void
-Send::expect_inputs (uint32_t expected)
+Send::expect_inputs (const ChanCount& expected)
 {
-	if (expected != expected_inputs) {
-		expected_inputs = expected;
+	if (expected != _expected_inputs) {
+		_expected_inputs = expected;
 		reset_panner ();
 	}
 }

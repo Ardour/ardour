@@ -54,9 +54,11 @@ class Session;
 class AudioEngine;
 class Connection;
 class Panner;
+class PeakMeter;
 class Port;
 class AudioPort;
 class MidiPort;
+class BufferSet;
 
 /** A collection of input and output ports with connections.
  *
@@ -99,27 +101,26 @@ class IO : public Stateful, public ARDOUR::StateManager
 	
 	virtual void silence  (jack_nframes_t, jack_nframes_t offset);
 
-	// These should be moved in to a separate object that manipulates an IO
-	
-	void pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff);
-	void pan_automated (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			    jack_nframes_t nframes, jack_nframes_t offset);
-	void collect_input  (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void deliver_output (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void deliver_output_no_pan (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void pan (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff);
+	void pan_automated (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset);
+	void collect_input  (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void deliver_output (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void deliver_output_no_pan (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
 	void just_meter_input (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 			       jack_nframes_t nframes, jack_nframes_t offset);
 
-	virtual uint32_t n_process_buffers () { return 0; }
+	virtual ChanCount n_process_buffers () { return ChanCount::ZERO; }
 
 	virtual void   set_gain (gain_t g, void *src);
 	void           inc_gain (gain_t delta, void *src);
 	gain_t         gain () const { return _desired_gain; }
 	virtual gain_t effective_gain () const;
 
-	Panner& panner() { return *_panner; }
+	Panner& panner()        { return *_panner; }
+	PeakMeter& peak_meter() { return *_meter; }
 
 	int ensure_io (uint32_t, uint32_t, bool clear, void *src);
+	int ensure_io (const ChanCount& in, const ChanCount& out, bool clear, void *src);
 
 	int use_input_connection (Connection&, void *src);
 	int use_output_connection (Connection&, void *src);
@@ -148,6 +149,9 @@ class IO : public Stateful, public ARDOUR::StateManager
 	jack_nframes_t input_latency() const;
 	void           set_port_latency (jack_nframes_t);
 
+	const PortSet& inputs()  const { return _inputs; }
+	const PortSet& outputs() const { return _outputs; }
+
 	Port *output (uint32_t n) const {
 		if (n < _outputs.num_ports()) {
 			return _outputs.port(n);
@@ -169,8 +173,10 @@ class IO : public Stateful, public ARDOUR::StateManager
 	MidiPort*  midi_input(uint32_t n) const;
 	MidiPort*  midi_output(uint32_t n) const;
 
-	const ChanCount& n_inputs ()  const { return _inputs.chan_count(); }
-	const ChanCount& n_outputs () const { return _outputs.chan_count(); }
+	const ChanCount& n_inputs ()  const { return _inputs.count(); }
+	const ChanCount& n_outputs () const { return _outputs.count(); }
+
+	void attach_buffers(ChanCount ignored);
 
 	sigc::signal<void,IOChange,void*> input_changed;
 	sigc::signal<void,IOChange,void*> output_changed;
@@ -197,25 +203,14 @@ class IO : public Stateful, public ARDOUR::StateManager
 
 	static int  reset_panners (void);
 	
-	static sigc::signal<int> PortsLegal;
-	static sigc::signal<int> PannersLegal;
-	static sigc::signal<int> ConnectingLegal;
-	static sigc::signal<void,ChanCount> MoreOutputs;
-	static sigc::signal<int> PortsCreated;
+	static sigc::signal<int>            PortsLegal;
+	static sigc::signal<int>            PannersLegal;
+	static sigc::signal<int>            ConnectingLegal;
+	static sigc::signal<void,ChanCount> MoreChannels;
+	static sigc::signal<int>            PortsCreated;
 
 	PBD::Controllable& gain_control() {
 		return _gain_control;
-	}
-
-	/* Peak metering */
-
-	float peak_input_power (uint32_t n) { 
-		if (n < std::max (_inputs.chan_count().get(DataType::AUDIO),
-		                  _outputs.chan_count().get(DataType::AUDIO))) {
-			return _visible_peak_power[n];
-		} else {
-			return minus_infinity();
-		}
 	}
 
     static void update_meters();
@@ -285,34 +280,30 @@ public:
 	mutable Glib::Mutex io_lock;
 
   protected:
-	Session&      _session;
-	Panner*       _panner;
-	gain_t        _gain;
-	gain_t        _effective_gain;
-	gain_t        _desired_gain;
-	Glib::Mutex   declick_lock;
-	PortSet      _outputs;
-	PortSet      _inputs;
-	vector<float> _peak_power;
-	vector<float> _visible_peak_power;
-	string        _name;
-	Connection*   _input_connection;
-	Connection*   _output_connection;
-	PBD::ID       _id;
-	bool           no_panner_reset;
-	XMLNode*       deferred_state;
-	DataType      _default_type;
+	Session&    _session;
+	Panner*     _panner;
+	BufferSet*  _output_buffers; //< Set directly to our output port buffers
+	gain_t      _gain;
+	gain_t      _effective_gain;
+	gain_t      _desired_gain;
+	Glib::Mutex declick_lock;
+	PortSet     _outputs;
+	PortSet     _inputs;
+	PeakMeter*  _meter;
+	string      _name;
+	Connection* _input_connection;
+	Connection* _output_connection;
+	PBD::ID     _id;
+	bool         no_panner_reset;
+	XMLNode*     deferred_state;
+	DataType    _default_type;
 
 	virtual void set_deferred_state() {}
 
-	void reset_peak_meters();
 	void reset_panner ();
 
 	virtual uint32_t pans_required() const
-		{ return _inputs.chan_count().get(DataType::AUDIO); }
-
-	static void apply_declick (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, 
-				   gain_t initial, gain_t target, bool invert_polarity);
+		{ return _inputs.count().get(DataType::AUDIO); }
 
 	struct GainControllable : public PBD::Controllable {
 	    GainControllable (IO& i) : io (i) {}
@@ -354,8 +345,9 @@ public:
 	static bool connecting_legal;
 	static bool ports_legal;
 
-  private:
+	BufferSet& output_buffers() { return *_output_buffers; }
 
+  private:
 
 	/* are these the best variable names ever, or what? */
 

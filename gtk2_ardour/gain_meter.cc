@@ -43,6 +43,7 @@
 
 #include <ardour/session.h>
 #include <ardour/route.h>
+#include <ardour/meter.h>
 
 #include "i18n.h"
 
@@ -326,7 +327,7 @@ GainMeter::update_meters ()
 	
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
-			peak = _io->peak_input_power (n);
+			peak = _io->peak_meter().peak_power (n);
 
 			(*i).meter->set (log_meter (peak), peak);
 						

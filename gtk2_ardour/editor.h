@@ -77,6 +77,7 @@ namespace ARDOUR {
 	class Session;
 	class AudioFilter;
 	class Crossfade;
+	class ChanCount;
 }
 
 namespace LADSPA {
@@ -1591,7 +1592,7 @@ class Editor : public PublicEditor
 	void external_edit_region ();
 
 	int write_audio_selection (TimeSelection&);
-	bool write_audio_range (ARDOUR::AudioPlaylist&, uint32_t channels, list<ARDOUR::AudioRange>&);
+	bool write_audio_range (ARDOUR::AudioPlaylist&, const ARDOUR::ChanCount& channels, list<ARDOUR::AudioRange>&);
 
 	void write_selection ();
 
@@ -1599,7 +1600,8 @@ class Editor : public PublicEditor
 
 	UndoAction get_memento() const;
 
-        XMLNode *before; /* used in *_reversible_command */
+	XMLNode *before; /* used in *_reversible_command */
+
 	void begin_reversible_command (string cmd_name);
 	void commit_reversible_command ();
 

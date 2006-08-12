@@ -45,6 +45,7 @@ namespace ARDOUR {
 
 class AudioEngine;
 class Session;
+class BufferSet;
 
 class Plugin;
 
@@ -120,7 +121,7 @@ class Plugin : public Stateful, public sigc::trackable
 	virtual void deactivate () = 0;
 	virtual void set_block_size (jack_nframes_t nframes) = 0;
 
-	virtual int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, jack_nframes_t nframes, jack_nframes_t offset) = 0;
+	virtual int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, jack_nframes_t nframes, jack_nframes_t offset) = 0;
 	virtual std::set<uint32_t> automatable() const = 0;
 	virtual void store_state (ARDOUR::PluginState&) = 0;
 	virtual void restore_state (ARDOUR::PluginState&) = 0;

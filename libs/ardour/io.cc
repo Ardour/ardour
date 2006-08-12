@@ -36,7 +36,8 @@
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/panner.h>
-#include <ardour/dB.h>
+#include <ardour/buffer_set.h>
+#include <ardour/meter.h>
 
 #include "i18n.h"
 
@@ -69,7 +70,7 @@ sigc::signal<void>           IO::Meter;
 sigc::signal<int>            IO::ConnectingLegal;
 sigc::signal<int>            IO::PortsLegal;
 sigc::signal<int>            IO::PannersLegal;
-sigc::signal<void,ChanCount> IO::MoreOutputs;
+sigc::signal<void,ChanCount> IO::MoreChannels;
 sigc::signal<int>            IO::PortsCreated;
 
 Glib::StaticMutex IO::m_meter_signal_lock = GLIBMM_STATIC_MUTEX_INIT;
@@ -91,13 +92,6 @@ static double direct_gain_to_control (gain_t gain) {
 	return pow((6.0*log(gain)/log(2.0)+192.0)/198.0, 8.0);
 }
 
-/*
-static bool sort_ports_by_name (Port* a, Port* b)
-{
-	return a->name() < b->name();
-}
-*/
-
 
 /** @param default_type The type of port that will be created by ensure_io
  * and friends if no type is explicitly requested (to avoid breakage).
@@ -106,6 +100,7 @@ IO::IO (Session& s, string name,
 	int input_min, int input_max, int output_min, int output_max,
 	DataType default_type)
 	: _session (s),
+      _output_buffers(new BufferSet()),
 	  _name (name),
 	  _default_type(default_type),
 	  _gain_control (*this),
@@ -116,6 +111,8 @@ IO::IO (Session& s, string name,
 	  _output_maximum (_default_type, output_max)
 {
 	_panner = new Panner (name, _session);
+	_meter = new PeakMeter (_session);
+
 	_gain = 1.0;
 	_desired_gain = 1.0;
 	_input_connection = 0;
@@ -137,11 +134,13 @@ IO::IO (Session& s, string name,
         Glib::Mutex::Lock guard (m_meter_signal_lock);
         m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
     }
+	
+	// Connect to our own MoreChannels signal to connect output buffers
+	IO::MoreChannels.connect (mem_fun (*this, &IO::attach_buffers));
 }
 
 IO::~IO ()
 {
-
     Glib::Mutex::Lock guard (m_meter_signal_lock);
 	Glib::Mutex::Lock lm (io_lock);
 
@@ -154,6 +153,10 @@ IO::~IO ()
 	}
 
     m_meter_connection.disconnect();
+
+	delete _meter;
+	delete _panner;
+	delete _output_buffers;
 }
 
 void
@@ -162,216 +165,34 @@ IO::silence (jack_nframes_t nframes, jack_nframes_t offset)
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		(*i)->silence (nframes, offset);
+		i->silence (nframes, offset);
 	}
 }
 
 void
-IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
+IO::pan_automated (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
 {
-	jack_nframes_t declick = min ((jack_nframes_t)128, nframes);
-	gain_t delta;
-	Sample *buffer;
-	double fractional_shift;
-	double fractional_pos;
-	gain_t polscale = invert_polarity ? -1.0f : 1.0f;
-
-	if (nframes == 0) return;
-	
-	fractional_shift = -1.0/declick;
-
-	if (target < initial) {
-		/* fade out: remove more and more of delta from initial */
-		delta = -(initial - target);
-	} else {
-		/* fade in: add more and more of delta from initial */
-		delta = target - initial;
-	}
-
-	for (uint32_t n = 0; n < nbufs; ++n) {
-
-		buffer = bufs[n];
-		fractional_pos = 1.0;
-
-		for (jack_nframes_t nx = 0; nx < declick; ++nx) {
-			buffer[nx] *= polscale * (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
-			fractional_pos += fractional_shift;
-		}
-		
-		/* now ensure the rest of the buffer has the target value
-		   applied, if necessary.
-		*/
-		
-		if (declick != nframes) {
-
-			if (invert_polarity) {
-				target = -target;
-			}
-
-			if (target == 0.0) {
-				memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
-			} else if (target != 1.0) {
-				for (jack_nframes_t nx = declick; nx < nframes; ++nx) {
-					buffer[nx] *= target;
-				}
-			}
-		}
-	}
+	_panner->distribute_automated(bufs, output_buffers(), start_frame, end_frame, nframes, offset);
 }
 
 void
-IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, jack_nframes_t offset)
+IO::pan (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff)
 {
-	Sample* dst;
-
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	if (n_outputs().get(DataType::AUDIO) == 0) {
-		return;
-	}
-
-	if (n_outputs().get(DataType::AUDIO) == 1) {
-
-		dst = audio_output(0)->get_audio_buffer().data (nframes, offset);
-
-		for (uint32_t n = 0; n < nbufs; ++n) {
-			if (bufs[n] != dst) {
-				memcpy (dst, bufs[n], sizeof (Sample) * nframes);
-			} 
-		}
-
-		output(0)->mark_silence (false);
-
-		return;
-	}
-
-	uint32_t o = 0;
-	vector<Sample *>::iterator in;
-	Panner::iterator pan;
-	Sample* obufs[n_outputs().get(DataType::AUDIO)];
-
-	/* the terrible silence ... */
-	for (PortSet::audio_iterator out = _outputs.audio_begin(); out != _outputs.audio_end(); ++out, ++o) {
-		(*out)->silence(nframes, offset);
-		obufs[o] = (*out)->get_audio_buffer().data(nframes, offset);
-	}
-
-	uint32_t n;
-
-	for (pan = _panner->begin(), n = 0; n < nbufs; ++n, ++pan) {
-		(*pan)->distribute_automated (bufs[n], obufs, start, end, nframes, _session.pan_automation_buffer());
-	}
-}
-
-void
-IO::pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff)
-{
-	Sample* dst;
-	Sample* src;
-
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	if (n_outputs().get(DataType::AUDIO) == 0) {
-		return;
-	}
-
-	/* the panner can be empty if there are no inputs to the 
-	   route, but still outputs
-	*/
-
+	/* the panner can be empty if there are no inputs to the route, but still outputs */
 	if (_panner->bypassed() || _panner->empty()) {
-		deliver_output_no_pan (bufs, nbufs, nframes, offset);
+		// FIXME: gain
+		deliver_output_no_pan (bufs, nframes, offset);
 		return;
-	}
-
-	if (n_outputs().get(DataType::AUDIO) == 1) {
-
-		dst = audio_output(0)->get_audio_buffer().data(nframes, offset);
-
-		if (gain_coeff == 0.0f) {
-
-			/* only one output, and gain was zero, so make it silent */
-
-			memset (dst, 0, sizeof (Sample) * nframes); 
-			
-		} else if (gain_coeff == 1.0f){
-
-			/* mix all buffers into the output */
-
-			uint32_t n;
-			
-			memcpy (dst, bufs[0], sizeof (Sample) * nframes);
-			
-			for (n = 1; n < nbufs; ++n) {
-				src = bufs[n];
-				
-				for (jack_nframes_t n = 0; n < nframes; ++n) {
-					dst[n] += src[n];
-				}
-			}
-
-			audio_output(0)->mark_silence (false);
-
-		} else {
-
-			/* mix all buffers into the output, scaling them all by the gain */
-
-			uint32_t n;
-
-			src = bufs[0];
-			
-			for (jack_nframes_t n = 0; n < nframes; ++n) {
-				dst[n] = src[n] * gain_coeff;
-			}	
-
-			for (n = 1; n < nbufs; ++n) {
-				src = bufs[n];
-				
-				for (jack_nframes_t n = 0; n < nframes; ++n) {
-					dst[n] += src[n] * gain_coeff;
-				}	
-			}
-			
-			audio_output(0)->mark_silence (false);
-		}
-
-		return;
-	}
-
-	uint32_t o = 0;
-	vector<Sample *>::iterator in;
-	Panner::iterator pan;
-	Sample* obufs[n_outputs().get(DataType::AUDIO)];
-
-	/* the terrible silence ... */
-
-	/* XXX this is wasteful but i see no way to avoid it */
-	
-	for (PortSet::audio_iterator out = _outputs.audio_begin(); out != _outputs.audio_end(); ++out, ++o) {
-		obufs[o] = (*out)->get_audio_buffer().data (nframes, offset);
-		memset (obufs[o], 0, sizeof (Sample) * nframes);
-		(*out)->mark_silence (false);
-	}
-
-	uint32_t n;
-
-	for (pan = _panner->begin(), n = 0; n < nbufs; ++n) {
-		Panner::iterator tmp;
-
-		tmp = pan;
-		++tmp;
-
-		(*pan)->distribute (bufs[n], obufs, gain_coeff, nframes);
-
-		if (tmp != _panner->end()) {
-			pan = tmp;
-		}
+	} else {
+		_panner->distribute(bufs, output_buffers(), nframes, offset, gain_coeff);
 	}
 }
 
 void
-IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+IO::deliver_output (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset)
 {
+	throw;
+#if 0
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	if (n_outputs().get(DataType::AUDIO) == 0) {
@@ -398,7 +219,7 @@ IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nfram
 	}
 
 	if (dg != _gain) {
-		apply_declick (bufs, nbufs, nframes, _gain, dg, false);
+		Declicker::run (bufs, nbufs, nframes, _gain, dg, false);
 		_gain = dg;
 		pangain = 1.0f;
 	} 
@@ -410,11 +231,14 @@ IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nfram
 	} else {
 		pan (bufs, nbufs, nframes, offset, pangain);
 	}
+#endif
 }
 
 void
-IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+IO::deliver_output_no_pan (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset)
 {
+	throw;
+#if 0
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	if (n_outputs().get(DataType::AUDIO) == 0) {
@@ -488,51 +312,31 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_
 	}
 
 	if (dg != _gain) {
-		apply_declick (outs, outs.size(), nframes, _gain, dg, false);
+		Declicker::run (outs, outs.size(), nframes, _gain, dg, false);
 		_gain = dg;
 	}
 
 	if (apply_gain_automation) {
 		_gain = old_gain;
 	}
+#endif
 }
 
 void
-IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+IO::collect_input (BufferSet& outs, jack_nframes_t nframes, jack_nframes_t offset)
 {
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	uint32_t n = 0;
-	Sample *last = 0;
+	outs.set_count(n_inputs());
 	
-	/* we require that bufs.size() >= 1 */
+	if (outs.count() == ChanCount::ZERO)
+		return;
 
-	for (PortSet::audio_iterator i = _inputs.audio_begin(); n < nbufs; ++i, ++n) {
-		if (i == _inputs.audio_end()) {
-			break;
-		}
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		
-		/* XXX always read the full extent of the port buffer that
-		   we need. One day, we may use jack_port_get_buffer_at_offset()
-		   or something similar. For now, this simple hack will
-		   have to do.
+		BufferSet::iterator o = outs.begin(*t);
+		for (PortSet::iterator i = _inputs.begin(*t); i != _inputs.end(*t); ++i, ++o) {
+			o->read_from(i->get_buffer(), nframes, offset);
+		}
 
-		   Hack? Why yes .. we only need to read nframes-worth of
-		   data, but the data we want is at 'offset' within the
-		   buffer.
-		*/
-
-		last = (*i)->get_audio_buffer().data(nframes, offset);
-		// the dest buffer's offset has already been applied
-		memcpy (bufs[n], last, sizeof (Sample) * nframes);
-	}
-
-	/* fill any excess outputs with the last input */
-	
-	while (n < nbufs && last) {
-		// the dest buffer's offset has already been applied
-		memcpy (bufs[n], last, sizeof (Sample) * nframes);
-		++n;
 	}
 }
 
@@ -540,14 +344,12 @@ void
 IO::just_meter_input (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		      jack_nframes_t nframes, jack_nframes_t offset)
 {
-	vector<Sample*>& bufs = _session.get_passthru_buffers ();
-	uint32_t nbufs = n_process_buffers ();
+	BufferSet& bufs = _session.get_scratch_buffers ();
+	ChanCount nbufs = n_process_buffers ();
 
-	collect_input (bufs, nbufs, nframes, offset);
+	collect_input (bufs, nframes, offset);
 
-	for (uint32_t n = 0; n < nbufs; ++n) {
-		_peak_power[n] = Session::compute_peak (bufs[n], nframes, _peak_power[n]);
-	}
+	_meter->run(bufs, nframes);
 }
 
 void
@@ -829,7 +631,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 			reset_panner ();
 		}
 
-		MoreOutputs (n_outputs()); /* EMIT SIGNAL */
+		MoreChannels (n_outputs()); /* EMIT SIGNAL */
 	}
 
 	if (destination.length()) {
@@ -942,7 +744,7 @@ IO::add_input_port (string source, void* src, DataType type)
 			reset_panner ();
 		}
 
-		MoreOutputs (n_inputs()); /* EMIT SIGNAL */
+		MoreChannels (n_inputs()); /* EMIT SIGNAL */
 	}
 
 	if (source.length()) {
@@ -1060,7 +862,7 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 		drop_input_connection ();
 		setup_peak_meters ();
 		reset_panner ();
-		MoreOutputs (n_inputs()); /* EMIT SIGNAL */
+		MoreChannels (n_inputs()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 	
@@ -1073,6 +875,30 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 	}
 
 	return changed;
+}
+
+/** Attach output_buffers to port buffers.
+ * 
+ * Connected to IOs own MoreChannels signal.
+ */
+void
+IO::attach_buffers(ChanCount ignored)
+{
+	_output_buffers->attach_buffers(_outputs);
+}
+
+int
+IO::ensure_io (const ChanCount& in, const ChanCount& out, bool clear, void* src)
+{
+	// FIXME: TYPE
+	uint32_t nin = in.get(_default_type);
+	uint32_t nout = out.get(_default_type);
+
+	// We only deal with one type still.  Sorry about your luck.
+	assert(nin == in.get_total());
+	assert(nout == out.get_total());
+
+	return ensure_io(nin, nout, clear, src);
 }
 
 int
@@ -1217,7 +1043,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 	}
 
 	if (in_changed || out_changed) {
-		MoreOutputs (max (n_outputs(), n_inputs())); /* EMIT SIGNAL */
+		MoreChannels (max (n_outputs(), n_inputs())); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 
@@ -1305,7 +1131,7 @@ IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
 	
 	if (changed) {
 		drop_output_connection ();
-		MoreOutputs (n_outputs()); /* EMIT SIGNAL */
+		MoreChannels (n_outputs()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 	
@@ -1430,7 +1256,7 @@ IO::state (bool full_state)
 	if (need_ins) {
 		for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 			
-			const char **connections = (*i)->get_connections();
+			const char **connections = i->get_connections();
 			
 			if (connections && connections[0]) {
 				str += '{';
@@ -1467,7 +1293,7 @@ IO::state (bool full_state)
 		
 		for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 			
-			const char **connections = (*i)->get_connections();
+			const char **connections = i->get_connections();
 			
 			if (connections && connections[0]) {
 				
@@ -1951,15 +1777,15 @@ IO::set_name (string name, void* src)
 	}
 
 	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		string current_name = (*i)->short_name();
+		string current_name = i->short_name();
 		current_name.replace (current_name.find (_name), _name.length(), name);
-		(*i)->set_name (current_name);
+		i->set_name (current_name);
 	}
 
 	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		string current_name = (*i)->short_name();
+		string current_name = i->short_name();
 		current_name.replace (current_name.find (_name), _name.length(), name);
-		(*i)->set_name (current_name);
+		i->set_name (current_name);
 	}
 
 	_name = name;
@@ -2034,7 +1860,7 @@ IO::set_port_latency (jack_nframes_t nframes)
 	Glib::Mutex::Lock lm (io_lock);
 
 	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		(*i)->set_latency (nframes);
+		i->set_latency (nframes);
 	}
 }
 
@@ -2049,7 +1875,7 @@ IO::output_latency () const
 	/* io lock not taken - must be protected by other means */
 
 	for (PortSet::const_iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		if ((latency = _session.engine().get_port_total_latency (*(*i))) > max_latency) {
+		if ((latency = _session.engine().get_port_total_latency (*i)) > max_latency) {
 			max_latency = latency;
 		}
 	}
@@ -2068,7 +1894,7 @@ IO::input_latency () const
 	/* io lock not taken - must be protected by other means */
 
 	for (PortSet::const_iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		if ((latency = _session.engine().get_port_total_latency (*(*i))) > max_latency) {
+		if ((latency = _session.engine().get_port_total_latency (*i)) > max_latency) {
 			max_latency = latency;
 		}
 	}
@@ -2106,7 +1932,7 @@ IO::use_input_connection (Connection& c, void* src)
 					
 					/* clear any existing connections */
 					
-					_session.engine().disconnect (_inputs.port(n));
+					_session.engine().disconnect (*_inputs.port(n));
 					
 				} else if (_inputs.port(n)->connected() > 1) {
 					
@@ -2119,7 +1945,7 @@ IO::use_input_connection (Connection& c, void* src)
 					   the one we want.
 					*/
 					
-					_session.engine().disconnect (_inputs.port(n));
+					_session.engine().disconnect (*_inputs.port(n));
 					
 				}
 			}
@@ -2185,7 +2011,7 @@ IO::use_output_connection (Connection& c, void* src)
 
 					/* clear any existing connections */
 
-					_session.engine().disconnect (_outputs.port(n));
+					_session.engine().disconnect (*_outputs.port(n));
 
 				} else if (_outputs.port(n)->connected() > 1) {
 
@@ -2198,7 +2024,7 @@ IO::use_output_connection (Connection& c, void* src)
 					   the one we want.
 					*/
 						
-					_session.engine().disconnect (_outputs.port(n));
+					_session.engine().disconnect (*_outputs.port(n));
 				}
 			}
 		}
@@ -2311,27 +2137,6 @@ IO::GainControllable::get_value (void) const
 	return direct_gain_to_control (io.effective_gain());
 }
 
-void
-IO::reset_peak_meters ()
-{
-	uint32_t limit = max (n_inputs().get(DataType::AUDIO), n_outputs().get(DataType::AUDIO));
-
-	for (uint32_t i = 0; i < limit; ++i) {
-		_peak_power[i] = 0;
-	}
-}
-
-void
-IO::setup_peak_meters ()
-{
-	uint32_t limit = max (n_inputs().get(DataType::AUDIO), n_outputs().get(DataType::AUDIO));
-
-	while (_peak_power.size() < limit) {
-		_peak_power.push_back (0);
-		_visible_peak_power.push_back (0);
-	}
-}
-
 UndoAction
 IO::get_memento() const
 {
@@ -2351,6 +2156,12 @@ IO::state_factory (std::string why) const
 	return state;
 }
 
+void
+IO::setup_peak_meters()
+{
+	_meter->setup(std::max(_inputs.count(), _outputs.count()));
+}
+
 /**
     Update the peak meters.
 
@@ -2364,40 +2175,16 @@ IO::update_meters()
 {
     Glib::Mutex::Lock guard (m_meter_signal_lock);
     
-    Meter();
+    Meter(); /* EMIT SIGNAL */
 }
 
 void
 IO::meter ()
 {
-	Glib::Mutex::Lock lm (io_lock); // READER: meter thread.
-	uint32_t limit = max (n_inputs().get(DataType::AUDIO), n_outputs().get(DataType::AUDIO));
+	// FIXME: Remove this function and just connect signal directly to PeakMeter::meter
 	
-	for (uint32_t n = 0; n < limit; ++n) {
-
-		/* XXX we should use atomic exchange here */
-
-		/* grab peak since last read */
-
- 		float new_peak = _peak_power[n];
-		_peak_power[n] = 0;
-		
-		/* compute new visible value using falloff */
-
-		if (new_peak > 0.0) {
-			new_peak = coefficient_to_dB (new_peak);
-		} else {
-			new_peak = minus_infinity();
-		}
-		
-		if (_session.meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
-			_visible_peak_power[n] = new_peak;
-		} else {
-			// do falloff
-			new_peak = _visible_peak_power[n] - _session.meter_falloff();
-			_visible_peak_power[n] = max (new_peak, -INFINITY);
-		}
-	}
+	Glib::Mutex::Lock lm (io_lock); // READER: meter thread.
+	_meter->meter();
 }
 
 int
@@ -2682,7 +2469,7 @@ IO::find_input_port_hole ()
 		snprintf (buf, jack_port_name_size(), _("%s/in %u"), _name.c_str(), n);
 
 		for ( ; i != _inputs.end(); ++i) {
-			if ((*i)->short_name() == buf) {
+			if (i->short_name() == buf) {
 				break;
 			}
 		}
@@ -2712,7 +2499,7 @@ IO::find_output_port_hole ()
 		snprintf (buf, jack_port_name_size(), _("%s/out %u"), _name.c_str(), n);
 
 		for ( ; i != _outputs.end(); ++i) {
-			if ((*i)->short_name() == buf) {
+			if (i->short_name() == buf) {
 				break;
 			}
 		}

@@ -98,7 +98,7 @@ class Track : public Route
 	virtual void passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter) = 0;
 
-	virtual uint32_t n_process_buffers () = 0;
+	virtual ChanCount n_process_buffers () = 0;
 	
 	Diskstream *_diskstream;
 	MeterPoint  _saved_meter_point;

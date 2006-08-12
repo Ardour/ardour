@@ -42,9 +42,9 @@ PortSet::add_port(Port* port)
 	v.push_back(port);
 	sort(v.begin(), v.end(), sort_ports_by_name);
 
-	_chan_count.set(port->type(), _chan_count.get(port->type()) + 1);
+	_count.set(port->type(), _count.get(port->type()) + 1);
 
-	assert(_chan_count.get(port->type()) == _ports[port->type().to_index()].size());
+	assert(_count.get(port->type()) == _ports[port->type().to_index()].size());
 }
 
 
@@ -89,23 +89,27 @@ PortSet::port(size_t n) const
 }
 
 Port*
-PortSet::nth_port_of_type(DataType type, size_t n) const
+PortSet::port(DataType type, size_t n) const
 {
-	const PortVec& v = _ports[type.to_index()];
-	assert(n < v.size());
-	return v[n];
+	if (type == DataType::NIL) {
+		return port(n);
+	} else {
+		const PortVec& v = _ports[type.to_index()];
+		assert(n < v.size());
+		return v[n];
+	}
 }
 
 AudioPort*
 PortSet::nth_audio_port(size_t n) const
 {
-	return dynamic_cast<AudioPort*>(nth_port_of_type(DataType::AUDIO, n));
+	return dynamic_cast<AudioPort*>(port(DataType::AUDIO, n));
 }
 
 MidiPort*
 PortSet::nth_midi_port(size_t n) const
 {
-	return dynamic_cast<MidiPort*>(nth_port_of_type(DataType::MIDI, n));
+	return dynamic_cast<MidiPort*>(port(DataType::MIDI, n));
 }
 
 } // namepace ARDOUR

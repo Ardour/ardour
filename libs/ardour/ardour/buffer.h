@@ -57,9 +57,12 @@ public:
 	DataType type() const { return _type; }
 
 	/** Clear (eg zero, or empty) buffer starting at TIME @a offset */
-	virtual void clear(jack_nframes_t offset = 0) = 0;
+	virtual void silence(jack_nframes_t len, jack_nframes_t offset=0) = 0;
 	
-	virtual void write(const Buffer& src, jack_nframes_t offset, jack_nframes_t len) = 0;
+	/** Clear the entire buffer */
+	virtual void clear() { silence(_capacity, 0); }
+
+	virtual void read_from(const Buffer& src, jack_nframes_t offset, jack_nframes_t len) = 0;
 
 protected:
 	Buffer(DataType type, size_t capacity)
@@ -88,23 +91,51 @@ public:
 	
 	~AudioBuffer();
 
-	void clear(jack_nframes_t offset=0) { memset(_data + offset, 0, sizeof (Sample) * _capacity); }
-
-	/** Copy @a len frames starting at @a offset, from the start of @a src */
-	void write(const Buffer& src, jack_nframes_t offset, jack_nframes_t len)
+	void silence(jack_nframes_t len, jack_nframes_t offset=0)
 	{
-		assert(src.type() == _type == DataType::AUDIO);
+		assert(_capacity > 0);
 		assert(offset + len <= _capacity);
-		memcpy(_data + offset, ((AudioBuffer&)src).data(len, offset), sizeof(Sample) * len);
+		memset(_data + offset, 0, sizeof (Sample) * len);
 	}
 	
-	/** Copy @a len frames starting at @a offset, from the start of @a src */
-	void write(const Sample* src, jack_nframes_t offset, jack_nframes_t len)
+	/** Read @a len frames FROM THE START OF @a src into self at @a offset */
+	void read_from(const Buffer& src, jack_nframes_t len, jack_nframes_t offset)
 	{
+		assert(_capacity > 0);
+		assert(src.type() == _type == DataType::AUDIO);
 		assert(offset + len <= _capacity);
-		memcpy(_data + offset, src, sizeof(Sample) * len);
+		memcpy(_data + offset, ((AudioBuffer&)src).data(len), sizeof(Sample) * len);
 	}
+	
+	/** Accumulate (add)@a len frames FROM THE START OF @a src into self at @a offset */
+	void accumulate_from(const AudioBuffer& src, jack_nframes_t len, jack_nframes_t offset)
+	{
+		assert(_capacity > 0);
+		assert(offset + len <= _capacity);
 
+		Sample*       const dst_raw = _data + offset;
+		const Sample* const src_raw = src.data(len);
+
+		for (jack_nframes_t n = 0; n < len; ++n) {
+			dst_raw[n] += src_raw[n];
+		}
+	}
+	
+	/** Accumulate (add) @a len frames FROM THE START OF @a src into self at @a offset
+	 * scaling by @a gain_coeff */
+	void accumulate_with_gain_from(const AudioBuffer& src, jack_nframes_t len, jack_nframes_t offset, gain_t gain_coeff)
+	{
+		assert(_capacity > 0);
+		assert(offset + len <= _capacity);
+
+		Sample*       const dst_raw = _data + offset;
+		const Sample* const src_raw = src.data(len);
+
+		for (jack_nframes_t n = 0; n < len; ++n) {
+			dst_raw[n] += src_raw[n] * gain_coeff;
+		}
+	}
+	
 	/** Set the data contained by this buffer manually (for setting directly to jack buffer).
 	 * 
 	 * Constructor MUST have been passed capacity=0 or this will die (to prevent mem leaks).
@@ -142,10 +173,10 @@ public:
 	
 	~MidiBuffer();
 
-	// FIXME: clear events starting at offset
-	void clear(jack_nframes_t offset=0) { assert(offset == 0); _size = 0; }
+	// FIXME: clear events starting at offset in time
+	void silence(jack_nframes_t len, jack_nframes_t offset=0) { assert(offset == 0); _size = 0; }
 	
-	void write(const Buffer& src, jack_nframes_t offset, jack_nframes_t nframes);
+	void read_from(const Buffer& src, jack_nframes_t nframes, jack_nframes_t offset);
 
 	void set_size(size_t size) { _size = size; }
 

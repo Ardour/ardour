@@ -448,7 +448,7 @@ RedirectBox::choose_send ()
 
 	/* XXX need redirect lock on route */
 
-	send->ensure_io (0, _route->max_redirect_outs(), false, this);
+	send->ensure_io (ChanCount::ZERO, _route->max_redirect_outs(), false, this);
 	
 	IOSelectorWindow *ios = new IOSelectorWindow (_session, send, false, true);
 	

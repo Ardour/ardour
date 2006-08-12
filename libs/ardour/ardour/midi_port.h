@@ -52,8 +52,7 @@ class MidiPort : public Port {
 	
 	/** Assumes that the port is an output port */
 	void silence (jack_nframes_t nframes, jack_nframes_t offset) {
-		// FIXME: silence starting at offset..
-		_buffer->clear();
+		_buffer->silence(nframes, offset);
 	}
 
   protected:

@@ -140,7 +140,7 @@ AudioDiskstream::init (Diskstream::Flag f)
 	allocate_temporary_buffers ();
 
 	add_channel ();
-	assert(_n_channels == 1);
+	assert(_n_channels == ChanCount(DataType::AUDIO, 1));
 }
 
 void
@@ -212,7 +212,7 @@ AudioDiskstream::non_realtime_input_change ()
 
 		if (input_change_pending & ConfigurationChanged) {
 
-			if (_io->n_inputs().get(DataType::AUDIO) > _n_channels) {
+			if (_io->n_inputs().get(DataType::AUDIO) > _n_channels.get(DataType::AUDIO)) {
 				
 				// we need to add new channel infos
 				
@@ -222,7 +222,7 @@ AudioDiskstream::non_realtime_input_change ()
 					add_channel ();
 				}
 				
-		} else if (_io->n_inputs().get(DataType::AUDIO) < _n_channels) {
+		} else if (_io->n_inputs().get(DataType::AUDIO) < _n_channels.get(DataType::AUDIO)) {
 				
 				// we need to get rid of channels
 				
@@ -1866,7 +1866,7 @@ AudioDiskstream::set_state (const XMLNode& node)
 	// create necessary extra channels
 	// we are always constructed with one and we always need one
 
-	if (nchans > _n_channels) {
+	if (nchans > _n_channels.get(DataType::AUDIO)) {
 
 		// we need to add new channel infos
 		//LockMonitor lm (state_lock, __LINE__, __FILE__);
@@ -1877,7 +1877,7 @@ AudioDiskstream::set_state (const XMLNode& node)
 			add_channel ();
 		}
 
-	} else if (nchans < _n_channels) {
+	} else if (nchans < _n_channels.get(DataType::AUDIO)) {
 
 		// we need to get rid of channels
 		//LockMonitor lm (state_lock, __LINE__, __FILE__);
@@ -1922,7 +1922,7 @@ AudioDiskstream::set_state (const XMLNode& node)
 		}
 	}
 
-	_n_channels = channels.size();
+	_n_channels.set(DataType::AUDIO, channels.size());
 
 	in_set_state = false;
 
@@ -2134,7 +2134,7 @@ AudioDiskstream::add_channel ()
 
 	channels.push_back (chan);
 
-	_n_channels = channels.size();
+	_n_channels.set(DataType::AUDIO, channels.size());
 
 	return 0;
 }
@@ -2148,7 +2148,7 @@ AudioDiskstream::remove_channel ()
 		destroy_channel (chan);
 		channels.pop_back();
 
-		_n_channels = channels.size();
+		_n_channels.set(DataType::AUDIO, channels.size());
 		return 0;
 	}
 
@@ -2224,7 +2224,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		return 1;
 	}
 
-	if (pending_sources.size() != _n_channels) {
+	if (pending_sources.size() != _n_channels.get(DataType::AUDIO)) {
 		error << string_compose (_("%1: incorrect number of pending sources listed - ignoring them all"), _name)
 		      << endmsg;
 		return -1;

@@ -80,7 +80,7 @@ Session::prepare_diskstreams ()
 int
 Session::no_roll (jack_nframes_t nframes, jack_nframes_t offset)
 {
-	jack_nframes_t end_frame = _transport_frame + nframes;
+	jack_nframes_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
 	bool declick = get_transport_declick_required();
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -130,6 +130,9 @@ Session::process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 
 	record_active = actively_recording(); // || (get_record_enabled() && get_punch_in());
 
+	const jack_nframes_t start_frame = _transport_frame;
+	const jack_nframes_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		int ret;
@@ -140,7 +143,7 @@ Session::process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 
 		(*i)->set_pending_declick (declick);
 
-		if ((ret = (*i)->roll (nframes, _transport_frame, _transport_frame + nframes, offset, declick, record_active, rec_monitors)) < 0) {
+		if ((ret = (*i)->roll (nframes, start_frame, end_frame, offset, declick, record_active, rec_monitors)) < 0) {
 
 			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
 			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that
@@ -171,6 +174,9 @@ Session::silent_process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 		/* force a declick out */
 		declick = -1;
 	}
+	
+	const jack_nframes_t start_frame = _transport_frame;
+	const jack_nframes_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
@@ -180,7 +186,7 @@ Session::silent_process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 			continue;
 		}
 
-		if ((ret = (*i)->silent_roll (nframes, _transport_frame, _transport_frame + nframes, offset, record_active, rec_monitors)) < 0) {
+		if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, offset, record_active, rec_monitors)) < 0) {
 			
 			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
 			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that

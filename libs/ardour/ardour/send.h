@@ -40,7 +40,7 @@ class Send : public Redirect {
 	Send (const Send&);
 	~Send ();
 	
-	void run (vector<Sample *> &bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
 	void activate() {}
 	void deactivate () {}
 
@@ -50,12 +50,12 @@ class Send : public Redirect {
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
 
-	uint32_t pans_required() const { return expected_inputs; }
-	void expect_inputs (uint32_t);
+	uint32_t pans_required() const { return _expected_inputs.get(DataType::AUDIO); }
+	void expect_inputs (const ChanCount&);
 
   private:
-	bool _metering;
-	uint32_t expected_inputs;
+	bool      _metering;
+	ChanCount _expected_inputs;
 };
 
 } // namespace ARDOUR

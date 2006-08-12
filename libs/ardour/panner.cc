@@ -39,6 +39,7 @@
 #include <ardour/utils.h>
 
 #include <ardour/mix.h>
+#include <ardour/buffer_set.h>
 
 #include "i18n.h"
 
@@ -292,8 +293,10 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 }
 
 void
-BaseStereoPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_nframes_t nframes)
+BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, jack_nframes_t nframes)
 {
+	assert(obufs.count().get(DataType::AUDIO) == 2);
+
 	pan_t delta;
 	Sample* dst;
 	pan_t pan;
@@ -301,10 +304,12 @@ BaseStereoPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, ja
 	if (_muted) {
 		return;
 	}
+	
+	Sample* const src = srcbuf.data(nframes);
 
 	/* LEFT */
 
-	dst = obufs[0];
+	dst = obufs.get_audio(0).data(nframes);
 
 	if (fabsf ((delta = (left - desired_left))) > 0.002) { // about 1 degree of arc 
 		
@@ -354,7 +359,7 @@ BaseStereoPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, ja
 
 	/* RIGHT */
 
-	dst = obufs[1];
+	dst = obufs.get_audio(1).data(nframes);
 	
 	if (fabsf ((delta = (right - desired_right))) > 0.002) { // about 1 degree of arc 
 		
@@ -445,19 +450,22 @@ EqualPowerStereoPanner::update ()
 }
 
 void
-EqualPowerStereoPanner::distribute_automated (Sample* src, Sample** obufs, 
+EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& obufs, 
 					      jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes,
 					      pan_t** buffers)
 {
+	assert(obufs.count().get(DataType::AUDIO) == 2);
+
 	Sample* dst;
 	pan_t* pbuf;
+	Sample* const src = srcbuf.data(nframes);
 
 	/* fetch positional data */
 
 	if (!_automation.rt_safe_get_vector (start, end, buffers[0], nframes)) {
 		/* fallback */
 		if (!_muted) {
-			distribute (src, obufs, 1.0, nframes);
+			distribute (srcbuf, obufs, 1.0, nframes);
 		}
 		return;
 	}
@@ -489,25 +497,25 @@ EqualPowerStereoPanner::distribute_automated (Sample* src, Sample** obufs,
 
 	/* LEFT */
 
-	dst = obufs[0];
+	dst = obufs.get_audio(0).data(nframes);
 	pbuf = buffers[0];
 	
 	for (jack_nframes_t n = 0; n < nframes; ++n) {
 		dst[n] += src[n] * pbuf[n];
 	}	
 
-        /* XXX it would be nice to mark the buffer as written to */
+	/* XXX it would be nice to mark the buffer as written to */
 
 	/* RIGHT */
 
-	dst = obufs[1];
+	dst = obufs.get_audio(1).data(nframes);
 	pbuf = buffers[1];
 
 	for (jack_nframes_t n = 0; n < nframes; ++n) {
 		dst[n] += src[n] * pbuf[n];
 	}	
 	
-        /* XXX it would be nice to mark the buffer as written to */
+	/* XXX it would be nice to mark the buffer as written to */
 }
 
 StreamPanner*
@@ -648,7 +656,7 @@ Multi2dPanner::update ()
 }
 
 void
-Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_nframes_t nframes)
+Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, jack_nframes_t nframes)
 {
 	Sample* dst;
 	pan_t pan;
@@ -658,11 +666,13 @@ Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_
 	if (_muted) {
 		return;
 	}
+	
+	Sample* const src = srcbuf.data(nframes);
 
 
 	for (n = 0, o = parent.outputs.begin(); o != parent.outputs.end(); ++o, ++n) {
 
-		dst = obufs[n];
+		dst = obufs.get_audio(n).data(nframes);
 	
 #ifdef CAN_INTERP
 		if (fabsf ((delta = (left_interp - desired_left))) > 0.002) { // about 1 degree of arc 
@@ -719,7 +729,7 @@ Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_
 }
 
 void
-Multi2dPanner::distribute_automated (Sample* src, Sample** obufs, 
+Multi2dPanner::distribute_automated (AudioBuffer& src, BufferSet& obufs, 
 				     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes,
 				     pan_t** buffers)
 {
@@ -1477,3 +1487,124 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 		}
 	}
 }
+
+void
+Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff)
+{
+	if (outbufs.count().get(DataType::AUDIO) == 0) {
+		// Don't want to lose audio...
+		assert(inbufs.count().get(DataType::AUDIO) == 0);
+		return;
+	}
+
+	// We shouldn't be called in the first place...
+	assert(!bypassed());
+	assert(!empty());
+
+	
+	if (outbufs.count().get(DataType::AUDIO) == 1) {
+
+		AudioBuffer& dst = outbufs.get_audio(0);
+
+		if (gain_coeff == 0.0f) {
+
+			/* only one output, and gain was zero, so make it silent */
+
+			dst.silence(offset);
+			
+		} else if (gain_coeff == 1.0f){
+
+			/* mix all buffers into the output */
+
+			// copy the first
+			dst.read_from(inbufs.get_audio(0), nframes, offset);
+			
+			// accumulate starting with the second
+			BufferSet::audio_iterator i = inbufs.audio_begin();
+			for (++i; i != inbufs.audio_end(); ++i) {
+				dst.accumulate_from(*i, nframes, offset);
+			}
+
+			//audio_output(0)->mark_silence (false); // FIXME
+
+		} else {
+
+			/* mix all buffers into the output, scaling them all by the gain */
+
+			// copy the first
+			dst.read_from(inbufs.get_audio(0), nframes, offset);
+			
+			// accumulate (with gain) starting with the second
+			BufferSet::audio_iterator i = inbufs.audio_begin();
+			for (++i; i != inbufs.audio_end(); ++i) {
+				dst.accumulate_with_gain_from(*i, nframes, offset, gain_coeff);
+			}
+
+			//audio_output(0)->mark_silence (false); // FIXME
+		}
+
+		return;
+	}
+
+	// More than 1 output, we should have 1 panner for each input
+	assert(size() == inbufs.count().get(DataType::AUDIO));
+	
+	/* the terrible silence ... */
+	for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
+		i->silence(nframes, offset);
+	}
+
+	BufferSet::audio_iterator i = inbufs.audio_begin();
+	for (iterator pan = begin(); pan != end(); ++pan, ++i) {
+		(*pan)->distribute (*i, outbufs, gain_coeff, nframes);
+	}
+}
+
+void
+Panner::distribute_automated (BufferSet& inbufs, BufferSet& outbufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
+{	
+	if (outbufs.count().get(DataType::AUDIO) == 0) {
+		// Don't want to lose audio...
+		assert(inbufs.count().get(DataType::AUDIO) == 0);
+		return;
+	}
+
+	// We shouldn't be called in the first place...
+	assert(!bypassed());
+	assert(!empty());
+
+
+	if (outbufs.count().get(DataType::AUDIO) == 1) {
+
+		AudioBuffer& dst = outbufs.get_audio(0);
+
+		// FIXME: apply gain automation?
+
+		// copy the first
+		dst.read_from(inbufs.get_audio(0), nframes, offset);
+
+		// accumulate starting with the second
+		BufferSet::audio_iterator i = inbufs.audio_begin();
+		for (++i; i != inbufs.audio_end(); ++i) {
+			dst.accumulate_from(*i, nframes, offset);
+		}
+
+		//audio_output(0)->mark_silence (false); // FIXME
+
+		return;
+	}
+
+	// More than 1 output, we should have 1 panner for each input
+	assert(size() == inbufs.count().get(DataType::AUDIO));
+	
+	/* the terrible silence ... */
+	for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
+		i->silence(nframes, offset);
+	}
+
+	BufferSet::audio_iterator i = inbufs.audio_begin();
+	for (iterator pan = begin(); pan != end(); ++pan, ++i) {
+		(*pan)->distribute_automated (*i, outbufs, start_frame, end_frame, nframes, _session.pan_automation_buffer());
+	}
+}
+

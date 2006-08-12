@@ -767,7 +767,7 @@ AudioRegionView::create_waves ()
 		return;
 	}
 
-	uint32_t nchans = atv.get_diskstream()->n_channels();
+	uint32_t nchans = atv.get_diskstream()->n_channels().get(DataType::AUDIO);
 	
 	/* in tmp_waves, set up null pointers for each channel so the vector is allocated */
 	for (uint32_t n = 0; n < nchans; ++n) {
@@ -806,7 +806,7 @@ void
 AudioRegionView::create_one_wave (uint32_t which, bool direct)
 {
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
-	uint32_t nchans = atv.get_diskstream()->n_channels();
+	uint32_t nchans = atv.get_diskstream()->n_channels().get(DataType::AUDIO);
 	uint32_t n;
 	uint32_t nwaves = std::min (nchans, audio_region().n_channels());
 	gdouble ht;
@@ -1024,7 +1024,7 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 	GhostRegion* ghost = new GhostRegion (atv, unit_position);
 	uint32_t nchans;
 	
-	nchans = rtv->get_diskstream()->n_channels();
+	nchans = rtv->get_diskstream()->n_channels().get(DataType::AUDIO);
 
 	for (uint32_t n = 0; n < nchans; ++n) {
 		

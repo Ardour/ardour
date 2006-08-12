@@ -33,7 +33,7 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>
-
+#include <ardour/buffer_set.h>
 #include "i18n.h"
 
 using namespace std;
@@ -400,17 +400,16 @@ AudioTrack::set_state_part_two ()
 	return;
 }	
 
-uint32_t
+ChanCount
 AudioTrack::n_process_buffers ()
 {
-	return max ((uint32_t) _diskstream->n_channels(), redirect_max_outs);
+	return max (_diskstream->n_channels(), redirect_max_outs);
 }
 
 void
 AudioTrack::passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter)
 {
-	uint32_t nbufs = n_process_buffers ();
-	process_output_buffers (_session.get_silent_buffers (nbufs), nbufs, start_frame, end_frame, nframes, offset, true, declick, meter);
+	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, offset, true, declick, meter);
 }
 
 int 
@@ -568,16 +567,15 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 		
 		/* copy the diskstream data to all output buffers */
 		
-		vector<Sample*>& bufs = _session.get_passthru_buffers ();
-		uint32_t limit = n_process_buffers ();
+		const size_t limit = n_process_buffers().get(DataType::AUDIO);
+		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 		
 		uint32_t n;
 		uint32_t i;
 
-
 		for (i = 0, n = 1; i < limit; ++i, ++n) {
-			memcpy (bufs[i], b, sizeof (Sample) * nframes); 
-			if (n < diskstream.n_channels()) {
+			memcpy (bufs.get_audio(i).data(nframes), b, sizeof (Sample) * nframes); 
+			if (n < diskstream.n_channels().get(DataType::AUDIO)) {
 				tmpb = diskstream.playback_buffer(n);
 				if (tmpb!=0) {
 					b = tmpb;
@@ -595,7 +593,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 			}
 		}
 
-		process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !_session.get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+		process_output_buffers (bufs, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !_session.get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
 		
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */
@@ -627,7 +625,7 @@ AudioTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jac
 }
 
 int
-AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
+AudioTrack::export_stuff (BufferSet& buffers, jack_nframes_t start, jack_nframes_t nframes)
 {
 	gain_t  gain_automation[nframes];
 	gain_t  gain_buffer[nframes];
@@ -635,8 +633,6 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 	RedirectList::iterator i;
 	bool post_fader_work = false;
 	gain_t this_gain = _gain;
-	vector<Sample*>::iterator bi;
-	Sample * b;
 	AudioDiskstream& diskstream = audio_diskstream();
 	
 	Glib::RWLock::ReaderLock rlock (redirect_lock);
@@ -645,24 +641,26 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(diskstream.playlist());
 	assert(apl);
 
-	if (apl->read (buffers[0], mix_buffer, gain_buffer, start, nframes) != nframes) {
+	if (apl->read (buffers.get_audio(nframes).data(nframes),
+			mix_buffer, gain_buffer, start, nframes) != nframes) {
 		return -1;
 	}
 
+	assert(buffers.count().get(DataType::AUDIO) >= 1);
 	uint32_t n=1;
-	bi = buffers.begin();
-	b = buffers[0];
+	Sample* b = buffers.get_audio(0).data(nframes);
+	BufferSet::audio_iterator bi = buffers.audio_begin();
 	++bi;
-	for (; bi != buffers.end(); ++bi, ++n) {
-		if (n < diskstream.n_channels()) {
-			if (apl->read ((*bi), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
+	for ( ; bi != buffers.audio_end(); ++bi, ++n) {
+		if (n < diskstream.n_channels().get(DataType::AUDIO)) {
+			if (apl->read (bi->data(nframes), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
 				return -1;
 			}
-			b = (*bi);
+			b = bi->data(nframes);
 		}
 		else {
 			/* duplicate last across remaining buffers */
-			memcpy ((*bi), b, sizeof (Sample) * nframes); 
+			memcpy (bi->data(nframes), b, sizeof (Sample) * nframes); 
 		}
 	}
 
@@ -677,7 +675,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 		if ((insert = boost::dynamic_pointer_cast<Insert>(*i)) != 0) {
 			switch (insert->placement()) {
 			case PreFader:
-				insert->run (buffers, nbufs, nframes, 0);
+				insert->run (buffers, nframes, 0);
 				break;
 			case PostFader:
 				post_fader_work = true;
@@ -690,8 +688,8 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 		
 		_gain_automation_curve.get_vector (start, start + nframes, gain_automation, nframes);
 
-		for (bi = buffers.begin(); bi != buffers.end(); ++bi) {
-			Sample *b = *bi;
+		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
+			Sample *b = bi->data(nframes);
 			for (jack_nframes_t n = 0; n < nframes; ++n) {
 				b[n] *= gain_automation[n];
 			}
@@ -699,8 +697,8 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 
 	} else {
 
-		for (bi = buffers.begin(); bi != buffers.end(); ++bi) {
-			Sample *b = *bi;
+		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
+			Sample *b = bi->data(nframes);
 			for (jack_nframes_t n = 0; n < nframes; ++n) {
 				b[n] *= this_gain;
 			}
@@ -717,7 +715,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 				case PreFader:
 					break;
 				case PostFader:
-					insert->run (buffers, nbufs, nframes, 0);
+					insert->run (buffers, nframes, 0);
 					break;
 				}
 			}

@@ -40,6 +40,8 @@ namespace ARDOUR {
 
 class Session;
 class Panner;
+class BufferSet;
+class AudioBuffer;
 
 class StreamPanner : public sigc::trackable, public Stateful
 {
@@ -62,10 +64,10 @@ class StreamPanner : public sigc::trackable, public Stateful
 	void get_effective_position (float& xpos, float& ypos) const { xpos = effective_x; ypos = effective_y; }
 	void get_effective_position (float& xpos, float& ypos, float& zpos) const { xpos = effective_x; ypos = effective_y; zpos = effective_z; }
 
-	/* the basic panner API */
+	/* the basic StreamPanner API */
 
-	virtual void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_nframes_t nframes) = 0;
-	virtual void distribute_automated (Sample* src, Sample** obufs, 
+	virtual void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, jack_nframes_t nframes) = 0;
+	virtual void distribute_automated (AudioBuffer& src, BufferSet& obufs,
 				     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, pan_t** buffers) = 0;
 
 	/* automation */
@@ -141,7 +143,7 @@ class BaseStereoPanner : public StreamPanner
 	   and a type name. See EqualPowerStereoPanner as an example.
 	*/
 
-	void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_nframes_t nframes);
+	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, jack_nframes_t nframes);
 
 	int load (istream&, string path, uint32_t&);
 	int save (ostream&) const;
@@ -169,7 +171,7 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	EqualPowerStereoPanner (Panner&);
 	~EqualPowerStereoPanner ();
 
-	void distribute_automated (Sample* src, Sample** obufs, 
+	void distribute_automated (AudioBuffer& src, BufferSet& obufs, 
 			     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, pan_t** buffers);
 
 	void get_current_coefficients (pan_t*) const;
@@ -203,8 +205,8 @@ class Multi2dPanner : public StreamPanner
 
 	Curve& automation() { return _automation; }
 
-	void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_nframes_t nframes);
-	void distribute_automated (Sample* src, Sample** obufs, 
+	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, jack_nframes_t nframes);
+	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
 			     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, pan_t** buffers);
 
 	int load (istream&, string path, uint32_t&);
@@ -238,6 +240,14 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 
 	Panner (string name, Session&);
 	virtual ~Panner ();
+
+	// FIXME: unify these two
+	
+	/// The fundamental Panner function
+	void distribute (BufferSet& src, BufferSet& dest, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff);
+
+	/// The other fundamental Panner function
+	void distribute_automated (BufferSet& src, BufferSet& dest, jack_nframes_t start_frame, jack_nframes_t end_frames, jack_nframes_t nframes, jack_nframes_t offset);
 
 	void set_name (string);
 

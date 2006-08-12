@@ -43,9 +43,11 @@ public:
 
 	void add_port(Port* port);
 
+	/** nth port */
 	Port* port(size_t index) const;
-
-	Port* nth_port_of_type(DataType type, size_t n) const;
+	
+	/** nth port of type @a t, or nth port if t = NIL */
+	Port* port(DataType t, size_t index) const;
 
 	AudioPort* nth_audio_port(size_t n) const;
 	
@@ -58,19 +60,19 @@ public:
 	 */
 	void clear() { _ports.clear(); }
 
-	const ChanCount& chan_count() const { return _chan_count; }
+	const ChanCount& count() const { return _count; }
 
-	bool empty() const { return (_chan_count.get_total() == 0); }
+	bool empty() const { return (_count.get_total() == 0); }
 
 	// ITERATORS
 	
-	// obviously these iterators will need to get more clever
-	// experimental phase, it's the interface that counts right now
+	// FIXME: this is a filthy copy-and-paste mess
 	
 	class iterator {
 	public:
 
-		Port* operator*()  { return _list.port(_index); }
+		Port& operator*()  { return *_set.port(_type, _index); }
+		Port* operator->() { return _set.port(_type, _index); }
 		iterator& operator++() { ++_index; return *this; } // yes, prefix only
 		bool operator==(const iterator& other) { return (_index == other._index); }
 		bool operator!=(const iterator& other) { return (_index != other._index); }
@@ -78,19 +80,29 @@ public:
 	private:
 		friend class PortSet;
 
-		iterator(PortSet& list, size_t index) : _list(list), _index(index) {}
+		iterator(PortSet& list, DataType type, size_t index)
+			: _set(list), _type(type), _index(index) {}
 
-		PortSet& _list;
-		size_t    _index;
+		PortSet& _set;
+		DataType _type; ///< Ignored if NIL (to iterator over entire set)
+		size_t   _index;
 	};
 
-	iterator begin() { return iterator(*this, 0); }
-	iterator end()   { return iterator(*this, _chan_count.get_total()); }
+	iterator begin(DataType type = DataType::NIL)
+		{ return iterator(*this, type, 0); }
 	
+	iterator end(DataType type = DataType::NIL)
+	{
+		return iterator(*this, type,
+			(type == DataType::NIL) ? _count.get_total() : _count.get(type));
+	}
+	
+	// FIXME: typeify
 	class const_iterator {
 	public:
 
-		const Port* operator*()  { return _list.port(_index); }
+		const Port& operator*()  { return *_set.port(_index); }
+		const Port* operator->() { return _set.port(_index); }
 		const_iterator& operator++() { ++_index; return *this; } // yes, prefix only
 		bool operator==(const const_iterator& other) { return (_index == other._index); }
 		bool operator!=(const const_iterator& other) { return (_index != other._index); }
@@ -98,21 +110,21 @@ public:
 	private:
 		friend class PortSet;
 
-		const_iterator(const PortSet& list, size_t index) : _list(list), _index(index) {}
+		const_iterator(const PortSet& list, size_t index) : _set(list), _index(index) {}
 
-		const PortSet& _list;
+		const PortSet& _set;
 		size_t          _index;
 	};
 
 	const_iterator begin() const { return const_iterator(*this, 0); }
-	const_iterator end()   const { return const_iterator(*this, _chan_count.get_total()); }
+	const_iterator end()   const { return const_iterator(*this, _count.get_total()); }
 
-	
 
 	class audio_iterator {
 	public:
 
-		AudioPort* operator*()  { return _list.nth_audio_port(_index); }
+		AudioPort& operator*()  { return *_set.nth_audio_port(_index); }
+		AudioPort* operator->()  { return _set.nth_audio_port(_index); }
 		audio_iterator& operator++() { ++_index; return *this; } // yes, prefix only
 		bool operator==(const audio_iterator& other) { return (_index == other._index); }
 		bool operator!=(const audio_iterator& other) { return (_index != other._index); }
@@ -120,14 +132,14 @@ public:
 	private:
 		friend class PortSet;
 
-		audio_iterator(PortSet& list, size_t index) : _list(list), _index(index) {}
+		audio_iterator(PortSet& list, size_t index) : _set(list), _index(index) {}
 
-		PortSet& _list;
+		PortSet& _set;
 		size_t    _index;
 	};
 
 	audio_iterator audio_begin() { return audio_iterator(*this, 0); }
-	audio_iterator audio_end()   { return audio_iterator(*this, _chan_count.get(DataType::AUDIO)); }
+	audio_iterator audio_end()   { return audio_iterator(*this, _count.get(DataType::AUDIO)); }
 
 
 
@@ -142,7 +154,7 @@ private:
 	// Vector of vectors, indexed by DataType::to_index()
 	std::vector<PortVec> _ports;
 
-	ChanCount _chan_count;
+	ChanCount _count;
 };
 
 

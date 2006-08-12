@@ -402,7 +402,7 @@ AudioStreamView::setup_rec_box ()
 				AudioDiskstream* ads = dynamic_cast<AudioDiskstream*>(_trackview.get_diskstream());
 				assert(ads);
 
-				for (uint32_t n=0; n < ads->n_channels(); ++n) {
+				for (uint32_t n=0; n < ads->n_channels().get(DataType::AUDIO); ++n) {
 					AudioSource *src = (AudioSource *) ads->write_source (n);
 					if (src) {
 						sources.push_back (src);
@@ -553,7 +553,7 @@ AudioStreamView::rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt,
 
 	rec_peak_ready_map[src] = true;
 
-	if (rec_peak_ready_map.size() == _trackview.get_diskstream()->n_channels()) {
+	if (rec_peak_ready_map.size() == _trackview.get_diskstream()->n_channels().get(DataType::AUDIO)) {
 		this->update_rec_regions ();
 		rec_peak_ready_map.clear();
 	}

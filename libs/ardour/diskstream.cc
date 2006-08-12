@@ -124,8 +124,6 @@ Diskstream::init (Flag f)
 	overwrite_frame = 0;
 	overwrite_queued = false;
 	input_change_pending = NoChange;
-
-	_n_channels = 0;
 }
 
 Diskstream::~Diskstream ()

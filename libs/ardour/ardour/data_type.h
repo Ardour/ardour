@@ -19,6 +19,7 @@
 #ifndef __ardour_data_type_h__
 #define __ardour_data_type_h__
 
+#include <cassert>
 #include <string>
 #include <ardour/data_type.h>
 #include <jack/jack.h>
@@ -95,7 +96,7 @@ public:
 	}
 
 	Symbol        to_symbol() const { return _symbol; }
-	inline size_t to_index() const  { return symbol_index(_symbol); }
+	inline size_t to_index() const  { assert(_symbol != NIL); return symbol_index(_symbol); }
 
 	/** DataType iterator, for writing generic loops that iterate over all
 	 * available types.

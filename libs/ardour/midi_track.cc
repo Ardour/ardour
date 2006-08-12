@@ -386,17 +386,16 @@ MidiTrack::set_state_part_two ()
 	return;
 }	
 
-uint32_t
+ChanCount
 MidiTrack::n_process_buffers ()
 {
-	return max ((uint32_t) _diskstream->n_channels(), redirect_max_outs);
+	return max (_diskstream->n_channels(), redirect_max_outs);
 }
 
 void
 MidiTrack::passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter)
 {
-	uint32_t nbufs = n_process_buffers ();
-	process_output_buffers (_session.get_silent_buffers (nbufs), nbufs, start_frame, end_frame, nframes, offset, true, declick, meter);
+	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, offset, true, declick, meter);
 }
 
 int 
@@ -508,7 +507,7 @@ MidiTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack
 }
 
 void
-MidiTrack::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
+MidiTrack::process_output_buffers (BufferSet& bufs,
 			       jack_nframes_t start_frame, jack_nframes_t end_frame, 
 			       jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
 			       bool meter)
@@ -539,9 +538,9 @@ MidiTrack::set_name (string str, void *src)
 }
 
 int
-MidiTrack::export_stuff (vector<unsigned char*>& buffers, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
+MidiTrack::export_stuff (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t end_frame)
 {
-	return 0;
+	return -1;
 }
 
 void

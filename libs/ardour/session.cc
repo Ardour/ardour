@@ -70,6 +70,7 @@
 #include <ardour/playlist.h>
 #include <ardour/click.h>
 #include <ardour/data_type.h>
+#include <ardour/buffer_set.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -256,6 +257,9 @@ Session::Session (AudioEngine &eng,
 		  string* mix_template)
 
 	: _engine (eng),
+	  _scratch_buffers(new BufferSet()),
+	  _silent_buffers(new BufferSet()),
+	  _send_buffers(new BufferSet()),
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
@@ -307,6 +311,9 @@ Session::Session (AudioEngine &eng,
 		  jack_nframes_t initial_length)
 
 	: _engine (eng),
+	  _scratch_buffers(new BufferSet()),
+	  _silent_buffers(new BufferSet()),
+	  _send_buffers(new BufferSet()),
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
@@ -389,17 +396,9 @@ Session::~Session ()
 
 	clear_clicks ();
 
-	for (vector<Sample*>::iterator i = _passthru_buffers.begin(); i != _passthru_buffers.end(); ++i) {
-		free(*i);
-	}
-
-	for (vector<Sample*>::iterator i = _silent_buffers.begin(); i != _silent_buffers.end(); ++i) {
-		free(*i);
-	}
-
- 	for (vector<Sample*>::iterator i = _send_buffers.begin(); i != _send_buffers.end(); ++i) {
- 		free(*i);
- 	}
+	delete _scratch_buffers;
+	delete _silent_buffers;
+	delete _send_buffers;
 
 	AudioDiskstream::free_working_buffers();
 	
@@ -1444,39 +1443,11 @@ Session::set_block_size (jack_nframes_t nframes)
 
 	{ 
 		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		vector<Sample*>::iterator i;
-		uint32_t np;
 			
 		current_block_size = nframes;
 		
-		for (np = 0, i = _passthru_buffers.begin(); i != _passthru_buffers.end(); ++i, ++np) {
-			free (*i);
-		}
+		ensure_buffers(_scratch_buffers->available());
 
-		for (vector<Sample*>::iterator i = _silent_buffers.begin(); i != _silent_buffers.end(); ++i) {
-			free (*i);
-		}
-
-		_passthru_buffers.clear ();
-		_silent_buffers.clear ();
-
-		ensure_passthru_buffers (ChanCount(DataType::AUDIO, np));
-
-		for (vector<Sample*>::iterator i = _send_buffers.begin(); i != _send_buffers.end(); ++i) {
-			free(*i);
-
-			Sample *buf;
-#ifdef NO_POSIX_MEMALIGN
-			buf = (Sample *) malloc(current_block_size * sizeof(Sample));
-#else
-			posix_memalign((void **)&buf,16,current_block_size * 4);
-#endif			
-			*i = buf;
-
-			memset (*i, 0, sizeof (Sample) * current_block_size);
-		}
-
-		
 		if (_gain_automation_buffer) {
 			delete [] _gain_automation_buffer;
 		}
@@ -3138,7 +3109,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 AudioFileSource *
 Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bool destructive)
 {
-	string spath = audio_path_from_name (ds.name(), ds.n_channels(), chan, destructive);
+	string spath = audio_path_from_name (ds.name(), ds.n_channels().get(DataType::AUDIO), chan, destructive);
 
 	/* this might throw failed_constructor(), which is OK */
 	
@@ -3657,41 +3628,17 @@ Session::tempo_map_changed (Change ignored)
 	set_dirty ();
 }
 
+/** Ensures that all buffers (scratch, send, silent, etc) are allocated for
+ * the given count with the current block size.
+ */
 void
-Session::ensure_passthru_buffers (ChanCount howmany)
+Session::ensure_buffers (ChanCount howmany)
 {
-	// FIXME: temporary hack
-
-	while (howmany.get(DataType::AUDIO) > _passthru_buffers.size()) {
-		Sample *p;
-#ifdef NO_POSIX_MEMALIGN
-		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
-#else
-		posix_memalign((void **)&p,16,current_block_size * 4);
-#endif			
-		_passthru_buffers.push_back (p);
-
-		*p = 0;
-		
-#ifdef NO_POSIX_MEMALIGN
-		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
-#else
-		posix_memalign((void **)&p,16,current_block_size * 4);
-#endif			
-		memset (p, 0, sizeof (Sample) * current_block_size);
-		_silent_buffers.push_back (p);
-
-		*p = 0;
-		
-#ifdef NO_POSIX_MEMALIGN
-		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
-#else
-		posix_memalign((void **)&p,16,current_block_size * 4);
-#endif			
-		memset (p, 0, sizeof (Sample) * current_block_size);
-		_send_buffers.push_back (p);
-		
-	}
+	// FIXME: NASTY assumption (midi block size == audio block size)
+	_scratch_buffers->ensure_buffers(howmany, current_block_size);
+	_send_buffers->ensure_buffers(howmany, current_block_size);
+	_silent_buffers->ensure_buffers(howmany, current_block_size);
+	
 	allocate_pan_automation_buffers (current_block_size, howmany.get(DataType::AUDIO), false);
 }
 
@@ -3859,17 +3806,17 @@ int
 Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nframes_t len, 	
 			       bool overwrite, vector<Source*>& srcs, InterThreadInfo& itt)
 {
-	int ret = -1;
-	Playlist* playlist;
-	AudioFileSource* fsource;
-	uint32_t x;
-	char buf[PATH_MAX+1];
-	string dir;
-	uint32_t nchans;
-	jack_nframes_t position;
-	jack_nframes_t this_chunk;
-	jack_nframes_t to_do;
-	vector<Sample*> buffers;
+	int              ret = -1;
+	Playlist*        playlist = 0;
+	AudioFileSource* fsource = 0;
+	uint32_t         x;
+	char             buf[PATH_MAX+1];
+	string           dir;
+	ChanCount        nchans(track.audio_diskstream().n_channels());
+	jack_nframes_t   position;
+	jack_nframes_t   this_chunk;
+	jack_nframes_t   to_do;
+	BufferSet        buffers;
 
 	// any bigger than this seems to cause stack overflows in called functions
 	const jack_nframes_t chunk_size = (128 * 1024)/4;
@@ -3887,12 +3834,10 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	if (track.has_external_redirects()) {
 		goto out;
 	}
-
-	nchans = track.audio_diskstream().n_channels();
 	
 	dir = discover_best_sound_dir ();
 
-	for (uint32_t chan_n=0; chan_n < nchans; ++chan_n) {
+	for (uint32_t chan_n=0; chan_n < nchans.get(DataType::AUDIO); ++chan_n) {
 
 		for (x = 0; x < 99999; ++x) {
 			snprintf (buf, sizeof(buf), "%s/%s-%d-bounce-%" PRIu32 ".wav", dir.c_str(), playlist->name().c_str(), chan_n, x+1);
@@ -3928,22 +3873,14 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	to_do = len;
 
 	/* create a set of reasonably-sized buffers */
-
-	for (vector<Sample*>::iterator i = _passthru_buffers.begin(); i != _passthru_buffers.end(); ++i) {
-		Sample* b;
-#ifdef NO_POSIX_MEMALIGN
-		b =  (Sample *) malloc(chunk_size * sizeof(Sample));
-#else
-		posix_memalign((void **)&b,16,chunk_size * 4);
-#endif			
-		buffers.push_back (b);
-	}
+	buffers.ensure_buffers(nchans, chunk_size);
+	buffers.set_count(nchans);
 
 	while (to_do && !itt.cancel) {
 		
 		this_chunk = min (to_do, chunk_size);
 		
-		if (track.export_stuff (buffers, nchans, start, this_chunk)) {
+		if (track.export_stuff (buffers, start, this_chunk)) {
 			goto out;
 		}
 
@@ -3952,7 +3889,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
 
 			if (afs) {
-				if (afs->write (buffers[n], this_chunk) != this_chunk) {
+				if (afs->write (buffers.get_audio(n).data(this_chunk), this_chunk) != this_chunk) {
 					goto out;
 				}
 			}
@@ -4002,10 +3939,6 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		}
 	}
 
-	for (vector<Sample*>::iterator i = buffers.begin(); i != buffers.end(); ++i) {
-		free(*i);
-	}
-
 	g_atomic_int_set (&processing_prohibited, 0);
 
 	itt.done = true;
@@ -4013,13 +3946,35 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	return ret;
 }
 
-vector<Sample*>&
-Session::get_silent_buffers (uint32_t howmany)
+BufferSet&
+Session::get_silent_buffers (ChanCount count)
 {
-	for (uint32_t i = 0; i < howmany; ++i) {
-		memset (_silent_buffers[i], 0, sizeof (Sample) * current_block_size);
+	assert(_silent_buffers->available() >= count);
+	_silent_buffers->set_count(count);
+
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (size_t i=0; i < count.get(*t); ++i) {
+			_silent_buffers->get(*t, i).clear();
+		}
 	}
-	return _silent_buffers;
+	
+	return *_silent_buffers;
+}
+
+BufferSet&
+Session::get_scratch_buffers (ChanCount count)
+{
+	assert(_scratch_buffers->available() >= count);
+	_scratch_buffers->set_count(count);
+	return *_scratch_buffers;
+}
+
+BufferSet&
+Session::get_send_buffers (ChanCount count)
+{
+	assert(_send_buffers->available() >= count);
+	_send_buffers->set_count(count);
+	return *_send_buffers;
 }
 
 uint32_t 

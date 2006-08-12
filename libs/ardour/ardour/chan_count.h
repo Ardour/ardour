@@ -73,41 +73,31 @@ public:
 	bool operator<(const ChanCount& other) const
 	{
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			if (_counts[(*t).to_index()] >= other._counts[(*t).to_index()]) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	bool operator<=(const ChanCount& other) const
-	{
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (_counts[(*t).to_index()] > other._counts[(*t).to_index()]) {
 				return false;
 			}
 		}
-		return true;
+		return (*this != other);
+	}
+
+	bool operator<=(const ChanCount& other) const
+	{
+		return ( (*this < other) || (*this == other) );
 	}
 	
 	bool operator>(const ChanCount& other) const
-	{
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			if (_counts[(*t).to_index()] <= other._counts[(*t).to_index()]) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	bool operator>=(const ChanCount& other) const
 	{
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (_counts[(*t).to_index()] < other._counts[(*t).to_index()]) {
 				return false;
 			}
 		}
-		return true;
+		return (*this != other);
+	}
+
+	bool operator>=(const ChanCount& other) const
+	{
+		return ( (*this > other) || (*this == other) );
 	}
 
 	static const ChanCount INFINITE;

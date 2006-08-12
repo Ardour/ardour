@@ -115,7 +115,7 @@ class Diskstream : public Stateful, public sigc::trackable
 	jack_nframes_t get_capture_start_frame (uint32_t n=0);
 	jack_nframes_t get_captured_frames (uint32_t n=0);
 	
-	uint32_t n_channels() { return _n_channels; }
+	ChanCount n_channels() { return _n_channels; }
 
 	static jack_nframes_t disk_io_frames() { return disk_io_chunk_frames; }
 	static void set_disk_io_chunk_frames (uint32_t n) { disk_io_chunk_frames = n; }
@@ -250,7 +250,7 @@ class Diskstream : public Stateful, public sigc::trackable
 	string            _name;
 	ARDOUR::Session&  _session;
 	ARDOUR::IO*       _io;
-	uint32_t          _n_channels;
+	ChanCount         _n_channels;
 	PBD::ID           _id;
 	Playlist*         _playlist;
 

@@ -83,11 +83,14 @@ MidiBuffer::~MidiBuffer()
 		free(_data);
 }
 
+
 /** Note that offset and nframes refer to sample time, not actual buffer locations */
 void
-MidiBuffer::write(const Buffer& src, jack_nframes_t offset, jack_nframes_t nframes)
+MidiBuffer::read_from(const Buffer& src, jack_nframes_t nframes, jack_nframes_t offset)
 {
-	assert(src.type() == DataType::MIDI);
+	// FIXME: offsets?  param semantics?
+	throw;
+	assert(src.type() == _type == DataType::MIDI);
 	assert(offset == 0);
 	MidiBuffer& msrc = (MidiBuffer&)src;
 	_size = 0;

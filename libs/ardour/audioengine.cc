@@ -472,36 +472,31 @@ AudioEngine::register_output_port (DataType type, const string& portname)
 
 
 int          
-AudioEngine::unregister_port (Port *port)
+AudioEngine::unregister_port (Port& port)
 {
 	if (!_running) { 
 		/* probably happening when the engine has been halted by JACK,
 		   in which case, there is nothing we can do here.
-		*/
+		   */
 		return 0;
 	}
 
-	if (port) {
+	int ret = jack_port_unregister (_jack, port._port);
 
-		int ret = jack_port_unregister (_jack, port->_port);
-		
-		if (ret == 0) {
+	if (ret == 0) {
 
-			for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
-				if ((*i) == port) {
-					ports.erase (i);
-					break;
-				}
+		for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
+			if (*i == &port) {
+				ports.erase (i);
+				break;
 			}
-
-			remove_connections_for (port);
 		}
 
-		return ret;
-
-	} else {
-		return -1;
+		remove_connections_for (port);
 	}
+
+	return ret;
+
 }
 
 int 
@@ -563,7 +558,7 @@ AudioEngine::disconnect (const string& source, const string& destination)
 }
 
 int
-AudioEngine::disconnect (Port *port)
+AudioEngine::disconnect (Port& port)
 {
 	if (!_running) {
 		if (!_has_run) {
@@ -574,7 +569,7 @@ AudioEngine::disconnect (Port *port)
 		}
 	}
 
-	int ret = jack_port_disconnect (_jack, port->_port);
+	int ret = jack_port_disconnect (_jack, port._port);
 
 	if (ret == 0) {
 		remove_connections_for (port);
@@ -851,7 +846,7 @@ AudioEngine::remove_all_ports ()
 }
 
 void
-AudioEngine::remove_connections_for (Port* port)
+AudioEngine::remove_connections_for (Port& port)
 {
 	for (PortConnections::iterator i = port_connections.begin(); i != port_connections.end(); ) {
 		PortConnections::iterator tmp;
@@ -859,7 +854,7 @@ AudioEngine::remove_connections_for (Port* port)
 		tmp = i;
 		++tmp;
 		
-		if ((*i).first == port->name()) {
+		if ((*i).first == port.name()) {
 			port_connections.erase (i);
 		}
 

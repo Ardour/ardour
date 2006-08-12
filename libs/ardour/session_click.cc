@@ -25,6 +25,7 @@
 #include <ardour/session.h>
 #include <ardour/tempo.h>
 #include <ardour/io.h>
+#include <ardour/buffer_set.h>
 
 #include <sndfile.h>
 
@@ -42,7 +43,6 @@ Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t off
 	TempoMap::BBTPointList *points;
 	jack_nframes_t end;
 	Sample *buf;
-	vector<Sample*> bufs;
 
 	if (_click_io == 0) {
 		return;
@@ -57,7 +57,8 @@ Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t off
 
 	end = start + nframes;
 
-	buf = _passthru_buffers[0];
+	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
+	buf = bufs.get_audio(0).data(nframes);
 	points = _tempo_map->get_points (start, end);
 
 	if (points == 0) {
@@ -127,7 +128,7 @@ Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t off
 		i = next;
 	}
 
-	_click_io->deliver_output (_passthru_buffers, 1, nframes, offset);
+	_click_io->deliver_output (bufs, nframes, offset);
 }
 
 void

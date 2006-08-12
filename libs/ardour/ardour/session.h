@@ -73,6 +73,7 @@ class Route;
 class AuxInput;
 class Source;
 class AudioSource;
+class BufferSet;
 
 class Diskstream;
 class AudioDiskstream;
@@ -280,10 +281,10 @@ class Session : public sigc::trackable, public Stateful
 
 	void process (jack_nframes_t nframes);
 
-	vector<Sample*>& get_passthru_buffers() { return _passthru_buffers; }
-	vector<Sample*>& get_silent_buffers (uint32_t howmany);
-	vector<Sample*>& get_send_buffers () { return _send_buffers; }
-
+	BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
+	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
+	BufferSet& get_send_buffers (ChanCount count = ChanCount::ZERO);
+	
 	Diskstream    *diskstream_by_id (const PBD::ID& id);
 	Diskstream    *diskstream_by_name (string name);
 
@@ -1072,9 +1073,9 @@ class Session : public sigc::trackable, public Stateful
 	jack_nframes_t          _last_slave_transport_frame;
 	jack_nframes_t           maximum_output_latency;
 	jack_nframes_t           last_stop_frame;
-	vector<Sample *>        _passthru_buffers;
-	vector<Sample *>        _silent_buffers;
-	vector<Sample *>        _send_buffers;
+	BufferSet*              _scratch_buffers;
+	BufferSet*              _silent_buffers;
+	BufferSet*              _send_buffers;
 	jack_nframes_t           current_block_size;
 	jack_nframes_t          _worst_output_latency;
 	jack_nframes_t          _worst_input_latency;
@@ -1091,7 +1092,7 @@ class Session : public sigc::trackable, public Stateful
 
 	void update_latency_compensation_proxy (void* ignored);
 
-	void ensure_passthru_buffers (ChanCount howmany);
+	void ensure_buffers (ChanCount howmany);
 	
 	void process_scrub          (jack_nframes_t);
 	void process_without_events (jack_nframes_t);

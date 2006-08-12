@@ -41,6 +41,7 @@
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
 #include <ardour/ladspa_plugin.h>
+#include <ardour/buffer_set.h>
 
 #include <pbd/stl_delete.h>
 
@@ -516,26 +517,28 @@ LadspaPlugin::automatable () const
 }
 
 int
-LadspaPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, int32_t& in_index, int32_t& out_index, jack_nframes_t nframes, jack_nframes_t offset)
+LadspaPlugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& out_index, jack_nframes_t nframes, jack_nframes_t offset)
 {
-	uint32_t port_index;
+	uint32_t port_index = 0;
 	cycles_t then, now;
 
-	port_index = 0;
-
 	then = get_cycles ();
+
+	const uint32_t nbufs = bufs.count().get(DataType::AUDIO);
 
 	while (port_index < parameter_count()) {
 		if (LADSPA_IS_PORT_AUDIO (port_descriptor(port_index))) {
 			if (LADSPA_IS_PORT_INPUT (port_descriptor(port_index))) {
-				connect_port (port_index, bufs[min((uint32_t) in_index,nbufs - 1)] + offset);
+				const size_t index = min(in_index, nbufs - 1);
+				connect_port (port_index, bufs.get_audio(index).data(nframes, offset));
 				//cerr << this << ' ' << name() << " @ " << offset << " inport " << in_index << " = buf " 
 				//     << min((uint32_t)in_index,nbufs) << " = " << &bufs[min((uint32_t)in_index,nbufs)][offset] << endl;
 				in_index++;
 
 
 			} else if (LADSPA_IS_PORT_OUTPUT (port_descriptor (port_index))) {
-				connect_port (port_index, bufs[min((uint32_t) out_index,nbufs - 1)] + offset);
+				const size_t index = min(out_index,nbufs - 1);
+				connect_port (port_index, bufs.get_audio(index).data(nframes, offset));
 				// cerr << this << ' ' << name() << " @ " << offset << " outport " << out_index << " = buf " 
 				//     << min((uint32_t)out_index,nbufs) << " = " << &bufs[min((uint32_t)out_index,nbufs)][offset] << endl;
 				out_index++;

@@ -161,8 +161,11 @@ class Route : public IO
 		}
 	}
 	
-	uint32_t max_redirect_outs () const { return redirect_max_outs; }
-		
+	ChanCount max_redirect_outs () const { return redirect_max_outs; }
+	
+	// FIXME: remove/replace err_streams parameters with something appropriate
+	// they are used by 'wierd_plugin_dialog'(sic) to display the number of input streams
+	// at the insertion point if the insert fails
 	int add_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
 	int add_redirects (const RedirectList&, void *src, uint32_t* err_streams = 0);
 	int remove_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
@@ -304,7 +307,7 @@ class Route : public IO
 	void passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		       jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter_inputs);
 
-	virtual void process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
+	virtual void process_output_buffers (BufferSet& bufs,
 				     jack_nframes_t start_frame, jack_nframes_t end_frame,
 				     jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
 				     bool meter);
@@ -318,11 +321,11 @@ class Route : public IO
 	sigc::connection input_signal_connection;
 
 	state_id_t _current_state_id;
-	uint32_t redirect_max_outs;
+	ChanCount redirect_max_outs;
 	uint32_t _remote_control_id;
 
 	uint32_t pans_required() const;
-	uint32_t n_process_buffers ();
+	ChanCount n_process_buffers ();
 
   private:
 	void init ();
