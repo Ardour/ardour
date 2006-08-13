@@ -1,4 +1,4 @@
-cd $dir/..
+cd `dirname "$0"`/..
 
 #export G_DEBUG=fatal_criticals
 

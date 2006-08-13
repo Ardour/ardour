@@ -1,4 +1,3 @@
 #!/bin/sh
-dir=`dirname "$0"`
-source ardev_common.sh
-exec $dir/ardour.bin --novst $*
+source `dirname "$0"`/ardev_common.sh
+exec gtk2_ardour/ardour.bin --novst "$*"
