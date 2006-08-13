@@ -101,11 +101,9 @@ class IO : public Stateful, public ARDOUR::StateManager
 	
 	virtual void silence  (jack_nframes_t, jack_nframes_t offset);
 
-	void pan (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff);
-	void pan_automated (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset);
 	void collect_input  (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void deliver_output (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void deliver_output_no_pan (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame,
+	                                      jack_nframes_t nframes, jack_nframes_t offset);
 	void just_meter_input (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 			       jack_nframes_t nframes, jack_nframes_t offset);
 
@@ -115,6 +113,9 @@ class IO : public Stateful, public ARDOUR::StateManager
 	void           inc_gain (gain_t delta, void *src);
 	gain_t         gain () const { return _desired_gain; }
 	virtual gain_t effective_gain () const;
+	
+	void set_phase_invert (bool yn, void *src);
+	bool phase_invert() const { return _phase_invert; }
 
 	Panner& panner()        { return *_panner; }
 	PeakMeter& peak_meter() { return *_meter; }
@@ -295,6 +296,7 @@ public:
 	Connection* _output_connection;
 	PBD::ID     _id;
 	bool         no_panner_reset;
+	bool        _phase_invert;
 	XMLNode*     deferred_state;
 	DataType    _default_type;
 

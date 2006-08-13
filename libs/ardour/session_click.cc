@@ -41,7 +41,6 @@ void
 Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t offset)
 {
 	TempoMap::BBTPointList *points;
-	jack_nframes_t end;
 	Sample *buf;
 
 	if (_click_io == 0) {
@@ -55,7 +54,7 @@ Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t off
 		return;
 	} 
 
-	end = start + nframes;
+	const jack_nframes_t end = start + (jack_nframes_t)floor(nframes * _transport_speed);
 
 	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
 	buf = bufs.get_audio(0).data(nframes);
@@ -127,8 +126,8 @@ Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t off
 
 		i = next;
 	}
-
-	_click_io->deliver_output (bufs, nframes, offset);
+	
+	_click_io->deliver_output (bufs, start, end, nframes, offset);
 }
 
 void

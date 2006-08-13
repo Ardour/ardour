@@ -74,8 +74,8 @@ MidiPort::cycle_start (jack_nframes_t nframes)
 
 	_buffer->set_size(event_count);
 	
-	if (_buffer->size() > 0)
-		cerr << "MIDIPort got " << event_count << " events." << endl;
+	//if (_buffer->size() > 0)
+	//	cerr << "MIDIPort got " << event_count << " events." << endl;
 }
 
 void

@@ -124,9 +124,6 @@ class Route : public IO
 
 	void set_mute_config (mute_type, bool, void *src);
 	bool get_mute_config (mute_type);
-
-	void set_phase_invert (bool yn, void *src);
-	bool phase_invert() const { return _phase_invert; }
 	
 	void       set_edit_group (RouteGroup *, void *);
 	void       drop_edit_group (void *);
@@ -269,7 +266,6 @@ class Route : public IO
 	bool                     _soloed : 1;
 	bool                     _solo_muted : 1;
 	bool                     _solo_safe : 1;
-	bool                     _phase_invert : 1;
 	bool                     _recordable : 1;
 	bool                     _active : 1;
 	bool                     _mute_affects_pre_fader : 1;

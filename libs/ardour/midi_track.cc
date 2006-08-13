@@ -482,6 +482,8 @@ int
 MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, int declick,
 		  bool can_record, bool rec_monitors_input)
 {
+	passthru (start_frame, end_frame, nframes, offset, declick, false);
+
 	return 0;
 }
 
@@ -512,7 +514,23 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 			       jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
 			       bool meter)
 {
-	// Do nothing (just bypass the Route version to avoid flaming death)
+	// There's no such thing as a MIDI bus for the time being, to avoid diverging from trunk
+	// too much until the SoC settles down.  We'll do all the MIDI route work here for now
+	
+	// Main output stage is the only stage we've got.
+	// I think it's a pretty good stage though, wouldn't you say?
+	
+
+	if (muted()) {
+
+		IO::silence(nframes, offset);
+
+	} else {
+
+		deliver_output(bufs, start_frame, end_frame, nframes, offset);
+
+	}
+
 }
 
 int

@@ -675,7 +675,7 @@ AudioTrack::export_stuff (BufferSet& buffers, jack_nframes_t start, jack_nframes
 		if ((insert = boost::dynamic_pointer_cast<Insert>(*i)) != 0) {
 			switch (insert->placement()) {
 			case PreFader:
-				insert->run (buffers, nframes, 0);
+				insert->run (buffers, start, start+nframes, nframes, 0);
 				break;
 			case PostFader:
 				post_fader_work = true;
@@ -715,7 +715,7 @@ AudioTrack::export_stuff (BufferSet& buffers, jack_nframes_t start, jack_nframes
 				case PreFader:
 					break;
 				case PostFader:
-					insert->run (buffers, nframes, 0);
+					insert->run (buffers, start, start+nframes, nframes, 0);
 					break;
 				}
 			}

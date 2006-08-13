@@ -16,8 +16,8 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_declicker_h__
-#define __ardour_declicker_h__
+#ifndef __ardour_amp_h__
+#define __ardour_amp_h__
 
 #include <ardour/types.h>
 
@@ -29,12 +29,14 @@ class BufferSet;
 /** Applies a declick operation to all audio inputs, passing the same number of
  * audio outputs, and passing through any other types unchanged.
  */
-class Declicker {
+class Amp {
 public:
 	static void run (BufferSet& bufs, jack_nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity);
+
+	static void apply_simple_gain(BufferSet& bufs, jack_nframes_t nframes, gain_t target);
 };
 
 
 } // namespace ARDOUR
 
-#endif // __ardour_declicker_h__
+#endif // __ardour_amp_h__

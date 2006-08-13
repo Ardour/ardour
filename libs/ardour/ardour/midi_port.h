@@ -40,7 +40,6 @@ class MidiPort : public Port {
 	DataType type() const { return DataType(DataType::MIDI); }
 
 	MidiBuffer& get_buffer() {
-		assert(_nframes_this_cycle > 0);
 		return *_buffer;
 	}
 	

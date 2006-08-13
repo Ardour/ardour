@@ -38,6 +38,7 @@
 #include <ardour/panner.h>
 #include <ardour/buffer_set.h>
 #include <ardour/meter.h>
+#include <ardour/amp.h>
 
 #include "i18n.h"
 
@@ -119,6 +120,7 @@ IO::IO (Session& s, string name,
 	_output_connection = 0;
 	pending_state_node = 0;
 	no_panner_reset = false;
+	_phase_invert = false;
 	deferred_state = 0;
 
 	apply_gain_automation = false;
@@ -169,157 +171,58 @@ IO::silence (jack_nframes_t nframes, jack_nframes_t offset)
 	}
 }
 
+/** Deliver bufs to the IO's Jack outputs.
+ *
+ * This function should automatically do whatever it necessary to correctly deliver bufs
+ * to the outputs, eg applying gain or pan or whatever else needs to be done.
+ */
 void
-IO::pan_automated (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
+IO::deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
 {
-	_panner->distribute_automated(bufs, output_buffers(), start_frame, end_frame, nframes, offset);
-}
-
-void
-IO::pan (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff)
-{
-	/* the panner can be empty if there are no inputs to the route, but still outputs */
-	if (_panner->bypassed() || _panner->empty()) {
-		// FIXME: gain
-		deliver_output_no_pan (bufs, nframes, offset);
-		return;
-	} else {
-		_panner->distribute(bufs, output_buffers(), nframes, offset, gain_coeff);
-	}
-}
-
-void
-IO::deliver_output (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset)
-{
-	throw;
-#if 0
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	if (n_outputs().get(DataType::AUDIO) == 0) {
-		return;
-	}
+	// FIXME: type specific code doesn't actually need to be here, it will go away in time
 	
-	if (_panner->bypassed() || _panner->empty()) {
-		deliver_output_no_pan (bufs, nbufs, nframes, offset);
-		return;
-	}
 
+	/* ********** AUDIO ********** */
 
-	gain_t dg;
-	gain_t pangain = _gain;
-	
-	{
-		Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
+	// Apply gain if gain automation isn't playing
+	if ( ! apply_gain_automation) {
 		
-		if (dm.locked()) {
-			dg = _desired_gain;
-		} else {
-			dg = _gain;
-		}
-	}
+		gain_t dg = _gain; // desired gain
 
-	if (dg != _gain) {
-		Declicker::run (bufs, nbufs, nframes, _gain, dg, false);
-		_gain = dg;
-		pangain = 1.0f;
-	} 
+		{
+			Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
 
-	/* simple, non-automation panning to outputs */
-
-	if (_session.transport_speed() > 1.5f || _session.transport_speed() < -1.5f) {
-		pan (bufs, nbufs, nframes, offset, pangain * speed_quietning);
-	} else {
-		pan (bufs, nbufs, nframes, offset, pangain);
-	}
-#endif
-}
-
-void
-IO::deliver_output_no_pan (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset)
-{
-	throw;
-#if 0
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	if (n_outputs().get(DataType::AUDIO) == 0) {
-		return;
-	}
-
-	gain_t dg;
-	gain_t old_gain = _gain;
-
-	if (apply_gain_automation) {
-
-		/* gain has already been applied by automation code. do nothing here except
-		   speed quietning.
-		*/
-
-		_gain = 1.0f;
-		dg = _gain;
-		
-	} else {
-
-		Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
-		
-		if (dm.locked()) {
-			dg = _desired_gain;
-		} else {
-			dg = _gain;
-		}
-	}
-
-	Sample* src;
-	Sample* dst;
-	uint32_t i;
-	vector<Sample*> outs;
-	gain_t actual_gain;
-
-	if (dg != _gain) {
-		/* unlikely condition */
-		i = 0;
-		for (PortSet::audio_iterator o = _outputs.audio_begin(); o != _outputs.audio_end(); ++o, ++i) {
-			outs.push_back ((*o)->get_audio_buffer().data (nframes, offset));
-		}
-	}
-
-	/* reduce nbufs to the index of the last input buffer */
-
-	nbufs--;
-
-	if (_session.transport_speed() > 1.5f || _session.transport_speed() < -1.5f) {
-		actual_gain = _gain * speed_quietning;
-	} else {
-		actual_gain = _gain;
-	}
-	
-	i = 0;
-	for (PortSet::audio_iterator o = _outputs.audio_begin(); o != _outputs.audio_end(); ++o, ++i) {
-
-		dst = (*o)->get_audio_buffer().data(nframes, offset);
-		src = bufs[min(nbufs,i)];
-
-		if (dg != _gain || actual_gain == 1.0f) {
-			memcpy (dst, src, sizeof (Sample) * nframes);
-		} else if (actual_gain == 0.0f) {
-			memset (dst, 0, sizeof (Sample) * nframes);
-		} else {
-			for (jack_nframes_t x = 0; x < nframes; ++x) {
-				dst[x] = src[x] * actual_gain;
+			if (dm.locked()) {
+				dg = _desired_gain;
 			}
 		}
+
+		Amp::run(bufs, nframes, _gain, dg, _phase_invert);
+	}
+	
+	// Use the panner to distribute audio to output port buffers
+	if (_panner && !_panner->empty() && !_panner->bypassed()) {
+		_panner->distribute(bufs, output_buffers(), start_frame, end_frame, nframes, offset);
+	}
+
+
+	/* ********** MIDI ********** */
+
+	// No MIDI, we're done here
+	if (bufs.count().get(DataType::MIDI) == 0) {
+		return;
+	}
+
+	const DataType type = DataType::MIDI; // type type type type...
+	
+	// Just dump any MIDI 1-to-1, we're not at all clever with MIDI routing yet
+	BufferSet::iterator o = output_buffers().begin(type);
+	for (BufferSet::iterator i = bufs.begin(type); i != bufs.end(type); ++i) {
 		
-		(*o)->mark_silence (false);
+		for (PortSet::iterator i = _inputs.begin(type); i != _inputs.end(type); ++i, ++o) {
+			o->read_from(i->get_buffer(), nframes, offset);
+		}
 	}
-
-	if (dg != _gain) {
-		Declicker::run (outs, outs.size(), nframes, _gain, dg, false);
-		_gain = dg;
-	}
-
-	if (apply_gain_automation) {
-		_gain = old_gain;
-	}
-#endif
 }
 
 void
@@ -2534,5 +2437,14 @@ MidiPort*
 IO::midi_output(uint32_t n) const
 {
 	return dynamic_cast<MidiPort*>(output(n));
+}
+
+void
+IO::set_phase_invert (bool yn, void *src)
+{
+	if (_phase_invert != yn) {
+		_phase_invert = yn;
+	}
+	//  phase_invert_changed (src); /* EMIT SIGNAL */
 }
 

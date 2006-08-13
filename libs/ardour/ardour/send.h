@@ -40,7 +40,7 @@ class Send : public Redirect {
 	Send (const Send&);
 	~Send ();
 	
-	void run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset);
 	void activate() {}
 	void deactivate () {}
 

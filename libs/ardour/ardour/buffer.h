@@ -136,6 +136,14 @@ public:
 		}
 	}
 	
+	void apply_gain(gain_t gain, jack_nframes_t len, jack_nframes_t offset=0) {
+		Sample* const buf = _data + offset;
+
+		for (jack_nframes_t n = 0; n < len; ++n) {
+			buf[n] *= gain;
+		}
+	}
+
 	/** Set the data contained by this buffer manually (for setting directly to jack buffer).
 	 * 
 	 * Constructor MUST have been passed capacity=0 or this will die (to prevent mem leaks).

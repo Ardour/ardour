@@ -1489,7 +1489,7 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 }
 
 void
-Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff)
+Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff)
 {
 	if (outbufs.count().get(DataType::AUDIO) == 0) {
 		// Don't want to lose audio...
@@ -1561,10 +1561,10 @@ Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, jack_nframes_t nframe
 }
 
 void
-Panner::distribute_automated (BufferSet& inbufs, BufferSet& outbufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
+Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
 {	
 	if (outbufs.count().get(DataType::AUDIO) == 0) {
-		// Don't want to lose audio...
+		// Failing to deliver audio we were asked to deliver is a bug
 		assert(inbufs.count().get(DataType::AUDIO) == 0);
 		return;
 	}
@@ -1573,7 +1573,22 @@ Panner::distribute_automated (BufferSet& inbufs, BufferSet& outbufs, jack_nframe
 	assert(!bypassed());
 	assert(!empty());
 
+	// If we shouldn't play automation defer to distribute_no_automation
+	if ( !( automation_state() & Play ||
+			 ((automation_state() & Touch) && !touching()) ) ) {
 
+		// Speed quietning
+		gain_t gain_coeff = 1.0;
+		if (fabsf(_session.transport_speed()) > 1.5f) {
+			gain_coeff = speed_quietning;
+		}
+
+		distribute_no_automation(inbufs, outbufs, nframes, offset, gain_coeff);
+		return;
+	}
+
+	// Otherwise.. let the automation flow, baby
+	
 	if (outbufs.count().get(DataType::AUDIO) == 1) {
 
 		AudioBuffer& dst = outbufs.get_audio(0);

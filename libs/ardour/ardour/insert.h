@@ -53,7 +53,7 @@ class Insert : public Redirect
 	
 	virtual ~Insert() { }
 
-	virtual void run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset) = 0;
+	virtual void run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset) = 0;
 	virtual void activate () {}
 	virtual void deactivate () {}
 
@@ -75,7 +75,7 @@ class PortInsert : public Insert
 	int set_state(const XMLNode&);
 
 	void init ();
-	void run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset);
 
 	jack_nframes_t latency();
 	
@@ -113,7 +113,7 @@ class PluginInsert : public Insert
 	StateManager::State* state_factory (std::string why) const;
 	Change restore_state (StateManager::State&);
 
-	void run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset);
 	void silence (jack_nframes_t nframes, jack_nframes_t offset);
 	void activate ();
 	void deactivate ();

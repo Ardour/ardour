@@ -41,8 +41,9 @@ midi_port.cc
 port_set.cc
 buffer.cc
 buffer_set.cc
-declicker.cc
 meter.cc
+amp.cc
+panner.cc
 audiofilesource.cc
 audiofilter.cc
 audioregion.cc
@@ -75,7 +76,6 @@ ladspa_plugin.cc
 location.cc
 mtc_slave.cc
 named_selection.cc
-panner.cc
 pcm_utils.cc
 playlist.cc
 playlist_factory.cc

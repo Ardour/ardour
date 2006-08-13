@@ -42,7 +42,7 @@
 #include <ardour/panner.h>
 #include <ardour/dB.h>
 #include <ardour/mix.h>
-#include <ardour/declicker.h>
+#include <ardour/amp.h>
 #include <ardour/meter.h>
 #include <ardour/buffer_set.h>
 #include "i18n.h"
@@ -230,9 +230,9 @@ Route::set_gain (gain_t val, void *src)
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-			       jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			       jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
-			       bool meter)
+		jack_nframes_t start_frame, jack_nframes_t end_frame, 
+        jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
+		bool meter)
 {
 	// This is definitely very audio-only for now
 	assert(_default_type == DataType::AUDIO);
@@ -279,17 +279,17 @@ Route::process_output_buffers (BufferSet& bufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (declick > 0) {
-		Declicker::run (bufs, nframes, 0.0, 1.0, _phase_invert);
+		Amp::run (bufs, nframes, 0.0, 1.0, _phase_invert);
 		_pending_declick = 0;
 	} else if (declick < 0) {
-		Declicker::run (bufs, nframes, 1.0, 0.0, _phase_invert);
+		Amp::run (bufs, nframes, 1.0, 0.0, _phase_invert);
 		_pending_declick = 0;
 	} else {
 
 		/* no global declick */
 
 		if (solo_gain != dsg) {
-			Declicker::run (bufs, nframes, solo_gain, dsg, _phase_invert);
+			Amp::run (bufs, nframes, solo_gain, dsg, _phase_invert);
 			solo_gain = dsg;
 		}
 	}
@@ -304,7 +304,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
-		Declicker::run (bufs, nframes, mute_gain, dmg, _phase_invert);
+		Amp::run (bufs, nframes, mute_gain, dmg, _phase_invert);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -334,7 +334,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 		} else {
 
-			co->deliver_output (bufs, nframes, offset);
+			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
 			
 		} 
 	} 
@@ -350,7 +350,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
-						(*i)->run (bufs, nframes, offset);
+						(*i)->run (bufs, start_frame, end_frame, nframes, offset);
 						break;
 					case PostFader:
 						post_fader_work = true;
@@ -374,7 +374,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader) {
-		Declicker::run (bufs, nframes, mute_gain, dmg, _phase_invert);
+		Amp::run (bufs, nframes, mute_gain, dmg, _phase_invert);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -411,7 +411,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 		} else {
 
-			co->deliver_output (bufs, nframes, offset);
+			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
 			
 		} 
 	} 
@@ -466,7 +466,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 			if (_gain != dg) {
 				
-				Declicker::run (bufs, nframes, _gain, dg, _phase_invert);
+				Amp::run (bufs, nframes, _gain, dg, _phase_invert);
 				_gain = dg;
 				
 			} else if (_gain != 0 && (_phase_invert || _gain != 1.0)) {
@@ -519,7 +519,7 @@ Route::process_output_buffers (BufferSet& bufs,
 					case PreFader:
 						break;
 					case PostFader:
-						(*i)->run (bufs, nframes, offset);
+						(*i)->run (bufs, start_frame, end_frame, nframes, offset);
 						break;
 					}
 				}
@@ -538,7 +538,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_control_outs) {
-		Declicker::run (bufs, nframes, mute_gain, dmg, _phase_invert);
+		Amp::run (bufs, nframes, mute_gain, dmg, _phase_invert);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -574,7 +574,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 		} else {
 
-			co->deliver_output_no_pan (bufs, nframes, offset);
+			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
 		} 
 	} 
 
@@ -583,7 +583,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   ----------------------------------------------------------------------*/
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_main_outs) {
-		Declicker::run (bufs, nframes, mute_gain, dmg, _phase_invert);
+		Amp::run (bufs, nframes, mute_gain, dmg, _phase_invert);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -631,18 +631,8 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 		} else {
 			
-			if (_session.transport_speed() > 1.5f || _session.transport_speed() < -1.5f) {
-				pan (bufs, nframes, offset, speed_quietning); 
-			} else {
-				// cerr << _name << " panner state = " << _panner->automation_state() << endl;
-				if (!_panner->empty() &&
-				    (_panner->automation_state() & Play ||
-				     ((_panner->automation_state() & Touch) && !_panner->touching()))) {
-					pan_automated (bufs, start_frame, end_frame, nframes, offset);
-				} else {
-					pan (bufs, nframes, offset, 1.0); 
-				}
-			}
+			deliver_output(bufs, start_frame, end_frame, nframes, offset);
+
 		}
 
 	}
@@ -652,8 +642,6 @@ Route::process_output_buffers (BufferSet& bufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterPostFader)) {
-//		cerr << "meter post" << endl;
-
 		if ((_gain == 0 && !apply_gain_automation) || dmg == 0) {
 			_meter->reset();
 		} else {
@@ -689,15 +677,6 @@ Route::passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nfra
 	process_output_buffers (bufs, start_frame, end_frame, nframes, offset, true, declick, meter_stream);
 
 #undef meter_stream
-}
-
-void
-Route::set_phase_invert (bool yn, void *src)
-{
-	if (_phase_invert != yn) {
-		_phase_invert = yn;
-	}
-	//  phase_invert_changed (src); /* EMIT SIGNAL */
 }
 
 void

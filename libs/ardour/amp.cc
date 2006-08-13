@@ -16,7 +16,7 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ardour/declicker.h>
+#include <ardour/amp.h>
 
 #include <algorithm>
 #include <cmath>
@@ -26,16 +26,21 @@
 namespace ARDOUR {
 
 
-/** Apply a declick operation to the audio buffers of @a bufs */
+/** Apply a declicked gain to the audio buffers of @a bufs */
 void
-Declicker::run (BufferSet& bufs, jack_nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
+Amp::run (BufferSet& bufs, jack_nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
 {
 	if (bufs.count().get(DataType::AUDIO) == 0)
 		return;
 
 	assert(bufs.buffer_capacity(DataType::AUDIO) >= nframes);
 
-	const jack_nframes_t declick = std::min ((jack_nframes_t)4096, nframes);
+	// if we don't need to declick, defer to apply_simple_gain
+	if (initial == target) {
+		apply_simple_gain(bufs, nframes, invert_polarity ? target : -target);
+	}
+
+	const jack_nframes_t declick = std::min ((jack_nframes_t)128, nframes);
 	gain_t         delta;
 	double         fractional_shift = -1.0/declick;
 	double         fractional_pos;
@@ -78,6 +83,14 @@ Declicker::run (BufferSet& bufs, jack_nframes_t nframes, gain_t initial, gain_t 
 				}
 			}
 		}
+	}
+}
+
+void
+Amp::apply_simple_gain (BufferSet& bufs, jack_nframes_t nframes, gain_t target)
+{
+	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+		i->apply_gain(target, nframes);
 	}
 }
 

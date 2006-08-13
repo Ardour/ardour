@@ -373,7 +373,7 @@ PluginInsert::silence (jack_nframes_t nframes, jack_nframes_t offset)
 }
 	
 void
-PluginInsert::run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset)
+PluginInsert::run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
 {
 	if (active()) {
 
@@ -911,7 +911,7 @@ PortInsert::~PortInsert ()
 }
 
 void
-PortInsert::run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset)
+PortInsert::run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
 {
 	if (n_outputs().get(_default_type) == 0) {
 		return;

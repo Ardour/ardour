@@ -241,13 +241,8 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	Panner (string name, Session&);
 	virtual ~Panner ();
 
-	// FIXME: unify these two
-	
 	/// The fundamental Panner function
-	void distribute (BufferSet& src, BufferSet& dest, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff);
-
-	/// The other fundamental Panner function
-	void distribute_automated (BufferSet& src, BufferSet& dest, jack_nframes_t start_frame, jack_nframes_t end_frames, jack_nframes_t nframes, jack_nframes_t offset);
+	void distribute(BufferSet& src, BufferSet& dest, jack_nframes_t start_frame, jack_nframes_t end_frames, jack_nframes_t nframes, jack_nframes_t offset);
 
 	void set_name (string);
 
@@ -311,6 +306,8 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	void set_position (float x, float y, float z, StreamPanner& orig);
 	
   private:
+	void distribute_no_automation(BufferSet& src, BufferSet& dest, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff);
+
 
 	string            automation_path;
 	Session&         _session;

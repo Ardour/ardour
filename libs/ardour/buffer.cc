@@ -89,8 +89,8 @@ void
 MidiBuffer::read_from(const Buffer& src, jack_nframes_t nframes, jack_nframes_t offset)
 {
 	// FIXME: offsets?  param semantics?
-	throw;
-	assert(src.type() == _type == DataType::MIDI);
+	assert(src.type() == _type);
+	assert(src.type() == DataType::MIDI);
 	assert(offset == 0);
 	MidiBuffer& msrc = (MidiBuffer&)src;
 	_size = 0;

@@ -81,7 +81,7 @@ class Redirect : public IO
 	Placement placement() const { return _placement; }
 	void set_placement (Placement, void *src);
 
-	virtual void run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset) = 0;
+	virtual void run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset) = 0;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
 	virtual jack_nframes_t latency() { return 0; }
