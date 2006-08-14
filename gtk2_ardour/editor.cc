@@ -3754,10 +3754,12 @@ Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
 void
 Editor::set_zoom_focus (ZoomFocus f)
 {
+	vector<string> txt = internationalize (zoom_focus_strings);
+	zoom_focus_selector.set_active_text (txt[(int)f]);
+	
 	if (zoom_focus != f) {
 		zoom_focus = f;
-		vector<string> txt = internationalize (zoom_focus_strings);
-		zoom_focus_selector.set_active_text (txt[(int)f]);
+
 		ZoomFocusChanged (); /* EMIT_SIGNAL */
 
 		instant_save ();
