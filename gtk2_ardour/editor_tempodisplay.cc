@@ -216,7 +216,7 @@ Editor::draw_measures ()
 				   are large.
 				*/
 
-				if (beat_spacing < 25.0) {
+				if (beat_spacing < 15.0) {
 					break;
 				}
 			}

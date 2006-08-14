@@ -124,7 +124,6 @@ class Diskstream : public Stateful, public sigc::trackable
 	virtual XMLNode& get_state(void) = 0;
 	virtual int      set_state(const XMLNode& node) = 0;
 	
-	// FIXME: makes sense for all diskstream types?
 	virtual void monitor_input (bool) {}
 
 	jack_nframes_t capture_offset() const { return _capture_offset; }

@@ -55,6 +55,8 @@ MidiRegion::MidiRegion (MidiSource& src, jack_nframes_t start, jack_nframes_t le
 	if (announce) {
 		 CheckNewRegion (this); /* EMIT SIGNAL */
 	}
+	
+	assert(_name.find("/") == string::npos);
 }
 
 /* Basic MidiRegion constructor (one channel) */
@@ -66,6 +68,8 @@ MidiRegion::MidiRegion (MidiSource& src, jack_nframes_t start, jack_nframes_t le
 	if (announce) {
 		 CheckNewRegion (this); /* EMIT SIGNAL */
 	}
+
+	assert(_name.find("/") == string::npos);
 }
 
 /* Basic MidiRegion constructor (many channels) */
@@ -77,6 +81,8 @@ MidiRegion::MidiRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t l
 	if (announce) {
 		 CheckNewRegion (this); /* EMIT SIGNAL */
 	}
+	
+	assert(_name.find("/") == string::npos);
 }
 
 
@@ -89,6 +95,8 @@ MidiRegion::MidiRegion (const MidiRegion& other, jack_nframes_t offset, jack_nfr
 	if (announce) {
 		CheckNewRegion (this); /* EMIT SIGNAL */
 	}
+	
+	assert(_name.find("/") == string::npos);
 }
 
 MidiRegion::MidiRegion (const MidiRegion &other)
@@ -97,6 +105,7 @@ MidiRegion::MidiRegion (const MidiRegion &other)
 	save_state ("initial state");
 
 	/* NOTE: no CheckNewRegion signal emitted here. This is the copy constructor */
+	assert(_name.find("/") == string::npos);
 }
 
 MidiRegion::MidiRegion (MidiSource& src, const XMLNode& node)
@@ -108,6 +117,7 @@ MidiRegion::MidiRegion (MidiSource& src, const XMLNode& node)
 
 	save_state ("initial state");
 
+	assert(_name.find("/") == string::npos);
 	assert(_type == DataType::MIDI);
 
 	CheckNewRegion (this); /* EMIT SIGNAL */
@@ -122,6 +132,7 @@ MidiRegion::MidiRegion (SourceList& srcs, const XMLNode& node)
 
 	save_state ("initial state");
 
+	assert(_name.find("/") == string::npos);
 	assert(_type == DataType::MIDI);
 
 	CheckNewRegion (this); /* EMIT SIGNAL */
@@ -167,7 +178,7 @@ MidiRegion::get_memento() const
 }
 
 jack_nframes_t
-MidiRegion::read_at (RawMidi *out, RawMidi* mix_buf, jack_nframes_t position, 
+MidiRegion::read_at (MidiBuffer& out, jack_nframes_t position, 
 		      jack_nframes_t cnt, 
 		      uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
 {
@@ -175,14 +186,14 @@ MidiRegion::read_at (RawMidi *out, RawMidi* mix_buf, jack_nframes_t position,
 }
 
 jack_nframes_t
-MidiRegion::master_read_at (RawMidi *out, RawMidi* mix_buf, jack_nframes_t position, 
+MidiRegion::master_read_at (MidiBuffer& out, jack_nframes_t position, 
 			     jack_nframes_t cnt, uint32_t chan_n) const
 {
 	return _read_at (_master_sources, out, position, cnt, chan_n, 0, 0);
 }
 
 jack_nframes_t
-MidiRegion::_read_at (const SourceList& srcs, RawMidi *buf, 
+MidiRegion::_read_at (const SourceList& srcs, MidiBuffer& buf, 
 		       jack_nframes_t position, jack_nframes_t cnt, 
 		       uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
 {

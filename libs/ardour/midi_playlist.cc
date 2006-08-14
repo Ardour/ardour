@@ -170,7 +170,7 @@ struct RegionSortByLayer
 
 /** FIXME: semantics of return value? */
 jack_nframes_t
-MidiPlaylist::read (RawMidi *buf, RawMidi *mixdown_buffer, jack_nframes_t start,
+MidiPlaylist::read (MidiBuffer& buf, jack_nframes_t start,
                      jack_nframes_t cnt, unsigned chan_n)
 {
 	/* this function is never called from a realtime thread, so
@@ -199,7 +199,7 @@ MidiPlaylist::read (RawMidi *buf, RawMidi *mixdown_buffer, jack_nframes_t start,
 	sort(regs.begin(), regs.end(), layer_cmp);
 
 	for (vector<MidiRegion*>::iterator i = regs.begin(); i != regs.end(); ++i) {
-			(*i)->read_at (buf, mixdown_buffer, start, cnt, chan_n, read_frames, skip_frames);
+			(*i)->read_at (buf, start, cnt, chan_n, read_frames, skip_frames);
 			ret += (*i)->read_data_count();
 	}
 

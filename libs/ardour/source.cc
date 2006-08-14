@@ -48,6 +48,8 @@ sigc::signal<void,Source*> Source::SourceCreated;
 Source::Source (string name, DataType type)
 	: _type(type)
 {
+	assert(_name.find("/") == string::npos);
+
 	_name = name;
 	_use_cnt = 0;
 	_timestamp = 0;
@@ -62,6 +64,7 @@ Source::Source (const XMLNode& node)
 	if (set_state (node) || _type == DataType::NIL) {
 		throw failed_constructor();
 	}
+	assert(_name.find("/") == string::npos);
 }
 
 Source::~Source ()
@@ -111,6 +114,7 @@ Source::set_state (const XMLNode& node)
 	if ((prop = node.property ("timestamp")) != 0) {
 		sscanf (prop->value().c_str(), "%ld", &_timestamp);
 	}
+	assert(_name.find("/") == string::npos);
 
 	return 0;
 }

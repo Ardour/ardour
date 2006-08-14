@@ -33,6 +33,7 @@ class Session;
 class Region;
 class MidiRegion;
 class Source;
+class MidiBuffer;
 
 class MidiPlaylist : public ARDOUR::Playlist
 {
@@ -55,7 +56,7 @@ public:
 	MidiPlaylist (const MidiPlaylist&, jack_nframes_t start, jack_nframes_t cnt,
 	              string name, bool hidden = false);
 
-	jack_nframes_t read (RawMidi *dst, RawMidi *mixdown,
+	jack_nframes_t read (MidiBuffer& buf,
 	                     jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&);

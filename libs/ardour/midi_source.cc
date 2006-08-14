@@ -90,14 +90,14 @@ MidiSource::set_state (const XMLNode& node)
 }
 
 jack_nframes_t
-MidiSource::read (RawMidi* dst, jack_nframes_t start, jack_nframes_t cnt) const
+MidiSource::read (MidiBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt);
 }
 
 jack_nframes_t
-MidiSource::write (RawMidi* dst, jack_nframes_t cnt)
+MidiSource::write (MidiBuffer& dst, jack_nframes_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
 	return write_unlocked (dst, cnt);

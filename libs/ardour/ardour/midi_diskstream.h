@@ -124,7 +124,7 @@ class MidiDiskstream : public Diskstream
 	
 	int do_refill_with_alloc();
 
-	int read (RawMidi* buf, jack_nframes_t& start, jack_nframes_t cnt, bool reversed);
+	int read (MidiBuffer& dst, jack_nframes_t& start, jack_nframes_t cnt, bool reversed);
 
 	void finish_capture (bool rec_monitors_input);
 	void transport_stopped (struct tm&, time_t, bool abort);

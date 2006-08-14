@@ -153,8 +153,6 @@ MidiStreamView::setup_rec_box ()
 
 	if (_trackview.session().transport_rolling()) {
 
-		cerr << "\tSHOW: rolling\n";
-
 		if (!rec_active && 
 		    _trackview.session().record_status() == Session::Recording && 
 		    _trackview.get_diskstream()->record_enabled()) {
@@ -165,13 +163,11 @@ MidiStreamView::setup_rec_box ()
 
 				MidiRegion::SourceList sources;
 
-				// FIXME
 				MidiDiskstream* mds = dynamic_cast<MidiDiskstream*>(_trackview.get_diskstream());
 				assert(mds);
 
 				sources.push_back((Source*)mds->write_source());
 				
-				// FIXME
 				rec_data_ready_connections.push_back (mds->write_source()->ViewDataRangeReady.connect (bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), mds->write_source()))); 
 
 				// handle multi
@@ -224,15 +220,9 @@ MidiStreamView::setup_rec_box ()
 			rec_updating = true;
 			rec_active = true;
 
-			// Show, damn you!
-			rec_rect->show();
-			rec_rect->raise_to_top();
-
 		} else if (rec_active &&
 			   (_trackview.session().record_status() != Session::Recording ||
 			    !_trackview.get_diskstream()->record_enabled())) {
-
-			cerr << "NO SHOW 1\n";
 
 			screen_update_connection.disconnect();
 			rec_active = false;
@@ -310,7 +300,7 @@ MidiStreamView::update_rec_regions ()
 				continue;
 			}
 			
-			// FIXME
+			// FIXME?
 			MidiRegion * region = dynamic_cast<MidiRegion*>(*iter);
 			assert(region);
 

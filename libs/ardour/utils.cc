@@ -203,6 +203,12 @@ region_name_from_path (string path)
 {
 	string::size_type pos;
 
+	/* remove any leading path */
+
+	if ((pos = path.find_last_of ('/')) != string::npos) {
+		path = path.substr(pos+1);
+	}
+
  	/* remove filename suffixes etc. */
 	
 	if ((pos = path.find_last_of ('.')) != string::npos) {

@@ -2480,7 +2480,7 @@ Session::diskstream_by_id (const PBD::ID& id)
 	return 0;
 }
 
-/* AudioRegion management */
+/* Region management */
 
 string
 Session::new_region_name (string old)
@@ -2538,6 +2538,8 @@ Session::region_name (string& result, string base, bool newlevel) const
 {
 	char buf[16];
 	string subbase;
+
+	assert(base.find("/") == string::npos);
 
 	if (base == "") {
 		

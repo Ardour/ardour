@@ -544,12 +544,14 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 			// FIXME: reading from a MIDI port is different, can't just memcpy
 			//memcpy (_current_capture_buffer, _io->input(0)->get_buffer (rec_nframes) + offset + rec_offset, sizeof (RawMidi) * rec_nframes);
 			assert(_source_port);
-			for (size_t i=0; i < _source_port->size(); ++i) {
-				cerr << "DISKSTREAM GOT EVENT " << i << "!!\n";
+			
+			/*for (size_t i=0; i < _source_port->size(); ++i) {
+				cerr << "DISKSTREAM GOT EVENT(1) " << i << "!!\n";
 			}
 
-			//if (_source_port->size() == 0)
-			//	cerr << "No events :/ (1)\n";
+			if (_source_port->size() == 0)
+				cerr << "No events :/ (1)\n";
+			*/
 
 
 		} else {
@@ -565,11 +567,15 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 			// FIXME (see above)
 			//RawMidi* buf = _io->input (0)->get_buffer (nframes) + offset;
 			assert(_source_port);
+
+			/*
 			for (size_t i=0; i < _source_port->size(); ++i) {
-				cerr << "DISKSTREAM GOT EVENT " << i << "!!\n";
+				cerr << "DISKSTREAM GOT EVENT(2) " << i << "!!\n";
 			}
-			//if (_source_port->size() == 0)
-			//	cerr << "No events :/ (2)\n";
+			if (_source_port->size() == 0)
+				cerr << "No events :/ (2)\n";
+			*/
+
 			RawMidi* buf = NULL; // FIXME FIXME FIXME (make it compile)
 			assert(false);
 			jack_nframes_t first = _capture_vector.len[0];
@@ -592,8 +598,8 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 	if (rec_nframes) {
 		
 		// FIXME: filthy hack to fool the GUI into thinking we're doing something
-		if (_write_source)
-			_write_source->ViewDataRangeReady (transport_frame, rec_nframes); /* EMIT SIGNAL */
+		//if (_write_source)
+		//	_write_source->ViewDataRangeReady (transport_frame, rec_nframes); /* EMIT SIGNAL */
 
 		/* data will be written to disk */
 
@@ -802,7 +808,7 @@ MidiDiskstream::internal_playback_seek (jack_nframes_t distance)
 }
 
 int
-MidiDiskstream::read (RawMidi* buf, jack_nframes_t& start, jack_nframes_t cnt, bool reversed)
+MidiDiskstream::read (MidiBuffer& dst, jack_nframes_t& start, jack_nframes_t cnt, bool reversed)
 {
 	return 0;
 }

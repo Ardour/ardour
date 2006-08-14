@@ -27,6 +27,8 @@
 
 namespace ARDOUR {
 
+class MidiBuffer;
+
 /** Standard Midi File (Type 0) Source */
 class SMFSource : public MidiSource {
   public:
@@ -86,8 +88,8 @@ class SMFSource : public MidiSource {
 
 	int init (string idstr, bool must_exist);
 
-	jack_nframes_t read_unlocked (RawMidi* dst, jack_nframes_t start, jack_nframes_t cn) const;
-	jack_nframes_t write_unlocked (RawMidi* dst, jack_nframes_t cnt);
+	jack_nframes_t read_unlocked (MidiBuffer& dst, jack_nframes_t start, jack_nframes_t cn) const;
+	jack_nframes_t write_unlocked (MidiBuffer& dst, jack_nframes_t cnt);
 
 	bool find (std::string path, bool must_exist, bool& is_new);
 	bool removable() const;

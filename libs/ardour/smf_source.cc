@@ -47,7 +47,7 @@ uint64_t                              SMFSource::header_position_offset;
 */
 
 SMFSource::SMFSource (std::string path, Flag flags)
-	: MidiSource (path), _flags (flags)
+	: MidiSource (region_name_from_path(path)), _flags (flags)
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
 
@@ -55,6 +55,8 @@ SMFSource::SMFSource (std::string path, Flag flags)
 		throw failed_constructor ();
 	}
 	
+	assert(_name.find("/") == string::npos);
+
 	SourceCreated (this); /* EMIT SIGNAL */
 }
 
@@ -70,6 +72,8 @@ SMFSource::SMFSource (const XMLNode& node)
 	if (init (_name, true)) {
 		throw failed_constructor ();
 	}
+	
+	assert(_name.find("/") == string::npos);
 	
 	SourceCreated (this); /* EMIT SIGNAL */
 }
@@ -91,10 +95,8 @@ SMFSource::removable () const
 int
 SMFSource::init (string pathstr, bool must_exist)
 {
-	bool is_new = false;
+	//bool is_new = false;
 
-	_length = 1024; // FIXME FIXME FIXME: force save
-	
 	/*
 	if (!find (pathstr, must_exist, is_new)) {
 		cerr << "cannot find " << pathstr << " with me = " << must_exist << endl;
@@ -106,8 +108,9 @@ SMFSource::init (string pathstr, bool must_exist)
 	}
 	*/
 
-	// Yeah, we sound it.  Swear.
+	// Yeah, we found it.  Swear.
 
+	assert(_name.find("/") == string::npos);
 	return 0;
 }
 
@@ -124,15 +127,18 @@ SMFSource::flush_header ()
 }
 
 jack_nframes_t
-SMFSource::read_unlocked (RawMidi* dst, jack_nframes_t start, jack_nframes_t cnt) const
+SMFSource::read_unlocked (MidiBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const
 {
-	return 0;
+	dst.clear();
+	return cnt;
 }
 
 jack_nframes_t
-SMFSource::write_unlocked (RawMidi* dst, jack_nframes_t cnt)
+SMFSource::write_unlocked (MidiBuffer& src, jack_nframes_t cnt)
 {
-	return 0;
+	ViewDataRangeReady (_length, cnt); /* EMIT SIGNAL */
+	_length += cnt;
+	return cnt;
 }
 
 XMLNode&
@@ -165,6 +171,8 @@ SMFSource::set_state (const XMLNode& node)
 		_flags = Flag (0);
 
 	}
+
+	assert(_name.find("/") == string::npos);
 
 	return 0;
 }
