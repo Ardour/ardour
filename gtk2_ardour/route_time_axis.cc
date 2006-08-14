@@ -878,8 +878,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 
 	switch (Keyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
-		/* XXX this is not right */
-		editor.get_selection().add (*tracks);
+		editor.get_selection().toggle (*tracks);
 		break;
 		
 	case Selection::Set:

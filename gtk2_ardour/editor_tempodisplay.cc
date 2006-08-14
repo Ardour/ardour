@@ -194,6 +194,7 @@ Editor::draw_measures ()
 
 	double x1, x2, y1, y2;
 	track_canvas.get_scroll_region (x1, y1, x2, y2);
+	y2 = 1000000000.0f;
 
 	for (i = all_bbt_points->begin(); i != all_bbt_points->end(); ++i) {
 
