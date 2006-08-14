@@ -54,6 +54,8 @@ SMFSource::SMFSource (std::string path, Flag flags)
 	if (init (path, false)) {
 		throw failed_constructor ();
 	}
+	
+	SourceCreated (this); /* EMIT SIGNAL */
 }
 
 SMFSource::SMFSource (const XMLNode& node)
@@ -68,6 +70,8 @@ SMFSource::SMFSource (const XMLNode& node)
 	if (init (_name, true)) {
 		throw failed_constructor ();
 	}
+	
+	SourceCreated (this); /* EMIT SIGNAL */
 }
 
 SMFSource::~SMFSource ()
@@ -89,8 +93,9 @@ SMFSource::init (string pathstr, bool must_exist)
 {
 	bool is_new = false;
 
-	_length = 0;
+	_length = 1024; // FIXME FIXME FIXME: force save
 	
+	/*
 	if (!find (pathstr, must_exist, is_new)) {
 		cerr << "cannot find " << pathstr << " with me = " << must_exist << endl;
 		return -1;
@@ -99,6 +104,9 @@ SMFSource::init (string pathstr, bool must_exist)
 	if (is_new && must_exist) {
 		return -1;
 	}
+	*/
+
+	// Yeah, we sound it.  Swear.
 
 	return 0;
 }

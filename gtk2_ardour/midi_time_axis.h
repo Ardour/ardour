@@ -74,13 +74,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	XMLNode* get_child_xml_node (const string & childname);
 
   private:
-	void region_view_added (RegionView*) {}
-
 	void route_active_changed ();
 
 	//void redirects_changed (void *); FIXME?
-
-	void build_display_menu ();
 
 	void add_redirect_to_subplugin_menu (ARDOUR::Redirect *);
 	

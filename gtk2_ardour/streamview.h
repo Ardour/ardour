@@ -144,6 +144,10 @@ protected:
 
 	vector<sigc::connection> playlist_connections;
 	sigc::connection         playlist_change_connection;
+	
+	list<sigc::connection>     rec_data_ready_connections;
+	jack_nframes_t             last_rec_data_frame;
+	map<ARDOUR::Source*, bool> rec_data_ready_map;
 };
 
 #endif /* __ardour_streamview_h__ */

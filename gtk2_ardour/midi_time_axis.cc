@@ -98,26 +98,27 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 
 	/* map current state of the route */
 
-	//redirects_changed (0);
+	redirects_changed (0);
 
 	ensure_xml_node ();
 
 	set_state (*xml_node);
 	
-	//_route.redirects_changed.connect (mem_fun(*this, &MidiTimeAxisView::redirects_changed));
+	_route->redirects_changed.connect (mem_fun(*this, &MidiTimeAxisView::redirects_changed));
 
-	if (is_midi_track()) {
+	if (is_track()) {
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";
 		controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 
 		/* ask for notifications of any new RegionViews */
-		//view->MidiRegionViewAdded.connect (mem_fun(*this, &MidiTimeAxisView::region_view_added));
-		//view->attach ();
+		_view->RegionViewAdded.connect (mem_fun(*this, &MidiTimeAxisView::region_view_added));
+		_view->attach ();
 
 	} else { /* bus */
 
+		throw; // what the?
 		controls_ebox.set_name ("MidiBusControlsBaseUnselected");
 		controls_base_selected_name = "MidiBusControlsBaseSelected";
 		controls_base_unselected_name = "MidiBusControlsBaseUnselected";
@@ -174,75 +175,6 @@ MidiTimeAxisView::set_state (const XMLNode& node)
 	}
 }
 
-void
-MidiTimeAxisView::build_display_menu ()
-{
-	using namespace Menu_Helpers;
-
-	/* get the size menu ready */
-
-	build_size_menu ();
-
-	/* prepare it */
-
-	TimeAxisView::build_display_menu ();
-
-	/* now fill it with our stuff */
-
-	MenuList& items = display_menu->items();
-	display_menu->set_name ("ArdourContextMenu");
-	
-	items.push_back (MenuElem (_("Height"), *size_menu));
-	items.push_back (MenuElem (_("Color"), mem_fun(*this, &MidiTimeAxisView::select_track_color)));
-
-
-	items.push_back (SeparatorElem());
-
-	build_remote_control_menu ();
-	items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
-
-	automation_action_menu = manage (new Menu);
-	MenuList& automation_items = automation_action_menu->items();
-	automation_action_menu->set_name ("ArdourContextMenu");
-	
-	automation_items.push_back (SeparatorElem());
-
-	automation_items.push_back (MenuElem (_("Plugins"), subplugin_menu));
-
-	if (is_midi_track()) {
-
-		Menu* alignment_menu = manage (new Menu);
-		MenuList& alignment_items = alignment_menu->items();
-		alignment_menu->set_name ("ArdourContextMenu");
-
-		RadioMenuItem::Group align_group;
-		
-		alignment_items.push_back (RadioMenuElem (align_group, _("Align with existing material"), bind (mem_fun(*this, &MidiTimeAxisView::set_align_style), ExistingMaterial)));
-		align_existing_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
-		if (get_diskstream()->alignment_style() == ExistingMaterial) {
-			align_existing_item->set_active();
-		}
-		alignment_items.push_back (RadioMenuElem (align_group, _("Align with capture time"), bind (mem_fun(*this, &MidiTimeAxisView::set_align_style), CaptureTime)));
-		align_capture_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
-		if (get_diskstream()->alignment_style() == CaptureTime) {
-			align_capture_item->set_active();
-		}
-		
-		items.push_back (MenuElem (_("Alignment"), *alignment_menu));
-
-		get_diskstream()->AlignmentStyleChanged.connect (mem_fun(*this, &MidiTimeAxisView::align_style_changed));
-	}
-
-	items.push_back (SeparatorElem());
-	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
-	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
-	route_active_menu_item->set_active (_route->active());
-
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
-
-}
-
 // FIXME: duplicated in audio_time_axis.cc
 /*static string 
 legalize_for_xml_node (string str)
@@ -267,7 +199,7 @@ MidiTimeAxisView::route_active_changed ()
 {
 	RouteUI::route_active_changed ();
 
-	if (is_midi_track()) {
+	if (is_track()) {
 		if (_route->active()) {
 			controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 			controls_base_selected_name = "MidiTrackControlsBaseSelected";
@@ -278,6 +210,9 @@ MidiTimeAxisView::route_active_changed ()
 			controls_base_unselected_name = "MidiTrackControlsBaseInactiveUnselected";
 		}
 	} else {
+
+		throw; // wha?
+		
 		if (_route->active()) {
 			controls_ebox.set_name ("BusControlsBaseUnselected");
 			controls_base_selected_name = "BusControlsBaseSelected";

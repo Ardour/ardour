@@ -48,22 +48,22 @@ using namespace Glib;
 using namespace Editing;
 
 void
-Editor::handle_audio_region_removed (AudioRegion* region)
+Editor::handle_region_removed (Region* region)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_audio_region_removed), region));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_region_removed), region));
 	redisplay_regions ();
 }
 
 void
-Editor::handle_new_audio_region (AudioRegion *region)
+Editor::handle_new_region (Region *region)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_audio_region), region));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_region), region));
 
 	/* don't copy region - the one we are being notified
 	   about belongs to the session, and so it will
 	   never be edited.
 	*/
-	add_audio_region_to_region_display (region);
+	add_region_to_region_display (region);
 }
 
 void
@@ -75,7 +75,7 @@ Editor::region_hidden (Region* r)
 }
 
 void
-Editor::add_audio_region_to_region_display (AudioRegion *region)
+Editor::add_region_to_region_display (Region *region)
 {
 	string str;
 	TreeModel::Row row;
@@ -206,14 +206,14 @@ Editor::region_list_selection_changed()
 }
 
 void
-Editor::insert_into_tmp_audio_regionlist(AudioRegion* region)
+Editor::insert_into_tmp_regionlist(Region* region)
 {
 	/* keep all whole files at the beginning */
 	
 	if (region->whole_file()) {
-		tmp_audio_region_list.push_front (region);
+		tmp_region_list.push_front (region);
 	} else {
-		tmp_audio_region_list.push_back (region);
+		tmp_region_list.push_back (region);
 	}
 }
 
@@ -229,11 +229,11 @@ Editor::redisplay_regions ()
 		   sorting.
 		*/
 		
-		tmp_audio_region_list.clear();
-		session->foreach_audio_region (this, &Editor::insert_into_tmp_audio_regionlist);
+		tmp_region_list.clear();
+		session->foreach_region (this, &Editor::insert_into_tmp_regionlist);
 
-		for (list<AudioRegion*>::iterator r = tmp_audio_region_list.begin(); r != tmp_audio_region_list.end(); ++r) {
-			add_audio_region_to_region_display (*r);
+		for (list<Region*>::iterator r = tmp_region_list.begin(); r != tmp_region_list.end(); ++r) {
+			add_region_to_region_display (*r);
 		}
 		
 		region_list_display.set_model (region_list_model);

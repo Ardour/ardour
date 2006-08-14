@@ -48,6 +48,16 @@ class SMFSource : public MidiSource {
 
 	virtual ~SMFSource ();
 
+	/* this block of methods do nothing for regular file sources, but are significant
+	   for files used in destructive recording.
+	*/
+	// FIXME and thus are useless for MIDI.. but make MidiDiskstream compile easier! :)
+
+	virtual jack_nframes_t last_capture_start_frame() const { return 0; }
+	virtual void           mark_capture_start (jack_nframes_t) {}
+	virtual void           mark_capture_end () {}
+	virtual void           clear_capture_marks() {}
+
 	int set_name (string newname, bool destructive);
 
 	string path() const { return _path; }

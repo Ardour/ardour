@@ -300,10 +300,10 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else {
 
-			reversibly_apply_audio_track_boolean ("rec-enable change", &AudioTrack::set_record_enable, !audio_track()->record_enabled(), this);
+			reversibly_apply_track_boolean ("rec-enable change", &Track::set_record_enable, !track()->record_enabled(), this);
 
 			ignore_toggle = true;
-			rec_enable_button->set_active(audio_track()->record_enabled());
+			rec_enable_button->set_active(track()->record_enabled());
 			ignore_toggle = false;
 		}
 		
@@ -589,6 +589,17 @@ RouteUI::reversibly_apply_audio_track_boolean (string name, void (AudioTrack::*f
 	bind (mem_fun (*audio_track(), func), yn, arg)();
         XMLNode &after = audio_track()->get_state();
 	_session.add_command (new MementoCommand<AudioTrack>(*audio_track(), before, after));
+	_session.commit_reversible_command ();
+}
+
+void
+RouteUI::reversibly_apply_track_boolean (string name, void (Track::*func)(bool, void *), bool yn, void *arg)
+{
+	_session.begin_reversible_command (name);
+        XMLNode &before = track()->get_state();
+	bind (mem_fun (*track(), func), yn, arg)();
+        XMLNode &after = track()->get_state();
+	_session.add_command (new MementoCommand<Track>(*track(), before, after));
 	_session.commit_reversible_command ();
 }
 

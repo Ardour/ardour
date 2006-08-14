@@ -53,8 +53,6 @@ public:
 				     jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
 				     bool meter);
 
-	void set_record_enable (bool yn, void *src);
-
 	MidiDiskstream& midi_diskstream() const;
 
 	int use_diskstream (string name);
@@ -74,8 +72,6 @@ public:
 	void bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo&);
 
 	int set_state(const XMLNode& node);
-
-	bool record_enabled() const;
 
 protected:
 	XMLNode& state (bool full);

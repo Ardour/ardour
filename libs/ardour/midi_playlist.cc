@@ -43,8 +43,11 @@ MidiPlaylist::State::~State ()
 {}
 
 MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
-		: Playlist (session, node, hidden)
+		: Playlist (session, node, DataType::MIDI, hidden)
 {
+	const XMLProperty* prop = node.property("type");
+	assert(prop && DataType(prop->value()) == DataType::MIDI);
+
 	in_set_state = true;
 	set_state (node);
 	in_set_state = false;
@@ -57,7 +60,7 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 }
 
 MidiPlaylist::MidiPlaylist (Session& session, string name, bool hidden)
-		: Playlist (session, name, hidden)
+		: Playlist (session, name, DataType::MIDI, hidden)
 {
 	save_state (_("initial state"));
 
@@ -70,6 +73,7 @@ MidiPlaylist::MidiPlaylist (Session& session, string name, bool hidden)
 MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, string name, bool hidden)
 		: Playlist (other, name, hidden)
 {
+	throw; // nope
 	save_state (_("initial state"));
 
 	/*
@@ -246,6 +250,7 @@ MidiPlaylist::refresh_dependents (Region& r)
 void
 MidiPlaylist::finalize_split_region (Region *o, Region *l, Region *r)
 {
+	throw; // I don't wanna
 	/*
 	MidiRegion *orig  = dynamic_cast<MidiRegion*>(o);
 	MidiRegion *left  = dynamic_cast<MidiRegion*>(l);
@@ -333,20 +338,18 @@ MidiPlaylist::check_dependents (Region& r, bool norefresh)
 int
 MidiPlaylist::set_state (const XMLNode& node)
 {
-	/*
-	XMLNode *child;
-	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
-
 	if (!in_set_state) {
 		Playlist::set_state (node);
 	}
 
-	nlist = node.children();
+	// Actually Charles, I don't much care for children
+	
+	/*
+	XMLNodeList nlist = node.children();
 
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		child = *niter;
+		XMLNode* const child = *niter;
 
 	}*/
 

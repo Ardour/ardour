@@ -248,7 +248,7 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	if (AudioSource::start_peak_thread ()) {
 		throw failed_constructor();
 	}
-
+	
 	/* start the time-of-day-clock */
 	
 	update_wall_clock ();

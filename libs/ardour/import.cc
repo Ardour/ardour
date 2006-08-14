@@ -262,7 +262,7 @@ Session::import_audiofile (import_status& status)
 	}
 
 	if (status.cancel) {
-		for (vector<AudioRegion *>::iterator i = status.new_regions.begin(); i != status.new_regions.end(); ++i) {
+		for (vector<Region *>::iterator i = status.new_regions.begin(); i != status.new_regions.end(); ++i) {
 			delete *i;
 		}
 

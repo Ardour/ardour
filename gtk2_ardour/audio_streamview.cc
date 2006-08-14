@@ -56,7 +56,7 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 {
 	crossfades_visible = true;
 
-	if (tv.is_audio_track())
+	if (tv.is_track())
 		stream_base_color = color_map[cAudioTrackBase];
 	else
 		stream_base_color = color_map[cAudioBusBase];
@@ -67,7 +67,6 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	_amplitude_above_axis = 1.0;
 
 	use_rec_regions = tv.editor.show_waveforms_recording ();
-	last_rec_peak_frame = 0;
 }
 
 AudioStreamView::~AudioStreamView ()
@@ -393,10 +392,10 @@ AudioStreamView::setup_rec_box ()
 
 				AudioRegion::SourceList sources;
 
-				for (list<sigc::connection>::iterator prc = peak_ready_connections.begin(); prc != peak_ready_connections.end(); ++prc) {
+				for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin(); prc != rec_data_ready_connections.end(); ++prc) {
 					(*prc).disconnect();
 				}
-				peak_ready_connections.clear();
+				rec_data_ready_connections.clear();
 					
 				// FIXME
 				AudioDiskstream* ads = dynamic_cast<AudioDiskstream*>(_trackview.get_diskstream());
@@ -406,7 +405,7 @@ AudioStreamView::setup_rec_box ()
 					AudioSource *src = (AudioSource *) ads->write_source (n);
 					if (src) {
 						sources.push_back (src);
-						peak_ready_connections.push_back (src->PeakRangeReady.connect (bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), src))); 
+						rec_data_ready_connections.push_back (src->PeakRangeReady.connect (bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), src))); 
 					}
 				}
 
@@ -492,14 +491,14 @@ AudioStreamView::setup_rec_box ()
 			/* disconnect rapid update */
 			screen_update_connection.disconnect();
 
-			for (list<sigc::connection>::iterator prc = peak_ready_connections.begin(); prc != peak_ready_connections.end(); ++prc) {
+			for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin(); prc != rec_data_ready_connections.end(); ++prc) {
 				(*prc).disconnect();
 			}
-			peak_ready_connections.clear();
+			rec_data_ready_connections.clear();
 
 			rec_updating = false;
 			rec_active = false;
-			last_rec_peak_frame = 0;
+			last_rec_data_frame = 0;
 			
 			/* remove temp regions */
 			for (list<Region*>::iterator iter=rec_regions.begin(); iter != rec_regions.end(); )
@@ -547,15 +546,15 @@ AudioStreamView::rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt,
 
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), start, cnt, src));
 	
-	if (rec_peak_ready_map.size() == 0 || start+cnt > last_rec_peak_frame) {
-		last_rec_peak_frame = start + cnt;
+	if (rec_data_ready_map.size() == 0 || start+cnt > last_rec_data_frame) {
+		last_rec_data_frame = start + cnt;
 	}
 
-	rec_peak_ready_map[src] = true;
+	rec_data_ready_map[src] = true;
 
-	if (rec_peak_ready_map.size() == _trackview.get_diskstream()->n_channels().get(DataType::AUDIO)) {
+	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().get(DataType::AUDIO)) {
 		this->update_rec_regions ();
-		rec_peak_ready_map.clear();
+		rec_data_ready_map.clear();
 	}
 }
 
@@ -587,9 +586,9 @@ AudioStreamView::update_rec_regions ()
 
 			if (region == rec_regions.back() && rec_active) {
 
-				if (last_rec_peak_frame > region->start()) {
+				if (last_rec_data_frame > region->start()) {
 
-					jack_nframes_t nlen = last_rec_peak_frame - region->start();
+					jack_nframes_t nlen = last_rec_data_frame - region->start();
 
 					if (nlen != region->length()) {
 

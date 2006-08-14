@@ -63,8 +63,11 @@
 #include <ardour/midi_diskstream.h>
 #include <ardour/utils.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/midi_playlist.h>
+#include <ardour/smf_source.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/destructive_filesource.h>
+#include <ardour/midi_source.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/auditioner.h>
 #include <ardour/export.h>
@@ -82,6 +85,7 @@
 #include <ardour/version.h>
 #include <ardour/location.h>
 #include <ardour/audioregion.h>
+#include <ardour/midi_region.h>
 #include <ardour/crossfade.h>
 #include <ardour/control_protocol_manager.h>
 
@@ -264,7 +268,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	/* These are all static "per-class" signals */
 
 	Region::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
-	AudioSource::AudioSourceCreated.connect (mem_fun (*this, &Session::add_audio_source));
+	Source::SourceCreated.connect (mem_fun (*this, &Session::add_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
 	Diskstream::DiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
@@ -1348,26 +1352,19 @@ Session::state(bool full_state)
 	child = node->add_child ("Sources");
 
 	if (full_state) {
-		Glib::Mutex::Lock sl (audio_source_lock);
+		Glib::Mutex::Lock sl (source_lock);
 
-		for (AudioSourceList::iterator siter = audio_sources.begin(); siter != audio_sources.end(); ++siter) {
+		for (SourceList::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
 			
-			/* Don't save information about AudioFileSources that are empty */
-			
-			AudioFileSource* fs;
 
-			if ((fs = dynamic_cast<AudioFileSource*> (siter->second)) != 0) {
-				DestructiveFileSource* dfs = dynamic_cast<DestructiveFileSource*> (fs);
+			DestructiveFileSource* const dfs = dynamic_cast<DestructiveFileSource*> (siter->second);
 
-				/* destructive file sources are OK if they are empty, because
-				   we will re-use them every time.
-				*/
+			/* Don't save sources that are empty, unless they're destructive (which are OK
+			   if they are empty, because we will re-use them every time.)
+			*/
 
-				if (!dfs) {
-					if (fs->length() == 0) {
-						continue;
-					}
-				}
+			if ( ! dfs && siter->second->length() == 0) {
+				continue;
 			}
 			
 			child->add_child_nocopy (siter->second->get_state());
@@ -1379,7 +1376,7 @@ Session::state(bool full_state)
 	if (full_state) { 
 		Glib::Mutex::Lock rl (region_lock);
 
-		for (AudioRegionList::const_iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
+		for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 			
 			/* only store regions not attached to playlists */
 
@@ -1769,7 +1766,7 @@ Session::load_regions (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	AudioRegion* region;
+	Region* region;
 
 	nlist = node.children();
 
@@ -1783,8 +1780,32 @@ Session::load_regions (const XMLNode& node)
 	return 0;
 }
 
-AudioRegion *
+Region *
 Session::XMLRegionFactory (const XMLNode& node, bool full)
+{
+	const XMLProperty* type = node.property("type");
+
+	try {
+	
+	if ( !type || type->value() == "audio" ) {
+
+		return XMLAudioRegionFactory (node, full);
+	
+	} else if (type->value() == "midi") {
+		
+		return XMLMidiRegionFactory (node, full);
+
+	}
+	
+	} catch (failed_constructor& err) {
+		return 0;
+	}
+
+	return 0;
+}
+
+AudioRegion *
+Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 {
 	const XMLProperty* prop;
 	Source* source;
@@ -1855,14 +1876,65 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 	}
 }
 
+MidiRegion *
+Session::XMLMidiRegionFactory (const XMLNode& node, bool full)
+{
+	const XMLProperty* prop;
+	Source* source;
+	MidiSource* ms;
+	MidiRegion::SourceList sources;
+	uint32_t nchans = 1;
+	
+	if (node.name() != X_("Region")) {
+		return 0;
+	}
+
+	if ((prop = node.property (X_("channels"))) != 0) {
+		nchans = atoi (prop->value().c_str());
+	}
+
+	// Multiple midi channels?  that's just crazy talk
+	assert(nchans == 1);
+
+	if ((prop = node.property (X_("source-0"))) == 0) {
+		if ((prop = node.property ("source")) == 0) {
+			error << _("Session: XMLNode describing a MidiRegion is incomplete (no source)") << endmsg;
+			return 0;
+		}
+	}
+
+	PBD::ID s_id (prop->value());
+
+	if ((source = source_by_id (s_id)) == 0) {
+		error << string_compose(_("Session: XMLNode describing a MidiRegion references an unknown source id =%1"), s_id) << endmsg;
+		return 0;
+	}
+
+	ms = dynamic_cast<MidiSource*>(source);
+	if (!ms) {
+		error << string_compose(_("Session: XMLNode describing a MidiRegion references a non-audio source id =%1"), s_id) << endmsg;
+		return 0;
+	}
+
+	sources.push_back (ms);
+
+	try {
+		return new MidiRegion (sources, node);
+	}
+
+	catch (failed_constructor& err) {
+		return 0;
+	}
+}
+
 XMLNode&
 Session::get_sources_as_xml ()
 
 {
 	XMLNode* node = new XMLNode (X_("Sources"));
-	Glib::Mutex::Lock lm (audio_source_lock);
+	Glib::Mutex::Lock lm (source_lock);
 
-	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
+	for (SourceList::iterator i = sources.begin(); i != sources.end(); ++i) {
 		node->add_child_nocopy (i->second->get_state());
 	}
 
@@ -1923,13 +1995,29 @@ Session::XMLSourceFactory (const XMLNode& node)
 	if (node.name() != "Source") {
 		return 0;
 	}
+	
+	DataType type = DataType::AUDIO;
+	const XMLProperty* prop = node.property("type");
+	if (prop) {
+		type = DataType(prop->value());
+	}
 
 	try {
+	
+	
+	if (type == DataType::AUDIO) {
+
 		src = AudioFileSource::create (node);
+
+	} else if (type == DataType::MIDI) {
+
+		src = new SMFSource (node);
+
 	}
 	
-	catch (failed_constructor& err) {
-		error << _("Found a sound file that cannot be used by Ardour. Talk to the progammers.") << endmsg;
+	
+	} catch (failed_constructor& err) {
+		error << _("Found a file that cannot be read by Ardour. Talk to the progammers.") << endmsg;
 		return 0;
 	}
 
@@ -2241,17 +2329,28 @@ Session::load_unused_playlists (const XMLNode& node)
 	return 0;
 }
 
-
 Playlist *
 Session::XMLPlaylistFactory (const XMLNode& node)
 {
-	try {
-		return new AudioPlaylist (*this, node);
-	}
+	const XMLProperty* type = node.property("type");
 
-	catch (failed_constructor& err) {
+	try {
+	
+	if ( !type || type->value() == "audio" ) {
+
+		return new AudioPlaylist (*this, node);
+	
+	} else if (type->value() == "midi") {
+
+		return new MidiPlaylist (*this, node);
+	
+	}
+	
+	} catch (failed_constructor& err) {
 		return 0;
 	}
+
+	return 0;
 }
 
 int
@@ -2961,9 +3060,9 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	rep.paths.clear ();
 	rep.space = 0;
 
-	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ) {
+	for (SourceList::iterator i = sources.begin(); i != sources.end(); ) {
 
-		AudioSourceList::iterator tmp;
+		SourceList::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -2980,7 +3079,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			   adding it to the list of all sources below
 			*/
 
-			audio_sources.erase (i);
+			sources.erase (i);
 		}
 
 		i = tmp;
@@ -2993,19 +3092,18 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		
 	for (vector<Source*>::iterator i = dead_sources.begin(); i != dead_sources.end();++i) {
 
-		for (AudioRegionList::iterator r = audio_regions.begin(); r != audio_regions.end(); ) {
-			AudioRegionList::iterator tmp;
-			AudioRegion* ar;
+		for (RegionList::iterator r = regions.begin(); r != regions.end(); ) {
+			RegionList::iterator tmp;
 
 			tmp = r;
 			++tmp;
 			
-			ar = r->second;
+			Region* const reg = r->second;
 
-			for (uint32_t n = 0; n < ar->n_channels(); ++n) {
-				if (&ar->source (n) == (*i)) {
+			for (uint32_t n = 0; n < reg->n_channels(); ++n) {
+				if (&reg->source (n) == (*i)) {
 					/* this region is dead */
-					remove_region (ar);
+					remove_region (reg);
 				}
 			}
 			
@@ -3050,7 +3148,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	/*  add our current source list
 	 */
 	
-	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
+	for (SourceList::iterator i = sources.begin(); i != sources.end(); ++i) {
 		AudioFileSource* fs;
 		
 		if ((fs = dynamic_cast<AudioFileSource*> (i->second)) != 0) {

@@ -28,13 +28,14 @@
 #include <pbd/stateful.h> 
 
 #include <ardour/ardour.h>
+#include <ardour/data_type.h>
 
 namespace ARDOUR {
 
 class Source : public Stateful, public sigc::trackable
 {
   public:
-	Source (std::string name);
+	Source (std::string name, DataType type);
 	Source (const XMLNode&);
 	virtual ~Source ();
 
@@ -60,12 +61,14 @@ class Source : public Stateful, public sigc::trackable
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
+	static sigc::signal<void,Source*> SourceCreated;
 	sigc::signal<void,Source *> GoingAway;
 
   protected:
 	void update_length (jack_nframes_t pos, jack_nframes_t cnt);
 
 	string            _name;
+	DataType          _type;
 	uint32_t          _use_cnt;
 	time_t            _timestamp;
 	jack_nframes_t    _length;

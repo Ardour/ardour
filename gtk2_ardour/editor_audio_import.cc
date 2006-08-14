@@ -176,8 +176,9 @@ Editor::import_sndfile (Glib::ustring path, ImportMode mode, AudioTrack* track, 
 	/* import thread finished - see if we should build a new track */
 	
 	if (!import_status.new_regions.empty()) {
-		AudioRegion& region (*import_status.new_regions.front());
-		finish_bringing_in_audio (region, region.n_channels(), region.n_channels(), track, pos, mode);
+		AudioRegion* const aregion = dynamic_cast<AudioRegion*>(import_status.new_regions.front());
+		assert(aregion);
+		finish_bringing_in_audio (*aregion, aregion->n_channels(), aregion->n_channels(), track, pos, mode);
 	}
 
 	track_canvas.get_window()->set_cursor (*current_canvas_cursor);

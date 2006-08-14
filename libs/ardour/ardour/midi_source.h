@@ -59,8 +59,10 @@ class MidiSource : public Source
 
 	static sigc::signal<void,MidiSource*> MidiSourceCreated;
 	       
-	mutable sigc::signal<void>  PeaksReady;
-	mutable sigc::signal<void,jack_nframes_t,jack_nframes_t>  PeakRangeReady;
+	// The MIDI equivalent to "peaks"
+	static int  start_view_data_thread ();
+	static void stop_view_data_thread ();
+	mutable sigc::signal<void,jack_nframes_t,jack_nframes_t> ViewDataRangeReady;
 	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);

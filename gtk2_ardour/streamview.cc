@@ -56,6 +56,7 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 	, use_rec_regions(tv.editor.show_waveforms_recording())
 	, region_color(_trackview.color())
 	, stream_base_color(0xFFFFFFFF)
+	, last_rec_data_frame(0)
 {
 	/* set_position() will position the group */
 

@@ -51,8 +51,9 @@ Change Region::HiddenChanged     = ARDOUR::new_change ();
 sigc::signal<void,Region *> Region::CheckNewRegion;
 
 /** Basic Region constructor (single source) */
-Region::Region (Source& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Region::Flag flags)
+Region::Region (Source& src, jack_nframes_t start, jack_nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: _name(name)
+	, _type(type)
 	, _flags(flags)
 	, _start(start) 
 	, _length(length) 
@@ -76,8 +77,9 @@ Region::Region (Source& src, jack_nframes_t start, jack_nframes_t length, const 
 }
 
 /** Basic Region constructor (many sources) */
-Region::Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Region::Flag flags)
+Region::Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: _name(name)
+	, _type(type)
 	, _flags(flags)
 	, _start(start) 
 	, _length(length) 
@@ -114,6 +116,7 @@ Region::Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, c
 /** Create a new Region from part of an existing one */
 Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: _name(name)
+	, _type(other.data_type())
 	, _flags(Flag(flags & ~(Locked|WholeFile|Hidden)))
 	, _start(other._start + offset) 
 	, _length(length) 
@@ -153,6 +156,7 @@ Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t lengt
 /** Pure copy constructor */
 Region::Region (const Region &other)
 	: _name(other._name)
+	, _type(other.data_type())
 	, _flags(Flag(other._flags & ~Locked))
 	, _start(other._start) 
 	, _length(other._length) 
@@ -196,6 +200,7 @@ Region::Region (const Region &other)
 
 Region::Region (SourceList& srcs, const XMLNode& node)
 	: _name(X_("error: XML did not reset this"))
+	, _type(DataType::NIL) // to be loaded from XML
 	, _flags(Flag(0))
 	, _start(0) 
 	, _length(0) 
@@ -230,12 +235,14 @@ Region::Region (SourceList& srcs, const XMLNode& node)
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
-	
+
+	assert(_type != DataType::NIL);
 	assert(_sources.size() > 0);
 }
 
 Region::Region (Source& src, const XMLNode& node)
 	: _name(X_("error: XML did not reset this"))
+	, _type(DataType::NIL)
 	, _flags(Flag(0))
 	, _start(0) 
 	, _length(0) 
@@ -257,6 +264,7 @@ Region::Region (Source& src, const XMLNode& node)
 		throw failed_constructor();
 	}
 	
+	assert(_type != DataType::NIL);
 	assert(_sources.size() > 0);
 }
 
@@ -957,6 +965,7 @@ Region::state (bool full_state)
 	_id.print (buf);
 	node->add_property ("id", buf);
 	node->add_property ("name", _name);
+	node->add_property ("type", _type.to_string());
 	snprintf (buf, sizeof (buf), "%u", _start);
 	node->add_property ("start", buf);
 	snprintf (buf, sizeof (buf), "%u", _length);
@@ -1004,6 +1013,12 @@ Region::set_state (const XMLNode& node)
 	}
 
 	_name = prop->value();
+	
+	if ((prop = node.property ("type")) == 0) {
+		_type = DataType::AUDIO;
+	} else {
+		_type = DataType(prop->value());
+	}
 
 	if ((prop = node.property ("start")) != 0) {
 		_start = (jack_nframes_t) atoi (prop->value().c_str());

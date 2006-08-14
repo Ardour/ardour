@@ -134,10 +134,10 @@ Editor::hide_measures ()
 ArdourCanvas::SimpleLine *
 Editor::get_time_line ()
 {
-         ArdourCanvas::SimpleLine *line;
+	ArdourCanvas::SimpleLine *line;
 
 	if (free_measure_lines.empty()) {
-	        line = new ArdourCanvas::SimpleLine (*time_line_group);
+		line = new ArdourCanvas::SimpleLine (*time_line_group);
 		used_measure_lines.push_back (line);
 	} else {
 		line = free_measure_lines.front();
@@ -194,6 +194,7 @@ Editor::draw_measures ()
 
 	double x1, x2, y1, y2;
 	track_canvas.get_scroll_region (x1, y1, x2, y2);
+	y2 = 1000000000.0f;
 
 	for (i = all_bbt_points->begin(); i != all_bbt_points->end(); ++i) {
 

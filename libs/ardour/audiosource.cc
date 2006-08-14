@@ -40,7 +40,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-sigc::signal<void,AudioSource *> AudioSource::AudioSourceCreated;
 pthread_t                    AudioSource::peak_thread;
 bool                         AudioSource::have_peak_thread = false;
 vector<AudioSource*>         AudioSource::pending_peak_sources;
@@ -51,7 +50,7 @@ bool AudioSource::_build_missing_peakfiles = false;
 bool AudioSource::_build_peakfiles = false;
 
 AudioSource::AudioSource (string name)
-	: Source (name)
+	: Source (name, DataType::AUDIO)
 {
 	if (pending_peak_sources_lock == 0) {
 		pending_peak_sources_lock = new Glib::Mutex;

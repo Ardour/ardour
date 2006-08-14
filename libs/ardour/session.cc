@@ -431,10 +431,10 @@ Session::~Session ()
 	}
 
 #ifdef TRACK_DESTRUCTION
-	cerr << "delete audio regions\n";
+	cerr << "delete regions\n";
 #endif /* TRACK_DESTRUCTION */
-	for (AudioRegionList::iterator i = audio_regions.begin(); i != audio_regions.end(); ) {
-		AudioRegionList::iterator tmp;
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ) {
+		RegionList::iterator tmp;
 
 		tmp =i;
 		++tmp;
@@ -461,8 +461,8 @@ Session::~Session ()
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete audio sources\n";
 #endif /* TRACK_DESTRUCTION */
-	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ) {
-		AudioSourceList::iterator tmp;
+	for (SourceList::iterator i = sources.begin(); i != sources.end(); ) {
+		SourceList::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -2137,11 +2137,11 @@ Session::remove_route (shared_ptr<Route> route)
 		/* writer goes out of scope, forces route list update */
 	}
 
-	AudioTrack* at;
-	AudioDiskstream* ds = 0;
+	Track* t;
+	Diskstream* ds = 0;
 	
-	if ((at = dynamic_cast<AudioTrack*>(route.get())) != 0) {
-		ds = &at->audio_diskstream();
+	if ((t = dynamic_cast<Track*>(route.get())) != 0) {
+		ds = &t->diskstream();
 	}
 	
 	if (ds) {
@@ -2183,7 +2183,7 @@ Session::route_solo_changed (void* src, shared_ptr<Route> route)
 	
 	bool is_track;
 	
-	is_track = (dynamic_cast<AudioTrack*>(route.get()) != 0);
+	is_track = (dynamic_cast<Track*>(route.get()) != 0);
 	
 	shared_ptr<RouteList> r = routes.reader ();
 
@@ -2195,7 +2195,7 @@ Session::route_solo_changed (void* src, shared_ptr<Route> route)
 			
 			/* don't mess with busses */
 			
-			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
+			if (dynamic_cast<Track*>((*i).get()) == 0) {
 				continue;
 			}
 			
@@ -2203,7 +2203,7 @@ Session::route_solo_changed (void* src, shared_ptr<Route> route)
 			
 			/* don't mess with tracks */
 			
-			if (dynamic_cast<AudioTrack*>((*i).get()) != 0) {
+			if (dynamic_cast<Track*>((*i).get()) != 0) {
 				continue;
 			}
 		}
@@ -2239,7 +2239,7 @@ Session::route_solo_changed (void* src, shared_ptr<Route> route)
         for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			something_soloed = true;
-			if (dynamic_cast<AudioTrack*>((*i).get())) {
+			if (dynamic_cast<Track*>((*i).get())) {
 				if (is_track) {
 					same_thing_soloed = true;
 					break;
@@ -2296,7 +2296,7 @@ Session::update_route_solo_state ()
         for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			mute = true;
-			if (dynamic_cast<AudioTrack*>((*i).get())) {
+			if (dynamic_cast<Track*>((*i).get())) {
 				is_track = true;
 			}
 			break;
@@ -2341,7 +2341,7 @@ Session::modify_solo_mute (bool is_track, bool mute)
 			
 			/* only alter track solo mute */
 			
-			if (dynamic_cast<AudioTrack*>((*i).get())) {
+			if (dynamic_cast<Track*>((*i).get())) {
 				if ((*i)->soloed()) {
 					(*i)->set_solo_mute (!mute);
 				} else {
@@ -2353,7 +2353,7 @@ Session::modify_solo_mute (bool is_track, bool mute)
 
 			/* only alter bus solo mute */
 
-			if (!dynamic_cast<AudioTrack*>((*i).get())) {
+			if (!dynamic_cast<Track*>((*i).get())) {
 
 				if ((*i)->soloed()) {
 
@@ -2506,7 +2506,7 @@ Session::new_region_name (string old)
 
 	while (number < (UINT_MAX-1)) {
 
-		AudioRegionList::const_iterator i;
+		RegionList::const_iterator i;
 		string sbuf;
 
 		number++;
@@ -2514,13 +2514,13 @@ Session::new_region_name (string old)
 		snprintf (buf, len, "%s%" PRIu32, old.substr (0, last_period + 1).c_str(), number);
 		sbuf = buf;
 
-		for (i = audio_regions.begin(); i != audio_regions.end(); ++i) {
+		for (i = regions.begin(); i != regions.end(); ++i) {
 			if (i->second->name() == sbuf) {
 				break;
 			}
 		}
 		
-		if (i == audio_regions.end()) {
+		if (i == regions.end()) {
 			break;
 		}
 	}
@@ -2543,7 +2543,7 @@ Session::region_name (string& result, string base, bool newlevel) const
 		
 		Glib::Mutex::Lock lm (region_lock);
 
-		snprintf (buf, sizeof (buf), "%d", (int)audio_regions.size() + 1);
+		snprintf (buf, sizeof (buf), "%d", (int)regions.size() + 1);
 
 		
 		result = "region.";
@@ -2579,7 +2579,7 @@ Session::region_name (string& result, string base, bool newlevel) const
 				
 				name_taken = false;
 				
-				for (AudioRegionList::const_iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
+				for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 					if (i->second->name() == result) {
 						name_taken = true;
 						break;
@@ -2603,62 +2603,48 @@ Session::region_name (string& result, string base, bool newlevel) const
 void
 Session::add_region (Region* region)
 {
-	AudioRegion* ar = 0;
-	AudioRegion* oar = 0;
 	bool added = false;
 
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
-		if ((ar = dynamic_cast<AudioRegion*> (region)) != 0) {
+		RegionList::iterator x;
 
-			AudioRegionList::iterator x;
+		for (x = regions.begin(); x != regions.end(); ++x) {
 
-			for (x = audio_regions.begin(); x != audio_regions.end(); ++x) {
+			if (region->region_list_equivalent (*x->second)) {
+				break;
+			}
+		}
 
-				oar = dynamic_cast<AudioRegion*> (x->second);
+		if (x == regions.end()) {
 
-				if (ar->region_list_equivalent (*oar)) {
-					break;
-				}
+			pair<RegionList::key_type,RegionList::mapped_type> entry;
+
+			entry.first = region->id();
+			entry.second = region;
+
+			pair<RegionList::iterator,bool> x = regions.insert (entry);
+
+			if (!x.second) {
+				return;
 			}
 
-			if (x == audio_regions.end()) {
+			added = true;
+		} 
 
-				pair<AudioRegionList::key_type,AudioRegionList::mapped_type> entry;
-
-				entry.first = region->id();
-				entry.second = ar;
-
-				pair<AudioRegionList::iterator,bool> x = audio_regions.insert (entry);
-				
-				if (!x.second) {
-					return;
-				}
-
-				added = true;
-			} 
-
-		} else {
-
-			fatal << _("programming error: ")
-			      << X_("unknown region type passed to Session::add_region()")
-			      << endmsg;
-			/*NOTREACHED*/
-
-		}
 	}
 
 	/* mark dirty because something has changed even if we didn't
 	   add the region to the region list.
-	*/
-	
+	   */
+
 	set_dirty();
-	
+
 	if (added) {
 		region->GoingAway.connect (mem_fun (*this, &Session::remove_region));
 		region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), region));
-		AudioRegionAdded (ar); /* EMIT SIGNAL */
+		RegionAdded (region); /* EMIT SIGNAL */
 	}
 }
 
@@ -2680,47 +2666,38 @@ Session::region_renamed (Region* region)
 void
 Session::remove_region (Region* region)
 {
-	AudioRegionList::iterator i;
-	AudioRegion* ar = 0;
+	RegionList::iterator i;
 	bool removed = false;
-	
+
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
- 		if ((ar = dynamic_cast<AudioRegion*> (region)) != 0) {
-			if ((i = audio_regions.find (region->id())) != audio_regions.end()) {
-				audio_regions.erase (i);
-				removed = true;
-			}
-
-		} else {
-
-			fatal << _("programming error: ") 
-			      << X_("unknown region type passed to Session::remove_region()")
-			      << endmsg;
-			/*NOTREACHED*/
+		if ((i = regions.find (region->id())) != regions.end()) {
+			regions.erase (i);
+			removed = true;
 		}
+
 	}
 
 	/* mark dirty because something has changed even if we didn't
 	   remove the region from the region list.
-	*/
+	   */
 
 	set_dirty();
 
 	if (removed) {
-		 AudioRegionRemoved(ar); /* EMIT SIGNAL */
+		RegionRemoved(region); /* EMIT SIGNAL */
 	}
 }
 
 Region*
 Session::find_whole_file_parent (Region& child)
 {
-	AudioRegionList::iterator i;
-	AudioRegion* region;
+	RegionList::iterator i;
+	Region* region;
 	Glib::Mutex::Lock lm (region_lock);
 
-	for (i = audio_regions.begin(); i != audio_regions.end(); ++i) {
+	for (i = regions.begin(); i != regions.end(); ++i) {
 
 		region = i->second;
 
@@ -2812,17 +2789,16 @@ Session::remove_region_from_region_list (Region& r)
 }
 
 /* Source Management */
-
 void
-Session::add_audio_source (AudioSource* source)
+Session::add_source (Source* source)
 {
-	pair<AudioSourceList::key_type, AudioSourceList::mapped_type> entry;
+	pair<SourceList::key_type, SourceList::mapped_type> entry;
 
  	{
- 		Glib::Mutex::Lock lm (audio_source_lock);
+ 		Glib::Mutex::Lock lm (source_lock);
 		entry.first = source->id();
 		entry.second = source;
-		audio_sources.insert (entry);
+		sources.insert (entry);
  	}
 	
 	source->GoingAway.connect (mem_fun (this, &Session::remove_source));
@@ -2834,13 +2810,13 @@ Session::add_audio_source (AudioSource* source)
 void
 Session::remove_source (Source* source)
 {
-	AudioSourceList::iterator i;
+	SourceList::iterator i;
 
 	{ 
-		Glib::Mutex::Lock lm (audio_source_lock);
+		Glib::Mutex::Lock lm (source_lock);
 
-		if ((i = audio_sources.find (source->id())) != audio_sources.end()) {
-			audio_sources.erase (i);
+		if ((i = sources.find (source->id())) != sources.end()) {
+			sources.erase (i);
 		} 
 	}
 
@@ -2860,11 +2836,11 @@ Session::remove_source (Source* source)
 Source *
 Session::source_by_id (const PBD::ID& id)
 {
-	Glib::Mutex::Lock lm (audio_source_lock);
-	AudioSourceList::iterator i;
+	Glib::Mutex::Lock lm (source_lock);
+	SourceList::iterator i;
 	Source* source = 0;
 
-	if ((i = audio_sources.find (id)) != audio_sources.end()) {
+	if ((i = sources.find (id)) != sources.end()) {
 		source = i->second;
 	}
 
@@ -3479,9 +3455,9 @@ Session::record_enable_change_all (bool yn)
 	shared_ptr<RouteList> r = routes.reader ();
 	
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		AudioTrack* at;
+		Track* at;
 
-		if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
+		if ((at = dynamic_cast<Track*>((*i).get())) != 0) {
 			at->set_record_enable (yn, this);
 		}
 	}
@@ -3791,9 +3767,9 @@ Session::freeze (InterThreadInfo& itt)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
-		AudioTrack *at;
+		Track *at;
 
-		if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
+		if ((at = dynamic_cast<Track*>((*i).get())) != 0) {
 			/* XXX this is wrong because itt.progress will keep returning to zero at the start
 			   of every track.
 			*/
@@ -3986,7 +3962,7 @@ Session::ntracks () const
 	shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		if (dynamic_cast<AudioTrack*> ((*i).get())) {
+		if (dynamic_cast<Track*> ((*i).get())) {
 			++n;
 		}
 	}
@@ -4001,7 +3977,7 @@ Session::nbusses () const
 	shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		if (dynamic_cast<AudioTrack*> ((*i).get()) == 0) {
+		if (dynamic_cast<Track*> ((*i).get()) == 0) {
 			++n;
 		}
 	}

@@ -27,6 +27,7 @@
 
 #include <ardour/ardour.h>
 #include <ardour/state_manager.h>
+#include <ardour/data_type.h>
 
 class XMLNode;
 
@@ -94,9 +95,9 @@ class Region : public Stateful, public StateManager
 	static Change HiddenChanged;
 
 	Region (Source& src, jack_nframes_t start, jack_nframes_t length, 
-		const string& name, layer_t = 0, Flag flags = DefaultFlags);
+		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
 	Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, 
-		const string& name, layer_t = 0, Flag flags = DefaultFlags);
+		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
 	Region (const Region&, jack_nframes_t start, jack_nframes_t length,
 		const string& name, layer_t = 0, Flag flags = DefaultFlags);
 	Region (const Region&);
@@ -110,6 +111,8 @@ class Region : public Stateful, public StateManager
 
 	string name() const { return _name; }
 	void set_name (string str);
+
+	const DataType& data_type() const { return _type; }
 
 	jack_nframes_t position () const { return _position; }
 	jack_nframes_t start ()    const { return _start; }
@@ -251,7 +254,8 @@ class Region : public Stateful, public StateManager
 	
 
 	PBD::ID                 _id;
-	string                  _name;        
+	string                  _name;
+	DataType                _type;
 	Flag                    _flags;
 	jack_nframes_t          _start;
 	jack_nframes_t          _length;

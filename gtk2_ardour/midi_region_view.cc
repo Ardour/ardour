@@ -68,7 +68,8 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
 	// where order is important and where it isn't...
 	
-	RegionView::init(basic_color, wfd);
+	// FIXME
+	RegionView::init(basic_color, /*wfd*/false);
 
 	compute_colors (basic_color);
 
@@ -108,6 +109,7 @@ MidiRegionView::show_region_editor ()
 GhostRegion*
 MidiRegionView::add_ghost (AutomationTimeAxisView& atv)
 {
+	throw; // FIXME
 	return NULL;
 }
 

@@ -117,7 +117,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	
 	_route->panner().Changed.connect (mem_fun(*this, &AudioTimeAxisView::update_pans));
 
-	if (is_audio_track()) {
+	if (is_track()) {
 
 		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
 		controls_base_selected_name = "AudioTrackControlsBaseSelected";

@@ -94,17 +94,11 @@ class AudioStreamView : public StreamView
 
 	void color_handler (ColorID id, uint32_t val);
 	
-
 	double _amplitude_above_axis;
 	
 	typedef list<CrossfadeView*> CrossfadeViewList;
 	CrossfadeViewList crossfade_views;
 	bool              crossfades_visible;
-
-	list<sigc::connection>     peak_ready_connections;
-	jack_nframes_t             last_rec_peak_frame;
-	map<ARDOUR::Source*, bool> rec_peak_ready_map;
-	
 };
 
 #endif /* __ardour_audio_streamview_h__ */

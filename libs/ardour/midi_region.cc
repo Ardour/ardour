@@ -48,7 +48,7 @@ using namespace ARDOUR;
 
 /** Basic MidiRegion constructor (one channel) */
 MidiRegion::MidiRegion (MidiSource& src, jack_nframes_t start, jack_nframes_t length, bool announce)
-	: Region (src, start, length, PBD::basename_nosuffix(src.name()), 0,  Region::Flag(Region::DefaultFlags|Region::External))
+	: Region (src, start, length, PBD::basename_nosuffix(src.name()), DataType::MIDI, 0,  Region::Flag(Region::DefaultFlags|Region::External))
 {
 	save_state ("initial state");
 
@@ -59,7 +59,7 @@ MidiRegion::MidiRegion (MidiSource& src, jack_nframes_t start, jack_nframes_t le
 
 /* Basic MidiRegion constructor (one channel) */
 MidiRegion::MidiRegion (MidiSource& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
-	: Region (src, start, length, name, layer, flags)
+	: Region (src, start, length, name, DataType::MIDI, layer, flags)
 {
 	save_state ("initial state");
 
@@ -70,7 +70,7 @@ MidiRegion::MidiRegion (MidiSource& src, jack_nframes_t start, jack_nframes_t le
 
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
-	: Region (srcs, start, length, name, layer, flags)
+	: Region (srcs, start, length, name, DataType::MIDI, layer, flags)
 {
 	save_state ("initial state");
 
@@ -108,6 +108,8 @@ MidiRegion::MidiRegion (MidiSource& src, const XMLNode& node)
 
 	save_state ("initial state");
 
+	assert(_type == DataType::MIDI);
+
 	CheckNewRegion (this); /* EMIT SIGNAL */
 }
 
@@ -119,6 +121,8 @@ MidiRegion::MidiRegion (SourceList& srcs, const XMLNode& node)
 	}
 
 	save_state ("initial state");
+
+	assert(_type == DataType::MIDI);
 
 	CheckNewRegion (this); /* EMIT SIGNAL */
 }
@@ -332,6 +336,8 @@ MidiRegion::separate_by_channel (Session& session, vector<MidiRegion*>& v) const
 		v.push_back (new MidiRegion (srcs, _start, _length, new_name, _layer, _flags));
 	}
 #endif
+
+	// Actually, I would prefer not if that's alright
 	return -1;
 }
 

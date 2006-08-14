@@ -29,11 +29,11 @@
 #include <ardour/midi_diskstream.h>
 #include <ardour/midi_track.h>
 //#include <ardour/playlist_templates.h>
-#include <ardour/source.h>
+#include <ardour/midi_source.h>
 
 #include "midi_streamview.h"
 #include "region_view.h"
-//#include "midi_regionview.h"
+#include "midi_region_view.h"
 #include "midi_time_axis.h"
 #include "canvas-simplerect.h"
 #include "region_selection.h"
@@ -52,55 +52,26 @@ using namespace Editing;
 MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
 {
-	region_color = _trackview.color();
-
-	if (tv.is_midi_track())
+	if (tv.is_track())
 		stream_base_color = color_map[cMidiTrackBase];
 	else
 		stream_base_color = color_map[cMidiBusBase];
-
-	/* set_position() will position the group */
-
-	canvas_group = new ArdourCanvas::Group(*_trackview.canvas_display);
-
-	canvas_rect = new ArdourCanvas::SimpleRect (*canvas_group);
-	canvas_rect->property_x1() = 0.0;
-	canvas_rect->property_y1() = 0.0;
-	canvas_rect->property_x2() = 1000000.0;
-	canvas_rect->property_y2() = (double) tv.height;
-	canvas_rect->property_outline_color_rgba() = color_map[cMidiTrackOutline];
-	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
+	
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
+	canvas_rect->property_outline_color_rgba() = color_map[cAudioTrackOutline];
 
-	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
-
-	_samples_per_unit = _trackview.editor.get_current_zoom();
-
-	if (_trackview.is_midi_track()) {
-		_trackview.midi_track()->DiskstreamChanged.connect (mem_fun (*this, &MidiStreamView::diskstream_changed));
-		_trackview.session().TransportStateChange.connect (mem_fun (*this, &MidiStreamView::transport_changed));
-		_trackview.get_diskstream()->RecordEnableChanged.connect (mem_fun (*this, &MidiStreamView::rec_enable_changed));
-		_trackview.session().RecordStateChanged.connect (mem_fun (*this, &MidiStreamView::sess_rec_enable_changed));
-	} 
-
-	rec_updating = false;
-	rec_active = false;
-	use_rec_regions = tv.editor.show_waveforms_recording ();
-
-	ColorChanged.connect (mem_fun (*this, &MidiStreamView::color_handler));
+	//use_rec_regions = tv.editor.show_waveforms_recording ();
+	use_rec_regions = true;
 }
 
 MidiStreamView::~MidiStreamView ()
 {
-	undisplay_diskstream ();
-	delete canvas_group;
 }
 
 
 void
 MidiStreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 {
-#if 0
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &MidiStreamView::add_region_view), r));
 
 	MidiRegion* region = dynamic_cast<MidiRegion*> (r);
@@ -122,30 +93,25 @@ MidiStreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 		}
 	}
 	
-	/* FIXME 
-	switch (_trackview.midi_track()->mode()) {
-	case Normal:
-		region_view = new MidiRegionView (canvas_group, _trackview, *region, 
-						   _samples_per_unit, region_color);
-		break;
-	case Destructive:
-		region_view = new TapeMidiRegionView (canvas_group, _trackview, *region, 
-						       _samples_per_unit, region_color);
-		break;
-	}
-	*/
+	// can't we all just get along?
+	assert(_trackview.midi_track()->mode() != Destructive);
+
 	region_view = new MidiRegionView (canvas_group, _trackview, *region, 
-					   _samples_per_unit, region_color);
+			_samples_per_unit, region_color);
 
 	region_view->init (region_color, wait_for_waves);
 	region_views.push_front (region_view);
 	
+	/* follow global waveform setting */
+
+	// FIXME
+	//region_view->set_waveform_visible(_trackview.editor.show_waveforms());
+
 	/* catch regionview going away */
 
 	region->GoingAway.connect (mem_fun (*this, &MidiStreamView::remove_region_view));
 	
 	RegionViewAdded (region_view);
-#endif
 }
 
 // FIXME: code duplication with AudioStreamVIew
@@ -183,26 +149,30 @@ MidiStreamView::redisplay_diskstream ()
 void
 MidiStreamView::setup_rec_box ()
 {
-#if 0
 	// cerr << _trackview.name() << " streamview SRB\n";
 
 	if (_trackview.session().transport_rolling()) {
 
-		// cerr << "\trolling\n";
+		cerr << "\tSHOW: rolling\n";
 
 		if (!rec_active && 
 		    _trackview.session().record_status() == Session::Recording && 
 		    _trackview.get_diskstream()->record_enabled()) {
 
-			if (_trackview.midi_track()->mode() == Normal && use_rec_regions && rec_regions.size() == rec_rects.size()) {
+			if (use_rec_regions && rec_regions.size() == rec_rects.size()) {
 
 				/* add a new region, but don't bother if they set use_rec_regions mid-record */
 
 				MidiRegion::SourceList sources;
 
 				// FIXME
-				MidiDiskstream* ads = dynamic_cast<MidiDiskstream*>(_trackview.get_diskstream());
-				assert(ads);
+				MidiDiskstream* mds = dynamic_cast<MidiDiskstream*>(_trackview.get_diskstream());
+				assert(mds);
+
+				sources.push_back((Source*)mds->write_source());
+				
+				// FIXME
+				rec_data_ready_connections.push_back (mds->write_source()->ViewDataRangeReady.connect (bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), mds->write_source()))); 
 
 				// handle multi
 				
@@ -222,30 +192,17 @@ MidiStreamView::setup_rec_box ()
 			
 			/* start a new rec box */
 
-			MidiTrack* at;
-
-			at = _trackview.midi_track(); /* we know what it is already */
-			MidiDiskstream& ds = at->midi_diskstream();
+			MidiTrack* mt = _trackview.midi_track(); /* we know what it is already */
+			MidiDiskstream& ds = mt->midi_diskstream();
 			jack_nframes_t frame_pos = ds.current_capture_start ();
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;
 
-			switch (_trackview.midi_track()->mode()) {
-			case Normal:
-				xend = xstart;
-				fill_color = color_map[cRecordingRectFill];
-				break;
-
-			case Destructive:
-				xend = xstart + 2;
-				fill_color = color_map[cRecordingRectFill];
-				/* make the recording rect translucent to allow
-				   the user to see the peak data coming in, etc.
-				*/
-				fill_color = UINT_RGBA_CHANGE_A (fill_color, 120);
-				break;
-			}
+			assert(_trackview.midi_track()->mode() == Normal);
+			
+			xend = xstart;
+			fill_color = color_map[cRecordingRectFill];
 			
 			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
 			rec_rect->property_x1() = xstart;
@@ -267,9 +224,15 @@ MidiStreamView::setup_rec_box ()
 			rec_updating = true;
 			rec_active = true;
 
+			// Show, damn you!
+			rec_rect->show();
+			rec_rect->raise_to_top();
+
 		} else if (rec_active &&
 			   (_trackview.session().record_status() != Session::Recording ||
 			    !_trackview.get_diskstream()->record_enabled())) {
+
+			cerr << "NO SHOW 1\n";
 
 			screen_update_connection.disconnect();
 			rec_active = false;
@@ -279,21 +242,21 @@ MidiStreamView::setup_rec_box ()
 		
 	} else {
 
-		// cerr << "\tNOT rolling, rec_rects = " << rec_rects.size() << " rec_regions = " << rec_regions.size() << endl;
+		cerr << "\tNOT rolling, rec_rects = " << rec_rects.size() << " rec_regions = " << rec_regions.size() << endl;
 
 		if (!rec_rects.empty() || !rec_regions.empty()) {
 
 			/* disconnect rapid update */
 			screen_update_connection.disconnect();
 
-			for (list<sigc::connection>::iterator prc = peak_ready_connections.begin(); prc != peak_ready_connections.end(); ++prc) {
+			for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin(); prc != rec_data_ready_connections.end(); ++prc) {
 				(*prc).disconnect();
 			}
-			peak_ready_connections.clear();
+			rec_data_ready_connections.clear();
 
 			rec_updating = false;
 			rec_active = false;
-			last_rec_peak_frame = 0;
+			last_rec_data_frame = 0;
 			
 			/* remove temp regions */
 			for (list<Region*>::iterator iter=rec_regions.begin(); iter != rec_regions.end(); )
@@ -324,14 +287,13 @@ MidiStreamView::setup_rec_box ()
 			
 		}
 	}
-#endif
 }
 
 void
 MidiStreamView::update_rec_regions ()
 {
-#if 0
 	if (use_rec_regions) {
+
 
 		uint32_t n = 0;
 
@@ -356,9 +318,9 @@ MidiStreamView::update_rec_regions ()
 
 			if (region == rec_regions.back() && rec_active) {
 
-				if (last_rec_peak_frame > region->start()) {
+				if (last_rec_data_frame > region->start()) {
 
-					jack_nframes_t nlen = last_rec_peak_frame - region->start();
+					jack_nframes_t nlen = last_rec_data_frame - region->start();
 
 					if (nlen != region->length()) {
 
@@ -408,7 +370,28 @@ MidiStreamView::update_rec_regions ()
 			iter = tmp;
 		}
 	}
-#endif
+}
+
+void
+MidiStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t cnt, Source * src)
+{
+	// this is called from the butler thread for now
+	// yeah we need a "peak" building thread or something.  whatever. :)
+	
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), start, cnt, src));
+	
+	//cerr << "REC DATA: " << start << " --- " << cnt << endl;
+
+	if (rec_data_ready_map.size() == 0 || start+cnt > last_rec_data_frame) {
+		last_rec_data_frame = start + cnt;
+	}
+
+	rec_data_ready_map[src] = true;
+
+	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().get(DataType::MIDI)) {
+		this->update_rec_regions ();
+		rec_data_ready_map.clear();
+	}
 }
 
 void

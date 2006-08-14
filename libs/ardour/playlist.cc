@@ -72,17 +72,22 @@ struct RegionSortByLastLayerOp {
     }
 };
 
-Playlist::Playlist (Session& sess, string nom, bool hide)
+Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 	: _session (sess)
+	, _type(type)
 {
 	init (hide);
 	_name = nom;
 	
 }
 
-Playlist::Playlist (Session& sess, const XMLNode& node, bool hide)
+Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide)
 	: _session (sess)
+	, _type(type)
 {
+	const XMLProperty* prop = node.property("type");
+	assert(!prop || DataType(prop->value()) == _type);
+
 	init (hide);
 	_name = "unnamed"; /* reset by set_state */
 	
@@ -92,7 +97,7 @@ Playlist::Playlist (Session& sess, const XMLNode& node, bool hide)
 }
 
 Playlist::Playlist (const Playlist& other, string namestr, bool hide)
-	: _name (namestr), _session (other._session), _orig_diskstream_id(other._orig_diskstream_id)
+	: _name (namestr), _session (other._session), _type(other._type), _orig_diskstream_id(other._orig_diskstream_id)
 {
 	init (hide);
 
@@ -125,7 +130,7 @@ Playlist::Playlist (const Playlist& other, string namestr, bool hide)
 }
 
 Playlist::Playlist (const Playlist& other, jack_nframes_t start, jack_nframes_t cnt, string str, bool hide)
-	: _name (str), _session (other._session), _orig_diskstream_id(other._orig_diskstream_id)
+	: _name (str), _session (other._session), _type(other._type), _orig_diskstream_id(other._orig_diskstream_id)
 {
 	RegionLock rlock2 (&((Playlist&)other));
 	
@@ -247,12 +252,14 @@ Playlist::init (bool hide)
 
 Playlist::Playlist (const Playlist& pl)
 	: _session (pl._session)
+	, _type(pl.data_type())
 {
 	fatal << _("playlist const copy constructor called") << endmsg;
 }
 
 Playlist::Playlist (Playlist& pl)
 	: _session (pl._session)
+	, _type(pl.data_type())
 {
 	fatal << _("playlist non-const copy constructor called") << endmsg;
 }
@@ -1426,6 +1433,7 @@ Playlist::state (bool full_state)
 	char buf[64];
 	
 	node->add_property (X_("name"), _name);
+	node->add_property (X_("type"), _type.to_string());
 
 	_orig_diskstream_id.print (buf);
 	node->add_property (X_("orig_diskstream_id"), buf);

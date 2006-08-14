@@ -70,8 +70,6 @@ class AudioSource : public Source
  	int  read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start, jack_nframes_t cnt, double samples_per_unit) const;
  	int  build_peaks ();
 	bool peaks_ready (sigc::slot<void>, sigc::connection&) const;
-
-	static sigc::signal<void,AudioSource*> AudioSourceCreated;
 	       
 	mutable sigc::signal<void>  PeaksReady;
 	mutable sigc::signal<void,jack_nframes_t,jack_nframes_t>  PeakRangeReady;

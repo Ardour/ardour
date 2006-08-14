@@ -2682,7 +2682,7 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	TimeAxisView* tvp = clicked_trackview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
-	if (tv && tv->is_audio_track()) {
+	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
 	}
 	
@@ -2711,11 +2711,11 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	start_grab(event);
 
 	TimeAxisView* tv = &clicked_regionview->get_time_axis_view();
-	RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(tv);
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
 	double speed = 1.0;
 
-	if (atv && atv->is_audio_track()) {
-		speed = atv->get_diskstream()->speed();
+	if (rtv && rtv->is_track()) {
+		speed = rtv->get_diskstream()->speed();
 	}
 	
 	drag_info.last_trackview = &clicked_regionview->get_time_axis_view();
@@ -2746,7 +2746,7 @@ Editor::start_region_brush_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	TimeAxisView* tvp = clicked_trackview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
-	if (tv && tv->is_audio_track()) {
+	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
 	}
 	
@@ -2796,7 +2796,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			rv = (*i);
 			
 			Playlist* to_playlist = rv->region().playlist();
-			RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(&rv->get_time_axis_view());
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&rv->get_time_axis_view());
 			
 			insert_result = affected_playlists.insert (to_playlist);
 			if (insert_result.second) {
@@ -2805,7 +2805,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 			latest_regionview = 0;
 			
-			sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+			sigc::connection c = rtv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 			
 			/* create a new region with the same name. */
 			
@@ -2821,7 +2821,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 			newregion->set_locked (false);
 			
-			to_playlist->add_region (*newregion, (jack_nframes_t) (rv->region().position() * atv->get_diskstream()->speed()));
+			to_playlist->add_region (*newregion, (jack_nframes_t) (rv->region().position() * rtv->get_diskstream()->speed()));
 			
 			c.disconnect ();
 			
@@ -2847,15 +2847,15 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	/* Which trackview is this ? */
 
 	TimeAxisView* tvp = trackview_by_y_position (drag_info.current_pointer_y);
-	AudioTimeAxisView* tv = dynamic_cast<AudioTimeAxisView*>(tvp);
+	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	/* The region motion is only processed if the pointer is over
 	   an audio track.
 	*/
 	
-	if (!tv || !tv->is_audio_track()) {
+	if (!tv || !tv->is_track()) {
 		/* To make sure we hide the verbose canvas cursor when the mouse is 
-		   not held over and audiotrack. 
+		   not held over a track. 
 		*/
 		hide_verbose_canvas_cursor ();
 		return;
@@ -2883,30 +2883,30 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			TimeAxisView *tracklist_timeview;
 			tracklist_timeview = (*i);
-			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tracklist_timeview);
+			RouteTimeAxisView* rtv2 = dynamic_cast<RouteTimeAxisView*>(tracklist_timeview);
 			list<TimeAxisView*> children_list;
 	      
 			/* zeroes are audio tracks. ones are other types. */
 	      
-			if (!atv2->hidden()) {
+			if (!rtv2->hidden()) {
 				
-				if (visible_y_high < atv2->order) {
-					visible_y_high = atv2->order;
+				if (visible_y_high < rtv2->order) {
+					visible_y_high = rtv2->order;
 				}
-				if (visible_y_low > atv2->order) {
-					visible_y_low = atv2->order;
+				if (visible_y_low > rtv2->order) {
+					visible_y_low = rtv2->order;
 				}
 		
-				if (!atv2->is_audio_track()) {		  		  
-					tracks = tracks |= (0x01 << atv2->order);
+				if (!rtv2->is_track()) {		  		  
+					tracks = tracks |= (0x01 << rtv2->order);
 				}
 	
-				height_list[atv2->order] = (*i)->height;
+				height_list[rtv2->order] = (*i)->height;
 				children = 1;
-				if ((children_list = atv2->get_child_list()).size() > 0) {
+				if ((children_list = rtv2->get_child_list()).size() > 0) {
 					for (list<TimeAxisView*>::iterator j = children_list.begin(); j != children_list.end(); ++j) { 
-						tracks = tracks |= (0x01 << (atv2->order + children));
-						height_list[atv2->order + children] =  (*j)->height;		    
+						tracks = tracks |= (0x01 << (rtv2->order + children));
+						height_list[rtv2->order + children] =  (*j)->height;		    
 						numtracks++;
 						children++;	
 					}
@@ -2941,27 +2941,27 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 			rv2->get_canvas_group()->i2w (ix1, iy1);
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
-			RouteTimeAxisView* atv2 = dynamic_cast<RouteTimeAxisView*>(tvp2);
+			RouteTimeAxisView* rtv2 = dynamic_cast<RouteTimeAxisView*>(tvp2);
 
-			if (atv2->order != original_pointer_order) {	
+			if (rtv2->order != original_pointer_order) {	
 				/* this isn't the pointer track */	
 
 				if (canvas_pointer_y_span > 0) {
 
 					/* moving up the canvas */
-					if ((atv2->order - canvas_pointer_y_span) >= visible_y_low) {
+					if ((rtv2->order - canvas_pointer_y_span) >= visible_y_low) {
 	
 						int32_t visible_tracks = 0;
 						while (visible_tracks < canvas_pointer_y_span ) {
 							visible_tracks++;
 		  
-							while (height_list[atv2->order - (visible_tracks - n)] == 0) {
+							while (height_list[rtv2->order - (visible_tracks - n)] == 0) {
 								/* we're passing through a hidden track */
 								n--;
 							}		  
 						}
 		 
-						if (tracks[atv2->order - (canvas_pointer_y_span - n)] != 0x00) {		  
+						if (tracks[rtv2->order - (canvas_pointer_y_span - n)] != 0x00) {		  
 							clamp_y_axis = true;
 						}
 		    
@@ -2973,7 +2973,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 					/*moving down the canvas*/
 
-					if ((atv2->order - (canvas_pointer_y_span - n)) <= visible_y_high) { // we will overflow
+					if ((rtv2->order - (canvas_pointer_y_span - n)) <= visible_y_high) { // we will overflow
 		    
 		    
 						int32_t visible_tracks = 0;
@@ -2981,11 +2981,11 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 						while (visible_tracks > canvas_pointer_y_span ) {
 							visible_tracks--;
 		      
-							while (height_list[atv2->order - (visible_tracks - n)] == 0) {		   
+							while (height_list[rtv2->order - (visible_tracks - n)] == 0) {		   
 								n++;
 							}		 
 						}
-						if (  tracks[atv2->order - ( canvas_pointer_y_span - n)] != 0x00) {
+						if (  tracks[rtv2->order - ( canvas_pointer_y_span - n)] != 0x00) {
 							clamp_y_axis = true;
 			    
 						}
@@ -2998,9 +2998,9 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			} else {
 		      
 				/* this is the pointer's track */
-				if ((atv2->order - pointer_y_span) > visible_y_high) { // we will overflow 
+				if ((rtv2->order - pointer_y_span) > visible_y_high) { // we will overflow 
 					clamp_y_axis = true;
-				} else if ((atv2->order - pointer_y_span) < visible_y_low) { // we will underflow
+				} else if ((rtv2->order - pointer_y_span) < visible_y_low) { // we will underflow
 					clamp_y_axis = true;
 				}
 			}	      
@@ -3136,14 +3136,14 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 		rv->get_canvas_group()->i2w (ix1, iy1);
 		TimeAxisView* tvp2 = trackview_by_y_position (iy1);
-		AudioTimeAxisView* canvas_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
-		AudioTimeAxisView* temp_atv;
+		RouteTimeAxisView* canvas_rtv = dynamic_cast<RouteTimeAxisView*>(tvp2);
+		RouteTimeAxisView* temp_rtv;
 
 		if ((pointer_y_span != 0) && !clamp_y_axis) {
 			y_delta = 0;
 			int32_t x = 0;
 			for (j = height_list.begin(); j!= height_list.end(); j++) {	
-				if (x == canvas_atv->order) {
+				if (x == canvas_rtv->order) {
 					/* we found the track the region is on */
 					if (x != original_pointer_order) {
 						/*this isn't from the same track we're dragging from */
@@ -3181,14 +3181,14 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 					/* find out where we'll be when we move and set height accordingly */
 		  
 					tvp2 = trackview_by_y_position (iy1 + y_delta);
-					temp_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
-					rv->set_height (temp_atv->height);
+					temp_rtv = dynamic_cast<RouteTimeAxisView*>(tvp2);
+					rv->set_height (temp_rtv->height);
 	
 					/*   if you un-comment the following, the region colours will follow the track colours whilst dragging,
 					     personally, i think this can confuse things, but never mind.
 					*/
 		  		  
-					//const GdkColor& col (temp_atv->view->get_region_color());
+					//const GdkColor& col (temp_rtv->view->get_region_color());
 					//rv->set_color (const_cast<GdkColor&>(col));
 					break;		
 				}
@@ -3229,9 +3229,9 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			   the motion is done.
 			*/
 
-			AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&rv->get_time_axis_view());
-			if (atv && atv->is_audio_track()) {
-				AudioPlaylist* pl = dynamic_cast<AudioPlaylist*>(atv->get_diskstream()->playlist());
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view());
+			if (rtv && rtv->is_track()) {
+				Playlist* pl = dynamic_cast<Playlist*>(rtv->get_diskstream()->playlist());
 				if (pl) {
 					/* only freeze and capture state once */
 
@@ -3300,7 +3300,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	/* adjust for track speed */
 	speed = 1.0;
 
-	atv = dynamic_cast<AudioTimeAxisView*> (drag_info.last_trackview);
+	atv = dynamic_cast<RouteTimeAxisView*> (drag_info.last_trackview);
 	if (atv && atv->get_diskstream()) {
 		speed = atv->get_diskstream()->speed();
 	}
@@ -3348,7 +3348,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			(*i)->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 			(*i)->get_canvas_group()->i2w (ix1, iy1);
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
-			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
+			RouteTimeAxisView* atv2 = dynamic_cast<RouteTimeAxisView*>(tvp2);
 	    
 			from_playlist = (*i)->region().playlist();
 			to_playlist = atv2->playlist();
@@ -3383,7 +3383,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			(*i)->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 			(*i)->get_canvas_group()->i2w (ix1, iy1);
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
-			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
+			RouteTimeAxisView* atv2 = dynamic_cast<RouteTimeAxisView*>(tvp2);
 	    
 			from_playlist = (*i)->region().playlist();
 			to_playlist = atv2->playlist();
@@ -3418,7 +3418,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			
 			if (regionview_x_movement) {
 				double ownspeed = 1.0;
-				AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&(rv->get_time_axis_view()));
+				RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*> (&(rv->get_time_axis_view()));
 
 				if (atv && atv->get_diskstream()) {
 					ownspeed = atv->get_diskstream()->speed();
@@ -3467,9 +3467,9 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 	
 	if (Keyboard::modifier_state_contains (event->state, Keyboard::Control)) {
 		TimeAxisView* tv = &rv.get_time_axis_view();
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(tv);
+		RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(tv);
 		double speed = 1.0;
-		if (atv && atv->is_audio_track()) {
+		if (atv && atv->is_track()) {
 			speed = atv->get_diskstream()->speed();
 		}
 
@@ -3904,9 +3904,9 @@ Editor::start_trim (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_trackview;
-	AudioTimeAxisView* tv = dynamic_cast<AudioTimeAxisView*>(tvp);
+	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
-	if (tv && tv->is_audio_track()) {
+	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
 	}
 	
@@ -3967,7 +3967,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 	pair<set<Playlist*>::iterator,bool> insert_result;
 
-	if (tv && tv->is_audio_track()) {
+	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
 	}
 	
@@ -4093,7 +4093,7 @@ Editor::single_contents_trim (RegionView& rv, jack_nframes_t frame_delta, bool l
 	TimeAxisView* tvp = clicked_trackview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
-	if (tv && tv->is_audio_track()) {
+	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
 	}
 	
@@ -4131,9 +4131,9 @@ Editor::single_start_trim (RegionView& rv, jack_nframes_t frame_delta, bool left
 
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_trackview;
-	AudioTimeAxisView* tv = dynamic_cast<AudioTimeAxisView*>(tvp);
+	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
-	if (tv && tv->is_audio_track()) {
+	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
 	}
 	
@@ -4165,9 +4165,9 @@ Editor::single_end_trim (RegionView& rv, jack_nframes_t frame_delta, bool left_d
 
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_trackview;
-	AudioTimeAxisView* tv = dynamic_cast<AudioTimeAxisView*>(tvp);
+	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
-	if (tv && tv->is_audio_track()) {
+	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
 	}
 	
@@ -4824,7 +4824,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, jack_nframes_t pos)
 
 	RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(&arv->get_time_axis_view());
 
-	if (atv == 0 || !atv->is_audio_track()) {
+	if (atv == 0 || !atv->is_track()) {
 		return;
 	}
 

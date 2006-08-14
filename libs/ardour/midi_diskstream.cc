@@ -35,6 +35,7 @@
 #include <pbd/basename.h>
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
+#include <pbd/memento_command.h>
 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
@@ -77,6 +78,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 
 	in_set_state = false;
 
+	assert(!destructive());
 	DiskstreamCreated (this); /* EMIT SIGNAL */
 }
 	
@@ -129,6 +131,8 @@ MidiDiskstream::init (Diskstream::Flag f)
 	_capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
 	
 	_n_channels = ChanCount(DataType::MIDI, 1);
+
+	assert(recordable());
 }
 
 MidiDiskstream::~MidiDiskstream ()
@@ -181,20 +185,18 @@ MidiDiskstream::non_realtime_input_change ()
 void
 MidiDiskstream::get_input_sources ()
 {
-#if 0
-	if (_io->n_inputs() == 0) {
-		cerr << "MidiDiskstream NO INPUTS?\n";
+	uint32_t ni = _io->n_inputs().get(DataType::MIDI);
+
+	if (ni == 0) {
 		return;
-	} else {
-		cerr << "INPUTS!\n";
 	}
 
-	// FIXME this is weird and really different from AudioDiskstream
-	
-	assert(_io->n_inputs() == 1);
-	assert(_io->midi_input(0));
+	// This is all we do for now at least
+	assert(ni == 1);
+
 	_source_port = _io->midi_input(0);
 
+	/* I don't get it....
 	const char **connections = _io->input(0)->get_connections ();
 
 	if (connections == 0 || connections[0] == 0) {
@@ -207,20 +209,12 @@ MidiDiskstream::get_input_sources ()
 
 	} else {
 		_source_port = dynamic_cast<MidiPort*>(
-			_session.engine().get_port_by_name (connections[0]));
-		assert(_source_port);
-	}
-
-	if (_source_port) {
-		cerr << "SOURCE PORT!\n";
-	} else {
-		cerr << "NO SOURCE PORT?!\n";
+			_session.engine().get_port_by_name (connections[0]) );
 	}
 
 	if (connections) {
 		free (connections);
-	}
-#endif
+	}*/
 }		
 
 int
@@ -299,46 +293,13 @@ MidiDiskstream::use_copy_playlist ()
 	}
 }
 
+/** Overloaded from parent to die horribly
+ */
 void
-MidiDiskstream::setup_destructive_playlist ()
+MidiDiskstream::set_destructive (bool yn)
 {
-	Region::SourceList srcs;
-
-	srcs.push_back (_write_source);
-	/* a single full-sized region */
-
-	cerr << "Setup MIDI DS using " << srcs.front()->natural_position () << endl;
-
-	MidiRegion* region = new MidiRegion (srcs, 0, max_frames, _name);
-	_playlist->add_region (*region, srcs.front()->natural_position());		
-}
-
-void
-MidiDiskstream::use_destructive_playlist ()
-{
-	/* use the sources associated with the single full-extent region */
-	
-	Playlist::RegionList* rl = _playlist->regions_at (0);
-
-	if (rl->empty()) {
-		reset_write_sources (false, true);
-		return;
-	}
-
-	MidiRegion* region = dynamic_cast<MidiRegion*> (rl->front());
-
-	if (region == 0) {
-		throw failed_constructor();
-	}
-
-	delete rl;
-
-	assert(region->n_channels() == 1);
-	_write_source = dynamic_cast<SMFSource*>(&region->source (0));
-	assert(_write_source);
-	_write_source->set_allow_remove_if_empty (false);
-
-	/* the source list will never be reset for a destructive track */
+	assert( ! destructive());
+	assert( ! yn);
 }
 
 void
@@ -587,8 +548,8 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 				cerr << "DISKSTREAM GOT EVENT " << i << "!!\n";
 			}
 
-			if (_source_port->size() == 0)
-				cerr << "No events :/ (1)\n";
+			//if (_source_port->size() == 0)
+			//	cerr << "No events :/ (1)\n";
 
 
 		} else {
@@ -607,8 +568,8 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 			for (size_t i=0; i < _source_port->size(); ++i) {
 				cerr << "DISKSTREAM GOT EVENT " << i << "!!\n";
 			}
-			if (_source_port->size() == 0)
-				cerr << "No events :/ (2)\n";
+			//if (_source_port->size() == 0)
+			//	cerr << "No events :/ (2)\n";
 			RawMidi* buf = NULL; // FIXME FIXME FIXME (make it compile)
 			assert(false);
 			jack_nframes_t first = _capture_vector.len[0];
@@ -630,6 +591,10 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 	
 	if (rec_nframes) {
 		
+		// FIXME: filthy hack to fool the GUI into thinking we're doing something
+		if (_write_source)
+			_write_source->ViewDataRangeReady (transport_frame, rec_nframes); /* EMIT SIGNAL */
+
 		/* data will be written to disk */
 
 		if (rec_nframes == nframes && rec_offset == 0) {
@@ -687,9 +652,9 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 			jack_nframes_t total = _playback_vector.len[0] + _playback_vector.len[1];
 			
 			if (necessary_samples > total) {
-				cerr << "DiskUnderrun\n";
+				//cerr << "DiskUnderrun\n";
 				//DiskUnderrun (); // FIXME
-				goto out;
+				//goto out;
 				
 			} else {
 				
@@ -758,12 +723,46 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 	} 
 
 	return ret;
+
+	_processed = true;
+
+	return 0;
 }
 
 bool
 MidiDiskstream::commit (jack_nframes_t nframes)
 {
-	return 0;
+	bool need_butler = false;
+
+	if (_actual_speed < 0.0) {
+		playback_sample -= playback_distance;
+	} else {
+		playback_sample += playback_distance;
+	}
+
+		_playback_buf->increment_read_ptr (playback_distance);
+		
+		if (adjust_capture_position) {
+			_capture_buf->increment_write_ptr (adjust_capture_position);
+		}
+	
+	if (adjust_capture_position != 0) {
+		capture_captured += adjust_capture_position;
+		adjust_capture_position = 0;
+	}
+	
+	if (_slaved) {
+		need_butler = _playback_buf->write_space() >= _playback_buf->bufsize() / 2;
+	} else {
+		need_butler = _playback_buf->write_space() >= disk_io_chunk_frames
+			|| _capture_buf->read_space() >= disk_io_chunk_frames;
+	}
+
+	state_lock.unlock();
+
+	_processed = false;
+
+	return need_butler;
 }
 
 void
@@ -786,6 +785,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 int
 MidiDiskstream::seek (jack_nframes_t frame, bool complete_refill)
 {
+	Glib::Mutex::Lock lm (state_lock);
 	return 0;
 }
 
@@ -810,12 +810,13 @@ MidiDiskstream::read (RawMidi* buf, jack_nframes_t& start, jack_nframes_t cnt, b
 int
 MidiDiskstream::do_refill_with_alloc ()
 {
-	return 0;
+	return do_refill();
 }
 
 int
 MidiDiskstream::do_refill ()
 {
+	// yeah, the data's ready.  promise.
 	return 0;
 }
 
@@ -832,17 +833,198 @@ MidiDiskstream::do_refill ()
 int
 MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 {
+	/* hey, so did you write that data? */
+
+	// oh yeah, you bet.  wrote it good.  honest.
+	
 	return 0;
 }
 
 void
 MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture)
 {
+	uint32_t buffer_position;
+	bool more_work = true;
+	int err = 0;
+	MidiRegion* region = 0;
+	jack_nframes_t total_capture;
+	MidiRegion::SourceList srcs;
+	MidiRegion::SourceList::iterator src;
+	vector<CaptureInfo*>::iterator ci;
+	bool mark_write_completed = false;
+
+	finish_capture (true);
+
+	/* butler is already stopped, but there may be work to do 
+	   to flush remaining data to disk.
+	   */
+
+	while (more_work && !err) {
+		switch (do_flush (Session::TransportContext, true)) {
+			case 0:
+				more_work = false;
+				break;
+			case 1:
+				break;
+			case -1:
+				error << string_compose(_("MidiDiskstream \"%1\": cannot flush captured data to disk!"), _name) << endmsg;
+				err++;
+		}
+	}
+
+	/* XXX is there anything we can do if err != 0 ? */
+	Glib::Mutex::Lock lm (capture_info_lock);
+
+	if (capture_info.empty()) {
+		return;
+	}
+
+	if (abort_capture) {
+
+		list<Source*>* deletion_list = new list<Source*>;
+
+		if (_write_source) {
+			_write_source->mark_for_remove ();
+			_write_source->release ();
+
+			deletion_list->push_back (_write_source);
+
+			_write_source = 0;
+		}
+
+		/* new source set up in "out" below */
+
+		if (!deletion_list->empty()) {
+			DeleteSources (deletion_list);
+		} else {
+			delete deletion_list;
+		}
+
+	} else {
+
+		assert(_write_source);
+
+		for (total_capture = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+			total_capture += (*ci)->frames;
+		}
+
+		/* figure out the name for this take */
+
+		SMFSource* s = _write_source;
+
+		if (s) {
+
+			srcs.push_back (s);
+
+			cerr << "MidiDiskstream: updating source after capture\n";
+			s->update_header (capture_info.front()->start, when, twhen);
+
+			s->set_captured_for (_name);
+
+		}
+
+		/* Register a new region with the Session that
+		   describes the entire source. Do this first
+		   so that any sub-regions will obviously be
+		   children of this one (later!)
+		   */
+		try {
+			assert(_write_source);
+			region = new MidiRegion (srcs, _write_source->last_capture_start_frame(), total_capture, 
+					region_name_from_path (_write_source->name()), 
+					0, Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile));
+
+			region->special_set_position (capture_info.front()->start);
+		}
+
+
+		catch (failed_constructor& err) {
+			error << string_compose(_("%1: could not create region for complete midi file"), _name) << endmsg;
+			/* XXX what now? */
+		}
+
+		_last_capture_regions.push_back (region);
+
+		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
+
+		XMLNode &before = _playlist->get_state();
+		_playlist->freeze ();
+
+		for (buffer_position = _write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+
+			string region_name;
+			_session.region_name (region_name, _write_source->name(), false);
+
+			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
+
+			try {
+				region = new MidiRegion (srcs, buffer_position, (*ci)->frames, region_name);
+			}
+
+			catch (failed_constructor& err) {
+				error << _("MidiDiskstream: could not create region for captured audio!") << endmsg;
+				continue; /* XXX is this OK? */
+			}
+
+			_last_capture_regions.push_back (region);
+
+			// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
+
+			i_am_the_modifier++;
+			_playlist->add_region (*region, (*ci)->start);
+			i_am_the_modifier--;
+
+			buffer_position += (*ci)->frames;
+		}
+
+		_playlist->thaw ();
+		XMLNode &after = _playlist->get_state();
+		_session.add_command (new MementoCommand<Playlist>(*_playlist, before, after));
+
+		mark_write_completed = true;
+
+		reset_write_sources (mark_write_completed);
+
+	}
+
+	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+		delete *ci;
+	}
+
+	capture_info.clear ();
+	capture_start_frame = 0;
 }
 
 void
 MidiDiskstream::finish_capture (bool rec_monitors_input)
 {
+	was_recording = false;
+	
+	if (capture_captured == 0) {
+		return;
+	}
+
+	// Why must we destroy?
+	assert(!destructive());
+
+	CaptureInfo* ci = new CaptureInfo;
+	
+	ci->start  =  capture_start_frame;
+	ci->frames = capture_captured;
+	
+	/* XXX theoretical race condition here. Need atomic exchange ? 
+	   However, the circumstances when this is called right 
+	   now (either on record-disable or transport_stopped)
+	   mean that no actual race exists. I think ...
+	   We now have a capture_info_lock, but it is only to be used
+	   to synchronize in the transport_stop and the capture info
+	   accessors, so that invalidation will not occur (both non-realtime).
+	*/
+
+	// cerr << "Finish capture, add new CI, " << ci->start << '+' << ci->frames << endl;
+
+	capture_info.push_back (ci);
+	capture_captured = 0;
 }
 
 void
@@ -852,12 +1034,8 @@ MidiDiskstream::set_record_enabled (bool yn)
 		return;
 	}
 
-	/* can't rec-enable in destructive mode if transport is before start */
-
-	if (destructive() && yn && _session.transport_frame() < _session.current_start_frame()) {
-		return;
-	}
-
+	assert(!destructive());
+	
 	if (yn && _source_port == 0) {
 
 		/* pick up connections not initiated *from* the IO object
@@ -1014,11 +1192,7 @@ MidiDiskstream::set_state (const XMLNode& node)
 			_playlist->set_orig_diskstream_id (_id);
 		}
 		
-		if (!destructive() && capture_pending_node) {
-			/* destructive streams have one and only one source per channel,
-			   and so they never end up in pending capture in any useful
-			   sense.
-			*/
+		if (capture_pending_node) {
 			use_pending_capture_data (*capture_pending_node);
 		}
 
@@ -1083,10 +1257,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	}
 
 	_write_source->use ();
-
-	/* do not remove destructive files even if they are empty */
-
-	_write_source->set_allow_remove_if_empty (!destructive());
+	_write_source->set_allow_remove_if_empty (true);
 
 	return 0;
 }
@@ -1098,29 +1269,11 @@ MidiDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 		return;
 	}
 
-	if (!destructive()) {
-
-		if (_write_source && mark_write_complete) {
-			_write_source->mark_streaming_write_completed ();
-		}
-		use_new_write_source ();
-
-	} else {
-		if (_write_source == 0) {
-			use_new_write_source ();
-		}
+	if (_write_source && mark_write_complete) {
+		_write_source->mark_streaming_write_completed ();
 	}
-
-	if (destructive()) {
-
-		/* we now have all our write sources set up, so create the
-		   playlist's single region.
-		   */
-
-		if (_playlist->empty()) {
-			setup_destructive_playlist ();
-		}
-	}
+	use_new_write_source ();
+	assert(_write_source);
 }
 
 int

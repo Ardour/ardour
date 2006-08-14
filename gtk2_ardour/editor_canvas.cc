@@ -426,7 +426,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		    guint info, guint time)
 {
 	TimeAxisView* tvp;
-	AudioTimeAxisView* tv;
+	RouteTimeAxisView* tv;
 	double cy;
 	vector<ustring> paths;
 	string spath;
@@ -462,7 +462,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		jack_nframes_t pos = 0;
 		do_embed (paths, false, ImportAsTrack, 0, pos, false);
 		
-	} else if ((tv = dynamic_cast<AudioTimeAxisView*>(tvp)) != 0) {
+	} else if ((tv = dynamic_cast<RouteTimeAxisView*>(tvp)) != 0) {
 
 		/* check that its an audio track, not a bus */
 		
@@ -486,9 +486,9 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 	for (uint32_t i = 0; i < sr->cnt; ++i) {
 
 		Region* r = reinterpret_cast<Region*> (sr->ptr[i]);
-		AudioRegion* ar;
 
-		if ((ar = dynamic_cast<AudioRegion*>(r)) != 0) {
+		AudioRegion* ar = dynamic_cast<AudioRegion*>(r);
+		if (ar) {
 			insert_region_list_drag (*ar, x, y);
 		}
 	}

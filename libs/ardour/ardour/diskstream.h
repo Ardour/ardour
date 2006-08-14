@@ -238,8 +238,8 @@ class Diskstream : public Stateful, public sigc::trackable
 	virtual void get_input_sources () = 0;
 	virtual void check_record_status (jack_nframes_t transport_frame, jack_nframes_t nframes, bool can_record) = 0;
 	virtual void set_align_style_from_io() {}
-	virtual void setup_destructive_playlist () = 0;
-	virtual void use_destructive_playlist () = 0;
+	virtual void setup_destructive_playlist () {}
+	virtual void use_destructive_playlist () {}
 
 	static jack_nframes_t disk_io_chunk_frames;
 	vector<CaptureInfo*>  capture_info;

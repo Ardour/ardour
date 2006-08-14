@@ -66,7 +66,7 @@ AudioRegionState::AudioRegionState (string why)
 
 /** Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t length, bool announce)
-	: Region (src, start, length, PBD::basename_nosuffix(src.name()), 0,  Region::Flag(Region::DefaultFlags|Region::External))
+	: Region (src, start, length, PBD::basename_nosuffix(src.name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External))
 	, _fade_in (0.0, 2.0, 1.0, false)
 	, _fade_out (0.0, 2.0, 1.0, false)
 	, _envelope (0.0, 2.0, 1.0, false)
@@ -87,7 +87,7 @@ AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t
 
 /* Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
-	: Region (src, start, length, name, layer, flags)
+	: Region (src, start, length, name, DataType::AUDIO, layer, flags)
 	, _fade_in (0.0, 2.0, 1.0, false)
 	, _fade_out (0.0, 2.0, 1.0, false)
 	, _envelope (0.0, 2.0, 1.0, false)
@@ -107,7 +107,7 @@ AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t
 
 /* Basic AudioRegion constructor (many channels) */
 AudioRegion::AudioRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
-	: Region (srcs, start, length, name, layer, flags)
+	: Region (srcs, start, length, name, DataType::AUDIO, layer, flags)
 	, _fade_in (0.0, 2.0, 1.0, false)
 	, _fade_out (0.0, 2.0, 1.0, false)
 	, _envelope (0.0, 2.0, 1.0, false)
@@ -204,6 +204,8 @@ AudioRegion::AudioRegion (AudioSource& src, const XMLNode& node)
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 
+	assert(_type == DataType::AUDIO);
+
 	CheckNewRegion (this); /* EMIT SIGNAL */
 }
 
@@ -223,6 +225,8 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+
+	assert(_type == DataType::AUDIO);
 
 	CheckNewRegion (this); /* EMIT SIGNAL */
 }

@@ -832,14 +832,14 @@ class Editor : public PublicEditor
 
 	int ensure_cursor (jack_nframes_t* pos);
 
-	void handle_new_audio_region (ARDOUR::AudioRegion *);
-	void handle_audio_region_removed (ARDOUR::AudioRegion *);
-	void add_audio_region_to_region_display (ARDOUR::AudioRegion *);
+	void handle_new_region (ARDOUR::Region *);
+	void handle_region_removed (ARDOUR::Region *);
+	void add_region_to_region_display (ARDOUR::Region *);
 	void region_hidden (ARDOUR::Region*);
 	void redisplay_regions ();
-	void insert_into_tmp_audio_regionlist(ARDOUR::AudioRegion *);
+	void insert_into_tmp_regionlist(ARDOUR::Region *);
 
-	list<ARDOUR::AudioRegion *> tmp_audio_region_list;
+	list<ARDOUR::Region *> tmp_region_list;
 
 	void cut_copy (Editing::CutCopyOp);
 	void cut_copy_points (Editing::CutCopyOp);

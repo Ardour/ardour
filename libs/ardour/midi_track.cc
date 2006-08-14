@@ -129,44 +129,6 @@ MidiTrack::use_diskstream (const PBD::ID& id)
 	return set_diskstream (*dstream);
 }
 
-bool
-MidiTrack::record_enabled () const
-{
-	return _diskstream->record_enabled ();
-}
-
-void
-MidiTrack::set_record_enable (bool yn, void *src)
-{
-	if (_freeze_record.state == Frozen) {
-		return;
-	}
-#if 0
-	if (_mix_group && src != _mix_group && _mix_group->is_active()) {
-		_mix_group->apply (&MidiTrack::set_record_enable, yn, _mix_group);
-		return;
-	}
-
-	/* keep track of the meter point as it was before we rec-enabled */
-
-	if (!diskstream->record_enabled()) {
-		_saved_meter_point = _meter_point;
-	}
-	
-	diskstream->set_record_enabled (yn, src);
-
-	if (diskstream->record_enabled()) {
-		set_meter_point (MeterInput, this);
-	} else {
-		set_meter_point (_saved_meter_point, this);
-	}
-
-	if (_session.get_midi_feedback()) {
-		_midi_rec_enable_control.send_feedback (record_enabled());
-	}
-#endif
-}
-
 MidiDiskstream&
 MidiTrack::midi_diskstream() const
 {
@@ -482,7 +444,109 @@ int
 MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, int declick,
 		  bool can_record, bool rec_monitors_input)
 {
-	passthru (start_frame, end_frame, nframes, offset, declick, false);
+	//passthru (start_frame, end_frame, nframes, offset, declick, false);
+	int dret;
+	RawMidi* b; // FIXME: this won't work, duh
+	//Sample* tmpb;
+	jack_nframes_t transport_frame;
+	MidiDiskstream& diskstream = midi_diskstream();
+	
+	{
+		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
+		if (lm.locked()) {
+			// automation snapshot can also be called from the non-rt context
+			// and it uses the redirect list, so we take the lock out here
+			automation_snapshot (start_frame);
+		}
+	}
+	
+	if (n_outputs().get_total() == 0 && _redirects.empty()) {
+		return 0;
+	}
+
+	if (!_active) {
+		silence (nframes, offset);
+		return 0;
+	}
+
+	transport_frame = _session.transport_frame();
+
+	if ((nframes = check_initial_delay (nframes, offset, transport_frame)) == 0) {
+		/* need to do this so that the diskstream sets its
+		   playback distance to zero, thus causing diskstream::commit
+		   to do nothing.
+		*/
+		return diskstream.process (transport_frame, 0, 0, can_record, rec_monitors_input);
+	} 
+
+	_silent = false;
+	//apply_gain_automation = false;
+
+	if ((dret = diskstream.process (transport_frame, nframes, offset, can_record, rec_monitors_input)) != 0) {
+		
+		silence (nframes, offset);
+
+		return dret;
+	}
+
+	/* special condition applies */
+	
+	if (_meter_point == MeterInput) {
+		just_meter_input (start_frame, end_frame, nframes, offset);
+	}
+
+	if (diskstream.record_enabled() && !can_record && !_session.get_auto_input()) {
+
+		/* not actually recording, but we want to hear the input material anyway,
+		   at least potentially (depending on monitoring options)
+		 */
+
+		passthru (start_frame, end_frame, nframes, offset, 0, true);
+
+	} else if ((b = diskstream.playback_buffer()) != 0) {
+		/*
+		  XXX is it true that the earlier test on n_outputs()
+		  means that we can avoid checking it again here? i think
+		  so, because changing the i/o configuration of an IO
+		  requires holding the AudioEngine lock, which we hold
+		  while in the process() tree.
+		*/
+
+		
+		/* copy the diskstream data to all output buffers */
+		
+		//const size_t limit = n_process_buffers().get(DataType::AUDIO);
+		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+		
+		//uint32_t n;
+		//uint32_t i;
+#if 0
+		for (i = 0, n = 1; i < limit; ++i, ++n) {
+			memcpy (bufs.get_audio(i).data(nframes), b, sizeof (Sample) * nframes); 
+			if (n < diskstream.n_channels().get(DataType::AUDIO)) {
+				tmpb = diskstream.playback_buffer(n);
+				if (tmpb!=0) {
+					b = tmpb;
+				}
+			}
+		}
+
+		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
+
+		if (!diskstream.record_enabled() && _session.transport_rolling()) {
+			Glib::Mutex::Lock am (automation_lock, Glib::TRY_LOCK);
+			
+			if (am.locked() && gain_automation_playback()) {
+				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
+			}
+		}
+#endif
+		process_output_buffers (bufs, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !_session.get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+		
+	} else {
+		/* problem with the diskstream; just be quiet for a bit */
+		silence (nframes, offset);
+	}
 
 	return 0;
 }
@@ -571,6 +635,7 @@ MidiTrack::set_latency_delay (jack_nframes_t longest_session_latency)
 void
 MidiTrack::bounce (InterThreadInfo& itt)
 {
+	throw;
 	//vector<MidiSource*> srcs;
 	//_session.write_one_midi_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
 }
@@ -579,6 +644,7 @@ MidiTrack::bounce (InterThreadInfo& itt)
 void
 MidiTrack::bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo& itt)
 {
+	throw;
 	//vector<MidiSource*> srcs;
 	//_session.write_one_midi_track (*this, start, end, false, srcs, itt);
 }

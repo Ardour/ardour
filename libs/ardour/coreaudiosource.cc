@@ -32,7 +32,7 @@ CoreAudioSource::CoreAudioSource (const XMLNode& node)
 {
 	init (_name);
 	
-	AudioSourceCreated (this); /* EMIT SIGNAL */
+	SourceCreated (this); /* EMIT SIGNAL */
 }
 
 CoreAudioSource::CoreAudioSource (const string& idstr, Flag flags)
@@ -40,7 +40,7 @@ CoreAudioSource::CoreAudioSource (const string& idstr, Flag flags)
 {
 	init (idstr);
 
-	AudioSourceCreated (this); /* EMIT SIGNAL */
+	SourceCreated (this); /* EMIT SIGNAL */
 }
 
 void 

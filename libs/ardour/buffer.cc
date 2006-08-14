@@ -101,8 +101,8 @@ MidiBuffer::read_from(const Buffer& src, jack_nframes_t nframes, jack_nframes_t 
 	}
 	assert(_size == msrc.size());
 
-	if (_size > 0)
-		std::cerr << "MidiBuffer wrote " << _size << " events.\n";
+	//if (_size > 0)
+	//	std::cerr << "MidiBuffer wrote " << _size << " events.\n";
 }
 
 

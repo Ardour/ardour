@@ -42,7 +42,7 @@ using namespace PBD;
 sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
 
 MidiSource::MidiSource (string name)
-	: Source (name)
+	: Source (name, DataType::MIDI)
 {
 	_read_data_count = 0;
 	_write_data_count = 0;

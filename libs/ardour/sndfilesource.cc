@@ -51,7 +51,7 @@ SndFileSource::SndFileSource (const XMLNode& node)
 		}
 	}
 
-	AudioSourceCreated (this); /* EMIT SIGNAL */
+	SourceCreated (this); /* EMIT SIGNAL */
 }
 
 SndFileSource::SndFileSource (string idstr, Flag flags)
@@ -73,7 +73,7 @@ SndFileSource::SndFileSource (string idstr, Flag flags)
 	}
 
 
-	AudioSourceCreated (this); /* EMIT SIGNAL */
+	SourceCreated (this); /* EMIT SIGNAL */
 }
 
 SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, jack_nframes_t rate, Flag flags)
@@ -184,7 +184,7 @@ SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, 
 		}
 	}
 
-	AudioSourceCreated (this); /* EMIT SIGNAL */
+	SourceCreated (this); /* EMIT SIGNAL */
 
 }
 

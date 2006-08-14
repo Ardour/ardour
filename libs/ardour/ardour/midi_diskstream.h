@@ -83,6 +83,10 @@ class MidiDiskstream : public Diskstream
 
 	void monitor_input (bool);
 
+	MidiSource* write_source() { return (MidiSource*)_write_source; }
+	
+	void set_destructive (bool yn); // doom!
+
   protected:
 	friend class Session;
 
@@ -138,8 +142,6 @@ class MidiDiskstream : public Diskstream
 	void get_input_sources ();
 	void check_record_status (jack_nframes_t transport_frame, jack_nframes_t nframes, bool can_record);
 	void set_align_style_from_io();
-	void setup_destructive_playlist ();
-	void use_destructive_playlist ();
 	
 	void engage_record_enable ();
 	void disengage_record_enable ();

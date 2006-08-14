@@ -39,6 +39,7 @@
 #include <ardour/crossfade_compare.h>
 #include <ardour/location.h>
 #include <ardour/state_manager.h>
+#include <ardour/data_type.h>
 
 namespace ARDOUR  {
 
@@ -49,8 +50,8 @@ class Playlist : public Stateful, public StateManager {
   public:
 	typedef list<Region*>    RegionList;
 
-	Playlist (Session&, const XMLNode&, bool hidden = false);
-	Playlist (Session&, string name, bool hidden = false);
+	Playlist (Session&, const XMLNode&, DataType type, bool hidden = false);
+	Playlist (Session&, string name, DataType type, bool hidden = false);
 	Playlist (const Playlist&, string name, bool hidden = false);
 	Playlist (const Playlist&, jack_nframes_t start, jack_nframes_t cnt, string name, bool hidden = false);
 
@@ -64,6 +65,8 @@ class Playlist : public Stateful, public StateManager {
 
 	const string& name() const { return _name; }
 	void set_name (const string& str);
+
+	const DataType& data_type() const { return _type; }
 
 	bool frozen() const { return _frozen; }
 	void set_frozen (bool yn);
@@ -171,6 +174,7 @@ class Playlist : public Stateful, public StateManager {
 	RegionList       regions;
 	string          _name;
 	Session&        _session;
+	DataType        _type;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
 	mutable Glib::Mutex region_lock;
@@ -275,7 +279,7 @@ class Playlist : public Stateful, public StateManager {
 
 	void timestamp_layer_op (Region&);
 
-        PBD::ID _id;
+	PBD::ID _id;
 };
 
 } /* namespace ARDOUR */

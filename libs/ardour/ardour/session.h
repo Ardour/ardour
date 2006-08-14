@@ -632,8 +632,8 @@ class Session : public sigc::trackable, public Stateful
 	
 	/* region info  */
 
-	sigc::signal<void,AudioRegion *> AudioRegionAdded;
-	sigc::signal<void,AudioRegion *> AudioRegionRemoved;
+	sigc::signal<void,Region *> RegionAdded;
+	sigc::signal<void,Region *> RegionRemoved;
 
 	int region_name (string& result, string base = string(""), bool newlevel = false) const;
 	string new_region_name (string);
@@ -642,9 +642,11 @@ class Session : public sigc::trackable, public Stateful
 	Region* find_whole_file_parent (Region& child);
 	void find_equivalent_playlist_regions (Region&, std::vector<Region*>& result);
 
-	AudioRegion *XMLRegionFactory (const XMLNode&, bool full);
+	Region*      XMLRegionFactory (const XMLNode&, bool full);
+	AudioRegion* XMLAudioRegionFactory (const XMLNode&, bool full);
+	MidiRegion* XMLMidiRegionFactory (const XMLNode&, bool full);
 
-	template<class T> void foreach_audio_region (T *obj, void (T::*func)(AudioRegion *));
+	template<class T> void foreach_region (T *obj, void (T::*func)(Region *));
 
 	/* source management */
 
@@ -658,7 +660,7 @@ class Session : public sigc::trackable, public Stateful
 	    string pathname;
 	    
 	    /* result */
-	    std::vector<AudioRegion*> new_regions;
+	    std::vector<Region*> new_regions;
 	    
 	};
 
@@ -672,7 +674,7 @@ class Session : public sigc::trackable, public Stateful
 	int start_audio_export (ARDOUR::AudioExportSpecification&);
 	int stop_audio_export (ARDOUR::AudioExportSpecification&);
 	
-	void add_audio_source (AudioSource *);
+	void add_source (Source *);
 	void remove_source (Source *);
 	int  cleanup_audio_file_source (AudioFileSource&);
 
@@ -1551,8 +1553,8 @@ class Session : public sigc::trackable, public Stateful
 	/* REGION MANAGEMENT */
 
 	mutable Glib::Mutex region_lock;
-	typedef map<PBD::ID,AudioRegion *> AudioRegionList;
-	AudioRegionList audio_regions;
+	typedef map<PBD::ID,Region *> RegionList;
+	RegionList regions;
 	
 	void region_renamed (Region *);
 	void region_changed (Change, Region *);
@@ -1563,10 +1565,10 @@ class Session : public sigc::trackable, public Stateful
 
 	/* SOURCES */
 	
-	mutable Glib::Mutex audio_source_lock;
-	typedef std::map<PBD::ID,AudioSource *> AudioSourceList;
+	mutable Glib::Mutex source_lock;
+	typedef std::map<PBD::ID,Source *> SourceList;
 
-	AudioSourceList audio_sources;
+	SourceList sources;
 
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();

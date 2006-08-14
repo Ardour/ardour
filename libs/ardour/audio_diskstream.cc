@@ -280,7 +280,8 @@ AudioDiskstream::get_input_sources ()
 			chan.source = 0;
 			
 		} else {
-			chan.source = _session.engine().get_port_by_name (connections[0]);
+			chan.source = dynamic_cast<AudioPort*>(
+				_session.engine().get_port_by_name (connections[0]) );
 		}
 		
 		if (connections) {

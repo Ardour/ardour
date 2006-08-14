@@ -2275,6 +2275,8 @@ Editor::new_region_from_selection ()
 void
 Editor::separate_region_from_selection ()
 {
+	// FIXME: TYPE
+	
 	bool doing_undo = false;
 
 	if (selection->time.empty()) {
@@ -2321,6 +2323,8 @@ Editor::separate_region_from_selection ()
 void
 Editor::separate_regions_using_location (Location& loc)
 {
+	// FIXME: TYPE
+	
 	bool doing_undo = false;
 
 	if (loc.is_mark()) {
@@ -2391,15 +2395,12 @@ Editor::crop_region_to_selection ()
 		
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
-			AudioTimeAxisView* atv;
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*i);
 
-			if ((atv = dynamic_cast<AudioTimeAxisView*> ((*i))) != 0) {
+			if (rtv && rtv->is_track()) {
 
-				if (atv->is_audio_track()) {
-					
-					if ((playlist = atv->playlist()) != 0) {
-						playlists.push_back (playlist);
-					}
+				if ((playlist = rtv->playlist()) != 0) {
+					playlists.push_back (playlist);
 				}
 			}
 		}
@@ -2460,8 +2461,7 @@ Editor::region_fill_track ()
 		
 		// FIXME
 		AudioRegion* const ar = dynamic_cast<AudioRegion*>(&region);
-		if (!ar)
-			continue;
+		assert(ar);
 
 		Playlist* pl = region.playlist();
 
@@ -2475,7 +2475,7 @@ Editor::region_fill_track ()
 			return;
 		}
 
-                XMLNode &before = pl->get_state();
+		XMLNode &before = pl->get_state();
 		pl->add_region (*(new AudioRegion (*ar)), ar->last_frame(), times);
 		session->add_command (new MementoCommand<Playlist>(*pl, before, pl->get_state()));
 	}
@@ -2486,7 +2486,7 @@ Editor::region_fill_track ()
 void
 Editor::region_fill_selection ()
 {
-       	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_audio_track()) {
+ 	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_audio_track()) {
 		return;
 	}
 
@@ -2613,7 +2613,7 @@ Editor::align_relative (RegionPoint what)
 }
 
 struct RegionSortByTime {
-    bool operator() (const AudioRegionView* a, const AudioRegionView* b) {
+    bool operator() (const RegionView* a, const RegionView* b) {
 	    return a->region().position() < b->region().position();
     }
 };
@@ -2781,11 +2781,11 @@ Editor::trim_region_from_edit_cursor ()
 void
 Editor::unfreeze_route ()
 {
-	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_audio_track()) {
+	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_track()) {
 		return;
 	}
 	
-	clicked_audio_trackview->audio_track()->unfreeze ();
+	clicked_audio_trackview->track()->unfreeze ();
 }
 
 void*
@@ -2812,7 +2812,7 @@ Editor::freeze_progress_timeout (void *arg)
 void
 Editor::freeze_route ()
 {
-	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_audio_track()) {
+	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_track()) {
 		return;
 	}
 	
