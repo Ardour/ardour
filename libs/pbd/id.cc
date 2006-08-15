@@ -25,7 +25,7 @@ ID::init ()
 ID::ID ()
 {
 	Glib::Mutex::Lock lm (*counter_lock);
-	id = _counter++;
+	_id = _counter++;
 }
 
 ID::ID (string str)
@@ -36,14 +36,14 @@ ID::ID (string str)
 int
 ID::string_assign (string str)
 {
-	return sscanf (str.c_str(), "%" PRIu64, &id) != 0;
+	return sscanf (str.c_str(), "%" PRIu64, &_id) != 0;
 }
 
 void
 ID::print (char* buf) const
 {
 	/* XXX sizeof buf is unknown. bad API design */
-	snprintf (buf, 16, "%" PRIu64, id);
+	snprintf (buf, 16, "%" PRIu64, _id);
 }
 
 string ID::to_s() const
@@ -61,10 +61,10 @@ ID::operator= (string str)
 }
 
 ostream&
-operator<< (ostream& ostr, const ID& id)
+operator<< (ostream& ostr, const ID& _id)
 {
 	char buf[32];
-	id.print (buf);
+	_id.print (buf);
 	ostr << buf;
 	return ostr;
 }
