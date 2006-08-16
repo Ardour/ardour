@@ -181,23 +181,36 @@ public:
 	
 	~MidiBuffer();
 
-	// FIXME: clear events starting at offset in time
-	void silence(jack_nframes_t len, jack_nframes_t offset=0) { assert(offset == 0); _size = 0; }
+	void silence(jack_nframes_t dur, jack_nframes_t offset=0);
 	
 	void read_from(const Buffer& src, jack_nframes_t nframes, jack_nframes_t offset);
 
-	void set_size(size_t size) { _size = size; }
+	bool push_back(const MidiEvent& event);
+	
+	const MidiEvent& operator[](size_t i) const { assert(i < _size); return _events[i]; }
+	MidiEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }
 
-	const RawMidi* data() const { return _data; }
-	RawMidi*       data()       { return _data; }
+	static size_t max_event_size() { return MAX_EVENT_SIZE; }
+
+	//void set_size(size_t size) { _size = size; }
+
+	//const RawMidi* data() const { return _data; }
+	//RawMidi*       data()       { return _data; }
 
 private:
 	// These are undefined (prevent copies)
 	MidiBuffer(const MidiBuffer& copy);            
 	MidiBuffer& operator=(const MidiBuffer& copy);
 
-	bool     _owns_data;
-	RawMidi* _data; ///< Actual buffer contents
+	// FIXME: Jack needs to tell us this
+	static const size_t MAX_EVENT_SIZE = 4; // bytes
+	
+	/* We use _size as "number of events", so the size of _data is
+	 * (_size * MAX_EVENT_SIZE)
+	 */
+
+	MidiEvent* _events;     ///< Event structs that point to offsets in _data
+	RawMidi*   _data;       ///< MIDI, straight up.  No time stamps.
 };
 
 } // namespace ARDOUR

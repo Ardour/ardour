@@ -222,8 +222,8 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_trackview = &rv->get_time_axis_view();
-		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, RegionItem);
 		break;
 
@@ -261,8 +261,8 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = 0;
 		clicked_control_point = 0;
-		clicked_trackview = tv;
-		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(tv);
+		clicked_axisview = tv;
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(tv);
 		ret = button_press_handler (item, event, StreamItem);
 		break;
 
@@ -297,8 +297,8 @@ Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = 0;
 		clicked_control_point = 0;
-		clicked_trackview = atv;
-		clicked_audio_trackview = 0;
+		clicked_axisview = atv;
+		clicked_routeview = 0;
 		ret = button_press_handler (item, event, AutomationTrackItem);
 		break;
 
@@ -334,8 +334,8 @@ Editor::canvas_fade_in_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRe
 	case GDK_BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_trackview = &rv->get_time_axis_view();
-		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		if (event->button.button == 3) {
 			return button_press_handler (item, event, FadeInItem);
 		}
@@ -368,8 +368,8 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_trackview = &rv->get_time_axis_view();
-		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, FadeInHandleItem);
 		break;
 
@@ -405,8 +405,8 @@ Editor::canvas_fade_out_event (GdkEvent *event, ArdourCanvas::Item* item, AudioR
 	case GDK_BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_trackview = &rv->get_time_axis_view();
-		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		if (event->button.button == 3) {
 			return button_press_handler (item, event, FadeOutItem);
 		}
@@ -439,8 +439,8 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_trackview = &rv->get_time_axis_view();
-		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, FadeOutHandleItem);
 		break;
 
@@ -481,7 +481,7 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 		clicked_crossfadeview = xfv;
-		clicked_trackview = &clicked_crossfadeview->get_time_axis_view();
+		clicked_axisview = &clicked_crossfadeview->get_time_axis_view();
 		if (event->button.button == 3) {
 			return button_press_handler (item, event, CrossfadeViewItem);
 		} 
@@ -547,8 +547,8 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
 		clicked_control_point = cp;
-		clicked_trackview = &cp->line.trackview;
-		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
+		clicked_axisview = &cp->line.trackview;
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		clicked_regionview = 0;
 		break;
 
@@ -709,8 +709,8 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_trackview = &clicked_regionview->get_time_axis_view();
-		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
+		clicked_axisview = &clicked_regionview->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, RegionViewNameHighlight);
 		break;
 	case GDK_BUTTON_RELEASE:
@@ -745,8 +745,8 @@ Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_trackview = &clicked_regionview->get_time_axis_view();
-		clicked_audio_trackview = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
+		clicked_axisview = &clicked_regionview->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, RegionViewName);
 		break;
 	case GDK_BUTTON_RELEASE:

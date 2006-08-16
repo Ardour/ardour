@@ -39,6 +39,7 @@
 #include <ardour/playlist.h>
 #include <ardour/midi_source.h>
 #include <ardour/types.h>
+#include <ardour/midi_ring_buffer.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -178,25 +179,51 @@ MidiRegion::get_memento() const
 }
 
 jack_nframes_t
-MidiRegion::read_at (MidiBuffer& out, jack_nframes_t position, 
-		      jack_nframes_t cnt, 
+MidiRegion::read_at (MidiRingBuffer& out, jack_nframes_t position, 
+		      jack_nframes_t dur, 
 		      uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
 {
-	return _read_at (_sources, out, position, cnt, chan_n, read_frames, skip_frames);
+	return _read_at (_sources, out, position, dur, chan_n, read_frames, skip_frames);
 }
 
 jack_nframes_t
-MidiRegion::master_read_at (MidiBuffer& out, jack_nframes_t position, 
-			     jack_nframes_t cnt, uint32_t chan_n) const
+MidiRegion::master_read_at (MidiRingBuffer& out, jack_nframes_t position, 
+			     jack_nframes_t dur, uint32_t chan_n) const
 {
-	return _read_at (_master_sources, out, position, cnt, chan_n, 0, 0);
+	return _read_at (_master_sources, out, position, dur, chan_n, 0, 0);
 }
 
 jack_nframes_t
-MidiRegion::_read_at (const SourceList& srcs, MidiBuffer& buf, 
-		       jack_nframes_t position, jack_nframes_t cnt, 
+MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, 
+		       jack_nframes_t position, jack_nframes_t dur, 
 		       uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
 {
+	MidiEvent ev;
+	RawMidi data[4];
+
+	const char note = rand()%30 + 30;
+	
+	ev.buffer = data;
+	ev.time = position;
+	ev.size = 3;
+	data[0] = 0x90;
+	data[1] = note;
+	data[2] = 120;
+	dst.write(ev);
+	
+	ev.buffer = data;
+	ev.time = (jack_nframes_t)(position + (9/10.0 * dur));
+	assert(ev.time < position + dur);
+	ev.size = 3;
+	data[0] = 0x80;
+	data[1] = note;
+	data[2] = 64;
+	dst.write(ev);
+
+	_read_data_count += dur;
+
+	return dur;
+#if 0
 	jack_nframes_t internal_offset;
 	jack_nframes_t buf_offset;
 	jack_nframes_t to_read;
@@ -240,6 +267,7 @@ MidiRegion::_read_at (const SourceList& srcs, MidiBuffer& buf,
 	_read_data_count += src.read_data_count();
 
 	return to_read;
+#endif
 }
 	
 XMLNode&

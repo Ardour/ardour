@@ -213,15 +213,12 @@ IO::deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t 
 		return;
 	}
 
-	const DataType type = DataType::MIDI; // type type type type...
+	const DataType type = DataType::MIDI;
 	
 	// Just dump any MIDI 1-to-1, we're not at all clever with MIDI routing yet
 	BufferSet::iterator o = output_buffers().begin(type);
-	for (BufferSet::iterator i = bufs.begin(type); i != bufs.end(type); ++i) {
-		
-		for (PortSet::iterator i = _inputs.begin(type); i != _inputs.end(type); ++i, ++o) {
-			o->read_from(i->get_buffer(), nframes, offset);
-		}
+	for (BufferSet::iterator i = bufs.begin(type); i != bufs.end(type); ++i, ++o) {
+		o->read_from(*i, nframes, offset);
 	}
 }
 

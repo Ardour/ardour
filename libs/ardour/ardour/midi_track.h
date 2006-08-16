@@ -76,10 +76,6 @@ public:
 protected:
 	XMLNode& state (bool full);
 
-	void passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame,
-	                       jack_nframes_t nframes, jack_nframes_t offset, int declick,
-	                       bool meter);
-
 	ChanCount n_process_buffers ();
 
 private:

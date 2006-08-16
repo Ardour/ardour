@@ -968,7 +968,7 @@ AudioDiskstream::seek (jack_nframes_t frame, bool complete_refill)
 {
 	Glib::Mutex::Lock lm (state_lock);
 	uint32_t n;
-	int ret;
+	int ret = -1;
 	ChannelList::iterator chan;
 
 	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {

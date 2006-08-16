@@ -39,19 +39,23 @@ class MidiPort : public Port {
 	
 	DataType type() const { return DataType(DataType::MIDI); }
 
-	MidiBuffer& get_buffer() {
-		return *_buffer;
+	Buffer& get_buffer() {
+		return _buffer;
+	}
+
+	MidiBuffer& get_midi_buffer() {
+		return _buffer;
 	}
 	
 	void cycle_start(jack_nframes_t nframes);
 	void cycle_end();
 
-	size_t capacity() { return _buffer->capacity(); }
-	size_t size()     { return _buffer->size(); }
+	size_t capacity() { return _buffer.capacity(); }
+	size_t size()     { return _buffer.size(); }
 	
 	/** Assumes that the port is an output port */
 	void silence (jack_nframes_t nframes, jack_nframes_t offset) {
-		_buffer->silence(nframes, offset);
+		_buffer.silence(nframes, offset);
 	}
 
   protected:
@@ -61,7 +65,7 @@ class MidiPort : public Port {
 	
 	/* engine isn't supposed to access below here */
 
-	MidiBuffer*    _buffer;
+	MidiBuffer     _buffer;
 	jack_nframes_t _nframes_this_cycle;
 };
  

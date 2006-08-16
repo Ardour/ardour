@@ -758,10 +758,10 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				scroll_tracks_up_line ();
 			} else {
 				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
-					if (clicked_trackview) {
+					if (clicked_axisview) {
 						if (!current_stepping_trackview) {
 						  step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-							current_stepping_trackview = clicked_trackview;
+							current_stepping_trackview = clicked_axisview;
 						}
 						gettimeofday (&last_track_height_step_timestamp, 0);
 						current_stepping_trackview->step_height (true);
@@ -795,10 +795,10 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				scroll_tracks_down_line ();
 			} else {
 				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
-					if (clicked_trackview) {
+					if (clicked_axisview) {
 						if (!current_stepping_trackview) {
 						  step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-							current_stepping_trackview = clicked_trackview;
+							current_stepping_trackview = clicked_axisview;
 						}
 						gettimeofday (&last_track_height_step_timestamp, 0);
 						current_stepping_trackview->step_height (false);
@@ -1036,7 +1036,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case MouseObject:
 			switch (item_type) {
 			case AutomationTrackItem:
-				dynamic_cast<AutomationTimeAxisView*>(clicked_trackview)->add_automation_event 
+				dynamic_cast<AutomationTimeAxisView*>(clicked_axisview)->add_automation_event 
 					(item,
 					 event,
 					 where,
@@ -1061,7 +1061,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 				
 			case AutomationTrackItem:
-				dynamic_cast<AutomationTimeAxisView*>(clicked_trackview)->
+				dynamic_cast<AutomationTimeAxisView*>(clicked_axisview)->
 					add_automation_event (item, event, where, event->button.y);
 				return true;
 				break;
@@ -2679,7 +2679,7 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	start_grab (event);
 
 	double speed = 1.0;
-	TimeAxisView* tvp = clicked_trackview;
+	TimeAxisView* tvp = clicked_axisview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
@@ -2743,7 +2743,7 @@ Editor::start_region_brush_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	start_grab (event);
 
 	double speed = 1.0;
-	TimeAxisView* tvp = clicked_trackview;
+	TimeAxisView* tvp = clicked_axisview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
@@ -3633,7 +3633,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	*/
 	
 	latest_regionview = 0;
-	sigc::connection c = clicked_audio_trackview->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+	sigc::connection c = clicked_routeview->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 	
 	/* A selection grab currently creates two undo/redo operations, one for 
 	   creating the new region and another for moving it.
@@ -3641,10 +3641,10 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	begin_reversible_command (_("selection grab"));
 
-	Playlist* playlist = clicked_trackview->playlist();
+	Playlist* playlist = clicked_axisview->playlist();
 
         before = &(playlist->get_state());
-	clicked_trackview->playlist()->add_region (*region, selection->time[clicked_selection].start);
+	clicked_axisview->playlist()->add_region (*region, selection->time[clicked_selection].start);
         XMLNode &after = playlist->get_state();
 	session->add_command(new MementoCommand<Playlist>(*playlist, *before, after));
 
@@ -3668,7 +3668,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab (event);
 	
-	drag_info.last_trackview = clicked_trackview;
+	drag_info.last_trackview = clicked_axisview;
 	drag_info.last_frame_position = latest_regionview->region().position();
 	drag_info.pointer_frame_offset = drag_info.grab_frame - drag_info.last_frame_position;
 	
@@ -3714,8 +3714,8 @@ Editor::start_selection_op (ArdourCanvas::Item* item, GdkEvent* event, Selection
 		break;
 
 	case SelectionStartTrim:
-		if (clicked_trackview) {
-			clicked_trackview->order_selection_trims (item, true);
+		if (clicked_axisview) {
+			clicked_axisview->order_selection_trims (item, true);
 		} 
 		start_grab (event, trimmer_cursor);
 		start = selection->time[clicked_selection].start;
@@ -3723,8 +3723,8 @@ Editor::start_selection_op (ArdourCanvas::Item* item, GdkEvent* event, Selection
 		break;
 		
 	case SelectionEndTrim:
-		if (clicked_trackview) {
-			clicked_trackview->order_selection_trims (item, false);
+		if (clicked_axisview) {
+			clicked_axisview->order_selection_trims (item, false);
 		}
 		start_grab (event, trimmer_cursor);
 		end = selection->time[clicked_selection].end;
@@ -3799,7 +3799,7 @@ Editor::drag_selection (ArdourCanvas::Item* item, GdkEvent* event)
 				drag_info.copy = false;
 			} else {
 				/* new selection-> */
-				clicked_selection = selection->set (clicked_trackview, start, end);
+				clicked_selection = selection->set (clicked_axisview, start, end);
 			}
 		} 
 		break;
@@ -3903,7 +3903,7 @@ void
 Editor::start_trim (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	double speed = 1.0;
-	TimeAxisView* tvp = clicked_trackview;
+	TimeAxisView* tvp = clicked_axisview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
@@ -3963,7 +3963,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	*/ 
 
 	double speed = 1.0;
-	TimeAxisView* tvp = clicked_trackview;
+	TimeAxisView* tvp = clicked_axisview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 	pair<set<Playlist*>::iterator,bool> insert_result;
 
@@ -4090,7 +4090,7 @@ Editor::single_contents_trim (RegionView& rv, jack_nframes_t frame_delta, bool l
 	jack_nframes_t new_bound;
 
 	double speed = 1.0;
-	TimeAxisView* tvp = clicked_trackview;
+	TimeAxisView* tvp = clicked_axisview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
@@ -4130,7 +4130,7 @@ Editor::single_start_trim (RegionView& rv, jack_nframes_t frame_delta, bool left
 	jack_nframes_t new_bound;
 
 	double speed = 1.0;
-	TimeAxisView* tvp = clicked_trackview;
+	TimeAxisView* tvp = clicked_axisview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
@@ -4164,7 +4164,7 @@ Editor::single_end_trim (RegionView& rv, jack_nframes_t frame_delta, bool left_d
 	jack_nframes_t new_bound;
 
 	double speed = 1.0;
-	TimeAxisView* tvp = clicked_trackview;
+	TimeAxisView* tvp = clicked_axisview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {

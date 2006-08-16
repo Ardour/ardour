@@ -45,6 +45,8 @@
 #include <ardour/utils.h>
 #include <ardour/diskstream.h>
 #include <ardour/midi_playlist.h>
+#include <ardour/midi_ring_buffer.h>
+
 struct tm;
 
 namespace ARDOUR {
@@ -65,8 +67,7 @@ class MidiDiskstream : public Diskstream
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
 	
-	RawMidi* playback_buffer () { return _current_playback_buffer; }
-	RawMidi* capture_buffer ()  { return _current_capture_buffer; }
+	void get_playback(MidiBuffer& dst, jack_nframes_t start, jack_nframes_t end);
 
 	void set_record_enabled (bool yn);
 
@@ -124,7 +125,7 @@ class MidiDiskstream : public Diskstream
 	
 	int do_refill_with_alloc();
 
-	int read (MidiBuffer& dst, jack_nframes_t& start, jack_nframes_t cnt, bool reversed);
+	int read (jack_nframes_t& start, jack_nframes_t cnt, bool reversed);
 
 	void finish_capture (bool rec_monitors_input);
 	void transport_stopped (struct tm&, time_t, bool abort);
@@ -147,17 +148,17 @@ class MidiDiskstream : public Diskstream
 	void disengage_record_enable ();
 	
 	// FIXME: This is basically a single ChannelInfo.. abstractify that concept?
-	RingBufferNPT<RawMidi>*           _playback_buf;
-	RingBufferNPT<RawMidi>*           _capture_buf;
-	RawMidi*                          _current_playback_buffer;
-	RawMidi*                          _current_capture_buffer;
-	RawMidi*                          _playback_wrap_buffer;
-	RawMidi*                          _capture_wrap_buffer;
+	MidiRingBuffer*                    _playback_buf;
+	MidiRingBuffer*                    _capture_buf;
+	//RawMidi*                          _current_playback_buffer;
+	//RawMidi*                          _current_capture_buffer;
+	//RawMidi*                          _playback_wrap_buffer;
+	//RawMidi*                          _capture_wrap_buffer;
 	MidiPort*                         _source_port;
 	SMFSource*                        _write_source; ///< aka capturing source
 	RingBufferNPT<CaptureTransition>* _capture_transition_buf;
-	RingBufferNPT<RawMidi>::rw_vector _playback_vector;
-	RingBufferNPT<RawMidi>::rw_vector _capture_vector;
+	//RingBufferNPT<RawMidi>::rw_vector _playback_vector;
+	//RingBufferNPT<RawMidi>::rw_vector _capture_vector;
 };
 
 }; /* namespace ARDOUR */

@@ -26,7 +26,7 @@ using namespace std;
 
 MidiPort::MidiPort(jack_port_t* p)
 	: Port(p)
-	, _buffer(NULL)
+	, _buffer(4096) // FIXME FIXME FIXME Jack needs to tell us this
 	, _nframes_this_cycle(0)
 {
 	DataType dt(_type);
@@ -34,22 +34,25 @@ MidiPort::MidiPort(jack_port_t* p)
 
 	reset();
 
-	_buffer = new MidiBuffer(4096); // FIXME FIXME FIXME
+
 }
 
 
 MidiPort::~MidiPort()
 {
-	delete _buffer;
 }
 
 void
 MidiPort::cycle_start (jack_nframes_t nframes)
 {
+	_buffer.clear();
+	assert(_buffer.size() == 0);
+
 	_nframes_this_cycle = nframes;
 
 	if (_flags & JackPortIsOutput) {
-		_buffer->set_size(0);
+		_buffer.silence(nframes);
+		assert(_buffer.size() == 0);
 		return;
 	}
 
@@ -60,21 +63,26 @@ MidiPort::cycle_start (jack_nframes_t nframes)
 	const jack_nframes_t event_count
 		= jack_midi_port_get_info(jack_buffer, nframes)->event_count;
 
-	assert(event_count < _buffer->capacity());
+	assert(event_count < _buffer.capacity());
 
+	MidiEvent ev;
+
+	// FIXME: too slow, event struct is copied twice (here and MidiBuffer::push_back)
 	for (jack_nframes_t i=0; i < event_count; ++i) {
-		jack_midi_event_t* const ev = &_buffer->data()[i];
-		jack_midi_event_get(ev, jack_buffer, i, nframes);
 
+		// This will fail to compile if we change MidiEvent to our own class
+		jack_midi_event_get(static_cast<jack_midi_event_t*>(&ev), jack_buffer, i, nframes);
+
+		_buffer.push_back(ev);
 		// Convert note ons with velocity 0 to proper note offs
 		// FIXME: Jack MIDI should guarantee this - does it?
 		//if (ev->buffer[0] == MIDI_CMD_NOTE_ON && ev->buffer[2] == 0)
 		//	ev->buffer[0] = MIDI_CMD_NOTE_OFF;
 	}
 
-	_buffer->set_size(event_count);
-	
-	//if (_buffer->size() > 0)
+	assert(_buffer.size() == event_count);
+
+	//if (_buffer.size() > 0)
 	//	cerr << "MIDIPort got " << event_count << " events." << endl;
 }
 
@@ -82,7 +90,7 @@ void
 MidiPort::cycle_end()
 {
 	if (_flags & JackPortIsInput) {
-		_nframes_this_cycle = 0; // catch any oopses
+		_nframes_this_cycle = 0;
 		return;
 	}
 
@@ -90,13 +98,17 @@ MidiPort::cycle_end()
 	
 	void* jack_buffer = jack_port_get_buffer(_port, _nframes_this_cycle);
 
-	const jack_nframes_t event_count = _buffer->size();
+	const jack_nframes_t event_count = _buffer.size();
+	
+	//if (event_count > 0)
+	//	cerr << "MIDIPort writing " << event_count << " events." << endl;
 
 	jack_midi_clear_buffer(jack_buffer, _nframes_this_cycle);
 	for (jack_nframes_t i=0; i < event_count; ++i) {
-		const jack_midi_event_t& ev = _buffer->data()[i];
+		const jack_midi_event_t& ev = _buffer[i];
+		assert(ev.time < _nframes_this_cycle);
 		jack_midi_event_write(jack_buffer, ev.time, ev.buffer, ev.size, _nframes_this_cycle);
 	}
 	
-	_nframes_this_cycle = 0; // catch oopses
+	_nframes_this_cycle = 0;
 }

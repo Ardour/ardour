@@ -406,12 +406,6 @@ AudioTrack::n_process_buffers ()
 	return max (_diskstream->n_channels(), redirect_max_outs);
 }
 
-void
-AudioTrack::passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter)
-{
-	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, offset, true, declick, meter);
-}
-
 int 
 AudioTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)

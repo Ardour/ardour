@@ -61,10 +61,10 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	: Diskstream(sess, name, flag)
 	, _playback_buf(0)
 	, _capture_buf(0)
-	, _current_playback_buffer(0)
-	, _current_capture_buffer(0)
-	, _playback_wrap_buffer(0)
-	, _capture_wrap_buffer(0)
+	//, _current_playback_buffer(0)
+	//, _current_capture_buffer(0)
+	//, _playback_wrap_buffer(0)
+	//, _capture_wrap_buffer(0)
 	, _source_port(0)
 	, _write_source(0)
 	, _capture_transition_buf(0)
@@ -86,10 +86,10 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	: Diskstream(sess, node)
 	, _playback_buf(0)
 	, _capture_buf(0)
-	, _current_playback_buffer(0)
-	, _current_capture_buffer(0)
-	, _playback_wrap_buffer(0)
-	, _capture_wrap_buffer(0)
+	//, _current_playback_buffer(0)
+	//, _current_capture_buffer(0)
+	//, _playback_wrap_buffer(0)
+	//, _capture_wrap_buffer(0)
 	, _source_port(0)
 	, _write_source(0)
 	, _capture_transition_buf(0)
@@ -124,10 +124,10 @@ MidiDiskstream::init (Diskstream::Flag f)
 	set_block_size (_session.get_block_size());
 	allocate_temporary_buffers ();
 
-	_playback_wrap_buffer = new RawMidi[wrap_buffer_size];
-	_capture_wrap_buffer = new RawMidi[wrap_buffer_size];
-	_playback_buf = new RingBufferNPT<RawMidi> (_session.diskstream_buffer_size());
-	_capture_buf = new RingBufferNPT<RawMidi> (_session.diskstream_buffer_size());
+	//_playback_wrap_buffer = new RawMidi[wrap_buffer_size];
+	//_capture_wrap_buffer = new RawMidi[wrap_buffer_size];
+	_playback_buf = new MidiRingBuffer (_session.diskstream_buffer_size());
+	_capture_buf = new MidiRingBuffer (_session.diskstream_buffer_size());
 	_capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
 	
 	_n_channels = ChanCount(DataType::MIDI, 1);
@@ -435,9 +435,9 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 	bool           nominally_recording;
 	bool           re = record_enabled ();
 	bool           collect_playback = false;
-	
-	_current_capture_buffer = 0;
-	_current_playback_buffer = 0;
+
+	/*_current_capture_buffer = 0;
+	  _current_playback_buffer = 0;*/
 
 	/* if we've already processed the frames corresponding to this call,
 	   just return. this allows multiple routes that are taking input
@@ -445,7 +445,7 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 	   this stuff only happen once. more commonly, it allows both
 	   the AudioTrack that is using this AudioDiskstream *and* the Session
 	   to call process() without problems.
-	*/
+	   */
 
 	if (_processed) {
 		return 0;
@@ -463,58 +463,58 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 	/* This lock is held until the end of AudioDiskstream::commit, so these two functions
 	   must always be called as a pair. The only exception is if this function
 	   returns a non-zero value, in which case, ::commit should not be called.
-	*/
+	   */
 
 	// If we can't take the state lock return.
 	if (!state_lock.trylock()) {
 		return 1;
 	}
-	
+
 	adjust_capture_position = 0;
 
 	if (nominally_recording || (_session.get_record_enabled() && _session.get_punch_in())) {
 		OverlapType ot;
-		
+
 		ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 
 		switch (ot) {
-		case OverlapNone:
-			rec_nframes = 0;
-			break;
-			
-		case OverlapInternal:
-		/*     ----------    recrange
-                         |---|       transrange
-		*/
-			rec_nframes = nframes;
-			rec_offset = 0;
-			break;
-			
-		case OverlapStart:
-			/*    |--------|    recrange
-                            -----|          transrange
-			*/
-			rec_nframes = transport_frame + nframes - first_recordable_frame;
-			if (rec_nframes) {
+			case OverlapNone:
+				rec_nframes = 0;
+				break;
+
+			case OverlapInternal:
+				/*     ----------    recrange
+					   |---|       transrange
+					   */
+				rec_nframes = nframes;
+				rec_offset = 0;
+				break;
+
+			case OverlapStart:
+				/*    |--------|    recrange
+					  -----|          transrange
+					  */
+				rec_nframes = transport_frame + nframes - first_recordable_frame;
+				if (rec_nframes) {
+					rec_offset = first_recordable_frame - transport_frame;
+				}
+				break;
+
+			case OverlapEnd:
+				/*    |--------|    recrange
+					  |--------  transrange
+					  */
+				rec_nframes = last_recordable_frame - transport_frame;
+				rec_offset = 0;
+				break;
+
+			case OverlapExternal:
+				/*    |--------|    recrange
+					  --------------  transrange
+					  */
+				rec_nframes = last_recordable_frame - last_recordable_frame;
 				rec_offset = first_recordable_frame - transport_frame;
-			}
-			break;
-			
-		case OverlapEnd:
-			/*    |--------|    recrange
-                                 |--------  transrange
-			*/
-			rec_nframes = last_recordable_frame - transport_frame;
-			rec_offset = 0;
-			break;
-			
-		case OverlapExternal:
-			/*    |--------|    recrange
-                            --------------  transrange
-			*/
-			rec_nframes = last_recordable_frame - last_recordable_frame;
-			rec_offset = first_recordable_frame - transport_frame;
-			break;
+				break;
 		}
 
 		if (rec_nframes && !was_recording) {
@@ -529,64 +529,20 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 	}
 
 	if (nominally_recording || rec_nframes) {
-		_capture_buf->get_write_vector (&_capture_vector);
 
-		if (rec_nframes <= _capture_vector.len[0]) {
+		assert(_source_port);
 
-			_current_capture_buffer = _capture_vector.buf[0];
+		// Pump entire port buffer into the ring buffer (FIXME!)
+		_capture_buf->write(_source_port->get_midi_buffer(), transport_frame);
 
-			/* note: grab the entire port buffer, but only copy what we were supposed to for recording, and use
-			   rec_offset
-			   */
+		/*
+		   for (size_t i=0; i < _source_port->size(); ++i) {
+		   cerr << "DISKSTREAM GOT EVENT(1) " << i << "!!\n";
+		   }
 
-			// FIXME: midi buffer size?
-
-			// FIXME: reading from a MIDI port is different, can't just memcpy
-			//memcpy (_current_capture_buffer, _io->input(0)->get_buffer (rec_nframes) + offset + rec_offset, sizeof (RawMidi) * rec_nframes);
-			assert(_source_port);
-			
-			/*for (size_t i=0; i < _source_port->size(); ++i) {
-				cerr << "DISKSTREAM GOT EVENT(1) " << i << "!!\n";
-			}
-
-			if (_source_port->size() == 0)
-				cerr << "No events :/ (1)\n";
-			*/
-
-
-		} else {
-
-			jack_nframes_t total = _capture_vector.len[0] + _capture_vector.len[1];
-
-			if (rec_nframes > total) {
-				cerr << "DiskOverrun\n";
-				//DiskOverrun (); // FIXME
-				goto out;
-			}
-
-			// FIXME (see above)
-			//RawMidi* buf = _io->input (0)->get_buffer (nframes) + offset;
-			assert(_source_port);
-
-			/*
-			for (size_t i=0; i < _source_port->size(); ++i) {
-				cerr << "DISKSTREAM GOT EVENT(2) " << i << "!!\n";
-			}
-			if (_source_port->size() == 0)
-				cerr << "No events :/ (2)\n";
-			*/
-
-			RawMidi* buf = NULL; // FIXME FIXME FIXME (make it compile)
-			assert(false);
-			jack_nframes_t first = _capture_vector.len[0];
-
-			memcpy (_capture_wrap_buffer, buf, sizeof (RawMidi) * first);
-			memcpy (_capture_vector.buf[0], buf, sizeof (RawMidi) * first);
-			memcpy (_capture_wrap_buffer+first, buf + first, sizeof (RawMidi) * (rec_nframes - first));
-			memcpy (_capture_vector.buf[1], buf + first, sizeof (RawMidi) * (rec_nframes - first));
-
-			_current_capture_buffer = _capture_wrap_buffer;
-		}
+		   if (_source_port->size() == 0)
+		   cerr << "No events :/ (1)\n";
+		   */
 	} else {
 
 		if (was_recording) {
@@ -594,30 +550,11 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 		}
 
 	}
-	
+
 	if (rec_nframes) {
-		
-		// FIXME: filthy hack to fool the GUI into thinking we're doing something
-		//if (_write_source)
-		//	_write_source->ViewDataRangeReady (transport_frame, rec_nframes); /* EMIT SIGNAL */
 
+		/* XXX XXX XXX XXX XXX XXX XXX XXX */
 		/* data will be written to disk */
-
-		if (rec_nframes == nframes && rec_offset == 0) {
-
-			_current_playback_buffer = _current_capture_buffer;
-			playback_distance = nframes;
-
-		} else {
-
-
-			/* we can't use the capture buffer as the playback buffer, because
-			   we recorded only a part of the current process' cycle data
-			   for capture.
-			*/
-
-			collect_playback = true;
-		}
 
 		adjust_capture_position = rec_nframes;
 
@@ -625,7 +562,7 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 
 		/* can't do actual capture yet - waiting for latency effects to finish before we start*/
 
-		_current_playback_buffer = _current_capture_buffer;
+		throw; // forget all that jazz!
 
 		playback_distance = nframes;
 
@@ -647,84 +584,22 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 		} else {
 			necessary_samples = nframes;
 		}
-		
-		_playback_buf->get_read_vector (&_playback_vector);
-		
-		if (necessary_samples <= _playback_vector.len[0]) {
 
-			_current_playback_buffer = _playback_vector.buf[0];
-
-		} else {
-			jack_nframes_t total = _playback_vector.len[0] + _playback_vector.len[1];
-			
-			if (necessary_samples > total) {
-				//cerr << "DiskUnderrun\n";
-				//DiskUnderrun (); // FIXME
-				//goto out;
-				
-			} else {
-				
-				memcpy (_playback_wrap_buffer, _playback_vector.buf[0],
-					_playback_vector.len[0] * sizeof (RawMidi));
-				memcpy (_playback_wrap_buffer + _playback_vector.len[0], _playback_vector.buf[1], 
-					(necessary_samples - _playback_vector.len[0]) * sizeof (RawMidi));
-				
-				_current_playback_buffer = _playback_wrap_buffer;
-			}
-		}
-
-#if 0
-		if (rec_nframes == 0 && _actual_speed != 1.0f && _actual_speed != -1.0f) {
-			
-			uint64_t phase = last_phase;
-			jack_nframes_t i = 0;
-
-			// Linearly interpolate into the alt buffer
-			// using 40.24 fixp maths (swh)
-
-			for (c = channels.begin(); c != channels.end(); ++c) {
-
-				float fr;
-				ChannelInfo& chan (*c);
-
-				i = 0;
-				phase = last_phase;
-
-				for (jack_nframes_t outsample = 0; outsample < nframes; ++outsample) {
-					i = phase >> 24;
-					fr = (phase & 0xFFFFFF) / 16777216.0f;
-					chan.speed_buffer[outsample] = 
-						chan._current_playback_buffer[i] * (1.0f - fr) +
-						chan._current_playback_buffer[i+1] * fr;
-					phase += phi;
-				}
-				
-				chan._current_playback_buffer = chan.speed_buffer;
-			}
-
-			playback_distance = i + 1;
-			last_phase = (phase & 0xFFFFFF);
-
-		} else {
-			playback_distance = nframes;
-		}
-#endif
-
-		playback_distance = nframes;
+		// XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
+		// Write into playback buffer here, and whatnot
 
 	}
 
 	ret = 0;
 
-  out:
 	_processed = true;
 
 	if (ret) {
 
 		/* we're exiting with failure, so ::commit will not
 		   be called. unlock the state lock.
-		*/
-		
+		   */
+
 		state_lock.unlock();
 	} 
 
@@ -746,24 +621,27 @@ MidiDiskstream::commit (jack_nframes_t nframes)
 		playback_sample += playback_distance;
 	}
 
-		_playback_buf->increment_read_ptr (playback_distance);
-		
-		if (adjust_capture_position) {
-			_capture_buf->increment_write_ptr (adjust_capture_position);
-		}
-	
+	/* XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX */
+
+	/*
+	_playback_buf->increment_read_ptr (playback_distance);
+
+	if (adjust_capture_position) {
+		_capture_buf->increment_write_ptr (adjust_capture_position);
+	}
+
 	if (adjust_capture_position != 0) {
 		capture_captured += adjust_capture_position;
 		adjust_capture_position = 0;
 	}
-	
+
 	if (_slaved) {
 		need_butler = _playback_buf->write_space() >= _playback_buf->bufsize() / 2;
 	} else {
 		need_butler = _playback_buf->write_space() >= disk_io_chunk_frames
 			|| _capture_buf->read_space() >= disk_io_chunk_frames;
 	}
-
+	*/
 	state_lock.unlock();
 
 	_processed = false;
@@ -792,24 +670,126 @@ int
 MidiDiskstream::seek (jack_nframes_t frame, bool complete_refill)
 {
 	Glib::Mutex::Lock lm (state_lock);
-	return 0;
+	int ret = -1;
+
+	_playback_buf->reset();
+	_capture_buf->reset();
+
+	playback_sample = frame;
+	file_frame = frame;
+
+	if (complete_refill) {
+		while ((ret = do_refill_with_alloc ()) > 0) ;
+	} else {
+		ret = do_refill_with_alloc ();
+	}
+
+	return ret;
 }
 
 int
 MidiDiskstream::can_internal_playback_seek (jack_nframes_t distance)
 {
-	return 0;
+	if (_playback_buf->read_space() < distance) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 int
 MidiDiskstream::internal_playback_seek (jack_nframes_t distance)
 {
+	first_recordable_frame += distance;
+	playback_sample += distance;
+
 	return 0;
 }
 
+/** @a start is set to the new frame position (TIME) read up to */
 int
-MidiDiskstream::read (MidiBuffer& dst, jack_nframes_t& start, jack_nframes_t cnt, bool reversed)
-{
+MidiDiskstream::read (jack_nframes_t& start, jack_nframes_t dur, bool reversed)
+{	
+	jack_nframes_t this_read = 0;
+	bool reloop = false;
+	jack_nframes_t loop_end = 0;
+	jack_nframes_t loop_start = 0;
+	jack_nframes_t loop_length = 0;
+	Location *loc = 0;
+
+	if (!reversed) {
+		/* Make the use of a Location atomic for this read operation.
+		   
+		   Note: Locations don't get deleted, so all we care about
+		   when I say "atomic" is that we are always pointing to
+		   the same one and using a start/length values obtained
+		   just once.
+		*/
+		
+		if ((loc = loop_location) != 0) {
+			loop_start = loc->start();
+			loop_end = loc->end();
+			loop_length = loop_end - loop_start;
+		}
+		
+		/* if we are looping, ensure that the first frame we read is at the correct
+		   position within the loop.
+		*/
+		
+		if (loc && start >= loop_end) {
+			//cerr << "start adjusted from " << start;
+			start = loop_start + ((start - loop_start) % loop_length);
+			//cerr << "to " << start << endl;
+		}
+		//cerr << "start is " << start << "  loopstart: " << loop_start << "  loopend: " << loop_end << endl;
+	}
+
+	while (dur) {
+
+		/* take any loop into account. we can't read past the end of the loop. */
+
+		if (loc && (loop_end - start < dur)) {
+			this_read = loop_end - start;
+			//cerr << "reloop true: thisread: " << this_read << "  dur: " << dur << endl;
+			reloop = true;
+		} else {
+			reloop = false;
+			this_read = dur;
+		}
+
+		if (this_read == 0) {
+			break;
+		}
+
+		this_read = min(dur,this_read);
+
+		if (midi_playlist()->read (*_playback_buf, start, this_read) != this_read) {
+			error << string_compose(_("MidiDiskstream %1: cannot read %2 from playlist at frame %3"), _id, this_read, 
+					 start) << endmsg;
+			return -1;
+		}
+
+		_read_data_count = _playlist->read_data_count();
+		
+		if (reversed) {
+
+			cerr << "Reversed MIDI.. that's just crazy talk." << endl;
+			// Swap note ons with note offs here
+
+		} else {
+			
+			/* if we read to the end of the loop, go back to the beginning */
+			
+			if (reloop) {
+				start = loop_start;
+			} else {
+				start += this_read;
+			}
+		} 
+
+		dur -= this_read;
+	}
+
 	return 0;
 }
 
@@ -822,8 +802,94 @@ MidiDiskstream::do_refill_with_alloc ()
 int
 MidiDiskstream::do_refill ()
 {
-	// yeah, the data's ready.  promise.
-	return 0;
+	int32_t        ret = 0;
+	size_t         write_space = _playback_buf->write_space();
+
+	bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
+
+	if (write_space == 0) {
+		return 0;
+	}
+
+	/* if there are 2+ chunks of disk i/o possible for
+	   this track, let the caller know so that it can arrange
+	   for us to be called again, ASAP.
+	   */
+
+	// FIXME: using disk_io_chunk_frames as an event count, not good
+	if (_playback_buf->write_space() >= (_slaved?3:2) * disk_io_chunk_frames) {
+		ret = 1;
+	}
+
+	/* if we're running close to normal speed and there isn't enough 
+	   space to do disk_io_chunk_frames of I/O, then don't bother.  
+
+	   at higher speeds, just do it because the sync between butler
+	   and audio thread may not be good enough.
+	   */
+
+	if ((write_space < disk_io_chunk_frames) && fabs (_actual_speed) < 2.0f) {
+		cerr << "No refill 1\n";
+		return 0;
+	}
+
+	/* when slaved, don't try to get too close to the read pointer. this
+	   leaves space for the buffer reversal to have something useful to
+	   work with.
+	   */
+
+	if (_slaved && write_space < (_playback_buf->capacity() / 2)) {
+		cerr << "No refill 2\n";
+		return 0;
+	}
+
+	if (reversed) {
+		cerr << "No refill 3 (reverse)\n";
+		return 0;
+	}
+
+	if (file_frame == max_frames) {
+		cerr << "No refill 4 (EOF)\n";
+
+		/* at end: nothing to do */
+
+		return 0;
+	}
+
+#if 0
+	// or this
+	if (file_frame > max_frames - total_space) {
+
+		/* to close to the end: read what we can, and zero fill the rest */
+
+		zero_fill = total_space - (max_frames - file_frame);
+		total_space = max_frames - file_frame;
+
+	} else {
+		zero_fill = 0;
+	}
+#endif
+
+	// At this point we:
+	assert(_playback_buf->write_space() > 0); // ... have something to write to, and
+	assert(file_frame <= max_frames); // ... something to write
+
+	// So (read it, then) write it:
+	
+	jack_nframes_t file_frame_tmp = file_frame;
+	jack_nframes_t to_read = min(disk_io_chunk_frames, (max_frames - file_frame));
+	
+	// FIXME: read count?
+	if (read (file_frame_tmp, to_read, reversed)) {
+		ret = -1;
+		goto out;
+	}
+
+	file_frame = file_frame_tmp;
+
+out:
+
+	return ret;
 }
 
 /** Flush pending data to disk.
@@ -1338,14 +1404,14 @@ float
 MidiDiskstream::playback_buffer_load () const
 {
 	return (float) ((double) _playback_buf->read_space()/
-			(double) _playback_buf->bufsize());
+			(double) _playback_buf->capacity());
 }
 
 float
 MidiDiskstream::capture_buffer_load () const
 {
 	return (float) ((double) _capture_buf->write_space()/
-			(double) _capture_buf->bufsize());
+			(double) _capture_buf->capacity());
 }
 
 
@@ -1353,4 +1419,49 @@ int
 MidiDiskstream::use_pending_capture_data (XMLNode& node)
 {
 	return 0;
+}
+
+/** Writes playback events in the given range to dst, translating time stamps
+ * so that an event at start has time = 0
+ */
+void
+MidiDiskstream::get_playback(MidiBuffer& dst, jack_nframes_t start, jack_nframes_t end)
+{
+	assert(end > start);
+	dst.clear();
+	assert(dst.size() == 0);
+/*
+	cerr << "MIDI Diskstream pretending to read" << endl;
+
+	MidiEvent ev;
+	RawMidi data[4];
+
+	const char note = rand()%30 + 30;
+	
+	ev.buffer = data;
+	ev.time = 0;
+	ev.size = 3;
+
+	data[0] = 0x90;
+	data[1] = note;
+	data[2] = 120;
+
+	dst.push_back(ev);
+	
+	ev.buffer = data;
+	ev.time = (end - start) / 2;
+	ev.size = 3;
+
+	data[0] = 0x80;
+	data[1] = note;
+	data[2] = 64;
+*/
+	_playback_buf->read(dst, start, end);
+
+	// Translate time stamps to be relative to the start of this cycle
+	for (size_t i=0; i < dst.size(); ++i) {
+		assert(dst[i].time >= start);
+		assert(dst[i].time <= end);
+		dst[i].time -= start;
+	}
 }

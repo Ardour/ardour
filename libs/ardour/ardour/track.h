@@ -95,9 +95,6 @@ class Track : public Route
 
 	virtual XMLNode& state (bool full) = 0;
 
-	virtual void passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter) = 0;
-
 	virtual ChanCount n_process_buffers () = 0;
 	
 	Diskstream *_diskstream;

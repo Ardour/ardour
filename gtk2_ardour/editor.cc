@@ -239,8 +239,8 @@ Editor::Editor (AudioEngine& eng)
 	selection->PointsChanged.connect (mem_fun(*this, &Editor::point_selection_changed));
 
 	clicked_regionview = 0;
-	clicked_trackview = 0;
-	clicked_audio_trackview = 0;
+	clicked_axisview = 0;
+	clicked_routeview = 0;
 	clicked_crossfadeview = 0;
 	clicked_control_point = 0;
 	latest_regionview = 0;
@@ -1474,7 +1474,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		break;
 
 	case StreamItem:
-		if (clicked_audio_trackview->get_diskstream()) {
+		if (clicked_routeview->is_track()) {
 			build_menu_function = &Editor::build_track_context_menu;
 		} else {
 			build_menu_function = &Editor::build_track_bus_context_menu;
@@ -1530,7 +1530,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		return;
 	}
 
-	if (clicked_audio_trackview && clicked_audio_trackview->audio_track()) {
+	if (clicked_routeview && clicked_routeview->audio_track()) {
 
 		/* Bounce to disk */
 		
@@ -1539,7 +1539,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		
 		edit_items.push_back (SeparatorElem());
 
-		switch (clicked_audio_trackview->audio_track()->freeze_state()) {
+		switch (clicked_routeview->audio_track()->freeze_state()) {
 		case AudioTrack::NoFreeze:
 			edit_items.push_back (MenuElem (_("Freeze"), mem_fun(*this, &Editor::freeze_route)));
 			break;
@@ -1589,7 +1589,7 @@ Editor::build_track_region_context_menu (jack_nframes_t frame)
 	MenuList& edit_items  = track_region_context_menu.items();
 	edit_items.clear();
 
-	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
+	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_axisview);
 
 	if (atv) {
 		Diskstream* ds;
@@ -1616,7 +1616,7 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 	MenuList& edit_items  = track_crossfade_context_menu.items();
 	edit_items.clear ();
 
-	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
+	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_axisview);
 
 	if (atv) {
 		Diskstream* ds;
@@ -2897,29 +2897,29 @@ Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool
 {
 	bool commit = false;
 
-	if (!clicked_trackview) {
+	if (!clicked_axisview) {
 		return false;
 	}
 
 	switch (op) {
 	case Selection::Toggle:
-		if (selection->selected (clicked_trackview)) {
+		if (selection->selected (clicked_axisview)) {
 			if (!no_remove) {
-				selection->remove (clicked_trackview);
+				selection->remove (clicked_axisview);
 				commit = true;
 			}
 		} else {
-			selection->add (clicked_trackview);
+			selection->add (clicked_axisview);
 			commit = false;
 		}
 		break;
 
 	case Selection::Set:
-		if (selection->selected (clicked_trackview) && selection->tracks.size() == 1) {
+		if (selection->selected (clicked_axisview) && selection->tracks.size() == 1) {
 			/* no commit necessary */
 		} 
 
-		selection->set (clicked_trackview);
+		selection->set (clicked_axisview);
 		break;
 		
 	case Selection::Extend:
@@ -2951,13 +2951,13 @@ Editor::set_selected_control_point_from_click (bool press, Selection::Operation 
 }
 
 void
-Editor::get_relevant_audio_tracks (AudioTimeAxisView& base, set<AudioTimeAxisView*>& relevant_tracks)
+Editor::get_relevant_tracks (RouteTimeAxisView& base, set<RouteTimeAxisView*>& relevant_tracks)
 {
 	/* step one: get all selected tracks and all tracks in the relevant edit groups */
 
 	for (TrackSelection::iterator ti = selection->tracks.begin(); ti != selection->tracks.end(); ++ti) {
 
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*ti);
+		RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(*ti);
 
 		if (!atv) {
 			continue;
@@ -2971,9 +2971,9 @@ Editor::get_relevant_audio_tracks (AudioTimeAxisView& base, set<AudioTimeAxisVie
 
 			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 				
-				AudioTimeAxisView* tatv;
+				RouteTimeAxisView* tatv;
 				
-				if ((tatv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
+				if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					
 					if (tatv->route()->edit_group() == group) {
 						relevant_tracks.insert (tatv);
@@ -2992,19 +2992,19 @@ Editor::get_relevant_audio_tracks (AudioTimeAxisView& base, set<AudioTimeAxisVie
 }
 
 void
-Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl)
+Editor::mapover_tracks (slot<void,RouteTimeAxisView&,uint32_t> sl)
 {
-	set<AudioTimeAxisView*> relevant_tracks;
+	set<RouteTimeAxisView*> relevant_tracks;
 
-	if (!clicked_audio_trackview) {
+	if (!clicked_routeview) {
 		return;
 	}
 
-	get_relevant_audio_tracks (*clicked_audio_trackview, relevant_tracks);
+	get_relevant_tracks (*clicked_routeview, relevant_tracks);
 
 	uint32_t sz = relevant_tracks.size();
 	
-	for (set<AudioTimeAxisView*>::iterator ati = relevant_tracks.begin(); ati != relevant_tracks.end(); ++ati) {
+	for (set<RouteTimeAxisView*>::iterator ati = relevant_tracks.begin(); ati != relevant_tracks.end(); ++ati) {
 		sl (**ati, sz);
 	}
 }
@@ -3046,13 +3046,13 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 	vector<RegionView*> all_equivalent_regions;
 	bool commit = false;
 
-	if (!clicked_regionview || !clicked_audio_trackview) {
+	if (!clicked_regionview || !clicked_routeview) {
 		return false;
 	}
 
 	if (op == Selection::Toggle || op == Selection::Set) {
 		
-		mapover_audio_tracks (bind (mem_fun (*this, &Editor::mapped_set_selected_regionview_from_click), 
+		mapover_tracks (bind (mem_fun (*this, &Editor::mapped_set_selected_regionview_from_click), 
 					    clicked_regionview, &all_equivalent_regions));
 		
 		
@@ -3198,11 +3198,11 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		      one that was clicked.
 		*/
 
-		set<AudioTimeAxisView*> relevant_tracks;
+		set<RouteTimeAxisView*> relevant_tracks;
 		
-		get_relevant_audio_tracks (*clicked_audio_trackview, relevant_tracks);
+		get_relevant_tracks (*clicked_routeview, relevant_tracks);
 		
-		for (set<AudioTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
+		for (set<RouteTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
 			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
 		}
 		
@@ -4100,7 +4100,7 @@ void
 Editor::new_playlists ()
 {
 	begin_reversible_command (_("new playlists"));
-	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_use_new_playlist));
+	mapover_tracks (mem_fun (*this, &Editor::mapped_use_new_playlist));
 	commit_reversible_command ();
 }
 
@@ -4108,7 +4108,7 @@ void
 Editor::copy_playlists ()
 {
 	begin_reversible_command (_("copy playlists"));
-	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_use_copy_playlist));
+	mapover_tracks (mem_fun (*this, &Editor::mapped_use_copy_playlist));
 	commit_reversible_command ();
 }
 
@@ -4116,24 +4116,24 @@ void
 Editor::clear_playlists ()
 {
 	begin_reversible_command (_("clear playlists"));
-	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_clear_playlist));
+	mapover_tracks (mem_fun (*this, &Editor::mapped_clear_playlist));
 	commit_reversible_command ();
 }
 
 void 
-Editor::mapped_use_new_playlist (AudioTimeAxisView& atv, uint32_t sz)
+Editor::mapped_use_new_playlist (RouteTimeAxisView& atv, uint32_t sz)
 {
 	atv.use_new_playlist (sz > 1 ? false : true);
 }
 
 void
-Editor::mapped_use_copy_playlist (AudioTimeAxisView& atv, uint32_t sz)
+Editor::mapped_use_copy_playlist (RouteTimeAxisView& atv, uint32_t sz)
 {
 	atv.use_copy_playlist (sz > 1 ? false : true);
 }
 
 void 
-Editor::mapped_clear_playlist (AudioTimeAxisView& atv, uint32_t sz)
+Editor::mapped_clear_playlist (RouteTimeAxisView& atv, uint32_t sz)
 {
 	atv.clear_playlist ();
 }

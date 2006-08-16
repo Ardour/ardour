@@ -410,23 +410,23 @@ class Editor : public PublicEditor
 	void clear_marker_display ();
 	void mouse_add_new_marker (jack_nframes_t where);
 
-	TimeAxisView*      clicked_trackview;
-	AudioTimeAxisView* clicked_audio_trackview;
+	TimeAxisView*      clicked_axisview;
+	RouteTimeAxisView* clicked_routeview;
 	RegionView*        clicked_regionview;
 	RegionView*        latest_regionview;
 	uint32_t           clicked_selection;
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
-	void get_relevant_audio_tracks (AudioTimeAxisView& base, std::set<AudioTimeAxisView*>& relevant_tracks);
-	void mapover_audio_tracks (sigc::slot<void,AudioTimeAxisView&,uint32_t> sl);
+	void get_relevant_tracks (RouteTimeAxisView& base, std::set<RouteTimeAxisView*>& relevant_tracks);
+	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl);
 
-	/* functions to be passed to mapover_audio_tracks(), possibly with sigc::bind()-supplied arguments */
+	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
 
 	void mapped_set_selected_regionview_from_click (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*);
-	void mapped_use_new_playlist (AudioTimeAxisView&, uint32_t);
-	void mapped_use_copy_playlist (AudioTimeAxisView&, uint32_t);
-	void mapped_clear_playlist (AudioTimeAxisView&, uint32_t);
+	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t);
+	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t);
+	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
 
 	/* end */
 

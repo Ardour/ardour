@@ -680,6 +680,12 @@ Route::passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nfra
 }
 
 void
+Route::passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter)
+{
+	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, offset, true, declick, meter);
+}
+
+void
 Route::set_solo (bool yn, void *src)
 {
 	if (_solo_safe) {

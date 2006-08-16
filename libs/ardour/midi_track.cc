@@ -32,6 +32,7 @@
 #include <ardour/midi_playlist.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>
+#include <ardour/buffer_set.h>
 
 #include "i18n.h"
 
@@ -354,23 +355,18 @@ MidiTrack::n_process_buffers ()
 	return max (_diskstream->n_channels(), redirect_max_outs);
 }
 
-void
-MidiTrack::passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter)
-{
-	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, offset, true, declick, meter);
-}
-
 int 
 MidiTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().get(DataType::MIDI) == 0) {
-		return 0;
+		//return 0;
+		throw; // FIXME
 	}
 
 	if (!_active) {
 		silence (nframes, offset);
-		return 0;
+		//return 0; // FIXME
 	}
 
 	if (session_state_changing) {
@@ -444,13 +440,9 @@ int
 MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, int declick,
 		  bool can_record, bool rec_monitors_input)
 {
-	//passthru (start_frame, end_frame, nframes, offset, declick, false);
 	int dret;
-	RawMidi* b; // FIXME: this won't work, duh
-	//Sample* tmpb;
-	jack_nframes_t transport_frame;
 	MidiDiskstream& diskstream = midi_diskstream();
-	
+
 	{
 		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
@@ -459,7 +451,7 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 			automation_snapshot (start_frame);
 		}
 	}
-	
+
 	if (n_outputs().get_total() == 0 && _redirects.empty()) {
 		return 0;
 	}
@@ -469,28 +461,27 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 		return 0;
 	}
 
-	transport_frame = _session.transport_frame();
+	jack_nframes_t transport_frame = _session.transport_frame();
 
 	if ((nframes = check_initial_delay (nframes, offset, transport_frame)) == 0) {
 		/* need to do this so that the diskstream sets its
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
-		*/
+		   */
 		return diskstream.process (transport_frame, 0, 0, can_record, rec_monitors_input);
 	} 
 
 	_silent = false;
-	//apply_gain_automation = false;
 
 	if ((dret = diskstream.process (transport_frame, nframes, offset, can_record, rec_monitors_input)) != 0) {
-		
+
 		silence (nframes, offset);
 
 		return dret;
 	}
 
 	/* special condition applies */
-	
+
 	if (_meter_point == MeterInput) {
 		just_meter_input (start_frame, end_frame, nframes, offset);
 	}
@@ -499,53 +490,30 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 
 		/* not actually recording, but we want to hear the input material anyway,
 		   at least potentially (depending on monitoring options)
-		 */
+		   */
 
 		passthru (start_frame, end_frame, nframes, offset, 0, true);
 
-	} else if ((b = diskstream.playback_buffer()) != 0) {
+	} else {
 		/*
-		  XXX is it true that the earlier test on n_outputs()
-		  means that we can avoid checking it again here? i think
-		  so, because changing the i/o configuration of an IO
-		  requires holding the AudioEngine lock, which we hold
-		  while in the process() tree.
-		*/
+		   XXX is it true that the earlier test on n_outputs()
+		   means that we can avoid checking it again here? i think
+		   so, because changing the i/o configuration of an IO
+		   requires holding the AudioEngine lock, which we hold
+		   while in the process() tree.
+		   */
 
-		
+
 		/* copy the diskstream data to all output buffers */
-		
+
 		//const size_t limit = n_process_buffers().get(DataType::AUDIO);
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
-		
-		//uint32_t n;
-		//uint32_t i;
-#if 0
-		for (i = 0, n = 1; i < limit; ++i, ++n) {
-			memcpy (bufs.get_audio(i).data(nframes), b, sizeof (Sample) * nframes); 
-			if (n < diskstream.n_channels().get(DataType::AUDIO)) {
-				tmpb = diskstream.playback_buffer(n);
-				if (tmpb!=0) {
-					b = tmpb;
-				}
-			}
-		}
 
-		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
+		diskstream.get_playback(bufs.get_midi(0), start_frame, end_frame);
 
-		if (!diskstream.record_enabled() && _session.transport_rolling()) {
-			Glib::Mutex::Lock am (automation_lock, Glib::TRY_LOCK);
-			
-			if (am.locked() && gain_automation_playback()) {
-				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
-			}
-		}
-#endif
-		process_output_buffers (bufs, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !_session.get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
-		
-	} else {
-		/* problem with the diskstream; just be quiet for a bit */
-		silence (nframes, offset);
+		process_output_buffers (bufs, start_frame, end_frame, nframes, offset,
+				(!_session.get_record_enabled() || !_session.get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+	
 	}
 
 	return 0;
@@ -584,7 +552,6 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 	// Main output stage is the only stage we've got.
 	// I think it's a pretty good stage though, wouldn't you say?
 	
-
 	if (muted()) {
 
 		IO::silence(nframes, offset);

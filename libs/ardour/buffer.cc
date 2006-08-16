@@ -16,8 +16,11 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ardour/buffer.h>
+#include <algorithm>
 #include <iostream>
+using std::cerr; using std::endl;
+
+#include <ardour/buffer.h>
 
 namespace ARDOUR {
 
@@ -62,47 +65,95 @@ AudioBuffer::~AudioBuffer()
 // FIXME: mirroring for MIDI buffers?
 MidiBuffer::MidiBuffer(size_t capacity)
 	: Buffer(DataType::MIDI, capacity)
-	, _owns_data(true)
+//	, _owns_data(true)
+	, _events(NULL)
 	, _data(NULL)
 {
 	assert(capacity > 0);
 
-	_size = capacity; // For audio buffers, size = capacity (always)
+	_size = 0;
+
 #ifdef NO_POSIX_MEMALIGN
-	_data =  (RawMidi *) malloc(sizeof(RawMidi) * capacity);
+	_events =  (MidiEvent *) malloc(sizeof(MidiEvent) * capacity);
+	_data =  (RawMidi *) malloc(sizeof(RawMidi) * capacity * MAX_EVENT_SIZE);
 #else
-	posix_memalign((void**)&_data, 16, sizeof(RawMidi) * capacity);
+	posix_memalign((void**)&_events, 16, sizeof(MidiEvent) * capacity);
+	posix_memalign((void**)&_data, 16, sizeof(RawMidi) * capacity * MAX_EVENT_SIZE);
 #endif	
 	assert(_data);
-	memset(_data, 0, sizeof(RawMidi) * capacity);
+	assert(_events);
+	silence(_capacity);
 }
 
 MidiBuffer::~MidiBuffer()
 {
-	if (_owns_data)
-		free(_data);
+	free(_events);
+	free(_data);
 }
 
 
-/** Note that offset and nframes refer to sample time, not actual buffer locations */
+/** Read events from @a src starting at time @a offset into the START of this buffer, for
+ * time direction @a nframes.  Relative time, where 0 = start of buffer.
+ *
+ * Note that offset and nframes refer to sample time, NOT buffer offsets or event counts.
+ */
 void
 MidiBuffer::read_from(const Buffer& src, jack_nframes_t nframes, jack_nframes_t offset)
 {
-	// FIXME: offsets?  param semantics?
-	assert(src.type() == _type);
 	assert(src.type() == DataType::MIDI);
-	assert(offset == 0);
-	MidiBuffer& msrc = (MidiBuffer&)src;
-	_size = 0;
-	for (size_t i=0; i < msrc.size() && msrc.data()[i].time < nframes; ++i) {
-		assert(i < _capacity);
-		_data[i] = msrc.data()[i];
-		++_size;
-	}
-	assert(_size == msrc.size());
+	const MidiBuffer& msrc = (MidiBuffer&)src;
 
-	//if (_size > 0)
-	//	std::cerr << "MidiBuffer wrote " << _size << " events.\n";
+	assert(_capacity >= src.size());
+
+	clear();
+	assert(_size == 0);
+
+	// FIXME: This is embarrassingly slow.  branch branch branch
+	for (size_t i=0; i < src.size(); ++i) {
+		const MidiEvent& ev = msrc[i];
+		if (ev.time >= offset && ev.time < offset+nframes) {
+			push_back(ev);
+		}
+	}
+}
+
+
+/** Push an event into the buffer.
+ *
+ * Note that the raw MIDI pointed to by ev will be COPIED and unmodified.
+ * That is, the caller still owns it, if it needs freeing it's Not My Problem(TM).
+ * Realtime safe.
+ * @return false if operation failed (not enough room)
+ */
+bool
+MidiBuffer::push_back(const MidiEvent& ev)
+{
+	if (_size == _capacity)
+		return false;
+
+	RawMidi* const write_loc = _data + (_size * MAX_EVENT_SIZE);
+
+	memcpy(write_loc, ev.buffer, ev.size);
+	_events[_size] = ev;
+	_events[_size].buffer = write_loc;
+	++_size;
+
+	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
+
+	return true;
+}
+
+
+void
+MidiBuffer::silence(jack_nframes_t dur, jack_nframes_t offset)
+{
+	// FIXME use parameters
+	assert(offset == 0);
+	//assert(dur == _capacity);
+
+	memset(_events, 0, sizeof(MidiEvent) * _capacity);
+	memset(_data, 0, sizeof(RawMidi) * _capacity * MAX_EVENT_SIZE);
+	_size = 0;
 }
 
 

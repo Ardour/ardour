@@ -226,11 +226,11 @@ Editor::split_regions_at (jack_nframes_t where, RegionSelection& regions)
 void
 Editor::remove_clicked_region ()
 {
-	if (clicked_audio_trackview == 0 || clicked_regionview == 0) {
+	if (clicked_routeview == 0 || clicked_regionview == 0) {
 		return;
 	}
 
-	Playlist* playlist = clicked_audio_trackview->playlist();
+	Playlist* playlist = clicked_routeview->playlist();
 	
 	begin_reversible_command (_("remove region"));
         XMLNode &before = playlist->get_state();
@@ -585,10 +585,10 @@ Editor::build_region_boundary_cache ()
 				break;
 			}
 
-		} else if (clicked_trackview) {
+		} else if (clicked_axisview) {
 
 			TrackViewList t;
-			t.push_back (clicked_trackview);
+			t.push_back (clicked_axisview);
 
 			if ((r = find_next_region (pos, point, 1, t, &ontrack)) == 0) {
 				break;
@@ -725,10 +725,10 @@ Editor::cursor_to_region_point (Cursor* cursor, RegionPoint point, int32_t dir)
 		
 		r = find_next_region (pos, point, dir, selection->tracks, &ontrack);
 		
-	} else if (clicked_trackview) {
+	} else if (clicked_axisview) {
 		
 		TrackViewList t;
-		t.push_back (clicked_trackview);
+		t.push_back (clicked_axisview);
 		
 		r = find_next_region (pos, point, dir, t, &ontrack);
 		
@@ -1287,7 +1287,7 @@ Editor::add_location_from_selection ()
 		return;
 	}
 
-	if (session == 0 || clicked_trackview == 0) {
+	if (session == 0 || clicked_axisview == 0) {
 		return;
 	}
 
@@ -1342,11 +1342,11 @@ Editor::select_all_in_track (Selection::Operation op)
 {
 	list<Selectable *> touched;
 
-	if (!clicked_trackview) {
+	if (!clicked_axisview) {
 		return;
 	}
 	
-	clicked_trackview->get_selectables (0, max_frames, 0, DBL_MAX, touched);
+	clicked_axisview->get_selectables (0, max_frames, 0, DBL_MAX, touched);
 
 	switch (op) {
 	case Selection::Toggle:
@@ -1392,11 +1392,11 @@ Editor::invert_selection_in_track ()
 {
 	list<Selectable *> touched;
 
-	if (!clicked_trackview) {
+	if (!clicked_axisview) {
 		return;
 	}
 	
-	clicked_trackview->get_inverted_selectables (*selection, touched);
+	clicked_axisview->get_inverted_selectables (*selection, touched);
 	selection->set (touched);
 }
 
@@ -1845,8 +1845,8 @@ Editor::insert_region_list_selection (float times)
 	RouteTimeAxisView *tv = 0;
 	Playlist *playlist;
 
-	if (clicked_audio_trackview != 0) {
-		tv = clicked_audio_trackview;
+	if (clicked_routeview != 0) {
+		tv = clicked_routeview;
 	} else if (!selection->tracks.empty()) {
 		if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
 			return;
@@ -2171,7 +2171,7 @@ Editor::interthread_cancel_clicked ()
 void
 Editor::region_from_selection ()
 {
-	if (clicked_trackview == 0) {
+	if (clicked_axisview == 0) {
 		return;
 	}
 
@@ -2383,9 +2383,9 @@ Editor::crop_region_to_selection ()
 	vector<Playlist*> playlists;
 	Playlist *playlist;
 
-	if (clicked_trackview != 0) {
+	if (clicked_axisview != 0) {
 
-		if ((playlist = clicked_trackview->playlist()) == 0) {
+		if ((playlist = clicked_axisview->playlist()) == 0) {
 			return;
 		}
 
@@ -2486,7 +2486,7 @@ Editor::region_fill_track ()
 void
 Editor::region_fill_selection ()
 {
- 	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_audio_track()) {
+ 	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
 		return;
 	}
 
@@ -2738,7 +2738,7 @@ Editor::trim_region_to_edit_cursor ()
 	float speed = 1.0f;
 	AudioTimeAxisView *atav;
 
-	if ( clicked_trackview != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(clicked_trackview)) != 0 ) {
+	if ( clicked_axisview != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(clicked_axisview)) != 0 ) {
 		if (atav->get_diskstream() != 0) {
 			speed = atav->get_diskstream()->speed();
 		}
@@ -2764,7 +2764,7 @@ Editor::trim_region_from_edit_cursor ()
 	float speed = 1.0f;
 	AudioTimeAxisView *atav;
 
-	if ( clicked_trackview != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(clicked_trackview)) != 0 ) {
+	if ( clicked_axisview != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(clicked_axisview)) != 0 ) {
 		if (atav->get_diskstream() != 0) {
 			speed = atav->get_diskstream()->speed();
 		}
@@ -2781,11 +2781,11 @@ Editor::trim_region_from_edit_cursor ()
 void
 Editor::unfreeze_route ()
 {
-	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_track()) {
+	if (clicked_routeview == 0 || !clicked_routeview->is_track()) {
 		return;
 	}
 	
-	clicked_audio_trackview->track()->unfreeze ();
+	clicked_routeview->track()->unfreeze ();
 }
 
 void*
@@ -2798,7 +2798,7 @@ Editor::_freeze_thread (void* arg)
 void*
 Editor::freeze_thread ()
 {
-	clicked_audio_trackview->audio_track()->freeze (*current_interthread_info);
+	clicked_routeview->audio_track()->freeze (*current_interthread_info);
 	return 0;
 }
 
@@ -2812,7 +2812,7 @@ Editor::freeze_progress_timeout (void *arg)
 void
 Editor::freeze_route ()
 {
-	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_track()) {
+	if (clicked_routeview == 0 || !clicked_routeview->is_track()) {
 		return;
 	}
 	

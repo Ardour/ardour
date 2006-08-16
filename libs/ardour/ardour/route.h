@@ -309,10 +309,13 @@ class Route : public IO
 				     bool meter);
 
   protected:
-	/* for derived classes */
 
 	virtual XMLNode& state(bool);
 
+	void passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame,
+	                       jack_nframes_t nframes, jack_nframes_t offset, int declick,
+	                       bool meter);
+	
 	void silence (jack_nframes_t nframes, jack_nframes_t offset);
 	sigc::connection input_signal_connection;
 

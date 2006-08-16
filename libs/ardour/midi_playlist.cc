@@ -30,6 +30,7 @@
 #include <ardour/midi_playlist.h>
 #include <ardour/midi_region.h>
 #include <ardour/session.h>
+#include <ardour/midi_ring_buffer.h>
 
 #include <pbd/error.h>
 
@@ -118,8 +119,8 @@ MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, string name, bool hidden)
 	}
 }
 
-MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, jack_nframes_t start, jack_nframes_t cnt, string name, bool hidden)
-		: Playlist (other, start, cnt, name, hidden)
+MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, jack_nframes_t start, jack_nframes_t dur, string name, bool hidden)
+		: Playlist (other, start, dur, name, hidden)
 {
 	save_state (_("initial state"));
 
@@ -168,10 +169,10 @@ struct RegionSortByLayer
 	}
 };
 
-/** FIXME: semantics of return value? */
+/** Returns the number of frames in time duration read (eg could be large when 0 events are read) */
 jack_nframes_t
-MidiPlaylist::read (MidiBuffer& buf, jack_nframes_t start,
-                     jack_nframes_t cnt, unsigned chan_n)
+MidiPlaylist::read (MidiRingBuffer& dst, jack_nframes_t start,
+                     jack_nframes_t dur, unsigned chan_n)
 {
 	/* this function is never called from a realtime thread, so
 	   its OK to block (for short intervals).
@@ -180,11 +181,11 @@ MidiPlaylist::read (MidiBuffer& buf, jack_nframes_t start,
 	Glib::Mutex::Lock rm (region_lock);
 
 	jack_nframes_t ret         = 0;
-	jack_nframes_t end         =  start + cnt - 1;
-	jack_nframes_t read_frames = 0;
-	jack_nframes_t skip_frames = 0;
+	jack_nframes_t end         = start + dur - 1;
+	//jack_nframes_t read_frames = 0;
+	//jack_nframes_t skip_frames = 0;
 
-	_read_data_count = 0;
+	//_read_data_count = 0;
 
 	vector<MidiRegion*> regs; // relevent regions overlapping start <--> end
 
@@ -199,13 +200,15 @@ MidiPlaylist::read (MidiBuffer& buf, jack_nframes_t start,
 	sort(regs.begin(), regs.end(), layer_cmp);
 
 	for (vector<MidiRegion*>::iterator i = regs.begin(); i != regs.end(); ++i) {
-			(*i)->read_at (buf, start, cnt, chan_n, read_frames, skip_frames);
-			ret += (*i)->read_data_count();
+		// FIXME: ensure time is monotonic here
+		(*i)->read_at (dst, start, dur, chan_n, 0, 0);// FIXME read_frames, skip_frames);
+		ret += (*i)->read_data_count();
 	}
 
 	_read_data_count += ret;
 	
-	return ret;
+	//return ret; FIXME?
+	return dur;
 }
 
 
@@ -386,8 +389,7 @@ MidiPlaylist::drop_all_states ()
 
 	/* delete every region that is left - these are all things that are part of our "history" */
 
-	for (set
-	        <Region *>::iterator ar = all_regions.begin(); ar != all_regions.end(); ++ar) {
+	for (set<Region *>::iterator ar = all_regions.begin(); ar != all_regions.end(); ++ar) {
 		(*ar)->unlock_sources ();
 		delete *ar;
 	}
@@ -587,6 +589,8 @@ MidiPlaylist::region_changed (Change what_changed, Region* region)
 		return false;
 	}
 
+	// Feeling rather uninterested today, but thanks for the heads up anyway!
+	
 	Change our_interests = Change (/*MidiRegion::FadeInChanged|
 	                               MidiRegion::FadeOutChanged|
 	                               MidiRegion::FadeInActiveChanged|

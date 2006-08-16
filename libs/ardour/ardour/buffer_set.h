@@ -28,6 +28,7 @@ namespace ARDOUR {
 
 class Buffer;
 class AudioBuffer;
+class MidiBuffer;
 class PortSet;
 
 
@@ -76,6 +77,11 @@ public:
 	AudioBuffer& get_audio(size_t i)
 	{
 		return (AudioBuffer&)get(DataType::AUDIO, i);
+	}
+	
+	MidiBuffer& get_midi(size_t i)
+	{
+		return (MidiBuffer&)get(DataType::MIDI, i);
 	}
 
 	void read_from(BufferSet& in, jack_nframes_t nframes, jack_nframes_t offset=0)

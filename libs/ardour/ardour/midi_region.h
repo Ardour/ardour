@@ -41,7 +41,7 @@ class Playlist;
 class Session;
 class MidiFilter;
 class MidiSource;
-class MidiBuffer;
+class MidiRingBuffer;
 
 class MidiRegion : public Region
 {
@@ -57,16 +57,16 @@ class MidiRegion : public Region
 
 	MidiSource& midi_source (uint32_t n=0) const;
 
-	jack_nframes_t read_at (MidiBuffer& out,
+	jack_nframes_t read_at (MidiRingBuffer& dst,
 			jack_nframes_t position,
-			jack_nframes_t cnt, 
+			jack_nframes_t dur, 
 			uint32_t       chan_n      = 0,
 			jack_nframes_t read_frames = 0,
 			jack_nframes_t skip_frames = 0) const;
 
-	jack_nframes_t master_read_at (MidiBuffer& buf,
+	jack_nframes_t master_read_at (MidiRingBuffer& dst,
 			jack_nframes_t position,
-			jack_nframes_t cnt,
+			jack_nframes_t dur,
 			uint32_t chan_n=0) const;
 
 	XMLNode& state (bool);
@@ -83,9 +83,9 @@ class MidiRegion : public Region
 	StateManager::State* state_factory (std::string why) const;
 	Change restore_state (StateManager::State&);
 
-	jack_nframes_t _read_at (const SourceList&, MidiBuffer& buf,
+	jack_nframes_t _read_at (const SourceList&, MidiRingBuffer& dst,
 		jack_nframes_t position,
-		jack_nframes_t cnt, 
+		jack_nframes_t dur, 
 		uint32_t chan_n = 0,
 		jack_nframes_t read_frames = 0,
 		jack_nframes_t skip_frames = 0) const;
