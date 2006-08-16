@@ -189,12 +189,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void add_route ();
 	
-	void session_add_audio_track (int input_channels, int32_t output_channels, ARDOUR::TrackMode mode) {
-		session_add_audio_route (true, input_channels, output_channels, mode);
+	void session_add_audio_track (int input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many) {
+		session_add_audio_route (true, input_channels, output_channels, mode, how_many);
 	}
 
 	void session_add_audio_bus (int input_channels, int32_t output_channels) {
-		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal);
+		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, 1);
 	}
 
 	void session_add_midi_track ();
@@ -532,7 +532,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void save_template ();
 
-	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode);
+	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many);
 
 	void set_transport_sensitivity (bool);
 

@@ -742,6 +742,52 @@ AudioEngine::n_physical_inputs () const
 	return i;
 }
 
+void
+AudioEngine::get_physical_inputs (vector<string>& ins)
+{
+	const char ** ports;
+	uint32_t i = 0;
+	
+	if (!_jack) {
+		return;
+	}
+	
+	if ((ports = jack_get_ports (_jack, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == 0) {
+		return;
+	}
+
+	if (ports) {
+		for (i = 0; ports[i]; ++i) {
+			ins.push_back (ports[i]);
+		}
+		cerr << "got " << ins.size() << " physical ins\n";
+		free (ports);
+	}
+}
+
+void
+AudioEngine::get_physical_outputs (vector<string>& outs)
+{
+	const char ** ports;
+	uint32_t i = 0;
+	
+	if (!_jack) {
+		return;
+	}
+	
+	if ((ports = jack_get_ports (_jack, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == 0) {
+		return;
+	}
+
+	if (ports) {
+		for (i = 0; ports[i]; ++i) {
+			outs.push_back (ports[i]);
+		}
+		cerr << "got " << outs.size() << " physical outs\n";
+		free (ports);
+	}
+}
+
 string
 AudioEngine::get_nth_physical (uint32_t n, int flag)
 {

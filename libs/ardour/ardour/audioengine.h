@@ -121,6 +121,9 @@ class AudioEngine : public sigc::trackable
 	uint32_t n_physical_outputs () const;
 	uint32_t n_physical_inputs () const;
 
+	void get_physical_outputs (std::vector<std::string>&);
+	void get_physical_inputs (std::vector<std::string>&);
+
 	std::string get_nth_physical_output (uint32_t n) {
 		return get_nth_physical (n, JackPortIsInput);
 	}

@@ -111,8 +111,6 @@ Route::init ()
 
 Route::~Route ()
 {
-	cerr << "deleting route " << _name << endl;
-
 	clear_redirects (this);
 
 	if (_control_outs) {
