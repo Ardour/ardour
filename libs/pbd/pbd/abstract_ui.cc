@@ -4,6 +4,10 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/failed_constructor.h>
 
+#include "i18n.h"
+
+using namespace std;
+
 template <typename RequestObject>
 AbstractUI<RequestObject>::AbstractUI (string name, bool with_signal_pipes)
 	: BaseUI (name, with_signal_pipes)
@@ -44,7 +48,7 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 	if (rbuf == 0) {
 		/* Cannot happen, but if it does we can't use the error reporting mechanism */
 		cerr << _("programming error: ")
-		     << string_compose (X_("no %1-UI request buffer found for thread %2"), name(), pthread_name())
+		     << string_compose ("no %1-UI request buffer found for thread %2", name(), pthread_name())
 		     << endl;
 		abort ();
 	}
@@ -55,7 +59,7 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 
 	if (vec.len[0] == 0) {
 		if (vec.len[1] == 0) {
-			cerr << string_compose (X_("no space in %1-UI request buffer for thread %2"), name(), pthread_name())
+			cerr << string_compose ("no space in %1-UI request buffer for thread %2", name(), pthread_name())
 			     << endl;
 			return 0;
 		} else {
@@ -131,7 +135,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 			   thread isn't registered!
 			*/
 			cerr << _("programming error: ")
-			     << string_compose (X_("AbstractUI::send_request() called from %1, but no request buffer exists for that thread"), pthread_name())
+			     << string_compose ("AbstractUI::send_request() called from %1 (%2), but no request buffer exists for that thread", name(), pthread_name())
 			     << endl;
 			abort ();
 		}
