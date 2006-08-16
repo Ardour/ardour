@@ -545,7 +545,7 @@ void
 ARDOUR_UI::count_recenabled_diskstreams (Route& route)
 {
 	Track* track = dynamic_cast<Track*>(&route);
-	if (track && track->diskstream().record_enabled()) {
+	if (track && track->diskstream()->record_enabled()) {
 		rec_enabled_diskstreams++;
 	}
 }
@@ -918,11 +918,6 @@ restart JACK with more ports."));
 }
 
 void
-ARDOUR_UI::diskstream_added (Diskstream* ds)
-{
-}
-
-void
 ARDOUR_UI::do_transport_locate (jack_nframes_t new_position)
 {
 	jack_nframes_t _preroll;
@@ -1172,7 +1167,7 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 		Track* t;
 
 		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
-			t->diskstream().set_record_enabled (!t->diskstream().record_enabled());
+			t->diskstream()->set_record_enabled (!t->diskstream()->record_enabled());
 		}
 	}
 	if (session == 0) {

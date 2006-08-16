@@ -111,7 +111,8 @@ Route::init ()
 
 Route::~Route ()
 {
-	GoingAway (); /* EMIT SIGNAL */
+	cerr << "deleting route " << _name << endl;
+
 	clear_redirects (this);
 
 	if (_control_outs) {

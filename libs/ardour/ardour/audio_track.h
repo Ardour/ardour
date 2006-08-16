@@ -46,7 +46,7 @@ class AudioTrack : public Track
 	int silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		jack_nframes_t offset, bool can_record, bool rec_monitors_input);
 
-	AudioDiskstream& audio_diskstream() const;
+	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
 
 	int use_diskstream (string name);
 	int use_diskstream (const PBD::ID& id);
@@ -71,7 +71,7 @@ class AudioTrack : public Track
 	uint32_t n_process_buffers ();
 	
   private:
-	int  set_diskstream (AudioDiskstream&, void *);
+	int  set_diskstream (boost::shared_ptr<AudioDiskstream>, void *);
 	int  deprecated_use_diskstream_connections ();
 	void set_state_part_two ();
 	void set_state_part_three ();

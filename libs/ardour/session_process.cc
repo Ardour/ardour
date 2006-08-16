@@ -66,7 +66,8 @@ Session::process (jack_nframes_t nframes)
 void
 Session::prepare_diskstreams ()
 {
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->prepare ();
 	}
 }
@@ -141,7 +142,8 @@ Session::process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 			   call path, so make sure we release any outstanding locks here before we return failure.
 			*/
 
-			for (DiskstreamList::iterator ids = diskstreams.begin(); ids != diskstreams.end(); ++ids) {
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+			for (DiskstreamList::iterator ids = dsl->begin(); ids != dsl->end(); ++ids) {
 				(*ids)->recover ();
 			}
 
@@ -181,7 +183,8 @@ Session::silent_process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 			   call path, so make sure we release any outstanding locks here before we return failure.
 			*/
 
-			for (DiskstreamList::iterator ids = diskstreams.begin(); ids != diskstreams.end(); ++ids) {
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+			for (DiskstreamList::iterator ids = dsl->begin(); ids != dsl->end(); ++ids) {
 				(*ids)->recover ();
 			}
 
@@ -200,7 +203,8 @@ Session::commit_diskstreams (jack_nframes_t nframes, bool &needs_butler)
 	float pworst = 1.0f;
 	float cworst = 1.0f;
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 
 		if ((*i)->hidden()) {
 			continue;
@@ -284,12 +288,10 @@ Session::process_with_events (jack_nframes_t nframes)
 	end_frame = _transport_frame + nframes;
 
 	{
-		Glib::RWLock::ReaderLock dsm (diskstream_lock, Glib::TRY_LOCK);
-	
 		Event* this_event;
 		Events::iterator the_next_one;
 		
-		if (!dsm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
+		if (post_transport_work & (PostTransportLocate|PostTransportStop)) {
 			no_roll (nframes, 0);
 			return;
 		}
@@ -560,17 +562,18 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 		if (slave_state == Waiting) {
 
 			// cerr << "waiting at " << slave_transport_frame << endl;
-			Glib::RWLock::ReaderLock dsm (diskstream_lock, Glib::TRY_LOCK);
-				
-			if (dsm.locked() && slave_transport_frame >= slave_wait_end) {
+			
+			if (slave_transport_frame >= slave_wait_end) {
 				// cerr << "\tstart at " << _transport_frame << endl;
 
 				slave_state = Running;
 
 				bool ok = true;
 				jack_nframes_t frame_delta = slave_transport_frame - _transport_frame;
+
+				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 				
-				for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 					if (!(*i)->can_internal_playback_seek (frame_delta)) {
 						ok = false;
 						break;
@@ -578,7 +581,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 				}
 
 				if (ok) {
-					for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+					for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 						(*i)->internal_playback_seek (frame_delta);
 					}
 					_transport_frame += frame_delta;
@@ -682,12 +685,6 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 
 		bool need_butler;
 		
-		Glib::RWLock::ReaderLock dsm (diskstream_lock, Glib::TRY_LOCK);
-		if (!dsm.locked()) {
-			goto noroll;
-		}
-
-		
 		prepare_diskstreams ();
 		silent_process_routes (nframes, offset);
 		commit_diskstreams (nframes, need_butler);
@@ -733,9 +730,7 @@ Session::process_without_events (jack_nframes_t nframes)
 	long frames_moved;
 	
 	{
-		Glib::RWLock::ReaderLock dsm (diskstream_lock, Glib::TRY_LOCK);
-
-		if (!dsm.locked() || (post_transport_work & (PostTransportLocate|PostTransportStop))) {
+		if (post_transport_work & (PostTransportLocate|PostTransportStop)) {
 			no_roll (nframes, 0);
 			return;
 		}

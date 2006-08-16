@@ -71,8 +71,6 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream:
 	use_new_playlist ();
 
 	in_set_state = false;
-
-	DiskstreamCreated (this); /* EMIT SIGNAL */
 }
 	
 AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
@@ -92,8 +90,6 @@ AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 	if (destructive()) {
 		use_destructive_playlist ();
 	}
-
-	DiskstreamCreated (this); /* EMIT SIGNAL */
 }
 
 void

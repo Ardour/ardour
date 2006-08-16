@@ -19,6 +19,8 @@
 #ifndef __ardour_track_h__
 #define __ardour_track_h__
 
+#include <boost/shared_ptr.hpp>
+
 #include <ardour/route.h>
 
 namespace ARDOUR {
@@ -50,7 +52,7 @@ class Track : public Route
 
 	virtual bool can_record();
 
-	Diskstream& diskstream() const { return *_diskstream; }
+	boost::shared_ptr<Diskstream> diskstream() const { return _diskstream; }
 
 	virtual int use_diskstream (string name) = 0;
 	virtual int use_diskstream (const PBD::ID& id) = 0;
@@ -100,7 +102,7 @@ class Track : public Route
 
 	virtual uint32_t n_process_buffers () = 0;
 	
-	Diskstream *_diskstream;
+	boost::shared_ptr<Diskstream> _diskstream;
 	MeterPoint  _saved_meter_point;
 	TrackMode   _mode;
 

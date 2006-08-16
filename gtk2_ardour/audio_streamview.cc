@@ -225,7 +225,7 @@ AudioStreamView::playlist_modified ()
 }
 
 void
-AudioStreamView::playlist_changed (Diskstream *ds)
+AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::playlist_changed), ds));
 
@@ -399,7 +399,7 @@ AudioStreamView::setup_rec_box ()
 				peak_ready_connections.clear();
 					
 				// FIXME
-				AudioDiskstream* ads = dynamic_cast<AudioDiskstream*>(_trackview.get_diskstream());
+				boost::shared_ptr<AudioDiskstream> ads = boost::dynamic_pointer_cast<AudioDiskstream>(_trackview.get_diskstream());
 				assert(ads);
 
 				for (uint32_t n=0; n < ads->n_channels(); ++n) {
@@ -431,8 +431,8 @@ AudioStreamView::setup_rec_box ()
 			AudioTrack* at;
 
 			at = _trackview.audio_track(); /* we know what it is already */
-			AudioDiskstream& ds = at->audio_diskstream();
-			jack_nframes_t frame_pos = ds.current_capture_start ();
+			boost::shared_ptr<AudioDiskstream> ds = at->audio_diskstream();
+			jack_nframes_t frame_pos = ds->current_capture_start ();
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;

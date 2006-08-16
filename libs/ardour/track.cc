@@ -41,7 +41,6 @@ using namespace PBD;
 
 Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, 1, -1, -1, -1, flag, default_type)
-	, _diskstream (0)
 	,  _rec_enable_control (*this)
 {
 	_declickable = true;
@@ -52,7 +51,6 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 
 Track::Track (Session& sess, const XMLNode& node, DataType default_type)
 	: Route (sess, "to be renamed", 0, 0, -1, -1, Route::Flag(0), default_type)
-	, _diskstream (0)
 	, _rec_enable_control (*this)
 {
 	_freeze_record.state = NoFreeze;
@@ -62,9 +60,6 @@ Track::Track (Session& sess, const XMLNode& node, DataType default_type)
 
 Track::~Track ()
 {
-	if (_diskstream) {
-		_diskstream->unref();
-	}
 }
 
 void

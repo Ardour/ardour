@@ -495,8 +495,9 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 	/* get everyone to the right position */
 
 	{
-		Glib::RWLock::ReaderLock lm (diskstream_lock);
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)-> seek (spec.start_frame, true)) {
 				error << string_compose (_("%1: cannot seek to %2 for export"),
 						  (*i)->name(), spec.start_frame)

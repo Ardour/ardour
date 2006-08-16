@@ -5,8 +5,7 @@
 #include "glibmm/thread.h"
  
 #include <list> 
- 
- 
+
 template<class T>
 class RCUManager
 {
@@ -43,7 +42,7 @@ public:
  
 	}
  
-	virtual boost::shared_ptr<T> write_copy ()
+	boost::shared_ptr<T> write_copy ()
 	{
 		m_lock.lock();
 
@@ -64,11 +63,11 @@ public:
 		current_write_old = RCUManager<T>::m_rcu_value;
 		
 		boost::shared_ptr<T> new_copy (new T(**current_write_old));
-		
+
 		return new_copy;
 	}
  
-	virtual bool update (boost::shared_ptr<T> new_value)
+	bool update (boost::shared_ptr<T> new_value)
 	{
 		// we hold the lock at this point effectively blocking
 		// other writers.
@@ -97,6 +96,11 @@ public:
 		m_lock.unlock();
 
 		return ret;
+	}
+
+	void flush () {
+		Glib::Mutex::Lock lm (m_lock);
+		m_dead_wood.clear ();
 	}
  
 private:

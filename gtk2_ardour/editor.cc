@@ -1596,7 +1596,7 @@ Editor::build_track_region_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
 
 	if (atv) {
-		Diskstream* ds;
+		boost::shared_ptr<Diskstream> ds;
 		Playlist* pl;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
@@ -1623,7 +1623,7 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
 
 	if (atv) {
-		Diskstream* ds;
+		boost::shared_ptr<Diskstream> ds;
 		Playlist* pl;
 		AudioPlaylist* apl;
 
@@ -3020,7 +3020,7 @@ Editor::mapped_set_selected_regionview_from_click (RouteTimeAxisView& tv, uint32
 	Playlist* pl;
 	vector<Region*> results;
 	RegionView* marv;
-	Diskstream* ds;
+	boost::shared_ptr<Diskstream> ds;
 
 	if ((ds = tv.get_diskstream()) == 0) {
 		/* bus */
@@ -3246,7 +3246,7 @@ Editor::set_selected_regionview_from_region_list (Region& region, Selection::Ope
 			Playlist* pl;
 			vector<Region*> results;
 			RegionView* marv;
-			Diskstream* ds;
+			boost::shared_ptr<Diskstream> ds;
 			
 			if ((ds = tatv->get_diskstream()) == 0) {
 				/* bus */

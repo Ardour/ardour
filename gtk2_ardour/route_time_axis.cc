@@ -728,7 +728,7 @@ RouteTimeAxisView::rename_current_playlist ()
 	ArdourPrompter prompter (true);
 	string name;
 
-	Diskstream *const ds = get_diskstream();
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	if (!ds || ds->destructive())
 		return;
 
@@ -759,7 +759,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt)
 {
 	string name;
 	
-	Diskstream *const ds = get_diskstream();
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	if (!ds || ds->destructive())
 		return;
 
@@ -800,7 +800,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 {
 	string name;
 	
-	Diskstream *const ds = get_diskstream();
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	if (!ds || ds->destructive())
 		return;
 
@@ -838,7 +838,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 void
 RouteTimeAxisView::clear_playlist ()
 {
-	Diskstream *const ds = get_diskstream();
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	if (!ds || ds->destructive())
 		return;
 
@@ -963,7 +963,7 @@ RouteTimeAxisView::name() const
 Playlist *
 RouteTimeAxisView::playlist () const 
 {
-	Diskstream *ds;
+	boost::shared_ptr<Diskstream> ds;
 
 	if ((ds = get_diskstream()) != 0) {
 		return ds->playlist(); 
@@ -1013,7 +1013,7 @@ RouteTimeAxisView::hide_click ()
 Region*
 RouteTimeAxisView::find_next_region (jack_nframes_t pos, RegionPoint point, int32_t dir)
 {
-	Diskstream *stream;
+	boost::shared_ptr<Diskstream> stream;
 	Playlist *playlist;
 
 	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
@@ -1027,7 +1027,7 @@ bool
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	Playlist* what_we_got;
-	Diskstream* ds = get_diskstream();
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	Playlist* playlist;
 	bool ret = false;
 

@@ -74,7 +74,7 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
-		t->diskstream().RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
+		t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
 
 		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
@@ -733,7 +733,7 @@ void
 RouteUI::route_removed ()
 {
 	ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::route_removed));
-	
+	cerr << "Route UI @ " << this << " destroyed by impending end of route\n";
 	delete this;
 }
 
@@ -905,15 +905,15 @@ RouteUI::audio_track() const
 	return dynamic_cast<AudioTrack*>(_route.get());
 }
 
-Diskstream*
+boost::shared_ptr<Diskstream>
 RouteUI::get_diskstream () const
 {
 	boost::shared_ptr<Track> t;
 
 	if ((t = boost::dynamic_pointer_cast<Track>(_route)) != 0) {
-		return &t->diskstream();
+		return t->diskstream();
 	} else {
-		return 0;
+		return boost::shared_ptr<Diskstream> ((Diskstream*) 0);
 	}
 }
 

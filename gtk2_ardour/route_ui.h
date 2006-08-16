@@ -57,7 +57,7 @@ class RouteUI : public virtual AxisView
 	ARDOUR::Track*      track() const;
 	ARDOUR::AudioTrack* audio_track() const;
 	
-	ARDOUR::Diskstream* get_diskstream() const;
+	boost::shared_ptr<ARDOUR::Diskstream> get_diskstream() const;
 
 	string name() const;
 

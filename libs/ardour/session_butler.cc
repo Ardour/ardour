@@ -248,11 +248,11 @@ Session::butler_thread_work ()
 
 		gettimeofday (&begin, 0);
 
-		Glib::RWLock::ReaderLock dsm (diskstream_lock);
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader ();
 		
-		for (i = diskstreams.begin(); !transport_work_requested() && butler_should_run && i != diskstreams.end(); ++i) {
+		for (i = dsl->begin(); !transport_work_requested() && butler_should_run && i != dsl->end(); ++i) {
 
-			Diskstream* const ds = *i;
+			boost::shared_ptr<Diskstream> ds = *i;
 
 			switch (ds->do_refill ()) {
 			case 0:
@@ -271,7 +271,7 @@ Session::butler_thread_work ()
 
 		}
 
-		if (i != diskstreams.end()) {
+		if (i != dsl->end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
@@ -293,7 +293,7 @@ Session::butler_thread_work ()
 		compute_io = true;
 		gettimeofday (&begin, 0);
 
-		for (i = diskstreams.begin(); !transport_work_requested() && butler_should_run && i != diskstreams.end(); ++i) {
+		for (i = dsl->begin(); !transport_work_requested() && butler_should_run && i != dsl->end(); ++i) {
 			// cerr << "write behind for " << (*i)->name () << endl;
 			
 			switch ((*i)->do_flush (Session::ButlerContext)) {
@@ -322,7 +322,7 @@ Session::butler_thread_work ()
 			request_stop ();
 		}
 
-		if (i != diskstreams.end()) {
+		if (i != dsl->end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
@@ -349,7 +349,7 @@ Session::butler_thread_work ()
 			Glib::Mutex::Lock lm (butler_request_lock);
 
 			if (butler_should_run && (disk_work_outstanding || transport_work_requested())) {
-//				for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+//				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 //					cerr << "AFTER " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //				}
 
@@ -388,8 +388,8 @@ Session::overwrite_some_buffers (Diskstream* ds)
 
 	} else {
 
-		Glib::RWLock::ReaderLock dm (diskstream_lock);
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			(*i)->set_pending_overwrite (true);
 		}
 	}

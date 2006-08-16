@@ -270,8 +270,9 @@ class Session : public sigc::trackable, public Stateful
 	vector<Sample*>& get_silent_buffers (uint32_t howmany);
 	vector<Sample*>& get_send_buffers () { return _send_buffers; }
 
-	Diskstream* diskstream_by_id (const PBD::ID& id);
-	Diskstream* diskstream_by_name (string name);
+	void add_diskstream (boost::shared_ptr<Diskstream>);
+	boost::shared_ptr<Diskstream> diskstream_by_id (const PBD::ID& id);
+	boost::shared_ptr<Diskstream> diskstream_by_name (string name);
 
 	bool have_captured() const { return _have_captured; }
 
@@ -281,9 +282,8 @@ class Session : public sigc::trackable, public Stateful
 	uint32_t get_next_diskstream_id() const { return n_diskstreams(); }
 	uint32_t n_diskstreams() const;
 	
-	typedef list<Diskstream *> DiskstreamList;
-
-	typedef std::list<boost::shared_ptr<Route> > RouteList; 
+	typedef std::list<boost::shared_ptr<Diskstream> > DiskstreamList;
+	typedef std::list<boost::shared_ptr<Route> >      RouteList; 
 
 	boost::shared_ptr<RouteList> get_routes() const {
 		return routes.reader ();
@@ -346,7 +346,6 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void> HaltOnXrun;
 
 	sigc::signal<void,boost::shared_ptr<Route> > RouteAdded;
-	sigc::signal<void,Diskstream*> DiskstreamAdded; // FIXME: make a shared_ptr
 
 	void request_roll ();
 	void request_bounded_roll (jack_nframes_t start, jack_nframes_t end);
@@ -1509,10 +1508,9 @@ class Session : public sigc::trackable, public Stateful
 
 	/* disk-streams */
 
-	DiskstreamList  diskstreams; 
-	mutable Glib::RWLock diskstream_lock;
+	SerializedRCUManager<DiskstreamList>  diskstreams; 
+
 	uint32_t dstream_buffer_size;
-	void add_diskstream (Diskstream*);
 	int  load_diskstreams (const XMLNode&);
 
 	/* routes stuff */
@@ -1580,7 +1578,7 @@ class Session : public sigc::trackable, public Stateful
 	Playlist *XMLPlaylistFactory (const XMLNode&);
 
 	void playlist_length_changed (Playlist *);
-	void diskstream_playlist_changed (Diskstream *);
+	void diskstream_playlist_changed (boost::shared_ptr<Diskstream>);
 
 	/* NAMED SELECTIONS */
 

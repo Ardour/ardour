@@ -256,6 +256,7 @@ Session::Session (AudioEngine &eng,
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
 	  midi_requests (128), // the size of this should match the midi request pool size
+	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
 	  _click_io ((IO*) 0),
@@ -306,6 +307,7 @@ Session::Session (AudioEngine &eng,
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
 	  midi_requests (16),
+	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  main_outs (0)
 
@@ -439,18 +441,45 @@ Session::~Session ()
 	}
 	
 #ifdef TRACK_DESTRUCTION
+	cerr << "delete routes\n";
+#endif /* TRACK_DESTRUCTION */
+        {
+		RCUWriter<RouteList> writer (routes);
+		boost::shared_ptr<RouteList> r = writer.get_copy ();
+		for (RouteList::iterator i = r->begin(); i != r->end(); ) {
+			RouteList::iterator tmp;
+			tmp = i;
+			++tmp;
+			cerr << "BEFORE: use count on route " << (*i)->name() << " = " << (*i).use_count() << endl;
+			(*i)->drop_references ();
+			cerr << "AFTER: use count on route " << (*i)->name() << " = " << (*i).use_count() << endl;
+			i = tmp;
+		}
+		r->clear ();
+		/* writer goes out of scope and updates master */
+	}
+
+	routes.flush ();
+
+#ifdef TRACK_DESTRUCTION
 	cerr << "delete diskstreams\n";
 #endif /* TRACK_DESTRUCTION */
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ) {
-		DiskstreamList::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
-		delete *i;
-
-		i = tmp;
-	}
+       {
+	       RCUWriter<DiskstreamList> dwriter (diskstreams);
+	       boost::shared_ptr<DiskstreamList> dsl = dwriter.get_copy();
+	       for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ) {
+		       DiskstreamList::iterator tmp;
+		       
+		       tmp = i;
+		       ++tmp;
+		       
+		       (*i)->drop_references ();
+		       
+		       i = tmp;
+	       }
+	       dsl->clear ();
+       }
+       diskstreams.flush ();
 
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete audio sources\n";
@@ -859,7 +888,7 @@ Session::playlist_length_changed (Playlist* pl)
 }
 
 void
-Session::diskstream_playlist_changed (Diskstream* dstream)
+Session::diskstream_playlist_changed (boost::shared_ptr<Diskstream> dstream)
 {
 	Playlist *playlist;
 
@@ -933,13 +962,10 @@ Session::set_auto_input (bool yn)
 		
 		if (Config->get_use_hardware_monitoring() && transport_rolling()) {
 			/* auto-input only makes a difference if we're rolling */
+			
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-			/* Even though this can called from RT context we are using
-			   a non-tentative rwlock here,  because the action must occur.
-			   The rarity and short potential lock duration makes this "OK"
-			*/
-			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (!auto_input);   
@@ -956,16 +982,19 @@ void
 Session::reset_input_monitor_state ()
 {
 	if (transport_rolling()) {
-		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring() && !auto_input);
 			}
 		}
 	} else {
-		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring());
@@ -1237,13 +1266,8 @@ Session::enable_record ()
 		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordStrobe);
 
 		if (Config->get_use_hardware_monitoring() && auto_input) {
-			/* Even though this can be called from RT context we are using
-			   a non-tentative rwlock here,  because the action must occur.
-			   The rarity and short potential lock duration makes this "OK"
-			*/
-			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			
-			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (true);   
 				}
@@ -1272,13 +1296,9 @@ Session::disable_record (bool rt_context, bool force)
 		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordExit);
 
 		if (Config->get_use_hardware_monitoring() && auto_input) {
-			/* Even though this can be called from RT context we are using
-			   a non-tentative rwlock here,  because the action must occur.
-			   The rarity and short potential lock duration makes this "OK"
-			*/
-			Glib::RWLock::ReaderLock dsm (diskstream_lock);
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 			
-			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (false);   
 				}
@@ -1299,13 +1319,9 @@ Session::step_back_from_record ()
 	g_atomic_int_set (&_record_status, Enabled);
 
 	if (Config->get_use_hardware_monitoring()) {
-		/* Even though this can be called from RT context we are using
-		   a non-tentative rwlock here,  because the action must occur.
-		   The rarity and short potential lock duration makes this "OK"
-		*/
-		Glib::RWLock::ReaderLock dsm (diskstream_lock);
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 		
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		        if (auto_input && (*i)->record_enabled ()) {
 			        //cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 		                (*i)->monitor_input (false);   
@@ -1428,7 +1444,6 @@ Session::set_block_size (jack_nframes_t nframes)
 	*/
 
 	{ 
-		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 		vector<Sample*>::iterator i;
 		uint32_t np;
 			
@@ -1475,7 +1490,8 @@ Session::set_block_size (jack_nframes_t nframes)
 			(*i)->set_block_size (nframes);
 		}
 		
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			(*i)->set_block_size (nframes);
 		}
 
@@ -1863,7 +1879,7 @@ Session::new_audio_route (int input_channels, int output_channels)
 }
 
 void
-Session::add_route (shared_ptr<Route> route)
+Session::add_route (boost::shared_ptr<Route> route)
 {
 	{ 
 		RCUWriter<RouteList> writer (routes);
@@ -1892,22 +1908,17 @@ Session::add_route (shared_ptr<Route> route)
 }
 
 void
-Session::add_diskstream (Diskstream* dstream)
+Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 {
 	/* need to do this in case we're rolling at the time, to prevent false underruns */
 	dstream->do_refill_with_alloc();
 	
 	{ 
-		Glib::RWLock::WriterLock lm (diskstream_lock);
-		diskstreams.push_back (dstream);
+		RCUWriter<DiskstreamList> writer (diskstreams);
+		boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
+		ds->push_back (dstream);
 	}
 
-	/* take a reference to the diskstream, preventing it from
-	   ever being deleted until the session itself goes away,
-	   or chooses to remove it for its own purposes.
-	*/
-
-	dstream->ref();
 	dstream->set_block_size (current_block_size);
 
 	dstream->PlaylistChanged.connect (sigc::bind (mem_fun (*this, &Session::diskstream_playlist_changed), dstream));
@@ -1918,8 +1929,6 @@ Session::add_diskstream (Diskstream* dstream)
 
 	set_dirty();
 	save_state (_current_snapshot_name);
-
-	DiskstreamAdded (dstream); /* EMIT SIGNAL */
 }
 
 void
@@ -1958,20 +1967,19 @@ Session::remove_route (shared_ptr<Route> route)
 
 	// FIXME: audio specific
 	AudioTrack* at;
-	AudioDiskstream* ds = 0;
+	boost::shared_ptr<AudioDiskstream> ds;
 	
 	if ((at = dynamic_cast<AudioTrack*>(route.get())) != 0) {
-		ds = &at->audio_diskstream();
+		ds = at->audio_diskstream();
 	}
 	
 	if (ds) {
 
 		{
-			Glib::RWLock::WriterLock lm (diskstream_lock);
-			diskstreams.remove (ds);
+			RCUWriter<DiskstreamList> dsl (diskstreams);
+			boost::shared_ptr<DiskstreamList> d = dsl.get_copy();
+			d->remove (ds);
 		}
-
-		ds->unref ();
 	}
 
 	find_current_end ();
@@ -1983,7 +1991,9 @@ Session::remove_route (shared_ptr<Route> route)
 
 	save_state (_current_snapshot_name);
 
-	/* all shared ptrs to route should go out of scope here */
+	/* try to cause everyone to drop their references */
+
+	route->drop_references ();
 }	
 
 void
@@ -2271,11 +2281,9 @@ Session::get_maximum_extent () const
 	jack_nframes_t max = 0;
 	jack_nframes_t me; 
 
-	/* Don't take the diskstream lock. Caller must have other ways to
-	   ensure atomicity.
-	*/
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	for (DiskstreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::const_iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		Playlist* pl = (*i)->playlist();
 		if ((me = pl->get_maximum_extent()) > max) {
 			max = me;
@@ -2285,32 +2293,32 @@ Session::get_maximum_extent () const
 	return max;
 }
 
-Diskstream *
+boost::shared_ptr<Diskstream>
 Session::diskstream_by_name (string name)
 {
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if ((*i)->name() == name) {
-			return* i;
+			return *i;
 		}
 	}
 
-	return 0;
+	return boost::shared_ptr<Diskstream>((Diskstream*) 0);
 }
 
-Diskstream *
+boost::shared_ptr<Diskstream>
 Session::diskstream_by_id (const PBD::ID& id)
 {
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if ((*i)->id() == id) {
 			return *i;
 		}
 	}
 
-	return 0;
+	return boost::shared_ptr<Diskstream>((Diskstream*) 0);
 }
 
 /* AudioRegion management */
@@ -2621,10 +2629,10 @@ int
 Session::remove_last_capture ()
 {
 	list<Region*> r;
-
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		list<Region*>& l = (*i)->last_capture_regions();
 		
 		if (!l.empty()) {
@@ -3185,10 +3193,11 @@ Session::set_all_mute (bool yn)
 uint32_t
 Session::n_diskstreams () const
 {
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	uint32_t n = 0;
 
-	for (DiskstreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+	for (DiskstreamList::const_iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->hidden()) {
 			n++;
 		}
@@ -3207,15 +3216,15 @@ Session::graph_reordered ()
 		return;
 	}
 
-	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
-
 	resort_routes ();
 
 	/* force all diskstreams to update their capture offset values to 
 	   reflect any changes in latencies within the graph.
 	*/
 	
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->set_capture_offset ();
 	}
 }
@@ -3494,11 +3503,9 @@ Session::remove_named_selection (NamedSelection* named_selection)
 void
 Session::reset_native_file_format ()
 {
-	// jlc - WHY take routelock?
-	//RWLockMonitor lm1 (route_lock, true, __LINE__, __FILE__);
-	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->reset_write_sources (false);
 	}
 }
@@ -3608,7 +3615,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	
 	/* call tree *MUST* hold route_lock */
 	
-	if ((playlist = track.diskstream().playlist()) == 0) {
+	if ((playlist = track.diskstream()->playlist()) == 0) {
 		goto out;
 	}
 
@@ -3618,7 +3625,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		goto out;
 	}
 
-	nchans = track.audio_diskstream().n_channels();
+	nchans = track.audio_diskstream()->n_channels();
 	
 	dir = discover_best_sound_dir ();
 

@@ -90,7 +90,7 @@ void
 PlaylistSelector::show_for (RouteUI* ruix)
 {
 	vector<const char*> item;
-	Diskstream* this_ds;
+	boost::shared_ptr<Diskstream> this_ds;
 	string str;
 
 	rui = ruix;
@@ -116,7 +116,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	
 	for (DSPL_Map::iterator x = dspl_map.begin(); x != dspl_map.end(); ++x) {
 
-		Diskstream* ds = session->diskstream_by_id (x->first);
+		boost::shared_ptr<Diskstream> ds = session->diskstream_by_id (x->first);
 
 		if (ds == 0) {
 			continue;
@@ -243,7 +243,7 @@ PlaylistSelector::selection_changed ()
 			return;
 		}
 		
-		at->diskstream().use_playlist (apl);
+		at->diskstream()->use_playlist (apl);
 
 		hide ();
 	}

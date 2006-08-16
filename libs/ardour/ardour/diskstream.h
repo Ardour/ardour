@@ -34,6 +34,7 @@
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
 #include <pbd/stateful.h>
+#include <pbd/destructible.h>
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
@@ -42,7 +43,6 @@
 #include <ardour/route.h>
 #include <ardour/port.h>
 #include <ardour/utils.h>
-
 
 struct tm;
 
@@ -54,7 +54,7 @@ class Session;
 class Playlist;
 class IO;
 
-class Diskstream : public Stateful, public sigc::trackable
+ class Diskstream : public Stateful, public sigc::trackable, public PBD::Destructible
 {	
   public:
 	enum Flag {
@@ -63,15 +63,15 @@ class Diskstream : public Stateful, public sigc::trackable
 		Destructive = 0x4
 	};
 
+	Diskstream (Session &, const string& name, Flag f = Recordable);
+	Diskstream (Session &, const XMLNode&);
+	virtual ~Diskstream();
+
 	string      name () const { return _name; }
 	virtual int set_name (string str);
 
 	ARDOUR::IO* io() const { return _io; }
 	void set_io (ARDOUR::IO& io);
-
-	virtual Diskstream& ref() { _refcnt++; return *this; }
-	void     unref() { if (_refcnt) _refcnt--; if (_refcnt == 0) delete this; }
-	uint32_t refcnt() const { return _refcnt; }
 
 	virtual float playback_buffer_load() const = 0;
 	virtual float capture_buffer_load() const = 0;
@@ -148,14 +148,10 @@ class Diskstream : public Stateful, public sigc::trackable
 
 	static sigc::signal<void>                DiskOverrun;
 	static sigc::signal<void>                DiskUnderrun;
-	static sigc::signal<void,Diskstream*>    DiskstreamCreated; // XXX use a ref with sigc2
 	static sigc::signal<void,list<Source*>*> DeleteSources;
 
   protected:
 	friend class Session;
-
-	Diskstream (Session &, const string& name, Flag f = Recordable);
-	Diskstream (Session &, const XMLNode&);
 
 	/* the Session is the only point of access for these because they require
 	 * that the Session is "inactive" while they are called.
@@ -187,9 +183,6 @@ class Diskstream : public Stateful, public sigc::trackable
 
 	//private:
 	
-	/** Use unref() to destroy a diskstream */
-	virtual ~Diskstream();
-
 	enum TransitionType {
 		CaptureStart = 0,
 		CaptureEnd
@@ -303,8 +296,6 @@ class Diskstream : public Stateful, public sigc::trackable
 	jack_nframes_t scrub_start;
 	jack_nframes_t scrub_buffer_size;
 	jack_nframes_t scrub_offset;
-
-	uint32_t _refcnt;
 
 	sigc::connection ports_created_c;
 	sigc::connection plmod_connection;

@@ -226,7 +226,7 @@ PluginSelector::set_correct_focus()
 		au_display.grab_focus();
 		return;
 	}
-#endif;
+#endif
 }
 
 void

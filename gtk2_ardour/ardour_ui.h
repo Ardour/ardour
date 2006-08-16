@@ -520,8 +520,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	sigc::connection point_one_second_connection;
 	sigc::connection point_zero_one_second_connection;
 
-	void diskstream_added (ARDOUR::Diskstream*);
-
 	gint session_menu (GdkEventButton *);
 
 	bool _will_create_new_session_automatically;

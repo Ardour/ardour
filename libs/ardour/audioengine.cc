@@ -47,6 +47,7 @@ jack_nframes_t Port::_short_over_length = 2;
 jack_nframes_t Port::_long_over_length = 10;
 
 AudioEngine::AudioEngine (string client_name) 
+	: ports (new Ports)
 {
 	session = 0;
 	session_remove_pending = false;
@@ -270,7 +271,10 @@ AudioEngine::process_callback (jack_nframes_t nframes)
 	}
 
 	if (last_monitor_check + monitor_check_interval < next_processed_frames) {
-		for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
+
+		boost::shared_ptr<Ports> p = ports.reader();
+
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 			
 			Port *port = (*i);
 			bool x;
@@ -329,7 +333,9 @@ AudioEngine::jack_bufsize_callback (jack_nframes_t nframes)
 	_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);
 	last_monitor_check = 0;
 
-	for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
+	boost::shared_ptr<Ports> p = ports.reader();
+
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 		(*i)->reset();
 	}
 
@@ -400,15 +406,19 @@ AudioEngine::register_input_port (DataType type, const string& portname)
 		}
 	}
 
-	jack_port_t *p = jack_port_register (_jack, portname.c_str(),
-		type.to_jack_type(), JackPortIsInput, 0);
+	jack_port_t *p = jack_port_register (_jack, portname.c_str(), type.to_jack_type(), JackPortIsInput, 0);
 
 	if (p) {
 
 		Port *newport;
+
 		if ((newport = new Port (p)) != 0) {
-			ports.insert (ports.begin(), newport);
+			RCUWriter<Ports> writer (ports);
+			boost::shared_ptr<Ports> ps = writer.get_copy ();
+			ps->insert (ps->begin(), newport);
+			/* writer goes out of scope, forces update */
 		}
+
 		return newport;
 
 	} else {
@@ -436,8 +446,19 @@ AudioEngine::register_output_port (DataType type, const string& portname)
 
 	if ((p = jack_port_register (_jack, portname.c_str(),
 		type.to_jack_type(), JackPortIsOutput, 0)) != 0) {
-		Port *newport = new Port (p);
-		ports.insert (ports.begin(), newport);
+
+		Port *newport = 0;
+
+		{
+			RCUWriter<Ports> writer (ports);
+			boost::shared_ptr<Ports> ps = writer.get_copy ();
+			
+			newport = new Port (p);
+			ps->insert (ps->begin(), newport);
+
+			/* writer goes out of scope, forces update */
+		}
+
 		return newport;
 
 	} else {
@@ -465,12 +486,20 @@ AudioEngine::unregister_port (Port *port)
 		int ret = jack_port_unregister (_jack, port->_port);
 		
 		if (ret == 0) {
+			
+			{
 
-			for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
-				if ((*i) == port) {
-					ports.erase (i);
-					break;
+				RCUWriter<Ports> writer (ports);
+				boost::shared_ptr<Ports> ps = writer.get_copy ();
+				
+				for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
+					if ((*i) == port) {
+						ps->erase (i);
+						break;
+					}
 				}
+
+				/* writer goes out of scope, forces update */
 			}
 
 			remove_connections_for (port);
@@ -613,7 +642,9 @@ AudioEngine::get_port_by_name (const string& portname, bool keep)
 	
 	/* check to see if we have a Port for this name already */
 
-	for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
+	boost::shared_ptr<Ports> pr = ports.reader();
+	
+	for (Ports::iterator i = pr->begin(); i != pr->end(); ++i) {
 		if (portname == (*i)->name()) {
 			return (*i);
 		}
@@ -623,11 +654,20 @@ AudioEngine::get_port_by_name (const string& portname, bool keep)
 
 	if ((p = jack_port_by_name (_jack, portname.c_str())) != 0) {
 		Port *newport = new Port (p);
-		if (keep && newport->is_mine (_jack)) {
-			ports.insert (newport);
+
+		{
+			if (keep && newport->is_mine (_jack)) {
+				RCUWriter<Ports> writer (ports);
+				boost::shared_ptr<Ports> ps = writer.get_copy ();
+				ps->insert (newport);
+				/* writer goes out of scope, forces update */
+			}
 		}
+
 		return newport;
+
 	} else {
+
 		return 0;
 	}
 }
@@ -827,12 +867,19 @@ AudioEngine::remove_all_ports ()
 	/* process lock MUST be held */
 
 	if (_jack) {
-		for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
+		boost::shared_ptr<Ports> p = ports.reader();
+
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 			jack_port_unregister (_jack, (*i)->_port);
 		}
 	}
 
-	ports.clear ();
+	{
+		RCUWriter<Ports> writer (ports);
+		boost::shared_ptr<Ports> ps = writer.get_copy ();
+		ps->clear ();
+	}
+
 	port_connections.clear ();
 }
 
@@ -932,7 +979,7 @@ AudioEngine::reconnect_to_jack ()
 	if (_jack) {
 		disconnect_from_jack ();
 		/* XXX give jackd a chance */
-        Glib::usleep (250000);
+		Glib::usleep (250000);
 	}
 
 	if (connect_to_jack (jack_client_name)) {
@@ -942,7 +989,9 @@ AudioEngine::reconnect_to_jack ()
 
 	Ports::iterator i;
 
-	for (i = ports.begin(); i != ports.end(); ++i) {
+	boost::shared_ptr<Ports> p = ports.reader ();
+
+	for (i = p->begin(); i != p->end(); ++i) {
 
 		/* XXX hack hack hack */
 
@@ -964,8 +1013,9 @@ AudioEngine::reconnect_to_jack ()
 		}
 	}
 
-	if (i != ports.end()) {
-		for (Ports::iterator i = ports.begin(); i != ports.end(); ++i) {
+	if (i != p->end()) {
+		/* failed */
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 			jack_port_unregister (_jack, (*i)->_port);
 		}
 		return -1;

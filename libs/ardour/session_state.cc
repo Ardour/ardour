@@ -264,7 +264,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	AudioSource::AudioSourceCreated.connect (mem_fun (*this, &Session::add_audio_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
-	AudioDiskstream::DiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
         Curve::CurveCreated.connect (mem_fun (*this, &Session::add_curve));
         AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
@@ -626,11 +625,10 @@ Session::load_diskstreams (const XMLNode& node)
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
 		
-		AudioDiskstream* dstream;
 
 		try {
-			dstream = new AudioDiskstream (*this, **citer);
-			/* added automatically by AudioDiskstreamCreated handler */
+			boost::shared_ptr<AudioDiskstream> dstream (new AudioDiskstream (*this, **citer));
+			add_diskstream (dstream);
 		} 
 		
 		catch (failed_constructor& err) {
@@ -1388,8 +1386,8 @@ Session::state(bool full_state)
 	child = node->add_child ("DiskStreams");
 
 	{ 
-		Glib::RWLock::ReaderLock dl (diskstream_lock);
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
 				child->add_child_nocopy ((*i)->get_state());
 			}
