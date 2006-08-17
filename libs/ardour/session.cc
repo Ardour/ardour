@@ -1728,13 +1728,13 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		} while (track_id < (UINT_MAX-1));
 
 		if (input_auto_connect & AutoConnectPhysical) {
-			nphysical_in = min (n_physical_inputs, physinputs.size());
+			nphysical_in = min (n_physical_inputs, (uint32_t) physinputs.size());
 		} else {
 			nphysical_in = 0;
 		}
 		
 		if (output_auto_connect & AutoConnectPhysical) {
-			nphysical_out = min (n_physical_outputs, physinputs.size());
+			nphysical_out = min (n_physical_outputs, (uint32_t) physinputs.size());
 		} else {
 			nphysical_out = 0;
 		}
