@@ -159,22 +159,26 @@ RouteParams_UI::~RouteParams_UI ()
 }
 
 void
-RouteParams_UI::add_route (boost::shared_ptr<Route> route)
+RouteParams_UI::add_routes (Session::RouteList& routes)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::add_route), route));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::add_routes), routes));
 	
-	if (route->hidden()) {
-		return;
+	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
+		boost::shared_ptr<Route> route = (*x);
+
+		if (route->hidden()) {
+			return;
+		}
+		
+		TreeModel::Row row = *(route_display_model->append());
+		row[route_display_columns.text] = route->name();
+		row[route_display_columns.route] = route;
+		
+		//route_select_list.rows().back().select ();
+		
+		route->name_changed.connect (bind (mem_fun(*this, &RouteParams_UI::route_name_changed), route));
+		route->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::route_removed), route));
 	}
-
-	TreeModel::Row row = *(route_display_model->append());
-	row[route_display_columns.text] = route->name();
-	row[route_display_columns.route] = route;
-
-	//route_select_list.rows().back().select ();
-	
-	route->name_changed.connect (bind (mem_fun(*this, &RouteParams_UI::route_name_changed), route));
-	route->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::route_removed), route));
 }
 
 
@@ -355,9 +359,10 @@ RouteParams_UI::set_session (Session *sess)
 	route_display_model->clear();
 
 	if (session) {
-		session->foreach_route (this, &RouteParams_UI::add_route);
+		boost::shared_ptr<Session::RouteList> r = session->get_routes();
+		add_routes (*r);
 		session->going_away.connect (mem_fun(*this, &ArdourDialog::session_gone));
-		session->RouteAdded.connect (mem_fun(*this, &RouteParams_UI::add_route));
+		session->RouteAdded.connect (mem_fun(*this, &RouteParams_UI::add_routes));
 		start_updating ();
 	} else {
 		stop_updating ();

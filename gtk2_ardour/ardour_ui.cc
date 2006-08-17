@@ -874,21 +874,21 @@ ARDOUR_UI::session_add_midi_track ()
 }
 
 void
-ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many)
+ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many)
 {
-	boost::shared_ptr<Route>          route;
-	vector<boost::shared_ptr<AudioTrack> > routes;
+	list<boost::shared_ptr<AudioTrack> > tracks;
+	Session::RouteList routes;
 
 	if (session == 0) {
-		warning << _("You cannot add a track without a session already loaded.") << endmsg;
+		warning << _("You cannot add a track or bus without a session already loaded.") << endmsg;
 		return;
 	}
 
 	try { 
-		if (disk) {
-			routes = session->new_audio_track (input_channels, output_channels, mode, how_many);
+		if (track) {
+			tracks = session->new_audio_track (input_channels, output_channels, mode, how_many);
 
-			if (routes.size() != how_many) {
+			if (tracks.size() != how_many) {
 				if (how_many == 1) {
 					error << _("could not create a new audio track") << endmsg;
 				} else {
@@ -897,8 +897,15 @@ ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t o
 			}
 
 		} else {
-			if ((route = session->new_audio_route (input_channels, output_channels)) == 0) {
-				error << _("could not create new audio bus") << endmsg;
+
+			routes = session->new_audio_route (input_channels, output_channels, how_many);
+
+			if (routes.size() != how_many) {
+				if (how_many == 1) {
+					error << _("could not create a new audio track") << endmsg;
+				} else {
+					error << string_compose (_("could not create %1 new audio tracks"), how_many) << endmsg;
+				}
 			}
 		}
 		
@@ -2086,14 +2093,7 @@ ARDOUR_UI::add_route ()
 	if (track) {
 		session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), count);
 	} else {
-		while (count) {
-			session_add_audio_bus (input_chan, output_chan);
-		}
-		--count;
-		
-		while (Main::events_pending()) {
-			Main::iteration ();
-		}
+		session_add_audio_bus (input_chan, output_chan, count);
 	}
 }
 

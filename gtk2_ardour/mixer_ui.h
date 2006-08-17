@@ -111,7 +111,7 @@ class Mixer_UI : public Gtk::Window
 
 	bool strip_scroller_button_release (GdkEventButton*);
 
-	void add_strip (boost::shared_ptr<ARDOUR::Route>);
+	void add_strip (ARDOUR::Session::RouteList&);
 	void remove_strip (MixerStrip *);
 
 	void hide_all_strips (bool with_select);

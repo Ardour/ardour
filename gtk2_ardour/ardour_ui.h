@@ -193,8 +193,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		session_add_audio_route (true, input_channels, output_channels, mode, how_many);
 	}
 
-	void session_add_audio_bus (int input_channels, int32_t output_channels) {
-		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, 1);
+	void session_add_audio_bus (int input_channels, int32_t output_channels, uint32_t how_many) {
+		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, how_many);
 	}
 
 	void session_add_midi_track ();

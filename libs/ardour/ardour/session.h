@@ -345,7 +345,7 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void> DurationChanged;
 	sigc::signal<void> HaltOnXrun;
 
-	sigc::signal<void,boost::shared_ptr<Route> > RouteAdded;
+	sigc::signal<void,RouteList&> RouteAdded;
 
 	void request_roll ();
 	void request_bounded_roll (jack_nframes_t start, jack_nframes_t end);
@@ -536,8 +536,8 @@ class Session : public sigc::trackable, public Stateful
 
 	/* fundamental operations. duh. */
 
-	std::vector<boost::shared_ptr<AudioTrack> > new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal, uint32_t how_many = 1);
-	boost::shared_ptr<Route>      new_audio_route (int input_channels, int output_channels);
+	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal, uint32_t how_many = 1);
+	RouteList new_audio_route (int input_channels, int output_channels, uint32_t how_many);
 
 	void   remove_route (boost::shared_ptr<Route>);
 
@@ -1517,7 +1517,7 @@ class Session : public sigc::trackable, public Stateful
 
 	SerializedRCUManager<RouteList>  routes;
 
-	void   add_route (boost::shared_ptr<Route>, bool save = true);
+	void   add_routes (RouteList&, bool save = true);
 	uint32_t destructive_index;
 
 	int load_routes (const XMLNode&);

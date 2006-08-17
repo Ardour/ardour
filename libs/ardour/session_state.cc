@@ -1707,6 +1707,7 @@ Session::load_routes (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
+	RouteList new_routes;
 
 	nlist = node.children();
 
@@ -1721,8 +1722,10 @@ Session::load_routes (const XMLNode& node)
 			return -1;
 		}
 
-		add_route (route);
+		new_routes.push_back (route);
 	}
+
+	add_routes (new_routes);
 
 	return 0;
 }

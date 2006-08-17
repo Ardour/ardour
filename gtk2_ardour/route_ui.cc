@@ -733,7 +733,6 @@ void
 RouteUI::route_removed ()
 {
 	ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::route_removed));
-	cerr << "Route UI @ " << this << " destroyed by impending end of route\n";
 	delete this;
 }
 

@@ -39,72 +39,76 @@ using namespace PBD;
 using namespace Gtk;
 
 void
-Editor::handle_new_route (boost::shared_ptr<Route> route)
+Editor::handle_new_route (Session::RouteList& routes)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route), route));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route), routes));
 	
 	TimeAxisView *tv;
 	AudioTimeAxisView *atv;
 	TreeModel::Row parent;
 	TreeModel::Row row;
 
-	if (route->hidden()) {
-		return;
-	}
-	
-	tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
+	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
+		boost::shared_ptr<Route> route = (*x);
 
-#if 0
-	if (route_display_model->children().size() == 0) {
-		
-                /* set up basic entries */
-
-		TreeModel::Row row;
-		
-		row = *(route_display_model->append());  // path = "0"
-		row[route_display_columns.text] = _("Busses");
-		row[route_display_columns.tv] = 0;
-		row = *(route_display_model->append());  // path = "1"
-		row[route_display_columns.text] = _("Tracks");
-		row[route_display_columns.tv] = 0;
-
-	}
-
-	if (dynamic_cast<AudioTrack*>(route.get()) != 0) {
-		TreeModel::iterator iter = route_display_model->get_iter ("1");  // audio tracks 
-		parent = *iter;
-	} else {
-		TreeModel::iterator iter = route_display_model->get_iter ("0");  // busses
-		parent = *iter;
-	}
-	
-
-	row = *(route_display_model->append (parent.children()));
-#else 
-	row = *(route_display_model->append ());
-#endif
-
-	row[route_display_columns.text] = route->name();
-	row[route_display_columns.visible] = tv->marked_for_display();
-	row[route_display_columns.tv] = tv;
-	
-	track_views.push_back (tv);
-
-	ignore_route_list_reorder = true;
-	
-	if ((atv = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
-		/* added a new fresh one at the end */
-		if (atv->route()->order_key(N_("editor")) == -1) {
-		        atv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
+		if (route->hidden()) {
+			return;
 		}
+		
+		tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
+		
+#if 0
+		if (route_display_model->children().size() == 0) {
+			
+			/* set up basic entries */
+			
+			TreeModel::Row row;
+			
+			row = *(route_display_model->append());  // path = "0"
+			row[route_display_columns.text] = _("Busses");
+			row[route_display_columns.tv] = 0;
+			row = *(route_display_model->append());  // path = "1"
+			row[route_display_columns.text] = _("Tracks");
+			row[route_display_columns.tv] = 0;
+			
+		}
+		
+		if (dynamic_cast<AudioTrack*>(route.get()) != 0) {
+			TreeModel::iterator iter = route_display_model->get_iter ("1");  // audio tracks 
+			parent = *iter;
+		} else {
+			TreeModel::iterator iter = route_display_model->get_iter ("0");  // busses
+			parent = *iter;
+		}
+		
+		
+		row = *(route_display_model->append (parent.children()));
+#else 
+		row = *(route_display_model->append ());
+#endif
+		
+		row[route_display_columns.text] = route->name();
+		row[route_display_columns.visible] = tv->marked_for_display();
+		row[route_display_columns.tv] = tv;
+		
+		track_views.push_back (tv);
+		
+		ignore_route_list_reorder = true;
+		
+		if ((atv = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
+			/* added a new fresh one at the end */
+			if (atv->route()->order_key(N_("editor")) == -1) {
+				atv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
+			}
+		}
+		
+		ignore_route_list_reorder = false;
+		
+		route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
+		
+		tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	}
 
-	ignore_route_list_reorder = false;
-	
-	route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
-
-	tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
-	
 	editor_mixer_button.set_sensitive(true);
 }
 
@@ -491,9 +495,7 @@ Editor::initial_route_list_display ()
 
 	route_display_model->clear ();
 
-	for (Session::RouteList::iterator i = r.begin(); i != r.end(); ++i) {
-		handle_new_route (*i);
-	}
+	handle_new_route (r);
 
 	no_route_list_redisplay = false;
 

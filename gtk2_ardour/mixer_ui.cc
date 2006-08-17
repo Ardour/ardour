@@ -251,38 +251,42 @@ Mixer_UI::show_window ()
 }
 
 void
-Mixer_UI::add_strip (boost::shared_ptr<Route> route)
+Mixer_UI::add_strip (Session::RouteList& routes)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_strip), route));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_strip), routes));
 	
 	MixerStrip* strip;
 
-	if (route->hidden()) {
-		return;
+	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
+		boost::shared_ptr<Route> route = (*x);
+
+		if (route->hidden()) {
+			return;
+		}
+		
+		strip = new MixerStrip (*this, *session, route);
+		strips.push_back (strip);
+		
+		strip->set_width (_strip_width);
+		show_strip (strip);
+		
+		no_track_list_redisplay = true;
+		
+		TreeModel::Row row = *(track_model->append());
+		row[track_columns.text] = route->name();
+		
+		row[track_columns.visible] = true;
+		row[track_columns.route] = route;
+		row[track_columns.strip] = strip;
+		
+		no_track_list_redisplay = false;
+		redisplay_track_list ();
+		
+		route->name_changed.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
+		strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
+		
+		strip->signal_button_release_event().connect (bind (mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 	}
-
-	strip = new MixerStrip (*this, *session, route);
-	strips.push_back (strip);
-
-	strip->set_width (_strip_width);
-	show_strip (strip);
-
-	no_track_list_redisplay = true;
-
-	TreeModel::Row row = *(track_model->append());
-	row[track_columns.text] = route->name();
-
-	row[track_columns.visible] = true;
-	row[track_columns.route] = route;
-	row[track_columns.strip] = strip;
-
-	no_track_list_redisplay = false;
-	redisplay_track_list ();
-
-	route->name_changed.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
-	strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
-
-	strip->signal_button_release_event().connect (bind (mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 }
 
 void
@@ -623,9 +627,7 @@ Mixer_UI::initial_track_display ()
 
 	track_model->clear ();
 
-	for (Session::RouteList::iterator i = copy.begin(); i != copy.end(); ++i) {
-		add_strip (*i);
-	}
+	add_strip (copy);
 
 	no_track_list_redisplay = false;
 

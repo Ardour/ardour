@@ -466,7 +466,7 @@ class Editor : public PublicEditor
 	void add_crossfade_context_items (AudioStreamView*, ARDOUR::Crossfade*, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
-	void handle_new_route (boost::shared_ptr<ARDOUR::Route>);
+	void handle_new_route (ARDOUR::Session::RouteList&);
 	void remove_route (TimeAxisView *);
 	bool route_removal;
 

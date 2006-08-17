@@ -760,7 +760,6 @@ AudioEngine::get_physical_inputs (vector<string>& ins)
 		for (i = 0; ports[i]; ++i) {
 			ins.push_back (ports[i]);
 		}
-		cerr << "got " << ins.size() << " physical ins\n";
 		free (ports);
 	}
 }
@@ -783,7 +782,6 @@ AudioEngine::get_physical_outputs (vector<string>& outs)
 		for (i = 0; ports[i]; ++i) {
 			outs.push_back (ports[i]);
 		}
-		cerr << "got " << outs.size() << " physical outs\n";
 		free (ports);
 	}
 }

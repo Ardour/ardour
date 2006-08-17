@@ -327,13 +327,17 @@ Session::Session (AudioEngine &eng,
 
 	if (control_out_channels) {
 		shared_ptr<Route> r (new Route (*this, _("monitor"), -1, control_out_channels, -1, control_out_channels, Route::ControlOut));
-		add_route (r);
+		RouteList rl;
+		rl.push_back (r);
+		add_routes (rl);
 		_control_out = r;
 	}
 
 	if (master_out_channels) {
 		shared_ptr<Route> r (new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut));
-		add_route (r);
+		RouteList rl;
+		rl.push_back (r);
+		add_routes (rl);
 		_master_out = r;
 	} else {
 		/* prohibit auto-connect to master, because there isn't one */
@@ -1669,7 +1673,7 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 	
 }
 
-vector<boost::shared_ptr<AudioTrack> >
+list<boost::shared_ptr<AudioTrack> >
 Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, uint32_t how_many)
 {
 	char track_name[32];
@@ -1677,7 +1681,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	uint32_t n = 0;
 	uint32_t channels_used = 0;
 	string port;
-	vector<boost::shared_ptr<AudioTrack> > ret;
+	RouteList new_routes;
+	list<boost::shared_ptr<AudioTrack> > ret;
 
 	/* count existing audio tracks */
 
@@ -1791,6 +1796,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 			track->set_remote_control_id (ntracks());
 
+			new_routes.push_back (track);
 			ret.push_back (track);
 		}
 
@@ -1804,23 +1810,22 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		--how_many;
 	}
 
-	if (!ret.empty()) {
-		for (vector<boost::shared_ptr<AudioTrack> >::iterator x = ret.begin(); x != ret.end(); ++x) {
-			add_route ((*x), false);
-		}
-		
+	if (!new_routes.empty()) {
+		add_routes (new_routes, false);
 		save_state (_current_snapshot_name);
 	}
 
 	return ret;
 }
 
-shared_ptr<Route>
-Session::new_audio_route (int input_channels, int output_channels)
+Session::RouteList
+Session::new_audio_route (int input_channels, int output_channels, uint32_t how_many)
 {
 	char bus_name[32];
+	uint32_t bus_id = 1;
 	uint32_t n = 0;
 	string port;
+	RouteList ret;
 
 	/* count existing audio busses */
 
@@ -1830,101 +1835,125 @@ Session::new_audio_route (int input_channels, int output_channels)
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
 				if (!(*i)->hidden()) {
-					n++;
+					bus_id++;
 				}
 			}
 		}
 	}
 
-	do {
-		snprintf (bus_name, sizeof(bus_name), "Bus %" PRIu32, n+1);
-		if (route_by_name (bus_name) == 0) {
-			break;
-		}
-		n++;
+	vector<string> physinputs;
+	vector<string> physoutputs;
 
-	} while (n < (UINT_MAX-1));
+	_engine.get_physical_outputs (physoutputs);
+	_engine.get_physical_inputs (physinputs);
 
-	try {
-		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
+	while (how_many) {
 
-		if (bus->ensure_io (input_channels, output_channels, false, this)) {
-			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
-					  input_channels, output_channels)
-			      << endmsg;
-		}
+		do {
+			++bus_id;
 
-		for (uint32_t x = 0; x < bus->n_inputs(); ++x) {
-			
-			port = "";
+			snprintf (bus_name, sizeof(bus_name), "Bus %" PRIu32, bus_id);
 
-			if (input_auto_connect & AutoConnectPhysical) {
-				port = _engine.get_nth_physical_input ((n+x)%n_physical_inputs);
-			} 
-			
-			if (port.length() && bus->connect_input (bus->input (x), port, this)) {
+			if (route_by_name (bus_name) == 0) {
 				break;
 			}
-		}
 
-		for (uint32_t x = 0; x < bus->n_outputs(); ++x) {
+		} while (bus_id < (UINT_MAX-1));
+
+		try {
+			shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
 			
-			port = "";
-
-			if (output_auto_connect & AutoConnectPhysical) {
-				port = _engine.get_nth_physical_input ((n+x)%n_physical_outputs);
-			} else if (output_auto_connect & AutoConnectMaster) {
-				if (_master_out) {
-					port = _master_out->input (x%_master_out->n_inputs())->name();
+			if (bus->ensure_io (input_channels, output_channels, false, this)) {
+				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+							 input_channels, output_channels)
+				      << endmsg;
+			}
+			
+			for (uint32_t x = 0; x < bus->n_inputs(); ++x) {
+				
+				port = "";
+				
+				if (input_auto_connect & AutoConnectPhysical) {
+					port = physinputs[((n+x)%n_physical_inputs)];
+				} 
+				
+				if (port.length() && bus->connect_input (bus->input (x), port, this)) {
+					break;
 				}
 			}
-
-			if (port.length() && bus->connect_output (bus->output (x), port, this)) {
-				break;
+			
+			for (uint32_t x = 0; x < bus->n_outputs(); ++x) {
+				
+				port = "";
+				
+				if (output_auto_connect & AutoConnectPhysical) {
+					port = physoutputs[((n+x)%n_physical_outputs)];
+				} else if (output_auto_connect & AutoConnectMaster) {
+					if (_master_out) {
+						port = _master_out->input (x%_master_out->n_inputs())->name();
+					}
+				}
+				
+				if (port.length() && bus->connect_output (bus->output (x), port, this)) {
+					break;
+				}
 			}
+			
+			if (_control_out) {
+				vector<string> cports;
+				uint32_t ni = _control_out->n_inputs();
+				
+				for (uint32_t n = 0; n < ni; ++n) {
+					cports.push_back (_control_out->input(n)->name());
+				}
+				bus->set_control_outs (cports);
+			}
+
+			ret.push_back (bus);
+		}
+	
+
+		catch (failed_constructor &err) {
+			error << _("Session: could not create new audio route.") << endmsg;
+			ret.clear ();
+			return ret;
 		}
 
-		if (_control_out) {
-			vector<string> cports;
-			uint32_t ni = _control_out->n_inputs();
-
-			for (uint32_t n = 0; n < ni; ++n) {
-				cports.push_back (_control_out->input(n)->name());
-			}
-			bus->set_control_outs (cports);
-		}
-		
-		add_route (bus);
-		return bus;
+		--how_many;
 	}
 
-	catch (failed_constructor &err) {
-		error << _("Session: could not create new audio route.") << endmsg;
-		return shared_ptr<Route> ((Route*) 0);
+	if (!ret.empty()) {
+		add_routes (ret, false);
+		save_state (_current_snapshot_name);
 	}
+
+	return ret;
+
 }
 
 void
-Session::add_route (boost::shared_ptr<Route> route, bool save)
+Session::add_routes (RouteList& new_routes, bool save)
 {
 	{ 
 		RCUWriter<RouteList> writer (routes);
 		shared_ptr<RouteList> r = writer.get_copy ();
-		r->push_front (route);
+		r->insert (r->end(), new_routes.begin(), new_routes.end());
 		resort_routes_using (r);
 	}
 
-	route->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), route));
-	route->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
-	route->output_changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
-	route->redirects_changed.connect (mem_fun (*this, &Session::update_latency_compensation_proxy));
-
-	if (route->master()) {
-		_master_out = route;
-	}
-
-	if (route->control()) {
-		_control_out = route;
+	for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
+		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), (*x)));
+		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
+		(*x)->output_changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
+		(*x)->redirects_changed.connect (mem_fun (*this, &Session::update_latency_compensation_proxy));
+		
+		if ((*x)->master()) {
+			_master_out = (*x);
+		}
+		
+		if ((*x)->control()) {
+			_control_out = (*x);
+		}
 	}
 
 	set_dirty();
@@ -1933,7 +1962,7 @@ Session::add_route (boost::shared_ptr<Route> route, bool save)
 		save_state (_current_snapshot_name);
 	}
 
-	RouteAdded (route); /* EMIT SIGNAL */
+	RouteAdded (new_routes); /* EMIT SIGNAL */
 }
 
 void

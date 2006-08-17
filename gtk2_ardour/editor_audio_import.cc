@@ -332,7 +332,7 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 		
 	case ImportAsTrack:
 	{ 
-		vector<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Normal, 1));
+		list<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Normal, 1));
 		if (!at.empty()) {
 			copy = new AudioRegion (region);
 			at.front()->diskstream()->playlist()->add_region (*copy, pos);
@@ -342,7 +342,7 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 
 	case ImportAsTapeTrack:
 	{
-		vector<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Destructive));
+		list<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Destructive));
 		if (!at.empty()) {
 			copy = new AudioRegion (region);
 			at.front()->diskstream()->playlist()->add_region (*copy, pos);
