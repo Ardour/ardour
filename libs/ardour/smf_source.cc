@@ -34,6 +34,8 @@
 
 #include <ardour/smf_source.h>
 #include <ardour/session.h>
+#include <ardour/midi_ring_buffer.h>
+#include <ardour/midi_util.h>
 
 #include "i18n.h"
 
@@ -47,11 +49,22 @@ uint64_t                              SMFSource::header_position_offset;
 */
 
 SMFSource::SMFSource (std::string path, Flag flags)
-	: MidiSource (region_name_from_path(path)), _flags (flags)
+	: MidiSource (region_name_from_path(path))
+	, _channel(0)
+	, _flags (flags)
+	, _allow_remove_if_empty(true)
+	, _timeline_position (0)
+	, _fd (0)
+	, _last_ev_time(0)
+	, _track_size(0)
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
 
 	if (init (path, false)) {
+		throw failed_constructor ();
+	}
+	
+	if (open()) {
 		throw failed_constructor ();
 	}
 	
@@ -61,7 +74,14 @@ SMFSource::SMFSource (std::string path, Flag flags)
 }
 
 SMFSource::SMFSource (const XMLNode& node)
-	: MidiSource (node), _flags (Flag (Writable|CanRename))
+	: MidiSource (node)
+	, _channel(0)
+	, _flags (Flag (Writable|CanRename))
+	, _allow_remove_if_empty(true)
+	, _timeline_position (0)
+	, _fd (0)
+	, _last_ev_time(0)
+	, _track_size(0)
 {
 	/* constructor used for existing internal-to-session files. file must exist */
 
@@ -70,6 +90,10 @@ SMFSource::SMFSource (const XMLNode& node)
 	}
 	
 	if (init (_name, true)) {
+		throw failed_constructor ();
+	}
+	
+	if (open()) {
 		throw failed_constructor ();
 	}
 	
@@ -95,9 +119,8 @@ SMFSource::removable () const
 int
 SMFSource::init (string pathstr, bool must_exist)
 {
-	//bool is_new = false;
+	bool is_new = false;
 
-	/*
 	if (!find (pathstr, must_exist, is_new)) {
 		cerr << "cannot find " << pathstr << " with me = " << must_exist << endl;
 		return -1;
@@ -106,38 +129,218 @@ SMFSource::init (string pathstr, bool must_exist)
 	if (is_new && must_exist) {
 		return -1;
 	}
-	*/
-
-	// Yeah, we found it.  Swear.
 
 	assert(_name.find("/") == string::npos);
 	return 0;
 }
 
 int
+SMFSource::open()
+{
+	cerr << "Opening SMF file " << path() << " writeable: " << writable() << endl;
+
+	// FIXME
+	//_fd = fopen(path().c_str(), writable() ? "r+" : "r");
+	_fd = fopen(path().c_str(), "w+");
+
+	// FIXME: pad things out so writing the header later doesn't overwrite data
+	flush_header();
+
+	// FIXME
+	//return (_fd == 0) ? -1 : 0;
+	return 0;
+}
+
+int
 SMFSource::update_header (jack_nframes_t when, struct tm&, time_t)
 {
-	return 0;
+	_timeline_position = when;
+	return flush_header();
 }
 
 int
 SMFSource::flush_header ()
 {
+	// FIXME: write timeline position somehow?
+	
+	cerr << "SMF Flushing header\n";
+
+	assert(_fd);
+
+	const uint16_t type     = GUINT16_TO_BE(0);    // SMF Type 0 (single track)
+	const uint16_t ntracks  = GUINT16_TO_BE(1);    // Number of tracks (always 1 for Type 0)
+	const uint16_t division = GUINT16_TO_BE(1920); // FIXME FIXME FIXME PPQN
+
+	char data[6];
+	memcpy(data, &type, 2);
+	memcpy(data+2, &ntracks, 2);
+	memcpy(data+4, &division, 2);
+
+	_fd = freopen(path().c_str(), "r+", _fd);
+	assert(_fd);
+	fseek(_fd, 0, 0);
+	write_chunk("MThd", 6, data);
+	//if (_track_size > 0) {
+		write_chunk_header("MTrk", _track_size); 
+	//}
+
+	_header_size = 22;
+
+	fflush(_fd);
+
+	return 0;
+}
+
+/** Returns the offset of the first event in the file with a time past @a start,
+ * relative to the start of the source.
+ *
+ * Returns -1 if not found.
+ */
+/*
+long
+SMFSource::find_first_event_after(jack_nframes_t start)
+{
+	// FIXME: obviously this is slooow
+	
+	fseek(_fd, _header_size, 0);
+
+	while ( ! feof(_fd) ) {
+		const uint32_t delta_time = read_var_len();
+
+		if (delta_time > start)
+			return delta_time;
+	}
+
+	return -1;
+}
+*/
+
+/** Read an event from the current position in file.
+ *
+ * File position MUST be at the beginning of a delta time, or this will die very messily.
+ * ev.buffer must be of size ev.size, and large enough for the event.
+ *
+ * Returns 0 on success, -1 if EOF.
+ */
+int
+SMFSource::read_event(MidiEvent& ev) const
+{
+#if 0
+	if (feof(_fd)) {
+		return -1;
+	}
+
+	uint32_t delta_time = read_var_len();
+	int status = fgetc(_fd);
+	assert(status != EOF); // FIXME die gracefully
+	ev.buffer[0] = (unsigned char)status;
+	ev.size = midi_event_size(ev.buffer[0]) + 1;
+	fread(ev.buffer+1, 1, ev.size - 1, _fd);
+	
+	printf("SMF - read event, delta = %u, size = %zu, data = ",
+		delta_time, ev.size);
+	for (size_t i=0; i < ev.size; ++i) {
+		printf("%X ", ev.buffer[i]);
+	}
+	printf("\n");
+#endif
 	return 0;
 }
 
 jack_nframes_t
-SMFSource::read_unlocked (MidiBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const
+SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const
 {
-	dst.clear();
+#if 0
+	cerr << "SMF - read " << start << " -- " << cnt;
+
+	// FIXME: ugh
+	unsigned char ev_buf[MidiBuffer::max_event_size()];
+	MidiEvent ev;
+	ev.time = 0;
+	ev.size = MidiBuffer::max_event_size();
+	ev.buffer = ev_buf;
+
+	while (true) {
+		int ret = read_event(ev);
+		if (ret == -1) {
+			break;
+		}
+
+		if (ev.time >= start) {
+			if (ev.time > start + cnt) {
+				break;
+			} else {
+				dst.write(ev);
+			}
+		}
+	}
+#endif
+	cerr << "SMF pretending to read" << endl;
+
+	MidiEvent ev;
+	RawMidi data[4];
+
+	const char note = rand()%30 + 30;
+	
+	ev.buffer = data;
+	ev.time = start+1; // FIXME: bug at 0?
+	ev.size = 3;
+
+	data[0] = 0x90;
+	data[1] = note;
+	data[2] = 120;
+
+	dst.write(ev);
+	
+	ev.buffer = data;
+	ev.time = start + (jack_nframes_t)(cnt * 8.0/10.0);
+	ev.size = 3;
+
+	data[0] = 0x80;
+	data[1] = note;
+	data[2] = 64;
+	
+	dst.write(ev);
+
+	//dst.clear();
+
 	return cnt;
 }
 
 jack_nframes_t
-SMFSource::write_unlocked (MidiBuffer& src, jack_nframes_t cnt)
+SMFSource::write_unlocked (MidiRingBuffer& src, jack_nframes_t cnt)
 {
+	cerr << "SMF WRITE -- " << _length << "--" << cnt << endl;
+	
+	MidiBuffer buf(1024); // FIXME: allocation, size?
+	src.read(buf, /*_length*/0, _length + cnt); // FIXME?
+
+	fseek(_fd, 0, SEEK_END);
+
+	// FIXME: start of source time?
+	
+	for (size_t i=0; i < buf.size(); ++i) {
+		const MidiEvent& ev = buf[i];
+		assert(ev.time >= _timeline_position);
+		uint32_t delta_time = (ev.time - _timeline_position) - _last_ev_time;
+		
+		printf("SMF - writing event, delta = %u, size = %zu, data = ",
+			delta_time, ev.size);
+		for (size_t i=0; i < ev.size; ++i) {
+			printf("%X ", ev.buffer[i]);
+		}
+		printf("\n");
+		
+		size_t stamp_size = write_var_len(delta_time);
+		fwrite(ev.buffer, 1, ev.size, _fd);
+		_last_ev_time += delta_time;
+		_track_size += stamp_size + ev.size;
+	}
+
+	fflush(_fd);
+
 	ViewDataRangeReady (_length, cnt); /* EMIT SIGNAL */
-	_length += cnt;
+	update_length(_length, cnt);
 	return cnt;
 }
 
@@ -443,3 +646,65 @@ SMFSource::is_empty (string path)
 	return false;
 }
 
+
+void
+SMFSource::write_chunk_header(char id[4], uint32_t length)
+{
+	const uint32_t length_be = GUINT32_TO_BE(length);
+
+	fwrite(id, 1, 4, _fd);
+	fwrite(&length_be, 4, 1, _fd);
+}
+
+void
+SMFSource::write_chunk(char id[4], uint32_t length, void* data)
+{
+	write_chunk_header(id, length);
+	
+	fwrite(data, 1, length, _fd);
+}
+
+/** Returns the size (in bytes) of the value written. */
+size_t
+SMFSource::write_var_len(uint32_t value)
+{
+	size_t ret = 0;
+
+	uint32_t buffer = value & 0x7F;
+
+	while ( (value >>= 7) ) {
+		buffer <<= 8;
+		buffer |= ((value & 0x7F) | 0x80);
+	}
+
+	while (true) {
+		printf("Writing var len byte %X\n", (unsigned char)buffer);
+		++ret;
+		fputc(buffer, _fd);
+		if (buffer & 0x80)
+			buffer >>= 8;
+		else
+			break;
+	}
+
+	return ret;
+}
+
+uint32_t
+SMFSource::read_var_len() const
+{
+	assert(!feof(_fd));
+
+	uint32_t value;
+	unsigned char c;
+
+	if ( (value = getc(_fd)) & 0x80 ) {
+		value &= 0x7F;
+		do {
+			assert(!feof(_fd));
+			value = (value << 7) + ((c = getc(_fd)) & 0x7F);
+		} while (c & 0x80);
+	}
+
+	return value;
+}

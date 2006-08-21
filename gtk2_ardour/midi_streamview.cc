@@ -366,7 +366,8 @@ void
 MidiStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t cnt, Source * src)
 {
 	// this is called from the butler thread for now
-	// yeah we need a "peak" building thread or something.  whatever. :)
+	// yeah we need a "peak" building thread or something, though there's not really any
+	// work for it to do...  whatever. :)
 	
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), start, cnt, src));
 	

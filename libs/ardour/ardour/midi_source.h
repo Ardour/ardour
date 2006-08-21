@@ -37,7 +37,7 @@ using std::string;
 
 namespace ARDOUR {
 
-class MidiBuffer;
+class MidiRingBuffer;
 
 /** Source for MIDI data */
 class MidiSource : public Source
@@ -47,8 +47,8 @@ class MidiSource : public Source
 	MidiSource (const XMLNode&);
 	virtual ~MidiSource ();
 
-	virtual jack_nframes_t read (MidiBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const;
-	virtual jack_nframes_t write (MidiBuffer& src, jack_nframes_t cnt);
+	virtual jack_nframes_t read (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const;
+	virtual jack_nframes_t write (MidiRingBuffer& src, jack_nframes_t cnt);
 
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_write_completed () {}
@@ -70,8 +70,8 @@ class MidiSource : public Source
 	int set_state (const XMLNode&);
 
   protected:
-	virtual jack_nframes_t read_unlocked (MidiBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const = 0;
-	virtual jack_nframes_t write_unlocked (MidiBuffer& dst, jack_nframes_t cnt) = 0;
+	virtual jack_nframes_t read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const = 0;
+	virtual jack_nframes_t write_unlocked (MidiRingBuffer& dst, jack_nframes_t cnt) = 0;
 	
 	mutable Glib::Mutex _lock;
 	string              _captured_for;

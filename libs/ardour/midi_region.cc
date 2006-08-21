@@ -198,6 +198,7 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst,
 		       jack_nframes_t position, jack_nframes_t dur, 
 		       uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
 {
+/*
 	MidiEvent ev;
 	RawMidi data[4];
 
@@ -223,7 +224,7 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst,
 	_read_data_count += dur;
 
 	return dur;
-#if 0
+*/
 	jack_nframes_t internal_offset;
 	jack_nframes_t buf_offset;
 	jack_nframes_t to_read;
@@ -234,8 +235,8 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst,
 	
 	if (position < _position) {
 		internal_offset = 0;
-		buf_offset = _position - position;
-		cnt -= buf_offset;
+		//buf_offset = _position - position;
+		//cnt -= buf_offset;
 	} else {
 		internal_offset = position - _position;
 		buf_offset = 0;
@@ -246,7 +247,7 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst,
 	}
 	
 
-	if ((to_read = min (cnt, _length - internal_offset)) == 0) {
+	if ((to_read = min (dur, _length - internal_offset)) == 0) {
 		return 0; /* read nothing */
 	}
 
@@ -260,14 +261,13 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst,
 	_read_data_count = 0;
 
 	MidiSource& src = midi_source(chan_n);
-	if (src.read (buf, _start + internal_offset, to_read) != to_read) {
+	if (src.read (dst, _start + internal_offset, to_read) != to_read) {
 		return 0; /* "read nothing" */
 	}
 
 	_read_data_count += src.read_data_count();
 
 	return to_read;
-#endif
 }
 	
 XMLNode&

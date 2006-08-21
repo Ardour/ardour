@@ -430,6 +430,7 @@ Session::setup_raid_path (string path)
 		fspath += tape_dir_name;
 		
 		AudioFileSource::set_search_path (fspath);
+		SMFSource::set_search_path (fspath); // FIXME: should be different
 
 		return;
 	}
@@ -488,6 +489,7 @@ Session::setup_raid_path (string path)
 	/* set the AudioFileSource search path */
 
 	AudioFileSource::set_search_path (fspath);
+	SMFSource::set_search_path (fspath); // FIXME: should be different
 
 	/* reset the round-robin soundfile path thingie */
 

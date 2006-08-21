@@ -21,13 +21,14 @@
 #ifndef __ardour_smf_filesource_h__ 
 #define __ardour_smf_filesource_h__
 
+#include <cstdio>
 #include <time.h>
 
 #include <ardour/midi_source.h>
 
 namespace ARDOUR {
 
-class MidiBuffer;
+class MidiRingBuffer;
 
 /** Standard Midi File (Type 0) Source */
 class SMFSource : public MidiSource {
@@ -84,23 +85,35 @@ class SMFSource : public MidiSource {
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-  protected:
+  private:
 
 	int init (string idstr, bool must_exist);
 
-	jack_nframes_t read_unlocked (MidiBuffer& dst, jack_nframes_t start, jack_nframes_t cn) const;
-	jack_nframes_t write_unlocked (MidiBuffer& dst, jack_nframes_t cnt);
+	jack_nframes_t read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cn) const;
+	jack_nframes_t write_unlocked (MidiRingBuffer& dst, jack_nframes_t cnt);
 
 	bool find (std::string path, bool must_exist, bool& is_new);
 	bool removable() const;
 	bool writable() const { return _flags & Writable; }
 	
-	uint16_t      _channel;
-	string        _path;
-	Flag          _flags;
-	string        _take_id;
-	bool          _allow_remove_if_empty;
-	uint64_t      _timeline_position;
+	int open();
+	
+	void     write_chunk_header(char id[4], uint32_t length);
+	void     write_chunk(char id[4], uint32_t length, void* data);
+	size_t   write_var_len(uint32_t val);
+	uint32_t read_var_len() const;
+	int      read_event(MidiEvent& ev) const;
+
+	uint16_t       _channel;
+	string         _path;
+	Flag           _flags;
+	string         _take_id;
+	bool           _allow_remove_if_empty;
+	uint64_t       _timeline_position;
+	FILE*          _fd;
+	jack_nframes_t _last_ev_time; // last frame time written, relative to source start
+	uint32_t       _track_size;
+	uint32_t       _header_size;
 
 	static string _search_path;
 };

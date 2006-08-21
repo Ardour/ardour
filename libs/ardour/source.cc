@@ -53,6 +53,7 @@ Source::Source (string name, DataType type)
 	_name = name;
 	_use_cnt = 0;
 	_timestamp = 0;
+	_length = 0;
 }
 
 Source::Source (const XMLNode& node) 
@@ -60,6 +61,7 @@ Source::Source (const XMLNode& node)
 {
 	_use_cnt = 0;
 	_timestamp = 0;
+	_length = 0;
 
 	if (set_state (node) || _type == DataType::NIL) {
 		throw failed_constructor();

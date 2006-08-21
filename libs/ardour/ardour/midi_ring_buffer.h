@@ -192,15 +192,20 @@ MidiRingBuffer::read(MidiBuffer& dst, jack_nframes_t start, jack_nframes_t end)
 	size_t         count         = 0;
 	size_t         limit         = read_space();
 
+	assert(time >= start); // FIXME: deal with skipped cycles/lost notes somehow
+	
 	while (time <= end && limit > 0) {
 		MidiEvent* const read_ev = &_ev_buf[priv_read_ptr];
 		if (time >= start) {
 			dst.push_back(*read_ev);
-			printf("MRB - read %xd %d %d with time %u at index %zu\n",
+			printf("MRB - read %#X %d %d with time %u at index %zu\n",
 				read_ev->buffer[0], read_ev->buffer[1], read_ev->buffer[2], read_ev->time,
 				priv_read_ptr);
 		} else {
-			cerr << "MRB: LOST EVENT!" << endl;
+			printf("MRB - SKIPPING - %#X %d %d with time %u at index %zu\n",
+				read_ev->buffer[0], read_ev->buffer[1], read_ev->buffer[2], read_ev->time,
+				priv_read_ptr);
+			break;
 		}
 
 		clear_event(priv_read_ptr);
@@ -215,7 +220,8 @@ MidiRingBuffer::read(MidiBuffer& dst, jack_nframes_t start, jack_nframes_t end)
 	}
 	
 	g_atomic_int_set(&_read_ptr, priv_read_ptr);
-	printf("(R) read space: %zu\n", read_space());
+	
+	//printf("(R) read space: %zu\n", read_space());
 
 	return count;
 }

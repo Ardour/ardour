@@ -535,6 +535,8 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 		// Pump entire port buffer into the ring buffer (FIXME!)
 		_capture_buf->write(_source_port->get_midi_buffer(), transport_frame);
 
+		// FIXME: hackitty hack, don't come back
+		//_write_source->ViewDataRangeReady (_write_source->length(), rec_nframes); /* EMIT SIGNAL */
 		/*
 		   for (size_t i=0; i < _source_port->size(); ++i) {
 		   cerr << "DISKSTREAM GOT EVENT(1) " << i << "!!\n";
@@ -562,7 +564,7 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 
 		/* can't do actual capture yet - waiting for latency effects to finish before we start*/
 
-		throw; // forget all that jazz!
+		// Ummm.. well, I suppose we'll just hang out for a bit?
 
 		playback_distance = nframes;
 
@@ -629,19 +631,19 @@ MidiDiskstream::commit (jack_nframes_t nframes)
 	if (adjust_capture_position) {
 		_capture_buf->increment_write_ptr (adjust_capture_position);
 	}
-
+*/
 	if (adjust_capture_position != 0) {
 		capture_captured += adjust_capture_position;
 		adjust_capture_position = 0;
 	}
 
 	if (_slaved) {
-		need_butler = _playback_buf->write_space() >= _playback_buf->bufsize() / 2;
+		need_butler = _playback_buf->write_space() >= _playback_buf->capacity() / 2;
 	} else {
 		need_butler = _playback_buf->write_space() >= disk_io_chunk_frames
 			|| _capture_buf->read_space() >= disk_io_chunk_frames;
 	}
-	*/
+	
 	state_lock.unlock();
 
 	_processed = false;
@@ -849,7 +851,7 @@ MidiDiskstream::do_refill ()
 	}
 
 	if (file_frame == max_frames) {
-		cerr << "No refill 4 (EOF)\n";
+		//cerr << "No refill 4 (EOF)\n";
 
 		/* at end: nothing to do */
 
@@ -905,10 +907,55 @@ out:
 int
 MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 {
-	/* hey, so did you write that data? */
+	uint32_t to_write;
+	int32_t ret = 0;
+	// FIXME: I'd be lying if I said I knew what this thing was
+	//RingBufferNPT<CaptureTransition>::rw_vector transvec;
+	jack_nframes_t total;
 
-	// oh yeah, you bet.  wrote it good.  honest.
-	
+	_write_data_count = 0;
+
+	total = _capture_buf->read_space();
+
+
+	// FIXME: put this condition back in! (removed for testing)
+	if (total == 0) { // || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
+		//cerr << "MDS - no flush 1\n";
+		goto out;
+	}
+
+	/* if there are 2+ chunks of disk i/o possible for
+	   this track, let the caller know so that it can arrange
+	   for us to be called again, ASAP.
+
+	   if we are forcing a flush, then if there is* any* extra
+	   work, let the caller know.
+
+	   if we are no longer recording and there is any extra work,
+	   let the caller know too.
+	   */
+
+	if (total >= 2 * disk_io_chunk_frames || ((force_flush || !was_recording) && total > disk_io_chunk_frames)) {
+		ret = 1;
+	} 
+
+	//to_write = min (disk_io_chunk_frames, (jack_nframes_t) vector.len[0]);
+	to_write = disk_io_chunk_frames;
+
+	assert(!destructive());
+
+	if ((!_write_source) || _write_source->write (*_capture_buf, to_write) != to_write) {
+		//cerr << "MDS - no flush 2\n";
+		error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
+		return -1;
+	} else {
+		//cerr << "MDS - flushed\n";
+	}
+
+	//(*chan).curr_capture_cnt += to_write;
+
+out:
+	//return ret;
 	return 0;
 }
 
@@ -1081,7 +1128,7 @@ MidiDiskstream::finish_capture (bool rec_monitors_input)
 
 	CaptureInfo* ci = new CaptureInfo;
 	
-	ci->start  =  capture_start_frame;
+	ci->start  = capture_start_frame;
 	ci->frames = capture_captured;
 	
 	/* XXX theoretical race condition here. Need atomic exchange ? 
@@ -1344,8 +1391,10 @@ MidiDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 	if (_write_source && mark_write_complete) {
 		_write_source->mark_streaming_write_completed ();
 	}
-	use_new_write_source ();
-	assert(_write_source);
+
+	if (!_write_source) {
+		use_new_write_source ();
+	}
 }
 
 int
@@ -1462,6 +1511,9 @@ MidiDiskstream::get_playback(MidiBuffer& dst, jack_nframes_t start, jack_nframes
 	for (size_t i=0; i < dst.size(); ++i) {
 		assert(dst[i].time >= start);
 		assert(dst[i].time <= end);
+		cerr << "Translating event stamp " << dst[i].time << " to ";
 		dst[i].time -= start;
+		cerr << dst[i].time << endl;
+
 	}
 }
