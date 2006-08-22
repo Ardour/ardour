@@ -51,12 +51,12 @@ uint64_t                              SMFSource::header_position_offset;
 SMFSource::SMFSource (std::string path, Flag flags)
 	: MidiSource (region_name_from_path(path))
 	, _channel(0)
-	, _flags (flags)
+	, _flags (Flag(flags | Writable)) // FIXME: this needs to be writable for now
 	, _allow_remove_if_empty(true)
 	, _timeline_position (0)
 	, _fd (0)
 	, _last_ev_time(0)
-	, _track_size(0)
+	, _track_size(4) // compensate for the EOT event
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
 
@@ -81,7 +81,7 @@ SMFSource::SMFSource (const XMLNode& node)
 	, _timeline_position (0)
 	, _fd (0)
 	, _last_ev_time(0)
-	, _track_size(0)
+	, _track_size(4) // compensate for the EOT event
 {
 	/* constructor used for existing internal-to-session files. file must exist */
 
@@ -225,7 +225,6 @@ SMFSource::find_first_event_after(jack_nframes_t start)
 int
 SMFSource::read_event(MidiEvent& ev) const
 {
-#if 0
 	if (feof(_fd)) {
 		return -1;
 	}
@@ -243,14 +242,13 @@ SMFSource::read_event(MidiEvent& ev) const
 		printf("%X ", ev.buffer[i]);
 	}
 	printf("\n");
-#endif
+	
 	return 0;
 }
 
 jack_nframes_t
 SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const
 {
-#if 0
 	cerr << "SMF - read " << start << " -- " << cnt;
 
 	// FIXME: ugh
@@ -274,7 +272,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframe
 			}
 		}
 	}
-#endif
+#if 0
 	cerr << "SMF pretending to read" << endl;
 
 	MidiEvent ev;
@@ -303,7 +301,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframe
 	dst.write(ev);
 
 	//dst.clear();
-
+#endif
 	return cnt;
 }
 
@@ -395,6 +393,15 @@ SMFSource::mark_streaming_write_completed ()
 	if (!writable()) {
 		return;
 	}
+	
+	cerr << "SMF - Writing EOT\n";
+
+	fseek(_fd, 0, SEEK_END);
+	write_var_len(1); // whatever...
+	char eot[4] = { 0xFF, 0x2F, 0x00 }; // end-of-track meta-event
+	fwrite(eot, 1, 4, _fd);
+	fflush(_fd);
+
 #if 0
 	Glib::Mutex::Lock lm (_lock);
 
