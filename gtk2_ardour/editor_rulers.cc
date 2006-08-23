@@ -215,7 +215,7 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	if (session == 0 || !ruler_pressed_button) {
 		return FALSE;
 	}
-
+	
 	double wcx=0,wcy=0;
 	double cx=0,cy=0;
 
@@ -231,24 +231,23 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	
 	jack_nframes_t where = leftmost_frame + pixel_to_frame (x);
 
-	/// ripped from maybe_autoscroll
+
+	/// ripped from maybe_autoscroll, and adapted to work here
 	jack_nframes_t one_page = (jack_nframes_t) rint (canvas_width * frames_per_unit);
 	jack_nframes_t rightmost_frame = leftmost_frame + one_page;
 
-	jack_nframes_t frame = pixel_to_frame (cx);
-
 	if (autoscroll_timeout_tag < 0) {
-		if (frame > rightmost_frame) {
+		if (where > rightmost_frame) {
 			if (rightmost_frame < max_frames) {
-				start_canvas_autoscroll (1);
+				start_canvas_autoscroll (10);
 			}
-		} else if (frame < leftmost_frame) {
+		} else if (where <= leftmost_frame) {
 			if (leftmost_frame > 0) {
 				start_canvas_autoscroll (-1);
 			}
 		} 
 	} else {
-		if (frame >= leftmost_frame && frame < rightmost_frame) {
+		if (where >= leftmost_frame && where < rightmost_frame) {
 			stop_canvas_autoscroll ();
 		}
 	}
