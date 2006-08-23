@@ -628,7 +628,7 @@ Editor::start_canvas_autoscroll (int dir)
 	stop_canvas_autoscroll ();
 
 	autoscroll_direction = dir;
-	autoscroll_distance = (jack_nframes_t) floor (current_page_frames()/100.0);
+	autoscroll_distance = (jack_nframes_t) floor (current_page_frames()/50.0);
 	autoscroll_cnt = 0;
 	
 	/* do it right now, which will start the repeated callbacks */
