@@ -225,9 +225,9 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst,
 
 	return dur;
 */
-	jack_nframes_t internal_offset;
-	jack_nframes_t buf_offset;
-	jack_nframes_t to_read;
+	jack_nframes_t internal_offset = 0;
+	jack_nframes_t src_offset      = 0;
+	jack_nframes_t to_read         = 0;
 	
 	/* precondition: caller has verified that we cover the desired section */
 
@@ -235,11 +235,11 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst,
 	
 	if (position < _position) {
 		internal_offset = 0;
-		//buf_offset = _position - position;
-		//cnt -= buf_offset;
+		src_offset = _position - position;
+		dur -= src_offset;
 	} else {
 		internal_offset = position - _position;
-		buf_offset = 0;
+		src_offset = 0;
 	}
 
 	if (internal_offset >= _length) {
@@ -261,11 +261,11 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst,
 	_read_data_count = 0;
 
 	MidiSource& src = midi_source(chan_n);
-	if (src.read (dst, _start + internal_offset, to_read) != to_read) {
+	if (src.read (dst, _start + internal_offset, to_read, _position) != to_read) {
 		return 0; /* "read nothing" */
 	}
 
-	_read_data_count += src.read_data_count();
+	_read_data_count += src.read_data_count(); // FIXME: semantics?
 
 	return to_read;
 }

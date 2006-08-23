@@ -159,6 +159,7 @@ class MidiDiskstream : public Diskstream
 	RingBufferNPT<CaptureTransition>* _capture_transition_buf;
 	//RingBufferNPT<RawMidi>::rw_vector _playback_vector;
 	//RingBufferNPT<RawMidi>::rw_vector _capture_vector;
+	jack_nframes_t _last_flush_frame;
 };
 
 }; /* namespace ARDOUR */

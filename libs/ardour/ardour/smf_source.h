@@ -70,6 +70,7 @@ class SMFSource : public MidiSource {
 
 	int update_header (jack_nframes_t when, struct tm&, time_t);
 	int flush_header ();
+	int flush_footer ();
 
 	int move_to_trash (const string trash_dir_name);
 
@@ -89,7 +90,7 @@ class SMFSource : public MidiSource {
 
 	int init (string idstr, bool must_exist);
 
-	jack_nframes_t read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cn) const;
+	jack_nframes_t read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cn, jack_nframes_t stamp_offset) const;
 	jack_nframes_t write_unlocked (MidiRingBuffer& dst, jack_nframes_t cnt);
 
 	bool find (std::string path, bool must_exist, bool& is_new);
@@ -113,7 +114,7 @@ class SMFSource : public MidiSource {
 	FILE*          _fd;
 	jack_nframes_t _last_ev_time; // last frame time written, relative to source start
 	uint32_t       _track_size;
-	uint32_t       _header_size;
+	uint32_t       _header_size; // size of SMF header, including MTrk chunk header
 
 	static string _search_path;
 };

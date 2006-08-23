@@ -232,7 +232,7 @@ MidiStreamView::setup_rec_box ()
 		
 	} else {
 
-		cerr << "\tNOT rolling, rec_rects = " << rec_rects.size() << " rec_regions = " << rec_regions.size() << endl;
+		// cerr << "\tNOT rolling, rec_rects = " << rec_rects.size() << " rec_regions = " << rec_regions.size() << endl;
 
 		if (!rec_rects.empty() || !rec_regions.empty()) {
 

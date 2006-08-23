@@ -46,8 +46,8 @@ class MidiSource : public Source
 	MidiSource (string name);
 	MidiSource (const XMLNode&);
 	virtual ~MidiSource ();
-
-	virtual jack_nframes_t read (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const;
+	
+	virtual jack_nframes_t read (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt, jack_nframes_t stamp_offset) const;
 	virtual jack_nframes_t write (MidiRingBuffer& src, jack_nframes_t cnt);
 
 	virtual void mark_for_remove() = 0;
@@ -70,7 +70,7 @@ class MidiSource : public Source
 	int set_state (const XMLNode&);
 
   protected:
-	virtual jack_nframes_t read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const = 0;
+	virtual jack_nframes_t read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt, jack_nframes_t stamp_offset) const = 0;
 	virtual jack_nframes_t write_unlocked (MidiRingBuffer& dst, jack_nframes_t cnt) = 0;
 	
 	mutable Glib::Mutex _lock;

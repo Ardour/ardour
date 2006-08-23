@@ -68,6 +68,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	, _source_port(0)
 	, _write_source(0)
 	, _capture_transition_buf(0)
+	, _last_flush_frame(0)
 {
 	/* prevent any write sources from being created */
 
@@ -93,6 +94,7 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	, _source_port(0)
 	, _write_source(0)
 	, _capture_transition_buf(0)
+	, _last_flush_frame(0)
 {
 	in_set_state = true;
 	init (Recordable);
@@ -180,6 +182,8 @@ MidiDiskstream::non_realtime_input_change ()
 	else {
 		seek (_session.transport_frame());
 	}
+
+	_last_flush_frame = _session.transport_frame();
 }
 
 void
@@ -679,6 +683,7 @@ MidiDiskstream::seek (jack_nframes_t frame, bool complete_refill)
 
 	playback_sample = frame;
 	file_frame = frame;
+	_last_flush_frame = frame;
 
 	if (complete_refill) {
 		while ((ret = do_refill_with_alloc ()) > 0) ;
@@ -915,11 +920,15 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 
 	_write_data_count = 0;
 
-	total = _capture_buf->read_space();
+	if (_last_flush_frame > _session.transport_frame()) {
+		_last_flush_frame = _session.transport_frame();
+	}
+
+	total = _session.transport_frame() - _last_flush_frame;
 
 
 	// FIXME: put this condition back in! (removed for testing)
-	if (total == 0) { // || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
+	if (total == 0 || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
 		//cerr << "MDS - no flush 1\n";
 		goto out;
 	}
@@ -946,9 +955,10 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 
 	if ((!_write_source) || _write_source->write (*_capture_buf, to_write) != to_write) {
 		//cerr << "MDS - no flush 2\n";
-		error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
+		error << string_compose(_("MidiDiskstream %1: cannot write to disk"), _id) << endmsg;
 		return -1;
 	} else {
+		_last_flush_frame = _session.transport_frame();
 		//cerr << "MDS - flushed\n";
 	}
 
@@ -1476,9 +1486,14 @@ MidiDiskstream::use_pending_capture_data (XMLNode& node)
 void
 MidiDiskstream::get_playback(MidiBuffer& dst, jack_nframes_t start, jack_nframes_t end)
 {
-	assert(end > start);
 	dst.clear();
 	assert(dst.size() == 0);
+	
+	// I think this happens with reverse varispeed?  maybe?
+	if (end <= start) {
+		return;
+	}
+
 /*
 	cerr << "MIDI Diskstream pretending to read" << endl;
 

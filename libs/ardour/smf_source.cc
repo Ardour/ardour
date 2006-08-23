@@ -56,7 +56,8 @@ SMFSource::SMFSource (std::string path, Flag flags)
 	, _timeline_position (0)
 	, _fd (0)
 	, _last_ev_time(0)
-	, _track_size(4) // compensate for the EOT event
+	, _track_size(4) // 4 bytes for the ever-present EOT event
+	, _header_size(22)
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
 
@@ -81,7 +82,8 @@ SMFSource::SMFSource (const XMLNode& node)
 	, _timeline_position (0)
 	, _fd (0)
 	, _last_ev_time(0)
-	, _track_size(4) // compensate for the EOT event
+	, _track_size(4) // 4 bytes for the ever-present EOT event
+	, _header_size(22)
 {
 	/* constructor used for existing internal-to-session files. file must exist */
 
@@ -139,16 +141,29 @@ SMFSource::open()
 {
 	cerr << "Opening SMF file " << path() << " writeable: " << writable() << endl;
 
-	// FIXME
-	//_fd = fopen(path().c_str(), writable() ? "r+" : "r");
-	_fd = fopen(path().c_str(), "w+");
+	assert(writable()); // FIXME;
 
-	// FIXME: pad things out so writing the header later doesn't overwrite data
-	flush_header();
+	_fd = fopen(path().c_str(), "r+");
 
-	// FIXME
-	//return (_fd == 0) ? -1 : 0;
-	return 0;
+	// File already exists
+	if (_fd) {
+		fseek(_fd, _header_size - 4, 0);
+		uint32_t track_size_be = 0;
+		fread(&track_size_be, 4, 1, _fd);
+		_track_size = GUINT32_FROM_BE(track_size_be);
+		cerr << "SMF - read track size " << _track_size;
+
+	// We're making a new file
+	} else {
+		_fd = fopen(path().c_str(), "w+");
+		_track_size = 0;
+
+		// write a tentative header just to pad things out so writing happens in the right spot
+		flush_header();
+		// FIXME: write the footer here too so it's a valid SMF (screw up writing ATM though)
+	}
+
+	return (_fd == 0) ? -1 : 0;
 }
 
 int
@@ -184,10 +199,21 @@ SMFSource::flush_header ()
 		write_chunk_header("MTrk", _track_size); 
 	//}
 
-	_header_size = 22;
-
 	fflush(_fd);
 
+	return 0;
+}
+
+int
+SMFSource::flush_footer()
+{
+	cerr << "SMF - Writing EOT\n";
+
+	fseek(_fd, 0, SEEK_END);
+	write_var_len(1); // whatever...
+	char eot[4] = { 0xFF, 0x2F, 0x00 }; // end-of-track meta-event
+	fwrite(eot, 1, 4, _fd);
+	fflush(_fd);
 	return 0;
 }
 
@@ -218,13 +244,18 @@ SMFSource::find_first_event_after(jack_nframes_t start)
 /** Read an event from the current position in file.
  *
  * File position MUST be at the beginning of a delta time, or this will die very messily.
- * ev.buffer must be of size ev.size, and large enough for the event.
+ * ev.buffer must be of size ev.size, and large enough for the event.  The returned event
+ * will have it's time field set to it's delta time (so it's the caller's responsibility
+ * to calculate a real time for the event).
  *
- * Returns 0 on success, -1 if EOF.
+ * Returns event length (including status byte) on success, 0 if event was
+ * skipped (eg a meta event), or -1 on EOF (or end of track).
  */
 int
 SMFSource::read_event(MidiEvent& ev) const
 {
+	// - 4 is for the EOT event, which we don't actually want to read
+	//if (feof(_fd) || ftell(_fd) >= _header_size + _track_size - 4) {
 	if (feof(_fd)) {
 		return -1;
 	}
@@ -232,10 +263,24 @@ SMFSource::read_event(MidiEvent& ev) const
 	uint32_t delta_time = read_var_len();
 	int status = fgetc(_fd);
 	assert(status != EOF); // FIXME die gracefully
+	if (status == 0xFF) {
+		assert(!feof(_fd));
+		int type = fgetc(_fd);
+		if ((unsigned char)type == 0x2F) {
+			cerr << "SMF - hit EOT" << endl;
+			return -1; // we hit the logical EOF anyway...
+		} else {
+			ev.size = 0;
+			ev.time = delta_time; // this is needed regardless
+			return 0;
+		}
+	}
+
 	ev.buffer[0] = (unsigned char)status;
 	ev.size = midi_event_size(ev.buffer[0]) + 1;
 	fread(ev.buffer+1, 1, ev.size - 1, _fd);
-	
+	ev.time = delta_time;
+
 	printf("SMF - read event, delta = %u, size = %zu, data = ",
 		delta_time, ev.size);
 	for (size_t i=0; i < ev.size; ++i) {
@@ -243,13 +288,15 @@ SMFSource::read_event(MidiEvent& ev) const
 	}
 	printf("\n");
 	
-	return 0;
+	return ev.size;
 }
 
 jack_nframes_t
-SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt) const
+SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt, jack_nframes_t stamp_offset) const
 {
 	cerr << "SMF - read " << start << " -- " << cnt;
+
+	jack_nframes_t time = 0;
 
 	// FIXME: ugh
 	unsigned char ev_buf[MidiBuffer::max_event_size()];
@@ -258,16 +305,31 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframe
 	ev.size = MidiBuffer::max_event_size();
 	ev.buffer = ev_buf;
 
-	while (true) {
+	// FIXME: it would be an impressive feat to actually make this any slower :)
+	
+	fseek(_fd, _header_size, 0);
+	
+	while (!feof(_fd)) {
 		int ret = read_event(ev);
-		if (ret == -1) {
+		if (ret == -1) { // EOF
+			cerr << "SMF - EOF\n";
 			break;
 		}
+
+		if (ret == 0) { // meta-event (skipped)
+			cerr << "SMF - META\n";
+			time += ev.time; // just accumulate delta time and ignore event
+			continue;
+		}
+
+		time += ev.time; // accumulate delta time
+		ev.time = time; // set ev.time to actual time (relative to source start)
 
 		if (ev.time >= start) {
 			if (ev.time > start + cnt) {
 				break;
 			} else {
+				ev.time += stamp_offset;
 				dst.write(ev);
 			}
 		}
@@ -337,7 +399,10 @@ SMFSource::write_unlocked (MidiRingBuffer& src, jack_nframes_t cnt)
 
 	fflush(_fd);
 
-	ViewDataRangeReady (_length, cnt); /* EMIT SIGNAL */
+	if (buf.size() > 0) {
+		ViewDataRangeReady (_length, cnt); /* EMIT SIGNAL */
+	}
+
 	update_length(_length, cnt);
 	return cnt;
 }
@@ -394,13 +459,7 @@ SMFSource::mark_streaming_write_completed ()
 		return;
 	}
 	
-	cerr << "SMF - Writing EOT\n";
-
-	fseek(_fd, 0, SEEK_END);
-	write_var_len(1); // whatever...
-	char eot[4] = { 0xFF, 0x2F, 0x00 }; // end-of-track meta-event
-	fwrite(eot, 1, 4, _fd);
-	fflush(_fd);
+	flush_footer();
 
 #if 0
 	Glib::Mutex::Lock lm (_lock);
@@ -685,7 +744,7 @@ SMFSource::write_var_len(uint32_t value)
 	}
 
 	while (true) {
-		printf("Writing var len byte %X\n", (unsigned char)buffer);
+		//printf("Writing var len byte %X\n", (unsigned char)buffer);
 		++ret;
 		fputc(buffer, _fd);
 		if (buffer & 0x80)
@@ -701,6 +760,9 @@ uint32_t
 SMFSource::read_var_len() const
 {
 	assert(!feof(_fd));
+
+	//int offset = ftell(_fd);
+	//cerr << "SMF - reading var len at " << offset << endl;
 
 	uint32_t value;
 	unsigned char c;
