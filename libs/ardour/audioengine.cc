@@ -67,11 +67,11 @@ AudioEngine::AudioEngine (string client_name)
     m_meter_thread = 0;
     m_meter_exit = false;
 
-    start_metering_thread();
+    if (connect_to_jack (client_name)) {
+	    throw NoBackendAvailable ();
+    }
     
-	if (connect_to_jack (client_name)) {
-		throw NoBackendAvailable ();
-	}
+    start_metering_thread();
 
 }
 
@@ -81,9 +81,9 @@ AudioEngine::~AudioEngine ()
 		jack_client_close (_jack);
 	}
 
-    if(m_meter_thread) {
-        g_atomic_int_inc(&m_meter_exit);
-    }
+	if(m_meter_thread) {
+		g_atomic_int_inc(&m_meter_exit);
+	}
 }
 
 void
