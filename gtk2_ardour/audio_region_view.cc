@@ -928,13 +928,13 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 		XMLNode &before = audio_region().get_state();
 		audio_region().set_envelope_active(true);
 		XMLNode &after = audio_region().get_state();
-		trackview.session().add_command (new MementoCommand<AudioRegion>(audio_region(), before, after));
+		trackview.session().add_command (new MementoCommand<AudioRegion>(audio_region(), &before, &after));
 	}
 
 	audio_region().envelope().add (fx, y);
 	
 	XMLNode &after = audio_region().envelope().get_state();
-	trackview.session().add_command (new MementoCommand<Curve>(audio_region().envelope(), before, after));
+	trackview.session().add_command (new MementoCommand<Curve>(audio_region().envelope(), &before, &after));
 	trackview.session().commit_reversible_command ();
 }
 

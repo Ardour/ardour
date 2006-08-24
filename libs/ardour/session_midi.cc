@@ -605,7 +605,6 @@ Session::mmc_record_strobe (MIDI::MachineControl &mmc)
 		*/
 		
 		save_state ("", true);
-		save_history ("");
 		g_atomic_int_set (&_record_status, Enabled);
 		RecordStateChanged (); /* EMIT SIGNAL */
 		

@@ -84,8 +84,6 @@ class AxisView : public virtual Selectable
 
 	Gtk::Label name_label;
 
-	bool _selected;
-
 	bool _marked_for_display;
 	
 }; /* class AxisView */

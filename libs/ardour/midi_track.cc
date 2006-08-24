@@ -51,18 +51,17 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 		dflags = MidiDiskstream::Flag (dflags | MidiDiskstream::Recordable);
 	}
 
-	if (mode == Destructive) {
-		dflags = MidiDiskstream::Flag (dflags | MidiDiskstream::Destructive);
-	}
+	assert(mode != Destructive);
 
-	MidiDiskstream* ds = new MidiDiskstream (_session, name, dflags);
+	boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, name, dflags));
+	_session.add_diskstream (ds);
+
+	set_diskstream (boost::dynamic_pointer_cast<MidiDiskstream> (ds));
 	
 	_declickable = true;
 	_freeze_record.state = NoFreeze;
 	_saved_meter_point = _meter_point;
 	_mode = mode;
-
-	set_diskstream (*ds);
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
@@ -76,20 +75,13 @@ MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 
 MidiTrack::~MidiTrack ()
 {
-	if (_diskstream) {
-		_diskstream->unref();
-	}
 }
 
 
 int
-MidiTrack::set_diskstream (MidiDiskstream& ds)
+MidiTrack::set_diskstream (boost::shared_ptr<MidiDiskstream> ds)
 {
-	if (_diskstream) {
-		_diskstream->unref();
-	}
-
-	_diskstream = &ds.ref();
+	_diskstream = ds;
 	_diskstream->set_io (*this);
 	_diskstream->set_destructive (_mode == Destructive);
 
@@ -107,33 +99,33 @@ MidiTrack::set_diskstream (MidiDiskstream& ds)
 int 
 MidiTrack::use_diskstream (string name)
 {
-	MidiDiskstream *dstream;
+	boost::shared_ptr<MidiDiskstream> dstream;
 
-	if ((dstream = dynamic_cast<MidiDiskstream*>(_session.diskstream_by_name (name))) == 0) {
-	  error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), name) << endmsg;
+	if ((dstream = boost::dynamic_pointer_cast<MidiDiskstream>(_session.diskstream_by_name (name))) == 0) {
+		error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), name) << endmsg;
 		return -1;
 	}
 	
-	return set_diskstream (*dstream);
+	return set_diskstream (dstream);
 }
 
 int 
 MidiTrack::use_diskstream (const PBD::ID& id)
 {
-	MidiDiskstream *dstream;
+	boost::shared_ptr<MidiDiskstream> dstream;
 
-	if ((dstream = dynamic_cast<MidiDiskstream*>(_session.diskstream_by_id (id))) == 0) {
+	if ((dstream = boost::dynamic_pointer_cast<MidiDiskstream> (_session.diskstream_by_id (id))) == 0) {
 	  	error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), id) << endmsg;
 		return -1;
 	}
 	
-	return set_diskstream (*dstream);
+	return set_diskstream (dstream);
 }
 
-MidiDiskstream&
+boost::shared_ptr<MidiDiskstream>
 MidiTrack::midi_diskstream() const
 {
-	return *dynamic_cast<MidiDiskstream*>(_diskstream);
+	return boost::dynamic_pointer_cast<MidiDiskstream>(_diskstream);
 }
 
 int
@@ -377,7 +369,7 @@ MidiTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfr
 		return 0;
 	}
 
-	midi_diskstream().check_record_status (start_frame, nframes, can_record);
+	midi_diskstream()->check_record_status (start_frame, nframes, can_record);
 
 	bool send_silence;
 	
@@ -441,7 +433,7 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 		  bool can_record, bool rec_monitors_input)
 {
 	int dret;
-	MidiDiskstream& diskstream = midi_diskstream();
+	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 
 	{
 		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
@@ -468,12 +460,12 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		   */
-		return diskstream.process (transport_frame, 0, 0, can_record, rec_monitors_input);
+		return diskstream->process (transport_frame, 0, 0, can_record, rec_monitors_input);
 	} 
 
 	_silent = false;
 
-	if ((dret = diskstream.process (transport_frame, nframes, offset, can_record, rec_monitors_input)) != 0) {
+	if ((dret = diskstream->process (transport_frame, nframes, offset, can_record, rec_monitors_input)) != 0) {
 
 		silence (nframes, offset);
 
@@ -486,7 +478,7 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 		just_meter_input (start_frame, end_frame, nframes, offset);
 	}
 
-	if (diskstream.record_enabled() && !can_record && !_session.get_auto_input()) {
+	if (diskstream->record_enabled() && !can_record && !_session.get_auto_input()) {
 
 		/* not actually recording, but we want to hear the input material anyway,
 		   at least potentially (depending on monitoring options)
@@ -509,7 +501,7 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 		//const size_t limit = n_process_buffers().get(DataType::AUDIO);
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 
-		diskstream.get_playback(bufs.get_midi(0), start_frame, end_frame);
+		diskstream->get_playback(bufs.get_midi(0), start_frame, end_frame);
 
 		process_output_buffers (bufs, start_frame, end_frame, nframes, offset,
 				(!_session.get_record_enabled() || !_session.get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
@@ -537,7 +529,7 @@ MidiTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack
 
 	silence (nframes, offset);
 
-	return midi_diskstream().process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
+	return midi_diskstream()->process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
 }
 
 void

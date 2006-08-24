@@ -76,7 +76,7 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
-		t->diskstream().RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
+		t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
 
 		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
@@ -577,7 +577,7 @@ RouteUI::reversibly_apply_route_boolean (string name, void (Route::*func)(bool, 
         XMLNode &before = _route->get_state();
         bind(mem_fun(*_route, func), yn, arg)();
         XMLNode &after = _route->get_state();
-        _session.add_command (new MementoCommand<Route>(*_route, before, after));
+        _session.add_command (new MementoCommand<Route>(*_route, &before, &after));
 	_session.commit_reversible_command ();
 }
 
@@ -588,7 +588,7 @@ RouteUI::reversibly_apply_audio_track_boolean (string name, void (AudioTrack::*f
         XMLNode &before = audio_track()->get_state();
 	bind (mem_fun (*audio_track(), func), yn, arg)();
         XMLNode &after = audio_track()->get_state();
-	_session.add_command (new MementoCommand<AudioTrack>(*audio_track(), before, after));
+	_session.add_command (new MementoCommand<AudioTrack>(*audio_track(), &before, &after));
 	_session.commit_reversible_command ();
 }
 
@@ -599,7 +599,7 @@ RouteUI::reversibly_apply_track_boolean (string name, void (Track::*func)(bool, 
         XMLNode &before = track()->get_state();
 	bind (mem_fun (*track(), func), yn, arg)();
         XMLNode &after = track()->get_state();
-	_session.add_command (new MementoCommand<Track>(*track(), before, after));
+	_session.add_command (new MementoCommand<Track>(*track(), &before, &after));
 	_session.commit_reversible_command ();
 }
 
@@ -746,7 +746,6 @@ void
 RouteUI::route_removed ()
 {
 	ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::route_removed));
-	
 	delete this;
 }
 
@@ -930,15 +929,15 @@ RouteUI::midi_track() const
 	return dynamic_cast<MidiTrack*>(_route.get());
 }
 
-Diskstream*
+boost::shared_ptr<Diskstream>
 RouteUI::get_diskstream () const
 {
 	boost::shared_ptr<Track> t;
 
 	if ((t = boost::dynamic_pointer_cast<Track>(_route)) != 0) {
-		return &t->diskstream();
+		return t->diskstream();
 	} else {
-		return 0;
+		return boost::shared_ptr<Diskstream> ((Diskstream*) 0);
 	}
 }
 

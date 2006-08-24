@@ -197,8 +197,8 @@ Session::realtime_stop (bool abort)
 void
 Session::butler_transport_work ()
 {
-	Glib::RWLock::ReaderLock dsm (diskstream_lock);
 	boost::shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 	if (post_transport_work & PostTransportCurveRealloc) {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -207,7 +207,7 @@ Session::butler_transport_work ()
 	}
 
 	if (post_transport_work & PostTransportInputChange) {
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			(*i)->non_realtime_input_change ();
 		}
 	}
@@ -223,7 +223,7 @@ Session::butler_transport_work ()
 		cumulative_rf_motion = 0;
 		reset_rf_scale (0);
 
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
 				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
 					(*i)->seek ((jack_nframes_t) (_transport_frame * (double) (*i)->speed()));
@@ -253,9 +253,9 @@ Session::butler_transport_work ()
 void
 Session::non_realtime_set_speed ()
 {
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->non_realtime_set_speed ();
 	}
 }
@@ -263,9 +263,9 @@ Session::non_realtime_set_speed ()
 void
 Session::non_realtime_overwrite ()
 {
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if ((*i)->pending_overwrite) {
 			(*i)->overwrite_existing_buffers ();
 		}
@@ -281,7 +281,9 @@ Session::non_realtime_stop (bool abort)
 	
 	did_record = false;
 	
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if ((*i)->get_captured_frames () != 0) {
 			did_record = true;
 			break;
@@ -329,14 +331,14 @@ Session::non_realtime_stop (bool abort)
                         XMLNode &before = loc->get_state();
                         loc->set_end(_transport_frame);
                         XMLNode &after = loc->get_state();
-                        add_command (new MementoCommand<Location>(*loc, before, after));
+                        add_command (new MementoCommand<Location>(*loc, &before, &after));
 		}
 
 		_end_location_is_free = false;
 		_have_captured = true;
 	}
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->transport_stopped (*now, xnow, abort);
 	}
 	
@@ -375,7 +377,7 @@ Session::non_realtime_stop (bool abort)
 	}
 #endif
 
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
 				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
 					(*i)->seek ((jack_nframes_t) (_transport_frame * (double) (*i)->speed()));
@@ -413,7 +415,6 @@ Session::non_realtime_stop (bool abort)
 	if ((post_transport_work & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
 		save_state ("", true);
-                save_history ("");
 	}
 
         /* always try to get rid of this */
@@ -424,7 +425,6 @@ Session::non_realtime_stop (bool abort)
 
 	if (did_record) {
 		save_state (_current_snapshot_name);
-		save_history (_current_snapshot_name);
 	}
 
 	if (post_transport_work & PostTransportDuration) {
@@ -501,7 +501,8 @@ Session::set_auto_loop (bool yn)
 
 			if (seamless_loop) {
 				// set all diskstreams to use internal looping
-				for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 					if (!(*i)->hidden()) {
 						(*i)->set_loop (loc);
 					}
@@ -509,7 +510,8 @@ Session::set_auto_loop (bool yn)
 			}
 			else {
 				// set all diskstreams to NOT use internal looping
-				for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 					if (!(*i)->hidden()) {
 						(*i)->set_loop (0);
 					}
@@ -539,7 +541,8 @@ Session::set_auto_loop (bool yn)
 		clear_events (Event::AutoLoop);
 
 		// set all diskstreams to NOT use internal looping
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
 				(*i)->set_loop (0);
 			}
@@ -657,12 +660,10 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 	if (with_roll) {
 		/* switch from input if we're going to roll */
 		if (Config->get_use_hardware_monitoring()) {
-			/* Even though this is called from RT context we are using
-			   a non-tentative rwlock here,  because the action must occur.
-			   The rarity and short potential lock duration makes this "OK"
-			*/
-			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (!auto_input);
@@ -672,12 +673,9 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 	} else {
 		/* otherwise we're going to stop, so do the opposite */
 		if (Config->get_use_hardware_monitoring()) {
-			/* Even though this is called from RT context we are using
-			   a non-tentative rwlock here,  because the action must occur.
-			   The rarity and short potential lock duration makes this "OK"
-			*/
-			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (true);
@@ -718,12 +716,9 @@ Session::set_transport_speed (float speed, bool abort)
 
 		if (Config->get_use_hardware_monitoring())
 		{
-			/* Even though this is called from RT context we are using
-			   a non-tentative rwlock here,  because the action must occur.
-			   The rarity and short potential lock duration makes this "OK"
-			*/
-			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (true);	
@@ -744,12 +739,10 @@ Session::set_transport_speed (float speed, bool abort)
 		}
 
 		if (Config->get_use_hardware_monitoring()) {
-			/* Even though this is called from RT context we are using
-			   a non-tentative rwlock here,  because the action must occur.
-			   The rarity and short potential lock duration makes this "OK"
-			*/
-			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if (auto_input && (*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (false);	
@@ -800,7 +793,8 @@ Session::set_transport_speed (float speed, bool abort)
 		_last_transport_speed = _transport_speed;
 		_transport_speed = speed;
 		
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
 				post_transport_work = PostTransportWork (post_transport_work | PostTransportSpeed);
 			}
@@ -890,7 +884,8 @@ Session::actually_start_transport ()
 	transport_sub_state |= PendingDeclickIn;
 	_transport_speed = 1.0;
 	
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->realtime_set_speed ((*i)->speed(), true);
 	}
 
@@ -1023,7 +1018,8 @@ Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
 	
 	_slave_type = src;
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->hidden()) {
 			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
 				non_rt_required = true;
@@ -1214,7 +1210,6 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		return;
 	}
 
-	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
 	_worst_track_latency = 0;
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -1252,7 +1247,9 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 	/* reflect any changes in latencies into capture offsets
 	*/
 	
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->set_capture_offset ();
 	}
 }

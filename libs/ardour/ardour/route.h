@@ -35,6 +35,7 @@
 #include <pbd/undo.h>
 #include <pbd/stateful.h> 
 #include <pbd/controllable.h>
+#include <pbd/destructible.h>
 
 #include <ardour/ardour.h>
 #include <ardour/io.h>
@@ -55,7 +56,7 @@ enum mute_type {
     MAIN_OUTS =    0x8
 };
 
-class Route : public IO
+ class Route : public IO, public PBD::Destructible
 {
   protected:
 
@@ -191,8 +192,6 @@ class Route : public IO
 	sigc::signal<void,void*> mix_group_changed;
 	sigc::signal<void>       active_changed;
 	sigc::signal<void,void*> meter_change;
-
-	sigc::signal<void> GoingAway;
 
 	/* gui's call this for their own purposes. */
 

@@ -30,6 +30,8 @@
 #include "mixer_strip.h"
 #include "gui_thread.h"
 
+#include <pbd/unknown_type.h>
+
 #include <ardour/route.h>
 
 #include "i18n.h"
@@ -41,79 +43,81 @@ using namespace Gtk;
 
 
 void
-Editor::handle_new_route (boost::shared_ptr<Route> route)
+Editor::handle_new_route (Session::RouteList& routes)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route), route));
-
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route), routes));
+	
 	TimeAxisView *tv;
+	RouteTimeAxisView *rtv;
 	TreeModel::Row parent;
 	TreeModel::Row row;
 
-	if (route->hidden()) {
-		return;
-	}
+	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
+		boost::shared_ptr<Route> route = (*x);
 
-	// FIXME
-	DataType type = route->default_type();
-	assert(type == ARDOUR::DataType::AUDIO || type == ARDOUR::DataType::MIDI);
-	
-	if (type == ARDOUR::DataType::AUDIO)
-		tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
-	else
-		tv = new MidiTimeAxisView (*this, *session, route, track_canvas);
-	
-#if 0
-	if (route_display_model->children().size() == 0) {
-		
-                /* set up basic entries */
-
-		TreeModel::Row row;
-		
-		row = *(route_display_model->append());  // path = "0"
-		row[route_display_columns.text] = _("Busses");
-		row[route_display_columns.tv] = 0;
-		row = *(route_display_model->append());  // path = "1"
-		row[route_display_columns.text] = _("Tracks");
-		row[route_display_columns.tv] = 0;
-
-	}
-
-	if (dynamic_cast<AudioTrack*>(route.get()) != 0) {
-		TreeModel::iterator iter = route_display_model->get_iter ("1");  // audio tracks 
-		parent = *iter;
-	} else {
-		TreeModel::iterator iter = route_display_model->get_iter ("0");  // busses
-		parent = *iter;
-	}
-	
-
-	row = *(route_display_model->append (parent.children()));
-#else 
-	row = *(route_display_model->append ());
-#endif
-
-	row[route_display_columns.text] = route->name();
-	row[route_display_columns.visible] = tv->marked_for_display();
-	row[route_display_columns.tv] = tv;
-	
-	track_views.push_back (tv);
-
-	ignore_route_list_reorder = true;
-	
-	RouteTimeAxisView* rtv = NULL;
-	if ((rtv = dynamic_cast<RouteTimeAxisView*> (tv)) != 0) {
-		/* added a new fresh one at the end */
-		if (rtv->route()->order_key(N_("editor")) == -1) {
-		        rtv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
+		if (route->hidden()) {
+			return;
 		}
+		
+		if (route->default_type() == ARDOUR::DataType::AUDIO)
+			tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
+		else if (route->default_type() == ARDOUR::DataType::MIDI)
+			tv = new MidiTimeAxisView (*this, *session, route, track_canvas);
+		else
+			throw unknown_type();
+		
+#if 0
+		if (route_display_model->children().size() == 0) {
+			
+			/* set up basic entries */
+			
+			TreeModel::Row row;
+			
+			row = *(route_display_model->append());  // path = "0"
+			row[route_display_columns.text] = _("Busses");
+			row[route_display_columns.tv] = 0;
+			row = *(route_display_model->append());  // path = "1"
+			row[route_display_columns.text] = _("Tracks");
+			row[route_display_columns.tv] = 0;
+			
+		}
+		
+		if (dynamic_cast<AudioTrack*>(route.get()) != 0) {
+			TreeModel::iterator iter = route_display_model->get_iter ("1");  // audio tracks 
+			parent = *iter;
+		} else {
+			TreeModel::iterator iter = route_display_model->get_iter ("0");  // busses
+			parent = *iter;
+		}
+		
+		
+		row = *(route_display_model->append (parent.children()));
+#else 
+		row = *(route_display_model->append ());
+#endif
+		
+		row[route_display_columns.text] = route->name();
+		row[route_display_columns.visible] = tv->marked_for_display();
+		row[route_display_columns.tv] = tv;
+		
+		track_views.push_back (tv);
+		
+		ignore_route_list_reorder = true;
+		
+		if ((rtv = dynamic_cast<RouteTimeAxisView*> (tv)) != 0) {
+			/* added a new fresh one at the end */
+			if (rtv->route()->order_key(N_("editor")) == -1) {
+				rtv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
+			}
+		}
+		
+		ignore_route_list_reorder = false;
+		
+		route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
+		
+		tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	}
 
-	ignore_route_list_reorder = false;
-	
-	route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
-
-	tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
-	
 	editor_mixer_button.set_sensitive(true);
 }
 
@@ -190,9 +194,9 @@ Editor::hide_track_in_display (TimeAxisView& tv)
 		}
 	}
 
-	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&tv);
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
 
-	if (atv && current_mixer_strip && (atv->route() == current_mixer_strip->route())) {
+	if (rtv && current_mixer_strip && (rtv->route() == current_mixer_strip->route())) {
 		// this will hide the mixer strip
 		set_selected_mixer_strip (tv);
 	}
@@ -234,7 +238,7 @@ Editor::redisplay_route_list ()
 
 	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
-		AudioTimeAxisView* at; 
+		RouteTimeAxisView* rt; 
 
 		if (tv == 0) {
 			// just a "title" row
@@ -247,8 +251,8 @@ Editor::redisplay_route_list ()
 			   to tracks.
 			*/
 			
-			if ((at = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
-				at->route()->set_order_key (N_("editor"), order);
+			if ((rt = dynamic_cast<RouteTimeAxisView*> (tv)) != 0) {
+				rt->route()->set_order_key (N_("editor"), order);
 				++order;
 			}
 		}
@@ -500,9 +504,7 @@ Editor::initial_route_list_display ()
 
 	route_display_model->clear ();
 
-	for (Session::RouteList::iterator i = r.begin(); i != r.end(); ++i) {
-		handle_new_route (*i);
-	}
+	handle_new_route (r);
 
 	no_route_list_redisplay = false;
 

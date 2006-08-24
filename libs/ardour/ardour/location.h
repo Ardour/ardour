@@ -149,6 +149,7 @@ class Locations : public Stateful, public StateManager
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
         PBD::ID id() { return _id; }
+        Location *get_location_by_id(PBD::ID);
 
 	Location* auto_loop_location () const;
 	Location* auto_punch_location () const;

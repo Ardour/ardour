@@ -31,6 +31,8 @@
 
 #include <glibmm/thread.h>
 
+#include <pbd/rcu.h>
+
 #include <ardour/ardour.h>
 #include <jack/jack.h>
 #include <jack/transport.h>
@@ -119,6 +121,9 @@ class AudioEngine : public sigc::trackable
 	uint32_t n_physical_outputs () const;
 	uint32_t n_physical_inputs () const;
 
+	void get_physical_outputs (std::vector<std::string>&);
+	void get_physical_inputs (std::vector<std::string>&);
+
 	std::string get_nth_physical_output (DataType type, uint32_t n) {
 		return get_nth_physical (type, n, JackPortIsInput);
 	}
@@ -187,7 +192,6 @@ class AudioEngine : public sigc::trackable
 	ARDOUR::Session      *session;
 	jack_client_t       *_jack;
 	std::string           jack_client_name;
-	Glib::Mutex           port_lock;
 	Glib::Mutex           _process_lock;
 	Glib::Mutex           session_remove_lock;
     Glib::Cond            session_removed;
@@ -206,7 +210,7 @@ class AudioEngine : public sigc::trackable
 	int                  _usecs_per_cycle;
 
 	typedef std::set<Port*> Ports;
-	Ports ports;
+	SerializedRCUManager<Ports> ports;
 
 	int    process_callback (jack_nframes_t nframes);
 	void   remove_all_ports ();

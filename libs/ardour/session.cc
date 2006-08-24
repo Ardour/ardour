@@ -266,6 +266,7 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  //midi_requests (128), // the size of this should match the midi request pool size
 	  _send_smpte_update (false),
+	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
 	  _click_io ((IO*) 0),
@@ -273,7 +274,7 @@ Session::Session (AudioEngine &eng,
 {
 	bool new_session;
 
-	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << endl;
+	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
 
 	n_physical_outputs = _engine.n_physical_outputs();
 	n_physical_inputs =  _engine.n_physical_inputs();
@@ -320,13 +321,14 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  //midi_requests (16),
 	  _send_smpte_update (false),
+	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  main_outs (0)
 
 {
 	bool new_session;
 
-	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << endl;
+	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
 
 	n_physical_outputs = max (requested_physical_out, _engine.n_physical_outputs());
 	n_physical_inputs = max (requested_physical_in, _engine.n_physical_inputs());
@@ -339,13 +341,17 @@ Session::Session (AudioEngine &eng,
 
 	if (control_out_channels) {
 		shared_ptr<Route> r (new Route (*this, _("monitor"), -1, control_out_channels, -1, control_out_channels, Route::ControlOut));
-		add_route (r);
+		RouteList rl;
+		rl.push_back (r);
+		add_routes (rl);
 		_control_out = r;
 	}
 
 	if (master_out_channels) {
 		shared_ptr<Route> r (new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut));
-		add_route (r);
+		RouteList rl;
+		rl.push_back (r);
+		add_routes (rl);
 		_master_out = r;
 	} else {
 		/* prohibit auto-connect to master, because there isn't one */
@@ -445,18 +451,43 @@ Session::~Session ()
 	}
 	
 #ifdef TRACK_DESTRUCTION
+	cerr << "delete routes\n";
+#endif /* TRACK_DESTRUCTION */
+        {
+		RCUWriter<RouteList> writer (routes);
+		boost::shared_ptr<RouteList> r = writer.get_copy ();
+		for (RouteList::iterator i = r->begin(); i != r->end(); ) {
+			RouteList::iterator tmp;
+			tmp = i;
+			++tmp;
+			(*i)->drop_references ();
+			i = tmp;
+		}
+		r->clear ();
+		/* writer goes out of scope and updates master */
+	}
+
+	routes.flush ();
+
+#ifdef TRACK_DESTRUCTION
 	cerr << "delete diskstreams\n";
 #endif /* TRACK_DESTRUCTION */
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ) {
-		DiskstreamList::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
-		delete *i;
-
-		i = tmp;
-	}
+       {
+	       RCUWriter<DiskstreamList> dwriter (diskstreams);
+	       boost::shared_ptr<DiskstreamList> dsl = dwriter.get_copy();
+	       for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ) {
+		       DiskstreamList::iterator tmp;
+		       
+		       tmp = i;
+		       ++tmp;
+		       
+		       (*i)->drop_references ();
+		       
+		       i = tmp;
+	       }
+	       dsl->clear ();
+       }
+       diskstreams.flush ();
 
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete audio sources\n";
@@ -867,7 +898,7 @@ Session::playlist_length_changed (Playlist* pl)
 }
 
 void
-Session::diskstream_playlist_changed (Diskstream* dstream)
+Session::diskstream_playlist_changed (boost::shared_ptr<Diskstream> dstream)
 {
 	Playlist *playlist;
 
@@ -941,13 +972,10 @@ Session::set_auto_input (bool yn)
 		
 		if (Config->get_use_hardware_monitoring() && transport_rolling()) {
 			/* auto-input only makes a difference if we're rolling */
+			
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-			/* Even though this can called from RT context we are using
-			   a non-tentative rwlock here,  because the action must occur.
-			   The rarity and short potential lock duration makes this "OK"
-			*/
-			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (!auto_input);   
@@ -964,16 +992,19 @@ void
 Session::reset_input_monitor_state ()
 {
 	if (transport_rolling()) {
-		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring() && !auto_input);
 			}
 		}
 	} else {
-		Glib::RWLock::ReaderLock dsm (diskstream_lock);
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring());
@@ -1015,7 +1046,6 @@ Session::auto_punch_start_changed (Location* location)
 	if (get_record_enabled() && get_punch_in()) {
 		/* capture start has been changed, so save new pending state */
 		save_state ("", true);
-                save_history("");
 	}
 }	
 
@@ -1246,13 +1276,8 @@ Session::enable_record ()
 		deliver_mmc(MIDI::MachineControl::cmdRecordStrobe, _last_record_location);
 
 		if (Config->get_use_hardware_monitoring() && auto_input) {
-			/* Even though this can be called from RT context we are using
-			   a non-tentative rwlock here,  because the action must occur.
-			   The rarity and short potential lock duration makes this "OK"
-			*/
-			Glib::RWLock::ReaderLock dsm (diskstream_lock);
-			
-			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (true);   
 				}
@@ -1285,13 +1310,9 @@ Session::disable_record (bool rt_context, bool force)
 			deliver_mmc (MIDI::MachineControl::cmdRecordExit, _transport_frame);
 
 		if (Config->get_use_hardware_monitoring() && auto_input) {
-			/* Even though this can be called from RT context we are using
-			   a non-tentative rwlock here,  because the action must occur.
-			   The rarity and short potential lock duration makes this "OK"
-			*/
-			Glib::RWLock::ReaderLock dsm (diskstream_lock);
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 			
-			for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (false);   
 				}
@@ -1312,13 +1333,9 @@ Session::step_back_from_record ()
 	g_atomic_int_set (&_record_status, Enabled);
 
 	if (Config->get_use_hardware_monitoring()) {
-		/* Even though this can be called from RT context we are using
-		   a non-tentative rwlock here,  because the action must occur.
-		   The rarity and short potential lock duration makes this "OK"
-		*/
-		Glib::RWLock::ReaderLock dsm (diskstream_lock);
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 		
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		        if (auto_input && (*i)->record_enabled ()) {
 			        //cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 		                (*i)->monitor_input (false);   
@@ -1337,7 +1354,6 @@ Session::maybe_enable_record ()
 	*/
 
 	save_state ("", true);
-        save_history ("");
 
 	if (_transport_speed) {
 		if (!punch_in) {
@@ -1442,7 +1458,6 @@ Session::set_block_size (jack_nframes_t nframes)
 	*/
 
 	{ 
-		Glib::RWLock::ReaderLock dsm (diskstream_lock);
 			
 		current_block_size = nframes;
 		
@@ -1461,7 +1476,8 @@ Session::set_block_size (jack_nframes_t nframes)
 			(*i)->set_block_size (nframes);
 		}
 		
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			(*i)->set_block_size (nframes);
 		}
 
@@ -1641,7 +1657,88 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 	
 }
 
-boost::shared_ptr<MidiTrack>
+list<boost::shared_ptr<MidiTrack> >
+Session::new_midi_track (TrackMode mode, uint32_t how_many)
+{
+	char track_name[32];
+	uint32_t track_id = 0;
+	uint32_t n = 0;
+	uint32_t channels_used = 0;
+	string port;
+	RouteList new_routes;
+	list<boost::shared_ptr<MidiTrack> > ret;
+
+	/* count existing audio tracks */
+
+	{
+		shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			if (dynamic_cast<MidiTrack*>((*i).get()) != 0) {
+				if (!(*i)->hidden()) {
+					n++;
+					channels_used += (*i)->n_inputs().get(DataType::MIDI);
+				}
+			}
+		}
+	}
+
+	while (how_many) {
+
+		/* check for duplicate route names, since we might have pre-existing
+		   routes with this name (e.g. create Midi1, Midi2, delete Midi1,
+		   save, close,restart,add new route - first named route is now
+		   Midi2)
+		*/
+		
+
+		do {
+			++track_id;
+
+			snprintf (track_name, sizeof(track_name), "Midi %" PRIu32, track_id);
+
+			if (route_by_name (track_name) == 0) {
+				break;
+			}
+			
+		} while (track_id < (UINT_MAX-1));
+
+		try {
+			shared_ptr<MidiTrack> track (new MidiTrack (*this, track_name, Route::Flag (0), mode));
+			
+			if (track->ensure_io (ChanCount(DataType::MIDI, 1), ChanCount(DataType::MIDI, 1), false, this)) {
+				error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
+			}
+			
+			channels_used += track->n_inputs ().get(DataType::MIDI);
+
+			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
+			track->set_remote_control_id (ntracks());
+
+			new_routes.push_back (track);
+			ret.push_back (track);
+		}
+
+		catch (failed_constructor &err) {
+			error << _("Session: could not create new midi track.") << endmsg;
+			// XXX should we delete the tracks already created? 
+			ret.clear ();
+			return ret;
+		}
+		
+		--how_many;
+	}
+
+	if (!new_routes.empty()) {
+		add_routes (new_routes, false);
+		save_state (_current_snapshot_name);
+	}
+
+	return ret;
+}
+
+#if 0
+std::list<boost::shared_ptr<MidiTrack> >
 Session::new_midi_track (TrackMode mode)
 {
 	char track_name[32];
@@ -1686,50 +1783,7 @@ Session::new_midi_track (TrackMode mode)
 			error << string_compose (_("cannot configure %1 in/%2 out configuration for new midi track"), track_name)
 			      << endmsg;
 		}
-#if 0
-		if (nphysical_in) {
-			for (uint32_t x = 0; x < track->n_inputs() && x < nphysical_in; ++x) {
-				
-				port = "";
-				
-				if (input_auto_connect & AutoConnectPhysical) {
-					port = _engine.get_nth_physical_input ((channels_used+x)%nphysical_in);
-				} 
-				
-				if (port.length() && track->connect_input (track->input (x), port, this)) {
-					break;
-				}
-			}
-		}
-		
-		for (uint32_t x = 0; x < track->n_outputs(); ++x) {
-			
-			port = "";
 
-			if (nphysical_out && (output_auto_connect & AutoConnectPhysical)) {
-				port = _engine.get_nth_physical_output ((channels_used+x)%nphysical_out);
-			} else if (output_auto_connect & AutoConnectMaster) {
-				if (_master_out) {
-					port = _master_out->input (x%_master_out->n_inputs())->name();
-				}
-			}
-
-			if (port.length() && track->connect_output (track->output (x), port, this)) {
-				break;
-			}
-		}
-
-		if (_control_out) {
-			vector<string> cports;
-			uint32_t ni = _control_out->n_inputs();
-
-			for (n = 0; n < ni; ++n) {
-				cports.push_back (_control_out->input(n)->name());
-			}
-
-			track->set_control_outs (cports);
-		}
-#endif
 		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 
 		add_route (track);
@@ -1743,7 +1797,6 @@ Session::new_midi_track (TrackMode mode)
 		return shared_ptr<MidiTrack> ((MidiTrack*) 0);
 	}
 }
-
 
 boost::shared_ptr<Route>
 Session::new_midi_route ()
@@ -1832,17 +1885,18 @@ Session::new_midi_route ()
 		return shared_ptr<Route> ((Route*) 0);
 	}
 }
+#endif
 
-
-shared_ptr<AudioTrack>
-Session::new_audio_track (int input_channels, int output_channels, TrackMode mode)
+list<boost::shared_ptr<AudioTrack> >
+Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, uint32_t how_many)
 {
 	char track_name[32];
+	uint32_t track_id = 0;
 	uint32_t n = 0;
 	uint32_t channels_used = 0;
 	string port;
-	uint32_t nphysical_in;
-	uint32_t nphysical_out;
+	RouteList new_routes;
+	list<boost::shared_ptr<AudioTrack> > ret;
 
 	/* count existing audio tracks */
 
@@ -1859,105 +1913,133 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		}
 	}
 
-	/* check for duplicate route names, since we might have pre-existing
-	   routes with this name (e.g. create Audio1, Audio2, delete Audio1,
-	   save, close,restart,add new route - first named route is now
-	   Audio2)
-	*/
+	vector<string> physinputs;
+	vector<string> physoutputs;
+	uint32_t nphysical_in;
+	uint32_t nphysical_out;
 
-	do {
-		snprintf (track_name, sizeof(track_name), "Audio %" PRIu32, n+1);
-		if (route_by_name (track_name) == 0) {
-			break;
+	_engine.get_physical_outputs (physoutputs);
+	_engine.get_physical_inputs (physinputs);
+
+	while (how_many) {
+
+		/* check for duplicate route names, since we might have pre-existing
+		   routes with this name (e.g. create Audio1, Audio2, delete Audio1,
+		   save, close,restart,add new route - first named route is now
+		   Audio2)
+		*/
+		
+
+		do {
+			++track_id;
+
+			snprintf (track_name, sizeof(track_name), "Audio %" PRIu32, track_id);
+
+			if (route_by_name (track_name) == 0) {
+				break;
+			}
+			
+		} while (track_id < (UINT_MAX-1));
+
+		if (input_auto_connect & AutoConnectPhysical) {
+			nphysical_in = min (n_physical_inputs, (uint32_t) physinputs.size());
+		} else {
+			nphysical_in = 0;
 		}
-		n++;
-
-	} while (n < (UINT_MAX-1));
-
-	if (input_auto_connect & AutoConnectPhysical) {
-		nphysical_in = n_physical_inputs;
-	} else {
-		nphysical_in = 0;
-	}
-
-	if (output_auto_connect & AutoConnectPhysical) {
-		nphysical_out = n_physical_outputs;
-	} else {
-		nphysical_out = 0;
-	}
-
-	try {
-		shared_ptr<AudioTrack> track (new AudioTrack (*this, track_name, Route::Flag (0), mode));
-
-		if (track->ensure_io (input_channels, output_channels, false, this)) {
-			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
-					  input_channels, output_channels)
-			      << endmsg;
+		
+		if (output_auto_connect & AutoConnectPhysical) {
+			nphysical_out = min (n_physical_outputs, (uint32_t) physinputs.size());
+		} else {
+			nphysical_out = 0;
 		}
-
-		if (nphysical_in) {
-			for (uint32_t x = 0; x < track->n_inputs().get(DataType::AUDIO) && x < nphysical_in; ++x) {
+		
+		try {
+			shared_ptr<AudioTrack> track (new AudioTrack (*this, track_name, Route::Flag (0), mode));
+			
+			if (track->ensure_io (input_channels, output_channels, false, this)) {
+				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+							 input_channels, output_channels)
+				      << endmsg;
+			}
+			
+			if (nphysical_in) {
+				for (uint32_t x = 0; x < track->n_inputs().get(DataType::AUDIO) && x < nphysical_in; ++x) {
+					
+					port = "";
+					
+					if (input_auto_connect & AutoConnectPhysical) {
+						port = physinputs[(channels_used+x)%nphysical_in];
+					} 
+					
+					if (port.length() && track->connect_input (track->input (x), port, this)) {
+						break;
+					}
+				}
+			}
+			
+			for (uint32_t x = 0; x < track->n_outputs().get(DataType::MIDI); ++x) {
 				
 				port = "";
 				
-				if (input_auto_connect & AutoConnectPhysical) {
-					port = _engine.get_nth_physical_input (DataType::AUDIO, (channels_used+x)%nphysical_in);
-				} 
+				if (nphysical_out && (output_auto_connect & AutoConnectPhysical)) {
+					port = physoutputs[(channels_used+x)%nphysical_out];
+				} else if (output_auto_connect & AutoConnectMaster) {
+					if (_master_out) {
+						port = _master_out->input (x%_master_out->n_inputs().get(DataType::AUDIO))->name();
+					}
+				}
 				
-				if (port.length() && track->connect_input (track->input (x), port, this)) {
+				if (port.length() && track->connect_output (track->output (x), port, this)) {
 					break;
 				}
 			}
+			
+			channels_used += track->n_inputs ().get(DataType::AUDIO);
+
+			if (_control_out) {
+				vector<string> cports;
+				uint32_t ni = _control_out->n_inputs().get(DataType::AUDIO);
+				
+				for (n = 0; n < ni; ++n) {
+					cports.push_back (_control_out->input(n)->name());
+				}
+				
+				track->set_control_outs (cports);
+			}
+			
+			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
+			track->set_remote_control_id (ntracks());
+
+			new_routes.push_back (track);
+			ret.push_back (track);
+		}
+
+		catch (failed_constructor &err) {
+			error << _("Session: could not create new audio track.") << endmsg;
+			// XXX should we delete the tracks already created? 
+			ret.clear ();
+			return ret;
 		}
 		
-		for (uint32_t x = 0; x < track->n_outputs().get(DataType::AUDIO); ++x) {
-			
-			port = "";
-
-			if (nphysical_out && (output_auto_connect & AutoConnectPhysical)) {
-				port = _engine.get_nth_physical_output (DataType::AUDIO, (channels_used+x)%nphysical_out);
-			} else if (output_auto_connect & AutoConnectMaster) {
-				if (_master_out) {
-					port = _master_out->audio_input (x%_master_out->n_inputs().get(DataType::AUDIO))->name();
-				}
-			}
-
-			if (port.length() && track->connect_output (track->output (x), port, this)) {
-				break;
-			}
-		}
-
-		if (_control_out) {
-			vector<string> cports;
-			uint32_t ni = _control_out->n_inputs().get(DataType::AUDIO);
-
-			for (n = 0; n < ni; ++n) {
-				cports.push_back (_control_out->audio_input(n)->name());
-			}
-
-			track->set_control_outs (cports);
-		}
-
-		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
-
-		add_route (track);
-
-		track->set_remote_control_id (ntracks());
-		return track;
+		--how_many;
 	}
 
-	catch (failed_constructor &err) {
-		error << _("Session: could not create new audio track.") << endmsg;
-		return shared_ptr<AudioTrack> ((AudioTrack*) 0);
+	if (!new_routes.empty()) {
+		add_routes (new_routes, false);
+		save_state (_current_snapshot_name);
 	}
+
+	return ret;
 }
 
-shared_ptr<Route>
-Session::new_audio_route (int input_channels, int output_channels)
+Session::RouteList
+Session::new_audio_route (int input_channels, int output_channels, uint32_t how_many)
 {
 	char bus_name[32];
+	uint32_t bus_id = 1;
 	uint32_t n = 0;
 	string port;
+	RouteList ret;
 
 	/* count existing audio busses */
 
@@ -1967,127 +2049,148 @@ Session::new_audio_route (int input_channels, int output_channels)
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
 				if (!(*i)->hidden()) {
-					n++;
+					bus_id++;
 				}
 			}
 		}
 	}
 
-	do {
-		snprintf (bus_name, sizeof(bus_name), "Bus %" PRIu32, n+1);
-		if (route_by_name (bus_name) == 0) {
-			break;
-		}
-		n++;
+	vector<string> physinputs;
+	vector<string> physoutputs;
 
-	} while (n < (UINT_MAX-1));
+	_engine.get_physical_outputs (physoutputs);
+	_engine.get_physical_inputs (physinputs);
 
-	try {
-		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
+	while (how_many) {
 
-		if (bus->ensure_io (input_channels, output_channels, false, this)) {
-			error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
-					  input_channels, output_channels)
-			      << endmsg;
-		}
+		do {
+			++bus_id;
 
-		for (uint32_t x = 0; x < bus->n_inputs().get(DataType::AUDIO); ++x) {
-			
-			port = "";
+			snprintf (bus_name, sizeof(bus_name), "Bus %" PRIu32, bus_id);
 
-			if (input_auto_connect & AutoConnectPhysical) {
-				port = _engine.get_nth_physical_input (DataType::AUDIO, (n+x)%n_physical_inputs);
-			} 
-			
-			if (port.length() && bus->connect_input (bus->input (x), port, this)) {
+			if (route_by_name (bus_name) == 0) {
 				break;
 			}
-		}
 
-		for (uint32_t x = 0; x < bus->n_outputs().get(DataType::AUDIO); ++x) {
+		} while (bus_id < (UINT_MAX-1));
+
+		try {
+			shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
 			
-			port = "";
-
-			if (output_auto_connect & AutoConnectPhysical) {
-				port = _engine.get_nth_physical_input (DataType::AUDIO, (n+x)%n_physical_outputs);
-			} else if (output_auto_connect & AutoConnectMaster) {
-				if (_master_out) {
-					port = _master_out->audio_input (x%_master_out->n_inputs().get(DataType::AUDIO))->name();
+			if (bus->ensure_io (input_channels, output_channels, false, this)) {
+				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+							 input_channels, output_channels)
+				      << endmsg;
+			}
+			
+			for (uint32_t x = 0; x < bus->n_inputs().get(DataType::AUDIO); ++x) {
+				
+				port = "";
+				
+				if (input_auto_connect & AutoConnectPhysical) {
+					port = physinputs[((n+x)%n_physical_inputs)];
+				} 
+				
+				if (port.length() && bus->connect_input (bus->input (x), port, this)) {
+					break;
 				}
 			}
-
-			if (port.length() && bus->connect_output (bus->output (x), port, this)) {
-				break;
+			
+			for (uint32_t x = 0; x < bus->n_outputs().get(DataType::AUDIO); ++x) {
+				
+				port = "";
+				
+				if (output_auto_connect & AutoConnectPhysical) {
+					port = physoutputs[((n+x)%n_physical_outputs)];
+				} else if (output_auto_connect & AutoConnectMaster) {
+					if (_master_out) {
+						port = _master_out->input (x%_master_out->n_inputs().get(DataType::AUDIO))->name();
+					}
+				}
+				
+				if (port.length() && bus->connect_output (bus->output (x), port, this)) {
+					break;
+				}
 			}
+			
+			if (_control_out) {
+				vector<string> cports;
+				uint32_t ni = _control_out->n_inputs().get(DataType::AUDIO);
+				
+				for (uint32_t n = 0; n < ni; ++n) {
+					cports.push_back (_control_out->input(n)->name());
+				}
+				bus->set_control_outs (cports);
+			}
+
+			ret.push_back (bus);
+		}
+	
+
+		catch (failed_constructor &err) {
+			error << _("Session: could not create new audio route.") << endmsg;
+			ret.clear ();
+			return ret;
 		}
 
-		if (_control_out) {
-			vector<string> cports;
-			uint32_t ni = _control_out->n_inputs().get(DataType::AUDIO);
-
-			for (uint32_t n = 0; n < ni; ++n) {
-				cports.push_back (_control_out->input(n)->name());
-			}
-			bus->set_control_outs (cports);
-		}
-		
-		add_route (bus);
-		return bus;
+		--how_many;
 	}
 
-	catch (failed_constructor &err) {
-		error << _("Session: could not create new audio route.") << endmsg;
-		return shared_ptr<Route> ((Route*) 0);
+	if (!ret.empty()) {
+		add_routes (ret, false);
+		save_state (_current_snapshot_name);
 	}
+
+	return ret;
+
 }
 
 void
-Session::add_route (shared_ptr<Route> route)
+Session::add_routes (RouteList& new_routes, bool save)
 {
 	{ 
 		RCUWriter<RouteList> writer (routes);
 		shared_ptr<RouteList> r = writer.get_copy ();
-		r->push_front (route);
+		r->insert (r->end(), new_routes.begin(), new_routes.end());
 		resort_routes_using (r);
 	}
 
-	route->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), route));
-	route->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
-	route->output_changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
-	route->redirects_changed.connect (mem_fun (*this, &Session::update_latency_compensation_proxy));
-
-	if (route->master()) {
-		_master_out = route;
-	}
-
-	if (route->control()) {
-		_control_out = route;
+	for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
+		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), (*x)));
+		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
+		(*x)->output_changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
+		(*x)->redirects_changed.connect (mem_fun (*this, &Session::update_latency_compensation_proxy));
+		
+		if ((*x)->master()) {
+			_master_out = (*x);
+		}
+		
+		if ((*x)->control()) {
+			_control_out = (*x);
+		}
 	}
 
 	set_dirty();
-	save_state (_current_snapshot_name);
-	save_history (_current_snapshot_name);
 
-	RouteAdded (route); /* EMIT SIGNAL */
+	if (save) {
+		save_state (_current_snapshot_name);
+	}
+
+	RouteAdded (new_routes); /* EMIT SIGNAL */
 }
 
 void
-Session::add_diskstream (Diskstream* dstream)
+Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 {
 	/* need to do this in case we're rolling at the time, to prevent false underruns */
 	dstream->do_refill_with_alloc();
 	
 	{ 
-		Glib::RWLock::WriterLock lm (diskstream_lock);
-		diskstreams.push_back (dstream);
+		RCUWriter<DiskstreamList> writer (diskstreams);
+		boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
+		ds->push_back (dstream);
 	}
 
-	/* take a reference to the diskstream, preventing it from
-	   ever being deleted until the session itself goes away,
-	   or chooses to remove it for its own purposes.
-	*/
-
-	dstream->ref();
 	dstream->set_block_size (current_block_size);
 
 	dstream->PlaylistChanged.connect (sigc::bind (mem_fun (*this, &Session::diskstream_playlist_changed), dstream));
@@ -2095,12 +2198,6 @@ Session::add_diskstream (Diskstream* dstream)
 	diskstream_playlist_changed (dstream);
 
 	dstream->prepare ();
-
-	set_dirty();
-	save_state (_current_snapshot_name);
-        save_history (_current_snapshot_name);
-
-	DiskstreamAdded (dstream); /* EMIT SIGNAL */
 }
 
 void
@@ -2138,20 +2235,19 @@ Session::remove_route (shared_ptr<Route> route)
 	}
 
 	Track* t;
-	Diskstream* ds = 0;
+	boost::shared_ptr<Diskstream> ds;
 	
 	if ((t = dynamic_cast<Track*>(route.get())) != 0) {
-		ds = &t->diskstream();
+		ds = t->diskstream();
 	}
 	
 	if (ds) {
 
 		{
-			Glib::RWLock::WriterLock lm (diskstream_lock);
-			diskstreams.remove (ds);
+			RCUWriter<DiskstreamList> dsl (diskstreams);
+			boost::shared_ptr<DiskstreamList> d = dsl.get_copy();
+			d->remove (ds);
 		}
-
-		ds->unref ();
 	}
 
 	find_current_end ();
@@ -2162,9 +2258,10 @@ Session::remove_route (shared_ptr<Route> route)
 	/* XXX should we disconnect from the Route's signals ? */
 
 	save_state (_current_snapshot_name);
-	save_history (_current_snapshot_name);
 
-	/* all shared ptrs to route should go out of scope here */
+	/* try to cause everyone to drop their references */
+
+	route->drop_references ();
 }	
 
 void
@@ -2403,6 +2500,20 @@ Session::route_by_name (string name)
 }
 
 shared_ptr<Route>
+Session::route_by_id (PBD::ID id)
+{
+	shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if ((*i)->id() == id) {
+			return *i;
+		}
+	}
+
+	return shared_ptr<Route> ((Route*) 0);
+}
+
+shared_ptr<Route>
 Session::route_by_remote_id (uint32_t id)
 {
 	shared_ptr<RouteList> r = routes.reader ();
@@ -2438,11 +2549,9 @@ Session::get_maximum_extent () const
 	jack_nframes_t max = 0;
 	jack_nframes_t me; 
 
-	/* Don't take the diskstream lock. Caller must have other ways to
-	   ensure atomicity.
-	*/
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	for (DiskstreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::const_iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		Playlist* pl = (*i)->playlist();
 		if ((me = pl->get_maximum_extent()) > max) {
 			max = me;
@@ -2452,32 +2561,32 @@ Session::get_maximum_extent () const
 	return max;
 }
 
-Diskstream *
+boost::shared_ptr<Diskstream>
 Session::diskstream_by_name (string name)
 {
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if ((*i)->name() == name) {
-			return* i;
+			return *i;
 		}
 	}
 
-	return 0;
+	return boost::shared_ptr<Diskstream>((Diskstream*) 0);
 }
 
-Diskstream *
+boost::shared_ptr<Diskstream>
 Session::diskstream_by_id (const PBD::ID& id)
 {
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if ((*i)->id() == id) {
 			return *i;
 		}
 	}
 
-	return 0;
+	return boost::shared_ptr<Diskstream>((Diskstream*) 0);
 }
 
 /* Region management */
@@ -2767,10 +2876,10 @@ int
 Session::remove_last_capture ()
 {
 	list<Region*> r;
-
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		list<Region*>& l = (*i)->last_capture_regions();
 		
 		if (!l.empty()) {
@@ -2829,7 +2938,6 @@ Session::remove_source (Source* source)
 		*/
 		
 		save_state (_current_snapshot_name);
-                save_history (_current_snapshot_name);
 	}
 
 	SourceRemoved(source); /* EMIT SIGNAL */
@@ -3404,10 +3512,11 @@ Session::set_all_mute (bool yn)
 uint32_t
 Session::n_diskstreams () const
 {
-	Glib::RWLock::ReaderLock lm (diskstream_lock);
 	uint32_t n = 0;
 
-	for (DiskstreamList::const_iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+	for (DiskstreamList::const_iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->hidden()) {
 			n++;
 		}
@@ -3426,15 +3535,15 @@ Session::graph_reordered ()
 		return;
 	}
 	
-	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
-
 	resort_routes ();
 
 	/* force all diskstreams to update their capture offset values to 
 	   reflect any changes in latencies within the graph.
 	*/
 	
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->set_capture_offset ();
 	}
 }
@@ -3691,11 +3800,9 @@ Session::remove_named_selection (NamedSelection* named_selection)
 void
 Session::reset_native_file_format ()
 {
-	// jlc - WHY take routelock?
-	//RWLockMonitor lm1 (route_lock, true, __LINE__, __FILE__);
-	Glib::RWLock::ReaderLock lm2 (diskstream_lock);
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->reset_write_sources (false);
 	}
 }
@@ -3792,7 +3899,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	uint32_t         x;
 	char             buf[PATH_MAX+1];
 	string           dir;
-	ChanCount        nchans(track.audio_diskstream().n_channels());
+	ChanCount        nchans(track.audio_diskstream()->n_channels());
 	jack_nframes_t   position;
 	jack_nframes_t   this_chunk;
 	jack_nframes_t   to_do;
@@ -3805,7 +3912,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	
 	/* call tree *MUST* hold route_lock */
 	
-	if ((playlist = track.diskstream().playlist()) == 0) {
+	if ((playlist = track.diskstream()->playlist()) == 0) {
 		goto out;
 	}
 
@@ -4007,3 +4114,14 @@ Session::set_xfade_model (CrossfadeModel xm)
 	}
 }
 
+void
+Session::add_curve(Curve *curve)
+{
+    curves[curve->id()] = curve;
+}
+
+void
+Session::add_automation_list(AutomationList *al)
+{
+    automation_lists[al->id()] = al;
+}

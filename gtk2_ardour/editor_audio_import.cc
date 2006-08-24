@@ -318,13 +318,13 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 		
 	case ImportToTrack:
 		if (track) {
-			Playlist* playlist  = track->diskstream().playlist();
+			Playlist* playlist  = track->diskstream()->playlist();
 			
 			AudioRegion* copy = new AudioRegion (region);
 			begin_reversible_command (_("insert sndfile"));
                         XMLNode &before = playlist->get_state();
 			playlist->add_region (*copy, pos);
-			session->add_command (new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+			session->add_command (new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 			commit_reversible_command ();
 
 			pos += region.length();
@@ -333,17 +333,21 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 		
 	case ImportAsTrack:
 	{ 
-		boost::shared_ptr<AudioTrack> at (session->new_audio_track (in_chans, out_chans, Normal));
-		copy = new AudioRegion (region);
-		at->diskstream().playlist()->add_region (*copy, pos);
+		list<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Normal, 1));
+		if (!at.empty()) {
+			copy = new AudioRegion (region);
+			at.front()->diskstream()->playlist()->add_region (*copy, pos);
+		}
 		break;
 	}
 
 	case ImportAsTapeTrack:
 	{
-		boost::shared_ptr<AudioTrack> at (session->new_audio_track (in_chans, out_chans, Destructive));
-		copy = new AudioRegion (region);
-		at->diskstream().playlist()->add_region (*copy, pos);
+		list<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Destructive));
+		if (!at.empty()) {
+			copy = new AudioRegion (region);
+			at.front()->diskstream()->playlist()->add_region (*copy, pos);
+		}
 		break;
 	}
 	}

@@ -87,7 +87,7 @@ class AudioStreamView : public StreamView
 	void undisplay_diskstream ();
 	void redisplay_diskstream ();
 	void playlist_modified ();
-	void playlist_changed (ARDOUR::Diskstream *ds);
+	void playlist_changed (boost::shared_ptr<ARDOUR::Diskstream>);
 
 	void add_crossfade (ARDOUR::Crossfade*);
 	void remove_crossfade (ARDOUR::Crossfade*);

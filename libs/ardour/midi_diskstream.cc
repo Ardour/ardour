@@ -80,7 +80,6 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	in_set_state = false;
 
 	assert(!destructive());
-	DiskstreamCreated (this); /* EMIT SIGNAL */
 }
 	
 MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
@@ -109,8 +108,6 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	if (destructive()) {
 		use_destructive_playlist ();
 	}
-
-	DiskstreamCreated (this); /* EMIT SIGNAL */
 }
 
 void
@@ -1108,7 +1105,7 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 
 		_playlist->thaw ();
 		XMLNode &after = _playlist->get_state();
-		_session.add_command (new MementoCommand<Playlist>(*_playlist, before, after));
+		_session.add_command (new MementoCommand<Playlist>(*_playlist, &before, &after));
 
 		mark_write_completed = true;
 
@@ -1526,9 +1523,9 @@ MidiDiskstream::get_playback(MidiBuffer& dst, jack_nframes_t start, jack_nframes
 	for (size_t i=0; i < dst.size(); ++i) {
 		assert(dst[i].time >= start);
 		assert(dst[i].time <= end);
-		cerr << "Translating event stamp " << dst[i].time << " to ";
+		//cerr << "Translating event stamp " << dst[i].time << " to ";
 		dst[i].time -= start;
-		cerr << dst[i].time << endl;
+		//cerr << dst[i].time << endl;
 
 	}
 }

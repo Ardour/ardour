@@ -76,10 +76,6 @@ ARDOUR_UI::connect_to_session (Session *s)
 	rec_button.set_sensitive (true);
 	shuttle_box.set_sensitive (true);
 	
-	if (session->n_diskstreams() == 0) {
-		session->DiskstreamAdded.connect (mem_fun(*this, &ARDOUR_UI::diskstream_added));
-	}
-
 	if (connection_editor) {
 		connection_editor->set_session (s);
 	}
@@ -156,7 +152,6 @@ ARDOUR_UI::unload_session ()
 			
 		case 1:
 			session->save_state ("");
-                        session->save_history ("");
 			break;
 		}
 	}

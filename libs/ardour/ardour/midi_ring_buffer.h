@@ -148,9 +148,9 @@ MidiRingBuffer::write (const MidiEvent& ev)
 		write_ev->buffer = &_raw_buf[raw_index];
         g_atomic_int_set(&_write_ptr, (priv_write_ptr + 1) % _size);
 		
-		printf("MRB - wrote %xd %d %d with time %u at index %zu (raw index %zu)\n",
-			write_ev->buffer[0], write_ev->buffer[1], write_ev->buffer[2], write_ev->time,
-			priv_write_ptr, raw_index);
+		//printf("MRB - wrote %xd %d %d with time %u at index %zu (raw index %zu)\n",
+		//	write_ev->buffer[0], write_ev->buffer[1], write_ev->buffer[2], write_ev->time,
+		//	priv_write_ptr, raw_index);
 		
 		assert(write_ev->size = ev.size);
 
@@ -176,9 +176,9 @@ MidiRingBuffer::read(MidiBuffer& dst, jack_nframes_t start, jack_nframes_t end)
 		MidiEvent* const read_ev = &_ev_buf[priv_read_ptr];
 		if (time >= start) {
 			dst.push_back(*read_ev);
-			printf("MRB - read %#X %d %d with time %u at index %zu\n",
-				read_ev->buffer[0], read_ev->buffer[1], read_ev->buffer[2], read_ev->time,
-				priv_read_ptr);
+			//printf("MRB - read %#X %d %d with time %u at index %zu\n",
+			//	read_ev->buffer[0], read_ev->buffer[1], read_ev->buffer[2], read_ev->time,
+			//	priv_read_ptr);
 		} else {
 			printf("MRB - SKIPPING - %#X %d %d with time %u at index %zu\n",
 				read_ev->buffer[0], read_ev->buffer[1], read_ev->buffer[2], read_ev->time,

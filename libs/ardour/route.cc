@@ -114,7 +114,6 @@ Route::init ()
 
 Route::~Route ()
 {
-	GoingAway (); /* EMIT SIGNAL */
 	clear_redirects (this);
 
 	if (_control_outs) {

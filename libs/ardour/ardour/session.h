@@ -285,8 +285,9 @@ class Session : public sigc::trackable, public Stateful
 	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
 	BufferSet& get_send_buffers (ChanCount count = ChanCount::ZERO);
 	
-	Diskstream    *diskstream_by_id (const PBD::ID& id);
-	Diskstream    *diskstream_by_name (string name);
+	void add_diskstream (boost::shared_ptr<Diskstream>);
+	boost::shared_ptr<Diskstream> diskstream_by_id (const PBD::ID& id);
+	boost::shared_ptr<Diskstream> diskstream_by_name (string name);
 
 	bool have_captured() const { return _have_captured; }
 
@@ -296,9 +297,8 @@ class Session : public sigc::trackable, public Stateful
 	uint32_t get_next_diskstream_id() const { return n_diskstreams(); }
 	uint32_t n_diskstreams() const;
 	
-	typedef list<Diskstream *> DiskstreamList;
-	
-	typedef std::list<boost::shared_ptr<Route> > RouteList; 
+	typedef std::list<boost::shared_ptr<Diskstream> > DiskstreamList;
+	typedef std::list<boost::shared_ptr<Route> >      RouteList; 
 	
 	boost::shared_ptr<RouteList> get_routes() const {
 		return routes.reader ();
@@ -317,6 +317,7 @@ class Session : public sigc::trackable, public Stateful
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
 
 	boost::shared_ptr<Route> route_by_name (string);
+	boost::shared_ptr<Route> route_by_id (PBD::ID);
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
 
 	bool route_name_unique (string) const;
@@ -350,7 +351,7 @@ class Session : public sigc::trackable, public Stateful
 	
 	/* Record status signals */
 
-        sigc::signal<void> RecordStateChanged;
+	sigc::signal<void> RecordStateChanged;
 
 	/* Transport mechanism signals */
 
@@ -359,8 +360,7 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void> DurationChanged;
 	sigc::signal<void> HaltOnXrun;
 
-	sigc::signal<void,boost::shared_ptr<Route> > RouteAdded;
-	sigc::signal<void,Diskstream*> DiskstreamAdded;
+	sigc::signal<void,RouteList&> RouteAdded;
 
 	void request_roll ();
 	void request_bounded_roll (jack_nframes_t start, jack_nframes_t end);
@@ -494,6 +494,7 @@ class Session : public sigc::trackable, public Stateful
 	int restore_state (string snapshot_name);
 	int save_template (string template_name);
         int save_history (string snapshot_name = "");
+        int restore_history (string snapshot_name);
 
 	static int rename_template (string old_name, string new_name);
 
@@ -551,11 +552,11 @@ class Session : public sigc::trackable, public Stateful
 
 	/* fundamental operations. duh. */
 
-	boost::shared_ptr<AudioTrack> new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal);
-	boost::shared_ptr<Route>      new_audio_route (int input_channels, int output_channels);
+	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal, uint32_t how_many = 1);
+	RouteList new_audio_route (int input_channels, int output_channels, uint32_t how_many);
 	
-	boost::shared_ptr<MidiTrack> new_midi_track (TrackMode mode = Normal);
-	boost::shared_ptr<Route>      new_midi_route ();
+	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (TrackMode mode = Normal, uint32_t how_many = 1);
+	//boost::shared_ptr<Route>     new_midi_route (uint32_t how_many = 1);
 
 	void   remove_route (boost::shared_ptr<Route>);
 	void   resort_routes ();
@@ -735,6 +736,10 @@ class Session : public sigc::trackable, public Stateful
 	sigc::signal<void> NamedSelectionAdded;
 	sigc::signal<void> NamedSelectionRemoved;
 
+        /* Curves and AutomationLists (TODO when they go away) */
+        void add_curve(Curve*);
+        void add_automation_list(AutomationList*);
+
 	/* fade curves */
 
 	float get_default_fade_length () const { return default_fade_msecs; }
@@ -861,6 +866,7 @@ class Session : public sigc::trackable, public Stateful
 
         // these commands are implemented in libs/ardour/session_command.cc
 	Command *memento_command_factory(XMLNode *n);
+        void register_with_memento_command_factory(PBD::ID, Stateful *);
         class GlobalSoloStateCommand : public Command
         {
             GlobalRouteBooleanState before, after;
@@ -1520,17 +1526,16 @@ class Session : public sigc::trackable, public Stateful
 
 	/* disk-streams */
 
-	DiskstreamList  diskstreams; 
-	mutable Glib::RWLock diskstream_lock;
+	SerializedRCUManager<DiskstreamList>  diskstreams; 
+
 	uint32_t dstream_buffer_size;
-	void add_diskstream (Diskstream*);
 	int  load_diskstreams (const XMLNode&);
 
 	/* routes stuff */
 
 	SerializedRCUManager<RouteList>  routes;
 
-	void   add_route (boost::shared_ptr<Route>);
+	void   add_routes (RouteList&, bool save = true);
 	uint32_t destructive_index;
 
 	int load_routes (const XMLNode&);
@@ -1591,7 +1596,7 @@ class Session : public sigc::trackable, public Stateful
 	Playlist *XMLPlaylistFactory (const XMLNode&);
 
 	void playlist_length_changed (Playlist *);
-	void diskstream_playlist_changed (Diskstream *);
+	void diskstream_playlist_changed (boost::shared_ptr<Diskstream>);
 
 	/* NAMED SELECTIONS */
 
@@ -1603,6 +1608,10 @@ class Session : public sigc::trackable, public Stateful
 
 	NamedSelection *named_selection_factory (string name);
 	NamedSelection *XMLNamedSelectionFactory (const XMLNode&);
+
+        /* CURVES and AUTOMATION LISTS */
+        std::map<PBD::ID, Curve*> curves;
+        std::map<PBD::ID, AutomationList*> automation_lists;
 
 	/* DEFAULT FADE CURVES */
 

@@ -59,11 +59,9 @@ class AudioDiskstream : public Diskstream
   public:
 	AudioDiskstream (Session &, const string& name, Diskstream::Flag f = Recordable);
 	AudioDiskstream (Session &, const XMLNode&);
+	~AudioDiskstream();
 
 	const PBD::ID& id() const { return _id; }
-
-	// FIXME
-	AudioDiskstream& ref() { _refcnt++; return *this; }
 
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
@@ -175,9 +173,6 @@ class AudioDiskstream : public Diskstream
 	bool commit  (jack_nframes_t nframes);
 
   private:
-
-	/* use unref() to destroy a diskstream */
-	~AudioDiskstream();
 
 	struct ChannelInfo {
 

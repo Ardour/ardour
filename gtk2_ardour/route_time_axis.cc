@@ -728,7 +728,7 @@ RouteTimeAxisView::rename_current_playlist ()
 	ArdourPrompter prompter (true);
 	string name;
 
-	Diskstream *const ds = get_diskstream();
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	if (!ds || ds->destructive())
 		return;
 
@@ -759,7 +759,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt)
 {
 	string name;
 	
-	Diskstream *const ds = get_diskstream();
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	if (!ds || ds->destructive())
 		return;
 
@@ -800,7 +800,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 {
 	string name;
 	
-	Diskstream *const ds = get_diskstream();
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	if (!ds || ds->destructive())
 		return;
 
@@ -838,7 +838,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 void
 RouteTimeAxisView::clear_playlist ()
 {
-	Diskstream *const ds = get_diskstream();
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	if (!ds || ds->destructive())
 		return;
 
@@ -878,8 +878,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 
 	switch (Keyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
-		/* XXX this is not right */
-		editor.get_selection().add (*tracks);
+		editor.get_selection().toggle (*tracks);
 		break;
 		
 	case Selection::Set:
@@ -964,7 +963,7 @@ RouteTimeAxisView::name() const
 Playlist *
 RouteTimeAxisView::playlist () const 
 {
-	Diskstream *ds;
+	boost::shared_ptr<Diskstream> ds;
 
 	if ((ds = get_diskstream()) != 0) {
 		return ds->playlist(); 
@@ -1014,7 +1013,7 @@ RouteTimeAxisView::hide_click ()
 Region*
 RouteTimeAxisView::find_next_region (jack_nframes_t pos, RegionPoint point, int32_t dir)
 {
-	Diskstream *stream;
+	boost::shared_ptr<Diskstream> stream;
 	Playlist *playlist;
 
 	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
@@ -1028,7 +1027,7 @@ bool
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	Playlist* what_we_got;
-	Diskstream* ds = get_diskstream();
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	Playlist* playlist;
 	bool ret = false;
 
@@ -1054,7 +1053,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
-			_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+			_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 			ret = true;
 		}
 		break;
@@ -1066,7 +1065,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+			_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 			what_we_got->unref ();
 			ret = true;
 		}
@@ -1097,7 +1096,7 @@ RouteTimeAxisView::paste (jack_nframes_t pos, float times, Selection& selection,
 	
 	XMLNode &before = playlist->get_state();
 	playlist->paste (**p, pos, times);
-	_session.add_command( new MementoCommand<Playlist>(*playlist, before, playlist->get_state()));
+	_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 
 	return true;
 }

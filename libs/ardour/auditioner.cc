@@ -49,7 +49,7 @@ Auditioner::Auditioner (Session& s)
 	}
 
 	if (right.length()) {
-		audio_diskstream().add_channel();
+		audio_diskstream()->add_channel();
 		add_output_port (right, this, DataType::AUDIO);
 	}
 
@@ -119,11 +119,11 @@ Auditioner::audition_region (AudioRegion& region)
 	_diskstream->playlist()->add_region (*the_region, 0, 1, false);
 
 	while (_diskstream->n_channels().get(DataType::AUDIO) < the_region->n_channels()) {
-		audio_diskstream().add_channel ();
+		audio_diskstream()->add_channel ();
 	}
 
 	while (_diskstream->n_channels().get(DataType::AUDIO) > the_region->n_channels()) {
-		audio_diskstream().remove_channel ();
+		audio_diskstream()->remove_channel ();
 	}
 
 	/* force a panner reset now that we have all channels */

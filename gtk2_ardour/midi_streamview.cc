@@ -163,7 +163,8 @@ MidiStreamView::setup_rec_box ()
 
 				MidiRegion::SourceList sources;
 
-				MidiDiskstream* mds = dynamic_cast<MidiDiskstream*>(_trackview.get_diskstream());
+				// FIXME
+				boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream>(_trackview.get_diskstream());
 				assert(mds);
 
 				sources.push_back((Source*)mds->write_source());
@@ -189,8 +190,8 @@ MidiStreamView::setup_rec_box ()
 			/* start a new rec box */
 
 			MidiTrack* mt = _trackview.midi_track(); /* we know what it is already */
-			MidiDiskstream& ds = mt->midi_diskstream();
-			jack_nframes_t frame_pos = ds.current_capture_start ();
+			boost::shared_ptr<MidiDiskstream> ds = mt->midi_diskstream();
+			jack_nframes_t frame_pos = ds->current_capture_start ();
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;

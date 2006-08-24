@@ -1825,8 +1825,8 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 
         XMLNode &after = arv->audio_region().get_state();
         session->add_command(new MementoCommand<ARDOUR::AudioRegion>(arv->audio_region(),
-                                                                     before,
-                                                                     after));
+                                                                     &before,
+                                                                     &after));
 	commit_reversible_command ();
 	fade_in_drag_motion_callback (item, event);
 }
@@ -1921,7 +1921,7 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 	arv->audio_region().set_fade_out_length (fade_length);
 
         XMLNode &after = arv->region().get_state();
-        session->add_command(new MementoCommand<ARDOUR::Region>(arv->region(), before, after));
+        session->add_command(new MementoCommand<ARDOUR::Region>(arv->region(), &before, &after));
 	commit_reversible_command ();
 
 	fade_out_drag_motion_callback (item, event);
@@ -2176,7 +2176,7 @@ Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	}
 
 	XMLNode &after = session->locations()->get_state();
-	session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
+	session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	commit_reversible_command ();
 	
 	marker_drag_line->hide();
@@ -2293,7 +2293,7 @@ Editor::meter_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
                 XMLNode &before = map.get_state();
 		map.add_meter (marker->meter(), when);
 		XMLNode &after = map.get_state();
-                session->add_command(new MementoCommand<TempoMap>(map, before, after));
+                session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		commit_reversible_command ();
 		
 		// delete the dummy marker we used for visual representation of copying.
@@ -2304,7 +2304,7 @@ Editor::meter_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 		XMLNode &before = map.get_state();
 		map.move_meter (marker->meter(), when);
 		XMLNode &after = map.get_state();
-                session->add_command(new MementoCommand<TempoMap>(map, before, after));
+                session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		commit_reversible_command ();
 	}
 }
@@ -2425,7 +2425,7 @@ Editor::tempo_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 		XMLNode &before = map.get_state();
 		map.add_tempo (marker->tempo(), when);
 		XMLNode &after = map.get_state();
-		session->add_command (new MementoCommand<TempoMap>(map, before, after));
+		session->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		commit_reversible_command ();
 		
 		// delete the dummy marker we used for visual representation of copying.
@@ -2436,7 +2436,7 @@ Editor::tempo_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
                 XMLNode &before = map.get_state();
 		map.move_tempo (marker->tempo(), when);
                 XMLNode &after = map.get_state();
-                session->add_command (new MementoCommand<TempoMap>(map, before, after));
+                session->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		commit_reversible_command ();
 	}
 }
@@ -2800,7 +2800,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 			insert_result = affected_playlists.insert (to_playlist);
 			if (insert_result.second) {
-				session->add_command (new MementoUndoCommand<Playlist>(*to_playlist, to_playlist->get_state()));
+				session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
 			}
 			
 			latest_regionview = 0;
@@ -3238,7 +3238,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 					insert_result = motion_frozen_playlists.insert (pl);
 					if (insert_result.second) {
 						pl->freeze();
-						session->add_command(new MementoUndoCommand<Playlist>(*pl, pl->get_state()));
+						session->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
 					}
 				}
 			}
@@ -3366,7 +3366,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			insert_result = motion_frozen_playlists.insert(to_playlist);
 			if (insert_result.second) {
 				to_playlist->freeze();
-                                session->add_command(new MementoUndoCommand<Playlist>(*to_playlist, to_playlist->get_state()));
+                                session->add_command(new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
 			}
 
 		}
@@ -3448,7 +3448,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
   out:
 	for (set<Playlist*>::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
 		(*p)->thaw ();
-		session->add_command (new MementoRedoCommand<Playlist>(*(*p), (*p)->get_state()));
+		session->add_command (new MementoCommand<Playlist>(*(*p), 0, & (*p)->get_state()));
 	}
 
 	motion_frozen_playlists.clear ();
@@ -3643,10 +3643,10 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	Playlist* playlist = clicked_axisview->playlist();
 
-        before = &(playlist->get_state());
+        XMLNode *before = &(playlist->get_state());
 	clicked_axisview->playlist()->add_region (*region, selection->time[clicked_selection].start);
-        XMLNode &after = playlist->get_state();
-	session->add_command(new MementoCommand<Playlist>(*playlist, *before, after));
+        XMLNode *after = &(playlist->get_state());
+	session->add_command(new MementoCommand<Playlist>(*playlist, before, after));
 
 	commit_reversible_command ();
 	
@@ -4013,7 +4013,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			Playlist * pl = (*i)->region().playlist();
 			insert_result = motion_frozen_playlists.insert (pl);
 			if (insert_result.second) {
-                                session->add_command(new MementoUndoCommand<Playlist>(*pl, pl->get_state()));
+                                session->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
 			}
 		}
 	}
@@ -4203,7 +4203,7 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		
 		for (set<Playlist*>::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
 			//(*p)->thaw ();
-                        session->add_command (new MementoRedoCommand<Playlist>(*(*p), (*p)->get_state()));
+                        session->add_command (new MementoCommand<Playlist>(*(*p), 0, &(*p)->get_state()));
                 }
 		
 		motion_frozen_playlists.clear ();
@@ -4241,7 +4241,7 @@ Editor::point_trim (GdkEvent* event)
                                         XMLNode &before = pl->get_state();
 					(*i)->region().trim_front (new_bound, this);	
                                         XMLNode &after = pl->get_state();
-                                        session->add_command(new MementoCommand<Playlist>(*pl, before, after));
+                                        session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 				}
 			}
 
@@ -4252,7 +4252,7 @@ Editor::point_trim (GdkEvent* event)
 				XMLNode &before = pl->get_state();
 				rv->region().trim_front (new_bound, this);	
                                 XMLNode &after = pl->get_state();
-				session->add_command(new MementoCommand<Playlist>(*pl, before, after));
+				session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 			}
 		}
 
@@ -4272,7 +4272,7 @@ Editor::point_trim (GdkEvent* event)
 					XMLNode &before = pl->get_state();
 					(*i)->region().trim_end (new_bound, this);
 					XMLNode &after = pl->get_state();
-					session->add_command(new MementoCommand<Playlist>(*pl, before, after));
+					session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 				}
 			}
 
@@ -4283,7 +4283,7 @@ Editor::point_trim (GdkEvent* event)
 				XMLNode &before = pl->get_state();
 				rv->region().trim_end (new_bound, this);
                                 XMLNode &after = pl->get_state();
-				session->add_command (new MementoCommand<Playlist>(*pl, before, after));
+				session->add_command (new MementoCommand<Playlist>(*pl, &before, &after));
 			}
 		}
 
@@ -4306,7 +4306,7 @@ Editor::thaw_region_after_trim (RegionView& rv)
 
 	region.thaw (_("trimmed region"));
         XMLNode &after = region.playlist()->get_state();
-	session->add_command (new MementoRedoCommand<Playlist>(*(region.playlist()), after));
+	session->add_command (new MementoCommand<Playlist>(*(region.playlist()), 0, &after));
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*>(&rv);
 	if (arv)
@@ -4451,7 +4451,7 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 			newloc = new Location(temp_location->start(), temp_location->end(), "unnamed", Location::IsRangeMarker);
 			session->locations()->add (newloc, true);
                         XMLNode &after = session->locations()->get_state();
-			session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
+			session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
 			commit_reversible_command ();
 			
 			range_bar_drag_rect->hide();
@@ -4834,7 +4834,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, jack_nframes_t pos)
         XMLNode &before = playlist->get_state();
 	playlist->add_region (*(new AudioRegion (arv->audio_region())), (jack_nframes_t) (pos * speed));
         XMLNode &after = playlist->get_state();
-	session->add_command(new MementoCommand<Playlist>(*playlist, before, after));
+	session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
 	
 	// playlist is frozen, so we have to update manually
 	

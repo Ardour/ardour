@@ -59,6 +59,8 @@ class Curve : public AutomationList
 	AutomationEventList::iterator closest_control_point_after (double xval);
 
 	void solve ();
+
+        static sigc::signal<void, Curve*> CurveCreated;
 		
   protected:
 	ControlEvent* point_factory (double,double) const;

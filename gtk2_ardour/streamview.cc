@@ -207,7 +207,7 @@ StreamView::undisplay_diskstream ()
 }
 
 void
-StreamView::display_diskstream (Diskstream *ds)
+StreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	playlist_change_connection.disconnect();
 	playlist_changed (ds);
@@ -225,7 +225,7 @@ StreamView::playlist_modified ()
 }
 
 void
-StreamView::playlist_changed (Diskstream *ds)
+StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_changed), ds));
 
@@ -264,9 +264,7 @@ StreamView::diskstream_changed ()
 	Track *t;
 
 	if ((t = _trackview.track()) != 0) {
-		Diskstream& ds = t->diskstream();
-		/* XXX grrr: when will SigC++ allow me to bind references? */
-		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*this, &StreamView::display_diskstream), &ds));
+		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*this, &StreamView::display_diskstream), t->diskstream()));
 	} else {
 		Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::undisplay_diskstream));
 	}

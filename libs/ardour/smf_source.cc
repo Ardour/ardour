@@ -294,7 +294,7 @@ SMFSource::read_event(MidiEvent& ev) const
 jack_nframes_t
 SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt, jack_nframes_t stamp_offset) const
 {
-	cerr << "SMF - read " << start << " -- " << cnt;
+	//cerr << "SMF - read " << start << " -- " << cnt;
 
 	jack_nframes_t time = 0;
 
@@ -312,12 +312,12 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframe
 	while (!feof(_fd)) {
 		int ret = read_event(ev);
 		if (ret == -1) { // EOF
-			cerr << "SMF - EOF\n";
+			//cerr << "SMF - EOF\n";
 			break;
 		}
 
 		if (ret == 0) { // meta-event (skipped)
-			cerr << "SMF - META\n";
+			//cerr << "SMF - META\n";
 			time += ev.time; // just accumulate delta time and ignore event
 			continue;
 		}
@@ -370,7 +370,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframe
 jack_nframes_t
 SMFSource::write_unlocked (MidiRingBuffer& src, jack_nframes_t cnt)
 {
-	cerr << "SMF WRITE -- " << _length << "--" << cnt << endl;
+	//cerr << "SMF WRITE -- " << _length << "--" << cnt << endl;
 	
 	MidiBuffer buf(1024); // FIXME: allocation, size?
 	src.read(buf, /*_length*/0, _length + cnt); // FIXME?

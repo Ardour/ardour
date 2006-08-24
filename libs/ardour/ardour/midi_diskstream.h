@@ -63,6 +63,7 @@ class MidiDiskstream : public Diskstream
   public:
 	MidiDiskstream (Session &, const string& name, Diskstream::Flag f = Recordable);
 	MidiDiskstream (Session &, const XMLNode&);
+	~MidiDiskstream();
 
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
@@ -115,9 +116,6 @@ class MidiDiskstream : public Diskstream
 	bool commit  (jack_nframes_t nframes);
 
   private:
-
-	/* use unref() to destroy a diskstream */
-	~MidiDiskstream();
 
 	/* The two central butler operations */
 	int do_flush (Session::RunContext context, bool force = false);

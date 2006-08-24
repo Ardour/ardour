@@ -705,6 +705,7 @@ Editor::Editor (AudioEngine& eng)
 	ControlProtocol::ScrollTimeline.connect (mem_fun (*this, &Editor::control_scroll));
 	constructed = true;
 	instant_save ();
+
 }
 
 Editor::~Editor()
@@ -1339,6 +1340,9 @@ Editor::connect_to_session (Session *t)
 		no_route_list_redisplay = false;
 		redisplay_route_list ();
 	}
+
+        /* register for undo history */
+        session->register_with_memento_command_factory(_id, this);
 }
 
 void
@@ -1592,7 +1596,7 @@ Editor::build_track_region_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_axisview);
 
 	if (atv) {
-		Diskstream* ds;
+		boost::shared_ptr<Diskstream> ds;
 		Playlist* pl;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
@@ -1619,7 +1623,7 @@ Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_axisview);
 
 	if (atv) {
-		Diskstream* ds;
+		boost::shared_ptr<Diskstream> ds;
 		Playlist* pl;
 		AudioPlaylist* apl;
 
@@ -2888,7 +2892,7 @@ void
 Editor::commit_reversible_command ()
 {
 	if (session) {
-		session->commit_reversible_command (new MementoCommand<Editor>(*this, *before, get_state()));
+		session->commit_reversible_command (new MementoCommand<Editor>(*this, before, &get_state()));
 	}
 }
 
@@ -3016,7 +3020,7 @@ Editor::mapped_set_selected_regionview_from_click (RouteTimeAxisView& tv, uint32
 	Playlist* pl;
 	vector<Region*> results;
 	RegionView* marv;
-	Diskstream* ds;
+	boost::shared_ptr<Diskstream> ds;
 
 	if ((ds = tv.get_diskstream()) == 0) {
 		/* bus */
@@ -3242,7 +3246,7 @@ Editor::set_selected_regionview_from_region_list (Region& region, Selection::Ope
 			Playlist* pl;
 			vector<Region*> results;
 			RegionView* marv;
-			Diskstream* ds;
+			boost::shared_ptr<Diskstream> ds;
 			
 			if ((ds = tatv->get_diskstream()) == 0) {
 				/* bus */
@@ -3750,10 +3754,12 @@ Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
 void
 Editor::set_zoom_focus (ZoomFocus f)
 {
+	vector<string> txt = internationalize (zoom_focus_strings);
+	zoom_focus_selector.set_active_text (txt[(int)f]);
+	
 	if (zoom_focus != f) {
 		zoom_focus = f;
-		vector<string> txt = internationalize (zoom_focus_strings);
-		zoom_focus_selector.set_active_text (txt[(int)f]);
+
 		ZoomFocusChanged (); /* EMIT_SIGNAL */
 
 		instant_save ();

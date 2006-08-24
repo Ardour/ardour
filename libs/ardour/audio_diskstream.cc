@@ -72,8 +72,6 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream:
 	use_new_playlist ();
 
 	in_set_state = false;
-
-	DiskstreamCreated (this); /* EMIT SIGNAL */
 }
 	
 AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
@@ -93,8 +91,6 @@ AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 	if (destructive()) {
 		use_destructive_playlist ();
 	}
-
-	DiskstreamCreated (this); /* EMIT SIGNAL */
 }
 
 void
@@ -1622,8 +1618,8 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		}
 
 		_playlist->thaw ();
-                XMLNode &after = _playlist->get_state();
-		_session.add_command (new MementoCommand<Playlist>(*_playlist, before, after));
+		XMLNode &after = _playlist->get_state();
+		_session.add_command (new MementoCommand<Playlist>(*_playlist, &before, &after));
 	}
 
 	mark_write_completed = true;

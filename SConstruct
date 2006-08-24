@@ -457,6 +457,16 @@ libraries['flac'] = conf.Finish ()
 # or if that fails...
 #libraries['flac']    = LibraryInfo (LIBS='FLAC')
 
+# boost (we don't link against boost, just use some header files)
+
+libraries['boost'] = LibraryInfo ()
+conf = Configure (libraries['boost'])
+if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == 0:
+        print "Boost header files do not appear to be installed."
+        sys.exit (1)
+    
+libraries['boost'] = conf.Finish ()
+
 #
 # Check for liblo
 

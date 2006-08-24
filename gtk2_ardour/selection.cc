@@ -180,6 +180,14 @@ Selection::toggle (Playlist* pl)
 }
 
 void
+Selection::toggle (const list<TimeAxisView*>& track_list)
+{
+	for (list<TimeAxisView*>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
+		toggle ( (*i) );
+	}
+}
+
+void
 Selection::toggle (TimeAxisView* track)
 {
 	TrackSelection::iterator i;
@@ -615,6 +623,7 @@ Selection::set (list<Selectable*>& selectables)
 	clear_points ();
 	add (selectables);
 }
+
 
 void
 Selection::add (list<Selectable*>& selectables)

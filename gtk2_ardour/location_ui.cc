@@ -658,7 +658,7 @@ gint LocationUI::do_location_remove (ARDOUR::Location *loc)
 	XMLNode &before = session->locations()->get_state();
 	session->locations()->remove (loc);
 	XMLNode &after = session->locations()->get_state();
-	session->add_command(new MementoCommand<Locations>(*(session->locations()), before, after));
+	session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	session->commit_reversible_command ();
 
 	return FALSE;
@@ -777,7 +777,7 @@ LocationUI::add_new_location()
 		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);
 		XMLNode &after = session->locations()->get_state();
-		session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 		session->commit_reversible_command ();
 	}
 	
@@ -794,7 +794,7 @@ LocationUI::add_new_range()
 		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);
 		XMLNode &after = session->locations()->get_state();
-		session->add_command (new MementoCommand<Locations>(*(session->locations()), before, after));
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 		session->commit_reversible_command ();
 	}
 }

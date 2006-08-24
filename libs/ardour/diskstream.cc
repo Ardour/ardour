@@ -63,7 +63,6 @@ using namespace PBD;
  */
 jack_nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
 
-sigc::signal<void,Diskstream*>    Diskstream::DiskstreamCreated;
 sigc::signal<void,list<Source*>*> Diskstream::DeleteSources;
 sigc::signal<void>                Diskstream::DiskOverrun;
 sigc::signal<void>                Diskstream::DiskUnderrun;
@@ -86,7 +85,6 @@ Diskstream::Diskstream (Session& sess, const XMLNode& node)
 void
 Diskstream::init (Flag f)
 {
-	_refcnt = 0;
 	_flags = f;
 	_io = 0;
 	_alignment_style = ExistingMaterial;

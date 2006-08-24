@@ -271,8 +271,9 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	Source::SourceCreated.connect (mem_fun (*this, &Session::add_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
-	Diskstream::DiskstreamCreated.connect (mem_fun (*this, &Session::add_diskstream));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
+        Curve::CurveCreated.connect (mem_fun (*this, &Session::add_curve));
+        AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
 
 	Controllable::Created.connect (mem_fun (*this, &Session::add_controllable));
 	Controllable::GoingAway.connect (mem_fun (*this, &Session::remove_controllable));
@@ -354,6 +355,7 @@ Session::second_stage_init (bool new_session)
 		_end_location_is_free = false;
 	}
 	
+        restore_history(_current_snapshot_name);
 	return 0;
 }
 
@@ -631,14 +633,15 @@ Session::load_diskstreams (const XMLNode& node)
 	clist = node.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
-		Diskstream* dstream = 0;
 
 		try {
 			/* diskstreams added automatically by DiskstreamCreated handler */
 			if ((*citer)->name() == "AudioDiskstream" || (*citer)->name() == "DiskStream") {
-				dstream = new AudioDiskstream (*this, **citer);
+				boost::shared_ptr<AudioDiskstream> dstream (new AudioDiskstream (*this, **citer));
+				add_diskstream (dstream);
 			} else if ((*citer)->name() == "MidiDiskstream") {
-				dstream = new MidiDiskstream (*this, **citer);
+				boost::shared_ptr<MidiDiskstream> dstream (new MidiDiskstream (*this, **citer));
+				add_diskstream (dstream);
 			} else {
 				error << _("Session: unknown diskstream type in XML") << endmsg;
 			}
@@ -727,6 +730,7 @@ Session::save_state (string snapshot_name, bool pending)
 	}
 
 	if (!pending) {
+                save_history(snapshot_name);
 
 		bool was_dirty = dirty();
 
@@ -1391,8 +1395,8 @@ Session::state(bool full_state)
 	child = node->add_child ("DiskStreams");
 
 	{ 
-		Glib::RWLock::ReaderLock dl (diskstream_lock);
-		for (DiskstreamList::iterator i = diskstreams.begin(); i != diskstreams.end(); ++i) {
+		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
 				child->add_child_nocopy ((*i)->get_state());
 			}
@@ -1695,7 +1699,6 @@ Session::set_state (const XMLNode& node)
 
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
-                save_history (_current_snapshot_name);
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
@@ -1713,6 +1716,7 @@ Session::load_routes (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
+	RouteList new_routes;
 
 	nlist = node.children();
 
@@ -1727,8 +1731,10 @@ Session::load_routes (const XMLNode& node)
 			return -1;
 		}
 
-		add_route (route);
+		new_routes.push_back (route);
 	}
+
+	add_routes (new_routes);
 
 	return 0;
 }
@@ -2599,7 +2605,6 @@ void
 Session::auto_save()
 {
 	save_state (_current_snapshot_name);
-        save_history (_current_snapshot_name);
 }
 
 RouteGroup *
@@ -3270,7 +3275,6 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	*/
 	
 	save_state ("");
-	save_history ("");
 
   out:
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state & ~InCleanup);
@@ -3410,6 +3414,7 @@ Session::save_history (string snapshot_name)
     string xml_path;
     string bak_path;
 
+
     tree.set_root (&history.get_state());
 
     if (snapshot_name.empty()) {
@@ -3417,6 +3422,7 @@ Session::save_history (string snapshot_name)
     }
 
     xml_path = _path + snapshot_name + ".history"; 
+    cerr << "Saving history to " << xml_path << endmsg;
 
     bak_path = xml_path + ".bak";
 
@@ -3446,6 +3452,68 @@ Session::save_history (string snapshot_name)
         }
 
         return -1;
+    }
+
+    return 0;
+}
+
+int
+Session::restore_history (string snapshot_name)
+{
+    XMLTree tree;
+    string xmlpath;
+
+    /* read xml */
+    xmlpath = _path + snapshot_name + ".history";
+    cerr << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
+
+    if (access (xmlpath.c_str(), F_OK)) {
+        error << string_compose(_("%1: session history file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
+        return 1;
+    }
+
+    if (!tree.read (xmlpath)) {
+        error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
+        return -1;
+    }
+
+    /* replace history */
+    history.clear();
+    for (XMLNodeConstIterator it  = tree.root()->children().begin();
+         it != tree.root()->children().end();
+         it++)
+    {
+        XMLNode *t = *it;
+        UndoTransaction ut;
+        struct timeval tv;
+
+        ut.set_name(t->property("name")->value());
+        stringstream ss(t->property("tv_sec")->value());
+        ss >> tv.tv_sec;
+        ss.str(t->property("tv_usec")->value());
+        ss >> tv.tv_usec;
+        ut.set_timestamp(tv);
+
+        for (XMLNodeConstIterator child_it  = t->children().begin();
+             child_it != t->children().end();
+             child_it++)
+        {
+            XMLNode *n = *child_it;
+            Command *c;
+            if (n->name() == "MementoCommand" ||
+                n->name() == "MementoUndoCommand" ||
+                n->name() == "MementoRedoCommand")
+            {
+                c = memento_command_factory(n);
+                if (c)
+                    ut.add_command(c);
+            }
+            else
+            {
+                error << string_compose(_("Couldn't figure out how to make a Command out of a %1 XMLNode."), n->name()) << endmsg;
+            }
+        }
+        history.add(ut);
     }
 
     return 0;

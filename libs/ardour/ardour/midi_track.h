@@ -53,7 +53,7 @@ public:
 				     jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
 				     bool meter);
 
-	MidiDiskstream& midi_diskstream() const;
+	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
 
 	int use_diskstream (string name);
 	int use_diskstream (const PBD::ID& id);
@@ -79,7 +79,7 @@ protected:
 	ChanCount n_process_buffers ();
 
 private:
-	int set_diskstream (MidiDiskstream&);
+	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
 
 	void set_state_part_two ();
 	void set_state_part_three ();

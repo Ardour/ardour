@@ -546,7 +546,7 @@ void
 ARDOUR_UI::count_recenabled_diskstreams (Route& route)
 {
 	Track* track = dynamic_cast<Track*>(&route);
-	if (track && track->diskstream().record_enabled()) {
+	if (track && track->diskstream()->record_enabled()) {
 		rec_enabled_diskstreams++;
 	}
 }
@@ -869,9 +869,9 @@ ARDOUR_UI::open_session ()
 
 
 void
-ARDOUR_UI::session_add_midi_route (bool disk)
+ARDOUR_UI::session_add_midi_route (bool disk, uint32_t how_many)
 {
-	boost::shared_ptr<Route> route;
+	list<boost::shared_ptr<MidiTrack> > tracks;
 
 	if (session == 0) {
 		warning << _("You cannot add a track without a session already loaded.") << endmsg;
@@ -880,14 +880,21 @@ ARDOUR_UI::session_add_midi_route (bool disk)
 
 	try { 
 		if (disk) {
-			if ((route = session->new_midi_track (/*mode*/)) == 0) {
-				error << _("could not create new midi track") << endmsg;
+
+			tracks = session->new_midi_track (ARDOUR::Normal, how_many);
+
+			if (tracks.size() != how_many) {
+				if (how_many == 1) {
+					error << _("could not create a new midi track") << endmsg;
+				} else {
+					error << string_compose (_("could not create %1 new midi tracks"), how_many) << endmsg;
+				}
 			}
-		} else {
+		} /*else {
 			if ((route = session->new_midi_route ()) == 0) {
 				error << _("could not create new midi bus") << endmsg;
 			}
-		}
+		}*/
 	}
 
 	catch (...) {
@@ -902,23 +909,38 @@ restart JACK with more ports."));
 
 
 void
-ARDOUR_UI::session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode)
+ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many)
 {
-	boost::shared_ptr<Route> route;
+	list<boost::shared_ptr<AudioTrack> > tracks;
+	Session::RouteList routes;
 
 	if (session == 0) {
-		warning << _("You cannot add a track without a session already loaded.") << endmsg;
+		warning << _("You cannot add a track or bus without a session already loaded.") << endmsg;
 		return;
 	}
 
 	try { 
-		if (disk) {
-			if ((route = session->new_audio_track (input_channels, output_channels, mode)) == 0) {
-				error << _("could not create new audio track") << endmsg;
+		if (track) {
+			tracks = session->new_audio_track (input_channels, output_channels, mode, how_many);
+
+			if (tracks.size() != how_many) {
+				if (how_many == 1) {
+					error << _("could not create a new audio track") << endmsg;
+				} else {
+					error << string_compose (_("could not create %1 new audio tracks"), how_many) << endmsg;
+				}
 			}
+
 		} else {
-			if ((route = session->new_audio_route (input_channels, output_channels)) == 0) {
-				error << _("could not create new audio bus") << endmsg;
+
+			routes = session->new_audio_route (input_channels, output_channels, how_many);
+
+			if (routes.size() != how_many) {
+				if (how_many == 1) {
+					error << _("could not create a new audio track") << endmsg;
+				} else {
+					error << string_compose (_("could not create %1 new audio tracks"), how_many) << endmsg;
+				}
 			}
 		}
 		
@@ -943,11 +965,6 @@ You should save Ardour, exit and\n\
 restart JACK with more ports."));
 		msg.run ();
 	}
-}
-
-void
-ARDOUR_UI::diskstream_added (Diskstream* ds)
-{
 }
 
 void
@@ -1200,7 +1217,7 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 		Track* t;
 
 		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
-			t->diskstream().set_record_enabled (!t->diskstream().record_enabled());
+			t->diskstream()->set_record_enabled (!t->diskstream()->record_enabled());
 		}
 	}
 	if (session == 0) {
@@ -1326,7 +1343,6 @@ ARDOUR_UI::start_engine ()
 			   settings for a new session 
 			*/
 			session->save_state ("");
-                        session->save_history ("");
 		}
 
 		/* there is too much going on, in too many threads, for us to 
@@ -1500,7 +1516,6 @@ ARDOUR_UI::save_state_canfail (string name)
 		}
 
 		if ((ret = session->save_state (name)) != 0) {
-                        session->save_history (name);
 			return ret;
 		}
 	}
@@ -2080,15 +2095,15 @@ ARDOUR_UI::add_route ()
 	}
 
 	ResponseType r = (ResponseType) add_route_dialog->run ();
-	
+
 	add_route_dialog->hide();
 
 	switch (r) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
-		return;
-		break;
+		case RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
+			break;
 	}
 
 	if ((count = add_route_dialog->count()) <= 0) {
@@ -2110,25 +2125,20 @@ ARDOUR_UI::add_route ()
 
 	/* XXX do something with name template */
 
-	while (count) {
-		if (add_route_dialog->type() == ARDOUR::DataType::MIDI) {
-			if (track) {
-				session_add_midi_track();
-			} else  {
-				MessageDialog msg (*editor,
-				   _("Sorry, MIDI Busses are not supported at this time."));
-				msg.run ();
-				//session_add_midi_bus();
-			}
-		} else if (track) {
-			session_add_audio_track (input_chan, output_chan, add_route_dialog->mode());
-		} else {
-			session_add_audio_bus (input_chan, output_chan);
+	if (add_route_dialog->type() == ARDOUR::DataType::MIDI) {
+		if (track) {
+			session_add_midi_track(count);
+		} else  {
+			MessageDialog msg (*editor,
+					_("Sorry, MIDI Busses are not supported at this time."));
+			msg.run ();
+			//session_add_midi_bus();
 		}
-		--count;
-		
-		while (Main::events_pending()) {
-			Main::iteration ();
+	} else { 
+		if (track) {
+			session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), count);
+		} else {
+			session_add_audio_bus (input_chan, output_chan, count);
 		}
 	}
 }
