@@ -63,15 +63,15 @@ AudioEngine::AudioEngine (string client_name)
 	_buffer_size = 0;
 	_freewheeling = false;
 	_freewheel_thread_registered = false;
-    
-    m_meter_thread = 0;
-    m_meter_exit = false;
 
-    if (connect_to_jack (client_name)) {
-	    throw NoBackendAvailable ();
-    }
-    
-    start_metering_thread();
+	m_meter_thread = 0;
+	m_meter_exit = false;
+
+	if (connect_to_jack (client_name)) {
+		throw NoBackendAvailable ();
+	}
+
+	start_metering_thread();
 
 }
 
@@ -207,7 +207,7 @@ AudioEngine::_xrun_callback (void *arg)
 int
 AudioEngine::_graph_order_callback (void *arg)
 {
-	 static_cast<AudioEngine *>(arg)->GraphReordered (); /* EMIT SIGNAL */
+	static_cast<AudioEngine *>(arg)->GraphReordered (); /* EMIT SIGNAL */
 	return 0;
 }
 
@@ -349,9 +349,9 @@ AudioEngine::jack_bufsize_callback (jack_nframes_t nframes)
 void
 AudioEngine::start_metering_thread ()
 {
-    if(m_meter_thread == 0) {
-        m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread), false);
-    }
+	if(m_meter_thread == 0) {
+		m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread), false);
+	}
 }
 
 void

@@ -130,19 +130,20 @@ IO::IO (Session& s, string name,
 
 	_gain_automation_state = Off;
 	_gain_automation_style = Absolute;
-    
-    {
-        // IO::Meter is emitted from another thread so the
-        // Meter signal must be protected.
-        Glib::Mutex::Lock guard (m_meter_signal_lock);
-        m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
-    }
+
+	{
+		// IO::Meter is emitted from another thread so the
+		// Meter signal must be protected.
+		Glib::Mutex::Lock guard (m_meter_signal_lock);
+		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
+	}
 }
 
 IO::~IO ()
 {
 
-    Glib::Mutex::Lock guard (m_meter_signal_lock);
+	Glib::Mutex::Lock guard (m_meter_signal_lock);
+	
 	Glib::Mutex::Lock lm (io_lock);
 	vector<Port *>::iterator i;
 
@@ -154,7 +155,7 @@ IO::~IO ()
 		_session.engine().unregister_port (*i);
 	}
 
-    m_meter_connection.disconnect();
+	m_meter_connection.disconnect();
 }
 
 void
@@ -977,7 +978,7 @@ IO::disconnect_inputs (void* src)
 			drop_input_connection ();
 		}
 	}
-	 input_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
+	input_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
 	return 0;
 }
 
