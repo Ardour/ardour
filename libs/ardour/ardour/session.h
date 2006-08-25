@@ -99,7 +99,7 @@ using std::string;
 using std::map;
 using std::set;
 
-class Session : public sigc::trackable, public StatefulDestructible
+class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 {
   private:
