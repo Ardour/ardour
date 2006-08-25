@@ -292,15 +292,15 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 					jack_nframes_t i = 0;
 					int n;
 
-					while ( i < arv->region().length() ) {
+					while ( i < arv->region()->length() ) {
 						// TODO: What about stereo+ channels? composite all to one, I guess
 
 						n = fft_graph.windowSize();
-						if (i + n >= arv->region().length() ) {
-							n = arv->region().length() - i;
+						if (i + n >= arv->region()->length() ) {
+							n = arv->region()->length() - i;
 						}
 
-						n = arv->audio_region().read_at(buf, mixbuf, gain, arv->region().position() + i, n);
+						n = arv->audio_region()->read_at(buf, mixbuf, gain, arv->region()->position() + i, n);
 	
 						if ( n < fft_graph.windowSize()) {
 							for (int j = n; j < fft_graph.windowSize(); j++) {
