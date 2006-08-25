@@ -19,24 +19,34 @@
 */
 
 #include <iostream>
+#include <string>
+#include <sstream>
 
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
-#include <string>
-#include <sstream>
+
+#include <sigc++/bind.h>
 
 using namespace std;
 using namespace sigc;
 
 UndoTransaction::UndoTransaction ()
 {
+	clearing = false;
 }
 
 UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
 {
 	_name = rhs._name;
+	clearing = false;
 	clear ();
 	actions.insert(actions.end(),rhs.actions.begin(),rhs.actions.end());
+}
+
+UndoTransaction::~UndoTransaction ()
+{
+	GoingAway ();
+	clear ();
 }
 
 UndoTransaction& 
@@ -52,13 +62,31 @@ UndoTransaction::operator= (const UndoTransaction& rhs)
 void
 UndoTransaction::add_command (Command *const action)
 {
+	action->GoingAway.connect (bind (mem_fun (*this, &UndoTransaction::remove_command), action));
 	actions.push_back (action);
+}
+
+void
+UndoTransaction::remove_command (Command* const action)
+{
+	if (clearing) {
+		return;
+	}
+	actions.remove (action);
+	if (actions.empty()) {
+		delete this;
+	}
 }
 
 void
 UndoTransaction::clear ()
 {
+	clearing = true;
+	for (list<Command*>::iterator i = actions.begin(); i != actions.end(); ++i) {
+		delete *i;
+	}
 	actions.clear ();
+	clearing = false;
 }
 
 void
@@ -72,7 +100,6 @@ UndoTransaction::operator() ()
 void
 UndoTransaction::undo ()
 {
-	cerr << "Undo " << _name << endl;
 	for (list<Command*>::reverse_iterator i = actions.rbegin(); i != actions.rend(); ++i) {
 		(*i)->undo();
 	}
@@ -81,7 +108,6 @@ UndoTransaction::undo ()
 void
 UndoTransaction::redo ()
 {
-	cerr << "Redo " << _name << endl;
         (*this)();
 }
 
@@ -103,10 +129,29 @@ XMLNode &UndoTransaction::get_state()
     return *node;
 }
 
-void
-UndoHistory::add (UndoTransaction ut)
+UndoHistory::UndoHistory ()
 {
+	clearing = false;
+}
+
+void
+UndoHistory::add (UndoTransaction* const ut)
+{
+	ut->GoingAway.connect (bind (mem_fun (*this, &UndoHistory::remove), ut));
 	UndoList.push_back (ut);
+
+	/* we are now owners of the transaction */
+}
+
+void
+UndoHistory::remove (UndoTransaction* const ut)
+{
+	if (clearing) {
+		return;
+	}
+
+	UndoList.remove (ut);
+	RedoList.remove (ut);
 }
 
 void
@@ -116,9 +161,9 @@ UndoHistory::undo (unsigned int n)
 		if (UndoList.size() == 0) {
 			return;
 		}
-		UndoTransaction ut = UndoList.back ();
+		UndoTransaction* ut = UndoList.back ();
 		UndoList.pop_back ();
-		ut.undo ();
+		ut->undo ();
 		RedoList.push_back (ut);
 	}
 }
@@ -130,9 +175,9 @@ UndoHistory::redo (unsigned int n)
 		if (RedoList.size() == 0) {
 			return;
 		}
-		UndoTransaction ut = RedoList.back ();
+		UndoTransaction* ut = RedoList.back ();
 		RedoList.pop_back ();
-		ut.redo ();
+		ut->redo ();
 		UndoList.push_back (ut);
 	}
 }
@@ -140,29 +185,34 @@ UndoHistory::redo (unsigned int n)
 void
 UndoHistory::clear_redo ()
 {
+	clearing = true;
 	RedoList.clear ();
+	clearing = false;
 }
 
 void
 UndoHistory::clear_undo ()
 {
+	clearing = true;
 	UndoList.clear ();
+	clearing = false;
 }
 
 void
 UndoHistory::clear ()
 {
-	RedoList.clear ();
-	UndoList.clear ();
+	clear_undo ();
+	clear_redo ();
 }
 
 XMLNode & UndoHistory::get_state()
 {
     XMLNode *node = new XMLNode ("UndoHistory");
 
-    list<UndoTransaction>::iterator it;
-    for (it=UndoList.begin(); it != UndoList.end(); it++)
-        node->add_child_nocopy(it->get_state());
+    list<UndoTransaction*>::iterator it;
+    for (it = UndoList.begin(); it != UndoList.end(); it++) {
+	    node->add_child_nocopy((*it)->get_state());
+    }
 
     return *node;
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 jack_nframes_t Crossfade::_short_xfade_length = 0;
-Change Crossfade::ActiveChanged = ARDOUR::new_change();
+Change Crossfade::ActiveChanged = new_change();
 
 /* XXX if and when we ever implement parallel processing of the process()
    callback, these will need to be handled on a per-thread basis.
@@ -70,15 +70,15 @@ Crossfade::operator== (const Crossfade& other)
 	return (_in == other._in) && (_out == other._out);
 }
 
-Crossfade::Crossfade (ARDOUR::AudioRegion& in, ARDOUR::AudioRegion& out, 
+Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<AudioRegion> out, 
 		      jack_nframes_t length,
 		      jack_nframes_t position,
 		      AnchorPoint ap)
 	: _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
 	  _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
 {
-	_in = &in;
-	_out = &out;
+	_in = in;
+	_out = out;
 	_length = length;
 	_position = position;
 	_anchor_point = ap;
@@ -89,7 +89,7 @@ Crossfade::Crossfade (ARDOUR::AudioRegion& in, ARDOUR::AudioRegion& out,
 	initialize ();
 }
 
-Crossfade::Crossfade (ARDOUR::AudioRegion& a, ARDOUR::AudioRegion& b, CrossfadeModel model, bool act)
+Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioRegion> b, CrossfadeModel model, bool act)
 	: _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
 	  _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
 {
@@ -110,7 +110,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	:  _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
 	   _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
 {
-	Region* r;
+	boost::shared_ptr<Region> r;
 	XMLProperty* prop;
 	LocaleGuard lg (X_("POSIX"));
 
@@ -129,7 +129,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 		throw failed_constructor();
 	}
 	
-	if ((_in = dynamic_cast<AudioRegion*> (r)) == 0) {
+	if ((_in = boost::dynamic_pointer_cast<AudioRegion> (r)) == 0) {
 		throw failed_constructor();
 	}
 
@@ -146,7 +146,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 		throw failed_constructor();
 	}
 	
-	if ((_out = dynamic_cast<AudioRegion*> (r)) == 0) {
+	if ((_out = boost::dynamic_pointer_cast<AudioRegion> (r)) == 0) {
 		throw failed_constructor();
 	}
 
@@ -160,7 +160,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	save_state ("initial");
 }
 
-Crossfade::Crossfade (const Crossfade &orig, ARDOUR::AudioRegion *newin, ARDOUR::AudioRegion *newout)
+Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newin, boost::shared_ptr<AudioRegion> newout)
 	: _fade_in(orig._fade_in),
 	  _fade_out(orig._fade_out)
 {
@@ -236,20 +236,20 @@ Crossfade::initialize (bool savestate)
 }	
 
 int
-Crossfade::compute (AudioRegion& a, AudioRegion& b, CrossfadeModel model)
+Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioRegion> b, CrossfadeModel model)
 {
-	AudioRegion* top;
-	AudioRegion* bottom;
+	boost::shared_ptr<AudioRegion> top;
+	boost::shared_ptr<AudioRegion> bottom;
 	jack_nframes_t short_xfade_length;
 
 	short_xfade_length = _short_xfade_length; 
 
-	if (a.layer() < b.layer()) {
-		top = &b;
-		bottom = &a;
+	if (a->layer() < b->layer()) {
+		top = b;
+		bottom = a;
 	} else {
-		top = &a;
-		bottom = &b;
+		top = a;
+		bottom = b;
 	}
 	
 	/* first check for matching ends */
@@ -605,7 +605,7 @@ Crossfade::member_changed (Change what_changed)
 {
 	Change what_we_care_about = Change (Region::MuteChanged|
 					    Region::LayerChanged|
-					    ARDOUR::BoundsChanged);
+					    BoundsChanged);
 
 	if (what_changed & what_we_care_about) {
 		refresh ();

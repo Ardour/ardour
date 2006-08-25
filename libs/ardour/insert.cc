@@ -172,7 +172,7 @@ PluginInsert::init ()
 
 PluginInsert::~PluginInsert ()
 {
-	GoingAway (this); /* EMIT SIGNAL */
+	GoingAway (); /* EMIT SIGNAL */
 }
 
 void
@@ -897,7 +897,7 @@ PortInsert::PortInsert (Session& s, const XMLNode& node)
 
 PortInsert::~PortInsert ()
 {
-	GoingAway (this);
+	GoingAway ();
 }
 
 void

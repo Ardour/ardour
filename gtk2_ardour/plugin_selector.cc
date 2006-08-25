@@ -244,7 +244,7 @@ PluginSelector::set_session (Session* s)
 	session = s;
 
 	if (session) {
-		session->going_away.connect (bind (mem_fun(*this, &PluginSelector::set_session), static_cast<Session*> (0)));
+		session->GoingAway.connect (bind (mem_fun(*this, &PluginSelector::set_session), static_cast<Session*> (0)));
 	}
 }
 

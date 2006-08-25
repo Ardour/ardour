@@ -235,7 +235,8 @@ SndFileSource::open ()
 	_length = _info.frames;
 
 
-	_broadcast_info = (SF_BROADCAST_INFO*) calloc (1, sizeof (SF_BROADCAST_INFO));
+	_broadcast_info = new SF_BROADCAST_INFO;
+	memset (_broadcast_info, 0, sizeof (*_broadcast_info));
 	
 	/* lookup broadcast info */
 	
@@ -244,7 +245,7 @@ SndFileSource::open ()
 		/* if the file has data but no broadcast info, then clearly, there is no broadcast info */
 
 		if (_length) {
-			free (_broadcast_info);
+			delete _broadcast_info;
 			_broadcast_info = 0;
 			_flags = Flag (_flags & ~Broadcast);
 		}
@@ -269,7 +270,7 @@ SndFileSource::open ()
 
 SndFileSource::~SndFileSource ()
 {
-	GoingAway (this); /* EMIT SIGNAL */
+	GoingAway (); /* EMIT SIGNAL */
 
 	if (sf) {
 		sf_close (sf);
@@ -485,7 +486,7 @@ SndFileSource::setup_broadcast_info (jack_nframes_t when, struct tm& now, time_t
 	if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
 		error << string_compose (_("cannot set broadcast info for audio file %1; Dropping broadcast info for this file"), _path) << endmsg;
 		_flags = Flag (_flags & ~Broadcast);
-		free (_broadcast_info);
+		delete _broadcast_info;
 		_broadcast_info = 0;
 		return -1;
 	}
@@ -506,7 +507,7 @@ SndFileSource::set_header_timeline_position ()
 	if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
 		error << string_compose (_("cannot set broadcast info for audio file %1; Dropping broadcast info for this file"), _path) << endmsg;
 		_flags = Flag (_flags & ~Broadcast);
-		free (_broadcast_info);
+		delete _broadcast_info;
 		_broadcast_info = 0;
 	}
 }

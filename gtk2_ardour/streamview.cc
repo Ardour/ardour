@@ -158,18 +158,18 @@ StreamView::set_samples_per_unit (gdouble spp)
 }
 
 void
-StreamView::add_region_view (Region *r)
+StreamView::add_region_view (boost::shared_ptr<Region> r)
 {
 	add_region_view_internal (r, true);
 }
 
 void
-StreamView::remove_region_view (Region *r)
+StreamView::remove_region_view (boost::shared_ptr<Region> r)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::remove_region_view), r));
 
 	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		if (&((*i)->region()) == r) {
+		if (((*i)->region()) == r) {
 			delete *i;
 			region_views.erase (i);
 			break;
@@ -178,7 +178,7 @@ StreamView::remove_region_view (Region *r)
 }
 
 void
-StreamView::remove_rec_region (Region *r)
+StreamView::remove_rec_region (boost::shared_ptr<Region> r)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &StreamView::remove_rec_region), r));
 	
@@ -187,7 +187,7 @@ StreamView::remove_rec_region (Region *r)
 		/*NOTREACHED*/
 	} 
 
-	for (list<Region *>::iterator i = rec_regions.begin(); i != rec_regions.end(); ++i) {
+	for (list<boost::shared_ptr<Region> >::iterator i = rec_regions.begin(); i != rec_regions.end(); ++i) {
 		if (*i == r) {
 			rec_regions.erase (i);
 			break;
@@ -303,7 +303,7 @@ StreamView::region_layered (RegionView* rv)
 	/* this used to be + 1, but regions to the left ended up below
 	  ..something.. and couldn't receive events.  why?  good question.
 	*/
-	rv->get_canvas_group()->raise (rv->region().layer() + 2);
+	rv->get_canvas_group()->raise (rv->region()->layer() + 2);
 }
 
 void
@@ -354,11 +354,11 @@ StreamView::update_rec_box ()
 }
 	
 RegionView*
-StreamView::find_view (const Region& region)
+StreamView::find_view (boost::shared_ptr<const Region> region)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 
-		if (&(*i)->region() == &region) {
+		if ((*i)->region() == region) {
 			return *i;
 		}
 	}
@@ -398,7 +398,7 @@ void
 StreamView::get_selectables (jack_nframes_t start, jack_nframes_t end, list<Selectable*>& results)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		if ((*i)->region().coverage(start, end) != OverlapNone) {
+		if ((*i)->region()->coverage(start, end) != OverlapNone) {
 			results.push_back (*i);
 		}
 	}

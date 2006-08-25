@@ -44,6 +44,7 @@
 #include <ardour/audiofilesource.h>
 #include <ardour/destructive_filesource.h>
 #include <ardour/send.h>
+#include <ardour/region_factory.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/audioregion.h>
@@ -188,8 +189,8 @@ AudioDiskstream::allocate_working_buffers()
 void
 AudioDiskstream::free_working_buffers()
 {
-	delete _mixdown_buffer;
-	delete _gain_buffer;
+	delete [] _mixdown_buffer;
+	delete [] _gain_buffer;
 	_working_buffers_size = 0;
 	_mixdown_buffer       = 0;
 	_gain_buffer          = 0;
@@ -367,7 +368,7 @@ AudioDiskstream::use_copy_playlist ()
 void
 AudioDiskstream::setup_destructive_playlist ()
 {
-	AudioRegion::SourceList srcs;
+	SourceList srcs;
 
 	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 		srcs.push_back ((*chan).write_source);
@@ -377,8 +378,8 @@ AudioDiskstream::setup_destructive_playlist ()
 
 	cerr << "setup DS using " << srcs.front()->natural_position () << endl;
 
-	AudioRegion* region = new AudioRegion (srcs, 0, max_frames, _name);
-	_playlist->add_region (*region, srcs.front()->natural_position());		
+	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0, max_frames, _name));
+	_playlist->add_region (region, srcs.front()->natural_position());		
 }
 
 void
@@ -393,7 +394,7 @@ AudioDiskstream::use_destructive_playlist ()
 		return;
 	}
 
-	AudioRegion* region = dynamic_cast<AudioRegion*> (rl->front());
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (rl->front());
 
 	if (region == 0) {
 		throw failed_constructor();
@@ -1449,10 +1450,10 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 	uint32_t buffer_position;
 	bool more_work = true;
 	int err = 0;
-	AudioRegion* region = 0;
+	boost::shared_ptr<AudioRegion> region;
 	jack_nframes_t total_capture;
-	AudioRegion::SourceList srcs;
-	AudioRegion::SourceList::iterator src;
+	SourceList srcs;
+	SourceList::iterator src;
 	ChannelList::iterator chan;
 	vector<CaptureInfo*>::iterator ci;
 	uint32_t n = 0; 
@@ -1561,10 +1562,11 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		*/
 		
 		try {
-			region = new AudioRegion (srcs, channels[0].write_source->last_capture_start_frame(), total_capture, 
-						  region_name_from_path (channels[0].write_source->name()), 
-						  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile));
-			
+			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, channels[0].write_source->last_capture_start_frame(), total_capture, 
+									     region_name_from_path (channels[0].write_source->name()), 
+									     0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile)));
+
+			region = boost::dynamic_pointer_cast<AudioRegion> (rx);
 			region->special_set_position (capture_info.front()->start);
 		}
 		
@@ -1586,10 +1588,11 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			string region_name;
 			_session.region_name (region_name, channels[0].write_source->name(), false);
 			
-			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
+			cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
 			
 			try {
-				region = new AudioRegion (srcs, buffer_position, (*ci)->frames, region_name);
+				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, buffer_position, (*ci)->frames, region_name));
+				region = boost::dynamic_pointer_cast<AudioRegion> (rx);
 			}
 			
 			catch (failed_constructor& err) {
@@ -1602,7 +1605,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
 			
 			i_am_the_modifier++;
-			_playlist->add_region (*region, (*ci)->start);
+			_playlist->add_region (region, (*ci)->start);
 			i_am_the_modifier--;
 			
 			buffer_position += (*ci)->frames;
@@ -2165,7 +2168,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	XMLNodeIterator niter;
 	AudioFileSource* fs;
 	AudioFileSource* first_fs = 0;
-	AudioRegion::SourceList pending_sources;
+	SourceList pending_sources;
 	jack_nframes_t position;
 
 	if ((prop = node.property (X_("at"))) == 0) {
@@ -2218,13 +2221,12 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		return -1;
 	}
 
-	AudioRegion* region;
+	boost::shared_ptr<AudioRegion> region;
 	
 	try {
-		region = new AudioRegion (pending_sources, 0, first_fs->length(),
-					  region_name_from_path (first_fs->name()), 
-					  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile));
-		
+		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(),
+											  region_name_from_path (first_fs->name()), 
+											  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile)));
 		region->special_set_position (0);
 	}
 
@@ -2237,7 +2239,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	}
 
 	try {
-		region = new AudioRegion (pending_sources, 0, first_fs->length(), region_name_from_path (first_fs->name()));
+		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(), region_name_from_path (first_fs->name())));
 	}
 
 	catch (failed_constructor& err) {
@@ -2248,7 +2250,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		return -1;
 	}
 
-	_playlist->add_region (*region, position);
+	_playlist->add_region (region, position);
 
 	return 0;
 }

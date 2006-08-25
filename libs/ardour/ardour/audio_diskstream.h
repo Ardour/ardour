@@ -141,8 +141,6 @@ class AudioDiskstream : public Diskstream
 		}
 	}
 
-	std::list<Region*>& last_capture_regions () { return _last_capture_regions; }
-
 	XMLNode* deprecated_io_node;
 
   protected:

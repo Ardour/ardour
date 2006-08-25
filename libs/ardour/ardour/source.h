@@ -25,13 +25,13 @@
 
 #include <sigc++/signal.h>
 
-#include <pbd/stateful.h> 
+#include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
 
 namespace ARDOUR {
 
-class Source : public Stateful, public sigc::trackable
+class Source : public PBD::StatefulDestructible, public sigc::trackable
 {
   public:
 	Source (std::string name);
@@ -53,7 +53,6 @@ class Source : public Stateful, public sigc::trackable
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-	sigc::signal<void,Source *> GoingAway;
 
   protected:
 	string            _name;

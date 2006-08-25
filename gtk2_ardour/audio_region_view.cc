@@ -57,7 +57,7 @@ using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
 
-AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, AudioRegion& r, double spu,
+AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  Gdk::Color& basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, sync_mark(0)
@@ -73,7 +73,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 {
 }
 
-AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, AudioRegion& r, double spu, 
+AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu, 
 				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
 	, sync_mark(0)
@@ -103,7 +103,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	zero_line             = 0;
 	_flags                = 0;
 
-	if ((node = _region.extra_xml ("GUI")) != 0) {
+	if ((node = _region->extra_xml ("GUI")) != 0) {
 		set_flags (node);
 	} else {
 		_flags = WaveformVisible;
@@ -149,11 +149,11 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 		fade_out_handle->set_data ("regionview", this);
 	}
 
-	string foo = _region.name();
+	string foo = _region->name();
 	foo += ':';
 	foo += "gain";
 
-	gain_line = new AudioRegionGainLine (foo, trackview.session(), *this, *group, audio_region().envelope());
+	gain_line = new AudioRegionGainLine (foo, trackview.session(), *this, *group, audio_region()->envelope());
 
 	if (!(_flags & EnvelopeVisible)) {
 		gain_line->hide ();
@@ -161,7 +161,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 		gain_line->show ();
 	}
 
-	reset_width_dependent_items ((double) _region.length() / samples_per_unit);
+	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
 	gain_line->reset ();
 
@@ -176,7 +176,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	fade_in_active_changed ();
 	fade_out_active_changed ();
 
-	_region.StateChanged.connect (mem_fun(*this, &AudioRegionView::region_changed));
+	_region->StateChanged.connect (mem_fun(*this, &AudioRegionView::region_changed));
 
 	fade_in_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
 	fade_in_handle->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
@@ -205,11 +205,11 @@ AudioRegionView::~AudioRegionView ()
 	}
 }
 
-ARDOUR::AudioRegion&
+boost::shared_ptr<ARDOUR::AudioRegion>
 AudioRegionView::audio_region() const
 {
 	// "Guaranteed" to succeed...
-	return dynamic_cast<AudioRegion&>(_region);
+	return boost::dynamic_pointer_cast<AudioRegion>(_region);
 }
 
 void
@@ -254,13 +254,13 @@ AudioRegionView::fade_out_changed ()
 void
 AudioRegionView::set_fade_in_active (bool yn)
 {
-	audio_region().set_fade_in_active (yn);
+	audio_region()->set_fade_in_active (yn);
 }
 
 void
 AudioRegionView::set_fade_out_active (bool yn)
 {
-	audio_region().set_fade_out_active (yn);
+	audio_region()->set_fade_out_active (yn);
 }
 
 void
@@ -270,7 +270,7 @@ AudioRegionView::fade_in_active_changed ()
 	uint32_t col;
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 
-	if (audio_region().fade_in_active()) {
+	if (audio_region()->fade_in_active()) {
 		col = RGBA_TO_UINT(r,g,b,120);
 		fade_in_shape->property_fill_color_rgba() = col;
 		fade_in_shape->property_width_pixels() = 0;
@@ -290,7 +290,7 @@ AudioRegionView::fade_out_active_changed ()
 	uint32_t col;
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 
-	if (audio_region().fade_out_active()) {
+	if (audio_region()->fade_out_active()) {
 		col = RGBA_TO_UINT(r,g,b,120);
 		fade_out_shape->property_fill_color_rgba() = col;
 		fade_out_shape->property_width_pixels() = 0;
@@ -311,7 +311,7 @@ AudioRegionView::region_scale_amplitude_changed ()
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// force a reload of the cache
-		waves[n]->property_data_src() = &_region;
+		waves[n]->property_data_src() = _region.get();
 	}
 }
 
@@ -323,13 +323,13 @@ AudioRegionView::region_resized (Change what_changed)
 	if (what_changed & Change (StartChanged|LengthChanged)) {
 
 	 	for (uint32_t n = 0; n < waves.size(); ++n) {
- 			waves[n]->property_region_start() = _region.start();
+ 			waves[n]->property_region_start() = _region->start();
 		}
 		
  		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 
  			for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
-				(*w)->property_region_start() = _region.start();
+				(*w)->property_region_start() = _region->start();
  			}
  		}
 	}
@@ -369,7 +369,7 @@ AudioRegionView::region_muted ()
 	RegionView::region_muted();
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		if (_region.muted()) {
+		if (_region->muted()) {
 			waves[n]->property_wave_color() = color_map[cMutedWaveForm];
 		} else {
 			waves[n]->property_wave_color() = color_map[cWaveForm];
@@ -449,7 +449,7 @@ AudioRegionView::reset_fade_shapes ()
 void
 AudioRegionView::reset_fade_in_shape ()
 {
-	reset_fade_in_shape_width ((jack_nframes_t) audio_region().fade_in().back()->when);
+	reset_fade_in_shape_width ((jack_nframes_t) audio_region()->fade_in().back()->when);
 }
 	
 void
@@ -494,7 +494,7 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 	fade_in_shape->show();
 
 	float curve[npoints];
-	audio_region().fade_in().get_vector (0, audio_region().fade_in().back()->when, curve, npoints);
+	audio_region()->fade_in().get_vector (0, audio_region()->fade_in().back()->when, curve, npoints);
 
 	points = get_canvas_points ("fade in shape", npoints+3);
 
@@ -533,7 +533,7 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 void
 AudioRegionView::reset_fade_out_shape ()
 {
-	reset_fade_out_shape_width ((jack_nframes_t) audio_region().fade_out().back()->when);
+	reset_fade_out_shape_width ((jack_nframes_t) audio_region()->fade_out().back()->when);
 }
 
 void
@@ -559,7 +559,7 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 	}
 
 	double handle_center;
-	handle_center = (_region.length() - width) / samples_per_unit;
+	handle_center = (_region->length() - width) / samples_per_unit;
 	
 	if (handle_center > 7.0) {
 		handle_center -= 3.0;
@@ -580,7 +580,7 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 	fade_out_shape->show();
 
 	float curve[npoints];
-	audio_region().fade_out().get_vector (0, audio_region().fade_out().back()->when, curve, npoints);
+	audio_region()->fade_out().get_vector (0, audio_region()->fade_out().back()->when, curve, npoints);
 
 	if (_height > NAME_HIGHLIGHT_THRESH) {
 		h = _height - NAME_HIGHLIGHT_SIZE;
@@ -658,11 +658,11 @@ AudioRegionView::set_colors ()
 	RegionView::set_colors();
 	
 	if (gain_line) {
-		gain_line->set_line_color (audio_region().envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
+		gain_line->set_line_color (audio_region()->envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
 	}
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		if (_region.muted()) {
+		if (_region->muted()) {
 			waves[n]->property_wave_color() = color_map[cMutedWaveForm];
 		} else {
 			waves[n]->property_wave_color() = color_map[cWaveForm];
@@ -754,14 +754,14 @@ AudioRegionView::create_waves ()
 	
 	for (uint32_t n = 0; n < nchans; ++n) {
 		
-		if (n >= audio_region().n_channels()) {
+		if (n >= audio_region()->n_channels()) {
 			break;
 		}
 		
 		wave_caches.push_back (WaveView::create_cache ());
 
 		if (wait_for_data) {
-			if (audio_region().source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
+			if (audio_region()->source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				create_one_wave (n, true);
 			} else {
 				create_zero_line = false;
@@ -774,7 +774,7 @@ AudioRegionView::create_waves ()
 	if (create_zero_line) {
 		zero_line = new ArdourCanvas::SimpleLine (*group);
 		zero_line->property_x1() = (gdouble) 1.0;
-		zero_line->property_x2() = (gdouble) (_region.length() / samples_per_unit) - 1.0;
+		zero_line->property_x2() = (gdouble) (_region->length() / samples_per_unit) - 1.0;
 		zero_line->property_color_rgba() = (guint) color_map[cZeroLine];
 		manage_zero_line ();
 	}
@@ -786,7 +786,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
 	uint32_t nchans = atv.get_diskstream()->n_channels();
 	uint32_t n;
-	uint32_t nwaves = std::min (nchans, audio_region().n_channels());
+	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
 	gdouble ht;
 
 	if (trackview.height < NAME_HIGHLIGHT_SIZE) {
@@ -799,7 +799,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 
 	WaveView *wave = new WaveView(*group);
 
-	wave->property_data_src() = (gpointer) &_region;
+	wave->property_data_src() = (gpointer) _region.get();
 	wave->property_cache() =  wave_caches[which];
 	wave->property_cache_updater() = true;
 	wave->property_channel() =  which;
@@ -811,8 +811,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	wave->property_height() =  (double) ht;
 	wave->property_samples_per_unit() =  samples_per_unit;
 	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
-	wave->property_wave_color() = _region.muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm];
-	wave->property_region_start() = _region.start();
+	wave->property_wave_color() = _region->muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm];
+	wave->property_region_start() = _region->start();
 
 	if (!(_flags & WaveformVisible)) {
 		wave->hide();
@@ -848,7 +848,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		if (!zero_line) {
 			zero_line = new ArdourCanvas::SimpleLine (*group);
 			zero_line->property_x1() = (gdouble) 1.0;
-			zero_line->property_x2() = (gdouble) (_region.length() / samples_per_unit) - 1.0;
+			zero_line->property_x2() = (gdouble) (_region->length() / samples_per_unit) - 1.0;
 			zero_line->property_color_rgba() = (guint) color_map[cZeroLine];
 			manage_zero_line ();
 		}
@@ -886,7 +886,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	jack_nframes_t fx = trackview.editor.pixel_to_frame (x);
 
-	if (fx > _region.length()) {
+	if (fx > _region->length()) {
 		return;
 	}
 
@@ -899,20 +899,20 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 	gain_line->view_to_model_y (y);
 
 	trackview.session().begin_reversible_command (_("add gain control point"));
-	XMLNode &before = audio_region().envelope().get_state();
+	XMLNode &before = audio_region()->envelope().get_state();
 
 
-	if (!audio_region().envelope_active()) {
-		XMLNode &before = audio_region().get_state();
-		audio_region().set_envelope_active(true);
-		XMLNode &after = audio_region().get_state();
-		trackview.session().add_command (new MementoCommand<AudioRegion>(audio_region(), &before, &after));
+	if (!audio_region()->envelope_active()) {
+		XMLNode &before = audio_region()->get_state();
+		audio_region()->set_envelope_active(true);
+		XMLNode &after = audio_region()->get_state();
+		trackview.session().add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &before, &after));
 	}
 
-	audio_region().envelope().add (fx, y);
+	audio_region()->envelope().add (fx, y);
 	
-	XMLNode &after = audio_region().envelope().get_state();
-	trackview.session().add_command (new MementoCommand<Curve>(audio_region().envelope(), &before, &after));
+	XMLNode &after = audio_region()->envelope().get_state();
+	trackview.session().add_command (new MementoCommand<Curve>(audio_region()->envelope(), &before, &after));
 	trackview.session().commit_reversible_command ();
 }
 
@@ -920,7 +920,7 @@ void
 AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 {
         ControlPoint *cp = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
-	audio_region().envelope().erase (cp->model);
+	audio_region()->envelope().erase (cp->model);
 }
 
 void
@@ -931,7 +931,7 @@ AudioRegionView::store_flags()
 	node->add_property ("waveform-visible", (_flags & WaveformVisible) ? "yes" : "no");
 	node->add_property ("envelope-visible", (_flags & EnvelopeVisible) ? "yes" : "no");
 
-	_region.add_extra_xml (*node);
+	_region->add_extra_xml (*node);
 }
 
 void
@@ -998,7 +998,7 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&trackview);
 	assert(rtv);
 
-	double unit_position = _region.position () / samples_per_unit;
+	double unit_position = _region->position () / samples_per_unit;
 	GhostRegion* ghost = new GhostRegion (atv, unit_position);
 	uint32_t nchans;
 	
@@ -1006,13 +1006,13 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 
 	for (uint32_t n = 0; n < nchans; ++n) {
 		
-		if (n >= audio_region().n_channels()) {
+		if (n >= audio_region()->n_channels()) {
 			break;
 		}
 		
 		WaveView *wave = new WaveView(*ghost->group);
 
-		wave->property_data_src() =  &_region;
+		wave->property_data_src() = _region.get();
 		wave->property_cache() =  wave_caches[n];
 		wave->property_cache_updater() = false;
 		wave->property_channel() = n;
@@ -1023,13 +1023,13 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 		wave->property_samples_per_unit() =  samples_per_unit;
 		wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 		wave->property_wave_color() = color_map[cGhostTrackWave];
-		wave->property_region_start() = _region.start();
+		wave->property_region_start() = _region->start();
 
 		ghost->waves.push_back(wave);
 	}
 
 	ghost->set_height ();
-	ghost->set_duration (_region.length() / samples_per_unit);
+	ghost->set_duration (_region->length() / samples_per_unit);
 	ghosts.push_back (ghost);
 
 	ghost->GoingAway.connect (mem_fun(*this, &AudioRegionView::remove_ghost));
@@ -1075,7 +1075,7 @@ void
 AudioRegionView::envelope_active_changed ()
 {
 	if (gain_line) {
-		gain_line->set_line_color (audio_region().envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
+		gain_line->set_line_color (audio_region()->envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
 	}
 }
 
@@ -1083,11 +1083,11 @@ void
 AudioRegionView::set_waveview_data_src()
 {
 
-	double unit_length= _region.length() / samples_per_unit;
+	double unit_length= _region->length() / samples_per_unit;
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// TODO: something else to let it know the channel
-		waves[n]->property_data_src() = &_region;
+		waves[n]->property_data_src() = _region.get();
 	}
 	
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -1095,7 +1095,7 @@ AudioRegionView::set_waveview_data_src()
 		(*i)->set_duration (unit_length);
 		
 		for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
-			(*w)->property_data_src() = &_region;
+			(*w)->property_data_src() = _region.get();
 		}
 	}
 

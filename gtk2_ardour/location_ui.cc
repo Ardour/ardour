@@ -836,7 +836,7 @@ LocationUI::set_session(ARDOUR::Session* sess)
 		session->locations()->StateChanged.connect (mem_fun(*this, &LocationUI::refresh_location_list_s));
 		session->locations()->added.connect (mem_fun(*this, &LocationUI::location_added));
 		session->locations()->removed.connect (mem_fun(*this, &LocationUI::location_removed));
-		session->going_away.connect (mem_fun(*this, &LocationUI::session_gone));
+		session->GoingAway.connect (mem_fun(*this, &LocationUI::session_gone));
 	}
 	refresh_location_list ();
 }

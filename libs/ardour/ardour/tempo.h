@@ -26,8 +26,11 @@
 #include <vector>
 #include <cmath>
 #include <glibmm/thread.h>
+
 #include <pbd/undo.h>
 #include <pbd/stateful.h> 
+#include <pbd/statefuldestructible.h> 
+
 #include <sigc++/signal.h>
 
 #include <ardour/ardour.h>
@@ -169,7 +172,8 @@ class TempoMapState : public StateManager::State {
 	Metrics *metrics;
 };
 
-class TempoMap : public Stateful, public StateManager {
+class TempoMap : public StateManager, public PBD::StatefulDestructible
+{
   public:
 
 	TempoMap (jack_nframes_t frame_rate);

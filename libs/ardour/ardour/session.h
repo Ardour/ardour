@@ -37,11 +37,13 @@
 #include <pbd/undo.h>
 #include <pbd/pool.h>
 #include <pbd/rcu.h>
+#include <pbd/statefuldestructible.h>
 
 #include <midi++/types.h>
 #include <midi++/mmc.h>
 
 #include <pbd/stateful.h> 
+#include <pbd/destructible.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
@@ -94,11 +96,10 @@ struct RouteGroup;
 
 using std::vector;
 using std::string;
-using std::list;
 using std::map;
 using std::set;
 
-class Session : public sigc::trackable, public Stateful
+class Session : public sigc::trackable, public StatefulDestructible
 
 {
   private:
@@ -324,11 +325,9 @@ class Session : public sigc::trackable, public Stateful
 	void disable_record (bool rt_context, bool force = false);
 	void step_back_from_record ();
 	
-	sigc::signal<void> going_away;
-
 	/* Proxy signal for region hidden changes */
 
-	sigc::signal<void,Region*> RegionHiddenChange;
+	sigc::signal<void,boost::shared_ptr<Region> > RegionHiddenChange;
 
 	/* Emitted when all i/o connections are complete */
 	
@@ -366,7 +365,7 @@ class Session : public sigc::trackable, public Stateful
 
 	int wipe ();
 
-	int remove_region_from_region_list (Region&);
+	int remove_region_from_region_list (boost::shared_ptr<Region>);
 
 	jack_nframes_t get_maximum_extent () const;
 	jack_nframes_t current_end_frame() const { return end_location->start(); }
@@ -615,19 +614,19 @@ class Session : public sigc::trackable, public Stateful
 	
 	/* region info  */
 
-	sigc::signal<void,AudioRegion *> AudioRegionAdded;
-	sigc::signal<void,AudioRegion *> AudioRegionRemoved;
+	sigc::signal<void,boost::shared_ptr<AudioRegion> > AudioRegionAdded;
+	sigc::signal<void,boost::shared_ptr<AudioRegion> > AudioRegionRemoved;
 
 	int region_name (string& result, string base = string(""), bool newlevel = false) const;
 	string new_region_name (string);
 	string path_from_region_name (string name, string identifier);
 
-	AudioRegion* find_whole_file_parent (AudioRegion&);
-	void find_equivalent_playlist_regions (Region&, std::vector<Region*>& result);
+	boost::shared_ptr<AudioRegion> find_whole_file_parent (boost::shared_ptr<AudioRegion>);
+	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 
-	AudioRegion *XMLRegionFactory (const XMLNode&, bool full);
+	boost::shared_ptr<AudioRegion> XMLRegionFactory (const XMLNode&, bool full);
 
-	template<class T> void foreach_audio_region (T *obj, void (T::*func)(AudioRegion *));
+	template<class T> void foreach_audio_region (T *obj, void (T::*func)(boost::shared_ptr<AudioRegion>));
 
 	/* source management */
 
@@ -641,7 +640,7 @@ class Session : public sigc::trackable, public Stateful
 	    string pathname;
 	    
 	    /* result */
-	    std::vector<AudioRegion*> new_regions;
+	    std::vector<boost::shared_ptr<AudioRegion> > new_regions;
 	    
 	};
 
@@ -667,8 +666,8 @@ class Session : public sigc::trackable, public Stateful
 	int  cleanup_sources (cleanup_report&);
 	int  cleanup_trash_sources (cleanup_report&);
 
-	int destroy_region (Region*);
-	int destroy_regions (list<Region*>);
+	int destroy_region (boost::shared_ptr<Region>);
+	int destroy_regions (std::list<boost::shared_ptr<Region> >);
 
 	int remove_last_capture ();
 
@@ -728,7 +727,7 @@ class Session : public sigc::trackable, public Stateful
 
 	boost::shared_ptr<Auditioner> the_auditioner() { return auditioner; }
 	void audition_playlist ();
-	void audition_region (Region&);
+	void audition_region (boost::shared_ptr<Region>);
 	void cancel_audition ();
 	bool is_auditioning () const;
 	
@@ -840,12 +839,15 @@ class Session : public sigc::trackable, public Stateful
 	void commit_reversible_command (Command* cmd = 0);
 
 	void add_command (Command *const cmd) {
-		current_trans.add_command (cmd);
+		current_trans->add_command (cmd);
 	}
+
+	std::map<PBD::ID, PBD::StatefulDestructible*> registry;
 
         // these commands are implemented in libs/ardour/session_command.cc
 	Command *memento_command_factory(XMLNode *n);
-        void register_with_memento_command_factory(PBD::ID, Stateful *);
+        void register_with_memento_command_factory(PBD::ID, PBD::StatefulDestructible *);
+
         class GlobalSoloStateCommand : public Command
         {
             GlobalRouteBooleanState before, after;
@@ -915,17 +917,17 @@ class Session : public sigc::trackable, public Stateful
 	/* tempo FX */
 
 	struct TimeStretchRequest {
-	    ARDOUR::AudioRegion* region;
+	    boost::shared_ptr<ARDOUR::AudioRegion> region;
 	    float                fraction; /* session: read ; GUI: write */
 	    float                progress; /* session: write ; GUI: read */
 	    bool                 running;  /* read/write */
 	    bool                 quick_seek; /* GUI: write */
 	    bool                 antialias;  /* GUI: write */
 
-	    TimeStretchRequest () : region (0) {}
+	    TimeStretchRequest () {} 
 	};
 
-	AudioRegion* tempoize_region (TimeStretchRequest&);
+	boost::shared_ptr<AudioRegion> tempoize_region (TimeStretchRequest&);
 
 	string raid_path() const;
 	void   set_raid_path(string);
@@ -1540,13 +1542,13 @@ class Session : public sigc::trackable, public Stateful
 	/* REGION MANAGEMENT */
 
 	mutable Glib::Mutex region_lock;
-	typedef map<PBD::ID,AudioRegion *> AudioRegionList;
+	typedef map<PBD::ID,boost::shared_ptr<AudioRegion> > AudioRegionList;
 	AudioRegionList audio_regions;
 	
-	void region_renamed (Region *);
-	void region_changed (Change, Region *);
-	void add_region (Region *);
-	void remove_region (Region *);
+	void region_renamed (boost::shared_ptr<Region>);
+	void region_changed (Change, boost::shared_ptr<Region>);
+	void add_region (boost::shared_ptr<Region>);
+	void remove_region (boost::shared_ptr<Region>);
 
 	int load_regions (const XMLNode& node);
 
@@ -1603,9 +1605,9 @@ class Session : public sigc::trackable, public Stateful
 	/* AUDITIONING */
 
 	boost::shared_ptr<Auditioner> auditioner;
-	void set_audition (AudioRegion*);
+	void set_audition (boost::shared_ptr<AudioRegion>);
 	void non_realtime_set_audition ();
-	AudioRegion *pending_audition_region;
+	boost::shared_ptr<AudioRegion> pending_audition_region;
 
 	/* EXPORT */
 
@@ -1674,7 +1676,7 @@ class Session : public sigc::trackable, public Stateful
 	void reverse_diskstream_buffers ();
 
 	UndoHistory history;
-	UndoTransaction current_trans;
+	UndoTransaction* current_trans;
 
 	GlobalRouteBooleanState get_global_route_boolean (bool (Route::*method)(void) const);
 	GlobalRouteMeterState get_global_route_metering ();

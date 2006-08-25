@@ -21,7 +21,10 @@
 #ifndef __ardour_region_h__
 #define __ardour_region_h__
 
+#include <boost/shared_ptr.hpp>
+
 #include <pbd/undo.h>
+#include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/state_manager.h>
@@ -53,7 +56,7 @@ struct RegionState : public StateManager::State
 	mutable RegionEditState _first_edit;
 };
 
-class Region : public Stateful, public StateManager
+class Region : public PBD::StatefulDestructible, public StateManager
 {
   public:
 	enum Flag {
@@ -89,11 +92,6 @@ class Region : public Stateful, public StateManager
 	static Change LayerChanged;
 	static Change HiddenChanged;
 
-	Region (jack_nframes_t start, jack_nframes_t length, 
-		const string& name, layer_t = 0, Flag flags = DefaultFlags);
-	Region (const Region&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
-	Region (const Region&);
-	Region (const XMLNode&);
 	virtual ~Region();
 
 	const PBD::ID& id() const { return _id; }
@@ -139,11 +137,11 @@ class Region : public Stateful, public StateManager
 		return ARDOUR::coverage (_position, _position + _length - 1, start, end);
 	}
 	
-	bool equivalent (const Region&) const;
-	bool size_equivalent (const Region&) const;
-	bool overlap_equivalent (const Region&) const;
-	bool region_list_equivalent (const Region&) const;
-	virtual bool source_equivalent (const Region&) const = 0;
+	bool equivalent (boost::shared_ptr<const Region>) const;
+	bool size_equivalent (boost::shared_ptr<const Region>) const;
+	bool overlap_equivalent (boost::shared_ptr<const Region>) const;
+	bool region_list_equivalent (boost::shared_ptr<const Region>) const;
+	virtual bool source_equivalent (boost::shared_ptr<const Region>) const = 0;
 	
 	virtual bool speed_mismatch (float) const = 0;
 
@@ -193,22 +191,20 @@ class Region : public Stateful, public StateManager
 	virtual XMLNode& state (bool);
 	virtual int      set_state (const XMLNode&);
 
-	sigc::signal<void,Region*> GoingAway;
-
-	/* This is emitted only when a new id is assigned. Therefore,
-	   in a pure Region copy, it will not be emitted.
-
-	   It must be emitted by derived classes, not Region
-	   itself, to permit dynamic_cast<> to be used to 
-	   infer the type of Region.
-	*/
-
-	static sigc::signal<void,Region*> CheckNewRegion;
-
-	virtual Region* get_parent() = 0;
+	virtual boost::shared_ptr<Region> get_parent() = 0;
 	
 	uint64_t last_layer_op() const { return _last_layer_op; }
 	void set_last_layer_op (uint64_t when);
+
+  protected:
+	friend class RegionFactory;
+
+	Region (jack_nframes_t start, jack_nframes_t length, 
+		const string& name, layer_t = 0, Flag flags = DefaultFlags);
+	Region (boost::shared_ptr<const Region>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
+	Region (boost::shared_ptr<const Region>);
+	Region (const XMLNode&);
+
 
   protected:
 	XMLNode& get_short_state (); /* used only by Session */

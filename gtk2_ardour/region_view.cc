@@ -59,33 +59,33 @@ sigc::signal<void,RegionView*> RegionView::RegionViewGoingAway;
 
 RegionView::RegionView (ArdourCanvas::Group* parent, 
                         TimeAxisView&        tv,
-                        ARDOUR::Region&      r,
+                        boost::shared_ptr<ARDOUR::Region> r,
                         double               spu,
                         Gdk::Color&          basic_color)
-	: TimeAxisViewItem (r.name(), *parent, tv, spu, basic_color, r.position(), r.length(),
-			TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
-			                              TimeAxisViewItem::ShowNameHighlight|
-			                              TimeAxisViewItem::ShowFrame))
-	, _region (r)
-	, sync_mark(0)
-	, no_wave_msg(0)
-	, editor(0)
-	, current_visible_sync_position(0.0)
-	, valid(false)
-	, _pixel_width(1.0)
-	, _height(1.0)
-	, in_destructor(false)
-	, wait_for_data(false)
+	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(),
+			    TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
+							  TimeAxisViewItem::ShowNameHighlight|
+							  TimeAxisViewItem::ShowFrame))
+	  , _region (r)
+	  , sync_mark(0)
+	  , no_wave_msg(0)
+	  , editor(0)
+	  , current_visible_sync_position(0.0)
+	  , valid(false)
+	  , _pixel_width(1.0)
+	  , _height(1.0)
+	  , in_destructor(false)
+	  , wait_for_data(false)
 {
 }
 
 RegionView::RegionView (ArdourCanvas::Group*         parent, 
                         TimeAxisView&                tv,
-                        ARDOUR::Region&              r,
+                        boost::shared_ptr<ARDOUR::Region> r,
                         double                       spu,
                         Gdk::Color&                  basic_color,
                         TimeAxisViewItem::Visibility visibility)
-	: TimeAxisViewItem (r.name(), *parent, tv, spu, basic_color, r.position(), r.length(), visibility)
+	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), visibility)
 	, _region (r)
 	, sync_mark(0)
 	, no_wave_msg(0)
@@ -129,7 +129,7 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	sync_mark->property_fill_color_rgba() = fill_color;
 	sync_mark->hide();
 
-	reset_width_dependent_items ((double) _region.length() / samples_per_unit);
+	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
 	set_height (trackview.height);
 
@@ -138,7 +138,7 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	region_resized (BoundsChanged);
 	region_locked ();
 
-	_region.StateChanged.connect (mem_fun(*this, &RegionView::region_changed));
+	_region->StateChanged.connect (mem_fun(*this, &RegionView::region_changed));
 
 	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
 	name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
@@ -182,7 +182,7 @@ RegionView::_lock_toggle (ArdourCanvas::Item* item, GdkEvent* ev, void* arg)
 void
 RegionView::lock_toggle ()
 {
-	_region.set_locked (!_region.locked());
+	_region->set_locked (!_region->locked());
 }
 
 void
@@ -227,14 +227,14 @@ RegionView::region_resized (Change what_changed)
 	double unit_length;
 
 	if (what_changed & ARDOUR::PositionChanged) {
-		set_position (_region.position(), 0);
+		set_position (_region->position(), 0);
 	}
 
 	if (what_changed & Change (StartChanged|LengthChanged)) {
 
-		set_duration (_region.length(), 0);
+		set_duration (_region->length(), 0);
 
-		unit_length = _region.length() / samples_per_unit;
+		unit_length = _region->length() / samples_per_unit;
 		
 		reset_width_dependent_items (unit_length);
 		
@@ -277,25 +277,25 @@ RegionView::region_opacity ()
 void
 RegionView::raise ()
 {
-	_region.raise ();
+	_region->raise ();
 }
 
 void
 RegionView::raise_to_top ()
 {
-	_region.raise_to_top ();
+	_region->raise_to_top ();
 }
 
 void
 RegionView::lower ()
 {
-	_region.lower ();
+	_region->lower ();
 }
 
 void
 RegionView::lower_to_bottom ()
 {
-	_region.lower_to_bottom ();
+	_region->lower_to_bottom ();
 }
 
 bool
@@ -328,7 +328,7 @@ RegionView::set_samples_per_unit (gdouble spu)
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		(*i)->set_samples_per_unit (spu);
-		(*i)->set_duration (_region.length() / samples_per_unit);
+		(*i)->set_duration (_region->length() / samples_per_unit);
 	}
 
 	region_sync_changed ();
@@ -342,7 +342,7 @@ RegionView::set_duration (jack_nframes_t frames, void *src)
 	}
 	
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_duration (_region.length() / samples_per_unit);
+		(*i)->set_duration (_region->length() / samples_per_unit);
 	}
 
 	return true;
@@ -367,7 +367,7 @@ RegionView::set_colors ()
 void
 RegionView::set_frame_color ()
 {
-	if (_region.opaque()) {
+	if (_region->opaque()) {
 		fill_opacity = 180;
 	} else {
 		fill_opacity = 100;
@@ -389,19 +389,19 @@ RegionView::region_renamed ()
 {
 	string str;
 
-	if (_region.locked()) {
+	if (_region->locked()) {
 		str += '>';
-		str += _region.name();
+		str += _region->name();
 		str += '<';
 	} else {
-		str = _region.name();
+		str = _region->name();
 	}
 
-	if (_region.speed_mismatch (trackview.session().frame_rate())) {
+	if (_region->speed_mismatch (trackview.session().frame_rate())) {
 		str = string ("*") + str;
 	}
 
-	if (_region.muted()) {
+	if (_region->muted()) {
 		str = string ("!") + str;
 	}
 
@@ -419,10 +419,10 @@ RegionView::region_sync_changed ()
 	int sync_dir;
 	jack_nframes_t sync_offset;
 
-	sync_offset = _region.sync_offset (sync_dir);
+	sync_offset = _region->sync_offset (sync_dir);
 
 	/* this has to handle both a genuine change of position, a change of samples_per_unit,
-	   and a change in the bounds of the _region.
+	   and a change in the bounds of the _region->
 	 */
 
 	if (sync_offset == 0) {
@@ -433,7 +433,7 @@ RegionView::region_sync_changed ()
 
 	} else {
 
-		if ((sync_dir < 0) || ((sync_dir > 0) && (sync_offset > _region.length()))) { 
+		if ((sync_dir < 0) || ((sync_dir > 0) && (sync_offset > _region->length()))) { 
 
 			/* no sync mark - its out of the bounds of the region */
 
@@ -462,7 +462,7 @@ RegionView::region_sync_changed ()
 void
 RegionView::move (double x_delta, double y_delta)
 {
-	if (_region.locked() || (x_delta == 0 && y_delta == 0)) {
+	if (_region->locked() || (x_delta == 0 && y_delta == 0)) {
 		return;
 	}
 

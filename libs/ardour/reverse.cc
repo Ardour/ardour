@@ -43,10 +43,10 @@ Reverse::~Reverse ()
 }
 
 int
-Reverse::run (AudioRegion& region)
+Reverse::run (boost::shared_ptr<AudioRegion> region)
 {
-	AudioRegion::SourceList nsrcs;
-	AudioRegion::SourceList::iterator si;
+	SourceList nsrcs;
+	SourceList::iterator si;
 	const jack_nframes_t blocksize = 256 * 1048;
 	Sample buf[blocksize];
 	jack_nframes_t fpos;
@@ -61,8 +61,8 @@ Reverse::run (AudioRegion& region)
 		goto out;
 	}
 
-	fend = region.start() + region.length();
-	fstart = region.start();
+	fend = region->start() + region->length();
+	fstart = region->start();
 
 	if (blocksize < fend) {
 		fpos =max(fstart, fend - blocksize);
@@ -70,7 +70,7 @@ Reverse::run (AudioRegion& region)
 		fpos = fstart;
 	}
 
-	to_read = min (region.length(), blocksize);
+	to_read = min (region->length(), blocksize);
 
 	/* now read it backwards */
 
@@ -78,11 +78,11 @@ Reverse::run (AudioRegion& region)
 
 		uint32_t n;
 
-		for (n = 0, si = nsrcs.begin(); n < region.n_channels(); ++n, ++si) {
+		for (n = 0, si = nsrcs.begin(); n < region->n_channels(); ++n, ++si) {
 
 			/* read it in */
 			
-			if (region.source (n).read (buf, fpos, to_read) != to_read) {
+			if (region->source (n).read (buf, fpos, to_read) != to_read) {
 				goto out;
 			}
 			

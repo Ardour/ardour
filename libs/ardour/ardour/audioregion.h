@@ -57,8 +57,6 @@ struct AudioRegionState : public RegionState
 class AudioRegion : public Region
 {
   public:
-	typedef vector<AudioSource *> SourceList;
-
 	static Change FadeInChanged;
 	static Change FadeOutChanged;
 	static Change FadeInActiveChanged;
@@ -67,16 +65,9 @@ class AudioRegion : public Region
 	static Change ScaleAmplitudeChanged;
 	static Change EnvelopeChanged;
 
-	AudioRegion (AudioSource&, jack_nframes_t start, jack_nframes_t length, bool announce = true);
-	AudioRegion (AudioSource&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	AudioRegion (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	AudioRegion (const AudioRegion&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	AudioRegion (const AudioRegion&);
-	AudioRegion (AudioSource&, const XMLNode&);
-	AudioRegion (SourceList &, const XMLNode&);
 	~AudioRegion();
 
-	bool source_equivalent (const Region&) const;
+	bool source_equivalent (boost::shared_ptr<const Region>) const;
 
 	bool speed_mismatch (float) const;
 
@@ -152,7 +143,7 @@ class AudioRegion : public Region
 
 	int exportme (ARDOUR::Session&, ARDOUR::AudioExportSpecification&);
 
-	Region* get_parent();
+	boost::shared_ptr<Region> get_parent();
 
 	/* xfade/fade interactions */
 
@@ -162,7 +153,15 @@ class AudioRegion : public Region
 	void resume_fade_out ();
 
   private:
-	friend class Playlist;
+	friend class RegionFactory;
+
+	AudioRegion (AudioSource&, jack_nframes_t start, jack_nframes_t length);
+	AudioRegion (AudioSource&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (boost::shared_ptr<const AudioRegion>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (boost::shared_ptr<const AudioRegion>);
+	AudioRegion (AudioSource&, const XMLNode&);
+	AudioRegion (SourceList &, const XMLNode&);
 
   private:
 	void set_default_fades ();

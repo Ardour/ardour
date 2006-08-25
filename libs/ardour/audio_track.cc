@@ -28,6 +28,7 @@
 #include <ardour/redirect.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiosource.h>
+#include <ardour/region_factory.h>
 #include <ardour/route_group_specialized.h>
 #include <ardour/insert.h>
 #include <ardour/audioplaylist.h>
@@ -746,7 +747,6 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	string new_playlist_name;
 	Playlist* new_playlist;
 	string dir;
-	AudioRegion* region;
 	string region_name;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
@@ -813,13 +813,13 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	/* create a new region from all filesources, keep it private */
 
-	region = new AudioRegion (srcs, 0, srcs[0]->length(), 
-				  region_name, 0, 
-				  (AudioRegion::Flag) (AudioRegion::WholeFile|AudioRegion::DefaultFlags),
-				  false);
+	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0, srcs[0]->length(), 
+								 region_name, 0, 
+								 (AudioRegion::Flag) (AudioRegion::WholeFile|AudioRegion::DefaultFlags),
+								 false));
 
 	new_playlist->set_orig_diskstream_id (diskstream->id());
-	new_playlist->add_region (*region, 0);
+	new_playlist->add_region (region, 0);
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 

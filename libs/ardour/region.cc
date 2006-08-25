@@ -47,8 +47,6 @@ Change Region::LockChanged       = ARDOUR::new_change ();
 Change Region::LayerChanged      = ARDOUR::new_change ();
 Change Region::HiddenChanged     = ARDOUR::new_change ();
 
-sigc::signal<void,Region *> Region::CheckNewRegion;
-
 Region::Region (jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Region::Flag flags)
 {
 	/* basic Region constructor */
@@ -71,7 +69,7 @@ Region::Region (jack_nframes_t start, jack_nframes_t length, const string& name,
 	_last_layer_op = 0;
 }
 
-Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+Region::Region (boost::shared_ptr<const Region> other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 {
 	/* create a new Region from part of an existing one */
 
@@ -80,9 +78,9 @@ Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t lengt
 	_playlist = 0;
 	_read_data_count = 0;
 
-	_start = other._start + offset; 
-	if (other._sync_position < offset) {
-		_sync_position = other._sync_position;
+	_start = other->_start + offset; 
+	if (other->_sync_position < offset) {
+		_sync_position = other->_sync_position;
 	} else {
 		_sync_position = _start;
 	}
@@ -96,7 +94,7 @@ Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t lengt
 	_last_layer_op = 0;
 }
 
-Region::Region (const Region &other)
+Region::Region (boost::shared_ptr<const Region> other)
 {
 	/* Pure copy constructor */
 
@@ -106,23 +104,23 @@ Region::Region (const Region &other)
 	_read_data_count = 0;
 
 	_first_edit = EditChangesID;
-	other._first_edit = EditChangesName;
+	other->_first_edit = EditChangesName;
 
-	if (other._extra_xml) {
-		_extra_xml = new XMLNode (*other._extra_xml);
+	if (other->_extra_xml) {
+		_extra_xml = new XMLNode (*other->_extra_xml);
 	} else {
 		_extra_xml = 0;
 	}
 
-	_start = other._start;
-	_sync_position = other._sync_position;
-	_length = other._length; 
-	_name = other._name;
-	_position = other._position; 
-	_layer = other._layer; 
-	_flags = Flag (other._flags & ~Locked);
+	_start = other->_start;
+	_sync_position = other->_sync_position;
+	_length = other->_length; 
+	_name = other->_name;
+	_position = other->_position; 
+	_layer = other->_layer; 
+	_flags = Flag (other->_flags & ~Locked);
 	_current_state_id = 0;
-	_last_layer_op = other._last_layer_op;
+	_last_layer_op = other->_last_layer_op;
 }
 
 Region::Region (const XMLNode& node)
@@ -148,6 +146,9 @@ Region::Region (const XMLNode& node)
 
 Region::~Region ()
 {
+	notify_callbacks ();
+
+	/* derived classes must emit GoingAway */
 }
 
 void
@@ -273,7 +274,7 @@ Region::first_edit ()
 		_first_edit = EditChangesNothing;
 
 		send_change (NameChanged);
-		CheckNewRegion (this);
+		/// XXX CheckNewRegion (boost::shared_ptr<Region>(this));
 	}
 }
 
@@ -284,7 +285,7 @@ Region::move_to_natural_position (void *src)
 		return;
 	}
 
-	Region* whole_file_region = get_parent();
+	boost::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
 		set_position (whole_file_region->position() + _start, src);
@@ -342,7 +343,7 @@ Region::set_position_on_top (jack_nframes_t pos, void *src)
 		}
 	}
 
-	_playlist->raise_region_to_top (*this);
+	_playlist->raise_region_to_top (boost::shared_ptr<Region>(this));
 
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
@@ -784,7 +785,7 @@ Region::raise ()
 		return;
 	}
 
-	_playlist->raise_region (*this);
+	_playlist->raise_region (boost::shared_ptr<Region>(this));
 }
 
 void
@@ -794,7 +795,7 @@ Region::lower ()
 		return;
 	}
 
-	_playlist->lower_region (*this);
+	_playlist->lower_region (boost::shared_ptr<Region>(this));
 }
 
 void
@@ -805,7 +806,7 @@ Region::raise_to_top ()
 		return;
 	}
 
-	_playlist->raise_region_to_top (*this);
+	_playlist->raise_region_to_top (boost::shared_ptr<Region>(this));
 }
 
 void
@@ -815,7 +816,7 @@ Region::lower_to_bottom ()
 		return;
 	}
 
-	_playlist->lower_region_to_bottom (*this);
+	_playlist->lower_region_to_bottom (boost::shared_ptr<Region>(this));
 }
 
 void
@@ -992,28 +993,28 @@ Region::set_last_layer_op (uint64_t when)
 }
 
 bool
-Region::overlap_equivalent (const Region& other) const
+Region::overlap_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return coverage (other.first_frame(), other.last_frame()) != OverlapNone;
+	return coverage (other->first_frame(), other->last_frame()) != OverlapNone;
 }
 
 bool
-Region::equivalent (const Region& other) const
+Region::equivalent (boost::shared_ptr<const Region> other) const
 {
-	return _start == other._start &&
-		_position == other._position &&
-		_length == other._length;
+	return _start == other->_start &&
+		_position == other->_position &&
+		_length == other->_length;
 }
 
 bool
-Region::size_equivalent (const Region& other) const
+Region::size_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return _start == other._start &&
-		_length == other._length;
+	return _start == other->_start &&
+		_length == other->_length;
 }
 
 bool
-Region::region_list_equivalent (const Region& other) const
+Region::region_list_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return size_equivalent (other) && source_equivalent (other) && _name == other._name;
+	return size_equivalent (other) && source_equivalent (other) && _name == other->_name;
 }

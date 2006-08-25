@@ -98,9 +98,9 @@ SendUI::outs_changed (IOChange change, void* ignored)
 }
 
 void
-SendUI::send_going_away (Redirect *ignored)
+SendUI::send_going_away ()
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &SendUI::send_going_away), ignored));
+	ENSURE_GUI_THREAD (mem_fun (*this, &SendUI::send_going_away))
 
 	delete this;
 }
@@ -143,9 +143,9 @@ SendUIWindow::~SendUIWindow ()
 }
 
 void
-SendUIWindow::send_going_away (Redirect *ignored)
+SendUIWindow::send_going_away ()
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &SendUIWindow::send_going_away), ignored));
+	ENSURE_GUI_THREAD (mem_fun (*this, &SendUIWindow::send_going_away));
 	
 	delete this;
 }

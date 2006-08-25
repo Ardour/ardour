@@ -40,6 +40,7 @@
 #include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/audioregion.h>
+#include <ardour/region_factory.h>
 
 #include "i18n.h"
 
@@ -53,7 +54,7 @@ Session::import_audiofile (import_status& status)
 {
 	SNDFILE *in;
 	AudioFileSource **newfiles = 0;
-	AudioRegion::SourceList sources;
+	SourceList sources;
 	SF_INFO info;
 	float *data = 0;
 	Sample **channel_data = 0;
@@ -217,8 +218,8 @@ Session::import_audiofile (import_status& status)
 			sources.push_back(newfiles[n]);
 		}
 
-		AudioRegion *r = new AudioRegion (sources, 0, newfiles[0]->length(), region_name_from_path (Glib::path_get_basename (basepath)),
-					0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile));
+		boost::shared_ptr<AudioRegion> r (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, 0, newfiles[0]->length(), region_name_from_path (Glib::path_get_basename (basepath)),
+														   0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile))));
 		
 		status.new_regions.push_back (r);
 
@@ -233,9 +234,9 @@ Session::import_audiofile (import_status& status)
 			   did not bother to create whole-file AudioRegions for them. Do it now.
 			*/
 		
-			AudioRegion *r = new AudioRegion (*newfiles[n], 0, newfiles[n]->length(), region_name_from_path (Glib::path_get_basename (newfiles[n]->name())),
-						0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile | AudioRegion::Import));
-
+			boost::shared_ptr<AudioRegion> r (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (*newfiles[n], 0, newfiles[n]->length(), region_name_from_path (Glib::path_get_basename (newfiles[n]->name())),
+															   0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile | AudioRegion::Import))));
+			
 			status.new_regions.push_back (r);
 		}
 	}
@@ -262,9 +263,8 @@ Session::import_audiofile (import_status& status)
 	}
 
 	if (status.cancel) {
-		for (vector<AudioRegion *>::iterator i = status.new_regions.begin(); i != status.new_regions.end(); ++i) {
-			delete *i;
-		}
+
+		status.new_regions.clear ();
 
 		for (vector<string>::iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
 			unlink ((*i).c_str());

@@ -26,6 +26,7 @@
 #endif
 
 #include <istream>
+#include <vector>
 
 #include <inttypes.h>
 #include <jack/types.h>
@@ -42,6 +43,7 @@ typedef int intptr_t;
 namespace ARDOUR {
 
 	class Source;
+	class AudioSource;
 
 	typedef jack_default_audio_sample_t Sample;
 	typedef float                       pan_t;
@@ -250,6 +252,8 @@ namespace ARDOUR {
 		VST
 	};
 	
+	typedef std::vector<AudioSource *> SourceList;
+
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);

@@ -81,6 +81,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/crossfade.h>
 #include <ardour/control_protocol_manager.h>
+#include <ardour/region_factory.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -175,7 +176,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	g_atomic_int_set (&_capture_load, 100);
 	g_atomic_int_set (&_playback_load_min, 100);
 	g_atomic_int_set (&_capture_load_min, 100);
-	pending_audition_region = 0;
 	_edit_mode = Slide;
 	pending_edit_mode = _edit_mode;
 	_play_range = false;
@@ -190,6 +190,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	layer_model = MoveAddHigher;
 	xfade_model = ShortCrossfade;
 	destructive_index = 0;
+	current_trans = 0;
 
 	AudioDiskstream::allocate_working_buffers();
 	
@@ -260,7 +261,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	/* These are all static "per-class" signals */
 
-	Region::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
+	RegionFactory::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
 	AudioSource::AudioSourceCreated.connect (mem_fun (*this, &Session::add_audio_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
@@ -1751,7 +1752,7 @@ Session::load_regions (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	AudioRegion* region;
+	boost::shared_ptr<AudioRegion> region;
 
 	nlist = node.children();
 
@@ -1762,21 +1763,22 @@ Session::load_regions (const XMLNode& node)
 			error << _("Session: cannot create Region from XML description.") << endmsg;
 		}
 	}
+
 	return 0;
 }
 
-AudioRegion *
+boost::shared_ptr<AudioRegion>
 Session::XMLRegionFactory (const XMLNode& node, bool full)
 {
 	const XMLProperty* prop;
 	Source* source;
 	AudioSource* as;
-	AudioRegion::SourceList sources;
+	SourceList sources;
 	uint32_t nchans = 1;
 	char buf[128];
 	
 	if (node.name() != X_("Region")) {
-		return 0;
+		return boost::shared_ptr<AudioRegion>();
 	}
 
 	if ((prop = node.property (X_("channels"))) != 0) {
@@ -1787,7 +1789,7 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 	if ((prop = node.property (X_("source-0"))) == 0) {
 		if ((prop = node.property ("source")) == 0) {
 			error << _("Session: XMLNode describing a AudioRegion is incomplete (no source)") << endmsg;
-			return 0;
+			return boost::shared_ptr<AudioRegion>();
 		}
 	}
 
@@ -1795,13 +1797,13 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 
 	if ((source = source_by_id (s_id)) == 0) {
 		error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
-		return 0;
+		return boost::shared_ptr<AudioRegion>();
 	}
 
 	as = dynamic_cast<AudioSource*>(source);
 	if (!as) {
 		error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), s_id) << endmsg;
-		return 0;
+		return boost::shared_ptr<AudioRegion>();
 	}
 
 	sources.push_back (as);
@@ -1816,24 +1818,26 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 			
 			if ((source = source_by_id (id2)) == 0) {
 				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), id2) << endmsg;
-				return 0;
+				return boost::shared_ptr<AudioRegion>();
 			}
 			
 			as = dynamic_cast<AudioSource*>(source);
 			if (!as) {
 				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), id2) << endmsg;
-				return 0;
+				return boost::shared_ptr<AudioRegion>();
 			}
 			sources.push_back (as);
 		}
 	}
 	
 	try {
-		return new AudioRegion (sources, node);
+		boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, node)));
+		return region;
+						       
 	}
 
 	catch (failed_constructor& err) {
-		return 0;
+		return boost::shared_ptr<AudioRegion>();
 	}
 }
 
@@ -2574,8 +2578,8 @@ Session::set_meter_falloff (float val)
 void
 Session::begin_reversible_command (string name)
 {
-	current_trans.clear ();
-	current_trans.set_name (name);
+	current_trans = new UndoTransaction;
+	current_trans->set_name (name);
 }
 
 void
@@ -2584,11 +2588,11 @@ Session::commit_reversible_command (Command *cmd)
 	struct timeval now;
 
 	if (cmd) {
-		current_trans.add_command (cmd);
+		current_trans->add_command (cmd);
 	}
 
 	gettimeofday (&now, 0);
-	current_trans.set_timestamp (now);
+	current_trans->set_timestamp (now);
 
 	history.add (current_trans);
 }
@@ -2976,7 +2980,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 		for (AudioRegionList::iterator r = audio_regions.begin(); r != audio_regions.end(); ) {
 			AudioRegionList::iterator tmp;
-			AudioRegion* ar;
+			boost::shared_ptr<AudioRegion> ar;
 
 			tmp = r;
 			++tmp;
@@ -3360,15 +3364,15 @@ Session::restore_history (string snapshot_name)
          it++)
     {
         XMLNode *t = *it;
-        UndoTransaction ut;
+        UndoTransaction* ut = new UndoTransaction ();
         struct timeval tv;
 
-        ut.set_name(t->property("name")->value());
+        ut->set_name(t->property("name")->value());
         stringstream ss(t->property("tv_sec")->value());
         ss >> tv.tv_sec;
         ss.str(t->property("tv_usec")->value());
         ss >> tv.tv_usec;
-        ut.set_timestamp(tv);
+        ut->set_timestamp(tv);
 
         for (XMLNodeConstIterator child_it  = t->children().begin();
              child_it != t->children().end();
@@ -3382,7 +3386,7 @@ Session::restore_history (string snapshot_name)
             {
                 c = memento_command_factory(n);
                 if (c)
-                    ut.add_command(c);
+                    ut->add_command(c);
             }
             else
             {

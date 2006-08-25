@@ -28,6 +28,7 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/panner.h>
 #include <ardour/data_type.h>
+#include <ardour/region_factory.h>
 
 using namespace std;
 using namespace ARDOUR;
@@ -57,7 +58,7 @@ Auditioner::Auditioner (Session& s)
 	
 	IO::output_changed.connect (mem_fun (*this, &Auditioner::output_changed));
 
-	the_region = 0;
+	the_region.reset ((AudioRegion*) 0);
 	g_atomic_int_set (&_active, 0);
 }
 
@@ -72,7 +73,7 @@ Auditioner::prepare_playlist ()
 	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(_diskstream->playlist());
 	assert(apl);
 
-	apl->clear (false, false);
+	apl->clear (false);
 	return *apl;
 }
 
@@ -99,7 +100,7 @@ Auditioner::audition_current_playlist ()
 }
 
 void
-Auditioner::audition_region (AudioRegion& region)
+Auditioner::audition_region (boost::shared_ptr<AudioRegion> region)
 {
 	if (g_atomic_int_get (&_active)) {
 		/* don't go via session for this, because we are going
@@ -110,11 +111,13 @@ Auditioner::audition_region (AudioRegion& region)
 
 	Glib::Mutex::Lock lm (lock);
 
-	the_region = new AudioRegion (region);
+	/* copy it */
+
+	boost::shared_ptr<AudioRegion> the_region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region)));
 	the_region->set_position (0, this);
 
-	_diskstream->playlist()->clear (true, false);
-	_diskstream->playlist()->add_region (*the_region, 0, 1, false);
+	_diskstream->playlist()->clear (false);
+	_diskstream->playlist()->add_region (the_region, 0, 1, false);
 
 	while (_diskstream->n_channels() < the_region->n_channels()) {
 		audio_diskstream()->add_channel ();

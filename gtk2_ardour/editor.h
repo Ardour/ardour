@@ -155,9 +155,9 @@ class Editor : public PublicEditor
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
 	TimeAxisView* get_named_time_axis(const string & name) ;
 
-	void consider_auditioning (ARDOUR::Region&);
-	void hide_a_region (ARDOUR::Region&);
-	void remove_a_region (ARDOUR::Region&);
+	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
+	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
+	void remove_a_region (boost::shared_ptr<ARDOUR::Region>);
 
 	/* option editor-access */
 
@@ -439,8 +439,8 @@ class Editor : public PublicEditor
 	bool set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
-	void set_selected_regionview_from_region_list (ARDOUR::Region& region, Selection::Operation op = Selection::Set);
-	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, ARDOUR::Region*);
+	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
+	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::shared_ptr<ARDOUR::Region>);
 	void collect_new_region_view (RegionView *);
 
 	Gtk::Menu track_context_menu;
@@ -462,7 +462,7 @@ class Editor : public PublicEditor
 	Gtk::Menu* build_track_selection_context_menu (jack_nframes_t);
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
-	void add_region_context_items (AudioStreamView*, ARDOUR::Region*, Gtk::Menu_Helpers::MenuList&);
+	void add_region_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Region>, Gtk::Menu_Helpers::MenuList&);
 	void add_crossfade_context_items (AudioStreamView*, ARDOUR::Crossfade*, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
@@ -630,7 +630,7 @@ class Editor : public PublicEditor
 	void    select_all_selectables_using_cursor (Cursor *, bool);
 	void    select_all_selectables_between_cursors (Cursor *, Cursor *);
 
-	ARDOUR::Region* find_next_region (jack_nframes_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (jack_nframes_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
 
 	vector<jack_nframes_t> region_boundary_cache;
 	void build_region_boundary_cache ();
@@ -698,7 +698,7 @@ class Editor : public PublicEditor
 		    add (color_);
 	    }
 	    Gtk::TreeModelColumn<Glib::ustring> name;
-	    Gtk::TreeModelColumn<ARDOUR::Region*> region;
+	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
 		Gtk::TreeModelColumn<Gdk::Color> color_;
 	};
 	    
@@ -720,7 +720,7 @@ class Editor : public PublicEditor
 	bool region_list_display_button_press (GdkEventButton *);
 	bool region_list_display_button_release (GdkEventButton *);
 	void region_list_clear ();
-	void region_list_selection_mapover (sigc::slot<void,ARDOUR::Region&>);
+	void region_list_selection_mapover (sigc::slot<void,boost::shared_ptr<ARDOUR::Region> >);
 	void build_region_list_menu ();
 	void show_region_list_display_context_menu (int button, int time);
 
@@ -832,14 +832,14 @@ class Editor : public PublicEditor
 
 	int ensure_cursor (jack_nframes_t* pos);
 
-	void handle_new_audio_region (ARDOUR::AudioRegion *);
-	void handle_audio_region_removed (ARDOUR::AudioRegion *);
-	void add_audio_region_to_region_display (ARDOUR::AudioRegion *);
-	void region_hidden (ARDOUR::Region*);
+	void handle_new_audio_region (boost::shared_ptr<ARDOUR::AudioRegion>);
+	void handle_audio_region_removed (boost::shared_ptr<ARDOUR::AudioRegion>);
+	void add_audio_region_to_region_display (boost::shared_ptr<ARDOUR::AudioRegion>);
+	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
 	void redisplay_regions ();
-	void insert_into_tmp_audio_regionlist(ARDOUR::AudioRegion *);
+	void insert_into_tmp_audio_regionlist(boost::shared_ptr<ARDOUR::AudioRegion>);
 
-	list<ARDOUR::AudioRegion *> tmp_audio_region_list;
+	list<boost::shared_ptr<ARDOUR::AudioRegion> > tmp_audio_region_list;
 
 	void cut_copy (Editing::CutCopyOp);
 	void cut_copy_points (Editing::CutCopyOp);
@@ -862,13 +862,13 @@ class Editor : public PublicEditor
 	void split_region_at (jack_nframes_t);
 	void split_regions_at (jack_nframes_t, RegionSelection&);
 	void crop_region_to_selection ();
-	void set_a_regions_sync_position (ARDOUR::Region&, jack_nframes_t);
+	void set_a_regions_sync_position (boost::shared_ptr<ARDOUR::Region>, jack_nframes_t);
 	void set_region_sync_from_edit_cursor ();
 	void remove_region_sync();
 	void align_selection (ARDOUR::RegionPoint, jack_nframes_t position);
 	void align_selection_relative (ARDOUR::RegionPoint point, jack_nframes_t position);
-	void align_region (ARDOUR::Region&, ARDOUR::RegionPoint point, jack_nframes_t position);
-	void align_region_internal (ARDOUR::Region&, ARDOUR::RegionPoint point, jack_nframes_t position);
+	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, jack_nframes_t position);
+	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, jack_nframes_t position);
 	void remove_some_regions ();
 	void remove_clicked_region ();
 	void destroy_clicked_region ();
@@ -878,8 +878,8 @@ class Editor : public PublicEditor
 	void region_fill_selection ();
 
 	void region_fill_track ();
-	void audition_playlist_region_standalone (ARDOUR::Region&);
-	void audition_playlist_region_via_route (ARDOUR::Region&, ARDOUR::Route&);
+	void audition_playlist_region_standalone (boost::shared_ptr<ARDOUR::Region>);
+	void audition_playlist_region_via_route (boost::shared_ptr<ARDOUR::Region>, ARDOUR::Route&);
 	void split_multichannel_region();
 	void reverse_region ();
 	void normalize_region ();
@@ -906,7 +906,7 @@ class Editor : public PublicEditor
 	void keyboard_insert_region_list_selection ();
 
 	void region_from_selection ();
-	void create_region_from_selection (std::vector<ARDOUR::AudioRegion*>&);
+	void create_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::AudioRegion> >&);
 
 	bool region_renamed;
 	void rename_region ();
@@ -932,7 +932,7 @@ class Editor : public PublicEditor
 	void amplitude_zoom (gdouble scale);
 	void amplitude_zoom_step (bool in);
 
-	void insert_region_list_drag (ARDOUR::AudioRegion&, int x, int y);
+	void insert_region_list_drag (boost::shared_ptr<ARDOUR::AudioRegion>, int x, int y);
 	void insert_region_list_selection (float times);
 
 	void add_external_audio_action (Editing::ImportMode);
@@ -943,7 +943,7 @@ class Editor : public PublicEditor
 	int  import_sndfile (Glib::ustring path, Editing::ImportMode mode, ARDOUR::AudioTrack* track, jack_nframes_t& pos);
 	int  embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
 			    ARDOUR::AudioTrack* track, jack_nframes_t& pos, bool prompt);
-	int finish_bringing_in_audio (ARDOUR::AudioRegion& region, uint32_t, uint32_t, ARDOUR::AudioTrack* track, jack_nframes_t& pos, Editing::ImportMode mode);
+	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t, ARDOUR::AudioTrack* track, jack_nframes_t& pos, Editing::ImportMode mode);
 
 	/* generic interthread progress window */
 	
@@ -1026,7 +1026,7 @@ class Editor : public PublicEditor
 	bool have_pending_keyboard_selection;
 	jack_nframes_t pending_keyboard_selection_start;
 
-	ARDOUR::Region* select_region_for_operation (int dir, TimeAxisView **tv);
+	boost::shared_ptr<ARDOUR::Region> select_region_for_operation (int dir, TimeAxisView **tv);
 	void extend_selection_to_end_of_region (bool next);
 	void extend_selection_to_start_of_region (bool previous);
 
@@ -1585,7 +1585,7 @@ class Editor : public PublicEditor
 	void export_range_markers ();
 
 	int  write_region_selection(RegionSelection&);
-	bool write_region (string path, ARDOUR::AudioRegion&);
+	bool write_region (string path, boost::shared_ptr<ARDOUR::AudioRegion>);
 	void export_region ();
 	void bounce_region_selection ();
 	void bounce_range_selection ();
@@ -1628,7 +1628,7 @@ class Editor : public PublicEditor
 
 	void instant_save ();
 
-	ARDOUR::AudioRegion* last_audition_region;
+	boost::shared_ptr<ARDOUR::AudioRegion> last_audition_region;
 	
 	/* freeze operations */
 

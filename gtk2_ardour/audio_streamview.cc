@@ -30,6 +30,7 @@
 #include <ardour/audio_track.h>
 #include <ardour/playlist_templates.h>
 #include <ardour/source.h>
+#include <ardour/region_factory.h>
 
 #include "audio_streamview.h"
 #include "audio_region_view.h"
@@ -124,11 +125,11 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
 }
 
 void
-AudioStreamView::add_region_view_internal (Region *r, bool wait_for_waves)
+AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_region_view), r));
 
-	AudioRegion* region = dynamic_cast<AudioRegion*> (r);
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
 
 	if (region == 0) {
 		return;
@@ -138,7 +139,7 @@ AudioStreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 	list<RegionView *>::iterator i;
 
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		if (&(*i)->region() == r) {
+		if ((*i)->region() == r) {
 			
 			/* great. we already have a AudioRegionView for this Region. use it again. */
 
@@ -149,11 +150,11 @@ AudioStreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 	
 	switch (_trackview.audio_track()->mode()) {
 	case Normal:
-		region_view = new AudioRegionView (canvas_group, _trackview, *region, 
+		region_view = new AudioRegionView (canvas_group, _trackview, region, 
 						   _samples_per_unit, region_color);
 		break;
 	case Destructive:
-		region_view = new TapeAudioRegionView (canvas_group, _trackview, *region, 
+		region_view = new TapeAudioRegionView (canvas_group, _trackview, region, 
 						       _samples_per_unit, region_color);
 		break;
 	}
@@ -168,13 +169,13 @@ AudioStreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 
 	/* catch regionview going away */
 
-	region->GoingAway.connect (mem_fun (*this, &AudioStreamView::remove_region_view));
+	region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), region));
 	
 	RegionViewAdded (region_view);
 }
 
 void
-AudioStreamView::remove_region_view (Region *r)
+AudioStreamView::remove_region_view (boost::shared_ptr<Region> r)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_region_view), r));
 
@@ -184,8 +185,8 @@ AudioStreamView::remove_region_view (Region *r)
 		tmp = i;
 		++tmp;
 		
-		AudioRegion* ar = dynamic_cast<AudioRegion*>(r);
-		if (ar && (*i)->crossfade.involves (*ar)) {
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(r);
+		if (ar && (*i)->crossfade.involves (ar)) {
 			delete *i;
 			crossfade_views.erase (i);
 		}
@@ -263,10 +264,10 @@ AudioStreamView::add_crossfade (Crossfade *crossfade)
 	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
 
-		if (!lview && arv && &(arv->region()) == &crossfade->out()) {
+		if (!lview && arv && (arv->region() == crossfade->out())) {
 			lview = arv;
 		}
-		if (!rview && arv && &(arv->region()) == &crossfade->in()) {
+		if (!rview && arv && (arv->region() == crossfade->in())) {
 			rview = arv;
 		}
 	}
@@ -391,7 +392,7 @@ AudioStreamView::setup_rec_box ()
 
 				/* add a new region, but don't bother if they set use_rec_regions mid-record */
 
-				AudioRegion::SourceList sources;
+				SourceList sources;
 
 				for (list<sigc::connection>::iterator prc = peak_ready_connections.begin(); prc != peak_ready_connections.end(); ++prc) {
 					(*prc).disconnect();
@@ -417,11 +418,12 @@ AudioStreamView::setup_rec_box ()
 					start = rec_regions.back()->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
 				
-				AudioRegion * region = new AudioRegion(sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false);
+				boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion>
+								       (RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false)));
 				region->set_position (_trackview.session().transport_frame(), this);
 				rec_regions.push_back (region);
 				/* catch it if it goes away */
-				region->GoingAway.connect (mem_fun (*this, &AudioStreamView::remove_rec_region));
+				region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_rec_region), region));
 
 				/* we add the region later */
 			}
@@ -502,23 +504,10 @@ AudioStreamView::setup_rec_box ()
 			last_rec_peak_frame = 0;
 			
 			/* remove temp regions */
-			for (list<Region*>::iterator iter=rec_regions.begin(); iter != rec_regions.end(); )
-			{
-				list<Region*>::iterator tmp;
-
-				tmp = iter;
-				++tmp;
-
-				/* this will trigger the remove_region_view */
-				delete *iter;
-
-				iter = tmp;
-			}
 			
 			rec_regions.clear();
 
 			// cerr << "\tclear " << rec_rects.size() << " rec rects\n";
-		
 
 			/* transport stopped, clear boxes */
 			for (vector<RecBoxInfo>::iterator iter=rec_rects.begin(); iter != rec_rects.end(); ++iter) {
@@ -566,9 +555,9 @@ AudioStreamView::update_rec_regions ()
 
 		uint32_t n = 0;
 
-		for (list<Region*>::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
+		for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
 
-			list<Region*>::iterator tmp;
+			list<boost::shared_ptr<Region> >::iterator tmp;
 
 			tmp = iter;
 			++tmp;
@@ -580,7 +569,7 @@ AudioStreamView::update_rec_regions ()
 			}
 			
 			// FIXME
-			AudioRegion * region = dynamic_cast<AudioRegion*>(*iter);
+			boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(*iter);
 			assert(region);
 
 			jack_nframes_t origlen = region->length();

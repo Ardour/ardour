@@ -353,7 +353,7 @@ Mixer_UI::connect_to_session (Session* sess)
 
 	initial_track_display ();
 
-	session->going_away.connect (mem_fun(*this, &Mixer_UI::disconnect_from_session));
+	session->GoingAway.connect (mem_fun(*this, &Mixer_UI::disconnect_from_session));
 	session->RouteAdded.connect (mem_fun(*this, &Mixer_UI::add_strip));
 	session->mix_group_added.connect (mem_fun(*this, &Mixer_UI::add_mix_group));
 	session->mix_group_removed.connect (mem_fun(*this, &Mixer_UI::mix_groups_changed));

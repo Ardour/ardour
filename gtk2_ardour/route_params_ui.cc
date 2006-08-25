@@ -361,7 +361,7 @@ RouteParams_UI::set_session (Session *sess)
 	if (session) {
 		boost::shared_ptr<Session::RouteList> r = session->get_routes();
 		add_routes (*r);
-		session->going_away.connect (mem_fun(*this, &ArdourDialog::session_gone));
+		session->GoingAway.connect (mem_fun(*this, &ArdourDialog::session_gone));
 		session->RouteAdded.connect (mem_fun(*this, &RouteParams_UI::add_routes));
 		start_updating ();
 	} else {
@@ -537,7 +537,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Redirect> redirect,
 
 			if (place == PreFader) {
 				cleanup_pre_view();
-				_pre_plugin_conn = send->GoingAway.connect (mem_fun(*this, &RouteParams_UI::redirect_going_away));
+				_pre_plugin_conn = send->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), redirect));
 				_active_pre_view = send_ui;
 				
 				pre_redir_hpane.add2 (*_active_pre_view);
@@ -545,7 +545,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Redirect> redirect,
 			}
 			else {
 				cleanup_post_view();
-				_post_plugin_conn = send->GoingAway.connect (mem_fun(*this, &RouteParams_UI::redirect_going_away));
+				_post_plugin_conn = send->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), redirect));
 				_active_post_view = send_ui;
 				
 				post_redir_hpane.add2 (*_active_post_view);
@@ -586,7 +586,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Redirect> redirect,
 					
 			if (place == PreFader) {
 				cleanup_pre_view();
-				_pre_plugin_conn = port_insert->GoingAway.connect (mem_fun(*this, &RouteParams_UI::redirect_going_away));
+				_pre_plugin_conn = port_insert->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), redirect));
 				_active_pre_view = portinsert_ui;
 				pre_redir_hpane.pack2 (*_active_pre_view);
 				portinsert_ui->redisplay();
@@ -594,7 +594,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Redirect> redirect,
 			}
 			else {
 				cleanup_post_view();
-				_post_plugin_conn = port_insert->GoingAway.connect (mem_fun(*this, &RouteParams_UI::redirect_going_away));
+				_post_plugin_conn = port_insert->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), redirect));
 				_active_post_view = portinsert_ui;
 				post_redir_hpane.pack2 (*_active_post_view);
 				portinsert_ui->redisplay();
@@ -615,9 +615,9 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Redirect> redirect,
 }
 
 void
-RouteParams_UI::plugin_going_away (Plugin *plugin, Placement place)
+RouteParams_UI::plugin_going_away (Placement place)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), plugin, place));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), place));
 	
 	// delete the current view without calling finish
 
@@ -632,18 +632,17 @@ RouteParams_UI::plugin_going_away (Plugin *plugin, Placement place)
 }
 
 void
-RouteParams_UI::redirect_going_away (ARDOUR::Redirect *plugin)
+RouteParams_UI::redirect_going_away (boost::shared_ptr<ARDOUR::Redirect> redirect)
 
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), plugin));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), redirect));
 	
 	printf ("redirect going away\n");
 	// delete the current view without calling finish
-	if (plugin == _pre_redirect.get()) {
+	if (redirect == _pre_redirect) {
 		cleanup_pre_view (false);
 		_pre_redirect.reset ((Redirect*) 0);
-	}
-	else if (plugin == _post_redirect.get()) {
+	} else if (redirect == _post_redirect) {
 		cleanup_post_view (false);
 		_post_redirect.reset ((Redirect*) 0);
 	}

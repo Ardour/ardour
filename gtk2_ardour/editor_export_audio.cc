@@ -92,12 +92,12 @@ Editor::export_region ()
 		return;
 	}
 
-	ExportDialog* dialog = new ExportRegionDialog (*this, &clicked_regionview->region());
+	ExportDialog* dialog = new ExportRegionDialog (*this, clicked_regionview->region());
 		
 	dialog->connect_to_session (session);
 	dialog->set_range (
-		clicked_regionview->region().first_frame(), 
-		clicked_regionview->region().last_frame());
+		clicked_regionview->region()->first_frame(), 
+		clicked_regionview->region()->last_frame());
 	dialog->start_export();
 }
 
@@ -140,7 +140,7 @@ Editor::bounce_region_selection ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		
-		Region& region ((*i)->region());
+		boost::shared_ptr<Region> region ((*i)->region());
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
 		Track* track = dynamic_cast<Track*>(rtv->route().get());
 
@@ -150,12 +150,12 @@ Editor::bounce_region_selection ()
 		itt.cancel = false;
 		itt.progress = 0.0f;
 
-		track->bounce_range (region.position(), region.position() + region.length(), itt);
+		track->bounce_range (region->position(), region->position() + region->length(), itt);
 	}
 }
 
 bool
-Editor::write_region (string path, AudioRegion& region)
+Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 {
 	AudioFileSource* fs;
 	const jack_nframes_t chunk_size = 4096;
@@ -168,11 +168,11 @@ Editor::write_region (string path, AudioRegion& region)
 	vector<AudioFileSource *> sources;
 	uint32_t nchans;
 	
-	nchans = region.n_channels();
+	nchans = region->n_channels();
 	
 	/* don't do duplicate of the entire source if that's what is going on here */
 
-	if (region.start() == 0 && region.length() == region.source().length()) {
+	if (region->start() == 0 && region->length() == region->source().length()) {
 		/* XXX should link(2) to create a new inode with "path" */
 		return true;
 	}
@@ -184,11 +184,11 @@ Editor::write_region (string path, AudioRegion& region)
 			for (cnt = 0; cnt < 999999; ++cnt) {
 				if (nchans == 1) {
 					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 ".wav", session->sound_dir().c_str(),
-						  legalize_for_path(region.name()).c_str(), cnt);
+						  legalize_for_path(region->name()).c_str(), cnt);
 				}
 				else {
 					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 "-%" PRId32 ".wav", session->sound_dir().c_str(),
-						  legalize_for_path(region.name()).c_str(), cnt, n);
+						  legalize_for_path(region->name()).c_str(), cnt, n);
 				}
 
 				path = s;
@@ -221,8 +221,8 @@ Editor::write_region (string path, AudioRegion& region)
 
 	}
 	
-	to_read = region.length();
-	pos = region.position();
+	to_read = region->length();
+	pos = region->position();
 
 	while (to_read) {
 		jack_nframes_t this_time;
@@ -233,7 +233,7 @@ Editor::write_region (string path, AudioRegion& region)
 			
 			fs = (*src);
 
-			if (region.read_at (buf, buf, gain_buffer, pos, this_time) != this_time) {
+			if (region->read_at (buf, buf, gain_buffer, pos, this_time) != this_time) {
 				break;
 			}
 			

@@ -10,12 +10,28 @@ namespace ARDOUR {
 
 class Session;
 
-Region* createRegion (const Region&, jack_nframes_t start, 
-		      jack_nframes_t length, std::string name, 
-		      layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-// Region* createRegion (const Region&, std::string name);
-Region* createRegion (const Region&);
-Region* createRegion (Session&, XMLNode&, bool);
+class RegionFactory {
+
+  public:
+	/* This is emitted only when a new id is assigned. Therefore,
+	   in a pure Region copy, it will not be emitted.
+
+	   It must be emitted by derived classes, not Region
+	   itself, to permit dynamic_cast<> to be used to 
+	   infer the type of Region.
+	*/
+
+	static sigc::signal<void,boost::shared_ptr<Region> > CheckNewRegion;
+
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, jack_nframes_t start, 
+						 jack_nframes_t length, std::string name, 
+						 layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
+	static boost::shared_ptr<Region> create (Source&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
+	static boost::shared_ptr<Region> create (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>);
+	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
+	static boost::shared_ptr<Region> create (SourceList &, const XMLNode&);
+};
 
 }
 

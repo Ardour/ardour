@@ -84,7 +84,7 @@ Selection::dump_region_layers()
 {
 	cerr << "region selection layer dump" << endl;
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
-		cerr << "layer: " << (int)(*i)->region().layer() << endl;
+		cerr << "layer: " << (int)(*i)->region()->layer() << endl;
 	}
 }
 

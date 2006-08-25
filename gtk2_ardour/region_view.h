@@ -43,7 +43,7 @@ class RegionView : public TimeAxisViewItem
   public:
 	RegionView (ArdourCanvas::Group* parent, 
 	            TimeAxisView&        time_view,
-	            ARDOUR::Region&      region,
+	            boost::shared_ptr<ARDOUR::Region> region,
 	            double               samples_per_unit,
 	            Gdk::Color&          basic_color);
 
@@ -51,7 +51,7 @@ class RegionView : public TimeAxisViewItem
 	
 	virtual void init (Gdk::Color& base_color, bool wait_for_data);
     
-	ARDOUR::Region& region() const { return _region; }
+	boost::shared_ptr<ARDOUR::Region> region() const { return _region; }
 	
 	bool is_valid() const    { return valid; }
     void set_valid (bool yn) { valid = yn; }
@@ -91,11 +91,11 @@ class RegionView : public TimeAxisViewItem
      * to the TimeAxisViewItem parent class
 	 */
     RegionView (ArdourCanvas::Group *, 
-	            TimeAxisView&,
-	            ARDOUR::Region&,
-	            double      samples_per_unit,
-	            Gdk::Color& basic_color,
-	            TimeAxisViewItem::Visibility);
+		TimeAxisView&,
+		boost::shared_ptr<ARDOUR::Region>,
+		double      samples_per_unit,
+		Gdk::Color& basic_color,
+		TimeAxisViewItem::Visibility);
 
     virtual void region_resized (ARDOUR::Change);
     void         region_moved (void *);
@@ -116,7 +116,7 @@ class RegionView : public TimeAxisViewItem
     
     virtual void color_handler (ColorID, uint32_t) {}
 	
-	ARDOUR::Region& _region;
+    boost::shared_ptr<ARDOUR::Region> _region;
     
     ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position 
     ArdourCanvas::Text*    no_wave_msg;
@@ -130,11 +130,11 @@ class RegionView : public TimeAxisViewItem
     double  _pixel_width;
     double  _height;
     bool    in_destructor;
-
-    bool             wait_for_data;
-	sigc::connection data_ready_connection;
     
-	vector<GhostRegion*> ghosts;
+    bool             wait_for_data;
+    sigc::connection data_ready_connection;
+    
+    vector<GhostRegion*> ghosts;
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

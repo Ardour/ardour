@@ -21,6 +21,10 @@
 #ifndef __lib_pbd_memento_command_h__
 #define __lib_pbd_memento_command_h__
 
+#include <iostream>
+using std::cerr;
+using std::endl;
+
 #include <pbd/command.h>
 #include <pbd/xml++.h>
 #include <sigc++/slot.h>
@@ -34,12 +38,22 @@ template <class obj_T>
 class MementoCommand : public Command
 {
     public:
-	MementoCommand(XMLNode &state);
-        MementoCommand(obj_T &obj, 
+        MementoCommand(obj_T &object, 
                        XMLNode *before,
                        XMLNode *after
                        ) 
-            : obj(obj), before(before), after(after) {}
+            : obj(object), before(before), after(after) {
+		obj.GoingAway.connect (sigc::mem_fun (*this, &MementoCommand<obj_T>::object_death));
+	}
+	~MementoCommand () {
+		GoingAway();
+		if (before) {
+			delete before;
+		}
+		if (after) {
+			delete after;
+		}
+	}
         void operator() () 
         {
             if (after)
@@ -60,20 +74,27 @@ class MementoCommand : public Command
             else
                 name = "MementoRedoCommand";
 
+	    
             XMLNode *node = new XMLNode(name);
-            node->add_property("obj_id", obj.id().to_s());
-            node->add_property("type_name", typeid(obj).name());
 
-            if (before)
-                node->add_child_copy(*before);
-            if (after)
-                node->add_child_copy(*after);
+	    node->add_property("obj_id", obj.id().to_s());
+	    node->add_property("type_name", typeid(obj).name());
+	    
+	    if (before)
+		    node->add_child_copy(*before);
+	    if (after)
+		    node->add_child_copy(*after);
 
             return *node;
         }
+
     protected:
         obj_T &obj;
         XMLNode *before, *after;
+
+	void object_death () {
+		delete this;
+	}
 };
 
 #endif // __lib_pbd_memento_h__

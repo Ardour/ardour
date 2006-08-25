@@ -360,7 +360,7 @@ AudioRegionView::region_scale_amplitude_changed ()
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// force a reload of the cache
-		waves[n]->property_data_src() = &region;
+		waves[n]->property_data_src() = region.get();
 	}
 }
 
@@ -1044,7 +1044,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 
 	WaveView *wave = new WaveView(*group);
 
-	wave->property_data_src() = (gpointer) &region;
+	wave->property_data_src() = (gpointer) region.get()
 	wave->property_cache() =  wave_caches[which];
 	wave->property_cache_updater() = true;
 	wave->property_channel() =  which;
@@ -1269,7 +1269,7 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 		
 		WaveView *wave = new WaveView(*ghost->group);
 
-		wave->property_data_src() =  &region;
+		wave->property_data_src() =  region.get();
 		wave->property_cache() =  wave_caches[n];
 		wave->property_cache_updater() = false;
 		wave->property_channel() = n;
@@ -1365,7 +1365,7 @@ AudioRegionView::set_waveview_data_src()
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// TODO: something else to let it know the channel
-		waves[n]->property_data_src() = &region;
+		waves[n]->property_data_src() = region.get();
 	}
 	
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -1373,7 +1373,7 @@ AudioRegionView::set_waveview_data_src()
 		(*i)->set_duration (unit_length);
 		
 		for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
-			(*w)->property_data_src() = &region;
+			(*w)->property_data_src() = region.get();
 		}
 	}
 

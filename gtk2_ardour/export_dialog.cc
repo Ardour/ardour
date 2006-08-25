@@ -392,7 +392,7 @@ void
 ExportDialog::connect_to_session (Session *s)
 {
 	session = s;
-	session->going_away.connect (mem_fun(*this, &Window::hide_all));
+	session->GoingAway.connect (mem_fun(*this, &Window::hide_all));
 
 	switch (session->frame_rate()) {
 	case 22050:

@@ -31,7 +31,7 @@
 
 #include <pbd/fastlog.h>
 #include <pbd/undo.h>
-#include <pbd/stateful.h> 
+#include <pbd/statefuldestructible.h> 
 #include <pbd/controllable.h>
 
 #include <ardour/ardour.h>
@@ -59,7 +59,7 @@ class Panner;
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-class IO : public Stateful, public ARDOUR::StateManager
+class IO : public PBD::StatefulDestructible, public ARDOUR::StateManager
 {
 
   public:
@@ -70,7 +70,7 @@ class IO : public Stateful, public ARDOUR::StateManager
 	    int output_min = -1, int output_max = -1,
 		DataType default_type = DataType::AUDIO);
 
-	virtual ~IO();
+virtual ~IO();
 
 	int input_minimum() const { return _input_minimum; }
 	int input_maximum() const { return _input_maximum; }

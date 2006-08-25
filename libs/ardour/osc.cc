@@ -365,7 +365,7 @@ void
 OSC::set_session (Session& s)
 {
 	session = &s;
-	session->going_away.connect (mem_fun (*this, &OSC::session_going_away));
+	session->GoingAway.connect (mem_fun (*this, &OSC::session_going_away));
 }
 
 void

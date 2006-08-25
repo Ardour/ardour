@@ -70,6 +70,7 @@ port.cc
 recent_sessions.cc
 redirect.cc
 region.cc
+region_factory.cc
 reverse.cc
 route.cc
 route_group.cc

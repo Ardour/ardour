@@ -37,7 +37,7 @@ using namespace PBD;
 using namespace sigc;
 using namespace std;
 
-AudioRegionEditor::AudioRegionEditor (Session& s, AudioRegion& r, AudioRegionView& rv)
+AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion> r, AudioRegionView& rv)
 	: RegionEditor (s),
 	  _region (r),
 	  _region_view (rv),
@@ -262,7 +262,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, AudioRegion& r, AudioRegionVie
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (this)));
 
 	string title = _("ardour: region ");
-	title += _region.name();
+	title += _region->name();
 	set_title (title);
 
 	show_all();
@@ -277,7 +277,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, AudioRegion& r, AudioRegionVie
 	fade_in_changed ();
 	fade_out_changed ();
 
-	XMLNode *node  = _region.extra_xml ("GUI");
+	XMLNode *node  = _region->extra_xml ("GUI");
 	XMLProperty *prop = 0;
 	bool showing_envelope = false;
 
@@ -293,7 +293,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, AudioRegion& r, AudioRegionVie
 		envelope_view_button.set_active (false);
 	}
 
-	_region.StateChanged.connect (mem_fun(*this, &AudioRegionEditor::region_changed));
+	_region->StateChanged.connect (mem_fun(*this, &AudioRegionEditor::region_changed));
 	
 	spin_arrow_grab = false;
 	
@@ -392,25 +392,25 @@ AudioRegionEditor::breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (Au
 void
 AudioRegionEditor::start_editing_fade_in ()
 {
-	_region.freeze ();
+	_region->freeze ();
 }
 
 void
 AudioRegionEditor::stop_editing_fade_in ()
 {
-	_region.thaw (_("fade in edit"));
+	_region->thaw (_("fade in edit"));
 }
 
 void
 AudioRegionEditor::start_editing_fade_out ()
 {
-	_region.freeze ();
+	_region->freeze ();
 }
 
 void
 AudioRegionEditor::stop_editing_fade_out ()
 {
-	_region.thaw (_("fade out edit"));
+	_region->thaw (_("fade out edit"));
 }
 
 void
@@ -453,24 +453,24 @@ AudioRegionEditor::connect_editor_events ()
 void
 AudioRegionEditor::start_clock_changed ()
 {
-	_region.set_position (start_clock.current_time(), this);
+	_region->set_position (start_clock.current_time(), this);
 }
 
 void
 AudioRegionEditor::end_clock_changed ()
 {
-	_region.trim_end (end_clock.current_time(), this);
+	_region->trim_end (end_clock.current_time(), this);
 
-	end_clock.set (_region.position() + _region.length(), true);
+	end_clock.set (_region->position() + _region->length(), true);
 }
 
 void
 AudioRegionEditor::length_clock_changed ()
 {
 	jack_nframes_t frames = length_clock.current_time();
-	_region.trim_end (_region.position() + frames, this);
+	_region->trim_end (_region->position() + frames, this);
 
-	length_clock.set (_region.length());
+	length_clock.set (_region->length());
 }
 
 gint
@@ -482,7 +482,7 @@ AudioRegionEditor::envelope_active_button_press(GdkEventButton *ev)
 gint
 AudioRegionEditor::envelope_active_button_release (GdkEventButton *ev)
 {
-	_region.set_envelope_active (!_region.envelope_active());
+	_region->set_envelope_active (!_region->envelope_active());
 	return stop_signal (envelope_active_button, "button_release_event");
 }
 
@@ -507,42 +507,42 @@ AudioRegionEditor::audition_button_toggled ()
 void
 AudioRegionEditor::raise_button_clicked ()
 {
-	_region.raise ();
+	_region->raise ();
 }
 
 void
 AudioRegionEditor::lower_button_clicked ()
 {
-	_region.lower ();
+	_region->lower ();
 }
 
 void
 AudioRegionEditor::opaque_button_clicked ()
 {
-	bool ractive = _region.opaque();
+	bool ractive = _region->opaque();
 
 	if (opaque_button.get_active() != ractive) {
-		_region.set_opaque (!ractive);
+		_region->set_opaque (!ractive);
 	}
 }
 
 void
 AudioRegionEditor::mute_button_clicked ()
 {
-	bool ractive = _region.muted();
+	bool ractive = _region->muted();
 
 	if (mute_button.get_active() != ractive) {
-		_region.set_muted (!ractive);
+		_region->set_muted (!ractive);
 	}
 }
 
 void
 AudioRegionEditor::lock_button_clicked ()
 {
-	bool ractive = _region.locked();
+	bool ractive = _region->locked();
 
 	if (lock_button.get_active() != ractive) {
-		_region.set_locked (!ractive);
+		_region->set_locked (!ractive);
 	}
 }
 
@@ -550,15 +550,15 @@ void
 AudioRegionEditor::layer_changed ()
 {
 	char buf[8];
-	snprintf (buf, sizeof(buf), "%d", (int) _region.layer() + 1);
+	snprintf (buf, sizeof(buf), "%d", (int) _region->layer() + 1);
 	layer_value_label.set_text (buf);
 }
 
 void
 AudioRegionEditor::name_changed ()
 {
-	if (name_entry.get_text() != _region.name()) {
-		name_entry.set_text (_region.name());
+	if (name_entry.get_text() != _region->name()) {
+		name_entry.set_text (_region->name());
 	}
 }
 
@@ -567,7 +567,7 @@ AudioRegionEditor::lock_changed ()
 {
 	bool yn;
 
-	if ((yn = _region.locked()) != lock_button.get_active()) {
+	if ((yn = _region->locked()) != lock_button.get_active()) {
 		lock_button.set_active (yn);
 	}
 
@@ -581,7 +581,7 @@ AudioRegionEditor::envelope_active_changed ()
 {
 	bool yn;
 
-	if ((yn = _region.envelope_active()) != envelope_active_button.get_active()) {
+	if ((yn = _region->envelope_active()) != envelope_active_button.get_active()) {
 		envelope_active_button.set_active (yn);
 	}
 }
@@ -590,7 +590,7 @@ void
 AudioRegionEditor::opacity_changed ()
 {
 	bool yn;
-	if ((yn = _region.opaque()) != opaque_button.get_active()) {
+	if ((yn = _region->opaque()) != opaque_button.get_active()) {
 		opaque_button.set_active (yn);
 	}
 }
@@ -599,7 +599,7 @@ void
 AudioRegionEditor::mute_changed ()
 {
 	bool yn;
-	if ((yn = _region.muted()) != mute_button.get_active()) {
+	if ((yn = _region->muted()) != mute_button.get_active()) {
 		mute_button.set_active (yn);
 	}
 }
@@ -608,9 +608,9 @@ void
 AudioRegionEditor::bounds_changed (Change what_changed)
 {
 	if (what_changed & Change ((PositionChanged|LengthChanged))) {
-		start_clock.set (_region.position(), true);
-		end_clock.set (_region.position() + _region.length(), true);
-		length_clock.set (_region.length(), true);
+		start_clock.set (_region->position(), true);
+		end_clock.set (_region->position() + _region->length(), true);
+		length_clock.set (_region->length(), true);
 	}
 }
 
@@ -623,8 +623,8 @@ AudioRegionEditor::activation ()
 void
 AudioRegionEditor::name_entry_changed ()
 {
-	if (name_entry.get_text() != _region.name()) {
-		_region.set_name (name_entry.get_text());
+	if (name_entry.get_text() != _region->name()) {
+		_region->set_name (name_entry.get_text());
 	}
 }
 
@@ -637,11 +637,11 @@ AudioRegionEditor::fade_in_changed ()
 	jack_nframes_t frames;
 	bool x;
 
-	if (adj_frames != (frames = (jack_nframes_t) _region.fade_in().back()->when)) {
+	if (adj_frames != (frames = (jack_nframes_t) _region->fade_in().back()->when)) {
 		fade_in_length_adjustment.set_value ((frames * 1000.0f) / sr);
 	}
 
-	if ((x = _region.fade_in_active()) != fade_in_active_button.get_active()) {
+	if ((x = _region->fade_in_active()) != fade_in_active_button.get_active()) {
 		fade_in_active_button.set_active (x);
 	}
 }
@@ -654,11 +654,11 @@ AudioRegionEditor::fade_out_changed ()
 	jack_nframes_t adj_frames = (jack_nframes_t) floor (msecs * (sr/1000.0f));
 	jack_nframes_t frames;
 	bool x;
-	if (adj_frames != (frames = (jack_nframes_t) _region.fade_out().back()->when)) {
+	if (adj_frames != (frames = (jack_nframes_t) _region->fade_out().back()->when)) {
 		fade_out_length_adjustment.set_value ((frames * 1000.0f) / sr);
 	}
 
-	if ((x = _region.fade_out_active()) != fade_out_active_button.get_active()) {
+	if ((x = _region->fade_out_active()) != fade_out_active_button.get_active()) {
 		fade_out_active_button.set_active (x);
 	}
 }
@@ -668,9 +668,9 @@ AudioRegionEditor::fade_in_length_adjustment_changed ()
 {
 	jack_nframes_t fade_length = (jack_nframes_t) floor (fade_in_length_adjustment.get_value() * _session.frame_rate() * 0.001); 
 	fade_length = max (fade_length, (jack_nframes_t) 64);
-	fade_length = min (fade_length, _region.length());
+	fade_length = min (fade_length, _region->length());
 	
-	_region.set_fade_in_length (fade_length);
+	_region->set_fade_in_length (fade_length);
 	/* region is frozen, no worries */
 	fade_in_changed();
 }
@@ -680,9 +680,9 @@ AudioRegionEditor::fade_out_length_adjustment_changed ()
 {
 	jack_nframes_t fade_length = (jack_nframes_t) floor (fade_out_length_adjustment.get_value() * _session.frame_rate() * 0.001); 
 	fade_length = max (fade_length, (jack_nframes_t) 64);
-	fade_length = min (fade_length, _region.length());
+	fade_length = min (fade_length, _region->length());
 	
-	_region.set_fade_out_length (fade_length);	
+	_region->set_fade_out_length (fade_length);	
 	/* region is frozen, no worries */
 	fade_out_changed();
 }
@@ -690,13 +690,13 @@ AudioRegionEditor::fade_out_length_adjustment_changed ()
 void
 AudioRegionEditor::fade_in_active_toggled ()
 {
-	_region.set_fade_in_active (fade_in_active_button.get_active());
+	_region->set_fade_in_active (fade_in_active_button.get_active());
 }
 
 void
 AudioRegionEditor::fade_out_active_toggled ()
 {
-	_region.set_fade_out_active (fade_out_active_button.get_active());
+	_region->set_fade_out_active (fade_out_active_button.get_active());
 }
 
 void
@@ -704,7 +704,7 @@ AudioRegionEditor::fade_out_active_changed ()
 {
 	bool x;
 
-	if ((x = _region.fade_out_active()) != fade_out_active_button.get_active()) {
+	if ((x = _region->fade_out_active()) != fade_out_active_button.get_active()) {
 		fade_out_active_button.set_active (x);
 	}
 }
@@ -714,7 +714,7 @@ AudioRegionEditor::fade_in_active_changed ()
 {
 	bool x;
 
-	if ((x = _region.fade_in_active()) != fade_in_active_button.get_active()) {
+	if ((x = _region->fade_in_active()) != fade_in_active_button.get_active()) {
 		fade_in_active_button.set_active (x);
 	}
 }

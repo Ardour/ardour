@@ -103,12 +103,12 @@ Editor::kbd_mute_unmute_region ()
 {
 	if (entered_regionview) {
 		begin_reversible_command (_("mute region"));
-		XMLNode &before = entered_regionview->region().playlist()->get_state();
+		XMLNode &before = entered_regionview->region()->playlist()->get_state();
 		
-	    entered_regionview->region().set_muted (!entered_regionview->region().muted());
+		entered_regionview->region()->set_muted (!entered_regionview->region()->muted());
 		
-		XMLNode &after = entered_regionview->region().playlist()->get_state();
-		session->add_command (new MementoCommand<ARDOUR::Playlist>(*(entered_regionview->region().playlist()), &before, &after));
+		XMLNode &after = entered_regionview->region()->playlist()->get_state();
+		session->add_command (new MementoCommand<ARDOUR::Playlist>(*(entered_regionview->region()->playlist()), &before, &after));
 		commit_reversible_command();
 	}
 }

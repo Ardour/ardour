@@ -98,7 +98,7 @@ VSTPlugin::VSTPlugin (const VSTPlugin &other)
 VSTPlugin::~VSTPlugin ()
 {
 	deactivate ();
-	GoingAway (this); /* EMIT SIGNAL */
+	GoingAway (); /* EMIT SIGNAL */
 	fst_close (_fst);
 }
 

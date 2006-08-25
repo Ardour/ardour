@@ -34,33 +34,17 @@
 inline void
 Selection::foreach_region (void (ARDOUR::Region::*method)(void)) {
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
-		((*i)->region().*(method))();
+		ARDOUR::Region* region = (*i)->region().get();
+		(region->*(method))();
 	}
 }
 
 template<class A> inline void 
 Selection::foreach_region (void (ARDOUR::Region::*method)(A), A arg) {
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
-		((*i)->region().*(method))(arg);
+		ARDOUR::Region* region = (*i)->region().get();
+		(region->*(method))(arg);
 	}
 }
-
-#if 0
-
-template<class A> inline void 
-Selection::foreach_route (void (ARDOUR::Route::*method)(A), A arg) {
-	for (list<ARDOUR::Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
-		((*i)->region().*(method))(arg);
-	}
-}
-
-template<class A1, class A2> inline void 
-Selection::foreach_route (void (ARDOUR::Route::*method)(A1,A2), A1 arg1, A2 arg2) {
-	for (list<ARDOUR::Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
-		((*i)->region().*(method))(arg1, arg2);
-	}
-}
-
-#endif
 
 #endif /* __ardour_gtk_selection_templates_h__ */

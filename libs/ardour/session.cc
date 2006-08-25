@@ -372,9 +372,23 @@ Session::~Session ()
 
 	_state_of_the_state = StateOfTheState (CannotSave|Deletion);
 	_engine.remove_session ();
+
+	GoingAway (); /* EMIT SIGNAL */
 	
-	going_away (); /* EMIT SIGNAL */
+	/* do this */
+
+	notify_callbacks ();
+
+	/* clear history so that no references to objects are held any more */
+
+	history.clear ();
+
+	/* clear state tree so that no references to objects are held any more */
 	
+	if (state_tree) {
+		delete state_tree;
+	}
+
 	terminate_butler_thread ();
 	terminate_midi_thread ();
 	
@@ -433,16 +447,12 @@ Session::~Session ()
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete audio regions\n";
 #endif /* TRACK_DESTRUCTION */
-	for (AudioRegionList::iterator i = audio_regions.begin(); i != audio_regions.end(); ) {
-		AudioRegionList::iterator tmp;
-
-		tmp =i;
-		++tmp;
-
-		delete i->second;
-
-		i = tmp;
+	
+	for (AudioRegionList::iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
+		i->second->drop_references ();
 	}
+
+	audio_regions.clear ();
 	
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete routes\n";
@@ -450,12 +460,8 @@ Session::~Session ()
         {
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> r = writer.get_copy ();
-		for (RouteList::iterator i = r->begin(); i != r->end(); ) {
-			RouteList::iterator tmp;
-			tmp = i;
-			++tmp;
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->drop_references ();
-			i = tmp;
 		}
 		r->clear ();
 		/* writer goes out of scope and updates master */
@@ -551,10 +557,6 @@ Session::~Session ()
 
 	if (mmc) {
 		delete mmc;
-	}
-
-	if (state_tree) {
-		delete state_tree;
 	}
 }
 
@@ -2497,24 +2499,24 @@ Session::region_name (string& result, string base, bool newlevel) const
 }	
 
 void
-Session::add_region (Region* region)
+Session::add_region (boost::shared_ptr<Region> region)
 {
-	AudioRegion* ar = 0;
-	AudioRegion* oar = 0;
+	boost::shared_ptr<AudioRegion> ar;
+	boost::shared_ptr<AudioRegion> oar;
 	bool added = false;
 
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
-		if ((ar = dynamic_cast<AudioRegion*> (region)) != 0) {
+		if ((ar = boost::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
 
 			AudioRegionList::iterator x;
 
 			for (x = audio_regions.begin(); x != audio_regions.end(); ++x) {
 
-				oar = dynamic_cast<AudioRegion*> (x->second);
+				oar = boost::dynamic_pointer_cast<AudioRegion> (x->second);
 
-				if (ar->region_list_equivalent (*oar)) {
+				if (ar->region_list_equivalent (oar)) {
 					break;
 				}
 			}
@@ -2527,6 +2529,7 @@ Session::add_region (Region* region)
 				entry.second = ar;
 
 				pair<AudioRegionList::iterator,bool> x = audio_regions.insert (entry);
+
 				
 				if (!x.second) {
 					return;
@@ -2552,14 +2555,14 @@ Session::add_region (Region* region)
 	set_dirty();
 	
 	if (added) {
-		region->GoingAway.connect (mem_fun (*this, &Session::remove_region));
+		region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), region));
 		region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), region));
 		AudioRegionAdded (ar); /* EMIT SIGNAL */
 	}
 }
 
 void
-Session::region_changed (Change what_changed, Region* region)
+Session::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 {
 	if (what_changed & Region::HiddenChanged) {
 		/* relay hidden changes */
@@ -2568,22 +2571,22 @@ Session::region_changed (Change what_changed, Region* region)
 }
 
 void
-Session::region_renamed (Region* region)
+Session::region_renamed (boost::shared_ptr<Region> region)
 {
 	add_region (region);
 }
 
 void
-Session::remove_region (Region* region)
+Session::remove_region (boost::shared_ptr<Region> region)
 {
 	AudioRegionList::iterator i;
-	AudioRegion* ar = 0;
+	boost::shared_ptr<AudioRegion> ar;
 	bool removed = false;
 	
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
- 		if ((ar = dynamic_cast<AudioRegion*> (region)) != 0) {
+ 		if ((ar = boost::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
 			if ((i = audio_regions.find (region->id())) != audio_regions.end()) {
 				audio_regions.erase (i);
 				removed = true;
@@ -2609,11 +2612,11 @@ Session::remove_region (Region* region)
 	}
 }
 
-AudioRegion*
-Session::find_whole_file_parent (AudioRegion& child)
+boost::shared_ptr<AudioRegion>
+Session::find_whole_file_parent (boost::shared_ptr<AudioRegion> child)
 {
 	AudioRegionList::iterator i;
-	AudioRegion* region;
+	boost::shared_ptr<AudioRegion> region;
 	Glib::Mutex::Lock lm (region_lock);
 
 	for (i = audio_regions.begin(); i != audio_regions.end(); ++i) {
@@ -2622,28 +2625,28 @@ Session::find_whole_file_parent (AudioRegion& child)
 
 		if (region->whole_file()) {
 
-			if (child.source_equivalent (*region)) {
+			if (child->source_equivalent (region)) {
 				return region;
 			}
 		}
 	} 
 
-	return 0;
+	return boost::shared_ptr<AudioRegion> ((AudioRegion*) 0);
 }	
 
 void
-Session::find_equivalent_playlist_regions (Region& region, vector<Region*>& result)
+Session::find_equivalent_playlist_regions (boost::shared_ptr<Region> region, vector<boost::shared_ptr<Region> >& result)
 {
 	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i)
 		(*i)->get_region_list_equivalent_regions (region, result);
 }
 
 int
-Session::destroy_region (Region* region)
+Session::destroy_region (boost::shared_ptr<Region> region)
 {
-	AudioRegion* aregion;
+	boost::shared_ptr<AudioRegion> aregion;
 
-	if ((aregion = dynamic_cast<AudioRegion*> (region)) == 0) {
+	if ((aregion = boost::dynamic_pointer_cast<AudioRegion> (region)) == 0) {
 		return 0;
 	}
 
@@ -2672,9 +2675,9 @@ Session::destroy_region (Region* region)
 }
 
 int
-Session::destroy_regions (list<Region*> regions)
+Session::destroy_regions (list<boost::shared_ptr<Region> > regions)
 {
-	for (list<Region*>::iterator i = regions.begin(); i != regions.end(); ++i) {
+	for (list<boost::shared_ptr<Region> >::iterator i = regions.begin(); i != regions.end(); ++i) {
 		destroy_region (*i);
 	}
 	return 0;
@@ -2683,12 +2686,12 @@ Session::destroy_regions (list<Region*> regions)
 int
 Session::remove_last_capture ()
 {
-	list<Region*> r;
+	list<boost::shared_ptr<Region> > r;
 	
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 	
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		list<Region*>& l = (*i)->last_capture_regions();
+		list<boost::shared_ptr<Region> >& l = (*i)->last_capture_regions();
 		
 		if (!l.empty()) {
 			r.insert (r.end(), l.begin(), l.end());
@@ -2701,9 +2704,9 @@ Session::remove_last_capture ()
 }
 
 int
-Session::remove_region_from_region_list (Region& r)
+Session::remove_region_from_region_list (boost::shared_ptr<Region> r)
 {
-	remove_region (&r);
+	remove_region (r);
 	return 0;
 }
 
@@ -2721,7 +2724,7 @@ Session::add_audio_source (AudioSource* source)
 		audio_sources.insert (entry);
  	}
 	
-	source->GoingAway.connect (mem_fun (this, &Session::remove_source));
+	source->GoingAway.connect (sigc::bind (mem_fun (this, &Session::remove_source), source));
 	set_dirty();
 	
 	SourceAdded (source); /* EMIT SIGNAL */
@@ -3055,7 +3058,7 @@ Session::add_playlist (Playlist* playlist)
 			playlists.insert (playlists.begin(), playlist);
 			// playlist->ref();
 			playlist->InUse.connect (mem_fun (*this, &Session::track_playlist));
-			playlist->GoingAway.connect (mem_fun (*this, &Session::remove_playlist));
+			playlist->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_playlist), playlist));
 		}
 	}
 
@@ -3126,7 +3129,7 @@ Session::remove_playlist (Playlist* playlist)
 }
 
 void 
-Session::set_audition (AudioRegion* r)
+Session::set_audition (boost::shared_ptr<AudioRegion> r)
 {
 	pending_audition_region = r;
 	post_transport_work = PostTransportWork (post_transport_work | PostTransportAudition);
@@ -3136,12 +3139,12 @@ Session::set_audition (AudioRegion* r)
 void
 Session::non_realtime_set_audition ()
 {
-	if (pending_audition_region == (AudioRegion*) 0xfeedface) {
+	if (pending_audition_region.get() == (AudioRegion*) 0xfeedface) {
 		auditioner->audition_current_playlist ();
 	} else if (pending_audition_region) {
-		auditioner->audition_region (*pending_audition_region);
+		auditioner->audition_region (pending_audition_region);
 	}
-	pending_audition_region = 0;
+	pending_audition_region.reset ((AudioRegion*) 0);
 	AuditionActive (true); /* EMIT SIGNAL */
 }
 
@@ -3154,12 +3157,12 @@ Session::audition_playlist ()
 }
 
 void
-Session::audition_region (Region& r)
+Session::audition_region (boost::shared_ptr<Region> r)
 {
-	AudioRegion* ar = dynamic_cast<AudioRegion*>(&r);
+	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(r);
 	if (ar) {
 		Event* ev = new Event (Event::Audition, Event::Add, Event::Immediate, 0, 0.0);
-		ev->set_ptr (ar);
+		// ev->set_ptr (ar); // AUDFIX
 		queue_event (ev);
 	}
 }
@@ -3336,7 +3339,7 @@ Session::add_redirect (Redirect* redirect)
 		/*NOTREACHED*/
 	}
 
-	redirect->GoingAway.connect (mem_fun (*this, &Session::remove_redirect));
+	redirect->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_redirect), redirect));
 
 	set_dirty();
 }

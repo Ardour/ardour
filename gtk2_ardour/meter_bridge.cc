@@ -101,7 +101,7 @@ MeterBridge::set_session (Session *s)
 		// (refs vs. ptrs)
 		// session->foreach_route (this, &MeterBridge::add_route);
 		session->RouteAdded.connect (mem_fun(*this, &MeterBridge::add_route));
-		session->going_away.connect (mem_fun(*this, &MeterBridge::session_gone));
+		session->GoingAway.connect (mem_fun(*this, &MeterBridge::session_gone));
 		start_metering ();
 	}
 }
@@ -171,7 +171,7 @@ MeterBridge::add_route (ARDOUR::Route* route)
     
 	meter->set_meter_on(true);
 	
-	session->going_away.connect (mem_fun(*this, &MeterBridge::session_gone));
+	session->GoingAway.connect (mem_fun(*this, &MeterBridge::session_gone));
 }
 
 void

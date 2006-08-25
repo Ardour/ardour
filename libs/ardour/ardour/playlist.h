@@ -25,6 +25,7 @@
 #include <set>
 #include <map>
 #include <list>
+#include <boost/shared_ptr.hpp>
 
 #include <sys/stat.h>
 
@@ -34,6 +35,7 @@
 
 #include <pbd/undo.h>
 #include <pbd/stateful.h> 
+#include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/crossfade_compare.h>
@@ -45,16 +47,16 @@ namespace ARDOUR  {
 class Session;
 class Region;
 
-class Playlist : public Stateful, public StateManager {
+class Playlist : public StateManager, public PBD::StatefulDestructible {
   public:
-	typedef list<Region*>    RegionList;
+	typedef list<boost::shared_ptr<Region> >    RegionList;
 
 	Playlist (Session&, const XMLNode&, bool hidden = false);
 	Playlist (Session&, string name, bool hidden = false);
 	Playlist (const Playlist&, string name, bool hidden = false);
 	Playlist (const Playlist&, jack_nframes_t start, jack_nframes_t cnt, string name, bool hidden = false);
 
-	virtual void clear (bool with_delete = false, bool with_save = true);
+	virtual void clear (bool with_save = true);
 	virtual void dump () const;
 	virtual UndoAction get_memento() const = 0;
 
@@ -79,17 +81,17 @@ class Playlist : public Stateful, public StateManager {
         PBD::ID id() { return _id; }
 	/* Editing operations */
 
-	void add_region (const Region&, jack_nframes_t position, float times = 1, bool with_save = true);
-	void remove_region (Region *);
-	void get_equivalent_regions (const Region&, std::vector<Region*>&);
-	void get_region_list_equivalent_regions (const Region&, std::vector<Region*>&);
-	void replace_region (Region& old, Region& newr, jack_nframes_t pos);
-	void split_region (Region&, jack_nframes_t position);
+	void add_region (boost::shared_ptr<Region>, jack_nframes_t position, float times = 1, bool with_save = true);
+	void remove_region (boost::shared_ptr<Region>);
+	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
+	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
+	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, jack_nframes_t pos);
+	void split_region (boost::shared_ptr<Region>, jack_nframes_t position);
 	void partition (jack_nframes_t start, jack_nframes_t end, bool just_top_level);
-	void duplicate (Region&, jack_nframes_t position, float times);
+	void duplicate (boost::shared_ptr<Region>, jack_nframes_t position, float times);
 	void nudge_after (jack_nframes_t start, jack_nframes_t distance, bool forwards);
 
-	Region* find_region (const PBD::ID&) const;
+	boost::shared_ptr<Region> find_region (const PBD::ID&) const;
 
 	Playlist* cut  (list<AudioRange>&, bool result_is_hidden = true);
 	Playlist* copy (list<AudioRange>&, bool result_is_hidden = true);
@@ -99,25 +101,24 @@ class Playlist : public Stateful, public StateManager {
 
 	RegionList* regions_at (jack_nframes_t frame);
 	RegionList* regions_touched (jack_nframes_t start, jack_nframes_t end);
-	Region*     top_region_at (jack_nframes_t frame);
+	boost::shared_ptr<Region>  top_region_at (jack_nframes_t frame);
 
-	Region*     find_next_region (jack_nframes_t frame, RegionPoint point, int dir);
+	boost::shared_ptr<Region>     find_next_region (jack_nframes_t frame, RegionPoint point, int dir);
 
-	template<class T> void foreach_region (T *t, void (T::*func)(Region *, void *), void *arg);
-	template<class T> void foreach_region (T *t, void (T::*func)(Region *));
+	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>, void *), void *arg);
+	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>));
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 	XMLNode& get_template ();
 
-	sigc::signal<void,Region *>       RegionAdded;
-	sigc::signal<void,Region *>       RegionRemoved;
+	sigc::signal<void,boost::shared_ptr<Region> > RegionAdded;
+	sigc::signal<void,boost::shared_ptr<Region> > RegionRemoved;
 	sigc::signal<void,Playlist*,bool> InUse;
 	sigc::signal<void>                Modified;
 	sigc::signal<void>                NameChanged;
 	sigc::signal<void>                LengthChanged;
 	sigc::signal<void>                LayeringChanged;
-	sigc::signal<void,Playlist *>     GoingAway;
 	sigc::signal<void>                StatePushed;
 
 	static sigc::signal<void,Playlist*> PlaylistCreated;
@@ -128,10 +129,10 @@ class Playlist : public Stateful, public StateManager {
 	void freeze ();
 	void thaw ();
 
-	void raise_region (Region&);
-	void lower_region (Region&);
-	void raise_region_to_top (Region&);
-	void lower_region_to_bottom (Region&);
+	void raise_region (boost::shared_ptr<Region>);
+	void lower_region (boost::shared_ptr<Region>);
+	void raise_region_to_top (boost::shared_ptr<Region>);
+	void lower_region_to_bottom (boost::shared_ptr<Region>);
 
 	uint32_t read_data_count() const { return _read_data_count; }
 
@@ -142,7 +143,7 @@ class Playlist : public Stateful, public StateManager {
 
 	/* destructive editing */
 	
-	virtual bool destroy_region (Region *) = 0;
+	virtual bool destroy_region (boost::shared_ptr<Region>) = 0;
 
   protected:
 	friend class Session;
@@ -212,8 +213,8 @@ class Playlist : public Stateful, public StateManager {
 	void release_notifications ();
 	virtual void flush_notifications ();
 
-	void notify_region_removed (Region *);
-	void notify_region_added (Region *);
+	void notify_region_removed (boost::shared_ptr<Region>);
+	void notify_region_added (boost::shared_ptr<Region>);
 	void notify_length_changed ();
 	void notify_layering_changed ();
 	void notify_modified ();
@@ -221,11 +222,11 @@ class Playlist : public Stateful, public StateManager {
 
 	void mark_session_dirty();
 
-	void region_changed_proxy (Change, Region*);
-	virtual bool region_changed (Change, Region*);
+	void region_changed_proxy (Change, boost::shared_ptr<Region>);
+	virtual bool region_changed (Change, boost::shared_ptr<Region>);
 
-	void region_bounds_changed (Change, Region *);
-	void region_deleted (Region *);
+	void region_bounds_changed (Change, boost::shared_ptr<Region>);
+	void region_deleted (boost::shared_ptr<Region>);
 
 	void sort_regions ();
 
@@ -236,11 +237,11 @@ class Playlist : public Stateful, public StateManager {
 	void splice_unlocked ();
 
 
-	virtual void finalize_split_region (Region *original, Region *left, Region *right) {}
+	virtual void finalize_split_region (boost::shared_ptr<Region> original, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right) {}
 	
-	virtual void check_dependents (Region& region, bool norefresh) {}
-	virtual void refresh_dependents (Region& region) {}
-	virtual void remove_dependents (Region& region) {}
+	virtual void check_dependents (boost::shared_ptr<Region> region, bool norefresh) {}
+	virtual void refresh_dependents (boost::shared_ptr<Region> region) {}
+	virtual void remove_dependents (boost::shared_ptr<Region> region) {}
 
 	virtual XMLNode& state (bool);
 
@@ -249,9 +250,9 @@ class Playlist : public Stateful, public StateManager {
 	void save_state (std::string why);
 	void maybe_save_state (std::string why);
 
-	void add_region_internal (Region *, jack_nframes_t position, bool delay_sort = false);
+	void add_region_internal (boost::shared_ptr<Region>, jack_nframes_t position, bool delay_sort = false);
 
-	int remove_region_internal (Region *, bool delay_sort = false);
+	int remove_region_internal (boost::shared_ptr<Region>, bool delay_sort = false);
 	RegionList *find_regions_at (jack_nframes_t frame);
 	void copy_regions (RegionList&) const;
 	void partition_internal (jack_nframes_t start, jack_nframes_t end, bool cutting, RegionList& thawlist);
@@ -264,7 +265,7 @@ class Playlist : public Stateful, public StateManager {
 	Playlist *copy (jack_nframes_t start, jack_nframes_t cnt, bool result_is_hidden);
 
 
-	int move_region_to_layer (layer_t, Region& r, int dir);
+	int move_region_to_layer (layer_t, boost::shared_ptr<Region> r, int dir);
 	void relayer ();
 
 	static Playlist* copyPlaylist (const Playlist&, jack_nframes_t start, jack_nframes_t length,
@@ -273,7 +274,7 @@ class Playlist : public Stateful, public StateManager {
 	void unset_freeze_parent (Playlist*);
 	void unset_freeze_child (Playlist*);
 
-	void timestamp_layer_op (Region&);
+	void timestamp_layer_op (boost::shared_ptr<Region>);
 
         PBD::ID _id;
 };

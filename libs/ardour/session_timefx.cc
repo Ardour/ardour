@@ -28,6 +28,7 @@
 #include <ardour/session.h>
 #include <ardour/audioregion.h>
 #include <ardour/sndfilesource.h>
+#include <ardour/region_factory.h>
 
 #include "i18n.h"
 
@@ -36,12 +37,12 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace soundtouch;
 
-AudioRegion*
+boost::shared_ptr<AudioRegion>
 Session::tempoize_region (TimeStretchRequest& tsr)
 {
-	AudioRegion::SourceList sources;
-	AudioRegion::SourceList::iterator it;
-	AudioRegion* r = 0;
+	SourceList sources;
+	SourceList::iterator it;
+	boost::shared_ptr<AudioRegion> r;
 	SoundTouch st;
 	string region_name;
 	string ident = X_("-TIMEFX-");
@@ -160,10 +161,9 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 
 	region_name = tsr.region->name() + X_(".t");
 
-	r = new AudioRegion (sources, 0, sources.front()->length(), region_name,
-			     0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile));
-
-
+	r = (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, 0, sources.front()->length(), region_name,
+									      0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile))));
+	     
   out:
 
 	if (sources.size()) {
@@ -172,7 +172,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		   for deletion.
 		*/
 
-		if ((r == 0 || !tsr.running)) {
+		if ((!r || !tsr.running)) {
 			for (it = sources.begin(); it != sources.end(); ++it) {
 				(*it)->mark_for_remove ();
 				delete *it;
@@ -183,10 +183,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 	/* if the process was cancelled, delete the region */
 
 	if (!tsr.running) {
-		if (r) {
-			delete r;
-			r = 0;
-		} 
+		r.reset ();
 	}
 	
 	return r;

@@ -48,14 +48,14 @@ using namespace Glib;
 using namespace Editing;
 
 void
-Editor::handle_audio_region_removed (AudioRegion* region)
+Editor::handle_audio_region_removed (boost::shared_ptr<AudioRegion> region)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_audio_region_removed), region));
 	redisplay_regions ();
 }
 
 void
-Editor::handle_new_audio_region (AudioRegion *region)
+Editor::handle_new_audio_region (boost::shared_ptr<AudioRegion> region)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_audio_region), region));
 
@@ -67,7 +67,7 @@ Editor::handle_new_audio_region (AudioRegion *region)
 }
 
 void
-Editor::region_hidden (Region* r)
+Editor::region_hidden (boost::shared_ptr<Region> r)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::region_hidden), r));	
 
@@ -75,7 +75,7 @@ Editor::region_hidden (Region* r)
 }
 
 void
-Editor::add_audio_region_to_region_display (AudioRegion *region)
+Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> region)
 {
 	string str;
 	TreeModel::Row row;
@@ -96,7 +96,7 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 			parent = *(region_list_model->append());
 			
 			parent[region_list_columns.name] = _("Hidden");
-			parent[region_list_columns.region] = 0;
+			/// XXX FIX ME parent[region_list_columns.region]->reset ();
 
 		} else {
 
@@ -104,7 +104,7 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 
 				parent = *(region_list_model->insert(iter));
 				parent[region_list_columns.name] = _("Hidden");
-				parent[region_list_columns.region] = 0;
+				/// XXX FIX ME parent[region_list_columns.region]->reset ();
 
 			} else {
 				parent = *iter;
@@ -151,11 +151,11 @@ Editor::add_audio_region_to_region_display (AudioRegion *region)
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
 
-			Region* rr = (*i)[region_list_columns.region];
-			AudioRegion* r = dynamic_cast<AudioRegion*>(rr);
+			boost::shared_ptr<Region> rr = (*i)[region_list_columns.region];
+			boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion>(rr);
 
 			if (r && r->whole_file()) {
-				if (region->source_equivalent (*r)) {
+				if (region->source_equivalent (r)) {
 					row = *(region_list_model->append ((*i).children()));
 					found_parent = true;
 					break;
@@ -200,13 +200,13 @@ Editor::region_list_selection_changed()
 		*/
 		
 		if ((iter = region_list_model->get_iter (*i))) {
-			set_selected_regionview_from_region_list (*((*iter)[region_list_columns.region]), Selection::Set);
+			set_selected_regionview_from_region_list (((*iter)[region_list_columns.region]), Selection::Set);
 		}
 	}
 }
 
 void
-Editor::insert_into_tmp_audio_regionlist(AudioRegion* region)
+Editor::insert_into_tmp_audio_regionlist(boost::shared_ptr<AudioRegion> region)
 {
 	/* keep all whole files at the beginning */
 	
@@ -232,7 +232,7 @@ Editor::redisplay_regions ()
 		tmp_audio_region_list.clear();
 		session->foreach_audio_region (this, &Editor::insert_into_tmp_audio_regionlist);
 
-		for (list<AudioRegion*>::iterator r = tmp_audio_region_list.begin(); r != tmp_audio_region_list.end(); ++r) {
+		for (list<boost::shared_ptr<AudioRegion> >::iterator r = tmp_audio_region_list.begin(); r != tmp_audio_region_list.end(); ++r) {
 			add_audio_region_to_region_display (*r);
 		}
 		
@@ -323,7 +323,7 @@ Editor::region_list_display_key_release (GdkEventKey* ev)
 bool
 Editor::region_list_display_button_press (GdkEventButton *ev)
 {
-	Region* region;
+	boost::shared_ptr<Region> region;
 	TreeIter iter;
 	TreeModel::Path path;
 	TreeViewColumn* column;
@@ -341,7 +341,7 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 	}
 
 	if (Keyboard::is_delete_event (ev)) {
-		session->remove_region_from_region_list (*region);
+		session->remove_region_from_region_list (region);
 		return true;
 	}
 
@@ -354,7 +354,7 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 	case 1:
 		/* audition on double click */
 		if (ev->type == GDK_2BUTTON_PRESS) {
-			consider_auditioning (*region);
+			consider_auditioning (region);
 			return true;
 		}
 		return false;
@@ -362,7 +362,7 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 
 	case 2:
 		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
-			consider_auditioning (*region);
+			consider_auditioning (region);
 		}
 		return true;
 		break;
@@ -382,7 +382,7 @@ Editor::region_list_display_button_release (GdkEventButton *ev)
 	TreeViewColumn* column;
 	int cellx;
 	int celly;
-	Region* region = 0;
+	boost::shared_ptr<Region> region;
 
 	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = region_list_model->get_iter (path))) {
@@ -391,7 +391,7 @@ Editor::region_list_display_button_release (GdkEventButton *ev)
 	}
 
 	if (region && Keyboard::is_delete_event (ev)) {
-		session->remove_region_from_region_list (*region);
+		session->remove_region_from_region_list (region);
 		return true;
 	}
 
@@ -399,9 +399,9 @@ Editor::region_list_display_button_release (GdkEventButton *ev)
 }
 
 void
-Editor::consider_auditioning (Region& region)
+Editor::consider_auditioning (boost::shared_ptr<Region> region)
 {
-	AudioRegion* r = dynamic_cast<AudioRegion*> (&region);
+	boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (region);
 
 	if (r == 0) {
 		session->cancel_audition ();
@@ -415,7 +415,7 @@ Editor::consider_auditioning (Region& region)
 		}
 	}
 
-	session->audition_region (*r);
+	session->audition_region (r);
 	last_audition_region = r;
 }
 
@@ -424,8 +424,8 @@ Editor::region_list_sorter (TreeModel::iterator a, TreeModel::iterator b)
 {
 	int cmp = 0;
 
-	Region* r1 = (*a)[region_list_columns.region];
-	Region* r2 = (*b)[region_list_columns.region];
+	boost::shared_ptr<Region> r1 = (*a)[region_list_columns.region];
+	boost::shared_ptr<Region> r2 = (*b)[region_list_columns.region];
 
 	/* handle rows without regions, like "Hidden" */
 
@@ -437,8 +437,8 @@ Editor::region_list_sorter (TreeModel::iterator a, TreeModel::iterator b)
 		return 1;
 	}
 
-	AudioRegion* region1 = dynamic_cast<AudioRegion*> (r1);
-	AudioRegion* region2 = dynamic_cast<AudioRegion*> (r2);
+	boost::shared_ptr<AudioRegion> region1 = boost::dynamic_pointer_cast<AudioRegion> (r1);
+	boost::shared_ptr<AudioRegion> region2 = boost::dynamic_pointer_cast<AudioRegion> (r2);
 
 	if (region1 == 0 || region2 == 0) {
 		Glib::ustring s1;
@@ -524,7 +524,7 @@ Editor::reset_region_list_sort_direction (bool up)
 }
 
 void
-Editor::region_list_selection_mapover (slot<void,Region&> sl)
+Editor::region_list_selection_mapover (slot<void,boost::shared_ptr<Region> > sl)
 {
 	Glib::RefPtr<TreeSelection> selection = region_list_display.get_selection();
 	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();
@@ -538,19 +538,19 @@ Editor::region_list_selection_mapover (slot<void,Region&> sl)
 		TreeIter iter;
 
 		if ((iter = region_list_model->get_iter (*i))) {
-			sl (*((*iter)[region_list_columns.region]));
+			sl (((*iter)[region_list_columns.region]));
 		}
 	}
 }
 
 void
-Editor::hide_a_region (Region& r)
+Editor::hide_a_region (boost::shared_ptr<Region> r)
 {
-	r.set_hidden (true);
+	r->set_hidden (true);
 }
 
 void
-Editor::remove_a_region (Region& r)
+Editor::remove_a_region (boost::shared_ptr<Region> r)
 {
 	session->remove_region_from_region_list (r);
 }
@@ -593,5 +593,7 @@ Editor::region_list_selection_filter (const RefPtr<TreeModel>& model, const Tree
 {
 	/* not possible to select rows that do not represent regions, like "Hidden" */
 
-	return (*(model->get_iter (path)))[region_list_columns.region] != 0;
+	/// XXXX FIXME boost::shared_ptr<Region> r = ((model->get_iter (path)))[region_list_columns.region];
+	/// return r != 0;
+	return true;
 }
