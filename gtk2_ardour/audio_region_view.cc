@@ -761,7 +761,7 @@ AudioRegionView::create_waves ()
 		wave_caches.push_back (WaveView::create_cache ());
 
 		if (wait_for_data) {
-			if (audio_region()->source(n).peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
+			if (audio_region()->source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				create_one_wave (n, true);
 			} else {
 				create_zero_line = false;

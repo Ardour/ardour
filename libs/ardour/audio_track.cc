@@ -728,7 +728,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 void
 AudioTrack::bounce (InterThreadInfo& itt)
 {
-	vector<AudioSource*> srcs;
+	vector<boost::shared_ptr<AudioSource> > srcs;
 	_session.write_one_audio_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
 }
 
@@ -736,14 +736,14 @@ AudioTrack::bounce (InterThreadInfo& itt)
 void
 AudioTrack::bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo& itt)
 {
-	vector<AudioSource*> srcs;
+	vector<boost::shared_ptr<AudioSource> > srcs;
 	_session.write_one_audio_track (*this, start, end, false, srcs, itt);
 }
 
 void
 AudioTrack::freeze (InterThreadInfo& itt)
 {
-	vector<AudioSource*> srcs;
+	vector<boost::shared_ptr<AudioSource> > srcs;
 	string new_playlist_name;
 	Playlist* new_playlist;
 	string dir;

@@ -50,8 +50,6 @@ SndFileSource::SndFileSource (const XMLNode& node)
 			throw failed_constructor ();
 		}
 	}
-
-	AudioSourceCreated (this); /* EMIT SIGNAL */
 }
 
 SndFileSource::SndFileSource (string idstr, Flag flags)
@@ -71,9 +69,6 @@ SndFileSource::SndFileSource (string idstr, Flag flags)
 			throw failed_constructor ();
 		}
 	}
-
-
-	AudioSourceCreated (this); /* EMIT SIGNAL */
 }
 
 SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, jack_nframes_t rate, Flag flags)
@@ -183,9 +178,6 @@ SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, 
 			throw failed_constructor ();
 		}
 	}
-
-	AudioSourceCreated (this); /* EMIT SIGNAL */
-
 }
 
 void 
@@ -413,7 +405,7 @@ SndFileSource::write_unlocked (Sample *data, jack_nframes_t cnt)
 	
 	
 	if (_build_peakfiles) {
-		queue_for_peaks (*this);
+		queue_for_peaks (this);
 	}
 
 	_write_data_count = cnt;

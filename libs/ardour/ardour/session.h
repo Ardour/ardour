@@ -21,12 +21,16 @@
 #ifndef __ardour_session_h__
 #define __ardour_session_h__
 
+
 #include <string>
 #include <list>
 #include <map>
 #include <vector>
 #include <set>
 #include <stack>
+
+#include <boost/weak_ptr.hpp>
+
 #include <stdint.h>
 
 #include <sndfile.h>
@@ -171,6 +175,8 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 			Session::SlaveSource slave;
 			Route*               route;
 	    };
+
+	    boost::shared_ptr<Region>   region;
 
 	    list<AudioRange>     audio_range;
 	    list<MusicRange>     music_range;
@@ -654,9 +660,9 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	int start_audio_export (ARDOUR::AudioExportSpecification&);
 	int stop_audio_export (ARDOUR::AudioExportSpecification&);
 	
-	void add_audio_source (AudioSource *);
-	void remove_source (Source *);
-	int  cleanup_audio_file_source (AudioFileSource&);
+	void add_source (boost::shared_ptr<Source>);
+	void remove_source (boost::weak_ptr<Source>);
+	int  cleanup_audio_file_source (boost::shared_ptr<AudioFileSource>);
 
 	struct cleanup_report {
 	    vector<string> paths;
@@ -685,12 +691,12 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	static sigc::signal<int> AskAboutPendingState;
 	
-	sigc::signal<void,Source *> SourceAdded;
-	sigc::signal<void,Source *> SourceRemoved;
+	sigc::signal<void,boost::shared_ptr<Source> > SourceAdded;
+	sigc::signal<void,boost::shared_ptr<Source> > SourceRemoved;
 
-	AudioFileSource *create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
+	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
-	Source *source_by_id (const PBD::ID&);
+	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
 
 	/* playlist management */
 
@@ -735,7 +741,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	/* flattening stuff */
 
-	int write_one_audio_track (AudioTrack&, jack_nframes_t start, jack_nframes_t cnt, bool overwrite, vector<AudioSource*>&,
+	int write_one_audio_track (AudioTrack&, jack_nframes_t start, jack_nframes_t cnt, bool overwrite, vector<boost::shared_ptr<AudioSource> >&,
 				   InterThreadInfo& wot);
 	int freeze (InterThreadInfo&);
 
@@ -1555,14 +1561,14 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	/* SOURCES */
 	
 	mutable Glib::Mutex audio_source_lock;
-	typedef std::map<PBD::ID,AudioSource *> AudioSourceList;
+	typedef std::map<PBD::ID,boost::shared_ptr<AudioSource> > AudioSourceList;
 
 	AudioSourceList audio_sources;
 
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();
 
-	Source *XMLSourceFactory (const XMLNode&);
+	boost::shared_ptr<Source> XMLSourceFactory (const XMLNode&);
 
 	/* PLAYLISTS */
 	
@@ -1605,9 +1611,9 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	/* AUDITIONING */
 
 	boost::shared_ptr<Auditioner> auditioner;
-	void set_audition (boost::shared_ptr<AudioRegion>);
+	void set_audition (boost::shared_ptr<Region>);
 	void non_realtime_set_audition ();
-	boost::shared_ptr<AudioRegion> pending_audition_region;
+	boost::shared_ptr<Region> pending_audition_region;
 
 	/* EXPORT */
 

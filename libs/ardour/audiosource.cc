@@ -28,6 +28,7 @@
 #include <cmath>
 #include <iomanip>
 #include <algorithm>
+#include <vector>
 
 #include <pbd/xml++.h>
 #include <pbd/pthread_utils.h>
@@ -40,7 +41,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-sigc::signal<void,AudioSource *> AudioSource::AudioSourceCreated;
 pthread_t                    AudioSource::peak_thread;
 bool                         AudioSource::have_peak_thread = false;
 vector<AudioSource*>         AudioSource::pending_peak_sources;
@@ -66,6 +66,7 @@ AudioSource::AudioSource (string name)
 AudioSource::AudioSource (const XMLNode& node) 
 	: Source (node)
 {
+	cerr << "audiosource from XML\n";
 	if (pending_peak_sources_lock == 0) {
 		pending_peak_sources_lock = new Glib::Mutex;
 	}
@@ -250,18 +251,18 @@ AudioSource::stop_peak_thread ()
 }
 
 void 
-AudioSource::queue_for_peaks (AudioSource& source)
+AudioSource::queue_for_peaks (AudioSource* source)
 {
 	if (have_peak_thread) {
-
+		
 		Glib::Mutex::Lock lm (*pending_peak_sources_lock);
 		
-		source.next_peak_clear_should_notify = true;
+		source->next_peak_clear_should_notify = true;
 		
 		if (find (pending_peak_sources.begin(),
 			  pending_peak_sources.end(),
-			  &source) == pending_peak_sources.end()) {
-			pending_peak_sources.push_back (&source);
+			  source) == pending_peak_sources.end()) {
+			pending_peak_sources.push_back (source);
 		}
 
 		char c = (char) PeakRequest::Build;
@@ -830,7 +831,7 @@ AudioSource::build_peaks_from_scratch ()
 
 	next_peak_clear_should_notify = true;
 	pending_peak_builds.push_back (new PeakBuildRecord (0, _length));
-	queue_for_peaks (*this);
+	queue_for_peaks (this);
 }
 
 bool

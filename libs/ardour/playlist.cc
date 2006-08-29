@@ -511,7 +511,6 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, jack_nframes_t 
 
 	region->set_playlist (this);
 	region->set_position (position, this);
-	region->lock_sources ();
 
 	timestamp_layer_op (region);
 

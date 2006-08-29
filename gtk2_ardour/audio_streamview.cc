@@ -25,7 +25,7 @@
 
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
-#include <ardour/audiosource.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/audio_track.h>
 #include <ardour/playlist_templates.h>
@@ -404,7 +404,7 @@ AudioStreamView::setup_rec_box ()
 				assert(ads);
 
 				for (uint32_t n=0; n < ads->n_channels(); ++n) {
-					AudioSource *src = (AudioSource *) ads->write_source (n);
+					boost::shared_ptr<AudioFileSource> src = boost::static_pointer_cast<AudioFileSource> (ads->write_source (n));
 					if (src) {
 						sources.push_back (src);
 						peak_ready_connections.push_back (src->PeakRangeReady.connect (bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), src))); 
@@ -530,7 +530,7 @@ AudioStreamView::foreach_crossfadeview (void (CrossfadeView::*pmf)(void))
 }
 
 void
-AudioStreamView::rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt, Source * src)
+AudioStreamView::rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt, boost::shared_ptr<Source> src)
 {
 	// this is called from the peak building thread
 
@@ -605,7 +605,7 @@ AudioStreamView::update_rec_regions ()
 
 				if (nlen != region->length()) {
 
-					if (region->source(0).length() >= region->start() + nlen) {
+					if (region->source(0)->length() >= region->start() + nlen) {
 
 						region->freeze ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);

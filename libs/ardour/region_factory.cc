@@ -39,7 +39,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, jack_nframes_t start,
 			     jack_nframes_t length, std::string name, 
 			     layer_t layer, Region::Flag flags, bool announce)
 {
-	boost::shared_ptr<AudioRegion> other;
+	boost::shared_ptr<const AudioRegion> other;
 
 	if ((other = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 		AudioRegion* ar = new AudioRegion (other, start, length, name, layer, flags);
@@ -75,6 +75,14 @@ RegionFactory::create (boost::shared_ptr<Region> region)
 }
 
 boost::shared_ptr<Region>
+RegionFactory::create (boost::shared_ptr<AudioRegion> region, jack_nframes_t start, 
+			     jack_nframes_t length, std::string name, 
+			     layer_t layer, Region::Flag flags, bool announce)
+{
+	return create (boost::static_pointer_cast<Region> (region), start, length, name, layer, flags, announce);
+}
+
+boost::shared_ptr<Region>
 RegionFactory::create (Session& session, XMLNode& node, bool yn)
 {
 	boost::shared_ptr<Region> r = session.XMLRegionFactory (node, yn);
@@ -107,12 +115,12 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 }
 
 boost::shared_ptr<Region> 
-RegionFactory::create (Source& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
+RegionFactory::create (boost::shared_ptr<Source> src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
 {
-	AudioSource* as;
+	boost::shared_ptr<AudioSource> as;
 
-	if ((as = dynamic_cast<AudioSource*>(&src)) != 0) {
-		boost::shared_ptr<Region> ret (new AudioRegion (*as, start, length, name, layer, flags));
+	if ((as = boost::dynamic_pointer_cast<AudioSource>(src)) != 0) {
+		boost::shared_ptr<Region> ret (new AudioRegion (as, start, length, name, layer, flags));
 		if (announce) {
 			CheckNewRegion (ret);
 		}

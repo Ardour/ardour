@@ -41,6 +41,8 @@
 #include <ardour/audio_diskstream.h>
 #include <ardour/audioregion.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/source_factory.h>
+#include <ardour/audiofilesource.h>
 
 #include "i18n.h"
 
@@ -157,7 +159,7 @@ Editor::bounce_region_selection ()
 bool
 Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 {
-	AudioFileSource* fs;
+	boost::shared_ptr<AudioFileSource> fs;
 	const jack_nframes_t chunk_size = 4096;
 	jack_nframes_t to_read;
 	Sample buf[chunk_size];
@@ -165,14 +167,14 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	jack_nframes_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
-	vector<AudioFileSource *> sources;
+	vector<boost::shared_ptr<AudioFileSource> > sources;
 	uint32_t nchans;
 	
 	nchans = region->n_channels();
 	
 	/* don't do duplicate of the entire source if that's what is going on here */
 
-	if (region->start() == 0 && region->length() == region->source().length()) {
+	if (region->start() == 0 && region->length() == region->source()->length()) {
 		/* XXX should link(2) to create a new inode with "path" */
 		return true;
 	}
@@ -206,7 +208,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 		
 			
 			try {
-				fs = AudioFileSource::create (path);
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (path, AudioFileSource::Flag (0)));
 			}
 			
 			catch (failed_constructor& err) {
@@ -229,7 +231,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 		this_time = min (to_read, chunk_size);
 
-		for (vector<AudioFileSource *>::iterator src=sources.begin(); src != sources.end(); ++src) {
+		for (vector<boost::shared_ptr<AudioFileSource> >::iterator src=sources.begin(); src != sources.end(); ++src) {
 			
 			fs = (*src);
 
@@ -252,7 +254,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	time (&tnow);
 	now = localtime (&tnow);
 	
-	for (vector<AudioFileSource *>::iterator src = sources.begin(); src != sources.end(); ++src) {
+	for (vector<boost::shared_ptr<AudioFileSource> >::iterator src = sources.begin(); src != sources.end(); ++src) {
 		(*src)->update_header (0, *now, tnow);
 	}
 
@@ -260,10 +262,8 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 error_out:
 
-	for (vector<AudioFileSource*>::iterator i = sources.begin(); i != sources.end(); ++i) {
-		
+	for (vector<boost::shared_ptr<AudioFileSource> >::iterator i = sources.begin(); i != sources.end(); ++i) {
 		(*i)->mark_for_remove ();
-		delete (*i);
 	}
 
 	return 0;
@@ -303,7 +303,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 bool
 Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<AudioRange>& range)
 {
-	AudioFileSource* fs;
+	boost::shared_ptr<AudioFileSource> fs;
 	const jack_nframes_t chunk_size = 4096;
 	jack_nframes_t nframes;
 	Sample buf[chunk_size];
@@ -312,7 +312,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	string path;
-	vector<AudioFileSource *> sources;
+	vector<boost::shared_ptr<AudioFileSource> > sources;
 
 	for (uint32_t n=0; n < channels; ++n) {
 		
@@ -339,7 +339,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 		path = s;
 		
 		try {
-			fs = AudioFileSource::create (path);
+			fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (path, AudioFileSource::Flag (0)));
 		}
 		
 		catch (failed_constructor& err) {
@@ -422,9 +422,8 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 error_out:
 	/* unref created files */
 
-	for (vector<AudioFileSource*>::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (vector<boost::shared_ptr<AudioFileSource> >::iterator i = sources.begin(); i != sources.end(); ++i) {
 		(*i)->mark_for_remove ();
-		delete *i;
 	}
 
 	return false;

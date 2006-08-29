@@ -82,7 +82,7 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 
 			/* read it in */
 			
-			if (region->source (n).read (buf, fpos, to_read) != to_read) {
+			if (region->source (n)->read (buf, fpos, to_read) != to_read) {
 				goto out;
 			}
 			
@@ -117,7 +117,6 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 	if (ret) {
 		for (si = nsrcs.begin(); si != nsrcs.end(); ++si) {
 			(*si)->mark_for_remove ();
-			delete *si;
 		}
 	}
 	

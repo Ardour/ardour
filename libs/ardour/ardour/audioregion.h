@@ -71,9 +71,7 @@ class AudioRegion : public Region
 
 	bool speed_mismatch (float) const;
 
-	void lock_sources ();
-	void unlock_sources ();
-	AudioSource& source (uint32_t n=0) const { if (n < sources.size()) return *sources[n]; else return *sources[0]; } 
+	boost::shared_ptr<AudioSource> source (uint32_t n=0) const { if (n < sources.size()) return sources[n]; else return sources[0]; } 
 
 	void set_scale_amplitude (gain_t);
 	gain_t scale_amplitude() const { return _scale_amplitude; }
@@ -155,12 +153,12 @@ class AudioRegion : public Region
   private:
 	friend class RegionFactory;
 
-	AudioRegion (AudioSource&, jack_nframes_t start, jack_nframes_t length);
-	AudioRegion (AudioSource&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (boost::shared_ptr<AudioSource>, jack_nframes_t start, jack_nframes_t length);
+	AudioRegion (boost::shared_ptr<AudioSource>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (boost::shared_ptr<const AudioRegion>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (boost::shared_ptr<const AudioRegion>);
-	AudioRegion (AudioSource&, const XMLNode&);
+	AudioRegion (boost::shared_ptr<AudioSource>, const XMLNode&);
 	AudioRegion (SourceList &, const XMLNode&);
 
   private:
@@ -190,8 +188,7 @@ class AudioRegion : public Region
 
 	void envelope_changed (Change);
 
-	void source_deleted (Source*);
-	
+	void source_deleted (boost::shared_ptr<Source>);
 	
 	SourceList        sources;
 	

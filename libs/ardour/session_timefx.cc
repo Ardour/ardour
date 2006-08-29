@@ -29,6 +29,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/region_factory.h>
+#include <ardour/source_factory.h>
 
 #include "i18n.h"
 
@@ -81,10 +82,8 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		}
 
 		try {
-			sources.push_back (new SndFileSource (path, 
-							      Config->get_native_file_data_format(),
-							      Config->get_native_file_header_format(),
-							      frame_rate()));
+			sources.push_back (boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (path, false, frame_rate())));
+
 		} catch (failed_constructor& err) {
 			error << string_compose (_("tempoize: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
 			goto out;
@@ -153,7 +152,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 	xnow = localtime (&now);
 
 	for (it = sources.begin(); it != sources.end(); ++it) {
-		AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*it);
+		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*it);
 		if (afs) {
 			afs->update_header (tsr.region->position(), *xnow, now);
 		}
@@ -175,9 +174,10 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		if ((!r || !tsr.running)) {
 			for (it = sources.begin(); it != sources.end(); ++it) {
 				(*it)->mark_for_remove ();
-				delete *it;
 			}
 		}
+
+		sources.clear ();
 	}
 	
 	/* if the process was cancelled, delete the region */

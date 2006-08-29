@@ -76,7 +76,7 @@ class AudioStreamView : public StreamView
 
   private:
 	void setup_rec_box ();
-	void rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt, ARDOUR::Source* src); 
+	void rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt, boost::shared_ptr<ARDOUR::Source> src); 
 	void update_rec_regions ();
 	
 	void add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
@@ -103,7 +103,7 @@ class AudioStreamView : public StreamView
 
 	list<sigc::connection>     peak_ready_connections;
 	jack_nframes_t             last_rec_peak_frame;
-	map<ARDOUR::Source*, bool> rec_peak_ready_map;
+	map<boost::shared_ptr<ARDOUR::Source>, bool> rec_peak_ready_map;
 	
 };
 

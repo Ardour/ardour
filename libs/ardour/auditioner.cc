@@ -20,6 +20,8 @@
 
 #include <glibmm/thread.h>
 
+#include <pbd/error.h>
+
 #include <ardour/audio_diskstream.h>
 #include <ardour/audioregion.h>
 #include <ardour/route.h>
@@ -32,6 +34,9 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
+
+#include "i18n.h"
 
 Auditioner::Auditioner (Session& s)
 	: AudioTrack (s, "auditioner", Route::Hidden)
@@ -100,13 +105,18 @@ Auditioner::audition_current_playlist ()
 }
 
 void
-Auditioner::audition_region (boost::shared_ptr<AudioRegion> region)
+Auditioner::audition_region (boost::shared_ptr<Region> region)
 {
 	if (g_atomic_int_get (&_active)) {
 		/* don't go via session for this, because we are going
 		   to remain active.
 		*/
 		cancel_audition ();
+	}
+
+	if (boost::dynamic_pointer_cast<AudioRegion>(region) == 0) {
+		error << _("Auditioning of non-audio regions not yet supported") << endmsg;
+		return;
 	}
 
 	Glib::Mutex::Lock lm (lock);

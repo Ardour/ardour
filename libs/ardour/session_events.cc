@@ -401,7 +401,7 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::Audition:
-		// set_audition (static_cast<AudioRegion*> (ev->ptr)); AUDFIX
+		set_audition (ev->region);
 		break;
 
 	case Event::InputConfigurationChange:

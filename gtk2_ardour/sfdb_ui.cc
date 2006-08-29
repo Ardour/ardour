@@ -33,6 +33,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/region_factory.h>
+#include <ardour/source_factory.h>
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -192,11 +193,11 @@ SoundFileBox::play_btn_clicked ()
 
 	if (region_cache.find (path) == region_cache.end()) {
 		SourceList srclist;
-		AudioFileSource* afs;
-
+		boost::shared_ptr<AudioFileSource> afs;
+		
 		for (int n = 0; n < sf_info.channels; ++n) {
 			try {
-				afs = AudioFileSource::create (path+":"+string_compose("%1", n));
+				afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (path+":"+string_compose("%1", n), AudioFileSource::Flag (0)));
 				srclist.push_back(afs);
 
 			} catch (failed_constructor& err) {

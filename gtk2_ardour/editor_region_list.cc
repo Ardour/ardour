@@ -120,11 +120,11 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 		set_color(c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
 		row[region_list_columns.color_] = c;
 
-		if (region->source().name()[0] == '/') { // external file
+		if (region->source()->name()[0] == '/') { // external file
 
 			if (region->whole_file()) {
 				str = ".../";
-				str += PBD::basename_nosuffix (region->source().name());
+				str += PBD::basename_nosuffix (region->source()->name());
 				
 			} else {
 				str = region->name();
@@ -467,7 +467,7 @@ Editor::region_list_sorter (TreeModel::iterator a, TreeModel::iterator b)
 		break;
 		
 	case ByTimestamp:
-		cmp = region1->source().timestamp() - region2->source().timestamp();
+		cmp = region1->source()->timestamp() - region2->source()->timestamp();
 		break;
 	
 	case ByStartInFile:
@@ -479,22 +479,22 @@ Editor::region_list_sorter (TreeModel::iterator a, TreeModel::iterator b)
 		break;
 		
 	case BySourceFileName:
-		cmp = strcasecmp (region1->source().name().c_str(), region2->source().name().c_str());
+		cmp = strcasecmp (region1->source()->name().c_str(), region2->source()->name().c_str());
 		break;
 
 	case BySourceFileLength:
-		cmp = region1->source().length() - region2->source().length();
+		cmp = region1->source()->length() - region2->source()->length();
 		break;
 		
 	case BySourceFileCreationDate:
-		cmp = region1->source().timestamp() - region2->source().timestamp();
+		cmp = region1->source()->timestamp() - region2->source()->timestamp();
 		break;
 
 	case BySourceFileFS:
-		if (region1->source().name() == region2->source().name()) {
+		if (region1->source()->name() == region2->source()->name()) {
 			cmp = strcasecmp (region1->name().c_str(),  region2->name().c_str());
 		} else {
-			cmp = strcasecmp (region1->source().name().c_str(),  region2->source().name().c_str());
+			cmp = strcasecmp (region1->source()->name().c_str(),  region2->source()->name().c_str());
 		}
 		break;
 	}

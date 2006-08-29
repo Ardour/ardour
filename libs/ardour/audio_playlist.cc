@@ -608,12 +608,6 @@ AudioPlaylist::drop_all_states ()
 		}
 	}
 
-	/* delete every region that is left - these are all things that are part of our "history" */
-
-	for (set<boost::shared_ptr<Region> >::iterator ar = all_regions.begin(); ar != all_regions.end(); ++ar) {
-		(*ar)->unlock_sources ();
-	}
-
 	/* delete every crossfade that is left (ditto as per regions) */
 
 	for (set<Crossfade *>::iterator axf = all_xfades.begin(); axf != all_xfades.end(); ++axf) {
@@ -764,7 +758,6 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 			++tmp;
 			
 			if ((*i) == region) {
-				(*i)->unlock_sources ();
 				regions.erase (i);
 				changed = true;
 			}

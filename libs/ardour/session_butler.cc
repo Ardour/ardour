@@ -187,7 +187,7 @@ Session::butler_thread_work ()
 		}
 
 		if (pfd[0].revents & ~POLLIN) {
-			error << _("Error on butler thread request pipe") << endmsg;
+			error << string_compose (_("Error on butler thread request pipe: fd=%1 err=%2"), pfd[0].fd, pfd[0].revents) << endmsg;
 			break;
 		}
 		

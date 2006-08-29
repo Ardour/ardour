@@ -2156,12 +2156,12 @@ ARDOUR_UI::halt_on_xrun_message ()
 }
 
 void 
-ARDOUR_UI::delete_sources_in_the_right_thread (list<ARDOUR::Source*>* deletion_list)
+ARDOUR_UI::delete_sources_in_the_right_thread (list<boost::shared_ptr<ARDOUR::Source> >* deletion_list)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread), deletion_list));
 
-	for (list<Source*>::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
-		delete *i;
+	for (list<boost::shared_ptr<Source> >::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
+		(*i)->drop_references ();
 	}
 
 	delete deletion_list;

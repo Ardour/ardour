@@ -48,6 +48,7 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/audioregion.h>
+#include <ardour/source_factory.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -100,7 +101,6 @@ AudioDiskstream::init_channel (ChannelInfo &chan)
 	chan.capture_wrap_buffer = 0;
 	chan.speed_buffer = 0;
 	chan.peak_power = 0.0f;
-	chan.write_source = 0;
 	chan.source = 0;
 	chan.current_capture_buffer = 0;
 	chan.current_playback_buffer = 0;
@@ -143,8 +143,7 @@ void
 AudioDiskstream::destroy_channel (ChannelInfo &chan)
 {
 	if (chan.write_source) {
-		chan.write_source->release ();
-		chan.write_source = 0;
+		chan.write_source.reset ();
 	}
 		
 	if (chan.speed_buffer) {
@@ -406,7 +405,7 @@ AudioDiskstream::use_destructive_playlist ()
 	ChannelList::iterator chan;
 
 	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
-		(*chan).write_source = dynamic_cast<AudioFileSource*>(&region->source (n));
+		(*chan).write_source = boost::dynamic_pointer_cast<AudioFileSource>(region->source (n));
 		assert((*chan).write_source);
 		(*chan).write_source->set_allow_remove_if_empty (false);
 	}
@@ -1489,18 +1488,17 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		
 		ChannelList::iterator chan;
 		
-		list<Source*>* deletion_list = new list<Source*>;
+		list<boost::shared_ptr<Source> >* deletion_list = new list<boost::shared_ptr<Source> >;
 
 		for ( chan = channels.begin(); chan != channels.end(); ++chan) {
 
 			if ((*chan).write_source) {
 				
 				(*chan).write_source->mark_for_remove ();
-				(*chan).write_source->release ();
 				
 				deletion_list->push_back ((*chan).write_source);
 
-				(*chan).write_source = 0;
+				(*chan).write_source.reset ();
 			}
 			
 			/* new source set up in "out" below */
@@ -1523,19 +1521,11 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
 
-		AudioFileSource* s = (*chan).write_source;
+		boost::shared_ptr<AudioFileSource> s = (*chan).write_source;
 		
 		if (s) {
-
-			AudioFileSource* fsrc;
-
 			srcs.push_back (s);
-
-			if ((fsrc = dynamic_cast<AudioFileSource *>(s)) != 0) {
-				cerr << "updating source after capture\n";
-				fsrc->update_header (capture_info.front()->start, when, twhen);
-			}
-
+			s->update_header (capture_info.front()->start, when, twhen);
 			s->set_captured_for (_name);
 			
 		}
@@ -1779,7 +1769,7 @@ AudioDiskstream::get_state ()
 		XMLNode* cs_child = new XMLNode (X_("CapturingSources"));
 		XMLNode* cs_grandchild;
 
-		for (vector<AudioFileSource*>::iterator i = capturing_sources.begin(); i != capturing_sources.end(); ++i) {
+		for (vector<boost::shared_ptr<AudioFileSource> >::iterator i = capturing_sources.begin(); i != capturing_sources.end(); ++i) {
 			cs_grandchild = new XMLNode (X_("file"));
 			cs_grandchild->add_property (X_("path"), (*i)->path());
 			cs_child->add_child_nocopy (*cs_grandchild);
@@ -1948,11 +1938,9 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 
 		if (AudioFileSource::is_empty (chan.write_source->path())) {
 			chan.write_source->mark_for_remove ();
-			chan.write_source->release();
-			delete chan.write_source;
+			chan.write_source.reset ();
 		} else {
-			chan.write_source->release();
-			chan.write_source = 0;
+			chan.write_source.reset ();
 		}
 	}
 
@@ -1964,11 +1952,9 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 
 	catch (failed_constructor &err) {
 		error << string_compose (_("%1:%2 new capture file not initialized correctly"), _name, n) << endmsg;
-		chan.write_source = 0;
+		chan.write_source.reset ();
 		return -1;
 	}
-
-	chan.write_source->use ();
 
 	/* do not remove destructive files even if they are empty */
 
@@ -2166,8 +2152,8 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	const XMLProperty* prop;
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	AudioFileSource* fs;
-	AudioFileSource* first_fs = 0;
+	boost::shared_ptr<AudioFileSource> fs;
+	boost::shared_ptr<AudioFileSource> first_fs;
 	SourceList pending_sources;
 	jack_nframes_t position;
 
@@ -2187,10 +2173,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 			}
 
 			try {
-				fs = new SndFileSource (prop->value(), 
-							Config->get_native_file_data_format(),
-							Config->get_native_file_header_format(),
-							_session.frame_rate());
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (prop->value(), false, _session.frame_rate()));
 			}
 
 			catch (failed_constructor& err) {

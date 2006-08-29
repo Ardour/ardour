@@ -65,6 +65,7 @@
 #include <ardour/playlist.h>
 #include <ardour/click.h>
 #include <ardour/data_type.h>
+#include <ardour/source_factory.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -272,10 +273,12 @@ Session::Session (AudioEngine &eng,
 	first_stage_init (fullpath, snapshot_name);
 	
 	if (create (new_session, mix_template, _engine.frame_rate() * 60 * 5)) {
+		cerr << "create failed\n";
 		throw failed_constructor ();
 	}
 	
 	if (second_stage_init (new_session)) {
+		cerr << "2nd state failed\n";
 		throw failed_constructor ();
 	}
 	
@@ -475,15 +478,8 @@ Session::~Session ()
        {
 	       RCUWriter<DiskstreamList> dwriter (diskstreams);
 	       boost::shared_ptr<DiskstreamList> dsl = dwriter.get_copy();
-	       for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ) {
-		       DiskstreamList::iterator tmp;
-		       
-		       tmp = i;
-		       ++tmp;
-		       
+	       for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		       (*i)->drop_references ();
-		       
-		       i = tmp;
 	       }
 	       dsl->clear ();
        }
@@ -498,10 +494,12 @@ Session::~Session ()
 		tmp = i;
 		++tmp;
 
-		delete i->second;
+		i->second->drop_references ();
 
 		i = tmp;
 	}
+
+	audio_sources.clear ();
 
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete mix groups\n";
@@ -2649,25 +2647,27 @@ Session::destroy_region (boost::shared_ptr<Region> region)
 	if ((aregion = boost::dynamic_pointer_cast<AudioRegion> (region)) == 0) {
 		return 0;
 	}
-
+	
 	if (aregion->playlist()) {
 		aregion->playlist()->destroy_region (region);
 	}
 
-	vector<Source*> srcs;
+	vector<boost::shared_ptr<Source> > srcs;
 	
 	for (uint32_t n = 0; n < aregion->n_channels(); ++n) {
-		srcs.push_back (&aregion->source (n));
+		srcs.push_back (aregion->source (n));
 	}
 
-	for (vector<Source*>::iterator i = srcs.begin(); i != srcs.end(); ++i) {
+	for (vector<boost::shared_ptr<Source> >::iterator i = srcs.begin(); i != srcs.end(); ++i) {
 		
-		if ((*i)->use_cnt() == 0) {
-			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*i);
+		if ((*i).use_count() == 1) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*i);
+
 			if (afs) {
 				(afs)->mark_for_remove ();
 			}
-			delete *i;
+			
+			(*i)->drop_references ();
 		}
 	}
 
@@ -2713,54 +2713,76 @@ Session::remove_region_from_region_list (boost::shared_ptr<Region> r)
 /* Source Management */
 
 void
-Session::add_audio_source (AudioSource* source)
+Session::add_source (boost::shared_ptr<Source> source)
 {
-	pair<AudioSourceList::key_type, AudioSourceList::mapped_type> entry;
+	boost::shared_ptr<AudioFileSource> afs;
 
- 	{
- 		Glib::Mutex::Lock lm (audio_source_lock);
+	cerr << "add new source " << source->name() << endl;
+
+	if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(source)) != 0) {
+
+		pair<AudioSourceList::key_type, AudioSourceList::mapped_type> entry;
+		pair<AudioSourceList::iterator,bool> result;
+
 		entry.first = source->id();
-		entry.second = source;
-		audio_sources.insert (entry);
- 	}
-	
-	source->GoingAway.connect (sigc::bind (mem_fun (this, &Session::remove_source), source));
-	set_dirty();
-	
-	SourceAdded (source); /* EMIT SIGNAL */
+		entry.second = afs;
+		
+		{
+			Glib::Mutex::Lock lm (audio_source_lock);
+			result = audio_sources.insert (entry);
+		}
+
+		if (!result.second) {
+			cerr << "\tNOT inserted ? " << result.second << endl;
+		}
+
+		source->GoingAway.connect (sigc::bind (mem_fun (this, &Session::remove_source), boost::weak_ptr<Source> (source)));
+		set_dirty();
+		
+		SourceAdded (source); /* EMIT SIGNAL */
+	} else {
+		cerr << "\tNOT AUDIO FILE\n";
+	}
 }
 
 void
-Session::remove_source (Source* source)
+Session::remove_source (boost::weak_ptr<Source> src)
 {
 	AudioSourceList::iterator i;
+	boost::shared_ptr<Source> source = src.lock();
 
-	{ 
-		Glib::Mutex::Lock lm (audio_source_lock);
-
-		if ((i = audio_sources.find (source->id())) != audio_sources.end()) {
-			audio_sources.erase (i);
-		} 
-	}
-
-	if (!_state_of_the_state & InCleanup) {
-
-		/* save state so we don't end up with a session file
-		   referring to non-existent sources.
-		*/
+	if (!source) {
+		cerr << "removing a source DEAD\n";
+	} else {
+		cerr << "removing a source " << source->name () << endl;
 		
-		save_state (_current_snapshot_name);
+		{ 
+			Glib::Mutex::Lock lm (audio_source_lock);
+			
+			if ((i = audio_sources.find (source->id())) != audio_sources.end()) {
+				audio_sources.erase (i);
+			} 
+		}
+		
+		if (!_state_of_the_state & InCleanup) {
+			
+			/* save state so we don't end up with a session file
+			   referring to non-existent sources.
+			*/
+			
+			save_state (_current_snapshot_name);
+		}
+		
+		SourceRemoved(source); /* EMIT SIGNAL */
 	}
-
-	SourceRemoved(source); /* EMIT SIGNAL */
 }
 
-Source *
+boost::shared_ptr<Source>
 Session::source_by_id (const PBD::ID& id)
 {
 	Glib::Mutex::Lock lm (audio_source_lock);
 	AudioSourceList::iterator i;
-	Source* source = 0;
+	boost::shared_ptr<Source> source;
 
 	if ((i = audio_sources.find (id)) != audio_sources.end()) {
 		source = i->second;
@@ -3006,24 +3028,11 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 	return spath;
 }
 
-AudioFileSource *
+boost::shared_ptr<AudioFileSource>
 Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bool destructive)
 {
 	string spath = audio_path_from_name (ds.name(), ds.n_channels(), chan, destructive);
-
-	/* this might throw failed_constructor(), which is OK */
-	
-	if (destructive) {
-		return new DestructiveFileSource (spath,
-						  Config->get_native_file_data_format(),
-						  Config->get_native_file_header_format(),
-						  frame_rate());
-	} else {
-		return new SndFileSource (spath, 
-					  Config->get_native_file_data_format(),
-					  Config->get_native_file_header_format(),
-					  frame_rate());
-	}
+	return boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (spath, destructive, frame_rate()));
 }
 
 /* Playlist management */
@@ -3129,7 +3138,7 @@ Session::remove_playlist (Playlist* playlist)
 }
 
 void 
-Session::set_audition (boost::shared_ptr<AudioRegion> r)
+Session::set_audition (boost::shared_ptr<Region> r)
 {
 	pending_audition_region = r;
 	post_transport_work = PostTransportWork (post_transport_work | PostTransportAudition);
@@ -3137,34 +3146,31 @@ Session::set_audition (boost::shared_ptr<AudioRegion> r)
 }
 
 void
-Session::non_realtime_set_audition ()
-{
-	if (pending_audition_region.get() == (AudioRegion*) 0xfeedface) {
-		auditioner->audition_current_playlist ();
-	} else if (pending_audition_region) {
-		auditioner->audition_region (pending_audition_region);
-	}
-	pending_audition_region.reset ((AudioRegion*) 0);
-	AuditionActive (true); /* EMIT SIGNAL */
-}
-
-void
 Session::audition_playlist ()
 {
 	Event* ev = new Event (Event::Audition, Event::Add, Event::Immediate, 0, 0.0);
-	ev->set_ptr ((void*) 0xfeedface);
+	ev->region.reset ();
 	queue_event (ev);
+}
+
+void
+Session::non_realtime_set_audition ()
+{
+	if (!pending_audition_region) {
+		auditioner->audition_current_playlist ();
+	} else {
+		auditioner->audition_region (pending_audition_region);
+		pending_audition_region.reset ();
+	}
+	AuditionActive (true); /* EMIT SIGNAL */
 }
 
 void
 Session::audition_region (boost::shared_ptr<Region> r)
 {
-	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(r);
-	if (ar) {
-		Event* ev = new Event (Event::Audition, Event::Add, Event::Immediate, 0, 0.0);
-		// ev->set_ptr (ar); // AUDFIX
-		queue_event (ev);
-	}
+	Event* ev = new Event (Event::Audition, Event::Add, Event::Immediate, 0, 0.0);
+	ev->region = r;
+	queue_event (ev);
 }
 
 void
@@ -3172,7 +3178,7 @@ Session::cancel_audition ()
 {
 	if (auditioner->active()) {
 		auditioner->cancel_audition ();
-		 AuditionActive (false); /* EMIT SIGNAL */
+		AuditionActive (false); /* EMIT SIGNAL */
 	}
 }
 
@@ -3583,9 +3589,9 @@ Session::route_name_unique (string n) const
 }
 
 int
-Session::cleanup_audio_file_source (AudioFileSource& fs)
+Session::cleanup_audio_file_source (boost::shared_ptr<AudioFileSource> fs)
 {
-	return fs.move_to_trash (dead_sound_dir_name);
+	return fs->move_to_trash (dead_sound_dir_name);
 }
 
 uint32_t
@@ -3652,11 +3658,11 @@ Session::freeze (InterThreadInfo& itt)
 
 int
 Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nframes_t len, 	
-			       bool overwrite, vector<AudioSource*>& srcs, InterThreadInfo& itt)
+			       bool overwrite, vector<boost::shared_ptr<AudioSource> >& srcs, InterThreadInfo& itt)
 {
 	int ret = -1;
 	Playlist* playlist;
-	AudioFileSource* fsource;
+	boost::shared_ptr<AudioFileSource> fsource;
 	uint32_t x;
 	char buf[PATH_MAX+1];
 	string dir;
@@ -3702,11 +3708,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		}
 		
 		try {
-			fsource =  new SndFileSource (buf, 
-						      Config->get_native_file_data_format(),
-						      Config->get_native_file_header_format(),
-						      frame_rate());
-							    
+			fsource = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (buf, false, frame_rate()));
 		}
 		
 		catch (failed_constructor& err) {
@@ -3714,7 +3716,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 			goto out;
 		}
 
-		srcs.push_back(fsource);
+		srcs.push_back (fsource);
 	}
 
 	/* XXX need to flush all redirects */
@@ -3743,9 +3745,9 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		}
 
 		uint32_t n = 0;
-		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
-			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
-
+		for (vector<boost::shared_ptr<AudioSource> >::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
+			
 			if (afs) {
 				if (afs->write (buffers[n], this_chunk) != this_chunk) {
 					goto out;
@@ -3767,8 +3769,9 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		time (&now);
 		xnow = localtime (&now);
 		
-		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
-			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
+		for (vector<boost::shared_ptr<AudioSource> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
+
 			if (afs) {
 				afs->update_header (position, *xnow, now);
 			}
@@ -3776,8 +3779,8 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		
 		/* build peakfile for new source */
 		
-		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
-			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
+		for (vector<boost::shared_ptr<AudioSource> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
 			if (afs) {
 				afs->build_peaks ();
 			}
@@ -3788,12 +3791,14 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		
   out:
 	if (ret) {
-		for (vector<AudioSource*>::iterator src=srcs.begin(); src != srcs.end(); ++src) {
-			AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*src);
+		for (vector<boost::shared_ptr<AudioSource> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
+
 			if (afs) {
 				afs->mark_for_remove ();
 			}
-			delete *src;
+
+			(*src)->drop_references ();
 		}
 	}
 

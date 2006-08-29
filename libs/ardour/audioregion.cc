@@ -64,17 +64,17 @@ AudioRegionState::AudioRegionState (string why)
 {
 }
 
-AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t length)
-	: Region (start, length, PBD::basename_nosuffix(src.name()), 0,  Region::Flag(Region::DefaultFlags|Region::External)),
+AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t start, jack_nframes_t length)
+	: Region (start, length, PBD::basename_nosuffix(src->name()), 0,  Region::Flag(Region::DefaultFlags|Region::External)),
 	  _fade_in (0.0, 2.0, 1.0, false),
 	  _fade_out (0.0, 2.0, 1.0, false),
 	  _envelope (0.0, 2.0, 1.0, false)
 {
 	/* basic AudioRegion constructor */
 
-	sources.push_back (&src);
-	master_sources.push_back (&src);
-	src.GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), &src));
+	sources.push_back (src);
+	master_sources.push_back (src);
+	src->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), src));
 
 	_scale_amplitude = 1.0;
 
@@ -86,7 +86,7 @@ AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 }
 
-AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (start, length, name, layer, flags),
 	  _fade_in (0.0, 2.0, 1.0, false),
 	  _fade_out (0.0, 2.0, 1.0, false),
@@ -94,9 +94,9 @@ AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t
 {
 	/* basic AudioRegion constructor */
 
-	sources.push_back (&src);
-	master_sources.push_back (&src);
-	src.GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), &src));
+	sources.push_back (src);
+	master_sources.push_back (src);
+	src->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), src));
 
 	_scale_amplitude = 1.0;
 
@@ -139,7 +139,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, jack_nfram
 {
 	/* create a new AudioRegion, that is part of an existing one */
 	
-	set<AudioSource*> unique_srcs;
+	set<boost::shared_ptr<AudioSource> > unique_srcs;
 
 	for (SourceList::const_iterator i= other->sources.begin(); i != other->sources.end(); ++i) {
 		sources.push_back (*i);
@@ -194,7 +194,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 {
 	/* Pure copy constructor */
 
-	set<AudioSource*> unique_srcs;
+	set<boost::shared_ptr<AudioSource> > unique_srcs;
 
 	for (SourceList::const_iterator i = other->sources.begin(); i != other->sources.end(); ++i) {
 		sources.push_back (*i);
@@ -222,15 +222,15 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	/* NOTE: no CheckNewRegion signal emitted here. This is the copy constructor */
 }
 
-AudioRegion::AudioRegion (AudioSource& src, const XMLNode& node)
+AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
 	: Region (node),
 	  _fade_in (0.0, 2.0, 1.0, false),
 	  _fade_out (0.0, 2.0, 1.0, false),
 	  _envelope (0.0, 2.0, 1.0, false)
 {
-	sources.push_back (&src);
-	master_sources.push_back (&src);
-	src.GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), &src));
+	sources.push_back (src);
+	master_sources.push_back (src);
+	src->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), src));
 
 	set_default_fades ();
 
@@ -249,7 +249,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	  _fade_out (0.0, 2.0, 1.0, false),
 	  _envelope (0.0, 2.0, 1.0, false)
 {
-	set<AudioSource*> unique_srcs;
+	set<boost::shared_ptr<AudioSource> > unique_srcs;
 
 	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		sources.push_back (*i);
@@ -1058,45 +1058,9 @@ AudioRegion::separate_by_channel (Session& session, vector<AudioRegion*>& v) con
 }
 
 void
-AudioRegion::source_deleted (Source* ignored)
+AudioRegion::source_deleted (boost::shared_ptr<Source> ignored)
 {
 	delete this;
-}
-
-void
-AudioRegion::lock_sources ()
-{
-	SourceList::iterator i;
-	set<AudioSource*> unique_srcs;
-
-	for (i = sources.begin(); i != sources.end(); ++i) {
-		unique_srcs.insert (*i);
-		(*i)->use ();
-	}
-
-	for (i = master_sources.begin(); i != master_sources.end(); ++i) {
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->use ();
-		}
-	}
-}
-
-void
-AudioRegion::unlock_sources ()
-{
-	SourceList::iterator i;
-	set<AudioSource*> unique_srcs;
-
-	for (i = sources.begin(); i != sources.end(); ++i) {
-		unique_srcs.insert (*i);
-		(*i)->release ();
-	}
-
-	for (i = master_sources.begin(); i != master_sources.end(); ++i) {
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->release ();
-		}
-	}
 }
 
 vector<string>
@@ -1269,7 +1233,7 @@ AudioRegion::normalize_to (float target_dB)
 
 			/* read it in */
 
-			if (source (n).read (buf, fpos, to_read) != to_read) {
+			if (source (n)->read (buf, fpos, to_read) != to_read) {
 				return;
 			}
 			
@@ -1377,7 +1341,7 @@ uint32_t region_length_from_c (void *arg)
 
 uint32_t sourcefile_length_from_c (void *arg, double zoom_factor)
 {
-	return ( (AudioRegion *) arg)->source().available_peaks (zoom_factor) ;
+	return ( (AudioRegion *) arg)->source()->available_peaks (zoom_factor) ;
 }
 
 } /* extern "C" */

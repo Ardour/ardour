@@ -84,8 +84,6 @@ class AudioSource : public Source
  	int  build_peaks ();
 	bool peaks_ready (sigc::slot<void>, sigc::connection&) const;
 
-	static sigc::signal<void,AudioSource*> AudioSourceCreated;
-	       
 	mutable sigc::signal<void>  PeaksReady;
 	mutable sigc::signal<void,jack_nframes_t,jack_nframes_t>  PeakRangeReady;
 	
@@ -147,7 +145,7 @@ class AudioSource : public Source
 	static vector<AudioSource*> pending_peak_sources;
 	static Glib::Mutex* pending_peak_sources_lock;
 
-	static void queue_for_peaks (AudioSource&);
+	static void queue_for_peaks (AudioSource*);
 	static void clear_queue_for_peaks ();
 	
 	struct PeakBuildRecord {

@@ -40,7 +40,7 @@ class Auditioner : public AudioTrack
 	Auditioner (Session&);
 	~Auditioner ();
 
-	void audition_region (boost::shared_ptr<AudioRegion>);
+	void audition_region (boost::shared_ptr<Region>);
 
 	ARDOUR::AudioPlaylist& prepare_playlist ();
 	void audition_current_playlist ();

@@ -82,6 +82,7 @@
 #include <ardour/crossfade.h>
 #include <ardour/control_protocol_manager.h>
 #include <ardour/region_factory.h>
+#include <ardour/source_factory.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -262,7 +263,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	/* These are all static "per-class" signals */
 
 	RegionFactory::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
-	AudioSource::AudioSourceCreated.connect (mem_fun (*this, &Session::add_audio_source));
+	SourceFactory::SourceCreated.connect (mem_fun (*this, &Session::add_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
@@ -288,6 +289,7 @@ Session::second_stage_init (bool new_session)
 
 	if (!new_session) {
 		if (load_state (_current_snapshot_name)) {
+			cerr << "load state failed\n";
 			return -1;
 		}
 		remove_empty_sounds ();
@@ -1349,10 +1351,10 @@ Session::state(bool full_state)
 			
 			/* Don't save information about AudioFileSources that are empty */
 			
-			AudioFileSource* fs;
+			boost::shared_ptr<AudioFileSource> fs;
 
-			if ((fs = dynamic_cast<AudioFileSource*> (siter->second)) != 0) {
-				DestructiveFileSource* dfs = dynamic_cast<DestructiveFileSource*> (fs);
+			if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (siter->second)) != 0) {
+				boost::shared_ptr<DestructiveFileSource> dfs = boost::dynamic_pointer_cast<DestructiveFileSource> (fs);
 
 				/* destructive file sources are OK if they are empty, because
 				   we will re-use them every time.
@@ -1771,8 +1773,8 @@ boost::shared_ptr<AudioRegion>
 Session::XMLRegionFactory (const XMLNode& node, bool full)
 {
 	const XMLProperty* prop;
-	Source* source;
-	AudioSource* as;
+	boost::shared_ptr<Source> source;
+	boost::shared_ptr<AudioSource> as;
 	SourceList sources;
 	uint32_t nchans = 1;
 	char buf[128];
@@ -1799,8 +1801,8 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 		error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
 		return boost::shared_ptr<AudioRegion>();
 	}
-
-	as = dynamic_cast<AudioSource*>(source);
+	
+	as = boost::dynamic_pointer_cast<AudioSource>(source);
 	if (!as) {
 		error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), s_id) << endmsg;
 		return boost::shared_ptr<AudioRegion>();
@@ -1821,7 +1823,7 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 				return boost::shared_ptr<AudioRegion>();
 			}
 			
-			as = dynamic_cast<AudioSource*>(source);
+			as = boost::dynamic_pointer_cast<AudioSource>(source);
 			if (!as) {
 				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), id2) << endmsg;
 				return boost::shared_ptr<AudioRegion>();
@@ -1885,7 +1887,7 @@ Session::load_sources (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	Source* source;
+	boost::shared_ptr<Source> source;
 
 	nlist = node.children();
 
@@ -1901,25 +1903,22 @@ Session::load_sources (const XMLNode& node)
 	return 0;
 }
 
-Source *
+boost::shared_ptr<Source>
 Session::XMLSourceFactory (const XMLNode& node)
 {
-	Source *src = 0;
 
 	if (node.name() != "Source") {
-		return 0;
+		return boost::shared_ptr<Source>();
 	}
 
 	try {
-		src = AudioFileSource::create (node);
+		return SourceFactory::create (node);
 	}
 	
 	catch (failed_constructor& err) {
 		error << _("Found a sound file that cannot be used by Ardour. Talk to the progammers.") << endmsg;
-		return 0;
+		return boost::shared_ptr<Source>();
 	}
-
-	return src;
 }
 
 int
@@ -2886,7 +2885,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 int
 Session::cleanup_sources (Session::cleanup_report& rep)
 {
-	vector<Source*> dead_sources;
+	vector<boost::shared_ptr<Source> > dead_sources;
 	vector<Playlist*> playlists_tbd;
 	PathScanner scanner;
 	string sound_path;
@@ -2958,7 +2957,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   capture files.
 		*/
 
-		if (i->second->use_cnt() == 0 && i->second->length() > 0) {
+		if (i->second.use_count() == 1 && i->second->length() > 0) {
 			dead_sources.push_back (i->second);
 
 			/* remove this source from our own list to avoid us
@@ -2976,7 +2975,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	   other snapshots).
 	*/
 		
-	for (vector<Source*>::iterator i = dead_sources.begin(); i != dead_sources.end();++i) {
+	for (vector<boost::shared_ptr<Source> >::iterator i = dead_sources.begin(); i != dead_sources.end();++i) {
 
 		for (AudioRegionList::iterator r = audio_regions.begin(); r != audio_regions.end(); ) {
 			AudioRegionList::iterator tmp;
@@ -2988,7 +2987,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			ar = r->second;
 
 			for (uint32_t n = 0; n < ar->n_channels(); ++n) {
-				if (&ar->source (n) == (*i)) {
+				if (ar->source (n) == (*i)) {
 					/* this region is dead */
 					remove_region (ar);
 				}
@@ -3036,9 +3035,9 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	 */
 	
 	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
-		AudioFileSource* fs;
+		boost::shared_ptr<AudioFileSource> fs;
 		
-		if ((fs = dynamic_cast<AudioFileSource*> (i->second)) != 0) {
+		if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (i->second)) != 0) {
 			all_sources.insert (fs->path());
 		} 
 	}

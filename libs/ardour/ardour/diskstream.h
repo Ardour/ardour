@@ -148,7 +148,7 @@ class IO;
 
 	static sigc::signal<void>                DiskOverrun;
 	static sigc::signal<void>                DiskUnderrun;
-	static sigc::signal<void,list<Source*>*> DeleteSources;
+	static sigc::signal<void,std::list<boost::shared_ptr<Source> >*> DeleteSources;
 
   protected:
 	friend class Session;

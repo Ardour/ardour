@@ -27,6 +27,7 @@
 
 #include <istream>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 #include <inttypes.h>
 #include <jack/types.h>
@@ -252,7 +253,7 @@ namespace ARDOUR {
 		VST
 	};
 	
-	typedef std::vector<AudioSource *> SourceList;
+	typedef std::vector<boost::shared_ptr<AudioSource> > SourceList;
 
 } // namespace ARDOUR
 

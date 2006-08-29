@@ -45,13 +45,11 @@ using namespace ARDOUR;
 Source::Source (string name)
 {
 	_name = name;
-	_use_cnt = 0;
 	_timestamp = 0;
 }
 
 Source::Source (const XMLNode& node) 
 {
-	_use_cnt = 0;
 	_timestamp = 0;
 
 	if (set_state (node)) {
@@ -61,6 +59,7 @@ Source::Source (const XMLNode& node)
 
 Source::~Source ()
 {
+	notify_callbacks ();
 }
 
 XMLNode&
@@ -103,17 +102,5 @@ Source::set_state (const XMLNode& node)
 	}
 
 	return 0;
-}
-
-void
-Source::use ()
-{
-	_use_cnt++;
-}
-
-void
-Source::release ()
-{
-	if (_use_cnt) --_use_cnt;
 }
 

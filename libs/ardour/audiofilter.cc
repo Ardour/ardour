@@ -27,6 +27,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/audiofilter.h>
 #include <ardour/region_factory.h>
+#include <ardour/source_factory.h>
 
 #include "i18n.h"
 
@@ -49,10 +50,7 @@ AudioFilter::make_new_sources (boost::shared_ptr<AudioRegion> region, SourceList
 		}
 
 		try {
-			nsrcs.push_back (new SndFileSource (path, 
-							    Config->get_native_file_data_format(),
-							    Config->get_native_file_header_format(),
-							    session.frame_rate()));
+			nsrcs.push_back (boost::dynamic_pointer_cast<AudioSource> (SourceFactory::createWritable (path, false, session.frame_rate())));
 		} 
 
 		catch (failed_constructor& err) {
@@ -78,7 +76,7 @@ AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs)
 	now = localtime (&xnow);
 
 	for (SourceList::iterator si = nsrcs.begin(); si != nsrcs.end(); ++si) {
-		AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*si);
+		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*si);
 		if (afs) {
 			afs->update_header (region->position(), *now, xnow);
 		}

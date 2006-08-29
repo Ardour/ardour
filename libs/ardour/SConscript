@@ -90,6 +90,7 @@ session_transport.cc
 sndfile_helpers.cc
 sndfilesource.cc
 source.cc
+source_factory.cc
 state_manager.cc
 tempo.cc
 utils.cc

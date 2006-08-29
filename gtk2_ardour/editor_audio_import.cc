@@ -32,6 +32,7 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/region_factory.h>
+#include <ardour/source_factory.h>
 #include <pbd/memento_command.h>
 
 #include "ardour_ui.h"
@@ -189,7 +190,7 @@ int
 Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool& check_sample_rate, ImportMode mode, 
 		       AudioTrack* track, jack_nframes_t& pos, bool prompt)
 {
-	AudioFileSource *source = 0; /* keep g++ quiet */
+	boost::shared_ptr<AudioFileSource> source;
 	SourceList sources;
 	boost::shared_ptr<AudioRegion> region;
 	string idspec;
@@ -269,7 +270,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 		idspec += string_compose(":%1", n);
 		
 		try {
-			source = AudioFileSource::create (idspec.c_str(), (mode == ImportAsTrack ? AudioFileSource::Destructive : AudioFileSource::Flag (0)));
+			source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (idspec, (mode == ImportAsTrack ? AudioFileSource::Destructive : AudioFileSource::Flag (0))));
 			sources.push_back(source);
 		} 
 		
