@@ -36,14 +36,14 @@ class AudioFilter {
 		: session (s){}
 	virtual ~AudioFilter() {}
 
-	virtual int run (ARDOUR::AudioRegion&) = 0;
-	std::vector<ARDOUR::AudioRegion*> results;
+	virtual int run (boost::shared_ptr<ARDOUR::AudioRegion>) = 0;
+	std::vector<boost::shared_ptr<ARDOUR::AudioRegion> > results;
 
   protected:
 	ARDOUR::Session& session;
 
-	int make_new_sources (ARDOUR::AudioRegion&, ARDOUR::AudioRegion::SourceList&);
-	int finish (ARDOUR::AudioRegion&, ARDOUR::AudioRegion::SourceList&);
+	int make_new_sources (boost::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::SourceList&);
+	int finish (boost::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::SourceList&);
 };
 
 } /* namespace */

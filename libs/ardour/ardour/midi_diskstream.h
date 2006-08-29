@@ -85,7 +85,7 @@ class MidiDiskstream : public Diskstream
 
 	void monitor_input (bool);
 
-	MidiSource* write_source() { return (MidiSource*)_write_source; }
+	boost::shared_ptr<SMFSource> write_source () { return _write_source; }
 	
 	void set_destructive (bool yn); // doom!
 
@@ -153,7 +153,7 @@ class MidiDiskstream : public Diskstream
 	//RawMidi*                          _playback_wrap_buffer;
 	//RawMidi*                          _capture_wrap_buffer;
 	MidiPort*                         _source_port;
-	SMFSource*                        _write_source; ///< aka capturing source
+	boost::shared_ptr<SMFSource>      _write_source;
 	RingBufferNPT<CaptureTransition>* _capture_transition_buf;
 	//RingBufferNPT<RawMidi>::rw_vector _playback_vector;
 	//RingBufferNPT<RawMidi>::rw_vector _capture_vector;

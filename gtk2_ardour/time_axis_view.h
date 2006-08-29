@@ -180,8 +180,8 @@ class TimeAxisView : public virtual AxisView
 	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&) {}
 
-	virtual ARDOUR::Region* find_next_region (jack_nframes_t pos, ARDOUR::RegionPoint, int32_t dir) {
-		return 0;
+	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (jack_nframes_t pos, ARDOUR::RegionPoint, int32_t dir) {
+		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 
   	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);

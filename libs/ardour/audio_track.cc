@@ -28,6 +28,7 @@
 #include <ardour/redirect.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiosource.h>
+#include <ardour/region_factory.h>
 #include <ardour/route_group_specialized.h>
 #include <ardour/insert.h>
 #include <ardour/audioplaylist.h>
@@ -719,7 +720,7 @@ AudioTrack::export_stuff (BufferSet& buffers, jack_nframes_t start, jack_nframes
 void
 AudioTrack::bounce (InterThreadInfo& itt)
 {
-	vector<Source*> srcs;
+	vector<boost::shared_ptr<Source> > srcs;
 	_session.write_one_audio_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
 }
 
@@ -727,18 +728,17 @@ AudioTrack::bounce (InterThreadInfo& itt)
 void
 AudioTrack::bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo& itt)
 {
-	vector<Source*> srcs;
+	vector<boost::shared_ptr<Source> > srcs;
 	_session.write_one_audio_track (*this, start, end, false, srcs, itt);
 }
 
 void
 AudioTrack::freeze (InterThreadInfo& itt)
 {
-	vector<Source*> srcs;
+	vector<boost::shared_ptr<Source> > srcs;
 	string new_playlist_name;
 	Playlist* new_playlist;
 	string dir;
-	AudioRegion* region;
 	string region_name;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
@@ -805,13 +805,13 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	/* create a new region from all filesources, keep it private */
 
-	region = new AudioRegion (srcs, 0, srcs[0]->length(), 
-				  region_name, 0, 
-				  (AudioRegion::Flag) (AudioRegion::WholeFile|AudioRegion::DefaultFlags),
-				  false);
+	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0, srcs[0]->length(), 
+								 region_name, 0, 
+								 (Region::Flag) (Region::WholeFile|Region::DefaultFlags),
+								 false));
 
 	new_playlist->set_orig_diskstream_id (diskstream->id());
-	new_playlist->add_region (*region, 0);
+	new_playlist->add_region (region, 0);
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 

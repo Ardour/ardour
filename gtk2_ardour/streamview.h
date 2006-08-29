@@ -83,14 +83,14 @@ public:
 	Gdk::Color get_region_color () const { return region_color; }
 	void       apply_color (Gdk::Color&, ColorTarget t);
 
-	RegionView*  find_view (const ARDOUR::Region&);
+	RegionView*  find_view (boost::shared_ptr<const ARDOUR::Region>);
 	void         foreach_regionview (sigc::slot<void,RegionView*> slot);
 
 	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (jack_nframes_t start, jack_nframes_t end, list<Selectable* >&);
 	void get_inverted_selectables (Selection&, list<Selectable* >& results);
 
-	void add_region_view (ARDOUR::Region*);
+	void add_region_view (boost::shared_ptr<ARDOUR::Region>);
 	void region_layered (RegionView*);
 	
 	sigc::signal<void,RegionView*> RegionViewAdded;
@@ -107,9 +107,9 @@ protected:
 	void         update_rec_box ();
 	virtual void update_rec_regions () = 0;
 	
-	virtual void add_region_view_internal (ARDOUR::Region*, bool wait_for_waves) = 0;
-	virtual void remove_region_view (ARDOUR::Region* );
-	void         remove_rec_region (ARDOUR::Region*);
+	virtual void add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves) = 0;
+	virtual void remove_region_view (boost::shared_ptr<ARDOUR::Region> );
+	void         remove_rec_region (boost::shared_ptr<ARDOUR::Region>);
 
 	void         display_diskstream (boost::shared_ptr<ARDOUR::Diskstream>);
 	virtual void undisplay_diskstream ();
@@ -134,7 +134,7 @@ protected:
 
 	sigc::connection       screen_update_connection;
 	vector<RecBoxInfo>     rec_rects;
-	list<ARDOUR::Region* > rec_regions;
+	list<boost::shared_ptr<ARDOUR::Region> > rec_regions;
 	bool                   rec_updating;
 	bool                   rec_active;
 	bool                   use_rec_regions;
@@ -145,9 +145,9 @@ protected:
 	vector<sigc::connection> playlist_connections;
 	sigc::connection         playlist_change_connection;
 	
-	list<sigc::connection>     rec_data_ready_connections;
-	jack_nframes_t             last_rec_data_frame;
-	map<ARDOUR::Source*, bool> rec_data_ready_map;
+	list<sigc::connection>                       rec_data_ready_connections;
+	jack_nframes_t                               last_rec_data_frame;
+	map<boost::shared_ptr<ARDOUR::Source>, bool> rec_data_ready_map;
 };
 
 #endif /* __ardour_streamview_h__ */

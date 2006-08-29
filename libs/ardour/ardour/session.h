@@ -1,22 +1,22 @@
-/*
-    Copyright (C) 2000 Paul Davis 
+	/*
+		Copyright (C) 2000 Paul Davis 
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+		This program is free software; you can redistribute it and/or modify
+		it under the terms of the GNU General Public License as published by
+		the Free Software Foundation; either version 2 of the License, or
+		(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+		This program is distributed in the hope that it will be useful,
+		but WITHOUT ANY WARRANTY; without even the implied warranty of
+		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+		GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+		You should have received a copy of the GNU General Public License
+		along with this program; if not, write to the Free Software
+		Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
-*/
+		$Id$
+	*/
 
 #ifndef __ardour_session_h__
 #define __ardour_session_h__
@@ -27,6 +27,9 @@
 #include <vector>
 #include <set>
 #include <stack>
+
+#include <boost/weak_ptr.hpp>
+
 #include <stdint.h>
 
 #include <sndfile.h>
@@ -37,11 +40,13 @@
 #include <pbd/undo.h>
 #include <pbd/pool.h>
 #include <pbd/rcu.h>
+#include <pbd/statefuldestructible.h>
 
 #include <midi++/types.h>
 #include <midi++/mmc.h>
 
 #include <pbd/stateful.h> 
+#include <pbd/destructible.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
@@ -108,12 +113,10 @@ struct RouteGroup;
 
 using std::vector;
 using std::string;
-using std::list;
 using std::map;
 using std::set;
 
-class Session : public sigc::trackable, public Stateful
-
+class Session : public sigc::trackable, public PBD::StatefulDestructible
 {
   private:
 	typedef std::pair<boost::shared_ptr<Route>,bool> RouteBooleanState;
@@ -133,7 +136,7 @@ class Session : public sigc::trackable, public Stateful
 		MTC,
 		JACK
 	};
-	
+		
 	enum AutoConnectOption {
 		AutoConnectPhysical = 0x1,
 		AutoConnectMaster = 0x2
@@ -184,6 +187,8 @@ class Session : public sigc::trackable, public Stateful
 			Session::SlaveSource slave;
 			Route*               route;
 	    };
+
+	    boost::shared_ptr<Region>   region;
 
 	    list<AudioRange>     audio_range;
 	    list<MusicRange>     music_range;
@@ -339,11 +344,9 @@ class Session : public sigc::trackable, public Stateful
 	void disable_record (bool rt_context, bool force = false);
 	void step_back_from_record ();
 	
-	sigc::signal<void> going_away;
-
 	/* Proxy signal for region hidden changes */
 
-	sigc::signal<void,Region*> RegionHiddenChange;
+	sigc::signal<void,boost::shared_ptr<Region> > RegionHiddenChange;
 
 	/* Emitted when all i/o connections are complete */
 	
@@ -382,7 +385,7 @@ class Session : public sigc::trackable, public Stateful
 	int wipe ();
 	//int wipe_diskstream (AudioDiskstream *);
 
-	int remove_region_from_region_list (Region&);
+	int remove_region_from_region_list (boost::shared_ptr<Region>);
 
 	jack_nframes_t get_maximum_extent () const;
 	jack_nframes_t current_end_frame() const { return end_location->start(); }
@@ -633,21 +636,21 @@ class Session : public sigc::trackable, public Stateful
 	
 	/* region info  */
 
-	sigc::signal<void,Region *> RegionAdded;
-	sigc::signal<void,Region *> RegionRemoved;
+	sigc::signal<void,boost::shared_ptr<Region> > RegionAdded;
+	sigc::signal<void,boost::shared_ptr<Region> > RegionRemoved;
 
 	int region_name (string& result, string base = string(""), bool newlevel = false) const;
 	string new_region_name (string);
 	string path_from_region_name (string name, string identifier);
 
-	Region* find_whole_file_parent (Region& child);
-	void find_equivalent_playlist_regions (Region&, std::vector<Region*>& result);
+	boost::shared_ptr<Region> find_whole_file_parent (Region&);
+	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 
-	Region*      XMLRegionFactory (const XMLNode&, bool full);
-	AudioRegion* XMLAudioRegionFactory (const XMLNode&, bool full);
-	MidiRegion* XMLMidiRegionFactory (const XMLNode&, bool full);
+	boost::shared_ptr<Region>      XMLRegionFactory (const XMLNode&, bool full);
+	boost::shared_ptr<AudioRegion> XMLAudioRegionFactory (const XMLNode&, bool full);
+	boost::shared_ptr<MidiRegion>  XMLMidiRegionFactory (const XMLNode&, bool full);
 
-	template<class T> void foreach_region (T *obj, void (T::*func)(Region *));
+	template<class T> void foreach_region (T *obj, void (T::*func)(boost::shared_ptr<Region>));
 
 	/* source management */
 
@@ -661,8 +664,7 @@ class Session : public sigc::trackable, public Stateful
 	    string pathname;
 	    
 	    /* result */
-	    std::vector<Region*> new_regions;
-	    
+	    std::vector<boost::shared_ptr<Region> > new_regions;
 	};
 
 	int import_audiofile (import_status&);
@@ -675,9 +677,9 @@ class Session : public sigc::trackable, public Stateful
 	int start_audio_export (ARDOUR::AudioExportSpecification&);
 	int stop_audio_export (ARDOUR::AudioExportSpecification&);
 	
-	void add_source (Source *);
-	void remove_source (Source *);
-	int  cleanup_audio_file_source (AudioFileSource&);
+	void add_source (boost::shared_ptr<Source>);
+	void remove_source (boost::weak_ptr<Source>);
+	int  cleanup_audio_file_source (boost::shared_ptr<AudioFileSource>);
 
 	struct cleanup_report {
 	    vector<string> paths;
@@ -687,8 +689,8 @@ class Session : public sigc::trackable, public Stateful
 	int  cleanup_sources (cleanup_report&);
 	int  cleanup_trash_sources (cleanup_report&);
 
-	int destroy_region (Region*);
-	int destroy_regions (list<Region*>);
+	int destroy_region (boost::shared_ptr<Region>);
+	int destroy_regions (std::list<boost::shared_ptr<Region> >);
 
 	int remove_last_capture ();
 
@@ -706,14 +708,14 @@ class Session : public sigc::trackable, public Stateful
 
 	static sigc::signal<int> AskAboutPendingState;
 	
-	sigc::signal<void,Source *> SourceAdded;
-	sigc::signal<void,Source *> SourceRemoved;
+	sigc::signal<void,boost::shared_ptr<Source> > SourceAdded;
+	sigc::signal<void,boost::shared_ptr<Source> > SourceRemoved;
 
-	AudioFileSource *create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
+	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
-	MidiSource *create_midi_source_for_session (ARDOUR::MidiDiskstream&);
+	boost::shared_ptr<MidiSource> create_midi_source_for_session (ARDOUR::MidiDiskstream&);
 
-	Source *source_by_id (const PBD::ID&);
+	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
 
 	/* playlist management */
 
@@ -750,7 +752,7 @@ class Session : public sigc::trackable, public Stateful
 
 	boost::shared_ptr<Auditioner> the_auditioner() { return auditioner; }
 	void audition_playlist ();
-	void audition_region (Region&);
+	void audition_region (boost::shared_ptr<Region>);
 	void cancel_audition ();
 	bool is_auditioning () const;
 	
@@ -758,7 +760,8 @@ class Session : public sigc::trackable, public Stateful
 
 	/* flattening stuff */
 
-	int write_one_audio_track (AudioTrack&, jack_nframes_t start, jack_nframes_t cnt, bool overwrite, vector<Source*>&, InterThreadInfo& wot);
+	int write_one_audio_track (AudioTrack&, jack_nframes_t start, jack_nframes_t cnt, bool overwrite, vector<boost::shared_ptr<Source> >&,
+				   InterThreadInfo& wot);
 	int freeze (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
@@ -861,12 +864,15 @@ class Session : public sigc::trackable, public Stateful
 	void commit_reversible_command (Command* cmd = 0);
 
 	void add_command (Command *const cmd) {
-		current_trans.add_command (cmd);
+		current_trans->add_command (cmd);
 	}
+
+	std::map<PBD::ID, PBD::StatefulDestructible*> registry;
 
         // these commands are implemented in libs/ardour/session_command.cc
 	Command *memento_command_factory(XMLNode *n);
-        void register_with_memento_command_factory(PBD::ID, Stateful *);
+        void register_with_memento_command_factory(PBD::ID, PBD::StatefulDestructible *);
+
         class GlobalSoloStateCommand : public Command
         {
             GlobalRouteBooleanState before, after;
@@ -936,17 +942,17 @@ class Session : public sigc::trackable, public Stateful
 	/* tempo FX */
 
 	struct TimeStretchRequest {
-	    ARDOUR::AudioRegion* region;
+	    boost::shared_ptr<ARDOUR::AudioRegion> region;
 	    float                fraction; /* session: read ; GUI: write */
 	    float                progress; /* session: write ; GUI: read */
 	    bool                 running;  /* read/write */
 	    bool                 quick_seek; /* GUI: write */
 	    bool                 antialias;  /* GUI: write */
 
-	    TimeStretchRequest () : region (0) {}
+	    TimeStretchRequest () {} 
 	};
 
-	AudioRegion* tempoize_region (TimeStretchRequest&);
+	boost::shared_ptr<AudioRegion> tempoize_region (TimeStretchRequest&);
 
 	string raid_path() const;
 	void   set_raid_path(string);
@@ -1558,27 +1564,27 @@ class Session : public sigc::trackable, public Stateful
 	/* REGION MANAGEMENT */
 
 	mutable Glib::Mutex region_lock;
-	typedef map<PBD::ID,Region *> RegionList;
+	typedef map<PBD::ID,boost::shared_ptr<Region> > RegionList;
 	RegionList regions;
 	
-	void region_renamed (Region *);
-	void region_changed (Change, Region *);
-	void add_region (Region *);
-	void remove_region (Region *);
+	void region_renamed (boost::shared_ptr<Region>);
+	void region_changed (Change, boost::shared_ptr<Region>);
+	void add_region (boost::shared_ptr<Region>);
+	void remove_region (boost::shared_ptr<Region>);
 
 	int load_regions (const XMLNode& node);
 
 	/* SOURCES */
 	
 	mutable Glib::Mutex source_lock;
-	typedef std::map<PBD::ID,Source *> SourceList;
+	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
 
-	SourceList sources;
+	SourceMap sources;
 
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();
 
-	Source *XMLSourceFactory (const XMLNode&);
+	boost::shared_ptr<Source> XMLSourceFactory (const XMLNode&);
 
 	/* PLAYLISTS */
 	
@@ -1609,9 +1615,9 @@ class Session : public sigc::trackable, public Stateful
 	NamedSelection *named_selection_factory (string name);
 	NamedSelection *XMLNamedSelectionFactory (const XMLNode&);
 
-        /* CURVES and AUTOMATION LISTS */
-        std::map<PBD::ID, Curve*> curves;
-        std::map<PBD::ID, AutomationList*> automation_lists;
+	/* CURVES and AUTOMATION LISTS */
+	std::map<PBD::ID, Curve*> curves;
+	std::map<PBD::ID, AutomationList*> automation_lists;
 
 	/* DEFAULT FADE CURVES */
 
@@ -1621,9 +1627,9 @@ class Session : public sigc::trackable, public Stateful
 	/* AUDITIONING */
 
 	boost::shared_ptr<Auditioner> auditioner;
-	void set_audition (AudioRegion*);
+	void set_audition (boost::shared_ptr<Region>);
 	void non_realtime_set_audition ();
-	AudioRegion *pending_audition_region;
+	boost::shared_ptr<Region> pending_audition_region;
 
 	/* EXPORT */
 
@@ -1692,7 +1698,7 @@ class Session : public sigc::trackable, public Stateful
 	void reverse_diskstream_buffers ();
 
 	UndoHistory history;
-	UndoTransaction current_trans;
+	UndoTransaction* current_trans;
 
 	GlobalRouteBooleanState get_global_route_boolean (bool (Route::*method)(void) const);
 	GlobalRouteMeterState get_global_route_metering ();

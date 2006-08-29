@@ -108,10 +108,10 @@ class AudioDiskstream : public Diskstream
 		return 0;
 	}
 
-	AudioFileSource *write_source (uint32_t n=0) {
+	boost::shared_ptr<AudioFileSource> write_source (uint32_t n=0) {
 		if (n < channels.size())
 			return channels[n].write_source;
-		return 0;
+		return boost::shared_ptr<AudioFileSource>();
 	}
 
 	int add_channel ();
@@ -140,8 +140,6 @@ class AudioDiskstream : public Diskstream
 			*last-- = tmp;
 		}
 	}
-
-	std::list<Region*>& last_capture_regions () { return _last_capture_regions; }
 
 	XMLNode* deprecated_io_node;
 
@@ -181,9 +179,9 @@ class AudioDiskstream : public Diskstream
 		Sample     *speed_buffer;
 
 		float       peak_power;
-
-		AudioFileSource   *fades_source;
-		AudioFileSource   *write_source;
+	    
+		boost::shared_ptr<AudioFileSource> fades_source;
+		boost::shared_ptr<AudioFileSource> write_source;
 
 		Port         *source;
 		Sample       *current_capture_buffer;
@@ -251,7 +249,7 @@ class AudioDiskstream : public Diskstream
 	int _do_refill (Sample *mixdown_buffer, float *gain_buffer);
 	
 	
-	std::vector<AudioFileSource*> capturing_sources;
+	std::vector<boost::shared_ptr<AudioFileSource> > capturing_sources;
 	
 	typedef vector<ChannelInfo> ChannelList;
 	ChannelList channels;

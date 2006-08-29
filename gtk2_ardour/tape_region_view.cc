@@ -50,12 +50,12 @@ const TimeAxisViewItem::Visibility TapeAudioRegionView::default_tape_visibility
 		TimeAxisViewItem::FullWidthNameHighlight);
 
 TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, 
-					  AudioRegion& r, 
+					  boost::shared_ptr<AudioRegion> r, 
 					  double spu, 
 					  Gdk::Color& basic_color)
 
 	: AudioRegionView (parent, tv, r, spu, basic_color, 
-			   TimeAxisViewItem::Visibility ((r.position() != 0) ? default_tape_visibility : 
+			   TimeAxisViewItem::Visibility ((r->position() != 0) ? default_tape_visibility : 
 							 TimeAxisViewItem::Visibility (default_tape_visibility|TimeAxisViewItem::HideFrameLeft)))
 {
 }
@@ -67,8 +67,8 @@ TapeAudioRegionView::init (Gdk::Color& basic_color, bool wfw)
 
 	/* every time the wave data changes and peaks are ready, redraw */
 	
-	for (uint32_t n = 0; n < audio_region().n_channels(); ++n) {
-		audio_region().audio_source(n).PeaksReady.connect (bind (mem_fun(*this, &TapeAudioRegionView::update), n));
+	for (uint32_t n = 0; n < audio_region()->n_channels(); ++n) {
+		audio_region()->audio_source(n)->PeaksReady.connect (bind (mem_fun(*this, &TapeAudioRegionView::update), n));
 	}
 	
 }
@@ -90,7 +90,7 @@ TapeAudioRegionView::update (uint32_t n)
 
 	/* this triggers a cache invalidation and redraw in the waveview */
 
-	waves[n]->property_data_src() = &_region;
+	waves[n]->property_data_src() = _region.get();
 }
 
 void

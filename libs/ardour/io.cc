@@ -129,13 +129,13 @@ IO::IO (Session& s, string name,
 
 	_gain_automation_state = Off;
 	_gain_automation_style = Absolute;
-    
-    {
-        // IO::Meter is emitted from another thread so the
-        // Meter signal must be protected.
-        Glib::Mutex::Lock guard (m_meter_signal_lock);
-        m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
-    }
+
+	{
+		// IO::Meter is emitted from another thread so the
+		// Meter signal must be protected.
+		Glib::Mutex::Lock guard (m_meter_signal_lock);
+		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
+	}
 	
 	// Connect to our own MoreChannels signal to connect output buffers
 	IO::MoreChannels.connect (mem_fun (*this, &IO::attach_buffers));
@@ -143,7 +143,8 @@ IO::IO (Session& s, string name,
 
 IO::~IO ()
 {
-    Glib::Mutex::Lock guard (m_meter_signal_lock);
+	Glib::Mutex::Lock guard (m_meter_signal_lock);
+	
 	Glib::Mutex::Lock lm (io_lock);
 
 	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
@@ -154,7 +155,7 @@ IO::~IO ()
 		_session.engine().unregister_port (*i);
 	}
 
-    m_meter_connection.disconnect();
+	m_meter_connection.disconnect();
 
 	delete _meter;
 	delete _panner;

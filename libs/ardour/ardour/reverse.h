@@ -30,7 +30,7 @@ class Reverse : public AudioFilter {
 	Reverse (ARDOUR::Session&);
 	~Reverse ();
 
-	int run (ARDOUR::AudioRegion&);
+	int run (boost::shared_ptr<ARDOUR::AudioRegion>);
 };
 
 } /* namespace */

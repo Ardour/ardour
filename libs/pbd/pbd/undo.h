@@ -29,9 +29,6 @@
 #include <sys/time.h>
 #include <pbd/command.h>
 
-using std::string;
-using std::list;
-
 typedef sigc::slot<void> UndoAction;
 
 class UndoTransaction : public Command
@@ -40,10 +37,11 @@ class UndoTransaction : public Command
 	UndoTransaction ();
 	UndoTransaction (const UndoTransaction&);
 	UndoTransaction& operator= (const UndoTransaction&);
+	~UndoTransaction ();
 
 	void clear ();
 
-	void add_command (Command *const);
+	void add_command (Command* const);
 
         void operator() ();
 	void undo();
@@ -51,10 +49,10 @@ class UndoTransaction : public Command
 
 	XMLNode &get_state();
 	
-	void set_name (const string& str) {
+	void set_name (const std::string& str) {
 		_name = str;
 	}
-	const string& name() const { return _name; }
+	const std::string& name() const { return _name; }
 
 	void set_timestamp (struct timeval &t) {
 		_timestamp = t;
@@ -65,26 +63,28 @@ class UndoTransaction : public Command
 	}
 
   private:
-	list<Command*>	 actions;
-	struct timeval   _timestamp;
-	string           _name;
+	std::list<Command*>    actions;
+	struct timeval        _timestamp;
+	std::string           _name;
+	bool                   clearing;
+	void remove_command (Command* const);
 };
 
 class UndoHistory
 {
   public:
-	UndoHistory() {}
+	UndoHistory();
 	~UndoHistory() {}
 	
-	void add (UndoTransaction ut);
+	void add (UndoTransaction* ut);
 	void undo (unsigned int n);
 	void redo (unsigned int n);
 	
 	unsigned long undo_depth() const { return UndoList.size(); }
 	unsigned long redo_depth() const { return RedoList.size(); }
 	
-	string next_undo() const { return (UndoList.empty() ? string("") : UndoList.back().name()); }
-	string next_redo() const { return (RedoList.empty() ? string("") : RedoList.back().name()); }
+	std::string next_undo() const { return (UndoList.empty() ? std::string("") : UndoList.back()->name()); }
+	std::string next_redo() const { return (RedoList.empty() ? std::string("") : RedoList.back()->name()); }
 
 	void clear ();
 	void clear_undo ();
@@ -92,9 +92,13 @@ class UndoHistory
 
         XMLNode &get_state();
         void save_state();
+
   private:
-	list<UndoTransaction> UndoList;
-	list<UndoTransaction> RedoList;
+	bool clearing;
+	std::list<UndoTransaction*> UndoList;
+	std::list<UndoTransaction*> RedoList;
+
+	void remove (UndoTransaction*);
 };
 
 

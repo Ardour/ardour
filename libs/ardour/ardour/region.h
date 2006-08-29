@@ -22,8 +22,10 @@
 #define __ardour_region_h__
 
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 #include <pbd/undo.h>
+#include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/state_manager.h>
@@ -56,10 +58,10 @@ struct RegionState : public StateManager::State
 	mutable RegionEditState _first_edit;
 };
 
-class Region : public Stateful, public StateManager
+class Region : public PBD::StatefulDestructible, public StateManager
 {
   public:
-	typedef std::vector<Source *> SourceList;
+	typedef std::vector<boost::shared_ptr<Source> > SourceList;
 
 	enum Flag {
 		Muted = 0x1,
@@ -94,15 +96,6 @@ class Region : public Stateful, public StateManager
 	static Change LayerChanged;
 	static Change HiddenChanged;
 
-	Region (Source& src, jack_nframes_t start, jack_nframes_t length, 
-		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
-	Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, 
-		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
-	Region (const Region&, jack_nframes_t start, jack_nframes_t length,
-		const string& name, layer_t = 0, Flag flags = DefaultFlags);
-	Region (const Region&);
-	Region (SourceList& srcs, const XMLNode&);
-	Region (Source& src, const XMLNode&);
 	virtual ~Region();
 
 	const PBD::ID& id() const { return _id; }
@@ -151,11 +144,11 @@ class Region : public Stateful, public StateManager
 		return ARDOUR::coverage (_position, _position + _length - 1, start, end);
 	}
 	
-	bool equivalent (const Region&) const;
-	bool size_equivalent (const Region&) const;
-	bool overlap_equivalent (const Region&) const;
-	bool region_list_equivalent (const Region&) const;
-	bool source_equivalent (const Region&) const;
+	bool equivalent (boost::shared_ptr<const Region>) const;
+	bool size_equivalent (boost::shared_ptr<const Region>) const;
+	bool overlap_equivalent (boost::shared_ptr<const Region>) const;
+	bool region_list_equivalent (boost::shared_ptr<const Region>) const;
+	bool source_equivalent (boost::shared_ptr<const Region>) const;
 	
 	/* EDITING OPERATIONS */
 
@@ -194,12 +187,10 @@ class Region : public Stateful, public StateManager
 
 	void set_playlist (ARDOUR::Playlist*);
 
-	void lock_sources ();
-	void unlock_sources ();
-	void source_deleted (Source*);
+	void source_deleted (boost::shared_ptr<Source>);
 
-	Source&  source (uint32_t n=0) const { return *_sources[ (n < _sources.size()) ? n : 0 ]; }
-	uint32_t n_channels()          const { return _sources.size(); }
+	boost::shared_ptr<Source> source (uint32_t n=0) const { return _sources[ (n < _sources.size()) ? n : 0 ]; }
+	uint32_t                  n_channels()          const { return _sources.size(); }
 
 	std::vector<string> master_source_names();
 
@@ -210,22 +201,22 @@ class Region : public Stateful, public StateManager
 	virtual XMLNode& state (bool);
 	virtual int      set_state (const XMLNode&);
 
-	sigc::signal<void,Region*> GoingAway;
-
-	/* This is emitted only when a new id is assigned. Therefore,
-	   in a pure Region copy, it will not be emitted.
-
-	   It must be emitted by derived classes, not Region
-	   itself, to permit dynamic_cast<> to be used to 
-	   infer the type of Region.
-	*/
-
-	static sigc::signal<void,Region*> CheckNewRegion;
-
-	Region* get_parent();
+	boost::shared_ptr<Region> get_parent();
 	
 	uint64_t last_layer_op() const { return _last_layer_op; }
 	void set_last_layer_op (uint64_t when);
+
+  protected:
+	friend class RegionFactory;
+
+	Region (boost::shared_ptr<Source> src, jack_nframes_t start, jack_nframes_t length, 
+		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
+	Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, 
+		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
+	Region (boost::shared_ptr<const Region>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
+	Region (boost::shared_ptr<const Region>);
+	Region (boost::shared_ptr<Source> src, const XMLNode&);
+	Region (SourceList& srcs, const XMLNode&);
 
   protected:
 	XMLNode& get_short_state (); /* used only by Session */

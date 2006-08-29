@@ -31,6 +31,8 @@
 #include <ardour/audio_track.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audiofilesource.h>
+#include <ardour/region_factory.h>
+#include <ardour/source_factory.h>
 #include <pbd/memento_command.h>
 
 #include "ardour_ui.h"
@@ -176,9 +178,8 @@ Editor::import_sndfile (Glib::ustring path, ImportMode mode, AudioTrack* track, 
 	/* import thread finished - see if we should build a new track */
 	
 	if (!import_status.new_regions.empty()) {
-		AudioRegion* const aregion = dynamic_cast<AudioRegion*>(import_status.new_regions.front());
-		assert(aregion);
-		finish_bringing_in_audio (*aregion, aregion->n_channels(), aregion->n_channels(), track, pos, mode);
+		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(import_status.new_regions.front());
+		finish_bringing_in_audio (region, region->n_channels(), region->n_channels(), track, pos, mode);
 	}
 
 	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
@@ -189,9 +190,9 @@ int
 Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool& check_sample_rate, ImportMode mode, 
 		       AudioTrack* track, jack_nframes_t& pos, bool prompt)
 {
-	AudioFileSource *source = 0; /* keep g++ quiet */
-	AudioRegion::SourceList sources;
-	AudioRegion* region;
+	boost::shared_ptr<AudioFileSource> source;
+	SourceList sources;
+	boost::shared_ptr<AudioRegion> region;
 	string idspec;
 	string linked_path;
 	SoundFileInfo finfo;
@@ -269,7 +270,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 		idspec += string_compose(":%1", n);
 		
 		try {
-			source = AudioFileSource::create (idspec.c_str(), (mode == ImportAsTrack ? AudioFileSource::Destructive : AudioFileSource::Flag (0)));
+			source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (DataType::AUDIO, idspec, (mode == ImportAsTrack ? AudioFileSource::Destructive : AudioFileSource::Flag (0))));
 			sources.push_back(source);
 		} 
 		
@@ -288,18 +289,18 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 	region_name = PBD::basename_nosuffix (path);
 	region_name += "-0";
 	
-	region = new AudioRegion (sources, 0, sources[0]->length(), region_name, 0,
-				  Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External));
+	region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, 0, sources[0]->length(), region_name, 0,
+										  Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
 	
 	input_chan = finfo.channels;
-
+	
 	if (session->get_output_auto_connect() & Session::AutoConnectMaster) {
 		output_chan = (session->master_out() ? session->master_out()->n_inputs().get(DataType::AUDIO) : input_chan);
 	} else {
 		output_chan = input_chan;
 	}
 	
-	finish_bringing_in_audio (*region, input_chan, output_chan, track, pos, mode);
+	finish_bringing_in_audio (region, input_chan, output_chan, track, pos, mode);
 	
   out:
 	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
@@ -307,10 +308,8 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 }
 
 int
-Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32_t out_chans, AudioTrack* track, jack_nframes_t& pos, ImportMode mode)
+Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_t in_chans, uint32_t out_chans, AudioTrack* track, jack_nframes_t& pos, ImportMode mode)
 {
-	AudioRegion* copy;
-
 	switch (mode) {
 	case ImportAsRegion:
 		/* relax, its been done */
@@ -320,14 +319,14 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 		if (track) {
 			Playlist* playlist  = track->diskstream()->playlist();
 			
-			AudioRegion* copy = new AudioRegion (region);
+			boost::shared_ptr<AudioRegion> copy (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region)));
 			begin_reversible_command (_("insert sndfile"));
                         XMLNode &before = playlist->get_state();
-			playlist->add_region (*copy, pos);
+			playlist->add_region (copy, pos);
 			session->add_command (new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 			commit_reversible_command ();
 
-			pos += region.length();
+			pos += region->length();
 		}
 		break;
 		
@@ -335,8 +334,8 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 	{ 
 		list<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Normal, 1));
 		if (!at.empty()) {
-			copy = new AudioRegion (region);
-			at.front()->diskstream()->playlist()->add_region (*copy, pos);
+			boost::shared_ptr<AudioRegion> copy (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region)));
+			at.front()->diskstream()->playlist()->add_region (copy, pos);
 		}
 		break;
 	}
@@ -345,8 +344,8 @@ Editor::finish_bringing_in_audio (AudioRegion& region, uint32_t in_chans, uint32
 	{
 		list<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Destructive));
 		if (!at.empty()) {
-			copy = new AudioRegion (region);
-			at.front()->diskstream()->playlist()->add_region (*copy, pos);
+			boost::shared_ptr<AudioRegion> copy (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region)));
+			at.front()->diskstream()->playlist()->add_region (copy, pos);
 		}
 		break;
 	}

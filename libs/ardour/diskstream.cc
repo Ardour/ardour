@@ -32,6 +32,8 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
+#include <sigc++/bind.h>
+
 #include <pbd/error.h>
 #include <pbd/basename.h>
 #include <glibmm/thread.h>
@@ -63,7 +65,7 @@ using namespace PBD;
  */
 jack_nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
 
-sigc::signal<void,list<Source*>*> Diskstream::DeleteSources;
+sigc::signal<void,list<boost::shared_ptr<Source> >*> Diskstream::DeleteSources;
 sigc::signal<void>                Diskstream::DiskOverrun;
 sigc::signal<void>                Diskstream::DiskUnderrun;
 
@@ -330,7 +332,7 @@ Diskstream::use_playlist (Playlist* playlist)
 		
 		plstate_connection = _playlist->StateChanged.connect (mem_fun (*this, &Diskstream::playlist_changed));
 		plmod_connection = _playlist->Modified.connect (mem_fun (*this, &Diskstream::playlist_modified));
-		plgone_connection = _playlist->GoingAway.connect (mem_fun (*this, &Diskstream::playlist_deleted));
+		plgone_connection = _playlist->GoingAway.connect (bind (mem_fun (*this, &Diskstream::playlist_deleted), _playlist));
 	}
 
 	if (!overwrite_queued) {

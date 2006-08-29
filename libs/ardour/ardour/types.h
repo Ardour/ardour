@@ -26,6 +26,8 @@
 #endif
 
 #include <istream>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
 #include <inttypes.h>
 #include <jack/types.h>
@@ -43,6 +45,7 @@ typedef int intptr_t;
 namespace ARDOUR {
 
 	class Source;
+	class AudioSource;
 
 	typedef jack_default_audio_sample_t Sample;
 	typedef float                       pan_t;
@@ -254,6 +257,7 @@ namespace ARDOUR {
 		VST
 	};
 	
+	typedef std::vector<boost::shared_ptr<Source> > SourceList;
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);

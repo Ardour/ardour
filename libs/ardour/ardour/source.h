@@ -24,15 +24,16 @@
 #include <string>
 
 #include <sigc++/signal.h>
+#include <boost/enable_shared_from_this.hpp>
 
-#include <pbd/stateful.h> 
+#include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/data_type.h>
 
 namespace ARDOUR {
 
-class Source : public Stateful, public sigc::trackable
+class Source : public PBD::StatefulDestructible, public sigc::trackable, public boost::enable_shared_from_this<Source>
 {
   public:
 	Source (std::string name, DataType type);
@@ -42,13 +43,9 @@ class Source : public Stateful, public sigc::trackable
 	std::string name() const { return _name; }
 	int set_name (std::string str, bool destructive);
 
-	const PBD::ID&  id() const   { return _id; }
+	DataType type() { return _type; }
 
-	uint32_t use_cnt() const { return _use_cnt; }
-	void use ();
-	void release ();
-	
-	virtual void mark_for_remove() = 0;
+	const PBD::ID&  id() const   { return _id; }
 
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
@@ -58,18 +55,19 @@ class Source : public Stateful, public sigc::trackable
 
 	virtual jack_nframes_t natural_position() const { return 0; }
 
+	virtual void mark_for_remove() = 0;
+	virtual void mark_streaming_write_completed () = 0;
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
-
+	
 	static sigc::signal<void,Source*> SourceCreated;
-	sigc::signal<void,Source *> GoingAway;
 
   protected:
 	void update_length (jack_nframes_t pos, jack_nframes_t cnt);
 
 	string            _name;
 	DataType          _type;
-	uint32_t          _use_cnt;
 	time_t            _timestamp;
 	jack_nframes_t    _length;
 

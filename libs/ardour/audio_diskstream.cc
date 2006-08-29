@@ -44,10 +44,12 @@
 #include <ardour/audiofilesource.h>
 #include <ardour/destructive_filesource.h>
 #include <ardour/send.h>
+#include <ardour/region_factory.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/audioregion.h>
 #include <ardour/audio_port.h>
+#include <ardour/source_factory.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -100,7 +102,6 @@ AudioDiskstream::init_channel (ChannelInfo &chan)
 	chan.capture_wrap_buffer = 0;
 	chan.speed_buffer = 0;
 	chan.peak_power = 0.0f;
-	chan.write_source = 0;
 	chan.source = 0;
 	chan.current_capture_buffer = 0;
 	chan.current_playback_buffer = 0;
@@ -143,8 +144,7 @@ void
 AudioDiskstream::destroy_channel (ChannelInfo &chan)
 {
 	if (chan.write_source) {
-		chan.write_source->release ();
-		chan.write_source = 0;
+		chan.write_source.reset ();
 	}
 		
 	if (chan.speed_buffer) {
@@ -189,8 +189,8 @@ AudioDiskstream::allocate_working_buffers()
 void
 AudioDiskstream::free_working_buffers()
 {
-	delete _mixdown_buffer;
-	delete _gain_buffer;
+	delete [] _mixdown_buffer;
+	delete [] _gain_buffer;
 	_working_buffers_size = 0;
 	_mixdown_buffer       = 0;
 	_gain_buffer          = 0;
@@ -369,7 +369,7 @@ AudioDiskstream::use_copy_playlist ()
 void
 AudioDiskstream::setup_destructive_playlist ()
 {
-	AudioRegion::SourceList srcs;
+	SourceList srcs;
 
 	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 		srcs.push_back ((*chan).write_source);
@@ -379,8 +379,8 @@ AudioDiskstream::setup_destructive_playlist ()
 
 	cerr << "setup DS using " << srcs.front()->natural_position () << endl;
 
-	AudioRegion* region = new AudioRegion (srcs, 0, max_frames, _name);
-	_playlist->add_region (*region, srcs.front()->natural_position());		
+	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0, max_frames, _name));
+	_playlist->add_region (region, srcs.front()->natural_position());		
 }
 
 void
@@ -395,7 +395,7 @@ AudioDiskstream::use_destructive_playlist ()
 		return;
 	}
 
-	AudioRegion* region = dynamic_cast<AudioRegion*> (rl->front());
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (rl->front());
 
 	if (region == 0) {
 		throw failed_constructor();
@@ -407,7 +407,7 @@ AudioDiskstream::use_destructive_playlist ()
 	ChannelList::iterator chan;
 
 	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
-		(*chan).write_source = dynamic_cast<AudioFileSource*>(&region->source (n));
+		(*chan).write_source = boost::dynamic_pointer_cast<AudioFileSource>(region->source (n));
 		assert((*chan).write_source);
 		(*chan).write_source->set_allow_remove_if_empty (false);
 	}
@@ -1458,10 +1458,10 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 	uint32_t buffer_position;
 	bool more_work = true;
 	int err = 0;
-	AudioRegion* region = 0;
+	boost::shared_ptr<AudioRegion> region;
 	jack_nframes_t total_capture;
-	AudioRegion::SourceList srcs;
-	AudioRegion::SourceList::iterator src;
+	SourceList srcs;
+	SourceList::iterator src;
 	ChannelList::iterator chan;
 	vector<CaptureInfo*>::iterator ci;
 	uint32_t n = 0; 
@@ -1497,18 +1497,17 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		
 		ChannelList::iterator chan;
 		
-		list<Source*>* deletion_list = new list<Source*>;
+		list<boost::shared_ptr<Source> >* deletion_list = new list<boost::shared_ptr<Source> >;
 
 		for ( chan = channels.begin(); chan != channels.end(); ++chan) {
 
 			if ((*chan).write_source) {
 				
 				(*chan).write_source->mark_for_remove ();
-				(*chan).write_source->release ();
 				
 				deletion_list->push_back ((*chan).write_source);
 
-				(*chan).write_source = 0;
+				(*chan).write_source.reset ();
 			}
 			
 			/* new source set up in "out" below */
@@ -1531,19 +1530,11 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
 
-		AudioFileSource* s = (*chan).write_source;
+		boost::shared_ptr<AudioFileSource> s = (*chan).write_source;
 		
 		if (s) {
-
-			AudioFileSource* fsrc;
-
 			srcs.push_back (s);
-
-			if ((fsrc = dynamic_cast<AudioFileSource *>(s)) != 0) {
-				cerr << "updating source after capture\n";
-				fsrc->update_header (capture_info.front()->start, when, twhen);
-			}
-
+			s->update_header (capture_info.front()->start, when, twhen);
 			s->set_captured_for (_name);
 			
 		}
@@ -1570,10 +1561,11 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		*/
 		
 		try {
-			region = new AudioRegion (srcs, channels[0].write_source->last_capture_start_frame(), total_capture, 
-						  region_name_from_path (channels[0].write_source->name()), 
-						  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile));
-			
+			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, channels[0].write_source->last_capture_start_frame(), total_capture, 
+									     region_name_from_path (channels[0].write_source->name()), 
+									     0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile)));
+
+			region = boost::dynamic_pointer_cast<AudioRegion> (rx);
 			region->special_set_position (capture_info.front()->start);
 		}
 		
@@ -1595,10 +1587,11 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			string region_name;
 			_session.region_name (region_name, channels[0].write_source->name(), false);
 			
-			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
+			cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
 			
 			try {
-				region = new AudioRegion (srcs, buffer_position, (*ci)->frames, region_name);
+				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, buffer_position, (*ci)->frames, region_name));
+				region = boost::dynamic_pointer_cast<AudioRegion> (rx);
 			}
 			
 			catch (failed_constructor& err) {
@@ -1611,7 +1604,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
 			
 			i_am_the_modifier++;
-			_playlist->add_region (*region, (*ci)->start);
+			_playlist->add_region (region, (*ci)->start);
 			i_am_the_modifier--;
 			
 			buffer_position += (*ci)->frames;
@@ -1785,7 +1778,7 @@ AudioDiskstream::get_state ()
 		XMLNode* cs_child = new XMLNode (X_("CapturingSources"));
 		XMLNode* cs_grandchild;
 
-		for (vector<AudioFileSource*>::iterator i = capturing_sources.begin(); i != capturing_sources.end(); ++i) {
+		for (vector<boost::shared_ptr<AudioFileSource> >::iterator i = capturing_sources.begin(); i != capturing_sources.end(); ++i) {
 			cs_grandchild = new XMLNode (X_("file"));
 			cs_grandchild->add_property (X_("path"), (*i)->path());
 			cs_child->add_child_nocopy (*cs_grandchild);
@@ -1954,11 +1947,9 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 
 		if (AudioFileSource::is_empty (chan.write_source->path())) {
 			chan.write_source->mark_for_remove ();
-			chan.write_source->release();
-			delete chan.write_source;
+			chan.write_source.reset ();
 		} else {
-			chan.write_source->release();
-			chan.write_source = 0;
+			chan.write_source.reset ();
 		}
 	}
 
@@ -1970,11 +1961,9 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 
 	catch (failed_constructor &err) {
 		error << string_compose (_("%1:%2 new capture file not initialized correctly"), _name, n) << endmsg;
-		chan.write_source = 0;
+		chan.write_source.reset ();
 		return -1;
 	}
-
-	chan.write_source->use ();
 
 	/* do not remove destructive files even if they are empty */
 
@@ -2172,9 +2161,9 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	const XMLProperty* prop;
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	AudioFileSource* fs;
-	AudioFileSource* first_fs = 0;
-	AudioRegion::SourceList pending_sources;
+	boost::shared_ptr<AudioFileSource> fs;
+	boost::shared_ptr<AudioFileSource> first_fs;
+	SourceList pending_sources;
 	jack_nframes_t position;
 
 	if ((prop = node.property (X_("at"))) == 0) {
@@ -2193,10 +2182,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 			}
 
 			try {
-				fs = new SndFileSource (prop->value(), 
-							Config->get_native_file_data_format(),
-							Config->get_native_file_header_format(),
-							_session.frame_rate());
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, prop->value(), false, _session.frame_rate()));
 			}
 
 			catch (failed_constructor& err) {
@@ -2227,13 +2213,12 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		return -1;
 	}
 
-	AudioRegion* region;
+	boost::shared_ptr<AudioRegion> region;
 	
 	try {
-		region = new AudioRegion (pending_sources, 0, first_fs->length(),
-					  region_name_from_path (first_fs->name()), 
-					  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile));
-		
+		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(),
+											  region_name_from_path (first_fs->name()), 
+											  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile)));
 		region->special_set_position (0);
 	}
 
@@ -2246,7 +2231,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	}
 
 	try {
-		region = new AudioRegion (pending_sources, 0, first_fs->length(), region_name_from_path (first_fs->name()));
+		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(), region_name_from_path (first_fs->name())));
 	}
 
 	catch (failed_constructor& err) {
@@ -2257,7 +2242,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		return -1;
 	}
 
-	_playlist->add_region (*region, position);
+	_playlist->add_region (region, position);
 
 	return 0;
 }

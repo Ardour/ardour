@@ -65,18 +65,11 @@ class AudioRegion : public Region
 	static Change ScaleAmplitudeChanged;
 	static Change EnvelopeChanged;
 
-	AudioRegion (AudioSource&, jack_nframes_t start, jack_nframes_t length, bool announce = true);
-	AudioRegion (AudioSource&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	AudioRegion (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	AudioRegion (const AudioRegion&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	AudioRegion (const AudioRegion&);
-	AudioRegion (AudioSource&, const XMLNode&);
-	AudioRegion (SourceList &, const XMLNode&);
 	~AudioRegion();
 
 	bool speed_mismatch (float) const;
 
-	AudioSource& audio_source (uint32_t n=0) const;
+	boost::shared_ptr<AudioSource> audio_source (uint32_t n=0) const;
 
 	void   set_scale_amplitude (gain_t);
 	gain_t scale_amplitude() const { return _scale_amplitude; }
@@ -149,7 +142,15 @@ class AudioRegion : public Region
 	void resume_fade_out ();
 
   private:
-	friend class Playlist;
+	friend class RegionFactory;
+
+	AudioRegion (boost::shared_ptr<AudioSource>, jack_nframes_t start, jack_nframes_t length);
+	AudioRegion (boost::shared_ptr<AudioSource>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (boost::shared_ptr<const AudioRegion>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (boost::shared_ptr<const AudioRegion>);
+	AudioRegion (boost::shared_ptr<AudioSource>, const XMLNode&);
+	AudioRegion (SourceList &, const XMLNode&);
 
   private:
 	void set_default_fades ();
@@ -174,7 +175,6 @@ class AudioRegion : public Region
 
 	void envelope_changed (Change);
 
-	
 	mutable Curve     _fade_in;
 	FadeShape         _fade_in_shape;
 	mutable Curve     _fade_out;

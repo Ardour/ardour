@@ -51,7 +51,6 @@ Source::Source (string name, DataType type)
 	assert(_name.find("/") == string::npos);
 
 	_name = name;
-	_use_cnt = 0;
 	_timestamp = 0;
 	_length = 0;
 }
@@ -59,7 +58,6 @@ Source::Source (string name, DataType type)
 Source::Source (const XMLNode& node) 
 	: _type(DataType::AUDIO)
 {
-	_use_cnt = 0;
 	_timestamp = 0;
 	_length = 0;
 
@@ -71,6 +69,7 @@ Source::Source (const XMLNode& node)
 
 Source::~Source ()
 {
+	notify_callbacks ();
 }
 
 XMLNode&
@@ -119,18 +118,6 @@ Source::set_state (const XMLNode& node)
 	assert(_name.find("/") == string::npos);
 
 	return 0;
-}
-
-void
-Source::use ()
-{
-	_use_cnt++;
-}
-
-void
-Source::release ()
-{
-	if (_use_cnt) --_use_cnt;
 }
 
 void

@@ -38,6 +38,7 @@
 #include <ardour/sndfilesource.h>
 #include <ardour/destructive_filesource.h>
 #include <ardour/session.h>
+#include <ardour/source_factory.h>
 
 // if these headers come before sigc++ is included
 // the parser throws ObjC++ errors. (nil is a keyword)
@@ -108,8 +109,7 @@ AudioFileSource::~AudioFileSource ()
 bool
 AudioFileSource::removable () const
 {
-	return (_flags & Removable) && ((_flags & RemoveAtDestroy) || 
-				      ((_flags & RemovableIfEmpty) && is_empty (_path)));
+	return (_flags & Removable) && ((_flags & RemoveAtDestroy) || ((_flags & RemovableIfEmpty) && is_empty (_path)));
 }
 
 int
@@ -163,80 +163,6 @@ AudioFileSource::old_peak_path (string audio_path)
 
 	return res;
 }
-
-#ifdef HAVE_COREAUDIO
-
-AudioFileSource*
-AudioFileSource::create (const XMLNode& node)
-{
-	AudioFileSource* es = 0;
-
-	if (node.property (X_("destructive")) != 0) {
-		
-		es = new DestructiveFileSource (node);
-	
-	} else {
-		
-		try {
-			es = new CoreAudioSource (node);
-		} 
-		
-		
-		catch (failed_constructor& err) {
-			es = new SndFileSource (node);
-		}
-	}
-	
-	return es;
-}
-
-#else
-
-AudioFileSource*
-AudioFileSource::create (const XMLNode& node)
-{
-	if (node.property (X_("destructive")) != 0) {
-		
-		return new DestructiveFileSource (node);
-		
-	} else {
-		
-		return new SndFileSource (node);
-	}
-}
-
-#endif // HAVE_COREAUDIO
-
-#ifdef HAVE_COREAUDIO
-AudioFileSource*
-AudioFileSource::create (const string& idstr, Flag flags)
-{
-	AudioFileSource* es = 0;
-
-	if (flags & Destructive) {
-		return new DestructiveFileSource (idstr, flags);
-	}
-
-	try {
-		es = new CoreAudioSource (idstr, flags);
-	}
-
-	catch (failed_constructor& err) {
-		es = new SndFileSource (idstr, flags);
-	}
-
-	return es;
-}
-
-#else
-
-AudioFileSource*
-AudioFileSource::create (const string& idstr, Flag flags)
-{
-	return new SndFileSource (idstr, flags);
-}
-
-#endif // HAVE_COREAUDIO
 
 bool
 AudioFileSource::get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg)
@@ -579,7 +505,6 @@ void
 AudioFileSource::set_header_position_offset (jack_nframes_t offset)
 {
 	header_position_offset = offset;
-	cerr << "hpo set to " << offset << endl;
 	HeaderPositionOffsetChanged ();
 }
 
@@ -639,11 +564,11 @@ bool
 AudioFileSource::is_empty (string path)
 {
 	bool ret = false;
-	AudioFileSource* afs = create (path, NoPeakFile);
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (
+		SourceFactory::createReadable (DataType::AUDIO, path, NoPeakFile, false));
 
 	if (afs) {
 		ret = (afs->length() == 0);
-		delete afs;
 	}
 
 	return ret;

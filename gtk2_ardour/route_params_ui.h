@@ -182,8 +182,8 @@ class RouteParams_UI : public ArdourDialog
 
 	void redirect_selected (boost::shared_ptr<ARDOUR::Redirect>, ARDOUR::Placement);
 	
-	void plugin_going_away (ARDOUR::Plugin *foo, ARDOUR::Placement);
-	void redirect_going_away (ARDOUR::Redirect *foo);
+	void plugin_going_away (ARDOUR::Placement);
+	void redirect_going_away (boost::shared_ptr<ARDOUR::Redirect>);
 
 	gint edit_input_configuration (GdkEventButton *ev);
 	gint edit_output_configuration (GdkEventButton *ev);

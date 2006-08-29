@@ -32,6 +32,8 @@
 #include <ardour/audio_library.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiofilesource.h>
+#include <ardour/region_factory.h>
+#include <ardour/source_factory.h>
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -187,15 +189,15 @@ SoundFileBox::play_btn_clicked ()
 		return;
 	}
 
-	static std::map<string, AudioRegion*> region_cache;
+	static std::map<string, boost::shared_ptr<AudioRegion> > region_cache;
 
 	if (region_cache.find (path) == region_cache.end()) {
-		AudioRegion::SourceList srclist;
-		AudioFileSource* afs;
-
+		SourceList srclist;
+		boost::shared_ptr<AudioFileSource> afs;
+		
 		for (int n = 0; n < sf_info.channels; ++n) {
 			try {
-				afs = AudioFileSource::create (path+":"+string_compose("%1", n));
+				afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (DataType::AUDIO, path+":"+string_compose("%1", n), AudioFileSource::Flag (0)));
 				srclist.push_back(afs);
 
 			} catch (failed_constructor& err) {
@@ -208,16 +210,18 @@ SoundFileBox::play_btn_clicked ()
 			return;
 		}
 
-		string result;
-		_session->region_name (result, Glib::path_get_basename(srclist[0]->name()), false);
-		AudioRegion* a_region = new AudioRegion(srclist, 0, srclist[0]->length(), result, 0, Region::DefaultFlags, false);
-		region_cache[path] = a_region;
+		pair<string,boost::shared_ptr<AudioRegion> > newpair;
+
+		_session->region_name (newpair.first, Glib::path_get_basename(srclist[0]->name()), false);
+		newpair.second = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, 0, srclist[0]->length(), newpair.first, 0, Region::DefaultFlags, false));
+
+		region_cache.insert (newpair);
 	}
 
 	play_btn.hide();
 	stop_btn.show();
 
-	_session->audition_region(*region_cache[path]);
+	_session->audition_region(region_cache[path]);
 }
 
 void

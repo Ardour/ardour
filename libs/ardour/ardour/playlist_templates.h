@@ -30,14 +30,14 @@ template<class T> void AudioPlaylist::foreach_crossfade (T *t, void (T::*func)(C
 	}
 }
 
-template<class T> void Playlist::foreach_region (T *t, void (T::*func)(Region *, void *), void *arg) {
+template<class T> void Playlist::foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>, void *), void *arg) {
 	RegionLock rlock (this, false);
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); i++) {	
 		(t->*func) ((*i), arg);
 	}
 	}
 
-template<class T> void Playlist::foreach_region (T *t, void (T::*func)(Region *)) {
+template<class T> void Playlist::foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>)) {
 	RegionLock rlock (this, false);
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); i++) {
 		(t->*func) (*i);

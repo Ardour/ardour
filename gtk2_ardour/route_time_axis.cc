@@ -1010,7 +1010,7 @@ RouteTimeAxisView::hide_click ()
 	editor.hide_track_in_display (*this);
 }
 
-Region*
+boost::shared_ptr<Region>
 RouteTimeAxisView::find_next_region (jack_nframes_t pos, RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Diskstream> stream;
@@ -1020,7 +1020,7 @@ RouteTimeAxisView::find_next_region (jack_nframes_t pos, RegionPoint point, int3
 		return playlist->find_next_region (pos, point, dir);
 	}
 
-	return 0;
+	return boost::shared_ptr<Region> ();
 }
 
 bool

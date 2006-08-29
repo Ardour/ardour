@@ -50,13 +50,13 @@ using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
 
-MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, MidiRegion& r, double spu,
+MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu,
 				  Gdk::Color& basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 {
 }
 
-MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, MidiRegion& r, double spu, 
+MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, 
 				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
 {
@@ -73,7 +73,7 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	compute_colors (basic_color);
 
-	reset_width_dependent_items ((double) _region.length() / samples_per_unit);
+	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
 	set_height (trackview.height);
 
@@ -81,7 +81,7 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 	region_resized (BoundsChanged);
 	region_locked ();
 
-	_region.StateChanged.connect (mem_fun(*this, &MidiRegionView::region_changed));
+	_region->StateChanged.connect (mem_fun(*this, &MidiRegionView::region_changed));
 
 	set_colors ();
 }
@@ -93,11 +93,11 @@ MidiRegionView::~MidiRegionView ()
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
 }
 
-ARDOUR::MidiRegion&
+boost::shared_ptr<ARDOUR::MidiRegion>
 MidiRegionView::midi_region() const
 {
 	// "Guaranteed" to succeed...
-	return dynamic_cast<MidiRegion&>(_region);
+	return boost::dynamic_pointer_cast<MidiRegion>(_region);
 }
 
 void

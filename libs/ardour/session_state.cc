@@ -88,6 +88,8 @@
 #include <ardour/midi_region.h>
 #include <ardour/crossfade.h>
 #include <ardour/control_protocol_manager.h>
+#include <ardour/region_factory.h>
+#include <ardour/source_factory.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -182,7 +184,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	g_atomic_int_set (&_capture_load, 100);
 	g_atomic_int_set (&_playback_load_min, 100);
 	g_atomic_int_set (&_capture_load_min, 100);
-	pending_audition_region = 0;
 	_edit_mode = Slide;
 	pending_edit_mode = _edit_mode;
 	_play_range = false;
@@ -197,6 +198,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	layer_model = MoveAddHigher;
 	xfade_model = ShortCrossfade;
 	destructive_index = 0;
+	current_trans = 0;
 
 	AudioDiskstream::allocate_working_buffers();
 
@@ -267,13 +269,13 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	/* These are all static "per-class" signals */
 
-	Region::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
-	Source::SourceCreated.connect (mem_fun (*this, &Session::add_source));
+	RegionFactory::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
+	SourceFactory::SourceCreated.connect (mem_fun (*this, &Session::add_source));
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
-        Curve::CurveCreated.connect (mem_fun (*this, &Session::add_curve));
-        AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
+	Curve::CurveCreated.connect (mem_fun (*this, &Session::add_curve));
+	AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
 
 	Controllable::Created.connect (mem_fun (*this, &Session::add_controllable));
 	Controllable::GoingAway.connect (mem_fun (*this, &Session::remove_controllable));
@@ -294,6 +296,7 @@ Session::second_stage_init (bool new_session)
 
 	if (!new_session) {
 		if (load_state (_current_snapshot_name)) {
+			cerr << "load state failed\n";
 			return -1;
 		}
 		remove_empty_sounds ();
@@ -1360,17 +1363,21 @@ Session::state(bool full_state)
 	if (full_state) {
 		Glib::Mutex::Lock sl (source_lock);
 
-		for (SourceList::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
+		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
 			
+			/* Don't save information about AudioFileSources that are empty */
+			
+			boost::shared_ptr<AudioFileSource> fs;
 
-			DestructiveFileSource* const dfs = dynamic_cast<DestructiveFileSource*> (siter->second);
+			if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (siter->second)) != 0) {
+				boost::shared_ptr<DestructiveFileSource> dfs = boost::dynamic_pointer_cast<DestructiveFileSource> (fs);
 
-			/* Don't save sources that are empty, unless they're destructive (which are OK
-			   if they are empty, because we will re-use them every time.)
-			*/
-
-			if ( ! dfs && siter->second->length() == 0) {
-				continue;
+				/* Don't save sources that are empty, unless they're destructive (which are OK
+				   if they are empty, because we will re-use them every time.)
+				*/
+				if ( ! dfs && siter->second->length() == 0) {
+					continue;
+				}
 			}
 			
 			child->add_child_nocopy (siter->second->get_state());
@@ -1774,7 +1781,7 @@ Session::load_regions (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	Region* region;
+	boost::shared_ptr<Region> region;
 
 	nlist = node.children();
 
@@ -1785,10 +1792,11 @@ Session::load_regions (const XMLNode& node)
 			error << _("Session: cannot create Region from XML description.") << endmsg;
 		}
 	}
+
 	return 0;
 }
 
-Region *
+boost::shared_ptr<Region>
 Session::XMLRegionFactory (const XMLNode& node, bool full)
 {
 	const XMLProperty* type = node.property("type");
@@ -1797,33 +1805,33 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 	
 	if ( !type || type->value() == "audio" ) {
 
-		return XMLAudioRegionFactory (node, full);
+		return boost::shared_ptr<Region>(XMLAudioRegionFactory (node, full));
 	
 	} else if (type->value() == "midi") {
 		
-		return XMLMidiRegionFactory (node, full);
+		return boost::shared_ptr<Region>(XMLMidiRegionFactory (node, full));
 
 	}
 	
 	} catch (failed_constructor& err) {
-		return 0;
+		return boost::shared_ptr<Region> ();
 	}
 
-	return 0;
+	return boost::shared_ptr<Region> ();
 }
 
-AudioRegion *
+boost::shared_ptr<AudioRegion>
 Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 {
 	const XMLProperty* prop;
-	Source* source;
-	AudioSource* as;
-	AudioRegion::SourceList sources;
+	boost::shared_ptr<Source> source;
+	boost::shared_ptr<AudioSource> as;
+	SourceList sources;
 	uint32_t nchans = 1;
 	char buf[128];
 	
 	if (node.name() != X_("Region")) {
-		return 0;
+		return boost::shared_ptr<AudioRegion>();
 	}
 
 	if ((prop = node.property (X_("channels"))) != 0) {
@@ -1834,7 +1842,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 	if ((prop = node.property (X_("source-0"))) == 0) {
 		if ((prop = node.property ("source")) == 0) {
 			error << _("Session: XMLNode describing a AudioRegion is incomplete (no source)") << endmsg;
-			return 0;
+			return boost::shared_ptr<AudioRegion>();
 		}
 	}
 
@@ -1842,13 +1850,13 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 
 	if ((source = source_by_id (s_id)) == 0) {
 		error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
-		return 0;
+		return boost::shared_ptr<AudioRegion>();
 	}
-
-	as = dynamic_cast<AudioSource*>(source);
+	
+	as = boost::dynamic_pointer_cast<AudioSource>(source);
 	if (!as) {
 		error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), s_id) << endmsg;
-		return 0;
+		return boost::shared_ptr<AudioRegion>();
 	}
 
 	sources.push_back (as);
@@ -1863,38 +1871,40 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 			
 			if ((source = source_by_id (id2)) == 0) {
 				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), id2) << endmsg;
-				return 0;
+				return boost::shared_ptr<AudioRegion>();
 			}
 			
-			as = dynamic_cast<AudioSource*>(source);
+			as = boost::dynamic_pointer_cast<AudioSource>(source);
 			if (!as) {
 				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), id2) << endmsg;
-				return 0;
+				return boost::shared_ptr<AudioRegion>();
 			}
 			sources.push_back (as);
 		}
 	}
 	
 	try {
-		return new AudioRegion (sources, node);
+		boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, node)));
+		return region;
+						       
 	}
 
 	catch (failed_constructor& err) {
-		return 0;
+		return boost::shared_ptr<AudioRegion>();
 	}
 }
 
-MidiRegion *
+boost::shared_ptr<MidiRegion>
 Session::XMLMidiRegionFactory (const XMLNode& node, bool full)
 {
 	const XMLProperty* prop;
-	Source* source;
-	MidiSource* ms;
+	boost::shared_ptr<Source> source;
+	boost::shared_ptr<MidiSource> ms;
 	MidiRegion::SourceList sources;
 	uint32_t nchans = 1;
 	
 	if (node.name() != X_("Region")) {
-		return 0;
+		return boost::shared_ptr<MidiRegion>();
 	}
 
 	if ((prop = node.property (X_("channels"))) != 0) {
@@ -1907,7 +1917,7 @@ Session::XMLMidiRegionFactory (const XMLNode& node, bool full)
 	if ((prop = node.property (X_("source-0"))) == 0) {
 		if ((prop = node.property ("source")) == 0) {
 			error << _("Session: XMLNode describing a MidiRegion is incomplete (no source)") << endmsg;
-			return 0;
+			return boost::shared_ptr<MidiRegion>();
 		}
 	}
 
@@ -1915,23 +1925,24 @@ Session::XMLMidiRegionFactory (const XMLNode& node, bool full)
 
 	if ((source = source_by_id (s_id)) == 0) {
 		error << string_compose(_("Session: XMLNode describing a MidiRegion references an unknown source id =%1"), s_id) << endmsg;
-		return 0;
+		return boost::shared_ptr<MidiRegion>();
 	}
 
-	ms = dynamic_cast<MidiSource*>(source);
+	ms = boost::dynamic_pointer_cast<MidiSource>(source);
 	if (!ms) {
-		error << string_compose(_("Session: XMLNode describing a MidiRegion references a non-audio source id =%1"), s_id) << endmsg;
-		return 0;
+		error << string_compose(_("Session: XMLNode describing a MidiRegion references a non-midi source id =%1"), s_id) << endmsg;
+		return boost::shared_ptr<MidiRegion>();
 	}
 
 	sources.push_back (ms);
 
 	try {
-		return new MidiRegion (sources, node);
+		boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (sources, node)));
+		return region;
 	}
 
 	catch (failed_constructor& err) {
-		return 0;
+		return boost::shared_ptr<MidiRegion>();
 	}
 }
 
@@ -1942,7 +1953,7 @@ Session::get_sources_as_xml ()
 	XMLNode* node = new XMLNode (X_("Sources"));
 	Glib::Mutex::Lock lm (source_lock);
 
-	for (SourceList::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		node->add_child_nocopy (i->second->get_state());
 	}
 
@@ -1979,7 +1990,7 @@ Session::load_sources (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	Source* source;
+	boost::shared_ptr<Source> source;
 
 	nlist = node.children();
 
@@ -1995,41 +2006,22 @@ Session::load_sources (const XMLNode& node)
 	return 0;
 }
 
-Source *
+boost::shared_ptr<Source>
 Session::XMLSourceFactory (const XMLNode& node)
 {
-	Source *src = 0;
 
 	if (node.name() != "Source") {
-		return 0;
-	}
-	
-	DataType type = DataType::AUDIO;
-	const XMLProperty* prop = node.property("type");
-	if (prop) {
-		type = DataType(prop->value());
+		return boost::shared_ptr<Source>();
 	}
 
 	try {
-	
-	
-	if (type == DataType::AUDIO) {
-
-		src = AudioFileSource::create (node);
-
-	} else if (type == DataType::MIDI) {
-
-		src = new SMFSource (node);
-
+		return SourceFactory::create (node);
 	}
 	
-	
-	} catch (failed_constructor& err) {
-		error << _("Found a file that cannot be read by Ardour. Talk to the progammers.") << endmsg;
-		return 0;
+	catch (failed_constructor& err) {
+		error << _("Found a sound file that cannot be used by Ardour. Talk to the progammers.") << endmsg;
+		return boost::shared_ptr<Source>();
 	}
-
-	return src;
 }
 
 int
@@ -2699,8 +2691,8 @@ Session::set_meter_falloff (float val)
 void
 Session::begin_reversible_command (string name)
 {
-	current_trans.clear ();
-	current_trans.set_name (name);
+	current_trans = new UndoTransaction;
+	current_trans->set_name (name);
 }
 
 void
@@ -2709,11 +2701,11 @@ Session::commit_reversible_command (Command *cmd)
 	struct timeval now;
 
 	if (cmd) {
-		current_trans.add_command (cmd);
+		current_trans->add_command (cmd);
 	}
 
 	gettimeofday (&now, 0);
-	current_trans.set_timestamp (now);
+	current_trans->set_timestamp (now);
 
 	history.add (current_trans);
 }
@@ -3007,7 +2999,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 int
 Session::cleanup_sources (Session::cleanup_report& rep)
 {
-	vector<Source*> dead_sources;
+	vector<boost::shared_ptr<Source> > dead_sources;
 	vector<Playlist*> playlists_tbd;
 	PathScanner scanner;
 	string sound_path;
@@ -3067,9 +3059,9 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	rep.paths.clear ();
 	rep.space = 0;
 
-	for (SourceList::iterator i = sources.begin(); i != sources.end(); ) {
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
 
-		SourceList::iterator tmp;
+		SourceMap::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -3079,7 +3071,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   capture files.
 		*/
 
-		if (i->second->use_cnt() == 0 && i->second->length() > 0) {
+		if (i->second.use_count() == 1 && i->second->length() > 0) {
 			dead_sources.push_back (i->second);
 
 			/* remove this source from our own list to avoid us
@@ -3097,7 +3089,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	   other snapshots).
 	*/
 		
-	for (vector<Source*>::iterator i = dead_sources.begin(); i != dead_sources.end();++i) {
+	for (vector<boost::shared_ptr<Source> >::iterator i = dead_sources.begin(); i != dead_sources.end();++i) {
 
 		for (RegionList::iterator r = regions.begin(); r != regions.end(); ) {
 			RegionList::iterator tmp;
@@ -3105,10 +3097,10 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			tmp = r;
 			++tmp;
 			
-			Region* const reg = r->second;
+			boost::shared_ptr<Region> reg = r->second;
 
 			for (uint32_t n = 0; n < reg->n_channels(); ++n) {
-				if (&reg->source (n) == (*i)) {
+				if (reg->source (n) == (*i)) {
 					/* this region is dead */
 					remove_region (reg);
 				}
@@ -3155,10 +3147,10 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	/*  add our current source list
 	 */
 	
-	for (SourceList::iterator i = sources.begin(); i != sources.end(); ++i) {
-		AudioFileSource* fs;
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+		boost::shared_ptr<AudioFileSource> fs;
 		
-		if ((fs = dynamic_cast<AudioFileSource*> (i->second)) != 0) {
+		if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (i->second)) != 0) {
 			all_sources.insert (fs->path());
 		} 
 	}
@@ -3484,15 +3476,15 @@ Session::restore_history (string snapshot_name)
          it++)
     {
         XMLNode *t = *it;
-        UndoTransaction ut;
+        UndoTransaction* ut = new UndoTransaction ();
         struct timeval tv;
 
-        ut.set_name(t->property("name")->value());
+        ut->set_name(t->property("name")->value());
         stringstream ss(t->property("tv_sec")->value());
         ss >> tv.tv_sec;
         ss.str(t->property("tv_usec")->value());
         ss >> tv.tv_usec;
-        ut.set_timestamp(tv);
+        ut->set_timestamp(tv);
 
         for (XMLNodeConstIterator child_it  = t->children().begin();
              child_it != t->children().end();
@@ -3506,7 +3498,7 @@ Session::restore_history (string snapshot_name)
             {
                 c = memento_command_factory(n);
                 if (c)
-                    ut.add_command(c);
+                    ut->add_command(c);
             }
             else
             {

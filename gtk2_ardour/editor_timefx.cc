@@ -160,21 +160,18 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 {
 	Track*    t;
 	Playlist* playlist;
-	Region*   new_region;
-
+	boost::shared_ptr<Region>   new_region;
 
 	for (RegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
 		if (!arv)
 			continue;
 
-		AudioRegion& region (arv->audio_region());
+		boost::shared_ptr<AudioRegion> region (arv->audio_region());
 		TimeAxisView* tv = &(arv->get_time_axis_view());
 		RouteTimeAxisView* rtv;
 		RegionSelection::iterator tmp;
 		
-		cerr << "stretch " << region.name() << endl;
-
 		tmp = i;
 		++tmp;
 
@@ -193,7 +190,7 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 			continue;
 		}
 
-		dialog.request.region = &region;
+		dialog.request.region = region;
 
 		if (!dialog.request.running) {
 			/* we were cancelled */
@@ -208,7 +205,7 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 		}
 
 		XMLNode &before = playlist->get_state();
-		playlist->replace_region (region, *new_region, region.position());
+		playlist->replace_region (region, new_region, region->position());
 		XMLNode &after = playlist->get_state();
 		session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
 
@@ -217,6 +214,7 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 
 	dialog.status = 0;
 	dialog.request.running = false;
+	dialog.request.region.reset ();
 }
 
 void*

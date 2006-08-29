@@ -131,9 +131,9 @@ PluginUIWindow::on_key_release_event (GdkEventKey* event)
 }
 
 void
-PluginUIWindow::plugin_going_away (ARDOUR::Redirect* ignored)
+PluginUIWindow::plugin_going_away ()
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PluginUIWindow::plugin_going_away), ignored));
+	ENSURE_GUI_THREAD(mem_fun(*this, &PluginUIWindow::plugin_going_away));
 	
 	_pluginui->stop_updating(0);
 	delete_when_idle (this);

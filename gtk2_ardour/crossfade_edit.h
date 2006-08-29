@@ -162,8 +162,8 @@ class CrossfadeEditor : public ArdourDialog
 
     sigc::connection peaks_ready_connection;
 
-    void make_waves (ARDOUR::AudioRegion&, WhichFade);
-    void peaks_ready (ARDOUR::AudioRegion* r, WhichFade);
+    void make_waves (boost::shared_ptr<ARDOUR::AudioRegion>, WhichFade);
+    void peaks_ready (boost::shared_ptr<ARDOUR::AudioRegion> r, WhichFade);
     
     void _apply_to (ARDOUR::Crossfade* xf);
     void setup (ARDOUR::Crossfade*);

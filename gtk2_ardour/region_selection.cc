@@ -102,12 +102,12 @@ RegionSelection::add (RegionView* rv, bool dosort)
 
 	rv->RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
 
-	if (rv->region().first_frame() < _current_start || empty()) {
-		_current_start = rv->region().first_frame();
+	if (rv->region()->first_frame() < _current_start || empty()) {
+		_current_start = rv->region()->first_frame();
 	}
 	
-	if (rv->region().last_frame() > _current_end || empty()) {
-		_current_end = rv->region().last_frame();
+	if (rv->region()->last_frame() > _current_end || empty()) {
+		_current_end = rv->region()->last_frame();
 	}
 	
 	insert (rv);
@@ -142,17 +142,17 @@ RegionSelection::remove (RegionView* rv)
 
 		} else {
 			
-			Region& region ((*i)->region());
+			boost::shared_ptr<Region> region ((*i)->region());
 
-			if (region.first_frame() == _current_start) {
+			if (region->first_frame() == _current_start) {
 				
 				/* reset current start */
 				
 				jack_nframes_t ref = max_frames;
 				
 				for (i = begin (); i != end(); ++i) {
-					if (region.first_frame() < ref) {
-						ref = region.first_frame();
+					if (region->first_frame() < ref) {
+						ref = region->first_frame();
 					}
 				}
 				
@@ -160,15 +160,15 @@ RegionSelection::remove (RegionView* rv)
 				
 			}
 			
-			if (region.last_frame() == _current_end) {
+			if (region->last_frame() == _current_end) {
 
 				/* reset current end */
 				
 				jack_nframes_t ref = 0;
 				
 				for (i = begin (); i != end(); ++i) {
-					if (region.first_frame() > ref) {
-						ref = region.first_frame();
+					if (region->first_frame() > ref) {
+						ref = region->first_frame();
 					}
 				}
 				
@@ -191,7 +191,7 @@ RegionSelection::add_to_layer (RegionView * rv)
 
 	for (i = _bylayer.begin(); i != _bylayer.end(); ++i)
 	{
-		if (rv->region().layer() < (*i)->region().layer()) {
+		if (rv->region()->layer() < (*i)->region()->layer()) {
 			_bylayer.insert(i, rv);
 			return;
 		}
@@ -203,7 +203,7 @@ RegionSelection::add_to_layer (RegionView * rv)
 
 struct RegionSortByTime {
     bool operator() (const RegionView* a, const RegionView* b) {
-	    return a->region().position() < b->region().position();
+	    return a->region()->position() < b->region()->position();
     }
 };
 

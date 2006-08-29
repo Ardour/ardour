@@ -51,6 +51,13 @@ Location::Location (const Location& other)
 	_flags = Flags (_flags & ~IsEnd);
 }
 
+Location::Location (const XMLNode& node)
+{
+	if (set_state (node)) {
+		throw failed_constructor ();
+	}
+}
+
 Location*
 Location::operator= (const Location& other)
 {
@@ -241,13 +248,16 @@ XMLNode&
 Location::get_state (void)
 {
 	XMLNode *node = new XMLNode ("Location");
-	char buf[32];
+	char buf[64];
 
 	typedef map<string, string>::const_iterator CI;
+
 	for(CI m = cd_info.begin(); m != cd_info.end(); ++m){
 		node->add_child_nocopy(cd_info_node(m->first, m->second));
 	}
 
+	id().print (buf);
+	node->add_property("id", buf);
 	node->add_property ("name", name());
 	snprintf (buf, sizeof (buf), "%u", start());
 	node->add_property ("start", buf);
@@ -262,7 +272,6 @@ Location::get_state (void)
 int
 Location::set_state (const XMLNode& node)
 {
-	XMLPropertyList plist;
 	const XMLProperty *prop;
 
 	XMLNodeList cd_list = node.children();
@@ -272,14 +281,17 @@ Location::set_state (const XMLNode& node)
 	string cd_name;
 	string cd_value;
 
-
 	if (node.name() != "Location") {
 		error << _("incorrect XML node passed to Location::set_state") << endmsg;
 		return -1;
 	}
 
-	plist = node.properties();
-		
+	if ((prop = node.property ("id")) == 0) {
+		warning << _("XML node for Location has no ID information") << endmsg;
+	} else {
+		_id = prop->value ();
+	}
+
 	if ((prop = node.property ("name")) == 0) {
 		error << _("XML node for Location has no name information") << endmsg;
 		return -1;
@@ -582,16 +594,20 @@ Locations::set_state (const XMLNode& node)
 		Glib::Mutex::Lock lm (lock);
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-			Location *loc = new Location;
 			
-			if (loc->set_state (**niter)) {
-				delete loc;
-			} else {
+			try {
+
+				Location *loc = new Location (**niter);
 				locations.push_back (loc);
+			}
+
+			catch (failed_constructor& err) {
+				error << _("could not load location from session file - ignored") << endmsg;
 			}
 		}
 		
 		if (locations.size()) {
+
 			current_location = locations.front();
 		} else {
 			current_location = 0;

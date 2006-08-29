@@ -56,16 +56,6 @@ class AudioFileSource : public AudioSource {
 
 	static void set_peak_dir (string dir) { peak_dir = dir; }
 
-	/* factory for an existing but not-used-in-session audio file. this exists
-	   because there maybe multiple back-end derivations of AudioFileSource,
-	   some of which can handle formats that cannot be handled by others.
-	   For example, CoreAudioFileSource can handle MP3 files, which SndFileSource
-	   cannot.
-	 */
-
-	static AudioFileSource* create (const string& path_plus_channel, Flag flags = Flag (0));
-	static AudioFileSource* create (const XMLNode&);
-
 	static bool get_soundfile_info (string path, SoundFileInfo& _info, string& error);
 
 	void set_allow_remove_if_empty (bool yn);

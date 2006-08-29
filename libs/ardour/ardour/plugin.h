@@ -24,7 +24,7 @@
 #include <boost/shared_ptr.hpp>
 #include <sigc++/signal.h>
 
-#include <pbd/stateful.h> 
+#include <pbd/statefuldestructible.h> 
 #include <pbd/controllable.h>
 
 #include <jack/types.h>
@@ -78,8 +78,7 @@ class PluginInfo {
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr> PluginInfoList;
 
-class Plugin : public Stateful, public sigc::trackable
-
+class Plugin : public PBD::StatefulDestructible, public sigc::trackable
 {
   public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
@@ -141,7 +140,6 @@ class Plugin : public Stateful, public sigc::trackable
 	virtual bool has_editor() const = 0;
 
 	sigc::signal<void,uint32_t,float> ParameterChanged;
-	sigc::signal<void,Plugin *> GoingAway;
 	
 	PBD::Controllable *get_nth_control (uint32_t);
 

@@ -20,60 +20,14 @@
 
 #include <pbd/error.h>
 
-#include <ardour/session.h>
-
 #include <ardour/playlist.h>
 #include <ardour/audioplaylist.h>
-
-#include <ardour/region_factory.h>
-#include <ardour/region.h>
-#include <ardour/audioregion.h>
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 
-Region*
-ARDOUR::createRegion (const Region& region, jack_nframes_t start, 
-		      jack_nframes_t length, std::string name, 
-		      layer_t layer, Region::Flag flags)
-{
-	const AudioRegion* ar;
-	
-	if ((ar = dynamic_cast<const AudioRegion*>(&region)) != 0) {
-		AudioRegion* ret;
-		ret = new AudioRegion (*ar, start, length, name, layer, flags);
-		return ret;
-	} else {
-		fatal << _("programming error: Playlist::createRegion called with unknown Region type")
-		      << endmsg;
-		/*NOTREACHED*/
-		return 0;
-	}
-}
-
-Region*
-ARDOUR::createRegion (const Region& region)
-{
-	const AudioRegion* ar;
-	
-	if ((ar = dynamic_cast<const AudioRegion*>(&region)) != 0) {
-		return new AudioRegion (*ar);
-	} else {
-		fatal << _("programming error: Playlist::createRegion called with unknown Region type")
-		      << endmsg;
-		/*NOTREACHED*/
-		return 0;
-	}
-}
-
-Region*
-ARDOUR::createRegion (Session& session, XMLNode& node, bool yn)
-{
-	return session.XMLRegionFactory (node, yn);
-}
-	
 Playlist*
 Playlist::copyPlaylist (const Playlist& playlist, jack_nframes_t start, jack_nframes_t length,
 			string name, bool result_is_hidden)

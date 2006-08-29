@@ -485,12 +485,9 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 
 	for (uint32_t i = 0; i < sr->cnt; ++i) {
 
-		Region* r = reinterpret_cast<Region*> (sr->ptr[i]);
-
-		AudioRegion* ar = dynamic_cast<AudioRegion*>(r);
-		if (ar) {
-			insert_region_list_drag (*ar, x, y);
-		}
+		boost::shared_ptr<Region> r (reinterpret_cast<Region*> (sr->ptr[i]));
+		
+		insert_region_list_drag (r, x, y);
 	}
 
 	context->drag_finish (true, false, time);

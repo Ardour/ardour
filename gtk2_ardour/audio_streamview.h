@@ -76,13 +76,13 @@ class AudioStreamView : public StreamView
 
   private:
 	void setup_rec_box ();
-	void rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt, ARDOUR::Source* src); 
+	void rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt, boost::shared_ptr<ARDOUR::Source> src); 
 	void update_rec_regions ();
 	
-	void add_region_view_internal (ARDOUR::Region*, bool wait_for_waves);
-	void remove_region_view (ARDOUR::Region* );
-	void remove_audio_region_view (ARDOUR::AudioRegion* );
-	void remove_audio_rec_region (ARDOUR::AudioRegion*);
+	void add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
+	void remove_region_view (boost::shared_ptr<ARDOUR::Region> );
+	void remove_audio_region_view (boost::shared_ptr<ARDOUR::AudioRegion> );
+	void remove_audio_rec_region (boost::shared_ptr<ARDOUR::AudioRegion>);
 
 	void undisplay_diskstream ();
 	void redisplay_diskstream ();

@@ -198,7 +198,7 @@ class PortInsertWindow : public ArdourDialog
 	void cancel ();
 	void accept ();
 
-	void plugin_going_away (ARDOUR::Redirect*);
+	void plugin_going_away ();
 };
 
 

@@ -62,12 +62,10 @@ class MidiStreamView : public StreamView
 
   private:
 	void setup_rec_box ();
-	void rec_data_range_ready (jack_nframes_t start, jack_nframes_t cnt, ARDOUR::Source* src); 
+	void rec_data_range_ready (jack_nframes_t start, jack_nframes_t cnt, boost::shared_ptr<ARDOUR::Source> src); 
 	void update_rec_regions ();
 	
-	void add_region_view_internal (ARDOUR::Region*, bool wait_for_waves);
-	void remove_midi_region_view (ARDOUR::MidiRegion* );
-	void remove_midi_rec_region (ARDOUR::MidiRegion*);
+	void add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
 
 	void redisplay_diskstream ();
 

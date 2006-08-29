@@ -58,7 +58,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 	AudioPlaylist (const AudioPlaylist&, string name, bool hidden = false);
 	AudioPlaylist (const AudioPlaylist&, jack_nframes_t start, jack_nframes_t cnt, string name, bool hidden = false);
 
-	void clear (bool with_delete = false, bool with_save = true);
+	void clear (bool with_save = true);
 
         jack_nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
 
@@ -75,7 +75,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 		(obj.*method) (states, _current_state_id);
 	}
 
-	bool destroy_region (Region*);
+	bool destroy_region (boost::shared_ptr<Region>);
 
 	void drop_all_states ();
 
@@ -91,11 +91,11 @@ class AudioPlaylist : public ARDOUR::Playlist
 	void notify_crossfade_added (Crossfade *);
 	void flush_notifications ();
 
-		void finalize_split_region (Region *orig, Region *left, Region *right);
+	void finalize_split_region (boost::shared_ptr<Region> orig, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right);
 	
-        void refresh_dependents (Region& region);
-        void check_dependents (Region& region, bool norefresh);
-        void remove_dependents (Region& region);
+        void refresh_dependents (boost::shared_ptr<Region> region);
+        void check_dependents (boost::shared_ptr<Region> region, bool norefresh);
+        void remove_dependents (boost::shared_ptr<Region> region);
 
     protected:
        ~AudioPlaylist (); /* public should use unref() */
@@ -108,7 +108,7 @@ class AudioPlaylist : public ARDOUR::Playlist
        XMLNode& state (bool full_state);
        void dump () const;
 
-       bool region_changed (Change, Region*);
+       bool region_changed (Change, boost::shared_ptr<Region>);
        void crossfade_changed (Change);
        void add_crossfade (Crossfade&);
 };

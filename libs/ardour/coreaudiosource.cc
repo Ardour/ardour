@@ -141,7 +141,7 @@ CoreAudioSource::init (const string& idstr)
 
 CoreAudioSource::~CoreAudioSource ()
 {
-	GoingAway (this); /* EMIT SIGNAL */
+	GoingAway (); /* EMIT SIGNAL */
 
 	if (af) {
 		ExtAudioFileDispose (af);

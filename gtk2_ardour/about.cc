@@ -186,13 +186,13 @@ About::About ()
 	set_website (X_("http://ardour.org/"));
 	set_website_label (X_("ardour.org"));
 	set_version ((string_compose(_("%1\n(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"), 
-			      VERSIONSTRING, 
-			      gtk_ardour_major_version, 
-			      gtk_ardour_minor_version, 
-			      gtk_ardour_micro_version, 
-			      libardour_major_version, 
-			      libardour_minor_version, 
-			      libardour_micro_version))); 
+				     VERSIONSTRING, 
+				     gtk_ardour_major_version, 
+				     gtk_ardour_minor_version, 
+				     gtk_ardour_micro_version, 
+				     libardour_major_version, 
+				     libardour_minor_version, 
+				     libardour_micro_version))); 
 
 
 #ifdef WITH_PAYMENT_OPTIONS

@@ -42,6 +42,8 @@
 #include <ardour/audioregion.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/chan_count.h>
+#include <ardour/source_factory.h>
+#include <ardour/audiofilesource.h>
 
 #include "i18n.h"
 
@@ -93,12 +95,12 @@ Editor::export_region ()
 		return;
 	}
 
-	ExportDialog* dialog = new ExportRegionDialog (*this, &clicked_regionview->region());
+	ExportDialog* dialog = new ExportRegionDialog (*this, clicked_regionview->region());
 		
 	dialog->connect_to_session (session);
 	dialog->set_range (
-		clicked_regionview->region().first_frame(), 
-		clicked_regionview->region().last_frame());
+		clicked_regionview->region()->first_frame(), 
+		clicked_regionview->region()->last_frame());
 	dialog->start_export();
 }
 
@@ -142,7 +144,7 @@ Editor::bounce_region_selection ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		
-		Region& region ((*i)->region());
+		boost::shared_ptr<Region> region ((*i)->region());
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
 		Track* track = dynamic_cast<Track*>(rtv->route().get());
 
@@ -152,14 +154,14 @@ Editor::bounce_region_selection ()
 		itt.cancel = false;
 		itt.progress = 0.0f;
 
-		track->bounce_range (region.position(), region.position() + region.length(), itt);
+		track->bounce_range (region->position(), region->position() + region->length(), itt);
 	}
 }
 
 bool
-Editor::write_region (string path, AudioRegion& region)
+Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 {
-	AudioFileSource* fs;
+	boost::shared_ptr<AudioFileSource> fs;
 	const jack_nframes_t chunk_size = 4096;
 	jack_nframes_t to_read;
 	Sample buf[chunk_size];
@@ -167,14 +169,14 @@ Editor::write_region (string path, AudioRegion& region)
 	jack_nframes_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
-	vector<AudioFileSource *> sources;
+	vector<boost::shared_ptr<AudioFileSource> > sources;
 	uint32_t nchans;
 	
-	nchans = region.n_channels();
+	nchans = region->n_channels();
 	
 	/* don't do duplicate of the entire source if that's what is going on here */
 
-	if (region.start() == 0 && region.length() == region.source().length()) {
+	if (region->start() == 0 && region->length() == region->source()->length()) {
 		/* XXX should link(2) to create a new inode with "path" */
 		return true;
 	}
@@ -186,11 +188,11 @@ Editor::write_region (string path, AudioRegion& region)
 			for (cnt = 0; cnt < 999999; ++cnt) {
 				if (nchans == 1) {
 					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 ".wav", session->sound_dir().c_str(),
-						  legalize_for_path(region.name()).c_str(), cnt);
+						  legalize_for_path(region->name()).c_str(), cnt);
 				}
 				else {
 					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 "-%" PRId32 ".wav", session->sound_dir().c_str(),
-						  legalize_for_path(region.name()).c_str(), cnt, n);
+						  legalize_for_path(region->name()).c_str(), cnt, n);
 				}
 
 				path = s;
@@ -208,7 +210,7 @@ Editor::write_region (string path, AudioRegion& region)
 		
 			
 			try {
-				fs = AudioFileSource::create (path);
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (DataType::AUDIO, path, AudioFileSource::Flag (0)));
 			}
 			
 			catch (failed_constructor& err) {
@@ -223,19 +225,19 @@ Editor::write_region (string path, AudioRegion& region)
 
 	}
 	
-	to_read = region.length();
-	pos = region.position();
+	to_read = region->length();
+	pos = region->position();
 
 	while (to_read) {
 		jack_nframes_t this_time;
 
 		this_time = min (to_read, chunk_size);
 
-		for (vector<AudioFileSource *>::iterator src=sources.begin(); src != sources.end(); ++src) {
+		for (vector<boost::shared_ptr<AudioFileSource> >::iterator src=sources.begin(); src != sources.end(); ++src) {
 			
 			fs = (*src);
 
-			if (region.read_at (buf, buf, gain_buffer, pos, this_time) != this_time) {
+			if (region->read_at (buf, buf, gain_buffer, pos, this_time) != this_time) {
 				break;
 			}
 			
@@ -254,7 +256,7 @@ Editor::write_region (string path, AudioRegion& region)
 	time (&tnow);
 	now = localtime (&tnow);
 	
-	for (vector<AudioFileSource *>::iterator src = sources.begin(); src != sources.end(); ++src) {
+	for (vector<boost::shared_ptr<AudioFileSource> >::iterator src = sources.begin(); src != sources.end(); ++src) {
 		(*src)->update_header (0, *now, tnow);
 	}
 
@@ -262,10 +264,8 @@ Editor::write_region (string path, AudioRegion& region)
 
 error_out:
 
-	for (vector<AudioFileSource*>::iterator i = sources.begin(); i != sources.end(); ++i) {
-		
+	for (vector<boost::shared_ptr<AudioFileSource> >::iterator i = sources.begin(); i != sources.end(); ++i) {
 		(*i)->mark_for_remove ();
-		delete (*i);
 	}
 
 	return 0;
@@ -305,7 +305,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 bool
 Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list<AudioRange>& range)
 {
-	AudioFileSource* fs;
+	boost::shared_ptr<AudioFileSource> fs;
 	const jack_nframes_t chunk_size = 4096;
 	jack_nframes_t nframes;
 	Sample buf[chunk_size];
@@ -314,7 +314,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	string path;
-	vector<AudioFileSource *> sources;
+	vector<boost::shared_ptr<AudioFileSource> > sources;
 
 	uint32_t channels = count.get(DataType::AUDIO);
 
@@ -343,7 +343,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 		path = s;
 		
 		try {
-			fs = AudioFileSource::create (path);
+			fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (DataType::AUDIO, path, AudioFileSource::Flag (0)));
 		}
 		
 		catch (failed_constructor& err) {
@@ -426,9 +426,8 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 error_out:
 	/* unref created files */
 
-	for (vector<AudioFileSource*>::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (vector<boost::shared_ptr<AudioFileSource> >::iterator i = sources.begin(); i != sources.end(); ++i) {
 		(*i)->mark_for_remove ();
-		delete *i;
 	}
 
 	return false;

@@ -56,7 +56,7 @@ enum mute_type {
     MAIN_OUTS =    0x8
 };
 
- class Route : public IO, public PBD::Destructible
+class Route : public IO
 {
   protected:
 

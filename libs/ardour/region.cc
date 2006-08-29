@@ -48,10 +48,8 @@ Change Region::LockChanged       = ARDOUR::new_change ();
 Change Region::LayerChanged      = ARDOUR::new_change ();
 Change Region::HiddenChanged     = ARDOUR::new_change ();
 
-sigc::signal<void,Region *> Region::CheckNewRegion;
-
 /** Basic Region constructor (single source) */
-Region::Region (Source& src, jack_nframes_t start, jack_nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
+Region::Region (boost::shared_ptr<Source> src, jack_nframes_t start, jack_nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: _name(name)
 	, _type(type)
 	, _flags(flags)
@@ -69,9 +67,9 @@ Region::Region (Source& src, jack_nframes_t start, jack_nframes_t length, const 
 {
 	_current_state_id = 0;
 	
-	_sources.push_back (&src);
-	_master_sources.push_back (&src);
-	src.GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+	_sources.push_back (src);
+	_master_sources.push_back (src);
+	src->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), src));
 
 	assert(_sources.size() > 0);
 }
@@ -95,18 +93,18 @@ Region::Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, c
 {
 	_current_state_id = 0;
 	
-	set<Source*> unique_srcs;
+	set<boost::shared_ptr<Source> > unique_srcs;
 
 	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		_sources.push_back (*i);
-		(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
 		unique_srcs.insert (*i);
 	}
 
 	for (SourceList::iterator i = srcs.begin(); i != srcs.end(); ++i) {
 		_master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
 		}
 	}
 	
@@ -114,11 +112,11 @@ Region::Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, c
 }
 
 /** Create a new Region from part of an existing one */
-Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+Region::Region (boost::shared_ptr<const Region> other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: _name(name)
-	, _type(other.data_type())
+	, _type(other->data_type())
 	, _flags(Flag(flags & ~(Locked|WholeFile|Hidden)))
-	, _start(other._start + offset) 
+	, _start(other->_start + offset) 
 	, _length(length) 
 	, _position(0) 
 	, _sync_position(_start)
@@ -132,20 +130,24 @@ Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t lengt
 {
 	_current_state_id = 0;
 	
-	if (other._sync_position < offset)
-		_sync_position = other._sync_position;
+	if (other->_sync_position < offset)
+		_sync_position = other->_sync_position;
 
-	set<Source*> unique_srcs;
+	set<boost::shared_ptr<Source> > unique_srcs;
 
-	for (SourceList::const_iterator i= other._sources.begin(); i != other._sources.end(); ++i) {
+	for (SourceList::const_iterator i= other->_sources.begin(); i != other->_sources.end(); ++i) {
 		_sources.push_back (*i);
-		(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
 		unique_srcs.insert (*i);
 	}
+	
+	if (other->_sync_position < offset) {
+		_sync_position = other->_sync_position;
+	}
 
-	for (SourceList::const_iterator i = other._master_sources.begin(); i != other._master_sources.end(); ++i) {
+	for (SourceList::const_iterator i = other->_master_sources.begin(); i != other->_master_sources.end(); ++i) {
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
 		}
 		_master_sources.push_back (*i);
 	}
@@ -154,44 +156,44 @@ Region::Region (const Region& other, jack_nframes_t offset, jack_nframes_t lengt
 }
 
 /** Pure copy constructor */
-Region::Region (const Region &other)
-	: _name(other._name)
-	, _type(other.data_type())
-	, _flags(Flag(other._flags & ~Locked))
-	, _start(other._start) 
-	, _length(other._length) 
-	, _position(other._position) 
-	, _sync_position(other._sync_position)
-	, _layer(other._layer)
+Region::Region (boost::shared_ptr<const Region> other)
+	: _name(other->_name)
+	, _type(other->data_type())
+	, _flags(Flag(other->_flags & ~Locked))
+	, _start(other->_start) 
+	, _length(other->_length) 
+	, _position(other->_position) 
+	, _sync_position(other->_sync_position)
+	, _layer(other->_layer)
 	, _first_edit(EditChangesID)
 	, _frozen(0)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
-	, _last_layer_op(other._last_layer_op)
+	, _last_layer_op(other->_last_layer_op)
 	, _playlist(0)
 {
 	_current_state_id = 0;
 	
-	other._first_edit = EditChangesName;
+	other->_first_edit = EditChangesName;
 
-	if (other._extra_xml) {
-		_extra_xml = new XMLNode (*other._extra_xml);
+	if (other->_extra_xml) {
+		_extra_xml = new XMLNode (*other->_extra_xml);
 	} else {
 		_extra_xml = 0;
 	}
 
-	set<Source*> unique_srcs;
+	set<boost::shared_ptr<Source> > unique_srcs;
 
-	for (SourceList::const_iterator i = other._sources.begin(); i != other._sources.end(); ++i) {
+	for (SourceList::const_iterator i = other->_sources.begin(); i != other->_sources.end(); ++i) {
 		_sources.push_back (*i);
-		(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
 		unique_srcs.insert (*i);
 	}
 
-	for (SourceList::const_iterator i = other._master_sources.begin(); i != other._master_sources.end(); ++i) {
+	for (SourceList::const_iterator i = other->_master_sources.begin(); i != other->_master_sources.end(); ++i) {
 		_master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
 		}
 	}
 	
@@ -215,22 +217,22 @@ Region::Region (SourceList& srcs, const XMLNode& node)
 	, _playlist(0)
 
 {
-	set<Source*> unique_srcs;
+	_current_state_id = 0;
+
+	set<boost::shared_ptr<Source> > unique_srcs;
 
 	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		_sources.push_back (*i);
-		(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
 		unique_srcs.insert (*i);
 	}
 
 	for (SourceList::iterator i = srcs.begin(); i != srcs.end(); ++i) {
 		_master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (mem_fun (*this, &Region::source_deleted));
+			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
 		}
 	}
-
-	_current_state_id = 0;
 
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -240,7 +242,7 @@ Region::Region (SourceList& srcs, const XMLNode& node)
 	assert(_sources.size() > 0);
 }
 
-Region::Region (Source& src, const XMLNode& node)
+Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	: _name(X_("error: XML did not reset this"))
 	, _type(DataType::NIL)
 	, _flags(Flag(0))
@@ -256,7 +258,7 @@ Region::Region (Source& src, const XMLNode& node)
 	, _last_layer_op(0)
 	, _playlist(0)
 {
-	_sources.push_back (&src);
+	_sources.push_back (src);
 
 	_current_state_id = 0;
 
@@ -270,6 +272,9 @@ Region::Region (Source& src, const XMLNode& node)
 
 Region::~Region ()
 {
+	notify_callbacks ();
+
+	/* derived classes must emit GoingAway */
 }
 
 void
@@ -395,7 +400,7 @@ Region::first_edit ()
 		_first_edit = EditChangesNothing;
 
 		send_change (NameChanged);
-		CheckNewRegion (this);
+		/// XXX CheckNewRegion (boost::shared_ptr<Region>(this));
 	}
 }
 
@@ -406,7 +411,7 @@ Region::move_to_natural_position (void *src)
 		return;
 	}
 
-	Region* whole_file_region = get_parent();
+	boost::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
 		set_position (whole_file_region->position() + _start, src);
@@ -464,7 +469,7 @@ Region::set_position_on_top (jack_nframes_t pos, void *src)
 		}
 	}
 
-	_playlist->raise_region_to_top (*this);
+	_playlist->raise_region_to_top (boost::shared_ptr<Region>(this));
 
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
@@ -906,7 +911,7 @@ Region::raise ()
 		return;
 	}
 
-	_playlist->raise_region (*this);
+	_playlist->raise_region (boost::shared_ptr<Region>(this));
 }
 
 void
@@ -916,7 +921,7 @@ Region::lower ()
 		return;
 	}
 
-	_playlist->lower_region (*this);
+	_playlist->lower_region (boost::shared_ptr<Region>(this));
 }
 
 void
@@ -927,7 +932,7 @@ Region::raise_to_top ()
 		return;
 	}
 
-	_playlist->raise_region_to_top (*this);
+	_playlist->raise_region_to_top (boost::shared_ptr<Region>(this));
 }
 
 void
@@ -937,7 +942,7 @@ Region::lower_to_bottom ()
 		return;
 	}
 
-	_playlist->lower_region_to_bottom (*this);
+	_playlist->lower_region_to_bottom (boost::shared_ptr<Region>(this));
 }
 
 void
@@ -1121,72 +1126,36 @@ Region::set_last_layer_op (uint64_t when)
 }
 
 bool
-Region::overlap_equivalent (const Region& other) const
+Region::overlap_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return coverage (other.first_frame(), other.last_frame()) != OverlapNone;
+	return coverage (other->first_frame(), other->last_frame()) != OverlapNone;
 }
 
 bool
-Region::equivalent (const Region& other) const
+Region::equivalent (boost::shared_ptr<const Region> other) const
 {
-	return _start == other._start &&
-		_position == other._position &&
-		_length == other._length;
+	return _start == other->_start &&
+		_position == other->_position &&
+		_length == other->_length;
 }
 
 bool
-Region::size_equivalent (const Region& other) const
+Region::size_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return _start == other._start &&
-		_length == other._length;
+	return _start == other->_start &&
+		_length == other->_length;
 }
 
 bool
-Region::region_list_equivalent (const Region& other) const
+Region::region_list_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return size_equivalent (other) && source_equivalent (other) && _name == other._name;
+	return size_equivalent (other) && source_equivalent (other) && _name == other->_name;
 }
 
 void
-Region::source_deleted (Source* ignored)
+Region::source_deleted (boost::shared_ptr<Source>)
 {
 	delete this;
-}
-
-void
-Region::lock_sources ()
-{
-	SourceList::iterator i;
-	set<Source*> unique_srcs;
-
-	for (i = _sources.begin(); i != _sources.end(); ++i) {
-		unique_srcs.insert (*i);
-		(*i)->use ();
-	}
-
-	for (i = _master_sources.begin(); i != _master_sources.end(); ++i) {
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->use ();
-		}
-	}
-}
-
-void
-Region::unlock_sources ()
-{
-	SourceList::iterator i;
-	set<Source*> unique_srcs;
-
-	for (i = _sources.begin(); i != _sources.end(); ++i) {
-		unique_srcs.insert (*i);
-		(*i)->release ();
-	}
-
-	for (i = _master_sources.begin(); i != _master_sources.end(); ++i) {
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->release ();
-		}
-	}
 }
 
 vector<string>
@@ -1203,18 +1172,21 @@ Region::master_source_names ()
 }
 
 bool
-Region::source_equivalent (const Region& other) const
+Region::source_equivalent (boost::shared_ptr<const Region> other) const
 {
+	if (!other)
+		return false;
+
 	SourceList::const_iterator i;
 	SourceList::const_iterator io;
 
-	for (i = _sources.begin(), io = other._sources.begin(); i != _sources.end() && io != other._sources.end(); ++i, ++io) {
+	for (i = _sources.begin(), io = other->_sources.begin(); i != _sources.end() && io != other->_sources.end(); ++i, ++io) {
 		if ((*i)->id() != (*io)->id()) {
 			return false;
 		}
 	}
 
-	for (i = _master_sources.begin(), io = other._master_sources.begin(); i != _master_sources.end() && io != other._master_sources.end(); ++i, ++io) {
+	for (i = _master_sources.begin(), io = other->_master_sources.begin(); i != _master_sources.end() && io != other->_master_sources.end(); ++i, ++io) {
 		if ((*i)->id() != (*io)->id()) {
 			return false;
 		}
@@ -1266,10 +1238,10 @@ Region::verify_start_mutable (jack_nframes_t& new_start)
 	return true;
 }
 
-Region*
+boost::shared_ptr<Region>
 Region::get_parent()
 {
-	Region* r = 0;
+	boost::shared_ptr<Region> r;
 
 	if (_playlist) {
 		r = _playlist->session().find_whole_file_parent (*this);

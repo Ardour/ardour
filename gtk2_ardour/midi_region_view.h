@@ -46,16 +46,16 @@ class MidiRegionView : public RegionView
 {
   public:
 	MidiRegionView (ArdourCanvas::Group *, 
-		 RouteTimeAxisView&,
-		 ARDOUR::MidiRegion&,
-		 double initial_samples_per_unit,
-		 Gdk::Color& basic_color);
+	                RouteTimeAxisView&,
+	                boost::shared_ptr<ARDOUR::MidiRegion>,
+	                double initial_samples_per_unit,
+	                Gdk::Color& basic_color);
 
 	~MidiRegionView ();
 	
 	virtual void init (Gdk::Color& base_color, bool wait_for_data = false);
 	
-	ARDOUR::MidiRegion& midi_region() const;
+	boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const;
     
     void show_region_editor ();
 
@@ -69,11 +69,11 @@ class MidiRegionView : public RegionView
     */
     
     MidiRegionView (ArdourCanvas::Group *, 
-		             RouteTimeAxisView&,
-		             ARDOUR::MidiRegion&,
-		             double      samples_per_unit,
-		             Gdk::Color& basic_color,
-		             TimeAxisViewItem::Visibility);
+	                RouteTimeAxisView&,
+	                boost::shared_ptr<ARDOUR::MidiRegion>,
+	                double samples_per_unit,
+	                Gdk::Color& basic_color,
+	                TimeAxisViewItem::Visibility);
     
     void region_moved (void *);
 

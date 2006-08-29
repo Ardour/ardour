@@ -144,7 +144,7 @@ LadspaPlugin::~LadspaPlugin ()
 	deactivate ();
 	cleanup ();
 
-	GoingAway (this); /* EMIT SIGNAL */
+	GoingAway (); /* EMIT SIGNAL */
 	
 	/* XXX who should close a plugin? */
 

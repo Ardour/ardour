@@ -13,9 +13,7 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-static map<PBD::ID, Stateful*> registry;
-
-void Session::register_with_memento_command_factory(PBD::ID id, Stateful *ptr)
+void Session::register_with_memento_command_factory(PBD::ID id, StatefulDestructible *ptr)
 {
     registry[id] = ptr;
 }
@@ -90,7 +88,8 @@ Command *Session::memento_command_factory(XMLNode *n)
     }
     // For Editor and AutomationLine which are off-limits here
     else if (registry.count(id))
-        return new MementoCommand<Stateful>(*registry[id], before, after);
+        return new MementoCommand<StatefulDestructible>(*registry[id], before, after);
+
 
     /* we failed */
     error << _("could not reconstitute MementoCommand from XMLNode. id=") << id.to_s() << endmsg;

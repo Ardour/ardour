@@ -48,68 +48,51 @@ using namespace std;
 using namespace ARDOUR;
 
 /** Basic MidiRegion constructor (one channel) */
-MidiRegion::MidiRegion (MidiSource& src, jack_nframes_t start, jack_nframes_t length, bool announce)
-	: Region (src, start, length, PBD::basename_nosuffix(src.name()), DataType::MIDI, 0,  Region::Flag(Region::DefaultFlags|Region::External))
+MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, jack_nframes_t start, jack_nframes_t length)
+	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::MIDI, 0,  Region::Flag(Region::DefaultFlags|Region::External))
 {
 	save_state ("initial state");
 
-	if (announce) {
-		 CheckNewRegion (this); /* EMIT SIGNAL */
-	}
-	
 	assert(_name.find("/") == string::npos);
 }
 
 /* Basic MidiRegion constructor (one channel) */
-MidiRegion::MidiRegion (MidiSource& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
+MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::MIDI, layer, flags)
 {
 	save_state ("initial state");
-
-	if (announce) {
-		 CheckNewRegion (this); /* EMIT SIGNAL */
-	}
 
 	assert(_name.find("/") == string::npos);
 }
 
 /* Basic MidiRegion constructor (many channels) */
-MidiRegion::MidiRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
+MidiRegion::MidiRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::MIDI, layer, flags)
 {
 	save_state ("initial state");
 
-	if (announce) {
-		 CheckNewRegion (this); /* EMIT SIGNAL */
-	}
-	
 	assert(_name.find("/") == string::npos);
 }
 
 
 /** Create a new MidiRegion, that is part of an existing one */
-MidiRegion::MidiRegion (const MidiRegion& other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
+MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, offset, length, name, layer, flags)
 {
 	save_state ("initial state");
 
-	if (announce) {
-		CheckNewRegion (this); /* EMIT SIGNAL */
-	}
-	
 	assert(_name.find("/") == string::npos);
 }
 
-MidiRegion::MidiRegion (const MidiRegion &other)
+MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 {
 	save_state ("initial state");
 
-	/* NOTE: no CheckNewRegion signal emitted here. This is the copy constructor */
 	assert(_name.find("/") == string::npos);
 }
 
-MidiRegion::MidiRegion (MidiSource& src, const XMLNode& node)
+MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
 	: Region (src, node)
 {
 	if (set_state (node)) {
@@ -120,8 +103,6 @@ MidiRegion::MidiRegion (MidiSource& src, const XMLNode& node)
 
 	assert(_name.find("/") == string::npos);
 	assert(_type == DataType::MIDI);
-
-	CheckNewRegion (this); /* EMIT SIGNAL */
 }
 
 MidiRegion::MidiRegion (SourceList& srcs, const XMLNode& node)
@@ -135,13 +116,11 @@ MidiRegion::MidiRegion (SourceList& srcs, const XMLNode& node)
 
 	assert(_name.find("/") == string::npos);
 	assert(_type == DataType::MIDI);
-
-	CheckNewRegion (this); /* EMIT SIGNAL */
 }
 
 MidiRegion::~MidiRegion ()
 {
-	GoingAway (this);
+	GoingAway (); /* EMIT SIGNAL */
 }
 
 StateManager::State*
@@ -260,12 +239,12 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst,
 
 	_read_data_count = 0;
 
-	MidiSource& src = midi_source(chan_n);
-	if (src.read (dst, _start + internal_offset, to_read, _position) != to_read) {
+	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
+	if (src->read (dst, _start + internal_offset, to_read, _position) != to_read) {
 		return 0; /* "read nothing" */
 	}
 
-	_read_data_count += src.read_data_count(); // FIXME: semantics?
+	_read_data_count += src->read_data_count(); // FIXME: semantics?
 
 	return to_read;
 }
@@ -380,10 +359,10 @@ MidiRegion::separate_by_channel (Session& session, vector<MidiRegion*>& v) const
 	return -1;
 }
 
-MidiSource&
+boost::shared_ptr<MidiSource>
 MidiRegion::midi_source (uint32_t n) const
 {
 	// Guaranteed to succeed (use a static cast?)
-	return dynamic_cast<MidiSource&>(source(n));
+	return boost::dynamic_pointer_cast<MidiSource>(source(n));
 }
 

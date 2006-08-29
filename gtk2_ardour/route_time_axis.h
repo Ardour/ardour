@@ -81,7 +81,7 @@ public:
 	void get_selectables (jack_nframes_t start, jack_nframes_t end, double top, double bot, list<Selectable *>&);
 	void get_inverted_selectables (Selection&, list<Selectable*>&);
 		
-	ARDOUR::Region* find_next_region (jack_nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (jack_nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
 
 	/* Editing operations */
 	bool cut_copy_clear (Selection&, Editing::CutCopyOp);

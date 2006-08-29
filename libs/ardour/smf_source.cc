@@ -70,8 +70,6 @@ SMFSource::SMFSource (std::string path, Flag flags)
 	}
 	
 	assert(_name.find("/") == string::npos);
-
-	SourceCreated (this); /* EMIT SIGNAL */
 }
 
 SMFSource::SMFSource (const XMLNode& node)
@@ -100,8 +98,6 @@ SMFSource::SMFSource (const XMLNode& node)
 	}
 	
 	assert(_name.find("/") == string::npos);
-	
-	SourceCreated (this); /* EMIT SIGNAL */
 }
 
 SMFSource::~SMFSource ()

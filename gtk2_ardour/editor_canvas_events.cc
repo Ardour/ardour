@@ -468,7 +468,7 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 }
 
 struct DescendingRegionLayerSorter {
-    bool operator()(Region* a, Region* b) {
+    bool operator()(boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
 	    return a->layer() > b->layer();
     }
 };
@@ -522,7 +522,7 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 					DescendingRegionLayerSorter cmp;
 					rl->sort (cmp);
 
-					RegionView* rv = atv->view()->find_view (*rl->front());
+					RegionView* rv = atv->view()->find_view (rl->front());
 
 					/* proxy */
 

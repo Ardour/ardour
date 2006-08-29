@@ -30,7 +30,9 @@
 #include <sigc++/signal.h>
 #include "canvas.h"
 #include "simplerect.h"
+
 #include <pbd/undo.h>
+#include <pbd/statefuldestructible.h> 
 
 #include <ardour/automation_event.h>
 
@@ -94,7 +96,7 @@ class ControlPoint
 	ShapeType _shape;
 };
 
-class AutomationLine : public sigc::trackable, public Stateful
+class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 {
   public:
         AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);

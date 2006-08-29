@@ -21,6 +21,8 @@
 #include <map>
 #include <vector>
 
+#include <sigc++/bind.h>
+
 #include <gtkmm/messagedialog.h>
 
 #include <glibmm/thread.h>
@@ -839,9 +841,9 @@ PortInsertWindow::PortInsertWindow (Session& sess, boost::shared_ptr<PortInsert>
 }
 
 void
-PortInsertWindow::plugin_going_away (ARDOUR::Redirect* ignored)
+PortInsertWindow::plugin_going_away ()
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PortInsertWindow::plugin_going_away), ignored));
+	ENSURE_GUI_THREAD(mem_fun(*this, &PortInsertWindow::plugin_going_away));
 	
 	delete_when_idle (this);
 }

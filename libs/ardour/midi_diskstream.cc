@@ -45,6 +45,7 @@
 #include <ardour/smf_source.h>
 #include <ardour/destructive_filesource.h>
 #include <ardour/send.h>
+#include <ardour/region_factory.h>
 #include <ardour/midi_playlist.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/midi_region.h>
@@ -66,7 +67,6 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	//, _playback_wrap_buffer(0)
 	//, _capture_wrap_buffer(0)
 	, _source_port(0)
-	, _write_source(0)
 	, _capture_transition_buf(0)
 	, _last_flush_frame(0)
 {
@@ -91,7 +91,6 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	//, _playback_wrap_buffer(0)
 	//, _capture_wrap_buffer(0)
 	, _source_port(0)
-	, _write_source(0)
 	, _capture_transition_buf(0)
 	, _last_flush_frame(0)
 {
@@ -972,7 +971,7 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 	uint32_t buffer_position;
 	bool more_work = true;
 	int err = 0;
-	MidiRegion* region = 0;
+	boost::shared_ptr<MidiRegion> region;
 	jack_nframes_t total_capture;
 	MidiRegion::SourceList srcs;
 	MidiRegion::SourceList::iterator src;
@@ -1007,15 +1006,15 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 
 	if (abort_capture) {
 
-		list<Source*>* deletion_list = new list<Source*>;
+		list<boost::shared_ptr<Source> >* deletion_list = new list<boost::shared_ptr<Source> >;
 
 		if (_write_source) {
+
 			_write_source->mark_for_remove ();
-			_write_source->release ();
 
 			deletion_list->push_back (_write_source);
 
-			_write_source = 0;
+			_write_source.reset();
 		}
 
 		/* new source set up in "out" below */
@@ -1036,7 +1035,7 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 
 		/* figure out the name for this take */
 
-		SMFSource* s = _write_source;
+		boost::shared_ptr<SMFSource> s = _write_source;
 
 		if (s) {
 
@@ -1056,10 +1055,12 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 		   */
 		try {
 			assert(_write_source);
-			region = new MidiRegion (srcs, _write_source->last_capture_start_frame(), total_capture, 
-					region_name_from_path (_write_source->name()), 
-					0, Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile));
+			
+			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, _write_source->last_capture_start_frame(), total_capture, 
+									     region_name_from_path (_write_source->name()), 
+									     0, Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
 
+			region = boost::dynamic_pointer_cast<MidiRegion> (rx);
 			region->special_set_position (capture_info.front()->start);
 		}
 
@@ -1084,11 +1085,12 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
 
 			try {
-				region = new MidiRegion (srcs, buffer_position, (*ci)->frames, region_name);
+				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, buffer_position, (*ci)->frames, region_name));
+				region = boost::dynamic_pointer_cast<MidiRegion> (rx);
 			}
 
 			catch (failed_constructor& err) {
-				error << _("MidiDiskstream: could not create region for captured audio!") << endmsg;
+				error << _("MidiDiskstream: could not create region for captured midi!") << endmsg;
 				continue; /* XXX is this OK? */
 			}
 
@@ -1097,7 +1099,7 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 			// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
 
 			i_am_the_modifier++;
-			_playlist->add_region (*region, (*ci)->start);
+			_playlist->add_region (region, (*ci)->start);
 			i_am_the_modifier--;
 
 			buffer_position += (*ci)->frames;
@@ -1361,16 +1363,14 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 
 		if (SMFSource::is_empty (_write_source->path())) {
 			_write_source->mark_for_remove ();
-			_write_source->release();
-			delete _write_source;
+			_write_source.reset();
 		} else {
-			_write_source->release();
-			_write_source = 0;
+			_write_source.reset();
 		}
 	}
 
 	try {
-		_write_source = dynamic_cast<SMFSource*>(_session.create_midi_source_for_session (*this));
+		_write_source = boost::dynamic_pointer_cast<SMFSource>(_session.create_midi_source_for_session (*this));
 		if (!_write_source) {
 			throw failed_constructor();
 		}
@@ -1378,11 +1378,10 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 
 	catch (failed_constructor &err) {
 		error << string_compose (_("%1:%2 new capture file not initialized correctly"), _name, n) << endmsg;
-		_write_source = 0;
+		_write_source.reset();
 		return -1;
 	}
 
-	_write_source->use ();
 	_write_source->set_allow_remove_if_empty (true);
 
 	return 0;

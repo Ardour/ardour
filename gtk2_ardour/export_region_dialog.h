@@ -27,7 +27,7 @@
 class ExportRegionDialog : public ExportDialog
 {
   public:
-	ExportRegionDialog (PublicEditor&, ARDOUR::Region*);
+	ExportRegionDialog (PublicEditor&, boost::shared_ptr<ARDOUR::Region>);
  
  	static void* _export_region_thread (void *);
 	void export_region ();
@@ -36,7 +36,7 @@ class ExportRegionDialog : public ExportDialog
 	void export_audio_data();
   
   private:
-	ARDOUR::AudioRegion* audio_region;
+	boost::shared_ptr<ARDOUR::AudioRegion> audio_region;
 };
 
 

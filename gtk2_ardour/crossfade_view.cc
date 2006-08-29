@@ -227,7 +227,7 @@ CrossfadeView::set_valid (bool yn)
 AudioRegionView&
 CrossfadeView::upper_regionview () const
 {
-	if (left_view.region().layer() > right_view.region().layer()) {
+	if (left_view.region()->layer() > right_view.region()->layer()) {
 		return left_view;
 	} else {
 		return right_view;

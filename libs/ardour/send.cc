@@ -64,7 +64,7 @@ Send::Send (const Send& other)
 
 Send::~Send ()
 {
-	GoingAway (this);
+	GoingAway ();
 }
 
 XMLNode&

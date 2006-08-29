@@ -54,7 +54,7 @@ class SendUI : public Gtk::HBox
 	sigc::connection screen_update_connection;
 	sigc::connection fast_screen_update_connection;
 		
-	void send_going_away (ARDOUR::Redirect*);
+	void send_going_away ();
 	void ins_changed (ARDOUR::IOChange, void*);
 	void outs_changed (ARDOUR::IOChange, void*);
 };
@@ -71,7 +71,7 @@ class SendUIWindow : public Gtk::Window
 	Gtk::VBox vpacker;
 	Gtk::HBox hpacker;
 
-	void send_going_away (ARDOUR::Redirect*);
+	void send_going_away ();
 };
 
 #endif /* __ardour_gtk_send_ui_h__ */

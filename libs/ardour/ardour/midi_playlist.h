@@ -69,10 +69,7 @@ public:
 		(obj.*method) (states, _current_state_id);
 	}
 
-	bool destroy_region (Region*);
-
-	void get_equivalent_regions (const MidiRegion&, std::vector<MidiRegion*>&);
-	void get_region_list_equivalent_regions (const MidiRegion&, std::vector<MidiRegion*>&);
+	bool destroy_region (boost::shared_ptr<Region>);
 
 	void drop_all_states ();
 
@@ -87,11 +84,11 @@ protected:
 	/* playlist "callbacks" */
 	void flush_notifications ();
 
-	void finalize_split_region (Region *orig, Region *left, Region *right);
-
-	void refresh_dependents (Region& region);
-	void check_dependents (Region& region, bool norefresh);
-	void remove_dependents (Region& region);
+	void finalize_split_region (boost::shared_ptr<Region> original, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right);
+	
+	void check_dependents (boost::shared_ptr<Region> region, bool norefresh);
+	void refresh_dependents (boost::shared_ptr<Region> region);
+	void remove_dependents (boost::shared_ptr<Region> region);
 
 protected:
 	~MidiPlaylist (); /* public should use unref() */
@@ -100,7 +97,7 @@ private:
 	XMLNode& state (bool full_state);
 	void dump () const;
 
-	bool region_changed (Change, Region*);
+	bool region_changed (Change, boost::shared_ptr<Region>);
 };
 
 } /* namespace ARDOUR */

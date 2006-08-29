@@ -53,11 +53,11 @@ class AudioRegionView;
 class AudioRegionEditor : public RegionEditor
 {
   public:
-	AudioRegionEditor (ARDOUR::Session&, ARDOUR::AudioRegion&, AudioRegionView& rv);
+	AudioRegionEditor (ARDOUR::Session&, boost::shared_ptr<ARDOUR::AudioRegion>, AudioRegionView& rv);
 	~AudioRegionEditor ();
 
   private:
-	ARDOUR::AudioRegion& _region;
+	boost::shared_ptr<ARDOUR::AudioRegion> _region;
 	AudioRegionView& _region_view;
 
 	void connect_editor_events ();

@@ -40,7 +40,7 @@ class Auditioner : public AudioTrack
 	Auditioner (Session&);
 	~Auditioner ();
 
-	void audition_region (AudioRegion&);
+	void audition_region (boost::shared_ptr<Region>);
 
 	ARDOUR::AudioPlaylist& prepare_playlist ();
 	void audition_current_playlist ();
@@ -54,7 +54,7 @@ class Auditioner : public AudioTrack
 	bool active() const { return g_atomic_int_get (&_active); }
 
   private:
-	AudioRegion *the_region;
+	boost::shared_ptr<AudioRegion> the_region;
 	jack_nframes_t current_frame;
 	mutable gint _active;
 	Glib::Mutex lock;

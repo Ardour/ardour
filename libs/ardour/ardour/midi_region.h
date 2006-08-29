@@ -46,16 +46,9 @@ class MidiRingBuffer;
 class MidiRegion : public Region
 {
   public:
-	MidiRegion (MidiSource&, jack_nframes_t start, jack_nframes_t length, bool announce = true);
-	MidiRegion (MidiSource&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	MidiRegion (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	MidiRegion (const MidiRegion&, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	MidiRegion (const MidiRegion&);
-	MidiRegion (MidiSource&, const XMLNode&);
-	MidiRegion (SourceList &, const XMLNode&);
 	~MidiRegion();
 
-	MidiSource& midi_source (uint32_t n=0) const;
+	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 
 	jack_nframes_t read_at (MidiRingBuffer& dst,
 			jack_nframes_t position,
@@ -75,6 +68,17 @@ class MidiRegion : public Region
 	int separate_by_channel (ARDOUR::Session&, vector<MidiRegion*>&) const;
 
 	UndoAction get_memento() const;
+
+  private:
+	friend class RegionFactory;
+
+	MidiRegion (boost::shared_ptr<MidiSource>, jack_nframes_t start, jack_nframes_t length);
+	MidiRegion (boost::shared_ptr<MidiSource>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	MidiRegion (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	MidiRegion (boost::shared_ptr<const MidiRegion>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	MidiRegion (boost::shared_ptr<const MidiRegion>);
+	MidiRegion (boost::shared_ptr<MidiSource>, const XMLNode&);
+	MidiRegion (SourceList &, const XMLNode&);
 
   private:
 	friend class Playlist;

@@ -28,8 +28,8 @@
 #include <ardour/midi_source.h>
 #include <ardour/midi_diskstream.h>
 #include <ardour/midi_track.h>
-//#include <ardour/playlist_templates.h>
-#include <ardour/midi_source.h>
+#include <ardour/smf_source.h>
+#include <ardour/region_factory.h>
 
 #include "midi_streamview.h"
 #include "region_view.h"
@@ -70,11 +70,11 @@ MidiStreamView::~MidiStreamView ()
 
 
 void
-MidiStreamView::add_region_view_internal (Region *r, bool wait_for_waves)
+MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &MidiStreamView::add_region_view), r));
 
-	MidiRegion* region = dynamic_cast<MidiRegion*> (r);
+	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
 
 	if (region == 0) {
 		return;
@@ -84,7 +84,7 @@ MidiStreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 	list<RegionView *>::iterator i;
 
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		if (&(*i)->region() == r) {
+		if ((*i)->region() == r) {
 			
 			/* great. we already have a MidiRegionView for this Region. use it again. */
 
@@ -96,7 +96,7 @@ MidiStreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 	// can't we all just get along?
 	assert(_trackview.midi_track()->mode() != Destructive);
 
-	region_view = new MidiRegionView (canvas_group, _trackview, *region, 
+	region_view = new MidiRegionView (canvas_group, _trackview, region, 
 			_samples_per_unit, region_color);
 
 	region_view->init (region_color, wait_for_waves);
@@ -109,7 +109,7 @@ MidiStreamView::add_region_view_internal (Region *r, bool wait_for_waves)
 
 	/* catch regionview going away */
 
-	region->GoingAway.connect (mem_fun (*this, &MidiStreamView::remove_region_view));
+	region->GoingAway.connect (bind (mem_fun (*this, &MidiStreamView::remove_region_view), region));
 	
 	RegionViewAdded (region_view);
 }
@@ -167,7 +167,7 @@ MidiStreamView::setup_rec_box ()
 				boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream>(_trackview.get_diskstream());
 				assert(mds);
 
-				sources.push_back((Source*)mds->write_source());
+				sources.push_back(mds->write_source());
 				
 				rec_data_ready_connections.push_back (mds->write_source()->ViewDataRangeReady.connect (bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), mds->write_source()))); 
 
@@ -178,11 +178,13 @@ MidiStreamView::setup_rec_box ()
 					start = rec_regions.back()->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
 				
-				MidiRegion * region = new MidiRegion(sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false);
+				boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion>
+					(RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false)));
+				assert(region);
 				region->set_position (_trackview.session().transport_frame(), this);
 				rec_regions.push_back (region);
 				/* catch it if it goes away */
-				region->GoingAway.connect (mem_fun (*this, &MidiStreamView::remove_rec_region));
+				region->GoingAway.connect (bind (mem_fun (*this, &MidiStreamView::remove_rec_region), region));
 
 				/* we add the region later */
 			}
@@ -250,23 +252,9 @@ MidiStreamView::setup_rec_box ()
 			last_rec_data_frame = 0;
 			
 			/* remove temp regions */
-			for (list<Region*>::iterator iter=rec_regions.begin(); iter != rec_regions.end(); )
-			{
-				list<Region*>::iterator tmp;
-
-				tmp = iter;
-				++tmp;
-
-				/* this will trigger the remove_region_view */
-				delete *iter;
-
-				iter = tmp;
-			}
-			
 			rec_regions.clear();
 
 			// cerr << "\tclear " << rec_rects.size() << " rec rects\n";
-		
 
 			/* transport stopped, clear boxes */
 			for (vector<RecBoxInfo>::iterator iter=rec_rects.begin(); iter != rec_rects.end(); ++iter) {
@@ -288,9 +276,9 @@ MidiStreamView::update_rec_regions ()
 
 		uint32_t n = 0;
 
-		for (list<Region*>::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
+		for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
 
-			list<Region*>::iterator tmp;
+			list<boost::shared_ptr<Region> >::iterator tmp;
 
 			tmp = iter;
 			++tmp;
@@ -301,8 +289,7 @@ MidiStreamView::update_rec_regions ()
 				continue;
 			}
 			
-			// FIXME?
-			MidiRegion * region = dynamic_cast<MidiRegion*>(*iter);
+			boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(*iter);
 			assert(region);
 
 			jack_nframes_t origlen = region->length();
@@ -338,7 +325,7 @@ MidiStreamView::update_rec_regions ()
 
 				if (nlen != region->length()) {
 
-					if (region->source(0).length() >= region->start() + nlen) {
+					if (region->source(0)->length() >= region->start() + nlen) {
 
 						region->freeze ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
@@ -364,7 +351,7 @@ MidiStreamView::update_rec_regions ()
 }
 
 void
-MidiStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t cnt, Source * src)
+MidiStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t cnt, boost::shared_ptr<Source> src)
 {
 	// this is called from the butler thread for now
 	// yeah we need a "peak" building thread or something, though there's not really any

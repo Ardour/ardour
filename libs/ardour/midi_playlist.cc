@@ -129,44 +129,19 @@ MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, jack_nframes_t start, jac
 
 MidiPlaylist::~MidiPlaylist ()
 {
-	set <Region*> all_regions;
-
-	GoingAway (this);
-
-	/* find every region we've ever used, and add it to the set of
-	   all regions.
-	*/
-
-	for (RegionList::iterator x = regions.begin(); x != regions.end(); ++x) {
-		all_regions.insert (*x);
-	}
+  	GoingAway (); /* EMIT SIGNAL */
 
 	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {
 
 		MidiPlaylist::State* apstate = dynamic_cast<MidiPlaylist::State*> (*i);
-
-		for (RegionList::iterator r = apstate->regions.begin(); r != apstate->regions.end(); ++r) {
-			all_regions.insert (*r);
-		}
-
 		delete apstate;
 	}
-
-	/* delete every region */
-
-	for (set<Region *>::iterator ar = all_regions.begin(); ar != all_regions.end(); ++ar) {
-		(*ar)->unlock_sources ();
-		delete *ar;
-	}
-
 }
 
-struct RegionSortByLayer
-{
-	bool operator() (Region *a, Region *b)
-	{
-		return a->layer() < b->layer();
-	}
+struct RegionSortByLayer {
+    bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+	    return a->layer() < b->layer();
+    }
 };
 
 /** Returns the number of frames in time duration read (eg could be large when 0 events are read) */
@@ -187,22 +162,24 @@ MidiPlaylist::read (MidiRingBuffer& dst, jack_nframes_t start,
 
 	//_read_data_count = 0;
 
-	vector<MidiRegion*> regs; // relevent regions overlapping start <--> end
+	// relevent regions overlapping start <--> end
+	vector<boost::shared_ptr<Region> > regs;
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		MidiRegion* const mr = dynamic_cast<MidiRegion*>(*i);
-		if (mr && mr->coverage (start, end) != OverlapNone) {
-			regs.push_back(mr);
+
+		if ((*i)->coverage (start, end) != OverlapNone) {
+			regs.push_back(*i);
 		}
 	}
 
 	RegionSortByLayer layer_cmp;
 	sort(regs.begin(), regs.end(), layer_cmp);
 
-	for (vector<MidiRegion*>::iterator i = regs.begin(); i != regs.end(); ++i) {
+	for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
 		// FIXME: ensure time is monotonic here
-		(*i)->read_at (dst, start, dur, chan_n, 0, 0);// FIXME read_frames, skip_frames);
-		ret += (*i)->read_data_count();
+		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
+		mr->read_at (dst, start, dur, chan_n, 0, 0);// FIXME read_frames, skip_frames);
+		ret += mr->read_data_count();
 	}
 
 	_read_data_count += ret;
@@ -213,16 +190,8 @@ MidiPlaylist::read (MidiRingBuffer& dst, jack_nframes_t start,
 
 
 void
-MidiPlaylist::remove_dependents (Region& region)
+MidiPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 {
-	MidiRegion* r = dynamic_cast<MidiRegion*> (&region);
-
-	if (r == 0) {
-		PBD::fatal << _("programming error: non-midi Region passed to remove_overlap in midi playlist")
-		<< endmsg;
-		return;
-	}
-
 }
 
 
@@ -241,17 +210,12 @@ MidiPlaylist::flush_notifications ()
 }
 
 void
-MidiPlaylist::refresh_dependents (Region& r)
+MidiPlaylist::refresh_dependents (boost::shared_ptr<Region> r)
 {
-	MidiRegion* ar = dynamic_cast<MidiRegion*>(&r);
-
-	if (ar == 0) {
-		return;
-	}
 }
 
 void
-MidiPlaylist::finalize_split_region (Region *o, Region *l, Region *r)
+MidiPlaylist::finalize_split_region (boost::shared_ptr<Region> original, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right)
 {
 	throw; // I don't wanna
 	/*
@@ -293,48 +257,8 @@ MidiPlaylist::finalize_split_region (Region *o, Region *l, Region *r)
 }
 
 void
-MidiPlaylist::check_dependents (Region& r, bool norefresh)
+MidiPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 {
-	MidiRegion* other;
-	MidiRegion* region;
-	MidiRegion* top;
-	MidiRegion* bottom;
-
-	if (in_set_state || in_partition) {
-		return;
-	}
-
-	if ((region = dynamic_cast<MidiRegion*> (&r)) == 0) {
-		PBD::fatal << _("programming error: non-midi Region tested for overlap in midi playlist")
-		<< endmsg;
-		return;
-	}
-
-	if (!norefresh) {
-		refresh_dependents (r);
-	}
-
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		other = dynamic_cast<MidiRegion*> (*i);
-
-		if (other == region) {
-			continue;
-		}
-
-		if (other->muted() || region->muted()) {
-			continue;
-		}
-
-		if (other->layer() < region->layer()) {
-			top = region;
-			bottom = other;
-		} else {
-			top = other;
-			bottom = region;
-		}
-
-	}
 }
 
 
@@ -362,14 +286,14 @@ MidiPlaylist::set_state (const XMLNode& node)
 void
 MidiPlaylist::drop_all_states ()
 {
-	set<Region*> all_regions;
+	set<boost::shared_ptr<Region> > all_regions;
 
-	/* find every region we've ever used, and add it to the set of
+	/* find every region we've ever used, and add it to the set of 
 	   all regions. same for xfades;
 	*/
 
 	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {
-
+		
 		MidiPlaylist::State* apstate = dynamic_cast<MidiPlaylist::State*> (*i);
 
 		for (RegionList::iterator r = apstate->regions.begin(); r != apstate->regions.end(); ++r) {
@@ -379,21 +303,13 @@ MidiPlaylist::drop_all_states ()
 
 	/* now remove from the "all" lists every region that is in the current list. */
 
-	for (list<Region*>::iterator i = regions.begin(); i != regions.end(); ++i) {
-		set
-			<Region*>::iterator x = all_regions.find (*i);
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		set<boost::shared_ptr<Region> >::iterator x = all_regions.find (*i);
 		if (x != all_regions.end()) {
 			all_regions.erase (x);
 		}
 	}
-
-	/* delete every region that is left - these are all things that are part of our "history" */
-
-	for (set<Region *>::iterator ar = all_regions.begin(); ar != all_regions.end(); ++ar) {
-		(*ar)->unlock_sources ();
-		delete *ar;
-	}
-
+	
 	/* Now do the generic thing ... */
 
 	StateManager::drop_all_states ();
@@ -456,7 +372,7 @@ MidiPlaylist::state (bool full_state)
 void
 MidiPlaylist::dump () const
 {
-	Region *r;
+	boost::shared_ptr<Region> r;
 
 	cerr << "Playlist \"" << _name << "\" " << endl
 	<< regions.size() << " regions "
@@ -475,9 +391,9 @@ MidiPlaylist::dump () const
 }
 
 bool
-MidiPlaylist::destroy_region (Region* region)
+MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 {
-	MidiRegion* r = dynamic_cast<MidiRegion*> (region);
+	boost::shared_ptr<MidiRegion> r = boost::dynamic_pointer_cast<MidiRegion> (region);
 	bool changed = false;
 
 	if (r == 0) {
@@ -498,7 +414,6 @@ MidiPlaylist::destroy_region (Region* region)
 			++tmp;
 
 			if ((*i) == region) {
-				(*i)->unlock_sources ();
 				regions.erase (i);
 				changed = true;
 			}
@@ -549,41 +464,8 @@ MidiPlaylist::destroy_region (Region* region)
 	return changed;
 }
 
-
-void
-MidiPlaylist::get_equivalent_regions (const MidiRegion& other, vector<MidiRegion*>& results)
-{
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		MidiRegion* ar = dynamic_cast<MidiRegion*> (*i);
-
-		if (ar) {
-			if (Config->get_use_overlap_equivalency()) {
-				if (ar->overlap_equivalent (other)) {
-					results.push_back (ar);
-				} else if (ar->equivalent (other)) {
-					results.push_back (ar);
-				}
-			}
-		}
-	}
-}
-
-void
-MidiPlaylist::get_region_list_equivalent_regions (const MidiRegion& other, vector<MidiRegion*>& results)
-{
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		MidiRegion* ar = dynamic_cast<MidiRegion*> (*i);
-
-		if (ar && ar->region_list_equivalent (other)) {
-			results.push_back (ar);
-		}
-	}
-}
-
 bool
-MidiPlaylist::region_changed (Change what_changed, Region* region)
+MidiPlaylist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 {
 	if (in_flush || in_set_state) {
 		return false;

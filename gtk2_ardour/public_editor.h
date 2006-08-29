@@ -11,6 +11,8 @@
 #include <jack/types.h>
 #include <sigc++/signal.h>
 
+#include <pbd/statefuldestructible.h> 
+
 #include "editing.h"
 #include "keyboard_target.h"
 #include "canvas.h"
@@ -52,7 +54,7 @@ class ImageFrameView;
 class ImageFrameTimeAxis;
 class MarkerView;
 
-class PublicEditor : public Gtk::Window, public Stateful {
+class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
   public:
 	PublicEditor();
 	virtual ~PublicEditor();
@@ -76,7 +78,7 @@ class PublicEditor : public Gtk::Window, public Stateful {
 	virtual void connect_to_image_compositor()  = 0;
 	virtual void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)  = 0;
 	virtual TimeAxisView* get_named_time_axis(const string & name)  = 0;
-	virtual void consider_auditioning (ARDOUR::Region&) = 0;
+	virtual void consider_auditioning (boost::shared_ptr<ARDOUR::Region>) = 0;
 	virtual void set_show_waveforms (bool yn) = 0;
 	virtual bool show_waveforms() const = 0;
 	virtual void set_show_waveforms_recording (bool yn) = 0;

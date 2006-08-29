@@ -207,7 +207,7 @@ class PluginUIWindow : public ArdourDialog
 	
   private:
 	PlugUIBase* _pluginui;
-	void plugin_going_away (ARDOUR::Redirect*);
+	void plugin_going_away ();
 };
 
 #ifdef VST_SUPPORT

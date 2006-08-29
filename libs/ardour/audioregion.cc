@@ -65,11 +65,11 @@ AudioRegionState::AudioRegionState (string why)
 }
 
 /** Basic AudioRegion constructor (one channel) */
-AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t length, bool announce)
-	: Region (src, start, length, PBD::basename_nosuffix(src.name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External))
-	, _fade_in (0.0, 2.0, 1.0, false)
-	, _fade_out (0.0, 2.0, 1.0, false)
-	, _envelope (0.0, 2.0, 1.0, false)
+AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t start, jack_nframes_t length)
+	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External)),
+	  _fade_in (0.0, 2.0, 1.0, false),
+	  _fade_out (0.0, 2.0, 1.0, false),
+	  _envelope (0.0, 2.0, 1.0, false)
 {
 	_scale_amplitude = 1.0;
 
@@ -79,14 +79,10 @@ AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t
 	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
-
-	if (announce) {
-		 CheckNewRegion (this); /* EMIT SIGNAL */
-	}
 }
 
 /* Basic AudioRegion constructor (one channel) */
-AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
+AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::AUDIO, layer, flags)
 	, _fade_in (0.0, 2.0, 1.0, false)
 	, _fade_out (0.0, 2.0, 1.0, false)
@@ -99,14 +95,10 @@ AudioRegion::AudioRegion (AudioSource& src, jack_nframes_t start, jack_nframes_t
 	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
-
-	if (announce) {
-		 CheckNewRegion (this); /* EMIT SIGNAL */
-	}
 }
 
 /* Basic AudioRegion constructor (many channels) */
-AudioRegion::AudioRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
+AudioRegion::AudioRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::AUDIO, layer, flags)
 	, _fade_in (0.0, 2.0, 1.0, false)
 	, _fade_out (0.0, 2.0, 1.0, false)
@@ -119,19 +111,15 @@ AudioRegion::AudioRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t
 	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
-
-	if (announce) {
-		 CheckNewRegion (this); /* EMIT SIGNAL */
-	}
 }
 
 
 /** Create a new AudioRegion, that is part of an existing one */
-AudioRegion::AudioRegion (const AudioRegion& other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags, bool announce)
-	: Region (other, offset, length, name, layer, flags)
-	, _fade_in (other._fade_in)
-	, _fade_out (other._fade_out)
-	, _envelope (other._envelope, (double) offset, (double) offset + length) 
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+	: Region (other, offset, length, name, layer, flags),
+	  _fade_in (other->_fade_in),
+	  _fade_out (other->_fade_out),
+	  _envelope (other->_envelope, (double) offset, (double) offset + length) 
 {
 	/* return to default fades if the existing ones are too long */
 	_fade_in_disabled = 0;
@@ -142,7 +130,7 @@ AudioRegion::AudioRegion (const AudioRegion& other, jack_nframes_t offset, jack_
 		if (_fade_in.back()->when >= _length) {
 			set_default_fade_in ();
 		} else {
-			_fade_in_disabled = other._fade_in_disabled;
+			_fade_in_disabled = other->_fade_in_disabled;
 		}
 		set_default_fade_out ();
 		_flags = Flag (_flags & ~Region::LeftOfSplit);
@@ -152,31 +140,29 @@ AudioRegion::AudioRegion (const AudioRegion& other, jack_nframes_t offset, jack_
 		if (_fade_out.back()->when >= _length) {
 			set_default_fade_out ();
 		} else {
-			_fade_out_disabled = other._fade_out_disabled;
+			_fade_out_disabled = other->_fade_out_disabled;
 		}
 		set_default_fade_in ();
 		_flags = Flag (_flags & ~Region::RightOfSplit);
 	}
 
-	_scale_amplitude = other._scale_amplitude;
+	_scale_amplitude = other->_scale_amplitude;
 
 	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
-
-	if (announce) {
-		CheckNewRegion (this); /* EMIT SIGNAL */
-	}
+	
+	assert(_type == DataType::AUDIO);
 }
 
-AudioRegion::AudioRegion (const AudioRegion &other)
-	: Region (other)
-	, _fade_in (other._fade_in)
-	, _fade_out (other._fade_out)
-	, _envelope (other._envelope) 
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
+	: Region (other),
+	  _fade_in (other->_fade_in),
+	  _fade_out (other->_fade_out),
+	  _envelope (other->_envelope) 
 {
-	_scale_amplitude = other._scale_amplitude;
-	_envelope = other._envelope;
+	_scale_amplitude = other->_scale_amplitude;
+	_envelope = other->_envelope;
 
 	_fade_in_disabled = 0;
 	_fade_out_disabled = 0;
@@ -185,10 +171,10 @@ AudioRegion::AudioRegion (const AudioRegion &other)
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 
-	/* NOTE: no CheckNewRegion signal emitted here. This is the copy constructor */
+	assert(_type == DataType::AUDIO);
 }
 
-AudioRegion::AudioRegion (AudioSource& src, const XMLNode& node)
+AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
 	: Region (src, node)
 	, _fade_in (0.0, 2.0, 1.0, false)
 	, _fade_out (0.0, 2.0, 1.0, false)
@@ -205,8 +191,6 @@ AudioRegion::AudioRegion (AudioSource& src, const XMLNode& node)
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 
 	assert(_type == DataType::AUDIO);
-
-	CheckNewRegion (this); /* EMIT SIGNAL */
 }
 
 AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
@@ -227,13 +211,11 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 
 	assert(_type == DataType::AUDIO);
-
-	CheckNewRegion (this); /* EMIT SIGNAL */
 }
 
 AudioRegion::~AudioRegion ()
 {
-	GoingAway (this);
+	GoingAway (); /* EMIT SIGNAL */
 }
 
 StateManager::State*
@@ -345,7 +327,7 @@ AudioRegion::read_peaks (PeakData *buf, jack_nframes_t npeaks, jack_nframes_t of
 		return 0; 
 	}
 	
-	if (audio_source(chan_n).read_peaks (buf, npeaks, offset, cnt, samples_per_unit)) {
+	if (audio_source(chan_n)->read_peaks (buf, npeaks, offset, cnt, samples_per_unit)) {
 		return 0;
 	} else {
 		if (_scale_amplitude != 1.0) {
@@ -419,12 +401,12 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 
 	_read_data_count = 0;
 
-	AudioSource& src = audio_source(chan_n);
-	if (src.read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
+	boost::shared_ptr<AudioSource> src = audio_source(chan_n);
+	if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
 		return 0; /* "read nothing" */
 	}
 
-	_read_data_count += src.read_data_count();
+	_read_data_count += src->read_data_count();
 
 	/* fade in */
 
@@ -974,7 +956,7 @@ AudioRegion::separate_by_channel (Session& session, vector<AudioRegion*>& v) con
 int
 AudioRegion::apply (AudioFilter& filter)
 {
-	return filter.run (*this);
+	return filter.run (boost::shared_ptr<AudioRegion> (this));
 }
 
 int
@@ -1002,7 +984,7 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 		
 		if (spec.channels == 1) {
 
-			if (audio_source().read (spec.dataF, _start + spec.pos, to_read) != to_read) {
+			if (audio_source()->read (spec.dataF, _start + spec.pos, to_read) != to_read) {
 				goto out;
 			}
 
@@ -1012,7 +994,7 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 
 			for (uint32_t chan = 0; chan < spec.channels; ++chan) {
 				
-				if (audio_source(chan).read (buf, _start + spec.pos, to_read) != to_read) {
+				if (audio_source(chan)->read (buf, _start + spec.pos, to_read) != to_read) {
 					goto out;
 				}
 				
@@ -1090,7 +1072,7 @@ AudioRegion::normalize_to (float target_dB)
 
 			/* read it in */
 
-			if (audio_source (n).read (buf, fpos, to_read) != to_read) {
+			if (audio_source (n)->read (buf, fpos, to_read) != to_read) {
 				return;
 			}
 			
@@ -1178,16 +1160,16 @@ AudioRegion::speed_mismatch (float sr) const
 		return false;
 	}
 
-	float fsr = audio_source().sample_rate();
+	float fsr = audio_source()->sample_rate();
 
 	return fsr != sr;
 }
 
-AudioSource&
+boost::shared_ptr<AudioSource>
 AudioRegion::audio_source (uint32_t n) const
 {
 	// Guaranteed to succeed (use a static cast?)
-	return dynamic_cast<AudioSource&>(source(n));
+	return boost::dynamic_pointer_cast<AudioSource>(source(n));
 }
 
 extern "C" {
@@ -1205,7 +1187,7 @@ uint32_t region_length_from_c (void *arg)
 
 uint32_t sourcefile_length_from_c (void *arg, double zoom_factor)
 {
-	return ( (AudioRegion *) arg)->audio_source().available_peaks (zoom_factor) ;
+	return ( (AudioRegion *) arg)->audio_source()->available_peaks (zoom_factor) ;
 }
 
 } /* extern "C" */

@@ -92,7 +92,6 @@ class Redirect : public IO
 	sigc::signal<void,Redirect*,void*> placement_changed;
 	sigc::signal<void,Redirect*,bool>  AutomationPlaybackChanged;
 	sigc::signal<void,Redirect*,uint32_t> AutomationChanged;
-	sigc::signal<void,Redirect*> GoingAway;
 
 	static sigc::signal<void,Redirect*> RedirectCreated;
 	

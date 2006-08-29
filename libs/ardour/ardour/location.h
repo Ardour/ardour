@@ -33,6 +33,7 @@
 
 #include <pbd/undo.h>
 #include <pbd/stateful.h> 
+#include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/state_manager.h>
@@ -41,7 +42,7 @@ using std::string;
 
 namespace ARDOUR {
 
-class Location : public Stateful, public sigc::trackable
+class Location : public sigc::trackable, public PBD::StatefulDestructible
 {
   public:
 	enum Flags {
@@ -72,6 +73,7 @@ class Location : public Stateful, public sigc::trackable
 	}
 
 	Location (const Location& other);
+	Location (const XMLNode&);
 	Location* operator= (const Location& other);
 
 	jack_nframes_t start() { return _start; }
@@ -132,7 +134,7 @@ class Location : public Stateful, public sigc::trackable
 	bool set_flag_internal (bool yn, Flags flag);
 };
 
-class Locations : public Stateful, public StateManager
+class Locations : public StateManager, public PBD::StatefulDestructible
 {
   public:
 	typedef std::list<Location *> LocationList;

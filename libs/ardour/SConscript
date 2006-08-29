@@ -84,6 +84,7 @@ plugin_manager.cc
 recent_sessions.cc
 redirect.cc
 region.cc
+region_factory.cc
 reverse.cc
 route.cc
 route_group.cc
@@ -103,6 +104,7 @@ session_transport.cc
 sndfile_helpers.cc
 sndfilesource.cc
 source.cc
+source_factory.cc
 state_manager.cc
 tempo.cc
 utils.cc

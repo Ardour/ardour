@@ -28,6 +28,8 @@
 #include <ardour/session.h>
 #include <ardour/audioregion.h>
 #include <ardour/sndfilesource.h>
+#include <ardour/region_factory.h>
+#include <ardour/source_factory.h>
 
 #include "i18n.h"
 
@@ -36,12 +38,12 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace soundtouch;
 
-AudioRegion*
+boost::shared_ptr<AudioRegion>
 Session::tempoize_region (TimeStretchRequest& tsr)
 {
-	AudioRegion::SourceList sources;
-	AudioRegion::SourceList::iterator it;
-	AudioRegion* r = 0;
+	SourceList sources;
+	SourceList::iterator it;
+	boost::shared_ptr<AudioRegion> r;
 	SoundTouch st;
 	string region_name;
 	string ident = X_("-TIMEFX-");
@@ -80,10 +82,9 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		}
 
 		try {
-			sources.push_back (new SndFileSource (path, 
-							      Config->get_native_file_data_format(),
-							      Config->get_native_file_header_format(),
-							      frame_rate()));
+			sources.push_back (boost::dynamic_pointer_cast<AudioFileSource> (
+				SourceFactory::createWritable (DataType::AUDIO, path, false, frame_rate())));
+
 		} catch (failed_constructor& err) {
 			error << string_compose (_("tempoize: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
 			goto out;
@@ -99,7 +100,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 			jack_nframes_t pos = 0;
 			jack_nframes_t this_read = 0;
 
-			AudioSource* const asrc = dynamic_cast<AudioSource*>(sources[i]);
+			boost::shared_ptr<AudioSource> asrc = boost::dynamic_pointer_cast<AudioSource>(sources[i]);
 			if (!asrc) {
 				cerr << "FIXME: TimeFX for non-audio" << endl;
 				continue;
@@ -158,7 +159,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 	xnow = localtime (&now);
 
 	for (it = sources.begin(); it != sources.end(); ++it) {
-		AudioFileSource* afs = dynamic_cast<AudioFileSource*>(*it);
+		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*it);
 		if (afs) {
 			afs->update_header (tsr.region->position(), *xnow, now);
 		}
@@ -166,10 +167,9 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 
 	region_name = tsr.region->name() + X_(".t");
 
-	r = new AudioRegion (sources, 0, sources.front()->length(), region_name,
-			     0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile));
-
-
+	r = (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, 0, sources.front()->length(), region_name,
+									      0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile))));
+	     
   out:
 
 	if (sources.size()) {
@@ -178,21 +178,19 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		   for deletion.
 		*/
 
-		if ((r == 0 || !tsr.running)) {
+		if ((!r || !tsr.running)) {
 			for (it = sources.begin(); it != sources.end(); ++it) {
 				(*it)->mark_for_remove ();
-				delete *it;
 			}
 		}
+
+		sources.clear ();
 	}
 	
 	/* if the process was cancelled, delete the region */
 
 	if (!tsr.running) {
-		if (r) {
-			delete r;
-			r = 0;
-		} 
+		r.reset ();
 	}
 	
 	return r;

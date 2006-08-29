@@ -27,8 +27,11 @@
 
 #include <sigc++/signal.h>
 #include <glibmm/thread.h>
+
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
+#include <pbd/statefuldestructible.h> 
+
 #include <ardour/ardour.h>
 #include <ardour/state_manager.h>
 
@@ -51,7 +54,7 @@ struct ControlEvent {
 
 };
 
-class AutomationList : public StateManager, public Stateful
+ class AutomationList : public StateManager, public PBD::StatefulDestructible
 {
   public:
 	typedef std::list<ControlEvent*> AutomationEventList;

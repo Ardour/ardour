@@ -376,7 +376,7 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt)
 	}
 
 	if (_build_peakfiles) {
-		queue_for_peaks (*this);
+		queue_for_peaks (this);
 	}
 	
 	return cnt;

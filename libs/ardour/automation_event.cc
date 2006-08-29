@@ -136,6 +136,8 @@ AutomationList::~AutomationList()
 	std::set<ControlEvent*> all_events;
 	AutomationList::State* asp;
 
+	GoingAway ();
+
 	for (AutomationEventList::iterator x = events.begin(); x != events.end(); ++x) {
 		all_events.insert (*x);
 	}

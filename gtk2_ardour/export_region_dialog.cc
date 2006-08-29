@@ -28,11 +28,10 @@
 #include "i18n.h"
 
 
-ExportRegionDialog::ExportRegionDialog (PublicEditor& editor, ARDOUR::Region* region) 
+ExportRegionDialog::ExportRegionDialog (PublicEditor& editor, boost::shared_ptr<ARDOUR::Region> region) 
 	: ExportDialog(editor)
 {
-	// FIXME
-	ARDOUR::AudioRegion* audio_region = dynamic_cast<ARDOUR::AudioRegion*>(region);
+	boost::shared_ptr<ARDOUR::AudioRegion> audio_region = boost::dynamic_pointer_cast<ARDOUR::AudioRegion>(region);
 	assert(audio_region);
 
 	do_not_allow_track_and_master_selection();

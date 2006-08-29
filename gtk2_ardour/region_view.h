@@ -43,7 +43,7 @@ class RegionView : public TimeAxisViewItem
   public:
 	RegionView (ArdourCanvas::Group* parent, 
 	            TimeAxisView&        time_view,
-	            ARDOUR::Region&      region,
+	            boost::shared_ptr<ARDOUR::Region> region,
 	            double               samples_per_unit,
 	            Gdk::Color&          basic_color);
 
@@ -51,7 +51,7 @@ class RegionView : public TimeAxisViewItem
 	
 	virtual void init (Gdk::Color& base_color, bool wait_for_data);
     
-	ARDOUR::Region& region() const { return _region; }
+	boost::shared_ptr<ARDOUR::Region> region() const { return _region; }
 	
 	bool is_valid() const    { return valid; }
     void set_valid (bool yn) { valid = yn; }
@@ -91,30 +91,12 @@ class RegionView : public TimeAxisViewItem
      * to the TimeAxisViewItem parent class
 	 */
     RegionView (ArdourCanvas::Group *, 
-	            TimeAxisView&,
-	            ARDOUR::Region&,
-	            double      samples_per_unit,
-	            Gdk::Color& basic_color,
-	            TimeAxisViewItem::Visibility);
+		TimeAxisView&,
+		boost::shared_ptr<ARDOUR::Region>,
+		double      samples_per_unit,
+		Gdk::Color& basic_color,
+		TimeAxisViewItem::Visibility);
     
-	ARDOUR::Region& _region;
-    
-    ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position 
-    ArdourCanvas::Text*    no_wave_msg;
-
-    RegionEditor *editor;
-
-    vector<ControlPoint *> control_points;
-    double current_visible_sync_position;
-
-    bool     valid; ///< see StreamView::redisplay_diskstream() 
-    double  _pixel_width;
-    double  _height;
-    bool    in_destructor;
-
-    bool             wait_for_data;
-	sigc::connection data_ready_connection;
-
     virtual void region_resized (ARDOUR::Change);
     void         region_moved (void *);
     virtual void region_muted ();
@@ -132,9 +114,27 @@ class RegionView : public TimeAxisViewItem
     virtual void set_frame_color ();
     virtual void reset_width_dependent_items (double pixel_width);
 
-    vector<GhostRegion*> ghosts;
-    
     virtual void color_handler (ColorID, uint32_t) {}
+	
+    boost::shared_ptr<ARDOUR::Region> _region;
+    
+    ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position 
+    ArdourCanvas::Text*    no_wave_msg;
+
+    RegionEditor* editor;
+
+    vector<ControlPoint *> control_points;
+    double current_visible_sync_position;
+
+    bool     valid; ///< see StreamView::redisplay_diskstream() 
+    double  _pixel_width;
+    double  _height;
+    bool    in_destructor;
+    
+    bool             wait_for_data;
+    sigc::connection data_ready_connection;
+    
+    vector<GhostRegion*> ghosts;
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

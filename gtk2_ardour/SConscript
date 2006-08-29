@@ -212,6 +212,10 @@ itest_files=Split("""
 itest.cc
 """)
 
+stest_files=Split("""
+stest.cc
+""")
+
 extra_sources = []
 
 vst_files = [ 'vst_pluginui.cc' ]

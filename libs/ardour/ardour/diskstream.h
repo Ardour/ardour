@@ -34,7 +34,7 @@
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
 #include <pbd/stateful.h>
-#include <pbd/destructible.h>
+#include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
@@ -54,7 +54,7 @@ class Session;
 class Playlist;
 class IO;
 
- class Diskstream : public Stateful, public sigc::trackable, public PBD::Destructible
+ class Diskstream : public sigc::trackable, public PBD::StatefulDestructible
 {	
   public:
 	enum Flag {
@@ -134,7 +134,7 @@ class IO;
 
 	int set_loop (Location *loc);
 
-	std::list<Region*>& last_capture_regions () { return _last_capture_regions; }
+	std::list<boost::shared_ptr<Region> >& last_capture_regions () { return _last_capture_regions; }
 
 	void handle_input_change (IOChange, void *src);
 
@@ -147,7 +147,7 @@ class IO;
 
 	static sigc::signal<void>                DiskOverrun;
 	static sigc::signal<void>                DiskUnderrun;
-	static sigc::signal<void,list<Source*>*> DeleteSources;
+	static sigc::signal<void,std::list<boost::shared_ptr<Source> >*> DeleteSources;
 
   protected:
 	friend class Session;
@@ -224,7 +224,7 @@ class IO;
 
 	virtual bool realtime_set_speed (double, bool global_change);
 
-	std::list<Region*> _last_capture_regions;
+	std::list<boost::shared_ptr<Region> > _last_capture_regions;
 	virtual int use_pending_capture_data (XMLNode& node) = 0;
 
 	virtual void get_input_sources () = 0;

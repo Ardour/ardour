@@ -23,10 +23,12 @@
 
 #include <vector>
 #include <algorithm>
+#include <boost/shared_ptr.hpp>
 
 #include <sigc++/signal.h>
 
 #include <pbd/undo.h>
+#include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/curve.h>
@@ -51,7 +53,7 @@ struct CrossfadeState : public StateManager::State {
     bool           active;
 };
 
-class Crossfade : public Stateful, public StateManager
+class Crossfade : public PBD::StatefulDestructible, public StateManager
 {
   public:
 
@@ -62,7 +64,7 @@ class Crossfade : public Stateful, public StateManager
 	
 	/* constructor for "fixed" xfades at each end of an internal overlap */
 
-	Crossfade (ARDOUR::AudioRegion& in, ARDOUR::AudioRegion& out,
+	Crossfade (boost::shared_ptr<ARDOUR::AudioRegion> in, boost::shared_ptr<ARDOUR::AudioRegion> out,
 		   jack_nframes_t position,
 		   jack_nframes_t initial_length,
 		   AnchorPoint);
@@ -71,12 +73,12 @@ class Crossfade : public Stateful, public StateManager
 	   except the "internal" case.
 	*/
 	
-	Crossfade (ARDOUR::AudioRegion& in, ARDOUR::AudioRegion& out, CrossfadeModel, bool active);
+	Crossfade (boost::shared_ptr<ARDOUR::AudioRegion> in, boost::shared_ptr<ARDOUR::AudioRegion> out, CrossfadeModel, bool active);
 
 
 	/* copy constructor to copy a crossfade with new regions. used (for example)
 	   when a playlist copy is made */
-	Crossfade (const Crossfade &, ARDOUR::AudioRegion *, ARDOUR::AudioRegion *);
+	Crossfade (const Crossfade &, boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>);
 	
 	/* the usual XML constructor */
 
@@ -88,8 +90,8 @@ class Crossfade : public Stateful, public StateManager
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
-	ARDOUR::AudioRegion& in() const { return *_in; }
-	ARDOUR::AudioRegion& out() const { return *_out; }
+	boost::shared_ptr<ARDOUR::AudioRegion> in() const { return _in; }
+	boost::shared_ptr<ARDOUR::AudioRegion> out() const { return _out; }
 	
 	jack_nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
 				float *gain_buffer, jack_nframes_t position, jack_nframes_t cnt, 
@@ -107,12 +109,12 @@ class Crossfade : public Stateful, public StateManager
 		return std::min (_in->layer(), _out->layer());
 	}
 
-	bool involves (ARDOUR::AudioRegion& region) const {
-		return _in == &region || _out == &region;
+	bool involves (boost::shared_ptr<ARDOUR::AudioRegion> region) const {
+		return _in == region || _out == region;
 	}
 
-	bool involves (ARDOUR::AudioRegion& a, ARDOUR::AudioRegion& b) const {
-		return (_in == &a && _out == &b) || (_in == &b && _out == &a);
+	bool involves (boost::shared_ptr<ARDOUR::AudioRegion> a, boost::shared_ptr<ARDOUR::AudioRegion> b) const {
+		return (_in == a && _out == b) || (_in == b && _out == a);
 	}
 
 	jack_nframes_t length() const { return _length; }
@@ -120,7 +122,6 @@ class Crossfade : public Stateful, public StateManager
 	jack_nframes_t position() const { return _position; }
 
 	sigc::signal<void,Crossfade*> Invalidated;
-	sigc::signal<void>            GoingAway;
 
 	bool covers (jack_nframes_t frame) const {
 		return _position <= frame && frame < _position + _length;
@@ -155,8 +156,8 @@ class Crossfade : public Stateful, public StateManager
 
 	static jack_nframes_t _short_xfade_length;
 
-	ARDOUR::AudioRegion* _in;
-	ARDOUR::AudioRegion* _out;
+	boost::shared_ptr<ARDOUR::AudioRegion> _in;
+	boost::shared_ptr<ARDOUR::AudioRegion> _out;
 	bool                 _active;
 	bool                 _in_update;
 	OverlapType           overlap_type;
@@ -172,7 +173,7 @@ class Crossfade : public Stateful, public StateManager
 	static Sample* crossfade_buffer_in;
 
 	void initialize (bool savestate=true);
-	int  compute (ARDOUR::AudioRegion&, ARDOUR::AudioRegion&, CrossfadeModel);
+	int  compute (boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>, CrossfadeModel);
 	bool update (bool force);
 
 	StateManager::State* state_factory (std::string why) const;
