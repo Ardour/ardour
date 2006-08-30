@@ -84,7 +84,7 @@ void
 Track::toggle_monitor_input ()
 {
 	for (vector<Port*>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		(*i)->request_monitor_input(!(*i)->monitoring_input());
+		(*i)->ensure_monitor_input(!(*i)->monitoring_input());
 	}
 }
 
@@ -164,12 +164,6 @@ Track::set_record_enable (bool yn, void *src)
 
 	if (_mix_group && src != _mix_group && _mix_group->is_active()) {
 		_mix_group->apply (&Track::set_record_enable, yn, _mix_group);
-		return;
-	}
-
-	// Do not set rec enabled if the track can't record.
-	if (yn && !can_record()) {
-		error << string_compose( _("Can not arm track '%1'. Check the input connections"), name() ) << endmsg;
 		return;
 	}
 

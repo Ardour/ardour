@@ -334,7 +334,7 @@ AudioRegion::restore_state (StateManager::State& sstate)
 	if (_fade_in_disabled != state->_fade_in_disabled) {
 		if (_fade_in_disabled == 0 && state->_fade_in_disabled) {
 			set_fade_in_active (false);
-		} if (_fade_in_disabled && state->_fade_in_disabled == 0) {
+		} else if (_fade_in_disabled && state->_fade_in_disabled == 0) {
 			set_fade_in_active (true);
 		}
 		_fade_in_disabled = state->_fade_in_disabled;
@@ -343,7 +343,7 @@ AudioRegion::restore_state (StateManager::State& sstate)
 	if (_fade_out_disabled != state->_fade_out_disabled) {
 		if (_fade_out_disabled == 0 && state->_fade_out_disabled) {
 			set_fade_out_active (false);
-		} if (_fade_out_disabled && state->_fade_out_disabled == 0) {
+		} else if (_fade_out_disabled && state->_fade_out_disabled == 0) {
 			set_fade_out_active (true);
 		}
 		_fade_out_disabled = state->_fade_out_disabled;

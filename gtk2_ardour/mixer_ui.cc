@@ -67,9 +67,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	mix_group_context_menu = 0;
 	no_track_list_redisplay = false;
 	in_group_row_change = false;
-
-	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
-	set_state (*node);
+	_visible = false;
 
  	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
  	scroller_base.set_name ("MixerWindow");
@@ -213,7 +211,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
-	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Gtk::Window *>(this)));
+	signal_delete_event().connect (mem_fun (*this, &Mixer_UI::hide_window));
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	_plugin_selector = new PluginSelector (PluginManager::the_manager());
@@ -248,7 +246,16 @@ Mixer_UI::show_window ()
 		ms = (*ri)[track_columns.strip];
 		ms->set_width (ms->get_width());
 	}
+	_visible = true;
 }
+
+bool
+Mixer_UI::hide_window (GdkEventAny *ev)
+{
+	_visible = false;
+	return just_hide_it(ev, static_cast<Gtk::Window *>(this));
+}
+
 
 void
 Mixer_UI::add_strip (Session::RouteList& routes)
@@ -345,7 +352,11 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 void
 Mixer_UI::connect_to_session (Session* sess)
 {
+
 	session = sess;
+
+	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
+	set_state (*node);
 
 	string wintitle = _("ardour: mixer: ");
 	wintitle += session->name();
@@ -361,6 +372,10 @@ Mixer_UI::connect_to_session (Session* sess)
 	mix_groups_changed ();
 	
 	_plugin_selector->set_session (session);
+
+	if (_visible) {
+	       show_window();
+	}
 
 	start_updating ();
 }
@@ -1048,6 +1063,12 @@ Mixer_UI::set_state (const XMLNode& node)
 		}
 	}
 
+	if ((prop = node.property ("show-mixer"))) {
+		if (prop->value() == "yes") {
+		       _visible = true;
+		}
+	}
+
 	return 0;
 }
 
@@ -1088,6 +1109,8 @@ Mixer_UI::get_state (void)
 	}
 
 	node->add_property ("narrow-strips", _strip_width == Narrow ? "yes" : "no");
+
+	node->add_property ("show-mixer", _visible ? "yes" : "no");
 
 	return *node;
 }

@@ -651,7 +651,6 @@ class Editor : public PublicEditor
 	void controls_layout_size_request (Gtk::Requisition*);
 
 	Gtk::HScrollbar     edit_hscrollbar;
-	bool                edit_hscroll_dragging;
 
 	void reset_hscrollbar_stepping ();
 	
@@ -684,12 +683,11 @@ class Editor : public PublicEditor
 
 	void tie_vertical_scrolling ();
 	void canvas_horizontally_scrolled ();
+	bool lazy_canvas_horizontally_scrolled ();
 	void reposition_and_zoom (jack_nframes_t sample, double fpu);
 	gint deferred_reposition_and_zoom (jack_nframes_t sample, double fpu);
 	void end_location_changed (ARDOUR::Location*);
 	bool repos_zoom_queued;
-	bool no_zoom_repos_update;
-	bool no_tempo_map_update;
 
 	struct RegionListDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    RegionListDisplayModelColumns() {
@@ -808,8 +806,6 @@ class Editor : public PublicEditor
 	void center_screen_internal (jack_nframes_t, float);
 	
 	void update_current_screen ();
-	sigc::connection slower_update_connection;
-	void update_slower ();
 	
 	gint show_track_context_menu (GdkEventButton *);
 	void hide_track_context_menu ();

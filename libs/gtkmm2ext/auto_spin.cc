@@ -51,7 +51,7 @@ void
 AutoSpin::stop_timer ()
 {
 	if (have_timer) {
-		gtk_timeout_remove (timeout_tag);
+		g_source_remove (timeout_tag);
 		have_timer = false;	
 	}
 }
@@ -151,7 +151,7 @@ AutoSpin::start_spinning (bool decrement, bool page)
 	
 	have_timer = true;
 	timer_calls = 0;
-	timeout_tag = gtk_timeout_add (initial_timer_interval,
+	timeout_tag = g_timeout_add (initial_timer_interval,
 				       AutoSpin::_timer,
 				       this);
 }
@@ -216,7 +216,7 @@ AutoSpin::timer ()
 		   request a much more frequent update.
 		*/
 		
-		timeout_tag = gtk_timeout_add (timer_interval,
+		timeout_tag = g_timeout_add (timer_interval,
 					       _timer,
 					       this);
 		have_timer = true;

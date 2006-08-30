@@ -140,27 +140,27 @@ Editor::set_meter_falloff (int intval)
 		 Config->set_meter_falloff_off(true);
 		 break;
 		case 1:
-		 val = 0.266f;
+		 val = 0.125f;
 		 Config->set_meter_falloff_slowest(true);
 		 break;
 		case 2:
-		 val = 0.342f;
+		 val = 0.250f;
 		 Config->set_meter_falloff_slow(true);
 		 break;
 		case 3:
-		 val = 0.7f;
+		 val = 0.375f;
 		 Config->set_meter_falloff_medium(true);
 		 break;
 		case 4:
-		 val = 1.1f;
+		 val = 0.500f;
 		 Config->set_meter_falloff_fast(true);
 		 break;
 		case 5:
-		 val = 1.5f;
+		 val = 0.750f;
 		 Config->set_meter_falloff_faster(true);
 		 break;
 		case 6:
-		 val = 2.5f;
+		 val = 0.875f;
 		 Config->set_meter_falloff_fastest(true);
 		 break;
 	}

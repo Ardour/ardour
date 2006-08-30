@@ -92,6 +92,7 @@ Editor::initialize_canvas ()
 	/* don't try to center the canvas */
 
 	track_canvas.set_center_scroll_region (false);
+	track_canvas.set_dither  	(Gdk::RGB_DITHER_NONE);
 
 	track_canvas.signal_event().connect (bind (mem_fun (*this, &Editor::track_canvas_event), (ArdourCanvas::Item*) 0));
 	track_canvas.set_name ("EditorMainCanvas");
@@ -133,6 +134,7 @@ Editor::initialize_canvas ()
 	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
 	time_canvas.set_flags (CAN_FOCUS);
 	time_canvas.set_center_scroll_region (false);
+	time_canvas.set_dither  	(Gdk::RGB_DITHER_NONE);
 	
 	meter_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
 	tempo_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height);
@@ -594,7 +596,7 @@ Editor::autoscroll_canvas ()
 
 		/* connect the timeout so that we get called repeatedly */
 
-		autoscroll_timeout_tag = gtk_timeout_add (20, _autoscroll_canvas, this);
+		autoscroll_timeout_tag = g_timeout_add (20, _autoscroll_canvas, this);
 		keep_calling = false;
 
 	} else if (autoscroll_cnt == 50) { /* 0.5 seconds */
@@ -640,7 +642,7 @@ void
 Editor::stop_canvas_autoscroll ()
 {
 	if (autoscroll_timeout_tag >= 0) {
-		gtk_timeout_remove (autoscroll_timeout_tag);
+		g_source_remove (autoscroll_timeout_tag);
 		autoscroll_timeout_tag = -1;
 	}
 }

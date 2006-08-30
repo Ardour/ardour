@@ -524,7 +524,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	bool _will_create_new_session_automatically;
 
-	NewSessionDialog* m_new_session_dialog;
+	NewSessionDialog* new_session_dialog;
 	
 	void open_session ();
 	void open_recent_session ();

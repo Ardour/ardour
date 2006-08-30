@@ -2110,7 +2110,7 @@ void
 Route::toggle_monitor_input ()
 {
 	for (vector<Port*>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		(*i)->request_monitor_input(!(*i)->monitoring_input());
+		(*i)->ensure_monitor_input(!(*i)->monitoring_input());
 	}
 }
 

@@ -267,7 +267,7 @@ show_ui_callback (void *arg)
 void
 gui_jack_error ()
 {
-  MessageDialog win (_("Ardour could not connect to JACK."),
+	MessageDialog win (_("Ardour could not connect to JACK."),
 		     false,
 		     Gtk::MESSAGE_INFO,
 		     (Gtk::ButtonsType)(Gtk::BUTTONS_NONE));
@@ -285,7 +285,11 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	win.show_all ();
 	win.set_position (Gtk::WIN_POS_CENTER);
 
-	/* we just don't care about the result */
+	if (!no_splash) {
+	  ui->hide_splash ();
+	}
+
+	/* we just don't care about the result, but we want to block */
 
 	win.run ();
 }
@@ -325,7 +329,7 @@ To create it from the command line, start ardour as \"ardour --new %1"), path) <
 		ui->load_session (path, name);
 
 	} else {
-	/*  TODO: This bit of code doesn't work properly yet
+	  /*  TODO: This bit of code doesn't work properly yet
 		Glib::signal_idle().connect (bind (mem_fun (*ui, &ARDOUR_UI::cmdline_new_session), path));
 		ui->set_will_create_new_session_automatically (true); */
 
@@ -354,9 +358,6 @@ int main (int argc, char *argv[])
 	ARDOUR::AudioEngine *engine;
 	vector<Glib::ustring> null_file_list;
 
-        // needs a better home.
-        Glib::thread_init();
-        
 	gtk_set_locale ();
 
 	(void)   bindtextdomain (PACKAGE, LOCALEDIR);
@@ -410,11 +411,12 @@ int main (int argc, char *argv[])
 		     << endl;
 	}
 
-	try { 
-		ui = new ARDOUR_UI (&argc, &argv, which_ui_rcfile());
-	} 
+	// needs a better home.
+        Glib::thread_init();
 
-	catch (failed_constructor& err) {
+        try { 
+		ui = new ARDOUR_UI (&argc, &argv, which_ui_rcfile());
+	} catch (failed_constructor& err) {
 		error << _("could not create ARDOUR GUI") << endmsg;
 		exit (1);
 	}
@@ -423,22 +425,28 @@ int main (int argc, char *argv[])
 	if (!no_splash) {
 		ui->show_splash ();
 		if (session_name.length()) {  
-			gtk_timeout_add (4000, show_ui_callback, ui);
+			g_timeout_add (4000, show_ui_callback, ui);
 		}
 	}
-	
-	try { 
+
+
+    	try { 
 		engine = new ARDOUR::AudioEngine (jack_client_name);
-		ARDOUR::init (use_vst, try_hw_optimization);
-		ui->set_engine (*engine);
 	} catch (AudioEngine::NoBackendAvailable& err) {
 		gui_jack_error ();
 		error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
 		return -1;
+	}
+ 
+
+    	try {
+		ARDOUR::init (use_vst, try_hw_optimization);
+		ui->set_engine (*engine);
 	} catch (failed_constructor& err) {
 		error << _("could not initialize Ardour.") << endmsg;
 		return -1;
 	} 
+
 
 	if (maybe_load_session ()) {
 		ui->run (text_receiver);

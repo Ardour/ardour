@@ -271,7 +271,6 @@ Editor::Editor (AudioEngine& eng)
 	first_action_message = 0;
 	export_dialog = 0;
 	show_gain_after_trim = false;
-	no_zoom_repos_update = false;
 	ignore_route_list_reorder = false;
 	no_route_list_redisplay = false;
 	verbose_cursor_on = true;
@@ -284,7 +283,6 @@ Editor::Editor (AudioEngine& eng)
 	_xfade_visibility = true;
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
-	edit_hscroll_dragging = false;
 	edit_group_list_menu = 0;
 	route_list_menu = 0;
 	region_list_menu = 0;
@@ -832,16 +830,6 @@ Editor::set_frames_per_unit (double fpu)
 		zoom_range_clock.set (frames);
 	}
 
-	/* only update these if we not about to call reposition_x_origin,
-	   which will do the same updates.
-	*/
-	
-	if (!no_zoom_repos_update) {
-		horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
-		update_fixed_rulers ();
-		tempo_map_changed (Change (0));
-	}
-
 	if (mouse_mode == MouseRange && selection->time.start () != selection->time.end_frame ()) {
 		if (!selection->tracks.empty()) {
 			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
@@ -909,7 +897,7 @@ Editor::edit_cursor_clock_changed()
 void
 Editor::zoom_adjustment_changed ()
 {
-	if (session == 0 || no_zoom_repos_update) {
+	if (session == 0) {
 		return;
 	}
 
@@ -976,40 +964,39 @@ Editor::deferred_control_scroll (jack_nframes_t target)
 void 
 Editor::canvas_horizontally_scrolled ()
 {
+
+        Glib::signal_idle().connect (mem_fun(*this, &Editor::lazy_canvas_horizontally_scrolled));
+
+}
+
+bool
+Editor::lazy_canvas_horizontally_scrolled ()
+{
+
 	leftmost_frame = (jack_nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
 	update_fixed_rulers ();
-	
-	if (!edit_hscroll_dragging) {
-		tempo_map_changed (Change (0));
-	} else {
-	        update_tempo_based_rulers();
-	}
+	tempo_map_changed (Change (0));
+
+	return false; 
 }
 
 void
 Editor::reposition_and_zoom (jack_nframes_t frame, double nfpu)
 {
 	if (!repos_zoom_queued) {
-		Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::deferred_reposition_and_zoom), frame, nfpu));
 		repos_zoom_queued = true;
+		Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::deferred_reposition_and_zoom), frame, nfpu));
 	}
 }
 
 gint
 Editor::deferred_reposition_and_zoom (jack_nframes_t frame, double nfpu)
 {
- 	/* if we need to force an update to the hscroller stuff,
-	   don't set no_zoom_repos_update.
-	*/
 
-	no_zoom_repos_update = (frame != leftmost_frame);
-	
 	set_frames_per_unit (nfpu);
-	if (no_zoom_repos_update) {
-		reposition_x_origin  (frame);
-	}
-	no_zoom_repos_update = false;
+	reposition_x_origin  (frame);
+
 	repos_zoom_queued = false;
 	
 	return FALSE;
@@ -1062,7 +1049,6 @@ void
 Editor::stop_scrolling ()
 {
 	scroll_connection.disconnect ();
-	slower_update_connection.disconnect ();
 }
 
 void
@@ -1307,6 +1293,7 @@ Editor::connect_to_session (Session *t)
 
 	restore_ruler_visibility ();
 	tempo_map_changed (Change (0));
+	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	edit_cursor->set_position (0);
 	playhead_cursor->set_position (0);
@@ -2243,6 +2230,7 @@ Editor::set_state (const XMLNode& node)
 			tact->set_active (yn);
 		}
 	}
+
 
 	return 0;
 }

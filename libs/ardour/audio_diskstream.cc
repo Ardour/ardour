@@ -1713,7 +1713,7 @@ AudioDiskstream::engage_record_enable ()
 	if (Config->get_use_hardware_monitoring())  {
 		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 			if ((*chan).source) {
-				(*chan).source->request_monitor_input (!(_session.get_auto_input() && rolling));
+				(*chan).source->ensure_monitor_input (!(_session.get_auto_input() && rolling));
 			}
 			capturing_sources.push_back ((*chan).write_source);
 		}
@@ -1733,7 +1733,7 @@ AudioDiskstream::disengage_record_enable ()
 	if (Config->get_use_hardware_monitoring()) {
 		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 			if ((*chan).source) {
-				(*chan).source->request_monitor_input (false);
+				(*chan).source->ensure_monitor_input (false);
 			}
 		}
 	}
@@ -2066,7 +2066,7 @@ AudioDiskstream::monitor_input (bool yn)
 	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 		
 		if ((*chan).source) {
-			(*chan).source->request_monitor_input (yn);
+			(*chan).source->ensure_monitor_input (yn);
 		}
 	}
 }

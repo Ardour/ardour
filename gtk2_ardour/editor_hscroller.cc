@@ -34,7 +34,6 @@ Editor::hscrollbar_allocate (Gtk::Allocation &alloc)
 bool
 Editor::hscrollbar_button_press (GdkEventButton *ev)
 {
-	edit_hscroll_dragging = true;
 	return true;
 }
 
@@ -42,11 +41,7 @@ bool
 Editor::hscrollbar_button_release (GdkEventButton *ev)
 {
 	if (session) {
-		if (edit_hscroll_dragging) {
-			// lets do a tempo redisplay only on button release, because it is dog slow
-			tempo_map_changed (Change (0));
-			edit_hscroll_dragging = false;
-		}
+
 	}
 
 	return true;
