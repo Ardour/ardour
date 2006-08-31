@@ -742,7 +742,8 @@ Session::process_without_events (jack_nframes_t nframes)
 	bool session_needs_butler = false;
 	jack_nframes_t stop_limit;
 	long frames_moved;
-	
+	jack_nframes_t offset = 0;
+
 	{
 		if (post_transport_work & (PostTransportLocate|PostTransportStop)) {
 			no_roll (nframes, 0);
@@ -777,16 +778,20 @@ Session::process_without_events (jack_nframes_t nframes)
 			return;
 		} 
 
-		click (_transport_frame, nframes, 0);
+		if (maybe_sync_start (nframes, offset)) {
+			return;
+		}
+
+		click (_transport_frame, nframes, offset);
 
 		prepare_diskstreams ();
 	
 		frames_moved = (long) floor (_transport_speed * nframes);
 
-		if (process_routes (nframes, 0)) {
-			no_roll (nframes, 0);
-			return;
-		}
+		if (process_routes (nframes, offset)) {
+			no_roll (nframes, offset);
+ 			return;
+ 		}
 
 		commit_diskstreams (nframes, session_needs_butler);
 
@@ -843,5 +848,33 @@ Session::process_audition (jack_nframes_t nframes)
 	if (!auditioner->active()) {
 		process_function = &Session::process_with_events;
 	}
+}
+
+bool
+Session::maybe_sync_start (jack_nframes_t& nframes, jack_nframes_t& offset)
+{
+	jack_nframes_t sync_offset;
+	
+	if (!waiting_for_sync_offset) {
+		return false;
+	}
+
+	if (_engine.get_sync_offset (sync_offset) && sync_offset < nframes) {
+
+		no_roll (sync_offset, 0);
+		nframes -= sync_offset;
+		offset += sync_offset;
+		waiting_for_sync_offset = false;
+		
+		if (nframes == 0) {
+			return true; // done
+		}
+		
+	} else {
+		no_roll (nframes, 0);
+		return true; // done
+	}
+
+	return false;
 }
 

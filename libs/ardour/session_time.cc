@@ -48,15 +48,20 @@ Session::bbt_time (jack_nframes_t when, BBT_Time& bbt)
 
 /* SMPTE TIME */
 
+void
+Session::sync_time_vars ()
+{
+	_current_frame_rate = _base_frame_rate * (1.0 + (video_pullup/100.0) );
+	_frames_per_hour = _current_frame_rate * 3600;
+	_frames_per_smpte_frame = (double) _current_frame_rate / (double) smpte_frames_per_second;
+	_smpte_frames_per_hour = (unsigned long) (smpte_frames_per_second * 3600.0);
+}
+
 int
 Session::set_smpte_type (float fps, bool drop_frames)
 {
 	smpte_frames_per_second = fps;
 	smpte_drop_frames = drop_frames;
-	_frames_per_smpte_frame = (double) _current_frame_rate / (double) smpte_frames_per_second;
-	_frames_per_hour = _current_frame_rate * 3600;
-	_smpte_frames_per_hour = (unsigned long) (smpte_frames_per_second * 3600.0);
-
 
 	last_smpte_valid = false;
 	// smpte type bits are the middle two in the upper nibble
@@ -83,7 +88,23 @@ Session::set_smpte_type (float fps, bool drop_frames)
 		break;
 	};
 
+	sync_time_vars();
+
 	SMPTETypeChanged (); /* EMIT SIGNAL */
+
+	set_dirty();
+
+	return 0;
+}
+
+int
+Session::set_video_pullup (float pull)
+{
+	video_pullup = pull;
+
+	sync_time_vars();
+
+	PullupChanged (); /* EMIT SIGNAL */
 
 	set_dirty();
 
@@ -410,6 +431,10 @@ Session::jack_timebase_callback (jack_transport_state_t state,
 
 		pos->valid = jack_position_bits_t (pos->valid | JackPositionBBT);
 	}
+
+	//poke audio video ratio so Ardour can track Video Sync
+	pos->audio_frames_per_video_frame = frame_rate() / smpte_frames_per_second;
+	pos->valid = jack_position_bits_t (pos->valid | JackAudioVideoRatio);
 
 #if 0
 	/* SMPTE info */

@@ -116,7 +116,8 @@ arch_specific_objects = [ ]
 
 osc_files = [ 'osc.cc' ]
 vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
-coreaudio_files = [ 'audio_unit.cc', 'coreaudiosource.cc' ]
+audiounit_files = [ 'audio_unit.cc' ]
+coreaudio_files = [ 'coreaudiosource.cc' ]
 extra_sources = [ ]
 
 if ardour['VST']:
@@ -194,11 +195,15 @@ if conf.CheckCHeader('sys/vfs.h'):
 if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
     ardour.Append(LINKFLAGS="-framework CoreMIDI")
 
-if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h') and ardour['COREAUDIO'] == 1:
+if conf.CheckCHeader('/System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h') and ardour['AUDIOUNITS']:
+    ardour.Append(CXXFLAGS="-DHAVE_AUDIOUNITS")
+    ardour.Append(LINKFLAGS="-framework AudioUnit")
+    extra_sources += audiounit_files
+ 
+if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h') and ardour['COREAUDIO']:
     ardour.Append(CXXFLAGS="-DHAVE_COREAUDIO")    
     ardour.Append(LINKFLAGS="-framework AudioToolbox")
     extra_sources += coreaudio_files
-    
 
 if env['CONFIG_ARCH'] == 'apple':
     # this next line avoids issues with circular dependencies between libardour and libardour_cp.
@@ -226,7 +231,7 @@ ardour.Merge ([
 if ardour['LIBLO']:
     ardour.Merge ([ libraries['lo'] ])
 
-if ardour['COREAUDIO']:
+if ardour['COREAUDIO'] or ardour['AUDIOUNITS']:
     ardour.Merge ([ libraries['appleutility'] ])
 
 ardour.VersionBuild(['version.cc', 'ardour/version.h'], 'SConscript')
@@ -256,12 +261,12 @@ libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_s
 Default(libardour)
 
 if env['NLS']:
-	i18n (ardour, ardour_files + vst_files + coreaudio_files, env)
+	i18n (ardour, ardour_files + vst_files + coreaudio_files + audiounit_files, env)
 
 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libardour))
 	      
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions.s', 'sse_functions_64bit.s' ] +
-				     ardour_files + vst_files + coreaudio_files +
+				     ardour_files + vst_files + coreaudio_files + audiounit_files +
 				     glob.glob('po/*.po') + glob.glob('ardour/*.h')))

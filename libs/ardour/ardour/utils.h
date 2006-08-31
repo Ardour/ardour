@@ -25,7 +25,7 @@
 #include <string>
 #include <cmath>
 
-#ifdef HAVE_COREAUDIO
+#if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
@@ -57,8 +57,11 @@ int touch_file(std::string path);
 std::string region_name_from_path (std::string path);
 std::string path_expand (std::string);
 
-#ifdef HAVE_COREAUDIO
+void compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out);
+
+#if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
 std::string CFStringRefToStdString(CFStringRef stringRef);
 #endif // HAVE_COREAUDIO
 
 #endif /* __ardour_utils_h__ */
+

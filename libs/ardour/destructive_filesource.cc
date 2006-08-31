@@ -56,6 +56,7 @@ typedef off_t off64_t;
 
 #include <pbd/error.h>
 #include <ardour/destructive_filesource.h>
+#include <ardour/utils.h>
 
 #include "i18n.h"
 
@@ -124,13 +125,7 @@ DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
 	out_coefficient = new gain_t[xfade_frames];
 	in_coefficient = new gain_t[xfade_frames];
 
-	for (jack_nframes_t n = 0; n < xfade_frames; ++n) {
-
-		/* XXXX THIS IS NOT THE RIGHT XFADE CURVE: USE A PROPER VOLUMETRIC EQUAL POWER CURVE */
-
-		in_coefficient[n] = n/(gain_t) (xfade_frames-1); /* 0 .. 1 */
-		out_coefficient[n] = 1.0 - in_coefficient[n];    /* 1 .. 0 */
-	}
+	compute_equal_power_fades (xfade_frames, in_coefficient, out_coefficient);
 }
 
 void
@@ -195,7 +190,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 	}
 
 	if (file_cnt) {
-		if ((retval = write_float (xfade_buf, fade_position, file_cnt)) != (ssize_t) file_cnt) {
+		if ((retval = read_unlocked (xfade_buf, fade_position, file_cnt)) != (ssize_t) file_cnt) {
 			if (retval >= 0 && errno == EAGAIN) {
 				/* XXX - can we really trust that errno is meaningful here?  yes POSIX, i'm talking to you.
 				 * short or no data there */
@@ -213,7 +208,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 	}
 	
 	if (nofade && !fade_in) {
-		if (write_float (data, file_pos, nofade) != nofade) {
+		if (write_float (data, file_pos - timeline_position, nofade) != nofade) {
 			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
@@ -245,24 +240,27 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 
 	} else if (xfade) {
 
+		gain_t in[xfade];
+		gain_t out[xfade];
+
 		/* short xfade, compute custom curve */
 
-		/* XXX COMPUTE THE CURVE, DAMMIT! */
+		compute_equal_power_fades (xfade, in, out);
 
 		for (jack_nframes_t n = 0; n < xfade; ++n) {
-			xfade_buf[n] = (xfade_buf[n] * out_coefficient[n]) + (fade_data[n] * in_coefficient[n]);
+			xfade_buf[n] = (xfade_buf[n] * out[n]) + (fade_data[n] * in[n]);		
 		}
 	}
 
 	if (xfade) {
-		if (write_float (xfade_buf, fade_position, xfade) != xfade) {
+		if (write_float (xfade_buf, fade_position - timeline_position, xfade) != xfade) {
 			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
 	}
 	
 	if (fade_in && nofade) {
-		if (write_float (data + xfade, file_pos + xfade, nofade) != nofade) {
+		if (write_float (data + xfade, file_pos + xfade - timeline_position, nofade) != nofade) {
 			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
@@ -345,7 +343,7 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt)
 
 		/* in the middle of recording */
 		
-		if (write_float (data, file_pos, cnt) != cnt) {
+		if (write_float (data, file_pos - timeline_position, cnt) != cnt) {
 			return 0;
 		}
 	}

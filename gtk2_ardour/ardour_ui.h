@@ -377,6 +377,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void sync_option_changed ();
 	void toggle_time_master ();
+	void toggle_video_sync ();
 
 	enum ShuttleBehaviour {
 		Sprung,

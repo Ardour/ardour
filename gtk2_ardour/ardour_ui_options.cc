@@ -43,7 +43,8 @@ ARDOUR_UI::setup_config_options ()
 	std::vector<Glib::ustring> groups;
 	groups.push_back("options");
 	groups.push_back("Editor");
-	
+	groups.push_back("Transport");	
+
 	struct { 
 	    char* name;
 	    bool (Configuration::*method)(void) const;
@@ -69,6 +70,7 @@ ARDOUR_UI::setup_config_options ()
 		{ "MeterHoldShort", &Configuration::get_meter_hold_short, 'r' },
 		{ "MeterHoldMedium", &Configuration::get_meter_hold_medium, 'r' },
 		{ "MeterHoldLong", &Configuration::get_meter_hold_long, 'r' },
+		{ "ToggleVideoSync", &Configuration::get_use_video_sync, 't' },
 		{ 0, 0, 0 }
 	};
 	
@@ -77,8 +79,13 @@ ARDOUR_UI::setup_config_options ()
 			Glib::RefPtr<Action> act = ActionManager::get_action (i->c_str(), options[n].name);
 			if (act) {
 				Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-				if (options[n].act_type == 't' || (options[n].act_type == 'r' && (Config->*(options[n].method))()))
-					tact->set_active ((Config->*(options[n].method))());
+				if (options[n].act_type == 't' || options[n].act_type == 'r') {
+					if ((Config->*(options[n].method))()) {
+						tact->set_active (true);
+					} else {
+						tact->set_active (false);
+					}
+				}
 				continue;
 			}
 		}
@@ -235,6 +242,16 @@ void
 ARDOUR_UI::toggle_punch_out ()
 {
 	toggle_session_state ("Transport", "TogglePunchOut", &Session::set_punch_out, &Session::get_punch_out);
+}
+
+ void
+ARDOUR_UI::toggle_video_sync()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", "ToggleVideoSync");
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		Config->set_use_video_sync (tact->get_active());
+	}
 }
 
 void

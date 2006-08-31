@@ -72,6 +72,8 @@ class AudioEngine : public sigc::trackable
 
 	int usecs_per_cycle () const { return _usecs_per_cycle; }
 
+	bool get_sync_offset (jack_nframes_t& offset) const;
+
 	jack_nframes_t frames_since_cycle_start () {
 		if (!_running || !_jack) return 0;
 		return jack_frames_since_cycle_start (_jack);

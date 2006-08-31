@@ -71,6 +71,7 @@
                     <menuitem action='ToggleAutoReturn'/>
                     <menuitem action='ToggleClick'/>
                     <menuitem action='toggle-follow-playhead'/>
+                    <menuitem action='ToggleVideoSync'/>
                </menu>
        </menu>
        <menu name='Edit' action='Edit'>

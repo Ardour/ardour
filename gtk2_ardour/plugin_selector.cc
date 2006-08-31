@@ -92,7 +92,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	}
 #endif
 
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 	aumodel = ListStore::create(aucols);
 	au_display.set_model (aumodel);
 	au_display.append_column (_("Available plugins"), aucols.name);
@@ -151,7 +151,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	}
 #endif
 
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 	notebook.pages().push_back (TabElem (auscroller, _("AudioUnit")));
 #endif
 
@@ -171,7 +171,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	}
 #endif
 
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 	au_display.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::row_clicked));
 	au_display.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::au_display_selection_changed));
 #endif
@@ -187,7 +187,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	vst_refiller ();
 #endif
 
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 	au_refiller ();
 #endif
 
@@ -219,7 +219,7 @@ PluginSelector::set_correct_focus()
 	}
 #endif
 
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 	cp--;
 
 	if (cp == 0) {
@@ -330,7 +330,7 @@ PluginSelector::vst_display_selection_changed()
 
 #endif //VST_SUPPORT
 
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 
 void
 PluginSelector::_au_refiller (void *arg)
@@ -374,7 +374,7 @@ PluginSelector::au_display_selection_changed()
 	current_selection = ARDOUR::AudioUnit;
 }
 
-#endif //HAVE_COREAUDIO
+#endif //HAVE_AUDIOUNIT
 
 void
 PluginSelector::use_plugin (PluginInfoPtr pi)
@@ -413,7 +413,7 @@ PluginSelector::btn_add_clicked()
 #endif
 			break;
 		case ARDOUR::AudioUnit:
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 			row = *(au_display.get_selection()->get_selected());
 			name = row[aucols.name];
 			pi = row[aucols.plugin];
@@ -451,7 +451,7 @@ PluginSelector::btn_update_clicked()
 #ifdef VST_SUPPORT
 	vst_refiller ();
 #endif	
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 	au_refiller ();
 #endif
 }

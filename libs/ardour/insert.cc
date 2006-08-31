@@ -36,7 +36,7 @@
 #include <ardour/vst_plugin.h>
 #endif
 
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNITS
 #include <ardour/audio_unit.h>
 #endif
 
@@ -523,7 +523,7 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef VST_SUPPORT
 	boost::shared_ptr<VSTPlugin> vp;
 #endif
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNITS
 	boost::shared_ptr<AUPlugin> ap;
 #endif
 
@@ -533,7 +533,7 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 	} else if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new VSTPlugin (*vp));
 #endif
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNITS
 	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new AUPlugin (*ap));
 #endif
@@ -839,7 +839,7 @@ PluginInsert::type ()
 #ifdef VST_SUPPORT
 	boost::shared_ptr<VSTPlugin> vp;
 #endif
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNITS
 	boost::shared_ptr<AUPlugin> ap;
 #endif
 	
@@ -851,7 +851,7 @@ PluginInsert::type ()
 	} else if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (other)) != 0) {
 		return ARDOUR::VST;
 #endif
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNITS
 	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
 		return ARDOUR::AudioUnit;
 #endif

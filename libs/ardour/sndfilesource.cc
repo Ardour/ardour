@@ -292,6 +292,11 @@ SndFileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t 
 	uint32_t real_cnt;
 	jack_nframes_t file_cnt;
 
+	//destructive (tape) tracks need to offset reads and writes by the timeline position
+	if (_flags && ARDOUR::Destructive == ARDOUR::Destructive) {
+		start -= timeline_position;
+	}
+
 	if (start > _length) {
 
 		/* read starts beyond end of data, just memset to zero */

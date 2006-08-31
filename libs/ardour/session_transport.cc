@@ -191,6 +191,10 @@ Session::realtime_stop (bool abort)
 		
 	_transport_speed = 0;
 
+	if (Config->get_use_video_sync()) {
+		waiting_for_sync_offset = true;
+	}
+
 	transport_sub_state = (auto_return ? AutoReturning : 0);
 }
 

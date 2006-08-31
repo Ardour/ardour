@@ -24,7 +24,6 @@
 #include <string>
 
 #include <sigc++/signal.h>
-#include <boost/enable_shared_from_this.hpp>
 
 #include <pbd/statefuldestructible.h> 
 
@@ -33,7 +32,7 @@
 
 namespace ARDOUR {
 
-class Source : public PBD::StatefulDestructible, public sigc::trackable, public boost::enable_shared_from_this<Source>
+class Source : public PBD::StatefulDestructible, public sigc::trackable
 {
   public:
 	Source (std::string name, DataType type);

@@ -229,6 +229,18 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	process_function = &Session::process_with_events;
 
+	if (Config->get_use_video_sync()) {
+		waiting_for_sync_offset = true;
+	} else {
+		waiting_for_sync_offset = false;
+	}
+
+	_current_frame_rate = 48000;
+	_base_frame_rate = 48000;
+
+	smpte_frames_per_second = 30;
+	video_pullup = 0.0;
+	smpte_drop_frames = false;
 	last_smpte_when = 0;
 	_smpte_offset = 0;
 	_smpte_offset_negative = true;
@@ -264,6 +276,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	/* default SMPTE type is 30 FPS, non-drop */
 
 	set_smpte_type (30.0, false);
+	set_video_pullup (0.0);
 
 	_engine.GraphReordered.connect (mem_fun (*this, &Session::graph_reordered));
 
@@ -926,6 +939,11 @@ Session::load_options (const XMLNode& node)
 			rf_speed = atof (prop->value().c_str());
 		}
 	}
+	if ((child = find_named_node (node, "video-pullup")) != 0) {
+		if ((prop = child->property ("val")) != 0) {
+			set_video_pullup( atof (prop->value().c_str()) );
+		}
+	}
 	if ((child = find_named_node (node, "smpte-frames-per-second")) != 0) {
 		if ((prop = child->property ("val")) != 0) {
 			set_smpte_type( atof (prop->value().c_str()), smpte_drop_frames );
@@ -1180,6 +1198,10 @@ Session::get_options () const
 	child = opthead->add_child ("rf-speed");
 	child->add_property ("val", buf);
 
+	snprintf (buf, sizeof(buf)-1, "%.4f", video_pullup);
+	child = opthead->add_child ("video-pullup");
+	child->add_property ("val", buf);
+	
 	snprintf (buf, sizeof(buf)-1, "%.2f", smpte_frames_per_second);
 	child = opthead->add_child ("smpte-frames-per-second");
 	child->add_property ("val", buf);

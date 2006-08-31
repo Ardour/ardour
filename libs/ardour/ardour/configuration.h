@@ -63,16 +63,18 @@ class Configuration : public Stateful
 
 	XMLNode* control_protocol_state () { return _control_protocol_state; }
 
+	sigc::signal<void,const char*> ParameterChanged;
+
         /* define accessor methods */
 
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) \
         Type get_##var () const { return var.get(); } \
-        void set_##var (Type val) { var.set (val); var.set_is_user (user_configuration); }
+        void set_##var (Type val) { var.set (val); var.set_is_user (user_configuration); ParameterChanged (name); }
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) \
         Type get_##var () const { return var.get(); } \
-        void set_##var (Type val) { var.set (val); var.set_is_user (user_configuration); }
+        void set_##var (Type val) { var.set (val); var.set_is_user (user_configuration); ParameterChanged (name); }
 #include "ardour/configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL

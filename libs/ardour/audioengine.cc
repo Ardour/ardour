@@ -163,18 +163,32 @@ AudioEngine::stop ()
 }
 
 
+	
+bool
+AudioEngine::get_sync_offset (jack_nframes_t& offset) const
+{
+	jack_position_t pos;
+	
+	(void) jack_transport_query (_jack, &pos);
+
+	if (pos.valid & JackVideoFrameOffset) {
+		offset = pos.video_offset;
+		return true;
+	}
+
+	return false;
+}
+
 void
 AudioEngine::_jack_timebase_callback (jack_transport_state_t state, jack_nframes_t nframes,
-
-									  jack_position_t* pos, int new_position, void *arg)
+				      jack_position_t* pos, int new_position, void *arg)
 {
 	static_cast<AudioEngine*> (arg)->jack_timebase_callback (state, nframes, pos, new_position);
 }
 
 void
 AudioEngine::jack_timebase_callback (jack_transport_state_t state, jack_nframes_t nframes,
-
-									 jack_position_t* pos, int new_position)
+				     jack_position_t* pos, int new_position)
 {
 	if (session && session->synced_to_jack()) {
 		session->jack_timebase_callback (state, nframes, pos, new_position);
