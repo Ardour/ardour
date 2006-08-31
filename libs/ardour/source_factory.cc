@@ -23,6 +23,10 @@
 #include <ardour/destructive_filesource.h>
 #include <ardour/configuration.h>
 
+#ifdef HAVE_COREAUDIO
+#include <ardour/coreaudiosource.h>
+#endif
+
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -31,8 +35,6 @@ using namespace std;
 sigc::signal<void,boost::shared_ptr<Source> > SourceFactory::SourceCreated;
 
 #ifdef HAVE_COREAUDIO
-
-
 boost::shared_ptr<Source>
 SourceFactory::create (const XMLNode& node)
 {

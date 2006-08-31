@@ -25,7 +25,7 @@
 #include <string>
 #include <cmath>
 
-#ifdef HAVE_COREAUDIO
+#if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
@@ -59,8 +59,9 @@ std::string path_expand (std::string);
 
 void compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out);
 
-#ifdef HAVE_COREAUDIO
+#if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
 std::string CFStringRefToStdString(CFStringRef stringRef);
 #endif // HAVE_COREAUDIO
 
 #endif /* __ardour_utils_h__ */
+

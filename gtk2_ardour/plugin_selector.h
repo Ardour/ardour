@@ -110,7 +110,7 @@ class PluginSelector : public ArdourDialog
 	void vst_display_selection_changed();
 #endif // VST_SUPPORT
 
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 	// page 3
 	struct AUColumns : public Gtk::TreeModel::ColumnRecord {
 		AUColumns () {
@@ -131,7 +131,7 @@ class PluginSelector : public ArdourDialog
 	static void _au_refiller (void *);
 	void au_refiller ();
 	void au_display_selection_changed();
-#endif //HAVE_COREAUDIO
+#endif //HAVE_AUDIOUNIT
 
 	ARDOUR::PluginManager *manager;
 

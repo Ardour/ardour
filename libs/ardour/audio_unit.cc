@@ -394,3 +394,4 @@ AUPluginInfo::setup_nchannels (CAComponentDescription& comp_desc)
                                              0, &cinfo, &info_size);
 	}
 }
+

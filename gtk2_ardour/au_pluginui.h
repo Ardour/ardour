@@ -38,11 +38,7 @@ class AUPluginUI
 	~AUPluginUI ();
 	
   private:
-	WindowRef wr;
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
-
-	void plugin_going_away (ARDOUR::Redirect*);
-	Component get_carbon_view_component(OSType subtype);
 };
 
 #endif // __au_plugin_ui_h__

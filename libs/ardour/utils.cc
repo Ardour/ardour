@@ -253,7 +253,7 @@ path_expand (string path)
 #endif
 }
 
-#ifdef HAVE_COREAUDIO
+#if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
 string 
 CFStringRefToStdString(CFStringRef stringRef)
 {
@@ -297,4 +297,3 @@ compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out)
 		in[n] = inVal * (scale * inVal + 1.0f - scale);
 	}
 }
-

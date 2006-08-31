@@ -261,7 +261,7 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginType ty
 		break;
 #endif
 
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNITS
 	case ARDOUR::AudioUnit:
 		plugs = AUPluginInfo::discover ();
 		unique_id = 0; // Neither do AU.
@@ -282,3 +282,4 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginType ty
 	
 	return PluginPtr ((Plugin*) 0);
 }
+

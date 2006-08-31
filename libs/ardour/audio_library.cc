@@ -432,9 +432,9 @@ AudioLibrary::safe_file_extension(string file)
         file.rfind(".vwe") == string::npos &&
         file.rfind(".paf") == string::npos &&
 #ifdef HAVE_COREAUDIO
-		file.rfind(".mp3") == string::npos &&
-		file.rfind(".aac") == string::npos &&
-		file.rfind(".mp4") == string::npos &&
+	file.rfind(".mp3") == string::npos &&
+	file.rfind(".aac") == string::npos &&
+	file.rfind(".mp4") == string::npos &&
 #endif // HAVE_COREAUDIO
         file.rfind(".voc") == string::npos);
 }

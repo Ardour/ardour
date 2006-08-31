@@ -61,7 +61,7 @@ skipped_files=Split("""
 connection_editor.cc
 """)
 
-coreaudio_files=Split("""
+audiounit_files=Split("""
 au_pluginui.cc
 """)
 
@@ -221,9 +221,9 @@ if env['VST']:
 	extra_sources += vst_files
 	gtkardour.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
 
-if gtkardour['COREAUDIO']:
-    extra_sources += coreaudio_files
-    gtkardour.Append(CCFLAGS='-DHAVE_COREAUDIO')
+if gtkardour['AUDIOUNITS']:
+    extra_sources += audiounit_files
+    gtkardour.Append(CCFLAGS='-DHAVE_AUDIOUNITS')
     gtkardour.Append(LINKFLAGS='-framework Carbon')
     gtkardour.Merge([libraries['appleutility']])
  

@@ -62,7 +62,7 @@
 
 #include "i18n.h"
 
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 #include "au_pluginui.h"
 #endif
 
@@ -1000,7 +1000,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 				} else {
 					plugin_ui->show_all ();
 				}
-#ifdef HAVE_COREAUDIO
+#ifdef HAVE_AUDIOUNIT
 			} else if (type == ARDOUR::AudioUnit) {
 				AUPluginUI* plugin_ui;
 				if (plugin_insert->get_gui() == 0) {

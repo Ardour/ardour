@@ -269,7 +269,11 @@ SoundFileBox::remove_field_clicked ()
 void
 SoundFileBox::field_edited (const Glib::ustring& str1, const Glib::ustring& str2)
 {
-	cout << "field_edited" << endl;
+	Gtk::TreeModel::Children rows(fields->children());
+	Gtk::TreeModel::Row row(rows[atoi(str1.c_str())]);
+	
+	Library->set_field (path, row[label_columns.field], str2);
+	
 	Library->save_changes ();
 }
 

@@ -31,16 +31,12 @@ CoreAudioSource::CoreAudioSource (const XMLNode& node)
 	: AudioFileSource (node)
 {
 	init (_name);
-	
-	AudioSourceCreated (this); /* EMIT SIGNAL */
 }
 
 CoreAudioSource::CoreAudioSource (const string& idstr, Flag flags)
 	: AudioFileSource(idstr, flags)
 {
 	init (idstr);
-
-	AudioSourceCreated (this); /* EMIT SIGNAL */
 }
 
 void 

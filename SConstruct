@@ -26,6 +26,7 @@ subst_dict = { }
 opts = Options('scache.conf')
 opts.AddOptions(
   ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
+    BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
@@ -507,8 +508,6 @@ else:
     have_libdmalloc = False
 
 libraries['dmalloc'] = conf.Finish ()
-
-#
 
 #
 # Audio/MIDI library (needed for MIDI, since audio is all handled via JACK)
