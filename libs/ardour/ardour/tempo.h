@@ -201,7 +201,7 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 	typedef vector<BBTPoint> BBTPointList;
 	
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(const Metrics&)) {
-		Glib::Mutex::Lock lm (lock);
+	        Glib::RWLock::ReaderLock lm (lock);
 		(obj.*method)(*metrics);
 	}
 
@@ -289,7 +289,7 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 	jack_nframes_t      last_bbt_when;
 	bool                last_bbt_valid;
 	BBT_Time            last_bbt;
-	mutable Glib::Mutex   lock;
+	mutable Glib::RWLock    lock;
 	
 	void timestamp_metrics ();
 

@@ -250,7 +250,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	shuttle_speed_threshold = 5;
 	rf_speed = 2.0;
 	_meter_hold = 100; // XXX unknown units: number of calls to meter::set()
-	_meter_falloff = 1.5f; // XXX unknown units: refresh_rate
+	_meter_falloff = 0.375f; // XXX unknown units: refresh_rate
 	max_level = 0;
 	min_level = 0;
 

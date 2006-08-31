@@ -106,9 +106,10 @@ class Port : public sigc::trackable {
 	}
 	
 	void ensure_monitor_input (bool yn) {
-		jack_port_request_monitor (_port, yn);
+		jack_port_ensure_monitor (_port, yn);
 	}
-	
+
+	/*XXX completely bloody useless imho*/
 	void request_monitor_input (bool yn) {
 		jack_port_request_monitor (_port, yn);
 	}

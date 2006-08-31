@@ -133,10 +133,10 @@ class AudioClock : public Gtk::HBox
 
 	jack_nframes_t last_when;
 
-	long last_hrs;
-	long last_mins;
-	long last_secs;
-	long last_frames;
+	uint32_t last_hrs;
+	uint32_t last_mins;
+	uint32_t last_secs;
+	uint32_t last_frames;
 	bool last_negative;
 
 	long  ms_last_hrs;

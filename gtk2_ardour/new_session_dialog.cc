@@ -31,6 +31,7 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/filefilter.h>
 #include <gtkmm/stock.h>
+#include <gdkmm/cursor.h>
 
 #include "opts.h"
 
@@ -63,7 +64,7 @@ NewSessionDialog::NewSessionDialog()
 	input_port_limit_hbox = Gtk::manage(new class Gtk::HBox(false, 0));
 	input_port_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
 	input_table = Gtk::manage(new class Gtk::Table(2, 2, false));
-	input_port_alignment = Gtk::manage(new class Gtk::Alignment(0.5, 0.5, 1, 1));
+
 	input_label = Gtk::manage(new class Gtk::Label(_("<b>Track/Bus Inputs</b>")));
 	input_frame = Gtk::manage(new class Gtk::Frame());
 	m_connect_outputs = Gtk::manage(new class Gtk::CheckButton(_("Automatically Connect Outputs")));
@@ -79,7 +80,7 @@ NewSessionDialog::NewSessionDialog()
 	m_connect_outputs_to_physical = Gtk::manage(new class Gtk::RadioButton(_RadioBGroup_m_connect_outputs_to_master, _("Connect to Physical Outputs")));
 	output_conn_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
 	output_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
-	output_port_alignment = Gtk::manage(new class Gtk::Alignment(0.5, 0.5, 1, 1));
+
 	output_label = Gtk::manage(new class Gtk::Label(_("<b>Track/Bus Outputs</b>")));
 	output_frame = Gtk::manage(new class Gtk::Frame());
 	advanced_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
@@ -90,7 +91,7 @@ NewSessionDialog::NewSessionDialog()
 	open_session_hbox = Gtk::manage(new class Gtk::HBox(false, 0));
 	m_treeview = Gtk::manage(new class Gtk::TreeView());
 	recent_scrolledwindow = Gtk::manage(new class Gtk::ScrolledWindow());
-	recent_alignment = Gtk::manage(new class Gtk::Alignment(0.5, 0.5, 1, 1));
+
 	recent_sesion_label = Gtk::manage(new class Gtk::Label(_("Open Recent Session")));
 	recent_frame = Gtk::manage(new class Gtk::Frame());
 	open_session_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
@@ -167,7 +168,7 @@ NewSessionDialog::NewSessionDialog()
 	input_table->set_row_spacings(0);
 	input_table->set_col_spacings(0);
 	input_table->attach(*input_port_vbox, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 6);
-	input_port_alignment->add(*input_table);
+
 	input_label->set_alignment(0, 0.5);
 	input_label->set_padding(0,0);
 	input_label->set_line_wrap(false);
@@ -175,7 +176,7 @@ NewSessionDialog::NewSessionDialog()
 	input_label->set_use_markup(true);
 	input_frame->set_shadow_type(Gtk::SHADOW_NONE);
 	input_frame->set_label_align(0,0.5);
-	input_frame->add(*input_port_alignment);
+	input_frame->add(*input_table);
 	input_frame->set_label_widget(*input_label);
 	m_connect_outputs->set_flags(Gtk::CAN_FOCUS);
 	m_connect_outputs->set_relief(Gtk::RELIEF_NORMAL);
@@ -212,7 +213,7 @@ NewSessionDialog::NewSessionDialog()
 	output_vbox->set_border_width(6);
 	output_vbox->pack_start(*output_port_vbox);
 	output_vbox->pack_start(*output_conn_vbox);
-	output_port_alignment->add(*output_vbox);
+
 	output_label->set_alignment(0, 0.5);
 	output_label->set_padding(0,0);
 	output_label->set_line_wrap(false);
@@ -220,7 +221,7 @@ NewSessionDialog::NewSessionDialog()
 	output_label->set_use_markup(true);
 	output_frame->set_shadow_type(Gtk::SHADOW_NONE);
 	output_frame->set_label_align(0,0.5);
-	output_frame->add(*output_port_alignment);
+	output_frame->add(*output_vbox);
 	output_frame->set_label_widget(*output_label);
 	advanced_vbox->pack_start(*advanced_table, Gtk::PACK_SHRINK, 0);
 	advanced_vbox->pack_start(*input_frame, Gtk::PACK_SHRINK, 12);
@@ -265,13 +266,13 @@ NewSessionDialog::NewSessionDialog()
 	recent_scrolledwindow->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	recent_scrolledwindow->property_window_placement().set_value(Gtk::CORNER_TOP_LEFT);
 	recent_scrolledwindow->add(*m_treeview);
-	recent_alignment->add(*recent_scrolledwindow);
+
 	recent_sesion_label->set_padding(0,0);
 	recent_sesion_label->set_line_wrap(false);
 	recent_sesion_label->set_selectable(false);
 	recent_frame->set_border_width(12);
 	recent_frame->set_shadow_type(Gtk::SHADOW_IN);
-	recent_frame->add(*recent_alignment);
+	recent_frame->add(*recent_scrolledwindow);
 	recent_frame->set_label_widget(*recent_sesion_label);
 	open_session_vbox->pack_start(*open_session_hbox, Gtk::PACK_SHRINK, 12);
 	open_session_vbox->pack_start(*recent_frame, Gtk::PACK_EXPAND_WIDGET, 0);
@@ -573,10 +574,13 @@ NewSessionDialog::file_chosen ()
 
 	m_treeview->get_selection()->unselect_all();
 
+	get_window()->set_cursor(Gdk::Cursor(Gdk::WATCH));
+
 	if (!m_open_filechooser->get_filename().empty()) {
-		set_response_sensitive (Gtk::RESPONSE_OK, true);
+	        set_response_sensitive (Gtk::RESPONSE_OK, true);
+		response (Gtk::RESPONSE_OK);
 	} else {
-		set_response_sensitive (Gtk::RESPONSE_OK, false);
+	        set_response_sensitive (Gtk::RESPONSE_OK, false);
 	}
 }
 
@@ -659,7 +663,7 @@ NewSessionDialog::reset_recent()
 	RecentSessionsSorter cmp;
 	
 	recent_model->clear ();
-	
+
 	ARDOUR::RecentSessions rs;
 	ARDOUR::read_recent_sessions (rs);
 	

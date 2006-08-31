@@ -277,12 +277,12 @@ SMFSource::read_event(MidiEvent& ev) const
 	fread(ev.buffer+1, 1, ev.size - 1, _fd);
 	ev.time = delta_time;
 
-	printf("SMF - read event, delta = %u, size = %zu, data = ",
+	/*printf("SMF - read event, delta = %u, size = %zu, data = ",
 		delta_time, ev.size);
 	for (size_t i=0; i < ev.size; ++i) {
 		printf("%X ", ev.buffer[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 	
 	return ev.size;
 }
@@ -351,13 +351,13 @@ SMFSource::write_unlocked (MidiRingBuffer& src, jack_nframes_t cnt)
 		assert(ev.time >= _timeline_position);
 		uint32_t delta_time = (ev.time - _timeline_position) - _last_ev_time;
 		
-		printf("SMF - writing event, delta = %u, size = %zu, data = ",
+		/*printf("SMF - writing event, delta = %u, size = %zu, data = ",
 			delta_time, ev.size);
 		for (size_t i=0; i < ev.size; ++i) {
 			printf("%X ", ev.buffer[i]);
 		}
 		printf("\n");
-		
+		*/
 		size_t stamp_size = write_var_len(delta_time);
 		fwrite(ev.buffer, 1, ev.size, _fd);
 		_last_ev_time += delta_time;

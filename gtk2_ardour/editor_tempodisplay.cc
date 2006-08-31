@@ -69,10 +69,14 @@ Editor::remove_metric_marks ()
 void
 Editor::draw_metric_marks (const Metrics& metrics)
 {
+
+        const MeterSection *ms;
+	const TempoSection *ts;
+	char buf[64];
+	
+	remove_metric_marks ();
+	
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		const MeterSection *ms;
-		const TempoSection *ts;
-		char buf[64];
 		
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->beats_per_bar(), ms->note_divisor ());
@@ -85,12 +89,13 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		}
 		
 	}
+
 }
 
 void
 Editor::tempo_map_changed (Change ignored)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::tempo_map_changed), ignored));
+        ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::tempo_map_changed), ignored));
 	
 	if (current_bbt_points) {
 		delete current_bbt_points;
@@ -108,17 +113,13 @@ Editor::tempo_map_changed (Change ignored)
 
 void
 Editor::redisplay_tempo ()
-{
-	update_tempo_based_rulers ();
-
-	remove_metric_marks ();	
+{	
 	hide_measures ();
 
 	if (session && current_bbt_points) {
-		session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 		draw_measures ();
+		update_tempo_based_rulers ();
 	}
-	
 }
 
 void
@@ -155,8 +156,8 @@ Editor::draw_measures ()
 		return;
 	}
 
-	TempoMap::BBTPointList::iterator i;
-	TempoMap::BBTPointList *all_bbt_points;
+	TempoMap::BBTPointList::iterator i = current_bbt_points->begin();
+	TempoMap::BBTPoint& p = (*i);
 	ArdourCanvas::SimpleLine *line;
 	gdouble xpos, last_xpos;
 	uint32_t cnt;
@@ -166,8 +167,6 @@ Editor::draw_measures ()
 		return;
 	}
 
-	all_bbt_points = session->tempo_map().get_points (leftmost_frame, leftmost_frame + current_page_frames());
-
 	cnt = 0;
 	last_xpos = 0;
 
@@ -176,7 +175,7 @@ Editor::draw_measures ()
 	gdouble last_beat = DBL_MAX;
 	gdouble beat_spacing = 0;
 
-	for (i = all_bbt_points->begin(); i != all_bbt_points->end() && beat_spacing == 0; ++i) {
+	for (i = current_bbt_points->begin(); i != current_bbt_points->end() && beat_spacing == 0; ++i) {
 		TempoMap::BBTPoint& p = (*i);
 
 		switch (p.type) {
@@ -194,11 +193,11 @@ Editor::draw_measures ()
 
 	double x1, x2, y1, y2;
 	track_canvas.get_scroll_region (x1, y1, x2, y2);
-	y2 = 1000000000.0f;
+	//y2 = 1000000000.0f;
 
-	for (i = all_bbt_points->begin(); i != all_bbt_points->end(); ++i) {
+	for (i = current_bbt_points->begin(); i != current_bbt_points->end(); ++i) {
 
-		TempoMap::BBTPoint& p = (*i);
+	        p = (*i);
 
 		switch (p.type) {
 		case TempoMap::Bar:
@@ -235,8 +234,6 @@ Editor::draw_measures ()
 			break;
 		}
 	}
-
-	delete all_bbt_points;
 
 	/* the cursors are always on top of everything */
 
@@ -282,6 +279,8 @@ Editor::mouse_add_new_tempo_event (jack_nframes_t frame)
 	commit_reversible_command ();
 	
 	map.dump (cerr);
+
+	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 }
 
 void
@@ -322,6 +321,8 @@ Editor::mouse_add_new_meter_event (jack_nframes_t frame)
 	commit_reversible_command ();
 	
 	map.dump (cerr);
+
+	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 }
 
 void
@@ -372,6 +373,8 @@ Editor::edit_meter_section (MeterSection* section)
         XMLNode &after = session->tempo_map().get_state();
 	session->add_command(new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
 	commit_reversible_command ();
+
+	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 }
 
 void
@@ -402,6 +405,8 @@ Editor::edit_tempo_section (TempoSection* section)
         XMLNode &after = session->tempo_map().get_state();
 	session->add_command (new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
 	commit_reversible_command ();
+
+	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 }
 
 void
@@ -452,6 +457,8 @@ Editor::real_remove_tempo_marker (TempoSection *section)
 	session->add_command(new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
 	commit_reversible_command ();
 
+	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
+
 	return FALSE;
 }
 
@@ -485,5 +492,8 @@ Editor::real_remove_meter_marker (MeterSection *section)
 	XMLNode &after = session->tempo_map().get_state();
 	session->add_command(new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
 	commit_reversible_command ();
+
+	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
+
 	return FALSE;
 }

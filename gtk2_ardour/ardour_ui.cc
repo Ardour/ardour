@@ -137,8 +137,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 		theArdourUI = this;
 	}
 
-	ActionManager::init ();
-
 	/* load colors */
 
 	color_manager = new ColorManager();
@@ -147,7 +145,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	
 	color_manager->load (color_file);
 
-	m_new_session_dialog = new NewSessionDialog();
 	editor = 0;
 	mixer = 0;
 	session = 0;
@@ -205,6 +202,9 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	engine->Running.connect (mem_fun(*this, &ARDOUR_UI::engine_running));
 	engine->Halted.connect (mem_fun(*this, &ARDOUR_UI::engine_halted));
 	engine->SampleRateChanged.connect (mem_fun(*this, &ARDOUR_UI::update_sample_rate));
+
+       	ActionManager::init ();
+	new_session_dialog = new NewSessionDialog();
 
 	_tooltips.enable();
 
@@ -1410,7 +1410,7 @@ ARDOUR_UI::start_blinking ()
 
 	if (blink_timeout_tag < 0) {
 		blink_on = false;	
-		blink_timeout_tag = gtk_timeout_add (240, _blink, this);
+		blink_timeout_tag = g_timeout_add (240, _blink, this);
 	}
 }
 
@@ -1418,7 +1418,7 @@ void
 ARDOUR_UI::stop_blinking ()
 {
 	if (blink_timeout_tag >= 0) {
-		gtk_timeout_remove (blink_timeout_tag);
+		g_source_remove (blink_timeout_tag);
 		blink_timeout_tag = -1;
 	}
 }
@@ -1651,100 +1651,105 @@ ARDOUR_UI::save_template ()
 void
 ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 {
-	m_new_session_dialog->show();
-	m_new_session_dialog->set_modal(true);
-	m_new_session_dialog->set_name(predetermined_path);
-	m_new_session_dialog->reset_recent();
+	int response = Gtk::RESPONSE_NONE;
 
-	int response = Gtk::RESPONSE_CANCEL;
+	new_session_dialog->set_modal(true);
+	new_session_dialog->set_name(predetermined_path);
+	new_session_dialog->reset_recent();
+	new_session_dialog->show();
+
+	//Glib::RefPtr<Gdk::Window> nsd_window = new_session_dialog->get_window();
 
 	do {
-		response = m_new_session_dialog->run ();
+	        response = new_session_dialog->run ();
+		//nsd_window ->set_cursor(Gdk::Cursor(Gdk::WATCH));
 		if(response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
-		  quit();
-		  return;
+		        quit();
+			return;
 
 		} else if (response == Gtk::RESPONSE_NONE) {
-		  /* Clear was pressed */
-		  m_new_session_dialog->reset();
+		        /* Clear was pressed */
+		        new_session_dialog->reset();
 
 		} else if (response == Gtk::RESPONSE_YES) {
-		  /* YES  == OPEN, but there's no enum for that */
-		  std::string session_name = m_new_session_dialog->session_name();
-		  std::string session_path = m_new_session_dialog->session_folder();
-		  load_session (session_path, session_name);
+		        /* YES  == OPEN, but there's no enum for that */
 
-
-		} else if (response == Gtk::RESPONSE_OK) {
-		  if (m_new_session_dialog->get_current_page() == 1) {
-
-		    /* XXX this is a bit of a hack.. 
-		       i really want the new sesion dialog to return RESPONSE_YES
-		       if we're on page 1 (the load page)
-		       Unfortunately i can't see how atm.. 
-		    */
-			std::string session_name = m_new_session_dialog->session_name();
-			std::string session_path = m_new_session_dialog->session_folder();
+		        std::string session_name = new_session_dialog->session_name();
+			std::string session_path = new_session_dialog->session_folder();
 			load_session (session_path, session_name);
 
-		  } else {
-
-			_session_is_new = true;
 			
-			std::string session_name = m_new_session_dialog->session_name();
-			std::string session_path = m_new_session_dialog->session_folder();
-			
-
-			  //XXX This is needed because session constructor wants a 
-			  //non-existant path. hopefully this will be fixed at some point.
-			
-			session_path = Glib::build_filename(session_path, session_name);
-			
-			std::string template_name = m_new_session_dialog->session_template_name();
-			
-			if (m_new_session_dialog->use_session_template()) {
-				
-				load_session (session_path, session_name, &template_name);
-				
+		} else if (response == Gtk::RESPONSE_OK) {
+		        if (new_session_dialog->get_current_page() == 1) {
+		  
+			        /* XXX this is a bit of a hack.. 
+				   i really want the new sesion dialog to return RESPONSE_YES
+				   if we're on page 1 (the load page)
+				   Unfortunately i can't see how atm.. 
+				*/
+			 
+			        std::string session_name = new_session_dialog->session_name();
+				std::string session_path = new_session_dialog->session_folder();
+				load_session (session_path, session_name);
+			       
 			} else {
-				
-				uint32_t cchns;
-				uint32_t mchns;
-				Session::AutoConnectOption iconnect;
-				Session::AutoConnectOption oconnect;
-				
-				if (m_new_session_dialog->create_control_bus()) {
-					cchns = (uint32_t) m_new_session_dialog->control_channel_count();
-				} else {
-					cchns = 0;
-				}
-				
-				if (m_new_session_dialog->create_master_bus()) {
-					mchns = (uint32_t) m_new_session_dialog->master_channel_count();
-				} else {
-					mchns = 0;
-				}
-				
-				if (m_new_session_dialog->connect_inputs()) {
-					iconnect = Session::AutoConnectPhysical;
-				} else {
-					iconnect = Session::AutoConnectOption (0);
-				}
-				
-				/// @todo some minor tweaks.
 
-				if (m_new_session_dialog->connect_outs_to_master()) {
-					oconnect = Session::AutoConnectMaster;
-				} else if (m_new_session_dialog->connect_outs_to_physical()) {
-					oconnect = Session::AutoConnectPhysical;
+			        _session_is_new = true;
+			      
+				std::string session_name = new_session_dialog->session_name();
+				std::string session_path = new_session_dialog->session_folder();
+			
+			
+				//XXX This is needed because session constructor wants a 
+				//non-existant path. hopefully this will be fixed at some point.
+			
+				session_path = Glib::build_filename(session_path, session_name);
+			
+				std::string template_name = new_session_dialog->session_template_name();
+			
+				if (new_session_dialog->use_session_template()) {
+			  
+				        load_session (session_path, session_name, &template_name);
+			  
 				} else {
-					oconnect = Session::AutoConnectOption (0);
-				} 
 				
-				uint32_t nphysin = (uint32_t) m_new_session_dialog->input_limit_count();
-				uint32_t nphysout = (uint32_t) m_new_session_dialog->output_limit_count();
+				        uint32_t cchns;
+					uint32_t mchns;
+					Session::AutoConnectOption iconnect;
+					Session::AutoConnectOption oconnect;
 				
-				build_session (session_path,
+					if (new_session_dialog->create_control_bus()) {
+					        cchns = (uint32_t) new_session_dialog->control_channel_count();
+					} else {
+					        cchns = 0;
+					}
+				
+					if (new_session_dialog->create_master_bus()) {
+					        mchns = (uint32_t) new_session_dialog->master_channel_count();
+					} else {
+					        mchns = 0;
+					}
+				      
+					if (new_session_dialog->connect_inputs()) {
+					        iconnect = Session::AutoConnectPhysical;
+					} else {
+					        iconnect = Session::AutoConnectOption (0);
+					}
+				      
+					/// @todo some minor tweaks.
+				
+					if (new_session_dialog->connect_outs_to_master()) {
+					        oconnect = Session::AutoConnectMaster;
+					} else if (new_session_dialog->connect_outs_to_physical()) {
+					        oconnect = Session::AutoConnectPhysical;
+					} else {
+					        oconnect = Session::AutoConnectOption (0);
+					} 
+				
+					uint32_t nphysin = (uint32_t) new_session_dialog->input_limit_count();
+					uint32_t nphysout = (uint32_t) new_session_dialog->output_limit_count();
+				
+					build_session (session_path,
 					       session_name,
 					       cchns,
 					       mchns,
@@ -1753,14 +1758,15 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 					       nphysin,
 					       nphysout, 
 					       engine->frame_rate() * 60 * 5);
-			}
-		  }	
+				}
+			}	
 		}
 		
 	} while (response == Gtk::RESPONSE_NONE);
-	m_new_session_dialog->hide();
 	show();
-
+	new_session_dialog->get_window()->set_cursor();
+	
+	new_session_dialog->hide();
 }
 
 void
@@ -1806,9 +1812,6 @@ This prevents the session from being loaded."));
 
 	connect_to_session (new_session);
 
-	//if (engine->running()) {
-	//mixer->show_window();
-	//}
 	session_loaded = true;
 	return 0;
 }
@@ -1861,9 +1864,6 @@ ARDOUR_UI::build_session (const string & path, const string & snap_name,
 
 	connect_to_session (new_session);
 
-	//if (engine->running()) {
-	//mixer->show_window();
-	//}
 	session_loaded = true;
 	return 0;
 }
@@ -1874,10 +1874,6 @@ ARDOUR_UI::show ()
 	if (editor) {
 		editor->show_window ();
 		shown_flag = true;
-	}
-
-	if (session && mixer) {
-		// mixer->show_window ();
 	}
 	
 	if (about) {
@@ -1898,7 +1894,8 @@ void
 ARDOUR_UI::hide_splash ()
 {
 	if (about) {
-		// about->hide();
+	        about->get_window()->set_cursor ();
+		about->hide();
 	}
 }
 

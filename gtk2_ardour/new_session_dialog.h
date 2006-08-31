@@ -101,14 +101,14 @@ protected:
 	Gtk::HBox * input_port_limit_hbox;
 	Gtk::VBox * input_port_vbox;
 	Gtk::Table * input_table;
-	Gtk::Alignment * input_port_alignment;
+
 	Gtk::Label * input_label;
 	Gtk::Frame * input_frame;
 	Gtk::HBox * output_port_limit_hbox;
 	Gtk::VBox * output_port_vbox;
 	Gtk::VBox * output_conn_vbox;
 	Gtk::VBox * output_vbox;
-	Gtk::Alignment * output_port_alignment;
+
 	Gtk::Label * output_label;
 	Gtk::Frame * output_frame;
 	Gtk::VBox * advanced_vbox;
@@ -117,7 +117,7 @@ protected:
 	Gtk::Table * new_session_table;
 	Gtk::HBox * open_session_hbox;
 	Gtk::ScrolledWindow * recent_scrolledwindow;
-	Gtk::Alignment * recent_alignment;
+
 	Gtk::Label * recent_sesion_label;
 	Gtk::Frame * recent_frame;
 	Gtk::VBox * open_session_vbox;

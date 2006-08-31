@@ -469,7 +469,7 @@ GainMeter::reset_peak_display ()
 {
 	max_peak = minus_infinity();
 	peak_display_label.set_text (_("-Inf"));
-	peak_display.set_name ("Mixerstrippeakdisplay");
+	peak_display.set_name ("MixerStripPeakDisplay");
 }
 
 void

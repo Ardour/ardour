@@ -220,13 +220,13 @@ TreeView_Selector::on_button_press_event(GdkEventButton* ev)
 
 	if (ev && (ev->type == GDK_BUTTON_RELEASE || ev->type == GDK_2BUTTON_PRESS)) {
 		if (ev->state & Gdk::CONTROL_MASK) {
-			gtk_idle_add (Selector::_control_clicked, this);
+			g_idle_add (Selector::_control_clicked, this);
 		} else if (ev->state & Gdk::SHIFT_MASK) {
-			gtk_idle_add (Selector::_shift_clicked, this);
+			g_idle_add (Selector::_shift_clicked, this);
 		} else if (ev->type == GDK_2BUTTON_PRESS) {
-			gtk_idle_add (Selector::_accept, this);
+			g_idle_add (Selector::_accept, this);
 		} else {
-			gtk_idle_add (Selector::_chosen, this);
+			g_idle_add (Selector::_chosen, this);
 		}
 	}
 

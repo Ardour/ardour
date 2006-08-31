@@ -73,6 +73,7 @@ class Mixer_UI : public Gtk::Window
 	int set_state (const XMLNode& );
 
 	void show_window ();
+	bool hide_window (GdkEventAny *ev);
 	void show_strip (MixerStrip *);
 	void hide_strip (MixerStrip *);
 
@@ -83,6 +84,8 @@ class Mixer_UI : public Gtk::Window
   private:
 	ARDOUR::AudioEngine&     engine;
 	ARDOUR::Session         *session;
+
+	bool _visible;
 	
 	Gtk::HBox                global_hpacker;
 	Gtk::VBox                global_vpacker;
