@@ -652,7 +652,8 @@ Route::process_output_buffers (BufferSet& bufs,
 ChanCount
 Route::n_process_buffers ()
 {
-	return max (n_inputs(), redirect_max_outs);
+	//return max (n_inputs(), redirect_max_outs);
+	return n_inputs(); // FIXME?
 }
 
 void
@@ -784,7 +785,7 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 			   
 			*/
 
-			porti->ensure_io (n_outputs ().get(DataType::AUDIO), n_inputs().get(DataType::AUDIO), false, this);
+			porti->ensure_io (n_outputs (), n_inputs(), false, this);
 		}
 
 		// Ensure peak vector sizes before the plugin is activated
@@ -1729,10 +1730,10 @@ Route::set_control_outs (const vector<string>& ports)
  	_control_outs = new IO (_session, coutname);
 
 	/* our control outs need as many outputs as we
-	   have outputs. we track the changes in ::output_change_handler().
+	   have audio outputs. we track the changes in ::output_change_handler().
 	*/
 
-	_control_outs->ensure_io (0, n_outputs().get(DataType::AUDIO), true, this);
+	_control_outs->ensure_io (ChanCount::ZERO, ChanCount(DataType::AUDIO, n_outputs().get(DataType::AUDIO)), true, this);
  
  	return 0;
 }	
@@ -1961,7 +1962,7 @@ Route::output_change_handler (IOChange change, void *ignored)
 {
 	if (change & ConfigurationChanged) {
 		if (_control_outs) {
-			_control_outs->ensure_io (0, n_outputs().get(DataType::AUDIO), true, this);
+			_control_outs->ensure_io (ChanCount::ZERO, ChanCount(DataType::AUDIO, n_outputs().get(DataType::AUDIO)), true, this);
 		}
 		
 		reset_plugin_counts (0);

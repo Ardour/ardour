@@ -330,36 +330,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframe
 			}
 		}
 	}
-#if 0
-	cerr << "SMF pretending to read" << endl;
-
-	MidiEvent ev;
-	RawMidi data[4];
-
-	const char note = rand()%30 + 30;
 	
-	ev.buffer = data;
-	ev.time = start+1; // FIXME: bug at 0?
-	ev.size = 3;
-
-	data[0] = 0x90;
-	data[1] = note;
-	data[2] = 120;
-
-	dst.write(ev);
-	
-	ev.buffer = data;
-	ev.time = start + (jack_nframes_t)(cnt * 8.0/10.0);
-	ev.size = 3;
-
-	data[0] = 0x80;
-	data[1] = note;
-	data[2] = 64;
-	
-	dst.write(ev);
-
-	//dst.clear();
-#endif
 	return cnt;
 }
 
@@ -488,7 +459,7 @@ SMFSource::move_to_trash (const string trash_dir_name)
 	}
 
 	/* don't move the file across filesystems, just
-	   stick it in the `trash_dir_name' directory
+	   stick it in the 'trash_dir_name' directory
 	   on whichever filesystem it was already on.
 	*/
 
@@ -531,7 +502,7 @@ SMFSource::move_to_trash (const string trash_dir_name)
 	}
 
 	if (::rename (_path.c_str(), newpath.c_str()) != 0) {
-		PBD::error << string_compose (_("cannot rename audio file source from %1 to %2 (%3)"),
+		PBD::error << string_compose (_("cannot rename midi file source from %1 to %2 (%3)"),
 				  _path, newpath, strerror (errno))
 		      << endmsg;
 		return -1;
@@ -682,15 +653,15 @@ SMFSource::set_name (string newname, bool destructive)
 {
 	//Glib::Mutex::Lock lm (_lock); FIXME
 	string oldpath = _path;
-	string newpath = Session::change_audio_path_by_name (oldpath, _name, newname, destructive);
+	string newpath = Session::change_midi_path_by_name (oldpath, _name, newname, destructive);
 
 	if (newpath.empty()) {
-		PBD::error << string_compose (_("programming error: %1"), "cannot generate a changed audio path") << endmsg;
+		PBD::error << string_compose (_("programming error: %1"), "cannot generate a changed midi path") << endmsg;
 		return -1;
 	}
 
 	if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
-		PBD::error << string_compose (_("cannot rename audio file for %1 to %2"), _name, newpath) << endmsg;
+		PBD::error << string_compose (_("cannot rename midi file for %1 to %2"), _name, newpath) << endmsg;
 		return -1;
 	}
 

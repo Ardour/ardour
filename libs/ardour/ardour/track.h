@@ -97,8 +97,6 @@ class Track : public Route
 
 	virtual XMLNode& state (bool full) = 0;
 
-	virtual ChanCount n_process_buffers () = 0;
-	
 	boost::shared_ptr<Diskstream> _diskstream;
 	MeterPoint  _saved_meter_point;
 	TrackMode   _mode;

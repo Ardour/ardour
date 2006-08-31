@@ -64,8 +64,6 @@ class AudioTrack : public Track
   protected:
 	XMLNode& state (bool full);
 
-	ChanCount n_process_buffers ();
-	
   private:
 	int  set_diskstream (boost::shared_ptr<AudioDiskstream>, void *);
 	int  deprecated_use_diskstream_connections ();

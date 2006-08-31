@@ -526,7 +526,9 @@ IOSelector::port_selection_changed (GdkEventButton *ev, TreeView* treeview)
 	if (for_input) {
 		if ((status = io->connect_input (selected_port, other_port_name, this)) == 0) {
 			Port *p = session.engine().get_port_by_name (other_port_name);
-			p->enable_metering();
+			if (p) {
+				p->enable_metering();
+			}
 		}
 	} else {
 		status = io->connect_output (selected_port, other_port_name, this);
@@ -664,7 +666,9 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 		
 		if (for_input) {
 			Port *p = session.engine().get_port_by_name (connected_port_name);
-			p->disable_metering();
+			if (p) {
+				p->disable_metering();
+			}
 			io->disconnect_input (port, connected_port_name, this);
 		} else {
 			io->disconnect_output (port, connected_port_name, this);

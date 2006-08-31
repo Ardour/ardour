@@ -41,7 +41,8 @@ public:
 	size_t num_ports() const;
 	size_t num_ports(DataType type) const { return _ports[type.to_index()].size(); }
 
-	void add_port(Port* port);
+	void add(Port* port);
+	bool remove(Port* port);
 
 	/** nth port */
 	Port* port(size_t index) const;

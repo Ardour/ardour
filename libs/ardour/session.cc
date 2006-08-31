@@ -1668,7 +1668,7 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
 
-	/* count existing audio tracks */
+	/* count existing midi tracks */
 
 	{
 		shared_ptr<RouteList> r = routes.reader ();
@@ -1736,156 +1736,6 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 
 	return ret;
 }
-
-#if 0
-std::list<boost::shared_ptr<MidiTrack> >
-Session::new_midi_track (TrackMode mode)
-{
-	char track_name[32];
-	uint32_t n = 0;
-	uint32_t channels_used = 0;
-	string port;
-
-	/* count existing midi tracks */
-
-	{
-		shared_ptr<RouteList> r = routes.reader ();
-
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if (dynamic_cast<MidiTrack*>((*i).get()) != 0) {
-				if (!(*i)->hidden()) {
-					n++;
-					channels_used += (*i)->n_inputs().get(DataType::MIDI);
-				}
-			}
-		}
-	}
-
-	/* check for duplicate route names, since we might have pre-existing
-	   routes with this name (e.g. create Midi1, Midi2, delete Midi1,
-	   save, close,restart,add new route - first named route is now
-	   Midi2)
-	*/
-
-	do {
-		snprintf (track_name, sizeof(track_name), "Midi %" PRIu32, n+1);
-		if (route_by_name (track_name) == 0) {
-			break;
-		}
-		n++;
-
-	} while (n < (UINT_MAX-1));
-
-	try {
-		shared_ptr<MidiTrack> track (new MidiTrack (*this, track_name, Route::Flag (0), mode));
-
-		if (track->ensure_io (1, 1, false, this)) {
-			error << string_compose (_("cannot configure %1 in/%2 out configuration for new midi track"), track_name)
-			      << endmsg;
-		}
-
-		track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
-
-		add_route (track);
-
-		track->set_remote_control_id (ntracks());
-		return track;
-	}
-
-	catch (failed_constructor &err) {
-		error << _("Session: could not create new midi track.") << endmsg;
-		return shared_ptr<MidiTrack> ((MidiTrack*) 0);
-	}
-}
-
-boost::shared_ptr<Route>
-Session::new_midi_route ()
-{
-	char bus_name[32];
-	uint32_t n = 0;
-	string port;
-
-	/* count existing midi busses */
-	{
-		shared_ptr<RouteList> r = routes.reader ();
-
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if (dynamic_cast<MidiTrack*>((*i).get()) == 0) {
-				if (!(*i)->hidden()) {
-					n++;
-				}
-			}
-		}
-	}
-
-	do {
-		snprintf (bus_name, sizeof(bus_name), "Bus %" PRIu32, n+1);
-		if (route_by_name (bus_name) == 0) {
-			break;
-		}
-		n++;
-
-	} while (n < (UINT_MAX-1));
-
-	try {
-		shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::MIDI));
-		
-		if (bus->ensure_io (1, 1, false, this)) {
-			error << (_("cannot configure 1 in/1 out configuration for new midi track"))
-			      << endmsg;
-		}
-#if 0
-		for (uint32_t x = 0; x < bus->n_inputs(); ++x) {
-			
-			port = "";
-
-			if (input_auto_connect & AutoConnectPhysical) {
-				port = _engine.get_nth_physical_input ((n+x)%n_physical_inputs);
-			} 
-			
-			if (port.length() && bus->connect_input (bus->input (x), port, this)) {
-				break;
-			}
-		}
-
-		for (uint32_t x = 0; x < bus->n_outputs(); ++x) {
-			
-			port = "";
-
-			if (output_auto_connect & AutoConnectPhysical) {
-				port = _engine.get_nth_physical_input ((n+x)%n_physical_outputs);
-			} else if (output_auto_connect & AutoConnectMaster) {
-				if (_master_out) {
-					port = _master_out->input (x%_master_out->n_inputs())->name();
-				}
-			}
-
-			if (port.length() && bus->connect_output (bus->output (x), port, this)) {
-				break;
-			}
-		}
-#endif
-/*
-		if (_control_out) {
-			vector<string> cports;
-			uint32_t ni = _control_out->n_inputs();
-
-			for (uint32_t n = 0; n < ni; ++n) {
-				cports.push_back (_control_out->input(n)->name());
-			}
-			bus->set_control_outs (cports);
-		}
-*/		
-		add_route (bus);
-		return bus;
-	}
-
-	catch (failed_constructor &err) {
-		error << _("Session: could not create new MIDI route.") << endmsg;
-		return shared_ptr<Route> ((Route*) 0);
-	}
-}
-#endif
 
 list<boost::shared_ptr<AudioTrack> >
 Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, uint32_t how_many)
@@ -1956,7 +1806,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		try {
 			shared_ptr<AudioTrack> track (new AudioTrack (*this, track_name, Route::Flag (0), mode));
 			
-			if (track->ensure_io (input_channels, output_channels, false, this)) {
+			if (track->ensure_io (ChanCount(DataType::AUDIO, input_channels), ChanCount(DataType::AUDIO, output_channels), false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
@@ -2077,7 +1927,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 		try {
 			shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
 			
-			if (bus->ensure_io (input_channels, output_channels, false, this)) {
+			if (bus->ensure_io (ChanCount(DataType::AUDIO, input_channels), ChanCount(DataType::AUDIO, output_channels), false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
@@ -3220,6 +3070,121 @@ Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bo
 {
 	string spath = audio_path_from_name (ds.name(), ds.n_channels().get(DataType::AUDIO), chan, destructive);
 	return boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, spath, destructive, frame_rate()));
+}
+
+// FIXME: _terrible_ code duplication
+string
+Session::change_midi_path_by_name (string path, string oldname, string newname, bool destructive)
+{
+	string look_for;
+	string old_basename = PBD::basename_nosuffix (oldname);
+	string new_legalized = legalize_for_path (newname);
+
+	/* note: we know (or assume) the old path is already valid */
+
+	if (destructive) {
+		
+		/* destructive file sources have a name of the form:
+
+		    /path/to/Tnnnn-NAME(%[LR])?.wav
+		  
+		    the task here is to replace NAME with the new name.
+		*/
+		
+		/* find last slash */
+
+		string dir;
+		string prefix;
+		string::size_type slash;
+		string::size_type dash;
+
+		if ((slash = path.find_last_of ('/')) == string::npos) {
+			return "";
+		}
+
+		dir = path.substr (0, slash+1);
+
+		/* '-' is not a legal character for the NAME part of the path */
+
+		if ((dash = path.find_last_of ('-')) == string::npos) {
+			return "";
+		}
+
+		prefix = path.substr (slash+1, dash-(slash+1));
+
+		path = dir;
+		path += prefix;
+		path += '-';
+		path += new_legalized;
+		path += ".mid";  /* XXX gag me with a spoon */
+		
+	} else {
+		
+		/* non-destructive file sources have a name of the form:
+
+		    /path/to/NAME-nnnnn(%[LR])?.wav
+		  
+		    the task here is to replace NAME with the new name.
+		*/
+		
+		string dir;
+		string suffix;
+		string::size_type slash;
+		string::size_type dash;
+		string::size_type postfix;
+
+		/* find last slash */
+
+		if ((slash = path.find_last_of ('/')) == string::npos) {
+			return "";
+		}
+
+		dir = path.substr (0, slash+1);
+
+		/* '-' is not a legal character for the NAME part of the path */
+
+		if ((dash = path.find_last_of ('-')) == string::npos) {
+			return "";
+		}
+
+		suffix = path.substr (dash+1);
+		
+		// Suffix is now everything after the dash. Now we need to eliminate
+		// the nnnnn part, which is done by either finding a '%' or a '.'
+
+		postfix = suffix.find_last_of ("%");
+		if (postfix == string::npos) {
+			postfix = suffix.find_last_of ('.');
+		}
+
+		if (postfix != string::npos) {
+			suffix = suffix.substr (postfix);
+		} else {
+			error << "Logic error in Session::change_midi_path_by_name(), please report to the developers" << endl;
+			return "";
+		}
+
+		const uint32_t limit = 10000;
+		char buf[PATH_MAX+1];
+
+		for (uint32_t cnt = 1; cnt <= limit; ++cnt) {
+
+			snprintf (buf, sizeof(buf), "%s%s-%u%s", dir.c_str(), newname.c_str(), cnt, suffix.c_str());
+
+			if (access (buf, F_OK) != 0) {
+				path = buf;
+				break;
+			}
+			path = "";
+		}
+
+		if (path == "") {
+			error << "FATAL ERROR! Could not find a " << endl;
+		}
+
+	}
+
+	return path;
 }
 
 string

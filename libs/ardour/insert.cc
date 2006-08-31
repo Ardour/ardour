@@ -923,24 +923,9 @@ PortInsert::run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end
 		return;
 	}
 
-	//uint32_t n;
-	vector<Port*>::iterator o;
-	vector<Port*>::iterator i;
+	deliver_output(bufs, start_frame, end_frame, nframes, offset);
 
-#if 0
-	/* deliver output */
-
-	for (o = _outputs.begin(), n = 0; o != _outputs.end(); ++o, ++n) {
-		memcpy ((*o)->get_buffer (nframes) + offset, bufs[min(nbufs,n)], sizeof (Sample) * nframes);
-		(*o)->mark_silence (false);
-	}
-	
-	/* collect input */
-	
-	for (i = _inputs.begin(), n = 0; i != _inputs.end(); ++i, ++n) {
-		memcpy (bufs[min(nbufs,n)], (*i)->get_buffer (nframes) + offset, sizeof (Sample) * nframes);
-	}
-#endif
+	collect_input(bufs, nframes, offset);
 }
 
 XMLNode&
@@ -1059,7 +1044,8 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 		out = n_inputs ().get(_default_type);
 	}
 
-	return ensure_io (out, in, false, this);
+	// FIXME
+	return ensure_io (ChanCount(_default_type, out), ChanCount(_default_type, in), false, this);
 }
 
 int32_t

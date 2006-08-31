@@ -62,6 +62,11 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	_freeze_record.state = NoFreeze;
 	_saved_meter_point = _meter_point;
 	_mode = mode;
+
+	set_input_minimum(ChanCount(DataType::MIDI, 1));
+	set_input_maximum(ChanCount(DataType::MIDI, 1));
+	set_output_minimum(ChanCount(DataType::MIDI, 1));
+	set_output_maximum(ChanCount(DataType::MIDI, 1));
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
@@ -71,6 +76,11 @@ MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	set_state (node);
 	_declickable = true;
 	_saved_meter_point = _meter_point;
+	
+	set_input_minimum(ChanCount(DataType::MIDI, 1));
+	set_input_maximum(ChanCount(DataType::MIDI, 1));
+	set_output_minimum(ChanCount(DataType::MIDI, 1));
+	set_output_maximum(ChanCount(DataType::MIDI, 1));
 }
 
 MidiTrack::~MidiTrack ()
@@ -340,12 +350,6 @@ MidiTrack::set_state_part_two ()
 	}
 	return;
 }	
-
-ChanCount
-MidiTrack::n_process_buffers ()
-{
-	return max (_diskstream->n_channels(), redirect_max_outs);
-}
 
 int 
 MidiTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 

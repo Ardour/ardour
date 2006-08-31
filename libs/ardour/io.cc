@@ -226,6 +226,8 @@ IO::deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t 
 void
 IO::collect_input (BufferSet& outs, jack_nframes_t nframes, jack_nframes_t offset)
 {
+	assert(outs.available() >= n_inputs());
+
 	outs.set_count(n_inputs());
 	
 	if (outs.count() == ChanCount::ZERO)
@@ -245,8 +247,7 @@ void
 IO::just_meter_input (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 		      jack_nframes_t nframes, jack_nframes_t offset)
 {
-	BufferSet& bufs = _session.get_scratch_buffers ();
-	ChanCount nbufs = n_process_buffers ();
+	BufferSet& bufs = _session.get_scratch_buffers (n_inputs());
 
 	collect_input (bufs, nframes, offset);
 
@@ -424,13 +425,13 @@ IO::set_input (Port* other_port, void* src)
 
 	if (other_port == 0) {
 		if (_input_minimum == ChanCount::ZERO) {
-			return ensure_inputs (0, false, true, src);
+			return ensure_inputs (ChanCount::ZERO, false, true, src);
 		} else {
 			return -1;
 		}
 	}
 
-	if (ensure_inputs (1, true, true, src)) {
+	if (ensure_inputs (ChanCount(other_port->type(), 1), true, true, src)) {
 		return -1;
 	}
 
@@ -440,8 +441,6 @@ IO::set_input (Port* other_port, void* src)
 int
 IO::remove_output_port (Port* port, void* src)
 {
-	throw; // FIXME
-#if 0
 	IOChange change (NoChange);
 
 	{
@@ -449,41 +448,34 @@ IO::remove_output_port (Port* port, void* src)
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
-			
-			if (_noutputs - 1 == (uint32_t) _output_minimum) {
+
+			if (n_outputs() <= _output_minimum) {
 				/* sorry, you can't do this */
 				return -1;
 			}
-			
-			for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-				if (*i == port) {
-					change = IOChange (change|ConfigurationChanged);
-					if (port->connected()) {
-						change = IOChange (change|ConnectionsChanged);
-					} 
 
-					_session.engine().unregister_port (*i);
-					_outputs.erase (i);
-					_noutputs--;
-					drop_output_connection ();
+			if (_outputs.remove(port)) {
+				change = IOChange (change|ConfigurationChanged);
 
-					break;
-				}
-			}
+				if (port->connected()) {
+					change = IOChange (change|ConnectionsChanged);
+				} 
 
-			if (change != NoChange) {
+				_session.engine().unregister_port (*port);
+				drop_output_connection ();
+				
 				setup_peak_meters ();
 				reset_panner ();
 			}
 		}
 	}
-	
+
 	if (change != NoChange) {
-		output_changed (change, src); /* EMIT SIGNAL */
+		output_changed (change, src);
 		_session.set_dirty ();
 		return 0;
-	}
-#endif
+	} 
+	
 	return -1;
 }
 
@@ -515,7 +507,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 			/* Create a new output port */
 			
 			// FIXME: naming scheme for differently typed ports?
-			if (_output_maximum.get_total() == 1) {
+			if (_output_maximum.get(type) == 1) {
 				snprintf (name, sizeof (name), _("%s/out"), _name.c_str());
 			} else {
 				snprintf (name, sizeof (name), _("%s/out %u"), _name.c_str(), find_output_port_hole());
@@ -526,7 +518,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 				return -1;
 			}
 			
-			_outputs.add_port (our_port);
+			_outputs.add (our_port);
 			drop_output_connection ();
 			setup_peak_meters ();
 			reset_panner ();
@@ -551,8 +543,6 @@ IO::add_output_port (string destination, void* src, DataType type)
 int
 IO::remove_input_port (Port* port, void* src)
 {
-	throw; // FIXME
-#if 0
 	IOChange change (NoChange);
 
 	{
@@ -561,29 +551,21 @@ IO::remove_input_port (Port* port, void* src)
 		{
 			Glib::Mutex::Lock lm (io_lock);
 
-			if (((int)_ninputs - 1) < _input_minimum) {
+			if (n_inputs() <= _input_minimum) {
 				/* sorry, you can't do this */
 				return -1;
 			}
-			for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 
-				if (*i == port) {
-					change = IOChange (change|ConfigurationChanged);
+			if (_inputs.remove(port)) {
+				change = IOChange (change|ConfigurationChanged);
 
-					if (port->connected()) {
-						change = IOChange (change|ConnectionsChanged);
-					} 
+				if (port->connected()) {
+					change = IOChange (change|ConnectionsChanged);
+				} 
 
-					_session.engine().unregister_port (*i);
-					_inputs.erase (i);
-					_ninputs--;
-					drop_input_connection ();
-
-					break;
-				}
-			}
-			
-			if (change != NoChange) {
+				_session.engine().unregister_port (*port);
+				drop_input_connection ();
+				
 				setup_peak_meters ();
 				reset_panner ();
 			}
@@ -595,7 +577,7 @@ IO::remove_input_port (Port* port, void* src)
 		_session.set_dirty ();
 		return 0;
 	} 
-#endif
+	
 	return -1;
 }
 
@@ -628,7 +610,7 @@ IO::add_input_port (string source, void* src, DataType type)
 			/* Create a new input port */
 			
 			// FIXME: naming scheme for differently typed ports?
-			if (_input_maximum.get_total() == 1) {
+			if (_input_maximum.get(type) == 1) {
 				snprintf (name, sizeof (name), _("%s/in"), _name.c_str());
 			} else {
 				snprintf (name, sizeof (name), _("%s/in %u"), _name.c_str(), find_input_port_hole());
@@ -638,8 +620,8 @@ IO::add_input_port (string source, void* src, DataType type)
 				error << string_compose(_("IO: cannot register input port %1"), name) << endmsg;
 				return -1;
 			}
-			
-			_inputs.add_port(our_port);
+
+			_inputs.add (our_port);
 			drop_input_connection ();
 			setup_peak_meters ();
 			reset_panner ();
@@ -708,55 +690,56 @@ IO::disconnect_outputs (void* src)
 }
 
 bool
-IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
+IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 {
-	Port* input_port;
-	bool changed = false;
+	Port* input_port = 0;
+	bool  changed    = false;
+
+
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		
+		const size_t n = count.get(*t);
 	
-	/* remove unused ports */
+		/* remove unused ports */
+		for (size_t i = n_inputs().get(*t); i > n; --i) {
+			input_port = _inputs.port(*t, i-1);
 
-	while (n_inputs().get(_default_type) > n) {
-		throw; // FIXME
-		/*
-		_session.engine().unregister_port (_inputs.back());
-		_inputs.pop_back();
-		_ninputs--;
-		changed = true;
-		*/
-	}
-		
-	/* create any necessary new ports */
-		
-	while (n_inputs().get(_default_type) < n) {
-		
-		char buf[64];
-		
-		/* Create a new input port (of the default type) */
-		
-		if (_input_maximum.get_total() == 1) {
-			snprintf (buf, sizeof (buf), _("%s/in"), _name.c_str());
+			assert(input_port);
+			_inputs.remove(input_port);
+			_session.engine().unregister_port (*input_port);
+
+			changed = true;
 		}
-		else {
-			snprintf (buf, sizeof (buf), _("%s/in %u"), _name.c_str(), find_input_port_hole());
-		}
-		
-		try {
-			
-			if ((input_port = _session.engine().register_input_port (_default_type, buf)) == 0) {
-				error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
-				return -1;
+
+		/* create any necessary new ports */
+		while (n_inputs().get(*t) < n) {
+
+			char buf[64];
+
+			if (_input_maximum.get(*t) == 1) {
+				snprintf (buf, sizeof (buf), _("%s/in"), _name.c_str());
+			} else {
+				snprintf (buf, sizeof (buf), _("%s/in %u"), _name.c_str(), find_input_port_hole());
 			}
-		}
 
-		catch (AudioEngine::PortRegistrationFailure& err) {
-			setup_peak_meters ();
-			reset_panner ();
-			/* pass it on */
-			throw err;
+			try {
+
+				if ((input_port = _session.engine().register_input_port (*t, buf)) == 0) {
+					error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
+					return -1;
+				}
+			}
+
+			catch (AudioEngine::PortRegistrationFailure& err) {
+				setup_peak_meters ();
+				reset_panner ();
+				/* pass it on */
+				throw err;
+			}
+
+			_inputs.add (input_port);
+			changed = true;
 		}
-		
-		_inputs.add_port (input_port);
-		changed = true;
 	}
 	
 	if (changed) {
@@ -769,7 +752,6 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 	
 	if (clear) {
 		/* disconnect all existing ports so that we get a fresh start */
-			
 		for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 			_session.engine().disconnect (*i);
 		}
@@ -780,7 +762,7 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 
 /** Attach output_buffers to port buffers.
  * 
- * Connected to IOs own MoreChannels signal.
+ * Connected to IO's own MoreChannels signal.
  */
 void
 IO::attach_buffers(ChanCount ignored)
@@ -789,31 +771,17 @@ IO::attach_buffers(ChanCount ignored)
 }
 
 int
-IO::ensure_io (const ChanCount& in, const ChanCount& out, bool clear, void* src)
+IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 {
-	// FIXME: TYPE
-	uint32_t nin = in.get(_default_type);
-	uint32_t nout = out.get(_default_type);
+	bool in_changed     = false;
+	bool out_changed    = false;
+	bool need_pan_reset = false;
 
-	// We only deal with one type still.  Sorry about your luck.
-	assert(nin == in.get_total());
-	assert(nout == out.get_total());
+	in = min (_input_maximum, in);
 
-	return ensure_io(nin, nout, clear, src);
-}
+	out = min (_output_maximum, out);
 
-int
-IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
-{
-	bool in_changed = false;
-	bool out_changed = false;
-	bool need_pan_reset;
-
-	nin = min (_input_maximum.get(_default_type), static_cast<size_t>(nin));
-
-	nout = min (_output_maximum.get(_default_type), static_cast<size_t>(nout));
-
-	if (nin == n_inputs().get(_default_type) && nout == n_outputs().get(_default_type) && !clear) {
+	if (in == n_inputs() && out == n_outputs() && !clear) {
 		return 0;
 	}
 
@@ -823,95 +791,103 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 
 		Port* port;
 		
-		if (n_outputs().get(_default_type) == nout) {
-			need_pan_reset = false;
-		} else {
+		if (n_outputs() != out) {
 			need_pan_reset = true;
 		}
 		
-		/* remove unused ports */
-		
-		while (n_inputs().get(_default_type) > nin) {
-			throw; // FIXME
-			/*
-			_session.engine().unregister_port (_inputs.back());
-			_inputs.pop_back();
-			_ninputs--;
-			in_changed = true;*/
-		}
-		
-		while (n_outputs().get(_default_type) > nout) {
-			throw; // FIXME
-			/*
-			_session.engine().unregister_port (_outputs.back());
-			_outputs.pop_back();
-			_noutputs--;
-			out_changed = true;*/
-		}
-		
-		/* create any necessary new ports (of the default type) */
-		
-		while (n_inputs().get(_default_type) < nin) {
-			
-			char buf[64];
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 
-			/* Create a new input port */
-			
-			if (_input_maximum.get_total() == 1) {
-				snprintf (buf, sizeof (buf), _("%s/in"), _name.c_str());
+			const size_t nin = in.get(*t);
+			const size_t nout = out.get(*t);
+
+			Port* output_port = 0;
+			Port* input_port = 0;
+
+			/* remove unused output ports */
+			for (size_t i = n_outputs().get(*t); i > nout; --i) {
+				output_port = _outputs.port(*t, i-1);
+
+				assert(output_port);
+				_outputs.remove(output_port);
+				_session.engine().unregister_port (*output_port);
+
+				out_changed = true;
 			}
-			else {
-				snprintf (buf, sizeof (buf), _("%s/in %u"), _name.c_str(), find_input_port_hole());
+
+			/* remove unused input ports */
+			for (size_t i = n_inputs().get(*t); i > nin; --i) {
+				input_port = _inputs.port(*t, i-1);
+
+				assert(input_port);
+				_inputs.remove(input_port);
+				_session.engine().unregister_port (*input_port);
+
+				in_changed = true;
 			}
-			
-			try {
-				if ((port = _session.engine().register_input_port (_default_type, buf)) == 0) {
-					error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
-					return -1;
+
+			/* create any necessary new input ports */
+
+			while (n_inputs().get(*t) < nin) {
+
+				char buf[64];
+
+				/* Create a new input port */
+
+				if (_input_maximum.get(*t) == 1) {
+					snprintf (buf, sizeof (buf), _("%s/in"), _name.c_str());
+				} else {
+					snprintf (buf, sizeof (buf), _("%s/in %u"), _name.c_str(), find_input_port_hole());
 				}
-			}
 
-			catch (AudioEngine::PortRegistrationFailure& err) {
-				setup_peak_meters ();
-				reset_panner ();
-				/* pass it on */
-				throw err;
-			}
-		
-			_inputs.add_port (port);
-			in_changed = true;
-		}
-
-		/* create any necessary new ports */
-		
-		while (n_outputs().get(_default_type) < nout) {
-			
-			char buf[64];
-			
-			/* Create a new output port */
-			
-			if (_output_maximum.get_total() == 1) {
-				snprintf (buf, sizeof (buf), _("%s/out"), _name.c_str());
-			} else {
-				snprintf (buf, sizeof (buf), _("%s/out %u"), _name.c_str(), find_output_port_hole());
-			}
-			
-			try { 
-				if ((port = _session.engine().register_output_port (_default_type, buf)) == 0) {
-					error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
-					return -1;
+				try {
+					if ((port = _session.engine().register_input_port (*t, buf)) == 0) {
+						error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
+						return -1;
+					}
 				}
+
+				catch (AudioEngine::PortRegistrationFailure& err) {
+					setup_peak_meters ();
+					reset_panner ();
+					/* pass it on */
+					throw err;
+				}
+
+				_inputs.add (port);
+				in_changed = true;
 			}
-			
-			catch (AudioEngine::PortRegistrationFailure& err) {
-				setup_peak_meters ();
-				reset_panner ();
-				/* pass it on */
-				throw err;
+
+			/* create any necessary new output ports */
+
+			while (n_outputs().get(*t) < nout) {
+
+				char buf[64];
+
+				/* Create a new output port */
+
+				if (_output_maximum.get(*t) == 1) {
+					snprintf (buf, sizeof (buf), _("%s/out"), _name.c_str());
+				} else {
+					snprintf (buf, sizeof (buf), _("%s/out %u"), _name.c_str(), find_output_port_hole());
+				}
+
+				try { 
+					if ((port = _session.engine().register_output_port (*t, buf)) == 0) {
+						error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
+						return -1;
+					}
+				}
+
+				catch (AudioEngine::PortRegistrationFailure& err) {
+					setup_peak_meters ();
+					reset_panner ();
+					/* pass it on */
+					throw err;
+				}
+
+				_outputs.add (port);
+				out_changed = true;
 			}
-		
-			_outputs.add_port (port);
-			out_changed = true;
 		}
 		
 		if (clear) {
@@ -952,22 +928,22 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 }
 
 int
-IO::ensure_inputs (uint32_t n, bool clear, bool lockit, void* src)
+IO::ensure_inputs (ChanCount count, bool clear, bool lockit, void* src)
 {
 	bool changed = false;
 
-	n = min (_input_maximum.get(_default_type), static_cast<size_t>(n));
+	count = min (_input_maximum, count);
 
-	if (n == n_inputs().get(_default_type) && !clear) {
+	if (count == n_inputs() && !clear) {
 		return 0;
 	}
 
 	if (lockit) {
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		Glib::Mutex::Lock im (io_lock);
-		changed = ensure_inputs_locked (n, clear, src);
+		changed = ensure_inputs_locked (count, clear, src);
 	} else {
-		changed = ensure_inputs_locked (n, clear, src);
+		changed = ensure_inputs_locked (count, clear, src);
 	}
 
 	if (changed) {
@@ -978,55 +954,54 @@ IO::ensure_inputs (uint32_t n, bool clear, bool lockit, void* src)
 }
 
 bool
-IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
+IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 {
-	Port* output_port;
-	bool changed = false;
-	bool need_pan_reset;
+	Port* output_port    = 0;
+	bool  changed        = false;
+	bool  need_pan_reset = false;
 
-	if (n_outputs().get(_default_type) == n) {
-		need_pan_reset = false;
-	} else {
+	if (n_outputs() != count) {
 		need_pan_reset = true;
 	}
 	
-	/* remove unused ports */
-	
-	while (n_outputs().get(_default_type) > n) {
-		throw; // FIXME
-		/*
-		_session.engine().unregister_port (_outputs.back());
-		_outputs.pop_back();
-		_noutputs--;
-		changed = true;
-		*/
-	}
-	
-	/* create any necessary new ports */
-	
-	while (n_outputs().get(_default_type) < n) {
-		
-		char buf[64];
-		
-		/* Create a new output port */
-		
-		if (_output_maximum.get(_default_type) == 1) {
-			snprintf (buf, sizeof (buf), _("%s/out"), _name.c_str());
-		} else {
-			snprintf (buf, sizeof (buf), _("%s/out %u"), _name.c_str(), find_output_port_hole());
-		}
-		
-		if ((output_port = _session.engine().register_output_port (_default_type, buf)) == 0) {
-			error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
-			return -1;
-		}
-		
-		_outputs.add_port (output_port);
-		changed = true;
-		setup_peak_meters ();
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 
-		if (need_pan_reset) {
-			reset_panner ();
+		const size_t n = count.get(*t);
+
+		/* remove unused ports */
+		for (size_t i = n_outputs().get(*t); i > n; --i) {
+			output_port = _outputs.port(*t, i-1);
+
+			assert(output_port);
+			_outputs.remove(output_port);
+			_session.engine().unregister_port (*output_port);
+
+			changed = true;
+		}
+
+		/* create any necessary new ports */
+		while (n_outputs().get(*t) < n) {
+
+			char buf[64];
+
+			if (_output_maximum.get(*t) == 1) {
+				snprintf (buf, sizeof (buf), _("%s/out"), _name.c_str());
+			} else {
+				snprintf (buf, sizeof (buf), _("%s/out %u"), _name.c_str(), find_output_port_hole());
+			}
+
+			if ((output_port = _session.engine().register_output_port (*t, buf)) == 0) {
+				error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
+				return -1;
+			}
+
+			_outputs.add (output_port);
+			changed = true;
+			setup_peak_meters ();
+
+			if (need_pan_reset) {
+				reset_panner ();
+			}
 		}
 	}
 	
@@ -1038,7 +1013,6 @@ IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
 	
 	if (clear) {
 		/* disconnect all existing ports so that we get a fresh start */
-		
 		for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 			_session.engine().disconnect (*i);
 		}
@@ -1048,13 +1022,13 @@ IO::ensure_outputs_locked (uint32_t n, bool clear, void* src)
 }
 
 int
-IO::ensure_outputs (uint32_t n, bool clear, bool lockit, void* src)
+IO::ensure_outputs (ChanCount count, bool clear, bool lockit, void* src)
 {
 	bool changed = false;
 
 	if (_output_maximum < ChanCount::INFINITE) {
-		n = min (_output_maximum.get(_default_type), static_cast<size_t>(n));
-		if (n == n_outputs().get(_default_type) && !clear) {
+		count = min (_output_maximum, count);
+		if (count == n_outputs() && !clear) {
 			return 0;
 		}
 	}
@@ -1064,14 +1038,15 @@ IO::ensure_outputs (uint32_t n, bool clear, bool lockit, void* src)
 	if (lockit) {
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		Glib::Mutex::Lock im (io_lock);
-		changed = ensure_outputs_locked (n, clear, src);
+		changed = ensure_outputs_locked (count, clear, src);
 	} else {
-		changed = ensure_outputs_locked (n, clear, src);
+		changed = ensure_outputs_locked (count, clear, src);
 	}
 
 	if (changed) {
 		 output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 	}
+
 	return 0;
 }
 
@@ -1090,7 +1065,7 @@ IO::reset_panner ()
 {
 	if (panners_legal) {
 		if (!no_panner_reset) {
-			_panner->reset (n_outputs().get(_default_type), pans_required());
+			_panner->reset (n_outputs().get(DataType::AUDIO), pans_required());
 		}
 	} else {
 		panner_legal_c.disconnect ();
@@ -1101,7 +1076,7 @@ IO::reset_panner ()
 int
 IO::panners_became_legal ()
 {
-	_panner->reset (n_outputs().get(_default_type), pans_required());
+	_panner->reset (n_outputs().get(DataType::AUDIO), pans_required());
 	_panner->load (); // automation
 	panner_legal_c.disconnect ();
 	return 0;
@@ -1225,6 +1200,7 @@ IO::state (bool full_state)
 	snprintf (buf, sizeof(buf), "%2.12f", gain());
 	node->add_property ("gain", buf);
 
+	// FIXME: this is NOT sufficient!
 	const int in_min  = (_input_minimum == ChanCount::ZERO) ? -1 : _input_minimum.get(_default_type);
 	const int in_max  = (_input_maximum == ChanCount::INFINITE) ? -1 : _input_maximum.get(_default_type);
 	const int out_min = (_output_minimum == ChanCount::ZERO) ? -1 : _output_minimum.get(_default_type);
@@ -1451,7 +1427,8 @@ IO::create_ports (const XMLNode& node)
 
 	no_panner_reset = true;
 
-	if (ensure_io (num_inputs, num_outputs, true, this)) {
+	// FIXME: audio-only
+	if (ensure_io (ChanCount(DataType::AUDIO, num_inputs), ChanCount(DataType::AUDIO, num_outputs), true, this)) {
 		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 		return -1;
 	}
@@ -1535,7 +1512,8 @@ IO::set_inputs (const string& str)
 		return 0;
 	}
 
-	if (ensure_inputs (nports, true, true, this)) {
+	// FIXME: audio-only
+	if (ensure_inputs (ChanCount(DataType::AUDIO, nports), true, true, this)) {
 		return -1;
 	}
 
@@ -1585,7 +1563,8 @@ IO::set_outputs (const string& str)
 		return 0;
 	}
 
-	if (ensure_outputs (nports, true, true, this)) {
+	// FIXME: audio-only
+	if (ensure_outputs (ChanCount(DataType::AUDIO, nports), true, true, this)) {
 		return -1;
 	}
 
@@ -1816,7 +1795,8 @@ IO::use_input_connection (Connection& c, void* src)
 		
 		drop_input_connection ();
 		
-		if (ensure_inputs (limit, false, false, src)) {
+		// FIXME connections only work for audio-only
+		if (ensure_inputs (ChanCount(DataType::AUDIO, limit), false, false, src)) {
 			return -1;
 		}
 
@@ -1894,7 +1874,8 @@ IO::use_output_connection (Connection& c, void* src)
 			
 		drop_output_connection ();
 
-		if (ensure_outputs (limit, false, false, src)) {
+		// FIXME: audio-only
+		if (ensure_outputs (ChanCount(DataType::AUDIO, limit), false, false, src)) {
 			return -1;
 		}
 

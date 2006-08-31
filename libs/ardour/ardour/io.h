@@ -76,7 +76,7 @@ class IO : public PBD::StatefulDestructible, public ARDOUR::StateManager
 	    int output_min = -1, int output_max = -1,
 		DataType default_type = DataType::AUDIO);
 	
-virtual ~IO();
+	virtual ~IO();
 
 	ChanCount input_minimum() const { return _input_minimum; }
 	ChanCount input_maximum() const { return _input_maximum; }
@@ -107,8 +107,6 @@ virtual ~IO();
 	void just_meter_input (jack_nframes_t start_frame, jack_nframes_t end_frame, 
 			       jack_nframes_t nframes, jack_nframes_t offset);
 
-	virtual ChanCount n_process_buffers () { return ChanCount::ZERO; }
-
 	virtual void   set_gain (gain_t g, void *src);
 	void           inc_gain (gain_t delta, void *src);
 	gain_t         gain () const { return _desired_gain; }
@@ -120,8 +118,7 @@ virtual ~IO();
 	Panner& panner()        { return *_panner; }
 	PeakMeter& peak_meter() { return *_meter; }
 
-	int ensure_io (uint32_t, uint32_t, bool clear, void *src);
-	int ensure_io (const ChanCount& in, const ChanCount& out, bool clear, void *src);
+	int ensure_io (ChanCount in, ChanCount out, bool clear, void *src);
 
 	int use_input_connection (Connection&, void *src);
 	int use_output_connection (Connection&, void *src);
@@ -379,8 +376,8 @@ public:
 	int set_sources (vector<string>&, void *src, bool add);
 	int set_destinations (vector<string>&, void *src, bool add);
 
-	int ensure_inputs (uint32_t, bool clear, bool lockit, void *src);
-	int ensure_outputs (uint32_t, bool clear, bool lockit, void *src);
+	int ensure_inputs (ChanCount, bool clear, bool lockit, void *src);
+	int ensure_outputs (ChanCount, bool clear, bool lockit, void *src);
 
 	void drop_input_connection ();
 	void drop_output_connection ();
@@ -396,8 +393,8 @@ public:
 	void setup_peak_meters ();
 	void meter ();
 
-	bool ensure_inputs_locked (uint32_t, bool clear, void *src);
-	bool ensure_outputs_locked (uint32_t, bool clear, void *src);
+	bool ensure_inputs_locked (ChanCount, bool clear, void *src);
+	bool ensure_outputs_locked (ChanCount, bool clear, void *src);
 
 	int32_t find_input_port_hole ();
 	int32_t find_output_port_hole ();

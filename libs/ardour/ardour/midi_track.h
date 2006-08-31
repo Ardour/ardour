@@ -76,8 +76,6 @@ public:
 protected:
 	XMLNode& state (bool full);
 
-	ChanCount n_process_buffers ();
-
 private:
 	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
 

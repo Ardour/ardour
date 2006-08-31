@@ -32,7 +32,7 @@ static bool sort_ports_by_name (Port* a, Port* b)
 }
 
 void
-PortSet::add_port(Port* port)
+PortSet::add(Port* port)
 {
 	const size_t list_index = port->type().to_index();
 	assert(list_index < _ports.size());
@@ -47,6 +47,20 @@ PortSet::add_port(Port* port)
 	assert(_count.get(port->type()) == _ports[port->type().to_index()].size());
 }
 
+bool
+PortSet::remove(Port* port)
+{
+	for (std::vector<PortVec>::iterator l = _ports.begin(); l != _ports.end(); ++l) {
+		PortVec::iterator i = find(l->begin(), l->end(), port);
+		if (i != l->end()) {
+			l->erase(i);
+			_count.set(port->type(), _count.get(port->type()) - 1);
+			return true;
+		}
+	}
+
+	return false;
+}
 
 /** Get the total number of ports (of all types) in the PortSet
  */
@@ -74,7 +88,7 @@ PortSet::contains(const Port* port) const
 Port*
 PortSet::port(size_t n) const
 {
-	// This is awesome
+	// This is awesome.  Awesomely slow.
 	
 	size_t size_so_far = 0;
 

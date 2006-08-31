@@ -280,6 +280,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	static void get_template_list (list<string>&);
 	
 	static string change_audio_path_by_name (string oldpath, string oldname, string newname, bool destructive);
+	static string change_midi_path_by_name (string oldpath, string oldname, string newname, bool destructive);
 	static string peak_path_from_audio_path (string);
 	string audio_path_from_name (string, uint32_t nchans, uint32_t chan, bool destructive);
 	string midi_path_from_name (string);

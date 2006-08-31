@@ -334,6 +334,9 @@ MidiRegion::recompute_at_start ()
 int
 MidiRegion::separate_by_channel (Session& session, vector<MidiRegion*>& v) const
 {
+	// Separate by MIDI channel?  bit different from audio since this is separating based
+	// on the actual contained data and destructively modifies and creates new sources..
+	
 #if 0
 	SourceList srcs;
 	string new_name;

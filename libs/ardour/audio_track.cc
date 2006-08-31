@@ -398,12 +398,6 @@ AudioTrack::set_state_part_two ()
 	return;
 }	
 
-ChanCount
-AudioTrack::n_process_buffers ()
-{
-	return max (_diskstream->n_channels(), redirect_max_outs);
-}
-
 int 
 AudioTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
