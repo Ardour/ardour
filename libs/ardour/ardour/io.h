@@ -94,7 +94,8 @@ class IO : public PBD::StatefulDestructible, public ARDOUR::StateManager
 	void set_output_minimum (int n);
 	void set_output_maximum (int n);
 
-	DataType default_type() const { return _default_type; }
+	DataType default_type() const         { return _default_type; }
+	void     set_default_type(DataType t) { _default_type = t; }
 
 	const string& name() const { return _name; }
 	virtual int set_name (string str, void *src);

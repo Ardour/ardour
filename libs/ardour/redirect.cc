@@ -45,8 +45,8 @@ const string Redirect::state_node_name = "Redirect";
 sigc::signal<void,Redirect*> Redirect::RedirectCreated;
 
 Redirect::Redirect (Session& s, const string& name, Placement p,
-
-		    int input_min, int input_max, int output_min, int output_max)
+                    int input_min, int input_max,
+                    int output_min, int output_max)
 	: IO (s, name, input_min, input_max, output_min, output_max)
 {
 	_placement = p;

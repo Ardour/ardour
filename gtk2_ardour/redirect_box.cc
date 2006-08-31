@@ -448,6 +448,7 @@ void
 RedirectBox::choose_send ()
 {
 	boost::shared_ptr<Send> send (new Send (_session, _placement));
+	send->set_default_type(_route->default_type());
 
 	/* XXX need redirect lock on route */
 

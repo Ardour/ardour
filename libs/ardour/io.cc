@@ -106,13 +106,26 @@ IO::IO (Session& s, string name,
 	  _default_type(default_type),
 	  _gain_control (*this),
 	  _gain_automation_curve (0.0, 2.0, 1.0),
-	  _input_minimum (_default_type, input_min),
-	  _input_maximum (_default_type, input_max),
-	  _output_minimum (_default_type, output_min),
-	  _output_maximum (_default_type, output_max)
+	  _input_minimum (ChanCount::ZERO),
+	  _input_maximum (ChanCount::INFINITE),
+	  _output_minimum (ChanCount::ZERO),
+	  _output_maximum (ChanCount::INFINITE)
 {
 	_panner = new Panner (name, _session);
 	_meter = new PeakMeter (_session);
+
+	if (input_min > 0) {
+		_input_minimum = ChanCount(_default_type, input_min);
+	}
+	if (input_max >= 0) {
+		_input_maximum = ChanCount(_default_type, input_max);
+	}
+	if (output_min > 0) {
+		_output_minimum = ChanCount(_default_type, output_min);
+	}
+	if (output_max >= 0) {
+		_output_maximum = ChanCount(_default_type, output_max);
+	}
 
 	_gain = 1.0;
 	_desired_gain = 1.0;

@@ -759,6 +759,8 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		boost::shared_ptr<PluginInsert> pi;
 		boost::shared_ptr<PortInsert> porti;
 
+		redirect->set_default_type(_default_type);
+
 		ChanCount potential_max_streams;
 
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redirect)) != 0) {

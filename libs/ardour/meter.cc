@@ -61,6 +61,11 @@ PeakMeter::setup (const ChanCount& in)
 {
 	uint32_t limit = in.get(DataType::AUDIO);
 
+	while (_peak_power.size() > limit) {
+		_peak_power.pop_back();
+		_visible_peak_power.pop_back();
+	}
+
 	while (_peak_power.size() < limit) {
 		_peak_power.push_back (0);
 		_visible_peak_power.push_back (0);
