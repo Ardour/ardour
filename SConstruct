@@ -467,6 +467,17 @@ if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == 0:
     
 libraries['boost'] = conf.Finish ()
 
+conf = env.Configure ()
+
+# jack_port_ensure_monitor available
+
+if conf.CheckFunc('jack_port_ensure_monitor'):
+    env.Append(CCFLAGS='-DWITH_JACK_PORT_ENSURE_MONITOR')
+else:
+    print '\nWARNING: You need at least svn revision 985 of jack for hardware monitoring to work correctly.\n'
+
+env = conf.Finish()
+
 #
 # Check for liblo
 
