@@ -360,6 +360,8 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	jack_nframes_t  last_transport_start() const { return _last_roll_location; }
 	void goto_end ()   { request_locate (end_location->start(), false);}
 	void goto_start () { request_locate (start_location->start(), false); }
+	void set_session_start (jack_nframes_t start) { start_location->set_start(start); }
+	void set_session_end (jack_nframes_t end) { end_location->set_start(end); _end_location_is_free = false; }
 	void use_rf_shuttle_speed ();
 	void request_transport_speed (float speed);
 	void request_overwrite_buffer (Diskstream*);
@@ -377,8 +379,9 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	jack_nframes_t current_end_frame() const { return end_location->start(); }
 	jack_nframes_t current_start_frame() const { return start_location->start(); }
 	jack_nframes_t frame_rate() const   { return _current_frame_rate; }
-	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
 	jack_nframes_t frames_per_hour() const { return _frames_per_hour; }
+
+	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
 	jack_nframes_t smpte_frames_per_hour() const { return _smpte_frames_per_hour; }
 
 	/* Locations */
@@ -417,7 +420,8 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 		MidiFeedback,
 		MidiControl,
 		TranzportControl,
-		Feedback
+		Feedback,
+		SmpteMode,
 	};
 
 	sigc::signal<void,ControlType> ControlChanged;
@@ -576,6 +580,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	float   shuttle_speed_threshold;
 	float   rf_speed;
 	float   smpte_frames_per_second;
+	float   video_pullup;
 	bool    smpte_drop_frames;
 	AnyTime preroll;
 	AnyTime postroll;
@@ -585,7 +590,35 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	jack_nframes_t transport_frame () const {return _transport_frame; }
 	jack_nframes_t audible_frame () const;
 
+	enum SmpteFormat {
+		smpte_23976,
+		smpte_24,
+		smpte_24976,
+		smpte_25,
+		smpte_2997,
+		smpte_2997drop,
+		smpte_30,
+		smpte_30drop,
+		smpte_5994,
+		smpte_60,
+	};
+
+	enum PullupFormat {
+		pullup_Plus4Plus1,
+		pullup_Plus4,
+		pullup_Plus4Minus1,
+		pullup_Plus1,
+		pullup_None,
+		pullup_Minus1,
+		pullup_Minus4Plus1,
+		pullup_Minus4,
+		pullup_Minus4Minus1,
+	};
+
 	int  set_smpte_type (float fps, bool drop_frames);
+	int  set_video_pullup (float pullup);
+
+	void sync_time_vars();
 
 	void bbt_time (jack_nframes_t when, BBT_Time&);
 	void smpte_to_sample( SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const;
@@ -604,8 +637,11 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	jack_nframes_t convert_to_frames_at (jack_nframes_t position, AnyTime&);
 
+	static sigc::signal<void> StartTimeChanged;
+	static sigc::signal<void> EndTimeChanged;
 	static sigc::signal<void> SMPTEOffsetChanged;
-	sigc::signal<void> SMPTETypeChanged;
+	static sigc::signal<void> SMPTETypeChanged;
+	static sigc::signal<void> PullupChanged;
 
 	void        request_slave_source (SlaveSource, jack_nframes_t pos = 0);
 	SlaveSource slave_source() const { return _slave_type; }
@@ -1054,7 +1090,9 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	mutable gint            processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
-	jack_nframes_t          _current_frame_rate;
+	bool                     waiting_for_sync_offset;
+	jack_nframes_t          _base_frame_rate;
+	jack_nframes_t          _current_frame_rate;  //this includes video pullup offset
 	int                      transport_sub_state;
 	mutable gint           _record_status;
 	jack_nframes_t          _transport_frame;
@@ -1155,6 +1193,8 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 		}
 		return false;
 	}
+
+	bool maybe_sync_start (jack_nframes_t&, jack_nframes_t&);
 
 	void check_declick_out ();
 
@@ -1800,6 +1840,8 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	void add_controllable (PBD::Controllable*);
 	void remove_controllable (PBD::Controllable*);
+
+	void handle_configuration_change (const char*);
 };
 
 } // namespace ARDOUR

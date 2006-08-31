@@ -30,6 +30,7 @@
 #include <pbd/xml++.h>
 
 #include <ardour/location.h>
+#include <ardour/session.h>
 #include <ardour/audiofilesource.h>
 
 #include "i18n.h"
@@ -84,7 +85,11 @@ Location::set_start (jack_nframes_t s)
 			_end = s;
 			start_changed(this); /* EMIT SIGNAL */
 			if ( is_start() ) {
+				Session::StartTimeChanged (); /* EMIT SIGNAL */
 				AudioFileSource::set_header_position_offset ( s );
+			}
+			if ( is_end() ) {
+				Session::EndTimeChanged (); /* EMIT SIGNAL */
 			}
 		}
 		return 0;

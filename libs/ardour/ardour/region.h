@@ -22,6 +22,7 @@
 #define __ardour_region_h__
 
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include <pbd/undo.h>
 #include <pbd/statefuldestructible.h> 
@@ -56,7 +57,7 @@ struct RegionState : public StateManager::State
 	mutable RegionEditState _first_edit;
 };
 
-class Region : public PBD::StatefulDestructible, public StateManager
+class Region : public PBD::StatefulDestructible, public StateManager, public boost::enable_shared_from_this<Region>
 {
   public:
 	enum Flag {

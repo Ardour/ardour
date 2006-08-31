@@ -57,6 +57,8 @@ int touch_file(std::string path);
 std::string region_name_from_path (std::string path);
 std::string path_expand (std::string);
 
+void compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out);
+
 #ifdef HAVE_COREAUDIO
 std::string CFStringRefToStdString(CFStringRef stringRef);
 #endif // HAVE_COREAUDIO

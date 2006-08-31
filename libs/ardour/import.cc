@@ -305,14 +305,18 @@ Session::sample_rate_convert (import_status& status, string infile, string& outf
 	sf_count_t  input_count = 0;
 
 	SNDFILE* in = sf_open(infile.c_str(), SFM_READ, &sf_info);
+	if (!in) {
+		error << string_compose(_("Import/SRC: could not open input file: %1"), outfile) << endmsg;
+		return false;
+	}
 	sf_count_t total_input_frames = sf_info.frames;
 	
 	outfile = build_tmp_convert_name(infile);
 	SNDFILE* out = sf_open(outfile.c_str(), SFM_RDWR, &sf_info);
-	if(!out) {
-		error << string_compose(_("Import: could not open temp file: %1"), outfile) << endmsg;
-		return false;
-	}
+	if (!out) {
+		error << string_compose(_("Import/SRC: could not open output file: %1"), outfile) << endmsg;
+ 		return false;
+ 	}
 	
 	sf_seek (in, 0, SEEK_SET) ;
 	sf_seek (out, 0, SEEK_SET) ;
@@ -370,8 +374,6 @@ Session::sample_rate_convert (import_status& status, string infile, string& outf
 	src_state = src_delete (src_state) ;
 	sf_close(in);
 	sf_close(out);
-
-	status.done = true;
 
 	if (status.cancel) {
 		return false;

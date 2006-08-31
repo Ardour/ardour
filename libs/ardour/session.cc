@@ -92,9 +92,13 @@ Session::mix_buffers_with_gain_t	Session::mix_buffers_with_gain 	= 0;
 Session::mix_buffers_no_gain_t		Session::mix_buffers_no_gain 	= 0;
 
 sigc::signal<int> Session::AskAboutPendingState;
-sigc::signal<void> Session::SMPTEOffsetChanged;
 sigc::signal<void> Session::SendFeedback;
 
+sigc::signal<void> Session::SMPTEOffsetChanged;
+sigc::signal<void> Session::SMPTETypeChanged;
+sigc::signal<void> Session::PullupChanged;
+sigc::signal<void> Session::StartTimeChanged;
+sigc::signal<void> Session::EndTimeChanged;
 
 int
 Session::find_session (string str, string& path, string& snapshot, bool& isnew)
@@ -287,6 +291,8 @@ Session::Session (AudioEngine &eng,
 	bool was_dirty = dirty();
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+
+	Config->ParameterChanged.connect (mem_fun (*this, &Session::handle_configuration_change));
 
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
@@ -1423,8 +1429,9 @@ Session::set_frame_rate (jack_nframes_t frames_per_second)
 		here.
 	*/
 
-	_current_frame_rate = frames_per_second;
-	_frames_per_smpte_frame = (double) _current_frame_rate / (double) smpte_frames_per_second;
+	_base_frame_rate = frames_per_second;
+
+	sync_time_vars();
 
 	Route::set_automation_interval ((jack_nframes_t) ceil ((double) frames_per_second * 0.25));
 
@@ -2717,8 +2724,6 @@ Session::add_source (boost::shared_ptr<Source> source)
 {
 	boost::shared_ptr<AudioFileSource> afs;
 
-	cerr << "add new source " << source->name() << endl;
-
 	if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(source)) != 0) {
 
 		pair<AudioSourceList::key_type, AudioSourceList::mapped_type> entry;
@@ -3869,6 +3874,16 @@ Session::set_xfade_model (CrossfadeModel xm)
 		xfade_model = xm;
 		set_dirty ();
 		ControlChanged (CrossfadingModel);
+	}
+}
+
+void
+Session::handle_configuration_change (const char* parameter)
+{
+	if (!strcmp (parameter, "use-video-sync")) {
+		if (_transport_speed == 0.0f) {
+			waiting_for_sync_offset = true;
+		}
 	}
 }
 

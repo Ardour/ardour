@@ -32,6 +32,7 @@
 #include <ardour/region.h>
 #include <ardour/playlist.h>
 #include <ardour/session.h>
+#include <ardour/region_factory.h>
 
 #include "i18n.h"
 
@@ -274,7 +275,7 @@ Region::first_edit ()
 		_first_edit = EditChangesNothing;
 
 		send_change (NameChanged);
-		/// XXX CheckNewRegion (boost::shared_ptr<Region>(this));
+		RegionFactory::CheckNewRegion (shared_from_this());
 	}
 }
 

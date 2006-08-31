@@ -250,8 +250,7 @@ AudioDiskstream::non_realtime_input_change ()
 
 	if (speed() != 1.0f || speed() != -1.0f) {
 		seek ((jack_nframes_t) (_session.transport_frame() * (double) speed()));
-	}
-	else {
+	} else {
 		seek (_session.transport_frame());
 	}
 }
@@ -384,8 +383,12 @@ AudioDiskstream::setup_destructive_playlist ()
 void
 AudioDiskstream::use_destructive_playlist ()
 {
-	/* use the sources associated with the single full-extent region */
-	
+	/* this is called from the XML-based constructor. when its done,
+	   we already have a playlist and a region, but we need to
+	   set up our sources for write. we use the sources associated 
+	   with the (presumed single, full-extent) region.
+	*/
+
 	Playlist::RegionList* rl = _playlist->regions_at (0);
 
 	if (rl->empty()) {

@@ -271,3 +271,30 @@ CFStringRefToStdString(CFStringRef stringRef)
 	return result;
 }
 #endif // HAVE_COREAUDIO
+
+void
+compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out)
+{
+	double step;
+
+	step = 1.0/nframes;
+
+	in[0] = 0.0f;
+	
+	for (int i = 1; i < nframes - 1; ++i) {
+		in[i] = in[i-1] + step;
+	}
+	
+	in[nframes-1] = 1.0;
+
+	const float pan_law_attenuation = -3.0f;
+	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
+
+	for (unsigned long n = 0; n < nframes; ++n) {
+		float inVal = in[n];
+		float outVal = 1 - inVal;
+		out[n] = outVal * (scale * outVal + 1.0f - scale);
+		in[n] = inVal * (scale * inVal + 1.0f - scale);
+	}
+}
+

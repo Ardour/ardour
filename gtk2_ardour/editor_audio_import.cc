@@ -82,11 +82,11 @@ Editor::bring_in_external_audio (ImportMode mode, AudioTrack* track, jack_nframe
 
 	switch (sfdb.run()) {
 	case SoundFileOmega::ResponseImport:
-		do_import (sfdb.get_paths(), sfdb.get_split(), mode, track, pos, prompt);
+		do_import (sfdb.get_paths(), sfdb.get_split(), sfdb.get_mode(), track, pos, prompt);
 		break;
 		
 	case SoundFileOmega::ResponseEmbed:
-		do_embed (sfdb.get_paths(), sfdb.get_split(), mode, track, pos, prompt);
+		do_embed (sfdb.get_paths(), sfdb.get_split(), sfdb.get_mode(), track, pos, prompt);
 		break;
 
 	default:
@@ -274,12 +274,12 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 			sources.push_back(source);
 		} 
 		
-		 catch (failed_constructor& err) {
-			 error << string_compose(_("could not open %1"), path) << endmsg;
-			 goto out;
-		 }
+		catch (failed_constructor& err) {
+			error << string_compose(_("could not open %1"), path) << endmsg;
+			goto out;
+		}
 		
-		 ARDOUR_UI::instance()->flush_pending ();
+		ARDOUR_UI::instance()->flush_pending ();
 	}
 	
 	if (sources.empty()) {

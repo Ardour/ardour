@@ -66,7 +66,6 @@ AudioSource::AudioSource (string name)
 AudioSource::AudioSource (const XMLNode& node) 
 	: Source (node)
 {
-	cerr << "audiosource from XML\n";
 	if (pending_peak_sources_lock == 0) {
 		pending_peak_sources_lock = new Glib::Mutex;
 	}

@@ -218,8 +218,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
-
-	/* NOTE: no CheckNewRegion signal emitted here. This is the copy constructor */
 }
 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
