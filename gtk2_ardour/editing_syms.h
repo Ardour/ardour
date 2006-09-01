@@ -54,7 +54,8 @@ DISPLAYCONTROL(ShowMeasures)
 DISPLAYCONTROL(ShowWaveforms)
 DISPLAYCONTROL(ShowWaveformsRecording)
 
-IMPORTMODE(ImportAsRegion)
-IMPORTMODE(ImportAsTrack)
-IMPORTMODE(ImportAsTapeTrack)
-IMPORTMODE(ImportToTrack)
+// if this is changed, remember to update the string table in sfdb_ui.cc
+IMPORTMODE(ImportAsRegion=0)
+IMPORTMODE(ImportToTrack=1)
+IMPORTMODE(ImportAsTrack=2)
+IMPORTMODE(ImportAsTapeTrack=3)

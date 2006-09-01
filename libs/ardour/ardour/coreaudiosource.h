@@ -20,8 +20,9 @@
 #ifndef __coreaudio_source_h__ 
 #define __coreaudio_source_h__
 
+#include <appleutility/CAAudioFile.h>
+
 #include <ardour/audiofilesource.h>
-#include <AudioToolbox/ExtendedAudioFile.h>
 
 namespace ARDOUR {
 
@@ -45,7 +46,7 @@ class CoreAudioSource : public AudioFileSource {
 	
 
   private:
-	ExtAudioFileRef af;
+	mutable CAAudioFile af;
 	uint16_t n_channels;
 
 	mutable float *tmpbuf;
