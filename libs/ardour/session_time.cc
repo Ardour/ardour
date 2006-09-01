@@ -428,9 +428,11 @@ Session::jack_timebase_callback (jack_transport_state_t state,
 		pos->valid = jack_position_bits_t (pos->valid | JackPositionBBT);
 	}
 
+#ifdef HAVE_JACK_VIDEO_SUPPORT
 	//poke audio video ratio so Ardour can track Video Sync
 	pos->audio_frames_per_video_frame = frame_rate() / smpte_frames_per_second;
 	pos->valid = jack_position_bits_t (pos->valid | JackAudioVideoRatio);
+#endif
 
 #if 0
 	/* SMPTE info */

@@ -157,9 +157,27 @@ def CheckJackRecomputeLatencies(context):
         context.Result(result)
         return result
 
+jack_video_frame_offset_test = """
+#include <jack/transport.h>
+int main(int argc, char** argv)
+{
+	jack_position_t pos;
+
+	pos.valid & JackVideoFrameOffset;
+	return 0;
+}
+"""
+
+def CheckJackVideoFrameOffset(context):
+	context.Message('Checking for JackVideoFrameOffset in jack_position_bits_t enum...')
+	result = context.TryLink(jack_video_frame_offset_test, '.c')
+	context.Result(result)
+	return result
+
 conf = Configure(ardour, custom_tests = {
 	'CheckJackClientOpen' : CheckJackClientOpen,
-	'CheckJackRecomputeLatencies' : CheckJackRecomputeLatencies
+	'CheckJackRecomputeLatencies' : CheckJackRecomputeLatencies,
+	'CheckJackVideoFrameOffset' : CheckJackVideoFrameOffset
 })
 
 if conf.CheckJackClientOpen():
@@ -167,6 +185,14 @@ if conf.CheckJackClientOpen():
 
 if conf.CheckJackRecomputeLatencies():
     ardour.Append(CXXFLAGS="-DHAVE_JACK_RECOMPUTE_LATENCIES")
+
+if conf.CheckJackVideoFrameOffset():
+	ardour.Append(CXXFLAGS="-DHAVE_JACK_VIDEO_SUPPORT")
+
+if conf.CheckFunc('jack_port_ensure_monitor'):
+    env.Append(CCFLAGS='-DHAVE_JACK_PORT_ENSURE_MONITOR')
+else:
+    print '\nWARNING: You need at least svn revision 985 of jack for hardware monitoring to work correctly.\n'
 
 #
 # Optional header files
