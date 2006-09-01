@@ -56,6 +56,8 @@ public:
 	 * Based on this you can static cast a Buffer* to the desired type. */
 	DataType type() const { return _type; }
 
+	bool silent() const { return _silent; }
+
 	/** Clear (eg zero, or empty) buffer starting at TIME @a offset */
 	virtual void silence(jack_nframes_t len, jack_nframes_t offset=0) = 0;
 	
@@ -66,12 +68,13 @@ public:
 
 protected:
 	Buffer(DataType type, size_t capacity)
-	: _type(type), _capacity(capacity), _size(0) 
+	: _type(type), _capacity(capacity), _size(0), _silent(true)
 	{}
 
 	DataType _type;
 	size_t   _capacity;
 	size_t   _size;
+	bool     _silent;
 
 private:
 	// Prevent copies (undefined)
@@ -93,9 +96,14 @@ public:
 
 	void silence(jack_nframes_t len, jack_nframes_t offset=0)
 	{
-		assert(_capacity > 0);
-		assert(offset + len <= _capacity);
-		memset(_data + offset, 0, sizeof (Sample) * len);
+		if (!_silent) {
+			assert(_capacity > 0);
+			assert(offset + len <= _capacity);
+			memset(_data + offset, 0, sizeof (Sample) * len);
+			if (offset == 0 && len == _capacity) {
+				_silent = true;
+			}
+		}
 	}
 	
 	/** Read @a len frames FROM THE START OF @a src into self at @a offset */
@@ -105,6 +113,7 @@ public:
 		assert(src.type() == _type == DataType::AUDIO);
 		assert(offset + len <= _capacity);
 		memcpy(_data + offset, ((AudioBuffer&)src).data(len), sizeof(Sample) * len);
+		_silent = src.silent();
 	}
 	
 	/** Accumulate (add)@a len frames FROM THE START OF @a src into self at @a offset */
@@ -119,6 +128,8 @@ public:
 		for (jack_nframes_t n = 0; n < len; ++n) {
 			dst_raw[n] += src_raw[n];
 		}
+
+		_silent = (src.silent() && _silent);
 	}
 	
 	/** Accumulate (add) @a len frames FROM THE START OF @a src into self at @a offset
@@ -134,6 +145,8 @@ public:
 		for (jack_nframes_t n = 0; n < len; ++n) {
 			dst_raw[n] += src_raw[n] * gain_coeff;
 		}
+		
+		_silent = ( (src.silent() && _silent) || (_silent && gain_coeff == 0) );
 	}
 	
 	void apply_gain(gain_t gain, jack_nframes_t len, jack_nframes_t offset=0) {
@@ -142,6 +155,8 @@ public:
 		for (jack_nframes_t n = 0; n < len; ++n) {
 			buf[n] *= gain;
 		}
+
+		_silent = (_silent || gain == 0);
 	}
 
 	/** Set the data contained by this buffer manually (for setting directly to jack buffer).
@@ -154,6 +169,7 @@ public:
 		_capacity = size;
 		_size = size;
 		_data = data;
+		_silent = false;
 	}
 
 	const Sample* data(jack_nframes_t nframes, jack_nframes_t offset=0) const

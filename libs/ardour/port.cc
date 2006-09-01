@@ -27,7 +27,6 @@ Port::Port (jack_port_t *p)
 	: _port (p)
 	, _metering(0)
 	, _last_monitor(false)
-	, _silent(false)
 {
 	if (_port == 0) {
 		throw failed_constructor();
@@ -44,7 +43,6 @@ void
 Port::reset ()
 {
 	_last_monitor = false;
-	_silent = false;
 }
 
 int 

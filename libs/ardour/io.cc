@@ -181,7 +181,7 @@ IO::silence (jack_nframes_t nframes, jack_nframes_t offset)
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		i->silence (nframes, offset);
+		i->get_buffer().silence (nframes, offset);
 	}
 }
 
@@ -217,6 +217,15 @@ IO::deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t 
 	// Use the panner to distribute audio to output port buffers
 	if (_panner && !_panner->empty() && !_panner->bypassed()) {
 		_panner->distribute(bufs, output_buffers(), start_frame, end_frame, nframes, offset);
+	} else {
+		const DataType type = DataType::AUDIO;
+
+		// Copy any audio 1:1 to outputs
+		assert(bufs.count().get(DataType::AUDIO) == output_buffers().count().get(DataType::AUDIO));
+		BufferSet::iterator o = output_buffers().begin(type);
+		for (BufferSet::iterator i = bufs.begin(type); i != bufs.end(type); ++i, ++o) {
+			o->read_from(*i, nframes, offset);
+		}
 	}
 
 
@@ -228,8 +237,9 @@ IO::deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t 
 	}
 
 	const DataType type = DataType::MIDI;
-	
-	// Just dump any MIDI 1-to-1, we're not at all clever with MIDI routing yet
+
+	// Copy any MIDI 1:1 to outputs
+	assert(bufs.count().get(DataType::MIDI) == output_buffers().count().get(DataType::MIDI));
 	BufferSet::iterator o = output_buffers().begin(type);
 	for (BufferSet::iterator i = bufs.begin(type); i != bufs.end(type); ++i, ++o) {
 		o->read_from(*i, nframes, offset);

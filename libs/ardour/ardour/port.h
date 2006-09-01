@@ -47,10 +47,6 @@ class Port : public sigc::trackable {
 
 	virtual Buffer& get_buffer() = 0;
 	
-	/** Silence/Empty the port, output ports only */
-	virtual void silence (jack_nframes_t nframes, jack_nframes_t offset) = 0;
-
-
 	std::string name() const { 
 		return _name;
 	}
@@ -128,12 +124,6 @@ class Port : public sigc::trackable {
 		jack_port_set_latency (_port, nframes);
 	}
 
-	bool is_silent() const { return _silent; }
-
-	void mark_silence (bool yn) {
-		_silent = yn;
-	}
-	
 	sigc::signal<void,bool> MonitorInputChanged;
 	sigc::signal<void,bool> ClockSyncChanged;
 
@@ -156,7 +146,6 @@ class Port : public sigc::trackable {
 	unsigned short _metering;
 
 	bool          _last_monitor : 1;
-	bool          _silent : 1;
 };
  
 } // namespace ARDOUR

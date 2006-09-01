@@ -84,10 +84,7 @@ public:
 		return (MidiBuffer&)get(DataType::MIDI, i);
 	}
 
-	void read_from(BufferSet& in, jack_nframes_t nframes, jack_nframes_t offset=0)
-	{
-		throw; // FIXME: implement this with spiffy DataType iterator etc.
-	}
+	void read_from(BufferSet& in, jack_nframes_t nframes, jack_nframes_t offset=0);
 
 	// ITERATORS
 	

@@ -1045,7 +1045,7 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 	}
 
 	// FIXME
-	return ensure_io (ChanCount(_default_type, out), ChanCount(_default_type, in), false, this);
+	return ensure_io (ChanCount(_default_type, in), ChanCount(_default_type, out), false, this);
 }
 
 int32_t

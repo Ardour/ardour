@@ -1525,8 +1525,6 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, jack_nf
 				dst.accumulate_from(*i, nframes, offset);
 			}
 
-			//audio_output(0)->mark_silence (false); // FIXME
-
 		} else {
 
 			/* mix all buffers into the output, scaling them all by the gain */
@@ -1540,7 +1538,6 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, jack_nf
 				dst.accumulate_with_gain_from(*i, nframes, offset, gain_coeff);
 			}
 
-			//audio_output(0)->mark_silence (false); // FIXME
 		}
 
 		return;
@@ -1603,8 +1600,6 @@ Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, jack_nframes_t start_
 		for (++i; i != inbufs.audio_end(); ++i) {
 			dst.accumulate_from(*i, nframes, offset);
 		}
-
-		//audio_output(0)->mark_silence (false); // FIXME
 
 		return;
 	}

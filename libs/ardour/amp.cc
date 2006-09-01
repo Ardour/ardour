@@ -37,7 +37,7 @@ Amp::run (BufferSet& bufs, jack_nframes_t nframes, gain_t initial, gain_t target
 
 	// if we don't need to declick, defer to apply_simple_gain
 	if (initial == target) {
-		apply_simple_gain(bufs, nframes, invert_polarity ? target : -target);
+		apply_simple_gain(bufs, nframes, invert_polarity ? -target : target);
 	}
 
 	const jack_nframes_t declick = std::min ((jack_nframes_t)128, nframes);

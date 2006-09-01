@@ -149,6 +149,22 @@ BufferSet::buffer_capacity(DataType type) const
 	return _buffers[type.to_index()][0]->capacity();
 }
 
+// FIXME: make 'in' const
+void
+BufferSet::read_from(BufferSet& in, jack_nframes_t nframes, jack_nframes_t offset)
+{
+	assert(available() >= in.count());
+
+	// Copy all buffers 1:1
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		BufferSet::iterator o = begin(*t);
+		for (BufferSet::iterator i = in.begin(*t); i != in.end(*t); ++i, ++o) {
+			o->read_from(*i, nframes, offset);
+		}
+	}
+
+	set_count(in.count());
+}
 
 } // namespace ARDOUR
 

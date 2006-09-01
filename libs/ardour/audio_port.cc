@@ -44,7 +44,7 @@ AudioPort::reset()
 		if (_buffer.capacity() > 0) {
 			_buffer.clear();
 		}
-		_silent = true;
+		assert(_buffer.silent());
 	}
 	
 	_metering = 0;
@@ -55,8 +55,12 @@ void
 AudioPort::cycle_start (jack_nframes_t nframes)
 {
 	if (_flags & JackPortIsOutput) {
-		// FIXME: do nothing, we can cache the value (but capacity needs to be set)
+		const bool silent = _buffer.silent();
+		// FIXME: do nothing, we can cache the value (but capacity needs to be set for MIDI)
 		_buffer.set_data((Sample*)jack_port_get_buffer (_port, nframes), nframes);
+		if (silent) {
+			_buffer.silence(nframes);
+		}
 	} else {
 		_buffer.set_data((Sample*)jack_port_get_buffer (_port, nframes), nframes);
 	}

@@ -75,16 +75,6 @@ class AudioPort : public Port {
 	static void set_short_over_length (jack_nframes_t);
 	static void set_long_over_length (jack_nframes_t);
 
-	/** Assumes that the port is an audio output port */
-	void silence (jack_nframes_t nframes, jack_nframes_t offset) {
-		if (!_silent) {
-			_buffer.silence(nframes, offset);
-			if (offset == 0 && nframes == _buffer.capacity()) {
-				_silent = true;
-			}
-		}
-	}
-	
   protected:
 	friend class AudioEngine;
 

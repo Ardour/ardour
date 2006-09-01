@@ -52,11 +52,6 @@ class MidiPort : public Port {
 
 	size_t capacity() { return _buffer.capacity(); }
 	size_t size()     { return _buffer.size(); }
-	
-	/** Assumes that the port is an output port */
-	void silence (jack_nframes_t nframes, jack_nframes_t offset) {
-		_buffer.silence(nframes, offset);
-	}
 
   protected:
 	friend class AudioEngine;

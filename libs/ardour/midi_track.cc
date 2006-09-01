@@ -542,22 +542,26 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 			       jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
 			       bool meter)
 {
-	// There's no such thing as a MIDI bus for the time being, to avoid diverging from trunk
-	// too much until the SoC settles down.  We'll do all the MIDI route work here for now
+	/* There's no such thing as a MIDI bus for the time being, to avoid diverging from trunk
+	 * too much until the SoC settles down.  We'll do all the MIDI route work here for now,
+	 * but the long-term goal is to have Route::process_output_buffers handle everything */
 	
-	// Main output stage is the only stage we've got.
-	// I think it's a pretty good stage though, wouldn't you say?
-	
-	if (muted()) {
-
-		IO::silence(nframes, offset);
-
-	} else {
-
-		deliver_output(bufs, start_frame, end_frame, nframes, offset);
-
+	// Run all redirects
+	if (with_redirects) {
+		Glib::RWLock::ReaderLock rm (redirect_lock, Glib::TRY_LOCK);
+		if (rm.locked()) {
+			for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+				(*i)->run (bufs, start_frame, end_frame, nframes, offset);
+			}
+		} 
 	}
-
+	
+	// Main output stage
+	if (muted()) {
+		IO::silence(nframes, offset);
+	} else {
+		deliver_output(bufs, start_frame, end_frame, nframes, offset);
+	}
 }
 
 int

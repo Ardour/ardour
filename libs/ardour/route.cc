@@ -240,7 +240,6 @@ Route::process_output_buffers (BufferSet& bufs,
 	bool post_fader_work = false;
 	bool mute_declick_applied = false;
 	gain_t dmg, dsg, dg;
-	vector<Sample*>::iterator bufiter;
 	IO *co;
 	bool mute_audible;
 	bool solo_audible;
@@ -338,9 +337,13 @@ Route::process_output_buffers (BufferSet& bufs,
 		} 
 	} 
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* ---------------------------------------------------------------------------------------------------
 	   PRE-FADER REDIRECTS
 	   -------------------------------------------------------------------------------------------------- */
+
+	/* FIXME: Somewhere in these loops is where bufs.count() should go from n_inputs() to redirect_max_outs()
+	 * (if they differ).  Something explicit needs to be done here to make sure the list of redirects will
+	 * give us what we need (possibly by inserting transparent 'translators' into the list to make it work) */
 
 	if (with_redirects) {
 		Glib::RWLock::ReaderLock rm (redirect_lock, Glib::TRY_LOCK);
@@ -371,7 +374,10 @@ Route::process_output_buffers (BufferSet& bufs,
 		} 
 	}
 
+	// FIXME: for now, just hope the redirects list did what it was supposed to
+	bufs.set_count(n_process_buffers());
 
+	
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader) {
 		Amp::run (bufs, nframes, mute_gain, dmg, _phase_invert);
 		mute_gain = dmg;
@@ -652,8 +658,7 @@ Route::process_output_buffers (BufferSet& bufs,
 ChanCount
 Route::n_process_buffers ()
 {
-	//return max (n_inputs(), redirect_max_outs);
-	return n_inputs(); // FIXME?
+	return max (n_inputs(), redirect_max_outs);
 }
 
 void
@@ -761,8 +766,6 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 
 		redirect->set_default_type(_default_type);
 
-		ChanCount potential_max_streams;
-
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redirect)) != 0) {
 			pi->set_count (1);
 
@@ -770,8 +773,6 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 				/* generator plugin */
 				_have_internal_generator = true;
 			}
-
-			potential_max_streams = max(pi->input_streams(), pi->output_streams());
 			
 		} else if ((porti = boost::dynamic_pointer_cast<PortInsert>(redirect)) != 0) {
 
@@ -784,13 +785,14 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 			   the "outputs" of the route should match the inputs of this
 			   route. XXX shouldn't they match the number of active signal
 			   streams at the point of insertion?
-			   
 			*/
+			// FIXME: (yes, they should)
 
 			porti->ensure_io (n_outputs (), n_inputs(), false, this);
 		}
-
+		
 		// Ensure peak vector sizes before the plugin is activated
+		ChanCount potential_max_streams = max(redirect->input_streams(), redirect->output_streams());
 		_meter->setup(potential_max_streams);
 
 		_redirects.push_back (redirect);

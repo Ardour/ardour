@@ -1066,7 +1066,7 @@ AudioEngine::reconnect_to_jack ()
 		(*i)->reset ();
 
 		if ((*i)->flags() & JackPortIsOutput) {
-			(*i)->silence (jack_get_buffer_size (_jack), 0);
+			(*i)->get_buffer().silence (jack_get_buffer_size (_jack), 0);
 		}
 	}
 

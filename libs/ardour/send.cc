@@ -38,7 +38,7 @@ Send::Send (Session& s, Placement p)
 {
 	_metering = false;
 	save_state (_("initial state"));
-	 RedirectCreated (this); /* EMIT SIGNAL */
+	RedirectCreated (this); /* EMIT SIGNAL */
 }
 
 Send::Send (Session& s, const XMLNode& node)
@@ -51,7 +51,7 @@ Send::Send (Session& s, const XMLNode& node)
 	}
 
 	save_state (_("initial state"));
-	 RedirectCreated (this); /* EMIT SIGNAL */
+	RedirectCreated (this); /* EMIT SIGNAL */
 }
 
 Send::Send (const Send& other)
@@ -114,7 +114,6 @@ Send::run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame
 
 		sendbufs.read_from(bufs, nframes);
 		assert(sendbufs.count() == bufs.count());
-		assert(sendbufs.count() == _outputs.count());
 
 		IO::deliver_output (sendbufs, start_frame, end_frame, nframes, offset);
 

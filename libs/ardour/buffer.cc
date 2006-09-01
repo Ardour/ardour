@@ -39,6 +39,7 @@ Buffer::create(DataType type, size_t capacity)
 
 AudioBuffer::AudioBuffer(size_t capacity)
 	: Buffer(DataType::AUDIO, capacity)
+	, _owns_data(false)
 	, _data(NULL)
 {
 	_size = capacity; // For audio buffers, size = capacity (always)
@@ -49,10 +50,8 @@ AudioBuffer::AudioBuffer(size_t capacity)
 		posix_memalign((void**)&_data, 16, sizeof(Sample) * capacity);
 #endif	
 		assert(_data);
-		clear();
 		_owns_data = true;
-	} else {
-		_owns_data = false;
+		clear();
 	}
 }
 
@@ -108,13 +107,15 @@ MidiBuffer::read_from(const Buffer& src, jack_nframes_t nframes, jack_nframes_t 
 	clear();
 	assert(_size == 0);
 
-	// FIXME: This is embarrassingly slow.  branch branch branch
+	// FIXME: slow
 	for (size_t i=0; i < src.size(); ++i) {
 		const MidiEvent& ev = msrc[i];
 		if (ev.time >= offset && ev.time < offset+nframes) {
 			push_back(ev);
 		}
 	}
+
+	_silent = src.silent();
 }
 
 
@@ -140,6 +141,8 @@ MidiBuffer::push_back(const MidiEvent& ev)
 
 	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
 
+	_silent = false;
+
 	return true;
 }
 
@@ -154,6 +157,7 @@ MidiBuffer::silence(jack_nframes_t dur, jack_nframes_t offset)
 	memset(_events, 0, sizeof(MidiEvent) * _capacity);
 	memset(_data, 0, sizeof(RawMidi) * _capacity * MAX_EVENT_SIZE);
 	_size = 0;
+	_silent = true;
 }
 
 
