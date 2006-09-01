@@ -657,8 +657,8 @@ NewSessionDialog::reset_template()
 void
 NewSessionDialog::reset_recent()
 {
-        /* Shamelessly ripped from ardour_ui.cc */
-        std::vector<string *> *sessions;
+	/* Shamelessly ripped from ardour_ui.cc */
+	std::vector<string *> *sessions;
 	std::vector<string *>::iterator i;
 	RecentSessionsSorter cmp;
 	
@@ -677,7 +677,7 @@ NewSessionDialog::reset_recent()
 	
 	for (i = sessions->begin(); i != sessions->end(); ++i) {
 
-	        std::vector<std::string*>* states;
+		std::vector<std::string*>* states;
 		std::vector<const gchar*> item;
 		std::string fullpath = *(*i);
 		
@@ -699,7 +699,7 @@ NewSessionDialog::reset_recent()
 		row[recent_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_columns.fullpath] = fullpath;
 		
-		if (states->size() > 1) {
+		if (states->size()) {
 		    
 		        /* add the children */
 		    
