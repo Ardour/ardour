@@ -98,7 +98,7 @@ RouteUI::~RouteUI()
 	delete mute_menu;
 }
 
-gint
+bool
 RouteUI::mute_press(GdkEventButton* ev)
 {
 	if (!ignore_toggle) {
@@ -159,7 +159,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 	return true;
 }
 
-gint
+bool
 RouteUI::mute_release(GdkEventButton* ev)
 {
 	if (!ignore_toggle) {
@@ -173,7 +173,7 @@ RouteUI::mute_release(GdkEventButton* ev)
 	return true;
 }
 
-gint
+bool
 RouteUI::solo_press(GdkEventButton* ev)
 {
 	if (!ignore_toggle) {
@@ -253,7 +253,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 	return true;
 }
 
-gint
+bool
 RouteUI::solo_release(GdkEventButton* ev)
 {
 	if (!ignore_toggle) {
@@ -269,7 +269,7 @@ RouteUI::solo_release(GdkEventButton* ev)
 	return true;
 }
 
-gint
+bool
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
 	if (!ignore_toggle && is_track() && rec_enable_button) {

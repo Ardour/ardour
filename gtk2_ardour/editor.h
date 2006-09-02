@@ -1506,7 +1506,7 @@ class Editor : public PublicEditor
 	jack_nframes_t autoscroll_distance;
      
 	static gint _autoscroll_canvas (void *);
-	gint autoscroll_canvas ();
+	bool autoscroll_canvas ();
 	void start_canvas_autoscroll (int direction);
 	void stop_canvas_autoscroll ();
 	void maybe_autoscroll (GdkEvent*);

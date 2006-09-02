@@ -263,7 +263,7 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 	GnomeCanvasSimpleRect* simplerect;
 	double x1, x2, y1, y2;
 	double old_x1, old_x2, old_y1, old_y2;
-	double a, b;
+	double a, b, c, d;
 	
 	old_x1 = item->x1;
 	old_y1 = item->y1;
@@ -287,42 +287,24 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x2, y2, &simplerect->bbox_lrx, &simplerect->bbox_lry);
 
 	/* now queue redraws for changed areas */
-
-	if (item->x1 != old_x1) {
-		
-		/* left edge changed. redraw the area that altered */
 		
 		a = MIN(item->x1, old_x1); 
 		b = MAX(item->x1, old_x1);
-		gnome_canvas_request_redraw (item->canvas, a - 1, item->y1, b + 1, item->y2);
-	}
-	
-	if (item->x2 != old_x2) {
-		
-		/* right edge changed. redraw the area that altered */
-		
-		a = MIN(item->x2, old_x2);
-		b = MAX(item->x2, old_x2);
-		gnome_canvas_request_redraw (item->canvas, a - 1, item->y1, b + 1, item->y2);
-	}
-	
-	if (item->y1 != old_y1) {
-		
-		/* top edge changed. redraw the area that altered */
-		
-		a = MIN(item->y1, old_y1);
-		b = MAX(item->y1, old_y1);
-		gnome_canvas_request_redraw (item->canvas, item->x1, a - 1, item->x2, b + 1);
-	}
-	
-	if (item->y2 != old_y2) {
-		
-		/* lower edge changed. redraw the area that altered */
-		
-		a = MIN(item->y2, old_y2);
-		b = MAX(item->y2, old_y2);
-		gnome_canvas_request_redraw (item->canvas, item->x1, a - 1, item->x2, b + 1);
-	}
+
+	        a = MIN(a, item->x2);
+		a = MIN(a, old_x2);
+		b = MAX(b, item->x2);
+		b = MAX(b, old_x2);
+
+		c = MIN(item->y1, old_y1);
+		d = MAX(item->y1, old_y1);
+
+	        c = MIN(c,item->y2);
+		c = MIN(c, old_y2);
+		d = MAX(d,item->y2);
+		d = MAX(d, old_y2);
+
+		gnome_canvas_request_redraw (item->canvas, a, c, b + 0.5, d + 0.5);
 }
 
 /* 
@@ -494,8 +476,8 @@ gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 		gnome_canvas_request_redraw (item->canvas, 
 					   simplerect->bbox_ulx,
 					   simplerect->bbox_uly,
-					   simplerect->bbox_lrx+1,
-					   simplerect->bbox_lry+1);
+					   simplerect->bbox_lrx+0.5,
+					   simplerect->bbox_lry+0.5);
 		simplerect->full_draw_on_update = FALSE;
 	}
 

@@ -643,7 +643,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_pane.pack1 (edit_packer, true, true);
 	edit_pane.pack2 (the_notebook, false, true);
 	
-	edit_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
+	edit_pane.signal_size_allocate().connect (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
 
 	top_hbox.pack_start (toolbar_frame, true, true);
 

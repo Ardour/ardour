@@ -118,6 +118,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	hide_button.add (*(manage (new Image (get_xpm("small_x.xpm")))));
 
+	/* XXX is this incomplete? i don't think its very useful atm
+
 	solo_button->signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
 	mute_button->signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
 	playlist_button.signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
@@ -125,6 +127,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	size_button.signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
 	visual_button.signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
 	hide_button.signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
+	*/
 
 	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
 	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release), false);
@@ -140,7 +143,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	if (is_track()) {
 		rec_enable_button->set_active (false);
 		rec_enable_button->set_name ("TrackRecordEnableButton");
-		rec_enable_button->signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
+		//rec_enable_button->signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
 		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));

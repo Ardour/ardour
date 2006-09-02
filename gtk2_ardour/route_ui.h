@@ -87,11 +87,11 @@ class RouteUI : public virtual AxisView
 
 	XMLNode* get_child_xml_node (const string & childname);
 	
-	gint mute_press(GdkEventButton*);
-	gint mute_release(GdkEventButton*);
-	gint solo_press(GdkEventButton*);
-	gint solo_release(GdkEventButton*);
-	gint rec_enable_press(GdkEventButton*);
+	bool mute_press(GdkEventButton*);
+	bool mute_release(GdkEventButton*);
+	bool solo_press(GdkEventButton*);
+	bool solo_release(GdkEventButton*);
+	bool rec_enable_press(GdkEventButton*);
 
 	void solo_changed(void*);
 	void mute_changed(void*);
