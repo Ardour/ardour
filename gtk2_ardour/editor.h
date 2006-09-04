@@ -684,6 +684,7 @@ class Editor : public PublicEditor
 	void tie_vertical_scrolling ();
 	void canvas_horizontally_scrolled ();
 	bool lazy_canvas_horizontally_scrolled ();
+
 	void reposition_and_zoom (jack_nframes_t sample, double fpu);
 	gint deferred_reposition_and_zoom (jack_nframes_t sample, double fpu);
 	void end_location_changed (ARDOUR::Location*);
@@ -1185,8 +1186,6 @@ class Editor : public PublicEditor
 	bool _follow_playhead;
 	bool _show_waveforms_recording;
 	
-	void add_bbt_marks (ARDOUR::TempoMap::BBTPointList&);
-
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
 	
 	typedef vector<ArdourCanvas::SimpleLine*> TimeLineList;
@@ -1196,8 +1195,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group* time_line_group;
 	ArdourCanvas::SimpleLine* get_time_line ();
 	void hide_measures ();
-	void draw_measures ();
-	void draw_time_bars ();
+	bool draw_measures ();
 
 	void new_tempo_section ();
 

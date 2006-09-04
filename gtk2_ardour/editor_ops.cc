@@ -1110,9 +1110,9 @@ Editor::temporal_zoom_step (bool coarser)
 	nfpu = frames_per_unit;
 	
 	if (coarser) { 
-		nfpu *= 2.0;
+		nfpu *= 1.61803399;
 	} else { 
-		nfpu = max(1.0,(nfpu/2.0));
+		nfpu = max(1.0,(nfpu/1.61803399));
 	}
 
 	temporal_zoom (nfpu);
@@ -1251,22 +1251,22 @@ Editor::temporal_zoom_to_frame (bool coarser, jack_nframes_t frame)
 {
 	if (!session) return;
 	
-	jack_nframes_t range_before = frame - leftmost_frame;
+	double range_before = frame - leftmost_frame;
 	double new_fpu;
 	
 	new_fpu = frames_per_unit;
 	
 	if (coarser) { 
-		new_fpu *= 2.0;
-		range_before *= 2;
+		new_fpu *= 1.61803399;
+		range_before *= 1.61803399;
 	} else { 
-		new_fpu = max(1.0,(new_fpu/2.0));
-		range_before /= 2;
+		new_fpu = max(1.0,(new_fpu/1.61803399));
+		range_before /= 1.61803399;
 	}
 
 	if (new_fpu == frames_per_unit) return;
 
-	jack_nframes_t new_leftmost = frame - range_before;
+	jack_nframes_t new_leftmost = frame - (jack_nframes_t)range_before;
 
 	if (new_leftmost > frame) new_leftmost = 0;
 

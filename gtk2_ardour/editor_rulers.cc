@@ -1034,114 +1034,87 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
                 return 0;
         }
 
-        TempoMap::BBTPointList::iterator i;
-	TempoMap::BBTPointList *zoomed_bbt_points;
+	TempoMap::BBTPointList::iterator i;
+
         uint32_t beats = 0;
         uint32_t bars = 0;
-	uint32_t tick = 0;
-	uint32_t skip;
-	uint32_t t;
-        uint32_t zoomed_beats = 0;
-        uint32_t zoomed_bars = 0;
         uint32_t desirable_marks;
 	uint32_t magic_accent_number = 1;
 	gint nmarks;
         char buf[64];
         gint n;
 	jack_nframes_t pos;
-        jack_nframes_t frame_one_beats_worth;
-        jack_nframes_t frame_skip;
-	double frame_skip_error;
-	double accumulated_error;
-        bool bar_helper_on = true;
-
+	bool bar_helper_on = true;
        
-	BBT_Time previous_beat;
 	BBT_Time next_beat;
 	jack_nframes_t next_beat_pos;
 	jack_nframes_t ilower = (jack_nframes_t) floor (lower);
-	jack_nframes_t iupper = (jack_nframes_t) floor (upper);
 
-      	if ((desirable_marks = maxchars / 6) == 0) {
+      	if ((desirable_marks = maxchars / 7) == 0) {
                return 0;
         }
 
         /* align the tick marks to whatever we're snapping to... */
-                                                                                                             
-        if (snap_type == SnapToAThirdBeat) {
+
+	switch (snap_type) {
+	case SnapToAThirdBeat:
                 bbt_beat_subdivision = 3;
-        } else if (snap_type == SnapToAQuarterBeat) {
+		break;
+	case SnapToAQuarterBeat:
                 bbt_beat_subdivision = 4;
-        } else if (snap_type == SnapToAEighthBeat) {
+		break;
+	case SnapToAEighthBeat:
                 bbt_beat_subdivision = 8;
 		magic_accent_number = 2;
-        } else if (snap_type == SnapToASixteenthBeat) {
+		break;
+	case SnapToASixteenthBeat:
                 bbt_beat_subdivision = 16;
 		magic_accent_number = 4;
-        } else if (snap_type == SnapToAThirtysecondBeat) {
+		break;
+	case SnapToAThirtysecondBeat:
                 bbt_beat_subdivision = 32;
 		magic_accent_number = 8;
-        } else {
+		break;
+	default:
 	       bbt_beat_subdivision = 4;
+		break;
 	}
 
-	/* First find what a beat's distance is, so we can start plotting stuff before the beginning of the ruler */
-
-	session->bbt_time(ilower,previous_beat);
-	previous_beat.ticks = 0;
-	next_beat = previous_beat;
-
-	if (session->tempo_map().meter_at(ilower).beats_per_bar() < (next_beat.beats + 1)) {
-	       next_beat.bars += 1;
-	       next_beat.beats = 1;
-	} else {
-	       next_beat.beats += 1;
-	}
-
-	frame_one_beats_worth = session->tempo_map().frame_time(next_beat) - session->tempo_map().frame_time(previous_beat);
-
-
-	zoomed_bbt_points = session->tempo_map().get_points((ilower >= frame_one_beats_worth) ? ilower - frame_one_beats_worth : 0, iupper);
-
-	if (current_bbt_points == 0 || zoomed_bbt_points == 0 || zoomed_bbt_points->empty()) {
+	if (current_bbt_points == 0 || current_bbt_points->empty()) {
 		return 0;
 	}
 
-	for (i = current_bbt_points->begin(); i != current_bbt_points->end(); i++) {
-        	if ((*i).type == TempoMap::Beat) {
-			beats++;
-		} else if ((*i).type == TempoMap::Bar) {
-			bars++;
-		}
-	}
+	i = current_bbt_points->end();
+	i--;
+	bars = (*i).bar - (*current_bbt_points->begin()).bar;
+	beats = current_bbt_points->size() - bars;
+
 	/*Only show the bar helper if there aren't many bars on the screen */
-	if (bars > 1) {
+	if (bars > 2) {
 	        bar_helper_on = false;
 	}
-
-	for (i = zoomed_bbt_points->begin(); i != zoomed_bbt_points->end(); i++) {
-               	if ((*i).type == TempoMap::Beat) {
-                       	zoomed_beats++;
-               	} else if ((*i).type == TempoMap::Bar) {
-                       	zoomed_bars++;
-               	}
-       	}
 
 	if (desirable_marks > (beats / 4)) {
 
 		/* we're in beat land...*/
 
+		uint32_t tick = 0;
+		uint32_t skip;
+		uint32_t t;
+	        jack_nframes_t frame_skip;
+		double frame_skip_error;
+		double accumulated_error;
 		double position_of_helper;
 		bool i_am_accented = false;
 		bool we_need_ticks = false;
 	
 		position_of_helper = ilower + (30 * Editor::get_current_zoom ());
 
-		if (desirable_marks >= (beats * 2)) {
-               		nmarks = (zoomed_beats * bbt_beat_subdivision) + 1;
+		if (desirable_marks >= (beats / 2)) {
+		  nmarks = ((beats + 4) * bbt_beat_subdivision) + 1;
 			we_need_ticks = true;
 		} else {
-			nmarks = zoomed_beats + 1;
+			nmarks = beats + 1;
 		}
 
 		*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
@@ -1150,17 +1123,14 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 		(*marks)[0].position = ilower;
 		(*marks)[0].style = GtkCustomRulerMarkMicro;
 		
-		for (n = 1, i = zoomed_bbt_points->begin(); i != zoomed_bbt_points->end() && n < nmarks; ++i) {
-		
-			if ((*i).frame <= ilower && (bar_helper_on)) {
-			
+		for (n = 1,   i = current_bbt_points->begin(); n < nmarks && i != current_bbt_points->end(); i++) {
+
+			if ((*i).frame < ilower && (bar_helper_on)) {
 					snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
 					(*marks)[0].label = g_strdup (buf); 
 			} else {
 
-	       
 			  if ((*i).type == TempoMap::Bar)  {
-			    tick = 0;
 			    (((*i).frame < position_of_helper) && bar_helper_on) ?
 			      snprintf (buf, sizeof(buf), " ") : snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
 			    (*marks)[n].label = g_strdup (buf);
@@ -1169,7 +1139,6 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 			    n++;
 			    
 			  } else if (((*i).type == TempoMap::Beat) && ((*i).beat > 1)) {
-			    tick = 0;
 			    ((((*i).frame < position_of_helper) && bar_helper_on) || !we_need_ticks) ?
 			      snprintf (buf, sizeof(buf), " ") : snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
 			    if (((*i).beat % 2 == 1) || we_need_ticks) {
@@ -1183,33 +1152,36 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 			  }
 
 			}
-			/* Find the next beat */
-			
-			session->bbt_time((*i).frame, next_beat);
 
-			if (session->tempo_map().meter_at((*i).frame).beats_per_bar() > (next_beat.beats + 1)) {
-			  next_beat.beats += 1;
-			} else {
-			  next_beat.bars += 1;
-			  next_beat.beats = 1;
-			}
-		
-			next_beat_pos = session->tempo_map().frame_time(next_beat);
 
 			/* Add the tick marks */
 
 			if (we_need_ticks) {
 
-      			        frame_skip = (jack_nframes_t) floor ((session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
-			        frame_skip_error =  ((session->frame_rate() *  60.0f) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute())) - frame_skip;
+			        /* Find the next beat */
+
+			        next_beat.beats = (*i).beat;
+				next_beat.bars = (*i).bar;
+
+				if ((*i).meter->beats_per_bar() > (next_beat.beats + 1)) {
+				  next_beat.beats += 1;
+				} else {
+				  next_beat.bars += 1;
+				  next_beat.beats = 1;
+				}
+				
+				next_beat_pos = session->tempo_map().frame_time(next_beat);
+
+      			        frame_skip = (jack_nframes_t) floor (frame_skip_error = (session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
+			        frame_skip_error -= frame_skip;
 			        skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
 
 				pos = (*i).frame + frame_skip;
 				accumulated_error = frame_skip_error;
 
-				tick += skip;
+				tick = skip;
 
-				for (t = 0; tick < Meter::ticks_per_beat && pos <= next_beat_pos ; pos += frame_skip, tick += skip, ++t) {
+				for (t = 0; (tick < Meter::ticks_per_beat) && (n < nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
 
 					if (t % magic_accent_number == (magic_accent_number - 1)) {
 						i_am_accented = true;
@@ -1246,23 +1218,22 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 				}
 			}
 		}
-		delete zoomed_bbt_points;
 		return n; //return the actual number of marks made, since we might have skipped some fro fractional time signatures 
 
        } else {
 
 		/* we're in bar land */
 
-		if (desirable_marks < (uint32_t) (zoomed_bars / 256)) {
+		if (desirable_marks < (uint32_t) (bars / 256)) {
         		nmarks = 1;
 			*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
-			snprintf (buf, sizeof(buf), "too many bars... (currently %" PRIu32 ")", zoomed_bars );
+			snprintf (buf, sizeof(buf), "too many bars... (currently %" PRIu32 ")", bars );
         		(*marks)[0].style = GtkCustomRulerMarkMajor;
         		(*marks)[0].label = g_strdup (buf);
 			(*marks)[0].position = ilower;
-		} else if (desirable_marks < (uint32_t) (nmarks = (gint) (zoomed_bars / 64))) {
+		} else if (desirable_marks < (uint32_t) (nmarks = (gint) (bars / 64))) {
 			*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
-			for (n = 0, i = zoomed_bbt_points->begin(); i != zoomed_bbt_points->end() && n < nmarks; i++) {
+			for (n = 0,   i = current_bbt_points->begin(); i != current_bbt_points->end() && n < nmarks; i++) {
 				if ((*i).type == TempoMap::Bar)  {
 					if ((*i).bar % 64 == 1) {
 						if ((*i).bar % 256 == 1) {
@@ -1282,9 +1253,9 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 					}
 				}
 			}
-		} else if (desirable_marks < (uint32_t) (nmarks = (gint)(zoomed_bars / 16))) {
+		} else if (desirable_marks < (uint32_t) (nmarks = (gint)(bars / 16))) {
 			*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
-			for (n = 0, i = zoomed_bbt_points->begin(); i != zoomed_bbt_points->end() && n < nmarks; i++) {
+			for (n = 0,  i = current_bbt_points->begin(); i != current_bbt_points->end() && n < nmarks; i++) {
 				if ((*i).type == TempoMap::Bar)  {
 					if ((*i).bar % 16 == 1) {
 						if ((*i).bar % 64 == 1) {
@@ -1304,9 +1275,9 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 					}
 				}
 			}
-		} else if (desirable_marks < (uint32_t) (nmarks = (gint)(zoomed_bars / 4))){
+		} else if (desirable_marks < (uint32_t) (nmarks = (gint)(bars / 4))){
 			*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
-			for (n = 0, i = zoomed_bbt_points->begin(); i != zoomed_bbt_points->end() && n < nmarks; ++i) {
+			for (n = 0,   i = current_bbt_points->begin(); i != current_bbt_points->end() && n < nmarks; ++i) {
 				if ((*i).type == TempoMap::Bar)  {
 					if ((*i).bar % 4 == 1) {
 						if ((*i).bar % 16 == 1) {
@@ -1327,9 +1298,9 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 				}
 			}
 		} else {
-			nmarks = zoomed_bars;
+			nmarks = bars;
 			*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
-                	for (n = 0, i = zoomed_bbt_points->begin(); i != zoomed_bbt_points->end() && n < nmarks; i++) {
+                	for (n = 0,  i = current_bbt_points->begin(); i != current_bbt_points->end() && n < nmarks; i++) {
                         	if ((*i).type == TempoMap::Bar)  {
                                 	if ((*i).bar % 4 == 1) {
                                         	snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
@@ -1348,7 +1319,6 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
                         	}
                 	}
         	}
-		delete zoomed_bbt_points;
 		return nmarks;
 	}
 }

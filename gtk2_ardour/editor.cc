@@ -966,7 +966,6 @@ Editor::canvas_horizontally_scrolled ()
 {
 
         Glib::signal_idle().connect (mem_fun(*this, &Editor::lazy_canvas_horizontally_scrolled));
-
 }
 
 bool
@@ -996,7 +995,7 @@ Editor::deferred_reposition_and_zoom (jack_nframes_t frame, double nfpu)
 
 	set_frames_per_unit (nfpu);
 	reposition_x_origin  (frame);
-
+	tempo_map_changed (Change (0));
 	repos_zoom_queued = false;
 	
 	return FALSE;

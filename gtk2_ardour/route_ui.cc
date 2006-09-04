@@ -84,10 +84,10 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 		
 		update_rec_display ();
 	} 
-	
+
 	mute_button->unset_flags (Gtk::CAN_FOCUS);
 	solo_button->unset_flags (Gtk::CAN_FOCUS);
-
+	
 	/* map the current state */
 
 	map_frozen ();

@@ -118,21 +118,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	hide_button.add (*(manage (new Image (get_xpm("small_x.xpm")))));
 
-	/* XXX is this incomplete? i don't think its very useful atm
-
-	solo_button->signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
-	mute_button->signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
-	playlist_button.signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
-	automation_button.signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
-	size_button.signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
-	visual_button.signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
-	hide_button.signal_button_press_event().connect (mem_fun (*this, &RouteTimeAxisView::select_me), false);
-	*/
-
-	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
-	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release), false);
-	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
-	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release), false);
  	edit_group_button.signal_button_release_event().connect (mem_fun(*this, &RouteTimeAxisView::edit_click), false);
 	playlist_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::playlist_click));
 	automation_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::automation_click));
@@ -200,6 +185,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	_route->name_changed.connect (mem_fun(*this, &RouteTimeAxisView::route_name_changed));
 	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 
+
 	if (is_track()) {
 
 		track()->FreezeChange.connect (mem_fun(*this, &RouteTimeAxisView::map_frozen));
@@ -218,6 +204,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	editor.ZoomChanged.connect (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
 	ColorChanged.connect (mem_fun (*this, &RouteTimeAxisView::color_handler));
+
 }
 
 RouteTimeAxisView::~RouteTimeAxisView ()
@@ -608,19 +595,19 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		show_name_entry ();
 		hide_name_label ();
 
-		mute_button->show_all();
-		solo_button->show_all();
+		mute_button->show();
+		solo_button->show();
 		if (rec_enable_button)
-			rec_enable_button->show_all();
+			rec_enable_button->show();
 
-		edit_group_button.show_all();
-		hide_button.show_all();
-		visual_button.show_all();
-		size_button.show_all();
-		automation_button.show_all();
+		edit_group_button.show();
+		hide_button.show();
+		visual_button.show();
+		size_button.show();
+		automation_button.show();
 		
 		if (is_track() && track()->mode() == ARDOUR::Normal) {
-			playlist_button.show_all();
+			playlist_button.show();
 		}
 		break;
 
@@ -628,10 +615,10 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		show_name_entry ();
 		hide_name_label ();
 
-		mute_button->show_all();
-		solo_button->show_all();
+		mute_button->show();
+		solo_button->show();
 		if (rec_enable_button)
-			rec_enable_button->show_all();
+			rec_enable_button->show();
 
 		edit_group_button.hide ();
 		hide_button.hide ();
@@ -1194,13 +1181,6 @@ RouteTimeAxisView::color_handler (ColorID id, uint32_t val)
 	default:
 		break;
 	}
-}
-
-bool
-RouteTimeAxisView::select_me (GdkEventButton* ev)
-{
-	editor.get_selection().add (this);
-	return false;
 }
 
 void

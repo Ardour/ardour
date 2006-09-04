@@ -96,14 +96,47 @@ void
 Editor::tempo_map_changed (Change ignored)
 {
         ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::tempo_map_changed), ignored));
-	
+
+	BBT_Time previous_beat, next_beat; // the beats previous to the leftmost frame and after the rightmost frame
+
+	session->bbt_time(leftmost_frame, previous_beat);
+
+	previous_beat.ticks = 0;
+	if (previous_beat.beats > 1) {
+	        previous_beat.beats -= 1;
+	} else if (previous_beat.bars > 1) {
+ 	        previous_beat.bars--;
+		previous_beat.beats += 1;
+	}
+
+	session->bbt_time(leftmost_frame + current_page_frames(), next_beat);
+
+	if (session->tempo_map().meter_at(leftmost_frame + current_page_frames()).beats_per_bar () > next_beat.beats + 1) {
+	  next_beat.beats += 1;
+	  next_beat.ticks = 0;
+	} else {
+	  next_beat.bars += 1;
+	  next_beat.beats = 1;
+	  next_beat.ticks = 0;
+	}
+
 	if (current_bbt_points) {
-		delete current_bbt_points;
+	        delete current_bbt_points;
 		current_bbt_points = 0;
 	}
 
 	if (session) {
-		current_bbt_points = session->tempo_map().get_points (leftmost_frame, leftmost_frame + current_page_frames());
+		current_bbt_points = session->tempo_map().get_points (session->tempo_map().frame_time (previous_beat), session->tempo_map().frame_time (next_beat));
+
+		/*
+		  TempoMap::BBTPointList::iterator i;
+		  cerr << "******************" << endl << "current bbt points dump: " << endl;
+		  for (i = current_bbt_points->begin(); i != current_bbt_points->end(); i++) {
+		  cerr  << (*i).bar << " : " << (*i).beat << endl;
+		  }
+		  cerr << "******************" << endl;
+		*/
+
 	} else {
 		current_bbt_points = 0;
 	}
@@ -114,10 +147,11 @@ Editor::tempo_map_changed (Change ignored)
 void
 Editor::redisplay_tempo ()
 {	
+
 	hide_measures ();
 
 	if (session && current_bbt_points) {
-		draw_measures ();
+   		Glib::signal_idle().connect (mem_fun (*this, &Editor::draw_measures));
 		update_tempo_based_rulers ();
 	}
 }
@@ -149,22 +183,21 @@ Editor::get_time_line ()
 	return line;
 }
 
-void
+bool
 Editor::draw_measures ()
 {
 	if (session == 0 || _show_measures == false) {
-		return;
+		return false;
 	}
 
-	TempoMap::BBTPointList::iterator i = current_bbt_points->begin();
-	TempoMap::BBTPoint& p = (*i);
+	TempoMap::BBTPointList::iterator i;
 	ArdourCanvas::SimpleLine *line;
 	gdouble xpos, last_xpos;
 	uint32_t cnt;
 	uint32_t color;
 
 	if (current_bbt_points == 0 || current_bbt_points->empty()) {
-		return;
+		return false;
 	}
 
 	cnt = 0;
@@ -176,7 +209,7 @@ Editor::draw_measures ()
 	gdouble beat_spacing = 0;
 
 	for (i = current_bbt_points->begin(); i != current_bbt_points->end() && beat_spacing == 0; ++i) {
-		TempoMap::BBTPoint& p = (*i);
+	        TempoMap::BBTPoint& p = (*i);
 
 		switch (p.type) {
 		case TempoMap::Bar:
@@ -191,13 +224,20 @@ Editor::draw_measures ()
 		}
 	}
 
+	if (beat_spacing < 12.0) {
+	        /* 
+		   if the lines are too close together, 
+		   they become useless 
+		*/
+		return false;
+	}
+
 	double x1, x2, y1, y2;
 	track_canvas.get_scroll_region (x1, y1, x2, y2);
-	//y2 = 1000000000.0f;
 
 	for (i = current_bbt_points->begin(); i != current_bbt_points->end(); ++i) {
 
-	        p = (*i);
+	        TempoMap::BBTPoint& p = (*i);
 
 		switch (p.type) {
 		case TempoMap::Bar:
@@ -239,6 +279,7 @@ Editor::draw_measures ()
 
 	cursor_group->raise_to_top();
 	time_line_group->lower_to_bottom();
+	return false;
 }
 
 void
