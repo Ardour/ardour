@@ -262,17 +262,17 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (declick > 0) {
-		apply_declick (bufs, nbufs, nframes, 0.0, 1.0, _phase_invert);
+		apply_declick (bufs, nbufs, nframes, 0.0, 1.0, false);
 		_pending_declick = 0;
 	} else if (declick < 0) {
-		apply_declick (bufs, nbufs, nframes, 1.0, 0.0, _phase_invert);
+		apply_declick (bufs, nbufs, nframes, 1.0, 0.0, false);
 		_pending_declick = 0;
 	} else {
 
 		/* no global declick */
 
 		if (solo_gain != dsg) {
-			apply_declick (bufs, nbufs, nframes, solo_gain, dsg, _phase_invert);
+			apply_declick (bufs, nbufs, nframes, solo_gain, dsg, false);
 			solo_gain = dsg;
 		}
 	}
@@ -289,7 +289,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	}
 
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, _phase_invert);
+		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -359,7 +359,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, _phase_invert);
+		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -525,7 +525,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	}
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_control_outs) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, _phase_invert);
+		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -570,7 +570,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   ----------------------------------------------------------------------*/
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_main_outs) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, _phase_invert);
+		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}

@@ -203,18 +203,21 @@ IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 		/* now ensure the rest of the buffer has the target value
 		   applied, if necessary.
 		*/
-		
+
 		if (declick != nframes) {
+			float this_target;
 
 			if (invert_polarity) {
-				target = -target;
+				this_target = -target;
+			} else { 
+				this_target = target;
 			}
 
-			if (target == 0.0) {
+			if (this_target == 0.0) {
 				memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
-			} else if (target != 1.0) {
+			} else if (this_target != 1.0) {
 				for (jack_nframes_t nx = declick; nx < nframes; ++nx) {
-					buffer[nx] *= target;
+					buffer[nx] *= this_target;
 				}
 			}
 		}
