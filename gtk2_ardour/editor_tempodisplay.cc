@@ -190,10 +190,15 @@ Editor::draw_measures ()
 			last_beat = xpos;
 		}
 	}
+	
+	if (beat_spacing < 3.0) {
+	    /* if the lines are too close together, they become useless */
+		return;
+	}
 
 	double x1, x2, y1, y2;
 	track_canvas.get_scroll_region (x1, y1, x2, y2);
-	//y2 = 1000000000.0f;
+	y2 = 1000000000.0f;
 
 	for (i = current_bbt_points->begin(); i != current_bbt_points->end(); ++i) {
 
@@ -215,7 +220,7 @@ Editor::draw_measures ()
 				   are large.
 				*/
 
-				if (beat_spacing < 15.0) {
+				if (beat_spacing < 4.0) {
 					break;
 				}
 			}
