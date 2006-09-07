@@ -121,10 +121,7 @@ class Location : public sigc::trackable, public PBD::StatefulDestructible
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
-        PBD::ID id() { return _id; }
-
   private:
-        PBD::ID _id;
 	string        _name;
 	jack_nframes_t     _start;
 	jack_nframes_t     _end;
@@ -150,7 +147,6 @@ class Locations : public StateManager, public PBD::StatefulDestructible
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
-        PBD::ID id() { return _id; }
         Location *get_location_by_id(PBD::ID);
 
 	Location* auto_loop_location () const;
@@ -204,8 +200,6 @@ class Locations : public StateManager, public PBD::StatefulDestructible
 
 	Change   restore_state (StateManager::State&);
 	StateManager::State* state_factory (std::string why) const;
-
-        PBD::ID _id;
 };
 
 } // namespace ARDOUR

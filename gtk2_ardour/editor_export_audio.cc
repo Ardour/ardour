@@ -208,7 +208,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 		
 			
 			try {
-				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (path, AudioFileSource::Flag (0)));
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (*session, path, AudioFileSource::Flag (0)));
 			}
 			
 			catch (failed_constructor& err) {
@@ -339,7 +339,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 		path = s;
 		
 		try {
-			fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (path, AudioFileSource::Flag (0)));
+			fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (*session, path, AudioFileSource::Flag (0)));
 		}
 		
 		catch (failed_constructor& err) {

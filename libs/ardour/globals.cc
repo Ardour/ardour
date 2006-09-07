@@ -372,7 +372,9 @@ ARDOUR::get_user_ardour_path ()
 
 	/* create it if necessary */
 
-	mkdir (path.c_str (), 0755);
+	if (g_mkdir_with_parents (path.c_str (), 0755)) {
+		throw exception ();
+	}
 
 	return path;
 }

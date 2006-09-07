@@ -92,7 +92,6 @@ class IO;
 	bool destructive() const { return _flags & Destructive; }
 	virtual void set_destructive (bool yn);
 
-	const PBD::ID& id()          const { return _id; }
 	bool           hidden()      const { return _flags & Hidden; }
 	bool           recordable()  const { return _flags & Recordable; }
 	bool           reversed()    const { return _actual_speed < 0.0f; }
@@ -244,7 +243,6 @@ class IO;
 	ARDOUR::Session&  _session;
 	ARDOUR::IO*       _io;
 	uint32_t          _n_channels;
-	PBD::ID           _id;
 	Playlist*         _playlist;
 
 	mutable gint             _record_enabled;

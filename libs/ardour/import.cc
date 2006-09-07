@@ -138,7 +138,7 @@ Session::import_audiofile (import_status& status)
 		} while ( !goodfile);
 
 		try { 
-			newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (buf, false, frame_rate()));
+			newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*this, buf, false, frame_rate()));
 		}
 
 		catch (failed_constructor& err) {

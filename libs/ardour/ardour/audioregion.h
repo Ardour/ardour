@@ -187,6 +187,7 @@ class AudioRegion : public Region
 	void recompute_at_end ();
 
 	void envelope_changed (Change);
+	void source_offset_changed ();
 
 	void source_deleted (boost::shared_ptr<Source>);
 	

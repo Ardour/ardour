@@ -174,9 +174,9 @@ VSTPlugin::get_state()
 
 		if (stat (path.c_str(), &sbuf)) {
 			if (errno == ENOENT) {
-				if (mkdir (path.c_str(), 0600)) {
+				if (g_mkdir_with_parents (path.c_str(), 0600)) {
 					error << string_compose (_("cannot create VST chunk directory: %1"),
-							  strerror (errno))
+								 strerror (errno))
 					      << endmsg;
 					return *root;
 				}

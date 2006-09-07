@@ -1327,6 +1327,7 @@ Editor::connect_to_session (Session *t)
 	}
 
         /* register for undo history */
+
         session->register_with_memento_command_factory(_id, this);
 }
 
@@ -2109,6 +2110,9 @@ Editor::set_state (const XMLNode& node)
 	int x, y, xoff, yoff;
 	Gdk::Geometry g;
 
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value ();
+	}
 
 	if ((geometry = find_named_node (node, "geometry")) == 0) {
 
@@ -2240,6 +2244,9 @@ Editor::get_state ()
 	XMLNode* node = new XMLNode ("Editor");
 	char buf[32];
 
+	_id.print (buf);
+	node->add_property ("id", buf);
+	
 	if (is_realized()) {
 		Glib::RefPtr<Gdk::Window> win = get_window();
 		
@@ -2249,7 +2256,7 @@ Editor::get_state ()
 		win->get_size(width, height);
 		
 		XMLNode* geometry = new XMLNode ("geometry");
-		char buf[32];
+
 		snprintf(buf, sizeof(buf), "%d", width);
 		geometry->add_property("x_size", string(buf));
 		snprintf(buf, sizeof(buf), "%d", height);

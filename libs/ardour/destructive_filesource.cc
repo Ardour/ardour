@@ -68,21 +68,21 @@ gain_t* DestructiveFileSource::out_coefficient = 0;
 gain_t* DestructiveFileSource::in_coefficient = 0;
 jack_nframes_t DestructiveFileSource::xfade_frames = 64;
 
-DestructiveFileSource::DestructiveFileSource (string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate, Flag flags)
-	: SndFileSource (path, samp_format, hdr_format, rate, flags)
+DestructiveFileSource::DestructiveFileSource (Session& s, string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate, Flag flags)
+	: SndFileSource (s, path, samp_format, hdr_format, rate, flags)
 {
 	init ();
 }
 
 
-DestructiveFileSource::DestructiveFileSource (string path, Flag flags)
-	: SndFileSource (path, flags)
+DestructiveFileSource::DestructiveFileSource (Session& s, string path, Flag flags)
+	: SndFileSource (s, path, flags)
 {
 	init ();
 }
 
-DestructiveFileSource::DestructiveFileSource (const XMLNode& node)
-	: SndFileSource (node)
+DestructiveFileSource::DestructiveFileSource (Session& s, const XMLNode& node)
+	: SndFileSource (s, node)
 {
 	init ();
 }

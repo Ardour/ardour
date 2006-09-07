@@ -13,15 +13,17 @@ class XMLNode;
 
 namespace ARDOUR {
 
+class Session;
+
 class SourceFactory {
   public:
 	static sigc::signal<void,boost::shared_ptr<Source> > SourceCreated;
 
-	static boost::shared_ptr<Source> create (const XMLNode& node);
+	static boost::shared_ptr<Source> create (Session&, const XMLNode& node);
 
 	// MIDI sources will have to be hacked in here somehow
-	static boost::shared_ptr<Source> createReadable (std::string idstr, AudioFileSource::Flag flags, bool announce = true);
-	static boost::shared_ptr<Source> createWritable (std::string name, bool destructive, jack_nframes_t rate, bool announce = true);
+	static boost::shared_ptr<Source> createReadable (Session&, std::string idstr, AudioFileSource::Flag flags, bool announce = true);
+	static boost::shared_ptr<Source> createWritable (Session&, std::string name, bool destructive, jack_nframes_t rate, bool announce = true);
 };
 
 }

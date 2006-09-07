@@ -198,7 +198,7 @@ SoundFileBox::play_btn_clicked ()
 		
 		for (int n = 0; n < sf_info.channels; ++n) {
 			try {
-				afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (path+":"+string_compose("%1", n), AudioFileSource::Flag (0)));
+				afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (*_session, path+":"+string_compose("%1", n), AudioFileSource::Flag (0)));
 				srclist.push_back(afs);
 
 			} catch (failed_constructor& err) {

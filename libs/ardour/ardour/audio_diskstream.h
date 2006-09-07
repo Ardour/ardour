@@ -61,8 +61,6 @@ class AudioDiskstream : public Diskstream
 	AudioDiskstream (Session &, const XMLNode&);
 	~AudioDiskstream();
 
-	const PBD::ID& id() const { return _id; }
-
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
 

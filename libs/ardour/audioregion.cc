@@ -38,7 +38,7 @@
 #include <ardour/dB.h>
 #include <ardour/playlist.h>
 #include <ardour/audiofilter.h>
-#include <ardour/audiosource.h>
+#include <ardour/audiofilesource.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -76,6 +76,11 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t sta
 	master_sources.push_back (src);
 	src->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), src));
 
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
+	if (afs) {
+		afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+	}
+
 	_scale_amplitude = 1.0;
 
 	set_default_fades ();
@@ -98,6 +103,11 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t sta
 	master_sources.push_back (src);
 	src->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), src));
 
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
+	if (afs) {
+		afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+	}
+
 	_scale_amplitude = 1.0;
 
 	set_default_fades ();
@@ -119,6 +129,11 @@ AudioRegion::AudioRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t
 		sources.push_back (*i);
 		master_sources.push_back (*i);
 		(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), (*i)));
+		
+		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> ((*i));
+		if (afs) {
+			afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+		}
 	}
 
 	_scale_amplitude = 1.0;
@@ -144,7 +159,17 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, jack_nfram
 	for (SourceList::const_iterator i= other->sources.begin(); i != other->sources.end(); ++i) {
 		sources.push_back (*i);
 		(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), *i));
-		unique_srcs.insert (*i);
+
+		pair<set<boost::shared_ptr<AudioSource> >::iterator,bool> result;
+
+		result = unique_srcs.insert (*i);
+
+		if (result.second) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*i);
+			if (afs) {
+				afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+			}
+		}
 	}
 
 	for (SourceList::const_iterator i = other->master_sources.begin(); i != other->master_sources.end(); ++i) {
@@ -199,7 +224,16 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	for (SourceList::const_iterator i = other->sources.begin(); i != other->sources.end(); ++i) {
 		sources.push_back (*i);
 		(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), *i));
-		unique_srcs.insert (*i);
+		pair<set<boost::shared_ptr<AudioSource> >::iterator,bool> result;
+
+		result = unique_srcs.insert (*i);
+
+		if (result.second) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*i);
+			if (afs) {
+				afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+			}
+		}
 	}
 
 	for (SourceList::const_iterator i = other->master_sources.begin(); i != other->master_sources.end(); ++i) {
@@ -230,6 +264,11 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 	master_sources.push_back (src);
 	src->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), src));
 
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
+	if (afs) {
+		afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+	}
+
 	set_default_fades ();
 
 	if (set_state (node)) {
@@ -252,7 +291,16 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		sources.push_back (*i);
 		(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), *i));
-		unique_srcs.insert (*i);
+		pair<set<boost::shared_ptr<AudioSource> >::iterator,bool> result;
+
+		result = unique_srcs.insert (*i);
+
+		if (result.second) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*i);
+			if (afs) {
+				afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+			}
+		}
 	}
 
 	for (SourceList::iterator i = srcs.begin(); i != srcs.end(); ++i) {
@@ -1322,6 +1370,12 @@ AudioRegion::speed_mismatch (float sr) const
 	float fsr = sources.front()->sample_rate();
 
 	return fsr != sr;
+}
+
+void
+AudioRegion::source_offset_changed ()
+{
+	set_position (source()->natural_position() + start(), this);
 }
 
 extern "C" {

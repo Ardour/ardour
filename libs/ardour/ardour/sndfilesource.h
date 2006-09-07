@@ -31,11 +31,11 @@ class SndFileSource : public AudioFileSource {
   public:
 	/* constructor to be called for existing external-to-session files */
 
-	SndFileSource (std::string path, Flag flags);
+	SndFileSource (Session&, std::string path, Flag flags);
 
 	/* constructor to be called for new in-session files */
 
-	SndFileSource (std::string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate, 
+	SndFileSource (Session&, std::string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate, 
 		       Flag flags = AudioFileSource::Flag (AudioFileSource::Writable|
 							   AudioFileSource::Removable|
 							   AudioFileSource::RemovableIfEmpty|
@@ -43,7 +43,7 @@ class SndFileSource : public AudioFileSource {
 		       
 	/* constructor to be called for existing in-session files */
 	
-	SndFileSource (const XMLNode&);
+	SndFileSource (Session&, const XMLNode&);
 
 	~SndFileSource ();
 

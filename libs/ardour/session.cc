@@ -81,10 +81,11 @@ using boost::shared_ptr;
 const char* Session::_template_suffix = X_(".template");
 const char* Session::_statefile_suffix = X_(".ardour");
 const char* Session::_pending_suffix = X_(".pending");
-const char* Session::sound_dir_name = X_("sounds");
-const char* Session::tape_dir_name = X_("tapes");
+const char* Session::old_sound_dir_name = X_("sounds");
+const char* Session::sound_dir_name = X_("audiofiles");
 const char* Session::peak_dir_name = X_("peaks");
 const char* Session::dead_sound_dir_name = X_("dead_sounds");
+const char* Session::interchange_dir_name = X_("interchange");
 
 Session::compute_peak_t				Session::compute_peak 			= 0;
 Session::apply_gain_to_buffer_t		Session::apply_gain_to_buffer 	= 0;
@@ -2799,17 +2800,11 @@ Session::source_by_id (const PBD::ID& id)
 }
 
 string
-Session::peak_path_from_audio_path (string audio_path)
+Session::peak_path_from_audio_path (string audio_path) const
 {
-	/* XXX hardly bombproof! fix me */
-
 	string res;
 
-	res = Glib::path_get_dirname (audio_path);
-	res = Glib::path_get_dirname (res);
-	res += '/';
-	res += peak_dir_name;
-	res += '/';
+	res = peak_dir ();
 	res += PBD::basename_nosuffix (audio_path);
 	res += ".peak";
 
@@ -2955,11 +2950,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 
 			spath = (*i).path;
 
-			if (destructive) {
-				spath += tape_dir_name;
-			} else {
-				spath += sound_dir_name;
-			}
+			spath += sound_dir_name;
 
 			if (destructive) {
 				if (nchan < 2) {
@@ -3016,11 +3007,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 
 	string foo = buf;
 
-	if (destructive) {
-		spath = tape_dir ();
-	} else {
-		spath = discover_best_sound_dir ();
-	}
+	spath = discover_best_sound_dir ();
 
 	string::size_type pos = foo.find_last_of ('/');
 	
@@ -3037,7 +3024,7 @@ boost::shared_ptr<AudioFileSource>
 Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bool destructive)
 {
 	string spath = audio_path_from_name (ds.name(), ds.n_channels(), chan, destructive);
-	return boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (spath, destructive, frame_rate()));
+	return boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*this, spath, destructive, frame_rate()));
 }
 
 /* Playlist management */
@@ -3206,7 +3193,7 @@ Session::remove_empty_sounds ()
 	
 	for (vector<string *>::iterator i = possible_audiofiles->begin(); i != possible_audiofiles->end(); ++i) {
 
-		if (AudioFileSource::is_empty (*(*i))) {
+		if (AudioFileSource::is_empty (*this, *(*i))) {
 
 			unlink ((*i)->c_str());
 			
@@ -3386,7 +3373,7 @@ jack_nframes_t
 Session::available_capture_duration ()
 {
 	const double scale = 4096.0 / sizeof (Sample);
-	
+
 	if (_total_free_4k_blocks * scale > (double) max_frames) {
 		return max_frames;
 	}
@@ -3713,7 +3700,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		}
 		
 		try {
-			fsource = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (buf, false, frame_rate()));
+			fsource = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*this, buf, false, frame_rate()));
 		}
 		
 		catch (failed_constructor& err) {

@@ -253,8 +253,6 @@ public:
 	void start_pan_touch (uint32_t which);
 	void end_pan_touch (uint32_t which);
 
-	const PBD::ID& id() const { return _id; }
-
 	void defer_pan_reset ();
 	void allow_pan_reset ();
 
@@ -282,7 +280,6 @@ public:
 	string              _name;
 	Connection*         _input_connection;
 	Connection*         _output_connection;
-	PBD::ID             _id;
 	bool                 no_panner_reset;
 	XMLNode*             deferred_state;
 	DataType        _default_type;

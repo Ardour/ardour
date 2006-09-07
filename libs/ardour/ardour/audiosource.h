@@ -47,8 +47,8 @@ const jack_nframes_t frames_per_peak = 256;
 class AudioSource : public Source
 {
   public:
-	AudioSource (string name);
-	AudioSource (const XMLNode&);
+	AudioSource (Session&, string name);
+	AudioSource (Session&, const XMLNode&);
 	virtual ~AudioSource ();
 
 	/* one could argue that this should belong to Source, but other data types

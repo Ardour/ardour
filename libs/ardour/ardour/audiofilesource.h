@@ -75,7 +75,7 @@ class AudioFileSource : public AudioSource {
 
 	int move_to_trash (const string trash_dir_name);
 
-	static bool is_empty (string path);
+	static bool is_empty (Session&, string path);
 	void mark_streaming_write_completed ();
 
 	void   mark_take (string);
@@ -104,16 +104,16 @@ class AudioFileSource : public AudioSource {
 	
 	/* constructor to be called for existing external-to-session files */
 
-	AudioFileSource (std::string path, Flag flags);
+	AudioFileSource (Session&, std::string path, Flag flags);
 
 	/* constructor to be called for new in-session files */
 
-	AudioFileSource (std::string path, Flag flags,
+	AudioFileSource (Session&, std::string path, Flag flags,
 			 SampleFormat samp_format, HeaderFormat hdr_format);
 
 	/* constructor to be called for existing in-session files */
 
-	AudioFileSource (const XMLNode&);
+	AudioFileSource (Session&, const XMLNode&);
 
 	int init (string idstr, bool must_exist);
 

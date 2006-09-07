@@ -50,7 +50,7 @@ AudioFilter::make_new_sources (boost::shared_ptr<AudioRegion> region, SourceList
 		}
 
 		try {
-			nsrcs.push_back (boost::dynamic_pointer_cast<AudioSource> (SourceFactory::createWritable (path, false, session.frame_rate())));
+			nsrcs.push_back (boost::dynamic_pointer_cast<AudioSource> (SourceFactory::createWritable (session, path, false, session.frame_rate())));
 		} 
 
 		catch (failed_constructor& err) {

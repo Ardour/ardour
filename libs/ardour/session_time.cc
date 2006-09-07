@@ -51,7 +51,7 @@ Session::bbt_time (jack_nframes_t when, BBT_Time& bbt)
 void
 Session::sync_time_vars ()
 {
-	_current_frame_rate = _base_frame_rate * (1.0 + (video_pullup/100.0) );
+	_current_frame_rate = (jack_nframes_t) round (_base_frame_rate * (1.0 + (video_pullup/100.0)));
 	_frames_per_hour = _current_frame_rate * 3600;
 	_frames_per_smpte_frame = (double) _current_frame_rate / (double) smpte_frames_per_second;
 	_smpte_frames_per_hour = (unsigned long) (smpte_frames_per_second * 3600.0);

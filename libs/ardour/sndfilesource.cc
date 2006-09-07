@@ -34,8 +34,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-SndFileSource::SndFileSource (const XMLNode& node)
-	: AudioFileSource (node)
+SndFileSource::SndFileSource (Session& s, const XMLNode& node)
+	: AudioFileSource (s, node)
 {
 	init (_name);
 
@@ -52,9 +52,9 @@ SndFileSource::SndFileSource (const XMLNode& node)
 	}
 }
 
-SndFileSource::SndFileSource (string idstr, Flag flags)
+SndFileSource::SndFileSource (Session& s, string idstr, Flag flags)
 	                                /* files created this way are never writable or removable */
-	: AudioFileSource (idstr, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
+	: AudioFileSource (s, idstr, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
 	init (idstr);
 
@@ -71,8 +71,8 @@ SndFileSource::SndFileSource (string idstr, Flag flags)
 	}
 }
 
-SndFileSource::SndFileSource (string idstr, SampleFormat sfmt, HeaderFormat hf, jack_nframes_t rate, Flag flags)
-	: AudioFileSource(idstr, flags, sfmt, hf)
+SndFileSource::SndFileSource (Session& s, string idstr, SampleFormat sfmt, HeaderFormat hf, jack_nframes_t rate, Flag flags)
+	: AudioFileSource (s, idstr, flags, sfmt, hf)
 {
 	int fmt = 0;
 
@@ -507,6 +507,9 @@ SndFileSource::set_header_timeline_position ()
 		delete _broadcast_info;
 		_broadcast_info = 0;
 	}
+
+	
+
 }
 
 jack_nframes_t

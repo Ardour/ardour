@@ -63,8 +63,8 @@ char   AudioFileSource::bwf_country_code[3] = "US";
 char   AudioFileSource::bwf_organization_code[4] = "LAS";
 char   AudioFileSource::bwf_serial_number[13] = "000000000000";
 
-AudioFileSource::AudioFileSource (string idstr, Flag flags)
-	: AudioSource (idstr), _flags (flags)
+AudioFileSource::AudioFileSource (Session& s, string idstr, Flag flags)
+	: AudioSource (s, idstr), _flags (flags)
 {
 	/* constructor used for existing external to session files. file must exist already */
 
@@ -74,8 +74,8 @@ AudioFileSource::AudioFileSource (string idstr, Flag flags)
 
 }
 
-AudioFileSource::AudioFileSource (std::string path, Flag flags, SampleFormat samp_format, HeaderFormat hdr_format)
-	: AudioSource (path), _flags (flags)
+AudioFileSource::AudioFileSource (Session& s, std::string path, Flag flags, SampleFormat samp_format, HeaderFormat hdr_format)
+	: AudioSource (s, path), _flags (flags)
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
 
@@ -84,8 +84,8 @@ AudioFileSource::AudioFileSource (std::string path, Flag flags, SampleFormat sam
 	}
 }
 
-AudioFileSource::AudioFileSource (const XMLNode& node)
-	: AudioSource (node), _flags (Flag (Writable|CanRename))
+AudioFileSource::AudioFileSource (Session& s, const XMLNode& node)
+	: AudioSource (s, node), _flags (Flag (Writable|CanRename))
 {
 	/* constructor used for existing internal-to-session files. file must exist */
 
@@ -109,7 +109,7 @@ AudioFileSource::~AudioFileSource ()
 bool
 AudioFileSource::removable () const
 {
-	return (_flags & Removable) && ((_flags & RemoveAtDestroy) || ((_flags & RemovableIfEmpty) && is_empty (_path)));
+	return (_flags & Removable) && ((_flags & RemoveAtDestroy) || ((_flags & RemovableIfEmpty) && is_empty (_session, _path)));
 }
 
 int
@@ -135,7 +135,7 @@ AudioFileSource::init (string pathstr, bool must_exist)
 string
 AudioFileSource::peak_path (string audio_path)
 {
-	return Session::peak_path_from_audio_path (audio_path);
+	return _session.peak_path_from_audio_path (audio_path);
 }
 
 string
@@ -552,10 +552,10 @@ AudioFileSource::set_name (string newname, bool destructive)
 }
 
 bool
-AudioFileSource::is_empty (string path)
+AudioFileSource::is_empty (Session& s, string path)
 {
 	bool ret = false;
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (path, NoPeakFile, false));
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (s, path, NoPeakFile, false));
 
 	if (afs) {
 		ret = (afs->length() == 0);

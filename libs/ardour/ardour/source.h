@@ -31,17 +31,17 @@
 
 namespace ARDOUR {
 
+class Session;
+
 class Source : public PBD::StatefulDestructible, public sigc::trackable
 {
   public:
-	Source (std::string name);
-	Source (const XMLNode&);
+	Source (Session&, std::string name);
+	Source (Session&, const XMLNode&);
 	virtual ~Source ();
 
 	std::string name() const { return _name; }
 	int set_name (std::string str, bool destructive);
-
-	const PBD::ID&  id() const   { return _id; }
 
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
@@ -51,11 +51,11 @@ class Source : public PBD::StatefulDestructible, public sigc::trackable
 
 
   protected:
+	Session&          _session;
 	string            _name;
 	time_t            _timestamp;
 
   private:
-	PBD::ID _id;
 };
 
 }

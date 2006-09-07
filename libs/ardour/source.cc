@@ -42,13 +42,15 @@ using std::max;
 
 using namespace ARDOUR;
 
-Source::Source (string name)
+Source::Source (Session& s, string name)
+	: _session (s)
 {
 	_name = name;
 	_timestamp = 0;
 }
 
-Source::Source (const XMLNode& node) 
+Source::Source (Session& s, const XMLNode& node) 
+	: _session (s)
 {
 	_timestamp = 0;
 

@@ -1616,6 +1616,9 @@ ARDOUR_UI::save_template ()
 void
 ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 {
+	string session_name;
+	string session_path;
+
 	int response = Gtk::RESPONSE_NONE;
 
 	new_session_dialog->set_modal(true);
@@ -1637,14 +1640,28 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 		        new_session_dialog->reset();
 
 		} else if (response == Gtk::RESPONSE_YES) {
+
 		        /* YES  == OPEN, but there's no enum for that */
 
-		        std::string session_name = new_session_dialog->session_name();
-			std::string session_path = new_session_dialog->session_folder();
-			load_session (session_path, session_name);
+		        session_name = new_session_dialog->session_name();
+			
+			if (session_name.empty()) {
+				response = Gtk::RESPONSE_NONE;
+				cerr << "session name is empty\n";
+				continue;
+			} 
 
+			if (session_name[0] == '/' || 
+			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
+			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+				load_session (Glib::path_get_dirname (session_name), session_name);
+			} else {
+				session_path = new_session_dialog->session_folder();
+				load_session (session_path, session_name);
+			}
 			
 		} else if (response == Gtk::RESPONSE_OK) {
+
 		        if (new_session_dialog->get_current_page() == 1) {
 		  
 			        /* XXX this is a bit of a hack.. 
@@ -1652,93 +1669,121 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 				   if we're on page 1 (the load page)
 				   Unfortunately i can't see how atm.. 
 				*/
-			 
-			        std::string session_name = new_session_dialog->session_name();
-				std::string session_path = new_session_dialog->session_folder();
-				load_session (session_path, session_name);
-			       
+				
+				if (session_name.empty()) {
+					response = Gtk::RESPONSE_NONE;
+					cerr << "session name is empty 2\n";
+					continue;
+				} 
+				
+				if (session_name[0] == '/' || 
+				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
+				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+					load_session (Glib::path_get_dirname (session_name), session_name);
+				} else {
+					session_path = new_session_dialog->session_folder();
+					load_session (session_path, session_name);
+				}
+			
 			} else {
 
 			        _session_is_new = true;
 			      
-				std::string session_name = new_session_dialog->session_name();
-				std::string session_path = new_session_dialog->session_folder();
+				session_name = new_session_dialog->session_name();
 			
+				if (session_name.empty()) {
+					response = Gtk::RESPONSE_NONE;
+					cerr << "session name is empty 3\n";
+					continue;
+				} 
+
+				if (session_name[0] == '/' || 
+				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
+				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+
+					session_path = Glib::path_get_dirname (session_name);
+					session_name = Glib::path_get_basename (session_name);
+
+				} else {
+
+					std::string session_path = new_session_dialog->session_folder();
+					
+				}
 			
 				//XXX This is needed because session constructor wants a 
 				//non-existant path. hopefully this will be fixed at some point.
-			
-				session_path = Glib::build_filename(session_path, session_name);
-			
+				
+				session_path = Glib::build_filename (session_path, session_name);
+						
 				std::string template_name = new_session_dialog->session_template_name();
-			
+						
 				if (new_session_dialog->use_session_template()) {
-			  
-				        load_session (session_path, session_name, &template_name);
+							
+					load_session (session_path, session_name, &template_name);
 			  
 				} else {
-				
-				        uint32_t cchns;
+							
+					uint32_t cchns;
 					uint32_t mchns;
 					Session::AutoConnectOption iconnect;
 					Session::AutoConnectOption oconnect;
-				
+							
 					if (new_session_dialog->create_control_bus()) {
-					        cchns = (uint32_t) new_session_dialog->control_channel_count();
+						cchns = (uint32_t) new_session_dialog->control_channel_count();
 					} else {
-					        cchns = 0;
+						cchns = 0;
 					}
-				
+							
 					if (new_session_dialog->create_master_bus()) {
-					        mchns = (uint32_t) new_session_dialog->master_channel_count();
+						mchns = (uint32_t) new_session_dialog->master_channel_count();
 					} else {
-					        mchns = 0;
+						mchns = 0;
 					}
-				      
+							
 					if (new_session_dialog->connect_inputs()) {
-					        iconnect = Session::AutoConnectPhysical;
+						iconnect = Session::AutoConnectPhysical;
 					} else {
-					        iconnect = Session::AutoConnectOption (0);
+						iconnect = Session::AutoConnectOption (0);
 					}
-				      
+							
 					/// @todo some minor tweaks.
-				
+							
 					if (new_session_dialog->connect_outs_to_master()) {
-					        oconnect = Session::AutoConnectMaster;
+						oconnect = Session::AutoConnectMaster;
 					} else if (new_session_dialog->connect_outs_to_physical()) {
-					        oconnect = Session::AutoConnectPhysical;
+						oconnect = Session::AutoConnectPhysical;
 					} else {
-					        oconnect = Session::AutoConnectOption (0);
+						oconnect = Session::AutoConnectOption (0);
 					} 
-				
+							
 					uint32_t nphysin = (uint32_t) new_session_dialog->input_limit_count();
 					uint32_t nphysout = (uint32_t) new_session_dialog->output_limit_count();
-				
+							
 					build_session (session_path,
-					       session_name,
-					       cchns,
-					       mchns,
-					       iconnect,
-					       oconnect,
-					       nphysin,
-					       nphysout, 
-					       engine->frame_rate() * 60 * 5);
+						       session_name,
+						       cchns,
+						       mchns,
+						       iconnect,
+						       oconnect,
+						       nphysin,
+						       nphysout, 
+						       engine->frame_rate() * 60 * 5);
 				}
-			}	
+			}
 		}
 		
 	} while (response == Gtk::RESPONSE_NONE);
+
 	show();
 	new_session_dialog->get_window()->set_cursor();
-	
 	new_session_dialog->hide();
 }
 
 void
 ARDOUR_UI::close_session()
 {
-  unload_session();
-  new_session ();
+	unload_session();
+	new_session ();
 }
 
 int

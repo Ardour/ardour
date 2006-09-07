@@ -78,7 +78,6 @@ class Playlist : public StateManager, public PBD::StatefulDestructible {
 	EditMode get_edit_mode() const { return _edit_mode; }
 	void set_edit_mode (EditMode);
 
-        PBD::ID id() { return _id; }
 	/* Editing operations */
 
 	void add_region (boost::shared_ptr<Region>, jack_nframes_t position, float times = 1, bool with_save = true);
@@ -275,8 +274,6 @@ class Playlist : public StateManager, public PBD::StatefulDestructible {
 	void unset_freeze_child (Playlist*);
 
 	void timestamp_layer_op (boost::shared_ptr<Region>);
-
-        PBD::ID _id;
 };
 
 } /* namespace ARDOUR */
