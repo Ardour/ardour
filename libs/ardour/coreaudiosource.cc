@@ -30,14 +30,14 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-CoreAudioSource::CoreAudioSource (const XMLNode& node)
-	: AudioFileSource (node)
+CoreAudioSource::CoreAudioSource (Session& s, const XMLNode& node)
+	: AudioFileSource (s, node)
 {
 	init (_name);
 }
 
-CoreAudioSource::CoreAudioSource (const string& idstr, Flag flags)
-	: AudioFileSource(idstr, flags)
+CoreAudioSource::CoreAudioSource (Session& s, const string& idstr, Flag flags)
+	: AudioFileSource(s, idstr, flags)
 {
 	init (idstr);
 }
