@@ -121,7 +121,6 @@ class AudioFileSource : public AudioSource {
 	string        _path;
 	Flag          _flags;
 	string        _take_id;
-	bool           allow_remove_if_empty;
 	uint64_t       timeline_position;
 
 	static string peak_dir;

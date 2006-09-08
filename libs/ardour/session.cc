@@ -3183,16 +3183,34 @@ Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::
 void
 Session::remove_empty_sounds ()
 {
-
 	PathScanner scanner;
-	string dir;
 
-	dir = sound_dir ();
-
-	vector<string *>* possible_audiofiles = scanner (dir, "\\.wav$", false, true);
+	vector<string *>* possible_audiofiles = scanner (sound_dir(), "\\.(wav|aiff|caf|w64)$", false, true);
 	
-	for (vector<string *>::iterator i = possible_audiofiles->begin(); i != possible_audiofiles->end(); ++i) {
+	Glib::Mutex::Lock lm (audio_source_lock);
+	
+	regex_t compiled_tape_track_pattern;
+	int err;
 
+	if ((err = regcomp (&compiled_tape_track_pattern, "/T[0-9][0-9][0-9][0-9]-", REG_EXTENDED|REG_NOSUB))) {
+
+		char msg[256];
+		
+		regerror (err, &compiled_tape_track_pattern, msg, sizeof (msg));
+		
+		error << string_compose (_("Cannot compile tape track regexp for use (%1)"), msg) << endmsg;
+		return;
+	}
+
+	for (vector<string *>::iterator i = possible_audiofiles->begin(); i != possible_audiofiles->end(); ++i) {
+		
+		/* never remove files that appear to be a tape track */
+
+		if (regexec (&compiled_tape_track_pattern, (*i)->c_str(), 0, 0, 0) == 0) {
+			delete *i;
+			continue;
+		}
+			
 		if (AudioFileSource::is_empty (*this, *(*i))) {
 
 			unlink ((*i)->c_str());

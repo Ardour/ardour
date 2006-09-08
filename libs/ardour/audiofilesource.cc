@@ -101,6 +101,7 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node)
 AudioFileSource::~AudioFileSource ()
 {
 	if (removable()) {
+		cerr << "Removing file " << _path << " because its removable\n";
 		unlink (_path.c_str());
 		unlink (peakpath.c_str());
 	}
@@ -109,7 +110,7 @@ AudioFileSource::~AudioFileSource ()
 bool
 AudioFileSource::removable () const
 {
-	return (_flags & Removable) && ((_flags & RemoveAtDestroy) || ((_flags & RemovableIfEmpty) && is_empty (_session, _path)));
+	return (_flags & Removable) && ((_flags & RemoveAtDestroy) || ((_flags & RemovableIfEmpty) && length() == 0));
 }
 
 int
@@ -518,7 +519,7 @@ void
 AudioFileSource::set_allow_remove_if_empty (bool yn)
 {
 	if (writable()) {
-		allow_remove_if_empty = yn;
+		_flags = Flag (_flags | RemovableIfEmpty);
 	}
 }
 

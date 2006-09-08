@@ -302,7 +302,6 @@ Session::second_stage_init (bool new_session)
 
 	if (!new_session) {
 		if (load_state (_current_snapshot_name)) {
-			cerr << "load state failed\n";
 			return -1;
 		}
 		remove_empty_sounds ();
@@ -1884,7 +1883,6 @@ Session::load_sources (const XMLNode& node)
 boost::shared_ptr<Source>
 Session::XMLSourceFactory (const XMLNode& node)
 {
-
 	if (node.name() != "Source") {
 		return boost::shared_ptr<Source>();
 	}
