@@ -266,8 +266,10 @@ Editor::initialize_canvas ()
 	
 	edit_cursor = new Cursor (*this, "blue", &Editor::canvas_edit_cursor_event);
 	playhead_cursor = new Cursor (*this, "red", &Editor::canvas_playhead_cursor_event);
-	
+
+	initial_ruler_update_required = true;
 	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
+
 }
 
 void
@@ -317,10 +319,15 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 		transport_punchout_line->property_y2() = canvas_height;
 	}
 		
-	update_fixed_rulers ();
-
-	if (is_visible()) {
+       	if (is_visible() && initial_ruler_update_required) {
+	  /*
+	    this is really dumb, but signal_size_allocate() gets emitted intermittently 
+	     depending on whether the canvas contents are visible or not. 
+	     we only want to do this once 
+	  */
+		update_fixed_rulers();
 		tempo_map_changed (Change (0));
+		initial_ruler_update_required = false;
 	} 
 	
 	Resized (); /* EMIT_SIGNAL */

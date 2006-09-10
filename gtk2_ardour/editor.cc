@@ -882,6 +882,9 @@ Editor::reposition_x_origin (jack_nframes_t frame)
 		}
 
 		horizontal_adjustment.set_value (frame/frames_per_unit);
+	} else {
+		update_fixed_rulers();
+		tempo_map_changed (Change (0));
 	}
 }
 
@@ -965,19 +968,10 @@ void
 Editor::canvas_horizontally_scrolled ()
 {
 
-        Glib::signal_idle().connect (mem_fun(*this, &Editor::lazy_canvas_horizontally_scrolled));
-}
-
-bool
-Editor::lazy_canvas_horizontally_scrolled ()
-{
-
-	leftmost_frame = (jack_nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
-
+  	leftmost_frame = (jack_nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 	update_fixed_rulers ();
 	tempo_map_changed (Change (0));
 
-	return false; 
 }
 
 void
@@ -995,7 +989,6 @@ Editor::deferred_reposition_and_zoom (jack_nframes_t frame, double nfpu)
 
 	set_frames_per_unit (nfpu);
 	reposition_x_origin  (frame);
-	tempo_map_changed (Change (0));
 	repos_zoom_queued = false;
 	
 	return FALSE;
@@ -1291,7 +1284,7 @@ Editor::connect_to_session (Session *t)
 	horizontal_adjustment.set_value (0);
 
 	restore_ruler_visibility ();
-	tempo_map_changed (Change (0));
+	//tempo_map_changed (Change (0));
 	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	edit_cursor->set_position (0);

@@ -229,6 +229,7 @@ class Editor : public PublicEditor
 
 	void set_show_measures (bool yn);
 	bool show_measures () const { return _show_measures; }
+	bool initial_ruler_update_required;
 
 #ifdef FFT_ANALYSIS
 	/* analysis window */
@@ -679,7 +680,6 @@ class Editor : public PublicEditor
 
 	void tie_vertical_scrolling ();
 	void canvas_horizontally_scrolled ();
-	bool lazy_canvas_horizontally_scrolled ();
 
 	void reposition_and_zoom (jack_nframes_t sample, double fpu);
 	gint deferred_reposition_and_zoom (jack_nframes_t sample, double fpu);
@@ -1191,7 +1191,8 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group* time_line_group;
 	ArdourCanvas::SimpleLine* get_time_line ();
 	void hide_measures ();
-	bool draw_measures ();
+	void draw_measures ();
+	bool lazy_hide_and_draw_measures ();
 
 	void new_tempo_section ();
 

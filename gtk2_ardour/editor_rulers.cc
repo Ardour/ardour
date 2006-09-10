@@ -818,9 +818,9 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 	if (lower > (spacer = (jack_nframes_t)(128 * Editor::get_current_zoom ()))) {
 		lower = lower - spacer;
 	} else {
-		upper = upper + spacer - lower;
 		lower = 0;
 	}
+	upper = upper + spacer;
 	range = (jack_nframes_t) floor (upper - lower);
 
 	if (range < (2 * session->frames_per_smpte_frame())) { /* 0 - 2 frames */
@@ -1110,8 +1110,8 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 	
 		position_of_helper = ilower + (30 * Editor::get_current_zoom ());
 
-		if (desirable_marks >= (beats / 2)) {
-		  nmarks = ((beats + 4) * bbt_beat_subdivision) + 1;
+		if (desirable_marks >= (beats)) {
+			nmarks = ((beats + 1) * bbt_beat_subdivision) + 1;
 			we_need_ticks = true;
 		} else {
 			nmarks = beats + 1;
@@ -1156,7 +1156,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 
 			/* Add the tick marks */
 
-			if (we_need_ticks) {
+			if (we_need_ticks && (*i).type != TempoMap::Bar) {
 
 			        /* Find the next beat */
 
@@ -1417,9 +1417,9 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble up
 	if (lower > (spacer = (jack_nframes_t)(128 * Editor::get_current_zoom ()))) {
 		lower = lower - spacer;
 	} else {
-		upper = upper + spacer;
 		lower = 0;
 	}
+	upper = upper + spacer;
 	range = iupper - ilower;
 
 	if (range <  (fr / 50)) {
