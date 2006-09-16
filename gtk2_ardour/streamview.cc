@@ -177,6 +177,8 @@ StreamView::remove_region_view (boost::shared_ptr<Region> r)
 	}
 }
 
+#if 0
+(unused)
 void
 StreamView::remove_rec_region (boost::shared_ptr<Region> r)
 {
@@ -194,6 +196,7 @@ StreamView::remove_rec_region (boost::shared_ptr<Region> r)
 		}
 	}
 }
+#endif
 
 void
 StreamView::undisplay_diskstream ()

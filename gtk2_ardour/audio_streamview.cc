@@ -217,9 +217,7 @@ AudioStreamView::playlist_modified ()
 
 	StreamView::playlist_modified();
 	
-	/* if the playlist is modified, make sure xfades are on top and all the regionviews are stacked 
-	   correctly.
-	*/
+	/* make sure xfades are on top and all the regionviews are stacked correctly. */
 
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
 		(*i)->get_canvas_group()->raise_to_top();
@@ -423,8 +421,8 @@ AudioStreamView::setup_rec_box ()
 								       (RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false)));
 				region->set_position (_trackview.session().transport_frame(), this);
 				rec_regions.push_back (region);
-				/* catch it if it goes away */
-				region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_rec_region), region));
+
+				// rec regions are destroyed in setup_rec_box
 
 				/* we add the region later */
 			}
@@ -506,6 +504,9 @@ AudioStreamView::setup_rec_box ()
 			
 			/* remove temp regions */
 			
+			for (list<boost::shared_ptr<ARDOUR::Region> >::iterator i = rec_regions.begin(); i != rec_regions.end(); ++i) {
+				(*i)->drop_references();
+			}
 			rec_regions.clear();
 
 			// cerr << "\tclear " << rec_rects.size() << " rec rects\n";
@@ -569,9 +570,10 @@ AudioStreamView::update_rec_regions ()
 				continue;
 			}
 			
-			// FIXME
 			boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(*iter);
-			assert(region);
+			if (!region) {
+				continue;
+			}
 
 			jack_nframes_t origlen = region->length();
 
