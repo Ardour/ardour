@@ -1833,8 +1833,6 @@ ARDOUR_UI::make_session_clean ()
 		session->set_clean ();
 	}
 
-	show ();
-
 	return FALSE;
 }
 
