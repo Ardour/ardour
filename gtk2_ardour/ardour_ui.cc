@@ -1833,6 +1833,8 @@ ARDOUR_UI::make_session_clean ()
 		session->set_clean ();
 	}
 
+	show ();
+
 	return FALSE;
 }
 
@@ -1881,6 +1883,11 @@ ARDOUR_UI::show ()
 {
 	if (editor) {
 		editor->show_window ();
+		
+		if (!shown_flag) {
+			editor->present ();
+		}
+
 		shown_flag = true;
 	}
 	
