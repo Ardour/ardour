@@ -39,6 +39,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_actions, X_("Autoconnect"), _("Autoconnect"));
 	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
+	ActionManager::register_action (editor_actions, X_("SMPTE"), _("SMPTE fps"));
+	ActionManager::register_action (editor_actions, X_("Pullup"), _("Pullup / Pulldown"));
 	ActionManager::register_action (editor_actions, X_("Metering"), _("Metering"));
 	ActionManager::register_action (editor_actions, X_("MeteringFallOffRate"), _("Fall off rate"));
 	ActionManager::register_action (editor_actions, X_("MeteringHoldTime"), _("Hold Time"));
@@ -393,6 +395,31 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerMoveAddHigher"), _("Most Recently Moved/Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::MoveAddHigher));
 	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerAddHigher"), _("Most Recently Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::AddHigher));
 
+	RadioAction::Group smpte_group;
+
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte23976"), _("23.976"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_23976));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte24"), _("24"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_24));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte24976"), _("24.976"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_24976));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte25"), _("25"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_25));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte2997"), _("29.97"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_2997));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte2997drop"), _("29.97 drop"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_2997drop));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte30"), _("30"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_30));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte30drop"), _("30 drop"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_30drop));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte5994"), _("59.94"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_5994));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte60"), _("60"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_60));
+
+	RadioAction::Group pullup_group;
+
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupPlus4Plus1"), _("+4.1667% + 0.1%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Plus4Plus1));
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupPlus4"), _("+4.1667%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Plus4));
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupPlus4Minus1"), _("+4.1667% - 0.1%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Plus4Minus1));
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupPlus1"), _("+ 0.1%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Plus1));
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupNone"), _("None"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_None));
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupMinus1"), _("- 0.1%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Minus1));
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupMinus4Plus1"), _("-4.1667% + 0.1%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Minus4Plus1));
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupMinus4"), _("-4.1667%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Minus4));
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupMinus4Minus1"), _("-4.1667% - 0.1%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Minus4Minus1));
+
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (zoom_actions);
 	ActionManager::add_action_group (mouse_mode_actions);
@@ -491,6 +518,150 @@ Editor::set_layer_model (Session::LayerModel model)
 		}
 	}
 }
+
+void
+Editor::smpte_fps_chosen (Session::SmpteFormat format)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	if (session) {
+
+		float fps = 10;
+		bool drop = false;
+
+		RefPtr<Action> act;
+
+		switch (format) {
+			case Session::smpte_23976: {
+				fps=23.976;
+				drop = false;
+				act = ActionManager::get_action (X_("Editor"), X_("Smpte23976"));
+			} break;
+			case Session::smpte_24: {
+				fps=24;
+				drop = false;
+				act = ActionManager::get_action (X_("Editor"), X_("Smpte24"));
+			} break;
+			case Session::smpte_24976: {
+				fps=24.976;
+				drop = false;
+				act = ActionManager::get_action (X_("Editor"), X_("Smpte24976"));
+			} break;
+			case Session::smpte_25: {
+				fps=25;
+				drop = false;
+				act = ActionManager::get_action (X_("Editor"), X_("Smpte25"));
+			} break;
+			case Session::smpte_2997: {
+				fps=29.97;
+				drop = false;
+				act = ActionManager::get_action (X_("Editor"), X_("Smpte2997"));
+			} break;
+			case Session::smpte_2997drop: {
+				fps=29.97;
+				drop = true;
+				act = ActionManager::get_action (X_("Editor"), X_("Smpte2997drop"));
+			} break;
+			case Session::smpte_30: {
+				fps=30;
+				drop = false;
+				act = ActionManager::get_action (X_("Editor"), X_("Smpte30"));
+			} break;
+			case Session::smpte_30drop: {
+				fps=30;
+				drop = true;
+				act = ActionManager::get_action (X_("Editor"), X_("Smpte30drop"));
+			} break;
+			case Session::smpte_5994: {
+				fps=59.94;
+				drop = false;
+				act = ActionManager::get_action (X_("Editor"), X_("Smpte5994"));
+			} break;
+			case Session::smpte_60: {
+				fps=60;
+				drop = false;
+				act = ActionManager::get_action (X_("Editor"), X_("Smpte60"));
+			} break;
+			default:
+				cerr << "Editor received unexpected smpte type" << endl;
+		}
+
+		if (act) {
+			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+			if (ract && ract->get_active()) {
+				session->set_smpte_type (fps, drop);
+			}
+		}
+	}
+}
+
+void
+Editor::video_pullup_chosen (Session::PullupFormat pullup)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	if (session) {
+
+		RefPtr<Action> act;
+
+		float pull = 0.0;
+
+		switch (pullup) {
+			case Session::pullup_Plus4Plus1:{
+				pull = 4.1667 + 0.1;
+				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Plus1"));
+			} break;
+			case Session::pullup_Plus4:{
+				pull = 4.1667;
+				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4"));
+			} break;
+			case Session::pullup_Plus4Minus1:{
+				pull = 4.1667 - 0.1;
+				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Minus1"));
+			} break;
+			case Session::pullup_Plus1:{
+				pull = 0.1;
+				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus1"));
+			} break;
+			case Session::pullup_None:{
+				pull = 0.0;
+				act = ActionManager::get_action (X_("Editor"), X_("PullupNone"));
+			} break;
+			case Session::pullup_Minus1:{
+				pull = -0.1;
+				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus1"));
+			} break;
+			case Session::pullup_Minus4Plus1:{
+				pull = -4.1667 + 0.1;
+				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Plus1"));
+			} break;
+			case Session::pullup_Minus4:{
+				pull = -4.1667;
+				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4"));
+			} break;
+			case Session::pullup_Minus4Minus1:{
+				pull = -4.1667 - 0.1;
+				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Minus1"));
+			} break;
+			default:
+				cerr << "Session received unexpected pullup type" << endl;
+		}
+		
+		if (act) {
+			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+			if (ract && ract->get_active()) {
+				session->set_video_pullup ( pull );
+			}
+		} else  cerr << "Editor::video_pullup_chosen could not find action to match pullup." << endl;
+	}
+}
+
 
 void
 Editor::set_crossfade_model (CrossfadeModel model)

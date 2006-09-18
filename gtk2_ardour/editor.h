@@ -301,6 +301,14 @@ class Editor : public PublicEditor
 	void set_meter_falloff (int);
 	void set_meter_hold (int32_t);
 
+	/* SMPTE timecode & video sync */
+
+	void smpte_fps_chosen (ARDOUR::Session::SmpteFormat format);
+	void video_pullup_chosen (ARDOUR::Session::PullupFormat pullup);
+
+	void update_smpte_mode();
+	void update_video_pullup();
+
 	/* xfades */
 
 	void toggle_auto_xfade ();
@@ -310,8 +318,8 @@ class Editor : public PublicEditor
 	void update_crossfade_model ();
 	void set_crossfade_model (ARDOUR::CrossfadeModel);
 
-	/* layers */
 
+	/* layers */
 	void set_layer_model (ARDOUR::Session::LayerModel);
 	void update_layering_model ();
 

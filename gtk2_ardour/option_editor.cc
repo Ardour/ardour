@@ -152,7 +152,6 @@ OptionEditor::set_session (Session *s)
 	click_emphasis_path_entry.set_sensitive (false);
 	session_raid_entry.set_sensitive (false);
 
-	smpte_fps_combo.set_sensitive (false);
 	short_xfade_slider.set_sensitive (false);
 	smpte_offset_negative_button.set_sensitive (false);
 
@@ -165,28 +164,9 @@ OptionEditor::set_session (Session *s)
 	click_path_entry.set_sensitive (true);
 	click_emphasis_path_entry.set_sensitive (true);
 	session_raid_entry.set_sensitive (true);
-	smpte_fps_combo.set_sensitive (true);
 	short_xfade_slider.set_sensitive (true);
 	smpte_offset_negative_button.set_sensitive (true);
 
-	if (!s->smpte_drop_frames) {
-		// non-drop frames
-		if (s->smpte_frames_per_second == 24.0)
-			smpte_fps_combo.set_active_text (_("24 FPS"));
-		else if (s->smpte_frames_per_second == 25.0)
-			smpte_fps_combo.set_active_text (_("25 FPS"));
-		else if (s->smpte_frames_per_second == 30.0)
-			smpte_fps_combo.set_active_text (_("30 FPS"));
-		else
-			smpte_fps_combo.set_active_text (_("???"));
-	} else {
-		// drop frames
-		if (floor(s->smpte_frames_per_second) == 29.0)
-			smpte_fps_combo.set_active_text (_("30 FPS drop"));
-		else
-			smpte_fps_combo.set_active_text (_("???"));
-	}
-	
 	smpte_offset_clock.set_session (s);
 	smpte_offset_clock.set (s->smpte_offset (), true);
 
@@ -352,15 +332,6 @@ OptionEditor::setup_sync_options ()
 	HBox* hbox;
 	vector<string> dumb;
 
-	dumb.clear ();
-	dumb.push_back (X_("24 FPS"));
-	dumb.push_back (X_("25 FPS"));
-	dumb.push_back (X_("30 FPS drop"));
-	dumb.push_back (X_("30 FPS non-drop"));
-	
-	set_popdown_strings (smpte_fps_combo, dumb);
-	smpte_fps_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::smpte_fps_chosen));
-	
 	smpte_offset_clock.set_mode (AudioClock::SMPTE);
 	smpte_offset_clock.ValueChanged.connect (mem_fun(*this, &OptionEditor::smpte_offset_chosen));
 	
@@ -368,19 +339,9 @@ OptionEditor::setup_sync_options ()
 
 	smpte_offset_negative_button.unset_flags (Gtk::CAN_FOCUS);
 
-	Label *smpte_fps_label = manage (new Label (_("SMPTE Frames/second")));
 	Label *smpte_offset_label = manage (new Label (_("SMPTE Offset")));
-	smpte_fps_label->set_name("OptionsLabel");
 	smpte_offset_label->set_name("OptionsLabel");
 	
-	hbox = manage (new HBox);
-	hbox->set_border_width (5);
-	hbox->set_spacing (10);
-	hbox->pack_start (*smpte_fps_label, false, false);
-	hbox->pack_start (smpte_fps_combo, false, false);
-
-	sync_packer.pack_start (*hbox, false, false);
-
 	hbox = manage (new HBox);
 	hbox->set_border_width (5);
 	hbox->set_spacing (10);
@@ -398,24 +359,6 @@ OptionEditor::smpte_offset_negative_clicked ()
 {
 	if (session) {
 		session->set_smpte_offset_negative (smpte_offset_negative_button.get_active());
-	}
-}
-
-void
-OptionEditor::smpte_fps_chosen ()
-{
-	if (session) {
-		string str = smpte_fps_combo.get_active_text();
-		
-		if (str == X_("24 FPS")) {
-			session->set_smpte_type (24.0, false);
-		} else if (str == X_("25 FPS")) {
-			session->set_smpte_type (25.0, false);
-		} else if (str == X_("30 FPS drop")) {
-			session->set_smpte_type (29.97, true);
-		} else if (str == X_("30 FPS non-drop")) {
-			session->set_smpte_type (30.0, false);
-		}
 	}
 }
 
