@@ -2950,7 +2950,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 
 			spath = (*i).path;
 
-			spath += sound_dir_name;
+			spath += sound_dir (false);
 
 			if (destructive) {
 				if (nchan < 2) {
@@ -2986,9 +2986,10 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 				}
 			}
 
-			if (access (buf, F_OK) == 0) {
+			if (g_file_test (buf, G_FILE_TEST_EXISTS)) {
 				existing++;
-			}
+			} 
+
 		}
 
 		if (existing == 0) {

@@ -48,6 +48,8 @@ DnDTreeView::serialize_pointers (RefPtr<TreeModel> model, TreeSelection::ListHan
 	uint32_t cnt = selection->size();
 	uint32_t sz = (sizeof (void*) * cnt) + sizeof (SerializedObjectPointers);
 
+	cerr << "lets plan to serialize " << cnt << " from selection\n";
+
 	char* buf = new char[sz];
 	SerializedObjectPointers* sr = new (buf) SerializedObjectPointers;
 	
@@ -59,10 +61,12 @@ DnDTreeView::serialize_pointers (RefPtr<TreeModel> model, TreeSelection::ListHan
 	cnt = 0;
 
 	for (TreeSelection::ListHandle_Path::iterator x = selection->begin(); x != selection->end(); ++x, ++cnt) {
+		cerr << "getting next item\n";
 		TreeModel::Row row = *(model->get_iter (*x));
 		row.get_value (data_column, sr->ptr[cnt]);
 	}
-	
+
+	cerr << "returning an SR with size = " << sr->size << endl;
 	return sr;
 }
 
@@ -79,6 +83,7 @@ DnDTreeView::on_drag_data_get(const RefPtr<DragContext>& context, SelectionData&
 		SerializedObjectPointers* sr = serialize_pointers (get_model(), &selection, selection_data.get_target());
 		selection_data.set (8, (guchar*)sr, sr->size);
 		
+		cerr << "selection data set to contain " << sr->size << endl;
 	}
 }
 

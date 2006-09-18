@@ -504,9 +504,14 @@ AudioStreamView::setup_rec_box ()
 			
 			/* remove temp regions */
 			
-			for (list<boost::shared_ptr<ARDOUR::Region> >::iterator i = rec_regions.begin(); i != rec_regions.end(); ++i) {
-				(*i)->drop_references();
+			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end();) {
+				list<boost::shared_ptr<Region> >::iterator tmp;
+				tmp = iter;
+				++tmp;
+				(*iter)->drop_references ();
+				iter = tmp;
 			}
+				
 			rec_regions.clear();
 
 			// cerr << "\tclear " << rec_rects.size() << " rec rects\n";

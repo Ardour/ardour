@@ -73,13 +73,13 @@ ActionManager::init ()
 		ui_manager->add_ui_from_file (ui_file);
 		loaded = true;
 	} catch (Glib::MarkupError& err) {
-		error << "badly formatted UI definition file" << endmsg;
+		error << _("badly formatted UI definition file") << endmsg;
 	} catch (...) {
-		error << "Ardour menu definition file not found" << endmsg;
+		error << _("Ardour menu definition file not found") << endmsg;
 	}
 
 	if (!loaded) {
-		error << "ardour will not work without a valid ardour.menus file" << endmsg;
+		error << _("ardour will not work without a valid ardour.menus file") << endmsg;
 		exit(1);
 	}
 }
@@ -277,7 +277,7 @@ ActionManager::uncheck_toggleaction (const char * name)
 	        RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
        		tact->set_active (false);
 	} else {
-		error << "Unknown action name: " << name << endmsg;
+		error << string_compose (_("Unknown action name: %1"),  name) << endmsg;
 	}
 
 	delete [] group_name;

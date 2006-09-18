@@ -226,7 +226,6 @@ SndFileSource::open ()
 
 	_length = _info.frames;
 
-
 	_broadcast_info = new SF_BROADCAST_INFO;
 	memset (_broadcast_info, 0, sizeof (*_broadcast_info));
 	
